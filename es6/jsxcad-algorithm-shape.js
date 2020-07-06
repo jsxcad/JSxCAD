@@ -1,13 +1,13 @@
 import { cache as cache$1, cachePoints } from './jsxcad-cache.js';
 import { fromPolygons } from './jsxcad-geometry-solid.js';
 import { translate } from './jsxcad-geometry-points.js';
+import { makeConvex, outline } from './jsxcad-geometry-z0surface-boolean.js';
 import { deduplicate, assertGood, flip, translate as translate$1, scale as scale$2, rotateX, isClosed } from './jsxcad-geometry-path.js';
-import { makeConvex, flip as flip$1, translate as translate$2 } from './jsxcad-geometry-surface.js';
+import { makeConvex as makeConvex$1, flip as flip$1, translate as translate$2 } from './jsxcad-geometry-surface.js';
 import { fromPolygon } from './jsxcad-math-plane.js';
 import { fromPoints } from './jsxcad-math-poly3.js';
 import { scale as scale$1, add as add$1, unit } from './jsxcad-math-vec3.js';
 import { fromAngleRadians } from './jsxcad-math-vec2.js';
-import { outline, makeConvex as makeConvex$1 } from './jsxcad-geometry-z0surface-boolean.js';
 import { createNormalize2 } from './jsxcad-algorithm-quantize.js';
 import { translate as translate$3 } from './jsxcad-geometry-tagged.js';
 
@@ -6443,7 +6443,7 @@ const buildConvexSurfaceHullImpl = (points) => {
   for (const nth of monotoneConvexHull2d(points)) {
     hull.push(points[nth]);
   }
-  return { type: 'z0Surface', z0Surface: [hull.reverse()] };
+  return { type: 'z0Surface', z0Surface: makeConvex([hull.reverse()]) };
 };
 
 const buildConvexSurfaceHull = cache$1(buildConvexSurfaceHullImpl);
@@ -6494,7 +6494,7 @@ const buildFromFunctionImpl = (op, resolution, cap = true, context) => {
       if (cap) {
         const deduplicatedPath = deduplicate(path);
         if (deduplicatedPath.length > 0) {
-          polygons.push(...makeConvex([deduplicatedPath]));
+          polygons.push(...makeConvex$1([deduplicatedPath]));
         }
       }
     }
@@ -6506,7 +6506,7 @@ const buildFromFunctionImpl = (op, resolution, cap = true, context) => {
   if (cap) {
     const deduplicatedPath = deduplicate(flip(lastPath));
     if (deduplicatedPath.length > 0) {
-      polygons.push(...makeConvex([deduplicatedPath]));
+      polygons.push(...makeConvex$1([deduplicatedPath]));
     }
   }
   const solid = { type: 'solid', solid: fromPolygons({}, polygons) };
@@ -6550,7 +6550,7 @@ const buildFromSlices = (buildPath, resolution, cap = true) => {
       if (cap) {
         const deduplicatedPath = deduplicate(path);
         if (deduplicatedPath.length > 0) {
-          polygons.push(...makeConvex([deduplicatedPath]));
+          polygons.push(...makeConvex$1([deduplicatedPath]));
         }
       }
     }
@@ -6562,7 +6562,7 @@ const buildFromSlices = (buildPath, resolution, cap = true) => {
   if (cap) {
     const deduplicatedPath = deduplicate(lastPath);
     if (deduplicatedPath.length > 0) {
-      polygons.push(...flip$1(makeConvex([deduplicatedPath])));
+      polygons.push(...flip$1(makeConvex$1([deduplicatedPath])));
     }
   }
 
@@ -6731,7 +6731,7 @@ const extrudeImpl = (z0Surface, height = 1, depth = 0, cap = true) => {
   if (cap) {
     // FIX: This is already Z0.
     // FIX: This is bringing the vertices out of alignment?
-    const surface = makeConvex$1(surfaceOutline, normalize);
+    const surface = makeConvex(surfaceOutline, normalize);
 
     // Roof goes up.
     const roof = translate$2([0, 0, height], surface);

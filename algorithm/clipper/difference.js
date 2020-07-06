@@ -3,6 +3,7 @@ import { fromSurface, toSurface } from './convert.js';
 
 import { createNormalize2 } from '@jsxcad/algorithm-quantize';
 import { doesNotOverlapOrAbut } from './doesNotOverlap.js';
+import { makeConvex } from './makeConvex.js';
 
 export const difference = (a, ...z0Surfaces) => {
   if (a === undefined || a.length === 0) {
@@ -33,5 +34,5 @@ export const difference = (a, ...z0Surfaces) => {
       a = toSurface(result, normalize);
     }
   }
-  return a;
+  return makeConvex(a, normalize);
 };

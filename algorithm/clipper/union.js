@@ -3,6 +3,7 @@ import { fromSurface, toSurface } from './convert.js';
 
 import { createNormalize2 } from '@jsxcad/algorithm-quantize';
 import { doesNotOverlapOrAbut } from './doesNotOverlap.js';
+import { makeConvex } from './makeConvex.js';
 
 /**
  * Produces a surface that is the union of all provided surfaces.
@@ -39,5 +40,5 @@ export const union = (...z0Surfaces) => {
       }
     }
   }
-  return z0Surfaces[0];
+  return makeConvex(z0Surfaces[0], normalize);
 };

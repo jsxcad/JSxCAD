@@ -4,6 +4,7 @@ import {
   unitSquarePolygon,
 } from '@jsxcad/data-shape';
 
+import { boot } from '@jsxcad/sys';
 import { fromPolygons } from '@jsxcad/geometry-solid';
 import fs from 'fs';
 import { scale as scalePaths } from '@jsxcad/geometry-paths';
@@ -12,6 +13,10 @@ import test from 'ava';
 import { toThreejsPage } from './toThreejsPage.js';
 
 const { readFile, writeFile } = fs.promises;
+
+test.beforeEach(async (t) => {
+  await boot();
+});
 
 test('No-eval geodesic sphere', async (t) => {
   const html = await toThreejsPage(

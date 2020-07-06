@@ -2717,112 +2717,6 @@ const doesNotOverlapOrAbut = (a, b) => {
   return false;
 };
 
-const difference = (a, ...z0Surfaces) => {
-  if (a === undefined || a.length === 0) {
-    return [];
-  }
-  const normalize = createNormalize2();
-  while (z0Surfaces.length >= 1) {
-    const b = z0Surfaces.shift();
-    if (b.length === 0) {
-      continue;
-    } else if (doesNotOverlapOrAbut(a, b)) {
-      continue;
-    } else {
-      const aPolygons = fromSurface(a, normalize);
-      if (aPolygons.length === 0) {
-        return [];
-      }
-      const bPolygons = fromSurface(b, normalize);
-      if (bPolygons.length === 0) {
-        continue;
-      }
-      const result = clipper$1.clipToPaths({
-        clipType: ClipType$1.Difference,
-        subjectInputs: [{ data: aPolygons, closed: true }],
-        clipInputs: [{ data: bPolygons, closed: true }],
-        subjectFillType: PolyFillType$1.Positive,
-      });
-      a = toSurface(result, normalize);
-    }
-  }
-  return a;
-};
-
-/**
- * Produces a surface that is the intersection of all provided surfaces.
- * The union of no surfaces is the empty surface.
- * The union of one surface is that surface.
- * @param {Array<Z0Surface>} surfaces - the z0 surfaces to union.
- * @returns {Z0Surface} the resulting z0 surface.
- */
-const intersection = (a, ...z0Surfaces) => {
-  if (a === undefined || a.length === 0) {
-    return [];
-  }
-  const normalize = createNormalize2();
-  while (z0Surfaces.length >= 1) {
-    const b = z0Surfaces.shift();
-    if (doesNotOverlapOrAbut(a, b)) {
-      return [];
-    } else {
-      const aPolygons = fromSurface(a, normalize);
-      if (aPolygons.length === 0) {
-        return [];
-      }
-      const bPolygons = fromSurface(b, normalize);
-      if (bPolygons.length === 0) {
-        return [];
-      }
-      const result = clipper$1.clipToPaths({
-        clipType: ClipType$1.Intersection,
-        subjectInputs: [{ data: aPolygons, closed: true }],
-        clipInputs: [{ data: bPolygons, closed: true }],
-        subjectFillType: PolyFillType$1.Positive,
-      });
-      a = toSurface(result, normalize);
-    }
-  }
-  return a;
-};
-
-/**
- * Produces a surface that is the intersection of all provided surfaces.
- * The union of no surfaces is the empty surface.
- * The union of one surface is that surface.
- * @param {Array<Z0Surface>} surfaces - the z0 surfaces to union.
- * @returns {Z0Surface} the resulting z0 surface.
- */
-const intersectionOfPathsBySurfaces = (a, ...z0Surfaces) => {
-  if (a === undefined || a.length === 0 || z0Surfaces.length === 0) {
-    return [];
-  }
-  const normalize = createNormalize2();
-  while (z0Surfaces.length >= 1) {
-    const b = z0Surfaces.shift();
-    if (doesNotOverlapOrAbut(a, b)) {
-      return [];
-    } else {
-      const subjectInputs = fromPaths(a, normalize);
-      if (subjectInputs.length === 0) {
-        return [];
-      }
-      const clipInputs = fromSurfaceAsClosedPaths(b, normalize);
-      if (clipInputs.length === 0) {
-        return [];
-      }
-      const result = clipper$1.clipToPolyTree({
-        clipType: ClipType$1.Intersection,
-        subjectInputs,
-        clipInputs,
-        subjectFillType: PolyFillType$1.Positive,
-      });
-      a = toPaths(clipper$1, result, normalize);
-    }
-  }
-  return a;
-};
-
 var earcut_1 = earcut;
 var default_1 = earcut;
 
@@ -3588,6 +3482,112 @@ const makeConvex = (surface, normalize = createNormalize2()) => {
   return normalized;
 };
 
+const difference = (a, ...z0Surfaces) => {
+  if (a === undefined || a.length === 0) {
+    return [];
+  }
+  const normalize = createNormalize2();
+  while (z0Surfaces.length >= 1) {
+    const b = z0Surfaces.shift();
+    if (b.length === 0) {
+      continue;
+    } else if (doesNotOverlapOrAbut(a, b)) {
+      continue;
+    } else {
+      const aPolygons = fromSurface(a, normalize);
+      if (aPolygons.length === 0) {
+        return [];
+      }
+      const bPolygons = fromSurface(b, normalize);
+      if (bPolygons.length === 0) {
+        continue;
+      }
+      const result = clipper$1.clipToPaths({
+        clipType: ClipType$1.Difference,
+        subjectInputs: [{ data: aPolygons, closed: true }],
+        clipInputs: [{ data: bPolygons, closed: true }],
+        subjectFillType: PolyFillType$1.Positive,
+      });
+      a = toSurface(result, normalize);
+    }
+  }
+  return makeConvex(a, normalize);
+};
+
+/**
+ * Produces a surface that is the intersection of all provided surfaces.
+ * The union of no surfaces is the empty surface.
+ * The union of one surface is that surface.
+ * @param {Array<Z0Surface>} surfaces - the z0 surfaces to union.
+ * @returns {Z0Surface} the resulting z0 surface.
+ */
+const intersection = (a, ...z0Surfaces) => {
+  if (a === undefined || a.length === 0) {
+    return [];
+  }
+  const normalize = createNormalize2();
+  while (z0Surfaces.length >= 1) {
+    const b = z0Surfaces.shift();
+    if (doesNotOverlapOrAbut(a, b)) {
+      return [];
+    } else {
+      const aPolygons = fromSurface(a, normalize);
+      if (aPolygons.length === 0) {
+        return [];
+      }
+      const bPolygons = fromSurface(b, normalize);
+      if (bPolygons.length === 0) {
+        return [];
+      }
+      const result = clipper$1.clipToPaths({
+        clipType: ClipType$1.Intersection,
+        subjectInputs: [{ data: aPolygons, closed: true }],
+        clipInputs: [{ data: bPolygons, closed: true }],
+        subjectFillType: PolyFillType$1.Positive,
+      });
+      a = toSurface(result, normalize);
+    }
+  }
+  return makeConvex(a, normalize);
+};
+
+/**
+ * Produces a surface that is the intersection of all provided surfaces.
+ * The union of no surfaces is the empty surface.
+ * The union of one surface is that surface.
+ * @param {Array<Z0Surface>} surfaces - the z0 surfaces to union.
+ * @returns {Z0Surface} the resulting z0 surface.
+ */
+const intersectionOfPathsBySurfaces = (a, ...z0Surfaces) => {
+  if (a === undefined || a.length === 0 || z0Surfaces.length === 0) {
+    return [];
+  }
+  const normalize = createNormalize2();
+  while (z0Surfaces.length >= 1) {
+    const b = z0Surfaces.shift();
+    if (doesNotOverlapOrAbut(a, b)) {
+      return [];
+    } else {
+      const subjectInputs = fromPaths(a, normalize);
+      if (subjectInputs.length === 0) {
+        return [];
+      }
+      const clipInputs = fromSurfaceAsClosedPaths(b, normalize);
+      if (clipInputs.length === 0) {
+        return [];
+      }
+      const result = clipper$1.clipToPolyTree({
+        clipType: ClipType$1.Intersection,
+        subjectInputs,
+        clipInputs,
+        subjectFillType: PolyFillType$1.Positive,
+      });
+      a = toPaths(clipper$1, result, normalize);
+    }
+  }
+  return a;
+};
+
 // import { RESOLUTION } from './convert.js';
 
 const THRESHOLD = 1e-5; // * RESOLUTION;
@@ -3685,7 +3685,7 @@ const union = (...z0Surfaces) => {
       }
     }
   }
-  return z0Surfaces[0];
+  return makeConvex(z0Surfaces[0], normalize);
 };
 
 const outline = reorient;
