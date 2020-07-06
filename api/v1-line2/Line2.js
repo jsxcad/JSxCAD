@@ -1,7 +1,7 @@
-import { fromPoints, intersectPointOfLines } from '@jsxcad/math-line2';
+import { fromPoints, intersect } from '@jsxcad/math-line2';
 
 export const ofPoints = (a, b) => fromPoints(a, b);
-export const meet = (a, b) => intersectPointOfLines(a, b);
+export const meet = (a, b) => intersect(a, b);
 
 export const Line2 = (...args) => ofPoints(...args);
 

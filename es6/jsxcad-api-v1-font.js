@@ -1525,10 +1525,5 @@ Font.Hershey = Hershey;
 Font.ofSize = ofSize$1;
 Font.read = async (...args) => readFont(...args);
 
-Font.Hershey.signature = 'Font.Hershey(size:number) -> Font';
-Font.ofSize.signature = 'Font.ofSize(size:number) -> Font';
-Font.read.signature =
-  'Font.read(path:string, { flip:boolean = false }) -> Font';
-
 export default Font;
 export { Font, Hershey, readFont };

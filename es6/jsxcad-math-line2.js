@@ -152,7 +152,7 @@ const fromPoints = (p1, p2) => {
  * @param {line2} line2 a 2D line for reference
  * @return {vec2} the point of intersection
  */
-const intersectPointOfLines = (line1, line2) =>
+const intersect = (line1, line2) =>
   solve2Linear(line1[0], line1[1], line2[0], line2[1], line1[2], line2[2]);
 
 // TODO: Call this flip?
@@ -200,4 +200,4 @@ const xAtY = (y, line) => {
   return x;
 };
 
-export { canonicalize, closestPoint, direction, distanceToPoint, doLinesIntersect, equals, fromPoints, fromValues, intersectPointOfLines, origin, reverse, transform, xAtY };
+export { canonicalize, closestPoint, direction, distanceToPoint, doLinesIntersect, equals, fromPoints, fromValues, intersect, origin, reverse, transform, xAtY };

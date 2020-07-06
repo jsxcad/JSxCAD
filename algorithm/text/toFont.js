@@ -1,8 +1,12 @@
-import { reorient, union } from '@jsxcad/geometry-z0surface-boolean';
+import {
+  makeConvex,
+  reorient,
+  union,
+} from '@jsxcad/geometry-z0surface-boolean';
+import { scale, taggedZ0Surface } from '@jsxcad/geometry-tagged';
 
 import OpenTypeJs from 'opentype.js/dist/opentype.js';
 import { fromSvgPath } from '@jsxcad/convert-svg';
-import { scale } from '@jsxcad/geometry-tagged';
 
 export const toFont = (options = {}, data) => {
   // Unfortunately opentype.js wants a buffer but doesn't take an offset.
@@ -40,10 +44,10 @@ export const toFont = (options = {}, data) => {
       // Outlining forces re-orientation.
       pathsets.push(reorient(paths));
     }
-    return scale([factor, factor, factor], {
-      type: 'z0Surface',
-      z0Surface: union(...pathsets),
-    });
+    return scale(
+      [factor, factor, factor],
+      taggedZ0Surface({}, makeConvex(union(...pathsets)))
+    );
   };
 
   return font;

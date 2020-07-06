@@ -10,5 +10,5 @@ import { solve2Linear } from '@jsxcad/math-utils';
  * @param {line2} line2 a 2D line for reference
  * @return {vec2} the point of intersection
  */
-export const intersectPointOfLines = (line1, line2) =>
+export const intersect = (line1, line2) =>
   solve2Linear(line1[0], line1[1], line2[0], line2[1], line1[2], line2[2]);
