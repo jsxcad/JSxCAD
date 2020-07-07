@@ -88228,6 +88228,28 @@ const ensureFile = async (file, url, {
   }
 };
 
+const defaultPaneLayout$1 = {
+  direction: 'row',
+  first: '0',
+  second: {
+    direction: 'column',
+    first: '2',
+    second: '3',
+    splitPercentage: 75
+  }
+};
+const defaultPaneViews$1 = [['0', {
+  view: 'editScript',
+  file: 'source/script.jsxcad',
+  title: 'Edit script.jsxcad'
+}], ['2', {
+  view: 'notebook',
+  title: 'Notebook'
+}], ['3', {
+  view: 'log',
+  title: 'Log'
+}]];
+
 class Ui extends react.PureComponent {
   static get propTypes() {
     return {
@@ -88253,8 +88275,8 @@ class Ui extends react.PureComponent {
       paneLayout: '0',
       paneViews: [],
       toast: []
-    };
-    this.addWorkspace = this.addWorkspace.bind(this);
+    }; // this.addWorkspace = this.addWorkspace.bind(this);
+
     this.createNode = this.createNode.bind(this);
     this.onChange = this.onChange.bind(this);
     this.onRelease = this.onRelease.bind(this);
@@ -88396,21 +88418,20 @@ class Ui extends react.PureComponent {
     await unwatchFileDeletion(deletionWatcher);
     await unwatchLog(logWatcher);
   }
-
+  /*
   async addWorkspace() {
     const workspace = document.getElementById('workspace/add/name').value;
-
     if (workspace.length > 0) {
       // FIX: Prevent this from overwriting existing filesystems.
-      setupFilesystem({
-        fileBase: workspace
-      });
-      await write$1('source/script.jsxcad', defaultScript$1);
-      await write$1('ui/paneLayout', defaultPaneLayout$1);
-      await write$1('ui/paneViews', defaultPaneViews$1);
+      setupFilesystem({ fileBase: workspace });
+      await write('source/script.jsxcad', defaultScript);
+      await write('ui/paneLayout', defaultPaneLayout);
+      await write('ui/paneViews', defaultPaneViews);
       await this.selectWorkspace(workspace);
     }
   }
+  */
+
 
   updateUrl({
     workspace,
@@ -88453,7 +88474,7 @@ class Ui extends react.PureComponent {
         paneLayout = paneLayoutData;
       }
     } else {
-      paneLayout = '0';
+      paneLayout = defaultPaneLayout$1;
     }
 
     const paneViewsData = await read$1('ui/paneViews');
@@ -88466,7 +88487,7 @@ class Ui extends react.PureComponent {
         paneViews = paneViewsData;
       }
     } else {
-      paneViews = [];
+      paneViews = defaultPaneViews$1;
     }
 
     this.switchingWorkspaces = true;
@@ -89016,28 +89037,6 @@ const setupUi = async sha => {
   }), document.getElementById('top'));
 };
 
-const defaultScript$1 = `// Circle(10).topView();`;
-const defaultPaneLayout$1 = {
-  direction: 'row',
-  first: '0',
-  second: {
-    direction: 'column',
-    first: '2',
-    second: '3',
-    splitPercentage: 75
-  }
-};
-const defaultPaneViews$1 = [['0', {
-  view: 'editScript',
-  file: 'source/script.jsxcad',
-  title: 'Edit script.jsxcad'
-}], ['1', {
-  view: 'notebook',
-  title: 'Notebook'
-}], ['3', {
-  view: 'log',
-  title: 'Log'
-}]];
 const installUi = async ({
   document,
   workspace,
