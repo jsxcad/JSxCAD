@@ -229,7 +229,17 @@ export const fromSvg = async (input, options = {}) => {
 
         const output = (svgPath) => {
           const paths = fromSvgPath(svgPath).paths;
-          const fill = node.getAttribute('fill');
+          const attributes = {
+            fill: node.getAttribute('fill'),
+            stroke: node.getAttribute('stroke'),
+          };
+          const style = node.getAttribute('style');
+          // style="fill:#000000;stroke-width:0.26458332"
+          for (const entry of style.split(';')) {
+            const [name, value] = entry.split(':');
+            attributes[name] = value;
+          }
+          const fill = attributes.fill;
           if (fill !== undefined && fill !== 'none' && fill !== '') {
             // Does fill, etc, inherit?
             const tags = toTagsFromName(fill);
@@ -241,7 +251,7 @@ export const fromSvg = async (input, options = {}) => {
               })
             );
           }
-          const stroke = node.getAttribute('stroke');
+          const stroke = attributes.stroke;
           if (stroke !== undefined && stroke !== 'none' && stroke !== '') {
             if (matrix.some((element) => isNaN(element))) {
               throw Error(`die: Bad element in matrix ${matrix}.`);
@@ -301,6 +311,8 @@ export const fromSvg = async (input, options = {}) => {
       case DOCUMENT_FRAGMENT_NODE:
       case NOTATION_NODE:
         break;
+      default:
+        throw Error(`Unexpected svg node type: ${node.nodeType}`);
     }
     if (node.childNodes) {
       for (let nth = 0; nth < node.childNodes.length; nth++) {
@@ -313,3 +325,5 @@ export const fromSvg = async (input, options = {}) => {
   walk({ matrix: identity() }, svg);
   return geometry;
 };
+
+export default fromSvg;

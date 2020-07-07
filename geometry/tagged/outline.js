@@ -4,6 +4,7 @@ import { cache } from '@jsxcad/cache';
 import { createNormalize3 } from '@jsxcad/algorithm-quantize';
 import { getAnyNonVoidSurfaces } from './getAnyNonVoidSurfaces.js';
 import { getNonVoidSolids } from './getNonVoidSolids.js';
+import { taggedPaths } from './taggedPaths.js';
 import { toKeptGeometry } from './toKeptGeometry.js';
 
 const outlineImpl = (geometry) => {
@@ -18,7 +19,7 @@ const outlineImpl = (geometry) => {
   for (const { surface, z0Surface } of getAnyNonVoidSurfaces(keptGeometry)) {
     outlines.push(outlineSurface(surface || z0Surface, normalize));
   }
-  return outlines.map((outline) => ({ type: 'paths', paths: outline }));
+  return outlines.map((outline) => taggedPaths({}, outline));
 };
 
 export const outline = cache(outlineImpl);
