@@ -56,6 +56,8 @@ export const staticDisplay = async (
     camera.layers.set(GEOMETRY_LAYER);
     renderer.render(scene, camera);
 
+    renderer.clearDepth();
+
     camera.layers.set(SKETCH_LAYER);
     renderer.render(scene, camera);
   };
