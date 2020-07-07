@@ -3,10 +3,14 @@ import {
   DirectionalLight,
   GridHelper,
   HemisphereLight,
+  Object3D,
   PerspectiveCamera,
   Scene,
+  Vector3,
   WebGLRenderer,
 } from 'three';
+
+Object3D.DefaultUp = new Vector3(0, 0, 1);
 
 export const createResizer = ({
   camera,
@@ -38,9 +42,9 @@ export const buildScene = ({
   const { target = [0, 0, 0], position = [40, 40, 40], up = [0, 0, 1] } = view;
 
   const camera = new PerspectiveCamera(27, width / height, 1, 1000000);
-  camera.up.set(...up);
   camera.layers.enable(1);
-  [camera.position.x, camera.position.y, camera.position.z] = position;
+  camera.position.set(...position);
+  camera.up.set(...up);
   camera.lookAt(...target);
 
   const scene = new Scene();

@@ -53535,6 +53535,8 @@ const buildGuiControls = ({ datasets, gui }) => {
   return count;
 };
 
+Object3D.DefaultUp = new Vector3(0, 0, 1);
+
 const createResizer = ({
   camera,
   renderer,
@@ -53565,9 +53567,9 @@ const buildScene = ({
   const { target = [0, 0, 0], position = [40, 40, 40], up = [0, 0, 1] } = view;
 
   const camera = new PerspectiveCamera(27, width / height, 1, 1000000);
-  camera.up.set(...up);
   camera.layers.enable(1);
-  [camera.position.x, camera.position.y, camera.position.z] = position;
+  camera.position.set(...position);
+  camera.up.set(...up);
   camera.lookAt(...target);
 
   const scene = new Scene();
@@ -54272,6 +54274,8 @@ const staticDisplay = async (
     camera.layers.set(GEOMETRY_LAYER);
     renderer.render(scene, camera);
 
+    renderer.clearDepth();
+
     camera.layers.set(SKETCH_LAYER);
     renderer.render(scene, camera);
   };
@@ -54299,9 +54303,11 @@ const toCanvasFromWebglContext = (webgl) => {
   return outCanvas;
 };
 
+const UP = [0, 1, 0];
+
 const staticView = async (
   shape,
-  { target, position, up = [0, 0, 1], width = 256, height = 128 } = {}
+  { target, position, up = UP, width = 256, height = 128 } = {}
 ) => {
   const threejsGeometry = toThreejsGeometry(shape.toKeptGeometry());
   const { renderer } = await staticDisplay(
@@ -54326,7 +54332,7 @@ const image = async (...args) => {
 
 const orbitView = async (
   shape,
-  { target, position, up = [0, 0, 1], width = 256, height = 128 } = {}
+  { target, position, up = UP, width = 256, height = 128 } = {}
 ) => {
   const container = document.createElement('div');
   container.style = `width: ${width}px; height: ${height}px`;
