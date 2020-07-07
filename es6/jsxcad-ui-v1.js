@@ -1,4 +1,4 @@
-import { read as read$1, log, write as write$1, getFilesystem, listFiles, watchFileCreation, watchFileDeletion, unwatchFileCreation, unwatchFileDeletion, deleteFile, watchFile, unwatchFiles, readFile, listFilesystems, setupFilesystem, watchLog, createService, setHandleAskUser, unwatchLog, boot, ask, touch } from './jsxcad-sys.js';
+import { read as read$1, log, write as write$1, getFilesystem, listFiles, watchFileCreation, watchFileDeletion, unwatchFileCreation, unwatchFileDeletion, deleteFile, watchFile, unwatchFiles, readFile, listFilesystems, setupFilesystem, watchLog, createService, unwatchLog, boot, ask, touch } from './jsxcad-sys.js';
 import { orbitDisplay, dataUrl } from './jsxcad-ui-threejs.js';
 import Shape from './jsxcad-api-v1-shape.js';
 
@@ -45928,285 +45928,6 @@ var Container = react.forwardRef(function (_ref, ref) {
 Container.displayName = 'Container';
 Container.defaultProps = defaultProps$5;
 
-var createChainableTypeChecker_1 = createCommonjsModule(function (module, exports) {
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = createChainableTypeChecker;
-/**
- * Copyright 2013-present, Facebook, Inc.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
- */
-
-// Mostly taken from ReactPropTypes.
-
-function createChainableTypeChecker(validate) {
-  function checkType(isRequired, props, propName, componentName, location, propFullName) {
-    var componentNameSafe = componentName || '<<anonymous>>';
-    var propFullNameSafe = propFullName || propName;
-
-    if (props[propName] == null) {
-      if (isRequired) {
-        return new Error('Required ' + location + ' `' + propFullNameSafe + '` was not specified ' + ('in `' + componentNameSafe + '`.'));
-      }
-
-      return null;
-    }
-
-    for (var _len = arguments.length, args = Array(_len > 6 ? _len - 6 : 0), _key = 6; _key < _len; _key++) {
-      args[_key - 6] = arguments[_key];
-    }
-
-    return validate.apply(undefined, [props, propName, componentNameSafe, location, propFullNameSafe].concat(args));
-  }
-
-  var chainedCheckType = checkType.bind(null, false);
-  chainedCheckType.isRequired = checkType.bind(null, true);
-
-  return chainedCheckType;
-}
-module.exports = exports['default'];
-});
-
-unwrapExports(createChainableTypeChecker_1);
-
-var all_1 = createCommonjsModule(function (module, exports) {
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = all;
-
-
-
-var _createChainableTypeChecker2 = _interopRequireDefault(createChainableTypeChecker_1);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function all() {
-  for (var _len = arguments.length, validators = Array(_len), _key = 0; _key < _len; _key++) {
-    validators[_key] = arguments[_key];
-  }
-
-  function allPropTypes() {
-    for (var _len2 = arguments.length, args = Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
-      args[_key2] = arguments[_key2];
-    }
-
-    var error = null;
-
-    validators.forEach(function (validator) {
-      if (error != null) {
-        return;
-      }
-
-      var result = validator.apply(undefined, args);
-      if (result != null) {
-        error = result;
-      }
-    });
-
-    return error;
-  }
-
-  return (0, _createChainableTypeChecker2.default)(allPropTypes);
-}
-module.exports = exports['default'];
-});
-
-unwrapExports(all_1);
-
-var warning$1 = function() {};
-
-{
-  var printWarning$2 = function printWarning(format, args) {
-    var len = arguments.length;
-    args = new Array(len > 1 ? len - 1 : 0);
-    for (var key = 1; key < len; key++) {
-      args[key - 1] = arguments[key];
-    }
-    var argIndex = 0;
-    var message = 'Warning: ' +
-      format.replace(/%s/g, function() {
-        return args[argIndex++];
-      });
-    if (typeof console !== 'undefined') {
-      console.error(message);
-    }
-    try {
-      // --- Welcome to debugging React ---
-      // This error was thrown as a convenience so that you can use this stack
-      // to find the callsite that caused this warning to fire.
-      throw new Error(message);
-    } catch (x) {}
-  };
-
-  warning$1 = function(condition, format, args) {
-    var len = arguments.length;
-    args = new Array(len > 2 ? len - 2 : 0);
-    for (var key = 2; key < len; key++) {
-      args[key - 2] = arguments[key];
-    }
-    if (format === undefined) {
-      throw new Error(
-          '`warning(condition, format, ...args)` requires a warning ' +
-          'message argument'
-      );
-    }
-    if (!condition) {
-      printWarning$2.apply(null, [format].concat(args));
-    }
-  };
-}
-
-var warning_1 = warning$1;
-
-var propTypes$2 = {
-  /**
-   * Specify whether the feedback is for valid or invalid fields
-   *
-   * @type {('valid'|'invalid')}
-   */
-  type: propTypes.string.isRequired,
-  as: propTypes.elementType
-};
-var defaultProps$6 = {
-  type: 'valid'
-};
-var Feedback = react.forwardRef( // Need to define the default "as" during prop destructuring to be compatible with styled-components github.com/react-bootstrap/react-bootstrap/issues/3595
-function (_ref, ref) {
-  var _ref$as = _ref.as,
-      Component = _ref$as === void 0 ? 'div' : _ref$as,
-      className = _ref.className,
-      type = _ref.type,
-      props = _objectWithoutPropertiesLoose(_ref, ["as", "className", "type"]);
-
-  return /*#__PURE__*/react.createElement(Component, _extends({}, props, {
-    ref: ref,
-    className: classnames(className, type && type + "-feedback")
-  }));
-});
-Feedback.displayName = 'Feedback';
-Feedback.propTypes = propTypes$2;
-Feedback.defaultProps = defaultProps$6;
-
-var FormContext = react.createContext({
-  controlId: undefined
-});
-
-var FormControl = react.forwardRef(function (_ref, ref) {
-  var bsPrefix = _ref.bsPrefix,
-      bsCustomPrefix = _ref.bsCustomPrefix,
-      type = _ref.type,
-      size = _ref.size,
-      id = _ref.id,
-      className = _ref.className,
-      isValid = _ref.isValid,
-      isInvalid = _ref.isInvalid,
-      plaintext = _ref.plaintext,
-      readOnly = _ref.readOnly,
-      custom = _ref.custom,
-      _ref$as = _ref.as,
-      Component = _ref$as === void 0 ? 'input' : _ref$as,
-      props = _objectWithoutPropertiesLoose(_ref, ["bsPrefix", "bsCustomPrefix", "type", "size", "id", "className", "isValid", "isInvalid", "plaintext", "readOnly", "custom", "as"]);
-
-  var _useContext = react_13(FormContext),
-      controlId = _useContext.controlId;
-
-  var _ref2 = custom ? [bsCustomPrefix, 'custom'] : [bsPrefix, 'form-control'],
-      prefix = _ref2[0],
-      defaultPrefix = _ref2[1];
-
-  bsPrefix = useBootstrapPrefix(prefix, defaultPrefix);
-  var classes;
-
-  if (plaintext) {
-    var _classes;
-
-    classes = (_classes = {}, _classes[bsPrefix + "-plaintext"] = true, _classes);
-  } else if (type === 'file') {
-    var _classes2;
-
-    classes = (_classes2 = {}, _classes2[bsPrefix + "-file"] = true, _classes2);
-  } else if (type === 'range') {
-    var _classes3;
-
-    classes = (_classes3 = {}, _classes3[bsPrefix + "-range"] = true, _classes3);
-  } else if (Component === 'select' && custom) {
-    var _classes4;
-
-    classes = (_classes4 = {}, _classes4[bsPrefix + "-select"] = true, _classes4[bsPrefix + "-select-" + size] = size, _classes4);
-  } else {
-    var _classes5;
-
-    classes = (_classes5 = {}, _classes5[bsPrefix] = true, _classes5[bsPrefix + "-" + size] = size, _classes5);
-  }
-
-   warning_1(controlId == null || !id, '`controlId` is ignored on `<FormControl>` when `id` is specified.') ;
-  return /*#__PURE__*/react.createElement(Component, _extends({}, props, {
-    type: type,
-    ref: ref,
-    readOnly: readOnly,
-    id: id || controlId,
-    className: classnames(className, classes, isValid && "is-valid", isInvalid && "is-invalid")
-  }));
-});
-FormControl.displayName = 'FormControl';
-FormControl.Feedback = Feedback;
-
-/**
- *
- * @property {InputGroupAppend} Append
- * @property {InputGroupPrepend} Prepend
- * @property {InputGroupText} Text
- * @property {InputGroupRadio} Radio
- * @property {InputGroupCheckbox} Checkbox
- */
-var InputGroup = react.forwardRef(function (_ref, ref) {
-  var bsPrefix = _ref.bsPrefix,
-      size = _ref.size,
-      className = _ref.className,
-      _ref$as = _ref.as,
-      Component = _ref$as === void 0 ? 'div' : _ref$as,
-      props = _objectWithoutPropertiesLoose(_ref, ["bsPrefix", "size", "className", "as"]);
-
-  bsPrefix = useBootstrapPrefix(bsPrefix, 'input-group');
-  return /*#__PURE__*/react.createElement(Component, _extends({
-    ref: ref
-  }, props, {
-    className: classnames(className, bsPrefix, size && bsPrefix + "-" + size)
-  }));
-});
-var InputGroupAppend = createWithBsPrefix('input-group-append');
-var InputGroupPrepend = createWithBsPrefix('input-group-prepend');
-var InputGroupText = createWithBsPrefix('input-group-text', {
-  Component: 'span'
-});
-
-var InputGroupCheckbox = function InputGroupCheckbox(props) {
-  return /*#__PURE__*/react.createElement(InputGroupText, null, /*#__PURE__*/react.createElement("input", _extends({
-    type: "checkbox"
-  }, props)));
-};
-
-var InputGroupRadio = function InputGroupRadio(props) {
-  return /*#__PURE__*/react.createElement(InputGroupText, null, /*#__PURE__*/react.createElement("input", _extends({
-    type: "radio"
-  }, props)));
-};
-
-InputGroup.displayName = 'InputGroup';
-InputGroup.Text = InputGroupText;
-InputGroup.Radio = InputGroupRadio;
-InputGroup.Checkbox = InputGroupCheckbox;
-InputGroup.Append = InputGroupAppend;
-InputGroup.Prepend = InputGroupPrepend;
-
 var matchesImpl;
 function matches(node, selector) {
   if (!matchesImpl) {
@@ -48264,6 +47985,51 @@ function contains$1(context, node) {
   if (context.compareDocumentPosition) return context === node || !!(context.compareDocumentPosition(node) & 16);
 }
 
+var warning$1 = function() {};
+
+{
+  var printWarning$2 = function printWarning(format, args) {
+    var len = arguments.length;
+    args = new Array(len > 1 ? len - 1 : 0);
+    for (var key = 1; key < len; key++) {
+      args[key - 1] = arguments[key];
+    }
+    var argIndex = 0;
+    var message = 'Warning: ' +
+      format.replace(/%s/g, function() {
+        return args[argIndex++];
+      });
+    if (typeof console !== 'undefined') {
+      console.error(message);
+    }
+    try {
+      // --- Welcome to debugging React ---
+      // This error was thrown as a convenience so that you can use this stack
+      // to find the callsite that caused this warning to fire.
+      throw new Error(message);
+    } catch (x) {}
+  };
+
+  warning$1 = function(condition, format, args) {
+    var len = arguments.length;
+    args = new Array(len > 2 ? len - 2 : 0);
+    for (var key = 2; key < len; key++) {
+      args[key - 2] = arguments[key];
+    }
+    if (format === undefined) {
+      throw new Error(
+          '`warning(condition, format, ...args)` requires a warning ' +
+          'message argument'
+      );
+    }
+    if (!condition) {
+      printWarning$2.apply(null, [format].concat(args));
+    }
+  };
+}
+
+var warning_1 = warning$1;
+
 function safeFindDOMNode(componentOrElement) {
   if (componentOrElement && 'setState' in componentOrElement) {
     return reactDom.findDOMNode(componentOrElement);
@@ -48460,7 +48226,7 @@ function useDropdownMenu(options) {
   });
   return menu;
 }
-var propTypes$3 = {
+var propTypes$2 = {
   /**
    * A render prop that returns a Menu element. The `props`
    * argument should spread through to **a component that can accept a ref**.
@@ -48517,7 +48283,7 @@ var propTypes$3 = {
    */
   rootCloseEvent: propTypes.string
 };
-var defaultProps$7 = {
+var defaultProps$6 = {
   usePopper: true
 };
 
@@ -48536,8 +48302,8 @@ function DropdownMenu(_ref2) {
 }
 
 DropdownMenu.displayName = 'ReactOverlaysDropdownMenu';
-DropdownMenu.propTypes = propTypes$3;
-DropdownMenu.defaultProps = defaultProps$7;
+DropdownMenu.propTypes = propTypes$2;
+DropdownMenu.defaultProps = defaultProps$6;
 
 var noop$5 = function noop() {};
 /**
@@ -48565,7 +48331,7 @@ function useDropdownToggle() {
     toggle: toggle
   }];
 }
-var propTypes$4 = {
+var propTypes$3 = {
   /**
    * A render prop that returns a Toggle element. The `props`
    * argument should spread through to **a component that can accept a ref**. Use
@@ -48607,9 +48373,9 @@ function DropdownToggle(_ref2) {
 }
 
 DropdownToggle.displayName = 'ReactOverlaysDropdownToggle';
-DropdownToggle.propTypes = propTypes$4;
+DropdownToggle.propTypes = propTypes$3;
 
-var propTypes$5 = {
+var propTypes$4 = {
   /**
    * A render prop that returns the root dropdown element. The `props`
    * argument should spread through to an element containing _both_ the
@@ -48824,7 +48590,7 @@ function Dropdown(_ref) {
 }
 
 Dropdown.displayName = 'ReactOverlaysDropdown';
-Dropdown.propTypes = propTypes$5;
+Dropdown.propTypes = propTypes$4;
 Dropdown.Menu = DropdownMenu;
 Dropdown.Toggle = DropdownToggle;
 
@@ -48836,7 +48602,7 @@ var makeEventKey = function makeEventKey(eventKey, href) {
 
 var NavContext = react.createContext(null);
 
-var defaultProps$8 = {
+var defaultProps$7 = {
   as: SafeAnchor,
   disabled: false
 };
@@ -48879,7 +48645,7 @@ var DropdownItem = react.forwardRef(function (_ref, ref) {
   }), children);
 });
 DropdownItem.displayName = 'DropdownItem';
-DropdownItem.defaultProps = defaultProps$8;
+DropdownItem.defaultProps = defaultProps$7;
 
 var toFnRef = function toFnRef(ref) {
   return !ref || typeof ref === 'function' ? ref : function (value) {
@@ -48991,7 +48757,7 @@ function usePopperMarginModifiers() {
   }, [margins])]];
 }
 
-var defaultProps$9 = {
+var defaultProps$8 = {
   alignRight: false,
   flip: true
 };
@@ -49057,7 +48823,7 @@ var DropdownMenu$1 = react.forwardRef(function (_ref, ref) {
   }));
 });
 DropdownMenu$1.displayName = 'DropdownMenu';
-DropdownMenu$1.defaultProps = defaultProps$9;
+DropdownMenu$1.defaultProps = defaultProps$8;
 
 var isRequiredForA11y_1 = createCommonjsModule(function (module, exports) {
 
@@ -49116,7 +48882,7 @@ var DropdownToggle$1 = react.forwardRef(function (_ref, ref) {
 });
 DropdownToggle$1.displayName = 'DropdownToggle';
 
-var defaultProps$a = {
+var defaultProps$9 = {
   navbar: false
 };
 var Dropdown$1 = react.forwardRef(function (uncontrolledProps, ref) {
@@ -49171,7 +48937,7 @@ var Dropdown$1 = react.forwardRef(function (uncontrolledProps, ref) {
   }));
 });
 Dropdown$1.displayName = 'Dropdown';
-Dropdown$1.defaultProps = defaultProps$a;
+Dropdown$1.defaultProps = defaultProps$9;
 Dropdown$1.Toggle = DropdownToggle$1;
 Dropdown$1.Menu = DropdownMenu$1;
 Dropdown$1.Item = DropdownItem;
@@ -49186,379 +48952,239 @@ Dropdown$1.Divider = createWithBsPrefix('dropdown-divider', {
   }
 });
 
-var defaultProps$b = {
-  type: 'checkbox'
+var createChainableTypeChecker_1 = createCommonjsModule(function (module, exports) {
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = createChainableTypeChecker;
+/**
+ * Copyright 2013-present, Facebook, Inc.
+ * All rights reserved.
+ *
+ * This source code is licensed under the BSD-style license found in the
+ * LICENSE file in the root directory of this source tree. An additional grant
+ * of patent rights can be found in the PATENTS file in the same directory.
+ */
+
+// Mostly taken from ReactPropTypes.
+
+function createChainableTypeChecker(validate) {
+  function checkType(isRequired, props, propName, componentName, location, propFullName) {
+    var componentNameSafe = componentName || '<<anonymous>>';
+    var propFullNameSafe = propFullName || propName;
+
+    if (props[propName] == null) {
+      if (isRequired) {
+        return new Error('Required ' + location + ' `' + propFullNameSafe + '` was not specified ' + ('in `' + componentNameSafe + '`.'));
+      }
+
+      return null;
+    }
+
+    for (var _len = arguments.length, args = Array(_len > 6 ? _len - 6 : 0), _key = 6; _key < _len; _key++) {
+      args[_key - 6] = arguments[_key];
+    }
+
+    return validate.apply(undefined, [props, propName, componentNameSafe, location, propFullNameSafe].concat(args));
+  }
+
+  var chainedCheckType = checkType.bind(null, false);
+  chainedCheckType.isRequired = checkType.bind(null, true);
+
+  return chainedCheckType;
+}
+module.exports = exports['default'];
+});
+
+unwrapExports(createChainableTypeChecker_1);
+
+var all_1 = createCommonjsModule(function (module, exports) {
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = all;
+
+
+
+var _createChainableTypeChecker2 = _interopRequireDefault(createChainableTypeChecker_1);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function all() {
+  for (var _len = arguments.length, validators = Array(_len), _key = 0; _key < _len; _key++) {
+    validators[_key] = arguments[_key];
+  }
+
+  function allPropTypes() {
+    for (var _len2 = arguments.length, args = Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+      args[_key2] = arguments[_key2];
+    }
+
+    var error = null;
+
+    validators.forEach(function (validator) {
+      if (error != null) {
+        return;
+      }
+
+      var result = validator.apply(undefined, args);
+      if (result != null) {
+        error = result;
+      }
+    });
+
+    return error;
+  }
+
+  return (0, _createChainableTypeChecker2.default)(allPropTypes);
+}
+module.exports = exports['default'];
+});
+
+unwrapExports(all_1);
+
+var propTypes$5 = {
+  /**
+   * Specify whether the feedback is for valid or invalid fields
+   *
+   * @type {('valid'|'invalid')}
+   */
+  type: propTypes.string.isRequired,
+  as: propTypes.elementType
 };
-var FormCheckInput = react.forwardRef(function (_ref, ref) {
-  var id = _ref.id,
-      bsPrefix = _ref.bsPrefix,
-      bsCustomPrefix = _ref.bsCustomPrefix,
-      className = _ref.className,
-      isValid = _ref.isValid,
-      isInvalid = _ref.isInvalid,
-      isStatic = _ref.isStatic,
-      _ref$as = _ref.as,
-      Component = _ref$as === void 0 ? 'input' : _ref$as,
-      props = _objectWithoutPropertiesLoose(_ref, ["id", "bsPrefix", "bsCustomPrefix", "className", "isValid", "isInvalid", "isStatic", "as"]);
-
-  var _useContext = react_13(FormContext),
-      controlId = _useContext.controlId,
-      custom = _useContext.custom;
-
-  var _ref2 = custom ? [bsCustomPrefix, 'custom-control-input'] : [bsPrefix, 'form-check-input'],
-      prefix = _ref2[0],
-      defaultPrefix = _ref2[1];
-
-  bsPrefix = useBootstrapPrefix(prefix, defaultPrefix);
-  return /*#__PURE__*/react.createElement(Component, _extends({}, props, {
-    ref: ref,
-    id: id || controlId,
-    className: classnames(className, bsPrefix, isValid && 'is-valid', isInvalid && 'is-invalid', isStatic && 'position-static')
-  }));
-});
-FormCheckInput.displayName = 'FormCheckInput';
-FormCheckInput.defaultProps = defaultProps$b;
-
-var FormCheckLabel = react.forwardRef(function (_ref, ref) {
-  var bsPrefix = _ref.bsPrefix,
-      bsCustomPrefix = _ref.bsCustomPrefix,
-      className = _ref.className,
-      htmlFor = _ref.htmlFor,
-      props = _objectWithoutPropertiesLoose(_ref, ["bsPrefix", "bsCustomPrefix", "className", "htmlFor"]);
-
-  var _useContext = react_13(FormContext),
-      controlId = _useContext.controlId,
-      custom = _useContext.custom;
-
-  var _ref2 = custom ? [bsCustomPrefix, 'custom-control-label'] : [bsPrefix, 'form-check-label'],
-      prefix = _ref2[0],
-      defaultPrefix = _ref2[1];
-
-  bsPrefix = useBootstrapPrefix(prefix, defaultPrefix);
-  return /*#__PURE__*/react.createElement("label", _extends({}, props, {
-    ref: ref,
-    htmlFor: htmlFor || controlId,
-    className: classnames(className, bsPrefix)
-  }));
-});
-FormCheckLabel.displayName = 'FormCheckLabel';
-
-var defaultProps$c = {
-  type: 'checkbox',
-  inline: false,
-  disabled: false,
-  isValid: false,
-  isInvalid: false,
-  title: ''
+var defaultProps$a = {
+  type: 'valid'
 };
-var FormCheck = react.forwardRef(function (_ref, ref) {
-  var id = _ref.id,
-      bsPrefix = _ref.bsPrefix,
-      bsCustomPrefix = _ref.bsCustomPrefix,
-      inline = _ref.inline,
-      disabled = _ref.disabled,
-      isValid = _ref.isValid,
-      isInvalid = _ref.isInvalid,
-      feedback = _ref.feedback,
-      className = _ref.className,
-      style = _ref.style,
-      title = _ref.title,
-      type = _ref.type,
-      label = _ref.label,
-      children = _ref.children,
-      propCustom = _ref.custom,
-      _ref$as = _ref.as,
-      as = _ref$as === void 0 ? 'input' : _ref$as,
-      props = _objectWithoutPropertiesLoose(_ref, ["id", "bsPrefix", "bsCustomPrefix", "inline", "disabled", "isValid", "isInvalid", "feedback", "className", "style", "title", "type", "label", "children", "custom", "as"]);
-
-  var custom = type === 'switch' ? true : propCustom;
-
-  var _ref2 = custom ? [bsCustomPrefix, 'custom-control'] : [bsPrefix, 'form-check'],
-      prefix = _ref2[0],
-      defaultPrefix = _ref2[1];
-
-  bsPrefix = useBootstrapPrefix(prefix, defaultPrefix);
-
-  var _useContext = react_13(FormContext),
-      controlId = _useContext.controlId;
-
-  var innerFormContext = react_12(function () {
-    return {
-      controlId: id || controlId,
-      custom: custom
-    };
-  }, [controlId, custom, id]);
-  var hasLabel = label != null && label !== false && !children;
-  var input = /*#__PURE__*/react.createElement(FormCheckInput, _extends({}, props, {
-    type: type === 'switch' ? 'checkbox' : type,
-    ref: ref,
-    isValid: isValid,
-    isInvalid: isInvalid,
-    isStatic: !hasLabel,
-    disabled: disabled,
-    as: as
-  }));
-  return /*#__PURE__*/react.createElement(FormContext.Provider, {
-    value: innerFormContext
-  }, /*#__PURE__*/react.createElement("div", {
-    style: style,
-    className: classnames(className, bsPrefix, custom && "custom-" + type, inline && bsPrefix + "-inline")
-  }, children || /*#__PURE__*/react.createElement(react.Fragment, null, input, hasLabel && /*#__PURE__*/react.createElement(FormCheckLabel, {
-    title: title
-  }, label), (isValid || isInvalid) && /*#__PURE__*/react.createElement(Feedback, {
-    type: isValid ? 'valid' : 'invalid'
-  }, feedback))));
-});
-FormCheck.displayName = 'FormCheck';
-FormCheck.defaultProps = defaultProps$c;
-FormCheck.Input = FormCheckInput;
-FormCheck.Label = FormCheckLabel;
-
-var FormFileInput = react.forwardRef(function (_ref, ref) {
-  var id = _ref.id,
-      bsPrefix = _ref.bsPrefix,
-      bsCustomPrefix = _ref.bsCustomPrefix,
-      className = _ref.className,
-      isValid = _ref.isValid,
-      isInvalid = _ref.isInvalid,
-      lang = _ref.lang,
-      _ref$as = _ref.as,
-      Component = _ref$as === void 0 ? 'input' : _ref$as,
-      props = _objectWithoutPropertiesLoose(_ref, ["id", "bsPrefix", "bsCustomPrefix", "className", "isValid", "isInvalid", "lang", "as"]);
-
-  var _useContext = react_13(FormContext),
-      controlId = _useContext.controlId,
-      custom = _useContext.custom;
-
-  var type = 'file';
-
-  var _ref2 = custom ? [bsCustomPrefix, 'custom-file-input'] : [bsPrefix, 'form-control-file'],
-      prefix = _ref2[0],
-      defaultPrefix = _ref2[1];
-
-  bsPrefix = useBootstrapPrefix(prefix, defaultPrefix);
-  return /*#__PURE__*/react.createElement(Component, _extends({}, props, {
-    ref: ref,
-    id: id || controlId,
-    type: type,
-    lang: lang,
-    className: classnames(className, bsPrefix, isValid && 'is-valid', isInvalid && 'is-invalid')
-  }));
-});
-FormFileInput.displayName = 'FormFileInput';
-
-var FormFileLabel = react.forwardRef(function (_ref, ref) {
-  var bsPrefix = _ref.bsPrefix,
-      bsCustomPrefix = _ref.bsCustomPrefix,
-      className = _ref.className,
-      htmlFor = _ref.htmlFor,
-      props = _objectWithoutPropertiesLoose(_ref, ["bsPrefix", "bsCustomPrefix", "className", "htmlFor"]);
-
-  var _useContext = react_13(FormContext),
-      controlId = _useContext.controlId,
-      custom = _useContext.custom;
-
-  var _ref2 = custom ? [bsCustomPrefix, 'custom-file-label'] : [bsPrefix, 'form-file-label'],
-      prefix = _ref2[0],
-      defaultPrefix = _ref2[1];
-
-  bsPrefix = useBootstrapPrefix(prefix, defaultPrefix);
-  return /*#__PURE__*/react.createElement("label", _extends({}, props, {
-    ref: ref,
-    htmlFor: htmlFor || controlId,
-    className: classnames(className, bsPrefix),
-    "data-browse": props['data-browse']
-  }));
-});
-FormFileLabel.displayName = 'FormFileLabel';
-
-var defaultProps$d = {
-  disabled: false,
-  isValid: false,
-  isInvalid: false
-};
-var FormFile = react.forwardRef(function (_ref, ref) {
-  var id = _ref.id,
-      bsPrefix = _ref.bsPrefix,
-      bsCustomPrefix = _ref.bsCustomPrefix,
-      disabled = _ref.disabled,
-      isValid = _ref.isValid,
-      isInvalid = _ref.isInvalid,
-      feedback = _ref.feedback,
-      className = _ref.className,
-      style = _ref.style,
-      label = _ref.label,
-      children = _ref.children,
-      custom = _ref.custom,
-      lang = _ref.lang,
-      dataBrowse = _ref['data-browse'],
-      _ref$as = _ref.as,
-      Component = _ref$as === void 0 ? 'div' : _ref$as,
-      _ref$inputAs = _ref.inputAs,
-      inputAs = _ref$inputAs === void 0 ? 'input' : _ref$inputAs,
-      props = _objectWithoutPropertiesLoose(_ref, ["id", "bsPrefix", "bsCustomPrefix", "disabled", "isValid", "isInvalid", "feedback", "className", "style", "label", "children", "custom", "lang", "data-browse", "as", "inputAs"]);
-
-  var _ref2 = custom ? [bsCustomPrefix, 'custom'] : [bsPrefix, 'form-file'],
-      prefix = _ref2[0],
-      defaultPrefix = _ref2[1];
-
-  bsPrefix = useBootstrapPrefix(prefix, defaultPrefix);
-  var type = 'file';
-
-  var _useContext = react_13(FormContext),
-      controlId = _useContext.controlId;
-
-  var innerFormContext = react_12(function () {
-    return {
-      controlId: id || controlId,
-      custom: custom
-    };
-  }, [controlId, custom, id]);
-  var hasLabel = label != null && label !== false && !children;
-  var input = /*#__PURE__*/react.createElement(FormFileInput, _extends({}, props, {
-    ref: ref,
-    isValid: isValid,
-    isInvalid: isInvalid,
-    disabled: disabled,
-    as: inputAs,
-    lang: lang
-  }));
-  return /*#__PURE__*/react.createElement(FormContext.Provider, {
-    value: innerFormContext
-  }, /*#__PURE__*/react.createElement(Component, {
-    style: style,
-    className: classnames(className, bsPrefix, custom && "custom-" + type)
-  }, children || /*#__PURE__*/react.createElement(react.Fragment, null, custom ? /*#__PURE__*/react.createElement(react.Fragment, null, input, hasLabel && /*#__PURE__*/react.createElement(FormFileLabel, {
-    "data-browse": dataBrowse
-  }, label)) : /*#__PURE__*/react.createElement(react.Fragment, null, hasLabel && /*#__PURE__*/react.createElement(FormFileLabel, null, label), input), (isValid || isInvalid) && /*#__PURE__*/react.createElement(Feedback, {
-    type: isValid ? 'valid' : 'invalid'
-  }, feedback))));
-});
-FormFile.displayName = 'FormFile';
-FormFile.defaultProps = defaultProps$d;
-FormFile.Input = FormFileInput;
-FormFile.Label = FormFileLabel;
-
-var FormGroup = react.forwardRef(function (_ref, ref) {
-  var bsPrefix = _ref.bsPrefix,
-      className = _ref.className,
-      children = _ref.children,
-      controlId = _ref.controlId,
-      _ref$as = _ref.as,
-      Component = _ref$as === void 0 ? 'div' : _ref$as,
-      props = _objectWithoutPropertiesLoose(_ref, ["bsPrefix", "className", "children", "controlId", "as"]);
-
-  bsPrefix = useBootstrapPrefix(bsPrefix, 'form-group');
-  var context = react_12(function () {
-    return {
-      controlId: controlId
-    };
-  }, [controlId]);
-  return /*#__PURE__*/react.createElement(FormContext.Provider, {
-    value: context
-  }, /*#__PURE__*/react.createElement(Component, _extends({}, props, {
-    ref: ref,
-    className: classnames(className, bsPrefix)
-  }), children));
-});
-FormGroup.displayName = 'FormGroup';
-
-var defaultProps$e = {
-  column: false,
-  srOnly: false
-};
-var FormLabel = react.forwardRef(function (_ref, ref) {
-  var _ref$as = _ref.as,
-      Component = _ref$as === void 0 ? 'label' : _ref$as,
-      bsPrefix = _ref.bsPrefix,
-      column = _ref.column,
-      srOnly = _ref.srOnly,
-      className = _ref.className,
-      htmlFor = _ref.htmlFor,
-      props = _objectWithoutPropertiesLoose(_ref, ["as", "bsPrefix", "column", "srOnly", "className", "htmlFor"]);
-
-  var _useContext = react_13(FormContext),
-      controlId = _useContext.controlId;
-
-  bsPrefix = useBootstrapPrefix(bsPrefix, 'form-label');
-  var columnClass = 'col-form-label';
-  if (typeof column === 'string') columnClass = columnClass + "-" + column;
-  var classes = classnames(className, bsPrefix, srOnly && 'sr-only', column && columnClass);
-   warning_1(controlId == null || !htmlFor, '`controlId` is ignored on `<FormLabel>` when `htmlFor` is specified.') ;
-  htmlFor = htmlFor || controlId;
-  if (column) return /*#__PURE__*/react.createElement(Col, _extends({
-    as: "label",
-    className: classes,
-    htmlFor: htmlFor
-  }, props));
-  return (
-    /*#__PURE__*/
-    // eslint-disable-next-line jsx-a11y/label-has-for, jsx-a11y/label-has-associated-control
-    react.createElement(Component, _extends({
-      ref: ref,
-      className: classes,
-      htmlFor: htmlFor
-    }, props))
-  );
-});
-FormLabel.displayName = 'FormLabel';
-FormLabel.defaultProps = defaultProps$e;
-
-var FormText = react.forwardRef( // Need to define the default "as" during prop destructuring to be compatible with styled-components github.com/react-bootstrap/react-bootstrap/issues/3595
+var Feedback = react.forwardRef( // Need to define the default "as" during prop destructuring to be compatible with styled-components github.com/react-bootstrap/react-bootstrap/issues/3595
 function (_ref, ref) {
-  var bsPrefix = _ref.bsPrefix,
+  var _ref$as = _ref.as,
+      Component = _ref$as === void 0 ? 'div' : _ref$as,
       className = _ref.className,
-      _ref$as = _ref.as,
-      Component = _ref$as === void 0 ? 'small' : _ref$as,
-      muted = _ref.muted,
-      props = _objectWithoutPropertiesLoose(_ref, ["bsPrefix", "className", "as", "muted"]);
+      type = _ref.type,
+      props = _objectWithoutPropertiesLoose(_ref, ["as", "className", "type"]);
 
-  bsPrefix = useBootstrapPrefix(bsPrefix, 'form-text');
   return /*#__PURE__*/react.createElement(Component, _extends({}, props, {
     ref: ref,
-    className: classnames(className, bsPrefix, muted && 'text-muted')
+    className: classnames(className, type && type + "-feedback")
   }));
 });
-FormText.displayName = 'FormText';
+Feedback.displayName = 'Feedback';
+Feedback.propTypes = propTypes$5;
+Feedback.defaultProps = defaultProps$a;
 
-var Switch = react.forwardRef(function (props, ref) {
-  return /*#__PURE__*/react.createElement(FormCheck, _extends({}, props, {
+var FormContext = react.createContext({
+  controlId: undefined
+});
+
+var FormControl = react.forwardRef(function (_ref, ref) {
+  var bsPrefix = _ref.bsPrefix,
+      bsCustomPrefix = _ref.bsCustomPrefix,
+      type = _ref.type,
+      size = _ref.size,
+      id = _ref.id,
+      className = _ref.className,
+      isValid = _ref.isValid,
+      isInvalid = _ref.isInvalid,
+      plaintext = _ref.plaintext,
+      readOnly = _ref.readOnly,
+      custom = _ref.custom,
+      _ref$as = _ref.as,
+      Component = _ref$as === void 0 ? 'input' : _ref$as,
+      props = _objectWithoutPropertiesLoose(_ref, ["bsPrefix", "bsCustomPrefix", "type", "size", "id", "className", "isValid", "isInvalid", "plaintext", "readOnly", "custom", "as"]);
+
+  var _useContext = react_13(FormContext),
+      controlId = _useContext.controlId;
+
+  var _ref2 = custom ? [bsCustomPrefix, 'custom'] : [bsPrefix, 'form-control'],
+      prefix = _ref2[0],
+      defaultPrefix = _ref2[1];
+
+  bsPrefix = useBootstrapPrefix(prefix, defaultPrefix);
+  var classes;
+
+  if (plaintext) {
+    var _classes;
+
+    classes = (_classes = {}, _classes[bsPrefix + "-plaintext"] = true, _classes);
+  } else if (type === 'file') {
+    var _classes2;
+
+    classes = (_classes2 = {}, _classes2[bsPrefix + "-file"] = true, _classes2);
+  } else if (type === 'range') {
+    var _classes3;
+
+    classes = (_classes3 = {}, _classes3[bsPrefix + "-range"] = true, _classes3);
+  } else if (Component === 'select' && custom) {
+    var _classes4;
+
+    classes = (_classes4 = {}, _classes4[bsPrefix + "-select"] = true, _classes4[bsPrefix + "-select-" + size] = size, _classes4);
+  } else {
+    var _classes5;
+
+    classes = (_classes5 = {}, _classes5[bsPrefix] = true, _classes5[bsPrefix + "-" + size] = size, _classes5);
+  }
+
+   warning_1(controlId == null || !id, '`controlId` is ignored on `<FormControl>` when `id` is specified.') ;
+  return /*#__PURE__*/react.createElement(Component, _extends({}, props, {
+    type: type,
     ref: ref,
-    type: "switch"
+    readOnly: readOnly,
+    id: id || controlId,
+    className: classnames(className, classes, isValid && "is-valid", isInvalid && "is-invalid")
   }));
 });
-Switch.displayName = 'Switch';
-Switch.Input = FormCheck.Input;
-Switch.Label = FormCheck.Label;
+FormControl.displayName = 'FormControl';
+FormControl.Feedback = Feedback;
 
-var defaultProps$f = {
-  inline: false
+/**
+ *
+ * @property {InputGroupAppend} Append
+ * @property {InputGroupPrepend} Prepend
+ * @property {InputGroupText} Text
+ * @property {InputGroupRadio} Radio
+ * @property {InputGroupCheckbox} Checkbox
+ */
+var InputGroup = react.forwardRef(function (_ref, ref) {
+  var bsPrefix = _ref.bsPrefix,
+      size = _ref.size,
+      className = _ref.className,
+      _ref$as = _ref.as,
+      Component = _ref$as === void 0 ? 'div' : _ref$as,
+      props = _objectWithoutPropertiesLoose(_ref, ["bsPrefix", "size", "className", "as"]);
+
+  bsPrefix = useBootstrapPrefix(bsPrefix, 'input-group');
+  return /*#__PURE__*/react.createElement(Component, _extends({
+    ref: ref
+  }, props, {
+    className: classnames(className, bsPrefix, size && bsPrefix + "-" + size)
+  }));
+});
+var InputGroupAppend = createWithBsPrefix('input-group-append');
+var InputGroupPrepend = createWithBsPrefix('input-group-prepend');
+var InputGroupText = createWithBsPrefix('input-group-text', {
+  Component: 'span'
+});
+
+var InputGroupCheckbox = function InputGroupCheckbox(props) {
+  return /*#__PURE__*/react.createElement(InputGroupText, null, /*#__PURE__*/react.createElement("input", _extends({
+    type: "checkbox"
+  }, props)));
 };
-var Form = react.forwardRef(function (_ref, ref) {
-  var bsPrefix = _ref.bsPrefix,
-      inline = _ref.inline,
-      className = _ref.className,
-      validated = _ref.validated,
-      _ref$as = _ref.as,
-      Component = _ref$as === void 0 ? 'form' : _ref$as,
-      props = _objectWithoutPropertiesLoose(_ref, ["bsPrefix", "inline", "className", "validated", "as"]);
 
-  bsPrefix = useBootstrapPrefix(bsPrefix, 'form');
-  return /*#__PURE__*/react.createElement(Component, _extends({}, props, {
-    ref: ref,
-    className: classnames(className, validated && 'was-validated', inline && bsPrefix + "-inline")
-  }));
-});
-Form.displayName = 'Form';
-Form.defaultProps = defaultProps$f;
-Form.Row = createWithBsPrefix('form-row');
-Form.Group = FormGroup;
-Form.Control = FormControl;
-Form.Check = FormCheck;
-Form.File = FormFile;
-Form.Switch = Switch;
-Form.Label = FormLabel;
-Form.Text = FormText;
+var InputGroupRadio = function InputGroupRadio(props) {
+  return /*#__PURE__*/react.createElement(InputGroupText, null, /*#__PURE__*/react.createElement("input", _extends({
+    type: "radio"
+  }, props)));
+};
+
+InputGroup.displayName = 'InputGroup';
+InputGroup.Text = InputGroupText;
+InputGroup.Radio = InputGroupRadio;
+InputGroup.Checkbox = InputGroupCheckbox;
+InputGroup.Append = InputGroupAppend;
+InputGroup.Prepend = InputGroupPrepend;
 
 var CardContext = react.createContext(null);
 
@@ -49679,7 +49305,7 @@ function (_ref, ref) {
 });
 NavItem.displayName = 'NavItem';
 
-var defaultProps$g = {
+var defaultProps$b = {
   disabled: false
 };
 var AbstractNavItem = react.forwardRef(function (_ref, ref) {
@@ -49726,9 +49352,9 @@ var AbstractNavItem = react.forwardRef(function (_ref, ref) {
     className: classnames(className, isActive && 'active')
   }));
 });
-AbstractNavItem.defaultProps = defaultProps$g;
+AbstractNavItem.defaultProps = defaultProps$b;
 
-var defaultProps$h = {
+var defaultProps$c = {
   disabled: false,
   as: SafeAnchor
 };
@@ -49754,9 +49380,9 @@ var NavLink = react.forwardRef(function (_ref, ref) {
   }));
 });
 NavLink.displayName = 'NavLink';
-NavLink.defaultProps = defaultProps$h;
+NavLink.defaultProps = defaultProps$c;
 
-var defaultProps$i = {
+var defaultProps$d = {
   justify: false,
   fill: false
 };
@@ -49798,7 +49424,7 @@ var Nav = react.forwardRef(function (uncontrolledProps, ref) {
   }, props), children);
 });
 Nav.displayName = 'Nav';
-Nav.defaultProps = defaultProps$i;
+Nav.defaultProps = defaultProps$d;
 Nav.Item = NavItem;
 Nav.Link = NavLink;
 
@@ -49902,7 +49528,7 @@ function getDimensionValue(dimension, elem) {
 }
 
 var collapseStyles = (_collapseStyles = {}, _collapseStyles[EXITED] = 'collapse', _collapseStyles[EXITING] = 'collapsing', _collapseStyles[ENTERING] = 'collapsing', _collapseStyles[ENTERED] = 'collapse show', _collapseStyles);
-var defaultProps$j = {
+var defaultProps$e = {
   in: false,
   timeout: 300,
   mountOnEnter: false,
@@ -50005,7 +49631,7 @@ var Collapse = /*#__PURE__*/function (_React$Component) {
   return Collapse;
 }(react.Component);
 
-Collapse.defaultProps = defaultProps$j;
+Collapse.defaultProps = defaultProps$e;
 
 var NavbarCollapse = react.forwardRef(function (_ref, ref) {
   var children = _ref.children,
@@ -50024,7 +49650,7 @@ var NavbarCollapse = react.forwardRef(function (_ref, ref) {
 });
 NavbarCollapse.displayName = 'NavbarCollapse';
 
-var defaultProps$k = {
+var defaultProps$f = {
   label: 'Toggle navigation'
 };
 var NavbarToggle = react.forwardRef(function (_ref, ref) {
@@ -50062,9 +49688,9 @@ var NavbarToggle = react.forwardRef(function (_ref, ref) {
   }));
 });
 NavbarToggle.displayName = 'NavbarToggle';
-NavbarToggle.defaultProps = defaultProps$k;
+NavbarToggle.defaultProps = defaultProps$f;
 
-var defaultProps$l = {
+var defaultProps$g = {
   expand: true,
   variant: 'light',
   collapseOnSelect: false
@@ -50125,7 +49751,7 @@ var Navbar = react.forwardRef(function (props, ref) {
     className: classnames(className, bsPrefix, expand && expandClass, variant && bsPrefix + "-" + variant, bg && "bg-" + bg, sticky && "sticky-" + sticky, fixed && "fixed-" + fixed)
   }), children)));
 });
-Navbar.defaultProps = defaultProps$l;
+Navbar.defaultProps = defaultProps$g;
 Navbar.displayName = 'Navbar';
 Navbar.Brand = NavbarBrand;
 Navbar.Toggle = NavbarToggle;
@@ -50139,10 +49765,8 @@ class Pane extends react.PureComponent {
     return {
       createNode: propTypes.func,
       file: propTypes.string,
-      fileChoices: propTypes.array,
       fileTitle: propTypes.string,
       id: propTypes.string,
-      onSelectFile: propTypes.func,
       onSelectView: propTypes.func,
       path: propTypes.array,
       view: propTypes.string,
@@ -50153,31 +49777,17 @@ class Pane extends react.PureComponent {
 
   constructor(props) {
     super(props);
-    this.state = {
-      fileTitle: props.fileTitle
-    };
+    this.state = {};
   }
 
   renderToolbar(extra = []) {
     const {
       id,
-      fileChoices = [],
       onSelectView,
-      onSelectFile,
       view,
       viewChoices,
       viewTitle
     } = this.props;
-    const {
-      fileTitle = ''
-    } = this.state;
-
-    const openFileTitle = e => {
-      if (e.key === 'Enter') {
-        onSelectFile(id, `source/${fileTitle}`, fileTitle);
-      }
-    };
-
     return /*#__PURE__*/react.createElement("div", {
       style: {
         width: '100%'
@@ -50209,25 +49819,7 @@ class Pane extends react.PureComponent {
       style: {
         color: 'black'
       }
-    }, viewTitle)), /*#__PURE__*/react.createElement(Dropdown$1, {
-      as: ButtonGroup
-    }, /*#__PURE__*/react.createElement(Form.Control, {
-      value: fileTitle,
-      onKeyPress: openFileTitle,
-      onChange: e => this.setState({
-        fileTitle: e.target.value
-      })
-    }), /*#__PURE__*/react.createElement(Dropdown$1.Toggle, {
-      split: true,
-      variant: "outline-primary",
-      id: "file-selector"
-    }), /*#__PURE__*/react.createElement(Dropdown$1.Menu, null, fileChoices.map(({
-      file,
-      fileTitle
-    }, index) => /*#__PURE__*/react.createElement(Dropdown$1.Item, {
-      key: index,
-      onClick: () => onSelectFile(id, file)
-    }, fileTitle)))), extra), /*#__PURE__*/react.createElement(Nav, {
+    }, viewTitle)), extra), /*#__PURE__*/react.createElement(Nav, {
       key: "tools"
     }, /*#__PURE__*/react.createElement(lib_5.Consumer, {
       key: `${id}/toolbar`
@@ -50266,7 +49858,7 @@ class Pane extends react.PureComponent {
 }
 
 var DEVICE_SIZES$1 = ['xl', 'lg', 'md', 'sm', 'xs'];
-var defaultProps$m = {
+var defaultProps$h = {
   noGutters: false
 };
 var Row = react.forwardRef(function (_ref, ref) {
@@ -50301,7 +49893,7 @@ var Row = react.forwardRef(function (_ref, ref) {
   }));
 });
 Row.displayName = 'Row';
-Row.defaultProps = defaultProps$m;
+Row.defaultProps = defaultProps$h;
 
 /* global FileReader */
 class FilesUi extends Pane {
@@ -50434,6 +50026,380 @@ class FilesUi extends Pane {
   }
 
 }
+
+var defaultProps$i = {
+  type: 'checkbox'
+};
+var FormCheckInput = react.forwardRef(function (_ref, ref) {
+  var id = _ref.id,
+      bsPrefix = _ref.bsPrefix,
+      bsCustomPrefix = _ref.bsCustomPrefix,
+      className = _ref.className,
+      isValid = _ref.isValid,
+      isInvalid = _ref.isInvalid,
+      isStatic = _ref.isStatic,
+      _ref$as = _ref.as,
+      Component = _ref$as === void 0 ? 'input' : _ref$as,
+      props = _objectWithoutPropertiesLoose(_ref, ["id", "bsPrefix", "bsCustomPrefix", "className", "isValid", "isInvalid", "isStatic", "as"]);
+
+  var _useContext = react_13(FormContext),
+      controlId = _useContext.controlId,
+      custom = _useContext.custom;
+
+  var _ref2 = custom ? [bsCustomPrefix, 'custom-control-input'] : [bsPrefix, 'form-check-input'],
+      prefix = _ref2[0],
+      defaultPrefix = _ref2[1];
+
+  bsPrefix = useBootstrapPrefix(prefix, defaultPrefix);
+  return /*#__PURE__*/react.createElement(Component, _extends({}, props, {
+    ref: ref,
+    id: id || controlId,
+    className: classnames(className, bsPrefix, isValid && 'is-valid', isInvalid && 'is-invalid', isStatic && 'position-static')
+  }));
+});
+FormCheckInput.displayName = 'FormCheckInput';
+FormCheckInput.defaultProps = defaultProps$i;
+
+var FormCheckLabel = react.forwardRef(function (_ref, ref) {
+  var bsPrefix = _ref.bsPrefix,
+      bsCustomPrefix = _ref.bsCustomPrefix,
+      className = _ref.className,
+      htmlFor = _ref.htmlFor,
+      props = _objectWithoutPropertiesLoose(_ref, ["bsPrefix", "bsCustomPrefix", "className", "htmlFor"]);
+
+  var _useContext = react_13(FormContext),
+      controlId = _useContext.controlId,
+      custom = _useContext.custom;
+
+  var _ref2 = custom ? [bsCustomPrefix, 'custom-control-label'] : [bsPrefix, 'form-check-label'],
+      prefix = _ref2[0],
+      defaultPrefix = _ref2[1];
+
+  bsPrefix = useBootstrapPrefix(prefix, defaultPrefix);
+  return /*#__PURE__*/react.createElement("label", _extends({}, props, {
+    ref: ref,
+    htmlFor: htmlFor || controlId,
+    className: classnames(className, bsPrefix)
+  }));
+});
+FormCheckLabel.displayName = 'FormCheckLabel';
+
+var defaultProps$j = {
+  type: 'checkbox',
+  inline: false,
+  disabled: false,
+  isValid: false,
+  isInvalid: false,
+  title: ''
+};
+var FormCheck = react.forwardRef(function (_ref, ref) {
+  var id = _ref.id,
+      bsPrefix = _ref.bsPrefix,
+      bsCustomPrefix = _ref.bsCustomPrefix,
+      inline = _ref.inline,
+      disabled = _ref.disabled,
+      isValid = _ref.isValid,
+      isInvalid = _ref.isInvalid,
+      feedback = _ref.feedback,
+      className = _ref.className,
+      style = _ref.style,
+      title = _ref.title,
+      type = _ref.type,
+      label = _ref.label,
+      children = _ref.children,
+      propCustom = _ref.custom,
+      _ref$as = _ref.as,
+      as = _ref$as === void 0 ? 'input' : _ref$as,
+      props = _objectWithoutPropertiesLoose(_ref, ["id", "bsPrefix", "bsCustomPrefix", "inline", "disabled", "isValid", "isInvalid", "feedback", "className", "style", "title", "type", "label", "children", "custom", "as"]);
+
+  var custom = type === 'switch' ? true : propCustom;
+
+  var _ref2 = custom ? [bsCustomPrefix, 'custom-control'] : [bsPrefix, 'form-check'],
+      prefix = _ref2[0],
+      defaultPrefix = _ref2[1];
+
+  bsPrefix = useBootstrapPrefix(prefix, defaultPrefix);
+
+  var _useContext = react_13(FormContext),
+      controlId = _useContext.controlId;
+
+  var innerFormContext = react_12(function () {
+    return {
+      controlId: id || controlId,
+      custom: custom
+    };
+  }, [controlId, custom, id]);
+  var hasLabel = label != null && label !== false && !children;
+  var input = /*#__PURE__*/react.createElement(FormCheckInput, _extends({}, props, {
+    type: type === 'switch' ? 'checkbox' : type,
+    ref: ref,
+    isValid: isValid,
+    isInvalid: isInvalid,
+    isStatic: !hasLabel,
+    disabled: disabled,
+    as: as
+  }));
+  return /*#__PURE__*/react.createElement(FormContext.Provider, {
+    value: innerFormContext
+  }, /*#__PURE__*/react.createElement("div", {
+    style: style,
+    className: classnames(className, bsPrefix, custom && "custom-" + type, inline && bsPrefix + "-inline")
+  }, children || /*#__PURE__*/react.createElement(react.Fragment, null, input, hasLabel && /*#__PURE__*/react.createElement(FormCheckLabel, {
+    title: title
+  }, label), (isValid || isInvalid) && /*#__PURE__*/react.createElement(Feedback, {
+    type: isValid ? 'valid' : 'invalid'
+  }, feedback))));
+});
+FormCheck.displayName = 'FormCheck';
+FormCheck.defaultProps = defaultProps$j;
+FormCheck.Input = FormCheckInput;
+FormCheck.Label = FormCheckLabel;
+
+var FormFileInput = react.forwardRef(function (_ref, ref) {
+  var id = _ref.id,
+      bsPrefix = _ref.bsPrefix,
+      bsCustomPrefix = _ref.bsCustomPrefix,
+      className = _ref.className,
+      isValid = _ref.isValid,
+      isInvalid = _ref.isInvalid,
+      lang = _ref.lang,
+      _ref$as = _ref.as,
+      Component = _ref$as === void 0 ? 'input' : _ref$as,
+      props = _objectWithoutPropertiesLoose(_ref, ["id", "bsPrefix", "bsCustomPrefix", "className", "isValid", "isInvalid", "lang", "as"]);
+
+  var _useContext = react_13(FormContext),
+      controlId = _useContext.controlId,
+      custom = _useContext.custom;
+
+  var type = 'file';
+
+  var _ref2 = custom ? [bsCustomPrefix, 'custom-file-input'] : [bsPrefix, 'form-control-file'],
+      prefix = _ref2[0],
+      defaultPrefix = _ref2[1];
+
+  bsPrefix = useBootstrapPrefix(prefix, defaultPrefix);
+  return /*#__PURE__*/react.createElement(Component, _extends({}, props, {
+    ref: ref,
+    id: id || controlId,
+    type: type,
+    lang: lang,
+    className: classnames(className, bsPrefix, isValid && 'is-valid', isInvalid && 'is-invalid')
+  }));
+});
+FormFileInput.displayName = 'FormFileInput';
+
+var FormFileLabel = react.forwardRef(function (_ref, ref) {
+  var bsPrefix = _ref.bsPrefix,
+      bsCustomPrefix = _ref.bsCustomPrefix,
+      className = _ref.className,
+      htmlFor = _ref.htmlFor,
+      props = _objectWithoutPropertiesLoose(_ref, ["bsPrefix", "bsCustomPrefix", "className", "htmlFor"]);
+
+  var _useContext = react_13(FormContext),
+      controlId = _useContext.controlId,
+      custom = _useContext.custom;
+
+  var _ref2 = custom ? [bsCustomPrefix, 'custom-file-label'] : [bsPrefix, 'form-file-label'],
+      prefix = _ref2[0],
+      defaultPrefix = _ref2[1];
+
+  bsPrefix = useBootstrapPrefix(prefix, defaultPrefix);
+  return /*#__PURE__*/react.createElement("label", _extends({}, props, {
+    ref: ref,
+    htmlFor: htmlFor || controlId,
+    className: classnames(className, bsPrefix),
+    "data-browse": props['data-browse']
+  }));
+});
+FormFileLabel.displayName = 'FormFileLabel';
+
+var defaultProps$k = {
+  disabled: false,
+  isValid: false,
+  isInvalid: false
+};
+var FormFile = react.forwardRef(function (_ref, ref) {
+  var id = _ref.id,
+      bsPrefix = _ref.bsPrefix,
+      bsCustomPrefix = _ref.bsCustomPrefix,
+      disabled = _ref.disabled,
+      isValid = _ref.isValid,
+      isInvalid = _ref.isInvalid,
+      feedback = _ref.feedback,
+      className = _ref.className,
+      style = _ref.style,
+      label = _ref.label,
+      children = _ref.children,
+      custom = _ref.custom,
+      lang = _ref.lang,
+      dataBrowse = _ref['data-browse'],
+      _ref$as = _ref.as,
+      Component = _ref$as === void 0 ? 'div' : _ref$as,
+      _ref$inputAs = _ref.inputAs,
+      inputAs = _ref$inputAs === void 0 ? 'input' : _ref$inputAs,
+      props = _objectWithoutPropertiesLoose(_ref, ["id", "bsPrefix", "bsCustomPrefix", "disabled", "isValid", "isInvalid", "feedback", "className", "style", "label", "children", "custom", "lang", "data-browse", "as", "inputAs"]);
+
+  var _ref2 = custom ? [bsCustomPrefix, 'custom'] : [bsPrefix, 'form-file'],
+      prefix = _ref2[0],
+      defaultPrefix = _ref2[1];
+
+  bsPrefix = useBootstrapPrefix(prefix, defaultPrefix);
+  var type = 'file';
+
+  var _useContext = react_13(FormContext),
+      controlId = _useContext.controlId;
+
+  var innerFormContext = react_12(function () {
+    return {
+      controlId: id || controlId,
+      custom: custom
+    };
+  }, [controlId, custom, id]);
+  var hasLabel = label != null && label !== false && !children;
+  var input = /*#__PURE__*/react.createElement(FormFileInput, _extends({}, props, {
+    ref: ref,
+    isValid: isValid,
+    isInvalid: isInvalid,
+    disabled: disabled,
+    as: inputAs,
+    lang: lang
+  }));
+  return /*#__PURE__*/react.createElement(FormContext.Provider, {
+    value: innerFormContext
+  }, /*#__PURE__*/react.createElement(Component, {
+    style: style,
+    className: classnames(className, bsPrefix, custom && "custom-" + type)
+  }, children || /*#__PURE__*/react.createElement(react.Fragment, null, custom ? /*#__PURE__*/react.createElement(react.Fragment, null, input, hasLabel && /*#__PURE__*/react.createElement(FormFileLabel, {
+    "data-browse": dataBrowse
+  }, label)) : /*#__PURE__*/react.createElement(react.Fragment, null, hasLabel && /*#__PURE__*/react.createElement(FormFileLabel, null, label), input), (isValid || isInvalid) && /*#__PURE__*/react.createElement(Feedback, {
+    type: isValid ? 'valid' : 'invalid'
+  }, feedback))));
+});
+FormFile.displayName = 'FormFile';
+FormFile.defaultProps = defaultProps$k;
+FormFile.Input = FormFileInput;
+FormFile.Label = FormFileLabel;
+
+var FormGroup = react.forwardRef(function (_ref, ref) {
+  var bsPrefix = _ref.bsPrefix,
+      className = _ref.className,
+      children = _ref.children,
+      controlId = _ref.controlId,
+      _ref$as = _ref.as,
+      Component = _ref$as === void 0 ? 'div' : _ref$as,
+      props = _objectWithoutPropertiesLoose(_ref, ["bsPrefix", "className", "children", "controlId", "as"]);
+
+  bsPrefix = useBootstrapPrefix(bsPrefix, 'form-group');
+  var context = react_12(function () {
+    return {
+      controlId: controlId
+    };
+  }, [controlId]);
+  return /*#__PURE__*/react.createElement(FormContext.Provider, {
+    value: context
+  }, /*#__PURE__*/react.createElement(Component, _extends({}, props, {
+    ref: ref,
+    className: classnames(className, bsPrefix)
+  }), children));
+});
+FormGroup.displayName = 'FormGroup';
+
+var defaultProps$l = {
+  column: false,
+  srOnly: false
+};
+var FormLabel = react.forwardRef(function (_ref, ref) {
+  var _ref$as = _ref.as,
+      Component = _ref$as === void 0 ? 'label' : _ref$as,
+      bsPrefix = _ref.bsPrefix,
+      column = _ref.column,
+      srOnly = _ref.srOnly,
+      className = _ref.className,
+      htmlFor = _ref.htmlFor,
+      props = _objectWithoutPropertiesLoose(_ref, ["as", "bsPrefix", "column", "srOnly", "className", "htmlFor"]);
+
+  var _useContext = react_13(FormContext),
+      controlId = _useContext.controlId;
+
+  bsPrefix = useBootstrapPrefix(bsPrefix, 'form-label');
+  var columnClass = 'col-form-label';
+  if (typeof column === 'string') columnClass = columnClass + "-" + column;
+  var classes = classnames(className, bsPrefix, srOnly && 'sr-only', column && columnClass);
+   warning_1(controlId == null || !htmlFor, '`controlId` is ignored on `<FormLabel>` when `htmlFor` is specified.') ;
+  htmlFor = htmlFor || controlId;
+  if (column) return /*#__PURE__*/react.createElement(Col, _extends({
+    as: "label",
+    className: classes,
+    htmlFor: htmlFor
+  }, props));
+  return (
+    /*#__PURE__*/
+    // eslint-disable-next-line jsx-a11y/label-has-for, jsx-a11y/label-has-associated-control
+    react.createElement(Component, _extends({
+      ref: ref,
+      className: classes,
+      htmlFor: htmlFor
+    }, props))
+  );
+});
+FormLabel.displayName = 'FormLabel';
+FormLabel.defaultProps = defaultProps$l;
+
+var FormText = react.forwardRef( // Need to define the default "as" during prop destructuring to be compatible with styled-components github.com/react-bootstrap/react-bootstrap/issues/3595
+function (_ref, ref) {
+  var bsPrefix = _ref.bsPrefix,
+      className = _ref.className,
+      _ref$as = _ref.as,
+      Component = _ref$as === void 0 ? 'small' : _ref$as,
+      muted = _ref.muted,
+      props = _objectWithoutPropertiesLoose(_ref, ["bsPrefix", "className", "as", "muted"]);
+
+  bsPrefix = useBootstrapPrefix(bsPrefix, 'form-text');
+  return /*#__PURE__*/react.createElement(Component, _extends({}, props, {
+    ref: ref,
+    className: classnames(className, bsPrefix, muted && 'text-muted')
+  }));
+});
+FormText.displayName = 'FormText';
+
+var Switch = react.forwardRef(function (props, ref) {
+  return /*#__PURE__*/react.createElement(FormCheck, _extends({}, props, {
+    ref: ref,
+    type: "switch"
+  }));
+});
+Switch.displayName = 'Switch';
+Switch.Input = FormCheck.Input;
+Switch.Label = FormCheck.Label;
+
+var defaultProps$m = {
+  inline: false
+};
+var Form = react.forwardRef(function (_ref, ref) {
+  var bsPrefix = _ref.bsPrefix,
+      inline = _ref.inline,
+      className = _ref.className,
+      validated = _ref.validated,
+      _ref$as = _ref.as,
+      Component = _ref$as === void 0 ? 'form' : _ref$as,
+      props = _objectWithoutPropertiesLoose(_ref, ["bsPrefix", "inline", "className", "validated", "as"]);
+
+  bsPrefix = useBootstrapPrefix(bsPrefix, 'form');
+  return /*#__PURE__*/react.createElement(Component, _extends({}, props, {
+    ref: ref,
+    className: classnames(className, validated && 'was-validated', inline && bsPrefix + "-inline")
+  }));
+});
+Form.displayName = 'Form';
+Form.defaultProps = defaultProps$m;
+Form.Row = createWithBsPrefix('form-row');
+Form.Group = FormGroup;
+Form.Control = FormControl;
+Form.Check = FormCheck;
+Form.File = FormFile;
+Form.Switch = Switch;
+Form.Label = FormLabel;
+Form.Text = FormText;
 
 var lodash_isequal = createCommonjsModule(function (module, exports) {
 /**
@@ -87641,1221 +87607,6 @@ class ShareUi extends SettingsUi {
 
 }
 
-var absSvgPath = absolutize;
-
-/**
- * redefine `path` with absolute coordinates
- *
- * @param {Array} path
- * @return {Array}
- */
-
-function absolutize(path){
-	var startX = 0;
-	var startY = 0;
-	var x = 0;
-	var y = 0;
-
-	return path.map(function(seg){
-		seg = seg.slice();
-		var type = seg[0];
-		var command = type.toUpperCase();
-
-		// is relative
-		if (type != command) {
-			seg[0] = command;
-			switch (type) {
-				case 'a':
-					seg[6] += x;
-					seg[7] += y;
-					break
-				case 'v':
-					seg[1] += y;
-					break
-				case 'h':
-					seg[1] += x;
-					break
-				default:
-					for (var i = 1; i < seg.length;) {
-						seg[i++] += x;
-						seg[i++] += y;
-					}
-			}
-		}
-
-		// update cursor state
-		switch (command) {
-			case 'Z':
-				x = startX;
-				y = startY;
-				break
-			case 'H':
-				x = seg[1];
-				break
-			case 'V':
-				y = seg[1];
-				break
-			case 'M':
-				x = startX = seg[1];
-				y = startY = seg[2];
-				break
-			default:
-				x = seg[seg.length - 2];
-				y = seg[seg.length - 1];
-		}
-
-		return seg
-	})
-}
-
-var parseSvgPath = parse;
-
-/**
- * expected argument lengths
- * @type {Object}
- */
-
-var length = {a: 7, c: 6, h: 1, l: 2, m: 2, q: 4, s: 4, t: 2, v: 1, z: 0};
-
-/**
- * segment pattern
- * @type {RegExp}
- */
-
-var segment = /([astvzqmhlc])([^astvzqmhlc]*)/ig;
-
-/**
- * parse an svg path data string. Generates an Array
- * of commands where each command is an Array of the
- * form `[command, arg1, arg2, ...]`
- *
- * @param {String} path
- * @return {Array}
- */
-
-function parse(path) {
-	var data = [];
-	path.replace(segment, function(_, command, args){
-		var type = command.toLowerCase();
-		args = parseValues(args);
-
-		// overloaded moveTo
-		if (type == 'm' && args.length > 2) {
-			data.push([command].concat(args.splice(0, 2)));
-			type = 'l';
-			command = command == 'm' ? 'l' : 'L';
-		}
-
-		while (true) {
-			if (args.length == length[type]) {
-				args.unshift(command);
-				return data.push(args)
-			}
-			if (args.length < length[type]) throw new Error('malformed path data')
-			data.push([command].concat(args.splice(0, length[type])));
-		}
-	});
-	return data
-}
-
-var number = /-?[0-9]*\.?[0-9]+(?:e[-+]?\d+)?/ig;
-
-function parseValues(args) {
-	var numbers = args.match(number);
-	return numbers ? numbers.map(Number) : []
-}
-
-const Component = react.Component;
-
-const toPoints = svgPath => {
-  const absolutePath = absSvgPath(parseSvgPath(svgPath));
-  const points = [];
-  let closePath = false;
-
-  for (const element of absolutePath) {
-    const [type, a, b, c, d, e, f, g] = element;
-
-    switch (type) {
-      case 'M':
-        points.push({
-          x: a,
-          y: b
-        });
-        break;
-
-      case 'L':
-        points.push({
-          x: a,
-          y: b
-        });
-        break;
-
-      case 'Q':
-        points.push({
-          x: c,
-          y: d,
-          q: {
-            x: a,
-            y: b
-          }
-        });
-        break;
-
-      case 'C':
-        points.push({
-          x: e,
-          y: f,
-          c: [{
-            x: a,
-            y: b
-          }, {
-            x: c,
-            y: d
-          }]
-        });
-        break;
-
-      case 'A':
-        points.push({
-          x: f,
-          y: g,
-          a: {
-            rx: a,
-            ry: b,
-            rot: c,
-            laf: d,
-            sf: e
-          }
-        });
-        break;
-
-      case 'Z':
-        closePath = true;
-        break;
-    }
-  }
-
-  return {
-    points,
-    closePath
-  };
-};
-
-class SvgPathEditor extends Pane {
-  constructor(_props2) {
-    super(_props2);
-
-    _defineProperty$2(this, "setWidth", e => {
-      let v = this.positiveNumber(e.target.value);
-      let min = 1;
-      if (v < min) v = min;
-      this.setState({
-        w: v
-      });
-    });
-
-    _defineProperty$2(this, "setHeight", e => {
-      let v = this.positiveNumber(e.target.value);
-      let min = 1;
-      if (v < min) v = min;
-      this.setState({
-        h: v
-      });
-    });
-
-    _defineProperty$2(this, "setGridSize", e => {
-      let grid = this.state.grid;
-      let v = this.positiveNumber(e.target.value);
-      let min = 1;
-      let max = Math.min(this.state.w, this.state.h);
-      if (v < min) v = min;
-      if (v >= max) v = max / 2;
-      grid.size = v;
-      this.setState({
-        grid
-      });
-    });
-
-    _defineProperty$2(this, "setGridSnap", e => {
-      let grid = this.state.grid;
-      grid.snap = e.target.checked;
-      this.setState({
-        grid
-      });
-    });
-
-    _defineProperty$2(this, "setGridShow", e => {
-      let grid = this.state.grid;
-      grid.show = e.target.checked;
-      this.setState({
-        grid
-      });
-    });
-
-    _defineProperty$2(this, "setClosePath", e => {
-      this.setState({
-        closePath: e.target.checked
-      });
-    });
-
-    _defineProperty$2(this, "save", async e => {
-      const {
-        file
-      } = this.props;
-      const path = this.generatePath();
-      await write$1(file, path);
-      await log({
-        op: 'text',
-        text: 'Saved',
-        level: 'serious'
-      });
-    });
-
-    _defineProperty$2(this, "getMouseCoords", e => {
-      const rect = reactDom.findDOMNode(this.refs.svg).getBoundingClientRect();
-      let x = Math.round(e.pageX - rect.left);
-      let y = Math.round(e.pageY - rect.top);
-
-      if (this.state.grid.snap) {
-        x = this.state.grid.size * Math.round(x / this.state.grid.size);
-        y = this.state.grid.size * Math.round(y / this.state.grid.size);
-      }
-
-      return {
-        x,
-        y
-      };
-    });
-
-    _defineProperty$2(this, "setPointType", e => {
-      const points = this.state.points;
-      const active = this.state.activePoint; // not the first point
-
-      if (active !== 0) {
-        let v = e.target.value;
-
-        switch (v) {
-          case 'l':
-            points[active] = {
-              x: points[active].x,
-              y: points[active].y
-            };
-            break;
-
-          case 'q':
-            points[active] = {
-              x: points[active].x,
-              y: points[active].y,
-              q: {
-                x: (points[active].x + points[active - 1].x) / 2,
-                y: (points[active].y + points[active - 1].y) / 2
-              }
-            };
-            break;
-
-          case 'c':
-            points[active] = {
-              x: points[active].x,
-              y: points[active].y,
-              c: [{
-                x: (points[active].x + points[active - 1].x - 50) / 2,
-                y: (points[active].y + points[active - 1].y) / 2
-              }, {
-                x: (points[active].x + points[active - 1].x + 50) / 2,
-                y: (points[active].y + points[active - 1].y) / 2
-              }]
-            };
-            break;
-
-          case 'a':
-            points[active] = {
-              x: points[active].x,
-              y: points[active].y,
-              a: {
-                rx: 50,
-                ry: 50,
-                rot: 0,
-                laf: 1,
-                sf: 1
-              }
-            };
-            break;
-        }
-
-        this.setState({
-          iteration: this.state.iteration + 1,
-          points
-        });
-      }
-    });
-
-    _defineProperty$2(this, "setPointPosition", (coord, e) => {
-      let coords = this.state.points[this.state.activePoint];
-      let v = this.positiveNumber(e.target.value);
-      if (coord === 'x' && v > this.state.w) v = this.state.w;
-      if (coord === 'y' && v > this.state.h) v = this.state.h;
-      coords[coord] = v;
-      this.setPointCoords(coords);
-    });
-
-    _defineProperty$2(this, "setQuadraticPosition", (coord, e) => {
-      let coords = this.state.points[this.state.activePoint].q;
-      let v = this.positiveNumber(e.target.value);
-      if (coord === 'x' && v > this.state.w) v = this.state.w;
-      if (coord === 'y' && v > this.state.h) v = this.state.h;
-      coords[coord] = v;
-      this.setQuadraticCoords(coords);
-    });
-
-    _defineProperty$2(this, "setCubicPosition", (coord, anchor, e) => {
-      let coords = this.state.points[this.state.activePoint].c[anchor];
-      let v = this.positiveNumber(e.target.value);
-      if (coord === 'x' && v > this.state.w) v = this.state.w;
-      if (coord === 'y' && v > this.state.h) v = this.state.h;
-      coords[coord] = v;
-      this.setCubicCoords(coords, anchor);
-    });
-
-    _defineProperty$2(this, "setPointCoords", coords => {
-      const points = this.state.points;
-      const active = this.state.activePoint;
-      points[active].x = coords.x;
-      points[active].y = coords.y;
-      this.setState({
-        points,
-        iteration: this.state.iteration + 1
-      });
-    });
-
-    _defineProperty$2(this, "setQuadraticCoords", coords => {
-      const points = this.state.points;
-      const active = this.state.activePoint;
-      points[active].q.x = coords.x;
-      points[active].q.y = coords.y;
-      this.setState({
-        points,
-        iteration: this.state.iteration + 1
-      });
-    });
-
-    _defineProperty$2(this, "setArcParam", (param, e) => {
-      const points = this.state.points;
-      const active = this.state.activePoint;
-      let v;
-
-      if (['laf', 'sf'].indexOf(param) > -1) {
-        v = e.target.checked ? 1 : 0;
-      } else {
-        v = this.positiveNumber(e.target.value);
-      }
-
-      points[active].a[param] = v;
-      this.setState({
-        points,
-        iteration: this.state.iteration + 1
-      });
-    });
-
-    _defineProperty$2(this, "setCubicCoords", (coords, anchor) => {
-      const points = this.state.points;
-      const active = this.state.activePoint;
-      points[active].c[anchor].x = coords.x;
-      points[active].c[anchor].y = coords.y;
-      this.setState({
-        points,
-        iteration: this.state.iteration + 1
-      });
-    });
-
-    _defineProperty$2(this, "setDraggedPoint", index => {
-      if (!this.state.ctrl) {
-        this.setState({
-          activePoint: index,
-          draggedPoint: true,
-          iteration: this.state.iteration + 1
-        });
-      }
-    });
-
-    _defineProperty$2(this, "setDraggedQuadratic", index => {
-      if (!this.state.ctrl) {
-        this.setState({
-          iteration: this.state.iteration + 1,
-          activePoint: index,
-          draggedQuadratic: true
-        });
-      }
-    });
-
-    _defineProperty$2(this, "setDraggedCubic", (index, anchor) => {
-      if (!this.state.ctrl) {
-        this.setState({
-          iteration: this.state.iteration + 1,
-          activePoint: index,
-          draggedCubic: anchor
-        });
-      }
-    });
-
-    _defineProperty$2(this, "cancelDragging", e => {
-      this.setState({
-        iteration: this.state.iteration + 1,
-        draggedPoint: false,
-        draggedQuadratic: false,
-        draggedCubic: false
-      });
-    });
-
-    _defineProperty$2(this, "addPoint", e => {
-      const {
-        activePoint,
-        ctrl,
-        points
-      } = this.state;
-
-      if (ctrl) {
-        let coords = this.getMouseCoords(e);
-        points.splice(activePoint, 0, coords);
-        this.setState({
-          iteration: this.state.iteration + 1,
-          points,
-          activePoint: activePoint + 1
-        });
-      }
-
-      e.stopPropagation();
-    });
-
-    _defineProperty$2(this, "removeActivePoint", e => {
-      const {
-        points,
-        activePoint
-      } = this.state;
-
-      if (points.length > 1 && activePoint !== 0) {
-        points.splice(activePoint, 1);
-        this.setState({
-          iteration: this.state.iteration + 1,
-          points,
-          activePoint: Math.min(points.length - 1, activePoint)
-        });
-      }
-    });
-
-    _defineProperty$2(this, "handleMouseMove", e => {
-      if (!this.state.ctrl) {
-        if (this.state.draggedPoint) {
-          this.setPointCoords(this.getMouseCoords(e));
-        } else if (this.state.draggedQuadratic) {
-          this.setQuadraticCoords(this.getMouseCoords(e));
-        } else if (this.state.draggedCubic !== false) {
-          this.setCubicCoords(this.getMouseCoords(e), this.state.draggedCubic);
-        }
-      }
-
-      e.stopPropagation();
-    });
-
-    _defineProperty$2(this, "handleKeyDown", e => {
-      if (e.ctrlKey) this.setState({
-        ctrl: true
-      });
-
-      if (e.key === 'Delete' && props.removeActivePoint) {
-        props.removeActivePoint(e);
-      }
-    });
-
-    _defineProperty$2(this, "handleKeyUp", e => {
-      if (!e.ctrlKey) this.setState({
-        ctrl: false
-      });
-    });
-
-    _defineProperty$2(this, "reset", e => {
-      let w = this.state.w;
-      let h = this.state.h;
-      this.setState({
-        iteration: this.state.iteration + 1,
-        points: [{
-          x: w / 2,
-          y: h / 2
-        }],
-        activePoint: 0
-      });
-    });
-
-    const {
-      points: _points,
-      closePath
-    } = toPoints(_props2.svgPath || 'M 100 300 Q 0 100 200 100');
-    this.state = {
-      w: 800,
-      h: 600,
-      grid: {
-        show: true,
-        snap: true,
-        size: 5
-      },
-      ctrl: false,
-      points: _points,
-      activePoint: _points.length - 1,
-      draggedPoint: false,
-      draggedQuadratic: false,
-      draggedCubic: false,
-      closePath,
-      iteration: 0
-    };
-  }
-
-  componentWillMount() {
-    document.addEventListener('keydown', this.handleKeyDown, false);
-    document.addEventListener('keyup', this.handleKeyUp, false);
-  }
-
-  async componentDidMount() {
-    const {
-      file
-    } = this.props;
-    const svgPath = await read$1(file);
-    const {
-      points,
-      closePath
-    } = toPoints(svgPath);
-    this.setState({
-      closePath,
-      points
-    });
-  }
-
-  componentWillUnmount() {
-    document.removeEventListener('keydown', this.handleKeyDown);
-    document.removeEventListener('keyup', this.handleKeyUp);
-  }
-
-  positiveNumber(n) {
-    n = parseInt(n);
-    if (isNaN(n) || n < 0) n = 0;
-    return n;
-  }
-
-  generatePath() {
-    let {
-      points,
-      closePath
-    } = this.state;
-    let d = '';
-    points.forEach((p, i) => {
-      if (i === 0) {
-        // first point
-        d += 'M ';
-      } else if (p.q) {
-        // quadratic
-        d += `Q ${p.q.x} ${p.q.y} `;
-      } else if (p.c) {
-        // cubic
-        d += `C ${p.c[0].x} ${p.c[0].y} ${p.c[1].x} ${p.c[1].y} `;
-      } else if (p.a) {
-        // arc
-        d += `A ${p.a.rx} ${p.a.ry} ${p.a.rot} ${p.a.laf} ${p.a.sf} `;
-      } else {
-        d += 'L ';
-      }
-
-      d += `${p.x} ${p.y} `;
-    });
-    if (closePath) d += 'Z';
-    return d;
-  }
-
-  renderPane() {
-    return /*#__PURE__*/react.createElement("div", {
-      className: "ad-SvgPathEditor",
-      onMouseUp: this.cancelDragging
-    }, /*#__PURE__*/react.createElement("div", {
-      className: "ad-SvgPathEditor-main"
-    }, /*#__PURE__*/react.createElement("div", {
-      className: "ad-SvgPathEditor-svg"
-    }, /*#__PURE__*/react.createElement(SVG, _extends$1({
-      ref: "svg",
-      svgPath: this.generatePath()
-    }, this.state, {
-      addPoint: this.addPoint,
-      setDraggedPoint: this.setDraggedPoint,
-      setDraggedQuadratic: this.setDraggedQuadratic,
-      setDraggedCubic: this.setDraggedCubic,
-      handleMouseMove: this.handleMouseMove
-    })))), /*#__PURE__*/react.createElement("div", {
-      className: "ad-SvgPathEditor-controls"
-    }, /*#__PURE__*/react.createElement(Controls, _extends$1({}, this.state, {
-      reset: this.reset,
-      removeActivePoint: this.removeActivePoint,
-      setPointPosition: this.setPointPosition,
-      setQuadraticPosition: this.setQuadraticPosition,
-      setCubicPosition: this.setCubicPosition,
-      setArcParam: this.setArcParam,
-      setPointType: this.setPointType,
-      setWidth: this.setWidth,
-      setHeight: this.setHeight,
-      setGridSize: this.setGridSize,
-      setGridSnap: this.setGridSnap,
-      setGridShow: this.setGridShow,
-      setClosePath: this.setClosePath,
-      save: this.save
-    }))));
-  }
-
-}
-/**
- * SVG rendering
- */
-
-
-class SVG extends Component {
-  render() {
-    const {
-      svgPath,
-      w,
-      h,
-      grid,
-      points,
-      activePoint,
-      addPoint,
-      handleMouseMove,
-      setDraggedPoint,
-      setDraggedQuadratic,
-      setDraggedCubic
-    } = this.props;
-    let circles = points.map((p, i, a) => {
-      let anchors = [];
-
-      if (p.q) {
-        anchors.push( /*#__PURE__*/react.createElement(Quadratic, {
-          key: anchors.length,
-          index: i,
-          p1x: a[i - 1].x,
-          p1y: a[i - 1].y,
-          p2x: p.x,
-          p2y: p.y,
-          x: p.q.x,
-          y: p.q.y,
-          setDraggedQuadratic: setDraggedQuadratic
-        }));
-      } else if (p.c) {
-        anchors.push( /*#__PURE__*/react.createElement(Cubic, {
-          key: anchors.length,
-          index: i,
-          p1x: a[i - 1].x,
-          p1y: a[i - 1].y,
-          p2x: p.x,
-          p2y: p.y,
-          x1: p.c[0].x,
-          y1: p.c[0].y,
-          x2: p.c[1].x,
-          y2: p.c[1].y,
-          setDraggedCubic: setDraggedCubic
-        }));
-      }
-
-      return /*#__PURE__*/react.createElement("g", {
-        key: i,
-        className: 'ad-PointGroup' + (i === 0 ? '  ad-PointGroup--first' : '') + (activePoint === i ? '  is-active' : '')
-      }, /*#__PURE__*/react.createElement(Point, {
-        key: "p",
-        index: i,
-        x: p.x,
-        y: p.y,
-        setDraggedPoint: setDraggedPoint
-      }), anchors);
-    });
-    return /*#__PURE__*/react.createElement("svg", {
-      className: "ad-SVG",
-      width: w,
-      height: h,
-      onClickCapture: e => addPoint(e),
-      onMouseMoveCapture: e => handleMouseMove(e)
-    }, /*#__PURE__*/react.createElement(Grid, {
-      w: w,
-      h: h,
-      grid: grid
-    }), /*#__PURE__*/react.createElement("path", {
-      className: "ad-Path",
-      d: svgPath
-    }), /*#__PURE__*/react.createElement("g", {
-      className: "ad-Points"
-    }, circles));
-  }
-
-}
-
-function Cubic(props) {
-  return /*#__PURE__*/react.createElement("g", {
-    className: "ad-Anchor"
-  }, /*#__PURE__*/react.createElement("line", {
-    className: "ad-Anchor-line",
-    x1: props.p1x,
-    y1: props.p1y,
-    x2: props.x1,
-    y2: props.y1
-  }), /*#__PURE__*/react.createElement("line", {
-    className: "ad-Anchor-line",
-    x1: props.p2x,
-    y1: props.p2y,
-    x2: props.x2,
-    y2: props.y2
-  }), /*#__PURE__*/react.createElement("circle", {
-    className: "ad-Anchor-point",
-    onMouseDown: e => props.setDraggedCubic(props.index, 0),
-    cx: props.x1,
-    cy: props.y1,
-    r: 6
-  }), /*#__PURE__*/react.createElement("circle", {
-    className: "ad-Anchor-point",
-    onMouseDown: e => props.setDraggedCubic(props.index, 1),
-    cx: props.x2,
-    cy: props.y2,
-    r: 6
-  }));
-}
-
-function Quadratic(props) {
-  return /*#__PURE__*/react.createElement("g", {
-    className: "ad-Anchor"
-  }, /*#__PURE__*/react.createElement("line", {
-    key: "q1",
-    className: "ad-Anchor-line",
-    x1: props.p1x,
-    y1: props.p1y,
-    x2: props.x,
-    y2: props.y
-  }), /*#__PURE__*/react.createElement("line", {
-    key: "q2",
-    className: "ad-Anchor-line",
-    x1: props.x,
-    y1: props.y,
-    x2: props.p2x,
-    y2: props.p2y
-  }), /*#__PURE__*/react.createElement("circle", {
-    key: "q3",
-    className: "ad-Anchor-point",
-    onMouseDown: e => props.setDraggedQuadratic(props.index),
-    cx: props.x,
-    cy: props.y,
-    r: 6
-  }));
-}
-
-function Point(props) {
-  return /*#__PURE__*/react.createElement("circle", {
-    className: "ad-Point",
-    onMouseDown: e => props.setDraggedPoint(props.index),
-    cx: props.x,
-    cy: props.y,
-    r: 8
-  });
-}
-
-function Grid(props) {
-  const {
-    show,
-    snap,
-    size
-  } = props.grid;
-  let grid = [];
-
-  for (let i = 1; i < props.w / size; i++) {
-    grid.push( /*#__PURE__*/react.createElement("line", {
-      key: `Gx${i}`,
-      x1: i * size,
-      y1: 0,
-      x2: i * size,
-      y2: props.h
-    }));
-  }
-
-  for (let i = 1; i < props.h / size; i++) {
-    grid.push( /*#__PURE__*/react.createElement("line", {
-      key: `Gy${i}`,
-      x1: 0,
-      y1: i * size,
-      x2: props.w,
-      y2: i * size
-    }));
-  }
-
-  return /*#__PURE__*/react.createElement("g", {
-    className: 'ad-Grid' + (!show ? '  is-hidden' : '')
-  }, grid);
-}
-/**
- * Controls
- */
-
-
-function Controls(props) {
-  const active = props.points[props.activePoint];
-  const step = props.grid.snap ? props.grid.size : 1;
-  let params = [];
-
-  if (active.q) {
-    params.push( /*#__PURE__*/react.createElement("div", {
-      key: params.length,
-      className: "ad-Controls-container"
-    }, /*#__PURE__*/react.createElement(Control, {
-      name: "Control point X position",
-      type: "range",
-      min: 0,
-      max: props.w,
-      step: step,
-      value: active.q.x,
-      onChange: e => props.setQuadraticPosition('x', e)
-    })));
-    params.push( /*#__PURE__*/react.createElement("div", {
-      key: params.length,
-      className: "ad-Controls-container"
-    }, /*#__PURE__*/react.createElement(Control, {
-      name: "Control point Y position",
-      type: "range",
-      min: 0,
-      max: props.h,
-      step: step,
-      value: active.q.y,
-      onChange: e => props.setQuadraticPosition('y', e)
-    })));
-  } else if (active.c) {
-    params.push( /*#__PURE__*/react.createElement("div", {
-      key: params.length,
-      className: "ad-Controls-container"
-    }, /*#__PURE__*/react.createElement(Control, {
-      name: "First control point X position",
-      type: "range",
-      min: 0,
-      max: props.w,
-      step: step,
-      value: active.c[0].x,
-      onChange: e => props.setCubicPosition('x', 0, e)
-    })));
-    params.push( /*#__PURE__*/react.createElement("div", {
-      key: params.length,
-      className: "ad-Controls-container"
-    }, /*#__PURE__*/react.createElement(Control, {
-      name: "First control point Y position",
-      type: "range",
-      min: 0,
-      max: props.h,
-      step: step,
-      value: active.c[0].y,
-      onChange: e => props.setCubicPosition('y', 0, e)
-    })));
-    params.push( /*#__PURE__*/react.createElement("div", {
-      key: params.length,
-      className: "ad-Controls-container"
-    }, /*#__PURE__*/react.createElement(Control, {
-      name: "Second control point X position",
-      type: "range",
-      min: 0,
-      max: props.w,
-      step: step,
-      value: active.c[1].x,
-      onChange: e => props.setCubicPosition('x', 1, e)
-    })));
-    params.push( /*#__PURE__*/react.createElement("div", {
-      key: params.length,
-      className: "ad-Controls-container"
-    }, /*#__PURE__*/react.createElement(Control, {
-      name: "Second control point Y position",
-      type: "range",
-      min: 0,
-      max: props.h,
-      step: step,
-      value: active.c[1].y,
-      onChange: e => props.setCubicPosition('y', 1, e)
-    })));
-  } else if (active.a) {
-    params.push( /*#__PURE__*/react.createElement("div", {
-      key: params.length,
-      className: "ad-Controls-container"
-    }, /*#__PURE__*/react.createElement(Control, {
-      name: "X Radius",
-      type: "range",
-      min: 0,
-      max: props.w,
-      step: step,
-      value: active.a.rx,
-      onChange: e => props.setArcParam('rx', e)
-    })));
-    params.push( /*#__PURE__*/react.createElement("div", {
-      key: params.length,
-      className: "ad-Controls-container"
-    }, /*#__PURE__*/react.createElement(Control, {
-      name: "Y Radius",
-      type: "range",
-      min: 0,
-      max: props.h,
-      step: step,
-      value: active.a.ry,
-      onChange: e => props.setArcParam('ry', e)
-    })));
-    params.push( /*#__PURE__*/react.createElement("div", {
-      key: params.length,
-      className: "ad-Controls-container"
-    }, /*#__PURE__*/react.createElement(Control, {
-      name: "Rotation",
-      type: "range",
-      min: 0,
-      max: 360,
-      step: 1,
-      value: active.a.rot,
-      onChange: e => props.setArcParam('rot', e)
-    })));
-    params.push( /*#__PURE__*/react.createElement("div", {
-      key: params.length,
-      className: "ad-Controls-container"
-    }, /*#__PURE__*/react.createElement(Control, {
-      name: "Large arc sweep flag",
-      type: "checkbox",
-      checked: active.a.laf,
-      onChange: e => props.setArcParam('laf', e)
-    })));
-    params.push( /*#__PURE__*/react.createElement("div", {
-      key: params.length,
-      className: "ad-Controls-container"
-    }, /*#__PURE__*/react.createElement(Control, {
-      name: "Sweep flag",
-      type: "checkbox",
-      checked: active.a.sf,
-      onChange: e => props.setArcParam('sf', e)
-    })));
-  }
-
-  return /*#__PURE__*/react.createElement("div", {
-    className: "ad-Controls"
-  }, /*#__PURE__*/react.createElement("h3", {
-    className: "ad-Controls-title"
-  }, "Parameters"), /*#__PURE__*/react.createElement("div", {
-    key: "c1",
-    className: "ad-Controls-container"
-  }, /*#__PURE__*/react.createElement(Control, {
-    name: "Width",
-    type: "text",
-    value: props.w,
-    onChange: e => props.setWidth(e)
-  }), /*#__PURE__*/react.createElement(Control, {
-    name: "Height",
-    type: "text",
-    value: props.h,
-    onChange: e => props.setHeight(e)
-  }), /*#__PURE__*/react.createElement(Control, {
-    name: "Close path",
-    type: "checkbox",
-    value: props.closePath,
-    onChange: e => props.setClosePath(e)
-  })), /*#__PURE__*/react.createElement("div", {
-    key: "c2",
-    className: "ad-Controls-container"
-  }, /*#__PURE__*/react.createElement(Control, {
-    name: "Grid size",
-    type: "text",
-    value: props.grid.size,
-    onChange: e => props.setGridSize(e)
-  }), /*#__PURE__*/react.createElement(Control, {
-    name: "Snap grid",
-    type: "checkbox",
-    checked: props.grid.snap,
-    onChange: e => props.setGridSnap(e)
-  }), /*#__PURE__*/react.createElement(Control, {
-    name: "Show grid",
-    type: "checkbox",
-    checked: props.grid.show,
-    onChange: e => props.setGridShow(e)
-  })), /*#__PURE__*/react.createElement("div", {
-    key: "c3",
-    className: "ad-Controls-container"
-  }, /*#__PURE__*/react.createElement(Control, {
-    type: "button",
-    action: "reset",
-    value: "Reset path",
-    onClick: e => props.reset(e)
-  })), /*#__PURE__*/react.createElement("h3", {
-    className: "ad-Controls-title"
-  }, "Selected point"), props.activePoint !== 0 && /*#__PURE__*/react.createElement("div", {
-    key: "c4",
-    className: "ad-Controls-container"
-  }, /*#__PURE__*/react.createElement(Control, {
-    name: "Point type",
-    type: "choices",
-    id: "pointType",
-    choices: [{
-      name: 'L',
-      value: 'l',
-      checked: !active.q && !active.c && !active.a
-    }, {
-      name: 'Q',
-      value: 'q',
-      checked: !!active.q
-    }, {
-      name: 'C',
-      value: 'c',
-      checked: !!active.c
-    }, {
-      name: 'A',
-      value: 'a',
-      checked: !!active.a
-    }],
-    onChange: e => props.setPointType(e)
-  })), /*#__PURE__*/react.createElement("div", {
-    key: "c5",
-    className: "ad-Controls-container"
-  }, /*#__PURE__*/react.createElement(Control, {
-    name: "Point X position",
-    type: "range",
-    min: 0,
-    max: props.w,
-    step: step,
-    value: active.x,
-    onChange: e => props.setPointPosition('x', e)
-  })), /*#__PURE__*/react.createElement("div", {
-    key: "c6",
-    className: "ad-Controls-container"
-  }, /*#__PURE__*/react.createElement(Control, {
-    name: "Point Y position",
-    type: "range",
-    min: 0,
-    max: props.h,
-    step: step,
-    value: active.y,
-    onChange: e => props.setPointPosition('y', e)
-  })), params, props.activePoint !== 0 && /*#__PURE__*/react.createElement("div", {
-    key: "c7",
-    className: "ad-Controls-container"
-  }, /*#__PURE__*/react.createElement(Control, {
-    type: "button",
-    action: "delete",
-    value: "Remove this point",
-    onClick: e => props.removeActivePoint(e)
-  })), /*#__PURE__*/react.createElement("div", {
-    key: "c8",
-    className: "ad-Controls-container"
-  }, /*#__PURE__*/react.createElement(Control, {
-    type: "button",
-    action: "save",
-    value: "Save",
-    onClick: e => props.save(e)
-  })));
-}
-
-function Control(props) {
-  const {
-    name,
-    type,
-    ..._props
-  } = props;
-  let control = '';
-  let label = '';
-
-  switch (type) {
-    case 'range':
-      control = /*#__PURE__*/react.createElement(Range, _props);
-      break;
-
-    case 'text':
-      control = /*#__PURE__*/react.createElement(Text, _props);
-      break;
-
-    case 'checkbox':
-      control = /*#__PURE__*/react.createElement(Checkbox, _props);
-      break;
-
-    case 'button':
-      control = /*#__PURE__*/react.createElement(Button$1, _props);
-      break;
-
-    case 'choices':
-      control = /*#__PURE__*/react.createElement(Choices, _props);
-      break;
-  }
-
-  if (name) {
-    label = /*#__PURE__*/react.createElement("label", {
-      className: "ad-Control-label"
-    }, name);
-  }
-
-  return /*#__PURE__*/react.createElement("div", {
-    className: "ad-Control"
-  }, label, control);
-}
-
-function Choices(props) {
-  let choices = props.choices.map((c, i) => {
-    return /*#__PURE__*/react.createElement("label", {
-      key: i,
-      className: "ad-Choice"
-    }, /*#__PURE__*/react.createElement("input", {
-      className: "ad-Choice-input",
-      type: "radio",
-      value: c.value,
-      checked: c.checked,
-      name: props.id,
-      onChange: props.onChange
-    }), /*#__PURE__*/react.createElement("div", {
-      className: "ad-Choice-fake"
-    }, c.name));
-  });
-  return /*#__PURE__*/react.createElement("div", {
-    className: "ad-Choices"
-  }, choices);
-}
-
-function Button$1(props) {
-  return /*#__PURE__*/react.createElement("button", {
-    className: 'ad-Button' + (props.action ? '  ad-Button--' + props.action : ''),
-    type: "button",
-    onClick: props.onClick
-  }, props.value);
-}
-
-function Checkbox(props) {
-  return /*#__PURE__*/react.createElement("label", {
-    className: "ad-Checkbox"
-  }, /*#__PURE__*/react.createElement("input", {
-    className: "ad-Checkbox-input",
-    type: "checkbox",
-    onChange: props.onChange,
-    checked: props.checked
-  }), /*#__PURE__*/react.createElement("div", {
-    className: "ad-Checkbox-fake"
-  }));
-}
-
-function Text(props) {
-  return /*#__PURE__*/react.createElement("input", {
-    className: "ad-Text",
-    type: "text",
-    value: props.value,
-    onChange: props.onChange
-  });
-}
-
-function Range(props) {
-  return /*#__PURE__*/react.createElement("div", {
-    className: "ad-Range"
-  }, /*#__PURE__*/react.createElement("input", {
-    className: "ad-Range-input",
-    type: "range",
-    min: props.min,
-    max: props.max,
-    step: props.step,
-    value: props.value,
-    onChange: props.onChange
-  }), /*#__PURE__*/react.createElement("input", {
-    className: "ad-Range-text  ad-Text",
-    type: "text",
-    value: props.value,
-    onChange: props.onChange
-  }));
-}
-
 /*
  * Browsers including Internet Explorer, Chrome, Safari, and Firefox store the
  * delay as a 32-bit signed integer internally. This causes an integer overflow
@@ -89459,11 +88210,6 @@ const ensureFile = async (file, url, {
   const sources = [];
 
   if (url !== undefined) {
-    if (url.startsWith('https://github.com/')) {
-      url = `https://raw.githubusercontent.com/${url.substr(19)}`;
-      url = url.replace('/blob/', '/');
-    }
-
     sources.push(url);
   } // Ensure the file exists.
   // TODO: Handle a transform from file to source so that things github can be used sensibly.
@@ -89487,7 +88233,9 @@ class Ui extends react.PureComponent {
     return {
       workspace: propTypes.string,
       workspaces: propTypes.array,
-      sha: propTypes.string
+      sha: propTypes.string,
+      file: propTypes.string,
+      fileTitle: propTypes.string
     };
   }
 
@@ -89496,7 +88244,6 @@ class Ui extends react.PureComponent {
     this.state = {
       isLogOpen: false,
       log: [],
-      parameters: [],
       workspaces: this.props.workspaces,
       layout: [],
       panes: [],
@@ -89507,13 +88254,11 @@ class Ui extends react.PureComponent {
       paneViews: [],
       toast: []
     };
-    this.askUser = this.askUser.bind(this);
     this.addWorkspace = this.addWorkspace.bind(this);
     this.createNode = this.createNode.bind(this);
     this.onChange = this.onChange.bind(this);
     this.onRelease = this.onRelease.bind(this);
     this.openLog = this.openLog.bind(this);
-    this.updateParameters = this.updateParameters.bind(this);
     this.doGithub = this.doGithub.bind(this);
     this.doSelectWorkspace = this.doSelectWorkspace.bind(this);
     this.doNav = this.doNav.bind(this);
@@ -89525,8 +88270,16 @@ class Ui extends react.PureComponent {
       workspace
     } = this.state;
     const {
+      file,
+      fileTitle,
       sha
     } = this.props;
+
+    if (file && fileTitle) {
+      await ensureFile(file, fileTitle, {
+        workspace
+      });
+    }
 
     const fileUpdater = async () => this.setState({
       workspaces: await listFilesystems(),
@@ -89618,15 +88371,15 @@ class Ui extends react.PureComponent {
       webWorker: `./webworker.js#${sha}`,
       agent,
       workerType: 'module'
-    }); // const { ask } = await createService({ webWorker: './webworker.js', agent, workerType: 'module' });
-
+    });
     this.setState({
       ask: ask$1,
       creationWatcher,
       deletionWatcher,
+      file,
+      fileTitle,
       logWatcher
     });
-    setHandleAskUser(this.askUser);
 
     if (workspace) {
       await this.selectWorkspace(workspace);
@@ -89644,42 +88397,6 @@ class Ui extends react.PureComponent {
     await unwatchLog(logWatcher);
   }
 
-  async askUser(identifier, options) {
-    const {
-      parameters
-    } = this.state;
-
-    for (const parameter of parameters) {
-      if (parameter.identifier === identifier) {
-        return parameter.value;
-      }
-    }
-
-    let {
-      choices,
-      initially
-    } = options;
-
-    if (initially === undefined && choices.length > 0) {
-      initially = choices[0];
-    }
-
-    this.setState({
-      parameters: [...parameters, {
-        identifier,
-        options,
-        value: initially
-      }]
-    });
-    return initially;
-  }
-
-  updateParameters(parameters) {
-    this.setState({
-      parameters
-    });
-  }
-
   async addWorkspace() {
     const workspace = document.getElementById('workspace/add/name').value;
 
@@ -89695,12 +88412,37 @@ class Ui extends react.PureComponent {
     }
   }
 
+  updateUrl({
+    workspace,
+    fileTitle
+  } = {}) {
+    if (workspace === undefined) {
+      workspace = this.state.workspace;
+    }
+
+    if (workspace === undefined) {
+      workspace = '';
+    }
+
+    if (fileTitle === undefined) {
+      fileTitle = this.state.fileTitle;
+    }
+
+    if (fileTitle !== undefined) {
+      fileTitle = `@${fileTitle}`;
+    }
+
+    const encodedWorkspace = encodeURIComponent(workspace);
+    history.pushState(null, null, `#${encodedWorkspace}${fileTitle}`);
+  }
+
   async selectWorkspace(workspace) {
     setupFilesystem({
       fileBase: workspace
     });
-    const encodedWorkspace = encodeURIComponent(workspace);
-    history.pushState(null, null, `#${encodedWorkspace}`);
+    this.updateUrl({
+      workspace
+    });
     const paneLayoutData = await read$1('ui/paneLayout');
     let paneLayout;
 
@@ -89864,15 +88606,6 @@ class Ui extends react.PureComponent {
           fileTitle: `${file.substring(7)}`
         });
       }
-
-      if (file.startsWith('source/') && (file.endsWith('.svp') || file.endsWith('.svgpath'))) {
-        views.push({
-          view: 'editSvgPath',
-          viewTitle: 'Edit SVG Path',
-          file,
-          fileTitle: `${file.substring(7)}`
-        });
-      }
     }
 
     views.push({
@@ -89927,15 +88660,14 @@ class Ui extends react.PureComponent {
     await write$1('ui/paneViews', newPaneViews);
   }
 
-  renderPane(views, id, path, createNode, onSelectView, onSelectFile) {
+  renderPane(views, id, path, createNode, onSelectView) {
     const {
+      file,
       workspace
     } = this.state;
     const {
-      view,
-      file
+      view
     } = this.getPaneView(id);
-    const fileChoices = views.filter(entry => entry.view === view && entry.file !== file);
     const seenViewChoices = new Set();
     const viewChoices = [];
 
@@ -89952,64 +88684,33 @@ class Ui extends react.PureComponent {
 
     switch (view) {
       case 'notebook':
-        {
-          const fileTitle = file === undefined ? '' : file.substring('source/'.length);
-          return /*#__PURE__*/react.createElement(NotebookUi, {
-            key: `${id}/notebook/${file}`,
-            id: id,
-            path: path,
-            createNode: createNode,
-            view: view,
-            viewChoices: viewChoices,
-            viewTitle: 'Notebook',
-            onSelectView: onSelectView,
-            file: file,
-            fileChoices: fileChoices,
-            fileTitle: fileTitle,
-            onSelectFile: onSelectFile,
-            workspace: workspace
-          });
-        }
+        return /*#__PURE__*/react.createElement(NotebookUi, {
+          key: `${id}/notebook/${file}`,
+          id: id,
+          path: path,
+          createNode: createNode,
+          view: view,
+          viewChoices: viewChoices,
+          viewTitle: 'Notebook',
+          onSelectView: onSelectView,
+          file: file,
+          workspace: workspace
+        });
 
       case 'editScript':
-        {
-          const fileTitle = file === undefined ? '' : file.substring('source/'.length);
-          return /*#__PURE__*/react.createElement(JsEditorUi, {
-            key: `${id}/editScript/${file}`,
-            id: id,
-            path: path,
-            createNode: createNode,
-            view: view,
-            viewChoices: viewChoices,
-            viewTitle: 'Edit Script',
-            onSelectView: onSelectView,
-            file: file,
-            fileChoices: fileChoices,
-            fileTitle: fileTitle,
-            onSelectFile: onSelectFile,
-            ask: ask,
-            workspace: workspace
-          });
-        }
-
-      case 'editSvgPath':
-        {
-          const fileTitle = file === undefined ? '' : file.substring('source/'.length);
-          return /*#__PURE__*/react.createElement(SvgPathEditor, {
-            key: `${id}/editSvgPath/${file}`,
-            id: id,
-            path: path,
-            createNode: createNode,
-            view: view,
-            viewChoices: viewChoices,
-            viewTitle: 'Edit SvgPath',
-            onSelectView: onSelectView,
-            file: file,
-            fileChoices: fileChoices,
-            fileTitle: fileTitle,
-            onSelectFile: onSelectFile
-          });
-        }
+        return /*#__PURE__*/react.createElement(JsEditorUi, {
+          key: `${id}/editScript/${file}`,
+          id: id,
+          path: path,
+          createNode: createNode,
+          view: view,
+          viewChoices: viewChoices,
+          viewTitle: 'Edit Script',
+          onSelectView: onSelectView,
+          file: file,
+          ask: ask,
+          workspace: workspace
+        });
 
       case 'files':
         return /*#__PURE__*/react.createElement(FilesUi, {
@@ -90091,6 +88792,8 @@ class Ui extends react.PureComponent {
   render() {
     const {
       workspace,
+      file,
+      fileTitle,
       files,
       toast
     } = this.state;
@@ -90200,13 +88903,26 @@ class Ui extends react.PureComponent {
       });
     };
 
-    const selectFile = async (id, file, url) => {
-      await ensureFile(file, url);
-      this.setPaneView(id, { ...this.getPaneView(id),
+    const selectFileTitle = async fileTitle => {
+      const file = `source/${fileTitle}`;
+      await ensureFile(file, fileTitle, {
+        workspace
+      });
+      this.updateUrl({
+        fileTitle
+      });
+      this.setState({
         file
       });
     };
 
+    const openFileTitle = async e => {
+      if (e.key === 'Enter') {
+        selectFileTitle(fileTitle);
+      }
+    };
+
+    const fileChoices = views.filter(entry => entry.file !== file);
     return /*#__PURE__*/react.createElement("div", {
       style: {
         height: '100%',
@@ -90233,14 +88949,32 @@ class Ui extends react.PureComponent {
       eventKey: "io"
     }, "Share")), /*#__PURE__*/react.createElement(Nav.Item, null, /*#__PURE__*/react.createElement(Nav.Link, {
       eventKey: "reference"
-    }, "Reference"))))), /*#__PURE__*/react.createElement(lib_1, {
+    }, "Reference")), /*#__PURE__*/react.createElement(Nav.Item, null, /*#__PURE__*/react.createElement(Dropdown$1, {
+      as: ButtonGroup
+    }, /*#__PURE__*/react.createElement(Form.Control, {
+      value: fileTitle,
+      onKeyPress: openFileTitle,
+      onChange: e => this.setState({
+        fileTitle: e.target.value
+      })
+    }), /*#__PURE__*/react.createElement(Dropdown$1.Toggle, {
+      split: true,
+      variant: "outline-primary",
+      id: "file-selector"
+    }), /*#__PURE__*/react.createElement(Dropdown$1.Menu, null, fileChoices.map(({
+      file,
+      fileTitle
+    }, index) => /*#__PURE__*/react.createElement(Dropdown$1.Item, {
+      key: index,
+      onClick: () => selectFileTitle(fileTitle)
+    }, fileTitle)))))))), /*#__PURE__*/react.createElement(lib_1, {
       style: {
         flex: '1 1 auto',
         background: '#e6ebf0'
       },
       key: `mosaic/${workspace}`,
       renderTile: (id, path) => {
-        const pane = this.renderPane(views, `${id}`, path, this.createNode, selectView, selectFile);
+        const pane = this.renderPane(views, `${id}`, path, this.createNode, selectView);
         return pane;
       },
       zeroStateView: /*#__PURE__*/react.createElement(lib_23, {
@@ -90258,21 +88992,15 @@ class Ui extends react.PureComponent {
 const setupUi = async sha => {
   const filesystems = await listFilesystems();
   const hash = location.hash.substring(1);
-  const [encodedWorkspace, encodedPath] = hash.split('@');
+  const [encodedWorkspace, encodedFile] = hash.split('@');
   const workspace = decodeURIComponent(encodedWorkspace);
-  let path;
-
-  if (encodedPath !== undefined) {
-    path = decodeURIComponent(encodedPath);
-    await ensureFile(`source/${path}`, path, {
-      workspace
-    });
-  }
-
+  let fileTitle = encodedFile ? decodeURIComponent(encodedFile) : undefined;
+  let file = fileTitle ? `source/${fileTitle}` : undefined;
   reactDom.render( /*#__PURE__*/react.createElement(Ui, {
     workspaces: [...filesystems],
     workspace: workspace,
-    path: path,
+    file: file,
+    fileTitle: fileTitle,
     sha: sha,
     width: "100%",
     height: "100%",

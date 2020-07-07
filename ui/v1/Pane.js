@@ -4,9 +4,6 @@ import {
   MosaicWindowContext,
 } from 'react-mosaic-component';
 
-import ButtonGroup from 'react-bootstrap/ButtonGroup';
-import Dropdown from 'react-bootstrap/Dropdown';
-import Form from 'react-bootstrap/Form';
 import Nav from 'react-bootstrap/Nav';
 import NavDropdown from 'react-bootstrap/NavDropdown';
 import Navbar from 'react-bootstrap/Navbar';
@@ -20,10 +17,8 @@ export class Pane extends React.PureComponent {
     return {
       createNode: PropTypes.func,
       file: PropTypes.string,
-      fileChoices: PropTypes.array,
       fileTitle: PropTypes.string,
       id: PropTypes.string,
-      onSelectFile: PropTypes.func,
       onSelectView: PropTypes.func,
       path: PropTypes.array,
       view: PropTypes.string,
@@ -34,25 +29,11 @@ export class Pane extends React.PureComponent {
 
   constructor(props) {
     super(props);
-    this.state = { fileTitle: props.fileTitle };
+    this.state = {};
   }
 
   renderToolbar(extra = []) {
-    const {
-      id,
-      fileChoices = [],
-      onSelectView,
-      onSelectFile,
-      view,
-      viewChoices,
-      viewTitle,
-    } = this.props;
-    const { fileTitle = '' } = this.state;
-    const openFileTitle = (e) => {
-      if (e.key === 'Enter') {
-        onSelectFile(id, `source/${fileTitle}`, fileTitle);
-      }
-    };
+    const { id, onSelectView, view, viewChoices, viewTitle } = this.props;
     return (
       <div style={{ width: '100%' }}>
         <Navbar
@@ -86,28 +67,6 @@ export class Pane extends React.PureComponent {
                 <Nav.Link style={{ color: 'black' }}>{viewTitle}</Nav.Link>
               </Nav.Item>
             )}
-            <Dropdown as={ButtonGroup}>
-              <Form.Control
-                value={fileTitle}
-                onKeyPress={openFileTitle}
-                onChange={(e) => this.setState({ fileTitle: e.target.value })}
-              />
-              <Dropdown.Toggle
-                split
-                variant="outline-primary"
-                id="file-selector"
-              />
-              <Dropdown.Menu>
-                {fileChoices.map(({ file, fileTitle }, index) => (
-                  <Dropdown.Item
-                    key={index}
-                    onClick={() => onSelectFile(id, file)}
-                  >
-                    {fileTitle}
-                  </Dropdown.Item>
-                ))}
-              </Dropdown.Menu>
-            </Dropdown>
             {extra}
           </Nav>
           <Nav key="tools">

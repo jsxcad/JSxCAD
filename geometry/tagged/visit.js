@@ -25,7 +25,7 @@ export const rewrite = (geometry, op, state) => {
             {
               content: validateContent(
                 geometry,
-                geometry.content?.map((entry) => walk(entry, state))
+                geometry.content?.map?.((entry) => walk(entry, state))
               ),
             },
             changes

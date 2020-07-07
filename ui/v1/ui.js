@@ -12,7 +12,6 @@ import {
   listFilesystems,
   log,
   read,
-  setHandleAskUser,
   setupFilesystem,
   touch,
   unwatchFileCreation,
@@ -34,7 +33,9 @@ import Button from 'react-bootstrap/Button';
 import ButtonGroup from 'react-bootstrap/ButtonGroup';
 import Col from 'react-bootstrap/Col';
 import Container from 'react-bootstrap/Container';
+import Dropdown from 'react-bootstrap/Dropdown';
 import FilesUi from './FilesUi';
+import Form from 'react-bootstrap/Form';
 import JsEditorUi from './JsEditorUi';
 import LogUi from './LogUi';
 import Modal from 'react-bootstrap/Modal';
@@ -48,7 +49,6 @@ import ReactDOM from 'react-dom';
 import Row from 'react-bootstrap/Row';
 import SelectWorkspaceUi from './SelectWorkspaceUi';
 import ShareUi from './ShareUi';
-import SvgPathEditor from './SvgPathEditor';
 import Toast from 'react-bootstrap/Toast';
 import { deepEqual } from 'fast-equals';
 import { writeWorkspace as writeWorkspaceToGist } from './gist';
@@ -56,10 +56,6 @@ import { writeWorkspace as writeWorkspaceToGist } from './gist';
 const ensureFile = async (file, url, { workspace } = {}) => {
   const sources = [];
   if (url !== undefined) {
-    if (url.startsWith('https://github.com/')) {
-      url = `https://raw.githubusercontent.com/${url.substr(19)}`;
-      url = url.replace('/blob/', '/');
-    }
     sources.push(url);
   }
   // Ensure the file exists.
@@ -77,6 +73,8 @@ class Ui extends React.PureComponent {
       workspace: PropTypes.string,
       workspaces: PropTypes.array,
       sha: PropTypes.string,
+      file: PropTypes.string,
+      fileTitle: PropTypes.string,
     };
   }
 
@@ -86,7 +84,6 @@ class Ui extends React.PureComponent {
     this.state = {
       isLogOpen: false,
       log: [],
-      parameters: [],
       workspaces: this.props.workspaces,
       layout: [],
       panes: [],
@@ -98,13 +95,11 @@ class Ui extends React.PureComponent {
       toast: [],
     };
 
-    this.askUser = this.askUser.bind(this);
     this.addWorkspace = this.addWorkspace.bind(this);
     this.createNode = this.createNode.bind(this);
     this.onChange = this.onChange.bind(this);
     this.onRelease = this.onRelease.bind(this);
     this.openLog = this.openLog.bind(this);
-    this.updateParameters = this.updateParameters.bind(this);
     this.doGithub = this.doGithub.bind(this);
     this.doSelectWorkspace = this.doSelectWorkspace.bind(this);
     this.doNav = this.doNav.bind(this);
@@ -114,7 +109,11 @@ class Ui extends React.PureComponent {
 
   async componentDidMount() {
     const { workspace } = this.state;
-    const { sha } = this.props;
+    const { file, fileTitle, sha } = this.props;
+
+    if (file && fileTitle) {
+      await ensureFile(file, fileTitle, { workspace });
+    }
 
     const fileUpdater = async () =>
       this.setState({
@@ -172,9 +171,14 @@ class Ui extends React.PureComponent {
       agent,
       workerType: 'module',
     });
-    // const { ask } = await createService({ webWorker: './webworker.js', agent, workerType: 'module' });
-    this.setState({ ask, creationWatcher, deletionWatcher, logWatcher });
-    setHandleAskUser(this.askUser);
+    this.setState({
+      ask,
+      creationWatcher,
+      deletionWatcher,
+      file,
+      fileTitle,
+      logWatcher,
+    });
 
     if (workspace) {
       await this.selectWorkspace(workspace);
@@ -189,32 +193,6 @@ class Ui extends React.PureComponent {
     await unwatchLog(logWatcher);
   }
 
-  async askUser(identifier, options) {
-    const { parameters } = this.state;
-
-    for (const parameter of parameters) {
-      if (parameter.identifier === identifier) {
-        return parameter.value;
-      }
-    }
-
-    let { choices, initially } = options;
-
-    if (initially === undefined && choices.length > 0) {
-      initially = choices[0];
-    }
-
-    this.setState({
-      parameters: [...parameters, { identifier, options, value: initially }],
-    });
-
-    return initially;
-  }
-
-  updateParameters(parameters) {
-    this.setState({ parameters });
-  }
-
   async addWorkspace() {
     const workspace = document.getElementById('workspace/add/name').value;
     if (workspace.length > 0) {
@@ -227,10 +205,26 @@ class Ui extends React.PureComponent {
     }
   }
 
+  updateUrl({ workspace, fileTitle } = {}) {
+    if (workspace === undefined) {
+      workspace = this.state.workspace;
+    }
+    if (workspace === undefined) {
+      workspace = '';
+    }
+    if (fileTitle === undefined) {
+      fileTitle = this.state.fileTitle;
+    }
+    if (fileTitle !== undefined) {
+      fileTitle = `@${fileTitle}`;
+    }
+    const encodedWorkspace = encodeURIComponent(workspace);
+    history.pushState(null, null, `#${encodedWorkspace}${fileTitle}`);
+  }
+
   async selectWorkspace(workspace) {
     setupFilesystem({ fileBase: workspace });
-    const encodedWorkspace = encodeURIComponent(workspace);
-    history.pushState(null, null, `#${encodedWorkspace}`);
+    this.updateUrl({ workspace });
     const paneLayoutData = await read('ui/paneLayout');
     let paneLayout;
     if (paneLayoutData !== undefined && paneLayoutData !== 'null') {
@@ -377,17 +371,6 @@ class Ui extends React.PureComponent {
           fileTitle: `${file.substring(7)}`,
         });
       }
-      if (
-        file.startsWith('source/') &&
-        (file.endsWith('.svp') || file.endsWith('.svgpath'))
-      ) {
-        views.push({
-          view: 'editSvgPath',
-          viewTitle: 'Edit SVG Path',
-          file,
-          fileTitle: `${file.substring(7)}`,
-        });
-      }
     }
 
     views.push({ view: 'files', viewTitle: 'Files' });
@@ -431,12 +414,9 @@ class Ui extends React.PureComponent {
     await write('ui/paneViews', newPaneViews);
   }
 
-  renderPane(views, id, path, createNode, onSelectView, onSelectFile) {
-    const { workspace } = this.state;
-    const { view, file } = this.getPaneView(id);
-    const fileChoices = views.filter(
-      (entry) => entry.view === view && entry.file !== file
-    );
+  renderPane(views, id, path, createNode, onSelectView) {
+    const { file, workspace } = this.state;
+    const { view } = this.getPaneView(id);
     const seenViewChoices = new Set();
     const viewChoices = [];
     for (const entry of views.filter((entry) => entry.view !== view)) {
@@ -448,9 +428,7 @@ class Ui extends React.PureComponent {
     const { ask } = this.state;
 
     switch (view) {
-      case 'notebook': {
-        const fileTitle =
-          file === undefined ? '' : file.substring('source/'.length);
+      case 'notebook':
         return (
           <NotebookUi
             key={`${id}/notebook/${file}`}
@@ -462,16 +440,10 @@ class Ui extends React.PureComponent {
             viewTitle={'Notebook'}
             onSelectView={onSelectView}
             file={file}
-            fileChoices={fileChoices}
-            fileTitle={fileTitle}
-            onSelectFile={onSelectFile}
             workspace={workspace}
           />
         );
-      }
-      case 'editScript': {
-        const fileTitle =
-          file === undefined ? '' : file.substring('source/'.length);
+      case 'editScript':
         return (
           <JsEditorUi
             key={`${id}/editScript/${file}`}
@@ -483,34 +455,10 @@ class Ui extends React.PureComponent {
             viewTitle={'Edit Script'}
             onSelectView={onSelectView}
             file={file}
-            fileChoices={fileChoices}
-            fileTitle={fileTitle}
-            onSelectFile={onSelectFile}
             ask={ask}
             workspace={workspace}
           />
         );
-      }
-      case 'editSvgPath': {
-        const fileTitle =
-          file === undefined ? '' : file.substring('source/'.length);
-        return (
-          <SvgPathEditor
-            key={`${id}/editSvgPath/${file}`}
-            id={id}
-            path={path}
-            createNode={createNode}
-            view={view}
-            viewChoices={viewChoices}
-            viewTitle={'Edit SvgPath'}
-            onSelectView={onSelectView}
-            file={file}
-            fileChoices={fileChoices}
-            fileTitle={fileTitle}
-            onSelectFile={onSelectFile}
-          />
-        );
-      }
       case 'files':
         return (
           <FilesUi
@@ -578,7 +526,7 @@ class Ui extends React.PureComponent {
   }
 
   render() {
-    const { workspace, files, toast } = this.state;
+    const { workspace, file, fileTitle, files, toast } = this.state;
     const views = this.buildViews(files);
 
     const toasts = toast.map((entry, index) => {
@@ -698,10 +646,20 @@ class Ui extends React.PureComponent {
       this.setPaneView(id, { ...this.getPaneView(id), view, file: undefined });
     };
 
-    const selectFile = async (id, file, url) => {
-      await ensureFile(file, url);
-      this.setPaneView(id, { ...this.getPaneView(id), file });
+    const selectFileTitle = async (fileTitle) => {
+      const file = `source/${fileTitle}`;
+      await ensureFile(file, fileTitle, { workspace });
+      this.updateUrl({ fileTitle });
+      this.setState({ file });
     };
+
+    const openFileTitle = async (e) => {
+      if (e.key === 'Enter') {
+        selectFileTitle(fileTitle);
+      }
+    };
+
+    const fileChoices = views.filter((entry) => entry.file !== file);
 
     return (
       <div
@@ -732,6 +690,32 @@ class Ui extends React.PureComponent {
               <Nav.Item>
                 <Nav.Link eventKey="reference">Reference</Nav.Link>
               </Nav.Item>
+              <Nav.Item>
+                <Dropdown as={ButtonGroup}>
+                  <Form.Control
+                    value={fileTitle}
+                    onKeyPress={openFileTitle}
+                    onChange={(e) =>
+                      this.setState({ fileTitle: e.target.value })
+                    }
+                  />
+                  <Dropdown.Toggle
+                    split
+                    variant="outline-primary"
+                    id="file-selector"
+                  />
+                  <Dropdown.Menu>
+                    {fileChoices.map(({ file, fileTitle }, index) => (
+                      <Dropdown.Item
+                        key={index}
+                        onClick={() => selectFileTitle(fileTitle)}
+                      >
+                        {fileTitle}
+                      </Dropdown.Item>
+                    ))}
+                  </Dropdown.Menu>
+                </Dropdown>
+              </Nav.Item>
             </Nav>
           </Navbar.Collapse>
         </Navbar>
@@ -744,8 +728,7 @@ class Ui extends React.PureComponent {
               `${id}`,
               path,
               this.createNode,
-              selectView,
-              selectFile
+              selectView
             );
             return pane;
           }}
@@ -763,18 +746,16 @@ class Ui extends React.PureComponent {
 const setupUi = async (sha) => {
   const filesystems = await listFilesystems();
   const hash = location.hash.substring(1);
-  const [encodedWorkspace, encodedPath] = hash.split('@');
+  const [encodedWorkspace, encodedFile] = hash.split('@');
   const workspace = decodeURIComponent(encodedWorkspace);
-  let path;
-  if (encodedPath !== undefined) {
-    path = decodeURIComponent(encodedPath);
-    await ensureFile(`source/${path}`, path, { workspace });
-  }
+  let fileTitle = encodedFile ? decodeURIComponent(encodedFile) : undefined;
+  let file = fileTitle ? `source/${fileTitle}` : undefined;
   ReactDOM.render(
     <Ui
       workspaces={[...filesystems]}
       workspace={workspace}
-      path={path}
+      file={file}
+      fileTitle={fileTitle}
       sha={sha}
       width="100%"
       height="100%"
