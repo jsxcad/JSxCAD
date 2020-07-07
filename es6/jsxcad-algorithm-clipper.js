@@ -3551,13 +3551,6 @@ const intersection = (a, ...z0Surfaces) => {
   return makeConvex(a, normalize);
 };
 
-/**
- * Produces a surface that is the intersection of all provided surfaces.
- * The union of no surfaces is the empty surface.
- * The union of one surface is that surface.
- * @param {Array<Z0Surface>} surfaces - the z0 surfaces to union.
- * @returns {Z0Surface} the resulting z0 surface.
- */
 const intersectionOfPathsBySurfaces = (a, ...z0Surfaces) => {
   if (a === undefined || a.length === 0 || z0Surfaces.length === 0) {
     return [];
@@ -3576,10 +3569,21 @@ const intersectionOfPathsBySurfaces = (a, ...z0Surfaces) => {
       if (clipInputs.length === 0) {
         return [];
       }
+      const unifiedClipInputs = [
+        {
+          data: clipper$1.clipToPaths({
+            clipType: ClipType$1.Union,
+            subjectInputs: clipInputs,
+            clipInputs: clipInputs,
+            subjectFillType: PolyFillType$1.Positive,
+          }),
+          closed: true,
+        },
+      ];
       const result = clipper$1.clipToPolyTree({
         clipType: ClipType$1.Intersection,
         subjectInputs,
-        clipInputs,
+        clipInputs: unifiedClipInputs,
         subjectFillType: PolyFillType$1.Positive,
       });
       a = toPaths(clipper$1, result, normalize);

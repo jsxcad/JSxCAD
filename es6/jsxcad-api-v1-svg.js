@@ -24,7 +24,7 @@ const SvgPath = (svgPath, options = {}) =>
     fromSvgPath(new TextEncoder('utf8').encode(svgPath), options)
   );
 
-const readSvg = async (path, { src } = {}) => {
+const readSvg = async (path, { src = path } = {}) => {
   let data = await readFile({ doSerialize: false }, `source/${path}`);
   if (data === undefined && src) {
     data = await readFile({ decode: 'utf8', sources: [src] }, `cache/${path}`);

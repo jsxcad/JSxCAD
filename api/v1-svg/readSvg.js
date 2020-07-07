@@ -2,7 +2,7 @@ import Shape from '@jsxcad/api-v1-shape';
 import { fromSvg } from '@jsxcad/convert-svg';
 import { readFile } from '@jsxcad/sys';
 
-export const readSvg = async (path, { src } = {}) => {
+export const readSvg = async (path, { src = path } = {}) => {
   let data = await readFile({ doSerialize: false }, `source/${path}`);
   if (data === undefined && src) {
     data = await readFile({ decode: 'utf8', sources: [src] }, `cache/${path}`);

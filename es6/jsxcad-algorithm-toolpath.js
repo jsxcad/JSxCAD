@@ -1,4 +1,4 @@
-import { normalize, subtract, rotateZ, scale, add } from './jsxcad-math-vec3.js';
+import { normalize, subtract, scale, rotateZ, add } from './jsxcad-math-vec3.js';
 import { getEdges, isClosed, createOpenPath } from './jsxcad-geometry-path.js';
 import { fromPoints, intersect } from './jsxcad-math-line2.js';
 import { getNonVoidPaths } from './jsxcad-geometry-tagged.js';
@@ -22,7 +22,7 @@ const toolpathEdges = (
     const direction = normalize(subtract(end, start));
     // The tool (with given radius) passes along the outside of the path.
     const rightAngle = Math.PI / -2;
-    const toolEdgeOffset = rotateZ(direction, rightAngle);
+    const toolEdgeOffset = scale(radius, rotateZ(direction, rightAngle));
     // And in order to get sharp angles with a circular tool we need to cut a bit further.
     const overcutOffset = scale(overcut ? 0 : -radius, direction);
     const toolStart = subtract(add(start, toolEdgeOffset), overcutOffset);

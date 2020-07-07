@@ -14,8 +14,7 @@ const Z = 2;
 const toGcode = async (
   geometry,
   {
-    spindleSpeed = 0,
-    doZero = true,
+    toolLevel = 0,
     topZ = 0,
     minCutZ = -1,
     cutDepth = 0.1,
@@ -52,9 +51,9 @@ const toGcode = async (
     to(x, y, z, 'G1');
   };
 
-  const spindleOn = () =>
-    spindleSpeed > 0 ? emit(`M3 S${spindleSpeed.toFixed(5)}`) : emit(`M5`);
-  const spindleOff = () => emit('M5');
+  const toolOn = () =>
+    toolLevel > 0 ? emit(`M3 S${toolLevel.toFixed(5)}`) : emit(`M5`);
+  const toolOff = () => emit('M5');
 
   const jump = (x, y) => {
     rapid(_, _, jumpZ); // up
@@ -68,11 +67,7 @@ const toGcode = async (
     rapid(0, 0, topZ); // home
   };
 
-  if (doZero) {
-    emit('G10 L20 P1 X0 Y0 Z0');
-  }
-
-  spindleOn();
+  toolOn();
 
   const keptGeometry = toKeptGeometry(
     translate([0, 0, -cutDepth], await geometry)
@@ -93,7 +88,7 @@ const toGcode = async (
   }
   home();
 
-  spindleOff();
+  toolOff();
 
   codes.push(``);
   return new TextEncoder('utf8').encode(codes.join('\n'));

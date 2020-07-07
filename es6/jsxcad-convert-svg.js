@@ -3426,6 +3426,17 @@ const fromSvgPath$1 = (svgPath, options = {}) =>
   );
 
 const ELEMENT_NODE$1 = 1;
+const ATTRIBUTE_NODE$1 = 2;
+const TEXT_NODE$1 = 3;
+const CDATA_SECTION_NODE$1 = 4;
+const ENTITY_REFERENCE_NODE$1 = 5;
+const ENTITY_NODE$1 = 6;
+const PROCESSING_INSTRUCTION_NODE$1 = 7;
+const COMMENT_NODE$1 = 8;
+const DOCUMENT_NODE$1 = 9;
+const DOCUMENT_TYPE_NODE$1 = 10;
+const DOCUMENT_FRAGMENT_NODE$1 = 11;
+const NOTATION_NODE$1 = 12;
 
 const applyTransforms = ({ matrix }, transformText) => {
   const match = /([^(]+)[(]([^)]*)[)] *(.*)/.exec(transformText);
@@ -3623,7 +3634,17 @@ const fromSvg = async (input, options = {}) => {
 
         const output = (svgPath) => {
           const paths = fromSvgPath$1(svgPath).paths;
-          const fill = node.getAttribute('fill');
+          const attributes = {
+            fill: node.getAttribute('fill'),
+            stroke: node.getAttribute('stroke'),
+          };
+          const style = node.getAttribute('style');
+          // style="fill:#000000;stroke-width:0.26458332"
+          for (const entry of style.split(';')) {
+            const [name, value] = entry.split(':');
+            attributes[name] = value;
+          }
+          const fill = attributes.fill;
           if (fill !== undefined && fill !== 'none' && fill !== '') {
             // Does fill, etc, inherit?
             const tags = toTagsFromName(fill);
@@ -3635,7 +3656,7 @@ const fromSvg = async (input, options = {}) => {
               })
             );
           }
-          const stroke = node.getAttribute('stroke');
+          const stroke = attributes.stroke;
           if (stroke !== undefined && stroke !== 'none' && stroke !== '') {
             if (matrix.some((element) => isNaN(element))) {
               throw Error(`die: Bad element in matrix ${matrix}.`);
@@ -3681,6 +3702,20 @@ const fromSvg = async (input, options = {}) => {
         }
         break;
       }
+      case ATTRIBUTE_NODE$1:
+      case TEXT_NODE$1:
+      case CDATA_SECTION_NODE$1:
+      case ENTITY_REFERENCE_NODE$1:
+      case ENTITY_NODE$1:
+      case PROCESSING_INSTRUCTION_NODE$1:
+      case COMMENT_NODE$1:
+      case DOCUMENT_NODE$1:
+      case DOCUMENT_TYPE_NODE$1:
+      case DOCUMENT_FRAGMENT_NODE$1:
+      case NOTATION_NODE$1:
+        break;
+      default:
+        throw Error(`Unexpected svg node type: ${node.nodeType}`);
     }
     if (node.childNodes) {
       for (let nth = 0; nth < node.childNodes.length; nth++) {
