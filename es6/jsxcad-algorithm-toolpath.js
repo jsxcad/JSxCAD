@@ -1,7 +1,9 @@
-import { normalize, subtract, scale, rotateZ, add } from './jsxcad-math-vec3.js';
+import { normalize, subtract, scale, rotateZ, add, fromPoint } from './jsxcad-math-vec3.js';
 import { getEdges, isClosed, createOpenPath } from './jsxcad-geometry-path.js';
-import { fromPoints, intersect } from './jsxcad-math-line2.js';
+import { fromPoints, intersect as intersect$1 } from './jsxcad-math-line2.js';
 import { getNonVoidPaths } from './jsxcad-geometry-tagged.js';
+
+const intersect = (a, b) => fromPoint(intersect$1(a, b));
 
 const toolpathEdges = (
   path,
@@ -27,27 +29,26 @@ const toolpathEdges = (
     const overcutOffset = scale(overcut ? 0 : -radius, direction);
     const toolStart = subtract(add(start, toolEdgeOffset), overcutOffset);
     const toolEnd = add(add(end, toolEdgeOffset), overcutOffset);
+    const thisToolLine = fromPoints(toolStart, toolEnd);
     if (!toolpath) {
       toolpath = createOpenPath();
       toolpaths.push(toolpath);
     }
-    if (solid) {
-      // Produce a continuous path -- for, e.g., milling.
-      const thisToolLine = fromPoints(toolStart, toolEnd);
+    if (overcut) {
       if (lastToolLine) {
-        // The tool is at the end of the previous cut.
-        // Bring it back along the cut to the point where it intersects this new toolpath.
+        // Move (back) to the intersection point from the overcut.
         toolpath.push(intersect(thisToolLine, lastToolLine));
-        // The tool will now be correctly placed to cut this toolpath.
       }
-      // Remember for the next toolpath.
-      lastToolLine = thisToolLine;
+    } else {
+      if (lastToolLine) {
+        // Trim the previous end point.
+        toolpath.pop();
+        // Replace it with the intersection.
+        toolpath.push(intersect(thisToolLine, lastToolLine));
+      }
     }
     toolpath.push(toolStart, toolEnd);
-    if (!solid) {
-      // Start a distinct toolpath.
-      toolpath = undefined;
-    }
+    lastToolLine = thisToolLine;
   }
   return toolpaths;
 };

@@ -251,7 +251,8 @@ export const buildMeshes = async ({
         const animate = () => {
           if (dataset.mesh) {
             const geometry = dataset.mesh.geometry;
-            // geometry.setDrawRange(index[current].start, index[current].length);
+            extent += index[current].length;
+            // geometry.setDrawRange(index[current].start, extent - index[current].start);
             geometry.setDrawRange(0, (extent += index[current].length));
             geometry.attributes.position.needsUpdate = true;
             render();

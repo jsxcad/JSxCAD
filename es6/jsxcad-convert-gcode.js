@@ -18,7 +18,7 @@ const toGcode = async (
     topZ = 0,
     minCutZ = -1,
     cutDepth = 0.1,
-    jumpHeight = 10,
+    jumpHeight = 1,
     feedRate = 60 * 5,
   } = {}
 ) => {
@@ -69,6 +69,7 @@ const toGcode = async (
 
   toolOn();
 
+  // FIX: This is incorrect -- it should move the geometry down so that the top of the geometry is at the initial cutDepth.
   const keptGeometry = toKeptGeometry(
     translate([0, 0, -cutDepth], await geometry)
   );
@@ -86,6 +87,7 @@ const toGcode = async (
       }
     }
   }
+
   home();
 
   toolOff();
