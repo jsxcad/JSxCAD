@@ -1,8 +1,20 @@
-import { add, normalize, rotateZ, scale, subtract } from '@jsxcad/math-vec3';
+import {
+  add,
+  fromPoint as fromPointToVec3,
+  normalize,
+  rotateZ,
+  scale,
+  subtract,
+} from '@jsxcad/math-vec3';
 import { createOpenPath, getEdges, isClosed } from '@jsxcad/geometry-path';
-import { intersect, fromPoints as lineOfPoints } from '@jsxcad/math-line2';
+import {
+  fromPoints as fromPointsToLine,
+  intersect as intersectLines,
+} from '@jsxcad/math-line2';
 
 import { getNonVoidPaths } from '@jsxcad/geometry-tagged';
+
+const intersect = (a, b) => fromPointToVec3(intersectLines(a, b));
 
 export const toolpathEdges = (
   path,
@@ -28,27 +40,26 @@ export const toolpathEdges = (
     const overcutOffset = scale(overcut ? 0 : -radius, direction);
     const toolStart = subtract(add(start, toolEdgeOffset), overcutOffset);
     const toolEnd = add(add(end, toolEdgeOffset), overcutOffset);
+    const thisToolLine = fromPointsToLine(toolStart, toolEnd);
     if (!toolpath) {
       toolpath = createOpenPath();
       toolpaths.push(toolpath);
     }
-    if (solid) {
-      // Produce a continuous path -- for, e.g., milling.
-      const thisToolLine = lineOfPoints(toolStart, toolEnd);
+    if (overcut) {
       if (lastToolLine) {
-        // The tool is at the end of the previous cut.
-        // Bring it back along the cut to the point where it intersects this new toolpath.
+        // Move (back) to the intersection point from the overcut.
         toolpath.push(intersect(thisToolLine, lastToolLine));
-        // The tool will now be correctly placed to cut this toolpath.
       }
-      // Remember for the next toolpath.
-      lastToolLine = thisToolLine;
+    } else {
+      if (lastToolLine) {
+        // Trim the previous end point.
+        toolpath.pop();
+        // Replace it with the intersection.
+        toolpath.push(intersect(thisToolLine, lastToolLine));
+      }
     }
     toolpath.push(toolStart, toolEnd);
-    if (!solid) {
-      // Start a distinct toolpath.
-      toolpath = undefined;
-    }
+    lastToolLine = thisToolLine;
   }
   return toolpaths;
 };
