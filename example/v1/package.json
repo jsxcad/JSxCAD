@@ -31,6 +31,11 @@
     "@jsxcad/sys": "^0.0.79"
   },
   "devDependencies": {
+    "@jsxcad/api-v1-pdf": "^0.0.79",
+    "@jsxcad/api-v1-svg": "^0.0.79",
+    "@jsxcad/api-v1-stl": "^0.0.79",
+    "@jsxcad/api-v1-cursor": "^0.0.79",
+    "@jsxcad/api-v1-extrude": "^0.0.79",
     "ava": "^3.9.0",
     "depcheck": "^0.9.1",
     "eslint": "^5.15.0"

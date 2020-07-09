@@ -4,15 +4,15 @@ const scene = assemble(
   Cylinder(3, 27).as('cylinder')
 );
 
-await scene.keep('sphere').writeStl('stl/sphere.stl');
+scene.keep('sphere').writeStl('stl/sphere.stl');
 
-await scene
+scene
   .keep('sphere')
   .section(Z(0.001))
   .outline()
   .writePdf('pdf/sphere.pdf');
 
-await scene
+scene
   .keep('sphere', 'cube')
   .section(Z(0.001))
   .outline()

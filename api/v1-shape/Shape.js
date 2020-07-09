@@ -15,7 +15,7 @@ import {
   makeWatertight,
   reconcile,
   taggedAssembly,
-  toKeptGeometry as toKeptTaggedGeometry,
+  toDisjointGeometry as toDisjointTaggedGeometry,
   toPoints,
   transform,
 } from '@jsxcad/geometry-tagged';
@@ -26,7 +26,7 @@ import { fromPolygons as fromPolygonsToSolid } from '@jsxcad/geometry-solid';
 
 export class Shape {
   close() {
-    const geometry = this.toKeptGeometry();
+    const geometry = this.toDisjointGeometry();
     if (!isSingleOpenPath(geometry.content[0])) {
       throw Error('Close requires a single open path.');
     }
@@ -36,7 +36,7 @@ export class Shape {
   concat(...shapes) {
     const paths = [];
     for (const shape of [this, ...shapes]) {
-      const geometry = shape.toKeptGeometry();
+      const geometry = shape.toDisjointGeometry();
       if (!isSingleOpenPath(geometry.content[0])) {
         throw Error(
           `Concatenation requires single open paths: ${JSON.stringify(
@@ -58,11 +58,11 @@ export class Shape {
   }
 
   eachPoint(operation) {
-    eachPoint(operation, this.toKeptGeometry());
+    eachPoint(operation, this.toDisjointGeometry());
   }
 
   flip() {
-    return fromGeometry(flip(toKeptGeometry(this)), this.context);
+    return fromGeometry(flip(toDisjointGeometry(this)), this.context);
   }
 
   setTags(tags) {
@@ -70,7 +70,11 @@ export class Shape {
   }
 
   toKeptGeometry(options = {}) {
-    return toKeptTaggedGeometry(toGeometry(this));
+    return this.toDisjointGeometry();
+  }
+
+  toDisjointGeometry(options = {}) {
+    return toDisjointTaggedGeometry(toGeometry(this));
   }
 
   getContext(symbol) {
@@ -82,7 +86,7 @@ export class Shape {
   }
 
   toPoints() {
-    return toPoints(this.toKeptGeometry()).points;
+    return toPoints(this.toDisjointGeometry()).points;
   }
 
   transform(matrix) {
@@ -93,7 +97,7 @@ export class Shape {
   }
 
   reconcile() {
-    return fromGeometry(reconcile(this.toKeptGeometry()));
+    return fromGeometry(reconcile(this.toDisjointGeometry()));
   }
 
   assertWatertight() {
@@ -104,12 +108,12 @@ export class Shape {
   }
 
   isWatertight() {
-    return isWatertight(this.toKeptGeometry());
+    return isWatertight(this.toDisjointGeometry());
   }
 
   makeWatertight(threshold) {
     return fromGeometry(
-      makeWatertight(this.toKeptGeometry(), undefined, undefined, threshold)
+      makeWatertight(this.toDisjointGeometry(), undefined, undefined, threshold)
     );
   }
 }
@@ -152,7 +156,8 @@ Shape.fromSolid = (solid, context) =>
 
 export const fromGeometry = Shape.fromGeometry;
 export const toGeometry = (shape) => shape.toGeometry();
-export const toKeptGeometry = (shape) => shape.toKeptGeometry();
+export const toDisjointGeometry = (shape) => shape.toDisjointGeometry();
+export const toKeptGeometry = (shape) => shape.toDisjointGeometry();
 
 addReadDecoder(
   (data) => data && data.geometry !== undefined,

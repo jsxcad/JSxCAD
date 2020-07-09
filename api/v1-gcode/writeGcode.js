@@ -27,10 +27,11 @@ const downloadGcodeMethod = function (...args) {
 };
 Shape.prototype.downloadGcode = downloadGcodeMethod;
 
-export const writeGcode = async (shape, name, options = {}) => {
+export const writeGcode = (shape, name, options = {}) => {
   for (const { data, filename } of prepareGcode(shape, name, {})) {
-    await writeFile({ doSerialize: false }, `output/${filename}`, data);
+    addPending(writeFile({ doSerialize: false }, `output/${filename}`, data));
   }
+  return shape;
 };
 
 const writeGcodeMethod = function (...args) {

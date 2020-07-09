@@ -304,10 +304,20 @@ const BRANCH = 0;
 const IN_LEAF = 1;
 const OUT_LEAF = 2;
 
+/**
+ * @typedef {object} Bsp
+ * @property {Plane} plane
+ * @property {Polygon[]} same
+ * @property {BRANCH|IN_LEAF|OUT_LEAF} kind
+ * @property {Bsp} back
+ * @property {Bsp} front
+ */
+
 const X = 0;
 const Y = 1;
 const Z = 2;
 
+/** @type {Bsp} */
 const inLeaf = {
   plane: null,
   same: [],
@@ -316,6 +326,7 @@ const inLeaf = {
   front: null,
 };
 
+/** @type {Bsp} */
 const outLeaf = {
   plane: null,
   same: [],
@@ -936,6 +947,18 @@ const boundPolygons = (bsp, polygons, normalize) => {
   return [clean(inPolygons), clean(outPolygons)];
 };
 
+const replaceLeafs = (bsp, inBsp = inLeaf, outBsp = outLeaf) => {
+  switch (bsp.kind) {
+    case IN_LEAF: return inBsp;
+    case OUT_LEAF: return outBsp;
+    case BRANCH: return { ...bsp, front: replaceLeafs(bsp.front, inBsp, outBsp), back: replaceLeafs(bsp.back, inBsp, outBsp) };
+    default: throw Error(`Unexpected bsp kind: ${bsp.kind}`);
+  }
+};
+
+// Anything in either bsp is in.
+const unifyBspTrees = (a, b) => replaceLeafs(a, inLeaf, b);
+
 const cut = (solid, surface, normalize = createNormalize3()) => {
   // Build a classifier from the planar polygon.
   const cutBsp = fromPolygons(surface, normalize);
@@ -1335,4 +1358,4 @@ const union = (...solids) => {
   return fromPolygons$1({}, s[0], normalize);
 };
 
-export { containsPoint, cut, cutOpen, deform, difference, fromSolid, intersection, section, union };
+export { containsPoint, cut, cutOpen, deform, difference, fromSolid, intersection, removeExteriorPolygonsForSection, section, unifyBspTrees, union };

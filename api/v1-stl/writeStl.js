@@ -40,10 +40,11 @@ const downloadStlMethod = function (...args) {
 };
 Shape.prototype.downloadStl = downloadStlMethod;
 
-export const writeStl = async (shape, name, options = {}) => {
+export const writeStl = (shape, name, options = {}) => {
   for (const { data, filename } of prepareStl(shape, name, {})) {
-    await writeFile({ doSerialize: false }, `output/${filename}`, data);
+    addPending(writeFile({ doSerialize: false }, `output/${filename}`, data));
   }
+  return shape;
 };
 
 const method = function (...args) {

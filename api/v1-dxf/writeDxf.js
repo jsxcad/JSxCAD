@@ -26,10 +26,11 @@ const downloadDxfMethod = function (...args) {
 };
 Shape.prototype.downloadDxf = downloadDxfMethod;
 
-export const writeDxf = async (shape, name, options = {}) => {
+export const writeDxf = (shape, name, options = {}) => {
   for (const { data, filename } of prepareDxf(shape, name, {})) {
-    await writeFile({ doSerialize: false }, `output/${filename}`, data);
+    addPending(writeFile({ doSerialize: false }, `output/${filename}`, data));
   }
+  return shape;
 };
 
 const writeDxfMethod = function (...args) {

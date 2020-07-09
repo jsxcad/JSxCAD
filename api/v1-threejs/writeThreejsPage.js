@@ -26,10 +26,11 @@ const downloadThreejsPageMethod = function (...args) {
 };
 Shape.prototype.downloadThreejsPage = downloadThreejsPageMethod;
 
-export const writeThreejsPage = async (shape, name, options = {}) => {
+export const writeThreejsPage = (shape, name, options = {}) => {
   for (const { data, filename } of prepareThreejsPage(shape, name, {})) {
-    await writeFile({ doSerialize: false }, `output/${filename}`, data);
+    addPending(writeFile({ doSerialize: false }, `output/${filename}`, data));
   }
+  return shape;
 };
 
 const writeThreejsPageMethod = function (...args) {
