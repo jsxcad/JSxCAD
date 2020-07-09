@@ -26,10 +26,11 @@ const downloadSvgMethod = function (...args) {
 };
 Shape.prototype.downloadSvg = downloadSvgMethod;
 
-export const writeSvg = async (shape, name, options = {}) => {
+export const writeSvg = (shape, name, options = {}) => {
   for (const { data, filename } of prepareSvg(shape, name, {})) {
-    await writeFile({ doSerialize: false }, `output/${filename}`, data);
+    addPending(writeFile({ doSerialize: false }, `output/${filename}`, data));
   }
+  return shape;
 };
 
 const writeSvgMethod = function (...args) {

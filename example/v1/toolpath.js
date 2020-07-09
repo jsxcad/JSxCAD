@@ -7,8 +7,8 @@ const design = assemble(
   toolpath.sweep(Circle(0.1)).color('yellow')
 );
 
-await design.writePdf('triangle_toolpath.pdf');
-await toolpath.writeGcode('triangle_toolpath.gcode');
+design.writePdf('triangle_toolpath.pdf');
+toolpath.writeGcode('triangle_toolpath.gcode');
 
 //An example of over-cutting corners in two dimensions
 const shapeTwo = Square(200).cut(Square(100));
@@ -16,7 +16,7 @@ const toolpathTwo = shapeTwo.toolpath(6.35, true, true);
 const cutAwayArea = toolpathTwo.sweep(Circle(6.35));
 const cutShape = shapeTwo.cut(cutAwayArea);
 
-await cutShape.writePdf('overcut_corners_shape.pdf');
+cutShape.writePdf('overcut_corners_shape.pdf');
 
 //An example of over-cutting corners in three dimensions
 const shape3D = Square(200, 200)
@@ -29,4 +29,4 @@ const cutAwayVolume = shape3D
   .extrude(10);
 const cutShape3d = shape3D.cut(cutAwayVolume);
 
-await cutShape3d.writeStl('cutShape.stl');
+cutShape3d.writeStl('cutShape.stl');

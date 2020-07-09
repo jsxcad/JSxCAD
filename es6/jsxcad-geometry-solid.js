@@ -327,6 +327,28 @@ const fromPolygons = (
   return cleanedSolid;
 };
 
+const large = 1e10;
+
+const fromSurface = (surface, normalize) => {
+  const walls = [];
+  const normal = toPlane$1(surface);
+  const top = scale$1(large, normal);
+  const bottom = scale$1(-large, normal);
+  for (const path of outline$1(surface, normalize)) {
+    for (const [start, end] of getEdges(path)) {
+      // Build a large wall.
+      walls.push([
+        add(start, top),
+        add(start, bottom),
+        add(end, bottom),
+        add(end, top),
+      ]);
+    }
+  }
+  // This is an excessively large uncapped prism.
+  return [walls];
+};
+
 /** Measure the bounding sphere of the given poly3
  * @param {poly3} the poly3 to measure
  * @returns computed bounding sphere; center (vec3) and radius
@@ -384,4 +406,4 @@ const toPolygons = (solid) => {
   return polygons;
 };
 
-export { alignVertices, assertGood, canonicalize, doesNotOverlap, eachPoint, findOpenEdges, flip, fromPolygons, isWatertight, makeWatertight, measureBoundingBox, measureBoundingSphere, outline, reconcile, rotateX, rotateY, rotateZ, scale, toGeneric, toOutlinedSolid, toPoints, toPolygons, transform, translate };
+export { alignVertices, assertGood, canonicalize, doesNotOverlap, eachPoint, findOpenEdges, flip, fromPolygons, fromSurface, isWatertight, makeWatertight, measureBoundingBox, measureBoundingSphere, outline, reconcile, rotateX, rotateY, rotateZ, scale, toGeneric, toOutlinedSolid, toPoints, toPolygons, transform, translate };

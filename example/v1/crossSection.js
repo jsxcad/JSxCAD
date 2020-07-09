@@ -4,6 +4,6 @@ const design = assemble(
   Cylinder(3, 27).as('cylinder')
 );
 
-await design.section(Z(0)).outline().writePdf('pdf/crossSection.pdf');
+design.section(Z(0)).outline().writePdf('pdf/crossSection.pdf');
 
-await design.cut(Z(0)).writeStl('stl/crossSection.stl');
+design.cut(Z(0)).writeStl('stl/crossSection.stl');

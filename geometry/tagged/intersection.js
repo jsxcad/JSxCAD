@@ -1,27 +1,31 @@
 import { cache } from '@jsxcad/cache';
+import { createNormalize3 } from '@jsxcad/algorithm-quantize';
+import { fromSurface as fromSurfaceToSolid } from '@jsxcad/geometry-solid';
+import { getAnySurfaces } from './getAnySurfaces.js';
 import { getPaths } from './getPaths.js';
 import { getSolids } from './getSolids.js';
-import { getSurfaces } from './getSurfaces.js';
-import { getZ0Surfaces } from './getZ0Surfaces.js';
+import { section as intersectionOfSurfaceWithSolid } from '@jsxcad/geometry-bsp';
 import { intersection as pathsIntersection } from '@jsxcad/geometry-paths';
 import { rewrite } from './visit.js';
 import { intersection as solidIntersection } from '@jsxcad/geometry-solid-boolean';
-import { intersection as surfaceIntersection } from '@jsxcad/geometry-surface-boolean';
 import { taggedPaths } from './taggedPaths.js';
 import { taggedSolid } from './taggedSolid.js';
 import { taggedSurface } from './taggedSurface.js';
 import { taggedZ0Surface } from './taggedZ0Surface.js';
-import { intersection as z0SurfaceIntersection } from '@jsxcad/geometry-z0surface-boolean';
 
 const intersectionImpl = (geometry, ...geometries) => {
   const op = (geometry, descend) => {
     const { tags } = geometry;
     switch (geometry.type) {
       case 'solid': {
+        const normalize = createNormalize3();
         const todo = [];
         for (const geometry of geometries) {
           for (const { solid } of getSolids(geometry)) {
             todo.push(solid);
+          }
+          for (const { surface, z0Surface } of getAnySurfaces(geometry)) {
+            todo.push(fromSurfaceToSolid(surface || z0Surface, normalize));
           }
         }
         return taggedSolid(
@@ -30,48 +34,49 @@ const intersectionImpl = (geometry, ...geometries) => {
         );
       }
       case 'surface': {
-        const todo = [];
+        const normalize = createNormalize3();
+        let thisSurface = geometry.surface;
         for (const geometry of geometries) {
-          for (const { surface } of getSurfaces(geometry)) {
-            todo.push(surface);
+          for (const { solid } of getSolids(geometry)) {
+            thisSurface = intersectionOfSurfaceWithSolid(
+              solid,
+              [thisSurface],
+              normalize
+            )[0];
           }
-          for (const { z0Surface } of getZ0Surfaces(geometry)) {
-            todo.push(z0Surface);
+          for (const { surface, z0Surface } of getAnySurfaces(geometry)) {
+            thisSurface = intersectionOfSurfaceWithSolid(
+              fromSurfaceToSolid(surface || z0Surface, normalize),
+              [thisSurface],
+              normalize
+            )[0];
           }
         }
-        return taggedSurface(
-          { tags },
-          surfaceIntersection(geometry.surface, ...todo)
-        );
+        return taggedSurface({ tags }, thisSurface);
       }
       case 'z0Surface': {
-        const todoSurfaces = [];
-        const todoZ0Surfaces = [];
+        const normalize = createNormalize3();
+        let thisSurface = geometry.z0Surface;
         for (const geometry of geometries) {
-          for (const { surface } of getSurfaces(geometry)) {
-            todoSurfaces.push(surface);
+          for (const { solid } of getSolids(geometry)) {
+            thisSurface = intersectionOfSurfaceWithSolid(
+              solid,
+              [thisSurface],
+              normalize
+            )[0];
           }
-          for (const { z0Surface } of getZ0Surfaces(geometry)) {
-            todoZ0Surfaces.push(z0Surface);
+          for (const { surface, z0Surface } of getAnySurfaces(geometry)) {
+            thisSurface = intersectionOfSurfaceWithSolid(
+              fromSurfaceToSolid(surface || z0Surface, normalize),
+              [thisSurface],
+              normalize
+            )[0];
           }
         }
-        if (todoSurfaces.length > 0) {
-          return taggedSurface(
-            { tags },
-            surfaceIntersection(
-              geometry.z0Surface,
-              ...todoSurfaces,
-              ...todoZ0Surfaces
-            )
-          );
-        } else {
-          return taggedZ0Surface(
-            { tags },
-            z0SurfaceIntersection(geometry.z0Surface, ...todoZ0Surfaces)
-          );
-        }
+        return taggedZ0Surface({ tags }, thisSurface);
       }
       case 'paths': {
+        // FIX: Handle intersection of paths and surfaces/solids.
         const todo = [];
         for (const geometry of geometries) {
           for (const { paths } of getPaths(geometry)) {
@@ -87,6 +92,7 @@ const intersectionImpl = (geometry, ...geometries) => {
         // Not implemented yet.
         return geometry;
       }
+      case 'plan':
       case 'assembly':
       case 'item':
       case 'disjointAssembly':

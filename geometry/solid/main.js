@@ -16,6 +16,7 @@ export { eachPoint } from './eachPoint.js';
 export { findOpenEdges } from './findOpenEdges.js';
 export { flip } from './flip.js';
 export { fromPolygons } from './fromPolygons.js';
+export { fromSurface } from './fromSurface.js';
 export { measureBoundingBox } from './measureBoundingBox.js';
 export { measureBoundingSphere } from './measureBoundingSphere.js';
 export { outline } from './outline.js';

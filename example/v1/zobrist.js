@@ -281,7 +281,7 @@ const zobristCubes = (specifications) => {
 
 const scaledCubes = zobristCubes().scale([10, 10, 10]);
 
-await scaledCubes.writeStl('tmp/zobrist.stl');
-await scaledCubes.writeThreejsPage({
+scaledCubes.writeStl('tmp/zobrist.stl');
+scaledCubes.writeThreejsPage({
   view: { position: [0, 0, 120], path: 'tmp/zobrist.html' },
 });

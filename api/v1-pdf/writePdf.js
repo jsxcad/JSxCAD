@@ -27,10 +27,11 @@ const downloadPdfMethod = function (...args) {
 Shape.prototype.downloadPdf = downloadPdfMethod;
 Shape.prototype.pdf = downloadPdfMethod;
 
-export const writePdf = async (shape, name, { lineWidth = 0.096 } = {}) => {
+export const writePdf = (shape, name, { lineWidth = 0.096 } = {}) => {
   for (const { data, filename } of preparePdf(shape, name, { lineWidth })) {
-    await writeFile({ doSerialize: false }, `output/${filename}`, data);
+    addPending(writeFile({ doSerialize: false }, `output/${filename}`, data));
   }
+  return writePdf;
 };
 
 const writePdfMethod = function (...args) {

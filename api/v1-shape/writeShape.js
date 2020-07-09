@@ -1,4 +1,4 @@
-import { emit, writeFile } from '@jsxcad/sys';
+import { addPending, emit, writeFile } from '@jsxcad/sys';
 
 import Shape from './Shape.js';
 
@@ -20,10 +20,11 @@ const downloadShapeMethod = function (...args) {
 };
 Shape.prototype.downloadShape = downloadShapeMethod;
 
-export const writeShape = async (shape, name, options = {}) => {
+export const writeShape = (shape, name, options = {}) => {
   for (const { data, filename } of prepareShape(shape, name, {})) {
-    await writeFile({ doSerialize: false }, `output/${filename}`, data);
+    addPending(writeFile({ doSerialize: false }, `output/${filename}`, data));
   }
+  return shape;
 };
 
 const writeShapeMethod = function (...args) {

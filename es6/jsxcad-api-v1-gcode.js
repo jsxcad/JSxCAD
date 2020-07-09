@@ -1,4 +1,4 @@
-import { writeFile, addPending, emit } from './jsxcad-sys.js';
+import { addPending, writeFile, emit } from './jsxcad-sys.js';
 import Shape from './jsxcad-api-v1-shape.js';
 import { ensurePages } from './jsxcad-api-v1-layout.js';
 import { toGcode } from './jsxcad-convert-gcode.js';
@@ -26,10 +26,11 @@ const downloadGcodeMethod = function (...args) {
 };
 Shape.prototype.downloadGcode = downloadGcodeMethod;
 
-const writeGcode = async (shape, name, options = {}) => {
+const writeGcode = (shape, name, options = {}) => {
   for (const { data, filename } of prepareGcode(shape, name, {})) {
-    await writeFile({ doSerialize: false }, `output/${filename}`, data);
+    addPending(writeFile({ doSerialize: false }, `output/${filename}`, data));
   }
+  return shape;
 };
 
 const writeGcodeMethod = function (...args) {

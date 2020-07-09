@@ -17,6 +17,7 @@ import './solids.js';
 import './sketch.js';
 import './trace.js';
 import './tags.js';
+import './wall.js';
 import './wireframe.js';
 import './wireframeFaces.js';
 import './with.js';

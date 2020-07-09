@@ -1,6 +1,6 @@
 import Shape$1, { Shape } from './jsxcad-api-v1-shape.js';
 import { fromSvgPath, fromSvg, toSvg } from './jsxcad-convert-svg.js';
-import { readFile, getSources, writeFile, addPending, emit } from './jsxcad-sys.js';
+import { readFile, getSources, addPending, writeFile, emit } from './jsxcad-sys.js';
 import { ensurePages } from './jsxcad-api-v1-layout.js';
 
 /**
@@ -84,10 +84,11 @@ const downloadSvgMethod = function (...args) {
 };
 Shape$1.prototype.downloadSvg = downloadSvgMethod;
 
-const writeSvg = async (shape, name, options = {}) => {
+const writeSvg = (shape, name, options = {}) => {
   for (const { data, filename } of prepareSvg(shape, name, {})) {
-    await writeFile({ doSerialize: false }, `output/${filename}`, data);
+    addPending(writeFile({ doSerialize: false }, `output/${filename}`, data));
   }
+  return shape;
 };
 
 const writeSvgMethod = function (...args) {

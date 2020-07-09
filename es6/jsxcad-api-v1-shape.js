@@ -1,7 +1,7 @@
 import { close, concatenate, open } from './jsxcad-geometry-path.js';
-import { taggedAssembly, eachPoint, flip, toKeptGeometry as toKeptGeometry$1, toPoints, transform, reconcile, isWatertight, makeWatertight, fromPathToSurface, fromPathToZ0Surface, fromPathsToSurface, fromPathsToZ0Surface, rewriteTags, union as union$1, intersection as intersection$1, difference as difference$1, assemble as assemble$1, getSolids, rewrite, measureBoundingBox as measureBoundingBox$1, taggedLayers, isVoid, taggedSketch, getPaths, allTags, getNonVoidSolids, getNonVoidSurfaces, getNonVoidZ0Surfaces, canonicalize as canonicalize$1, measureArea } from './jsxcad-geometry-tagged.js';
-import { addReadDecoder, log as log$1, readFile, writeFile, emit } from './jsxcad-sys.js';
-import { fromPolygons, findOpenEdges } from './jsxcad-geometry-solid.js';
+import { taggedAssembly, eachPoint, flip, toDisjointGeometry as toDisjointGeometry$1, toPoints, transform, reconcile, isWatertight, makeWatertight, fromPathToSurface, fromPathToZ0Surface, fromPathsToSurface, fromPathsToZ0Surface, rewriteTags, union as union$1, intersection as intersection$1, difference as difference$1, assemble as assemble$1, getSolids, rewrite, measureBoundingBox as measureBoundingBox$1, taggedLayers, isVoid, taggedSketch, getPaths, allTags, getAnyNonVoidSurfaces, taggedSolid, getNonVoidSolids, getNonVoidSurfaces, getNonVoidZ0Surfaces, canonicalize as canonicalize$1, measureArea } from './jsxcad-geometry-tagged.js';
+import { addReadDecoder, log as log$1, readFile, addPending, writeFile, emit } from './jsxcad-sys.js';
+import { fromPolygons, findOpenEdges, fromSurface } from './jsxcad-geometry-solid.js';
 import { outline } from './jsxcad-geometry-surface.js';
 import { createNormalize3 } from './jsxcad-algorithm-quantize.js';
 import { junctionSelector } from './jsxcad-geometry-halfedge.js';
@@ -12,7 +12,7 @@ import { fromTranslation, fromRotation, fromXRotation, fromYRotation, fromZRotat
 
 class Shape {
   close() {
-    const geometry = this.toKeptGeometry();
+    const geometry = this.toDisjointGeometry();
     if (!isSingleOpenPath(geometry.content[0])) {
       throw Error('Close requires a single open path.');
     }
@@ -22,7 +22,7 @@ class Shape {
   concat(...shapes) {
     const paths = [];
     for (const shape of [this, ...shapes]) {
-      const geometry = shape.toKeptGeometry();
+      const geometry = shape.toDisjointGeometry();
       if (!isSingleOpenPath(geometry.content[0])) {
         throw Error(
           `Concatenation requires single open paths: ${JSON.stringify(
@@ -44,11 +44,11 @@ class Shape {
   }
 
   eachPoint(operation) {
-    eachPoint(operation, this.toKeptGeometry());
+    eachPoint(operation, this.toDisjointGeometry());
   }
 
   flip() {
-    return fromGeometry(flip(toKeptGeometry(this)), this.context);
+    return fromGeometry(flip(toDisjointGeometry(this)), this.context);
   }
 
   setTags(tags) {
@@ -56,7 +56,11 @@ class Shape {
   }
 
   toKeptGeometry(options = {}) {
-    return toKeptGeometry$1(toGeometry(this));
+    return this.toDisjointGeometry();
+  }
+
+  toDisjointGeometry(options = {}) {
+    return toDisjointGeometry$1(toGeometry(this));
   }
 
   getContext(symbol) {
@@ -68,7 +72,7 @@ class Shape {
   }
 
   toPoints() {
-    return toPoints(this.toKeptGeometry()).points;
+    return toPoints(this.toDisjointGeometry()).points;
   }
 
   transform(matrix) {
@@ -79,7 +83,7 @@ class Shape {
   }
 
   reconcile() {
-    return fromGeometry(reconcile(this.toKeptGeometry()));
+    return fromGeometry(reconcile(this.toDisjointGeometry()));
   }
 
   assertWatertight() {
@@ -90,12 +94,12 @@ class Shape {
   }
 
   isWatertight() {
-    return isWatertight(this.toKeptGeometry());
+    return isWatertight(this.toDisjointGeometry());
   }
 
   makeWatertight(threshold) {
     return fromGeometry(
-      makeWatertight(this.toKeptGeometry(), undefined, undefined, threshold)
+      makeWatertight(this.toDisjointGeometry(), undefined, undefined, threshold)
     );
   }
 }
@@ -138,7 +142,8 @@ Shape.fromSolid = (solid, context) =>
 
 const fromGeometry = Shape.fromGeometry;
 const toGeometry = (shape) => shape.toGeometry();
-const toKeptGeometry = (shape) => shape.toKeptGeometry();
+const toDisjointGeometry = (shape) => shape.toDisjointGeometry();
+const toKeptGeometry = (shape) => shape.toDisjointGeometry();
 
 addReadDecoder(
   (data) => data && data.geometry !== undefined,
@@ -778,6 +783,25 @@ const method = function () {
 };
 
 Shape.prototype.tags = method;
+
+// FIX: Debugging only -- remove this method.
+const wall = (shape) => {
+  const normalize = createNormalize3();
+  const solids = [];
+  for (const { surface, z0Surface, tags } of getAnyNonVoidSurfaces(
+    shape.toDisjointGeometry()
+  )) {
+    solids.push(
+      taggedSolid({ tags }, fromSurface(surface || z0Surface, normalize))
+    );
+  }
+  return Shape.fromGeometry(taggedAssembly({}, ...solids));
+};
+
+const wallMethod = function () {
+  return wall(this);
+};
+Shape.prototype.wall = wallMethod;
 
 const toWireframeFromSolid = (solid) => {
   const paths = [];
@@ -1582,10 +1606,11 @@ const downloadShapeMethod = function (...args) {
 };
 Shape.prototype.downloadShape = downloadShapeMethod;
 
-const writeShape = async (shape, name, options = {}) => {
+const writeShape = (shape, name, options = {}) => {
   for (const { data, filename } of prepareShape(shape, name, {})) {
-    await writeFile({ doSerialize: false }, `output/${filename}`, data);
+    addPending(writeFile({ doSerialize: false }, `output/${filename}`, data));
   }
+  return shape;
 };
 
 const writeShapeMethod = function (...args) {

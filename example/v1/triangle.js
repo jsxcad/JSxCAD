@@ -1,1 +1,1 @@
-await Triangle().writeThreejsPage('tmp/triangle.html');
+Triangle().writeThreejsPage('tmp/triangle.html');

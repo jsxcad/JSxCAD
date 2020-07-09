@@ -1,4 +1,4 @@
-import { emit, writeFile, addPending } from './jsxcad-sys.js';
+import { emit, addPending, writeFile } from './jsxcad-sys.js';
 import Shape from './jsxcad-api-v1-shape.js';
 import { ensurePages } from './jsxcad-api-v1-layout.js';
 import { toThreejsPage } from './jsxcad-convert-threejs.js';
@@ -25,10 +25,11 @@ const downloadThreejsPageMethod = function (...args) {
 };
 Shape.prototype.downloadThreejsPage = downloadThreejsPageMethod;
 
-const writeThreejsPage = async (shape, name, options = {}) => {
+const writeThreejsPage = (shape, name, options = {}) => {
   for (const { data, filename } of prepareThreejsPage(shape, name, {})) {
-    await writeFile({ doSerialize: false }, `output/${filename}`, data);
+    addPending(writeFile({ doSerialize: false }, `output/${filename}`, data));
   }
+  return shape;
 };
 
 const writeThreejsPageMethod = function (...args) {
