@@ -38,10 +38,18 @@ const intersectionImpl = (geometry, ...geometries) => {
         let thisSurface = geometry.surface;
         for (const geometry of geometries) {
           for (const { solid } of getSolids(geometry)) {
-            thisSurface = intersectionOfSurfaceWithSolid(solid, [thisSurface], normalize)[0];
+            thisSurface = intersectionOfSurfaceWithSolid(
+              solid,
+              [thisSurface],
+              normalize
+            )[0];
           }
           for (const { surface, z0Surface } of getAnySurfaces(geometry)) {
-            thisSurface = intersectionOfSurfaceWithSolid(fromSurfaceToSolid(surface || z0Surface, normalize), [thisSurface], normalize)[0];
+            thisSurface = intersectionOfSurfaceWithSolid(
+              fromSurfaceToSolid(surface || z0Surface, normalize),
+              [thisSurface],
+              normalize
+            )[0];
           }
         }
         return taggedSurface({ tags }, thisSurface);
@@ -51,10 +59,18 @@ const intersectionImpl = (geometry, ...geometries) => {
         let thisSurface = geometry.z0Surface;
         for (const geometry of geometries) {
           for (const { solid } of getSolids(geometry)) {
-            thisSurface = intersectionOfSurfaceWithSolid(solid, [thisSurface], normalize)[0];
+            thisSurface = intersectionOfSurfaceWithSolid(
+              solid,
+              [thisSurface],
+              normalize
+            )[0];
           }
           for (const { surface, z0Surface } of getAnySurfaces(geometry)) {
-            thisSurface = intersectionOfSurfaceWithSolid(fromSurfaceToSolid(surface || z0Surface, normalize), [thisSurface], normalize)[0];
+            thisSurface = intersectionOfSurfaceWithSolid(
+              fromSurfaceToSolid(surface || z0Surface, normalize),
+              [thisSurface],
+              normalize
+            )[0];
           }
         }
         return taggedZ0Surface({ tags }, thisSurface);

@@ -1,5 +1,13 @@
-import { fromSolid as fromSolidToBsp, section as intersectionOfSurfaceWithSolid, removeExteriorPolygonsForSection, unifyBspTrees } from '@jsxcad/geometry-bsp';
-import { makeWatertight as makeWatertightSurface, toPlane as fromSurfaceToPlane } from '@jsxcad/geometry-surface';
+import {
+  fromSolid as fromSolidToBsp,
+  section as intersectionOfSurfaceWithSolid,
+  removeExteriorPolygonsForSection,
+  unifyBspTrees,
+} from '@jsxcad/geometry-bsp';
+import {
+  toPlane as fromSurfaceToPlane,
+  makeWatertight as makeWatertightSurface,
+} from '@jsxcad/geometry-surface';
 
 import { cache } from '@jsxcad/cache';
 import { createNormalize3 } from '@jsxcad/algorithm-quantize';
@@ -32,14 +40,13 @@ const unionImpl = (geometry, ...geometries) => {
           }
         }
         // No meaningful way to unify with a surface.
-        return taggedSolid(
-          { tags },
-          solidUnion(geometry.solid, ...todo)
-        );
+        return taggedSolid({ tags }, solidUnion(geometry.solid, ...todo));
       }
       case 'surface': {
         const normalize = createNormalize3();
-        let planeSurface = fromPlaneToPolygon(fromSurfaceToPlane(geometry.surface));
+        let planeSurface = fromPlaneToPolygon(
+          fromSurfaceToPlane(geometry.surface)
+        );
         const clipFaces = [];
         clipFaces.push(...fromSurfaceToSolid(geometry.surface, normalize));
         for (const geometry of geometries) {
@@ -47,25 +54,44 @@ const unionImpl = (geometry, ...geometries) => {
             clipFaces.push(...solid);
           }
           for (const { surface, z0Surface } of getAnySurfaces(geometry)) {
-            clipFaces.push(...fromSurfaceToSolid(surface || z0Surface, normalize));
+            clipFaces.push(
+              ...fromSurfaceToSolid(surface || z0Surface, normalize)
+            );
           }
         }
-        const clippedSurface = intersectionOfSurfaceWithSolid(clipFaces, [planeSurface], normalize)[0];
+        const clippedSurface = intersectionOfSurfaceWithSolid(
+          clipFaces,
+          [planeSurface],
+          normalize
+        )[0];
         return taggedSurface({ tags }, makeWatertightSurface(clippedSurface));
       }
       case 'z0Surface': {
         const normalize = createNormalize3();
         let planarPolygon = fromPlaneToPolygon([0, 0, 1, 0]);
-        let bsp = fromSolidToBsp(fromSurfaceToSolid(geometry.z0Surface, normalize), normalize);
+        let bsp = fromSolidToBsp(
+          fromSurfaceToSolid(geometry.z0Surface, normalize),
+          normalize
+        );
         for (const geometry of geometries) {
           for (const { solid } of getSolids(geometry)) {
             bsp = unifyBspTrees(fromSolidToBsp(solid, normalize), bsp);
           }
           for (const { surface, z0Surface } of getAnySurfaces(geometry)) {
-            bsp = unifyBspTrees(fromSolidToBsp(fromSurfaceToSolid(surface || z0Surface, normalize), normalize), bsp);
+            bsp = unifyBspTrees(
+              fromSolidToBsp(
+                fromSurfaceToSolid(surface || z0Surface, normalize),
+                normalize
+              ),
+              bsp
+            );
           }
         }
-        const clippedSurface = removeExteriorPolygonsForSection(bsp, [planarPolygon], normalize);
+        const clippedSurface = removeExteriorPolygonsForSection(
+          bsp,
+          [planarPolygon],
+          normalize
+        );
         return taggedZ0Surface({ tags }, makeWatertightSurface(clippedSurface));
       }
       case 'paths': {

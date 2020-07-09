@@ -1,5 +1,9 @@
 export { cut, cutOpen } from './cut.js';
-export { fromSolid, removeExteriorPolygonsForSection, unifyBspTrees } from './bsp.js';
+export {
+  fromSolid,
+  removeExteriorPolygonsForSection,
+  unifyBspTrees,
+} from './bsp.js';
 
 export { containsPoint } from './containsPoint.js';
 export { deform } from './deform.js';

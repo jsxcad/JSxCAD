@@ -1,4 +1,7 @@
-import { flip as flipSolid, fromSurface as fromSurfaceToSolid } from '@jsxcad/geometry-solid';
+import {
+  flip as flipSolid,
+  fromSurface as fromSurfaceToSolid,
+} from '@jsxcad/geometry-solid';
 
 import { cache } from '@jsxcad/cache';
 import { createNormalize3 } from '@jsxcad/algorithm-quantize';
@@ -29,20 +32,25 @@ const differenceImpl = (geometry, ...geometries) => {
             todo.push(fromSurfaceToSolid(surface || z0Surface, normalize));
           }
         }
-        return taggedSolid(
-          { tags },
-          solidDifference(geometry.solid, ...todo)
-        );
+        return taggedSolid({ tags }, solidDifference(geometry.solid, ...todo));
       }
       case 'surface': {
         const normalize = createNormalize3();
         let thisSurface = geometry.surface;
         for (const geometry of geometries) {
           for (const { solid } of getSolids(geometry)) {
-            thisSurface = intersectionOfSurfaceWithSolid(flipSolid(solid), [thisSurface], normalize)[0];
+            thisSurface = intersectionOfSurfaceWithSolid(
+              flipSolid(solid),
+              [thisSurface],
+              normalize
+            )[0];
           }
           for (const { surface, z0Surface } of getAnySurfaces(geometry)) {
-            thisSurface = intersectionOfSurfaceWithSolid(flipSolid(fromSurfaceToSolid(surface || z0Surface, normalize)), [thisSurface], normalize)[0];
+            thisSurface = intersectionOfSurfaceWithSolid(
+              flipSolid(fromSurfaceToSolid(surface || z0Surface, normalize)),
+              [thisSurface],
+              normalize
+            )[0];
           }
         }
         return taggedSurface({ tags }, thisSurface);
@@ -52,10 +60,18 @@ const differenceImpl = (geometry, ...geometries) => {
         let thisSurface = geometry.z0Surface;
         for (const geometry of geometries) {
           for (const { solid } of getSolids(geometry)) {
-            thisSurface = intersectionOfSurfaceWithSolid(flipSolid(solid), [thisSurface], normalize)[0];
+            thisSurface = intersectionOfSurfaceWithSolid(
+              flipSolid(solid),
+              [thisSurface],
+              normalize
+            )[0];
           }
           for (const { surface, z0Surface } of getAnySurfaces(geometry)) {
-            thisSurface = intersectionOfSurfaceWithSolid(flipSolid(fromSurfaceToSolid(surface || z0Surface, normalize)), [thisSurface], normalize)[0];
+            thisSurface = intersectionOfSurfaceWithSolid(
+              flipSolid(fromSurfaceToSolid(surface || z0Surface, normalize)),
+              [thisSurface],
+              normalize
+            )[0];
           }
         }
         return taggedZ0Surface({ tags }, thisSurface);

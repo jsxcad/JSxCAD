@@ -82,7 +82,9 @@ export const toPdf = async (
     fromScaling([scale, scale, scale])
   );
   const keptGeometry = toKeptGeometry(transform(matrix, await geometry));
-  for (const { tags, surface, z0Surface } of getAnyNonVoidSurfaces(keptGeometry)) {
+  for (const { tags, surface, z0Surface } of getAnyNonVoidSurfaces(
+    keptGeometry
+  )) {
     lines.push(toFillColor(toRgbFromTags(tags, black)));
     lines.push(toStrokeColor(toRgbFromTags(tags, black)));
     for (const path of outline(surface || z0Surface)) {

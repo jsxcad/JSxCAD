@@ -1,4 +1,4 @@
-import { writeFile, addPending, emit } from './jsxcad-sys.js';
+import { addPending, writeFile, emit } from './jsxcad-sys.js';
 import Shape from './jsxcad-api-v1-shape.js';
 import { toPdf } from './jsxcad-convert-pdf.js';
 import { ensurePages } from './jsxcad-api-v1-layout.js';
@@ -26,10 +26,11 @@ const downloadPdfMethod = function (...args) {
 Shape.prototype.downloadPdf = downloadPdfMethod;
 Shape.prototype.pdf = downloadPdfMethod;
 
-const writePdf = async (shape, name, { lineWidth = 0.096 } = {}) => {
+const writePdf = (shape, name, { lineWidth = 0.096 } = {}) => {
   for (const { data, filename } of preparePdf(shape, name, { lineWidth })) {
-    await writeFile({ doSerialize: false }, `output/${filename}`, data);
+    addPending(writeFile({ doSerialize: false }, `output/${filename}`, data));
   }
+  return writePdf;
 };
 
 const writePdfMethod = function (...args) {

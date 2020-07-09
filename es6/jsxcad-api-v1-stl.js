@@ -1,6 +1,6 @@
 import Shape, { Shape as Shape$1 } from './jsxcad-api-v1-shape.js';
 import { fromStl, toStl } from './jsxcad-convert-stl.js';
-import { readFile, writeFile, addPending, emit } from './jsxcad-sys.js';
+import { readFile, addPending, writeFile, emit } from './jsxcad-sys.js';
 import { ensurePages } from './jsxcad-api-v1-layout.js';
 
 /**
@@ -62,10 +62,11 @@ const downloadStlMethod = function (...args) {
 };
 Shape$1.prototype.downloadStl = downloadStlMethod;
 
-const writeStl = async (shape, name, options = {}) => {
+const writeStl = (shape, name, options = {}) => {
   for (const { data, filename } of prepareStl(shape, name, {})) {
-    await writeFile({ doSerialize: false }, `output/${filename}`, data);
+    addPending(writeFile({ doSerialize: false }, `output/${filename}`, data));
   }
+  return shape;
 };
 
 const method = function (...args) {

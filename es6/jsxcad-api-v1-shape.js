@@ -1,6 +1,6 @@
 import { close, concatenate, open } from './jsxcad-geometry-path.js';
 import { taggedAssembly, eachPoint, flip, toDisjointGeometry as toDisjointGeometry$1, toPoints, transform, reconcile, isWatertight, makeWatertight, fromPathToSurface, fromPathToZ0Surface, fromPathsToSurface, fromPathsToZ0Surface, rewriteTags, union as union$1, intersection as intersection$1, difference as difference$1, assemble as assemble$1, getSolids, rewrite, measureBoundingBox as measureBoundingBox$1, taggedLayers, isVoid, taggedSketch, getPaths, allTags, getAnyNonVoidSurfaces, taggedSolid, getNonVoidSolids, getNonVoidSurfaces, getNonVoidZ0Surfaces, canonicalize as canonicalize$1, measureArea } from './jsxcad-geometry-tagged.js';
-import { addReadDecoder, log as log$1, readFile, writeFile, emit } from './jsxcad-sys.js';
+import { addReadDecoder, log as log$1, readFile, addPending, writeFile, emit } from './jsxcad-sys.js';
 import { fromPolygons, findOpenEdges, fromSurface } from './jsxcad-geometry-solid.js';
 import { outline } from './jsxcad-geometry-surface.js';
 import { createNormalize3 } from './jsxcad-algorithm-quantize.js';
@@ -788,13 +788,19 @@ Shape.prototype.tags = method;
 const wall = (shape) => {
   const normalize = createNormalize3();
   const solids = [];
-  for (const { surface, z0Surface, tags } of getAnyNonVoidSurfaces(shape.toDisjointGeometry())) {
-    solids.push(taggedSolid({ tags }, fromSurface(surface || z0Surface, normalize)));
+  for (const { surface, z0Surface, tags } of getAnyNonVoidSurfaces(
+    shape.toDisjointGeometry()
+  )) {
+    solids.push(
+      taggedSolid({ tags }, fromSurface(surface || z0Surface, normalize))
+    );
   }
   return Shape.fromGeometry(taggedAssembly({}, ...solids));
 };
 
-const wallMethod = function () { return wall(this); };
+const wallMethod = function () {
+  return wall(this);
+};
 Shape.prototype.wall = wallMethod;
 
 const toWireframeFromSolid = (solid) => {
@@ -1600,10 +1606,11 @@ const downloadShapeMethod = function (...args) {
 };
 Shape.prototype.downloadShape = downloadShapeMethod;
 
-const writeShape = async (shape, name, options = {}) => {
+const writeShape = (shape, name, options = {}) => {
   for (const { data, filename } of prepareShape(shape, name, {})) {
-    await writeFile({ doSerialize: false }, `output/${filename}`, data);
+    addPending(writeFile({ doSerialize: false }, `output/${filename}`, data));
   }
+  return shape;
 };
 
 const writeShapeMethod = function (...args) {

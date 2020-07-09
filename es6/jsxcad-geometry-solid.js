@@ -337,7 +337,12 @@ const fromSurface = (surface, normalize) => {
   for (const path of outline$1(surface, normalize)) {
     for (const [start, end] of getEdges(path)) {
       // Build a large wall.
-      walls.push([add(start, top), add(start, bottom), add(end, bottom), add(end, top)]);
+      walls.push([
+        add(start, top),
+        add(start, bottom),
+        add(end, bottom),
+        add(end, top),
+      ]);
     }
   }
   // This is an excessively large uncapped prism.

@@ -1,4 +1,4 @@
-import { emit, writeFile } from '@jsxcad/sys';
+import { addPending, emit, writeFile } from '@jsxcad/sys';
 
 import Shape from './Shape.js';
 

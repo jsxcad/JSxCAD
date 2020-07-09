@@ -6,11 +6,7 @@ const scene = assemble(
 
 scene.keep('sphere').writeStl('stl/sphere.stl');
 
-scene
-  .keep('sphere')
-  .section(Z(0.001))
-  .outline()
-  .writePdf('pdf/sphere.pdf');
+scene.keep('sphere').section(Z(0.001)).outline().writePdf('pdf/sphere.pdf');
 
 scene
   .keep('sphere', 'cube')

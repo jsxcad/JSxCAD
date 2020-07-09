@@ -1,5 +1,8 @@
 import { add, scale } from '@jsxcad/math-vec3';
-import { outline as outlineSurface, toPlane as toPlaneFromSurface } from '@jsxcad/geometry-surface';
+import {
+  outline as outlineSurface,
+  toPlane as toPlaneFromSurface,
+} from '@jsxcad/geometry-surface';
 
 import { getEdges } from '@jsxcad/geometry-path';
 
@@ -13,7 +16,12 @@ export const fromSurface = (surface, normalize) => {
   for (const path of outlineSurface(surface, normalize)) {
     for (const [start, end] of getEdges(path)) {
       // Build a large wall.
-      walls.push([add(start, top), add(start, bottom), add(end, bottom), add(end, top)]);
+      walls.push([
+        add(start, top),
+        add(start, bottom),
+        add(end, bottom),
+        add(end, top),
+      ]);
     }
   }
   // This is an excessively large uncapped prism.

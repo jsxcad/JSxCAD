@@ -949,10 +949,18 @@ const boundPolygons = (bsp, polygons, normalize) => {
 
 const replaceLeafs = (bsp, inBsp = inLeaf, outBsp = outLeaf) => {
   switch (bsp.kind) {
-    case IN_LEAF: return inBsp;
-    case OUT_LEAF: return outBsp;
-    case BRANCH: return { ...bsp, front: replaceLeafs(bsp.front, inBsp, outBsp), back: replaceLeafs(bsp.back, inBsp, outBsp) };
-    default: throw Error(`Unexpected bsp kind: ${bsp.kind}`);
+    case IN_LEAF:
+      return inBsp;
+    case OUT_LEAF:
+      return outBsp;
+    case BRANCH:
+      return {
+        ...bsp,
+        front: replaceLeafs(bsp.front, inBsp, outBsp),
+        back: replaceLeafs(bsp.back, inBsp, outBsp),
+      };
+    default:
+      throw Error(`Unexpected bsp kind: ${bsp.kind}`);
   }
 };
 
