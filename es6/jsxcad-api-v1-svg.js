@@ -1,6 +1,6 @@
 import Shape$1, { Shape } from './jsxcad-api-v1-shape.js';
 import { fromSvgPath, fromSvg, toSvg } from './jsxcad-convert-svg.js';
-import { readFile, getSources, addPending, writeFile, emit } from './jsxcad-sys.js';
+import { readFile, read, addPending, writeFile, emit } from './jsxcad-sys.js';
 import { ensurePages } from './jsxcad-api-v1-layout.js';
 
 /**
@@ -52,12 +52,9 @@ const readSvgPath = async (options) => {
     options = { path: options };
   }
   const { path } = options;
-  let data = await readFile({ decode: 'utf8', ...options }, `source/${path}`);
+  let data = await read(`source/${path}`);
   if (data === undefined) {
-    data = await readFile(
-      { decode: 'utf8', sources: getSources(`cache/${path}`), ...options },
-      `cache/${path}`
-    );
+    data = await read(`cache/${path}`, { sources: [path] });
   }
   return Shape$1.fromGeometry(await fromSvgPath(options, data));
 };

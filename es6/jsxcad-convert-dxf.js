@@ -2442,7 +2442,7 @@ function getAcadColor$1(index) {
 //   BYBLOCK means inherits from block
 //   BYLAYER (default) mean inherits from layer
 
-const fromDxf = async (options = {}, data) => {
+const fromDxf = async (data) => {
   const parser = new DxfParser();
   const dxf = parser.parseSync(data);
   const assembly = [];

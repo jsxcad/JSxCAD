@@ -11,6 +11,10 @@ const large = 1e10;
 export const fromSurface = (surface, normalize) => {
   const walls = [];
   const normal = toPlaneFromSurface(surface);
+  if (normal === undefined) {
+    // The surface is degenerate.
+    return [];
+  }
   const top = scale(large, normal);
   const bottom = scale(-large, normal);
   for (const path of outlineSurface(surface, normalize)) {

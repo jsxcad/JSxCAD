@@ -1,7 +1,6 @@
-import { getSources, readFile } from '@jsxcad/sys';
-
 import Shape from '@jsxcad/api-v1-shape';
 import { fromShapefile } from '@jsxcad/convert-shapefile';
+import { read } from '@jsxcad/sys';
 
 /**
  *
@@ -16,29 +15,16 @@ import { fromShapefile } from '@jsxcad/convert-shapefile';
  *
  **/
 
-export const readShapefile = async (options) => {
-  const { shpPath, dbfPath } = options;
-  let shpData = await readFile(
-    { doSerialize: false, ...options },
-    `source/${shpPath}`
-  );
+export const readShapefile = async (shpPath, dbfPath) => {
+  let shpData = await read(`source/${shpPath}`, { doSerialize: false });
   if (shpData === undefined) {
-    shpData = await readFile(
-      { sources: getSources(`cache/${shpPath}`), ...options },
-      `cache/${shpPath}`
-    );
+    shpData = await read(`cache/${shpPath}`, { sources: [shpPath] });
   }
-  let dbfData = await readFile(
-    { doSerialize: false, ...options },
-    `source/${dbfPath}`
-  );
+  let dbfData = await read(`source/${dbfPath}`, { doSerialize: false });
   if (dbfData === undefined) {
-    dbfData = await readFile(
-      { sources: getSources(`cache/${dbfPath}`), ...options },
-      `cache/${dbfPath}`
-    );
+    dbfData = await read(`cache/${dbfPath}`, { sources: [dbfPath] });
   }
-  return Shape.fromGeometry(await fromShapefile(options, shpData, dbfData));
+  return Shape.fromGeometry(await fromShapefile(shpData, dbfData));
 };
 
 export default readShapefile;

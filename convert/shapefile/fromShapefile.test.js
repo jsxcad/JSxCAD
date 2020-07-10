@@ -7,7 +7,7 @@ const { readFile } = fs.promises;
 test('Boolean Properties', async (t) => {
   const shp = await readFile('boolean-property.shp');
   const dbf = await readFile('boolean-property.dbf');
-  const data = await fromShapefile({}, shp, dbf);
+  const data = await fromShapefile(shp, dbf);
   t.deepEqual(data, {
     type: 'assembly',
     content: [

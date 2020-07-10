@@ -1,0 +1,57 @@
+import { GearProfile } from 'https://gitcdn.link/cdn/jsxcad/JSxCAD/master/library/InvoluteGear.js';
+
+const profile = GearProfile(6, { mmPerTooth: 12 });
+
+md`
+Cutting a gear profile without overcut.
+`;
+
+profile
+  .toolpath(3 / 2, { overcut: false })
+  .op((tp) =>
+    Assembly(
+      ...tp.toPoints().map((p) =>
+        Circle(3 / 2)
+          .outline()
+          .move(...p)
+          .color('green')
+      ),
+      tp.trace(1).color('blue'),
+      profile.color('red')
+    )
+  )
+  .Item()
+  .topView();
+
+md`
+Note that the concave corners are not cut completely, but the shape is not cut into.
+`;
+
+md`
+---
+`;
+
+md`
+Cutting a gear profile with overcut.
+`;
+
+profile
+  .toolpath(3 / 2, { overcut: true })
+  .op((tp) =>
+    Assembly(
+      ...tp.toPoints().map((p) =>
+        Circle(3 / 2)
+          .outline()
+          .move(...p)
+          .color('green')
+      ),
+      tp.trace(1).color('blue'),
+      profile.color('red')
+    )
+  )
+  .Item()
+  .topView();
+
+md`
+Note that the concave corners are cut completely, but the shape is cut into.
+`;

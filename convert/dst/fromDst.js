@@ -165,7 +165,7 @@ export const fetchStitches = ({ previousX = 0, previousY = 0 }, fetchBytes) => {
   }
 };
 
-export const fromDst = async (options = {}, data) => {
+export const fromDst = async (data, options = {}) => {
   const fetcher = createByteFetcher(data);
   const header = fetchHeader({}, fetcher);
   return {

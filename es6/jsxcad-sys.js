@@ -3267,6 +3267,9 @@ const { serialize } = v8$1;
 // FIX Convert data by representation.
 
 const writeFile = async (options, path, data) => {
+  if (path.startsWith('source/source/')) {
+    throw Error('source/source');
+  }
   data = await data;
   // FIX: Should be checking for a proxy fs, not webworker.
   // if (false && isWebWorker) {
@@ -3420,7 +3423,7 @@ const fetchPersistent = async (path, doSerialize) => {
 };
 
 // Fetch from external sources.
-const fetchSources = async (options = {}, sources) => {
+const fetchSources = async (sources) => {
   const fetchUrl = await getUrlFetcher();
   const fetchFile = await getFileFetcher((path) => path, false);
   // Try to load the data from a source.
@@ -3450,13 +3453,11 @@ const fetchSources = async (options = {}, sources) => {
 // Deprecated
 const readFile = async (options, path) => {
   const { allowFetch = true, ephemeral } = options;
-  // if (false && isWebWorker) {
-  //  return self.ask({ readFile: { options, path } });
-  // }
   const {
     sources = [],
     workspace = getFilesystem(),
     useCache = true,
+    decode,
   } = options;
   let originalWorkspace = getFilesystem();
   if (workspace !== originalWorkspace) {
@@ -3475,7 +3476,11 @@ const readFile = async (options, path) => {
     setupFilesystem({ fileBase: originalWorkspace });
   }
   if (file.data === undefined && allowFetch && sources.length > 0) {
-    file.data = await fetchSources({}, sources);
+    let data = await fetchSources(sources);
+    if (decode) {
+      data = new TextDecoder(decode).decode(data);
+    }
+    file.data = data;
     if (!ephemeral && file.data !== undefined) {
       // Update persistent cache.
       await writeFile({ ...options, doSerialize: true }, path, file.data);

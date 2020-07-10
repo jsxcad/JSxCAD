@@ -7,7 +7,7 @@
   "module": "dist/main.js",
   "type": "module",
   "scripts": {
-    "depcheck": "depcheck",
+    "depcheck": "depcheck --ignores 'http*'",
     "lint": "eslint *.js",
     "lintfix": "eslint --fix *.js",
     "rollup": "rollup -c rollup_main.js",
