@@ -1,24 +1,14 @@
-import { readFile, getSources, addPending, writeFile, emit } from './jsxcad-sys.js';
 import Shape from './jsxcad-api-v1-shape.js';
 import { fromDxf, toDxf } from './jsxcad-convert-dxf.js';
+import { read, addPending, writeFile, emit } from './jsxcad-sys.js';
 import { ensurePages } from './jsxcad-api-v1-layout.js';
 
-const readDxf = async (options) => {
-  if (typeof options === 'string') {
-    options = { path: options };
-  }
-  const { path } = options;
-  let data = await readFile(
-    { doSerialize: false, ...options },
-    `source/${path}`
-  );
+const readDxf = async (path) => {
+  let data = await read(`source/${path}`, { doSerialize: false });
   if (data === undefined) {
-    data = await readFile(
-      { sources: getSources(`cache/${path}`), ...options },
-      `cache/${path}`
-    );
+    data = await read(`cache/${path}`, { sources: [path] });
   }
-  return Shape.fromGeometry(await fromDxf(options, data));
+  return Shape.fromGeometry(await fromDxf(data));
 };
 
 const prepareDxf = (shape, name, options = {}) => {

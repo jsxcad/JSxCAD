@@ -4,7 +4,7 @@ import DxfParser from 'dxf-parser';
 import { buildRegularPolygon } from '@jsxcad/algorithm-shape';
 import { toTagFromRgbInt } from '@jsxcad/algorithm-color';
 
-export const fromDxf = async (options = {}, data) => {
+export const fromDxf = async (data) => {
   const parser = new DxfParser();
   const dxf = parser.parseSync(data);
   const assembly = [];

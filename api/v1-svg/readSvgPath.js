@@ -1,7 +1,6 @@
-import { getSources, readFile } from '@jsxcad/sys';
-
 import Shape from '@jsxcad/api-v1-shape';
 import { fromSvgPath } from '@jsxcad/convert-svg';
+import { read } from '@jsxcad/sys';
 
 /**
  *
@@ -14,12 +13,9 @@ export const readSvgPath = async (options) => {
     options = { path: options };
   }
   const { path } = options;
-  let data = await readFile({ decode: 'utf8', ...options }, `source/${path}`);
+  let data = await read(`source/${path}`);
   if (data === undefined) {
-    data = await readFile(
-      { decode: 'utf8', sources: getSources(`cache/${path}`), ...options },
-      `cache/${path}`
-    );
+    data = await read(`cache/${path}`, { sources: [path] });
   }
   return Shape.fromGeometry(await fromSvgPath(options, data));
 };

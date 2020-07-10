@@ -576,7 +576,7 @@ const toGeometry = (geometry, properties) => {
   }
 };
 
-const fromShapefile = async (options, shp, dbf) => {
+const fromShapefile = async (shp, dbf) => {
   const geoJson = await Shapefile.read(shp, dbf);
   const geometry = toGeometry(geoJson);
   return geometry;

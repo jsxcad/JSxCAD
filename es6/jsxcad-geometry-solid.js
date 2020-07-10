@@ -332,6 +332,10 @@ const large = 1e10;
 const fromSurface = (surface, normalize) => {
   const walls = [];
   const normal = toPlane$1(surface);
+  if (normal === undefined) {
+    // The surface is degenerate.
+    return [];
+  }
   const top = scale$1(large, normal);
   const bottom = scale$1(-large, normal);
   for (const path of outline$1(surface, normalize)) {

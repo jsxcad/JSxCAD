@@ -1,7 +1,6 @@
-import { getSources, readFile } from '@jsxcad/sys';
-
 import { Shape } from '@jsxcad/api-v1-shape';
 import { fromDst } from '@jsxcad/convert-dst';
+import { read } from '@jsxcad/sys';
 
 /**
  *
@@ -24,19 +23,12 @@ import { fromDst } from '@jsxcad/convert-dst';
  *
  **/
 
-export const readDst = async (options) => {
-  if (typeof options === 'string') {
-    options = { path: options };
-  }
-  const { path } = options;
-  let data = await readFile({ as: 'bytes' }, `source/${path}`);
+export const readDst = async (path) => {
+  let data = await read(`source/${path}`);
   if (data === undefined) {
-    data = await readFile(
-      { doSerialize: false, sources: getSources(`cache/${path}`), ...options },
-      `cache/${path}`
-    );
+    data = await read(`cache/${path}`, { doSerialize: false, sources: [path] });
   }
-  return Shape.fromGeometry(await fromDst(options, data));
+  return Shape.fromGeometry(await fromDst(data));
 };
 
 export default readDst;

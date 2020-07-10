@@ -16,6 +16,19 @@ import { getNonVoidPaths } from '@jsxcad/geometry-tagged';
 
 const intersect = (a, b) => fromPointToVec3(intersectLines(a, b));
 
+const RIGHT_ANGLE = Math.PI / -2;
+
+const makeToolLine = (start, end, radius) => {
+  const direction = normalize(subtract(end, start));
+  // The tool (with given radius) passes along the outside of the path.
+  const toolEdgeOffset = scale(radius, rotateZ(direction, RIGHT_ANGLE));
+  // And in order to get sharp angles with a circular tool we need to cut a bit further.
+  const toolStart = add(start, toolEdgeOffset);
+  const toolEnd = add(end, toolEdgeOffset);
+  const toolLine = fromPointsToLine(toolStart, toolEnd);
+  return [toolStart, toolEnd, toolLine];
+};
+
 export const toolpathEdges = (
   path,
   radius = 1,
@@ -26,21 +39,8 @@ export const toolpathEdges = (
   let toolpath;
   let lastToolLine;
   const edges = getEdges(path);
-  // FIX: Avoid retracing.
-  if (isClosed(path)) {
-    // If the path is closed retrace the first path to make sure it's properly closed.
-    edges.push(edges[0]);
-  }
   for (const [start, end] of edges) {
-    const direction = normalize(subtract(end, start));
-    // The tool (with given radius) passes along the outside of the path.
-    const rightAngle = Math.PI / -2;
-    const toolEdgeOffset = scale(radius, rotateZ(direction, rightAngle));
-    // And in order to get sharp angles with a circular tool we need to cut a bit further.
-    const overcutOffset = scale(overcut ? 0 : -radius, direction);
-    const toolStart = subtract(add(start, toolEdgeOffset), overcutOffset);
-    const toolEnd = add(add(end, toolEdgeOffset), overcutOffset);
-    const thisToolLine = fromPointsToLine(toolStart, toolEnd);
+    const [toolStart, toolEnd, thisToolLine] = makeToolLine(start, end, radius);
     if (!toolpath) {
       toolpath = createOpenPath();
       toolpaths.push(toolpath);
@@ -50,16 +50,26 @@ export const toolpathEdges = (
         // Move (back) to the intersection point from the overcut.
         toolpath.push(intersect(thisToolLine, lastToolLine));
       }
+      toolpath.push(toolStart, toolEnd);
     } else {
       if (lastToolLine) {
-        // Trim the previous end point.
-        toolpath.pop();
-        // Replace it with the intersection.
-        toolpath.push(intersect(thisToolLine, lastToolLine));
+        // Replace the previous point with the intersection.
+        toolpath[toolpath.length - 1] = intersect(thisToolLine, lastToolLine);
+        toolpath.push(toolEnd);
+      } else {
+        toolpath.push(toolStart, toolEnd);
       }
     }
-    toolpath.push(toolStart, toolEnd);
     lastToolLine = thisToolLine;
+  }
+  if (isClosed(path) && !overcut) {
+    toolpath.shift();
+    // Rewrite the start and end to meet at their intersection.
+    const [start, end] = edges[0];
+    const [, , thisToolLine] = makeToolLine(start, end, radius);
+    const intersection = intersect(thisToolLine, lastToolLine);
+    toolpath[0] = intersection;
+    toolpath[toolpath.length - 1] = intersection;
   }
   return toolpaths;
 };

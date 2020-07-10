@@ -1,4 +1,4 @@
-import { getSources, readFile } from '@jsxcad/sys';
+import { read } from '@jsxcad/sys';
 
 import { toEcmascript } from '@jsxcad/compiler';
 
@@ -16,15 +16,15 @@ export const buildImportModule = (api) => async (name, { src } = {}) => {
   let script;
   if (script === undefined) {
     const path = `source/${name}`;
-    script = await readFile({ path, as: 'utf8' }, path);
-  }
-  if (script === undefined) {
-    const path = `cache/${name}`;
-    const sources = getSources(path);
+    const sources = [];
     if (src) {
       sources.push(src);
     }
-    script = await readFile({ path, as: 'utf8', sources }, path);
+    sources.push(name);
+    script = await read(path, { sources, decode: 'utf8' });
+  }
+  if (script === undefined) {
+    throw Error(`Cannot import module ${name}`);
   }
   const ecmascript = await toEcmascript(script);
   const builder = new Function(

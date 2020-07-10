@@ -2128,7 +2128,7 @@ const fetchStitches = ({ previousX = 0, previousY = 0 }, fetchBytes) => {
   }
 };
 
-const fromDst = async (options = {}, data) => {
+const fromDst = async (data, options = {}) => {
   const fetcher = createByteFetcher(data);
   const header = fetchHeader({}, fetcher);
   return {

@@ -1,4 +1,4 @@
-import Shape$1, { Shape, union, assemble, layer } from './jsxcad-api-v1-shape.js';
+import Shape$1, { Shape, assemble, layer, union } from './jsxcad-api-v1-shape.js';
 import { buildConvexSurfaceHull, buildConvexHull, loop, extrude as extrude$1, buildConvexMinkowskiSum } from './jsxcad-algorithm-shape.js';
 import { Y as Y$1, Z as Z$3 } from './jsxcad-api-v1-connector.js';
 import { getPaths, getZ0Surfaces, getSurfaces, getPlans, getAnySurfaces, outline as outline$1, getSolids, taggedLayers, measureBoundingBox } from './jsxcad-geometry-tagged.js';
@@ -52,7 +52,7 @@ const ChainedHull = (...shapes) => {
       chain.push(Shape.fromGeometry(buildConvexHull(points)));
     }
   }
-  return union(...chain);
+  return assemble(...chain);
 };
 
 const ChainedHullMethod = function (...args) {

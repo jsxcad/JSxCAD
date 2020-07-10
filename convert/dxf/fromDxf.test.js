@@ -6,7 +6,6 @@ const { readFile } = fs.promises;
 
 test('Basic', async (t) => {
   const geometry = await fromDxf(
-    {},
     await readFile('toDxf.test.triangle.dxf', { encoding: 'utf8' })
   );
   t.deepEqual(geometry, {

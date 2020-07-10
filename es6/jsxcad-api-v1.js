@@ -1,4 +1,4 @@
-import { addPending, write, emit, addSource, read, readFile, getSources } from './jsxcad-sys.js';
+import { addPending, write, emit, addSource, read } from './jsxcad-sys.js';
 export { emit, read, write } from './jsxcad-sys.js';
 import Shape, { Shape as Shape$1, log, make } from './jsxcad-api-v1-shape.js';
 export { Shape, log, make } from './jsxcad-api-v1-shape.js';
@@ -259,15 +259,15 @@ const buildImportModule = (api) => async (name, { src } = {}) => {
   let script;
   if (script === undefined) {
     const path = `source/${name}`;
-    script = await readFile({ path, as: 'utf8' }, path);
-  }
-  if (script === undefined) {
-    const path = `cache/${name}`;
-    const sources = getSources(path);
+    const sources = [];
     if (src) {
       sources.push(src);
     }
-    script = await readFile({ path, as: 'utf8', sources }, path);
+    sources.push(name);
+    script = await read(path, { sources, decode: 'utf8' });
+  }
+  if (script === undefined) {
+    throw Error(`Cannot import module ${name}`);
   }
   const ecmascript = await toEcmascript(script);
   const builder = new Function(
