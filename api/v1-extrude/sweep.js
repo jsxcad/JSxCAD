@@ -1,8 +1,8 @@
-import { Shape, assemble, union } from '@jsxcad/api-v1-shape';
+import { Shape, assemble } from '@jsxcad/api-v1-shape';
 
-import ChainedHull from './ChainedHull.js';
+import Hull from './Hull.js';
+import { getEdges } from '@jsxcad/geometry-path';
 import { getPaths } from '@jsxcad/geometry-tagged';
-import { isOpen } from '@jsxcad/geometry-path';
 
 /**
  *
@@ -17,16 +17,14 @@ export const sweep = (toolpath, tool) => {
   const chains = [];
   for (const { paths } of getPaths(toolpath.toKeptGeometry())) {
     for (const path of paths) {
-      if (isOpen(path)) {
-        chains.push(
-          ChainedHull(...path.slice(1).map((point) => tool.move(...point)))
-        );
-      } else {
-        chains.push(ChainedHull(...path.map((point) => tool.move(...point))));
-      }
+      chains.push(
+        ...getEdges(path).map(([start, end]) =>
+          Hull(tool.move(...start), tool.move(...end))
+        )
+      );
     }
   }
-  return union(...chains);
+  return assemble(...chains);
 };
 
 const sweepMethod = function (tool) {

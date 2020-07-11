@@ -88275,8 +88275,7 @@ class Ui extends react.PureComponent {
       paneLayout: '0',
       paneViews: [],
       toast: []
-    }; // this.addWorkspace = this.addWorkspace.bind(this);
-
+    };
     this.createNode = this.createNode.bind(this);
     this.onChange = this.onChange.bind(this);
     this.onRelease = this.onRelease.bind(this);
@@ -88418,20 +88417,6 @@ class Ui extends react.PureComponent {
     await unwatchFileDeletion(deletionWatcher);
     await unwatchLog(logWatcher);
   }
-  /*
-  async addWorkspace() {
-    const workspace = document.getElementById('workspace/add/name').value;
-    if (workspace.length > 0) {
-      // FIX: Prevent this from overwriting existing filesystems.
-      setupFilesystem({ fileBase: workspace });
-      await write('source/script.jsxcad', defaultScript);
-      await write('ui/paneLayout', defaultPaneLayout);
-      await write('ui/paneViews', defaultPaneViews);
-      await this.selectWorkspace(workspace);
-    }
-  }
-  */
-
 
   updateUrl({
     workspace,
@@ -88933,7 +88918,8 @@ class Ui extends react.PureComponent {
         fileTitle
       });
       this.setState({
-        file
+        file,
+        fileTitle
       });
     };
 
@@ -88943,7 +88929,7 @@ class Ui extends react.PureComponent {
       }
     };
 
-    const fileChoices = views.filter(entry => entry.file !== file);
+    const fileChoices = [...new Set(views.filter(entry => entry.view === 'editScript' && entry.file !== file))];
     return /*#__PURE__*/react.createElement("div", {
       style: {
         height: '100%',

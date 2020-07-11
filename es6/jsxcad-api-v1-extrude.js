@@ -1,4 +1,4 @@
-import Shape$1, { Shape, assemble, layer, union } from './jsxcad-api-v1-shape.js';
+import Shape$1, { Shape, assemble, layer } from './jsxcad-api-v1-shape.js';
 import { buildConvexSurfaceHull, buildConvexHull, loop, extrude as extrude$1, buildConvexMinkowskiSum } from './jsxcad-algorithm-shape.js';
 import { Y as Y$1, Z as Z$3 } from './jsxcad-api-v1-connector.js';
 import { getPaths, getZ0Surfaces, getSurfaces, getPlans, getAnySurfaces, outline as outline$1, getSolids, taggedLayers, measureBoundingBox } from './jsxcad-geometry-tagged.js';
@@ -7,7 +7,7 @@ import { toPlane as toPlane$1, transform, makeConvex, flip as flip$1 } from './j
 import { toXYPlaneTransforms } from './jsxcad-math-plane.js';
 import { intersectionOfPathsBySurfaces, outline as outline$2 } from './jsxcad-geometry-z0surface-boolean.js';
 import { transform as transform$2 } from './jsxcad-geometry-paths.js';
-import { isClosed, transform as transform$3, isCounterClockwise, flip, isOpen } from './jsxcad-geometry-path.js';
+import { isClosed, transform as transform$3, isCounterClockwise, flip, getEdges } from './jsxcad-geometry-path.js';
 import { section as section$1, cutOpen, fromSolid, containsPoint as containsPoint$1 } from './jsxcad-geometry-bsp.js';
 import { createNormalize3 } from './jsxcad-algorithm-quantize.js';
 import { toPlane as toPlane$2 } from './jsxcad-math-poly3.js';
@@ -611,16 +611,14 @@ const sweep = (toolpath, tool) => {
   const chains = [];
   for (const { paths } of getPaths(toolpath.toKeptGeometry())) {
     for (const path of paths) {
-      if (isOpen(path)) {
-        chains.push(
-          ChainedHull(...path.slice(1).map((point) => tool.move(...point)))
-        );
-      } else {
-        chains.push(ChainedHull(...path.map((point) => tool.move(...point))));
-      }
+      chains.push(
+        ...getEdges(path).map(([start, end]) =>
+          Hull(tool.move(...start), tool.move(...end))
+        )
+      );
     }
   }
-  return union(...chains);
+  return assemble(...chains);
 };
 
 const sweepMethod = function (tool) {

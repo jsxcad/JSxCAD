@@ -6,7 +6,7 @@ import { createNormalize3 } from './jsxcad-algorithm-quantize.js';
 import { transform as transform$4, canonicalize as canonicalize$5, difference as difference$1, eachPoint as eachPoint$3, flip as flip$3, intersection as intersection$1, union as union$2 } from './jsxcad-geometry-paths.js';
 import { transform as transform$5, canonicalize as canonicalize$4, toPolygon } from './jsxcad-math-plane.js';
 import { transform as transform$3, canonicalize as canonicalize$3, eachPoint as eachPoint$4, flip as flip$4, union as union$1 } from './jsxcad-geometry-points.js';
-import { transform as transform$1, canonicalize as canonicalize$2, eachPoint as eachPoint$1, flip as flip$2, makeConvex, measureArea as measureArea$1, measureBoundingBox as measureBoundingBox$2, makeWatertight as makeWatertight$2, toPlane } from './jsxcad-geometry-surface.js';
+import { transform as transform$1, canonicalize as canonicalize$2, makeWatertight as makeWatertight$2, eachPoint as eachPoint$1, flip as flip$2, makeConvex, measureArea as measureArea$1, measureBoundingBox as measureBoundingBox$2, toPlane } from './jsxcad-geometry-surface.js';
 import { section, fromSolid, unifyBspTrees, removeExteriorPolygonsForSection } from './jsxcad-geometry-bsp.js';
 import { difference as difference$2, intersection as intersection$2, union as union$3 } from './jsxcad-geometry-solid-boolean.js';
 import { min, max } from './jsxcad-math-vec3.js';
@@ -406,7 +406,7 @@ const differenceImpl = (geometry, ...geometries) => {
             )[0];
           }
         }
-        return taggedSurface({ tags }, thisSurface);
+        return taggedSurface({ tags }, makeWatertight$2(thisSurface));
       }
       case 'z0Surface': {
         const normalize = createNormalize3();
@@ -427,7 +427,7 @@ const differenceImpl = (geometry, ...geometries) => {
             )[0];
           }
         }
-        return taggedZ0Surface({ tags }, thisSurface);
+        return taggedZ0Surface({ tags }, makeWatertight$2(thisSurface));
       }
       case 'paths': {
         const todo = [];
@@ -991,7 +991,7 @@ const intersectionImpl = (geometry, ...geometries) => {
             )[0];
           }
         }
-        return taggedSurface({ tags }, thisSurface);
+        return taggedSurface({ tags }, makeWatertight$2(thisSurface));
       }
       case 'z0Surface': {
         const normalize = createNormalize3();
@@ -1012,7 +1012,7 @@ const intersectionImpl = (geometry, ...geometries) => {
             )[0];
           }
         }
-        return taggedZ0Surface({ tags }, thisSurface);
+        return taggedZ0Surface({ tags }, makeWatertight$2(thisSurface));
       }
       case 'paths': {
         // FIX: Handle intersection of paths and surfaces/solids.

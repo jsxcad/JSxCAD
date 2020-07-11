@@ -5,6 +5,7 @@ import { getAnySurfaces } from './getAnySurfaces.js';
 import { getPaths } from './getPaths.js';
 import { getSolids } from './getSolids.js';
 import { section as intersectionOfSurfaceWithSolid } from '@jsxcad/geometry-bsp';
+import { makeWatertight as makeWatertightSurface } from '@jsxcad/geometry-surface';
 import { intersection as pathsIntersection } from '@jsxcad/geometry-paths';
 import { rewrite } from './visit.js';
 import { intersection as solidIntersection } from '@jsxcad/geometry-solid-boolean';
@@ -52,7 +53,7 @@ const intersectionImpl = (geometry, ...geometries) => {
             )[0];
           }
         }
-        return taggedSurface({ tags }, thisSurface);
+        return taggedSurface({ tags }, makeWatertightSurface(thisSurface));
       }
       case 'z0Surface': {
         const normalize = createNormalize3();
@@ -73,7 +74,7 @@ const intersectionImpl = (geometry, ...geometries) => {
             )[0];
           }
         }
-        return taggedZ0Surface({ tags }, thisSurface);
+        return taggedZ0Surface({ tags }, makeWatertightSurface(thisSurface));
       }
       case 'paths': {
         // FIX: Handle intersection of paths and surfaces/solids.
