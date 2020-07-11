@@ -9,6 +9,7 @@ import { getAnySurfaces } from './getAnySurfaces.js';
 import { getPaths } from './getPaths.js';
 import { getSolids } from './getSolids.js';
 import { section as intersectionOfSurfaceWithSolid } from '@jsxcad/geometry-bsp';
+import { makeWatertight as makeWatertightSurface } from '@jsxcad/geometry-surface';
 import { difference as pathsDifference } from '@jsxcad/geometry-paths';
 import { rewrite } from './visit.js';
 import { difference as solidDifference } from '@jsxcad/geometry-solid-boolean';
@@ -53,7 +54,7 @@ const differenceImpl = (geometry, ...geometries) => {
             )[0];
           }
         }
-        return taggedSurface({ tags }, thisSurface);
+        return taggedSurface({ tags }, makeWatertightSurface(thisSurface));
       }
       case 'z0Surface': {
         const normalize = createNormalize3();
@@ -74,7 +75,7 @@ const differenceImpl = (geometry, ...geometries) => {
             )[0];
           }
         }
-        return taggedZ0Surface({ tags }, thisSurface);
+        return taggedZ0Surface({ tags }, makeWatertightSurface(thisSurface));
       }
       case 'paths': {
         const todo = [];

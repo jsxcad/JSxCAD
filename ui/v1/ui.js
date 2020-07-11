@@ -114,7 +114,6 @@ class Ui extends React.PureComponent {
       toast: [],
     };
 
-    // this.addWorkspace = this.addWorkspace.bind(this);
     this.createNode = this.createNode.bind(this);
     this.onChange = this.onChange.bind(this);
     this.onRelease = this.onRelease.bind(this);
@@ -211,20 +210,6 @@ class Ui extends React.PureComponent {
     await unwatchFileDeletion(deletionWatcher);
     await unwatchLog(logWatcher);
   }
-
-  /*
-  async addWorkspace() {
-    const workspace = document.getElementById('workspace/add/name').value;
-    if (workspace.length > 0) {
-      // FIX: Prevent this from overwriting existing filesystems.
-      setupFilesystem({ fileBase: workspace });
-      await write('source/script.jsxcad', defaultScript);
-      await write('ui/paneLayout', defaultPaneLayout);
-      await write('ui/paneViews', defaultPaneViews);
-      await this.selectWorkspace(workspace);
-    }
-  }
-*/
 
   updateUrl({ workspace, fileTitle } = {}) {
     if (workspace === undefined) {
@@ -671,7 +656,7 @@ class Ui extends React.PureComponent {
       const file = `source/${fileTitle}`;
       await ensureFile(file, fileTitle, { workspace });
       this.updateUrl({ fileTitle });
-      this.setState({ file });
+      this.setState({ file, fileTitle });
     };
 
     const openFileTitle = async (e) => {
@@ -680,7 +665,13 @@ class Ui extends React.PureComponent {
       }
     };
 
-    const fileChoices = views.filter((entry) => entry.file !== file);
+    const fileChoices = [
+      ...new Set(
+        views.filter(
+          (entry) => entry.view === 'editScript' && entry.file !== file
+        )
+      ),
+    ];
 
     return (
       <div
