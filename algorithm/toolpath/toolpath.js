@@ -1,11 +1,4 @@
-import {
-  add,
-  fromPoint as fromPointToVec3,
-  normalize,
-  rotateZ,
-  scale,
-  subtract,
-} from '@jsxcad/math-vec3';
+import { add, normalize, rotateZ, scale, subtract } from '@jsxcad/math-vec3';
 import { createOpenPath, getEdges, isClosed } from '@jsxcad/geometry-path';
 import {
   fromPoints as fromPointsToLine,
@@ -14,9 +7,10 @@ import {
 
 import { getNonVoidPaths } from '@jsxcad/geometry-tagged';
 
-const intersect = (a, b) => fromPointToVec3(intersectLines(a, b));
-
+const Z = 2;
 const RIGHT_ANGLE = Math.PI / -2;
+
+const intersect = (a, b, z) => [...intersectLines(a, b), z];
 
 const makeToolLine = (start, end, radius) => {
   const direction = normalize(subtract(end, start));
@@ -29,6 +23,7 @@ const makeToolLine = (start, end, radius) => {
   return [toolStart, toolEnd, toolLine];
 };
 
+// FIX: We assume a constant Z here.
 export const toolpathEdges = (
   path,
   radius = 1,
@@ -48,13 +43,17 @@ export const toolpathEdges = (
     if (overcut) {
       if (lastToolLine) {
         // Move (back) to the intersection point from the overcut.
-        toolpath.push(intersect(thisToolLine, lastToolLine));
+        toolpath.push(intersect(thisToolLine, lastToolLine, start[Z]));
       }
       toolpath.push(toolStart, toolEnd);
     } else {
       if (lastToolLine) {
         // Replace the previous point with the intersection.
-        toolpath[toolpath.length - 1] = intersect(thisToolLine, lastToolLine);
+        toolpath[toolpath.length - 1] = intersect(
+          thisToolLine,
+          lastToolLine,
+          start[Z]
+        );
         toolpath.push(toolEnd);
       } else {
         toolpath.push(toolStart, toolEnd);
@@ -67,7 +66,7 @@ export const toolpathEdges = (
     // Rewrite the start and end to meet at their intersection.
     const [start, end] = edges[0];
     const [, , thisToolLine] = makeToolLine(start, end, radius);
-    const intersection = intersect(thisToolLine, lastToolLine);
+    const intersection = intersect(thisToolLine, lastToolLine, start[Z]);
     toolpath[0] = intersection;
     toolpath[toolpath.length - 1] = intersection;
   }

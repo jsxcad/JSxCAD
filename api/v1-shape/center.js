@@ -20,9 +20,21 @@ const X = 0;
 const Y = 1;
 const Z = 2;
 
-export const center = (shape) => {
+export const center = (
+  shape,
+  { centerX = true, centerY = true, centerZ = true } = {}
+) => {
   const [minPoint, maxPoint] = measureBoundingBox(shape);
-  let center = scale(0.5, add(minPoint, maxPoint));
+  const center = scale(0.5, add(minPoint, maxPoint));
+  if (!centerX) {
+    center[X] = 0;
+  }
+  if (!centerY) {
+    center[Y] = 0;
+  }
+  if (!centerZ) {
+    center[Z] = 0;
+  }
   // FIX: Find a more principled way to handle centering empty shapes.
   if (isNaN(center[X]) || isNaN(center[Y]) || isNaN(center[Z])) {
     return shape;
@@ -37,6 +49,3 @@ const centerMethod = function (...params) {
 Shape.prototype.center = centerMethod;
 
 export default center;
-
-center.signature = 'center(shape:Shape) -> Shape';
-centerMethod.signature = 'Shape -> center() -> Shape';
