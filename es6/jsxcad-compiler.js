@@ -6475,7 +6475,17 @@ const strip = (ast) => {
   }
 };
 
-const toEcmascript = async (script, options = {}) => {
+/**
+ * Convert a module to executable ecmascript function.
+ * The conversion includes caching constant variables for reuse, and tree pruning.
+ *
+ * @param {string} script
+ * @param {object} options
+ * @param {string} options.path - The path to the script for producing relative paths.
+ * @param {function(path:string} options.import - A method for resolving imports.
+ */
+
+const toEcmascript = async (script, { path } = {}) => {
   const parseOptions = {
     allowAwaitOutsideFunction: true,
     allowReturnOutsideFunction: true,

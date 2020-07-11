@@ -1,10 +1,10 @@
+import { add, equals } from '@jsxcad/math-vec3';
 import {
   getNonVoidPaths,
   toKeptGeometry,
   translate,
 } from '@jsxcad/geometry-tagged';
 
-import { equals } from '@jsxcad/math-vec3';
 import { getEdges } from '@jsxcad/geometry-path';
 
 const X = 0;
@@ -19,7 +19,8 @@ const Z = 2;
 export const toGcode = async (
   geometry,
   {
-    toolLevel = 0,
+    origin = [0, 0, 0],
+    rpm = 0,
     topZ = 0,
     minCutZ = -1,
     cutDepth = 0.1,
@@ -56,8 +57,7 @@ export const toGcode = async (
     to(x, y, z, 'G1');
   };
 
-  const toolOn = () =>
-    toolLevel > 0 ? emit(`M3 S${toolLevel.toFixed(5)}`) : emit(`M5`);
+  const toolOn = () => (rpm > 0 ? emit(`M3 S${rpm.toFixed(5)}`) : emit(`M5`));
   const toolOff = () => emit('M5');
 
   const jump = (x, y) => {
@@ -72,11 +72,14 @@ export const toGcode = async (
     rapid(0, 0, topZ); // home
   };
 
+  const useMetric = () => emit('G21');
+
+  useMetric();
   toolOn();
 
   // FIX: This is incorrect -- it should move the geometry down so that the top of the geometry is at the initial cutDepth.
   const keptGeometry = toKeptGeometry(
-    translate([0, 0, -cutDepth], await geometry)
+    translate(add(origin, [0, 0, -cutDepth]), await geometry)
   );
   for (const { paths } of getNonVoidPaths(keptGeometry)) {
     for (const path of paths) {

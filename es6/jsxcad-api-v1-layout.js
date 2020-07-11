@@ -44,7 +44,11 @@ const pack = (
   }
   let packedShape = Shape.fromGeometry(taggedLayers({}, ...packedLayers));
   if (size === undefined) {
-    packedShape = packedShape.center();
+    packedShape = packedShape.center({
+      centerX: true,
+      centerY: true,
+      centerZ: false,
+    });
   }
   return packedShape;
 };

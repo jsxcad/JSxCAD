@@ -8,6 +8,7 @@
  */
 
 import '@jsxcad/api-v1-deform';
+import '@jsxcad/api-v1-gcode';
 import '@jsxcad/api-v1-layout';
 import '@jsxcad/api-v1-pdf';
 import '@jsxcad/api-v1-plans';
