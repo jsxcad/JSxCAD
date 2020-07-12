@@ -1,4 +1,3 @@
-import { Shape, assemble } from '@jsxcad/api-v1-shape';
 import {
   alignVertices,
   transform as transformSolid,
@@ -9,6 +8,8 @@ import {
   transform as transformSurface,
 } from '@jsxcad/geometry-surface';
 
+import { Assembly } from '@jsxcad/api-v1-shapes';
+import { Shape } from '@jsxcad/api-v1-shape';
 import { extrude as extrudeAlgorithm } from '@jsxcad/algorithm-shape';
 import { toXYPlaneTransforms } from '@jsxcad/math-plane';
 
@@ -88,7 +89,7 @@ export const extrude = (shape, height = 1, depth = 0) => {
   for (const entry of getPlans(keptGeometry)) {
     solids.push(entry);
   }
-  return assemble(...solids);
+  return Assembly(...solids);
 };
 
 const extrudeMethod = function (...args) {

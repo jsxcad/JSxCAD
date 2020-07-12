@@ -1,7 +1,7 @@
 import { Polygon, Circle, Path } from './jsxcad-api-v1-shapes.js';
 import { Hershey } from './jsxcad-api-v1-font.js';
 import Plan from './jsxcad-api-v1-plan.js';
-import { Shape, assemble } from './jsxcad-api-v1-shape.js';
+import Shape from './jsxcad-api-v1-shape.js';
 
 const dp2 = (number) => Math.round(number * 100) / 100;
 
@@ -39,7 +39,7 @@ const Label = (label, mark = [0, 0, 0]) =>
 Plan.Label = Label;
 
 const withLabelMethod = function (...args) {
-  return assemble(this, Plan.Label(...args));
+  return this.with(Plan.Label(...args));
 };
 Shape.prototype.withLabel = withLabelMethod;
 

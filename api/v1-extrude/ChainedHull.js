@@ -1,8 +1,10 @@
-import { Shape, assemble } from '@jsxcad/api-v1-shape';
 import {
   buildConvexHull,
   buildConvexSurfaceHull,
 } from '@jsxcad/algorithm-shape';
+
+import { Assembly } from '@jsxcad/api-v1-shapes';
+import { Shape } from '@jsxcad/api-v1-shape';
 
 /**
  *
@@ -41,7 +43,7 @@ export const ChainedHull = (...shapes) => {
       chain.push(Shape.fromGeometry(buildConvexHull(points)));
     }
   }
-  return assemble(...chain);
+  return Assembly(...chain);
 };
 
 const ChainedHullMethod = function (...args) {

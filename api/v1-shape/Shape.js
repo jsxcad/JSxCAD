@@ -20,8 +20,6 @@ import {
   transform,
 } from '@jsxcad/geometry-tagged';
 
-import { addReadDecoder } from '@jsxcad/sys';
-
 import { fromPolygons as fromPolygonsToSolid } from '@jsxcad/geometry-solid';
 
 export class Shape {
@@ -158,10 +156,5 @@ export const fromGeometry = Shape.fromGeometry;
 export const toGeometry = (shape) => shape.toGeometry();
 export const toDisjointGeometry = (shape) => shape.toDisjointGeometry();
 export const toKeptGeometry = (shape) => shape.toDisjointGeometry();
-
-addReadDecoder(
-  (data) => data && data.geometry !== undefined,
-  (data) => Shape.fromGeometry(data.geometry)
-);
 
 export default Shape;

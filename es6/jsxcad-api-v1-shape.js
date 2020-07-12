@@ -1,14 +1,14 @@
 import { close, concatenate, open } from './jsxcad-geometry-path.js';
-import { taggedAssembly, eachPoint, flip, toDisjointGeometry as toDisjointGeometry$1, toPoints, transform, reconcile, isWatertight, makeWatertight, fromPathToSurface, fromPathToZ0Surface, fromPathsToSurface, fromPathsToZ0Surface, rewriteTags, union as union$1, intersection as intersection$1, difference as difference$1, assemble as assemble$1, getSolids, rewrite, measureBoundingBox as measureBoundingBox$1, taggedLayers, isVoid, taggedSketch, getPaths, allTags, getAnyNonVoidSurfaces, taggedSolid, getNonVoidSolids, getNonVoidSurfaces, getNonVoidZ0Surfaces, canonicalize as canonicalize$1, measureArea } from './jsxcad-geometry-tagged.js';
-import { addReadDecoder, log as log$1, readFile, addPending, writeFile, emit } from './jsxcad-sys.js';
+import { taggedAssembly, eachPoint, flip, toDisjointGeometry as toDisjointGeometry$1, toPoints, transform, reconcile, isWatertight, makeWatertight, fromPathToSurface, fromPathToZ0Surface, fromPathsToSurface, fromPathsToZ0Surface, union as union$1, rewriteTags, assemble as assemble$1, canonicalize as canonicalize$1, measureBoundingBox as measureBoundingBox$1, intersection as intersection$1, allTags, difference as difference$1, getSolids, rewrite, taggedLayers, isVoid, measureArea, taggedSketch, getPaths, getAnyNonVoidSurfaces, taggedSolid, getNonVoidSolids, getNonVoidSurfaces, getNonVoidZ0Surfaces } from './jsxcad-geometry-tagged.js';
 import { fromPolygons, findOpenEdges, fromSurface } from './jsxcad-geometry-solid.js';
+import { scale as scale$1, add, negate, normalize, subtract, dot, cross, distance } from './jsxcad-math-vec3.js';
+import { toTagFromName } from './jsxcad-algorithm-color.js';
 import { outline } from './jsxcad-geometry-surface.js';
 import { createNormalize3 } from './jsxcad-algorithm-quantize.js';
 import { junctionSelector } from './jsxcad-geometry-halfedge.js';
-import { scale as scale$1, add, negate, normalize, subtract, dot, cross, distance } from './jsxcad-math-vec3.js';
-import { segment } from './jsxcad-geometry-paths.js';
-import { toTagFromName } from './jsxcad-algorithm-color.js';
+import { emit, addPending, writeFile, read, write, log as log$1 } from './jsxcad-sys.js';
 import { fromTranslation, fromRotation, fromXRotation, fromYRotation, fromZRotation, fromScaling } from './jsxcad-math-mat4.js';
+import { segment } from './jsxcad-geometry-paths.js';
 
 class Shape {
   close() {
@@ -145,56 +145,6 @@ const toGeometry = (shape) => shape.toGeometry();
 const toDisjointGeometry = (shape) => shape.toDisjointGeometry();
 const toKeptGeometry = (shape) => shape.toDisjointGeometry();
 
-addReadDecoder(
-  (data) => data && data.geometry !== undefined,
-  (data) => Shape.fromGeometry(data.geometry)
-);
-
-/**
- *
- * # As
- *
- * Produces a version of a shape with user defined tags.
- *
- * ::: illustration
- * ```
- * Circle(10).as('A')
- * ```
- * :::
- *
- **/
-
-const as = (shape, tags) =>
-  Shape.fromGeometry(
-    rewriteTags(
-      tags.map((tag) => `user/${tag}`),
-      [],
-      shape.toGeometry()
-    )
-  );
-
-const notAs = (shape, tags) =>
-  Shape.fromGeometry(
-    rewriteTags(
-      [],
-      tags.map((tag) => `user/${tag}`),
-      shape.toGeometry()
-    )
-  );
-
-const asMethod = function (...tags) {
-  return as(this, tags);
-};
-const notAsMethod = function (...tags) {
-  return notAs(this, tags);
-};
-
-Shape.prototype.as = asMethod;
-Shape.prototype.notAs = notAsMethod;
-
-asMethod.signature = 'Shape -> as(...tags:string) -> Shape';
-notAsMethod.signature = 'Shape -> as(...tags:string) -> Shape';
-
 /**
  *
  * # Union
@@ -302,6 +252,202 @@ addToMethod.signature = 'Shape -> (...Shapes) -> Shape';
 
 /**
  *
+ * # As
+ *
+ * Produces a version of a shape with user defined tags.
+ *
+ * ::: illustration
+ * ```
+ * Circle(10).as('A')
+ * ```
+ * :::
+ *
+ **/
+
+const as = (shape, tags) =>
+  Shape.fromGeometry(
+    rewriteTags(
+      tags.map((tag) => `user/${tag}`),
+      [],
+      shape.toGeometry()
+    )
+  );
+
+const notAs = (shape, tags) =>
+  Shape.fromGeometry(
+    rewriteTags(
+      [],
+      tags.map((tag) => `user/${tag}`),
+      shape.toGeometry()
+    )
+  );
+
+const asMethod = function (...tags) {
+  return as(this, tags);
+};
+const notAsMethod = function (...tags) {
+  return notAs(this, tags);
+};
+
+Shape.prototype.as = asMethod;
+Shape.prototype.notAs = notAsMethod;
+
+asMethod.signature = 'Shape -> as(...tags:string) -> Shape';
+notAsMethod.signature = 'Shape -> as(...tags:string) -> Shape';
+
+/**
+ *
+ * # Assemble
+ *
+ * Produces an assembly of shapes that can be manipulated as a single shape.
+ * assemble(a, b) is equivalent to a.with(b).
+ *
+ * ::: illustration { "view": { "position": [80, 80, 80] } }
+ * ```
+ * assemble(Circle(20).moveZ(-12),
+ *          Square(40).moveZ(16).outline(),
+ *          Cylinder(10, 20));
+ * ```
+ * :::
+ *
+ * Components of the assembly can be extracted by tag filtering.
+ *
+ * Components later in the assembly project holes into components earlier in the
+ * assembly so that the geometries are disjoint.
+ *
+ * ::: illustration { "view": { "position": [100, 100, 100] } }
+ * ```
+ * assemble(Cube(30).above().as('cube'),
+ *          Cylinder(10, 40).above().as('cylinder'))
+ * ```
+ * :::
+ * ::: illustration { "view": { "position": [100, 100, 100] } }
+ * ```
+ * assemble(Cube(30).above().as('cube'),
+ *          Cylinder(10, 40).above().as('cylinder'))
+ *   .keep('cube')
+ * ```
+ * :::
+ * ::: illustration { "view": { "position": [100, 100, 100] } }
+ * ```
+ * assemble(Cube(30).above().as('cube'),
+ *          assemble(Circle(40),
+ *                   Circle(50).outline()).as('circles'))
+ *   .keep('circles')
+ * ```
+ * :::
+ * ::: illustration { "view": { "position": [100, 100, 100] } }
+ * ```
+ * assemble(Cube(30).above().as('cube'),
+ *          assemble(Circle(40).as('circle'),
+ *                   Circle(50).outline().as('outline')))
+ *   .drop('outline')
+ * ```
+ * :::
+ *
+ **/
+
+const assemble = (...shapes) => {
+  shapes = shapes.filter((shape) => shape !== undefined);
+  switch (shapes.length) {
+    case 0: {
+      return Shape.fromGeometry(taggedAssembly({}));
+    }
+    case 1: {
+      return shapes[0];
+    }
+    default: {
+      return fromGeometry(assemble$1(...shapes.map(toGeometry)));
+    }
+  }
+};
+
+const canonicalize = (shape) =>
+  Shape.fromGeometry(canonicalize$1(shape.toGeometry()));
+
+const canonicalizeMethod = function () {
+  return canonicalize(this);
+};
+Shape.prototype.canonicalize = canonicalizeMethod;
+
+/**
+ *
+ * # Measure Bounding Box
+ *
+ * Provides the corners of the smallest orthogonal box containing the shape.
+ *
+ * ::: illustration { "view": { "position": [40, 40, 40] } }
+ * ```
+ * Sphere(7)
+ * ```
+ * :::
+ * ::: illustration { "view": { "position": [40, 40, 40] } }
+ * ```
+ * const [corner1, corner2] = Sphere(7).measureBoundingBox();
+ * Cube.fromCorners(corner1, corner2)
+ * ```
+ * :::
+ **/
+
+const measureBoundingBox = (shape) =>
+  measureBoundingBox$1(shape.toGeometry());
+
+const measureBoundingBoxMethod = function () {
+  return measureBoundingBox(this);
+};
+Shape.prototype.measureBoundingBox = measureBoundingBoxMethod;
+
+measureBoundingBox.signature = 'measureBoundingBox(shape:Shape) -> BoundingBox';
+measureBoundingBoxMethod.signature =
+  'Shape -> measureBoundingBox() -> BoundingBox';
+
+/**
+ *
+ * # Center
+ *
+ * Moves the shape so that its bounding box is centered on the origin.
+ *
+ * ::: illustration { "view": { "position": [60, -60, 60], "target": [0, 0, 0] } }
+ * ```
+ * Circle(20).with(Cube(10).center())
+ * ```
+ * :::
+ **/
+
+const X = 0;
+const Y = 1;
+const Z = 2;
+
+const center = (
+  shape,
+  { centerX = true, centerY = true, centerZ = true } = {}
+) => {
+  const [minPoint, maxPoint] = measureBoundingBox(shape);
+  const center = scale$1(0.5, add(minPoint, maxPoint));
+  if (!centerX) {
+    center[X] = 0;
+  }
+  if (!centerY) {
+    center[Y] = 0;
+  }
+  if (!centerZ) {
+    center[Z] = 0;
+  }
+  // FIX: Find a more principled way to handle centering empty shapes.
+  if (isNaN(center[X]) || isNaN(center[Y]) || isNaN(center[Z])) {
+    return shape;
+  }
+  const moved = shape.move(...negate(center));
+  return moved;
+};
+
+const centerMethod = function (...params) {
+  return center(this, ...params);
+};
+Shape.prototype.center = centerMethod;
+
+/**
+ *
  * # Intersection
  *
  * Intersection produces a version of the first shape retaining only the parts included in the remaining shapes.
@@ -380,6 +526,54 @@ clipFromMethod.signature = 'Shape -> clipFrom(...to:Shape) -> Shape';
 
 /**
  *
+ * # Color
+ *
+ * Produces a version of a shape the given color.
+ * FIX: Support color in convert/threejs/toSvg.
+ *
+ * ::: illustration
+ * ```
+ * Circle(10).color('blue')
+ * ```
+ * :::
+ * ::: illustration
+ * ```
+ * Triangle(10).color('chartreuse')
+ * ```
+ * :::
+ *
+ **/
+
+const fromName = (shape, name) =>
+  Shape.fromGeometry(
+    rewriteTags([toTagFromName(name)], [], shape.toGeometry())
+  );
+
+const color = (...args) => fromName(...args);
+
+const colorMethod = function (...args) {
+  return color(this, ...args);
+};
+Shape.prototype.color = colorMethod;
+
+color.signature = 'color(shape:Shape, color:string) -> Shape';
+colorMethod.signature = 'Shape -> color(color:string) -> Shape';
+
+const colors = (shape) =>
+  [...allTags(shape.toGeometry())]
+    .filter((tag) => tag.startsWith('color/'))
+    .map((tag) => tag.substring(6));
+
+const colorsMethod = function () {
+  return colors(this);
+};
+Shape.prototype.colors = colorsMethod;
+
+colors.signature = 'colors(shape:Shape) -> strings';
+colorsMethod.signature = 'Shape -> colors() -> strings';
+
+/**
+ *
  * # Difference
  *
  * Difference produces a version of the first shape with the remaining shapes removed, where applicable.
@@ -454,73 +648,6 @@ Shape.prototype.cutFrom = cutFromMethod;
 
 cutFromMethod.signature = 'Shape -> cutFrom(...shapes:Shape) -> Shape';
 
-/**
- *
- * # Assemble
- *
- * Produces an assembly of shapes that can be manipulated as a single shape.
- * assemble(a, b) is equivalent to a.with(b).
- *
- * ::: illustration { "view": { "position": [80, 80, 80] } }
- * ```
- * assemble(Circle(20).moveZ(-12),
- *          Square(40).moveZ(16).outline(),
- *          Cylinder(10, 20));
- * ```
- * :::
- *
- * Components of the assembly can be extracted by tag filtering.
- *
- * Components later in the assembly project holes into components earlier in the
- * assembly so that the geometries are disjoint.
- *
- * ::: illustration { "view": { "position": [100, 100, 100] } }
- * ```
- * assemble(Cube(30).above().as('cube'),
- *          Cylinder(10, 40).above().as('cylinder'))
- * ```
- * :::
- * ::: illustration { "view": { "position": [100, 100, 100] } }
- * ```
- * assemble(Cube(30).above().as('cube'),
- *          Cylinder(10, 40).above().as('cylinder'))
- *   .keep('cube')
- * ```
- * :::
- * ::: illustration { "view": { "position": [100, 100, 100] } }
- * ```
- * assemble(Cube(30).above().as('cube'),
- *          assemble(Circle(40),
- *                   Circle(50).outline()).as('circles'))
- *   .keep('circles')
- * ```
- * :::
- * ::: illustration { "view": { "position": [100, 100, 100] } }
- * ```
- * assemble(Cube(30).above().as('cube'),
- *          assemble(Circle(40).as('circle'),
- *                   Circle(50).outline().as('outline')))
- *   .drop('outline')
- * ```
- * :::
- *
- **/
-
-const assemble = (...shapes) => {
-  shapes = shapes.filter((shape) => shape !== undefined);
-  switch (shapes.length) {
-    case 0: {
-      return Shape.fromGeometry(taggedAssembly({}));
-    }
-    case 1: {
-      return shapes[0];
-    }
-    default: {
-      return fromGeometry(assemble$1(...shapes.map(toGeometry)));
-    }
-  }
-};
-
 const faces = (shape, op = (x) => x) => {
   const faces = [];
   for (const { solid } of getSolids(shape.toKeptGeometry())) {
@@ -594,292 +721,6 @@ const nonJunctionsMethod = function () {
   return nonJunctions(this);
 };
 Shape.prototype.nonJunctions = nonJunctionsMethod;
-
-/**
- *
- * # Measure Bounding Box
- *
- * Provides the corners of the smallest orthogonal box containing the shape.
- *
- * ::: illustration { "view": { "position": [40, 40, 40] } }
- * ```
- * Sphere(7)
- * ```
- * :::
- * ::: illustration { "view": { "position": [40, 40, 40] } }
- * ```
- * const [corner1, corner2] = Sphere(7).measureBoundingBox();
- * Cube.fromCorners(corner1, corner2)
- * ```
- * :::
- **/
-
-const measureBoundingBox = (shape) =>
-  measureBoundingBox$1(shape.toGeometry());
-
-const measureBoundingBoxMethod = function () {
-  return measureBoundingBox(this);
-};
-Shape.prototype.measureBoundingBox = measureBoundingBoxMethod;
-
-measureBoundingBox.signature = 'measureBoundingBox(shape:Shape) -> BoundingBox';
-measureBoundingBoxMethod.signature =
-  'Shape -> measureBoundingBox() -> BoundingBox';
-
-/**
- *
- * # Measure Center
- *
- * Provides the center of the smallest orthogonal box containing the shape.
- *
- * ::: illustration { "view": { "position": [40, 40, 40] } }
- * ```
- * Sphere(7)
- * ```
- * :::
- **/
-
-const measureCenter = (shape) => {
-  // FIX: Produce a clearer definition of center.
-  const geometry = shape.toKeptGeometry();
-  if (geometry.plan && geometry.plan.connector) {
-    // Return the center of the connector.
-    return geometry.marks[0];
-  }
-  const [high, low] = measureBoundingBox(shape);
-  return scale$1(0.5, add(high, low));
-};
-
-const measureCenterMethod = function () {
-  return measureCenter(this);
-};
-Shape.prototype.measureCenter = measureCenterMethod;
-
-measureCenter.signature = 'measureCenter(shape:Shape) -> vector';
-measureCenterMethod.signature = 'Shape -> measureCenter() -> vector';
-
-const noPlan = (shape, tags, select) => {
-  const op = (geometry, descend) => {
-    if (geometry.plan) {
-      return taggedLayers({});
-    } else {
-      return descend();
-    }
-  };
-
-  const rewritten = rewrite(shape.toKeptGeometry(), op);
-  return Shape.fromGeometry(rewritten);
-};
-
-const noPlanMethod = function (...tags) {
-  return noPlan(this);
-};
-Shape.prototype.noPlan = noPlanMethod;
-
-const noVoid = (shape, tags, select) => {
-  const op = (geometry, descend) => {
-    if (isVoid(geometry)) {
-      return taggedLayers({});
-    } else {
-      return descend();
-    }
-  };
-
-  const rewritten = rewrite(shape.toKeptGeometry(), op);
-  return Shape.fromGeometry(rewritten);
-};
-
-const noVoidMethod = function (...tags) {
-  return noVoid(this);
-};
-Shape.prototype.noVoid = noVoidMethod;
-
-const opMethod = function (op, ...args) {
-  return op(this, ...args);
-};
-const withOpMethod = function (op, ...args) {
-  return assemble(this, op(this, ...args));
-};
-
-Shape.prototype.op = opMethod;
-Shape.prototype.withOp = withOpMethod;
-
-const openEdges = (shape, { isOpen = true } = {}) => {
-  const r = (v) => v;
-  const paths = [];
-  for (const { solid } of getSolids(shape.toKeptGeometry())) {
-    paths.push(...findOpenEdges(solid, isOpen));
-  }
-  return Shape.fromGeometry({
-    type: 'paths',
-    paths: paths.map((path) => path.map(([x, y, z]) => [r(x), r(y), r(z)])),
-  });
-};
-
-const openEdgesMethod = function (...args) {
-  return openEdges(this, ...args);
-};
-Shape.prototype.openEdges = openEdgesMethod;
-
-const withOpenEdgesMethod = function (...args) {
-  return assemble(this, openEdges(this, ...args));
-};
-Shape.prototype.withOpenEdges = withOpenEdgesMethod;
-
-const solids = (shape, xform = (_) => _) => {
-  const solids = [];
-  for (const solid of getSolids(shape.toKeptGeometry())) {
-    solids.push(xform(Shape.fromGeometry(solid)));
-  }
-  return solids;
-};
-
-const solidsMethod = function (...args) {
-  return solids(this, ...args);
-};
-Shape.prototype.solids = solidsMethod;
-
-const sketch = (shape) =>
-  Shape.fromGeometry(taggedSketch({}, shape.toGeometry()));
-
-Shape.prototype.sketch = function () {
-  return sketch(this);
-};
-
-Shape.prototype.withSketch = function () {
-  return assemble(this, sketch(this));
-};
-
-const trace = (shape, length = 1) => {
-  const tracePaths = [];
-  for (const { paths } of getPaths(shape.toKeptGeometry())) {
-    for (let start = 0; ; start += length) {
-      const segments = segment(paths, start, start + length);
-      if (segments.length === 0) {
-        break;
-      }
-      tracePaths.push(...segments);
-    }
-  }
-  return Shape.fromGeometry({
-    type: 'paths',
-    paths: tracePaths,
-    tags: ['display/trace'],
-  });
-};
-
-const traceMethod = function (length = 1) {
-  return trace(this, length);
-};
-Shape.prototype.trace = traceMethod;
-
-const tags = (shape) =>
-  [...allTags(shape.toGeometry())]
-    .filter((tag) => tag.startsWith('user/'))
-    .map((tag) => tag.substring(5));
-
-const method = function () {
-  return tags(this);
-};
-
-Shape.prototype.tags = method;
-
-// FIX: Debugging only -- remove this method.
-const wall = (shape) => {
-  const normalize = createNormalize3();
-  const solids = [];
-  for (const { surface, z0Surface, tags } of getAnyNonVoidSurfaces(
-    shape.toDisjointGeometry()
-  )) {
-    solids.push(
-      taggedSolid({ tags }, fromSurface(surface || z0Surface, normalize))
-    );
-  }
-  return Shape.fromGeometry(taggedAssembly({}, ...solids));
-};
-
-const wallMethod = function () {
-  return wall(this);
-};
-Shape.prototype.wall = wallMethod;
-
-const toWireframeFromSolid = (solid) => {
-  const paths = [];
-  for (const surface of solid) {
-    paths.push(...surface);
-  }
-  return Shape.fromPaths(paths);
-};
-
-const toWireframeFromSurface = (surface) => {
-  return Shape.fromPaths(surface);
-};
-
-const wireframe = (options = {}, shape) => {
-  const pieces = [];
-  for (const { solid } of getNonVoidSolids(shape.toKeptGeometry())) {
-    pieces.push(toWireframeFromSolid(solid));
-  }
-  for (const { surface } of getNonVoidSurfaces(shape.toKeptGeometry())) {
-    pieces.push(toWireframeFromSurface(surface));
-  }
-  for (const { z0Surface } of getNonVoidZ0Surfaces(shape.toKeptGeometry())) {
-    pieces.push(toWireframeFromSurface(z0Surface));
-  }
-  return assemble(...pieces);
-};
-
-const method$1 = function (options) {
-  return wireframe(options, this);
-};
-
-Shape.prototype.wireframe = method$1;
-Shape.prototype.withWireframe = function (options) {
-  return assemble(this, wireframe(options, this));
-};
-
-const wireframeFaces = (shape, op = (x) => x) => {
-  const faces = [];
-  for (const { solid } of getSolids(shape.toKeptGeometry())) {
-    for (const surface of solid) {
-      for (const path of surface) {
-        faces.push(
-          op(Shape.fromGeometry({ type: 'paths', paths: [path] }), faces.length)
-        );
-      }
-    }
-  }
-  return assemble(...faces);
-};
-
-const wireframeFacesMethod = function (...args) {
-  return wireframeFaces(this, ...args);
-};
-Shape.prototype.wireframeFaces = wireframeFacesMethod;
-
-/**
- *
- * # With
- *
- * Assembles the current shape with those provided.
- *
- * The below example is equivalent to
- * ```
- * assemble(Circle(20), Square(40).moveX(10))
- * ```
- *
- * ::: illustration { "view": { "position": [80, 80, 80] } }
- * ```
- * Circle(20).with(Square(40).moveX(10))
- * ```
- * :::
- *
- **/
-
-const withMethod = function (...shapes) {
-  return assemble(this, ...shapes);
-};
-Shape.prototype.with = withMethod;
 
 /**
  *
@@ -991,107 +832,6 @@ const dropMethod = function (...tags) {
 };
 Shape.prototype.drop = dropMethod;
 
-const canonicalize = (shape) =>
-  Shape.fromGeometry(canonicalize$1(shape.toGeometry()));
-
-const canonicalizeMethod = function () {
-  return canonicalize(this);
-};
-Shape.prototype.canonicalize = canonicalizeMethod;
-
-/**
- *
- * # Center
- *
- * Moves the shape so that its bounding box is centered on the origin.
- *
- * ::: illustration { "view": { "position": [60, -60, 60], "target": [0, 0, 0] } }
- * ```
- * Circle(20).with(Cube(10).center())
- * ```
- * :::
- **/
-
-const X = 0;
-const Y = 1;
-const Z = 2;
-
-const center = (
-  shape,
-  { centerX = true, centerY = true, centerZ = true } = {}
-) => {
-  const [minPoint, maxPoint] = measureBoundingBox(shape);
-  const center = scale$1(0.5, add(minPoint, maxPoint));
-  if (!centerX) {
-    center[X] = 0;
-  }
-  if (!centerY) {
-    center[Y] = 0;
-  }
-  if (!centerZ) {
-    center[Z] = 0;
-  }
-  // FIX: Find a more principled way to handle centering empty shapes.
-  if (isNaN(center[X]) || isNaN(center[Y]) || isNaN(center[Z])) {
-    return shape;
-  }
-  const moved = shape.move(...negate(center));
-  return moved;
-};
-
-const centerMethod = function (...params) {
-  return center(this, ...params);
-};
-Shape.prototype.center = centerMethod;
-
-/**
- *
- * # Color
- *
- * Produces a version of a shape the given color.
- * FIX: Support color in convert/threejs/toSvg.
- *
- * ::: illustration
- * ```
- * Circle(10).color('blue')
- * ```
- * :::
- * ::: illustration
- * ```
- * Triangle(10).color('chartreuse')
- * ```
- * :::
- *
- **/
-
-const fromName = (shape, name) =>
-  Shape.fromGeometry(
-    rewriteTags([toTagFromName(name)], [], shape.toGeometry())
-  );
-
-const color = (...args) => fromName(...args);
-
-const colorMethod = function (...args) {
-  return color(this, ...args);
-};
-Shape.prototype.color = colorMethod;
-
-color.signature = 'color(shape:Shape, color:string) -> Shape';
-colorMethod.signature = 'Shape -> color(color:string) -> Shape';
-
-const colors = (shape) =>
-  [...allTags(shape.toGeometry())]
-    .filter((tag) => tag.startsWith('color/'))
-    .map((tag) => tag.substring(6));
-
-const colorsMethod = function () {
-  return colors(this);
-};
-Shape.prototype.colors = colorsMethod;
-
-colors.signature = 'colors(shape:Shape) -> strings';
-colorsMethod.signature = 'Shape -> colors() -> strings';
-
 /**
  *
  * # Kept
@@ -1120,44 +860,6 @@ const layerMethod = function (...shapes) {
 };
 Shape.prototype.layer = layerMethod;
 Shape.prototype.and = layerMethod;
-
-/**
- *
- * # Log
- *
- * Writes a string to the console.
- *
- * ```
- * log("Hello, World")
- * ```
- *
- **/
-
-const log = (text, level) =>
-  log$1({ op: 'text', text: String(text), level });
-
-const logOp = (shape, op) =>
-  log$1({ op: 'text', text: String(op(shape)) });
-
-const logMethod = function (
-  op = (shape) => JSON.stringify(shape.toKeptGeometry())
-) {
-  logOp(this, op);
-  return this;
-};
-Shape.prototype.log = logMethod;
-
-log.signature = 'log(op:function)';
-
-const readShape = async (path, { src } = {}) => {
-  let data = await readFile({ doSerialize: false }, `source/${path}`);
-  if (data === undefined && src) {
-    data = await readFile({ sources: [src] }, `cache/${path}`);
-  }
-  return Shape.fromGeometry(await JSON.parse(data));
-};
-
-const make = (path, builder) => readShape(path, builder);
 
 /**
  *
@@ -1191,6 +893,38 @@ Shape.prototype.material = materialMethod;
 
 material.signature = 'material(shape:Shape) -> Shape';
 materialMethod.signature = 'Shape -> material() -> Shape';
+
+/**
+ *
+ * # Measure Center
+ *
+ * Provides the center of the smallest orthogonal box containing the shape.
+ *
+ * ::: illustration { "view": { "position": [40, 40, 40] } }
+ * ```
+ * Sphere(7)
+ * ```
+ * :::
+ **/
+
+const measureCenter = (shape) => {
+  // FIX: Produce a clearer definition of center.
+  const geometry = shape.toKeptGeometry();
+  if (geometry.plan && geometry.plan.connector) {
+    // Return the center of the connector.
+    return geometry.marks[0];
+  }
+  const [high, low] = measureBoundingBox(shape);
+  return scale$1(0.5, add(high, low));
+};
+
+const measureCenterMethod = function () {
+  return measureCenter(this);
+};
+Shape.prototype.measureCenter = measureCenterMethod;
+
+measureCenter.signature = 'measureCenter(shape:Shape) -> vector';
+measureCenterMethod.signature = 'Shape -> measureCenter() -> vector';
 
 /**
  *
@@ -1231,10 +965,10 @@ materialMethod.signature = 'Shape -> material() -> Shape';
 const translate = (shape, x = 0, y = 0, z = 0) =>
   shape.transform(fromTranslation([x, y, z]));
 
-const method$2 = function (...args) {
+const method = function (...args) {
   return translate(this, ...args);
 };
-Shape.prototype.translate = method$2;
+Shape.prototype.translate = method;
 
 /**
  *
@@ -1309,6 +1043,74 @@ Shape.prototype.moveZ = moveZMethod;
 
 moveZ.signature = 'moveZ(shape:Shape, z:number = 0) -> Shape';
 moveZMethod.signature = 'Shape -> moveZ(z:number = 0) -> Shape';
+
+const noPlan = (shape, tags, select) => {
+  const op = (geometry, descend) => {
+    if (geometry.plan) {
+      return taggedLayers({});
+    } else {
+      return descend();
+    }
+  };
+
+  const rewritten = rewrite(shape.toKeptGeometry(), op);
+  return Shape.fromGeometry(rewritten);
+};
+
+const noPlanMethod = function (...tags) {
+  return noPlan(this);
+};
+Shape.prototype.noPlan = noPlanMethod;
+
+const noVoid = (shape, tags, select) => {
+  const op = (geometry, descend) => {
+    if (isVoid(geometry)) {
+      return taggedLayers({});
+    } else {
+      return descend();
+    }
+  };
+
+  const rewritten = rewrite(shape.toKeptGeometry(), op);
+  return Shape.fromGeometry(rewritten);
+};
+
+const noVoidMethod = function (...tags) {
+  return noVoid(this);
+};
+Shape.prototype.noVoid = noVoidMethod;
+
+const opMethod = function (op, ...args) {
+  return op(this, ...args);
+};
+const withOpMethod = function (op, ...args) {
+  return assemble(this, op(this, ...args));
+};
+
+Shape.prototype.op = opMethod;
+Shape.prototype.withOp = withOpMethod;
+
+const openEdges = (shape, { isOpen = true } = {}) => {
+  const r = (v) => v;
+  const paths = [];
+  for (const { solid } of getSolids(shape.toKeptGeometry())) {
+    paths.push(...findOpenEdges(solid, isOpen));
+  }
+  return Shape.fromGeometry({
+    type: 'paths',
+    paths: paths.map((path) => path.map(([x, y, z]) => [r(x), r(y), r(z)])),
+  });
+};
+
+const openEdgesMethod = function (...args) {
+  return openEdges(this, ...args);
+};
+Shape.prototype.openEdges = openEdgesMethod;
+
+const withOpenEdgesMethod = function (...args) {
+  return assemble(this, openEdges(this, ...args));
+};
+Shape.prototype.withOpenEdges = withOpenEdgesMethod;
 
 /**
  *
@@ -1522,6 +1324,64 @@ Shape.prototype.size = sizeMethod;
 size.signature = 'size(shape:Shape) -> Size';
 sizeMethod.signature = 'Shape -> size() -> Size';
 
+const sketch = (shape) =>
+  Shape.fromGeometry(taggedSketch({}, shape.toGeometry()));
+
+Shape.prototype.sketch = function () {
+  return sketch(this);
+};
+
+Shape.prototype.withSketch = function () {
+  return assemble(this, sketch(this));
+};
+
+const solids = (shape, xform = (_) => _) => {
+  const solids = [];
+  for (const solid of getSolids(shape.toKeptGeometry())) {
+    solids.push(xform(Shape.fromGeometry(solid)));
+  }
+  return solids;
+};
+
+const solidsMethod = function (...args) {
+  return solids(this, ...args);
+};
+Shape.prototype.solids = solidsMethod;
+
+const tags = (shape) =>
+  [...allTags(shape.toGeometry())]
+    .filter((tag) => tag.startsWith('user/'))
+    .map((tag) => tag.substring(5));
+
+const method$1 = function () {
+  return tags(this);
+};
+
+Shape.prototype.tags = method$1;
+
+const trace = (shape, length = 1) => {
+  const tracePaths = [];
+  for (const { paths } of getPaths(shape.toKeptGeometry())) {
+    for (let start = 0; ; start += length) {
+      const segments = segment(paths, start, start + length);
+      if (segments.length === 0) {
+        break;
+      }
+      tracePaths.push(...segments);
+    }
+  }
+  return Shape.fromGeometry({
+    type: 'paths',
+    paths: tracePaths,
+    tags: ['display/trace'],
+  });
+};
+
+const traceMethod = function (length = 1) {
+  return trace(this, length);
+};
+Shape.prototype.trace = traceMethod;
+
 /**
  *
  * # Turn
@@ -1597,6 +1457,103 @@ const turnZMethod = function (angle) {
 };
 Shape.prototype.turnZ = turnZMethod;
 
+// FIX: Debugging only -- remove this method.
+const wall = (shape) => {
+  const normalize = createNormalize3();
+  const solids = [];
+  for (const { surface, z0Surface, tags } of getAnyNonVoidSurfaces(
+    shape.toDisjointGeometry()
+  )) {
+    solids.push(
+      taggedSolid({ tags }, fromSurface(surface || z0Surface, normalize))
+    );
+  }
+  return Shape.fromGeometry(taggedAssembly({}, ...solids));
+};
+
+const wallMethod = function () {
+  return wall(this);
+};
+Shape.prototype.wall = wallMethod;
+
+const toWireframeFromSolid = (solid) => {
+  const paths = [];
+  for (const surface of solid) {
+    paths.push(...surface);
+  }
+  return Shape.fromPaths(paths);
+};
+
+const toWireframeFromSurface = (surface) => {
+  return Shape.fromPaths(surface);
+};
+
+const wireframe = (options = {}, shape) => {
+  const pieces = [];
+  for (const { solid } of getNonVoidSolids(shape.toKeptGeometry())) {
+    pieces.push(toWireframeFromSolid(solid));
+  }
+  for (const { surface } of getNonVoidSurfaces(shape.toKeptGeometry())) {
+    pieces.push(toWireframeFromSurface(surface));
+  }
+  for (const { z0Surface } of getNonVoidZ0Surfaces(shape.toKeptGeometry())) {
+    pieces.push(toWireframeFromSurface(z0Surface));
+  }
+  return assemble(...pieces);
+};
+
+const method$2 = function (options) {
+  return wireframe(options, this);
+};
+
+Shape.prototype.wireframe = method$2;
+Shape.prototype.withWireframe = function (options) {
+  return assemble(this, wireframe(options, this));
+};
+
+const wireframeFaces = (shape, op = (x) => x) => {
+  const faces = [];
+  for (const { solid } of getSolids(shape.toKeptGeometry())) {
+    for (const surface of solid) {
+      for (const path of surface) {
+        faces.push(
+          op(Shape.fromGeometry({ type: 'paths', paths: [path] }), faces.length)
+        );
+      }
+    }
+  }
+  return assemble(...faces);
+};
+
+const wireframeFacesMethod = function (...args) {
+  return wireframeFaces(this, ...args);
+};
+Shape.prototype.wireframeFaces = wireframeFacesMethod;
+
+/**
+ *
+ * # With
+ *
+ * Assembles the current shape with those provided.
+ *
+ * The below example is equivalent to
+ * ```
+ * assemble(Circle(20), Square(40).moveX(10))
+ * ```
+ *
+ * ::: illustration { "view": { "position": [80, 80, 80] } }
+ * ```
+ * Circle(20).with(Square(40).moveX(10))
+ * ```
+ * :::
+ *
+ **/
+
+const withMethod = function (...shapes) {
+  return assemble(this, ...shapes);
+};
+Shape.prototype.with = withMethod;
+
 const prepareShape = (shape, name, options = {}) => {
   let index = 0;
   const entries = [];
@@ -1627,5 +1584,39 @@ const writeShapeMethod = function (...args) {
 };
 Shape.prototype.writeShape = writeShapeMethod;
 
+const loadGeometry = async (path) =>
+  Shape.fromGeometry(await read(path));
+
+const saveGeometry = async (path, shape) =>
+  write(path, shape.toGeometry());
+
+/**
+ *
+ * # Log
+ *
+ * Writes a string to the console.
+ *
+ * ```
+ * log("Hello, World")
+ * ```
+ *
+ **/
+
+const log = (text, level) =>
+  log$1({ op: 'text', text: String(text), level });
+
+const logOp = (shape, op) =>
+  log$1({ op: 'text', text: String(op(shape)) });
+
+const logMethod = function (
+  op = (shape) => JSON.stringify(shape.toKeptGeometry())
+) {
+  logOp(this, op);
+  return this;
+};
+Shape.prototype.log = logMethod;
+
+log.signature = 'log(op:function)';
+
 export default Shape;
-export { Shape, assemble, canonicalize, center, color, colors, difference, drop, intersection, keep, kept, layer, log, make, material, move, moveX, moveY, moveZ, orient, readShape, rotate, rotateX, rotateY, rotateZ, scale, size, translate, turn, turnX, turnY, turnZ, union, writeShape };
+export { Shape, loadGeometry, log, saveGeometry };

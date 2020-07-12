@@ -66,7 +66,6 @@ export const toEcmascript = async (script, { path } = {}) => {
       dependencies.push(node.name);
     };
 
-    // walk(declarator, undefined, { CallExpression, Identifier });
     recursive(declarator, undefined, { Identifier });
 
     const dependencyShas = dependencies.map(fromIdToSha);
@@ -94,20 +93,22 @@ export const toEcmascript = async (script, { path } = {}) => {
     const meta = await read(`meta/def/${id}`);
     if (meta && meta.sha === sha) {
       const readCode = strip(
-        parse(`await read('data/def/${id}')`, parseOptions)
+        parse(`await loadGeometry('data/def/${id}')`, parseOptions)
       );
       const readExpression = readCode.body[0].expression;
       const init = readExpression;
       out.push({ ...declaration, declarations: [{ ...declarator, init }] });
     } else {
       out.push({ ...declaration, declarations: [declarator] });
+      // Only cache Shapes.
       out.push(
         parse(
-          `await write('data/def/${id}', ${id}) && await write('meta/def/${id}', { sha: '${sha}' });`,
+          `${id} instanceof Shape && await saveGeometry('data/def/${id}', ${id}) && await write('meta/def/${id}', { sha: '${sha}' });`,
           parseOptions
         )
       );
     }
+    out.push(parse(`Object.freeze(${id});`, parseOptions));
   };
 
   for (let nth = 0; nth < body.length; nth++) {

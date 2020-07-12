@@ -1,4 +1,3 @@
-import { Shape, assemble } from '@jsxcad/api-v1-shape';
 import {
   alignVertices,
   transform as transformSolid,
@@ -11,6 +10,8 @@ import {
 } from '@jsxcad/geometry-surface';
 import { getPlans, getSolids } from '@jsxcad/geometry-tagged';
 
+import { Assembly } from '@jsxcad/api-v1-shapes';
+import { Shape } from '@jsxcad/api-v1-shape';
 import { Z } from '@jsxcad/api-v1-connector';
 import { createNormalize3 } from '@jsxcad/algorithm-quantize';
 import { extrude } from '@jsxcad/algorithm-shape';
@@ -79,7 +80,7 @@ export const stretch = (shape, length, connector = Z()) => {
     );
   }
 
-  return assemble(...stretches);
+  return Assembly(...stretches);
 };
 
 const method = function (...args) {

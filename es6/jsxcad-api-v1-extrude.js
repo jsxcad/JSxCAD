@@ -1,5 +1,6 @@
-import Shape$1, { Shape, assemble, layer } from './jsxcad-api-v1-shape.js';
 import { buildConvexSurfaceHull, buildConvexHull, loop, extrude as extrude$1, buildConvexMinkowskiSum } from './jsxcad-algorithm-shape.js';
+import { Assembly, Layers } from './jsxcad-api-v1-shapes.js';
+import Shape$1, { Shape } from './jsxcad-api-v1-shape.js';
 import { Y as Y$1, Z as Z$3 } from './jsxcad-api-v1-connector.js';
 import { getPaths, getZ0Surfaces, getSurfaces, getPlans, getAnySurfaces, outline as outline$1, getSolids, taggedLayers, measureBoundingBox } from './jsxcad-geometry-tagged.js';
 import { alignVertices, transform as transform$1, fromPolygons } from './jsxcad-geometry-solid.js';
@@ -52,7 +53,7 @@ const ChainedHull = (...shapes) => {
       chain.push(Shape.fromGeometry(buildConvexHull(points)));
     }
   }
-  return assemble(...chain);
+  return Assembly(...chain);
 };
 
 const ChainedHullMethod = function (...args) {
@@ -155,7 +156,7 @@ const Loop = (
       }
     }
   }
-  return assemble(...solids);
+  return Assembly(...solids);
 };
 
 const LoopMethod = function (...args) {
@@ -239,7 +240,7 @@ const extrude = (shape, height = 1, depth = 0) => {
   for (const entry of getPlans(keptGeometry)) {
     solids.push(entry);
   }
-  return assemble(...solids);
+  return Assembly(...solids);
 };
 
 const extrudeMethod = function (...args) {
@@ -275,7 +276,7 @@ const fillMethod = function (...args) {
 Shape.prototype.fill = fillMethod;
 
 const withFillMethod = function (...args) {
-  return assemble(this, fill(this, ...args));
+  return this.with(fill(this, ...args));
 };
 Shape.prototype.withFill = withFillMethod;
 
@@ -316,7 +317,7 @@ const interior = (shape) => {
       )
     );
   }
-  return assemble(...surfaces);
+  return Assembly(...surfaces);
 };
 
 const interiorMethod = function (...args) {
@@ -383,7 +384,7 @@ minkowski.signature = 'minkowski(a:Shape, b:Shape) -> Shape';
  **/
 
 const outline = (shape) =>
-  assemble(
+  Assembly(
     ...outline$1(shape.toGeometry()).map((outline) =>
       Shape.fromGeometry(outline)
     )
@@ -393,7 +394,7 @@ const outlineMethod = function (options) {
   return outline(this);
 };
 const withOutlineMethod = function (options) {
-  return assemble(this, outline(this));
+  return this.with(outline(this));
 };
 
 Shape.prototype.outline = outlineMethod;
@@ -473,7 +474,7 @@ const section = (solidShape, ...connectors) => {
       );
     }
   }
-  return layer(...shapes);
+  return Layers(...shapes);
 };
 
 const sectionMethod = function (...args) {
@@ -590,7 +591,7 @@ const stretch = (shape, length, connector = Z$3()) => {
     );
   }
 
-  return assemble(...stretches);
+  return Assembly(...stretches);
 };
 
 const method = function (...args) {
@@ -618,7 +619,7 @@ const sweep = (toolpath, tool) => {
       );
     }
   }
-  return assemble(...chains);
+  return Assembly(...chains);
 };
 
 const sweepMethod = function (tool) {
@@ -627,7 +628,7 @@ const sweepMethod = function (tool) {
 
 Shape.prototype.sweep = sweepMethod;
 Shape.prototype.withSweep = function (tool) {
-  return assemble(this, sweep(this, tool));
+  return this.with(sweep(this, tool));
 };
 
 const toolpath = (
@@ -646,7 +647,7 @@ const method$1 = function (...options) {
 
 Shape.prototype.toolpath = method$1;
 Shape.prototype.withToolpath = function (...args) {
-  return assemble(this, toolpath(this, ...args));
+  return this.with(toolpath(this, ...args));
 };
 
 const X = 0;
@@ -778,7 +779,7 @@ const surfaceCloudMethod = function (...args) {
 Shape.prototype.surfaceCloud = surfaceCloudMethod;
 
 const withSurfaceCloudMethod = function (...args) {
-  return assemble(this, surfaceCloud(this, ...args));
+  return this.with(surfaceCloud(this, ...args));
 };
 Shape.prototype.withSurfaceCloud = withSurfaceCloudMethod;
 

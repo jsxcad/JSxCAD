@@ -1,5 +1,5 @@
-import Shape$1, { union, assemble, Shape } from './jsxcad-api-v1-shape.js';
-import { Sphere, Circle } from './jsxcad-api-v1-shapes.js';
+import Shape$1, { Shape } from './jsxcad-api-v1-shape.js';
+import { Sphere, Union, Circle, Assembly } from './jsxcad-api-v1-shapes.js';
 import { getSolids, getAnySurfaces, outline, transform } from './jsxcad-geometry-tagged.js';
 import { Hull, outline as outline$1 } from './jsxcad-api-v1-extrude.js';
 import { getEdges } from './jsxcad-geometry-path.js';
@@ -38,9 +38,9 @@ const shell = (shape, radius = 1, resolution = 8) => {
         );
       }
     }
-    shells.push(union(...pieces).as(...tags));
+    shells.push(Union(...pieces).as(...tags));
   }
-  assembly.push(union(...shells));
+  assembly.push(Union(...shells));
 
   const faces = [];
   // Handle surface aspects.
@@ -63,14 +63,14 @@ const shell = (shape, radius = 1, resolution = 8) => {
       }
     }
     faces.push(
-      union(...pieces.map((piece) => piece.transform(from))).as(
+      Union(...pieces.map((piece) => piece.transform(from))).as(
         ...(geometry.tags || [])
       )
     );
   }
-  assembly.push(union(...faces));
+  assembly.push(Union(...faces));
 
-  return assemble(...assembly);
+  return Assembly(...assembly);
 };
 
 const shellMethod = function (radius, resolution) {

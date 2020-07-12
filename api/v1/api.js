@@ -28,7 +28,7 @@ export { Connector, X, Y, Z } from '@jsxcad/api-v1-connector';
 
 export { ChainedHull, Hull, Loop } from '@jsxcad/api-v1-extrude';
 
-export { Shape, log, make } from '@jsxcad/api-v1-shape';
+export { Shape, loadGeometry, log, saveGeometry } from '@jsxcad/api-v1-shape';
 
 export { Line2 } from '@jsxcad/api-v1-line2';
 

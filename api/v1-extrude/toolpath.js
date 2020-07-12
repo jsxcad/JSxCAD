@@ -1,4 +1,4 @@
-import { Shape, assemble } from '@jsxcad/api-v1-shape';
+import { Shape } from '@jsxcad/api-v1-shape';
 
 import { toolpath as toolpathAlgorithm } from '@jsxcad/algorithm-toolpath';
 
@@ -18,7 +18,7 @@ const method = function (...options) {
 
 Shape.prototype.toolpath = method;
 Shape.prototype.withToolpath = function (...args) {
-  return assemble(this, toolpath(this, ...args));
+  return this.with(toolpath(this, ...args));
 };
 
 export default toolpath;

@@ -1,5 +1,5 @@
 import { concatenate, rotateZ, translate } from './jsxcad-geometry-path.js';
-import Shape, { difference, intersection } from './jsxcad-api-v1-shape.js';
+import Shape from './jsxcad-api-v1-shape.js';
 import { numbers, linear } from './jsxcad-api-v1-math.js';
 import { taggedAssembly, getAnySurfaces, getPaths, taggedDisjointAssembly, taggedLayers, rewriteTags } from './jsxcad-geometry-tagged.js';
 import { buildRegularPolygon, toRadiusFromApothem as toRadiusFromApothem$1, regularPolygonEdgeLengthToRadius, buildPolygonFromPoints, buildRegularPrism, buildFromFunction, buildFromSlices, buildRegularIcosahedron, buildRingSphere, buildRegularTetrahedron } from './jsxcad-algorithm-shape.js';
@@ -440,7 +440,7 @@ Cylinder.ofSlices.signature =
 Cylinder.ofFunction.signature =
   'Cylinder.ofFunction(op:function, { resolution:number, cap:boolean = true, context:Object }) -> Shape';
 
-const Difference = (...args) => difference(...args);
+const Difference = (first, ...rest) => first.cut(...rest);
 
 const Empty = (...shapes) =>
   Shape.fromGeometry(
@@ -536,7 +536,7 @@ Icosahedron.ofRadius.signature =
 Icosahedron.ofDiameter.signature =
   'Icosahedron.ofDiameter(diameter:number = 1) -> Shape';
 
-const Intersection = (...args) => intersection(...args);
+const Intersection = (first, ...rest) => first.clip(...rest);
 
 const isDefined = (value) => value;
 

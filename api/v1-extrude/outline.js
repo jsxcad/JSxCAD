@@ -1,5 +1,5 @@
-import { Shape, assemble } from '@jsxcad/api-v1-shape';
-
+import { Assembly } from '@jsxcad/api-v1-shapes';
+import { Shape } from '@jsxcad/api-v1-shape';
 import { outline as outlineGeometry } from '@jsxcad/geometry-tagged';
 
 /**
@@ -27,7 +27,7 @@ import { outline as outlineGeometry } from '@jsxcad/geometry-tagged';
  **/
 
 export const outline = (shape) =>
-  assemble(
+  Assembly(
     ...outlineGeometry(shape.toGeometry()).map((outline) =>
       Shape.fromGeometry(outline)
     )
@@ -37,7 +37,7 @@ const outlineMethod = function (options) {
   return outline(this);
 };
 const withOutlineMethod = function (options) {
-  return assemble(this, outline(this));
+  return this.with(outline(this));
 };
 
 Shape.prototype.outline = outlineMethod;

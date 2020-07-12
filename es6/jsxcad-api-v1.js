@@ -1,7 +1,7 @@
 import { addPending, write, emit, addSource, read } from './jsxcad-sys.js';
 export { emit, read, write } from './jsxcad-sys.js';
-import Shape, { Shape as Shape$1, log, make } from './jsxcad-api-v1-shape.js';
-export { Shape, log, make } from './jsxcad-api-v1-shape.js';
+import Shape, { Shape as Shape$1, loadGeometry, log, saveGeometry } from './jsxcad-api-v1-shape.js';
+export { Shape, loadGeometry, log, saveGeometry } from './jsxcad-api-v1-shape.js';
 import { ensurePages, Page, pack } from './jsxcad-api-v1-layout.js';
 export { Page, pack } from './jsxcad-api-v1-layout.js';
 import './jsxcad-api-v1-deform.js';
@@ -192,8 +192,9 @@ var api = /*#__PURE__*/Object.freeze({
   Hull: Hull,
   Loop: Loop,
   Shape: Shape$1,
+  loadGeometry: loadGeometry,
   log: log,
-  make: make,
+  saveGeometry: saveGeometry,
   Line2: Line2,
   Plan: Plan,
   Arc: Arc,

@@ -1,6 +1,7 @@
-import { Shape, layer } from '@jsxcad/api-v1-shape';
 import { getPlans, getSolids } from '@jsxcad/geometry-tagged';
 
+import { Layers } from '@jsxcad/api-v1-shapes';
+import { Shape } from '@jsxcad/api-v1-shape';
 import { Z } from '@jsxcad/api-v1-connector';
 import { section as bspSection } from '@jsxcad/geometry-bsp';
 import { createNormalize3 } from '@jsxcad/algorithm-quantize';
@@ -78,7 +79,7 @@ export const section = (solidShape, ...connectors) => {
       );
     }
   }
-  return layer(...shapes);
+  return Layers(...shapes);
 };
 
 const sectionMethod = function (...args) {
