@@ -1,4 +1,4 @@
-import { normalize, subtract, scale, rotateZ, add } from './jsxcad-math-vec3.js';
+import { equals, normalize, subtract, scale, rotateZ, add } from './jsxcad-math-vec3.js';
 import { getEdges, createOpenPath, isClosed } from './jsxcad-geometry-path.js';
 import { intersect as intersect$1, fromPoints } from './jsxcad-math-line2.js';
 import { getNonVoidPaths } from './jsxcad-geometry-tagged.js';
@@ -29,7 +29,7 @@ const toolpathEdges = (
   const toolpaths = [];
   let toolpath;
   let lastToolLine;
-  const edges = getEdges(path);
+  const edges = getEdges(path).filter(([start, end]) => !equals(start, end));
   for (const [start, end] of edges) {
     const [toolStart, toolEnd, thisToolLine] = makeToolLine(start, end, radius);
     if (!toolpath) {

@@ -36,15 +36,12 @@ export const outline = (shape) =>
 const outlineMethod = function (options) {
   return outline(this);
 };
+
 const withOutlineMethod = function (options) {
   return this.with(outline(this));
 };
 
 Shape.prototype.outline = outlineMethod;
 Shape.prototype.withOutline = withOutlineMethod;
-
-outline.signature = 'outline(shape:Surface) -> Shape';
-outlineMethod.signature = 'Shape -> outline() -> Shape';
-withOutlineMethod.signature = 'Shape -> outline() -> Shape';
 
 export default outline;

@@ -1,4 +1,11 @@
-import { add, normalize, rotateZ, scale, subtract } from '@jsxcad/math-vec3';
+import {
+  add,
+  equals,
+  normalize,
+  rotateZ,
+  scale,
+  subtract,
+} from '@jsxcad/math-vec3';
 import { createOpenPath, getEdges, isClosed } from '@jsxcad/geometry-path';
 import {
   fromPoints as fromPointsToLine,
@@ -33,7 +40,7 @@ export const toolpathEdges = (
   const toolpaths = [];
   let toolpath;
   let lastToolLine;
-  const edges = getEdges(path);
+  const edges = getEdges(path).filter(([start, end]) => !equals(start, end));
   for (const [start, end] of edges) {
     const [toolStart, toolEnd, thisToolLine] = makeToolLine(start, end, radius);
     if (!toolpath) {

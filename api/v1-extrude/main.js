@@ -3,6 +3,7 @@ import Hull from './Hull.js';
 import Loop from './Loop.js';
 import extrude from './extrude.js';
 import fill from './fill.js';
+import inline from './inline.js';
 import interior from './interior.js';
 import minkowski from './minkowski.js';
 import outline from './outline.js';
@@ -21,6 +22,7 @@ const api = {
   fill,
   interior,
   minkowski,
+  inline,
   outline,
   section,
   squash,
@@ -36,6 +38,7 @@ export {
   Loop,
   extrude,
   fill,
+  inline,
   interior,
   minkowski,
   outline,

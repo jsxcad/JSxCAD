@@ -282,6 +282,61 @@ Shape.prototype.withFill = withFillMethod;
 
 /**
  *
+ * # Outline
+ *
+ * Generates the outline of a surface.
+ *
+ * ::: illustration
+ * ```
+ * difference(Circle(10),
+ *            Circle(2).move([-4]),
+ *            Circle(2).move([4]))
+ * ```
+ * :::
+ * ::: illustration
+ * ```
+ * difference(Circle(10),
+ *            Circle(2).move([-4]),
+ *            Circle(2).move([4]))
+ *   .outline()
+ * ```
+ * :::
+ *
+ **/
+
+const outline = (shape) =>
+  Assembly(
+    ...outline$1(shape.toGeometry()).map((outline) =>
+      Shape.fromGeometry(outline)
+    )
+  );
+
+const outlineMethod = function (options) {
+  return outline(this);
+};
+
+const withOutlineMethod = function (options) {
+  return this.with(outline(this));
+};
+
+Shape.prototype.outline = outlineMethod;
+Shape.prototype.withOutline = withOutlineMethod;
+
+const inline = (shape) => outline(shape.flip());
+
+const inlineMethod = function (options) {
+  return inline(this);
+};
+
+const withInlineMethod = function (options) {
+  return this.with(inline(this));
+};
+
+Shape$1.prototype.inline = inlineMethod;
+Shape$1.prototype.withInline = withInlineMethod;
+
+/**
+ *
  * # Interior
  *
  * Generates a surface from the interior of a simple closed path.
@@ -358,51 +413,6 @@ const minkowskiMethod = function (shape) {
 Shape.prototype.minkowski = minkowskiMethod;
 
 minkowski.signature = 'minkowski(a:Shape, b:Shape) -> Shape';
-
-/**
- *
- * # Outline
- *
- * Generates the outline of a surface.
- *
- * ::: illustration
- * ```
- * difference(Circle(10),
- *            Circle(2).move([-4]),
- *            Circle(2).move([4]))
- * ```
- * :::
- * ::: illustration
- * ```
- * difference(Circle(10),
- *            Circle(2).move([-4]),
- *            Circle(2).move([4]))
- *   .outline()
- * ```
- * :::
- *
- **/
-
-const outline = (shape) =>
-  Assembly(
-    ...outline$1(shape.toGeometry()).map((outline) =>
-      Shape.fromGeometry(outline)
-    )
-  );
-
-const outlineMethod = function (options) {
-  return outline(this);
-};
-const withOutlineMethod = function (options) {
-  return this.with(outline(this));
-};
-
-Shape.prototype.outline = outlineMethod;
-Shape.prototype.withOutline = withOutlineMethod;
-
-outline.signature = 'outline(shape:Surface) -> Shape';
-outlineMethod.signature = 'Shape -> outline() -> Shape';
-withOutlineMethod.signature = 'Shape -> outline() -> Shape';
 
 /**
  *
@@ -858,6 +868,7 @@ const api = {
   fill,
   interior,
   minkowski,
+  inline,
   outline,
   section,
   squash,
@@ -868,4 +879,4 @@ const api = {
 };
 
 export default api;
-export { ChainedHull, Hull, Loop, extrude, fill, interior, minkowski, outline, section, squash, stretch, sweep, toolpath, voxels };
+export { ChainedHull, Hull, Loop, extrude, fill, inline, interior, minkowski, outline, section, squash, stretch, sweep, toolpath, voxels };
