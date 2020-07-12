@@ -1,10 +1,10 @@
-import { Shape, assemble } from '@jsxcad/api-v1-shape';
 import { getAnySurfaces, getPaths } from '@jsxcad/geometry-tagged';
 import {
   toPlane,
   transform as transformSurface,
 } from '@jsxcad/geometry-surface';
 
+import { Shape } from '@jsxcad/api-v1-shape';
 import { intersectionOfPathsBySurfaces } from '@jsxcad/geometry-z0surface-boolean';
 import { toXYPlaneTransforms } from '@jsxcad/math-plane';
 import { transform as transformPaths } from '@jsxcad/geometry-paths';
@@ -32,7 +32,7 @@ const fillMethod = function (...args) {
 Shape.prototype.fill = fillMethod;
 
 const withFillMethod = function (...args) {
-  return assemble(this, fill(this, ...args));
+  return this.with(fill(this, ...args));
 };
 Shape.prototype.withFill = withFillMethod;
 

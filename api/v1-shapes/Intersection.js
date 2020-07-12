@@ -1,5 +1,3 @@
-import { intersection } from '@jsxcad/api-v1-shape';
-
-export const Intersection = (...args) => intersection(...args);
+export const Intersection = (first, ...rest) => first.clip(...rest);
 
 export default Intersection;

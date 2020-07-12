@@ -1,5 +1,3 @@
-import { difference } from '@jsxcad/api-v1-shape';
-
-export const Difference = (...args) => difference(...args);
+export const Difference = (first, ...rest) => first.cut(...rest);
 
 export default Difference;

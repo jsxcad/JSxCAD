@@ -1,5 +1,5 @@
 export { addPending, resolvePending } from './pending.js';
-export { addReadDecoder, read, readFile } from './readFile.js';
+export { read, readFile } from './readFile.js';
 export { addSource, getSources } from './source.js';
 export { ask, setHandleAskUser } from './ask.js';
 export { boot, onBoot } from './boot.js';

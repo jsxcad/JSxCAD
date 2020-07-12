@@ -3338,38 +3338,6 @@ const write = async (path, data, options = {}) => {
 const { promises: promises$1 } = fs;
 const { deserialize } = v8$1;
 
-// Read decoders allow us to turn data back into objects based on structure.
-const readDecoders = [];
-
-const addReadDecoder = (guard, decoder) =>
-  readDecoders.push({ guard, decoder });
-
-// There should be a better way to do this.
-const decode = (data) => {
-  if (typeof data !== 'object') {
-    return data;
-  }
-  for (const { guard, decoder } of readDecoders) {
-    if (guard(data)) {
-      return decoder(data);
-    }
-  }
-  if (Array.isArray(data)) {
-    // We may have arrays of things to decode.
-    for (let i = 0; i < data.length; i++) {
-      if (typeof data[i] === 'object') {
-        data[i] = decode(data[i]);
-      }
-    }
-  } else if (data.byteLength === undefined) {
-    // We may have objects of things to decode, but not ArrayBuffers.
-    for (let key of Object.keys(data)) {
-      data[key] = decode(data[key]);
-    }
-  }
-  return data;
-};
-
 const getUrlFetcher = async () => {
   if (isBrowser) {
     return window.fetch;
@@ -3495,10 +3463,7 @@ const readFile = async (options, path) => {
   return file.data;
 };
 
-const read = async (path, options = {}) => {
-  const data = await readFile(options, path);
-  return decode(data);
-};
+const read = async (path, options = {}) => readFile(options, path);
 
 const sources = new Map();
 
@@ -3779,4 +3744,4 @@ const touch = async (path, { workspace } = {}) => {
   }
 };
 
-export { addPending, addReadDecoder, addSource, ask, boot, clearEmitted, conversation, createService, deleteFile$1 as deleteFile, emit$1 as emit, getEmitted, getFilesystem, getSources, listFiles$1 as listFiles, listFilesystems, log, onBoot, qualifyPath, read, readFile, resolvePending, setHandleAskUser, setupFilesystem, touch, unwatchFile, unwatchFileCreation, unwatchFileDeletion, unwatchFiles, unwatchLog, watchFile, watchFileCreation, watchFileDeletion, watchLog, write, writeFile };
+export { addPending, addSource, ask, boot, clearEmitted, conversation, createService, deleteFile$1 as deleteFile, emit$1 as emit, getEmitted, getFilesystem, getSources, listFiles$1 as listFiles, listFilesystems, log, onBoot, qualifyPath, read, readFile, resolvePending, setHandleAskUser, setupFilesystem, touch, unwatchFile, unwatchFileCreation, unwatchFileDeletion, unwatchFiles, unwatchLog, watchFile, watchFileCreation, watchFileDeletion, watchLog, write, writeFile };

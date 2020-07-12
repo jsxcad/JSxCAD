@@ -146,17 +146,18 @@ test('Reuse and Redefine', async (t) => {
   // Establish
   await write('data/def/A', 1);
   await write('meta/def/A', {
-    sha: 'da8b2b5ce546b8af68cea7d5a9c27efe2a4fd8e3',
+    sha: 'a94dbf09d58bc3979357ff42d7171daf5ca410f0',
   });
 
   // Reuse
   const reuse = await toEcmascript(
-    'const A = foo(); const B = () => 2; function C () {}'
+    'const A = Circle(); const B = () => 2; function C () {}'
   );
   t.is(
     reuse,
     `
-const A = await read('data/def/A');
+const A = await loadGeometry('data/def/A');
+Object.freeze(A);
 const B = () => 2;
 function C() {}
 return {};
@@ -171,9 +172,10 @@ return {};
     redefine,
     `
 const A = bar();
-(await write('data/def/A', A)) && (await write('meta/def/A', {
+A instanceof Shape && (await saveGeometry('data/def/A', A)) && (await write('meta/def/A', {
   sha: '8e0d3a8ac5c7a9b2684fa19794087e7e4223cd53'
 }));
+Object.freeze(A);
 const B = () => 2;
 function C() {}
 return {};
@@ -197,14 +199,15 @@ test('Indirect Redefinition', async (t) => {
   t.is(
     reuse,
     `
-const D = await read('data/def/D');
+const D = await loadGeometry('data/def/D');
+Object.freeze(D);
 const E = () => D;
 return {};
 `
   );
 });
 
-test('Bad Redefinition', async (t) => {
+test('Reuse', async (t) => {
   // Demonstrate defined case.
   await write('meta/def/mountainView', {
     sha: 'b59f37ba343f2a4a9ddf44b1091190f973b19743',
@@ -221,7 +224,8 @@ mountainView.frontView({ position: [0, -100, 50] });
     define,
     `
 const Mountain = () => foo();
-const mountainView = await read('data/def/mountainView');
+const mountainView = await loadGeometry('data/def/mountainView');
+Object.freeze(mountainView);
 mountainView.frontView({
   position: [0, -100, 50]
 });
@@ -242,12 +246,34 @@ mountainView.frontView({ position: [0, -100, 50] });
     `
 const Mountain = () => bar();
 const mountainView = Mountain().scale(0.5).Page();
-(await write('data/def/mountainView', mountainView)) && (await write('meta/def/mountainView', {
+mountainView instanceof Shape && (await saveGeometry('data/def/mountainView', mountainView)) && (await write('meta/def/mountainView', {
   sha: 'bdf04f14234eed622dfca3aa405abd88911ea304'
 }));
+Object.freeze(mountainView);
 mountainView.frontView({
   position: [0, -100, 50]
 });
+return {};
+`
+  );
+});
+
+test('Top level definitions are frozen', async (t) => {
+  const script = await toEcmascript(
+    `
+const a = [];
+log(a);
+`
+  );
+  t.is(
+    script,
+    `
+const a = [];
+a instanceof Shape && (await saveGeometry('data/def/a', a)) && (await write('meta/def/a', {
+  sha: 'b0e5d6b61a0feb61ed104d4688df2b0dd8884cd4'
+}));
+Object.freeze(a);
+log(a);
 return {};
 `
   );

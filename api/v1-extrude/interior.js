@@ -1,4 +1,5 @@
-import { Shape, assemble } from '@jsxcad/api-v1-shape';
+import { Assembly } from '@jsxcad/api-v1-shapes';
+import { Shape } from '@jsxcad/api-v1-shape';
 
 import { getPaths } from '@jsxcad/geometry-tagged';
 import { isClosed } from '@jsxcad/geometry-path';
@@ -40,7 +41,7 @@ export const interior = (shape) => {
       )
     );
   }
-  return assemble(...surfaces);
+  return Assembly(...surfaces);
 };
 
 const interiorMethod = function (...args) {

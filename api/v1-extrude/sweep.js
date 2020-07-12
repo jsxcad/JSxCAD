@@ -1,6 +1,6 @@
-import { Shape, assemble } from '@jsxcad/api-v1-shape';
-
+import { Assembly } from '@jsxcad/api-v1-shapes';
 import Hull from './Hull.js';
+import { Shape } from '@jsxcad/api-v1-shape';
 import { getEdges } from '@jsxcad/geometry-path';
 import { getPaths } from '@jsxcad/geometry-tagged';
 
@@ -24,7 +24,7 @@ export const sweep = (toolpath, tool) => {
       );
     }
   }
-  return assemble(...chains);
+  return Assembly(...chains);
 };
 
 const sweepMethod = function (tool) {
@@ -33,7 +33,7 @@ const sweepMethod = function (tool) {
 
 Shape.prototype.sweep = sweepMethod;
 Shape.prototype.withSweep = function (tool) {
-  return assemble(this, sweep(this, tool));
+  return this.with(sweep(this, tool));
 };
 
 export default sweep;

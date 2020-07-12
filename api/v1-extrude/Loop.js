@@ -1,4 +1,5 @@
-import { Shape, assemble } from '@jsxcad/api-v1-shape';
+import { Assembly } from '@jsxcad/api-v1-shapes';
+import { Shape } from '@jsxcad/api-v1-shape';
 
 import { Y } from '@jsxcad/api-v1-connector';
 import { getPaths } from '@jsxcad/geometry-tagged';
@@ -43,7 +44,7 @@ export const Loop = (
       }
     }
   }
-  return assemble(...solids);
+  return Assembly(...solids);
 };
 
 const LoopMethod = function (...args) {

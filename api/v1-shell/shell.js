@@ -1,5 +1,4 @@
-import { Circle, Sphere } from '@jsxcad/api-v1-shapes';
-import { Shape, assemble, union } from '@jsxcad/api-v1-shape';
+import { Assembly, Circle, Sphere, Union } from '@jsxcad/api-v1-shapes';
 import {
   getAnySurfaces,
   getSolids,
@@ -8,6 +7,7 @@ import {
 } from '@jsxcad/geometry-tagged';
 
 import { Hull } from '@jsxcad/api-v1-extrude';
+import { Shape } from '@jsxcad/api-v1-shape';
 import { getEdges } from '@jsxcad/geometry-path';
 import { toPlane } from '@jsxcad/geometry-surface';
 import { toXYPlaneTransforms } from '@jsxcad/math-plane';
@@ -44,9 +44,9 @@ export const shell = (shape, radius = 1, resolution = 8) => {
         );
       }
     }
-    shells.push(union(...pieces).as(...tags));
+    shells.push(Union(...pieces).as(...tags));
   }
-  assembly.push(union(...shells));
+  assembly.push(Union(...shells));
 
   const faces = [];
   // Handle surface aspects.
@@ -69,14 +69,14 @@ export const shell = (shape, radius = 1, resolution = 8) => {
       }
     }
     faces.push(
-      union(...pieces.map((piece) => piece.transform(from))).as(
+      Union(...pieces.map((piece) => piece.transform(from))).as(
         ...(geometry.tags || [])
       )
     );
   }
-  assembly.push(union(...faces));
+  assembly.push(Union(...faces));
 
-  return assemble(...assembly);
+  return Assembly(...assembly);
 };
 
 const shellMethod = function (radius, resolution) {
