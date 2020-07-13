@@ -11,23 +11,34 @@ const X = 0;
 const Y = 1;
 const Z = 2;
 
-// Zero work position machine
-// G10 L20 P1 X0
-// G10 L20 P1 Y0
-// G10 L20 P1 Z0
+const computeFeedRate = ({
+  toolDiameter = 3.175,
+  chipLoad = 0.1,
+  fluteCount = 1,
+  rpm = 7000,
+}) => fluteCount * chipLoad * rpm;
 
 export const toGcode = async (
   geometry,
   {
     origin = [0, 0, 0],
-    rpm = 0,
     topZ = 0,
     minCutZ = -1,
     cutDepth = 0.1,
     jumpHeight = 1,
-    feedRate = 60 * 5,
+    toolDiameter,
+    chipLoad,
+    fluteCount,
+    rpm = 7000,
+    feedRate = computeFeedRate({ toolDiameter, chipLoad, fluteCount, rpm }),
   } = {}
 ) => {
+  if (!(feedRate > 0)) {
+    throw Error(`Invalid feedRate: ${feedRate}`);
+  }
+  if (!(rpm > 0)) {
+    throw Error(`Invalid rpm: ${rpm}`);
+  }
   const jumpZ = topZ + jumpHeight;
 
   const codes = [];
@@ -44,7 +55,7 @@ export const toGcode = async (
     f = feedRate
   ) => {
     emit(
-      `${g} X${x.toFixed(5)} Y${y.toFixed(5)} Z${z.toFixed(5)} F${f.toFixed(5)}`
+      `${g} X${x.toFixed(3)} Y${y.toFixed(3)} Z${z.toFixed(3)} F${f.toFixed(3)}`
     );
     position = [x, y, z];
   };
@@ -57,7 +68,7 @@ export const toGcode = async (
     to(x, y, z, 'G1');
   };
 
-  const toolOn = () => (rpm > 0 ? emit(`M3 S${rpm.toFixed(5)}`) : emit(`M5`));
+  const toolOn = () => (rpm > 0 ? emit(`M3 S${rpm.toFixed(3)}`) : emit(`M5`));
   const toolOff = () => emit('M5');
 
   const jump = (x, y) => {
