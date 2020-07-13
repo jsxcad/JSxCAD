@@ -443,14 +443,7 @@ Cylinder.ofFunction.signature =
 const Difference = (first, ...rest) => first.cut(...rest);
 
 const Empty = (...shapes) =>
-  Shape.fromGeometry(
-    taggedDisjointAssembly(
-      {},
-      { type: 'solid', solid: [] },
-      { type: 'surface', surface: [] },
-      { type: 'paths', paths: [] }
-    )
-  );
+  Shape.fromGeometry(taggedDisjointAssembly({}));
 
 /**
  *
@@ -923,7 +916,13 @@ Triangle.ofApothem = ofApothem$8;
 Triangle.ofRadius = ofRadius$c;
 Triangle.ofDiameter = ofDiameter$b;
 
-const Union = (...args) => Empty().add(...args);
+const Union = (first, ...rest) => {
+  if (first === undefined) {
+    return Empty();
+  } else {
+    return first.add(...rest);
+  }
+};
 
 const UnionMethod = function (...args) {
   return Union(this, ...args);

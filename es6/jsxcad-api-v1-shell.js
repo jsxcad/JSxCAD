@@ -111,11 +111,6 @@ const growMethod = function (...args) {
 };
 Shape$1.prototype.grow = growMethod;
 
-grow.signature =
-  'grow(shape:Shape, amount:number = 1, { resolution:number = 16 }) -> Shape';
-growMethod.signature =
-  'Shape -> grow(amount:number = 1, { resolution:number = 16 }) -> Shape';
-
 const offset = (shape, radius = 1, resolution = 16) =>
   outline$1(grow(shape, radius, resolution));
 

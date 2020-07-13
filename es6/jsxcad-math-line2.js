@@ -139,7 +139,8 @@ const fromPoints = (p1, p2) => {
   const direction = subtract(p2, p1);
   const normalizedNormal = normalize(normal(direction));
   const distance = dot(p1, normalizedNormal);
-  return fromValues(normalizedNormal[0], normalizedNormal[1], distance);
+  const values = fromValues(normalizedNormal[0], normalizedNormal[1], distance);
+  return values;
 };
 
 /**

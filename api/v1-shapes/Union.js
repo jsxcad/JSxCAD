@@ -1,7 +1,13 @@
-import { Empty } from './Empty.js';
+import Empty from './Empty.js';
 import Shape from '@jsxcad/api-v1-shape';
 
-export const Union = (...args) => Empty().add(...args);
+export const Union = (first, ...rest) => {
+  if (first === undefined) {
+    return Empty();
+  } else {
+    return first.add(...rest);
+  }
+};
 
 const UnionMethod = function (...args) {
   return Union(this, ...args);

@@ -25,8 +25,3 @@ const growMethod = function (...args) {
 Shape.prototype.grow = growMethod;
 
 export default grow;
-
-grow.signature =
-  'grow(shape:Shape, amount:number = 1, { resolution:number = 16 }) -> Shape';
-growMethod.signature =
-  'Shape -> grow(amount:number = 1, { resolution:number = 16 }) -> Shape';

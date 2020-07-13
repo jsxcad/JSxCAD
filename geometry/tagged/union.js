@@ -1,6 +1,5 @@
 import {
   fromSolid as fromSolidToBsp,
-  section as intersectionOfSurfaceWithSolid,
   removeExteriorPolygonsForSection,
   unifyBspTrees,
 } from '@jsxcad/geometry-bsp';
@@ -42,21 +41,26 @@ const unionImpl = (geometry, ...geometries) => {
         // No meaningful way to unify with a surface.
         return taggedSolid({ tags }, solidUnion(geometry.solid, ...todo));
       }
+      /*
       case 'surface': {
-        const normalize = createNormalize3();
-        let planeSurface = fromPlaneToPolygon(
-          fromSurfaceToPlane(geometry.surface)
-        );
         const clipFaces = [];
-        clipFaces.push(...fromSurfaceToSolid(geometry.surface, normalize));
+        if (geometry.surface.length >= 3) {
+          const normalize = createNormalize3();
+          let planeSurface = fromPlaneToPolygon(
+            fromSurfaceToPlane(geometry.surface)
+          );
+          clipFaces.push(...fromSurfaceToSolid(geometry.surface, normalize));
+        }
         for (const geometry of geometries) {
           for (const { solid } of getSolids(geometry)) {
             clipFaces.push(...solid);
           }
           for (const { surface, z0Surface } of getAnySurfaces(geometry)) {
-            clipFaces.push(
-              ...fromSurfaceToSolid(surface || z0Surface, normalize)
-            );
+            if ((surface || z0Surface).length >= 3) {
+              clipFaces.push(
+                ...fromSurfaceToSolid(surface || z0Surface, normalize)
+              );
+            }
           }
         }
         const clippedSurface = intersectionOfSurfaceWithSolid(
@@ -66,7 +70,40 @@ const unionImpl = (geometry, ...geometries) => {
         )[0];
         return taggedSurface({ tags }, makeWatertightSurface(clippedSurface));
       }
+*/
+      case 'surface': {
+        // FIX: This has a problem with trying to union with an empty surface.
+        const normalize = createNormalize3();
+        let planarPolygon = fromPlaneToPolygon(
+          fromSurfaceToPlane(geometry.surface)
+        );
+        let bsp = fromSolidToBsp(
+          fromSurfaceToSolid(geometry.surface, normalize),
+          normalize
+        );
+        for (const geometry of geometries) {
+          for (const { solid } of getSolids(geometry)) {
+            bsp = unifyBspTrees(fromSolidToBsp(solid, normalize), bsp);
+          }
+          for (const { surface, z0Surface } of getAnySurfaces(geometry)) {
+            bsp = unifyBspTrees(
+              fromSolidToBsp(
+                fromSurfaceToSolid(surface || z0Surface, normalize),
+                normalize
+              ),
+              bsp
+            );
+          }
+        }
+        const clippedSurface = removeExteriorPolygonsForSection(
+          bsp,
+          [planarPolygon],
+          normalize
+        );
+        return taggedSurface({ tags }, makeWatertightSurface(clippedSurface));
+      }
       case 'z0Surface': {
+        // FIX: This has a problem with trying to union with an empty surface.
         const normalize = createNormalize3();
         let planarPolygon = fromPlaneToPolygon([0, 0, 1, 0]);
         let bsp = fromSolidToBsp(
