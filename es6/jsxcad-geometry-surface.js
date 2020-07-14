@@ -10,7 +10,13 @@ import { pushWhenValid } from './jsxcad-geometry-polygons.js';
 import { union, outline as outline$1 } from './jsxcad-geometry-z0surface-boolean.js';
 
 // export const toPlane = (surface) => toPlaneOfPolygon(surface[0]);
-const canonicalize = (surface) => surface.map(canonicalize$1);
+const canonicalize = (surface) => {
+  const canonicalizedSurface = surface.map(canonicalize$1);
+  if (canonicalizedSurface.plane) {
+    throw Error('die');
+  }
+  return canonicalizedSurface;
+};
 
 // Transforms
 const transform = (matrix, surface) =>

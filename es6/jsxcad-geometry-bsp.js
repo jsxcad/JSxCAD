@@ -1,9 +1,10 @@
 import { toPolygons, alignVertices, fromPolygons as fromPolygons$1 } from './jsxcad-geometry-solid.js';
 import { equals, splitLineSegmentByPlane } from './jsxcad-math-plane.js';
 import { pushWhenValid, doesNotOverlap, measureBoundingBox, flip } from './jsxcad-geometry-polygons.js';
-import { subtract, max, min } from './jsxcad-math-vec3.js';
+import { subtract, max, min, dot as dot$1, add, scale } from './jsxcad-math-vec3.js';
 import { toPlane } from './jsxcad-math-poly3.js';
 import { createNormalize3 } from './jsxcad-algorithm-quantize.js';
+import { getEdges, createOpenPath } from './jsxcad-geometry-path.js';
 
 const EPSILON = 1e-5;
 // const EPSILON2 = 1e-10;
@@ -1288,6 +1289,60 @@ const intersection = (...solids) => {
   return fromPolygons$1({}, s[0], normalize);
 };
 
+const planeDistance = (plane, point) =>
+  plane[0] * point[0] + plane[1] * point[1] + plane[2] * point[2] - plane[3];
+
+const splitPaths = (normalize, plan, paths, back, front) => {
+  for (const path of paths) {
+    splitPath(normalize, plan, path, back, front);
+  }
+};
+
+// FIX: This chops up the path into discrete segments.
+const splitPath = (normalize, plane, path, back, front) => {
+  for (const [start, end] of getEdges(path)) {
+    const t = planeDistance(plane, start);
+    const direction = subtract(end, start);
+    let lambda = (plane[3] - dot$1(plane, start)) / dot$1(plane, direction);
+    if (!Number.isNaN(lambda) && lambda > 0 && lambda < 1) {
+      const span = normalize(add(start, scale(lambda, direction)));
+      if (t > 0) {
+        // Front to back
+        front.push(createOpenPath(start, span));
+        back.push(createOpenPath(span, end));
+      } else {
+        back.push(createOpenPath(start, span));
+        front.push(createOpenPath(span, end));
+      }
+    } else {
+      if (t > 0) {
+        front.push(createOpenPath(start, end));
+      } else {
+        back.push(createOpenPath(start, end));
+      }
+    }
+  }
+};
+
+const removeExteriorPaths = (bsp, paths, normalize, emit) => {
+  if (bsp === inLeaf) {
+    return emit(paths);
+  } else if (bsp === outLeaf) {
+    return [];
+  } else {
+    const front = [];
+    const back = [];
+    splitPaths(
+      normalize,
+      bsp.plane,
+      paths,
+      /* back= */ back,
+      /* abutting= */ front);
+    removeExteriorPaths(bsp.front, front, normalize, emit);
+    removeExteriorPaths(bsp.back, back, normalize, emit);
+  }
+};
+
 const section = (solid, surfaces, normalize) => {
   const bsp = fromSolid(alignVertices(solid, normalize), normalize);
   return surfaces.map((surface) =>
@@ -1366,4 +1421,4 @@ const union = (...solids) => {
   return fromPolygons$1({}, s[0], normalize);
 };
 
-export { containsPoint, cut, cutOpen, deform, difference, fromSolid, intersection, removeExteriorPolygonsForSection, section, unifyBspTrees, union };
+export { containsPoint, cut, cutOpen, deform, difference, fromSolid, intersection, removeExteriorPaths, removeExteriorPolygonsForSection, section, unifyBspTrees, union };

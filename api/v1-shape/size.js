@@ -11,8 +11,8 @@ export const size = (shape) => {
   const geometry = shape.toKeptGeometry();
   const [min, max] = measureBoundingBox(geometry);
   const area = measureArea(geometry);
-  const width = max[X] - min[X];
-  const length = max[Y] - min[Y];
+  const length = max[X] - min[X];
+  const width = max[Y] - min[Y];
   const height = max[Z] - min[Z];
   const center = scale(0.5, add(min, max));
   const radius = distance(center, max);

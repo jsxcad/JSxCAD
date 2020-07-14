@@ -121,23 +121,18 @@ const toMethod = function (connector, options) {
   return connect(this, connector, options);
 };
 Shape.prototype.to = toMethod;
-toMethod.signature = 'Connector -> to(from:Connector) -> Shape';
 
 const fromMethod = function (connector, options) {
   return connect(connector, this, options);
 };
 Shape.prototype.from = fromMethod;
-fromMethod.signature = 'Connector -> from(from:Connector) -> Shape';
 
 const atMethod = function (connector, options) {
   return connect(this, connector, { ...options, doConnect: false });
 };
 Shape.prototype.at = atMethod;
-atMethod.signature = 'Connector -> at(target:Connector) -> Shape';
 
 export default connect;
-
-connect.signature = 'connect(to:Connector, from:Connector) -> Shape';
 
 export const join = (a, aJoin, bJoin, b) => {
   const aConnection = connect(a, aJoin).toGeometry();

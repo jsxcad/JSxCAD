@@ -1,11 +1,19 @@
+import {
+  equals as equalsPlane,
+  transform as transformPlane,
+} from '@jsxcad/math-plane';
 import { identityMatrix, multiply } from '@jsxcad/math-mat4';
+import {
+  toPlane as toPlaneFromSurface,
+  transform as transformSurface,
+} from '@jsxcad/geometry-surface';
 
 import { rewrite } from './visit.js';
+import { taggedSurface } from './taggedSurface.js';
+import { taggedZ0Surface } from './taggedZ0Surface.js';
 import { transform as transformPaths } from '@jsxcad/geometry-paths';
-import { transform as transformPlane } from '@jsxcad/math-plane';
 import { transform as transformPoints } from '@jsxcad/geometry-points';
 import { transform as transformSolid } from '@jsxcad/geometry-solid';
-import { transform as transformSurface } from '@jsxcad/geometry-surface';
 
 const transformedGeometry = Symbol('transformedGeometry');
 
@@ -48,13 +56,19 @@ export const toTransformedGeometry = (geometry) => {
         case 'solid':
           return descend({ solid: transformSolid(matrix, geometry.solid) });
         case 'surface':
-          return descend({
-            surface: transformSurface(matrix, geometry.surface),
-          });
-        case 'z0Surface':
-          return descend({
-            z0Surface: transformSurface(matrix, geometry.z0Surface),
-          });
+        case 'z0Surface': {
+          const transformedSurface = transformSurface(
+            matrix,
+            geometry.z0Surface || geometry.surface
+          );
+          if (
+            equalsPlane(toPlaneFromSurface(transformedSurface), [0, 0, 1, 0])
+          ) {
+            return taggedZ0Surface({ tags: geometry.tags }, transformedSurface);
+          } else {
+            return taggedSurface({ tags: geometry.tags }, transformedSurface);
+          }
+        }
         default:
           throw Error(
             `Unexpected geometry ${geometry.type} see ${JSON.stringify(

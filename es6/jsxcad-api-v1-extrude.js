@@ -2,7 +2,7 @@ import { buildConvexSurfaceHull, buildConvexHull, loop, extrude as extrude$1, bu
 import { Assembly, Layers } from './jsxcad-api-v1-shapes.js';
 import Shape$1, { Shape } from './jsxcad-api-v1-shape.js';
 import { Y as Y$1, Z as Z$3 } from './jsxcad-api-v1-connector.js';
-import { getPaths, getZ0Surfaces, getSurfaces, getPlans, getAnySurfaces, outline as outline$1, getSolids, taggedLayers, measureBoundingBox } from './jsxcad-geometry-tagged.js';
+import { getPaths, getZ0Surfaces, getSurfaces, getPlans, getAnySurfaces, outline as outline$1, getSolids, taggedLayers, measureBoundingBox, taggedPoints, measureHeights } from './jsxcad-geometry-tagged.js';
 import { alignVertices, transform as transform$1, fromPolygons } from './jsxcad-geometry-solid.js';
 import { toPlane as toPlane$1, transform, makeConvex, flip as flip$1 } from './jsxcad-geometry-surface.js';
 import { toXYPlaneTransforms } from './jsxcad-math-plane.js';
@@ -681,13 +681,13 @@ const ceilPoint = ([x, y, z], resolution) => [
 
 const voxels = (shape, resolution = 1) => {
   const offset = resolution / 2;
-  const geometry = shape.toKeptGeometry();
+  const geometry = shape.toDisjointGeometry();
   const normalize = createNormalize3();
   const [boxMin, boxMax] = measureBoundingBox(geometry);
   const min = floorPoint(boxMin, resolution);
   const max = ceilPoint(boxMax, resolution);
   const classifiers = [];
-  for (const { solid } of getSolids(shape.toKeptGeometry())) {
+  for (const { solid } of getSolids(shape.toDisjointGeometry())) {
     classifiers.push({ bsp: fromSolid(solid, normalize) });
   }
   const test = (point) => {
@@ -746,13 +746,13 @@ Shape.prototype.voxels = voxelsMethod;
 
 const surfaceCloud = (shape, resolution = 1) => {
   const offset = resolution / 2;
-  const geometry = shape.toKeptGeometry();
+  const geometry = shape.toDisjointGeometry();
   const normalize = createNormalize3();
   const [boxMin, boxMax] = measureBoundingBox(geometry);
   const min = floorPoint(boxMin, resolution);
   const max = ceilPoint(boxMax, resolution);
   const classifiers = [];
-  for (const { solid } of getSolids(shape.toKeptGeometry())) {
+  for (const { solid } of getSolids(shape.toDisjointGeometry())) {
     classifiers.push({ bsp: fromSolid(solid, normalize) });
   }
   const test = (point) => {
@@ -808,13 +808,13 @@ const orderPoints = ([aX, aY, aZ], [bX, bY, bZ]) => {
 
 const cloud = (shape, resolution = 1) => {
   const offset = resolution / 2;
-  const geometry = shape.toKeptGeometry();
+  const geometry = shape.toDisjointGeometry();
   const normalize = createNormalize3();
   const [boxMin, boxMax] = measureBoundingBox(geometry);
   const min = floorPoint(boxMin, resolution);
   const max = ceilPoint(boxMax, resolution);
   const classifiers = [];
-  for (const { solid } of getSolids(shape.toKeptGeometry())) {
+  for (const { solid } of getSolids(shape.toDisjointGeometry())) {
     classifiers.push({ bsp: fromSolid(solid, normalize) });
   }
   const test = (point) => {
@@ -846,7 +846,7 @@ Shape.prototype.cloud = cloudMethod;
 
 // FIX: move this
 const containsPoint = (shape, point) => {
-  for (const { solid } of getSolids(shape.toKeptGeometry())) {
+  for (const { solid } of getSolids(shape.toDisjointGeometry())) {
     const bsp = fromSolid(solid, createNormalize3());
     if (containsPoint$1(bsp, point)) {
       return true;
@@ -859,6 +859,16 @@ const containsPointMethod = function (point) {
   return containsPoint(this, point);
 };
 Shape.prototype.containsPoint = containsPointMethod;
+
+const heightCloud = (shape, resolution) => {
+  const heights = measureHeights(shape.toDisjointGeometry(), resolution);
+  return Shape.fromGeometry(taggedPoints({}, heights));
+};
+
+const heightCloudMethod = function (resolution) {
+  return heightCloud(this, resolution);
+};
+Shape.prototype.heightCloud = heightCloudMethod;
 
 const api = {
   ChainedHull,

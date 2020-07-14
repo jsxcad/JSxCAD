@@ -68,6 +68,7 @@ export { intersection } from './intersection.js';
 export { keep } from './keep.js';
 export { measureArea } from './measureArea.js';
 export { measureBoundingBox } from './measureBoundingBox.js';
+export { measureHeights } from './measureHeights.js';
 export { outline } from './outline.js';
 export { rewriteTags } from './rewriteTags.js';
 export { taggedAssembly } from './taggedAssembly.js';

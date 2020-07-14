@@ -362,6 +362,44 @@ const assemble = (...shapes) => {
   }
 };
 
+const X = 0;
+const Y = 1;
+const Z = 2;
+
+/**
+ * Moves the left front corner to the left front corner of the bench
+ * and places the top level with the bench top at Z = 0.
+ *
+ * Operations are downward and relative to the top of the shape.
+ */
+
+const bench = (shape, x = 0, y = 0, z = 0) => {
+  const { max, min, width } = shape.size();
+  return shape.move(0 - x - min[X], 0 - y - min[Y] - width / 2, 0 - z - max[Z]);
+};
+
+const benchMethod = function (x, y, z) {
+  return bench(this, x, y, z);
+};
+Shape.prototype.bench = benchMethod;
+
+/**
+ * Moves the left front corner to the left front corner of the bench
+ * and places the bottom level with the bench top at Z = 0.
+ *
+ * Operations are upward and relative to the bottom of the shape.
+ */
+
+const benchTop = (shape, x = 0, y = 0, z = 0) => {
+  const { min, width } = shape.size();
+  return shape.move(0 - x - min[X], 0 - y - width / 2, 0 - z - min[Z]);
+};
+
+const benchTopMethod = function (x, y, z) {
+  return benchTop(this, x, y, z);
+};
+Shape.prototype.benchTop = benchTopMethod;
+
 const canonicalize = (shape) =>
   Shape.fromGeometry(canonicalize$1(shape.toGeometry()));
 
@@ -414,9 +452,9 @@ measureBoundingBoxMethod.signature =
  * :::
  **/
 
-const X = 0;
-const Y = 1;
-const Z = 2;
+const X$1 = 0;
+const Y$1 = 1;
+const Z$1 = 2;
 
 const center = (
   shape,
@@ -425,16 +463,16 @@ const center = (
   const [minPoint, maxPoint] = measureBoundingBox(shape);
   const center = scale$1(0.5, add(minPoint, maxPoint));
   if (!centerX) {
-    center[X] = 0;
+    center[X$1] = 0;
   }
   if (!centerY) {
-    center[Y] = 0;
+    center[Y$1] = 0;
   }
   if (!centerZ) {
-    center[Z] = 0;
+    center[Z$1] = 0;
   }
   // FIX: Find a more principled way to handle centering empty shapes.
-  if (isNaN(center[X]) || isNaN(center[Y]) || isNaN(center[Z])) {
+  if (isNaN(center[X$1]) || isNaN(center[Y$1]) || isNaN(center[Z$1])) {
     return shape;
   }
   const moved = shape.move(...negate(center));
@@ -985,11 +1023,6 @@ const moveMethod = function (...params) {
 };
 Shape.prototype.move = moveMethod;
 
-move.signature =
-  'move(shape:Shape, x:number = 0, y:number = 0, z:number = 0) -> Shape';
-moveMethod.signature =
-  'Shape -> move(x:number = 0, y:number = 0, z:number = 0) -> Shape';
-
 /**
  *
  * # MoveX
@@ -1300,17 +1333,17 @@ const scaleMethod = function (factor) {
 };
 Shape.prototype.scale = scaleMethod;
 
-const X$1 = 0;
-const Y$1 = 1;
-const Z$1 = 2;
+const X$2 = 0;
+const Y$2 = 1;
+const Z$2 = 2;
 
 const size = (shape) => {
   const geometry = shape.toKeptGeometry();
   const [min, max] = measureBoundingBox$1(geometry);
   const area = measureArea(geometry);
-  const width = max[X$1] - min[X$1];
-  const length = max[Y$1] - min[Y$1];
-  const height = max[Z$1] - min[Z$1];
+  const length = max[X$2] - min[X$2];
+  const width = max[Y$2] - min[Y$2];
+  const height = max[Z$2] - min[Z$2];
   const center = scale$1(0.5, add(min, max));
   const radius = distance(center, max);
   return { area, length, width, height, max, min, center, radius };
