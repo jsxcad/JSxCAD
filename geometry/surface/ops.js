@@ -5,7 +5,13 @@ import {
 import { fromScaling, fromTranslation, fromZRotation } from '@jsxcad/math-mat4';
 
 // export const toPlane = (surface) => toPlaneOfPolygon(surface[0]);
-export const canonicalize = (surface) => surface.map(canonicalizePolygon);
+export const canonicalize = (surface) => {
+  const canonicalizedSurface = surface.map(canonicalizePolygon);
+  if (canonicalizedSurface.plane) {
+    throw Error('die');
+  }
+  return canonicalizedSurface;
+};
 
 // Transforms
 export const transform = (matrix, surface) =>

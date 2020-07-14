@@ -2,33 +2,7 @@ import { canonicalize as canonicalize$1, cross, subtract, dot, fromValues, min, 
 import { fromPolygon, signedDistanceToPoint, equals } from './jsxcad-math-plane.js';
 import { isMirroring } from './jsxcad-math-mat4.js';
 
-/**
- * Transforms the vertices of a polygon, producing a new poly3.
- *
- * The polygon does not need to be a poly3, but may be any array of
- * points. The points being represented as arrays of values.
- *
- * If the original has a 'plane' property, the result will have a clone
- * of the plane.
- *
- * @param {Function} [transform=vec3.clone] - function used to transform the vertices.
- * @returns {Array} a copy with transformed vertices and copied properties.
- *
- * @example
- * const vertices = [ [0, 0, 0], [0, 10, 0], [0, 10, 10] ]
- * let observed = poly3.map(vertices)
- */
-const map = (original, transform) => {
-  if (original === undefined) {
-    original = [];
-  }
-  if (transform === undefined) {
-    transform = (_) => _;
-  }
-  return original.map((vertex) => transform(vertex));
-};
-
-const canonicalize = (polygon) => map(polygon, canonicalize$1);
+const canonicalize = (polygon) => polygon.map(canonicalize$1);
 
 /**
  * Emits the edges of a polygon in order.
@@ -136,6 +110,32 @@ const isStrictlyCoplanar = (polygon) => {
     }
   }
   return true;
+};
+
+/**
+ * Transforms the vertices of a polygon, producing a new poly3.
+ *
+ * The polygon does not need to be a poly3, but may be any array of
+ * points. The points being represented as arrays of values.
+ *
+ * If the original has a 'plane' property, the result will have a clone
+ * of the plane.
+ *
+ * @param {Function} [transform=vec3.clone] - function used to transform the vertices.
+ * @returns {Array} a copy with transformed vertices and copied properties.
+ *
+ * @example
+ * const vertices = [ [0, 0, 0], [0, 10, 0], [0, 10, 10] ]
+ * let observed = poly3.map(vertices)
+ */
+const map = (original, transform) => {
+  if (original === undefined) {
+    original = [];
+  }
+  if (transform === undefined) {
+    transform = (_) => _;
+  }
+  return original.map((vertex) => transform(vertex));
 };
 
 // measure the area of the given poly3 (3D planar polygon)

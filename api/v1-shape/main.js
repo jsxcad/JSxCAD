@@ -2,6 +2,7 @@ import './add.js';
 import './addTo.js';
 import './as.js';
 import './assemble.js';
+import './bench.js';
 import './canonicalize.js';
 import './center.js';
 import './clip.js';

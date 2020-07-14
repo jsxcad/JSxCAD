@@ -42,9 +42,9 @@ test('Surface', (t) => {
     tags: undefined,
     content: [
       {
-        type: 'z0Surface',
+        type: 'surface',
         tags: undefined,
-        z0Surface: [
+        surface: [
           [
             [-0.5, -0.5, 0],
             [0.5, -0.5, 0],

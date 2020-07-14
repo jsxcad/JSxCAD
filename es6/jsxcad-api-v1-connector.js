@@ -446,6 +446,7 @@ leftMethod.signature = 'Shape -> left() -> Shape';
 
 const on = (above, below, op = (_) => _) =>
   above.bottom().to(below.top().op(op));
+
 const onMethod = function (below, op) {
   return on(this, below, op);
 };
@@ -710,21 +711,16 @@ const toMethod = function (connector, options) {
   return connect(this, connector, options);
 };
 Shape.prototype.to = toMethod;
-toMethod.signature = 'Connector -> to(from:Connector) -> Shape';
 
 const fromMethod = function (connector, options) {
   return connect(connector, this, options);
 };
 Shape.prototype.from = fromMethod;
-fromMethod.signature = 'Connector -> from(from:Connector) -> Shape';
 
 const atMethod = function (connector, options) {
   return connect(this, connector, { ...options, doConnect: false });
 };
 Shape.prototype.at = atMethod;
-atMethod.signature = 'Connector -> at(target:Connector) -> Shape';
-
-connect.signature = 'connect(to:Connector, from:Connector) -> Shape';
 
 const api = {
   Connector,

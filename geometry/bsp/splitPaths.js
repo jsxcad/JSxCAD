@@ -1,4 +1,4 @@
-import { add, dot, scale, subtract } from '@jsxcad/math-plane';
+import { add, dot, scale, subtract } from '@jsxcad/math-vec3';
 
 import { createOpenPath, getEdges } from '@jsxcad/geometry-path';
 
@@ -38,3 +38,4 @@ const splitPath = (normalize, plane, path, back, front) => {
 };
 
 export { splitPaths };
+export default splitPaths;
