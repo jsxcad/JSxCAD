@@ -7,7 +7,7 @@ import { transform as transform$4, canonicalize as canonicalize$5, difference as
 import { equals, transform as transform$5, canonicalize as canonicalize$4, toPolygon } from './jsxcad-math-plane.js';
 import { transform as transform$3, canonicalize as canonicalize$3, eachPoint as eachPoint$4, flip as flip$4, union as union$1 } from './jsxcad-geometry-points.js';
 import { transform as transform$1, toPlane, canonicalize as canonicalize$2, makeWatertight as makeWatertight$2, eachPoint as eachPoint$1, flip as flip$2, makeConvex, measureArea as measureArea$1, measureBoundingBox as measureBoundingBox$2 } from './jsxcad-geometry-surface.js';
-import { section, removeExteriorPaths, fromSolid, unifyBspTrees, removeExteriorPolygonsForSection } from './jsxcad-geometry-bsp.js';
+import { section, removeExteriorPaths, fromSolid, fromSurface as fromSurface$1, unifyBspTrees, removeExteriorPolygonsForSection } from './jsxcad-geometry-bsp.js';
 import { difference as difference$2, intersection as intersection$1, union as union$3 } from './jsxcad-geometry-solid-boolean.js';
 import { min, max } from './jsxcad-math-vec3.js';
 import { measureBoundingBox as measureBoundingBox$1 } from './jsxcad-geometry-z0surface.js';
@@ -1034,6 +1034,18 @@ const intersectionImpl = (geometry, ...geometries) => {
             const clippedPaths = [];
             removeExteriorPaths(
               fromSolid(solid, normalize),
+              thisPaths,
+              normalize,
+              (paths) => clippedPaths.push(...paths)
+            );
+            thisPaths = clippedPaths;
+          }
+          for (const { surface, z0Surface } of getAnyNonVoidSurfaces(
+            geometry
+          )) {
+            const clippedPaths = [];
+            removeExteriorPaths(
+              fromSurface$1(surface || z0Surface, normalize),
               thisPaths,
               normalize,
               (paths) => clippedPaths.push(...paths)

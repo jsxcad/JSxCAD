@@ -1,5 +1,6 @@
 import {
   fromSolid as fromSolidToBsp,
+  fromSurface as fromSurfaceToBsp,
   section as intersectionOfSurfaceWithSolid,
   removeExteriorPaths,
 } from '@jsxcad/geometry-bsp';
@@ -94,6 +95,18 @@ const intersectionImpl = (geometry, ...geometries) => {
             const clippedPaths = [];
             removeExteriorPaths(
               fromSolidToBsp(solid, normalize),
+              thisPaths,
+              normalize,
+              (paths) => clippedPaths.push(...paths)
+            );
+            thisPaths = clippedPaths;
+          }
+          for (const { surface, z0Surface } of getAnyNonVoidSurfaces(
+            geometry
+          )) {
+            const clippedPaths = [];
+            removeExteriorPaths(
+              fromSurfaceToBsp(surface || z0Surface, normalize),
               thisPaths,
               normalize,
               (paths) => clippedPaths.push(...paths)

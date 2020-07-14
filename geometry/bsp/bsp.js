@@ -144,7 +144,6 @@ const fromPolygonsToBspTree = (polygons, normalize) => {
 };
 
 const fromPolygons = (polygons, normalize) =>
-  // fromPolygonsToBspTree(polygons.filter(polygon => toPlane(polygon) !== undefined), normalize);
   fromPolygonsToBspTree(polygons, normalize);
 
 const fromSolid = (solid, normalize) => {

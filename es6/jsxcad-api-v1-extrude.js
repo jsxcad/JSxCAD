@@ -2,13 +2,11 @@ import { buildConvexSurfaceHull, buildConvexHull, loop, extrude as extrude$1, bu
 import { Assembly, Layers } from './jsxcad-api-v1-shapes.js';
 import Shape$1, { Shape } from './jsxcad-api-v1-shape.js';
 import { Y as Y$1, Z as Z$3 } from './jsxcad-api-v1-connector.js';
-import { getPaths, getZ0Surfaces, getSurfaces, getPlans, getAnySurfaces, outline as outline$1, getSolids, taggedLayers, measureBoundingBox, taggedPoints, measureHeights } from './jsxcad-geometry-tagged.js';
+import { getPaths, getZ0Surfaces, getSurfaces, getPlans, outline as outline$1, getSolids, taggedLayers, union, taggedZ0Surface, taggedPaths, measureBoundingBox, taggedPoints, measureHeights } from './jsxcad-geometry-tagged.js';
 import { alignVertices, transform as transform$1, fromPolygons } from './jsxcad-geometry-solid.js';
 import { toPlane as toPlane$1, transform, makeConvex, flip as flip$1 } from './jsxcad-geometry-surface.js';
 import { toXYPlaneTransforms } from './jsxcad-math-plane.js';
-import { intersectionOfPathsBySurfaces, outline as outline$2 } from './jsxcad-geometry-z0surface-boolean.js';
-import { transform as transform$2 } from './jsxcad-geometry-paths.js';
-import { isClosed, transform as transform$3, isCounterClockwise, flip, getEdges } from './jsxcad-geometry-path.js';
+import { isClosed, transform as transform$2, isCounterClockwise, flip, getEdges } from './jsxcad-geometry-path.js';
 import { section as section$1, cutOpen, fromSolid, containsPoint as containsPoint$1 } from './jsxcad-geometry-bsp.js';
 import { createNormalize3 } from './jsxcad-algorithm-quantize.js';
 import { toPlane as toPlane$2 } from './jsxcad-math-poly3.js';
@@ -253,33 +251,6 @@ extrude.signature =
 extrudeMethod.signature =
   'Shape -> extrude(height:number = 1, depth:number = 1) -> Shape';
 
-const fill = (shape, pathsShape) => {
-  const fills = [];
-  for (const { surface, z0Surface } of getAnySurfaces(shape.toKeptGeometry())) {
-    const anySurface = surface || z0Surface;
-    const plane = toPlane$1(anySurface);
-    const [to, from] = toXYPlaneTransforms(plane);
-    const flatSurface = transform(to, anySurface);
-    for (const { paths } of getPaths(pathsShape.toKeptGeometry())) {
-      const flatPaths = transform$2(to, paths);
-      const flatFill = intersectionOfPathsBySurfaces(flatPaths, flatSurface);
-      const fill = transform$2(from, flatFill);
-      fills.push(...fill);
-    }
-  }
-  return Shape.fromGeometry({ type: 'paths', paths: fills });
-};
-
-const fillMethod = function (...args) {
-  return fill(this, ...args);
-};
-Shape.prototype.fill = fillMethod;
-
-const withFillMethod = function (...args) {
-  return this.with(fill(this, ...args));
-};
-Shape.prototype.withFill = withFillMethod;
-
 /**
  *
  * # Outline
@@ -462,7 +433,7 @@ const toSurface = (plane) => {
     [min, min, 0],
     [max, min, 0],
   ];
-  const polygon = transform$3(from, path);
+  const polygon = transform$2(from, path);
   return [polygon];
 };
 
@@ -504,11 +475,9 @@ const squash = (shape) => {
         polygons.push(isCounterClockwise(flat) ? flat : flip(flat));
       }
     }
-    result.content.push({
-      type: 'z0Surface',
-      z0Surface: outline$2(polygons),
-      tags,
-    });
+    result.content.push(
+      union(...polygons.map((polygon) => taggedZ0Surface({ tags }, [polygon])))
+    );
   }
   for (const { surface, tags } of getSurfaces(geometry)) {
     const polygons = [];
@@ -517,14 +486,14 @@ const squash = (shape) => {
       if (toPlane$2(flat) === undefined) continue;
       polygons.push(isCounterClockwise(flat) ? flat : flip(flat));
     }
-    result.content.push({ type: 'z0Surface', z0Surface: polygons, tags });
+    result.content.push(taggedZ0Surface({ tags }, polygons));
   }
   for (const { z0Surface, tags } of getZ0Surfaces(geometry)) {
     const polygons = [];
     for (const path of z0Surface) {
       polygons.push(path);
     }
-    result.content.push({ type: 'z0Surface', z0Surface: polygons, tags });
+    result.content.push(taggedZ0Surface({ tags }, polygons));
   }
   for (const { paths, tags } of getPaths(geometry)) {
     const flatPaths = [];
@@ -532,6 +501,7 @@ const squash = (shape) => {
       flatPaths.push(path.map(([x, y]) => [x, y, 0]));
     }
     result.content.push({ type: 'paths', paths: flatPaths, tags });
+    result.content.push(taggedPaths({ tags }, flatPaths));
   }
   return Shape$1.fromGeometry(result);
 };
@@ -565,7 +535,7 @@ const toSurface$1 = (plane) => {
     [min, min, 0],
     [max, min, 0],
   ];
-  const polygon = transform$3(from, path);
+  const polygon = transform$2(from, path);
   return [polygon];
 };
 
@@ -875,7 +845,6 @@ const api = {
   Hull,
   Loop,
   extrude,
-  fill,
   interior,
   minkowski,
   inline,
@@ -889,4 +858,4 @@ const api = {
 };
 
 export default api;
-export { ChainedHull, Hull, Loop, extrude, fill, inline, interior, minkowski, outline, section, squash, stretch, sweep, toolpath, voxels };
+export { ChainedHull, Hull, Loop, extrude, inline, interior, minkowski, outline, section, squash, stretch, sweep, toolpath, voxels };

@@ -1,9 +1,10 @@
 import { toPolygons, alignVertices, fromPolygons as fromPolygons$1 } from './jsxcad-geometry-solid.js';
 import { equals, splitLineSegmentByPlane } from './jsxcad-math-plane.js';
 import { pushWhenValid, doesNotOverlap, measureBoundingBox, flip } from './jsxcad-geometry-polygons.js';
-import { subtract, max, min, dot as dot$1, add, scale } from './jsxcad-math-vec3.js';
+import { subtract, max, min, scale, add, dot as dot$1 } from './jsxcad-math-vec3.js';
 import { toPlane } from './jsxcad-math-poly3.js';
 import { createNormalize3 } from './jsxcad-algorithm-quantize.js';
+import { toPlane as toPlane$1, outline } from './jsxcad-geometry-surface.js';
 import { getEdges, createOpenPath } from './jsxcad-geometry-path.js';
 
 const EPSILON = 1e-5;
@@ -423,7 +424,6 @@ const fromPolygonsToBspTree = (polygons, normalize) => {
 };
 
 const fromPolygons = (polygons, normalize) =>
-  // fromPolygonsToBspTree(polygons.filter(polygon => toPlane(polygon) !== undefined), normalize);
   fromPolygonsToBspTree(polygons, normalize);
 
 const fromSolid = (solid, normalize) => {
@@ -1220,6 +1220,32 @@ const difference = (aSolid, ...bSolids) => {
   return fromPolygons$1({}, a, normalize);
 };
 
+const large = 1e10;
+
+const fromSurface = (surface, normalize) => {
+  const polygons = [];
+  const normal = toPlane$1(surface);
+  if (normal === undefined) {
+    // The surface is degenerate.
+    return fromPolygons([]);
+  }
+  const top = scale(large, normal);
+  const bottom = scale(-large, normal);
+  for (const path of outline(surface, normalize)) {
+    for (const [start, end] of getEdges(path)) {
+      // Build a large wall.
+      polygons.push([
+        add(start, top),
+        add(start, bottom),
+        add(end, bottom),
+        add(end, top),
+      ]);
+    }
+  }
+  // This is an excessively large uncapped prism.
+  return fromPolygons(polygons, normalize);
+};
+
 const MIN$1 = 0;
 
 // An asymmetric binary merge.
@@ -1421,4 +1447,4 @@ const union = (...solids) => {
   return fromPolygons$1({}, s[0], normalize);
 };
 
-export { containsPoint, cut, cutOpen, deform, difference, fromSolid, intersection, removeExteriorPaths, removeExteriorPolygonsForSection, section, unifyBspTrees, union };
+export { containsPoint, cut, cutOpen, deform, difference, fromSolid, fromSurface, intersection, removeExteriorPaths, removeExteriorPolygonsForSection, section, unifyBspTrees, union };
