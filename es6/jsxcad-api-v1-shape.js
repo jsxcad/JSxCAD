@@ -1,5 +1,5 @@
 import { close, concatenate, open } from './jsxcad-geometry-path.js';
-import { taggedAssembly, eachPoint, flip, toDisjointGeometry as toDisjointGeometry$1, toPoints, transform, reconcile, isWatertight, makeWatertight, fromPathToSurface, fromPathToZ0Surface, fromPathsToSurface, fromPathsToZ0Surface, union as union$1, rewriteTags, assemble as assemble$1, canonicalize as canonicalize$1, measureBoundingBox as measureBoundingBox$1, intersection as intersection$1, allTags, difference as difference$1, getSolids, rewrite, taggedLayers, isVoid, measureArea, taggedSketch, getPaths, getAnyNonVoidSurfaces, taggedSolid, getNonVoidSolids, getNonVoidSurfaces, getNonVoidZ0Surfaces } from './jsxcad-geometry-tagged.js';
+import { taggedAssembly, eachPoint, flip, toDisjointGeometry as toDisjointGeometry$1, toPoints, transform, reconcile, isWatertight, makeWatertight, taggedPaths, fromPathToSurface, fromPathToZ0Surface, fromPathsToSurface, fromPathsToZ0Surface, taggedPoints, taggedSolid, taggedZ0Surface, union as union$1, rewriteTags, assemble as assemble$1, canonicalize as canonicalize$1, measureBoundingBox as measureBoundingBox$1, intersection as intersection$1, allTags, difference as difference$1, getSolids, rewrite, taggedLayers, isVoid, measureArea, taggedSketch, getPaths, getAnyNonVoidSurfaces, getNonVoidSolids, getNonVoidSurfaces, getNonVoidZ0Surfaces } from './jsxcad-geometry-tagged.js';
 import { fromPolygons, findOpenEdges, fromSurface } from './jsxcad-geometry-solid.js';
 import { scale as scale$1, add, negate, normalize, subtract, dot, cross, distance } from './jsxcad-math-vec3.js';
 import { toTagFromName } from './jsxcad-algorithm-color.js';
@@ -108,14 +108,14 @@ const isSingleOpenPath = ({ paths }) =>
   paths !== undefined && paths.length === 1 && paths[0][0] === null;
 
 Shape.fromClosedPath = (path, context) =>
-  fromGeometry({ type: 'paths', paths: [close(path)] }, context);
+  fromGeometry(taggedPaths({}, [close(path)]), context);
 Shape.fromGeometry = (geometry, context) => new Shape(geometry, context);
 Shape.fromOpenPath = (path, context) =>
-  fromGeometry({ type: 'paths', paths: [open(path)] }, context);
+  fromGeometry(taggedPaths({}, [open(path)]), context);
 Shape.fromPath = (path, context) =>
-  fromGeometry({ type: 'paths', paths: [path] }, context);
+  fromGeometry(taggedPaths({}, [path]), context);
 Shape.fromPaths = (paths, context) =>
-  fromGeometry({ type: 'paths', paths: paths }, context);
+  fromGeometry(taggedPaths({}, paths), context);
 Shape.fromPathToSurface = (path, context) =>
   fromGeometry(fromPathToSurface(path), context);
 Shape.fromPathToZ0Surface = (path, context) =>
@@ -125,20 +125,20 @@ Shape.fromPathsToSurface = (paths, context) =>
 Shape.fromPathsToZ0Surface = (paths, context) =>
   fromGeometry(fromPathsToZ0Surface(paths), context);
 Shape.fromPoint = (point, context) =>
-  fromGeometry({ type: 'points', points: [point] }, context);
+  fromGeometry(taggedPoints({}, [point]), context);
 Shape.fromPoints = (points, context) =>
-  fromGeometry({ type: 'points', points: points }, context);
+  fromGeometry(taggedPoints({}, points), context);
 Shape.fromPolygonsToSolid = (polygons, context) =>
   fromGeometry(
-    { type: 'solid', solid: fromPolygons({}, polygons) },
+    taggedSolid({}, fromPolygons(polygons)),
     context
   );
 Shape.fromPolygonsToZ0Surface = (polygons, context) =>
-  fromGeometry({ type: 'z0Surface', z0Surface: polygons }, context);
+  fromGeometry(taggedZ0Surface({}, polygons), context);
 Shape.fromSurfaces = (surfaces, context) =>
-  fromGeometry({ type: 'solid', solid: surfaces }, context);
+  fromGeometry(taggedSolid({}, surfaces), context);
 Shape.fromSolid = (solid, context) =>
-  fromGeometry({ type: 'solid', solid }, context);
+  fromGeometry(taggedSolid({}, solid), context);
 
 const fromGeometry = Shape.fromGeometry;
 const toGeometry = (shape) => shape.toGeometry();

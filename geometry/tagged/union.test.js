@@ -1,12 +1,12 @@
 import {
+  fromPolygons as fromPolygonsToSolid,
+  scale as scaleSolid,
+  translate as translateSolid,
+} from '@jsxcad/geometry-solid';
+import {
   rotateZ as rotateSurface,
   scale as scaleSurface,
 } from '@jsxcad/geometry-surface';
-import {
-  scale as scaleSolid,
-  fromPolygons as solidFromPolygons,
-  translate as translateSolid,
-} from '@jsxcad/geometry-solid';
 import {
   unitCubePolygons,
   unitRegularTrianglePolygon,
@@ -84,21 +84,21 @@ test('Solid', (t) => {
       type: 'solid',
       solid: translateSolid(
         [0, 0, 0],
-        scaleSolid([10, 10, 10], solidFromPolygons({}, unitCubePolygons))
+        scaleSolid([10, 10, 10], fromPolygonsToSolid(unitCubePolygons))
       ),
     },
     {
       type: 'solid',
       solid: translateSolid(
         [2, 2, 0],
-        scaleSolid([10, 10, 10], solidFromPolygons({}, unitCubePolygons))
+        scaleSolid([10, 10, 10], fromPolygonsToSolid(unitCubePolygons))
       ),
     },
     {
       type: 'solid',
       solid: translateSolid(
         [4, 4, 0],
-        scaleSolid([10, 10, 10], solidFromPolygons({}, unitCubePolygons))
+        scaleSolid([10, 10, 10], fromPolygonsToSolid(unitCubePolygons))
       ),
     }
   );

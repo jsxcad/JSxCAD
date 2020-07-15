@@ -15,6 +15,10 @@ import {
   makeWatertight,
   reconcile,
   taggedAssembly,
+  taggedPaths,
+  taggedPoints,
+  taggedSolid,
+  taggedZ0Surface,
   toDisjointGeometry as toDisjointTaggedGeometry,
   toPoints,
   transform,
@@ -120,14 +124,14 @@ const isSingleOpenPath = ({ paths }) =>
   paths !== undefined && paths.length === 1 && paths[0][0] === null;
 
 Shape.fromClosedPath = (path, context) =>
-  fromGeometry({ type: 'paths', paths: [closePath(path)] }, context);
+  fromGeometry(taggedPaths({}, [closePath(path)]), context);
 Shape.fromGeometry = (geometry, context) => new Shape(geometry, context);
 Shape.fromOpenPath = (path, context) =>
-  fromGeometry({ type: 'paths', paths: [openPath(path)] }, context);
+  fromGeometry(taggedPaths({}, [openPath(path)]), context);
 Shape.fromPath = (path, context) =>
-  fromGeometry({ type: 'paths', paths: [path] }, context);
+  fromGeometry(taggedPaths({}, [path]), context);
 Shape.fromPaths = (paths, context) =>
-  fromGeometry({ type: 'paths', paths: paths }, context);
+  fromGeometry(taggedPaths({}, paths), context);
 Shape.fromPathToSurface = (path, context) =>
   fromGeometry(fromPathToSurface(path), context);
 Shape.fromPathToZ0Surface = (path, context) =>
@@ -137,20 +141,20 @@ Shape.fromPathsToSurface = (paths, context) =>
 Shape.fromPathsToZ0Surface = (paths, context) =>
   fromGeometry(fromPathsToZ0Surface(paths), context);
 Shape.fromPoint = (point, context) =>
-  fromGeometry({ type: 'points', points: [point] }, context);
+  fromGeometry(taggedPoints({}, [point]), context);
 Shape.fromPoints = (points, context) =>
-  fromGeometry({ type: 'points', points: points }, context);
+  fromGeometry(taggedPoints({}, points), context);
 Shape.fromPolygonsToSolid = (polygons, context) =>
   fromGeometry(
-    { type: 'solid', solid: fromPolygonsToSolid({}, polygons) },
+    taggedSolid({}, fromPolygonsToSolid(polygons)),
     context
   );
 Shape.fromPolygonsToZ0Surface = (polygons, context) =>
-  fromGeometry({ type: 'z0Surface', z0Surface: polygons }, context);
+  fromGeometry(taggedZ0Surface({}, polygons), context);
 Shape.fromSurfaces = (surfaces, context) =>
-  fromGeometry({ type: 'solid', solid: surfaces }, context);
+  fromGeometry(taggedSolid({}, surfaces), context);
 Shape.fromSolid = (solid, context) =>
-  fromGeometry({ type: 'solid', solid }, context);
+  fromGeometry(taggedSolid({}, solid), context);
 
 export const fromGeometry = Shape.fromGeometry;
 export const toGeometry = (shape) => shape.toGeometry();

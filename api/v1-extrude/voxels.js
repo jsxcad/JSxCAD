@@ -7,6 +7,7 @@ import {
   measureBoundingBox,
   measureHeights,
   taggedPoints,
+  taggedSolid,
 } from '@jsxcad/geometry-tagged';
 
 import { Shape } from '@jsxcad/api-v1-shape';
@@ -86,10 +87,7 @@ export const voxels = (shape, resolution = 1) => {
       }
     }
   }
-  return Shape.fromGeometry({
-    type: 'solid',
-    solid: fromPolygons({}, polygons),
-  });
+  return Shape.fromGeometry(taggedSolid({}, fromPolygons(polygons)));
 };
 
 const voxelsMethod = function (...args) {

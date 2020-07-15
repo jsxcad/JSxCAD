@@ -14,7 +14,7 @@ const eachPoint = (thunk, points) => {
   }
 };
 
-const fromPolygons = (options = {}, polygons) => {
+const fromPolygons = (polygons) => {
   const points = [];
   for (const polygon of polygons) {
     for (const point of polygon) {

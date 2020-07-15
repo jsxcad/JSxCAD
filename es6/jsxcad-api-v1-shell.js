@@ -1,10 +1,40 @@
-import Shape$1, { Shape } from './jsxcad-api-v1-shape.js';
+import Shape, { Shape as Shape$1 } from './jsxcad-api-v1-shape.js';
+import { grow as grow$1, getSolids, getAnySurfaces, outline as outline$1, transform } from './jsxcad-geometry-tagged.js';
+import { outline, Hull } from './jsxcad-api-v1-extrude.js';
 import { Sphere, Union, Circle, Assembly } from './jsxcad-api-v1-shapes.js';
-import { getSolids, getAnySurfaces, outline, transform } from './jsxcad-geometry-tagged.js';
-import { Hull, outline as outline$1 } from './jsxcad-api-v1-extrude.js';
 import { getEdges } from './jsxcad-geometry-path.js';
 import { toPlane } from './jsxcad-geometry-surface.js';
 import { toXYPlaneTransforms } from './jsxcad-math-plane.js';
+
+const grow = (shape, amount = 0) =>
+  Shape.fromGeometry(grow$1(shape.toGeometry(), amount));
+
+const growMethod = function (amount = 0) { return grow(this, amount); };
+Shape.prototype.grow = growMethod;
+
+/*
+import shell from './shell.js';
+
+export const grow = (shape, amount = 1, { resolution = 16 } = {}) =>
+  amount >= 0
+    ? shape.union(shell(shape, amount, resolution))
+    : shape.cut(shell(shape, -amount, resolution));
+
+const growMethod = function (...args) {
+  return grow(this, ...args);
+};
+Shape.prototype.grow = growMethod;
+
+export default grow;
+*/
+
+const offset = (shape, radius = 1, resolution = 16) =>
+  outline(grow(shape, radius));
+
+const offsetMethod = function (radius, resolution) {
+  return offset(this, radius, resolution);
+};
+Shape$1.prototype.offset = offsetMethod;
 
 /**
  *
@@ -52,7 +82,7 @@ const shell = (shape, radius = 1, resolution = 8) => {
     }
     const [to, from] = toXYPlaneTransforms(plane);
     const pieces = [];
-    for (const { paths } of outline(transform(to, geometry))) {
+    for (const { paths } of outline$1(transform(to, geometry))) {
       for (const path of paths) {
         for (const edge of getEdges(path)) {
           // FIX: Handle non-z0-surfaces properly.
@@ -76,85 +106,23 @@ const shell = (shape, radius = 1, resolution = 8) => {
 const shellMethod = function (radius, resolution) {
   return shell(this, radius, resolution);
 };
-Shape.prototype.shell = shellMethod;
+Shape$1.prototype.shell = shellMethod;
 
 const outerShellMethod = function (radius, resolution) {
   return shell(this, radius, resolution).cut(this);
 };
-Shape.prototype.outerShell = outerShellMethod;
+Shape$1.prototype.outerShell = outerShellMethod;
 
 const innerShellMethod = function (radius, resolution) {
   return shell(this, radius, resolution).clip(this);
 };
-Shape.prototype.innerShell = innerShellMethod;
-
-/**
- *
- * # grow
- *
- * Moves the edges of the shape inward by the specified amount.
- *
- * ::: illustration { "view": { "position": [60, -60, 60], "target": [0, 0, 0] } }
- * ```
- * Cube(10).with(Cube(10).moveX(10).grow(2))
- * ```
- * :::
- **/
-
-const grow = (shape, amount = 1, { resolution = 16 } = {}) =>
-  amount >= 0
-    ? shape.union(shell(shape, amount, resolution))
-    : shape.cut(shell(shape, -amount, resolution));
-
-const growMethod = function (...args) {
-  return grow(this, ...args);
-};
-Shape$1.prototype.grow = growMethod;
-
-const offset = (shape, radius = 1, resolution = 16) =>
-  outline$1(grow(shape, radius, resolution));
-
-const offsetMethod = function (radius, resolution) {
-  return offset(this, radius, resolution);
-};
-Shape.prototype.offset = offsetMethod;
-
-/**
- *
- * # shrink
- *
- * Moves the edges of the shape inward by the specified amount.
- *
- * ::: illustration { "view": { "position": [60, -60, 60], "target": [0, 0, 0] } }
- * ```
- * Cube(10).wireframe().with(Cube(10).shrink(2))
- * ```
- * :::
- **/
-
-const byRadius = (shape, amount = 1, { resolution = 16 } = {}) =>
-  grow(shape, -amount, resolution);
-
-const shrink = (...args) => byRadius(...args);
-
-shrink.byRadius = byRadius;
-
-const shrinkMethod = function (radius, resolution) {
-  return shrink(this, radius, resolution);
-};
-Shape$1.prototype.shrink = shrinkMethod;
-
-shrink.signature =
-  'shrink(shape:Shape, amount:number = 1, { resolution:number = 16 }) -> Shape';
-shrinkMethod.signature =
-  'Shape -> shrink(amount:number = 1, { resolution:number = 16 }) -> Shape';
+Shape$1.prototype.innerShell = innerShellMethod;
 
 const api = {
   grow,
   offset,
   shell,
-  shrink,
 };
 
 export default api;
-export { grow, offset, shell, shrink };
+export { grow, offset, shell };

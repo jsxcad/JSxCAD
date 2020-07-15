@@ -49,7 +49,7 @@ test.beforeEach(async (t) => {
 
 test('Geometric Skew', (t) => {
   const solid = deform(
-    fromPolygons({}, cubePolygons),
+    fromPolygons(cubePolygons),
     ([x, y, z]) => [x * z, y * z, z],
     [-1, -1, -1],
     [1, 1, 1],

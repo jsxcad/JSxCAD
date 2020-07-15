@@ -105,6 +105,11 @@ const fromBoundingBoxes = (
   return bsp;
 };
 
+/**
+ * Builds a BspTree from polygon soup.
+ * The bsp tree is constructed from the planes of the polygons.
+ * The polygons allow us to determine when a half-plane is uninhabited.
+ */
 const fromPolygonsToBspTree = (polygons, normalize) => {
   if (polygons.length === 0) {
     // Everything is outside of an empty geometry.

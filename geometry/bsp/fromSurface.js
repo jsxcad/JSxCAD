@@ -7,7 +7,7 @@ import {
 import { fromPolygons } from './bsp.js';
 import { getEdges } from '@jsxcad/geometry-path';
 
-const large = 1e10;
+const LARGE = 1e10;
 
 export const fromSurface = (surface, normalize) => {
   const polygons = [];
@@ -16,8 +16,8 @@ export const fromSurface = (surface, normalize) => {
     // The surface is degenerate.
     return fromPolygons([]);
   }
-  const top = scale(large, normal);
-  const bottom = scale(-large, normal);
+  const top = scale(LARGE, normal);
+  const bottom = scale(-LARGE, normal);
   for (const path of outlineSurface(surface, normalize)) {
     for (const [start, end] of getEdges(path)) {
       // Build a large wall.

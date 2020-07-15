@@ -18296,47 +18296,6 @@ function useEventCallback(fn) {
   }, [ref]);
 }
 
-var rHyphen = /-(.)/g;
-function camelize(string) {
-  return string.replace(rHyphen, function (_, chr) {
-    return chr.toUpperCase();
-  });
-}
-
-var forwardRef_1 = createCommonjsModule(function (module, exports) {
-
-exports.__esModule = true;
-exports.default = forwardRef;
-
-var _react = _interopRequireDefault(react);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function forwardRef(renderFn, _temp) {
-  var _ref = _temp === void 0 ? {} : _temp,
-      propTypes = _ref.propTypes,
-      defaultProps = _ref.defaultProps,
-      _ref$allowFallback = _ref.allowFallback,
-      allowFallback = _ref$allowFallback === void 0 ? false : _ref$allowFallback,
-      _ref$displayName = _ref.displayName,
-      displayName = _ref$displayName === void 0 ? renderFn.name || renderFn.displayName : _ref$displayName;
-
-  var render = function render(props, ref) {
-    return renderFn(props, ref);
-  };
-
-  return Object.assign(_react.default.forwardRef || !allowFallback ? _react.default.forwardRef(render) : function (props) {
-    return render(props, null);
-  }, {
-    displayName: displayName,
-    propTypes: propTypes,
-    defaultProps: defaultProps
-  });
-}
-});
-
-var forwardRef = unwrapExports(forwardRef_1);
-
 var ThemeContext = react.createContext({});
 var Consumer = ThemeContext.Consumer,
     Provider = ThemeContext.Provider;
@@ -18345,70 +18304,6 @@ function useBootstrapPrefix(prefix, defaultPrefix) {
   var prefixes = react_13(ThemeContext);
   return prefix || prefixes[defaultPrefix] || defaultPrefix;
 }
-
-function createBootstrapComponent(Component, opts) {
-  if (typeof opts === 'string') opts = {
-    prefix: opts
-  };
-  var isClassy = Component.prototype && Component.prototype.isReactComponent; // If it's a functional component make sure we don't break it with a ref
-
-  var _opts = opts,
-      prefix = _opts.prefix,
-      _opts$forwardRefAs = _opts.forwardRefAs,
-      forwardRefAs = _opts$forwardRefAs === void 0 ? isClassy ? 'ref' : 'innerRef' : _opts$forwardRefAs;
-  return forwardRef(function (_ref2, ref) {
-    var props = _extends({}, _ref2);
-
-    props[forwardRefAs] = ref; // eslint-disable-next-line react/prop-types
-
-    var bsPrefix = useBootstrapPrefix(props.bsPrefix, prefix);
-    return /*#__PURE__*/react.createElement(Component, _extends({}, props, {
-      bsPrefix: bsPrefix
-    }));
-  }, {
-    displayName: "Bootstrap(" + (Component.displayName || Component.name) + ")"
-  });
-}
-
-var pascalCase = function pascalCase(str) {
-  return str[0].toUpperCase() + camelize(str).slice(1);
-};
-
-function createWithBsPrefix(prefix, _temp) {
-  var _ref = _temp === void 0 ? {} : _temp,
-      _ref$displayName = _ref.displayName,
-      displayName = _ref$displayName === void 0 ? pascalCase(prefix) : _ref$displayName,
-      _ref$Component = _ref.Component,
-      Component = _ref$Component === void 0 ? 'div' : _ref$Component,
-      defaultProps = _ref.defaultProps;
-
-  var BsComponent = react.forwardRef( // eslint-disable-next-line react/prop-types
-  function (_ref2, ref) {
-    var className = _ref2.className,
-        bsPrefix = _ref2.bsPrefix,
-        _ref2$as = _ref2.as,
-        Tag = _ref2$as === void 0 ? Component : _ref2$as,
-        props = _objectWithoutPropertiesLoose(_ref2, ["className", "bsPrefix", "as"]);
-
-    var resolvedPrefix = useBootstrapPrefix(bsPrefix, prefix);
-    return /*#__PURE__*/react.createElement(Tag, _extends({
-      ref: ref,
-      className: classnames(className, resolvedPrefix)
-    }, props));
-  });
-  BsComponent.defaultProps = defaultProps;
-  BsComponent.displayName = displayName;
-  return BsComponent;
-}
-
-var divWithClassName = (function (className) {
-  return react.forwardRef(function (p, ref) {
-    return /*#__PURE__*/react.createElement("div", _extends({}, p, {
-      ref: ref,
-      className: classnames(p.className, className)
-    }));
-  });
-});
 
 var canUseDOM = !!(typeof window !== 'undefined' && window.document && window.document.createElement);
 
@@ -18421,7 +18316,7 @@ function ownerWindow(node) {
   return doc && doc.defaultView || window;
 }
 
-function getComputedStyle$1(node, psuedoElement) {
+function getComputedStyle(node, psuedoElement) {
   return ownerWindow(node).getComputedStyle(node, psuedoElement);
 }
 
@@ -18450,7 +18345,7 @@ function style(node, property) {
   var transforms = '';
 
   if (typeof property === 'string') {
-    return node.style.getPropertyValue(hyphenateStyleName(property)) || getComputedStyle$1(node).getPropertyValue(hyphenateStyleName(property));
+    return node.style.getPropertyValue(hyphenateStyleName(property)) || getComputedStyle(node).getPropertyValue(hyphenateStyleName(property));
   }
 
   Object.keys(property).forEach(function (key) {
@@ -45580,7 +45475,8 @@ Transition.EXITING = EXITING;
 // reading a dimension prop will cause the browser to recalculate,
 // which will let our animations work
 function triggerBrowserReflow(node) {
-  node.offsetHeight; // eslint-disable-line no-unused-expressions
+  // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+  node.offsetHeight;
 }
 
 var _fadeStyles;
@@ -45643,6 +45539,52 @@ CloseButton.displayName = 'CloseButton';
 CloseButton.propTypes = propTypes$1;
 CloseButton.defaultProps = defaultProps$1;
 
+var divWithClassName = (function (className) {
+  return react.forwardRef(function (p, ref) {
+    return /*#__PURE__*/react.createElement("div", _extends({}, p, {
+      ref: ref,
+      className: classnames(p.className, className)
+    }));
+  });
+});
+
+var rHyphen = /-(.)/g;
+function camelize(string) {
+  return string.replace(rHyphen, function (_, chr) {
+    return chr.toUpperCase();
+  });
+}
+
+var pascalCase = function pascalCase(str) {
+  return str[0].toUpperCase() + camelize(str).slice(1);
+};
+
+// TODO: emstricten & fix the typing here! `createWithBsPrefix<TElementType>...`
+function createWithBsPrefix(prefix, _temp) {
+  var _ref = _temp === void 0 ? {} : _temp,
+      _ref$displayName = _ref.displayName,
+      displayName = _ref$displayName === void 0 ? pascalCase(prefix) : _ref$displayName,
+      Component = _ref.Component,
+      defaultProps = _ref.defaultProps;
+
+  var BsComponent = react.forwardRef(function (_ref2, ref) {
+    var className = _ref2.className,
+        bsPrefix = _ref2.bsPrefix,
+        _ref2$as = _ref2.as,
+        Tag = _ref2$as === void 0 ? Component || 'div' : _ref2$as,
+        props = _objectWithoutPropertiesLoose(_ref2, ["className", "bsPrefix", "as"]);
+
+    var resolvedPrefix = useBootstrapPrefix(bsPrefix, prefix);
+    return /*#__PURE__*/react.createElement(Tag, _extends({
+      ref: ref,
+      className: classnames(className, resolvedPrefix)
+    }, props));
+  });
+  BsComponent.defaultProps = defaultProps;
+  BsComponent.displayName = displayName;
+  return BsComponent;
+}
+
 /**
  * Safe chained function
  *
@@ -45670,7 +45612,9 @@ function createChainedFunction() {
         args[_key2] = arguments[_key2];
       }
 
-      acc.apply(this, args);
+      // @ts-ignore
+      acc.apply(this, args); // @ts-ignore
+
       f.apply(this, args);
     };
   }, null);
@@ -45741,16 +45685,23 @@ var SafeAnchor = react.forwardRef(function (_ref, ref) {
 });
 SafeAnchor.displayName = 'SafeAnchor';
 
+var DivStyledAsH4 = divWithClassName('h4');
+DivStyledAsH4.displayName = 'DivStyledAsH4';
+var AlertHeading = createWithBsPrefix('alert-heading', {
+  Component: DivStyledAsH4
+});
+var AlertLink = createWithBsPrefix('alert-link', {
+  Component: SafeAnchor
+});
 var defaultProps$2 = {
   show: true,
   transition: Fade,
   closeLabel: 'Close alert'
 };
-var controllables = {
-  show: 'onClose'
-};
 var Alert = react.forwardRef(function (uncontrolledProps, ref) {
-  var _useUncontrolled = useUncontrolled(uncontrolledProps, controllables),
+  var _useUncontrolled = useUncontrolled(uncontrolledProps, {
+    show: 'onClose'
+  }),
       bsPrefix = _useUncontrolled.bsPrefix,
       show = _useUncontrolled.show,
       closeLabel = _useUncontrolled.closeLabel,
@@ -45759,13 +45710,16 @@ var Alert = react.forwardRef(function (uncontrolledProps, ref) {
       variant = _useUncontrolled.variant,
       onClose = _useUncontrolled.onClose,
       dismissible = _useUncontrolled.dismissible,
-      Transition = _useUncontrolled.transition,
+      transition = _useUncontrolled.transition,
       props = _objectWithoutPropertiesLoose(_useUncontrolled, ["bsPrefix", "show", "closeLabel", "className", "children", "variant", "onClose", "dismissible", "transition"]);
 
   var prefix = useBootstrapPrefix(bsPrefix, 'alert');
   var handleClose = useEventCallback(function (e) {
-    onClose(false, e);
+    if (onClose) {
+      onClose(false, e);
+    }
   });
+  var Transition = transition === true ? Fade : transition;
   var alert = /*#__PURE__*/react.createElement("div", _extends({
     role: "alert"
   }, Transition ? props : undefined, {
@@ -45779,25 +45733,19 @@ var Alert = react.forwardRef(function (uncontrolledProps, ref) {
   return /*#__PURE__*/react.createElement(Transition, _extends({
     unmountOnExit: true
   }, props, {
+    ref: undefined,
     in: show
   }), alert);
 });
-var DivStyledAsH4 = divWithClassName('h4');
-DivStyledAsH4.displayName = 'DivStyledAsH4';
 Alert.displayName = 'Alert';
 Alert.defaultProps = defaultProps$2;
-Alert.Link = createWithBsPrefix('alert-link', {
-  Component: SafeAnchor
-});
-Alert.Heading = createWithBsPrefix('alert-heading', {
-  Component: DivStyledAsH4
-});
+Alert.Link = AlertLink;
+Alert.Heading = AlertHeading;
 
 var defaultProps$3 = {
   variant: 'primary',
   active: false,
-  disabled: false,
-  type: 'button'
+  disabled: false
 };
 var Button = react.forwardRef(function (_ref, ref) {
   var bsPrefix = _ref.bsPrefix,
@@ -45825,8 +45773,10 @@ var Button = react.forwardRef(function (_ref, ref) {
     props.ref = ref;
   }
 
-  if (!as) {
+  if (type) {
     props.type = type;
+  } else if (!as) {
+    props.type = 'button';
   }
 
   var Component = as || 'button';
@@ -45842,15 +45792,15 @@ var defaultProps$4 = {
   toggle: false,
   role: 'group'
 };
-var ButtonGroup = react.forwardRef(function (props, ref) {
-  var bsPrefix = props.bsPrefix,
-      size = props.size,
-      toggle = props.toggle,
-      vertical = props.vertical,
-      className = props.className,
-      _props$as = props.as,
-      Component = _props$as === void 0 ? 'div' : _props$as,
-      rest = _objectWithoutPropertiesLoose(props, ["bsPrefix", "size", "toggle", "vertical", "className", "as"]);
+var ButtonGroup = react.forwardRef(function (_ref, ref) {
+  var bsPrefix = _ref.bsPrefix,
+      size = _ref.size,
+      toggle = _ref.toggle,
+      vertical = _ref.vertical,
+      className = _ref.className,
+      _ref$as = _ref.as,
+      Component = _ref$as === void 0 ? 'div' : _ref$as,
+      rest = _objectWithoutPropertiesLoose(_ref, ["bsPrefix", "size", "toggle", "vertical", "className", "as"]);
 
   var prefix = useBootstrapPrefix(bsPrefix, 'btn-group');
   var baseClass = prefix;
@@ -45878,9 +45828,11 @@ function (_ref, ref) {
   DEVICE_SIZES.forEach(function (brkPoint) {
     var propValue = props[brkPoint];
     delete props[brkPoint];
-    var span, offset, order;
+    var span;
+    var offset;
+    var order;
 
-    if (propValue != null && typeof propValue === 'object') {
+    if (typeof propValue === 'object' && propValue != null) {
       var _propValue$span = propValue.span;
       span = _propValue$span === void 0 ? true : _propValue$span;
       offset = propValue.offset;
@@ -45890,7 +45842,7 @@ function (_ref, ref) {
     }
 
     var infix = brkPoint !== 'xs' ? "-" + brkPoint : '';
-    if (span != null) spans.push(span === true ? "" + prefix + infix : "" + prefix + infix + "-" + span);
+    if (span) spans.push(span === true ? "" + prefix + infix : "" + prefix + infix + "-" + span);
     if (order != null) classes.push("order" + infix + "-" + order);
     if (offset != null) classes.push("offset" + infix + "-" + offset);
   });
@@ -46030,7 +45982,7 @@ function useForceUpdate() {
   return dispatch;
 }
 
-var DropdownContext = react.createContext(null);
+var DropdownContext = /*#__PURE__*/react.createContext(null);
 
 /**
  * Track whether a component is current mounted. Generally less preferable than
@@ -46161,7 +46113,7 @@ function getNodeName(element) {
   return element ? (element.nodeName || '').toLowerCase() : null;
 }
 
-function getComputedStyle$2(element) {
+function getComputedStyle$1(element) {
   return getWindow(element).getComputedStyle(element);
 }
 
@@ -46208,7 +46160,7 @@ function getParentNode(element) {
 
 function getTrueOffsetParent(element) {
   if (!isHTMLElement(element) || // https://github.com/popperjs/popper-core/issues/837
-  getComputedStyle$2(element).position === 'fixed') {
+  getComputedStyle$1(element).position === 'fixed') {
     return null;
   }
 
@@ -46217,7 +46169,7 @@ function getTrueOffsetParent(element) {
   if (offsetParent) {
     var html = getDocumentElement(offsetParent);
 
-    if (getNodeName(offsetParent) === 'body' && getComputedStyle$2(offsetParent).position === 'static' && getComputedStyle$2(html).position !== 'static') {
+    if (getNodeName(offsetParent) === 'body' && getComputedStyle$1(offsetParent).position === 'static' && getComputedStyle$1(html).position !== 'static') {
       return html;
     }
   }
@@ -46231,7 +46183,7 @@ function getContainingBlock(element) {
   var currentNode = getParentNode(element);
 
   while (isHTMLElement(currentNode) && ['html', 'body'].indexOf(getNodeName(currentNode)) < 0) {
-    var css = getComputedStyle$2(currentNode); // This is non-exhaustive but covers the most common CSS properties that
+    var css = getComputedStyle$1(currentNode); // This is non-exhaustive but covers the most common CSS properties that
     // create a containing block.
 
     if (css.transform !== 'none' || css.perspective !== 'none' || css.willChange && css.willChange !== 'auto') {
@@ -46250,11 +46202,11 @@ function getOffsetParent(element) {
   var window = getWindow(element);
   var offsetParent = getTrueOffsetParent(element);
 
-  while (offsetParent && isTableElement(offsetParent) && getComputedStyle$2(offsetParent).position === 'static') {
+  while (offsetParent && isTableElement(offsetParent) && getComputedStyle$1(offsetParent).position === 'static') {
     offsetParent = getTrueOffsetParent(offsetParent);
   }
 
-  if (offsetParent && getNodeName(offsetParent) === 'body' && getComputedStyle$2(offsetParent).position === 'static') {
+  if (offsetParent && getNodeName(offsetParent) === 'body' && getComputedStyle$1(offsetParent).position === 'static') {
     return window;
   }
 
@@ -46464,7 +46416,7 @@ function computeStyles(_ref3) {
       adaptive = _options$adaptive === void 0 ? true : _options$adaptive;
 
   {
-    var transitionProperty = getComputedStyle$2(state.elements.popper).transitionProperty || '';
+    var transitionProperty = getComputedStyle$1(state.elements.popper).transitionProperty || '';
 
     if (adaptive && ['transform', 'top', 'right', 'bottom', 'left'].some(function (property) {
       return transitionProperty.indexOf(property) >= 0;
@@ -46664,7 +46616,7 @@ function getDocumentRect(element) {
   var x = -winScroll.scrollLeft + getWindowScrollBarX(element);
   var y = -winScroll.scrollTop;
 
-  if (getComputedStyle$2(body || html).direction === 'rtl') {
+  if (getComputedStyle$1(body || html).direction === 'rtl') {
     x += Math.max(html.clientWidth, body ? body.clientWidth : 0) - width;
   }
 
@@ -46678,7 +46630,7 @@ function getDocumentRect(element) {
 
 function isScrollParent(element) {
   // Firefox wants us to check `-x` and `-y` variations as well
-  var _getComputedStyle = getComputedStyle$2(element),
+  var _getComputedStyle = getComputedStyle$1(element),
       overflow = _getComputedStyle.overflow,
       overflowX = _getComputedStyle.overflowX,
       overflowY = _getComputedStyle.overflowY;
@@ -46751,7 +46703,7 @@ function getClientRectFromMixedType(element, clippingParent) {
 
 function getClippingParents(element) {
   var clippingParents = listScrollParents(getParentNode(element));
-  var canEscapeClipping = ['absolute', 'fixed'].indexOf(getComputedStyle$2(element).position) >= 0;
+  var canEscapeClipping = ['absolute', 'fixed'].indexOf(getComputedStyle$1(element).position) >= 0;
   var clipperElement = canEscapeClipping && isHTMLElement(element) ? getOffsetParent(element) : element;
 
   if (!isElement(clipperElement)) {
@@ -47656,7 +47608,7 @@ function popperGenerator(generatorOptions) {
             }
           }
 
-          var _getComputedStyle = getComputedStyle$2(popper),
+          var _getComputedStyle = getComputedStyle$1(popper),
               marginTop = _getComputedStyle.marginTop,
               marginRight = _getComputedStyle.marginRight,
               marginBottom = _getComputedStyle.marginBottom,
@@ -47821,40 +47773,22 @@ var createPopper = popperGenerator({
   defaultModifiers: [hide$1, popperOffsets$1, computeStyles$1, eventListeners, offset$1, flip$1, preventOverflow$1, arrow$1]
 });
 
-var initialPopperStyles = {
-  position: 'absolute',
-  top: '0',
-  left: '0',
-  opacity: '0',
-  pointerEvents: 'none'
+var initialPopperStyles = function initialPopperStyles(position) {
+  return {
+    position: position,
+    top: '0',
+    left: '0',
+    opacity: '0',
+    pointerEvents: 'none'
+  };
 };
-var initialArrowStyles = {}; // until docjs supports type exports...
 
-function toModifierMap(modifiers) {
-  var result = {};
+var disabledApplyStylesModifier = {
+  name: 'applyStyles',
+  enabled: false
+}; // until docjs supports type exports...
 
-  if (!Array.isArray(modifiers)) {
-    return modifiers || result;
-  } // eslint-disable-next-line no-unused-expressions
-
-
-  modifiers == null ? void 0 : modifiers.forEach(function (m) {
-    result[m.name] = m;
-  });
-  return result;
-}
-function toModifierArray(map) {
-  if (map === void 0) {
-    map = {};
-  }
-
-  if (Array.isArray(map)) return map;
-  return Object.keys(map).map(function (k) {
-    map[k].name = k;
-    return map[k];
-  });
-}
-
+var EMPTY_MODIFIERS = [];
 /**
  * Position an element relative some reference element using Popper.js
  *
@@ -47871,6 +47805,7 @@ function toModifierArray(map) {
  *
  * @returns {UsePopperState} The popper state
  */
+
 function usePopper(referenceElement, popperElement, _temp) {
   var _ref = _temp === void 0 ? {} : _temp,
       _ref$enabled = _ref.enabled,
@@ -47879,83 +47814,75 @@ function usePopper(referenceElement, popperElement, _temp) {
       placement = _ref$placement === void 0 ? 'bottom' : _ref$placement,
       _ref$strategy = _ref.strategy,
       strategy = _ref$strategy === void 0 ? 'absolute' : _ref$strategy,
-      _ref$eventsEnabled = _ref.eventsEnabled,
-      eventsEnabled = _ref$eventsEnabled === void 0 ? true : _ref$eventsEnabled,
-      userModifiers = _ref.modifiers,
-      popperOptions = _objectWithoutPropertiesLoose(_ref, ["enabled", "placement", "strategy", "eventsEnabled", "modifiers"]);
+      _ref$modifiers = _ref.modifiers,
+      modifiers = _ref$modifiers === void 0 ? EMPTY_MODIFIERS : _ref$modifiers,
+      config = _objectWithoutPropertiesLoose(_ref, ["enabled", "placement", "strategy", "modifiers"]);
 
   var popperInstanceRef = react_15();
-  var scheduleUpdate = react_9(function () {
-    if (popperInstanceRef.current) {
-      popperInstanceRef.current.update();
-    }
+  var update = react_9(function () {
+    var _popperInstanceRef$cu;
+
+    (_popperInstanceRef$cu = popperInstanceRef.current) == null ? void 0 : _popperInstanceRef$cu.update();
+  }, []);
+  var forceUpdate = react_9(function () {
+    var _popperInstanceRef$cu2;
+
+    (_popperInstanceRef$cu2 = popperInstanceRef.current) == null ? void 0 : _popperInstanceRef$cu2.forceUpdate();
   }, []);
 
   var _useSafeState = useSafeState(react_16({
     placement: placement,
-    scheduleUpdate: scheduleUpdate,
-    outOfBoundaries: false,
-    styles: initialPopperStyles,
-    arrowStyles: initialArrowStyles
+    update: update,
+    forceUpdate: forceUpdate,
+    attributes: {},
+    styles: {
+      popper: initialPopperStyles(strategy),
+      arrow: {}
+    }
   })),
-      state = _useSafeState[0],
+      popperState = _useSafeState[0],
       setState = _useSafeState[1];
 
   var updateModifier = react_12(function () {
     return {
       name: 'updateStateModifier',
       enabled: true,
-      phase: 'afterWrite',
+      phase: 'write',
       requires: ['computeStyles'],
-      fn: function fn(data) {
-        var _data$state$modifiers, _data$state$styles, _data$state$styles2;
-
+      fn: function fn(_ref2) {
+        var state = _ref2.state;
+        var styles = {};
+        var attributes = {};
+        Object.keys(state.elements).forEach(function (element) {
+          styles[element] = state.styles[element];
+          attributes[element] = state.attributes[element];
+        });
         setState({
-          scheduleUpdate: scheduleUpdate,
-          outOfBoundaries: !!((_data$state$modifiers = data.state.modifiersData.hide) == null ? void 0 : _data$state$modifiers.isReferenceHidden),
-          placement: data.state.placement,
-          styles: _extends({}, (_data$state$styles = data.state.styles) == null ? void 0 : _data$state$styles.popper),
-          arrowStyles: _extends({}, (_data$state$styles2 = data.state.styles) == null ? void 0 : _data$state$styles2.arrow),
-          state: data.state
+          state: state,
+          styles: styles,
+          attributes: attributes,
+          update: update,
+          forceUpdate: forceUpdate,
+          placement: state.placement
         });
       }
     };
-  }, [scheduleUpdate, setState]);
-  var modifiers = toModifierArray(userModifiers);
-  var eventsModifier = modifiers.find(function (m) {
-    return m.name === 'eventListeners';
-  });
-
-  if (!eventsModifier && eventsEnabled) {
-    eventsModifier = {
-      name: 'eventListeners',
-      enabled: true
-    };
-    modifiers = [].concat(modifiers, [eventsModifier]);
-  } // A placement difference in state means popper determined a new placement
-  // apart from the props value. By the time the popper element is rendered with
-  // the new position Popper has already measured it, if the place change triggers
-  // a size change it will result in a misaligned popper. So we schedule an update to be sure.
-
-
-  react_10(function () {
-    scheduleUpdate();
-  }, [state.placement, scheduleUpdate]);
+  }, [update, forceUpdate, setState]);
   react_10(function () {
     if (!popperInstanceRef.current || !enabled) return;
     popperInstanceRef.current.setOptions({
       placement: placement,
       strategy: strategy,
-      modifiers: [].concat(modifiers, [updateModifier])
+      modifiers: [].concat(modifiers, [updateModifier, disabledApplyStylesModifier])
     }); // intentionally NOT re-running on new modifiers
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [strategy, placement, eventsModifier.enabled, updateModifier, enabled]);
+  }, [strategy, placement, updateModifier, enabled]);
   react_10(function () {
     if (!enabled || referenceElement == null || popperElement == null) {
       return undefined;
     }
 
-    popperInstanceRef.current = createPopper(referenceElement, popperElement, _extends(_extends({}, popperOptions), {}, {
+    popperInstanceRef.current = createPopper(referenceElement, popperElement, _extends({}, config, {
       placement: placement,
       strategy: strategy,
       modifiers: [].concat(modifiers, [updateModifier])
@@ -47965,16 +47892,18 @@ function usePopper(referenceElement, popperElement, _temp) {
         popperInstanceRef.current.destroy();
         popperInstanceRef.current = undefined;
         setState(function (s) {
-          return _extends(_extends({}, s), {}, {
-            styles: initialPopperStyles,
-            arrowStyles: initialArrowStyles
+          return _extends({}, s, {
+            attributes: {},
+            styles: {
+              popper: initialPopperStyles(strategy)
+            }
           });
         });
       }
     }; // This is only run once to _create_ the popper
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [enabled, referenceElement, popperElement]);
-  return state;
+  return popperState;
 }
 
 /* eslint-disable no-bitwise, no-cond-assign */
@@ -48121,11 +48050,79 @@ function useRootClose(ref, onRootClose, _temp) {
   }, [ref, disabled, clickTrigger, handleMouseCapture, handleMouse, handleKeyUp]);
 }
 
+function toModifierMap(modifiers) {
+  var result = {};
+
+  if (!Array.isArray(modifiers)) {
+    return modifiers || result;
+  } // eslint-disable-next-line no-unused-expressions
+
+
+  modifiers == null ? void 0 : modifiers.forEach(function (m) {
+    result[m.name] = m;
+  });
+  return result;
+}
+function toModifierArray(map) {
+  if (map === void 0) {
+    map = {};
+  }
+
+  if (Array.isArray(map)) return map;
+  return Object.keys(map).map(function (k) {
+    map[k].name = k;
+    return map[k];
+  });
+}
+function mergeOptionsWithPopperConfig(_ref) {
+  var _modifiers$preventOve, _modifiers$preventOve2, _modifiers$offset, _modifiers$arrow;
+
+  var enabled = _ref.enabled,
+      enableEvents = _ref.enableEvents,
+      placement = _ref.placement,
+      flip = _ref.flip,
+      offset = _ref.offset,
+      containerPadding = _ref.containerPadding,
+      arrowElement = _ref.arrowElement,
+      _ref$popperConfig = _ref.popperConfig,
+      popperConfig = _ref$popperConfig === void 0 ? {} : _ref$popperConfig;
+  var modifiers = toModifierMap(popperConfig.modifiers);
+  return _extends({}, popperConfig, {
+    placement: placement,
+    enabled: enabled,
+    modifiers: toModifierArray(_extends({}, modifiers, {
+      eventListeners: {
+        enabled: enableEvents
+      },
+      preventOverflow: _extends({}, modifiers.preventOverflow, {
+        options: containerPadding ? _extends({
+          padding: containerPadding
+        }, (_modifiers$preventOve = modifiers.preventOverflow) == null ? void 0 : _modifiers$preventOve.options) : (_modifiers$preventOve2 = modifiers.preventOverflow) == null ? void 0 : _modifiers$preventOve2.options
+      }),
+      offset: {
+        options: _extends({
+          offset: offset
+        }, (_modifiers$offset = modifiers.offset) == null ? void 0 : _modifiers$offset.options)
+      },
+      arrow: _extends({}, modifiers.arrow, {
+        enabled: !!arrowElement,
+        options: _extends({}, (_modifiers$arrow = modifiers.arrow) == null ? void 0 : _modifiers$arrow.options, {
+          element: arrowElement
+        })
+      }),
+      flip: _extends({
+        enabled: !!flip
+      }, modifiers.flip)
+    }))
+  });
+}
+
 var noop$4 = function noop() {};
 /**
  * @memberOf Dropdown
  * @param {object}  options
  * @param {boolean} options.flip Automatically adjust the menu `drop` position based on viewport edge detection
+ * @param {[number, number]} options.offset Define an offset distance between the Menu and the Toggle
  * @param {boolean} options.show Display the menu manually, ignored in the context of a `Dropdown`
  * @param {boolean} options.usePopper opt in/out of using PopperJS to position menus. When disabled you must position it yourself.
  * @param {string}  options.rootCloseEvent The pointer event to listen for when determining "clicks outside" the menu for triggering a close.
@@ -48134,8 +48131,6 @@ var noop$4 = function noop() {};
 
 
 function useDropdownMenu(options) {
-  var _modifiers$arrow;
-
   if (options === void 0) {
     options = {};
   }
@@ -48149,6 +48144,7 @@ function useDropdownMenu(options) {
   var hasShownRef = react_15(false);
   var _options = options,
       flip = _options.flip,
+      offset = _options.offset,
       rootCloseEvent = _options.rootCloseEvent,
       _options$popperConfig = _options.popperConfig,
       popperConfig = _options$popperConfig === void 0 ? {} : _options$popperConfig,
@@ -48173,25 +48169,20 @@ function useDropdownMenu(options) {
 
   var placement = alignEnd ? 'bottom-end' : 'bottom-start';
   if (drop === 'up') placement = alignEnd ? 'top-end' : 'top-start';else if (drop === 'right') placement = alignEnd ? 'right-end' : 'right-start';else if (drop === 'left') placement = alignEnd ? 'left-end' : 'left-start';
-  var modifiers = toModifierMap(popperConfig.modifiers);
-  var popper = usePopper(toggleElement, menuElement, _extends(_extends({}, popperConfig), {}, {
+
+  var _usePopper = usePopper(toggleElement, menuElement, mergeOptionsWithPopperConfig({
     placement: placement,
     enabled: !!(shouldUsePopper && show),
-    modifiers: _extends(_extends({}, modifiers), {}, {
-      eventListeners: {
-        enabled: !!show
-      },
-      arrow: _extends(_extends({}, modifiers.arrow), {}, {
-        enabled: !!arrowElement,
-        options: _extends(_extends({}, (_modifiers$arrow = modifiers.arrow) == null ? void 0 : _modifiers$arrow.options), {}, {
-          element: arrowElement
-        })
-      }),
-      flip: _extends({
-        enabled: !!flip
-      }, modifiers.flip)
-    })
-  }));
+    enableEvents: show,
+    offset: offset,
+    flip: flip,
+    arrowElement: arrowElement,
+    popperConfig: popperConfig
+  })),
+      styles = _usePopper.styles,
+      attributes = _usePopper.attributes,
+      popper = _objectWithoutPropertiesLoose(_usePopper, ["styles", "attributes"]);
+
   var menu;
   var menuProps = {
     ref: setMenu || noop$4,
@@ -48205,18 +48196,19 @@ function useDropdownMenu(options) {
   };
 
   if (!shouldUsePopper) {
-    menu = _extends(_extends({}, childArgs), {}, {
+    menu = _extends({}, childArgs, {
       props: menuProps
     });
   } else {
-    menu = _extends(_extends(_extends({}, popper), childArgs), {}, {
-      props: _extends(_extends({}, menuProps), {}, {
-        style: popper.styles
+    menu = _extends({}, popper, childArgs, {
+      props: _extends({}, menuProps, attributes.popper, {
+        style: styles.popper
       }),
-      arrowProps: {
-        ref: attachArrowRef,
-        style: popper.arrowStyles
-      }
+      arrowProps: _extends({
+        ref: attachArrowRef
+      }, attributes.arrow, {
+        style: styles.arrow
+      })
     });
   }
 
@@ -48236,8 +48228,8 @@ var propTypes$2 = {
    *   alignEnd: boolean,
    *   close: (?SyntheticEvent) => void,
    *   placement: Placement,
-   *   outOfBoundaries: ?boolean,
-   *   scheduleUpdate: () => void,
+   *   update: () => void,
+   *   forceUpdate: () => void,
    *   props: {
    *     ref: (?HTMLElement) => void,
    *     style: { [string]: string | number },
@@ -48594,13 +48586,18 @@ Dropdown.propTypes = propTypes$4;
 Dropdown.Menu = DropdownMenu;
 Dropdown.Toggle = DropdownToggle;
 
-var SelectableContext = react.createContext();
+var SelectableContext = react.createContext(null);
 var makeEventKey = function makeEventKey(eventKey, href) {
+  if (href === void 0) {
+    href = null;
+  }
+
   if (eventKey != null) return String(eventKey);
   return href || null;
 };
 
 var NavContext = react.createContext(null);
+NavContext.displayName = 'NavContext';
 
 var defaultProps$7 = {
   as: SafeAnchor,
@@ -48626,7 +48623,7 @@ var DropdownItem = react.forwardRef(function (_ref, ref) {
   var _ref2 = navContext || {},
       activeKey = _ref2.activeKey;
 
-  var key = makeEventKey(eventKey, href);
+  var key = makeEventKey(eventKey || null, href);
   var active = propActive == null && key != null ? makeEventKey(activeKey) === key : propActive;
   var handleClick = useEventCallback(function (event) {
     // SafeAnchor handles the disabled case, but we handle it here
@@ -48636,13 +48633,18 @@ var DropdownItem = react.forwardRef(function (_ref, ref) {
     if (onSelectCtx) onSelectCtx(key, event);
     if (onSelect) onSelect(key, event);
   });
-  return /*#__PURE__*/react.createElement(Component, _extends({}, props, {
-    ref: ref,
-    href: href,
-    disabled: disabled,
-    className: classnames(className, prefix, active && 'active', disabled && 'disabled'),
-    onClick: handleClick
-  }), children);
+  return (
+    /*#__PURE__*/
+    // "TS2604: JSX element type 'Component' does not have any construct or call signatures."
+    // @ts-ignore
+    react.createElement(Component, _extends({}, props, {
+      ref: ref,
+      href: href,
+      disabled: disabled,
+      className: classnames(className, prefix, active && 'active', disabled && 'disabled'),
+      onClick: handleClick
+    }), children)
+  );
 });
 DropdownItem.displayName = 'DropdownItem';
 DropdownItem.defaultProps = defaultProps$7;
@@ -48684,7 +48686,8 @@ function useMergedRefs(refA, refB) {
   }, [refA, refB]);
 }
 
-var NavbarContext = react.createContext(null);
+var context = react.createContext(null);
+context.displayName = 'NavbarContext';
 
 function useWrappedRefWithWarning(ref, componentName) {
 
@@ -48701,7 +48704,7 @@ function hasClass(element, className) {
 }
 
 function getMargins(element) {
-  var styles = getComputedStyle(element);
+  var styles = window.getComputedStyle(element);
   var top = parseFloat(styles.marginTop) || 0;
   var right = parseFloat(styles.marginRight) || 0;
   var bottom = parseFloat(styles.marginBottom) || 0;
@@ -48717,12 +48720,13 @@ function getMargins(element) {
 function usePopperMarginModifiers() {
   var overlayRef = react_15(null);
   var margins = react_15(null);
-  return [react_9(function (overlay) {
+  var callback = react_9(function (overlay) {
     if (!overlay || !(hasClass(overlay, 'popover') || hasClass(overlay, 'dropdown-menu'))) return;
     margins.current = getMargins(overlay);
-    overlay.style.margin = 0;
+    overlay.style.margin = '0';
     overlayRef.current = overlay;
-  }, []), [react_12(function () {
+  }, []);
+  var offset = react_12(function () {
     return {
       name: 'offset',
       options: {
@@ -48754,13 +48758,47 @@ function usePopperMarginModifiers() {
         }
       }
     };
-  }, [margins])]];
+  }, [margins]); // Converts popover arrow margin to arrow modifier padding
+
+  var popoverArrowMargins = react_12(function () {
+    return {
+      name: 'popoverArrowMargins',
+      enabled: true,
+      phase: 'main',
+      requiresIfExists: ['arrow'],
+      effect: function effect(_ref2) {
+        var state = _ref2.state;
+
+        if (!overlayRef.current || !state.elements.arrow || !hasClass(overlayRef.current, 'popover') || !state.modifiersData['arrow#persistent']) {
+          return undefined;
+        }
+
+        var _getMargins = getMargins(state.elements.arrow),
+            top = _getMargins.top,
+            right = _getMargins.right;
+
+        var padding = top || right;
+        state.modifiersData['arrow#persistent'].padding = {
+          top: padding,
+          left: padding,
+          right: padding,
+          bottom: padding
+        };
+        state.elements.arrow.style.margin = '0';
+        return function () {
+          if (state.elements.arrow) state.elements.arrow.style.margin = '';
+        };
+      }
+    };
+  }, []);
+  return [callback, [offset, popoverArrowMargins]];
 }
 
 var defaultProps$8 = {
   alignRight: false,
   flip: true
-};
+}; // TODO: remove this hack
+
 var DropdownMenu$1 = react.forwardRef(function (_ref, ref) {
   var bsPrefix = _ref.bsPrefix,
       className = _ref.className,
@@ -48771,33 +48809,32 @@ var DropdownMenu$1 = react.forwardRef(function (_ref, ref) {
       renderOnMount = _ref.renderOnMount,
       _ref$as = _ref.as,
       Component = _ref$as === void 0 ? 'div' : _ref$as,
-      _ref$popperConfig = _ref.popperConfig,
-      popperConfig = _ref$popperConfig === void 0 ? {} : _ref$popperConfig,
+      popperConfig = _ref.popperConfig,
       props = _objectWithoutPropertiesLoose(_ref, ["bsPrefix", "className", "alignRight", "rootCloseEvent", "flip", "show", "renderOnMount", "as", "popperConfig"]);
 
-  var isNavbar = react_13(NavbarContext);
+  var isNavbar = react_13(context);
   var prefix = useBootstrapPrefix(bsPrefix, 'dropdown-menu');
 
   var _usePopperMarginModif = usePopperMarginModifiers(),
       popperRef = _usePopperMarginModif[0],
       marginModifiers = _usePopperMarginModif[1];
 
-  var _useDropdownMenu = useDropdownMenu({
+  var _ref2 = useDropdownMenu({
     flip: flip,
     rootCloseEvent: rootCloseEvent,
     show: showProps,
     alignEnd: alignRight,
     usePopper: !isNavbar,
     popperConfig: _extends({}, popperConfig, {
-      modifiers: marginModifiers.concat(popperConfig.modifiers || [])
+      modifiers: marginModifiers.concat((popperConfig == null ? void 0 : popperConfig.modifiers) || [])
     })
   }),
-      hasShown = _useDropdownMenu.hasShown,
-      placement = _useDropdownMenu.placement,
-      show = _useDropdownMenu.show,
-      alignEnd = _useDropdownMenu.alignEnd,
-      close = _useDropdownMenu.close,
-      menuProps = _useDropdownMenu.props;
+      hasShown = _ref2.hasShown,
+      placement = _ref2.placement,
+      show = _ref2.show,
+      alignEnd = _ref2.alignEnd,
+      close = _ref2.close,
+      menuProps = _ref2.props;
 
   menuProps.ref = useMergedRefs(popperRef, useMergedRefs(useWrappedRefWithWarning(ref, 'DropdownMenu'), menuProps.ref));
   if (!hasShown && !renderOnMount) return null; // For custom components provide additional, non-DOM, props;
@@ -48808,17 +48845,14 @@ var DropdownMenu$1 = react.forwardRef(function (_ref, ref) {
     menuProps.alignRight = alignEnd;
   }
 
-  var style = props.style;
-
   if (placement) {
     // we don't need the default popper style,
     // menus are display: none when not shown.
-    style = _extends({}, style, {}, menuProps.style);
+    props.style = _extends({}, props.style, {}, menuProps.style);
     props['x-placement'] = placement;
   }
 
   return /*#__PURE__*/react.createElement(Component, _extends({}, props, menuProps, {
-    style: style,
     className: classnames(className, prefix, show && 'show', alignEnd && prefix + "-right")
   }));
 });
@@ -48882,11 +48916,21 @@ var DropdownToggle$1 = react.forwardRef(function (_ref, ref) {
 });
 DropdownToggle$1.displayName = 'DropdownToggle';
 
+var DropdownHeader = createWithBsPrefix('dropdown-header', {
+  defaultProps: {
+    role: 'heading'
+  }
+});
+var DropdownDivider = createWithBsPrefix('dropdown-divider', {
+  defaultProps: {
+    role: 'separator'
+  }
+});
 var defaultProps$9 = {
   navbar: false
 };
-var Dropdown$1 = react.forwardRef(function (uncontrolledProps, ref) {
-  var _useUncontrolled = useUncontrolled(uncontrolledProps, {
+var Dropdown$1 = react.forwardRef(function (pProps, ref) {
+  var _useUncontrolled = useUncontrolled(pProps, {
     show: 'onToggle'
   }),
       bsPrefix = _useUncontrolled.bsPrefix,
@@ -48910,9 +48954,12 @@ var Dropdown$1 = react.forwardRef(function (uncontrolledProps, ref) {
     }
 
     if (event.currentTarget === document) source = 'rootClose';
-    onToggle(nextShow, event, {
-      source: source
-    });
+
+    if (onToggle) {
+      onToggle(nextShow, event, {
+        source: source
+      });
+    }
   });
   var handleSelect = useEventCallback(function (key, event) {
     if (onSelectCtx) onSelectCtx(key, event);
@@ -48938,19 +48985,11 @@ var Dropdown$1 = react.forwardRef(function (uncontrolledProps, ref) {
 });
 Dropdown$1.displayName = 'Dropdown';
 Dropdown$1.defaultProps = defaultProps$9;
-Dropdown$1.Toggle = DropdownToggle$1;
-Dropdown$1.Menu = DropdownMenu$1;
+Dropdown$1.Divider = DropdownDivider;
+Dropdown$1.Header = DropdownHeader;
 Dropdown$1.Item = DropdownItem;
-Dropdown$1.Header = createWithBsPrefix('dropdown-header', {
-  defaultProps: {
-    role: 'heading'
-  }
-});
-Dropdown$1.Divider = createWithBsPrefix('dropdown-divider', {
-  defaultProps: {
-    role: 'separator'
-  }
-});
+Dropdown$1.Menu = DropdownMenu$1;
+Dropdown$1.Toggle = DropdownToggle$1;
 
 var createChainableTypeChecker_1 = createCommonjsModule(function (module, exports) {
 
@@ -49051,28 +49090,30 @@ var propTypes$5 = {
    *
    * @type {('valid'|'invalid')}
    */
-  type: propTypes.string.isRequired,
+  type: propTypes.string,
+
+  /** Display feedback as a tooltip. */
+  tooltip: propTypes.bool,
   as: propTypes.elementType
-};
-var defaultProps$a = {
-  type: 'valid'
 };
 var Feedback = react.forwardRef( // Need to define the default "as" during prop destructuring to be compatible with styled-components github.com/react-bootstrap/react-bootstrap/issues/3595
 function (_ref, ref) {
   var _ref$as = _ref.as,
       Component = _ref$as === void 0 ? 'div' : _ref$as,
       className = _ref.className,
-      type = _ref.type,
-      props = _objectWithoutPropertiesLoose(_ref, ["as", "className", "type"]);
+      _ref$type = _ref.type,
+      type = _ref$type === void 0 ? 'valid' : _ref$type,
+      _ref$tooltip = _ref.tooltip,
+      tooltip = _ref$tooltip === void 0 ? false : _ref$tooltip,
+      props = _objectWithoutPropertiesLoose(_ref, ["as", "className", "type", "tooltip"]);
 
   return /*#__PURE__*/react.createElement(Component, _extends({}, props, {
     ref: ref,
-    className: classnames(className, type && type + "-feedback")
+    className: classnames(className, type + "-" + (tooltip ? 'tooltip' : 'feedback'))
   }));
 });
 Feedback.displayName = 'Feedback';
 Feedback.propTypes = propTypes$5;
-Feedback.defaultProps = defaultProps$a;
 
 var FormContext = react.createContext({
   controlId: undefined
@@ -49083,16 +49124,19 @@ var FormControl = react.forwardRef(function (_ref, ref) {
       bsCustomPrefix = _ref.bsCustomPrefix,
       type = _ref.type,
       size = _ref.size,
+      htmlSize = _ref.htmlSize,
       id = _ref.id,
       className = _ref.className,
-      isValid = _ref.isValid,
-      isInvalid = _ref.isInvalid,
+      _ref$isValid = _ref.isValid,
+      isValid = _ref$isValid === void 0 ? false : _ref$isValid,
+      _ref$isInvalid = _ref.isInvalid,
+      isInvalid = _ref$isInvalid === void 0 ? false : _ref$isInvalid,
       plaintext = _ref.plaintext,
       readOnly = _ref.readOnly,
       custom = _ref.custom,
       _ref$as = _ref.as,
       Component = _ref$as === void 0 ? 'input' : _ref$as,
-      props = _objectWithoutPropertiesLoose(_ref, ["bsPrefix", "bsCustomPrefix", "type", "size", "id", "className", "isValid", "isInvalid", "plaintext", "readOnly", "custom", "as"]);
+      props = _objectWithoutPropertiesLoose(_ref, ["bsPrefix", "bsCustomPrefix", "type", "size", "htmlSize", "id", "className", "isValid", "isInvalid", "plaintext", "readOnly", "custom", "as"]);
 
   var _useContext = react_13(FormContext),
       controlId = _useContext.controlId;
@@ -49129,6 +49173,7 @@ var FormControl = react.forwardRef(function (_ref, ref) {
    warning_1(controlId == null || !id, '`controlId` is ignored on `<FormControl>` when `id` is specified.') ;
   return /*#__PURE__*/react.createElement(Component, _extends({}, props, {
     type: type,
+    size: htmlSize,
     ref: ref,
     readOnly: readOnly,
     id: id || controlId,
@@ -49136,7 +49181,27 @@ var FormControl = react.forwardRef(function (_ref, ref) {
   }));
 });
 FormControl.displayName = 'FormControl';
-FormControl.Feedback = Feedback;
+var FormControl$1 = Object.assign(FormControl, {
+  Feedback: Feedback
+});
+
+var InputGroupAppend = createWithBsPrefix('input-group-append');
+var InputGroupPrepend = createWithBsPrefix('input-group-prepend');
+var InputGroupText = createWithBsPrefix('input-group-text', {
+  Component: 'span'
+});
+
+var InputGroupCheckbox = function InputGroupCheckbox(props) {
+  return /*#__PURE__*/react.createElement(InputGroupText, null, /*#__PURE__*/react.createElement("input", _extends({
+    type: "checkbox"
+  }, props)));
+};
+
+var InputGroupRadio = function InputGroupRadio(props) {
+  return /*#__PURE__*/react.createElement(InputGroupText, null, /*#__PURE__*/react.createElement("input", _extends({
+    type: "radio"
+  }, props)));
+};
 
 /**
  *
@@ -49161,35 +49226,24 @@ var InputGroup = react.forwardRef(function (_ref, ref) {
     className: classnames(className, bsPrefix, size && bsPrefix + "-" + size)
   }));
 });
-var InputGroupAppend = createWithBsPrefix('input-group-append');
-var InputGroupPrepend = createWithBsPrefix('input-group-prepend');
-var InputGroupText = createWithBsPrefix('input-group-text', {
-  Component: 'span'
+InputGroup.displayName = 'InputGroup';
+
+var InputGroupWithExtras = _extends({}, InputGroup, {
+  Text: InputGroupText,
+  Radio: InputGroupRadio,
+  Checkbox: InputGroupCheckbox,
+  Append: InputGroupAppend,
+  Prepend: InputGroupPrepend
 });
 
-var InputGroupCheckbox = function InputGroupCheckbox(props) {
-  return /*#__PURE__*/react.createElement(InputGroupText, null, /*#__PURE__*/react.createElement("input", _extends({
-    type: "checkbox"
-  }, props)));
-};
+var context$1 = react.createContext(null);
+context$1.displayName = 'CardContext';
 
-var InputGroupRadio = function InputGroupRadio(props) {
-  return /*#__PURE__*/react.createElement(InputGroupText, null, /*#__PURE__*/react.createElement("input", _extends({
-    type: "radio"
-  }, props)));
-};
-
-InputGroup.displayName = 'InputGroup';
-InputGroup.Text = InputGroupText;
-InputGroup.Radio = InputGroupRadio;
-InputGroup.Checkbox = InputGroupCheckbox;
-InputGroup.Append = InputGroupAppend;
-InputGroup.Prepend = InputGroupPrepend;
-
-var CardContext = react.createContext(null);
+// eslint-disable-next-line @typescript-eslint/interface-name-prefix
 
 var TabContext = react.createContext(null);
 
+// eslint-disable-next-line @typescript-eslint/no-empty-function
 var noop$6 = function noop() {};
 
 var AbstractNav = react.forwardRef(function (_ref, ref) {
@@ -49219,9 +49273,11 @@ var AbstractNav = react.forwardRef(function (_ref, ref) {
   var listNode = react_15(null);
 
   var getNextActiveChild = function getNextActiveChild(offset) {
-    if (!listNode.current) return null;
-    var items = qsa(listNode.current, '[data-rb-event-key]:not(.disabled)');
-    var activeChild = listNode.current.querySelector('.active');
+    var currentListNode = listNode.current;
+    if (!currentListNode) return null;
+    var items = qsa(currentListNode, '[data-rb-event-key]:not(.disabled)');
+    var activeChild = currentListNode.querySelector('.active');
+    if (!activeChild) return null;
     var index = items.indexOf(activeChild);
     if (index === -1) return null;
     var nextIndex = index + offset;
@@ -49305,18 +49361,17 @@ function (_ref, ref) {
 });
 NavItem.displayName = 'NavItem';
 
-var defaultProps$b = {
+var defaultProps$a = {
   disabled: false
 };
 var AbstractNavItem = react.forwardRef(function (_ref, ref) {
   var active = _ref.active,
       className = _ref.className,
-      tabIndex = _ref.tabIndex,
       eventKey = _ref.eventKey,
       onSelect = _ref.onSelect,
       onClick = _ref.onClick,
       Component = _ref.as,
-      props = _objectWithoutPropertiesLoose(_ref, ["active", "className", "tabIndex", "eventKey", "onSelect", "onClick", "as"]);
+      props = _objectWithoutPropertiesLoose(_ref, ["active", "className", "eventKey", "onSelect", "onClick", "as"]);
 
   var navKey = makeEventKey(eventKey, props.href);
   var parentOnSelect = react_13(SelectableContext);
@@ -49336,7 +49391,7 @@ var AbstractNavItem = react.forwardRef(function (_ref, ref) {
   }
 
   if (props.role === 'tab') {
-    props.tabIndex = isActive ? tabIndex : -1;
+    props.tabIndex = isActive ? props.tabIndex : -1;
     props['aria-selected'] = isActive;
   }
 
@@ -49352,9 +49407,9 @@ var AbstractNavItem = react.forwardRef(function (_ref, ref) {
     className: classnames(className, isActive && 'active')
   }));
 });
-AbstractNavItem.defaultProps = defaultProps$b;
+AbstractNavItem.defaultProps = defaultProps$a;
 
-var defaultProps$c = {
+var defaultProps$b = {
   disabled: false,
   as: SafeAnchor
 };
@@ -49380,9 +49435,9 @@ var NavLink = react.forwardRef(function (_ref, ref) {
   }));
 });
 NavLink.displayName = 'NavLink';
-NavLink.defaultProps = defaultProps$c;
+NavLink.defaultProps = defaultProps$b;
 
-var defaultProps$d = {
+var defaultProps$c = {
   justify: false,
   fill: false
 };
@@ -49394,7 +49449,7 @@ var Nav = react.forwardRef(function (uncontrolledProps, ref) {
   }),
       _useUncontrolled$as = _useUncontrolled.as,
       as = _useUncontrolled$as === void 0 ? 'div' : _useUncontrolled$as,
-      bsPrefix = _useUncontrolled.bsPrefix,
+      initialBsPrefix = _useUncontrolled.bsPrefix,
       variant = _useUncontrolled.variant,
       fill = _useUncontrolled.fill,
       justify = _useUncontrolled.justify,
@@ -49404,14 +49459,16 @@ var Nav = react.forwardRef(function (uncontrolledProps, ref) {
       activeKey = _useUncontrolled.activeKey,
       props = _objectWithoutPropertiesLoose(_useUncontrolled, ["as", "bsPrefix", "variant", "fill", "justify", "navbar", "className", "children", "activeKey"]);
 
-  bsPrefix = useBootstrapPrefix(bsPrefix, 'nav');
-  var navbarBsPrefix, cardHeaderBsPrefix;
-  var navbarContext = react_13(NavbarContext);
-  var cardContext = react_13(CardContext);
+  var bsPrefix = useBootstrapPrefix(initialBsPrefix, 'nav');
+  var navbarBsPrefix;
+  var cardHeaderBsPrefix;
+  var isNavbar = false;
+  var navbarContext = react_13(context);
+  var cardContext = react_13(context$1);
 
   if (navbarContext) {
     navbarBsPrefix = navbarContext.bsPrefix;
-    navbar = navbar == null ? true : navbar;
+    isNavbar = navbar == null ? true : navbar;
   } else if (cardContext) {
     cardHeaderBsPrefix = cardContext.cardHeaderBsPrefix;
   }
@@ -49420,11 +49477,11 @@ var Nav = react.forwardRef(function (uncontrolledProps, ref) {
     as: as,
     ref: ref,
     activeKey: activeKey,
-    className: classnames(className, (_classNames = {}, _classNames[bsPrefix] = !navbar, _classNames[navbarBsPrefix + "-nav"] = navbar, _classNames[cardHeaderBsPrefix + "-" + variant] = !!cardHeaderBsPrefix, _classNames[bsPrefix + "-" + variant] = !!variant, _classNames[bsPrefix + "-fill"] = fill, _classNames[bsPrefix + "-justified"] = justify, _classNames))
+    className: classnames(className, (_classNames = {}, _classNames[bsPrefix] = !isNavbar, _classNames[navbarBsPrefix + "-nav"] = isNavbar, _classNames[cardHeaderBsPrefix + "-" + variant] = !!cardHeaderBsPrefix, _classNames[bsPrefix + "-" + variant] = !!variant, _classNames[bsPrefix + "-fill"] = fill, _classNames[bsPrefix + "-justified"] = justify, _classNames))
   }, props), children);
 });
 Nav.displayName = 'Nav';
-Nav.defaultProps = defaultProps$d;
+Nav.defaultProps = defaultProps$c;
 Nav.Item = NavItem;
 Nav.Link = NavLink;
 
@@ -49520,118 +49577,91 @@ var MARGINS = {
   width: ['marginLeft', 'marginRight']
 };
 
-function getDimensionValue(dimension, elem) {
+function getDefaultDimensionValue(dimension, elem) {
   var offset = "offset" + dimension[0].toUpperCase() + dimension.slice(1);
   var value = elem[offset];
   var margins = MARGINS[dimension];
-  return value + parseInt(style(elem, margins[0]), 10) + parseInt(style(elem, margins[1]), 10);
+  return value + // @ts-ignore
+  parseInt(style(elem, margins[0]), 10) + // @ts-ignore
+  parseInt(style(elem, margins[1]), 10);
 }
 
 var collapseStyles = (_collapseStyles = {}, _collapseStyles[EXITED] = 'collapse', _collapseStyles[EXITING] = 'collapsing', _collapseStyles[ENTERING] = 'collapsing', _collapseStyles[ENTERED] = 'collapse show', _collapseStyles);
-var defaultProps$e = {
+var defaultProps$d = {
   in: false,
   timeout: 300,
   mountOnEnter: false,
   unmountOnExit: false,
   appear: false,
-  dimension: 'height',
-  getDimensionValue: getDimensionValue
+  getDimensionValue: getDefaultDimensionValue
 };
+var Collapse = react.forwardRef(function (_ref, ref) {
+  var onEnter = _ref.onEnter,
+      onEntering = _ref.onEntering,
+      onEntered = _ref.onEntered,
+      onExit = _ref.onExit,
+      onExiting = _ref.onExiting,
+      className = _ref.className,
+      children = _ref.children,
+      _ref$dimension = _ref.dimension,
+      dimension = _ref$dimension === void 0 ? 'height' : _ref$dimension,
+      _ref$getDimensionValu = _ref.getDimensionValue,
+      getDimensionValue = _ref$getDimensionValu === void 0 ? getDefaultDimensionValue : _ref$getDimensionValu,
+      props = _objectWithoutPropertiesLoose(_ref, ["onEnter", "onEntering", "onEntered", "onExit", "onExiting", "className", "children", "dimension", "getDimensionValue"]);
 
-var Collapse = /*#__PURE__*/function (_React$Component) {
-  _inheritsLoose(Collapse, _React$Component);
-
-  function Collapse() {
-    var _this;
-
-    for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
-      args[_key] = arguments[_key];
-    }
-
-    _this = _React$Component.call.apply(_React$Component, [this].concat(args)) || this;
-
-    _this.handleEnter = function (elem) {
-      elem.style[_this.getDimension()] = '0';
-    };
-
-    _this.handleEntering = function (elem) {
-      var dimension = _this.getDimension();
-
-      elem.style[dimension] = _this._getScrollDimensionValue(elem, dimension);
-    };
-
-    _this.handleEntered = function (elem) {
-      elem.style[_this.getDimension()] = null;
-    };
-
-    _this.handleExit = function (elem) {
-      var dimension = _this.getDimension();
-
-      elem.style[dimension] = _this.props.getDimensionValue(dimension, elem) + "px";
-      triggerBrowserReflow(elem);
-    };
-
-    _this.handleExiting = function (elem) {
-      elem.style[_this.getDimension()] = null;
-    };
-
-    return _this;
-  }
-
-  var _proto = Collapse.prototype;
-
-  _proto.getDimension = function getDimension() {
-    return typeof this.props.dimension === 'function' ? this.props.dimension() : this.props.dimension;
-  }
+  /* Compute dimension */
+  var computedDimension = typeof dimension === 'function' ? dimension() : dimension;
   /* -- Expanding -- */
-  ;
 
-  // for testing
-  _proto._getScrollDimensionValue = function _getScrollDimensionValue(elem, dimension) {
-    var scroll = "scroll" + dimension[0].toUpperCase() + dimension.slice(1);
-    return elem[scroll] + "px";
-  };
+  var handleEnter = react_12(function () {
+    return createChainedFunction(function (elem) {
+      elem.style[computedDimension] = '0';
+    }, onEnter);
+  }, [computedDimension, onEnter]);
+  var handleEntering = react_12(function () {
+    return createChainedFunction(function (elem) {
+      var scroll = "scroll" + computedDimension[0].toUpperCase() + computedDimension.slice(1);
+      elem.style[computedDimension] = elem[scroll] + "px";
+    }, onEntering);
+  }, [computedDimension, onEntering]);
+  var handleEntered = react_12(function () {
+    return createChainedFunction(function (elem) {
+      elem.style[computedDimension] = null;
+    }, onEntered);
+  }, [computedDimension, onEntered]);
+  /* -- Collapsing -- */
 
-  _proto.render = function render() {
-    var _this2 = this;
+  var handleExit = react_12(function () {
+    return createChainedFunction(function (elem) {
+      elem.style[computedDimension] = getDimensionValue(computedDimension, elem) + "px";
+      triggerBrowserReflow(elem);
+    }, onExit);
+  }, [onExit, getDimensionValue, computedDimension]);
+  var handleExiting = react_12(function () {
+    return createChainedFunction(function (elem) {
+      elem.style[computedDimension] = null;
+    }, onExiting);
+  }, [computedDimension, onExiting]);
+  return /*#__PURE__*/react.createElement(Transition // @ts-ignore
+  , _extends({
+    ref: ref,
+    addEndListener: transitionEnd
+  }, props, {
+    "aria-expanded": props.role ? props.in : null,
+    onEnter: handleEnter,
+    onEntering: handleEntering,
+    onEntered: handleEntered,
+    onExit: handleExit,
+    onExiting: handleExiting
+  }), function (state, innerProps) {
+    return react.cloneElement(children, _extends({}, innerProps, {
+      className: classnames(className, children.props.className, collapseStyles[state], computedDimension === 'width' && 'width')
+    }));
+  });
+}); // @ts-ignore
 
-    var _this$props = this.props,
-        onEnter = _this$props.onEnter,
-        onEntering = _this$props.onEntering,
-        onEntered = _this$props.onEntered,
-        onExit = _this$props.onExit,
-        onExiting = _this$props.onExiting,
-        className = _this$props.className,
-        children = _this$props.children,
-        props = _objectWithoutPropertiesLoose(_this$props, ["onEnter", "onEntering", "onEntered", "onExit", "onExiting", "className", "children"]);
-
-    delete props.dimension;
-    delete props.getDimensionValue;
-    var handleEnter = createChainedFunction(this.handleEnter, onEnter);
-    var handleEntering = createChainedFunction(this.handleEntering, onEntering);
-    var handleEntered = createChainedFunction(this.handleEntered, onEntered);
-    var handleExit = createChainedFunction(this.handleExit, onExit);
-    var handleExiting = createChainedFunction(this.handleExiting, onExiting);
-    return /*#__PURE__*/react.createElement(Transition, _extends({
-      addEndListener: transitionEnd
-    }, props, {
-      "aria-expanded": props.role ? props.in : null,
-      onEnter: handleEnter,
-      onEntering: handleEntering,
-      onEntered: handleEntered,
-      onExit: handleExit,
-      onExiting: handleExiting
-    }), function (state, innerProps) {
-      return react.cloneElement(children, _extends({}, innerProps, {
-        className: classnames(className, children.props.className, collapseStyles[state], _this2.getDimension() === 'width' && 'width')
-      }));
-    });
-  };
-
-  return Collapse;
-}(react.Component);
-
-Collapse.defaultProps = defaultProps$e;
+// @ts-ignore
+Collapse.defaultProps = defaultProps$d;
 
 var NavbarCollapse = react.forwardRef(function (_ref, ref) {
   var children = _ref.children,
@@ -49639,7 +49669,7 @@ var NavbarCollapse = react.forwardRef(function (_ref, ref) {
       props = _objectWithoutPropertiesLoose(_ref, ["children", "bsPrefix"]);
 
   bsPrefix = useBootstrapPrefix(bsPrefix, 'navbar-collapse');
-  return /*#__PURE__*/react.createElement(NavbarContext.Consumer, null, function (context) {
+  return /*#__PURE__*/react.createElement(context.Consumer, null, function (context) {
     return /*#__PURE__*/react.createElement(Collapse, _extends({
       in: !!(context && context.expanded)
     }, props), /*#__PURE__*/react.createElement("div", {
@@ -49650,7 +49680,7 @@ var NavbarCollapse = react.forwardRef(function (_ref, ref) {
 });
 NavbarCollapse.displayName = 'NavbarCollapse';
 
-var defaultProps$f = {
+var defaultProps$e = {
   label: 'Toggle navigation'
 };
 var NavbarToggle = react.forwardRef(function (_ref, ref) {
@@ -49665,7 +49695,7 @@ var NavbarToggle = react.forwardRef(function (_ref, ref) {
 
   bsPrefix = useBootstrapPrefix(bsPrefix, 'navbar-toggler');
 
-  var _ref2 = react_13(NavbarContext) || {},
+  var _ref2 = react_13(context) || {},
       onToggle = _ref2.onToggle,
       expanded = _ref2.expanded;
 
@@ -49688,9 +49718,12 @@ var NavbarToggle = react.forwardRef(function (_ref, ref) {
   }));
 });
 NavbarToggle.displayName = 'NavbarToggle';
-NavbarToggle.defaultProps = defaultProps$f;
+NavbarToggle.defaultProps = defaultProps$e;
 
-var defaultProps$g = {
+var NavbarText = createWithBsPrefix('navbar-text', {
+  Component: 'span'
+});
+var defaultProps$f = {
   expand: true,
   variant: 'light',
   collapseOnSelect: false
@@ -49699,7 +49732,7 @@ var Navbar = react.forwardRef(function (props, ref) {
   var _useUncontrolled = useUncontrolled(props, {
     expanded: 'onToggle'
   }),
-      bsPrefix = _useUncontrolled.bsPrefix,
+      initialBsPrefix = _useUncontrolled.bsPrefix,
       expand = _useUncontrolled.expand,
       variant = _useUncontrolled.variant,
       bg = _useUncontrolled.bg,
@@ -49715,12 +49748,14 @@ var Navbar = react.forwardRef(function (props, ref) {
       collapseOnSelect = _useUncontrolled.collapseOnSelect,
       controlledProps = _objectWithoutPropertiesLoose(_useUncontrolled, ["bsPrefix", "expand", "variant", "bg", "fixed", "sticky", "className", "children", "as", "expanded", "onToggle", "onSelect", "collapseOnSelect"]);
 
-  bsPrefix = useBootstrapPrefix(bsPrefix, 'navbar');
+  var bsPrefix = useBootstrapPrefix(initialBsPrefix, 'navbar');
   var handleCollapse = react_9(function () {
     if (onSelect) onSelect.apply(void 0, arguments);
 
     if (collapseOnSelect && expanded) {
-      _onToggle(false);
+      if (_onToggle) {
+        _onToggle(false);
+      }
     }
   }, [onSelect, collapseOnSelect, expanded, _onToggle]); // will result in some false positives but that seems better
   // than false negatives. strict `undefined` check allows explicit
@@ -49735,13 +49770,13 @@ var Navbar = react.forwardRef(function (props, ref) {
   var navbarContext = react_12(function () {
     return {
       onToggle: function onToggle() {
-        return _onToggle(!expanded);
+        return _onToggle && _onToggle(!expanded);
       },
       bsPrefix: bsPrefix,
-      expanded: expanded
+      expanded: !!expanded
     };
   }, [bsPrefix, expanded, _onToggle]);
-  return /*#__PURE__*/react.createElement(NavbarContext.Provider, {
+  return /*#__PURE__*/react.createElement(context.Provider, {
     value: navbarContext
   }, /*#__PURE__*/react.createElement(SelectableContext.Provider, {
     value: handleCollapse
@@ -49751,14 +49786,12 @@ var Navbar = react.forwardRef(function (props, ref) {
     className: classnames(className, bsPrefix, expand && expandClass, variant && bsPrefix + "-" + variant, bg && "bg-" + bg, sticky && "sticky-" + sticky, fixed && "fixed-" + fixed)
   }), children)));
 });
-Navbar.defaultProps = defaultProps$g;
+Navbar.defaultProps = defaultProps$f;
 Navbar.displayName = 'Navbar';
 Navbar.Brand = NavbarBrand;
 Navbar.Toggle = NavbarToggle;
 Navbar.Collapse = NavbarCollapse;
-Navbar.Text = createWithBsPrefix('navbar-text', {
-  Component: 'span'
-});
+Navbar.Text = NavbarText;
 
 class Pane extends react.PureComponent {
   static get propTypes() {
@@ -49858,7 +49891,7 @@ class Pane extends react.PureComponent {
 }
 
 var DEVICE_SIZES$1 = ['xl', 'lg', 'md', 'sm', 'xs'];
-var defaultProps$h = {
+var defaultProps$g = {
   noGutters: false
 };
 var Row = react.forwardRef(function (_ref, ref) {
@@ -49893,7 +49926,7 @@ var Row = react.forwardRef(function (_ref, ref) {
   }));
 });
 Row.displayName = 'Row';
-Row.defaultProps = defaultProps$h;
+Row.defaultProps = defaultProps$g;
 
 /* global FileReader */
 class FilesUi extends Pane {
@@ -49971,12 +50004,12 @@ class FilesUi extends Pane {
     const {
       files = []
     } = this.state;
-    return files.map(file => /*#__PURE__*/react.createElement(InputGroup, {
+    return files.map(file => /*#__PURE__*/react.createElement(InputGroupWithExtras, {
       key: file
-    }, /*#__PURE__*/react.createElement(FormControl, {
+    }, /*#__PURE__*/react.createElement(FormControl$1, {
       disabled: true,
       placeholder: file
-    }), /*#__PURE__*/react.createElement(InputGroup.Append, null, /*#__PURE__*/react.createElement(Button, {
+    }), /*#__PURE__*/react.createElement(InputGroupWithExtras.Append, null, /*#__PURE__*/react.createElement(Button, {
       onClick: () => deleteFile({}, file),
       variant: "outline-primary"
     }, "Delete"))));
@@ -50001,13 +50034,13 @@ class FilesUi extends Pane {
         flex: '1 1 auto',
         overflow: 'auto'
       }
-    }, /*#__PURE__*/react.createElement(Col, null, /*#__PURE__*/react.createElement(InputGroup, null, /*#__PURE__*/react.createElement(FormControl, {
+    }, /*#__PURE__*/react.createElement(Col, null, /*#__PURE__*/react.createElement(InputGroupWithExtras, null, /*#__PURE__*/react.createElement(FormControl$1, {
       id: "source/add/name",
       placeholder: "File Name"
-    }), /*#__PURE__*/react.createElement(InputGroup.Append, null, /*#__PURE__*/react.createElement(Button, {
+    }), /*#__PURE__*/react.createElement(InputGroupWithExtras.Append, null, /*#__PURE__*/react.createElement(Button, {
       onClick: this.addFile,
       variant: "outline-primary"
-    }, "Add"))), /*#__PURE__*/react.createElement(InputGroup, null, /*#__PURE__*/react.createElement(FormControl, {
+    }, "Add"))), /*#__PURE__*/react.createElement(InputGroupWithExtras, null, /*#__PURE__*/react.createElement(FormControl$1, {
       as: "input",
       type: "file",
       id: `source/${id}/import`,
@@ -50016,10 +50049,10 @@ class FilesUi extends Pane {
       style: {
         display: 'none'
       }
-    }), /*#__PURE__*/react.createElement(FormControl, {
+    }), /*#__PURE__*/react.createElement(FormControl$1, {
       id: `source/${id}/name`,
       placeholder: ""
-    }), /*#__PURE__*/react.createElement(InputGroup.Append, null, /*#__PURE__*/react.createElement(Button, {
+    }), /*#__PURE__*/react.createElement(InputGroupWithExtras.Append, null, /*#__PURE__*/react.createElement(Button, {
       onClick: this.clickImportFile,
       variant: "outline-primary"
     }, "Import"))), this.buildFiles())));
@@ -50027,20 +50060,21 @@ class FilesUi extends Pane {
 
 }
 
-var defaultProps$i = {
-  type: 'checkbox'
-};
 var FormCheckInput = react.forwardRef(function (_ref, ref) {
   var id = _ref.id,
       bsPrefix = _ref.bsPrefix,
       bsCustomPrefix = _ref.bsCustomPrefix,
       className = _ref.className,
-      isValid = _ref.isValid,
-      isInvalid = _ref.isInvalid,
+      _ref$type = _ref.type,
+      type = _ref$type === void 0 ? 'checkbox' : _ref$type,
+      _ref$isValid = _ref.isValid,
+      isValid = _ref$isValid === void 0 ? false : _ref$isValid,
+      _ref$isInvalid = _ref.isInvalid,
+      isInvalid = _ref$isInvalid === void 0 ? false : _ref$isInvalid,
       isStatic = _ref.isStatic,
       _ref$as = _ref.as,
       Component = _ref$as === void 0 ? 'input' : _ref$as,
-      props = _objectWithoutPropertiesLoose(_ref, ["id", "bsPrefix", "bsCustomPrefix", "className", "isValid", "isInvalid", "isStatic", "as"]);
+      props = _objectWithoutPropertiesLoose(_ref, ["id", "bsPrefix", "bsCustomPrefix", "className", "type", "isValid", "isInvalid", "isStatic", "as"]);
 
   var _useContext = react_13(FormContext),
       controlId = _useContext.controlId,
@@ -50053,12 +50087,12 @@ var FormCheckInput = react.forwardRef(function (_ref, ref) {
   bsPrefix = useBootstrapPrefix(prefix, defaultPrefix);
   return /*#__PURE__*/react.createElement(Component, _extends({}, props, {
     ref: ref,
+    type: type,
     id: id || controlId,
     className: classnames(className, bsPrefix, isValid && 'is-valid', isInvalid && 'is-invalid', isStatic && 'position-static')
   }));
 });
 FormCheckInput.displayName = 'FormCheckInput';
-FormCheckInput.defaultProps = defaultProps$i;
 
 var FormCheckLabel = react.forwardRef(function (_ref, ref) {
   var bsPrefix = _ref.bsPrefix,
@@ -50084,33 +50118,33 @@ var FormCheckLabel = react.forwardRef(function (_ref, ref) {
 });
 FormCheckLabel.displayName = 'FormCheckLabel';
 
-var defaultProps$j = {
-  type: 'checkbox',
-  inline: false,
-  disabled: false,
-  isValid: false,
-  isInvalid: false,
-  title: ''
-};
 var FormCheck = react.forwardRef(function (_ref, ref) {
   var id = _ref.id,
       bsPrefix = _ref.bsPrefix,
       bsCustomPrefix = _ref.bsCustomPrefix,
-      inline = _ref.inline,
-      disabled = _ref.disabled,
-      isValid = _ref.isValid,
-      isInvalid = _ref.isInvalid,
+      _ref$inline = _ref.inline,
+      inline = _ref$inline === void 0 ? false : _ref$inline,
+      _ref$disabled = _ref.disabled,
+      disabled = _ref$disabled === void 0 ? false : _ref$disabled,
+      _ref$isValid = _ref.isValid,
+      isValid = _ref$isValid === void 0 ? false : _ref$isValid,
+      _ref$isInvalid = _ref.isInvalid,
+      isInvalid = _ref$isInvalid === void 0 ? false : _ref$isInvalid,
+      _ref$feedbackTooltip = _ref.feedbackTooltip,
+      feedbackTooltip = _ref$feedbackTooltip === void 0 ? false : _ref$feedbackTooltip,
       feedback = _ref.feedback,
       className = _ref.className,
       style = _ref.style,
-      title = _ref.title,
-      type = _ref.type,
+      _ref$title = _ref.title,
+      title = _ref$title === void 0 ? '' : _ref$title,
+      _ref$type = _ref.type,
+      type = _ref$type === void 0 ? 'checkbox' : _ref$type,
       label = _ref.label,
       children = _ref.children,
       propCustom = _ref.custom,
       _ref$as = _ref.as,
       as = _ref$as === void 0 ? 'input' : _ref$as,
-      props = _objectWithoutPropertiesLoose(_ref, ["id", "bsPrefix", "bsCustomPrefix", "inline", "disabled", "isValid", "isInvalid", "feedback", "className", "style", "title", "type", "label", "children", "custom", "as"]);
+      props = _objectWithoutPropertiesLoose(_ref, ["id", "bsPrefix", "bsCustomPrefix", "inline", "disabled", "isValid", "isInvalid", "feedbackTooltip", "feedback", "className", "style", "title", "type", "label", "children", "custom", "as"]);
 
   var custom = type === 'switch' ? true : propCustom;
 
@@ -50147,11 +50181,11 @@ var FormCheck = react.forwardRef(function (_ref, ref) {
   }, children || /*#__PURE__*/react.createElement(react.Fragment, null, input, hasLabel && /*#__PURE__*/react.createElement(FormCheckLabel, {
     title: title
   }, label), (isValid || isInvalid) && /*#__PURE__*/react.createElement(Feedback, {
-    type: isValid ? 'valid' : 'invalid'
+    type: isValid ? 'valid' : 'invalid',
+    tooltip: feedbackTooltip
   }, feedback))));
 });
 FormCheck.displayName = 'FormCheck';
-FormCheck.defaultProps = defaultProps$j;
 FormCheck.Input = FormCheckInput;
 FormCheck.Label = FormCheckLabel;
 
@@ -50213,18 +50247,18 @@ var FormFileLabel = react.forwardRef(function (_ref, ref) {
 });
 FormFileLabel.displayName = 'FormFileLabel';
 
-var defaultProps$k = {
-  disabled: false,
-  isValid: false,
-  isInvalid: false
-};
 var FormFile = react.forwardRef(function (_ref, ref) {
   var id = _ref.id,
       bsPrefix = _ref.bsPrefix,
       bsCustomPrefix = _ref.bsCustomPrefix,
-      disabled = _ref.disabled,
-      isValid = _ref.isValid,
-      isInvalid = _ref.isInvalid,
+      _ref$disabled = _ref.disabled,
+      disabled = _ref$disabled === void 0 ? false : _ref$disabled,
+      _ref$isValid = _ref.isValid,
+      isValid = _ref$isValid === void 0 ? false : _ref$isValid,
+      _ref$isInvalid = _ref.isInvalid,
+      isInvalid = _ref$isInvalid === void 0 ? false : _ref$isInvalid,
+      _ref$feedbackTooltip = _ref.feedbackTooltip,
+      feedbackTooltip = _ref$feedbackTooltip === void 0 ? false : _ref$feedbackTooltip,
       feedback = _ref.feedback,
       className = _ref.className,
       style = _ref.style,
@@ -50237,7 +50271,7 @@ var FormFile = react.forwardRef(function (_ref, ref) {
       Component = _ref$as === void 0 ? 'div' : _ref$as,
       _ref$inputAs = _ref.inputAs,
       inputAs = _ref$inputAs === void 0 ? 'input' : _ref$inputAs,
-      props = _objectWithoutPropertiesLoose(_ref, ["id", "bsPrefix", "bsCustomPrefix", "disabled", "isValid", "isInvalid", "feedback", "className", "style", "label", "children", "custom", "lang", "data-browse", "as", "inputAs"]);
+      props = _objectWithoutPropertiesLoose(_ref, ["id", "bsPrefix", "bsCustomPrefix", "disabled", "isValid", "isInvalid", "feedbackTooltip", "feedback", "className", "style", "label", "children", "custom", "lang", "data-browse", "as", "inputAs"]);
 
   var _ref2 = custom ? [bsCustomPrefix, 'custom'] : [bsPrefix, 'form-file'],
       prefix = _ref2[0],
@@ -50272,11 +50306,11 @@ var FormFile = react.forwardRef(function (_ref, ref) {
   }, children || /*#__PURE__*/react.createElement(react.Fragment, null, custom ? /*#__PURE__*/react.createElement(react.Fragment, null, input, hasLabel && /*#__PURE__*/react.createElement(FormFileLabel, {
     "data-browse": dataBrowse
   }, label)) : /*#__PURE__*/react.createElement(react.Fragment, null, hasLabel && /*#__PURE__*/react.createElement(FormFileLabel, null, label), input), (isValid || isInvalid) && /*#__PURE__*/react.createElement(Feedback, {
-    type: isValid ? 'valid' : 'invalid'
+    type: isValid ? 'valid' : 'invalid',
+    tooltip: feedbackTooltip
   }, feedback))));
 });
 FormFile.displayName = 'FormFile';
-FormFile.defaultProps = defaultProps$k;
 FormFile.Input = FormFileInput;
 FormFile.Label = FormFileLabel;
 
@@ -50304,7 +50338,7 @@ var FormGroup = react.forwardRef(function (_ref, ref) {
 });
 FormGroup.displayName = 'FormGroup';
 
-var defaultProps$l = {
+var defaultProps$h = {
   column: false,
   srOnly: false
 };
@@ -50343,7 +50377,7 @@ var FormLabel = react.forwardRef(function (_ref, ref) {
   );
 });
 FormLabel.displayName = 'FormLabel';
-FormLabel.defaultProps = defaultProps$l;
+FormLabel.defaultProps = defaultProps$h;
 
 var FormText = react.forwardRef( // Need to define the default "as" during prop destructuring to be compatible with styled-components github.com/react-bootstrap/react-bootstrap/issues/3595
 function (_ref, ref) {
@@ -50372,10 +50406,11 @@ Switch.displayName = 'Switch';
 Switch.Input = FormCheck.Input;
 Switch.Label = FormCheck.Label;
 
-var defaultProps$m = {
+var FormRow = createWithBsPrefix('form-row');
+var defaultProps$i = {
   inline: false
 };
-var Form = react.forwardRef(function (_ref, ref) {
+var FormImpl = react.forwardRef(function (_ref, ref) {
   var bsPrefix = _ref.bsPrefix,
       inline = _ref.inline,
       className = _ref.className,
@@ -50390,16 +50425,16 @@ var Form = react.forwardRef(function (_ref, ref) {
     className: classnames(className, validated && 'was-validated', inline && bsPrefix + "-inline")
   }));
 });
-Form.displayName = 'Form';
-Form.defaultProps = defaultProps$m;
-Form.Row = createWithBsPrefix('form-row');
-Form.Group = FormGroup;
-Form.Control = FormControl;
-Form.Check = FormCheck;
-Form.File = FormFile;
-Form.Switch = Switch;
-Form.Label = FormLabel;
-Form.Text = FormText;
+FormImpl.displayName = 'Form';
+FormImpl.defaultProps = defaultProps$i;
+FormImpl.Row = FormRow;
+FormImpl.Group = FormGroup;
+FormImpl.Control = FormControl$1;
+FormImpl.Check = FormCheck;
+FormImpl.File = FormFile;
+FormImpl.Switch = Switch;
+FormImpl.Label = FormLabel;
+FormImpl.Text = FormText;
 
 var lodash_isequal = createCommonjsModule(function (module, exports) {
 /**
@@ -52424,744 +52459,7 @@ exportAce(ACE_NAMESPACE);
 
 })();
 
-ace.define("ace/lib/regexp",["require","exports","module"], function(require, exports, module) {
-
-    var real = {
-            exec: RegExp.prototype.exec,
-            test: RegExp.prototype.test,
-            match: String.prototype.match,
-            replace: String.prototype.replace,
-            split: String.prototype.split
-        },
-        compliantExecNpcg = real.exec.call(/()??/, "")[1] === undefined, // check `exec` handling of nonparticipating capturing groups
-        compliantLastIndexIncrement = function () {
-            var x = /^/g;
-            real.test.call(x, "");
-            return !x.lastIndex;
-        }();
-
-    if (compliantLastIndexIncrement && compliantExecNpcg)
-        return;
-    RegExp.prototype.exec = function (str) {
-        var match = real.exec.apply(this, arguments),
-            name, r2;
-        if ( typeof(str) == 'string' && match) {
-            if (!compliantExecNpcg && match.length > 1 && indexOf(match, "") > -1) {
-                r2 = RegExp(this.source, real.replace.call(getNativeFlags(this), "g", ""));
-                real.replace.call(str.slice(match.index), r2, function () {
-                    for (var i = 1; i < arguments.length - 2; i++) {
-                        if (arguments[i] === undefined)
-                            match[i] = undefined;
-                    }
-                });
-            }
-            if (this._xregexp && this._xregexp.captureNames) {
-                for (var i = 1; i < match.length; i++) {
-                    name = this._xregexp.captureNames[i - 1];
-                    if (name)
-                       match[name] = match[i];
-                }
-            }
-            if (!compliantLastIndexIncrement && this.global && !match[0].length && (this.lastIndex > match.index))
-                this.lastIndex--;
-        }
-        return match;
-    };
-    if (!compliantLastIndexIncrement) {
-        RegExp.prototype.test = function (str) {
-            var match = real.exec.call(this, str);
-            if (match && this.global && !match[0].length && (this.lastIndex > match.index))
-                this.lastIndex--;
-            return !!match;
-        };
-    }
-
-    function getNativeFlags (regex) {
-        return (regex.global     ? "g" : "") +
-               (regex.ignoreCase ? "i" : "") +
-               (regex.multiline  ? "m" : "") +
-               (regex.extended   ? "x" : "") + // Proposed for ES4; included in AS3
-               (regex.sticky     ? "y" : "");
-    }
-
-    function indexOf (array, item, from) {
-        if (Array.prototype.indexOf) // Use the native array method if available
-            return array.indexOf(item, from);
-        for (var i = from || 0; i < array.length; i++) {
-            if (array[i] === item)
-                return i;
-        }
-        return -1;
-    }
-
-});
-
-ace.define("ace/lib/es5-shim",["require","exports","module"], function(require, exports, module) {
-
-function Empty() {}
-
-if (!Function.prototype.bind) {
-    Function.prototype.bind = function bind(that) { // .length is 1
-        var target = this;
-        if (typeof target != "function") {
-            throw new TypeError("Function.prototype.bind called on incompatible " + target);
-        }
-        var args = slice.call(arguments, 1); // for normal call
-        var bound = function () {
-
-            if (this instanceof bound) {
-
-                var result = target.apply(
-                    this,
-                    args.concat(slice.call(arguments))
-                );
-                if (Object(result) === result) {
-                    return result;
-                }
-                return this;
-
-            } else {
-                return target.apply(
-                    that,
-                    args.concat(slice.call(arguments))
-                );
-
-            }
-
-        };
-        if(target.prototype) {
-            Empty.prototype = target.prototype;
-            bound.prototype = new Empty();
-            Empty.prototype = null;
-        }
-        return bound;
-    };
-}
-var call = Function.prototype.call;
-var prototypeOfArray = Array.prototype;
-var prototypeOfObject = Object.prototype;
-var slice = prototypeOfArray.slice;
-var _toString = call.bind(prototypeOfObject.toString);
-var owns = call.bind(prototypeOfObject.hasOwnProperty);
-var defineGetter;
-var defineSetter;
-var lookupGetter;
-var lookupSetter;
-var supportsAccessors;
-if ((supportsAccessors = owns(prototypeOfObject, "__defineGetter__"))) {
-    defineGetter = call.bind(prototypeOfObject.__defineGetter__);
-    defineSetter = call.bind(prototypeOfObject.__defineSetter__);
-    lookupGetter = call.bind(prototypeOfObject.__lookupGetter__);
-    lookupSetter = call.bind(prototypeOfObject.__lookupSetter__);
-}
-if ([1,2].splice(0).length != 2) {
-    if(function() { // test IE < 9 to splice bug - see issue #138
-        function makeArray(l) {
-            var a = new Array(l+2);
-            a[0] = a[1] = 0;
-            return a;
-        }
-        var array = [], lengthBefore;
-        
-        array.splice.apply(array, makeArray(20));
-        array.splice.apply(array, makeArray(26));
-
-        lengthBefore = array.length; //46
-        array.splice(5, 0, "XXX"); // add one element
-
-        if (lengthBefore + 1 == array.length) {
-            return true;// has right splice implementation without bugs
-        }
-    }()) {//IE 6/7
-        var array_splice = Array.prototype.splice;
-        Array.prototype.splice = function(start, deleteCount) {
-            if (!arguments.length) {
-                return [];
-            } else {
-                return array_splice.apply(this, [
-                    start === void 0 ? 0 : start,
-                    deleteCount === void 0 ? (this.length - start) : deleteCount
-                ].concat(slice.call(arguments, 2)))
-            }
-        };
-    } else {//IE8
-        Array.prototype.splice = function(pos, removeCount){
-            var length = this.length;
-            if (pos > 0) {
-                if (pos > length)
-                    pos = length;
-            } else if (pos == void 0) {
-                pos = 0;
-            } else if (pos < 0) {
-                pos = Math.max(length + pos, 0);
-            }
-
-            if (!(pos+removeCount < length))
-                removeCount = length - pos;
-
-            var removed = this.slice(pos, pos+removeCount);
-            var insert = slice.call(arguments, 2);
-            var add = insert.length;            
-            if (pos === length) {
-                if (add) {
-                    this.push.apply(this, insert);
-                }
-            } else {
-                var remove = Math.min(removeCount, length - pos);
-                var tailOldPos = pos + remove;
-                var tailNewPos = tailOldPos + add - remove;
-                var tailCount = length - tailOldPos;
-                var lengthAfterRemove = length - remove;
-
-                if (tailNewPos < tailOldPos) { // case A
-                    for (var i = 0; i < tailCount; ++i) {
-                        this[tailNewPos+i] = this[tailOldPos+i];
-                    }
-                } else if (tailNewPos > tailOldPos) { // case B
-                    for (i = tailCount; i--; ) {
-                        this[tailNewPos+i] = this[tailOldPos+i];
-                    }
-                } // else, add == remove (nothing to do)
-
-                if (add && pos === lengthAfterRemove) {
-                    this.length = lengthAfterRemove; // truncate array
-                    this.push.apply(this, insert);
-                } else {
-                    this.length = lengthAfterRemove + add; // reserves space
-                    for (i = 0; i < add; ++i) {
-                        this[pos+i] = insert[i];
-                    }
-                }
-            }
-            return removed;
-        };
-    }
-}
-if (!Array.isArray) {
-    Array.isArray = function isArray(obj) {
-        return _toString(obj) == "[object Array]";
-    };
-}
-var boxedString = Object("a"),
-    splitString = boxedString[0] != "a" || !(0 in boxedString);
-
-if (!Array.prototype.forEach) {
-    Array.prototype.forEach = function forEach(fun /*, thisp*/) {
-        var object = toObject(this),
-            self = splitString && _toString(this) == "[object String]" ?
-                this.split("") :
-                object,
-            thisp = arguments[1],
-            i = -1,
-            length = self.length >>> 0;
-        if (_toString(fun) != "[object Function]") {
-            throw new TypeError(); // TODO message
-        }
-
-        while (++i < length) {
-            if (i in self) {
-                fun.call(thisp, self[i], i, object);
-            }
-        }
-    };
-}
-if (!Array.prototype.map) {
-    Array.prototype.map = function map(fun /*, thisp*/) {
-        var object = toObject(this),
-            self = splitString && _toString(this) == "[object String]" ?
-                this.split("") :
-                object,
-            length = self.length >>> 0,
-            result = Array(length),
-            thisp = arguments[1];
-        if (_toString(fun) != "[object Function]") {
-            throw new TypeError(fun + " is not a function");
-        }
-
-        for (var i = 0; i < length; i++) {
-            if (i in self)
-                result[i] = fun.call(thisp, self[i], i, object);
-        }
-        return result;
-    };
-}
-if (!Array.prototype.filter) {
-    Array.prototype.filter = function filter(fun /*, thisp */) {
-        var object = toObject(this),
-            self = splitString && _toString(this) == "[object String]" ?
-                this.split("") :
-                    object,
-            length = self.length >>> 0,
-            result = [],
-            value,
-            thisp = arguments[1];
-        if (_toString(fun) != "[object Function]") {
-            throw new TypeError(fun + " is not a function");
-        }
-
-        for (var i = 0; i < length; i++) {
-            if (i in self) {
-                value = self[i];
-                if (fun.call(thisp, value, i, object)) {
-                    result.push(value);
-                }
-            }
-        }
-        return result;
-    };
-}
-if (!Array.prototype.every) {
-    Array.prototype.every = function every(fun /*, thisp */) {
-        var object = toObject(this),
-            self = splitString && _toString(this) == "[object String]" ?
-                this.split("") :
-                object,
-            length = self.length >>> 0,
-            thisp = arguments[1];
-        if (_toString(fun) != "[object Function]") {
-            throw new TypeError(fun + " is not a function");
-        }
-
-        for (var i = 0; i < length; i++) {
-            if (i in self && !fun.call(thisp, self[i], i, object)) {
-                return false;
-            }
-        }
-        return true;
-    };
-}
-if (!Array.prototype.some) {
-    Array.prototype.some = function some(fun /*, thisp */) {
-        var object = toObject(this),
-            self = splitString && _toString(this) == "[object String]" ?
-                this.split("") :
-                object,
-            length = self.length >>> 0,
-            thisp = arguments[1];
-        if (_toString(fun) != "[object Function]") {
-            throw new TypeError(fun + " is not a function");
-        }
-
-        for (var i = 0; i < length; i++) {
-            if (i in self && fun.call(thisp, self[i], i, object)) {
-                return true;
-            }
-        }
-        return false;
-    };
-}
-if (!Array.prototype.reduce) {
-    Array.prototype.reduce = function reduce(fun /*, initial*/) {
-        var object = toObject(this),
-            self = splitString && _toString(this) == "[object String]" ?
-                this.split("") :
-                object,
-            length = self.length >>> 0;
-        if (_toString(fun) != "[object Function]") {
-            throw new TypeError(fun + " is not a function");
-        }
-        if (!length && arguments.length == 1) {
-            throw new TypeError("reduce of empty array with no initial value");
-        }
-
-        var i = 0;
-        var result;
-        if (arguments.length >= 2) {
-            result = arguments[1];
-        } else {
-            do {
-                if (i in self) {
-                    result = self[i++];
-                    break;
-                }
-                if (++i >= length) {
-                    throw new TypeError("reduce of empty array with no initial value");
-                }
-            } while (true);
-        }
-
-        for (; i < length; i++) {
-            if (i in self) {
-                result = fun.call(void 0, result, self[i], i, object);
-            }
-        }
-
-        return result;
-    };
-}
-if (!Array.prototype.reduceRight) {
-    Array.prototype.reduceRight = function reduceRight(fun /*, initial*/) {
-        var object = toObject(this),
-            self = splitString && _toString(this) == "[object String]" ?
-                this.split("") :
-                object,
-            length = self.length >>> 0;
-        if (_toString(fun) != "[object Function]") {
-            throw new TypeError(fun + " is not a function");
-        }
-        if (!length && arguments.length == 1) {
-            throw new TypeError("reduceRight of empty array with no initial value");
-        }
-
-        var result, i = length - 1;
-        if (arguments.length >= 2) {
-            result = arguments[1];
-        } else {
-            do {
-                if (i in self) {
-                    result = self[i--];
-                    break;
-                }
-                if (--i < 0) {
-                    throw new TypeError("reduceRight of empty array with no initial value");
-                }
-            } while (true);
-        }
-
-        do {
-            if (i in this) {
-                result = fun.call(void 0, result, self[i], i, object);
-            }
-        } while (i--);
-
-        return result;
-    };
-}
-if (!Array.prototype.indexOf || ([0, 1].indexOf(1, 2) != -1)) {
-    Array.prototype.indexOf = function indexOf(sought /*, fromIndex */ ) {
-        var self = splitString && _toString(this) == "[object String]" ?
-                this.split("") :
-                toObject(this),
-            length = self.length >>> 0;
-
-        if (!length) {
-            return -1;
-        }
-
-        var i = 0;
-        if (arguments.length > 1) {
-            i = toInteger(arguments[1]);
-        }
-        i = i >= 0 ? i : Math.max(0, length + i);
-        for (; i < length; i++) {
-            if (i in self && self[i] === sought) {
-                return i;
-            }
-        }
-        return -1;
-    };
-}
-if (!Array.prototype.lastIndexOf || ([0, 1].lastIndexOf(0, -3) != -1)) {
-    Array.prototype.lastIndexOf = function lastIndexOf(sought /*, fromIndex */) {
-        var self = splitString && _toString(this) == "[object String]" ?
-                this.split("") :
-                toObject(this),
-            length = self.length >>> 0;
-
-        if (!length) {
-            return -1;
-        }
-        var i = length - 1;
-        if (arguments.length > 1) {
-            i = Math.min(i, toInteger(arguments[1]));
-        }
-        i = i >= 0 ? i : length - Math.abs(i);
-        for (; i >= 0; i--) {
-            if (i in self && sought === self[i]) {
-                return i;
-            }
-        }
-        return -1;
-    };
-}
-if (!Object.getPrototypeOf) {
-    Object.getPrototypeOf = function getPrototypeOf(object) {
-        return object.__proto__ || (
-            object.constructor ?
-            object.constructor.prototype :
-            prototypeOfObject
-        );
-    };
-}
-if (!Object.getOwnPropertyDescriptor) {
-    var ERR_NON_OBJECT = "Object.getOwnPropertyDescriptor called on a " +
-                         "non-object: ";
-    Object.getOwnPropertyDescriptor = function getOwnPropertyDescriptor(object, property) {
-        if ((typeof object != "object" && typeof object != "function") || object === null)
-            throw new TypeError(ERR_NON_OBJECT + object);
-        if (!owns(object, property))
-            return;
-
-        var descriptor, getter, setter;
-        descriptor =  { enumerable: true, configurable: true };
-        if (supportsAccessors) {
-            var prototype = object.__proto__;
-            object.__proto__ = prototypeOfObject;
-
-            var getter = lookupGetter(object, property);
-            var setter = lookupSetter(object, property);
-            object.__proto__ = prototype;
-
-            if (getter || setter) {
-                if (getter) descriptor.get = getter;
-                if (setter) descriptor.set = setter;
-                return descriptor;
-            }
-        }
-        descriptor.value = object[property];
-        return descriptor;
-    };
-}
-if (!Object.getOwnPropertyNames) {
-    Object.getOwnPropertyNames = function getOwnPropertyNames(object) {
-        return Object.keys(object);
-    };
-}
-if (!Object.create) {
-    var createEmpty;
-    if (Object.prototype.__proto__ === null) {
-        createEmpty = function () {
-            return { "__proto__": null };
-        };
-    } else {
-        createEmpty = function () {
-            var empty = {};
-            for (var i in empty)
-                empty[i] = null;
-            empty.constructor =
-            empty.hasOwnProperty =
-            empty.propertyIsEnumerable =
-            empty.isPrototypeOf =
-            empty.toLocaleString =
-            empty.toString =
-            empty.valueOf =
-            empty.__proto__ = null;
-            return empty;
-        };
-    }
-
-    Object.create = function create(prototype, properties) {
-        var object;
-        if (prototype === null) {
-            object = createEmpty();
-        } else {
-            if (typeof prototype != "object")
-                throw new TypeError("typeof prototype["+(typeof prototype)+"] != 'object'");
-            var Type = function () {};
-            Type.prototype = prototype;
-            object = new Type();
-            object.__proto__ = prototype;
-        }
-        if (properties !== void 0)
-            Object.defineProperties(object, properties);
-        return object;
-    };
-}
-
-function doesDefinePropertyWork(object) {
-    try {
-        Object.defineProperty(object, "sentinel", {});
-        return "sentinel" in object;
-    } catch (exception) {
-    }
-}
-if (Object.defineProperty) {
-    var definePropertyWorksOnObject = doesDefinePropertyWork({});
-    var definePropertyWorksOnDom = typeof document == "undefined" ||
-        doesDefinePropertyWork(document.createElement("div"));
-    if (!definePropertyWorksOnObject || !definePropertyWorksOnDom) {
-        var definePropertyFallback = Object.defineProperty;
-    }
-}
-
-if (!Object.defineProperty || definePropertyFallback) {
-    var ERR_NON_OBJECT_DESCRIPTOR = "Property description must be an object: ";
-    var ERR_NON_OBJECT_TARGET = "Object.defineProperty called on non-object: ";
-    var ERR_ACCESSORS_NOT_SUPPORTED = "getters & setters can not be defined " +
-                                      "on this javascript engine";
-
-    Object.defineProperty = function defineProperty(object, property, descriptor) {
-        if ((typeof object != "object" && typeof object != "function") || object === null)
-            throw new TypeError(ERR_NON_OBJECT_TARGET + object);
-        if ((typeof descriptor != "object" && typeof descriptor != "function") || descriptor === null)
-            throw new TypeError(ERR_NON_OBJECT_DESCRIPTOR + descriptor);
-        if (definePropertyFallback) {
-            try {
-                return definePropertyFallback.call(Object, object, property, descriptor);
-            } catch (exception) {
-            }
-        }
-        if (owns(descriptor, "value")) {
-
-            if (supportsAccessors && (lookupGetter(object, property) ||
-                                      lookupSetter(object, property)))
-            {
-                var prototype = object.__proto__;
-                object.__proto__ = prototypeOfObject;
-                delete object[property];
-                object[property] = descriptor.value;
-                object.__proto__ = prototype;
-            } else {
-                object[property] = descriptor.value;
-            }
-        } else {
-            if (!supportsAccessors)
-                throw new TypeError(ERR_ACCESSORS_NOT_SUPPORTED);
-            if (owns(descriptor, "get"))
-                defineGetter(object, property, descriptor.get);
-            if (owns(descriptor, "set"))
-                defineSetter(object, property, descriptor.set);
-        }
-
-        return object;
-    };
-}
-if (!Object.defineProperties) {
-    Object.defineProperties = function defineProperties(object, properties) {
-        for (var property in properties) {
-            if (owns(properties, property))
-                Object.defineProperty(object, property, properties[property]);
-        }
-        return object;
-    };
-}
-if (!Object.seal) {
-    Object.seal = function seal(object) {
-        return object;
-    };
-}
-if (!Object.freeze) {
-    Object.freeze = function freeze(object) {
-        return object;
-    };
-}
-try {
-    Object.freeze(function () {});
-} catch (exception) {
-    Object.freeze = (function freeze(freezeObject) {
-        return function freeze(object) {
-            if (typeof object == "function") {
-                return object;
-            } else {
-                return freezeObject(object);
-            }
-        };
-    })(Object.freeze);
-}
-if (!Object.preventExtensions) {
-    Object.preventExtensions = function preventExtensions(object) {
-        return object;
-    };
-}
-if (!Object.isSealed) {
-    Object.isSealed = function isSealed(object) {
-        return false;
-    };
-}
-if (!Object.isFrozen) {
-    Object.isFrozen = function isFrozen(object) {
-        return false;
-    };
-}
-if (!Object.isExtensible) {
-    Object.isExtensible = function isExtensible(object) {
-        if (Object(object) === object) {
-            throw new TypeError(); // TODO message
-        }
-        var name = '';
-        while (owns(object, name)) {
-            name += '?';
-        }
-        object[name] = true;
-        var returnValue = owns(object, name);
-        delete object[name];
-        return returnValue;
-    };
-}
-if (!Object.keys) {
-    var hasDontEnumBug = true,
-        dontEnums = [
-            "toString",
-            "toLocaleString",
-            "valueOf",
-            "hasOwnProperty",
-            "isPrototypeOf",
-            "propertyIsEnumerable",
-            "constructor"
-        ],
-        dontEnumsLength = dontEnums.length;
-
-    for (var key in {"toString": null}) {
-        hasDontEnumBug = false;
-    }
-
-    Object.keys = function keys(object) {
-
-        if (
-            (typeof object != "object" && typeof object != "function") ||
-            object === null
-        ) {
-            throw new TypeError("Object.keys called on a non-object");
-        }
-
-        var keys = [];
-        for (var name in object) {
-            if (owns(object, name)) {
-                keys.push(name);
-            }
-        }
-
-        if (hasDontEnumBug) {
-            for (var i = 0, ii = dontEnumsLength; i < ii; i++) {
-                var dontEnum = dontEnums[i];
-                if (owns(object, dontEnum)) {
-                    keys.push(dontEnum);
-                }
-            }
-        }
-        return keys;
-    };
-
-}
-if (!Date.now) {
-    Date.now = function now() {
-        return new Date().getTime();
-    };
-}
-var ws = "\x09\x0A\x0B\x0C\x0D\x20\xA0\u1680\u2000\u2001\u2002\u2003" +
-    "\u2004\u2005\u2006\u2007\u2008\u2009\u200A\u202F\u205F\u3000\u2028" +
-    "\u2029\uFEFF";
-if (!String.prototype.trim) {
-    ws = "[" + ws + "]";
-    var trimBeginRegexp = new RegExp("^" + ws + ws + "*"),
-        trimEndRegexp = new RegExp(ws + ws + "*$");
-    String.prototype.trim = function trim() {
-        return String(this).replace(trimBeginRegexp, "").replace(trimEndRegexp, "");
-    };
-}
-
-function toInteger(n) {
-    n = +n;
-    if (n !== n) { // isNaN
-        n = 0;
-    } else if (n !== 0 && n !== (1/0) && n !== -(1/0)) {
-        n = (n > 0 || -1) * Math.floor(Math.abs(n));
-    }
-    return n;
-}
-var toObject = function (o) {
-    if (o == null) { // this matches both null and undefined
-        throw new TypeError("can't convert "+o+" to object");
-    }
-    return Object(o);
-};
-
-});
-
-ace.define("ace/lib/fixoldbrowsers",["require","exports","module","ace/lib/regexp","ace/lib/es5-shim"], function(require, exports, module) {
-
-require("./regexp");
-require("./es5-shim");
+ace.define("ace/lib/fixoldbrowsers",["require","exports","module"], function(require, exports, module) {
 if (typeof Element != "undefined" && !Element.prototype.remove) {
     Object.defineProperty(Element.prototype, "remove", {
         enumerable: false,
@@ -53678,18 +52976,19 @@ exports.getButton = function(e) {
 };
 
 exports.capture = function(el, eventHandler, releaseCaptureHandler) {
+    var ownerDocument = el && el.ownerDocument || document;
     function onMouseUp(e) {
         eventHandler && eventHandler(e);
         releaseCaptureHandler && releaseCaptureHandler(e);
 
-        removeListener(document, "mousemove", eventHandler);
-        removeListener(document, "mouseup", onMouseUp);
-        removeListener(document, "dragstart", onMouseUp);
+        removeListener(ownerDocument, "mousemove", eventHandler);
+        removeListener(ownerDocument, "mouseup", onMouseUp);
+        removeListener(ownerDocument, "dragstart", onMouseUp);
     }
 
-    addListener(document, "mousemove", eventHandler);
-    addListener(document, "mouseup", onMouseUp);
-    addListener(document, "dragstart", onMouseUp);
+    addListener(ownerDocument, "mousemove", eventHandler);
+    addListener(ownerDocument, "mouseup", onMouseUp);
+    addListener(ownerDocument, "dragstart", onMouseUp);
     
     return onMouseUp;
 };
@@ -54570,8 +53869,13 @@ var TextInput = function(parentNode, host) {
                     line = line.slice(0, MAX_LINE_LENGTH);
                 } else {
                     line = "\n";
-                    selectionStart = 0;
-                    selectionEnd = 1;
+                    if (selectionStart == selectionEnd) {
+                        selectionStart = selectionEnd = 0;
+                    }
+                    else {
+                        selectionStart = 0;
+                        selectionEnd = 1;
+                    }
                 }
             }
         }
@@ -54670,6 +53974,12 @@ var TextInput = function(parentNode, host) {
             if (!fromInput && !inserted && !restoreStart && !extendLeft && !extendRight && !restoreEnd)
                 return "";
             sendingText = true;
+            var shouldReset = false;
+            if (useragent.isAndroid && inserted == ". ") {
+                inserted = "  ";
+                shouldReset = true;
+            }
+            
             if (inserted && !extendLeft && !extendRight && !restoreStart && !restoreEnd || commandMode) {
                 host.onTextInput(inserted);
             } else {
@@ -54686,7 +53996,7 @@ var TextInput = function(parentNode, host) {
             lastSelectionStart = selectionStart;
             lastSelectionEnd = selectionEnd;
             lastRestoreEnd = restoreEnd;
-            return inserted;
+            return shouldReset ? "\n" : inserted;
         }
     };
     var onInput = function(e) {
@@ -56103,9 +55413,17 @@ exports.addTouchListeners = function(el, editor) {
         if (!contextMenu) createContextMenu();
         var cursor = editor.selection.cursor;
         var pagePos = editor.renderer.textToScreenCoordinates(cursor.row, cursor.column);
+        var leftOffset = editor.renderer.textToScreenCoordinates(0, 0).pageX;
+        var scrollLeft = editor.renderer.scrollLeft;
         var rect = editor.container.getBoundingClientRect();
         contextMenu.style.top = pagePos.pageY - rect.top - 3 + "px";
-        contextMenu.style.right = "10px";
+        if (pagePos.pageX - rect.left < rect.width - 70) {
+            contextMenu.style.left = "";
+            contextMenu.style.right = "10px";
+        } else {
+            contextMenu.style.right = "";
+            contextMenu.style.left = leftOffset + scrollLeft - rect.left + "px";
+        }
         contextMenu.style.display = "";
         contextMenu.firstChild.style.display = "none";
         editor.on("input", hideContextMenu);
@@ -56188,6 +55506,8 @@ exports.addTouchListeners = function(el, editor) {
             var cursorPos = editor.renderer.$cursorLayer.getPixelPosition(cursor, true);
             var anchorPos = editor.renderer.$cursorLayer.getPixelPosition(anchor, true);
             var rect = editor.renderer.scroller.getBoundingClientRect();
+            var offsetTop = editor.renderer.layerConfig.offset;
+            var offsetLeft = editor.renderer.scrollLeft;
             var weightedDistance = function(x, y) {
                 x = x / w;
                 y = y / h - 0.75;
@@ -56200,12 +55520,12 @@ exports.addTouchListeners = function(el, editor) {
             }
             
             var diff1 = weightedDistance(
-                e.clientX - rect.left - cursorPos.left,
-                e.clientY - rect.top - cursorPos.top
+                e.clientX - rect.left - cursorPos.left + offsetLeft,
+                e.clientY - rect.top - cursorPos.top + offsetTop
             );
             var diff2 = weightedDistance(
-                e.clientX - rect.left - anchorPos.left,
-                e.clientY - rect.top - anchorPos.top
+                e.clientX - rect.left - anchorPos.left + offsetLeft,
+                e.clientY - rect.top - anchorPos.top + offsetTop
             );
             if (diff1 < 3.5 && diff2 < 3.5)
                 mode = diff1 > diff2 ? "cursor" : "anchor";
@@ -56802,7 +56122,7 @@ function deHyphenate(str) {
     return str.replace(/-(.)/g, function(m, m1) { return m1.toUpperCase(); });
 }
 
-exports.version = "1.4.10";
+exports.version = "1.4.12";
 
 });
 
@@ -56972,6 +56292,9 @@ var MouseHandler = function(editor) {
         }.bind(this);
         setTimeout(stop, 10);
         this.editor.on("nativecontextmenu", stop);
+    };
+    this.destroy = function() {
+        if (this.releaseMouse) this.releaseMouse();
     };
 }).call(MouseHandler.prototype);
 
@@ -58900,18 +58223,18 @@ var TextHighlightRules = function() {
 
     this.createKeywordMapper = function(map, defaultToken, ignoreCase, splitChar) {
         var keywords = Object.create(null);
+        this.$keywordList = [];
         Object.keys(map).forEach(function(className) {
             var a = map[className];
-            if (ignoreCase)
-                a = a.toLowerCase();
             var list = a.split(splitChar || "|");
-            for (var i = list.length; i--; )
-                keywords[list[i]] = className;
-        });
-        if (Object.getPrototypeOf(keywords)) {
-            keywords.__proto__ = null;
-        }
-        this.$keywordList = Object.keys(keywords);
+            for (var i = list.length; i--; ) {
+                var word = list[i];
+                this.$keywordList.push(word);
+                if (ignoreCase)
+                    word = word.toLowerCase(); 
+                keywords[word] = className;
+            }
+        }, this);
         map = null;
         return ignoreCase
             ? function(value) {return keywords[value.toLowerCase()] || defaultToken; }
@@ -61331,9 +60654,11 @@ function Folding() {
         var folds = this.getFoldsInRange(fold.range);
         if (folds.length > 0) {
             this.removeFolds(folds);
-            folds.forEach(function(subFold) {
-                fold.addSubFold(subFold);
-            });
+            if (!fold.collapseChildren) {
+                folds.forEach(function(subFold) {
+                    fold.addSubFold(subFold);
+                });
+            }
         }
 
         for (var i = 0; i < foldData.length; i++) {
@@ -61452,7 +60777,7 @@ function Folding() {
         var range, folds;
         if (location == null) {
             range = new Range(0, 0, this.getLength(), 0);
-            expandInner = true;
+            if (expandInner == null) expandInner = true;
         } else if (typeof location == "number")
             range = new Range(location, 0, location, this.getLine(location).length);
         else if ("row" in location)
@@ -61461,14 +60786,10 @@ function Folding() {
             range = location;
         
         folds = this.getFoldsInRangeList(range);
-        if (expandInner) {
+        if (expandInner != false) {
             this.removeFolds(folds);
         } else {
-            var subFolds = folds;
-            while (subFolds.length) {
-                this.expandFolds(subFolds);
-                subFolds = this.getFoldsInRangeList(range);
-            }
+            this.expandFolds(folds);
         }
         if (folds.length)
             return folds;
@@ -61605,7 +60926,7 @@ function Folding() {
     this.getCommentFoldRange = function(row, column, dir) {
         var iterator = new TokenIterator(this, row, column);
         var token = iterator.getCurrentToken();
-        var type = token.type;
+        var type = token && token.type;
         if (token && /^comment|string/.test(type)) {
             type = type.match(/comment|string/)[0];
             if (type == "comment")
@@ -61646,7 +60967,7 @@ function Folding() {
         }
     };
 
-    this.foldAll = function(startRow, endRow, depth) {
+    this.foldAll = function(startRow, endRow, depth, test) {
         if (depth == undefined)
             depth = 100000; // JSON.stringify doesn't hanle Infinity
         var foldWidgets = this.foldWidgets;
@@ -61659,6 +60980,8 @@ function Folding() {
                 foldWidgets[row] = this.getFoldWidget(row);
             if (foldWidgets[row] != "start")
                 continue;
+            
+            if (test && !test(row)) continue;
 
             var range = this.getFoldWidgetRange(row);
             if (range && range.isMultiLine()
@@ -61666,13 +60989,31 @@ function Folding() {
                 && range.start.row >= startRow
             ) {
                 row = range.end.row;
-                try {
-                    var fold = this.addFold("...", range);
-                    if (fold)
-                        fold.collapseChildren = depth;
-                } catch(e) {}
+                range.collapseChildren = depth;
+                this.addFold("...", range);
             }
         }
+    };
+    
+    this.foldToLevel = function(level) {
+        this.foldAll();
+        while (level-- > 0)
+            this.unfold(null, false);
+    };
+    
+    this.foldAllComments = function() {
+        var session = this;
+        this.foldAll(null, null, null, function(row) {
+            var tokens = session.getTokens(row);
+            for (var i = 0; i < tokens.length; i++) {
+                var token = tokens[i];
+                if (token.type == "text" && /^\s+$/.test(token.value))
+                    continue;
+                if (/comment/.test(token.type))
+                    return true;
+                return false;
+            }
+        });
     };
     this.$foldStyles = {
         "manual": 1,
@@ -64533,6 +63874,13 @@ exports.commands = [{
     scrollIntoView: "center",
     readOnly: true
 }, {
+    name: "foldAllComments",
+    description: "Fold all comments",
+    bindKey: bindKey(null, "Ctrl-Command-Option-0"),
+    exec: function(editor) { editor.session.foldAllComments(); },
+    scrollIntoView: "center",
+    readOnly: true
+}, {
     name: "foldOther",
     description: "Fold other",
     bindKey: bindKey("Alt-0", "Command-Option-0"),
@@ -65275,6 +64623,17 @@ exports.commands = [{
     readOnly: true
 }];
 
+for (var i = 1; i < 9; i++) {
+    exports.commands.push({
+        name: "foldToLevel" + i,
+        description: "Fold To Level " + i,
+        level: i,
+        exec: function(editor) { editor.session.foldToLevel(this.level); },
+        scrollIntoView: "center",
+        readOnly: true
+    });
+}
+
 });
 
 ace.define("ace/editor",["require","exports","module","ace/lib/fixoldbrowsers","ace/lib/oop","ace/lib/dom","ace/lib/lang","ace/lib/useragent","ace/keyboard/textinput","ace/mouse/mouse_handler","ace/mouse/fold_handler","ace/keyboard/keybinding","ace/edit_session","ace/search","ace/range","ace/lib/event_emitter","ace/commands/command_manager","ace/commands/default_commands","ace/config","ace/token_iterator","ace/clipboard"], function(require, exports, module) {
@@ -65703,25 +65062,33 @@ Editor.$uid = 0;
                 return;
             }
             
-            if (token.type.indexOf("tag-open") != -1) {
+            if (token.type.indexOf("tag-open") !== -1) {
                 token = iterator.stepForward();
                 if (!token)
                     return;
             }
             
             var tag = token.value;
+            var currentTag = token.value;
             var depth = 0;
             var prevToken = iterator.stepBackward();
             
-            if (prevToken.value == '<'){
+            if (prevToken.value === '<'){
                 do {
                     prevToken = token;
                     token = iterator.stepForward();
-                    
-                    if (token && token.value === tag && token.type.indexOf('tag-name') !== -1) {
-                        if (prevToken.value === '<'){
-                            depth++;
-                        } else if (prevToken.value === '</'){
+
+                    if (token) {
+                        if (token.type.indexOf('tag-name') !== -1) {
+                            currentTag = token.value;
+                            if (tag === currentTag) {
+                                if (prevToken.value === '<') {
+                                    depth++;
+                                } else if (prevToken.value === '</') {
+                                    depth--;
+                                }
+                            }
+                        } else if (tag === currentTag && token.value === '/>') { // self closing tag
                             depth--;
                         }
                     }
@@ -65731,12 +65098,32 @@ Editor.$uid = 0;
                 do {
                     token = prevToken;
                     prevToken = iterator.stepBackward();
-                    
-                    if (token && token.value === tag && token.type.indexOf('tag-name') !== -1) {
-                        if (prevToken.value === '<') {
-                            depth++;
-                        } else if (prevToken.value === '</') {
-                            depth--;
+
+                    if (token) {
+                        if (token.type.indexOf('tag-name') !== -1) {
+                            if (tag === token.value) {
+                                if (prevToken.value === '<') {
+                                    depth++;
+                                } else if (prevToken.value === '</') {
+                                    depth--;
+                                }
+                            }
+                        } else if (token.value === '/>') { // self closing tag
+                            var stepCount = 0;
+                            var tmpToken = prevToken;
+                            while (tmpToken) {
+                                if (tmpToken.type.indexOf('tag-name') !== -1 && tmpToken.value === tag) {
+                                    depth--;
+                                    break;
+                                } else if (tmpToken.value === '<') {
+                                    break;
+                                }
+                                tmpToken = iterator.stepBackward();
+                                stepCount++;
+                            }
+                            for (var i = 0; i < stepCount; i++) {
+                                iterator.stepForward();
+                            }
                         }
                     }
                 } while (prevToken && depth <= 0);
@@ -67162,6 +66549,8 @@ Editor.$uid = 0;
             });
             this.$toDestroy = null;
         }
+        if (this.$mouseHandler)
+            this.$mouseHandler.destroy();
         this.renderer.destroy();
         this._signal("destroy", this);
         if (this.session)
@@ -69796,7 +69185,7 @@ var FontMetrics = exports.FontMetrics = function(parentEl) {
 
     
     this.$getZoom = function getZoom(element) {
-        if (!element) return 1;
+        if (!element || !element.parentElement) return 1;
         return (window.getComputedStyle(element).zoom || 1) * getZoom(element.parentElement);
     };
     this.$initTransformMeasureNodes = function() {
@@ -80379,7 +79768,9 @@ var SnippetManager = function() {
                 {regex: "\\|" + escape("\\|") + "*\\|", onMatch: function(val, state, stack) {
                     var choices = val.slice(1, -1).replace(/\\[,|\\]|,/g, function(operator) {
                         return operator.length == 2 ? operator[1] : "\x00";
-                    }).split("\x00");
+                    }).split("\x00").map(function(value){
+                        return {value: value};
+                    });
                     stack[0].choices = choices;
                     return [choices[0]];
                 }, next: "start"},
@@ -81077,18 +80468,17 @@ var TabstopManager = function(editor) {
         
         this.selectedTabstop = ts;
         var range = ts.firstNonLinked || ts;
+        if (ts.choices) range.cursor = range.start;
         if (!this.editor.inVirtualSelectionMode) {
             var sel = this.editor.multiSelect;
-            sel.toSingleRange(range.clone());
+            sel.toSingleRange(range);
             for (var i = 0; i < ts.length; i++) {
                 if (ts.hasLinkedRanges && ts[i].linked)
                     continue;
                 sel.addRange(ts[i].clone(), true);
             }
-            if (sel.ranges[0])
-                sel.addRange(sel.ranges[0].clone());
         } else {
-            this.editor.selection.setRange(range);
+            this.editor.selection.fromOrientedRange(range);
         }
         
         this.editor.keyBinding.addKeyboardHandler(this.keyboardHandler);
@@ -81717,6 +81107,7 @@ var Autocomplete = function() {
         } else if (keepPopupPosition && !prefix) {
             this.detach();
         }
+        this.changeTimer.cancel();
     };
 
     this.detach = function() {
@@ -81779,14 +81170,15 @@ var Autocomplete = function() {
         if (!data)
             return false;
 
+        var completions = this.completions;
         this.editor.startOperation({command: {name: "insertMatch"}});
         if (data.completer && data.completer.insertMatch) {
             data.completer.insertMatch(this.editor, data);
         } else {
-            if (this.completions.filterText) {
+            if (completions.filterText) {
                 var ranges = this.editor.selection.getAllRanges();
                 for (var i = 0, range; range = ranges[i]; i++) {
-                    range.start.column -= this.completions.filterText.length;
+                    range.start.column -= completions.filterText.length;
                     this.editor.session.remove(range);
                 }
             }
@@ -81795,7 +81187,8 @@ var Autocomplete = function() {
             else
                 this.editor.execCommand("insertstring", data.value || data);
         }
-        this.detach();
+        if (this.completions == completions)
+            this.detach();
         this.editor.endOperation();
     };
 
@@ -82922,31 +82315,6 @@ function scrollbarSize(recalc) {
 }
 
 /**
- * Return the actively focused element safely.
- *
- * @param doc the document to checl
- */
-
-function activeElement(doc) {
-  if (doc === void 0) {
-    doc = ownerDocument();
-  }
-
-  // Support: IE 9 only
-  // IE9 throws an "Unspecified error" accessing document.activeElement from an <iframe>
-  try {
-    var active = doc.activeElement; // IE11 returns a seemingly empty object in some cases when accessing
-    // document.activeElement from an <iframe>
-
-    if (!active || !active.nodeName) return null;
-    return active;
-  } catch (e) {
-    /* ie throws if no active element */
-    return doc.body;
-  }
-}
-
-/**
  * Returns a ref that is immediately updated with the new value
  *
  * @param value The Ref value
@@ -82973,6 +82341,31 @@ function useWillUnmount(fn) {
       return onUnmount.current();
     };
   }, []);
+}
+
+/**
+ * Return the actively focused element safely.
+ *
+ * @param doc the document to checl
+ */
+
+function activeElement(doc) {
+  if (doc === void 0) {
+    doc = ownerDocument();
+  }
+
+  // Support: IE 9 only
+  // IE9 throws an "Unspecified error" accessing document.activeElement from an <iframe>
+  try {
+    var active = doc.activeElement; // IE11 returns a seemingly empty object in some cases when accessing
+    // document.activeElement from an <iframe>
+
+    if (!active || !active.nodeName) return null;
+    return active;
+  } catch (e) {
+    /* ie throws if no active element */
+    return doc.body;
+  }
 }
 
 function addClass(element, className) {
@@ -83132,10 +82525,7 @@ var ModalManager = /*#__PURE__*/function () {
   };
 
   _proto.removeContainerStyle = function removeContainerStyle(containerState, container) {
-    var style = containerState.style;
-    Object.keys(style).forEach(function (key) {
-      container.style[key] = style[key];
-    });
+    Object.assign(container.style, containerState.style);
   };
 
   _proto.add = function add(modal, container, className) {
@@ -83288,7 +82678,7 @@ function useModalManager(provided) {
   });
 }
 
-var Modal = react_7(function (_ref, ref) {
+var Modal = /*#__PURE__*/react_7(function (_ref, ref) {
   var _ref$show = _ref.show,
       show = _ref$show === void 0 ? false : _ref$show,
       _ref$role = _ref.role,
@@ -83461,18 +82851,18 @@ var Modal = react_7(function (_ref, ref) {
     return null;
   }
 
-  var dialogProps = _extends(_extends({
+  var dialogProps = _extends({
     role: role,
     ref: modal.setDialogRef,
     // apparently only works on the dialog role element
     'aria-modal': role === 'dialog' ? true : undefined
-  }, rest), {}, {
+  }, rest, {
     style: style,
     className: className,
     tabIndex: -1
   });
 
-  var dialog = renderDialog ? renderDialog(dialogProps) : /*#__PURE__*/react.createElement("div", dialogProps, react.cloneElement(children, {
+  var dialog = renderDialog ? renderDialog(dialogProps) : /*#__PURE__*/react.createElement("div", dialogProps, /*#__PURE__*/react.cloneElement(children, {
     role: 'document'
   }));
 
@@ -83507,7 +82897,7 @@ var Modal = react_7(function (_ref, ref) {
     }
   }
 
-  return /*#__PURE__*/react.createElement(react.Fragment, null, reactDom.createPortal( /*#__PURE__*/react.createElement(react.Fragment, null, backdropElement, dialog), container));
+  return /*#__PURE__*/react.createElement(react.Fragment, null, /*#__PURE__*/reactDom.createPortal( /*#__PURE__*/react.createElement(react.Fragment, null, backdropElement, dialog), container));
 });
 var propTypes$7 = {
   /**
@@ -83681,78 +83071,73 @@ var BootstrapModalManager = /*#__PURE__*/function (_ModalManager) {
   _inheritsLoose(BootstrapModalManager, _ModalManager);
 
   function BootstrapModalManager() {
-    var _this;
-
-    for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
-      args[_key] = arguments[_key];
-    }
-
-    _this = _ModalManager.call.apply(_ModalManager, [this].concat(args)) || this;
-
-    _this.adjustAndStore = function (prop, element, adjust) {
-      var _css;
-
-      var actual = element.style[prop];
-      element.dataset[prop] = actual;
-      style(element, (_css = {}, _css[prop] = parseFloat(style(element, prop)) + adjust + "px", _css));
-    };
-
-    _this.restore = function (prop, element) {
-      var value = element.dataset[prop];
-
-      if (value !== undefined) {
-        var _css2;
-
-        delete element.dataset[prop];
-        style(element, (_css2 = {}, _css2[prop] = value, _css2));
-      }
-    };
-
-    return _this;
+    return _ModalManager.apply(this, arguments) || this;
   }
 
   var _proto = BootstrapModalManager.prototype;
 
+  _proto.adjustAndStore = function adjustAndStore(prop, element, adjust) {
+    var _css;
+
+    var actual = element.style[prop]; // TODO: DOMStringMap and CSSStyleDeclaration aren't strictly compatible
+    // @ts-ignore
+
+    element.dataset[prop] = actual;
+    style(element, (_css = {}, _css[prop] = parseFloat(style(element, prop)) + adjust + "px", _css));
+  };
+
+  _proto.restore = function restore(prop, element) {
+    var value = element.dataset[prop];
+
+    if (value !== undefined) {
+      var _css2;
+
+      delete element.dataset[prop];
+      style(element, (_css2 = {}, _css2[prop] = value, _css2));
+    }
+  };
+
   _proto.setContainerStyle = function setContainerStyle(containerState, container) {
-    var _this2 = this;
+    var _this = this;
 
     _ModalManager.prototype.setContainerStyle.call(this, containerState, container);
 
     if (!containerState.overflowing) return;
     var size = scrollbarSize();
     qsa(container, Selector.FIXED_CONTENT).forEach(function (el) {
-      return _this2.adjustAndStore('paddingRight', el, size);
+      return _this.adjustAndStore('paddingRight', el, size);
     });
     qsa(container, Selector.STICKY_CONTENT).forEach(function (el) {
-      return _this2.adjustAndStore('margingRight', el, -size);
+      return _this.adjustAndStore('marginRight', el, -size);
     });
     qsa(container, Selector.NAVBAR_TOGGLER).forEach(function (el) {
-      return _this2.adjustAndStore('margingRight', el, size);
+      return _this.adjustAndStore('marginRight', el, size);
     });
   };
 
   _proto.removeContainerStyle = function removeContainerStyle(containerState, container) {
-    var _this3 = this;
+    var _this2 = this;
 
     _ModalManager.prototype.removeContainerStyle.call(this, containerState, container);
 
     qsa(container, Selector.FIXED_CONTENT).forEach(function (el) {
-      return _this3.restore('paddingRight', el);
+      return _this2.restore('paddingRight', el);
     });
     qsa(container, Selector.STICKY_CONTENT).forEach(function (el) {
-      return _this3.restore('margingRight', el);
+      return _this2.restore('marginRight', el);
     });
     qsa(container, Selector.NAVBAR_TOGGLER).forEach(function (el) {
-      return _this3.restore('margingRight', el);
+      return _this2.restore('marginRight', el);
     });
   };
 
   return BootstrapModalManager;
 }(ModalManager);
 
-var Body = createWithBsPrefix('modal-body');
+var ModalBody = createWithBsPrefix('modal-body');
 
 var ModalContext = react.createContext({
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
   onHide: function onHide() {}
 });
 
@@ -83776,9 +83161,9 @@ var ModalDialog = react.forwardRef(function (_ref, ref) {
 });
 ModalDialog.displayName = 'ModalDialog';
 
-var Footer = createWithBsPrefix('modal-footer');
+var ModalFooter = createWithBsPrefix('modal-footer');
 
-var defaultProps$n = {
+var defaultProps$j = {
   closeLabel: 'Close',
   closeButton: false
 };
@@ -83807,15 +83192,15 @@ var ModalHeader = react.forwardRef(function (_ref, ref) {
   }));
 });
 ModalHeader.displayName = 'ModalHeader';
-ModalHeader.defaultProps = defaultProps$n;
+ModalHeader.defaultProps = defaultProps$j;
 
 var DivStyledAsH4$1 = divWithClassName('h4');
-var Title = createWithBsPrefix('modal-title', {
+var ModalTitle = createWithBsPrefix('modal-title', {
   Component: DivStyledAsH4$1
 });
 
 var manager$1;
-var defaultProps$o = {
+var defaultProps$k = {
   show: false,
   backdrop: true,
   keyboard: true,
@@ -83837,227 +83222,267 @@ function BackdropTransition(props) {
 /* eslint-enable no-use-before-define */
 
 
-var Modal$1 = /*#__PURE__*/function (_React$Component) {
-  _inheritsLoose(Modal, _React$Component);
+var Modal$1 = react.forwardRef(function (_ref, ref) {
+  var bsPrefix = _ref.bsPrefix,
+      className = _ref.className,
+      style = _ref.style,
+      dialogClassName = _ref.dialogClassName,
+      children = _ref.children,
+      Dialog = _ref.dialogAs,
+      ariaLabelledby = _ref['aria-labelledby'],
+      show = _ref.show,
+      animation = _ref.animation,
+      backdrop = _ref.backdrop,
+      keyboard = _ref.keyboard,
+      onEscapeKeyDown = _ref.onEscapeKeyDown,
+      onShow = _ref.onShow,
+      onHide = _ref.onHide,
+      container = _ref.container,
+      autoFocus = _ref.autoFocus,
+      enforceFocus = _ref.enforceFocus,
+      restoreFocus = _ref.restoreFocus,
+      restoreFocusOptions = _ref.restoreFocusOptions,
+      onEntered = _ref.onEntered,
+      onExit = _ref.onExit,
+      onExiting = _ref.onExiting,
+      onEnter = _ref.onEnter,
+      onEntering = _ref.onEntering,
+      onExited = _ref.onExited,
+      backdropClassName = _ref.backdropClassName,
+      propsManager = _ref.manager,
+      props = _objectWithoutPropertiesLoose(_ref, ["bsPrefix", "className", "style", "dialogClassName", "children", "dialogAs", "aria-labelledby", "show", "animation", "backdrop", "keyboard", "onEscapeKeyDown", "onShow", "onHide", "container", "autoFocus", "enforceFocus", "restoreFocus", "restoreFocusOptions", "onEntered", "onExit", "onExiting", "onEnter", "onEntering", "onExited", "backdropClassName", "manager"]);
 
-  function Modal() {
-    var _this;
+  var _useState = react_16({}),
+      modalStyle = _useState[0],
+      setStyle = _useState[1];
 
-    for (var _len = arguments.length, _args = new Array(_len), _key = 0; _key < _len; _key++) {
-      _args[_key] = arguments[_key];
-    }
+  var _useState2 = react_16(false),
+      animateStaticModal = _useState2[0],
+      setAnimateStaticModal = _useState2[1];
 
-    _this = _React$Component.call.apply(_React$Component, [this].concat(_args)) || this;
-    _this.state = {
-      style: {}
-    };
-    _this.modalContext = {
-      onHide: function onHide() {
-        return _this.props.onHide();
-      }
-    };
+  var waitingForMouseUpRef = react_15(false);
+  var ignoreBackdropClickRef = react_15(false);
+  var removeStaticModalAnimationRef = react_15(null); // TODO: what's this type
 
-    _this.setModalRef = function (ref) {
-      _this._modal = ref;
-    };
+  var _useCallbackRef = useCallbackRef(),
+      modal = _useCallbackRef[0],
+      setModalRef = _useCallbackRef[1];
 
-    _this.handleDialogMouseDown = function () {
-      _this._waitingForMouseUp = true;
-    };
-
-    _this.handleMouseUp = function (e) {
-      if (_this._waitingForMouseUp && e.target === _this._modal.dialog) {
-        _this._ignoreBackdropClick = true;
-      }
-
-      _this._waitingForMouseUp = false;
-    };
-
-    _this.handleClick = function (e) {
-      if (_this._ignoreBackdropClick || e.target !== e.currentTarget) {
-        _this._ignoreBackdropClick = false;
-        return;
-      }
-
-      _this.props.onHide();
-    };
-
-    _this.handleEnter = function (node) {
-      var _this$props;
-
-      if (node) {
-        node.style.display = 'block';
-
-        _this.updateDialogStyle(node);
-      }
-
-      for (var _len2 = arguments.length, args = new Array(_len2 > 1 ? _len2 - 1 : 0), _key2 = 1; _key2 < _len2; _key2++) {
-        args[_key2 - 1] = arguments[_key2];
+  var handleHide = useEventCallback(onHide);
+  bsPrefix = useBootstrapPrefix(bsPrefix, 'modal');
+  react_11(ref, function () {
+    return {
+      get _modal() {
+         warning_1(false, 'Accessing `_modal` is not supported and will be removed in a future release') ;
+        return modal;
       }
 
-      if (_this.props.onEnter) (_this$props = _this.props).onEnter.apply(_this$props, [node].concat(args));
     };
-
-    _this.handleEntering = function (node) {
-      var _this$props2;
-
-      for (var _len3 = arguments.length, args = new Array(_len3 > 1 ? _len3 - 1 : 0), _key3 = 1; _key3 < _len3; _key3++) {
-        args[_key3 - 1] = arguments[_key3];
-      }
-
-      if (_this.props.onEntering) (_this$props2 = _this.props).onEntering.apply(_this$props2, [node].concat(args)); // FIXME: This should work even when animation is disabled.
-
-      addEventListener$1(window, 'resize', _this.handleWindowResize);
+  }, [modal]);
+  var modalContext = react_12(function () {
+    return {
+      onHide: handleHide
     };
+  }, [handleHide]);
 
-    _this.handleExited = function (node) {
-      var _this$props3;
-
-      if (node) node.style.display = ''; // RHL removes it sometimes
-
-      for (var _len4 = arguments.length, args = new Array(_len4 > 1 ? _len4 - 1 : 0), _key4 = 1; _key4 < _len4; _key4++) {
-        args[_key4 - 1] = arguments[_key4];
-      }
-
-      if (_this.props.onExited) (_this$props3 = _this.props).onExited.apply(_this$props3, args); // FIXME: This should work even when animation is disabled.
-
-      removeEventListener(window, 'resize', _this.handleWindowResize);
-    };
-
-    _this.handleWindowResize = function () {
-      _this.updateDialogStyle(_this._modal.dialog);
-    };
-
-    _this.getModalManager = function () {
-      if (_this.props.manager) {
-        return _this.props.manager;
-      }
-
-      if (!manager$1) {
-        manager$1 = new BootstrapModalManager();
-      }
-
-      return manager$1;
-    };
-
-    _this.renderBackdrop = function (props) {
-      var _this$props4 = _this.props,
-          bsPrefix = _this$props4.bsPrefix,
-          backdropClassName = _this$props4.backdropClassName,
-          animation = _this$props4.animation;
-      return /*#__PURE__*/react.createElement("div", _extends({}, props, {
-        className: classnames(bsPrefix + "-backdrop", backdropClassName, !animation && 'show')
-      }));
-    };
-
-    return _this;
+  function getModalManager() {
+    if (propsManager) return propsManager;
+    if (!manager$1) manager$1 = new BootstrapModalManager();
+    return manager$1;
   }
 
-  var _proto = Modal.prototype;
+  function updateDialogStyle(node) {
+    if (!canUseDOM) return;
+    var containerIsOverflowing = getModalManager().isContainerOverflowing(modal);
+    var modalIsOverflowing = node.scrollHeight > ownerDocument(node).documentElement.clientHeight;
+    setStyle({
+      paddingRight: containerIsOverflowing && !modalIsOverflowing ? scrollbarSize() : undefined,
+      paddingLeft: !containerIsOverflowing && modalIsOverflowing ? scrollbarSize() : undefined
+    });
+  }
 
-  _proto.componentWillUnmount = function componentWillUnmount() {
-    // Clean up the listener if we need to.
-    removeEventListener(window, 'resize', this.handleWindowResize);
+  var handleWindowResize = useEventCallback(function () {
+    if (modal) {
+      updateDialogStyle(modal.dialog);
+    }
+  });
+  useWillUnmount(function () {
+    removeEventListener(window, 'resize', handleWindowResize);
+
+    if (removeStaticModalAnimationRef.current) {
+      removeStaticModalAnimationRef.current();
+    }
+  }); // We prevent the modal from closing during a drag by detecting where the
+  // the click originates from. If it starts in the modal and then ends outside
+  // don't close.
+
+  var handleDialogMouseDown = function handleDialogMouseDown() {
+    waitingForMouseUpRef.current = true;
   };
 
-  _proto.updateDialogStyle = function updateDialogStyle(node) {
-    if (!canUseDOM) return;
-    var containerIsOverflowing = this.getModalManager().isContainerOverflowing(this._modal);
-    var modalIsOverflowing = node.scrollHeight > ownerDocument(node).documentElement.clientHeight;
-    this.setState({
-      style: {
-        paddingRight: containerIsOverflowing && !modalIsOverflowing ? scrollbarSize() : undefined,
-        paddingLeft: !containerIsOverflowing && modalIsOverflowing ? scrollbarSize() : undefined
-      }
+  var handleMouseUp = function handleMouseUp(e) {
+    if (waitingForMouseUpRef.current && modal && e.target === modal.dialog) {
+      ignoreBackdropClickRef.current = true;
+    }
+
+    waitingForMouseUpRef.current = false;
+  };
+
+  var handleStaticModalAnimation = function handleStaticModalAnimation() {
+    setAnimateStaticModal(true);
+    removeStaticModalAnimationRef.current = transitionEnd(modal.dialog, function () {
+      setAnimateStaticModal(false);
     });
   };
 
-  _proto.render = function render() {
-    var _this$props5 = this.props,
-        bsPrefix = _this$props5.bsPrefix,
-        className = _this$props5.className,
-        style = _this$props5.style,
-        dialogClassName = _this$props5.dialogClassName,
-        children = _this$props5.children,
-        Dialog = _this$props5.dialogAs,
-        ariaLabelledby = _this$props5['aria-labelledby'],
-        show = _this$props5.show,
-        animation = _this$props5.animation,
-        backdrop = _this$props5.backdrop,
-        keyboard = _this$props5.keyboard,
-        onEscapeKeyDown = _this$props5.onEscapeKeyDown,
-        onShow = _this$props5.onShow,
-        onHide = _this$props5.onHide,
-        container = _this$props5.container,
-        autoFocus = _this$props5.autoFocus,
-        enforceFocus = _this$props5.enforceFocus,
-        restoreFocus = _this$props5.restoreFocus,
-        restoreFocusOptions = _this$props5.restoreFocusOptions,
-        onEntered = _this$props5.onEntered,
-        onExit = _this$props5.onExit,
-        onExiting = _this$props5.onExiting,
-        _ = _this$props5.onExited,
-        _1 = _this$props5.onEntering,
-        _6 = _this$props5.onEnter,
-        _4 = _this$props5.onEntering,
-        _2 = _this$props5.backdropClassName,
-        props = _objectWithoutPropertiesLoose(_this$props5, ["bsPrefix", "className", "style", "dialogClassName", "children", "dialogAs", "aria-labelledby", "show", "animation", "backdrop", "keyboard", "onEscapeKeyDown", "onShow", "onHide", "container", "autoFocus", "enforceFocus", "restoreFocus", "restoreFocusOptions", "onEntered", "onExit", "onExiting", "onExited", "onEntering", "onEnter", "onEntering", "backdropClassName"]);
+  var handleStaticBackdropClick = function handleStaticBackdropClick(e) {
+    if (e.target !== e.currentTarget) {
+      return;
+    }
 
-    var clickHandler = backdrop === true ? this.handleClick : null;
-
-    var baseModalStyle = _extends({}, style, {}, this.state.style); // Sets `display` always block when `animation` is false
-
-
-    if (!animation) baseModalStyle.display = 'block';
-    return /*#__PURE__*/react.createElement(ModalContext.Provider, {
-      value: this.modalContext
-    }, /*#__PURE__*/react.createElement(BaseModal, {
-      show: show,
-      backdrop: backdrop,
-      container: container,
-      keyboard: keyboard,
-      autoFocus: autoFocus,
-      enforceFocus: enforceFocus,
-      restoreFocus: restoreFocus,
-      restoreFocusOptions: restoreFocusOptions,
-      onEscapeKeyDown: onEscapeKeyDown,
-      onShow: onShow,
-      onHide: onHide,
-      onEntered: onEntered,
-      onExit: onExit,
-      onExiting: onExiting,
-      manager: this.getModalManager(),
-      ref: this.setModalRef,
-      style: baseModalStyle,
-      className: classnames(className, bsPrefix),
-      containerClassName: bsPrefix + "-open",
-      transition: animation ? DialogTransition : undefined,
-      backdropTransition: animation ? BackdropTransition : undefined,
-      renderBackdrop: this.renderBackdrop,
-      onClick: clickHandler,
-      onMouseUp: this.handleMouseUp,
-      onEnter: this.handleEnter,
-      onEntering: this.handleEntering,
-      onExited: this.handleExited,
-      'aria-labelledby': ariaLabelledby
-    }, /*#__PURE__*/react.createElement(Dialog, _extends({}, props, {
-      onMouseDown: this.handleDialogMouseDown,
-      className: dialogClassName
-    }), children)));
+    handleStaticModalAnimation();
   };
 
-  return Modal;
-}(react.Component);
+  var handleClick = function handleClick(e) {
+    if (backdrop === 'static') {
+      handleStaticBackdropClick(e);
+      return;
+    }
 
-Modal$1.defaultProps = defaultProps$o;
-var DecoratedModal = createBootstrapComponent(Modal$1, 'modal');
-DecoratedModal.Body = Body;
-DecoratedModal.Header = ModalHeader;
-DecoratedModal.Title = Title;
-DecoratedModal.Footer = Footer;
-DecoratedModal.Dialog = ModalDialog;
-DecoratedModal.TRANSITION_DURATION = 300;
-DecoratedModal.BACKDROP_TRANSITION_DURATION = 150;
+    if (ignoreBackdropClickRef.current || e.target !== e.currentTarget) {
+      ignoreBackdropClickRef.current = false;
+      return;
+    }
+
+    onHide();
+  };
+
+  var handleEscapeKeyDown = function handleEscapeKeyDown(e) {
+    if (!keyboard && backdrop === 'static') {
+      // Call preventDefault to stop modal from closing in react-overlays,
+      // then play our animation.
+      e.preventDefault();
+      handleStaticModalAnimation();
+    } else if (keyboard && onEscapeKeyDown) {
+      onEscapeKeyDown(e);
+    }
+  };
+
+  var handleEnter = function handleEnter(node) {
+    if (node) {
+      node.style.display = 'block';
+      updateDialogStyle(node);
+    }
+
+    for (var _len = arguments.length, args = new Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
+      args[_key - 1] = arguments[_key];
+    }
+
+    if (onEnter) onEnter.apply(void 0, [node].concat(args));
+  };
+
+  var handleExit = function handleExit(node) {
+    if (removeStaticModalAnimationRef.current) {
+      removeStaticModalAnimationRef.current();
+    }
+
+    for (var _len2 = arguments.length, args = new Array(_len2 > 1 ? _len2 - 1 : 0), _key2 = 1; _key2 < _len2; _key2++) {
+      args[_key2 - 1] = arguments[_key2];
+    }
+
+    if (onExit) onExit.apply(void 0, [node].concat(args));
+  };
+
+  var handleEntering = function handleEntering(node) {
+    for (var _len3 = arguments.length, args = new Array(_len3 > 1 ? _len3 - 1 : 0), _key3 = 1; _key3 < _len3; _key3++) {
+      args[_key3 - 1] = arguments[_key3];
+    }
+
+    if (onEntering) onEntering.apply(void 0, [node].concat(args)); // FIXME: This should work even when animation is disabled.
+
+    addEventListener$1(window, 'resize', handleWindowResize);
+  };
+
+  var handleExited = function handleExited(node) {
+    if (node) node.style.display = ''; // RHL removes it sometimes
+
+    for (var _len4 = arguments.length, args = new Array(_len4 > 1 ? _len4 - 1 : 0), _key4 = 1; _key4 < _len4; _key4++) {
+      args[_key4 - 1] = arguments[_key4];
+    }
+
+    if (onExited) onExited.apply(void 0, args); // FIXME: This should work even when animation is disabled.
+
+    removeEventListener(window, 'resize', handleWindowResize);
+  };
+
+  var renderBackdrop = react_9(function (backdropProps) {
+    return /*#__PURE__*/react.createElement("div", _extends({}, backdropProps, {
+      className: classnames(bsPrefix + "-backdrop", backdropClassName, !animation && 'show')
+    }));
+  }, [animation, backdropClassName, bsPrefix]);
+
+  var baseModalStyle = _extends({}, style, {}, modalStyle); // Sets `display` always block when `animation` is false
+
+
+  if (!animation) {
+    baseModalStyle.display = 'block';
+  }
+
+  var renderDialog = function renderDialog(dialogProps) {
+    return /*#__PURE__*/react.createElement("div", _extends({
+      role: "dialog"
+    }, dialogProps, {
+      style: baseModalStyle,
+      className: classnames(className, bsPrefix, animateStaticModal && bsPrefix + "-static"),
+      onClick: backdrop ? handleClick : undefined,
+      onMouseUp: handleMouseUp,
+      "aria-labelledby": ariaLabelledby
+    }), /*#__PURE__*/react.createElement(Dialog, _extends({}, props, {
+      role: "document",
+      onMouseDown: handleDialogMouseDown,
+      className: dialogClassName
+    }), children));
+  };
+
+  return /*#__PURE__*/react.createElement(ModalContext.Provider, {
+    value: modalContext
+  }, /*#__PURE__*/react.createElement(BaseModal, {
+    show: show,
+    ref: setModalRef,
+    backdrop: backdrop,
+    container: container,
+    keyboard: true // Always set true - see handleEscapeKeyDown
+    ,
+    autoFocus: autoFocus,
+    enforceFocus: enforceFocus,
+    restoreFocus: restoreFocus,
+    restoreFocusOptions: restoreFocusOptions,
+    onEscapeKeyDown: handleEscapeKeyDown,
+    onShow: onShow,
+    onHide: onHide,
+    onEnter: handleEnter,
+    onEntering: handleEntering,
+    onEntered: onEntered,
+    onExit: handleExit,
+    onExiting: onExiting,
+    onExited: handleExited,
+    manager: getModalManager(),
+    containerClassName: bsPrefix + "-open",
+    transition: animation ? DialogTransition : undefined,
+    backdropTransition: animation ? BackdropTransition : undefined,
+    renderBackdrop: renderBackdrop,
+    renderDialog: renderDialog
+  }));
+});
+Modal$1.displayName = 'Modal';
+Modal$1.defaultProps = defaultProps$k;
+Modal$1.Body = ModalBody;
+Modal$1.Header = ModalHeader;
+Modal$1.Title = ModalTitle;
+Modal$1.Footer = ModalFooter;
+Modal$1.Dialog = ModalDialog;
+Modal$1.TRANSITION_DURATION = 300;
+Modal$1.BACKDROP_TRANSITION_DURATION = 150;
 
 function _defineProperty$2(obj, key, value) {
   if (key in obj) {
@@ -86767,7 +86192,7 @@ class NotebookUi extends Pane {
 
 class NothingUi extends Pane {}
 
-var defaultProps$p = {
+var defaultProps$l = {
   variant: null
 };
 var CardImg = react.forwardRef( // Need to define the default "as" during prop destructuring to be compatible with styled-components github.com/react-bootstrap/react-bootstrap/issues/3595
@@ -86786,12 +86211,27 @@ function (_ref, ref) {
   }, props));
 });
 CardImg.displayName = 'CardImg';
-CardImg.defaultProps = defaultProps$p;
+CardImg.defaultProps = defaultProps$l;
 
 var DivStyledAsH5 = divWithClassName('h5');
 var DivStyledAsH6 = divWithClassName('h6');
 var CardBody = createWithBsPrefix('card-body');
-var defaultProps$q = {
+var CardTitle = createWithBsPrefix('card-title', {
+  Component: DivStyledAsH5
+});
+var CardSubtitle = createWithBsPrefix('card-subtitle', {
+  Component: DivStyledAsH6
+});
+var CardLink = createWithBsPrefix('card-link', {
+  Component: 'a'
+});
+var CardText = createWithBsPrefix('card-text', {
+  Component: 'p'
+});
+var CardHeader = createWithBsPrefix('card-header');
+var CardFooter = createWithBsPrefix('card-footer');
+var CardImgOverlay = createWithBsPrefix('card-img-overlay');
+var defaultProps$m = {
   body: false
 };
 var Card = react.forwardRef(function (_ref, ref) {
@@ -86812,33 +86252,28 @@ var Card = react.forwardRef(function (_ref, ref) {
       cardHeaderBsPrefix: prefix + "-header"
     };
   }, [prefix]);
-  return /*#__PURE__*/react.createElement(CardContext.Provider, {
+  return /*#__PURE__*/react.createElement(context$1.Provider, {
     value: cardContext
   }, /*#__PURE__*/react.createElement(Component, _extends({
     ref: ref
   }, props, {
     className: classnames(className, prefix, bg && "bg-" + bg, text && "text-" + text, border && "border-" + border)
-  }), body ? /*#__PURE__*/react.createElement(CardBody, null, children) : children));
+  }), body ?
+  /*#__PURE__*/
+  // @ts-ignore
+  react.createElement(CardBody, null, children) : children));
 });
 Card.displayName = 'Card';
-Card.defaultProps = defaultProps$q;
+Card.defaultProps = defaultProps$m;
 Card.Img = CardImg;
-Card.Title = createWithBsPrefix('card-title', {
-  Component: DivStyledAsH5
-});
-Card.Subtitle = createWithBsPrefix('card-subtitle', {
-  Component: DivStyledAsH6
-});
+Card.Title = CardTitle;
+Card.Subtitle = CardSubtitle;
 Card.Body = CardBody;
-Card.Link = createWithBsPrefix('card-link', {
-  Component: 'a'
-});
-Card.Text = createWithBsPrefix('card-text', {
-  Component: 'p'
-});
-Card.Header = createWithBsPrefix('card-header');
-Card.Footer = createWithBsPrefix('card-footer');
-Card.ImgOverlay = createWithBsPrefix('card-img-overlay');
+Card.Link = CardLink;
+Card.Text = CardText;
+Card.Header = CardHeader;
+Card.Footer = CardFooter;
+Card.ImgOverlay = CardImgOverlay;
 
 class SettingsUi extends react.PureComponent {
   static get propTypes() {
@@ -86917,8 +86352,6 @@ class SettingsUi extends react.PureComponent {
 
 }
 
-/* eslint-disable react/no-unused-prop-types */
-
 var TabContainer = function TabContainer(props) {
   var _useUncontrolled = useUncontrolled(props, {
     activeKey: 'onSelect'
@@ -86942,8 +86375,8 @@ var TabContainer = function TabContainer(props) {
       onSelect: onSelect,
       activeKey: activeKey,
       transition: transition,
-      mountOnEnter: mountOnEnter,
-      unmountOnExit: unmountOnExit,
+      mountOnEnter: mountOnEnter || false,
+      unmountOnExit: unmountOnExit || false,
       getControlledId: function getControlledId(key) {
         return generateChildId(key, 'tabpane');
       },
@@ -86955,7 +86388,7 @@ var TabContainer = function TabContainer(props) {
   return /*#__PURE__*/react.createElement(TabContext.Provider, {
     value: tabContext
   }, /*#__PURE__*/react.createElement(SelectableContext.Provider, {
-    value: onSelect
+    value: onSelect || null
   }, children));
 };
 
@@ -87046,7 +86479,6 @@ var TabPane = react.forwardRef(function (props, ref) {
 TabPane.displayName = 'TabPane';
 
 /* eslint-disable react/require-render-return, react/no-unused-prop-types */
-
 var Tab = /*#__PURE__*/function (_React$Component) {
   _inheritsLoose(Tab, _React$Component);
 
@@ -87097,7 +86529,7 @@ function forEach(children, func) {
   });
 }
 
-var defaultProps$r = {
+var defaultProps$n = {
   variant: 'tabs',
   mountOnEnter: false,
   unmountOnExit: false
@@ -87134,7 +86566,7 @@ function renderTab(child) {
   }, title);
 }
 
-var Tabs = react.forwardRef(function (props, ref) {
+var Tabs = function Tabs(props) {
   var _useUncontrolled = useUncontrolled(props, {
     activeKey: 'onSelect'
   }),
@@ -87149,7 +86581,6 @@ var Tabs = react.forwardRef(function (props, ref) {
       controlledProps = _objectWithoutPropertiesLoose(_useUncontrolled, ["id", "onSelect", "transition", "mountOnEnter", "unmountOnExit", "children", "activeKey"]);
 
   return /*#__PURE__*/react.createElement(TabContainer, {
-    ref: ref,
     id: id,
     activeKey: activeKey,
     onSelect: onSelect,
@@ -87167,8 +86598,9 @@ var Tabs = react.forwardRef(function (props, ref) {
     delete childProps.tabClassName;
     return /*#__PURE__*/react.createElement(TabPane, childProps);
   })));
-});
-Tabs.defaultProps = defaultProps$r;
+};
+
+Tabs.defaultProps = defaultProps$n;
 Tabs.displayName = 'Tabs';
 
 const defaultPaneLayout = {
@@ -87269,14 +86701,14 @@ class SelectWorkspaceUi extends SettingsUi {
       rows.push(workspaces.slice(i, i + 5));
     }
 
-    return /*#__PURE__*/react.createElement(DecoratedModal, {
+    return /*#__PURE__*/react.createElement(Modal$1, {
       show: this.props.show,
       onHide: this.doHide,
       size: "xl",
       scrollable: true
-    }, /*#__PURE__*/react.createElement(DecoratedModal.Header, {
+    }, /*#__PURE__*/react.createElement(Modal$1.Header, {
       closeButton: true
-    }, /*#__PURE__*/react.createElement(DecoratedModal.Title, null, "Workspace")), /*#__PURE__*/react.createElement(DecoratedModal.Body, null, /*#__PURE__*/react.createElement(Tabs, {
+    }, /*#__PURE__*/react.createElement(Modal$1.Title, null, "Workspace")), /*#__PURE__*/react.createElement(Modal$1.Body, null, /*#__PURE__*/react.createElement(Tabs, {
       defaultActiveKey: "local",
       style: {
         display: 'flex'
@@ -87307,7 +86739,7 @@ class SelectWorkspaceUi extends SettingsUi {
     }), /*#__PURE__*/react.createElement(Tab, {
       eventKey: "create",
       title: "Create"
-    }, /*#__PURE__*/react.createElement(Form, null, /*#__PURE__*/react.createElement(Form.Group, null, /*#__PURE__*/react.createElement(Form.Label, null, "Workspace Name"), /*#__PURE__*/react.createElement(Form.Control, {
+    }, /*#__PURE__*/react.createElement(FormImpl, null, /*#__PURE__*/react.createElement(FormImpl.Group, null, /*#__PURE__*/react.createElement(FormImpl.Label, null, "Workspace Name"), /*#__PURE__*/react.createElement(FormImpl.Control, {
       name: "workspace",
       value: workspace,
       onChange: this.doUpdate
@@ -87447,11 +86879,11 @@ class ShareGistUi extends SettingsUi {
       isPublic = true,
       url
     } = this.state;
-    return /*#__PURE__*/react.createElement(Form, null, /*#__PURE__*/react.createElement(Form.Group, null, /*#__PURE__*/react.createElement(Form.Label, null, "Gist Url"), /*#__PURE__*/react.createElement(Form.Control, {
+    return /*#__PURE__*/react.createElement(FormImpl, null, /*#__PURE__*/react.createElement(FormImpl.Group, null, /*#__PURE__*/react.createElement(FormImpl.Label, null, "Gist Url"), /*#__PURE__*/react.createElement(FormImpl.Control, {
       name: "url",
       value: url,
       onChange: this.doUpdate
-    }), /*#__PURE__*/react.createElement(Form.Label, null, "Gist is public?"), /*#__PURE__*/react.createElement(Form.Check, {
+    }), /*#__PURE__*/react.createElement(FormImpl.Label, null, "Gist is public?"), /*#__PURE__*/react.createElement(FormImpl.Check, {
       name: "isPublic",
       checked: isPublic,
       onChange: this.doUpdate
@@ -87546,15 +86978,15 @@ class ShareGithubUi extends SettingsUi {
       repository,
       prefix
     } = this.state;
-    return /*#__PURE__*/react.createElement(Form, null, /*#__PURE__*/react.createElement(Form.Group, null, /*#__PURE__*/react.createElement(Form.Label, null, "Owner"), /*#__PURE__*/react.createElement(Form.Control, {
+    return /*#__PURE__*/react.createElement(FormImpl, null, /*#__PURE__*/react.createElement(FormImpl.Group, null, /*#__PURE__*/react.createElement(FormImpl.Label, null, "Owner"), /*#__PURE__*/react.createElement(FormImpl.Control, {
       name: "owner",
       value: owner,
       onChange: this.doUpdate
-    })), /*#__PURE__*/react.createElement(Form.Group, null, /*#__PURE__*/react.createElement(Form.Label, null, "Repository"), /*#__PURE__*/react.createElement(Form.Control, {
+    })), /*#__PURE__*/react.createElement(FormImpl.Group, null, /*#__PURE__*/react.createElement(FormImpl.Label, null, "Repository"), /*#__PURE__*/react.createElement(FormImpl.Control, {
       name: "repository",
       value: repository,
       onChange: this.doUpdate
-    })), /*#__PURE__*/react.createElement(Form.Group, null, /*#__PURE__*/react.createElement(Form.Label, null, "Path Prefix"), /*#__PURE__*/react.createElement(Form.Control, {
+    })), /*#__PURE__*/react.createElement(FormImpl.Group, null, /*#__PURE__*/react.createElement(FormImpl.Label, null, "Path Prefix"), /*#__PURE__*/react.createElement(FormImpl.Control, {
       name: "prefix",
       value: prefix,
       onChange: this.doUpdate
@@ -87585,12 +87017,12 @@ class ShareUi extends SettingsUi {
     const {
       toast
     } = this.props;
-    return /*#__PURE__*/react.createElement(DecoratedModal, {
+    return /*#__PURE__*/react.createElement(Modal$1, {
       show: this.props.show,
       onHide: this.doHide
-    }, /*#__PURE__*/react.createElement(DecoratedModal.Header, {
+    }, /*#__PURE__*/react.createElement(Modal$1.Header, {
       closeButton: true
-    }, /*#__PURE__*/react.createElement(DecoratedModal.Title, null, "Share")), /*#__PURE__*/react.createElement(DecoratedModal.Body, null, /*#__PURE__*/react.createElement(Tabs, {
+    }, /*#__PURE__*/react.createElement(Modal$1.Title, null, "Share")), /*#__PURE__*/react.createElement(Modal$1.Body, null, /*#__PURE__*/react.createElement(Tabs, {
       defaultActiveKey: "repository"
     }, /*#__PURE__*/react.createElement(Tab, {
       eventKey: "repository",
@@ -87666,10 +87098,11 @@ function useTimeout() {
 }
 
 var ToastContext = react.createContext({
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
   onClose: function onClose() {}
 });
 
-var defaultProps$s = {
+var defaultProps$o = {
   closeLabel: 'Close',
   closeButton: true
 };
@@ -87700,50 +87133,53 @@ var ToastHeader = react.forwardRef(function (_ref, ref) {
   }));
 });
 ToastHeader.displayName = 'ToastHeader';
-ToastHeader.defaultProps = defaultProps$s;
+ToastHeader.defaultProps = defaultProps$o;
 
-var Body$1 = createWithBsPrefix('toast-body');
+var ToastBody = createWithBsPrefix('toast-body');
 
-var defaultProps$t = {
-  animation: true,
-  autohide: false,
-  delay: 3000,
-  show: true,
-  transition: Fade
-};
 var Toast = react.forwardRef(function (_ref, ref) {
   var bsPrefix = _ref.bsPrefix,
       className = _ref.className,
       children = _ref.children,
-      Transition = _ref.transition,
-      show = _ref.show,
-      animation = _ref.animation,
-      delay = _ref.delay,
-      autohide = _ref.autohide,
+      _ref$transition = _ref.transition,
+      Transition = _ref$transition === void 0 ? Fade : _ref$transition,
+      _ref$show = _ref.show,
+      show = _ref$show === void 0 ? true : _ref$show,
+      _ref$animation = _ref.animation,
+      animation = _ref$animation === void 0 ? true : _ref$animation,
+      _ref$delay = _ref.delay,
+      delay = _ref$delay === void 0 ? 3000 : _ref$delay,
+      _ref$autohide = _ref.autohide,
+      autohide = _ref$autohide === void 0 ? false : _ref$autohide,
       onClose = _ref.onClose,
       props = _objectWithoutPropertiesLoose(_ref, ["bsPrefix", "className", "children", "transition", "show", "animation", "delay", "autohide", "onClose"]);
 
-  bsPrefix = useBootstrapPrefix('toast');
+  bsPrefix = useBootstrapPrefix(bsPrefix, 'toast'); // We use refs for these, because we don't want to restart the autohide
+  // timer in case these values change.
+
   var delayRef = react_15(delay);
   var onCloseRef = react_15(onClose);
   react_10(function () {
-    // We use refs for these, because we don't want to restart the autohide
-    // timer in case these values change.
     delayRef.current = delay;
     onCloseRef.current = onClose;
   }, [delay, onClose]);
   var autohideTimeout = useTimeout();
+  var autohideToast = !!(autohide && show);
   var autohideFunc = react_9(function () {
-    if (!(autohide && show)) {
-      return;
+    if (autohideToast) {
+      onCloseRef.current == null ? void 0 : onCloseRef.current();
     }
-
-    onCloseRef.current();
-  }, [autohide, show]);
-  autohideTimeout.set(autohideFunc, delayRef.current);
-  var hasAnimation = react_12(function () {
-    return Transition && animation;
-  }, [Transition, animation]);
+  }, [autohideToast]);
+  react_10(function () {
+    // Only reset timer if show or autohide changes.
+    autohideTimeout.set(autohideFunc, delayRef.current);
+  }, [autohideTimeout, autohideFunc]);
+  var toastContext = react_12(function () {
+    return {
+      onClose: onClose
+    };
+  }, [onClose]);
+  var hasAnimation = !!(Transition && animation);
   var toast = /*#__PURE__*/react.createElement("div", _extends({}, props, {
     ref: ref,
     className: classnames(bsPrefix, className, !hasAnimation && (show ? 'show' : 'hide')),
@@ -87751,20 +87187,18 @@ var Toast = react.forwardRef(function (_ref, ref) {
     "aria-live": "assertive",
     "aria-atomic": "true"
   }), children);
-  var toastContext = {
-    onClose: onClose
-  };
   return /*#__PURE__*/react.createElement(ToastContext.Provider, {
     value: toastContext
-  }, hasAnimation ? /*#__PURE__*/react.createElement(Transition, {
+  }, hasAnimation && Transition ? /*#__PURE__*/react.createElement(Transition, {
     in: show,
     unmountOnExit: true
   }, toast) : toast);
 });
-Toast.defaultProps = defaultProps$t;
 Toast.displayName = 'Toast';
-Toast.Body = Body$1;
-Toast.Header = ToastHeader;
+var Toast$1 = Object.assign(Toast, {
+  Body: ToastBody,
+  Header: ToastHeader
+});
 
 var fastEquals = createCommonjsModule(function (module, exports) {
 (function (global, factory) {
@@ -88809,7 +88243,7 @@ class Ui extends react.PureComponent {
         text,
         duration = 1000
       } = entry;
-      return /*#__PURE__*/react.createElement(Toast, {
+      return /*#__PURE__*/react.createElement(Toast$1, {
         key: `toast/${index}`,
         variant: "info",
         delay: duration,
@@ -88842,15 +88276,15 @@ class Ui extends react.PureComponent {
       }
 
       const paneView = this.getPaneView(switchView);
-      return /*#__PURE__*/react.createElement(Container, null, /*#__PURE__*/react.createElement(Row, null, /*#__PURE__*/react.createElement(Col, null, /*#__PURE__*/react.createElement(DecoratedModal, {
+      return /*#__PURE__*/react.createElement(Container, null, /*#__PURE__*/react.createElement(Row, null, /*#__PURE__*/react.createElement(Col, null, /*#__PURE__*/react.createElement(Modal$1, {
         show: switchView !== undefined,
         onHide: () => this.setState({
           switchView: undefined
         }),
         keyboard: true
-      }, /*#__PURE__*/react.createElement(DecoratedModal.Header, {
+      }, /*#__PURE__*/react.createElement(Modal$1.Header, {
         closeButton: true
-      }, /*#__PURE__*/react.createElement(DecoratedModal.Title, null, "Select Content")), /*#__PURE__*/react.createElement(DecoratedModal.Body, null, /*#__PURE__*/react.createElement(ButtonGroup, {
+      }, /*#__PURE__*/react.createElement(Modal$1.Title, null, "Select Content")), /*#__PURE__*/react.createElement(Modal$1.Body, null, /*#__PURE__*/react.createElement(ButtonGroup, {
         vertical: true,
         style: {
           width: '100%'
@@ -88958,7 +88392,7 @@ class Ui extends react.PureComponent {
       eventKey: "reference"
     }, "Reference")), /*#__PURE__*/react.createElement(Nav.Item, null, /*#__PURE__*/react.createElement(Dropdown$1, {
       as: ButtonGroup
-    }, /*#__PURE__*/react.createElement(Form.Control, {
+    }, /*#__PURE__*/react.createElement(FormImpl.Control, {
       value: fileTitle,
       onKeyPress: openFileTitle,
       onChange: e => this.setState({

@@ -8,7 +8,6 @@ export let doCheckOverlap = false;
 export let doDefragment = 'none';
 
 export const fromPolygons = (
-  options = {},
   polygons,
   normalize3 = createNormalize3()
 ) => {

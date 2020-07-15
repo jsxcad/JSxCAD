@@ -52,8 +52,8 @@ test.beforeEach(async (t) => {
 
 test('Self union', (t) => {
   const solid = union(
-    fromPolygons({}, cubePolygons),
-    fromPolygons({}, cubePolygons)
+    fromPolygons(cubePolygons),
+    fromPolygons(cubePolygons)
   );
   t.deepEqual(canonicalize(solid), [
     [
@@ -133,8 +133,8 @@ test('Self union', (t) => {
 
 test('Overlapping 1 union', (t) => {
   const solid = union(
-    transform(fromTranslation([0.5, 0.0, 0.0]), fromPolygons({}, cubePolygons)),
-    fromPolygons({}, cubePolygons)
+    transform(fromTranslation([0.5, 0.0, 0.0]), fromPolygons(cubePolygons)),
+    fromPolygons(cubePolygons)
   );
   t.deepEqual(canonicalize(solid), [
     [
@@ -214,8 +214,8 @@ test('Overlapping 1 union', (t) => {
 
 test('Overlapping union', (t) => {
   const solid = union(
-    transform(fromTranslation([0.5, 0.5, 0.5]), fromPolygons({}, cubePolygons)),
-    fromPolygons({}, cubePolygons)
+    transform(fromTranslation([0.5, 0.5, 0.5]), fromPolygons(cubePolygons)),
+    fromPolygons(cubePolygons)
   );
   t.deepEqual(canonicalize(solid), [
     [

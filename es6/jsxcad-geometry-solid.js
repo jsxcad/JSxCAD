@@ -286,7 +286,6 @@ const createNormalize4 = () => {
 };
 
 const fromPolygons = (
-  options = {},
   polygons,
   normalize3 = createNormalize3()
 ) => {
