@@ -12,7 +12,6 @@ import '@jsxcad/api-v1-gcode';
 import '@jsxcad/api-v1-layout';
 import '@jsxcad/api-v1-pdf';
 import '@jsxcad/api-v1-plans';
-import '@jsxcad/api-v1-shell';
 import '@jsxcad/api-v1-svg';
 import '@jsxcad/api-v1-stl';
 
@@ -33,6 +32,10 @@ export { Shape, loadGeometry, log, saveGeometry } from '@jsxcad/api-v1-shape';
 export { Line2 } from '@jsxcad/api-v1-line2';
 
 export { Plan } from '@jsxcad/api-v1-plan';
+
+export { Shell } from '@jsxcad/api-v1-shell';
+
+export { BenchPlane } from '@jsxcad/api-v1-tools';
 
 export {
   Arc,

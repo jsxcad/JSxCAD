@@ -144,6 +144,7 @@ export class JsEditorUi extends Pane {
       script = new TextDecoder('utf8').decode(script);
     }
     await ask({ evaluate: script, workspace, path: file });
+    await log({ op: 'text', text: 'Finished', level: 'serious' });
   }
 
   async save() {

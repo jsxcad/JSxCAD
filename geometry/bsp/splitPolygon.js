@@ -5,7 +5,6 @@ import {
 // import { equals as equalsPoint, subtract } from '@jsxcad/math-vec3';
 
 import { pushWhenValid } from '@jsxcad/geometry-polygons';
-import { subtract } from '@jsxcad/math-vec3';
 import { toPlane } from '@jsxcad/math-poly3';
 
 const EPSILON = 1e-5;

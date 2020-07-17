@@ -145,10 +145,7 @@ Shape.fromPoint = (point, context) =>
 Shape.fromPoints = (points, context) =>
   fromGeometry(taggedPoints({}, points), context);
 Shape.fromPolygonsToSolid = (polygons, context) =>
-  fromGeometry(
-    taggedSolid({}, fromPolygonsToSolid(polygons)),
-    context
-  );
+  fromGeometry(taggedSolid({}, fromPolygonsToSolid(polygons)), context);
 Shape.fromPolygonsToZ0Surface = (polygons, context) =>
   fromGeometry(taggedZ0Surface({}, polygons), context);
 Shape.fromSurfaces = (surfaces, context) =>

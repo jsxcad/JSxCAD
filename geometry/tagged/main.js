@@ -64,7 +64,6 @@ export { getSolids } from './getSolids.js';
 export { getSurfaces } from './getSurfaces.js';
 export { getTags } from './getTags.js';
 export { getZ0Surfaces } from './getZ0Surfaces.js';
-export { grow } from './grow.js';
 export { intersection } from './intersection.js';
 export { keep } from './keep.js';
 export { measureArea } from './measureArea.js';

@@ -1,8 +1,8 @@
 import { toPolygons, alignVertices, fromPolygons as fromPolygons$1 } from './jsxcad-geometry-solid.js';
 import { equals, splitLineSegmentByPlane, toPolygon } from './jsxcad-math-plane.js';
 import { pushWhenValid, doesNotOverlap, measureBoundingBox, flip } from './jsxcad-geometry-polygons.js';
-import { max, min, scale, add, subtract, dot as dot$1 } from './jsxcad-math-vec3.js';
 import { toPlane } from './jsxcad-math-poly3.js';
+import { max, min, scale, add, subtract, dot as dot$1 } from './jsxcad-math-vec3.js';
 import { createNormalize3 } from './jsxcad-algorithm-quantize.js';
 import { toPlane as toPlane$1, outline } from './jsxcad-geometry-surface.js';
 import { getEdges, createOpenPath } from './jsxcad-geometry-path.js';
@@ -449,6 +449,46 @@ const removeExteriorPolygonsForSection = (bsp, polygons, normalize) => {
   }
 };
 
+const removeInteriorPolygonsForSurface = (bsp, polygons, normalize) => {
+  if (bsp === inLeaf) {
+    return [];
+  } else if (bsp === outLeaf) {
+    return keepOut(polygons);
+  } else {
+    const front = [];
+    const back = [];
+    for (let i = 0; i < polygons.length; i++) {
+      splitPolygon(
+        normalize,
+        bsp.plane,
+        polygons[i],
+        /* back= */ back, // drop
+        /* abutting= */ back, // drop
+        /* overlapping= */ back, // drop
+        /* front= */ front
+      );
+    }
+    const trimmedFront = removeInteriorPolygonsForSurface(
+      bsp.front,
+      front,
+      normalize
+    );
+    const trimmedBack = removeInteriorPolygonsForSurface(
+      bsp.back,
+      back,
+      normalize
+    );
+
+    if (trimmedFront.length === 0) {
+      return trimmedBack;
+    } else if (trimmedBack.length === 0) {
+      return trimmedFront;
+    } else {
+      return merge(trimmedFront, trimmedBack);
+    }
+  }
+};
+
 const removeExteriorPolygonsForCutDroppingOverlap = (
   bsp,
   polygons,
@@ -467,7 +507,7 @@ const removeExteriorPolygonsForCutDroppingOverlap = (
         bsp.plane,
         polygons[i],
         /* back= */ back, // keepward
-        /* abutting= */ front, // dropward
+        /* abutting= */ back, // keepward
         /* overlapping= */ front, // dropward
         /* front= */ front
       ); // dropward
@@ -551,7 +591,7 @@ const removeInteriorPolygonsForDifference = (bsp, polygons, normalize) => {
         bsp.plane,
         polygons[i],
         /* back= */ inward,
-        /* abutting= */ outward, // keepward
+        /* abutting= */ inward, // dropward
         /* overlapping= */ inward, // dropward
         /* front= */ outward
       );
@@ -832,10 +872,7 @@ const cut = (solid, surface, normalize = createNormalize3()) => {
     normalize
   );
 
-  return fromPolygons$1(
-    [...trimmedSolid, ...trimmedPolygons],
-    normalize
-  );
+  return fromPolygons$1([...trimmedSolid, ...trimmedPolygons], normalize);
 };
 
 const cutOpen = (solid, surface, normalize = createNormalize3()) => {
@@ -855,22 +892,35 @@ const cutOpen = (solid, surface, normalize = createNormalize3()) => {
 
 // All planes are faces.
 
-const clipPolygonsToFaces = (bsp, polygons, normalize, emit) => {
-  console.log(`QQ/polygons: ${JSON.stringify(polygons)}`);
-  if (polygons.length === 0) {
-    return;
-  } else if (bsp === inLeaf) {
+const clipPolygonsToFaces = (
+  bsp,
+  polygons,
+  normalize,
+  emit,
+  path = ''
+) => {
+  if (polygons.length === 0) ; else if (bsp === inLeaf) {
     for (const polygon of polygons) {
+      console.log(`QQ/path: ${path}`);
+      polygon.path = path;
       emit(polygon);
     }
   } else if (bsp !== outLeaf) {
     const front = [];
     const back = [];
     for (const polygon of polygons) {
-      splitPolygon(normalize, bsp.plane, polygon, /*back=*/back, /*abutting=*/front, /*overlapping=*/back, /*front=*/front);
+      splitPolygon(
+        normalize,
+        bsp.plane,
+        polygon,
+        /* back= */ back,
+        /* abutting= */ front,
+        /* overlapping= */ back,
+        /* front= */ front
+      );
     }
-    clipPolygonsToFaces(bsp.front, front, normalize, emit);
-    clipPolygonsToFaces(bsp.back, back, normalize, emit);
+    clipPolygonsToFaces(bsp.front, front, normalize, emit, path + 'f');
+    clipPolygonsToFaces(bsp.back, back, normalize, emit, path + 'b');
   }
 };
 
@@ -1083,6 +1133,11 @@ const difference = (aSolid, ...bSolids) => {
   return fromPolygons$1(a, normalize);
 };
 
+const differenceOfSurfaceWithSolid = (solid, surface, normalize) => {
+  const bsp = fromSolid(alignVertices(solid, normalize), normalize);
+  return removeInteriorPolygonsForSurface(bsp, surface, normalize);
+};
+
 const fromPlanes = (planes, normalize) => {
   const polygons = [];
   for (const plane of planes) {
@@ -1247,6 +1302,92 @@ const section = (solid, surfaces, normalize) => {
   );
 };
 
+const toConvexClouds = (bsp, normalize) => {
+  const clouds = [];
+  const walk = (bsp, polygons) => {
+    if (bsp === outLeaf) {
+      return null;
+    } else if (bsp === inLeaf) {
+      const cloud = [];
+      for (const polygon of polygons) {
+        cloud.push(...polygon);
+      }
+      clouds.push(cloud);
+    } else {
+      const back = [...bsp.same];
+      const front = [...bsp.same];
+      for (const polygon of polygons) {
+        splitPolygon(normalize, bsp.plane, polygon, back, front, back, front);
+      }
+      walk(bsp.front, front);
+      walk(bsp.back, back);
+    }
+  };
+  walk(bsp, []);
+  return clouds;
+};
+
+const toDot = (bsp) => {
+  const lines = [];
+  const dot = (text) => lines.push(text);
+
+  dot(`digraph {`);
+
+  const ids = new Map();
+  let nextId = 0;
+
+  const walk = (bsp, parent) => {
+    if (bsp === inLeaf) {
+      return `"IN_${parent}"`;
+    } else if (bsp === outLeaf) {
+      return `"OUT ${parent}"`;
+    } else {
+      if (!ids.has(bsp)) {
+        ids.set(bsp, nextId++);
+      }
+      const id = ids.get(bsp);
+
+      dot(
+        `  ${id} [label="${bsp.plane.map((v) => v.toFixed(3)).join(', ')}"];`
+      );
+      dot(`  ${id} -> ${walk(bsp.front, id)} [label="front"];`);
+      dot(`  ${id} -> ${walk(bsp.back, id)} [label="back"];`);
+
+      return id;
+    }
+  };
+
+  walk(bsp);
+
+  dot(`}`);
+
+  return lines.join('\n');
+};
+
+const toPlanesFromSolid = (solid, offset = 0) => {
+  const planes = [];
+  const addPlane = (plane) => {
+    // FIX: Inefficient.
+    if (!planes.some((entry) => equals(entry, plane))) {
+      planes.push(plane);
+    }
+  };
+
+  for (const surface of solid) {
+    addPlane(toPlane$1(surface));
+  }
+
+  return planes;
+};
+
+const toPolygonsFromPlanes = (planes) => {
+  const polygons = [];
+  for (const plane of planes) {
+    polygons.push(toPolygon(plane, 2));
+  }
+  return polygons;
+};
+
 const MIN$2 = 0;
 
 // An asymmetric binary merge.
@@ -1318,4 +1459,4 @@ const union = (...solids) => {
   return fromPolygons$1(s[0], normalize);
 };
 
-export { clipPolygonsToFaces, containsPoint, cut, cutOpen, deform, difference, fromPlanes, fromSolid, fromSurface, intersection, removeExteriorPaths, removeExteriorPolygonsForSection, section, unifyBspTrees, union };
+export { clipPolygonsToFaces, containsPoint, cut, cutOpen, deform, difference, differenceOfSurfaceWithSolid, fromPlanes, fromSolid, fromSurface, intersection, removeExteriorPaths, removeExteriorPolygonsForSection, section, toConvexClouds, toDot, toPlanesFromSolid, toPolygonsFromPlanes, unifyBspTrees, union };

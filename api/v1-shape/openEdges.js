@@ -1,7 +1,8 @@
+import { getSolids, taggedPaths } from '@jsxcad/geometry-tagged';
+
 import Shape from './Shape.js';
 import assemble from './assemble.js';
 import { findOpenEdges } from '@jsxcad/geometry-solid';
-import { getSolids } from '@jsxcad/geometry-tagged';
 
 export const openEdges = (shape, { isOpen = true } = {}) => {
   const r = (v) => v;
@@ -9,10 +10,12 @@ export const openEdges = (shape, { isOpen = true } = {}) => {
   for (const { solid } of getSolids(shape.toKeptGeometry())) {
     paths.push(...findOpenEdges(solid, isOpen));
   }
-  return Shape.fromGeometry({
-    type: 'paths',
-    paths: paths.map((path) => path.map(([x, y, z]) => [r(x), r(y), r(z)])),
-  });
+  return Shape.fromGeometry(
+    taggedPaths(
+      {},
+      paths.map((path) => path.map(([x, y, z]) => [r(x), r(y), r(z)]))
+    )
+  );
 };
 
 const openEdgesMethod = function (...args) {

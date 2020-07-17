@@ -5,10 +5,10 @@ import {
 
 import { cache } from '@jsxcad/cache';
 import { createNormalize3 } from '@jsxcad/algorithm-quantize';
+import { differenceOfSurfaceWithSolid } from '@jsxcad/geometry-bsp';
 import { getAnySurfaces } from './getAnySurfaces.js';
 import { getPaths } from './getPaths.js';
 import { getSolids } from './getSolids.js';
-import { section as intersectionOfSurfaceWithSolid } from '@jsxcad/geometry-bsp';
 import { makeWatertight as makeWatertightSurface } from '@jsxcad/geometry-surface';
 import { difference as pathsDifference } from '@jsxcad/geometry-paths';
 import { rewrite } from './visit.js';
@@ -40,18 +40,10 @@ const differenceImpl = (geometry, ...geometries) => {
         let thisSurface = geometry.surface;
         for (const geometry of geometries) {
           for (const { solid } of getSolids(geometry)) {
-            thisSurface = intersectionOfSurfaceWithSolid(
-              flipSolid(solid),
-              [thisSurface],
-              normalize
-            )[0];
+            thisSurface = differenceOfSurfaceWithSolid(solid, thisSurface, normalize);
           }
           for (const { surface, z0Surface } of getAnySurfaces(geometry)) {
-            thisSurface = intersectionOfSurfaceWithSolid(
-              flipSolid(fromSurfaceToSolid(surface || z0Surface, normalize)),
-              [thisSurface],
-              normalize
-            )[0];
+            thisSurface = differenceOfSurfaceWithSolid(fromSurfaceToSolid(surface || z0Surface, normalize), thisSurface, normalize);
           }
         }
         return taggedSurface({ tags }, makeWatertightSurface(thisSurface));
@@ -61,18 +53,10 @@ const differenceImpl = (geometry, ...geometries) => {
         let thisSurface = geometry.z0Surface;
         for (const geometry of geometries) {
           for (const { solid } of getSolids(geometry)) {
-            thisSurface = intersectionOfSurfaceWithSolid(
-              flipSolid(solid),
-              [thisSurface],
-              normalize
-            )[0];
+            thisSurface = differenceOfSurfaceWithSolid(solid, thisSurface, normalize);
           }
           for (const { surface, z0Surface } of getAnySurfaces(geometry)) {
-            thisSurface = intersectionOfSurfaceWithSolid(
-              flipSolid(fromSurfaceToSolid(surface || z0Surface, normalize)),
-              [thisSurface],
-              normalize
-            )[0];
+            thisSurface = differenceOfSurfaceWithSolid(fromSurfaceToSolid(surface || z0Surface, normalize), thisSurface, normalize);
           }
         }
         return taggedZ0Surface({ tags }, makeWatertightSurface(thisSurface));

@@ -599,7 +599,7 @@ const sweep = (toolpath, tool) => {
       );
     }
   }
-  return Assembly(...chains);
+  return Layers(...chains).Item('sweep');
 };
 
 const sweepMethod = function (tool) {

@@ -82060,6 +82060,11 @@ class JsEditorUi extends Pane {
       workspace,
       path: file
     });
+    await log({
+      op: 'text',
+      text: 'Finished',
+      level: 'serious'
+    });
   }
 
   async save() {
@@ -88243,6 +88248,11 @@ class Ui extends react.PureComponent {
         text,
         duration = 1000
       } = entry;
+
+      if (duration !== 1000) {
+        console.log(`QQ/strange duration: ${duration}`);
+      }
+
       return /*#__PURE__*/react.createElement(Toast$1, {
         key: `toast/${index}`,
         variant: "info",

@@ -1,9 +1,8 @@
 import { close, concatenate, open } from './jsxcad-geometry-path.js';
-import { taggedAssembly, eachPoint, flip, toDisjointGeometry as toDisjointGeometry$1, toPoints, transform, reconcile, isWatertight, makeWatertight, taggedPaths, fromPathToSurface, fromPathToZ0Surface, fromPathsToSurface, fromPathsToZ0Surface, taggedPoints, taggedSolid, taggedZ0Surface, union as union$1, rewriteTags, assemble as assemble$1, canonicalize as canonicalize$1, measureBoundingBox as measureBoundingBox$1, intersection as intersection$1, allTags, difference as difference$1, getSolids, rewrite, taggedLayers, isVoid, measureArea, taggedSketch, getPaths, getAnyNonVoidSurfaces, getNonVoidSolids, getNonVoidSurfaces, getNonVoidZ0Surfaces } from './jsxcad-geometry-tagged.js';
+import { taggedAssembly, eachPoint, flip, toDisjointGeometry as toDisjointGeometry$1, toPoints, transform, reconcile, isWatertight, makeWatertight, taggedPaths, fromPathToSurface, fromPathToZ0Surface, fromPathsToSurface, fromPathsToZ0Surface, taggedPoints, taggedSolid, taggedZ0Surface, union as union$1, rewriteTags, assemble as assemble$1, canonicalize as canonicalize$1, measureBoundingBox as measureBoundingBox$1, intersection as intersection$1, allTags, difference as difference$1, getSolids, taggedDisjointAssembly, outline, taggedSurface, rewrite, taggedLayers, isVoid, measureArea, taggedSketch, getPaths, getAnyNonVoidSurfaces, getNonVoidSolids, getNonVoidSurfaces, getNonVoidZ0Surfaces } from './jsxcad-geometry-tagged.js';
 import { fromPolygons, findOpenEdges, fromSurface } from './jsxcad-geometry-solid.js';
 import { scale as scale$1, add, negate, normalize, subtract, dot, cross, distance } from './jsxcad-math-vec3.js';
 import { toTagFromName } from './jsxcad-algorithm-color.js';
-import { outline } from './jsxcad-geometry-surface.js';
 import { createNormalize3 } from './jsxcad-algorithm-quantize.js';
 import { junctionSelector } from './jsxcad-geometry-halfedge.js';
 import { emit, addPending, writeFile, read, write, log as log$1 } from './jsxcad-sys.js';
@@ -129,10 +128,7 @@ Shape.fromPoint = (point, context) =>
 Shape.fromPoints = (points, context) =>
   fromGeometry(taggedPoints({}, points), context);
 Shape.fromPolygonsToSolid = (polygons, context) =>
-  fromGeometry(
-    taggedSolid({}, fromPolygons(polygons)),
-    context
-  );
+  fromGeometry(taggedSolid({}, fromPolygons(polygons)), context);
 Shape.fromPolygonsToZ0Surface = (polygons, context) =>
   fromGeometry(taggedZ0Surface({}, polygons), context);
 Shape.fromSurfaces = (surfaces, context) =>
@@ -691,7 +687,12 @@ const faces = (shape, op = (x) => x) => {
   for (const { solid } of getSolids(shape.toKeptGeometry())) {
     for (const surface of solid) {
       faces.push(
-        op(Shape.fromGeometry({ paths: outline(surface) }), faces.length)
+        op(
+          Shape.fromGeometry(
+            taggedDisjointAssembly({}, ...outline(taggedSurface({}, surface)))
+          ),
+          faces.length
+        )
       );
     }
   }
@@ -745,7 +746,7 @@ const junctions = (shape, mode = (n) => n) => {
       }
     }
   }
-  return Shape.fromGeometry({ points: junctions });
+  return Shape.fromGeometry(taggedPoints({}, junctions));
 };
 
 const nonJunctions = (shape) => junctions(shape, (n) => !n);
@@ -1129,10 +1130,12 @@ const openEdges = (shape, { isOpen = true } = {}) => {
   for (const { solid } of getSolids(shape.toKeptGeometry())) {
     paths.push(...findOpenEdges(solid, isOpen));
   }
-  return Shape.fromGeometry({
-    type: 'paths',
-    paths: paths.map((path) => path.map(([x, y, z]) => [r(x), r(y), r(z)])),
-  });
+  return Shape.fromGeometry(
+    taggedPaths(
+      {},
+      paths.map((path) => path.map(([x, y, z]) => [r(x), r(y), r(z)]))
+    )
+  );
 };
 
 const openEdgesMethod = function (...args) {
@@ -1403,11 +1406,9 @@ const trace = (shape, length = 1) => {
       tracePaths.push(...segments);
     }
   }
-  return Shape.fromGeometry({
-    type: 'paths',
-    paths: tracePaths,
-    tags: ['display/trace'],
-  });
+  return Shape.fromGeometry(
+    taggedPaths({ tags: ['display/trace'] }, tracePaths)
+  );
 };
 
 const traceMethod = function (length = 1) {
@@ -1550,7 +1551,7 @@ const wireframeFaces = (shape, op = (x) => x) => {
     for (const surface of solid) {
       for (const path of surface) {
         faces.push(
-          op(Shape.fromGeometry({ type: 'paths', paths: [path] }), faces.length)
+          op(Shape.fromGeometry(taggedPaths({}, [path])), faces.length)
         );
       }
     }

@@ -33,10 +33,7 @@ export const cut = (solid, surface, normalize = createNormalize3()) => {
     normalize
   );
 
-  return fromPolygonsToSolid(
-    [...trimmedSolid, ...trimmedPolygons],
-    normalize
-  );
+  return fromPolygonsToSolid([...trimmedSolid, ...trimmedPolygons], normalize);
 };
 
 export const cutOpen = (solid, surface, normalize = createNormalize3()) => {

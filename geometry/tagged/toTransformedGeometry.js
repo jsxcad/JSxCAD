@@ -57,10 +57,13 @@ export const toTransformedGeometry = (geometry) => {
           return descend({ solid: transformSolid(matrix, geometry.solid) });
         case 'surface':
         case 'z0Surface': {
-          const transformedSurface = transformSurface(
-            matrix,
-            geometry.z0Surface || geometry.surface
-          );
+          const surface = geometry.z0Surface || geometry.surface;
+          if (surface.length === 0) {
+            // Empty geometries don't need transforming, but we'll return a
+            // fresh one to avoid any caching.
+            return taggedSurface({}, []);
+          }
+          const transformedSurface = transformSurface(matrix, surface);
           if (
             equalsPlane(toPlaneFromSurface(transformedSurface), [0, 0, 1, 0])
           ) {

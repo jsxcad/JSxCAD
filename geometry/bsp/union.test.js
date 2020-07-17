@@ -51,10 +51,7 @@ test.beforeEach(async (t) => {
 });
 
 test('Self union', (t) => {
-  const solid = union(
-    fromPolygons(cubePolygons),
-    fromPolygons(cubePolygons)
-  );
+  const solid = union(fromPolygons(cubePolygons), fromPolygons(cubePolygons));
   t.deepEqual(canonicalize(solid), [
     [
       [
