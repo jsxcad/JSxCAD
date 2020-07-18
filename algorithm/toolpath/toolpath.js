@@ -19,10 +19,10 @@ const RIGHT_ANGLE = Math.PI / -2;
 
 const intersect = (a, b, z) => [...intersectLines(a, b), z];
 
-const makeToolLine = (start, end, radius) => {
+const makeToolLine = (start, end, diameter) => {
   const direction = normalize(subtract(end, start));
-  // The tool (with given radius) passes along the outside of the path.
-  const toolEdgeOffset = scale(radius, rotateZ(direction, RIGHT_ANGLE));
+  // The tool (with given diameter) passes along the outside of the path.
+  const toolEdgeOffset = scale(diameter / 2, rotateZ(direction, RIGHT_ANGLE));
   // And in order to get sharp angles with a circular tool we need to cut a bit further.
   const toolStart = add(start, toolEdgeOffset);
   const toolEnd = add(end, toolEdgeOffset);
@@ -33,7 +33,7 @@ const makeToolLine = (start, end, radius) => {
 // FIX: We assume a constant Z here.
 export const toolpathEdges = (
   path,
-  radius = 1,
+  diameter = 1,
   overcut = true,
   solid = false
 ) => {
@@ -42,7 +42,11 @@ export const toolpathEdges = (
   let lastToolLine;
   const edges = getEdges(path).filter(([start, end]) => !equals(start, end));
   for (const [start, end] of edges) {
-    const [toolStart, toolEnd, thisToolLine] = makeToolLine(start, end, radius);
+    const [toolStart, toolEnd, thisToolLine] = makeToolLine(
+      start,
+      end,
+      diameter
+    );
     if (!toolpath) {
       toolpath = createOpenPath();
       toolpaths.push(toolpath);
@@ -72,7 +76,7 @@ export const toolpathEdges = (
     toolpath.shift();
     // Rewrite the start and end to meet at their intersection.
     const [start, end] = edges[0];
-    const [, , thisToolLine] = makeToolLine(start, end, radius);
+    const [, , thisToolLine] = makeToolLine(start, end, diameter);
     const intersection = intersect(thisToolLine, lastToolLine, start[Z]);
     toolpath[0] = intersection;
     toolpath[toolpath.length - 1] = intersection;
@@ -82,14 +86,14 @@ export const toolpathEdges = (
 
 export const toolpath = (
   geometry,
-  radius = 1,
+  diameter = 1,
   overcut = true,
   solid = false
 ) => {
   const toolpaths = [];
   for (const { paths } of getNonVoidPaths(geometry)) {
     for (const path of paths) {
-      toolpaths.push(...toolpathEdges(path, radius, overcut, solid));
+      toolpaths.push(...toolpathEdges(path, diameter, overcut, solid));
     }
   }
   return toolpaths;

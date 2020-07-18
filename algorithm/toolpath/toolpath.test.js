@@ -33,8 +33,8 @@ test('path', (t) => {
   ]);
 });
 
-test('radius = 1', (t) => {
-  const cuts = toolpathEdges(unitRegularTrianglePolygon, 1, 0);
+test('diameter = 1', (t) => {
+  const cuts = toolpathEdges(unitRegularTrianglePolygon, 2, 0);
   t.deepEqual(canonicalize(cuts), [
     [
       [2.99999, 0, 0],
