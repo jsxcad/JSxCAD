@@ -1,23 +1,25 @@
 import { add, scale } from '@jsxcad/math-vec3';
 import {
+  flip as flipSurface,
   outline as outlineSurface,
   toPlane as toPlaneFromSurface,
+  translate as translateSurface,
 } from '@jsxcad/geometry-surface';
 
 import { fromPolygons } from './bsp.js';
 import { getEdges } from '@jsxcad/geometry-path';
 
-const large = 1e10;
+const LARGE = 1e10;
 
 export const fromSurface = (surface, normalize) => {
   const polygons = [];
   const normal = toPlaneFromSurface(surface);
   if (normal === undefined) {
     // The surface is degenerate.
-    return fromPolygons([]);
+    return [];
   }
-  const top = scale(large, normal);
-  const bottom = scale(-large, normal);
+  const top = scale(LARGE, normal);
+  const bottom = scale(0, normal);
   for (const path of outlineSurface(surface, normalize)) {
     for (const [start, end] of getEdges(path)) {
       // Build a large wall.
@@ -29,6 +31,8 @@ export const fromSurface = (surface, normalize) => {
       ]);
     }
   }
-  // This is an excessively large uncapped prism.
+  // Build a tall prism.
+  polygons.push(...translateSurface(bottom, flipSurface(surface)));
+  polygons.push(...translateSurface(top, surface));
   return fromPolygons(polygons, normalize);
 };

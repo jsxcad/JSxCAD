@@ -1,5 +1,6 @@
+import { getPaths, taggedPaths } from '@jsxcad/geometry-tagged';
+
 import Shape from './Shape.js';
-import { getPaths } from '@jsxcad/geometry-tagged';
 import { segment } from '@jsxcad/geometry-paths';
 
 export const trace = (shape, length = 1) => {
@@ -13,11 +14,9 @@ export const trace = (shape, length = 1) => {
       tracePaths.push(...segments);
     }
   }
-  return Shape.fromGeometry({
-    type: 'paths',
-    paths: tracePaths,
-    tags: ['display/trace'],
-  });
+  return Shape.fromGeometry(
+    taggedPaths({ tags: ['display/trace'] }, tracePaths)
+  );
 };
 
 const traceMethod = function (length = 1) {

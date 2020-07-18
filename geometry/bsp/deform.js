@@ -2,8 +2,8 @@ import { BRANCH, dividePolygons, inLeaf } from './bsp.js';
 
 import {
   alignVertices,
+  fromPolygons as fromPolygonsToSolid,
   toPolygons as toPolygonsFromSolid,
-  fromPolygons as toSolidFromPolygons,
 } from '@jsxcad/geometry-solid';
 
 import { createNormalize3 } from '@jsxcad/algorithm-quantize';
@@ -105,5 +105,5 @@ export const deform = (solid, transform, min, max, resolution) => {
     path.map((point) => vertices.get(JSON.stringify(point)))
   );
 
-  return toSolidFromPolygons({}, transformedPolygons);
+  return fromPolygonsToSolid(transformedPolygons);
 };

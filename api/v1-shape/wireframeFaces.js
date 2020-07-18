@@ -1,6 +1,7 @@
+import { getSolids, taggedPaths } from '@jsxcad/geometry-tagged';
+
 import Shape from './Shape.js';
 import assemble from './assemble.js';
-import { getSolids } from '@jsxcad/geometry-tagged';
 
 export const wireframeFaces = (shape, op = (x) => x) => {
   const faces = [];
@@ -8,7 +9,7 @@ export const wireframeFaces = (shape, op = (x) => x) => {
     for (const surface of solid) {
       for (const path of surface) {
         faces.push(
-          op(Shape.fromGeometry({ type: 'paths', paths: [path] }), faces.length)
+          op(Shape.fromGeometry(taggedPaths({}, [path])), faces.length)
         );
       }
     }

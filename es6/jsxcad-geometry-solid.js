@@ -4,7 +4,7 @@ import { getEdges, deduplicate } from './jsxcad-geometry-path.js';
 import { pushWhenValid } from './jsxcad-geometry-polygons.js';
 import { toPlane } from './jsxcad-math-poly3.js';
 import { fromXRotation, fromYRotation, fromZRotation, fromScaling, fromTranslation } from './jsxcad-math-mat4.js';
-import { transform as transform$1, assertGood as assertGood$1, canonicalize as canonicalize$1, measureBoundingBox as measureBoundingBox$1, eachPoint as eachPoint$1, flip as flip$1, toPlane as toPlane$1, outline as outline$1 } from './jsxcad-geometry-surface.js';
+import { transform as transform$1, assertGood as assertGood$1, canonicalize as canonicalize$1, measureBoundingBox as measureBoundingBox$1, eachPoint as eachPoint$1, flip as flip$1, toPlane as toPlane$1, outline as outline$1, translate as translate$1 } from './jsxcad-geometry-surface.js';
 import { cleanSolid } from './jsxcad-geometry-halfedge.js';
 
 const THRESHOLD = 1e-5;
@@ -285,11 +285,7 @@ const createNormalize4 = () => {
   return normalize4;
 };
 
-const fromPolygons = (
-  options = {},
-  polygons,
-  normalize3 = createNormalize3()
-) => {
+const fromPolygons = (polygons, normalize3 = createNormalize3()) => {
   const normalize4 = createNormalize4();
   const coplanarGroups = new Map();
 
@@ -337,7 +333,7 @@ const fromSurface = (surface, normalize) => {
     return [];
   }
   const top = scale$1(large, normal);
-  const bottom = scale$1(-large, normal);
+  const bottom = scale$1(0, normal);
   for (const path of outline$1(surface, normalize)) {
     for (const [start, end] of getEdges(path)) {
       // Build a large wall.
@@ -349,8 +345,12 @@ const fromSurface = (surface, normalize) => {
       ]);
     }
   }
-  // This is an excessively large uncapped prism.
-  return [walls];
+  // Build a tall prism.
+  return [
+    translate$1(bottom, flip$1(surface)),
+    translate$1(top, surface),
+    ...walls.map((wall) => [wall]),
+  ];
 };
 
 /** Measure the bounding sphere of the given poly3

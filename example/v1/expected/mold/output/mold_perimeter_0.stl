@@ -1,16 +1,16 @@
 solid JSxCAD
 facet normal 0.499999960472677 -0.8660254266055479 0
 outer loop
+vertex 24 0 6
 vertex -24 -27.71281 6
 vertex -24 -27.71281 0
-vertex 24 0 0
 endloop
 endfacet
 facet normal 0.499999960472677 -0.8660254266055479 0
 outer loop
+vertex -24 -27.71281 0
 vertex 24 0 0
 vertex 24 0 6
-vertex -24 -27.71281 6
 endloop
 endfacet
 facet normal 0 0 -1

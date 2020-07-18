@@ -1,10 +1,10 @@
 import { toPolygons, alignVertices, fromPolygons as fromPolygons$1 } from './jsxcad-geometry-solid.js';
-import { equals, splitLineSegmentByPlane } from './jsxcad-math-plane.js';
+import { equals, splitLineSegmentByPlane, toPolygon } from './jsxcad-math-plane.js';
 import { pushWhenValid, doesNotOverlap, measureBoundingBox, flip } from './jsxcad-geometry-polygons.js';
-import { subtract, max, min, scale, add, dot as dot$1 } from './jsxcad-math-vec3.js';
 import { toPlane } from './jsxcad-math-poly3.js';
+import { max, min, scale, add, subtract, dot as dot$1 } from './jsxcad-math-vec3.js';
 import { createNormalize3 } from './jsxcad-algorithm-quantize.js';
-import { toPlane as toPlane$1, outline } from './jsxcad-geometry-surface.js';
+import { toPlane as toPlane$1, outline, translate, flip as flip$1 } from './jsxcad-geometry-surface.js';
 import { getEdges, createOpenPath } from './jsxcad-geometry-path.js';
 
 const EPSILON = 1e-5;
@@ -30,117 +30,6 @@ const dot = (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
 // };
 
 const pointType = [];
-
-const splitConcave = (normalize, plane, points, polygonPlane, back, front) => {
-  const buildList = (points) => {
-    const nodes = [];
-    let head = null;
-    let tail = null;
-    const addLink = (
-      point,
-      type,
-      next = null,
-      link = null,
-      visited = false
-    ) => {
-      const node = { point, type, next, link, visited };
-      if (head === null) {
-        head = node;
-        head.next = head;
-      } else {
-        tail.next = node;
-      }
-      nodes.push(node);
-      tail = node;
-      tail.next = head;
-    };
-    for (let index = 0; index < points.length; index++) {
-      addLink(points[index], pointType[index]);
-    }
-    return nodes;
-  };
-
-  const orderSpans = (spans) => {
-    const trendVector = subtract(spans[0].point, spans[1].point);
-    const trend = (point) => dot(point, trendVector);
-    const orderByTrend = (a, b) => {
-      const ta = trend(a.point);
-      const tb = trend(b.point);
-      return ta - tb;
-    };
-    spans.sort(orderByTrend);
-    return spans;
-  };
-
-  const buildSpans = (head) => {
-    const spans = [];
-    let node = head;
-    do {
-      const next = node.next;
-      if (
-        (node.type === FRONT && next.type !== FRONT) ||
-        (node.type !== FRONT && next.type === FRONT)
-      ) {
-        // Interpolate a span-point.
-        const spanPoint = normalize(
-          splitLineSegmentByPlane(plane, node.point, next.point)
-        );
-        const span = {
-          point: spanPoint,
-          type: COPLANAR,
-          next,
-          link: null,
-          visited: true,
-        };
-        node.next = span;
-        // Remember the split for ordering.
-        spans.push(span);
-      }
-      node = next;
-    } while (node !== head);
-    return orderSpans(spans);
-  };
-
-  const nodes = buildList(points);
-  const spans = buildSpans(nodes[0]);
-
-  while (spans.length >= 2) {
-    const a = spans.pop();
-    const b = spans.pop();
-    a.link = b;
-    b.link = a;
-  }
-
-  for (const start of nodes) {
-    if (start.visited === true) {
-      continue;
-    }
-
-    const points = [];
-    let node = start;
-    let type = 0;
-    do {
-      node.visited = true;
-      type |= node.type;
-      points.push(node.point);
-      if (node.link !== null) {
-        node = node.link;
-        points.push(node.point);
-        node.visited = true;
-      }
-      node = node.next;
-    } while (node !== start);
-    if (type === FRONT) {
-      pushWhenValid(front, points, polygonPlane);
-    } else if (type === BACK) {
-      pushWhenValid(back, points, polygonPlane);
-    } else if (type !== COPLANAR) {
-      // Coplanar loops are degenerate, so drop them.
-      // Otherwise it's an error.
-      throw Error('die');
-    }
-  }
-};
 
 const splitPolygon = (
   normalize,
@@ -245,58 +134,7 @@ const splitPolygon = (
       if (spanPoints.length <= 2) {
         pushWhenValid(front, frontPoints, polygonPlane);
         pushWhenValid(back, backPoints, polygonPlane);
-      } else {
-        splitConcave(normalize, plane, polygon, polygonPlane, back, front);
       }
-      /*
-      if ((spans.length % 2) === 0) {
-        throw Error('die: Even number of spans.');
-      }
-      if (spans.length > 3) {
-        const trendVector = subtract(spans[0][SPAN_POINT], spans[1][SPAN_POINT]);
-        const trend = (point) => dot(point, trendVector);
-        spans.sort(([a], [b]) => a === null ? -1 : trend(a) - trend(b));
-        // The order needs to be such that the span joins follow the winding
-        // direction.
-        for (let i = 0; i < spans; i++) {
-          spans[i][BACK_SPAN] = spans[spans.length - i][BACK_SPAN_BACKWARD];
-        }
-        // Each span-pair is now an enter + exit, given the winding rule.
-        // But not necessarily an enter + exit for the same contour.
-        // We must re-arrange so that the contours are connected properly.
-        // Check to split points.
-        // Now the span points are sequenced.
-        // Restitch the graph.
-        while (spans.length > 0) {
-          const exit = spans.pop();
-          const enter = spans.pop();
-          // Prepend the enter nodes to the exit nodes.
-          enter[FRONT_SPAN].unshift(...exit[FRONT_SPAN]);
-          enter[BACK_SPAN].unshift(...exit[BACK_SPAN]);
-          if (spans.length > 0) {
-            // If the enter ends with the next exit, join them up.
-            const nextExit = tail(spans);
-            if (equalsPoint(nextExit[SPAN_POINT], tail(enter[FRONT_SPAN]))) {
-              nextExit[FRONT_SPAN].unshift(...enter[FRONT_SPAN]);
-            } else {
-              pushWhenValid(front, enter[FRONT_SPAN], polygonPlane);
-            }
-            if (equalsPoint(nextExit[SPAN_POINT], tail(enter[BACK_SPAN]))) {
-              nextExit[BACK_SPAN].unshift(...enter[BACK_SPAN]);
-            } else {
-              pushWhenValid(back, enter[BACK_SPAN], polygonPlane);
-            }
-          } else {
-            // These are the final spans, they cannot be deferred.
-            pushWhenValid(front, enter[FRONT_SPAN], polygonPlane);
-            pushWhenValid(back, enter[BACK_SPAN], polygonPlane);
-          }
-        }
-      } else {
-        pushWhenValid(front, spans[0][FRONT_SPAN], polygonPlane);
-        pushWhenValid(back, spans[0][BACK_SPAN], polygonPlane);
-      }
-*/
       break;
     }
   }
@@ -385,6 +223,11 @@ const fromBoundingBoxes = (
   return bsp;
 };
 
+/**
+ * Builds a BspTree from polygon soup.
+ * The bsp tree is constructed from the planes of the polygons.
+ * The polygons allow us to determine when a half-plane is uninhabited.
+ */
 const fromPolygonsToBspTree = (polygons, normalize) => {
   if (polygons.length === 0) {
     // Everything is outside of an empty geometry.
@@ -624,7 +467,7 @@ const removeExteriorPolygonsForCutDroppingOverlap = (
         bsp.plane,
         polygons[i],
         /* back= */ back, // keepward
-        /* abutting= */ front, // dropward
+        /* abutting= */ back, // keepward
         /* overlapping= */ front, // dropward
         /* front= */ front
       ); // dropward
@@ -708,7 +551,7 @@ const removeInteriorPolygonsForDifference = (bsp, polygons, normalize) => {
         bsp.plane,
         polygons[i],
         /* back= */ inward,
-        /* abutting= */ outward, // keepward
+        /* abutting= */ inward, // dropward
         /* overlapping= */ inward, // dropward
         /* front= */ outward
       );
@@ -989,11 +832,7 @@ const cut = (solid, surface, normalize = createNormalize3()) => {
     normalize
   );
 
-  return fromPolygons$1(
-    {},
-    [...trimmedSolid, ...trimmedPolygons],
-    normalize
-  );
+  return fromPolygons$1([...trimmedSolid, ...trimmedPolygons], normalize);
 };
 
 const cutOpen = (solid, surface, normalize = createNormalize3()) => {
@@ -1008,7 +847,41 @@ const cutOpen = (solid, surface, normalize = createNormalize3()) => {
     normalize
   );
 
-  return fromPolygons$1({}, trimmedSolid, normalize);
+  return fromPolygons$1(trimmedSolid, normalize);
+};
+
+// All planes are faces.
+
+const clipPolygonsToFaces = (
+  bsp,
+  polygons,
+  normalize,
+  emit,
+  path = ''
+) => {
+  if (polygons.length === 0) ; else if (bsp === inLeaf) {
+    for (const polygon of polygons) {
+      console.log(`QQ/path: ${path}`);
+      polygon.path = path;
+      emit(polygon);
+    }
+  } else if (bsp !== outLeaf) {
+    const front = [];
+    const back = [];
+    for (const polygon of polygons) {
+      splitPolygon(
+        normalize,
+        bsp.plane,
+        polygon,
+        /* back= */ back,
+        /* abutting= */ front,
+        /* overlapping= */ back,
+        /* front= */ front
+      );
+    }
+    clipPolygonsToFaces(bsp.front, front, normalize, emit, path + 'f');
+    clipPolygonsToFaces(bsp.back, back, normalize, emit, path + 'b');
+  }
 };
 
 const containsPoint = (bsp, point, history = []) => {
@@ -1133,7 +1006,29 @@ const deform = (solid, transform, min, max, resolution) => {
     path.map((point) => vertices.get(JSON.stringify(point)))
   );
 
-  return fromPolygons$1({}, transformedPolygons);
+  return fromPolygons$1(transformedPolygons);
+};
+
+const differenceSurface = (bsp, surface, normalize, emit) => {
+  if (bsp === outLeaf) {
+    emit(surface);
+  } else if (bsp !== inLeaf) {
+    const front = [];
+    const back = [];
+    for (let i = 0; i < surface.length; i++) {
+      splitPolygon(
+        normalize,
+        bsp.plane,
+        surface[i],
+        /* back= */ back,
+        /* abutting= */ back,
+        /* overlapping= */ back,
+        /* front= */ front
+      );
+    }
+    differenceSurface(bsp.front, front, normalize, emit);
+    differenceSurface(bsp.back, back, normalize, emit);
+  }
 };
 
 const boxPartition = (
@@ -1217,20 +1112,28 @@ const difference = (aSolid, ...bSolids) => {
       a = clean([...aOut, ...aTrimmed, ...flip(bTrimmed)]);
     }
   }
-  return fromPolygons$1({}, a, normalize);
+  return fromPolygons$1(a, normalize);
 };
 
-const large = 1e10;
+const fromPlanes = (planes, normalize) => {
+  const polygons = [];
+  for (const plane of planes) {
+    polygons.push(toPolygon(plane));
+  }
+  return fromPolygons(polygons, normalize);
+};
+
+const LARGE = 1e10;
 
 const fromSurface = (surface, normalize) => {
   const polygons = [];
   const normal = toPlane$1(surface);
   if (normal === undefined) {
     // The surface is degenerate.
-    return fromPolygons([]);
+    return [];
   }
-  const top = scale(large, normal);
-  const bottom = scale(-large, normal);
+  const top = scale(LARGE, normal);
+  const bottom = scale(0, normal);
   for (const path of outline(surface, normalize)) {
     for (const [start, end] of getEdges(path)) {
       // Build a large wall.
@@ -1242,8 +1145,32 @@ const fromSurface = (surface, normalize) => {
       ]);
     }
   }
-  // This is an excessively large uncapped prism.
+  // Build a tall prism.
+  polygons.push(...translate(bottom, flip$1(surface)));
+  polygons.push(...translate(top, surface));
   return fromPolygons(polygons, normalize);
+};
+
+const intersectSurface = (bsp, surface, normalize, emit) => {
+  if (bsp === inLeaf) {
+    emit(surface);
+  } else if (bsp !== outLeaf) {
+    const front = [];
+    const back = [];
+    for (let i = 0; i < surface.length; i++) {
+      splitPolygon(
+        normalize,
+        bsp.plane,
+        surface[i],
+        /* back= */ back,
+        /* abutting= */ back,
+        /* overlapping= */ back,
+        /* front= */ front
+      );
+    }
+    intersectSurface(bsp.front, front, normalize, emit);
+    intersectSurface(bsp.back, back, normalize, emit);
+  }
 };
 
 const MIN$1 = 0;
@@ -1312,7 +1239,7 @@ const intersection = (...solids) => {
       s.push(clean([...aTrimmed, ...bTrimmed]));
     }
   }
-  return fromPolygons$1({}, s[0], normalize);
+  return fromPolygons$1(s[0], normalize);
 };
 
 const planeDistance = (plane, point) =>
@@ -1374,6 +1301,92 @@ const section = (solid, surfaces, normalize) => {
   return surfaces.map((surface) =>
     removeExteriorPolygonsForSection(bsp, surface, normalize)
   );
+};
+
+const toConvexClouds = (bsp, normalize) => {
+  const clouds = [];
+  const walk = (bsp, polygons) => {
+    if (bsp === outLeaf) {
+      return null;
+    } else if (bsp === inLeaf) {
+      const cloud = [];
+      for (const polygon of polygons) {
+        cloud.push(...polygon);
+      }
+      clouds.push(cloud);
+    } else {
+      const back = [...bsp.same];
+      const front = [...bsp.same];
+      for (const polygon of polygons) {
+        splitPolygon(normalize, bsp.plane, polygon, back, front, back, front);
+      }
+      walk(bsp.front, front);
+      walk(bsp.back, back);
+    }
+  };
+  walk(bsp, []);
+  return clouds;
+};
+
+const toDot = (bsp) => {
+  const lines = [];
+  const dot = (text) => lines.push(text);
+
+  dot(`digraph {`);
+
+  const ids = new Map();
+  let nextId = 0;
+
+  const walk = (bsp, parent) => {
+    if (bsp === inLeaf) {
+      return `"IN_${parent}"`;
+    } else if (bsp === outLeaf) {
+      return `"OUT ${parent}"`;
+    } else {
+      if (!ids.has(bsp)) {
+        ids.set(bsp, nextId++);
+      }
+      const id = ids.get(bsp);
+
+      dot(
+        `  ${id} [label="${bsp.plane.map((v) => v.toFixed(3)).join(', ')}"];`
+      );
+      dot(`  ${id} -> ${walk(bsp.front, id)} [label="front"];`);
+      dot(`  ${id} -> ${walk(bsp.back, id)} [label="back"];`);
+
+      return id;
+    }
+  };
+
+  walk(bsp);
+
+  dot(`}`);
+
+  return lines.join('\n');
+};
+
+const toPlanesFromSolid = (solid, offset = 0) => {
+  const planes = [];
+  const addPlane = (plane) => {
+    // FIX: Inefficient.
+    if (!planes.some((entry) => equals(entry, plane))) {
+      planes.push(plane);
+    }
+  };
+
+  for (const surface of solid) {
+    addPlane(toPlane$1(surface));
+  }
+
+  return planes;
+};
+
+const toPolygonsFromPlanes = (planes) => {
+  const polygons = [];
+  for (const plane of planes) {
+    polygons.push(toPolygon(plane, 2));
+  }
+  return polygons;
 };
 
 const MIN$2 = 0;
@@ -1444,7 +1457,7 @@ const union = (...solids) => {
       s.push(clean([...aOut, ...bTrimmed, ...bOut, ...aTrimmed]));
     }
   }
-  return fromPolygons$1({}, s[0], normalize);
+  return fromPolygons$1(s[0], normalize);
 };
 
-export { containsPoint, cut, cutOpen, deform, difference, fromSolid, fromSurface, intersection, removeExteriorPaths, removeExteriorPolygonsForSection, section, unifyBspTrees, union };
+export { clipPolygonsToFaces, containsPoint, cut, cutOpen, deform, difference, differenceSurface, fromPlanes, fromSolid, fromSurface, intersectSurface, intersection, removeExteriorPaths, removeExteriorPolygonsForSection, section, toConvexClouds, toDot, toPlanesFromSolid, toPolygonsFromPlanes, unifyBspTrees, union };

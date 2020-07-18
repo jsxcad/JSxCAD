@@ -14,7 +14,7 @@ import { cache } from '@jsxcad/cache';
 
 import { createNormalize2 } from '@jsxcad/algorithm-quantize';
 
-import { fromPolygons as toSolidFromPolygons } from '@jsxcad/geometry-solid';
+import { fromPolygons as fromPolygonsToSolid } from '@jsxcad/geometry-solid';
 
 const extrudeImpl = (z0Surface, height = 1, depth = 0, cap = true) => {
   const normalize = createNormalize2();
@@ -51,7 +51,7 @@ const extrudeImpl = (z0Surface, height = 1, depth = 0, cap = true) => {
     polygons.push(...floor);
   }
 
-  const solid = toSolidFromPolygons({}, polygons);
+  const solid = fromPolygonsToSolid(polygons);
   return solid;
 };
 

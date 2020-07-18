@@ -5745,7 +5745,7 @@ const buildConvexHullImpl = (points) => {
     polygon.map((nthPoint) => points[nthPoint])
   );
   polygons.isConvex = true;
-  return { type: 'solid', solid: fromPolygons({}, polygons) };
+  return { type: 'solid', solid: fromPolygons(polygons) };
 };
 
 const buildConvexHull = cache$1(buildConvexHullImpl);
@@ -6742,7 +6742,7 @@ const extrudeImpl = (z0Surface, height = 1, depth = 0, cap = true) => {
     polygons.push(...floor);
   }
 
-  const solid = fromPolygons({}, polygons);
+  const solid = fromPolygons(polygons);
   return solid;
 };
 
@@ -6830,7 +6830,7 @@ const buildRingSphereImpl = (resolution = 20) => {
   for (const polygon of polygons) {
     assertGood(polygon);
   }
-  const solid = { type: 'solid', solid: fromPolygons({}, polygons) };
+  const solid = { type: 'solid', solid: fromPolygons(polygons) };
   return solid;
 };
 

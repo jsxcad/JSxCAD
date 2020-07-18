@@ -1,12 +1,12 @@
 import {
+  fromPolygons as fromPolygonsToSolid,
+  scale as scaleSolid,
+  translate as translateSolid,
+} from '@jsxcad/geometry-solid';
+import {
   rotateZ as rotateSurface,
   scale as scaleSurface,
 } from '@jsxcad/geometry-surface';
-import {
-  scale as scaleSolid,
-  fromPolygons as solidFromPolygons,
-  translate as translateSolid,
-} from '@jsxcad/geometry-solid';
 import {
   unitCubePolygons,
   unitRegularTrianglePolygon,
@@ -42,19 +42,19 @@ test('Surface', (t) => {
     tags: undefined,
     content: [
       {
-        type: 'surface',
+        type: 'z0Surface',
         tags: undefined,
-        surface: [
+        z0Surface: [
           [
-            [-0.5, -0.5, 0],
-            [0.5, -0.5, 0],
-            [0.5, -0.4, 0],
-            [-0.5, -0.4, 0],
-          ],
-          [
+            [0.17321, 0.5, 0],
             [0.5, -0.06602, 0],
             [0.5, 0.5, 0],
-            [0.17321, 0.5, 0],
+          ],
+          [
+            [0.5, -0.4, 0],
+            [-0.5, -0.4, 0],
+            [-0.5, -0.5, 0],
+            [0.5, -0.5, 0],
           ],
           [
             [-0.5, 0.5, 0],
@@ -62,15 +62,15 @@ test('Surface', (t) => {
             [-0.17321, 0.5, 0],
           ],
           [
+            [-0.69282, -0.4, 0],
+            [-0.5, -0.4, 0],
+            [0.5, -0.4, 0],
             [0.69282, -0.4, 0],
             [0.5, -0.06602, 0],
             [0.17321, 0.5, 0],
             [0, 0.8, 0],
             [-0.17321, 0.5, 0],
             [-0.5, -0.06602, 0],
-            [-0.69282, -0.4, 0],
-            [-0.5, -0.4, 0],
-            [0.5, -0.4, 0],
           ],
         ],
       },
@@ -84,21 +84,21 @@ test('Solid', (t) => {
       type: 'solid',
       solid: translateSolid(
         [0, 0, 0],
-        scaleSolid([10, 10, 10], solidFromPolygons({}, unitCubePolygons))
+        scaleSolid([10, 10, 10], fromPolygonsToSolid(unitCubePolygons))
       ),
     },
     {
       type: 'solid',
       solid: translateSolid(
         [2, 2, 0],
-        scaleSolid([10, 10, 10], solidFromPolygons({}, unitCubePolygons))
+        scaleSolid([10, 10, 10], fromPolygonsToSolid(unitCubePolygons))
       ),
     },
     {
       type: 'solid',
       solid: translateSolid(
         [4, 4, 0],
-        scaleSolid([10, 10, 10], solidFromPolygons({}, unitCubePolygons))
+        scaleSolid([10, 10, 10], fromPolygonsToSolid(unitCubePolygons))
       ),
     }
   );

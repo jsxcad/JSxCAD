@@ -7,11 +7,7 @@ import { toPlane } from '@jsxcad/math-poly3';
 export let doCheckOverlap = false;
 export let doDefragment = 'none';
 
-export const fromPolygons = (
-  options = {},
-  polygons,
-  normalize3 = createNormalize3()
-) => {
+export const fromPolygons = (polygons, normalize3 = createNormalize3()) => {
   const normalize4 = createNormalize4();
   const coplanarGroups = new Map();
 

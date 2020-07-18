@@ -30,7 +30,7 @@ test('No-eval geodesic sphere', async (t) => {
         },
         {
           type: 'solid',
-          solid: fromPolygons({}, unitGeodesicSphere20Polygons),
+          solid: fromPolygons(unitGeodesicSphere20Polygons),
           tags: ['solid'],
         },
         {

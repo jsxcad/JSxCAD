@@ -105,6 +105,11 @@ const fromBoundingBoxes = (
   return bsp;
 };
 
+/**
+ * Builds a BspTree from polygon soup.
+ * The bsp tree is constructed from the planes of the polygons.
+ * The polygons allow us to determine when a half-plane is uninhabited.
+ */
 const fromPolygonsToBspTree = (polygons, normalize) => {
   if (polygons.length === 0) {
     // Everything is outside of an empty geometry.
@@ -362,6 +367,46 @@ const removeExteriorPolygonsForSection = (bsp, polygons, normalize) => {
   }
 };
 
+const removeInteriorPolygonsForSurface = (bsp, polygons, normalize) => {
+  if (bsp === inLeaf) {
+    return [];
+  } else if (bsp === outLeaf) {
+    return keepOut(polygons);
+  } else {
+    const front = [];
+    const back = [];
+    for (let i = 0; i < polygons.length; i++) {
+      splitPolygon(
+        normalize,
+        bsp.plane,
+        polygons[i],
+        /* back= */ back, // drop
+        /* abutting= */ back, // drop
+        /* overlapping= */ back, // drop
+        /* front= */ front
+      );
+    }
+    const trimmedFront = removeInteriorPolygonsForSurface(
+      bsp.front,
+      front,
+      normalize
+    );
+    const trimmedBack = removeInteriorPolygonsForSurface(
+      bsp.back,
+      back,
+      normalize
+    );
+
+    if (trimmedFront.length === 0) {
+      return trimmedBack;
+    } else if (trimmedBack.length === 0) {
+      return trimmedFront;
+    } else {
+      return merge(trimmedFront, trimmedBack);
+    }
+  }
+};
+
 const removeExteriorPolygonsForCutDroppingOverlap = (
   bsp,
   polygons,
@@ -380,7 +425,7 @@ const removeExteriorPolygonsForCutDroppingOverlap = (
         bsp.plane,
         polygons[i],
         /* back= */ back, // keepward
-        /* abutting= */ front, // dropward
+        /* abutting= */ back, // keepward
         /* overlapping= */ front, // dropward
         /* front= */ front
       ); // dropward
@@ -464,7 +509,7 @@ const removeInteriorPolygonsForDifference = (bsp, polygons, normalize) => {
         bsp.plane,
         polygons[i],
         /* back= */ inward,
-        /* abutting= */ outward, // keepward
+        /* abutting= */ inward, // dropward
         /* overlapping= */ inward, // dropward
         /* front= */ outward
       );
@@ -748,6 +793,7 @@ export {
   removeExteriorPolygonsForIntersectionDroppingOverlap,
   removeExteriorPolygonsForIntersectionKeepingOverlap,
   removeInteriorPolygonsForDifference,
+  removeInteriorPolygonsForSurface,
   toPolygons,
   toString,
   unifyBspTrees,

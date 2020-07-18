@@ -1,34 +1,12 @@
 import Shape from '@jsxcad/api-v1-shape';
-import grow from './grow.js';
+import Shell from './Shell.js';
 
-/**
- *
- * # shrink
- *
- * Moves the edges of the shape inward by the specified amount.
- *
- * ::: illustration { "view": { "position": [60, -60, 60], "target": [0, 0, 0] } }
- * ```
- * Cube(10).wireframe().with(Cube(10).shrink(2))
- * ```
- * :::
- **/
+export const shrink = (shape, amount, { resolution = 3 } = {}) =>
+  shape.cut(Shell(amount, { resolution }, shape));
 
-export const byRadius = (shape, amount = 1, { resolution = 16 } = {}) =>
-  grow(shape, -amount, resolution);
-
-export const shrink = (...args) => byRadius(...args);
-
-shrink.byRadius = byRadius;
-
-const shrinkMethod = function (radius, resolution) {
-  return shrink(this, radius, resolution);
+const shrinkMethod = function (amount, { resolution = 3 } = {}) {
+  return shrink(this, amount, { resolution });
 };
 Shape.prototype.shrink = shrinkMethod;
 
 export default shrink;
-
-shrink.signature =
-  'shrink(shape:Shape, amount:number = 1, { resolution:number = 16 }) -> Shape';
-shrinkMethod.signature =
-  'Shape -> shrink(amount:number = 1, { resolution:number = 16 }) -> Shape';

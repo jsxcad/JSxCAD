@@ -1,13 +1,13 @@
 import { identityMatrix, multiply, fromXRotation, fromYRotation, fromZRotation, fromTranslation, fromScaling } from './jsxcad-math-mat4.js';
 import { cacheTransform, cache, cacheRewriteTags } from './jsxcad-cache.js';
-import { reconcile as reconcile$1, makeWatertight as makeWatertight$1, isWatertight as isWatertight$1, findOpenEdges as findOpenEdges$1, transform as transform$2, canonicalize as canonicalize$1, flip as flip$1, fromSurface, eachPoint as eachPoint$2, measureBoundingBox as measureBoundingBox$3 } from './jsxcad-geometry-solid.js';
+import { reconcile as reconcile$1, makeWatertight as makeWatertight$1, isWatertight as isWatertight$1, findOpenEdges as findOpenEdges$1, transform as transform$2, canonicalize as canonicalize$1, fromSurface as fromSurface$1, eachPoint as eachPoint$2, flip as flip$1, measureBoundingBox as measureBoundingBox$3 } from './jsxcad-geometry-solid.js';
 import { close, createOpenPath } from './jsxcad-geometry-path.js';
 import { createNormalize3 } from './jsxcad-algorithm-quantize.js';
 import { transform as transform$4, canonicalize as canonicalize$5, difference as difference$1, eachPoint as eachPoint$3, flip as flip$3, union as union$2 } from './jsxcad-geometry-paths.js';
 import { equals, transform as transform$5, canonicalize as canonicalize$4, toPolygon } from './jsxcad-math-plane.js';
 import { transform as transform$3, canonicalize as canonicalize$3, eachPoint as eachPoint$4, flip as flip$4, union as union$1 } from './jsxcad-geometry-points.js';
 import { transform as transform$1, toPlane, canonicalize as canonicalize$2, makeWatertight as makeWatertight$2, eachPoint as eachPoint$1, flip as flip$2, makeConvex, measureArea as measureArea$1, measureBoundingBox as measureBoundingBox$2 } from './jsxcad-geometry-surface.js';
-import { section, removeExteriorPaths, fromSolid, fromSurface as fromSurface$1, unifyBspTrees, removeExteriorPolygonsForSection } from './jsxcad-geometry-bsp.js';
+import { differenceSurface, fromSolid, fromSurface, removeExteriorPaths, intersectSurface, unifyBspTrees } from './jsxcad-geometry-bsp.js';
 import { difference as difference$2, intersection as intersection$1, union as union$3 } from './jsxcad-geometry-solid-boolean.js';
 import { min, max } from './jsxcad-math-vec3.js';
 import { measureBoundingBox as measureBoundingBox$1 } from './jsxcad-geometry-z0surface.js';
@@ -263,10 +263,13 @@ const toTransformedGeometry = (geometry) => {
           return descend({ solid: transform$2(matrix, geometry.solid) });
         case 'surface':
         case 'z0Surface': {
-          const transformedSurface = transform$1(
-            matrix,
-            geometry.z0Surface || geometry.surface
-          );
+          const surface = geometry.z0Surface || geometry.surface;
+          if (surface.length === 0) {
+            // Empty geometries don't need transforming, but we'll return a
+            // fresh one to avoid any caching.
+            return taggedSurface({}, []);
+          }
+          const transformedSurface = transform$1(matrix, surface);
           if (
             equals(toPlane(transformedSurface), [0, 0, 1, 0])
           ) {
@@ -388,52 +391,38 @@ const differenceImpl = (geometry, ...geometries) => {
             todo.push(solid);
           }
           for (const { surface, z0Surface } of getAnySurfaces(geometry)) {
-            todo.push(fromSurface(surface || z0Surface, normalize));
+            todo.push(fromSurface$1(surface || z0Surface, normalize));
           }
         }
         return taggedSolid({ tags }, difference$2(geometry.solid, ...todo));
       }
+      case 'z0Surface':
       case 'surface': {
         const normalize = createNormalize3();
-        let thisSurface = geometry.surface;
+        let thisSurface = geometry.surface || geometry.z0Surface;
         for (const geometry of geometries) {
           for (const { solid } of getSolids(geometry)) {
-            thisSurface = section(
-              flip$1(solid),
-              [thisSurface],
-              normalize
-            )[0];
+            const differencedSurface = [];
+            differenceSurface(
+              fromSolid(solid),
+              thisSurface,
+              normalize,
+              (surface) => differencedSurface.push(...surface)
+            );
+            thisSurface = differencedSurface;
           }
           for (const { surface, z0Surface } of getAnySurfaces(geometry)) {
-            thisSurface = section(
-              flip$1(fromSurface(surface || z0Surface, normalize)),
-              [thisSurface],
-              normalize
-            )[0];
+            const differencedSurface = [];
+            differenceSurface(
+              fromSurface(surface || z0Surface, normalize),
+              thisSurface,
+              normalize,
+              (surface) => differencedSurface.push(...surface)
+            );
+            thisSurface = differencedSurface;
           }
         }
         return taggedSurface({ tags }, makeWatertight$2(thisSurface));
-      }
-      case 'z0Surface': {
-        const normalize = createNormalize3();
-        let thisSurface = geometry.z0Surface;
-        for (const geometry of geometries) {
-          for (const { solid } of getSolids(geometry)) {
-            thisSurface = section(
-              flip$1(solid),
-              [thisSurface],
-              normalize
-            )[0];
-          }
-          for (const { surface, z0Surface } of getAnySurfaces(geometry)) {
-            thisSurface = section(
-              flip$1(fromSurface(surface || z0Surface, normalize)),
-              [thisSurface],
-              normalize
-            )[0];
-          }
-        }
-        return taggedZ0Surface({ tags }, makeWatertight$2(thisSurface));
       }
       case 'paths': {
         const todo = [];
@@ -972,7 +961,7 @@ const intersectionImpl = (geometry, ...geometries) => {
           for (const { surface, z0Surface } of getAnyNonVoidSurfaces(
             geometry
           )) {
-            todo.push(fromSurface(surface || z0Surface, normalize));
+            todo.push(fromSurface$1(surface || z0Surface, normalize));
           }
         }
         return taggedSolid(
@@ -980,51 +969,35 @@ const intersectionImpl = (geometry, ...geometries) => {
           intersection$1(geometry.solid, ...todo)
         );
       }
+      case 'z0Surface':
       case 'surface': {
         const normalize = createNormalize3();
-        let thisSurface = geometry.surface;
+        let thisSurface = geometry.surface || geometry.z0Surface;
         for (const geometry of geometries) {
           for (const { solid } of getNonVoidSolids(geometry)) {
-            thisSurface = section(
-              solid,
-              [thisSurface],
-              normalize
-            )[0];
+            const intersectedSurface = [];
+            intersectSurface(
+              fromSolid(solid),
+              thisSurface,
+              normalize,
+              (surface) => intersectedSurface.push(...surface)
+            );
+            thisSurface = intersectedSurface;
           }
           for (const { surface, z0Surface } of getAnyNonVoidSurfaces(
             geometry
           )) {
-            thisSurface = section(
+            const intersectedSurface = [];
+            intersectSurface(
               fromSurface(surface || z0Surface, normalize),
-              [thisSurface],
-              normalize
-            )[0];
+              thisSurface,
+              normalize,
+              (surface) => intersectedSurface.push(...surface)
+            );
+            thisSurface = intersectedSurface;
           }
         }
         return taggedSurface({ tags }, makeWatertight$2(thisSurface));
-      }
-      case 'z0Surface': {
-        const normalize = createNormalize3();
-        let thisSurface = geometry.z0Surface;
-        for (const geometry of geometries) {
-          for (const { solid } of getNonVoidSolids(geometry)) {
-            thisSurface = section(
-              solid,
-              [thisSurface],
-              normalize
-            )[0];
-          }
-          for (const { surface, z0Surface } of getAnyNonVoidSurfaces(
-            geometry
-          )) {
-            thisSurface = section(
-              fromSurface(surface || z0Surface, normalize),
-              [thisSurface],
-              normalize
-            )[0];
-          }
-        }
-        return taggedZ0Surface({ tags }, makeWatertight$2(thisSurface));
       }
       case 'paths': {
         const normalize = createNormalize3();
@@ -1045,7 +1018,7 @@ const intersectionImpl = (geometry, ...geometries) => {
           )) {
             const clippedPaths = [];
             removeExteriorPaths(
-              fromSurface$1(surface || z0Surface, normalize),
+              fromSurface(surface || z0Surface, normalize),
               thisPaths,
               normalize,
               (paths) => clippedPaths.push(...paths)
@@ -1222,7 +1195,7 @@ const toBspTree = (geometry, normalize) => {
         bspTree = unifyBspTrees(
           bspTree,
           fromSolid(
-            fromSurface(
+            fromSurface$1(
               geometry.surface || geometry.z0Surface,
               normalize
             ),
@@ -1429,16 +1402,13 @@ const unionImpl = (geometry, ...geometries) => {
         // No meaningful way to unify with a surface.
         return taggedSolid({ tags }, union$3(geometry.solid, ...todo));
       }
+      case 'z0Surface':
       case 'surface': {
         // FIX: This has a problem with trying to union with an empty surface.
         const normalize = createNormalize3();
-        let planarPolygon = toPolygon(
-          toPlane(geometry.surface)
-        );
-        let bsp = fromSolid(
-          fromSurface(geometry.surface, normalize),
-          normalize
-        );
+        const thisSurface = geometry.surface || geometry.z0Surface;
+        let planarPolygon = toPolygon(toPlane(thisSurface));
+        let bsp = fromSurface(thisSurface, normalize);
         for (const geometry of geometries) {
           for (const { solid } of getNonVoidSolids(geometry)) {
             bsp = unifyBspTrees(fromSolid(solid, normalize), bsp);
@@ -1447,51 +1417,16 @@ const unionImpl = (geometry, ...geometries) => {
             geometry
           )) {
             bsp = unifyBspTrees(
-              fromSolid(
-                fromSurface(surface || z0Surface, normalize),
-                normalize
-              ),
+              fromSurface(surface || z0Surface, normalize),
               bsp
             );
           }
         }
-        const clippedSurface = removeExteriorPolygonsForSection(
-          bsp,
-          [planarPolygon],
-          normalize
+        const clippedSurface = [];
+        intersectSurface(bsp, [planarPolygon], normalize, (surface) =>
+          clippedSurface.push(...surface)
         );
         return taggedSurface({ tags }, makeWatertight$2(clippedSurface));
-      }
-      case 'z0Surface': {
-        // FIX: This has a problem with trying to union with an empty surface.
-        const normalize = createNormalize3();
-        let planarPolygon = toPolygon([0, 0, 1, 0]);
-        let bsp = fromSolid(
-          fromSurface(geometry.z0Surface, normalize),
-          normalize
-        );
-        for (const geometry of geometries) {
-          for (const { solid } of getNonVoidSolids(geometry)) {
-            bsp = unifyBspTrees(fromSolid(solid, normalize), bsp);
-          }
-          for (const { surface, z0Surface } of getAnyNonVoidSurfaces(
-            geometry
-          )) {
-            bsp = unifyBspTrees(
-              fromSolid(
-                fromSurface(surface || z0Surface, normalize),
-                normalize
-              ),
-              bsp
-            );
-          }
-        }
-        const clippedSurface = removeExteriorPolygonsForSection(
-          bsp,
-          [planarPolygon],
-          normalize
-        );
-        return taggedZ0Surface({ tags }, makeWatertight$2(clippedSurface));
       }
       case 'paths': {
         const { paths, tags } = geometry;

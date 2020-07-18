@@ -8,7 +8,6 @@ import './jsxcad-api-v1-deform.js';
 import './jsxcad-api-v1-gcode.js';
 import './jsxcad-api-v1-pdf.js';
 import './jsxcad-api-v1-plans.js';
-import './jsxcad-api-v1-shell.js';
 import './jsxcad-api-v1-svg.js';
 import './jsxcad-api-v1-stl.js';
 import { Connector, X, Y, Z } from './jsxcad-api-v1-connector.js';
@@ -19,6 +18,10 @@ import { Line2 } from './jsxcad-api-v1-line2.js';
 export { Line2 } from './jsxcad-api-v1-line2.js';
 import { Plan } from './jsxcad-api-v1-plan.js';
 export { Plan } from './jsxcad-api-v1-plan.js';
+import { Shell } from './jsxcad-api-v1-shell.js';
+export { Shell } from './jsxcad-api-v1-shell.js';
+import { BenchPlane } from './jsxcad-api-v1-tools.js';
+export { BenchPlane } from './jsxcad-api-v1-tools.js';
 import { Arc, Assembly, Circle, Cone, Cube, Cylinder, Difference, Empty, Hexagon, Icosahedron, Intersection, Layers, Line, Path, Point, Points, Polygon, Polyhedron, Prism, Sphere, Spiral, Square, Tetrahedron, Torus, Triangle, Union, Void, Wave } from './jsxcad-api-v1-shapes.js';
 export { Arc, Assembly, Circle, Cone, Cube, Cylinder, Difference, Empty, Hexagon, Icosahedron, Intersection, Layers, Line, Path, Point, Points, Polygon, Polyhedron, Prism, Sphere, Spiral, Square, Tetrahedron, Torus, Triangle, Union, Void, Wave } from './jsxcad-api-v1-shapes.js';
 import { Item } from './jsxcad-api-v1-item.js';
@@ -197,6 +200,8 @@ var api = /*#__PURE__*/Object.freeze({
   saveGeometry: saveGeometry,
   Line2: Line2,
   Plan: Plan,
+  Shell: Shell,
+  BenchPlane: BenchPlane,
   Arc: Arc,
   Assembly: Assembly,
   Circle: Circle,

@@ -2,7 +2,7 @@ import { buildConvexSurfaceHull, buildConvexHull, loop, extrude as extrude$1, bu
 import { Assembly, Layers } from './jsxcad-api-v1-shapes.js';
 import Shape$1, { Shape } from './jsxcad-api-v1-shape.js';
 import { Y as Y$1, Z as Z$3 } from './jsxcad-api-v1-connector.js';
-import { getPaths, getZ0Surfaces, getSurfaces, getPlans, outline as outline$1, getSolids, taggedLayers, union, taggedZ0Surface, taggedPaths, measureBoundingBox, taggedPoints, measureHeights } from './jsxcad-geometry-tagged.js';
+import { getPaths, getZ0Surfaces, getSurfaces, getPlans, outline as outline$1, getSolids, taggedLayers, union, taggedZ0Surface, taggedPaths, measureBoundingBox, taggedSolid, taggedPoints, measureHeights } from './jsxcad-geometry-tagged.js';
 import { alignVertices, transform as transform$1, fromPolygons } from './jsxcad-geometry-solid.js';
 import { toPlane as toPlane$1, transform, makeConvex, flip as flip$1 } from './jsxcad-geometry-surface.js';
 import { toXYPlaneTransforms } from './jsxcad-math-plane.js';
@@ -599,7 +599,7 @@ const sweep = (toolpath, tool) => {
       );
     }
   }
-  return Assembly(...chains);
+  return Layers(...chains).Item('sweep');
 };
 
 const sweepMethod = function (tool) {
@@ -703,10 +703,7 @@ const voxels = (shape, resolution = 1) => {
       }
     }
   }
-  return Shape.fromGeometry({
-    type: 'solid',
-    solid: fromPolygons({}, polygons),
-  });
+  return Shape.fromGeometry(taggedSolid({}, fromPolygons(polygons)));
 };
 
 const voxelsMethod = function (...args) {

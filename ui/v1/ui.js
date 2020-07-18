@@ -537,6 +537,9 @@ class Ui extends React.PureComponent {
 
     const toasts = toast.map((entry, index) => {
       const { text, duration = 1000 } = entry;
+      if (duration !== 1000) {
+        console.log(`QQ/strange duration: ${duration}`);
+      }
       return (
         <Toast
           key={`toast/${index}`}

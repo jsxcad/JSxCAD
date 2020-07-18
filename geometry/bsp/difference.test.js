@@ -50,16 +50,16 @@ test.beforeEach(async (t) => {
 
 test('Self difference', (t) => {
   const solid = difference(
-    fromPolygons({}, cubePolygons),
-    fromPolygons({}, cubePolygons)
+    fromPolygons(cubePolygons),
+    fromPolygons(cubePolygons)
   );
   t.deepEqual(canonicalize(solid), []);
 });
 
 test('Overlapping difference', (t) => {
   const solid = difference(
-    transform(fromTranslation([0.5, 0.5, 0.5]), fromPolygons({}, cubePolygons)),
-    fromPolygons({}, cubePolygons)
+    transform(fromTranslation([0.5, 0.5, 0.5]), fromPolygons(cubePolygons)),
+    fromPolygons(cubePolygons)
   );
   t.deepEqual(canonicalize(solid), [
     [

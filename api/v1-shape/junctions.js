@@ -1,6 +1,7 @@
+import { getSolids, taggedPoints } from '@jsxcad/geometry-tagged';
+
 import Shape from './Shape.js';
 import { createNormalize3 } from '@jsxcad/algorithm-quantize';
-import { getSolids } from '@jsxcad/geometry-tagged';
 import { junctionSelector } from '@jsxcad/geometry-halfedge';
 
 export const junctions = (shape, mode = (n) => n) => {
@@ -22,7 +23,7 @@ export const junctions = (shape, mode = (n) => n) => {
       }
     }
   }
-  return Shape.fromGeometry({ points: junctions });
+  return Shape.fromGeometry(taggedPoints({}, junctions));
 };
 
 export const nonJunctions = (shape) => junctions(shape, (n) => !n);

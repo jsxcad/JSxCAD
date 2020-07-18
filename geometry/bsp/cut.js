@@ -1,7 +1,7 @@
 import {
   alignVertices,
+  fromPolygons as fromPolygonsToSolid,
   toPolygons as toPolygonsFromSolid,
-  fromPolygons as toSolidFromPolygons,
 } from '@jsxcad/geometry-solid';
 
 import {
@@ -33,11 +33,7 @@ export const cut = (solid, surface, normalize = createNormalize3()) => {
     normalize
   );
 
-  return toSolidFromPolygons(
-    {},
-    [...trimmedSolid, ...trimmedPolygons],
-    normalize
-  );
+  return fromPolygonsToSolid([...trimmedSolid, ...trimmedPolygons], normalize);
 };
 
 export const cutOpen = (solid, surface, normalize = createNormalize3()) => {
@@ -52,5 +48,5 @@ export const cutOpen = (solid, surface, normalize = createNormalize3()) => {
     normalize
   );
 
-  return toSolidFromPolygons({}, trimmedSolid, normalize);
+  return fromPolygonsToSolid(trimmedSolid, normalize);
 };

@@ -52,7 +52,7 @@ test.beforeEach(async (t) => {
 
 test('Section', (t) => {
   const surface = section(
-    fromPolygons({}, cubePolygons),
+    fromPolygons(cubePolygons),
     [
       [
         [

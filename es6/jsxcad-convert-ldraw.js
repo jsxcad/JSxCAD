@@ -190,7 +190,7 @@ const fromLDraw = async (part, { allowFetch = true } = {}) => ({
     (-90 * Math.PI) / 180,
     scale(
       [0.4, 0.4, 0.4],
-      fromPolygons({}, await fromPartToPolygons(`${part}.dat`, { allowFetch }))
+      fromPolygons(await fromPartToPolygons(`${part}.dat`, { allowFetch }))
     )
   ),
 });

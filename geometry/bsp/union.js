@@ -1,7 +1,7 @@
 import {
   alignVertices,
+  fromPolygons as fromPolygonsToSolid,
   toPolygons as toPolygonsFromSolid,
-  fromPolygons as toSolidFromPolygons,
 } from '@jsxcad/geometry-solid';
 
 import {
@@ -89,5 +89,5 @@ export const union = (...solids) => {
       s.push(clean([...aOut, ...bTrimmed, ...bOut, ...aTrimmed]));
     }
   }
-  return toSolidFromPolygons({}, s[0], normalize);
+  return fromPolygonsToSolid(s[0], normalize);
 };

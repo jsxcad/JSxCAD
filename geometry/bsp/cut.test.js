@@ -50,7 +50,7 @@ test.beforeEach(async (t) => {
 });
 
 test('Cut', (t) => {
-  const solid = cut(fromPolygons({}, cubePolygons), [
+  const solid = cut(fromPolygons(cubePolygons), [
     [
       [-10, -10, 0],
       [10, -10, 0],

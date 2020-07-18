@@ -50,8 +50,8 @@ test.beforeEach(async (t) => {
 
 test('Self intersection', (t) => {
   const solid = intersection(
-    fromPolygons({}, cubePolygons),
-    fromPolygons({}, cubePolygons)
+    fromPolygons(cubePolygons),
+    fromPolygons(cubePolygons)
   );
   t.deepEqual(canonicalize(solid), [
     [
@@ -131,8 +131,8 @@ test('Self intersection', (t) => {
 
 test('Overlapping intersection', (t) => {
   const solid = intersection(
-    transform(fromTranslation([0.5, 0.5, 0.5]), fromPolygons({}, cubePolygons)),
-    fromPolygons({}, cubePolygons)
+    transform(fromTranslation([0.5, 0.5, 0.5]), fromPolygons(cubePolygons)),
+    fromPolygons(cubePolygons)
   );
   t.deepEqual(canonicalize(solid), [
     [

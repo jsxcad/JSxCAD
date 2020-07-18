@@ -1,10 +1,9 @@
+import { getSolids, taggedLayers } from './jsxcad-geometry-tagged.js';
+import { Hull, outline } from './jsxcad-api-v1-extrude.js';
 import Shape$1, { Shape } from './jsxcad-api-v1-shape.js';
-import { Sphere, Union, Circle, Assembly } from './jsxcad-api-v1-shapes.js';
-import { getSolids, getAnySurfaces, outline, transform } from './jsxcad-geometry-tagged.js';
-import { Hull, outline as outline$1 } from './jsxcad-api-v1-extrude.js';
-import { getEdges } from './jsxcad-geometry-path.js';
-import { toPlane } from './jsxcad-geometry-surface.js';
-import { toXYPlaneTransforms } from './jsxcad-math-plane.js';
+import { Sphere } from './jsxcad-api-v1-shapes.js';
+import { toConvexClouds, fromSolid } from './jsxcad-geometry-bsp.js';
+import { createNormalize3 } from './jsxcad-algorithm-quantize.js';
 
 /**
  *
@@ -20,141 +19,91 @@ import { toXYPlaneTransforms } from './jsxcad-math-plane.js';
  *
  **/
 
-const shell = (shape, radius = 1, resolution = 8) => {
+const Shell = (radius = 1, resolution = 3, ...shapes) => {
   resolution = Math.max(resolution, 3);
-  const keptGeometry = shape.toKeptGeometry();
-  const assembly = [];
-
-  // Handle solid aspects.
-  const shells = [];
-  for (const { solid, tags = [] } of getSolids(keptGeometry)) {
-    const pieces = [];
-    for (const surface of solid) {
-      for (const polygon of surface) {
-        pieces.push(
-          Hull(
-            ...polygon.map((point) => Sphere(radius, resolution).move(...point))
-          )
-        );
-      }
-    }
-    shells.push(Union(...pieces).as(...tags));
-  }
-  assembly.push(Union(...shells));
-
-  const faces = [];
-  // Handle surface aspects.
-  for (const geometry of getAnySurfaces(keptGeometry)) {
-    const anySurface = geometry.surface || geometry.z0Surface;
-    const plane = toPlane(anySurface);
-    if (plane === undefined) {
-      continue;
-    }
-    const [to, from] = toXYPlaneTransforms(plane);
-    const pieces = [];
-    for (const { paths } of outline(transform(to, geometry))) {
-      for (const path of paths) {
-        for (const edge of getEdges(path)) {
-          // FIX: Handle non-z0-surfaces properly.
+  const pieces = [];
+  for (const shape of shapes) {
+    for (const { solid, tags = [] } of getSolids(shape.toDisjointGeometry())) {
+      for (const surface of solid) {
+        for (const polygon of surface) {
           pieces.push(
-            Hull(...edge.map(([x, y]) => Circle(radius, resolution).move(x, y)))
+            Hull(
+              ...polygon.map((point) =>
+                Sphere(radius, resolution).move(...point)
+              )
+            )
+              .setTags(tags)
+              .toGeometry()
           );
         }
       }
     }
-    faces.push(
-      Union(...pieces.map((piece) => piece.transform(from))).as(
-        ...(geometry.tags || [])
-      )
-    );
   }
-  assembly.push(Union(...faces));
 
-  return Assembly(...assembly);
+  return Shape.fromGeometry(taggedLayers({}, ...pieces));
 };
 
 const shellMethod = function (radius, resolution) {
-  return shell(this, radius, resolution);
+  return Shell(radius, resolution, this);
 };
 Shape.prototype.shell = shellMethod;
 
 const outerShellMethod = function (radius, resolution) {
-  return shell(this, radius, resolution).cut(this);
+  return Shell(radius, resolution, this).cut(this);
 };
 Shape.prototype.outerShell = outerShellMethod;
 
 const innerShellMethod = function (radius, resolution) {
-  return shell(this, radius, resolution).clip(this);
+  return Shell(radius, resolution, this).clip(this);
 };
 Shape.prototype.innerShell = innerShellMethod;
 
-/**
- *
- * # grow
- *
- * Moves the edges of the shape inward by the specified amount.
- *
- * ::: illustration { "view": { "position": [60, -60, 60], "target": [0, 0, 0] } }
- * ```
- * Cube(10).with(Cube(10).moveX(10).grow(2))
- * ```
- * :::
- **/
-
-const grow = (shape, amount = 1, { resolution = 16 } = {}) =>
-  amount >= 0
-    ? shape.union(shell(shape, amount, resolution))
-    : shape.cut(shell(shape, -amount, resolution));
+const grow = (shape, amount = 1, { resolution = 3 } = {}) => {
+  const normalize = createNormalize3();
+  resolution = Math.max(resolution, 3);
+  const pieces = [];
+  for (const { solid, tags = [] } of getSolids(shape.toDisjointGeometry())) {
+    for (const cloud of toConvexClouds(
+      fromSolid(solid, normalize),
+      normalize
+    )) {
+      pieces.push(
+        Hull(...cloud.map((point) => Sphere(amount, resolution).move(...point)))
+          .setTags(tags)
+          .toGeometry()
+      );
+    }
+  }
+  return Shape.fromGeometry(taggedLayers({}, ...pieces));
+};
 
 const growMethod = function (...args) {
   return grow(this, ...args);
 };
-Shape$1.prototype.grow = growMethod;
+Shape.prototype.grow = growMethod;
 
 const offset = (shape, radius = 1, resolution = 16) =>
-  outline$1(grow(shape, radius, resolution));
+  outline(grow(shape, radius, resolution));
 
 const offsetMethod = function (radius, resolution) {
   return offset(this, radius, resolution);
 };
 Shape.prototype.offset = offsetMethod;
 
-/**
- *
- * # shrink
- *
- * Moves the edges of the shape inward by the specified amount.
- *
- * ::: illustration { "view": { "position": [60, -60, 60], "target": [0, 0, 0] } }
- * ```
- * Cube(10).wireframe().with(Cube(10).shrink(2))
- * ```
- * :::
- **/
+const shrink = (shape, amount, { resolution = 3 } = {}) =>
+  shape.cut(Shell(amount, { resolution }, shape));
 
-const byRadius = (shape, amount = 1, { resolution = 16 } = {}) =>
-  grow(shape, -amount, resolution);
-
-const shrink = (...args) => byRadius(...args);
-
-shrink.byRadius = byRadius;
-
-const shrinkMethod = function (radius, resolution) {
-  return shrink(this, radius, resolution);
+const shrinkMethod = function (amount, { resolution = 3 } = {}) {
+  return shrink(this, amount, { resolution });
 };
 Shape$1.prototype.shrink = shrinkMethod;
 
-shrink.signature =
-  'shrink(shape:Shape, amount:number = 1, { resolution:number = 16 }) -> Shape';
-shrinkMethod.signature =
-  'Shape -> shrink(amount:number = 1, { resolution:number = 16 }) -> Shape';
-
 const api = {
+  Shell,
   grow,
   offset,
-  shell,
   shrink,
 };
 
 export default api;
-export { grow, offset, shell, shrink };
+export { Shell, grow, offset, shrink };
