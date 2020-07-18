@@ -1,11 +1,7 @@
-import {
-  flip as flipSolid,
-  fromSurface as fromSurfaceToSolid,
-} from '@jsxcad/geometry-solid';
-
 import { cache } from '@jsxcad/cache';
 import { createNormalize3 } from '@jsxcad/algorithm-quantize';
 import { differenceOfSurfaceWithSolid } from '@jsxcad/geometry-bsp';
+import { fromSurface as fromSurfaceToSolid } from '@jsxcad/geometry-solid';
 import { getAnySurfaces } from './getAnySurfaces.js';
 import { getPaths } from './getPaths.js';
 import { getSolids } from './getSolids.js';
@@ -16,7 +12,6 @@ import { difference as solidDifference } from '@jsxcad/geometry-solid-boolean';
 import { taggedPaths } from './taggedPaths.js';
 import { taggedSolid } from './taggedSolid.js';
 import { taggedSurface } from './taggedSurface.js';
-import { taggedZ0Surface } from './taggedZ0Surface.js';
 
 const differenceImpl = (geometry, ...geometries) => {
   const op = (geometry, descend) => {
@@ -35,31 +30,27 @@ const differenceImpl = (geometry, ...geometries) => {
         }
         return taggedSolid({ tags }, solidDifference(geometry.solid, ...todo));
       }
+      case 'z0Surface':
       case 'surface': {
         const normalize = createNormalize3();
-        let thisSurface = geometry.surface;
+        let thisSurface = geometry.surface || geometry.z0Surface;
         for (const geometry of geometries) {
           for (const { solid } of getSolids(geometry)) {
-            thisSurface = differenceOfSurfaceWithSolid(solid, thisSurface, normalize);
+            thisSurface = differenceOfSurfaceWithSolid(
+              solid,
+              thisSurface,
+              normalize
+            );
           }
           for (const { surface, z0Surface } of getAnySurfaces(geometry)) {
-            thisSurface = differenceOfSurfaceWithSolid(fromSurfaceToSolid(surface || z0Surface, normalize), thisSurface, normalize);
+            thisSurface = differenceOfSurfaceWithSolid(
+              fromSurfaceToSolid(surface || z0Surface, normalize),
+              thisSurface,
+              normalize
+            );
           }
         }
         return taggedSurface({ tags }, makeWatertightSurface(thisSurface));
-      }
-      case 'z0Surface': {
-        const normalize = createNormalize3();
-        let thisSurface = geometry.z0Surface;
-        for (const geometry of geometries) {
-          for (const { solid } of getSolids(geometry)) {
-            thisSurface = differenceOfSurfaceWithSolid(solid, thisSurface, normalize);
-          }
-          for (const { surface, z0Surface } of getAnySurfaces(geometry)) {
-            thisSurface = differenceOfSurfaceWithSolid(fromSurfaceToSolid(surface || z0Surface, normalize), thisSurface, normalize);
-          }
-        }
-        return taggedZ0Surface({ tags }, makeWatertightSurface(thisSurface));
       }
       case 'paths': {
         const todo = [];

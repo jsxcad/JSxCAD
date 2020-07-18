@@ -1,7 +1,7 @@
 import {
   fromSolid as fromSolidToBsp,
   fromSurface as fromSurfaceToBsp,
-  section as intersectionOfSurfaceWithSolid,
+  intersectSurface,
   removeExteriorPaths,
 } from '@jsxcad/geometry-bsp';
 
@@ -17,7 +17,6 @@ import { intersection as solidIntersection } from '@jsxcad/geometry-solid-boolea
 import { taggedPaths } from './taggedPaths.js';
 import { taggedSolid } from './taggedSolid.js';
 import { taggedSurface } from './taggedSurface.js';
-import { taggedZ0Surface } from './taggedZ0Surface.js';
 
 const intersectionImpl = (geometry, ...geometries) => {
   const op = (geometry, descend) => {
@@ -41,51 +40,35 @@ const intersectionImpl = (geometry, ...geometries) => {
           solidIntersection(geometry.solid, ...todo)
         );
       }
+      case 'z0Surface':
       case 'surface': {
         const normalize = createNormalize3();
-        let thisSurface = geometry.surface;
+        let thisSurface = geometry.surface || geometry.z0Surface;
         for (const geometry of geometries) {
           for (const { solid } of getNonVoidSolids(geometry)) {
-            thisSurface = intersectionOfSurfaceWithSolid(
-              solid,
-              [thisSurface],
-              normalize
-            )[0];
+            const intersectedSurface = [];
+            intersectSurface(
+              fromSolidToBsp(solid),
+              thisSurface,
+              normalize,
+              (surface) => intersectedSurface.push(...surface)
+            );
+            thisSurface = intersectedSurface;
           }
           for (const { surface, z0Surface } of getAnyNonVoidSurfaces(
             geometry
           )) {
-            thisSurface = intersectionOfSurfaceWithSolid(
-              fromSurfaceToSolid(surface || z0Surface, normalize),
-              [thisSurface],
-              normalize
-            )[0];
+            const intersectedSurface = [];
+            intersectSurface(
+              fromSurfaceToBsp(surface || z0Surface, normalize),
+              thisSurface,
+              normalize,
+              (surface) => intersectedSurface.push(...surface)
+            );
+            thisSurface = intersectedSurface;
           }
         }
         return taggedSurface({ tags }, makeWatertightSurface(thisSurface));
-      }
-      case 'z0Surface': {
-        const normalize = createNormalize3();
-        let thisSurface = geometry.z0Surface;
-        for (const geometry of geometries) {
-          for (const { solid } of getNonVoidSolids(geometry)) {
-            thisSurface = intersectionOfSurfaceWithSolid(
-              solid,
-              [thisSurface],
-              normalize
-            )[0];
-          }
-          for (const { surface, z0Surface } of getAnyNonVoidSurfaces(
-            geometry
-          )) {
-            thisSurface = intersectionOfSurfaceWithSolid(
-              fromSurfaceToSolid(surface || z0Surface, normalize),
-              [thisSurface],
-              normalize
-            )[0];
-          }
-        }
-        return taggedZ0Surface({ tags }, makeWatertightSurface(thisSurface));
       }
       case 'paths': {
         const normalize = createNormalize3();

@@ -12,6 +12,7 @@ export { difference } from './difference.js';
 export { differenceOfSurfaceWithSolid } from './differenceOfSurfaceWithSolid.js';
 export { fromPlanes } from './fromPlanes.js';
 export { fromSurface } from './fromSurface.js';
+export { intersectSurface } from './intersectSurface.js';
 export { intersection } from './intersection.js';
 export { removeExteriorPaths } from './removeExteriorPaths.js';
 export { section } from './section.js';

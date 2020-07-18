@@ -4,7 +4,7 @@ import { pushWhenValid, doesNotOverlap, measureBoundingBox, flip } from './jsxca
 import { toPlane } from './jsxcad-math-poly3.js';
 import { max, min, scale, add, subtract, dot as dot$1 } from './jsxcad-math-vec3.js';
 import { createNormalize3 } from './jsxcad-algorithm-quantize.js';
-import { toPlane as toPlane$1, outline } from './jsxcad-geometry-surface.js';
+import { toPlane as toPlane$1, outline, translate, flip as flip$1 } from './jsxcad-geometry-surface.js';
 import { getEdges, createOpenPath } from './jsxcad-geometry-path.js';
 
 const EPSILON = 1e-5;
@@ -1153,10 +1153,10 @@ const fromSurface = (surface, normalize) => {
   const normal = toPlane$1(surface);
   if (normal === undefined) {
     // The surface is degenerate.
-    return fromPolygons([]);
+    return [];
   }
   const top = scale(LARGE, normal);
-  const bottom = scale(-LARGE, normal);
+  const bottom = scale(0, normal);
   for (const path of outline(surface, normalize)) {
     for (const [start, end] of getEdges(path)) {
       // Build a large wall.
@@ -1168,8 +1168,32 @@ const fromSurface = (surface, normalize) => {
       ]);
     }
   }
-  // This is an excessively large uncapped prism.
+  // Build a tall prism.
+  polygons.push(...translate(bottom, flip$1(surface)));
+  polygons.push(...translate(top, surface));
   return fromPolygons(polygons, normalize);
+};
+
+const intersectSurface = (bsp, surface, normalize, emit) => {
+  if (bsp === inLeaf) {
+    return emit(surface);
+  } else if (bsp === outLeaf) ; else {
+    const front = [];
+    const back = [];
+    for (let i = 0; i < surface.length; i++) {
+      splitPolygon(
+        normalize,
+        bsp.plane,
+        surface[i],
+        /* back= */ back,
+        /* abutting= */ back,
+        /* overlapping= */ back,
+        /* front= */ front
+      );
+    }
+    intersectSurface(bsp.front, front, normalize, emit);
+    intersectSurface(bsp.back, back, normalize, emit);
+  }
 };
 
 const MIN$1 = 0;
@@ -1459,4 +1483,4 @@ const union = (...solids) => {
   return fromPolygons$1(s[0], normalize);
 };
 
-export { clipPolygonsToFaces, containsPoint, cut, cutOpen, deform, difference, differenceOfSurfaceWithSolid, fromPlanes, fromSolid, fromSurface, intersection, removeExteriorPaths, removeExteriorPolygonsForSection, section, toConvexClouds, toDot, toPlanesFromSolid, toPolygonsFromPlanes, unifyBspTrees, union };
+export { clipPolygonsToFaces, containsPoint, cut, cutOpen, deform, difference, differenceOfSurfaceWithSolid, fromPlanes, fromSolid, fromSurface, intersectSurface, intersection, removeExteriorPaths, removeExteriorPolygonsForSection, section, toConvexClouds, toDot, toPlanesFromSolid, toPolygonsFromPlanes, unifyBspTrees, union };
