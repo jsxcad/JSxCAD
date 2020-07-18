@@ -449,46 +449,6 @@ const removeExteriorPolygonsForSection = (bsp, polygons, normalize) => {
   }
 };
 
-const removeInteriorPolygonsForSurface = (bsp, polygons, normalize) => {
-  if (bsp === inLeaf) {
-    return [];
-  } else if (bsp === outLeaf) {
-    return keepOut(polygons);
-  } else {
-    const front = [];
-    const back = [];
-    for (let i = 0; i < polygons.length; i++) {
-      splitPolygon(
-        normalize,
-        bsp.plane,
-        polygons[i],
-        /* back= */ back, // drop
-        /* abutting= */ back, // drop
-        /* overlapping= */ back, // drop
-        /* front= */ front
-      );
-    }
-    const trimmedFront = removeInteriorPolygonsForSurface(
-      bsp.front,
-      front,
-      normalize
-    );
-    const trimmedBack = removeInteriorPolygonsForSurface(
-      bsp.back,
-      back,
-      normalize
-    );
-
-    if (trimmedFront.length === 0) {
-      return trimmedBack;
-    } else if (trimmedBack.length === 0) {
-      return trimmedFront;
-    } else {
-      return merge(trimmedFront, trimmedBack);
-    }
-  }
-};
-
 const removeExteriorPolygonsForCutDroppingOverlap = (
   bsp,
   polygons,
@@ -1049,6 +1009,28 @@ const deform = (solid, transform, min, max, resolution) => {
   return fromPolygons$1(transformedPolygons);
 };
 
+const differenceSurface = (bsp, surface, normalize, emit) => {
+  if (bsp === outLeaf) {
+    emit(surface);
+  } else if (bsp !== inLeaf) {
+    const front = [];
+    const back = [];
+    for (let i = 0; i < surface.length; i++) {
+      splitPolygon(
+        normalize,
+        bsp.plane,
+        surface[i],
+        /* back= */ back,
+        /* abutting= */ back,
+        /* overlapping= */ back,
+        /* front= */ front
+      );
+    }
+    differenceSurface(bsp.front, front, normalize, emit);
+    differenceSurface(bsp.back, back, normalize, emit);
+  }
+};
+
 const boxPartition = (
   bbBsp,
   aBB,
@@ -1133,11 +1115,6 @@ const difference = (aSolid, ...bSolids) => {
   return fromPolygons$1(a, normalize);
 };
 
-const differenceOfSurfaceWithSolid = (solid, surface, normalize) => {
-  const bsp = fromSolid(alignVertices(solid, normalize), normalize);
-  return removeInteriorPolygonsForSurface(bsp, surface, normalize);
-};
-
 const fromPlanes = (planes, normalize) => {
   const polygons = [];
   for (const plane of planes) {
@@ -1176,8 +1153,8 @@ const fromSurface = (surface, normalize) => {
 
 const intersectSurface = (bsp, surface, normalize, emit) => {
   if (bsp === inLeaf) {
-    return emit(surface);
-  } else if (bsp === outLeaf) ; else {
+    emit(surface);
+  } else if (bsp !== outLeaf) {
     const front = [];
     const back = [];
     for (let i = 0; i < surface.length; i++) {
@@ -1483,4 +1460,4 @@ const union = (...solids) => {
   return fromPolygons$1(s[0], normalize);
 };
 
-export { clipPolygonsToFaces, containsPoint, cut, cutOpen, deform, difference, differenceOfSurfaceWithSolid, fromPlanes, fromSolid, fromSurface, intersectSurface, intersection, removeExteriorPaths, removeExteriorPolygonsForSection, section, toConvexClouds, toDot, toPlanesFromSolid, toPolygonsFromPlanes, unifyBspTrees, union };
+export { clipPolygonsToFaces, containsPoint, cut, cutOpen, deform, difference, differenceSurface, fromPlanes, fromSolid, fromSurface, intersectSurface, intersection, removeExteriorPaths, removeExteriorPolygonsForSection, section, toConvexClouds, toDot, toPlanesFromSolid, toPolygonsFromPlanes, unifyBspTrees, union };

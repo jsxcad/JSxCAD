@@ -1,6 +1,11 @@
+import {
+  differenceSurface,
+  fromSolid as fromSolidToBsp,
+  fromSurface as fromSurfaceToBsp,
+} from '@jsxcad/geometry-bsp';
+
 import { cache } from '@jsxcad/cache';
 import { createNormalize3 } from '@jsxcad/algorithm-quantize';
-import { differenceOfSurfaceWithSolid } from '@jsxcad/geometry-bsp';
 import { fromSurface as fromSurfaceToSolid } from '@jsxcad/geometry-solid';
 import { getAnySurfaces } from './getAnySurfaces.js';
 import { getPaths } from './getPaths.js';
@@ -36,18 +41,24 @@ const differenceImpl = (geometry, ...geometries) => {
         let thisSurface = geometry.surface || geometry.z0Surface;
         for (const geometry of geometries) {
           for (const { solid } of getSolids(geometry)) {
-            thisSurface = differenceOfSurfaceWithSolid(
-              solid,
+            const differencedSurface = [];
+            differenceSurface(
+              fromSolidToBsp(solid),
               thisSurface,
-              normalize
+              normalize,
+              (surface) => differencedSurface.push(...surface)
             );
+            thisSurface = differencedSurface;
           }
           for (const { surface, z0Surface } of getAnySurfaces(geometry)) {
-            thisSurface = differenceOfSurfaceWithSolid(
-              fromSurfaceToSolid(surface || z0Surface, normalize),
+            const differencedSurface = [];
+            differenceSurface(
+              fromSurfaceToBsp(surface || z0Surface, normalize),
               thisSurface,
-              normalize
+              normalize,
+              (surface) => differencedSurface.push(...surface)
             );
+            thisSurface = differencedSurface;
           }
         }
         return taggedSurface({ tags }, makeWatertightSurface(thisSurface));

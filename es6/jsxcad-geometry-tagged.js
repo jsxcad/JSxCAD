@@ -1,13 +1,13 @@
 import { identityMatrix, multiply, fromXRotation, fromYRotation, fromZRotation, fromTranslation, fromScaling } from './jsxcad-math-mat4.js';
 import { cacheTransform, cache, cacheRewriteTags } from './jsxcad-cache.js';
-import { reconcile as reconcile$1, makeWatertight as makeWatertight$1, isWatertight as isWatertight$1, findOpenEdges as findOpenEdges$1, transform as transform$2, canonicalize as canonicalize$1, fromSurface, eachPoint as eachPoint$2, flip as flip$1, measureBoundingBox as measureBoundingBox$3 } from './jsxcad-geometry-solid.js';
+import { reconcile as reconcile$1, makeWatertight as makeWatertight$1, isWatertight as isWatertight$1, findOpenEdges as findOpenEdges$1, transform as transform$2, canonicalize as canonicalize$1, fromSurface as fromSurface$1, eachPoint as eachPoint$2, flip as flip$1, measureBoundingBox as measureBoundingBox$3 } from './jsxcad-geometry-solid.js';
 import { close, createOpenPath } from './jsxcad-geometry-path.js';
 import { createNormalize3 } from './jsxcad-algorithm-quantize.js';
 import { transform as transform$4, canonicalize as canonicalize$5, difference as difference$1, eachPoint as eachPoint$3, flip as flip$3, union as union$2 } from './jsxcad-geometry-paths.js';
 import { equals, transform as transform$5, canonicalize as canonicalize$4, toPolygon } from './jsxcad-math-plane.js';
 import { transform as transform$3, canonicalize as canonicalize$3, eachPoint as eachPoint$4, flip as flip$4, union as union$1 } from './jsxcad-geometry-points.js';
 import { transform as transform$1, toPlane, canonicalize as canonicalize$2, makeWatertight as makeWatertight$2, eachPoint as eachPoint$1, flip as flip$2, makeConvex, measureArea as measureArea$1, measureBoundingBox as measureBoundingBox$2 } from './jsxcad-geometry-surface.js';
-import { differenceOfSurfaceWithSolid, removeExteriorPaths, fromSolid, fromSurface as fromSurface$1, intersectSurface, unifyBspTrees } from './jsxcad-geometry-bsp.js';
+import { differenceSurface, fromSolid, fromSurface, removeExteriorPaths, intersectSurface, unifyBspTrees } from './jsxcad-geometry-bsp.js';
 import { difference as difference$2, intersection as intersection$1, union as union$3 } from './jsxcad-geometry-solid-boolean.js';
 import { min, max } from './jsxcad-math-vec3.js';
 import { measureBoundingBox as measureBoundingBox$1 } from './jsxcad-geometry-z0surface.js';
@@ -391,7 +391,7 @@ const differenceImpl = (geometry, ...geometries) => {
             todo.push(solid);
           }
           for (const { surface, z0Surface } of getAnySurfaces(geometry)) {
-            todo.push(fromSurface(surface || z0Surface, normalize));
+            todo.push(fromSurface$1(surface || z0Surface, normalize));
           }
         }
         return taggedSolid({ tags }, difference$2(geometry.solid, ...todo));
@@ -402,18 +402,24 @@ const differenceImpl = (geometry, ...geometries) => {
         let thisSurface = geometry.surface || geometry.z0Surface;
         for (const geometry of geometries) {
           for (const { solid } of getSolids(geometry)) {
-            thisSurface = differenceOfSurfaceWithSolid(
-              solid,
+            const differencedSurface = [];
+            differenceSurface(
+              fromSolid(solid),
               thisSurface,
-              normalize
+              normalize,
+              (surface) => differencedSurface.push(...surface)
             );
+            thisSurface = differencedSurface;
           }
           for (const { surface, z0Surface } of getAnySurfaces(geometry)) {
-            thisSurface = differenceOfSurfaceWithSolid(
+            const differencedSurface = [];
+            differenceSurface(
               fromSurface(surface || z0Surface, normalize),
               thisSurface,
-              normalize
+              normalize,
+              (surface) => differencedSurface.push(...surface)
             );
+            thisSurface = differencedSurface;
           }
         }
         return taggedSurface({ tags }, makeWatertight$2(thisSurface));
@@ -955,7 +961,7 @@ const intersectionImpl = (geometry, ...geometries) => {
           for (const { surface, z0Surface } of getAnyNonVoidSurfaces(
             geometry
           )) {
-            todo.push(fromSurface(surface || z0Surface, normalize));
+            todo.push(fromSurface$1(surface || z0Surface, normalize));
           }
         }
         return taggedSolid(
@@ -983,7 +989,7 @@ const intersectionImpl = (geometry, ...geometries) => {
           )) {
             const intersectedSurface = [];
             intersectSurface(
-              fromSurface$1(surface || z0Surface, normalize),
+              fromSurface(surface || z0Surface, normalize),
               thisSurface,
               normalize,
               (surface) => intersectedSurface.push(...surface)
@@ -1012,7 +1018,7 @@ const intersectionImpl = (geometry, ...geometries) => {
           )) {
             const clippedPaths = [];
             removeExteriorPaths(
-              fromSurface$1(surface || z0Surface, normalize),
+              fromSurface(surface || z0Surface, normalize),
               thisPaths,
               normalize,
               (paths) => clippedPaths.push(...paths)
@@ -1189,7 +1195,7 @@ const toBspTree = (geometry, normalize) => {
         bspTree = unifyBspTrees(
           bspTree,
           fromSolid(
-            fromSurface(
+            fromSurface$1(
               geometry.surface || geometry.z0Surface,
               normalize
             ),
@@ -1402,7 +1408,7 @@ const unionImpl = (geometry, ...geometries) => {
         const normalize = createNormalize3();
         const thisSurface = geometry.surface || geometry.z0Surface;
         let planarPolygon = toPolygon(toPlane(thisSurface));
-        let bsp = fromSurface$1(thisSurface, normalize);
+        let bsp = fromSurface(thisSurface, normalize);
         for (const geometry of geometries) {
           for (const { solid } of getNonVoidSolids(geometry)) {
             bsp = unifyBspTrees(fromSolid(solid, normalize), bsp);
@@ -1411,7 +1417,7 @@ const unionImpl = (geometry, ...geometries) => {
             geometry
           )) {
             bsp = unifyBspTrees(
-              fromSurface$1(surface || z0Surface, normalize),
+              fromSurface(surface || z0Surface, normalize),
               bsp
             );
           }

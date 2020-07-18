@@ -2,10 +2,10 @@ import { inLeaf, outLeaf } from './bsp.js';
 
 import splitPolygon from './splitPolygon.js';
 
-export const intersectSurface = (bsp, surface, normalize, emit) => {
-  if (bsp === inLeaf) {
+export const differenceSurface = (bsp, surface, normalize, emit) => {
+  if (bsp === outLeaf) {
     emit(surface);
-  } else if (bsp !== outLeaf) {
+  } else if (bsp !== inLeaf) {
     const front = [];
     const back = [];
     for (let i = 0; i < surface.length; i++) {
@@ -19,9 +19,9 @@ export const intersectSurface = (bsp, surface, normalize, emit) => {
         /* front= */ front
       );
     }
-    intersectSurface(bsp.front, front, normalize, emit);
-    intersectSurface(bsp.back, back, normalize, emit);
+    differenceSurface(bsp.front, front, normalize, emit);
+    differenceSurface(bsp.back, back, normalize, emit);
   }
 };
 
-export default intersectSurface;
+export default differenceSurface;
