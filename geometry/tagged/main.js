@@ -84,6 +84,7 @@ export { taggedSurface } from './taggedSurface.js';
 export { taggedZ0Surface } from './taggedZ0Surface.js';
 export { toDisjointGeometry } from './toDisjointGeometry.js';
 export { toKeptGeometry } from './toKeptGeometry.js';
+export { toTransformedGeometry } from './toTransformedGeometry.js';
 export { toPoints } from './toPoints.js';
 export { transform } from './transform.js';
 export { union } from './union.js';

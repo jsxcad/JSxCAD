@@ -11,13 +11,15 @@ export const Jigsaw = (
   const cuts = Math.ceil(depth / cutDepth);
   const actualCutDepth = depth / cuts;
   const design = [];
+  const sweep = [];
   for (const surface of shape.surfaces()) {
+    const edge = surface.outline();
     // FIX: This assumes a plunging tool.
     const paths = Shape.fromGeometry(
       taggedPaths(
         { tags: ['path/Toolpath'] },
         toolpath(
-          surface.outline().toDisjointGeometry(),
+          edge.toTransformedGeometry(),
           toolDiameter,
           /* overcut= */ false,
           /* solid= */ true
@@ -27,10 +29,9 @@ export const Jigsaw = (
     for (let cut = 1; cut < cuts; cut++) {
       design.push(paths.moveZ(cut * -actualCutDepth));
     }
+    sweep.push(edge.sweep(Cylinder.ofDiameter(toolDiameter, depth).bench()).Void());
   }
-  return Assembly(...design).op((s) =>
-    s.with(s.sweep(Cylinder.ofDiameter(toolDiameter, cutDepth).bench()))
-  );
+  return Assembly(...design, ...sweep);
 };
 
 export default Jigsaw;

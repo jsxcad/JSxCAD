@@ -53962,6 +53962,10 @@ const buildMeshes = async ({
       layer = SKETCH_LAYER;
       break;
     case 'paths': {
+      if (tags && tags.includes('path/Toolpath')) {
+        // Put toolpaths in the sketch layer.
+        layer = SKETCH_LAYER;
+      }
       const paths = threejsGeometry.threejsPaths;
       const dataset = {};
       const geometry = new BufferGeometry();

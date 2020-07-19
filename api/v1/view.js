@@ -9,7 +9,7 @@ const view = (
   { path, width = 1024, height = 512, position = [100, -100, 100] } = {}
 ) => {
   let nth = 0;
-  for (const entry of ensurePages(shape.toKeptGeometry())) {
+  for (const entry of ensurePages(shape.toDisjointGeometry())) {
     if (path) {
       const nthPath = `${path}_${nth++}`;
       addPending(write(nthPath, entry));

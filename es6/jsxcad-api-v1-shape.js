@@ -1,5 +1,5 @@
 import { close, concatenate, open } from './jsxcad-geometry-path.js';
-import { taggedAssembly, eachPoint, flip, toDisjointGeometry as toDisjointGeometry$1, toPoints, transform, reconcile, isWatertight, makeWatertight, taggedPaths, fromPathToSurface, fromPathToZ0Surface, fromPathsToSurface, fromPathsToZ0Surface, taggedPoints, taggedSolid, taggedZ0Surface, union as union$1, rewriteTags, assemble as assemble$1, canonicalize as canonicalize$1, measureBoundingBox as measureBoundingBox$1, intersection as intersection$1, allTags, difference as difference$1, getSolids, taggedDisjointAssembly, outline, taggedSurface, rewrite, taggedLayers, isVoid, getNonVoidSolids, getAnyNonVoidSurfaces, measureArea, taggedSketch, getPaths, getNonVoidSurfaces, getNonVoidZ0Surfaces } from './jsxcad-geometry-tagged.js';
+import { taggedAssembly, eachPoint, flip, toDisjointGeometry as toDisjointGeometry$1, toTransformedGeometry, toPoints, transform, reconcile, isWatertight, makeWatertight, taggedPaths, fromPathToSurface, fromPathToZ0Surface, fromPathsToSurface, fromPathsToZ0Surface, taggedPoints, taggedSolid, taggedZ0Surface, union as union$1, rewriteTags, assemble as assemble$1, canonicalize as canonicalize$1, measureBoundingBox as measureBoundingBox$1, intersection as intersection$1, allTags, difference as difference$1, getSolids, taggedDisjointAssembly, outline, taggedSurface, rewrite, taggedLayers, isVoid, getNonVoidSolids, getAnyNonVoidSurfaces, measureArea, taggedSketch, getPaths, getNonVoidSurfaces, getNonVoidZ0Surfaces } from './jsxcad-geometry-tagged.js';
 import { fromPolygons, findOpenEdges, fromSurface } from './jsxcad-geometry-solid.js';
 import { scale as scale$1, add, negate, normalize, subtract, dot, cross, distance } from './jsxcad-math-vec3.js';
 import { toTagFromName } from './jsxcad-algorithm-color.js';
@@ -61,6 +61,10 @@ class Shape {
 
   toDisjointGeometry(options = {}) {
     return toDisjointGeometry$1(toGeometry(this));
+  }
+
+  toTransformedGeometry(options = {}) {
+    return toTransformedGeometry(toGeometry(this));
   }
 
   getContext(symbol) {

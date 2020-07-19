@@ -81,7 +81,7 @@ export class SelectWorkspaceUi extends SettingsUi {
   }
 
   render() {
-    const { workspaces, toast } = this.props;
+    const { workspaces } = this.props;
     const { workspace = '' } = this.state;
 
     const rows = [];
@@ -142,7 +142,6 @@ export class SelectWorkspaceUi extends SettingsUi {
               </Form>
             </Tab>
           </Tabs>
-          {toast}
         </Modal.Body>
       </Modal>
     );

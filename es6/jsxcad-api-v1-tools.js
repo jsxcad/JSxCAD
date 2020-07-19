@@ -27,6 +27,7 @@ const BenchPlane = ({
   }
   return Toolpath(...points).with(
     Cube(length, width, cutHeight + cutDepth)
+      .Void()
       .benchTop()
       .moveZ(-cutDepth)
   );
@@ -65,7 +66,7 @@ const DrillPress = (
   // Move back to the middle so we don't rub the wall on the way up.
   points.push(Point(0, 0, 0));
   return Toolpath(...points)
-    .with(Cylinder.ofDiameter(diameter, depth).moveZ(depth / -2))
+    .with(Cylinder.ofDiameter(diameter, depth).Void().moveZ(depth / -2))
     .move(x, y);
 };
 
@@ -76,13 +77,15 @@ const Jigsaw = (
   const cuts = Math.ceil(depth / cutDepth);
   const actualCutDepth = depth / cuts;
   const design = [];
+  const sweep = [];
   for (const surface of shape.surfaces()) {
+    const edge = surface.outline();
     // FIX: This assumes a plunging tool.
     const paths = Shape.fromGeometry(
       taggedPaths(
         { tags: ['path/Toolpath'] },
         toolpath(
-          surface.outline().toDisjointGeometry(),
+          edge.toTransformedGeometry(),
           toolDiameter,
           /* overcut= */ false,
           /* solid= */ true
@@ -92,10 +95,9 @@ const Jigsaw = (
     for (let cut = 1; cut < cuts; cut++) {
       design.push(paths.moveZ(cut * -actualCutDepth));
     }
+    sweep.push(edge.sweep(Cylinder.ofDiameter(toolDiameter, depth).bench()).Void());
   }
-  return Assembly(...design).op((s) =>
-    s.with(s.sweep(Cylinder.ofDiameter(toolDiameter, cutDepth).bench()))
-  );
+  return Assembly(...design, ...sweep);
 };
 
 const Router = (
@@ -105,13 +107,15 @@ const Router = (
   const cuts = Math.ceil(depth / cutDepth);
   const actualCutDepth = depth / cuts;
   const design = [];
+  const sweep = [];
   for (const surface of shape.surfaces()) {
+    const edge = surface.outline().flip();
     // FIX: This assumes a plunging tool.
     const paths = Shape.fromGeometry(
       taggedPaths(
         { tags: ['path/Toolpath'] },
         toolpath(
-          surface.outline().flip().toDisjointGeometry(),
+          edge.toTransformedGeometry(),
           toolDiameter,
           /* overcut= */ false,
           /* solid= */ true
@@ -121,10 +125,9 @@ const Router = (
     for (let cut = 1; cut < cuts; cut++) {
       design.push(paths.moveZ(cut * -actualCutDepth));
     }
+    sweep.push(edge.sweep(Cylinder.ofDiameter(toolDiameter, depth).bench()).Void());
   }
-  return Assembly(...design).op((s) =>
-    s.with(s.sweep(Cylinder.ofDiameter(toolDiameter, cutDepth).bench()))
-  );
+  return Assembly(...design, ...sweep);
 };
 
 export { BenchPlane, DrillPress, Jigsaw, Router };

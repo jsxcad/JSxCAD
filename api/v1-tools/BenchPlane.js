@@ -24,6 +24,7 @@ export const BenchPlane = ({
   }
   return Toolpath(...points).with(
     Cube(length, width, cutHeight + cutDepth)
+      .Void()
       .benchTop()
       .moveZ(-cutDepth)
   );
