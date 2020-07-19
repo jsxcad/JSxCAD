@@ -541,29 +541,19 @@ const Layers = (...shapes) =>
     )
   );
 
-const fromPoints = (...points) =>
+const fromVec3 = (...points) =>
   Shape.fromOpenPath(points.map(([x = 0, y = 0, z = 0]) => [x, y, z]));
 
-/**
- *
- * # Path
- *
- * ::: illustration { "view": { "position": [0, 0, 5] } }
- * ```
- * Path([0, 1],
- *      [1, 1],
- *      [1, 0],
- *      [0.2, 0.2])
- * ```
- * :::
- *
- **/
+const fromPoints = (...shapes) => {
+  const vec3List = [];
+  for (const shape of shapes) {
+    shape.eachPoint((vec3) => vec3List.push(vec3));
+  }
+  return fromVec3(...vec3List);
+};
 
 const Path = (...points) => fromPoints(...points);
-Path.fromPoints = fromPoints;
-
-Path.signature = 'Path(...points:Point) -> Shape';
-Path.fromPoints.signature = 'Path.fromPoints(...points:Point) -> Shape';
+Path.fromVec3 = fromVec3;
 
 const Line = (length) => Path([0, 0, length / -2], [0, 0, length / 2]);
 
@@ -821,6 +811,9 @@ const Tetrahedron = (...args) => ofRadius$b(...args);
 Tetrahedron.ofRadius = ofRadius$b;
 Tetrahedron.ofDiameter = ofDiameter$a;
 
+const Toolpath = (...points) =>
+  Path(...points).setTags(['path/Toolpath']);
+
 /**
  *
  * # Torus
@@ -993,6 +986,7 @@ const api = {
   Spiral,
   Square,
   Tetrahedron,
+  Toolpath,
   Torus,
   Triangle,
   Union,
@@ -1001,4 +995,4 @@ const api = {
 };
 
 export default api;
-export { Arc, Assembly, Circle, Cone, Cube, Cylinder, Difference, Empty, Hexagon, Icosahedron, Intersection, Layers, Line, Path, Point, Points, Polygon, Polyhedron, Prism, Sketch, Sphere, Spiral, Square, Tetrahedron, Torus, Triangle, Union, Void, Wave };
+export { Arc, Assembly, Circle, Cone, Cube, Cylinder, Difference, Empty, Hexagon, Icosahedron, Intersection, Layers, Line, Path, Point, Points, Polygon, Polyhedron, Prism, Sketch, Sphere, Spiral, Square, Tetrahedron, Toolpath, Torus, Triangle, Union, Void, Wave };

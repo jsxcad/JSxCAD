@@ -16,8 +16,12 @@ const outlineImpl = (geometry) => {
   for (const { solid } of getNonVoidSolids(keptGeometry)) {
     outlines.push(outlineSolid(solid, normalize));
   }
-  for (const { surface, z0Surface } of getAnyNonVoidSurfaces(keptGeometry)) {
-    outlines.push(outlineSurface(surface || z0Surface, normalize));
+  // This is a bit tricky -- let's consider an assembly that produces an effective surface.
+  // For now, let's consolidate, and see what goes terribly wrong.
+  for (const surface of getAnyNonVoidSurfaces(keptGeometry).map(
+    ({ surface, z0Surface }) => surface || z0Surface
+  )) {
+    outlines.push(outlineSurface(surface, normalize));
   }
   return outlines.map((outline) => taggedPaths({}, outline));
 };

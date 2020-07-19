@@ -5,6 +5,7 @@ export { assertCoplanar } from './assertCoplanar.js';
 export { assertGood } from './assertGood.js';
 export { eachPoint } from './eachPoint.js';
 export { flip } from './flip.js';
+export { fromPlane } from './fromPlane.js';
 export { fromPolygons } from './fromPolygons.js';
 export { makeConvex } from './makeConvex.js';
 export { makeConvexNoHoles } from './makeConvexNoHoles.js';

@@ -1,5 +1,5 @@
-export const rotateY = ([x, y, z], angle) => [
-  z * Math.sin(angle) + x * Math.cos(angle),
+export const rotateY = ([x, y, z], radians) => [
+  z * Math.sin(radians) + x * Math.cos(radians),
   y,
-  z * Math.cos(angle) - x * Math.sin(angle),
+  z * Math.cos(radians) - x * Math.sin(radians),
 ];

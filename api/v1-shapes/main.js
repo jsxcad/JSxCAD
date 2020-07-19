@@ -22,6 +22,7 @@ import Sphere from './Sphere.js';
 import Spiral from './Spiral.js';
 import Square from './Square.js';
 import Tetrahedron from './Tetrahedron.js';
+import Toolpath from './Toolpath.js';
 import Torus from './Torus.js';
 import Triangle from './Triangle.js';
 import Union from './Union.js';
@@ -53,6 +54,7 @@ const api = {
   Spiral,
   Square,
   Tetrahedron,
+  Toolpath,
   Torus,
   Triangle,
   Union,
@@ -84,6 +86,7 @@ export {
   Sphere,
   Spiral,
   Square,
+  Toolpath,
   Tetrahedron,
   Torus,
   Triangle,

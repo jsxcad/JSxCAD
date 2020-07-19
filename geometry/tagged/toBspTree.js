@@ -1,9 +1,9 @@
 import {
   fromSolid as fromSolidToBsp,
+  fromSurface as fromSurfaceToBsp,
   unifyBspTrees,
 } from '@jsxcad/geometry-bsp';
 
-import { fromSurface as fromSurfaceToSolid } from '@jsxcad/geometry-solid';
 import { visit } from './visit.js';
 
 export const toBspTree = (geometry, normalize) => {
@@ -23,13 +23,7 @@ export const toBspTree = (geometry, normalize) => {
       case 'z0Surface': {
         bspTree = unifyBspTrees(
           bspTree,
-          fromSolidToBsp(
-            fromSurfaceToSolid(
-              geometry.surface || geometry.z0Surface,
-              normalize
-            ),
-            normalize
-          )
+          fromSurfaceToBsp(geometry.surface || geometry.z0Surface, normalize)
         );
         return descend();
       }

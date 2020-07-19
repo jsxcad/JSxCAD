@@ -238,21 +238,21 @@ const random = (vec) => {
   }
 };
 
-const rotateX = ([x, y, z], angle) => [
+const rotateX = ([x, y, z], radians) => [
   x,
-  y * Math.cos(angle) - z * Math.sin(angle),
-  y * Math.sin(angle) + z * Math.cos(angle),
+  y * Math.cos(radians) - z * Math.sin(radians),
+  y * Math.sin(radians) + z * Math.cos(radians),
 ];
 
-const rotateY = ([x, y, z], angle) => [
-  z * Math.sin(angle) + x * Math.cos(angle),
+const rotateY = ([x, y, z], radians) => [
+  z * Math.sin(radians) + x * Math.cos(radians),
   y,
-  z * Math.cos(angle) - x * Math.sin(angle),
+  z * Math.cos(radians) - x * Math.sin(radians),
 ];
 
-const rotateZ = ([x, y, z], angle) => [
-  x * Math.cos(angle) - y * Math.sin(angle),
-  x * Math.sin(angle) + y * Math.cos(angle),
+const rotateZ = ([x, y, z], radians) => [
+  x * Math.cos(radians) - y * Math.sin(radians),
+  x * Math.sin(radians) + y * Math.cos(radians),
   z,
 ];
 

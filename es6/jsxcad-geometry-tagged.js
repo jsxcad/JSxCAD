@@ -7,8 +7,8 @@ import { transform as transform$4, canonicalize as canonicalize$5, difference as
 import { equals, transform as transform$5, canonicalize as canonicalize$4, toPolygon } from './jsxcad-math-plane.js';
 import { transform as transform$3, canonicalize as canonicalize$3, eachPoint as eachPoint$4, flip as flip$4, union as union$1 } from './jsxcad-geometry-points.js';
 import { transform as transform$1, toPlane, canonicalize as canonicalize$2, makeWatertight as makeWatertight$2, eachPoint as eachPoint$1, flip as flip$2, makeConvex, measureArea as measureArea$1, measureBoundingBox as measureBoundingBox$2 } from './jsxcad-geometry-surface.js';
-import { differenceSurface, fromSolid, fromSurface, removeExteriorPaths, intersectSurface, unifyBspTrees } from './jsxcad-geometry-bsp.js';
-import { difference as difference$2, intersection as intersection$1, union as union$3 } from './jsxcad-geometry-solid-boolean.js';
+import { differenceSurface, fromSolid, fromSurface, unifyBspTrees, removeExteriorPaths, intersectSurface, intersection as intersection$1 } from './jsxcad-geometry-bsp.js';
+import { difference as difference$2, union as union$3 } from './jsxcad-geometry-solid-boolean.js';
 import { min, max } from './jsxcad-math-vec3.js';
 import { measureBoundingBox as measureBoundingBox$1 } from './jsxcad-geometry-z0surface.js';
 import { outlineSolid, outlineSurface } from './jsxcad-geometry-halfedge.js';
@@ -947,84 +947,150 @@ const getZ0Surfaces = (geometry) => {
   return z0Surfaces;
 };
 
+const taggedLayers = ({ tags }, ...content) => {
+  if (content.some((value) => !value)) {
+    throw Error(`Undefined Layers content`);
+  }
+  if (content.some((value) => value.length)) {
+    throw Error(`Layers content is an array`);
+  }
+  return { type: 'layers', tags, content };
+};
+
+const toBspTree = (geometry, normalize) => {
+  // Start with an empty tree.
+  let bspTree = fromSolid([], normalize);
+  const op = (geometry, descend) => {
+    switch (geometry.type) {
+      case 'solid': {
+        bspTree = unifyBspTrees(
+          bspTree,
+          fromSolid(geometry.solid, normalize)
+        );
+        return descend();
+      }
+      // FIX: We want some distinction between volumes for membership and volumes for composition.
+      case 'surface':
+      case 'z0Surface': {
+        bspTree = unifyBspTrees(
+          bspTree,
+          fromSurface(geometry.surface || geometry.z0Surface, normalize)
+        );
+        return descend();
+      }
+      case 'paths':
+      case 'points':
+      case 'plan':
+      case 'assembly':
+      case 'item':
+      case 'disjointAssembly':
+      case 'layers':
+      case 'sketch': {
+        return descend();
+      }
+      default:
+        throw Error(`Unexpected geometry: ${JSON.stringify(geometry)}`);
+    }
+  };
+
+  visit(geometry, op);
+
+  return bspTree;
+};
+
 const intersectionImpl = (geometry, ...geometries) => {
   const op = (geometry, descend) => {
     const { tags } = geometry;
     switch (geometry.type) {
       case 'solid': {
-        const normalize = createNormalize3();
-        const todo = [];
-        for (const geometry of geometries) {
-          for (const { solid } of getNonVoidSolids(geometry)) {
-            todo.push(solid);
-          }
-          for (const { surface, z0Surface } of getAnyNonVoidSurfaces(
-            geometry
-          )) {
-            todo.push(fromSurface$1(surface || z0Surface, normalize));
-          }
+        const otherGeometry = geometries[0];
+        const solids = [
+          ...getNonVoidSolids(otherGeometry).map(({ solid }) => solid),
+          ...getAnyNonVoidSurfaces(
+            otherGeometry
+          ).map(({ surface, z0Surface }) =>
+            fromSurface$1(surface || z0Surface)
+          ),
+        ];
+        const intersections = solids
+          .map((solid) => intersection$1(geometry.solid, solid))
+          .filter((solid) => solid.length > 0)
+          .map((solid) => taggedSolid({ tags }, solid));
+        if (intersections.length === 1) {
+          return intersections[0];
+        } else if (geometries.length === 1) {
+          return taggedLayers({}, ...intersections);
+        } else {
+          return intersection(
+            taggedLayers({}, ...intersections),
+            ...geometries.slice(1)
+          );
         }
-        return taggedSolid(
-          { tags },
-          intersection$1(geometry.solid, ...todo)
-        );
       }
       case 'z0Surface':
-      case 'surface': {
+      case 'surface' /* {
         const normalize = createNormalize3();
         let thisSurface = geometry.surface || geometry.z0Surface;
         for (const geometry of geometries) {
-          for (const { solid } of getNonVoidSolids(geometry)) {
-            const intersectedSurface = [];
-            intersectSurface(
-              fromSolid(solid),
-              thisSurface,
-              normalize,
-              (surface) => intersectedSurface.push(...surface)
-            );
-            thisSurface = intersectedSurface;
-          }
-          for (const { surface, z0Surface } of getAnyNonVoidSurfaces(
-            geometry
-          )) {
-            const intersectedSurface = [];
-            intersectSurface(
-              fromSurface(surface || z0Surface, normalize),
-              thisSurface,
-              normalize,
-              (surface) => intersectedSurface.push(...surface)
-            );
-            thisSurface = intersectedSurface;
-          }
+          const bsp = toBspTree(geometry, normalize);
+          const intersectedSurface = [];
+          intersectSurface(
+            bsp,
+            thisSurface,
+            normalize,
+            (surface) => intersectedSurface.push(...surface)
+          );
+          thisSurface = intersectedSurface;
         }
-        return taggedSurface({ tags }, makeWatertight$2(thisSurface));
+        return taggedSurface({ tags }, makeWatertightSurface(thisSurface));
+      } */: {
+        const normalize = createNormalize3();
+        const thisSurface = geometry.surface || geometry.z0Surface;
+        const otherGeometry = geometries[0];
+        const solids = [
+          ...getNonVoidSolids(otherGeometry).map(({ solid }) => solid),
+          ...getAnyNonVoidSurfaces(
+            otherGeometry
+          ).map(({ surface, z0Surface }) =>
+            fromSurface$1(surface || z0Surface)
+          ),
+        ];
+        const intersections = solids
+          .map((solid) => {
+            const intersectedSurface = [];
+            intersectSurface(
+              fromSolid(solid, normalize),
+              thisSurface,
+              normalize,
+              (surface) => intersectedSurface.push(...surface)
+            );
+            return intersectedSurface;
+          })
+          .filter((surface) => surface.length > 0)
+          .map((surface) =>
+            taggedSurface({ tags }, makeWatertight$2(surface))
+          );
+        if (intersections.length === 1) {
+          return intersections[0];
+        } else if (geometries.length === 1) {
+          return taggedLayers({}, ...intersections);
+        } else {
+          return intersection(
+            taggedLayers({}, ...intersections),
+            ...geometries.slice(1)
+          );
+        }
       }
       case 'paths': {
         const normalize = createNormalize3();
         let thisPaths = geometry.paths;
         for (const geometry of geometries) {
-          for (const { solid } of getNonVoidSolids(geometry)) {
-            const clippedPaths = [];
-            removeExteriorPaths(
-              fromSolid(solid, normalize),
-              thisPaths,
-              normalize,
-              (paths) => clippedPaths.push(...paths)
-            );
-            thisPaths = clippedPaths;
-          }
-          for (const { surface, z0Surface } of getAnyNonVoidSurfaces(
-            geometry
-          )) {
-            const clippedPaths = [];
-            removeExteriorPaths(
-              fromSurface(surface || z0Surface, normalize),
-              thisPaths,
-              normalize,
-              (paths) => clippedPaths.push(...paths)
-            );
-            thisPaths = clippedPaths;
-          }
+          const bsp = toBspTree(geometry, normalize);
+          const clippedPaths = [];
+          removeExteriorPaths(bsp, thisPaths, normalize, (paths) =>
+            clippedPaths.push(...paths)
+          );
+          thisPaths = clippedPaths;
         }
         return taggedPaths({ tags }, thisPaths);
       }
@@ -1177,53 +1243,6 @@ const measureBoundingBox = (geometry) => {
   return [minPoint, maxPoint];
 };
 
-const toBspTree = (geometry, normalize) => {
-  // Start with an empty tree.
-  let bspTree = fromSolid([], normalize);
-  const op = (geometry, descend) => {
-    switch (geometry.type) {
-      case 'solid': {
-        bspTree = unifyBspTrees(
-          bspTree,
-          fromSolid(geometry.solid, normalize)
-        );
-        return descend();
-      }
-      // FIX: We want some distinction between volumes for membership and volumes for composition.
-      case 'surface':
-      case 'z0Surface': {
-        bspTree = unifyBspTrees(
-          bspTree,
-          fromSolid(
-            fromSurface$1(
-              geometry.surface || geometry.z0Surface,
-              normalize
-            ),
-            normalize
-          )
-        );
-        return descend();
-      }
-      case 'paths':
-      case 'points':
-      case 'plan':
-      case 'assembly':
-      case 'item':
-      case 'disjointAssembly':
-      case 'layers':
-      case 'sketch': {
-        return descend();
-      }
-      default:
-        throw Error(`Unexpected geometry: ${JSON.stringify(geometry)}`);
-    }
-  };
-
-  visit(geometry, op);
-
-  return bspTree;
-};
-
 const X = 0;
 const Y = 1;
 const Z = 2;
@@ -1268,8 +1287,12 @@ const outlineImpl = (geometry) => {
   for (const { solid } of getNonVoidSolids(keptGeometry)) {
     outlines.push(outlineSolid(solid, normalize));
   }
-  for (const { surface, z0Surface } of getAnyNonVoidSurfaces(keptGeometry)) {
-    outlines.push(outlineSurface(surface || z0Surface, normalize));
+  // This is a bit tricky -- let's consider an assembly that produces an effective surface.
+  // For now, let's consolidate, and see what goes terribly wrong.
+  for (const surface of getAnyNonVoidSurfaces(keptGeometry).map(
+    ({ surface, z0Surface }) => surface || z0Surface
+  )) {
+    outlines.push(outlineSurface(surface, normalize));
   }
   return outlines.map((outline) => taggedPaths({}, outline));
 };
@@ -1287,16 +1310,6 @@ const taggedItem = ({ tags }, ...content) => {
     throw Error(`Item expects a single content geometry`);
   }
   return { type: 'item', tags, content };
-};
-
-const taggedLayers = ({ tags }, ...content) => {
-  if (content.some((value) => !value)) {
-    throw Error(`Undefined Layers content`);
-  }
-  if (content.some((value) => value.length)) {
-    throw Error(`Layers content is an array`);
-  }
-  return { type: 'layers', tags, content };
 };
 
 const taggedLayout = (
@@ -1403,21 +1416,22 @@ const unionImpl = (geometry, ...geometries) => {
         return taggedSolid({ tags }, union$3(geometry.solid, ...todo));
       }
       case 'z0Surface':
-      case 'surface': {
+      case 'surface': /*
+      {
         // FIX: This has a problem with trying to union with an empty surface.
         const normalize = createNormalize3();
         const thisSurface = geometry.surface || geometry.z0Surface;
-        let planarPolygon = toPolygon(toPlane(thisSurface));
-        let bsp = fromSurface(thisSurface, normalize);
+        let planarPolygon = fromPlaneToPolygon(fromSurfaceToPlane(thisSurface));
+        let bsp = fromSurfaceToBsp(thisSurface, normalize);
         for (const geometry of geometries) {
           for (const { solid } of getNonVoidSolids(geometry)) {
-            bsp = unifyBspTrees(fromSolid(solid, normalize), bsp);
+            bsp = unifyBspTrees(fromSolidToBsp(solid, normalize), bsp);
           }
           for (const { surface, z0Surface } of getAnyNonVoidSurfaces(
             geometry
           )) {
             bsp = unifyBspTrees(
-              fromSurface(surface || z0Surface, normalize),
+              fromSurfaceToBsp(surface || z0Surface, normalize),
               bsp
             );
           }
@@ -1426,7 +1440,55 @@ const unionImpl = (geometry, ...geometries) => {
         intersectSurface(bsp, [planarPolygon], normalize, (surface) =>
           clippedSurface.push(...surface)
         );
-        return taggedSurface({ tags }, makeWatertight$2(clippedSurface));
+        return taggedSurface({ tags }, makeWatertightSurface(clippedSurface));
+      }
+*/
+      {
+        const normalize = createNormalize3();
+        const thisSurface = geometry.surface || geometry.z0Surface;
+        let planarPolygon = toPolygon(toPlane(thisSurface));
+        // Cut the plane into pieces and assemble into a surface.
+        let clippedSurfaces = [];
+        for (const input of [geometry, ...geometries]) {
+          for (const { solid } of getNonVoidSolids(input)) {
+            const clippedPolygons = [];
+            intersectSurface(
+              fromSolid(solid, normalize),
+              [planarPolygon],
+              normalize,
+              (polygons) => clippedPolygons.push(...polygons)
+            );
+            clippedSurfaces.push(
+              taggedSurface({}, makeWatertight$2(clippedPolygons))
+            );
+          }
+          for (const { surface, z0Surface } of getAnyNonVoidSurfaces(input)) {
+            const clippedPolygons = [];
+            intersectSurface(
+              fromSurface(surface || z0Surface, normalize),
+              [planarPolygon],
+              normalize,
+              (polygons) => clippedPolygons.push(...polygons)
+            );
+            clippedSurfaces.push(
+              taggedSurface({}, makeWatertight$2(clippedPolygons))
+            );
+          }
+        }
+        if (clippedSurfaces.length === 0) {
+          return taggedDisjointAssembly({});
+        } else if (clippedSurfaces.length === 1) {
+          return clippedSurfaces[0];
+        } else {
+          const mergedSurface = [];
+          for (const { surface } of getSurfaces(
+            toDisjointGeometry(taggedAssembly({}, ...clippedSurfaces))
+          )) {
+            // These are disjoint and coplanar, so we can merge them into a single surface.
+            mergedSurface.push(...surface);
+          }
+          return taggedSurface({}, makeWatertight$2(mergedSurface));
+        }
       }
       case 'paths': {
         const { paths, tags } = geometry;

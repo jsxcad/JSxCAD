@@ -1,9 +1,9 @@
 import Shape from './Shape.js';
-import { getSolids } from '@jsxcad/geometry-tagged';
+import { getNonVoidSolids } from '@jsxcad/geometry-tagged';
 
 export const solids = (shape, xform = (_) => _) => {
   const solids = [];
-  for (const solid of getSolids(shape.toKeptGeometry())) {
+  for (const solid of getNonVoidSolids(shape.toDisjointGeometry())) {
     solids.push(xform(Shape.fromGeometry(solid)));
   }
   return solids;

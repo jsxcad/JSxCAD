@@ -323,34 +323,31 @@ const fromPolygons = (polygons, normalize3 = createNormalize3()) => {
   return cleanedSolid;
 };
 
-const large = 1e10;
+const LARGE = 1e10;
 
 const fromSurface = (surface, normalize) => {
-  const walls = [];
+  const solid = [];
   const normal = toPlane$1(surface);
   if (normal === undefined) {
     // The surface is degenerate.
     return [];
   }
-  const top = scale$1(large, normal);
+  const top = scale$1(LARGE, normal);
   const bottom = scale$1(0, normal);
   for (const path of outline$1(surface, normalize)) {
     for (const [start, end] of getEdges(path)) {
       // Build a large wall.
-      walls.push([
-        add(start, top),
-        add(start, bottom),
-        add(end, bottom),
-        add(end, top),
+      solid.push([
+        [add(start, top), add(start, bottom), add(end, bottom), add(end, top)],
       ]);
     }
   }
   // Build a tall prism.
-  return [
+  solid.push(
     translate$1(bottom, flip$1(surface)),
-    translate$1(top, surface),
-    ...walls.map((wall) => [wall]),
-  ];
+    translate$1(top, surface)
+  );
+  return solid;
 };
 
 /** Measure the bounding sphere of the given poly3

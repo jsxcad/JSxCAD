@@ -8,32 +8,29 @@ import {
 
 import { getEdges } from '@jsxcad/geometry-path';
 
-const large = 1e10;
+const LARGE = 1e10;
 
 export const fromSurface = (surface, normalize) => {
-  const walls = [];
+  const solid = [];
   const normal = toPlaneFromSurface(surface);
   if (normal === undefined) {
     // The surface is degenerate.
     return [];
   }
-  const top = scale(large, normal);
+  const top = scale(LARGE, normal);
   const bottom = scale(0, normal);
   for (const path of outlineSurface(surface, normalize)) {
     for (const [start, end] of getEdges(path)) {
       // Build a large wall.
-      walls.push([
-        add(start, top),
-        add(start, bottom),
-        add(end, bottom),
-        add(end, top),
+      solid.push([
+        [add(start, top), add(start, bottom), add(end, bottom), add(end, top)],
       ]);
     }
   }
   // Build a tall prism.
-  return [
+  solid.push(
     translateSurface(bottom, flipSurface(surface)),
-    translateSurface(top, surface),
-    ...walls.map((wall) => [wall]),
-  ];
+    translateSurface(top, surface)
+  );
+  return solid;
 };
