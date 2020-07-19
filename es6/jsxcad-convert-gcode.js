@@ -1,23 +1,28 @@
-import { add, equals } from './jsxcad-math-vec3.js';
-import { toKeptGeometry, translate, getNonVoidPaths } from './jsxcad-geometry-tagged.js';
+import { getNonVoidPaths, toKeptGeometry } from './jsxcad-geometry-tagged.js';
+import { equals } from './jsxcad-math-vec3.js';
 import { getEdges } from './jsxcad-geometry-path.js';
 
 const X = 0;
 const Y = 1;
 const Z = 2;
 
+/** Checks for equality, ignoring z. */
+const equalsXY = ([aX, aY], [bX, bY]) => equals([aX, aY, 0], [bX, bY, 0]);
+
 const computeFeedRate = ({
   toolDiameter = 3.175,
   chipLoad = 0.1,
   fluteCount = 1,
   rpm = 7000,
-}) => fluteCount * chipLoad * rpm;
+  maxFeedRate = 800,
+}) => Math.min(fluteCount * chipLoad * rpm, maxFeedRate);
 
 const toGcode = async (
   geometry,
   {
     origin = [0, 0, 0],
     topZ = 0,
+    maxFeedRate = 800,
     minCutZ = -1,
     cutDepth = 0.1,
     jumpHeight = 1,
@@ -25,7 +30,13 @@ const toGcode = async (
     chipLoad,
     fluteCount,
     rpm = 7000,
-    feedRate = computeFeedRate({ toolDiameter, chipLoad, fluteCount, rpm }),
+    feedRate = computeFeedRate({
+      toolDiameter,
+      chipLoad,
+      fluteCount,
+      rpm,
+      maxFeedRate,
+    }),
   } = {}
 ) => {
   if (!(feedRate > 0)) {
@@ -84,16 +95,16 @@ const toGcode = async (
   toolOn();
 
   // FIX: This is incorrect -- it should move the geometry down so that the top of the geometry is at the initial cutDepth.
-  const keptGeometry = toKeptGeometry(
-    translate(add(origin, [0, 0, -cutDepth]), await geometry)
-  );
-  for (const { paths } of getNonVoidPaths(keptGeometry)) {
+  for (const { paths } of getNonVoidPaths(toKeptGeometry(geometry))) {
     for (const path of paths) {
       for (const [start, end] of getEdges(path)) {
         if (start[Z] < minCutZ) {
           throw Error(`Attempting to cut below minCutZ`);
         }
-        if (!equals(start, position)) {
+        if (!equalsXY(start, position)) {
+          // We assume that we can plunge or raise vertically without issue.
+          // This avoids raising before plunging.
+          // FIX: This whole approach is essentially wrong, and needs to consider if the tool can plunge or not.
           jump(...start);
           cut(...start); // cut down
         }

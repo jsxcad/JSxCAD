@@ -1,5 +1,5 @@
+import { Assembly } from '@jsxcad/api-v1-shapes';
 import Hull from './Hull.js';
-import { Layers } from '@jsxcad/api-v1-shapes';
 import { Shape } from '@jsxcad/api-v1-shape';
 import { getEdges } from '@jsxcad/geometry-path';
 import { getPaths } from '@jsxcad/geometry-tagged';
@@ -24,7 +24,7 @@ export const sweep = (toolpath, tool) => {
       );
     }
   }
-  return Layers(...chains).Item('sweep');
+  return Assembly(...chains);
 };
 
 const sweepMethod = function (tool) {

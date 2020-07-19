@@ -1,7 +1,7 @@
 import { canonicalize as canonicalize$1, transform as transform$2, toPlane as toPlane$1, flip as flip$1, isConvex, measureArea as measureArea$1 } from './jsxcad-math-poly3.js';
 import { fromTranslation, fromZRotation, fromScaling } from './jsxcad-math-mat4.js';
 import { subtract, scale as scale$1, dot, distance, add } from './jsxcad-math-vec3.js';
-import { equals as equals$1, splitLineSegmentByPlane, signedDistanceToPoint, toXYPlaneTransforms } from './jsxcad-math-plane.js';
+import { equals as equals$1, splitLineSegmentByPlane, signedDistanceToPoint, toPolygon, toXYPlaneTransforms } from './jsxcad-math-plane.js';
 import { cacheCut, cacheTransform } from './jsxcad-cache.js';
 import { assertUnique, getEdges } from './jsxcad-geometry-path.js';
 import { createNormalize3 } from './jsxcad-algorithm-quantize.js';
@@ -313,6 +313,8 @@ const map = (original, transform) => {
 };
 
 const flip = (surface) => map(surface, flip$1);
+
+const fromPlane = (plane) => [toPolygon(plane)];
 
 const THRESHOLD = 1e-5;
 
@@ -1345,4 +1347,4 @@ const retessellate = (
   return transform$1(fromZ0, retessellated).map((path) => path.map(normalize3));
 };
 
-export { assertCoplanar, assertGood, canonicalize, cut, cutSurface, eachPoint, flip, fromPolygons, makeConvex, makeConvexNoHoles, makeSimple, makeWatertight, measureArea, measureBoundingBox, measureBoundingSphere, outline, retessellate, rotateZ, scale, toGeneric, toPlane, toPoints, toPolygons, transform, translate };
+export { assertCoplanar, assertGood, canonicalize, cut, cutSurface, eachPoint, flip, fromPlane, fromPolygons, makeConvex, makeConvexNoHoles, makeSimple, makeWatertight, measureArea, measureBoundingBox, measureBoundingSphere, outline, retessellate, rotateZ, scale, toGeneric, toPlane, toPoints, toPolygons, transform, translate };

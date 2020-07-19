@@ -1,5 +1,5 @@
 import { close, concatenate, open } from './jsxcad-geometry-path.js';
-import { taggedAssembly, eachPoint, flip, toDisjointGeometry as toDisjointGeometry$1, toPoints, transform, reconcile, isWatertight, makeWatertight, taggedPaths, fromPathToSurface, fromPathToZ0Surface, fromPathsToSurface, fromPathsToZ0Surface, taggedPoints, taggedSolid, taggedZ0Surface, union as union$1, rewriteTags, assemble as assemble$1, canonicalize as canonicalize$1, measureBoundingBox as measureBoundingBox$1, intersection as intersection$1, allTags, difference as difference$1, getSolids, taggedDisjointAssembly, outline, taggedSurface, rewrite, taggedLayers, isVoid, measureArea, taggedSketch, getPaths, getAnyNonVoidSurfaces, getNonVoidSolids, getNonVoidSurfaces, getNonVoidZ0Surfaces } from './jsxcad-geometry-tagged.js';
+import { taggedAssembly, eachPoint, flip, toDisjointGeometry as toDisjointGeometry$1, toPoints, transform, reconcile, isWatertight, makeWatertight, taggedPaths, fromPathToSurface, fromPathToZ0Surface, fromPathsToSurface, fromPathsToZ0Surface, taggedPoints, taggedSolid, taggedZ0Surface, union as union$1, rewriteTags, assemble as assemble$1, canonicalize as canonicalize$1, measureBoundingBox as measureBoundingBox$1, intersection as intersection$1, allTags, difference as difference$1, getSolids, taggedDisjointAssembly, outline, taggedSurface, rewrite, taggedLayers, isVoid, getNonVoidSolids, getAnyNonVoidSurfaces, measureArea, taggedSketch, getPaths, getNonVoidSurfaces, getNonVoidZ0Surfaces } from './jsxcad-geometry-tagged.js';
 import { fromPolygons, findOpenEdges, fromSurface } from './jsxcad-geometry-solid.js';
 import { scale as scale$1, add, negate, normalize, subtract, dot, cross, distance } from './jsxcad-math-vec3.js';
 import { toTagFromName } from './jsxcad-algorithm-color.js';
@@ -7,6 +7,7 @@ import { createNormalize3 } from './jsxcad-algorithm-quantize.js';
 import { junctionSelector } from './jsxcad-geometry-halfedge.js';
 import { emit, addPending, writeFile, read, write, log as log$1 } from './jsxcad-sys.js';
 import { fromTranslation, fromRotation, fromXRotation, fromYRotation, fromZRotation, fromScaling } from './jsxcad-math-mat4.js';
+import { fromPlane, toPlane } from './jsxcad-geometry-surface.js';
 import { segment } from './jsxcad-geometry-paths.js';
 
 class Shape {
@@ -1190,6 +1191,42 @@ orient.signature =
 orientMethod.signature =
   'Shape -> orient({ center:Point, facing:Vector, at:Point, from:Point }) -> Shape';
 
+const planes = (shape) => {
+  const pieces = [];
+  for (const { solid, tags } of getNonVoidSolids(shape.toDisjointGeometry())) {
+    for (const surface of solid) {
+      pieces.push(
+        Shape.fromGeometry(
+          taggedSurface(
+            { tags },
+            fromPlane(toPlane(surface))
+          )
+        )
+      );
+    }
+  }
+  for (const { surface, z0Surface, tags } of getAnyNonVoidSurfaces(
+    shape.toDisjointGeometry()
+  )) {
+    const thisSurface = surface || z0Surface;
+    pieces.push(
+      Shape.fromGeometry(
+        taggedSurface(
+          { tags },
+          fromPlane(toPlane(thisSurface))
+        )
+      )
+    );
+  }
+
+  return pieces;
+};
+
+const planesMethod = function () {
+  return planes(this);
+};
+Shape.prototype.planes = planesMethod;
+
 /**
  *
  * # Rotate
@@ -1373,7 +1410,7 @@ Shape.prototype.withSketch = function () {
 
 const solids = (shape, xform = (_) => _) => {
   const solids = [];
-  for (const solid of getSolids(shape.toKeptGeometry())) {
+  for (const solid of getNonVoidSolids(shape.toDisjointGeometry())) {
     solids.push(xform(Shape.fromGeometry(solid)));
   }
   return solids;
@@ -1383,6 +1420,19 @@ const solidsMethod = function (...args) {
   return solids(this, ...args);
 };
 Shape.prototype.solids = solidsMethod;
+
+const surfaces = (shape, op = (_) => _) => {
+  const surfaces = [];
+  for (const surface of getAnyNonVoidSurfaces(shape.toDisjointGeometry())) {
+    surfaces.push(op(Shape.fromGeometry(surface)));
+  }
+  return surfaces;
+};
+
+const surfacesMethod = function (op) {
+  return surfaces(this, op);
+};
+Shape.prototype.surfaces = surfacesMethod;
 
 const tags = (shape) =>
   [...allTags(shape.toGeometry())]

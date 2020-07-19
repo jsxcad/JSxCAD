@@ -4,12 +4,12 @@ import { toolpath as toolpathAlgorithm } from '@jsxcad/algorithm-toolpath';
 
 export const toolpath = (
   shape,
-  radius = 1,
+  diameter = 1,
   { overcut = true, solid = false } = {}
 ) =>
   Shape.fromGeometry({
     type: 'paths',
-    paths: toolpathAlgorithm(shape.toKeptGeometry(), radius, overcut, solid),
+    paths: toolpathAlgorithm(shape.toKeptGeometry(), diameter, overcut, solid),
   });
 
 const method = function (...options) {

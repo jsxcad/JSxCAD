@@ -599,7 +599,7 @@ const sweep = (toolpath, tool) => {
       );
     }
   }
-  return Layers(...chains).Item('sweep');
+  return Assembly(...chains);
 };
 
 const sweepMethod = function (tool) {
@@ -613,12 +613,12 @@ Shape.prototype.withSweep = function (tool) {
 
 const toolpath = (
   shape,
-  radius = 1,
+  diameter = 1,
   { overcut = true, solid = false } = {}
 ) =>
   Shape.fromGeometry({
     type: 'paths',
-    paths: toolpath$1(shape.toKeptGeometry(), radius, overcut, solid),
+    paths: toolpath$1(shape.toKeptGeometry(), diameter, overcut, solid),
   });
 
 const method$1 = function (...options) {

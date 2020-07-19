@@ -1,4 +1,4 @@
-import { Cube, Path } from '@jsxcad/api-v1-shapes';
+import { Cube, Point, Toolpath } from '@jsxcad/api-v1-shapes';
 
 export const BenchPlane = ({
   width = 50,
@@ -12,22 +12,19 @@ export const BenchPlane = ({
   const radialDepth = toolDiameter * advance;
   for (let x = 0; x < length; ) {
     points.push(
-      [x, (width - toolDiameter) / -2, z],
-      [x, (width - toolDiameter) / 2, z]
+      Point(x, (width - toolDiameter) / -2, z),
+      Point(x, (width - toolDiameter) / 2, z)
     );
     x += radialDepth;
     points.push(
-      [x + toolDiameter, (width - toolDiameter) / 2, z],
-      [x + toolDiameter, (width - toolDiameter) / -2, z]
+      Point(x, (width - toolDiameter) / 2, z),
+      Point(x, (width - toolDiameter) / -2, z)
     );
     x += radialDepth;
   }
-  const design = Path(...points);
-  return design
-    .with(
-      design.sweep(
-        Cube(toolDiameter, toolDiameter, cutHeight).benchTop(0, 0, cutDepth)
-      )
-    )
-    .Item('Plane Tooling');
+  return Toolpath(...points).with(
+    Cube(length, width, cutHeight + cutDepth)
+      .benchTop()
+      .moveZ(-cutDepth)
+  );
 };
