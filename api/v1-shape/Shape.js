@@ -21,6 +21,7 @@ import {
   taggedZ0Surface,
   toDisjointGeometry as toDisjointTaggedGeometry,
   toPoints,
+  toTransformedGeometry as toTransformedTaggedGeometry,
   transform,
 } from '@jsxcad/geometry-tagged';
 
@@ -77,6 +78,10 @@ export class Shape {
 
   toDisjointGeometry(options = {}) {
     return toDisjointTaggedGeometry(toGeometry(this));
+  }
+
+  toTransformedGeometry(options = {}) {
+    return toTransformedTaggedGeometry(toGeometry(this));
   }
 
   getContext(symbol) {

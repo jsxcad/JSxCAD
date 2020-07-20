@@ -28,7 +28,6 @@ import {
   writeWorkspace as writeWorkspaceToGithub,
 } from './github';
 
-import Alert from 'react-bootstrap/Alert';
 import Button from 'react-bootstrap/Button';
 import ButtonGroup from 'react-bootstrap/ButtonGroup';
 import Col from 'react-bootstrap/Col';
@@ -49,7 +48,6 @@ import ReactDOM from 'react-dom';
 import Row from 'react-bootstrap/Row';
 import SelectWorkspaceUi from './SelectWorkspaceUi';
 import ShareUi from './ShareUi';
-import Toast from 'react-bootstrap/Toast';
 import { deepEqual } from 'fast-equals';
 import { writeWorkspace as writeWorkspaceToGist } from './gist';
 
@@ -111,7 +109,6 @@ class Ui extends React.PureComponent {
       build: 0,
       paneLayout: '0',
       paneViews: [],
-      toast: [],
     };
 
     this.createNode = this.createNode.bind(this);
@@ -150,12 +147,9 @@ class Ui extends React.PureComponent {
         case 'open':
           return;
         default: {
-          const { log, toast } = this.state;
+          const { log } = this.state;
           this.setState({
             log: [...log, entry],
-            toast: [...toast, entry].filter(
-              (entry) => entry.op === 'text' && entry.level === 'serious'
-            ),
           });
         }
       }
@@ -532,48 +526,8 @@ class Ui extends React.PureComponent {
   }
 
   render() {
-    const { workspace, file, fileTitle, files, toast } = this.state;
+    const { workspace, file, fileTitle, files } = this.state;
     const views = this.buildViews(files);
-
-    const toasts = toast.map((entry, index) => {
-      const { text, duration = 1000 } = entry;
-      if (duration !== 1000) {
-        console.log(`QQ/strange duration: ${duration}`);
-      }
-      return (
-        <Toast
-          key={`toast/${index}`}
-          variant="info"
-          delay={duration}
-          show={true}
-          autohide
-          onClose={() =>
-            this.setState({ toast: toast.filter((item) => item !== entry) })
-          }
-        >
-          {text}
-        </Toast>
-      );
-    });
-
-    const toastDiv =
-      toasts.length > 0 ? (
-        <Alert
-          key="toasts"
-          variant="primary"
-          style={{
-            position: 'absolute',
-            zIndex: 1000,
-            left: '50%',
-            top: '50%',
-            transform: 'translate(-50%, -50%)',
-          }}
-        >
-          {toasts}
-        </Alert>
-      ) : (
-        []
-      );
 
     const switchViewModal = () => {
       const { switchView } = this.state;
@@ -627,7 +581,6 @@ class Ui extends React.PureComponent {
             key="shareUi"
             show={true}
             storage="share"
-            toast={toastDiv}
             onSubmit={this.doGithub}
             onHide={() => this.setState({ showShareUi: false })}
           />
@@ -639,7 +592,6 @@ class Ui extends React.PureComponent {
             show={true}
             workspaces={workspaces}
             storage="selectWorkspace"
-            toast={toastDiv}
             onSubmit={this.doSelectWorkspace}
             onHide={() => this.setState({ showSelectWorkspaceUi: false })}
           />
@@ -686,7 +638,6 @@ class Ui extends React.PureComponent {
         }}
       >
         {modal}
-        {modal === undefined && toastDiv}
         <Navbar bg="light" expand="lg" style={{ flex: '0 0 auto' }}>
           <Navbar.Brand>JSxCAD</Navbar.Brand>
           <Navbar.Toggle aria-controls="basic-navbar-nav" />

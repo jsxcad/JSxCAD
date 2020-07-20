@@ -13,7 +13,6 @@ export class ShareUi extends SettingsUi {
   }
 
   render() {
-    const { toast } = this.props;
     return (
       <Modal show={this.props.show} onHide={this.doHide}>
         <Modal.Header closeButton>
@@ -29,7 +28,6 @@ export class ShareUi extends SettingsUi {
             </Tab>
           </Tabs>
         </Modal.Body>
-        {toast}
       </Modal>
     );
   }
