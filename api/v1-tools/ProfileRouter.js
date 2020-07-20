@@ -4,7 +4,7 @@ import Shape from '@jsxcad/api-v1-shape';
 import { taggedPaths } from '@jsxcad/geometry-tagged';
 import { toolpath } from '@jsxcad/algorithm-toolpath';
 
-export const Router = (
+export const ProfileRouter = (
   depth = 10,
   { toolDiameter = 3.145, cutDepth = 0.3, toolLength = 17 } = {}
 ) => (shape) => {
@@ -13,13 +13,12 @@ export const Router = (
   const design = [];
   const sweep = [];
   for (const surface of shape.surfaces()) {
-    const edge = surface.outline().flip();
     // FIX: This assumes a plunging tool.
     const paths = Shape.fromGeometry(
       taggedPaths(
         { tags: ['path/Toolpath'] },
         toolpath(
-          edge.toTransformedGeometry(),
+          surface.outline().toTransformedGeometry(),
           toolDiameter,
           /* overcut= */ false,
           /* solid= */ true
@@ -29,9 +28,13 @@ export const Router = (
     for (let cut = 1; cut < cuts; cut++) {
       design.push(paths.moveZ(cut * -actualCutDepth));
     }
-    sweep.push(edge.sweep(Cylinder.ofDiameter(toolDiameter, depth).bench()).Void());
+    sweep.push(
+      paths
+        .sweep(Cylinder.ofDiameter(toolDiameter, depth).moveZ(depth / -2))
+        .Void()
+    );
   }
   return Assembly(...design, ...sweep);
 };
 
-export default Router;
+export default ProfileRouter;

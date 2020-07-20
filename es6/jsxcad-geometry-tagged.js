@@ -1416,7 +1416,7 @@ const unionImpl = (geometry, ...geometries) => {
         return taggedSolid({ tags }, union$3(geometry.solid, ...todo));
       }
       case 'z0Surface':
-      case 'surface': /*
+      case 'surface' /*
       {
         // FIX: This has a problem with trying to union with an empty surface.
         const normalize = createNormalize3();
@@ -1442,8 +1442,7 @@ const unionImpl = (geometry, ...geometries) => {
         );
         return taggedSurface({ tags }, makeWatertightSurface(clippedSurface));
       }
-*/
-      {
+*/: {
         const normalize = createNormalize3();
         const thisSurface = geometry.surface || geometry.z0Surface;
         let planarPolygon = toPolygon(toPlane(thisSurface));

@@ -20,8 +20,8 @@ import { Plan } from './jsxcad-api-v1-plan.js';
 export { Plan } from './jsxcad-api-v1-plan.js';
 import { Shell } from './jsxcad-api-v1-shell.js';
 export { Shell } from './jsxcad-api-v1-shell.js';
-import { BenchPlane, DrillPress, Jigsaw, Router } from './jsxcad-api-v1-tools.js';
-export { BenchPlane, DrillPress, Jigsaw, Router } from './jsxcad-api-v1-tools.js';
+import { BenchPlane, BenchSaw, DrillPress, HoleRouter, ProfileRouter } from './jsxcad-api-v1-tools.js';
+export { BenchPlane, BenchSaw, DrillPress, HoleRouter, ProfileRouter } from './jsxcad-api-v1-tools.js';
 import { Arc, Assembly, Circle, Cone, Cube, Cylinder, Difference, Empty, Hexagon, Icosahedron, Intersection, Layers, Line, Path, Point, Points, Polygon, Polyhedron, Prism, Sphere, Spiral, Square, Tetrahedron, Torus, Triangle, Union, Void, Wave } from './jsxcad-api-v1-shapes.js';
 export { Arc, Assembly, Circle, Cone, Cube, Cylinder, Difference, Empty, Hexagon, Icosahedron, Intersection, Layers, Line, Path, Point, Points, Polygon, Polyhedron, Prism, Sphere, Spiral, Square, Tetrahedron, Torus, Triangle, Union, Void, Wave } from './jsxcad-api-v1-shapes.js';
 import { Item } from './jsxcad-api-v1-item.js';
@@ -202,9 +202,10 @@ var api = /*#__PURE__*/Object.freeze({
   Plan: Plan,
   Shell: Shell,
   BenchPlane: BenchPlane,
+  BenchSaw: BenchSaw,
   DrillPress: DrillPress,
-  Jigsaw: Jigsaw,
-  Router: Router,
+  HoleRouter: HoleRouter,
+  ProfileRouter: ProfileRouter,
   Arc: Arc,
   Assembly: Assembly,
   Circle: Circle,

@@ -35,7 +35,13 @@ export { Plan } from '@jsxcad/api-v1-plan';
 
 export { Shell } from '@jsxcad/api-v1-shell';
 
-export { BenchPlane, DrillPress, Jigsaw, Router } from '@jsxcad/api-v1-tools';
+export {
+  BenchPlane,
+  BenchSaw,
+  DrillPress,
+  HoleRouter,
+  ProfileRouter,
+} from '@jsxcad/api-v1-tools';
 
 export {
   Arc,

@@ -82,7 +82,7 @@ export const Page = (
   const margin = itemMargin;
   const layers = [];
   for (const shape of shapes) {
-    for (const leaf of getLeafs(shape.toTransformedGeometry())) {
+    for (const leaf of getLeafs(shape.toDisjointGeometry())) {
       layers.push(leaf);
     }
   }
@@ -110,7 +110,7 @@ export const Page = (
     const pageWidth = packSize[MAX][X] - packSize[MIN][X];
     const pageLength = packSize[MAX][Y] - packSize[MIN][Y];
     const plans = [];
-    for (const layer of content.toTransformedGeometry().content[0].content) {
+    for (const layer of content.toDisjointGeometry().content[0].content) {
       plans.push(
         buildLayoutGeometry({ layer, packSize, pageWidth, pageLength, margin })
       );
@@ -134,7 +134,7 @@ export const Page = (
     const pageLength = packSize[MAX][Y] - packSize[MIN][Y];
     if (isFinite(pageWidth) && isFinite(pageLength)) {
       const plans = [];
-      for (const layer of content.toTransformedGeometry().content[0].content) {
+      for (const layer of content.toDisjointGeometry().content[0].content) {
         const layoutGeometry = buildLayoutGeometry({
           layer,
           packSize,
@@ -163,7 +163,7 @@ export const ensurePages = (geometry, depth = 0) => {
   const pages = getLayouts(geometry);
   if (pages.length === 0 && depth === 0) {
     return ensurePages(
-      Page({}, Shape.fromGeometry(geometry)).toTransformedGeometry(),
+      Page({}, Shape.fromGeometry(geometry)).toDisjointGeometry(),
       depth + 1
     );
   } else {

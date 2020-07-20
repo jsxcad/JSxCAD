@@ -33,7 +33,11 @@ export const DrillPress = (
   // Move back to the middle so we don't rub the wall on the way up.
   points.push(Point(0, 0, 0));
   return Toolpath(...points)
-    .with(Cylinder.ofDiameter(diameter, depth).Void().moveZ(depth / -2))
+    .with(
+      Cylinder.ofDiameter(diameter, depth)
+        .Void()
+        .moveZ(depth / -2)
+    )
     .move(x, y);
 };
 
