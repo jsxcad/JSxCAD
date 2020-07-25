@@ -207,9 +207,13 @@ export const buildMeshes = async ({
       layer = SKETCH_LAYER;
       break;
     case 'paths': {
+      let transparent = false;
+      let opacity = 1;
       if (tags && tags.includes('path/Toolpath')) {
         // Put toolpaths in the sketch layer.
         layer = SKETCH_LAYER;
+        opacity = 0.5;
+        transparent = true;
       }
       const paths = threejsGeometry.threejsPaths;
       const dataset = {};
@@ -217,6 +221,8 @@ export const buildMeshes = async ({
       const material = new LineBasicMaterial({
         color: 0xffffff,
         vertexColors: VertexColors,
+        transparent,
+        opacity,
       });
       const color = new Color(setColor(tags, {}, [0, 0, 0]).color);
       const colors = [];
@@ -231,7 +237,16 @@ export const buildMeshes = async ({
           if (start === null || end === null) continue;
           const [aX = 0, aY = 0, aZ = 0] = start;
           const [bX = 0, bY = 0, bZ = 0] = end;
-          colors.push(color.r, color.g, color.b, color.r, color.g, color.b);
+          colors.push(
+            color.r,
+            color.g,
+            color.b,
+            opacity,
+            color.r,
+            color.g,
+            color.b,
+            opacity
+          );
           positions.push(aX, aY, aZ, bX, bY, bZ);
           entry.length += 2;
         }
@@ -243,7 +258,7 @@ export const buildMeshes = async ({
         'position',
         new Float32BufferAttribute(positions, 3)
       );
-      geometry.setAttribute('color', new Float32BufferAttribute(colors, 3));
+      // geometry.setAttribute('color', new Float32BufferAttribute(colors, 4));
       dataset.mesh = new LineSegments(geometry, material);
       dataset.mesh.layers.set(layer);
       dataset.name = toName(threejsGeometry);

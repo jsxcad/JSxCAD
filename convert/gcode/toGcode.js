@@ -10,9 +10,27 @@ const Z = 2;
 /** Checks for equality, ignoring z. */
 const equalsXY = ([aX, aY], [bX, bY]) => equals([aX, aY, 0], [bX, bY, 0]);
 
+// https://shapeokoenthusiasts.gitbook.io/shapeoko-cnc-a-to-z/feeds-and-speeds-basics
+// For a 3.175 mm tool
+// soft plastic 0.05 ~ 0.13, soft wood 0.025 ~ 0.065, hard wood 0.013 ~ 0.025.
+const fromMaterialToChipLoad = (material) => {
+  switch (material) {
+    case 'soft plastic':
+      return 0.08;
+    case 'soft wood':
+      return 0.045;
+    case 'hard wood':
+      return 0.019;
+    case 'unknown':
+    default:
+      return 0.05;
+  }
+};
+
 const computeFeedRate = ({
   toolDiameter = 3.175,
-  chipLoad = 0.1,
+  material = 'unknown',
+  chipLoad = fromMaterialToChipLoad(material),
   fluteCount = 1,
   rpm = 7000,
   maxFeedRate = 800,
@@ -26,6 +44,7 @@ export const toGcode = async (
     maxFeedRate = 800,
     minCutZ = -1,
     cutDepth = 0.1,
+    material,
     jumpHeight = 1,
     toolDiameter,
     chipLoad,
@@ -35,6 +54,7 @@ export const toGcode = async (
       toolDiameter,
       chipLoad,
       fluteCount,
+      material,
       rpm,
       maxFeedRate,
     }),
@@ -54,25 +74,28 @@ export const toGcode = async (
 
   const emit = (code) => codes.push(code);
 
-  const to = (
+  // Runs each axis at maximum velocity until matches, so may make dog-legs.
+  const rapid = (
     x = position[X],
     y = position[Y],
     z = position[Z],
-    g = 'G1',
     f = feedRate
   ) => {
-    emit(
-      `${g} X${x.toFixed(3)} Y${y.toFixed(3)} Z${z.toFixed(3)} F${f.toFixed(3)}`
-    );
+    emit(`G0 X${x.toFixed(3)} Y${y.toFixed(3)} Z${z.toFixed(3)}`);
     position = [x, y, z];
   };
 
-  // Runs each axis at maximum velocity until matches, so may make dog-legs.
-  const rapid = (x, y, z) => to(x, y, z, 'G0');
-
   // Straight motion at set speed.
-  const cut = (x, y, z) => {
-    to(x, y, z, 'G1');
+  const cut = (
+    x = position[X],
+    y = position[Y],
+    z = position[Z],
+    f = feedRate
+  ) => {
+    emit(
+      `G1 X${x.toFixed(3)} Y${y.toFixed(3)} Z${z.toFixed(3)} F${f.toFixed(3)}`
+    );
+    position = [x, y, z];
   };
 
   const toolOn = () => (rpm > 0 ? emit(`M3 S${rpm.toFixed(3)}`) : emit(`M5`));
@@ -84,8 +107,9 @@ export const toGcode = async (
     rapid(x, y, topZ); // down
   };
 
-  const home = () => {
+  const park = () => {
     rapid(_, _, jumpZ); // up
+    toolOff();
     rapid(0, 0, jumpZ); // across
     rapid(0, 0, topZ); // home
   };
@@ -114,9 +138,7 @@ export const toGcode = async (
     }
   }
 
-  home();
-
-  toolOff();
+  park();
 
   codes.push(``);
   return new TextEncoder('utf8').encode(codes.join('\n'));

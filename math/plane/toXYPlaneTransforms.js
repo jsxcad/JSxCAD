@@ -1,4 +1,10 @@
-import { cross, fromScalar, multiply, random, unit } from '@jsxcad/math-vec3';
+import {
+  cross,
+  fromScalar,
+  multiply,
+  orthogonal,
+  unit,
+} from '@jsxcad/math-vec3';
 
 import { fromValues } from '@jsxcad/math-mat4';
 
@@ -12,7 +18,7 @@ export const toXYPlaneTransforms = (plane, rightVector) => {
     throw Error('die');
   }
   if (rightVector === undefined) {
-    rightVector = random(plane);
+    rightVector = orthogonal(plane);
   }
 
   const v = unit(cross(plane, rightVector));

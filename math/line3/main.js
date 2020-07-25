@@ -1,5 +1,6 @@
 export { canonicalize } from './canonicalize.js';
 export { closestPoint } from './closestPoint.js';
+export { closestSegmentBetweenLines } from './closestSegmentBetweenLines.js';
 export { direction } from './direction.js';
 export { distanceToPoint } from './distanceToPoint.js';
 export { equals } from './equals.js';

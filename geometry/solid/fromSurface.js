@@ -8,7 +8,8 @@ import {
 
 import { getEdges } from '@jsxcad/geometry-path';
 
-const LARGE = 1e10;
+// const LARGE = 1e10;
+const LARGE = 1;
 
 export const fromSurface = (surface, normalize) => {
   const solid = [];

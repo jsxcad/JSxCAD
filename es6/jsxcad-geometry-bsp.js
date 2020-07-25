@@ -4,8 +4,9 @@ import { pushWhenValid, doesNotOverlap, measureBoundingBox, flip } from './jsxca
 import { toPlane } from './jsxcad-math-poly3.js';
 import { max, min, scale, add, subtract, dot as dot$1 } from './jsxcad-math-vec3.js';
 import { createNormalize3 } from './jsxcad-algorithm-quantize.js';
-import { toPlane as toPlane$1, outline, translate, flip as flip$1 } from './jsxcad-geometry-surface.js';
+import { toPlane as toPlane$1, translate, flip as flip$1 } from './jsxcad-geometry-surface.js';
 import { getEdges, createOpenPath } from './jsxcad-geometry-path.js';
+import { outlineSurface } from './jsxcad-geometry-halfedge.js';
 
 const EPSILON = 1e-5;
 // const EPSILON2 = 1e-10;
@@ -1059,9 +1060,12 @@ const difference = (aSolid, ...bSolids) => {
 
   const normalize = createNormalize3();
   let a = toPolygons(alignVertices(aSolid, normalize));
+  if (a.length === 0) {
+    return [];
+  }
   let bs = bSolids
     .map((b) => toPolygons(alignVertices(b, normalize)))
-    .filter((b) => !doesNotOverlap(a, b));
+    .filter((b) => b.length > 0 && !doesNotOverlap(a, b));
 
   while (bs.length > 0) {
     const b = bs.shift();
@@ -1128,26 +1132,24 @@ const LARGE = 1e10;
 const fromSurface = (surface, normalize) => {
   const polygons = [];
   const normal = toPlane$1(surface);
-  if (normal === undefined) {
-    // The surface is degenerate.
-    return [];
-  }
-  const top = scale(LARGE, normal);
-  const bottom = scale(0, normal);
-  for (const path of outline(surface, normalize)) {
-    for (const [start, end] of getEdges(path)) {
-      // Build a large wall.
-      polygons.push([
-        add(start, top),
-        add(start, bottom),
-        add(end, bottom),
-        add(end, top),
-      ]);
+  if (normal !== undefined) {
+    const top = scale(LARGE, normal);
+    const bottom = scale(0, normal);
+    for (const path of outlineSurface(surface, normalize)) {
+      for (const [start, end] of getEdges(path)) {
+        // Build a large wall.
+        polygons.push([
+          add(start, top),
+          add(start, bottom),
+          add(end, bottom),
+          add(end, top),
+        ]);
+      }
     }
+    // Build a tall prism.
+    polygons.push(...translate(bottom, flip$1(surface)));
+    polygons.push(...translate(top, surface));
   }
-  // Build a tall prism.
-  polygons.push(...translate(bottom, flip$1(surface)));
-  polygons.push(...translate(top, surface));
   return fromPolygons(polygons, normalize);
 };
 
@@ -1400,9 +1402,9 @@ const union = (...solids) => {
     return solids[0];
   }
   const normalize = createNormalize3();
-  const s = solids.map((solid) =>
-    toPolygons(alignVertices(solid, normalize))
-  );
+  const s = solids
+    .map((solid) => toPolygons(alignVertices(solid, normalize)))
+    .filter((s) => s.length > 0);
   while (s.length >= 2) {
     const a = s.shift();
     const b = s.shift();

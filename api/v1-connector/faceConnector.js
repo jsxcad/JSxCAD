@@ -1,4 +1,4 @@
-import { add, random, scale } from '@jsxcad/math-vec3';
+import { add, orthogonal, scale } from '@jsxcad/math-vec3';
 
 import Connector from './Connector.js';
 import { getSolids } from '@jsxcad/geometry-tagged';
@@ -55,7 +55,7 @@ export const faceConnector = (shape, id, scoreOrientation, scorePosition) => {
     Connector(id, {
       plane,
       center: bestPosition,
-      right: add(bestPosition, random(plane)),
+      right: add(bestPosition, orthogonal(plane)),
     })
   );
 };
@@ -64,7 +64,7 @@ export const toConnector = (shape, surface, id) => {
   const center = toPosition(surface);
   // FIX: Adding y + 1 is not always correct.
   const plane = toPlane(surface);
-  return Connector(id, { plane, center, right: random(plane) });
+  return Connector(id, { plane, center, right: orthogonal(plane) });
 };
 
 export const withConnector = (shape, surface, id) => {

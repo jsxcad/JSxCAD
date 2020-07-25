@@ -2,12 +2,12 @@ import { Cylinder, Point, Toolpath } from '@jsxcad/api-v1-shapes';
 
 export const DrillPress = (
   diameter = 10,
-  { toolDiameter = 3.145, cutDepth = 0.3, sides = 16 } = {}
+  { toolDiameter = 3.175, cutDepth = 0.3, sides = 16 } = {}
 ) => (depth = 0, x = 0, y = 0) => {
   const radius = diameter / 2;
   const points = [];
   const toolRadius = toolDiameter / 2;
-  const cuts = Math.ceil(depth / cutDepth);
+  const cuts = Math.ceil(depth / Math.min(depth, cutDepth));
   const actualCutDepth = depth / cuts;
   const anglePerSide = 360 / sides;
   const rings = Math.ceil((radius - toolRadius) / toolDiameter);

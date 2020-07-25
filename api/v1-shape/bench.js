@@ -12,8 +12,8 @@ const Z = 2;
  */
 
 export const bench = (shape, x = 0, y = 0, z = 0) => {
-  const { max, min, width } = shape.size();
-  return shape.move(0 - x - min[X], 0 - y - min[Y] - width / 2, 0 - z - max[Z]);
+  const { max, min } = shape.size();
+  return shape.move(0 - x - min[X], 0 - y - min[Y], 0 - z - max[Z]);
 };
 
 const benchMethod = function (x, y, z) {
@@ -31,8 +31,8 @@ export default bench;
  */
 
 export const benchTop = (shape, x = 0, y = 0, z = 0) => {
-  const { min, width } = shape.size();
-  return shape.move(0 - x - min[X], 0 - y - width / 2, 0 - z - min[Z]);
+  const { min } = shape.size();
+  return shape.move(0 - x - min[X], 0 - y - min[Y], 0 - z - min[Z]);
 };
 
 const benchTopMethod = function (x, y, z) {

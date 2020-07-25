@@ -1,5 +1,5 @@
 import { reallyQuantizeForSpace } from './jsxcad-math-utils.js';
-import { unit, dot, subtract, cross, length, random, scale, add, multiply, fromScalar, transform as transform$1 } from './jsxcad-math-vec3.js';
+import { unit, dot, subtract, cross, length, orthogonal, scale, add, multiply, fromScalar, transform as transform$1 } from './jsxcad-math-vec3.js';
 import { fromValues, isMirroring } from './jsxcad-math-mat4.js';
 
 const canonicalize = ([x = 0, y = 0, z = 0, w = 0]) => [
@@ -61,25 +61,25 @@ const EPS = 1e-5;
 
 /** Create a new plane from the given points like fromPoints,
  * but allow the vectors to be on one point or one line
- * in such a case a random plane through the given points is constructed
+ * in such a case a plane through the given points is constructed
  * @param {Vec3} a - 3D point
  * @param {Vec3} b - 3D point
  * @param {Vec3} c - 3D point
  * @returns {Vec4} a new plane with properly typed values
  */
-const fromPointsRandom = (a, b, c) => {
+const fromPointsOrthogonal = (a, b, c) => {
   let v1 = subtract(b, a);
   let v2 = subtract(c, a);
   if (length(v1) < EPS) {
-    v1 = random(v2);
+    v1 = orthogonal(v2);
   }
   if (length(v2) < EPS) {
-    v2 = random(v1);
+    v2 = orthogonal(v1);
   }
   let normal = cross(v1, v2);
   if (length(normal) < EPS) {
     // this would mean that v1 == v2.negated()
-    v2 = random(v1);
+    v2 = orthogonal(v1);
     normal = cross(v1, v2);
   }
   normal = unit(normal);
@@ -141,7 +141,7 @@ const splitLineSegmentByPlane = (plane, p1, p2) => {
 const W$2 = 3;
 
 const toPolygon = (plane, size = 1e10) => {
-  const v = unit(cross(plane, random(plane)));
+  const v = unit(cross(plane, orthogonal(plane)));
   const u = cross(v, plane);
   const origin = scale(plane[W$2], plane);
   return [
@@ -162,7 +162,7 @@ const toXYPlaneTransforms = (plane, rightVector) => {
     throw Error('die');
   }
   if (rightVector === undefined) {
-    rightVector = random(plane);
+    rightVector = orthogonal(plane);
   }
 
   const v = unit(cross(plane, rightVector));
@@ -217,7 +217,7 @@ const toXYPlaneTransforms = (plane, rightVector) => {
 const transform = (matrix, plane) => {
   const ismirror = isMirroring(matrix);
   // get two vectors in the plane:
-  const r = random(plane);
+  const r = orthogonal(plane);
   const u = cross(plane, r);
   const v = cross(plane, u);
   // get 3 points in the plane:
@@ -237,4 +237,4 @@ const transform = (matrix, plane) => {
   return newplane;
 };
 
-export { canonicalize, equals, flip, fromNormalAndPoint, fromPoints, fromPointsRandom, fromPolygon, signedDistanceToPoint, splitLineSegmentByPlane, toPolygon, toXYPlaneTransforms, transform };
+export { canonicalize, equals, flip, fromNormalAndPoint, fromPoints, fromPointsOrthogonal, fromPolygon, signedDistanceToPoint, splitLineSegmentByPlane, toPolygon, toXYPlaneTransforms, transform };
