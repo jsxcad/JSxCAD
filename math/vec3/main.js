@@ -18,7 +18,7 @@ export { min } from './min.js';
 export { multiply } from './multiply.js';
 export { negate } from './negate.js';
 export { normalize } from './normalize.js';
-export { random } from './random.js';
+export { orthogonal } from './orthogonal.js';
 export { rotateX } from './rotateX.js';
 export { rotateY } from './rotateY.js';
 export { rotateZ } from './rotateZ.js';

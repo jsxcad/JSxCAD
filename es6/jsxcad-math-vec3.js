@@ -226,8 +226,8 @@ const multiply = ([ax, ay, az], [bx, by, bz]) => [
  */
 const negate = ([x, y, z]) => [-x, -y, -z];
 
-// find a vector that is somewhat perpendicular to this one
-const random = (vec) => {
+// find a vector that is somewhat orthogonal to this one
+const orthogonal = (vec) => {
   const temp = abs(vec);
   if (temp[0] <= temp[1] && temp[0] <= temp[2]) {
     return [1, 0, 0];
@@ -378,4 +378,4 @@ const unit = (vector) => {
   return [x / magnitude, y / magnitude, z / magnitude];
 };
 
-export { abs, add, angle, canonicalize, cross, distance, divide, dot, equals, fromPoint, fromScalar, fromValues, fromVec2, length, lerp, max, min, multiply, negate, normalize, random, rotateX, rotateY, rotateZ, scale, squaredDistance, squaredLength, subtract, transform, turnX, turnY, turnZ, unit };
+export { abs, add, angle, canonicalize, cross, distance, divide, dot, equals, fromPoint, fromScalar, fromValues, fromVec2, length, lerp, max, min, multiply, negate, normalize, orthogonal, rotateX, rotateY, rotateZ, scale, squaredDistance, squaredLength, subtract, transform, turnX, turnY, turnZ, unit };

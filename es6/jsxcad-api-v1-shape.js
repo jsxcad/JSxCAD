@@ -375,8 +375,8 @@ const Z = 2;
  */
 
 const bench = (shape, x = 0, y = 0, z = 0) => {
-  const { max, min, width } = shape.size();
-  return shape.move(0 - x - min[X], 0 - y - min[Y] - width / 2, 0 - z - max[Z]);
+  const { max, min } = shape.size();
+  return shape.move(0 - x - min[X], 0 - y - min[Y], 0 - z - max[Z]);
 };
 
 const benchMethod = function (x, y, z) {
@@ -392,8 +392,8 @@ Shape.prototype.bench = benchMethod;
  */
 
 const benchTop = (shape, x = 0, y = 0, z = 0) => {
-  const { min, width } = shape.size();
-  return shape.move(0 - x - min[X], 0 - y - width / 2, 0 - z - min[Z]);
+  const { min } = shape.size();
+  return shape.move(0 - x - min[X], 0 - y - min[Y], 0 - z - min[Z]);
 };
 
 const benchTopMethod = function (x, y, z) {
@@ -836,7 +836,8 @@ const keepOrDrop = (shape, tags, select) => {
         // Operate on the shape.
         const shape = Shape.fromGeometry(geometry);
         // Note that this transform does not violate geometry disjunction.
-        const dropped = shape.Void().layer(shape.sketch()).toGeometry();
+        // const dropped = shape.Void().layer(shape.sketch()).toGeometry();
+        const dropped = shape.Void().toGeometry();
         return dropped;
       }
     } else {

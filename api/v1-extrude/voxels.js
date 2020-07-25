@@ -6,6 +6,7 @@ import {
   getSolids,
   measureBoundingBox,
   measureHeights,
+  taggedPaths,
   taggedPoints,
   taggedSolid,
 } from '@jsxcad/geometry-tagged';
@@ -131,7 +132,7 @@ export const surfaceCloud = (shape, resolution = 1) => {
       }
     }
   }
-  return Shape.fromGeometry({ paths });
+  return Shape.fromGeometry(taggedPaths({}, paths));
 };
 
 const surfaceCloudMethod = function (...args) {
@@ -187,7 +188,7 @@ export const cloud = (shape, resolution = 1) => {
     }
   }
   points.sort(orderPoints);
-  return Shape.fromGeometry({ points });
+  return Shape.fromGeometry(taggedPoints({}, points));
 };
 
 const cloudMethod = function (...args) {

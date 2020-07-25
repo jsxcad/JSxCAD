@@ -2,7 +2,7 @@ import {
   add,
   cross,
   multiply,
-  random,
+  orthogonal,
   transform as transformVec3,
 } from '@jsxcad/math-vec3';
 
@@ -17,7 +17,7 @@ import { isMirroring } from '@jsxcad/math-mat4';
 export const transform = (matrix, plane) => {
   const ismirror = isMirroring(matrix);
   // get two vectors in the plane:
-  const r = random(plane);
+  const r = orthogonal(plane);
   const u = cross(plane, r);
   const v = cross(plane, u);
   // get 3 points in the plane:

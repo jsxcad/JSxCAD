@@ -6509,7 +6509,7 @@ const buildFromFunctionImpl = (op, resolution, cap = true, context) => {
       polygons.push(...makeConvex$1([deduplicatedPath]));
     }
   }
-  const solid = { type: 'solid', solid: fromPolygons({}, polygons) };
+  const solid = { type: 'solid', solid: fromPolygons(polygons) };
   return solid;
 };
 
@@ -6568,7 +6568,7 @@ const buildFromSlices = (buildPath, resolution, cap = true) => {
 
   return {
     type: 'solid',
-    solid: fromPolygons({}, flip$1(polygons)),
+    solid: fromPolygons(flip$1(polygons)),
   };
 };
 
@@ -6976,7 +6976,7 @@ const loopImpl = (
       lastPath
     );
   }
-  return { type: 'solid', solid: fromPolygons({}, polygons) };
+  return { type: 'solid', solid: fromPolygons(polygons) };
 };
 
 const loop = cache$1(loopImpl);

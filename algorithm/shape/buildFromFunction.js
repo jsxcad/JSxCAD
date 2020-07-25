@@ -5,9 +5,9 @@ import {
 } from '@jsxcad/geometry-path';
 
 import { cache } from '@jsxcad/cache';
+import { fromPolygons as fromPolygonsToSolid } from '@jsxcad/geometry-solid';
 import { makeConvex } from '@jsxcad/geometry-surface';
 import { fromPolygon as toPlaneFromPolygon } from '@jsxcad/math-plane';
-import { fromPolygons as toSolidFromPolygons } from '@jsxcad/geometry-solid';
 
 const EPSILON = 1e-5;
 
@@ -70,7 +70,7 @@ const buildFromFunctionImpl = (op, resolution, cap = true, context) => {
       polygons.push(...makeConvex([deduplicatedPath]));
     }
   }
-  const solid = { type: 'solid', solid: toSolidFromPolygons({}, polygons) };
+  const solid = { type: 'solid', solid: fromPolygonsToSolid(polygons) };
   return solid;
 };
 

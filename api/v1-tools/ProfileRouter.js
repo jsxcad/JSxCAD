@@ -6,9 +6,9 @@ import { toolpath } from '@jsxcad/algorithm-toolpath';
 
 export const ProfileRouter = (
   depth = 10,
-  { toolDiameter = 3.145, cutDepth = 0.3, toolLength = 17 } = {}
+  { toolDiameter = 3.175, cutDepth = 0.3, toolLength = 17 } = {}
 ) => (shape) => {
-  const cuts = Math.ceil(depth / cutDepth);
+  const cuts = Math.ceil(depth / Math.min(cutDepth, depth));
   const actualCutDepth = depth / cuts;
   const design = [];
   const sweep = [];
@@ -18,15 +18,15 @@ export const ProfileRouter = (
       taggedPaths(
         { tags: ['path/Toolpath'] },
         toolpath(
-          surface.outline().toTransformedGeometry(),
+          surface.bench().outline().toTransformedGeometry(),
           toolDiameter,
           /* overcut= */ false,
           /* solid= */ true
         )
       )
     );
-    for (let cut = 1; cut < cuts; cut++) {
-      design.push(paths.moveZ(cut * -actualCutDepth));
+    for (let cut = 0; cut < cuts; cut++) {
+      design.push(paths.moveZ((cut + 1) * -actualCutDepth));
     }
     sweep.push(
       paths

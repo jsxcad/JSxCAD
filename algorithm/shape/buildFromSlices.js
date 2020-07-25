@@ -1,9 +1,8 @@
 import { assertGood, deduplicate } from '@jsxcad/geometry-path';
-
 import { flip as flipSurface, makeConvex } from '@jsxcad/geometry-surface';
 
-import { fromPolygon as toPlaneFromPolygon } from '@jsxcad/math-plane';
-import { fromPolygons as toSolidFromPolygons } from '@jsxcad/geometry-solid';
+import { fromPolygon as fromPolygonToPlane } from '@jsxcad/math-plane';
+import { fromPolygons as fromPolygonsToSolid } from '@jsxcad/geometry-solid';
 
 const buildWalls = (polygons, floor, roof) => {
   for (
@@ -16,11 +15,11 @@ const buildWalls = (polygons, floor, roof) => {
     const b = deduplicate([floor[end], roof[end], roof[start]]);
 
     // Some of these polygons may become degenerate -- skip those.
-    if (toPlaneFromPolygon(a)) {
+    if (fromPolygonToPlane(a)) {
       polygons.push(a);
     }
 
-    if (toPlaneFromPolygon(b)) {
+    if (fromPolygonToPlane(b)) {
       polygons.push(b);
     }
   }
@@ -58,6 +57,6 @@ export const buildFromSlices = (buildPath, resolution, cap = true) => {
 
   return {
     type: 'solid',
-    solid: toSolidFromPolygons({}, flipSurface(polygons)),
+    solid: fromPolygonsToSolid(flipSurface(polygons)),
   };
 };

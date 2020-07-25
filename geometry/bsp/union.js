@@ -32,9 +32,9 @@ export const union = (...solids) => {
     return solids[0];
   }
   const normalize = createNormalize3();
-  const s = solids.map((solid) =>
-    toPolygonsFromSolid(alignVertices(solid, normalize))
-  );
+  const s = solids
+    .map((solid) => toPolygonsFromSolid(alignVertices(solid, normalize)))
+    .filter((s) => s.length > 0);
   while (s.length >= 2) {
     const a = s.shift();
     const b = s.shift();

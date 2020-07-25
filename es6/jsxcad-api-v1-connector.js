@@ -1,5 +1,5 @@
 import Shape, { Shape as Shape$1, log } from './jsxcad-api-v1-shape.js';
-import { add, random, scale, dot, subtract, negate } from './jsxcad-math-vec3.js';
+import { add, orthogonal, scale, dot, subtract, negate } from './jsxcad-math-vec3.js';
 import Plan from './jsxcad-api-v1-plan.js';
 import { visit, getSolids, getAnySurfaces, getPlans, getSurfaces, getZ0Surfaces, toKeptGeometry, drop } from './jsxcad-geometry-tagged.js';
 import { toPlane as toPlane$1, cut as cut$1 } from './jsxcad-geometry-surface.js';
@@ -202,7 +202,7 @@ const faceConnector = (shape, id, scoreOrientation, scorePosition) => {
     Connector(id, {
       plane,
       center: bestPosition,
-      right: add(bestPosition, random(plane)),
+      right: add(bestPosition, orthogonal(plane)),
     })
   );
 };
@@ -211,7 +211,7 @@ const toConnector = (shape, surface, id) => {
   const center = toPosition(surface);
   // FIX: Adding y + 1 is not always correct.
   const plane = toPlane$1(surface);
-  return Connector(id, { plane, center, right: random(plane) });
+  return Connector(id, { plane, center, right: orthogonal(plane) });
 };
 
 const withConnector = (shape, surface, id) => {

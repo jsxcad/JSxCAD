@@ -1,7 +1,7 @@
 import { abs } from './abs.js';
 
-// find a vector that is somewhat perpendicular to this one
-export const random = (vec) => {
+// find a vector that is somewhat orthogonal to this one
+export const orthogonal = (vec) => {
   const temp = abs(vec);
   if (temp[0] <= temp[1] && temp[0] <= temp[2]) {
     return [1, 0, 0];

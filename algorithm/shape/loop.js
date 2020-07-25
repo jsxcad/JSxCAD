@@ -1,7 +1,7 @@
 import { flip, rotateX, translate } from '@jsxcad/geometry-path';
 
 import { cache } from '@jsxcad/cache';
-import { fromPolygons as toSolidFromPolygons } from '@jsxcad/geometry-solid';
+import { fromPolygons as fromPolygonsToSolid } from '@jsxcad/geometry-solid';
 
 const buildWalls = (polygons, floor, roof) => {
   for (
@@ -53,7 +53,7 @@ const loopImpl = (
       lastPath
     );
   }
-  return { type: 'solid', solid: toSolidFromPolygons({}, polygons) };
+  return { type: 'solid', solid: fromPolygonsToSolid(polygons) };
 };
 
 export const loop = cache(loopImpl);

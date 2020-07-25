@@ -323,7 +323,8 @@ const fromPolygons = (polygons, normalize3 = createNormalize3()) => {
   return cleanedSolid;
 };
 
-const LARGE = 1e10;
+// const LARGE = 1e10;
+const LARGE = 1;
 
 const fromSurface = (surface, normalize) => {
   const solid = [];
