@@ -41,6 +41,11 @@ const paths = [
 ];
 
 // FIX: Why aren't we computing the convex hull?
-export const buildRegularIcosahedron = (options = {}) => {
-  return fromPointsAndPaths({ points: points, paths: paths });
+
+/**
+ * Computes the polygons of a unit icosahedron.
+ * @type {function():Polygon[]}
+ */
+export const buildRegularIcosahedron = () => {
+  return fromPointsAndPaths(points, paths);
 };

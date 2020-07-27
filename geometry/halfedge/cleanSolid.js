@@ -24,24 +24,16 @@ import toSolid from './toSolid.js';
 
 export const fromSolidToCleanSolid = (solid, normalize) =>
   fromLoopsToCleanSolid(
-    fromSolid(
-      solid,
-      normalize,
-      /* closed= */ true
-    ),
+    fromSolid(solid, normalize, /* closed= */ true),
     junctionSelector(fromSolidToJunctions(solid, normalize)),
-    normalize,
+    normalize
   );
 
 export const fromPolygonsToCleanSolid = (polygons, normalize) =>
   fromLoopsToCleanSolid(
-    fromPolygons(
-      polygons,
-      normalize,
-      /* closed= */ true
-    ),
+    fromPolygons(polygons, normalize, /* closed= */ true),
     junctionSelector(fromPolygonsToJunctions(polygons, normalize)),
-    normalize,
+    normalize
   );
 
 export const fromLoopsToCleanSolid = (loops, selectJunction, normalize) => {

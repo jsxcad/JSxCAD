@@ -23,6 +23,7 @@ const maxSize = 500;
 
 // Keyed by identity
 
+/** @type {function(*):?} */
 export const cache = (op) => memoize(op, { maxSize });
 
 // Keyed by matrix structure and geometry identity.

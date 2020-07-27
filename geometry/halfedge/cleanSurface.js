@@ -10,11 +10,7 @@ import toSurface from './toSurface.js';
 
 export const fromSurfaceToCleanSurface = (surface, normalize) =>
   fromLoopsToCleanSurface(
-    fromSurface(
-      surface,
-      normalize,
-      /* closed= */ false
-    ),
+    fromSurface(surface, normalize, /* closed= */ false),
     /* junctionSelector= */ (_) => true,
     normalize
   );

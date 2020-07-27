@@ -1,5 +1,5 @@
 /**
- * Adds two vec3's
+ * Adds two Points.
  *
  * @param {vec3} a the first vector to add
  * @param {vec3} b the second vector to add

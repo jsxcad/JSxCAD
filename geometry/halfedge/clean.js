@@ -9,7 +9,9 @@ export const clean = (loop) => {
   /** @type {Edge} */
   let link = loop;
   do {
-if (link.start === false) { throw Error(`die: start is false`); }
+    if (link.start === false) {
+      throw Error(`die: start is false`);
+    }
     if (link.next === undefined) {
       throw Error(`die: ${link.id} ${link.dead}`);
     }

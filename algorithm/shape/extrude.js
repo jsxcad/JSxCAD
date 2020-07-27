@@ -5,10 +5,10 @@ import {
 
 import {
   flip as flipSurface,
+  makeConvex,
+  outline,
   translate as translateSurface,
 } from '@jsxcad/geometry-surface';
-
-import { makeConvex, outline } from '@jsxcad/geometry-surface';
 
 import { cache } from '@jsxcad/cache';
 
@@ -16,9 +16,9 @@ import { createNormalize2 } from '@jsxcad/algorithm-quantize';
 
 import { fromPolygons as fromPolygonsToSolid } from '@jsxcad/geometry-solid';
 
-const extrudeImpl = (z0Surface, height = 1, depth = 0, cap = true) => {
+const extrudeImpl = (surface, height = 1, depth = 0, cap = true) => {
   const normalize = createNormalize2();
-  const surfaceOutline = outline(z0Surface, normalize);
+  const surfaceOutline = outline(surface, normalize);
   const polygons = [];
   const stepHeight = height - depth;
 
@@ -55,4 +55,8 @@ const extrudeImpl = (z0Surface, height = 1, depth = 0, cap = true) => {
   return solid;
 };
 
+/**
+ * Extrudes a surface vertically.
+ * @type {function(Surface, height:number, depth:number, cap:boolean):Solid}
+ */
 export const extrude = cache(extrudeImpl);

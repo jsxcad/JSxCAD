@@ -1,7 +1,6 @@
-import { canonicalize } from '@jsxcad/geometry-solid';
-
 import { boot } from '@jsxcad/sys';
 import { buildRegularPrism } from './buildRegularPrism.js';
+import { canonicalize } from '@jsxcad/geometry-solid';
 import test from 'ava';
 
 test.beforeEach(async (t) => {

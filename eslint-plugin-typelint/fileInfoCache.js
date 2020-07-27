@@ -1,3 +1,6 @@
-const fileInfoCache = {};
+let fileInfoCache = {};
 
-module.exports = { fileInfoCache };
+const getFileInfoCache = () => fileInfoCache;
+const setFileInfoCache = (cache) => { fileInfoCache = cache; };
+
+module.exports = { getFileInfoCache, setFileInfoCache };

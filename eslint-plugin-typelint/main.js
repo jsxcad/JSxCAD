@@ -1,5 +1,5 @@
 module.exports = {
-    rules: {
-        "typecheck": require('./typecheck.js')
-    }
+  rules: {
+    typecheck: require('./typecheck.js'),
+  },
 };

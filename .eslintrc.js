@@ -1,5 +1,5 @@
 module.exports = {
-  plugins: [ "@jsxcad/eslint-plugin-typelint" ],
+  plugins: ['@jsxcad/eslint-plugin-typelint'],
   extends: ['standard', 'plugin:react/recommended'],
   parser: 'babel-eslint',
   rules: {
@@ -33,6 +33,6 @@ module.exports = {
     'space-before-function-paren': [0, 'ignore'],
     'comma-dangle': [0, 'ignore'],
     'space-in-parens': [0, 'ignore'],
-    '@jsxcad/typelint/typecheck': [ 'warn' ],
+    '@jsxcad/typelint/typecheck': ['warn', { 'cache': {} }],
   },
 };
