@@ -54,6 +54,11 @@ function acquireBinding(node) {
 function getDefaultExportDeclaration(context) {
     const { programNode } = getFileInfo(context);
 
+    if (!programNode) {
+      // The content of this file is inaccessible.
+      return;
+    }
+
     for (const node of programNode.body) {
       if (node.type === 'ExportDefaultDeclaration') {
         return node.declaration;
@@ -63,6 +68,11 @@ function getDefaultExportDeclaration(context) {
 
 function getNamedExportIdentifier(symbolName, context) {
     const { programNode } = getFileInfo(context);
+
+    if (!programNode) {
+      // The content of this file is inaccessible.
+      return;
+    }
 
     for (const node of programNode.body) {
       if (node.type !== 'ExportNamedDeclaration') {
@@ -186,27 +196,24 @@ function getTypeContext(context) {
 function getFileInfo(context) {
     const filename = context.getFilename();
 
-    if (!fileInfoCache[filename]) {
-      try {
-        console.log(`import ${filename}.`);
-        const fileContents = fs.readFileSync(filename).toString();
-        const programNode = parseFile(filename, fileContents, context);
-        // Adds fileInfoCache entry.
-        storeProgram(programNode, context);
-      } catch (e) {
-        fileInfoCache[filename] = {};
-        console.log(`import ${filename} failed.`);
-      }
+    if (filename === undefined) {
+      // The import could not be resolved, so we will have no information
+      // about it.
+      return {};
+    } else if (!fileInfoCache[filename]) {
+      console.log(`import ${filename}.`);
+      const fileContents = fs.readFileSync(filename).toString();
+      const programNode = parseFile(filename, fileContents, context);
+      // Adds fileInfoCache entry.
+      storeProgram(programNode, context);
+    } else {
+      fileInfoCache[filename] = {};
     }
 
     return fileInfoCache[filename];
 }
 
 function getContextForFile(fsPath, currentContext) {
-    if (!fsPath.endsWith('.js')) {
-      fsPath = `${fsPath}.js`;
-    }
-
     const resolvedPath = resolve(fsPath, currentContext);
 
     if (resolvedPath === currentContext.getFilename()) {
@@ -220,6 +227,7 @@ function getContextForFile(fsPath, currentContext) {
         newContext[i] = currentContext[i];
     }
 
+    // If the path couldn't be resolved, this will yield 'undefined'.
     newContext.getFilename = () => resolvedPath;
 
     // Prime the cache eagerly so that typedefs are in place.
