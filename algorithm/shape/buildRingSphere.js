@@ -36,7 +36,7 @@ const buildRingSphereImpl = (resolution = 20) => {
     let angle = (Math.PI * 1.0 * slice) / latitudinalResolution;
     let height = Math.cos(angle);
     let radius = Math.sin(angle);
-    const points = ring.z0Surface[0]; // FIX: Make this less fragile.
+    const points = ring;
     const scaledPath = scale([radius, radius, radius], points);
     const translatedPath = translate([0, 0, height], scaledPath);
     const path = translatedPath;

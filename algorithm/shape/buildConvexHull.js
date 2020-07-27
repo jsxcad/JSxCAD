@@ -3,7 +3,7 @@ import { cache } from '@jsxcad/cache';
 import { fromPolygons as fromPolygonsToSolid } from '@jsxcad/geometry-solid';
 
 const buildConvexHullImpl = (points) => {
-  const faces = QuickHull(points, { skipTriangulation: true });
+  const faces = QuickHull(points, { skipTriangulation: false });
   const polygons = faces.map((polygon) =>
     polygon.map((nthPoint) => points[nthPoint])
   );

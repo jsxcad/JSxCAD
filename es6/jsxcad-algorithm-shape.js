@@ -1,15 +1,14 @@
 import { cache as cache$1, cachePoints } from './jsxcad-cache.js';
 import { fromPolygons } from './jsxcad-geometry-solid.js';
 import { translate } from './jsxcad-geometry-points.js';
-import { makeConvex, outline } from './jsxcad-geometry-z0surface-boolean.js';
+import { makeConvex } from './jsxcad-geometry-z0surface-boolean.js';
 import { deduplicate, assertGood, flip, translate as translate$1, scale as scale$2, rotateX, isClosed } from './jsxcad-geometry-path.js';
-import { makeConvex as makeConvex$1, flip as flip$1, translate as translate$2 } from './jsxcad-geometry-surface.js';
+import { makeConvex as makeConvex$1, flip as flip$1, outline, translate as translate$2 } from './jsxcad-geometry-surface.js';
 import { fromPolygon } from './jsxcad-math-plane.js';
 import { fromPoints } from './jsxcad-math-poly3.js';
 import { scale as scale$1, add as add$1, unit } from './jsxcad-math-vec3.js';
 import { fromAngleRadians } from './jsxcad-math-vec2.js';
 import { createNormalize2 } from './jsxcad-algorithm-quantize.js';
-import { translate as translate$3 } from './jsxcad-geometry-tagged.js';
 
 function clone(point) { //TODO: use gl-vec2 for this
     return [point[0], point[1]]
@@ -5740,7 +5739,7 @@ module.exports = exports['default'];
 var QuickHull = unwrapExports(dist);
 
 const buildConvexHullImpl = (points) => {
-  const faces = QuickHull(points, { skipTriangulation: true });
+  const faces = QuickHull(points, { skipTriangulation: false });
   const polygons = faces.map((polygon) =>
     polygon.map((nthPoint) => points[nthPoint])
   );
@@ -6699,10 +6698,7 @@ const buildRegularPolygonImpl = (sides = 32) => {
     let [x, y] = fromAngleRadians(radians);
     points.push([x, y, 0]);
   }
-  points.isConvex = true;
-  // FIX: Clean up the consumers of this result.
-  const z0Surface = { type: 'z0Surface', z0Surface: [points] };
-  return z0Surface;
+  return points;
 };
 
 const buildRegularPolygon = cache$1(buildRegularPolygonImpl);
@@ -6731,7 +6727,7 @@ const extrudeImpl = (z0Surface, height = 1, depth = 0, cap = true) => {
   if (cap) {
     // FIX: This is already Z0.
     // FIX: This is bringing the vertices out of alignment?
-    const surface = makeConvex(surfaceOutline, normalize);
+    const surface = makeConvex$1(surfaceOutline, normalize);
 
     // Roof goes up.
     const roof = translate$2([0, 0, height], surface);
@@ -6761,12 +6757,8 @@ const extrude = cache$1(extrudeImpl);
  */
 
 const buildRegularPrismImpl = (edges = 32) => {
-  const surface = buildRegularPolygon(edges);
-  surface.isConvex = true;
-  return translate$3([0, 0, -0.5], {
-    type: 'solid',
-    solid: extrude(surface.z0Surface, 1),
-  });
+  const path = buildRegularPolygon(edges);
+  return extrude([translate$1([0, 0, -0.5], path)], 1);
 };
 
 const buildRegularPrism = cache$1(buildRegularPrismImpl);
@@ -6817,7 +6809,7 @@ const buildRingSphereImpl = (resolution = 20) => {
     let angle = (Math.PI * 1.0 * slice) / latitudinalResolution;
     let height = Math.cos(angle);
     let radius = Math.sin(angle);
-    const points = ring.z0Surface[0]; // FIX: Make this less fragile.
+    const points = ring;
     const scaledPath = scale$2([radius, radius, radius], points);
     const translatedPath = translate$1([0, 0, height], scaledPath);
     const path = translatedPath;

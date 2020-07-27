@@ -23,6 +23,8 @@
     "geometry/*",
     "math/*",
     "sys",
+    "typecheck",
+    "eslint-plugin-typelint",
     "ui/*"
   ]
 }

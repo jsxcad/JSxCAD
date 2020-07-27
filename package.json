@@ -47,7 +47,7 @@
   "keywords": [],
   "license": "MIT",
   "devDependencies": {
-    "@orzechowskid/eslint-plugin-typelint": "^0.4.2",
+    "@jsxcad/eslint-plugin-typelint": "^0.0.79",
     "ava": "^3.9.0",
     "babel-eslint": "^10.0.1",
     "eslint": "^5.15.0",

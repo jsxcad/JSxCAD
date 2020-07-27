@@ -38,6 +38,7 @@ export { drop } from './drop.js';
 export { eachItem } from './eachItem.js';
 export { eachPoint } from './eachPoint.js';
 export { flip } from './flip.js';
+export { fix } from './fix.js';
 export { fresh } from './fresh.js';
 export { fromPathToSurface } from './fromPathToSurface.js';
 export { fromPathToZ0Surface } from './fromPathToZ0Surface.js';

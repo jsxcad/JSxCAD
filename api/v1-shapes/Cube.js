@@ -5,6 +5,7 @@ import {
 } from '@jsxcad/algorithm-shape';
 
 import Shape from '@jsxcad/api-v1-shape';
+import { taggedSolid } from '@jsxcad/geometry-tagged';
 
 /**
  *
@@ -55,7 +56,7 @@ import Shape from '@jsxcad/api-v1-shape';
 const edgeScale = regularPolygonEdgeLengthToRadius(1, 4);
 
 const unitCube = () =>
-  Shape.fromGeometry(buildRegularPrism(4))
+  Shape.fromGeometry(taggedSolid({}, buildRegularPrism(4)))
     .rotateZ(45)
     .scale([edgeScale, edgeScale, 1]);
 
@@ -69,7 +70,7 @@ export const ofSize = (width = 1, length, height) =>
   ]);
 
 export const ofRadius = (radius) =>
-  Shape.fromGeometry(buildRegularPrism(4))
+  Shape.fromGeometry(taggedSolid({}, buildRegularPrism(4)))
     .rotateZ(45)
     .scale([radius, radius, radius / edgeScale]);
 

@@ -2,43 +2,30 @@ import { Assembly } from '@jsxcad/api-v1-shapes';
 import { Shape } from '@jsxcad/api-v1-shape';
 import { outline as outlineGeometry } from '@jsxcad/geometry-tagged';
 
-/**
- *
- * # Outline
- *
- * Generates the outline of a surface.
- *
- * ::: illustration
- * ```
- * difference(Circle(10),
- *            Circle(2).move([-4]),
- *            Circle(2).move([4]))
- * ```
- * :::
- * ::: illustration
- * ```
- * difference(Circle(10),
- *            Circle(2).move([-4]),
- *            Circle(2).move([4]))
- *   .outline()
- * ```
- * :::
- *
- **/
-
-export const outline = (shape) =>
+export const outline = (
+  shape,
+  { includeFaces = true, includeHoles = true } = {}
+) =>
   Assembly(
-    ...outlineGeometry(shape.toGeometry()).map((outline) =>
-      Shape.fromGeometry(outline)
-    )
+    ...outlineGeometry(
+      shape.toGeometry(),
+      includeFaces,
+      includeHoles
+    ).map((outline) => Shape.fromGeometry(outline))
   );
 
-const outlineMethod = function (options) {
-  return outline(this);
+const outlineMethod = function ({
+  includeFaces = true,
+  includeHoles = true,
+} = {}) {
+  return outline(this, { includeFaces, includeHoles });
 };
 
-const withOutlineMethod = function (options) {
-  return this.with(outline(this));
+const withOutlineMethod = function ({
+  includeFaces = true,
+  includeHoles = true,
+} = {}) {
+  return this.with(outline(this, { includeFaces, includeHoles }));
 };
 
 Shape.prototype.outline = outlineMethod;

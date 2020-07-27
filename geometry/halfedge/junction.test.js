@@ -1,5 +1,6 @@
+import { fromSolidToJunctions, junctionSelector } from './junction.js';
+
 import { createNormalize3 } from '@jsxcad/algorithm-quantize';
-import { junctionSelector } from './junction.js';
 import test from 'ava';
 
 const solid = [
@@ -269,6 +270,9 @@ const solid = [
 
 test('Select Junction', (t) => {
   const normalize = createNormalize3();
-  const selector = junctionSelector(solid, normalize);
+  const selector = junctionSelector(
+    fromSolidToJunctions(solid, normalize),
+    normalize
+  );
   t.true(selector(normalize([-0.49999999999999994, 0.5000000000000001, -0.5])));
 });

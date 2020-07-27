@@ -23,10 +23,7 @@ const buildRegularPolygonImpl = (sides = 32) => {
     let [x, y] = fromAngleRadians(radians);
     points.push([x, y, 0]);
   }
-  points.isConvex = true;
-  // FIX: Clean up the consumers of this result.
-  const z0Surface = { type: 'z0Surface', z0Surface: [points] };
-  return z0Surface;
+  return points;
 };
 
 export const buildRegularPolygon = cache(buildRegularPolygonImpl);

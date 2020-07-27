@@ -1,6 +1,7 @@
 import { buildRingSphere, toRadiusFromApothem } from '@jsxcad/algorithm-shape';
 
 import Shape from '@jsxcad/api-v1-shape';
+import { taggedSolid } from '@jsxcad/geometry-tagged';
 
 /**
  *
@@ -32,7 +33,9 @@ import Shape from '@jsxcad/api-v1-shape';
  **/
 
 const unitSphere = (resolution = 16) => {
-  const shape = Shape.fromGeometry(buildRingSphere(resolution));
+  const shape = Shape.fromGeometry(
+    taggedSolid({}, buildRingSphere(resolution))
+  );
   // Make convex.
   shape.toGeometry().solid.isConvex = true;
   return shape;

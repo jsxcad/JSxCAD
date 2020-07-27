@@ -251,43 +251,30 @@ extrude.signature =
 extrudeMethod.signature =
   'Shape -> extrude(height:number = 1, depth:number = 1) -> Shape';
 
-/**
- *
- * # Outline
- *
- * Generates the outline of a surface.
- *
- * ::: illustration
- * ```
- * difference(Circle(10),
- *            Circle(2).move([-4]),
- *            Circle(2).move([4]))
- * ```
- * :::
- * ::: illustration
- * ```
- * difference(Circle(10),
- *            Circle(2).move([-4]),
- *            Circle(2).move([4]))
- *   .outline()
- * ```
- * :::
- *
- **/
-
-const outline = (shape) =>
+const outline = (
+  shape,
+  { includeFaces = true, includeHoles = true } = {}
+) =>
   Assembly(
-    ...outline$1(shape.toGeometry()).map((outline) =>
-      Shape.fromGeometry(outline)
-    )
+    ...outline$1(
+      shape.toGeometry(),
+      includeFaces,
+      includeHoles
+    ).map((outline) => Shape.fromGeometry(outline))
   );
 
-const outlineMethod = function (options) {
-  return outline(this);
+const outlineMethod = function ({
+  includeFaces = true,
+  includeHoles = true,
+} = {}) {
+  return outline(this, { includeFaces, includeHoles });
 };
 
-const withOutlineMethod = function (options) {
-  return this.with(outline(this));
+const withOutlineMethod = function ({
+  includeFaces = true,
+  includeHoles = true,
+} = {}) {
+  return this.with(outline(this, { includeFaces, includeHoles }));
 };
 
 Shape.prototype.outline = outlineMethod;

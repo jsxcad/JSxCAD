@@ -1,5 +1,6 @@
 import Shape from '@jsxcad/api-v1-shape';
 import { buildRegularTetrahedron } from '@jsxcad/algorithm-shape';
+import { taggedSolid } from '@jsxcad/geometry-tagged';
 
 /**
  *
@@ -30,7 +31,8 @@ import { buildRegularTetrahedron } from '@jsxcad/algorithm-shape';
  *
  **/
 
-const unitTetrahedron = () => Shape.fromGeometry(buildRegularTetrahedron({}));
+const unitTetrahedron = () =>
+  Shape.fromGeometry(taggedSolid({}, buildRegularTetrahedron({})));
 
 export const ofRadius = (radius = 1) => unitTetrahedron().scale(radius);
 export const ofDiameter = (diameter = 1) =>

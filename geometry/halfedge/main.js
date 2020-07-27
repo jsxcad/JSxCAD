@@ -1,4 +1,12 @@
-export { cleanSolid } from './cleanSolid.js';
+export {
+  fromLoopsToCleanSolid,
+  fromPolygonsToCleanSolid,
+  fromSolidToCleanSolid,
+} from './cleanSolid.js';
+export {
+  fromLoopsToCleanSurface,
+  fromSurfaceToCleanSurface,
+} from './cleanSurface.js';
 export { outlineSurface } from './outlineSurface.js';
 export { outlineSolid } from './outlineSolid.js';
 export { fromSolid } from './fromSolid.js';

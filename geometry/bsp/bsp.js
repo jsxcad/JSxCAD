@@ -159,6 +159,16 @@ const fromSolid = (solid, normalize) => {
   return fromPolygons(polygons, normalize);
 };
 
+const fromSolids = (solids, normalize) => {
+  const polygons = [];
+  for (const solid of solids) {
+    for (const surface of solid) {
+      polygons.push(...surface);
+    }
+  }
+  return fromPolygons(polygons, normalize);
+};
+
 const toPolygons = (bsp) => {
   const polygons = [];
   const walk = (bsp) => {
@@ -782,6 +792,7 @@ export {
   fromBoundingBoxes,
   fromPolygons,
   fromSolid,
+  fromSolids,
   inLeaf,
   outLeaf,
   removeExteriorPolygonsForSection,

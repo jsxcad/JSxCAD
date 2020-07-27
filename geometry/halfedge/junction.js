@@ -1,13 +1,7 @@
-/**
- * @typedef {import("./types").Plane} Plane
- * @typedef {import("./types").Point} Point
- * @typedef {import("./types").PointSelector} PointSelector
- * @typedef {import("./types").Normalizer} Normalizer
- * @typedef {import("./types").Solid} Solid
- */
+import './types.js';
 
 import { dot } from '@jsxcad/math-vec3';
-import { toPlane as toPlaneOfPath } from '@jsxcad/math-poly3';
+import { toPlane as toPlaneOfPolygon } from '@jsxcad/math-poly3';
 
 const THRESHOLD = 0.99999;
 
@@ -46,7 +40,18 @@ const getPlanesOfPoint = (planesOfPoint, point) => {
   return planes;
 };
 
-export const computeJunctions = (solid, normalize) => {
+export const fromSolidToJunctions = (solid, normalize) => {
+  const polygons = [];
+  for (const surface of solid) {
+    polygons.push(...surface);
+  }
+  return fromPolygonsToJunctions(polygons, normalize);
+};
+
+export const fromSurfaceToJunctions = (surface, normalize) =>
+  fromPolygonsToJunctions(surface, normalize);
+
+export const fromPolygonsToJunctions = (polygons, normalize) => {
   const planesOfPoint = new Map();
 
   /**
@@ -56,24 +61,20 @@ export const computeJunctions = (solid, normalize) => {
    * @param {Plane} planeOfPath
    * @returns {undefined}
    */
-  const considerJunction = (point, planeOfPath) => {
+  const considerJunction = (point, planeOfPolygon) => {
     let planes = getPlanesOfPoint(planesOfPoint, point);
     for (const plane of planes) {
-      if (equalsPlane(plane, planeOfPath)) {
+      if (equalsPlane(plane, planeOfPolygon)) {
         return;
       }
     }
-    planes.push(planeOfPath);
-    if (planes.length > 3) {
-      throw Error('die: non-manifold');
-    }
+    planes.push(planeOfPolygon);
+    // A point can be at the corner of more than three polygons.
   };
 
-  for (const surface of solid) {
-    for (const path of surface) {
-      for (const point of path) {
-        considerJunction(normalize(point), toPlaneOfPath(path));
-      }
+  for (const polygon of polygons) {
+    for (const point of polygon) {
+      considerJunction(normalize(point), toPlaneOfPolygon(polygon));
     }
   }
 
@@ -88,10 +89,8 @@ export const computeJunctions = (solid, normalize) => {
  * @param {Normalizer} normalize
  * @returns {PointSelector}
  */
-export const junctionSelector = (solid, normalize) => {
-  const planesOfPoint = computeJunctions(solid, normalize);
-
-  const select = (point) => getPlanesOfPoint(planesOfPoint, point).length === 3;
+export const junctionSelector = (junctions, normalize) => {
+  const select = (point) => getPlanesOfPoint(junctions, point).length >= 3;
 
   return select;
 };

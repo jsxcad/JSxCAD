@@ -1,8 +1,7 @@
 import { fromPolygons, makeWatertight } from './jsxcad-geometry-solid.js';
 import { canonicalize, toTriangles } from './jsxcad-geometry-polygons.js';
-import { toKeptGeometry, getNonVoidSolids } from './jsxcad-geometry-tagged.js';
+import { toDisjointGeometry, getNonVoidSolids } from './jsxcad-geometry-tagged.js';
 import { toPlane } from './jsxcad-math-poly3.js';
-import { union } from './jsxcad-geometry-solid-boolean.js';
 
 function parse(str) {
   if(typeof str !== 'string') {
@@ -123,6 +122,8 @@ const fromStl = async (stl, { format = 'ascii' } = {}) => {
   return { type: 'solid', solid: fromPolygons(polygons) };
 };
 
+// import { union } from './jsxcad-geometry-solid-boolean.js';
+
 /**
  * Translates a polygon array [[[x, y, z], [x, y, z], ...]] to ascii STL.
  * The exterior side of a polygon is determined by a CCW point ordering.
@@ -132,14 +133,12 @@ const fromStl = async (stl, { format = 'ascii' } = {}) => {
  * @returns {String} - the ascii STL output.
  */
 
-const fromSolidToTriangles = (solid) => {
-  const triangles = [];
+const fromSolidToTriangles = (solid, triangles) => {
   for (const surface of makeWatertight(solid)) {
     for (const triangle of toTriangles({}, surface)) {
       triangles.push(triangle);
     }
   }
-  return triangles;
 };
 
 const convertToFacets = (options, polygons) =>
@@ -168,11 +167,11 @@ const convertToFacet = (polygon) => {
 };
 
 const toStl = async (geometry, options = {}) => {
-  const keptGeometry = toKeptGeometry(await geometry);
-  const solids = getNonVoidSolids(keptGeometry);
-  const triangles = fromSolidToTriangles(
-    union(...solids.map(({ solid }) => solid))
-  );
+  const keptGeometry = toDisjointGeometry(await geometry);
+  const triangles = [];
+  for (const { solid } of getNonVoidSolids(keptGeometry)) {
+    fromSolidToTriangles(solid, triangles);
+  }
   const output = `solid JSxCAD\n${convertToFacets(
     options,
     canonicalize(triangles)

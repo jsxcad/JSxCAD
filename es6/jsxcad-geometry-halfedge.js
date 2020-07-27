@@ -2,6 +2,95 @@ import { dot, length, scale } from './jsxcad-math-vec3.js';
 import { toPlane as toPlane$1, flip } from './jsxcad-math-poly3.js';
 import { pushWhenValid } from './jsxcad-geometry-polygons.js';
 
+const THRESHOLD = 0.99999;
+
+/**
+ * equalsPlane
+ *
+ * @function
+ * @param {Plane} a
+ * @param {Plane} b
+ * @returns {boolean} b
+ */
+const equalsPlane = (a, b) => {
+  if (a === undefined || b === undefined) {
+    return false;
+  }
+  const t = dot(a, b);
+  if (t >= THRESHOLD) {
+    return true;
+  } else {
+    return false;
+  }
+};
+
+/**
+ * getPlanesOfPoint
+ *
+ * @param {Point} point
+ * @returns {Plane[]}
+ */
+const getPlanesOfPoint = (planesOfPoint, point) => {
+  let planes = planesOfPoint.get(point);
+  if (planes === undefined) {
+    planes = [];
+    planesOfPoint.set(point, planes);
+  }
+  return planes;
+};
+
+const fromSolidToJunctions = (solid, normalize) => {
+  const polygons = [];
+  for (const surface of solid) {
+    polygons.push(...surface);
+  }
+  return fromPolygonsToJunctions(polygons, normalize);
+};
+
+const fromPolygonsToJunctions = (polygons, normalize) => {
+  const planesOfPoint = new Map();
+
+  /**
+   * considerJunction
+   *
+   * @param {Point} point
+   * @param {Plane} planeOfPath
+   * @returns {undefined}
+   */
+  const considerJunction = (point, planeOfPolygon) => {
+    let planes = getPlanesOfPoint(planesOfPoint, point);
+    for (const plane of planes) {
+      if (equalsPlane(plane, planeOfPolygon)) {
+        return;
+      }
+    }
+    planes.push(planeOfPolygon);
+    // A point can be at the corner of more than three polygons.
+  };
+
+  for (const polygon of polygons) {
+    for (const point of polygon) {
+      considerJunction(normalize(point), toPlane$1(polygon));
+    }
+  }
+
+  return planesOfPoint;
+};
+
+/**
+ * junctionSelector
+ *
+ * @function
+ * @param {Solid} solid
+ * @param {Normalizer} normalize
+ * @returns {PointSelector}
+ */
+const junctionSelector = (junctions, normalize) => {
+  const select = (point) => getPlanesOfPoint(junctions, point).length >= 3;
+
+  return select;
+};
+
 /**
  * clean
  * @param {Edge} loop
@@ -11,13 +100,13 @@ const clean = (loop) => {
   /** @type {Edge} */
   let link = loop;
   do {
+if (link.start === false) { throw Error(`die: start is false`); }
     if (link.next === undefined) {
       throw Error(`die: ${link.id} ${link.dead}`);
     }
     if (link.to !== undefined) {
       throw Error(`die: to`);
     }
-    // else if (twin.next.next === link.next)
     if (link.next.twin === link.next.next) {
       if (link.next === link.next.next.next) {
         // The loop is degenerate.
@@ -220,99 +309,26 @@ const fromSolid = (solid, normalize, closed = true, verbose = false) => {
 };
 
 /**
- * @typedef {import("./types").Plane} Plane
- * @typedef {import("./types").Point} Point
- * @typedef {import("./types").PointSelector} PointSelector
- * @typedef {import("./types").Normalizer} Normalizer
- * @typedef {import("./types").Solid} Solid
- */
-
-const THRESHOLD = 0.99999;
-
-/**
- * equalsPlane
+ * fromSurface
  *
  * @function
- * @param {Plane} a
- * @param {Plane} b
- * @returns {boolean} b
- */
-const equalsPlane = (a, b) => {
-  if (a === undefined || b === undefined) {
-    return false;
-  }
-  const t = dot(a, b);
-  if (t >= THRESHOLD) {
-    return true;
-  } else {
-    return false;
-  }
-};
-
-/**
- * getPlanesOfPoint
- *
- * @param {Point} point
- * @returns {Plane[]}
- */
-const getPlanesOfPoint = (planesOfPoint, point) => {
-  let planes = planesOfPoint.get(point);
-  if (planes === undefined) {
-    planes = [];
-    planesOfPoint.set(point, planes);
-  }
-  return planes;
-};
-
-const computeJunctions = (solid, normalize) => {
-  const planesOfPoint = new Map();
-
-  /**
-   * considerJunction
-   *
-   * @param {Point} point
-   * @param {Plane} planeOfPath
-   * @returns {undefined}
-   */
-  const considerJunction = (point, planeOfPath) => {
-    let planes = getPlanesOfPoint(planesOfPoint, point);
-    for (const plane of planes) {
-      if (equalsPlane(plane, planeOfPath)) {
-        return;
-      }
-    }
-    planes.push(planeOfPath);
-    if (planes.length > 3) {
-      throw Error('die: non-manifold');
-    }
-  };
-
-  for (const surface of solid) {
-    for (const path of surface) {
-      for (const point of path) {
-        considerJunction(normalize(point), toPlane$1(path));
-      }
-    }
-  }
-
-  return planesOfPoint;
-};
-
-/**
- * junctionSelector
- *
- * @function
- * @param {Solid} solid
+ * @param {Surface} surface
  * @param {Normalizer} normalize
- * @returns {PointSelector}
+ * @returns {Loops}
  */
-const junctionSelector = (solid, normalize) => {
-  const planesOfPoint = computeJunctions(solid, normalize);
+const fromSurface = (surface, normalize) =>
+  fromSolid([surface], normalize, /* closed= */ false);
 
-  const select = (point) => getPlanesOfPoint(planesOfPoint, point).length === 3;
-
-  return select;
-};
+/**
+ * fromPolygons
+ *
+ * @function
+ * @param {Polygons} polygons
+ * @param {Normalizer} normalize
+ * @returns {Loops}
+ */
+const fromPolygons = (polygons, normalize) =>
+  fromSurface(polygons, normalize);
 
 /**
  * @typedef {import("./types").Edge} Edge
@@ -1643,7 +1659,7 @@ const toSolid = (loops, selectJunction) => {
   };
 
   for (const loop of loops) {
-    walk(loop);
+    walk(loop.face);
   }
 
   return solid;
@@ -1657,33 +1673,58 @@ const toSolid = (loops, selectJunction) => {
  * @param {Normalizer} normalize
  * @returns {Solid}
  */
-const cleanSolid = (solid, normalize) => {
-  // This is currently a best-effort operation, to support solids that are not
-  // properly 2-manifold.
-  try {
-    const loops = fromSolid(solid, normalize, /* closed= */ true);
-    const selectJunction = junctionSelector(solid, normalize);
-    const mergedLoops = merge(loops);
-    /** @type {Edge[]} */
-    const cleanedLoops = mergedLoops.map(clean);
-    const splitLoops = split(cleanedLoops);
-    const cleanedSolid = toSolid(splitLoops, selectJunction);
-    return cleanedSolid;
-  } catch (e) {
-    return solid;
-  }
+
+const fromSolidToCleanSolid = (solid, normalize) =>
+  fromLoopsToCleanSolid(
+    fromSolid(
+      solid,
+      normalize,
+      /* closed= */ true
+    ),
+    junctionSelector(fromSolidToJunctions(solid, normalize)));
+
+const fromPolygonsToCleanSolid = (polygons, normalize) =>
+  fromLoopsToCleanSolid(
+    fromPolygons(
+      polygons,
+      normalize),
+    junctionSelector(fromPolygonsToJunctions(polygons, normalize)));
+
+const fromLoopsToCleanSolid = (loops, selectJunction, normalize) => {
+  const mergedLoops = merge(loops);
+  /** @type {Edge[]} */
+  const cleanedLoops = mergedLoops.map(clean);
+  const splitLoops = split(cleanedLoops);
+  const cleanedSolid = toSolid(splitLoops, selectJunction);
+  return cleanedSolid;
 };
 
-/**
- * fromSurface
- *
- * @function
- * @param {Surface} surface
- * @param {Normalizer} normalize
- * @returns {Loops}
- */
-const fromSurface = (surface, normalize) =>
-  fromSolid([surface], normalize, /* closed= */ false);
+const toSurface = (loops, selectJunction) => {
+  const solid = toSolid(loops, selectJunction);
+  if (solid.length > 1) {
+    throw Error(`Not a surface-structured solid.`);
+  }
+  if (solid.length === 1) {
+    return solid[0];
+  }
+  return [];
+};
+
+const fromSurfaceToCleanSurface = (surface, normalize) =>
+  fromLoopsToCleanSurface(
+    fromSurface(
+      surface,
+      normalize),
+    /* junctionSelector= */ (_) => true);
+
+const fromLoopsToCleanSurface = (loops, selectJunction, normalize) => {
+  const mergedLoops = merge(loops);
+  /** @type {Edge[]} */
+  const cleanedLoops = mergedLoops.map(clean);
+  const splitLoops = split(cleanedLoops);
+  const cleanedSurface = toSurface(splitLoops, selectJunction);
+  return cleanedSurface;
+};
 
 /**
  * @typedef {import("./types").Loops} Loops
@@ -1697,12 +1738,14 @@ const fromSurface = (surface, normalize) =>
  * @param {Loops} loops
  * @returns {Polygons}
  */
-const toPolygons = (loops) => {
+const toPolygons = (loops, includeFaces = true, includeHoles = true) => {
   const polygons = [];
   const faces = [];
   for (const loop of loops) {
-    faces.push(loop.face);
-    if (loop.face.holes) {
+    if (includeFaces) {
+      faces.push(loop.face);
+    }
+    if (loop.face.holes && includeHoles) {
       faces.push(...loop.face.holes);
     }
   }
@@ -1731,12 +1774,17 @@ const toPolygons = (loops) => {
  * @param {Normalizer} normalize
  * @returns {Surface}
  */
-const outlineSurface = (surface, normalize) => {
+const outlineSurface = (
+  surface,
+  normalize,
+  includeFaces = true,
+  includeHoles = true
+) => {
   const loops = fromSurface(surface, normalize);
   const mergedLoops = merge(loops);
   const cleanedLoops = mergedLoops.map(clean);
   const splitLoops = split(cleanedLoops);
-  return toPolygons(splitLoops);
+  return toPolygons(splitLoops, includeFaces, includeHoles);
 };
 
 /**
@@ -1760,4 +1808,4 @@ const outlineSolid = (solid, normalize) => {
   return toPolygons(splitLoops);
 };
 
-export { cleanSolid, fromSolid, fromSurface, junctionSelector, outlineSolid, outlineSurface, toPlane, toPolygons, toSolid };
+export { fromLoopsToCleanSolid, fromLoopsToCleanSurface, fromPolygonsToCleanSolid, fromSolid, fromSolidToCleanSolid, fromSurface, fromSurfaceToCleanSurface, junctionSelector, outlineSolid, outlineSurface, toPlane, toPolygons, toSolid };

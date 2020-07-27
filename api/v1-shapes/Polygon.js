@@ -6,9 +6,10 @@ import {
 } from '@jsxcad/algorithm-shape';
 
 import Shape from '@jsxcad/api-v1-shape';
+import { taggedZ0Surface } from '@jsxcad/geometry-tagged';
 
 const unitPolygon = (sides = 16) =>
-  Shape.fromGeometry(buildRegularPolygon(sides));
+  Shape.fromGeometry(taggedZ0Surface({}, [buildRegularPolygon(sides)]));
 
 // Note: radius here is circumradius.
 const toRadiusFromEdge = (edge, sides) =>

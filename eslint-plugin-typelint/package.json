@@ -1,0 +1,42 @@
+{
+  "name": "@jsxcad/eslint-plugin-typelint",
+  "version": "0.0.79",
+  "description": "Typelint support for JSxCAD",
+  "repository": "https://github.com/jsxcad/JSxCAD",
+  "main": "main.js",
+  "type": "commonjs",
+  "scripts": {
+    "depcheck": "depcheck",
+    "lint": "eslint *.js",
+    "lintfix": "eslint --fix *.js",
+    "rollup": "rollup -c rollup_main.js",
+    "test": "ava",
+    "tests": "ava *.test.js"
+  },
+  "contributors": [
+    {
+      "name": "Dan Orzechowski",
+      "url": "https://github.com/orzechowskid/"
+    },
+    {
+      "name": "Brian Spilsbury",
+      "url": "https://github.com/pentacular/"
+    }
+  ],
+  "keywords": [],
+  "license": "MIT",
+  "dependencies": {
+    "@jsxcad/typecheck": "^0.0.79",
+    "doctrine": "^3.0.0",
+    "scope-analyzer": "^2.1.1"
+  },
+  "devDependencies": {
+    "ava": "^3.9.0",
+    "depcheck": "^0.9.1",
+    "eslint": "^5.15.0",
+    "eslint-module-utils": "^2.6.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

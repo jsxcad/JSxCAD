@@ -1,7 +1,7 @@
 import { concatenate, rotateZ, translate } from './jsxcad-geometry-path.js';
 import Shape from './jsxcad-api-v1-shape.js';
 import { numbers, linear } from './jsxcad-api-v1-math.js';
-import { taggedAssembly, getAnySurfaces, getPaths, taggedDisjointAssembly, taggedLayers, rewriteTags } from './jsxcad-geometry-tagged.js';
+import { taggedAssembly, taggedZ0Surface, taggedSolid, getAnySurfaces, getPaths, taggedDisjointAssembly, taggedLayers, rewriteTags } from './jsxcad-geometry-tagged.js';
 import { buildRegularPolygon, toRadiusFromApothem as toRadiusFromApothem$1, regularPolygonEdgeLengthToRadius, buildPolygonFromPoints, buildRegularPrism, buildFromFunction, buildFromSlices, buildRegularIcosahedron, buildRingSphere, buildRegularTetrahedron } from './jsxcad-algorithm-shape.js';
 
 /**
@@ -58,7 +58,7 @@ const Assembly = (...shapes) =>
   );
 
 const unitPolygon = (sides = 16) =>
-  Shape.fromGeometry(buildRegularPolygon(sides));
+  Shape.fromGeometry(taggedZ0Surface({}, [buildRegularPolygon(sides)]));
 
 // Note: radius here is circumradius.
 const toRadiusFromEdge = (edge, sides) =>
@@ -203,7 +203,11 @@ ofDiameter$1.signature =
   'Circle.ofDiameter(diameter:number = 1, { sides:number = 32 }) -> Shape';
 
 const buildPrism = (radius = 1, height = 1, sides = 32) =>
-  Shape.fromGeometry(buildRegularPrism(sides)).scale([radius, radius, height]);
+  Shape.fromGeometry(taggedSolid({}, buildRegularPrism(sides))).scale([
+    radius,
+    radius,
+    height,
+  ]);
 
 /**
  *
@@ -235,11 +239,16 @@ const toPathFromSurface = (shape) => {
 };
 
 const ofFunction = (op, { resolution, cap = true, context } = {}) =>
-  Shape.fromGeometry(buildFromFunction(op, resolution, cap, context));
+  Shape.fromGeometry(
+    taggedSolid({}, buildFromFunction(op, resolution, cap, context))
+  );
 
 const ofSlices = (op, { slices = 2, cap = true } = {}) =>
   Shape.fromGeometry(
-    buildFromSlices((t) => toPathFromSurface(op(t)), slices, cap)
+    taggedSolid(
+      {},
+      buildFromSlices((t) => toPathFromSurface(op(t)), slices, cap)
+    )
   );
 
 const Prism = (...args) => ofRadius$3(...args);
@@ -316,7 +325,7 @@ Cone.ofApothem = ofApothem$2;
 const edgeScale = regularPolygonEdgeLengthToRadius(1, 4);
 
 const unitCube = () =>
-  Shape.fromGeometry(buildRegularPrism(4))
+  Shape.fromGeometry(taggedSolid({}, buildRegularPrism(4)))
     .rotateZ(45)
     .scale([edgeScale, edgeScale, 1]);
 
@@ -330,7 +339,7 @@ const ofSize = (width = 1, length, height) =>
   ]);
 
 const ofRadius$5 = (radius) =>
-  Shape.fromGeometry(buildRegularPrism(4))
+  Shape.fromGeometry(taggedSolid({}, buildRegularPrism(4)))
     .rotateZ(45)
     .scale([radius, radius, radius / edgeScale]);
 
@@ -359,7 +368,11 @@ Cube.ofDiameter = ofDiameter$4;
 Cube.fromCorners = fromCorners;
 
 const buildPrism$1 = (radius = 1, height = 1, sides = 32) =>
-  Shape.fromGeometry(buildRegularPrism(sides)).scale([radius, radius, height]);
+  Shape.fromGeometry(taggedSolid({}, buildRegularPrism(sides))).scale([
+    radius,
+    radius,
+    height,
+  ]);
 
 /**
  *
@@ -412,11 +425,16 @@ const toPathFromShape = (shape) => {
 };
 
 const ofFunction$1 = (op, { resolution, cap = true, context } = {}) =>
-  Shape.fromGeometry(buildFromFunction(op, resolution, cap, context));
+  Shape.fromGeometry(
+    taggedSolid({}, buildFromFunction(op, resolution, cap, context))
+  );
 
 const ofSlices$1 = (op, { slices = 2, cap = true } = {}) =>
   Shape.fromGeometry(
-    buildFromSlices((slice) => toPathFromShape(op(slice)), slices, cap)
+    taggedSolid(
+      {},
+      buildFromSlices((slice) => toPathFromShape(op(slice)), slices, cap)
+    )
   );
 
 const Cylinder = (...args) => ofRadius$6(...args);
@@ -668,7 +686,9 @@ Shape.prototype.Sketch = SketchMethod;
  **/
 
 const unitSphere = (resolution = 16) => {
-  const shape = Shape.fromGeometry(buildRingSphere(resolution));
+  const shape = Shape.fromGeometry(
+    taggedSolid({}, buildRingSphere(resolution))
+  );
   // Make convex.
   shape.toGeometry().solid.isConvex = true;
   return shape;
@@ -737,12 +757,16 @@ const toRadiusFromApothem = (apothem) => apothem / Math.cos(Math.PI / 4);
 
 const edgeScale$1 = regularPolygonEdgeLengthToRadius(1, 4);
 const unitSquare = () =>
-  Shape.fromGeometry(buildRegularPolygon(4)).rotateZ(45).scale(edgeScale$1);
+  Shape.fromGeometry(taggedZ0Surface({}, [buildRegularPolygon(4)]))
+    .rotateZ(45)
+    .scale(edgeScale$1);
 
 const ofSize$1 = (width = 1, length) =>
   unitSquare().scale([width, length === undefined ? width : length, 1]);
 const ofRadius$a = (radius) =>
-  Shape.fromGeometry(buildRegularPolygon(4)).rotateZ(45).scale(radius);
+  Shape.fromGeometry(taggedZ0Surface({}, [buildRegularPolygon(4)]))
+    .rotateZ(45)
+    .scale(radius);
 const ofApothem$7 = (apothem) => ofRadius$a(toRadiusFromApothem(apothem));
 const ofDiameter$9 = (diameter) => ofRadius$a(diameter / 2);
 
@@ -800,7 +824,8 @@ Square.fromCorners.signature =
  *
  **/
 
-const unitTetrahedron = () => Shape.fromGeometry(buildRegularTetrahedron({}));
+const unitTetrahedron = () =>
+  Shape.fromGeometry(taggedSolid({}, buildRegularTetrahedron({})));
 
 const ofRadius$b = (radius = 1) => unitTetrahedron().scale(radius);
 const ofDiameter$a = (diameter = 1) =>

@@ -8,7 +8,7 @@ import {
   translate as translateSurface,
 } from '@jsxcad/geometry-surface';
 
-import { makeConvex, outline } from '@jsxcad/geometry-z0surface-boolean';
+import { makeConvex, outline } from '@jsxcad/geometry-surface';
 
 import { cache } from '@jsxcad/cache';
 
