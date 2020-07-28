@@ -2,6 +2,7 @@ const X = 0;
 const Y = 1;
 
 // The resolution is 1 / multiplier.
+/** @type {function(multiplier:number):Normalizer} */
 const createNormalize2 = (multiplier = 1e5) => {
   const map = new Map();
   const update = (key, value) => {

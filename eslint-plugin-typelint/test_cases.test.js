@@ -1,11 +1,11 @@
-const { patchFs, patchRequire } = require('fs-monkey');
-
 const { ESLint } = require('eslint');
-const { Volume } = require('memfs');
 const { Union } = require('unionfs');
+const { Volume } = require('memfs');
 const fs = require('fs');
-const baseFs = { ...fs };
+const { patchFs } = require('fs-monkey');
 const test = require('ava');
+
+const baseFs = { ...fs };
 
 const buildLintOptions = () => ({
   plugins: ['@jsxcad/eslint-plugin-typelint'],
@@ -23,7 +23,9 @@ const notEmpty = (text) => text.length > 0;
 
 const readTestCases = async (path) => {
   const testCases = [];
-  const text = await fs.promises.readFile(`${__dirname}/${path}`, { encoding: 'utf8' });
+  const text = await fs.promises.readFile(`${__dirname}/${path}`, {
+    encoding: 'utf8',
+  });
   for (const testCase of text.split('=====\n').filter(notEmpty).map(trim)) {
     const [caseName, expected, ...files] = testCase.split('-----\n').map(trim);
     const expectedMessages = expected.split('\n').filter(notEmpty).map(trim);
@@ -44,7 +46,10 @@ const readTestCases = async (path) => {
 };
 
 const runEsLint = async (filePath, filesystem) => {
-  const eslint = new ESLint({ baseConfig: buildLintOptions(), useEslintrc: false });
+  const eslint = new ESLint({
+    baseConfig: buildLintOptions(),
+    useEslintrc: false,
+  });
   const vol = Volume.fromJSON(filesystem);
   const ufs = new Union();
   ufs.use(vol).use(baseFs);
@@ -54,9 +59,15 @@ const runEsLint = async (filePath, filesystem) => {
   } finally {
     unpatchFs();
   }
-}
+};
 
-const lint = async ({ t, caseName, filePath, filesystem, expectedMessages }) => {
+const lint = async ({
+  t,
+  caseName,
+  filePath,
+  filesystem,
+  expectedMessages,
+}) => {
   const collectedMessages = [];
   for (const { messages } of await runEsLint(filePath, filesystem)) {
     for (const { message } of messages) {
@@ -66,14 +77,23 @@ const lint = async ({ t, caseName, filePath, filesystem, expectedMessages }) => 
 
   const fsText = JSON.stringify(filesystem);
 
-  const produced = `\n${caseName}\n-----\n${fsText}\n-----\n${collectedMessages.join('\n')}\n`;
-  const expected = `\n${caseName}\n-----\n${fsText}\n-----\n${expectedMessages.join('\n')}\n`;
+  const produced = `\n${caseName}\n-----\n${fsText}\n-----\n${collectedMessages.join(
+    '\n'
+  )}\n`;
+  const expected = `\n${caseName}\n-----\n${fsText}\n-----\n${expectedMessages.join(
+    '\n'
+  )}\n`;
 
   t.is(produced, expected);
 };
 
 test('Test Cases', async (t) => {
-  for (const { caseName, filePath, filesystem, expectedMessages } of (await readTestCases('test_cases.txt'))) {
+  for (const {
+    caseName,
+    filePath,
+    filesystem,
+    expectedMessages,
+  } of await readTestCases('test_cases.txt')) {
     if (filePath) {
       await lint({ t, caseName, filePath, filesystem, expectedMessages });
     }

@@ -8,9 +8,7 @@ import {
   eachPoint,
   flip,
   fromPathToSurface,
-  fromPathToZ0Surface,
   fromPathsToSurface,
-  fromPathsToZ0Surface,
   isWatertight,
   makeWatertight,
   reconcile,
@@ -18,7 +16,7 @@ import {
   taggedPaths,
   taggedPoints,
   taggedSolid,
-  taggedZ0Surface,
+  taggedSurface,
   toDisjointGeometry as toDisjointTaggedGeometry,
   toPoints,
   toTransformedGeometry as toTransformedTaggedGeometry,
@@ -139,20 +137,16 @@ Shape.fromPaths = (paths, context) =>
   fromGeometry(taggedPaths({}, paths), context);
 Shape.fromPathToSurface = (path, context) =>
   fromGeometry(fromPathToSurface(path), context);
-Shape.fromPathToZ0Surface = (path, context) =>
-  fromGeometry(fromPathToZ0Surface(path), context);
 Shape.fromPathsToSurface = (paths, context) =>
   fromGeometry(fromPathsToSurface(paths), context);
-Shape.fromPathsToZ0Surface = (paths, context) =>
-  fromGeometry(fromPathsToZ0Surface(paths), context);
 Shape.fromPoint = (point, context) =>
   fromGeometry(taggedPoints({}, [point]), context);
 Shape.fromPoints = (points, context) =>
   fromGeometry(taggedPoints({}, points), context);
 Shape.fromPolygonsToSolid = (polygons, context) =>
   fromGeometry(taggedSolid({}, fromPolygonsToSolid(polygons)), context);
-Shape.fromPolygonsToZ0Surface = (polygons, context) =>
-  fromGeometry(taggedZ0Surface({}, polygons), context);
+Shape.fromPolygonsToSurface = (polygons, context) =>
+  fromGeometry(taggedSurface({}, polygons), context);
 Shape.fromSurfaces = (surfaces, context) =>
   fromGeometry(taggedSolid({}, surfaces), context);
 Shape.fromSolid = (solid, context) =>

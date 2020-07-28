@@ -100,7 +100,9 @@ const clean = (loop) => {
   /** @type {Edge} */
   let link = loop;
   do {
-if (link.start === false) { throw Error(`die: start is false`); }
+    if (link.start === false) {
+      throw Error(`die: start is false`);
+    }
     if (link.next === undefined) {
       throw Error(`die: ${link.id} ${link.dead}`);
     }
@@ -1676,18 +1678,12 @@ const toSolid = (loops, selectJunction) => {
 
 const fromSolidToCleanSolid = (solid, normalize) =>
   fromLoopsToCleanSolid(
-    fromSolid(
-      solid,
-      normalize,
-      /* closed= */ true
-    ),
+    fromSolid(solid, normalize, /* closed= */ true),
     junctionSelector(fromSolidToJunctions(solid, normalize)));
 
 const fromPolygonsToCleanSolid = (polygons, normalize) =>
   fromLoopsToCleanSolid(
-    fromPolygons(
-      polygons,
-      normalize),
+    fromPolygons(polygons, normalize),
     junctionSelector(fromPolygonsToJunctions(polygons, normalize)));
 
 const fromLoopsToCleanSolid = (loops, selectJunction, normalize) => {
@@ -1700,21 +1696,17 @@ const fromLoopsToCleanSolid = (loops, selectJunction, normalize) => {
 };
 
 const toSurface = (loops, selectJunction) => {
+  const surface = [];
   const solid = toSolid(loops, selectJunction);
-  if (solid.length > 1) {
-    throw Error(`Not a surface-structured solid.`);
+  for (const loops of solid) {
+    surface.push(...loops);
   }
-  if (solid.length === 1) {
-    return solid[0];
-  }
-  return [];
+  return surface;
 };
 
 const fromSurfaceToCleanSurface = (surface, normalize) =>
   fromLoopsToCleanSurface(
-    fromSurface(
-      surface,
-      normalize),
+    fromSurface(surface, normalize),
     /* junctionSelector= */ (_) => true);
 
 const fromLoopsToCleanSurface = (loops, selectJunction, normalize) => {

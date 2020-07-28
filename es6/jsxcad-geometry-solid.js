@@ -227,6 +227,7 @@ const findOpenEdges = (solid, isOpen = true) => {
 
 const flip = (solid) => solid.map((surface) => flip$1(surface));
 
+/** @type {function(Polygon[],Normalizer):Solid} */
 const fromPolygons = (polygons, normalize3 = createNormalize3()) => {
   /*
   const normalize4 = createNormalize4();

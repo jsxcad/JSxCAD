@@ -7,7 +7,7 @@ test('Triangle', async (t) => {
   const pdf = await toPdf({
     tags: ['color/blue'],
     type: 'paths',
-    paths: buildRegularPolygon(3).z0Surface,
+    paths: [buildRegularPolygon(3)],
   });
   t.is(
     new TextDecoder('utf8').decode(pdf),
@@ -43,7 +43,7 @@ test('Triangle', async (t) => {
 test('Triangle with a custom page size', async (t) => {
   // A surface is a set of paths.
   const pdf = await toPdf(
-    { type: 'paths', paths: buildRegularPolygon(3).z0Surface },
+    { type: 'paths', paths: [buildRegularPolygon(3)] },
     { size: [100, 200] }
   );
   t.is(

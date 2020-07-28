@@ -1,10 +1,10 @@
 import {
   fromSolid as fromSolidToBsp,
-  fromSolids as fromSolidsToBsp,
+  // fromSolids as fromSolidsToBsp,
   // fromSurface as fromSurfaceToBsp,
   intersectSurface,
-  toConvexSolids,
-  unifySolids,
+  // toConvexSolids,
+  // unifySolids,
   union as solidUnion,
 } from '@jsxcad/geometry-bsp';
 import {
@@ -25,7 +25,7 @@ import { union as pointsUnion } from '@jsxcad/geometry-points';
 import { rewrite } from './visit.js';
 // import { union as solidUnion } from '@jsxcad/geometry-solid-boolean';
 // import { taggedAssembly } from './taggedAssembly.js';
-import { taggedDisjointAssembly } from './taggedDisjointAssembly.js';
+// import { taggedDisjointAssembly } from './taggedDisjointAssembly.js';
 import { taggedPaths } from './taggedPaths.js';
 import { taggedPoints } from './taggedPoints.js';
 import { taggedSolid } from './taggedSolid.js';
@@ -39,7 +39,7 @@ const unionImpl = (geometry, ...geometries) => {
     const { tags } = geometry;
     switch (geometry.type) {
       case 'solid': {
-        const normalize = createNormalize3();
+        // const normalize = createNormalize3();
         const solids = [];
         for (const geometry of geometries) {
           for (const { solid } of getNonVoidSolids(geometry)) {

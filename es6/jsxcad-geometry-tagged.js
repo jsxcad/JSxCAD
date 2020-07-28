@@ -785,29 +785,15 @@ const fresh = (geometry) => {
   return fresh;
 };
 
-const fromPathToSurfaceImpl = (path) => {
-  return { type: 'surface', surface: [path] };
-};
-
-const fromPathToSurface = cache(fromPathToSurfaceImpl);
-
-const fromPathToZ0SurfaceImpl = (path) => {
-  return { type: 'z0Surface', z0Surface: [path] };
-};
-
-const fromPathToZ0Surface = cache(fromPathToZ0SurfaceImpl);
-
 const fromPathsToSurfaceImpl = (paths) => {
-  return { type: 'surface', surface: makeConvex(paths) };
+  return taggedSurface({}, makeConvex(paths, createNormalize3()));
 };
 
 const fromPathsToSurface = cache(fromPathsToSurfaceImpl);
 
-const fromPathsToZ0SurfaceImpl = (paths) => {
-  return { type: 'z0Surface', z0Surface: paths };
-};
+const fromPathToSurfaceImpl = (path) => fromPathsToSurface([path]);
 
-const fromPathsToZ0Surface = cache(fromPathsToZ0SurfaceImpl);
+const fromPathToSurface = cache(fromPathToSurfaceImpl);
 
 const fromSurfaceToPathsImpl = (surface) => {
   return { type: 'paths', paths: surface };
@@ -1078,13 +1064,14 @@ const intersectionImpl = (geometry, ...geometries) => {
     const { tags } = geometry;
     switch (geometry.type) {
       case 'solid': {
+        const normalize = createNormalize3();
         const otherGeometry = geometries[0];
         const solids = [
           ...getNonVoidSolids(otherGeometry).map(({ solid }) => solid),
           ...getAnyNonVoidSurfaces(
             otherGeometry
           ).map(({ surface, z0Surface }) =>
-            fromSurface$1(surface || z0Surface)
+            fromSurface$1(surface || z0Surface, normalize)
           ),
         ];
         const intersections = solids
@@ -1127,7 +1114,7 @@ const intersectionImpl = (geometry, ...geometries) => {
           ...getAnyNonVoidSurfaces(
             otherGeometry
           ).map(({ surface, z0Surface }) =>
-            fromSurface$1(surface || z0Surface)
+            fromSurface$1(surface || z0Surface, normalize)
           ),
         ];
         const intersections = solids
@@ -1445,7 +1432,7 @@ const unionImpl = (geometry, ...geometries) => {
     const { tags } = geometry;
     switch (geometry.type) {
       case 'solid': {
-        const normalize = createNormalize3();
+        // const normalize = createNormalize3();
         const solids = [];
         for (const geometry of geometries) {
           for (const { solid } of getNonVoidSolids(geometry)) {
@@ -1615,4 +1602,4 @@ const translate = (vector, geometry) =>
 const scale = (vector, geometry) =>
   transform(fromScaling(vector), geometry);
 
-export { allTags, assemble, canonicalize, difference, drop, eachItem, eachPoint, findOpenEdges, fix, flip, fresh, fromPathToSurface, fromPathToZ0Surface, fromPathsToSurface, fromPathsToZ0Surface, fromSurfaceToPaths, getAnyNonVoidSurfaces, getAnySurfaces, getItems, getLayers, getLayouts, getLeafs, getNonVoidItems, getNonVoidPaths, getNonVoidPlans, getNonVoidPoints, getNonVoidSolids, getNonVoidSurfaces, getNonVoidZ0Surfaces, getPaths, getPlans, getPoints, getSolids, getSurfaces, getTags, getZ0Surfaces, intersection, isNotVoid, isVoid, isWatertight, keep, makeWatertight, measureArea, measureBoundingBox, measureHeights, outline, reconcile, rewrite, rewriteTags, rotateX, rotateY, rotateZ, scale, taggedAssembly, taggedDisjointAssembly, taggedItem, taggedLayers, taggedLayout, taggedPaths, taggedPoints, taggedSketch, taggedSolid, taggedSurface, taggedZ0Surface, toDisjointGeometry, toKeptGeometry, toPoints, toTransformedGeometry, transform, translate, union, update, visit };
+export { allTags, assemble, canonicalize, difference, drop, eachItem, eachPoint, findOpenEdges, fix, flip, fresh, fromPathToSurface, fromPathsToSurface, fromSurfaceToPaths, getAnyNonVoidSurfaces, getAnySurfaces, getItems, getLayers, getLayouts, getLeafs, getNonVoidItems, getNonVoidPaths, getNonVoidPlans, getNonVoidPoints, getNonVoidSolids, getNonVoidSurfaces, getNonVoidZ0Surfaces, getPaths, getPlans, getPoints, getSolids, getSurfaces, getTags, getZ0Surfaces, intersection, isNotVoid, isVoid, isWatertight, keep, makeWatertight, measureArea, measureBoundingBox, measureHeights, outline, reconcile, rewrite, rewriteTags, rotateX, rotateY, rotateZ, scale, taggedAssembly, taggedDisjointAssembly, taggedItem, taggedLayers, taggedLayout, taggedPaths, taggedPoints, taggedSketch, taggedSolid, taggedSurface, taggedZ0Surface, toDisjointGeometry, toKeptGeometry, toPoints, toTransformedGeometry, transform, translate, union, update, visit };

@@ -689,8 +689,6 @@ const unitSphere = (resolution = 16) => {
   const shape = Shape.fromGeometry(
     taggedSolid({}, buildRingSphere(resolution))
   );
-  // Make convex.
-  shape.toGeometry().solid.isConvex = true;
   return shape;
 };
 

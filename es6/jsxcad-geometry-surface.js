@@ -1,15 +1,14 @@
-import { canonicalize as canonicalize$1, transform as transform$2, toPlane as toPlane$1, flip as flip$1, measureArea as measureArea$1 } from './jsxcad-math-poly3.js';
+import { canonicalize as canonicalize$1, transform as transform$2, toPlane as toPlane$1, flip as flip$1, isConvex, measureArea as measureArea$1 } from './jsxcad-math-poly3.js';
 import { fromTranslation, fromZRotation, fromScaling } from './jsxcad-math-mat4.js';
 import { subtract, scale as scale$1, dot, distance, add } from './jsxcad-math-vec3.js';
 import { equals as equals$1, splitLineSegmentByPlane, signedDistanceToPoint, toPolygon, toXYPlaneTransforms } from './jsxcad-math-plane.js';
 import { cacheCut, cacheTransform } from './jsxcad-cache.js';
 import { assertUnique, getEdges } from './jsxcad-geometry-path.js';
-import { fromSurfaceToCleanSurface } from './jsxcad-geometry-halfedge.js';
-export { fromSurfaceToCleanSurface as makeConvex, outlineSurface as outline } from './jsxcad-geometry-halfedge.js';
 import { createNormalize3 } from './jsxcad-algorithm-quantize.js';
-import { union } from './jsxcad-geometry-z0surface-boolean.js';
+import { makeConvex as makeConvex$1, retessellate as retessellate$1 } from './jsxcad-geometry-z0surface.js';
 import { pushWhenValid } from './jsxcad-geometry-polygons.js';
-import { retessellate as retessellate$1 } from './jsxcad-geometry-z0surface.js';
+import { union } from './jsxcad-geometry-z0surface-boolean.js';
+export { outlineSurface as outline } from './jsxcad-geometry-halfedge.js';
 
 // export const toPlane = (surface) => toPlaneOfPolygon(surface[0]);
 const canonicalize = (surface) => {
@@ -318,7 +317,150 @@ const flip = (surface) => map(surface, flip$1);
 
 const fromPlane = (plane) => [toPolygon(plane)];
 
-const fromPolygons = ({ plane }, polygons) => fromSurfaceToCleanSurface(polygons);
+const THRESHOLD = 1e-5;
+
+const watertight = Symbol('watertight');
+
+const X = 0;
+const Y = 1;
+const Z = 2;
+
+const orderVertices = (a, b) => {
+  const dX = a[X] - b[X];
+  if (dX !== 0) return dX;
+  const dY = a[Y] - b[Y];
+  if (dY !== 0) return dY;
+  const dZ = a[Z] - b[Z];
+  return dZ;
+};
+
+const makeWatertight = (surface, normalize, threshold = THRESHOLD) => {
+  if (!surface[watertight]) {
+    if (isWatertight(surface)) {
+      surface[watertight] = surface;
+    }
+  }
+
+  if (!surface[watertight]) {
+    if (normalize === undefined) {
+      normalize = createNormalize3(1 / threshold);
+    }
+
+    const vertices = new Set();
+    for (const path of surface) {
+      const reconciledPath = [];
+      for (const point of path) {
+        const reconciledPoint = normalize(point);
+        reconciledPath.push(reconciledPoint);
+        vertices.add(reconciledPoint);
+      }
+      if (toPlane$1(reconciledPath) !== undefined) ;
+    }
+
+    const orderedVertices = [...vertices];
+    orderedVertices.sort(orderVertices);
+    for (let i = 0; i < orderedVertices.length; i++) {
+      orderedVertices[i].index = i;
+    }
+
+    const watertightPaths = [];
+    for (const path of surface) {
+      const watertightPath = [];
+      for (const [start, end] of getEdges(path)) {
+        watertightPath.push(start);
+        const span = distance(start, end);
+        const colinear = [];
+        // let limit = Math.max(start.index, end.index);
+        // for (let i = Math.min(start.index, end.index); i < limit; i++) {
+        for (let i = 0; i < orderedVertices.length; i++) {
+          const vertex = orderedVertices[i];
+          // FIX: Threshold
+          if (
+            Math.abs(distance(start, vertex) + distance(vertex, end) - span) <
+            threshold
+          ) {
+            colinear.push(vertex);
+          }
+        }
+        // Arrange by distance from start.
+        colinear.sort((a, b) => distance(start, a) - distance(start, b));
+        // Insert into the path.
+        watertightPath.push(...colinear);
+      }
+      pushWhenValid(watertightPaths, watertightPath);
+    }
+
+    surface[watertight] = watertightPaths;
+  }
+
+  return surface[watertight];
+};
+
+const isWatertight = (surface) => {
+  const edges = new Set();
+  for (const path of surface) {
+    for (const [start, end] of getEdges(path)) {
+      edges.add(`${JSON.stringify([start, end])}`);
+    }
+  }
+  for (const path of surface) {
+    for (const [start, end] of getEdges(path)) {
+      if (!edges.has(`${JSON.stringify([end, start])}`)) {
+        return false;
+      }
+    }
+  }
+  return true;
+};
+
+// export { fromSurfaceToCleanSurface as makeConvex } from './jsxcad-geometry-halfedge.js';
+
+// Cut the corners to produce triangles.
+const triangulateConvexPolygon = (polygon) => {
+  const surface = [];
+  for (let i = 2; i < polygon.length; i++) {
+    surface.push([polygon[0], polygon[i - 1], polygon[i]]);
+  }
+  return surface;
+};
+
+const makeConvex = (surface, normalize3 = createNormalize3(), plane) => {
+  if (surface.length === undefined) {
+    throw Error('die');
+  }
+  if (surface.length === 0) {
+    // An empty surface is not non-convex.
+    return surface;
+  }
+  if (surface.length === 1) {
+    const polygon = surface[0];
+    if (polygon.length === 3) {
+      // A triangle is already convex.
+      return surface;
+    }
+    if (polygon.length > 3 && isConvex(polygon)) {
+      return triangulateConvexPolygon(polygon.map(normalize3));
+    }
+  }
+  if (plane === undefined) {
+    plane = toPlane(surface);
+    if (plane === undefined) {
+      return [];
+    }
+  }
+  const [to, from] = toXYPlaneTransforms(plane);
+  const z0Surface = transform(
+    to,
+    surface.map((path) => path.map(normalize3))
+  );
+  const convexZ0Surface = makeConvex$1(z0Surface);
+  const convexSurface = transform(from, convexZ0Surface).map((path) =>
+    path.map(normalize3)
+  );
+  return makeWatertight(convexSurface);
+};
+
+const fromPolygons = ({ plane }, polygons) => makeConvex(polygons);
 
 var earcut_1 = earcut;
 var default_1 = earcut;
@@ -999,14 +1141,14 @@ earcut.flatten = function (data) {
 };
 earcut_1.default = default_1;
 
-const X = 0;
-const Y = 1;
-const Z = 2;
+const X$1 = 0;
+const Y$1 = 1;
+const Z$1 = 2;
 
 const buildContourXy = (polygon) => {
   const contour = [];
   for (const point of polygon) {
-    contour.push(point[X], point[Y]);
+    contour.push(point[X$1], point[Y$1]);
   }
   return contour;
 };
@@ -1014,7 +1156,7 @@ const buildContourXy = (polygon) => {
 const buildContourXz = (polygon) => {
   const contour = [];
   for (const point of polygon) {
-    contour.push(point[X], point[Z]);
+    contour.push(point[X$1], point[Z$1]);
   }
   return contour;
 };
@@ -1022,7 +1164,7 @@ const buildContourXz = (polygon) => {
 const buildContourYz = (polygon) => {
   const contour = [];
   for (const point of polygon) {
-    contour.push(point[Y], point[Z]);
+    contour.push(point[Y$1], point[Z$1]);
   }
   return contour;
 };
@@ -1110,102 +1252,6 @@ const makeSimple = (options = {}, surface) => {
   return transform(from, simpleSurface);
 };
 
-const THRESHOLD = 1e-5;
-
-const watertight = Symbol('watertight');
-
-const X$1 = 0;
-const Y$1 = 1;
-const Z$1 = 2;
-
-const orderVertices = (a, b) => {
-  const dX = a[X$1] - b[X$1];
-  if (dX !== 0) return dX;
-  const dY = a[Y$1] - b[Y$1];
-  if (dY !== 0) return dY;
-  const dZ = a[Z$1] - b[Z$1];
-  return dZ;
-};
-
-const makeWatertight = (surface, normalize, threshold = THRESHOLD) => {
-  if (!surface[watertight]) {
-    if (isWatertight(surface)) {
-      surface[watertight] = surface;
-    }
-  }
-
-  if (!surface[watertight]) {
-    if (normalize === undefined) {
-      normalize = createNormalize3(1 / threshold);
-    }
-
-    const vertices = new Set();
-    for (const path of surface) {
-      const reconciledPath = [];
-      for (const point of path) {
-        const reconciledPoint = normalize(point);
-        reconciledPath.push(reconciledPoint);
-        vertices.add(reconciledPoint);
-      }
-      if (toPlane$1(reconciledPath) !== undefined) ;
-    }
-
-    const orderedVertices = [...vertices];
-    orderedVertices.sort(orderVertices);
-    for (let i = 0; i < orderedVertices.length; i++) {
-      orderedVertices[i].index = i;
-    }
-
-    const watertightPaths = [];
-    for (const path of surface) {
-      const watertightPath = [];
-      for (const [start, end] of getEdges(path)) {
-        watertightPath.push(start);
-        const span = distance(start, end);
-        const colinear = [];
-        // let limit = Math.max(start.index, end.index);
-        // for (let i = Math.min(start.index, end.index); i < limit; i++) {
-        for (let i = 0; i < orderedVertices.length; i++) {
-          const vertex = orderedVertices[i];
-          // FIX: Threshold
-          if (
-            Math.abs(distance(start, vertex) + distance(vertex, end) - span) <
-            threshold
-          ) {
-            colinear.push(vertex);
-          }
-        }
-        // Arrange by distance from start.
-        colinear.sort((a, b) => distance(start, a) - distance(start, b));
-        // Insert into the path.
-        watertightPath.push(...colinear);
-      }
-      pushWhenValid(watertightPaths, watertightPath);
-    }
-
-    surface[watertight] = watertightPaths;
-  }
-
-  return surface[watertight];
-};
-
-const isWatertight = (surface) => {
-  const edges = new Set();
-  for (const path of surface) {
-    for (const [start, end] of getEdges(path)) {
-      edges.add(`${JSON.stringify([start, end])}`);
-    }
-  }
-  for (const path of surface) {
-    for (const [start, end] of getEdges(path)) {
-      if (!edges.has(`${JSON.stringify([end, start])}`)) {
-        return false;
-      }
-    }
-  }
-  return true;
-};
-
 const measureArea = (surface) => {
   // CHECK: That this handles negative area properly.
   let total = 0;
@@ -1284,4 +1330,4 @@ const retessellate = (
   return transform$1(fromZ0, retessellated).map((path) => path.map(normalize3));
 };
 
-export { assertCoplanar, assertGood, canonicalize, cut, cutSurface, eachPoint, flip, fromPlane, fromPolygons, makeConvexNoHoles, makeSimple, makeWatertight, measureArea, measureBoundingBox, measureBoundingSphere, retessellate, rotateZ, scale, toGeneric, toPlane, toPoints, toPolygons, transform, translate };
+export { assertCoplanar, assertGood, canonicalize, cut, cutSurface, eachPoint, flip, fromPlane, fromPolygons, makeConvex, makeConvexNoHoles, makeSimple, makeWatertight, measureArea, measureBoundingBox, measureBoundingSphere, retessellate, rotateZ, scale, toGeneric, toPlane, toPoints, toPolygons, transform, translate };

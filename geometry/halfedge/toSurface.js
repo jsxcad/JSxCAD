@@ -1,14 +1,12 @@
 import { toSolid } from './toSolid.js';
 
 export const toSurface = (loops, selectJunction) => {
+  const surface = [];
   const solid = toSolid(loops, selectJunction);
-  if (solid.length > 1) {
-    throw Error(`Not a surface-structured solid.`);
+  for (const loops of solid) {
+    surface.push(...loops);
   }
-  if (solid.length === 1) {
-    return solid[0];
-  }
-  return [];
+  return surface;
 };
 
 export default toSurface;

@@ -1,7 +1,5 @@
 import './types.js';
 
-import { fromSurfaceToJunctions, junctionSelector } from './junction.js';
-
 import clean from './clean.js';
 import fromSurface from './fromSurface.js';
 import merge from './merge.js';

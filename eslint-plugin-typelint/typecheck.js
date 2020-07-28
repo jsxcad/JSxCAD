@@ -1,6 +1,5 @@
 const { Type } = require('@jsxcad/typecheck');
 const {
-  getArgumentsForCalledFunction,
   getArgumentsForFunctionCall,
   getContainingFunctionDeclaration,
   getNameOfCalledFunction,
@@ -12,7 +11,6 @@ const { toStringFromNode } = require('./astring.js');
 
 module.exports = {
   create: function (context) {
-    let vfs;
     for (const option of context.options) {
       if (option.cache) {
         setCaches(option.cache);
@@ -76,10 +74,7 @@ module.exports = {
         if (!node.argument && expectedReturnType) {
           /* bare `return;` statement */
 
-          if (
-            !Type.undefined.isOfType(expectedReturnType) &&
-            !allowImplicitUndefineds
-          ) {
+          if (!Type.undefined.isOfType(expectedReturnType)) {
             context.report({
               message: `returning an implicit undefined from a function declared to return ${expectedReturnType}`,
               node,
@@ -105,16 +100,21 @@ module.exports = {
         let initType;
 
         if (node.init) {
-          initType = resolveType(node.init, context)
+          initType = resolveType(node.init, context);
         } else if (node.parent.parent.type === 'ForOfStatement') {
-          initType = resolveType(node.parent.parent.right, context).getElement();
+          initType = resolveType(
+            node.parent.parent.right,
+            context
+          ).getElement();
         } else {
           initType = Type.undefined;
         }
 
         if (!initType.isOfType(identifierType)) {
           context.report({
-            message: `can't initialize variable ${toStringFromNode(node)} of type ${identifierType} with value of type ${initType}`,
+            message: `can't initialize variable ${toStringFromNode(
+              node
+            )} of type ${identifierType} with value of type ${initType}`,
             node,
           });
         }

@@ -1,4 +1,4 @@
-/* global history, location, window */
+/* global history, location */
 
 import { Mosaic, MosaicZeroState } from 'react-mosaic-component';
 

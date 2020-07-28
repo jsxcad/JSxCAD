@@ -5738,15 +5738,20 @@ module.exports = exports['default'];
 
 var QuickHull = unwrapExports(dist);
 
+/** @type function(Points):Solid */
 const buildConvexHullImpl = (points) => {
   const faces = QuickHull(points, { skipTriangulation: false });
   const polygons = faces.map((polygon) =>
     polygon.map((nthPoint) => points[nthPoint])
   );
   polygons.isConvex = true;
-  return { type: 'solid', solid: fromPolygons(polygons) };
+  return fromPolygons(polygons);
 };
 
+/**
+ * Constructs a convex hull from the points given.
+ * @type function(Points):Solid
+ */
 const buildConvexHull = cache$1(buildConvexHullImpl);
 
 const buildConvexMinkowskiSumImpl = (aPoints, bPoints) => {
@@ -6571,7 +6576,9 @@ const buildFromSlices = (buildPath, resolution, cap = true) => {
   };
 };
 
-const fromPointsAndPaths = ({ points = [], paths = [] }) => {
+/** @type {function(Point[], Path[]):Triangle[]} */
+const fromPointsAndPaths = (points = [], paths = []) => {
+  /** @type {Polygon[]} */
   const polygons = [];
   for (const path of paths) {
     polygons.push(fromPoints(path.map((nth) => points[nth])));
@@ -6580,6 +6587,7 @@ const fromPointsAndPaths = ({ points = [], paths = [] }) => {
 };
 
 // Unit icosahedron vertices.
+/** @type {Point[]} */
 const points = [
   [0.850651, 0.0, -0.525731],
   [0.850651, -0.0, 0.525731],
@@ -6596,6 +6604,7 @@ const points = [
 ];
 
 // Triangular decomposition structure.
+/** @type {Path[]} */
 const paths = [
   [1, 9, 0],
   [0, 10, 1],
@@ -6620,8 +6629,13 @@ const paths = [
 ];
 
 // FIX: Why aren't we computing the convex hull?
-const buildRegularIcosahedron = (options = {}) => {
-  return fromPointsAndPaths({ points: points, paths: paths });
+
+/**
+ * Computes the polygons of a unit icosahedron.
+ * @type {function():Triangle[]}
+ */
+const buildRegularIcosahedron = () => {
+  return fromPointsAndPaths(points, paths);
 };
 
 //      0
@@ -6630,14 +6644,24 @@ const buildRegularIcosahedron = (options = {}) => {
 //   /\  /\
 // 1/__\/__\2
 //     21
+
+/** @typedef {vec3[]} Triangle */
+
+/** @type {function(triangle:Triangle):Polygon[]} */
 const subdivideTriangle = (triangle) => {
+  /** @type {vec3} */
   const t0 = triangle[0];
+  /** @type {vec3} */
   const t1 = triangle[1];
+  /** @type {vec3} */
   const t2 = triangle[2];
+
   const t10 = scale$1(1 / 2, add$1(t1, t0));
   const t20 = scale$1(1 / 2, add$1(t2, t0));
   const t21 = scale$1(1 / 2, add$1(t2, t1));
+
   // Turning CCW.
+  /** @type {Polygon[]} */
   return [
     [t0, t10, t20],
     [t10, t1, t21],
@@ -6646,7 +6670,9 @@ const subdivideTriangle = (triangle) => {
   ];
 };
 
+/** @type {function(mesh:Triangle[]):Triangle[]} */
 const subdivideTriangularMesh = (mesh) => {
+  /** @type {Triangle[]} */
   const subdividedMesh = [];
   for (const triangle of mesh) {
     for (const subTriangle of subdivideTriangle(triangle)) {
@@ -6660,9 +6686,11 @@ const subdivideTriangularMesh = (mesh) => {
  *
  * Builds a sphere with at least the number of faces requested, and less than
  *   four times the number of faces requested.
+ * @type {function(faces:number):Triangle[]}
  */
-const buildGeodesicSphere = ({ faces = 20 }) => {
-  let mesh = buildRegularIcosahedron({});
+const buildGeodesicSphere = (faces = 20) => {
+  /** @type {Triangle[]} */
+  let mesh = buildRegularIcosahedron();
   while (mesh.length < faces) {
     mesh = subdivideTriangularMesh(mesh);
   }
@@ -6703,9 +6731,11 @@ const buildRegularPolygonImpl = (sides = 32) => {
 
 const buildRegularPolygon = cache$1(buildRegularPolygonImpl);
 
-const extrudeImpl = (z0Surface, height = 1, depth = 0, cap = true) => {
+/** @type {function(surface:Surface, height:number, depth:number, cap:boolean):Solid} */
+const extrudeImpl = (surface, height = 1, depth = 0, cap = true) => {
   const normalize = createNormalize2();
-  const surfaceOutline = outline(z0Surface, normalize);
+  const surfaceOutline = outline(surface, normalize);
+  /** @type {Polygon[]} */
   const polygons = [];
   const stepHeight = height - depth;
 
@@ -6742,25 +6772,24 @@ const extrudeImpl = (z0Surface, height = 1, depth = 0, cap = true) => {
   return solid;
 };
 
+/**
+ * Extrudes a surface vertically.
+ * @type {function(Surface, height:number, depth:number, cap:boolean):Solid}
+ */
 const extrude = cache$1(extrudeImpl);
 
-/**
- * Construct a regular unit prism of a given edge count.
- * Note: radius and length must not conflict.
- *
- * @param {Object} [options] - options for construction
- * @param {Integer} [options.edges=32] - how many edges the polygon has.
- * @returns {PointArray} Array of points along the path of the circle in CCW winding.
- *
- * @example
- * const circlePoints = regularPolygon({ edges: 32 })
- */
-
+/** @type {function(edges:number):Solid} */
 const buildRegularPrismImpl = (edges = 32) => {
   const path = buildRegularPolygon(edges);
-  return extrude([translate$1([0, 0, -0.5], path)], 1);
+  /** @type {Surface} */
+  const surface = [translate$1([0, 0, -0.5], path)];
+  return extrude(surface, 1);
 };
 
+/**
+ * Builds a regular prism of height 1 with the specified number of edges.
+ * @type {function(edges:number):Solid}
+ */
 const buildRegularPrism = cache$1(buildRegularPrismImpl);
 
 // Unit tetrahedron vertices.
@@ -6797,6 +6826,7 @@ const buildWalls$2 = (polygons, floor, roof) => {
 
 // Approximates a UV sphere.
 const buildRingSphereImpl = (resolution = 20) => {
+  /** @type {Polygon[]} */
   const polygons = [];
   let lastPath;
 
@@ -6822,8 +6852,7 @@ const buildRingSphereImpl = (resolution = 20) => {
   for (const polygon of polygons) {
     assertGood(polygon);
   }
-  const solid = { type: 'solid', solid: fromPolygons(polygons) };
-  return solid;
+  return fromPolygons(polygons);
 };
 
 const buildRingSphere = cache$1(buildRingSphereImpl);
@@ -6943,6 +6972,7 @@ const loopImpl = (
   const stepRadians = (Math.PI * 2) / resolution;
   const pitchPerRadian = pitch / (Math.PI * 2);
   let lastPath;
+  /** @type {Polygon[]} */
   const polygons = [];
   if (endRadians !== Math.PI * 2 || pitch !== 0) {
     // Cap the loop.

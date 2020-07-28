@@ -122,17 +122,6 @@ const fromStl = async (stl, { format = 'ascii' } = {}) => {
   return { type: 'solid', solid: fromPolygons(polygons) };
 };
 
-// import { union } from './jsxcad-geometry-solid-boolean.js';
-
-/**
- * Translates a polygon array [[[x, y, z], [x, y, z], ...]] to ascii STL.
- * The exterior side of a polygon is determined by a CCW point ordering.
- *
- * @param {Object} options.
- * @param {Polygon Array} polygons - An array of arrays of points.
- * @returns {String} - the ascii STL output.
- */
-
 const fromSolidToTriangles = (solid, triangles) => {
   for (const surface of makeWatertight(solid)) {
     for (const triangle of toTriangles({}, surface)) {

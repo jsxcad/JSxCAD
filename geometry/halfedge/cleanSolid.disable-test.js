@@ -342,7 +342,7 @@ test('merge/clean/split - front wall', (t) => {
   ]);
 });
 
-const canonicalize = (solid) => JSON.parse(JSON.stringify(x));
+const canonicalize = (solid) => JSON.parse(JSON.stringify(solid));
 
 const normalize = (normalizePoint, solid) =>
   solid.map((surface) =>

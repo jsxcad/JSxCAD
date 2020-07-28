@@ -50,8 +50,7 @@ const buildRingSphereImpl = (resolution = 20) => {
   for (const polygon of polygons) {
     assertGood(polygon);
   }
-  const solid = { type: 'solid', solid: fromPolygonsToSolid(polygons) };
-  return solid;
+  return fromPolygonsToSolid(polygons);
 };
 
 export const buildRingSphere = cache(buildRingSphereImpl);

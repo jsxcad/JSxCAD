@@ -1,22 +1,16 @@
 const fs = require('fs');
-const path = require('path');
 
 const doctrine = require('doctrine');
 
 const { default: parseFile } = require('eslint-module-utils/parse');
 const { default: resolve } = require('eslint-module-utils/resolve');
 const scan = require('scope-analyzer');
-const { toStringFromNode } = require('./astring.js');
+// const { toStringFromNode } = require('./astring.js');
 
 const { getFileInfoCache, setFileInfoCache } = require('./fileInfoCache.js');
 const { getTypedefCache, setTypedefCache } = require('./typedefCache.js');
 
-const {
-  RecordType,
-  Type,
-  TypeContext,
-  UnionType,
-} = require('@jsxcad/typecheck');
+const { Type, TypeContext } = require('@jsxcad/typecheck');
 
 const setCaches = (settings) => {
   if (settings.fileInfoCache === undefined) {
@@ -118,9 +112,13 @@ const getNamedExportType = (path, symbolName, context) => {
       }
     }
     if (node.declaration) {
-      for (const declaration of node.declaration.declarations) {
-        if (declaration.id.name === symbolName) {
-          return resolveType(declaration.id, externalContext);
+      if (!node.declaration.declarations) {
+        console.log(`Unexpected node.declaration.declarations`);
+      } else {
+        for (const declaration of node.declaration.declarations) {
+          if (declaration.id.name === symbolName) {
+            return resolveType(declaration.id, externalContext);
+          }
         }
       }
     }
@@ -153,11 +151,11 @@ const getTypeContext = (context) => {
 const getFilesystem = (context) => {
   for (const option of context.options) {
     if (option.vfs) {
-      return vfs;
+      return option.vfs;
     }
   }
   return fs;
-}
+};
 
 const getFileInfo = (context) => {
   const fileInfoCache = getFileInfoCache();
@@ -170,7 +168,9 @@ const getFileInfo = (context) => {
   } else if (!fileInfoCache[filename]) {
     // console.log(`Loading ${filename}`);
     fileInfoCache[filename] = {};
-    const fileContents = getFilesystem(context).readFileSync(filename).toString();
+    const fileContents = getFilesystem(context)
+      .readFileSync(filename)
+      .toString();
     const programNode = parseFile(filename, fileContents, context);
     // Adds fileInfoCache entry.
     storeProgram(programNode, context);

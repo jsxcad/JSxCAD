@@ -9,13 +9,13 @@ export const X = (x = 0) => {
   const size = 1e5;
   const min = -size;
   const max = size;
-  const sheet = Shape.fromPathToZ0Surface([
+  const sheet = Shape.fromPathToSurface([
     [x, max, min],
     [x, max, max],
     [x, min, max],
     [x, min, min],
   ]);
-  return toConnector(sheet, sheet.toGeometry().z0Surface, 'top');
+  return toConnector(sheet, sheet.toGeometry().surface, 'top');
 };
 
 export default X;

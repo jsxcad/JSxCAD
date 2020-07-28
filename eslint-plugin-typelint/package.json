@@ -10,7 +10,7 @@
     "lint": "eslint *.js",
     "lintone": "eslint",
     "lintfix": "eslint --fix *.js",
-    "rollup": "rollup -c rollup_main.js",
+    "rollup": "echo ok",
     "test": "ava",
     "tests": "ava *.test.js"
   },

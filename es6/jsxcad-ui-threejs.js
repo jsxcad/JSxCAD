@@ -54300,8 +54300,6 @@ const staticDisplay = async (
   return { canvas, renderer };
 };
 
-/* global document */
-
 const toCanvasFromWebglContext = (webgl) => {
   const { width, height } = webgl.canvas;
   const outCanvas = document.createElement('canvas');

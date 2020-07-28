@@ -23,13 +23,14 @@ const intersectionImpl = (geometry, ...geometries) => {
     const { tags } = geometry;
     switch (geometry.type) {
       case 'solid': {
+        const normalize = createNormalize3();
         const otherGeometry = geometries[0];
         const solids = [
           ...getNonVoidSolids(otherGeometry).map(({ solid }) => solid),
           ...getAnyNonVoidSurfaces(
             otherGeometry
           ).map(({ surface, z0Surface }) =>
-            fromSurfaceToSolid(surface || z0Surface)
+            fromSurfaceToSolid(surface || z0Surface, normalize)
           ),
         ];
         const intersections = solids
@@ -72,7 +73,7 @@ const intersectionImpl = (geometry, ...geometries) => {
           ...getAnyNonVoidSurfaces(
             otherGeometry
           ).map(({ surface, z0Surface }) =>
-            fromSurfaceToSolid(surface || z0Surface)
+            fromSurfaceToSolid(surface || z0Surface, normalize)
           ),
         ];
         const intersections = solids

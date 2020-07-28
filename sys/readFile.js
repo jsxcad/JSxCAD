@@ -1,4 +1,4 @@
-/* global self, window */
+/* global self */
 // FIX: Refactor this once we figure it out.
 
 import * as fs from 'fs';

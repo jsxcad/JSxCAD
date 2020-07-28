@@ -20451,6 +20451,40 @@ var disabledApplyStylesModifier = {
   enabled: false
 }; // until docjs supports type exports...
 
+var ariaDescribedByModifier = {
+  name: 'ariaDescribedBy',
+  enabled: true,
+  phase: 'afterWrite',
+  effect: function effect(_ref) {
+    var state = _ref.state;
+    return function () {
+      var _state$elements = state.elements,
+          reference = _state$elements.reference,
+          popper = _state$elements.popper;
+
+      if ('removeAttribute' in reference) {
+        var ids = (reference.getAttribute('aria-describedby') || '').split(',').filter(function (id) {
+          return id.trim() !== popper.id;
+        });
+        if (!ids.length) reference.removeAttribute('aria-describedby');else reference.setAttribute('aria-describedby', ids.join(','));
+      }
+    };
+  },
+  fn: function fn(_ref2) {
+    var _popper$getAttribute;
+
+    var state = _ref2.state;
+    var _state$elements2 = state.elements,
+        popper = _state$elements2.popper,
+        reference = _state$elements2.reference;
+    var role = (_popper$getAttribute = popper.getAttribute('role')) == null ? void 0 : _popper$getAttribute.toLowerCase();
+
+    if (popper.id && role === 'tooltip' && 'setAttribute' in reference) {
+      var ids = reference.getAttribute('aria-describedby');
+      reference.setAttribute('aria-describedby', ids ? ids + "," + popper.id : popper.id);
+    }
+  }
+};
 var EMPTY_MODIFIERS = [];
 /**
  * Position an element relative some reference element using Popper.js
@@ -20470,16 +20504,16 @@ var EMPTY_MODIFIERS = [];
  */
 
 function usePopper(referenceElement, popperElement, _temp) {
-  var _ref = _temp === void 0 ? {} : _temp,
-      _ref$enabled = _ref.enabled,
-      enabled = _ref$enabled === void 0 ? true : _ref$enabled,
-      _ref$placement = _ref.placement,
-      placement = _ref$placement === void 0 ? 'bottom' : _ref$placement,
-      _ref$strategy = _ref.strategy,
-      strategy = _ref$strategy === void 0 ? 'absolute' : _ref$strategy,
-      _ref$modifiers = _ref.modifiers,
-      modifiers = _ref$modifiers === void 0 ? EMPTY_MODIFIERS : _ref$modifiers,
-      config = _objectWithoutPropertiesLoose(_ref, ["enabled", "placement", "strategy", "modifiers"]);
+  var _ref3 = _temp === void 0 ? {} : _temp,
+      _ref3$enabled = _ref3.enabled,
+      enabled = _ref3$enabled === void 0 ? true : _ref3$enabled,
+      _ref3$placement = _ref3.placement,
+      placement = _ref3$placement === void 0 ? 'bottom' : _ref3$placement,
+      _ref3$strategy = _ref3.strategy,
+      strategy = _ref3$strategy === void 0 ? 'absolute' : _ref3$strategy,
+      _ref3$modifiers = _ref3.modifiers,
+      modifiers = _ref3$modifiers === void 0 ? EMPTY_MODIFIERS : _ref3$modifiers,
+      config = _objectWithoutPropertiesLoose(_ref3, ["enabled", "placement", "strategy", "modifiers"]);
 
   var popperInstanceRef = react_15();
   var update = react_9(function () {
@@ -20512,8 +20546,8 @@ function usePopper(referenceElement, popperElement, _temp) {
       enabled: true,
       phase: 'write',
       requires: ['computeStyles'],
-      fn: function fn(_ref2) {
-        var state = _ref2.state;
+      fn: function fn(_ref4) {
+        var state = _ref4.state;
         var styles = {};
         var attributes = {};
         Object.keys(state.elements).forEach(function (element) {
@@ -20548,7 +20582,7 @@ function usePopper(referenceElement, popperElement, _temp) {
     popperInstanceRef.current = createPopper(referenceElement, popperElement, _extends({}, config, {
       placement: placement,
       strategy: strategy,
-      modifiers: [].concat(modifiers, [updateModifier])
+      modifiers: [].concat(modifiers, [ariaDescribedByModifier, updateModifier])
     }));
     return function () {
       if (popperInstanceRef.current != null) {
@@ -48066,6 +48100,9 @@ var DropdownDivider = createWithBsPrefix('dropdown-divider', {
     role: 'separator'
   }
 });
+var DropdownItemText = createWithBsPrefix('dropdown-item-text', {
+  Component: 'span'
+});
 var defaultProps$6 = {
   navbar: false
 };
@@ -48128,6 +48165,7 @@ Dropdown$1.defaultProps = defaultProps$6;
 Dropdown$1.Divider = DropdownDivider;
 Dropdown$1.Header = DropdownHeader;
 Dropdown$1.Item = DropdownItem;
+Dropdown$1.ItemText = DropdownItemText;
 Dropdown$1.Menu = DropdownMenu$1;
 Dropdown$1.Toggle = DropdownToggle$1;
 
@@ -48378,8 +48416,6 @@ var InputGroupWithExtras = _extends({}, InputGroup, {
 
 var context$1 = react.createContext(null);
 context$1.displayName = 'CardContext';
-
-// eslint-disable-next-line @typescript-eslint/interface-name-prefix
 
 var TabContext = react.createContext(null);
 
@@ -48693,6 +48729,7 @@ var NavDropdown = react.forwardRef(function (_ref, ref) {
 NavDropdown.displayName = 'NavDropdown';
 NavDropdown.propTypes = propTypes$5;
 NavDropdown.Item = Dropdown$1.Item;
+NavDropdown.ItemText = Dropdown$1.ItemText;
 NavDropdown.Divider = Dropdown$1.Divider;
 NavDropdown.Header = Dropdown$1.Header;
 
@@ -82306,10 +82343,10 @@ var siblings = function siblings(container, exclude, cb) {
   });
 };
 
-function ariaHidden(show, node) {
+function ariaHidden(hide, node) {
   if (!node) return;
 
-  if (show) {
+  if (hide) {
     node.setAttribute('aria-hidden', 'true');
   } else {
     node.removeAttribute('aria-hidden');
@@ -87419,7 +87456,7 @@ var fastEquals = createCommonjsModule(function (module, exports) {
 unwrapExports(fastEquals);
 var fastEquals_1 = fastEquals.deepEqual;
 
-/* global history, location, window */
+/* global history, location */
 
 const ensureFile = async (file, url, {
   workspace

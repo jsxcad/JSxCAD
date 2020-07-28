@@ -9,7 +9,7 @@ const buildConvexHullImpl = (points) => {
     polygon.map((nthPoint) => points[nthPoint])
   );
   polygons.isConvex = true;
-  return { type: 'solid', solid: fromPolygonsToSolid(polygons) };
+  return fromPolygonsToSolid(polygons);
 };
 
 /**
