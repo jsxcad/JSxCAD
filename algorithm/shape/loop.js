@@ -28,6 +28,7 @@ const loopImpl = (
   const stepRadians = (Math.PI * 2) / resolution;
   const pitchPerRadian = pitch / (Math.PI * 2);
   let lastPath;
+  /** @type {Polygon[]} */
   const polygons = [];
   if (endRadians !== Math.PI * 2 || pitch !== 0) {
     // Cap the loop.

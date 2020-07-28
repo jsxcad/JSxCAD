@@ -59,7 +59,7 @@
   "devDependencies": {
     "ava": "^3.9.0",
     "depcheck": "^0.9.1",
-    "eslint": "^5.15.0",
+    "eslint": "^7.0.0",
     "rollup": "^1.11.0",
     "rollup-plugin-commonjs": "^9.3.4",
     "rollup-plugin-node-builtins": "^2.1.2",

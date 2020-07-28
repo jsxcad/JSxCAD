@@ -1,6 +1,6 @@
 import { fromPoints } from '@jsxcad/math-poly3';
 
-/** @type {function(Point[], Path[]):Polygon} */
+/** @type {function(Point[], Path[]):Triangle[]} */
 export const fromPointsAndPaths = (points = [], paths = []) => {
   /** @type {Polygon[]} */
   const polygons = [];

@@ -33,6 +33,6 @@ module.exports = {
     'space-before-function-paren': [0, 'ignore'],
     'comma-dangle': [0, 'ignore'],
     'space-in-parens': [0, 'ignore'],
-    '@jsxcad/typelint/typecheck': ['warn', { 'cache': {} }],
+    '@jsxcad/typelint/typecheck': ['warn', { cache: {} }],
   },
 };

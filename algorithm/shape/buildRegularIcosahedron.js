@@ -1,6 +1,7 @@
 import { fromPointsAndPaths } from './fromPointsAndPaths.js';
 
 // Unit icosahedron vertices.
+/** @type {Point[]} */
 const points = [
   [0.850651, 0.0, -0.525731],
   [0.850651, -0.0, 0.525731],
@@ -17,6 +18,7 @@ const points = [
 ];
 
 // Triangular decomposition structure.
+/** @type {Path[]} */
 const paths = [
   [1, 9, 0],
   [0, 10, 1],
@@ -44,7 +46,7 @@ const paths = [
 
 /**
  * Computes the polygons of a unit icosahedron.
- * @type {function():Polygon[]}
+ * @type {function():Triangle[]}
  */
 export const buildRegularIcosahedron = () => {
   return fromPointsAndPaths(points, paths);

@@ -24,6 +24,7 @@ const buildWalls = (polygons, floor, roof) => {
 
 // Approximates a UV sphere.
 const buildRingSphereImpl = (resolution = 20) => {
+  /** @type {Polygon[]} */
   const polygons = [];
   let lastPath;
 

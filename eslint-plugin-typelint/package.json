@@ -34,8 +34,11 @@
   "devDependencies": {
     "ava": "^3.9.0",
     "depcheck": "^0.9.1",
-    "eslint": "^5.15.0",
-    "eslint-module-utils": "^2.6.0"
+    "eslint": "^7.0.0",
+    "eslint-module-utils": "^2.6.0",
+    "fs-monkey": "^1.0.1",
+    "memfs": "^3.2.0",
+    "unionfs": "^4.4.0"
   },
   "publishConfig": {
     "access": "public"

@@ -16,9 +16,11 @@ import { createNormalize2 } from '@jsxcad/algorithm-quantize';
 
 import { fromPolygons as fromPolygonsToSolid } from '@jsxcad/geometry-solid';
 
+/** @type {function(surface:Surface, height:number, depth:number, cap:boolean):Solid} */
 const extrudeImpl = (surface, height = 1, depth = 0, cap = true) => {
   const normalize = createNormalize2();
   const surfaceOutline = outline(surface, normalize);
+  /** @type {Polygon[]} */
   const polygons = [];
   const stepHeight = height - depth;
 

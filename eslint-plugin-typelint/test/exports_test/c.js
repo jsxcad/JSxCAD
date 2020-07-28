@@ -1,2 +1,2 @@
 /** @type {function(*):?} */
-export const c = x => x;
+export const c = (x) => x;

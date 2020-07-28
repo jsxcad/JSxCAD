@@ -7,6 +7,7 @@ import { toPlane } from '@jsxcad/math-poly3';
 export let doCheckOverlap = false;
 export let doDefragment = 'none';
 
+/** @type {function(Polygon[],Normalizer):Solid} */
 export const fromPolygons = (polygons, normalize3 = createNormalize3()) => {
   /*
   const normalize4 = createNormalize4();

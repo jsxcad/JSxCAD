@@ -1,4 +1,5 @@
 const fs = require('fs');
+const path = require('path');
 
 const doctrine = require('doctrine');
 
@@ -27,7 +28,7 @@ const setCaches = (settings) => {
     settings.typedefCache = {};
   }
   setTypedefCache(settings.typedefCache);
-}
+};
 
 const parseJsdocComments = (programNode, context) => {
   for (const statement of programNode.body) {
@@ -50,17 +51,17 @@ const parseJsdocComments = (programNode, context) => {
       getTypeContext(context)
     );
   }
-}
+};
 
-const getTypedefs = (context) => {
-  return getTypedefCache();
-}
+const getTypedefs = (context) => getTypedefCache();
+
+// const resolve = (fsPath, context) => path.resolve(path.dirname(context.getFilename()), fsPath);
 
 const importModule = (path, context) => {
   const fsPath = resolve(path, context);
   const externalContext = getContextForFile(fsPath, context);
   return getTypeContext(externalContext);
-}
+};
 
 const acquireBinding = (node) => {
   switch (node.type) {
@@ -73,7 +74,7 @@ const acquireBinding = (node) => {
     default:
       throw Error(`Unexpected type for acquireBinding: ${node.type} ${node}`);
   }
-}
+};
 
 const getDefaultExportDeclaration = (context) => {
   const { programNode } = getFileInfo(context);
@@ -88,7 +89,7 @@ const getDefaultExportDeclaration = (context) => {
       return node.declaration;
     }
   }
-}
+};
 
 const getNamedExportType = (path, symbolName, context) => {
   const externalContext = getContextForFile(path, context);
@@ -106,7 +107,11 @@ const getNamedExportType = (path, symbolName, context) => {
     for (const specifier of node.specifiers) {
       if (specifier.exported.name === symbolName) {
         if (node.source && node.source.value) {
-          return getNamedExportType(node.source.value, specifier.local.name, externalContext);
+          return getNamedExportType(
+            node.source.value,
+            specifier.local.name,
+            externalContext
+          );
         } else {
           return resolveType(specifier.local, externalContext);
         }
@@ -122,9 +127,10 @@ const getNamedExportType = (path, symbolName, context) => {
   }
 
   return Type.any;
-}
+};
 
-const resolveType = (node, context) => Type.fromNode(node, getTypeContext(context));
+const resolveType = (node, context) =>
+  Type.fromNode(node, getTypeContext(context));
 
 const getTypeContext = (context) => {
   const fileInfo = getFileInfo(context);
@@ -134,13 +140,23 @@ const getTypeContext = (context) => {
       acquireBinding: acquireBinding,
       importModule: (path) => importModule(path, context),
       getDefaultExportDeclaration: () => getDefaultExportDeclaration(context),
-      getNamedExportType: (path, symbolName) => getNamedExportType(path, symbolName, context),
+      getNamedExportType: (path, symbolName) =>
+        getNamedExportType(path, symbolName, context),
       filename: context.getFilename(),
       parseComment: doctrine.parse,
       parseType: doctrine.parseType,
     });
   }
   return fileInfo.typeContext;
+};
+
+const getFilesystem = (context) => {
+  for (const option of context.options) {
+    if (option.vfs) {
+      return vfs;
+    }
+  }
+  return fs;
 }
 
 const getFileInfo = (context) => {
@@ -154,14 +170,14 @@ const getFileInfo = (context) => {
   } else if (!fileInfoCache[filename]) {
     // console.log(`Loading ${filename}`);
     fileInfoCache[filename] = {};
-    const fileContents = fs.readFileSync(filename).toString();
+    const fileContents = getFilesystem(context).readFileSync(filename).toString();
     const programNode = parseFile(filename, fileContents, context);
     // Adds fileInfoCache entry.
     storeProgram(programNode, context);
   }
 
   return fileInfoCache[filename];
-}
+};
 
 const getContextForFile = (fsPath, currentContext) => {
   const resolvedPath = resolve(fsPath, currentContext);
@@ -184,7 +200,7 @@ const getContextForFile = (fsPath, currentContext) => {
   getFileInfo(newContext);
 
   return newContext;
-}
+};
 
 /**
  * @mutates
@@ -194,7 +210,7 @@ const addAST = (programNode) => {
   scan.crawl(programNode);
 
   return programNode;
-}
+};
 
 const storeProgram = (programNode, context) => {
   const fileInfoCache = getFileInfoCache();
@@ -204,7 +220,7 @@ const storeProgram = (programNode, context) => {
     programNode,
   };
   parseJsdocComments(programNode, context);
-}
+};
 
 /**
  * @param {Node} node
@@ -226,7 +242,7 @@ const getNameOfCalledFunction = (node, context) => {
     default:
       return node.callee.name;
   }
-}
+};
 
 const getContainingFunctionDeclaration = (node, context) => {
   let funcDecl = node;
@@ -239,7 +255,7 @@ const getContainingFunctionDeclaration = (node, context) => {
     funcDecl = funcDecl.parent;
   }
   return funcDecl;
-}
+};
 
 module.exports = {
   getArgumentsForFunctionCall,

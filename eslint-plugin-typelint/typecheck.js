@@ -8,9 +8,11 @@ const {
   resolveType,
   storeProgram,
 } = require('./utils.js');
+const { toStringFromNode } = require('./astring.js');
 
 module.exports = {
   create: function (context) {
+    let vfs;
     for (const option of context.options) {
       if (option.cache) {
         setCaches(option.cache);
@@ -100,13 +102,19 @@ module.exports = {
       VariableDeclarator(node) {
         const identifierType = resolveType(node, context);
 
-        const initType = node.init
-          ? resolveType(node.init, context)
-          : Type.undefined;
+        let initType;
+
+        if (node.init) {
+          initType = resolveType(node.init, context)
+        } else if (node.parent.parent.type === 'ForOfStatement') {
+          initType = resolveType(node.parent.parent.right, context).getElement();
+        } else {
+          initType = Type.undefined;
+        }
 
         if (!initType.isOfType(identifierType)) {
           context.report({
-            message: `can't initialize variable of type ${identifierType} with value of type ${initType}`,
+            message: `can't initialize variable ${toStringFromNode(node)} of type ${identifierType} with value of type ${initType}`,
             node,
           });
         }
