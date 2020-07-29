@@ -1,5 +1,5 @@
 {
-  "name": "@jsxcad/eslint-plugin-typelint",
+  "name": "@jsxcad/eslint-plugin-typelint-test",
   "version": "0.0.79",
   "description": "Typelint support for JSxCAD",
   "repository": "https://github.com/jsxcad/JSxCAD",
@@ -15,10 +15,6 @@
   },
   "contributors": [
     {
-      "name": "Dan Orzechowski",
-      "url": "https://github.com/orzechowskid/"
-    },
-    {
       "name": "Brian Spilsbury",
       "url": "https://github.com/pentacular/"
     }
@@ -26,9 +22,7 @@
   "keywords": [],
   "license": "MIT",
   "dependencies": {
-    "@jsxcad/typecheck": "^0.0.79",
-    "doctrine": "^3.0.0",
-    "scope-analyzer": "^2.1.1"
+    "@jsxcad/eslint-plugin-typelint": "^0.0.79"
   },
   "devDependencies": {
     "ava": "^3.9.0",

@@ -25,6 +25,7 @@
     "sys",
     "typecheck",
     "eslint-plugin-typelint",
+    "eslint-plugin-typelint-test",
     "ui/*"
   ]
 }
