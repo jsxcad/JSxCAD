@@ -28,6 +28,7 @@
     "opentype.js": "^0.11.0"
   },
   "devDependencies": {
+    "@jsxcad/eslint-plugin-typelint": "^0.0.79",
     "@jsxcad/geometry-tagged": "^0.0.79",
     "@jsxcad/geometry-z0surface-boolean": "^0.0.79",
     "@jsxcad/sys": "^0.0.79",

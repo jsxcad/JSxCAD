@@ -7,9 +7,8 @@
   "type": "commonjs",
   "scripts": {
     "depcheck": "depcheck",
-    "lint": "eslint *.js",
-    "lintone": "eslint",
-    "lintfix": "eslint --fix *.js",
+    "lint": "eslint -c .eslintrc.cjs *.js",
+    "lintfix": "eslint -c .eslintrc.cjs --fix *.js",
     "rollup": "echo ok",
     "test": "ava",
     "tests": "ava *.test.js"
