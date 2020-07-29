@@ -10,8 +10,8 @@
     "lint": "eslint -c .eslintrc.cjs *.js",
     "lintfix": "eslint -c .eslintrc.cjs --fix *.js",
     "rollup": "echo ok",
-    "test": "ava",
-    "tests": "ava *.test.js"
+    "test": "echo ok",
+    "tests": "echo ok"
   },
   "contributors": [
     {
@@ -31,7 +31,6 @@
     "scope-analyzer": "^2.1.1"
   },
   "devDependencies": {
-    "ava": "^3.9.0",
     "depcheck": "^0.9.1",
     "eslint": "^7.0.0",
     "eslint-module-utils": "^2.6.0",
@@ -41,10 +40,7 @@
     "eslint-plugin-node": "^8.0.1",
     "eslint-plugin-promise": "^4.0.1",
     "eslint-plugin-react": "^7.17.0",
-    "eslint-plugin-standard": "^4.0.0",
-    "fs-monkey": "^1.0.1",
-    "memfs": "^3.2.0",
-    "unionfs": "^4.4.0"
+    "eslint-plugin-standard": "^4.0.0"
   },
   "publishConfig": {
     "access": "public"
