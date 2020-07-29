@@ -3,9 +3,12 @@ import { getEdges, createOpenPath, isClosed } from './jsxcad-geometry-path.js';
 import { intersect as intersect$1, fromPoints } from './jsxcad-math-line2.js';
 import { getNonVoidPaths } from './jsxcad-geometry-tagged.js';
 
+const X = 0;
+const Y = 1;
 const Z = 2;
 const RIGHT_ANGLE = Math.PI / -2;
 
+const isFinite = Number.isFinite;
 const intersect = (a, b, z) => [...intersect$1(a, b), z];
 
 const makeToolLine = (start, end, diameter) => {
@@ -43,17 +46,19 @@ const toolpathEdges = (
     if (overcut) {
       if (lastToolLine) {
         // Move (back) to the intersection point from the overcut.
-        toolpath.push(intersect(thisToolLine, lastToolLine, start[Z]));
+        const intersection = intersect(thisToolLine, lastToolLine, start[Z]);
+        if (isFinite(intersection[X]) && isFinite(intersection[Y])) {
+          toolpath.push(intersection);
+        }
       }
       toolpath.push(toolStart, toolEnd);
     } else {
       if (lastToolLine) {
         // Replace the previous point with the intersection.
-        toolpath[toolpath.length - 1] = intersect(
-          thisToolLine,
-          lastToolLine,
-          start[Z]
-        );
+        const intersection = intersect(thisToolLine, lastToolLine, start[Z]);
+        if (isFinite(intersection[X]) && isFinite(intersection[Y])) {
+          toolpath[toolpath.length - 1] = intersection;
+        }
         toolpath.push(toolEnd);
       } else {
         toolpath.push(toolStart, toolEnd);
@@ -62,13 +67,15 @@ const toolpathEdges = (
     lastToolLine = thisToolLine;
   }
   if (isClosed(path) && !overcut) {
-    toolpath.shift();
     // Rewrite the start and end to meet at their intersection.
     const [start, end] = edges[0];
     const [, , thisToolLine] = makeToolLine(start, end, diameter);
     const intersection = intersect(thisToolLine, lastToolLine, start[Z]);
-    toolpath[0] = intersection;
-    toolpath[toolpath.length - 1] = intersection;
+    if (isFinite(intersection[X]) && isFinite(intersection[Y])) {
+      toolpath.shift();
+      toolpath[0] = intersection;
+      toolpath[toolpath.length - 1] = intersection;
+    }
   }
   return toolpaths;
 };

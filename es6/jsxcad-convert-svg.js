@@ -6,6 +6,7 @@ import { equals } from './jsxcad-math-vec2.js';
 import { transform } from './jsxcad-geometry-paths.js';
 import { toTagsFromName } from './jsxcad-algorithm-color.js';
 import { transform as transform$1, measureBoundingBox, translate, canonicalize as canonicalize$2, toKeptGeometry, getAnyNonVoidSurfaces, getNonVoidPaths } from './jsxcad-geometry-tagged.js';
+import { createNormalize3 } from './jsxcad-algorithm-quantize.js';
 import { outline } from './jsxcad-geometry-surface.js';
 
 const canonicalizeSegment = ([directive, ...args]) => [
@@ -3744,6 +3745,7 @@ const toColorFromTags = (tags, otherwise = 'black') => {
 };
 
 const toSvg = async (baseGeometry, { padding = 0 } = {}) => {
+  const normalize = createNormalize3();
   const [min, max] = measureBoundingBox(await baseGeometry);
   const width = max[X] - min[X];
   const height = max[Y] - min[Y];
@@ -3766,7 +3768,7 @@ const toSvg = async (baseGeometry, { padding = 0 } = {}) => {
     if (anySurface === undefined) throw Error('die');
     const color = toColorFromTags(tags);
     const paths = [];
-    for (const polygon of outline(anySurface)) {
+    for (const polygon of outline(anySurface, normalize)) {
       paths.push(
         `${polygon
           .map(

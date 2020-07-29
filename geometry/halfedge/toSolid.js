@@ -71,7 +71,7 @@ export const toSolid = (loops, selectJunction) => {
   };
 
   for (const loop of loops) {
-    walk(loop);
+    walk(loop.face);
   }
 
   return solid;

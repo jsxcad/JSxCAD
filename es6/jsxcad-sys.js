@@ -283,33 +283,22 @@ var process = {
   uptime: uptime
 };
 
-// Inlined browser-or-node@1.2.1 due to es6 importing issue.
-
-const _typeof =
-  typeof Symbol === 'function' && typeof Symbol.iterator === 'symbol'
-    ? function (obj) {
-        return typeof obj;
-      }
-    : function (obj) {
-        return obj &&
-          typeof Symbol === 'function' &&
-          obj.constructor === Symbol &&
-          obj !== Symbol.prototype
-          ? 'symbol'
-          : typeof obj;
-      };
-
-/* global window self */
+/* global self */
 
 const isBrowser =
   typeof window !== 'undefined' && typeof window.document !== 'undefined';
 
-/* eslint-disable no-restricted-globals */
-const isWebWorker =
-  (typeof self === 'undefined' ? 'undefined' : _typeof(self)) === 'object' &&
-  self.constructor &&
-  self.constructor.name === 'DedicatedWorkerGlobalScope';
-/* eslint-enable no-restricted-globals */
+const checkIsWebWorker = () => {
+  try {
+    return (
+      self.constructor && self.constructor.name === 'DedicatedWorkerGlobalScope'
+    );
+  } catch (e) {
+    return false;
+  }
+};
+
+const isWebWorker = checkIsWebWorker();
 
 const isNode =
   typeof process !== 'undefined' &&
@@ -329,7 +318,7 @@ function createCommonjsModule(fn, module) {
 var localforage = createCommonjsModule(function (module, exports) {
 /*!
     localForage -- Offline Storage, Improved
-    Version 1.7.4
+    Version 1.8.1
     https://localforage.github.io/localForage
     (c) 2013-2017 Mozilla, Apache License 2.0
 */
@@ -3333,7 +3322,7 @@ const write = async (path, data, options = {}) => {
   return writeFile(options, path, data);
 };
 
-/* global self, window */
+/* global self */
 
 const { promises: promises$1 } = fs;
 const { deserialize } = v8$1;

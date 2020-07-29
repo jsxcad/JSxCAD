@@ -7,6 +7,7 @@ import {
   translate,
 } from '@jsxcad/geometry-tagged';
 
+import { createNormalize3 } from '@jsxcad/algorithm-quantize';
 import { outline } from '@jsxcad/geometry-surface';
 
 const X = 0;
@@ -24,6 +25,7 @@ const toColorFromTags = (tags, otherwise = 'black') => {
 };
 
 export const toSvg = async (baseGeometry, { padding = 0 } = {}) => {
+  const normalize = createNormalize3();
   const [min, max] = measureBoundingBox(await baseGeometry);
   const width = max[X] - min[X];
   const height = max[Y] - min[Y];
@@ -46,7 +48,7 @@ export const toSvg = async (baseGeometry, { padding = 0 } = {}) => {
     if (anySurface === undefined) throw Error('die');
     const color = toColorFromTags(tags);
     const paths = [];
-    for (const polygon of outline(anySurface)) {
+    for (const polygon of outline(anySurface, normalize)) {
       paths.push(
         `${polygon
           .map(

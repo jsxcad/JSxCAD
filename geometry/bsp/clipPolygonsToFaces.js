@@ -2,38 +2,61 @@ import { inLeaf, outLeaf } from './bsp.js';
 
 import splitPolygon from './splitPolygon.js';
 
-// All planes are faces.
-
-export const clipPolygonsToFaces = (
-  bsp,
-  polygons,
-  normalize,
-  emit,
-  path = ''
-) => {
-  if (polygons.length === 0) {
-  } else if (bsp === inLeaf) {
-    for (const polygon of polygons) {
-      console.log(`QQ/path: ${path}`);
-      polygon.path = path;
-      emit(polygon);
-    }
-  } else if (bsp !== outLeaf) {
+export const clipPolygonsToFaces = (bsp, polygons, normalize, emit) => {
+  if (bsp !== inLeaf && bsp !== outLeaf) {
     const front = [];
     const back = [];
-    for (const polygon of polygons) {
+    const face = [];
+    for (let i = 0; i < polygons.length; i++) {
       splitPolygon(
         normalize,
         bsp.plane,
-        polygon,
+        polygons[i],
         /* back= */ back,
         /* abutting= */ front,
-        /* overlapping= */ back,
+        /* overlapping= */ face,
         /* front= */ front
       );
     }
-    clipPolygonsToFaces(bsp.front, front, normalize, emit, path + 'f');
-    clipPolygonsToFaces(bsp.back, back, normalize, emit, path + 'b');
+    if (front.length > 0) {
+      clipPolygonsToFaces(bsp.front, front, normalize, emit);
+    }
+    if (back.length > 0) {
+      clipPolygonsToFaces(bsp.back, back, normalize, emit);
+    }
+    if (face.length > 0) {
+      clipFaces(bsp.back, face, normalize, emit);
+    }
+  }
+};
+
+export const clipFaces = (bsp, polygons, normalize, emit) => {
+  if (bsp === inLeaf) {
+    emit(polygons);
+  } else if (bsp !== outLeaf) {
+    const front = [];
+    const back = [];
+    const face = [];
+    for (let i = 0; i < polygons.length; i++) {
+      splitPolygon(
+        normalize,
+        bsp.plane,
+        polygons[i],
+        /* back= */ back,
+        /* abutting= */ front,
+        /* overlapping= */ face,
+        /* front= */ front
+      );
+    }
+    if (front.length > 0) {
+      clipPolygonsToFaces(bsp.front, front, normalize, emit);
+    }
+    if (back.length > 0) {
+      clipPolygonsToFaces(bsp.back, back, normalize, emit);
+    }
+    if (face.length > 0) {
+      clipFaces(bsp.back, face, normalize, emit);
+    }
   }
 };
 

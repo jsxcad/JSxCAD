@@ -1,13 +1,13 @@
-import { cleanSolid } from '@jsxcad/geometry-halfedge';
 import { createNormalize3 } from '@jsxcad/algorithm-quantize';
-import { createNormalize4 } from './createNormalize4.js';
+import { fromSolidToCleanSolid } from '@jsxcad/geometry-halfedge';
 import { makeWatertight } from './makeWatertight.js';
-import { toPlane } from '@jsxcad/math-poly3';
 
 export let doCheckOverlap = false;
 export let doDefragment = 'none';
 
+/** @type {function(Polygon[],Normalizer):Solid} */
 export const fromPolygons = (polygons, normalize3 = createNormalize3()) => {
+  /*
   const normalize4 = createNormalize4();
   const coplanarGroups = new Map();
 
@@ -40,7 +40,8 @@ export const fromPolygons = (polygons, normalize3 = createNormalize3()) => {
   for (const surface of coplanarGroups.values()) {
     solid.push(surface);
   }
-  const watertightSolid = makeWatertight(solid, normalize3);
-  const cleanedSolid = cleanSolid(watertightSolid, normalize3);
+*/
+  const watertightSolid = makeWatertight([polygons], normalize3);
+  const cleanedSolid = fromSolidToCleanSolid(watertightSolid, normalize3);
   return cleanedSolid;
 };

@@ -1,5 +1,6 @@
 import { multiply, fromTranslation, fromScaling } from './jsxcad-math-mat4.js';
 import { toKeptGeometry, transform, getAnyNonVoidSurfaces, getNonVoidPaths } from './jsxcad-geometry-tagged.js';
+import { createNormalize3 } from './jsxcad-algorithm-quantize.js';
 import { outline } from './jsxcad-geometry-surface.js';
 import { toRgbFromTags } from './jsxcad-algorithm-color.js';
 
@@ -66,6 +67,7 @@ const toPdf = async (
   geometry,
   { lineWidth = 0.096, size = [210, 297] } = {}
 ) => {
+  const normalize = createNormalize3();
   // This is the size of a post-script point in mm.
   const pointSize = 0.352777778;
   const scale = 1 / pointSize;
@@ -81,7 +83,7 @@ const toPdf = async (
   )) {
     lines.push(toFillColor(toRgbFromTags(tags, black)));
     lines.push(toStrokeColor(toRgbFromTags(tags, black)));
-    for (const path of outline(surface || z0Surface)) {
+    for (const path of outline(surface || z0Surface, normalize)) {
       let nth = path[0] === null ? 1 : 0;
       if (nth >= path.length) {
         continue;

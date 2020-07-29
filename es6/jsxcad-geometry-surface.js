@@ -7,7 +7,8 @@ import { assertUnique, getEdges } from './jsxcad-geometry-path.js';
 import { createNormalize3 } from './jsxcad-algorithm-quantize.js';
 import { makeConvex as makeConvex$1, retessellate as retessellate$1 } from './jsxcad-geometry-z0surface.js';
 import { pushWhenValid } from './jsxcad-geometry-polygons.js';
-import { union, outline as outline$1 } from './jsxcad-geometry-z0surface-boolean.js';
+import { union } from './jsxcad-geometry-z0surface-boolean.js';
+export { outlineSurface as outline } from './jsxcad-geometry-halfedge.js';
 
 // export const toPlane = (surface) => toPlaneOfPolygon(surface[0]);
 const canonicalize = (surface) => {
@@ -411,6 +412,8 @@ const isWatertight = (surface) => {
   }
   return true;
 };
+
+// export { fromSurfaceToCleanSurface as makeConvex } from './jsxcad-geometry-halfedge.js';
 
 // Cut the corners to produce triangles.
 const triangulateConvexPolygon = (polygon) => {
@@ -1288,31 +1291,6 @@ const measureBoundingSphere = (surface) => {
   return surface.measureBoundingSphere;
 };
 
-const transformImpl = (matrix, polygons) =>
-  polygons.map((polygon) => transform$2(matrix, polygon));
-
-const transform$1 = cacheTransform(transformImpl);
-
-const outline = (
-  surface,
-  normalize = createNormalize3(),
-  plane = toPlane(surface)
-) => {
-  if (plane === undefined) {
-    return [];
-  }
-  // FIX: Detect when the surfaces aren't in the same plane.
-  const [toZ0, fromZ0] = toXYPlaneTransforms(plane);
-  const z0Surface = transform$1(
-    toZ0,
-    surface.map((path) => path.map(normalize))
-  );
-  const outlinedZ0Surface = outline$1(z0Surface, normalize);
-  return transform$1(fromZ0, outlinedZ0Surface).map((path) =>
-    path.map(normalize)
-  );
-};
-
 const toGeneric = (surface) =>
   surface.map((path) => path.map((point) => [...point]));
 
@@ -1323,6 +1301,11 @@ const toPoints = (surface) => {
 };
 
 const toPolygons = (options = {}, surface) => surface;
+
+const transformImpl = (matrix, polygons) =>
+  polygons.map((polygon) => transform$2(matrix, polygon));
+
+const transform$1 = cacheTransform(transformImpl);
 
 const retessellate = (
   surface,
@@ -1347,4 +1330,4 @@ const retessellate = (
   return transform$1(fromZ0, retessellated).map((path) => path.map(normalize3));
 };
 
-export { assertCoplanar, assertGood, canonicalize, cut, cutSurface, eachPoint, flip, fromPlane, fromPolygons, makeConvex, makeConvexNoHoles, makeSimple, makeWatertight, measureArea, measureBoundingBox, measureBoundingSphere, outline, retessellate, rotateZ, scale, toGeneric, toPlane, toPoints, toPolygons, transform, translate };
+export { assertCoplanar, assertGood, canonicalize, cut, cutSurface, eachPoint, flip, fromPlane, fromPolygons, makeConvex, makeConvexNoHoles, makeSimple, makeWatertight, measureArea, measureBoundingBox, measureBoundingSphere, retessellate, rotateZ, scale, toGeneric, toPlane, toPoints, toPolygons, transform, translate };

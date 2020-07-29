@@ -146,7 +146,7 @@ const fromPoints = (p1, p2) => {
 /**
  * Return the point of intersection between the given lines.
  *
- * The point will have Infinity values if the lines are paralell.
+ * The point will have Infinity values if the lines are parallel.
  * The point will have NaN values if the lines are the same.
  *
  * @param {line2} line1 a 2D line for reference

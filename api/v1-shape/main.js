@@ -13,6 +13,7 @@ import './cut.js';
 import './cutFrom.js';
 import './difference.js';
 import './faces.js';
+import './fix.js';
 import './inSolids.js';
 import './intersection.js';
 import './junctions.js';

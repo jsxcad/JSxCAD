@@ -1,3 +1,5 @@
+// export { fromSurfaceToCleanSurface as makeConvex } from '@jsxcad/geometry-halfedge';
+
 import { createNormalize3 } from '@jsxcad/algorithm-quantize';
 import { isConvex } from '@jsxcad/math-poly3';
 import { makeConvex as makeConvexZ0Surface } from '@jsxcad/geometry-z0surface';

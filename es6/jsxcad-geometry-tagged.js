@@ -7,8 +7,8 @@ import { transform as transform$4, canonicalize as canonicalize$5, difference as
 import { equals, transform as transform$5, canonicalize as canonicalize$4, toPolygon } from './jsxcad-math-plane.js';
 import { transform as transform$3, canonicalize as canonicalize$3, eachPoint as eachPoint$4, flip as flip$4, union as union$1 } from './jsxcad-geometry-points.js';
 import { transform as transform$1, toPlane, canonicalize as canonicalize$2, makeWatertight as makeWatertight$2, eachPoint as eachPoint$1, flip as flip$2, makeConvex, measureArea as measureArea$1, measureBoundingBox as measureBoundingBox$2 } from './jsxcad-geometry-surface.js';
-import { differenceSurface, fromSolid, fromSurface, unifyBspTrees, removeExteriorPaths, intersectSurface, intersection as intersection$1 } from './jsxcad-geometry-bsp.js';
-import { difference as difference$2, union as union$3 } from './jsxcad-geometry-solid-boolean.js';
+import { differenceSurface, fromSolid, fromSurface, toConvexSolids, unifyBspTrees, removeExteriorPaths, intersectSurface, intersection as intersection$1, union as union$3 } from './jsxcad-geometry-bsp.js';
+import { difference as difference$2 } from './jsxcad-geometry-solid-boolean.js';
 import { min, max } from './jsxcad-math-vec3.js';
 import { measureBoundingBox as measureBoundingBox$1 } from './jsxcad-geometry-z0surface.js';
 import { outlineSolid, outlineSurface } from './jsxcad-geometry-halfedge.js';
@@ -673,6 +673,107 @@ const flip = (geometry) => {
   return rewrite(geometry, op);
 };
 
+const taggedDisjointAssembly = ({ tags }, ...content) => {
+  if (content.some((value) => !value)) {
+    throw Error(`Undefined DisjointAssembly content`);
+  }
+  if (content.some((value) => value.length)) {
+    throw Error(`DisjointAssembly content is an array`);
+  }
+  if (content.some((value) => value.geometry)) {
+    throw Error(`Likely Shape instance in DisjointAssembly content`);
+  }
+  if (tags !== undefined && tags.length === undefined) {
+    throw Error(`Bad tags`);
+  }
+  if (typeof tags === 'function') {
+    throw Error(`Tags is a function`);
+  }
+  const disjointAssembly = { type: 'disjointAssembly', tags, content };
+  visit(disjointAssembly, (geometry, descend) => {
+    if (geometry.type === 'transform') {
+      throw Error('DisjointAssembly contains transform.');
+    }
+    return descend();
+  });
+  return disjointAssembly;
+};
+
+const linkDisjointAssembly = Symbol('linkDisjointAssembly');
+
+const toDisjointGeometry = (geometry) => {
+  const op = (geometry, descend, walk) => {
+    if (geometry[linkDisjointAssembly]) {
+      return geometry[linkDisjointAssembly];
+    } else if (geometry.type === 'disjointAssembly') {
+      // Everything below this point is disjoint.
+      return geometry;
+    } else if (geometry.type === 'transform') {
+      return walk(toTransformedGeometry(geometry), op);
+    } else if (geometry.type === 'assembly') {
+      const assembly = geometry.content.map((entry) => rewrite(entry, op));
+      const disjointAssembly = [];
+      for (let i = assembly.length - 1; i >= 0; i--) {
+        disjointAssembly.unshift(difference(assembly[i], ...disjointAssembly));
+      }
+      const disjointed = taggedDisjointAssembly({}, ...disjointAssembly);
+      geometry[linkDisjointAssembly] = disjointed;
+      return disjointed;
+    } else {
+      return descend();
+    }
+  };
+  // FIX: Interleave toTransformedGeometry into this rewrite.
+  if (geometry.type === 'disjointAssembly') {
+    return geometry;
+  } else {
+    const disjointed = rewrite(geometry, op);
+    if (disjointed.type === 'disjointAssembly') {
+      geometry[linkDisjointAssembly] = disjointed;
+      return disjointed;
+    } else {
+      const wrapper = taggedDisjointAssembly({}, disjointed);
+      geometry[linkDisjointAssembly] = wrapper;
+      return wrapper;
+    }
+  }
+};
+
+const fix = (geometry) => {
+  const op = (geometry, descend) => {
+    const { tags } = geometry;
+    switch (geometry.type) {
+      case 'solid': {
+        const normalize = createNormalize3();
+        const bsp = fromSolid(geometry.solid, normalize);
+        const convexSolids = toConvexSolids(bsp, normalize);
+        if (convexSolids.length === 1) {
+          convexSolids[0].tags = tags;
+          return convexSolids[0];
+        } else {
+          return taggedDisjointAssembly({ tags }, ...convexSolids);
+        }
+      }
+      case 'surface':
+      case 'z0Surface':
+      case 'paths':
+      case 'points':
+      case 'plan':
+      case 'assembly':
+      case 'item':
+      case 'disjointAssembly':
+      case 'layers':
+      case 'sketch':
+        // Sketches aren't real for union.
+        return descend();
+      default:
+        throw Error(`Unexpected geometry: ${JSON.stringify(geometry)}`);
+    }
+  };
+
+  return rewrite(toDisjointGeometry(geometry), op);
+};
+
 // Remove any symbols (which refer to cached values).
 const fresh = (geometry) => {
   const fresh = {};
@@ -684,29 +785,15 @@ const fresh = (geometry) => {
   return fresh;
 };
 
-const fromPathToSurfaceImpl = (path) => {
-  return { type: 'surface', surface: [path] };
-};
-
-const fromPathToSurface = cache(fromPathToSurfaceImpl);
-
-const fromPathToZ0SurfaceImpl = (path) => {
-  return { type: 'z0Surface', z0Surface: [path] };
-};
-
-const fromPathToZ0Surface = cache(fromPathToZ0SurfaceImpl);
-
 const fromPathsToSurfaceImpl = (paths) => {
-  return { type: 'surface', surface: makeConvex(paths) };
+  return taggedSurface({}, makeConvex(paths, createNormalize3()));
 };
 
 const fromPathsToSurface = cache(fromPathsToSurfaceImpl);
 
-const fromPathsToZ0SurfaceImpl = (paths) => {
-  return { type: 'z0Surface', z0Surface: paths };
-};
+const fromPathToSurfaceImpl = (path) => fromPathsToSurface([path]);
 
-const fromPathsToZ0Surface = cache(fromPathsToZ0SurfaceImpl);
+const fromPathToSurface = cache(fromPathToSurfaceImpl);
 
 const fromSurfaceToPathsImpl = (surface) => {
   return { type: 'paths', paths: surface };
@@ -752,32 +839,6 @@ const getItems = (geometry) => {
   };
   visit(geometry, op);
   return items;
-};
-
-const taggedDisjointAssembly = ({ tags }, ...content) => {
-  if (content.some((value) => !value)) {
-    throw Error(`Undefined DisjointAssembly content`);
-  }
-  if (content.some((value) => value.length)) {
-    throw Error(`DisjointAssembly content is an array`);
-  }
-  if (content.some((value) => value.geometry)) {
-    throw Error(`Likely Shape instance in DisjointAssembly content`);
-  }
-  if (tags !== undefined && tags.length === undefined) {
-    throw Error(`Bad tags`);
-  }
-  if (typeof tags === 'function') {
-    throw Error(`Tags is a function`);
-  }
-  const disjointAssembly = { type: 'disjointAssembly', tags, content };
-  visit(disjointAssembly, (geometry, descend) => {
-    if (geometry.type === 'transform') {
-      throw Error('DisjointAssembly contains transform.');
-    }
-    return descend();
-  });
-  return disjointAssembly;
 };
 
 // This gets each layer independently.
@@ -1003,13 +1064,14 @@ const intersectionImpl = (geometry, ...geometries) => {
     const { tags } = geometry;
     switch (geometry.type) {
       case 'solid': {
+        const normalize = createNormalize3();
         const otherGeometry = geometries[0];
         const solids = [
           ...getNonVoidSolids(otherGeometry).map(({ solid }) => solid),
           ...getAnyNonVoidSurfaces(
             otherGeometry
           ).map(({ surface, z0Surface }) =>
-            fromSurface$1(surface || z0Surface)
+            fromSurface$1(surface || z0Surface, normalize)
           ),
         ];
         const intersections = solids
@@ -1052,7 +1114,7 @@ const intersectionImpl = (geometry, ...geometries) => {
           ...getAnyNonVoidSurfaces(
             otherGeometry
           ).map(({ surface, z0Surface }) =>
-            fromSurface$1(surface || z0Surface)
+            fromSurface$1(surface || z0Surface, normalize)
           ),
         ];
         const intersections = solids
@@ -1121,46 +1183,6 @@ const intersection = cache(intersectionImpl);
 
 const keep = (tags, geometry) =>
   rewriteTags(['compose/non-positive'], [], geometry, tags, 'has not');
-
-const linkDisjointAssembly = Symbol('linkDisjointAssembly');
-
-const toDisjointGeometry = (geometry) => {
-  const op = (geometry, descend, walk) => {
-    if (geometry[linkDisjointAssembly]) {
-      return geometry[linkDisjointAssembly];
-    } else if (geometry.type === 'disjointAssembly') {
-      // Everything below this point is disjoint.
-      return geometry;
-    } else if (geometry.type === 'transform') {
-      return walk(toTransformedGeometry(geometry), op);
-    } else if (geometry.type === 'assembly') {
-      const assembly = geometry.content.map((entry) => rewrite(entry, op));
-      const disjointAssembly = [];
-      for (let i = assembly.length - 1; i >= 0; i--) {
-        disjointAssembly.unshift(difference(assembly[i], ...disjointAssembly));
-      }
-      const disjointed = taggedDisjointAssembly({}, ...disjointAssembly);
-      geometry[linkDisjointAssembly] = disjointed;
-      return disjointed;
-    } else {
-      return descend();
-    }
-  };
-  // FIX: Interleave toTransformedGeometry into this rewrite.
-  if (geometry.type === 'disjointAssembly') {
-    return geometry;
-  } else {
-    const disjointed = rewrite(geometry, op);
-    if (disjointed.type === 'disjointAssembly') {
-      geometry[linkDisjointAssembly] = disjointed;
-      return disjointed;
-    } else {
-      const wrapper = taggedDisjointAssembly({}, disjointed);
-      geometry[linkDisjointAssembly] = wrapper;
-      return wrapper;
-    }
-  }
-};
 
 // DEPRECATED
 const toKeptGeometry = (geometry) => toDisjointGeometry(geometry);
@@ -1278,7 +1300,7 @@ const measureHeights = (geometry, resolution = 1) => {
   return [...heights.values()];
 };
 
-const outlineImpl = (geometry) => {
+const outlineImpl = (geometry, includeFaces = true, includeHoles = true) => {
   const normalize = createNormalize3();
 
   // FIX: This assumes general coplanarity.
@@ -1292,7 +1314,9 @@ const outlineImpl = (geometry) => {
   for (const surface of getAnyNonVoidSurfaces(keptGeometry).map(
     ({ surface, z0Surface }) => surface || z0Surface
   )) {
-    outlines.push(outlineSurface(surface, normalize));
+    outlines.push(
+      outlineSurface(surface, normalize, includeFaces, includeHoles)
+    );
   }
   return outlines.map((outline) => taggedPaths({}, outline));
 };
@@ -1408,14 +1432,25 @@ const unionImpl = (geometry, ...geometries) => {
     const { tags } = geometry;
     switch (geometry.type) {
       case 'solid': {
-        const todo = [];
+        // const normalize = createNormalize3();
+        const solids = [];
         for (const geometry of geometries) {
           for (const { solid } of getNonVoidSolids(geometry)) {
-            todo.push(solid);
+            solids.push(solid);
           }
         }
         // No meaningful way to unify with a surface.
-        return taggedSolid({ tags }, union$3(geometry.solid, ...todo));
+        return taggedSolid({ tags }, union$3(geometry.solid, ...solids));
+        /*
+        // return taggedSolid({ tags }, unifySolids(normalize, geometry.solid, ...solids));
+        const bsp = fromSolidsToBsp(solids, normalize);
+        const convexSolids = toConvexSolids(bsp, normalize);
+        if (convexSolids.length === 1) {
+          return convexSolids[0];
+        } else {
+          return taggedDisjointAssembly({}, ...convexSolids);
+        }
+*/
       } /*
       case 'z0Surface':
       case 'surface': {
@@ -1567,4 +1602,4 @@ const translate = (vector, geometry) =>
 const scale = (vector, geometry) =>
   transform(fromScaling(vector), geometry);
 
-export { allTags, assemble, canonicalize, difference, drop, eachItem, eachPoint, findOpenEdges, flip, fresh, fromPathToSurface, fromPathToZ0Surface, fromPathsToSurface, fromPathsToZ0Surface, fromSurfaceToPaths, getAnyNonVoidSurfaces, getAnySurfaces, getItems, getLayers, getLayouts, getLeafs, getNonVoidItems, getNonVoidPaths, getNonVoidPlans, getNonVoidPoints, getNonVoidSolids, getNonVoidSurfaces, getNonVoidZ0Surfaces, getPaths, getPlans, getPoints, getSolids, getSurfaces, getTags, getZ0Surfaces, intersection, isNotVoid, isVoid, isWatertight, keep, makeWatertight, measureArea, measureBoundingBox, measureHeights, outline, reconcile, rewrite, rewriteTags, rotateX, rotateY, rotateZ, scale, taggedAssembly, taggedDisjointAssembly, taggedItem, taggedLayers, taggedLayout, taggedPaths, taggedPoints, taggedSketch, taggedSolid, taggedSurface, taggedZ0Surface, toDisjointGeometry, toKeptGeometry, toPoints, toTransformedGeometry, transform, translate, union, update, visit };
+export { allTags, assemble, canonicalize, difference, drop, eachItem, eachPoint, findOpenEdges, fix, flip, fresh, fromPathToSurface, fromPathsToSurface, fromSurfaceToPaths, getAnyNonVoidSurfaces, getAnySurfaces, getItems, getLayers, getLayouts, getLeafs, getNonVoidItems, getNonVoidPaths, getNonVoidPlans, getNonVoidPoints, getNonVoidSolids, getNonVoidSurfaces, getNonVoidZ0Surfaces, getPaths, getPlans, getPoints, getSolids, getSurfaces, getTags, getZ0Surfaces, intersection, isNotVoid, isVoid, isWatertight, keep, makeWatertight, measureArea, measureBoundingBox, measureHeights, outline, reconcile, rewrite, rewriteTags, rotateX, rotateY, rotateZ, scale, taggedAssembly, taggedDisjointAssembly, taggedItem, taggedLayers, taggedLayout, taggedPaths, taggedPoints, taggedSketch, taggedSolid, taggedSurface, taggedZ0Surface, toDisjointGeometry, toKeptGeometry, toPoints, toTransformedGeometry, transform, translate, union, update, visit };

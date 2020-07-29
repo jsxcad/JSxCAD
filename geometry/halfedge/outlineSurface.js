@@ -17,12 +17,17 @@ import toPolygons from './toPolygons.js';
  * @param {Normalizer} normalize
  * @returns {Surface}
  */
-export const outlineSurface = (surface, normalize) => {
+export const outlineSurface = (
+  surface,
+  normalize,
+  includeFaces = true,
+  includeHoles = true
+) => {
   const loops = fromSurface(surface, normalize);
   const mergedLoops = merge(loops);
   const cleanedLoops = mergedLoops.map(clean);
   const splitLoops = split(cleanedLoops);
-  return toPolygons(splitLoops);
+  return toPolygons(splitLoops, includeFaces, includeHoles);
 };
 
 export default outlineSurface;

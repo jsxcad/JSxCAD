@@ -7,7 +7,7 @@ import { getNonVoidSolids } from './getNonVoidSolids.js';
 import { taggedPaths } from './taggedPaths.js';
 import { toKeptGeometry } from './toKeptGeometry.js';
 
-const outlineImpl = (geometry) => {
+const outlineImpl = (geometry, includeFaces = true, includeHoles = true) => {
   const normalize = createNormalize3();
 
   // FIX: This assumes general coplanarity.
@@ -21,7 +21,9 @@ const outlineImpl = (geometry) => {
   for (const surface of getAnyNonVoidSurfaces(keptGeometry).map(
     ({ surface, z0Surface }) => surface || z0Surface
   )) {
-    outlines.push(outlineSurface(surface, normalize));
+    outlines.push(
+      outlineSurface(surface, normalize, includeFaces, includeHoles)
+    );
   }
   return outlines.map((outline) => taggedPaths({}, outline));
 };

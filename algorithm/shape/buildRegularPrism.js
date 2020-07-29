@@ -1,27 +1,18 @@
 import { buildRegularPolygon } from './buildRegularPolygon.js';
 import { cache } from '@jsxcad/cache';
 import { extrude } from './extrude.js';
-import { translate } from '@jsxcad/geometry-tagged';
+import { translate } from '@jsxcad/geometry-path';
 
-/**
- * Construct a regular unit prism of a given edge count.
- * Note: radius and length must not conflict.
- *
- * @param {Object} [options] - options for construction
- * @param {Integer} [options.edges=32] - how many edges the polygon has.
- * @returns {PointArray} Array of points along the path of the circle in CCW winding.
- *
- * @example
- * const circlePoints = regularPolygon({ edges: 32 })
- */
-
+/** @type {function(edges:number):Solid} */
 const buildRegularPrismImpl = (edges = 32) => {
-  const surface = buildRegularPolygon(edges);
-  surface.isConvex = true;
-  return translate([0, 0, -0.5], {
-    type: 'solid',
-    solid: extrude(surface.z0Surface, 1),
-  });
+  const path = buildRegularPolygon(edges);
+  /** @type {Surface} */
+  const surface = [translate([0, 0, -0.5], path)];
+  return extrude(surface, 1);
 };
 
+/**
+ * Builds a regular prism of height 1 with the specified number of edges.
+ * @type {function(edges:number):Solid}
+ */
 export const buildRegularPrism = cache(buildRegularPrismImpl);

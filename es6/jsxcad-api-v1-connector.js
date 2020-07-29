@@ -265,13 +265,13 @@ const Z$1 = (z = 0) => {
   const min = -size;
   const max = size;
   // FIX: Why aren't we createing the connector directly?
-  const sheet = Shape$1.fromPathToZ0Surface([
+  const sheet = Shape$1.fromPathToSurface([
     [max, min, z],
     [max, max, z],
     [min, max, z],
     [min, min, z],
   ]);
-  return toConnector(sheet, sheet.toGeometry().z0Surface, 'top');
+  return toConnector(sheet, sheet.toGeometry().surface, 'top');
 };
 
 /**
@@ -569,13 +569,13 @@ const X$2 = (x = 0) => {
   const size = 1e5;
   const min = -size;
   const max = size;
-  const sheet = Shape$1.fromPathToZ0Surface([
+  const sheet = Shape$1.fromPathToSurface([
     [x, max, min],
     [x, max, max],
     [x, min, max],
     [x, min, min],
   ]);
-  return toConnector(sheet, sheet.toGeometry().z0Surface, 'top');
+  return toConnector(sheet, sheet.toGeometry().surface, 'top');
 };
 
 // Ideally this would be a plane of infinite extent.
@@ -586,13 +586,13 @@ const Y$2 = (y = 0) => {
   const size = 1e5;
   const min = -size;
   const max = size;
-  const sheet = Shape$1.fromPathToZ0Surface([
+  const sheet = Shape$1.fromPathToSurface([
     [max, y, min],
     [max, y, max],
     [min, y, max],
     [min, y, min],
   ]);
-  return toConnector(sheet, sheet.toGeometry().z0Surface, 'top');
+  return toConnector(sheet, sheet.toGeometry().surface, 'top');
 };
 
 /**

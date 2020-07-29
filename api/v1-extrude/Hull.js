@@ -2,6 +2,7 @@ import {
   buildConvexHull,
   buildConvexSurfaceHull,
 } from '@jsxcad/algorithm-shape';
+import { taggedSolid, taggedSurface } from '@jsxcad/geometry-tagged';
 
 import { Shape } from '@jsxcad/api-v1-shape';
 
@@ -45,9 +46,11 @@ export const Hull = (...shapes) => {
   shapes.forEach((shape) => shape.eachPoint((point) => points.push(point)));
   // FIX: Detect planar hulls properly.
   if (points.every((point) => point[Z] === 0)) {
-    return Shape.fromGeometry(buildConvexSurfaceHull(points));
+    return Shape.fromGeometry(
+      taggedSurface({}, buildConvexSurfaceHull(points))
+    );
   } else {
-    return Shape.fromGeometry(buildConvexHull(points));
+    return Shape.fromGeometry(taggedSolid({}, buildConvexHull(points)));
   }
 };
 

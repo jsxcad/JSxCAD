@@ -24,6 +24,7 @@ const buildWalls = (polygons, floor, roof) => {
 
 // Approximates a UV sphere.
 const buildRingSphereImpl = (resolution = 20) => {
+  /** @type {Polygon[]} */
   const polygons = [];
   let lastPath;
 
@@ -36,7 +37,7 @@ const buildRingSphereImpl = (resolution = 20) => {
     let angle = (Math.PI * 1.0 * slice) / latitudinalResolution;
     let height = Math.cos(angle);
     let radius = Math.sin(angle);
-    const points = ring.z0Surface[0]; // FIX: Make this less fragile.
+    const points = ring;
     const scaledPath = scale([radius, radius, radius], points);
     const translatedPath = translate([0, 0, height], scaledPath);
     const path = translatedPath;
@@ -49,8 +50,7 @@ const buildRingSphereImpl = (resolution = 20) => {
   for (const polygon of polygons) {
     assertGood(polygon);
   }
-  const solid = { type: 'solid', solid: fromPolygonsToSolid(polygons) };
-  return solid;
+  return fromPolygonsToSolid(polygons);
 };
 
 export const buildRingSphere = cache(buildRingSphereImpl);

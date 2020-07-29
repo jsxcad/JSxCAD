@@ -1,8 +1,8 @@
 import { buildConvexSurfaceHull, buildConvexHull, loop, extrude as extrude$1, buildConvexMinkowskiSum } from './jsxcad-algorithm-shape.js';
 import { Assembly, Layers } from './jsxcad-api-v1-shapes.js';
 import Shape$1, { Shape } from './jsxcad-api-v1-shape.js';
+import { taggedSurface, taggedSolid, getPaths, getZ0Surfaces, getSurfaces, getPlans, outline as outline$1, getSolids, taggedLayers, union, taggedZ0Surface, taggedPaths, measureBoundingBox, taggedPoints, measureHeights } from './jsxcad-geometry-tagged.js';
 import { Y as Y$1, Z as Z$3 } from './jsxcad-api-v1-connector.js';
-import { getPaths, getZ0Surfaces, getSurfaces, getPlans, outline as outline$1, getSolids, taggedLayers, union, taggedZ0Surface, taggedPaths, measureBoundingBox, taggedSolid, taggedPoints, measureHeights } from './jsxcad-geometry-tagged.js';
 import { alignVertices, transform as transform$1, fromPolygons } from './jsxcad-geometry-solid.js';
 import { toPlane as toPlane$1, transform, makeConvex, flip as flip$1 } from './jsxcad-geometry-surface.js';
 import { toXYPlaneTransforms } from './jsxcad-math-plane.js';
@@ -101,9 +101,11 @@ const Hull = (...shapes) => {
   shapes.forEach((shape) => shape.eachPoint((point) => points.push(point)));
   // FIX: Detect planar hulls properly.
   if (points.every((point) => point[Z$1] === 0)) {
-    return Shape.fromGeometry(buildConvexSurfaceHull(points));
+    return Shape.fromGeometry(
+      taggedSurface({}, buildConvexSurfaceHull(points))
+    );
   } else {
-    return Shape.fromGeometry(buildConvexHull(points));
+    return Shape.fromGeometry(taggedSolid({}, buildConvexHull(points)));
   }
 };
 
@@ -251,43 +253,30 @@ extrude.signature =
 extrudeMethod.signature =
   'Shape -> extrude(height:number = 1, depth:number = 1) -> Shape';
 
-/**
- *
- * # Outline
- *
- * Generates the outline of a surface.
- *
- * ::: illustration
- * ```
- * difference(Circle(10),
- *            Circle(2).move([-4]),
- *            Circle(2).move([4]))
- * ```
- * :::
- * ::: illustration
- * ```
- * difference(Circle(10),
- *            Circle(2).move([-4]),
- *            Circle(2).move([4]))
- *   .outline()
- * ```
- * :::
- *
- **/
-
-const outline = (shape) =>
+const outline = (
+  shape,
+  { includeFaces = true, includeHoles = true } = {}
+) =>
   Assembly(
-    ...outline$1(shape.toGeometry()).map((outline) =>
-      Shape.fromGeometry(outline)
-    )
+    ...outline$1(
+      shape.toGeometry(),
+      includeFaces,
+      includeHoles
+    ).map((outline) => Shape.fromGeometry(outline))
   );
 
-const outlineMethod = function (options) {
-  return outline(this);
+const outlineMethod = function ({
+  includeFaces = true,
+  includeHoles = true,
+} = {}) {
+  return outline(this, { includeFaces, includeHoles });
 };
 
-const withOutlineMethod = function (options) {
-  return this.with(outline(this));
+const withOutlineMethod = function ({
+  includeFaces = true,
+  includeHoles = true,
+} = {}) {
+  return this.with(outline(this, { includeFaces, includeHoles }));
 };
 
 Shape.prototype.outline = outlineMethod;

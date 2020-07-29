@@ -7,7 +7,7 @@
   "module": "dist/bundle.js",
   "type": "module",
   "scripts": {
-    "depcheck": "depcheck --ignores=debug,import-local,lodash,@jsxcad/ui-v1 --ignore-dirs=dist,gitcdn,local",
+    "depcheck": "depcheck --ignores 'debug,import-local,lodash,@jsxcad/ui-v1,@jsxcad/eslint*,eslint*,babel-eslint' --ignore-dirs=dist,gitcdn,local",
     "lint": "eslint *.js",
     "lintfix": "eslint --fix *.js",
     "test": "ava",
@@ -52,6 +52,7 @@
     "react-mosaic-component": "^3.2.0"
   },
   "devDependencies": {
+    "@jsxcad/eslint-plugin-typelint": "^0.0.79",
     "@babel/core": "^7.7.4",
     "@babel/plugin-proposal-class-properties": "^7.7.4",
     "@babel/plugin-transform-react-jsx": "^7.7.4",
@@ -59,7 +60,14 @@
     "@babel/preset-react": "^7.7.4",
     "ava": "^3.9.0",
     "depcheck": "^0.9.1",
-    "eslint": "^5.15.0",
+    "eslint": "^7.0.0",
+    "babel-eslint": "^10.0.1",
+    "eslint-config-standard": "^12.0.0",
+    "eslint-plugin-import": "^2.16.0",
+    "eslint-plugin-node": "^8.0.1",
+    "eslint-plugin-promise": "^4.0.1",
+    "eslint-plugin-react": "^7.17.0",
+    "eslint-plugin-standard": "^4.0.0",
     "rollup": "^1.11.0",
     "rollup-plugin-babel": "^4.3.3",
     "rollup-plugin-commonjs": "^9.3.4",

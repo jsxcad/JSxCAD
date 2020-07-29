@@ -4,12 +4,16 @@ import {
   buildRegularPrism,
   toRadiusFromApothem,
 } from '@jsxcad/algorithm-shape';
+import { getAnySurfaces, taggedSolid } from '@jsxcad/geometry-tagged';
 
 import Shape from '@jsxcad/api-v1-shape';
-import { getAnySurfaces } from '@jsxcad/geometry-tagged';
 
 const buildPrism = (radius = 1, height = 1, sides = 32) =>
-  Shape.fromGeometry(buildRegularPrism(sides)).scale([radius, radius, height]);
+  Shape.fromGeometry(taggedSolid({}, buildRegularPrism(sides))).scale([
+    radius,
+    radius,
+    height,
+  ]);
 
 /**
  *
@@ -44,11 +48,16 @@ const toPathFromSurface = (shape) => {
 };
 
 export const ofFunction = (op, { resolution, cap = true, context } = {}) =>
-  Shape.fromGeometry(buildFromFunction(op, resolution, cap, context));
+  Shape.fromGeometry(
+    taggedSolid({}, buildFromFunction(op, resolution, cap, context))
+  );
 
 export const ofSlices = (op, { slices = 2, cap = true } = {}) =>
   Shape.fromGeometry(
-    buildFromSlices((t) => toPathFromSurface(op(t)), slices, cap)
+    taggedSolid(
+      {},
+      buildFromSlices((t) => toPathFromSurface(op(t)), slices, cap)
+    )
   );
 
 export const Prism = (...args) => ofRadius(...args);

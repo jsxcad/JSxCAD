@@ -1,5 +1,3 @@
-/* global document */
-
 import { orbitDisplay } from './orbitDisplay.js';
 import { staticDisplay } from './staticDisplay.js';
 import { toThreejsGeometry } from '@jsxcad/convert-threejs';

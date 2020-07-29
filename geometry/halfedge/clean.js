@@ -9,13 +9,15 @@ export const clean = (loop) => {
   /** @type {Edge} */
   let link = loop;
   do {
+    if (link.start === false) {
+      throw Error(`die: start is false`);
+    }
     if (link.next === undefined) {
       throw Error(`die: ${link.id} ${link.dead}`);
     }
     if (link.to !== undefined) {
       throw Error(`die: to`);
     }
-    // else if (twin.next.next === link.next)
     if (link.next.twin === link.next.next) {
       if (link.next === link.next.next.next) {
         // The loop is degenerate.

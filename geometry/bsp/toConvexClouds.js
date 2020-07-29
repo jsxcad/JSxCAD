@@ -10,7 +10,7 @@ export const toConvexClouds = (bsp, normalize) => {
     } else if (bsp === inLeaf) {
       const cloud = [];
       for (const polygon of polygons) {
-        cloud.push(...polygon);
+        cloud.push(...polygon.map(normalize));
       }
       clouds.push(cloud);
     } else {
@@ -26,3 +26,5 @@ export const toConvexClouds = (bsp, normalize) => {
   walk(bsp, []);
   return clouds;
 };
+
+export default toConvexClouds;

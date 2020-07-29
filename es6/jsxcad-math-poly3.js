@@ -29,18 +29,8 @@ const eachEdge = (options = {}, thunk, polygon) => {
 const flip = (polygon) => [...polygon].reverse();
 
 /**
- * Create a poly3 from the given points.
- *
- * @param {Array[]} points - list of points
- * @param {plane} [planeof] - plane of the polygon
- *
- * @example
- * const points = [
- *   [0,  0, 0],
- *   [0, 10, 0],
- *   [0, 10, 10]
- * ]
- * const polygon = createFromPoints(points)
+ * Create a Polygon from the given points.
+ * @type {function(Point[], Plane):Polygon}
  */
 const fromPoints = (points, planeof) => [...points];
 
