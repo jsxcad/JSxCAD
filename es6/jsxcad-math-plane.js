@@ -124,26 +124,43 @@ const W$1 = 3;
 const signedDistanceToPoint = (plane, point) =>
   dot(plane, point) - plane[W$1];
 
+const W$2 = 3;
 /**
  * Split the given line by the given plane.
  * Robust splitting, even if the line is parallel to the plane
- * @return {vec3} a new point
+ * @type {function(plane:Plane, start:Point, end:Point):Point}
  */
-const splitLineSegmentByPlane = (plane, p1, p2) => {
-  const direction = subtract(p2, p1);
-  let lambda = (plane[3] - dot(plane, p1)) / dot(plane, direction);
+const splitLineByPlane = (plane, start, end) => {
+  const direction = subtract(end, start);
+  const lambda = (plane[W$2] - dot(plane, start)) / dot(plane, direction);
+  if (Number.isNaN(lambda)) {
+    return start;
+  }
+  return add(start, scale(lambda, direction));
+};
+
+const W$3 = 3;
+
+/**
+ * Split the given line by the given plane.
+ * Robust splitting, even if the line is parallel to the plane
+ * @type {function(plane:Plane, start:Point, end:Point):Point}
+ */
+const splitLineSegmentByPlane = (plane, start, end) => {
+  const direction = subtract(end, start);
+  let lambda = (plane[W$3] - dot(plane, start)) / dot(plane, direction);
   if (Number.isNaN(lambda)) lambda = 0;
   if (lambda > 1) lambda = 1;
   if (lambda < 0) lambda = 0;
-  return add(p1, scale(lambda, direction));
+  return add(start, scale(lambda, direction));
 };
 
-const W$2 = 3;
+const W$4 = 3;
 
 const toPolygon = (plane, size = 1e10) => {
   const v = unit(cross(plane, orthogonal(plane)));
   const u = cross(v, plane);
-  const origin = scale(plane[W$2], plane);
+  const origin = scale(plane[W$4], plane);
   return [
     add(origin, scale(-size, u)),
     add(origin, scale(-size, v)),
@@ -155,7 +172,7 @@ const toPolygon = (plane, size = 1e10) => {
 const X$1 = 0;
 const Y$1 = 1;
 const Z$1 = 2;
-const W$3 = 3;
+const W$5 = 3;
 
 const toXYPlaneTransforms = (plane, rightVector) => {
   if (plane === undefined) {
@@ -167,7 +184,7 @@ const toXYPlaneTransforms = (plane, rightVector) => {
 
   const v = unit(cross(plane, rightVector));
   const u = cross(v, plane);
-  const p = multiply(plane, fromScalar(plane[W$3]));
+  const p = multiply(plane, fromScalar(plane[W$5]));
 
   const to = fromValues(
     u[X$1],
@@ -184,7 +201,7 @@ const toXYPlaneTransforms = (plane, rightVector) => {
     0,
     0,
     0,
-    -plane[W$3],
+    -plane[W$5],
     1
   );
 
@@ -237,4 +254,4 @@ const transform = (matrix, plane) => {
   return newplane;
 };
 
-export { canonicalize, equals, flip, fromNormalAndPoint, fromPoints, fromPointsOrthogonal, fromPolygon, signedDistanceToPoint, splitLineSegmentByPlane, toPolygon, toXYPlaneTransforms, transform };
+export { canonicalize, equals, flip, fromNormalAndPoint, fromPoints, fromPointsOrthogonal, fromPolygon, signedDistanceToPoint, splitLineByPlane, splitLineSegmentByPlane, toPolygon, toXYPlaneTransforms, transform };

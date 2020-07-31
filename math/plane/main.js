@@ -6,6 +6,7 @@ export { fromPoints } from './fromPoints.js';
 export { fromPointsOrthogonal } from './fromPointsOrthogonal.js';
 export { fromPolygon } from './fromPolygon.js';
 export { signedDistanceToPoint } from './signedDistanceToPoint.js';
+export { splitLineByPlane } from './splitLineByPlane.js';
 export { splitLineSegmentByPlane } from './splitLineSegmentByPlane.js';
 export { toPolygon } from './toPolygon.js';
 export { toXYPlaneTransforms } from './toXYPlaneTransforms.js';
