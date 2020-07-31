@@ -8,7 +8,7 @@ export default {
   input: 'maslowWorker.js',
   output: {
     dir: 'dist',
-    format: 'amd',
+    format: 'cjs',
   },
   plugins: [
     hypothetical({
