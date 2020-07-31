@@ -1,15 +1,11 @@
 import './types.js';
 
-// import toDot from './toDot.js';
-
 /**
  * clean
  * @param {Edge} loop
  * @returns {Edge|undefined}
  */
 export const clean = (loop) => {
-  // console.log('before');
-  // console.log(toDot([loop]));
   /** @type {Edge} */
   let link = loop;
   do {
@@ -22,7 +18,7 @@ export const clean = (loop) => {
     if (link.to !== undefined) {
       throw Error(`die: to`);
     }
-    if (link.next.twin === link.next.next) {
+    while (link.next.twin === link.next.next) {
       if (link.next === link.next.next.next) {
         // The loop is degenerate.
         return undefined;
@@ -39,22 +35,6 @@ export const clean = (loop) => {
     link.face = loop;
   } while (link !== loop);
 
-  // console.log('after');
-  // console.log(toDot([loop]));
-
-  // Check that the spurs are gone.
-  let count = 0;
-  do {
-    const twin = link.twin;
-    if (twin === undefined || twin.face !== link.face) {
-      // Nothing to do.
-    } else if (link.next === twin) {
-      throw Error(`die: ${count} ${link.start}`);
-    }
-    link = link.next;
-    count++;
-  } while (link !== loop);
-
   // Check that the spurs are gone.
   let violations = 0;
   do {
@@ -65,8 +45,6 @@ export const clean = (loop) => {
       // The twin links backward along a spur.
       // These should have been removed in the cleaning phase.
       violations += 1;
-      console.log(`QQ/violation`);
-      // console.log(toDot([link]));
     }
     link = link.next;
   } while (link !== loop);
