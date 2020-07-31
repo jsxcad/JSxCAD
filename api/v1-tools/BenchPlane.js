@@ -8,7 +8,7 @@ export const BenchPlane = (
     toolDiameter = 3.175,
     axialRate = 1,
     millingStyle = 'any',
-    showSweep = false,
+    sweep = 'cut',
   } = {}
 ) => (length, depth) => {
   let points = [];
@@ -70,10 +70,12 @@ export const BenchPlane = (
   }
   return Assembly(
     ...pointset.map((points) => Toolpath(...points)),
-    Cube(length, width, cutHeight + cutDepth)
-      .benchTop()
-      .moveZ(-depth)
-      .op((s) => (showSweep ? s : s.Void()))
+    sweep === 'no'
+      ? undefined
+      : Cube(length, width, cutHeight + cutDepth)
+          .benchTop()
+          .moveZ(-depth)
+          .op((s) => (sweep === 'show' ? s : s.Void()))
   );
 };
 

@@ -1,5 +1,5 @@
 import { close, concatenate, open } from './jsxcad-geometry-path.js';
-import { taggedAssembly, eachPoint, flip, toDisjointGeometry as toDisjointGeometry$1, toTransformedGeometry, toPoints, transform, reconcile, isWatertight, makeWatertight, taggedPaths, fromPathToSurface, fromPathsToSurface, taggedPoints, taggedSolid, taggedSurface, union as union$1, rewriteTags, assemble as assemble$1, canonicalize as canonicalize$1, measureBoundingBox as measureBoundingBox$1, intersection as intersection$1, allTags, difference as difference$1, getSolids, taggedDisjointAssembly, outline, fix as fix$1, rewrite, taggedLayers, isVoid, getNonVoidSolids, getAnyNonVoidSurfaces, measureArea, taggedSketch, getPaths, getNonVoidSurfaces, getNonVoidZ0Surfaces } from './jsxcad-geometry-tagged.js';
+import { taggedAssembly, eachPoint, flip, toDisjointGeometry as toDisjointGeometry$1, toTransformedGeometry, toPoints, transform, reconcile, isWatertight, makeWatertight, taggedPaths, fromPathToSurface, fromPathsToSurface, taggedPoints, taggedSolid, taggedSurface, union as union$1, rewriteTags, assemble as assemble$1, canonicalize as canonicalize$1, measureBoundingBox as measureBoundingBox$1, intersection as intersection$1, allTags, difference as difference$1, getSolids, taggedDisjointAssembly, outline, fix as fix$1, rewrite, taggedLayers, isVoid, getNonVoidSolids, getAnyNonVoidSurfaces, measureArea, taggedSketch, getNonVoidPaths, getPaths, getNonVoidSurfaces, getNonVoidZ0Surfaces } from './jsxcad-geometry-tagged.js';
 import { fromPolygons, findOpenEdges, fromSurface } from './jsxcad-geometry-solid.js';
 import { scale as scale$1, add, negate, normalize, subtract, dot, cross, distance } from './jsxcad-math-vec3.js';
 import { toTagFromName } from './jsxcad-algorithm-color.js';
@@ -1452,6 +1452,27 @@ const method$1 = function () {
 };
 
 Shape.prototype.tags = method$1;
+
+const toolpaths = (shape, xform = (_) => _) => {
+  const toolpaths = [];
+  for (const geometry of getNonVoidPaths(shape.toDisjointGeometry())) {
+    const { tags = [] } = geometry;
+    if (tags.includes('path/Toolpath')) {
+      toolpaths.push(xform(Shape.fromGeometry(geometry)));
+    }
+  }
+  return toolpaths;
+};
+
+const toolpathsMethod = function (xform) {
+  return toolpaths(this, xform);
+};
+Shape.prototype.toolpaths = toolpathsMethod;
+
+const keepToolpathsMethod = function (xform) {
+  return assemble(...toolpaths(this, xform));
+};
+Shape.prototype.keepToolpaths = keepToolpathsMethod;
 
 const trace = (shape, length = 1) => {
   const tracePaths = [];

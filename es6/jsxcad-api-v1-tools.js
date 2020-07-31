@@ -11,7 +11,7 @@ const BenchPlane = (
     toolDiameter = 3.175,
     axialRate = 1,
     millingStyle = 'any',
-    showSweep = false,
+    sweep = 'cut',
   } = {}
 ) => (length, depth) => {
   let points = [];
@@ -73,25 +73,36 @@ const BenchPlane = (
   }
   return Assembly(
     ...pointset.map((points) => Toolpath(...points)),
-    Cube(length, width, cutHeight + cutDepth)
-      .benchTop()
-      .moveZ(-depth)
-      .op((s) => (showSweep ? s : s.Void()))
+    sweep === 'no'
+      ? undefined
+      : Cube(length, width, cutHeight + cutDepth)
+          .benchTop()
+          .moveZ(-depth)
+          .op((s) => (sweep === 'show' ? s : s.Void()))
   );
 };
 
 const BenchSaw = (
   width,
-  { toolDiameter, cutDepth, axialRate, millingStyle = 'any' } = {}
+  {
+    toolDiameter,
+    cutDepth,
+    axialRate,
+    millingStyle = 'any',
+    sweep = 'cut',
+  } = {}
 ) => (length, depth) =>
-  BenchPlane(length, { toolDiameter, cutDepth, axialRate, millingStyle })(
-    width,
-    depth
-  ).moveX(-width);
+  BenchPlane(length, {
+    toolDiameter,
+    cutDepth,
+    axialRate,
+    millingStyle,
+    sweep,
+  })(width, depth).moveX(-width);
 
 const DrillPress = (
   diameter = 10,
-  { toolDiameter = 3.175, cutDepth = 0.3, sides = 16 } = {}
+  { toolDiameter = 3.175, cutDepth = 0.3, sides = 16, sweep = 'cut' } = {}
 ) => (depth = 0, x = 0, y = 0) => {
   const radius = diameter / 2;
   const points = [];
@@ -121,30 +132,31 @@ const DrillPress = (
   }
   // Move back to the middle so we don't rub the wall on the way up.
   points.push(Point(0, 0, 0));
-  return Toolpath(...points)
-    .with(
-      Cylinder.ofDiameter(diameter, depth)
-        .Void()
-        .moveZ(depth / -2)
-    )
-    .move(x, y);
+  return Assembly(
+    Toolpath(...points),
+    sweep === 'no'
+      ? undefined
+      : Cylinder.ofDiameter(diameter, depth)
+          .op((s) => (sweep === 'show' ? s : s.Void()))
+          .moveZ(depth / -2)
+  ).move(x, y);
 };
 
 const HoleRouter = (
   depth = 10,
-  { toolDiameter = 3.175, cutDepth = 0.3, toolLength = 17 } = {}
-) => (shape) => {
+  { toolDiameter = 3.175, cutDepth = 0.3, toolLength = 17, sweep = 'cut' } = {}
+) => (shape, x = 0, y = 0, z = 0) => {
   const cuts = Math.ceil(depth / Math.min(depth, cutDepth));
   const actualCutDepth = depth / cuts;
   const design = [];
-  const sweep = [];
+  const sweeps = [];
   for (const surface of shape.surfaces()) {
     // FIX: This assumes a plunging tool.
     const paths = Shape.fromGeometry(
       taggedPaths(
         { tags: ['path/Toolpath'] },
         toolpath(
-          surface.bench().outline().flip().toTransformedGeometry(),
+          surface.bench(-x, -y, -z).outline().flip().toTransformedGeometry(),
           toolDiameter,
           /* overcut= */ false,
           /* solid= */ true
@@ -154,30 +166,32 @@ const HoleRouter = (
     for (let cut = 0; cut < cuts; cut++) {
       design.push(paths.moveZ((cut + 1) * -actualCutDepth));
     }
-    sweep.push(
-      paths
-        .sweep(Cylinder.ofDiameter(toolDiameter, depth).moveZ(depth / -2))
-        .Void()
-    );
+    if (sweep !== 'no') {
+      sweeps.push(
+        paths
+          .sweep(Cylinder.ofDiameter(toolDiameter, depth).moveZ(depth / -2))
+          .op((s) => (sweep === 'show' ? s : s.Void()))
+      );
+    }
   }
-  return Assembly(...design, ...sweep);
+  return Assembly(...design, ...sweeps);
 };
 
 const ProfileRouter = (
   depth = 10,
-  { toolDiameter = 3.175, cutDepth = 0.3, toolLength = 17 } = {}
-) => (shape) => {
+  { toolDiameter = 3.175, cutDepth = 0.3, toolLength = 17, sweep = 'no' } = {}
+) => (shape, x = 0, y = 0, z = 0) => {
   const cuts = Math.ceil(depth / Math.min(cutDepth, depth));
   const actualCutDepth = depth / cuts;
   const design = [];
-  const sweep = [];
+  const sweeps = [];
   for (const surface of shape.surfaces()) {
     // FIX: This assumes a plunging tool.
     const paths = Shape.fromGeometry(
       taggedPaths(
         { tags: ['path/Toolpath'] },
         toolpath(
-          surface.bench().outline().toTransformedGeometry(),
+          surface.bench(-x, -y, -z).outline().toTransformedGeometry(),
           toolDiameter,
           /* overcut= */ false,
           /* solid= */ true
@@ -187,13 +201,15 @@ const ProfileRouter = (
     for (let cut = 0; cut < cuts; cut++) {
       design.push(paths.moveZ((cut + 1) * -actualCutDepth));
     }
-    sweep.push(
-      paths
-        .sweep(Cylinder.ofDiameter(toolDiameter, depth).moveZ(depth / -2))
-        .Void()
-    );
+    if (sweep !== 'no') {
+      sweeps.push(
+        paths
+          .sweep(Cylinder.ofDiameter(toolDiameter, depth).moveZ(depth / -2))
+          .op((s) => (sweep === 'show' ? s : s.Void()))
+      );
+    }
   }
-  return Assembly(...design, ...sweep);
+  return Assembly(...design, ...sweeps);
 };
 
 export { BenchPlane, BenchSaw, DrillPress, HoleRouter, ProfileRouter };

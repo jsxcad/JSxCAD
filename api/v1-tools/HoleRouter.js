@@ -6,19 +6,19 @@ import { toolpath } from '@jsxcad/algorithm-toolpath';
 
 export const HoleRouter = (
   depth = 10,
-  { toolDiameter = 3.175, cutDepth = 0.3, toolLength = 17 } = {}
-) => (shape) => {
+  { toolDiameter = 3.175, cutDepth = 0.3, toolLength = 17, sweep = 'cut' } = {}
+) => (shape, x = 0, y = 0, z = 0) => {
   const cuts = Math.ceil(depth / Math.min(depth, cutDepth));
   const actualCutDepth = depth / cuts;
   const design = [];
-  const sweep = [];
+  const sweeps = [];
   for (const surface of shape.surfaces()) {
     // FIX: This assumes a plunging tool.
     const paths = Shape.fromGeometry(
       taggedPaths(
         { tags: ['path/Toolpath'] },
         toolpath(
-          surface.bench().outline().flip().toTransformedGeometry(),
+          surface.bench(-x, -y, -z).outline().flip().toTransformedGeometry(),
           toolDiameter,
           /* overcut= */ false,
           /* solid= */ true
@@ -28,13 +28,15 @@ export const HoleRouter = (
     for (let cut = 0; cut < cuts; cut++) {
       design.push(paths.moveZ((cut + 1) * -actualCutDepth));
     }
-    sweep.push(
-      paths
-        .sweep(Cylinder.ofDiameter(toolDiameter, depth).moveZ(depth / -2))
-        .Void()
-    );
+    if (sweep !== 'no') {
+      sweeps.push(
+        paths
+          .sweep(Cylinder.ofDiameter(toolDiameter, depth).moveZ(depth / -2))
+          .op((s) => (sweep === 'show' ? s : s.Void()))
+      );
+    }
   }
-  return Assembly(...design, ...sweep);
+  return Assembly(...design, ...sweeps);
 };
 
 export default HoleRouter;
