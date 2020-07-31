@@ -32,6 +32,9 @@ export const equalsPlane = (a, b) => {
  * @returns {Plane[]}
  */
 const getPlanesOfPoint = (planesOfPoint, point) => {
+  if (!Array.isArray(point)) {
+    throw Error(`die: Expected point`);
+  }
   let planes = planesOfPoint.get(point);
   if (planes === undefined) {
     planes = [];

@@ -49,22 +49,7 @@ const intersectionImpl = (geometry, ...geometries) => {
         }
       }
       case 'z0Surface':
-      case 'surface' /* {
-        const normalize = createNormalize3();
-        let thisSurface = geometry.surface || geometry.z0Surface;
-        for (const geometry of geometries) {
-          const bsp = toBspTree(geometry, normalize);
-          const intersectedSurface = [];
-          intersectSurface(
-            bsp,
-            thisSurface,
-            normalize,
-            (surface) => intersectedSurface.push(...surface)
-          );
-          thisSurface = intersectedSurface;
-        }
-        return taggedSurface({ tags }, makeWatertightSurface(thisSurface));
-      } */: {
+      case 'surface': {
         const normalize = createNormalize3();
         const thisSurface = geometry.surface || geometry.z0Surface;
         const otherGeometry = geometries[0];

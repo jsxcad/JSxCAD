@@ -2,6 +2,7 @@ import { EPSILON, splitPolygon } from './splitPolygon.js';
 import { max, min } from '@jsxcad/math-vec3';
 
 import { toPlane } from '@jsxcad/math-poly3';
+import { toPolygon as toPolygonFromPlane } from '@jsxcad/math-plane';
 
 const FRONT = 1;
 const BACK = 2;
@@ -177,6 +178,25 @@ const toPolygons = (bsp) => {
         if (bsp.same.length > 0) {
           polygons.push(...bsp.same);
         }
+        walk(bsp.back);
+        walk(bsp.front);
+        break;
+      }
+      case IN_LEAF:
+      case OUT_LEAF:
+        break;
+    }
+  };
+  walk(bsp);
+  return polygons;
+};
+
+const toPlanarPolygons = (bsp) => {
+  const polygons = [];
+  const walk = (bsp) => {
+    switch (bsp.kind) {
+      case BRANCH: {
+        polygons.push(toPolygonFromPlane(bsp.plane));
         walk(bsp.back);
         walk(bsp.front);
         break;
@@ -505,6 +525,38 @@ const removeExteriorPolygonsForCutKeepingOverlap = (
   }
 };
 
+const removeInteriorPolygons = (bsp, polygons, normalize) => {
+  if (bsp === inLeaf) {
+    return [];
+  } else if (bsp === outLeaf) {
+    return keepOut(polygons);
+  } else {
+    const outward = [];
+    const inward = [];
+    for (let i = 0; i < polygons.length; i++) {
+      splitPolygon(
+        normalize,
+        bsp.plane,
+        polygons[i],
+        /* back= */ inward,
+        /* abutting= */ outward,
+        /* overlapping= */ outward,
+        /* front= */ outward
+      );
+    }
+    const trimmedFront = removeInteriorPolygons(bsp.front, outward, normalize);
+    const trimmedBack = removeInteriorPolygons(bsp.back, inward, normalize);
+
+    if (trimmedFront.length === 0) {
+      return trimmedBack;
+    } else if (trimmedBack.length === 0) {
+      return trimmedFront;
+    } else {
+      return merge(trimmedFront, trimmedBack);
+    }
+  }
+};
+
 const removeInteriorPolygonsForDifference = (bsp, polygons, normalize) => {
   if (bsp === inLeaf) {
     return [];
@@ -519,7 +571,7 @@ const removeInteriorPolygonsForDifference = (bsp, polygons, normalize) => {
         bsp.plane,
         polygons[i],
         /* back= */ inward,
-        /* abutting= */ inward, // dropward
+        /* abutting= */ outward, // dropward
         /* overlapping= */ inward, // dropward
         /* front= */ outward
       );
@@ -574,6 +626,38 @@ const removeExteriorPolygonsForDifference = (bsp, polygons, normalize) => {
       inward,
       normalize
     );
+
+    if (trimmedFront.length === 0) {
+      return trimmedBack;
+    } else if (trimmedBack.length === 0) {
+      return trimmedFront;
+    } else {
+      return merge(trimmedFront, trimmedBack);
+    }
+  }
+};
+
+const removeExteriorPolygons = (bsp, polygons, normalize) => {
+  if (bsp === inLeaf) {
+    return keepIn(polygons);
+  } else if (bsp === outLeaf) {
+    return [];
+  } else {
+    const outward = [];
+    const inward = [];
+    for (let i = 0; i < polygons.length; i++) {
+      splitPolygon(
+        normalize,
+        bsp.plane,
+        polygons[i],
+        /* back= */ inward,
+        /* abutting= */ inward,
+        /* overlapping= */ inward,
+        /* front= */ outward
+      );
+    }
+    const trimmedFront = removeExteriorPolygons(bsp.front, outward, normalize);
+    const trimmedBack = removeExteriorPolygons(bsp.back, inward, normalize);
 
     if (trimmedFront.length === 0) {
       return trimmedBack;
@@ -795,10 +879,12 @@ export {
   fromSolids,
   inLeaf,
   outLeaf,
+  removeExteriorPolygons,
   removeExteriorPolygonsForSection,
   removeExteriorPolygonsForCutDroppingOverlap,
   removeExteriorPolygonsForCutKeepingOverlap,
   removeExteriorPolygonsForDifference,
+  removeInteriorPolygons,
   removeInteriorPolygonsForUnionKeepingOverlap,
   removeInteriorPolygonsForUnionDroppingOverlap,
   removeExteriorPolygonsForIntersectionDroppingOverlap,
@@ -806,6 +892,7 @@ export {
   removeInteriorPolygonsForDifference,
   removeInteriorPolygonsForSurface,
   toPolygons,
+  toPlanarPolygons,
   toString,
   unifyBspTrees,
 };

@@ -4,10 +4,8 @@ import * as api from '@jsxcad/api-v1';
 import * as convertThree from '@jsxcad/convert-threejs';
 import * as sys from '@jsxcad/sys';
 import { add, normalize, scale, subtract } from '@jsxcad/math-vec3';
-import { intersection, union } from '@jsxcad/api-v1-shape';
 import { Hull } from '@jsxcad/api-v1-extrude';
 import { clearCache } from '@jsxcad/cache';
-// import { pack } from '@jsxcad/api-v1-layout';
 import { toStl } from '@jsxcad/convert-stl';
 import { toSvg } from '@jsxcad/convert-svg';
 
@@ -134,6 +132,7 @@ const say = (message) => postMessage(message);
 const agent = async ({ ask, question }) => {
   try {
     var { key, values } = question;
+    const shape = (nth) => api.Shape.fromGeometry(values[nth]);
     clearCache();
     switch (key) {
       case 'assemble':
@@ -212,10 +211,7 @@ const agent = async ({ ask, question }) => {
         values = values.map(api.Shape.fromGeometry);
         return Hull(...values).toKeptGeometry();
       case 'intersection':
-        return intersection(
-          api.Shape.fromGeometry(values[0]),
-          api.Shape.fromGeometry(values[1])
-        ).toKeptGeometry();
+        return shape(0).cut(shape(1)).toDisjointGeometry();
       case 'rectangle':
         return api.Square(values[0], values[1]).toKeptGeometry();
       case 'Over Cut Inside Corners':
@@ -338,6 +334,7 @@ const agent = async ({ ask, question }) => {
           .section()
           .outline()
           .toKeptGeometry();
+      /*
       case 'SVG Picture':
         const shape = api.Shape.fromGeometry(values[0]).center();
         const bounds = shape.measureBoundingBox();
@@ -346,25 +343,21 @@ const agent = async ({ ask, question }) => {
           { view: { position: [0, 0, cameraDistance], near: 1, far: 10000 } },
           shape.rotateX(20).rotateY(-45).toKeptGeometry()
         );
+*/
       case 'size':
-        return api.Shape.fromGeometry(values[0]).size();
+        return shape(0).size();
       case 'tag':
-        return api.Shape.fromGeometry(values[0]).as(values[1]).toKeptGeometry();
+        return shape(0).as(values[1]).toDisjointGeometry();
       case 'specify':
-        return api.Shape.fromGeometry(values[0])
-          .Item(values[1])
-          .toKeptGeometry();
+        return shape(0).Item(values[1]).DisjointGeometry();
       case 'translate':
-        return api.Shape.fromGeometry(values[0])
+        return shape(0)
           .move(values[1], values[2], values[3])
-          .toKeptGeometry();
+          .DisjointGeometry();
       case 'getBOM':
         return api.Shape.fromGeometry(values[0]).bom();
       case 'union':
-        return union(
-          api.Shape.fromGeometry(values[0]),
-          api.Shape.fromGeometry(values[1])
-        ).toKeptGeometry();
+        return shape(0).add(shape(1)).toDisjointGeometry();
       default:
         return -1;
     }

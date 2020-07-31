@@ -1090,22 +1090,7 @@ const intersectionImpl = (geometry, ...geometries) => {
         }
       }
       case 'z0Surface':
-      case 'surface' /* {
-        const normalize = createNormalize3();
-        let thisSurface = geometry.surface || geometry.z0Surface;
-        for (const geometry of geometries) {
-          const bsp = toBspTree(geometry, normalize);
-          const intersectedSurface = [];
-          intersectSurface(
-            bsp,
-            thisSurface,
-            normalize,
-            (surface) => intersectedSurface.push(...surface)
-          );
-          thisSurface = intersectedSurface;
-        }
-        return taggedSurface({ tags }, makeWatertightSurface(thisSurface));
-      } */: {
+      case 'surface': {
         const normalize = createNormalize3();
         const thisSurface = geometry.surface || geometry.z0Surface;
         const otherGeometry = geometries[0];
@@ -1424,15 +1409,12 @@ const toPoints = (geometry) => {
   return { type: 'points', points: [...points] };
 };
 
-// import { toDisjointGeometry } from './toDisjointGeometry.js';
-
 // Union is a little more complex, since it can violate disjointAssembly invariants.
 const unionImpl = (geometry, ...geometries) => {
   const op = (geometry, descend) => {
     const { tags } = geometry;
     switch (geometry.type) {
       case 'solid': {
-        // const normalize = createNormalize3();
         const solids = [];
         for (const geometry of geometries) {
           for (const { solid } of getNonVoidSolids(geometry)) {
@@ -1441,93 +1423,8 @@ const unionImpl = (geometry, ...geometries) => {
         }
         // No meaningful way to unify with a surface.
         return taggedSolid({ tags }, union$3(geometry.solid, ...solids));
-        /*
-        // return taggedSolid({ tags }, unifySolids(normalize, geometry.solid, ...solids));
-        const bsp = fromSolidsToBsp(solids, normalize);
-        const convexSolids = toConvexSolids(bsp, normalize);
-        if (convexSolids.length === 1) {
-          return convexSolids[0];
-        } else {
-          return taggedDisjointAssembly({}, ...convexSolids);
-        }
-*/
-      } /*
-      case 'z0Surface':
-      case 'surface': {
-        const normalize = createNormalize3();
-        const thisSurface = geometry.surface || geometry.z0Surface;
-        let planarPolygon = toPolygonFromPlane(toPlaneFromSurface(thisSurface));
-        // Cut the plane into pieces and assemble into a surface.
-        let clippedPolygons = [];
-        for (const input of [geometry, ...geometries]) {
-          for (const { solid } of getNonVoidSolids(input)) {
-            intersectSurface(
-              fromSolidToBsp(solid, normalize),
-              [planarPolygon],
-              normalize,
-              (polygons) => clippedPolygons.push(...polygons)
-            );
-            clippedSurfaces.push(
-              taggedSurface({}, makeWatertightSurface(clippedPolygons, normalize))
-            );
-          }
-          for (const { surface, z0Surface } of getAnyNonVoidSurfaces(input)) {
-            const clippedPolygons = [];
-            intersectSurface(
-              fromSurfaceToBsp(surface || z0Surface, normalize),
-              [planarPolygon],
-              normalize,
-              (polygons) => clippedPolygons.push(...polygons)
-            );
-            clippedSurfaces.push(
-              taggedSurface({}, makeWatertightSurface(clippedPolygons, normalize))
-            );
-          }
-        }
-        if (clippedSurfaces.length === 0) {
-          return taggedDisjointAssembly({});
-        } else if (clippedSurfaces.length === 1) {
-          return clippedSurfaces[0];
-        } else {
-          const mergedSurface = [];
-          for (const { surface } of getSurfaces(
-            toDisjointGeometry(taggedAssembly({}, ...clippedSurfaces))
-          )) {
-            // These are disjoint and coplanar, so we can merge them into a single surface.
-            mergedSurface.push(...surface);
-          }
-          return taggedSurface({}, makeWatertightSurface(mergedSurface, normalize));
-        }
       }
-*/
-      /*
-      case 'z0Surface':
-      case 'surface': {
-        // FIX: This has a problem with trying to union with an empty surface.
-        const normalize = createNormalize3();
-        const thisSurface = geometry.surface || geometry.z0Surface;
-        let planarPolygon = toPolygonFromPlane(toPlaneFromSurface(thisSurface));
-        let bsp = fromSurfaceToBsp(thisSurface, normalize);
-        for (const geometry of geometries) {
-          for (const { solid } of getNonVoidSolids(geometry)) {
-            bsp = unifyBspTrees(fromSolidToBsp(solid, normalize), bsp);
-          }
-          for (const { surface, z0Surface } of getAnyNonVoidSurfaces(
-            geometry
-          )) {
-            bsp = unifyBspTrees(
-              fromSurfaceToBsp(surface || z0Surface, normalize),
-              bsp
-            );
-          }
-        }
-        const clippedSurface = [];
-        intersectSurface(bsp, [planarPolygon], normalize, (surface) =>
-          clippedSurface.push(...surface)
-        );
-        return taggedSurface({ tags }, makeWatertightSurface(clippedSurface, normalize));
-      }
-*/ case 'surface':
+      case 'surface':
       case 'z0Surface': {
         const normalize = createNormalize3();
         const thisSurface = geometry.surface || geometry.z0Surface;
