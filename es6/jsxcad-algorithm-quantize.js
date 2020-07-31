@@ -43,6 +43,8 @@ const Z = 2;
 
 // The resolution is 1 / multiplier.
 // export const createNormalize3 = (multiplier = 1e5) => {
+
+/** @type {function():Normalizer} */
 const createNormalize3 = (multiplier = 1e5 * 2) => {
   const map = new Map();
   const update = (key, value) => {

@@ -31,6 +31,9 @@ const equalsPlane = (a, b) => {
  * @returns {Plane[]}
  */
 const getPlanesOfPoint = (planesOfPoint, point) => {
+  if (!Array.isArray(point)) {
+    throw Error(`die: Expected point`);
+  }
   let planes = planesOfPoint.get(point);
   if (planes === undefined) {
     planes = [];
@@ -91,12 +94,16 @@ const junctionSelector = (junctions, normalize) => {
   return select;
 };
 
+// import toDot from './toDot.js';
+
 /**
  * clean
  * @param {Edge} loop
  * @returns {Edge|undefined}
  */
 const clean = (loop) => {
+  // console.log('before');
+  // console.log(toDot([loop]));
   /** @type {Edge} */
   let link = loop;
   do {
@@ -126,6 +133,20 @@ const clean = (loop) => {
     link.face = loop;
   } while (link !== loop);
 
+  // console.log('after');
+  // console.log(toDot([loop]));
+
+  // Check that the spurs are gone.
+  let count = 0;
+  do {
+    const twin = link.twin;
+    if (twin === undefined || twin.face !== link.face) ; else if (link.next === twin) {
+      throw Error(`die: ${count} ${link.start}`);
+    }
+    link = link.next;
+    count++;
+  } while (link !== loop);
+
   // Check that the spurs are gone.
   let violations = 0;
   do {
@@ -134,12 +155,14 @@ const clean = (loop) => {
       // The twin links backward along a spur.
       // These should have been removed in the cleaning phase.
       violations += 1;
+      console.log(`QQ/violation`);
+      // console.log(toDot([link]));
     }
     link = link.next;
   } while (link !== loop);
 
   if (violations > 0) {
-    throw Error(`die: ${violations}`);
+    throw Error(`die: twin links backward along a spur ${violations}`);
   }
   return link.face;
 };
@@ -1676,22 +1699,34 @@ const toSolid = (loops, selectJunction) => {
  * @returns {Solid}
  */
 
-const fromSolidToCleanSolid = (solid, normalize) =>
+const fromSolidToCleanSolid = (
+  solid,
+  normalize,
+  isJunction = junctionSelector(fromSolidToJunctions(solid, normalize))
+) =>
   fromLoopsToCleanSolid(
     fromSolid(solid, normalize, /* closed= */ true),
-    junctionSelector(fromSolidToJunctions(solid, normalize)));
+    normalize,
+    isJunction
+  );
 
-const fromPolygonsToCleanSolid = (polygons, normalize) =>
+const fromPolygonsToCleanSolid = (
+  polygons,
+  normalize,
+  isJunction = junctionSelector(fromPolygonsToJunctions(polygons, normalize))
+) =>
   fromLoopsToCleanSolid(
     fromPolygons(polygons, normalize),
-    junctionSelector(fromPolygonsToJunctions(polygons, normalize)));
+    isJunction,
+    normalize
+  );
 
-const fromLoopsToCleanSolid = (loops, selectJunction, normalize) => {
+const fromLoopsToCleanSolid = (loops, normalize, isJunction) => {
   const mergedLoops = merge(loops);
   /** @type {Edge[]} */
   const cleanedLoops = mergedLoops.map(clean);
   const splitLoops = split(cleanedLoops);
-  const cleanedSolid = toSolid(splitLoops, selectJunction);
+  const cleanedSolid = toSolid(splitLoops, isJunction);
   return cleanedSolid;
 };
 
@@ -1704,17 +1739,23 @@ const toSurface = (loops, selectJunction) => {
   return surface;
 };
 
-const fromSurfaceToCleanSurface = (surface, normalize) =>
+const fromSurfaceToCleanSurface = (
+  surface,
+  normalize,
+  isJunction = (point) => true
+) =>
   fromLoopsToCleanSurface(
     fromSurface(surface, normalize),
-    /* junctionSelector= */ (_) => true);
+    isJunction,
+    normalize
+  );
 
-const fromLoopsToCleanSurface = (loops, selectJunction, normalize) => {
+const fromLoopsToCleanSurface = (loops, normalize, isJunction) => {
   const mergedLoops = merge(loops);
   /** @type {Edge[]} */
   const cleanedLoops = mergedLoops.map(clean);
   const splitLoops = split(cleanedLoops);
-  const cleanedSurface = toSurface(splitLoops, selectJunction);
+  const cleanedSurface = toSurface(splitLoops, isJunction);
   return cleanedSurface;
 };
 

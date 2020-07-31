@@ -6,7 +6,6 @@ export {
   unifyBspTrees,
 } from './bsp.js';
 
-export { clipPolygonsToFaces } from './clipPolygonsToFaces.js';
 export { containsPoint } from './containsPoint.js';
 export { deform } from './deform.js';
 export { differenceSurface } from './differenceSurface.js';
@@ -23,5 +22,4 @@ export { toDot } from './toDot.js';
 export { toPlanesFromSolid } from './toPlanesFromSolid.js';
 export { toPolygonsFromPlanes } from './toPolygonsFromPlanes.js';
 export { toPlanarPolygonsFromSolids } from './toPlanarPolygonsFromSolids.js';
-export { unifySolids } from './unifySolids.js';
 export { union } from './union.js';

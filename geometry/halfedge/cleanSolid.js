@@ -22,25 +22,33 @@ import toSolid from './toSolid.js';
  * @returns {Solid}
  */
 
-export const fromSolidToCleanSolid = (solid, normalize) =>
+export const fromSolidToCleanSolid = (
+  solid,
+  normalize,
+  isJunction = junctionSelector(fromSolidToJunctions(solid, normalize))
+) =>
   fromLoopsToCleanSolid(
     fromSolid(solid, normalize, /* closed= */ true),
-    junctionSelector(fromSolidToJunctions(solid, normalize)),
-    normalize
+    normalize,
+    isJunction
   );
 
-export const fromPolygonsToCleanSolid = (polygons, normalize) =>
+export const fromPolygonsToCleanSolid = (
+  polygons,
+  normalize,
+  isJunction = junctionSelector(fromPolygonsToJunctions(polygons, normalize))
+) =>
   fromLoopsToCleanSolid(
     fromPolygons(polygons, normalize, /* closed= */ true),
-    junctionSelector(fromPolygonsToJunctions(polygons, normalize)),
+    isJunction,
     normalize
   );
 
-export const fromLoopsToCleanSolid = (loops, selectJunction, normalize) => {
+export const fromLoopsToCleanSolid = (loops, normalize, isJunction) => {
   const mergedLoops = merge(loops);
   /** @type {Edge[]} */
   const cleanedLoops = mergedLoops.map(clean);
   const splitLoops = split(cleanedLoops);
-  const cleanedSolid = toSolid(splitLoops, selectJunction);
+  const cleanedSolid = toSolid(splitLoops, isJunction);
   return cleanedSolid;
 };

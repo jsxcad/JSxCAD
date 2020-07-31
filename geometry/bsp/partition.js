@@ -31,5 +31,5 @@ export const nullPartition = (
   return [aIn, [], aBsp];
 };
 
-export default boxPartition;
-// export default nullPartition;
+// export default boxPartition;
+export default nullPartition;

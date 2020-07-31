@@ -563,7 +563,7 @@ const removeInteriorPolygonsForDifference = (bsp, polygons, normalize) => {
         bsp.plane,
         polygons[i],
         /* back= */ inward,
-        /* abutting= */ inward, // dropward
+        /* abutting= */ outward, // dropward
         /* overlapping= */ inward, // dropward
         /* front= */ outward
       );
@@ -750,59 +750,6 @@ const dividePolygons = (bsp, polygons, normalize) => {
   }
 };
 
-const separatePolygonsForBoundPolygons = (bsp, polygons, normalize) => {
-  if (polygons.length === 0) {
-    return [];
-  } else if (bsp === inLeaf) {
-    return keepIn(polygons);
-  } else if (bsp === outLeaf) {
-    return keepOut(polygons);
-  } else {
-    const front = [];
-    const back = [];
-    for (let i = 0; i < polygons.length; i++) {
-      splitPolygon(
-        normalize,
-        bsp.plane,
-        polygons[i],
-        /* back= */ back, // toward keepIn
-        /* abutting= */ front, // toward keepOut
-        /* overlapping= */ back, // toward keepIn
-        /* front= */ front
-      ); // toward keepOut
-    }
-    const trimmedFront = separatePolygonsForBoundPolygons(
-      bsp.front,
-      front,
-      normalize
-    );
-    const trimmedBack = separatePolygonsForBoundPolygons(
-      bsp.back,
-      back,
-      normalize
-    );
-
-    return [...trimmedFront, ...trimmedBack];
-  }
-};
-
-const boundPolygons = (bsp, polygons, normalize) => {
-  const inPolygons = [];
-  const outPolygons = [];
-  for (const polygon of separatePolygonsForBoundPolygons(
-    bsp,
-    polygons,
-    normalize
-  )) {
-    if (polygon.leaf === inLeaf) {
-      inPolygons.push(polygon);
-    } else if (polygon.leaf === outLeaf) {
-      outPolygons.push(polygon);
-    }
-  }
-  return [clean(inPolygons), clean(outPolygons)];
-};
-
 const replaceLeafs = (bsp, inBsp = inLeaf, outBsp = outLeaf) => {
   switch (bsp.kind) {
     case IN_LEAF:
@@ -860,64 +807,6 @@ const cutOpen = (solid, surface, normalize = createNormalize3()) => {
   );
 
   return fromPolygons$1(trimmedSolid, normalize);
-};
-
-const clipPolygonsToFaces = (bsp, polygons, normalize, emit) => {
-  if (bsp !== inLeaf && bsp !== outLeaf) {
-    const front = [];
-    const back = [];
-    const face = [];
-    for (let i = 0; i < polygons.length; i++) {
-      splitPolygon(
-        normalize,
-        bsp.plane,
-        polygons[i],
-        /* back= */ back,
-        /* abutting= */ front,
-        /* overlapping= */ face,
-        /* front= */ front
-      );
-    }
-    if (front.length > 0) {
-      clipPolygonsToFaces(bsp.front, front, normalize, emit);
-    }
-    if (back.length > 0) {
-      clipPolygonsToFaces(bsp.back, back, normalize, emit);
-    }
-    if (face.length > 0) {
-      clipFaces(bsp.back, face, normalize, emit);
-    }
-  }
-};
-
-const clipFaces = (bsp, polygons, normalize, emit) => {
-  if (bsp === inLeaf) {
-    emit(polygons);
-  } else if (bsp !== outLeaf) {
-    const front = [];
-    const back = [];
-    const face = [];
-    for (let i = 0; i < polygons.length; i++) {
-      splitPolygon(
-        normalize,
-        bsp.plane,
-        polygons[i],
-        /* back= */ back,
-        /* abutting= */ front,
-        /* overlapping= */ face,
-        /* front= */ front
-      );
-    }
-    if (front.length > 0) {
-      clipPolygonsToFaces(bsp.front, front, normalize, emit);
-    }
-    if (back.length > 0) {
-      clipPolygonsToFaces(bsp.back, back, normalize, emit);
-    }
-    if (face.length > 0) {
-      clipFaces(bsp.back, face, normalize, emit);
-    }
-  }
 };
 
 const containsPoint = (bsp, point, history = []) => {
@@ -1067,7 +956,7 @@ const differenceSurface = (bsp, surface, normalize, emit) => {
   }
 };
 
-const boxPartition = (
+const nullPartition = (
   bbBsp,
   aBB,
   bBB,
@@ -1075,16 +964,10 @@ const boxPartition = (
   aPolygons,
   normalize
 ) => {
-  const [aIn, aOut] = boundPolygons(bbBsp, aPolygons, normalize);
-  const aBsp = fromBoundingBoxes(
-    aBB,
-    bBB,
-    bbOutLeaf,
-    fromPolygons(aIn, normalize)
-  );
-  return [aIn, aOut, aBsp];
+  const aIn = aPolygons;
+  const aBsp = fromPolygons(aIn, normalize);
+  return [aIn, [], aBsp];
 };
-// export default nullPartition;
 
 const MIN = 0;
 
@@ -1109,8 +992,8 @@ const difference = (aSolid, ...bSolids) => {
     const bBB = measureBoundingBox(b);
     const bbBsp = fromBoundingBoxes(aBB, bBB, outLeaf, inLeaf);
 
-    const [aIn, aOut, aBsp] = boxPartition(bbBsp, aBB, bBB, inLeaf, a, normalize);
-    const [bIn, , bBsp] = boxPartition(bbBsp, aBB, bBB, outLeaf, b, normalize);
+    const [aIn, aOut, aBsp] = nullPartition(bbBsp, aBB, bBB, inLeaf, a, normalize);
+    const [bIn, , bBsp] = nullPartition(bbBsp, aBB, bBB, outLeaf, b, normalize);
 
     if (aIn.length === 0) {
       const bbMin = max(aBB[MIN], bBB[MIN]);
@@ -1236,8 +1119,8 @@ const intersection = (...solids) => {
     const bBB = measureBoundingBox(b);
     const bbBsp = fromBoundingBoxes(aBB, bBB, outLeaf, inLeaf);
 
-    const [aIn, , aBsp] = boxPartition(bbBsp, aBB, bBB, outLeaf, a, normalize);
-    const [bIn, , bBsp] = boxPartition(bbBsp, aBB, bBB, outLeaf, b, normalize);
+    const [aIn, , aBsp] = nullPartition(bbBsp, aBB, bBB, outLeaf, a, normalize);
+    const [bIn, , bBsp] = nullPartition(bbBsp, aBB, bBB, outLeaf, b, normalize);
 
     if (aIn.length === 0) {
       const bbMin = max(aBB[MIN$1], bBB[MIN$1]);
@@ -1452,16 +1335,6 @@ const toPlanarPolygonsFromSolids = (solids) => {
   return toPolygonsFromPlanes(planes);
 };
 
-const unifySolids = (normalize, ...solids) => {
-  const bsp = fromSolids(solids, normalize);
-  const unclippedPolygons = toPlanarPolygonsFromSolids(solids);
-  const clippedPolygons = [];
-  clipPolygonsToFaces(bsp, unclippedPolygons, normalize, (polygons) =>
-    clippedPolygons.push(...polygons)
-  );
-  return fromPolygons$1(clippedPolygons, normalize);
-};
-
 const MIN$2 = 0;
 
 // An asymmetric binary merge.
@@ -1489,8 +1362,8 @@ const union = (...solids) => {
     const bBB = measureBoundingBox(b);
     const bbBsp = fromBoundingBoxes(aBB, bBB, outLeaf, inLeaf);
 
-    const [aIn, aOut, aBsp] = boxPartition(bbBsp, aBB, bBB, inLeaf, a, normalize);
-    const [bIn, bOut, bBsp] = boxPartition(bbBsp, aBB, bBB, inLeaf, b, normalize);
+    const [aIn, aOut, aBsp] = nullPartition(bbBsp, aBB, bBB, inLeaf, a, normalize);
+    const [bIn, bOut, bBsp] = nullPartition(bbBsp, aBB, bBB, inLeaf, b, normalize);
 
     if (aIn.length === 0) {
       const bbMin = max(aBB[MIN$2], bBB[MIN$2]);
@@ -1533,4 +1406,4 @@ const union = (...solids) => {
   return fromPolygons$1(s[0], normalize);
 };
 
-export { clipPolygonsToFaces, containsPoint, cut, cutOpen, deform, difference, differenceSurface, fromPlanes, fromSolid, fromSolids, fromSurface, intersectSurface, intersection, removeExteriorPaths, removeExteriorPolygonsForSection, section, toConvexClouds, toConvexSolids, toDot, toPlanarPolygonsFromSolids, toPlanesFromSolid, toPolygonsFromPlanes, unifyBspTrees, unifySolids, union };
+export { containsPoint, cut, cutOpen, deform, difference, differenceSurface, fromPlanes, fromSolid, fromSolids, fromSurface, intersectSurface, intersection, removeExteriorPaths, removeExteriorPolygonsForSection, section, toConvexClouds, toConvexSolids, toDot, toPlanarPolygonsFromSolids, toPlanesFromSolid, toPolygonsFromPlanes, unifyBspTrees, union };
