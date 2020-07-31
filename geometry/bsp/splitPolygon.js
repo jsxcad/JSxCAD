@@ -1,7 +1,4 @@
-import {
-  equals as equalsPlane,
-  splitLineSegmentByPlane,
-} from '@jsxcad/math-plane';
+import { equals as equalsPlane, splitLineByPlane } from '@jsxcad/math-plane';
 // import { equals as equalsPoint, subtract } from '@jsxcad/math-vec3';
 
 import { pushWhenValid } from '@jsxcad/geometry-polygons';
@@ -10,10 +7,9 @@ import { toPlane } from '@jsxcad/math-poly3';
 const EPSILON = 1e-5;
 // const EPSILON2 = 1e-10;
 
-const COPLANAR = 0; // Neither front nor back.
-const FRONT = 1;
-const BACK = 2;
-const SPANNING = 3; // Both front and back.
+const COPLANAR = 1; // Neither front nor back.
+const FRONT = 2;
+const BACK = 4;
 
 const COPLANAR_FRONT = 4;
 const COPLANAR_BACK = 5;
@@ -106,10 +102,10 @@ const splitPolygon = (
     case BACK:
       back.push(polygon);
       return;
-    case SPANNING: {
+    default: {
+      // SPANNING
       const frontPoints = [];
       const backPoints = [];
-      const spanPoints = [];
 
       const last = polygon.length - 1;
       let startPoint = polygon[last];
@@ -125,23 +121,23 @@ const splitPolygon = (
           // The inequality is important as it includes COPLANAR points.
           backPoints.push(startPoint);
         }
-        if ((startType | endType) === SPANNING) {
-          // This should exclude COPLANAR points.
+        if (
+          (startType === FRONT && endType !== FRONT) ||
+          (startType === BACK && endType !== BACK)
+        ) {
+          // This should include COPLANAR points.
           // Compute the point that touches the splitting plane.
           const spanPoint = normalize(
-            splitLineSegmentByPlane(plane, startPoint, endPoint)
+            splitLineByPlane(plane, startPoint, endPoint)
           );
           frontPoints.push(spanPoint);
           backPoints.push(spanPoint);
-          spanPoints.push(spanPoint);
         }
         startPoint = endPoint;
         startType = endType;
       }
-      if (spanPoints.length <= 2) {
-        pushWhenValid(front, frontPoints, polygonPlane);
-        pushWhenValid(back, backPoints, polygonPlane);
-      }
+      pushWhenValid(front, frontPoints, polygonPlane);
+      pushWhenValid(back, backPoints, polygonPlane);
       break;
     }
   }

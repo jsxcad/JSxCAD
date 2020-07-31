@@ -67,10 +67,10 @@ test('Section', (t) => {
   );
   t.deepEqual(canonicalize(surface[0]), [
     [
+      [-1, 1, 0],
       [-1, -1, 0],
       [1, -1, 0],
       [1, 1, 0],
-      [-1, 1, 0],
     ],
   ]);
 });
