@@ -44,6 +44,7 @@ import './sketch.js';
 import './solids.js';
 import './surfaces.js';
 import './tags.js';
+import './toolpaths.js';
 import './trace.js';
 import './translate.js';
 import './turn.js';

@@ -1,8 +1,8 @@
-import { Cylinder, Point, Toolpath } from '@jsxcad/api-v1-shapes';
+import { Assembly, Cylinder, Point, Toolpath } from '@jsxcad/api-v1-shapes';
 
 export const DrillPress = (
   diameter = 10,
-  { toolDiameter = 3.175, cutDepth = 0.3, sides = 16 } = {}
+  { toolDiameter = 3.175, cutDepth = 0.3, sides = 16, sweep = 'cut' } = {}
 ) => (depth = 0, x = 0, y = 0) => {
   const radius = diameter / 2;
   const points = [];
@@ -32,13 +32,14 @@ export const DrillPress = (
   }
   // Move back to the middle so we don't rub the wall on the way up.
   points.push(Point(0, 0, 0));
-  return Toolpath(...points)
-    .with(
-      Cylinder.ofDiameter(diameter, depth)
-        .Void()
-        .moveZ(depth / -2)
-    )
-    .move(x, y);
+  return Assembly(
+    Toolpath(...points),
+    sweep === 'no'
+      ? undefined
+      : Cylinder.ofDiameter(diameter, depth)
+          .op((s) => (sweep === 'show' ? s : s.Void()))
+          .moveZ(depth / -2)
+  ).move(x, y);
 };
 
 export default DrillPress;
