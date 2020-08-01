@@ -2,15 +2,17 @@ import builtins from 'rollup-plugin-node-builtins';
 import commonjs from 'rollup-plugin-commonjs';
 import globals from 'rollup-plugin-node-globals';
 import hypothetical from 'rollup-plugin-hypothetical-windows-fix';
+import loadz0r from 'rollup-plugin-loadz0r';
 import nodeResolve from 'rollup-plugin-node-resolve';
 
 export default {
   input: 'maslowWorker.js',
   output: {
     dir: 'dist',
-    format: 'cjs',
+    format: 'amd',
   },
   plugins: [
+    loadz0r(),
     hypothetical({
       allowFallthrough: true,
       allowRealFiles: true,
