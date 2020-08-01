@@ -40,6 +40,7 @@ export {
   BenchSaw,
   DrillPress,
   HoleRouter,
+  LineRouter,
   ProfileRouter,
 } from '@jsxcad/api-v1-tools';
 

@@ -9,6 +9,9 @@ const Z = 2;
 /** Checks for equality, ignoring z. */
 const equalsXY = ([aX, aY], [bX, bY]) => equals([aX, aY, 0], [bX, bY, 0]);
 
+/** Checks for equality, ignoring x and y */
+const equalsZ = ([, , aZ], [, , bZ]) => equals([0, 0, aZ], [0, 0, bZ]);
+
 // https://shapeokoenthusiasts.gitbook.io/shapeoko-cnc-a-to-z/feeds-and-speeds-basics
 // For a 3.175 mm tool
 // soft plastic 0.05 ~ 0.13, soft wood 0.025 ~ 0.065, hard wood 0.013 ~ 0.025.
@@ -100,8 +103,12 @@ const toGcode = async (
   const toolOn = () => (rpm > 0 ? emit(`M3 S${rpm.toFixed(3)}`) : emit(`M5`));
   const toolOff = () => emit('M5');
 
-  const jump = (x, y) => {
+  const raise = () => {
     rapid(_, _, jumpZ); // up
+  };
+
+  const jump = (x, y) => {
+    raise();
     rapid(x, y, jumpZ); // across
     rapid(x, y, topZ); // down
   };
@@ -116,9 +123,9 @@ const toGcode = async (
   const useMetric = () => emit('G21');
 
   useMetric();
+  raise();
   toolOn();
 
-  // FIX: This is incorrect -- it should move the geometry down so that the top of the geometry is at the initial cutDepth.
   for (const { paths } of getNonVoidPaths(toKeptGeometry(geometry))) {
     for (const path of paths) {
       for (const [start, end] of getEdges(path)) {
@@ -130,6 +137,8 @@ const toGcode = async (
           // This avoids raising before plunging.
           // FIX: This whole approach is essentially wrong, and needs to consider if the tool can plunge or not.
           jump(...start);
+        }
+        if (!equalsZ(start, position)) {
           cut(...start); // cut down
         }
         cut(...end); // cut across

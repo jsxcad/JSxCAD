@@ -51,7 +51,10 @@ const buildLayoutGeometry = ({
   const size = [pageWidth, pageLength];
   const r = (v) => Math.floor(v * 100) / 100;
   const title = `${r(pageWidth)} x ${r(pageLength)} : ${itemNames.join(', ')}`;
-  const visualization = Square(pageWidth, pageLength)
+  const visualization = Square(
+    Math.max(pageWidth, margin),
+    Math.max(pageLength, margin)
+  )
     .outline()
     .with(
       Hershey(max(pageWidth, pageLength) * labelScale)(title).move(

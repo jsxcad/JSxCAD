@@ -1,6 +1,6 @@
 import { Point, Assembly, Toolpath, Cube, Cylinder } from './jsxcad-api-v1-shapes.js';
-import Shape from './jsxcad-api-v1-shape.js';
-import { taggedPaths } from './jsxcad-geometry-tagged.js';
+import Shape, { Shape as Shape$1 } from './jsxcad-api-v1-shape.js';
+import { taggedPaths, getNonVoidPaths } from './jsxcad-geometry-tagged.js';
 import { toolpath } from './jsxcad-algorithm-toolpath.js';
 
 const BenchPlane = (
@@ -177,6 +177,36 @@ const HoleRouter = (
   return Assembly(...design, ...sweeps);
 };
 
+const LineRouter = (
+  depth = 10,
+  { toolDiameter = 3.175, cutDepth = 0.3, toolLength = 17, sweep = 'no' } = {}
+) => (shape, x = 0, y = 0, z = 0) => {
+  const cuts = Math.ceil(depth / Math.min(cutDepth, depth));
+  const actualCutDepth = depth / cuts;
+  const design = [];
+  const sweeps = [];
+  for (const { paths } of getNonVoidPaths(
+    shape.bench(-x, -y, -z).toDisjointGeometry()
+  )) {
+    // FIX: This assumes a plunging tool.
+    const toolpaths = Shape$1.fromGeometry(
+      taggedPaths({ tags: ['path/Toolpath'] }, paths)
+    );
+    for (let cut = 0; cut < cuts; cut++) {
+      design.push(toolpaths.moveZ((cut + 1) * -actualCutDepth));
+    }
+    if (sweep !== 'no') {
+      // Generally a v bit.
+      sweeps.push(
+        paths
+          .sweep(Cylinder.ofDiameter(toolDiameter, depth).moveZ(depth / -2))
+          .op((s) => (sweep === 'show' ? s : s.Void()))
+      );
+    }
+  }
+  return Assembly(...design, ...sweeps);
+};
+
 const ProfileRouter = (
   depth = 10,
   { toolDiameter = 3.175, cutDepth = 0.3, toolLength = 17, sweep = 'no' } = {}
@@ -212,4 +242,4 @@ const ProfileRouter = (
   return Assembly(...design, ...sweeps);
 };
 
-export { BenchPlane, BenchSaw, DrillPress, HoleRouter, ProfileRouter };
+export { BenchPlane, BenchSaw, DrillPress, HoleRouter, LineRouter, ProfileRouter };

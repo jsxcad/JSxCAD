@@ -156,12 +156,21 @@ export const toEcmascript = async (script, { path } = {}) => {
               );
               break;
             case 'ImportSpecifier':
-              out.push(
-                parse(
-                  `const { ${imported.name} } = await importModule('${source.value}');`,
-                  parseOptions
-                )
-              );
+              if (local.name !== imported.name) {
+                out.push(
+                  parse(
+                    `const { ${imported.name}: ${local.name} } = await importModule('${source.value}');`,
+                    parseOptions
+                  )
+                );
+              } else {
+                out.push(
+                  parse(
+                    `const { ${imported.name} } = await importModule('${source.value}');`,
+                    parseOptions
+                  )
+                );
+              }
               break;
           }
         }

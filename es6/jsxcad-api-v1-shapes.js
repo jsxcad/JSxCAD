@@ -52,9 +52,14 @@ const ofRadius = (radius, angle = 360, { start = 0, sides = 32 } = {}) =>
 const Arc = (...args) => ofRadius(...args);
 Arc.ofRadius = ofRadius;
 
+const isDefined = (value) => value !== undefined;
+
 const Assembly = (...shapes) =>
   Shape.fromGeometry(
-    taggedAssembly({}, ...shapes.map((shape) => shape.toGeometry()))
+    taggedAssembly(
+      {},
+      ...shapes.filter(isDefined).map((shape) => shape.toGeometry())
+    )
   );
 
 const unitPolygon = (sides = 16) =>
@@ -549,13 +554,13 @@ Icosahedron.ofDiameter.signature =
 
 const Intersection = (first, ...rest) => first.clip(...rest);
 
-const isDefined = (value) => value;
+const isDefined$1 = (value) => value;
 
 const Layers = (...shapes) =>
   Shape.fromGeometry(
     taggedLayers(
       {},
-      ...shapes.filter(isDefined).map((shape) => shape.toGeometry())
+      ...shapes.filter(isDefined$1).map((shape) => shape.toGeometry())
     )
   );
 
