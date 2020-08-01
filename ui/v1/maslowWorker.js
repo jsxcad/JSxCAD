@@ -1,13 +1,13 @@
 /* global postMessage, onmessage:writable, self */
 
-import * as api from '@jsxcad/api-v1';
-import * as convertThree from '@jsxcad/convert-threejs';
-import * as sys from '@jsxcad/sys';
-import { add, normalize, scale, subtract } from '@jsxcad/math-vec3';
-import { Hull } from '@jsxcad/api-v1-extrude';
-import { clearCache } from '@jsxcad/cache';
-import { toStl } from '@jsxcad/convert-stl';
-import { toSvg } from '@jsxcad/convert-svg';
+import * as api from '../../es6/jsxcad-api-v1.js';
+import * as convertThree from '../../es6/jsxcad-convert-threejs.js';
+import * as sys from '../../es6/jsxcad-sys.js';
+import { add, normalize, scale, subtract } from '../../es6/jsxcad-math-vec3.js';
+import { Hull } from '../../es6/jsxcad-api-v1-extrude.js';
+import { clearCache } from '../../es6/jsxcad-cache.js';
+import { toStl } from '../../es6/jsxcad-convert-stl.js';
+import { toSvg } from '../../es6/jsxcad-convert-svg.js';
 
 function computeXYSegmentLength(p1, p2) {
   const segmentLength = Math.sqrt(
