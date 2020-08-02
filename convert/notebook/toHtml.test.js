@@ -24,7 +24,6 @@ test('Geodesic sphere', async (t) => {
     },
   ];
   const html = await toHtml(notebook);
-  console.log(new TextDecoder('utf8').decode(html));
   t.is(
     new TextDecoder('utf8').decode(html),
     await readFile('toHtml.test.html', { encoding: 'utf8' })
