@@ -1,0 +1,35 @@
+
+<html>
+ <head>
+  <title>JSxCAD Viewer</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+ </head>
+ <body>
+  <script type='module'>
+    import { dataUrl } from 'https://gitcdn.link/cdn/jsxcad/JSxCAD/master/es6/jsxcad-ui-threejs.js';
+    import { Shape } from 'https://gitcdn.link/cdn/jsxcad/JSxCAD/master/es6/jsxcad-api-v1-shape.js';
+
+    const geometry = {"type":"disjointAssembly","content":[{"type":"paths","tags":["paths"],"paths":[[[3,0,0],[-1.5,2.59809,0],[-1.5,-2.59809,0]]]},{"type":"solid","tags":["solid"],"solid":[[[[0.52573,-0.85065,0],[-0.52573,-0.85065,0],[0,-0.52573,-0.85065]]],[[[0,-0.52573,-0.85065],[0.85065,0,-0.52573],[0.52573,-0.85065,0]]],[[[0.85065,0,0],[0.52573,-0.85065,0],[0.85065,0,-0.52573]]],[[[0.52573,0.85065,0],[0.85065,0,0],[0.85065,0,-0.52573]]],[[[0.52573,0.85065,0],[0.85065,0,-0.52573],[0,0.52573,-0.85065]]],[[[0.85065,0,-0.52573],[0,-0.52573,-0.85065],[0,0.52573,-0.85065]]],[[[0,0.52573,-0.85065],[0,-0.52573,-0.85065],[-0.85065,0,-0.52573]]],[[[0,-0.52573,-0.85065],[-0.52573,-0.85065,0],[-0.85065,0,-0.52573]]],[[[-0.85065,0,-0.52573],[-0.52573,-0.85065,0],[-0.85065,0,0]]],[[[0.52573,-0.85065,0],[0.85065,0,0],[0.52573,0.85065,0]],[[0.52573,0.85065,0],[-0.52573,0.85065,0],[-0.85065,0,0]],[[-0.85065,0,0],[-0.52573,-0.85065,0],[0.52573,-0.85065,0]],[[0.52573,-0.85065,0],[0.52573,0.85065,0],[-0.85065,0,0]]],[[[0.52573,0.85065,0],[0,0.52573,-0.85065],[-0.52573,0.85065,0]]],[[[0,0.52573,-0.85065],[-0.85065,0,-0.52573],[-0.52573,0.85065,0]]],[[[-0.85065,0,0],[-0.52573,0.85065,0],[-0.85065,0,-0.52573]]]]},{"type":"surface","tags":["surface"],"surface":[[[1,1,0],[-1,1,0],[-1,-1,0],[1,-1,0]]]}]};
+
+    const run = async () => {
+      const { width = 1024, height = 1024, position = [0, 0, 100] } = {};
+      const body = document.getElementsByTagName('body')[0];
+      const url = await dataUrl(Shape.fromGeometry(geometry), {
+        width,
+        height,
+        position,
+      });
+      const image = document.createElement('img');
+      image.src = url;
+      body.appendChild(image);
+    };
+
+    document.onreadystatechange = () => {
+      if (document.readyState === 'complete') {
+        run();
+      }
+    };
+  </script>
+ </body>
+</html>
