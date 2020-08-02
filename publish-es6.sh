@@ -44,6 +44,7 @@ cp convert/dst/dist/main.js es6/jsxcad-convert-dst.js
 cp convert/dxf/dist/main.js es6/jsxcad-convert-dxf.js
 cp convert/gcode/dist/main.js es6/jsxcad-convert-gcode.js
 cp convert/ldraw/dist/main.js es6/jsxcad-convert-ldraw.js
+cp convert/notebook/dist/main.js es6/jsxcad-convert-notebook.js
 cp convert/pdf/dist/main.js es6/jsxcad-convert-pdf.js
 cp convert/png/dist/main.js es6/jsxcad-convert-png.js
 cp convert/shapefile/dist/main.js es6/jsxcad-convert-shapefile.js
@@ -74,6 +75,7 @@ cp math/vec2/dist/main.js es6/jsxcad-math-vec2.js
 cp math/vec3/dist/main.js es6/jsxcad-math-vec3.js
 cp math/vec4/dist/main.js es6/jsxcad-math-vec4.js
 cp sys/dist/main.js es6/jsxcad-sys.js
+cp ui/notebook/dist/main.js es6/jsxcad-ui-notebook.js
 cp ui/threejs/dist/main.js es6/jsxcad-ui-threejs.js
 cp ui/v1/dist/main.js es6/jsxcad-ui-v1.js
 cp ui/v1/dist/webworker.js es6/jsxcad-ui-v1-webworker.js
