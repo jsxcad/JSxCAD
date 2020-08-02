@@ -85964,7 +85964,7 @@ class NotebookUi extends Pane {
       nth += 1;
       const isSelected = nth === selected;
 
-      if (note.geometry) {
+      if (note.view) {
         const index = nth;
         const {
           width,
@@ -85972,7 +85972,7 @@ class NotebookUi extends Pane {
           position,
           path,
           geometry
-        } = note.geometry;
+        } = note.view;
         const mode = index === selected ? 'dynamic' : 'static';
 
         const select = e => {

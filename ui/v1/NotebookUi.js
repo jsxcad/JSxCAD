@@ -302,9 +302,9 @@ export class NotebookUi extends Pane {
     for (const note of notebook) {
       nth += 1;
       const isSelected = nth === selected;
-      if (note.geometry) {
+      if (note.view) {
         const index = nth;
-        const { width, height, position, path, geometry } = note.geometry;
+        const { width, height, position, path, geometry } = note.view;
         const mode = index === selected ? 'dynamic' : 'static';
         const select = (e) => {
           e.stopPropagation();

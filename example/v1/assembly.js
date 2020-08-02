@@ -3,16 +3,33 @@ import '@jsxcad/api-v1-threejs';
 
 const assembly = Cube(30).as('cube').with(Cylinder(5, 30).as('cylinder'));
 
-assembly.keep('cube').Item().Page().writeStl('cube');
+md`
+Cube
+`;
+assembly
+  .keep('cube')
+  .Item()
+  .Page()
+  .view({ position: [100, -100, 100] })
+  .writeStl('cube');
 
+md`
+Cube-Cylinder
+`;
 // This should produce the cube with a hole in it filled by the cylinder.
-assembly.keep('cube', 'cylinder').Item().writeStl('cube-cylinder');
+assembly.keep('cube', 'cylinder').Item().view().writeStl('cube-cylinder');
 
+md`
+Cylinder
+`;
 // This should produce just the cylinder and no cube.
-assembly.keep('cylinder').Item().writeStl('cylinder');
+assembly.keep('cylinder').Item().view().writeStl('cylinder');
 
+md`
+Assembly
+`;
 // This should produce a threejs page with the two distinct geometries together.
-assembly.writeThreejsPage({
+assembly.view().writeThreejsPage({
   cameraPosition: [0, 0, 120],
   path: 'html/assembly.html',
 });

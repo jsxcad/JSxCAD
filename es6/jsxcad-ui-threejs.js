@@ -54310,7 +54310,7 @@ const toCanvasFromWebglContext = (webgl) => {
   return outCanvas;
 };
 
-const UP = [0, 1, 0];
+const UP = [0, 0, 1];
 
 const staticView = async (
   shape,

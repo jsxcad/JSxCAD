@@ -13,9 +13,9 @@ const view = (
     if (path) {
       const nthPath = `${path}_${nth++}`;
       addPending(write(nthPath, entry));
-      emit({ geometry: { width, height, position, path: nthPath } });
+      emit({ view: { width, height, position, path: nthPath } });
     } else {
-      emit({ geometry: { width, height, position, geometry: entry } });
+      emit({ view: { width, height, position, geometry: entry } });
     }
   }
   return shape;
