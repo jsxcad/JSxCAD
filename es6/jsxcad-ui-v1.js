@@ -85718,7 +85718,7 @@ class OrbitView extends react.PureComponent {
         borderStyle: 'solid',
         borderWidth: 'thin',
         borderColor: 'blue',
-        display: 'inline-block',
+        display: 'block',
         width: '90%',
         height: '90%'
       },
@@ -85790,7 +85790,7 @@ class StaticView extends react.PureComponent {
     } = this.state;
     return /*#__PURE__*/react.createElement("div", {
       style: {
-        display: 'inline-block'
+        display: 'block'
       }
     }, /*#__PURE__*/react.createElement("img", {
       src: url,
@@ -85891,11 +85891,11 @@ class DownloadView extends react.PureComponent {
       data,
       type
     }, index) => {
-      return /*#__PURE__*/react.createElement(Button, {
+      return /*#__PURE__*/react.createElement("div", null, /*#__PURE__*/react.createElement(Button, {
         key: index,
         variant: "outline-primary",
         onClick: () => downloadFile(filename, data, type)
-      }, filename);
+      }, filename));
     };
 
     return /*#__PURE__*/react.createElement(ButtonGroup, null, entries.map(makeDownloadButton));
@@ -85964,7 +85964,7 @@ class NotebookUi extends Pane {
       nth += 1;
       const isSelected = nth === selected;
 
-      if (note.geometry) {
+      if (note.view) {
         const index = nth;
         const {
           width,
@@ -85972,7 +85972,7 @@ class NotebookUi extends Pane {
           position,
           path,
           geometry
-        } = note.geometry;
+        } = note.view;
         const mode = index === selected ? 'dynamic' : 'static';
 
         const select = e => {

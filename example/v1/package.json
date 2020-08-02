@@ -28,6 +28,7 @@
   "dependencies": {
     "@jsxcad/api-v1": "^0.0.79",
     "@jsxcad/compiler": "^0.0.79",
+    "@jsxcad/convert-notebook": "^0.0.79",
     "@jsxcad/sys": "^0.0.79"
   },
   "devDependencies": {

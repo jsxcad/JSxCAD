@@ -1,11 +1,20 @@
-import { addSource, boot, resolvePending, setupFilesystem } from '@jsxcad/sys';
+import {
+  addSource,
+  boot,
+  clearEmitted,
+  getEmitted,
+  resolvePending,
+  setupFilesystem,
+} from '@jsxcad/sys';
 import { promises, readFileSync, writeFileSync } from 'fs';
+import { toHtml } from '@jsxcad/convert-notebook';
 
 import { importModule } from '@jsxcad/api-v1';
 import { toEcmascript } from '@jsxcad/compiler';
 
 export const run = async (target, base = 'observed') => {
   Error.stackTraceLimit = Infinity;
+  clearEmitted();
   await boot();
   const start = new Date();
   setupFilesystem({ fileBase: `${base}/${target}` });
@@ -15,6 +24,10 @@ export const run = async (target, base = 'observed') => {
   const end = new Date();
   const observedTime = end - start;
   writeFileSync(`jsxcad/observed/${target}/time`, `${observedTime}`);
+  writeFileSync(
+    `jsxcad/observed/${target}/notebook.html`,
+    await toHtml(getEmitted())
+  );
   console.log(`Observed Time: ${observedTime}`);
   const expectedTime = parseInt(readFileSync(`expected/${target}/time`));
   console.log(`Expected Time: ${expectedTime}`);
