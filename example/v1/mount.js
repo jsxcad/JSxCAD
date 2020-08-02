@@ -209,5 +209,5 @@ console.log(`QQ/begin`);
 const mount = main();
 console.log(`QQ/end`);
 
-mount.cloud().writeShape('mount');
-mount.Item().Page().writeStl('mount');
+mount.cloud().view().writeShape('mount');
+mount.Item().Page().view().writeStl('mount');

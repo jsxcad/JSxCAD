@@ -5,4 +5,5 @@ Cube(30)
   .section()
   .Item()
   .Page()
+  .view()
   .writePdf('cutCubes');

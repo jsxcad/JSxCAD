@@ -1,3 +1,3 @@
-minkowski(Cube().front().right().above(), Sphere()).writeStl(
-  'stl/minkowski.stl'
-);
+minkowski(Cube().front().right().above(), Sphere())
+  .view()
+  .writeStl('stl/minkowski.stl');

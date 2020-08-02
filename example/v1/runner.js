@@ -24,10 +24,7 @@ export const run = async (target, base = 'observed') => {
   const end = new Date();
   const observedTime = end - start;
   writeFileSync(`jsxcad/observed/${target}/time`, `${observedTime}`);
-  writeFileSync(
-    `jsxcad/observed/${target}/notebook.html`,
-    await toHtml(getEmitted())
-  );
+  writeFileSync(`observed/${target}.html`, await toHtml(getEmitted()));
   console.log(`Observed Time: ${observedTime}`);
   const expectedTime = parseInt(readFileSync(`expected/${target}/time`));
   console.log(`Expected Time: ${expectedTime}`);

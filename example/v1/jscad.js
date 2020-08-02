@@ -36,4 +36,4 @@ const example001 = await readJscad({
 
 const output = example001();
 
-output.writeStl('tmp/jscad.stl');
+output.view().writeStl('tmp/jscad.stl');

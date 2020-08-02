@@ -13,4 +13,5 @@ Cursor.fromOrigin()
   .rotateZ(90)
   .toShape()
   .Page()
+  .view()
   .writePdf('cursor');
