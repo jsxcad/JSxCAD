@@ -1843,8 +1843,8 @@ var marked_1 = marked;
 const toDomElement = async (notebook) => {
   const container = document.createElement('div');
   for (const note of notebook) {
-    if (note.geometry) {
-      const { geometry, width, height, target, up, position } = note.geometry;
+    if (note.view) {
+      const { geometry, width, height, target, up, position } = note.view;
       const url = await dataUrl(Shape.fromGeometry(geometry), {
         width,
         height,
