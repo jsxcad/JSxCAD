@@ -1844,10 +1844,12 @@ const toDomElement = async (notebook) => {
   const container = document.createElement('div');
   for (const note of notebook) {
     if (note.geometry) {
-      const { geometry, width, height, position } = note.geometry;
+      const { geometry, width, height, target, up, position } = note.geometry;
       const url = await dataUrl(Shape.fromGeometry(geometry), {
         width,
         height,
+        target,
+        up,
         position,
       });
       const image = document.createElement('img');

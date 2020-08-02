@@ -16,10 +16,12 @@ test('Geodesic sphere', async (t) => {
     { md: '# Test Notebook.' },
     { md: '## A Sphere.' },
     {
-      geometry: {
-        type: 'solid',
-        solid: fromPolygons(unitGeodesicSphere20Polygons),
-        tags: ['solid'],
+      view: {
+        geometry: {
+          type: 'solid',
+          solid: fromPolygons(unitGeodesicSphere20Polygons),
+          tags: ['solid'],
+        },
       },
     },
   ];
