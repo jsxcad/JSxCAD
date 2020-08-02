@@ -30,5 +30,5 @@ const Spinner = ({
     .add(Cylinder.ofDiameter(coreDiameter, coreThickness))
     .with(BearingBall(bearingBallDiameter + bearingBallPlay * 2));
 
-Spinner({ wingTwist: 45 }).cloud(0.5).writeShape('spinner');
-Spinner({ wingTwist: 45 }).Item().Page().writeStl('spinner');
+Spinner({ wingTwist: 45 }).cloud(0.5).view().writeShape('spinner');
+Spinner({ wingTwist: 45 }).Item().Page().view().writeStl('spinner');

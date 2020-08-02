@@ -6,12 +6,7 @@ const assembly = Cube(30).as('cube').with(Cylinder(5, 30).as('cylinder'));
 md`
 Cube
 `;
-assembly
-  .keep('cube')
-  .Item()
-  .Page()
-  .view({ position: [100, -100, 100] })
-  .writeStl('cube');
+assembly.keep('cube').Item().Page().view().writeStl('cube');
 
 md`
 Cube-Cylinder

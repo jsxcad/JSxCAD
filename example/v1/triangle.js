@@ -1,1 +1,1 @@
-Triangle().writeThreejsPage('tmp/triangle.html');
+Triangle().view().writeThreejsPage('tmp/triangle.html');

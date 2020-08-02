@@ -5,4 +5,5 @@ Square(30)
   .outline()
   .Item()
   .Page()
+  .view()
   .writePdf('squares');

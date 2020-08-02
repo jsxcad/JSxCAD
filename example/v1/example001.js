@@ -27,8 +27,8 @@ function example001() {
 }
 
 const solid = example001();
-solid.writeStl('tmp/example001.stl');
-solid.writeThreejsPage({
+solid.view().writeStl('tmp/example001.stl');
+solid.view().writeThreejsPage({
   cameraPosition: [0, 0, 120],
   path: 'tmp/example001.html',
 });

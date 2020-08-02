@@ -1,1 +1,1 @@
-Cube(30).front().right().above().writeStl('stl/cube.stl');
+Cube(30).front().right().above().view().writeStl('stl/cube.stl');

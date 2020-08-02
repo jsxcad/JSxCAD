@@ -1852,9 +1852,11 @@ const toDomElement = async (notebook) => {
         up,
         position,
       });
+      const div = document.createElement('div');
       const image = document.createElement('img');
       image.src = url;
-      container.appendChild(image);
+      div.appendChild(image);
+      container.appendChild(div);
     }
     if (note.md) {
       // Use ''' and '' instead of ``` and `` to avoid escaping.

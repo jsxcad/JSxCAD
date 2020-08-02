@@ -9,4 +9,5 @@ Cube.fromCorners([0, 0, 0], [40, 4, 1])
   )
   .Item()
   .Page()
+  .view()
   .writeStl('interlock-proof-of-concept');

@@ -4,13 +4,15 @@ let x = assemble(
   Cube().translate([0.5, 0, 0]).as('c')
 );
 
-x.writeStl('sphereCubes');
+x.view().writeStl('sphereCubes');
 
-x.writeSvgPhoto({
+x.view().writeSvgPhoto({
   path: 'svg/sphereCubes.svg',
   view: { position: [6, 6, 6] },
 });
-x.keep('a').writeSvgPhoto({
-  path: 'svg/sphereCubesA.svg',
-  view: { position: [-6, 6, 6] },
-});
+x.keep('a')
+  .view()
+  .writeSvgPhoto({
+    path: 'svg/sphereCubesA.svg',
+    view: { position: [-6, 6, 6] },
+  });

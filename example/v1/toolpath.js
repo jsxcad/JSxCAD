@@ -29,4 +29,4 @@ const cutAwayVolume = shape3D
   .extrude(10);
 const cutShape3d = shape3D.cut(cutAwayVolume);
 
-cutShape3d.writeStl('cutShape.stl');
+cutShape3d.view().writeStl('cutShape.stl');
