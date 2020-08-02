@@ -53535,8 +53535,6 @@ const buildGuiControls = ({ datasets, gui }) => {
   return count;
 };
 
-Object3D.DefaultUp = new Vector3(0, 0, 1);
-
 const createResizer = ({
   camera,
   renderer,
@@ -53564,6 +53562,8 @@ const buildScene = ({
   withAxes = true,
   renderer,
 }) => {
+  Object3D.DefaultUp.set(0, 0.0001, 1);
+
   const { target = [0, 0, 0], position = [40, 40, 40], up = [0, 0, 1] } = view;
 
   const camera = new PerspectiveCamera(27, width / height, 1, 1000000);
@@ -54310,7 +54310,7 @@ const toCanvasFromWebglContext = (webgl) => {
   return outCanvas;
 };
 
-const UP = [0, 0, 1];
+const UP = [0, 0.0001, 1];
 
 const staticView = async (
   shape,

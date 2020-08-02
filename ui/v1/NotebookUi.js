@@ -89,7 +89,7 @@ export class OrbitView extends React.PureComponent {
           borderStyle: 'solid',
           borderWidth: 'thin',
           borderColor: 'blue',
-          display: 'inline-block',
+          display: 'block',
           width: '90%',
           height: '90%',
         }}
@@ -149,7 +149,7 @@ export class StaticView extends React.PureComponent {
     const { onClick } = this.props;
     const { url } = this.state;
     return (
-      <div style={{ display: 'inline-block' }}>
+      <div style={{ display: 'block' }}>
         <img
           src={url}
           onClick={onClick}
@@ -245,13 +245,15 @@ export class DownloadView extends React.PureComponent {
 
     const makeDownloadButton = ({ filename, data, type }, index) => {
       return (
-        <Button
-          key={index}
-          variant="outline-primary"
-          onClick={() => downloadFile(filename, data, type)}
-        >
-          {filename}
-        </Button>
+        <div>
+          <Button
+            key={index}
+            variant="outline-primary"
+            onClick={() => downloadFile(filename, data, type)}
+          >
+            {filename}
+          </Button>
+        </div>
       );
     };
 
