@@ -54314,7 +54314,13 @@ const UP = [0, 1, 0];
 
 const staticView = async (
   shape,
-  { target, position, up = UP, width = 256, height = 128 } = {}
+  {
+    target = [0, 0, 0],
+    position = [0, 0, 0],
+    up = UP,
+    width = 256,
+    height = 128,
+  } = {}
 ) => {
   const threejsGeometry = toThreejsGeometry(shape.toKeptGeometry());
   const { renderer } = await staticDisplay(

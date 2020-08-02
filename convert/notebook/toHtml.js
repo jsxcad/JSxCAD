@@ -1,6 +1,10 @@
 export const toHtml = async (
   notebook,
-  { view, title = 'JSxCAD Viewer' } = {}
+  {
+    view,
+    title = 'JSxCAD Viewer',
+    modulePath = 'https://gitcdn.link/cdn/jsxcad/JSxCAD/master/es6',
+  } = {}
 ) => {
   const html = `
 <html>
@@ -11,14 +15,13 @@ export const toHtml = async (
  </head>
  <body>
   <script type='module'>
-    import { toDomElement } from 'https://gitcdn.link/cdn/jsxcad/JSxCAD/master/es6/jsxcad-ui-notebook.js';
+    import { toDomElement } from '${modulePath}/jsxcad-ui-notebook.js';
 
     const notebook = ${JSON.stringify(notebook)};
 
     const run = async () => {
-      const { width = 1024, height = 1024, position = [0, 0, 100] } = {};
       const body = document.getElementsByTagName('body')[0];
-      const notebookElement = toDomElement(notebook);
+      const notebookElement = await toDomElement(notebook);
       body.appendChild(notebookElement);
     };
 
