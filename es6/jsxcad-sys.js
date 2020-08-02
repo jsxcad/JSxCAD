@@ -3733,4 +3733,4 @@ const touch = async (path, { workspace } = {}) => {
   }
 };
 
-export { addPending, addSource, ask, boot, clearEmitted, conversation, createService, deleteFile$1 as deleteFile, emit$1 as emit, getEmitted, getFilesystem, getSources, listFiles$1 as listFiles, listFilesystems, log, onBoot, qualifyPath, read, readFile, resolvePending, setHandleAskUser, setupFilesystem, touch, unwatchFile, unwatchFileCreation, unwatchFileDeletion, unwatchFiles, unwatchLog, watchFile, watchFileCreation, watchFileDeletion, watchLog, write, writeFile };
+export { addPending, addSource, ask, boot, clearEmitted, conversation, createService, deleteFile$1 as deleteFile, emit$1 as emit, getEmitted, getFilesystem, getSources, isBrowser, isNode, isWebWorker, listFiles$1 as listFiles, listFilesystems, log, onBoot, qualifyPath, read, readFile, resolvePending, setHandleAskUser, setupFilesystem, touch, unwatchFile, unwatchFileCreation, unwatchFileDeletion, unwatchFiles, unwatchLog, watchFile, watchFileCreation, watchFileDeletion, watchLog, write, writeFile };

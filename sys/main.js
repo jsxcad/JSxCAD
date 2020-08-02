@@ -5,6 +5,7 @@ export { ask, setHandleAskUser } from './ask.js';
 export { boot, onBoot } from './boot.js';
 export { clearEmitted, emit, getEmitted } from './emit.js';
 export { getFilesystem, qualifyPath, setupFilesystem } from './filesystem.js';
+export { isBrowser, isNode, isWebWorker } from './browserOrNode.js';
 export { listFiles, listFilesystems } from './listFiles.js';
 export { log, unwatchLog, watchLog } from './log.js';
 export { unwatchFile, watchFile } from './watchFile.js';
