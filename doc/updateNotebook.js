@@ -1,9 +1,4 @@
-import {
-  boot,
-  clearEmitted,
-  getEmitted,
-  resolvePending,
-} from '@jsxcad/sys';
+import { boot, clearEmitted, getEmitted, resolvePending } from '@jsxcad/sys';
 import { readFileSync, writeFileSync } from 'fs';
 import { importModule } from '@jsxcad/api-v1';
 import pixelmatch from 'pixelmatch';
@@ -30,9 +25,7 @@ export const updateNotebook = async (target) => {
   const observedPng = pngjs.PNG.sync.read(capture);
   let expectedPng;
   try {
-    expectedPng = pngjs.PNG.sync.read(
-      readFileSync(`${target}.png`)
-    );
+    expectedPng = pngjs.PNG.sync.read(readFileSync(`${target}.png`));
   } catch (error) {
     if (error.code !== 'ENOENT') {
       throw error;

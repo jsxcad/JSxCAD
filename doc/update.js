@@ -6,7 +6,9 @@ import { updateNotebook } from './updateNotebook.js';
 const build = async (baseDirectory) => {
   const notebooks = [];
   const walk = async (directory) => {
-    for (const entry of await fs.promises.readdir(directory, { withFileTypes: true })) {
+    for (const entry of await fs.promises.readdir(directory, {
+      withFileTypes: true,
+    })) {
       if (['node_modules'].includes(entry.name)) {
         continue;
       }
@@ -26,4 +28,4 @@ const build = async (baseDirectory) => {
   }
 };
 
-build(argv[2]).catch(error => console.log(error.toString()));
+build(argv[2]).catch((error) => console.log(error.toString()));
