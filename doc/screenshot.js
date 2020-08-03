@@ -8,7 +8,8 @@ export const screenshot = async (html, { width, height }) => {
   page.on('error', (msg) => console.log(msg.text()));
   await page.setContent(html);
   await page.waitForSelector('.notebook.loaded');
-  const png = await page.screenshot({ fullPage: true });
+  const pngData = await page.screenshot({ fullPage: true });
+  const imageUrls = [];
   await browser.close();
-  return png;
+  return { pngData, imageUrls };
 };
