@@ -16,13 +16,13 @@ export const updateNotebook = async (target) => {
   await resolvePending();
   const html = await toHtml(getEmitted());
   writeFileSync(`${target}.html`, html);
-  const capture = await screenshot(
+  const { pngData } = await screenshot(
     new TextDecoder('utf8').decode(html),
     `${target}.png`,
     { width, height }
   );
-  writeFileSync(`${target}.observed.png`, capture);
-  const observedPng = pngjs.PNG.sync.read(capture);
+  writeFileSync(`${target}.observed.png`, pngData);
+  const observedPng = pngjs.PNG.sync.read(pngData);
   let expectedPng;
   try {
     expectedPng = pngjs.PNG.sync.read(readFileSync(`${target}.png`));
@@ -30,7 +30,7 @@ export const updateNotebook = async (target) => {
     if (error.code !== 'ENOENT') {
       throw error;
     }
-    writeFileSync(`${target}.png`, capture);
+    writeFileSync(`${target}.png`, pngData);
     return;
   }
   const differencePng = new pngjs.PNG({ width, height });
