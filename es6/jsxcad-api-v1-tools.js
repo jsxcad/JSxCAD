@@ -198,7 +198,7 @@ const LineRouter = (
     if (sweep !== 'no') {
       // Generally a v bit.
       sweeps.push(
-        paths
+        Shape$1.fromGeometry(taggedPaths({}, paths))
           .sweep(Cylinder.ofDiameter(toolDiameter, depth).moveZ(depth / -2))
           .op((s) => (sweep === 'show' ? s : s.Void()))
       );

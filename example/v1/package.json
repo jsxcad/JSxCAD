@@ -29,7 +29,10 @@
     "@jsxcad/api-v1": "^0.0.79",
     "@jsxcad/compiler": "^0.0.79",
     "@jsxcad/convert-notebook": "^0.0.79",
-    "@jsxcad/sys": "^0.0.79"
+    "@jsxcad/sys": "^0.0.79",
+    "pixelmatch": "^5.2.1",
+    "pngjs": "^5.0.0",
+    "puppeteer": "^5.2.1"
   },
   "devDependencies": {
     "@jsxcad/eslint-plugin-typelint": "^0.0.79",

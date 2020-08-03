@@ -14,14 +14,19 @@
     const run = async () => {
       const body = document.getElementsByTagName('body')[0];
       const notebookElement = await toDomElement(notebook);
+      notebookElement.classList.add('notebook', 'loaded');
       body.appendChild(notebookElement);
     };
 
-    document.onreadystatechange = () => {
-      if (document.readyState === 'complete') {
-        run();
-      }
-    };
+    if (document.readyState === 'complete') {
+      run();
+    } else {
+      document.onreadystatechange = () => {
+        if (document.readyState === 'complete') {
+          run();
+        }
+      };
+    }
   </script>
  </body>
 </html>
