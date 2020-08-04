@@ -87753,7 +87753,7 @@ class Ui extends react.PureComponent {
     const views = [];
 
     for (const file of files) {
-      if (file.startsWith('source/') && (file.endsWith('.jsxcad') || file.endsWith('.jsx') || file.endsWith('.js'))) {
+      if (file.startsWith('source/') && (file.endsWith('.jsxcad') || file.endsWith('.jsx') || file.endsWith('.nb') || file.endsWith('.js'))) {
         views.push({
           view: 'editScript',
           viewTitle: 'Edit Script',
