@@ -6,6 +6,19 @@ import pngjs from 'pngjs';
 import { screenshot } from './screenshot.js';
 import { toHtml } from '@jsxcad/convert-notebook';
 
+const writeMarkdown = (path, notebook, imageUrls) => {
+  const md = [];
+  for (let nth = 0; nth < notebook.length; nth++) {
+    if (notebook[nth].md) {
+      md.push(notebook[nth].md);
+    }
+    if (imageUrls[nth]) {
+      md.push(`![Image](${imageUrls[nth]})`);
+    }
+  }
+  writeFileSync(path, md.join('\n'));
+};
+
 export const updateNotebook = async (target) => {
   console.log(`updateNotebook: ${target}`);
   const width = 512;
@@ -14,13 +27,15 @@ export const updateNotebook = async (target) => {
   await boot();
   await importModule(`${target}.nb`);
   await resolvePending();
-  const html = await toHtml(getEmitted());
+  const notebook = getEmitted();
+  const html = await toHtml(notebook);
   writeFileSync(`${target}.html`, html);
-  const { pngData } = await screenshot(
+  const { pngData, imageUrls } = await screenshot(
     new TextDecoder('utf8').decode(html),
     `${target}.png`,
     { width, height }
   );
+  await writeMarkdown(`${target}.md`, notebook, imageUrls);
   writeFileSync(`${target}.observed.png`, pngData);
   const observedPng = pngjs.PNG.sync.read(pngData);
   let expectedPng;

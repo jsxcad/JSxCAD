@@ -10,6 +10,10 @@ export const screenshot = async (html, { width, height }) => {
   await page.waitForSelector('.notebook.loaded');
   const pngData = await page.screenshot({ fullPage: true });
   const imageUrls = [];
+  for (const element of await page.$$('.note')) {
+    const property = await element.getProperty('src');
+    imageUrls.push(await property.jsonValue());
+  }
   await browser.close();
   return { pngData, imageUrls };
 };
