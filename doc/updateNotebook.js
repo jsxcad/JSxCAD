@@ -2,6 +2,7 @@ import { boot, clearEmitted, getEmitted, resolvePending } from '@jsxcad/sys';
 import { readFileSync, writeFileSync } from 'fs';
 import imageDataUri from 'image-data-uri';
 import { importModule } from '@jsxcad/api-v1';
+import pathModule from 'path';
 import pixelmatch from 'pixelmatch';
 import pngjs from 'pngjs';
 import { screenshot } from './screenshot.js';
@@ -19,7 +20,7 @@ const writeMarkdown = (path, notebook, imageUrls) => {
       const { dataBuffer } = imageDataUri.decode(imageUrls[nth]);
       const imagePath = `${path}.img.${imageCount}.png`;
       writeFileSync(imagePath, dataBuffer);
-      md.push(`![Image](${imagePath})`);
+      md.push(`![Image](${pathModule.basename(imagePath)})`);
     }
   }
   writeFileSync(`${path}.md`, md.join('\n'));
