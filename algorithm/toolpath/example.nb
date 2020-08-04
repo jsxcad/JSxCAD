@@ -1,3 +1,5 @@
+md`[Open](https://jsxcad.js.org/preAlphaHead/#JSxCAD@https://gitcdn.link/cdn/jsxcad/JSxCAD/master/algorithm/toolpath/example.nb)`;
+
 import { GearProfile } from 'https://gitcdn.link/cdn/jsxcad/JSxCAD/master/library/InvoluteGear.js';
 
 const profile = GearProfile(6, { mmPerTooth: 12 });

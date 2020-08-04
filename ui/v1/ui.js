@@ -356,6 +356,7 @@ class Ui extends React.PureComponent {
         file.startsWith('source/') &&
         (file.endsWith('.jsxcad') ||
           file.endsWith('.jsx') ||
+          file.endsWith('.nb') ||
           file.endsWith('.js'))
       ) {
         views.push({

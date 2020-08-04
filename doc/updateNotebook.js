@@ -18,7 +18,7 @@ const writeMarkdown = (path, notebook, imageUrls) => {
     if (imageUrls[nth]) {
       imageCount += 1;
       const { dataBuffer } = imageDataUri.decode(imageUrls[nth]);
-      const imagePath = `${path}.img.${imageCount}.png`;
+      const imagePath = `${path}.md.${imageCount}.png`;
       writeFileSync(imagePath, dataBuffer);
       md.push(`![Image](${pathModule.basename(imagePath)})`);
     }
@@ -28,8 +28,6 @@ const writeMarkdown = (path, notebook, imageUrls) => {
 
 export const updateNotebook = async (target) => {
   console.log(`updateNotebook: ${target}`);
-  const width = 512;
-  const height = 2048;
   clearEmitted();
   await boot();
   await importModule(`${target}.nb`);
@@ -39,8 +37,7 @@ export const updateNotebook = async (target) => {
   writeFileSync(`${target}.html`, html);
   const { pngData, imageUrls } = await screenshot(
     new TextDecoder('utf8').decode(html),
-    `${target}.png`,
-    { width, height }
+    `${target}.png`
   );
   await writeMarkdown(target, notebook, imageUrls);
   writeFileSync(`${target}.observed.png`, pngData);
@@ -55,6 +52,7 @@ export const updateNotebook = async (target) => {
     writeFileSync(`${target}.png`, pngData);
     return;
   }
+  const { width, height } = expectedPng;
   const differencePng = new pngjs.PNG({ width, height });
   const pixelThreshold = 1;
   const numFailedPixels = pixelmatch(
@@ -72,6 +70,10 @@ export const updateNotebook = async (target) => {
     }
   );
   if (numFailedPixels >= pixelThreshold) {
+    writeFileSync(
+      `${target}.difference.png`,
+      pngjs.PNG.sync.write(differencePng)
+    );
     throw Error('die');
   }
 };
