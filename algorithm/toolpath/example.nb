@@ -1,4 +1,8 @@
-md`[Open](https://jsxcad.js.org/preAlphaHead/#JSxCAD@https://gitcdn.link/cdn/jsxcad/JSxCAD/master/algorithm/toolpath/example.nb)`;
+md`
+---
+[Open Notebook in Editor](https://jsxcad.js.org/preAlphaHead/#JSxCAD@https://gitcdn.link/cdn/jsxcad/JSxCAD/master/algorithm/toolpath/example.nb)
+---
+`;
 
 import { GearProfile } from 'https://gitcdn.link/cdn/jsxcad/JSxCAD/master/library/InvoluteGear.js';
 
