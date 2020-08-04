@@ -1,6 +1,8 @@
 import { boot, clearEmitted, getEmitted, resolvePending } from '@jsxcad/sys';
 import { readFileSync, writeFileSync } from 'fs';
+import imageDataUri from 'image-data-uri';
 import { importModule } from '@jsxcad/api-v1';
+import pathModule from 'path';
 import pixelmatch from 'pixelmatch';
 import pngjs from 'pngjs';
 import { screenshot } from './screenshot.js';
@@ -8,15 +10,20 @@ import { toHtml } from '@jsxcad/convert-notebook';
 
 const writeMarkdown = (path, notebook, imageUrls) => {
   const md = [];
+  let imageCount = 0;
   for (let nth = 0; nth < notebook.length; nth++) {
     if (notebook[nth].md) {
       md.push(notebook[nth].md);
     }
     if (imageUrls[nth]) {
-      md.push(`![Image](${imageUrls[nth]})`);
+      imageCount += 1;
+      const { dataBuffer } = imageDataUri.decode(imageUrls[nth]);
+      const imagePath = `${path}.img.${imageCount}.png`;
+      writeFileSync(imagePath, dataBuffer);
+      md.push(`![Image](${pathModule.basename(imagePath)})`);
     }
   }
-  writeFileSync(path, md.join('\n'));
+  writeFileSync(`${path}.md`, md.join('\n'));
 };
 
 export const updateNotebook = async (target) => {
@@ -35,7 +42,7 @@ export const updateNotebook = async (target) => {
     `${target}.png`,
     { width, height }
   );
-  await writeMarkdown(`${target}.md`, notebook, imageUrls);
+  await writeMarkdown(target, notebook, imageUrls);
   writeFileSync(`${target}.observed.png`, pngData);
   const observedPng = pngjs.PNG.sync.read(pngData);
   let expectedPng;
