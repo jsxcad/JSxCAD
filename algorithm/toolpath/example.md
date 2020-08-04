@@ -1,4 +1,8 @@
-[Open](https://jsxcad.js.org/preAlphaHead/#JSxCAD@https://gitcdn.link/cdn/jsxcad/JSxCAD/master/algorithm/toolpath/example.nb)
+
+---
+[Open Notebook in Editor](https://jsxcad.js.org/preAlphaHead/#JSxCAD@https://gitcdn.link/cdn/jsxcad/JSxCAD/master/algorithm/toolpath/example.nb)
+---
+
 
 Cutting a gear profile without overcut.
 
@@ -6,7 +10,9 @@ Cutting a gear profile without overcut.
 
 Note that the concave corners are not cut completely, but the shape is not cut into.
 
+
 ---
+
 
 Cutting a gear profile with overcut.
 
