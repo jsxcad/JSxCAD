@@ -12,7 +12,23 @@ export const toDomElement = async (notebook) => {
     const { geometry, target, up, position } = note.view;
     const view = { target, up, position };
     const { canvas } = await orbitDisplay({ view, geometry }, container);
-    canvas.addEventListener('click', (event) => container.removeChild(canvas));
+    container.appendChild(canvas);
+    canvas.classList.add('note', 'orbitView');
+    canvas.addEventListener(
+      'keydown',
+      (event) => {
+        if (
+          event.key === 'Escape' ||
+          event.key === 'Esc' ||
+          event.keyCode === 27
+        ) {
+          event.preventDefault();
+          container.removeChild(canvas);
+          return false;
+        }
+      },
+      true
+    );
   };
 
   for (const note of notebook) {
