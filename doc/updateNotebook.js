@@ -1,7 +1,8 @@
 import { boot, clearEmitted, getEmitted, resolvePending } from '@jsxcad/sys';
+import { importModule, log } from '@jsxcad/api-v1';
 import { readFileSync, writeFileSync } from 'fs';
+
 import imageDataUri from 'image-data-uri';
-import { importModule } from '@jsxcad/api-v1';
 import pathModule from 'path';
 import pixelmatch from 'pixelmatch';
 import pngjs from 'pngjs';
@@ -30,7 +31,11 @@ export const updateNotebook = async (target) => {
   console.log(`updateNotebook: ${target}`);
   clearEmitted();
   await boot();
-  await importModule(`${target}.nb`);
+  try {
+    await importModule(`${target}.nb`);
+  } catch (error) {
+    log(error.toString());
+  }
   await resolvePending();
   const notebook = getEmitted();
   const html = await toHtml(notebook);

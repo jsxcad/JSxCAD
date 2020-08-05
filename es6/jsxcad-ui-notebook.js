@@ -1,5 +1,5 @@
+import { dataUrl, orbitDisplay } from './jsxcad-ui-threejs.js';
 import { Shape } from './jsxcad-api-v1-shape.js';
-import { dataUrl } from './jsxcad-ui-threejs.js';
 
 function createCommonjsModule(fn, module) {
 	return module = { exports: {} }, fn(module, module.exports), module.exports;
@@ -1842,6 +1842,14 @@ var marked_1 = marked;
 
 const toDomElement = async (notebook) => {
   const container = document.createElement('div');
+
+  const showOrbitView = async (event, note) => {
+    const { geometry, target, up, position } = note.view;
+    const view = { target, up, position };
+    const { canvas } = await orbitDisplay({ view, geometry }, container);
+    canvas.addEventListener('click', (event) => container.removeChild(canvas));
+  };
+
   for (const note of notebook) {
     if (note.view) {
       const { geometry, width, height, target, up, position } = note.view;
@@ -1856,6 +1864,7 @@ const toDomElement = async (notebook) => {
       const image = document.createElement('img');
       image.classList.add('note', 'view');
       image.src = url;
+      image.addEventListener('click', (event) => showOrbitView());
       div.appendChild(image);
       container.appendChild(div);
     }
