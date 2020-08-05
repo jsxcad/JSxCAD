@@ -1864,7 +1864,7 @@ const toDomElement = async (notebook) => {
       const image = document.createElement('img');
       image.classList.add('note', 'view');
       image.src = url;
-      image.addEventListener('click', (event) => showOrbitView());
+      image.addEventListener('click', (event) => showOrbitView(event, note));
       div.appendChild(image);
       container.appendChild(div);
     }
