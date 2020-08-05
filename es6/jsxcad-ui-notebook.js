@@ -1854,7 +1854,7 @@ const toDomElement = async (notebook) => {
       });
       const div = document.createElement('div');
       const image = document.createElement('img');
-      image.classList.add('note');
+      image.classList.add('note', 'view');
       image.src = url;
       div.appendChild(image);
       container.appendChild(div);
@@ -1864,9 +1864,16 @@ const toDomElement = async (notebook) => {
       // FIX: Do this in a more principled fashion.
       const data = note.md.replace(/'''/g, '```').replace(/''/g, '``');
       const markup = document.createElement('div');
-      markup.classList.add('note');
+      markup.classList.add('note', 'markdown');
       markup.innerHTML = marked_1(data);
       container.appendChild(markup);
+    }
+    if (note.log) {
+      const text = document.createTextNode(note.log.text);
+      const entry = document.createElement('div');
+      entry.appendChild(text);
+      entry.classList.add('note', 'log');
+      container.appendChild(entry);
     }
   }
   return container;
