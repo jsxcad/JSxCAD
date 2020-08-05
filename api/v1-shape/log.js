@@ -1,5 +1,6 @@
+import { emit, log as sysLog } from '@jsxcad/sys';
+
 import Shape from './Shape.js';
-import { log as sysLog } from '@jsxcad/sys';
 
 /**
  *
@@ -13,11 +14,16 @@ import { log as sysLog } from '@jsxcad/sys';
  *
  **/
 
-export const log = (text, level) =>
-  sysLog({ op: 'text', text: String(text), level });
+export const log = (text, level) => {
+  emit({ log: { text, level } });
+  return sysLog({ op: 'text', text: String(text), level });
+};
 
-export const logOp = (shape, op) =>
-  sysLog({ op: 'text', text: String(op(shape)) });
+export const logOp = (shape, op) => {
+  const text = String(op(shape));
+  emit({ log: { text } });
+  return sysLog({ op: 'text', text });
+};
 
 const logMethod = function (
   op = (shape) => JSON.stringify(shape.toKeptGeometry())
@@ -26,7 +32,5 @@ const logMethod = function (
   return this;
 };
 Shape.prototype.log = logMethod;
-
-log.signature = 'log(op:function)';
 
 export default log;
