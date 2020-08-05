@@ -29,6 +29,7 @@ export const createResizer = ({
 };
 
 export const buildScene = ({
+  canvas,
   width,
   height,
   view,
@@ -72,7 +73,7 @@ export const buildScene = ({
   camera.add(light);
 
   if (renderer === undefined) {
-    renderer = new WebGLRenderer({ antialias: true });
+    renderer = new WebGLRenderer({ antialias: true, canvas });
     renderer.autoClear = false;
     renderer.setSize(width, height);
     renderer.setClearColor(0xffffff);
@@ -83,7 +84,5 @@ export const buildScene = ({
     renderer.domElement.style =
       'padding-left: 5px; padding-right: 5px; padding-bottom: 5px; position: absolute; z-index: 1';
   }
-  const canvas = renderer.domElement;
-
-  return { camera, canvas, renderer, scene };
+  return { camera, canvas: renderer.domElement, renderer, scene };
 };

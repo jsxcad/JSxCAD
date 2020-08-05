@@ -53555,6 +53555,7 @@ const createResizer = ({
 };
 
 const buildScene = ({
+  canvas,
   width,
   height,
   view,
@@ -53598,7 +53599,7 @@ const buildScene = ({
   camera.add(light);
 
   if (renderer === undefined) {
-    renderer = new WebGLRenderer({ antialias: true });
+    renderer = new WebGLRenderer({ antialias: true, canvas });
     renderer.autoClear = false;
     renderer.setSize(width, height);
     renderer.setClearColor(0xffffff);
@@ -53609,9 +53610,7 @@ const buildScene = ({
     renderer.domElement.style =
       'padding-left: 5px; padding-right: 5px; padding-bottom: 5px; position: absolute; z-index: 1';
   }
-  const canvas = renderer.domElement;
-
-  return { camera, canvas, renderer, scene };
+  return { camera, canvas: renderer.domElement, renderer, scene };
 };
 
 const GEOMETRY_LAYER = 0;
@@ -54154,7 +54153,10 @@ const moveToFit = ({
 
 /* global ResizeObserver */
 
-const orbitDisplay = async ({ view = {}, geometry } = {}, page) => {
+const orbitDisplay = async (
+  { view = {}, geometry, canvas } = {},
+  page
+) => {
   let datasets = [];
   const width = page.offsetWidth;
   const height = page.offsetHeight;
@@ -54165,7 +54167,8 @@ const orbitDisplay = async ({ view = {}, geometry } = {}, page) => {
   const planLayers = new Layers();
   planLayers.set(SKETCH_LAYER);
 
-  const { camera, canvas, renderer, scene } = buildScene({
+  const { camera, displayCanvas, renderer, scene } = buildScene({
+    canvas,
     width,
     height,
     view,
@@ -54185,13 +54188,15 @@ const orbitDisplay = async ({ view = {}, geometry } = {}, page) => {
     renderer.render(scene, camera);
   };
 
-  page.appendChild(canvas);
+  if (!canvas) {
+    page.appendChild(displayCanvas);
+  }
 
   const { trackball } = buildTrackballControls({
     camera,
     render,
     view,
-    viewerElement: canvas,
+    viewerElement: displayCanvas,
   });
 
   const { resize } = createResizer({
@@ -54229,7 +54234,7 @@ const orbitDisplay = async ({ view = {}, geometry } = {}, page) => {
     render();
   }
 
-  return { canvas, render, updateGeometry };
+  return { canvas: displayCanvas, render, updateGeometry, trackball };
 };
 
 let locked = false;
