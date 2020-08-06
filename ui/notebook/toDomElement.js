@@ -5,7 +5,7 @@ import { dataUrl, orbitDisplay } from '@jsxcad/ui-threejs';
 import { Shape } from '@jsxcad/api-v1-shape';
 import marked from 'marked';
 
-export const toDomElement = async (notebook) => {
+export const toDomElement = async (notebook = []) => {
   const container = document.createElement('div');
 
   const showOrbitView = async (event, note) => {

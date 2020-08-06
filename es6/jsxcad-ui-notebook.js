@@ -1840,7 +1840,7 @@ var marked_1 = marked;
 
 // global document
 
-const toDomElement = async (notebook) => {
+const toDomElement = async (notebook = []) => {
   const container = document.createElement('div');
 
   const showOrbitView = async (event, note) => {
