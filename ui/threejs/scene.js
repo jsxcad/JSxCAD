@@ -37,9 +37,8 @@ export const buildScene = ({
   withAxes = true,
   renderer,
 }) => {
-  Object3D.DefaultUp.set(0, 0.0001, 1);
-
-  const { target = [0, 0, 0], position = [40, 40, 40], up = [0, 0, 1] } = view;
+  const { target = [0, 0, 0], position = [40, 40, 40], up = [0, 1, 1] } = view;
+  Object3D.DefaultUp.set(...up);
 
   const camera = new PerspectiveCamera(27, width / height, 1, 1000000);
   camera.layers.enable(1);
