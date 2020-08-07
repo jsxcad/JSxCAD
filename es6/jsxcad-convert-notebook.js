@@ -73,17 +73,22 @@ var base64Arraybuffer = createCommonjsModule(function (module, exports) {
 var base64Arraybuffer_1 = base64Arraybuffer.encode;
 var base64Arraybuffer_2 = base64Arraybuffer.decode;
 
-const encodeNotebook = (notebook) => {
+const encodeNotebook = async (notebook) => {
   const encoded = [];
-  for (const entry of notebook) {
-    if (entry.download) {
-      encoded.push({
-        ...entry,
-        data: undefined,
-        base64Data: base64Arraybuffer.encode(entry.data),
-      });
+  for (const note of notebook) {
+    if (note.download) {
+      const encodedEntries = [];
+      for (const entry of note.download.entries) {
+        const encodedEntry = {
+          ...entry,
+          base64Data: base64Arraybuffer.encode(await entry.data.buffer),
+        };
+        delete encodedEntry.data;
+        encodedEntries.push(encodedEntry);
+      }
+      encoded.push({ download: { entries: encodedEntries } });
     } else {
-      encoded.push(entry);
+      encoded.push(note);
     }
   }
   return encoded;
@@ -113,7 +118,7 @@ const toHtml = async (
   <script type='module'>
     import { toDomElement } from '${modulePath}/jsxcad-ui-notebook.js';
 
-    const notebook = ${JSON.stringify(encodeNotebook(notebook))};
+    const notebook = ${JSON.stringify(await encodeNotebook(notebook))};
 
     const run = async () => {
       const body = document.getElementsByTagName('body')[0];

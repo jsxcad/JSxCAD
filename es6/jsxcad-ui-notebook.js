@@ -1921,7 +1921,7 @@ var FileSaver_min = createCommonjsModule(function (module, exports) {
 
 const downloadFile = async (event, filename, base64Data, type) => {
   const data = base64Arraybuffer.decode(base64Data);
-  const blob = new Blob([data.buffer], { type });
+  const blob = new Blob([data], { type });
   FileSaver_min(blob, filename);
 };
 

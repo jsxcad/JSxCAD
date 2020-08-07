@@ -1,16 +1,21 @@
 import Base64ArrayBuffer from 'base64-arraybuffer';
 
-const encodeNotebook = (notebook) => {
+const encodeNotebook = async (notebook) => {
   const encoded = [];
-  for (const entry of notebook) {
-    if (entry.download) {
-      encoded.push({
-        ...entry,
-        data: undefined,
-        base64Data: Base64ArrayBuffer.encode(entry.data),
-      });
+  for (const note of notebook) {
+    if (note.download) {
+      const encodedEntries = [];
+      for (const entry of note.download.entries) {
+        const encodedEntry = {
+          ...entry,
+          base64Data: Base64ArrayBuffer.encode(await entry.data.buffer),
+        };
+        delete encodedEntry.data;
+        encodedEntries.push(encodedEntry);
+      }
+      encoded.push({ download: { entries: encodedEntries } });
     } else {
-      encoded.push(entry);
+      encoded.push(note);
     }
   }
   return encoded;
@@ -40,7 +45,7 @@ export const toHtml = async (
   <script type='module'>
     import { toDomElement } from '${modulePath}/jsxcad-ui-notebook.js';
 
-    const notebook = ${JSON.stringify(encodeNotebook(notebook))};
+    const notebook = ${JSON.stringify(await encodeNotebook(notebook))};
 
     const run = async () => {
       const body = document.getElementsByTagName('body')[0];
