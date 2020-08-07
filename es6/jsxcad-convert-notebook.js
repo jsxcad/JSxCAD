@@ -14,7 +14,7 @@ const toHtml = async (
   <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
   <style>
     .note.log { font-family: "Arial Black", Gadget, sans-serif; color: red }
-    .note.orbitView { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); zIndex: 100; }
+    .note.orbitView { position: absolute; top: 0; left: 0; right: 0; bottom: 0; zIndex: 100; }
   </style>
  </head>
  <body>

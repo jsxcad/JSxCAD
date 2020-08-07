@@ -1863,7 +1863,6 @@ const toDomElement = async (notebook = []) => {
       { view, geometry },
       window.document.body
     );
-    container.appendChild(canvas);
     canvas.classList.add('note', 'orbitView');
     canvas.addEventListener(
       'keydown',
