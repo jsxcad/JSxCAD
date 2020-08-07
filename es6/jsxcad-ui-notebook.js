@@ -1859,11 +1859,10 @@ const toDomElement = async (notebook = []) => {
   const showOrbitView = async (event, note) => {
     const { geometry, target, up, position } = note.view;
     const view = { target, up, position };
-    const { canvas } = await orbitDisplay(
-      { view, geometry },
-      window.document.body
-    );
-    canvas.classList.add('note', 'orbitView');
+    const div = document.createElement('div');
+    div.classList.add('note', 'orbitView');
+    window.document.body.appendChild(div);
+    const { canvas } = await orbitDisplay({ view, geometry }, div);
     canvas.addEventListener(
       'keydown',
       (event) => {
@@ -1873,7 +1872,7 @@ const toDomElement = async (notebook = []) => {
           event.keyCode === 27
         ) {
           event.preventDefault();
-          window.document.body.removeChild(canvas);
+          window.document.body.removeChild(div);
           return false;
         }
       },
