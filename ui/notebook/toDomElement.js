@@ -77,7 +77,7 @@ export const toDomElement = async (notebook = []) => {
       for (const { data, filename, type } of note.download.entries) {
         const button = document.createElement('button');
         button.classList.add('note', 'download');
-        button.name = filename;
+        button.textContent = filename;
         button.addEventListener('click', (event) =>
           downloadFile(event, filename, data, type)
         );
