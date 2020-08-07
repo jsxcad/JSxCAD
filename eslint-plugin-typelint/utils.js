@@ -143,6 +143,7 @@ const getTypeContext = (context) => {
       filename: context.getFilename(),
       parseComment: doctrine.parse,
       parseType: doctrine.parseType,
+      getComments: (node) => context.getComments(node),
     });
   }
   return fileInfo.typeContext;

@@ -1103,6 +1103,7 @@ class TypeContext {
     parseComment,
     parseType,
     filename,
+    getComments,
   } = {}) {
     this.typedefs = typedefs;
     this.types = types;
@@ -1114,6 +1115,7 @@ class TypeContext {
     this.parseComment = parseComment;
     this.importModule = importModule;
     this.parseType = parseType;
+    this.getComments = getComments;
   }
 
   getTypedef(name) {
@@ -1136,7 +1138,26 @@ class TypeContext {
     this.types[line] = type;
   }
 
-  getTypeDeclaration(line) {
+  getTypeDeclaration(node) {
+    const { leading } = this.getComments(node);
+
+    if (leading) {
+      for (const { value } of leading) {
+        // Check for a /** ... */ style comment.
+        if (!value.startsWith('*')) {
+          continue;
+        }
+        // Cut off the leading * left over from the /** ... */.
+        const typeString = value.substr(1);
+        const type = Type.fromString(typeString, this);
+        if (type !== Type.any && type !== Type.invalid) {
+          return type;
+        }
+      }
+    }
+
+    // Fall back to a statement level declaration.
+    const line = node.loc.start.line;
     const type = this.types[line] || Type.any;
     return type;
   }
@@ -1930,10 +1951,8 @@ Type.fromString = (string, typeContext) =>
   Type.fromDoctrineType(typeContext.parseType(string), {}, typeContext);
 
 Type.fromNode = (node, typeContext) => {
-  const startLine = (node) => node.loc.start.line;
-
   const resolveTypeFromNode = (node, typeContext) =>
-    typeContext.getTypeDeclaration(startLine(node));
+    typeContext.getTypeDeclaration(node);
 
   const resolveTypeForBinaryExpression = (node, typeContext) => {
     const { left, operator, right } = node;
