@@ -70,3 +70,11 @@ const R = [1, 2, 3];
 for (const Q of R) {
   f(Q);
 }
+=====
+Inline comments are included.
+-----
+can't initialize variable a = 'ten' of type number with value of type string
+-----
+a.js
+~~~~~
+const /** number */ a = 'ten';
