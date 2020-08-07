@@ -17,7 +17,7 @@ export const toDomElement = async (notebook = []) => {
   const showOrbitView = async (event, note) => {
     const { geometry, target, up, position } = note.view;
     const view = { target, up, position };
-    const { canvas } = await orbitDisplay({ view, geometry }, container);
+    const { canvas } = await orbitDisplay({ view, geometry }, window);
     container.appendChild(canvas);
     canvas.classList.add('note', 'orbitView');
     canvas.addEventListener(
