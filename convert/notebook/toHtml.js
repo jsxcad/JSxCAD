@@ -6,9 +6,10 @@ const encodeNotebook = async (notebook) => {
     if (note.download) {
       const encodedEntries = [];
       for (const entry of note.download.entries) {
+        const data = await entry.data;
         const encodedEntry = {
           ...entry,
-          base64Data: Base64ArrayBuffer.encode(await entry.data.buffer),
+          base64Data: Base64ArrayBuffer.encode(data.buffer),
         };
         delete encodedEntry.data;
         encodedEntries.push(encodedEntry);
