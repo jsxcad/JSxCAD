@@ -1,3 +1,21 @@
+import Base64ArrayBuffer from 'base64-arraybuffer';
+
+const encodeNotebook = (notebook) => {
+  const encoded = [];
+  for (const entry of notebook) {
+    if (entry.download) {
+      encoded.push({
+        ...entry,
+        data: undefined,
+        base64Data: Base64ArrayBuffer.encode(entry.data),
+      });
+    } else {
+      encoded.push(entry);
+    }
+  }
+  return encoded;
+};
+
 export const toHtml = async (
   notebook,
   {
@@ -15,14 +33,14 @@ export const toHtml = async (
   <style>
     .note.log { font-family: "Arial Black", Gadget, sans-serif; color: red }
     .note.view { border: 1px dashed #1C6EA4; }
-    .note.orbitView { position: absolute; top: 0; width: 100%; height: 100; zIndex: 100; }
+    .note.orbitView { position: absolute; top: 0; width: 100%; height: 100%; zIndex: 100; }
   </style>
  </head>
  <body>
   <script type='module'>
     import { toDomElement } from '${modulePath}/jsxcad-ui-notebook.js';
 
-    const notebook = ${JSON.stringify(notebook)};
+    const notebook = ${JSON.stringify(encodeNotebook(notebook))};
 
     const run = async () => {
       const body = document.getElementsByTagName('body')[0];

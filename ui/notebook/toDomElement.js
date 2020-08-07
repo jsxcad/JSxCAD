@@ -2,11 +2,13 @@
 
 import { dataUrl, orbitDisplay } from '@jsxcad/ui-threejs';
 
+import Base64ArrayBuffer from 'base64-arraybuffer';
 import { Shape } from '@jsxcad/api-v1-shape';
 import marked from 'marked';
 import saveAs from 'file-saver';
 
-const downloadFile = async (event, filename, data, type) => {
+const downloadFile = async (event, filename, base64Data, type) => {
+  const data = Base64ArrayBuffer.decode(base64Data);
   const blob = new Blob([data.buffer], { type });
   saveAs(blob, filename);
 };
@@ -74,12 +76,13 @@ export const toDomElement = async (notebook = []) => {
     }
     if (note.download) {
       const div = document.createElement('div');
-      for (const { data, filename, type } of note.download.entries) {
+      for (const { base64Data, filename, type } of note.download.entries) {
         const button = document.createElement('button');
         button.classList.add('note', 'download');
-        button.textContent = filename;
+        const text = document.createTextNode(filename);
+        button.appendChild(text);
         button.addEventListener('click', (event) =>
-          downloadFile(event, filename, data, type)
+          downloadFile(event, filename, base64Data, type)
         );
         div.appendChild(button);
       }
