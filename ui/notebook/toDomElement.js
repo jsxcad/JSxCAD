@@ -9,7 +9,7 @@ import saveAs from 'file-saver';
 
 const downloadFile = async (event, filename, base64Data, type) => {
   const data = Base64ArrayBuffer.decode(base64Data);
-  const blob = new Blob([data.buffer], { type });
+  const blob = new Blob([data], { type });
   saveAs(blob, filename);
 };
 
