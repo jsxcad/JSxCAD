@@ -85215,9 +85215,13 @@ class Ui extends react.PureComponent {
 
   renderPane(views, id, path, createNode, onSelectView) {
     const {
+      ask,
       file,
       workspace
     } = this.state;
+    const {
+      sha
+    } = this.props;
     const {
       view
     } = this.getPaneView(id);
@@ -85231,14 +85235,11 @@ class Ui extends react.PureComponent {
       }
     }
 
-    const {
-      ask
-    } = this.state;
-
     switch (view) {
       case 'notebook':
         return /*#__PURE__*/react.createElement(NotebookUi, {
           key: `${id}/notebook/${file}`,
+          sha: sha,
           id: id,
           path: path,
           createNode: createNode,

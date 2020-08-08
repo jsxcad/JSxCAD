@@ -1919,8 +1919,7 @@ var FileSaver_min = createCommonjsModule(function (module, exports) {
 
 /* global Blob */
 
-const downloadFile = async (event, filename, base64Data, type) => {
-  const data = base64Arraybuffer.decode(base64Data);
+const downloadFile = async (event, filename, data, type) => {
   const blob = new Blob([data], { type });
   FileSaver_min(blob, filename);
 };
@@ -1933,7 +1932,7 @@ const toDomElement = async (notebook = []) => {
     const view = { target, up, position };
     const div = document.createElement('div');
     div.classList.add('note', 'orbitView');
-    window.document.body.appendChild(div);
+    window.document.body.insertBefore(div, window.document.body.firstChild);
     const { canvas } = await orbitDisplay({ view, geometry }, div);
     canvas.addEventListener(
       'keydown',
@@ -1988,13 +1987,16 @@ const toDomElement = async (notebook = []) => {
     }
     if (note.download) {
       const div = document.createElement('div');
-      for (const { base64Data, filename, type } of note.download.entries) {
+      for (let { base64Data, data, filename, type } of note.download.entries) {
+        if (base64Data) {
+          data = base64Arraybuffer.decode(base64Data);
+        }
         const button = document.createElement('button');
         button.classList.add('note', 'download');
         const text = document.createTextNode(filename);
         button.appendChild(text);
         button.addEventListener('click', (event) =>
-          downloadFile(event, filename, base64Data, type)
+          downloadFile(event, filename, data, type)
         );
         div.appendChild(button);
       }

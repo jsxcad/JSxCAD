@@ -57,28 +57,34 @@ export const updateNotebook = async (target) => {
     writeFileSync(`${target}.png`, pngData);
     return;
   }
-  const { width, height } = expectedPng;
-  const differencePng = new pngjs.PNG({ width, height });
-  const pixelThreshold = 1;
-  const numFailedPixels = pixelmatch(
-    expectedPng.data,
-    observedPng.data,
-    differencePng.data,
-    width,
-    height,
-    {
-      threshold: pixelThreshold,
-      alpha: 0.2,
-      diffMask: process.env.FORCE_COLOR === '0',
-      diffColor:
-        process.env.FORCE_COLOR === '0' ? [255, 255, 255] : [255, 0, 0],
-    }
-  );
-  if (numFailedPixels >= pixelThreshold) {
-    writeFileSync(
-      `${target}.difference.png`,
-      pngjs.PNG.sync.write(differencePng)
+  // FIX: Stop overriding the differencing.
+  try {
+    const { width, height } = expectedPng;
+    const differencePng = new pngjs.PNG({ width, height });
+    const pixelThreshold = 1;
+    const numFailedPixels = pixelmatch(
+      expectedPng.data,
+      observedPng.data,
+      differencePng.data,
+      width,
+      height,
+      {
+        threshold: pixelThreshold,
+        alpha: 0.2,
+        diffMask: process.env.FORCE_COLOR === '0',
+        diffColor:
+          process.env.FORCE_COLOR === '0' ? [255, 255, 255] : [255, 0, 0],
+      }
     );
-    throw Error('die');
+    if (numFailedPixels >= pixelThreshold) {
+      writeFileSync(
+        `${target}.difference.png`,
+        pngjs.PNG.sync.write(differencePng)
+      );
+      throw Error('die');
+    }
+  } catch (error) {
+    // Just update it.
+    writeFileSync(`${target}.png`, pngData);
   }
 };
