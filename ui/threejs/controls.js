@@ -1,6 +1,6 @@
 import * as dat from 'dat.gui';
 
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
+import { TrackballControls } from 'three/examples/jsm/controls/TrackballControls';
 
 export const buildTrackballControls = ({
   camera,
@@ -9,11 +9,15 @@ export const buildTrackballControls = ({
   view = {},
 }) => {
   const { target = [0, 0, 0] } = view;
-  const trackball = new OrbitControls(camera, viewerElement);
+  const trackball = new TrackballControls(camera, viewerElement);
   trackball.keys = [65, 83, 68];
-  trackball.addEventListener('change', render);
+  // trackball.addEventListener('change', render);
   trackball.target.set(...target);
   trackball.update();
+  trackball.zoomSpeed = 2.5;
+  trackball.panSpeed = 1.25;
+  trackball.rotateSpeed = 2.5;
+  trackball.staticMoving = true;
   return { trackball };
 };
 

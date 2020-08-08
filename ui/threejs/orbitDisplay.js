@@ -1,4 +1,4 @@
-/* global ResizeObserver */
+/* global ResizeObserver, requestAnimationFrame */
 
 import { GEOMETRY_LAYER, SKETCH_LAYER } from './layers.js';
 import { buildScene, createResizer } from './scene.js';
@@ -89,6 +89,14 @@ export const orbitDisplay = async (
     await updateGeometry(geometry);
     render();
   }
+
+  const animate = () => {
+    requestAnimationFrame(animate);
+    trackball.update();
+    render();
+  };
+
+  animate();
 
   return { canvas: displayCanvas, render, updateGeometry, trackball };
 };
