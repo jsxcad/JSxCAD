@@ -20,23 +20,20 @@ export const toDomElement = async (notebook = []) => {
     const view = { target, up, position };
     const div = document.createElement('div');
     div.classList.add('note', 'orbitView');
-    window.document.body.insertBefore(div, window.document.body.firstChild);
-    const { canvas } = await orbitDisplay({ view, geometry }, div);
-    canvas.addEventListener(
-      'keydown',
-      (event) => {
-        if (
-          event.key === 'Escape' ||
-          event.key === 'Esc' ||
-          event.keyCode === 27
-        ) {
-          event.preventDefault();
-          window.document.body.removeChild(div);
-          return false;
-        }
-      },
-      true
-    );
+    const body = window.document.body;
+    body.insertBefore(div, body.firstChild);
+    await orbitDisplay({ view, geometry }, div);
+    const onKeyDown = (event) => {
+      if (
+        event.key === 'Escape' ||
+        event.key === 'Esc' ||
+        event.keyCode === 27
+      ) {
+        body.removeEventListener('keydown', onKeyDown, true);
+        body.removeChild(div);
+      }
+    };
+    body.addEventListener('keydown', onKeyDown, true);
   };
 
   for (const note of notebook) {
