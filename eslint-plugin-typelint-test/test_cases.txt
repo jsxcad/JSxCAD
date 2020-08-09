@@ -78,3 +78,14 @@ can't initialize variable a = 'ten' of type number with value of type string
 a.js
 ~~~~~
 const /** number */ a = 'ten';
+=====
+Destructuring.
+-----
+-----
+a.js
+~~~~~
+/** @type {function():string} */
+const toRgbIntFromName = () => {
+  const { /** string */ name } = colors;
+  return name;
+};

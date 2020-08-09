@@ -2174,9 +2174,9 @@ Type.fromNode = (node, typeContext) => {
       }
     }
 
-    const { parent } = definition;
+    // In some cases we can derive the type from the position in the enclosing nodes.
 
-    // If it is defined in a parameter, the declaration is for the function.
+    const { parent } = definition;
 
     switch (parent.type) {
       case 'ArrayPattern': {
@@ -2226,16 +2226,19 @@ Type.fromNode = (node, typeContext) => {
         // So we require an explicit declaration, which is detected above.
         return Type.fromNode(parent, typeContext);
       }
-      case 'RestElement':
-      case 'ClassDeclaration':
       case 'CatchClause':
+      case 'RestElement':
       case 'ImportNamespaceSpecifier':
-      case 'Property': {
+      case 'Property':
+        return resolveTypeFromNode(parent, typeContext);
+      case 'ClassDeclaration': {
         console.log(`Unimplemented parent.type: ${parent.type}.`);
         return Type.any;
       }
       default:
-        throw Error(`Unexpected parent.type: ${parent.type}`);
+        console.log(`node: ${generate(node)}`);
+        console.log(`parent: ${generate(parent)}`);
+        throw Error(`Unexpected parent.type: ${parent.type} for ${name}`);
     }
   };
 
