@@ -28,7 +28,6 @@ const writeMarkdown = (path, notebook, imageUrls) => {
 };
 
 export const updateNotebook = async (target) => {
-  console.log(`updateNotebook: ${target}`);
   clearEmitted();
   await boot();
   try {
@@ -51,40 +50,35 @@ export const updateNotebook = async (target) => {
   try {
     expectedPng = pngjs.PNG.sync.read(readFileSync(`${target}.png`));
   } catch (error) {
-    if (error.code !== 'ENOENT') {
-      throw error;
+    if (error.code === 'ENOENT') {
+      // We have no expectation -- generate one.
+      writeFileSync(`${target}.png`, pngjs.PNG.sync.write(pngData));
+      return;
     }
-    writeFileSync(`${target}.png`, pngData);
-    return;
+    throw error;
   }
-  // FIX: Stop overriding the differencing.
-  try {
-    const { width, height } = expectedPng;
-    const differencePng = new pngjs.PNG({ width, height });
-    const pixelThreshold = 1;
-    const numFailedPixels = pixelmatch(
-      expectedPng.data,
-      observedPng.data,
-      differencePng.data,
-      width,
-      height,
-      {
-        threshold: pixelThreshold,
-        alpha: 0.2,
-        diffMask: process.env.FORCE_COLOR === '0',
-        diffColor:
-          process.env.FORCE_COLOR === '0' ? [255, 255, 255] : [255, 0, 0],
-      }
-    );
-    if (numFailedPixels >= pixelThreshold) {
-      writeFileSync(
-        `${target}.difference.png`,
-        pngjs.PNG.sync.write(differencePng)
-      );
-      throw Error('die');
+  const { width, height } = expectedPng;
+  const differencePng = new pngjs.PNG({ width, height });
+  const pixelThreshold = 1;
+  const numFailedPixels = pixelmatch(
+    expectedPng.data,
+    observedPng.data,
+    differencePng.data,
+    width,
+    height,
+    {
+      threshold: 0.01,
+      alpha: 0.2,
+      diffMask: process.env.FORCE_COLOR === '0',
+      diffColor:
+        process.env.FORCE_COLOR === '0' ? [255, 255, 255] : [255, 0, 0],
     }
-  } catch (error) {
-    // Just update it.
-    writeFileSync(`${target}.png`, pngData);
+  );
+  if (numFailedPixels >= pixelThreshold) {
+    writeFileSync(
+      `${target}.difference.png`,
+      pngjs.PNG.sync.write(differencePng)
+    );
+    console.log(`${target}.difference.png`);
   }
 };

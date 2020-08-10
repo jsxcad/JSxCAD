@@ -48,7 +48,8 @@ class TypeContext {
   }
 
   getTypeDeclaration(node) {
-    const { leading } = this.getComments(node);
+    // const { leading } = this.getComments(node);
+    const leading = node.leadingComments;
 
     if (leading) {
       for (const { value } of leading) {

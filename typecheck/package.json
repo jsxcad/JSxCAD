@@ -12,7 +12,7 @@
   "scripts": {
     "depcheck": "depcheck",
     "lint": "eslint -c .eslintrc.cjs *.js",
-    "lintfix": "eslint  -c .eslintrc.cjs--fix *.js",
+    "lintfix": "eslint  -c .eslintrc.cjs --fix *.js",
     "rollup": "rollup -c rollup_main.js",
     "test": "ava",
     "tests": "ava *.test.js",
