@@ -3,7 +3,6 @@ const {
   getArgumentsForFunctionCall,
   getContainingFunctionDeclaration,
   getNameOfCalledFunction,
-  setCaches,
   resolveType,
   storeProgram,
 } = require('./utils.js');
@@ -11,13 +10,6 @@ const { toStringFromNode } = require('./astring.js');
 
 module.exports = {
   create: function (context) {
-    for (const option of context.options) {
-      if (option.cache) {
-        setCaches(option.cache);
-      }
-    }
-    const { ignoreTrailingUndefineds = false } = context.options[0] || {};
-
     return {
       AssignmentExpression(node) {
         const identifierType = resolveType(node.left, context);
@@ -48,12 +40,10 @@ module.exports = {
             callType === undefined &&
             !Type.undefined.isOfType(argumentType)
           ) {
-            if (!ignoreTrailingUndefineds) {
-              context.report({
-                message: `type ${argumentType} expected for argument ${index} in call to ${functionName} but undefined implicitly provided`,
-                node,
-              });
-            }
+            context.report({
+              message: `type ${argumentType} expected for argument ${index} in call to ${functionName} but undefined implicitly provided`,
+              node,
+            });
           }
         }
       },

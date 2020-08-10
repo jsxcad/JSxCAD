@@ -8,10 +8,11 @@
   "scripts": {
     "depcheck": "echo ok",
     "lint": "eslint -c .eslintrc.cjs *.js",
+    "nolint": "ava nolint.test.mjs",
     "lintfix": "eslint -c .eslintrc.cjs --fix *.js",
     "rollup": "echo ok",
-    "test": "ava",
-    "tests": "ava *.test.js"
+    "test": "echo ok",
+    "tests": "echo ok"
   },
   "contributors": [
     {
@@ -22,7 +23,9 @@
   "keywords": [],
   "license": "MIT",
   "dependencies": {
-    "@jsxcad/eslint-plugin-typelint": "^0.0.79"
+    "@jsxcad/eslint-plugin-typelint": "^0.0.79",
+    "acorn": "^7.1.0",
+    "acorn-walk": "^7.1.1"
   },
   "devDependencies": {
     "ava": "^3.9.0",

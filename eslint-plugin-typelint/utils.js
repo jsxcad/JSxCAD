@@ -1,12 +1,8 @@
 const fs = require('fs');
-
 const doctrine = require('doctrine');
-
-const { default: parseFile } = require('eslint-module-utils/parse');
-const { default: resolve } = require('eslint-module-utils/resolve');
+const estraverse = require('estraverse');
 const scan = require('scope-analyzer');
-// const { toStringFromNode } = require('./astring.js');
-
+const { Parser } = require('acorn');
 const { getFileInfoCache, setFileInfoCache } = require('./fileInfoCache.js');
 const { getTypedefCache, setTypedefCache } = require('./typedefCache.js');
 
@@ -35,13 +31,12 @@ const parseJsdocComments = (programNode, context) => {
         break;
     }
   }
-  for (const comment of programNode.comments) {
-    if (comment.type !== 'Block' || comment.value[0] !== '*') {
-      continue;
-    }
+  for (const { type, value, loc } of programNode.comments) {
+    if (type !== 'Block') continue;
+    if (!value.startsWith('*')) continue;
     Type.parseComment(
-      comment.loc.end.line + 1,
-      `/*${comment.value}*/`,
+      loc.end.line + 1,
+      `/*${value}*/`,
       getTypeContext(context)
     );
   }
@@ -49,9 +44,26 @@ const parseJsdocComments = (programNode, context) => {
 
 const getTypedefs = (context) => getTypedefCache();
 
-// const resolve = (fsPath, context) => path.resolve(path.dirname(context.getFilename()), fsPath);
+const parseFile = (filename, fileContents, context) => {
+  const comments = [];
+  const tokens = [];
+  const ast = Parser.parse(fileContents, {
+    sourceType: 'module',
+    sourceFile: filename,
+    locations: true,
+    ranges: true,
+    onComment: comments,
+    onToken: tokens,
+  });
+  estraverse.attachComments(ast, comments, tokens);
+  ast.comments = comments;
+  return ast;
+};
+
+const resolve = (path, context) => path;
 
 const importModule = (path, context) => {
+  // FFR: see import.meta.resolve
   const fsPath = resolve(path, context);
   const externalContext = getContextForFile(fsPath, context);
   return getTypeContext(externalContext);
@@ -149,15 +161,6 @@ const getTypeContext = (context) => {
   return fileInfo.typeContext;
 };
 
-const getFilesystem = (context) => {
-  for (const option of context.options) {
-    if (option.vfs) {
-      return option.vfs;
-    }
-  }
-  return fs;
-};
-
 const getFileInfo = (context) => {
   const fileInfoCache = getFileInfoCache();
   const filename = context.getFilename();
@@ -169,9 +172,7 @@ const getFileInfo = (context) => {
   } else if (!fileInfoCache[filename]) {
     // console.log(`Loading ${filename}`);
     fileInfoCache[filename] = {};
-    const fileContents = getFilesystem(context)
-      .readFileSync(filename)
-      .toString();
+    const fileContents = fs.readFileSync(filename).toString();
     const programNode = parseFile(filename, fileContents, context);
     // Adds fileInfoCache entry.
     storeProgram(programNode, context);
@@ -261,6 +262,8 @@ const getContainingFunctionDeclaration = (node, context) => {
 module.exports = {
   getArgumentsForFunctionCall,
   getContainingFunctionDeclaration,
+  getContextForFile,
+  getFileInfo,
   getNameOfCalledFunction,
   resolveType,
   setCaches,
