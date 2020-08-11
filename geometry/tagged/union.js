@@ -62,7 +62,7 @@ const unionImpl = (geometry, ...geometries) => {
           (polygons) => clippedPolygons.push(...polygons)
         );
         return taggedSurface(
-          {},
+          { tags },
           makeWatertightSurface(clippedPolygons, normalize)
         );
       }
