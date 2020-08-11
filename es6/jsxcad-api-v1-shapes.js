@@ -700,7 +700,7 @@ const unitSphere = (resolution = 16) => {
 const ofRadius$9 = (radius = 1, { resolution = 16 } = {}) =>
   unitSphere(resolution).scale(radius);
 const ofApothem$6 = (apothem = 1, { resolution = 16 } = {}) =>
-  ofRadius$9(toRadiusFromApothem$1(apothem), { resolution });
+  ofRadius$9(toRadiusFromApothem$1(apothem, (2 + resolution) * 2), { resolution });
 const ofDiameter$8 = (diameter = 1, { resolution = 16 } = {}) =>
   ofRadius$9(diameter / 2, { resolution });
 
