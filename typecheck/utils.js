@@ -1,12 +1,14 @@
-const fs = require('fs');
-const doctrine = require('doctrine');
-const estraverse = require('estraverse');
-const scan = require('scope-analyzer');
-const { Parser } = require('acorn');
-const { getFileInfoCache, setFileInfoCache } = require('./fileInfoCache.js');
-const { getTypedefCache, setTypedefCache } = require('./typedefCache.js');
+import { Type, TypeContext } from './Type.js';
+import { getFileInfoCache, setFileInfoCache } from './fileInfoCache.js';
+import { getTypedefCache, setTypedefCache } from './typedefCache.js';
 
-const { Type, TypeContext } = require('@jsxcad/typecheck');
+import Fs from 'fs';
+import { Parser } from 'acorn/dist/acorn.mjs';
+import Path from 'path';
+import ResolveFrom from 'resolve-from';
+import doctrine from 'doctrine';
+import estraverse from 'estraverse';
+import scan from 'scope-analyzer';
 
 const setCaches = (settings) => {
   if (settings.fileInfoCache === undefined) {
@@ -60,13 +62,34 @@ const parseFile = (filename, fileContents, context) => {
   return ast;
 };
 
-const resolve = (path, context) => path;
+const resolve = (path, context) => {
+  const directory = Path.dirname(context.getFilename());
+  if (path.startsWith('/')) {
+    return path;
+  } else if (path.startsWith('.')) {
+    return Path.join(directory, path);
+  } else {
+    // This should be a bare identifier -- try module resolution.
+    try {
+      return ResolveFrom(directory, path);
+    } catch (error) {
+      console.log(`QQ/resolve/path: ${path}`);
+      console.log(`QQ/resolve/directory: ${directory}`);
+      console.log(`QQ/resolve: ${error.stack}`);
+      throw error;
+    }
+  }
+};
 
 const importModule = (path, context) => {
   // FFR: see import.meta.resolve
-  const fsPath = resolve(path, context);
-  const externalContext = getContextForFile(fsPath, context);
-  return getTypeContext(externalContext);
+  try {
+    const fsPath = resolve(path, context);
+    const externalContext = getContextForFile(fsPath, context);
+    return getTypeContext(externalContext);
+  } catch (error) {
+    console.log(`QQ/importModule: ${error.toString()}`);
+  }
 };
 
 const acquireBinding = (node) => {
@@ -172,8 +195,8 @@ const getFileInfo = (context) => {
   } else if (!fileInfoCache[filename]) {
     // console.log(`Loading ${filename}`);
     fileInfoCache[filename] = {};
-    const fileContents = fs.readFileSync(filename).toString();
-    const programNode = parseFile(filename, fileContents, context);
+    const fileContent = Fs.readFileSync(filename).toString();
+    const programNode = parseFile(filename, fileContent, context);
     // Adds fileInfoCache entry.
     storeProgram(programNode, context);
   }
@@ -259,7 +282,7 @@ const getContainingFunctionDeclaration = (node, context) => {
   return funcDecl;
 };
 
-module.exports = {
+export {
   getArgumentsForFunctionCall,
   getContainingFunctionDeclaration,
   getContextForFile,

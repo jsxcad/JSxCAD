@@ -5,4 +5,4 @@ const setTypedefCache = (cache) => {
   typedefCache = cache;
 };
 
-module.exports = { getTypedefCache, setTypedefCache };
+export { getTypedefCache, setTypedefCache };

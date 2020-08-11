@@ -1139,7 +1139,6 @@ class TypeContext {
   }
 
   getTypeDeclaration(node) {
-    // const { leading } = this.getComments(node);
     const leading = node.leadingComments;
 
     if (leading) {
@@ -1150,9 +1149,9 @@ class TypeContext {
         }
         // Cut off the leading * left over from the /** ... */.
         const typeString = value.substr(1);
-        const type = Type.fromString(typeString, this);
-        if (type !== Type.any && type !== Type.invalid) {
-          return type;
+        const result = Type.fromString(typeString, this);
+        if (result !== Type.any && result !== Type.invalid) {
+          return result;
         }
       }
     }
@@ -1948,8 +1947,18 @@ Type.parseComment = (line, comment, typeContext) => {
   return type;
 };
 
-Type.fromString = (string, typeContext) =>
-  Type.fromDoctrineType(typeContext.parseType(string), {}, typeContext);
+Type.fromString = (string, typeContext) => {
+  try {
+    return Type.fromDoctrineType(
+      typeContext.parseType(string),
+      {},
+      typeContext
+    );
+  } catch (error) {
+    console.log(`QQ/Type.fromString/string: ${string}`);
+    throw error;
+  }
+};
 
 Type.fromNode = (node, typeContext) => {
   const resolveTypeFromNode = (node, typeContext) =>
@@ -2209,6 +2218,9 @@ Type.fromNode = (node, typeContext) => {
         const externalTypeContext = typeContext.importModule(
           parent.parent.source.value
         );
+        if (!externalTypeContext) {
+          return Type.any;
+        }
         const declaration = externalTypeContext.getDefaultExportDeclaration();
         if (!declaration) {
           return Type.any;
@@ -2219,7 +2231,12 @@ Type.fromNode = (node, typeContext) => {
       case 'ImportSpecifier': {
         const path = parent.parent.source.value;
         const externalSymbol = parent.imported.name;
-        return typeContext.getNamedExportType(path, externalSymbol);
+        try {
+          return typeContext.getNamedExportType(path, externalSymbol);
+        } catch (error) {
+          console.log(`QQ/Type/ImportSpecifier: ${error.toString()}`);
+          return Type.any;
+        }
       }
       case 'VariableDeclarator': {
         // FIX: This should be at the Declaration level so that we can see if it is const.
@@ -2290,6 +2307,7 @@ Type.fromNode = (node, typeContext) => {
         return resolveTypeForUnaryExpression(node);
       case 'VariableDeclarator':
         return resolveTypeForVariableDeclarator(node, typeContext);
+      case 'SequenceExpression':
       case 'ObjectPattern':
       case 'OptionalCallExpression':
       case 'NewExpression':

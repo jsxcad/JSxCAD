@@ -4,7 +4,7 @@ Undefined is incompatible with number.
 -----
 can't initialize variable x of type number with value of type undefined
 -----
-a.js
+/test/a.js
 ~~~~~
 /** @type {number} */
 let x;
@@ -15,7 +15,7 @@ Undefined is incompatible with string.
 -----
 can't initialize variable x of type string with value of type undefined
 -----
-a.js
+/test/a.js
 ~~~~~
 /** @type {string} */
 let x;
@@ -25,7 +25,7 @@ let x;
 Array elements are correctly inferred
 -----
 -----
-a.js
+/test/a.js
 ~~~~~
 /** @type {function(points:vec3[]):*} */
 export const a = (points) => {
@@ -39,18 +39,18 @@ export const a = (points) => {
 Types can be traced through indirect exports.
 -----
 -----
-a.js
+/test/a.js
 ~~~~~
-import { c } from './b.js';
+import { c } from '/test/b.js';
 
 /** @type {function():A} */
 const a = c();
 -----
-b.js
+/test/b.js
 ~~~~~
-export { c } from './c.js';
+export { c } from '/test/c.js';
 -----
-c.js
+/test/c.js
 ~~~~~
 /** @type {function(*):?} */
 export const c = (x) => x;
@@ -60,7 +60,7 @@ export const c = (x) => x;
 Elements are inferred correctly in for..of
 -----
 -----
-a.js
+/test/a.js
 ~~~~~
 /** @type {function(a:number):number} */
 const f = a => a;
@@ -75,14 +75,14 @@ Inline comments are included.
 -----
 can't initialize variable a = 'ten' of type number with value of type string
 -----
-a.js
+/test/a.js
 ~~~~~
 const /** number */ a = 'ten';
 =====
 Destructuring.
 -----
 -----
-a.js
+/test/a.js
 ~~~~~
 /** @type {function():string} */
 const toRgbIntFromName = () => {
