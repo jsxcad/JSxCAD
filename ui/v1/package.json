@@ -42,7 +42,6 @@
     "react-mosaic-component": "^3.2.0"
   },
   "devDependencies": {
-    "@jsxcad/eslint-plugin-typelint": "^0.0.79",
     "@babel/core": "^7.7.4",
     "@babel/plugin-proposal-class-properties": "^7.7.4",
     "@babel/plugin-transform-react-jsx": "^7.7.4",

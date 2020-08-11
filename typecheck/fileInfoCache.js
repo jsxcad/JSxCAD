@@ -5,4 +5,4 @@ const setFileInfoCache = (cache) => {
   fileInfoCache = cache;
 };
 
-module.exports = { getFileInfoCache, setFileInfoCache };
+export { getFileInfoCache, setFileInfoCache };

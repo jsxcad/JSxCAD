@@ -1,21 +1,16 @@
-const { ESLint } = require('eslint');
-const { Union } = require('unionfs');
-const { Volume } = require('memfs');
-const fs = require('fs');
-const { patchFs } = require('fs-monkey');
-const test = require('ava');
+import FsMonkey from 'fs-monkey';
+import MemFs from 'memfs';
+import UnionFs from 'unionfs';
+import fs from 'fs';
+import { setCaches } from './utils.js';
+import test from 'ava';
+import { typecheckModule } from './typecheckModule.js';
+
+const { Union } = UnionFs;
+const { Volume } = MemFs;
+const { patchFs } = FsMonkey;
 
 const baseFs = { ...fs };
-
-const buildLintOptions = () => ({
-  plugins: ['@jsxcad/eslint-plugin-typelint'],
-  rules: { '@jsxcad/typelint/typecheck': ['error'] },
-  parserOptions: {
-    ecmaFeatures: { jsx: true },
-    ecmaVersion: 8,
-    sourceType: `module`,
-  },
-});
 
 const trim = (text) => text.trim();
 
@@ -23,7 +18,7 @@ const notEmpty = (text) => text.length > 0;
 
 const readTestCases = async (path) => {
   const testCases = [];
-  const text = await fs.promises.readFile(`${__dirname}/${path}`, {
+  const text = await fs.promises.readFile(path, {
     encoding: 'utf8',
   });
   for (const testCase of text.split('=====\n').filter(notEmpty).map(trim)) {
@@ -45,17 +40,14 @@ const readTestCases = async (path) => {
   return testCases;
 };
 
-const runEsLint = async (filePath, filesystem) => {
-  const eslint = new ESLint({
-    baseConfig: buildLintOptions(),
-    useEslintrc: false,
-  });
+const run = async (filePath, filesystem) => {
   const vol = Volume.fromJSON(filesystem);
   const ufs = new Union();
   ufs.use(vol).use(baseFs);
   const unpatchFs = patchFs(ufs);
+  setCaches({});
   try {
-    return await eslint.lintFiles(filePath);
+    return typecheckModule(filePath);
   } finally {
     unpatchFs();
   }
@@ -69,10 +61,8 @@ const lint = async ({
   expectedMessages,
 }) => {
   const collectedMessages = [];
-  for (const { messages } of await runEsLint(filePath, filesystem)) {
-    for (const { message } of messages) {
-      collectedMessages.push(message);
-    }
+  for (const { message } of await run(filePath, filesystem)) {
+    collectedMessages.push(message);
   }
 
   const fsText = JSON.stringify(filesystem);

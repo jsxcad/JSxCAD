@@ -35,7 +35,6 @@
     "puppeteer": "^5.2.1"
   },
   "devDependencies": {
-    "@jsxcad/eslint-plugin-typelint": "^0.0.79",
     "@jsxcad/api-v1-pdf": "^0.0.79",
     "@jsxcad/api-v1-svg": "^0.0.79",
     "@jsxcad/api-v1-stl": "^0.0.79",
