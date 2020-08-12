@@ -1715,9 +1715,18 @@ const saveGeometry = async (path, shape) =>
  *
  **/
 
-const log = (text, level) => {
+const toText = (value) => {
+  if (typeof value === 'object') {
+    return JSON.stringify(value);
+  } else {
+    return String(value);
+  }
+};
+
+const log = (value, level) => {
+  const text = toText(value);
   emit({ log: { text, level } });
-  return log$1({ op: 'text', text: String(text), level });
+  return log$1({ op: 'text', text, level });
 };
 
 const logOp = (shape, op) => {

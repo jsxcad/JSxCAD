@@ -1,7 +1,6 @@
-
 # Shape.add examples.
 
-[Open in Editor](https://jsxcad.js.org/preAlphaHead/#JSxCAD@https://gitcdn.link/cdn/jsxcad/JSxCAD/master/algorithm/toolpath/BenchPlane/BenchPlane.nb)
+[Open in Editor](https://jsxcad.js.org/preAlphaHead/#JSxCAD@https://gitcdn.link/cdn/jsxcad/JSxCAD/master/api/v1-shape/add/add.nb)
 
 ---
 

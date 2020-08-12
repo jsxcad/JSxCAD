@@ -234,7 +234,11 @@ const fromPolygons = (polygons, normalize = createNormalize3()) => {
   return cleanedSolid;
 };
 
-const LARGE = 1e10;
+const LARGE = 1e2; // works
+// const LARGE = 1e7; // works
+// const LARGE = 1e8; // works
+// const LARGE = 1e9; // works
+// const LARGE = 1e10; // shows defects
 
 const fromSurface = (surface, normalize) => {
   const solid = [];
