@@ -8,6 +8,7 @@
   "type": "module",
   "scripts": {
     "depcheck": "depcheck --ignores '@jsxcad/eslint*,eslint*,babel-eslint'",
+    "doc": "node ../../doc/update.js",
     "lint": "eslint *.js",
     "lintfix": "eslint --fix *.js",
     "rollup": "rollup -c rollup_main.js",
@@ -37,7 +38,6 @@
     "@jsxcad/math-vec3": "^0.0.79"
   },
   "devDependencies": {
-    "@jsxcad/eslint-plugin-typelint": "^0.0.79",
     "ava": "^3.9.0",
     "depcheck": "^0.9.1",
     "eslint": "^7.0.0",

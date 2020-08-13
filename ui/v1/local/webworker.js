@@ -1,8 +1,24 @@
 import * as api from './jsxcad-api-v1.js';
-import { boot, conversation, log, setupFilesystem, clearEmitted, resolvePending, getEmitted, write } from './jsxcad-sys.js';
+import { boot, conversation, log, setupFilesystem, clearEmitted, emit, resolvePending, getEmitted, write } from './jsxcad-sys.js';
 import { toEcmascript } from './jsxcad-compiler.js';
 
 /* global postMessage, onmessage:writable, self */
+
+const writeNotebook = async path => {
+  resolvePending(); // Update the notebook.
+
+  const notebook = getEmitted(); // Resolve any promises.
+
+  for (const note of notebook) {
+    if (note.download) {
+      for (const entry of note.download.entries) {
+        entry.data = await entry.data;
+      }
+    }
+  }
+
+  await write(`notebook/${path}`, notebook);
+};
 
 const say = message => postMessage(message);
 
@@ -10,24 +26,25 @@ const agent = async ({
   ask,
   question
 }) => {
-  try {
-    await log({
-      op: 'clear'
-    });
-    await log({
-      op: 'evaluate',
-      status: 'run'
-    });
-    await log({
-      op: 'text',
-      text: 'Evaluation Started'
-    });
+  await log({
+    op: 'clear'
+  });
+  await log({
+    op: 'evaluate',
+    status: 'run'
+  });
+  await log({
+    op: 'text',
+    text: 'Evaluation Started'
+  });
 
-    if (question.evaluate) {
-      setupFilesystem({
-        fileBase: question.workspace
-      });
-      clearEmitted();
+  if (question.evaluate) {
+    setupFilesystem({
+      fileBase: question.workspace
+    });
+    clearEmitted();
+
+    try {
       const ecmascript = await toEcmascript(question.evaluate);
       console.log({
         op: 'text',
@@ -49,37 +66,31 @@ const agent = async ({
         op: 'evaluate',
         status: 'success'
       }); // Wait for any pending operations.
-
-      resolvePending(); // Update the notebook.
-
-      const notebook = getEmitted(); // Resolve any promises.
-
-      for (const note of notebook) {
-        if (note.download) {
-          for (const entry of note.download.entries) {
-            entry.data = await entry.data;
-          }
+    } catch (error) {
+      emit({
+        log: {
+          text: error.stack,
+          level: 'serious'
         }
-      }
-
-      await write(`notebook/${question.path}`, notebook);
+      });
+      await log({
+        op: 'text',
+        text: error.stack,
+        level: 'serious'
+      });
+      await log({
+        op: 'text',
+        text: 'Evaluation Failed',
+        level: 'serious'
+      });
+      await log({
+        op: 'evaluate',
+        status: 'failure'
+      });
+    } finally {
+      await writeNotebook(question.path);
+      setupFilesystem();
     }
-  } catch (error) {
-    await log({
-      op: 'text',
-      text: error.stack,
-      level: 'serious'
-    });
-    await log({
-      op: 'text',
-      text: 'Evaluation Failed',
-      level: 'serious'
-    });
-    await log({
-      op: 'evaluate',
-      status: 'failure'
-    });
-    setupFilesystem();
   }
 };
 

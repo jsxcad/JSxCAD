@@ -42,7 +42,7 @@ const unitSphere = (resolution = 16) => {
 export const ofRadius = (radius = 1, { resolution = 16 } = {}) =>
   unitSphere(resolution).scale(radius);
 export const ofApothem = (apothem = 1, { resolution = 16 } = {}) =>
-  ofRadius(toRadiusFromApothem(apothem), { resolution });
+  ofRadius(toRadiusFromApothem(apothem, (2 + resolution) * 2), { resolution });
 export const ofDiameter = (diameter = 1, { resolution = 16 } = {}) =>
   ofRadius(diameter / 2, { resolution });
 

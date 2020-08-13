@@ -1715,11 +1715,25 @@ const saveGeometry = async (path, shape) =>
  *
  **/
 
-const log = (text, level) =>
-  log$1({ op: 'text', text: String(text), level });
+const toText = (value) => {
+  if (typeof value === 'object') {
+    return JSON.stringify(value);
+  } else {
+    return String(value);
+  }
+};
 
-const logOp = (shape, op) =>
-  log$1({ op: 'text', text: String(op(shape)) });
+const log = (value, level) => {
+  const text = toText(value);
+  emit({ log: { text, level } });
+  return log$1({ op: 'text', text, level });
+};
+
+const logOp = (shape, op) => {
+  const text = String(op(shape));
+  emit({ log: { text } });
+  return log$1({ op: 'text', text });
+};
 
 const logMethod = function (
   op = (shape) => JSON.stringify(shape.toKeptGeometry())
@@ -1728,8 +1742,6 @@ const logMethod = function (
   return this;
 };
 Shape.prototype.log = logMethod;
-
-log.signature = 'log(op:function)';
 
 export default Shape;
 export { Shape, loadGeometry, log, saveGeometry };

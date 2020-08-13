@@ -1,9 +1,82 @@
+import { dataUrl, orbitDisplay } from './jsxcad-ui-threejs.js';
 import { Shape } from './jsxcad-api-v1-shape.js';
-import { dataUrl } from './jsxcad-ui-threejs.js';
+
+var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
 
 function createCommonjsModule(fn, module) {
 	return module = { exports: {} }, fn(module, module.exports), module.exports;
 }
+
+var base64Arraybuffer = createCommonjsModule(function (module, exports) {
+/*
+ * base64-arraybuffer
+ * https://github.com/niklasvh/base64-arraybuffer
+ *
+ * Copyright (c) 2012 Niklas von Hertzen
+ * Licensed under the MIT license.
+ */
+(function(){
+
+  var chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+
+  // Use a lookup table to find the index.
+  var lookup = new Uint8Array(256);
+  for (var i = 0; i < chars.length; i++) {
+    lookup[chars.charCodeAt(i)] = i;
+  }
+
+  exports.encode = function(arraybuffer) {
+    var bytes = new Uint8Array(arraybuffer),
+    i, len = bytes.length, base64 = "";
+
+    for (i = 0; i < len; i+=3) {
+      base64 += chars[bytes[i] >> 2];
+      base64 += chars[((bytes[i] & 3) << 4) | (bytes[i + 1] >> 4)];
+      base64 += chars[((bytes[i + 1] & 15) << 2) | (bytes[i + 2] >> 6)];
+      base64 += chars[bytes[i + 2] & 63];
+    }
+
+    if ((len % 3) === 2) {
+      base64 = base64.substring(0, base64.length - 1) + "=";
+    } else if (len % 3 === 1) {
+      base64 = base64.substring(0, base64.length - 2) + "==";
+    }
+
+    return base64;
+  };
+
+  exports.decode =  function(base64) {
+    var bufferLength = base64.length * 0.75,
+    len = base64.length, i, p = 0,
+    encoded1, encoded2, encoded3, encoded4;
+
+    if (base64[base64.length - 1] === "=") {
+      bufferLength--;
+      if (base64[base64.length - 2] === "=") {
+        bufferLength--;
+      }
+    }
+
+    var arraybuffer = new ArrayBuffer(bufferLength),
+    bytes = new Uint8Array(arraybuffer);
+
+    for (i = 0; i < len; i+=4) {
+      encoded1 = lookup[base64.charCodeAt(i)];
+      encoded2 = lookup[base64.charCodeAt(i+1)];
+      encoded3 = lookup[base64.charCodeAt(i+2)];
+      encoded4 = lookup[base64.charCodeAt(i+3)];
+
+      bytes[p++] = (encoded1 << 2) | (encoded2 >> 4);
+      bytes[p++] = ((encoded2 & 15) << 4) | (encoded3 >> 2);
+      bytes[p++] = ((encoded3 & 3) << 6) | (encoded4 & 63);
+    }
+
+    return arraybuffer;
+  };
+})();
+});
+var base64Arraybuffer_1 = base64Arraybuffer.encode;
+var base64Arraybuffer_2 = base64Arraybuffer.decode;
 
 var defaults = createCommonjsModule(function (module) {
 function getDefaults() {
@@ -1838,12 +1911,46 @@ marked.parse = marked;
 
 var marked_1 = marked;
 
-// global document
+var FileSaver_min = createCommonjsModule(function (module, exports) {
+(function(a,b){b();})(commonjsGlobal,function(){function b(a,b){return "undefined"==typeof b?b={autoBom:!1}:"object"!=typeof b&&(console.warn("Deprecated: Expected third argument to be a object"),b={autoBom:!b}),b.autoBom&&/^\s*(?:text\/\S*|application\/xml|\S*\/\S*\+xml)\s*;.*charset\s*=\s*utf-8/i.test(a.type)?new Blob(["\uFEFF",a],{type:a.type}):a}function c(b,c,d){var e=new XMLHttpRequest;e.open("GET",b),e.responseType="blob",e.onload=function(){a(e.response,c,d);},e.onerror=function(){console.error("could not download file");},e.send();}function d(a){var b=new XMLHttpRequest;b.open("HEAD",a,!1);try{b.send();}catch(a){}return 200<=b.status&&299>=b.status}function e(a){try{a.dispatchEvent(new MouseEvent("click"));}catch(c){var b=document.createEvent("MouseEvents");b.initMouseEvent("click",!0,!0,window,0,0,0,80,20,!1,!1,!1,!1,0,null),a.dispatchEvent(b);}}var f="object"==typeof window&&window.window===window?window:"object"==typeof self&&self.self===self?self:"object"==typeof commonjsGlobal&&commonjsGlobal.global===commonjsGlobal?commonjsGlobal:void 0,a=f.saveAs||("object"!=typeof window||window!==f?function(){}:"download"in HTMLAnchorElement.prototype?function(b,g,h){var i=f.URL||f.webkitURL,j=document.createElement("a");g=g||b.name||"download",j.download=g,j.rel="noopener","string"==typeof b?(j.href=b,j.origin===location.origin?e(j):d(j.href)?c(b,g,h):e(j,j.target="_blank")):(j.href=i.createObjectURL(b),setTimeout(function(){i.revokeObjectURL(j.href);},4E4),setTimeout(function(){e(j);},0));}:"msSaveOrOpenBlob"in navigator?function(f,g,h){if(g=g||f.name||"download","string"!=typeof f)navigator.msSaveOrOpenBlob(b(f,h),g);else if(d(f))c(f,g,h);else {var i=document.createElement("a");i.href=f,i.target="_blank",setTimeout(function(){e(i);});}}:function(a,b,d,e){if(e=e||open("","_blank"),e&&(e.document.title=e.document.body.innerText="downloading..."),"string"==typeof a)return c(a,b,d);var g="application/octet-stream"===a.type,h=/constructor/i.test(f.HTMLElement)||f.safari,i=/CriOS\/[\d]+/.test(navigator.userAgent);if((i||g&&h)&&"object"==typeof FileReader){var j=new FileReader;j.onloadend=function(){var a=j.result;a=i?a:a.replace(/^data:[^;]*;/,"data:attachment/file;"),e?e.location.href=a:location=a,e=null;},j.readAsDataURL(a);}else {var k=f.URL||f.webkitURL,l=k.createObjectURL(a);e?e.location=l:location.href=l,e=null,setTimeout(function(){k.revokeObjectURL(l);},4E4);}});f.saveAs=a.saveAs=a,(module.exports=a);});
 
-const toDomElement = async (notebook) => {
+
+});
+
+/* global Blob */
+
+const downloadFile = async (event, filename, data, type) => {
+  const blob = new Blob([data], { type });
+  FileSaver_min(blob, filename);
+};
+
+const toDomElement = async (notebook = []) => {
   const container = document.createElement('div');
+
+  const showOrbitView = async (event, note) => {
+    const { geometry, target, up, position } = note.view;
+    const view = { target, up, position };
+    const div = document.createElement('div');
+    div.classList.add('note', 'orbitView');
+    const body = window.document.body;
+    body.insertBefore(div, body.firstChild);
+    await orbitDisplay({ view, geometry }, div);
+    const onKeyDown = (event) => {
+      if (
+        event.key === 'Escape' ||
+        event.key === 'Esc' ||
+        event.keyCode === 27
+      ) {
+        body.removeEventListener('keydown', onKeyDown, true);
+        body.removeChild(div);
+      }
+    };
+    body.addEventListener('keydown', onKeyDown, true);
+  };
+
   for (const note of notebook) {
     if (note.view) {
+      const div = document.createElement('div');
       const { geometry, width, height, target, up, position } = note.view;
       const url = await dataUrl(Shape.fromGeometry(geometry), {
         width,
@@ -1852,21 +1959,45 @@ const toDomElement = async (notebook) => {
         up,
         position,
       });
-      const div = document.createElement('div');
       const image = document.createElement('img');
-      image.classList.add('note');
+      image.classList.add('note', 'view');
       image.src = url;
+      image.addEventListener('click', (event) => showOrbitView(event, note));
       div.appendChild(image);
       container.appendChild(div);
     }
     if (note.md) {
+      const markup = document.createElement('div');
       // Use ''' and '' instead of ``` and `` to avoid escaping.
       // FIX: Do this in a more principled fashion.
       const data = note.md.replace(/'''/g, '```').replace(/''/g, '``');
-      const markup = document.createElement('div');
-      markup.classList.add('note');
+      markup.classList.add('note', 'markdown');
       markup.innerHTML = marked_1(data);
       container.appendChild(markup);
+    }
+    if (note.log) {
+      const entry = document.createElement('div');
+      const text = document.createTextNode(note.log.text);
+      entry.appendChild(text);
+      entry.classList.add('note', 'log');
+      container.appendChild(entry);
+    }
+    if (note.download) {
+      const div = document.createElement('div');
+      for (let { base64Data, data, filename, type } of note.download.entries) {
+        if (base64Data) {
+          data = base64Arraybuffer.decode(base64Data);
+        }
+        const button = document.createElement('button');
+        button.classList.add('note', 'download');
+        const text = document.createTextNode(filename);
+        button.appendChild(text);
+        button.addEventListener('click', (event) =>
+          downloadFile(event, filename, data, type)
+        );
+        div.appendChild(button);
+      }
+      container.appendChild(div);
     }
   }
   return container;

@@ -22,12 +22,13 @@
   "keywords": [],
   "license": "MIT",
   "dependencies": {
+    "base64-arraybuffer": "^0.2.0",
+    "file-saver": "^2.0.2",
     "marked": "^0.8.2",
     "@jsxcad/api-v1-shape": "^0.0.79",
     "@jsxcad/ui-threejs": "^0.0.79"
   },
   "devDependencies": {
-    "@jsxcad/eslint-plugin-typelint": "^0.0.79",
     "depcheck": "^0.9.1",
     "eslint": "^7.0.0",
     "babel-eslint": "^10.0.1",

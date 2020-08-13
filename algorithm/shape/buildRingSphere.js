@@ -1,6 +1,7 @@
 import {
   assertGood,
   deduplicate,
+  flip,
   scale,
   translate,
 } from '@jsxcad/geometry-path';
@@ -33,20 +34,35 @@ const buildRingSphereImpl = (resolution = 20) => {
 
   // Trace out latitudinal rings.
   const ring = buildRegularPolygon(longitudinalResolution);
+  let path;
+  const getEffectiveSlice = (slice) => {
+    if (slice === 0) {
+      return 0.5;
+    } else if (slice === latitudinalResolution) {
+      return latitudinalResolution - 0.5;
+    } else {
+      return slice;
+    }
+  };
   for (let slice = 0; slice <= latitudinalResolution; slice++) {
-    let angle = (Math.PI * 1.0 * slice) / latitudinalResolution;
-    let height = Math.cos(angle);
-    let radius = Math.sin(angle);
+    const angle =
+      (Math.PI * 1.0 * getEffectiveSlice(slice)) / latitudinalResolution;
+    const height = Math.cos(angle);
+    const radius = Math.sin(angle);
     const points = ring;
     const scaledPath = scale([radius, radius, radius], points);
     const translatedPath = translate([0, 0, height], scaledPath);
-    const path = translatedPath;
+    path = translatedPath;
     if (lastPath !== undefined) {
       buildWalls(polygons, path, lastPath);
+    } else {
+      polygons.push(path);
     }
     lastPath = path;
   }
-  polygons.isConvex = true;
+  if (path) {
+    polygons.push(flip(path));
+  }
   for (const polygon of polygons) {
     assertGood(polygon);
   }

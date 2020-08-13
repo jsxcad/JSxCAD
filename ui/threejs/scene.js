@@ -29,6 +29,7 @@ export const createResizer = ({
 };
 
 export const buildScene = ({
+  canvas,
   width,
   height,
   view,
@@ -36,9 +37,8 @@ export const buildScene = ({
   withAxes = true,
   renderer,
 }) => {
-  Object3D.DefaultUp.set(0, 0.0001, 1);
-
-  const { target = [0, 0, 0], position = [40, 40, 40], up = [0, 0, 1] } = view;
+  const { target = [0, 0, 0], position = [40, 40, 40], up = [0, 1, 1] } = view;
+  Object3D.DefaultUp.set(...up);
 
   const camera = new PerspectiveCamera(27, width / height, 1, 1000000);
   camera.layers.enable(1);
@@ -72,7 +72,7 @@ export const buildScene = ({
   camera.add(light);
 
   if (renderer === undefined) {
-    renderer = new WebGLRenderer({ antialias: true });
+    renderer = new WebGLRenderer({ antialias: true, canvas });
     renderer.autoClear = false;
     renderer.setSize(width, height);
     renderer.setClearColor(0xffffff);
@@ -83,7 +83,5 @@ export const buildScene = ({
     renderer.domElement.style =
       'padding-left: 5px; padding-right: 5px; padding-bottom: 5px; position: absolute; z-index: 1';
   }
-  const canvas = renderer.domElement;
-
-  return { camera, canvas, renderer, scene };
+  return { camera, canvas: renderer.domElement, renderer, scene };
 };

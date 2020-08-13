@@ -12,11 +12,10 @@
   "scripts": {
     "depcheck": "depcheck",
     "lint": "eslint -c .eslintrc.cjs *.js",
-    "lintfix": "eslint  -c .eslintrc.cjs--fix *.js",
+    "lintfix": "eslint  -c .eslintrc.cjs --fix *.js",
     "rollup": "rollup -c rollup_main.js",
     "test": "ava",
-    "tests": "ava *.test.js",
-    "webpack": "webpack -d --config webpack.config.cjs"
+    "tests": "ava *.test.js"
   },
   "contributors": [
     {
@@ -30,7 +29,17 @@
   ],
   "keywords": [],
   "license": "MIT",
-  "dependencies": {},
+  "dependencies": {
+    "acorn": "^7.1.0",
+    "acorn-walk": "^7.1.1",
+    "doctrine": "^3.0.0",
+    "estraverse": "^5.2.0",
+    "fs-monkey": "^1.0.1",
+    "memfs": "^3.2.0",
+    "resolve-from": "^5.0.0",
+    "scope-analyzer": "^2.1.1",
+    "unionfs": "^4.4.0"
+  },
   "devDependencies": {
     "ava": "^3.9.0",
     "depcheck": "^0.9.1",

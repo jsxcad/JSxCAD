@@ -56,7 +56,6 @@
     "@jsxcad/math-vec3": "^0.0.79"
   },
   "devDependencies": {
-    "@jsxcad/eslint-plugin-typelint": "^0.0.79",
     "ava": "^3.9.0",
     "depcheck": "^0.9.1",
     "eslint": "^7.0.0",
