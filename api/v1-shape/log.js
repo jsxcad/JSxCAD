@@ -14,9 +14,18 @@ import Shape from './Shape.js';
  *
  **/
 
-export const log = (text, level) => {
+const toText = (value) => {
+  if (typeof value === 'object') {
+    return JSON.stringify(value);
+  } else {
+    return String(value);
+  }
+};
+
+export const log = (value, level) => {
+  const text = toText(value);
   emit({ log: { text, level } });
-  return sysLog({ op: 'text', text: String(text), level });
+  return sysLog({ op: 'text', text, level });
 };
 
 export const logOp = (shape, op) => {

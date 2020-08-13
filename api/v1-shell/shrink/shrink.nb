@@ -1,0 +1,27 @@
+md`
+# Shape.shrink examples.
+
+[Open in Editor](https://jsxcad.js.org/preAlphaHead/#JSxCAD@https://gitcdn.link/cdn/jsxcad/JSxCAD/master/api/v1-shell/shrink/shrink.nb)
+
+---
+
+Shape.shrink reduces a shape by moving its faces backward along their normals by some amount.
+
+---
+`;
+
+
+const shape = Square(10).cut(Triangle(5));
+
+Layers(
+  shape,
+  shape.outline(),
+  shape.shrink(0.5).outline(),
+  shape.shrink(1).outline(),
+  shape.shrink(1.5).outline(),
+  shape.shrink(2).outline(),
+  shape.shrink(2.5).outline(),
+  shape.shrink(3).outline(),
+  )
+  .Item()
+  .topView();

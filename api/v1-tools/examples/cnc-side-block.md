@@ -1,4 +1,3 @@
-
 # CNC Side Block
 
 [Open in Editor](https://jsxcad.js.org/preAlphaHead/#JSxCAD@https://gitcdn.link/cdn/jsxcad/JSxCAD/master/algorithm/toolpath/example.nb)
