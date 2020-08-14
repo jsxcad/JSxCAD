@@ -5,7 +5,7 @@ import { toolpath as toolpathAlgorithm } from '@jsxcad/algorithm-toolpath';
 export const toolpath = (
   shape,
   diameter = 1,
-  { overcut = true, solid = false } = {}
+  { overcut = false, solid = true } = {}
 ) =>
   Shape.fromGeometry({
     type: 'paths',
