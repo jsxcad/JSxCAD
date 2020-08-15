@@ -1,13 +1,14 @@
 import { reallyQuantizeForSpace } from './jsxcad-math-utils.js';
+import { makeConvex, toPlane, flip, outline } from './jsxcad-geometry-surface.js';
 import { fromScaling, identity, multiply, fromTranslation, fromZRotation } from './jsxcad-math-mat4.js';
 import { assertGood, isClosed, canonicalize as canonicalize$1, close } from './jsxcad-geometry-path.js';
 import { buildAdaptiveCubicBezierCurve } from './jsxcad-algorithm-shape.js';
 import { equals } from './jsxcad-math-vec2.js';
 import { transform } from './jsxcad-geometry-paths.js';
+import { dot } from './jsxcad-math-vec3.js';
 import { toTagsFromName } from './jsxcad-algorithm-color.js';
 import { transform as transform$1, measureBoundingBox, translate, canonicalize as canonicalize$2, toKeptGeometry, getAnyNonVoidSurfaces, getNonVoidPaths } from './jsxcad-geometry-tagged.js';
 import { createNormalize3 } from './jsxcad-algorithm-quantize.js';
-import { outline } from './jsxcad-geometry-surface.js';
 
 const canonicalizeSegment = ([directive, ...args]) => [
   directive,
@@ -3426,6 +3427,16 @@ const fromSvgPath$1 = (svgPath, options = {}) =>
     Object.assign({ normalizeCoordinateSystem: false }, options)
   );
 
+const fromPathsToSurface = (paths) => {
+  const surface = makeConvex(close(paths));
+  const plane = toPlane(surface);
+  if (dot(plane, [0, 0, 1]) < 0) {
+    return flip(surface);
+  } else {
+    return surface;
+  }
+};
+
 const ELEMENT_NODE$1 = 1;
 const ATTRIBUTE_NODE$1 = 2;
 const TEXT_NODE$1 = 3;
@@ -3443,9 +3454,10 @@ const applyTransforms = ({ matrix }, transformText) => {
   const match = /([^(]+)[(]([^)]*)[)] *(.*)/.exec(transformText);
   if (match) {
     const [operator, operandText, rest] = match.slice(1);
-    const operands = operandText
-      .split(/ +/)
-      .map((operand) => parseFloat(operand));
+    const operandTokens = operandText
+      .split(/ *, */g)
+      .flatMap((token) => token.split(/ +/g));
+    const operands = operandTokens.map((operand) => parseFloat(operand));
     if (operands.some((operand) => isNaN(operand))) {
       throw Error(`die: Bad operand in ${transformText}.`);
     }
@@ -3640,7 +3652,6 @@ const fromSvg = async (input, options = {}) => {
             stroke: node.getAttribute('stroke'),
           };
           const style = node.getAttribute('style');
-          // style="fill:#000000;stroke-width:0.26458332"
           for (const entry of style.split(';')) {
             const [name, value] = entry.split(':');
             attributes[name] = value;
@@ -3652,7 +3663,7 @@ const fromSvg = async (input, options = {}) => {
             geometry.content.push(
               transform$1(scale(matrix), {
                 type: 'z0Surface',
-                z0Surface: close(paths),
+                z0Surface: fromPathsToSurface(paths),
                 tags,
               })
             );
