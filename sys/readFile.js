@@ -88,6 +88,7 @@ const fetchSources = async (sources) => {
             return new Uint8Array(await response.arrayBuffer());
           }
         } else {
+          log({ op: 'text', text: `# Fetching ${source}` });
           // Assume a file path.
           const data = await fetchFile(source);
           if (data !== undefined) {

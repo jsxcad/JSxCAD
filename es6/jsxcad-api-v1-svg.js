@@ -1,6 +1,6 @@
 import Shape$1, { Shape } from './jsxcad-api-v1-shape.js';
 import { fromSvgPath, fromSvg, toSvg } from './jsxcad-convert-svg.js';
-import { readFile, read, addPending, writeFile, emit } from './jsxcad-sys.js';
+import { read, addPending, writeFile, emit } from './jsxcad-sys.js';
 import { ensurePages } from './jsxcad-api-v1-layout.js';
 
 /**
@@ -24,19 +24,10 @@ const SvgPath = (svgPath, options = {}) =>
     fromSvgPath(new TextEncoder('utf8').encode(svgPath), options)
   );
 
-const readSvg = async (path, { src = path } = {}) => {
-  let data = await readFile({ doSerialize: false }, `source/${path}`);
-  if (data === undefined && src) {
-    data = await readFile({ decode: 'utf8', sources: [src] }, `cache/${path}`);
-  }
+const readSvg = async (path) => {
+  const data = await read(`source/${path}`, { sources: [path] });
   if (data === undefined) {
-    data = await readFile(
-      { doSerialize: false, decode: 'utf8' },
-      `output/${path}`
-    );
-  }
-  if (data === undefined) {
-    throw Error(`Cannot find ${path}`);
+    throw Error(`Cannot read svg from ${path}`);
   }
   return Shape$1.fromGeometry(await fromSvg(data));
 };

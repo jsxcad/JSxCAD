@@ -1,3 +1,5 @@
+import { flip, makeConvex, toPlane } from '@jsxcad/geometry-surface';
+
 import {
   fromScaling,
   fromTranslation,
@@ -10,6 +12,7 @@ import SvgPoints from 'svg-points/cjs/index.js';
 import XmlDom from 'xmldom';
 import { fromSvgPath as baseFromSvgPath } from './fromSvgPath.js';
 import { close } from '@jsxcad/geometry-path';
+import { dot } from '@jsxcad/math-vec3';
 import { toTagsFromName } from '@jsxcad/algorithm-color';
 import { transform } from '@jsxcad/geometry-tagged';
 
@@ -19,6 +22,16 @@ const fromSvgPath = (svgPath, options = {}) =>
     new TextEncoder('utf8').encode(svgPath),
     Object.assign({ normalizeCoordinateSystem: false }, options)
   );
+
+const fromPathsToSurface = (paths) => {
+  const surface = makeConvex(close(paths));
+  const plane = toPlane(surface);
+  if (dot(plane, [0, 0, 1]) < 0) {
+    return flip(surface);
+  } else {
+    return surface;
+  }
+};
 
 const ELEMENT_NODE = 1;
 const ATTRIBUTE_NODE = 2;
@@ -37,9 +50,10 @@ const applyTransforms = ({ matrix }, transformText) => {
   const match = /([^(]+)[(]([^)]*)[)] *(.*)/.exec(transformText);
   if (match) {
     const [operator, operandText, rest] = match.slice(1);
-    const operands = operandText
-      .split(/ +/)
-      .map((operand) => parseFloat(operand));
+    const operandTokens = operandText
+      .split(/ *, */g)
+      .flatMap((token) => token.split(/ +/g));
+    const operands = operandTokens.map((operand) => parseFloat(operand));
     if (operands.some((operand) => isNaN(operand))) {
       throw Error(`die: Bad operand in ${transformText}.`);
     }
@@ -234,7 +248,6 @@ export const fromSvg = async (input, options = {}) => {
             stroke: node.getAttribute('stroke'),
           };
           const style = node.getAttribute('style');
-          // style="fill:#000000;stroke-width:0.26458332"
           for (const entry of style.split(';')) {
             const [name, value] = entry.split(':');
             attributes[name] = value;
@@ -246,7 +259,7 @@ export const fromSvg = async (input, options = {}) => {
             geometry.content.push(
               transform(scale(matrix), {
                 type: 'z0Surface',
-                z0Surface: close(paths),
+                z0Surface: fromPathsToSurface(paths),
                 tags,
               })
             );
