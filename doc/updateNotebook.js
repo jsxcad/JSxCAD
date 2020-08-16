@@ -33,10 +33,15 @@ export const updateNotebook = async (target) => {
   try {
     await importModule(`${target}.nb`);
   } catch (error) {
-    log(error.toString());
+    log(error.stack);
   }
   await resolvePending();
   const notebook = getEmitted();
+  for (const note of notebook) {
+    if (note.log) {
+      console.log(note.log.text);
+    }
+  }
   const html = await toHtml(notebook);
   writeFileSync(`${target}.html`, html);
   const { pngData, imageUrls } = await screenshot(
