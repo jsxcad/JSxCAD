@@ -3,7 +3,7 @@ import fs from 'fs';
 import path from 'path';
 import { updateNotebook } from './updateNotebook.js';
 
-const build = async (baseDirectory) => {
+const build = async (baseDirectory = '.') => {
   const notebooks = [];
   const walk = async (directory) => {
     for (const entry of await fs.promises.readdir(directory, {
@@ -24,6 +24,7 @@ const build = async (baseDirectory) => {
   };
   await walk(baseDirectory);
   for (const notebook of notebooks) {
+    console.log(`QQ/notebook: ${notebook}`);
     await updateNotebook(notebook);
   }
 };

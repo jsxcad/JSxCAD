@@ -1,7 +1,8 @@
 import { boot, clearEmitted, getEmitted, resolvePending } from '@jsxcad/sys';
+import { importModule, log } from '@jsxcad/api-v1';
 import { readFileSync, writeFileSync } from 'fs';
+
 import imageDataUri from 'image-data-uri';
-import { importModule } from '@jsxcad/api-v1';
 import pathModule from 'path';
 import pixelmatch from 'pixelmatch';
 import pngjs from 'pngjs';
@@ -27,12 +28,20 @@ const writeMarkdown = (path, notebook, imageUrls) => {
 };
 
 export const updateNotebook = async (target) => {
-  console.log(`updateNotebook: ${target}`);
   clearEmitted();
   await boot();
-  await importModule(`${target}.nb`);
+  try {
+    await importModule(`${target}.nb`);
+  } catch (error) {
+    log(error.stack);
+  }
   await resolvePending();
   const notebook = getEmitted();
+  for (const note of notebook) {
+    if (note.log) {
+      console.log(note.log.text);
+    }
+  }
   const html = await toHtml(notebook);
   writeFileSync(`${target}.html`, html);
   const { pngData, imageUrls } = await screenshot(
@@ -46,11 +55,12 @@ export const updateNotebook = async (target) => {
   try {
     expectedPng = pngjs.PNG.sync.read(readFileSync(`${target}.png`));
   } catch (error) {
-    if (error.code !== 'ENOENT') {
-      throw error;
+    if (error.code === 'ENOENT') {
+      // We have no expectation -- generate one.
+      writeFileSync(`${target}.png`, pngjs.PNG.sync.write(pngData));
+      return;
     }
-    writeFileSync(`${target}.png`, pngData);
-    return;
+    throw error;
   }
   const { width, height } = expectedPng;
   const differencePng = new pngjs.PNG({ width, height });
@@ -62,7 +72,7 @@ export const updateNotebook = async (target) => {
     width,
     height,
     {
-      threshold: pixelThreshold,
+      threshold: 0.01,
       alpha: 0.2,
       diffMask: process.env.FORCE_COLOR === '0',
       diffColor:
@@ -74,6 +84,6 @@ export const updateNotebook = async (target) => {
       `${target}.difference.png`,
       pngjs.PNG.sync.write(differencePng)
     );
-    throw Error('die');
+    console.log(`${target}.difference.png`);
   }
 };

@@ -28,7 +28,6 @@
     "@jsxcad/ui-threejs": "^0.0.79"
   },
   "devDependencies": {
-    "@jsxcad/eslint-plugin-typelint": "^0.0.79",
     "depcheck": "^0.9.1",
     "eslint": "^7.0.0",
     "babel-eslint": "^10.0.1",

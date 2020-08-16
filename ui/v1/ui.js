@@ -416,7 +416,8 @@ class Ui extends React.PureComponent {
   }
 
   renderPane(views, id, path, createNode, onSelectView) {
-    const { file, workspace } = this.state;
+    const { ask, file, workspace } = this.state;
+    const { sha } = this.props;
     const { view } = this.getPaneView(id);
     const seenViewChoices = new Set();
     const viewChoices = [];
@@ -426,13 +427,13 @@ class Ui extends React.PureComponent {
         viewChoices.push(entry);
       }
     }
-    const { ask } = this.state;
 
     switch (view) {
       case 'notebook':
         return (
           <NotebookUi
             key={`${id}/notebook/${file}`}
+            sha={sha}
             id={id}
             path={path}
             createNode={createNode}

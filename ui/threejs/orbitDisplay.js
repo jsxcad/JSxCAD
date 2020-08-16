@@ -1,4 +1,4 @@
-/* global ResizeObserver */
+/* global ResizeObserver, requestAnimationFrame */
 
 import { GEOMETRY_LAYER, SKETCH_LAYER } from './layers.js';
 import { buildScene, createResizer } from './scene.js';
@@ -9,7 +9,10 @@ import { buildTrackballControls } from './controls.js';
 import { moveToFit } from './moveToFit.js';
 import { toThreejsGeometry } from '@jsxcad/convert-threejs';
 
-export const orbitDisplay = async ({ view = {}, geometry } = {}, page) => {
+export const orbitDisplay = async (
+  { view = {}, geometry, canvas } = {},
+  page
+) => {
   let datasets = [];
   const width = page.offsetWidth;
   const height = page.offsetHeight;
@@ -20,7 +23,8 @@ export const orbitDisplay = async ({ view = {}, geometry } = {}, page) => {
   const planLayers = new Layers();
   planLayers.set(SKETCH_LAYER);
 
-  const { camera, canvas, renderer, scene } = buildScene({
+  const { camera, canvas: displayCanvas, renderer, scene } = buildScene({
+    canvas,
     width,
     height,
     view,
@@ -40,13 +44,15 @@ export const orbitDisplay = async ({ view = {}, geometry } = {}, page) => {
     renderer.render(scene, camera);
   };
 
-  page.appendChild(canvas);
+  if (!canvas) {
+    page.appendChild(displayCanvas);
+  }
 
   const { trackball } = buildTrackballControls({
     camera,
     render,
     view,
-    viewerElement: canvas,
+    viewerElement: displayCanvas,
   });
 
   const { resize } = createResizer({
@@ -84,7 +90,15 @@ export const orbitDisplay = async ({ view = {}, geometry } = {}, page) => {
     render();
   }
 
-  return { canvas, render, updateGeometry };
+  const animate = () => {
+    requestAnimationFrame(animate);
+    trackball.update();
+    render();
+  };
+
+  animate();
+
+  return { canvas: displayCanvas, render, updateGeometry, trackball };
 };
 
 export default orbitDisplay;

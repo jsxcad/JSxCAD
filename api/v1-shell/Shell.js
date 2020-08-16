@@ -1,4 +1,11 @@
-import { add, normalize, scale, subtract, transform } from '@jsxcad/math-vec3';
+import {
+  add,
+  dot,
+  normalize,
+  scale,
+  subtract,
+  transform,
+} from '@jsxcad/math-vec3';
 
 import {
   getAnyNonVoidSurfaces,
@@ -65,8 +72,9 @@ export const Shell = (radius = 1, resolution = 3, ...shapes) => {
       const thisSurface = surface || z0Surface;
       const plane = toPlaneFromSurface(thisSurface);
       const rotate90 = fromRotation(Math.PI / -2, plane);
+      const getDirection = (start, end) => normalize(subtract(end, start));
       const getOffset = ([start, end]) => {
-        const direction = normalize(subtract(end, start));
+        const direction = getDirection(start, end);
         const offset = transform(rotate90, scale(radius, direction));
         return offset;
       };
@@ -97,6 +105,7 @@ export const Shell = (radius = 1, resolution = 3, ...shapes) => {
           const currentInner = getInner(currentOffset, current);
           const nextOuter = getOuter(nextOffset, next);
           const nextInner = getInner(nextOffset, next);
+          // FIX: The projected offsets can cross.
           const startOuter =
             intersect(lastOuter, currentOuter)[END] ?? currentOuter[START];
           const endOuter =
@@ -107,6 +116,17 @@ export const Shell = (radius = 1, resolution = 3, ...shapes) => {
             intersect(currentInner, nextInner)[START] ?? currentInner[END];
           // Build an offset surface.
           const polygon = [endOuter, endInner, startInner, startOuter];
+          const currentDirection = getDirection(current[0], current[1]);
+          if (dot(currentDirection, getDirection(startOuter, endOuter)) < 0) {
+            // Swap the direction of the outer offset.
+            polygon[0] = startOuter;
+            polygon[3] = endOuter;
+          }
+          if (dot(currentDirection, getDirection(startInner, endInner)) < 0) {
+            // Swap the direction of the inner offset.
+            polygon[1] = startInner;
+            polygon[2] = endInner;
+          }
           // These need to be distinct surfaces so that they can be unioned.
           surfaces.push(taggedSurface({}, [polygon]));
         }

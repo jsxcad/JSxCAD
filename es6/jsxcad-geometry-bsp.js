@@ -1292,7 +1292,7 @@ const toDot = (bsp) => {
   return lines.join('\n');
 };
 
-const toPlanesFromSolid = (solid, offset = 0) => {
+const toPlanesFromSolid = (solid) => {
   const planes = [];
   const addPlane = (plane) => {
     // FIX: Inefficient.

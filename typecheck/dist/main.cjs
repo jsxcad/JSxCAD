@@ -1103,6 +1103,7 @@ class TypeContext {
     parseComment,
     parseType,
     filename,
+    getComments,
   } = {}) {
     this.typedefs = typedefs;
     this.types = types;
@@ -1114,6 +1115,7 @@ class TypeContext {
     this.parseComment = parseComment;
     this.importModule = importModule;
     this.parseType = parseType;
+    this.getComments = getComments;
   }
 
   getTypedef(name) {
@@ -1136,7 +1138,26 @@ class TypeContext {
     this.types[line] = type;
   }
 
-  getTypeDeclaration(line) {
+  getTypeDeclaration(node) {
+    const leading = node.leadingComments;
+
+    if (leading) {
+      for (const { value } of leading) {
+        // Check for a /** ... */ style comment.
+        if (!value.startsWith('*')) {
+          continue;
+        }
+        // Cut off the leading * left over from the /** ... */.
+        const typeString = value.substr(1);
+        const result = Type.fromString(typeString, this);
+        if (result !== Type.any && result !== Type.invalid) {
+          return result;
+        }
+      }
+    }
+
+    // Fall back to a statement level declaration.
+    const line = node.loc.start.line;
     const type = this.types[line] || Type.any;
     return type;
   }
@@ -1926,14 +1947,22 @@ Type.parseComment = (line, comment, typeContext) => {
   return type;
 };
 
-Type.fromString = (string, typeContext) =>
-  Type.fromDoctrineType(typeContext.parseType(string), {}, typeContext);
+Type.fromString = (string, typeContext) => {
+  try {
+    return Type.fromDoctrineType(
+      typeContext.parseType(string),
+      {},
+      typeContext
+    );
+  } catch (error) {
+    console.log(`QQ/Type.fromString/string: ${string}`);
+    throw error;
+  }
+};
 
 Type.fromNode = (node, typeContext) => {
-  const startLine = (node) => node.loc.start.line;
-
   const resolveTypeFromNode = (node, typeContext) =>
-    typeContext.getTypeDeclaration(startLine(node));
+    typeContext.getTypeDeclaration(node);
 
   const resolveTypeForBinaryExpression = (node, typeContext) => {
     const { left, operator, right } = node;
@@ -2155,9 +2184,9 @@ Type.fromNode = (node, typeContext) => {
       }
     }
 
-    const { parent } = definition;
+    // In some cases we can derive the type from the position in the enclosing nodes.
 
-    // If it is defined in a parameter, the declaration is for the function.
+    const { parent } = definition;
 
     switch (parent.type) {
       case 'ArrayPattern': {
@@ -2189,6 +2218,9 @@ Type.fromNode = (node, typeContext) => {
         const externalTypeContext = typeContext.importModule(
           parent.parent.source.value
         );
+        if (!externalTypeContext) {
+          return Type.any;
+        }
         const declaration = externalTypeContext.getDefaultExportDeclaration();
         if (!declaration) {
           return Type.any;
@@ -2199,7 +2231,12 @@ Type.fromNode = (node, typeContext) => {
       case 'ImportSpecifier': {
         const path = parent.parent.source.value;
         const externalSymbol = parent.imported.name;
-        return typeContext.getNamedExportType(path, externalSymbol);
+        try {
+          return typeContext.getNamedExportType(path, externalSymbol);
+        } catch (error) {
+          console.log(`QQ/Type/ImportSpecifier: ${error.toString()}`);
+          return Type.any;
+        }
       }
       case 'VariableDeclarator': {
         // FIX: This should be at the Declaration level so that we can see if it is const.
@@ -2207,16 +2244,19 @@ Type.fromNode = (node, typeContext) => {
         // So we require an explicit declaration, which is detected above.
         return Type.fromNode(parent, typeContext);
       }
-      case 'RestElement':
-      case 'ClassDeclaration':
       case 'CatchClause':
+      case 'RestElement':
       case 'ImportNamespaceSpecifier':
-      case 'Property': {
+      case 'Property':
+        return resolveTypeFromNode(parent, typeContext);
+      case 'ClassDeclaration': {
         console.log(`Unimplemented parent.type: ${parent.type}.`);
         return Type.any;
       }
       default:
-        throw Error(`Unexpected parent.type: ${parent.type}`);
+        console.log(`node: ${generate(node)}`);
+        console.log(`parent: ${generate(parent)}`);
+        throw Error(`Unexpected parent.type: ${parent.type} for ${name}`);
     }
   };
 
@@ -2267,6 +2307,7 @@ Type.fromNode = (node, typeContext) => {
         return resolveTypeForUnaryExpression(node);
       case 'VariableDeclarator':
         return resolveTypeForVariableDeclarator(node, typeContext);
+      case 'SequenceExpression':
       case 'ObjectPattern':
       case 'OptionalCallExpression':
       case 'NewExpression':
