@@ -39,7 +39,8 @@
     "react-bootstrap": "^1.0.0-beta.14",
     "react-dom": ">=16.8.2",
     "react-draggable": "4.2.0",
-    "react-mosaic-component": "^3.2.0"
+    "react-mosaic-component": "^3.2.0",
+    "workerpool": "^6.0.0"
   },
   "devDependencies": {
     "@babel/core": "^7.7.4",
@@ -47,6 +48,7 @@
     "@babel/plugin-transform-react-jsx": "^7.7.4",
     "@babel/preset-env": "^7.7.4",
     "@babel/preset-react": "^7.7.4",
+    "@rollup/plugin-replace": "^2.3.3",
     "ava": "^3.9.0",
     "depcheck": "^0.9.1",
     "eslint": "^7.0.0",
