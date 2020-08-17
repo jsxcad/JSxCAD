@@ -1,6 +1,6 @@
-import { add, subtract, normalize, dot, transform, scale } from './jsxcad-math-vec3.js';
-import { getNonVoidSolids, getAnyNonVoidSurfaces, taggedSurface, union, taggedAssembly, getSolids, taggedLayers } from './jsxcad-geometry-tagged.js';
-import { Hull, outline } from './jsxcad-api-v1-extrude.js';
+import { add, subtract, normalize, dot, transform, scale, squaredDistance } from './jsxcad-math-vec3.js';
+import { getNonVoidSolids, getAnyNonVoidSurfaces, taggedSurface, union, taggedAssembly, getSolids, taggedLayers, getNonVoidPaths, taggedPaths } from './jsxcad-geometry-tagged.js';
+import { Hull } from './jsxcad-api-v1-extrude.js';
 import Shape$1, { Shape } from './jsxcad-api-v1-shape.js';
 import { Sphere } from './jsxcad-api-v1-shapes.js';
 import { createNormalize3 } from './jsxcad-algorithm-quantize.js';
@@ -10,6 +10,7 @@ import { closestSegmentBetweenLines } from './jsxcad-math-line3.js';
 import { outlineSurface } from './jsxcad-geometry-halfedge.js';
 import { toPlane } from './jsxcad-geometry-surface.js';
 import { toConvexClouds, fromSolid } from './jsxcad-geometry-bsp.js';
+import { fromPolygon } from './jsxcad-math-plane.js';
 
 /**
  *
@@ -163,8 +164,130 @@ const growMethod = function (...args) {
 };
 Shape.prototype.grow = growMethod;
 
-const offset = (shape, radius = 1, resolution = 16) =>
-  outline(grow(shape, radius, resolution));
+const INTERSECTION_THRESHOLD = 1e-5;
+
+const START$1 = 0;
+const END$1 = 1;
+
+/*
+
+5<   >2
+0  T  3
+1i> <j4
+
+slice(j + 1), slice(0, i + 1), T
+slice(i + 1, j + 1), T
+
+*/
+
+const resolveSelfIntersections = (path, plane, resolved) => {
+  const todo = [path];
+  let n = 0;
+  while (todo.length > 0) {
+    const walk = (path) => {
+      const planeOfPath = fromPolygon(path);
+      if (planeOfPath === undefined) {
+        return;
+      }
+      const at = (nth) => path[nth % path.length];
+console.log(`QQ/walk: ${path.length} ${n++} ${todo.length}`);
+      // FIX: Use an appropriate spatial decomposition.
+      for (let i = 0; i < path.length; i++) {
+        const iStart = at(i);
+        const iEnd = at(i + 1);
+        for (let j = i + 2; j < path.length; j++) {
+          if ((j + 1) % path.length === i) {
+            continue;
+          }
+          const jStart = at(j);
+          const jEnd = at(j + 1);
+          const [from, to] = closestSegmentBetweenLines([iStart, iEnd], [jStart, jEnd]);
+          if (from === null || to === null) {
+            continue;
+          }
+          if (squaredDistance(from, to) < INTERSECTION_THRESHOLD) {
+            console.log(`QQ: i=${i} j=${j} l=${path.length}`);
+            // We've found a self-intersection.
+            // Chop the loop.
+            if (i < j) {
+              // [a, b, c, d@i, e, f, g@j, h, i]
+              // to
+              // [e, f, g, to]
+              // [a, b, c, d, from, h, i]
+              todo.push([...path.slice(i + 1, j + 1), to]);
+              todo.push([...path.slice(j + 1), ...path.slice(0, i + 1), from]);
+              return;
+            } else {
+              todo.push([...path.slice(j + 1, i + 1), to]);
+              todo.push([...path.slice(i + 1), ...path.slice(0, j + 1), from]);
+              return;
+            }
+          }
+        }
+      }
+      // no self-intersections, this path is done.
+      if (dot(plane, planeOfPath) > 0) {
+        resolved.push(path);
+      }
+    };
+    walk(todo.pop());
+  }
+};
+
+const offset = (shape, radius = 1, resolution = 16) => {
+  const offsetPathsets = [];
+  for (const { tags, paths } of getNonVoidPaths(shape.toDisjointGeometry())) {
+    const resolved = [];
+    for (const path of paths) {
+      // Let's assume this path has a coherent plane.
+      const plane = fromPolygon(path);
+      const rotate90 = fromRotation(Math.PI / -2, plane);
+      const getDirection = (start, end) => normalize(subtract(end, start));
+      const getOffset = ([start, end]) => {
+        const direction = getDirection(start, end);
+        const offset = transform(rotate90, scale(radius, direction));
+        return offset;
+      };
+      const getOuter = (offset, [start, end]) => [
+        add(start, offset),
+        add(end, offset),
+      ];
+
+      const offsetPath = [];
+      const edges = getEdges(path);
+      let last = edges[edges.length - 2];
+      let current = edges[edges.length - 1];
+      let next = edges[0];
+      for (
+        let nth = 0;
+        nth < edges.length;
+        last = current, current = next, next = edges[++nth]
+      ) {
+        const lastOffset = getOffset(last);
+        const currentOffset = getOffset(current);
+        const nextOffset = getOffset(next);
+        const lastOuter = getOuter(lastOffset, last);
+        const currentOuter = getOuter(currentOffset, current);
+        const nextOuter = getOuter(nextOffset, next);
+        const startOuter =
+          closestSegmentBetweenLines(lastOuter, currentOuter)[END$1] ?? currentOuter[START$1];
+        const endOuter =
+          closestSegmentBetweenLines(currentOuter, nextOuter)[START$1] ?? currentOuter[END$1];
+        // Build an offset surface.
+        const currentDirection = getDirection(current[0], current[1]);
+        if (dot(currentDirection, getDirection(startOuter, endOuter)) < 0) {
+          offsetPath.push(startOuter);
+        } else {
+          offsetPath.push(endOuter);
+        }
+      }
+      resolveSelfIntersections(offsetPath, plane, resolved);
+    }
+    offsetPathsets.push(taggedPaths({ tags }, resolved));
+  }
+console.log(`QQ/resolved: ${offsetPathsets.length}`);
+  return Shape.fromGeometry(taggedAssembly({}, ...offsetPathsets));
+};
 
 const offsetMethod = function (radius, resolution) {
   return offset(this, radius, resolution);

@@ -114,6 +114,14 @@ export const closestSegmentBetweenLines = ([p1, p2], [p3, p4]) => {
   const mua = numerator / denominator;
   const mub = (d1343 + d4321 * mua) / d4343;
 
+  if (mua < 0.0 || mua > 1.0) {
+    return [null, null];
+  }
+
+  if (mub < 0.0 || mub > 1.0) {
+    return [null, null];
+  }
+
   const pa = [p1[X] + mua * p21[X], p1[Y] + mua * p21[Y], p1[Z] + mua * p21[Z]];
   const pb = [p3[X] + mub * p43[X], p3[Y] + mub * p43[Y], p3[Z] + mub * p43[Z]];
 
