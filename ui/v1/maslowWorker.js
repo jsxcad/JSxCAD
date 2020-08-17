@@ -8,6 +8,7 @@ import { Hull } from '../../es6/jsxcad-api-v1-extrude.js';
 import { clearCache } from '../../es6/jsxcad-cache.js';
 import { toStl } from '../../es6/jsxcad-convert-stl.js';
 import { toSvg } from '../../es6/jsxcad-convert-svg.js';
+import workerpool from 'workerpool/dist/workerpool.js';
 
 function computeXYSegmentLength(p1, p2) {
   const segmentLength = Math.sqrt(

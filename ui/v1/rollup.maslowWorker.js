@@ -4,6 +4,7 @@ import globals from 'rollup-plugin-node-globals';
 import hypothetical from 'rollup-plugin-hypothetical-windows-fix';
 import loadz0r from 'rollup-plugin-loadz0r';
 import nodeResolve from 'rollup-plugin-node-resolve';
+import replace from '@rollup/plugin-replace';
 
 export default {
   input: 'maslowWorker.js',
@@ -13,6 +14,9 @@ export default {
   },
   plugins: [
     loadz0r(),
+    replace({
+      __dirname: '""',
+    }),
     hypothetical({
       allowFallthrough: true,
       allowRealFiles: true,
