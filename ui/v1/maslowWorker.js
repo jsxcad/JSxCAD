@@ -10,6 +10,9 @@ import { toStl } from '../../es6/jsxcad-convert-stl.js';
 import { toSvg } from '../../es6/jsxcad-convert-svg.js';
 import workerpool from 'workerpool/dist/workerpool.js';
 
+// Just something to make sure workerpool gets used.
+export const foo = () => workerpool;
+
 function computeXYSegmentLength(p1, p2) {
   const segmentLength = Math.sqrt(
     (p1[0] - p2[0]) * (p1[0] - p2[0]) + (p1[1] - p2[1]) * (p1[1] - p2[1])
