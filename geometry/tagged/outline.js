@@ -7,10 +7,15 @@ import { getNonVoidSolids } from './getNonVoidSolids.js';
 import { taggedPaths } from './taggedPaths.js';
 import { toKeptGeometry } from './toKeptGeometry.js';
 
+// FIX: The semantics here are a bit off.
+// Let's consider the case of Assembly(Square(10), Square(10).outline()).outline().
+// This will drop the Square(10).outline() as it will not be outline-able.
+// Currently we need this so that things like withOutline() will work properly,
+// but ideally outline would be idempotent and rewrite shapes as their outlines,
+// unless already outlined, and handle the withOutline case within this.
 const outlineImpl = (geometry, includeFaces = true, includeHoles = true) => {
   const normalize = createNormalize3();
 
-  // FIX: This assumes general coplanarity.
   const keptGeometry = toKeptGeometry(geometry);
   const outlines = [];
   for (const { solid } of getNonVoidSolids(keptGeometry)) {

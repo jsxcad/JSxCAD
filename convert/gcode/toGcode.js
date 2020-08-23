@@ -1,6 +1,10 @@
-import { getNonVoidPaths, toKeptGeometry } from '@jsxcad/geometry-tagged';
+import { equals, negate } from '@jsxcad/math-vec3';
+import {
+  getNonVoidPaths,
+  toDisjointGeometry,
+  translate,
+} from '@jsxcad/geometry-tagged';
 
-import { equals } from '@jsxcad/math-vec3';
 import { getEdges } from '@jsxcad/geometry-path';
 
 const X = 0;
@@ -43,7 +47,7 @@ export const toGcode = async (
     x = position[X],
     y = position[Y],
     z = position[Z],
-    f = feedRate
+    f = tool.feedRate
   ) => {
     emit(`G0 X${x.toFixed(3)} Y${y.toFixed(3)} Z${z.toFixed(3)}`);
     position = [x, y, z];
@@ -54,7 +58,7 @@ export const toGcode = async (
     x = position[X],
     y = position[Y],
     z = position[Z],
-    f = feedRate
+    f = tool.feedRate
   ) => {
     setSpeed(tool.cutSpeed);
     emit(
@@ -84,27 +88,48 @@ export const toGcode = async (
     }
   };
 
+  const toolReconfigure = ({ feedRate, laserPower, spindleRpm } = {}) => {
+    if (feedRate) {
+      tool.feedRate = feedRate;
+    }
+    switch (toolType) {
+      case 'spindle':
+        if (spindleRpm) {
+          tool.jumpSpeed = spindleRpm;
+          tool.cutSpeed = spindleRpm;
+        }
+        break;
+      case 'constantLaser':
+        if (laserPower) {
+          tool.jumpSpeed = 0;
+          tool.cutSpeed = laserPower;
+        }
+        break;
+      case 'dynamicLaser':
+        if (laserPower) {
+          tool.jumpSpeed = laserPower;
+          tool.cutSpeed = laserPower;
+        }
+        break;
+    }
+  };
+
   const toolWarmup = () => {
+    toolReconfigure({ feedRate, laserPower, spindleRpm });
     switch (toolType) {
       case 'spindle':
         tool.isSpindle = true;
-        tool.jumpSpeed = spindleRpm;
-        tool.cutSpeed = spindleRpm;
         disableLaserMode();
         raise();
         emit('M3');
         break;
       case 'constantLaser':
         tool.isConstantLaser = true;
-        tool.jumpSpeed = 0;
-        tool.cutSpeed = laserPower;
         enableLaserMode();
         emit('M3');
         break;
       case 'dynamicLaser':
         tool.isDynamicLaser = true;
-        tool.jumpSpeed = laserPower;
-        tool.cutSpeed = laserPower;
         enableLaserMode();
         emit('M4');
         break;
@@ -115,6 +140,10 @@ export const toGcode = async (
 
   const toolShutdown = () => {
     emit('M5');
+  };
+
+  const toolPause = () => {
+    emit('M0');
   };
 
   const raise = () => {
@@ -138,23 +167,44 @@ export const toGcode = async (
   toolWarmup();
 
   for (const { tags = [], paths } of getNonVoidPaths(
-    toKeptGeometry(geometry)
+    toDisjointGeometry(translate(negate(origin), geometry))
   )) {
-    for (const tag of tags) {
-      if (tag.startsWith('toolpath/')) {
-        const [, attribute, value] = tag.split('/');
-        switch (attribute) {
-          case 'feed_rate':
-            feedRate = Number(value);
-            break;
-          case 'laser_power':
-            laserPower = Number(value);
-            break;
-          case 'spindle_rpm':
-            spindleRpm = Number(value);
-            break;
+    let pathPauseAfter = false;
+    let pathPauseBefore = false;
+    {
+      let pathFeedRate = feedRate;
+      let pathLaserPower = laserPower;
+      let pathSpindleRpm = spindleRpm;
+      for (const tag of tags) {
+        if (tag.startsWith('toolpath/')) {
+          const [, attribute, value] = tag.split('/');
+          switch (attribute) {
+            case 'feed_rate':
+              pathFeedRate = Number(value);
+              break;
+            case 'laser_power':
+              pathLaserPower = Number(value);
+              break;
+            case 'spindle_rpm':
+              pathSpindleRpm = Number(value);
+              break;
+            case 'pause_after':
+              pathPauseAfter = true;
+              break;
+            case 'pause_before':
+              pathPauseBefore = true;
+              break;
+          }
         }
       }
+      toolReconfigure({
+        feedRate: pathFeedRate,
+        laserPower: pathLaserPower,
+        spindleRpm: pathSpindleRpm,
+      });
+    }
+    if (pathPauseBefore) {
+      toolPause();
     }
     for (const path of paths) {
       for (const [start, end] of getEdges(path)) {
@@ -172,6 +222,9 @@ export const toGcode = async (
         }
         cut(...end); // cut across
       }
+    }
+    if (pathPauseAfter) {
+      toolPause();
     }
   }
 

@@ -591,9 +591,6 @@ const colorMethod = function (...args) {
 };
 Shape.prototype.color = colorMethod;
 
-color.signature = 'color(shape:Shape, color:string) -> Shape';
-colorMethod.signature = 'Shape -> color(color:string) -> Shape';
-
 const colors = (shape) =>
   [...allTags(shape.toGeometry())]
     .filter((tag) => tag.startsWith('color/'))
@@ -704,6 +701,16 @@ const facesMethod = function (...args) {
   return faces(this, ...args);
 };
 Shape.prototype.faces = facesMethod;
+
+const feedRate = (shape, mmPerMinute) =>
+  Shape.fromGeometry(
+    rewriteTags([`toolpath/feed_rate/${mmPerMinute}`], [], shape.toGeometry())
+  );
+
+const feedRateMethod = function (...args) {
+  return feedRate(this, ...args);
+};
+Shape.prototype.feedRate = feedRateMethod;
 
 const fix = (shape) => Shape.fromGeometry(fix$1(shape.toGeometry()));
 
@@ -908,6 +915,16 @@ const layerMethod = function (...shapes) {
 };
 Shape.prototype.layer = layerMethod;
 Shape.prototype.and = layerMethod;
+
+const laserPower = (shape, level) =>
+  Shape.fromGeometry(
+    rewriteTags([`toolpath/laser_power/${level}`], [], shape.toGeometry())
+  );
+
+const laserPowerMethod = function (...args) {
+  return laserPower(this, ...args);
+};
+Shape.prototype.laserPower = laserPowerMethod;
 
 /**
  *
@@ -1199,6 +1216,30 @@ orient.signature =
 orientMethod.signature =
   'Shape -> orient({ center:Point, facing:Vector, at:Point, from:Point }) -> Shape';
 
+/** Pause after the path is complete, waiting for the user to continue. */
+
+const pauseAfter = (shape) =>
+  Shape.fromGeometry(
+    rewriteTags([`toolpath/pause_after`], [], shape.toGeometry())
+  );
+
+const pauseAfterMethod = function (...args) {
+  return pauseAfter(this);
+};
+Shape.prototype.pauseAfter = pauseAfterMethod;
+
+/** Pause before the path is started, waiting for the user to continue. */
+
+const pauseBefore = (shape) =>
+  Shape.fromGeometry(
+    rewriteTags([`toolpath/pause_before`], [], shape.toGeometry())
+  );
+
+const pauseBeforeMethod = function (...args) {
+  return pauseBefore(this);
+};
+Shape.prototype.pauseBefore = pauseBeforeMethod;
+
 const planes = (shape) => {
   const pieces = [];
   for (const { solid, tags } of getNonVoidSolids(shape.toDisjointGeometry())) {
@@ -1428,6 +1469,16 @@ const solidsMethod = function (...args) {
   return solids(this, ...args);
 };
 Shape.prototype.solids = solidsMethod;
+
+const spindleRpm = (shape, rpm) =>
+  Shape.fromGeometry(
+    rewriteTags([`toolpath/spindle_rpm/${rpm}`], [], shape.toGeometry())
+  );
+
+const spindleRpmMethod = function (...args) {
+  return spindleRpm(this, ...args);
+};
+Shape.prototype.spindleRpm = spindleRpmMethod;
 
 const surfaces = (shape, op = (_) => _) => {
   const surfaces = [];

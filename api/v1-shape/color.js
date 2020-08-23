@@ -35,6 +35,3 @@ const colorMethod = function (...args) {
 Shape.prototype.color = colorMethod;
 
 export default color;
-
-color.signature = 'color(shape:Shape, color:string) -> Shape';
-colorMethod.signature = 'Shape -> color(color:string) -> Shape';

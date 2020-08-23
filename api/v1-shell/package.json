@@ -35,6 +35,7 @@
     "@jsxcad/geometry-tagged": "^0.0.79",
     "@jsxcad/math-line3": "^0.0.79",
     "@jsxcad/math-mat4": "^0.0.79",
+    "@jsxcad/math-plane": "^0.0.79",
     "@jsxcad/math-vec3": "^0.0.79"
   },
   "devDependencies": {
