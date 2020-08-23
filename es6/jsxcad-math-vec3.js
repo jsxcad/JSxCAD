@@ -224,7 +224,7 @@ const multiply = ([ax, ay, az], [bx, by, bz]) => [
  * @param {vec3} a vector to negate
  * @returns {vec3} out
  */
-const negate = ([x, y, z]) => [-x, -y, -z];
+const negate = ([x = 0, y = 0, z = 0]) => [-x, -y, -z];
 
 // find a vector that is somewhat orthogonal to this one
 const orthogonal = (vec) => {

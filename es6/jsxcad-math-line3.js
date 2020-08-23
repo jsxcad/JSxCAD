@@ -144,7 +144,7 @@ const closestSegmentBetweenLines = ([p1, p2], [p3, p4]) => {
   const pa = [p1[X] + mua * p21[X], p1[Y] + mua * p21[Y], p1[Z] + mua * p21[Z]];
   const pb = [p3[X] + mub * p43[X], p3[Y] + mub * p43[Y], p3[Z] + mub * p43[Z]];
 
-  return [pa, pb];
+  return [pa, pb, mua, mub];
 };
 
 /**
