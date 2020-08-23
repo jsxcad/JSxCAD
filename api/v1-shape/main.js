@@ -9,6 +9,7 @@ import './clip.js';
 import './clipFrom.js';
 import './color.js';
 import './colors.js';
+import './constantLaser.js';
 import './cut.js';
 import './cutFrom.js';
 import './difference.js';

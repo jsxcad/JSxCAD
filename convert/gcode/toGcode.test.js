@@ -20,29 +20,30 @@ test('Spindle Triangle', async (t) => {
   t.deepEqual(new TextDecoder('utf8').decode(code), expected);
 });
 
-test('Constant Laser Triangle', async (t) => {
+test('Laser Triangle', async (t) => {
   const code = await toGcode(
     {
       type: 'paths',
       paths: [unitRegularTrianglePolygon],
     },
-    { toolType: 'constantLaser', laserPower: 1000, feedRate: 10000 }
+    { toolType: 'laser', laserPower: 1000, feedRate: 10000 }
   );
-  const expected = await readFile('constant_laser_triangle.gcode', {
+  const expected = await readFile('laser_triangle.gcode', {
     encoding: 'utf8',
   });
   t.deepEqual(new TextDecoder('utf8').decode(code), expected);
 });
 
-test('Dynamic Laser Triangle', async (t) => {
+test('Constant Laser Triangle', async (t) => {
   const code = await toGcode(
     {
       type: 'paths',
+      tags: ['toolpath/constant_laser'],
       paths: [unitRegularTrianglePolygon],
     },
-    { toolType: 'dynamicLaser', laserPower: 1000, feedRate: 10000 }
+    { toolType: 'laser', laserPower: 1000, feedRate: 10000 }
   );
-  const expected = await readFile('dynamic_laser_triangle.gcode', {
+  const expected = await readFile('constant_laser_triangle.gcode', {
     encoding: 'utf8',
   });
   t.deepEqual(new TextDecoder('utf8').decode(code), expected);

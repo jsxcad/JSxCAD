@@ -604,6 +604,16 @@ Shape.prototype.colors = colorsMethod;
 colors.signature = 'colors(shape:Shape) -> strings';
 colorsMethod.signature = 'Shape -> colors() -> strings';
 
+const constantLaser = (shape, level) =>
+  Shape.fromGeometry(
+    rewriteTags([`toolpath/constant_laser`], [], shape.toGeometry())
+  );
+
+const constantLaserMethod = function (...args) {
+  return constantLaser(this);
+};
+Shape.prototype.constantLaser = constantLaserMethod;
+
 /**
  *
  * # Difference

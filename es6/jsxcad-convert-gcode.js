@@ -94,13 +94,7 @@ const toGcode = async (
           tool.cutSpeed = spindleRpm;
         }
         break;
-      case 'constantLaser':
-        if (laserPower) {
-          tool.jumpSpeed = 0;
-          tool.cutSpeed = laserPower;
-        }
-        break;
-      case 'dynamicLaser':
+      case 'laser':
         if (laserPower) {
           tool.jumpSpeed = laserPower;
           tool.cutSpeed = laserPower;
@@ -118,13 +112,8 @@ const toGcode = async (
         raise();
         emit('M3');
         break;
-      case 'constantLaser':
-        tool.isConstantLaser = true;
-        enableLaserMode();
-        emit('M3');
-        break;
-      case 'dynamicLaser':
-        tool.isDynamicLaser = true;
+      case 'laser':
+        tool.isLaser = true;
         enableLaserMode();
         emit('M4');
         break;
@@ -166,6 +155,7 @@ const toGcode = async (
   )) {
     let pathPauseAfter = false;
     let pathPauseBefore = false;
+    let pathConstantLaser = false;
     {
       let pathFeedRate = feedRate;
       let pathLaserPower = laserPower;
@@ -179,6 +169,9 @@ const toGcode = async (
               break;
             case 'laser_power':
               pathLaserPower = Number(value);
+              break;
+            case 'constant_laser':
+              pathConstantLaser = true;
               break;
             case 'spindle_rpm':
               pathSpindleRpm = Number(value);
@@ -197,6 +190,9 @@ const toGcode = async (
         laserPower: pathLaserPower,
         spindleRpm: pathSpindleRpm,
       });
+    }
+    if (pathConstantLaser) {
+      disableLaserMode();
     }
     if (pathPauseBefore) {
       toolPause();
@@ -220,6 +216,9 @@ const toGcode = async (
     }
     if (pathPauseAfter) {
       toolPause();
+    }
+    if (pathConstantLaser) {
+      enableLaserMode();
     }
   }
 
