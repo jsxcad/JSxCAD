@@ -33,6 +33,7 @@ export const DrillPress = (
   // Move back to the middle so we don't rub the wall on the way up.
   points.push(Point(0, 0, 0));
   return Assembly(
+    Point(x, y, 0), // Add a zero point for rebenching.
     Toolpath(...points),
     sweep === 'no'
       ? undefined

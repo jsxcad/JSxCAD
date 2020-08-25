@@ -216,6 +216,16 @@ const ensurePages = (geometry, depth = 0) => {
   }
 };
 
+const PackMethod = function (options = {}) {
+  return Page(options, this);
+};
+Shape.prototype.Pack = PackMethod;
+
+const FixMethod = function (options = {}) {
+  return Page({ ...options, pack: false }, this);
+};
+Shape.prototype.Fix = FixMethod;
+
 const api = {
   pack,
 };

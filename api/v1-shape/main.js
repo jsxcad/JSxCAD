@@ -36,6 +36,7 @@ import './op.js';
 import './openEdges.js';
 import './orient.js';
 import './pause.js';
+import './paths.js';
 import './planes.js';
 import './readShape.js';
 import './rotate.js';

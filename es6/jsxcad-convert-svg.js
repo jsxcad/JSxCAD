@@ -3650,6 +3650,7 @@ const fromSvg = async (input, options = {}) => {
           const attributes = {
             fill: node.getAttribute('fill'),
             stroke: node.getAttribute('stroke'),
+            'stroke-width': node.getAttribute('stroke-width'),
           };
           const style = node.getAttribute('style');
           for (const entry of style.split(';')) {
@@ -3669,7 +3670,14 @@ const fromSvg = async (input, options = {}) => {
             );
           }
           const stroke = attributes.stroke;
-          if (stroke !== undefined && stroke !== 'none' && stroke !== '') {
+          const hasStroke =
+            stroke !== undefined && stroke !== 'none' && stroke !== '';
+          const strokeWidth = attributes['stroke-width'];
+          const hasStrokeWidth =
+            strokeWidth !== undefined &&
+            strokeWidth !== 'none' &&
+            strokeWidth !== '';
+          if (hasStroke || hasStrokeWidth) {
             if (matrix.some((element) => isNaN(element))) {
               throw Error(`die: Bad element in matrix ${matrix}.`);
             }

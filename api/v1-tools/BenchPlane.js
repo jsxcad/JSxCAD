@@ -69,6 +69,7 @@ export const BenchPlane = (
     }
   }
   return Assembly(
+    Point(0, 0, 0), // Add a zero point for rebenching.
     ...pointset.map((points) => Toolpath(...points)),
     sweep === 'no'
       ? undefined
