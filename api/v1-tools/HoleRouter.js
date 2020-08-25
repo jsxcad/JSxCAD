@@ -1,4 +1,4 @@
-import { Assembly, Cylinder } from '@jsxcad/api-v1-shapes';
+import { Assembly, Cylinder, Point } from '@jsxcad/api-v1-shapes';
 
 import Shape from '@jsxcad/api-v1-shape';
 import { taggedPaths } from '@jsxcad/geometry-tagged';
@@ -36,7 +36,11 @@ export const HoleRouter = (
       );
     }
   }
-  return Assembly(...design, ...sweeps);
+  return Assembly(
+    Point(x, y, 0), // Add a zero point for rebenching.
+    ...design,
+    ...sweeps
+  );
 };
 
 export default HoleRouter;

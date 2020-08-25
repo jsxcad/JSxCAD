@@ -72,6 +72,7 @@ const BenchPlane = (
     }
   }
   return Assembly(
+    Point(0, 0, 0), // Add a zero point for rebenching.
     ...pointset.map((points) => Toolpath(...points)),
     sweep === 'no'
       ? undefined
@@ -133,6 +134,7 @@ const DrillPress = (
   // Move back to the middle so we don't rub the wall on the way up.
   points.push(Point(0, 0, 0));
   return Assembly(
+    Point(x, y, 0), // Add a zero point for rebenching.
     Toolpath(...points),
     sweep === 'no'
       ? undefined
@@ -174,7 +176,11 @@ const HoleRouter = (
       );
     }
   }
-  return Assembly(...design, ...sweeps);
+  return Assembly(
+    Point(x, y, 0), // Add a zero point for rebenching.
+    ...design,
+    ...sweeps
+  );
 };
 
 const LineRouter = (
@@ -204,7 +210,11 @@ const LineRouter = (
       );
     }
   }
-  return Assembly(...design, ...sweeps);
+  return Assembly(
+    Point(x, y, 0), // Add a zero point for rebenching.
+    ...design,
+    ...sweeps
+  );
 };
 
 const ProfileRouter = (
@@ -215,13 +225,20 @@ const ProfileRouter = (
   const actualCutDepth = depth / cuts;
   const design = [];
   const sweeps = [];
+  let shapes = [];
   for (const surface of shape.surfaces()) {
+    shapes.push(surface.outline());
+  }
+  for (const paths of shape.paths()) {
+    shapes.push(paths);
+  }
+  for (const shape of shapes) {
     // FIX: This assumes a plunging tool.
     const paths = Shape.fromGeometry(
       taggedPaths(
         { tags: ['path/Toolpath'] },
         toolpath(
-          surface.bench(-x, -y, -z).outline().toTransformedGeometry(),
+          shape.bench(-x, -y, -z).toTransformedGeometry(),
           toolDiameter,
           /* overcut= */ false,
           /* solid= */ true
@@ -239,7 +256,11 @@ const ProfileRouter = (
       );
     }
   }
-  return Assembly(...design, ...sweeps);
+  return Assembly(
+    Point(x, y, 0), // Add a zero point for rebenching.
+    ...design,
+    ...sweeps
+  );
 };
 
 export { BenchPlane, BenchSaw, DrillPress, HoleRouter, LineRouter, ProfileRouter };

@@ -1,4 +1,4 @@
-import { Assembly, Cylinder } from '@jsxcad/api-v1-shapes';
+import { Assembly, Cylinder, Point } from '@jsxcad/api-v1-shapes';
 
 import Shape from '@jsxcad/api-v1-shape';
 import { taggedPaths } from '@jsxcad/geometry-tagged';
@@ -12,13 +12,20 @@ export const ProfileRouter = (
   const actualCutDepth = depth / cuts;
   const design = [];
   const sweeps = [];
+  let shapes = [];
   for (const surface of shape.surfaces()) {
+    shapes.push(surface.outline());
+  }
+  for (const paths of shape.paths()) {
+    shapes.push(paths);
+  }
+  for (const shape of shapes) {
     // FIX: This assumes a plunging tool.
     const paths = Shape.fromGeometry(
       taggedPaths(
         { tags: ['path/Toolpath'] },
         toolpath(
-          surface.bench(-x, -y, -z).outline().toTransformedGeometry(),
+          shape.bench(-x, -y, -z).toTransformedGeometry(),
           toolDiameter,
           /* overcut= */ false,
           /* solid= */ true
@@ -36,7 +43,11 @@ export const ProfileRouter = (
       );
     }
   }
-  return Assembly(...design, ...sweeps);
+  return Assembly(
+    Point(x, y, 0), // Add a zero point for rebenching.
+    ...design,
+    ...sweeps
+  );
 };
 
 export default ProfileRouter;
