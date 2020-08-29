@@ -1,5 +1,5 @@
 import { close, concatenate, open } from './jsxcad-geometry-path.js';
-import { taggedAssembly, eachPoint, flip, toDisjointGeometry as toDisjointGeometry$1, toTransformedGeometry, toPoints, transform, reconcile, isWatertight, makeWatertight, taggedPaths, fromPathToSurface, fromPathsToSurface, taggedPoints, taggedSolid, taggedSurface, union as union$1, rewriteTags, assemble as assemble$1, canonicalize as canonicalize$1, measureBoundingBox as measureBoundingBox$1, intersection as intersection$1, allTags, difference as difference$1, getSolids, taggedDisjointAssembly, outline, fix as fix$1, rewrite, taggedLayers, isVoid, getNonVoidPaths, getNonVoidSolids, getAnyNonVoidSurfaces, measureArea, taggedSketch, getPaths, getNonVoidSurfaces, getNonVoidZ0Surfaces } from './jsxcad-geometry-tagged.js';
+import { taggedAssembly, eachPoint, flip, toDisjointGeometry as toDisjointGeometry$1, toTransformedGeometry, toPoints, transform, reconcile, isWatertight, makeWatertight, taggedPaths, fromPathToSurface, fromPathsToSurface, taggedPoints, taggedSolid, taggedSurface, union as union$1, rewriteTags, assemble as assemble$1, canonicalize as canonicalize$1, measureBoundingBox as measureBoundingBox$1, intersection as intersection$1, allTags, difference as difference$1, getSolids, taggedDisjointAssembly, outline, fix as fix$1, rewrite, taggedLayers, isVoid, getNonVoidPaths, getPeg, getNonVoidSolids, getAnyNonVoidSurfaces, measureArea, taggedSketch, getPaths, getNonVoidSurfaces, getNonVoidZ0Surfaces } from './jsxcad-geometry-tagged.js';
 import { fromPolygons, findOpenEdges, fromSurface } from './jsxcad-geometry-solid.js';
 import { scale as scale$1, add, negate, normalize, subtract, dot, cross, distance } from './jsxcad-math-vec3.js';
 import { toTagFromName } from './jsxcad-algorithm-color.js';
@@ -7,6 +7,7 @@ import { createNormalize3 } from './jsxcad-algorithm-quantize.js';
 import { junctionSelector } from './jsxcad-geometry-halfedge.js';
 import { emit, addPending, writeFile, read, write, log as log$1 } from './jsxcad-sys.js';
 import { fromTranslation, fromRotation, fromXRotation, fromYRotation, fromZRotation, fromScaling } from './jsxcad-math-mat4.js';
+import { fromPoint, toXYPlaneTransforms } from './jsxcad-math-plane.js';
 import { fromPlane, toPlane } from './jsxcad-geometry-surface.js';
 import { segment } from './jsxcad-geometry-paths.js';
 
@@ -856,8 +857,7 @@ const keepOrDrop = (shape, tags, select) => {
         // Operate on the shape.
         const shape = Shape.fromGeometry(geometry);
         // Note that this transform does not violate geometry disjunction.
-        // const dropped = shape.Void().layer(shape.sketch()).toGeometry();
-        const dropped = shape.Void().toGeometry();
+        const dropped = shape.hole().toGeometry();
         return dropped;
       }
     } else {
@@ -1221,11 +1221,6 @@ const orientMethod = function (...args) {
 };
 Shape.prototype.orient = orientMethod;
 
-orient.signature =
-  'orient(Shape:shape, { center:Point, facing:Vector, at:Point, from:Point }) -> Shape';
-orientMethod.signature =
-  'Shape -> orient({ center:Point, facing:Vector, at:Point, from:Point }) -> Shape';
-
 /** Pause after the path is complete, waiting for the user to continue. */
 
 const pauseAfter = (shape) =>
@@ -1262,6 +1257,25 @@ const pathsMethod = function (op) {
   return paths(this, op);
 };
 Shape.prototype.paths = pathsMethod;
+
+const peg = (shape, shapeToPeg) => {
+  const [x, y, z, u, v, d] = getPeg(shape.toGeometry());
+  const plane = fromPoint([0, 0, 0, u, v, d]);
+  const [, from] = toXYPlaneTransforms(plane);
+  return shapeToPeg.transform(from).move(x, y, z);
+};
+
+const pegMethod = function (shapeToPeg) {
+  return peg(this, shapeToPeg);
+};
+
+Shape.prototype.peg = pegMethod;
+
+const shapeMethod = (build) => {
+  return function (...args) {
+    return this.peg(build(...args));
+  };
+};
 
 const planes = (shape) => {
   const pieces = [];
@@ -1818,4 +1832,4 @@ const logMethod = function (
 Shape.prototype.log = logMethod;
 
 export default Shape;
-export { Shape, loadGeometry, log, saveGeometry };
+export { Shape, loadGeometry, log, saveGeometry, shapeMethod };

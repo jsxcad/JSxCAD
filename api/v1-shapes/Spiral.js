@@ -1,6 +1,6 @@
+import { Shape, shapeMethod } from '@jsxcad/api-v1-shape';
 import { concatenate, rotateZ } from '@jsxcad/geometry-path';
 
-import Shape from '@jsxcad/api-v1-shape';
 import { numbers } from '@jsxcad/api-v1-math';
 
 /**
@@ -42,3 +42,5 @@ export const Spiral = (
 };
 
 export default Spiral;
+
+Shape.prototype.Spiral = shapeMethod(Spiral);

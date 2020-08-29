@@ -36,6 +36,11 @@ const fromNormalAndPoint = (normal, point) => {
   return [u[0], u[1], u[2], w];
 };
 
+const fromPoint = ([x = 0, y = 0, z = 0, u = 0, v = 0, d = 1]) => {
+  const w = dot([x, y, z], [u, v, d]);
+  return [u, v, d, w];
+};
+
 /**
  * Create a new plane from the given points
  *
@@ -254,4 +259,4 @@ const transform = (matrix, plane) => {
   return newplane;
 };
 
-export { canonicalize, equals, flip, fromNormalAndPoint, fromPoints, fromPointsOrthogonal, fromPolygon, signedDistanceToPoint, splitLineByPlane, splitLineSegmentByPlane, toPolygon, toXYPlaneTransforms, transform };
+export { canonicalize, equals, flip, fromNormalAndPoint, fromPoint, fromPoints, fromPointsOrthogonal, fromPolygon, signedDistanceToPoint, splitLineByPlane, splitLineSegmentByPlane, toPolygon, toXYPlaneTransforms, transform };

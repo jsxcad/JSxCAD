@@ -1,3 +1,5 @@
+import { Shape, shapeMethod } from '@jsxcad/api-v1-shape';
+
 import { Polygon } from './Polygon.js';
 
 /**
@@ -57,3 +59,5 @@ Triangle.ofRadius = ofRadius;
 Triangle.ofDiameter = ofDiameter;
 
 export default Triangle;
+
+Shape.prototype.Triangle = shapeMethod(Triangle);

@@ -1,4 +1,5 @@
-import Shape from '@jsxcad/api-v1-shape';
+import { Shape, shapeMethod } from '@jsxcad/api-v1-shape';
+
 import { taggedAssembly } from '@jsxcad/geometry-tagged';
 
 const isDefined = (value) => value !== undefined;
@@ -12,3 +13,5 @@ export const Assembly = (...shapes) =>
   );
 
 export default Assembly;
+
+Shape.prototype.Assembly = shapeMethod(Assembly);

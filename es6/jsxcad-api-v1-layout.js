@@ -107,7 +107,7 @@ const buildLayoutGeometry = ({
       )
     )
     .color('red')
-    .Sketch()
+    .sketch()
     .toGeometry();
   return taggedLayout(
     { size, margin, title, marks: packSize },

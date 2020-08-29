@@ -5,7 +5,7 @@ import Shape$1, { Shape } from './jsxcad-api-v1-shape.js';
 import { Sphere } from './jsxcad-api-v1-shapes.js';
 import { createNormalize3 } from './jsxcad-algorithm-quantize.js';
 import { fromRotation } from './jsxcad-math-mat4.js';
-import { getEdges } from './jsxcad-geometry-path.js';
+import { getEdges, deduplicate } from './jsxcad-geometry-path.js';
 import { closestSegmentBetweenLines } from './jsxcad-math-line3.js';
 import { outlineSurface } from './jsxcad-geometry-halfedge.js';
 import { toPlane } from './jsxcad-geometry-surface.js';
@@ -220,7 +220,7 @@ const getSelfIntersections = (path) => {
   for (let i = 0; i < path.length; i++) {
     const iStart = path[at(i)];
     const iEnd = path[at(i + 1)];
-    for (let j = i + 2; j < path.length; j++) {
+    for (let j = i + 1; j < path.length; j++) {
       if (mod(j + 1, path.length) === i) {
         continue;
       }
@@ -256,34 +256,54 @@ const getSelfIntersections = (path) => {
 // For each intersection, we also queue the path we didn't follow, and then repeat for it.
 
 const resolveSelfIntersections = (input, plane, resolved) => {
+  // resolved.push(input); return;
   const path = getMinimumVertexPath(input);
   const selfIntersections = getSelfIntersections(path);
-  console.log(
-    `QQ/selfIntersections: ${JSON.stringify([...selfIntersections.entries()])}`
-  );
+  for (const [k, v] of selfIntersections.entries()) {
+    console.log(`QQ/selfIntersection: ${k} ${JSON.stringify(v)}`);
+  }
   const start = 0;
   let current = start;
   let from = current;
   const simplePath = [];
   do {
-    console.log(`current: ${current} from: ${from}`);
-    simplePath.push(path[current]);
+    console.log(`QQ/current: ${current} from: ${from}`);
     const intersections = selfIntersections.get(current);
+    console.log(`QQ/Mark/2`);
     // Find where we intersected it, and proceed to the next one.
     if (intersections !== undefined) {
+      console.log(`QQ/Mark/3`);
       if (from === current) {
+        console.log(`QQ/from == current`);
         // The first intersection.
+        simplePath.push(path[current]);
         simplePath.push(intersections[0].vertex);
-        from = current;
+        from = intersections[0].from;
         current = intersections[0].to;
       } else {
+        console.log(`QQ/from != current`);
         let found = false;
         for (let nth = 0; nth < intersections.length; nth++) {
-          console.log(`QQ/from-vs-from: ${intersections[nth].from}, ${from}`);
+          console.log(`QQ/check: ${nth}`);
           if (intersections[nth].from === from) {
-            simplePath.push(intersections[nth + 1].vertex);
-            from = current;
-            current = intersections[nth + 1].to;
+            console.log(`QQ/found: ${nth}`);
+            const enter = intersections[nth];
+            // We entered on that intersection.
+            simplePath.push(enter.vertex);
+            const exit = intersections[nth + 1];
+            if (exit) {
+              console.log(`QQ/exit`);
+              // We left on this intersection.
+              simplePath.push(exit.vertex);
+              // And we were traveling along the exit path when we left.
+              from = exit.from;
+              current = exit.to;
+            } else {
+              console.log(`QQ/walk`);
+              // We walked to the next vertex.
+              current += 1;
+              from = current;
+            }
             found = true;
             break;
           }
@@ -295,6 +315,7 @@ const resolveSelfIntersections = (input, plane, resolved) => {
         }
       }
     } else {
+      console.log(`QQ/no intersections`);
       current = (current + 1) % path.length;
       from = current;
     }
@@ -303,18 +324,25 @@ const resolveSelfIntersections = (input, plane, resolved) => {
   resolved.push(simplePath);
 };
 
-const offset = (shape, radius = 1, resolution = 16) => {
+const offset = (shape, amount = 1) => {
+  console.log(`QQ/offset/amount: ${amount}`);
+  const normalize3 = createNormalize3();
   const offsetPathsets = [];
   for (const { tags, paths } of getNonVoidPaths(shape.toDisjointGeometry())) {
     const resolved = [];
-    for (const path of paths) {
+    for (const rawPath of paths) {
+      const path = deduplicate(rawPath.map(normalize3));
+      console.log(`QQ/path: ${JSON.stringify(path)}`);
       // Let's assume this path has a coherent plane.
       const plane = fromPolygon(path);
       const rotate90 = fromRotation(Math.PI / -2, plane);
       const getDirection = (start, end) => normalize(subtract(end, start));
       const getOffset = ([start, end]) => {
         const direction = getDirection(start, end);
-        const offset = transform(rotate90, scale(radius, direction));
+        console.log(`QQ/offset/direction: ${direction}`);
+        console.log(`QQ/offset/amount: ${amount}`);
+        const offset = scale(amount, transform(rotate90, direction));
+        console.log(`QQ/offset/offset: ${offset}`);
         return [add(start, offset), add(end, offset)];
       };
 
@@ -325,23 +353,21 @@ const offset = (shape, radius = 1, resolution = 16) => {
       let lastOffset;
       for (const edge of edges) {
         const offset = getOffset(edge);
-        console.log(`QQ/offset: ${JSON.stringify(offset)}`);
-        console.log(`QQ/lastOffset: ${JSON.stringify(lastOffset)}`);
         if (lastOffset) {
           const [from] = closestSegmentBetweenLines(lastOffset, offset);
           if (from === null) {
-            console.log(`QQ/no intersection`);
-            console.log(`QQ/lastOffset: ${JSON.stringify(lastOffset)}`);
-            console.log(`QQ/offset: ${JSON.stringify(offset)}`);
+            console.log(`QQ/colinear`);
             // This segment is colinear with the last, overwrite it.
             offsetPath.pop();
           } else {
+            console.log(`QQ/rewrite`);
             // Rewrite the previous end point to be the intersection.
             offsetPath.pop();
             offsetPath.push(from);
           }
           offsetPath.push(offset[END$1]);
         } else {
+          console.log(`QQ/initial`);
           offsetPath.push(offset[START$1], offset[END$1]);
         }
         lastOffset = offset;
@@ -365,8 +391,8 @@ const offset = (shape, radius = 1, resolution = 16) => {
   return Shape.fromGeometry(taggedAssembly({}, ...offsetPathsets));
 };
 
-const offsetMethod = function (radius, resolution) {
-  return offset(this, radius, resolution);
+const offsetMethod = function (amount) {
+  return offset(this, amount);
 };
 Shape.prototype.offset = offsetMethod;
 

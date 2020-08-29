@@ -1,7 +1,7 @@
+import Shape$1, { Shape, shapeMethod } from './jsxcad-api-v1-shape.js';
 import { concatenate, rotateZ, translate } from './jsxcad-geometry-path.js';
-import Shape from './jsxcad-api-v1-shape.js';
 import { numbers, linear } from './jsxcad-api-v1-math.js';
-import { taggedAssembly, taggedZ0Surface, taggedSolid, getAnySurfaces, getPaths, taggedDisjointAssembly, taggedLayers, rewriteTags } from './jsxcad-geometry-tagged.js';
+import { taggedAssembly, taggedZ0Surface, taggedSolid, getAnySurfaces, getPaths, taggedDisjointAssembly, taggedLayers, taggedPoints, rewriteTags } from './jsxcad-geometry-tagged.js';
 import { buildRegularPolygon, toRadiusFromApothem as toRadiusFromApothem$1, regularPolygonEdgeLengthToRadius, buildPolygonFromPoints, buildRegularPrism, buildFromFunction, buildFromSlices, buildRegularIcosahedron, buildRingSphere, buildRegularTetrahedron } from './jsxcad-algorithm-shape.js';
 
 /**
@@ -42,6 +42,8 @@ const Spiral = (
   return Shape.fromPath(path);
 };
 
+Shape.prototype.Spiral = shapeMethod(Spiral);
+
 const ofRadius = (radius, angle = 360, { start = 0, sides = 32 } = {}) =>
   Spiral((a) => [[radius]], {
     from: start,
@@ -52,6 +54,8 @@ const ofRadius = (radius, angle = 360, { start = 0, sides = 32 } = {}) =>
 const Arc = (...args) => ofRadius(...args);
 Arc.ofRadius = ofRadius;
 
+Shape.prototype.Arc = shapeMethod(Arc);
+
 const isDefined = (value) => value !== undefined;
 
 const Assembly = (...shapes) =>
@@ -61,6 +65,8 @@ const Assembly = (...shapes) =>
       ...shapes.filter(isDefined).map((shape) => shape.toGeometry())
     )
   );
+
+Shape.prototype.Assembly = shapeMethod(Assembly);
 
 const unitPolygon = (sides = 16) =>
   Shape.fromGeometry(taggedZ0Surface({}, [buildRegularPolygon(sides)]));
@@ -127,6 +133,8 @@ Polygon.ofRadius = ofRadius$1;
 Polygon.ofDiameter = ofDiameter;
 Polygon.ofPoints = ofPoints;
 Polygon.toRadiusFromApothem = toRadiusFromApothem$1;
+
+Shape.prototype.Polygon = shapeMethod(Polygon);
 
 /**
  *
@@ -197,15 +205,7 @@ Circle.ofDiameter = ofDiameter$1;
 Circle.toRadiusFromApothem = (radius = 1, sides = 32) =>
   Polygon.toRadiusFromApothem(radius, sides);
 
-Circle.signature = 'Circle(radius:number = 1, { sides:number = 32 }) -> Shape';
-ofEdge$1.signature =
-  'Circle.ofEdge(edge:number = 1, { sides:number = 32 }) -> Shape';
-ofRadius$2.signature =
-  'Circle.ofRadius(radius:number = 1, { sides:number = 32 }) -> Shape';
-ofApothem$1.signature =
-  'Circle.ofApothem(apothem:number = 1, { sides:number = 32 }) -> Shape';
-ofDiameter$1.signature =
-  'Circle.ofDiameter(diameter:number = 1, { sides:number = 32 }) -> Shape';
+Shape.prototype.Circle = shapeMethod(Circle);
 
 const buildPrism = (radius = 1, height = 1, sides = 32) =>
   Shape.fromGeometry(taggedSolid({}, buildRegularPrism(sides))).scale([
@@ -263,6 +263,8 @@ Prism.ofDiameter = ofDiameter$2;
 Prism.ofFunction = ofFunction;
 Prism.ofSlices = ofSlices;
 
+Shape.prototype.Prism = shapeMethod(Prism);
+
 const ofRadius$4 = (radius = 1, height = 1, { sides = 32 } = {}) => {
   const fn = linear(1, 0);
   return Prism.ofSlices((t) =>
@@ -280,6 +282,8 @@ const Cone = (...args) => ofRadius$4(...args);
 Cone.ofRadius = ofRadius$4;
 Cone.ofDiameter = ofDiameter$3;
 Cone.ofApothem = ofApothem$2;
+
+Shape.prototype.Cone = shapeMethod(Cone);
 
 /**
  *
@@ -372,6 +376,8 @@ Cube.ofApothem = ofApothem$3;
 Cube.ofDiameter = ofDiameter$4;
 Cube.fromCorners = fromCorners;
 
+Shape.prototype.Cube = shapeMethod(Cube);
+
 const buildPrism$1 = (radius = 1, height = 1, sides = 32) =>
   Shape.fromGeometry(taggedSolid({}, buildRegularPrism(sides))).scale([
     radius,
@@ -450,23 +456,16 @@ Cylinder.ofDiameter = ofDiameter$5;
 Cylinder.ofFunction = ofFunction$1;
 Cylinder.ofSlices = ofSlices$1;
 
-Cylinder.signature =
-  'Cylinder(radius:number = 1, height:number = 1, { sides:number = 32 }) -> Shape';
-Cylinder.ofRadius.signature =
-  'Cylinder.ofRadius(radius:number = 1, height:number = 1, { sides:number = 32 }) -> Shape';
-Cylinder.ofDiameter.signature =
-  'Cylinder.ofDiameter(radius:number = 1, height:number = 1, { sides:number = 32 }) -> Shape';
-Cylinder.ofApothem.signature =
-  'Cylinder.ofApothem(radius:number = 1, height:number = 1, { sides:number = 32 }) -> Shape';
-Cylinder.ofSlices.signature =
-  'Cylinder.ofSlices(op:function, { slices:number = 2, cap:boolean = true }) -> Shape';
-Cylinder.ofFunction.signature =
-  'Cylinder.ofFunction(op:function, { resolution:number, cap:boolean = true, context:Object }) -> Shape';
+Shape.prototype.Cylinder = shapeMethod(Cylinder);
 
 const Difference = (first, ...rest) => first.cut(...rest);
 
+Shape.prototype.Difference = shapeMethod(Difference);
+
 const Empty = (...shapes) =>
   Shape.fromGeometry(taggedDisjointAssembly({}));
+
+Shape.prototype.Empty = shapeMethod(Empty);
 
 /**
  *
@@ -499,12 +498,7 @@ Hexagon.ofApothem = ofApothem$5;
 Hexagon.ofRadius = ofRadius$7;
 Hexagon.ofDiameter = ofDiameter$6;
 
-Hexagon.signature = 'Hexagon(radius:number = 1) -> Shape';
-Hexagon.ofRadius.signature = 'Hexagon.ofRadius(radius:number = 1) -> Shape';
-Hexagon.ofDiameter.signature =
-  'Hexagon.ofDiameter(diameter:number = 1) -> Shape';
-Hexagon.ofApothem.signature = 'Hexagon.ofApothem(apothem:number = 1) -> Shape';
-Hexagon.ofEdge.signature = 'Hexagon.ofEdge(edge:number = 1) -> Shape';
+Shape.prototype.Hexagon = shapeMethod(Hexagon);
 
 /**
  *
@@ -546,13 +540,11 @@ const Icosahedron = (...args) => ofRadius$8(...args);
 Icosahedron.ofRadius = ofRadius$8;
 Icosahedron.ofDiameter = ofDiameter$7;
 
-Icosahedron.signature = 'Icosahedron(radius:number = 1) -> Shape';
-Icosahedron.ofRadius.signature =
-  'Icosahedron.ofRadius(radius:number = 1) -> Shape';
-Icosahedron.ofDiameter.signature =
-  'Icosahedron.ofDiameter(diameter:number = 1) -> Shape';
+Shape.prototype.Icosahedron = shapeMethod(Icosahedron);
 
 const Intersection = (first, ...rest) => first.clip(...rest);
+
+Shape.prototype.Intersection = shapeMethod(Intersection);
 
 const isDefined$1 = (value) => value;
 
@@ -563,6 +555,8 @@ const Layers = (...shapes) =>
       ...shapes.filter(isDefined$1).map((shape) => shape.toGeometry())
     )
   );
+
+Shape.prototype.Layers = shapeMethod(Layers);
 
 const fromVec3 = (...points) =>
   Shape.fromOpenPath(points.map(([x = 0, y = 0, z = 0]) => [x, y, z]));
@@ -578,15 +572,25 @@ const fromPoints = (...shapes) => {
 const Path = (...points) => fromPoints(...points);
 Path.fromVec3 = fromVec3;
 
-const Line = (length) => Path([0, 0, length / -2], [0, 0, length / 2]);
+Shape.prototype.Path = shapeMethod(Path);
 
-Line.signature = 'Line(length:number) -> Shape';
-
-const fromPoint = (x = 0, y = 0, z = 0) => Shape.fromPoint([x, y, z]);
-const Point = (...args) => fromPoint(...args);
+const fromPoint = ([x = 0, y = 0, z = 0]) => Shape.fromPoint([x, y, z]);
+const Point = (...args) => fromPoint([...args]);
 Point.fromPoint = fromPoint;
 
-Point.signature = 'Point(point:Point) -> Shape';
+Shape.prototype.Point = shapeMethod(Point);
+
+const Line = (length) => Path(Point(0), Point(length));
+
+Shape.prototype.Line = shapeMethod(Line);
+
+const fromPoint$1 = ([x = 0, y = 0, z = 0], [u = 0, v = 0, d = 1]) =>
+  Shape.fromGeometry(taggedPoints({ tags: ['peg'] }, [[x, y, z, u, v, d]]));
+const Peg = (x = 0, y = 0, z = 0, u = 0, v = 0, d = 1) =>
+  fromPoint$1([x, y, z], [u, v, d]);
+Peg.fromPoint = fromPoint$1;
+
+Shape.prototype.Peg = shapeMethod(Peg);
 
 const fromPoints$1 = (...args) => Shape.fromPoints(args);
 
@@ -628,6 +632,8 @@ const fromPoints$1 = (...args) => Shape.fromPoints(args);
 const Points = (...args) => fromPoints$1(...args);
 Points.fromPoints = fromPoints$1;
 
+Shape.prototype.Points = shapeMethod(Points);
+
 /**
  *
  * # Polyhedron
@@ -653,13 +659,12 @@ const Polyhedron = (...args) => ofPointPaths(...args);
 
 Polyhedron.ofPointPaths = ofPointPaths;
 
-// FIX: This name is confusing wrt Shape.sketch().
-const Sketch = (shape) => shape.Void().with(shape.sketch());
+Shape.prototype.Polyhedron = shapeMethod(Polyhedron);
 
-const SketchMethod = function () {
-  return Sketch(this);
-};
-Shape.prototype.Sketch = SketchMethod;
+// FIX: This name is confusing wrt Shape.sketch().
+const Sketch = (shape) => shape.sketch();
+
+Shape.prototype.Sketch = shapeMethod(Sketch);
 
 /**
  *
@@ -709,6 +714,8 @@ const Sphere = (...args) => ofRadius$9(...args);
 Sphere.ofApothem = ofApothem$6;
 Sphere.ofRadius = ofRadius$9;
 Sphere.ofDiameter = ofDiameter$8;
+
+Shape.prototype.Sphere = shapeMethod(Sphere);
 
 /**
  *
@@ -790,13 +797,7 @@ Square.ofApothem = ofApothem$7;
 Square.ofDiameter = ofDiameter$9;
 Square.fromCorners = fromCorners$1;
 
-Square.signature = 'Square(edge:number) -> Surface';
-Square.ofApothem.signature = 'Square(apothem:number) -> Surface';
-Square.ofDiameter.signature = 'Square(diameter:number) -> Surface';
-Square.ofRadius.signature = 'Square(radius:number) -> Surface';
-Square.ofSize.signature = 'Square(edge:number) -> Surface';
-Square.fromCorners.signature =
-  'Square(corner1:Point, corner2:Point) -> Surface';
+Shape.prototype.Square = shapeMethod(Square);
 
 /**
  *
@@ -839,8 +840,12 @@ const Tetrahedron = (...args) => ofRadius$b(...args);
 Tetrahedron.ofRadius = ofRadius$b;
 Tetrahedron.ofDiameter = ofDiameter$a;
 
+Shape.prototype.Tetrahedron = shapeMethod(Tetrahedron);
+
 const Toolpath = (...points) =>
   Path(...points).setTags(['path/Toolpath']);
+
+Shape.prototype.Toolpath = shapeMethod(Toolpath);
 
 /**
  *
@@ -880,6 +885,8 @@ const Torus = (
     .moveY(radius)
     .Loop(360, { sides: segments })
     .rotateY(90);
+
+Shape.prototype.Torus = shapeMethod(Torus);
 
 /**
  *
@@ -937,6 +944,8 @@ Triangle.ofApothem = ofApothem$8;
 Triangle.ofRadius = ofRadius$c;
 Triangle.ofDiameter = ofDiameter$b;
 
+Shape.prototype.Triangle = shapeMethod(Triangle);
+
 const Union = (first, ...rest) => {
   if (first === undefined) {
     return Empty();
@@ -945,20 +954,18 @@ const Union = (first, ...rest) => {
   }
 };
 
-const UnionMethod = function (...args) {
-  return Union(this, ...args);
-};
-Shape.prototype.Union = UnionMethod;
+Shape.prototype.Union = shapeMethod(Union);
 
-const Void = (shape) =>
-  Shape.fromGeometry(
+// FIX: Move to api-v1-shape?
+const hole = (shape) =>
+  Shape$1.fromGeometry(
     rewriteTags(['compose/non-positive'], [], shape.toGeometry())
   );
 
-const VoidMethod = function () {
-  return Void(this);
+const holeMethod = function () {
+  return hole(this);
 };
-Shape.prototype.Void = VoidMethod;
+Shape$1.prototype.hole = holeMethod;
 
 /**
  *
@@ -989,6 +996,8 @@ const Wave = (
   return Shape.fromPath(path);
 };
 
+Shape.prototype.Wave = shapeMethod(Wave);
+
 const api = {
   Arc,
   Assembly,
@@ -1004,6 +1013,7 @@ const api = {
   Layers,
   Line,
   Path,
+  Peg,
   Point,
   Points,
   Polygon,
@@ -1018,9 +1028,9 @@ const api = {
   Torus,
   Triangle,
   Union,
-  Void,
+  Void: hole,
   Wave,
 };
 
 export default api;
-export { Arc, Assembly, Circle, Cone, Cube, Cylinder, Difference, Empty, Hexagon, Icosahedron, Intersection, Layers, Line, Path, Point, Points, Polygon, Polyhedron, Prism, Sketch, Sphere, Spiral, Square, Tetrahedron, Toolpath, Torus, Triangle, Union, Void, Wave };
+export { Arc, Assembly, Circle, Cone, Cube, Cylinder, Difference, Empty, Hexagon, Icosahedron, Intersection, Layers, Line, Path, Peg, Point, Points, Polygon, Polyhedron, Prism, Sketch, Sphere, Spiral, Square, Tetrahedron, Toolpath, Torus, Triangle, Union, hole as Void, Wave };

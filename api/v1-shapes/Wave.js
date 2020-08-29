@@ -1,6 +1,6 @@
+import { Shape, shapeMethod } from '@jsxcad/api-v1-shape';
 import { concatenate, translate } from '@jsxcad/geometry-path';
 
-import Shape from '@jsxcad/api-v1-shape';
 import { numbers } from '@jsxcad/api-v1-math';
 
 /**
@@ -33,3 +33,5 @@ export const Wave = (
 };
 
 export default Wave;
+
+Shape.prototype.Wave = shapeMethod(Wave);

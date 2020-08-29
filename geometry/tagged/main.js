@@ -57,6 +57,7 @@ export { getNonVoidSolids } from './getNonVoidSolids.js';
 export { getNonVoidSurfaces } from './getNonVoidSurfaces.js';
 export { getNonVoidZ0Surfaces } from './getNonVoidZ0Surfaces.js';
 export { getPaths } from './getPaths.js';
+export { getPeg } from './getPeg.js';
 export { getPlans } from './getPlans.js';
 export { getPoints } from './getPoints.js';
 export { getSolids } from './getSolids.js';

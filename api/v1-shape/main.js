@@ -37,6 +37,7 @@ import './openEdges.js';
 import './orient.js';
 import './pause.js';
 import './paths.js';
+import './peg.js';
 import './planes.js';
 import './readShape.js';
 import './rotate.js';
@@ -70,5 +71,6 @@ import Shape from './Shape.js';
 import log from './log.js';
 
 export { Shape, loadGeometry, log, saveGeometry };
+export { shapeMethod } from './peg.js';
 
 export default Shape;

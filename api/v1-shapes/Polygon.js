@@ -1,3 +1,4 @@
+import { Shape, shapeMethod } from '@jsxcad/api-v1-shape';
 import {
   buildPolygonFromPoints,
   buildRegularPolygon,
@@ -5,7 +6,6 @@ import {
   toRadiusFromApothem,
 } from '@jsxcad/algorithm-shape';
 
-import Shape from '@jsxcad/api-v1-shape';
 import { taggedZ0Surface } from '@jsxcad/geometry-tagged';
 
 const unitPolygon = (sides = 16) =>
@@ -75,3 +75,5 @@ Polygon.ofPoints = ofPoints;
 Polygon.toRadiusFromApothem = toRadiusFromApothem;
 
 export default Polygon;
+
+Shape.prototype.Polygon = shapeMethod(Polygon);

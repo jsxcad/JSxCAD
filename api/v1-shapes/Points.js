@@ -1,4 +1,4 @@
-import Shape from '@jsxcad/api-v1-shape';
+import { Shape, shapeMethod } from '@jsxcad/api-v1-shape';
 
 export const fromPoints = (...args) => Shape.fromPoints(args);
 
@@ -41,3 +41,5 @@ export const Points = (...args) => fromPoints(...args);
 Points.fromPoints = fromPoints;
 
 export default Points;
+
+Shape.prototype.Points = shapeMethod(Points);

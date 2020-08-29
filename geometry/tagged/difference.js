@@ -43,7 +43,7 @@ const differenceImpl = (geometry, ...geometries) => {
           for (const { solid } of getSolids(geometry)) {
             const differencedSurface = [];
             differenceSurface(
-              fromSolidToBsp(solid),
+              fromSolidToBsp(solid, normalize),
               thisSurface,
               normalize,
               (surface) => differencedSurface.push(...surface)
