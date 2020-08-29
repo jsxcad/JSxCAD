@@ -3,6 +3,7 @@ import { concatenate, rotateZ, translate } from './jsxcad-geometry-path.js';
 import { numbers, linear } from './jsxcad-api-v1-math.js';
 import { taggedAssembly, taggedZ0Surface, taggedSolid, getAnySurfaces, getPaths, taggedDisjointAssembly, taggedLayers, taggedPoints, rewriteTags } from './jsxcad-geometry-tagged.js';
 import { buildRegularPolygon, toRadiusFromApothem as toRadiusFromApothem$1, regularPolygonEdgeLengthToRadius, buildPolygonFromPoints, buildRegularPrism, buildFromFunction, buildFromSlices, buildRegularIcosahedron, buildRingSphere, buildRegularTetrahedron } from './jsxcad-algorithm-shape.js';
+import { add } from './jsxcad-math-vec3.js';
 
 /**
  *
@@ -584,11 +585,24 @@ const Line = (length) => Path(Point(0), Point(length));
 
 Shape.prototype.Line = shapeMethod(Line);
 
-const fromPoint$1 = ([x = 0, y = 0, z = 0], [u = 0, v = 0, d = 1]) =>
-  Shape.fromGeometry(taggedPoints({ tags: ['peg'] }, [[x, y, z, u, v, d]]));
-const Peg = (x = 0, y = 0, z = 0, u = 0, v = 0, d = 1) =>
-  fromPoint$1([x, y, z], [u, v, d]);
-Peg.fromPoint = fromPoint$1;
+const X = 0;
+const Y = 1;
+const Z = 2;
+
+const Peg = (
+  origin = [0, 0, 0],
+  forward = [0, 1, 0],
+  right = [1, 0, 0]
+) => {
+  const o = origin;
+  const f = add(origin, forward);
+  const r = add(origin, right);
+  return Shape.fromGeometry(
+    taggedPoints({ tags: ['peg'] }, [
+      [o[X], o[Y], o[Z], f[X], f[Y], f[Z], r[X], r[Y], r[Z]],
+    ])
+  );
+};
 
 Shape.prototype.Peg = shapeMethod(Peg);
 

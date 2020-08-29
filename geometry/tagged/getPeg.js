@@ -13,5 +13,26 @@ export const getPeg = (geometry) => {
       }
     }
   });
-  return peg || [0, 0, 0, 0, 0, 1];
+  const [
+    originX = 0,
+    originY = 0,
+    originZ = 0,
+    forwardX = originX,
+    forwardY = originY + 1,
+    forwardZ = originZ,
+    rightX = originX + 1,
+    rightY = originY,
+    rightZ = originZ,
+  ] = peg || [];
+  return [
+    originX,
+    originY,
+    originZ,
+    forwardX,
+    forwardY,
+    forwardZ,
+    rightX,
+    rightY,
+    rightZ,
+  ];
 };

@@ -234,7 +234,7 @@ const fromPolygons = (polygons, normalize = createNormalize3()) => {
   return cleanedSolid;
 };
 
-const LARGE = 1e2; // works
+const LARGE = 1e6; // works
 // const LARGE = 1e7; // works
 // const LARGE = 1e8; // works
 // const LARGE = 1e9; // works

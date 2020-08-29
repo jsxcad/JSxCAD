@@ -7,7 +7,7 @@ import { createNormalize3 } from './jsxcad-algorithm-quantize.js';
 import { junctionSelector } from './jsxcad-geometry-halfedge.js';
 import { emit, addPending, writeFile, read, write, log as log$1 } from './jsxcad-sys.js';
 import { fromTranslation, fromRotation, fromXRotation, fromYRotation, fromZRotation, fromScaling } from './jsxcad-math-mat4.js';
-import { fromPoint, toXYPlaneTransforms } from './jsxcad-math-plane.js';
+import { fromPoints, toXYPlaneTransforms } from './jsxcad-math-plane.js';
 import { fromPlane, toPlane } from './jsxcad-geometry-surface.js';
 import { segment } from './jsxcad-geometry-paths.js';
 
@@ -1258,11 +1258,31 @@ const pathsMethod = function (op) {
 };
 Shape.prototype.paths = pathsMethod;
 
+const getAngle = ([aX, aY], [bX, bY]) => {
+  const a2 = Math.atan2(aX, aY); // 0
+  const a1 = Math.atan2(bX, bY);
+  const sign = a1 > a2 ? 1 : -1;
+  const angle = a1 - a2; // a1
+  const K = -sign * Math.PI * 2;
+  const absoluteAngle =
+    Math.abs(K + angle) < Math.abs(angle) ? K + angle : angle;
+  return (absoluteAngle * 180) / Math.PI;
+};
+
 const peg = (shape, shapeToPeg) => {
-  const [x, y, z, u, v, d] = getPeg(shape.toGeometry());
-  const plane = fromPoint([0, 0, 0, u, v, d]);
+  const coords = getPeg(shape.toTransformedGeometry());
+  const origin = coords.slice(0, 3);
+  const forward = coords.slice(3, 6);
+  const right = coords.slice(6, 9);
+
+  const plane = fromPoints(origin, forward, right);
   const [, from] = toXYPlaneTransforms(plane);
-  return shapeToPeg.transform(from).move(x, y, z);
+  const orientation = subtract(right, origin);
+  const angle = getAngle([1, 0], orientation);
+  return shapeToPeg
+    .move(...origin)
+    .rotateZ(-angle)
+    .transform(from);
 };
 
 const pegMethod = function (shapeToPeg) {
