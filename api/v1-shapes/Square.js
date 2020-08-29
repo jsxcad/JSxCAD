@@ -1,9 +1,9 @@
+import { Shape, shapeMethod } from '@jsxcad/api-v1-shape';
 import {
   buildRegularPolygon,
   regularPolygonEdgeLengthToRadius,
 } from '@jsxcad/algorithm-shape';
 
-import Shape from '@jsxcad/api-v1-shape';
 import { taggedZ0Surface } from '@jsxcad/geometry-tagged';
 
 /**
@@ -86,12 +86,6 @@ Square.ofApothem = ofApothem;
 Square.ofDiameter = ofDiameter;
 Square.fromCorners = fromCorners;
 
-Square.signature = 'Square(edge:number) -> Surface';
-Square.ofApothem.signature = 'Square(apothem:number) -> Surface';
-Square.ofDiameter.signature = 'Square(diameter:number) -> Surface';
-Square.ofRadius.signature = 'Square(radius:number) -> Surface';
-Square.ofSize.signature = 'Square(edge:number) -> Surface';
-Square.fromCorners.signature =
-  'Square(corner1:Point, corner2:Point) -> Surface';
+Shape.prototype.Square = shapeMethod(Square);
 
 export default Square;

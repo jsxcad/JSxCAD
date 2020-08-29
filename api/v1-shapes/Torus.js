@@ -1,3 +1,5 @@
+import { Shape, shapeMethod } from '@jsxcad/api-v1-shape';
+
 import { Circle } from './Circle.js';
 
 /**
@@ -40,3 +42,5 @@ export const Torus = (
     .rotateY(90);
 
 export default Torus;
+
+Shape.prototype.Torus = shapeMethod(Torus);

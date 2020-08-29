@@ -1,3 +1,5 @@
+import { Shape, shapeMethod } from '@jsxcad/api-v1-shape';
+
 import Polygon from './Polygon.js';
 
 /**
@@ -69,14 +71,6 @@ Circle.ofDiameter = ofDiameter;
 Circle.toRadiusFromApothem = (radius = 1, sides = 32) =>
   Polygon.toRadiusFromApothem(radius, sides);
 
-Circle.signature = 'Circle(radius:number = 1, { sides:number = 32 }) -> Shape';
-ofEdge.signature =
-  'Circle.ofEdge(edge:number = 1, { sides:number = 32 }) -> Shape';
-ofRadius.signature =
-  'Circle.ofRadius(radius:number = 1, { sides:number = 32 }) -> Shape';
-ofApothem.signature =
-  'Circle.ofApothem(apothem:number = 1, { sides:number = 32 }) -> Shape';
-ofDiameter.signature =
-  'Circle.ofDiameter(diameter:number = 1, { sides:number = 32 }) -> Shape';
-
 export default Circle;
+
+Shape.prototype.Circle = shapeMethod(Circle);

@@ -1,3 +1,5 @@
+import { Shape, shapeMethod } from '@jsxcad/api-v1-shape';
+
 import { Polygon } from './Polygon.js';
 
 /**
@@ -33,9 +35,4 @@ Hexagon.ofDiameter = ofDiameter;
 
 export default Hexagon;
 
-Hexagon.signature = 'Hexagon(radius:number = 1) -> Shape';
-Hexagon.ofRadius.signature = 'Hexagon.ofRadius(radius:number = 1) -> Shape';
-Hexagon.ofDiameter.signature =
-  'Hexagon.ofDiameter(diameter:number = 1) -> Shape';
-Hexagon.ofApothem.signature = 'Hexagon.ofApothem(apothem:number = 1) -> Shape';
-Hexagon.ofEdge.signature = 'Hexagon.ofEdge(edge:number = 1) -> Shape';
+Shape.prototype.Hexagon = shapeMethod(Hexagon);

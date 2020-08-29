@@ -1,4 +1,4 @@
-import Shape from '@jsxcad/api-v1-shape';
+import { Shape, shapeMethod } from '@jsxcad/api-v1-shape';
 
 /**
  *
@@ -26,3 +26,5 @@ export const Polyhedron = (...args) => ofPointPaths(...args);
 Polyhedron.ofPointPaths = ofPointPaths;
 
 export default Polyhedron;
+
+Shape.prototype.Polyhedron = shapeMethod(Polyhedron);

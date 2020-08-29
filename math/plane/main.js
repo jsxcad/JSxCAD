@@ -2,6 +2,7 @@ export { canonicalize } from './canonicalize.js';
 export { equals } from './equals.js';
 export { flip } from './flip.js';
 export { fromNormalAndPoint } from './fromNormalAndPoint.js';
+export { fromPoint } from './fromPoint.js';
 export { fromPoints } from './fromPoints.js';
 export { fromPointsOrthogonal } from './fromPointsOrthogonal.js';
 export { fromPolygon } from './fromPolygon.js';

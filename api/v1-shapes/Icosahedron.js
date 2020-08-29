@@ -1,4 +1,5 @@
-import Shape from '@jsxcad/api-v1-shape';
+import { Shape, shapeMethod } from '@jsxcad/api-v1-shape';
+
 import { buildRegularIcosahedron } from '@jsxcad/algorithm-shape';
 
 /**
@@ -43,8 +44,4 @@ Icosahedron.ofDiameter = ofDiameter;
 
 export default Icosahedron;
 
-Icosahedron.signature = 'Icosahedron(radius:number = 1) -> Shape';
-Icosahedron.ofRadius.signature =
-  'Icosahedron.ofRadius(radius:number = 1) -> Shape';
-Icosahedron.ofDiameter.signature =
-  'Icosahedron.ofDiameter(diameter:number = 1) -> Shape';
+Shape.prototype.Icosahedron = shapeMethod(Icosahedron);

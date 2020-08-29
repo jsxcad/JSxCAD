@@ -1,14 +1,15 @@
 import Shape from '@jsxcad/api-v1-shape';
 import { rewriteTags } from '@jsxcad/geometry-tagged';
 
-export const Void = (shape) =>
+// FIX: Move to api-v1-shape?
+export const hole = (shape) =>
   Shape.fromGeometry(
     rewriteTags(['compose/non-positive'], [], shape.toGeometry())
   );
 
-const VoidMethod = function () {
-  return Void(this);
+const holeMethod = function () {
+  return hole(this);
 };
-Shape.prototype.Void = VoidMethod;
+Shape.prototype.hole = holeMethod;
 
-export default Void;
+export default hole;

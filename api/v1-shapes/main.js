@@ -12,6 +12,7 @@ import Intersection from './Intersection.js';
 import Layers from './Layers.js';
 import Line from './Line.js';
 import Path from './Path.js';
+import Peg from './Peg.js';
 import Point from './Point.js';
 import Points from './Points.js';
 import Polygon from './Polygon.js';
@@ -44,6 +45,7 @@ const api = {
   Layers,
   Line,
   Path,
+  Peg,
   Point,
   Points,
   Polygon,
@@ -77,6 +79,7 @@ export {
   Layers,
   Line,
   Path,
+  Peg,
   Point,
   Points,
   Polygon,

@@ -1,4 +1,4 @@
-import Shape from '@jsxcad/api-v1-shape';
+import { Shape, shapeMethod } from '@jsxcad/api-v1-shape';
 import { buildRegularTetrahedron } from '@jsxcad/algorithm-shape';
 import { taggedSolid } from '@jsxcad/geometry-tagged';
 
@@ -44,3 +44,5 @@ Tetrahedron.ofRadius = ofRadius;
 Tetrahedron.ofDiameter = ofDiameter;
 
 export default Tetrahedron;
+
+Shape.prototype.Tetrahedron = shapeMethod(Tetrahedron);

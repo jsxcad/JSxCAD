@@ -1,3 +1,4 @@
+import { Shape, shapeMethod } from '@jsxcad/api-v1-shape';
 import {
   buildFromFunction,
   buildFromSlices,
@@ -5,8 +6,6 @@ import {
   toRadiusFromApothem,
 } from '@jsxcad/algorithm-shape';
 import { getAnySurfaces, taggedSolid } from '@jsxcad/geometry-tagged';
-
-import Shape from '@jsxcad/api-v1-shape';
 
 const buildPrism = (radius = 1, height = 1, sides = 32) =>
   Shape.fromGeometry(taggedSolid({}, buildRegularPrism(sides))).scale([
@@ -68,3 +67,5 @@ Prism.ofFunction = ofFunction;
 Prism.ofSlices = ofSlices;
 
 export default Prism;
+
+Shape.prototype.Prism = shapeMethod(Prism);

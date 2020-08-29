@@ -39,9 +39,4 @@ const orientMethod = function (...args) {
 };
 Shape.prototype.orient = orientMethod;
 
-orient.signature =
-  'orient(Shape:shape, { center:Point, facing:Vector, at:Point, from:Point }) -> Shape';
-orientMethod.signature =
-  'Shape -> orient({ center:Point, facing:Vector, at:Point, from:Point }) -> Shape';
-
 export default orient;

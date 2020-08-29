@@ -1,6 +1,6 @@
+import { Shape, shapeMethod } from '@jsxcad/api-v1-shape';
 import { buildRingSphere, toRadiusFromApothem } from '@jsxcad/algorithm-shape';
 
-import Shape from '@jsxcad/api-v1-shape';
 import { taggedSolid } from '@jsxcad/geometry-tagged';
 
 /**
@@ -53,3 +53,5 @@ Sphere.ofRadius = ofRadius;
 Sphere.ofDiameter = ofDiameter;
 
 export default Sphere;
+
+Shape.prototype.Sphere = shapeMethod(Sphere);

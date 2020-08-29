@@ -1,10 +1,10 @@
+import { Shape, shapeMethod } from '@jsxcad/api-v1-shape';
 import {
   buildRegularPrism,
   regularPolygonEdgeLengthToRadius,
   toRadiusFromApothem,
 } from '@jsxcad/algorithm-shape';
 
-import Shape from '@jsxcad/api-v1-shape';
 import { taggedSolid } from '@jsxcad/geometry-tagged';
 
 /**
@@ -99,3 +99,5 @@ Cube.ofDiameter = ofDiameter;
 Cube.fromCorners = fromCorners;
 
 export default Cube;
+
+Shape.prototype.Cube = shapeMethod(Cube);

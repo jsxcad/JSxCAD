@@ -59,6 +59,7 @@ export {
   Layers,
   Line,
   Path,
+  Peg,
   Point,
   Points,
   Polygon,

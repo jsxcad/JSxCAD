@@ -1,3 +1,4 @@
+import { Shape, shapeMethod } from '@jsxcad/api-v1-shape';
 import {
   buildFromFunction,
   buildFromSlices,
@@ -5,8 +6,6 @@ import {
   toRadiusFromApothem,
 } from '@jsxcad/algorithm-shape';
 import { getPaths, taggedSolid } from '@jsxcad/geometry-tagged';
-
-import Shape from '@jsxcad/api-v1-shape';
 
 const buildPrism = (radius = 1, height = 1, sides = 32) =>
   Shape.fromGeometry(taggedSolid({}, buildRegularPrism(sides))).scale([
@@ -88,15 +87,4 @@ Cylinder.ofSlices = ofSlices;
 
 export default Cylinder;
 
-Cylinder.signature =
-  'Cylinder(radius:number = 1, height:number = 1, { sides:number = 32 }) -> Shape';
-Cylinder.ofRadius.signature =
-  'Cylinder.ofRadius(radius:number = 1, height:number = 1, { sides:number = 32 }) -> Shape';
-Cylinder.ofDiameter.signature =
-  'Cylinder.ofDiameter(radius:number = 1, height:number = 1, { sides:number = 32 }) -> Shape';
-Cylinder.ofApothem.signature =
-  'Cylinder.ofApothem(radius:number = 1, height:number = 1, { sides:number = 32 }) -> Shape';
-Cylinder.ofSlices.signature =
-  'Cylinder.ofSlices(op:function, { slices:number = 2, cap:boolean = true }) -> Shape';
-Cylinder.ofFunction.signature =
-  'Cylinder.ofFunction(op:function, { resolution:number, cap:boolean = true, context:Object }) -> Shape';
+Shape.prototype.Cylinder = shapeMethod(Cylinder);

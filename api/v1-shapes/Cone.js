@@ -1,3 +1,5 @@
+import { Shape, shapeMethod } from '@jsxcad/api-v1-shape';
+
 import Circle from './Circle.js';
 import Prism from './Prism.js';
 import { linear } from '@jsxcad/api-v1-math';
@@ -22,3 +24,5 @@ Cone.ofDiameter = ofDiameter;
 Cone.ofApothem = ofApothem;
 
 export default Cone;
+
+Shape.prototype.Cone = shapeMethod(Cone);
