@@ -10,8 +10,8 @@ import './jsxcad-api-v1-pdf.js';
 import './jsxcad-api-v1-plans.js';
 import './jsxcad-api-v1-svg.js';
 import './jsxcad-api-v1-stl.js';
-import { Connector, X, Y, Z } from './jsxcad-api-v1-connector.js';
-export { Connector, X, Y, Z } from './jsxcad-api-v1-connector.js';
+import { X, Y, Z } from './jsxcad-api-v1-connector.js';
+export { X, Y, Z } from './jsxcad-api-v1-connector.js';
 import { ChainedHull, Hull, Loop } from './jsxcad-api-v1-extrude.js';
 export { ChainedHull, Hull, Loop } from './jsxcad-api-v1-extrude.js';
 import { Line2 } from './jsxcad-api-v1-line2.js';
@@ -187,7 +187,6 @@ var api = /*#__PURE__*/Object.freeze({
   emit: emit,
   read: read,
   write: write,
-  Connector: Connector,
   X: X,
   Y: Y,
   Z: Z,

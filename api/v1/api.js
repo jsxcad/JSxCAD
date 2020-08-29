@@ -23,7 +23,7 @@ export { source } from './source.js';
 
 export { emit, read, write } from '@jsxcad/sys';
 
-export { Connector, X, Y, Z } from '@jsxcad/api-v1-connector';
+export { X, Y, Z } from '@jsxcad/api-v1-connector';
 
 export { ChainedHull, Hull, Loop } from '@jsxcad/api-v1-extrude';
 
