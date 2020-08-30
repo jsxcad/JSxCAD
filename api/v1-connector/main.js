@@ -1,6 +1,5 @@
 import './back.js';
 import './bottom.js';
-import './chop.js';
 import './flat.js';
 import './front.js';
 import './left.js';

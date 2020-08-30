@@ -49,6 +49,7 @@ const toSurface = (plane) => {
   return [polygon];
 };
 
+// DEPRECATED
 export const chop = (shape, connector = Z()) => {
   const cuts = [];
   const planeSurface = toSurface(toPlane(connector));

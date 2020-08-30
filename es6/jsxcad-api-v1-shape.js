@@ -1275,7 +1275,7 @@ const peg = (shape, shapeToPeg) => {
   const forward = coords.slice(3, 6);
   const right = coords.slice(6, 9);
 
-  const plane = fromPoints(origin, forward, right);
+  const plane = fromPoints(right, forward, origin);
   const [, from] = toXYPlaneTransforms(plane);
   const orientation = subtract(right, origin);
   const angle = getAngle([1, 0], orientation);

@@ -4,6 +4,7 @@ import { numbers, linear } from './jsxcad-api-v1-math.js';
 import { taggedAssembly, taggedZ0Surface, taggedSolid, getAnySurfaces, getPaths, taggedDisjointAssembly, taggedLayers, taggedPoints, rewriteTags } from './jsxcad-geometry-tagged.js';
 import { buildRegularPolygon, toRadiusFromApothem as toRadiusFromApothem$1, regularPolygonEdgeLengthToRadius, buildPolygonFromPoints, buildRegularPrism, buildFromFunction, buildFromSlices, buildRegularIcosahedron, buildRingSphere, buildRegularTetrahedron } from './jsxcad-algorithm-shape.js';
 import { add } from './jsxcad-math-vec3.js';
+import { toPolygon } from './jsxcad-math-plane.js';
 
 /**
  *
@@ -606,6 +607,12 @@ const Peg = (
 
 Shape.prototype.Peg = shapeMethod(Peg);
 
+// These are just excessively large polygons, which approximate planes.
+const Plane = (plane = [0, 0, 1, 0]) =>
+  Shape.fromPathToSurface(toPolygon(plane));
+
+Shape.prototype.Plane = shapeMethod(Plane);
+
 const fromPoints$1 = (...args) => Shape.fromPoints(args);
 
 /**
@@ -1028,6 +1035,7 @@ const api = {
   Line,
   Path,
   Peg,
+  Plane,
   Point,
   Points,
   Polygon,
@@ -1047,4 +1055,4 @@ const api = {
 };
 
 export default api;
-export { Arc, Assembly, Circle, Cone, Cube, Cylinder, Difference, Empty, Hexagon, Icosahedron, Intersection, Layers, Line, Path, Peg, Point, Points, Polygon, Polyhedron, Prism, Sketch, Sphere, Spiral, Square, Tetrahedron, Toolpath, Torus, Triangle, Union, hole as Void, Wave };
+export { Arc, Assembly, Circle, Cone, Cube, Cylinder, Difference, Empty, Hexagon, Icosahedron, Intersection, Layers, Line, Path, Peg, Plane, Point, Points, Polygon, Polyhedron, Prism, Sketch, Sphere, Spiral, Square, Tetrahedron, Toolpath, Torus, Triangle, Union, hole as Void, Wave };

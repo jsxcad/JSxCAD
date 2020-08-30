@@ -8,8 +8,8 @@ import './jsxcad-api-v1-deform.js';
 import './jsxcad-api-v1-gcode.js';
 import './jsxcad-api-v1-pdf.js';
 import './jsxcad-api-v1-plans.js';
-import './jsxcad-api-v1-svg.js';
-import './jsxcad-api-v1-stl.js';
+import { Peg, Arc, Assembly, Circle, Cone, Cube, Cylinder, Difference, Empty, Hexagon, Icosahedron, Intersection, Layers, Line, Path, Point, Points, Polygon, Polyhedron, Prism, Sphere, Spiral, Square, Tetrahedron, Torus, Triangle, Union, Void, Wave } from './jsxcad-api-v1-shapes.js';
+export { Arc, Assembly, Circle, Cone, Cube, Cylinder, Difference, Empty, Hexagon, Icosahedron, Intersection, Layers, Line, Path, Peg, Point, Points, Polygon, Polyhedron, Prism, Sphere, Spiral, Square, Tetrahedron, Torus, Triangle, Union, Void, Wave } from './jsxcad-api-v1-shapes.js';
 import { X, Y, Z } from './jsxcad-api-v1-connector.js';
 export { X, Y, Z } from './jsxcad-api-v1-connector.js';
 import { ChainedHull, Hull, Loop } from './jsxcad-api-v1-extrude.js';
@@ -22,12 +22,14 @@ import { Shell } from './jsxcad-api-v1-shell.js';
 export { Shell } from './jsxcad-api-v1-shell.js';
 import { BenchPlane, BenchSaw, DrillPress, HoleRouter, LineRouter, ProfileRouter } from './jsxcad-api-v1-tools.js';
 export { BenchPlane, BenchSaw, DrillPress, HoleRouter, LineRouter, ProfileRouter } from './jsxcad-api-v1-tools.js';
-import { Arc, Assembly, Circle, Cone, Cube, Cylinder, Difference, Empty, Hexagon, Icosahedron, Intersection, Layers, Line, Path, Peg, Point, Points, Polygon, Polyhedron, Prism, Sphere, Spiral, Square, Tetrahedron, Torus, Triangle, Union, Void, Wave } from './jsxcad-api-v1-shapes.js';
-export { Arc, Assembly, Circle, Cone, Cube, Cylinder, Difference, Empty, Hexagon, Icosahedron, Intersection, Layers, Line, Path, Peg, Point, Points, Polygon, Polyhedron, Prism, Sphere, Spiral, Square, Tetrahedron, Torus, Triangle, Union, Void, Wave } from './jsxcad-api-v1-shapes.js';
 import { Item } from './jsxcad-api-v1-item.js';
 export { Item } from './jsxcad-api-v1-item.js';
 import { Noise, Random, acos, cos, ease, max, min, numbers, sin, sqrt, vec } from './jsxcad-api-v1-math.js';
 export { Noise, Random, acos, cos, ease, max, min, numbers, sin, sqrt, vec } from './jsxcad-api-v1-math.js';
+import { readSvg } from './jsxcad-api-v1-svg.js';
+export { readSvg } from './jsxcad-api-v1-svg.js';
+import { readStl } from './jsxcad-api-v1-stl.js';
+export { readStl } from './jsxcad-api-v1-stl.js';
 import { foot, inch, mm, mil, cm, m, thou, yard } from './jsxcad-api-v1-units.js';
 export { cm, foot, inch, m, mil, mm, thou, yard } from './jsxcad-api-v1-units.js';
 import { toEcmascript } from './jsxcad-compiler.js';
@@ -178,8 +180,15 @@ const source = (path, source) => addSource(`cache/${path}`, source);
  * the api uses.
  */
 
+const x = Peg([0, 0, 0], [0, 0, 1], [0, 1, 0]);
+const y = Peg([0, 0, 0], [0, 0, 1], [-1, 0, 0]);
+const z = Peg([0, 0, 0], [0, 1, 0], [1, 0, 0]);
+
 var api = /*#__PURE__*/Object.freeze({
   __proto__: null,
+  x: x,
+  y: y,
+  z: z,
   Page: Page,
   pack: pack,
   md: md,
@@ -247,6 +256,8 @@ var api = /*#__PURE__*/Object.freeze({
   sin: sin,
   sqrt: sqrt,
   vec: vec,
+  readSvg: readSvg,
+  readStl: readStl,
   foot: foot,
   inch: inch,
   mm: mm,
@@ -326,4 +337,4 @@ registerDynamicModule(module('svg'), './jsxcad-api-v1-svg.js');
 registerDynamicModule(module('threejs'), './jsxcad-api-v1-threejs.js');
 registerDynamicModule(module('units'), './jsxcad-api-v1-units.js');
 
-export { importModule, md, source };
+export { importModule, md, source, x, y, z };
