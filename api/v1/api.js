@@ -12,8 +12,12 @@ import '@jsxcad/api-v1-gcode';
 import '@jsxcad/api-v1-layout';
 import '@jsxcad/api-v1-pdf';
 import '@jsxcad/api-v1-plans';
-import '@jsxcad/api-v1-svg';
-import '@jsxcad/api-v1-stl';
+
+import { Peg } from '@jsxcad/api-v1-shapes';
+
+export const x = Peg([0, 0, 0], [0, 0, 1], [0, 1, 0]);
+export const y = Peg([0, 0, 0], [0, 0, 1], [-1, 0, 0]);
+export const z = Peg([0, 0, 0], [0, 1, 0], [1, 0, 0]);
 
 export { Page, pack } from '@jsxcad/api-v1-layout';
 
@@ -91,5 +95,9 @@ export {
   sqrt,
   vec,
 } from '@jsxcad/api-v1-math';
+
+export { readSvg } from '@jsxcad/api-v1-svg';
+
+export { readStl } from '@jsxcad/api-v1-stl';
 
 export { foot, inch, mm, mil, cm, m, thou, yard } from '@jsxcad/api-v1-units';

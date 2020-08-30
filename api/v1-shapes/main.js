@@ -13,6 +13,7 @@ import Layers from './Layers.js';
 import Line from './Line.js';
 import Path from './Path.js';
 import Peg from './Peg.js';
+import Plane from './Plane.js';
 import Point from './Point.js';
 import Points from './Points.js';
 import Polygon from './Polygon.js';
@@ -46,6 +47,7 @@ const api = {
   Line,
   Path,
   Peg,
+  Plane,
   Point,
   Points,
   Polygon,
@@ -80,6 +82,7 @@ export {
   Line,
   Path,
   Peg,
+  Plane,
   Point,
   Points,
   Polygon,
