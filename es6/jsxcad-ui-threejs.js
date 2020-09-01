@@ -53543,6 +53543,7 @@ const buildMeshes = async ({
         opacity,
       });
       const color = new Color$1(setColor(tags, {}, [0, 0, 0]).color);
+      const colors = [];
       const positions = [];
       const index = [];
       for (const path of paths) {
@@ -53554,6 +53555,16 @@ const buildMeshes = async ({
           if (start === null || end === null) continue;
           const [aX = 0, aY = 0, aZ = 0] = start;
           const [bX = 0, bY = 0, bZ = 0] = end;
+          colors.push(
+            color.r,
+            color.g,
+            color.b,
+            opacity,
+            color.r,
+            color.g,
+            color.b,
+            opacity
+          );
           positions.push(aX, aY, aZ, bX, bY, bZ);
           entry.length += 2;
         }
@@ -53565,7 +53576,7 @@ const buildMeshes = async ({
         'position',
         new Float32BufferAttribute(positions, 3)
       );
-      // geometry.setAttribute('color', new Float32BufferAttribute(colors, 4));
+      geometry.setAttribute('color', new Float32BufferAttribute(colors, 4));
       dataset.mesh = new LineSegments(geometry, material);
       dataset.mesh.layers.set(layer);
       dataset.name = toName(threejsGeometry);

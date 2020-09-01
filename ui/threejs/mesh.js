@@ -259,7 +259,7 @@ export const buildMeshes = async ({
         'position',
         new Float32BufferAttribute(positions, 3)
       );
-      // geometry.setAttribute('color', new Float32BufferAttribute(colors, 4));
+      geometry.setAttribute('color', new Float32BufferAttribute(colors, 4));
       dataset.mesh = new LineSegments(geometry, material);
       dataset.mesh.layers.set(layer);
       dataset.name = toName(threejsGeometry);
