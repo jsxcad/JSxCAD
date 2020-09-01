@@ -77,9 +77,6 @@ const getSelfIntersections = (path) => {
     const iStart = path[at(i)];
     const iEnd = path[at(i + 1)];
     for (let j = i + 1; j < path.length; j++) {
-      if (mod(j + 1, path.length) === i) {
-        continue;
-      }
       const jStart = path[at(j)];
       const jEnd = path[at(j + 1)];
       const [from, to, mua, mub] = intersect([iStart, iEnd], [jStart, jEnd]);
@@ -94,7 +91,6 @@ const getSelfIntersections = (path) => {
         continue;
       }
       if (squaredDistance(from, to) < INTERSECTION_THRESHOLD) {
-        console.log(`QQ: i=${i} j=${j} l=${path.length}`);
         // We've found a self-intersection.
         addIntersection(i, at(j), at(j + 1), from);
         addIntersection(j, at(i), at(i + 1), to);
@@ -115,93 +111,102 @@ const resolveSelfIntersections = (input, plane, resolved) => {
   // resolved.push(input); return;
   const path = getMinimumVertexPath(input);
   const selfIntersections = getSelfIntersections(path);
-  for (const [k, v] of selfIntersections.entries()) {
-    console.log(`QQ/selfIntersection: ${k} ${JSON.stringify(v)}`);
-  }
-  const start = 0;
-  let current = start;
-  let from = current;
-  const simplePath = [];
-  do {
-    console.log(`QQ/current: ${current} from: ${from}`);
-    const intersections = selfIntersections.get(current);
-    console.log(`QQ/Mark/2`);
-    // Find where we intersected it, and proceed to the next one.
-    if (intersections !== undefined) {
-      console.log(`QQ/Mark/3`);
-      if (from === current) {
-        console.log(`QQ/from == current`);
-        // The first intersection.
-        simplePath.push(path[current]);
-        simplePath.push(intersections[0].vertex);
-        from = intersections[0].from;
-        current = intersections[0].to;
-      } else {
-        console.log(`QQ/from != current`);
-        let found = false;
-        for (let nth = 0; nth < intersections.length; nth++) {
-          console.log(`QQ/check: ${nth}`);
-          if (intersections[nth].from === from) {
-            console.log(`QQ/found: ${nth}`);
-            const enter = intersections[nth];
-            // We entered on that intersection.
-            simplePath.push(enter.vertex);
-            const exit = intersections[nth + 1];
-            if (exit) {
-              console.log(`QQ/exit`);
-              // We left on this intersection.
-              simplePath.push(exit.vertex);
-              // And we were traveling along the exit path when we left.
-              from = exit.from;
-              current = exit.to;
-            } else {
-              console.log(`QQ/walk`);
-              // We walked to the next vertex.
-              current += 1;
-              from = current;
+  const todo = [{ from: path.length - 1, current: 0, vertex: path[0] }];
+  const scheduled = [];
+  while (todo.length > 0) {
+    // What makes this a bit tricky is that we may stop on a pseudo-vertex.
+    let { from, current, vertex } = todo.pop();
+    const simplePath = [vertex];
+    const isLoop = () =>
+      simplePath.length >= 2 &&
+      equals(simplePath[0], simplePath[simplePath.length - 1]) &&
+      !equals(
+        simplePath[simplePath.length - 2],
+        simplePath[simplePath.length - 1]
+      );
+    const walk = () => {
+      while (true) {
+        const intersections = selfIntersections.get(current);
+        // Find where we intersected it, and proceed to the next one.
+        if (intersections !== undefined) {
+          let found = false;
+          for (let nth = 0; nth < intersections.length; nth++) {
+            if (intersections[nth].from === from) {
+              const enter = intersections[nth];
+              // We entered on that intersection.
+              // FIX: This may have problems with touching corners.
+              simplePath.push(enter.vertex);
+              if (isLoop()) {
+                simplePath.pop();
+                return;
+              }
+              const exit = intersections[nth + 1];
+              if (exit) {
+                // We left on this intersection.
+                simplePath.push(exit.vertex);
+                if (isLoop()) {
+                  simplePath.pop();
+                  return;
+                }
+                // Schedule the path not taken for later traversal.
+                if (
+                  !scheduled.some(
+                    (entry) => entry.current === current && entry.from === from
+                  )
+                ) {
+                  todo.push({
+                    current: current,
+                    from: exit.from,
+                    vertex: exit.vertex,
+                  });
+                  scheduled.push({ current, from });
+                }
+                // And we were traveling along the exit path when we left.
+                from = current;
+                current = exit.from;
+              } else {
+                // We walked to the next vertex.
+                from = current;
+                current = (current + 1) % path.length;
+              }
+              found = true;
+              break;
             }
-            found = true;
-            break;
           }
-        }
-        if (!found) {
-          throw Error(
-            `Can't find junction ${from} in ${JSON.stringify(intersections)}`
-          );
+          if (!found) {
+            throw Error(
+              `Current ${current} Can't find from ${from} in ${JSON.stringify(
+                intersections
+              )}`
+            );
+          }
+        } else {
+          current = (current + 1) % path.length;
+          from = current;
         }
       }
-    } else {
-      console.log(`QQ/no intersections`);
-      current = (current + 1) % path.length;
-      from = current;
-    }
-  } while (current !== start);
-  console.log(`QQ/simplePath: ${JSON.stringify(simplePath)}`);
-  resolved.push(simplePath);
+    };
+    walk();
+    resolved.push(simplePath);
+  }
 };
 
 export const offset = (shape, amount = 1) => {
-  console.log(`QQ/offset/amount: ${amount}`);
   const normalize3 = createNormalize3();
   const offsetPathsets = [];
   for (const { tags, paths } of getNonVoidPaths(shape.toDisjointGeometry())) {
     const resolved = [];
     for (const rawPath of paths) {
       const path = deduplicate(rawPath.map(normalize3));
-      console.log(`QQ/path: ${JSON.stringify(path)}`);
       // Let's assume this path has a coherent plane.
       const plane = fromPolygonToPlane(path);
       const rotate90 = fromRotation(Math.PI / -2, plane);
       const getDirection = (start, end) => normalize(subtract(end, start));
       const getOffset = ([start, end]) => {
         const direction = getDirection(start, end);
-        console.log(`QQ/offset/direction: ${direction}`);
-        console.log(`QQ/offset/amount: ${amount}`);
         const offset = scale(amount, transform(rotate90, direction));
-        console.log(`QQ/offset/offset: ${offset}`);
         return [add(start, offset), add(end, offset)];
       };
-
       const offsetPath = [];
       const edges = getEdges(path).filter(
         ([start, end]) => !equals(start, end)
@@ -212,18 +217,15 @@ export const offset = (shape, amount = 1) => {
         if (lastOffset) {
           const [from] = intersect(lastOffset, offset);
           if (from === null) {
-            console.log(`QQ/colinear`);
             // This segment is colinear with the last, overwrite it.
             offsetPath.pop();
           } else {
-            console.log(`QQ/rewrite`);
             // Rewrite the previous end point to be the intersection.
             offsetPath.pop();
             offsetPath.push(from);
           }
           offsetPath.push(offset[END]);
         } else {
-          console.log(`QQ/initial`);
           offsetPath.push(offset[START], offset[END]);
         }
         lastOffset = offset;
@@ -238,12 +240,10 @@ export const offset = (shape, amount = 1) => {
           offsetPath[0] = from;
         }
       }
-      console.log(offsetPath);
       resolveSelfIntersections(offsetPath, plane, resolved);
     }
     offsetPathsets.push(taggedPaths({ tags }, resolved));
   }
-  console.log(`QQ/resolved: ${offsetPathsets.length}`);
   return Shape.fromGeometry(taggedAssembly({}, ...offsetPathsets));
 };
 
