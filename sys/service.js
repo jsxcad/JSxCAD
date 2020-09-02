@@ -18,3 +18,16 @@ export const createService = async ({
     throw Error('die');
   }
 };
+
+export const askService = async (spec, question) => {
+  const { ask, release } = await createService(spec);
+  let answer;
+  try {
+    answer = await ask(question);
+  } catch (error) {
+    console.log(`QQ/askService: ${error.stack}`);
+  } finally {
+    await release();
+  }
+  return answer;
+};

@@ -3,9 +3,9 @@
 import { Mosaic, MosaicZeroState } from 'react-mosaic-component';
 
 import {
+  askService,
   ask as askSys,
   boot,
-  createService,
   deleteFile,
   getFilesystem,
   listFiles,
@@ -178,11 +178,14 @@ class Ui extends React.PureComponent {
       }
     };
 
-    const { ask } = await createService({
+    const serviceSpec = {
       webWorker: `./webworker.js#${sha}`,
       agent,
       workerType: 'module',
-    });
+    };
+
+    const ask = async (question) => askService(serviceSpec, question);
+
     this.setState({
       ask,
       creationWatcher,
@@ -190,6 +193,7 @@ class Ui extends React.PureComponent {
       file,
       fileTitle,
       logWatcher,
+      serviceSpec,
     });
 
     if (workspace) {

@@ -1,4 +1,5 @@
 export { addPending, resolvePending } from './pending.js';
+export { askService, createService } from './service.js';
 export { read, readFile } from './readFile.js';
 export { addSource, getSources } from './source.js';
 export { ask, setHandleAskUser } from './ask.js';
@@ -18,7 +19,6 @@ export {
 } from './files.js';
 
 export { conversation } from './conversation.js';
-export { createService } from './service.js';
 export { deleteFile } from './deleteFile.js';
 export { touch } from './touch.js';
 export { write, writeFile } from './writeFile.js';
