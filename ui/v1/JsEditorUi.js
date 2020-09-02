@@ -1,6 +1,13 @@
 // import * as api from '@jsxcad/api-v1';
 
-import { log, read, unwatchFiles, watchFile, write } from '@jsxcad/sys';
+import {
+  log,
+  read,
+  terminateActiveServices,
+  unwatchFiles,
+  watchFile,
+  write,
+} from '@jsxcad/sys';
 // import { toSignature, toSnippet } from './signature';
 
 import AceEditor from 'react-ace';
@@ -135,6 +142,7 @@ export class JsEditorUi extends Pane {
   }
 
   async run() {
+    await terminateActiveServices();
     const { ask, file, workspace } = this.props;
     await this.save();
     await log({ op: 'open' });
