@@ -18,3 +18,10 @@ export const createService = async ({
     throw Error('die');
   }
 };
+
+export const askService = async (spec, question) => {
+  const { ask, release } = await createService(spec);
+  const answer = await ask(question);
+  await release();
+  return answer;
+};

@@ -1,5 +1,7 @@
 /* global Worker */
 
+import { acquireService, releaseService } from './servicePool.js';
+
 import { conversation } from './conversation.js';
 import { log } from './log.js';
 
@@ -10,18 +12,25 @@ export const webService = async ({
   agent,
   workerType,
 }) => {
-  let worker;
   try {
-    worker = new Worker(webWorker, { type: workerType });
+    return await acquireService(
+      { webWorker, type: workerType },
+      ({ webWorker, type }) => {
+        const worker = new Worker(webWorker, { type: workerType });
+        const say = (message) => worker.postMessage(message);
+        const { ask, hear } = conversation({ agent, say });
+        worker.onmessage = ({ data }) => hear(data);
+        worker.onerror = (error) => {
+          console.log(`QQ/webWorker/error: ${error}`);
+        };
+        const service = { ask };
+        service.release = async () =>
+          releaseService({ webWorker, type: workerType }, service);
+        return service;
+      }
+    );
   } catch (e) {
     log({ op: 'text', text: '' + e, level: 'serious', duration: 6000000 });
     throw Error('die');
   }
-  const say = (message) => worker.postMessage(message);
-  const { ask, hear } = conversation({ agent, say });
-  worker.onmessage = ({ data }) => hear(data);
-  worker.onerror = (error) => {
-    console.log(`QQ/webWorker/error: ${error}`);
-  };
-  return { ask };
 };
