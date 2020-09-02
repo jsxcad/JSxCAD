@@ -309,7 +309,7 @@ const conversation = ({ agent, say }) => {
   const hear = async (message) => {
     const { id, question, answer, error } = message;
     // Check hasOwnProperty to detect undefined values.
-    if (answer) {
+    if (message.hasOwnProperty('answer')) {
       const { resolve, reject } = openQuestions.get(id);
       if (error) {
         reject(error);
@@ -317,7 +317,7 @@ const conversation = ({ agent, say }) => {
         resolve(answer);
       }
       openQuestions.delete(id);
-    } else if (question) {
+    } else if (message.hasOwnProperty('question')) {
       const answer = await agent({ ask, question });
       say({ id, answer });
     } else {
@@ -400,8 +400,14 @@ const createService = async ({
 
 const askService = async (spec, question) => {
   const { ask, release } = await createService(spec);
-  const answer = await ask(question);
-  await release();
+  let answer;
+  try {
+    answer = await ask(question);
+  } catch (error) {
+    console.log(`QQ/askService: ${error.stack}`);
+  } finally {
+    await release();
+  }
   return answer;
 };
 
