@@ -258,9 +258,9 @@ const isNode =
 
 const nodeService = () => {};
 
-let serviceCount = 0;
 let serviceLimit = 5;
 let idleServiceLimit = 5;
+const activeServices = new Set();
 const idleServices = [];
 const pending$1 = [];
 
@@ -271,27 +271,51 @@ const acquireService = async (spec, newService) => {
     // Recycle an existing service.
     // FIX: We might have multiple paths to consider in the future.
     // For now, just assume that the path is correct.
-    return idleServices.pop();
-  } else if (serviceCount < serviceLimit) {
+    const service = idleServices.pop();
+    activeServices.add(service);
+    return service;
+  } else if (activeServices.size < serviceLimit) {
     // Create a new service.
-    serviceCount += 1;
-    return newService(spec);
+    const service = await newService(spec);
+    activeServices.add(service);
+    return service;
   } else {
     // Wait for a service to become available.
-    return new Promise((resolve, reject) => pending$1.push(resolve));
+    return new Promise((resolve, reject) =>
+      pending$1.push({ spec, newService, resolve })
+    );
   }
 };
 
 const releaseService = async (spec, service) => {
   if (pending$1.length > 0) {
     // Send it directly to someone who needs it.
-    pending$1.unshift()(service);
+    // FIX: Consider different specifications.
+    const request = pending$1.shift();
+    request.resolve(service);
   } else if (idleServices.length < idleServiceLimit) {
     // Recycle the service.
+    activeServices.delete(service);
     idleServices.push(service);
   } else {
     // Drop the service.
-    serviceCount -= 1;
+    activeServices.delete(service);
+  }
+};
+
+const getServiceCount = () => activeServices.size + idleServices.length;
+
+const terminateActiveServices = async () => {
+  for (const { terminate } of activeServices) {
+    await terminate();
+  }
+  activeServices.clear();
+  // TODO: Enable up to activeService worth of pending tasks.
+  while (pending$1.length < 0 && getServiceCount() < serviceLimit) {
+    const { spec, newService, resolve } = pending$1.shift();
+    const service = await newService(spec);
+    activeServices.add(service);
+    resolve(service);
   }
 };
 
@@ -366,11 +390,12 @@ const webService = async ({
         const worker = new Worker(webWorker, { type: workerType });
         const say = (message) => worker.postMessage(message);
         const { ask, hear } = conversation({ agent, say });
+        const terminate = async () => worker.terminate();
         worker.onmessage = ({ data }) => hear(data);
         worker.onerror = (error) => {
           console.log(`QQ/webWorker/error: ${error}`);
         };
-        const service = { ask };
+        const service = { ask, terminate };
         service.release = async () =>
           releaseService({ webWorker, type: workerType }, service);
         return service;
@@ -3791,4 +3816,4 @@ const touch = async (path, { workspace } = {}) => {
   }
 };
 
-export { addPending, addSource, ask, askService, boot, clearEmitted, conversation, createService, deleteFile$1 as deleteFile, emit$1 as emit, getEmitted, getFilesystem, getSources, isBrowser, isNode, isWebWorker, listFiles$1 as listFiles, listFilesystems, log, onBoot, qualifyPath, read, readFile, resolvePending, setHandleAskUser, setupFilesystem, touch, unwatchFile, unwatchFileCreation, unwatchFileDeletion, unwatchFiles, unwatchLog, watchFile, watchFileCreation, watchFileDeletion, watchLog, write, writeFile };
+export { addPending, addSource, ask, askService, boot, clearEmitted, conversation, createService, deleteFile$1 as deleteFile, emit$1 as emit, getEmitted, getFilesystem, getSources, isBrowser, isNode, isWebWorker, listFiles$1 as listFiles, listFilesystems, log, onBoot, qualifyPath, read, readFile, resolvePending, setHandleAskUser, setupFilesystem, terminateActiveServices, touch, unwatchFile, unwatchFileCreation, unwatchFileDeletion, unwatchFiles, unwatchLog, watchFile, watchFileCreation, watchFileDeletion, watchLog, write, writeFile };

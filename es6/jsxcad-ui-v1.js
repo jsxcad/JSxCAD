@@ -1,4 +1,4 @@
-import { read as read$1, log, write as write$1, getFilesystem, listFiles, watchFileCreation, watchFileDeletion, unwatchFileCreation, unwatchFileDeletion, deleteFile, watchFile, unwatchFiles, readFile, listFilesystems, setupFilesystem, watchLog, unwatchLog, boot, askService, ask, touch } from './jsxcad-sys.js';
+import { read as read$1, log, write as write$1, getFilesystem, listFiles, watchFileCreation, watchFileDeletion, unwatchFileCreation, unwatchFileDeletion, deleteFile, terminateActiveServices, watchFile, unwatchFiles, readFile, listFilesystems, setupFilesystem, watchLog, unwatchLog, boot, askService, ask, touch } from './jsxcad-sys.js';
 import { toDomElement } from './jsxcad-ui-notebook.js';
 
 var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
@@ -81849,6 +81849,7 @@ class JsEditorUi extends Pane {
   }
 
   async run() {
+    await terminateActiveServices();
     const {
       ask,
       file,

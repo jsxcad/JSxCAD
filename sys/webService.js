@@ -19,11 +19,12 @@ export const webService = async ({
         const worker = new Worker(webWorker, { type: workerType });
         const say = (message) => worker.postMessage(message);
         const { ask, hear } = conversation({ agent, say });
+        const terminate = async () => worker.terminate();
         worker.onmessage = ({ data }) => hear(data);
         worker.onerror = (error) => {
           console.log(`QQ/webWorker/error: ${error}`);
         };
-        const service = { ask };
+        const service = { ask, terminate };
         service.release = async () =>
           releaseService({ webWorker, type: workerType }, service);
         return service;

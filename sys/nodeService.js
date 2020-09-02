@@ -14,19 +14,9 @@ export const nodeService = async ({
     const worker = new Worker(nodeWorker);
     const say = (message) => worker.postMessage(message);
     const { ask, hear } = conversation({ agent, say });
-    const abort = async () => {
-      return new Promise((resolve, reject) => {
-        worker.terminate((err, exitCode) => {
-          if (err) {
-            reject(err);
-          } else {
-            resolve(exitCode);
-          }
-        });
-      });
-    };
+    const terminate = async () => worker.terminate();
     worker.on('message', hear);
-    const service = { ask, abort };
+    const service = { ask, terminate };
     service.release = async () => releaseService({ nodeWorker }, service);
     return service;
   });

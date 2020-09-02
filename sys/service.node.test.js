@@ -16,7 +16,7 @@ test('Echo service', async (t) => {
       idleServiceCount: 0,
       idleServiceLimit: 5,
       pendingCount: 0,
-      serviceCount: 1,
+      activeServiceCount: 1,
       serviceLimit: 5,
     });
     await release();
@@ -24,7 +24,7 @@ test('Echo service', async (t) => {
       idleServiceCount: 1,
       idleServiceLimit: 5,
       pendingCount: 0,
-      serviceCount: 1,
+      activeServiceCount: 0,
       serviceLimit: 5,
     });
   }
@@ -39,7 +39,7 @@ test('Echo service', async (t) => {
       idleServiceCount: 1,
       idleServiceLimit: 5,
       pendingCount: 0,
-      serviceCount: 1,
+      activeServiceCount: 0,
       serviceLimit: 5,
     });
     t.is(await askService(spec, 'B'), 'Worker Secret B');
@@ -47,7 +47,7 @@ test('Echo service', async (t) => {
       idleServiceCount: 1,
       idleServiceLimit: 5,
       pendingCount: 0,
-      serviceCount: 1,
+      activeServiceCount: 0,
       serviceLimit: 5,
     });
   }

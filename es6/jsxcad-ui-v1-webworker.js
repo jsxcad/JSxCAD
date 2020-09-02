@@ -90,9 +90,18 @@ const agent = async ({
     } finally {
       await writeNotebook(question.path);
       setupFilesystem();
+      await resolvePending();
     }
   }
-};
+}; // We need to start receiving messages immediately, but we're not ready to process them yet.
+// Put them in a buffer.
+
+
+const messageBootQueue = [];
+
+onmessage = ({
+  data
+}) => messageBootQueue.push(data);
 
 const bootstrap = async () => {
   await boot();
@@ -107,7 +116,12 @@ const bootstrap = async () => {
 
   onmessage = ({
     data
-  }) => hear(data);
+  }) => hear(data); // Now that we're ready, drain the buffer.
+
+
+  while (messageBootQueue.length > 0) {
+    hear(messageBootQueue.shift());
+  }
 
   if (onmessage === undefined) throw Error('die');
 };
