@@ -1,4 +1,5 @@
-import { read as read$1, log, write as write$1, getFilesystem, listFiles, watchFileCreation, watchFileDeletion, unwatchFileCreation, unwatchFileDeletion, deleteFile, terminateActiveServices, watchFile, unwatchFiles, readFile, listFilesystems, setupFilesystem, watchLog, unwatchLog, boot, askService, ask, touch } from './jsxcad-sys.js';
+import { read as read$1, log, write as write$1, getFilesystem, listFiles, watchFileCreation, watchFileDeletion, unwatchFileCreation, unwatchFileDeletion, deleteFile, terminateActiveServices, emit as emit$1, watchFile, unwatchFiles, resolvePending, getEmitted, readFile, listFilesystems, setupFilesystem, watchLog, unwatchLog, boot, askService, ask, touch } from './jsxcad-sys.js';
+import { toEcmascript } from './jsxcad-compiler.js';
 import { toDomElement } from './jsxcad-ui-notebook.js';
 
 var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
@@ -81774,38 +81775,23 @@ const snippetCompleter = {
     callback(null, completions);
   }
 };
-/*
-const getSignatures = (api) => {
-  const signatures = [];
-  for (const name of Object.keys(api)) {
-    const value = api[name];
-    const string = value.signature;
-    if (string !== undefined) {
-      signatures.push(toSignature(string));
-    }
-    for (const name of Object.keys(value)) {
-      const property = value[name];
-      const string = property.signature;
-      if (string !== undefined) {
-        signatures.push(toSignature(string));
-      }
-    }
-    if (value.prototype !== undefined) {
-      for (const name of Object.keys(value.prototype)) {
-        const property = value.prototype[name];
-        const string = property.signature;
-        if (string !== undefined) {
-          signatures.push(toSignature(string));
-        }
+aceEditorCompleter.setCompleters([snippetCompleter]);
+
+const writeNotebook = async (path, notebook) => {
+  await resolvePending(); // Extend the notebook.
+
+  notebook.push(...getEmitted()); // Resolve any promises.
+
+  for (const note of notebook) {
+    if (note.download) {
+      for (const entry of note.download.entries) {
+        entry.data = await entry.data;
       }
     }
   }
-  return signatures;
-};
-*/
-// const snippets = getSignatures(api).map(toSnippet);
 
-aceEditorCompleter.setCompleters([snippetCompleter]); // aceEditorSnippetManager.register(snippets, 'JSxCAD');
+  await write$1(`notebook/${path}`, notebook);
+};
 
 class JsEditorUi extends Pane {
   static get propTypes() {
@@ -81860,6 +81846,9 @@ class JsEditorUi extends Pane {
       op: 'open'
     });
     await log({
+      op: 'clear'
+    });
+    await log({
       op: 'text',
       text: 'Running',
       level: 'serious'
@@ -81870,11 +81859,34 @@ class JsEditorUi extends Pane {
       script = new TextDecoder('utf8').decode(script);
     }
 
-    await ask({
-      evaluate: script,
+    const topLevel = new Map();
+    const ecmascript = await toEcmascript(script, {
+      topLevel
+    });
+    emit$1({
+      md: `---`
+    });
+    emit$1({
+      md: `#### Programs`
+    });
+
+    for (const [id, {
+      program
+    }] of topLevel.entries()) {
+      emit$1({
+        md: `##### ${id}`
+      });
+      emit$1({
+        md: `'''\n${program}\n'''\n`
+      });
+    }
+
+    const notebook = await ask({
+      evaluate: ecmascript,
       workspace,
       path: file
     });
+    await writeNotebook(file, notebook);
     await log({
       op: 'text',
       text: 'Finished',

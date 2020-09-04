@@ -10,10 +10,9 @@ export const strip = (ast) => {
   } else if (ast instanceof Object) {
     const stripped = {};
     for (const key of Object.keys(ast)) {
-      if (['end', 'loc', 'start'].includes(key)) {
-        continue;
+      if (!['end', 'loc', 'start', 'parent'].includes(key)) {
+        stripped[key] = strip(ast[key]);
       }
-      stripped[key] = strip(ast[key]);
     }
     return stripped;
   } else {
@@ -31,20 +30,22 @@ export const strip = (ast) => {
  * @param {function(path:string} options.import - A method for resolving imports.
  */
 
-export const toEcmascript = async (script, { path } = {}) => {
+export const toEcmascript = async (
+  script,
+  { path, topLevel = new Map() } = {}
+) => {
   const parseOptions = {
     allowAwaitOutsideFunction: true,
     allowReturnOutsideFunction: true,
     sourceType: 'module',
   };
+
   let ast = parse(script, parseOptions);
 
   const exportNames = [];
 
   const body = ast.body;
   const out = [];
-
-  const topLevel = new Map();
 
   const fromIdToSha = (id) => {
     const entry = topLevel.get(id);
@@ -59,7 +60,11 @@ export const toEcmascript = async (script, { path } = {}) => {
     { doExport = false } = {}
   ) => {
     const id = declarator.id.name;
-    const code = strip(declarator);
+    const code = {
+      type: 'VariableDeclaration',
+      kind: declaration.kind,
+      declarations: [strip(declarator)],
+    };
     const dependencies = [];
 
     const Identifier = (node, state, c) => {
@@ -72,8 +77,35 @@ export const toEcmascript = async (script, { path } = {}) => {
 
     const definition = { code, dependencies, dependencyShas };
     const sha = hash(definition);
-    const entry = { sha, definition };
+
+    const generateSubprogram = () => {
+      const body = [];
+      const seen = new Set();
+      const walk = (dependencies) => {
+        for (const dependency of dependencies) {
+          if (seen.has(dependency)) {
+            continue;
+          }
+          seen.add(dependency);
+          const entry = topLevel.get(dependency);
+          if (entry === undefined) {
+            continue;
+          }
+          walk(entry.dependencies);
+          body.push(entry.code);
+        }
+      };
+      walk(dependencies);
+      body.push(code);
+      const program = { type: 'Program', body };
+      return generate(program);
+    };
+
+    const program = generateSubprogram();
+
+    const entry = { code, definition, dependencies, program, sha };
     topLevel.set(id, entry);
+
     if (doExport) {
       exportNames.push(id);
     }
@@ -190,5 +222,6 @@ export const toEcmascript = async (script, { path } = {}) => {
 
   const result =
     '\n' + generate(parse(out.map(generate).join('\n'), parseOptions));
+
   return result;
 };

@@ -1,11 +1,27 @@
 import * as api from './jsxcad-api-v1.js';
-import { boot, conversation, log, setupFilesystem, clearEmitted, emit, resolvePending, getEmitted, write } from './jsxcad-sys.js';
-import { toEcmascript } from './jsxcad-compiler.js';
+import { boot, conversation, log, setupFilesystem, clearEmitted, emit, resolvePending, getEmitted } from './jsxcad-sys.js';
 
 /* global postMessage, onmessage:writable, self */
 
-const writeNotebook = async path => {
-  resolvePending(); // Update the notebook.
+/*
+const writeNotebook = async (path) => {
+  sys.resolvePending();
+  // Update the notebook.
+  const notebook = sys.getEmitted();
+  // Resolve any promises.
+  for (const note of notebook) {
+    if (note.download) {
+      for (const entry of note.download.entries) {
+        entry.data = await entry.data;
+      }
+    }
+  }
+  await sys.write(`notebook/${path}`, notebook);
+};
+*/
+
+const resolveNotebook = async path => {
+  await resolvePending(); // Update the notebook.
 
   const notebook = getEmitted(); // Resolve any promises.
 
@@ -16,8 +32,6 @@ const writeNotebook = async path => {
       }
     }
   }
-
-  await write(`notebook/${path}`, notebook);
 };
 
 const say = message => postMessage(message);
@@ -26,9 +40,6 @@ const agent = async ({
   ask,
   question
 }) => {
-  await log({
-    op: 'clear'
-  });
   await log({
     op: 'evaluate',
     status: 'run'
@@ -45,7 +56,8 @@ const agent = async ({
     clearEmitted();
 
     try {
-      const ecmascript = await toEcmascript(question.evaluate);
+      const ecmascript = question.evaluate; // await toEcmascript(question.evaluate);
+
       console.log({
         op: 'text',
         text: `QQ/script: ${question.evaluate}`
@@ -88,10 +100,13 @@ const agent = async ({
         status: 'failure'
       });
     } finally {
-      await writeNotebook(question.path);
-      setupFilesystem();
+      // await writeNotebook(question.path);
+      await resolveNotebook(question.path);
       await resolvePending();
     }
+
+    setupFilesystem();
+    return getEmitted();
   }
 }; // We need to start receiving messages immediately, but we're not ready to process them yet.
 // Put them in a buffer.
