@@ -1,6 +1,7 @@
 // import * as api from '@jsxcad/api-v1';
 
 import {
+  clearEmitted,
   emit,
   getEmitted,
   log,
@@ -128,6 +129,7 @@ export class JsEditorUi extends Pane {
 
   async run() {
     await terminateActiveServices();
+    clearEmitted();
     const { ask, file, workspace } = this.props;
     await this.save();
     await log({ op: 'open' });

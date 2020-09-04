@@ -3,23 +3,6 @@ import { boot, conversation, log, setupFilesystem, clearEmitted, emit, resolvePe
 
 /* global postMessage, onmessage:writable, self */
 
-/*
-const writeNotebook = async (path) => {
-  sys.resolvePending();
-  // Update the notebook.
-  const notebook = sys.getEmitted();
-  // Resolve any promises.
-  for (const note of notebook) {
-    if (note.download) {
-      for (const entry of note.download.entries) {
-        entry.data = await entry.data;
-      }
-    }
-  }
-  await sys.write(`notebook/${path}`, notebook);
-};
-*/
-
 const resolveNotebook = async path => {
   await resolvePending(); // Update the notebook.
 
@@ -56,8 +39,7 @@ const agent = async ({
     clearEmitted();
 
     try {
-      const ecmascript = question.evaluate; // await toEcmascript(question.evaluate);
-
+      const ecmascript = question.evaluate;
       console.log({
         op: 'text',
         text: `QQ/script: ${question.evaluate}`
@@ -100,7 +82,6 @@ const agent = async ({
         status: 'failure'
       });
     } finally {
-      // await writeNotebook(question.path);
       await resolveNotebook(question.path);
       await resolvePending();
     }
