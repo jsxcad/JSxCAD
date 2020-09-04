@@ -2,6 +2,7 @@ import { readFile, unwatchFiles, watchFile } from '@jsxcad/sys';
 
 import Col from 'react-bootstrap/Col';
 import Container from 'react-bootstrap/Container';
+import Mermaid from 'mermaid';
 import Pane from './Pane.js';
 import PropTypes from 'prop-types';
 import React from 'react';
@@ -45,6 +46,7 @@ export class NotebookUi extends Pane {
       refs[0].appendChild(newDomElement);
     }
     this.setState({ notebook, domElement: newDomElement });
+    Mermaid.init(undefined, '.mermaid');
   }
 
   renderToolbar() {

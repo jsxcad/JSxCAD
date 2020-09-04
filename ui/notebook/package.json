@@ -24,7 +24,7 @@
   "dependencies": {
     "base64-arraybuffer": "^0.2.0",
     "file-saver": "^2.0.2",
-    "marked": "^0.8.2",
+    "marked": "^1.1.1",
     "@jsxcad/api-v1-shape": "^0.0.79",
     "@jsxcad/ui-threejs": "^0.0.79"
   },
