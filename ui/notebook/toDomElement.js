@@ -12,6 +12,18 @@ const downloadFile = async (event, filename, data, type) => {
   saveAs(blob, filename);
 };
 
+marked.use({
+  renderer: {
+    code(code, language) {
+      if (code.match(/^sequenceDiagram/) || code.match(/^graph/)) {
+        return '<div class="mermaid">' + code + '</div>';
+      } else {
+        return '<pre><code>' + code + '</code></pre>';
+      }
+    },
+  },
+});
+
 export const toDomElement = async (notebook = []) => {
   const container = document.createElement('div');
 
