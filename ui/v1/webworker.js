@@ -2,8 +2,9 @@
 
 import * as api from '@jsxcad/api-v1';
 import * as sys from '@jsxcad/sys';
-import { toEcmascript } from '@jsxcad/compiler';
+// import { toEcmascript } from '@jsxcad/compiler';
 
+/*
 const writeNotebook = async (path) => {
   sys.resolvePending();
   // Update the notebook.
@@ -18,17 +19,31 @@ const writeNotebook = async (path) => {
   }
   await sys.write(`notebook/${path}`, notebook);
 };
+*/
+
+const resolveNotebook = async (path) => {
+  await sys.resolvePending();
+  // Update the notebook.
+  const notebook = sys.getEmitted();
+  // Resolve any promises.
+  for (const note of notebook) {
+    if (note.download) {
+      for (const entry of note.download.entries) {
+        entry.data = await entry.data;
+      }
+    }
+  }
+};
 
 const say = (message) => postMessage(message);
 const agent = async ({ ask, question }) => {
-  await sys.log({ op: 'clear' });
   await sys.log({ op: 'evaluate', status: 'run' });
   await sys.log({ op: 'text', text: 'Evaluation Started' });
   if (question.evaluate) {
     sys.setupFilesystem({ fileBase: question.workspace });
     sys.clearEmitted();
     try {
-      const ecmascript = await toEcmascript(question.evaluate);
+      const ecmascript = question.evaluate; // await toEcmascript(question.evaluate);
       console.log({ op: 'text', text: `QQ/script: ${question.evaluate}` });
       console.log({ op: 'text', text: `QQ/ecmascript: ${ecmascript}` });
       const builder = new Function(
@@ -54,10 +69,12 @@ const agent = async ({ ask, question }) => {
       });
       await sys.log({ op: 'evaluate', status: 'failure' });
     } finally {
-      await writeNotebook(question.path);
-      sys.setupFilesystem();
+      // await writeNotebook(question.path);
+      await resolveNotebook(question.path);
       await sys.resolvePending();
     }
+    sys.setupFilesystem();
+    return sys.getEmitted();
   }
 };
 

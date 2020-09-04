@@ -146,7 +146,7 @@ test('Reuse and Redefine', async (t) => {
   // Establish
   await write('data/def/A', 1);
   await write('meta/def/A', {
-    sha: 'a94dbf09d58bc3979357ff42d7171daf5ca410f0',
+    sha: 'd20ea9544ceb910f702b8ab8167cbe3e5fb7a2a2',
   });
 
   // Reuse
@@ -173,7 +173,7 @@ return {};
     `
 const A = bar();
 A instanceof Shape && (await saveGeometry('data/def/A', A)) && (await write('meta/def/A', {
-  sha: '8e0d3a8ac5c7a9b2684fa19794087e7e4223cd53'
+  sha: '998f2a52e6cffab9dfbdadd70971164741f7538f'
 }));
 Object.freeze(A);
 const B = () => 2;
@@ -187,11 +187,11 @@ test('Indirect Redefinition', async (t) => {
   // Establish
   await write('data/def/D', 1);
   await write('meta/def/D', {
-    sha: 'dbefe81bda93e322be22b4a3ccf53c3c43173192',
+    sha: '132b04f13d83839780310820e22fa068e6e12f3b',
   });
   await write('data/def/E', 1);
   await write('meta/def/E', {
-    sha: '38106474eafb9ef3606469a77c07042e325a4bb0',
+    sha: '91c534153aa9d64e620465cee99c4fa0739c4472',
   });
 
   // Demonstrate reuse.
@@ -210,7 +210,7 @@ return {};
 test('Reuse', async (t) => {
   // Demonstrate defined case.
   await write('meta/def/mountainView', {
-    sha: 'b59f37ba343f2a4a9ddf44b1091190f973b19743',
+    sha: 'c3b0ad66f1281cd0078066eea1b208fef9ffc133',
   });
   const define = await toEcmascript(
     `
@@ -247,7 +247,7 @@ mountainView.frontView({ position: [0, -100, 50] });
 const Mountain = () => bar();
 const mountainView = Mountain().scale(0.5).Page();
 mountainView instanceof Shape && (await saveGeometry('data/def/mountainView', mountainView)) && (await write('meta/def/mountainView', {
-  sha: 'bdf04f14234eed622dfca3aa405abd88911ea304'
+  sha: 'ff13df28379e2578fac3d15154411d6bf1b707a8'
 }));
 Object.freeze(mountainView);
 mountainView.frontView({
@@ -270,11 +270,34 @@ log(a);
     `
 const a = [];
 a instanceof Shape && (await saveGeometry('data/def/a', a)) && (await write('meta/def/a', {
-  sha: 'b0e5d6b61a0feb61ed104d4688df2b0dd8884cd4'
+  sha: '008e21a56df83b743c52799ddf689ac20ea2bb8c'
 }));
 Object.freeze(a);
 log(a);
 return {};
 `
+  );
+});
+
+test('Top level definitions generate sub-programs', async (t) => {
+  const topLevel = new Map();
+  await toEcmascript(
+    `
+let bar = () => 1;
+const Mountain = () => bar();
+const mountainView = Mountain().scale(0.5).Page();
+mountainView.frontView({ position: [0, -100, 50] });
+`,
+    { topLevel }
+  );
+
+  t.deepEqual(topLevel.get('bar').program, 'let bar = () => 1;\n');
+  t.deepEqual(
+    topLevel.get('Mountain').program,
+    'let bar = () => 1;\nconst Mountain = () => bar();\n'
+  );
+  t.deepEqual(
+    topLevel.get('mountainView').program,
+    'let bar = () => 1;\nconst Mountain = () => bar();\nconst mountainView = Mountain().scale(0.5).Page();\n'
   );
 });

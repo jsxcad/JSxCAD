@@ -1,14 +1,16 @@
 // import * as api from '@jsxcad/api-v1';
 
 import {
+  emit,
+  getEmitted,
   log,
   read,
+  resolvePending,
   terminateActiveServices,
   unwatchFiles,
   watchFile,
   write,
 } from '@jsxcad/sys';
-// import { toSignature, toSnippet } from './signature';
 
 import AceEditor from 'react-ace';
 import Col from 'react-bootstrap/Col';
@@ -25,6 +27,7 @@ import { aceEditorCompleter } from './AceEditorCompleter';
 import { aceEditorSnippetManager } from './AceEditorSnippetManager';
 
 import { prismJsAuxiliary } from './PrismJSAuxiliary';
+import { toEcmascript } from '@jsxcad/compiler';
 
 if (!aceEditorAuxiliary) throw Error('die');
 if (!prismJsAuxiliary) throw Error('die');
@@ -70,40 +73,22 @@ const snippetCompleter = {
   },
 };
 
-/*
-const getSignatures = (api) => {
-  const signatures = [];
-  for (const name of Object.keys(api)) {
-    const value = api[name];
-    const string = value.signature;
-    if (string !== undefined) {
-      signatures.push(toSignature(string));
-    }
-    for (const name of Object.keys(value)) {
-      const property = value[name];
-      const string = property.signature;
-      if (string !== undefined) {
-        signatures.push(toSignature(string));
-      }
-    }
-    if (value.prototype !== undefined) {
-      for (const name of Object.keys(value.prototype)) {
-        const property = value.prototype[name];
-        const string = property.signature;
-        if (string !== undefined) {
-          signatures.push(toSignature(string));
-        }
+aceEditorCompleter.setCompleters([snippetCompleter]);
+
+const writeNotebook = async (path, notebook) => {
+  await resolvePending();
+  // Extend the notebook.
+  notebook.push(...getEmitted());
+  // Resolve any promises.
+  for (const note of notebook) {
+    if (note.download) {
+      for (const entry of note.download.entries) {
+        entry.data = await entry.data;
       }
     }
   }
-  return signatures;
+  await write(`notebook/${path}`, notebook);
 };
-*/
-
-// const snippets = getSignatures(api).map(toSnippet);
-
-aceEditorCompleter.setCompleters([snippetCompleter]);
-// aceEditorSnippetManager.register(snippets, 'JSxCAD');
 
 export class JsEditorUi extends Pane {
   static get propTypes() {
@@ -146,12 +131,22 @@ export class JsEditorUi extends Pane {
     const { ask, file, workspace } = this.props;
     await this.save();
     await log({ op: 'open' });
+    await log({ op: 'clear' });
     await log({ op: 'text', text: 'Running', level: 'serious' });
     let script = await read(file);
     if (script.buffer) {
       script = new TextDecoder('utf8').decode(script);
     }
-    await ask({ evaluate: script, workspace, path: file });
+    const topLevel = new Map();
+    const ecmascript = await toEcmascript(script, { topLevel });
+    emit({ md: `---` });
+    emit({ md: `#### Programs` });
+    for (const [id, { program }] of topLevel.entries()) {
+      emit({ md: `##### ${id}` });
+      emit({ md: `'''\n${program}\n'''\n` });
+    }
+    const notebook = await ask({ evaluate: ecmascript, workspace, path: file });
+    await writeNotebook(file, notebook);
     await log({ op: 'text', text: 'Finished', level: 'serious' });
   }
 
