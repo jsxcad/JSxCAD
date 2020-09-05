@@ -17,7 +17,4 @@ const fuseMethod = function (...args) {
 };
 Shape.prototype.fuse = fuseMethod;
 
-fuse.signature = 'fuse(shape:Shape, op:function) -> Shapes';
-fuseMethod.signature = 'Shape -> fuse(op:function) -> Shapes';
-
 export default fuse;

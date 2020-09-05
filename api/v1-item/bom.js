@@ -1,16 +1,11 @@
 import Shape from '@jsxcad/api-v1-shape';
+import { emit } from '@jsxcad/sys';
 import { visit } from '@jsxcad/geometry-tagged';
-
-/**
- *
- * # Bill Of Materials
- *
- **/
 
 export const bom = (shape) => {
   const bom = [];
   visit(shape.toKeptGeometry(), (geometry, descend) => {
-    if (geometry.item) {
+    if (geometry.type === 'item' && geometry.tags) {
       bom.push(
         geometry.tags
           .filter((tag) => tag.startsWith('item/'))
@@ -22,11 +17,30 @@ export const bom = (shape) => {
   return bom;
 };
 
-const bomMethod = function (...args) {
-  return bom(this, ...args);
+const bomMethod = function () {
+  return bom(this);
 };
 Shape.prototype.bom = bomMethod;
 
-bomMethod.signature = 'Shape -> bom() -> string';
+const bomViewMethod = function () {
+  const counts = new Map();
+  for (const ids of this.bom()) {
+    for (const id of ids) {
+      counts.set(id, (counts.get(id) || 0) + 1);
+    }
+  }
+  const md = [];
+  md.push(``);
+  md.push(`| Item | Count |`);
+  md.push(`| ---- | ----- |`);
+  for (const [id, count] of counts) {
+    md.push(`| ${id} | ${count} |`);
+  }
+  md.push(``);
+
+  emit({ md: md.join('\n') });
+  return this;
+};
+Shape.prototype.bomView = bomViewMethod;
 
 export default bom;

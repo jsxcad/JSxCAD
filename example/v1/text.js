@@ -8,6 +8,6 @@ const greatVibes = await readFont('ttf/GreatVibes.ttf', {
 });
 const letters = greatVibes(10)(string);
 
-letters.Item().Page().view().writePdf('text');
+letters.item().Page().view().writePdf('text');
 
-letters.extrude(10).center().Item().Page().view().writeStl('text');
+letters.extrude(10).center().item().Page().view().writeStl('text');
