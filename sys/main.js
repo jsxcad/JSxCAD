@@ -1,4 +1,9 @@
-export { addPending, resolvePending } from './pending.js';
+export {
+  addPending,
+  getPendingErrorHandler,
+  resolvePending,
+  setPendingErrorHandler,
+} from './pending.js';
 export { askService, createService } from './service.js';
 export { read, readFile } from './readFile.js';
 export { addSource, getSources } from './source.js';

@@ -1,6 +1,6 @@
 import Shape$1, { Shape } from './jsxcad-api-v1-shape.js';
 import { fromSvgPath, fromSvg, toSvg } from './jsxcad-convert-svg.js';
-import { read, addPending, writeFile, emit } from './jsxcad-sys.js';
+import { read, addPending, writeFile, getPendingErrorHandler, emit } from './jsxcad-sys.js';
 import { ensurePages } from './jsxcad-api-v1-layout.js';
 
 /**
@@ -54,7 +54,7 @@ const prepareSvg = (shape, name, options = {}) => {
   let index = 0;
   const entries = [];
   for (const entry of ensurePages(shape.toKeptGeometry())) {
-    const op = toSvg(entry, options);
+    const op = toSvg(entry, options).catch(getPendingErrorHandler());
     addPending(op);
     entries.push({
       data: op,

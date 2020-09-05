@@ -38,7 +38,7 @@ export const DrillPress = (
     sweep === 'no'
       ? undefined
       : Cylinder.ofDiameter(diameter, depth)
-          .op((s) => (sweep === 'show' ? s : s.Void()))
+          .op((s) => (sweep === 'show' ? s : s.hole()))
           .moveZ(depth / -2)
   ).move(x, y);
 };

@@ -1,4 +1,9 @@
-import { addPending, emit, writeFile } from '@jsxcad/sys';
+import {
+  addPending,
+  emit,
+  getPendingErrorHandler,
+  writeFile,
+} from '@jsxcad/sys';
 
 import Shape from '@jsxcad/api-v1-shape';
 import { ensurePages } from '@jsxcad/api-v1-layout';
@@ -8,7 +13,7 @@ export const prepareThreejsPage = (shape, name, options = {}) => {
   let index = 0;
   const entries = [];
   for (const entry of ensurePages(shape.toKeptGeometry())) {
-    const op = toThreejsPage(entry, options);
+    const op = toThreejsPage(entry, options).catch(getPendingErrorHandler());
     addPending(op);
     entries.push({
       data: op,

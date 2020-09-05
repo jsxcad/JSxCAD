@@ -39,7 +39,7 @@ export const ProfileRouter = (
       sweeps.push(
         paths
           .sweep(Cylinder.ofDiameter(toolDiameter, depth).moveZ(depth / -2))
-          .op((s) => (sweep === 'show' ? s : s.Void()))
+          .op((s) => (sweep === 'show' ? s : s.hole()))
       );
     }
   }
