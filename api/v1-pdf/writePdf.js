@@ -1,4 +1,9 @@
-import { addPending, emit, writeFile } from '@jsxcad/sys';
+import {
+  addPending,
+  emit,
+  getPendingErrorHandler,
+  writeFile,
+} from '@jsxcad/sys';
 
 import Shape from '@jsxcad/api-v1-shape';
 import { toPdf as convertToPdf } from '@jsxcad/convert-pdf';
@@ -9,7 +14,9 @@ export const preparePdf = (shape, name, { lineWidth = 0.096 } = {}) => {
   const entries = [];
   for (const entry of ensurePages(shape.toKeptGeometry())) {
     const { size } = entry.layout;
-    const op = convertToPdf(entry, { lineWidth, size });
+    const op = convertToPdf(entry, { lineWidth, size }).catch(
+      getPendingErrorHandler()
+    );
     addPending(op);
     entries.push({
       data: op,

@@ -76,7 +76,7 @@ export const BenchPlane = (
       : Cube(length, width, cutHeight + cutDepth)
           .benchTop()
           .moveZ(-depth)
-          .op((s) => (sweep === 'show' ? s : s.Void()))
+          .op((s) => (sweep === 'show' ? s : s.hole()))
   );
 };
 

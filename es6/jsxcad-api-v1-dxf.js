@@ -1,6 +1,6 @@
 import Shape from './jsxcad-api-v1-shape.js';
 import { fromDxf, toDxf } from './jsxcad-convert-dxf.js';
-import { read, addPending, writeFile, emit } from './jsxcad-sys.js';
+import { read, addPending, writeFile, getPendingErrorHandler, emit } from './jsxcad-sys.js';
 import { ensurePages } from './jsxcad-api-v1-layout.js';
 
 const readDxf = async (path) => {
@@ -15,7 +15,7 @@ const prepareDxf = (shape, name, options = {}) => {
   let index = 0;
   const entries = [];
   for (const entry of ensurePages(shape.toKeptGeometry())) {
-    const op = toDxf(entry, options);
+    const op = toDxf(entry, options).catch(getPendingErrorHandler());
     addPending(op);
     entries.push({
       data: op,

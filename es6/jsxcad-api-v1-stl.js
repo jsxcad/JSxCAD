@@ -1,6 +1,6 @@
 import Shape, { Shape as Shape$1 } from './jsxcad-api-v1-shape.js';
 import { fromStl, toStl } from './jsxcad-convert-stl.js';
-import { readFile, addPending, writeFile, emit } from './jsxcad-sys.js';
+import { readFile, addPending, writeFile, getPendingErrorHandler, emit } from './jsxcad-sys.js';
 import { ensurePages } from './jsxcad-api-v1-layout.js';
 
 /**
@@ -44,7 +44,7 @@ const prepareStl = (shape, name, options = {}) => {
   let index = 0;
   const entries = [];
   for (const entry of ensurePages(shape.toKeptGeometry())) {
-    const op = toStl(entry, options);
+    const op = toStl(entry, options).catch(getPendingErrorHandler());
     addPending(op);
     entries.push({
       data: op,

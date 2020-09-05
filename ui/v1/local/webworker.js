@@ -1,5 +1,5 @@
 import * as api from './jsxcad-api-v1.js';
-import { boot, conversation, log, setupFilesystem, clearEmitted, emit, resolvePending, getEmitted } from './jsxcad-sys.js';
+import { setPendingErrorHandler, emit, log, boot, conversation, setupFilesystem, clearEmitted, resolvePending, getEmitted } from './jsxcad-sys.js';
 
 /* global postMessage, onmessage:writable, self */
 
@@ -18,6 +18,22 @@ const resolveNotebook = async path => {
 };
 
 const say = message => postMessage(message);
+
+const reportError = error => {
+  emit({
+    log: {
+      text: error.stack,
+      level: 'serious'
+    }
+  });
+  log({
+    op: 'text',
+    text: error.stack,
+    level: 'serious'
+  });
+};
+
+setPendingErrorHandler(reportError);
 
 const agent = async ({
   ask,
@@ -61,17 +77,7 @@ const agent = async ({
         status: 'success'
       }); // Wait for any pending operations.
     } catch (error) {
-      emit({
-        log: {
-          text: error.stack,
-          level: 'serious'
-        }
-      });
-      await log({
-        op: 'text',
-        text: error.stack,
-        level: 'serious'
-      });
+      reportError(error);
       await log({
         op: 'text',
         text: 'Evaluation Failed',
@@ -114,6 +120,12 @@ const bootstrap = async () => {
     data
   }) => hear(data); // Now that we're ready, drain the buffer.
 
+
+  if (self.messageBootQueue !== undefined) {
+    while (self.messageBootQueue.length > 0) {
+      hear(self.messageBootQueue.shift());
+    }
+  }
 
   while (messageBootQueue.length > 0) {
     hear(messageBootQueue.shift());

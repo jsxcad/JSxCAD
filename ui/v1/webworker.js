@@ -18,6 +18,14 @@ const resolveNotebook = async (path) => {
 };
 
 const say = (message) => postMessage(message);
+
+const reportError = (error) => {
+  sys.emit({ log: { text: error.stack, level: 'serious' } });
+  sys.log({ op: 'text', text: error.stack, level: 'serious' });
+};
+
+sys.setPendingErrorHandler(reportError);
+
 const agent = async ({ ask, question }) => {
   await sys.log({ op: 'evaluate', status: 'run' });
   await sys.log({ op: 'text', text: 'Evaluation Started' });
@@ -42,8 +50,7 @@ const agent = async ({ ask, question }) => {
       await sys.log({ op: 'evaluate', status: 'success' });
       // Wait for any pending operations.
     } catch (error) {
-      sys.emit({ log: { text: error.stack, level: 'serious' } });
-      await sys.log({ op: 'text', text: error.stack, level: 'serious' });
+      reportError(error);
       await sys.log({
         op: 'text',
         text: 'Evaluation Failed',

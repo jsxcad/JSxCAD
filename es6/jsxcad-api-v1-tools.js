@@ -79,7 +79,7 @@ const BenchPlane = (
       : Cube(length, width, cutHeight + cutDepth)
           .benchTop()
           .moveZ(-depth)
-          .op((s) => (sweep === 'show' ? s : s.Void()))
+          .op((s) => (sweep === 'show' ? s : s.hole()))
   );
 };
 
@@ -139,7 +139,7 @@ const DrillPress = (
     sweep === 'no'
       ? undefined
       : Cylinder.ofDiameter(diameter, depth)
-          .op((s) => (sweep === 'show' ? s : s.Void()))
+          .op((s) => (sweep === 'show' ? s : s.hole()))
           .moveZ(depth / -2)
   ).move(x, y);
 };
@@ -172,7 +172,7 @@ const HoleRouter = (
       sweeps.push(
         paths
           .sweep(Cylinder.ofDiameter(toolDiameter, depth).moveZ(depth / -2))
-          .op((s) => (sweep === 'show' ? s : s.Void()))
+          .op((s) => (sweep === 'show' ? s : s.hole()))
       );
     }
   }
@@ -206,7 +206,7 @@ const LineRouter = (
       sweeps.push(
         Shape$1.fromGeometry(taggedPaths({}, paths))
           .sweep(Cylinder.ofDiameter(toolDiameter, depth).moveZ(depth / -2))
-          .op((s) => (sweep === 'show' ? s : s.Void()))
+          .op((s) => (sweep === 'show' ? s : s.hole()))
       );
     }
   }
@@ -252,7 +252,7 @@ const ProfileRouter = (
       sweeps.push(
         paths
           .sweep(Cylinder.ofDiameter(toolDiameter, depth).moveZ(depth / -2))
-          .op((s) => (sweep === 'show' ? s : s.Void()))
+          .op((s) => (sweep === 'show' ? s : s.hole()))
       );
     }
   }

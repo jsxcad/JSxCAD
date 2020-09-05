@@ -142,6 +142,15 @@ export class JsEditorUi extends Pane {
     const topLevel = new Map();
     const ecmascript = await toEcmascript(script, { topLevel });
     emit({ md: `---` });
+    emit({ md: `#### Dependency Tree` });
+    const graph = [];
+    for (const [id, { dependencies }] of topLevel.entries()) {
+      for (const dependency of dependencies) {
+        graph.push(`${dependency}(${dependency}  .) --> ${id}(${id}  .)`);
+      }
+    }
+    emit({ md: `'''\ngraph TD\n${graph.join('\n')}\n'''` });
+    emit({ md: `---` });
     emit({ md: `#### Programs` });
     for (const [id, { program }] of topLevel.entries()) {
       emit({ md: `##### ${id}` });
