@@ -202,7 +202,7 @@ function myColor(shape, tag) {
 }
 
 function myBOMTag(shape, tag) {
-  return shape.Item(tag);
+  return shape.item(tag);
 }
 
 console.log(`QQ/begin`);
@@ -210,4 +210,4 @@ const mount = main();
 console.log(`QQ/end`);
 
 mount.cloud().view().writeShape('mount');
-mount.Item().Page().view().writeStl('mount');
+mount.item().Page().view().writeStl('mount');

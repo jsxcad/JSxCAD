@@ -1,69 +1,27 @@
-import { toKeptGeometry, rewriteTags, taggedItem, visit, rewrite, update, getItems, getLeafs } from './jsxcad-geometry-tagged.js';
-import Shape, { Shape as Shape$1 } from './jsxcad-api-v1-shape.js';
-
-const registry = [];
-
-// FIX: Need to clear out temporary registrations.
-
-const fromDesignator = (designator) => {
-  for (const { parser, constructor } of registry) {
-    const spec = parser(designator);
-    if (spec !== undefined && spec !== null && spec !== false) {
-      return constructor(spec);
-    }
-  }
-  throw Error('die');
-};
-
-// Later definitions override earlier definitions.
-const registerDesignator = (parser, constructor) =>
-  registry.unshift({ parser, constructor });
-
-/**
- *
- * # Item
- *
- * Encapsulates a geometry as a discrete item.
- *
- **/
+import { taggedItem, taggedAssembly, visit, rewrite, update, getItems, getLeafs } from './jsxcad-geometry-tagged.js';
+import Shape from './jsxcad-api-v1-shape.js';
+import { emit } from './jsxcad-sys.js';
 
 // Constructs an item from the designator.
-const Item = (designator) => {
-  if (typeof designator === 'string') {
-    return fromDesignator(designator);
-  } else if (designator instanceof Array) {
-    return fromDesignator(...designator);
-  }
-};
+const Item = (id, ...shapes) =>
+  Shape.fromGeometry(
+    taggedItem(
+      { tags: [`item/${id}`] },
+      taggedAssembly({}, ...shapes.map((shape) => shape.toGeometry()))
+    )
+  );
 
 // Turns the current shape into an item.
 const itemMethod = function (id) {
-  const shape = Shape.fromGeometry(
-    toKeptGeometry(
-      rewriteTags([`item/${id}`], [], taggedItem({}, this.toGeometry()))
-    )
-  ); /* .with(Connector('center')); */
-  // Register the designator for re-use.
-  registerDesignator(
-    (d) => d === id,
-    () => shape
-  );
-  return shape;
+  return Item(id, this);
 };
 
-Shape.prototype.Item = itemMethod;
-Shape.prototype.toItem = itemMethod;
-
-/**
- *
- * # Bill Of Materials
- *
- **/
+Shape.prototype.item = itemMethod;
 
 const bom = (shape) => {
   const bom = [];
   visit(shape.toKeptGeometry(), (geometry, descend) => {
-    if (geometry.item) {
+    if (geometry.type === 'item' && geometry.tags) {
       bom.push(
         geometry.tags
           .filter((tag) => tag.startsWith('item/'))
@@ -75,12 +33,31 @@ const bom = (shape) => {
   return bom;
 };
 
-const bomMethod = function (...args) {
+const bomMethod = function () {
   return bom(this);
 };
 Shape.prototype.bom = bomMethod;
 
-bomMethod.signature = 'Shape -> bom() -> string';
+const bomViewMethod = function () {
+  const counts = new Map();
+  for (const ids of this.bom()) {
+    for (const id of ids) {
+      counts.set(id, (counts.get(id) || 0) + 1);
+    }
+  }
+  const md = [];
+  md.push(``);
+  md.push(`| Item | Count |`);
+  md.push(`| ---- | ----- |`);
+  for (const [id, count] of counts) {
+    md.push(`| ${id} | ${count} |`);
+  }
+  md.push(``);
+
+  emit({ md: md.join('\n') });
+  return this;
+};
+Shape.prototype.bomView = bomViewMethod;
 
 const fuse = (shape, op = (_) => _) =>
   Shape.fromGeometry(
@@ -97,9 +74,6 @@ const fuseMethod = function (...args) {
   return fuse(this, ...args);
 };
 Shape.prototype.fuse = fuseMethod;
-
-fuse.signature = 'fuse(shape:Shape, op:function) -> Shapes';
-fuseMethod.signature = 'Shape -> fuse(op:function) -> Shapes';
 
 const inItems = (shape, op = (_) => _) => {
   const rewritten = rewrite(shape.toKeptGeometry(), (geometry, descend) => {
@@ -155,36 +129,14 @@ Shape.prototype.leafs = leafsMethod;
 leafs.signature = 'leafs(shape:Shape, op:function) -> Shapes';
 leafsMethod.signature = 'Shape -> leafs(op:function) -> Shapes';
 
-const toBillOfMaterial = (shape) => {
-  const specifications = [];
-  for (const { tags } of getItems(shape.toKeptGeometry())) {
-    for (const tag of tags) {
-      if (tag.startsWith('item/')) {
-        const specification = tag.substring(5);
-        specifications.push(specification);
-      }
-    }
-  }
-  return specifications;
-};
-
-const toBillOfMaterialMethod = function (options = {}) {
-  return toBillOfMaterial(this);
-};
-
-Shape$1.prototype.toBillOfMaterial = toBillOfMaterialMethod;
-
 const api = {
   Item,
   bom,
-  fromDesignator,
   fuse,
   inItems,
   items,
   leafs,
-  registerDesignator,
-  toBillOfMaterial: toBillOfMaterialMethod,
 };
 
 export default api;
-export { Item, bom, fromDesignator, fuse, inItems, items, leafs, registerDesignator, toBillOfMaterialMethod as toBillOfMaterial };
+export { Item, bom, fuse, inItems, items, leafs };

@@ -331,7 +331,10 @@ const resolveSelfIntersections = (input, plane, resolved) => {
       }
     };
     walk();
-    resolved.push(simplePath);
+    if (dot(plane, fromPolygon(simplePath)) > 0) {
+      // Keep the paths that have not changed orientation.
+      resolved.push(simplePath);
+    }
   }
 };
 

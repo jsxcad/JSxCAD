@@ -8,6 +8,7 @@
   "type": "module",
   "scripts": {
     "depcheck": "depcheck --ignores '@jsxcad/eslint*,eslint*,babel-eslint'",
+    "doc": "node ../../doc/update.js",
     "lint": "eslint *.js",
     "lintfix": "eslint --fix *.js",
     "rollup": "rollup -c rollup_main.js",
@@ -24,7 +25,8 @@
   "license": "MIT",
   "dependencies": {
     "@jsxcad/api-v1-shape": "^0.0.79",
-    "@jsxcad/geometry-tagged": "^0.0.79"
+    "@jsxcad/geometry-tagged": "^0.0.79",
+    "@jsxcad/sys": "^0.0.79"
   },
   "devDependencies": {
     "ava": "^3.9.0",

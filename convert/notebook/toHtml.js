@@ -72,6 +72,11 @@ export const toHtml = async (
       background: #2196F3;
       color: white;
     }
+
+    .note th,td {
+      border: 1px solid dodgerblue;
+      padding: 5px;
+    }
   </style>
  </head>
  <body>
