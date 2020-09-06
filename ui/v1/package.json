@@ -33,6 +33,7 @@
     "base64-js": "^1.3.0",
     "fast-equals": "^2.0.0",
     "mermaid": "^8.7.0",
+    "prettier": "^2.0.5",
     "prismjs": "^1.17.1",
     "prop-types": "^15.7.2",
     "react": ">=16.8.2",
