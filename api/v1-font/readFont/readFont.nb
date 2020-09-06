@@ -1,0 +1,8 @@
+import { readFont } from '@jsxcad/api-v1-font';
+
+const kr = await readFont('https://gitcdn.link/cdn/googlefonts/noto-cjk/master/NotoSerifCJKkr-Regular.otf');
+
+const { string } = await stringBox('string', '앙연');
+const { size } = await numberBox('size', 10);
+
+kr(size)(string).topView();
