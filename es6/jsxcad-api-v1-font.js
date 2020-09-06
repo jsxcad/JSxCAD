@@ -1,5 +1,5 @@
 import Shape from './jsxcad-api-v1-shape.js';
-import { readFile } from './jsxcad-sys.js';
+import { read } from './jsxcad-sys.js';
 import { toFont } from './jsxcad-algorithm-text.js';
 
 // TODO: (await readFont(...))({ emSize: 16 })("CA");
@@ -42,11 +42,8 @@ import { toFont } from './jsxcad-algorithm-text.js';
 
 const toEmSizeFromMm = (mm) => mm * 1.5;
 
-const readFont = async (path, { src } = {}) => {
-  let data = await readFile({ doSerialize: false }, `source/${path}`);
-  if (data === undefined) {
-    data = await readFile({ sources: [src] }, `cache/${path}`);
-  }
+const readFont = async (path) => {
+  let data = await read(`source/${path}`, { sources: [path] });
   const font = toFont({ path }, data);
   const fontFactory = (size = 1) => (text) =>
     Shape.fromGeometry(font({ emSize: toEmSizeFromMm(size) }, text));

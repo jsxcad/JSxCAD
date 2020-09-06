@@ -8,11 +8,11 @@ const getControlValues = async () =>
 export const stringBox = async (label, otherwise) => {
   const { [label]: value = otherwise } = await getControlValues();
   emit({ control: { type: 'stringBox', label, value } });
-  return { [label]: value };
+  return value;
 };
 
 export const numberBox = async (label, otherwise) =>
-  Number(await stringBox(label));
+  Number(await stringBox(label, otherwise));
 
 export const sliderBox = async (
   label,
@@ -21,17 +21,17 @@ export const sliderBox = async (
 ) => {
   const { [label]: value = otherwise } = await getControlValues();
   emit({ control: { type: 'sliderBox', label, value, min, max, step } });
-  return { [label]: Number(value) };
+  return Number(value);
 };
 
 export const checkBox = async (label, otherwise) => {
   const { [label]: value = otherwise } = await getControlValues();
   emit({ control: { type: 'checkBox', label, value } });
-  return { [label]: Boolean(value) };
+  return Boolean(value);
 };
 
 export const selectBox = async (label, otherwise, options) => {
   const { [label]: value = otherwise } = await getControlValues();
   emit({ control: { type: 'selectBox', label, value, options } });
-  return { [label]: value };
+  return value;
 };
