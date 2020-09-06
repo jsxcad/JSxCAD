@@ -3803,6 +3803,8 @@ const deleteFile$1 = async (options, path) => {
   await deleteFile(options, path);
 };
 
+const getCurrentPath = () => '.';
+
 const touch = async (path, { workspace } = {}) => {
   let originalWorkspace = getFilesystem();
   if (workspace !== originalWorkspace) {
@@ -3823,4 +3825,4 @@ const touch = async (path, { workspace } = {}) => {
   }
 };
 
-export { addPending, addSource, ask, askService, boot, clearEmitted, conversation, createService, deleteFile$1 as deleteFile, emit$1 as emit, getEmitted, getFilesystem, getPendingErrorHandler, getSources, isBrowser, isNode, isWebWorker, listFiles$1 as listFiles, listFilesystems, log, onBoot, qualifyPath, read, readFile, resolvePending, setHandleAskUser, setPendingErrorHandler, setupFilesystem, terminateActiveServices, touch, unwatchFile, unwatchFileCreation, unwatchFileDeletion, unwatchFiles, unwatchLog, watchFile, watchFileCreation, watchFileDeletion, watchLog, write, writeFile };
+export { addPending, addSource, ask, askService, boot, clearEmitted, conversation, createService, deleteFile$1 as deleteFile, emit$1 as emit, getCurrentPath, getEmitted, getFilesystem, getPendingErrorHandler, getSources, isBrowser, isNode, isWebWorker, listFiles$1 as listFiles, listFilesystems, log, onBoot, qualifyPath, read, readFile, resolvePending, setHandleAskUser, setPendingErrorHandler, setupFilesystem, terminateActiveServices, touch, unwatchFile, unwatchFileCreation, unwatchFileDeletion, unwatchFiles, unwatchLog, watchFile, watchFileCreation, watchFileDeletion, watchLog, write, writeFile };

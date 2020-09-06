@@ -1,13 +1,6 @@
-// import * as api from '@jsxcad/api-v1';
-
 import {
-  clearEmitted,
-  emit,
-  getEmitted,
   log,
   read,
-  resolvePending,
-  terminateActiveServices,
   unwatchFiles,
   watchFile,
   write,
@@ -28,7 +21,6 @@ import { aceEditorCompleter } from './AceEditorCompleter';
 import { aceEditorSnippetManager } from './AceEditorSnippetManager';
 
 import { prismJsAuxiliary } from './PrismJSAuxiliary';
-import { toEcmascript } from '@jsxcad/compiler';
 
 if (!aceEditorAuxiliary) throw Error('die');
 if (!prismJsAuxiliary) throw Error('die');
@@ -76,27 +68,13 @@ const snippetCompleter = {
 
 aceEditorCompleter.setCompleters([snippetCompleter]);
 
-const writeNotebook = async (path, notebook) => {
-  await resolvePending();
-  // Extend the notebook.
-  notebook.push(...getEmitted());
-  // Resolve any promises.
-  for (const note of notebook) {
-    if (note.download) {
-      for (const entry of note.download.entries) {
-        entry.data = await entry.data;
-      }
-    }
-  }
-  await write(`notebook/${path}`, notebook);
-};
-
 export class JsEditorUi extends Pane {
   static get propTypes() {
     return {
       ask: PropTypes.func,
       file: PropTypes.string,
       id: PropTypes.string,
+      onRun: PropTypes.func,
       workspace: PropTypes.string,
     };
   }
@@ -128,8 +106,22 @@ export class JsEditorUi extends Pane {
   }
 
   async run() {
+    const { onRun } = this.props;
+    await this.save();
+    if (onRun) {
+      onRun();
+    }
+  }
+/*
     await terminateActiveServices();
     clearEmitted();
+
+    // FIX: This is a bit awkward.
+    // The responsibility for updating the control values ought to be with what
+    // renders the notebook.
+    const notebookControlData = await getNotebookControlData();
+    await write(`control/${getCurrentPath()}`, notebookControlData);
+
     const { ask, file, workspace } = this.props;
     await this.save();
     await log({ op: 'open' });
@@ -160,6 +152,7 @@ export class JsEditorUi extends Pane {
     await writeNotebook(file, notebook);
     await log({ op: 'text', text: 'Finished', level: 'serious' });
   }
+*/
 
   async save() {
     const { file } = this.props;

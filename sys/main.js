@@ -25,6 +25,7 @@ export {
 
 export { conversation } from './conversation.js';
 export { deleteFile } from './deleteFile.js';
+export { getCurrentPath } from './current.js';
 export { terminateActiveServices } from './servicePool.js';
 export { touch } from './touch.js';
 export { write, writeFile } from './writeFile.js';
