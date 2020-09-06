@@ -13,11 +13,13 @@ export class NotebookUi extends Pane {
   static get propTypes() {
     return {
       id: PropTypes.string,
+      onRun: PropTypes.func,
     };
   }
 
   constructor(props) {
     super(props);
+    this.onKeyDown = this.onKeyDown.bind(this);
     this.update = this.update.bind(this);
   }
 
@@ -49,6 +51,45 @@ export class NotebookUi extends Pane {
     Mermaid.init(undefined, '.mermaid');
   }
 
+  stop(e) {
+    e.stopPropagation();
+  }
+
+  preventDefault(e) {
+    e.preventDefault();
+    return false;
+  }
+
+  onKeyDown(e) {
+    const ENTER = 13;
+    const SHIFT = 16;
+    const CONTROL = 17;
+
+    const key = e.which || e.keyCode || 0;
+
+    switch (key) {
+      case CONTROL:
+      case SHIFT:
+        return true;
+    }
+
+    const { shiftKey } = e;
+    switch (key) {
+      case ENTER: {
+        if (shiftKey) {
+          const { onRun } = this.props;
+          e.preventDefault();
+          e.stopPropagation();
+          if (onRun) {
+            onRun();
+          }
+          return false;
+        }
+        break;
+      }
+    }
+  }
+
   renderToolbar() {
     return super.renderToolbar();
   }
@@ -76,7 +117,10 @@ export class NotebookUi extends Pane {
         style={{ height: '100%', display: 'flex', flexFlow: 'column' }}
       >
         <Row style={{ width: '100%', height: '100%', flex: '1 1 auto' }}>
-          <Col style={{ width: '100%', height: '100%', overflow: 'auto' }}>
+          <Col
+            style={{ width: '100%', height: '100%', overflow: 'auto' }}
+            onKeyDown={this.onKeyDown}
+          >
             {notebook}
           </Col>
         </Row>

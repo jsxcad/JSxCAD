@@ -28,6 +28,7 @@
     "@jsxcad/api-v1-math": "^0.0.79",
     "@jsxcad/api-v1-shape": "^0.0.79",
     "@jsxcad/geometry-path": "^0.0.79",
+    "@jsxcad/geometry-paths": "^0.0.79",
     "@jsxcad/geometry-tagged": "^0.0.79",
     "@jsxcad/math-plane": "^0.0.79",
     "@jsxcad/math-vec3": "^0.0.79"

@@ -1,4 +1,4 @@
-import { Empty, Square } from '@jsxcad/api-v1-shapes';
+import { Empty, Hershey, Square } from '@jsxcad/api-v1-shapes';
 import {
   getLayouts,
   getLeafs,
@@ -9,7 +9,6 @@ import {
   visit,
 } from '@jsxcad/geometry-tagged';
 
-import { Hershey } from '@jsxcad/api-v1-font';
 import Shape from '@jsxcad/api-v1-shape';
 import { max } from '@jsxcad/api-v1-math';
 import { pack as packOp } from './pack.js';

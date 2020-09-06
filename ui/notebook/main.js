@@ -1,1 +1,1 @@
-export { toDomElement } from './toDomElement.js';
+export { getNotebookControlData, toDomElement } from './toDomElement.js';

@@ -2561,6 +2561,7 @@ marked_1.use({
 
 const toDomElement = async (notebook = []) => {
   const container = document.createElement('div');
+  container.classList.add('notebook');
 
   const showOrbitView = async (event, note) => {
     const { geometry, target, up, position } = note.view;
@@ -2634,8 +2635,92 @@ const toDomElement = async (notebook = []) => {
       }
       container.appendChild(div);
     }
+    if (note.control) {
+      const div = document.createElement('div');
+      const { type, label, value } = note.control;
+      switch (type) {
+        case 'stringBox': {
+          const input = document.createElement('input');
+          input.classList.add('note', 'control', 'input', 'box');
+          input.name = label;
+          input.value = value;
+          div.appendChild(input);
+          break;
+        }
+        case 'checkBox': {
+          const input = document.createElement('input');
+          input.classList.add('note', 'control', 'input', 'checkbox');
+          input.name = label;
+          input.type = 'checkbox';
+          input.value = value;
+          div.appendChild(input);
+          break;
+        }
+        case 'selectBox': {
+          const { options = [] } = note.control;
+          const input = document.createElement('select');
+          input.classList.add('note', 'control', 'input', 'checkbox');
+          input.name = label;
+          input.value = value;
+          for (const optionValue of options) {
+            const option = document.createElement('option');
+            option.value = optionValue;
+            if (optionValue === value) {
+              option.selected = true;
+            }
+            option.innerText = optionValue;
+            input.appendChild(option);
+          }
+          div.appendChild(input);
+          break;
+        }
+        case 'sliderBox': {
+          const { min = 0, max = 100, step = 1 } = note.control;
+          const output = document.createElement('span');
+          output.innerText = value;
+          div.appendChild(output);
+          const input = document.createElement('input');
+          input.classList.add('note', 'control', 'input', 'slider');
+          input.name = label;
+          input.type = 'range';
+          input.min = min;
+          input.max = max;
+          input.step = step;
+          input.value = value;
+          div.appendChild(input);
+          input.addEventListener('change', () => {
+            output.innerText = input.value;
+          });
+          input.addEventListener('input', () => {
+            output.innerText = input.value;
+          });
+          break;
+        }
+      }
+      const labelNode = document.createElement('label');
+      labelNode.htmlFor = label;
+      labelNode.appendChild(document.createTextNode(label));
+      div.appendChild(labelNode);
+      container.appendChild(div);
+    }
   }
   return container;
 };
 
-export { toDomElement };
+const getNotebookControlData = async () => {
+  const data = {};
+  const notebooks = document.getElementsByClassName('notebook');
+  for (let nthNotebook = 0; nthNotebook < notebooks.length; nthNotebook++) {
+    const notebook = notebooks[nthNotebook];
+    const inputs = notebook.getElementsByClassName('note control input');
+    for (let nthInput = 0; nthInput < inputs.length; nthInput++) {
+      const input = inputs[nthInput];
+      const label = input.name;
+      const value = input.value;
+      data[label] = value;
+    }
+  }
+  return data;
+};
+
+export { getNotebookControlData, toDomElement };

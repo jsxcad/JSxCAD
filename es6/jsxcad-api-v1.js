@@ -1,4 +1,4 @@
-import { addPending, write, emit, addSource, read } from './jsxcad-sys.js';
+import { addPending, write, emit, read, getCurrentPath, addSource } from './jsxcad-sys.js';
 export { emit, read, write } from './jsxcad-sys.js';
 import Shape, { Shape as Shape$1, loadGeometry, log, saveGeometry } from './jsxcad-api-v1-shape.js';
 export { Shape, loadGeometry, log, saveGeometry } from './jsxcad-api-v1-shape.js';
@@ -8,8 +8,8 @@ import './jsxcad-api-v1-deform.js';
 import './jsxcad-api-v1-gcode.js';
 import './jsxcad-api-v1-pdf.js';
 import './jsxcad-api-v1-plans.js';
-import { Peg, Arc, Assembly, Circle, Cone, Cube, Cylinder, Difference, Empty, Hexagon, Icosahedron, Intersection, Layers, Line, Path, Point, Points, Polygon, Polyhedron, Prism, Sphere, Spiral, Square, Tetrahedron, Torus, Triangle, Union, Void, Wave } from './jsxcad-api-v1-shapes.js';
-export { Arc, Assembly, Circle, Cone, Cube, Cylinder, Difference, Empty, Hexagon, Icosahedron, Intersection, Layers, Line, Path, Peg, Point, Points, Polygon, Polyhedron, Prism, Sphere, Spiral, Square, Tetrahedron, Torus, Triangle, Union, Void, Wave } from './jsxcad-api-v1-shapes.js';
+import { Peg, Arc, Assembly, Circle, Cone, Cube, Cylinder, Difference, Empty, Hershey, Hexagon, Icosahedron, Intersection, Layers, Line, Path, Point, Points, Polygon, Polyhedron, Prism, Sphere, Spiral, Square, Tetrahedron, Torus, Triangle, Union, Void, Wave } from './jsxcad-api-v1-shapes.js';
+export { Arc, Assembly, Circle, Cone, Cube, Cylinder, Difference, Empty, Hershey, Hexagon, Icosahedron, Intersection, Layers, Line, Path, Peg, Point, Points, Polygon, Polyhedron, Prism, Sphere, Spiral, Square, Tetrahedron, Torus, Triangle, Union, Void, Wave } from './jsxcad-api-v1-shapes.js';
 import { X, Y, Z } from './jsxcad-api-v1-connector.js';
 export { X, Y, Z } from './jsxcad-api-v1-connector.js';
 import { ChainedHull, Hull, Loop } from './jsxcad-api-v1-extrude.js';
@@ -169,6 +169,42 @@ const md = (strings, ...placeholders) => {
   return md;
 };
 
+// FIX: This needs to consider the current module.
+// FIX: Needs to communicate cache invalidation with other workers.
+const getControlValues = async () =>
+  (await read(`control/${getCurrentPath()}`, { useCache: false })) || {};
+
+const stringBox = async (label, otherwise) => {
+  const { [label]: value = otherwise } = await getControlValues();
+  emit({ control: { type: 'stringBox', label, value } });
+  return { [label]: value };
+};
+
+const numberBox = async (label, otherwise) =>
+  Number(await stringBox(label));
+
+const sliderBox = async (
+  label,
+  otherwise,
+  { min = 0, max = 100, step = 1 } = {}
+) => {
+  const { [label]: value = otherwise } = await getControlValues();
+  emit({ control: { type: 'sliderBox', label, value, min, max, step } });
+  return { [label]: Number(value) };
+};
+
+const checkBox = async (label, otherwise) => {
+  const { [label]: value = otherwise } = await getControlValues();
+  emit({ control: { type: 'checkBox', label, value } });
+  return { [label]: Boolean(value) };
+};
+
+const selectBox = async (label, otherwise, options) => {
+  const { [label]: value = otherwise } = await getControlValues();
+  emit({ control: { type: 'selectBox', label, value, options } });
+  return { [label]: value };
+};
+
 const source = (path, source) => addSource(`cache/${path}`, source);
 
 /**
@@ -192,6 +228,11 @@ var api = /*#__PURE__*/Object.freeze({
   Page: Page,
   pack: pack,
   md: md,
+  checkBox: checkBox,
+  numberBox: numberBox,
+  selectBox: selectBox,
+  sliderBox: sliderBox,
+  stringBox: stringBox,
   source: source,
   emit: emit,
   read: read,
@@ -223,6 +264,7 @@ var api = /*#__PURE__*/Object.freeze({
   Cylinder: Cylinder,
   Difference: Difference,
   Empty: Empty,
+  Hershey: Hershey,
   Hexagon: Hexagon,
   Icosahedron: Icosahedron,
   Intersection: Intersection,
@@ -337,4 +379,4 @@ registerDynamicModule(module('svg'), './jsxcad-api-v1-svg.js');
 registerDynamicModule(module('threejs'), './jsxcad-api-v1-threejs.js');
 registerDynamicModule(module('units'), './jsxcad-api-v1-units.js');
 
-export { importModule, md, source, x, y, z };
+export { checkBox, importModule, md, numberBox, selectBox, sliderBox, source, stringBox, x, y, z };

@@ -6,6 +6,7 @@ import Cube from './Cube.js';
 import Cylinder from './Cylinder.js';
 import Difference from './Difference.js';
 import Empty from './Empty.js';
+import Hershey from './Hershey.js';
 import Hexagon from './Hexagon.js';
 import Icosahedron from './Icosahedron.js';
 import Intersection from './Intersection.js';
@@ -40,6 +41,7 @@ const api = {
   Cylinder,
   Difference,
   Empty,
+  Hershey,
   Hexagon,
   Icosahedron,
   Intersection,
@@ -75,6 +77,7 @@ export {
   Cylinder,
   Difference,
   Empty,
+  Hershey,
   Hexagon,
   Icosahedron,
   Intersection,
