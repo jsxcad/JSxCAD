@@ -23,7 +23,13 @@ export { Page, pack } from '@jsxcad/api-v1-layout';
 
 export { md } from './md.js';
 
-export { checkBox, numberBox, selectBox, sliderBox, stringBox } from './control.js';
+export {
+  checkBox,
+  numberBox,
+  selectBox,
+  sliderBox,
+  stringBox,
+} from './control.js';
 
 export { source } from './source.js';
 

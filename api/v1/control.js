@@ -3,7 +3,7 @@ import { emit, getCurrentPath, read } from '@jsxcad/sys';
 // FIX: This needs to consider the current module.
 // FIX: Needs to communicate cache invalidation with other workers.
 const getControlValues = async () =>
-  await read(`control/${getCurrentPath()}`, { useCache: false }) || {};
+  (await read(`control/${getCurrentPath()}`, { useCache: false })) || {};
 
 export const stringBox = async (label, otherwise) => {
   const { [label]: value = otherwise } = await getControlValues();
@@ -11,9 +11,14 @@ export const stringBox = async (label, otherwise) => {
   return { [label]: value };
 };
 
-export const numberBox = async (label, otherwise) => Number(await stringBox(label));
+export const numberBox = async (label, otherwise) =>
+  Number(await stringBox(label));
 
-export const sliderBox = async (label, otherwise, { min = 0, max = 100, step = 1 } = {}) => {
+export const sliderBox = async (
+  label,
+  otherwise,
+  { min = 0, max = 100, step = 1 } = {}
+) => {
   const { [label]: value = otherwise } = await getControlValues();
   emit({ control: { type: 'sliderBox', label, value, min, max, step } });
   return { [label]: Number(value) };

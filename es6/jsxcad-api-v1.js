@@ -8,8 +8,8 @@ import './jsxcad-api-v1-deform.js';
 import './jsxcad-api-v1-gcode.js';
 import './jsxcad-api-v1-pdf.js';
 import './jsxcad-api-v1-plans.js';
-import { Peg, Arc, Assembly, Circle, Cone, Cube, Cylinder, Difference, Empty, Hexagon, Icosahedron, Intersection, Layers, Line, Path, Point, Points, Polygon, Polyhedron, Prism, Sphere, Spiral, Square, Tetrahedron, Torus, Triangle, Union, Void, Wave } from './jsxcad-api-v1-shapes.js';
-export { Arc, Assembly, Circle, Cone, Cube, Cylinder, Difference, Empty, Hexagon, Icosahedron, Intersection, Layers, Line, Path, Peg, Point, Points, Polygon, Polyhedron, Prism, Sphere, Spiral, Square, Tetrahedron, Torus, Triangle, Union, Void, Wave } from './jsxcad-api-v1-shapes.js';
+import { Peg, Arc, Assembly, Circle, Cone, Cube, Cylinder, Difference, Empty, Hershey, Hexagon, Icosahedron, Intersection, Layers, Line, Path, Point, Points, Polygon, Polyhedron, Prism, Sphere, Spiral, Square, Tetrahedron, Torus, Triangle, Union, Void, Wave } from './jsxcad-api-v1-shapes.js';
+export { Arc, Assembly, Circle, Cone, Cube, Cylinder, Difference, Empty, Hershey, Hexagon, Icosahedron, Intersection, Layers, Line, Path, Peg, Point, Points, Polygon, Polyhedron, Prism, Sphere, Spiral, Square, Tetrahedron, Torus, Triangle, Union, Void, Wave } from './jsxcad-api-v1-shapes.js';
 import { X, Y, Z } from './jsxcad-api-v1-connector.js';
 export { X, Y, Z } from './jsxcad-api-v1-connector.js';
 import { ChainedHull, Hull, Loop } from './jsxcad-api-v1-extrude.js';
@@ -172,7 +172,7 @@ const md = (strings, ...placeholders) => {
 // FIX: This needs to consider the current module.
 // FIX: Needs to communicate cache invalidation with other workers.
 const getControlValues = async () =>
-  await read(`control/${getCurrentPath()}`, { useCache: false }) || {};
+  (await read(`control/${getCurrentPath()}`, { useCache: false })) || {};
 
 const stringBox = async (label, otherwise) => {
   const { [label]: value = otherwise } = await getControlValues();
@@ -180,9 +180,14 @@ const stringBox = async (label, otherwise) => {
   return { [label]: value };
 };
 
-const numberBox = async (label, otherwise) => Number(await stringBox(label));
+const numberBox = async (label, otherwise) =>
+  Number(await stringBox(label));
 
-const sliderBox = async (label, otherwise, { min = 0, max = 100, step = 1 } = {}) => {
+const sliderBox = async (
+  label,
+  otherwise,
+  { min = 0, max = 100, step = 1 } = {}
+) => {
   const { [label]: value = otherwise } = await getControlValues();
   emit({ control: { type: 'sliderBox', label, value, min, max, step } });
   return { [label]: Number(value) };
@@ -259,6 +264,7 @@ var api = /*#__PURE__*/Object.freeze({
   Cylinder: Cylinder,
   Difference: Difference,
   Empty: Empty,
+  Hershey: Hershey,
   Hexagon: Hexagon,
   Icosahedron: Icosahedron,
   Intersection: Intersection,

@@ -2688,8 +2688,12 @@ const toDomElement = async (notebook = []) => {
           input.step = step;
           input.value = value;
           div.appendChild(input);
-          input.addEventListener('change', () => { output.innerText = input.value; });
-          input.addEventListener('input', () => { output.innerText = input.value; });
+          input.addEventListener('change', () => {
+            output.innerText = input.value;
+          });
+          input.addEventListener('input', () => {
+            output.innerText = input.value;
+          });
           break;
         }
       }

@@ -1,10 +1,4 @@
-import {
-  log,
-  read,
-  unwatchFiles,
-  watchFile,
-  write,
-} from '@jsxcad/sys';
+import { log, read, unwatchFiles, watchFile, write } from '@jsxcad/sys';
 
 import AceEditor from 'react-ace';
 import Col from 'react-bootstrap/Col';
@@ -112,7 +106,7 @@ export class JsEditorUi extends Pane {
       onRun();
     }
   }
-/*
+  /*
     await terminateActiveServices();
     clearEmitted();
 

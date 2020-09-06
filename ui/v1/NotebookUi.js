@@ -117,7 +117,10 @@ export class NotebookUi extends Pane {
         style={{ height: '100%', display: 'flex', flexFlow: 'column' }}
       >
         <Row style={{ width: '100%', height: '100%', flex: '1 1 auto' }}>
-          <Col style={{ width: '100%', height: '100%', overflow: 'auto' }} onKeyDown={this.onKeyDown}>
+          <Col
+            style={{ width: '100%', height: '100%', overflow: 'auto' }}
+            onKeyDown={this.onKeyDown}
+          >
             {notebook}
           </Col>
         </Row>

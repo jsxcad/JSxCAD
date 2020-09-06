@@ -1,6 +1,5 @@
-import { Empty, Square } from './jsxcad-api-v1-shapes.js';
+import { Empty, Square, Hershey } from './jsxcad-api-v1-shapes.js';
 import { getLeafs, taggedItem, taggedDisjointAssembly, toDisjointGeometry, taggedLayers, measureBoundingBox, taggedLayout, getLayouts, visit, isNotVoid } from './jsxcad-geometry-tagged.js';
-import { Hershey } from './jsxcad-api-v1-font.js';
 import Shape from './jsxcad-api-v1-shape.js';
 import { max } from './jsxcad-api-v1-math.js';
 import { pack as pack$1 } from './jsxcad-algorithm-pack.js';
