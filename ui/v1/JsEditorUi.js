@@ -5,6 +5,8 @@ import Col from 'react-bootstrap/Col';
 import Container from 'react-bootstrap/Container';
 import Nav from 'react-bootstrap/Nav';
 import Pane from './Pane';
+import Prettier from 'prettier/standalone.js';
+import PrettierParserBabel from 'prettier/parser-babel.js';
 import PrismJS from 'prismjs/components/prism-core';
 import PropTypes from 'prop-types';
 import React from 'react';
@@ -106,51 +108,17 @@ export class JsEditorUi extends Pane {
       onRun();
     }
   }
-  /*
-    await terminateActiveServices();
-    clearEmitted();
-
-    // FIX: This is a bit awkward.
-    // The responsibility for updating the control values ought to be with what
-    // renders the notebook.
-    const notebookControlData = await getNotebookControlData();
-    await write(`control/${getCurrentPath()}`, notebookControlData);
-
-    const { ask, file, workspace } = this.props;
-    await this.save();
-    await log({ op: 'open' });
-    await log({ op: 'clear' });
-    await log({ op: 'text', text: 'Running', level: 'serious' });
-    let script = await read(file);
-    if (script.buffer) {
-      script = new TextDecoder('utf8').decode(script);
-    }
-    const topLevel = new Map();
-    const ecmascript = await toEcmascript(script, { topLevel });
-    emit({ md: `---` });
-    emit({ md: `#### Dependency Tree` });
-    const graph = [];
-    for (const [id, { dependencies }] of topLevel.entries()) {
-      for (const dependency of dependencies) {
-        graph.push(`${dependency}(${dependency}  .) --> ${id}(${id}  .)`);
-      }
-    }
-    emit({ md: `'''\ngraph TD\n${graph.join('\n')}\n'''` });
-    emit({ md: `---` });
-    emit({ md: `#### Programs` });
-    for (const [id, { program }] of topLevel.entries()) {
-      emit({ md: `##### ${id}` });
-      emit({ md: `'''\n${program}\n'''\n` });
-    }
-    const notebook = await ask({ evaluate: ecmascript, workspace, path: file });
-    await writeNotebook(file, notebook);
-    await log({ op: 'text', text: 'Finished', level: 'serious' });
-  }
-*/
 
   async save() {
     const { file } = this.props;
     const { code = '' } = this.state;
+    const prettierCode = Prettier.format(code, {
+      trailingComma: 'es5',
+      singleQuote: true,
+      parser: 'babel',
+      plugins: [PrettierParserBabel],
+    });
+    this.setState({ code: prettierCode });
     await write(file, code);
     await log({ op: 'text', text: 'Saved', level: 'serious' });
   }
