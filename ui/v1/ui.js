@@ -54,6 +54,7 @@ import ReactDOM from 'react-dom';
 import Row from 'react-bootstrap/Row';
 import SelectWorkspaceUi from './SelectWorkspaceUi';
 import ShareUi from './ShareUi';
+import Spinner from 'react-bootstrap/Spinner';
 import { deepEqual } from 'fast-equals';
 import { getNotebookControlData } from '@jsxcad/ui-notebook';
 import { toEcmascript } from '@jsxcad/compiler';
@@ -323,6 +324,7 @@ class Ui extends React.PureComponent {
   }
 
   async onRun() {
+    this.setState({ running: true });
     const { ask, file, workspace } = this.state;
     await terminateActiveServices();
     clearEmitted();
@@ -376,6 +378,7 @@ class Ui extends React.PureComponent {
 
     await writeNotebook(file, notebook);
     await log({ op: 'text', text: 'Finished', level: 'serious' });
+    this.setState({ running: false });
   }
 
   createNode() {
@@ -599,7 +602,7 @@ class Ui extends React.PureComponent {
   }
 
   render() {
-    const { workspace, file, fileTitle, files } = this.state;
+    const { running, workspace, file, fileTitle, files } = this.state;
     const views = this.buildViews(files);
 
     const switchViewModal = () => {
@@ -757,6 +760,13 @@ class Ui extends React.PureComponent {
               </Nav.Item>
             </Nav>
           </Navbar.Collapse>
+          {running ? (
+            <Spinner animation="border" role="status">
+              <span className="sr-only">Running</span>
+            </Spinner>
+          ) : (
+            <span></span>
+          )}
         </Navbar>
         <Mosaic
           style={{ flex: '1 1 auto', background: '#e6ebf0' }}
