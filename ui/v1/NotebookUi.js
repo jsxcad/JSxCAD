@@ -1,24 +1,22 @@
 import { readFile, unwatchFiles, watchFile } from '@jsxcad/sys';
 
-import Col from 'react-bootstrap/Col';
-import Container from 'react-bootstrap/Container';
 import Mermaid from 'mermaid';
-import Pane from './Pane.js';
 import PropTypes from 'prop-types';
 import React from 'react';
-import Row from 'react-bootstrap/Row';
 import { toDomElement } from '@jsxcad/ui-notebook';
 
-export class NotebookUi extends Pane {
+export class NotebookUi extends React.PureComponent {
   static get propTypes() {
     return {
       id: PropTypes.string,
+      file: PropTypes.file,
       onRun: PropTypes.func,
     };
   }
 
   constructor(props) {
     super(props);
+    this.state = {};
     this.onKeyDown = this.onKeyDown.bind(this);
     this.update = this.update.bind(this);
   }
@@ -90,12 +88,7 @@ export class NotebookUi extends Pane {
     }
   }
 
-  renderToolbar() {
-    return super.renderToolbar();
-  }
-
-  renderPane() {
-    const { id } = this.props;
+  render() {
     const { domElement, refs } = this.state;
 
     const notebook = domElement ? (
@@ -111,21 +104,7 @@ export class NotebookUi extends Pane {
       <div />
     );
 
-    return (
-      <Container
-        key={id}
-        style={{ height: '100%', display: 'flex', flexFlow: 'column' }}
-      >
-        <Row style={{ width: '100%', height: '100%', flex: '1 1 auto' }}>
-          <Col
-            style={{ width: '100%', height: '100%', overflow: 'auto' }}
-            onKeyDown={this.onKeyDown}
-          >
-            {notebook}
-          </Col>
-        </Row>
-      </Container>
-    );
+    return <div onKeyDown={this.onKeyDown}>{notebook}</div>;
   }
 }
 

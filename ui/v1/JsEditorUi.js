@@ -1,16 +1,11 @@
 import { log, read, unwatchFiles, watchFile, write } from '@jsxcad/sys';
 
 import AceEditor from 'react-ace';
-import Col from 'react-bootstrap/Col';
-import Container from 'react-bootstrap/Container';
-import Nav from 'react-bootstrap/Nav';
-import Pane from './Pane';
 import Prettier from 'prettier/standalone.js';
 import PrettierParserBabel from 'prettier/parser-babel.js';
 import PrismJS from 'prismjs/components/prism-core';
 import PropTypes from 'prop-types';
 import React from 'react';
-import Row from 'react-bootstrap/Row';
 
 import { aceEditorAuxiliary } from './AceEditorAuxiliary';
 import { aceEditorCompleter } from './AceEditorCompleter';
@@ -64,7 +59,7 @@ const snippetCompleter = {
 
 aceEditorCompleter.setCompleters([snippetCompleter]);
 
-export class JsEditorUi extends Pane {
+export class JsEditorUi extends React.PureComponent {
   static get propTypes() {
     return {
       ask: PropTypes.func,
@@ -77,6 +72,7 @@ export class JsEditorUi extends Pane {
 
   constructor(props) {
     super(props);
+    this.state = {};
 
     this.onKeyDown = this.onKeyDown.bind(this);
     this.onValueChange = this.onValueChange.bind(this);
@@ -205,59 +201,34 @@ export class JsEditorUi extends Pane {
     }
   }
 
-  renderToolbar() {
-    return super.renderToolbar([
-      <Nav.Item key="JsEditor/run">
-        <Nav.Link onClick={this.run} style={{ color: 'blue' }}>
-          Run
-        </Nav.Link>
-      </Nav.Item>,
-      <Nav.Item key="JsEditor/save">
-        <Nav.Link onClick={this.save} style={{ color: 'blue' }}>
-          Save
-        </Nav.Link>
-      </Nav.Item>,
-    ]);
-  }
-
-  renderPane() {
+  render() {
     const { id } = this.props;
-    const { modal, code = '' } = this.state;
+    const { code = '' } = this.state;
 
     return (
-      <Container
-        style={{ height: '100%', display: 'flex', flexFlow: 'column' }}
-      >
-        <Row style={{ width: '100%', height: '100%', flex: '1 1 auto' }}>
-          <Col
-            style={{ width: '100%', height: '100%', overflow: 'auto' }}
-            onKeyDown={this.onKeyDown}
-          >
-            {modal}
-            <AceEditor
-              commands={[this.runShortcut(), this.saveShortcut()]}
-              editorProps={{ $blockScrolling: true }}
-              setOptions={{
-                // enableBasicAutocompletion: true,
-                enableLiveAutocompletion: true,
-                enableSnippets: true,
-                useWorker: false,
-              }}
-              height="100%"
-              highlightActiveLine={true}
-              key={id}
-              mode="javascript"
-              name={id}
-              onChange={this.onValueChange}
-              showGutter={true}
-              showPrintMargin={true}
-              theme="github"
-              value={code}
-              width="100%"
-            ></AceEditor>
-          </Col>
-        </Row>
-      </Container>
+      <div onKeyDown={this.onKeyDown}>
+        <AceEditor
+          commands={[this.runShortcut(), this.saveShortcut()]}
+          editorProps={{ $blockScrolling: true }}
+          setOptions={{
+            // enableBasicAutocompletion: true,
+            enableLiveAutocompletion: true,
+            enableSnippets: true,
+            useWorker: false,
+          }}
+          height="100%"
+          highlightActiveLine={true}
+          key={id}
+          mode="javascript"
+          name={id}
+          onChange={this.onValueChange}
+          showGutter={true}
+          showPrintMargin={true}
+          theme="github"
+          value={code}
+          width="100%"
+        />
+      </div>
     );
   }
 }
