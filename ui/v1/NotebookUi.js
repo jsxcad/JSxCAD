@@ -9,7 +9,7 @@ export class NotebookUi extends React.PureComponent {
   static get propTypes() {
     return {
       id: PropTypes.string,
-      file: PropTypes.file,
+      file: PropTypes.string,
       onRun: PropTypes.func,
     };
   }

@@ -1,8 +1,8 @@
-import { log, read, unwatchFiles, watchFile, write } from '@jsxcad/sys';
+// import { log, read, unwatchFiles, watchFile, write } from '@jsxcad/sys';
 
 import AceEditor from 'react-ace';
-import Prettier from 'prettier/standalone.js';
-import PrettierParserBabel from 'prettier/parser-babel.js';
+// import Prettier from 'prettier/standalone.js';
+// import PrettierParserBabel from 'prettier/parser-babel.js';
 import PrismJS from 'prismjs/components/prism-core';
 import PropTypes from 'prop-types';
 import React from 'react';
@@ -63,9 +63,12 @@ export class JsEditorUi extends React.PureComponent {
   static get propTypes() {
     return {
       ask: PropTypes.func,
+      data: PropTypes.string,
       file: PropTypes.string,
       id: PropTypes.string,
       onRun: PropTypes.func,
+      onSave: PropTypes.func,
+      onChange: PropTypes.func,
       workspace: PropTypes.string,
     };
   }
@@ -76,9 +79,6 @@ export class JsEditorUi extends React.PureComponent {
 
     this.onKeyDown = this.onKeyDown.bind(this);
     this.onValueChange = this.onValueChange.bind(this);
-    this.run = this.run.bind(this);
-    this.save = this.save.bind(this);
-    this.update = this.update.bind(this);
   }
 
   saveShortcut() {
@@ -90,69 +90,34 @@ export class JsEditorUi extends React.PureComponent {
   }
 
   runShortcut() {
+    const { onRun } = this.props;
     return {
       name: 'run',
       bindKey: { win: 'Shift-Enter', mac: 'Shift-Enter' },
-      exec: () => this.run(),
+      exec: () => onRun(),
     };
   }
 
   async run() {
-    const { onRun } = this.props;
-    await this.save();
-    if (onRun) {
-      onRun();
-    }
+    this.props.onRun();
   }
 
   async save() {
-    const { file } = this.props;
-    const { code = '' } = this.state;
-    const prettierCode = Prettier.format(code, {
-      trailingComma: 'es5',
-      singleQuote: true,
-      parser: 'babel',
-      plugins: [PrettierParserBabel],
-    });
-    this.setState({ code: prettierCode });
-    await write(file, code);
-    await log({ op: 'text', text: 'Saved', level: 'serious' });
+    this.props.onSave();
   }
 
-  async componentDidMount() {
-    const { file } = this.props;
-    if (file !== undefined) {
-      const watcher = await watchFile(`source/${file}`, this.update);
-      this.setState({ watcher });
-      await this.update();
-    }
+  async componentDidMount() {}
+
+  async update() {}
+
+  async componentWillUnmount() {}
+
+  onValueChange(data) {
+    this.props.onChange(data);
   }
 
-  async update() {
-    const { file } = this.props;
-    if (file !== undefined) {
-      let code = await read(file);
-      if (code.buffer) {
-        code = new TextDecoder('utf8').decode(code);
-      }
-      this.setState({ code });
-    }
-  }
-
-  async componentWillUnmount() {
-    const { watcher } = this.state;
-
-    if (watcher) {
-      await unwatchFiles(watcher);
-    }
-  }
-
-  onValueChange(code) {
-    this.setState({ code });
-  }
-
-  highlight(code) {
-    return PrismJS.highlight(code, PrismJS.languages.js);
+  highlight(data) {
+    return PrismJS.highlight(data, PrismJS.languages.js);
   }
 
   stop(e) {
@@ -203,7 +168,7 @@ export class JsEditorUi extends React.PureComponent {
 
   render() {
     const { id } = this.props;
-    const { code = '' } = this.state;
+    const { data = '' } = this.props;
 
     return (
       <div onKeyDown={this.onKeyDown}>
@@ -225,7 +190,7 @@ export class JsEditorUi extends React.PureComponent {
           showGutter={true}
           showPrintMargin={true}
           theme="github"
-          value={code}
+          value={data}
           width="100%"
         />
       </div>

@@ -26,13 +26,17 @@ import {
   write,
 } from '@jsxcad/sys';
 
+import Button from 'react-bootstrap/Button';
 import ButtonGroup from 'react-bootstrap/ButtonGroup';
 import Dropdown from 'react-bootstrap/Dropdown';
 import Form from 'react-bootstrap/Form';
 import JsEditorUi from './JsEditorUi';
+import Modal from 'react-bootstrap/Modal';
 import Nav from 'react-bootstrap/Nav';
 import Navbar from 'react-bootstrap/Navbar';
 import NotebookUi from './NotebookUi';
+import Prettier from 'prettier/standalone.js';
+import PrettierParserBabel from 'prettier/parser-babel.js';
 import PropTypes from 'prop-types';
 import React from 'react';
 import ReactDOM from 'react-dom';
@@ -80,7 +84,7 @@ class Ui extends React.PureComponent {
       workspaces: PropTypes.array,
       sha: PropTypes.string,
       file: PropTypes.string,
-      fileTitle: PropTypes.string,
+      path: PropTypes.string,
     };
   }
 
@@ -93,15 +97,21 @@ class Ui extends React.PureComponent {
       files: [],
     };
 
-    this.onRun = this.onRun.bind(this);
+    this.onChangeJsEditor = this.onChangeJsEditor.bind(this);
+    this.doPublish = this.doPublish.bind(this);
+    this.doReload = this.doReload.bind(this);
+    this.doRun = this.doRun.bind(this);
+    this.doSave = this.doSave.bind(this);
+    this.doUnload = this.doUnload.bind(this);
+    this.doUpload = this.doUpload.bind(this);
   }
 
   async componentDidMount() {
     const { workspace } = this.state;
-    const { file, fileTitle, sha } = this.props;
+    const { file, path, sha } = this.props;
 
-    if (file && fileTitle) {
-      await ensureFile(file, fileTitle, { workspace });
+    if (file && path) {
+      await ensureFile(file, path, { workspace });
     }
 
     const fileUpdater = async () =>
@@ -147,12 +157,16 @@ class Ui extends React.PureComponent {
       creationWatcher,
       deletionWatcher,
       file,
-      fileTitle,
+      path,
       serviceSpec,
     });
 
     if (workspace) {
       await this.selectWorkspace(workspace);
+    }
+
+    if (path) {
+      await this.loadJsEditor(path);
     }
   }
 
@@ -163,21 +177,21 @@ class Ui extends React.PureComponent {
     await unwatchFileDeletion(deletionWatcher);
   }
 
-  updateUrl({ workspace, fileTitle } = {}) {
+  updateUrl({ workspace, path } = {}) {
     if (workspace === undefined) {
       workspace = this.state.workspace;
     }
     if (workspace === undefined) {
       workspace = '';
     }
-    if (fileTitle === undefined) {
-      fileTitle = this.state.fileTitle;
+    if (path === undefined) {
+      path = this.state.path;
     }
-    if (fileTitle !== undefined) {
-      fileTitle = `@${fileTitle}`;
+    if (path !== undefined) {
+      path = `@${path}`;
     }
     const encodedWorkspace = encodeURIComponent(workspace);
-    history.pushState(null, null, `#${encodedWorkspace}${fileTitle}`);
+    history.pushState(null, null, `#${encodedWorkspace}${path}`);
   }
 
   async selectWorkspace(workspace) {
@@ -211,7 +225,73 @@ class Ui extends React.PureComponent {
     this.setState({ paneLayout, paneViews, workspace, files });
   }
 
-  async onRun() {
+  buildConfirm(messageText, actionText, act, cancel) {
+    return (
+      <Modal show={true} onHide={cancel}>
+        <Modal.Header closeButton>
+          <Modal.Title>{messageText}</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>Publish?</Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={cancel}>
+            Cancel
+          </Button>
+          <Button variant="primary" onClick={act}>
+            {actionText}
+          </Button>
+        </Modal.Footer>
+      </Modal>
+    );
+  }
+
+  async loadJsEditor(path) {
+    const { workspace } = this.state;
+    const file = `source/${path}`;
+    await ensureFile(file, path, { workspace });
+    this.updateUrl({ path });
+    const data = await read(file);
+    this.setState({ file, path, jsEditorData: data });
+  }
+
+  onChangeJsEditor(data) {
+    this.setState({ jsEditorData: data });
+  }
+
+  async doPublish() {
+    const cancel = () => this.setState({ modal: undefined });
+    const publish = () => this.setState({ modal: undefined });
+    this.setState({
+      modal: this.buildConfirm('Publish', 'Publish', publish, cancel),
+    });
+  }
+
+  async doReload() {
+    const cancel = () => this.setState({ modal: undefined });
+    const reload = () => this.setState({ modal: undefined });
+    this.setState({
+      modal: this.buildConfirm('Reload', 'Reload', reload, cancel),
+    });
+  }
+
+  async doUnload() {
+    const cancel = () => this.setState({ modal: undefined });
+    const unload = () => this.setState({ modal: undefined });
+    this.setState({
+      modal: this.buildConfirm('Unload', 'Unload', unload, cancel),
+    });
+  }
+
+  async doUpload() {
+    const cancel = () => this.setState({ modal: undefined });
+    const upload = () => this.setState({ modal: undefined });
+    this.setState({
+      modal: this.buildConfirm('Upload', 'Upload', upload, cancel),
+    });
+  }
+
+  async doRun() {
+    const { jsEditorData } = this.state;
+    await this.doSave();
     this.setState({ running: true });
     const { ask, file, workspace } = this.state;
     await terminateActiveServices();
@@ -226,10 +306,7 @@ class Ui extends React.PureComponent {
     await log({ op: 'open' });
     await log({ op: 'clear' });
     await log({ op: 'text', text: 'Running', level: 'serious' });
-    let script = await read(file);
-    if (script.buffer) {
-      script = new TextDecoder('utf8').decode(script);
-    }
+    let script = jsEditorData;
     const topLevel = new Map();
     const ecmascript = await toEcmascript(script, { topLevel });
     emit({ md: `---` });
@@ -269,30 +346,32 @@ class Ui extends React.PureComponent {
     this.setState({ running: false });
   }
 
+  async doSave(data) {
+    const { file, jsEditorData } = this.state;
+    const prettierData = Prettier.format(jsEditorData, {
+      trailingComma: 'es5',
+      singleQuote: true,
+      parser: 'babel',
+      plugins: [PrettierParserBabel],
+    });
+    await write(file, prettierData);
+    await log({ op: 'text', text: 'Saved', level: 'serious' });
+    this.setState({ jsEditorData: prettierData });
+  }
+
   render() {
     const {
       ask,
       file,
-      fileTitle,
+      path,
+      jsEditorData = '',
       files,
       mode = 'Notebook',
+      modal,
       running,
       workspace,
     } = this.state;
     const { sha } = this.props;
-
-    const selectFileTitle = async (fileTitle) => {
-      const file = `source/${fileTitle}`;
-      await ensureFile(file, fileTitle, { workspace });
-      this.updateUrl({ fileTitle });
-      this.setState({ file, fileTitle });
-    };
-
-    const openFileTitle = async (e) => {
-      if (e.key === 'Enter') {
-        selectFileTitle(fileTitle);
-      }
-    };
 
     const fileChoices = [
       ...new Set(
@@ -300,10 +379,11 @@ class Ui extends React.PureComponent {
           .filter(
             (file) =>
               file.startsWith('source/') &&
-              (file.endsWith('.js') || file.endsWith('.nb'))
+              (file.endsWith('.js') ||
+                file.endsWith('.nb') ||
+                file.endsWith('.svg'))
           )
           .map((file) => file.substr(7))
-          .filter((option) => option !== file)
       ),
     ];
 
@@ -311,26 +391,33 @@ class Ui extends React.PureComponent {
     const panes = [];
 
     navItems.push(
-      <Nav.Item>
+      <Nav.Item key="mode">
         <Form.Control
           as="select"
+          value={mode}
           onChange={(e) => this.setState({ mode: e.target.value })}
         >
-          <option selected={mode === 'Notebook'}>Notebook</option>
-          <option selected={mode === 'Files'}>Files</option>
+          <option>Notebook</option>
+          <option>Files</option>
         </Form.Control>
       </Nav.Item>
     );
 
     switch (mode) {
-      case 'Notebook':
+      case 'Notebook': {
+        const openFileTitle = async (e) => {
+          if (e.key === 'Enter') {
+            await this.loadJsEditor(path);
+          }
+        };
+
         navItems.push(
-          <Nav.Item>
+          <Nav.Item key="file">
             <Dropdown as={ButtonGroup}>
               <Form.Control
-                value={fileTitle}
+                value={path || ''}
                 onKeyPress={openFileTitle}
-                onChange={(e) => this.setState({ fileTitle: e.target.value })}
+                onChange={(e) => this.setState({ path: e.target.value })}
                 style={{ width: '100%' }}
               />
               <Dropdown.Toggle
@@ -339,36 +426,83 @@ class Ui extends React.PureComponent {
                 id="file-selector"
               />
               <Dropdown.Menu>
-                {fileChoices.map((file, index) => (
-                  <Dropdown.Item
-                    key={index}
-                    onClick={() => selectFileTitle(file)}
-                  >
-                    {file}
-                  </Dropdown.Item>
-                ))}
+                {fileChoices
+                  .filter((option) => option !== file)
+                  .map((file, index) => (
+                    <Dropdown.Item
+                      key={index}
+                      onClick={() => this.loadJsEditor(file)}
+                    >
+                      {file}
+                    </Dropdown.Item>
+                  ))}
               </Dropdown.Menu>
             </Dropdown>
           </Nav.Item>
         );
         if (file) {
+          navItems.push(
+            <Nav key="run" className="mr-auto">
+              <Nav.Item onClick={() => this.doRun()}>
+                <Nav.Link>Run</Nav.Link>
+              </Nav.Item>
+            </Nav>
+          );
+          navItems.push(
+            <Nav key="save" className="mr-auto">
+              <Nav.Item onClick={() => this.doSave()}>
+                <Nav.Link>Save</Nav.Link>
+              </Nav.Item>
+            </Nav>
+          );
+          navItems.push(
+            <Nav key="publish" className="mr-auto">
+              <Nav.Item onClick={() => this.doPublish()}>
+                <Nav.Link>Publish</Nav.Link>
+              </Nav.Item>
+            </Nav>
+          );
+          navItems.push(
+            <Nav key="upload" className="mr-auto">
+              <Nav.Item onClick={() => this.doUpload()}>
+                <Nav.Link>Upload</Nav.Link>
+              </Nav.Item>
+            </Nav>
+          );
+          navItems.push(
+            <Nav key="reload" className="mr-auto">
+              <Nav.Item onClick={() => this.doReload()}>
+                <Nav.Link>Reload</Nav.Link>
+              </Nav.Item>
+            </Nav>
+          );
+          navItems.push(
+            <Nav key="unload" className="mr-auto">
+              <Nav.Item onClick={() => this.doUnload()}>
+                <Nav.Link>Unload</Nav.Link>
+              </Nav.Item>
+            </Nav>
+          );
           panes.push(
             <div>
               <SplitPane split="vertical" defaultSize={830}>
-                <Pane>
+                <Pane className="pane">
                   <JsEditorUi
                     key={`editScript/${file}`}
-                    onRun={this.onRun}
+                    onRun={this.doRun}
+                    onSave={this.doSave}
+                    onChange={this.onChangeJsEditor}
+                    data={jsEditorData}
                     file={file}
                     ask={ask}
                     workspace={workspace}
                   />
                 </Pane>
-                <Pane>
+                <Pane className="pane">
                   <NotebookUi
                     key={`notebook/${file}`}
                     sha={sha}
-                    onRun={this.onRun}
+                    onRun={this.doRun}
                     file={file}
                     workspace={workspace}
                   />
@@ -378,11 +512,57 @@ class Ui extends React.PureComponent {
           );
         }
         break;
-      case 'Files':
+      }
+      case 'Files': {
+        navItems.push(
+          <Nav key="publish" className="mr-auto">
+            <Nav.Item onClick={() => this.doPublish()}>
+              <Nav.Link>Publish</Nav.Link>
+            </Nav.Item>
+          </Nav>
+        );
+        navItems.push(
+          <Nav key="reload" className="mr-auto">
+            <Nav.Item onClick={() => this.doReload()}>
+              <Nav.Link>Reload</Nav.Link>
+            </Nav.Item>
+          </Nav>
+        );
+        navItems.push(
+          <Nav key="unload" className="mr-auto">
+            <Nav.Item onClick={() => this.doUnload()}>
+              <Nav.Link>Unload</Nav.Link>
+            </Nav.Item>
+          </Nav>
+        );
+        const counts = new Map();
+        const prefixes = new Set();
+        for (const file of fileChoices) {
+          const parts = file.split('/');
+          parts.pop();
+          parts.push('');
+          const prefix = parts.join('/');
+          counts.set(prefix, (counts.get(prefix) || 0) + 1);
+          prefixes.add(prefix);
+          prefixes.add(file);
+        }
+        panes.push(
+          <Form>
+            <Form.Group>
+              {[...prefixes]
+                .filter((file) => !counts.has(file) || counts.get(file) >= 2)
+                .map((file, nth) => (
+                  <Form.Check key={nth} type="checkbox" label={file} />
+                ))}
+            </Form.Group>
+          </Form>
+        );
         break;
+      }
     }
+
     navItems.push(
-      <Nav class="mr-auto">
+      <Nav className="mr-auto">
         <Nav.Item
           onClick={() =>
             window.open('https://github.com/jsxcad/JSxCAD/wiki/Reference')
@@ -410,6 +590,7 @@ class Ui extends React.PureComponent {
           flexFlow: 'column',
         }}
       >
+        {modal}
         <Navbar bg="light" expand="lg" style={{ flex: '0 0 auto' }}>
           <Navbar.Brand>{workspace}</Navbar.Brand>
           <Navbar.Toggle aria-controls="basic-navbar-nav" />
@@ -429,14 +610,14 @@ const setupUi = async (sha) => {
   const hash = location.hash.substring(1);
   const [encodedWorkspace, encodedFile] = hash.split('@');
   const workspace = decodeURIComponent(encodedWorkspace) || 'JSxCAD';
-  let fileTitle = encodedFile ? decodeURIComponent(encodedFile) : '';
-  let file = fileTitle ? `source/${fileTitle}` : '';
+  let path = encodedFile ? decodeURIComponent(encodedFile) : '';
+  let file = path ? `source/${path}` : '';
   ReactDOM.render(
     <Ui
       workspaces={[...filesystems]}
       workspace={workspace}
       file={file}
-      fileTitle={fileTitle}
+      path={path}
       sha={sha}
       width="100%"
       height="100%"
