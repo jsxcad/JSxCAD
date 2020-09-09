@@ -1,4 +1,4 @@
-/* global history, location */
+/* global FileReader, history, location */
 
 import SplitPane, { Pane } from 'react-split-pane';
 
@@ -30,6 +30,7 @@ import Button from 'react-bootstrap/Button';
 import ButtonGroup from 'react-bootstrap/ButtonGroup';
 import Dropdown from 'react-bootstrap/Dropdown';
 import Form from 'react-bootstrap/Form';
+import FormControl from 'react-bootstrap/FormControl';
 import JsEditorUi from './JsEditorUi';
 import Modal from 'react-bootstrap/Modal';
 import Nav from 'react-bootstrap/Nav';
@@ -225,18 +226,25 @@ class Ui extends React.PureComponent {
     this.setState({ paneLayout, paneViews, workspace, files });
   }
 
-  buildConfirm(messageText, actionText, act, cancel) {
+  buildConfirm({
+    text = '',
+    operationText = text,
+    messageText = operationText,
+    actionText = operationText,
+    action,
+    cancel,
+  }) {
     return (
       <Modal show={true} onHide={cancel}>
         <Modal.Header closeButton>
-          <Modal.Title>{messageText}</Modal.Title>
+          <Modal.Title>{operationText}</Modal.Title>
         </Modal.Header>
-        <Modal.Body>Publish?</Modal.Body>
+        <Modal.Body>{messageText}</Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={cancel}>
             Cancel
           </Button>
-          <Button variant="primary" onClick={act}>
+          <Button variant="primary" onClick={action}>
             {actionText}
           </Button>
         </Modal.Footer>
@@ -244,13 +252,53 @@ class Ui extends React.PureComponent {
     );
   }
 
+  buildUpload({
+    text = '',
+    operationText = text,
+    messageText = operationText,
+    actionText = operationText,
+    action,
+    cancel,
+  }) {
+    return (
+      <Modal show={true} onHide={cancel}>
+        <Modal.Header closeButton>
+          <Modal.Title>{operationText}</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>{messageText}</Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={cancel}>
+            Cancel
+          </Button>
+          <Button
+            variant="primary"
+            onClick={() =>
+              document.getElementById('FormControl/UploadControl').click()
+            }
+          >
+            {actionText}
+          </Button>
+          <FormControl
+            id="FormControl/UploadControl"
+            as="input"
+            type="file"
+            multiple={false}
+            onChange={action}
+            style={{ display: 'none' }}
+          />
+        </Modal.Footer>
+      </Modal>
+    );
+  }
   async loadJsEditor(path) {
     const { workspace } = this.state;
     const file = `source/${path}`;
     await ensureFile(file, path, { workspace });
     this.updateUrl({ path });
     const data = await read(file);
-    this.setState({ file, path, jsEditorData: data });
+    const jsEditorData =
+      typeof data === 'string' ? data : new TextDecoder('utf8').decode(data);
+    this.setState({ file, path, jsEditorData });
   }
 
   onChangeJsEditor(data) {
@@ -261,7 +309,7 @@ class Ui extends React.PureComponent {
     const cancel = () => this.setState({ modal: undefined });
     const publish = () => this.setState({ modal: undefined });
     this.setState({
-      modal: this.buildConfirm('Publish', 'Publish', publish, cancel),
+      modal: this.buildConfirm({ text: 'Publish', action: publish, cancel }),
     });
   }
 
@@ -269,23 +317,48 @@ class Ui extends React.PureComponent {
     const cancel = () => this.setState({ modal: undefined });
     const reload = () => this.setState({ modal: undefined });
     this.setState({
-      modal: this.buildConfirm('Reload', 'Reload', reload, cancel),
+      modal: this.buildConfirm({ text: 'Reload', action: reload, cancel }),
     });
   }
 
   async doUnload() {
     const cancel = () => this.setState({ modal: undefined });
-    const unload = () => this.setState({ modal: undefined });
+    const unload = async () => {
+      const { file } = this.state;
+      await deleteFile({}, file);
+      this.setState({ path: undefined, file: undefined, modal: undefined });
+    };
     this.setState({
-      modal: this.buildConfirm('Unload', 'Unload', unload, cancel),
+      modal: this.buildConfirm({
+        text: 'Unload',
+        messageText:
+          'Unloading a file will discard any local changes permanantly. This cannot be undone.',
+        action: unload,
+        cancel,
+      }),
     });
   }
 
   async doUpload() {
+    const { file } = this.state;
+
+    const upload = () => {
+      const uploadControl = document.getElementById(
+        'FormControl/UploadControl'
+      );
+      const handle = uploadControl.files[0];
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        const data = e.target.result;
+        await write(file, new Uint8Array(data));
+        this.setState({ modal: undefined });
+      };
+      reader.readAsArrayBuffer(handle);
+    };
     const cancel = () => this.setState({ modal: undefined });
-    const upload = () => this.setState({ modal: undefined });
+
     this.setState({
-      modal: this.buildConfirm('Upload', 'Upload', upload, cancel),
+      modal: this.buildUpload({ text: 'Upload', action: upload, cancel }),
     });
   }
 
@@ -348,15 +421,24 @@ class Ui extends React.PureComponent {
 
   async doSave(data) {
     const { file, jsEditorData } = this.state;
-    const prettierData = Prettier.format(jsEditorData, {
-      trailingComma: 'es5',
-      singleQuote: true,
-      parser: 'babel',
-      plugins: [PrettierParserBabel],
-    });
-    await write(file, prettierData);
+    const getCleanData = (data) => {
+      try {
+        // Just make a best attempt
+        data = Prettier.format(jsEditorData, {
+          trailingComma: 'es5',
+          singleQuote: true,
+          parser: 'babel',
+          plugins: [PrettierParserBabel],
+        });
+      } catch (e) {
+        // Then give up.
+      }
+      return data;
+    };
+    const cleanData = getCleanData(jsEditorData);
+    await write(file, new TextEncoder('utf8').encode(cleanData));
     await log({ op: 'text', text: 'Saved', level: 'serious' });
-    this.setState({ jsEditorData: prettierData });
+    this.setState({ jsEditorData: cleanData });
   }
 
   render() {
@@ -458,21 +540,47 @@ class Ui extends React.PureComponent {
           navItems.push(
             <Nav key="publish" className="mr-auto">
               <Nav.Item onClick={() => this.doPublish()}>
-                <Nav.Link>Publish</Nav.Link>
+                <Nav.Link disabled>Publish</Nav.Link>
               </Nav.Item>
             </Nav>
           );
+          const upload = () => {
+            const uploadControl = document.getElementById(
+              'FormControl/UploadControl'
+            );
+            const handle = uploadControl.files[0];
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+              const data = e.target.result;
+              await write(file, new Uint8Array(data));
+              this.setState({ modal: undefined });
+              await this.loadJsEditor(path);
+            };
+            reader.readAsArrayBuffer(handle);
+          };
           navItems.push(
             <Nav key="upload" className="mr-auto">
-              <Nav.Item onClick={() => this.doUpload()}>
+              <Nav.Item
+                onClick={() =>
+                  document.getElementById('FormControl/UploadControl').click()
+                }
+              >
                 <Nav.Link>Upload</Nav.Link>
+                <FormControl
+                  id="FormControl/UploadControl"
+                  as="input"
+                  type="file"
+                  multiple={false}
+                  onChange={upload}
+                  style={{ display: 'none' }}
+                />
               </Nav.Item>
             </Nav>
           );
           navItems.push(
             <Nav key="reload" className="mr-auto">
               <Nav.Item onClick={() => this.doReload()}>
-                <Nav.Link>Reload</Nav.Link>
+                <Nav.Link disabled>Reload</Nav.Link>
               </Nav.Item>
             </Nav>
           );
@@ -517,21 +625,21 @@ class Ui extends React.PureComponent {
         navItems.push(
           <Nav key="publish" className="mr-auto">
             <Nav.Item onClick={() => this.doPublish()}>
-              <Nav.Link>Publish</Nav.Link>
+              <Nav.Link disabled>Publish</Nav.Link>
             </Nav.Item>
           </Nav>
         );
         navItems.push(
           <Nav key="reload" className="mr-auto">
             <Nav.Item onClick={() => this.doReload()}>
-              <Nav.Link>Reload</Nav.Link>
+              <Nav.Link disabled>Reload</Nav.Link>
             </Nav.Item>
           </Nav>
         );
         navItems.push(
           <Nav key="unload" className="mr-auto">
             <Nav.Item onClick={() => this.doUnload()}>
-              <Nav.Link>Unload</Nav.Link>
+              <Nav.Link disabled>Unload</Nav.Link>
             </Nav.Item>
           </Nav>
         );
