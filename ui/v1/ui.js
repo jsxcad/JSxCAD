@@ -1,4 +1,4 @@
-/* global FileReader, history, location */
+/* global FileReader, btoa, history, location */
 
 import SplitPane, { Pane } from 'react-split-pane';
 
@@ -363,8 +363,12 @@ class Ui extends React.PureComponent {
   }
 
   async doRun() {
-    const { jsEditorData } = this.state;
+    const { path, jsEditorData } = this.state;
     await this.doSave();
+    if (!path.endsWith('.js') && !path.endsWith('.nb')) {
+      // We don't know how to run these things, so just save and move on.
+      return;
+    }
     this.setState({ running: true });
     const { ask, file, workspace } = this.state;
     await terminateActiveServices();
@@ -591,33 +595,60 @@ class Ui extends React.PureComponent {
               </Nav.Item>
             </Nav>
           );
-          panes.push(
-            <div>
-              <SplitPane split="vertical" defaultSize={830}>
-                <Pane className="pane">
-                  <JsEditorUi
-                    key={`editScript/${file}`}
-                    onRun={this.doRun}
-                    onSave={this.doSave}
-                    onChange={this.onChangeJsEditor}
-                    data={jsEditorData}
-                    file={file}
-                    ask={ask}
-                    workspace={workspace}
-                  />
-                </Pane>
-                <Pane className="pane">
-                  <NotebookUi
-                    key={`notebook/${file}`}
-                    sha={sha}
-                    onRun={this.doRun}
-                    file={file}
-                    workspace={workspace}
-                  />
-                </Pane>
-              </SplitPane>
-            </div>
-          );
+          if (file.endsWith('.js') || file.endsWith('.nb')) {
+            panes.push(
+              <div>
+                <SplitPane split="vertical" defaultSize={830}>
+                  <Pane className="pane">
+                    <JsEditorUi
+                      key={`editScript/${file}`}
+                      onRun={this.doRun}
+                      onSave={this.doSave}
+                      onChange={this.onChangeJsEditor}
+                      data={jsEditorData}
+                      file={file}
+                      ask={ask}
+                      workspace={workspace}
+                    />
+                  </Pane>
+                  <Pane className="pane">
+                    <NotebookUi
+                      key={`notebook/${file}`}
+                      sha={sha}
+                      onRun={this.doRun}
+                      file={file}
+                      workspace={workspace}
+                    />
+                  </Pane>
+                </SplitPane>
+              </div>
+            );
+          } else if (file.endsWith('.svg')) {
+            panes.push(
+              <div>
+                <SplitPane split="vertical" defaultSize={830}>
+                  <Pane className="pane">
+                    <JsEditorUi
+                      key={`editScript/${file}`}
+                      onRun={this.doRun}
+                      onSave={this.doSave}
+                      onChange={this.onChangeJsEditor}
+                      data={jsEditorData}
+                      file={file}
+                      ask={ask}
+                      workspace={workspace}
+                    />
+                  </Pane>
+                  <Pane className="pane">
+                    <img
+                      src={`data:image/svg+xml;base64,${btoa(jsEditorData)}`}
+                      style={{ width: '100%', height: '100%' }}
+                    />
+                  </Pane>
+                </SplitPane>
+              </div>
+            );
+          }
         }
         break;
       }
