@@ -192,6 +192,7 @@ export class JsEditorUi extends React.PureComponent {
           theme="github"
           value={data}
           width="100%"
+          wrapEnabled={true}
         />
       </div>
     );
