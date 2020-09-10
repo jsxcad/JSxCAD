@@ -203,11 +203,12 @@ class Ui extends React.PureComponent {
     if (path === undefined) {
       path = this.state.path;
     }
-    if (path !== undefined) {
-      path = `@${path}`;
-    }
     const encodedWorkspace = encodeURIComponent(workspace);
-    history.pushState(null, null, `#${encodedWorkspace}${path}`);
+    history.pushState(
+      { path },
+      null,
+      `#${encodedWorkspace}${path ? '@' : ''}${path}`
+    );
   }
 
   async selectWorkspace(workspace) {
@@ -799,8 +800,12 @@ const setupUi = async (sha) => {
   const workspace = decodeURIComponent(encodedWorkspace) || 'JSxCAD';
   let path = encodedFile ? decodeURIComponent(encodedFile) : '';
   let file = path ? `source/${path}` : '';
+  let ui;
   ReactDOM.render(
     <Ui
+      ref={(ref) => {
+        ui = ref;
+      }}
       workspaces={[...filesystems]}
       workspace={workspace}
       file={file}
@@ -814,6 +819,11 @@ const setupUi = async (sha) => {
     />,
     document.getElementById('top')
   );
+
+  window.addEventListener('popstate', (e) => {
+    const { path = '' } = e.state;
+    ui.loadJsEditor(path);
+  });
 };
 
 export const installUi = async ({ document, workspace, sha }) => {
