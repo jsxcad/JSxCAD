@@ -32,6 +32,7 @@ import Dropdown from 'react-bootstrap/Dropdown';
 import Form from 'react-bootstrap/Form';
 import FormControl from 'react-bootstrap/FormControl';
 import JsEditorUi from './JsEditorUi';
+import Mermaid from 'mermaid';
 import Modal from 'react-bootstrap/Modal';
 import Nav from 'react-bootstrap/Nav';
 import Navbar from 'react-bootstrap/Navbar';
@@ -43,7 +44,20 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import Spinner from 'react-bootstrap/Spinner';
 import { getNotebookControlData } from '@jsxcad/ui-notebook';
+import marked from 'marked';
 import { toEcmascript } from '@jsxcad/compiler';
+
+marked.use({
+  renderer: {
+    code(code, language) {
+      if (code.match(/^sequenceDiagram/) || code.match(/^graph/)) {
+        return '<div class="mermaid">' + code + '</div>';
+      } else {
+        return '<pre><code>' + code + '</code></pre>';
+      }
+    },
+  },
+});
 
 const ensureFile = async (file, url, { workspace } = {}) => {
   const sources = [];
@@ -99,6 +113,7 @@ class Ui extends React.PureComponent {
     };
 
     this.onChangeJsEditor = this.onChangeJsEditor.bind(this);
+    this.onClickEditorLink = this.onClickEditorLink.bind(this);
     this.doPublish = this.doPublish.bind(this);
     this.doReload = this.doReload.bind(this);
     this.doRun = this.doRun.bind(this);
@@ -305,6 +320,10 @@ class Ui extends React.PureComponent {
     this.setState({ jsEditorData: data });
   }
 
+  async onClickEditorLink(url) {
+    await this.loadJsEditor(url);
+  }
+
   async doPublish() {
     const cancel = () => this.setState({ modal: undefined });
     const publish = () => this.setState({ modal: undefined });
@@ -467,7 +486,8 @@ class Ui extends React.PureComponent {
               file.startsWith('source/') &&
               (file.endsWith('.js') ||
                 file.endsWith('.nb') ||
-                file.endsWith('.svg'))
+                file.endsWith('.svg') ||
+                true)
           )
           .map((file) => file.substr(7))
       ),
@@ -605,6 +625,7 @@ class Ui extends React.PureComponent {
                       onRun={this.doRun}
                       onSave={this.doSave}
                       onChange={this.onChangeJsEditor}
+                      onClickLink={this.onClickEditorLink}
                       data={jsEditorData}
                       file={file}
                       ask={ask}
@@ -633,6 +654,7 @@ class Ui extends React.PureComponent {
                       onRun={this.doRun}
                       onSave={this.doSave}
                       onChange={this.onChangeJsEditor}
+                      onClickLink={this.onClickEditorLink}
                       data={jsEditorData}
                       file={file}
                       ask={ask}
@@ -648,6 +670,32 @@ class Ui extends React.PureComponent {
                 </SplitPane>
               </div>
             );
+          } else if (file.endsWith('.md')) {
+            panes.push(
+              <div>
+                <SplitPane split="vertical" defaultSize={830}>
+                  <Pane className="pane">
+                    <JsEditorUi
+                      key={`editScript/${file}`}
+                      onRun={this.doRun}
+                      onSave={this.doSave}
+                      onChange={this.onChangeJsEditor}
+                      onClickLink={this.onClickEditorLink}
+                      data={jsEditorData}
+                      file={file}
+                      ask={ask}
+                      workspace={workspace}
+                    />
+                  </Pane>
+                  <Pane className="pane">
+                    <div
+                      dangerouslySetInnerHTML={{ __html: marked(jsEditorData) }}
+                    />
+                  </Pane>
+                </SplitPane>
+              </div>
+            );
+            setTimeout(() => Mermaid.init(undefined, '.mermaid'), 0);
           }
         }
         break;

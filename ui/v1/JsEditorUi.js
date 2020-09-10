@@ -1,8 +1,5 @@
-// import { log, read, unwatchFiles, watchFile, write } from '@jsxcad/sys';
-
 import AceEditor from 'react-ace';
-// import Prettier from 'prettier/standalone.js';
-// import PrettierParserBabel from 'prettier/parser-babel.js';
+import ExtractUrls from 'extract-urls';
 import PrismJS from 'prismjs/components/prism-core';
 import PropTypes from 'prop-types';
 import React from 'react';
@@ -10,7 +7,6 @@ import React from 'react';
 import { aceEditorAuxiliary } from './AceEditorAuxiliary';
 import { aceEditorCompleter } from './AceEditorCompleter';
 import { aceEditorSnippetManager } from './AceEditorSnippetManager';
-
 import { prismJsAuxiliary } from './PrismJSAuxiliary';
 
 if (!aceEditorAuxiliary) throw Error('die');
@@ -69,6 +65,7 @@ export class JsEditorUi extends React.PureComponent {
       onRun: PropTypes.func,
       onSave: PropTypes.func,
       onChange: PropTypes.func,
+      onClickLink: PropTypes.func,
       workspace: PropTypes.string,
     };
   }
@@ -106,7 +103,13 @@ export class JsEditorUi extends React.PureComponent {
     this.props.onSave();
   }
 
-  async componentDidMount() {}
+  async componentDidMount() {
+    this.aceEditor.editor.on('linkClick', ({ token }) => {
+      const { value = '' } = token;
+      const [url = ''] = ExtractUrls(value);
+      this.props.onClickLink(url);
+    });
+  }
 
   async update() {}
 
@@ -173,12 +176,16 @@ export class JsEditorUi extends React.PureComponent {
     return (
       <div onKeyDown={this.onKeyDown}>
         <AceEditor
+          ref={(ref) => {
+            this.aceEditor = ref;
+          }}
           commands={[this.runShortcut(), this.saveShortcut()]}
           editorProps={{ $blockScrolling: true }}
           setOptions={{
             // enableBasicAutocompletion: true,
-            enableLiveAutocompletion: true,
-            enableSnippets: true,
+            // enableLiveAutocompletion: true,
+            // enableSnippets: true,
+            enableLinking: true,
             useWorker: false,
           }}
           height="100%"
