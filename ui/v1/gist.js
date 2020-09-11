@@ -32,15 +32,10 @@ export const writeGist = async ({
   isPublic = true,
 }) => {
   const files = {};
-  const prefix = `source/`;
-  const decoder = new TextDecoder('utf8');
   for (const path of paths) {
-    if (path.startsWith(prefix)) {
-      const name = path.substring(prefix.length);
-      const data = await read(path, { workspace });
-      const content = decoder.decode(data);
-      files[name] = { content };
-    }
+    const data = await read(`source/${path}`, { workspace });
+    const content = new TextDecoder('utf8').decode(data);
+    files[path] = { content };
   }
   const gist = await post(eq(CREATED), `gists`, {
     description: `${title} #jsxcad`,

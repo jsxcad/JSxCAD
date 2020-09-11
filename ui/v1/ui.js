@@ -111,6 +111,7 @@ class Ui extends React.PureComponent {
       workspaces: this.props.workspaces,
       workspace: this.props.workspace,
       files: [],
+      selectedFiles: [],
     };
 
     this.onChangeJsEditor = this.onChangeJsEditor.bind(this);
@@ -240,7 +241,13 @@ class Ui extends React.PureComponent {
     }
 
     const files = [...(await listFiles())];
-    this.setState({ paneLayout, paneViews, workspace, files });
+    this.setState({
+      paneLayout,
+      paneViews,
+      workspace,
+      files,
+      selectedFiles: [],
+    });
   }
 
   buildConfirm({
@@ -333,23 +340,41 @@ class Ui extends React.PureComponent {
     const publish = async () => {
       const title = titleElement.value;
       const url = await writeGist({ title, paths: files });
-      this.setState({
-        modal: (
-          <Modal show={true} onHide={cancel}>
-            <Modal.Header closeButton>
-              <Modal.Title>Published Gist</Modal.Title>
-            </Modal.Header>
-            <Modal.Body>
-              The gist {title} can be found at <a href={url}>{url}</a>.
-            </Modal.Body>
-            <Modal.Footer>
-              <Button variant="primary" onClick={done}>
-                Done
-              </Button>
-            </Modal.Footer>
-          </Modal>
-        ),
-      });
+      if (url) {
+        this.setState({
+          modal: (
+            <Modal show={true} onHide={cancel}>
+              <Modal.Header closeButton>
+                <Modal.Title>Published Gist</Modal.Title>
+              </Modal.Header>
+              <Modal.Body>
+                The gist {title} can be found at <a href={url}>{url}</a>.
+              </Modal.Body>
+              <Modal.Footer>
+                <Button variant="primary" onClick={done}>
+                  Done
+                </Button>
+              </Modal.Footer>
+            </Modal>
+          ),
+        });
+      } else {
+        this.setState({
+          modal: (
+            <Modal show={true} onHide={cancel}>
+              <Modal.Header closeButton>
+                <Modal.Title>Published Gist</Modal.Title>
+              </Modal.Header>
+              <Modal.Body>A gist could not be created.</Modal.Body>
+              <Modal.Footer>
+                <Button variant="primary" onClick={done}>
+                  Close
+                </Button>
+              </Modal.Footer>
+            </Modal>
+          ),
+        });
+      }
     };
     this.setState({
       modal: (
@@ -520,7 +545,7 @@ class Ui extends React.PureComponent {
       mode = 'Notebook',
       modal,
       running,
-      selectedFiles = [],
+      selectedFiles,
       workspace,
     } = this.state;
     const { sha } = this.props;
@@ -780,13 +805,26 @@ class Ui extends React.PureComponent {
           prefixes.add(prefix);
           prefixes.add(file);
         }
+        const check = (file, checked) => {
+          const updated = selectedFiles.filter((value) => value !== file);
+          if (checked) {
+            updated.push(file);
+          }
+          this.setState({ selectedFiles: updated });
+        };
         panes.push(
           <Form>
             <Form.Group>
               {[...prefixes]
                 .filter((file) => !counts.has(file) || counts.get(file) >= 2)
                 .map((file, nth) => (
-                  <Form.Check key={nth} type="checkbox" label={file} />
+                  <Form.Check
+                    key={nth}
+                    type="checkbox"
+                    label={file}
+                    checked={selectedFiles.includes(file)}
+                    onChange={({ target }) => check(file, target.checked)}
+                  />
                 ))}
             </Form.Group>
           </Form>
