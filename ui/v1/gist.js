@@ -1,17 +1,16 @@
 import { CREATED, OK, eq, request as githubRequest } from './githubRequest';
-import { listFiles, read, write } from '@jsxcad/sys';
+import { read, write } from '@jsxcad/sys';
 
 const request = (isOk, path, method, body, options) =>
   githubRequest(isOk, path, method, body, { ...options, service: 'gist' });
 
-export const get = async (isOk, path, options) =>
+const get = async (isOk, path, options) =>
   request(isOk, path, 'GET', undefined, options);
-export const post = async (isOk, path, body, options) =>
-  request(isOk, path, 'POST', body, options);
-export const patch = async (isOk, path, body, options) =>
-  request(isOk, path, 'PATCH', body, options);
 
-export const readWorkspace = async (gistId, { workspace }) => {
+const post = async (isOk, path, body, options) =>
+  request(isOk, path, 'POST', body, options);
+
+export const readGist = async (gistId, { workspace }) => {
   const gist = await get(eq(OK), `gists/${gistId}`);
   if (gist === undefined) return;
   const { files } = gist;
@@ -26,17 +25,25 @@ export const readWorkspace = async (gistId, { workspace }) => {
   return true;
 };
 
-export const writeWorkspace = async ({ workspace, isPublic = true }) => {
+export const writeGist = async ({
+  title = '',
+  workspace,
+  paths = [],
+  isPublic = true,
+}) => {
   const files = {};
   const prefix = `source/`;
-  for (const path of await listFiles({ workspace })) {
+  const decoder = new TextDecoder('utf8');
+  for (const path of paths) {
     if (path.startsWith(prefix)) {
       const name = path.substring(prefix.length);
-      files[name] = { content: await read(path, { workspace }) };
+      const data = await read(path, { workspace });
+      const content = decoder.decode(data);
+      files[name] = { content };
     }
   }
   const gist = await post(eq(CREATED), `gists`, {
-    description: `${workspace} #jsxcad`,
+    description: `${title} #jsxcad`,
     public: isPublic,
     files,
   });

@@ -46,6 +46,7 @@ import Spinner from 'react-bootstrap/Spinner';
 import { getNotebookControlData } from '@jsxcad/ui-notebook';
 import marked from 'marked';
 import { toEcmascript } from '@jsxcad/compiler';
+import { writeGist } from './gist.js';
 
 marked.use({
   renderer: {
@@ -114,7 +115,7 @@ class Ui extends React.PureComponent {
 
     this.onChangeJsEditor = this.onChangeJsEditor.bind(this);
     this.onClickEditorLink = this.onClickEditorLink.bind(this);
-    this.doPublish = this.doPublish.bind(this);
+    this.doPublishGist = this.doPublishGist.bind(this);
     this.doReload = this.doReload.bind(this);
     this.doRun = this.doRun.bind(this);
     this.doSave = this.doSave.bind(this);
@@ -325,11 +326,55 @@ class Ui extends React.PureComponent {
     await this.loadJsEditor(url);
   }
 
-  async doPublish() {
+  async doPublishGist(files) {
+    let titleElement;
     const cancel = () => this.setState({ modal: undefined });
-    const publish = () => this.setState({ modal: undefined });
+    const done = () => this.setState({ modal: undefined });
+    const publish = async () => {
+      const title = titleElement.value;
+      const url = await writeGist({ title, paths: files });
+      this.setState({
+        modal: (
+          <Modal show={true} onHide={cancel}>
+            <Modal.Header closeButton>
+              <Modal.Title>Published Gist</Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+              The gist {title} can be found at <a href={url}>{url}</a>.
+            </Modal.Body>
+            <Modal.Footer>
+              <Button variant="primary" onClick={done}>
+                Done
+              </Button>
+            </Modal.Footer>
+          </Modal>
+        ),
+      });
+    };
     this.setState({
-      modal: this.buildConfirm({ text: 'Publish', action: publish, cancel }),
+      modal: (
+        <Modal show={true} onHide={cancel}>
+          <Modal.Header closeButton>
+            <Modal.Title>Publish Gist</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            Gist title{' '}
+            <Form.Control
+              ref={(ref) => {
+                titleElement = ref;
+              }}
+            />
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={cancel}>
+              Cancel
+            </Button>
+            <Button variant="primary" onClick={publish}>
+              Publish Gist
+            </Button>
+          </Modal.Footer>
+        </Modal>
+      ),
     });
   }
 
@@ -475,6 +520,7 @@ class Ui extends React.PureComponent {
       mode = 'Notebook',
       modal,
       running,
+      selectedFiles = [],
       workspace,
     } = this.state;
     const { sha } = this.props;
@@ -563,9 +609,9 @@ class Ui extends React.PureComponent {
             </Nav>
           );
           navItems.push(
-            <Nav key="publish" className="mr-auto">
-              <Nav.Item onClick={() => this.doPublish()}>
-                <Nav.Link disabled>Publish</Nav.Link>
+            <Nav key="publish_gist" className="mr-auto">
+              <Nav.Item onClick={() => this.doPublishGist([file])}>
+                <Nav.Link disabled>Publish Gist</Nav.Link>
               </Nav.Item>
             </Nav>
           );
@@ -703,9 +749,9 @@ class Ui extends React.PureComponent {
       }
       case 'Files': {
         navItems.push(
-          <Nav key="publish" className="mr-auto">
-            <Nav.Item onClick={() => this.doPublish()}>
-              <Nav.Link disabled>Publish</Nav.Link>
+          <Nav key="publish_gist" className="mr-auto">
+            <Nav.Item onClick={() => this.doPublishGist(selectedFiles)}>
+              <Nav.Link disabled>Publish Gist</Nav.Link>
             </Nav.Item>
           </Nav>
         );
