@@ -6,8 +6,9 @@ import {
   request as githubRequest,
 } from './githubRequest.js';
 
+import { read, write } from '@jsxcad/sys';
+
 import { toByteArray as toByteArrayFromBase64 } from 'base64-js';
-import { write } from '@jsxcad/sys';
 
 const FILE = '100644';
 
@@ -45,7 +46,7 @@ export const ensureRepository = async (repositoryName) => {
   }
 };
 
-const getState = async (owner, repository, { overwrite = false }) => {
+const getState = async (owner, repository, { replaceRepository = false }) => {
   // When the repository is empty, we'll get a CONFLICT.
   const commits = await get(
     eq(OK, CONFLICT),
@@ -53,7 +54,7 @@ const getState = async (owner, repository, { overwrite = false }) => {
   );
   if (commits === undefined) return {};
   const [lastCommitSha, baseTree] =
-    commits.length > 0 && !overwrite
+    commits.length > 0 && !replaceRepository
       ? [commits[0].sha, commits[0].commit.tree.sha]
       : [undefined, undefined];
   const oldTree =
@@ -61,19 +62,20 @@ const getState = async (owner, repository, { overwrite = false }) => {
       ? { tree: [] }
       : await get(
           eq(OK),
-          `repos/${owner}/${repository}/git/trees/${baseTree}?recursive=1`
+          `repos/${owner}/${repository}/git/trees/${baseTree}`
+          // `repos/${owner}/${repository}/git/trees/${baseTree}?recursive=1`
         );
   if (oldTree === undefined) return {};
   return { lastCommitSha, baseTree, oldTree };
 };
 
-export const readWorkspace = async (
+export const readFromGithub = async (
   owner,
   repository,
   prefix,
-  { overwrite = false }
+  { replaceRepository = false } = {}
 ) => {
-  const { oldTree } = await getState(owner, repository, { overwrite });
+  const { oldTree } = await getState(owner, repository, { replaceRepository });
   const queue = [];
   for (const { path, sha, type } of oldTree.tree) {
     if (type === 'blob' && path.startsWith(prefix)) {
@@ -94,33 +96,41 @@ export const readWorkspace = async (
   return true;
 };
 
-export const writeWorkspace = async (
+export const writeToGithub = async (
   owner,
   repository,
-  prefix,
-  files,
-  { overwrite = false }
+  branch,
+  paths,
+  sourcePaths,
+  { replaceRepository = false } = {}
 ) => {
   await ensureRepository(repository);
   const { lastCommitSha, baseTree, oldTree } = await getState(
     owner,
     repository,
-    { overwrite }
+    { replaceRepository }
   );
   if (oldTree === undefined) return;
-  const updateTree = files.map(([path, content]) => ({
-    path: `${prefix}${path}`,
+  const contents = [];
+  for (const path of sourcePaths) {
+    contents.push(await read(`source/${path}`));
+  }
+  const updateTree = paths.map((path, nth) => ({
+    path, // : path.replace(/[/]/g, '_'),
     mode: FILE,
     type: 'blob',
-    content,
+    content: new TextDecoder('utf8').decode(contents[nth]),
   }));
-  const updatePaths = new Set(files.map(([path]) => `${prefix}${path}`));
+  const deleteTree = [];
+  /*
+  const updatePaths = new Set(paths);
   const deleteTree = oldTree.tree
     .filter(
       ({ path, type }) =>
-        type === 'blob' && path.startsWith(prefix) && !updatePaths.has(path)
+        type === 'blob' && !updatePaths.has(path)
     )
     .map((entry) => ({ ...entry, sha: null }));
+  */
   const tree = await post(
     eq(CREATED, CONFLICT),
     `repos/${owner}/${repository}/git/trees`,
@@ -134,7 +144,7 @@ export const writeWorkspace = async (
     { message: 'Test', tree: tree.sha, parents }
   );
   if (commit === undefined) return;
-  await patch(eq(200), `repos/${owner}/${repository}/git/refs/heads/master`, {
+  await patch(eq(200), `repos/${owner}/${repository}/git/refs/heads/${branch}`, {
     sha: commit.sha,
     force: true,
   });

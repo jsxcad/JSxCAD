@@ -47,6 +47,7 @@ import { getNotebookControlData } from '@jsxcad/ui-notebook';
 import marked from 'marked';
 import { toEcmascript } from '@jsxcad/compiler';
 import { writeGist } from './gist.js';
+import { writeToGithub } from './github.js';
 
 marked.use({
   renderer: {
@@ -111,12 +112,13 @@ class Ui extends React.PureComponent {
       workspaces: this.props.workspaces,
       workspace: this.props.workspace,
       files: [],
-      selectedFiles: [],
+      selectedPaths: [],
     };
 
     this.onChangeJsEditor = this.onChangeJsEditor.bind(this);
     this.onClickEditorLink = this.onClickEditorLink.bind(this);
     this.doPublishGist = this.doPublishGist.bind(this);
+    this.doPublishToGithub = this.doPublishToGithub.bind(this);
     this.doReload = this.doReload.bind(this);
     this.doRun = this.doRun.bind(this);
     this.doSave = this.doSave.bind(this);
@@ -246,7 +248,7 @@ class Ui extends React.PureComponent {
       paneViews,
       workspace,
       files,
-      selectedFiles: [],
+      selectedPaths: [],
     });
   }
 
@@ -333,13 +335,13 @@ class Ui extends React.PureComponent {
     await this.loadJsEditor(url);
   }
 
-  async doPublishGist(files) {
+  async doPublishGist(paths) {
     let titleElement;
     const cancel = () => this.setState({ modal: undefined });
     const done = () => this.setState({ modal: undefined });
     const publish = async () => {
       const title = titleElement.value;
-      const url = await writeGist({ title, paths: files });
+      const url = await writeGist({ title, paths });
       if (url) {
         this.setState({
           modal: (
@@ -403,6 +405,85 @@ class Ui extends React.PureComponent {
     });
   }
 
+  async doPublishToGithub(paths) {
+    const publications = new Map();
+
+    // Decode gitcdn paths.
+    for (const gitcdnPath of paths) {
+      const [, , owner, repository, branch, path] = gitcdnPath.match(/^(http|https):[/][/]gitcdn.link[/]cdn[/]([^/]*)[/]([^/]*)[/]([^/]*)[/](.*)$/) || [];
+      if (owner && repository && branch && path) {
+        const unit = `${owner}/${repository}/${branch}`;
+        if (!publications.has(unit)) {
+          publications.set(unit, { owner, repository, branch, paths: [], sourcePaths: [] });
+        }
+        const entry = publications.get(unit);
+        entry.paths.push(path);
+        entry.sourcePaths.push(gitcdnPath);
+      }
+    }
+
+    const cancel = () => this.setState({ modal: undefined });
+    const done = () => this.setState({ modal: undefined });
+    const publish = async () => {
+      for (const entry of publications.values()) {
+        const { owner, repository, branch, paths, sourcePaths } = entry;
+        entry.status = await writeToGithub(owner, repository, branch, paths, sourcePaths, { replaceRepository: false });
+      }
+      this.setState({
+        modal: (
+          <Modal show={true} onHide={cancel}>
+            <Modal.Header closeButton>
+              <Modal.Title>Published to Github</Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+              {
+               [...publications.values()].map(
+                 ({ owner, repository, branch, paths, status }, nth) =>
+                    <div key={nth}>
+                      Update {owner}/{repository}:
+                      <ul>{paths.map((path, nth) => <li key={nth}>{path}</li>)}</ul>
+                      { status ? 'Succeeded' : 'Failed' }
+                    </div>)
+              }
+            </Modal.Body>
+            <Modal.Footer>
+              <Button variant="primary" onClick={done}>
+                Done
+              </Button>
+            </Modal.Footer>
+          </Modal>
+        ),
+      });
+    };
+    this.setState({
+      modal: (
+        <Modal show={true} onHide={cancel}>
+          <Modal.Header closeButton>
+            <Modal.Title>Publish to Github</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+              {
+               [...publications.values()].map(
+                 ({ owner, repository, branch, paths }, nth) =>
+                    <div key={nth}>
+                      Publish to {owner}/{repository}:
+                      <ul>{paths.map((path, nth) => <li key={nth}>{path}</li>)}</ul>
+                    </div>)
+              }
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={cancel}>
+              Cancel
+            </Button>
+            <Button variant="primary" onClick={publish}>
+              Publish to Github
+            </Button>
+          </Modal.Footer>
+        </Modal>
+      ),
+    });
+  }
+
   async doReload() {
     const cancel = () => this.setState({ modal: undefined });
     const reload = () => this.setState({ modal: undefined });
@@ -411,21 +492,32 @@ class Ui extends React.PureComponent {
     });
   }
 
-  async doUnload() {
+  async doUnload(paths) {
     const cancel = () => this.setState({ modal: undefined });
     const unload = async () => {
-      const { file } = this.state;
-      await deleteFile({}, file);
-      this.setState({ path: undefined, file: undefined, modal: undefined });
+      for (const path of paths) {
+        await deleteFile({}, `source/${path}`);
+      }
+      this.setState({ path: undefined, file: undefined, selectedPaths: [], modal: undefined });
     };
     this.setState({
-      modal: this.buildConfirm({
-        text: 'Unload',
-        messageText:
-          'Unloading a file will discard any local changes permanantly. This cannot be undone.',
-        action: unload,
-        cancel,
-      }),
+      modal: <Modal show={true} onHide={cancel}>
+              <Modal.Header closeButton>
+                <Modal.Title>Unload</Modal.Title>
+              </Modal.Header>
+              <Modal.Body>
+                Unloading will discard any local changes permanantly. This cannot be undone.
+                <p/>
+                Unload the following paths?
+                <ul>
+                  {paths.map((path, nth) => <li key={nth}>{path}</li>)}
+                </ul>
+              </Modal.Body>
+              <Modal.Footer>
+                <Button variant="secondary" onClick={cancel}>Cancel</Button>
+                <Button variant="primary" onClick={unload}>Unload</Button>
+              </Modal.Footer>
+            </Modal>
     });
   }
 
@@ -453,48 +545,54 @@ class Ui extends React.PureComponent {
   }
 
   async doRun() {
-    const { path, jsEditorData } = this.state;
+    const { ask, file, jsEditorData, path, workspace } = this.state;
     await this.doSave();
     if (!path.endsWith('.js') && !path.endsWith('.nb')) {
       // We don't know how to run these things, so just save and move on.
       return;
     }
-    this.setState({ running: true });
-    const { ask, file, workspace } = this.state;
-    await terminateActiveServices();
-    clearEmitted();
+    let notebook;
+    try {
+      this.setState({ running: true });
+      await terminateActiveServices();
+      clearEmitted();
 
-    // FIX: This is a bit awkward.
-    // The responsibility for updating the control values ought to be with what
-    // renders the notebook.
-    const notebookControlData = await getNotebookControlData();
-    await write(`control/${getCurrentPath()}`, notebookControlData);
+      // FIX: This is a bit awkward.
+      // The responsibility for updating the control values ought to be with what
+      // renders the notebook.
+      const notebookControlData = await getNotebookControlData();
+      await write(`control/${getCurrentPath()}`, notebookControlData);
 
-    await log({ op: 'open' });
-    await log({ op: 'clear' });
-    await log({ op: 'text', text: 'Running', level: 'serious' });
-    let script = jsEditorData;
-    const topLevel = new Map();
-    const ecmascript = await toEcmascript(script, { topLevel });
-    emit({ md: `---` });
-    emit({ md: `#### Dependency Tree` });
-    const graph = [];
-    for (const [id, { dependencies }] of topLevel.entries()) {
-      for (const dependency of dependencies) {
-        graph.push(`${dependency}(${dependency}  .) --> ${id}(${id}  .)`);
+      await log({ op: 'open' });
+      await log({ op: 'clear' });
+      await log({ op: 'text', text: 'Running', level: 'serious' });
+      let script = jsEditorData;
+      const topLevel = new Map();
+      const ecmascript = await toEcmascript(script, { topLevel });
+      emit({ md: `---` });
+      emit({ md: `#### Dependency Tree` });
+      const graph = [];
+      for (const [id, { dependencies }] of topLevel.entries()) {
+        for (const dependency of dependencies) {
+          graph.push(`${dependency}(${dependency}  .) --> ${id}(${id}  .)`);
+        }
       }
+      emit({ md: `'''\ngraph TD\n${graph.join('\n')}\n'''` });
+      emit({ md: `---` });
+      emit({ md: `#### Programs` });
+      for (const [id, { program }] of topLevel.entries()) {
+        emit({ md: `##### ${id}` });
+        emit({ md: `'''\n${program}\n'''\n` });
+      }
+      notebook = await ask({ evaluate: ecmascript, workspace, path: file });
+      await resolvePending();
+    } catch (error) {
+      emit({ log: { text: error.stack, level: 'serious' } });
+    } finally {
+      this.setState({ running: false });
     }
-    emit({ md: `'''\ngraph TD\n${graph.join('\n')}\n'''` });
-    emit({ md: `---` });
-    emit({ md: `#### Programs` });
-    for (const [id, { program }] of topLevel.entries()) {
-      emit({ md: `##### ${id}` });
-      emit({ md: `'''\n${program}\n'''\n` });
-    }
-    const notebook = await ask({ evaluate: ecmascript, workspace, path: file });
 
     const writeNotebook = async (path, notebook) => {
-      await resolvePending();
       // Extend the notebook.
       notebook.push(...getEmitted());
       // Resolve any promises.
@@ -509,8 +607,6 @@ class Ui extends React.PureComponent {
     };
 
     await writeNotebook(file, notebook);
-    await log({ op: 'text', text: 'Finished', level: 'serious' });
-    this.setState({ running: false });
   }
 
   async doSave(data) {
@@ -545,7 +641,7 @@ class Ui extends React.PureComponent {
       mode = 'Notebook',
       modal,
       running,
-      selectedFiles,
+      selectedPaths,
       workspace,
     } = this.state;
     const { sha } = this.props;
@@ -635,8 +731,15 @@ class Ui extends React.PureComponent {
           );
           navItems.push(
             <Nav key="publish_gist" className="mr-auto">
-              <Nav.Item onClick={() => this.doPublishGist([file])}>
-                <Nav.Link disabled>Publish Gist</Nav.Link>
+              <Nav.Item onClick={() => this.doPublishGist([path])}>
+                <Nav.Link>Publish Gist</Nav.Link>
+              </Nav.Item>
+            </Nav>
+          );
+          navItems.push(
+            <Nav key="publish_to_github" className="mr-auto">
+              <Nav.Item onClick={() => this.doPublishToGithub([path])}>
+                <Nav.Link>Publish to Github</Nav.Link>
               </Nav.Item>
             </Nav>
           );
@@ -682,7 +785,7 @@ class Ui extends React.PureComponent {
           );
           navItems.push(
             <Nav key="unload" className="mr-auto">
-              <Nav.Item onClick={() => this.doUnload()}>
+              <Nav.Item onClick={() => this.doUnload([path])}>
                 <Nav.Link>Unload</Nav.Link>
               </Nav.Item>
             </Nav>
@@ -775,8 +878,15 @@ class Ui extends React.PureComponent {
       case 'Files': {
         navItems.push(
           <Nav key="publish_gist" className="mr-auto">
-            <Nav.Item onClick={() => this.doPublishGist(selectedFiles)}>
-              <Nav.Link disabled>Publish Gist</Nav.Link>
+            <Nav.Item onClick={() => this.doPublishGist(selectedPaths)}>
+              <Nav.Link>Publish Gist</Nav.Link>
+            </Nav.Item>
+          </Nav>
+        );
+        navItems.push(
+          <Nav key="publish_to_github" className="mr-auto">
+            <Nav.Item onClick={() => this.doPublishToGithub(selectedPaths)}>
+              <Nav.Link>Publish to Github</Nav.Link>
             </Nav.Item>
           </Nav>
         );
@@ -789,8 +899,8 @@ class Ui extends React.PureComponent {
         );
         navItems.push(
           <Nav key="unload" className="mr-auto">
-            <Nav.Item onClick={() => this.doUnload()}>
-              <Nav.Link disabled>Unload</Nav.Link>
+            <Nav.Item onClick={() => this.doUnload(selectedPaths)}>
+              <Nav.Link>Unload</Nav.Link>
             </Nav.Item>
           </Nav>
         );
@@ -806,11 +916,11 @@ class Ui extends React.PureComponent {
           prefixes.add(file);
         }
         const check = (file, checked) => {
-          const updated = selectedFiles.filter((value) => value !== file);
+          const updated = selectedPaths.filter((value) => value !== file);
           if (checked) {
             updated.push(file);
           }
-          this.setState({ selectedFiles: updated });
+          this.setState({ selectedPaths: updated });
         };
         panes.push(
           <Form>
@@ -822,7 +932,7 @@ class Ui extends React.PureComponent {
                     key={nth}
                     type="checkbox"
                     label={file}
-                    checked={selectedFiles.includes(file)}
+                    checked={selectedPaths.includes(file)}
                     onChange={({ target }) => check(file, target.checked)}
                   />
                 ))}
