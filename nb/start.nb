@@ -1,5 +1,7 @@
 md`# JSxCAD`;
 
+md`Press Shift-Enter or click Run above to generate notebook.`;
+
 md`## Links`;
 
 md`1. [Examples](#JSxCAD@https://gitcdn.link/cdn/jsxcad/JSxCAD/master/nb/examples.nb)`;
@@ -31,6 +33,14 @@ md`## Stability`;
 md`Please understand that JSxCAD is undergoing rapid evolution, and the API is not stable.`;
 
 md`You will soon be able to select particular commits to work at to mitigate this somewhat.`;
+
+md`## Supported Browsers`;
+
+md`Only the latest version of chromium is supported at this time.`;
+
+md`Other browsers may or may not work, and fixes to support them are a low priority.`;
+
+md`This should change as JSxCAD becomes more mature.`;
 
 md`## Data Storage`;
 
