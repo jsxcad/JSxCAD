@@ -7,12 +7,12 @@
   "module": "dist/bundle.js",
   "type": "module",
   "scripts": {
-    "depcheck": "depcheck --ignores 'debug,import-local,lodash,@jsxcad/ui-v1,@jsxcad/eslint*,eslint*,babel-eslint' --ignore-dirs=dist,gitcdn,local",
+    "depcheck": "depcheck --ignores 'https:,debug,import-local,lodash,@jsxcad/ui-v1,@jsxcad/eslint*,eslint*,babel-eslint' --ignore-dirs=dist,gitcdn,local",
     "lint": "eslint *.js",
     "lintfix": "eslint --fix *.js",
     "test": "ava",
     "tests": "ava *.test.js",
-    "rollup": "rollup -c rollup_main.js && rollup -c rollup_webworker.js",
+    "rollup": "rollup -c rollup_main.js && rollup -c rollup_webworker.js && rollup -c rollup.auth.js && rollup -c rollup.auth.es6.js",
     "didYouRunBootstrapMaslowRollup": "rollup -c rollup.maslowWorker.js",
     "didYouRunBootstrapMaslowMasterRollup": "rollup -c rollup.maslowMaster.js"
   },

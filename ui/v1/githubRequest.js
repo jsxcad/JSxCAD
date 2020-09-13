@@ -24,7 +24,7 @@ export const request = async (
     body = JSON.stringify(body);
   }
   const request = { method, headers, body };
-  while (--attempts > 0) {
+  while (attempts-- > 0) {
     if (token === undefined) {
       token = await getNewAccessToken(service, token);
       if (token === undefined) {
