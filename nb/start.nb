@@ -1,0 +1,36 @@
+md`# JSxCAD`;
+
+md`## Links`;
+
+md`1. [Examples](#JSxCAD@https://gitcdn.link/cdn/jsxcad/JSxCAD/master/nb/examples.nb)`;
+
+md`## Introduction`;
+
+md`JSxCAD allows CAD design as notebooks.`;
+
+Hershey(20)('JSxCAD').trace().topView();
+
+md`Clicking on a view maximizes and allows rotation and animation; use Escape to return.`;
+
+md`## Data Storage`;
+
+md`Edits are stored locally in the browser - they can be downloaded or published only explicitly.`;
+
+md`
+* Control-S will save local edits in the browser.
+* Shift-Enter will save, then run the notebook being edited.
+`;
+
+md`## Navigation`;
+
+md`You can Control-Click on a link in the editor to visit a page.`;
+
+md`
+'''
+import 'https://gitcdn.link/cdn/jsxcad/JSxCAD/master/nb/examples.nb';
+'''
+`;
+
+md`You can click on links in a notebook, like so: [examples.nb](#JSxCAD@https://gitcdn.link/cdn/jsxcad/JSxCAD/master/nb/examples.nb)`;
+
+md`The back button should return as usual, and urls can be bookmarked normally.`;
