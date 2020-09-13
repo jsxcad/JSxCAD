@@ -1,52 +1,51 @@
-md`# JSxCAD`;
+md`
+# JSxCAD
 
-md`Press Shift-Enter or click Run above to generate notebook.`;
+Press Shift-Enter or click Run above to generate notebook.
 
-md`## Links`;
+## Links
 
-md`1. [Examples](#JSxCAD@https://gitcdn.link/cdn/jsxcad/JSxCAD/master/nb/examples.nb)`;
+1. [Examples](#JSxCAD@https://gitcdn.link/cdn/jsxcad/JSxCAD/master/nb/examples.nb)
 
-md`## Introduction`;
+## Introduction
 
-md`JSxCAD allows CAD design as notebooks.`;
+JSxCAD allows CAD design as notebooks.`;
 
 Hershey(20)('JSxCAD').trace().topView();
 
-md`Clicking on a view maximizes and allows rotation and animation; use Escape to return.`;
-
-md`## Navigation`;
-
-md`You can Control-Click on a link in the editor to visit a page.`;
-
 md`
+Clicking on a view maximizes and allows rotation and animation; use Escape to return.
+
+## Navigation
+
+You can Control-Click on a link in the editor to visit a page.
+
 '''
 import 'https://gitcdn.link/cdn/jsxcad/JSxCAD/master/nb/examples.nb';
 '''
-`;
 
-md`You can click on links in a notebook, like so: [examples.nb](#JSxCAD@https://gitcdn.link/cdn/jsxcad/JSxCAD/master/nb/examples.nb)`;
+You can click on links in a notebook, like so: [examples.nb](#JSxCAD@https://gitcdn.link/cdn/jsxcad/JSxCAD/master/nb/examples.nb)
 
-md`The back button should return as usual, and urls can be bookmarked normally.`;
+The back button should return as usual, and urls can be bookmarked normally.
 
-md`## Stability`;
+## Stability
 
-md`Please understand that JSxCAD is undergoing rapid evolution, and the API is not stable.`;
+Please understand that JSxCAD is undergoing rapid evolution, and the API is not stable.
 
-md`You will soon be able to select particular commits to work at to mitigate this somewhat.`;
+You will soon be able to select particular commits to work at to mitigate this somewhat.
 
-md`## Supported Browsers`;
+## Supported Browsers
 
-md`Only the latest version of chromium is supported at this time.`;
+Only the latest version of chromium is supported at this time.
 
-md`Other browsers may or may not work, and fixes to support them are a low priority.`;
+Other browsers may or may not work, and fixes to support them are a low priority.
 
-md`This should change as JSxCAD becomes more mature.`;
+This should change as JSxCAD becomes more mature.
 
-md`## Data Storage`;
+## Data Storage
 
-md`Edits are stored locally in the browser - they can be downloaded or published only explicitly.`;
+Edits are stored locally in the browser - they can be downloaded or published only explicitly.
 
-md`
 * Control-S will save local edits in the browser.
 * Shift-Enter will save, then run the notebook being edited.
 `;
