@@ -28,6 +28,7 @@ import {
 
 import Button from 'react-bootstrap/Button';
 import ButtonGroup from 'react-bootstrap/ButtonGroup';
+import Col from 'react-bootstrap/Col';
 import Dropdown from 'react-bootstrap/Dropdown';
 import Form from 'react-bootstrap/Form';
 import FormControl from 'react-bootstrap/FormControl';
@@ -842,31 +843,33 @@ class Ui extends React.PureComponent {
           );
           if (file.endsWith('.js') || file.endsWith('.nb')) {
             panes.push(
-              <div>
-                <SplitPane split="vertical" defaultSize={830}>
-                  <Pane className="pane">
-                    <JsEditorUi
-                      key={`editScript/${file}`}
-                      onRun={this.doRun}
-                      onSave={this.doSave}
-                      onChange={this.onChangeJsEditor}
-                      onClickLink={this.onClickEditorLink}
-                      data={jsEditorData}
-                      file={file}
-                      ask={ask}
-                      workspace={workspace}
-                    />
-                  </Pane>
-                  <Pane className="pane">
-                    <NotebookUi
-                      key={`notebook/${file}`}
-                      sha={sha}
-                      onRun={this.doRun}
-                      data={notebookData}
-                      workspace={workspace}
-                    />
-                  </Pane>
-                </SplitPane>
+              <div style={{ width: '100%', height: '100%', margin: '0px' }}>
+                <Col style={{ width: '100%', height: '100%' }}>
+                  <SplitPane split="vertical" defaultSize={830}>
+                    <Pane className="pane">
+                      <JsEditorUi
+                        key={`editScript/${file}`}
+                        onRun={this.doRun}
+                        onSave={this.doSave}
+                        onChange={this.onChangeJsEditor}
+                        onClickLink={this.onClickEditorLink}
+                        data={jsEditorData}
+                        file={file}
+                        ask={ask}
+                        workspace={workspace}
+                      />
+                    </Pane>
+                    <Pane className="pane">
+                      <NotebookUi
+                        key={`notebook/${file}`}
+                        sha={sha}
+                        onRun={this.doRun}
+                        data={notebookData}
+                        workspace={workspace}
+                      />
+                    </Pane>
+                  </SplitPane>
+                </Col>
               </div>
             );
           } else if (file.endsWith('.svg')) {
