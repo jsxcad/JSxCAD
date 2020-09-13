@@ -505,7 +505,7 @@ function createCommonjsModule(fn, module) {
 var localforage = createCommonjsModule(function (module, exports) {
 /*!
     localForage -- Offline Storage, Improved
-    Version 1.8.1
+    Version 1.9.0
     https://localforage.github.io/localForage
     (c) 2013-2017 Mozilla, Apache License 2.0
 */
@@ -3553,7 +3553,7 @@ const fetchSources = async (sources) => {
       try {
         if (source.startsWith('http:') || source.startsWith('https:')) {
           log({ op: 'text', text: `# Fetching ${source}` });
-          const response = await fetchUrl(source);
+          const response = await fetchUrl(source, { cache: 'reload' });
           if (response.ok) {
             return new Uint8Array(await response.arrayBuffer());
           }

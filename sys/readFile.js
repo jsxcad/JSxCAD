@@ -83,7 +83,7 @@ const fetchSources = async (sources) => {
       try {
         if (source.startsWith('http:') || source.startsWith('https:')) {
           log({ op: 'text', text: `# Fetching ${source}` });
-          const response = await fetchUrl(source);
+          const response = await fetchUrl(source, { cache: 'reload' });
           if (response.ok) {
             return new Uint8Array(await response.arrayBuffer());
           }
