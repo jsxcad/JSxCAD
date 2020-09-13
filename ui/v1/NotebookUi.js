@@ -1,5 +1,3 @@
-import { readFile, unwatchFiles, watchFile } from '@jsxcad/sys';
-
 import Mermaid from 'mermaid';
 import PropTypes from 'prop-types';
 import React from 'react';
@@ -9,7 +7,8 @@ export class NotebookUi extends React.PureComponent {
   static get propTypes() {
     return {
       id: PropTypes.string,
-      file: PropTypes.string,
+      data: PropTypes.array,
+      // file: PropTypes.string,
       onRun: PropTypes.func,
     };
   }
@@ -19,34 +18,6 @@ export class NotebookUi extends React.PureComponent {
     this.state = {};
     this.onKeyDown = this.onKeyDown.bind(this);
     this.update = this.update.bind(this);
-  }
-
-  async componentDidMount() {
-    const { file } = this.props;
-    const watcher = await watchFile(`notebook/${file}`, this.update);
-    this.setState({ watcher, refs: [] });
-    await this.update();
-  }
-
-  async componentWillUnmount() {
-    const { watcher } = this.state;
-
-    if (watcher) {
-      await unwatchFiles(watcher);
-    }
-  }
-
-  async update() {
-    const { file } = this.props;
-    const { refs } = this.state;
-    const notebook = await readFile({}, `notebook/${file}`);
-    const newDomElement = await toDomElement(notebook);
-    if (refs[0]) {
-      refs[0].removeChild(refs[0].firstChild);
-      refs[0].appendChild(newDomElement);
-    }
-    this.setState({ notebook, domElement: newDomElement });
-    Mermaid.init(undefined, '.mermaid');
   }
 
   stop(e) {
@@ -89,22 +60,21 @@ export class NotebookUi extends React.PureComponent {
   }
 
   render() {
-    const { domElement, refs } = this.state;
-
-    const notebook = domElement ? (
+    const { data } = this.props;
+    let ref;
+    const result = (
       <div
-        ref={(ref) => {
-          if (ref) {
-            refs[0] = ref;
-            ref.appendChild(domElement);
-          }
+        onKeyDown={this.onKeyDown}
+        ref={(value) => {
+          ref = value;
         }}
-      ></div>
-    ) : (
-      <div />
+      />
     );
-
-    return <div onKeyDown={this.onKeyDown}>{notebook}</div>;
+    setTimeout(async () => {
+      ref.appendChild(await toDomElement(data));
+      Mermaid.init(undefined, '.mermaid');
+    }, 0);
+    return result;
   }
 }
 

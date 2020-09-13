@@ -7,7 +7,7 @@
   "module": "dist/bundle.js",
   "type": "module",
   "scripts": {
-    "depcheck": "depcheck --ignores 'debug,import-local,lodash,@jsxcad/ui-v1,@jsxcad/eslint*,eslint*,babel-eslint' --ignore-dirs=dist,gitcdn,local",
+    "depcheck": "depcheck --ignores 'https:,debug,import-local,lodash,@jsxcad/ui-v1,@jsxcad/eslint*,eslint*,babel-eslint' --ignore-dirs=dist,gitcdn,local",
     "lint": "eslint *.js",
     "lintfix": "eslint --fix *.js",
     "test": "ava",
