@@ -316,11 +316,13 @@ class Ui extends React.PureComponent {
       </Modal>
     );
   }
-  async loadJsEditor(path) {
+  async loadJsEditor(path, { shouldUpdateUrl = true } = {}) {
     const { workspace } = this.state;
     const file = `source/${path}`;
     await ensureFile(file, path, { workspace });
-    this.updateUrl({ path });
+    if (shouldUpdateUrl) {
+      this.updateUrl({ path });
+    }
     const data = await read(file);
     const jsEditorData =
       typeof data === 'string' ? data : new TextDecoder('utf8').decode(data);
@@ -1037,11 +1039,17 @@ class Ui extends React.PureComponent {
 
 const setupUi = async (sha) => {
   const filesystems = await listFilesystems();
-  const hash = location.hash.substring(1);
-  const [encodedWorkspace, encodedFile] = hash.split('@');
-  const workspace = decodeURIComponent(encodedWorkspace) || 'JSxCAD';
-  let path = encodedFile ? decodeURIComponent(encodedFile) : '';
-  let file = path ? `source/${path}` : '';
+  const decodeHash = () => {
+    const hash = location.hash.substring(1);
+    const [encodedWorkspace, encodedFile] = hash.split('@');
+    const workspace = decodeURIComponent(encodedWorkspace) || 'JSxCAD';
+    const path = encodedFile
+      ? decodeURIComponent(encodedFile)
+      : 'https://gitcdn.link/cdn/jsxcad/JSxCAD/master/nb/start.nb';
+    const file = `source/${path}`;
+    return [path, file, workspace];
+  };
+  const [path, file, workspace] = decodeHash();
   let ui;
   ReactDOM.render(
     <Ui
@@ -1064,7 +1072,12 @@ const setupUi = async (sha) => {
 
   window.addEventListener('popstate', (e) => {
     const { path = '' } = e.state;
-    ui.loadJsEditor(path);
+    ui.loadJsEditor(path, { shouldUpdateUrl: false });
+  });
+
+  window.addEventListener('hashchange', (e) => {
+    const [path] = decodeHash();
+    ui.loadJsEditor(path, { shouldUpdateUrl: false });
   });
 };
 

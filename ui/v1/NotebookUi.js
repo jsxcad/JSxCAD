@@ -17,7 +17,6 @@ export class NotebookUi extends React.PureComponent {
     super(props);
     this.state = {};
     this.onKeyDown = this.onKeyDown.bind(this);
-    this.update = this.update.bind(this);
   }
 
   stop(e) {
@@ -71,6 +70,9 @@ export class NotebookUi extends React.PureComponent {
       />
     );
     setTimeout(async () => {
+      while (ref.firstChild) {
+        ref.removeChild(ref.lastChild);
+      }
       ref.appendChild(await toDomElement(data));
       Mermaid.init(undefined, '.mermaid');
     }, 0);
