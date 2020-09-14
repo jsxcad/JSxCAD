@@ -11,7 +11,7 @@ Press Shift-Enter or click Run above to generate notebook.
 
 JSxCAD allows CAD design as notebooks.`;
 
-Hershey(20)('JSxCAD').trace().topView();
+Hershey(20)('JSxCAD').trace().item('Title').Page({ itemMargin: 5 }).topView();
 
 md`
 Clicking on a view maximizes and allows rotation and animation; use Escape to return.
