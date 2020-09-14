@@ -1,6 +1,8 @@
 md`
 # JSxCAD Examples
 
+* Output
+ * [SVG](#JSxCAD@https://gitcdn.link/cdn/jsxcad/JSxCAD/master/api/v1-svg/example/svg.nb)
 * [Shapes](#JSxCAD@https://gitcdn.link/cdn/jsxcad/JSxCAD/master/api/v1-shapes/example/shapes.nb)
 
 `;
