@@ -20,7 +20,11 @@ md`
 We can also read SVG in as shapes.
 `;
 
-const example = await readSvg(
+const svg = await readSvg(
   'https://gitcdn.link/cdn/jsxcad/JSxCAD/master/api/v1-svg/example/example.svg'
 );
-example.topView();
+svg.topView();
+
+md`
+You can also Control-Click on the example.svg url in the editor to edit the example.svg directly.
+`;
