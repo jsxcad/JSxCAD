@@ -5,7 +5,7 @@ import { parse as parseStlBinary } from './parseStlBinary.js';
 const toParser = (format) => {
   switch (format) {
     case 'ascii':
-      return parseStlAscii;
+      return (data) => parseStlAscii(new TextDecoder('utf8').decode(data));
     case 'binary':
       return parseStlBinary;
     default:

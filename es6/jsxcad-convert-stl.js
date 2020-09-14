@@ -104,7 +104,7 @@ const parse$1 = (data) => {
 const toParser = (format) => {
   switch (format) {
     case 'ascii':
-      return parseStlAscii;
+      return (data) => parseStlAscii(new TextDecoder('utf8').decode(data));
     case 'binary':
       return parse$1;
     default:
