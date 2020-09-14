@@ -71,3 +71,65 @@ md`A set of points along the x axis.`;
 const polygon = Polygon(10, { sides: 5 });
 polygon.topView();
 md`A five sided regular polygon of radius 10.`;
+
+const polyhedron = Polyhedron(
+  [
+    [10, 10, 0],
+    [10, -10, 0],
+    [-10, -10, 0],
+    [-10, 10, 0],
+    [0, 0, 10],
+  ],
+  [
+    [4, 1, 0],
+    [4, 2, 1],
+    [4, 3, 2],
+    [4, 0, 3],
+    [3, 0, 1],
+    [3, 1, 2],
+  ]
+);
+polyhedron.view();
+md`A polyhedron.`;
+
+const prism = Prism(5, 10, { sides: 5 });
+prism.view();
+md`A five sided prism of radius 5 and height 10.`;
+
+const sketch = Cube(5).outline().sketch().and(Cylinder(4, 10)).item();
+sketch.view();
+md`A sketch of a cube outline showing through a cylinder.`;
+
+const sphere = Sphere(10);
+sphere.view();
+md`A sphere of radius 10.`;
+
+const spiral = Spiral((a) => [[a / 1000]], { to: 360 * 10 });
+spiral.topView();
+md`A spiral path.`;
+
+const square = Square(10);
+square.topView();
+md`A 10x10 square.`;
+
+const tetrahedron = Tetrahedron(10);
+tetrahedron.frontView();
+md`A tetrahedron of radius 10.`;
+
+md`FIX: Toolpath.`;
+
+md`FIX: const torus = Torus(20, 2);
+torus.view();
+A torus of radius 20 and thickness 2.`;
+
+const triangle = Triangle(5);
+triangle.topView();
+md`A triangle of edge length 5.`;
+
+const union = Union(Triangle(10), Circle(4));
+union.topView();
+md`A union of a triangle and a circle.`;
+
+const wave = Wave((a) => [[0, sin(a * 3) * 100]], { to: 360 });
+wave.topView();
+md`A sine wave path.`;
