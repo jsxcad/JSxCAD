@@ -7,7 +7,7 @@ import { equals } from './jsxcad-math-vec2.js';
 import { transform } from './jsxcad-geometry-paths.js';
 import { dot } from './jsxcad-math-vec3.js';
 import { toTagsFromName } from './jsxcad-algorithm-color.js';
-import { transform as transform$1, measureBoundingBox, translate, canonicalize as canonicalize$2, toKeptGeometry, getAnyNonVoidSurfaces, getNonVoidPaths } from './jsxcad-geometry-tagged.js';
+import { transform as transform$1, scale, measureBoundingBox, translate, canonicalize as canonicalize$2, toTransformedGeometry, getAnyNonVoidSurfaces, getNonVoidPaths } from './jsxcad-geometry-tagged.js';
 import { createNormalize3 } from './jsxcad-algorithm-quantize.js';
 
 const canonicalizeSegment = ([directive, ...args]) => [
@@ -3765,11 +3765,12 @@ const toColorFromTags = (tags, otherwise = 'black') => {
 
 const toSvg = async (baseGeometry, { padding = 0 } = {}) => {
   const normalize = createNormalize3();
-  const [min, max] = measureBoundingBox(await baseGeometry);
+  const flippedGeometry = scale([1, -1, 1], await baseGeometry);
+  const [min, max] = measureBoundingBox(flippedGeometry);
   const width = max[X] - min[X];
   const height = max[Y] - min[Y];
-  const translated = translate([width / 2, height / 2, 0], await baseGeometry);
-  const geometry = canonicalize$2(toKeptGeometry(translated));
+  const translated = translate([width / 2, height / 2, 0], flippedGeometry);
+  const geometry = canonicalize$2(toTransformedGeometry(translated));
 
   const svg = [
     `<?xml version="1.0" encoding="UTF-8"?>`,

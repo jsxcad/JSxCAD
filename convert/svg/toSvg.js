@@ -3,7 +3,8 @@ import {
   getAnyNonVoidSurfaces,
   getNonVoidPaths,
   measureBoundingBox,
-  toKeptGeometry,
+  scale,
+  toTransformedGeometry,
   translate,
 } from '@jsxcad/geometry-tagged';
 
@@ -26,11 +27,12 @@ const toColorFromTags = (tags, otherwise = 'black') => {
 
 export const toSvg = async (baseGeometry, { padding = 0 } = {}) => {
   const normalize = createNormalize3();
-  const [min, max] = measureBoundingBox(await baseGeometry);
+  const flippedGeometry = scale([1, -1, 1], await baseGeometry);
+  const [min, max] = measureBoundingBox(flippedGeometry);
   const width = max[X] - min[X];
   const height = max[Y] - min[Y];
-  const translated = translate([width / 2, height / 2, 0], await baseGeometry);
-  const geometry = canonicalize(toKeptGeometry(translated));
+  const translated = translate([width / 2, height / 2, 0], flippedGeometry);
+  const geometry = canonicalize(toTransformedGeometry(translated));
 
   const svg = [
     `<?xml version="1.0" encoding="UTF-8"?>`,
