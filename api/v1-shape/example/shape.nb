@@ -1,0 +1,78 @@
+md`# Shape Operations`;
+
+md`## shape.add(...shapes)`;
+const add = Circle(10).color('blue').add(Square(17).color('red'));
+add.topView();
+md`shape is extended to cover the space of the shapes.`;
+
+md`## shape.addTo(targetShape)`;
+const addTo = Circle(10).color('blue').addTo(Square(17).color('red'));
+addTo.topView();
+md`targetShape is extend to cover the space of shape.`;
+
+md`## shape.as(...tags)`;
+const as = Circle(10).as('circle');
+as.topView();
+md`shape is tagged with the provided tags. See keep/drop.`;
+
+md`## shape.bench(x = 0, y = 0, z = 0)`;
+const bench = Cube(10).bench().fix();
+bench.view();
+md`shape is moved so the left-front-top vertex as at the origin.`;
+
+md`## shape.benchTop(x = 0, y = 0, z = 0)`;
+const benchTop = Cube(10).benchTop().fix();
+benchTop.view();
+md`shape is moved so the left-front-lower vertex as at the origin.`;
+
+md`## shape.center()`;
+const center = Cube(10).center();
+center.view();
+md`shape is moved so that the center of the bounding box is at the origin.`;
+
+md`## shape.clip(...shapes)`;
+const clip = Cube(10).color('blue').clip(Sphere(6).color('red'));
+clip.view();
+md`shape is restricted to only cover the space also covered by all shapes.`;
+
+md`## shape.clipFrom(targetShape)`;
+const clipFrom = Cube(10).color('blue').clipFrom(Sphere(6).color('red'));
+clipFrom.view();
+md`shape is restricted to only cover the space also covered by all shapes.`;
+
+md`## shape.color(name)`;
+const color = Square(10).color('cerulean');
+color.topView();
+md`shape is tagged with the named color.`;
+
+md`## shape.colors(name)
+'''
+log(Square(10).color('cerulean').colors());
+'''`;
+log(Square(10).color('cerulean').colors());
+md`The color tags of the shape are returned.`;
+
+md`## shape.constantLaser(level)`;
+const constantLaser = Square(10).outline().constantLaser(1000).trace();
+constantLaser.topView();
+md`Shape is tagged with a constant laser output level.`;
+
+md`## shape.cut(...shape)`;
+const cut = Cube(10).color('blue').cut(Cylinder(4, 10).color('red'));
+cut.view();
+
+md`## shape.cutFrom(targetShape)`;
+const cutFrom = Cube(10).color('blue').cutFrom(Cylinder(8, 10).color('red'));
+cutFrom.view();
+
+md`## shape.faces()`;
+md`FIX`;
+
+md`## shape.feedRate(mmPerMinute)`;
+const feedRate = Square(10).outline().feedRate(1000).trace();
+feedRate.topView();
+md`Shape is tagged with a feed rate.`;
+
+md`## shape.fix()`;
+const fix = Square(10).move(5).fix().topView();
+md`Shape uses a fixed layout without packing.`;
