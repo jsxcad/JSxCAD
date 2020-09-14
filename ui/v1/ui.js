@@ -700,14 +700,7 @@ class Ui extends React.PureComponent {
     const fileChoices = [
       ...new Set(
         files
-          .filter(
-            (file) =>
-              file.startsWith('source/') &&
-              (file.endsWith('.js') ||
-                file.endsWith('.nb') ||
-                file.endsWith('.svg') ||
-                true)
-          )
+          .filter((file) => file.startsWith('source/'))
           .map((file) => file.substr(7))
       ),
     ];
@@ -893,6 +886,26 @@ class Ui extends React.PureComponent {
                     <img
                       src={`data:image/svg+xml;base64,${btoa(jsEditorData)}`}
                       style={{ width: '100%', height: '100%' }}
+                    />
+                  </Pane>
+                </SplitPane>
+              </div>
+            );
+          } else if (file.endsWith('.stl')) {
+            panes.push(
+              <div>
+                <SplitPane split="vertical" defaultSize={830}>
+                  <Pane className="pane">
+                    <JsEditorUi
+                      key={`editScript/${file}`}
+                      onRun={this.doRun}
+                      onSave={this.doSave}
+                      onChange={this.onChangeJsEditor}
+                      onClickLink={this.onClickEditorLink}
+                      data={jsEditorData}
+                      file={file}
+                      ask={ask}
+                      workspace={workspace}
                     />
                   </Pane>
                 </SplitPane>
