@@ -73,6 +73,7 @@ export {
   Line,
   Path,
   Peg,
+  Plane,
   Point,
   Points,
   Polygon,
