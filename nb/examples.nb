@@ -1,1 +1,6 @@
-md`# JSxCAD Examples`;
+md`
+# JSxCAD Examples
+
+* [Shapes](#JSxCAD@https://gitcdn.link/cdn/jsxcad/JSxCAD/master/api/v1-shapes/example/shapes.nb)
+
+`;
