@@ -1,0 +1,73 @@
+md`# Shapes`;
+
+const arc = Arc(20, 300);
+arc.topView();
+md`A radius 20 Arc of 45 degrees.`;
+
+const assembly = Assembly(Square(20), Triangle(5));
+assembly.topView();
+md`An assembly of a 20x20 square and a triangle of length 5.`;
+
+const circle = Circle(20);
+circle.topView();
+md`A circle of radus 20.`;
+
+md`FIX: Cone(5, 50).view();`;
+
+const cube = Cube(20);
+cube.view();
+md`A 20x20x20 cube.`;
+
+const cylinder = Cylinder(5, 10);
+cylinder.view();
+md`A radius 5 cylinder of height 10.`;
+
+const difference = Difference(Square(20), Triangle(5));
+difference.topView();
+md`A 20x20 square with a triangle of size 5 removed.`;
+
+md`FIX: Empty().topView();`;
+
+const hershey = Hershey(10)('Hershey').page({ itemMargin: 5 });
+hershey.topView();
+md`Single line text of size 10.`;
+
+const hexagon = Hexagon(10);
+hexagon.topView();
+md`A hexagon of radius 10.`;
+
+const icosahedron = Icosahedron(10);
+icosahedron.view();
+md`An icosahedron of radius 10.`;
+
+const intersection = Intersection(Cube(10), Sphere(7));
+intersection.view();
+md`The intersection of a 10x10x10 Cube and a Sphere of radius 7.`;
+
+const line = Line(10);
+line.topView();
+md`A line of length 10.`;
+
+const path = Path(Point(0), Point(10, 5), Point(20));
+path.topView();
+md`A simple open path.`;
+
+const peg = Peg([0, 0, 0], [0, 1, 0], [0, 0, 1]).Square(10);
+peg.view();
+md`A peg with a square attached.`;
+
+const plane = Cube(10).cut(Plane());
+plane.view();
+md`A cube cut by the z0 plane.`;
+
+const point = Point();
+point.topView();
+md`A point at the origin.`;
+
+const points = Points([0], [1], [2], [3]);
+points.topView();
+md`A set of points along the x axis.`;
+
+const polygon = Polygon(10, { sides: 5 });
+polygon.topView();
+md`A five sided regular polygon of radius 10.`;
