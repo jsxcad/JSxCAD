@@ -1,3 +1,5 @@
+import { Group, Layers } from './Group.js';
+
 import Arc from './Arc.js';
 import Assembly from './Assembly.js';
 import Circle from './Circle.js';
@@ -10,7 +12,6 @@ import Hershey from './Hershey.js';
 import Hexagon from './Hexagon.js';
 import Icosahedron from './Icosahedron.js';
 import Intersection from './Intersection.js';
-import Layers from './Layers.js';
 import Line from './Line.js';
 import Path from './Path.js';
 import Peg from './Peg.js';
@@ -41,6 +42,7 @@ const api = {
   Cylinder,
   Difference,
   Empty,
+  Group,
   Hershey,
   Hexagon,
   Icosahedron,

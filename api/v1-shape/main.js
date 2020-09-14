@@ -21,7 +21,7 @@ import './intersection.js';
 import './junctions.js';
 import './keep.js';
 import './kept.js';
-import './layer.js';
+import './group.js';
 import './laserPower.js';
 import './make.js';
 import './material.js';

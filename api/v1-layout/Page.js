@@ -157,7 +157,8 @@ export const Page = (
 const PageMethod = function (options = {}) {
   return Page(options, this);
 };
-Shape.prototype.Page = PageMethod;
+Shape.prototype.Page = PageMethod; // Deprecate
+Shape.prototype.page = PageMethod;
 
 export default Page;
 
@@ -176,9 +177,11 @@ export const ensurePages = (geometry, depth = 0) => {
 const PackMethod = function (options = {}) {
   return Page(options, this);
 };
-Shape.prototype.Pack = PackMethod;
+Shape.prototype.Pack = PackMethod; // Deprecate
+Shape.prototype.pack = PackMethod;
 
 const FixMethod = function (options = {}) {
   return Page({ ...options, pack: false }, this);
 };
-Shape.prototype.Fix = FixMethod;
+Shape.prototype.Fix = FixMethod; // Deprecate
+Shape.prototype.fix = FixMethod;

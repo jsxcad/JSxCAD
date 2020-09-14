@@ -4,7 +4,7 @@ import { taggedLayers } from '@jsxcad/geometry-tagged';
 
 const isDefined = (value) => value;
 
-export const Layers = (...shapes) =>
+export const Group = (...shapes) =>
   Shape.fromGeometry(
     taggedLayers(
       {},
@@ -12,6 +12,9 @@ export const Layers = (...shapes) =>
     )
   );
 
-export default Layers;
+export const Layers = Group; // Deprecated
 
-Shape.prototype.Layers = shapeMethod(Layers);
+Shape.prototype.Group = shapeMethod(Group);
+Shape.prototype.Layers = Shape.prototype.Group; // Deprecated
+
+export default Group;

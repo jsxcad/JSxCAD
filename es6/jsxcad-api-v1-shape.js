@@ -915,16 +915,17 @@ Shape.prototype.kept = keptMethod;
 kept.signature = 'kept(shape:Shape) -> Shape';
 keptMethod.signature = 'Shape -> kept() -> Shape';
 
-const layer = (...shapes) =>
+const group = (...shapes) =>
   Shape.fromGeometry(
     taggedLayers({}, ...shapes.map((shape) => shape.toGeometry()))
   );
 
-const layerMethod = function (...shapes) {
-  return layer(this, ...shapes);
+const groupMethod = function (...shapes) {
+  return group(this, ...shapes);
 };
-Shape.prototype.layer = layerMethod;
-Shape.prototype.and = layerMethod;
+Shape.prototype.group = groupMethod;
+Shape.prototype.layer = Shape.prototype.group;
+Shape.prototype.and = groupMethod;
 
 const laserPower = (shape, level) =>
   Shape.fromGeometry(

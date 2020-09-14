@@ -1,11 +1,26 @@
 import Shape$1, { Shape, shapeMethod } from './jsxcad-api-v1-shape.js';
+import { taggedLayers, taggedAssembly, taggedZ0Surface, taggedSolid, getAnySurfaces, getPaths, taggedDisjointAssembly, taggedPoints, rewriteTags } from './jsxcad-geometry-tagged.js';
 import { concatenate, rotateZ, translate as translate$1 } from './jsxcad-geometry-path.js';
 import { numbers, linear } from './jsxcad-api-v1-math.js';
-import { taggedAssembly, taggedZ0Surface, taggedSolid, getAnySurfaces, getPaths, taggedDisjointAssembly, taggedLayers, taggedPoints, rewriteTags } from './jsxcad-geometry-tagged.js';
 import { buildRegularPolygon, toRadiusFromApothem as toRadiusFromApothem$1, regularPolygonEdgeLengthToRadius, buildPolygonFromPoints, buildRegularPrism, buildFromFunction, buildFromSlices, buildRegularIcosahedron, buildRingSphere, buildRegularTetrahedron } from './jsxcad-algorithm-shape.js';
 import { translate } from './jsxcad-geometry-paths.js';
 import { add } from './jsxcad-math-vec3.js';
 import { toPolygon } from './jsxcad-math-plane.js';
+
+const isDefined = (value) => value;
+
+const Group = (...shapes) =>
+  Shape.fromGeometry(
+    taggedLayers(
+      {},
+      ...shapes.filter(isDefined).map((shape) => shape.toGeometry())
+    )
+  );
+
+const Layers = Group; // Deprecated
+
+Shape.prototype.Group = shapeMethod(Group);
+Shape.prototype.Layers = Shape.prototype.Group; // Deprecated
 
 /**
  *
@@ -59,13 +74,13 @@ Arc.ofRadius = ofRadius;
 
 Shape.prototype.Arc = shapeMethod(Arc);
 
-const isDefined = (value) => value !== undefined;
+const isDefined$1 = (value) => value !== undefined;
 
 const Assembly = (...shapes) =>
   Shape.fromGeometry(
     taggedAssembly(
       {},
-      ...shapes.filter(isDefined).map((shape) => shape.toGeometry())
+      ...shapes.filter(isDefined$1).map((shape) => shape.toGeometry())
     )
   );
 
@@ -1984,18 +1999,6 @@ const Intersection = (first, ...rest) => first.clip(...rest);
 
 Shape.prototype.Intersection = shapeMethod(Intersection);
 
-const isDefined$1 = (value) => value;
-
-const Layers = (...shapes) =>
-  Shape.fromGeometry(
-    taggedLayers(
-      {},
-      ...shapes.filter(isDefined$1).map((shape) => shape.toGeometry())
-    )
-  );
-
-Shape.prototype.Layers = shapeMethod(Layers);
-
 const fromVec3 = (...points) =>
   Shape.fromOpenPath(points.map(([x = 0, y = 0, z = 0]) => [x, y, z]));
 
@@ -2049,7 +2052,8 @@ const Plane = (plane = [0, 0, 1, 0]) =>
 
 Shape.prototype.Plane = shapeMethod(Plane);
 
-const fromPoints$1 = (...args) => Shape.fromPoints(args);
+const fromPoints$1 = (...args) =>
+  Shape.fromPoints(args.map(([x = 0, y = 0, z = 0]) => [x, y, z]));
 
 /**
  *
@@ -2464,6 +2468,7 @@ const api = {
   Cylinder,
   Difference,
   Empty,
+  Group,
   Hershey,
   Hexagon,
   Icosahedron,
