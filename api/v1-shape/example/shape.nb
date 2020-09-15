@@ -138,3 +138,107 @@ md`## shape.moveZ(z = 0)`;
 const moveZ = Square(1).moveZ(1);
 moveZ.fix().frontView();
 md`shape is moved by the specified offset.`;
+
+md`## shape.noHoles()`;
+const noHoles = Assembly(Cube(10), Cylinder(4, 10).hole()).noHoles();
+noHoles.view();
+md`Hole geometry is removed from the shape, but voids remain.`;
+
+md`## shape.op(op)`;
+const op = Cube(10).op((s) => s.color('green'));
+op.view();
+md`Applies op to shape.`;
+
+md`## shape.pauseBefore()`;
+md`Adds a pause before following the toolpath`;
+md`## shape.pauseAfter();`;
+md`Adds a pause after following the toolpath`;
+
+md`## shape.paths(op = identity)`;
+const paths = Group(...Cube(10).outline().and(Cube(10)).paths());
+paths.view();
+md`Produces an array the paths shapes in shape.`;
+
+md`## shape.peg(shapeToPeg)`;
+const peg = y.peg(Square(10));
+peg.view();
+md`Moves shapeToPeg to the origin of the peg found in shape.`;
+
+md`## shape.rotate(angle, axis = [0, 0, 1])`;
+const rotate = Cube(1, 1, 5).rotate(-45, [1, 1, 1]);
+rotate.view();
+md`Rotates shape around axis by angle.`;
+
+md`## shape.rotateX(angle)`;
+const rotateX = Cube(1, 1, 5).rotateX(45);
+rotateX.view();
+md`Rotates shape around the X axis by angle.`;
+
+md`## shape.rotateY(angle)`;
+const rotateY = Cube(1, 1, 5).rotateY(45);
+rotateY.view();
+md`Rotates shape around the Y axis by angle.`;
+
+md`## shape.rotateZ(angle)`;
+const rotateZ = Cube(1, 1, 5).rotateZ(45);
+rotateZ.view();
+md`Rotates shape around the Z axis by angle.`;
+
+md`## shape.scale(x = 1, y = x, z = y)`;
+const scale = Cube(1).scale(1, 2, 3);
+scale.view();
+md`Scales shape along the axes.`;
+
+md`## shape.size()`;
+log(JSON.stringify(Cube().size(), null, 2));
+md`Describes the dimensions of a shape.`;
+
+md`## shape.sketch()`;
+const sketch = Group(Cube(10).outline().sketch(), Cube(20));
+sketch.fix().view();
+md`Converts a shape to an overlay sketch.`;
+
+md`## shape.solids(op = identity)`;
+const solids = Group(
+  ...Group(Cube(10), Square(10)).solids((s) => s.color('orange'))
+);
+solids.view();
+md`Returns the solids of shape transformed by op;`;
+
+md`## shape.spindleRpm(rpm);`;
+md`Sets the spindle rpm for the toolpaths of shape.`;
+
+md`## shape.surfaces(op = identity)`;
+const surfaces = Group(
+  ...Group(Cube(10), Square(10)).surfaces((s) => s.color('orange'))
+);
+surfaces.view();
+md`Returns the surfaces of shape transformed by op.`;
+
+md`## shape.tags()`;
+log(Group(Circle().as('circle'), Square().as('square')).tags());
+
+md`## shape.toolpaths(op = identity)`;
+const toolpaths = Group(
+  ...Toolpath(Point(0), Point(10), Point(10, 10), Point(0, 10)).toolpaths()
+);
+toolpaths.topView();
+md`Returns the toolpaths of the shape transformed by op.`;
+
+md`## shape.trace()`;
+const trace = Square(10).outline().trace();
+trace.topView();
+md`Animates a trace along a path, when viewing interactively.`;
+
+md`## shape.wireframe()`;
+const wireframe = Cube().wireframe();
+wireframe.view();
+md`
+Shows a wireframe of a solid, exposing implementation details.
+Use shape.outline() for geometric structure
+`;
+
+md`## shape.with(...shapes)`;
+const withEx = Cube(10).with(Cylinder(6, 5).hole());
+withEx.view();
+md`Assembles shape with shapes.`;
