@@ -1,7 +1,7 @@
 import { isVoid, rewrite, taggedLayers } from '@jsxcad/geometry-tagged';
 import { Shape } from './Shape.js';
 
-const noVoid = (shape, tags, select) => {
+const noHoles = (shape, tags, select) => {
   const op = (geometry, descend) => {
     if (isVoid(geometry)) {
       return taggedLayers({});
@@ -14,7 +14,7 @@ const noVoid = (shape, tags, select) => {
   return Shape.fromGeometry(rewritten);
 };
 
-const noVoidMethod = function (...tags) {
-  return noVoid(this, tags);
+const noHolesMethod = function (...tags) {
+  return noHoles(this, tags);
 };
-Shape.prototype.noVoid = noVoidMethod;
+Shape.prototype.noHoles = noHolesMethod;

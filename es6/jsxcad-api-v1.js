@@ -8,8 +8,8 @@ import './jsxcad-api-v1-deform.js';
 import './jsxcad-api-v1-gcode.js';
 import './jsxcad-api-v1-pdf.js';
 import './jsxcad-api-v1-plans.js';
-import { Peg, Arc, Assembly, Circle, Cone, Cube, Cylinder, Difference, Empty, Hershey, Hexagon, Icosahedron, Intersection, Layers, Line, Path, Plane, Point, Points, Polygon, Polyhedron, Prism, Sphere, Spiral, Square, Tetrahedron, Torus, Triangle, Union, Void, Wave } from './jsxcad-api-v1-shapes.js';
-export { Arc, Assembly, Circle, Cone, Cube, Cylinder, Difference, Empty, Hershey, Hexagon, Icosahedron, Intersection, Layers, Line, Path, Peg, Plane, Point, Points, Polygon, Polyhedron, Prism, Sphere, Spiral, Square, Tetrahedron, Torus, Triangle, Union, Void, Wave } from './jsxcad-api-v1-shapes.js';
+import { Peg, Arc, Assembly, Circle, Cone, Cube, Cylinder, Difference, Empty, Group, Hershey, Hexagon, Icosahedron, Intersection, Layers, Line, Path, Plane, Point, Points, Polygon, Polyhedron, Prism, Sphere, Spiral, Square, Tetrahedron, Toolpath, Torus, Triangle, Union, Void, Wave } from './jsxcad-api-v1-shapes.js';
+export { Arc, Assembly, Circle, Cone, Cube, Cylinder, Difference, Empty, Group, Hershey, Hexagon, Icosahedron, Intersection, Layers, Line, Path, Peg, Plane, Point, Points, Polygon, Polyhedron, Prism, Sphere, Spiral, Square, Tetrahedron, Toolpath, Torus, Triangle, Union, Void, Wave } from './jsxcad-api-v1-shapes.js';
 import { X, Y, Z } from './jsxcad-api-v1-connector.js';
 export { X, Y, Z } from './jsxcad-api-v1-connector.js';
 import { ChainedHull, Hull, Loop } from './jsxcad-api-v1-extrude.js';
@@ -264,6 +264,7 @@ var api = /*#__PURE__*/Object.freeze({
   Cylinder: Cylinder,
   Difference: Difference,
   Empty: Empty,
+  Group: Group,
   Hershey: Hershey,
   Hexagon: Hexagon,
   Icosahedron: Icosahedron,
@@ -282,6 +283,7 @@ var api = /*#__PURE__*/Object.freeze({
   Spiral: Spiral,
   Square: Square,
   Tetrahedron: Tetrahedron,
+  Toolpath: Toolpath,
   Torus: Torus,
   Triangle: Triangle,
   Union: Union,

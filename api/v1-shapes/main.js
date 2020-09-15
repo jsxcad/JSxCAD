@@ -79,6 +79,7 @@ export {
   Cylinder,
   Difference,
   Empty,
+  Group,
   Hershey,
   Hexagon,
   Icosahedron,

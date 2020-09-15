@@ -61,7 +61,7 @@ const unitSquare = () =>
     .scale(edgeScale);
 
 export const ofSize = (width = 1, length) =>
-  unitSquare().scale([width, length === undefined ? width : length, 1]);
+  unitSquare().scale(width, length, 1);
 export const ofRadius = (radius) =>
   Shape.fromGeometry(taggedZ0Surface({}, [buildRegularPolygon(4)]))
     .rotateZ(45)
@@ -75,7 +75,7 @@ export const fromCorners = (corner1, corner2) => {
   const length = c2x - c1x;
   const width = c2y - c1y;
   const center = [(c1x + c2x) / 2, (c1y + c2y) / 2];
-  return unitSquare().scale([length, width]).translate(center);
+  return unitSquare().scale(length, width, 1).translate(center);
 };
 
 export const Square = (...args) => ofSize(...args);
