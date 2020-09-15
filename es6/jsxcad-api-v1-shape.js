@@ -1,14 +1,13 @@
 import { close, concatenate, open } from './jsxcad-geometry-path.js';
-import { taggedAssembly, eachPoint, flip, toDisjointGeometry as toDisjointGeometry$1, toTransformedGeometry, toPoints, transform, reconcile, isWatertight, makeWatertight, taggedPaths, fromPathToSurface, fromPathsToSurface, taggedPoints, taggedSolid, taggedSurface, union as union$1, rewriteTags, assemble as assemble$1, canonicalize as canonicalize$1, measureBoundingBox as measureBoundingBox$1, intersection as intersection$1, allTags, difference as difference$1, getSolids, taggedDisjointAssembly, outline, fix as fix$1, rewrite, taggedLayers, isVoid, getNonVoidPaths, getPeg, getNonVoidSolids, getAnyNonVoidSurfaces, measureArea, taggedSketch, getPaths, getNonVoidSurfaces, getNonVoidZ0Surfaces } from './jsxcad-geometry-tagged.js';
+import { taggedAssembly, eachPoint, flip, toDisjointGeometry as toDisjointGeometry$1, toTransformedGeometry, toPoints, transform, reconcile, isWatertight, makeWatertight, taggedPaths, fromPathToSurface, fromPathsToSurface, taggedPoints, taggedSolid, taggedSurface, union as union$1, rewriteTags, canonicalize as canonicalize$1, measureBoundingBox as measureBoundingBox$1, intersection as intersection$1, allTags, difference as difference$1, getSolids, fix as fix$1, rewrite, taggedLayers, isVoid, assemble as assemble$1, getNonVoidPaths, getPeg, measureArea, taggedSketch, getNonVoidSolids, getAnyNonVoidSurfaces, getPaths, getNonVoidSurfaces, getNonVoidZ0Surfaces } from './jsxcad-geometry-tagged.js';
 import { fromPolygons, findOpenEdges, fromSurface } from './jsxcad-geometry-solid.js';
 import { scale as scale$1, add, negate, normalize, subtract, dot, cross, distance } from './jsxcad-math-vec3.js';
 import { toTagFromName } from './jsxcad-algorithm-color.js';
 import { createNormalize3 } from './jsxcad-algorithm-quantize.js';
 import { junctionSelector } from './jsxcad-geometry-halfedge.js';
-import { emit, addPending, writeFile, read, write, log as log$1 } from './jsxcad-sys.js';
 import { fromTranslation, fromRotation, fromXRotation, fromYRotation, fromZRotation, fromScaling } from './jsxcad-math-mat4.js';
 import { fromPoints, toXYPlaneTransforms } from './jsxcad-math-plane.js';
-import { fromPlane, toPlane } from './jsxcad-geometry-surface.js';
+import { emit, addPending, writeFile, read, write, log as log$1 } from './jsxcad-sys.js';
 import { segment } from './jsxcad-geometry-paths.js';
 
 class Shape {
@@ -246,8 +245,6 @@ const addToMethod = function (shape) {
 };
 Shape.prototype.addTo = addToMethod;
 
-addToMethod.signature = 'Shape -> (...Shapes) -> Shape';
-
 /**
  *
  * # As
@@ -292,73 +289,6 @@ Shape.prototype.notAs = notAsMethod;
 
 asMethod.signature = 'Shape -> as(...tags:string) -> Shape';
 notAsMethod.signature = 'Shape -> as(...tags:string) -> Shape';
-
-/**
- *
- * # Assemble
- *
- * Produces an assembly of shapes that can be manipulated as a single shape.
- * assemble(a, b) is equivalent to a.with(b).
- *
- * ::: illustration { "view": { "position": [80, 80, 80] } }
- * ```
- * assemble(Circle(20).moveZ(-12),
- *          Square(40).moveZ(16).outline(),
- *          Cylinder(10, 20));
- * ```
- * :::
- *
- * Components of the assembly can be extracted by tag filtering.
- *
- * Components later in the assembly project holes into components earlier in the
- * assembly so that the geometries are disjoint.
- *
- * ::: illustration { "view": { "position": [100, 100, 100] } }
- * ```
- * assemble(Cube(30).above().as('cube'),
- *          Cylinder(10, 40).above().as('cylinder'))
- * ```
- * :::
- * ::: illustration { "view": { "position": [100, 100, 100] } }
- * ```
- * assemble(Cube(30).above().as('cube'),
- *          Cylinder(10, 40).above().as('cylinder'))
- *   .keep('cube')
- * ```
- * :::
- * ::: illustration { "view": { "position": [100, 100, 100] } }
- * ```
- * assemble(Cube(30).above().as('cube'),
- *          assemble(Circle(40),
- *                   Circle(50).outline()).as('circles'))
- *   .keep('circles')
- * ```
- * :::
- * ::: illustration { "view": { "position": [100, 100, 100] } }
- * ```
- * assemble(Cube(30).above().as('cube'),
- *          assemble(Circle(40).as('circle'),
- *                   Circle(50).outline().as('outline')))
- *   .drop('outline')
- * ```
- * :::
- *
- **/
-
-const assemble = (...shapes) => {
-  shapes = shapes.filter((shape) => shape !== undefined);
-  switch (shapes.length) {
-    case 0: {
-      return Shape.fromGeometry(taggedAssembly({}));
-    }
-    case 1: {
-      return shapes[0];
-    }
-    default: {
-      return fromGeometry(assemble$1(...shapes.map(toGeometry)));
-    }
-  }
-};
 
 const X = 0;
 const Y = 1;
@@ -696,16 +626,11 @@ const faces = (shape, op = (x) => x) => {
   for (const { solid } of getSolids(shape.toKeptGeometry())) {
     for (const surface of solid) {
       faces.push(
-        op(
-          Shape.fromGeometry(
-            taggedDisjointAssembly({}, ...outline(taggedSurface({}, surface)))
-          ),
-          faces.length
-        )
+        op(Shape.fromGeometry(taggedSurface({}, surface)), faces.length)
       );
     }
   }
-  return assemble(...faces);
+  return faces;
 };
 
 const facesMethod = function (...args) {
@@ -749,9 +674,6 @@ const inSolidsMethod = function (...args) {
   return inSolids(this, ...args);
 };
 Shape.prototype.inSolids = inSolidsMethod;
-
-inSolids.signature = 'inSolids(shape:Shape, op:function) -> Shapes';
-inSolidsMethod.signature = 'Shape -> inSolids(op:function) -> Shapes';
 
 const junctions = (shape, mode = (n) => n) => {
   const junctions = [];
@@ -897,24 +819,6 @@ const dropMethod = function (...tags) {
 };
 Shape.prototype.drop = dropMethod;
 
-/**
- *
- * # Kept
- *
- * Kept produces a geometry without dropped elements.
- *
- **/
-
-const kept = (shape) => Shape.fromGeometry(toKeptGeometry(shape));
-
-const keptMethod = function () {
-  return kept(this);
-};
-Shape.prototype.kept = keptMethod;
-
-kept.signature = 'kept(shape:Shape) -> Shape';
-keptMethod.signature = 'Shape -> kept() -> Shape';
-
 const group = (...shapes) =>
   Shape.fromGeometry(
     taggedLayers({}, ...shapes.map((shape) => shape.toGeometry()))
@@ -969,38 +873,6 @@ Shape.prototype.material = materialMethod;
 
 material.signature = 'material(shape:Shape) -> Shape';
 materialMethod.signature = 'Shape -> material() -> Shape';
-
-/**
- *
- * # Measure Center
- *
- * Provides the center of the smallest orthogonal box containing the shape.
- *
- * ::: illustration { "view": { "position": [40, 40, 40] } }
- * ```
- * Sphere(7)
- * ```
- * :::
- **/
-
-const measureCenter = (shape) => {
-  // FIX: Produce a clearer definition of center.
-  const geometry = shape.toKeptGeometry();
-  if (geometry.plan && geometry.plan.connector) {
-    // Return the center of the connector.
-    return geometry.marks[0];
-  }
-  const [high, low] = measureBoundingBox(shape);
-  return scale$1(0.5, add(high, low));
-};
-
-const measureCenterMethod = function () {
-  return measureCenter(this);
-};
-Shape.prototype.measureCenter = measureCenterMethod;
-
-measureCenter.signature = 'measureCenter(shape:Shape) -> vector';
-measureCenterMethod.signature = 'Shape -> measureCenter() -> vector';
 
 /**
  *
@@ -1115,25 +987,7 @@ Shape.prototype.moveZ = moveZMethod;
 moveZ.signature = 'moveZ(shape:Shape, z:number = 0) -> Shape';
 moveZMethod.signature = 'Shape -> moveZ(z:number = 0) -> Shape';
 
-const noPlan = (shape, tags, select) => {
-  const op = (geometry, descend) => {
-    if (geometry.plan) {
-      return taggedLayers({});
-    } else {
-      return descend();
-    }
-  };
-
-  const rewritten = rewrite(shape.toKeptGeometry(), op);
-  return Shape.fromGeometry(rewritten);
-};
-
-const noPlanMethod = function (...tags) {
-  return noPlan(this);
-};
-Shape.prototype.noPlan = noPlanMethod;
-
-const noVoid = (shape, tags, select) => {
+const noHoles = (shape, tags, select) => {
   const op = (geometry, descend) => {
     if (isVoid(geometry)) {
       return taggedLayers({});
@@ -1146,10 +1000,77 @@ const noVoid = (shape, tags, select) => {
   return Shape.fromGeometry(rewritten);
 };
 
-const noVoidMethod = function (...tags) {
-  return noVoid(this);
+const noHolesMethod = function (...tags) {
+  return noHoles(this);
 };
-Shape.prototype.noVoid = noVoidMethod;
+Shape.prototype.noHoles = noHolesMethod;
+
+/**
+ *
+ * # Assemble
+ *
+ * Produces an assembly of shapes that can be manipulated as a single shape.
+ * assemble(a, b) is equivalent to a.with(b).
+ *
+ * ::: illustration { "view": { "position": [80, 80, 80] } }
+ * ```
+ * assemble(Circle(20).moveZ(-12),
+ *          Square(40).moveZ(16).outline(),
+ *          Cylinder(10, 20));
+ * ```
+ * :::
+ *
+ * Components of the assembly can be extracted by tag filtering.
+ *
+ * Components later in the assembly project holes into components earlier in the
+ * assembly so that the geometries are disjoint.
+ *
+ * ::: illustration { "view": { "position": [100, 100, 100] } }
+ * ```
+ * assemble(Cube(30).above().as('cube'),
+ *          Cylinder(10, 40).above().as('cylinder'))
+ * ```
+ * :::
+ * ::: illustration { "view": { "position": [100, 100, 100] } }
+ * ```
+ * assemble(Cube(30).above().as('cube'),
+ *          Cylinder(10, 40).above().as('cylinder'))
+ *   .keep('cube')
+ * ```
+ * :::
+ * ::: illustration { "view": { "position": [100, 100, 100] } }
+ * ```
+ * assemble(Cube(30).above().as('cube'),
+ *          assemble(Circle(40),
+ *                   Circle(50).outline()).as('circles'))
+ *   .keep('circles')
+ * ```
+ * :::
+ * ::: illustration { "view": { "position": [100, 100, 100] } }
+ * ```
+ * assemble(Cube(30).above().as('cube'),
+ *          assemble(Circle(40).as('circle'),
+ *                   Circle(50).outline().as('outline')))
+ *   .drop('outline')
+ * ```
+ * :::
+ *
+ **/
+
+const assemble = (...shapes) => {
+  shapes = shapes.filter((shape) => shape !== undefined);
+  switch (shapes.length) {
+    case 0: {
+      return Shape.fromGeometry(taggedAssembly({}));
+    }
+    case 1: {
+      return shapes[0];
+    }
+    default: {
+      return fromGeometry(assemble$1(...shapes.map(toGeometry)));
+    }
+  }
+};
 
 const opMethod = function (op, ...args) {
   return op(this, ...args);
@@ -1298,42 +1219,6 @@ const shapeMethod = (build) => {
   };
 };
 
-const planes = (shape) => {
-  const pieces = [];
-  for (const { solid, tags } of getNonVoidSolids(shape.toDisjointGeometry())) {
-    for (const surface of solid) {
-      pieces.push(
-        Shape.fromGeometry(
-          taggedSurface(
-            { tags },
-            fromPlane(toPlane(surface))
-          )
-        )
-      );
-    }
-  }
-  for (const { surface, z0Surface, tags } of getAnyNonVoidSurfaces(
-    shape.toDisjointGeometry()
-  )) {
-    const thisSurface = surface || z0Surface;
-    pieces.push(
-      Shape.fromGeometry(
-        taggedSurface(
-          { tags },
-          fromPlane(toPlane(thisSurface))
-        )
-      )
-    );
-  }
-
-  return pieces;
-};
-
-const planesMethod = function () {
-  return planes(this);
-};
-Shape.prototype.planes = planesMethod;
-
 /**
  *
  * # Rotate
@@ -1443,40 +1328,11 @@ const rotateZMethod = function (angle) {
 };
 Shape.prototype.rotateZ = rotateZMethod;
 
-/**
- *
- * # Scale
- *
- * Scales an object uniformly or per axis.
- *
- * ::: illustration { "view": { "position": [10, 10, 10] } }
- * ```
- * Cube()
- * ```
- * :::
- * ::: illustration { "view": { "position": [10, 10, 10] } }
- * ```
- * Cube().scale(2)
- * ```
- * :::
- * ::: illustration { "view": { "position": [10, 10, 10] } }
- * ```
- * Cube().scale([1, 2, 3])
- * ```
- * :::
- **/
+const scale = (shape, x = 1, y = x, z = y) =>
+  shape.transform(fromScaling([x, y, z]));
 
-const scale = (factor, shape) => {
-  if (factor.length) {
-    const [x = 1, y = 1, z = 1] = factor;
-    return shape.transform(fromScaling([x, y, z]));
-  } else {
-    return shape.transform(fromScaling([factor, factor, factor]));
-  }
-};
-
-const scaleMethod = function (factor) {
-  return scale(factor, this);
+const scaleMethod = function (x, y, z) {
+  return scale(this, x, y, z);
 };
 Shape.prototype.scale = scaleMethod;
 

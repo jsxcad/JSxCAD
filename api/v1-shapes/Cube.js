@@ -58,21 +58,17 @@ const edgeScale = regularPolygonEdgeLengthToRadius(1, 4);
 const unitCube = () =>
   Shape.fromGeometry(taggedSolid({}, buildRegularPrism(4)))
     .rotateZ(45)
-    .scale([edgeScale, edgeScale, 1]);
+    .scale(edgeScale, edgeScale, 1);
 
 // Cube Interfaces.
 
 export const ofSize = (width = 1, length, height) =>
-  unitCube().scale([
-    width,
-    length === undefined ? width : length,
-    height === undefined ? width : height,
-  ]);
+  unitCube().scale(width, length, height);
 
 export const ofRadius = (radius) =>
   Shape.fromGeometry(taggedSolid({}, buildRegularPrism(4)))
     .rotateZ(45)
-    .scale([radius, radius, radius / edgeScale]);
+    .scale(radius, radius, radius / edgeScale);
 
 export const ofApothem = (apothem) => ofRadius(toRadiusFromApothem(apothem, 4));
 
@@ -86,7 +82,7 @@ export const fromCorners = (corner1, corner2) => {
   const height = c2z - c1z;
   const center = [(c1x + c2x) / 2, (c1y + c2y) / 2, (c1z + c2z) / 2];
   return unitCube()
-    .scale([length, width, height])
+    .scale(length, width, height)
     .move(...center);
 };
 

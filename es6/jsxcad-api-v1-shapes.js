@@ -226,11 +226,11 @@ Circle.toRadiusFromApothem = (radius = 1, sides = 32) =>
 Shape.prototype.Circle = shapeMethod(Circle);
 
 const buildPrism = (radius = 1, height = 1, sides = 32) =>
-  Shape.fromGeometry(taggedSolid({}, buildRegularPrism(sides))).scale([
+  Shape.fromGeometry(taggedSolid({}, buildRegularPrism(sides))).scale(
     radius,
     radius,
-    height,
-  ]);
+    height
+  );
 
 /**
  *
@@ -354,21 +354,17 @@ const edgeScale = regularPolygonEdgeLengthToRadius(1, 4);
 const unitCube = () =>
   Shape.fromGeometry(taggedSolid({}, buildRegularPrism(4)))
     .rotateZ(45)
-    .scale([edgeScale, edgeScale, 1]);
+    .scale(edgeScale, edgeScale, 1);
 
 // Cube Interfaces.
 
 const ofSize = (width = 1, length, height) =>
-  unitCube().scale([
-    width,
-    length === undefined ? width : length,
-    height === undefined ? width : height,
-  ]);
+  unitCube().scale(width, length, height);
 
 const ofRadius$5 = (radius) =>
   Shape.fromGeometry(taggedSolid({}, buildRegularPrism(4)))
     .rotateZ(45)
-    .scale([radius, radius, radius / edgeScale]);
+    .scale(radius, radius, radius / edgeScale);
 
 const ofApothem$3 = (apothem) => ofRadius$5(toRadiusFromApothem$1(apothem, 4));
 
@@ -382,7 +378,7 @@ const fromCorners = (corner1, corner2) => {
   const height = c2z - c1z;
   const center = [(c1x + c2x) / 2, (c1y + c2y) / 2, (c1z + c2z) / 2];
   return unitCube()
-    .scale([length, width, height])
+    .scale(length, width, height)
     .move(...center);
 };
 
@@ -397,11 +393,11 @@ Cube.fromCorners = fromCorners;
 Shape.prototype.Cube = shapeMethod(Cube);
 
 const buildPrism$1 = (radius = 1, height = 1, sides = 32) =>
-  Shape.fromGeometry(taggedSolid({}, buildRegularPrism(sides))).scale([
+  Shape.fromGeometry(taggedSolid({}, buildRegularPrism(sides))).scale(
     radius,
     radius,
-    height,
-  ]);
+    height
+  );
 
 /**
  *
@@ -2233,7 +2229,7 @@ const unitSquare = () =>
     .scale(edgeScale$1);
 
 const ofSize$2 = (width = 1, length) =>
-  unitSquare().scale([width, length === undefined ? width : length, 1]);
+  unitSquare().scale(width, length, 1);
 const ofRadius$a = (radius) =>
   Shape.fromGeometry(taggedZ0Surface({}, [buildRegularPolygon(4)]))
     .rotateZ(45)
@@ -2247,7 +2243,7 @@ const fromCorners$1 = (corner1, corner2) => {
   const length = c2x - c1x;
   const width = c2y - c1y;
   const center = [(c1x + c2x) / 2, (c1y + c2y) / 2];
-  return unitSquare().scale([length, width]).translate(center);
+  return unitSquare().scale(length, width, 1).translate(center);
 };
 
 const Square = (...args) => ofSize$2(...args);
@@ -2497,4 +2493,4 @@ const api = {
 };
 
 export default api;
-export { Arc, Assembly, Circle, Cone, Cube, Cylinder, Difference, Empty, Hershey, Hexagon, Icosahedron, Intersection, Layers, Line, Path, Peg, Plane, Point, Points, Polygon, Polyhedron, Prism, Sketch, Sphere, Spiral, Square, Tetrahedron, Toolpath, Torus, Triangle, Union, hole as Void, Wave };
+export { Arc, Assembly, Circle, Cone, Cube, Cylinder, Difference, Empty, Group, Hershey, Hexagon, Icosahedron, Intersection, Layers, Line, Path, Peg, Plane, Point, Points, Polygon, Polyhedron, Prism, Sketch, Sphere, Spiral, Square, Tetrahedron, Toolpath, Torus, Triangle, Union, hole as Void, Wave };

@@ -514,11 +514,47 @@ class Ui extends React.PureComponent {
     });
   }
 
-  async doReload() {
+  async doReload(paths) {
     const cancel = () => this.setState({ modal: undefined });
-    const reload = () => this.setState({ modal: undefined });
+    const reload = async () => {
+      const { path } = this.state;
+      for (const path of paths) {
+        await deleteFile({}, `source/${path}`);
+        await read(`source/${path}`, { sources: [path] });
+      }
+      await this.loadJsEditor(path);
+      this.setState({
+        selectedPaths: [],
+        modal: undefined,
+      });
+    };
     this.setState({
-      modal: this.buildConfirm({ text: 'Reload', action: reload, cancel }),
+      modal: (
+        <Modal show={true} onHide={cancel}>
+          <Modal.Header closeButton>
+            <Modal.Title>Unload</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            Reloading will discard any local changes permanantly. This cannot be
+            undone.
+            <p />
+            Reload the following paths?
+            <ul>
+              {paths.map((path, nth) => (
+                <li key={nth}>{path}</li>
+              ))}
+            </ul>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={cancel}>
+              Cancel
+            </Button>
+            <Button variant="primary" onClick={reload}>
+              Reload
+            </Button>
+          </Modal.Footer>
+        </Modal>
+      ),
     });
   }
 
@@ -822,8 +858,8 @@ class Ui extends React.PureComponent {
           );
           navItems.push(
             <Nav key="reload" className="mr-auto">
-              <Nav.Item onClick={() => this.doReload()}>
-                <Nav.Link disabled>Reload</Nav.Link>
+              <Nav.Item onClick={() => this.doReload([path])}>
+                <Nav.Link>Reload</Nav.Link>
               </Nav.Item>
             </Nav>
           );
@@ -958,8 +994,8 @@ class Ui extends React.PureComponent {
         );
         navItems.push(
           <Nav key="reload" className="mr-auto">
-            <Nav.Item onClick={() => this.doReload()}>
-              <Nav.Link disabled>Reload</Nav.Link>
+            <Nav.Item onClick={() => this.doReload(selectedPaths)}>
+              <Nav.Link>Reload</Nav.Link>
             </Nav.Item>
           </Nav>
         );

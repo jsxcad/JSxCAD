@@ -21,7 +21,4 @@ const inSolidsMethod = function (...args) {
 };
 Shape.prototype.inSolids = inSolidsMethod;
 
-inSolids.signature = 'inSolids(shape:Shape, op:function) -> Shapes';
-inSolidsMethod.signature = 'Shape -> inSolids(op:function) -> Shapes';
-
 export default inSolids;

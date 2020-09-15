@@ -8,11 +8,11 @@ import {
 import { getPaths, taggedSolid } from '@jsxcad/geometry-tagged';
 
 const buildPrism = (radius = 1, height = 1, sides = 32) =>
-  Shape.fromGeometry(taggedSolid({}, buildRegularPrism(sides))).scale([
+  Shape.fromGeometry(taggedSolid({}, buildRegularPrism(sides))).scale(
     radius,
     radius,
-    height,
-  ]);
+    height
+  );
 
 /**
  *
