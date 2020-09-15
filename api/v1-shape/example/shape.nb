@@ -60,13 +60,17 @@ md`Shape is tagged with a constant laser output level.`;
 md`## shape.cut(...shape)`;
 const cut = Cube(10).color('blue').cut(Cylinder(4, 10).color('red'));
 cut.view();
+md`shape is restricted to not cover the space covered by shapes.`;
 
 md`## shape.cutFrom(targetShape)`;
 const cutFrom = Cube(10).color('blue').cutFrom(Cylinder(8, 10).color('red'));
 cutFrom.view();
+md`targetShape is restricted to not cover the space covered by shape.`;
 
-md`## shape.faces()`;
-md`FIX`;
+md`## shape.faces(op = identity)`;
+const faces = Group(...Prism(1, 1, { sides: 5 }).faces());
+faces.view();
+md`The faces of solids are produced as an array of surfaces transformed by op.`;
 
 md`## shape.feedRate(mmPerMinute)`;
 const feedRate = Square(10).outline().feedRate(1000).trace();
@@ -74,5 +78,63 @@ feedRate.topView();
 md`Shape is tagged with a feed rate.`;
 
 md`## shape.fix()`;
-const fix = Square(10).move(5).fix().topView();
-md`Shape uses a fixed layout without packing.`;
+const fix = Square(10).move(5).fix();
+fix.topView();
+md`Use a fixed layout for shape packing.`;
+
+md`## shape.inSolids(op = identity)`;
+const inSolids = Group(
+  Cube(10),
+  Square(20),
+  Cylinder(2, 5).move(5)
+).inSolids((s) => s.color('red'));
+inSolids.fix().view();
+md`Rewrite the solids in shape transformed by op.`;
+
+md`## shape.keep(tags)`;
+const keep = Assembly(Cube(10).as('cube'), Prism(4, 10).as('prism')).keep(
+  'cube'
+);
+keep.view();
+md`The shapes without the provided tags become holes.`;
+
+md`## shape.drop(tags)`;
+const drop = Assembly(Cube(10).as('cube'), Prism(4, 10).as('prism')).drop(
+  'prism'
+);
+drop.view();
+md`The shapes with the provided tags become holes`;
+
+md`## shape.group(...shapes)`;
+const groupMethod = Cube(10).color('orange').group(Circle(15));
+groupMethod.fix().view();
+md`shape forms a group with shapes.`;
+
+md`## shape.laserPower(level)`;
+const laserPower = Square(10).outline().laserPower(500).trace();
+laserPower.topView();
+
+md`## shape.material(name)`;
+const material = Square(10).material('copper');
+material.topView();
+md`shape is made of the named material.`;
+
+md`## shape.move(x = 0, y = 0, z = 0)`;
+const move = Square(1).move(1, 1, 1);
+move.fix().topView();
+md`shape is moved by the specified offset.`;
+
+md`## shape.moveX(x = 0)`;
+const moveX = Square(1).moveX(1);
+moveX.fix().topView();
+md`shape is moved by the specified offset.`;
+
+md`## shape.moveY(y = 0)`;
+const moveY = Square(1).moveY(1);
+moveY.fix().topView();
+md`shape is moved by the specified offset.`;
+
+md`## shape.moveZ(z = 0)`;
+const moveZ = Square(1).moveZ(1);
+moveZ.fix().frontView();
+md`shape is moved by the specified offset.`;
