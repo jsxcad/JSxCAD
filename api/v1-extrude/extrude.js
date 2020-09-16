@@ -13,40 +13,6 @@ import { Shape } from '@jsxcad/api-v1-shape';
 import { extrude as extrudeAlgorithm } from '@jsxcad/algorithm-shape';
 import { toXYPlaneTransforms } from '@jsxcad/math-plane';
 
-/**
- *
- * # Extrude
- *
- * Generates a solid from a surface by linear extrusion.
- *
- * ```
- * shape.extrude(height, depth, { twist = 0, steps = 1 })
- * ```
- *
- * ::: illustration
- * ```
- * Circle(10).cut(Circle(8))
- * ```
- * :::
- * ::: illustration { "view": { "position": [40, 40, 60] } }
- * ```
- * Circle(10).cut(Circle(8)).extrude(10)
- * ```
- * :::
- *
- * ::: illustration { "view": { "position": [40, 40, 60] } }
- * ```
- * Triangle(10).extrude(5, -2)
- * ```
- * :::
- * ::: illustration { "view": { "position": [40, 40, 60] } }
- * ```
- * Triangle(10).extrude(10, 0, { twist: 90, steps: 10 })
- * ```
- * :::
- *
- **/
-
 export const extrude = (shape, height = 1, depth = 0) => {
   if (height < depth) {
     [height, depth] = [depth, height];

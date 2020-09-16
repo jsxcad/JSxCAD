@@ -164,40 +164,6 @@ const LoopMethod = function (...args) {
 };
 Shape.prototype.Loop = LoopMethod;
 
-/**
- *
- * # Extrude
- *
- * Generates a solid from a surface by linear extrusion.
- *
- * ```
- * shape.extrude(height, depth, { twist = 0, steps = 1 })
- * ```
- *
- * ::: illustration
- * ```
- * Circle(10).cut(Circle(8))
- * ```
- * :::
- * ::: illustration { "view": { "position": [40, 40, 60] } }
- * ```
- * Circle(10).cut(Circle(8)).extrude(10)
- * ```
- * :::
- *
- * ::: illustration { "view": { "position": [40, 40, 60] } }
- * ```
- * Triangle(10).extrude(5, -2)
- * ```
- * :::
- * ::: illustration { "view": { "position": [40, 40, 60] } }
- * ```
- * Triangle(10).extrude(10, 0, { twist: 90, steps: 10 })
- * ```
- * :::
- *
- **/
-
 const extrude = (shape, height = 1, depth = 0) => {
   if (height < depth) {
     [height, depth] = [depth, height];
@@ -364,15 +330,15 @@ const minkowski = (a, b) => {
   const bPoints = [];
   a.eachPoint((point) => aPoints.push(point));
   b.eachPoint((point) => bPoints.push(point));
-  return Shape.fromGeometry(buildConvexMinkowskiSum(aPoints, bPoints));
+  return Shape.fromGeometry(
+    taggedSolid({}, buildConvexMinkowskiSum(aPoints, bPoints))
+  );
 };
 
 const minkowskiMethod = function (shape) {
   return minkowski(this, shape);
 };
 Shape.prototype.minkowski = minkowskiMethod;
-
-minkowski.signature = 'minkowski(a:Shape, b:Shape) -> Shape';
 
 /**
  *
