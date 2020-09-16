@@ -8,5 +8,7 @@ md`
 * Shape
  * [Construction](#JSxCAD@https://gitcdn.link/cdn/jsxcad/JSxCAD/master/api/v1-shapes/example/shapes.nb)
  * Operation
+   * [Deform](#JSxCAD@https://gitcdn.link/cdn/jsxcad/JSxCAD/master/api/v1-deform/example/deform.nb)
+   * [Extrude](#JSxCAD@https://gitcdn.link/cdn/jsxcad/JSxCAD/master/api/v1-extrude/example/extrude.nb)
    * [Shape](#JSxCAD@https://gitcdn.link/cdn/jsxcad/JSxCAD/master/api/v1-shape/example/shape.nb)
 `;
