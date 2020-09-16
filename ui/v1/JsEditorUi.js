@@ -197,6 +197,7 @@ export class JsEditorUi extends React.PureComponent {
           showGutter={true}
           showPrintMargin={true}
           theme="github"
+          fontSize={18}
           value={data}
           width="100%"
           wrapEnabled={true}

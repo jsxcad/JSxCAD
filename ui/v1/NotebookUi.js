@@ -67,7 +67,7 @@ export class NotebookUi extends React.PureComponent {
         ref={(value) => {
           ref = value;
         }}
-        style={{ height: '100%', overflow: 'scroll' }}
+        style={{ height: '100%', overflow: 'scroll', marginLeft: '20px' }}
       />
     );
     setTimeout(async () => {

@@ -123,6 +123,7 @@ class Ui extends React.PureComponent {
     this.doReload = this.doReload.bind(this);
     this.doRun = this.doRun.bind(this);
     this.doSave = this.doSave.bind(this);
+    this.doStop = this.doStop.bind(this);
     this.doUnload = this.doUnload.bind(this);
     this.doUpload = this.doUpload.bind(this);
   }
@@ -329,6 +330,9 @@ class Ui extends React.PureComponent {
       typeof data === 'string' ? data : new TextDecoder('utf8').decode(data);
     const notebookData = await read(`notebook/${path}`);
     this.setState({ file, path, jsEditorData, notebookData });
+
+    // Automatically run the notebook on load. The user can hit Stop.
+    await this.doRun();
   }
 
   onChangeJsEditor(data) {
@@ -624,6 +628,18 @@ class Ui extends React.PureComponent {
     });
   }
 
+  async doStop() {
+    const { running } = this.state;
+    if (!running) {
+      return;
+    }
+    try {
+      await terminateActiveServices();
+    } finally {
+      this.setState({ running: false });
+    }
+  }
+
   async doRun() {
     const { ask, file, jsEditorData, path, workspace } = this.state;
     await this.doSave();
@@ -733,6 +749,8 @@ class Ui extends React.PureComponent {
     } = this.state;
     const { sha } = this.props;
 
+    const paneWidth = Math.floor(window.innerWidth / 2);
+
     const fileChoices = [
       ...new Set(
         files
@@ -799,6 +817,13 @@ class Ui extends React.PureComponent {
             <Nav key="run" className="mr-auto">
               <Nav.Item onClick={() => this.doRun()}>
                 <Nav.Link>Run</Nav.Link>
+              </Nav.Item>
+            </Nav>
+          );
+          navItems.push(
+            <Nav key="stop" className="mr-auto">
+              <Nav.Item onClick={() => this.doStop()}>
+                <Nav.Link>Stop</Nav.Link>
               </Nav.Item>
             </Nav>
           );
@@ -874,8 +899,17 @@ class Ui extends React.PureComponent {
             panes.push(
               <div style={{ width: '100%', height: '100%', margin: '0px' }}>
                 <Col style={{ width: '100%', height: '100%' }}>
-                  <SplitPane split="vertical" defaultSize={830}>
-                    <Pane className="pane">
+                  <SplitPane split="vertical" defaultSize={paneWidth}>
+                    <Pane key="first" className="pane">
+                      <NotebookUi
+                        key={`notebook/${file}`}
+                        sha={sha}
+                        onRun={this.doRun}
+                        data={notebookData}
+                        workspace={workspace}
+                      />
+                    </Pane>
+                    <Pane key="second" className="pane">
                       <JsEditorUi
                         key={`editScript/${file}`}
                         onRun={this.doRun}
@@ -888,15 +922,6 @@ class Ui extends React.PureComponent {
                         workspace={workspace}
                       />
                     </Pane>
-                    <Pane className="pane">
-                      <NotebookUi
-                        key={`notebook/${file}`}
-                        sha={sha}
-                        onRun={this.doRun}
-                        data={notebookData}
-                        workspace={workspace}
-                      />
-                    </Pane>
                   </SplitPane>
                 </Col>
               </div>
@@ -904,8 +929,14 @@ class Ui extends React.PureComponent {
           } else if (file.endsWith('.svg')) {
             panes.push(
               <div>
-                <SplitPane split="vertical" defaultSize={830}>
-                  <Pane className="pane">
+                <SplitPane split="vertical" defaultSize={paneWidth}>
+                  <Pane key="first" className="pane">
+                    <img
+                      src={`data:image/svg+xml;base64,${btoa(jsEditorData)}`}
+                      style={{ width: '100%', height: '100%' }}
+                    />
+                  </Pane>
+                  <Pane key="second" className="pane">
                     <JsEditorUi
                       key={`editScript/${file}`}
                       onRun={this.doRun}
@@ -918,20 +949,14 @@ class Ui extends React.PureComponent {
                       workspace={workspace}
                     />
                   </Pane>
-                  <Pane className="pane">
-                    <img
-                      src={`data:image/svg+xml;base64,${btoa(jsEditorData)}`}
-                      style={{ width: '100%', height: '100%' }}
-                    />
-                  </Pane>
                 </SplitPane>
               </div>
             );
           } else if (file.endsWith('.stl')) {
             panes.push(
               <div>
-                <SplitPane split="vertical" defaultSize={830}>
-                  <Pane className="pane">
+                <SplitPane split="vertical" defaultSize={paneWidth}>
+                  <Pane key="first" className="pane">
                     <JsEditorUi
                       key={`editScript/${file}`}
                       onRun={this.doRun}
@@ -950,8 +975,13 @@ class Ui extends React.PureComponent {
           } else if (file.endsWith('.md')) {
             panes.push(
               <div>
-                <SplitPane split="vertical" defaultSize={830}>
-                  <Pane className="pane">
+                <SplitPane split="vertical" defaultSize={paneWidth}>
+                  <Pane key="first" className="pane">
+                    <div
+                      dangerouslySetInnerHTML={{ __html: marked(jsEditorData) }}
+                    />
+                  </Pane>
+                  <Pane key="second" className="pane">
                     <JsEditorUi
                       key={`editScript/${file}`}
                       onRun={this.doRun}
@@ -962,11 +992,6 @@ class Ui extends React.PureComponent {
                       file={file}
                       ask={ask}
                       workspace={workspace}
-                    />
-                  </Pane>
-                  <Pane className="pane">
-                    <div
-                      dangerouslySetInnerHTML={{ __html: marked(jsEditorData) }}
                     />
                   </Pane>
                 </SplitPane>
