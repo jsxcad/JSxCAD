@@ -19,7 +19,6 @@ const toGcode = async (
     topZ = 0,
     maxFeedRate = 800,
     minCutZ = -1,
-    cutDepth = 0.1,
     jumpHeight = 1,
     spindleRpm = 0,
     laserPower = 0,

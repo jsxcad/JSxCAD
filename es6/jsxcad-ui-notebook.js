@@ -2652,7 +2652,7 @@ const toDomElement = async (notebook = []) => {
           input.classList.add('note', 'control', 'input', 'checkbox');
           input.name = label;
           input.type = 'checkbox';
-          input.value = value;
+          input.checked = value;
           div.appendChild(input);
           break;
         }
@@ -2716,8 +2716,11 @@ const getNotebookControlData = async () => {
     for (let nthInput = 0; nthInput < inputs.length; nthInput++) {
       const input = inputs[nthInput];
       const label = input.name;
-      const value = input.value;
-      data[label] = value;
+      if (input.type === 'checkbox') {
+        data[label] = input.checked;
+      } else {
+        data[label] = input.value;
+      }
     }
   }
   return data;

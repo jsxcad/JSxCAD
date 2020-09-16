@@ -1,31 +1,20 @@
-import { Assembly } from '@jsxcad/api-v1-shapes';
+import { Group } from '@jsxcad/api-v1-shapes';
 import { Shape } from '@jsxcad/api-v1-shape';
 import { outline as outlineGeometry } from '@jsxcad/geometry-tagged';
 
-export const outline = (
-  shape,
-  { includeFaces = true, includeHoles = true } = {}
-) =>
-  Assembly(
-    ...outlineGeometry(
-      shape.toGeometry(),
-      includeFaces,
-      includeHoles
-    ).map((outline) => Shape.fromGeometry(outline))
+export const outline = (shape) =>
+  Group(
+    ...outlineGeometry(shape.toGeometry()).map((outline) =>
+      Shape.fromGeometry(outline)
+    )
   );
 
-const outlineMethod = function ({
-  includeFaces = true,
-  includeHoles = true,
-} = {}) {
-  return outline(this, { includeFaces, includeHoles });
+const outlineMethod = function () {
+  return outline(this);
 };
 
-const withOutlineMethod = function ({
-  includeFaces = true,
-  includeHoles = true,
-} = {}) {
-  return this.with(outline(this, { includeFaces, includeHoles }));
+const withOutlineMethod = function (op = (x) => x) {
+  return this.with(op(outline(this)));
 };
 
 Shape.prototype.outline = outlineMethod;

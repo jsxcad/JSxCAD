@@ -1,5 +1,5 @@
 import { buildConvexSurfaceHull, buildConvexHull, loop, extrude as extrude$1, buildConvexMinkowskiSum } from './jsxcad-algorithm-shape.js';
-import { Assembly, Layers } from './jsxcad-api-v1-shapes.js';
+import { Assembly, Group, Layers } from './jsxcad-api-v1-shapes.js';
 import Shape$1, { Shape } from './jsxcad-api-v1-shape.js';
 import { taggedSurface, taggedSolid, getPaths, getZ0Surfaces, getSurfaces, getPlans, outline as outline$1, getSolids, taggedLayers, union, taggedZ0Surface, taggedPaths, measureBoundingBox, taggedPoints, measureHeights } from './jsxcad-geometry-tagged.js';
 import { Y as Y$1, Z as Z$3 } from './jsxcad-api-v1-connector.js';
@@ -219,30 +219,19 @@ extrude.signature =
 extrudeMethod.signature =
   'Shape -> extrude(height:number = 1, depth:number = 1) -> Shape';
 
-const outline = (
-  shape,
-  { includeFaces = true, includeHoles = true } = {}
-) =>
-  Assembly(
-    ...outline$1(
-      shape.toGeometry(),
-      includeFaces,
-      includeHoles
-    ).map((outline) => Shape.fromGeometry(outline))
+const outline = (shape) =>
+  Group(
+    ...outline$1(shape.toGeometry()).map((outline) =>
+      Shape.fromGeometry(outline)
+    )
   );
 
-const outlineMethod = function ({
-  includeFaces = true,
-  includeHoles = true,
-} = {}) {
-  return outline(this, { includeFaces, includeHoles });
+const outlineMethod = function () {
+  return outline(this);
 };
 
-const withOutlineMethod = function ({
-  includeFaces = true,
-  includeHoles = true,
-} = {}) {
-  return this.with(outline(this, { includeFaces, includeHoles }));
+const withOutlineMethod = function (op = (x) => x) {
+  return this.with(op(outline(this)));
 };
 
 Shape.prototype.outline = outlineMethod;
