@@ -1,5 +1,6 @@
 import { Shape } from '@jsxcad/api-v1-shape';
 import { buildConvexMinkowskiSum } from '@jsxcad/algorithm-shape';
+import { taggedSolid } from '@jsxcad/geometry-tagged';
 
 /**
  *
@@ -22,14 +23,14 @@ export const minkowski = (a, b) => {
   const bPoints = [];
   a.eachPoint((point) => aPoints.push(point));
   b.eachPoint((point) => bPoints.push(point));
-  return Shape.fromGeometry(buildConvexMinkowskiSum(aPoints, bPoints));
+  return Shape.fromGeometry(
+    taggedSolid({}, buildConvexMinkowskiSum(aPoints, bPoints))
+  );
 };
 
 const minkowskiMethod = function (shape) {
   return minkowski(this, shape);
 };
 Shape.prototype.minkowski = minkowskiMethod;
-
-minkowski.signature = 'minkowski(a:Shape, b:Shape) -> Shape';
 
 export default minkowski;
