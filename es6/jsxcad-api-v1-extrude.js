@@ -1,7 +1,7 @@
 import { buildConvexSurfaceHull, buildConvexHull, loop, extrude as extrude$1, buildConvexMinkowskiSum } from './jsxcad-algorithm-shape.js';
+import { taggedSurface, taggedSolid, getPaths, getZ0Surfaces, getSurfaces, getPlans, outline as outline$1, getSolids, taggedLayers, union, taggedZ0Surface, taggedPaths, measureBoundingBox, taggedPoints, measureHeights } from './jsxcad-geometry-tagged.js';
 import { Assembly, Group, Layers } from './jsxcad-api-v1-shapes.js';
 import Shape$1, { Shape } from './jsxcad-api-v1-shape.js';
-import { taggedSurface, taggedSolid, getPaths, getZ0Surfaces, getSurfaces, getPlans, outline as outline$1, getSolids, taggedLayers, union, taggedZ0Surface, taggedPaths, measureBoundingBox, taggedPoints, measureHeights } from './jsxcad-geometry-tagged.js';
 import { Y as Y$1, Z as Z$3 } from './jsxcad-api-v1-connector.js';
 import { alignVertices, transform as transform$1, fromPolygons } from './jsxcad-geometry-solid.js';
 import { toPlane as toPlane$1, transform, makeConvex, flip as flip$1 } from './jsxcad-geometry-surface.js';
@@ -46,9 +46,9 @@ const ChainedHull = (...shapes) => {
   for (let nth = 1; nth < pointsets.length; nth++) {
     const points = [...pointsets[nth - 1], ...pointsets[nth]];
     if (points.every((point) => point[Z] === 0)) {
-      chain.push(Shape.fromGeometry(buildConvexSurfaceHull(points)));
+      chain.push(Shape.fromGeometry(taggedSurface({}, buildConvexSurfaceHull(points))));
     } else {
-      chain.push(Shape.fromGeometry(buildConvexHull(points)));
+      chain.push(Shape.fromGeometry(taggedSolid({}, buildConvexHull(points))));
     }
   }
   return Assembly(...chain);
@@ -58,8 +58,6 @@ const ChainedHullMethod = function (...args) {
   return ChainedHull(this, ...args);
 };
 Shape.prototype.ChainedHull = ChainedHullMethod;
-
-ChainedHull.signature = 'ChainedHull(...shapes:Shape) -> Shape';
 
 const Z$1 = 2;
 
