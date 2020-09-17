@@ -7,7 +7,8 @@ const buildConvexSurfaceHullImpl = (points) => {
   for (const nth of ConvexHull2d(points)) {
     hull.push(points[nth]);
   }
-  return { type: 'z0Surface', z0Surface: makeConvex([hull.reverse()]) };
+  // Do we need makeConvex here?
+  return makeConvex([hull.reverse()]);
 };
 
 export const buildConvexSurfaceHull = cache(buildConvexSurfaceHullImpl);

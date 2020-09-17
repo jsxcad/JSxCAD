@@ -1,4 +1,4 @@
-import { Point, Assembly, Toolpath, Cube, Cylinder } from './jsxcad-api-v1-shapes.js';
+import { Point, Assembly, Toolpath, Square, Cylinder } from './jsxcad-api-v1-shapes.js';
 import Shape, { Shape as Shape$1 } from './jsxcad-api-v1-shape.js';
 import { taggedPaths, getNonVoidPaths } from './jsxcad-geometry-tagged.js';
 import { toolpath } from './jsxcad-algorithm-toolpath.js';
@@ -7,7 +7,7 @@ const BenchPlane = (
   width = 50,
   {
     cutDepth = 0.3,
-    cutHeight = 1000,
+    cutHeight = 0,
     toolDiameter = 3.175,
     axialRate = 0.25,
     millingStyle = 'any',
@@ -76,9 +76,9 @@ const BenchPlane = (
     ...pointset.map((points) => Toolpath(...points)),
     sweep === 'no'
       ? undefined
-      : Cube(length, width, cutHeight + cutDepth)
-          .benchTop()
-          .moveZ(-depth)
+      : Square(length, width)
+          .extrude(0, depth)
+          .bench()
           .op((s) => (sweep === 'show' ? s : s.hole()))
   );
 };

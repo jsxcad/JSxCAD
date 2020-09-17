@@ -1,10 +1,10 @@
-import { Assembly, Cube, Point, Toolpath } from '@jsxcad/api-v1-shapes';
+import { Assembly, Point, Square, Toolpath } from '@jsxcad/api-v1-shapes';
 
 export const BenchPlane = (
   width = 50,
   {
     cutDepth = 0.3,
-    cutHeight = 1000,
+    cutHeight = 0,
     toolDiameter = 3.175,
     axialRate = 0.25,
     millingStyle = 'any',
@@ -73,9 +73,9 @@ export const BenchPlane = (
     ...pointset.map((points) => Toolpath(...points)),
     sweep === 'no'
       ? undefined
-      : Cube(length, width, cutHeight + cutDepth)
-          .benchTop()
-          .moveZ(-depth)
+      : Square(length, width)
+          .extrude(0, depth)
+          .bench()
           .op((s) => (sweep === 'show' ? s : s.hole()))
   );
 };
