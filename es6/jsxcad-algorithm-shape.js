@@ -6443,7 +6443,8 @@ const buildConvexSurfaceHullImpl = (points) => {
   for (const nth of monotoneConvexHull2d(points)) {
     hull.push(points[nth]);
   }
-  return { type: 'z0Surface', z0Surface: makeConvex([hull.reverse()]) };
+  // Do we need makeConvex here?
+  return makeConvex([hull.reverse()]);
 };
 
 const buildConvexSurfaceHull = cache$1(buildConvexSurfaceHullImpl);

@@ -2,6 +2,7 @@ import {
   buildConvexHull,
   buildConvexSurfaceHull,
 } from '@jsxcad/algorithm-shape';
+import { taggedSolid, taggedSurface } from '@jsxcad/geometry-tagged';
 
 import { Assembly } from '@jsxcad/api-v1-shapes';
 import { Shape } from '@jsxcad/api-v1-shape';
@@ -38,9 +39,9 @@ export const ChainedHull = (...shapes) => {
   for (let nth = 1; nth < pointsets.length; nth++) {
     const points = [...pointsets[nth - 1], ...pointsets[nth]];
     if (points.every((point) => point[Z] === 0)) {
-      chain.push(Shape.fromGeometry(buildConvexSurfaceHull(points)));
+      chain.push(Shape.fromGeometry(taggedSurface({}, buildConvexSurfaceHull(points))));
     } else {
-      chain.push(Shape.fromGeometry(buildConvexHull(points)));
+      chain.push(Shape.fromGeometry(taggedSolid({}, buildConvexHull(points))));
     }
   }
   return Assembly(...chain);
@@ -50,7 +51,5 @@ const ChainedHullMethod = function (...args) {
   return ChainedHull(this, ...args);
 };
 Shape.prototype.ChainedHull = ChainedHullMethod;
-
-ChainedHull.signature = 'ChainedHull(...shapes:Shape) -> Shape';
 
 export default ChainedHull;
