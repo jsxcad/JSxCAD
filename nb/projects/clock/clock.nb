@@ -1,0 +1,74 @@
+import { readFont } from '@jsxcad/api-v1-font';
+
+md`
+# Clock
+
+This is a simple project to produce a clock.
+
+## Clock Display
+
+We want to produce a display something like this.
+
+<img src="https://upload.wikimedia.org/wikipedia/commons/a/a4/Wecker_mit_Radium.jpg" width="256">
+
+## Parameters
+`;
+
+const face = {
+  faceRadius: await numberBox('face radius', 90),
+  axleRadius: await numberBox('axle radius', 5),
+  thickness: await numberBox('thickness', 3),
+  fontSize: await numberBox('font size', 20),
+};
+
+md`## Parts`;
+
+const hourHand = { face, reach: 0.75, tipRadius: 1.75, thickness: 3 };
+const minuteHand = { face, reach: 0.9, tipRadius: 1.5, thickness: 3 };
+const clock = { face, hourHand, minuteHand };
+
+const Hand = ({ reach, tipRadius, face, axleRadius, thickness }) =>
+  Hull(
+    Circle(face.axleRadius + 2.5),
+    Circle(tipRadius).move(reach * face.faceRadius)
+  ).cut(Circle(face.axleRadius));
+
+const aladinRegular = await readFont(
+  'https://gitcdn.link/repo/google/fonts/master/ofl/aladin/Aladin-Regular.ttf'
+);
+
+const font = (c) => aladinRegular(face.fontSize)(c).outline().center();
+
+const Face = ({ axleRadius, faceRadius, thickness, fontSize }) =>
+  Circle(faceRadius)
+    .cut(Circle(axleRadius))
+    .and(
+      ...numbers(
+        (n) =>
+          font(`${n}`)
+            .moveY(faceRadius - fontSize)
+            .rotate((-n / 12) * 360),
+        { from: 1, to: 12 }
+      )
+    );
+
+Face(face).fix().topView();
+md`The clock face.`;
+
+Hand(hourHand).withOutline().fix().topView();
+md`The hour hand.`;
+
+Hand(minuteHand).withOutline().fix().topView();
+md`The minute hand.`;
+
+const Clock = ({ face, hourHand, minuteHand }) =>
+  Group(
+    Face(face),
+    Hand(hourHand).rotate(45).moveZ(face.thickness),
+    Hand(minuteHand).moveZ(face.thickness + hourHand.thickness)
+  );
+
+md`## Assembly`;
+
+Clock(clock).withOutline().fix().topView();
+md`A complete clock.`;
