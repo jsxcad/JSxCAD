@@ -1,0 +1,12 @@
+md`
+# Known Defects
+
+A while back we switched the geometry to require watertight 2-manifold structure.
+
+A number of operations are failing as a result of this.
+
+These defects are being worked on.
+`;
+
+md`## Cylinder touching Cube`;
+Cube(10).cut(Cylinder(5, 10)).view();
