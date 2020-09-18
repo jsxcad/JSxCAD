@@ -1,0 +1,25 @@
+md`# Complex Construction`;
+
+md`## Assembly(...shapes)`;
+const assembly = Assembly(Square(20), Triangle(5));
+assembly.topView();
+md`An assembly of a 20x20 square and a triangle of length 5.`;
+
+md`## Difference(...shapes)`;
+const difference = Difference(Square(20), Triangle(5));
+difference.topView();
+md`A 20x20 square with a triangle of size 5 removed.`;
+
+md`## Group(...shapes)`;
+const group = Group(Square(20), Triangle(5));
+group.topView();
+
+md`## Intersection(...shapes)`;
+const intersection = Intersection(Cube(10), Sphere(7));
+intersection.view();
+md`The intersection of a 10x10x10 Cube and a Sphere of radius 7.`;
+
+md`## Union(...shapes)`;
+const union = Union(Triangle(10), Circle(4));
+union.topView();
+md`A union of a triangle and a circle.`;
