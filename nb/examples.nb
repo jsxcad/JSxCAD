@@ -19,7 +19,7 @@ md`
      * [Deform](#JSxCAD@https://gitcdn.link/cdn/jsxcad/JSxCAD/master/api/v1-deform/example/deform.nb)
      * [Extrude](#JSxCAD@https://gitcdn.link/cdn/jsxcad/JSxCAD/master/api/v1-extrude/example/extrude.nb)
      * [Shape](#JSxCAD@https://gitcdn.link/cdn/jsxcad/JSxCAD/master/api/v1-shape/example/shape.nb)
+     * [Shell](#JSxCAD@https://gitcdn.link/cdn/jsxcad/JSxCAD/master/api/v1-shell/example/shell.nb)
  * [Tools](#JSxCAD@https://gitcdn.link/cdn/jsxcad/JSxCAD/master/api/v1-tools/example/tools.nb)
-
 * [Projects](#JSxCAD@https://gitcdn.link/cdn/jsxcad/JSxCAD/master/nb/projects/index.nb)
 `;
