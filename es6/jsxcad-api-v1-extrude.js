@@ -46,7 +46,9 @@ const ChainedHull = (...shapes) => {
   for (let nth = 1; nth < pointsets.length; nth++) {
     const points = [...pointsets[nth - 1], ...pointsets[nth]];
     if (points.every((point) => point[Z] === 0)) {
-      chain.push(Shape.fromGeometry(taggedSurface({}, buildConvexSurfaceHull(points))));
+      chain.push(
+        Shape.fromGeometry(taggedSurface({}, buildConvexSurfaceHull(points)))
+      );
     } else {
       chain.push(Shape.fromGeometry(taggedSolid({}, buildConvexHull(points))));
     }
