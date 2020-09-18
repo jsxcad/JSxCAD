@@ -8,10 +8,17 @@ const mill = {
   toolDiameter: 1,
   millingStyle: 'conventional',
   sweep: 'show',
+  toolType: 'spindle',
+  minCutZ: -10,
+  axialRate: 1,
 };
 
 md`## BenchPlane(width, tool)(length, depth)`;
-BenchPlane(5, mill)(10, 2).fix().view();
+BenchPlane(5, mill)(10, 2)
+  .with(Square(10, 5).outline().sketch().bench())
+  .fix()
+  .view()
+  .downloadGcode('bench_plane', mill);
 md`This shows the volume removed by the plane and a milling toolpath to achieve it.`;
 
 md`## BenchSaw(width, tool)(length, depth)`;
