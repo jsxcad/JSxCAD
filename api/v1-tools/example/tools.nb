@@ -46,3 +46,15 @@ ProfileRouter(10, { ...mill, sweep: 'no' })(Triangle(20).bench())
   .fix()
   .view();
 md`The ProfileRouter cuts around the outside of a shape.`;
+
+md`## Bevel(shape)(length)`;
+const Bevel = (shape) => (on, length) =>
+  on.rotate(90).bench().cut(shape.extrude(length));
+const roundBevel = Bevel(y.Circle());
+Cube(10)
+  .op(roundBevel, 10)
+  .op(roundBevel, 10)
+  .op(roundBevel, 10)
+  .op(roundBevel, 10)
+  .fix()
+  .view();
