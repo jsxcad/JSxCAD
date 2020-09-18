@@ -10,17 +10,18 @@ export const BenchPlane = (
     millingStyle = 'any',
     sweep = 'cut',
   } = {}
-) => (length, depth) => {
+) => (length, depth, { x = 0, y = 0, z = 0 } = {}) => {
   let points = [];
   const pointset = [points];
   const toolRadius = toolDiameter / 2;
-  const advances = Math.ceil(length / (toolDiameter * axialRate));
-  const actualAdvance = length / advances;
+  const minX = toolRadius;
+  const maxX = length - toolRadius;
+  const advances = Math.ceil((maxX - minX) / (toolDiameter * axialRate));
+  const xAdvance = (maxX - minX) / advances;
   // An extra leveling pass at the end if we ramp.
   const cuts = Math.ceil(depth / Math.min(depth, cutDepth));
   const actualCut = depth / cuts;
-  for (let advance = 0; advance < advances; advance++) {
-    const x = toolRadius + advance * actualAdvance;
+  for (let x = toolRadius; x <= maxX; x += xAdvance) {
     for (let cut = 0; cut < cuts; cut++) {
       const startZ = Math.max(0 - actualCut * cut, 0 - depth);
       const endZ = Math.max(startZ - actualCut, 0 - depth);
@@ -77,7 +78,7 @@ export const BenchPlane = (
           .extrude(0, depth)
           .bench()
           .op((s) => (sweep === 'show' ? s : s.hole()))
-  );
+  ).move(x, y, z);
 };
 
 export default BenchPlane;

@@ -2043,8 +2043,8 @@ const Peg = (
 Shape.prototype.Peg = shapeMethod(Peg);
 
 // These are just excessively large polygons, which approximate planes.
-const Plane = (plane = [0, 0, 1, 0]) =>
-  Shape.fromPathToSurface(toPolygon(plane));
+const Plane = (x = 0, y = 0, z = 1, w = 0) =>
+  Shape.fromPathToSurface(toPolygon([x, y, z, w]));
 
 Shape.prototype.Plane = shapeMethod(Plane);
 

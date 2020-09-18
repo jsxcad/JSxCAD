@@ -1,0 +1,33 @@
+import { readSvg } from '@jsxcad/api-v1-svg';
+
+md`A self-intersecting path.`;
+
+const fill = (p) =>
+  Assembly(
+    p.offset(-0.5),
+    p.offset(-1),
+    p.offset(-1.5),
+    p.offset(-2),
+    p.offset(-2.5),
+    p.offset(-3),
+    p.offset(-3.5),
+    p.offset(-4),
+    p.offset(-4.5),
+    p.offset(-5),
+    p.offset(-5.5),
+    )
+  .Item();
+
+const pentagram = Path(...numbers(a => Point(10).rotate(a * 216), { to: 4 })).close();
+
+pentagram.op(fill).topView();
+
+Square(20).cut(Triangle(15).move(5)).outline().op(fill).topView();
+
+Circle(20).cut(Circle(20).move(10)).outline().op(fill).topView();
+
+return;
+
+const dinosaur = await readSvg('offset/dinosaur.svg');
+const silhouette = dinosaur.outline().scale(0.02);
+silhouette.offset(1).topView();
