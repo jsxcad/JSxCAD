@@ -58,3 +58,21 @@ Cube(10)
   .op(roundBevel, 10)
   .fix()
   .view();
+
+const stepBevel = Bevel(y.Square());
+Cube(10)
+  .op(stepBevel, 10)
+  .op(stepBevel, 10)
+  .op(stepBevel, 10)
+  .op(stepBevel, 10)
+  .fix()
+  .view();
+
+const angleBevel = Bevel(y.Square(1).rotateY(45));
+Cube(10)
+  .op(angleBevel, 10)
+  .op(angleBevel, 10)
+  .op(angleBevel, 10)
+  .op(angleBevel, 10)
+  .fix()
+  .view();
