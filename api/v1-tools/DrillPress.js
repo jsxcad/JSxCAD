@@ -3,7 +3,7 @@ import { Assembly, Cylinder, Point, Toolpath } from '@jsxcad/api-v1-shapes';
 export const DrillPress = (
   diameter = 10,
   { toolDiameter = 3.175, cutDepth = 0.3, sides = 16, sweep = 'cut' } = {}
-) => (depth = 0, x = 0, y = 0) => {
+) => (depth = 0, { x = 0, y = 0, z = 0 }) => {
   const radius = diameter / 2;
   const points = [];
   const toolRadius = toolDiameter / 2;
@@ -40,7 +40,7 @@ export const DrillPress = (
       : Cylinder.ofDiameter(diameter, depth)
           .op((s) => (sweep === 'show' ? s : s.hole()))
           .moveZ(depth / -2)
-  ).move(x, y);
+  ).move(x, y, z);
 };
 
 export default DrillPress;
