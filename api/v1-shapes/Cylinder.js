@@ -14,40 +14,6 @@ const buildPrism = (radius = 1, height = 1, sides = 32) =>
     height
   );
 
-/**
- *
- * # Cylinder
- *
- * Generates cylinders.
- *
- * ::: illustration { "view": { "position": [10, 10, 10] } }
- * ```
- * Cylinder()
- * ```
- * :::
- * ::: illustration { "view": { "position": [40, 40, 40] } }
- * ```
- * Cylinder(10, 5)
- * ```
- * :::
- * ::: illustration { "view": { "position": [40, 40, 40] } }
- * ```
- * Cylinder.ofRadius(6, 10, { sides: 8 })
- * ```
- * :::
- * ::: illustration { "view": { "position": [40, 40, 40] } }
- * ```
- * Cylinder.ofApothem(6, 10, { sides: 8 })
- * ```
- * :::
- * ::: illustration { "view": { "position": [40, 40, 40] } }
- * ```
- * Cylinder.ofDiameter(6, 8, { sides: 16 })
- * ```
- * :::
- *
- **/
-
 export const ofRadius = (radius = 1, height = 1, { sides = 32 } = {}) =>
   buildPrism(radius, height, sides);
 export const ofApothem = (apothem = 1, height = 1, { sides = 32 } = {}) =>
@@ -87,4 +53,7 @@ Cylinder.ofSlices = ofSlices;
 
 export default Cylinder;
 
+export const Rod = Cylinder;
+
 Shape.prototype.Cylinder = shapeMethod(Cylinder);
+Shape.prototype.Rod = shapeMethod(Rod);

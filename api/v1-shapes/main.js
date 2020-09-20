@@ -1,11 +1,12 @@
+import { Ball, Sphere } from './Sphere.js';
+import { Box, Cube } from './Cube.js';
+import { Cylinder, Rod } from './Cylinder.js';
 import { Group, Layers } from './Group.js';
 
 import Arc from './Arc.js';
 import Assembly from './Assembly.js';
 import Circle from './Circle.js';
 import Cone from './Cone.js';
-import Cube from './Cube.js';
-import Cylinder from './Cylinder.js';
 import Difference from './Difference.js';
 import Empty from './Empty.js';
 import Hershey from './Hershey.js';
@@ -22,7 +23,6 @@ import Polygon from './Polygon.js';
 import Polyhedron from './Polyhedron.js';
 import Prism from './Prism.js';
 import Sketch from './Sketch.js';
-import Sphere from './Sphere.js';
 import Spiral from './Spiral.js';
 import Square from './Square.js';
 import Tetrahedron from './Tetrahedron.js';
@@ -30,12 +30,13 @@ import Toolpath from './Toolpath.js';
 import Torus from './Torus.js';
 import Triangle from './Triangle.js';
 import Union from './Union.js';
-import Void from './Void.js';
 import Wave from './Wave.js';
 
 const api = {
   Arc,
   Assembly,
+  Ball,
+  Box,
   Circle,
   Cone,
   Cube,
@@ -57,6 +58,7 @@ const api = {
   Polygon,
   Polyhedron,
   Prism,
+  Rod,
   Sketch,
   Sphere,
   Spiral,
@@ -66,13 +68,14 @@ const api = {
   Torus,
   Triangle,
   Union,
-  Void,
   Wave,
 };
 
 export {
   Arc,
   Assembly,
+  Ball,
+  Box,
   Circle,
   Cone,
   Cube,
@@ -94,6 +97,7 @@ export {
   Polygon,
   Polyhedron,
   Prism,
+  Rod,
   Sketch,
   Sphere,
   Spiral,
@@ -103,7 +107,6 @@ export {
   Torus,
   Triangle,
   Union,
-  Void,
   Wave,
 };
 

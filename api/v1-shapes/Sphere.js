@@ -3,35 +3,6 @@ import { buildRingSphere, toRadiusFromApothem } from '@jsxcad/algorithm-shape';
 
 import { taggedSolid } from '@jsxcad/geometry-tagged';
 
-/**
- *
- * # Sphere
- *
- * Generates spheres.
- *
- * ::: illustration { "view": { "position": [5, 5, 5] } }
- * ```
- * Sphere()
- * ```
- * :::
- * ::: illustration { "view": { "position": [60, 60, 60] } }
- * ```
- * Sphere(10)
- * ```
- * :::
- * ::: illustration { "view": { "position": [40, 40, 40] } }
- * ```
- * Sphere({ radius: 8, resolution: 5 })
- * ```
- * :::
- * ::: illustration { "view": { "position": [40, 40, 40] } }
- * ```
- * Sphere({ diameter: 16, resolution: 64 })
- * ```
- * :::
- *
- **/
-
 const unitSphere = (resolution = 16) => {
   const shape = Shape.fromGeometry(
     taggedSolid({}, buildRingSphere(resolution))
@@ -53,5 +24,7 @@ Sphere.ofRadius = ofRadius;
 Sphere.ofDiameter = ofDiameter;
 
 export default Sphere;
+export const Ball = Sphere;
 
 Shape.prototype.Sphere = shapeMethod(Sphere);
+Shape.prototype.Ball = shapeMethod(Ball);
