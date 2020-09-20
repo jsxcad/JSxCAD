@@ -59,6 +59,8 @@ export {
 export {
   Arc,
   Assembly,
+  Ball,
+  Box,
   Circle,
   Cone,
   Cube,
@@ -80,6 +82,7 @@ export {
   Polygon,
   Polyhedron,
   Prism,
+  Rod,
   Sphere,
   Spiral,
   Square,
@@ -88,7 +91,6 @@ export {
   Torus,
   Triangle,
   Union,
-  Void,
   Wave,
 } from '@jsxcad/api-v1-shapes';
 

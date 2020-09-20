@@ -7,52 +7,6 @@ import {
 
 import { taggedSolid } from '@jsxcad/geometry-tagged';
 
-/**
- *
- * # Cube (cuboid)
- *
- * Generates cuboids.
- *
- * ::: illustration { "view": { "position": [10, 10, 10] } }
- * ```
- * Cube()
- * ```
- * :::
- * ::: illustration { "view": { "position": [40, 40, 40] } }
- * ```
- * Cube(10)
- * ```
- * :::
- * ::: illustration { "view": { "position": [80, 80, 80] } }
- * ```
- * Cube(10, 20, 30)
- * ```
- * :::
- * ::: illustration { "view": { "position": [40, 40, 40] } }
- * ```
- * Cube.ofRadius(8)
- * ```
- * :::
- * ::: illustration { "view": { "position": [40, 40, 40] } }
- * ```
- * Cube.ofDiameter(16)
- * ```
- * :::
- * ::: illustration { "view": { "position": [40, 40, 40] } }
- * ```
- * Cube.ofApothem(8)
- * ```
- * :::
- * ::: illustration { "view": { "position": [40, 40, 40] } }
- * ```
- * Cube.fromCorners([0, 0, 0], [10, 10, 10])
- * ```
- * :::
- *
- **/
-
-// Geometry construction.
-
 const edgeScale = regularPolygonEdgeLengthToRadius(1, 4);
 
 const unitCube = () =>
@@ -94,6 +48,8 @@ Cube.ofApothem = ofApothem;
 Cube.ofDiameter = ofDiameter;
 Cube.fromCorners = fromCorners;
 
+export const Box = Cube;
 export default Cube;
 
+Shape.prototype.Box = shapeMethod(Box);
 Shape.prototype.Cube = shapeMethod(Cube);
