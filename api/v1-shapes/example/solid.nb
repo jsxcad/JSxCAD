@@ -1,5 +1,15 @@
 md`# Solid Construction`;
 
+md`## Ball(radius, { resolution: 32 })`;
+const ball = Ball(20);
+ball.view();
+md`Produces a spherical ball of the given radius.`;
+
+md`## Box(length = 1, width = length, height = width)`;
+const box = Box(20, 10, 5);
+box.view();
+md`Produces a cuboid box of the given dimensions.`;
+
 md`## ChainedHull(...shapes)`;
 const chainedHull = ChainedHull(
   Circle(20),
@@ -9,16 +19,6 @@ const chainedHull = ChainedHull(
 chainedHull.fix().view();
 
 md`FIX: Cone(5, 50).view();`;
-
-md`## Cube(length = 1, width = length, height = width)`;
-const cube = Cube(20);
-cube.view();
-md`Produces a cubiod.`;
-
-md`## Cylinder(radius, height, { sides = 16 } = {})`;
-const cylinder = Cylinder(5, 10);
-cylinder.view();
-md`Produces a cylinder`;
 
 md`FIX: Empty().topView();`;
 
@@ -58,10 +58,10 @@ const prism = Prism(5, 10, { sides: 5 });
 prism.view();
 md`A five sided prism of radius 5 and height 10.`;
 
-md`## Sphere(radius, { resolution = 32 } = {})`;
-const sphere = Sphere(10);
-sphere.view();
-md`A sphere of radius 10.`;
+md`## Rod(radius, height, { sides = 32 } = {})`;
+const rod = Rod(5, 10);
+rod.view();
+md`Produces a cylindical rod of the given radius and length.`;
 
 md`## Tetrahedron(radius)`;
 const tetrahedron = Tetrahedron(10);
