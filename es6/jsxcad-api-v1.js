@@ -8,8 +8,8 @@ import './jsxcad-api-v1-deform.js';
 import './jsxcad-api-v1-gcode.js';
 import './jsxcad-api-v1-pdf.js';
 import './jsxcad-api-v1-plans.js';
-import { Peg, Arc, Assembly, Circle, Cone, Cube, Cylinder, Difference, Empty, Group, Hershey, Hexagon, Icosahedron, Intersection, Layers, Line, Path, Plane, Point, Points, Polygon, Polyhedron, Prism, Sphere, Spiral, Square, Tetrahedron, Toolpath, Torus, Triangle, Union, Void, Wave } from './jsxcad-api-v1-shapes.js';
-export { Arc, Assembly, Circle, Cone, Cube, Cylinder, Difference, Empty, Group, Hershey, Hexagon, Icosahedron, Intersection, Layers, Line, Path, Peg, Plane, Point, Points, Polygon, Polyhedron, Prism, Sphere, Spiral, Square, Tetrahedron, Toolpath, Torus, Triangle, Union, Void, Wave } from './jsxcad-api-v1-shapes.js';
+import { Peg, Arc, Assembly, Ball, Box, Circle, Cone, Cube, Cylinder, Difference, Empty, Group, Hershey, Hexagon, Icosahedron, Intersection, Layers, Line, Path, Plane, Point, Points, Polygon, Polyhedron, Prism, Rod, Sphere, Spiral, Square, Tetrahedron, Toolpath, Torus, Triangle, Union, Wave } from './jsxcad-api-v1-shapes.js';
+export { Arc, Assembly, Ball, Box, Circle, Cone, Cube, Cylinder, Difference, Empty, Group, Hershey, Hexagon, Icosahedron, Intersection, Layers, Line, Path, Peg, Plane, Point, Points, Polygon, Polyhedron, Prism, Rod, Sphere, Spiral, Square, Tetrahedron, Toolpath, Torus, Triangle, Union, Wave } from './jsxcad-api-v1-shapes.js';
 import { X, Y, Z } from './jsxcad-api-v1-connector.js';
 export { X, Y, Z } from './jsxcad-api-v1-connector.js';
 import { ChainedHull, Hull, Loop } from './jsxcad-api-v1-extrude.js';
@@ -258,6 +258,8 @@ var api = /*#__PURE__*/Object.freeze({
   ProfileRouter: ProfileRouter,
   Arc: Arc,
   Assembly: Assembly,
+  Ball: Ball,
+  Box: Box,
   Circle: Circle,
   Cone: Cone,
   Cube: Cube,
@@ -279,6 +281,7 @@ var api = /*#__PURE__*/Object.freeze({
   Polygon: Polygon,
   Polyhedron: Polyhedron,
   Prism: Prism,
+  Rod: Rod,
   Sphere: Sphere,
   Spiral: Spiral,
   Square: Square,
@@ -287,7 +290,6 @@ var api = /*#__PURE__*/Object.freeze({
   Torus: Torus,
   Triangle: Triangle,
   Union: Union,
-  Void: Void,
   Wave: Wave,
   Item: Item,
   Noise: Noise,

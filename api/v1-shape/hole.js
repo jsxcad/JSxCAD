@@ -1,7 +1,6 @@
-import Shape from '@jsxcad/api-v1-shape';
+import Shape from './Shape.js';
 import { rewriteTags } from '@jsxcad/geometry-tagged';
 
-// FIX: Move to api-v1-shape?
 export const hole = (shape) =>
   Shape.fromGeometry(
     rewriteTags(['compose/non-positive'], [], shape.toGeometry())

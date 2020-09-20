@@ -655,6 +655,16 @@ const fixMethod = function () {
 };
 Shape.prototype.fix = fixMethod;
 
+const hole = (shape) =>
+  Shape.fromGeometry(
+    rewriteTags(['compose/non-positive'], [], shape.toGeometry())
+  );
+
+const holeMethod = function () {
+  return hole(this);
+};
+Shape.prototype.hole = holeMethod;
+
 const inSolids = (shape, op = (_) => _) => {
   let nth = 0;
   const rewritten = rewrite(shape.toKeptGeometry(), (geometry, descend) => {
