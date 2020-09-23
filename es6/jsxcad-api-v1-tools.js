@@ -93,19 +93,19 @@ const BenchSaw = (
     millingStyle = 'any',
     sweep = 'cut',
   } = {}
-) => (length, depth, { x = 0, y = 0, z = 0 }) =>
+) => (length, depth) =>
   BenchPlane(length, {
     toolDiameter,
     cutDepth,
     axialRate,
     millingStyle,
     sweep,
-  })(width, depth, { x, y, z }).moveX(-width);
+  })(width, depth).moveX(-width);
 
 const DrillPress = (
   diameter = 10,
   { toolDiameter = 3.175, cutDepth = 0.3, sides = 16, sweep = 'cut' } = {}
-) => (depth = 0, { x = 0, y = 0, z = 0 }) => {
+) => (depth = 0, x = 0, y = 0) => {
   const radius = diameter / 2;
   const points = [];
   const toolRadius = toolDiameter / 2;
@@ -142,13 +142,13 @@ const DrillPress = (
       : Cylinder.ofDiameter(diameter, depth)
           .op((s) => (sweep === 'show' ? s : s.hole()))
           .moveZ(depth / -2)
-  ).move(x, y, z);
+  ).move(x, y);
 };
 
 const HoleRouter = (
   depth = 10,
   { toolDiameter = 3.175, cutDepth = 0.3, toolLength = 17, sweep = 'cut' } = {}
-) => (shape, { x = 0, y = 0, z = 0 }) => {
+) => (shape, x = 0, y = 0, z = 0) => {
   const cuts = Math.ceil(depth / Math.min(depth, cutDepth));
   const actualCutDepth = depth / cuts;
   const design = [];
@@ -187,7 +187,7 @@ const HoleRouter = (
 const LineRouter = (
   depth = 10,
   { toolDiameter = 3.175, cutDepth = 0.3, toolLength = 17, sweep = 'no' } = {}
-) => (shape, { x = 0, y = 0, z = 0 }) => {
+) => (shape, x = 0, y = 0, z = 0) => {
   const cuts = Math.ceil(depth / Math.min(cutDepth, depth));
   const actualCutDepth = depth / cuts;
   const design = [];
@@ -221,7 +221,7 @@ const LineRouter = (
 const ProfileRouter = (
   depth = 10,
   { toolDiameter = 3.175, cutDepth = 0.3, toolLength = 17, sweep = 'no' } = {}
-) => (shape, { x = 0, y = 0, z = 0 }) => {
+) => (shape, x = 0, y = 0, z = 0) => {
   const cuts = Math.ceil(depth / Math.min(cutDepth, depth));
   const actualCutDepth = depth / cuts;
   const design = [];

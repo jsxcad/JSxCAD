@@ -2,12 +2,12 @@ const path = require('path');
 
 module.exports = {
   target: 'node',
-  entry: './occ-webpack.js',
+  entry: './oc-webpack.js',
   output: {
     path: path.resolve(__dirname, 'dist'),
     library: 'api',
     libraryTarget: 'umd',
-    filename: 'occ.cjs'
+    filename: 'oc.cjs'
   },
   module: {
     rules: [

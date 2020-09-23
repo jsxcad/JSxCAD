@@ -11,9 +11,10 @@
     "lint": "eslint *.js",
     "lintfix": "eslint --fix *.js",
     "rollup": "rollup -c rollup_main.js",
-    "test": "ava --timeout=60s",
-    "tests": "ava --timeout=60s *.test.js",
-    "webpack": "webpack -d --config webpack.config.cjs"
+    "test": "ava --timeout=600s",
+    "tests": "ava --timeout=600s *.test.js",
+    "webpack": "webpack -d --config webpack.config.cjs",
+    "webpack2": "webpack -d --config webpack2.config.cjs"
   },
   "contributors": [
     {
@@ -28,10 +29,11 @@
     "opencascade.js": "^0.1.19"
   },
   "devDependencies": {
+    "@wasm-tool/emscripten": "^1.0.0",
     "ava": "^3.9.0",
+    "babel-eslint": "^10.0.1",
     "depcheck": "^0.9.1",
     "eslint": "^7.0.0",
-    "babel-eslint": "^10.0.1",
     "eslint-config-standard": "^12.0.0",
     "eslint-plugin-import": "^2.16.0",
     "eslint-plugin-node": "^8.0.1",
