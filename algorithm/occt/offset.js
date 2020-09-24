@@ -1,9 +1,10 @@
 import { getOcct } from './occt.js';
 
-export const offset = async (paths, amount) => {
-  const oc = await getOcct();
+// Note: This does not handle self-intersection properly.
+
+export const offset = (paths, amount) => {
   const inputJson = JSON.stringify(paths);
-  const outputJson = oc.offset(inputJson, amount);
+  const outputJson = getOcct().offset(inputJson, amount);
   const offsetPaths = JSON.parse(outputJson);
   return offsetPaths;
-}
+};

@@ -1363,6 +1363,17 @@ const taggedItem = ({ tags }, ...content) => {
   return { type: 'item', tags, content };
 };
 
+const taggedGroup = ({ tags }, ...content) => {
+  if (content.some((value) => !value)) {
+    throw Error(`Undefined Group content`);
+  }
+  if (content.some((value) => value.length)) {
+    throw Error(`Group content is an array`);
+  }
+  // FIX: Deprecate layers.
+  return { type: 'layers', tags, content };
+};
+
 const taggedLayout = (
   { tags, size, margin, title, marks = [] },
   ...content
@@ -1541,4 +1552,4 @@ const translate = (vector, geometry) =>
 const scale = (vector, geometry) =>
   transform(fromScaling(vector), geometry);
 
-export { allTags, assemble, canonicalize, difference, drop, eachItem, eachPoint, findOpenEdges, fix, flip, fresh, fromPathToSurface, fromPathsToSurface, fromSurfaceToPaths, getAnyNonVoidSurfaces, getAnySurfaces, getItems, getLayers, getLayouts, getLeafs, getNonVoidItems, getNonVoidPaths, getNonVoidPlans, getNonVoidPoints, getNonVoidSolids, getNonVoidSurfaces, getNonVoidZ0Surfaces, getPaths, getPeg, getPlans, getPoints, getSolids, getSurfaces, getTags, getZ0Surfaces, intersection, isNotVoid, isVoid, isWatertight, keep, makeWatertight, measureArea, measureBoundingBox, measureHeights, outline, reconcile, rewrite, rewriteTags, rotateX, rotateY, rotateZ, scale, taggedAssembly, taggedDisjointAssembly, taggedItem, taggedLayers, taggedLayout, taggedPaths, taggedPoints, taggedSketch, taggedSolid, taggedSurface, taggedZ0Surface, toDisjointGeometry, toKeptGeometry, toPoints, toTransformedGeometry, transform, translate, union, update, visit };
+export { allTags, assemble, canonicalize, difference, drop, eachItem, eachPoint, findOpenEdges, fix, flip, fresh, fromPathToSurface, fromPathsToSurface, fromSurfaceToPaths, getAnyNonVoidSurfaces, getAnySurfaces, getItems, getLayers, getLayouts, getLeafs, getNonVoidItems, getNonVoidPaths, getNonVoidPlans, getNonVoidPoints, getNonVoidSolids, getNonVoidSurfaces, getNonVoidZ0Surfaces, getPaths, getPeg, getPlans, getPoints, getSolids, getSurfaces, getTags, getZ0Surfaces, intersection, isNotVoid, isVoid, isWatertight, keep, makeWatertight, measureArea, measureBoundingBox, measureHeights, outline, reconcile, rewrite, rewriteTags, rotateX, rotateY, rotateZ, scale, taggedAssembly, taggedDisjointAssembly, taggedGroup, taggedItem, taggedLayers, taggedLayout, taggedPaths, taggedPoints, taggedSketch, taggedSolid, taggedSurface, taggedZ0Surface, toDisjointGeometry, toKeptGeometry, toPoints, toTransformedGeometry, transform, translate, union, update, visit };

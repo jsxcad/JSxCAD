@@ -74,6 +74,7 @@ export { rewriteTags } from './rewriteTags.js';
 export { taggedAssembly } from './taggedAssembly.js';
 export { taggedItem } from './taggedItem.js';
 export { taggedDisjointAssembly } from './taggedDisjointAssembly.js';
+export { taggedGroup } from './taggedGroup.js';
 export { taggedLayers } from './taggedLayers.js';
 export { taggedLayout } from './taggedLayout.js';
 export { taggedPaths } from './taggedPaths.js';

@@ -1,8 +1,8 @@
 import builtins from 'rollup-plugin-node-builtins';
+import cjs from 'rollup-plugin-cjs-es';
 import commonjs from 'rollup-plugin-commonjs';
 import globals from 'rollup-plugin-node-globals';
 import nodeResolve from 'rollup-plugin-node-resolve';
-import cjs from 'rollup-plugin-cjs-es';
 
 Error.stackTraceLimit = Infinity;
 
