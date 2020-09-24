@@ -3,6 +3,7 @@
 cp algorithm/clipper/dist/main.js es6/jsxcad-algorithm-clipper.js
 cp algorithm/color/dist/main.js es6/jsxcad-algorithm-color.js
 cp algorithm/contour/dist/main.js es6/jsxcad-algorithm-contour.js
+cp algorithm/occt/dist/main.js es6/jsxcad-algorithm-occt.js
 cp algorithm/pack/dist/main.js es6/jsxcad-algorithm-pack.js
 cp algorithm/quantize/dist/main.js es6/jsxcad-algorithm-quantize.js
 cp algorithm/shape/dist/main.js es6/jsxcad-algorithm-shape.js
