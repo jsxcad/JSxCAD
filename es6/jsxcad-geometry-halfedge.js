@@ -266,6 +266,7 @@ const fromSolid = (solid, normalize, closed = true, verbose = false) => {
   }
 
   // Bridge the edges.
+  let duplicateEdgeCount = 0;
   for (const loop of loops) {
     let link = loop;
     do {
@@ -280,13 +281,19 @@ const fromSolid = (solid, normalize, closed = true, verbose = false) => {
               candidate.twin = link;
               link.twin = candidate;
             } else {
-              throw Error('die');
+              duplicateEdgeCount += 1;
+              // throw Error('die');
             }
           }
         }
       }
       link = link.next;
     } while (link !== loop);
+  }
+
+  if (duplicateEdgeCount > 0) {
+    console.log(`warning: duplicateEdgeCount = ${duplicateEdgeCount}`);
+    // throw Error(`die: duplicateEdgeCount = ${duplicateEdgeCount}`);
   }
 
   let holeCount = 0;

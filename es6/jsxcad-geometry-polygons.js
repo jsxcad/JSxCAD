@@ -398,6 +398,7 @@ const pushWhenValid = (out, points, expectedPlane) => {
     validated.plane = expectedPlane;
   }
   out.push(validated);
+  return validated;
 };
 
 const toGeneric = (polygons) => map(polygons, map$1);

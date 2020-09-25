@@ -16,8 +16,10 @@ const unitCube = () =>
 
 // Cube Interfaces.
 
-export const ofSize = (width = 1, length, height) =>
+export const ofSize = (width = 1, length = width, height = length) =>
   unitCube().scale(width, length, height);
+
+export const ofEdge = (length = 1) => ofSize(1);
 
 export const ofRadius = (radius) =>
   Shape.fromGeometry(taggedSolid({}, buildRegularPrism(4)))
@@ -28,7 +30,7 @@ export const ofApothem = (apothem) => ofRadius(toRadiusFromApothem(apothem, 4));
 
 export const ofDiameter = (diameter) => ofRadius(diameter / 2);
 
-export const fromCorners = (corner1, corner2) => {
+export const fromCorners = (corner1 = [1, 1, 1], corner2 = [0, 0, 0]) => {
   const [c1x, c1y, c1z] = corner1;
   const [c2x, c2y, c2z] = corner2;
   const length = c2x - c1x;
@@ -40,16 +42,20 @@ export const fromCorners = (corner1, corner2) => {
     .move(...center);
 };
 
-export const Cube = (...args) => ofSize(...args);
-
-Cube.ofSize = ofSize;
-Cube.ofRadius = ofRadius;
-Cube.ofApothem = ofApothem;
-Cube.ofDiameter = ofDiameter;
-Cube.fromCorners = fromCorners;
-
-export const Box = Cube;
-export default Cube;
+export const Box = ofSize;
+export const BoxOfApothem = ofApothem;
+export const BoxOfCorners = fromCorners;
+export const BoxOfDiameter = ofDiameter;
+export const BoxOfEdge = ofEdge;
+export const BoxOfRadius = ofRadius;
+export const BoxOfSize = ofSize;
 
 Shape.prototype.Box = shapeMethod(Box);
-Shape.prototype.Cube = shapeMethod(Cube);
+Shape.prototype.BoxOfApothem = shapeMethod(BoxOfApothem);
+Shape.prototype.BoxOfCorners = shapeMethod(BoxOfCorners);
+Shape.prototype.BoxOfDiameter = shapeMethod(BoxOfDiameter);
+Shape.prototype.BoxOfEdge = shapeMethod(BoxOfEdge);
+Shape.prototype.BoxOfRadius = shapeMethod(BoxOfRadius);
+Shape.prototype.BoxOfSize = shapeMethod(BoxOfSize);
+
+export default Box;

@@ -1,7 +1,21 @@
-import { Ball, Sphere } from './Sphere.js';
-import { Box, Cube } from './Cube.js';
-import { Cylinder, Rod } from './Cylinder.js';
-import { Group, Layers } from './Group.js';
+import { Ball, BallOfApothem, BallOfDiameter, BallOfRadius } from './Ball.js';
+import {
+  Box,
+  BoxOfApothem,
+  BoxOfCorners,
+  BoxOfDiameter,
+  BoxOfEdge,
+  BoxOfRadius,
+  BoxOfSize,
+} from './Box.js';
+import {
+  Rod,
+  RodOfApothem,
+  RodOfDiameter,
+  RodOfFunction,
+  RodOfRadius,
+  RodOfSlices,
+} from './Rod.js';
 
 import Arc from './Arc.js';
 import Assembly from './Assembly.js';
@@ -9,6 +23,7 @@ import Circle from './Circle.js';
 import Cone from './Cone.js';
 import Difference from './Difference.js';
 import Empty from './Empty.js';
+import Group from './Group.js';
 import Hershey from './Hershey.js';
 import Hexagon from './Hexagon.js';
 import Icosahedron from './Icosahedron.js';
@@ -37,10 +52,14 @@ const api = {
   Assembly,
   Ball,
   Box,
+  BoxOfApothem,
+  BoxOfCorners,
+  BoxOfDiameter,
+  BoxOfRadius,
+  BoxOfEdge,
+  BoxOfSize,
   Circle,
   Cone,
-  Cube,
-  Cylinder,
   Difference,
   Empty,
   Group,
@@ -48,7 +67,6 @@ const api = {
   Hexagon,
   Icosahedron,
   Intersection,
-  Layers,
   Line,
   Path,
   Peg,
@@ -59,8 +77,12 @@ const api = {
   Polyhedron,
   Prism,
   Rod,
+  RodOfApothem,
+  RodOfDiameter,
+  RodOfFunction,
+  RodOfRadius,
+  RodOfSlices,
   Sketch,
-  Sphere,
   Spiral,
   Square,
   Tetrahedron,
@@ -75,11 +97,18 @@ export {
   Arc,
   Assembly,
   Ball,
+  BallOfApothem,
+  BallOfDiameter,
+  BallOfRadius,
   Box,
+  BoxOfApothem,
+  BoxOfCorners,
+  BoxOfDiameter,
+  BoxOfRadius,
+  BoxOfEdge,
+  BoxOfSize,
   Circle,
   Cone,
-  Cube,
-  Cylinder,
   Difference,
   Empty,
   Group,
@@ -87,7 +116,6 @@ export {
   Hexagon,
   Icosahedron,
   Intersection,
-  Layers,
   Line,
   Path,
   Peg,
@@ -98,8 +126,12 @@ export {
   Polyhedron,
   Prism,
   Rod,
+  RodOfApothem,
+  RodOfDiameter,
+  RodOfFunction,
+  RodOfRadius,
+  RodOfSlices,
   Sketch,
-  Sphere,
   Spiral,
   Square,
   Toolpath,

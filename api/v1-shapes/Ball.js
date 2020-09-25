@@ -17,14 +17,14 @@ export const ofApothem = (apothem = 1, { resolution = 16 } = {}) =>
 export const ofDiameter = (diameter = 1, { resolution = 16 } = {}) =>
   ofRadius(diameter / 2, { resolution });
 
-export const Sphere = (...args) => ofRadius(...args);
+export const Ball = ofRadius;
+export const BallOfApothem = ofApothem;
+export const BallOfRadius = ofRadius;
+export const BallOfDiameter = ofDiameter;
 
-Sphere.ofApothem = ofApothem;
-Sphere.ofRadius = ofRadius;
-Sphere.ofDiameter = ofDiameter;
-
-export default Sphere;
-export const Ball = Sphere;
-
-Shape.prototype.Sphere = shapeMethod(Sphere);
 Shape.prototype.Ball = shapeMethod(Ball);
+Shape.prototype.BallOfApothem = shapeMethod(BallOfApothem);
+Shape.prototype.BallOfDiameter = shapeMethod(BallOfDiameter);
+Shape.prototype.BallOfRadius = shapeMethod(BallOfRadius);
+
+export default Ball;

@@ -1,4 +1,4 @@
-import { Assembly, Cylinder, Point } from '@jsxcad/api-v1-shapes';
+import { Assembly, Point, Rod } from '@jsxcad/api-v1-shapes';
 
 import Shape from '@jsxcad/api-v1-shape';
 import { taggedPaths } from '@jsxcad/geometry-tagged';
@@ -38,7 +38,7 @@ export const ProfileRouter = (
     if (sweep !== 'no') {
       sweeps.push(
         paths
-          .sweep(Cylinder.ofDiameter(toolDiameter, depth).moveZ(depth / -2))
+          .sweep(Rod.ofDiameter(toolDiameter, depth).moveZ(depth / -2))
           .op((s) => (sweep === 'show' ? s : s.hole()))
       );
     }

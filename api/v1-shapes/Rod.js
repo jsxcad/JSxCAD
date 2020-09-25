@@ -43,17 +43,18 @@ export const ofSlices = (op, { slices = 2, cap = true } = {}) =>
     )
   );
 
-export const Cylinder = (...args) => ofRadius(...args);
+export const Rod = ofRadius;
+export const RodOfRadius = ofRadius;
+export const RodOfApothem = ofApothem;
+export const RodOfDiameter = ofDiameter;
+export const RodOfFunction = ofFunction;
+export const RodOfSlices = ofSlices;
 
-Cylinder.ofRadius = ofRadius;
-Cylinder.ofApothem = ofApothem;
-Cylinder.ofDiameter = ofDiameter;
-Cylinder.ofFunction = ofFunction;
-Cylinder.ofSlices = ofSlices;
-
-export default Cylinder;
-
-export const Rod = Cylinder;
-
-Shape.prototype.Cylinder = shapeMethod(Cylinder);
 Shape.prototype.Rod = shapeMethod(Rod);
+Shape.prototype.RodOfApothem = shapeMethod(RodOfApothem);
+Shape.prototype.RodOfDiameter = shapeMethod(RodOfDiameter);
+Shape.prototype.RodOfFunction = shapeMethod(RodOfFunction);
+Shape.prototype.RodOfRadius = shapeMethod(RodOfRadius);
+Shape.prototype.RodOfSlices = shapeMethod(RodOfSlices);
+
+export default Rod;
