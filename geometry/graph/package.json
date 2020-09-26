@@ -1,7 +1,7 @@
 {
-  "name": "@jsxcad/geometry-tagged",
+  "name": "@jsxcad/geometry-graph",
   "version": "0.0.79",
-  "description": "Assembly algorithms for JSxCAD",
+  "description": "Operations on half-edge graph structure for JSxCAD",
   "repository": "https://github.com/jsxcad/JSxCAD",
   "main": "main.js",
   "module": "dist/main.js",
@@ -10,7 +10,6 @@
     "depcheck": "depcheck --ignores '@jsxcad/eslint*,eslint*,babel-eslint'",
     "lint": "eslint *.js",
     "lintfix": "eslint --fix *.js",
-    "prettier": "prettier --write .",
     "rollup": "rollup -c rollup_main.js",
     "test": "ava",
     "tests": "ava *.test.js"
@@ -24,30 +23,13 @@
   "keywords": [],
   "license": "MIT",
   "dependencies": {
-    "@jsxcad/cache": "^0.0.79",
     "@jsxcad/algorithm-quantize": "^0.0.79",
-    "@jsxcad/geometry-bsp": "^0.0.79",
-    "@jsxcad/geometry-graph": "^0.0.79",
-    "@jsxcad/geometry-halfedge": "^0.0.79",
-    "@jsxcad/geometry-path": "^0.0.79",
-    "@jsxcad/geometry-paths": "^0.0.79",
-    "@jsxcad/geometry-points": "^0.0.79",
-    "@jsxcad/geometry-solid": "^0.0.79",
-    "@jsxcad/geometry-solid-boolean": "^0.0.79",
-    "@jsxcad/geometry-surface": "^0.0.79",
-    "@jsxcad/geometry-z0surface": "^0.0.79",
-    "@jsxcad/math-mat4": "^0.0.79",
-    "@jsxcad/math-plane": "^0.0.79",
+    "@jsxcad/geometry-polygons": "^0.0.79",
+    "@jsxcad/math-poly3": "^0.0.79",
     "@jsxcad/math-vec3": "^0.0.79",
-    "@jsxcad/sys": "^0.0.79",
-    "rollup": "^1.11.0",
-    "rollup-plugin-commonjs": "^9.3.4",
-    "rollup-plugin-node-builtins": "^2.1.2",
-    "rollup-plugin-node-globals": "^1.4.0",
-    "rollup-plugin-node-resolve": "^4.2.3"
+    "earcut": "^2.2.2"
   },
   "devDependencies": {
-    "@jsxcad/data-shape": "^0.0.79",
     "ava": "^3.9.0",
     "depcheck": "^0.9.1",
     "eslint": "^7.0.0",
@@ -58,7 +40,11 @@
     "eslint-plugin-promise": "^4.0.1",
     "eslint-plugin-react": "^7.17.0",
     "eslint-plugin-standard": "^4.0.0",
-    "prettier": "^2.0.5"
+    "rollup": "^1.11.0",
+    "rollup-plugin-commonjs": "^9.3.4",
+    "rollup-plugin-node-builtins": "^2.1.2",
+    "rollup-plugin-node-globals": "^1.4.0",
+    "rollup-plugin-node-resolve": "^4.2.3"
   },
   "publishConfig": {
     "access": "public"

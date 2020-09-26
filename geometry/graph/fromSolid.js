@@ -1,9 +1,15 @@
 import './types.js';
 
-import createEdge from './createEdge.js';
-import eachLink from './eachLink.js';
+import {
+  addFace,
+  addFaceEdge,
+  addPoint,
+  create,
+  eachFace,
+  eachFaceEdge,
+} from './graph.js';
 
-let id = 0;
+import { toPlane } from '@jsxcad/math-poly3';
 
 /**
  * fromSolid
@@ -30,45 +36,30 @@ export const fromSolid = (solid, normalize, closed = true, verbose = false) => {
     }
     return twins;
   };
-  const loops = [];
+  const graph = create();
 
   for (const surface of solid) {
     for (const path of surface) {
-      let first;
-      let last;
+      const face = addFace(graph, { plane: toPlane(path) });
       for (let nth = 0; nth < path.length; nth++) {
         const thisPoint = normalize(path[nth]);
         const nextPoint = normalize(path[(nth + 1) % path.length]);
-        const edge = createEdge(thisPoint);
-        edge.id = id++;
+        const edge = addFaceEdge(graph, face, {
+          start: addPoint(graph, thisPoint),
+        });
         // nextPoint will be the start of the twin.
-        getTwins(nextPoint).push(edge);
-        if (first === undefined) {
-          first = edge;
-        }
-        if (last !== undefined) {
-          last.next = edge;
-        }
-        // Any arbitrary link will serve for face identity.
-        edge.face = first;
-        last = edge;
+        getTwins(addPoint(graph, nextPoint)).push(edge);
       }
-      if (first === undefined) {
-        throw Error(`die: ${JSON.stringify(path)}`);
-      }
-      // Close the loop.
-      last.next = first;
-      // And collect the closed loop.
-      loops.push(first);
     }
   }
 
   // Bridge the edges.
-  for (const loop of loops) {
-    let link = loop;
-    do {
-      if (link.twin === undefined) {
-        const candidates = twinMap.get(link.start);
+  let duplicateEdgeCount = 0;
+  eachFace(graph, (face, faceNode) => {
+    eachFaceEdge(graph, face, (edge, edgeNode) => {
+      const nextNode = graph.edge[edgeNode.next];
+      if (edgeNode.twin === -1) {
+        const candidates = twinMap.get(edgeNode.start);
         if (candidates === undefined) {
           throw Error('die');
         }
@@ -76,42 +67,47 @@ export const fromSolid = (solid, normalize, closed = true, verbose = false) => {
         // Find the candidate that starts where we end.
         let count = 0;
         for (const candidate of candidates) {
-          if (candidate.start === link.next.start) {
+          const candidateNode = graph.edge[candidate];
+          if (candidateNode.start === nextNode.start) {
             count += 1;
-            if (candidate.twin === undefined) {
-              candidate.twin = link;
-              link.twin = candidate;
+            if (candidateNode.twin === -1) {
+              candidateNode.twin = edge;
+              edgeNode.twin = candidate;
             } else {
-              throw Error('die');
+              duplicateEdgeCount += 1;
+              // throw Error('die');
             }
           }
         }
         if (count > 1) {
-          // console.log(`QQ/fromSolid/twins: multiple ${link.start} -> ${link.next.start}`);
+          // console.log(`QQ/fromSolid/twins: multiple ${count} ${link.start} -> ${link.next.start}`);
         } else if (count === 0) {
           // console.log(`QQ/fromSolid/twins: none ${link.start} -> ${link.next.start} ${link.face.id}`);
         } else if (count === 1) {
           // console.log(`QQ/fromSolid/twins: one ${link.start} -> ${link.next.start} ${link.face.id} to ${link.twin.start} -> ${link.twin.next.start} ${link.twin.face.id}`);
         }
       }
-      link = link.next;
-    } while (link !== loop);
+    });
+  });
+
+  if (duplicateEdgeCount > 0) {
+    console.log(`warning: duplicateEdgeCount = ${duplicateEdgeCount}`);
+    // throw Error(`die: duplicateEdgeCount = ${duplicateEdgeCount}`);
   }
 
   let holeCount = 0;
   let edgeCount = 0;
 
   if (closed) {
-    for (const loop of loops) {
-      if (loop.face === undefined) continue;
-      eachLink(loop, (edge) => {
+    eachFace(graph, (face, faceNode) => {
+      eachFaceEdge(graph, face, (edge, edgeNode) => {
         edgeCount += 1;
-        if (edge.twin === undefined) {
+        if (edgeNode.twin === -1) {
           // A hole in the 2-manifold.
           holeCount += 1;
         }
       });
-    }
+    });
   }
 
   if (verbose && holeCount > 0) {
@@ -119,7 +115,7 @@ export const fromSolid = (solid, normalize, closed = true, verbose = false) => {
     console.log(`QQ/halfedge/fromSolid/edgeCount: ${edgeCount}`);
   }
 
-  return loops;
+  return graph;
 };
 
 export default fromSolid;
