@@ -25,4 +25,5 @@ export const pushWhenValid = (out, points, expectedPlane) => {
     validated.plane = expectedPlane;
   }
   out.push(validated);
+  return validated;
 };

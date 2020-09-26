@@ -1,21 +1,21 @@
 import '@jsxcad/api-v1-stl';
 import '@jsxcad/api-v1-threejs';
 
-const assembly = Cube(30).as('cube').with(Cylinder(5, 30).as('cylinder'));
+const assembly = Box(30).as('cube').with(Rod(5, 30).as('cylinder'));
 
 md`
-Cube
+Box
 `;
 assembly.keep('cube').item().Page().view().writeStl('cube');
 
 md`
-Cube-Cylinder
+Box-Rod
 `;
 // This should produce the cube with a hole in it filled by the cylinder.
 assembly.keep('cube', 'cylinder').item().view().writeStl('cube-cylinder');
 
 md`
-Cylinder
+Rod
 `;
 // This should produce just the cylinder and no cube.
 assembly.keep('cylinder').item().view().writeStl('cylinder');

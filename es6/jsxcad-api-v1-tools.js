@@ -1,4 +1,4 @@
-import { Point, Assembly, Toolpath, Square, Cylinder } from './jsxcad-api-v1-shapes.js';
+import { Point, Assembly, Toolpath, Square, Rod } from './jsxcad-api-v1-shapes.js';
 import Shape, { Shape as Shape$1 } from './jsxcad-api-v1-shape.js';
 import { taggedPaths, getNonVoidPaths } from './jsxcad-geometry-tagged.js';
 import { toolpath } from './jsxcad-algorithm-toolpath.js';
@@ -139,7 +139,7 @@ const DrillPress = (
     Toolpath(...points),
     sweep === 'no'
       ? undefined
-      : Cylinder.ofDiameter(diameter, depth)
+      : Rod.ofDiameter(diameter, depth)
           .op((s) => (sweep === 'show' ? s : s.hole()))
           .moveZ(depth / -2)
   ).move(x, y, z);
@@ -172,7 +172,7 @@ const HoleRouter = (
     if (sweep !== 'no') {
       sweeps.push(
         paths
-          .sweep(Cylinder.ofDiameter(toolDiameter, depth).moveZ(depth / -2))
+          .sweep(Rod.ofDiameter(toolDiameter, depth).moveZ(depth / -2))
           .op((s) => (sweep === 'show' ? s : s.hole()))
       );
     }
@@ -206,7 +206,7 @@ const LineRouter = (
       // Generally a v bit.
       sweeps.push(
         Shape$1.fromGeometry(taggedPaths({}, paths))
-          .sweep(Cylinder.ofDiameter(toolDiameter, depth).moveZ(depth / -2))
+          .sweep(Rod.ofDiameter(toolDiameter, depth).moveZ(depth / -2))
           .op((s) => (sweep === 'show' ? s : s.hole()))
       );
     }
@@ -252,7 +252,7 @@ const ProfileRouter = (
     if (sweep !== 'no') {
       sweeps.push(
         paths
-          .sweep(Cylinder.ofDiameter(toolDiameter, depth).moveZ(depth / -2))
+          .sweep(Rod.ofDiameter(toolDiameter, depth).moveZ(depth / -2))
           .op((s) => (sweep === 'show' ? s : s.hole()))
       );
     }

@@ -64,6 +64,7 @@ export const fromSolid = (solid, normalize, closed = true, verbose = false) => {
   }
 
   // Bridge the edges.
+  let duplicateEdgeCount = 0;
   for (const loop of loops) {
     let link = loop;
     do {
@@ -82,12 +83,13 @@ export const fromSolid = (solid, normalize, closed = true, verbose = false) => {
               candidate.twin = link;
               link.twin = candidate;
             } else {
-              throw Error('die');
+              duplicateEdgeCount += 1;
+              // throw Error('die');
             }
           }
         }
         if (count > 1) {
-          // console.log(`QQ/fromSolid/twins: multiple ${link.start} -> ${link.next.start}`);
+          // console.log(`QQ/fromSolid/twins: multiple ${count} ${link.start} -> ${link.next.start}`);
         } else if (count === 0) {
           // console.log(`QQ/fromSolid/twins: none ${link.start} -> ${link.next.start} ${link.face.id}`);
         } else if (count === 1) {
@@ -96,6 +98,11 @@ export const fromSolid = (solid, normalize, closed = true, verbose = false) => {
       }
       link = link.next;
     } while (link !== loop);
+  }
+
+  if (duplicateEdgeCount > 0) {
+    console.log(`warning: duplicateEdgeCount = ${duplicateEdgeCount}`);
+    // throw Error(`die: duplicateEdgeCount = ${duplicateEdgeCount}`);
   }
 
   let holeCount = 0;

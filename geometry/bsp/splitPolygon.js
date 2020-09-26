@@ -138,7 +138,6 @@ const splitPolygon = (
       }
       pushWhenValid(front, frontPoints, polygonPlane);
       pushWhenValid(back, backPoints, polygonPlane);
-      break;
     }
   }
 };

@@ -12,9 +12,6 @@ export const Group = (...shapes) =>
     )
   );
 
-export const Layers = Group; // Deprecated
-
 Shape.prototype.Group = shapeMethod(Group);
-Shape.prototype.Layers = Shape.prototype.Group; // Deprecated
 
 export default Group;

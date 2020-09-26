@@ -1,6 +1,6 @@
 import { buildConvexSurfaceHull, buildConvexHull, loop, extrude as extrude$1, buildConvexMinkowskiSum } from './jsxcad-algorithm-shape.js';
 import { taggedSurface, taggedSolid, getPaths, getZ0Surfaces, getSurfaces, getPlans, outline as outline$1, getSolids, taggedLayers, union, taggedZ0Surface, taggedPaths, measureBoundingBox, taggedPoints, measureHeights } from './jsxcad-geometry-tagged.js';
-import { Assembly, Group, Layers } from './jsxcad-api-v1-shapes.js';
+import { Assembly, Group } from './jsxcad-api-v1-shapes.js';
 import Shape$1, { Shape } from './jsxcad-api-v1-shape.js';
 import { Y as Y$1, Z as Z$3 } from './jsxcad-api-v1-connector.js';
 import { alignVertices, transform as transform$1, fromPolygons } from './jsxcad-geometry-solid.js';
@@ -363,7 +363,7 @@ const section = (solidShape, ...connectors) => {
       );
     }
   }
-  return Layers(...shapes);
+  return Group(...shapes);
 };
 
 const sectionMethod = function (...args) {

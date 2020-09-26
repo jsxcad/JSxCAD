@@ -9,8 +9,8 @@ import {
   fromBoundingBoxes,
   inLeaf,
   outLeaf,
-  removeExteriorPolygonsForDifference,
-  removeInteriorPolygonsForDifference,
+  removeExteriorPolygonForDifference,
+  removeInteriorPolygonForDifference,
   fromPolygons as toBspFromPolygons,
 } from './bsp.js';
 
@@ -75,18 +75,33 @@ export const difference = (aSolid, ...bSolids) => {
       }
     } else {
       // Remove the parts of a that are inside b.
-      const aTrimmed = removeInteriorPolygonsForDifference(
-        bBsp,
-        aIn,
-        normalize
-      );
+      const aTrimmed = [];
+      const aEmit = (polygon) => aTrimmed.push(polygon);
+      for (const aPolygon of aIn) {
+        const kept = removeInteriorPolygonForDifference(
+          bBsp,
+          aPolygon,
+          normalize,
+          aEmit
+        );
+        if (kept) {
+          aEmit(kept);
+        }
+      }
       // Remove the parts of b that are outside a.
-      const bTrimmed = removeExteriorPolygonsForDifference(
-        aBsp,
-        bIn,
-        normalize
-      );
-
+      const bTrimmed = [];
+      const bEmit = (polygon) => bTrimmed.push(polygon);
+      for (const bPolygon of bIn) {
+        const kept = removeExteriorPolygonForDifference(
+          aBsp,
+          bPolygon,
+          normalize,
+          bEmit
+        );
+        if (kept) {
+          bEmit(kept);
+        }
+      }
       a = clean([...aOut, ...aTrimmed, ...flip(bTrimmed)]);
     }
   }
