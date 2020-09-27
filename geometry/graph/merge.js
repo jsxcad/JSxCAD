@@ -1,6 +1,14 @@
 // Note that merging produces duplicate points.
 
-import { eachFace, eachFaceLoop, eachLoopEdge, getEdgeNode, getFaceNode, getLoopNode, spliceLoop } from './graph.js';
+import {
+  eachFace,
+  eachFaceLoop,
+  eachLoopEdge,
+  getEdgeNode,
+  getFaceNode,
+  getLoopNode,
+  spliceLoop,
+} from './graph.js';
 import { equalsPlane } from './equalsPlane.js';
 
 export const mergeLoops = (graph) => {

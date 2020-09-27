@@ -12,7 +12,8 @@ export const addFace = (graph, { plane, loops = [] } = {}) => {
   return face;
 };
 
-export const addFaceLoop = (graph, face, loop) => getFaceNode(graph, face).loops.push(loop);
+export const addFaceLoop = (graph, face, loop) =>
+  getFaceNode(graph, face).loops.push(loop);
 
 export const addLoop = (graph, { edge = -1, face = -1 } = {}) => {
   const loop = graph.loops.length;
@@ -48,7 +49,10 @@ export const addPoint = (graph, point) => {
   return id;
 };
 
-export const deleteLoop = (graph, loop) => eachLoopEdge(graph, loop, (edge, edgeNode) => { edgeNode.loop = -1; });
+export const deleteLoop = (graph, loop) =>
+  eachLoopEdge(graph, loop, (edge, edgeNode) => {
+    edgeNode.loop = -1;
+  });
 
 export const eachEdge = (graph, start, op) => {
   if (start === -1) {
@@ -62,11 +66,17 @@ export const eachEdge = (graph, start, op) => {
   } while (edge !== start);
 };
 
-export const eachFace = (graph, op) => graph.faces.forEach((faceNode, face) => op(face, faceNode));
-export const eachFaceEdge = (graph, face, op) => eachFaceLoop(graph, face, loop => eachLoopEdge(graph, loop, op));
-export const eachFaceLoop = (graph, face, op) => getFaceNode(graph, face).loops.forEach(loop => op(loop, getLoopNode(graph, loop)));
+export const eachFace = (graph, op) =>
+  graph.faces.forEach((faceNode, face) => op(face, faceNode));
+export const eachFaceEdge = (graph, face, op) =>
+  eachFaceLoop(graph, face, (loop) => eachLoopEdge(graph, loop, op));
+export const eachFaceLoop = (graph, face, op) =>
+  getFaceNode(graph, face).loops.forEach((loop) =>
+    op(loop, getLoopNode(graph, loop))
+  );
 
-export const eachLoopEdge = (graph, loop, op) => eachEdge(graph, getLoopNode(graph, loop).edge, op);
+export const eachLoopEdge = (graph, loop, op) =>
+  eachEdge(graph, getLoopNode(graph, loop).edge, op);
 
 export const getEdgeNode = (graph, edge) => graph.edges[edge];
 export const getFaceNode = (graph, face) => graph.faces[face];

@@ -13,5 +13,7 @@ export const graph = (shape) => {
   return Shape.fromGeometry(taggedGroup({}, ...graphs));
 };
 
-const graphMethod = function () { return graph(this); };
+const graphMethod = function () {
+  return graph(this);
+};
 Shape.prototype.graph = graphMethod;

@@ -1,4 +1,9 @@
-import { eachFaceLoop, eachLoopEdge, getFacePlane, getPointNode } from './graph.js';
+import {
+  eachFaceLoop,
+  eachLoopEdge,
+  getFacePlane,
+  getPointNode,
+} from './graph.js';
 import {
   flip as flipPolygon,
   toPlane as toPlaneOfPolygon,
