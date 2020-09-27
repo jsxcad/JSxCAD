@@ -18,6 +18,8 @@ export const canonicalize = (geometry) => {
           marks: canonicalizePoints(geometry.marks),
           planes: geometry.planes.map(canonicalizePlane),
         });
+      case 'graph':
+        return descend({ graph: { ...geometry.graph, point: canonicalizePoints(geometry.graph.point) } });
       case 'surface':
         return descend({ surface: canonicalizeSurface(geometry.surface) });
       case 'z0Surface':

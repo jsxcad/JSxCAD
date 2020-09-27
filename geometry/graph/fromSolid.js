@@ -1,12 +1,12 @@
-import './types.js';
-
 import {
   addFace,
-  addFaceEdge,
+  addLoop,
+  addLoopEdge,
   addPoint,
   create,
   eachFace,
   eachFaceEdge,
+  getEdgeNode,
 } from './graph.js';
 
 import { toPlane } from '@jsxcad/math-poly3';
@@ -41,11 +41,12 @@ export const fromSolid = (solid, normalize, closed = true, verbose = false) => {
   for (const surface of solid) {
     for (const path of surface) {
       const face = addFace(graph, { plane: toPlane(path) });
+      const loop = addLoop(graph, { face });
       for (let nth = 0; nth < path.length; nth++) {
         const thisPoint = normalize(path[nth]);
         const nextPoint = normalize(path[(nth + 1) % path.length]);
-        const edge = addFaceEdge(graph, face, {
-          start: addPoint(graph, thisPoint),
+        const edge = addLoopEdge(graph, loop, {
+          point: addPoint(graph, thisPoint),
         });
         // nextPoint will be the start of the twin.
         getTwins(addPoint(graph, nextPoint)).push(edge);
@@ -57,9 +58,9 @@ export const fromSolid = (solid, normalize, closed = true, verbose = false) => {
   let duplicateEdgeCount = 0;
   eachFace(graph, (face, faceNode) => {
     eachFaceEdge(graph, face, (edge, edgeNode) => {
-      const nextNode = graph.edge[edgeNode.next];
+      const nextNode = getEdgeNode(graph, edgeNode.next);
       if (edgeNode.twin === -1) {
-        const candidates = twinMap.get(edgeNode.start);
+        const candidates = twinMap.get(edgeNode.point);
         if (candidates === undefined) {
           throw Error('die');
         }
@@ -67,8 +68,8 @@ export const fromSolid = (solid, normalize, closed = true, verbose = false) => {
         // Find the candidate that starts where we end.
         let count = 0;
         for (const candidate of candidates) {
-          const candidateNode = graph.edge[candidate];
-          if (candidateNode.start === nextNode.start) {
+          const candidateNode = getEdgeNode(graph, candidate);
+          if (candidateNode.point === nextNode.point) {
             count += 1;
             if (candidateNode.twin === -1) {
               candidateNode.twin = edge;
@@ -80,19 +81,19 @@ export const fromSolid = (solid, normalize, closed = true, verbose = false) => {
           }
         }
         if (count > 1) {
-          // console.log(`QQ/fromSolid/twins: multiple ${count} ${link.start} -> ${link.next.start}`);
+          // console.log(`QQ/fromSolid/twins: multiple ${count} ${link.point} -> ${link.next.point}`);
         } else if (count === 0) {
-          // console.log(`QQ/fromSolid/twins: none ${link.start} -> ${link.next.start} ${link.face.id}`);
+          // console.log(`QQ/fromSolid/twins: none ${link.point} -> ${link.next.point} ${link.face.id}`);
         } else if (count === 1) {
-          // console.log(`QQ/fromSolid/twins: one ${link.start} -> ${link.next.start} ${link.face.id} to ${link.twin.start} -> ${link.twin.next.start} ${link.twin.face.id}`);
+          // console.log(`QQ/fromSolid/twins: one ${link.point} -> ${link.next.point} ${link.face.id} to ${link.twin.point} -> ${link.twin.next.point} ${link.twin.face.id}`);
         }
       }
     });
   });
 
   if (duplicateEdgeCount > 0) {
-    console.log(`warning: duplicateEdgeCount = ${duplicateEdgeCount}`);
-    // throw Error(`die: duplicateEdgeCount = ${duplicateEdgeCount}`);
+    // console.log(`warning: duplicateEdgeCount = ${duplicateEdgeCount}`);
+    throw Error(`die: duplicateEdgeCount = ${duplicateEdgeCount}`);
   }
 
   let holeCount = 0;

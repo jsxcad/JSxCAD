@@ -19,6 +19,7 @@ import './inSolids.js';
 import './intersection.js';
 import './junctions.js';
 import './keep.js';
+import './graph.js';
 import './group.js';
 import './laserPower.js';
 import './material.js';

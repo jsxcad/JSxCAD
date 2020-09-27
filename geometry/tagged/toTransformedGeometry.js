@@ -57,7 +57,7 @@ export const toTransformedGeometry = (geometry) => {
         case 'solid':
           return descend({ solid: transformSolid(matrix, geometry.solid) });
         case 'graph':
-          return descend({ graph: transformGraph(matrix, geometry.solid) });
+          return descend({ graph: transformGraph(matrix, geometry.graph) });
         case 'surface':
         case 'z0Surface': {
           const surface = geometry.z0Surface || geometry.surface;

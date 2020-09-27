@@ -1,12 +1,13 @@
 import { identityMatrix, multiply, fromXRotation, fromYRotation, fromZRotation, fromTranslation, fromScaling } from './jsxcad-math-mat4.js';
 import { cacheTransform, cache, cacheRewriteTags } from './jsxcad-cache.js';
-import { reconcile as reconcile$1, makeWatertight as makeWatertight$1, isWatertight as isWatertight$1, findOpenEdges as findOpenEdges$1, transform as transform$2, canonicalize as canonicalize$1, fromSurface as fromSurface$1, eachPoint as eachPoint$2, flip as flip$1, measureBoundingBox as measureBoundingBox$3 } from './jsxcad-geometry-solid.js';
+import { reconcile as reconcile$1, makeWatertight as makeWatertight$1, isWatertight as isWatertight$1, findOpenEdges as findOpenEdges$1, transform as transform$3, canonicalize as canonicalize$1, fromSurface as fromSurface$1, eachPoint as eachPoint$2, flip as flip$1, measureBoundingBox as measureBoundingBox$3 } from './jsxcad-geometry-solid.js';
 import { close, createOpenPath } from './jsxcad-geometry-path.js';
 import { createNormalize3 } from './jsxcad-algorithm-quantize.js';
-import { transform as transform$4, canonicalize as canonicalize$5, difference as difference$1, eachPoint as eachPoint$3, flip as flip$3, union as union$2 } from './jsxcad-geometry-paths.js';
-import { equals, transform as transform$5, canonicalize as canonicalize$4, toPolygon } from './jsxcad-math-plane.js';
-import { transform as transform$3, canonicalize as canonicalize$3, eachPoint as eachPoint$4, flip as flip$4, union as union$1 } from './jsxcad-geometry-points.js';
+import { transform as transform$5, canonicalize as canonicalize$5, difference as difference$1, eachPoint as eachPoint$3, flip as flip$3, union as union$2 } from './jsxcad-geometry-paths.js';
+import { equals, transform as transform$6, canonicalize as canonicalize$4, toPolygon } from './jsxcad-math-plane.js';
+import { transform as transform$4, canonicalize as canonicalize$3, eachPoint as eachPoint$4, flip as flip$4, measureBoundingBox as measureBoundingBox$4, union as union$1 } from './jsxcad-geometry-points.js';
 import { transform as transform$1, toPlane, canonicalize as canonicalize$2, makeWatertight as makeWatertight$2, eachPoint as eachPoint$1, flip as flip$2, makeConvex, measureArea as measureArea$1, measureBoundingBox as measureBoundingBox$2 } from './jsxcad-geometry-surface.js';
+import { transform as transform$2 } from './jsxcad-geometry-graph.js';
 import { differenceSurface, fromSolid, fromSurface, toConvexSolids, unifyBspTrees, removeExteriorPaths, intersectSurface, intersection as intersection$1, union as union$3 } from './jsxcad-geometry-bsp.js';
 import { difference as difference$2 } from './jsxcad-geometry-solid-boolean.js';
 import { min, max } from './jsxcad-math-vec3.js';
@@ -248,19 +249,21 @@ const toTransformedGeometry = (geometry) => {
         case 'plan':
           return descend(
             {
-              marks: transform$3(matrix, geometry.marks),
+              marks: transform$4(matrix, geometry.marks),
               planes: geometry.planes.map((plane) =>
-                transform$5(matrix, plane)
+                transform$6(matrix, plane)
               ),
             },
             matrix
           );
         case 'paths':
-          return descend({ paths: transform$4(matrix, geometry.paths) });
+          return descend({ paths: transform$5(matrix, geometry.paths) });
         case 'points':
-          return descend({ points: transform$3(matrix, geometry.points) });
+          return descend({ points: transform$4(matrix, geometry.points) });
         case 'solid':
-          return descend({ solid: transform$2(matrix, geometry.solid) });
+          return descend({ solid: transform$3(matrix, geometry.solid) });
+        case 'graph':
+          return descend({ graph: transform$2(matrix, geometry.graph) });
         case 'surface':
         case 'z0Surface': {
           const surface = geometry.z0Surface || geometry.surface;
@@ -303,6 +306,8 @@ const canonicalize = (geometry) => {
           marks: canonicalize$3(geometry.marks),
           planes: geometry.planes.map(canonicalize$4),
         });
+      case 'graph':
+        return descend({ graph: { ...geometry.graph, point: canonicalize$3(geometry.graph.point) } });
       case 'surface':
         return descend({ surface: canonicalize$2(geometry.surface) });
       case 'z0Surface':
@@ -1266,6 +1271,8 @@ const measureBoundingBox = (geometry) => {
       case 'plan':
       case 'sketch':
         return descend();
+      case 'graph':
+        return update(measureBoundingBox$4(geometry.graph.point));
       case 'layout':
         return update(geometry.marks);
       case 'solid':
@@ -1362,6 +1369,12 @@ const taggedItem = ({ tags }, ...content) => {
   }
   return { type: 'item', tags, content };
 };
+
+const taggedGraph = ({ tags }, graph) => ({
+  type: 'graph',
+  tags,
+  graph,
+});
 
 const taggedGroup = ({ tags }, ...content) => {
   if (content.some((value) => !value)) {
@@ -1552,4 +1565,4 @@ const translate = (vector, geometry) =>
 const scale = (vector, geometry) =>
   transform(fromScaling(vector), geometry);
 
-export { allTags, assemble, canonicalize, difference, drop, eachItem, eachPoint, findOpenEdges, fix, flip, fresh, fromPathToSurface, fromPathsToSurface, fromSurfaceToPaths, getAnyNonVoidSurfaces, getAnySurfaces, getItems, getLayers, getLayouts, getLeafs, getNonVoidItems, getNonVoidPaths, getNonVoidPlans, getNonVoidPoints, getNonVoidSolids, getNonVoidSurfaces, getNonVoidZ0Surfaces, getPaths, getPeg, getPlans, getPoints, getSolids, getSurfaces, getTags, getZ0Surfaces, intersection, isNotVoid, isVoid, isWatertight, keep, makeWatertight, measureArea, measureBoundingBox, measureHeights, outline, reconcile, rewrite, rewriteTags, rotateX, rotateY, rotateZ, scale, taggedAssembly, taggedDisjointAssembly, taggedGroup, taggedItem, taggedLayers, taggedLayout, taggedPaths, taggedPoints, taggedSketch, taggedSolid, taggedSurface, taggedZ0Surface, toDisjointGeometry, toKeptGeometry, toPoints, toTransformedGeometry, transform, translate, union, update, visit };
+export { allTags, assemble, canonicalize, difference, drop, eachItem, eachPoint, findOpenEdges, fix, flip, fresh, fromPathToSurface, fromPathsToSurface, fromSurfaceToPaths, getAnyNonVoidSurfaces, getAnySurfaces, getItems, getLayers, getLayouts, getLeafs, getNonVoidItems, getNonVoidPaths, getNonVoidPlans, getNonVoidPoints, getNonVoidSolids, getNonVoidSurfaces, getNonVoidZ0Surfaces, getPaths, getPeg, getPlans, getPoints, getSolids, getSurfaces, getTags, getZ0Surfaces, intersection, isNotVoid, isVoid, isWatertight, keep, makeWatertight, measureArea, measureBoundingBox, measureHeights, outline, reconcile, rewrite, rewriteTags, rotateX, rotateY, rotateZ, scale, taggedAssembly, taggedDisjointAssembly, taggedGraph, taggedGroup, taggedItem, taggedLayers, taggedLayout, taggedPaths, taggedPoints, taggedSketch, taggedSolid, taggedSurface, taggedZ0Surface, toDisjointGeometry, toKeptGeometry, toPoints, toTransformedGeometry, transform, translate, union, update, visit };
