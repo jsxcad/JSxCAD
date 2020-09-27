@@ -307,7 +307,12 @@ const canonicalize = (geometry) => {
           planes: geometry.planes.map(canonicalize$4),
         });
       case 'graph':
-        return descend({ graph: { ...geometry.graph, point: canonicalize$3(geometry.graph.point) } });
+        return descend({
+          graph: {
+            ...geometry.graph,
+            point: canonicalize$3(geometry.graph.point),
+          },
+        });
       case 'surface':
         return descend({ surface: canonicalize$2(geometry.surface) });
       case 'z0Surface':

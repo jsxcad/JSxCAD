@@ -2,80 +2,83 @@ import { toPlane, flip } from './jsxcad-math-poly3.js';
 import { dot } from './jsxcad-math-vec3.js';
 import { transform as transform$1 } from './jsxcad-geometry-points.js';
 
-const create = () => ({ point: [], edge: [], face: [] });
+const create = () => ({ points: [], edges: [], loops: [], faces: [] });
 
-const addPoint = (graph, point) => {
-  const found = graph.point.indexOf(point);
-  if (found !== -1) {
-    return found;
-  }
-  const id = graph.point.length;
-  graph.point.push(point);
-  return id;
-};
-
-const addEdge = (graph, { start, next = -1, face = -1, twin = -1 }) => {
-  const id = graph.edge.length;
-  graph.edge.push({ start, face, twin, next });
-  return id;
-};
-
-const addFaceEdge = (graph, face, { start, twin = -1 }) => {
-  const faceNode = graph.face[face];
-  const edge = addEdge(graph, { start, face, twin });
-  const edgeNode = graph.edge[edge];
-  if (faceNode.edge === -1) {
-    edgeNode.next = edge;
-  } else {
-    const faceEdgeNode = graph.edge[faceNode.edge];
-    edgeNode.next = faceEdgeNode.next;
-    faceEdgeNode.next = edge;
-  }
-  faceNode.edge = edge;
+const addEdge = (graph, { point, next = -1, loop = -1, twin = -1 }) => {
+  const edge = graph.edges.length;
+  graph.edges.push({ point, loop, twin, next });
   return edge;
 };
 
-const eachLoopEdge = (graph, loop, op) => {
-  if (loop === -1) {
-    return;
-  }
-  const start = loop;
-  let edge = start;
-  do {
-    const edgeNode = graph.edge[edge];
-    op(edge, edgeNode);
-    edge = edgeNode.next;
-  } while (edge !== start);
+const addFace = (graph, { plane, loops = [] } = {}) => {
+  const face = graph.faces.length;
+  graph.faces.push({ plane, loops });
+  return face;
 };
 
-const eachFaceEdge = (graph, face, op) => {
-  const faceNode = graph.face[face];
-  const loop = faceNode.edge;
-  eachLoopEdge(graph, loop, op);
-  /*
+const addLoop = (graph, { edge = -1, face = -1 } = {}) => {
+  const loop = graph.loops.length;
+  graph.loops.push({ edge, face });
+  if (face !== -1) {
+    getFaceNode(graph, face).loops.push(loop);
+  }
+  return loop;
+};
+
+const addLoopEdge = (graph, loop, { point, twin = -1 }) => {
+  const loopNode = getLoopNode(graph, loop);
+  const edge = addEdge(graph, { loop, point, twin });
+  const edgeNode = getEdgeNode(graph, edge);
+  if (loopNode.edge === -1) {
+    edgeNode.next = edge;
+  } else {
+    const lastNode = getEdgeNode(graph, loopNode.edge);
+    edgeNode.next = lastNode.next;
+    lastNode.next = edge;
+  }
+  loopNode.edge = edge;
+  return edge;
+};
+
+const addPoint = (graph, point) => {
+  const found = graph.points.indexOf(point);
+  if (found !== -1) {
+    return found;
+  }
+  const id = graph.points.length;
+  graph.points.push(point);
+  return id;
+};
+
+const eachEdge = (graph, start, op) => {
   if (start === -1) {
     return;
   }
   let edge = start;
   do {
-    const edgeNode = graph.edge[edge];
+    const edgeNode = graph.edges[edge];
     op(edge, edgeNode);
     edge = edgeNode.next;
   } while (edge !== start);
-*/
 };
 
-const addFace = (graph, { plane, edge = -1, holes = [] } = {}) => {
-  const id = graph.face.length;
-  graph.face.push({ plane, edge, holes });
-  return id;
-};
+const eachFace = (graph, op) =>
+  graph.faces.forEach((faceNode, face) => op(face, faceNode));
+const eachFaceEdge = (graph, face, op) =>
+  eachFaceLoop(graph, face, (loop) => eachLoopEdge(graph, loop, op));
+const eachFaceLoop = (graph, face, op) =>
+  getFaceNode(graph, face).loops.forEach((loop) =>
+    op(loop, getLoopNode(graph, loop))
+  );
 
-const eachFace = (graph, op) => {
-  for (let face = 0; face < graph.face.length; face++) {
-    op(face, graph.face[face]);
-  }
-};
+const eachLoopEdge = (graph, loop, op) =>
+  eachEdge(graph, getLoopNode(graph, loop).edge, op);
+
+const getEdgeNode = (graph, edge) => graph.edges[edge];
+const getFaceNode = (graph, face) => graph.faces[face];
+const getFacePlane = (graph, face) => graph.faces[face].plane;
+const getLoopNode = (graph, loop) => graph.loops[loop];
+const getPointNode = (graph, point) => graph.points[point];
 
 /**
  * fromSolid
@@ -107,11 +110,12 @@ const fromSolid = (solid, normalize, closed = true, verbose = false) => {
   for (const surface of solid) {
     for (const path of surface) {
       const face = addFace(graph, { plane: toPlane(path) });
+      const loop = addLoop(graph, { face });
       for (let nth = 0; nth < path.length; nth++) {
         const thisPoint = normalize(path[nth]);
         const nextPoint = normalize(path[(nth + 1) % path.length]);
-        const edge = addFaceEdge(graph, face, {
-          start: addPoint(graph, thisPoint),
+        const edge = addLoopEdge(graph, loop, {
+          point: addPoint(graph, thisPoint),
         });
         // nextPoint will be the start of the twin.
         getTwins(addPoint(graph, nextPoint)).push(edge);
@@ -123,15 +127,15 @@ const fromSolid = (solid, normalize, closed = true, verbose = false) => {
   let duplicateEdgeCount = 0;
   eachFace(graph, (face, faceNode) => {
     eachFaceEdge(graph, face, (edge, edgeNode) => {
-      const nextNode = graph.edge[edgeNode.next];
+      const nextNode = getEdgeNode(graph, edgeNode.next);
       if (edgeNode.twin === -1) {
-        const candidates = twinMap.get(edgeNode.start);
+        const candidates = twinMap.get(edgeNode.point);
         if (candidates === undefined) {
           throw Error('die');
         }
         for (const candidate of candidates) {
-          const candidateNode = graph.edge[candidate];
-          if (candidateNode.start === nextNode.start) {
+          const candidateNode = getEdgeNode(graph, candidate);
+          if (candidateNode.point === nextNode.point) {
             if (candidateNode.twin === -1) {
               candidateNode.twin = edge;
               edgeNode.twin = candidate;
@@ -146,8 +150,8 @@ const fromSolid = (solid, normalize, closed = true, verbose = false) => {
   });
 
   if (duplicateEdgeCount > 0) {
-    console.log(`warning: duplicateEdgeCount = ${duplicateEdgeCount}`);
-    // throw Error(`die: duplicateEdgeCount = ${duplicateEdgeCount}`);
+    // console.log(`warning: duplicateEdgeCount = ${duplicateEdgeCount}`);
+    throw Error(`die: duplicateEdgeCount = ${duplicateEdgeCount}`);
   }
 
   let holeCount = 0;
@@ -859,7 +863,7 @@ const Z = 2;
 const buildContourXy = (points, contour, graph, loop, selectJunction) => {
   const index = contour.length >>> 1;
   eachLoopEdge(graph, loop, (edge, edgeNode) => {
-    const point = graph.point[edgeNode.start];
+    const point = getPointNode(graph, edgeNode.point);
     if (selectJunction(point)) {
       points.push(point);
       contour.push(point[X], point[Y]);
@@ -871,8 +875,8 @@ const buildContourXy = (points, contour, graph, loop, selectJunction) => {
 const buildContourXz = (points, contour, graph, loop, selectJunction) => {
   const index = contour.length >>> 1;
   eachLoopEdge(graph, loop, (edge, edgeNode) => {
-    const point = graph.point[edgeNode.start];
-    if (selectJunction(edgeNode.start)) {
+    const point = getPointNode(graph, edgeNode.point);
+    if (selectJunction(edgeNode.point)) {
       points.push(point);
       contour.push(point[X], point[Z]);
     }
@@ -883,8 +887,8 @@ const buildContourXz = (points, contour, graph, loop, selectJunction) => {
 const buildContourYz = (points, contour, graph, loop, selectJunction) => {
   const index = contour.length >>> 1;
   eachLoopEdge(graph, loop, (edge, edgeNode) => {
-    const point = graph.point[edgeNode.start];
-    if (selectJunction(edgeNode.start)) {
+    const point = getPointNode(graph, edgeNode.point);
+    if (selectJunction(edgeNode.point)) {
       points.push(point);
       contour.push(point[Y], point[Z]);
     }
@@ -922,45 +926,45 @@ const pushConvexPolygons = (
   selectJunction = (any) => true,
   concavePolygons
 ) => {
-  const faceNode = graph.face[face];
-  const loop = faceNode.edge;
-  const plane = faceNode.plane;
-  const buildContour = selectBuildContour(plane);
-  const points = [];
-  const contour = [];
-  buildContour(points, contour, graph, loop, selectJunction);
-  if (concavePolygons) {
-    concavePolygons.push(...points);
-  }
-  const holes = [];
-  /*
-  FIX: Hole construction.
-  if (loop.face.holes) {
-    for (const hole of loop.face.holes) {
-      const index = buildContour(points, contour, graph, hole, selectJunction);
-      if (index !== contour.length >>> 1) {
-        holes.push(index);
+  const plane = getFacePlane(graph, face);
+  eachFaceLoop(graph, face, (loop, loopNode) => {
+    const buildContour = selectBuildContour(plane);
+    const points = [];
+    const contour = [];
+    buildContour(points, contour, graph, loop, selectJunction);
+    if (concavePolygons) {
+      concavePolygons.push(...points);
+    }
+    const holes = [];
+    /*
+    FIX: Hole construction.
+    if (loop.face.holes) {
+      for (const hole of loop.face.holes) {
+        const index = buildContour(points, contour, graph, hole, selectJunction);
+        if (index !== contour.length >>> 1) {
+          holes.push(index);
+        }
       }
     }
-  }
-  */
-  const triangles = earcut_1(contour, holes);
-  for (let i = 0; i < triangles.length; i += 3) {
-    const a = triangles[i + 0];
-    const b = triangles[i + 1];
-    const c = triangles[i + 2];
-    const triangle = [points[a], points[b], points[c]];
-    const trianglePlane = toPlane(triangle);
-    if (trianglePlane === undefined) {
-      // Degenerate.
-      continue;
+    */
+    const triangles = earcut_1(contour, holes);
+    for (let i = 0; i < triangles.length; i += 3) {
+      const a = triangles[i + 0];
+      const b = triangles[i + 1];
+      const c = triangles[i + 2];
+      const triangle = [points[a], points[b], points[c]];
+      const trianglePlane = toPlane(triangle);
+      if (trianglePlane === undefined) {
+        // Degenerate.
+        continue;
+      }
+      if (dot(trianglePlane, plane) < 0) {
+        polygons.push(flip(triangle));
+      } else {
+        polygons.push(triangle);
+      }
     }
-    if (dot(trianglePlane, plane) < 0) {
-      polygons.push(flip(triangle));
-    } else {
-      polygons.push(triangle);
-    }
-  }
+  });
 };
 
 const toSolid = (graph) => {
@@ -975,6 +979,9 @@ const toSolid = (graph) => {
   return solid;
 };
 
-const transform = (matrix, graph) => ({ ...graph, point: transform$1(matrix, graph.point) });
+const transform = (matrix, graph) => ({
+  ...graph,
+  point: transform$1(matrix, graph.point),
+});
 
 export { fromSolid, toSolid, transform };
