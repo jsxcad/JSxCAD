@@ -22,7 +22,7 @@ export const canonicalize = (geometry) => {
         return descend({
           graph: {
             ...geometry.graph,
-            point: canonicalizePoints(geometry.graph.point),
+            points: canonicalizePoints(geometry.graph.points),
           },
         });
       case 'surface':

@@ -835,7 +835,7 @@ Shape.prototype.drop = dropMethod;
 const graph = (shape) => {
   const graphs = [];
   for (const { tags, solid } of getSolids(shape.toTransformedGeometry())) {
-    graphs.push(taggedGraph(tags, fromSolid(solid)));
+    graphs.push(taggedGraph({ tags }, fromSolid(solid)));
   }
   return Shape.fromGeometry(taggedGroup({}, ...graphs));
 };

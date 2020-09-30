@@ -310,7 +310,7 @@ const canonicalize = (geometry) => {
         return descend({
           graph: {
             ...geometry.graph,
-            point: canonicalize$3(geometry.graph.point),
+            points: canonicalize$3(geometry.graph.points),
           },
         });
       case 'surface':
@@ -1277,7 +1277,7 @@ const measureBoundingBox = (geometry) => {
       case 'sketch':
         return descend();
       case 'graph':
-        return update(measureBoundingBox$4(geometry.graph.point));
+        return update(measureBoundingBox$4(geometry.graph.points));
       case 'layout':
         return update(geometry.marks);
       case 'solid':

@@ -41,7 +41,7 @@ export const measureBoundingBox = (geometry) => {
       case 'sketch':
         return descend();
       case 'graph':
-        return update(measureBoundingBoxOfPoints(geometry.graph.point));
+        return update(measureBoundingBoxOfPoints(geometry.graph.points));
       case 'layout':
         return update(geometry.marks);
       case 'solid':

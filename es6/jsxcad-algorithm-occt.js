@@ -433,8 +433,8 @@ var Module = (function () {
     }
     var wasmMemory;
     var wasmTable = new WebAssembly.Table({
-      initial: 7002,
-      maximum: 7002,
+      initial: 11284,
+      maximum: 11284,
       element: 'anyfunc',
     });
     var ABORT = false;
@@ -1110,6 +1110,38 @@ var Module = (function () {
       return (setTempRet0(thrownType), catchInfo.ptr) | 0;
     }
     function ___cxa_find_matching_catch_3() {
+      var thrown = exceptionLast;
+      if (!thrown) {
+        return (setTempRet0(0), 0) | 0;
+      }
+      var info = new ExceptionInfo(thrown);
+      var thrownType = info.get_type();
+      var catchInfo = new CatchInfo();
+      catchInfo.set_base_ptr(thrown);
+      if (!thrownType) {
+        return (setTempRet0(0), catchInfo.ptr) | 0;
+      }
+      var typeArray = Array.prototype.slice.call(arguments);
+      var stackTop = stackSave();
+      var exceptionThrowBuf = stackAlloc(4);
+      HEAP32[exceptionThrowBuf >> 2] = thrown;
+      for (var i = 0; i < typeArray.length; i++) {
+        var caughtType = typeArray[i];
+        if (caughtType === 0 || caughtType === thrownType) {
+          break;
+        }
+        if (___cxa_can_catch(caughtType, thrownType, exceptionThrowBuf)) {
+          var adjusted = HEAP32[exceptionThrowBuf >> 2];
+          if (thrown !== adjusted) {
+            catchInfo.set_adjusted_ptr(adjusted);
+          }
+          return (setTempRet0(caughtType), catchInfo.ptr) | 0;
+        }
+      }
+      stackRestore(stackTop);
+      return (setTempRet0(thrownType), catchInfo.ptr) | 0;
+    }
+    function ___cxa_find_matching_catch_5() {
       var thrown = exceptionLast;
       if (!thrown) {
         return (setTempRet0(0), 0) | 0;
@@ -3798,6 +3830,136 @@ var Module = (function () {
         return low;
       },
     };
+    function ___sys_access(path, amode) {
+      try {
+        path = SYSCALLS.getStr(path);
+        return SYSCALLS.doAccess(path, amode);
+      } catch (e) {
+        if (typeof FS === 'undefined' || !(e instanceof FS.ErrnoError))
+          abort(e);
+        return -e.errno;
+      }
+    }
+    function ___sys_chmod(path, mode) {
+      try {
+        path = SYSCALLS.getStr(path);
+        FS.chmod(path, mode);
+        return 0;
+      } catch (e) {
+        if (typeof FS === 'undefined' || !(e instanceof FS.ErrnoError))
+          abort(e);
+        return -e.errno;
+      }
+    }
+    function ___sys_fcntl64(fd, cmd, varargs) {
+      SYSCALLS.varargs = varargs;
+      try {
+        var stream = SYSCALLS.getStreamFromFD(fd);
+        switch (cmd) {
+          case 0: {
+            var arg = SYSCALLS.get();
+            if (arg < 0) {
+              return -28;
+            }
+            var newStream;
+            newStream = FS.open(stream.path, stream.flags, 0, arg);
+            return newStream.fd;
+          }
+          case 1:
+          case 2:
+            return 0;
+          case 3:
+            return stream.flags;
+          case 4: {
+            var arg = SYSCALLS.get();
+            stream.flags |= arg;
+            return 0;
+          }
+          case 12: {
+            var arg = SYSCALLS.get();
+            var offset = 0;
+            HEAP16[(arg + offset) >> 1] = 2;
+            return 0;
+          }
+          case 13:
+          case 14:
+            return 0;
+          case 16:
+          case 8:
+            return -28;
+          case 9:
+            setErrNo(28);
+            return -1;
+          default: {
+            return -28;
+          }
+        }
+      } catch (e) {
+        if (typeof FS === 'undefined' || !(e instanceof FS.ErrnoError))
+          abort(e);
+        return -e.errno;
+      }
+    }
+    function ___sys_fstat64(fd, buf) {
+      try {
+        var stream = SYSCALLS.getStreamFromFD(fd);
+        return SYSCALLS.doStat(FS.stat, stream.path, buf);
+      } catch (e) {
+        if (typeof FS === 'undefined' || !(e instanceof FS.ErrnoError))
+          abort(e);
+        return -e.errno;
+      }
+    }
+    function ___sys_ioctl(fd, op, varargs) {
+      SYSCALLS.varargs = varargs;
+      try {
+        var stream = SYSCALLS.getStreamFromFD(fd);
+        switch (op) {
+          case 21509:
+          case 21505: {
+            if (!stream.tty) return -59;
+            return 0;
+          }
+          case 21510:
+          case 21511:
+          case 21512:
+          case 21506:
+          case 21507:
+          case 21508: {
+            if (!stream.tty) return -59;
+            return 0;
+          }
+          case 21519: {
+            if (!stream.tty) return -59;
+            var argp = SYSCALLS.get();
+            HEAP32[argp >> 2] = 0;
+            return 0;
+          }
+          case 21520: {
+            if (!stream.tty) return -59;
+            return -28;
+          }
+          case 21531: {
+            var argp = SYSCALLS.get();
+            return FS.ioctl(stream, op, argp);
+          }
+          case 21523: {
+            if (!stream.tty) return -59;
+            return 0;
+          }
+          case 21524: {
+            if (!stream.tty) return -59;
+            return 0;
+          }
+          default:
+            abort('bad ioctl syscall ' + op);
+        }
+      } catch (e) {
+        if (typeof FS === 'undefined' || !(e instanceof FS.ErrnoError))
+          abort(e);
+        return -e.errno;
+      }
+    }
     function syscallMmap2(addr, len, prot, flags, fd, off) {
       off <<= 12;
       var ptr;
@@ -3859,6 +4021,29 @@ var Module = (function () {
     function ___sys_munmap(addr, len) {
       try {
         return syscallMunmap(addr, len);
+      } catch (e) {
+        if (typeof FS === 'undefined' || !(e instanceof FS.ErrnoError))
+          abort(e);
+        return -e.errno;
+      }
+    }
+    function ___sys_open(path, flags, varargs) {
+      SYSCALLS.varargs = varargs;
+      try {
+        var pathname = SYSCALLS.getStr(path);
+        var mode = SYSCALLS.get();
+        var stream = FS.open(pathname, flags, mode);
+        return stream.fd;
+      } catch (e) {
+        if (typeof FS === 'undefined' || !(e instanceof FS.ErrnoError))
+          abort(e);
+        return -e.errno;
+      }
+    }
+    function ___sys_stat64(path, buf) {
+      try {
+        path = SYSCALLS.getStr(path);
+        return SYSCALLS.doStat(FS.stat, path, buf);
       } catch (e) {
         if (typeof FS === 'undefined' || !(e instanceof FS.ErrnoError))
           abort(e);
@@ -4058,6 +4243,766 @@ var Module = (function () {
         destructorFunction: null,
       });
     }
+    function ClassHandle_isAliasOf(other) {
+      if (!(this instanceof ClassHandle)) {
+        return false;
+      }
+      if (!(other instanceof ClassHandle)) {
+        return false;
+      }
+      var leftClass = this.$$.ptrType.registeredClass;
+      var left = this.$$.ptr;
+      var rightClass = other.$$.ptrType.registeredClass;
+      var right = other.$$.ptr;
+      while (leftClass.baseClass) {
+        left = leftClass.upcast(left);
+        leftClass = leftClass.baseClass;
+      }
+      while (rightClass.baseClass) {
+        right = rightClass.upcast(right);
+        rightClass = rightClass.baseClass;
+      }
+      return leftClass === rightClass && left === right;
+    }
+    function shallowCopyInternalPointer(o) {
+      return {
+        count: o.count,
+        deleteScheduled: o.deleteScheduled,
+        preservePointerOnDelete: o.preservePointerOnDelete,
+        ptr: o.ptr,
+        ptrType: o.ptrType,
+        smartPtr: o.smartPtr,
+        smartPtrType: o.smartPtrType,
+      };
+    }
+    function throwInstanceAlreadyDeleted(obj) {
+      function getInstanceTypeName(handle) {
+        return handle.$$.ptrType.registeredClass.name;
+      }
+      throwBindingError(getInstanceTypeName(obj) + ' instance already deleted');
+    }
+    var finalizationGroup = false;
+    function detachFinalizer(handle) {}
+    function runDestructor($$) {
+      if ($$.smartPtr) {
+        $$.smartPtrType.rawDestructor($$.smartPtr);
+      } else {
+        $$.ptrType.registeredClass.rawDestructor($$.ptr);
+      }
+    }
+    function releaseClassHandle($$) {
+      $$.count.value -= 1;
+      var toDelete = 0 === $$.count.value;
+      if (toDelete) {
+        runDestructor($$);
+      }
+    }
+    function attachFinalizer(handle) {
+      if ('undefined' === typeof FinalizationGroup) {
+        attachFinalizer = function (handle) {
+          return handle;
+        };
+        return handle;
+      }
+      finalizationGroup = new FinalizationGroup(function (iter) {
+        for (var result = iter.next(); !result.done; result = iter.next()) {
+          var $$ = result.value;
+          if (!$$.ptr) {
+            console.warn('object already deleted: ' + $$.ptr);
+          } else {
+            releaseClassHandle($$);
+          }
+        }
+      });
+      attachFinalizer = function (handle) {
+        finalizationGroup.register(handle, handle.$$, handle.$$);
+        return handle;
+      };
+      detachFinalizer = function (handle) {
+        finalizationGroup.unregister(handle.$$);
+      };
+      return attachFinalizer(handle);
+    }
+    function ClassHandle_clone() {
+      if (!this.$$.ptr) {
+        throwInstanceAlreadyDeleted(this);
+      }
+      if (this.$$.preservePointerOnDelete) {
+        this.$$.count.value += 1;
+        return this;
+      } else {
+        var clone = attachFinalizer(
+          Object.create(Object.getPrototypeOf(this), {
+            $$: { value: shallowCopyInternalPointer(this.$$) },
+          })
+        );
+        clone.$$.count.value += 1;
+        clone.$$.deleteScheduled = false;
+        return clone;
+      }
+    }
+    function ClassHandle_delete() {
+      if (!this.$$.ptr) {
+        throwInstanceAlreadyDeleted(this);
+      }
+      if (this.$$.deleteScheduled && !this.$$.preservePointerOnDelete) {
+        throwBindingError('Object already scheduled for deletion');
+      }
+      detachFinalizer(this);
+      releaseClassHandle(this.$$);
+      if (!this.$$.preservePointerOnDelete) {
+        this.$$.smartPtr = undefined;
+        this.$$.ptr = undefined;
+      }
+    }
+    function ClassHandle_isDeleted() {
+      return !this.$$.ptr;
+    }
+    var delayFunction = undefined;
+    var deletionQueue = [];
+    function flushPendingDeletes() {
+      while (deletionQueue.length) {
+        var obj = deletionQueue.pop();
+        obj.$$.deleteScheduled = false;
+        obj['delete']();
+      }
+    }
+    function ClassHandle_deleteLater() {
+      if (!this.$$.ptr) {
+        throwInstanceAlreadyDeleted(this);
+      }
+      if (this.$$.deleteScheduled && !this.$$.preservePointerOnDelete) {
+        throwBindingError('Object already scheduled for deletion');
+      }
+      deletionQueue.push(this);
+      if (deletionQueue.length === 1 && delayFunction) {
+        delayFunction(flushPendingDeletes);
+      }
+      this.$$.deleteScheduled = true;
+      return this;
+    }
+    function init_ClassHandle() {
+      ClassHandle.prototype['isAliasOf'] = ClassHandle_isAliasOf;
+      ClassHandle.prototype['clone'] = ClassHandle_clone;
+      ClassHandle.prototype['delete'] = ClassHandle_delete;
+      ClassHandle.prototype['isDeleted'] = ClassHandle_isDeleted;
+      ClassHandle.prototype['deleteLater'] = ClassHandle_deleteLater;
+    }
+    function ClassHandle() {}
+    var registeredPointers = {};
+    function ensureOverloadTable(proto, methodName, humanName) {
+      if (undefined === proto[methodName].overloadTable) {
+        var prevFunc = proto[methodName];
+        proto[methodName] = function () {
+          if (
+            !proto[methodName].overloadTable.hasOwnProperty(arguments.length)
+          ) {
+            throwBindingError(
+              "Function '" +
+                humanName +
+                "' called with an invalid number of arguments (" +
+                arguments.length +
+                ') - expects one of (' +
+                proto[methodName].overloadTable +
+                ')!'
+            );
+          }
+          return proto[methodName].overloadTable[arguments.length].apply(
+            this,
+            arguments
+          );
+        };
+        proto[methodName].overloadTable = [];
+        proto[methodName].overloadTable[prevFunc.argCount] = prevFunc;
+      }
+    }
+    function exposePublicSymbol(name, value, numArguments) {
+      if (Module.hasOwnProperty(name)) {
+        if (
+          undefined === numArguments ||
+          (undefined !== Module[name].overloadTable &&
+            undefined !== Module[name].overloadTable[numArguments])
+        ) {
+          throwBindingError("Cannot register public name '" + name + "' twice");
+        }
+        ensureOverloadTable(Module, name, name);
+        if (Module.hasOwnProperty(numArguments)) {
+          throwBindingError(
+            'Cannot register multiple overloads of a function with the same number of arguments (' +
+              numArguments +
+              ')!'
+          );
+        }
+        Module[name].overloadTable[numArguments] = value;
+      } else {
+        Module[name] = value;
+        if (undefined !== numArguments) {
+          Module[name].numArguments = numArguments;
+        }
+      }
+    }
+    function RegisteredClass(
+      name,
+      constructor,
+      instancePrototype,
+      rawDestructor,
+      baseClass,
+      getActualType,
+      upcast,
+      downcast
+    ) {
+      this.name = name;
+      this.constructor = constructor;
+      this.instancePrototype = instancePrototype;
+      this.rawDestructor = rawDestructor;
+      this.baseClass = baseClass;
+      this.getActualType = getActualType;
+      this.upcast = upcast;
+      this.downcast = downcast;
+      this.pureVirtualFunctions = [];
+    }
+    function upcastPointer(ptr, ptrClass, desiredClass) {
+      while (ptrClass !== desiredClass) {
+        if (!ptrClass.upcast) {
+          throwBindingError(
+            'Expected null or instance of ' +
+              desiredClass.name +
+              ', got an instance of ' +
+              ptrClass.name
+          );
+        }
+        ptr = ptrClass.upcast(ptr);
+        ptrClass = ptrClass.baseClass;
+      }
+      return ptr;
+    }
+    function constNoSmartPtrRawPointerToWireType(destructors, handle) {
+      if (handle === null) {
+        if (this.isReference) {
+          throwBindingError('null is not a valid ' + this.name);
+        }
+        return 0;
+      }
+      if (!handle.$$) {
+        throwBindingError(
+          'Cannot pass "' + _embind_repr(handle) + '" as a ' + this.name
+        );
+      }
+      if (!handle.$$.ptr) {
+        throwBindingError(
+          'Cannot pass deleted object as a pointer of type ' + this.name
+        );
+      }
+      var handleClass = handle.$$.ptrType.registeredClass;
+      var ptr = upcastPointer(handle.$$.ptr, handleClass, this.registeredClass);
+      return ptr;
+    }
+    function genericPointerToWireType(destructors, handle) {
+      var ptr;
+      if (handle === null) {
+        if (this.isReference) {
+          throwBindingError('null is not a valid ' + this.name);
+        }
+        if (this.isSmartPointer) {
+          ptr = this.rawConstructor();
+          if (destructors !== null) {
+            destructors.push(this.rawDestructor, ptr);
+          }
+          return ptr;
+        } else {
+          return 0;
+        }
+      }
+      if (!handle.$$) {
+        throwBindingError(
+          'Cannot pass "' + _embind_repr(handle) + '" as a ' + this.name
+        );
+      }
+      if (!handle.$$.ptr) {
+        throwBindingError(
+          'Cannot pass deleted object as a pointer of type ' + this.name
+        );
+      }
+      if (!this.isConst && handle.$$.ptrType.isConst) {
+        throwBindingError(
+          'Cannot convert argument of type ' +
+            (handle.$$.smartPtrType
+              ? handle.$$.smartPtrType.name
+              : handle.$$.ptrType.name) +
+            ' to parameter type ' +
+            this.name
+        );
+      }
+      var handleClass = handle.$$.ptrType.registeredClass;
+      ptr = upcastPointer(handle.$$.ptr, handleClass, this.registeredClass);
+      if (this.isSmartPointer) {
+        if (undefined === handle.$$.smartPtr) {
+          throwBindingError('Passing raw pointer to smart pointer is illegal');
+        }
+        switch (this.sharingPolicy) {
+          case 0:
+            if (handle.$$.smartPtrType === this) {
+              ptr = handle.$$.smartPtr;
+            } else {
+              throwBindingError(
+                'Cannot convert argument of type ' +
+                  (handle.$$.smartPtrType
+                    ? handle.$$.smartPtrType.name
+                    : handle.$$.ptrType.name) +
+                  ' to parameter type ' +
+                  this.name
+              );
+            }
+            break;
+          case 1:
+            ptr = handle.$$.smartPtr;
+            break;
+          case 2:
+            if (handle.$$.smartPtrType === this) {
+              ptr = handle.$$.smartPtr;
+            } else {
+              var clonedHandle = handle['clone']();
+              ptr = this.rawShare(
+                ptr,
+                __emval_register(function () {
+                  clonedHandle['delete']();
+                })
+              );
+              if (destructors !== null) {
+                destructors.push(this.rawDestructor, ptr);
+              }
+            }
+            break;
+          default:
+            throwBindingError('Unsupporting sharing policy');
+        }
+      }
+      return ptr;
+    }
+    function nonConstNoSmartPtrRawPointerToWireType(destructors, handle) {
+      if (handle === null) {
+        if (this.isReference) {
+          throwBindingError('null is not a valid ' + this.name);
+        }
+        return 0;
+      }
+      if (!handle.$$) {
+        throwBindingError(
+          'Cannot pass "' + _embind_repr(handle) + '" as a ' + this.name
+        );
+      }
+      if (!handle.$$.ptr) {
+        throwBindingError(
+          'Cannot pass deleted object as a pointer of type ' + this.name
+        );
+      }
+      if (handle.$$.ptrType.isConst) {
+        throwBindingError(
+          'Cannot convert argument of type ' +
+            handle.$$.ptrType.name +
+            ' to parameter type ' +
+            this.name
+        );
+      }
+      var handleClass = handle.$$.ptrType.registeredClass;
+      var ptr = upcastPointer(handle.$$.ptr, handleClass, this.registeredClass);
+      return ptr;
+    }
+    function simpleReadValueFromPointer(pointer) {
+      return this['fromWireType'](HEAPU32[pointer >> 2]);
+    }
+    function RegisteredPointer_getPointee(ptr) {
+      if (this.rawGetPointee) {
+        ptr = this.rawGetPointee(ptr);
+      }
+      return ptr;
+    }
+    function RegisteredPointer_destructor(ptr) {
+      if (this.rawDestructor) {
+        this.rawDestructor(ptr);
+      }
+    }
+    function RegisteredPointer_deleteObject(handle) {
+      if (handle !== null) {
+        handle['delete']();
+      }
+    }
+    function downcastPointer(ptr, ptrClass, desiredClass) {
+      if (ptrClass === desiredClass) {
+        return ptr;
+      }
+      if (undefined === desiredClass.baseClass) {
+        return null;
+      }
+      var rv = downcastPointer(ptr, ptrClass, desiredClass.baseClass);
+      if (rv === null) {
+        return null;
+      }
+      return desiredClass.downcast(rv);
+    }
+    function getInheritedInstanceCount() {
+      return Object.keys(registeredInstances).length;
+    }
+    function getLiveInheritedInstances() {
+      var rv = [];
+      for (var k in registeredInstances) {
+        if (registeredInstances.hasOwnProperty(k)) {
+          rv.push(registeredInstances[k]);
+        }
+      }
+      return rv;
+    }
+    function setDelayFunction(fn) {
+      delayFunction = fn;
+      if (deletionQueue.length && delayFunction) {
+        delayFunction(flushPendingDeletes);
+      }
+    }
+    function init_embind() {
+      Module['getInheritedInstanceCount'] = getInheritedInstanceCount;
+      Module['getLiveInheritedInstances'] = getLiveInheritedInstances;
+      Module['flushPendingDeletes'] = flushPendingDeletes;
+      Module['setDelayFunction'] = setDelayFunction;
+    }
+    var registeredInstances = {};
+    function getBasestPointer(class_, ptr) {
+      if (ptr === undefined) {
+        throwBindingError('ptr should not be undefined');
+      }
+      while (class_.baseClass) {
+        ptr = class_.upcast(ptr);
+        class_ = class_.baseClass;
+      }
+      return ptr;
+    }
+    function getInheritedInstance(class_, ptr) {
+      ptr = getBasestPointer(class_, ptr);
+      return registeredInstances[ptr];
+    }
+    function makeClassHandle(prototype, record) {
+      if (!record.ptrType || !record.ptr) {
+        throwInternalError('makeClassHandle requires ptr and ptrType');
+      }
+      var hasSmartPtrType = !!record.smartPtrType;
+      var hasSmartPtr = !!record.smartPtr;
+      if (hasSmartPtrType !== hasSmartPtr) {
+        throwInternalError('Both smartPtrType and smartPtr must be specified');
+      }
+      record.count = { value: 1 };
+      return attachFinalizer(
+        Object.create(prototype, { $$: { value: record } })
+      );
+    }
+    function RegisteredPointer_fromWireType(ptr) {
+      var rawPointer = this.getPointee(ptr);
+      if (!rawPointer) {
+        this.destructor(ptr);
+        return null;
+      }
+      var registeredInstance = getInheritedInstance(
+        this.registeredClass,
+        rawPointer
+      );
+      if (undefined !== registeredInstance) {
+        if (0 === registeredInstance.$$.count.value) {
+          registeredInstance.$$.ptr = rawPointer;
+          registeredInstance.$$.smartPtr = ptr;
+          return registeredInstance['clone']();
+        } else {
+          var rv = registeredInstance['clone']();
+          this.destructor(ptr);
+          return rv;
+        }
+      }
+      function makeDefaultHandle() {
+        if (this.isSmartPointer) {
+          return makeClassHandle(this.registeredClass.instancePrototype, {
+            ptrType: this.pointeeType,
+            ptr: rawPointer,
+            smartPtrType: this,
+            smartPtr: ptr,
+          });
+        } else {
+          return makeClassHandle(this.registeredClass.instancePrototype, {
+            ptrType: this,
+            ptr: ptr,
+          });
+        }
+      }
+      var actualType = this.registeredClass.getActualType(rawPointer);
+      var registeredPointerRecord = registeredPointers[actualType];
+      if (!registeredPointerRecord) {
+        return makeDefaultHandle.call(this);
+      }
+      var toType;
+      if (this.isConst) {
+        toType = registeredPointerRecord.constPointerType;
+      } else {
+        toType = registeredPointerRecord.pointerType;
+      }
+      var dp = downcastPointer(
+        rawPointer,
+        this.registeredClass,
+        toType.registeredClass
+      );
+      if (dp === null) {
+        return makeDefaultHandle.call(this);
+      }
+      if (this.isSmartPointer) {
+        return makeClassHandle(toType.registeredClass.instancePrototype, {
+          ptrType: toType,
+          ptr: dp,
+          smartPtrType: this,
+          smartPtr: ptr,
+        });
+      } else {
+        return makeClassHandle(toType.registeredClass.instancePrototype, {
+          ptrType: toType,
+          ptr: dp,
+        });
+      }
+    }
+    function init_RegisteredPointer() {
+      RegisteredPointer.prototype.getPointee = RegisteredPointer_getPointee;
+      RegisteredPointer.prototype.destructor = RegisteredPointer_destructor;
+      RegisteredPointer.prototype['argPackAdvance'] = 8;
+      RegisteredPointer.prototype[
+        'readValueFromPointer'
+      ] = simpleReadValueFromPointer;
+      RegisteredPointer.prototype[
+        'deleteObject'
+      ] = RegisteredPointer_deleteObject;
+      RegisteredPointer.prototype[
+        'fromWireType'
+      ] = RegisteredPointer_fromWireType;
+    }
+    function RegisteredPointer(
+      name,
+      registeredClass,
+      isReference,
+      isConst,
+      isSmartPointer,
+      pointeeType,
+      sharingPolicy,
+      rawGetPointee,
+      rawConstructor,
+      rawShare,
+      rawDestructor
+    ) {
+      this.name = name;
+      this.registeredClass = registeredClass;
+      this.isReference = isReference;
+      this.isConst = isConst;
+      this.isSmartPointer = isSmartPointer;
+      this.pointeeType = pointeeType;
+      this.sharingPolicy = sharingPolicy;
+      this.rawGetPointee = rawGetPointee;
+      this.rawConstructor = rawConstructor;
+      this.rawShare = rawShare;
+      this.rawDestructor = rawDestructor;
+      if (!isSmartPointer && registeredClass.baseClass === undefined) {
+        if (isConst) {
+          this['toWireType'] = constNoSmartPtrRawPointerToWireType;
+          this.destructorFunction = null;
+        } else {
+          this['toWireType'] = nonConstNoSmartPtrRawPointerToWireType;
+          this.destructorFunction = null;
+        }
+      } else {
+        this['toWireType'] = genericPointerToWireType;
+      }
+    }
+    function replacePublicSymbol(name, value, numArguments) {
+      if (!Module.hasOwnProperty(name)) {
+        throwInternalError('Replacing nonexistant public symbol');
+      }
+      if (
+        undefined !== Module[name].overloadTable &&
+        undefined !== numArguments
+      ) {
+        Module[name].overloadTable[numArguments] = value;
+      } else {
+        Module[name] = value;
+        Module[name].argCount = numArguments;
+      }
+    }
+    function getDynCaller(sig, ptr) {
+      assert(
+        sig.indexOf('j') >= 0,
+        'getDynCaller should only be called with i64 sigs'
+      );
+      var argCache = [];
+      return function () {
+        argCache.length = arguments.length;
+        for (var i = 0; i < arguments.length; i++) {
+          argCache[i] = arguments[i];
+        }
+        return dynCall(sig, ptr, argCache);
+      };
+    }
+    function embind__requireFunction(signature, rawFunction) {
+      signature = readLatin1String(signature);
+      function makeDynCaller() {
+        if (signature.indexOf('j') != -1) {
+          return getDynCaller(signature, rawFunction);
+        }
+        return wasmTable.get(rawFunction);
+      }
+      var fp = makeDynCaller();
+      if (typeof fp !== 'function') {
+        throwBindingError(
+          'unknown function pointer with signature ' +
+            signature +
+            ': ' +
+            rawFunction
+        );
+      }
+      return fp;
+    }
+    var UnboundTypeError = undefined;
+    function getTypeName(type) {
+      var ptr = ___getTypeName(type);
+      var rv = readLatin1String(ptr);
+      _free(ptr);
+      return rv;
+    }
+    function throwUnboundTypeError(message, types) {
+      var unboundTypes = [];
+      var seen = {};
+      function visit(type) {
+        if (seen[type]) {
+          return;
+        }
+        if (registeredTypes[type]) {
+          return;
+        }
+        if (typeDependencies[type]) {
+          typeDependencies[type].forEach(visit);
+          return;
+        }
+        unboundTypes.push(type);
+        seen[type] = true;
+      }
+      types.forEach(visit);
+      throw new UnboundTypeError(
+        message + ': ' + unboundTypes.map(getTypeName).join([', '])
+      );
+    }
+    function __embind_register_class(
+      rawType,
+      rawPointerType,
+      rawConstPointerType,
+      baseClassRawType,
+      getActualTypeSignature,
+      getActualType,
+      upcastSignature,
+      upcast,
+      downcastSignature,
+      downcast,
+      name,
+      destructorSignature,
+      rawDestructor
+    ) {
+      name = readLatin1String(name);
+      getActualType = embind__requireFunction(
+        getActualTypeSignature,
+        getActualType
+      );
+      if (upcast) {
+        upcast = embind__requireFunction(upcastSignature, upcast);
+      }
+      if (downcast) {
+        downcast = embind__requireFunction(downcastSignature, downcast);
+      }
+      rawDestructor = embind__requireFunction(
+        destructorSignature,
+        rawDestructor
+      );
+      var legalFunctionName = makeLegalFunctionName(name);
+      exposePublicSymbol(legalFunctionName, function () {
+        throwUnboundTypeError(
+          'Cannot construct ' + name + ' due to unbound types',
+          [baseClassRawType]
+        );
+      });
+      whenDependentTypesAreResolved(
+        [rawType, rawPointerType, rawConstPointerType],
+        baseClassRawType ? [baseClassRawType] : [],
+        function (base) {
+          base = base[0];
+          var baseClass;
+          var basePrototype;
+          if (baseClassRawType) {
+            baseClass = base.registeredClass;
+            basePrototype = baseClass.instancePrototype;
+          } else {
+            basePrototype = ClassHandle.prototype;
+          }
+          var constructor = createNamedFunction(legalFunctionName, function () {
+            if (Object.getPrototypeOf(this) !== instancePrototype) {
+              throw new BindingError("Use 'new' to construct " + name);
+            }
+            if (undefined === registeredClass.constructor_body) {
+              throw new BindingError(name + ' has no accessible constructor');
+            }
+            var body = registeredClass.constructor_body[arguments.length];
+            if (undefined === body) {
+              throw new BindingError(
+                'Tried to invoke ctor of ' +
+                  name +
+                  ' with invalid number of parameters (' +
+                  arguments.length +
+                  ') - expected (' +
+                  Object.keys(registeredClass.constructor_body).toString() +
+                  ') parameters instead!'
+              );
+            }
+            return body.apply(this, arguments);
+          });
+          var instancePrototype = Object.create(basePrototype, {
+            constructor: { value: constructor },
+          });
+          constructor.prototype = instancePrototype;
+          var registeredClass = new RegisteredClass(
+            name,
+            constructor,
+            instancePrototype,
+            rawDestructor,
+            baseClass,
+            getActualType,
+            upcast,
+            downcast
+          );
+          var referenceConverter = new RegisteredPointer(
+            name,
+            registeredClass,
+            true,
+            false,
+            false
+          );
+          var pointerConverter = new RegisteredPointer(
+            name + '*',
+            registeredClass,
+            false,
+            false,
+            false
+          );
+          var constPointerConverter = new RegisteredPointer(
+            name + ' const*',
+            registeredClass,
+            false,
+            true,
+            false
+          );
+          registeredPointers[rawType] = {
+            pointerType: pointerConverter,
+            constPointerType: constPointerConverter,
+          };
+          replacePublicSymbol(legalFunctionName, constructor);
+          return [referenceConverter, pointerConverter, constPointerConverter];
+        }
+      );
+    }
     var emval_free_list = [];
     var emval_handle_array = [
       {},
@@ -4115,9 +5060,6 @@ var Module = (function () {
           return handle;
         }
       }
-    }
-    function simpleReadValueFromPointer(pointer) {
-      return this['fromWireType'](HEAPU32[pointer >> 2]);
     }
     function __embind_register_emval(rawType, name) {
       name = readLatin1String(name);
@@ -4329,139 +5271,12 @@ var Module = (function () {
       var invokerFunction = new_(Function, args1).apply(null, args2);
       return invokerFunction;
     }
-    function ensureOverloadTable(proto, methodName, humanName) {
-      if (undefined === proto[methodName].overloadTable) {
-        var prevFunc = proto[methodName];
-        proto[methodName] = function () {
-          if (
-            !proto[methodName].overloadTable.hasOwnProperty(arguments.length)
-          ) {
-            throwBindingError(
-              "Function '" +
-                humanName +
-                "' called with an invalid number of arguments (" +
-                arguments.length +
-                ') - expects one of (' +
-                proto[methodName].overloadTable +
-                ')!'
-            );
-          }
-          return proto[methodName].overloadTable[arguments.length].apply(
-            this,
-            arguments
-          );
-        };
-        proto[methodName].overloadTable = [];
-        proto[methodName].overloadTable[prevFunc.argCount] = prevFunc;
-      }
-    }
-    function exposePublicSymbol(name, value, numArguments) {
-      if (Module.hasOwnProperty(name)) {
-        if (
-          undefined === numArguments ||
-          (undefined !== Module[name].overloadTable &&
-            undefined !== Module[name].overloadTable[numArguments])
-        ) {
-          throwBindingError("Cannot register public name '" + name + "' twice");
-        }
-        ensureOverloadTable(Module, name, name);
-        if (Module.hasOwnProperty(numArguments)) {
-          throwBindingError(
-            'Cannot register multiple overloads of a function with the same number of arguments (' +
-              numArguments +
-              ')!'
-          );
-        }
-        Module[name].overloadTable[numArguments] = value;
-      } else {
-        Module[name] = value;
-        if (undefined !== numArguments) {
-          Module[name].numArguments = numArguments;
-        }
-      }
-    }
     function heap32VectorToArray(count, firstElement) {
       var array = [];
       for (var i = 0; i < count; i++) {
         array.push(HEAP32[(firstElement >> 2) + i]);
       }
       return array;
-    }
-    function replacePublicSymbol(name, value, numArguments) {
-      if (!Module.hasOwnProperty(name)) {
-        throwInternalError('Replacing nonexistant public symbol');
-      }
-      if (
-        undefined !== Module[name].overloadTable &&
-        undefined !== numArguments
-      ) {
-        Module[name].overloadTable[numArguments] = value;
-      } else {
-        Module[name] = value;
-        Module[name].argCount = numArguments;
-      }
-    }
-    function getDynCaller(sig, ptr) {
-      assert(
-        sig.indexOf('j') >= 0,
-        'getDynCaller should only be called with i64 sigs'
-      );
-      var argCache = [];
-      return function () {
-        argCache.length = arguments.length;
-        for (var i = 0; i < arguments.length; i++) {
-          argCache[i] = arguments[i];
-        }
-        return dynCall(sig, ptr, argCache);
-      };
-    }
-    function embind__requireFunction(signature, rawFunction) {
-      signature = readLatin1String(signature);
-      function makeDynCaller() {
-        if (signature.indexOf('j') != -1) {
-          return getDynCaller(signature, rawFunction);
-        }
-        return wasmTable.get(rawFunction);
-      }
-      var fp = makeDynCaller();
-      if (typeof fp !== 'function') {
-        throwBindingError(
-          'unknown function pointer with signature ' +
-            signature +
-            ': ' +
-            rawFunction
-        );
-      }
-      return fp;
-    }
-    var UnboundTypeError = undefined;
-    function getTypeName(type) {
-      var ptr = ___getTypeName(type);
-      var rv = readLatin1String(ptr);
-      _free(ptr);
-      return rv;
-    }
-    function throwUnboundTypeError(message, types) {
-      var unboundTypes = [];
-      var seen = {};
-      function visit(type) {
-        if (seen[type]) {
-          return;
-        }
-        if (registeredTypes[type]) {
-          return;
-        }
-        if (typeDependencies[type]) {
-          typeDependencies[type].forEach(visit);
-          return;
-        }
-        unboundTypes.push(type);
-        seen[type] = true;
-      }
-      types.forEach(visit);
-      throw new UnboundTypeError(
-        message + ': ' + unboundTypes.map(getTypeName).join([', '])
-      );
     }
     function __embind_register_function(
       name,
@@ -4901,6 +5716,24 @@ var Module = (function () {
         return e.errno;
       }
     }
+    function _fd_fdstat_get(fd, pbuf) {
+      try {
+        var stream = SYSCALLS.getStreamFromFD(fd);
+        var type = stream.tty
+          ? 2
+          : FS.isDir(stream.mode)
+          ? 3
+          : FS.isLink(stream.mode)
+          ? 7
+          : 4;
+        HEAP8[pbuf >> 0] = type;
+        return 0;
+      } catch (e) {
+        if (typeof FS === 'undefined' || !(e instanceof FS.ErrnoError))
+          abort(e);
+        return e.errno;
+      }
+    }
     function _fd_read(fd, iov, iovcnt, pnum) {
       try {
         var stream = SYSCALLS.getStreamFromFD(fd);
@@ -4965,6 +5798,11 @@ var Module = (function () {
     function _llvm_eh_typeid_for(type) {
       return type;
     }
+    function _pthread_create() {
+      return 6;
+    }
+    function _pthread_detach() {}
+    function _pthread_join() {}
     function _pthread_mutexattr_destroy() {}
     function _pthread_mutexattr_init() {}
     function _pthread_mutexattr_settype() {}
@@ -5339,6 +6177,166 @@ var Module = (function () {
     function _strftime_l(s, maxsize, format, tm) {
       return _strftime(s, maxsize, format, tm);
     }
+    function _sysconf(name) {
+      switch (name) {
+        case 30:
+          return 16384;
+        case 85:
+          var maxHeapSize = HEAPU8.length;
+          return maxHeapSize / 16384;
+        case 132:
+        case 133:
+        case 12:
+        case 137:
+        case 138:
+        case 15:
+        case 235:
+        case 16:
+        case 17:
+        case 18:
+        case 19:
+        case 20:
+        case 149:
+        case 13:
+        case 10:
+        case 236:
+        case 153:
+        case 9:
+        case 21:
+        case 22:
+        case 159:
+        case 154:
+        case 14:
+        case 77:
+        case 78:
+        case 139:
+        case 80:
+        case 81:
+        case 82:
+        case 68:
+        case 67:
+        case 164:
+        case 11:
+        case 29:
+        case 47:
+        case 48:
+        case 95:
+        case 52:
+        case 51:
+        case 46:
+        case 79:
+          return 200809;
+        case 27:
+        case 246:
+        case 127:
+        case 128:
+        case 23:
+        case 24:
+        case 160:
+        case 161:
+        case 181:
+        case 182:
+        case 242:
+        case 183:
+        case 184:
+        case 243:
+        case 244:
+        case 245:
+        case 165:
+        case 178:
+        case 179:
+        case 49:
+        case 50:
+        case 168:
+        case 169:
+        case 175:
+        case 170:
+        case 171:
+        case 172:
+        case 97:
+        case 76:
+        case 32:
+        case 173:
+        case 35:
+          return -1;
+        case 176:
+        case 177:
+        case 7:
+        case 155:
+        case 8:
+        case 157:
+        case 125:
+        case 126:
+        case 92:
+        case 93:
+        case 129:
+        case 130:
+        case 131:
+        case 94:
+        case 91:
+          return 1;
+        case 74:
+        case 60:
+        case 69:
+        case 70:
+        case 4:
+          return 1024;
+        case 31:
+        case 42:
+        case 72:
+          return 32;
+        case 87:
+        case 26:
+        case 33:
+          return 2147483647;
+        case 34:
+        case 1:
+          return 47839;
+        case 38:
+        case 36:
+          return 99;
+        case 43:
+        case 37:
+          return 2048;
+        case 0:
+          return 2097152;
+        case 3:
+          return 65536;
+        case 28:
+          return 32768;
+        case 44:
+          return 32767;
+        case 75:
+          return 16384;
+        case 39:
+          return 1e3;
+        case 89:
+          return 700;
+        case 71:
+          return 256;
+        case 40:
+          return 255;
+        case 2:
+          return 100;
+        case 180:
+          return 64;
+        case 25:
+          return 20;
+        case 5:
+          return 16;
+        case 6:
+          return 6;
+        case 73:
+          return 4;
+        case 84: {
+          if (typeof navigator === 'object')
+            return navigator['hardwareConcurrency'] || 1;
+          return 1;
+        }
+      }
+      setErrNo(28);
+      return -1;
+    }
     var FSNode = function (parent, name, mode, rdev) {
       if (!parent) {
         parent = this;
@@ -5391,11 +6389,14 @@ var Module = (function () {
       Error,
       'InternalError'
     );
-    init_emval();
+    init_ClassHandle();
+    init_RegisteredPointer();
+    init_embind();
     UnboundTypeError = Module['UnboundTypeError'] = extendError(
       Error,
       'UnboundTypeError'
     );
+    init_emval();
     function intArrayFromString(stringy, dontAddNull, length) {
       var len = length > 0 ? length : lengthBytesUTF8(stringy) + 1;
       var u8array = new Array(len);
@@ -5414,358 +6415,448 @@ var Module = (function () {
       },
     });
     var asmLibraryArg = {
-      jd: ___assert_fail,
-      m: ___cxa_allocate_exception,
-      ka: ___cxa_begin_catch,
-      Ea: ___cxa_end_catch,
+      we: ___assert_fail,
+      o: ___cxa_allocate_exception,
+      $: ___cxa_begin_catch,
+      ha: ___cxa_end_catch,
       f: ___cxa_find_matching_catch_2,
-      h: ___cxa_find_matching_catch_3,
-      o: ___cxa_free_exception,
-      fe: ___cxa_rethrow,
-      Ac: ___cxa_thread_atexit,
-      q: ___cxa_throw,
+      i: ___cxa_find_matching_catch_3,
+      yc: ___cxa_find_matching_catch_5,
+      p: ___cxa_free_exception,
+      Kf: ___cxa_rethrow,
+      cd: ___cxa_thread_atexit,
+      s: ___cxa_throw,
       b: wasmTable,
-      ud: ___map_file,
+      Ie: ___map_file,
       j: ___resumeException,
-      xd: ___sys_mmap2,
-      yd: ___sys_munmap,
-      Ad: __embind_register_bool,
-      zd: __embind_register_emval,
-      vc: __embind_register_float,
-      md: __embind_register_function,
-      Ua: __embind_register_integer,
-      Ga: __embind_register_memory_view,
-      wc: __embind_register_std_string,
-      cc: __embind_register_std_wstring,
-      Bd: __embind_register_void,
-      kd: __emval_decref,
-      ld: __emval_incref,
-      ed: __emval_new_cstring,
-      ye: __emval_take_value,
-      tc: _abort,
-      W: _emscripten_longjmp,
-      pd: _emscripten_memcpy_big,
-      qd: _emscripten_resize_heap,
-      sd: _environ_get,
-      td: _environ_sizes_get,
-      Md: _exit,
-      vd: _fd_close,
-      wd: _fd_read,
-      od: _fd_seek,
-      uc: _fd_write,
+      Ne: ___sys_access,
+      Qe: ___sys_chmod,
+      ad: ___sys_fcntl64,
+      Pe: ___sys_fstat64,
+      Ke: ___sys_ioctl,
+      Le: ___sys_mmap2,
+      Me: ___sys_munmap,
+      Re: ___sys_open,
+      Oe: ___sys_stat64,
+      Te: __embind_register_bool,
+      Ae: __embind_register_class,
+      Se: __embind_register_emval,
+      Bd: __embind_register_float,
+      Gb: __embind_register_function,
+      yb: __embind_register_integer,
+      gb: __embind_register_memory_view,
+      Cd: __embind_register_std_string,
+      bd: __embind_register_std_wstring,
+      Ue: __embind_register_void,
+      xd: __emval_decref,
+      yd: __emval_incref,
+      ve: __emval_new_cstring,
+      vd: __emval_take_value,
+      zd: _abort,
+      F: _emscripten_longjmp,
+      Ce: _emscripten_memcpy_big,
+      De: _emscripten_resize_heap,
+      Ge: _environ_get,
+      He: _environ_sizes_get,
+      df: _exit,
+      $c: _fd_close,
+      Fe: _fd_fdstat_get,
+      Je: _fd_read,
+      Be: _fd_seek,
+      Ad: _fd_write,
       c: _getTempRet0,
-      Zb: invoke_d,
-      C: invoke_dd,
-      K: invoke_ddd,
-      sa: invoke_dddd,
+      rd: invoke_d,
+      I: invoke_dd,
+      z: invoke_ddd,
+      ja: invoke_dddd,
       n: invoke_di,
       A: invoke_did,
-      Oc: invoke_didd,
-      Ca: invoke_diddd,
-      Tb: invoke_diddi,
-      ob: invoke_didi,
-      u: invoke_dii,
-      xa: invoke_diid,
-      tb: invoke_diidd,
-      pa: invoke_diiddd,
-      Hc: invoke_diiddi,
-      jb: invoke_diidi,
-      ca: invoke_diii,
-      lb: invoke_diiii,
-      bd: invoke_diiiii,
-      cd: invoke_diiiiii,
-      ta: invoke_diiiiiidiiii,
-      Wc: invoke_diiiiiii,
+      Yb: invoke_didd,
+      Ta: invoke_diddd,
+      Qd: invoke_didddddidi,
+      Bc: invoke_didddidi,
+      ub: invoke_diddi,
+      Pb: invoke_didi,
+      ud: invoke_didii,
+      v: invoke_dii,
+      Ma: invoke_diid,
+      wb: invoke_diidd,
+      Ia: invoke_diiddd,
+      Rd: invoke_diiddi,
+      Sb: invoke_diidi,
+      Yf: invoke_diidii,
+      fa: invoke_diii,
+      Zf: invoke_diiid,
+      Vb: invoke_diiii,
+      Qc: invoke_diiiii,
+      Rc: invoke_diiiiii,
+      Ka: invoke_diiiiiidiiii,
+      fe: invoke_diiiiiii,
       t: invoke_i,
-      Td: invoke_iddiii,
-      Va: invoke_iddiiiiii,
-      se: invoke_idi,
-      Ja: invoke_idii,
-      kc: invoke_idiiiiii,
+      Hb: invoke_iddddiid,
+      jc: invoke_idddii,
+      Vc: invoke_iddid,
+      Zc: invoke_iddiddiiiii,
+      pf: invoke_iddiii,
+      Ab: invoke_iddiiiiii,
+      ne: invoke_iddiiiiiii,
+      sd: invoke_idi,
+      Fb: invoke_idid,
+      jb: invoke_idii,
+      wd: invoke_idiiididii,
+      pc: invoke_idiiiii,
+      hd: invoke_idiiiiii,
       d: invoke_ii,
-      O: invoke_iid,
-      Qb: invoke_iidd,
-      Db: invoke_iiddd,
-      Gd: invoke_iiddddd,
-      ad: invoke_iiddddddddiii,
-      sc: invoke_iiddddi,
-      Qc: invoke_iiddddii,
-      eb: invoke_iiddi,
-      Id: invoke_iiddid,
-      Qa: invoke_iiddii,
-      Cc: invoke_iiddiid,
-      Nd: invoke_iiddiiiii,
-      qe: invoke_iiddiiiiiiiiii,
-      U: invoke_iidi,
-      Sd: invoke_iidid,
-      te: invoke_iididdii,
-      re: invoke_iididi,
-      mc: invoke_iididiii,
-      ea: invoke_iidii,
-      $d: invoke_iidiiddii,
-      Bb: invoke_iidiii,
-      sb: invoke_iidiiii,
+      x: invoke_iid,
+      ua: invoke_iidd,
+      zb: invoke_iiddd,
+      Ze: invoke_iiddddd,
+      Pc: invoke_iiddddddddiii,
+      hf: invoke_iiddddddiiii,
+      Uc: invoke_iiddddi,
+      Xd: invoke_iiddddii,
+      Bf: invoke_iidddi,
+      zf: invoke_iidddidd,
+      ra: invoke_iiddi,
+      $e: invoke_iiddid,
+      vc: invoke_iiddiddidii,
+      mb: invoke_iiddii,
+      Hd: invoke_iiddiid,
+      hg: invoke_iiddiiid,
+      jf: invoke_iiddiiiii,
+      Vf: invoke_iiddiiiiiiiiii,
+      V: invoke_iidi,
+      mc: invoke_iidid,
+      Xf: invoke_iididdii,
+      Wf: invoke_iididi,
+      md: invoke_iididiii,
+      ka: invoke_iidii,
+      tf: invoke_iidiiddii,
+      Qa: invoke_iidiii,
+      ab: invoke_iidiiid,
+      Ob: invoke_iidiiidd,
+      bc: invoke_iidiiii,
       g: invoke_iii,
       Q: invoke_iiid,
       N: invoke_iiidd,
-      oc: invoke_iiiddd,
-      Pb: invoke_iiidddd,
-      Oa: invoke_iiidddddd,
-      he: invoke_iiiddddi,
-      Sa: invoke_iiiddddii,
-      zb: invoke_iiidddi,
-      Bc: invoke_iiidddid,
-      Mb: invoke_iiidddiid,
-      ga: invoke_iiiddi,
-      _c: invoke_iiiddid,
-      Ab: invoke_iiiddidd,
-      wa: invoke_iiiddidddd,
-      F: invoke_iiiddii,
-      Nc: invoke_iiiddiiii,
-      R: invoke_iiidi,
+      pd: invoke_iiiddd,
+      Gc: invoke_iiidddd,
+      Ba: invoke_iiidddddd,
+      Yc: invoke_iiiddddi,
+      nf: invoke_iiiddddid,
+      $a: invoke_iiiddddii,
+      sc: invoke_iiidddi,
+      Gd: invoke_iiidddid,
+      Dc: invoke_iiidddiid,
+      ta: invoke_iiiddi,
+      ie: invoke_iiiddid,
+      _b: invoke_iiiddidd,
+      La: invoke_iiiddidddd,
+      J: invoke_iiiddii,
+      dg: invoke_iiiddiii,
+      Vd: invoke_iiiddiiii,
+      S: invoke_iiidi,
       $b: invoke_iiidid,
-      ua: invoke_iiidii,
-      hb: invoke_iiidiii,
-      k: invoke_iiii,
-      E: invoke_iiiid,
-      ja: invoke_iiiidd,
-      Na: invoke_iiiiddd,
-      _b: invoke_iiiidddddd,
-      me: invoke_iiiiddddddii,
-      ne: invoke_iiiiddddi,
-      rc: invoke_iiiidddi,
-      Vb: invoke_iiiiddi,
-      Da: invoke_iiiiddii,
-      jc: invoke_iiiiddiii,
-      ve: invoke_iiiiddiiii,
-      cb: invoke_iiiidi,
-      bc: invoke_iiiidiii,
-      r: invoke_iiiii,
-      aa: invoke_iiiiid,
-      Lc: invoke_iiiiiddd,
-      gd: invoke_iiiiidddd,
-      qc: invoke_iiiiiddi,
-      ub: invoke_iiiiidi,
-      oa: invoke_iiiiidiidd,
-      y: invoke_iiiiii,
+      of: invoke_iiididi,
+      sa: invoke_iiidii,
+      _d: invoke_iiidiid,
+      Ya: invoke_iiidiii,
+      Gf: invoke_iiidiiiii,
+      l: invoke_iiii,
+      G: invoke_iiiid,
+      ma: invoke_iiiidd,
+      Pa: invoke_iiiiddd,
+      Jc: invoke_iiiidddd,
+      ic: invoke_iiiidddddd,
+      bg: invoke_iiiidddddddddd,
+      Df: invoke_iiiiddddddi,
+      Rf: invoke_iiiiddddddii,
+      Sf: invoke_iiiiddddi,
+      hc: invoke_iiiiddddidd,
+      fc: invoke_iiiidddi,
+      Xb: invoke_iiiiddi,
+      Oa: invoke_iiiiddii,
+      qe: invoke_iiiiddiid,
+      gd: invoke_iiiiddiii,
+      ke: invoke_iiiiddiiii,
+      Ra: invoke_iiiidi,
+      fg: invoke_iiiidid,
+      Kc: invoke_iiiidii,
+      rc: invoke_iiiidiii,
+      ue: invoke_iiiidiiiii,
+      re: invoke_iiiidiiiiiid,
+      q: invoke_iiiii,
+      na: invoke_iiiiid,
+      pb: invoke_iiiiidd,
+      Td: invoke_iiiiiddd,
+      ag: invoke_iiiiidddd,
+      Tc: invoke_iiiiiddi,
+      cc: invoke_iiiiidi,
+      be: invoke_iiiiidii,
+      Ha: invoke_iiiiidiidd,
+      ae: invoke_iiiiidiiiiii,
+      w: invoke_iiiiii,
       _: invoke_iiiiiid,
-      hd: invoke_iiiiiidd,
-      ke: invoke_iiiiiidddii,
-      Rc: invoke_iiiiiiddiddiii,
-      Ub: invoke_iiiiiidiii,
-      G: invoke_iiiiiii,
-      Za: invoke_iiiiiiid,
-      X: invoke_iiiiiiii,
-      dd: invoke_iiiiiiiiddi,
-      Ob: invoke_iiiiiiiiddiiii,
-      Eb: invoke_iiiiiiiiddiiiii,
-      Z: invoke_iiiiiiiii,
-      Yb: invoke_iiiiiiiiid,
-      fd: invoke_iiiiiiiiiddddii,
-      Fd: invoke_iiiiiiiiidi,
-      yb: invoke_iiiiiiiiii,
-      we: invoke_iiiiiiiiiiddidd,
-      nb: invoke_iiiiiiiiiii,
-      Rd: invoke_iiiiiiiiiiii,
-      zc: invoke_iiiiiiiiiiiid,
-      Ec: invoke_iiiiiiiiiiiiid,
-      Pd: invoke_iiiiiiiiiiiiii,
-      $: invoke_v,
-      Qd: invoke_vddddiiiiiiiiiiii,
-      Pa: invoke_vdddii,
-      bb: invoke_vdddiii,
-      Pc: invoke_vdddiiii,
-      Vd: invoke_vdddiiiiiiiii,
-      ya: invoke_vddi,
-      Ra: invoke_vddii,
-      xc: invoke_vddiii,
-      gb: invoke_vddiiiiiii,
-      pc: invoke_vdi,
-      $a: invoke_vdiddddi,
-      Xb: invoke_vdiddiiii,
-      nd: invoke_vdiddiiiiii,
-      gc: invoke_vdiii,
-      fc: invoke_vdiiii,
-      da: invoke_vdiiiii,
-      Ia: invoke_vdiiiiiiii,
-      va: invoke_vdiiiiiiiii,
-      Nb: invoke_vdiiiiiiiiii,
-      yc: invoke_vdiiiiiiiiiii,
+      oe: invoke_iiiiiidd,
+      Pf: invoke_iiiiiidddii,
+      Yd: invoke_iiiiiiddiddiii,
+      Hc: invoke_iiiiiiddiiiii,
+      Oc: invoke_iiiiiidiii,
+      Da: invoke_iiiiiidiiidd,
+      M: invoke_iiiiiii,
+      Sa: invoke_iiiiiiid,
+      Af: invoke_iiiiiiiddi,
+      W: invoke_iiiiiiii,
+      Ff: invoke_iiiiiiiidd,
+      Kb: invoke_iiiiiiiidddddddddiiddii,
+      Sc: invoke_iiiiiiiiddi,
+      Fc: invoke_iiiiiiiiddiiii,
+      lc: invoke_iiiiiiiiddiiiii,
+      xe: invoke_iiiiiiiidiii,
+      da: invoke_iiiiiiiii,
+      Nb: invoke_iiiiiiiiid,
+      $f: invoke_iiiiiiiiiddddii,
+      Ye: invoke_iiiiiiiiidi,
+      Ja: invoke_iiiiiiiiii,
+      le: invoke_iiiiiiiiiiddidd,
+      kb: invoke_iiiiiiiiiii,
+      Ic: invoke_iiiiiiiiiiidi,
+      Pd: invoke_iiiiiiiiiiii,
+      Fd: invoke_iiiiiiiiiiiid,
+      Jd: invoke_iiiiiiiiiiiiid,
+      lf: invoke_iiiiiiiiiiiiii,
+      cg: invoke_iiiiiiiiiiiiiii,
+      aa: invoke_v,
+      mf: invoke_vddddiiiiiiiiiiii,
+      sb: invoke_vdddii,
+      Ib: invoke_vdddiii,
+      Wd: invoke_vdddiiii,
+      rf: invoke_vdddiiiiiiiii,
+      Na: invoke_vddi,
+      qb: invoke_vddii,
+      Dd: invoke_vddiii,
+      Za: invoke_vddiiii,
+      Rb: invoke_vddiiiiiii,
+      Od: invoke_vddiiiiiiiiiiiiiii,
+      Ac: invoke_vddiiiiiiiiiiiiiiiii,
+      Nd: invoke_vddiiiiiiiiiiiiiiiiiiii,
+      Md: invoke_vddiiiiiiiiiiiiiiiiiiiiiiii,
+      ec: invoke_vdi,
+      nb: invoke_vdiddddi,
+      Lb: invoke_vdiddii,
+      Mb: invoke_vdiddiiii,
+      _f: invoke_vdiddiiiiii,
+      Ua: invoke_vdidii,
+      Lc: invoke_vdiii,
+      fd: invoke_vdiiii,
+      qa: invoke_vdiiiii,
+      hb: invoke_vdiiiiiiii,
+      Ca: invoke_vdiiiiiiiii,
+      Ec: invoke_vdiiiiiiiiii,
+      Ed: invoke_vdiiiiiiiiiii,
       e: invoke_vi,
-      D: invoke_vid,
-      na: invoke_vidd,
-      db: invoke_viddd,
-      Gb: invoke_vidddd,
-      ac: invoke_vidddddd,
-      Hd: invoke_viddddddd,
-      Cb: invoke_vidddddddii,
-      id: invoke_vidddddi,
-      Ya: invoke_viddddii,
-      dc: invoke_viddddiiii,
-      pb: invoke_vidddi,
-      Tc: invoke_vidddidddddd,
-      Vc: invoke_vidddii,
-      kb: invoke_vidddiiidi,
-      ma: invoke_viddi,
-      ec: invoke_viddid,
-      Wd: invoke_viddidd,
-      ce: invoke_viddidddiiii,
-      Xa: invoke_viddii,
-      ge: invoke_viddiidiiidii,
-      M: invoke_viddiii,
-      wb: invoke_viddiiiiii,
-      Jb: invoke_viddiiiiiiiiii,
-      z: invoke_vidi,
-      Ha: invoke_vidid,
-      Lb: invoke_vididd,
-      I: invoke_vidii,
-      ae: invoke_vidiiddddii,
-      H: invoke_vidiii,
-      le: invoke_vidiiiddii,
-      Zc: invoke_vidiiii,
-      Ed: invoke_vidiiiiidd,
-      i: invoke_vii,
-      v: invoke_viid,
-      B: invoke_viidd,
-      S: invoke_viiddd,
-      _a: invoke_viidddd,
-      Yd: invoke_viiddddd,
-      P: invoke_viidddddd,
-      rb: invoke_viidddddddiiii,
-      ue: invoke_viiddddi,
-      Kc: invoke_viiddddidd,
-      _d: invoke_viidddi,
-      Mc: invoke_viidddii,
-      V: invoke_viiddi,
-      fb: invoke_viiddidd,
-      T: invoke_viiddii,
-      Xc: invoke_viiddiiii,
-      qb: invoke_viiddiiiiii,
-      Ba: invoke_viiddiiiiiiii,
-      ba: invoke_viidi,
-      la: invoke_viidid,
-      Rb: invoke_viididd,
-      Aa: invoke_viidii,
-      pe: invoke_viidiid,
-      Wa: invoke_viidiii,
-      vb: invoke_viidiiid,
-      ib: invoke_viidiiiii,
-      l: invoke_viii,
-      L: invoke_viiid,
-      Fa: invoke_viiidd,
-      ic: invoke_viiiddd,
-      lc: invoke_viiidddd,
-      Zd: invoke_viiiddddi,
-      Ud: invoke_viiidddidi,
-      Ic: invoke_viiiddi,
-      je: invoke_viiiddid,
-      Wb: invoke_viiiddiiii,
-      Od: invoke_viiiddiiiiiiiiiiiiii,
-      xb: invoke_viiidi,
-      hc: invoke_viiidii,
-      Dc: invoke_viiidiii,
-      ie: invoke_viiidiiiiddiiiiii,
-      ha: invoke_viiidiiiii,
-      s: invoke_viiii,
-      Y: invoke_viiiid,
-      Ma: invoke_viiiidd,
-      Sb: invoke_viiiidddd,
-      Xd: invoke_viiiiddddd,
-      Jc: invoke_viiiidddddd,
-      oe: invoke_viiiidii,
-      w: invoke_viiiii,
-      za: invoke_viiiiid,
-      fa: invoke_viiiiidd,
-      Kb: invoke_viiiiiddd,
-      Fb: invoke_viiiiidddd,
-      $c: invoke_viiiiidddiii,
-      Yc: invoke_viiiiiddi,
-      be: invoke_viiiiiddidd,
-      Ta: invoke_viiiiidi,
-      x: invoke_viiiiii,
-      Hb: invoke_viiiiiid,
-      mb: invoke_viiiiiiddi,
-      Dd: invoke_viiiiiiddiii,
-      Cd: invoke_viiiiiiddiiii,
-      nc: invoke_viiiiiididi,
-      J: invoke_viiiiiii,
-      ee: invoke_viiiiiiiddd,
-      qa: invoke_viiiiiiii,
-      ia: invoke_viiiiiiiid,
-      Ka: invoke_viiiiiiiii,
-      xe: invoke_viiiiiiiiiddi,
-      La: invoke_viiiiiiiiii,
-      Sc: invoke_viiiiiiiiiid,
-      ab: invoke_viiiiiiiiiii,
-      de: invoke_viiiiiiiiiiidd,
-      Ib: invoke_viiiiiiiiiiidi,
-      Fc: invoke_viiiiiiiiiiiidi,
-      Gc: invoke_viiiiiiiiiiiidii,
-      Uc: invoke_viiiiiiiiiiiii,
-      ra: _llvm_eh_typeid_for,
+      E: invoke_vid,
+      X: invoke_vidd,
+      Zb: invoke_viddd,
+      fb: invoke_vidddd,
+      Cb: invoke_vidddddd,
+      _e: invoke_viddddddd,
+      Lf: invoke_vidddddddddddd,
+      kc: invoke_vidddddddii,
+      uc: invoke_vidddddi,
+      ze: invoke_viddddi,
+      ob: invoke_viddddii,
+      ed: invoke_viddddiiii,
+      Ga: invoke_vidddi,
+      ld: invoke_vidddidddddd,
+      ee: invoke_vidddii,
+      Tb: invoke_vidddiiidi,
+      ga: invoke_viddi,
+      Ub: invoke_viddid,
+      kd: invoke_viddidd,
+      xf: invoke_viddidddiiii,
+      ya: invoke_viddii,
+      Mf: invoke_viddiidiiidii,
+      L: invoke_viddiii,
+      eb: invoke_viddiiiiii,
+      zc: invoke_viddiiiiiiiiii,
+      C: invoke_vidi,
+      za: invoke_vidid,
+      bb: invoke_vididd,
+      ce: invoke_vididdi,
+      Xc: invoke_vididi,
+      K: invoke_vidii,
+      uf: invoke_vidiiddddii,
+      he: invoke_vidiidii,
+      R: invoke_vidiii,
+      Qf: invoke_vidiiiddii,
+      nc: invoke_vidiiidi,
+      Qb: invoke_vidiiii,
+      Xe: invoke_vidiiiiidd,
+      vf: invoke_vidiiiiii,
+      h: invoke_vii,
+      u: invoke_viid,
+      D: invoke_viidd,
+      T: invoke_viiddd,
+      Va: invoke_viidddd,
+      tc: invoke_viiddddd,
+      U: invoke_viidddddd,
+      id: invoke_viidddddddd,
+      Jb: invoke_viidddddddiiii,
+      _c: invoke_viidddddi,
+      wc: invoke_viiddddi,
+      pe: invoke_viiddddidd,
+      Xa: invoke_viidddi,
+      Ud: invoke_viidddii,
+      Y: invoke_viiddi,
+      vb: invoke_viiddidd,
+      ba: invoke_viiddii,
+      eg: invoke_viiddiii,
+      ge: invoke_viiddiiii,
+      ac: invoke_viiddiiiiii,
+      _a: invoke_viiddiiiiiiii,
+      P: invoke_viidi,
+      Ea: invoke_viidid,
+      Nc: invoke_viididd,
+      gg: invoke_viididdi,
+      se: invoke_viididi,
+      xa: invoke_viidii,
+      Uf: invoke_viidiid,
+      ib: invoke_viidiii,
+      dc: invoke_viidiiid,
+      Eb: invoke_viidiiiii,
+      k: invoke_viii,
+      O: invoke_viiid,
+      ea: invoke_viiidd,
+      xb: invoke_viiiddd,
+      gc: invoke_viiidddd,
+      sf: invoke_viiiddddi,
+      qf: invoke_viiidddidi,
+      Db: invoke_viiiddi,
+      Of: invoke_viiiddid,
+      lb: invoke_viiiddiiii,
+      kf: invoke_viiiddiiiiiiiiiiiiii,
+      rb: invoke_viiidi,
+      te: invoke_viiidid,
+      la: invoke_viiidii,
+      Id: invoke_viiidiii,
+      Cf: invoke_viiidiiii,
+      Nf: invoke_viiidiiiiddiiiiii,
+      va: invoke_viiidiiiii,
+      r: invoke_viiii,
+      Z: invoke_viiiid,
+      Fa: invoke_viiiidd,
+      qc: invoke_viiiidddd,
+      Wc: invoke_viiiiddddd,
+      Sd: invoke_viiiidddddd,
+      qd: invoke_viiiidi,
+      Tf: invoke_viiiidii,
+      y: invoke_viiiii,
+      ia: invoke_viiiiid,
+      pa: invoke_viiiiidd,
+      Cc: invoke_viiiiiddd,
+      Bb: invoke_viiiiidddd,
+      oc: invoke_viiiiiddddi,
+      je: invoke_viiiiidddiii,
+      nd: invoke_viiiiiddi,
+      wf: invoke_viiiiiddidd,
+      Ef: invoke_viiiiiddiii,
+      ye: invoke_viiiiiddiiii,
+      cb: invoke_viiiiidi,
+      If: invoke_viiiiidii,
+      B: invoke_viiiiii,
+      tb: invoke_viiiiiid,
+      $d: invoke_viiiiiidddi,
+      Wb: invoke_viiiiiiddi,
+      We: invoke_viiiiiiddiii,
+      Ve: invoke_viiiiiiddiiii,
+      od: invoke_viiiiiididi,
+      Jf: invoke_viiiiiidii,
+      Mc: invoke_viiiiiidiidid,
+      H: invoke_viiiiiii,
+      Hf: invoke_viiiiiiiddd,
+      oa: invoke_viiiiiiii,
+      wa: invoke_viiiiiiiid,
+      jd: invoke_viiiiiiiiddi,
+      Aa: invoke_viiiiiiiii,
+      de: invoke_viiiiiiiiid,
+      me: invoke_viiiiiiiiiddi,
+      Wa: invoke_viiiiiiiiii,
+      Zd: invoke_viiiiiiiiiid,
+      db: invoke_viiiiiiiiiii,
+      yf: invoke_viiiiiiiiiiidd,
+      xc: invoke_viiiiiiiiiiidi,
+      Kd: invoke_viiiiiiiiiiiidi,
+      Ld: invoke_viiiiiiiiiiiidii,
+      td: invoke_viiiiiiiiiiiii,
+      ca: _llvm_eh_typeid_for,
       a: wasmMemory,
-      Jd: _pthread_mutexattr_destroy,
-      Ld: _pthread_mutexattr_init,
-      Kd: _pthread_mutexattr_settype,
-      p: _setTempRet0,
-      rd: _strftime_l,
+      ff: _pthread_create,
+      dd: _pthread_detach,
+      ef: _pthread_join,
+      af: _pthread_mutexattr_destroy,
+      cf: _pthread_mutexattr_init,
+      bf: _pthread_mutexattr_settype,
+      m: _setTempRet0,
+      Ee: _strftime_l,
+      gf: _sysconf,
     };
     var asm = createWasm();
     var ___wasm_call_ctors = (Module['___wasm_call_ctors'] = function () {
       return (___wasm_call_ctors = Module['___wasm_call_ctors'] =
-        Module['asm']['ze']).apply(null, arguments);
+        Module['asm']['ig']).apply(null, arguments);
     });
     var _malloc = (Module['_malloc'] = function () {
-      return (_malloc = Module['_malloc'] = Module['asm']['Ae']).apply(
+      return (_malloc = Module['_malloc'] = Module['asm']['jg']).apply(
         null,
         arguments
       );
     });
     var _memset = (Module['_memset'] = function () {
-      return (_memset = Module['_memset'] = Module['asm']['Be']).apply(
+      return (_memset = Module['_memset'] = Module['asm']['kg']).apply(
         null,
         arguments
       );
     });
     var _free = (Module['_free'] = function () {
-      return (_free = Module['_free'] = Module['asm']['Ce']).apply(
+      return (_free = Module['_free'] = Module['asm']['lg']).apply(
         null,
         arguments
       );
     });
     var ___errno_location = (Module['___errno_location'] = function () {
       return (___errno_location = Module['___errno_location'] =
-        Module['asm']['De']).apply(null, arguments);
+        Module['asm']['mg']).apply(null, arguments);
     });
     var ___getTypeName = (Module['___getTypeName'] = function () {
       return (___getTypeName = Module['___getTypeName'] =
-        Module['asm']['Ee']).apply(null, arguments);
+        Module['asm']['ng']).apply(null, arguments);
     });
     var ___embind_register_native_and_builtin_types = (Module[
       '___embind_register_native_and_builtin_types'
     ] = function () {
       return (___embind_register_native_and_builtin_types = Module[
         '___embind_register_native_and_builtin_types'
-      ] = Module['asm']['Fe']).apply(null, arguments);
+      ] = Module['asm']['og']).apply(null, arguments);
     });
     var _setThrew = (Module['_setThrew'] = function () {
-      return (_setThrew = Module['_setThrew'] = Module['asm']['Ge']).apply(
+      return (_setThrew = Module['_setThrew'] = Module['asm']['pg']).apply(
         null,
         arguments
       );
     });
     var stackSave = (Module['stackSave'] = function () {
-      return (stackSave = Module['stackSave'] = Module['asm']['He']).apply(
+      return (stackSave = Module['stackSave'] = Module['asm']['qg']).apply(
         null,
         arguments
       );
     });
     var stackRestore = (Module['stackRestore'] = function () {
       return (stackRestore = Module['stackRestore'] =
-        Module['asm']['Ie']).apply(null, arguments);
+        Module['asm']['rg']).apply(null, arguments);
     });
     var stackAlloc = (Module['stackAlloc'] = function () {
-      return (stackAlloc = Module['stackAlloc'] = Module['asm']['Je']).apply(
+      return (stackAlloc = Module['stackAlloc'] = Module['asm']['sg']).apply(
         null,
         arguments
       );
@@ -5775,38 +6866,38 @@ var Module = (function () {
     ] = function () {
       return (__ZSt18uncaught_exceptionv = Module[
         '__ZSt18uncaught_exceptionv'
-      ] = Module['asm']['Ke']).apply(null, arguments);
+      ] = Module['asm']['tg']).apply(null, arguments);
     });
     var _memalign = (Module['_memalign'] = function () {
-      return (_memalign = Module['_memalign'] = Module['asm']['Le']).apply(
+      return (_memalign = Module['_memalign'] = Module['asm']['ug']).apply(
         null,
         arguments
       );
     });
     var dynCall_viijii = (Module['dynCall_viijii'] = function () {
       return (dynCall_viijii = Module['dynCall_viijii'] =
-        Module['asm']['Me']).apply(null, arguments);
+        Module['asm']['vg']).apply(null, arguments);
     });
     var dynCall_jiji = (Module['dynCall_jiji'] = function () {
       return (dynCall_jiji = Module['dynCall_jiji'] =
-        Module['asm']['Ne']).apply(null, arguments);
+        Module['asm']['wg']).apply(null, arguments);
     });
     var dynCall_iiiiij = (Module['dynCall_iiiiij'] = function () {
       return (dynCall_iiiiij = Module['dynCall_iiiiij'] =
-        Module['asm']['Oe']).apply(null, arguments);
+        Module['asm']['xg']).apply(null, arguments);
     });
     var dynCall_iiiiijj = (Module['dynCall_iiiiijj'] = function () {
       return (dynCall_iiiiijj = Module['dynCall_iiiiijj'] =
-        Module['asm']['Pe']).apply(null, arguments);
+        Module['asm']['yg']).apply(null, arguments);
     });
     var dynCall_iiiiiijj = (Module['dynCall_iiiiiijj'] = function () {
       return (dynCall_iiiiiijj = Module['dynCall_iiiiiijj'] =
-        Module['asm']['Qe']).apply(null, arguments);
+        Module['asm']['zg']).apply(null, arguments);
     });
-    function invoke_vi(index, a1) {
+    function invoke_i(index) {
       var sp = stackSave();
       try {
-        wasmTable.get(index)(a1);
+        return wasmTable.get(index)();
       } catch (e) {
         stackRestore(sp);
         if (e !== e + 0 && e !== 'longjmp') throw e;
@@ -5823,30 +6914,20 @@ var Module = (function () {
         _setThrew(1, 0);
       }
     }
-    function invoke_i(index) {
-      var sp = stackSave();
-      try {
-        return wasmTable.get(index)();
-      } catch (e) {
-        stackRestore(sp);
-        if (e !== e + 0 && e !== 'longjmp') throw e;
-        _setThrew(1, 0);
-      }
-    }
-    function invoke_iiiii(index, a1, a2, a3, a4) {
-      var sp = stackSave();
-      try {
-        return wasmTable.get(index)(a1, a2, a3, a4);
-      } catch (e) {
-        stackRestore(sp);
-        if (e !== e + 0 && e !== 'longjmp') throw e;
-        _setThrew(1, 0);
-      }
-    }
     function invoke_ii(index, a1) {
       var sp = stackSave();
       try {
         return wasmTable.get(index)(a1);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_vi(index, a1) {
+      var sp = stackSave();
+      try {
+        wasmTable.get(index)(a1);
       } catch (e) {
         stackRestore(sp);
         if (e !== e + 0 && e !== 'longjmp') throw e;
@@ -5863,106 +6944,6 @@ var Module = (function () {
         _setThrew(1, 0);
       }
     }
-    function invoke_viii(index, a1, a2, a3) {
-      var sp = stackSave();
-      try {
-        wasmTable.get(index)(a1, a2, a3);
-      } catch (e) {
-        stackRestore(sp);
-        if (e !== e + 0 && e !== 'longjmp') throw e;
-        _setThrew(1, 0);
-      }
-    }
-    function invoke_viiiii(index, a1, a2, a3, a4, a5) {
-      var sp = stackSave();
-      try {
-        wasmTable.get(index)(a1, a2, a3, a4, a5);
-      } catch (e) {
-        stackRestore(sp);
-        if (e !== e + 0 && e !== 'longjmp') throw e;
-        _setThrew(1, 0);
-      }
-    }
-    function invoke_viiddddd(index, a1, a2, a3, a4, a5, a6, a7) {
-      var sp = stackSave();
-      try {
-        wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7);
-      } catch (e) {
-        stackRestore(sp);
-        if (e !== e + 0 && e !== 'longjmp') throw e;
-        _setThrew(1, 0);
-      }
-    }
-    function invoke_iiiddddii(index, a1, a2, a3, a4, a5, a6, a7, a8) {
-      var sp = stackSave();
-      try {
-        return wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7, a8);
-      } catch (e) {
-        stackRestore(sp);
-        if (e !== e + 0 && e !== 'longjmp') throw e;
-        _setThrew(1, 0);
-      }
-    }
-    function invoke_iiiddii(index, a1, a2, a3, a4, a5, a6) {
-      var sp = stackSave();
-      try {
-        return wasmTable.get(index)(a1, a2, a3, a4, a5, a6);
-      } catch (e) {
-        stackRestore(sp);
-        if (e !== e + 0 && e !== 'longjmp') throw e;
-        _setThrew(1, 0);
-      }
-    }
-    function invoke_vdddii(index, a1, a2, a3, a4, a5) {
-      var sp = stackSave();
-      try {
-        wasmTable.get(index)(a1, a2, a3, a4, a5);
-      } catch (e) {
-        stackRestore(sp);
-        if (e !== e + 0 && e !== 'longjmp') throw e;
-        _setThrew(1, 0);
-      }
-    }
-    function invoke_viid(index, a1, a2, a3) {
-      var sp = stackSave();
-      try {
-        wasmTable.get(index)(a1, a2, a3);
-      } catch (e) {
-        stackRestore(sp);
-        if (e !== e + 0 && e !== 'longjmp') throw e;
-        _setThrew(1, 0);
-      }
-    }
-    function invoke_iidi(index, a1, a2, a3) {
-      var sp = stackSave();
-      try {
-        return wasmTable.get(index)(a1, a2, a3);
-      } catch (e) {
-        stackRestore(sp);
-        if (e !== e + 0 && e !== 'longjmp') throw e;
-        _setThrew(1, 0);
-      }
-    }
-    function invoke_viidd(index, a1, a2, a3, a4) {
-      var sp = stackSave();
-      try {
-        wasmTable.get(index)(a1, a2, a3, a4);
-      } catch (e) {
-        stackRestore(sp);
-        if (e !== e + 0 && e !== 'longjmp') throw e;
-        _setThrew(1, 0);
-      }
-    }
-    function invoke_viiid(index, a1, a2, a3, a4) {
-      var sp = stackSave();
-      try {
-        wasmTable.get(index)(a1, a2, a3, a4);
-      } catch (e) {
-        stackRestore(sp);
-        if (e !== e + 0 && e !== 'longjmp') throw e;
-        _setThrew(1, 0);
-      }
-    }
     function invoke_iiii(index, a1, a2, a3) {
       var sp = stackSave();
       try {
@@ -5973,50 +6954,20 @@ var Module = (function () {
         _setThrew(1, 0);
       }
     }
-    function invoke_viiiiid(index, a1, a2, a3, a4, a5, a6) {
+    function invoke_iiiii(index, a1, a2, a3, a4) {
       var sp = stackSave();
       try {
-        wasmTable.get(index)(a1, a2, a3, a4, a5, a6);
+        return wasmTable.get(index)(a1, a2, a3, a4);
       } catch (e) {
         stackRestore(sp);
         if (e !== e + 0 && e !== 'longjmp') throw e;
         _setThrew(1, 0);
       }
     }
-    function invoke_viiiid(index, a1, a2, a3, a4, a5) {
+    function invoke_viii(index, a1, a2, a3) {
       var sp = stackSave();
       try {
-        wasmTable.get(index)(a1, a2, a3, a4, a5);
-      } catch (e) {
-        stackRestore(sp);
-        if (e !== e + 0 && e !== 'longjmp') throw e;
-        _setThrew(1, 0);
-      }
-    }
-    function invoke_viiddi(index, a1, a2, a3, a4, a5) {
-      var sp = stackSave();
-      try {
-        wasmTable.get(index)(a1, a2, a3, a4, a5);
-      } catch (e) {
-        stackRestore(sp);
-        if (e !== e + 0 && e !== 'longjmp') throw e;
-        _setThrew(1, 0);
-      }
-    }
-    function invoke_vdiddddi(index, a1, a2, a3, a4, a5, a6, a7) {
-      var sp = stackSave();
-      try {
-        wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7);
-      } catch (e) {
-        stackRestore(sp);
-        if (e !== e + 0 && e !== 'longjmp') throw e;
-        _setThrew(1, 0);
-      }
-    }
-    function invoke_iid(index, a1, a2) {
-      var sp = stackSave();
-      try {
-        return wasmTable.get(index)(a1, a2);
+        wasmTable.get(index)(a1, a2, a3);
       } catch (e) {
         stackRestore(sp);
         if (e !== e + 0 && e !== 'longjmp') throw e;
@@ -6033,42 +6984,30 @@ var Module = (function () {
         _setThrew(1, 0);
       }
     }
-    function invoke_viiiiiii(index, a1, a2, a3, a4, a5, a6, a7) {
+    function invoke_iiiiiii(index, a1, a2, a3, a4, a5, a6) {
       var sp = stackSave();
       try {
-        wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7);
+        return wasmTable.get(index)(a1, a2, a3, a4, a5, a6);
       } catch (e) {
         stackRestore(sp);
         if (e !== e + 0 && e !== 'longjmp') throw e;
         _setThrew(1, 0);
       }
     }
-    function invoke_iiidd(index, a1, a2, a3, a4) {
+    function invoke_viiiii(index, a1, a2, a3, a4, a5) {
       var sp = stackSave();
       try {
-        return wasmTable.get(index)(a1, a2, a3, a4);
+        wasmTable.get(index)(a1, a2, a3, a4, a5);
       } catch (e) {
         stackRestore(sp);
         if (e !== e + 0 && e !== 'longjmp') throw e;
         _setThrew(1, 0);
       }
     }
-    function invoke_vdiddiiiiii(
-      index,
-      a1,
-      a2,
-      a3,
-      a4,
-      a5,
-      a6,
-      a7,
-      a8,
-      a9,
-      a10
-    ) {
+    function invoke_iiiiii(index, a1, a2, a3, a4, a5) {
       var sp = stackSave();
       try {
-        wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10);
+        return wasmTable.get(index)(a1, a2, a3, a4, a5);
       } catch (e) {
         stackRestore(sp);
         if (e !== e + 0 && e !== 'longjmp') throw e;
@@ -6079,36 +7018,6 @@ var Module = (function () {
       var sp = stackSave();
       try {
         return wasmTable.get(index)(a1);
-      } catch (e) {
-        stackRestore(sp);
-        if (e !== e + 0 && e !== 'longjmp') throw e;
-        _setThrew(1, 0);
-      }
-    }
-    function invoke_viidddddd(index, a1, a2, a3, a4, a5, a6, a7, a8) {
-      var sp = stackSave();
-      try {
-        wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7, a8);
-      } catch (e) {
-        stackRestore(sp);
-        if (e !== e + 0 && e !== 'longjmp') throw e;
-        _setThrew(1, 0);
-      }
-    }
-    function invoke_iidiii(index, a1, a2, a3, a4, a5) {
-      var sp = stackSave();
-      try {
-        return wasmTable.get(index)(a1, a2, a3, a4, a5);
-      } catch (e) {
-        stackRestore(sp);
-        if (e !== e + 0 && e !== 'longjmp') throw e;
-        _setThrew(1, 0);
-      }
-    }
-    function invoke_viidii(index, a1, a2, a3, a4, a5) {
-      var sp = stackSave();
-      try {
-        wasmTable.get(index)(a1, a2, a3, a4, a5);
       } catch (e) {
         stackRestore(sp);
         if (e !== e + 0 && e !== 'longjmp') throw e;
@@ -6135,80 +7044,10 @@ var Module = (function () {
         _setThrew(1, 0);
       }
     }
-    function invoke_viddi(index, a1, a2, a3, a4) {
+    function invoke_viiid(index, a1, a2, a3, a4) {
       var sp = stackSave();
       try {
         wasmTable.get(index)(a1, a2, a3, a4);
-      } catch (e) {
-        stackRestore(sp);
-        if (e !== e + 0 && e !== 'longjmp') throw e;
-        _setThrew(1, 0);
-      }
-    }
-    function invoke_ddd(index, a1, a2) {
-      var sp = stackSave();
-      try {
-        return wasmTable.get(index)(a1, a2);
-      } catch (e) {
-        stackRestore(sp);
-        if (e !== e + 0 && e !== 'longjmp') throw e;
-        _setThrew(1, 0);
-      }
-    }
-    function invoke_viiiiii(index, a1, a2, a3, a4, a5, a6) {
-      var sp = stackSave();
-      try {
-        wasmTable.get(index)(a1, a2, a3, a4, a5, a6);
-      } catch (e) {
-        stackRestore(sp);
-        if (e !== e + 0 && e !== 'longjmp') throw e;
-        _setThrew(1, 0);
-      }
-    }
-    function invoke_iiiiii(index, a1, a2, a3, a4, a5) {
-      var sp = stackSave();
-      try {
-        return wasmTable.get(index)(a1, a2, a3, a4, a5);
-      } catch (e) {
-        stackRestore(sp);
-        if (e !== e + 0 && e !== 'longjmp') throw e;
-        _setThrew(1, 0);
-      }
-    }
-    function invoke_viiddidd(index, a1, a2, a3, a4, a5, a6, a7) {
-      var sp = stackSave();
-      try {
-        wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7);
-      } catch (e) {
-        stackRestore(sp);
-        if (e !== e + 0 && e !== 'longjmp') throw e;
-        _setThrew(1, 0);
-      }
-    }
-    function invoke_vidddi(index, a1, a2, a3, a4, a5) {
-      var sp = stackSave();
-      try {
-        wasmTable.get(index)(a1, a2, a3, a4, a5);
-      } catch (e) {
-        stackRestore(sp);
-        if (e !== e + 0 && e !== 'longjmp') throw e;
-        _setThrew(1, 0);
-      }
-    }
-    function invoke_viiidd(index, a1, a2, a3, a4, a5) {
-      var sp = stackSave();
-      try {
-        wasmTable.get(index)(a1, a2, a3, a4, a5);
-      } catch (e) {
-        stackRestore(sp);
-        if (e !== e + 0 && e !== 'longjmp') throw e;
-        _setThrew(1, 0);
-      }
-    }
-    function invoke_viiiiidd(index, a1, a2, a3, a4, a5, a6, a7) {
-      var sp = stackSave();
-      try {
-        wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7);
       } catch (e) {
         stackRestore(sp);
         if (e !== e + 0 && e !== 'longjmp') throw e;
@@ -6225,30 +7064,50 @@ var Module = (function () {
         _setThrew(1, 0);
       }
     }
-    function invoke_did(index, a1, a2) {
+    function invoke_viidd(index, a1, a2, a3, a4) {
       var sp = stackSave();
       try {
-        return wasmTable.get(index)(a1, a2);
+        wasmTable.get(index)(a1, a2, a3, a4);
       } catch (e) {
         stackRestore(sp);
         if (e !== e + 0 && e !== 'longjmp') throw e;
         _setThrew(1, 0);
       }
     }
-    function invoke_dd(index, a1) {
+    function invoke_iiiddii(index, a1, a2, a3, a4, a5, a6) {
       var sp = stackSave();
       try {
-        return wasmTable.get(index)(a1);
+        return wasmTable.get(index)(a1, a2, a3, a4, a5, a6);
       } catch (e) {
         stackRestore(sp);
         if (e !== e + 0 && e !== 'longjmp') throw e;
         _setThrew(1, 0);
       }
     }
-    function invoke_iiiid(index, a1, a2, a3, a4) {
+    function invoke_iiiiidd(index, a1, a2, a3, a4, a5, a6) {
       var sp = stackSave();
       try {
-        return wasmTable.get(index)(a1, a2, a3, a4);
+        return wasmTable.get(index)(a1, a2, a3, a4, a5, a6);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_viid(index, a1, a2, a3) {
+      var sp = stackSave();
+      try {
+        wasmTable.get(index)(a1, a2, a3);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_viiiiii(index, a1, a2, a3, a4, a5, a6) {
+      var sp = stackSave();
+      try {
+        wasmTable.get(index)(a1, a2, a3, a4, a5, a6);
       } catch (e) {
         stackRestore(sp);
         if (e !== e + 0 && e !== 'longjmp') throw e;
@@ -6259,116 +7118,6 @@ var Module = (function () {
       var sp = stackSave();
       try {
         wasmTable.get(index)(a1, a2, a3, a4);
-      } catch (e) {
-        stackRestore(sp);
-        if (e !== e + 0 && e !== 'longjmp') throw e;
-        _setThrew(1, 0);
-      }
-    }
-    function invoke_viidi(index, a1, a2, a3, a4) {
-      var sp = stackSave();
-      try {
-        wasmTable.get(index)(a1, a2, a3, a4);
-      } catch (e) {
-        stackRestore(sp);
-        if (e !== e + 0 && e !== 'longjmp') throw e;
-        _setThrew(1, 0);
-      }
-    }
-    function invoke_iiiiiii(index, a1, a2, a3, a4, a5, a6) {
-      var sp = stackSave();
-      try {
-        return wasmTable.get(index)(a1, a2, a3, a4, a5, a6);
-      } catch (e) {
-        stackRestore(sp);
-        if (e !== e + 0 && e !== 'longjmp') throw e;
-        _setThrew(1, 0);
-      }
-    }
-    function invoke_v(index) {
-      var sp = stackSave();
-      try {
-        wasmTable.get(index)();
-      } catch (e) {
-        stackRestore(sp);
-        if (e !== e + 0 && e !== 'longjmp') throw e;
-        _setThrew(1, 0);
-      }
-    }
-    function invoke_diii(index, a1, a2, a3) {
-      var sp = stackSave();
-      try {
-        return wasmTable.get(index)(a1, a2, a3);
-      } catch (e) {
-        stackRestore(sp);
-        if (e !== e + 0 && e !== 'longjmp') throw e;
-        _setThrew(1, 0);
-      }
-    }
-    function invoke_viiddd(index, a1, a2, a3, a4, a5) {
-      var sp = stackSave();
-      try {
-        wasmTable.get(index)(a1, a2, a3, a4, a5);
-      } catch (e) {
-        stackRestore(sp);
-        if (e !== e + 0 && e !== 'longjmp') throw e;
-        _setThrew(1, 0);
-      }
-    }
-    function invoke_vddi(index, a1, a2, a3) {
-      var sp = stackSave();
-      try {
-        wasmTable.get(index)(a1, a2, a3);
-      } catch (e) {
-        stackRestore(sp);
-        if (e !== e + 0 && e !== 'longjmp') throw e;
-        _setThrew(1, 0);
-      }
-    }
-    function invoke_iiiidiii(index, a1, a2, a3, a4, a5, a6, a7) {
-      var sp = stackSave();
-      try {
-        return wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7);
-      } catch (e) {
-        stackRestore(sp);
-        if (e !== e + 0 && e !== 'longjmp') throw e;
-        _setThrew(1, 0);
-      }
-    }
-    function invoke_iiiiid(index, a1, a2, a3, a4, a5) {
-      var sp = stackSave();
-      try {
-        return wasmTable.get(index)(a1, a2, a3, a4, a5);
-      } catch (e) {
-        stackRestore(sp);
-        if (e !== e + 0 && e !== 'longjmp') throw e;
-        _setThrew(1, 0);
-      }
-    }
-    function invoke_vidddddd(index, a1, a2, a3, a4, a5, a6, a7) {
-      var sp = stackSave();
-      try {
-        wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7);
-      } catch (e) {
-        stackRestore(sp);
-        if (e !== e + 0 && e !== 'longjmp') throw e;
-        _setThrew(1, 0);
-      }
-    }
-    function invoke_dddd(index, a1, a2, a3) {
-      var sp = stackSave();
-      try {
-        return wasmTable.get(index)(a1, a2, a3);
-      } catch (e) {
-        stackRestore(sp);
-        if (e !== e + 0 && e !== 'longjmp') throw e;
-        _setThrew(1, 0);
-      }
-    }
-    function invoke_vidddddi(index, a1, a2, a3, a4, a5, a6, a7) {
-      var sp = stackSave();
-      try {
-        wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7);
       } catch (e) {
         stackRestore(sp);
         if (e !== e + 0 && e !== 'longjmp') throw e;
@@ -6395,7 +7144,7 @@ var Module = (function () {
         _setThrew(1, 0);
       }
     }
-    function invoke_iiiddidd(index, a1, a2, a3, a4, a5, a6, a7) {
+    function invoke_iddddiid(index, a1, a2, a3, a4, a5, a6, a7) {
       var sp = stackSave();
       try {
         return wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7);
@@ -6405,20 +7154,10 @@ var Module = (function () {
         _setThrew(1, 0);
       }
     }
-    function invoke_iiiiiidd(index, a1, a2, a3, a4, a5, a6, a7) {
+    function invoke_did(index, a1, a2) {
       var sp = stackSave();
       try {
-        return wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7);
-      } catch (e) {
-        stackRestore(sp);
-        if (e !== e + 0 && e !== 'longjmp') throw e;
-        _setThrew(1, 0);
-      }
-    }
-    function invoke_iiidid(index, a1, a2, a3, a4, a5) {
-      var sp = stackSave();
-      try {
-        return wasmTable.get(index)(a1, a2, a3, a4, a5);
+        return wasmTable.get(index)(a1, a2);
       } catch (e) {
         stackRestore(sp);
         if (e !== e + 0 && e !== 'longjmp') throw e;
@@ -6435,10 +7174,305 @@ var Module = (function () {
         _setThrew(1, 0);
       }
     }
-    function invoke_iiiiddd(index, a1, a2, a3, a4, a5, a6) {
+    function invoke_viiiddd(index, a1, a2, a3, a4, a5, a6) {
       var sp = stackSave();
       try {
-        return wasmTable.get(index)(a1, a2, a3, a4, a5, a6);
+        wasmTable.get(index)(a1, a2, a3, a4, a5, a6);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_v(index) {
+      var sp = stackSave();
+      try {
+        wasmTable.get(index)();
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_viidddddi(index, a1, a2, a3, a4, a5, a6, a7, a8) {
+      var sp = stackSave();
+      try {
+        wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7, a8);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_iiiid(index, a1, a2, a3, a4) {
+      var sp = stackSave();
+      try {
+        return wasmTable.get(index)(a1, a2, a3, a4);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_iiiidd(index, a1, a2, a3, a4, a5) {
+      var sp = stackSave();
+      try {
+        return wasmTable.get(index)(a1, a2, a3, a4, a5);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_dd(index, a1) {
+      var sp = stackSave();
+      try {
+        return wasmTable.get(index)(a1);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_vidd(index, a1, a2, a3) {
+      var sp = stackSave();
+      try {
+        wasmTable.get(index)(a1, a2, a3);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_dddd(index, a1, a2, a3) {
+      var sp = stackSave();
+      try {
+        return wasmTable.get(index)(a1, a2, a3);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_viddddii(index, a1, a2, a3, a4, a5, a6, a7) {
+      var sp = stackSave();
+      try {
+        wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_idddii(index, a1, a2, a3, a4, a5) {
+      var sp = stackSave();
+      try {
+        return wasmTable.get(index)(a1, a2, a3, a4, a5);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_vidddi(index, a1, a2, a3, a4, a5) {
+      var sp = stackSave();
+      try {
+        wasmTable.get(index)(a1, a2, a3, a4, a5);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_viiiiiii(index, a1, a2, a3, a4, a5, a6, a7) {
+      var sp = stackSave();
+      try {
+        wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_diidd(index, a1, a2, a3, a4) {
+      var sp = stackSave();
+      try {
+        return wasmTable.get(index)(a1, a2, a3, a4);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_viddddi(index, a1, a2, a3, a4, a5, a6) {
+      var sp = stackSave();
+      try {
+        wasmTable.get(index)(a1, a2, a3, a4, a5, a6);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_iidd(index, a1, a2, a3) {
+      var sp = stackSave();
+      try {
+        return wasmTable.get(index)(a1, a2, a3);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_iddiddiiiii(
+      index,
+      a1,
+      a2,
+      a3,
+      a4,
+      a5,
+      a6,
+      a7,
+      a8,
+      a9,
+      a10
+    ) {
+      var sp = stackSave();
+      try {
+        return wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_viidi(index, a1, a2, a3, a4) {
+      var sp = stackSave();
+      try {
+        wasmTable.get(index)(a1, a2, a3, a4);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_viiiid(index, a1, a2, a3, a4, a5) {
+      var sp = stackSave();
+      try {
+        wasmTable.get(index)(a1, a2, a3, a4, a5);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_iiiiiiii(index, a1, a2, a3, a4, a5, a6, a7) {
+      var sp = stackSave();
+      try {
+        return wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_iiidii(index, a1, a2, a3, a4, a5) {
+      var sp = stackSave();
+      try {
+        return wasmTable.get(index)(a1, a2, a3, a4, a5);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_viidddddd(index, a1, a2, a3, a4, a5, a6, a7, a8) {
+      var sp = stackSave();
+      try {
+        wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7, a8);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_vidiiii(index, a1, a2, a3, a4, a5, a6) {
+      var sp = stackSave();
+      try {
+        wasmTable.get(index)(a1, a2, a3, a4, a5, a6);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_vidddd(index, a1, a2, a3, a4, a5) {
+      var sp = stackSave();
+      try {
+        wasmTable.get(index)(a1, a2, a3, a4, a5);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_viiidd(index, a1, a2, a3, a4, a5) {
+      var sp = stackSave();
+      try {
+        wasmTable.get(index)(a1, a2, a3, a4, a5);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_viiiiiddiiii(
+      index,
+      a1,
+      a2,
+      a3,
+      a4,
+      a5,
+      a6,
+      a7,
+      a8,
+      a9,
+      a10,
+      a11
+    ) {
+      var sp = stackSave();
+      try {
+        wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_idiiididii(index, a1, a2, a3, a4, a5, a6, a7, a8, a9) {
+      var sp = stackSave();
+      try {
+        return wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7, a8, a9);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_vddiiii(index, a1, a2, a3, a4, a5, a6) {
+      var sp = stackSave();
+      try {
+        wasmTable.get(index)(a1, a2, a3, a4, a5, a6);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_viddiiiiii(index, a1, a2, a3, a4, a5, a6, a7, a8, a9) {
+      var sp = stackSave();
+      try {
+        wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7, a8, a9);
       } catch (e) {
         stackRestore(sp);
         if (e !== e + 0 && e !== 'longjmp') throw e;
@@ -6455,6 +7489,570 @@ var Module = (function () {
         _setThrew(1, 0);
       }
     }
+    function invoke_iiiddddi(index, a1, a2, a3, a4, a5, a6, a7) {
+      var sp = stackSave();
+      try {
+        return wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_iiiiiiiidiii(
+      index,
+      a1,
+      a2,
+      a3,
+      a4,
+      a5,
+      a6,
+      a7,
+      a8,
+      a9,
+      a10,
+      a11
+    ) {
+      var sp = stackSave();
+      try {
+        return wasmTable.get(index)(
+          a1,
+          a2,
+          a3,
+          a4,
+          a5,
+          a6,
+          a7,
+          a8,
+          a9,
+          a10,
+          a11
+        );
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_viiiiiiiii(index, a1, a2, a3, a4, a5, a6, a7, a8, a9) {
+      var sp = stackSave();
+      try {
+        wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7, a8, a9);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_viddi(index, a1, a2, a3, a4) {
+      var sp = stackSave();
+      try {
+        wasmTable.get(index)(a1, a2, a3, a4);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_iiidd(index, a1, a2, a3, a4) {
+      var sp = stackSave();
+      try {
+        return wasmTable.get(index)(a1, a2, a3, a4);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_ddd(index, a1, a2) {
+      var sp = stackSave();
+      try {
+        return wasmTable.get(index)(a1, a2);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_viiddddi(index, a1, a2, a3, a4, a5, a6, a7) {
+      var sp = stackSave();
+      try {
+        wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_viiddidd(index, a1, a2, a3, a4, a5, a6, a7) {
+      var sp = stackSave();
+      try {
+        wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_iiidiii(index, a1, a2, a3, a4, a5, a6) {
+      var sp = stackSave();
+      try {
+        return wasmTable.get(index)(a1, a2, a3, a4, a5, a6);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_iiiiiid(index, a1, a2, a3, a4, a5, a6) {
+      var sp = stackSave();
+      try {
+        return wasmTable.get(index)(a1, a2, a3, a4, a5, a6);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_iiiiiiiiii(index, a1, a2, a3, a4, a5, a6, a7, a8, a9) {
+      var sp = stackSave();
+      try {
+        return wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7, a8, a9);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_idid(index, a1, a2, a3) {
+      var sp = stackSave();
+      try {
+        return wasmTable.get(index)(a1, a2, a3);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_vididi(index, a1, a2, a3, a4, a5) {
+      var sp = stackSave();
+      try {
+        wasmTable.get(index)(a1, a2, a3, a4, a5);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_iiddiddidii(
+      index,
+      a1,
+      a2,
+      a3,
+      a4,
+      a5,
+      a6,
+      a7,
+      a8,
+      a9,
+      a10
+    ) {
+      var sp = stackSave();
+      try {
+        return wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_diddd(index, a1, a2, a3, a4) {
+      var sp = stackSave();
+      try {
+        return wasmTable.get(index)(a1, a2, a3, a4);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_viiddii(index, a1, a2, a3, a4, a5, a6) {
+      var sp = stackSave();
+      try {
+        wasmTable.get(index)(a1, a2, a3, a4, a5, a6);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_viddii(index, a1, a2, a3, a4, a5) {
+      var sp = stackSave();
+      try {
+        wasmTable.get(index)(a1, a2, a3, a4, a5);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_iiiiid(index, a1, a2, a3, a4, a5) {
+      var sp = stackSave();
+      try {
+        return wasmTable.get(index)(a1, a2, a3, a4, a5);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_iiiiiiid(index, a1, a2, a3, a4, a5, a6, a7) {
+      var sp = stackSave();
+      try {
+        return wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_vidddddi(index, a1, a2, a3, a4, a5, a6, a7) {
+      var sp = stackSave();
+      try {
+        wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_viiddd(index, a1, a2, a3, a4, a5) {
+      var sp = stackSave();
+      try {
+        wasmTable.get(index)(a1, a2, a3, a4, a5);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_viiddi(index, a1, a2, a3, a4, a5) {
+      var sp = stackSave();
+      try {
+        wasmTable.get(index)(a1, a2, a3, a4, a5);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_iid(index, a1, a2) {
+      var sp = stackSave();
+      try {
+        return wasmTable.get(index)(a1, a2);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_viiiiddddd(index, a1, a2, a3, a4, a5, a6, a7, a8, a9) {
+      var sp = stackSave();
+      try {
+        wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7, a8, a9);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_iidi(index, a1, a2, a3) {
+      var sp = stackSave();
+      try {
+        return wasmTable.get(index)(a1, a2, a3);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_viidddi(index, a1, a2, a3, a4, a5, a6) {
+      var sp = stackSave();
+      try {
+        wasmTable.get(index)(a1, a2, a3, a4, a5, a6);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_iiddi(index, a1, a2, a3, a4) {
+      var sp = stackSave();
+      try {
+        return wasmTable.get(index)(a1, a2, a3, a4);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_didii(index, a1, a2, a3, a4) {
+      var sp = stackSave();
+      try {
+        return wasmTable.get(index)(a1, a2, a3, a4);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_diddi(index, a1, a2, a3, a4) {
+      var sp = stackSave();
+      try {
+        return wasmTable.get(index)(a1, a2, a3, a4);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_viiiiiiii(index, a1, a2, a3, a4, a5, a6, a7, a8) {
+      var sp = stackSave();
+      try {
+        wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7, a8);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_iiddiiid(index, a1, a2, a3, a4, a5, a6, a7) {
+      var sp = stackSave();
+      try {
+        return wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_iiiidiiiii(index, a1, a2, a3, a4, a5, a6, a7, a8, a9) {
+      var sp = stackSave();
+      try {
+        return wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7, a8, a9);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_viididdi(index, a1, a2, a3, a4, a5, a6, a7) {
+      var sp = stackSave();
+      try {
+        wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_viiiiiiiiiiiii(
+      index,
+      a1,
+      a2,
+      a3,
+      a4,
+      a5,
+      a6,
+      a7,
+      a8,
+      a9,
+      a10,
+      a11,
+      a12,
+      a13
+    ) {
+      var sp = stackSave();
+      try {
+        wasmTable.get(index)(
+          a1,
+          a2,
+          a3,
+          a4,
+          a5,
+          a6,
+          a7,
+          a8,
+          a9,
+          a10,
+          a11,
+          a12,
+          a13
+        );
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_viiiiiiiiiii(
+      index,
+      a1,
+      a2,
+      a3,
+      a4,
+      a5,
+      a6,
+      a7,
+      a8,
+      a9,
+      a10,
+      a11
+    ) {
+      var sp = stackSave();
+      try {
+        wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_viidiiiii(index, a1, a2, a3, a4, a5, a6, a7, a8) {
+      var sp = stackSave();
+      try {
+        wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7, a8);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_diii(index, a1, a2, a3) {
+      var sp = stackSave();
+      try {
+        return wasmTable.get(index)(a1, a2, a3);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_iiiidid(index, a1, a2, a3, a4, a5, a6) {
+      var sp = stackSave();
+      try {
+        return wasmTable.get(index)(a1, a2, a3, a4, a5, a6);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_iiiidi(index, a1, a2, a3, a4, a5) {
+      var sp = stackSave();
+      try {
+        return wasmTable.get(index)(a1, a2, a3, a4, a5);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_viiidid(index, a1, a2, a3, a4, a5, a6) {
+      var sp = stackSave();
+      try {
+        wasmTable.get(index)(a1, a2, a3, a4, a5, a6);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_viididi(index, a1, a2, a3, a4, a5, a6) {
+      var sp = stackSave();
+      try {
+        wasmTable.get(index)(a1, a2, a3, a4, a5, a6);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_viiiiid(index, a1, a2, a3, a4, a5, a6) {
+      var sp = stackSave();
+      try {
+        wasmTable.get(index)(a1, a2, a3, a4, a5, a6);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_viiiiidd(index, a1, a2, a3, a4, a5, a6, a7) {
+      var sp = stackSave();
+      try {
+        wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_viiiidd(index, a1, a2, a3, a4, a5, a6) {
+      var sp = stackSave();
+      try {
+        wasmTable.get(index)(a1, a2, a3, a4, a5, a6);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_iiidid(index, a1, a2, a3, a4, a5) {
+      var sp = stackSave();
+      try {
+        return wasmTable.get(index)(a1, a2, a3, a4, a5);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_iiiidiiiiiid(
+      index,
+      a1,
+      a2,
+      a3,
+      a4,
+      a5,
+      a6,
+      a7,
+      a8,
+      a9,
+      a10,
+      a11
+    ) {
+      var sp = stackSave();
+      try {
+        return wasmTable.get(index)(
+          a1,
+          a2,
+          a3,
+          a4,
+          a5,
+          a6,
+          a7,
+          a8,
+          a9,
+          a10,
+          a11
+        );
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
     function invoke_viddiii(index, a1, a2, a3, a4, a5, a6) {
       var sp = stackSave();
       try {
@@ -6465,7 +8063,27 @@ var Module = (function () {
         _setThrew(1, 0);
       }
     }
-    function invoke_iiiiidddd(index, a1, a2, a3, a4, a5, a6, a7, a8) {
+    function invoke_viiddiii(index, a1, a2, a3, a4, a5, a6, a7) {
+      var sp = stackSave();
+      try {
+        wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_vdiddddi(index, a1, a2, a3, a4, a5, a6, a7) {
+      var sp = stackSave();
+      try {
+        wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_iiiiddiid(index, a1, a2, a3, a4, a5, a6, a7, a8) {
       var sp = stackSave();
       try {
         return wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7, a8);
@@ -6475,10 +8093,362 @@ var Module = (function () {
         _setThrew(1, 0);
       }
     }
-    function invoke_iiiidd(index, a1, a2, a3, a4, a5) {
+    function invoke_viiiiiid(index, a1, a2, a3, a4, a5, a6, a7) {
+      var sp = stackSave();
+      try {
+        wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_iiiddiii(index, a1, a2, a3, a4, a5, a6, a7) {
+      var sp = stackSave();
+      try {
+        return wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_iiiddidd(index, a1, a2, a3, a4, a5, a6, a7) {
+      var sp = stackSave();
+      try {
+        return wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_viiiddi(index, a1, a2, a3, a4, a5, a6) {
+      var sp = stackSave();
+      try {
+        wasmTable.get(index)(a1, a2, a3, a4, a5, a6);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_iddid(index, a1, a2, a3, a4) {
+      var sp = stackSave();
+      try {
+        return wasmTable.get(index)(a1, a2, a3, a4);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_iiiiiiiiiiiiiii(
+      index,
+      a1,
+      a2,
+      a3,
+      a4,
+      a5,
+      a6,
+      a7,
+      a8,
+      a9,
+      a10,
+      a11,
+      a12,
+      a13,
+      a14
+    ) {
+      var sp = stackSave();
+      try {
+        return wasmTable.get(index)(
+          a1,
+          a2,
+          a3,
+          a4,
+          a5,
+          a6,
+          a7,
+          a8,
+          a9,
+          a10,
+          a11,
+          a12,
+          a13,
+          a14
+        );
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_viiddddidd(index, a1, a2, a3, a4, a5, a6, a7, a8, a9) {
+      var sp = stackSave();
+      try {
+        wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7, a8, a9);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_iiiiiiiii(index, a1, a2, a3, a4, a5, a6, a7, a8) {
+      var sp = stackSave();
+      try {
+        return wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7, a8);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_idi(index, a1, a2) {
+      var sp = stackSave();
+      try {
+        return wasmTable.get(index)(a1, a2);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_viiiiidi(index, a1, a2, a3, a4, a5, a6, a7) {
+      var sp = stackSave();
+      try {
+        wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_vididd(index, a1, a2, a3, a4, a5) {
+      var sp = stackSave();
+      try {
+        wasmTable.get(index)(a1, a2, a3, a4, a5);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_vidid(index, a1, a2, a3, a4) {
+      var sp = stackSave();
+      try {
+        wasmTable.get(index)(a1, a2, a3, a4);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_vidiii(index, a1, a2, a3, a4, a5) {
+      var sp = stackSave();
+      try {
+        wasmTable.get(index)(a1, a2, a3, a4, a5);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_viddd(index, a1, a2, a3, a4) {
+      var sp = stackSave();
+      try {
+        wasmTable.get(index)(a1, a2, a3, a4);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_didi(index, a1, a2, a3) {
+      var sp = stackSave();
+      try {
+        return wasmTable.get(index)(a1, a2, a3);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_didd(index, a1, a2, a3) {
+      var sp = stackSave();
+      try {
+        return wasmTable.get(index)(a1, a2, a3);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_iidiii(index, a1, a2, a3, a4, a5) {
       var sp = stackSave();
       try {
         return wasmTable.get(index)(a1, a2, a3, a4, a5);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_iiddii(index, a1, a2, a3, a4, a5) {
+      var sp = stackSave();
+      try {
+        return wasmTable.get(index)(a1, a2, a3, a4, a5);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_viidid(index, a1, a2, a3, a4, a5) {
+      var sp = stackSave();
+      try {
+        wasmTable.get(index)(a1, a2, a3, a4, a5);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_vidddddd(index, a1, a2, a3, a4, a5, a6, a7) {
+      var sp = stackSave();
+      try {
+        wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_iiiiddddidd(
+      index,
+      a1,
+      a2,
+      a3,
+      a4,
+      a5,
+      a6,
+      a7,
+      a8,
+      a9,
+      a10
+    ) {
+      var sp = stackSave();
+      try {
+        return wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_iiiidddddddddd(
+      index,
+      a1,
+      a2,
+      a3,
+      a4,
+      a5,
+      a6,
+      a7,
+      a8,
+      a9,
+      a10,
+      a11,
+      a12,
+      a13
+    ) {
+      var sp = stackSave();
+      try {
+        return wasmTable.get(index)(
+          a1,
+          a2,
+          a3,
+          a4,
+          a5,
+          a6,
+          a7,
+          a8,
+          a9,
+          a10,
+          a11,
+          a12,
+          a13
+        );
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_iidiiid(index, a1, a2, a3, a4, a5, a6) {
+      var sp = stackSave();
+      try {
+        return wasmTable.get(index)(a1, a2, a3, a4, a5, a6);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_iidiiidd(index, a1, a2, a3, a4, a5, a6, a7) {
+      var sp = stackSave();
+      try {
+        return wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_iiiddddii(index, a1, a2, a3, a4, a5, a6, a7, a8) {
+      var sp = stackSave();
+      try {
+        return wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7, a8);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_viiddddd(index, a1, a2, a3, a4, a5, a6, a7) {
+      var sp = stackSave();
+      try {
+        wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_iiiiiidd(index, a1, a2, a3, a4, a5, a6, a7) {
+      var sp = stackSave();
+      try {
+        return wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_iiiiddd(index, a1, a2, a3, a4, a5, a6) {
+      var sp = stackSave();
+      try {
+        return wasmTable.get(index)(a1, a2, a3, a4, a5, a6);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_iiiiidddd(index, a1, a2, a3, a4, a5, a6, a7, a8) {
+      var sp = stackSave();
+      try {
+        return wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7, a8);
       } catch (e) {
         stackRestore(sp);
         if (e !== e + 0 && e !== 'longjmp') throw e;
@@ -6496,16 +8466,6 @@ var Module = (function () {
       }
     }
     function invoke_iiiddi(index, a1, a2, a3, a4, a5) {
-      var sp = stackSave();
-      try {
-        return wasmTable.get(index)(a1, a2, a3, a4, a5);
-      } catch (e) {
-        stackRestore(sp);
-        if (e !== e + 0 && e !== 'longjmp') throw e;
-        _setThrew(1, 0);
-      }
-    }
-    function invoke_iiidii(index, a1, a2, a3, a4, a5) {
       var sp = stackSave();
       try {
         return wasmTable.get(index)(a1, a2, a3, a4, a5);
@@ -6566,40 +8526,62 @@ var Module = (function () {
         _setThrew(1, 0);
       }
     }
-    function invoke_iiddi(index, a1, a2, a3, a4) {
+    function invoke_vdiddiiiiii(
+      index,
+      a1,
+      a2,
+      a3,
+      a4,
+      a5,
+      a6,
+      a7,
+      a8,
+      a9,
+      a10
+    ) {
       var sp = stackSave();
       try {
-        return wasmTable.get(index)(a1, a2, a3, a4);
+        wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10);
       } catch (e) {
         stackRestore(sp);
         if (e !== e + 0 && e !== 'longjmp') throw e;
         _setThrew(1, 0);
       }
     }
-    function invoke_iiiiiid(index, a1, a2, a3, a4, a5, a6) {
+    function invoke_viidii(index, a1, a2, a3, a4, a5) {
       var sp = stackSave();
       try {
-        return wasmTable.get(index)(a1, a2, a3, a4, a5, a6);
+        wasmTable.get(index)(a1, a2, a3, a4, a5);
       } catch (e) {
         stackRestore(sp);
         if (e !== e + 0 && e !== 'longjmp') throw e;
         _setThrew(1, 0);
       }
     }
-    function invoke_viiiiiid(index, a1, a2, a3, a4, a5, a6, a7) {
+    function invoke_vddi(index, a1, a2, a3) {
       var sp = stackSave();
       try {
-        wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7);
+        wasmTable.get(index)(a1, a2, a3);
       } catch (e) {
         stackRestore(sp);
         if (e !== e + 0 && e !== 'longjmp') throw e;
         _setThrew(1, 0);
       }
     }
-    function invoke_viiiidd(index, a1, a2, a3, a4, a5, a6) {
+    function invoke_iiiidiii(index, a1, a2, a3, a4, a5, a6, a7) {
       var sp = stackSave();
       try {
-        wasmTable.get(index)(a1, a2, a3, a4, a5, a6);
+        return wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_vdddii(index, a1, a2, a3, a4, a5) {
+      var sp = stackSave();
+      try {
+        wasmTable.get(index)(a1, a2, a3, a4, a5);
       } catch (e) {
         stackRestore(sp);
         if (e !== e + 0 && e !== 'longjmp') throw e;
@@ -6616,30 +8598,60 @@ var Module = (function () {
         _setThrew(1, 0);
       }
     }
-    function invoke_vidd(index, a1, a2, a3) {
+    function invoke_diiid(index, a1, a2, a3, a4) {
       var sp = stackSave();
       try {
-        wasmTable.get(index)(a1, a2, a3);
+        return wasmTable.get(index)(a1, a2, a3, a4);
       } catch (e) {
         stackRestore(sp);
         if (e !== e + 0 && e !== 'longjmp') throw e;
         _setThrew(1, 0);
       }
     }
-    function invoke_didi(index, a1, a2, a3) {
+    function invoke_diidii(index, a1, a2, a3, a4, a5) {
       var sp = stackSave();
       try {
-        return wasmTable.get(index)(a1, a2, a3);
+        return wasmTable.get(index)(a1, a2, a3, a4, a5);
       } catch (e) {
         stackRestore(sp);
         if (e !== e + 0 && e !== 'longjmp') throw e;
         _setThrew(1, 0);
       }
     }
-    function invoke_viddd(index, a1, a2, a3, a4) {
+    function invoke_iddiiiiiii(index, a1, a2, a3, a4, a5, a6, a7, a8, a9) {
       var sp = stackSave();
       try {
-        wasmTable.get(index)(a1, a2, a3, a4);
+        return wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7, a8, a9);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_viiiidi(index, a1, a2, a3, a4, a5, a6) {
+      var sp = stackSave();
+      try {
+        wasmTable.get(index)(a1, a2, a3, a4, a5, a6);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_viiidddd(index, a1, a2, a3, a4, a5, a6, a7) {
+      var sp = stackSave();
+      try {
+        wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_viiiddiiii(index, a1, a2, a3, a4, a5, a6, a7, a8, a9) {
+      var sp = stackSave();
+      try {
+        wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7, a8, a9);
       } catch (e) {
         stackRestore(sp);
         if (e !== e + 0 && e !== 'longjmp') throw e;
@@ -6668,10 +8680,10 @@ var Module = (function () {
         _setThrew(1, 0);
       }
     }
-    function invoke_iiiiiiiiii(index, a1, a2, a3, a4, a5, a6, a7, a8, a9) {
+    function invoke_iidii(index, a1, a2, a3, a4) {
       var sp = stackSave();
       try {
-        return wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7, a8, a9);
+        return wasmTable.get(index)(a1, a2, a3, a4);
       } catch (e) {
         stackRestore(sp);
         if (e !== e + 0 && e !== 'longjmp') throw e;
@@ -6682,26 +8694,6 @@ var Module = (function () {
       var sp = stackSave();
       try {
         return wasmTable.get(index)(a1, a2, a3, a4, a5, a6);
-      } catch (e) {
-        stackRestore(sp);
-        if (e !== e + 0 && e !== 'longjmp') throw e;
-        _setThrew(1, 0);
-      }
-    }
-    function invoke_iiiiiiiii(index, a1, a2, a3, a4, a5, a6, a7, a8) {
-      var sp = stackSave();
-      try {
-        return wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7, a8);
-      } catch (e) {
-        stackRestore(sp);
-        if (e !== e + 0 && e !== 'longjmp') throw e;
-        _setThrew(1, 0);
-      }
-    }
-    function invoke_iiiiiiii(index, a1, a2, a3, a4, a5, a6, a7) {
-      var sp = stackSave();
-      try {
-        return wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7);
       } catch (e) {
         stackRestore(sp);
         if (e !== e + 0 && e !== 'longjmp') throw e;
@@ -6907,30 +8899,10 @@ var Module = (function () {
         _setThrew(1, 0);
       }
     }
-    function invoke_viiiiiiiii(index, a1, a2, a3, a4, a5, a6, a7, a8, a9) {
-      var sp = stackSave();
-      try {
-        wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7, a8, a9);
-      } catch (e) {
-        stackRestore(sp);
-        if (e !== e + 0 && e !== 'longjmp') throw e;
-        _setThrew(1, 0);
-      }
-    }
     function invoke_viidddd(index, a1, a2, a3, a4, a5, a6) {
       var sp = stackSave();
       try {
         wasmTable.get(index)(a1, a2, a3, a4, a5, a6);
-      } catch (e) {
-        stackRestore(sp);
-        if (e !== e + 0 && e !== 'longjmp') throw e;
-        _setThrew(1, 0);
-      }
-    }
-    function invoke_viiiddiiii(index, a1, a2, a3, a4, a5, a6, a7, a8, a9) {
-      var sp = stackSave();
-      try {
-        wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7, a8, a9);
       } catch (e) {
         stackRestore(sp);
         if (e !== e + 0 && e !== 'longjmp') throw e;
@@ -6984,40 +8956,10 @@ var Module = (function () {
         _setThrew(1, 0);
       }
     }
-    function invoke_viddiiiiii(index, a1, a2, a3, a4, a5, a6, a7, a8, a9) {
-      var sp = stackSave();
-      try {
-        wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7, a8, a9);
-      } catch (e) {
-        stackRestore(sp);
-        if (e !== e + 0 && e !== 'longjmp') throw e;
-        _setThrew(1, 0);
-      }
-    }
-    function invoke_viiddddi(index, a1, a2, a3, a4, a5, a6, a7) {
-      var sp = stackSave();
-      try {
-        wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7);
-      } catch (e) {
-        stackRestore(sp);
-        if (e !== e + 0 && e !== 'longjmp') throw e;
-        _setThrew(1, 0);
-      }
-    }
     function invoke_iididdii(index, a1, a2, a3, a4, a5, a6, a7) {
       var sp = stackSave();
       try {
         return wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7);
-      } catch (e) {
-        stackRestore(sp);
-        if (e !== e + 0 && e !== 'longjmp') throw e;
-        _setThrew(1, 0);
-      }
-    }
-    function invoke_idi(index, a1, a2) {
-      var sp = stackSave();
-      try {
-        return wasmTable.get(index)(a1, a2);
       } catch (e) {
         stackRestore(sp);
         if (e !== e + 0 && e !== 'longjmp') throw e;
@@ -7038,26 +8980,6 @@ var Module = (function () {
       var sp = stackSave();
       try {
         return wasmTable.get(index)(a1, a2, a3, a4, a5);
-      } catch (e) {
-        stackRestore(sp);
-        if (e !== e + 0 && e !== 'longjmp') throw e;
-        _setThrew(1, 0);
-      }
-    }
-    function invoke_viidid(index, a1, a2, a3, a4, a5) {
-      var sp = stackSave();
-      try {
-        wasmTable.get(index)(a1, a2, a3, a4, a5);
-      } catch (e) {
-        stackRestore(sp);
-        if (e !== e + 0 && e !== 'longjmp') throw e;
-        _setThrew(1, 0);
-      }
-    }
-    function invoke_iiiiiiid(index, a1, a2, a3, a4, a5, a6, a7) {
-      var sp = stackSave();
-      try {
-        return wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7);
       } catch (e) {
         stackRestore(sp);
         if (e !== e + 0 && e !== 'longjmp') throw e;
@@ -7146,26 +9068,6 @@ var Module = (function () {
         _setThrew(1, 0);
       }
     }
-    function invoke_viiiiiiii(index, a1, a2, a3, a4, a5, a6, a7, a8) {
-      var sp = stackSave();
-      try {
-        wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7, a8);
-      } catch (e) {
-        stackRestore(sp);
-        if (e !== e + 0 && e !== 'longjmp') throw e;
-        _setThrew(1, 0);
-      }
-    }
-    function invoke_iidii(index, a1, a2, a3, a4) {
-      var sp = stackSave();
-      try {
-        return wasmTable.get(index)(a1, a2, a3, a4);
-      } catch (e) {
-        stackRestore(sp);
-        if (e !== e + 0 && e !== 'longjmp') throw e;
-        _setThrew(1, 0);
-      }
-    }
     function invoke_iiiddid(index, a1, a2, a3, a4, a5, a6) {
       var sp = stackSave();
       try {
@@ -7196,26 +9098,6 @@ var Module = (function () {
         _setThrew(1, 0);
       }
     }
-    function invoke_iiiidi(index, a1, a2, a3, a4, a5) {
-      var sp = stackSave();
-      try {
-        return wasmTable.get(index)(a1, a2, a3, a4, a5);
-      } catch (e) {
-        stackRestore(sp);
-        if (e !== e + 0 && e !== 'longjmp') throw e;
-        _setThrew(1, 0);
-      }
-    }
-    function invoke_viddddii(index, a1, a2, a3, a4, a5, a6, a7) {
-      var sp = stackSave();
-      try {
-        wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7);
-      } catch (e) {
-        stackRestore(sp);
-        if (e !== e + 0 && e !== 'longjmp') throw e;
-        _setThrew(1, 0);
-      }
-    }
     function invoke_iiiiiidiii(index, a1, a2, a3, a4, a5, a6, a7, a8, a9) {
       var sp = stackSave();
       try {
@@ -7236,16 +9118,6 @@ var Module = (function () {
         _setThrew(1, 0);
       }
     }
-    function invoke_diddi(index, a1, a2, a3, a4) {
-      var sp = stackSave();
-      try {
-        return wasmTable.get(index)(a1, a2, a3, a4);
-      } catch (e) {
-        stackRestore(sp);
-        if (e !== e + 0 && e !== 'longjmp') throw e;
-        _setThrew(1, 0);
-      }
-    }
     function invoke_iiiiidi(index, a1, a2, a3, a4, a5, a6) {
       var sp = stackSave();
       try {
@@ -7260,6 +9132,16 @@ var Module = (function () {
       var sp = stackSave();
       try {
         return wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7, a8);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_vidiidii(index, a1, a2, a3, a4, a5, a6, a7) {
+      var sp = stackSave();
+      try {
+        wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7);
       } catch (e) {
         stackRestore(sp);
         if (e !== e + 0 && e !== 'longjmp') throw e;
@@ -7295,16 +9177,6 @@ var Module = (function () {
           a10,
           a11
         );
-      } catch (e) {
-        stackRestore(sp);
-        if (e !== e + 0 && e !== 'longjmp') throw e;
-        _setThrew(1, 0);
-      }
-    }
-    function invoke_vidiii(index, a1, a2, a3, a4, a5) {
-      var sp = stackSave();
-      try {
-        wasmTable.get(index)(a1, a2, a3, a4, a5);
       } catch (e) {
         stackRestore(sp);
         if (e !== e + 0 && e !== 'longjmp') throw e;
@@ -7372,16 +9244,6 @@ var Module = (function () {
           a10,
           a11
         );
-      } catch (e) {
-        stackRestore(sp);
-        if (e !== e + 0 && e !== 'longjmp') throw e;
-        _setThrew(1, 0);
-      }
-    }
-    function invoke_vidiiii(index, a1, a2, a3, a4, a5, a6) {
-      var sp = stackSave();
-      try {
-        wasmTable.get(index)(a1, a2, a3, a4, a5, a6);
       } catch (e) {
         stackRestore(sp);
         if (e !== e + 0 && e !== 'longjmp') throw e;
@@ -7475,16 +9337,6 @@ var Module = (function () {
         _setThrew(1, 0);
       }
     }
-    function invoke_iiiddddi(index, a1, a2, a3, a4, a5, a6, a7) {
-      var sp = stackSave();
-      try {
-        return wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7);
-      } catch (e) {
-        stackRestore(sp);
-        if (e !== e + 0 && e !== 'longjmp') throw e;
-        _setThrew(1, 0);
-      }
-    }
     function invoke_viiiiiiddi(index, a1, a2, a3, a4, a5, a6, a7, a8, a9) {
       var sp = stackSave();
       try {
@@ -7495,30 +9347,10 @@ var Module = (function () {
         _setThrew(1, 0);
       }
     }
-    function invoke_viddii(index, a1, a2, a3, a4, a5) {
-      var sp = stackSave();
-      try {
-        wasmTable.get(index)(a1, a2, a3, a4, a5);
-      } catch (e) {
-        stackRestore(sp);
-        if (e !== e + 0 && e !== 'longjmp') throw e;
-        _setThrew(1, 0);
-      }
-    }
     function invoke_viiiiiddi(index, a1, a2, a3, a4, a5, a6, a7, a8) {
       var sp = stackSave();
       try {
         wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7, a8);
-      } catch (e) {
-        stackRestore(sp);
-        if (e !== e + 0 && e !== 'longjmp') throw e;
-        _setThrew(1, 0);
-      }
-    }
-    function invoke_viiiiidi(index, a1, a2, a3, a4, a5, a6, a7) {
-      var sp = stackSave();
-      try {
-        wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7);
       } catch (e) {
         stackRestore(sp);
         if (e !== e + 0 && e !== 'longjmp') throw e;
@@ -7536,16 +9368,6 @@ var Module = (function () {
       }
     }
     function invoke_diiii(index, a1, a2, a3, a4) {
-      var sp = stackSave();
-      try {
-        return wasmTable.get(index)(a1, a2, a3, a4);
-      } catch (e) {
-        stackRestore(sp);
-        if (e !== e + 0 && e !== 'longjmp') throw e;
-        _setThrew(1, 0);
-      }
-    }
-    function invoke_diidd(index, a1, a2, a3, a4) {
       var sp = stackSave();
       try {
         return wasmTable.get(index)(a1, a2, a3, a4);
@@ -7599,57 +9421,7 @@ var Module = (function () {
         _setThrew(1, 0);
       }
     }
-    function invoke_vidddd(index, a1, a2, a3, a4, a5) {
-      var sp = stackSave();
-      try {
-        wasmTable.get(index)(a1, a2, a3, a4, a5);
-      } catch (e) {
-        stackRestore(sp);
-        if (e !== e + 0 && e !== 'longjmp') throw e;
-        _setThrew(1, 0);
-      }
-    }
-    function invoke_diiiiiii(index, a1, a2, a3, a4, a5, a6, a7) {
-      var sp = stackSave();
-      try {
-        return wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7);
-      } catch (e) {
-        stackRestore(sp);
-        if (e !== e + 0 && e !== 'longjmp') throw e;
-        _setThrew(1, 0);
-      }
-    }
-    function invoke_viiidddd(index, a1, a2, a3, a4, a5, a6, a7) {
-      var sp = stackSave();
-      try {
-        wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7);
-      } catch (e) {
-        stackRestore(sp);
-        if (e !== e + 0 && e !== 'longjmp') throw e;
-        _setThrew(1, 0);
-      }
-    }
-    function invoke_vidddii(index, a1, a2, a3, a4, a5, a6) {
-      var sp = stackSave();
-      try {
-        wasmTable.get(index)(a1, a2, a3, a4, a5, a6);
-      } catch (e) {
-        stackRestore(sp);
-        if (e !== e + 0 && e !== 'longjmp') throw e;
-        _setThrew(1, 0);
-      }
-    }
-    function invoke_viiiidddd(index, a1, a2, a3, a4, a5, a6, a7, a8) {
-      var sp = stackSave();
-      try {
-        wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7, a8);
-      } catch (e) {
-        stackRestore(sp);
-        if (e !== e + 0 && e !== 'longjmp') throw e;
-        _setThrew(1, 0);
-      }
-    }
-    function invoke_viiiiiiiiiiiii(
+    function invoke_vidddddddddddd(
       index,
       a1,
       a2,
@@ -7682,6 +9454,56 @@ var Module = (function () {
           a12,
           a13
         );
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_viiiiiidii(index, a1, a2, a3, a4, a5, a6, a7, a8, a9) {
+      var sp = stackSave();
+      try {
+        wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7, a8, a9);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_viiiiidii(index, a1, a2, a3, a4, a5, a6, a7, a8) {
+      var sp = stackSave();
+      try {
+        wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7, a8);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_diiiiiii(index, a1, a2, a3, a4, a5, a6, a7) {
+      var sp = stackSave();
+      try {
+        return wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_vidddii(index, a1, a2, a3, a4, a5, a6) {
+      var sp = stackSave();
+      try {
+        wasmTable.get(index)(a1, a2, a3, a4, a5, a6);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_viiiidddd(index, a1, a2, a3, a4, a5, a6, a7, a8) {
+      var sp = stackSave();
+      try {
+        wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7, a8);
       } catch (e) {
         stackRestore(sp);
         if (e !== e + 0 && e !== 'longjmp') throw e;
@@ -7753,10 +9575,582 @@ var Module = (function () {
         _setThrew(1, 0);
       }
     }
-    function invoke_iidd(index, a1, a2, a3) {
+    function invoke_viiidii(index, a1, a2, a3, a4, a5, a6) {
       var sp = stackSave();
       try {
-        return wasmTable.get(index)(a1, a2, a3);
+        wasmTable.get(index)(a1, a2, a3, a4, a5, a6);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_vdidii(index, a1, a2, a3, a4, a5) {
+      var sp = stackSave();
+      try {
+        wasmTable.get(index)(a1, a2, a3, a4, a5);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_vdiddii(index, a1, a2, a3, a4, a5, a6) {
+      var sp = stackSave();
+      try {
+        wasmTable.get(index)(a1, a2, a3, a4, a5, a6);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_viiiiiidiidid(
+      index,
+      a1,
+      a2,
+      a3,
+      a4,
+      a5,
+      a6,
+      a7,
+      a8,
+      a9,
+      a10,
+      a11,
+      a12
+    ) {
+      var sp = stackSave();
+      try {
+        wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_iiidiiiii(index, a1, a2, a3, a4, a5, a6, a7, a8) {
+      var sp = stackSave();
+      try {
+        return wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7, a8);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_viddid(index, a1, a2, a3, a4, a5) {
+      var sp = stackSave();
+      try {
+        wasmTable.get(index)(a1, a2, a3, a4, a5);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_viddidd(index, a1, a2, a3, a4, a5, a6) {
+      var sp = stackSave();
+      try {
+        wasmTable.get(index)(a1, a2, a3, a4, a5, a6);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_viiiiiiiiid(
+      index,
+      a1,
+      a2,
+      a3,
+      a4,
+      a5,
+      a6,
+      a7,
+      a8,
+      a9,
+      a10
+    ) {
+      var sp = stackSave();
+      try {
+        wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_vdiii(index, a1, a2, a3, a4) {
+      var sp = stackSave();
+      try {
+        wasmTable.get(index)(a1, a2, a3, a4);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_iiiiiiiidd(index, a1, a2, a3, a4, a5, a6, a7, a8, a9) {
+      var sp = stackSave();
+      try {
+        return wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7, a8, a9);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_vididdi(index, a1, a2, a3, a4, a5, a6) {
+      var sp = stackSave();
+      try {
+        wasmTable.get(index)(a1, a2, a3, a4, a5, a6);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_iiiiiiiidddddddddiiddii(
+      index,
+      a1,
+      a2,
+      a3,
+      a4,
+      a5,
+      a6,
+      a7,
+      a8,
+      a9,
+      a10,
+      a11,
+      a12,
+      a13,
+      a14,
+      a15,
+      a16,
+      a17,
+      a18,
+      a19,
+      a20,
+      a21,
+      a22
+    ) {
+      var sp = stackSave();
+      try {
+        return wasmTable.get(index)(
+          a1,
+          a2,
+          a3,
+          a4,
+          a5,
+          a6,
+          a7,
+          a8,
+          a9,
+          a10,
+          a11,
+          a12,
+          a13,
+          a14,
+          a15,
+          a16,
+          a17,
+          a18,
+          a19,
+          a20,
+          a21,
+          a22
+        );
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_viidddddddiiii(
+      index,
+      a1,
+      a2,
+      a3,
+      a4,
+      a5,
+      a6,
+      a7,
+      a8,
+      a9,
+      a10,
+      a11,
+      a12,
+      a13
+    ) {
+      var sp = stackSave();
+      try {
+        wasmTable.get(index)(
+          a1,
+          a2,
+          a3,
+          a4,
+          a5,
+          a6,
+          a7,
+          a8,
+          a9,
+          a10,
+          a11,
+          a12,
+          a13
+        );
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_idiiiii(index, a1, a2, a3, a4, a5, a6) {
+      var sp = stackSave();
+      try {
+        return wasmTable.get(index)(a1, a2, a3, a4, a5, a6);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_viiiiiiiiddi(
+      index,
+      a1,
+      a2,
+      a3,
+      a4,
+      a5,
+      a6,
+      a7,
+      a8,
+      a9,
+      a10,
+      a11
+    ) {
+      var sp = stackSave();
+      try {
+        wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_viiiiiddiii(
+      index,
+      a1,
+      a2,
+      a3,
+      a4,
+      a5,
+      a6,
+      a7,
+      a8,
+      a9,
+      a10
+    ) {
+      var sp = stackSave();
+      try {
+        wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_iiiiidii(index, a1, a2, a3, a4, a5, a6, a7) {
+      var sp = stackSave();
+      try {
+        return wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_iiiiddddddi(
+      index,
+      a1,
+      a2,
+      a3,
+      a4,
+      a5,
+      a6,
+      a7,
+      a8,
+      a9,
+      a10
+    ) {
+      var sp = stackSave();
+      try {
+        return wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_iiiidii(index, a1, a2, a3, a4, a5, a6) {
+      var sp = stackSave();
+      try {
+        return wasmTable.get(index)(a1, a2, a3, a4, a5, a6);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_viiidiiii(index, a1, a2, a3, a4, a5, a6, a7, a8) {
+      var sp = stackSave();
+      try {
+        wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7, a8);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_viiiiiddddi(
+      index,
+      a1,
+      a2,
+      a3,
+      a4,
+      a5,
+      a6,
+      a7,
+      a8,
+      a9,
+      a10
+    ) {
+      var sp = stackSave();
+      try {
+        wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_iidddi(index, a1, a2, a3, a4, a5) {
+      var sp = stackSave();
+      try {
+        return wasmTable.get(index)(a1, a2, a3, a4, a5);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_iiiiiiiddi(index, a1, a2, a3, a4, a5, a6, a7, a8, a9) {
+      var sp = stackSave();
+      try {
+        return wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7, a8, a9);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_iiiiidiiiiii(
+      index,
+      a1,
+      a2,
+      a3,
+      a4,
+      a5,
+      a6,
+      a7,
+      a8,
+      a9,
+      a10,
+      a11
+    ) {
+      var sp = stackSave();
+      try {
+        return wasmTable.get(index)(
+          a1,
+          a2,
+          a3,
+          a4,
+          a5,
+          a6,
+          a7,
+          a8,
+          a9,
+          a10,
+          a11
+        );
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_iiiiiidiiidd(
+      index,
+      a1,
+      a2,
+      a3,
+      a4,
+      a5,
+      a6,
+      a7,
+      a8,
+      a9,
+      a10,
+      a11
+    ) {
+      var sp = stackSave();
+      try {
+        return wasmTable.get(index)(
+          a1,
+          a2,
+          a3,
+          a4,
+          a5,
+          a6,
+          a7,
+          a8,
+          a9,
+          a10,
+          a11
+        );
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_viidddddddd(
+      index,
+      a1,
+      a2,
+      a3,
+      a4,
+      a5,
+      a6,
+      a7,
+      a8,
+      a9,
+      a10
+    ) {
+      var sp = stackSave();
+      try {
+        wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_iiiidddd(index, a1, a2, a3, a4, a5, a6, a7) {
+      var sp = stackSave();
+      try {
+        return wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_viiiiiidddi(
+      index,
+      a1,
+      a2,
+      a3,
+      a4,
+      a5,
+      a6,
+      a7,
+      a8,
+      a9,
+      a10
+    ) {
+      var sp = stackSave();
+      try {
+        wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_iidddidd(index, a1, a2, a3, a4, a5, a6, a7) {
+      var sp = stackSave();
+      try {
+        return wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_iiidiid(index, a1, a2, a3, a4, a5, a6) {
+      var sp = stackSave();
+      try {
+        return wasmTable.get(index)(a1, a2, a3, a4, a5, a6);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_vidiiidi(index, a1, a2, a3, a4, a5, a6, a7) {
+      var sp = stackSave();
+      try {
+        wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_iidid(index, a1, a2, a3, a4) {
+      var sp = stackSave();
+      try {
+        return wasmTable.get(index)(a1, a2, a3, a4);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_iiiiiiiiiiidi(
+      index,
+      a1,
+      a2,
+      a3,
+      a4,
+      a5,
+      a6,
+      a7,
+      a8,
+      a9,
+      a10,
+      a11,
+      a12
+    ) {
+      var sp = stackSave();
+      try {
+        return wasmTable.get(index)(
+          a1,
+          a2,
+          a3,
+          a4,
+          a5,
+          a6,
+          a7,
+          a8,
+          a9,
+          a10,
+          a11,
+          a12
+        );
       } catch (e) {
         stackRestore(sp);
         if (e !== e + 0 && e !== 'longjmp') throw e;
@@ -7949,6 +10343,53 @@ var Module = (function () {
         _setThrew(1, 0);
       }
     }
+    function invoke_iiiiiiddiiiii(
+      index,
+      a1,
+      a2,
+      a3,
+      a4,
+      a5,
+      a6,
+      a7,
+      a8,
+      a9,
+      a10,
+      a11,
+      a12
+    ) {
+      var sp = stackSave();
+      try {
+        return wasmTable.get(index)(
+          a1,
+          a2,
+          a3,
+          a4,
+          a5,
+          a6,
+          a7,
+          a8,
+          a9,
+          a10,
+          a11,
+          a12
+        );
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_vidiiiiii(index, a1, a2, a3, a4, a5, a6, a7, a8) {
+      var sp = stackSave();
+      try {
+        wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7, a8);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
     function invoke_iiiiddiii(index, a1, a2, a3, a4, a5, a6, a7, a8) {
       var sp = stackSave();
       try {
@@ -8031,50 +10472,10 @@ var Module = (function () {
         _setThrew(1, 0);
       }
     }
-    function invoke_didd(index, a1, a2, a3) {
-      var sp = stackSave();
-      try {
-        return wasmTable.get(index)(a1, a2, a3);
-      } catch (e) {
-        stackRestore(sp);
-        if (e !== e + 0 && e !== 'longjmp') throw e;
-        _setThrew(1, 0);
-      }
-    }
-    function invoke_diddd(index, a1, a2, a3, a4) {
-      var sp = stackSave();
-      try {
-        return wasmTable.get(index)(a1, a2, a3, a4);
-      } catch (e) {
-        stackRestore(sp);
-        if (e !== e + 0 && e !== 'longjmp') throw e;
-        _setThrew(1, 0);
-      }
-    }
-    function invoke_viidddi(index, a1, a2, a3, a4, a5, a6) {
-      var sp = stackSave();
-      try {
-        wasmTable.get(index)(a1, a2, a3, a4, a5, a6);
-      } catch (e) {
-        stackRestore(sp);
-        if (e !== e + 0 && e !== 'longjmp') throw e;
-        _setThrew(1, 0);
-      }
-    }
     function invoke_viiiddddi(index, a1, a2, a3, a4, a5, a6, a7, a8) {
       var sp = stackSave();
       try {
         wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7, a8);
-      } catch (e) {
-        stackRestore(sp);
-        if (e !== e + 0 && e !== 'longjmp') throw e;
-        _setThrew(1, 0);
-      }
-    }
-    function invoke_viiiddd(index, a1, a2, a3, a4, a5, a6) {
-      var sp = stackSave();
-      try {
-        wasmTable.get(index)(a1, a2, a3, a4, a5, a6);
       } catch (e) {
         stackRestore(sp);
         if (e !== e + 0 && e !== 'longjmp') throw e;
@@ -8116,16 +10517,6 @@ var Module = (function () {
           a13,
           a14
         );
-      } catch (e) {
-        stackRestore(sp);
-        if (e !== e + 0 && e !== 'longjmp') throw e;
-        _setThrew(1, 0);
-      }
-    }
-    function invoke_viiidii(index, a1, a2, a3, a4, a5, a6) {
-      var sp = stackSave();
-      try {
-        wasmTable.get(index)(a1, a2, a3, a4, a5, a6);
       } catch (e) {
         stackRestore(sp);
         if (e !== e + 0 && e !== 'longjmp') throw e;
@@ -8211,16 +10602,6 @@ var Module = (function () {
         _setThrew(1, 0);
       }
     }
-    function invoke_viidiiiii(index, a1, a2, a3, a4, a5, a6, a7, a8) {
-      var sp = stackSave();
-      try {
-        wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7, a8);
-      } catch (e) {
-        stackRestore(sp);
-        if (e !== e + 0 && e !== 'longjmp') throw e;
-        _setThrew(1, 0);
-      }
-    }
     function invoke_vdiiiiiiiii(
       index,
       a1,
@@ -8260,16 +10641,6 @@ var Module = (function () {
       var sp = stackSave();
       try {
         wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11);
-      } catch (e) {
-        stackRestore(sp);
-        if (e !== e + 0 && e !== 'longjmp') throw e;
-        _setThrew(1, 0);
-      }
-    }
-    function invoke_vdiii(index, a1, a2, a3, a4) {
-      var sp = stackSave();
-      try {
-        wasmTable.get(index)(a1, a2, a3, a4);
       } catch (e) {
         stackRestore(sp);
         if (e !== e + 0 && e !== 'longjmp') throw e;
@@ -8316,50 +10687,10 @@ var Module = (function () {
         _setThrew(1, 0);
       }
     }
-    function invoke_viiddddidd(index, a1, a2, a3, a4, a5, a6, a7, a8, a9) {
-      var sp = stackSave();
-      try {
-        wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7, a8, a9);
-      } catch (e) {
-        stackRestore(sp);
-        if (e !== e + 0 && e !== 'longjmp') throw e;
-        _setThrew(1, 0);
-      }
-    }
-    function invoke_viiddii(index, a1, a2, a3, a4, a5, a6) {
-      var sp = stackSave();
-      try {
-        wasmTable.get(index)(a1, a2, a3, a4, a5, a6);
-      } catch (e) {
-        stackRestore(sp);
-        if (e !== e + 0 && e !== 'longjmp') throw e;
-        _setThrew(1, 0);
-      }
-    }
     function invoke_iiidddiid(index, a1, a2, a3, a4, a5, a6, a7, a8) {
       var sp = stackSave();
       try {
         return wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7, a8);
-      } catch (e) {
-        stackRestore(sp);
-        if (e !== e + 0 && e !== 'longjmp') throw e;
-        _setThrew(1, 0);
-      }
-    }
-    function invoke_viddid(index, a1, a2, a3, a4, a5) {
-      var sp = stackSave();
-      try {
-        wasmTable.get(index)(a1, a2, a3, a4, a5);
-      } catch (e) {
-        stackRestore(sp);
-        if (e !== e + 0 && e !== 'longjmp') throw e;
-        _setThrew(1, 0);
-      }
-    }
-    function invoke_vididd(index, a1, a2, a3, a4, a5) {
-      var sp = stackSave();
-      try {
-        wasmTable.get(index)(a1, a2, a3, a4, a5);
       } catch (e) {
         stackRestore(sp);
         if (e !== e + 0 && e !== 'longjmp') throw e;
@@ -8392,69 +10723,6 @@ var Module = (function () {
       var sp = stackSave();
       try {
         return wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7, a8);
-      } catch (e) {
-        stackRestore(sp);
-        if (e !== e + 0 && e !== 'longjmp') throw e;
-        _setThrew(1, 0);
-      }
-    }
-    function invoke_viiiiddddd(index, a1, a2, a3, a4, a5, a6, a7, a8, a9) {
-      var sp = stackSave();
-      try {
-        wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7, a8, a9);
-      } catch (e) {
-        stackRestore(sp);
-        if (e !== e + 0 && e !== 'longjmp') throw e;
-        _setThrew(1, 0);
-      }
-    }
-    function invoke_vidid(index, a1, a2, a3, a4) {
-      var sp = stackSave();
-      try {
-        wasmTable.get(index)(a1, a2, a3, a4);
-      } catch (e) {
-        stackRestore(sp);
-        if (e !== e + 0 && e !== 'longjmp') throw e;
-        _setThrew(1, 0);
-      }
-    }
-    function invoke_viiiiiiiiiii(
-      index,
-      a1,
-      a2,
-      a3,
-      a4,
-      a5,
-      a6,
-      a7,
-      a8,
-      a9,
-      a10,
-      a11
-    ) {
-      var sp = stackSave();
-      try {
-        wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11);
-      } catch (e) {
-        stackRestore(sp);
-        if (e !== e + 0 && e !== 'longjmp') throw e;
-        _setThrew(1, 0);
-      }
-    }
-    function invoke_viddidd(index, a1, a2, a3, a4, a5, a6) {
-      var sp = stackSave();
-      try {
-        wasmTable.get(index)(a1, a2, a3, a4, a5, a6);
-      } catch (e) {
-        stackRestore(sp);
-        if (e !== e + 0 && e !== 'longjmp') throw e;
-        _setThrew(1, 0);
-      }
-    }
-    function invoke_iiidiii(index, a1, a2, a3, a4, a5, a6) {
-      var sp = stackSave();
-      try {
-        return wasmTable.get(index)(a1, a2, a3, a4, a5, a6);
       } catch (e) {
         stackRestore(sp);
         if (e !== e + 0 && e !== 'longjmp') throw e;
@@ -8505,6 +10773,26 @@ var Module = (function () {
         _setThrew(1, 0);
       }
     }
+    function invoke_iiddd(index, a1, a2, a3, a4) {
+      var sp = stackSave();
+      try {
+        return wasmTable.get(index)(a1, a2, a3, a4);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_iiididi(index, a1, a2, a3, a4, a5, a6) {
+      var sp = stackSave();
+      try {
+        return wasmTable.get(index)(a1, a2, a3, a4, a5, a6);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
     function invoke_viiiiiddd(index, a1, a2, a3, a4, a5, a6, a7, a8) {
       var sp = stackSave();
       try {
@@ -8515,20 +10803,10 @@ var Module = (function () {
         _setThrew(1, 0);
       }
     }
-    function invoke_viiiddi(index, a1, a2, a3, a4, a5, a6) {
+    function invoke_didddidi(index, a1, a2, a3, a4, a5, a6, a7) {
       var sp = stackSave();
       try {
-        wasmTable.get(index)(a1, a2, a3, a4, a5, a6);
-      } catch (e) {
-        stackRestore(sp);
-        if (e !== e + 0 && e !== 'longjmp') throw e;
-        _setThrew(1, 0);
-      }
-    }
-    function invoke_iidid(index, a1, a2, a3, a4) {
-      var sp = stackSave();
-      try {
-        return wasmTable.get(index)(a1, a2, a3, a4);
+        return wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7);
       } catch (e) {
         stackRestore(sp);
         if (e !== e + 0 && e !== 'longjmp') throw e;
@@ -8539,6 +10817,61 @@ var Module = (function () {
       var sp = stackSave();
       try {
         return wasmTable.get(index)(a1, a2, a3, a4, a5);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_didddddidi(index, a1, a2, a3, a4, a5, a6, a7, a8, a9) {
+      var sp = stackSave();
+      try {
+        return wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7, a8, a9);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_iiiddddid(index, a1, a2, a3, a4, a5, a6, a7, a8) {
+      var sp = stackSave();
+      try {
+        return wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7, a8);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_iiiiiiiiiiii(
+      index,
+      a1,
+      a2,
+      a3,
+      a4,
+      a5,
+      a6,
+      a7,
+      a8,
+      a9,
+      a10,
+      a11
+    ) {
+      var sp = stackSave();
+      try {
+        return wasmTable.get(index)(
+          a1,
+          a2,
+          a3,
+          a4,
+          a5,
+          a6,
+          a7,
+          a8,
+          a9,
+          a10,
+          a11
+        );
       } catch (e) {
         stackRestore(sp);
         if (e !== e + 0 && e !== 'longjmp') throw e;
@@ -8559,6 +10892,226 @@ var Module = (function () {
       var sp = stackSave();
       try {
         wasmTable.get(index)(a1, a2, a3, a4);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_vddiiiiiiiiiiiiiii(
+      index,
+      a1,
+      a2,
+      a3,
+      a4,
+      a5,
+      a6,
+      a7,
+      a8,
+      a9,
+      a10,
+      a11,
+      a12,
+      a13,
+      a14,
+      a15,
+      a16,
+      a17
+    ) {
+      var sp = stackSave();
+      try {
+        wasmTable.get(index)(
+          a1,
+          a2,
+          a3,
+          a4,
+          a5,
+          a6,
+          a7,
+          a8,
+          a9,
+          a10,
+          a11,
+          a12,
+          a13,
+          a14,
+          a15,
+          a16,
+          a17
+        );
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_vddiiiiiiiiiiiiiiiii(
+      index,
+      a1,
+      a2,
+      a3,
+      a4,
+      a5,
+      a6,
+      a7,
+      a8,
+      a9,
+      a10,
+      a11,
+      a12,
+      a13,
+      a14,
+      a15,
+      a16,
+      a17,
+      a18,
+      a19
+    ) {
+      var sp = stackSave();
+      try {
+        wasmTable.get(index)(
+          a1,
+          a2,
+          a3,
+          a4,
+          a5,
+          a6,
+          a7,
+          a8,
+          a9,
+          a10,
+          a11,
+          a12,
+          a13,
+          a14,
+          a15,
+          a16,
+          a17,
+          a18,
+          a19
+        );
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_vddiiiiiiiiiiiiiiiiiiii(
+      index,
+      a1,
+      a2,
+      a3,
+      a4,
+      a5,
+      a6,
+      a7,
+      a8,
+      a9,
+      a10,
+      a11,
+      a12,
+      a13,
+      a14,
+      a15,
+      a16,
+      a17,
+      a18,
+      a19,
+      a20,
+      a21,
+      a22
+    ) {
+      var sp = stackSave();
+      try {
+        wasmTable.get(index)(
+          a1,
+          a2,
+          a3,
+          a4,
+          a5,
+          a6,
+          a7,
+          a8,
+          a9,
+          a10,
+          a11,
+          a12,
+          a13,
+          a14,
+          a15,
+          a16,
+          a17,
+          a18,
+          a19,
+          a20,
+          a21,
+          a22
+        );
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_vddiiiiiiiiiiiiiiiiiiiiiiii(
+      index,
+      a1,
+      a2,
+      a3,
+      a4,
+      a5,
+      a6,
+      a7,
+      a8,
+      a9,
+      a10,
+      a11,
+      a12,
+      a13,
+      a14,
+      a15,
+      a16,
+      a17,
+      a18,
+      a19,
+      a20,
+      a21,
+      a22,
+      a23,
+      a24,
+      a25,
+      a26
+    ) {
+      var sp = stackSave();
+      try {
+        wasmTable.get(index)(
+          a1,
+          a2,
+          a3,
+          a4,
+          a5,
+          a6,
+          a7,
+          a8,
+          a9,
+          a10,
+          a11,
+          a12,
+          a13,
+          a14,
+          a15,
+          a16,
+          a17,
+          a18,
+          a19,
+          a20,
+          a21,
+          a22,
+          a23,
+          a24,
+          a25,
+          a26
+        );
       } catch (e) {
         stackRestore(sp);
         if (e !== e + 0 && e !== 'longjmp') throw e;
@@ -8692,51 +11245,6 @@ var Module = (function () {
       var sp = stackSave();
       try {
         wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7, a8, a9);
-      } catch (e) {
-        stackRestore(sp);
-        if (e !== e + 0 && e !== 'longjmp') throw e;
-        _setThrew(1, 0);
-      }
-    }
-    function invoke_iiiiiiiiiiii(
-      index,
-      a1,
-      a2,
-      a3,
-      a4,
-      a5,
-      a6,
-      a7,
-      a8,
-      a9,
-      a10,
-      a11
-    ) {
-      var sp = stackSave();
-      try {
-        return wasmTable.get(index)(
-          a1,
-          a2,
-          a3,
-          a4,
-          a5,
-          a6,
-          a7,
-          a8,
-          a9,
-          a10,
-          a11
-        );
-      } catch (e) {
-        stackRestore(sp);
-        if (e !== e + 0 && e !== 'longjmp') throw e;
-        _setThrew(1, 0);
-      }
-    }
-    function invoke_iiddd(index, a1, a2, a3, a4) {
-      var sp = stackSave();
-      try {
-        return wasmTable.get(index)(a1, a2, a3, a4);
       } catch (e) {
         stackRestore(sp);
         if (e !== e + 0 && e !== 'longjmp') throw e;
@@ -8918,16 +11426,6 @@ var Module = (function () {
         _setThrew(1, 0);
       }
     }
-    function invoke_iiddii(index, a1, a2, a3, a4, a5) {
-      var sp = stackSave();
-      try {
-        return wasmTable.get(index)(a1, a2, a3, a4, a5);
-      } catch (e) {
-        stackRestore(sp);
-        if (e !== e + 0 && e !== 'longjmp') throw e;
-        _setThrew(1, 0);
-      }
-    }
     function invoke_viiddiiiiiiii(
       index,
       a1,
@@ -8946,45 +11444,6 @@ var Module = (function () {
       var sp = stackSave();
       try {
         wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12);
-      } catch (e) {
-        stackRestore(sp);
-        if (e !== e + 0 && e !== 'longjmp') throw e;
-        _setThrew(1, 0);
-      }
-    }
-    function invoke_viidddddddiiii(
-      index,
-      a1,
-      a2,
-      a3,
-      a4,
-      a5,
-      a6,
-      a7,
-      a8,
-      a9,
-      a10,
-      a11,
-      a12,
-      a13
-    ) {
-      var sp = stackSave();
-      try {
-        wasmTable.get(index)(
-          a1,
-          a2,
-          a3,
-          a4,
-          a5,
-          a6,
-          a7,
-          a8,
-          a9,
-          a10,
-          a11,
-          a12,
-          a13
-        );
       } catch (e) {
         stackRestore(sp);
         if (e !== e + 0 && e !== 'longjmp') throw e;
@@ -9033,6 +11492,41 @@ var Module = (function () {
           a11,
           a12,
           a13
+        );
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_iiddddddiiii(
+      index,
+      a1,
+      a2,
+      a3,
+      a4,
+      a5,
+      a6,
+      a7,
+      a8,
+      a9,
+      a10,
+      a11
+    ) {
+      var sp = stackSave();
+      try {
+        return wasmTable.get(index)(
+          a1,
+          a2,
+          a3,
+          a4,
+          a5,
+          a6,
+          a7,
+          a8,
+          a9,
+          a10,
+          a11
         );
       } catch (e) {
         stackRestore(sp);
@@ -9399,6 +11893,24 @@ const getOcct = () => occt;
 
 onBoot(initOcct);
 
+const common = (a, b) => getOcct().common(a, b);
+
+const cut = (a, b) => getOcct().cut(a, b);
+
+const fromGraph = (graph) => {
+  const inputJson = JSON.stringify(graph);
+  const shape = getOcct().fromGraph(inputJson);
+  return shape;
+};
+
+const fromPolygons = (polygons) => {
+  const inputJson = JSON.stringify(polygons);
+  const shape = getOcct().fromPolygons(inputJson);
+  return shape;
+};
+
+const fuse = (a, b) => getOcct().fuse(a, b);
+
 // Note: This does not handle self-intersection properly.
 
 const offset = (paths, amount) => {
@@ -9408,4 +11920,16 @@ const offset = (paths, amount) => {
   return offsetPaths;
 };
 
-export { offset };
+const toGraph = (shape) => {
+  const outputJson = getOcct().toGraph(shape);
+  const graph = JSON.parse(outputJson);
+  return graph;
+};
+
+const toPolygons = (shape) => {
+  const outputJson = getOcct().toPolygons(shape);
+  const polygons = JSON.parse(outputJson);
+  return polygons;
+};
+
+export { common, cut, fromGraph, fromPolygons, fuse, initOcct, offset, toGraph, toPolygons };

@@ -11,8 +11,8 @@
     "lint": "eslint *.js",
     "lintfix": "eslint --fix *.js",
     "rollup": "rollup -c rollup_main.js",
-    "test": "ava",
-    "tests": "ava *.test.js"
+    "test": "ava --timeout=600s",
+    "tests": "ava --timeout=600s *.test.js"
   },
   "contributors": [
     {
@@ -23,6 +23,7 @@
   "keywords": [],
   "license": "MIT",
   "dependencies": {
+    "@jsxcad/algorithm-occt": "^0.0.79",
     "@jsxcad/algorithm-quantize": "^0.0.79",
     "@jsxcad/geometry-points": "^0.0.79",
     "@jsxcad/math-poly3": "^0.0.79",

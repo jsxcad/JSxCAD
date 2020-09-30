@@ -23,6 +23,7 @@
   "keywords": [],
   "license": "MIT",
   "dependencies": {
+    "@jsxcad/data-shape": "^0.0.79",
     "@jsxcad/sys": "^0.0.79"
   },
   "devDependencies": {
