@@ -48,18 +48,18 @@ test('toPolygons', (t) => {
       { loop: 11, next: 33, point: 5 },
     ],
     faces: [
-      { loops: [0] },
-      { loops: [1] },
-      { loops: [2] },
-      { loops: [3] },
-      { loops: [4] },
-      { loops: [5] },
-      { loops: [6] },
-      { loops: [7] },
-      { loops: [8] },
-      { loops: [9] },
-      { loops: [10] },
-      { loops: [11] },
+      { loop: 0 },
+      { loop: 1 },
+      { loop: 2 },
+      { loop: 3 },
+      { loop: 4 },
+      { loop: 5 },
+      { loop: 6 },
+      { loop: 7 },
+      { loop: 8 },
+      { loop: 9 },
+      { loop: 10 },
+      { loop: 11 },
     ],
     loops: [
       { edge: 2, face: 0 },
@@ -85,7 +85,6 @@ test('toPolygons', (t) => {
       [-0.5, -0.5, -0.5],
       [0.5, -0.5, -0.5],
     ],
-    version: '2',
   };
   const shape = fromGraph(graph);
   const polygons = toPolygons(shape);

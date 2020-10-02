@@ -4,16 +4,23 @@ import {
   fromSurface as fromSurfaceToBsp,
 } from '@jsxcad/geometry-bsp';
 
+import {
+  fromSolid as fromSolidToGraph,
+  difference as graphDifference,
+} from '@jsxcad/geometry-graph';
+
 import { cache } from '@jsxcad/cache';
 import { createNormalize3 } from '@jsxcad/algorithm-quantize';
 import { fromSurface as fromSurfaceToSolid } from '@jsxcad/geometry-solid';
 import { getAnySurfaces } from './getAnySurfaces.js';
+import { getGraphs } from './getGraphs.js';
 import { getPaths } from './getPaths.js';
 import { getSolids } from './getSolids.js';
 import { makeWatertight as makeWatertightSurface } from '@jsxcad/geometry-surface';
 import { difference as pathsDifference } from '@jsxcad/geometry-paths';
 import { rewrite } from './visit.js';
 import { difference as solidDifference } from '@jsxcad/geometry-solid-boolean';
+import { taggedGraph } from './taggedGraph.js';
 import { taggedPaths } from './taggedPaths.js';
 import { taggedSolid } from './taggedSolid.js';
 import { taggedSurface } from './taggedSurface.js';
@@ -22,6 +29,18 @@ const differenceImpl = (geometry, ...geometries) => {
   const op = (geometry, descend) => {
     const { tags } = geometry;
     switch (geometry.type) {
+      case 'graph': {
+        let differenced = geometry.graph;
+        for (const geometry of geometries) {
+          for (const { graph } of getGraphs(geometry)) {
+            differenced = graphDifference(differenced, graph);
+          }
+          for (const { solid } of getSolids(geometry)) {
+            differenced = graphDifference(differenced, fromSolidToGraph(solid));
+          }
+        }
+        return taggedGraph({ tags }, differenced);
+      }
       case 'solid': {
         const normalize = createNormalize3();
         const todo = [];

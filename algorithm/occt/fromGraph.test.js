@@ -1,154 +1,16 @@
 import { fromGraph } from './fromGraph.js';
 import { initOcct } from './occt.js';
 import test from 'ava';
-import { toPolygons } from './toPolygons.js';
+import { toGraph } from './toGraph.js';
 
 test.beforeEach(async (t) => {
   await initOcct();
 });
 
 test('fromGraph', (t) => {
-  const graph = {
-    edges: [
-      { loop: 0, next: 1, point: 0 },
-      { loop: 0, next: 2, point: 1 },
-      { loop: 0, next: 0, point: 2 },
-      { loop: 1, next: 4, point: 2 },
-      { loop: 1, next: 5, point: 3 },
-      { loop: 1, next: 3, point: 0 },
-      { loop: 2, next: 7, point: 4 },
-      { loop: 2, next: 8, point: 2 },
-      { loop: 2, next: 6, point: 1 },
-      { loop: 3, next: 10, point: 1 },
-      { loop: 3, next: 11, point: 5 },
-      { loop: 3, next: 9, point: 4 },
-      { loop: 4, next: 13, point: 1 },
-      { loop: 4, next: 14, point: 0 },
-      { loop: 4, next: 12, point: 6 },
-      { loop: 5, next: 16, point: 6 },
-      { loop: 5, next: 17, point: 5 },
-      { loop: 5, next: 15, point: 1 },
-      { loop: 6, next: 19, point: 0 },
-      { loop: 6, next: 20, point: 3 },
-      { loop: 6, next: 18, point: 7 },
-      { loop: 7, next: 22, point: 7 },
-      { loop: 7, next: 23, point: 6 },
-      { loop: 7, next: 21, point: 0 },
-      { loop: 8, next: 25, point: 3 },
-      { loop: 8, next: 26, point: 2 },
-      { loop: 8, next: 24, point: 4 },
-      { loop: 9, next: 28, point: 4 },
-      { loop: 9, next: 29, point: 7 },
-      { loop: 9, next: 27, point: 3 },
-      { loop: 10, next: 31, point: 5 },
-      { loop: 10, next: 32, point: 6 },
-      { loop: 10, next: 30, point: 7 },
-      { loop: 11, next: 34, point: 7 },
-      { loop: 11, next: 35, point: 4 },
-      { loop: 11, next: 33, point: 5 },
-    ],
-    faces: [
-      { loops: [0] },
-      { loops: [1] },
-      { loops: [2] },
-      { loops: [3] },
-      { loops: [4] },
-      { loops: [5] },
-      { loops: [6] },
-      { loops: [7] },
-      { loops: [8] },
-      { loops: [9] },
-      { loops: [10] },
-      { loops: [11] },
-    ],
-    loops: [
-      { edge: 2, face: 0 },
-      { edge: 5, face: 1 },
-      { edge: 8, face: 2 },
-      { edge: 11, face: 3 },
-      { edge: 14, face: 4 },
-      { edge: 17, face: 5 },
-      { edge: 20, face: 6 },
-      { edge: 23, face: 7 },
-      { edge: 26, face: 8 },
-      { edge: 29, face: 9 },
-      { edge: 32, face: 10 },
-      { edge: 35, face: 11 },
-    ],
-    points: [
-      [-0.5, 0.5, -0.5],
-      [-0.5, 0.5, 0.5],
-      [0.5, 0.5, 0.5],
-      [0.5, 0.5, -0.5],
-      [0.5, -0.5, 0.5],
-      [-0.5, -0.5, 0.5],
-      [-0.5, -0.5, -0.5],
-      [0.5, -0.5, -0.5],
-    ],
-    version: '2',
-  };
+  const graph =
+{"edges":[{"loop":0,"next":1,"point":0},{"loop":0,"next":2,"point":1},{"loop":0,"next":0,"point":2},{"loop":1,"next":4,"point":3,"twin":11},{"loop":1,"next":5,"point":4,"twin":27},{"loop":1,"next":6,"point":5,"twin":25},{"loop":1,"next":7,"point":6,"twin":19},{"loop":1,"next":3,"point":7,"twin":13},{"loop":2,"next":9,"point":8,"twin":36},{"loop":2,"next":10,"point":9},{"loop":2,"next":11,"point":10},{"loop":2,"next":12,"point":4,"twin":11},{"loop":2,"next":8,"point":3,"twin":17},{"loop":3,"next":14,"point":3,"twin":13},{"loop":3,"next":15,"point":7},{"loop":3,"next":16,"point":11},{"loop":3,"next":17,"point":12,"twin":37},{"loop":3,"next":13,"point":8,"twin":17},{"loop":4,"next":19,"point":11},{"loop":4,"next":20,"point":7,"twin":19},{"loop":4,"next":21,"point":6},{"loop":4,"next":18,"point":13},{"loop":5,"next":23,"point":14,"twin":45},{"loop":5,"next":24,"point":15},{"loop":5,"next":25,"point":13},{"loop":5,"next":26,"point":6,"twin":25},{"loop":5,"next":22,"point":5,"twin":31},{"loop":6,"next":28,"point":5,"twin":27},{"loop":6,"next":29,"point":4},{"loop":6,"next":30,"point":10},{"loop":6,"next":31,"point":16,"twin":46},{"loop":6,"next":27,"point":14,"twin":31},{"loop":7,"next":33,"point":2},{"loop":7,"next":34,"point":17},{"loop":7,"next":32,"point":0},{"loop":8,"next":36,"point":18,"twin":48},{"loop":8,"next":37,"point":9,"twin":36},{"loop":8,"next":38,"point":8,"twin":37},{"loop":8,"next":39,"point":12,"twin":56},{"loop":8,"next":35,"point":19,"twin":54},{"loop":9,"next":41,"point":2},{"loop":9,"next":42,"point":1},{"loop":9,"next":40,"point":17},{"loop":10,"next":44,"point":16,"twin":62},{"loop":10,"next":45,"point":20,"twin":66},{"loop":10,"next":46,"point":15,"twin":45},{"loop":10,"next":43,"point":14,"twin":46},{"loop":11,"next":48,"point":10},{"loop":11,"next":49,"point":9,"twin":48},{"loop":11,"next":50,"point":18},{"loop":11,"next":47,"point":21},{"loop":12,"next":52,"point":22,"twin":72},{"loop":12,"next":53,"point":23},{"loop":12,"next":54,"point":21},{"loop":12,"next":55,"point":18,"twin":54},{"loop":12,"next":51,"point":19,"twin":60},{"loop":13,"next":57,"point":19,"twin":56},{"loop":13,"next":58,"point":12},{"loop":13,"next":59,"point":11},{"loop":13,"next":60,"point":24,"twin":73},{"loop":13,"next":56,"point":22,"twin":60},{"loop":14,"next":62,"point":21},{"loop":14,"next":63,"point":20,"twin":62},{"loop":14,"next":64,"point":16},{"loop":14,"next":61,"point":10},{"loop":15,"next":66,"point":13},{"loop":15,"next":67,"point":15,"twin":66},{"loop":15,"next":68,"point":20},{"loop":15,"next":65,"point":21},{"loop":16,"next":70,"point":17},{"loop":16,"next":71,"point":1},{"loop":16,"next":69,"point":0},{"loop":17,"next":73,"point":23,"twin":72},{"loop":17,"next":74,"point":22,"twin":73},{"loop":17,"next":75,"point":24,"twin":81},{"loop":17,"next":72,"point":25,"twin":77},{"loop":18,"next":77,"point":21},{"loop":18,"next":78,"point":23,"twin":77},{"loop":18,"next":79,"point":25},{"loop":18,"next":76,"point":13},{"loop":19,"next":81,"point":13},{"loop":19,"next":82,"point":25,"twin":81},{"loop":19,"next":83,"point":24},{"loop":19,"next":80,"point":11}],"faces":[{"holes":[1],"loop":0},{"holes":[],"loop":2},{"holes":[],"loop":3},{"holes":[],"loop":4},{"holes":[],"loop":5},{"holes":[],"loop":6},{"holes":[8],"loop":7},{"holes":[10],"loop":9},{"holes":[],"loop":11},{"holes":[],"loop":12},{"holes":[],"loop":13},{"holes":[],"loop":14},{"holes":[],"loop":15},{"holes":[17],"loop":16},{"holes":[],"loop":18},{"holes":[],"loop":19}],"loops":[{"edge":2,"face":0},{"edge":7,"face":0},{"edge":12,"face":1},{"edge":17,"face":2},{"edge":21,"face":3},{"edge":26,"face":4},{"edge":31,"face":5},{"edge":34,"face":6},{"edge":39,"face":6},{"edge":42,"face":7},{"edge":46,"face":7},{"edge":50,"face":8},{"edge":55,"face":9},{"edge":60,"face":10},{"edge":64,"face":11},{"edge":68,"face":12},{"edge":71,"face":13},{"edge":75,"face":13},{"edge":79,"face":14},{"edge":83,"face":15}],"points":[[-1,-1,1],[1,-1,-1],[1,1,1],[0.27499999999999986,-0.27500000000000013,0.45],[0.45,-0.10000000000000003,0.45],[0.44999999999999996,-0.2750000000000002,0.2750000000000001],[0.44999999999999996,-0.4500000000000001,0.09999999999999998],[0.09999999999999992,-0.45000000000000007,0.45],[-0.2749999999999999,0.2750000000000001,0.45],[-0.09999999999999992,0.45000000000000007,0.45],[0.45000000000000007,0.45,0.45],[-0.4500000000000001,-0.44999999999999996,0.45],[-0.45000000000000007,0.09999999999999998,0.45],[0.44999999999999996,-0.4500000000000001,-0.45],[0.45000000000000007,0.2750000000000001,-0.2750000000000001],[0.45,0.10000000000000003,-0.45],[0.45000000000000007,0.45,-0.10000000000000003],[-1,1,-1],[-0.45,0.45000000000000007,0.10000000000000003],[-0.45,0.275,0.27499999999999997],[0.10000000000000003,0.45,-0.45],[-0.45,0.45000000000000007,-0.45],[-0.4500000000000001,-0.27499999999999997,-0.275],[-0.45000000000000007,-0.09999999999999998,-0.45],[-0.4500000000000001,-0.44999999999999996,-0.10000000000000003],[-0.10000000000000003,-0.45,-0.45]]};
   const shape = fromGraph(graph);
-  const polygons = toPolygons(shape);
-  t.deepEqual(polygons, [
-    [
-      [0.5, 0.5, 0.5],
-      [-0.5, 0.5, -0.5],
-      [-0.5, 0.5, 0.5],
-    ],
-    [
-      [-0.5, 0.5, -0.5],
-      [0.5, 0.5, 0.5],
-      [0.5, 0.5, -0.5],
-    ],
-    [
-      [-0.5, 0.5, 0.5],
-      [0.5, -0.5, 0.5],
-      [0.5, 0.5, 0.5],
-    ],
-    [
-      [0.5, -0.5, 0.5],
-      [-0.5, 0.5, 0.5],
-      [-0.5, -0.5, 0.5],
-    ],
-    [
-      [-0.5, -0.5, -0.5],
-      [-0.5, 0.5, 0.5],
-      [-0.5, 0.5, -0.5],
-    ],
-    [
-      [-0.5, 0.5, 0.5],
-      [-0.5, -0.5, -0.5],
-      [-0.5, -0.5, 0.5],
-    ],
-    [
-      [0.5, -0.5, -0.5],
-      [-0.5, 0.5, -0.5],
-      [0.5, 0.5, -0.5],
-    ],
-    [
-      [-0.5, 0.5, -0.5],
-      [0.5, -0.5, -0.5],
-      [-0.5, -0.5, -0.5],
-    ],
-    [
-      [0.5, -0.5, 0.5],
-      [0.5, 0.5, -0.5],
-      [0.5, 0.5, 0.5],
-    ],
-    [
-      [0.5, 0.5, -0.5],
-      [0.5, -0.5, 0.5],
-      [0.5, -0.5, -0.5],
-    ],
-    [
-      [0.5, -0.5, -0.5],
-      [-0.5, -0.5, 0.5],
-      [-0.5, -0.5, -0.5],
-    ],
-    [
-      [-0.5, -0.5, 0.5],
-      [0.5, -0.5, -0.5],
-      [0.5, -0.5, 0.5],
-    ],
-  ]);
+  const reconstitutedGraph = toGraph(shape);
+  t.deepEqual(graph, reconstitutedGraph);
 });

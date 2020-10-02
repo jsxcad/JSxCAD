@@ -5,14 +5,21 @@ import {
   intersection as solidIntersection,
 } from '@jsxcad/geometry-bsp';
 
+import {
+  fromSolid as fromSolidToGraph,
+  intersection as graphIntersection,
+} from '@jsxcad/geometry-graph';
+
 import { cache } from '@jsxcad/cache';
 import { createNormalize3 } from '@jsxcad/algorithm-quantize';
 import { fromSurface as fromSurfaceToSolid } from '@jsxcad/geometry-solid';
 import { getAnyNonVoidSurfaces } from './getAnyNonVoidSurfaces.js';
+import { getNonVoidGraphs } from './getNonVoidGraphs.js';
 import { getNonVoidSolids } from './getNonVoidSolids.js';
 import { makeWatertight as makeWatertightSurface } from '@jsxcad/geometry-surface';
 import { rewrite } from './visit.js';
-import { taggedLayers } from './taggedLayers.js';
+import { taggedGraph } from './taggedGraph.js';
+import { taggedGroup } from './taggedGroup.js';
 import { taggedPaths } from './taggedPaths.js';
 import { taggedSolid } from './taggedSolid.js';
 import { taggedSurface } from './taggedSurface.js';
@@ -22,6 +29,21 @@ const intersectionImpl = (geometry, ...geometries) => {
   const op = (geometry, descend) => {
     const { tags } = geometry;
     switch (geometry.type) {
+      case 'graph': {
+        let intersected = geometry.graph;
+        for (const geometry of geometries) {
+          for (const { graph } of getNonVoidGraphs(geometry)) {
+            intersected = graphIntersection(intersected, graph);
+          }
+          for (const { solid } of getNonVoidSolids(geometry)) {
+            intersected = graphIntersection(
+              intersected,
+              fromSolidToGraph(solid)
+            );
+          }
+        }
+        return taggedGraph({ tags }, intersected);
+      }
       case 'solid': {
         const normalize = createNormalize3();
         const otherGeometry = geometries[0];
@@ -40,10 +62,10 @@ const intersectionImpl = (geometry, ...geometries) => {
         if (intersections.length === 1) {
           return intersections[0];
         } else if (geometries.length === 1) {
-          return taggedLayers({}, ...intersections);
+          return taggedGroup({}, ...intersections);
         } else {
           return intersection(
-            taggedLayers({}, ...intersections),
+            taggedGroup({}, ...intersections),
             ...geometries.slice(1)
           );
         }
@@ -79,10 +101,10 @@ const intersectionImpl = (geometry, ...geometries) => {
         if (intersections.length === 1) {
           return intersections[0];
         } else if (geometries.length === 1) {
-          return taggedLayers({}, ...intersections);
+          return taggedGroup({}, ...intersections);
         } else {
           return intersection(
-            taggedLayers({}, ...intersections),
+            taggedGroup({}, ...intersections),
             ...geometries.slice(1)
           );
         }

@@ -1,5 +1,7 @@
-import { fromPolygons, toGraph, fromGraph, toPolygons } from './jsxcad-algorithm-occt.js';
+import { toGraph, cut, fromGraph, fromPolygons, common, toPolygons, fuse } from './jsxcad-algorithm-occt.js';
 import { transform as transform$1 } from './jsxcad-geometry-points.js';
+
+const difference = (a, b) => toGraph(cut(fromGraph(a), fromGraph(b)));
 
 const fromSolid = (solid) => {
   const polygons = [];
@@ -10,6 +12,8 @@ const fromSolid = (solid) => {
   const graph = toGraph(shape);
   return graph;
 };
+
+const intersection = (a, b) => toGraph(common(fromGraph(a), fromGraph(b)));
 
 const toSolid = (graph) => {
   const shape = fromGraph(graph);
@@ -27,4 +31,6 @@ const transform = (matrix, graph) => ({
   points: transform$1(matrix, graph.points),
 });
 
-export { fromSolid, toSolid, transform };
+const union = (a, b) => toGraph(fuse(fromGraph(a), fromGraph(b)));
+
+export { difference, fromSolid, intersection, toSolid, transform, union };

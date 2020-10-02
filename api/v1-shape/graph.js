@@ -1,11 +1,17 @@
-import { getSolids, taggedGraph, taggedGroup } from '@jsxcad/geometry-tagged';
+import { fromSolid, toSolid as toSolidFromGraph } from '@jsxcad/geometry-graph';
+import {
+  getGraphs,
+  getSolids,
+  taggedGraph,
+  taggedGroup,
+  taggedSolid,
+} from '@jsxcad/geometry-tagged';
 
 import Shape from './Shape.js';
-import { fromSolid } from '@jsxcad/geometry-graph';
 
 // FIX: Remove after graphs are properly integrated.
 
-export const graph = (shape) => {
+export const toGraph = (shape) => {
   const graphs = [];
   for (const { tags, solid } of getSolids(shape.toTransformedGeometry())) {
     graphs.push(taggedGraph({ tags }, fromSolid(solid)));
@@ -13,7 +19,20 @@ export const graph = (shape) => {
   return Shape.fromGeometry(taggedGroup({}, ...graphs));
 };
 
-const graphMethod = function () {
-  return graph(this);
+const toGraphMethod = function () {
+  return toGraph(this);
 };
-Shape.prototype.graph = graphMethod;
+Shape.prototype.toGraph = toGraphMethod;
+
+export const toSolid = (shape) => {
+  const solids = [];
+  for (const { tags, graph } of getGraphs(shape.toTransformedGeometry())) {
+    solids.push(taggedSolid({ tags }, toSolidFromGraph(graph)));
+  }
+  return Shape.fromGeometry(taggedGroup({}, ...solids));
+};
+
+const toSolidMethod = function () {
+  return toSolid(this);
+};
+Shape.prototype.toSolid = toSolidMethod;
