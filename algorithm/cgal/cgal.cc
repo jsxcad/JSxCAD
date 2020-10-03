@@ -1,7 +1,5 @@
 #include <emscripten/bind.h>
 
-#include "json11.hpp"
-
 #include <array>
 
 #include <CGAL/Simple_cartesian.h>

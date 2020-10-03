@@ -5,7 +5,7 @@ export const fromSolid = (solid) => {
   for (const surface of solid) {
     polygons.push(...surface);
   }
-  const surfaceMesh = fromPolygonToSurfaceMesh(polygons);
+  const surfaceMesh = fromPolygonsToSurfaceMesh(polygons);
   const graph = fromSurfaceMeshToGraph(shape);
   return graph;
 };
