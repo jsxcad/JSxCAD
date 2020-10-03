@@ -1,9 +1,9 @@
 import { fromSolid } from './fromSolid.js';
-import { initOcct } from '@jsxcad/algorithm-occt';
+import { initCgal } from '@jsxcad/algorithm-cgal';
 import test from 'ava';
 
 test.beforeEach(async (t) => {
-  await initOcct();
+  await initCgal();
 });
 
 test('fromSolid', (t) => {

@@ -12,11 +12,8 @@ export const fromPolygonsToSurfaceMesh = (jsPolygons) => {
       c.addTriple(triples, x, y, z);
       c.Polygon__push_back(polygon, index++);
     }
-    console.log(`QQ/polygon: ${polygon.size()}`);
     polygons.push_back(polygon);
   }
-console.log(`QQ/points: ${triples.size()}`);
-console.log(`QQ/polygons: ${polygons.size()}`);
   const surfaceMesh = c.FromPolygonSoupToSurfaceMesh(triples, polygons);
   return surfaceMesh;
 };
