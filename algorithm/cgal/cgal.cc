@@ -27,7 +27,8 @@ typedef Surface_mesh::Halfedge_index Halfedge_index;
 typedef Surface_mesh::Face_index Face_index;
 typedef Surface_mesh::Vertex_index Vertex_index;
 
-typedef std::array<Kernel::FT, 3> Custom_point;
+typedef std::array<Kernel::FT, 3> Triple;
+typedef std::vector<Triple> Triples;
 
 typedef std::vector<std::size_t> Polygon;
 
@@ -35,37 +36,19 @@ void Polygon__push_back(Polygon* polygon, std::size_t index) {
   polygon->push_back(index);
 }
 
-#if 0
-class Polygon : public std::vector<int> {
- public:
-  Polygon(int a) {
-    push_back(a);
-  }
-
-  Polygon(int a, int b) {
-    push_back(a);
-    push_back(b);
-  }
-
-  void push_back(int value) {
-    std::vector<int>::push_back(value);
-  }
-};
-#endif
-
 typedef std::vector<Polygon> Polygons;
 
-struct Array_traits
+struct Triple_array_traits
 {
   struct Equal_3
   {
-    bool operator()(const Custom_point& p, const Custom_point& q) const {
+    bool operator()(const Triple& p, const Triple& q) const {
       return (p == q);
     }
   };
   struct Less_xyz_3
   {
-    bool operator()(const Custom_point& p, const Custom_point& q) const {
+    bool operator()(const Triple& p, const Triple& q) const {
       return std::lexicographical_compare(p.begin(), p.end(), q.begin(), q.end());
     }
   };
@@ -74,38 +57,6 @@ struct Array_traits
 };
 
 #if 0
-// There really needs to be a better way to do this.
-const Polyhedron* FromPolygonSoupToPolyhedron(const std::string input_json) {
-  std::vector<Custom_point> points;
-  std::vector<Polygon> polygons;
-
-  std::string error;
-  json11::Json input = json11::Json::parse(input_json, error); 
-
-  const auto& json_points = input["points"];
-  const auto& json_polygons = input["polygons"];
-
-  for (const auto& json_point : json_points.array_items()) {
-    points.emplace_back(Custom_point{json_point[0].number_value(), json_point[1].number_value(), json_point[2].number_value()});
-  }
-
-  for (const auto& json_polygon : json_polygons.array_items()) {
-    std::vector<std::size_t> polygon;
-    for (const auto& json_index : json_polygon.array_items()) {
-      polygon.push_back(json_index.number_value());
-    }
-    polygons.push_back(polygon);
-  }
-
-  CGAL::Polygon_mesh_processing::repair_polygon_soup(points, polygons, CGAL::parameters::geom_traits(Array_traits()));
-  Polyhedron* mesh = new Polyhedron();
-  CGAL::Polygon_mesh_processing::orient_polygon_soup(points, polygons);
-  CGAL::Polygon_mesh_processing::polygon_soup_to_polygon_mesh(points, polygons, *mesh);
-
-  return mesh;
-}
-#endif
-
 struct Point_array_traits
 {
   struct Equal_3
@@ -122,16 +73,19 @@ struct Point_array_traits
   };
   Equal_3 equal_3_object() const { return Equal_3(); }
   Less_xyz_3 less_xyz_3_object() const { return Less_xyz_3(); }
-  // Kernel::LessXYZ_3 less_xyz_3_object() const { return Kernel::LessXYZ_3(); }
 };
+#endif
 
-Surface_mesh* FromPolygonSoupToSurfaceMesh(const Points& input_points, const Polygons& input_polygons) {
-  Points points = input_points;
+Surface_mesh* FromPolygonSoupToSurfaceMesh(const Triples& input_triples, const Polygons& input_polygons) {
+  Triples triples = input_triples;
   Polygons polygons = input_polygons;
-  CGAL::Polygon_mesh_processing::repair_polygon_soup(points, polygons, CGAL::parameters::geom_traits(Point_array_traits()));
+  assert(triples.size() == 36);
+  assert(polygons.size() == 12);
+  CGAL::Polygon_mesh_processing::repair_polygon_soup(triples, polygons, CGAL::parameters::geom_traits(Triple_array_traits()));
   Surface_mesh* mesh = new Surface_mesh();
-  CGAL::Polygon_mesh_processing::orient_polygon_soup(points, polygons);
-  CGAL::Polygon_mesh_processing::polygon_soup_to_polygon_mesh(points, polygons, *mesh);
+  CGAL::Polygon_mesh_processing::orient_polygon_soup(triples, polygons);
+  CGAL::Polygon_mesh_processing::polygon_soup_to_polygon_mesh(triples, polygons, *mesh);
+  assert(num_faces(*mesh) > 0);
   return mesh;
 }
 
@@ -179,7 +133,7 @@ bool testFn() {
   p.push_back(0); p.push_back(1); p.push_back(2); p.push_back(3);
   p.push_back(4); p.push_back(3); p.push_back(2); p.push_back(1);
   polygons.push_back(p);
-  CGAL::Polygon_mesh_processing::repair_polygon_soup(points, polygons, CGAL::parameters::geom_traits(Array_traits()));
+  CGAL::Polygon_mesh_processing::repair_polygon_soup(points, polygons, CGAL::parameters::geom_traits(Triple_array_traits()));
   CGAL::Surface_mesh<Kernel::Point_3> mesh;
   // Polyhedron_3 mesh;
   CGAL::Polygon_mesh_processing::orient_polygon_soup(points, polygons);
@@ -214,29 +168,88 @@ int testFn2() {
   return 1;
 }
 
+void Surface_mesh__EachFace(Surface_mesh* mesh, emscripten::val op) {
+  for (const auto& face_index : mesh->faces()) {
+    if (!mesh->is_removed(face_index)) {
+      op(std::size_t(face_index));
+    }
+  }
+}
+
+void addTriple(Triples* triples, Kernel::FT x, Kernel::FT y, Kernel::FT z) {
+  triples->emplace_back(Triple{ x, y, z });
+}
+
+std::size_t Surface_mesh__halfedge_to_target(Surface_mesh* mesh, std::size_t halfedge_index) {
+  return std::size_t(mesh->target(Halfedge_index(halfedge_index)));
+}
+
+std::size_t Surface_mesh__halfedge_to_face(Surface_mesh* mesh, std::size_t halfedge_index) {
+  return std::size_t(mesh->face(Halfedge_index(halfedge_index)));
+}
+
+std::size_t Surface_mesh__halfedge_to_next_halfedge(Surface_mesh* mesh, std::size_t halfedge_index) {
+  return std::size_t(mesh->next(Halfedge_index(halfedge_index)));
+}
+
+std::size_t Surface_mesh__halfedge_to_prev_halfedge(Surface_mesh* mesh, std::size_t halfedge_index) {
+  return std::size_t(mesh->prev(Halfedge_index(halfedge_index)));
+}
+
+std::size_t Surface_mesh__halfedge_to_opposite_halfedge(Surface_mesh* mesh, std::size_t halfedge_index) {
+  return std::size_t(mesh->opposite(Halfedge_index(halfedge_index)));
+}
+
+std::size_t Surface_mesh__vertex_to_halfedge(Surface_mesh* mesh, std::size_t vertex_index) {
+  return std::size_t(mesh->halfedge(Vertex_index(vertex_index)));
+}
+
+std::size_t Surface_mesh__face_to_halfedge(Surface_mesh* mesh, std::size_t face_index) {
+  return std::size_t(mesh->halfedge(Face_index(face_index)));
+}
+
+const Point& Surface_mesh__vertex_to_point(Surface_mesh* mesh, std::size_t vertex_index) {
+  return mesh->point(Vertex_index(vertex_index));
+}
+
+void Surface_mesh__collect_garbage(Surface_mesh* mesh) {
+  mesh->collect_garbage();
+}
+
 using emscripten::select_const;
 using emscripten::select_overload;
 
 EMSCRIPTEN_BINDINGS(module) {
+  emscripten::function("addTriple", &addTriple, emscripten::allow_raw_pointers());
+
+  emscripten::class_<Triples>("Triples")
+    .constructor<>()
+    .function("push_back", select_overload<void(const Triple&)>(&Triples::push_back))
+    .function("size", select_overload<size_t()const>(&Triples::size));
+
   emscripten::class_<Points>("Points")
     .constructor<>()
-    .function("push_back", select_overload<void(const Point&)>(&Points::push_back));
+    .function("push_back", select_overload<void(const Point&)>(&Points::push_back))
+    .function("size", select_overload<size_t()const>(&Points::size));
 
   emscripten::class_<Polygon>("Polygon")
-    .constructor<>();
+    .constructor<>()
+    .function("size", select_overload<size_t()const>(&Polygon::size));
 
   emscripten::function("Polygon__push_back", &Polygon__push_back, emscripten::allow_raw_pointers());
 
   emscripten::class_<Polygons>("Polygons")
     .constructor<>()
-    .function("push_back", select_overload<void(const Polygon&)>(&Polygons::push_back));
+    .function("push_back", select_overload<void(const Polygon&)>(&Polygons::push_back))
+    .function("size", select_overload<size_t()const>(&Polygons::size));
 
   emscripten::class_<Nef_polyhedron>("Nef_polyhedron")
     .constructor<>()
     .function("is_valid", &Nef_polyhedron::is_valid);
 
-  emscripten::class_<Face_index>("Face_index");
-  emscripten::class_<Vertex_index>("Vertex_index");
+  emscripten::class_<Face_index>("Face_index").constructor<std::size_t>();
+  emscripten::class_<Halfedge_index>("Halfedge_index").constructor<std::size_t>();
+  emscripten::class_<Vertex_index>("Vertex_index").constructor<std::size_t>();
 
   emscripten::class_<Surface_mesh>("Surface_mesh")
     .constructor<>()
@@ -244,7 +257,20 @@ EMSCRIPTEN_BINDINGS(module) {
     .function("add_edge_2", (Halfedge_index (Surface_mesh::*)(Vertex_index, Vertex_index))&Surface_mesh::add_edge)
     .function("add_face_3", (Face_index (Surface_mesh::*)(Vertex_index, Vertex_index, Vertex_index))&Surface_mesh::add_face)
     .function("add_face_4", (Face_index (Surface_mesh::*)(Vertex_index, Vertex_index, Vertex_index, Vertex_index))&Surface_mesh::add_face)
-    .function("is_valid", select_overload<bool(bool)const>(&Surface_mesh::is_valid));
+    .function("is_valid", select_overload<bool(bool)const>(&Surface_mesh::is_valid))
+    .function("has_garbage", &Surface_mesh::has_garbage);
+
+  emscripten::function("Surface_mesh__halfedge_to_target", &Surface_mesh__halfedge_to_target, emscripten::allow_raw_pointers());
+  emscripten::function("Surface_mesh__halfedge_to_face", &Surface_mesh__halfedge_to_face, emscripten::allow_raw_pointers());
+  emscripten::function("Surface_mesh__halfedge_to_next_halfedge", &Surface_mesh__halfedge_to_next_halfedge, emscripten::allow_raw_pointers());
+  emscripten::function("Surface_mesh__halfedge_to_prev_halfedge", &Surface_mesh__halfedge_to_prev_halfedge, emscripten::allow_raw_pointers());
+  emscripten::function("Surface_mesh__halfedge_to_opposite_halfedge", &Surface_mesh__halfedge_to_opposite_halfedge, emscripten::allow_raw_pointers());
+  emscripten::function("Surface_mesh__vertex_to_halfedge", &Surface_mesh__vertex_to_halfedge, emscripten::allow_raw_pointers());
+  emscripten::function("Surface_mesh__face_to_halfedge", &Surface_mesh__face_to_halfedge, emscripten::allow_raw_pointers());
+  emscripten::function("Surface_mesh__vertex_to_point", &Surface_mesh__vertex_to_point, emscripten::allow_raw_pointers());
+  emscripten::function("Surface_mesh__collect_garbage", &Surface_mesh__collect_garbage, emscripten::allow_raw_pointers());
+
+  emscripten::function("Surface_mesh__EachFace", &Surface_mesh__EachFace, emscripten::allow_raw_pointers());
 
   emscripten::class_<Polyhedron>("Polyhedron")
     .function("is_closed", &Polyhedron::is_closed)
