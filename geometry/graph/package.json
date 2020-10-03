@@ -23,7 +23,7 @@
   "keywords": [],
   "license": "MIT",
   "dependencies": {
-    "@jsxcad/algorithm-occt": "^0.0.79",
+    "@jsxcad/algorithm-cgal": "^0.0.79",
     "@jsxcad/algorithm-quantize": "^0.0.79",
     "@jsxcad/geometry-points": "^0.0.79",
     "@jsxcad/math-poly3": "^0.0.79",

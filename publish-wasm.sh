@@ -1,3 +1,3 @@
 #!/bin/bash
 
-cp algorithm/occt/occt.wasm wasm/occt.wasm
+cp algorithm/cgal/cgal.wasm wasm/cgal.wasm

@@ -1,11 +1,11 @@
-import { fromPolygons, toGraph } from '@jsxcad/algorithm-occt';
+import { fromPolygonsToSurfaceMesh, fromSurfaceMeshToGraph } from '@jsxcad/algorithm-cgal';
 
 export const fromSolid = (solid) => {
   const polygons = [];
   for (const surface of solid) {
     polygons.push(...surface);
   }
-  const shape = fromPolygons(polygons);
-  const graph = toGraph(shape);
+  const surfaceMesh = fromPolygonToSurfaceMesh(polygons);
+  const graph = fromSurfaceMeshToGraph(shape);
   return graph;
 };
