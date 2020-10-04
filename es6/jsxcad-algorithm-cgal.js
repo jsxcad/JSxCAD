@@ -1,3 +1,256 @@
+import { onBoot } from './jsxcad-sys.js';
+import { fromPolygon } from './jsxcad-math-plane.js';
+
+// Copyright Joyent, Inc. and other Node contributors.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a
+// copy of this software and associated documentation files (the
+// "Software"), to deal in the Software without restriction, including
+// without limitation the rights to use, copy, modify, merge, publish,
+// distribute, sublicense, and/or sell copies of the Software, and to permit
+// persons to whom the Software is furnished to do so, subject to the
+// following conditions:
+//
+// The above copyright notice and this permission notice shall be included
+// in all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
+// NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+// DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+// OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+// USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+// resolves . and .. elements in a path array with directory names there
+// must be no slashes, empty elements, or device names (c:\) in the array
+// (so also no leading and trailing slashes - it does not distinguish
+// relative and absolute paths)
+function normalizeArray(parts, allowAboveRoot) {
+  // if the path tries to go above the root, `up` ends up > 0
+  var up = 0;
+  for (var i = parts.length - 1; i >= 0; i--) {
+    var last = parts[i];
+    if (last === '.') {
+      parts.splice(i, 1);
+    } else if (last === '..') {
+      parts.splice(i, 1);
+      up++;
+    } else if (up) {
+      parts.splice(i, 1);
+      up--;
+    }
+  }
+
+  // if the path is allowed to go above the root, restore leading ..s
+  if (allowAboveRoot) {
+    for (; up--; up) {
+      parts.unshift('..');
+    }
+  }
+
+  return parts;
+}
+
+// Split a filename into [root, dir, basename, ext], unix version
+// 'root' is just a slash, or nothing.
+var splitPathRe =
+    /^(\/?|)([\s\S]*?)((?:\.{1,2}|[^\/]+?|)(\.[^.\/]*|))(?:[\/]*)$/;
+var splitPath = function(filename) {
+  return splitPathRe.exec(filename).slice(1);
+};
+
+// path.resolve([from ...], to)
+// posix version
+function resolve() {
+  var resolvedPath = '',
+      resolvedAbsolute = false;
+
+  for (var i = arguments.length - 1; i >= -1 && !resolvedAbsolute; i--) {
+    var path = (i >= 0) ? arguments[i] : '/';
+
+    // Skip empty and invalid entries
+    if (typeof path !== 'string') {
+      throw new TypeError('Arguments to path.resolve must be strings');
+    } else if (!path) {
+      continue;
+    }
+
+    resolvedPath = path + '/' + resolvedPath;
+    resolvedAbsolute = path.charAt(0) === '/';
+  }
+
+  // At this point the path should be resolved to a full absolute path, but
+  // handle relative paths to be safe (might happen when process.cwd() fails)
+
+  // Normalize the path
+  resolvedPath = normalizeArray(filter(resolvedPath.split('/'), function(p) {
+    return !!p;
+  }), !resolvedAbsolute).join('/');
+
+  return ((resolvedAbsolute ? '/' : '') + resolvedPath) || '.';
+}
+// path.normalize(path)
+// posix version
+function normalize(path) {
+  var isPathAbsolute = isAbsolute(path),
+      trailingSlash = substr(path, -1) === '/';
+
+  // Normalize the path
+  path = normalizeArray(filter(path.split('/'), function(p) {
+    return !!p;
+  }), !isPathAbsolute).join('/');
+
+  if (!path && !isPathAbsolute) {
+    path = '.';
+  }
+  if (path && trailingSlash) {
+    path += '/';
+  }
+
+  return (isPathAbsolute ? '/' : '') + path;
+}
+// posix version
+function isAbsolute(path) {
+  return path.charAt(0) === '/';
+}
+
+// posix version
+function join() {
+  var paths = Array.prototype.slice.call(arguments, 0);
+  return normalize(filter(paths, function(p, index) {
+    if (typeof p !== 'string') {
+      throw new TypeError('Arguments to path.join must be strings');
+    }
+    return p;
+  }).join('/'));
+}
+
+
+// path.relative(from, to)
+// posix version
+function relative(from, to) {
+  from = resolve(from).substr(1);
+  to = resolve(to).substr(1);
+
+  function trim(arr) {
+    var start = 0;
+    for (; start < arr.length; start++) {
+      if (arr[start] !== '') break;
+    }
+
+    var end = arr.length - 1;
+    for (; end >= 0; end--) {
+      if (arr[end] !== '') break;
+    }
+
+    if (start > end) return [];
+    return arr.slice(start, end - start + 1);
+  }
+
+  var fromParts = trim(from.split('/'));
+  var toParts = trim(to.split('/'));
+
+  var length = Math.min(fromParts.length, toParts.length);
+  var samePartsLength = length;
+  for (var i = 0; i < length; i++) {
+    if (fromParts[i] !== toParts[i]) {
+      samePartsLength = i;
+      break;
+    }
+  }
+
+  var outputParts = [];
+  for (var i = samePartsLength; i < fromParts.length; i++) {
+    outputParts.push('..');
+  }
+
+  outputParts = outputParts.concat(toParts.slice(samePartsLength));
+
+  return outputParts.join('/');
+}
+
+var sep = '/';
+var delimiter = ':';
+
+function dirname(path) {
+  var result = splitPath(path),
+      root = result[0],
+      dir = result[1];
+
+  if (!root && !dir) {
+    // No dirname whatsoever
+    return '.';
+  }
+
+  if (dir) {
+    // It has a dirname, strip trailing slash
+    dir = dir.substr(0, dir.length - 1);
+  }
+
+  return root + dir;
+}
+
+function basename(path, ext) {
+  var f = splitPath(path)[2];
+  // TODO: make this comparison case-insensitive on windows?
+  if (ext && f.substr(-1 * ext.length) === ext) {
+    f = f.substr(0, f.length - ext.length);
+  }
+  return f;
+}
+
+
+function extname(path) {
+  return splitPath(path)[3];
+}
+var path = {
+  extname: extname,
+  basename: basename,
+  dirname: dirname,
+  sep: sep,
+  delimiter: delimiter,
+  relative: relative,
+  join: join,
+  isAbsolute: isAbsolute,
+  normalize: normalize,
+  resolve: resolve
+};
+function filter (xs, f) {
+    if (xs.filter) return xs.filter(f);
+    var res = [];
+    for (var i = 0; i < xs.length; i++) {
+        if (f(xs[i], i, xs)) res.push(xs[i]);
+    }
+    return res;
+}
+
+// String.prototype.substr - negative index don't work in IE8
+var substr = 'ab'.substr(-1) === 'b' ?
+    function (str, start, len) { return str.substr(start, len) } :
+    function (str, start, len) {
+        if (start < 0) start = str.length + start;
+        return str.substr(start, len);
+    }
+;
+
+var _require_path_ = /*#__PURE__*/Object.freeze({
+  __proto__: null,
+  resolve: resolve,
+  normalize: normalize,
+  isAbsolute: isAbsolute,
+  join: join,
+  relative: relative,
+  sep: sep,
+  delimiter: delimiter,
+  dirname: dirname,
+  basename: basename,
+  extname: extname,
+  'default': path
+});
+
+var _require_crypto_ = {};
+
 var Module = (function () {
   var _scriptDir =
     typeof document !== 'undefined' && document.currentScript
@@ -44,18 +297,18 @@ var Module = (function () {
       }
       return scriptDirectory + path;
     }
-    var read_, readAsync, readBinary, setWindowTitle;
+    var read_, readBinary;
     var nodeFS;
     var nodePath;
     if (ENVIRONMENT_IS_NODE) {
       if (ENVIRONMENT_IS_WORKER) {
-        scriptDirectory = require('path').dirname(scriptDirectory) + '/';
+        scriptDirectory = dirname(scriptDirectory) + '/';
       } else {
         scriptDirectory = __dirname + '/';
       }
       read_ = function shell_read(filename, binary) {
-        if (!nodeFS) nodeFS = require('fs');
-        if (!nodePath) nodePath = require('path');
+        if (!nodeFS) nodeFS = _require_crypto_;
+        if (!nodePath) nodePath = _require_path_;
         filename = nodePath['normalize'](filename);
         return nodeFS['readFileSync'](filename, binary ? null : 'utf8');
       };
@@ -147,25 +400,7 @@ var Module = (function () {
             return new Uint8Array(xhr.response);
           };
         }
-        readAsync = function readAsync(url, onload, onerror) {
-          var xhr = new XMLHttpRequest();
-          xhr.open('GET', url, true);
-          xhr.responseType = 'arraybuffer';
-          xhr.onload = function xhr_onload() {
-            if (xhr.status == 200 || (xhr.status == 0 && xhr.response)) {
-              onload(xhr.response);
-              return;
-            }
-            onerror();
-          };
-          xhr.onerror = onerror;
-          xhr.send(null);
-        };
       }
-      setWindowTitle = function (title) {
-        document.title = title;
-      };
-    } else {
     }
     var out = Module['print'] || console.log.bind(console);
     var err = Module['printErr'] || console.warn.bind(console);
@@ -183,10 +418,6 @@ var Module = (function () {
       if (!factor) factor = STACK_ALIGN;
       return Math.ceil(size / factor) * factor;
     }
-    var tempRet0 = 0;
-    var setTempRet0 = function (value) {
-      tempRet0 = value;
-    };
     var wasmBinary;
     if (Module['wasmBinary']) wasmBinary = Module['wasmBinary'];
     var noExitRuntime;
@@ -201,7 +432,6 @@ var Module = (function () {
       element: 'anyfunc',
     });
     var ABORT = false;
-    var EXITSTATUS = 0;
     function assert(condition, text) {
       if (!condition) {
         abort('Assertion failed: ' + text);
@@ -433,8 +663,6 @@ var Module = (function () {
     var __ATINIT__ = [];
     var __ATMAIN__ = [];
     var __ATPOSTRUN__ = [];
-    var runtimeInitialized = false;
-    var runtimeExited = false;
     function preRun() {
       if (Module['preRun']) {
         if (typeof Module['preRun'] == 'function')
@@ -446,7 +674,6 @@ var Module = (function () {
       callRuntimeCallbacks(__ATPRERUN__);
     }
     function initRuntime() {
-      runtimeInitialized = true;
       if (!Module['noFSInit'] && !FS.init.initialized) FS.init();
       TTY.init();
       callRuntimeCallbacks(__ATINIT__);
@@ -454,9 +681,6 @@ var Module = (function () {
     function preMain() {
       FS.ignorePermissions = false;
       callRuntimeCallbacks(__ATMAIN__);
-    }
-    function exitRuntime() {
-      runtimeExited = true;
     }
     function postRun() {
       if (Module['postRun']) {
@@ -479,11 +703,7 @@ var Module = (function () {
     var Math_floor = Math.floor;
     var Math_min = Math.min;
     var runDependencies = 0;
-    var runDependencyWatcher = null;
     var dependenciesFulfilled = null;
-    function getUniqueRunDependency(id) {
-      return id;
-    }
     function addRunDependency(id) {
       runDependencies++;
       if (Module['monitorRunDependencies']) {
@@ -496,10 +716,6 @@ var Module = (function () {
         Module['monitorRunDependencies'](runDependencies);
       }
       if (runDependencies == 0) {
-        if (runDependencyWatcher !== null) {
-          clearInterval(runDependencyWatcher);
-          runDependencyWatcher = null;
-        }
         if (dependenciesFulfilled) {
           var callback = dependenciesFulfilled;
           dependenciesFulfilled = null;
@@ -516,7 +732,6 @@ var Module = (function () {
       what += '';
       err(what);
       ABORT = true;
-      EXITSTATUS = 1;
       what = 'abort(' + what + '). Build with -s ASSERTIONS=1 for more info.';
       var e = new WebAssembly.RuntimeError(what);
       readyPromiseReject(e);
@@ -580,9 +795,9 @@ var Module = (function () {
       function receiveInstance(instance, module) {
         var exports = instance.exports;
         Module['asm'] = exports;
-        removeRunDependency('wasm-instantiate');
+        removeRunDependency();
       }
-      addRunDependency('wasm-instantiate');
+      addRunDependency();
       function receiveInstantiatedSource(output) {
         receiveInstance(output['instance']);
       }
@@ -768,19 +983,9 @@ var Module = (function () {
         return prev === 1;
       };
     }
-    var exceptionLast = 0;
-    function __ZSt18uncaught_exceptionv() {
-      return __ZSt18uncaught_exceptionv.uncaught_exceptions > 0;
-    }
     function ___cxa_throw(ptr, type, destructor) {
       var info = new ExceptionInfo(ptr);
       info.init(type, destructor);
-      exceptionLast = ptr;
-      if (!('uncaught_exception' in __ZSt18uncaught_exceptionv)) {
-        __ZSt18uncaught_exceptionv.uncaught_exceptions = 1;
-      } else {
-        __ZSt18uncaught_exceptionv.uncaught_exceptions++;
-      }
       throw ptr;
     }
     function setErrNo(value) {
@@ -2579,12 +2784,11 @@ var Module = (function () {
           };
         } else if (ENVIRONMENT_IS_NODE) {
           try {
-            var crypto_module = require('crypto');
+            var crypto_module = _require_crypto_;
             random_device = function () {
               return crypto_module['randomBytes'](1)[0];
             };
           } catch (e) {}
-        } else {
         }
         if (!random_device) {
           random_device = function () {
@@ -3077,7 +3281,6 @@ var Module = (function () {
         var fullname = name
           ? PATH_FS.resolve(PATH.join2(parent, name))
           : parent;
-        var dep = getUniqueRunDependency('cp ' + fullname);
         function processData(byteArray) {
           function finish(byteArray) {
             if (preFinish) preFinish();
@@ -3092,7 +3295,7 @@ var Module = (function () {
               );
             }
             if (onload) onload();
-            removeRunDependency(dep);
+            removeRunDependency();
           }
           var handled = false;
           Module['preloadPlugins'].forEach(function (plugin) {
@@ -3100,14 +3303,14 @@ var Module = (function () {
             if (plugin['canHandle'](fullname)) {
               plugin['handle'](byteArray, fullname, finish, function () {
                 if (onerror) onerror();
-                removeRunDependency(dep);
+                removeRunDependency();
               });
               handled = true;
             }
           });
           if (!handled) finish(byteArray);
         }
-        addRunDependency(dep);
+        addRunDependency();
         if (typeof url == 'string') {
           Browser.asyncLoad(
             url,
@@ -4612,7 +4815,6 @@ var Module = (function () {
       if (returns) {
         invokerFnBody +=
           'var ret = retType.fromWireType(rv);\n' + 'return ret;\n';
-      } else {
       }
       invokerFnBody += '}\n';
       args1.push(invokerFnBody);
@@ -5167,8 +5369,7 @@ var Module = (function () {
       abort('OOM');
     }
     function _emscripten_resize_heap(requestedSize) {
-      requestedSize = requestedSize >>> 0;
-      abortOnCannotGrowMemory(requestedSize);
+      abortOnCannotGrowMemory();
     }
     var ENV = {};
     function getExecutableName() {
@@ -5296,7 +5497,6 @@ var Module = (function () {
       }
     }
     function _setTempRet0($i) {
-      setTempRet0($i | 0);
     }
     function __isLeapYear(year) {
       return year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0);
@@ -5851,7 +6051,6 @@ var Module = (function () {
       if (!calledRun) dependenciesFulfilled = runCaller;
     };
     function run(args) {
-      args = args || arguments_;
       if (runDependencies > 0) {
         return;
       }
@@ -5885,10 +6084,7 @@ var Module = (function () {
       if (implicit && noExitRuntime && status === 0) {
         return;
       }
-      if (noExitRuntime) {
-      } else {
-        EXITSTATUS = status;
-        exitRuntime();
+      if (noExitRuntime) ; else {
         if (Module['onExit']) Module['onExit'](status);
         ABORT = true;
       }
@@ -5907,10 +6103,89 @@ var Module = (function () {
     return Module.ready;
   };
 })();
-if (typeof exports === 'object' && typeof module === 'object')
-  module.exports = Module;
+let _exports_ = {};
+const _module_ = {exports: _exports_};
+if (typeof _exports_ === 'object' && typeof _module_ === 'object')
+  _module_.exports = Module;
 else if (typeof define === 'function' && define['amd'])
   define([], function () {
     return Module;
   });
-else if (typeof exports === 'object') exports['Module'] = Module;
+else if (typeof _exports_ === 'object') _exports_['Module'] = Module;
+var Cgal = _module_.exports;
+
+let cgal;
+
+const initCgal = async () => {
+  if (cgal === undefined) {
+    cgal = await Cgal();
+  }
+};
+
+const getCgal = () => cgal;
+
+onBoot(initCgal);
+
+const fromPolygonsToSurfaceMesh = (jsPolygons) => {
+  const c = getCgal();
+  // FIX: Leaks.
+  const triples = new c.Triples();
+  const polygons = new c.Polygons();
+  let index = 0;
+  for (const jsPolygon of jsPolygons) {
+    const polygon = new c.Polygon();
+    for (const [x, y, z] of jsPolygon) {
+      c.addTriple(triples, x, y, z);
+      c.Polygon__push_back(polygon, index++);
+    }
+    polygons.push_back(polygon);
+  }
+  const surfaceMesh = c.FromPolygonSoupToSurfaceMesh(triples, polygons);
+  return surfaceMesh;
+};
+
+const fromSurfaceMeshToGraph = (mesh) => {
+  const c = getCgal();
+  if (mesh.has_garbage()) {
+    c.Surface_mesh__collect_garbage(mesh);
+  }
+  const graph = { edges: [], faces: [], loops: [], points: [] };
+  c.Surface_mesh__EachFace(mesh, (face) => {
+    const halfedge = c.Surface_mesh__face_to_halfedge(mesh, face);
+    graph.loops[face] = { edge: halfedge };
+    const start = halfedge;
+    let current = start;
+    const polygon = [];
+    do {
+      const next = c.Surface_mesh__halfedge_to_next_halfedge(mesh, current);
+      const opposite = c.Surface_mesh__halfedge_to_opposite_halfedge(
+        mesh,
+        current
+      );
+      const target = c.Surface_mesh__halfedge_to_target(mesh, current);
+      graph.edges[current] = {
+        point: target,
+        next,
+        loop: face,
+        twin: opposite,
+      };
+      if (graph.points[target] === undefined) {
+        const point = c.Surface_mesh__vertex_to_point(mesh, target);
+        const triple = [point.x(), point.y(), point.z()];
+        graph.points[target] = triple;
+      }
+      polygon.push(graph.points[target]);
+      current = next;
+    } while (current !== start);
+    graph.faces[face] = { loop: face, plane: fromPolygon(polygon) };
+  });
+  return graph;
+};
+
+const fromSurfaceMeshToNefPolyhedron = (surfaceMesh) => {
+  const c = getCgal();
+  const nefPolyhedron = c.FromSurfaceMeshToNefPolyhedron(surfaceMesh);
+  return nefPolyhedron;
+};
+
+export { fromPolygonsToSurfaceMesh, fromSurfaceMeshToGraph, fromSurfaceMeshToNefPolyhedron, initCgal };

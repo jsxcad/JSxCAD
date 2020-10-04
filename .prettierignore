@@ -1,5 +1,6 @@
 convert/notebook/toHtml.test.html
 convert/threejs/toThreejsPage.test.html
+algorithm/cgal/CGAL-*
 dist
 js-angusj-clipperjs-web
 molecule-full-expected.js

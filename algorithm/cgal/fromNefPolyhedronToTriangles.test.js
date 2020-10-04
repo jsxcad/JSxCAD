@@ -1,3 +1,4 @@
+import { fromNefPolyhedronToTriangles } from './fromNefPolyhedronToTriangles.js';
 import { fromPolygonsToSurfaceMesh } from './fromPolygonsToSurfaceMesh.js';
 import { fromSurfaceMeshToNefPolyhedron } from './fromSurfaceMeshToNefPolyhedron.js';
 import { initCgal } from './getCgal.js';
@@ -76,4 +77,67 @@ test('FromPolygonsToSurfaceMesh', (t) => {
   t.true(surfaceMesh.is_valid(false));
   const nefPolyhedron = fromSurfaceMeshToNefPolyhedron(surfaceMesh);
   t.true(nefPolyhedron.is_valid(false, 1));
+  const triangles = fromNefPolyhedronToTriangles(nefPolyhedron);
+  t.deepEqual(triangles, [
+    [
+      [-0.5, -0.5, -0.5],
+      [-0.5, 0.5, -0.5],
+      [0.5, -0.5, -0.5],
+    ],
+    [
+      [0.5, -0.5, -0.5],
+      [-0.5, 0.5, -0.5],
+      [0.5, 0.5, -0.5],
+    ],
+    [
+      [-0.5, 0.5, -0.5],
+      [-0.5, 0.5, 0.5],
+      [0.5, 0.5, -0.5],
+    ],
+    [
+      [0.5, 0.5, -0.5],
+      [-0.5, 0.5, 0.5],
+      [0.5, 0.5, 0.5],
+    ],
+    [
+      [-0.5, -0.5, -0.5],
+      [-0.5, -0.5, 0.5],
+      [-0.5, 0.5, -0.5],
+    ],
+    [
+      [-0.5, 0.5, -0.5],
+      [-0.5, -0.5, 0.5],
+      [-0.5, 0.5, 0.5],
+    ],
+    [
+      [-0.5, -0.5, -0.5],
+      [0.5, -0.5, -0.5],
+      [-0.5, -0.5, 0.5],
+    ],
+    [
+      [-0.5, -0.5, 0.5],
+      [0.5, -0.5, -0.5],
+      [0.5, -0.5, 0.5],
+    ],
+    [
+      [0.5, -0.5, -0.5],
+      [0.5, 0.5, -0.5],
+      [0.5, -0.5, 0.5],
+    ],
+    [
+      [0.5, -0.5, 0.5],
+      [0.5, 0.5, -0.5],
+      [0.5, 0.5, 0.5],
+    ],
+    [
+      [-0.5, -0.5, 0.5],
+      [0.5, -0.5, 0.5],
+      [-0.5, 0.5, 0.5],
+    ],
+    [
+      [-0.5, 0.5, 0.5],
+      [0.5, -0.5, 0.5],
+      [0.5, 0.5, 0.5],
+    ],
+  ]);
 });

@@ -74,8 +74,8 @@ export const eachFaceEdge = (graph, face, op) =>
 
 export const eachFaceLoop = (graph, face, op) => {
   const loop = getFaceNode(graph, face).loop;
-  op(loop, getLoopNode(graph, loop))
-}
+  op(loop, getLoopNode(graph, loop));
+};
 
 export const eachLoopEdge = (graph, loop, op) =>
   eachEdge(graph, getLoopNode(graph, loop).edge, op);

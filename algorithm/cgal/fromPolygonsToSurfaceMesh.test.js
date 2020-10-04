@@ -70,7 +70,7 @@ const box = [
   ],
 ];
 
-test('FromPolygonsToSurfaceMesh', t => {
+test('FromPolygonsToSurfaceMesh', (t) => {
   const surfaceMesh = fromPolygonsToSurfaceMesh(box);
   t.true(surfaceMesh.is_valid(false));
 });

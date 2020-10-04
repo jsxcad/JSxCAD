@@ -5,6 +5,7 @@
 #include <CGAL/Simple_cartesian.h>
 #include <CGAL/Bounded_kernel.h>
 #include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
+// #include <CGAL/Exact_predicates_exact_constructions_kernel.h>
 
 #include <CGAL/Nef_polyhedron_3.h>
 #include <CGAL/Polygon_mesh_processing/orientation.h>
@@ -13,10 +14,12 @@
 #include <CGAL/Polyhedron_3.h>
 #include <CGAL/Polyhedron_items_with_id_3.h>
 #include <CGAL/Surface_mesh.h>
+#include <CGAL/boost/graph/convert_nef_polyhedron_to_polygon_mesh.h>
 
 typedef CGAL::Exact_predicates_inexact_constructions_kernel Kernel;
+// typedef CGAL::Exact_predicates_exact_constructions_kernel Kernel;
 
-typedef CGAL::Nef_polyhedron_3<Kernel> Nef_polyhedron;
+typedef CGAL::Nef_polyhedron_3<Kernel, CGAL::SNC_indexed_items> Nef_polyhedron;
 typedef CGAL::Polyhedron_3<Kernel, CGAL::Polyhedron_items_with_id_3> Polyhedron;
 typedef Kernel::Point_3 Point;
 typedef std::vector<Point> Points;
@@ -54,26 +57,6 @@ struct Triple_array_traits
   Less_xyz_3 less_xyz_3_object() const { return Less_xyz_3(); }
 };
 
-#if 0
-struct Point_array_traits
-{
-  struct Equal_3
-  {
-    bool operator()(const Point& p, const Point& q) const {
-      return CGAL::compare_xyz(p, q);
-    }
-  };
-  struct Less_xyz_3
-  {
-    bool operator()(const Point& p, const Point& q) const {
-      return CGAL::lexicographically_xyz_smaller(p, q);
-    }
-  };
-  Equal_3 equal_3_object() const { return Equal_3(); }
-  Less_xyz_3 less_xyz_3_object() const { return Less_xyz_3(); }
-};
-#endif
-
 Surface_mesh* FromPolygonSoupToSurfaceMesh(const Triples& input_triples, const Polygons& input_polygons) {
   Triples triples = input_triples;
   Polygons polygons = input_polygons;
@@ -91,80 +74,26 @@ Nef_polyhedron* FromSurfaceMeshToNefPolyhedron(const Surface_mesh* surface_mesh)
   return new Nef_polyhedron(*surface_mesh);
 }
 
-bool testFn() {
-  // First, construct a polygon soup with some problems
-  std::vector<std::array<Kernel::FT, 3> > points;
-  std::vector<Polygon> polygons;
-  points.push_back(CGAL::make_array<Kernel::FT>(0,0,0));
-  points.push_back(CGAL::make_array<Kernel::FT>(1,0,0));
-  points.push_back(CGAL::make_array<Kernel::FT>(0,1,0));
-  points.push_back(CGAL::make_array<Kernel::FT>(-1,0,0));
-  points.push_back(CGAL::make_array<Kernel::FT>(0,-1,0));
-  points.push_back(CGAL::make_array<Kernel::FT>(0,1,0)); // duplicate point
-  points.push_back(CGAL::make_array<Kernel::FT>(0,-2,0)); // unused point
-  Polygon p;
-  p.push_back(0); p.push_back(1); p.push_back(2);
-  polygons.push_back(p);
-  // degenerate face
-  p.clear();
-  p.push_back(0); p.push_back(0); p.push_back(0);
-  polygons.push_back(p);
-  p.clear();
-  p.push_back(0); p.push_back(1); p.push_back(4);
-  polygons.push_back(p);
-  // duplicate face with different orientation
-  p.clear();
-  p.push_back(0); p.push_back(4); p.push_back(1);
-  polygons.push_back(p);
-  p.clear();
-  p.push_back(0); p.push_back(3); p.push_back(5);
-  polygons.push_back(p);
-  // degenerate face
-  p.clear();
-  p.push_back(0); p.push_back(3); p.push_back(0);
-  polygons.push_back(p);
-  p.clear();
-  p.push_back(0); p.push_back(3); p.push_back(4);
-  polygons.push_back(p);
-  // pinched and degenerate face
-  p.clear();
-  p.push_back(0); p.push_back(1); p.push_back(2); p.push_back(3);
-  p.push_back(4); p.push_back(3); p.push_back(2); p.push_back(1);
-  polygons.push_back(p);
-  CGAL::Polygon_mesh_processing::repair_polygon_soup(points, polygons, CGAL::parameters::geom_traits(Triple_array_traits()));
-  CGAL::Surface_mesh<Kernel::Point_3> mesh;
-  // Polyhedron_3 mesh;
-  CGAL::Polygon_mesh_processing::orient_polygon_soup(points, polygons);
-  CGAL::Polygon_mesh_processing::polygon_soup_to_polygon_mesh(points, polygons, mesh);
-  assert(num_vertices(mesh) == 5);
-  assert(num_faces(mesh) == 4);
-  assert(mesh.is_valid(false));
-
-  Nef_polyhedron nef(mesh);
-  assert(nef.is_valid());
-  return 1;
+void FromNefPolyhedronToTriangles(Nef_polyhedron* nef_polyhedron, emscripten::val emit) {
+  Points points;
+  Polygons polygons;
+  convert_nef_polyhedron_to_polygon_soup(*nef_polyhedron, points, polygons, true);
+  for (const auto& triangle : polygons) {
+    const auto& a = points[triangle[0]];
+    const auto& b = points[triangle[1]];
+    const auto& c = points[triangle[2]];
+    emit(a.x(), a.y(), a.z(),
+         b.x(), b.y(), b.z(),
+         c.x(), c.y(), c.z());
+  }
 }
 
-int testFn2() {
-  Surface_mesh mesh;
-  auto v0 = mesh.add_vertex(Kernel::Point_3(0, 0, 0));
-  auto v1 = mesh.add_vertex(Kernel::Point_3(1, 0, 0));
-  auto v2 = mesh.add_vertex(Kernel::Point_3(0, 1, 0));
-  auto v3 = mesh.add_vertex(Kernel::Point_3(1, 1, 1));
-
-  assert(mesh.add_face(v0, v1, v2) != Surface_mesh::null_face());
-  assert(mesh.add_face(v0, v3, v1) != Surface_mesh::null_face());
-  assert(mesh.add_face(v0, v2, v3) != Surface_mesh::null_face());
-  assert(mesh.add_face(v3, v2, v1) != Surface_mesh::null_face());
-
-  assert(num_vertices(mesh) == 4);
-  assert(num_faces(mesh) == 4);
-  assert(mesh.is_valid(false));
-
-  Nef_polyhedron nef(mesh);
-  assert(nef.is_valid());
-  return 1;
+Surface_mesh* FromNefPolyhedronToSurfaceMesh(Nef_polyhedron* nef_polyhedron) {
+  Surface_mesh* mesh = new Surface_mesh();
+  CGAL::convert_nef_polyhedron_to_polygon_mesh(*nef_polyhedron, *mesh);
+  return mesh;
 }
+
 
 void Surface_mesh__EachFace(Surface_mesh* mesh, emscripten::val op) {
   for (const auto& face_index : mesh->faces()) {
@@ -208,6 +137,44 @@ std::size_t Surface_mesh__face_to_halfedge(Surface_mesh* mesh, std::size_t face_
 
 const Point& Surface_mesh__vertex_to_point(Surface_mesh* mesh, std::size_t vertex_index) {
   return mesh->point(Vertex_index(vertex_index));
+}
+
+const std::size_t Surface_mesh__add_vertex(Surface_mesh* mesh, Kernel::FT x, Kernel::FT y, Kernel::FT z) {
+  std::size_t index(mesh->add_vertex(Point{x, y, z}));
+  assert(index == std::size_t(Vertex_index(index)));
+  return index;
+}
+
+const std::size_t Surface_mesh__add_face(Surface_mesh* mesh) {
+  std::size_t index(mesh->add_face());
+  assert(index == std::size_t(Face_index(index)));
+  return index;
+}
+
+const std::size_t Surface_mesh__add_edge(Surface_mesh* mesh) {
+  std::size_t index(mesh->add_edge());
+  assert(index == std::size_t(Halfedge_index(index)));
+  return index;
+}
+
+void Surface_mesh__set_edge_target(Surface_mesh* mesh, std::size_t edge, std::size_t target) {
+  mesh->set_target(Halfedge_index(edge), Vertex_index(target));
+}
+
+void Surface_mesh__set_edge_next(Surface_mesh* mesh, std::size_t edge, std::size_t next) {
+  mesh->set_next(Halfedge_index(edge), Halfedge_index(next));
+}
+
+void Surface_mesh__set_edge_face(Surface_mesh* mesh, std::size_t edge, std::size_t face) {
+  mesh->set_face(Halfedge_index(edge), Face_index(face));
+}
+
+void Surface_mesh__set_face_edge(Surface_mesh* mesh, std::size_t face, std::size_t edge) {
+  mesh->set_halfedge(Face_index(face), Halfedge_index(edge));
+}
+
+void Surface_mesh__set_vertex_edge(Surface_mesh* mesh, std::size_t face, std::size_t edge) {
+  mesh->set_halfedge(Vertex_index(face), Halfedge_index(edge));
 }
 
 void Surface_mesh__collect_garbage(Surface_mesh* mesh) {
@@ -256,7 +223,13 @@ EMSCRIPTEN_BINDINGS(module) {
     .function("add_face_3", (Face_index (Surface_mesh::*)(Vertex_index, Vertex_index, Vertex_index))&Surface_mesh::add_face)
     .function("add_face_4", (Face_index (Surface_mesh::*)(Vertex_index, Vertex_index, Vertex_index, Vertex_index))&Surface_mesh::add_face)
     .function("is_valid", select_overload<bool(bool)const>(&Surface_mesh::is_valid))
+    .function("number_of_vertices", &Surface_mesh::number_of_vertices)
+    .function("number_of_halfedges", &Surface_mesh::number_of_halfedges)
+    .function("number_of_edges", &Surface_mesh::number_of_edges)
+    .function("number_of_faces", &Surface_mesh::number_of_faces)
     .function("has_garbage", &Surface_mesh::has_garbage);
+
+  emscripten::function("Surface_mesh__EachFace", &Surface_mesh__EachFace, emscripten::allow_raw_pointers());
 
   emscripten::function("Surface_mesh__halfedge_to_target", &Surface_mesh__halfedge_to_target, emscripten::allow_raw_pointers());
   emscripten::function("Surface_mesh__halfedge_to_face", &Surface_mesh__halfedge_to_face, emscripten::allow_raw_pointers());
@@ -268,7 +241,14 @@ EMSCRIPTEN_BINDINGS(module) {
   emscripten::function("Surface_mesh__vertex_to_point", &Surface_mesh__vertex_to_point, emscripten::allow_raw_pointers());
   emscripten::function("Surface_mesh__collect_garbage", &Surface_mesh__collect_garbage, emscripten::allow_raw_pointers());
 
-  emscripten::function("Surface_mesh__EachFace", &Surface_mesh__EachFace, emscripten::allow_raw_pointers());
+  emscripten::function("Surface_mesh__add_vertex", &Surface_mesh__add_vertex, emscripten::allow_raw_pointers());
+  emscripten::function("Surface_mesh__add_face", &Surface_mesh__add_face, emscripten::allow_raw_pointers());
+  emscripten::function("Surface_mesh__add_edge", &Surface_mesh__add_edge, emscripten::allow_raw_pointers());
+  emscripten::function("Surface_mesh__set_edge_target", &Surface_mesh__set_edge_target, emscripten::allow_raw_pointers());
+  emscripten::function("Surface_mesh__set_edge_next", &Surface_mesh__set_edge_next, emscripten::allow_raw_pointers());
+  emscripten::function("Surface_mesh__set_edge_face", &Surface_mesh__set_edge_face, emscripten::allow_raw_pointers());
+  emscripten::function("Surface_mesh__set_face_edge", &Surface_mesh__set_face_edge, emscripten::allow_raw_pointers());
+  emscripten::function("Surface_mesh__set_vertex_edge", &Surface_mesh__set_vertex_edge, emscripten::allow_raw_pointers());
 
   emscripten::class_<Polyhedron>("Polyhedron")
     .function("is_closed", &Polyhedron::is_closed)
@@ -286,7 +266,6 @@ EMSCRIPTEN_BINDINGS(module) {
 
   emscripten::function("FromPolygonSoupToSurfaceMesh", &FromPolygonSoupToSurfaceMesh, emscripten::allow_raw_pointers());
   emscripten::function("FromSurfaceMeshToNefPolyhedron", &FromSurfaceMeshToNefPolyhedron, emscripten::allow_raw_pointers());
-
-  emscripten::function("testFn", &testFn);
-  emscripten::function("testFn2", &testFn2);
+  emscripten::function("FromNefPolyhedronToTriangles", &FromNefPolyhedronToTriangles, emscripten::allow_raw_pointers());
+  emscripten::function("FromNefPolyhedronToSurfaceMesh", &FromNefPolyhedronToSurfaceMesh, emscripten::allow_raw_pointers());
 }
