@@ -196,8 +196,8 @@ var Module = (function () {
     }
     var wasmMemory;
     var wasmTable = new WebAssembly.Table({
-      initial: 843,
-      maximum: 843,
+      initial: 873,
+      maximum: 873,
       element: 'anyfunc',
     });
     var ABORT = false;
@@ -5752,8 +5752,8 @@ var Module = (function () {
     });
     var asmLibraryArg = {
       c: ___assert_fail,
-      d: ___cxa_allocate_exception,
-      e: ___cxa_throw,
+      e: ___cxa_allocate_exception,
+      d: ___cxa_throw,
       b: wasmTable,
       z: ___map_file,
       y: ___sys_munmap,
@@ -5767,10 +5767,10 @@ var Module = (function () {
       k: __embind_register_integer,
       i: __embind_register_memory_view,
       r: __embind_register_std_string,
-      o: __embind_register_std_wstring,
+      n: __embind_register_std_wstring,
       G: __embind_register_void,
       s: __emval_call,
-      n: __emval_decref,
+      o: __emval_decref,
       m: _abort,
       v: _emscripten_memcpy_big,
       w: _emscripten_resize_heap,

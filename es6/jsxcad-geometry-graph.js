@@ -1,9 +1,15 @@
-import { fromPolygonsToSurfaceMesh, fromSurfaceMeshToGraph } from './jsxcad-algorithm-cgal.js';
+import { fromNefPolyhedronToGraph, differenceOfNefPolyhedrons, fromGraphToNefPolyhedron, fromPolygonsToSurfaceMesh, fromSurfaceMeshToGraph, intersectionOfNefPolyhedrons, unionOfNefPolyhedrons } from './jsxcad-algorithm-cgal.js';
 import { toPlane, flip } from './jsxcad-math-poly3.js';
 import { dot } from './jsxcad-math-vec3.js';
 import { transform as transform$1 } from './jsxcad-geometry-points.js';
 
-const difference = (a, b) => a;
+const difference = (a, b) =>
+  fromNefPolyhedronToGraph(
+    differenceOfNefPolyhedrons(
+      fromGraphToNefPolyhedron(b),
+      fromGraphToNefPolyhedron(a)
+    )
+  );
 
 const fromSolid = (solid) => {
   const polygons = [];
@@ -15,7 +21,13 @@ const fromSolid = (solid) => {
   return graph;
 };
 
-const intersection = (a, b) => a;
+const intersection = (a, b) =>
+  fromNefPolyhedronToGraph(
+    intersectionOfNefPolyhedrons(
+      fromGraphToNefPolyhedron(b),
+      fromGraphToNefPolyhedron(a)
+    )
+  );
 
 const eachEdge = (graph, start, op) => {
   if (start === -1) {
@@ -851,6 +863,12 @@ const transform = (matrix, graph) => ({
   points: transform$1(matrix, graph.points),
 });
 
-const union = (a, b) => a;
+const union = (a, b) =>
+  fromNefPolyhedronToGraph(
+    unionOfNefPolyhedrons(
+      fromGraphToNefPolyhedron(b),
+      fromGraphToNefPolyhedron(a)
+    )
+  );
 
 export { difference, fromSolid, intersection, toSolid, transform, union };

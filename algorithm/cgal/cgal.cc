@@ -60,13 +60,10 @@ struct Triple_array_traits
 Surface_mesh* FromPolygonSoupToSurfaceMesh(const Triples& input_triples, const Polygons& input_polygons) {
   Triples triples = input_triples;
   Polygons polygons = input_polygons;
-  assert(triples.size() == 36);
-  assert(polygons.size() == 12);
   CGAL::Polygon_mesh_processing::repair_polygon_soup(triples, polygons, CGAL::parameters::geom_traits(Triple_array_traits()));
   Surface_mesh* mesh = new Surface_mesh();
   CGAL::Polygon_mesh_processing::orient_polygon_soup(triples, polygons);
   CGAL::Polygon_mesh_processing::polygon_soup_to_polygon_mesh(triples, polygons, *mesh);
-  assert(num_faces(*mesh) > 0);
   return mesh;
 }
 
@@ -181,6 +178,18 @@ void Surface_mesh__collect_garbage(Surface_mesh* mesh) {
   mesh->collect_garbage();
 }
 
+Nef_polyhedron* DifferenceOfNefPolyhedrons(Nef_polyhedron* a, Nef_polyhedron* b) {
+  return new Nef_polyhedron(*a - *b);
+}
+
+Nef_polyhedron* IntersectionOfNefPolyhedrons(Nef_polyhedron* a, Nef_polyhedron* b) {
+  return new Nef_polyhedron(*a * *b);
+}
+
+Nef_polyhedron* UnionOfNefPolyhedrons(Nef_polyhedron* a, Nef_polyhedron* b) {
+  return new Nef_polyhedron(*a + *b);
+}
+
 using emscripten::select_const;
 using emscripten::select_overload;
 
@@ -268,4 +277,8 @@ EMSCRIPTEN_BINDINGS(module) {
   emscripten::function("FromSurfaceMeshToNefPolyhedron", &FromSurfaceMeshToNefPolyhedron, emscripten::allow_raw_pointers());
   emscripten::function("FromNefPolyhedronToTriangles", &FromNefPolyhedronToTriangles, emscripten::allow_raw_pointers());
   emscripten::function("FromNefPolyhedronToSurfaceMesh", &FromNefPolyhedronToSurfaceMesh, emscripten::allow_raw_pointers());
+
+  emscripten::function("DifferenceOfNefPolyhedrons", &DifferenceOfNefPolyhedrons, emscripten::allow_raw_pointers());
+  emscripten::function("IntersectionOfNefPolyhedrons", &IntersectionOfNefPolyhedrons, emscripten::allow_raw_pointers());
+  emscripten::function("UnionOfNefPolyhedrons", &UnionOfNefPolyhedrons, emscripten::allow_raw_pointers());
 }

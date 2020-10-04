@@ -1,7 +1,6 @@
 import { fromGraphToNefPolyhedron } from './fromGraphToNefPolyhedron.js';
 import { fromNefPolyhedronToGraph } from './fromNefPolyhedronToGraph.js';
 import { initCgal } from './getCgal.js';
-
 import test from 'ava';
 
 test.beforeEach(async (t) => {
