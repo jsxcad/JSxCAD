@@ -7,7 +7,7 @@ import {
 export const difference = (a, b) =>
   fromNefPolyhedronToGraph(
     differenceOfNefPolyhedrons(
-      fromGraphToNefPolyhedron(b),
-      fromGraphToNefPolyhedron(a)
+      fromGraphToNefPolyhedron(a),
+      fromGraphToNefPolyhedron(b)
     )
   );

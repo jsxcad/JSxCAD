@@ -2,22 +2,29 @@
 
 #include <array>
 
+#include <CGAL/MP_Float.h>
+#include <CGAL/Quotient.h>
 #include <CGAL/Simple_cartesian.h>
 #include <CGAL/Bounded_kernel.h>
-#include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
-// #include <CGAL/Exact_predicates_exact_constructions_kernel.h>
-
+// #include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
+#include <CGAL/Exact_predicates_exact_constructions_kernel.h>
 #include <CGAL/Nef_polyhedron_3.h>
 #include <CGAL/Polygon_mesh_processing/orientation.h>
 #include <CGAL/Polygon_mesh_processing/polygon_soup_to_polygon_mesh.h>
 #include <CGAL/Polygon_mesh_processing/repair_polygon_soup.h>
+#include <CGAL/Polygon_mesh_processing/triangulate_faces.h>
 #include <CGAL/Polyhedron_3.h>
 #include <CGAL/Polyhedron_items_with_id_3.h>
 #include <CGAL/Surface_mesh.h>
 #include <CGAL/boost/graph/convert_nef_polyhedron_to_polygon_mesh.h>
 
-typedef CGAL::Exact_predicates_inexact_constructions_kernel Kernel;
+// typedef CGAL::Cartesian<double> Kernel; // Doesn't work.
+
+typedef CGAL::Simple_cartesian<CGAL::Gmpq> Kernel;
+
+// typedef CGAL::Exact_predicates_inexact_constructions_kernel Kernel;
 // typedef CGAL::Exact_predicates_exact_constructions_kernel Kernel;
+// typedef CGAL::Simple_cartesian<CGAL::Quotient<CGAL::MP_Float>> Kernel; // Works, but very slowly.
 
 typedef CGAL::Nef_polyhedron_3<Kernel, CGAL::SNC_indexed_items> Nef_polyhedron;
 typedef CGAL::Polyhedron_3<Kernel, CGAL::Polyhedron_items_with_id_3> Polyhedron;
@@ -64,6 +71,7 @@ Surface_mesh* FromPolygonSoupToSurfaceMesh(const Triples& input_triples, const P
   Surface_mesh* mesh = new Surface_mesh();
   CGAL::Polygon_mesh_processing::orient_polygon_soup(triples, polygons);
   CGAL::Polygon_mesh_processing::polygon_soup_to_polygon_mesh(triples, polygons, *mesh);
+  assert(CGAL::Polygon_mesh_processing::triangulate_faces(*mesh) == true);
   return mesh;
 }
 
@@ -79,15 +87,16 @@ void FromNefPolyhedronToTriangles(Nef_polyhedron* nef_polyhedron, emscripten::va
     const auto& a = points[triangle[0]];
     const auto& b = points[triangle[1]];
     const auto& c = points[triangle[2]];
-    emit(a.x(), a.y(), a.z(),
-         b.x(), b.y(), b.z(),
-         c.x(), c.y(), c.z());
+    emit(CGAL::to_double(a.x()), CGAL::to_double(a.y()), CGAL::to_double(a.z()),
+         CGAL::to_double(b.x()), CGAL::to_double(b.y()), CGAL::to_double(b.z()),
+         CGAL::to_double(c.x()), CGAL::to_double(c.y()), CGAL::to_double(c.z()));
   }
 }
 
 Surface_mesh* FromNefPolyhedronToSurfaceMesh(Nef_polyhedron* nef_polyhedron) {
   Surface_mesh* mesh = new Surface_mesh();
   CGAL::convert_nef_polyhedron_to_polygon_mesh(*nef_polyhedron, *mesh);
+  assert(CGAL::Polygon_mesh_processing::triangulate_faces(*mesh) == true);
   return mesh;
 }
 
@@ -100,7 +109,9 @@ void Surface_mesh__EachFace(Surface_mesh* mesh, emscripten::val op) {
   }
 }
 
-void addTriple(Triples* triples, Kernel::FT x, Kernel::FT y, Kernel::FT z) {
+// void addTriple(Triples* triples, Kernel::FT x, Kernel::FT y, Kernel::FT z) {
+
+void addTriple(Triples* triples, float x, float y, float z) {
   triples->emplace_back(Triple{ x, y, z });
 }
 
@@ -136,7 +147,7 @@ const Point& Surface_mesh__vertex_to_point(Surface_mesh* mesh, std::size_t verte
   return mesh->point(Vertex_index(vertex_index));
 }
 
-const std::size_t Surface_mesh__add_vertex(Surface_mesh* mesh, Kernel::FT x, Kernel::FT y, Kernel::FT z) {
+const std::size_t Surface_mesh__add_vertex(Surface_mesh* mesh, float x, float y, float z) {
   std::size_t index(mesh->add_vertex(Point{x, y, z}));
   assert(index == std::size_t(Vertex_index(index)));
   return index;
@@ -190,10 +201,16 @@ Nef_polyhedron* UnionOfNefPolyhedrons(Nef_polyhedron* a, Nef_polyhedron* b) {
   return new Nef_polyhedron(*a + *b);
 }
 
+double FT__to_double(const Kernel::FT& ft) {
+  return CGAL::to_double(ft);
+}
+
 using emscripten::select_const;
 using emscripten::select_overload;
 
 EMSCRIPTEN_BINDINGS(module) {
+  emscripten::class_<Kernel::FT>("FT").constructor<>();
+
   emscripten::function("addTriple", &addTriple, emscripten::allow_raw_pointers());
 
   emscripten::class_<Triples>("Triples")
@@ -264,7 +281,7 @@ EMSCRIPTEN_BINDINGS(module) {
     .function("is_valid", &Polyhedron::is_valid);
 
   emscripten::class_<Point>("Point")
-    .constructor<double, double, double>()
+    .constructor<float, float, float>()
     .function("hx", &Point::hx)
     .function("hy", &Point::hy)
     .function("hz", &Point::hz)
@@ -281,4 +298,6 @@ EMSCRIPTEN_BINDINGS(module) {
   emscripten::function("DifferenceOfNefPolyhedrons", &DifferenceOfNefPolyhedrons, emscripten::allow_raw_pointers());
   emscripten::function("IntersectionOfNefPolyhedrons", &IntersectionOfNefPolyhedrons, emscripten::allow_raw_pointers());
   emscripten::function("UnionOfNefPolyhedrons", &UnionOfNefPolyhedrons, emscripten::allow_raw_pointers());
+
+  emscripten::function("FT__to_double", &FT__to_double, emscripten::allow_raw_pointers());
 }

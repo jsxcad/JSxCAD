@@ -6,8 +6,8 @@ import { transform as transform$1 } from './jsxcad-geometry-points.js';
 const difference = (a, b) =>
   fromNefPolyhedronToGraph(
     differenceOfNefPolyhedrons(
-      fromGraphToNefPolyhedron(b),
-      fromGraphToNefPolyhedron(a)
+      fromGraphToNefPolyhedron(a),
+      fromGraphToNefPolyhedron(b)
     )
   );
 

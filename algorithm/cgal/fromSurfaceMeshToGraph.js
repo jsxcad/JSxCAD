@@ -28,7 +28,11 @@ export const fromSurfaceMeshToGraph = (mesh) => {
       };
       if (graph.points[target] === undefined) {
         const point = c.Surface_mesh__vertex_to_point(mesh, target);
-        const triple = [point.x(), point.y(), point.z()];
+        const triple = [
+          c.FT__to_double(point.x()),
+          c.FT__to_double(point.y()),
+          c.FT__to_double(point.z()),
+        ];
         graph.points[target] = triple;
       }
       polygon.push(graph.points[target]);

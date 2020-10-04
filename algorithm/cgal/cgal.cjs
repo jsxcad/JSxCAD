@@ -196,8 +196,8 @@ var Module = (function () {
     }
     var wasmMemory;
     var wasmTable = new WebAssembly.Table({
-      initial: 873,
-      maximum: 873,
+      initial: 798,
+      maximum: 798,
       element: 'anyfunc',
     });
     var ABORT = false;
@@ -395,6 +395,12 @@ var Module = (function () {
       if (!dontAddNull) HEAP8[buffer >> 0] = 0;
     }
     var WASM_PAGE_SIZE = 65536;
+    function alignUp(x, multiple) {
+      if (x % multiple > 0) {
+        x += multiple - (x % multiple);
+      }
+      return x;
+    }
     var buffer,
       HEAP8,
       HEAPU8,
@@ -421,7 +427,7 @@ var Module = (function () {
     } else {
       wasmMemory = new WebAssembly.Memory({
         initial: INITIAL_INITIAL_MEMORY / WASM_PAGE_SIZE,
-        maximum: INITIAL_INITIAL_MEMORY / WASM_PAGE_SIZE,
+        maximum: 2147483648 / WASM_PAGE_SIZE,
       });
     }
     if (wasmMemory) {
@@ -714,6 +720,10 @@ var Module = (function () {
     };
     function ___cxa_allocate_exception(size) {
       return _malloc(size + ExceptionInfoAttrs.SIZE) + ExceptionInfoAttrs.SIZE;
+    }
+    function _atexit(func, arg) {}
+    function ___cxa_thread_atexit(a0, a1) {
+      return _atexit(a0, a1);
     }
     function ExceptionInfo(excPtr) {
       this.excPtr = excPtr;
@@ -1303,6 +1313,9 @@ var Module = (function () {
           return size;
         },
         write: function (stream, buffer, offset, length, position, canOwn) {
+          if (buffer.buffer === HEAP8.buffer) {
+            canOwn = false;
+          }
           if (!length) return 0;
           var node = stream.node;
           node.timestamp = Date.now();
@@ -5163,12 +5176,43 @@ var Module = (function () {
     function _emscripten_memcpy_big(dest, src, num) {
       HEAPU8.copyWithin(dest, src, src + num);
     }
-    function abortOnCannotGrowMemory(requestedSize) {
-      abort('OOM');
+    function _emscripten_get_heap_size() {
+      return HEAPU8.length;
+    }
+    function emscripten_realloc_buffer(size) {
+      try {
+        wasmMemory.grow((size - buffer.byteLength + 65535) >>> 16);
+        updateGlobalBufferAndViews(wasmMemory.buffer);
+        return 1;
+      } catch (e) {}
     }
     function _emscripten_resize_heap(requestedSize) {
       requestedSize = requestedSize >>> 0;
-      abortOnCannotGrowMemory(requestedSize);
+      var oldSize = _emscripten_get_heap_size();
+      var maxHeapSize = 2147483648;
+      if (requestedSize > maxHeapSize) {
+        return false;
+      }
+      var minHeapSize = 16777216;
+      for (var cutDown = 1; cutDown <= 4; cutDown *= 2) {
+        var overGrownHeapSize = oldSize * (1 + 0.2 / cutDown);
+        overGrownHeapSize = Math.min(
+          overGrownHeapSize,
+          requestedSize + 100663296
+        );
+        var newSize = Math.min(
+          maxHeapSize,
+          alignUp(
+            Math.max(minHeapSize, requestedSize, overGrownHeapSize),
+            65536
+          )
+        );
+        var replacement = emscripten_realloc_buffer(newSize);
+        if (replacement) {
+          return true;
+        }
+      }
+      return false;
     }
     var ENV = {};
     function getExecutableName() {
@@ -5294,6 +5338,133 @@ var Module = (function () {
           abort(e);
         return e.errno;
       }
+    }
+    var ERRNO_CODES = {
+      EPERM: 63,
+      ENOENT: 44,
+      ESRCH: 71,
+      EINTR: 27,
+      EIO: 29,
+      ENXIO: 60,
+      E2BIG: 1,
+      ENOEXEC: 45,
+      EBADF: 8,
+      ECHILD: 12,
+      EAGAIN: 6,
+      EWOULDBLOCK: 6,
+      ENOMEM: 48,
+      EACCES: 2,
+      EFAULT: 21,
+      ENOTBLK: 105,
+      EBUSY: 10,
+      EEXIST: 20,
+      EXDEV: 75,
+      ENODEV: 43,
+      ENOTDIR: 54,
+      EISDIR: 31,
+      EINVAL: 28,
+      ENFILE: 41,
+      EMFILE: 33,
+      ENOTTY: 59,
+      ETXTBSY: 74,
+      EFBIG: 22,
+      ENOSPC: 51,
+      ESPIPE: 70,
+      EROFS: 69,
+      EMLINK: 34,
+      EPIPE: 64,
+      EDOM: 18,
+      ERANGE: 68,
+      ENOMSG: 49,
+      EIDRM: 24,
+      ECHRNG: 106,
+      EL2NSYNC: 156,
+      EL3HLT: 107,
+      EL3RST: 108,
+      ELNRNG: 109,
+      EUNATCH: 110,
+      ENOCSI: 111,
+      EL2HLT: 112,
+      EDEADLK: 16,
+      ENOLCK: 46,
+      EBADE: 113,
+      EBADR: 114,
+      EXFULL: 115,
+      ENOANO: 104,
+      EBADRQC: 103,
+      EBADSLT: 102,
+      EDEADLOCK: 16,
+      EBFONT: 101,
+      ENOSTR: 100,
+      ENODATA: 116,
+      ETIME: 117,
+      ENOSR: 118,
+      ENONET: 119,
+      ENOPKG: 120,
+      EREMOTE: 121,
+      ENOLINK: 47,
+      EADV: 122,
+      ESRMNT: 123,
+      ECOMM: 124,
+      EPROTO: 65,
+      EMULTIHOP: 36,
+      EDOTDOT: 125,
+      EBADMSG: 9,
+      ENOTUNIQ: 126,
+      EBADFD: 127,
+      EREMCHG: 128,
+      ELIBACC: 129,
+      ELIBBAD: 130,
+      ELIBSCN: 131,
+      ELIBMAX: 132,
+      ELIBEXEC: 133,
+      ENOSYS: 52,
+      ENOTEMPTY: 55,
+      ENAMETOOLONG: 37,
+      ELOOP: 32,
+      EOPNOTSUPP: 138,
+      EPFNOSUPPORT: 139,
+      ECONNRESET: 15,
+      ENOBUFS: 42,
+      EAFNOSUPPORT: 5,
+      EPROTOTYPE: 67,
+      ENOTSOCK: 57,
+      ENOPROTOOPT: 50,
+      ESHUTDOWN: 140,
+      ECONNREFUSED: 14,
+      EADDRINUSE: 3,
+      ECONNABORTED: 13,
+      ENETUNREACH: 40,
+      ENETDOWN: 38,
+      ETIMEDOUT: 73,
+      EHOSTDOWN: 142,
+      EHOSTUNREACH: 23,
+      EINPROGRESS: 26,
+      EALREADY: 7,
+      EDESTADDRREQ: 17,
+      EMSGSIZE: 35,
+      EPROTONOSUPPORT: 66,
+      ESOCKTNOSUPPORT: 137,
+      EADDRNOTAVAIL: 4,
+      ENETRESET: 39,
+      EISCONN: 30,
+      ENOTCONN: 53,
+      ETOOMANYREFS: 141,
+      EUSERS: 136,
+      EDQUOT: 19,
+      ESTALE: 72,
+      ENOTSUP: 138,
+      ENOMEDIUM: 148,
+      EILSEQ: 25,
+      EOVERFLOW: 61,
+      ECANCELED: 11,
+      ENOTRECOVERABLE: 56,
+      EOWNERDEAD: 62,
+      ESTRPIPE: 135,
+    };
+    function _raise(sig) {
+      setErrNo(ERRNO_CODES.ENOSYS);
+      return -1;
     }
     function _setTempRet0($i) {
       setTempRet0($i | 0);
@@ -5752,93 +5923,95 @@ var Module = (function () {
     });
     var asmLibraryArg = {
       c: ___assert_fail,
-      e: ___cxa_allocate_exception,
-      d: ___cxa_throw,
+      n: ___cxa_allocate_exception,
+      d: ___cxa_thread_atexit,
+      m: ___cxa_throw,
       b: wasmTable,
-      z: ___map_file,
-      y: ___sys_munmap,
-      F: __embind_register_bool,
+      A: ___map_file,
+      z: ___sys_munmap,
+      G: __embind_register_bool,
       h: __embind_register_class,
-      j: __embind_register_class_constructor,
+      i: __embind_register_class_constructor,
       f: __embind_register_class_function,
-      E: __embind_register_emval,
-      q: __embind_register_float,
-      g: __embind_register_function,
+      F: __embind_register_emval,
+      r: __embind_register_float,
+      e: __embind_register_function,
       k: __embind_register_integer,
-      i: __embind_register_memory_view,
-      r: __embind_register_std_string,
-      n: __embind_register_std_wstring,
-      G: __embind_register_void,
-      s: __emval_call,
+      j: __embind_register_memory_view,
+      s: __embind_register_std_string,
+      p: __embind_register_std_wstring,
+      H: __embind_register_void,
+      t: __emval_call,
       o: __emval_decref,
-      m: _abort,
-      v: _emscripten_memcpy_big,
-      w: _emscripten_resize_heap,
-      A: _environ_get,
-      B: _environ_sizes_get,
+      g: _abort,
+      w: _emscripten_memcpy_big,
+      x: _emscripten_resize_heap,
+      B: _environ_get,
+      C: _environ_sizes_get,
       l: _exit,
-      D: _fd_close,
-      C: _fd_read,
-      t: _fd_seek,
-      p: _fd_write,
+      E: _fd_close,
+      D: _fd_read,
+      u: _fd_seek,
+      q: _fd_write,
       a: wasmMemory,
-      u: _setTempRet0,
-      x: _strftime_l,
-      H: _time,
+      I: _raise,
+      v: _setTempRet0,
+      y: _strftime_l,
+      J: _time,
     };
     var asm = createWasm();
     var ___wasm_call_ctors = (Module['___wasm_call_ctors'] = function () {
       return (___wasm_call_ctors = Module['___wasm_call_ctors'] =
-        Module['asm']['I']).apply(null, arguments);
+        Module['asm']['K']).apply(null, arguments);
+    });
+    var _malloc = (Module['_malloc'] = function () {
+      return (_malloc = Module['_malloc'] = Module['asm']['L']).apply(
+        null,
+        arguments
+      );
+    });
+    var _free = (Module['_free'] = function () {
+      return (_free = Module['_free'] = Module['asm']['M']).apply(
+        null,
+        arguments
+      );
     });
     var ___getTypeName = (Module['___getTypeName'] = function () {
       return (___getTypeName = Module['___getTypeName'] =
-        Module['asm']['J']).apply(null, arguments);
+        Module['asm']['N']).apply(null, arguments);
     });
     var ___embind_register_native_and_builtin_types = (Module[
       '___embind_register_native_and_builtin_types'
     ] = function () {
       return (___embind_register_native_and_builtin_types = Module[
         '___embind_register_native_and_builtin_types'
-      ] = Module['asm']['K']).apply(null, arguments);
+      ] = Module['asm']['O']).apply(null, arguments);
     });
     var ___errno_location = (Module['___errno_location'] = function () {
       return (___errno_location = Module['___errno_location'] =
-        Module['asm']['L']).apply(null, arguments);
-    });
-    var _malloc = (Module['_malloc'] = function () {
-      return (_malloc = Module['_malloc'] = Module['asm']['M']).apply(
-        null,
-        arguments
-      );
-    });
-    var _free = (Module['_free'] = function () {
-      return (_free = Module['_free'] = Module['asm']['N']).apply(
-        null,
-        arguments
-      );
+        Module['asm']['P']).apply(null, arguments);
     });
     var dynCall_viijii = (Module['dynCall_viijii'] = function () {
       return (dynCall_viijii = Module['dynCall_viijii'] =
-        Module['asm']['O']).apply(null, arguments);
+        Module['asm']['Q']).apply(null, arguments);
     });
     var dynCall_jiji = (Module['dynCall_jiji'] = function () {
-      return (dynCall_jiji = Module['dynCall_jiji'] = Module['asm']['P']).apply(
+      return (dynCall_jiji = Module['dynCall_jiji'] = Module['asm']['R']).apply(
         null,
         arguments
       );
     });
     var dynCall_iiiiij = (Module['dynCall_iiiiij'] = function () {
       return (dynCall_iiiiij = Module['dynCall_iiiiij'] =
-        Module['asm']['Q']).apply(null, arguments);
+        Module['asm']['S']).apply(null, arguments);
     });
     var dynCall_iiiiijj = (Module['dynCall_iiiiijj'] = function () {
       return (dynCall_iiiiijj = Module['dynCall_iiiiijj'] =
-        Module['asm']['R']).apply(null, arguments);
+        Module['asm']['T']).apply(null, arguments);
     });
     var dynCall_iiiiiijj = (Module['dynCall_iiiiiijj'] = function () {
       return (dynCall_iiiiiijj = Module['dynCall_iiiiiijj'] =
-        Module['asm']['S']).apply(null, arguments);
+        Module['asm']['U']).apply(null, arguments);
     });
     var calledRun;
     function ExitStatus(status) {

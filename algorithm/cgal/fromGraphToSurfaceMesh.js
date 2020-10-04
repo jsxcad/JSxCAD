@@ -53,5 +53,9 @@ export const fromGraphToSurfaceMesh = (graph) => {
     c.Surface_mesh__set_face_edge(mesh, loop, edge);
   });
 
+  if (!mesh.is_valid(false)) {
+    throw Error('die');
+  }
+
   return mesh;
 };
