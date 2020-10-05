@@ -1,4 +1,5 @@
 import { toPlane } from '@jsxcad/math-poly3';
+import { toSolid as toSolidFromGraph } from '@jsxcad/geometry-graph';
 import { toTriangles } from '@jsxcad/geometry-polygons';
 
 const pointsToThreejsPoints = (points) => points;
@@ -121,6 +122,13 @@ export const toThreejsGeometry = (geometry, supertags) => {
       return {
         type: 'surface',
         threejsSurface: surfaceToThreejsSurface(geometry.z0Surface),
+        tags,
+        isThreejsGeometry: true,
+      };
+    case 'graph':
+      return {
+        type: 'solid',
+        threejsSolid: solidToThreejsSolid(toSolidFromGraph(geometry.graph)),
         tags,
         isThreejsGeometry: true,
       };

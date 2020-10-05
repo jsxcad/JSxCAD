@@ -3,6 +3,12 @@ import {
   intersectSurface,
   union as solidUnion,
 } from '@jsxcad/geometry-bsp';
+
+import {
+  fromSolid as fromSolidToGraph,
+  union as graphUnion,
+} from '@jsxcad/geometry-graph';
+
 import {
   makeWatertight as makeWatertightSurface,
   toPlane as toPlaneFromSurface,
@@ -12,12 +18,14 @@ import { cache } from '@jsxcad/cache';
 import { createNormalize3 } from '@jsxcad/algorithm-quantize';
 import { fromSurface as fromSurfaceToSolid } from '@jsxcad/geometry-solid';
 import { getAnyNonVoidSurfaces } from './getAnyNonVoidSurfaces.js';
+import { getNonVoidGraphs } from './getNonVoidGraphs.js';
 import { getNonVoidPaths } from './getNonVoidPaths.js';
 import { getNonVoidPoints } from './getNonVoidPoints.js';
 import { getNonVoidSolids } from './getNonVoidSolids.js';
 import { union as pathsUnion } from '@jsxcad/geometry-paths';
 import { union as pointsUnion } from '@jsxcad/geometry-points';
 import { rewrite } from './visit.js';
+import { taggedGraph } from './taggedGraph.js';
 import { taggedPaths } from './taggedPaths.js';
 import { taggedPoints } from './taggedPoints.js';
 import { taggedSolid } from './taggedSolid.js';
@@ -29,6 +37,18 @@ const unionImpl = (geometry, ...geometries) => {
   const op = (geometry, descend) => {
     const { tags } = geometry;
     switch (geometry.type) {
+      case 'graph': {
+        let unified = geometry.graph;
+        for (const geometry of geometries) {
+          for (const { graph } of getNonVoidGraphs(geometry)) {
+            unified = graphUnion(unified, graph);
+          }
+          for (const { solid } of getNonVoidSolids(geometry)) {
+            unified = graphUnion(unified, fromSolidToGraph(solid));
+          }
+        }
+        return taggedGraph({ tags }, unified);
+      }
       case 'solid': {
         const solids = [];
         for (const geometry of geometries) {

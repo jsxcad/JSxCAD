@@ -1,16 +1,15 @@
 import { add, subtract, normalize, dot, transform, scale } from './jsxcad-math-vec3.js';
-import { getNonVoidSolids, getAnyNonVoidSurfaces, taggedSurface, union, taggedAssembly, getSolids, taggedLayers, getNonVoidPaths, taggedPaths, taggedGroup } from './jsxcad-geometry-tagged.js';
+import { getNonVoidSolids, getAnyNonVoidSurfaces, taggedSurface, union, taggedAssembly, getSolids, taggedLayers } from './jsxcad-geometry-tagged.js';
 import { Ball } from './jsxcad-api-v1-shapes.js';
 import { Hull } from './jsxcad-api-v1-extrude.js';
 import Shape$1, { Shape } from './jsxcad-api-v1-shape.js';
 import { createNormalize3 } from './jsxcad-algorithm-quantize.js';
 import { fromRotation } from './jsxcad-math-mat4.js';
-import { getEdges, deduplicate } from './jsxcad-geometry-path.js';
+import { getEdges } from './jsxcad-geometry-path.js';
 import { closestSegmentBetweenLines } from './jsxcad-math-line3.js';
 import { outlineSurface } from './jsxcad-geometry-halfedge.js';
 import { toPlane } from './jsxcad-geometry-surface.js';
 import { toConvexClouds, fromSolid } from './jsxcad-geometry-bsp.js';
-import { offset as offset$1 } from './jsxcad-algorithm-occt.js';
 
 /**
  *
@@ -165,6 +164,7 @@ const growMethod = function (...args) {
 Shape.prototype.grow = growMethod;
 
 const offset = (shape, amount = 1) => {
+  /*
   const normalize = createNormalize3();
   const offsetPathsets = [];
   for (const { tags, paths } of getNonVoidPaths(shape.toDisjointGeometry())) {
@@ -172,12 +172,13 @@ const offset = (shape, amount = 1) => {
     // Offset each path separately.
     for (const path of paths) {
       offsetPaths.push(
-        ...offset$1([deduplicate(path.map(normalize))], amount)
+        ...offsetAlgorithm([deduplicate(path.map(normalize))], amount)
       );
     }
     offsetPathsets.push(taggedPaths({ tags }, offsetPaths));
   }
   return Shape.fromGeometry(taggedGroup({}, ...offsetPathsets));
+*/
 };
 
 const offsetMethod = function (amount) {

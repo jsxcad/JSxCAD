@@ -1,9 +1,9 @@
 #!/bin/bash
 
+cp algorithm/cgal/dist/main.js es6/jsxcad-algorithm-cgal.js
 cp algorithm/clipper/dist/main.js es6/jsxcad-algorithm-clipper.js
 cp algorithm/color/dist/main.js es6/jsxcad-algorithm-color.js
 cp algorithm/contour/dist/main.js es6/jsxcad-algorithm-contour.js
-cp algorithm/occt/dist/main.js es6/jsxcad-algorithm-occt.js
 cp algorithm/pack/dist/main.js es6/jsxcad-algorithm-pack.js
 cp algorithm/quantize/dist/main.js es6/jsxcad-algorithm-quantize.js
 cp algorithm/shape/dist/main.js es6/jsxcad-algorithm-shape.js
@@ -54,6 +54,7 @@ cp convert/svg/dist/main.js es6/jsxcad-convert-svg.js
 cp convert/threejs/dist/main.js es6/jsxcad-convert-threejs.js
 cp data/shape/dist/main.js es6/jsxcad-data-shape.js
 cp geometry/bsp/dist/main.js es6/jsxcad-geometry-bsp.js
+cp geometry/graph/dist/main.js es6/jsxcad-geometry-graph.js
 cp geometry/halfedge/dist/main.js es6/jsxcad-geometry-halfedge.js
 cp geometry/path/dist/main.js es6/jsxcad-geometry-path.js
 cp geometry/paths/dist/main.js es6/jsxcad-geometry-paths.js

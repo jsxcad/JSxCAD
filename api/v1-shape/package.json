@@ -26,6 +26,7 @@
   "dependencies": {
     "@jsxcad/algorithm-color": "^0.0.79",
     "@jsxcad/algorithm-quantize": "^0.0.79",
+    "@jsxcad/geometry-graph": "^0.0.79",
     "@jsxcad/geometry-path": "^0.0.79",
     "@jsxcad/geometry-paths": "^0.0.79",
     "@jsxcad/geometry-halfedge": "^0.0.79",

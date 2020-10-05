@@ -11,6 +11,7 @@ import {
 import { rewrite } from './visit.js';
 import { taggedSurface } from './taggedSurface.js';
 import { taggedZ0Surface } from './taggedZ0Surface.js';
+import { transform as transformGraph } from '@jsxcad/geometry-graph';
 import { transform as transformPaths } from '@jsxcad/geometry-paths';
 import { transform as transformPoints } from '@jsxcad/geometry-points';
 import { transform as transformSolid } from '@jsxcad/geometry-solid';
@@ -55,6 +56,8 @@ export const toTransformedGeometry = (geometry) => {
           return descend({ points: transformPoints(matrix, geometry.points) });
         case 'solid':
           return descend({ solid: transformSolid(matrix, geometry.solid) });
+        case 'graph':
+          return descend({ graph: transformGraph(matrix, geometry.graph) });
         case 'surface':
         case 'z0Surface': {
           const surface = geometry.z0Surface || geometry.surface;
