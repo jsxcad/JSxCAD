@@ -23,24 +23,6 @@ const view = (
 
 Shape.prototype.view = function ({
   path,
-  width = 512,
-  height = 256,
-  position = [100, -100, 100],
-} = {}) {
-  return view(this, { path, width, height, position });
-};
-
-Shape.prototype.smallView = function ({
-  path,
-  width = 256,
-  height = 128,
-  position = [100, -100, 100],
-} = {}) {
-  return view(this, { path, width, height, position });
-};
-
-Shape.prototype.bigView = function ({
-  path,
   width = 1024,
   height = 512,
   position = [100, -100, 100],
@@ -50,25 +32,7 @@ Shape.prototype.bigView = function ({
 
 Shape.prototype.topView = function ({
   path,
-  width = 512,
-  height = 256,
-  position = [0, 0, 100],
-} = {}) {
-  return view(this, { path, width, height, position });
-};
-
-Shape.prototype.smallTopView = function ({
-  path,
-  width = 256,
-  height = 128,
-  position = [0, 0, 100],
-} = {}) {
-  return view(this, { path, width, height, position });
-};
-
-Shape.prototype.bigTopView = function ({
-  path,
-  width = 1024,
+  width = 2014,
   height = 512,
   position = [0, 0, 100],
 } = {}) {
@@ -76,24 +40,6 @@ Shape.prototype.bigTopView = function ({
 };
 
 Shape.prototype.frontView = function ({
-  path,
-  width = 512,
-  height = 256,
-  position = [0, -100, 0],
-} = {}) {
-  return view(this, { path, width, height, position });
-};
-
-Shape.prototype.smallFrontView = function ({
-  path,
-  width = 256,
-  height = 128,
-  position = [0, -100, 0],
-} = {}) {
-  return view(this, { path, width, height, position });
-};
-
-Shape.prototype.bigFrontView = function ({
   path,
   width = 1024,
   height = 512,
@@ -103,24 +49,6 @@ Shape.prototype.bigFrontView = function ({
 };
 
 Shape.prototype.sideView = function ({
-  path,
-  width = 512,
-  height = 256,
-  position = [100, 0, 0],
-} = {}) {
-  return view(this, { path, width, height, position });
-};
-
-Shape.prototype.smallSideView = function ({
-  path,
-  width = 256,
-  height = 128,
-  position = [100, 0, 0],
-} = {}) {
-  return view(this, { path, width, height, position });
-};
-
-Shape.prototype.bigSideView = function ({
   path,
   width = 1024,
   height = 512,
