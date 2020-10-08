@@ -1,4 +1,4 @@
-import { fromPolygonsToSurfaceMesh } from './fromPolygonsToSurfaceMesh.js';
+import { fromPolygonsToNefPolyhedron } from './fromPolygonsToNefPolyhedron.js';
 import { initCgal } from './getCgal.js';
 
 import test from 'ava';
@@ -70,8 +70,7 @@ const box = [
   ],
 ];
 
-test('FromPolygonsToSurfaceMesh', (t) => {
-  const surfaceMesh = fromPolygonsToSurfaceMesh(box);
-  t.true(surfaceMesh.is_valid(false));
-  t.true(surfaceMesh.number_of_edges() > 0);
+test('FromPolygonsToNefPolyhedron', (t) => {
+  const nefPolyhedron = fromPolygonsToNefPolyhedron(box);
+  t.true(nefPolyhedron.is_valid(false, 1));
 });

@@ -11,7 +11,7 @@ const unitSphere = (resolution = 16) => {
   const shape = Shape.fromGeometry(
     taggedSolid({}, buildRingSphere(resolution))
   );
-  return shape;
+  return shape.toGraph();
 };
 
 const ofRadius = (radius = 1, { resolution = 16 } = {}) =>
@@ -35,6 +35,7 @@ const edgeScale = regularPolygonEdgeLengthToRadius(1, 4);
 
 const unitCube = () =>
   Shape.fromGeometry(taggedSolid({}, buildRegularPrism(4)))
+    .toGraph()
     .rotateZ(45)
     .scale(edgeScale, edgeScale, 1);
 
@@ -83,7 +84,7 @@ Shape.prototype.BoxOfRadius = shapeMethod(BoxOfRadius);
 Shape.prototype.BoxOfSize = shapeMethod(BoxOfSize);
 
 const buildPrism = (radius = 1, height = 1, sides = 32) =>
-  Shape.fromGeometry(taggedSolid({}, buildRegularPrism(sides))).scale(
+  Shape.fromGeometry(taggedSolid({}, buildRegularPrism(sides))).toGraph().scale(
     radius,
     radius,
     height
@@ -108,7 +109,7 @@ const toPathFromShape = (shape) => {
 const ofFunction = (op, { resolution, cap = true, context } = {}) =>
   Shape.fromGeometry(
     taggedSolid({}, buildFromFunction(op, resolution, cap, context))
-  );
+  ).toGraph();
 
 const ofSlices = (op, { slices = 2, cap = true } = {}) =>
   Shape.fromGeometry(
@@ -116,7 +117,7 @@ const ofSlices = (op, { slices = 2, cap = true } = {}) =>
       {},
       buildFromSlices((slice) => toPathFromShape(op(slice)), slices, cap)
     )
-  );
+  ).toGraph();
 
 const Rod = ofRadius$2;
 const RodOfRadius = ofRadius$2;
@@ -131,28 +132,6 @@ Shape.prototype.RodOfDiameter = shapeMethod(RodOfDiameter);
 Shape.prototype.RodOfFunction = shapeMethod(RodOfFunction);
 Shape.prototype.RodOfRadius = shapeMethod(RodOfRadius);
 Shape.prototype.RodOfSlices = shapeMethod(RodOfSlices);
-
-/**
- *
- * # Spiral
- *
- * These take a function mapping angle to radius.
- *
- * ::: illustration { "view": { "position": [0, 0, 10] } }
- * ```
- * Spiral(angle => [angle],
- *        { to: 360 * 5 });
- * ```
- * :::
- * ::: illustration { "view": { "position": [0, 0, 10] } }
- * ```
- * Spiral({ to: 360 },
- *        (angle) => [[2 + sin(angle * 20)]])
- *   .close()
- *   .interior()
- * ```
- * :::
- **/
 
 const Spiral = (
   toPathFromAngle = (angle) => [[angle]],
@@ -214,45 +193,6 @@ const ofDiameter$3 = (diameter, ...args) =>
 const ofPoints = (points) =>
   Shape.fromGeometry(buildPolygonFromPoints(points));
 
-/**
- *
- * # Polygon
- *
- * ::: illustration { "view": { "position": [0, 0, 5] } }
- * ```
- * Polygon([0, 1],
- *         [1, 1],
- *         [1, 0],
- *         [0.2, 0.2])
- * ```
- * :::
- * ::: illustration { "view": { "position": [0, -1, 50] } }
- * ```
- * Polygon({ edge: 10, sides: 6 })
- * ```
- * :::
- * ::: illustration { "view": { "position": [0, -1, 50] } }
- * ```
- * assemble(
- *   Polygon({ apothem: 10, sides: 5 }),
- *   Circle(10).drop())
- * ```
- * :::
- * ::: illustration { "view": { "position": [0, -1, 50] } }
- * ```
- * assemble(
- *   Circle(10),
- *   Polygon({ radius: 10, sides: 5 }).drop())
- * ```
- * :::
- * ::: illustration { "view": { "position": [0, -1, 50] } }
- * ```
- * Polygon({ diameter: 20, sides: 3 })
- * ```
- * :::
- *
- **/
-
 const Polygon = (...args) => ofRadius$4(...args);
 
 Polygon.ofEdge = ofEdge$1;
@@ -263,54 +203,6 @@ Polygon.ofPoints = ofPoints;
 Polygon.toRadiusFromApothem = toRadiusFromApothem$1;
 
 Shape.prototype.Polygon = shapeMethod(Polygon);
-
-/**
- *
- * # Circle (disc)
- *
- * Circles are approximated as surfaces delimeted by regular polygons.
- *
- * Properly speaking what is produced here are discs.
- * The circle perimeter can be extracted via outline().
- *
- * ::: illustration { "view": { "position": [0, 0, 10] } }
- * ```
- * Circle()
- * ```
- * :::
- * ::: illustration
- * ```
- * Circle(10)
- * ```
- * :::
- * ::: illustration
- * ```
- * Circle.ofRadius(10, { sides: 8 })
- * ```
- * :::
- * ::: illustration
- * ```
- * Circle.ofApothem(10, { sides: 8 })
- * ```
- * :::
- * ::: illustration
- * ```
- * Circle.ofApothem(10, { sides: 5 })
- *       .with(Circle.ofRadius(10, { sides: 5 }).drop(),
- *             Circle.ofRadius(10).outline().moveZ(0.01))
- * ```
- * :::
- * ::: illustration
- * ```
- * Circle.ofDiameter(20, { sides: 16 })
- * ```
- * :::
- * ::: illustration
- * ```
- * Circle.ofEdge(5, { sides: 5 })
- * ```
- * :::
- **/
 
 const ofEdge$2 = (edge = 1, { sides = 32 } = {}) =>
   Polygon.ofEdge(edge, { sides });
@@ -336,25 +228,11 @@ Circle.toRadiusFromApothem = (radius = 1, sides = 32) =>
 Shape.prototype.Circle = shapeMethod(Circle);
 
 const buildPrism$1 = (radius = 1, height = 1, sides = 32) =>
-  Shape.fromGeometry(taggedSolid({}, buildRegularPrism(sides))).scale(
+  Shape.fromGeometry(taggedSolid({}, buildRegularPrism(sides))).toGraph().scale(
     radius,
     radius,
     height
   );
-
-/**
- *
- * # Prism
- *
- * Generates prisms.
- *
- * ::: illustration { "view": { "position": [10, 10, 10] } }
- * ```
- * Prism()
- * ```
- * :::
- *
- **/
 
 const ofRadius$6 = (radius = 1, height = 1, { sides = 3 } = {}) =>
   buildPrism$1(radius, height, sides);
@@ -397,7 +275,7 @@ const ofRadius$7 = (radius = 1, height = 1, { sides = 32 } = {}) => {
   const fn = linear(1, 0);
   return Prism.ofSlices((t) =>
     Circle(fn(t) * radius, { sides }).moveZ(t * height)
-  );
+  ).toGraph();
 };
 
 const ofDiameter$6 = (diameter, ...args) =>
@@ -1869,22 +1747,6 @@ const Hershey = (size) => ofSize$1(size);
 Hershey.ofSize = ofSize$1;
 Hershey.toPaths = toPaths;
 
-/**
- *
- * # Hexagon
- *
- * ::: illustration { "view": { "position": [0, 0, 5] } }
- * ```
- * Hexagon()
- * ```
- * :::
- * ::: illustration
- * ```
- * Hexagon(20)
- * ```
- * :::
- **/
-
 const ofEdge$3 = (edge = 1) => Polygon.ofEdge(edge, { sides: 6 });
 const ofApothem$6 = (apothem = 1) =>
   Polygon.ofApothem(apothem, { sides: 6 });
@@ -1902,37 +1764,8 @@ Hexagon.ofDiameter = ofDiameter$7;
 
 Shape.prototype.Hexagon = shapeMethod(Hexagon);
 
-/**
- *
- * # Icosahedron
- *
- * Generates tetrahedrons.
- *
- * ::: illustration { "view": { "position": [8, 8, 8] } }
- * ```
- * Icosahedron()
- * ```
- * :::
- * ::: illustration { "view": { "position": [80, 80, 80] } }
- * ```
- * Icosahedron(10)
- * ```
- * :::
- * ::: illustration { "view": { "position": [60, 60, 60] } }
- * ```
- * Icosahedron({ radius: 8 })
- * ```
- * :::
- * ::: illustration { "view": { "position": [60, 60, 60] } }
- * ```
- * Icosahedron({ diameter: 16 })
- * ```
- * :::
- *
- **/
-
 const unitIcosahedron = () =>
-  Shape.fromPolygonsToSolid(buildRegularIcosahedron({}));
+  Shape.fromPolygonsToSolid(buildRegularIcosahedron({})).toGraph();
 
 const ofRadius$9 = (radius = 1) => unitIcosahedron().scale(radius);
 const ofDiameter$8 = (diameter = 1) =>
@@ -2004,65 +1837,17 @@ Shape.prototype.Plane = shapeMethod(Plane);
 const fromPoints$1 = (...args) =>
   Shape.fromPoints(args.map(([x = 0, y = 0, z = 0]) => [x, y, z]));
 
-/**
- *
- * # Points
- *
- * Generates point cloud.
- *
- * Note: The points are not visible in the illustrations below.
- *
- * ::: illustration
- * ```
- * Points([ -0.5, -0.5, -0.5 ],
- *        [ -0.5, -0.5, 0.5 ],
- *        [ -0.5, 0.5, -0.5 ],
- *        [ -0.5, 0.5, 0.5 ],
- *        [ 0.5, -0.5, -0.5 ],
- *        [ 0.5, -0.5, 0.5 ],
- *        [ 0.5, 0.5, -0.5 ],
- *        [ 0.5, 0.5, 0.5 ])
- * ```
- * :::
- * ::: illustration { "view": { "position": [5, 5, 5] } }
- * ```
- * hull(Points([ -0.5, -0.5, -0.5 ],
- *             [ -0.5, -0.5, 0.5 ],
- *             [ -0.5, 0.5, -0.5 ],
- *             [ -0.5, 0.5, 0.5 ],
- *             [ 0.5, -0.5, -0.5 ],
- *             [ 0.5, -0.5, 0.5 ],
- *             [ 0.5, 0.5, -0.5 ],
- *             [ 0.5, 0.5, 0.5 ]))
- * ```
- * :::
- *
- **/
-
 const Points = (...args) => fromPoints$1(...args);
 Points.fromPoints = fromPoints$1;
 
 Shape.prototype.Points = shapeMethod(Points);
-
-/**
- *
- * # Polyhedron
- *
- * ::: illustration { "view": { "position": [80, 20, 20] } }
- * ```
- * Polyhedron([[10, 10, 0], [10, -10, 0], [-10, -10, 0], [-10, 10, 0], [0, 0, 10]],
- *            [[4, 1, 0], [4, 2, 1], [4, 3, 2], [4, 0, 3], [3, 0, 1], [3, 1, 2]] })
- * ```
- * :::
- *
- **/
 
 const ofPointPaths = (points = [], paths = []) => {
   const polygons = [];
   for (const path of paths) {
     polygons.push(path.map((point) => points[point]));
   }
-  return Shape.fromPolygonsToSolid(polygons);
+  return Shape.fromPolygonsToSolid(polygons).toGraph();
 };
 
 const Polyhedron = (...args) => ofPointPaths(...args);
@@ -2075,52 +1860,6 @@ Shape.prototype.Polyhedron = shapeMethod(Polyhedron);
 const Sketch = (shape) => shape.sketch();
 
 Shape.prototype.Sketch = shapeMethod(Sketch);
-
-/**
- *
- * # Square (rectangle)
- *
- * Properly speaking what is produced here are rectangles.
- *
- * ::: illustration { "view": { "position": [0, 0, 10] } }
- * ```
- * Square()
- * ```
- * :::
- * ::: illustration
- * ```
- * Square(10)
- * ```
- * :::
- * ::: illustration
- * ```
- * Square(6, 12)
- * ```
- * :::
- * ::: illustration
- * ```
- * Square({ edge: 10 })
- * ```
- * :::
- * ::: illustration
- * ```
- * assemble(Circle(10),
- *          Square({ radius: 10 })
- *            .drop())
- * ```
- * :::
- * ::: illustration
- * ```
- * assemble(Square({ apothem: 10 }),
- *          Circle(10).drop())
- * ```
- * :::
- * ::: illustration
- * ```
- * Square({ diameter: 20 })
- * ```
- * :::
- **/
 
 const toRadiusFromApothem = (apothem) => apothem / Math.cos(Math.PI / 4);
 
@@ -2158,35 +1897,6 @@ Square.fromCorners = fromCorners$1;
 
 Shape.prototype.Square = shapeMethod(Square);
 
-/**
- *
- * # Tetrahedron
- *
- * Generates tetrahedrons.
- *
- * ::: illustration { "view": { "position": [8, 8, 8] } }
- * ```
- * Tetrahedron()
- * ```
- * :::
- * ::: illustration { "view": { "position": [80, 80, 80] } }
- * ```
- * Tetrahedron(10)
- * ```
- * :::
- * ::: illustration { "view": { "position": [60, 60, 60] } }
- * ```
- * Tetrahedron({ radius: 8 })
- * ```
- * :::
- * ::: illustration { "view": { "position": [60, 60, 60] } }
- * ```
- * Tetrahedron({ diameter: 16 })
- * ```
- * :::
- *
- **/
-
 const unitTetrahedron = () =>
   Shape.fromGeometry(taggedSolid({}, buildRegularTetrahedron({})));
 
@@ -2206,34 +1916,6 @@ const Toolpath = (...points) =>
 
 Shape.prototype.Toolpath = shapeMethod(Toolpath);
 
-/**
- *
- * # Torus
- *
- * ::: illustration { "view": { "position": [-80, -80, 80] } }
- * ```
- * Torus({ thickness: 5,
- *         radius: 20 })
- * ```
- * :::
- * ::: illustration { "view": { "position": [-80, -80, 80] } }
- * ```
- * Torus({ thickness: 5,
- *         radius: 20,
- *         sides: 4 })
- * ```
- * :::
- * ::: illustration { "view": { "position": [-80, -80, 80] } }
- * ```
- * Torus({ thickness: 5,
- *         radius: 20,
- *         sides: 4,
- *         rotation: 45 })
- * ```
- * :::
- *
- **/
-
 const Torus = (
   radius = 1,
   height = 1,
@@ -2243,51 +1925,9 @@ const Torus = (
     .rotateZ(rotation)
     .moveY(radius)
     .Loop(360, { sides: segments })
-    .rotateY(90);
+    .rotateY(90).toGraph();
 
 Shape.prototype.Torus = shapeMethod(Torus);
-
-/**
- *
- * # Triangle
- *
- * ::: illustration { "view": { "position": [0, 0, 5] } }
- * ```
- * Triangle()
- * ```
- * :::
- * ::: illustration
- * ```
- * Triangle(20)
- * ```
- * :::
- * ::: illustration
- * ```
- * Triangle({ radius: 10 })
- * ```
- * :::
- * ::: illustration
- * ```
- * assemble(Circle(10),
- *          Triangle({ radius: 10 })
- *            .drop())
- * ```
- * :::
- * ::: illustration
- * ```
- * assemble(Triangle({ apothem: 5 }),
- *          Circle(5).drop())
- * ```
- * :::
- * ::: illustration
- * ```
- * assemble(Triangle({ radius: 10 })
- *            .rotateZ(180),
- *          Triangle({ diameter: 10 })
- *            .drop())
- * ```
- * :::
- **/
 
 const ofEdge$4 = (edge = 1) => Polygon.ofEdge(edge, { sides: 3 });
 const ofApothem$8 = (apothem = 1) =>
@@ -2314,20 +1954,6 @@ const Union = (first, ...rest) => {
 };
 
 Shape.prototype.Union = shapeMethod(Union);
-
-/**
- *
- * # Wave
- *
- * These take a function mapping X distance to Y distance.
- *
- * ::: illustration { "view": { "position": [0, 0, 10] } }
- * ```
- * Wave(angle => [[sin(angle) * 100]],
- *      { to: 360 });
- * ```
- * :::
- **/
 
 const Wave = (
   toPathFromXDistance = (xDistance) => [[0]],

@@ -18,7 +18,12 @@ export const fromGraphToSurfaceMesh = (graph) => {
   );
 
   const edgeIndex = [];
-  graph.edges.forEach(({ point, twin }, edge) => {
+  graph.edges.forEach((edgeNode, edge) => {
+    if (!edgeNode) {
+      return;
+    }
+    const { point, twin } = edgeNode;
+
     // Edges are always paired.
     if (edgeIndex[edge] !== undefined) {
       return;
@@ -38,7 +43,12 @@ export const fromGraphToSurfaceMesh = (graph) => {
     }
   });
 
-  graph.edges.forEach(({ point, next, loop, twin }, edge) => {
+  graph.edges.forEach((edgeNode, edge) => {
+    if (!edgeNode) {
+      return;
+    }
+    const { point, next, loop } = edgeNode;
+
     if (point >= graph.points.length) throw Error('die');
     c.Surface_mesh__set_edge_target(mesh, edgeIndex[edge], vertexIndex[point]);
 

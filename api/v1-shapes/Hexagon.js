@@ -2,22 +2,6 @@ import { Shape, shapeMethod } from '@jsxcad/api-v1-shape';
 
 import { Polygon } from './Polygon.js';
 
-/**
- *
- * # Hexagon
- *
- * ::: illustration { "view": { "position": [0, 0, 5] } }
- * ```
- * Hexagon()
- * ```
- * :::
- * ::: illustration
- * ```
- * Hexagon(20)
- * ```
- * :::
- **/
-
 export const ofEdge = (edge = 1) => Polygon.ofEdge(edge, { sides: 6 });
 export const ofApothem = (apothem = 1) =>
   Polygon.ofApothem(apothem, { sides: 6 });

@@ -11,6 +11,7 @@ const edgeScale = regularPolygonEdgeLengthToRadius(1, 4);
 
 const unitCube = () =>
   Shape.fromGeometry(taggedSolid({}, buildRegularPrism(4)))
+    .toGraph()
     .rotateZ(45)
     .scale(edgeScale, edgeScale, 1);
 

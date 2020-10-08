@@ -9,7 +9,7 @@ export const ofRadius = (radius = 1, height = 1, { sides = 32 } = {}) => {
   const fn = linear(1, 0);
   return Prism.ofSlices((t) =>
     Circle(fn(t) * radius, { sides }).moveZ(t * height)
-  );
+  ).toGraph();
 };
 
 export const ofDiameter = (diameter, ...args) =>

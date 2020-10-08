@@ -7,7 +7,7 @@ const unitSphere = (resolution = 16) => {
   const shape = Shape.fromGeometry(
     taggedSolid({}, buildRingSphere(resolution))
   );
-  return shape;
+  return shape.toGraph();
 };
 
 export const ofRadius = (radius = 1, { resolution = 16 } = {}) =>

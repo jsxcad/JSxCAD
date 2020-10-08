@@ -13,6 +13,7 @@ import {
   makeWatertight,
   reconcile,
   taggedAssembly,
+  taggedGraph,
   taggedPaths,
   taggedPoints,
   taggedSolid,
@@ -129,6 +130,8 @@ const isSingleOpenPath = ({ paths }) =>
 Shape.fromClosedPath = (path, context) =>
   fromGeometry(taggedPaths({}, [closePath(path)]), context);
 Shape.fromGeometry = (geometry, context) => new Shape(geometry, context);
+Shape.fromGraph = (graph, context) =>
+  new Shape(taggedGraph({}, graph), context);
 Shape.fromOpenPath = (path, context) =>
   fromGeometry(taggedPaths({}, [openPath(path)]), context);
 Shape.fromPath = (path, context) =>

@@ -64,7 +64,7 @@ Shape.prototype.view = function ({
 
 Shape.prototype.topView = function ({
   path,
-  width = 2014,
+  width = 1024,
   height = 512,
   position = [0, 0, 100],
 } = {}) {

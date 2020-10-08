@@ -8,25 +8,9 @@ import {
 import { getAnySurfaces, taggedSolid } from '@jsxcad/geometry-tagged';
 
 const buildPrism = (radius = 1, height = 1, sides = 32) =>
-  Shape.fromGeometry(taggedSolid({}, buildRegularPrism(sides))).scale(
-    radius,
-    radius,
-    height
-  );
-
-/**
- *
- * # Prism
- *
- * Generates prisms.
- *
- * ::: illustration { "view": { "position": [10, 10, 10] } }
- * ```
- * Prism()
- * ```
- * :::
- *
- **/
+  Shape.fromGeometry(taggedSolid({}, buildRegularPrism(sides)))
+    .toGraph()
+    .scale(radius, radius, height);
 
 export const ofRadius = (radius = 1, height = 1, { sides = 3 } = {}) =>
   buildPrism(radius, height, sides);

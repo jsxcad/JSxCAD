@@ -47,8 +47,8 @@ const fromPolygons = (polygons) => {
 
 // returns an array of two Vector3Ds (minimum coordinates and maximum coordinates)
 const measureBoundingBox = (points) => {
-  let max$1 = points[0];
-  let min$1 = points[0];
+  let min$1 = [Infinity, Infinity, Infinity];
+  let max$1 = [-Infinity, -Infinity, -Infinity];
   eachPoint((point) => {
     max$1 = max(max$1, point);
     min$1 = min(min$1, point);

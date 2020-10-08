@@ -1,5 +1,5 @@
 import { close, concatenate, open } from './jsxcad-geometry-path.js';
-import { taggedAssembly, eachPoint, flip, toDisjointGeometry as toDisjointGeometry$1, toTransformedGeometry, toPoints, transform, reconcile, isWatertight, makeWatertight, taggedPaths, fromPathToSurface, fromPathsToSurface, taggedPoints, taggedSolid, taggedSurface, union as union$1, rewriteTags, canonicalize as canonicalize$1, measureBoundingBox as measureBoundingBox$1, intersection as intersection$1, allTags, difference as difference$1, getSolids, fix as fix$1, rewrite, taggedGroup, taggedGraph, getGraphs, taggedLayers, isVoid, assemble as assemble$1, getNonVoidPaths, getPeg, measureArea, taggedSketch, getNonVoidSolids, getAnyNonVoidSurfaces, getPaths, getNonVoidSurfaces, getNonVoidZ0Surfaces } from './jsxcad-geometry-tagged.js';
+import { taggedAssembly, eachPoint, flip, toDisjointGeometry as toDisjointGeometry$1, toTransformedGeometry, toPoints, transform, reconcile, isWatertight, makeWatertight, taggedPaths, taggedGraph, fromPathToSurface, fromPathsToSurface, taggedPoints, taggedSolid, taggedSurface, union as union$1, rewriteTags, canonicalize as canonicalize$1, measureBoundingBox as measureBoundingBox$1, intersection as intersection$1, allTags, difference as difference$1, getSolids, fix as fix$1, rewrite, taggedGroup, getGraphs, taggedLayers, isVoid, assemble as assemble$1, getNonVoidPaths, getPeg, measureArea, taggedSketch, getNonVoidSolids, getAnyNonVoidSurfaces, getPaths, getNonVoidSurfaces, getNonVoidZ0Surfaces } from './jsxcad-geometry-tagged.js';
 import { fromPolygons, findOpenEdges, fromSurface } from './jsxcad-geometry-solid.js';
 import { scale as scale$1, add, negate, normalize, subtract, dot, cross, distance } from './jsxcad-math-vec3.js';
 import { toTagFromName } from './jsxcad-algorithm-color.js';
@@ -115,6 +115,7 @@ const isSingleOpenPath = ({ paths }) =>
 Shape.fromClosedPath = (path, context) =>
   fromGeometry(taggedPaths({}, [close(path)]), context);
 Shape.fromGeometry = (geometry, context) => new Shape(geometry, context);
+Shape.fromGraph = (graph, context) => new Shape(taggedGraph({}, graph), context);
 Shape.fromOpenPath = (path, context) =>
   fromGeometry(taggedPaths({}, [open(path)]), context);
 Shape.fromPath = (path, context) =>
@@ -1230,13 +1231,18 @@ const getAngle = ([aX, aY], [bX, bY]) => {
   return (absoluteAngle * 180) / Math.PI;
 };
 
-const peg = (shape, shapeToPeg) => {
+const getPegCoords = (shape) => {
   const coords = getPeg(shape.toTransformedGeometry());
   const origin = coords.slice(0, 3);
   const forward = coords.slice(3, 6);
   const right = coords.slice(6, 9);
-
   const plane = fromPoints(right, forward, origin);
+
+  return { coords, origin, forward, right, plane };
+};
+
+const peg = (shape, shapeToPeg) => {
+  const { coords, origin, forward, right, plane } = getPegCoords(shape);
   const [, from] = toXYPlaneTransforms(plane);
   const orientation = subtract(right, origin);
   const angle = getAngle([1, 0], orientation);
@@ -1748,4 +1754,4 @@ const logMethod = function (
 Shape.prototype.log = logMethod;
 
 export default Shape;
-export { Shape, loadGeometry, log, saveGeometry, shapeMethod };
+export { Shape, getPegCoords, loadGeometry, log, saveGeometry, shapeMethod };
