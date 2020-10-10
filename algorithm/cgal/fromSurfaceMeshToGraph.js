@@ -1,3 +1,4 @@
+import { equals } from '@jsxcad/math-vec3';
 import { fromPolygon as fromPolygonToPlane } from '@jsxcad/math-plane';
 import { getCgal } from './getCgal.js';
 
@@ -7,38 +8,33 @@ export const fromSurfaceMeshToGraph = (mesh) => {
     c.Surface_mesh__collect_garbage(mesh);
   }
   const graph = { edges: [], faces: [], loops: [], points: [] };
-  c.Surface_mesh__EachFace(mesh, (face) => {
-    const halfedge = c.Surface_mesh__face_to_halfedge(mesh, face);
-    graph.loops[face] = { edge: halfedge };
-    const start = halfedge;
-    let current = start;
-    const polygon = [];
-    do {
-      const next = c.Surface_mesh__halfedge_to_next_halfedge(mesh, current);
-      const opposite = c.Surface_mesh__halfedge_to_opposite_halfedge(
-        mesh,
-        current
-      );
-      const target = c.Surface_mesh__halfedge_to_target(mesh, current);
-      graph.edges[current] = {
-        point: target,
-        next,
-        loop: face,
-        twin: opposite,
-      };
-      if (graph.points[target] === undefined) {
-        const point = c.Surface_mesh__vertex_to_point(mesh, target);
-        const triple = [
-          c.FT__to_double(point.x()),
-          c.FT__to_double(point.y()),
-          c.FT__to_double(point.z()),
-        ];
-        graph.points[target] = triple;
+  const polygon = [];
+  let face = -1;
+  c.Surface_mesh__explore(
+    mesh,
+    (faceId) => {
+      if (polygon.length >= 3) {
+        graph.faces[face].plane = fromPolygonToPlane(polygon);
       }
-      polygon.push(graph.points[target]);
-      current = next;
-    } while (current !== start);
-    graph.faces[face] = { loop: face, plane: fromPolygonToPlane(polygon) };
-  });
+      polygon.length = 0;
+      face = faceId;
+    },
+    (point, x, y, z) => {
+      if (graph.points[point]) {
+        if (!equals(graph.points[point], [x, y, z])) {
+          throw Error('die');
+        }
+      }
+      graph.points[point] = [x, y, z];
+    },
+    (point, edge, next, twin) => {
+      graph.edges[edge] = { point, next, twin, loop: face };
+      if (graph.faces[face] === undefined) {
+        graph.faces[face] = { loop: face, surface_mesh: 5 };
+        graph.loops[face] = { edge, face };
+      }
+      polygon.push(graph.points[point]);
+    }
+  );
   return graph;
 };

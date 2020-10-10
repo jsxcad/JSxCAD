@@ -1,7 +1,9 @@
 import { equals } from '@jsxcad/math-vec3';
+import { fromPolygon } from '@jsxcad/math-plane';
 import { getCgal } from './getCgal.js';
 
 export const fromNefPolyhedronToGraph = (nefPolyhedron) => {
+  // const console = { log: () => undefined };
   const c = getCgal();
   const graph = { points: [], edges: [], loops: [], faces: [] };
   const vertexMap = [];
@@ -19,8 +21,8 @@ export const fromNefPolyhedronToGraph = (nefPolyhedron) => {
   let facetId;
   let facetPlane;
   let loopId;
-  // This top-down approach does not work for things like section, where we only
-  // get vertices.
+  let sfaceId;
+  const polygon = [];
   c.Nef_polyhedron__explore(
     nefPolyhedron,
     () => {
@@ -30,21 +32,31 @@ export const fromNefPolyhedronToGraph = (nefPolyhedron) => {
       console.log(`shell`);
     },
     (facet, x, y, z, w) => {
+      if (polygon.length >= 3) {
+        graph.faces[facetId].points_plane = fromPolygon(polygon);
+        polygon.length = 0;
+      }
       console.log(``);
       console.log(`facet: ${facet}`);
       facetId = facet;
       facetPlane = [x, y, z, w];
     },
-    (loop) => {
-      console.log(`loop: ${loop}`);
+    (loop, sface) => {
+      if (polygon.length >= 3) {
+        graph.faces[facetId].points_plane = fromPolygon(polygon);
+      }
+      console.log(`loop: ${loop} sface: ${sface}`);
       loopId = loop;
+      polygon.length = 0;
     },
     (halfedge, vertex, next, twin) => {
       console.log(`edge: ${halfedge} ${vertex} ${next} ${twin}`);
       const point = vertexMap[vertex];
       graph.edges[halfedge] = { point, next, twin, loop: facetId };
       if (graph.faces[facetId] === undefined) {
-        graph.faces[facetId] = { plane: facetPlane };
+        // The facetPlane seems to be incorrect.
+        // graph.faces[facetId] = { facetPlane: facetPlane, nef: true };
+        graph.faces[facetId] = { plane: facetPlane, nef: true };
       }
       if (graph.loops[loopId] === undefined) {
         graph.loops[loopId] = { edge: halfedge, face: facetId };
@@ -56,6 +68,7 @@ export const fromNefPolyhedronToGraph = (nefPolyhedron) => {
           graph.faces[facetId].holes = [loopId];
         }
       }
+      polygon.push(graph.points[point]);
     },
     (vertex, x, y, z) => addPoint(vertex, [x, y, z])
   );

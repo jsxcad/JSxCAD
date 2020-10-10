@@ -84,11 +84,9 @@ Shape.prototype.BoxOfRadius = shapeMethod(BoxOfRadius);
 Shape.prototype.BoxOfSize = shapeMethod(BoxOfSize);
 
 const buildPrism = (radius = 1, height = 1, sides = 32) =>
-  Shape.fromGeometry(taggedSolid({}, buildRegularPrism(sides))).toGraph().scale(
-    radius,
-    radius,
-    height
-  );
+  Shape.fromGeometry(taggedSolid({}, buildRegularPrism(sides)))
+    .toGraph()
+    .scale(radius, radius, height);
 
 const ofRadius$2 = (radius = 1, height = 1, { sides = 32 } = {}) =>
   buildPrism(radius, height, sides);
@@ -228,11 +226,9 @@ Circle.toRadiusFromApothem = (radius = 1, sides = 32) =>
 Shape.prototype.Circle = shapeMethod(Circle);
 
 const buildPrism$1 = (radius = 1, height = 1, sides = 32) =>
-  Shape.fromGeometry(taggedSolid({}, buildRegularPrism(sides))).toGraph().scale(
-    radius,
-    radius,
-    height
-  );
+  Shape.fromGeometry(taggedSolid({}, buildRegularPrism(sides)))
+    .toGraph()
+    .scale(radius, radius, height);
 
 const ofRadius$6 = (radius = 1, height = 1, { sides = 3 } = {}) =>
   buildPrism$1(radius, height, sides);
@@ -1925,7 +1921,8 @@ const Torus = (
     .rotateZ(rotation)
     .moveY(radius)
     .Loop(360, { sides: segments })
-    .rotateY(90).toGraph();
+    .rotateY(90)
+    .toGraph();
 
 Shape.prototype.Torus = shapeMethod(Torus);
 

@@ -84,6 +84,9 @@ export const pushConvexPolygons = (
   if (concavePolygons) {
     concavePolygons.push(...points);
   }
+  if (dot(toPlaneOfPolygon(points), plane) < 0.9) {
+    console.log(`QQ/plane drift`);
+  }
   const holes = [];
   if (faceNode.holes) {
     for (const hole of faceNode.holes) {

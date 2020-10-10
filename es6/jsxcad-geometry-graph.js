@@ -1,6 +1,7 @@
-import { fromNefPolyhedronToGraph, fromPolygonsToNefPolyhedron, differenceOfNefPolyhedrons, fromPolygonsToSurfaceMesh, fromSurfaceMeshToGraph, intersectionOfNefPolyhedrons, sectionOfNefPolyhedron, unionOfNefPolyhedrons } from './jsxcad-algorithm-cgal.js';
+import { fromNefPolyhedronToGraph, fromSurfaceMeshToNefPolyhedron, fromPolygonsToSurfaceMesh, differenceOfNefPolyhedrons, fromSurfaceMeshToGraph, intersectionOfNefPolyhedrons, sectionOfNefPolyhedron, unionOfNefPolyhedrons } from './jsxcad-algorithm-cgal.js';
 import { toPlane, flip } from './jsxcad-math-poly3.js';
 import { dot, min, max } from './jsxcad-math-vec3.js';
+import { transform as transform$2 } from './jsxcad-math-plane.js';
 import { transform as transform$1 } from './jsxcad-geometry-points.js';
 
 const graphSymbol = Symbol('graph');
@@ -9,8 +10,12 @@ const nefPolyhedronSymbol = Symbol('nefPolyhedron');
 const fromNefPolyhedron = (nefPolyhedron) => {
   let graph = nefPolyhedron[graphSymbol];
   if (graph === undefined) {
+    console.log(`QQ/fromNefPolyhedron/computed`);
     graph = fromNefPolyhedronToGraph(nefPolyhedron);
     nefPolyhedron[graphSymbol] = graph;
+    graph[nefPolyhedronSymbol] = nefPolyhedron;
+  } else {
+    console.log(`QQ/fromNefPolyhedron/cached`);
   }
   return graph;
 };
@@ -800,6 +805,9 @@ const pushConvexPolygons = (
   if (concavePolygons) {
     concavePolygons.push(...points);
   }
+  if (dot(toPlane(points), plane) < 0.9) {
+    console.log(`QQ/plane drift`);
+  }
   const holes = [];
   if (faceNode.holes) {
     for (const hole of faceNode.holes) {
@@ -843,14 +851,20 @@ const toSolid = (graph) => {
 const toNefPolyhedron = (graph) => {
   let nefPolyhedron = graph[nefPolyhedronSymbol];
   if (nefPolyhedron === undefined) {
+    console.log(`QQ/toNefPolyhedron/computed`);
     const polygons = [];
     const solid = toSolid(graph);
     for (const surface of solid) {
       polygons.push(...surface);
     }
-    // nefPolyhedron = fromSurfaceMeshToNefPolyhedron(fromPolygonsToSurfaceMesh(polygons));
-    nefPolyhedron = fromPolygonsToNefPolyhedron(polygons);
+    nefPolyhedron = fromSurfaceMeshToNefPolyhedron(
+      fromPolygonsToSurfaceMesh(polygons)
+    );
+    // nefPolyhedron = fromPolygonsToNefPolyhedron(polygons);
     graph[nefPolyhedronSymbol] = nefPolyhedron;
+    nefPolyhedron[graphSymbol] = graph;
+  } else {
+    console.log(`QQ/toNefPolyhedron/cached`);
   }
   return nefPolyhedron;
 };
@@ -902,9 +916,11 @@ const section = ([x, y, z, w], graph) =>
     sectionOfNefPolyhedron(toNefPolyhedron(graph), x, y, z, w)
   );
 
+// FIX: Precision loss.
 const transform = (matrix, graph) => ({
   ...graph,
   points: transform$1(matrix, graph.points),
+  faces: graph.faces.map(face => ({ ...face, plane: transform$2(matrix, face.plane) }))
 });
 
 const union = (a, b) =>

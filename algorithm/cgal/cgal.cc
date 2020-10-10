@@ -282,6 +282,7 @@ public:
     Halffacet_const_handle f = h->twin();
 
     const Plane& p = f->plane();
+
     _emit_halffacet(
         halffacet_id(f),
         CGAL::to_double(p.a()), 
@@ -293,7 +294,7 @@ public:
     for (fci = f->facet_cycles_begin(); fci != f->facet_cycles_end(); ++fci) {
       if (fci.is_shalfedge()) {
         SHalfedge_const_handle loop = SHalfedge_const_handle(fci);
-        _emit_loop(shalfedge_id(loop));
+        _emit_loop(shalfedge_id(loop), sface_id(loop->incident_sface()));
         SHalfedge_around_facet_const_circulator sfc(fci);
         SHalfedge_around_facet_const_circulator send(sfc);
         CGAL_For_all(sfc, send) {
@@ -406,6 +407,64 @@ void Nef_polyhedron__explore(const Nef_polyhedron* nef, emscripten::val emit_vol
     }
     ++vol_it;
   }
+  // Terminate the final loop.
+  emit_loop((std::size_t)-1, (std::size_t)-1);
+}
+
+/*
+  c.Surface_mesh__explore(mesh,
+    (face) => { faceId = face; polygon.length = 0; },
+    (point, x, y, z) => { graph.points[point] = [x, y, z]; }
+    (edge, point, next, twin) => {
+      graph.edges[edge] = { point, next, twin, loop: faceId };
+      if (graph.faces[faceId] === undefined) {
+        graph.faces[faceId] = { loop: faceId, surface_mesh: true };
+      }
+      polygon.push(graph.points[point]);
+      if (polygon.length === 3) {
+        graph.faces[faceId].plane = fromPolygon(polygon);
+      }
+    });
+*/
+
+class Surface_mesh_explorer {
+ public:
+  Surface_mesh_explorer(emscripten::val& emit_face, emscripten::val& emit_point, emscripten::val& emit_edge)
+    : _emit_face(emit_face),_emit_point(emit_point), _emit_edge(emit_edge) {}
+
+  void Explore(const Surface_mesh& mesh) {
+    for (const auto& face : mesh.faces()) {
+      _emit_face((std::size_t)face);
+      const auto& start = mesh.halfedge(face);
+      Halfedge_index halfedge = start;
+      do {
+        const auto& target = mesh.target(halfedge);
+        const auto& p = mesh.point(target);
+        _emit_point((std::size_t)target, CGAL::to_double(p.x()), CGAL::to_double(p.y()), CGAL::to_double(p.z()));
+        const auto& next = mesh.next(halfedge);
+        const auto& opposite = mesh.opposite(halfedge);
+        _emit_edge((std::size_t)target,
+                   (std::size_t)halfedge, 
+                   (std::size_t)next,
+                   (std::size_t)opposite);
+        halfedge = next;
+      } while (halfedge != start);
+    }
+  }
+
+ private:
+
+  emscripten::val& _emit_face;
+  emscripten::val& _emit_point;
+  emscripten::val& _emit_edge;
+};
+
+void Surface_mesh__explore(const Surface_mesh* mesh, emscripten::val emit_face, emscripten::val emit_point, emscripten::val emit_edge) {
+  Surface_mesh_explorer explorer(emit_face, emit_point, emit_edge);
+  explorer.Explore(*mesh);
+  // Indicate that the previous face has finished.
+  // The number doesn't matter, but let's make it distinctive.
+  emit_face((std::size_t)-1);
 }
 
 using emscripten::select_const;
@@ -507,4 +566,5 @@ EMSCRIPTEN_BINDINGS(module) {
   emscripten::function("FT__to_double", &FT__to_double, emscripten::allow_raw_pointers());
 
   emscripten::function("Nef_polyhedron__explore", &Nef_polyhedron__explore, emscripten::allow_raw_pointers());
+  emscripten::function("Surface_mesh__explore", &Surface_mesh__explore, emscripten::allow_raw_pointers());
 }

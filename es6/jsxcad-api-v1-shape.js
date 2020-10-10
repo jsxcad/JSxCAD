@@ -115,7 +115,8 @@ const isSingleOpenPath = ({ paths }) =>
 Shape.fromClosedPath = (path, context) =>
   fromGeometry(taggedPaths({}, [close(path)]), context);
 Shape.fromGeometry = (geometry, context) => new Shape(geometry, context);
-Shape.fromGraph = (graph, context) => new Shape(taggedGraph({}, graph), context);
+Shape.fromGraph = (graph, context) =>
+  new Shape(taggedGraph({}, graph), context);
 Shape.fromOpenPath = (path, context) =>
   fromGeometry(taggedPaths({}, [open(path)]), context);
 Shape.fromPath = (path, context) =>
@@ -1242,7 +1243,7 @@ const getPegCoords = (shape) => {
 };
 
 const peg = (shape, shapeToPeg) => {
-  const { coords, origin, forward, right, plane } = getPegCoords(shape);
+  const { origin, right, plane } = getPegCoords(shape);
   const [, from] = toXYPlaneTransforms(plane);
   const orientation = subtract(right, origin);
   const angle = getAngle([1, 0], orientation);
