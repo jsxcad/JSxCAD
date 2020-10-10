@@ -15,13 +15,18 @@ const getAngle = ([aX, aY], [bX, bY]) => {
   return (absoluteAngle * 180) / Math.PI;
 };
 
-export const peg = (shape, shapeToPeg) => {
+export const getPegCoords = (shape) => {
   const coords = getPeg(shape.toTransformedGeometry());
   const origin = coords.slice(0, 3);
   const forward = coords.slice(3, 6);
   const right = coords.slice(6, 9);
-
   const plane = fromPoints(right, forward, origin);
+
+  return { coords, origin, forward, right, plane };
+};
+
+export const peg = (shape, shapeToPeg) => {
+  const { origin, right, plane } = getPegCoords(shape);
   const [, from] = toXYPlaneTransforms(plane);
   const orientation = subtract(right, origin);
   const angle = getAngle([1, 0], orientation);

@@ -1,13 +1,8 @@
-import {
-  fromGraphToNefPolyhedron,
-  fromNefPolyhedronToGraph,
-  unionOfNefPolyhedrons,
-} from '@jsxcad/algorithm-cgal';
+import { fromNefPolyhedron } from './fromNefPolyhedron.js';
+import { toNefPolyhedron } from './toNefPolyhedron.js';
+import { unionOfNefPolyhedrons } from '@jsxcad/algorithm-cgal';
 
 export const union = (a, b) =>
-  fromNefPolyhedronToGraph(
-    unionOfNefPolyhedrons(
-      fromGraphToNefPolyhedron(b),
-      fromGraphToNefPolyhedron(a)
-    )
+  fromNefPolyhedron(
+    unionOfNefPolyhedrons(toNefPolyhedron(b), toNefPolyhedron(a))
   );

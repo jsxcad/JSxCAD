@@ -8,11 +8,9 @@ import {
 import { getPaths, taggedSolid } from '@jsxcad/geometry-tagged';
 
 const buildPrism = (radius = 1, height = 1, sides = 32) =>
-  Shape.fromGeometry(taggedSolid({}, buildRegularPrism(sides))).scale(
-    radius,
-    radius,
-    height
-  );
+  Shape.fromGeometry(taggedSolid({}, buildRegularPrism(sides)))
+    .toGraph()
+    .scale(radius, radius, height);
 
 export const ofRadius = (radius = 1, height = 1, { sides = 32 } = {}) =>
   buildPrism(radius, height, sides);
@@ -33,7 +31,7 @@ const toPathFromShape = (shape) => {
 export const ofFunction = (op, { resolution, cap = true, context } = {}) =>
   Shape.fromGeometry(
     taggedSolid({}, buildFromFunction(op, resolution, cap, context))
-  );
+  ).toGraph();
 
 export const ofSlices = (op, { slices = 2, cap = true } = {}) =>
   Shape.fromGeometry(
@@ -41,7 +39,7 @@ export const ofSlices = (op, { slices = 2, cap = true } = {}) =>
       {},
       buildFromSlices((slice) => toPathFromShape(op(slice)), slices, cap)
     )
-  );
+  ).toGraph();
 
 export const Rod = ofRadius;
 export const RodOfRadius = ofRadius;

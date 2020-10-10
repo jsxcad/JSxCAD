@@ -1,15 +1,15 @@
 import { buildConvexSurfaceHull, buildConvexHull, loop, extrude as extrude$1, buildConvexMinkowskiSum } from './jsxcad-algorithm-shape.js';
-import { taggedSurface, taggedSolid, getPaths, getZ0Surfaces, getSurfaces, getPlans, outline as outline$1, getSolids, taggedLayers, union, taggedZ0Surface, taggedPaths, measureBoundingBox, taggedPoints, measureHeights } from './jsxcad-geometry-tagged.js';
+import { taggedSurface, taggedSolid, getPaths, getZ0Surfaces, getSurfaces, getPlans, outline as outline$1, section as section$1, taggedGroup, taggedLayers, getSolids, union, taggedZ0Surface, taggedPaths, measureBoundingBox, taggedPoints, measureHeights } from './jsxcad-geometry-tagged.js';
 import { Assembly, Group } from './jsxcad-api-v1-shapes.js';
-import Shape$1, { Shape } from './jsxcad-api-v1-shape.js';
+import Shape$1, { Shape, getPegCoords } from './jsxcad-api-v1-shape.js';
 import { Y as Y$1, Z as Z$3 } from './jsxcad-api-v1-connector.js';
 import { alignVertices, transform as transform$1, fromPolygons } from './jsxcad-geometry-solid.js';
-import { toPlane as toPlane$1, transform, makeConvex, flip as flip$1 } from './jsxcad-geometry-surface.js';
+import { toPlane, transform, flip as flip$1 } from './jsxcad-geometry-surface.js';
 import { toXYPlaneTransforms } from './jsxcad-math-plane.js';
-import { isClosed, transform as transform$2, isCounterClockwise, flip, getEdges } from './jsxcad-geometry-path.js';
-import { section as section$1, cutOpen, fromSolid, containsPoint as containsPoint$1 } from './jsxcad-geometry-bsp.js';
+import { isClosed, isCounterClockwise, flip, transform as transform$2, getEdges } from './jsxcad-geometry-path.js';
+import { toPlane as toPlane$1 } from './jsxcad-math-poly3.js';
+import { cutOpen, section as section$2, fromSolid, containsPoint as containsPoint$1 } from './jsxcad-geometry-bsp.js';
 import { createNormalize3 } from './jsxcad-algorithm-quantize.js';
-import { toPlane as toPlane$2 } from './jsxcad-math-poly3.js';
 import { fromTranslation } from './jsxcad-math-mat4.js';
 import { scale } from './jsxcad-math-vec3.js';
 import { toolpath as toolpath$1 } from './jsxcad-algorithm-toolpath.js';
@@ -143,7 +143,7 @@ const extrude = (shape, height = 1, depth = 0) => {
   }
   for (const { surface, tags } of getSurfaces(keptGeometry)) {
     if (surface.length > 0) {
-      const plane = toPlane$1(surface);
+      const plane = toPlane(surface);
       if (
         plane[0] === 0 &&
         plane[1] === 0 &&
@@ -155,7 +155,7 @@ const extrude = (shape, height = 1, depth = 0) => {
         const solid = extrude$1(surface, height, depth);
         solids.push(Shape.fromGeometry({ type: 'solid', solid, tags }));
       } else {
-        const [toZ0, fromZ0] = toXYPlaneTransforms(toPlane$1(surface));
+        const [toZ0, fromZ0] = toXYPlaneTransforms(toPlane(surface));
         const z0SolidGeometry = extrude$1(
           transform(toZ0, surface),
           height,
@@ -293,77 +293,25 @@ const minkowskiMethod = function (shape) {
 };
 Shape.prototype.minkowski = minkowskiMethod;
 
-/**
- *
- * # Section
- *
- * Produces a cross-section of a solid as a surface.
- *
- * ::: illustration { "view": { "position": [40, 40, 60] } }
- * ```
- * difference(Cylinder(10, 10),
- *            Cylinder(8, 10))
- * ```
- * :::
- * ::: illustration
- * ```
- * difference(Sphere(10),
- *            Sphere(8))
- *   .section()
- * ```
- * :::
- * ::: illustration
- * ```
- * difference(Sphere(10),
- *            Sphere(8))
- *   .section()
- *   .outline()
- * ```
- * :::
- *
- **/
-
-const toPlane = (connector) => {
-  for (const entry of getPlans(connector.toKeptGeometry())) {
-    if (entry.plan && entry.plan.connector) {
-      return entry.planes[0];
+const section = (shape, ...pegs) => {
+  const planes = [];
+  if (pegs.length === 0) {
+    planes.push([0, 0, 1, 0]);
+  } else {
+    for (const peg of pegs) {
+      const { plane } = getPegCoords(peg);
+      planes.push(plane);
     }
   }
-};
-
-const toSurface = (plane) => {
-  const max = +1e5;
-  const min = -1e5;
-  const [, from] = toXYPlaneTransforms(plane);
-  const path = [
-    [max, max, 0],
-    [min, max, 0],
-    [min, min, 0],
-    [max, min, 0],
-  ];
-  const polygon = transform$2(from, path);
-  return [polygon];
-};
-
-const section = (solidShape, ...connectors) => {
-  if (connectors.length === 0) {
-    connectors.push(Z$3(0));
+  const sections = [];
+  for (const plane of planes) {
+    sections.push(section$1(plane, shape.toGeometry()));
   }
-  const planes = connectors.map(toPlane);
-  const planeSurfaces = planes.map(toSurface);
-  const shapes = [];
-  const normalize = createNormalize3();
-  for (const { solid, tags } of getSolids(solidShape.toKeptGeometry())) {
-    const sections = section$1(solid, planeSurfaces, normalize);
-    const surfaces = sections.map((section) => makeConvex(section, normalize));
-    for (let i = 0; i < surfaces.length; i++) {
-      surfaces[i].plane = planes[i];
-      shapes.push(
-        Shape.fromGeometry({ type: 'surface', surface: surfaces[i], tags })
-      );
-    }
+  if (sections.length > 1) {
+    return Shape.fromGeometry(taggedGroup({}, ...sections));
+  } else {
+    return Shape.fromGeometry(sections[0]);
   }
-  return Group(...shapes);
 };
 
 const sectionMethod = function (...args) {
@@ -379,7 +327,7 @@ const squash = (shape) => {
     for (const surface of solid) {
       for (const path of surface) {
         const flat = path.map(([x, y]) => [x, y, 0]);
-        if (toPlane$2(flat) === undefined) continue;
+        if (toPlane$1(flat) === undefined) continue;
         polygons.push(isCounterClockwise(flat) ? flat : flip(flat));
       }
     }
@@ -391,7 +339,7 @@ const squash = (shape) => {
     const polygons = [];
     for (const path of surface) {
       const flat = path.map(([x, y]) => [x, y, 0]);
-      if (toPlane$2(flat) === undefined) continue;
+      if (toPlane$1(flat) === undefined) continue;
       polygons.push(isCounterClockwise(flat) ? flat : flip(flat));
     }
     result.content.push(taggedZ0Surface({ tags }, polygons));
@@ -433,7 +381,7 @@ const toPlaneFromConnector = (connector) => {
   }
 };
 
-const toSurface$1 = (plane) => {
+const toSurface = (plane) => {
   const max = +1e5;
   const min = -1e5;
   const [, from] = toXYPlaneTransforms(plane);
@@ -450,15 +398,15 @@ const toSurface$1 = (plane) => {
 const stretch = (shape, length, connector = Z$3()) => {
   const normalize = createNormalize3();
   const stretches = [];
-  const planeSurface = toSurface$1(toPlaneFromConnector(connector));
+  const planeSurface = toSurface(toPlaneFromConnector(connector));
   for (const { solid, tags } of getSolids(shape.toKeptGeometry())) {
     if (solid.length === 0) {
       continue;
     }
     const bottom = cutOpen(solid, planeSurface, normalize);
-    const [profile] = section$1(solid, [planeSurface], normalize);
+    const [profile] = section$2(solid, [planeSurface], normalize);
     const top = cutOpen(solid, flip$1(planeSurface), normalize);
-    const [toZ0, fromZ0] = toXYPlaneTransforms(toPlane$1(profile));
+    const [toZ0, fromZ0] = toXYPlaneTransforms(toPlane(profile));
     const z0SolidGeometry = extrude$1(
       transform(toZ0, profile),
       length,
@@ -467,7 +415,7 @@ const stretch = (shape, length, connector = Z$3()) => {
     );
     const middle = transform$1(fromZ0, z0SolidGeometry);
     const topMoved = transform$1(
-      fromTranslation(scale(length, toPlane$1(profile))),
+      fromTranslation(scale(length, toPlane(profile))),
       top
     );
     stretches.push(

@@ -2,34 +2,6 @@ import { Shape, shapeMethod } from '@jsxcad/api-v1-shape';
 
 import { Circle } from './Circle.js';
 
-/**
- *
- * # Torus
- *
- * ::: illustration { "view": { "position": [-80, -80, 80] } }
- * ```
- * Torus({ thickness: 5,
- *         radius: 20 })
- * ```
- * :::
- * ::: illustration { "view": { "position": [-80, -80, 80] } }
- * ```
- * Torus({ thickness: 5,
- *         radius: 20,
- *         sides: 4 })
- * ```
- * :::
- * ::: illustration { "view": { "position": [-80, -80, 80] } }
- * ```
- * Torus({ thickness: 5,
- *         radius: 20,
- *         sides: 4,
- *         rotation: 45 })
- * ```
- * :::
- *
- **/
-
 export const Torus = (
   radius = 1,
   height = 1,
@@ -39,7 +11,8 @@ export const Torus = (
     .rotateZ(rotation)
     .moveY(radius)
     .Loop(360, { sides: segments })
-    .rotateY(90);
+    .rotateY(90)
+    .toGraph();
 
 export default Torus;
 

@@ -2,6 +2,7 @@ import { max, min } from '@jsxcad/math-vec3';
 
 import { eachPoint } from './eachPoint.js';
 import { isVoid } from './isNotVoid.js';
+import { measureBoundingBox as measureBoundingBoxOfGraph } from '@jsxcad/geometry-graph';
 import { measureBoundingBox as measureBoundingBoxOfPoints } from '@jsxcad/geometry-points';
 import { measureBoundingBox as measureBoundingBoxOfSolid } from '@jsxcad/geometry-solid';
 import { measureBoundingBox as measureBoundingBoxOfSurface } from '@jsxcad/geometry-surface';
@@ -41,7 +42,7 @@ export const measureBoundingBox = (geometry) => {
       case 'sketch':
         return descend();
       case 'graph':
-        return update(measureBoundingBoxOfPoints(geometry.graph.points));
+        return update(measureBoundingBoxOfGraph(geometry.graph));
       case 'layout':
         return update(geometry.marks);
       case 'solid':
@@ -51,6 +52,7 @@ export const measureBoundingBox = (geometry) => {
       case 'z0Surface':
         return update(measureBoundingBoxOfZ0Surface(geometry.z0Surface));
       case 'points':
+        return update(measureBoundingBoxOfPoints(geometry.points));
       case 'paths':
         return update(measureBoundingBoxGeneric(geometry));
       default:

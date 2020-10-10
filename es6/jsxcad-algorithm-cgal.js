@@ -1,4 +1,5 @@
 import { onBoot } from './jsxcad-sys.js';
+import { equals } from './jsxcad-math-vec3.js';
 import { fromPolygon } from './jsxcad-math-plane.js';
 
 // Copyright Joyent, Inc. and other Node contributors.
@@ -427,8 +428,8 @@ var Module = (function () {
     }
     var wasmMemory;
     var wasmTable = new WebAssembly.Table({
-      initial: 798,
-      maximum: 798,
+      initial: 834,
+      maximum: 834,
       element: 'anyfunc',
     });
     var ABORT = false;
@@ -6124,36 +6125,36 @@ var Module = (function () {
     });
     var asmLibraryArg = {
       c: ___assert_fail,
-      n: ___cxa_allocate_exception,
+      p: ___cxa_allocate_exception,
       d: ___cxa_thread_atexit,
-      m: ___cxa_throw,
+      o: ___cxa_throw,
       b: wasmTable,
       A: ___map_file,
       z: ___sys_munmap,
       G: __embind_register_bool,
-      h: __embind_register_class,
-      i: __embind_register_class_constructor,
-      f: __embind_register_class_function,
+      j: __embind_register_class,
+      k: __embind_register_class_constructor,
+      g: __embind_register_class_function,
       F: __embind_register_emval,
-      r: __embind_register_float,
-      e: __embind_register_function,
-      k: __embind_register_integer,
-      j: __embind_register_memory_view,
-      s: __embind_register_std_string,
-      p: __embind_register_std_wstring,
+      s: __embind_register_float,
+      f: __embind_register_function,
+      m: __embind_register_integer,
+      l: __embind_register_memory_view,
+      t: __embind_register_std_string,
+      q: __embind_register_std_wstring,
       H: __embind_register_void,
-      t: __emval_call,
-      o: __emval_decref,
-      g: _abort,
+      h: __emval_call,
+      e: __emval_decref,
+      i: _abort,
       w: _emscripten_memcpy_big,
       x: _emscripten_resize_heap,
       B: _environ_get,
       C: _environ_sizes_get,
-      l: _exit,
+      n: _exit,
       E: _fd_close,
       D: _fd_read,
       u: _fd_seek,
-      q: _fd_write,
+      r: _fd_write,
       a: wasmMemory,
       I: _raise,
       v: _setTempRet0,
@@ -6321,7 +6322,12 @@ const fromGraphToSurfaceMesh = (graph) => {
   );
 
   const edgeIndex = [];
-  graph.edges.forEach(({ point, twin }, edge) => {
+  graph.edges.forEach((edgeNode, edge) => {
+    if (!edgeNode) {
+      return;
+    }
+    const { point, twin } = edgeNode;
+
     // Edges are always paired.
     if (edgeIndex[edge] !== undefined) {
       return;
@@ -6341,7 +6347,12 @@ const fromGraphToSurfaceMesh = (graph) => {
     }
   });
 
-  graph.edges.forEach(({ point, next, loop, twin }, edge) => {
+  graph.edges.forEach((edgeNode, edge) => {
+    if (!edgeNode) {
+      return;
+    }
+    const { point, next, loop } = edgeNode;
+
     if (point >= graph.points.length) throw Error('die');
     c.Surface_mesh__set_edge_target(mesh, edgeIndex[edge], vertexIndex[point]);
 
@@ -6372,10 +6383,222 @@ const fromSurfaceMeshToNefPolyhedron = (surfaceMesh) => {
 const fromGraphToNefPolyhedron = (graph) =>
   fromSurfaceMeshToNefPolyhedron(fromGraphToSurfaceMesh(graph));
 
+const fromNefPolyhedronFacetsToGraph = (nefPolyhedron) => {
+  const console = { log: () => undefined };
+  const c = getCgal();
+  const graph = { points: [], edges: [], loops: [], faces: [], surfaces: [] };
+  const vertexMap = [];
+  const addPoint = (vertex, point) => {
+    for (let index = 0; index < graph.points.length; index++) {
+      if (equals(point, graph.points[index])) {
+        vertexMap[vertex] = index;
+        return index;
+      }
+    }
+    const index = graph.points.length;
+    graph.points.push(point);
+    vertexMap[vertex] = index;
+  };
+  let facetId;
+  let facetPlane;
+  let loopId;
+  const polygon = [];
+  c.Nef_polyhedron__explore_facets(
+    nefPolyhedron,
+    (facet, x, y, z, w) => {
+      if (polygon.length >= 3) {
+        graph.faces[facetId].points_plane = fromPolygon(polygon);
+        polygon.length = 0;
+      }
+      console.log(``);
+      console.log(`facet: ${facet}`);
+      facetId = facet;
+      facetPlane = [x, y, z, w];
+    },
+    (loop, sface) => {
+      if (polygon.length >= 3) {
+        graph.faces[facetId].points_plane = fromPolygon(polygon);
+      }
+      console.log(`loop: ${loop} sface: ${sface}`);
+      loopId = loop;
+      polygon.length = 0;
+    },
+    (halfedge, vertex, next, twin) => {
+      console.log(`edge: ${halfedge} ${vertex} ${next} ${twin}`);
+      const point = vertexMap[vertex];
+      graph.edges[halfedge] = { point, next, twin, loop: facetId };
+      if (graph.faces[facetId] === undefined) {
+        // The facetPlane seems to be incorrect.
+        graph.faces[facetId] = { plane: facetPlane };
+        if (graph.surfaces[0] === undefined) {
+          graph.surfaces[0] = { faces: [] };
+        }
+        graph.surfaces[0].faces.push(facetId);
+      }
+      if (graph.loops[loopId] === undefined) {
+        graph.loops[loopId] = { edge: halfedge, face: facetId };
+        if (graph.faces[facetId].loop === undefined) {
+          graph.faces[facetId].loop = loopId;
+        } else if (graph.faces[facetId].holes) {
+          graph.faces[facetId].holes.push(loopId);
+        } else {
+          graph.faces[facetId].holes = [loopId];
+        }
+      }
+      polygon.push(graph.points[point]);
+    },
+    (vertex, x, y, z) => addPoint(vertex, [x, y, z])
+  );
+  return graph;
+};
+
+const fromNefPolyhedronShellsToGraph = (nefPolyhedron) => {
+  const console = { log: () => undefined };
+  const c = getCgal();
+  const graph = { points: [], edges: [], loops: [], faces: [], volumes: [] };
+  const vertexMap = [];
+  const addPoint = (vertex, point) => {
+    for (let index = 0; index < graph.points.length; index++) {
+      if (equals(point, graph.points[index])) {
+        vertexMap[vertex] = index;
+        return index;
+      }
+    }
+    const index = graph.points.length;
+    graph.points.push(point);
+    vertexMap[vertex] = index;
+  };
+  let facetId;
+  let facetPlane;
+  let loopId;
+  let volumeId;
+  const polygon = [];
+  c.Nef_polyhedron__explore_shells(
+    nefPolyhedron,
+    (volume) => {
+      console.log(`volume`);
+      volumeId = volume;
+    },
+    () => {
+      console.log(`shell`);
+    },
+    (facet, x, y, z, w) => {
+      if (polygon.length >= 3) {
+        graph.faces[facetId].points_plane = fromPolygon(polygon);
+        polygon.length = 0;
+      }
+      console.log(``);
+      console.log(`facet: ${facet}`);
+      facetId = facet;
+      facetPlane = [x, y, z, w];
+    },
+    (loop, sface) => {
+      if (polygon.length >= 3) {
+        graph.faces[facetId].points_plane = fromPolygon(polygon);
+      }
+      console.log(`loop: ${loop} sface: ${sface}`);
+      loopId = loop;
+      polygon.length = 0;
+    },
+    (halfedge, vertex, next, twin) => {
+      console.log(`edge: ${halfedge} ${vertex} ${next} ${twin}`);
+      const point = vertexMap[vertex];
+      graph.edges[halfedge] = { point, next, twin, loop: facetId };
+      if (graph.faces[facetId] === undefined) {
+        // The facetPlane seems to be incorrect.
+        graph.faces[facetId] = { plane: facetPlane };
+        if (graph.volumes[volumeId] === undefined) {
+          graph.volumes[volumeId] = { faces: [] };
+        }
+        graph.volumes[volumeId].faces.push(facetId);
+      }
+      if (graph.loops[loopId] === undefined) {
+        graph.loops[loopId] = { edge: halfedge, face: facetId };
+        if (graph.faces[facetId].loop === undefined) {
+          graph.faces[facetId].loop = loopId;
+        } else if (graph.faces[facetId].holes) {
+          graph.faces[facetId].holes.push(loopId);
+        } else {
+          graph.faces[facetId].holes = [loopId];
+        }
+      }
+      polygon.push(graph.points[point]);
+    },
+    (vertex, x, y, z) => addPoint(vertex, [x, y, z])
+  );
+  return graph;
+};
+
 const fromNefPolyhedronToSurfaceMesh = (nefPolyhedron) => {
   const c = getCgal();
   const mesh = c.FromNefPolyhedronToSurfaceMesh(nefPolyhedron);
   return mesh;
+};
+
+const fromNefPolyhedronToPolygons = (nef) => {
+  const c = getCgal();
+  const polygons = [];
+  let polygon;
+  c.FromNefPolyhedronToPolygons(
+    nef,
+    false,
+    (x, y, z) => polygon.push([x, y, z]),
+    () => {
+      polygon = [];
+      polygons.push(polygon);
+    }
+  );
+  return polygons;
+};
+
+const fromNefPolyhedronToTriangles = (nef) => {
+  const c = getCgal();
+  const triangles = [];
+  let triangle;
+  c.FromNefPolyhedronToPolygons(
+    nef,
+    true,
+    (x, y, z) => triangle.push([x, y, z]),
+    () => {
+      triangle = [];
+      triangles.push(triangle);
+    }
+  );
+  return triangles;
+};
+
+const fromPolygonsToNefPolyhedron = (jsPolygons) => {
+  const c = getCgal();
+  const nefPolyhedron = c.FromPolygonSoupToNefPolyhedron(
+    (triples, polygons) => {
+      let index = 0;
+      for (const jsPolygon of jsPolygons) {
+        const polygon = new c.Polygon();
+        for (const [x, y, z] of jsPolygon) {
+          c.addTriple(triples, x, y, z);
+          c.Polygon__push_back(polygon, index++);
+        }
+        polygons.push_back(polygon);
+      }
+    }
+  );
+  return nefPolyhedron;
+};
+
+const fromPolygonsToSurfaceMesh = (jsPolygons) => {
+  const c = getCgal();
+  const surfaceMesh = c.FromPolygonSoupToSurfaceMesh((triples, polygons) => {
+    let index = 0;
+    for (const jsPolygon of jsPolygons) {
+      const polygon = new c.Polygon();
+      for (const [x, y, z] of jsPolygon) {
+        c.addTriple(triples, x, y, z);
+        c.Polygon__push_back(polygon, index++);
+      }
+      polygons.push_back(polygon);
+    }
+  });
+  return surfaceMesh;
 };
 
 const fromSurfaceMeshToGraph = (mesh) => {
@@ -6384,80 +6607,49 @@ const fromSurfaceMeshToGraph = (mesh) => {
     c.Surface_mesh__collect_garbage(mesh);
   }
   const graph = { edges: [], faces: [], loops: [], points: [] };
-  c.Surface_mesh__EachFace(mesh, (face) => {
-    const halfedge = c.Surface_mesh__face_to_halfedge(mesh, face);
-    graph.loops[face] = { edge: halfedge };
-    const start = halfedge;
-    let current = start;
-    const polygon = [];
-    do {
-      const next = c.Surface_mesh__halfedge_to_next_halfedge(mesh, current);
-      const opposite = c.Surface_mesh__halfedge_to_opposite_halfedge(
-        mesh,
-        current
-      );
-      const target = c.Surface_mesh__halfedge_to_target(mesh, current);
-      graph.edges[current] = {
-        point: target,
-        next,
-        loop: face,
-        twin: opposite,
-      };
-      if (graph.points[target] === undefined) {
-        const point = c.Surface_mesh__vertex_to_point(mesh, target);
-        const triple = [
-          c.FT__to_double(point.x()),
-          c.FT__to_double(point.y()),
-          c.FT__to_double(point.z()),
-        ];
-        graph.points[target] = triple;
+  const polygon = [];
+  let face = -1;
+  c.Surface_mesh__explore(
+    mesh,
+    (faceId) => {
+      if (polygon.length >= 3) {
+        graph.faces[face].plane = fromPolygon(polygon);
       }
-      polygon.push(graph.points[target]);
-      current = next;
-    } while (current !== start);
-    graph.faces[face] = { loop: face, plane: fromPolygon(polygon) };
-  });
-  return graph;
-};
-
-const fromNefPolyhedronToGraph = (nefPolyhedron) =>
-  fromSurfaceMeshToGraph(fromNefPolyhedronToSurfaceMesh(nefPolyhedron));
-
-const fromNefPolyhedronToTriangles = (nef) => {
-  const c = getCgal();
-  const triangles = [];
-  c.FromNefPolyhedronToTriangles(nef, (aX, aY, aZ, bX, bY, bZ, cX, cY, cZ) =>
-    triangles.push([
-      [aX, aY, aZ],
-      [bX, bY, bZ],
-      [cX, cY, cZ],
-    ])
-  );
-  return triangles;
-};
-
-const fromPolygonsToSurfaceMesh = (jsPolygons) => {
-  const c = getCgal();
-  // FIX: Leaks.
-  const triples = new c.Triples();
-  const polygons = new c.Polygons();
-  let index = 0;
-  for (const jsPolygon of jsPolygons) {
-    const polygon = new c.Polygon();
-    for (const [x, y, z] of jsPolygon) {
-      c.addTriple(triples, x, y, z);
-      c.Polygon__push_back(polygon, index++);
+      polygon.length = 0;
+      face = faceId;
+    },
+    (point, x, y, z) => {
+      if (graph.points[point]) {
+        if (!equals(graph.points[point], [x, y, z])) {
+          throw Error('die');
+        }
+      }
+      graph.points[point] = [x, y, z];
+    },
+    (point, edge, next, twin) => {
+      graph.edges[edge] = { point, next, twin, loop: face };
+      if (graph.faces[face] === undefined) {
+        graph.faces[face] = { loop: face };
+        graph.loops[face] = { edge, face };
+      }
+      polygon.push(graph.points[point]);
     }
-    polygons.push_back(polygon);
-  }
-  const surfaceMesh = c.FromPolygonSoupToSurfaceMesh(triples, polygons);
-  return surfaceMesh;
+  );
+  return graph;
 };
 
 const intersectionOfNefPolyhedrons = (a, b) =>
   getCgal().IntersectionOfNefPolyhedrons(a, b);
 
+const sectionOfNefPolyhedron = (
+  nefPolyhedron,
+  x = 0,
+  y = 0,
+  z = 0,
+  w = 0
+) => getCgal().SectionOfNefPolyhedron(nefPolyhedron, x, y, z, w);
+
 const unionOfNefPolyhedrons = (a, b) =>
   getCgal().UnionOfNefPolyhedrons(a, b);
 
-export { differenceOfNefPolyhedrons, fromGraphToNefPolyhedron, fromGraphToSurfaceMesh, fromNefPolyhedronToGraph, fromNefPolyhedronToSurfaceMesh, fromNefPolyhedronToTriangles, fromPolygonsToSurfaceMesh, fromSurfaceMeshToGraph, fromSurfaceMeshToNefPolyhedron, initCgal, intersectionOfNefPolyhedrons, unionOfNefPolyhedrons };
+export { differenceOfNefPolyhedrons, fromGraphToNefPolyhedron, fromGraphToSurfaceMesh, fromNefPolyhedronFacetsToGraph, fromNefPolyhedronShellsToGraph, fromNefPolyhedronToPolygons, fromNefPolyhedronToSurfaceMesh, fromNefPolyhedronToTriangles, fromPolygonsToNefPolyhedron, fromPolygonsToSurfaceMesh, fromSurfaceMeshToGraph, fromSurfaceMeshToNefPolyhedron, initCgal, intersectionOfNefPolyhedrons, sectionOfNefPolyhedron, unionOfNefPolyhedrons };

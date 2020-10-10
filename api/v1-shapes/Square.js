@@ -6,52 +6,6 @@ import {
 
 import { taggedZ0Surface } from '@jsxcad/geometry-tagged';
 
-/**
- *
- * # Square (rectangle)
- *
- * Properly speaking what is produced here are rectangles.
- *
- * ::: illustration { "view": { "position": [0, 0, 10] } }
- * ```
- * Square()
- * ```
- * :::
- * ::: illustration
- * ```
- * Square(10)
- * ```
- * :::
- * ::: illustration
- * ```
- * Square(6, 12)
- * ```
- * :::
- * ::: illustration
- * ```
- * Square({ edge: 10 })
- * ```
- * :::
- * ::: illustration
- * ```
- * assemble(Circle(10),
- *          Square({ radius: 10 })
- *            .drop())
- * ```
- * :::
- * ::: illustration
- * ```
- * assemble(Square({ apothem: 10 }),
- *          Circle(10).drop())
- * ```
- * :::
- * ::: illustration
- * ```
- * Square({ diameter: 20 })
- * ```
- * :::
- **/
-
 const toRadiusFromApothem = (apothem) => apothem / Math.cos(Math.PI / 4);
 
 const edgeScale = regularPolygonEdgeLengthToRadius(1, 4);

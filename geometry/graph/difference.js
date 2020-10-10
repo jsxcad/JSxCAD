@@ -1,13 +1,8 @@
-import {
-  differenceOfNefPolyhedrons,
-  fromGraphToNefPolyhedron,
-  fromNefPolyhedronToGraph,
-} from '@jsxcad/algorithm-cgal';
+import { differenceOfNefPolyhedrons } from '@jsxcad/algorithm-cgal';
+import { fromNefPolyhedron } from './fromNefPolyhedron.js';
+import { toNefPolyhedron } from './toNefPolyhedron.js';
 
 export const difference = (a, b) =>
-  fromNefPolyhedronToGraph(
-    differenceOfNefPolyhedrons(
-      fromGraphToNefPolyhedron(a),
-      fromGraphToNefPolyhedron(b)
-    )
+  fromNefPolyhedron(
+    differenceOfNefPolyhedrons(toNefPolyhedron(a), toNefPolyhedron(b))
   );

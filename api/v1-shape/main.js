@@ -66,6 +66,6 @@ import Shape from './Shape.js';
 import log from './log.js';
 
 export { Shape, loadGeometry, log, saveGeometry };
-export { shapeMethod } from './peg.js';
+export { getPegCoords, shapeMethod } from './peg.js';
 
 export default Shape;
