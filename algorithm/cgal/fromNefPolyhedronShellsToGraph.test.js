@@ -1,6 +1,6 @@
 import { differenceOfNefPolyhedrons } from './differenceOfNefPolyhedrons.js';
 import { fromGraphToNefPolyhedron } from './fromGraphToNefPolyhedron.js';
-import { fromNefPolyhedronToGraph } from './fromNefPolyhedronToGraph2.js';
+import { fromNefPolyhedronShellsToGraph } from './fromNefPolyhedronShellsToGraph.js';
 import { initCgal } from './getCgal.js';
 
 import test from 'ava';
@@ -8,169 +8,6 @@ import test from 'ava';
 test.beforeEach(async (t) => {
   await initCgal();
 });
-
-const graph = {
-  edges: [
-    { point: 1, next: 2, loop: 0, twin: 1 },
-    { point: 0, next: 18, loop: 4, twin: 0 },
-    { point: 2, next: 4, loop: 0, twin: 3 },
-    { point: 1, next: 12, loop: 2, twin: 2 },
-    { point: 0, next: 0, loop: 0, twin: 5 },
-    { point: 2, next: 6, loop: 1, twin: 4 },
-    { point: 3, next: 8, loop: 1, twin: 7 },
-    { point: 2, next: 11, loop: 8, twin: 6 },
-    { point: 0, next: 5, loop: 1, twin: 9 },
-    { point: 3, next: 24, loop: 6, twin: 8 },
-    { point: 2, next: 3, loop: 2, twin: 11 },
-    { point: 4, next: 30, loop: 8, twin: 10 },
-    { point: 4, next: 10, loop: 2, twin: 13 },
-    { point: 1, next: 14, loop: 3, twin: 12 },
-    { point: 5, next: 16, loop: 3, twin: 15 },
-    { point: 1, next: 21, loop: 5, twin: 14 },
-    { point: 4, next: 13, loop: 3, twin: 17 },
-    { point: 5, next: 35, loop: 11, twin: 16 },
-    { point: 6, next: 20, loop: 4, twin: 19 },
-    { point: 0, next: 27, loop: 7, twin: 18 },
-    { point: 1, next: 1, loop: 4, twin: 21 },
-    { point: 6, next: 22, loop: 5, twin: 20 },
-    { point: 5, next: 15, loop: 5, twin: 23 },
-    { point: 6, next: 29, loop: 10, twin: 22 },
-    { point: 7, next: 26, loop: 6, twin: 25 },
-    { point: 3, next: 31, loop: 9, twin: 24 },
-    { point: 0, next: 9, loop: 6, twin: 27 },
-    { point: 7, next: 28, loop: 7, twin: 26 },
-    { point: 6, next: 19, loop: 7, twin: 29 },
-    { point: 7, next: 34, loop: 10, twin: 28 },
-    { point: 3, next: 7, loop: 8, twin: 31 },
-    { point: 4, next: 32, loop: 9, twin: 30 },
-    { point: 7, next: 25, loop: 9, twin: 33 },
-    { point: 4, next: 17, loop: 11, twin: 32 },
-    { point: 5, next: 23, loop: 10, twin: 35 },
-    { point: 7, next: 33, loop: 11, twin: 34 },
-  ],
-  faces: [
-    { loop: 0, plane: [0, 1, 0, 0.5] },
-    { loop: 1, plane: [0, 1, 0, 0.5] },
-    { loop: 2, plane: [0, 0, 1, 0.5] },
-    { loop: 3, plane: [0, 0, 1, 0.5] },
-    { loop: 4, plane: [-1, 0, 0, 0.5] },
-    { loop: 5, plane: [-1, 0, 0, 0.5] },
-    { loop: 6, plane: [0, 0, -1, 0.5] },
-    { loop: 7, plane: [0, 0, -1, 0.5] },
-    { loop: 8, plane: [1, 0, 0, 0.5] },
-    { loop: 9, plane: [1, 0, 0, 0.5] },
-    { loop: 10, plane: [0, -1, 0, 0.5] },
-    { loop: 11, plane: [0, -1, 0, 0.5] },
-  ],
-  loops: [
-    { edge: 4 },
-    { edge: 5 },
-    { edge: 12 },
-    { edge: 13 },
-    { edge: 20 },
-    { edge: 21 },
-    { edge: 26 },
-    { edge: 27 },
-    { edge: 30 },
-    { edge: 31 },
-    { edge: 34 },
-    { edge: 35 },
-  ],
-  points: [
-    [-0.5, 0.5, -0.5],
-    [-0.5, 0.5, 0.5],
-    [0.5, 0.5, 0.5],
-    [0.5, 0.5, -0.5],
-    [0.5, -0.5, 0.5],
-    [-0.5, -0.5, 0.5],
-    [-0.5, -0.5, -0.5],
-    [0.5, -0.5, -0.5],
-  ],
-};
-
-false &&
-  test('fromNefPolyhedronToGraph', (t) => {
-    const nefPolyhedron = fromGraphToNefPolyhedron(graph);
-    t.true(nefPolyhedron.is_valid(false, 1));
-    const outputGraph = fromNefPolyhedronToGraph(nefPolyhedron);
-    console.log(JSON.stringify(outputGraph));
-    t.deepEqual(JSON.parse(JSON.stringify(outputGraph)), {
-      points: [
-        [-0.5, -0.5, -0.5],
-        [-0.5, 0.5, -0.5],
-        [0.5, 0.5, -0.5],
-        [0.5, -0.5, -0.5],
-        [-0.5, 0.5, 0.5],
-        [0.5, 0.5, 0.5],
-        [-0.5, -0.5, 0.5],
-        [0.5, -0.5, 0.5],
-      ],
-      edges: [
-        { point: 0, next: 1, twin: 2, loop: 0 },
-        { point: 1, next: 3, twin: 4, loop: 0 },
-        null,
-        { point: 2, next: 5, twin: 6, loop: 0 },
-        null,
-        { point: 3, next: 0, twin: 7, loop: 0 },
-        null,
-        null,
-        { point: 1, next: 9, twin: 10, loop: 1 },
-        { point: 4, next: 11, twin: 12, loop: 1 },
-        null,
-        { point: 5, next: 13, twin: 14, loop: 1 },
-        null,
-        { point: 2, next: 8, twin: 15, loop: 1 },
-        null,
-        null,
-        { point: 0, next: 17, twin: 18, loop: 2 },
-        { point: 6, next: 19, twin: 20, loop: 2 },
-        null,
-        { point: 4, next: 21, twin: 22, loop: 2 },
-        null,
-        { point: 1, next: 16, twin: 23, loop: 2 },
-        null,
-        null,
-        { point: 0, next: 25, twin: 26, loop: 3 },
-        { point: 3, next: 27, twin: 28, loop: 3 },
-        null,
-        { point: 7, next: 29, twin: 30, loop: 3 },
-        null,
-        { point: 6, next: 24, twin: 31, loop: 3 },
-        null,
-        null,
-        { point: 3, next: 33, twin: 34, loop: 4 },
-        { point: 2, next: 35, twin: 36, loop: 4 },
-        null,
-        { point: 5, next: 37, twin: 38, loop: 4 },
-        null,
-        { point: 7, next: 32, twin: 39, loop: 4 },
-        null,
-        null,
-        { point: 6, next: 41, twin: 42, loop: 5 },
-        { point: 7, next: 43, twin: 44, loop: 5 },
-        null,
-        { point: 5, next: 45, twin: 46, loop: 5 },
-        null,
-        { point: 4, next: 40, twin: 47, loop: 5 },
-      ],
-      loops: [
-        { edge: 0, face: 0 },
-        { edge: 8, face: 1 },
-        { edge: 16, face: 2 },
-        { edge: 24, face: 3 },
-        { edge: 32, face: 4 },
-        { edge: 40, face: 5 },
-      ],
-      faces: [
-        { loop: 0, plane: [0, 0, -1, 0.5] },
-        { loop: 1, plane: [0, 1, 0, 0.5] },
-        { loop: 2, plane: [-1, 0, 0, 0.5] },
-        { loop: 3, plane: [0, -1, 0, 0.5] },
-        { loop: 4, plane: [1, 0, 0, 0.5] },
-        { loop: 5, plane: [0, 0, 1, 0.5] },
-      ],
-    });
-  });
 
 const outerBox = {
   edges: [
@@ -378,12 +215,11 @@ const innerBox = {
   ],
 };
 
-test('fromNefPolyhedronToGraph', (t) => {
+test('fromNefPolyhedronShellsToGraph', (t) => {
   const outer = fromGraphToNefPolyhedron(outerBox);
   const inner = fromGraphToNefPolyhedron(innerBox);
   const torus = differenceOfNefPolyhedrons(outer, inner);
-  const outputGraph = fromNefPolyhedronToGraph(torus);
-  console.log(JSON.stringify(outputGraph));
+  const outputGraph = fromNefPolyhedronShellsToGraph(torus);
   t.deepEqual(JSON.parse(JSON.stringify(outputGraph)), {
     points: [
       [0.5, -0.5, -0.5],
@@ -469,24 +305,29 @@ test('fromNefPolyhedronToGraph', (t) => {
     ],
     faces: [
       {
-        facetPlane: [0, 0, -1, -0.5],
+        plane: [0, 0, -1, -0.5],
         loop: 0,
-        plane: [0, 0, 1, -0.5],
+        points_plane: [0, 0, 1, -0.5],
         holes: [1],
       },
-      { facetPlane: [-1, 0, 0, -0.5], loop: 2, plane: [-1, 0, 0, 0.5] },
-      { facetPlane: [0, -1, 0, -0.5], loop: 3, plane: [0, -1, 0, 0.5] },
-      { facetPlane: [1, 0, 0, -0.5], loop: 4, plane: [1, 0, 0, 0.5] },
-      { facetPlane: [0, 1, 0, -0.5], loop: 5, plane: [0, 1, 0, 0.5] },
-      { facetPlane: [1, 0, 0, 0.25], loop: 6, plane: [1, 0, 0, -0.25] },
-      { facetPlane: [0, -1, 0, 0.25], loop: 7, plane: [0, -1, 0, -0.25] },
-      { facetPlane: [-1, 0, 0, 0.25], loop: 8, plane: [-1, 0, 0, -0.25] },
-      { facetPlane: [0, 1, 0, 0.25], loop: 9, plane: [0, 1, 0, -0.25] },
+      { plane: [-1, 0, 0, -0.5], loop: 2, points_plane: [-1, 0, 0, 0.5] },
+      { plane: [0, -1, 0, -0.5], loop: 3, points_plane: [0, -1, 0, 0.5] },
+      { plane: [1, 0, 0, -0.5], loop: 4, points_plane: [1, 0, 0, 0.5] },
+      { plane: [0, 1, 0, -0.5], loop: 5, points_plane: [0, 1, 0, 0.5] },
+      { plane: [1, 0, 0, 0.25], loop: 6, points_plane: [1, 0, 0, -0.25] },
+      { plane: [0, -1, 0, 0.25], loop: 7, points_plane: [0, -1, 0, -0.25] },
+      { plane: [-1, 0, 0, 0.25], loop: 8, points_plane: [-1, 0, 0, -0.25] },
+      { plane: [0, 1, 0, 0.25], loop: 9, points_plane: [0, 1, 0, -0.25] },
       {
-        facetPlane: [0, 0, 1, -0.5],
+        plane: [0, 0, 1, -0.5],
         loop: 10,
-        plane: [0, 0, -1, -0.5],
+        points_plane: [0, 0, -1, -0.5],
         holes: [11],
+      },
+    ],
+    volumes: [
+      {
+        faces: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
       },
     ],
   });

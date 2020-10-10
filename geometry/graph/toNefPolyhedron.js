@@ -1,5 +1,5 @@
 import {
-  fromPolygonsToNefPolyhedron,
+  // fromPolygonsToNefPolyhedron,
   fromPolygonsToSurfaceMesh,
   fromSurfaceMeshToNefPolyhedron,
 } from '@jsxcad/algorithm-cgal';

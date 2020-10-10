@@ -1,4 +1,4 @@
-import { fromNefPolyhedronToGraph, fromSurfaceMeshToNefPolyhedron, fromPolygonsToSurfaceMesh, differenceOfNefPolyhedrons, fromSurfaceMeshToGraph, intersectionOfNefPolyhedrons, sectionOfNefPolyhedron, unionOfNefPolyhedrons } from './jsxcad-algorithm-cgal.js';
+import { fromNefPolyhedronShellsToGraph, fromSurfaceMeshToNefPolyhedron, fromPolygonsToSurfaceMesh, differenceOfNefPolyhedrons, fromSurfaceMeshToGraph, intersectionOfNefPolyhedrons, fromNefPolyhedronFacetsToGraph, sectionOfNefPolyhedron, unionOfNefPolyhedrons } from './jsxcad-algorithm-cgal.js';
 import { toPlane, flip } from './jsxcad-math-poly3.js';
 import { dot, min, max } from './jsxcad-math-vec3.js';
 import { transform as transform$2 } from './jsxcad-math-plane.js';
@@ -11,7 +11,7 @@ const fromNefPolyhedron = (nefPolyhedron) => {
   let graph = nefPolyhedron[graphSymbol];
   if (graph === undefined) {
     console.log(`QQ/fromNefPolyhedron/computed`);
-    graph = fromNefPolyhedronToGraph(nefPolyhedron);
+    graph = fromNefPolyhedronShellsToGraph(nefPolyhedron);
     nefPolyhedron[graphSymbol] = graph;
     graph[nefPolyhedronSymbol] = nefPolyhedron;
   } else {
@@ -912,7 +912,7 @@ const outline = (graph) => {
 };
 
 const section = ([x, y, z, w], graph) =>
-  fromNefPolyhedronToGraph(
+  fromNefPolyhedronFacetsToGraph(
     sectionOfNefPolyhedron(toNefPolyhedron(graph), x, y, z, w)
   );
 
@@ -920,7 +920,10 @@ const section = ([x, y, z, w], graph) =>
 const transform = (matrix, graph) => ({
   ...graph,
   points: transform$1(matrix, graph.points),
-  faces: graph.faces.map(face => ({ ...face, plane: transform$2(matrix, face.plane) }))
+  faces: graph.faces.map((face) => ({
+    ...face,
+    plane: transform$2(matrix, face.plane),
+  })),
 });
 
 const union = (a, b) =>

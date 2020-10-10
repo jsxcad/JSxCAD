@@ -2,10 +2,10 @@ import { equals } from '@jsxcad/math-vec3';
 import { fromPolygon } from '@jsxcad/math-plane';
 import { getCgal } from './getCgal.js';
 
-export const fromNefPolyhedronToGraph = (nefPolyhedron) => {
-  // const console = { log: () => undefined };
+export const fromNefPolyhedronShellsToGraph = (nefPolyhedron) => {
+  const console = { log: () => undefined };
   const c = getCgal();
-  const graph = { points: [], edges: [], loops: [], faces: [] };
+  const graph = { points: [], edges: [], loops: [], faces: [], volumes: [] };
   const vertexMap = [];
   const addPoint = (vertex, point) => {
     for (let index = 0; index < graph.points.length; index++) {
@@ -21,12 +21,13 @@ export const fromNefPolyhedronToGraph = (nefPolyhedron) => {
   let facetId;
   let facetPlane;
   let loopId;
-  let sfaceId;
+  let volumeId;
   const polygon = [];
-  c.Nef_polyhedron__explore(
+  c.Nef_polyhedron__explore_shells(
     nefPolyhedron,
-    () => {
+    (volume) => {
       console.log(`volume`);
+      volumeId = volume;
     },
     () => {
       console.log(`shell`);
@@ -55,8 +56,11 @@ export const fromNefPolyhedronToGraph = (nefPolyhedron) => {
       graph.edges[halfedge] = { point, next, twin, loop: facetId };
       if (graph.faces[facetId] === undefined) {
         // The facetPlane seems to be incorrect.
-        // graph.faces[facetId] = { facetPlane: facetPlane, nef: true };
-        graph.faces[facetId] = { plane: facetPlane, nef: true };
+        graph.faces[facetId] = { plane: facetPlane };
+        if (graph.volumes[volumeId] === undefined) {
+          graph.volumes[volumeId] = { faces: [] };
+        }
+        graph.volumes[volumeId].faces.push(facetId);
       }
       if (graph.loops[loopId] === undefined) {
         graph.loops[loopId] = { edge: halfedge, face: facetId };

@@ -78,7 +78,6 @@ test('FromPolygonsToSurfaceMesh', (t) => {
   const nefPolyhedron = fromSurfaceMeshToNefPolyhedron(surfaceMesh);
   t.true(nefPolyhedron.is_valid(false, 1));
   const polygons = fromNefPolyhedronToPolygons(nefPolyhedron);
-  console.log(`QQ/polygons: ${JSON.stringify(polygons)}`);
   t.deepEqual(polygons, [
     [
       [-0.5, -0.5, -0.5],

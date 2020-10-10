@@ -30,7 +30,7 @@ export const fromSurfaceMeshToGraph = (mesh) => {
     (point, edge, next, twin) => {
       graph.edges[edge] = { point, next, twin, loop: face };
       if (graph.faces[face] === undefined) {
-        graph.faces[face] = { loop: face, surface_mesh: 5 };
+        graph.faces[face] = { loop: face };
         graph.loops[face] = { edge, face };
       }
       polygon.push(graph.points[point]);

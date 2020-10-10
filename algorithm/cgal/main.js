@@ -1,7 +1,8 @@
 export { differenceOfNefPolyhedrons } from './differenceOfNefPolyhedrons.js';
 export { fromGraphToNefPolyhedron } from './fromGraphToNefPolyhedron.js';
 export { fromGraphToSurfaceMesh } from './fromGraphToSurfaceMesh.js';
-export { fromNefPolyhedronToGraph } from './fromNefPolyhedronToGraph2.js';
+export { fromNefPolyhedronFacetsToGraph } from './fromNefPolyhedronFacetsToGraph.js';
+export { fromNefPolyhedronShellsToGraph } from './fromNefPolyhedronShellsToGraph.js';
 export { fromNefPolyhedronToSurfaceMesh } from './fromNefPolyhedronToSurfaceMesh.js';
 export { fromNefPolyhedronToPolygons } from './fromNefPolyhedronToPolygons.js';
 export { fromNefPolyhedronToTriangles } from './fromNefPolyhedronToTriangles.js';
