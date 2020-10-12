@@ -1,6 +1,7 @@
 import ChainedHull from './ChainedHull.js';
 import Hull from './Hull.js';
 import Loop from './Loop.js';
+import cloudSolid from './cloudSolid.js';
 import extrude from './extrude.js';
 import inline from './inline.js';
 import interior from './interior.js';
@@ -34,6 +35,7 @@ export {
   ChainedHull,
   Hull,
   Loop,
+  cloudSolid,
   extrude,
   inline,
   interior,

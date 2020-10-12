@@ -20,6 +20,9 @@ export const fromSurfaceMeshToGraph = (mesh) => {
       face = faceId;
     },
     (point, x, y, z) => {
+      if (!isFinite(x) || !isFinite(y) || !isFinite(z)) {
+        throw Error('die');
+      }
       if (graph.points[point]) {
         if (!equals(graph.points[point], [x, y, z])) {
           throw Error('die');

@@ -24,6 +24,7 @@
   "license": "MIT",
   "dependencies": {
     "@jsxcad/geometry-polygons": "^0.0.79",
+    "@jsxcad/geometry-graph": "^0.0.79",
     "@jsxcad/geometry-solid": "^0.0.79",
     "@jsxcad/geometry-tagged": "^0.0.79",
     "@jsxcad/math-poly3": "^0.0.79",

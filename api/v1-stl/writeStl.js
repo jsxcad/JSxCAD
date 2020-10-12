@@ -9,19 +9,6 @@ import { Shape } from '@jsxcad/api-v1-shape';
 import { toStl as convertToStl } from '@jsxcad/convert-stl';
 import { ensurePages } from '@jsxcad/api-v1-layout';
 
-/**
- *
- * # Write STL
- *
- * ::: illustration { "view": { "position": [5, 5, 5] } }
- * ```
- * await Cube().writeStl('cube.stl');
- * await readStl({ path: 'cube.stl' });
- * ```
- * :::
- *
- **/
-
 export const prepareStl = (shape, name, options = {}) => {
   // CHECK: Should this be limited to Page plans?
   let index = 0;

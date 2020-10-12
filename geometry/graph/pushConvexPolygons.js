@@ -76,11 +76,16 @@ export const pushConvexPolygons = (
   concavePolygons
 ) => {
   const faceNode = getFaceNode(graph, face);
-  const plane = faceNode.plane;
+  let plane = faceNode.plane;
   const buildContour = selectBuildContour(plane);
   const points = [];
   const contour = [];
   buildContour(points, contour, graph, faceNode.loop, selectJunction);
+  if (points.length === 3) {
+    // Triangles are easy.
+    polygons.push(points);
+    return;
+  }
   if (concavePolygons) {
     concavePolygons.push(...points);
   }

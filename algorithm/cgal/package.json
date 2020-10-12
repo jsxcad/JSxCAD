@@ -12,8 +12,8 @@
     "lint": "eslint *.js",
     "lintfix": "eslint --fix *.js",
     "rollup": "rollup -c rollup_main.js",
-    "test": "ava --timeout=600s",
-    "tests": "ava --timeout=600s *.test.js"
+    "test": "ava --timeout=1000s",
+    "tests": "ava --timeout=1000s *.test.js"
   },
   "contributors": [
     {

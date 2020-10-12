@@ -215,6 +215,24 @@ var Module = (function () {
         },
       });
     }
+    if (!Object.getOwnPropertyDescriptor(Module['ready'], '_memset')) {
+      Object.defineProperty(Module['ready'], '_memset', {
+        configurable: true,
+        get: function () {
+          abort(
+            'You are getting _memset on the Promise object, instead of the instance. Use .then() to get called back with the instance, see the MODULARIZE docs in src/settings.js'
+          );
+        },
+      });
+      Object.defineProperty(Module['ready'], '_memset', {
+        configurable: true,
+        set: function () {
+          abort(
+            'You are setting _memset on the Promise object, instead of the instance. Use .then() to get called back with the instance, see the MODULARIZE docs in src/settings.js'
+          );
+        },
+      });
+    }
     if (
       !Object.getOwnPropertyDescriptor(Module['ready'], 'onRuntimeInitialized')
     ) {
@@ -723,8 +741,8 @@ var Module = (function () {
     }
     var wasmMemory;
     var wasmTable = new WebAssembly.Table({
-      initial: 860,
-      maximum: 860,
+      initial: 972,
+      maximum: 972,
       element: 'anyfunc',
     });
     var ABORT = false;
@@ -1044,9 +1062,9 @@ var Module = (function () {
       Module['HEAPF32'] = HEAPF32 = new Float32Array(buf);
       Module['HEAPF64'] = HEAPF64 = new Float64Array(buf);
     }
-    var STACK_BASE = 5364528,
-      STACK_MAX = 121648,
-      DYNAMIC_BASE = 5364528;
+    var STACK_BASE = 5402064,
+      STACK_MAX = 159184,
+      DYNAMIC_BASE = 5402064;
     assert(STACK_BASE % 16 === 0, 'stack must start aligned');
     assert(DYNAMIC_BASE % 16 === 0, 'heap must start aligned');
     var TOTAL_STACK = 5242880;
@@ -4519,6 +4537,20 @@ var Module = (function () {
         return low;
       },
     };
+    function ___sys_getrusage(who, usage) {
+      try {
+        _memset(usage, 0, 136);
+        HEAP32[usage >> 2] = 1;
+        HEAP32[(usage + 4) >> 2] = 2;
+        HEAP32[(usage + 8) >> 2] = 3;
+        HEAP32[(usage + 12) >> 2] = 4;
+        return 0;
+      } catch (e) {
+        if (typeof FS === 'undefined' || !(e instanceof FS.ErrnoError))
+          abort(e);
+        return -e.errno;
+      }
+    }
     function syscallMunmap(addr, len) {
       if ((addr | 0) === -1 || len === 0) {
         return -28;
@@ -6937,6 +6969,7 @@ var Module = (function () {
       __cxa_throw: ___cxa_throw,
       __indirect_function_table: wasmTable,
       __map_file: ___map_file,
+      __sys_getrusage: ___sys_getrusage,
       __sys_munmap: ___sys_munmap,
       _embind_register_bool: __embind_register_bool,
       _embind_register_class: __embind_register_class,
@@ -6974,6 +7007,7 @@ var Module = (function () {
     var ___wasm_call_ctors = (Module[
       '___wasm_call_ctors'
     ] = createExportWrapper('__wasm_call_ctors'));
+    var _memset = (Module['_memset'] = createExportWrapper('memset'));
     var _malloc = (Module['_malloc'] = createExportWrapper('malloc'));
     var _free = (Module['_free'] = createExportWrapper('free'));
     var ___getTypeName = (Module['___getTypeName'] = createExportWrapper(

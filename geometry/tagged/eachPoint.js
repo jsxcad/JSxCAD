@@ -1,3 +1,4 @@
+import { eachPoint as eachPointOfGraph } from '@jsxcad/geometry-graph';
 import { eachPoint as eachPointOfPaths } from '@jsxcad/geometry-paths';
 import { eachPoint as eachPointOfPoints } from '@jsxcad/geometry-points';
 import { eachPoint as eachPointOfSolid } from '@jsxcad/geometry-solid';
@@ -23,6 +24,8 @@ export const eachPoint = (emit, geometry) => {
         return eachPointOfSurface(emit, geometry.surface);
       case 'z0Surface':
         return eachPointOfSurface(emit, geometry.z0Surface);
+      case 'graph':
+        return eachPointOfGraph(geometry.graph, emit);
       default:
         throw Error(
           `Unexpected geometry ${geometry.type} ${JSON.stringify(geometry)}`

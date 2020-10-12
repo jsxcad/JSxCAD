@@ -1,8 +1,7 @@
-import { fromSurfaceMeshToGraph, fromNefPolyhedronToSurfaceMesh, fromGraphToSurfaceMesh, fromSurfaceMeshToNefPolyhedron, differenceOfNefPolyhedrons, extrudeSurfaceMesh, fromPolygonsToSurfaceMesh, intersectionOfNefPolyhedrons, fromNefPolyhedronFacetsToGraph, sectionOfNefPolyhedron, unionOfNefPolyhedrons } from './jsxcad-algorithm-cgal.js';
-import { scale, min, max, dot } from './jsxcad-math-vec3.js';
+import { fromSurfaceMeshToGraph, fromNefPolyhedronToSurfaceMesh, fromGraphToSurfaceMesh, fromSurfaceMeshToNefPolyhedron, differenceOfNefPolyhedrons, extrudeSurfaceMesh, fromPointsToSurfaceMesh, fromPolygonsToSurfaceMesh, intersectionOfNefPolyhedrons, fromNefPolyhedronFacetsToGraph, sectionOfNefPolyhedron, fromSurfaceMeshToTriangles, unionOfNefPolyhedrons } from './jsxcad-algorithm-cgal.js';
+import { scale, min, max, dot, transform as transform$1 } from './jsxcad-math-vec3.js';
 import { toPlane, flip } from './jsxcad-math-poly3.js';
 import { transform as transform$2 } from './jsxcad-math-plane.js';
-import { transform as transform$1 } from './jsxcad-geometry-points.js';
 
 const graphSymbol = Symbol('graph');
 const nefPolyhedronSymbol = Symbol('nefPolyhedron');
@@ -68,6 +67,14 @@ const difference = (a, b) =>
     differenceOfNefPolyhedrons(toNefPolyhedron(a), toNefPolyhedron(b))
   );
 
+const eachPoint = (graph, op) => {
+  for (const point of graph.points) {
+    if (point !== undefined) {
+      op(point);
+    }
+  }
+};
+
 const extrude = (graph, height, depth) => {
   if (graph.faces.length > 0) {
     // Arbitrarily pick the plane of the first graph to extrude along.
@@ -84,16 +91,28 @@ const extrude = (graph, height, depth) => {
   }
 };
 
-const fromSolid = (solid) => {
-  const polygons = [];
-  for (const surface of solid) {
-    polygons.push(...surface);
-  }
+const fromPoints = (points) => {
+  const mesh = fromPointsToSurfaceMesh(points);
+  const graph = fromSurfaceMeshToGraph(mesh);
+  graph[surfaceMeshSymbol] = mesh;
+  mesh[graphSymbol] = graph;
+  return graph;
+};
+
+const fromPolygons = (polygons) => {
   const mesh = fromPolygonsToSurfaceMesh(polygons);
   const graph = fromSurfaceMeshToGraph(mesh);
   graph[surfaceMeshSymbol] = mesh;
   mesh[graphSymbol] = graph;
   return graph;
+};
+
+const fromSolid = (solid) => {
+  const polygons = [];
+  for (const surface of solid) {
+    polygons.push(...surface);
+  }
+  return fromPolygons(polygons);
 };
 
 const fromSurface = (surface) =>
@@ -108,8 +127,10 @@ const measureBoundingBox = (graph) => {
   let minPoint = [Infinity, Infinity, Infinity];
   let maxPoint = [-Infinity, -Infinity, -Infinity];
   for (const point of graph.points) {
-    minPoint = min(minPoint, point);
-    maxPoint = max(maxPoint, point);
+    if (point !== undefined) {
+      minPoint = min(minPoint, point);
+      maxPoint = max(maxPoint, point);
+    }
   }
   return [minPoint, maxPoint];
 };
@@ -913,11 +934,16 @@ const pushConvexPolygons = (
   concavePolygons
 ) => {
   const faceNode = getFaceNode(graph, face);
-  const plane = faceNode.plane;
+  let plane = faceNode.plane;
   const buildContour = selectBuildContour(plane);
   const points = [];
   const contour = [];
   buildContour(points, contour, graph, faceNode.loop, selectJunction);
+  if (points.length === 3) {
+    // Triangles are easy.
+    polygons.push(points);
+    return;
+  }
   if (concavePolygons) {
     concavePolygons.push(...points);
   }
@@ -977,21 +1003,36 @@ const toSurface = (graph) => {
   return surface;
 };
 
+const toTriangles = (graph) =>
+  fromSurfaceMeshToTriangles(toSurfaceMesh(graph));
+
 // FIX: Precision loss.
-const transform = (matrix, graph) => ({
-  ...graph,
-  points: transform$1(matrix, graph.points),
-  faces: graph.faces.map((face) => ({
-    ...face,
-    plane: transform$2(matrix, face.plane),
-  })),
-  [nefPolyhedronSymbol]: undefined,
-  [surfaceMeshSymbol]: undefined,
-});
+const transform = (matrix, graph) => {
+  const transformedPoints = [];
+  for (let nth = 0; nth < graph.points.length; nth++) {
+    const point = graph.points[nth];
+    if (point !== undefined) {
+      transformedPoints[nth] = transform$1(matrix, point);
+    }
+  }
+
+  const transformedFaces = graph.faces.map((face) => ({
+      ...face,
+      plane: face.plane ? transform$2(matrix, face.plane) : face.plane,
+    }));
+
+  return {
+    ...graph,
+    points: transformedPoints,
+    faces: transformedFaces,
+    [nefPolyhedronSymbol]: undefined,
+    [surfaceMeshSymbol]: undefined,
+  };
+};
 
 const union = (a, b) =>
   fromNefPolyhedron(
     unionOfNefPolyhedrons(toNefPolyhedron(b), toNefPolyhedron(a))
   );
 
-export { difference, extrude, fromSolid, fromSurface, intersection, measureBoundingBox, outline, section, toSolid, toSurface, transform, union };
+export { difference, eachPoint, extrude, fromPoints, fromPolygons, fromSolid, fromSurface, intersection, measureBoundingBox, outline, section, toSolid, toSurface, toTriangles, transform, union };

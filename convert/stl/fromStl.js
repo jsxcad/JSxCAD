@@ -1,4 +1,6 @@
-import { fromPolygons } from '@jsxcad/geometry-solid';
+import { taggedGraph, taggedPaths } from '@jsxcad/geometry-tagged';
+
+import { fromPolygons } from '@jsxcad/geometry-graph';
 import parseStlAscii from 'parse-stl-ascii';
 import { parse as parseStlBinary } from './parseStlBinary.js';
 
@@ -13,12 +15,37 @@ const toParser = (format) => {
   }
 };
 
-export const fromStl = async (stl, { format = 'ascii' } = {}) => {
+export const fromStl = async (
+  stl,
+  { format = 'ascii', geometry = 'graph' } = {}
+) => {
   const parse = toParser(format);
   const { positions, cells } = parse(stl);
   const polygons = [];
   for (const [a, b, c] of cells) {
-    polygons.push([positions[a], positions[b], positions[c]]);
+    const pa = positions[a];
+    const pb = positions[b];
+    const pc = positions[c];
+    if (pa.some((value) => !isFinite(value))) continue;
+    if (pb.some((value) => !isFinite(value))) continue;
+    if (pc.some((value) => !isFinite(value))) continue;
+    polygons.push([[...pa], [...pb], [...pc]]);
   }
-  return { type: 'solid', solid: fromPolygons(polygons) };
+  for (const polygon of polygons) {
+    for (const point of polygon) {
+      for (const value of point) {
+        if (!isFinite(value)) {
+          throw Error('die');
+        }
+      }
+    }
+  }
+  switch (geometry) {
+    case 'graph':
+      return taggedGraph({}, fromPolygons(polygons));
+    case 'paths':
+      return taggedPaths({}, polygons);
+    default:
+      throw Error(`Unknown geometry type ${geometry}`);
+  }
 };

@@ -4,16 +4,24 @@
 
 #include <CGAL/MP_Float.h>
 #include <CGAL/Quotient.h>
+#include <CGAL/Extended_cartesian.h>
 #include <CGAL/Simple_cartesian.h>
 #include <CGAL/Bounded_kernel.h>
 #include <CGAL/Exact_predicates_exact_constructions_kernel.h>
 #include <CGAL/Nef_nary_union_3.h>
 #include <CGAL/Nef_polyhedron_3.h>
+
+#include <CGAL/Advancing_front_surface_reconstruction.h>
 #include <CGAL/Polygon_mesh_processing/corefinement.h>
+#include <CGAL/Polygon_mesh_processing/detect_features.h>
 #include <CGAL/Polygon_mesh_processing/extrude.h>
 #include <CGAL/Polygon_mesh_processing/orientation.h>
+#include <CGAL/Polygon_mesh_processing/polygon_mesh_to_polygon_soup.h>
 #include <CGAL/Polygon_mesh_processing/polygon_soup_to_polygon_mesh.h>
+#include <CGAL/Polygon_mesh_processing/remesh.h>
 #include <CGAL/Polygon_mesh_processing/repair_polygon_soup.h>
+#include <CGAL/Polygon_mesh_processing/smooth_mesh.h>
+#include <CGAL/Polygon_mesh_processing/smooth_shape.h>
 #include <CGAL/Polygon_mesh_processing/triangulate_faces.h>
 #include <CGAL/Polyhedron_3.h>
 #include <CGAL/Polyhedron_items_with_id_3.h>
@@ -22,8 +30,12 @@
 #include <CGAL/boost/graph/convert_nef_polyhedron_to_polygon_mesh.h>
 #include <CGAL/Unique_hash_map.h>
 
+#ifdef SURFACE_MESH_BOOLEANS
+typedef CGAL::Extended_cartesian<CGAL::Gmpq> Kernel;
+#else
 typedef CGAL::Simple_cartesian<CGAL::Gmpq> Kernel;
 // typedef CGAL::Exact_predicates_exact_constructions_kernel Kernel;
+#endif
 
 typedef CGAL::Nef_polyhedron_3<Kernel, CGAL::SNC_indexed_items> Nef_polyhedron;
 typedef CGAL::Polyhedron_3<Kernel, CGAL::Polyhedron_items_with_id_3> Polyhedron;
@@ -80,6 +92,23 @@ Surface_mesh* FromPolygonSoupToSurfaceMesh(emscripten::val fill) {
   return mesh;
 }
 
+void FromSurfaceMeshToPolygonSoup(Surface_mesh* mesh, bool triangulate, emscripten::val emit_polygon, emscripten::val emit_point) {
+  if (triangulate) {
+    // Note: Destructive update.
+    CGAL::Polygon_mesh_processing::triangulate_faces(mesh->faces(), *mesh);
+  }
+  Points points;
+  Polygons polygons;
+  CGAL::Polygon_mesh_processing::polygon_mesh_to_polygon_soup(*mesh, points, polygons);
+  for (const auto& polygon : polygons) {
+    emit_polygon();
+    for (const auto& index : polygon) {
+      const auto& p = points[index];
+      emit_point(CGAL::to_double(p.x()), CGAL::to_double(p.y()), CGAL::to_double(p.z()));
+    }
+  }
+}
+
 Nef_polyhedron* FromPolygonSoupToNefPolyhedron(emscripten::val load) {
   Triples triples;
   Polygons polygons;
@@ -126,6 +155,92 @@ Surface_mesh* FromNefPolyhedronToSurfaceMesh(Nef_polyhedron* nef_polyhedron) {
   Surface_mesh* mesh = new Surface_mesh();
   CGAL::convert_nef_polyhedron_to_polygon_mesh(*nef_polyhedron, *mesh);
   assert(CGAL::Polygon_mesh_processing::triangulate_faces(*mesh) == true);
+  return mesh;
+}
+
+struct TriangularSurfaceMeshBuilder {
+  typedef std::array<std::size_t,3> Facet;
+
+  Surface_mesh& mesh;
+
+  template < typename PointIterator>
+  TriangularSurfaceMeshBuilder(Surface_mesh& mesh, PointIterator b, PointIterator e) : mesh(mesh) {
+    for(; b!=e; ++b) {
+      boost::graph_traits<Surface_mesh>::vertex_descriptor v;
+      v = add_vertex(mesh);
+      mesh.point(v) = *b;
+    }
+  }
+
+  TriangularSurfaceMeshBuilder& operator=(const Facet f) {
+    typedef boost::graph_traits<Surface_mesh>::vertex_descriptor vertex_descriptor;
+    typedef boost::graph_traits<Surface_mesh>::vertices_size_type size_type;
+    mesh.add_face(vertex_descriptor(static_cast<size_type>(f[0])),
+                  vertex_descriptor(static_cast<size_type>(f[1])),
+                  vertex_descriptor(static_cast<size_type>(f[2])));
+    return *this;
+  }
+
+  TriangularSurfaceMeshBuilder& operator*() { return *this; }
+  TriangularSurfaceMeshBuilder& operator++() { return *this; }
+  TriangularSurfaceMeshBuilder operator++(int) { return *this; }
+};
+
+Surface_mesh* FromPointsToSurfaceMesh(emscripten::val fill) {
+  Surface_mesh* mesh = new Surface_mesh();
+  std::vector<Triple> triples;
+  std::vector<Triple>* triples_ptr = &triples;
+  fill(triples_ptr);
+  std::vector<Point> points;
+  for (const auto& triple : triples) {
+    points.emplace_back(Point{ triple[0], triple[1], triple[2] });
+  }
+  TriangularSurfaceMeshBuilder builder(*mesh, points.begin(), points.end());
+  CGAL::advancing_front_surface_reconstruction(points.begin(),
+                                               points.end(),
+                                               builder);
+  return mesh;
+}
+
+Surface_mesh* SmoothSurfaceMesh(Surface_mesh* input) {
+  typedef boost::graph_traits<Surface_mesh>::edge_descriptor edge_descriptor;
+
+  Surface_mesh* mesh = new Surface_mesh(*input);
+
+  CGAL::Polygon_mesh_processing::isotropic_remeshing(
+    mesh->faces(),
+    0.1,
+    *mesh,
+    CGAL::Polygon_mesh_processing::parameters::number_of_iterations(5));
+
+#if 0
+  typedef boost::property_map<Surface_mesh, CGAL::edge_is_feature_t>::type EIFMap;
+  EIFMap eif = get(CGAL::edge_is_feature, *mesh);
+  // Constrain edges with a dihedral angle over the limit.
+  CGAL::Polygon_mesh_processing::detect_sharp_edges(*mesh, 60, eif);
+
+  int sharp_counter = 0;
+  for (edge_descriptor e : edges(*mesh)) {
+    if(get(eif, e)) {
+      ++sharp_counter;
+    }
+  }
+#endif
+
+  const unsigned int nb_iterations = 1;
+
+#if 0
+  CGAL::Polygon_mesh_processing::smooth_shape(mesh->faces(), *mesh, 1e-4, CGAL::Polygon_mesh_processing::parameters::number_of_iterations(nb_iterations));
+#else
+  // Smooth with both angle and area criteria + Delaunay flips
+  CGAL::Polygon_mesh_processing::smooth_mesh(
+      *mesh,
+      CGAL::Polygon_mesh_processing::parameters::number_of_iterations(nb_iterations)
+          .use_safety_constraints(false) // authorize all moves
+          // .edge_is_constrained_map(eif)
+  );
+#endif
+
   return mesh;
 }
 
@@ -273,7 +388,7 @@ Nef_polyhedron* SectionOfNefPolyhedron(Nef_polyhedron* a, double x, double y, do
   return new Nef_polyhedron(a->intersection(Plane(x, y, z, w), Nef_polyhedron::Intersection_mode::PLANE_ONLY));
 }
 
-/*
+#ifdef SURFACE_MESH_BOOLEANS
 Surface_mesh* DifferenceOfSurfaceMeshes(Surface_mesh* a, Surface_mesh* b) {
   Surface_mesh* c = new Surface_mesh();
   CGAL::Polygon_mesh_processing::corefine_and_compute_difference(
@@ -303,7 +418,7 @@ Surface_mesh* UnionOfSurfaceMeshes(Surface_mesh* a, Surface_mesh* b) {
       CGAL::Polygon_mesh_processing::parameters::throw_on_self_intersection(true));
   return c;
 }
-*/
+#endif
 
 double FT__to_double(const Kernel::FT& ft) {
   return CGAL::to_double(ft);
@@ -644,15 +759,19 @@ EMSCRIPTEN_BINDINGS(module) {
   emscripten::function("UnionOfNefPolyhedrons", &UnionOfNefPolyhedrons, emscripten::allow_raw_pointers());
   emscripten::function("SectionOfNefPolyhedron", &SectionOfNefPolyhedron, emscripten::allow_raw_pointers());
 
-  /*
+#ifdef SURFACE_MESH_BOOLEANS
   emscripten::function("DifferenceOfSurfaceMeshes", &DifferenceOfSurfaceMeshes, emscripten::allow_raw_pointers());
   emscripten::function("IntersectionOfSurfaceMeshes", &IntersectionOfSurfaceMeshes, emscripten::allow_raw_pointers());
   emscripten::function("UnionOfSurfaceMeshes", &UnionOfSurfaceMeshes, emscripten::allow_raw_pointers());
-  */
+#endif
 
   emscripten::function("FT__to_double", &FT__to_double, emscripten::allow_raw_pointers());
 
   emscripten::function("Nef_polyhedron__explore_shells", &Nef_polyhedron__explore_shells, emscripten::allow_raw_pointers());
   emscripten::function("Nef_polyhedron__explore_facets", &Nef_polyhedron__explore_facets, emscripten::allow_raw_pointers());
   emscripten::function("Surface_mesh__explore", &Surface_mesh__explore, emscripten::allow_raw_pointers());
+
+  emscripten::function("FromPointsToSurfaceMesh", &FromPointsToSurfaceMesh, emscripten::allow_raw_pointers());
+  emscripten::function("SmoothSurfaceMesh", &SmoothSurfaceMesh, emscripten::allow_raw_pointers());
+  emscripten::function("FromSurfaceMeshToPolygonSoup", &FromSurfaceMeshToPolygonSoup, emscripten::allow_raw_pointers());
 }

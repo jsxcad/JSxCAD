@@ -1,8 +1,9 @@
 import { buildConvexSurfaceHull, buildConvexHull, loop, buildConvexMinkowskiSum, extrude as extrude$2 } from './jsxcad-algorithm-shape.js';
-import { taggedSurface, taggedSolid, getPaths, extrude as extrude$1, outline as outline$1, section as section$1, taggedGroup, taggedLayers, getSolids, union, taggedZ0Surface, getSurfaces, getZ0Surfaces, taggedPaths, getPlans, measureBoundingBox, taggedPoints, measureHeights } from './jsxcad-geometry-tagged.js';
+import { taggedSurface, taggedSolid, getPaths, taggedGraph, extrude as extrude$1, outline as outline$1, section as section$1, taggedGroup, taggedLayers, getSolids, union, taggedZ0Surface, getSurfaces, getZ0Surfaces, taggedPaths, getPlans, measureBoundingBox, taggedPoints, measureHeights } from './jsxcad-geometry-tagged.js';
 import { Assembly, Group } from './jsxcad-api-v1-shapes.js';
 import Shape$1, { Shape, getPegCoords } from './jsxcad-api-v1-shape.js';
 import { Y as Y$1, Z as Z$3 } from './jsxcad-api-v1-connector.js';
+import { fromPoints } from './jsxcad-geometry-graph.js';
 import { isClosed, isCounterClockwise, flip, transform as transform$2, getEdges } from './jsxcad-geometry-path.js';
 import { toPlane } from './jsxcad-math-poly3.js';
 import { transform as transform$1, alignVertices, fromPolygons } from './jsxcad-geometry-solid.js';
@@ -127,6 +128,21 @@ const LoopMethod = function (...args) {
   return Loop(this, ...args);
 };
 Shape.prototype.Loop = LoopMethod;
+
+const cloudSolid = (shape) => {
+  const points = shape.toPoints();
+  return Shape.fromGeometry(taggedGraph({}, fromPoints(points)));
+};
+
+const cloudSolidMethod = function () {
+  return cloudSolid(this);
+};
+Shape.prototype.cloudSolid = cloudSolidMethod;
+
+const withCloudSolidMethod = function () {
+  return this.with(cloudSolid(this));
+};
+Shape.prototype.withCloudSolid = withCloudSolidMethod;
 
 const extrude = (shape, height = 1, depth = 0) => {
   if (height < depth) {
@@ -737,4 +753,4 @@ const api = {
 };
 
 export default api;
-export { ChainedHull, Hull, Loop, extrude, inline, interior, minkowski, outline, section, squash, stretch, sweep, toolpath, voxels };
+export { ChainedHull, Hull, Loop, cloudSolid, extrude, inline, interior, minkowski, outline, section, squash, stretch, sweep, toolpath, voxels };

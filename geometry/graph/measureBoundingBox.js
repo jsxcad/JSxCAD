@@ -4,8 +4,10 @@ export const measureBoundingBox = (graph) => {
   let minPoint = [Infinity, Infinity, Infinity];
   let maxPoint = [-Infinity, -Infinity, -Infinity];
   for (const point of graph.points) {
-    minPoint = min(minPoint, point);
-    maxPoint = max(maxPoint, point);
+    if (point !== undefined) {
+      minPoint = min(minPoint, point);
+      maxPoint = max(maxPoint, point);
+    }
   }
   return [minPoint, maxPoint];
 };
