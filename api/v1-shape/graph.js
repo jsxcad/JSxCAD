@@ -1,5 +1,11 @@
-import { fromSolid, toSolid as toSolidFromGraph } from '@jsxcad/geometry-graph';
 import {
+  fromSolid,
+  fromSurface,
+  toSolid as toSolidFromGraph,
+} from '@jsxcad/geometry-graph';
+
+import {
+  getAnySurfaces,
   getGraphs,
   getSolids,
   taggedGraph,
@@ -15,6 +21,11 @@ export const toGraph = (shape) => {
   const graphs = [];
   for (const { tags, solid } of getSolids(shape.toTransformedGeometry())) {
     graphs.push(taggedGraph({ tags }, fromSolid(solid)));
+  }
+  for (const { tags, surface, z0Surface } of getAnySurfaces(
+    shape.toTransformedGeometry()
+  )) {
+    graphs.push(taggedGraph({ tags }, fromSurface(surface || z0Surface)));
   }
   return Shape.fromGeometry(taggedGroup({}, ...graphs));
 };

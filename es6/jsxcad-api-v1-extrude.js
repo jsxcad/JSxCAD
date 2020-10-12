@@ -1,17 +1,17 @@
-import { buildConvexSurfaceHull, buildConvexHull, loop, extrude as extrude$1, buildConvexMinkowskiSum } from './jsxcad-algorithm-shape.js';
-import { taggedSurface, taggedSolid, getPaths, getZ0Surfaces, getSurfaces, getPlans, outline as outline$1, section as section$1, taggedGroup, taggedLayers, getSolids, union, taggedZ0Surface, taggedPaths, measureBoundingBox, taggedPoints, measureHeights } from './jsxcad-geometry-tagged.js';
+import { buildConvexSurfaceHull, buildConvexHull, loop, buildConvexMinkowskiSum, extrude as extrude$2 } from './jsxcad-algorithm-shape.js';
+import { taggedSurface, taggedSolid, getPaths, extrude as extrude$1, outline as outline$1, section as section$1, taggedGroup, taggedLayers, getSolids, union, taggedZ0Surface, getSurfaces, getZ0Surfaces, taggedPaths, getPlans, measureBoundingBox, taggedPoints, measureHeights } from './jsxcad-geometry-tagged.js';
 import { Assembly, Group } from './jsxcad-api-v1-shapes.js';
 import Shape$1, { Shape, getPegCoords } from './jsxcad-api-v1-shape.js';
 import { Y as Y$1, Z as Z$3 } from './jsxcad-api-v1-connector.js';
-import { alignVertices, transform as transform$1, fromPolygons } from './jsxcad-geometry-solid.js';
-import { toPlane, transform, flip as flip$1 } from './jsxcad-geometry-surface.js';
-import { toXYPlaneTransforms } from './jsxcad-math-plane.js';
 import { isClosed, isCounterClockwise, flip, transform as transform$2, getEdges } from './jsxcad-geometry-path.js';
-import { toPlane as toPlane$1 } from './jsxcad-math-poly3.js';
+import { toPlane } from './jsxcad-math-poly3.js';
+import { transform as transform$1, alignVertices, fromPolygons } from './jsxcad-geometry-solid.js';
 import { cutOpen, section as section$2, fromSolid, containsPoint as containsPoint$1 } from './jsxcad-geometry-bsp.js';
+import { flip as flip$1, toPlane as toPlane$1, transform } from './jsxcad-geometry-surface.js';
 import { createNormalize3 } from './jsxcad-algorithm-quantize.js';
 import { fromTranslation } from './jsxcad-math-mat4.js';
 import { scale } from './jsxcad-math-vec3.js';
+import { toXYPlaneTransforms } from './jsxcad-math-plane.js';
 import { toolpath as toolpath$1 } from './jsxcad-algorithm-toolpath.js';
 
 /**
@@ -132,18 +132,46 @@ const extrude = (shape, height = 1, depth = 0) => {
   if (height < depth) {
     [height, depth] = [depth, height];
   }
+  return Shape$1.fromGeometry(extrude$1(shape.toGeometry(), height, depth));
+};
+
+const extrudeMethod = function (height = 1, depth = 0) {
+  return extrude(this, height, depth);
+};
+Shape$1.prototype.extrude = extrudeMethod;
+
+/*
+import {
+  alignVertices,
+  transform as transformSolid,
+} from './jsxcad-geometry-solid.js';
+import { getPlans, getSurfaces, getZ0Surfaces } from './jsxcad-geometry-tagged.js';
+import {
+  toPlane as toPlaneOfSurface,
+  transform as transformSurface,
+} from './jsxcad-geometry-surface.js';
+
+import { Assembly } from './jsxcad-api-v1-shapes.js';
+import { Shape } from './jsxcad-api-v1-shape.js';
+import { extrude as extrudeAlgorithm } from './jsxcad-algorithm-shape.js';
+import { toXYPlaneTransforms } from './jsxcad-math-plane.js';
+
+export const extrude = (shape, height = 1, depth = 0) => {
+  if (height < depth) {
+    [height, depth] = [depth, height];
+  }
   // FIX: Handle extrusion along a vector properly.
   const solids = [];
   const keptGeometry = shape.toKeptGeometry();
   for (const { z0Surface, tags } of getZ0Surfaces(keptGeometry)) {
     if (z0Surface.length > 0) {
-      const solid = alignVertices(extrude$1(z0Surface, height, depth));
+      const solid = alignVertices(extrudeAlgorithm(z0Surface, height, depth));
       solids.push(Shape.fromGeometry({ type: 'solid', solid, tags }));
     }
   }
   for (const { surface, tags } of getSurfaces(keptGeometry)) {
     if (surface.length > 0) {
-      const plane = toPlane(surface);
+      const plane = toPlaneOfSurface(surface);
       if (
         plane[0] === 0 &&
         plane[1] === 0 &&
@@ -152,16 +180,16 @@ const extrude = (shape, height = 1, depth = 0) => {
       ) {
         // Detect Z0.
         // const solid = alignVertices(extrudeAlgorithm(surface, height, depth));
-        const solid = extrude$1(surface, height, depth);
+        const solid = extrudeAlgorithm(surface, height, depth);
         solids.push(Shape.fromGeometry({ type: 'solid', solid, tags }));
       } else {
-        const [toZ0, fromZ0] = toXYPlaneTransforms(toPlane(surface));
-        const z0SolidGeometry = extrude$1(
-          transform(toZ0, surface),
+        const [toZ0, fromZ0] = toXYPlaneTransforms(toPlaneOfSurface(surface));
+        const z0SolidGeometry = extrudeAlgorithm(
+          transformSurface(toZ0, surface),
           height,
           depth
         );
-        const solid = alignVertices(transform$1(fromZ0, z0SolidGeometry));
+        const solid = alignVertices(transformSolid(fromZ0, z0SolidGeometry));
         solids.push(Shape.fromGeometry({ type: 'solid', solid, tags }));
       }
     }
@@ -178,10 +206,8 @@ const extrudeMethod = function (...args) {
 };
 Shape.prototype.extrude = extrudeMethod;
 
-extrude.signature =
-  'extrude(shape:Shape, height:number = 1, depth:number = 1) -> Shape';
-extrudeMethod.signature =
-  'Shape -> extrude(height:number = 1, depth:number = 1) -> Shape';
+export default extrude;
+*/
 
 const outline = (shape) =>
   Group(
@@ -327,7 +353,7 @@ const squash = (shape) => {
     for (const surface of solid) {
       for (const path of surface) {
         const flat = path.map(([x, y]) => [x, y, 0]);
-        if (toPlane$1(flat) === undefined) continue;
+        if (toPlane(flat) === undefined) continue;
         polygons.push(isCounterClockwise(flat) ? flat : flip(flat));
       }
     }
@@ -339,7 +365,7 @@ const squash = (shape) => {
     const polygons = [];
     for (const path of surface) {
       const flat = path.map(([x, y]) => [x, y, 0]);
-      if (toPlane$1(flat) === undefined) continue;
+      if (toPlane(flat) === undefined) continue;
       polygons.push(isCounterClockwise(flat) ? flat : flip(flat));
     }
     result.content.push(taggedZ0Surface({ tags }, polygons));
@@ -406,8 +432,8 @@ const stretch = (shape, length, connector = Z$3()) => {
     const bottom = cutOpen(solid, planeSurface, normalize);
     const [profile] = section$2(solid, [planeSurface], normalize);
     const top = cutOpen(solid, flip$1(planeSurface), normalize);
-    const [toZ0, fromZ0] = toXYPlaneTransforms(toPlane(profile));
-    const z0SolidGeometry = extrude$1(
+    const [toZ0, fromZ0] = toXYPlaneTransforms(toPlane$1(profile));
+    const z0SolidGeometry = extrude$2(
       transform(toZ0, profile),
       length,
       0,
@@ -415,7 +441,7 @@ const stretch = (shape, length, connector = Z$3()) => {
     );
     const middle = transform$1(fromZ0, z0SolidGeometry);
     const topMoved = transform$1(
-      fromTranslation(scale(length, toPlane(profile))),
+      fromTranslation(scale(length, toPlane$1(profile))),
       top
     );
     stretches.push(

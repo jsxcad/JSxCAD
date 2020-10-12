@@ -1,5 +1,4 @@
 import { equals } from '@jsxcad/math-vec3';
-import { fromPolygon } from '@jsxcad/math-plane';
 import { getCgal } from './getCgal.js';
 
 export const fromNefPolyhedronFacetsToGraph = (nefPolyhedron) => {
@@ -21,26 +20,16 @@ export const fromNefPolyhedronFacetsToGraph = (nefPolyhedron) => {
   let facetId;
   let facetPlane;
   let loopId;
-  const polygon = [];
   c.Nef_polyhedron__explore_facets(
     nefPolyhedron,
     (facet, x, y, z, w) => {
-      if (polygon.length >= 3) {
-        graph.faces[facetId].points_plane = fromPolygon(polygon);
-        polygon.length = 0;
-      }
       console.log(``);
       console.log(`facet: ${facet}`);
       facetId = facet;
       facetPlane = [x, y, z, w];
     },
     (loop, sface) => {
-      if (polygon.length >= 3) {
-        graph.faces[facetId].points_plane = fromPolygon(polygon);
-      }
-      console.log(`loop: ${loop} sface: ${sface}`);
       loopId = loop;
-      polygon.length = 0;
     },
     (halfedge, vertex, next, twin) => {
       console.log(`edge: ${halfedge} ${vertex} ${next} ${twin}`);
@@ -64,7 +53,6 @@ export const fromNefPolyhedronFacetsToGraph = (nefPolyhedron) => {
           graph.faces[facetId].holes = [loopId];
         }
       }
-      polygon.push(graph.points[point]);
     },
     (vertex, x, y, z) => addPoint(vertex, [x, y, z])
   );

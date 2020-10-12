@@ -1,4 +1,5 @@
 export { differenceOfNefPolyhedrons } from './differenceOfNefPolyhedrons.js';
+export { extrudeSurfaceMesh } from './extrudeSurfaceMesh.js';
 export { fromGraphToNefPolyhedron } from './fromGraphToNefPolyhedron.js';
 export { fromGraphToSurfaceMesh } from './fromGraphToSurfaceMesh.js';
 export { fromNefPolyhedronFacetsToGraph } from './fromNefPolyhedronFacetsToGraph.js';

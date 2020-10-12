@@ -3,6 +3,8 @@ import {
   fromSurfaceMeshToGraph,
 } from '@jsxcad/algorithm-cgal';
 
+import { graphSymbol, surfaceMeshSymbol } from './symbols.js';
+
 export const fromSolid = (solid) => {
   const polygons = [];
   for (const surface of solid) {
@@ -10,5 +12,7 @@ export const fromSolid = (solid) => {
   }
   const mesh = fromPolygonsToSurfaceMesh(polygons);
   const graph = fromSurfaceMeshToGraph(mesh);
+  graph[surfaceMeshSymbol] = mesh;
+  mesh[graphSymbol] = graph;
   return graph;
 };

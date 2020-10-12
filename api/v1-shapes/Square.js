@@ -11,6 +11,7 @@ const toRadiusFromApothem = (apothem) => apothem / Math.cos(Math.PI / 4);
 const edgeScale = regularPolygonEdgeLengthToRadius(1, 4);
 const unitSquare = () =>
   Shape.fromGeometry(taggedZ0Surface({}, [buildRegularPolygon(4)]))
+    .toGraph()
     .rotateZ(45)
     .scale(edgeScale);
 
@@ -18,6 +19,7 @@ export const ofSize = (width = 1, length) =>
   unitSquare().scale(width, length, 1);
 export const ofRadius = (radius) =>
   Shape.fromGeometry(taggedZ0Surface({}, [buildRegularPolygon(4)]))
+    .toGraph()
     .rotateZ(45)
     .scale(radius);
 export const ofApothem = (apothem) => ofRadius(toRadiusFromApothem(apothem));

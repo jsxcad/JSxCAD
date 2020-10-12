@@ -1,26 +1,13 @@
-import {
-  // fromPolygonsToNefPolyhedron,
-  fromPolygonsToSurfaceMesh,
-  fromSurfaceMeshToNefPolyhedron,
-} from '@jsxcad/algorithm-cgal';
-
 import { graphSymbol, nefPolyhedronSymbol } from './symbols.js';
 
-import { toSolid } from './toSolid.js';
+import { fromSurfaceMeshToNefPolyhedron } from '@jsxcad/algorithm-cgal';
+import { toSurfaceMesh } from './toSurfaceMesh.js';
 
 export const toNefPolyhedron = (graph) => {
   let nefPolyhedron = graph[nefPolyhedronSymbol];
   if (nefPolyhedron === undefined) {
-    console.log(`QQ/toNefPolyhedron/computed`);
-    const polygons = [];
-    const solid = toSolid(graph);
-    for (const surface of solid) {
-      polygons.push(...surface);
-    }
-    nefPolyhedron = fromSurfaceMeshToNefPolyhedron(
-      fromPolygonsToSurfaceMesh(polygons)
-    );
-    // nefPolyhedron = fromPolygonsToNefPolyhedron(polygons);
+    const mesh = toSurfaceMesh(graph);
+    nefPolyhedron = fromSurfaceMeshToNefPolyhedron(mesh);
     graph[nefPolyhedronSymbol] = nefPolyhedron;
     nefPolyhedron[graphSymbol] = graph;
   } else {

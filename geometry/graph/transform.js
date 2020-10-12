@@ -1,3 +1,5 @@
+import { nefPolyhedronSymbol, surfaceMeshSymbol } from './symbols.js';
+
 import { transform as transformPlane } from '@jsxcad/math-plane';
 import { transform as transformPoints } from '@jsxcad/geometry-points';
 
@@ -9,4 +11,6 @@ export const transform = (matrix, graph) => ({
     ...face,
     plane: transformPlane(matrix, face.plane),
   })),
+  [nefPolyhedronSymbol]: undefined,
+  [surfaceMeshSymbol]: undefined,
 });

@@ -8,7 +8,7 @@ test.beforeEach(async (t) => {
   await initCgal();
 });
 
-const graph = {
+const solid = {
   edges: [
     { point: 1, next: 2, loop: 0, twin: 1 },
     { point: 0, next: 18, loop: 4, twin: 0 },
@@ -87,9 +87,10 @@ const graph = {
   ],
 };
 
-test('FromGraphToSurfaceMesh', (t) => {
-  const mesh = fromGraphToSurfaceMesh(graph);
+test('FromGraphToSurfaceMesh/solid', (t) => {
+  const mesh = fromGraphToSurfaceMesh(solid);
   t.true(mesh.is_valid(false));
+  t.false(mesh.is_empty());
   const regeneratedGraph = fromSurfaceMeshToGraph(mesh);
   t.deepEqual(regeneratedGraph, {
     edges: [
@@ -167,6 +168,69 @@ test('FromGraphToSurfaceMesh', (t) => {
       [-0.5, -0.5, 0.5],
       [-0.5, -0.5, -0.5],
       [0.5, -0.5, -0.5],
+    ],
+  });
+});
+
+const surface = {
+  edges: [
+    { point: 1, next: 8, twin: 1, loop: 0 },
+    null,
+    { point: 2, next: 4, twin: 3, loop: 1 },
+    null,
+    { point: 3, next: 9, twin: 5, loop: 1 },
+    null,
+    { point: 0, next: 0, twin: 7, loop: 0 },
+    null,
+    { point: 3, next: 6, twin: 9, loop: 0 },
+    { point: 1, next: 2, twin: 8, loop: 1 },
+  ],
+  faces: [
+    { loop: 0, plane: [0, 0, 1, 0] },
+    { loop: 1, plane: [0, 0, 1, 0] },
+  ],
+  loops: [
+    { edge: 8, face: 0 },
+    { edge: 9, face: 1 },
+  ],
+  points: [
+    [0.5000000000000001, 0.5, 0],
+    [-0.49999999999999994, 0.5000000000000001, 0],
+    [-0.5000000000000002, -0.49999999999999994, 0],
+    [0.4999999999999999, -0.5000000000000002, 0],
+  ],
+};
+
+test('FromGraphToSurfaceMesh/surface', (t) => {
+  const mesh = fromGraphToSurfaceMesh(surface);
+  t.true(mesh.is_valid(true));
+  t.false(mesh.is_empty());
+  const regeneratedGraph = fromSurfaceMeshToGraph(mesh);
+  t.deepEqual(JSON.parse(JSON.stringify(regeneratedGraph)), {
+    edges: [
+      { point: 0, next: 2, twin: 1, loop: 0 },
+      null,
+      { point: 1, next: 4, twin: 3, loop: 0 },
+      null,
+      { point: 3, next: 0, twin: 5, loop: 0 },
+      { point: 1, next: 6, twin: 4, loop: 1 },
+      { point: 2, next: 8, twin: 7, loop: 1 },
+      null,
+      { point: 3, next: 5, twin: 9, loop: 1 },
+    ],
+    faces: [
+      { loop: 0, plane: [0, 0, 1, 0] },
+      { loop: 1, plane: [0, 0, 1, 0] },
+    ],
+    loops: [
+      { edge: 4, face: 0 },
+      { edge: 5, face: 1 },
+    ],
+    points: [
+      [0.5, 0.5, 0],
+      [-0.5, 0.5, 0],
+      [-0.5, -0.5, 0],
+      [0.5, -0.5, 0],
     ],
   });
 });

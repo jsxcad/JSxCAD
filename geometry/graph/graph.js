@@ -58,11 +58,16 @@ export const eachEdge = (graph, start, op) => {
   if (start === -1) {
     return;
   }
+  const limit = graph.edges.length;
+  let count = 0;
   let edge = start;
   do {
     const edgeNode = graph.edges[edge];
     op(edge, edgeNode);
     edge = edgeNode.next;
+    if (count++ > limit) {
+      throw Error(`Infinite edge loop`);
+    }
   } while (edge !== start);
 };
 

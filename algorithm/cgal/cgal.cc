@@ -10,6 +10,7 @@
 #include <CGAL/Nef_nary_union_3.h>
 #include <CGAL/Nef_polyhedron_3.h>
 #include <CGAL/Polygon_mesh_processing/corefinement.h>
+#include <CGAL/Polygon_mesh_processing/extrude.h>
 #include <CGAL/Polygon_mesh_processing/orientation.h>
 #include <CGAL/Polygon_mesh_processing/polygon_soup_to_polygon_mesh.h>
 #include <CGAL/Polygon_mesh_processing/repair_polygon_soup.h>
@@ -17,6 +18,7 @@
 #include <CGAL/Polyhedron_3.h>
 #include <CGAL/Polyhedron_items_with_id_3.h>
 #include <CGAL/Surface_mesh.h>
+#include <CGAL/boost/graph/Named_function_parameters.h>
 #include <CGAL/boost/graph/convert_nef_polyhedron_to_polygon_mesh.h>
 #include <CGAL/Unique_hash_map.h>
 
@@ -27,6 +29,7 @@ typedef CGAL::Nef_polyhedron_3<Kernel, CGAL::SNC_indexed_items> Nef_polyhedron;
 typedef CGAL::Polyhedron_3<Kernel, CGAL::Polyhedron_items_with_id_3> Polyhedron;
 typedef Kernel::Point_3 Point;
 typedef Kernel::Plane_3 Plane;
+typedef Kernel::Vector_3 Vector;
 typedef std::vector<Point> Points;
 typedef CGAL::Surface_mesh<Point> Surface_mesh;
 typedef Surface_mesh::Halfedge_index Halfedge_index;
@@ -106,22 +109,6 @@ Nef_polyhedron* FromSurfaceMeshToNefPolyhedron(const Surface_mesh* surface_mesh)
   return new Nef_polyhedron(*surface_mesh);
 }
 
-/*
-void FromNefPolyhedronToTriangles(Nef_polyhedron* nef_polyhedron, emscripten::val emit) {
-  Points points;
-  Polygons polygons;
-  convert_nef_polyhedron_to_polygon_soup(*nef_polyhedron, points, polygons, true);
-  for (const auto& triangle : polygons) {
-    const auto& a = points[triangle[0]];
-    const auto& b = points[triangle[1]];
-    const auto& c = points[triangle[2]];
-    emit(CGAL::to_double(a.x()), CGAL::to_double(a.y()), CGAL::to_double(a.z()),
-         CGAL::to_double(b.x()), CGAL::to_double(b.y()), CGAL::to_double(b.z()),
-         CGAL::to_double(c.x()), CGAL::to_double(c.y()), CGAL::to_double(c.z()));
-  }
-}
-*/
-
 void FromNefPolyhedronToPolygons(Nef_polyhedron* nef_polyhedron, bool triangulate, emscripten::val emit_point, emscripten::val emit_polygon) {
   Points points;
   Polygons polygons;
@@ -141,7 +128,6 @@ Surface_mesh* FromNefPolyhedronToSurfaceMesh(Nef_polyhedron* nef_polyhedron) {
   assert(CGAL::Polygon_mesh_processing::triangulate_faces(*mesh) == true);
   return mesh;
 }
-
 
 void Surface_mesh__EachFace(Surface_mesh* mesh, emscripten::val op) {
   for (const auto& face_index : mesh->faces()) {
@@ -199,6 +185,19 @@ const std::size_t Surface_mesh__add_face(Surface_mesh* mesh) {
   return index;
 }
 
+const std::size_t Surface_mesh__add_face_vertices(Surface_mesh* mesh, emscripten::val next_vertex) {
+  std::vector<Vertex_index> vertices;
+  for (;;) {
+    Vertex_index vertex(next_vertex().as<std::size_t>());
+    if (!vertices.empty() && vertex == vertices[0]) {
+      break;
+    }
+    vertices.push_back(vertex);
+  }
+  std::size_t index(mesh->add_face(vertices));
+  return index;
+}
+
 const std::size_t Surface_mesh__add_edge(Surface_mesh* mesh) {
   std::size_t index(mesh->add_edge());
   assert(index == std::size_t(Halfedge_index(index)));
@@ -225,8 +224,37 @@ void Surface_mesh__set_vertex_edge(Surface_mesh* mesh, std::size_t face, std::si
   mesh->set_halfedge(Vertex_index(face), Halfedge_index(edge));
 }
 
+void Surface_mesh__set_vertex_halfedge_to_border_halfedge(Surface_mesh* mesh, std::size_t edge) {
+  return mesh->set_vertex_halfedge_to_border_halfedge(Halfedge_index(edge));
+}
+
 void Surface_mesh__collect_garbage(Surface_mesh* mesh) {
   mesh->collect_garbage();
+}
+
+template<typename MAP>
+struct Project
+{
+  Project(MAP map, Vector vector): map(map), vector(vector) {}
+  template<typename VD, typename T>
+  void operator()(const T&,VD vd) const
+  {
+    put(map, vd, get(map, vd) + vector);
+  }
+  MAP map;
+  Vector vector;
+};
+
+Surface_mesh* ExtrusionOfSurfaceMesh(Surface_mesh* mesh, double high_x, double high_y, double high_z, double low_x, double low_y, double low_z) {
+  Surface_mesh* extruded_mesh = new Surface_mesh();
+
+  typedef typename boost::property_map<Surface_mesh, CGAL::vertex_point_t>::type VPMap;
+  Project<VPMap> bottom(get(CGAL::vertex_point, *extruded_mesh), Vector(high_x, high_y, high_z));
+  Project<VPMap> top(get(CGAL::vertex_point, *extruded_mesh), Vector(low_x, low_y, low_z));
+
+  CGAL::Polygon_mesh_processing::extrude_mesh(*mesh, *extruded_mesh, bottom, top);
+
+  return extruded_mesh;
 }
 
 Nef_polyhedron* DifferenceOfNefPolyhedrons(Nef_polyhedron* a, Nef_polyhedron* b) {
@@ -435,120 +463,6 @@ public:
     _facet_explorer.Explore(h);
   }
 
-#if 0
-  void visit(Halffacet_const_handle h) {
-    Halffacet_const_handle f = h->twin();
-
-    const Plane& p = f->plane();
-
-    _emit_halffacet(
-        halffacet_id(f),
-        CGAL::to_double(p.a()), 
-        CGAL::to_double(p.b()), 
-        CGAL::to_double(p.c()), 
-        CGAL::to_double(p.d()));
-
-    Halffacet_cycle_const_iterator fci;
-    for (fci = f->facet_cycles_begin(); fci != f->facet_cycles_end(); ++fci) {
-      if (fci.is_shalfedge()) {
-        SHalfedge_const_handle loop = SHalfedge_const_handle(fci);
-        _emit_loop(shalfedge_id(loop), sface_id(loop->incident_sface()));
-        SHalfedge_around_facet_const_circulator sfc(fci);
-        SHalfedge_around_facet_const_circulator send(sfc);
-        CGAL_For_all(sfc, send) {
-          SHalfedge_around_facet_const_circulator sfc_next = sfc;
-          ++sfc_next;
-          const Halfedge_const_handle& e = sfc->source();
-          const Halfedge_const_handle& next = sfc_next->source();
-          _emit_shalfedge(halfedge_id(e), vertex_id(e->source()), halfedge_id(next), halfedge_id(sfc->twin()->source()));
-        }
-      }
-    }
-  }
-
- private:
-   std::size_t svertex_id(SVertex_const_handle h) {
-     if (_svertex_ids.is_defined(h)) {
-       return _svertex_ids[h];
-     }
-     size_t index = _svertex_count++;
-     _svertex_ids[h] = index;
-     const auto& p = h->point();
-     _emit_svertex(index, CGAL::to_double(p.x()), CGAL::to_double(p.y()), CGAL::to_double(p.z()));
-     return index;
-   }
-
-   std::size_t vertex_id(Vertex_const_handle h) {
-     if (_vertex_ids.is_defined(h)) {
-       return _vertex_ids[h];
-     }
-     std::size_t index = _vertex_count++;
-     _vertex_ids[h] = index;
-     const auto& p = h->point();
-     _emit_svertex(index, CGAL::to_double(p.x()), CGAL::to_double(p.y()), CGAL::to_double(p.z()));
-     return index;
-   }
-
-   std::size_t shalfedge_id(SHalfedge_const_handle h) {
-     if (_shalfedge_ids.is_defined(h)) {
-       return _shalfedge_ids[h];
-     }
-     std::size_t index = _shalfedge_count++;
-     _shalfedge_ids[h] = index;
-     return index;
-   }
-
-   std::size_t halfedge_id(Halfedge_const_handle h) {
-     if (_halfedge_ids.is_defined(h)) {
-       return _halfedge_ids[h];
-     }
-     std::size_t index = _halfedge_count++;
-     _halfedge_ids[h] = index;
-     return index;
-   }
-
-   std::size_t halffacet_id(Halffacet_const_handle h) {
-     if (_halffacet_ids.is_defined(h)) {
-       return _halffacet_ids[h];
-     }
-     std::size_t index = _halffacet_count++;
-     _halffacet_ids[h] = index;
-     return index;
-   }
-
-   std::size_t sface_id(SFace_const_handle h) {
-     if (_sface_ids.is_defined(h)) {
-       return _sface_ids[h];
-     }
-     std::size_t index = _sface_count++;
-     _sface_ids[h] = index;
-     return index;
-   }
-
-  emscripten::val& _emit_halffacet;
-  emscripten::val& _emit_loop;
-  emscripten::val& _emit_shalfedge;
-  emscripten::val& _emit_svertex;
-
-  std::size_t _svertex_count = 0;
-  CGAL::Unique_hash_map<SVertex_const_handle, size_t> _svertex_ids;
-
-  std::size_t _vertex_count = 0;
-  CGAL::Unique_hash_map<Vertex_const_handle, size_t> _vertex_ids;
-
-  std::size_t _shalfedge_count = 0;
-  CGAL::Unique_hash_map<SHalfedge_const_handle, size_t> _shalfedge_ids;
-
-  std::size_t _halfedge_count = 0;
-  CGAL::Unique_hash_map<Halfedge_const_handle, size_t> _halfedge_ids;
-
-  std::size_t _halffacet_count = 0;
-  CGAL::Unique_hash_map<Halffacet_const_handle, size_t> _halffacet_ids;
-
-  std::size_t _sface_count = 0;
-  CGAL::Unique_hash_map<SFace_const_handle, size_t> _sface_ids;
-#endif
-
   Facet_explorer _facet_explorer;
 };
 
@@ -654,7 +568,14 @@ EMSCRIPTEN_BINDINGS(module) {
 
   emscripten::class_<Nef_polyhedron>("Nef_polyhedron")
     .constructor<>()
-    .function("is_valid", &Nef_polyhedron::is_valid);
+    .function("number_of_vertices", &Nef_polyhedron::number_of_vertices)
+    .function("number_of_halfedges", &Nef_polyhedron::number_of_halfedges)
+    .function("number_of_edges", &Nef_polyhedron::number_of_edges)
+    .function("number_of_halffacets", &Nef_polyhedron::number_of_halffacets)
+    .function("number_of_facets", &Nef_polyhedron::number_of_facets)
+    .function("number_of_volumes", select_overload<size_t()const>(&Nef_polyhedron::number_of_volumes))
+    .function("is_valid", &Nef_polyhedron::is_valid)
+    .function("is_empty", &Nef_polyhedron::is_empty);
 
   emscripten::class_<Face_index>("Face_index").constructor<std::size_t>();
   emscripten::class_<Halfedge_index>("Halfedge_index").constructor<std::size_t>();
@@ -667,6 +588,7 @@ EMSCRIPTEN_BINDINGS(module) {
     .function("add_face_3", (Face_index (Surface_mesh::*)(Vertex_index, Vertex_index, Vertex_index))&Surface_mesh::add_face)
     .function("add_face_4", (Face_index (Surface_mesh::*)(Vertex_index, Vertex_index, Vertex_index, Vertex_index))&Surface_mesh::add_face)
     .function("is_valid", select_overload<bool(bool)const>(&Surface_mesh::is_valid))
+    .function("is_empty", &Surface_mesh::is_empty)
     .function("number_of_vertices", &Surface_mesh::number_of_vertices)
     .function("number_of_halfedges", &Surface_mesh::number_of_halfedges)
     .function("number_of_edges", &Surface_mesh::number_of_edges)
@@ -674,6 +596,7 @@ EMSCRIPTEN_BINDINGS(module) {
     .function("has_garbage", &Surface_mesh::has_garbage);
 
   emscripten::function("Surface_mesh__EachFace", &Surface_mesh__EachFace, emscripten::allow_raw_pointers());
+  emscripten::function("ExtrusionOfSurfaceMesh", &ExtrusionOfSurfaceMesh, emscripten::allow_raw_pointers());
 
   emscripten::function("Surface_mesh__halfedge_to_target", &Surface_mesh__halfedge_to_target, emscripten::allow_raw_pointers());
   emscripten::function("Surface_mesh__halfedge_to_face", &Surface_mesh__halfedge_to_face, emscripten::allow_raw_pointers());
@@ -687,12 +610,14 @@ EMSCRIPTEN_BINDINGS(module) {
 
   emscripten::function("Surface_mesh__add_vertex", &Surface_mesh__add_vertex, emscripten::allow_raw_pointers());
   emscripten::function("Surface_mesh__add_face", &Surface_mesh__add_face, emscripten::allow_raw_pointers());
+  emscripten::function("Surface_mesh__add_face_vertices", &Surface_mesh__add_face_vertices, emscripten::allow_raw_pointers());
   emscripten::function("Surface_mesh__add_edge", &Surface_mesh__add_edge, emscripten::allow_raw_pointers());
   emscripten::function("Surface_mesh__set_edge_target", &Surface_mesh__set_edge_target, emscripten::allow_raw_pointers());
   emscripten::function("Surface_mesh__set_edge_next", &Surface_mesh__set_edge_next, emscripten::allow_raw_pointers());
   emscripten::function("Surface_mesh__set_edge_face", &Surface_mesh__set_edge_face, emscripten::allow_raw_pointers());
   emscripten::function("Surface_mesh__set_face_edge", &Surface_mesh__set_face_edge, emscripten::allow_raw_pointers());
   emscripten::function("Surface_mesh__set_vertex_edge", &Surface_mesh__set_vertex_edge, emscripten::allow_raw_pointers());
+  emscripten::function("Surface_mesh__set_vertex_halfedge_to_border_halfedge", &Surface_mesh__set_vertex_halfedge_to_border_halfedge, emscripten::allow_raw_pointers());
 
   emscripten::class_<Polyhedron>("Polyhedron")
     .function("is_closed", &Polyhedron::is_closed)
