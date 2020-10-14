@@ -1,7 +1,5 @@
-import {
-  fromPolygonsToSurfaceMesh,
-  fromSurfaceMeshToGraph,
-} from '@jsxcad/algorithm-cgal';
+import { fromPolygonsToSurfaceMesh } from '@jsxcad/algorithm-cgal';
+import { fromSurfaceMesh } from './fromSurfaceMesh.js';
 
 export const fromSurface = (surface) =>
-  fromSurfaceMeshToGraph(fromPolygonsToSurfaceMesh(surface));
+  fromSurfaceMesh(fromPolygonsToSurfaceMesh(surface));

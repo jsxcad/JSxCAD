@@ -1,9 +1,9 @@
 import { buildConvexSurfaceHull, buildConvexHull, loop, buildConvexMinkowskiSum, extrude as extrude$2 } from './jsxcad-algorithm-shape.js';
-import { taggedSurface, taggedSolid, getPaths, taggedGraph, extrude as extrude$1, outline as outline$1, section as section$1, taggedGroup, taggedLayers, getSolids, union, taggedZ0Surface, getSurfaces, getZ0Surfaces, taggedPaths, getPlans, measureBoundingBox, taggedPoints, measureHeights } from './jsxcad-geometry-tagged.js';
+import { taggedSurface, taggedSolid, taggedGraph, getPaths, extrude as extrude$1, outline as outline$1, section as section$1, taggedGroup, taggedLayers, getSolids, union, taggedZ0Surface, getSurfaces, getZ0Surfaces, taggedPaths, getPlans, measureBoundingBox, taggedPoints, measureHeights } from './jsxcad-geometry-tagged.js';
 import { Assembly, Group } from './jsxcad-api-v1-shapes.js';
 import Shape$1, { Shape, getPegCoords } from './jsxcad-api-v1-shape.js';
-import { Y as Y$1, Z as Z$3 } from './jsxcad-api-v1-connector.js';
-import { fromPoints } from './jsxcad-geometry-graph.js';
+import { convexHull, fromPoints } from './jsxcad-geometry-graph.js';
+import { Y as Y$1, Z as Z$2 } from './jsxcad-api-v1-connector.js';
 import { isClosed, isCounterClockwise, flip, transform as transform$2, getEdges } from './jsxcad-geometry-path.js';
 import { toPlane } from './jsxcad-math-poly3.js';
 import { transform as transform$1, alignVertices, fromPolygons } from './jsxcad-geometry-solid.js';
@@ -62,13 +62,22 @@ const ChainedHullMethod = function (...args) {
 };
 Shape.prototype.ChainedHull = ChainedHullMethod;
 
-const Z$1 = 2;
+/*
+import {
+  buildConvexHull,
+  buildConvexSurfaceHull,
+} from './jsxcad-algorithm-shape.js';
+import { taggedSolid, taggedSurface } from './jsxcad-geometry-tagged.js';
 
-const Hull = (...shapes) => {
+import { Shape } from './jsxcad-api-v1-shape.js';
+
+const Z = 2;
+
+export const Hull = (...shapes) => {
   const points = [];
   shapes.forEach((shape) => shape.eachPoint((point) => points.push(point)));
   // FIX: Detect planar hulls properly.
-  if (points.every((point) => point[Z$1] === 0)) {
+  if (points.every((point) => point[Z] === 0)) {
     return Shape.fromGeometry(
       taggedSurface({}, buildConvexSurfaceHull(points))
     );
@@ -76,11 +85,18 @@ const Hull = (...shapes) => {
     return Shape.fromGeometry(taggedSolid({}, buildConvexHull(points)));
   }
 };
+*/
 
-const HullMethod = function (...shapes) {
+const Hull = (...shapes) => {
+  const points = [];
+  shapes.forEach((shape) => shape.eachPoint((point) => points.push(point)));
+  return Shape.fromGeometry(taggedGraph({}, convexHull(points)));
+};
+
+const hullMethod = function (...shapes) {
   return Hull(this, ...shapes);
 };
-Shape.prototype.Hull = HullMethod;
+Shape.prototype.hull = hullMethod;
 
 /**
  *
@@ -437,7 +453,7 @@ const toSurface = (plane) => {
   return [polygon];
 };
 
-const stretch = (shape, length, connector = Z$3()) => {
+const stretch = (shape, length, connector = Z$2()) => {
   const normalize = createNormalize3();
   const stretches = [];
   const planeSurface = toSurface(toPlaneFromConnector(connector));
@@ -530,7 +546,7 @@ Shape.prototype.withToolpath = function (...args) {
 
 const X = 0;
 const Y = 1;
-const Z$2 = 2;
+const Z$1 = 2;
 
 const floor = (value, resolution) =>
   Math.floor(value / resolution) * resolution;
@@ -569,7 +585,7 @@ const voxels = (shape, resolution = 1) => {
   const polygons = [];
   for (let x = min[X] - offset; x <= max[X] + offset; x += resolution) {
     for (let y = min[Y] - offset; y <= max[Y] + offset; y += resolution) {
-      for (let z = min[Z$2] - offset; z <= max[Z$2] + offset; z += resolution) {
+      for (let z = min[Z$1] - offset; z <= max[Z$1] + offset; z += resolution) {
         const state = test([x, y, z]);
         if (state !== test([x + resolution, y, z])) {
           const face = [
@@ -631,7 +647,7 @@ const surfaceCloud = (shape, resolution = 1) => {
   const paths = [];
   for (let x = min[X] - offset; x <= max[X] + offset; x += resolution) {
     for (let y = min[Y] - offset; y <= max[Y] + offset; y += resolution) {
-      for (let z = min[Z$2] - offset; z <= max[Z$2] + offset; z += resolution) {
+      for (let z = min[Z$1] - offset; z <= max[Z$1] + offset; z += resolution) {
         const state = test([x, y, z]);
         if (state !== test([x + resolution, y, z])) {
           paths.push([null, [x, y, z], [x + resolution, y, z]]);
@@ -693,7 +709,7 @@ const cloud = (shape, resolution = 1) => {
   const points = [];
   for (let x = min[X] - offset; x <= max[X] + offset; x += resolution) {
     for (let y = min[Y] - offset; y <= max[Y] + offset; y += resolution) {
-      for (let z = min[Z$2] - offset; z <= max[Z$2] + offset; z += resolution) {
+      for (let z = min[Z$1] - offset; z <= max[Z$1] + offset; z += resolution) {
         if (test([x, y, z])) {
           points.push([x, y, z]);
         }

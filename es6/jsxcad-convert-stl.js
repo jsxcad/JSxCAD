@@ -113,7 +113,10 @@ const toParser = (format) => {
   }
 };
 
-const fromStl = async (stl, { format = 'ascii', geometry = 'graph' } = {}) => {
+const fromStl = async (
+  stl,
+  { format = 'ascii', geometry = 'graph' } = {}
+) => {
   const parse = toParser(format);
   const { positions, cells } = parse(stl);
   const polygons = [];
@@ -121,9 +124,9 @@ const fromStl = async (stl, { format = 'ascii', geometry = 'graph' } = {}) => {
     const pa = positions[a];
     const pb = positions[b];
     const pc = positions[c];
-    if (pa.some(value => !isFinite(value))) continue;
-    if (pb.some(value => !isFinite(value))) continue;
-    if (pc.some(value => !isFinite(value))) continue;
+    if (pa.some((value) => !isFinite(value))) continue;
+    if (pb.some((value) => !isFinite(value))) continue;
+    if (pc.some((value) => !isFinite(value))) continue;
     polygons.push([[...pa], [...pb], [...pc]]);
   }
   for (const polygon of polygons) {
@@ -136,9 +139,12 @@ const fromStl = async (stl, { format = 'ascii', geometry = 'graph' } = {}) => {
     }
   }
   switch (geometry) {
-    case 'graph': return taggedGraph({}, fromPolygons(polygons));
-    case 'paths': return taggedPaths({}, polygons);
-    default: throw Error(`Unknown geometry type ${geometry}`);
+    case 'graph':
+      return taggedGraph({}, fromPolygons(polygons));
+    case 'paths':
+      return taggedPaths({}, polygons);
+    default:
+      throw Error(`Unknown geometry type ${geometry}`);
   }
 };
 

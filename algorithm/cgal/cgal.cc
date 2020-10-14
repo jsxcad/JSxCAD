@@ -28,14 +28,11 @@
 #include <CGAL/Surface_mesh.h>
 #include <CGAL/boost/graph/Named_function_parameters.h>
 #include <CGAL/boost/graph/convert_nef_polyhedron_to_polygon_mesh.h>
+#include <CGAL/convex_hull_3.h>
 #include <CGAL/Unique_hash_map.h>
 
-#ifdef SURFACE_MESH_BOOLEANS
-typedef CGAL::Extended_cartesian<CGAL::Gmpq> Kernel;
-#else
 typedef CGAL::Simple_cartesian<CGAL::Gmpq> Kernel;
 // typedef CGAL::Exact_predicates_exact_constructions_kernel Kernel;
-#endif
 
 typedef CGAL::Nef_polyhedron_3<Kernel, CGAL::SNC_indexed_items> Nef_polyhedron;
 typedef CGAL::Polyhedron_3<Kernel, CGAL::Polyhedron_items_with_id_3> Polyhedron;
@@ -203,15 +200,33 @@ Surface_mesh* FromPointsToSurfaceMesh(emscripten::val fill) {
 }
 
 Surface_mesh* SmoothSurfaceMesh(Surface_mesh* input) {
+  std::cout << "QQ/SmoothSurfaceMesh/Start" << std::endl;
+
   typedef boost::graph_traits<Surface_mesh>::edge_descriptor edge_descriptor;
 
   Surface_mesh* mesh = new Surface_mesh(*input);
 
+  std::cout << "QQ/SmoothSurfaceMesh/is_valid_polygon_mesh: " << CGAL::is_valid_polygon_mesh(*mesh) << std::endl;
+  std::cout << "QQ/SmoothSurfaceMesh/number_of_edges: " << mesh->number_of_edges() << std::endl;
+
+#if 0
+  std::cout << "QQ/SmoothSurfaceMesh/Split/Start" << std::endl;
+  CGAL::Polygon_mesh_processing::split_long_edges(
+    mesh->edges(),
+    1,
+    *mesh);
+  std::cout << "QQ/SmoothSurfaceMesh/Split/End" << std::endl;
+  std::cout << "QQ/SmoothSurfaceMesh/number_of_edges: " << mesh->number_of_edges() << std::endl;
+#endif
+
+  std::cout << "QQ/SmoothSurfaceMesh/Remesh/Start" << std::endl;
   CGAL::Polygon_mesh_processing::isotropic_remeshing(
     mesh->faces(),
-    0.1,
+    5,
     *mesh,
-    CGAL::Polygon_mesh_processing::parameters::number_of_iterations(5));
+    CGAL::Polygon_mesh_processing::parameters::number_of_iterations(1));
+  std::cout << "QQ/SmoothSurfaceMesh/Remesh/End" << std::endl;
+  std::cout << "QQ/SmoothSurfaceMesh/number_of_edges: " << mesh->number_of_edges() << std::endl;
 
 #if 0
   typedef boost::property_map<Surface_mesh, CGAL::edge_is_feature_t>::type EIFMap;
@@ -230,17 +245,21 @@ Surface_mesh* SmoothSurfaceMesh(Surface_mesh* input) {
   const unsigned int nb_iterations = 1;
 
 #if 0
-  CGAL::Polygon_mesh_processing::smooth_shape(mesh->faces(), *mesh, 1e-4, CGAL::Polygon_mesh_processing::parameters::number_of_iterations(nb_iterations));
+  CGAL::Polygon_mesh_processing::smooth_shape(mesh->faces(), *mesh, 1, CGAL::Polygon_mesh_processing::parameters::number_of_iterations(nb_iterations));
 #else
   // Smooth with both angle and area criteria + Delaunay flips
+  std::cout << "QQ/SmoothSurfaceMesh/SmoothMesh/Start" << std::endl;
   CGAL::Polygon_mesh_processing::smooth_mesh(
       *mesh,
       CGAL::Polygon_mesh_processing::parameters::number_of_iterations(nb_iterations)
-          .use_safety_constraints(false) // authorize all moves
+          // .use_safety_constraints(false) // authorize all moves
           // .edge_is_constrained_map(eif)
   );
+  std::cout << "QQ/SmoothSurfaceMesh/SmoothMesh/End" << std::endl;
 #endif
+  std::cout << "QQ/SmoothSurfaceMesh/number_of_edges: " << mesh->number_of_edges() << std::endl;
 
+  std::cout << "QQ/SmoothSurfaceMesh/SmoothMesh/Done" << std::endl;
   return mesh;
 }
 
@@ -252,8 +271,12 @@ void Surface_mesh__EachFace(Surface_mesh* mesh, emscripten::val op) {
   }
 }
 
-void addTriple(Triples* triples, float x, float y, float z) {
+void addTriple(Triples* triples, double x, double y, double z) {
   triples->emplace_back(Triple{ x, y, z });
+}
+
+void addPoint(Points* points, double x, double y, double z) {
+  points->emplace_back(Point{ x, y, z });
 }
 
 std::size_t Surface_mesh__halfedge_to_target(Surface_mesh* mesh, std::size_t halfedge_index) {
@@ -652,6 +675,16 @@ void Surface_mesh__explore(const Surface_mesh* mesh, emscripten::val emit_face, 
   emit_face((std::size_t)-1);
 }
 
+Surface_mesh* ComputeConvexHullAsSurfaceMesh(emscripten::val fill) {
+  Points points;
+  Points* points_ptr = &points;
+  fill(points_ptr);
+  Surface_mesh* mesh = new Surface_mesh();
+  // compute convex hull of non-collinear points
+  CGAL::convex_hull_3(points.begin(), points.end(), *mesh);
+  return mesh;
+}
+
 using emscripten::select_const;
 using emscripten::select_overload;
 
@@ -664,6 +697,8 @@ EMSCRIPTEN_BINDINGS(module) {
     .constructor<>()
     .function("push_back", select_overload<void(const Triple&)>(&Triples::push_back))
     .function("size", select_overload<size_t()const>(&Triples::size));
+
+  emscripten::function("addPoint", &addPoint, emscripten::allow_raw_pointers());
 
   emscripten::class_<Points>("Points")
     .constructor<>()
@@ -774,4 +809,5 @@ EMSCRIPTEN_BINDINGS(module) {
   emscripten::function("FromPointsToSurfaceMesh", &FromPointsToSurfaceMesh, emscripten::allow_raw_pointers());
   emscripten::function("SmoothSurfaceMesh", &SmoothSurfaceMesh, emscripten::allow_raw_pointers());
   emscripten::function("FromSurfaceMeshToPolygonSoup", &FromSurfaceMeshToPolygonSoup, emscripten::allow_raw_pointers());
+  emscripten::function("ComputeConvexHullAsSurfaceMesh", &ComputeConvexHullAsSurfaceMesh, emscripten::allow_raw_pointers());
 }

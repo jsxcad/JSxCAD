@@ -75,6 +75,7 @@ export { measureHeights } from './measureHeights.js';
 export { outline } from './outline.js';
 export { rewriteTags } from './rewriteTags.js';
 export { section } from './section.js';
+export { smooth } from './smooth.js';
 export { taggedAssembly } from './taggedAssembly.js';
 export { taggedItem } from './taggedItem.js';
 export { taggedDisjointAssembly } from './taggedDisjointAssembly.js';

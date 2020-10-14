@@ -1,4 +1,4 @@
-import { fromSurfaceMeshToGraph, fromNefPolyhedronToSurfaceMesh, fromGraphToSurfaceMesh, fromSurfaceMeshToNefPolyhedron, differenceOfNefPolyhedrons, extrudeSurfaceMesh, fromPointsToSurfaceMesh, fromPolygonsToSurfaceMesh, intersectionOfNefPolyhedrons, fromNefPolyhedronFacetsToGraph, sectionOfNefPolyhedron, fromSurfaceMeshToTriangles, unionOfNefPolyhedrons } from './jsxcad-algorithm-cgal.js';
+import { fromSurfaceMeshToGraph, fromPointsToConvexHullAsSurfaceMesh, fromNefPolyhedronToSurfaceMesh, fromGraphToSurfaceMesh, fromSurfaceMeshToNefPolyhedron, differenceOfNefPolyhedrons, extrudeSurfaceMesh, fromPointsToSurfaceMesh, fromPolygonsToSurfaceMesh, intersectionOfNefPolyhedrons, fromNefPolyhedronFacetsToGraph, sectionOfNefPolyhedron, smoothSurfaceMesh, fromSurfaceMeshToTriangles, unionOfNefPolyhedrons } from './jsxcad-algorithm-cgal.js';
 import { scale, min, max, dot, transform as transform$1 } from './jsxcad-math-vec3.js';
 import { toPlane, flip } from './jsxcad-math-poly3.js';
 import { transform as transform$2 } from './jsxcad-math-plane.js';
@@ -19,6 +19,9 @@ const fromSurfaceMesh = (surfaceMesh) => {
   }
   return graph;
 };
+
+const convexHull = (points) =>
+  fromSurfaceMesh(fromPointsToConvexHullAsSurfaceMesh(points));
 
 // This is for a proper manifold, but will not produce a simplified outline.
 
@@ -116,7 +119,7 @@ const fromSolid = (solid) => {
 };
 
 const fromSurface = (surface) =>
-  fromSurfaceMeshToGraph(fromPolygonsToSurfaceMesh(surface));
+  fromSurfaceMesh(fromPolygonsToSurfaceMesh(surface));
 
 const intersection = (a, b) =>
   fromNefPolyhedron(
@@ -185,6 +188,9 @@ const section = ([x, y, z, w], graph) =>
   fromNefPolyhedronFacetsToGraph(
     sectionOfNefPolyhedron(toNefPolyhedron(graph), x, y, z, w)
   );
+
+const smooth = (graph) =>
+  fromSurfaceMesh(smoothSurfaceMesh(toSurfaceMesh(graph)));
 
 var earcut_1 = earcut;
 var default_1 = earcut;
@@ -1017,9 +1023,9 @@ const transform = (matrix, graph) => {
   }
 
   const transformedFaces = graph.faces.map((face) => ({
-      ...face,
-      plane: face.plane ? transform$2(matrix, face.plane) : face.plane,
-    }));
+    ...face,
+    plane: face.plane ? transform$2(matrix, face.plane) : face.plane,
+  }));
 
   return {
     ...graph,
@@ -1035,4 +1041,4 @@ const union = (a, b) =>
     unionOfNefPolyhedrons(toNefPolyhedron(b), toNefPolyhedron(a))
   );
 
-export { difference, eachPoint, extrude, fromPoints, fromPolygons, fromSolid, fromSurface, intersection, measureBoundingBox, outline, section, toSolid, toSurface, toTriangles, transform, union };
+export { convexHull, difference, eachPoint, extrude, fromPoints, fromPolygons, fromSolid, fromSurface, intersection, measureBoundingBox, outline, section, smooth, toSolid, toSurface, toTriangles, transform, union };

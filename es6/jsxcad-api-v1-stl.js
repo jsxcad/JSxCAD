@@ -3,23 +3,13 @@ import { fromStl, toStl } from './jsxcad-convert-stl.js';
 import { read, addPending, writeFile, getPendingErrorHandler, emit } from './jsxcad-sys.js';
 import { ensurePages } from './jsxcad-api-v1-layout.js';
 
-const readStl = async (path, { src, format = 'ascii', geometry = 'graph' } = {}) => {
+const readStl = async (
+  path,
+  { src, format = 'ascii', geometry = 'graph' } = {}
+) => {
   const data = await read(`source/${path}`, { sources: [path] });
   return Shape.fromGeometry(await fromStl(data, { format, geometry }));
 };
-
-/**
- *
- * # Write STL
- *
- * ::: illustration { "view": { "position": [5, 5, 5] } }
- * ```
- * await Cube().writeStl('cube.stl');
- * await readStl({ path: 'cube.stl' });
- * ```
- * :::
- *
- **/
 
 const prepareStl = (shape, name, options = {}) => {
   // CHECK: Should this be limited to Page plans?
