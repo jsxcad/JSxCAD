@@ -679,7 +679,7 @@ void Surface_mesh__explore(const Surface_mesh* mesh, emscripten::val emit_face, 
   emit_face((std::size_t)-1);
 }
 
-Surface_mesh* ComputeConvexHullAsSurfaceMesh(int component_limit, emscripten::val fill) {
+Surface_mesh* ComputeConvexHullAsSurfaceMesh(emscripten::val fill) {
   Points points;
   Points* points_ptr = &points;
   fill(points_ptr);
@@ -689,7 +689,7 @@ Surface_mesh* ComputeConvexHullAsSurfaceMesh(int component_limit, emscripten::va
   return mesh;
 }
 
-Surface_mesh* ComputeAlphaShapeAsSurfaceMesh(emscripten::val fill) {
+Surface_mesh* ComputeAlphaShapeAsSurfaceMesh(int component_limit, emscripten::val fill) {
   typedef CGAL::Alpha_shape_vertex_base_3<Kernel>      Vb;
   typedef CGAL::Alpha_shape_cell_base_3<Kernel>        Fb;
   typedef CGAL::Triangulation_data_structure_3<Vb,Fb>  Tds;

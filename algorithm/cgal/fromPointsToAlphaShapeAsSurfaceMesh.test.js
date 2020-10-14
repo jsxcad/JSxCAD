@@ -19,7 +19,7 @@ test('FromPointsToAlphaShapeAsSurfaceMesh', (t) => {
     [0.5, -0.5, 0.5],
   ];
 
-  const surfaceMesh = fromPointsToAlphaShapeAsSurfaceMesh(points);
+  const surfaceMesh = fromPointsToAlphaShapeAsSurfaceMesh(points, 1);
   t.true(surfaceMesh.is_valid(false));
   const graph = fromSurfaceMeshToGraph(surfaceMesh);
   t.deepEqual(JSON.parse(JSON.stringify(graph)), {
