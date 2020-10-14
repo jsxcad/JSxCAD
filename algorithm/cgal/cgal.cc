@@ -679,7 +679,7 @@ void Surface_mesh__explore(const Surface_mesh* mesh, emscripten::val emit_face, 
   emit_face((std::size_t)-1);
 }
 
-Surface_mesh* ComputeConvexHullAsSurfaceMesh(emscripten::val fill) {
+Surface_mesh* ComputeConvexHullAsSurfaceMesh(int component_limit, emscripten::val fill) {
   Points points;
   Points* points_ptr = &points;
   fill(points_ptr);
@@ -702,7 +702,7 @@ Surface_mesh* ComputeAlphaShapeAsSurfaceMesh(emscripten::val fill) {
   Points* points_ptr = &points;
   fill(points_ptr);
   Alpha_shape_3 alpha_shape(points.begin(), points.end());
-  Alpha_iterator optimizer = alpha_shape.find_optimal_alpha(1);
+  Alpha_iterator optimizer = alpha_shape.find_optimal_alpha(component_limit);
   alpha_shape.set_alpha(*optimizer);
 
   Surface_mesh* mesh = new Surface_mesh();
