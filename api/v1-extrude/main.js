@@ -1,3 +1,4 @@
+import Alpha from './Alpha.js';
 import ChainedHull from './ChainedHull.js';
 import Hull from './Hull.js';
 import Loop from './Loop.js';
@@ -15,6 +16,7 @@ import toolpath from './toolpath.js';
 import voxels from './voxels.js';
 
 const api = {
+  Alpha,
   ChainedHull,
   Hull,
   Loop,
@@ -32,6 +34,7 @@ const api = {
 };
 
 export {
+  Alpha,
   ChainedHull,
   Hull,
   Loop,

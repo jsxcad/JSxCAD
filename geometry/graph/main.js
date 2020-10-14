@@ -1,3 +1,4 @@
+export { alphaShape } from './alphaShape.js';
 export { convexHull } from './convexHull.js';
 export { difference } from './difference.js';
 export { eachPoint } from './eachPoint.js';

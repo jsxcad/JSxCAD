@@ -12,6 +12,10 @@
 #include <CGAL/Nef_polyhedron_3.h>
 
 #include <CGAL/Advancing_front_surface_reconstruction.h>
+#include <CGAL/Alpha_shape_3.h>
+#include <CGAL/Alpha_shape_cell_base_3.h>
+#include <CGAL/Alpha_shape_vertex_base_3.h>
+#include <CGAL/Delaunay_triangulation_3.h>
 #include <CGAL/Polygon_mesh_processing/corefinement.h>
 #include <CGAL/Polygon_mesh_processing/detect_features.h>
 #include <CGAL/Polygon_mesh_processing/extrude.h>
@@ -685,6 +689,53 @@ Surface_mesh* ComputeConvexHullAsSurfaceMesh(emscripten::val fill) {
   return mesh;
 }
 
+Surface_mesh* ComputeAlphaShapeAsSurfaceMesh(emscripten::val fill) {
+  typedef CGAL::Alpha_shape_vertex_base_3<Kernel>      Vb;
+  typedef CGAL::Alpha_shape_cell_base_3<Kernel>        Fb;
+  typedef CGAL::Triangulation_data_structure_3<Vb,Fb>  Tds;
+  typedef CGAL::Delaunay_triangulation_3<Kernel,Tds>   Triangulation_3;
+  typedef CGAL::Alpha_shape_3<Triangulation_3>         Alpha_shape_3;
+  typedef Kernel::Point_3                              Point;
+  typedef Alpha_shape_3::Alpha_iterator                Alpha_iterator;
+
+  Points points;
+  Points* points_ptr = &points;
+  fill(points_ptr);
+  Alpha_shape_3 alpha_shape(points.begin(), points.end());
+  Alpha_iterator optimizer = alpha_shape.find_optimal_alpha(1);
+  alpha_shape.set_alpha(*optimizer);
+
+  Surface_mesh* mesh = new Surface_mesh();
+
+  std::vector<Alpha_shape_3::Facet > Facets;
+  alpha_shape.get_alpha_shape_facets(std::back_inserter(Facets), Alpha_shape_3::REGULAR);
+  for (auto i = 0; i < Facets.size(); i++) {
+    //checks for exterior cells
+    if (alpha_shape.classify(Facets[i].first) != Alpha_shape_3::EXTERIOR) {
+      Facets[i] = alpha_shape.mirror_facet(Facets[i]);
+    }
+
+    CGAL_assertion(alpha_shape.classify(Facets[i].first) == Alpha_shape_3::EXTERIOR);
+
+    // gets indices of alpha shape and gets consistent orientation
+    int indices[3] = { (Facets[i].second + 1) % 4, (Facets[i].second + 2) % 4, (Facets[i].second + 3) % 4 };
+    if (Facets[i].second % 2 == 0) {
+      std::swap(indices[0], indices[1]);
+    }
+
+    // adds data to cgal mesh
+    for (auto j = 0; j < 3; ++j) {
+      mesh->add_vertex(Facets[i].first->vertex(indices[j])->point());
+    }
+    auto v0 = static_cast<boost::graph_traits<Surface_mesh>::vertex_descriptor>(3 * i);
+    auto v1 = static_cast<boost::graph_traits<Surface_mesh>::vertex_descriptor>(3 * i + 1);
+    auto v2 = static_cast<boost::graph_traits<Surface_mesh>::vertex_descriptor>(3 * i + 2);
+    mesh->add_face(v0, v1, v2);
+  }
+
+  return mesh;
+}
+
 using emscripten::select_const;
 using emscripten::select_overload;
 
@@ -810,4 +861,5 @@ EMSCRIPTEN_BINDINGS(module) {
   emscripten::function("SmoothSurfaceMesh", &SmoothSurfaceMesh, emscripten::allow_raw_pointers());
   emscripten::function("FromSurfaceMeshToPolygonSoup", &FromSurfaceMeshToPolygonSoup, emscripten::allow_raw_pointers());
   emscripten::function("ComputeConvexHullAsSurfaceMesh", &ComputeConvexHullAsSurfaceMesh, emscripten::allow_raw_pointers());
+  emscripten::function("ComputeAlphaShapeAsSurfaceMesh", &ComputeAlphaShapeAsSurfaceMesh, emscripten::allow_raw_pointers());
 }

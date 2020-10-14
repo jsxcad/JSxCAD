@@ -799,8 +799,8 @@ var Module = (function () {
     }
     var wasmMemory;
     var wasmTable = new WebAssembly.Table({
-      initial: 1e3,
-      maximum: 1e3,
+      initial: 1001,
+      maximum: 1001,
       element: 'anyfunc',
     });
     var ABORT = false;
@@ -1068,9 +1068,9 @@ var Module = (function () {
       Module['HEAPF32'] = HEAPF32 = new Float32Array(buf);
       Module['HEAPF64'] = HEAPF64 = new Float64Array(buf);
     }
-    var STACK_BASE = 5406272,
-      STACK_MAX = 163392,
-      DYNAMIC_BASE = 5406272;
+    var STACK_BASE = 5427056,
+      STACK_MAX = 184176,
+      DYNAMIC_BASE = 5427056;
     assert(STACK_BASE % 16 === 0, 'stack must start aligned');
     assert(DYNAMIC_BASE % 16 === 0, 'heap must start aligned');
     var TOTAL_STACK = 5242880;
@@ -8936,6 +8936,15 @@ const fromNefPolyhedronToTriangles = (nef) => {
   return triangles;
 };
 
+const fromPointsToAlphaShapeAsSurfaceMesh = (jsPoints) => {
+  const c = getCgal();
+  return c.ComputeAlphaShapeAsSurfaceMesh((points) => {
+    for (const [x, y, z] of jsPoints) {
+      c.addPoint(points, x, y, z);
+    }
+  });
+};
+
 const fromPointsToConvexHullAsSurfaceMesh = (jsPoints) => {
   const c = getCgal();
   return c.ComputeConvexHullAsSurfaceMesh((points) => {
@@ -9077,4 +9086,4 @@ const smoothSurfaceMesh = (mesh) => getCgal().SmoothSurfaceMesh(mesh);
 const unionOfNefPolyhedrons = (a, b) =>
   getCgal().UnionOfNefPolyhedrons(a, b);
 
-export { differenceOfNefPolyhedrons, extrudeSurfaceMesh, fromGraphToNefPolyhedron, fromGraphToSurfaceMesh, fromNefPolyhedronFacetsToGraph, fromNefPolyhedronShellsToGraph, fromNefPolyhedronToPolygons, fromNefPolyhedronToSurfaceMesh, fromNefPolyhedronToTriangles, fromPointsToConvexHullAsSurfaceMesh, fromPointsToSurfaceMesh, fromPolygonsToNefPolyhedron, fromPolygonsToSurfaceMesh, fromSurfaceMeshToGraph, fromSurfaceMeshToNefPolyhedron, fromSurfaceMeshToPolygons, fromSurfaceMeshToTriangles, initCgal, intersectionOfNefPolyhedrons, sectionOfNefPolyhedron, smoothSurfaceMesh, unionOfNefPolyhedrons };
+export { differenceOfNefPolyhedrons, extrudeSurfaceMesh, fromGraphToNefPolyhedron, fromGraphToSurfaceMesh, fromNefPolyhedronFacetsToGraph, fromNefPolyhedronShellsToGraph, fromNefPolyhedronToPolygons, fromNefPolyhedronToSurfaceMesh, fromNefPolyhedronToTriangles, fromPointsToAlphaShapeAsSurfaceMesh, fromPointsToConvexHullAsSurfaceMesh, fromPointsToSurfaceMesh, fromPolygonsToNefPolyhedron, fromPolygonsToSurfaceMesh, fromSurfaceMeshToGraph, fromSurfaceMeshToNefPolyhedron, fromSurfaceMeshToPolygons, fromSurfaceMeshToTriangles, initCgal, intersectionOfNefPolyhedrons, sectionOfNefPolyhedron, smoothSurfaceMesh, unionOfNefPolyhedrons };

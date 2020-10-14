@@ -1,4 +1,4 @@
-import { fromSurfaceMeshToGraph, fromPointsToConvexHullAsSurfaceMesh, fromNefPolyhedronToSurfaceMesh, fromGraphToSurfaceMesh, fromSurfaceMeshToNefPolyhedron, differenceOfNefPolyhedrons, extrudeSurfaceMesh, fromPointsToSurfaceMesh, fromPolygonsToSurfaceMesh, intersectionOfNefPolyhedrons, fromNefPolyhedronFacetsToGraph, sectionOfNefPolyhedron, smoothSurfaceMesh, fromSurfaceMeshToTriangles, unionOfNefPolyhedrons } from './jsxcad-algorithm-cgal.js';
+import { fromSurfaceMeshToGraph, fromPointsToAlphaShapeAsSurfaceMesh, fromPointsToConvexHullAsSurfaceMesh, fromNefPolyhedronToSurfaceMesh, fromGraphToSurfaceMesh, fromSurfaceMeshToNefPolyhedron, differenceOfNefPolyhedrons, extrudeSurfaceMesh, fromPointsToSurfaceMesh, fromPolygonsToSurfaceMesh, intersectionOfNefPolyhedrons, fromNefPolyhedronFacetsToGraph, sectionOfNefPolyhedron, smoothSurfaceMesh, fromSurfaceMeshToTriangles, unionOfNefPolyhedrons } from './jsxcad-algorithm-cgal.js';
 import { scale, min, max, dot, transform as transform$1 } from './jsxcad-math-vec3.js';
 import { toPlane, flip } from './jsxcad-math-poly3.js';
 import { transform as transform$2 } from './jsxcad-math-plane.js';
@@ -19,6 +19,9 @@ const fromSurfaceMesh = (surfaceMesh) => {
   }
   return graph;
 };
+
+const alphaShape = (points) =>
+  fromSurfaceMesh(fromPointsToAlphaShapeAsSurfaceMesh(points));
 
 const convexHull = (points) =>
   fromSurfaceMesh(fromPointsToConvexHullAsSurfaceMesh(points));
@@ -1041,4 +1044,4 @@ const union = (a, b) =>
     unionOfNefPolyhedrons(toNefPolyhedron(b), toNefPolyhedron(a))
   );
 
-export { convexHull, difference, eachPoint, extrude, fromPoints, fromPolygons, fromSolid, fromSurface, intersection, measureBoundingBox, outline, section, smooth, toSolid, toSurface, toTriangles, transform, union };
+export { alphaShape, convexHull, difference, eachPoint, extrude, fromPoints, fromPolygons, fromSolid, fromSurface, intersection, measureBoundingBox, outline, section, smooth, toSolid, toSurface, toTriangles, transform, union };

@@ -1,8 +1,8 @@
-import { buildConvexSurfaceHull, buildConvexHull, loop, buildConvexMinkowskiSum, extrude as extrude$2 } from './jsxcad-algorithm-shape.js';
-import { taggedSurface, taggedSolid, taggedGraph, getPaths, extrude as extrude$1, outline as outline$1, section as section$1, taggedGroup, taggedLayers, getSolids, union, taggedZ0Surface, getSurfaces, getZ0Surfaces, taggedPaths, getPlans, measureBoundingBox, taggedPoints, measureHeights } from './jsxcad-geometry-tagged.js';
-import { Assembly, Group } from './jsxcad-api-v1-shapes.js';
 import Shape$1, { Shape, getPegCoords } from './jsxcad-api-v1-shape.js';
-import { convexHull, fromPoints } from './jsxcad-geometry-graph.js';
+import { alphaShape, convexHull, fromPoints } from './jsxcad-geometry-graph.js';
+import { taggedGraph, taggedSurface, taggedSolid, getPaths, extrude as extrude$1, outline as outline$1, section as section$1, taggedGroup, taggedLayers, getSolids, union, taggedZ0Surface, getSurfaces, getZ0Surfaces, taggedPaths, getPlans, measureBoundingBox, taggedPoints, measureHeights } from './jsxcad-geometry-tagged.js';
+import { buildConvexSurfaceHull, buildConvexHull, loop, buildConvexMinkowskiSum, extrude as extrude$2 } from './jsxcad-algorithm-shape.js';
+import { Assembly, Group } from './jsxcad-api-v1-shapes.js';
 import { Y as Y$1, Z as Z$2 } from './jsxcad-api-v1-connector.js';
 import { isClosed, isCounterClockwise, flip, transform as transform$2, getEdges } from './jsxcad-geometry-path.js';
 import { toPlane } from './jsxcad-math-poly3.js';
@@ -14,6 +14,17 @@ import { fromTranslation } from './jsxcad-math-mat4.js';
 import { scale } from './jsxcad-math-vec3.js';
 import { toXYPlaneTransforms } from './jsxcad-math-plane.js';
 import { toolpath as toolpath$1 } from './jsxcad-algorithm-toolpath.js';
+
+const Alpha = (...shapes) => {
+  const points = [];
+  shapes.forEach((shape) => shape.eachPoint((point) => points.push(point)));
+  return Shape.fromGeometry(taggedGraph({}, alphaShape(points)));
+};
+
+const alphaMethod = function (...shapes) {
+  return Alpha(this, ...shapes);
+};
+Shape.prototype.alpha = alphaMethod;
 
 /**
  *
@@ -752,6 +763,7 @@ const heightCloudMethod = function (resolution) {
 Shape.prototype.heightCloud = heightCloudMethod;
 
 const api = {
+  Alpha,
   ChainedHull,
   Hull,
   Loop,
@@ -769,4 +781,4 @@ const api = {
 };
 
 export default api;
-export { ChainedHull, Hull, Loop, cloudSolid, extrude, inline, interior, minkowski, outline, section, squash, stretch, sweep, toolpath, voxels };
+export { Alpha, ChainedHull, Hull, Loop, cloudSolid, extrude, inline, interior, minkowski, outline, section, squash, stretch, sweep, toolpath, voxels };
