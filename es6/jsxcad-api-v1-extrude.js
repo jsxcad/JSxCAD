@@ -15,14 +15,16 @@ import { scale } from './jsxcad-math-vec3.js';
 import { toXYPlaneTransforms } from './jsxcad-math-plane.js';
 import { toolpath as toolpath$1 } from './jsxcad-algorithm-toolpath.js';
 
-const Alpha = (...shapes) => {
+const Alpha = (shape, componentLimit = 1) => {
   const points = [];
-  shapes.forEach((shape) => shape.eachPoint((point) => points.push(point)));
-  return Shape.fromGeometry(taggedGraph({}, alphaShape(points)));
+  shape.eachPoint((point) => points.push(point));
+  return Shape.fromGeometry(
+    taggedGraph({}, alphaShape(points, componentLimit))
+  );
 };
 
-const alphaMethod = function (...shapes) {
-  return Alpha(this, ...shapes);
+const alphaMethod = function (componentLimit = 1) {
+  return Alpha(this, componentLimit);
 };
 Shape.prototype.alpha = alphaMethod;
 

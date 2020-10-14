@@ -20,8 +20,8 @@ const fromSurfaceMesh = (surfaceMesh) => {
   return graph;
 };
 
-const alphaShape = (points) =>
-  fromSurfaceMesh(fromPointsToAlphaShapeAsSurfaceMesh(points));
+const alphaShape = (points, componentLimit) =>
+  fromSurfaceMesh(fromPointsToAlphaShapeAsSurfaceMesh(points, componentLimit));
 
 const convexHull = (points) =>
   fromSurfaceMesh(fromPointsToConvexHullAsSurfaceMesh(points));

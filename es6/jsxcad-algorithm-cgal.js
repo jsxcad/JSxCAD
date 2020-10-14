@@ -799,8 +799,8 @@ var Module = (function () {
     }
     var wasmMemory;
     var wasmTable = new WebAssembly.Table({
-      initial: 1001,
-      maximum: 1001,
+      initial: 1002,
+      maximum: 1002,
       element: 'anyfunc',
     });
     var ABORT = false;
@@ -1068,9 +1068,9 @@ var Module = (function () {
       Module['HEAPF32'] = HEAPF32 = new Float32Array(buf);
       Module['HEAPF64'] = HEAPF64 = new Float64Array(buf);
     }
-    var STACK_BASE = 5427056,
-      STACK_MAX = 184176,
-      DYNAMIC_BASE = 5427056;
+    var STACK_BASE = 5427072,
+      STACK_MAX = 184192,
+      DYNAMIC_BASE = 5427072;
     assert(STACK_BASE % 16 === 0, 'stack must start aligned');
     assert(DYNAMIC_BASE % 16 === 0, 'heap must start aligned');
     var TOTAL_STACK = 5242880;
@@ -8950,9 +8950,12 @@ const fromNefPolyhedronToTriangles = (nef) => {
   return triangles;
 };
 
-const fromPointsToAlphaShapeAsSurfaceMesh = (jsPoints) => {
+const fromPointsToAlphaShapeAsSurfaceMesh = (
+  jsPoints,
+  componentLimit
+) => {
   const c = getCgal();
-  return c.ComputeAlphaShapeAsSurfaceMesh((points) => {
+  return c.ComputeAlphaShapeAsSurfaceMesh(componentLimit, (points) => {
     for (const [x, y, z] of jsPoints) {
       c.addPoint(points, x, y, z);
     }
