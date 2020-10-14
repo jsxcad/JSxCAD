@@ -1,4 +1,4 @@
-import { getSolids, taggedSolid, taggedAssembly } from './jsxcad-geometry-tagged.js';
+import { getSolids, taggedSolid, taggedAssembly, smooth as smooth$1 } from './jsxcad-geometry-tagged.js';
 import { measureBoundingBox, makeWatertight } from './jsxcad-geometry-solid.js';
 import Shape from './jsxcad-api-v1-shape.js';
 import { deform } from './jsxcad-geometry-bsp.js';
@@ -3731,6 +3731,15 @@ const skewMethod = function (...args) {
 };
 Shape.prototype.skew = skewMethod;
 
+const smooth = (shape) => {
+  return Shape.fromGeometry(smooth$1(shape.toGeometry()));
+};
+
+const smoothMethod = function () {
+  return smooth(this);
+};
+Shape.prototype.smooth = smoothMethod;
+
 const Z$3 = 2;
 
 const scaleXY = (factor, [x, y, z]) => [...scale(factor, [x, y]), z];
@@ -3790,9 +3799,10 @@ const api = {
   arch,
   crumple,
   skew,
+  smooth,
   taper,
   twist,
 };
 
 export default api;
-export { arch, crumple, skew, taper, twist };
+export { arch, crumple, skew, smooth, taper, twist };

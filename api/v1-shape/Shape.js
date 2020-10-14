@@ -95,6 +95,10 @@ export class Shape {
     return toPoints(this.toDisjointGeometry()).points;
   }
 
+  points() {
+    return Shape.fromGeometry(toPoints(this.toTransformedGeometry()));
+  }
+
   transform(matrix) {
     if (matrix.some((item) => typeof item !== 'number' || isNaN(item))) {
       throw Error('die: matrix is malformed');

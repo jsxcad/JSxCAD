@@ -82,7 +82,7 @@ test('fromSolid', (t) => {
     ],
   ];
   const graph = fromSolid(box);
-  t.deepEqual(graph, {
+  t.deepEqual(JSON.parse(JSON.stringify(graph)), {
     edges: [
       { point: 1, next: 2, twin: 1, loop: 0 },
       { point: 0, next: 18, twin: 0, loop: 4 },

@@ -136,12 +136,12 @@ test('FromGraphToSurfaceMesh', (t) => {
       { edge: 17, face: 5 },
     ],
     faces: [
-      { plane: [0, 0, -1, -0.5], loop: 0, points_plane: [0, 0, -1, 0.5] },
-      { plane: [0, 1, 0, -0.5], loop: 1, points_plane: [0, 1, 0, 0.5] },
-      { plane: [-1, 0, 0, -0.5], loop: 2, points_plane: [-1, 0, 0, 0.5] },
-      { plane: [0, -1, 0, -0.5], loop: 3, points_plane: [0, -1, 0, 0.5] },
-      { plane: [1, 0, 0, -0.5], loop: 4, points_plane: [1, 0, 0, 0.5] },
-      { plane: [0, 0, 1, -0.5], loop: 5, points_plane: [0, 0, 1, 0.5] },
+      { plane: [0, 0, -1, -0.5], loop: 0 },
+      { plane: [0, 1, 0, -0.5], loop: 1 },
+      { plane: [-1, 0, 0, -0.5], loop: 2 },
+      { plane: [0, -1, 0, -0.5], loop: 3 },
+      { plane: [1, 0, 0, -0.5], loop: 4 },
+      { plane: [0, 0, 1, -0.5], loop: 5 },
     ],
     volumes: [{ faces: [0, 1, 2, 3, 4, 5] }],
   });

@@ -5,7 +5,11 @@ export const toSolid = (graph) => {
   const solid = [];
   eachFace(graph, (face) => {
     const surface = [];
-    pushConvexPolygons(surface, graph, face);
+    try {
+      pushConvexPolygons(surface, graph, face);
+    } catch (e) {
+      console.log(e.stack);
+    }
     if (surface.length > 0) {
       solid.push(surface);
     }

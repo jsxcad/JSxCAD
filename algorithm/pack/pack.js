@@ -11,12 +11,13 @@ const { GrowingPacker, Packer } = BinPackingEs;
 
 const X = 0;
 const Y = 1;
+const Z = 2;
 
 const measureSize = (geometry) => {
   const [min, max] = measureBoundingBox(geometry);
   const width = max[X] - min[X];
   const height = max[Y] - min[Y];
-  return [width, height];
+  return [width, height, min[Z]];
 };
 
 const measureOrigin = (geometry) => {
@@ -53,12 +54,12 @@ export const pack = (
   const blocks = [];
 
   for (const geometry of geometries) {
-    const [width, height] = measureSize(geometry);
+    const [width, height, minZ] = measureSize(geometry);
     if (!isFinite(width) || !isFinite(height)) {
       continue;
     }
     const [w, h] = [width + itemMargin * 2, height + itemMargin * 2];
-    blocks.push({ w, h, geometry });
+    blocks.push({ w, h, minZ, geometry });
   }
 
   // Place largest cells first
@@ -69,7 +70,7 @@ export const pack = (
   let minPoint = [Infinity, Infinity, 0];
   let maxPoint = [-Infinity, -Infinity, 0];
 
-  for (const { geometry, fit } of blocks) {
+  for (const { geometry, fit, minZ } of blocks) {
     if (fit && fit.used) {
       const [x, y] = measureOrigin(geometry);
       const xo = 0 + xOffset + (fit.x - x + itemMargin + pageMargin);
@@ -79,7 +80,7 @@ export const pack = (
         [fit.x + xOffset + fit.w, fit.y + yOffset + fit.h, 0],
         maxPoint
       );
-      const transformed = toKeptGeometry(translate([xo, yo, 0], geometry));
+      const transformed = toKeptGeometry(translate([xo, yo, -minZ], geometry));
       packedGeometries.push(transformed);
     } else {
       unpackedGeometries.push(geometry);

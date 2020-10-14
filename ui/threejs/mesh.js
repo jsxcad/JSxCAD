@@ -236,6 +236,10 @@ export const buildMeshes = async ({
           const start = path[last];
           const end = path[nth];
           if (start === null || end === null) continue;
+          if (!start.every(isFinite) || !end.every(isFinite)) {
+            // Not sure where these non-finite path values are coming from.
+            continue;
+          }
           const [aX = 0, aY = 0, aZ = 0] = start;
           const [bX = 0, bY = 0, bZ = 0] = end;
           colors.push(
@@ -248,6 +252,12 @@ export const buildMeshes = async ({
             color.b,
             opacity
           );
+          if (!isFinite(aX)) throw Error('die');
+          if (!isFinite(aY)) throw Error('die');
+          if (!isFinite(aZ)) throw Error('die');
+          if (!isFinite(bX)) throw Error('die');
+          if (!isFinite(bY)) throw Error('die');
+          if (!isFinite(bZ)) throw Error('die');
           positions.push(aX, aY, aZ, bX, bY, bZ);
           entry.length += 2;
         }

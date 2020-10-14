@@ -174,7 +174,9 @@ const Assembly = (...shapes) =>
 Shape.prototype.Assembly = shapeMethod(Assembly);
 
 const unitPolygon = (sides = 16) =>
-  Shape.fromGeometry(taggedZ0Surface({}, [buildRegularPolygon(sides)]));
+  Shape.fromGeometry(
+    taggedZ0Surface({}, [buildRegularPolygon(sides)])
+  ).toGraph();
 
 // Note: radius here is circumradius.
 const toRadiusFromEdge = (edge, sides) =>
@@ -189,7 +191,7 @@ const ofApothem$3 = (apothem, { sides = 16 }) =>
 const ofDiameter$3 = (diameter, ...args) =>
   ofRadius$4(diameter / 2, ...args);
 const ofPoints = (points) =>
-  Shape.fromGeometry(buildPolygonFromPoints(points));
+  Shape.fromGeometry(buildPolygonFromPoints(points)).toGraph();
 
 const Polygon = (...args) => ofRadius$4(...args);
 
@@ -1862,6 +1864,7 @@ const toRadiusFromApothem = (apothem) => apothem / Math.cos(Math.PI / 4);
 const edgeScale$1 = regularPolygonEdgeLengthToRadius(1, 4);
 const unitSquare = () =>
   Shape.fromGeometry(taggedZ0Surface({}, [buildRegularPolygon(4)]))
+    .toGraph()
     .rotateZ(45)
     .scale(edgeScale$1);
 
@@ -1869,6 +1872,7 @@ const ofSize$2 = (width = 1, length) =>
   unitSquare().scale(width, length, 1);
 const ofRadius$a = (radius) =>
   Shape.fromGeometry(taggedZ0Surface({}, [buildRegularPolygon(4)]))
+    .toGraph()
     .rotateZ(45)
     .scale(radius);
 const ofApothem$7 = (apothem) => ofRadius$a(toRadiusFromApothem(apothem));
@@ -1894,7 +1898,7 @@ Square.fromCorners = fromCorners$1;
 Shape.prototype.Square = shapeMethod(Square);
 
 const unitTetrahedron = () =>
-  Shape.fromGeometry(taggedSolid({}, buildRegularTetrahedron({})));
+  Shape.fromGeometry(taggedSolid({}, buildRegularTetrahedron({}))).toGraph();
 
 const ofRadius$b = (radius = 1) => unitTetrahedron().scale(radius);
 const ofDiameter$a = (diameter = 1) =>

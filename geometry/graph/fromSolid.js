@@ -1,14 +1,9 @@
-import {
-  fromPolygonsToSurfaceMesh,
-  fromSurfaceMeshToGraph,
-} from '@jsxcad/algorithm-cgal';
+import { fromPolygons } from './fromPolygons.js';
 
 export const fromSolid = (solid) => {
   const polygons = [];
   for (const surface of solid) {
     polygons.push(...surface);
   }
-  const mesh = fromPolygonsToSurfaceMesh(polygons);
-  const graph = fromSurfaceMeshToGraph(mesh);
-  return graph;
+  return fromPolygons(polygons);
 };

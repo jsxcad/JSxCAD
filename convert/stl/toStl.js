@@ -1,8 +1,13 @@
 import { canonicalize, toTriangles } from '@jsxcad/geometry-polygons';
-import { getNonVoidSolids, toDisjointGeometry } from '@jsxcad/geometry-tagged';
+import {
+  getNonVoidGraphs,
+  getNonVoidSolids,
+  toDisjointGeometry,
+} from '@jsxcad/geometry-tagged';
 
 import { makeWatertight } from '@jsxcad/geometry-solid';
 import { toPlane } from '@jsxcad/math-poly3';
+import { toTriangles as toTrianglesFromGraph } from '@jsxcad/geometry-graph';
 
 const fromSolidToTriangles = (solid, triangles) => {
   for (const surface of makeWatertight(solid)) {
@@ -42,6 +47,9 @@ export const toStl = async (geometry, options = {}) => {
   const triangles = [];
   for (const { solid } of getNonVoidSolids(keptGeometry)) {
     fromSolidToTriangles(solid, triangles);
+  }
+  for (const { graph } of getNonVoidGraphs(keptGeometry)) {
+    triangles.push(...toTrianglesFromGraph(graph));
   }
   const output = `solid JSxCAD\n${convertToFacets(
     options,

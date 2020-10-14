@@ -1,5 +1,5 @@
+import { toSolid, toSurface } from './jsxcad-geometry-graph.js';
 import { toPlane } from './jsxcad-math-poly3.js';
-import { toSolid } from './jsxcad-geometry-graph.js';
 import { toTriangles } from './jsxcad-geometry-polygons.js';
 import { toDisjointGeometry } from './jsxcad-geometry-tagged.js';
 
@@ -127,12 +127,23 @@ const toThreejsGeometry = (geometry, supertags) => {
         isThreejsGeometry: true,
       };
     case 'graph':
-      return {
-        type: 'solid',
-        threejsSolid: solidToThreejsSolid(toSolid(geometry.graph)),
-        tags,
-        isThreejsGeometry: true,
-      };
+      if (geometry.graph.volumes) {
+        return {
+          type: 'solid',
+          threejsSolid: solidToThreejsSolid(toSolid(geometry.graph)),
+          tags,
+          isThreejsGeometry: true,
+        };
+      } else {
+        return {
+          type: 'surface',
+          threejsSurface: surfaceToThreejsSurface(
+            toSurface(geometry.graph)
+          ),
+          tags,
+          isThreejsGeometry: true,
+        };
+      }
     default:
       throw Error(`Unexpected geometry: ${geometry.type}`);
   }

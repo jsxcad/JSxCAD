@@ -1,4 +1,5 @@
 export { differenceOfNefPolyhedrons } from './differenceOfNefPolyhedrons.js';
+export { extrudeSurfaceMesh } from './extrudeSurfaceMesh.js';
 export { fromGraphToNefPolyhedron } from './fromGraphToNefPolyhedron.js';
 export { fromGraphToSurfaceMesh } from './fromGraphToSurfaceMesh.js';
 export { fromNefPolyhedronFacetsToGraph } from './fromNefPolyhedronFacetsToGraph.js';
@@ -6,11 +7,17 @@ export { fromNefPolyhedronShellsToGraph } from './fromNefPolyhedronShellsToGraph
 export { fromNefPolyhedronToSurfaceMesh } from './fromNefPolyhedronToSurfaceMesh.js';
 export { fromNefPolyhedronToPolygons } from './fromNefPolyhedronToPolygons.js';
 export { fromNefPolyhedronToTriangles } from './fromNefPolyhedronToTriangles.js';
+export { fromPointsToAlphaShapeAsSurfaceMesh } from './fromPointsToAlphaShapeAsSurfaceMesh.js';
+export { fromPointsToConvexHullAsSurfaceMesh } from './fromPointsToConvexHullAsSurfaceMesh.js';
+export { fromPointsToSurfaceMesh } from './fromPointsToSurfaceMesh.js';
 export { fromPolygonsToNefPolyhedron } from './fromPolygonsToNefPolyhedron.js';
 export { fromPolygonsToSurfaceMesh } from './fromPolygonsToSurfaceMesh.js';
 export { fromSurfaceMeshToGraph } from './fromSurfaceMeshToGraph.js';
 export { fromSurfaceMeshToNefPolyhedron } from './fromSurfaceMeshToNefPolyhedron.js';
+export { fromSurfaceMeshToPolygons } from './fromSurfaceMeshToPolygons.js';
+export { fromSurfaceMeshToTriangles } from './fromSurfaceMeshToTriangles.js';
 export { initCgal } from './getCgal.js';
 export { intersectionOfNefPolyhedrons } from './intersectionOfNefPolyhedrons.js';
 export { sectionOfNefPolyhedron } from './sectionOfNefPolyhedron.js';
+export { smoothSurfaceMesh } from './smoothSurfaceMesh.js';
 export { unionOfNefPolyhedrons } from './unionOfNefPolyhedrons.js';

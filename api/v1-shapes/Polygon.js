@@ -9,7 +9,9 @@ import {
 import { taggedZ0Surface } from '@jsxcad/geometry-tagged';
 
 const unitPolygon = (sides = 16) =>
-  Shape.fromGeometry(taggedZ0Surface({}, [buildRegularPolygon(sides)]));
+  Shape.fromGeometry(
+    taggedZ0Surface({}, [buildRegularPolygon(sides)])
+  ).toGraph();
 
 // Note: radius here is circumradius.
 const toRadiusFromEdge = (edge, sides) =>
@@ -24,7 +26,7 @@ export const ofApothem = (apothem, { sides = 16 }) =>
 export const ofDiameter = (diameter, ...args) =>
   ofRadius(diameter / 2, ...args);
 export const ofPoints = (points) =>
-  Shape.fromGeometry(buildPolygonFromPoints(points));
+  Shape.fromGeometry(buildPolygonFromPoints(points)).toGraph();
 
 export const Polygon = (...args) => ofRadius(...args);
 
