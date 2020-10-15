@@ -506,14 +506,6 @@ const method = function (...args) {
 };
 Shape.prototype.stretch = method;
 
-/**
- *
- * # Sweep
- *
- * Sweep a tool profile along a path, to produce a surface.
- *
- **/
-
 // FIX: This is a weak approximation assuming a 1d profile -- it will need to be redesigned.
 const sweep = (toolpath, tool) => {
   const chains = [];
@@ -526,15 +518,15 @@ const sweep = (toolpath, tool) => {
       );
     }
   }
-  return Assembly(...chains);
+  return Group(...chains);
 };
 
-const sweepMethod = function (tool) {
+const sweepMethod = function (tool, { resolution = 1 } = {}) {
   return sweep(this, tool);
 };
 
 Shape.prototype.sweep = sweepMethod;
-Shape.prototype.withSweep = function (tool) {
+Shape.prototype.withSweep = function (tool, { resolution }) {
   return this.with(sweep(this, tool));
 };
 

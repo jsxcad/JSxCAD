@@ -204,33 +204,22 @@ Surface_mesh* FromPointsToSurfaceMesh(emscripten::val fill) {
 }
 
 Surface_mesh* SmoothSurfaceMesh(Surface_mesh* input) {
-  std::cout << "QQ/SmoothSurfaceMesh/Start" << std::endl;
-
   typedef boost::graph_traits<Surface_mesh>::edge_descriptor edge_descriptor;
 
   Surface_mesh* mesh = new Surface_mesh(*input);
 
-  std::cout << "QQ/SmoothSurfaceMesh/is_valid_polygon_mesh: " << CGAL::is_valid_polygon_mesh(*mesh) << std::endl;
-  std::cout << "QQ/SmoothSurfaceMesh/number_of_edges: " << mesh->number_of_edges() << std::endl;
-
 #if 0
-  std::cout << "QQ/SmoothSurfaceMesh/Split/Start" << std::endl;
   CGAL::Polygon_mesh_processing::split_long_edges(
     mesh->edges(),
     1,
     *mesh);
-  std::cout << "QQ/SmoothSurfaceMesh/Split/End" << std::endl;
-  std::cout << "QQ/SmoothSurfaceMesh/number_of_edges: " << mesh->number_of_edges() << std::endl;
 #endif
 
-  std::cout << "QQ/SmoothSurfaceMesh/Remesh/Start" << std::endl;
   CGAL::Polygon_mesh_processing::isotropic_remeshing(
     mesh->faces(),
     5,
     *mesh,
     CGAL::Polygon_mesh_processing::parameters::number_of_iterations(1));
-  std::cout << "QQ/SmoothSurfaceMesh/Remesh/End" << std::endl;
-  std::cout << "QQ/SmoothSurfaceMesh/number_of_edges: " << mesh->number_of_edges() << std::endl;
 
 #if 0
   typedef boost::property_map<Surface_mesh, CGAL::edge_is_feature_t>::type EIFMap;
@@ -252,18 +241,14 @@ Surface_mesh* SmoothSurfaceMesh(Surface_mesh* input) {
   CGAL::Polygon_mesh_processing::smooth_shape(mesh->faces(), *mesh, 1, CGAL::Polygon_mesh_processing::parameters::number_of_iterations(nb_iterations));
 #else
   // Smooth with both angle and area criteria + Delaunay flips
-  std::cout << "QQ/SmoothSurfaceMesh/SmoothMesh/Start" << std::endl;
   CGAL::Polygon_mesh_processing::smooth_mesh(
       *mesh,
       CGAL::Polygon_mesh_processing::parameters::number_of_iterations(nb_iterations)
           // .use_safety_constraints(false) // authorize all moves
           // .edge_is_constrained_map(eif)
   );
-  std::cout << "QQ/SmoothSurfaceMesh/SmoothMesh/End" << std::endl;
 #endif
-  std::cout << "QQ/SmoothSurfaceMesh/number_of_edges: " << mesh->number_of_edges() << std::endl;
 
-  std::cout << "QQ/SmoothSurfaceMesh/SmoothMesh/Done" << std::endl;
   return mesh;
 }
 
@@ -734,6 +719,15 @@ Surface_mesh* ComputeAlphaShapeAsSurfaceMesh(int component_limit, emscripten::va
   }
 
   return mesh;
+}
+
+Surface_mesh* ComputeOutline(Surface_mesh* input) {
+  Surface_mesh* mesh = new Surface_mesh(*input);
+
+  for (auto& edge : mesh->halfedges()) {
+    auto& twin = mesh->opposite(edge);
+    CGAL::Euler::join_face(edge, *mesh);
+  }
 }
 
 using emscripten::select_const;

@@ -77,6 +77,9 @@ export const pushConvexPolygons = (
 ) => {
   const faceNode = getFaceNode(graph, face);
   let plane = faceNode.plane;
+  if (plane === undefined) {
+    return;
+  }
   const buildContour = selectBuildContour(plane);
   const points = [];
   const contour = [];

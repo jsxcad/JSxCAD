@@ -1,4 +1,4 @@
-import { Point, Assembly, Toolpath, Square, Rod } from './jsxcad-api-v1-shapes.js';
+import { Point, Assembly, Toolpath, Square, RodOfDiameter } from './jsxcad-api-v1-shapes.js';
 import Shape, { Shape as Shape$1 } from './jsxcad-api-v1-shape.js';
 import { taggedPaths, getNonVoidPaths } from './jsxcad-geometry-tagged.js';
 import { toolpath } from './jsxcad-algorithm-toolpath.js';
@@ -93,7 +93,7 @@ const BenchSaw = (
     millingStyle = 'any',
     sweep = 'cut',
   } = {}
-) => (length, depth, { x = 0, y = 0, z = 0 }) =>
+) => (length, depth, { x = 0, y = 0, z = 0 } = {}) =>
   BenchPlane(length, {
     toolDiameter,
     cutDepth,
@@ -105,7 +105,7 @@ const BenchSaw = (
 const DrillPress = (
   diameter = 10,
   { toolDiameter = 3.175, cutDepth = 0.3, sides = 16, sweep = 'cut' } = {}
-) => (depth = 0, { x = 0, y = 0, z = 0 }) => {
+) => (depth = 0, { x = 0, y = 0, z = 0 } = {}) => {
   const radius = diameter / 2;
   const points = [];
   const toolRadius = toolDiameter / 2;
@@ -139,7 +139,7 @@ const DrillPress = (
     Toolpath(...points),
     sweep === 'no'
       ? undefined
-      : Rod.ofDiameter(diameter, depth)
+      : RodOfDiameter(diameter, depth)
           .op((s) => (sweep === 'show' ? s : s.hole()))
           .moveZ(depth / -2)
   ).move(x, y, z);
@@ -148,7 +148,7 @@ const DrillPress = (
 const HoleRouter = (
   depth = 10,
   { toolDiameter = 3.175, cutDepth = 0.3, toolLength = 17, sweep = 'cut' } = {}
-) => (shape, { x = 0, y = 0, z = 0 }) => {
+) => (shape, { x = 0, y = 0, z = 0 } = {}) => {
   const cuts = Math.ceil(depth / Math.min(depth, cutDepth));
   const actualCutDepth = depth / cuts;
   const design = [];
@@ -172,7 +172,7 @@ const HoleRouter = (
     if (sweep !== 'no') {
       sweeps.push(
         paths
-          .sweep(Rod.ofDiameter(toolDiameter, depth).moveZ(depth / -2))
+          .sweep(RodOfDiameter(toolDiameter, depth).moveZ(depth / -2))
           .op((s) => (sweep === 'show' ? s : s.hole()))
       );
     }
@@ -187,7 +187,7 @@ const HoleRouter = (
 const LineRouter = (
   depth = 10,
   { toolDiameter = 3.175, cutDepth = 0.3, toolLength = 17, sweep = 'no' } = {}
-) => (shape, { x = 0, y = 0, z = 0 }) => {
+) => (shape, { x = 0, y = 0, z = 0 } = {}) => {
   const cuts = Math.ceil(depth / Math.min(cutDepth, depth));
   const actualCutDepth = depth / cuts;
   const design = [];
@@ -206,7 +206,7 @@ const LineRouter = (
       // Generally a v bit.
       sweeps.push(
         Shape$1.fromGeometry(taggedPaths({}, paths))
-          .sweep(Rod.ofDiameter(toolDiameter, depth).moveZ(depth / -2))
+          .sweep(RodOfDiameter(toolDiameter, depth).moveZ(depth / -2))
           .op((s) => (sweep === 'show' ? s : s.hole()))
       );
     }
@@ -221,7 +221,7 @@ const LineRouter = (
 const ProfileRouter = (
   depth = 10,
   { toolDiameter = 3.175, cutDepth = 0.3, toolLength = 17, sweep = 'no' } = {}
-) => (shape, { x = 0, y = 0, z = 0 }) => {
+) => (shape, { x = 0, y = 0, z = 0 } = {}) => {
   const cuts = Math.ceil(depth / Math.min(cutDepth, depth));
   const actualCutDepth = depth / cuts;
   const design = [];
@@ -252,7 +252,7 @@ const ProfileRouter = (
     if (sweep !== 'no') {
       sweeps.push(
         paths
-          .sweep(Rod.ofDiameter(toolDiameter, depth).moveZ(depth / -2))
+          .sweep(RodOfDiameter(toolDiameter, depth).moveZ(depth / -2))
           .op((s) => (sweep === 'show' ? s : s.hole()))
       );
     }

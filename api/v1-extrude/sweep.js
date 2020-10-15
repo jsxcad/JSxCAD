@@ -1,16 +1,8 @@
-import { Assembly } from '@jsxcad/api-v1-shapes';
-import Hull from './Hull.js';
+import { Group } from '@jsxcad/api-v1-shapes';
+import { Hull } from './Hull.js';
 import { Shape } from '@jsxcad/api-v1-shape';
 import { getEdges } from '@jsxcad/geometry-path';
 import { getPaths } from '@jsxcad/geometry-tagged';
-
-/**
- *
- * # Sweep
- *
- * Sweep a tool profile along a path, to produce a surface.
- *
- **/
 
 // FIX: This is a weak approximation assuming a 1d profile -- it will need to be redesigned.
 export const sweep = (toolpath, tool) => {
@@ -24,16 +16,16 @@ export const sweep = (toolpath, tool) => {
       );
     }
   }
-  return Assembly(...chains);
+  return Group(...chains);
 };
 
-const sweepMethod = function (tool) {
-  return sweep(this, tool);
+const sweepMethod = function (tool, { resolution = 1 } = {}) {
+  return sweep(this, tool, { resolution });
 };
 
 Shape.prototype.sweep = sweepMethod;
-Shape.prototype.withSweep = function (tool) {
-  return this.with(sweep(this, tool));
+Shape.prototype.withSweep = function (tool, { resolution }) {
+  return this.with(sweep(this, tool, { resolution }));
 };
 
 export default sweep;
