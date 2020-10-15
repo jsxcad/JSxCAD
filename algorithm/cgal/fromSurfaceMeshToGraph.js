@@ -15,6 +15,11 @@ export const fromSurfaceMeshToGraph = (mesh) => {
     (faceId) => {
       if (polygon.length >= 3) {
         graph.faces[face].plane = fromPolygonToPlane(polygon);
+        if (graph.faces[face].plane === undefined) {
+          console.log(`QQ/bent: ${JSON.stringify(polygon)}`);
+        }
+      } else {
+        console.log(`QQ/degenerate: ${JSON.stringify(polygon)}`);
       }
       polygon.length = 0;
       face = faceId;

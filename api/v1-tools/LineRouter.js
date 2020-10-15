@@ -1,4 +1,4 @@
-import { Assembly, Point, Rod } from '@jsxcad/api-v1-shapes';
+import { Assembly, Point, RodOfDiameter } from '@jsxcad/api-v1-shapes';
 import { getNonVoidPaths, taggedPaths } from '@jsxcad/geometry-tagged';
 
 import { Shape } from '@jsxcad/api-v1-shape';
@@ -6,7 +6,7 @@ import { Shape } from '@jsxcad/api-v1-shape';
 export const LineRouter = (
   depth = 10,
   { toolDiameter = 3.175, cutDepth = 0.3, toolLength = 17, sweep = 'no' } = {}
-) => (shape, { x = 0, y = 0, z = 0 }) => {
+) => (shape, { x = 0, y = 0, z = 0 } = {}) => {
   const cuts = Math.ceil(depth / Math.min(cutDepth, depth));
   const actualCutDepth = depth / cuts;
   const design = [];
@@ -25,7 +25,7 @@ export const LineRouter = (
       // Generally a v bit.
       sweeps.push(
         Shape.fromGeometry(taggedPaths({}, paths))
-          .sweep(Rod.ofDiameter(toolDiameter, depth).moveZ(depth / -2))
+          .sweep(RodOfDiameter(toolDiameter, depth).moveZ(depth / -2))
           .op((s) => (sweep === 'show' ? s : s.hole()))
       );
     }

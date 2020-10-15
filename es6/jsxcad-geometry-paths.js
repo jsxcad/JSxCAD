@@ -123,6 +123,18 @@ const segment = (paths, start, end) => {
   return segments;
 };
 
+const segmented = (paths, length) => {
+  const segmentedPaths = [];
+  for (let start = 0; ; start += length) {
+    const segments = segment(paths, start, start + length);
+    if (segments.length === 0) {
+      break;
+    }
+    segmentedPaths.push(...segments);
+  }
+  return segmentedPaths;
+};
+
 /**
  * Transforms each path of Paths.
  *
@@ -174,4 +186,4 @@ const scale = ([x = 1, y = 1, z = 1], paths) =>
 const translate = ([x = 0, y = 0, z = 0], paths) =>
   transform(fromTranslation([x, y, z]), paths);
 
-export { butLast, canonicalize, difference, eachPoint, findOpenEdges, flip, intersection, last, measureBoundingBox, scale, segment, toGeneric, toPoints, toPolygons, toZ0Polygons, transform, translate, union };
+export { butLast, canonicalize, difference, eachPoint, findOpenEdges, flip, intersection, last, measureBoundingBox, scale, segment, segmented, toGeneric, toPoints, toPolygons, toZ0Polygons, transform, translate, union };

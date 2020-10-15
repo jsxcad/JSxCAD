@@ -11,6 +11,7 @@ export { intersection } from './intersection.js';
 export { last } from './last.js';
 export { measureBoundingBox } from './measureBoundingBox.js';
 export { segment } from './segment.js';
+export { segmented } from './segmented.js';
 export { toGeneric } from './toGeneric.js';
 export { toPoints } from './toPoints.js';
 export { toPolygons } from './toPolygons.js';
