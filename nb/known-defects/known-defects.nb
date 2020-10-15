@@ -9,4 +9,5 @@ These defects are being worked on.
 `;
 
 md`## Cylinder touching Cube`;
-Cube(10).cut(Cylinder(5, 10)).view();
+md`Fixed`;
+Box(10).cut(Rod(5, 10)).view();
