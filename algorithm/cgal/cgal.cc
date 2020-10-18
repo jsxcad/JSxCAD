@@ -27,8 +27,11 @@
 #include <CGAL/Polygon_mesh_processing/smooth_mesh.h>
 #include <CGAL/Polygon_mesh_processing/smooth_shape.h>
 #include <CGAL/Polygon_mesh_processing/triangulate_faces.h>
+#if 0
 #include <CGAL/Polyhedron_3.h>
 #include <CGAL/Polyhedron_items_with_id_3.h>
+#include <CGAL/PolyhedronItems_3::Face
+#endif
 #include <CGAL/Surface_mesh.h>
 #include <CGAL/boost/graph/Named_function_parameters.h>
 #include <CGAL/boost/graph/convert_nef_polyhedron_to_polygon_mesh.h>
@@ -39,7 +42,9 @@ typedef CGAL::Simple_cartesian<CGAL::Gmpq> Kernel;
 // typedef CGAL::Exact_predicates_exact_constructions_kernel Kernel;
 
 typedef CGAL::Nef_polyhedron_3<Kernel, CGAL::SNC_indexed_items> Nef_polyhedron;
+#if 0
 typedef CGAL::Polyhedron_3<Kernel, CGAL::Polyhedron_items_with_id_3> Polyhedron;
+#endif
 typedef Kernel::Point_3 Point;
 typedef Kernel::Plane_3 Plane;
 typedef Kernel::Vector_3 Vector;
@@ -633,6 +638,9 @@ class Surface_mesh_explorer {
     for (const auto& face : mesh.faces()) {
       _emit_face((std::size_t)face);
       const auto& start = mesh.halfedge(face);
+      if (mesh.is_removed(start)) {
+        continue;
+      }
       Halfedge_index halfedge = start;
       do {
         const auto& target = mesh.target(halfedge);
@@ -721,13 +729,47 @@ Surface_mesh* ComputeAlphaShapeAsSurfaceMesh(int component_limit, emscripten::va
   return mesh;
 }
 
-Surface_mesh* ComputeOutline(Surface_mesh* input) {
+Surface_mesh* OutlineOfSurfaceMesh(Surface_mesh* input) {
   Surface_mesh* mesh = new Surface_mesh(*input);
-
-  for (auto& edge : mesh->halfedges()) {
-    auto& twin = mesh->opposite(edge);
-    CGAL::Euler::join_face(edge, *mesh);
+  for (auto& edge : halfedges(*mesh)) {
+    if (mesh->is_removed(edge)) {
+      continue;
+    }
+    auto twin = opposite(edge, *mesh);
+    auto edge_face = face(edge, *mesh);
+    auto twin_face = face(twin, *mesh);
+    if (edge_face == twin_face) {
+      CGAL::Euler::split_face(edge, twin, *mesh);
+    } else {
+      auto edge_face_normal = CGAL::Polygon_mesh_processing::compute_face_normal(edge_face, *mesh);
+      auto twin_face_normal = CGAL::Polygon_mesh_processing::compute_face_normal(twin_face, *mesh);
+      if (edge_face_normal == twin_face_normal) {
+        CGAL::Euler::join_face(edge, *mesh);
+      }
+    }
   }
+  // Collapse spurs.
+  for (;;) {
+    bool collapsed = false;
+    for (auto& edge : halfedges(*mesh)) {
+      if (mesh->is_removed(edge)) {
+        continue;
+      }
+      auto edge_next = next(edge, *mesh);
+      auto edge_next_next = next(edge_next, *mesh);
+      auto edge_source = source(edge, *mesh);
+      auto edge_next_next_source = source(edge_next_next, *mesh);
+      if (edge_source == edge_next_next_source && edge != edge_next_next) {
+        CGAL::Euler::split_face(prev(edge, *mesh), edge_next, *mesh);
+        CGAL::Euler::remove_face(edge_next, *mesh);
+        collapsed = true;
+      }
+    }
+    if (collapsed == false) {
+      break;
+    }
+  }
+  return mesh;
 }
 
 using emscripten::select_const;
@@ -814,9 +856,11 @@ EMSCRIPTEN_BINDINGS(module) {
   emscripten::function("Surface_mesh__set_vertex_edge", &Surface_mesh__set_vertex_edge, emscripten::allow_raw_pointers());
   emscripten::function("Surface_mesh__set_vertex_halfedge_to_border_halfedge", &Surface_mesh__set_vertex_halfedge_to_border_halfedge, emscripten::allow_raw_pointers());
 
+#if 0
   emscripten::class_<Polyhedron>("Polyhedron")
     .function("is_closed", &Polyhedron::is_closed)
     .function("is_valid", &Polyhedron::is_valid);
+#endif
 
   emscripten::class_<Point>("Point")
     .constructor<float, float, float>()
@@ -856,4 +900,5 @@ EMSCRIPTEN_BINDINGS(module) {
   emscripten::function("FromSurfaceMeshToPolygonSoup", &FromSurfaceMeshToPolygonSoup, emscripten::allow_raw_pointers());
   emscripten::function("ComputeConvexHullAsSurfaceMesh", &ComputeConvexHullAsSurfaceMesh, emscripten::allow_raw_pointers());
   emscripten::function("ComputeAlphaShapeAsSurfaceMesh", &ComputeAlphaShapeAsSurfaceMesh, emscripten::allow_raw_pointers());
+  emscripten::function("OutlineOfSurfaceMesh", &OutlineOfSurfaceMesh, emscripten::allow_raw_pointers());
 }
