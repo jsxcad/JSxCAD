@@ -19,7 +19,7 @@ export const fromSurfaceMeshToGraph = (mesh) => {
           console.log(`QQ/bent: ${JSON.stringify(polygon)}`);
         }
       } else {
-        console.log(`QQ/degenerate: ${JSON.stringify(polygon)}`);
+        // console.log(`QQ/degenerate: ${JSON.stringify(polygon)}`);
       }
       polygon.length = 0;
       face = faceId;

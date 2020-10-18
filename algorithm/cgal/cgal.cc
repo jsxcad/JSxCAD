@@ -732,7 +732,7 @@ Surface_mesh* ComputeAlphaShapeAsSurfaceMesh(int component_limit, emscripten::va
 Surface_mesh* OutlineOfSurfaceMesh(Surface_mesh* input) {
   Surface_mesh* mesh = new Surface_mesh(*input);
   for (auto& edge : halfedges(*mesh)) {
-    if (mesh->is_removed(edge)) {
+    if (mesh->is_removed(edge) || is_border_edge(edge, *mesh)) {
       continue;
     }
     auto twin = opposite(edge, *mesh);

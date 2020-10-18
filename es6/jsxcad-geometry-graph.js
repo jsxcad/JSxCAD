@@ -1,4 +1,4 @@
-import { fromSurfaceMeshToGraph, fromPointsToAlphaShapeAsSurfaceMesh, fromPointsToConvexHullAsSurfaceMesh, fromNefPolyhedronToSurfaceMesh, fromGraphToSurfaceMesh, fromSurfaceMeshToNefPolyhedron, differenceOfNefPolyhedrons, extrudeSurfaceMesh, fromPointsToSurfaceMesh, fromPolygonsToSurfaceMesh, intersectionOfNefPolyhedrons, fromNefPolyhedronFacetsToGraph, sectionOfNefPolyhedron, smoothSurfaceMesh, fromSurfaceMeshToTriangles, unionOfNefPolyhedrons } from './jsxcad-algorithm-cgal.js';
+import { fromSurfaceMeshToGraph, fromPointsToAlphaShapeAsSurfaceMesh, fromPointsToConvexHullAsSurfaceMesh, fromNefPolyhedronToSurfaceMesh, fromGraphToSurfaceMesh, fromSurfaceMeshToNefPolyhedron, differenceOfNefPolyhedrons, extrudeSurfaceMesh, fromPointsToSurfaceMesh, fromPolygonsToSurfaceMesh, intersectionOfNefPolyhedrons, outlineOfSurfaceMesh, fromNefPolyhedronFacetsToGraph, sectionOfNefPolyhedron, smoothSurfaceMesh, fromSurfaceMeshToTriangles, unionOfNefPolyhedrons } from './jsxcad-algorithm-cgal.js';
 import { scale, min, max, dot, transform as transform$1 } from './jsxcad-math-vec3.js';
 import { toPlane, flip } from './jsxcad-math-poly3.js';
 import { transform as transform$2 } from './jsxcad-math-plane.js';
@@ -177,10 +177,11 @@ const getPointNode = (graph, point) => graph.points[point];
 
 const outline = (graph) => {
   const paths = [];
-  eachFace(graph, (face) => {
+  const outline = fromSurfaceMesh(outlineOfSurfaceMesh(toSurfaceMesh(graph)));
+  eachFace(outline, (face) => {
     const path = [];
-    eachFaceEdge(graph, face, (edge, { point }) => {
-      path.push(getPointNode(graph, point));
+    eachFaceEdge(outline, face, (edge, { point }) => {
+      path.push(getPointNode(outline, point));
     });
     paths.push(path);
   });

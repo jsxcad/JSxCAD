@@ -9,7 +9,7 @@ test.beforeEach(async (t) => {
   await initCgal();
 });
 
-test('FromSurfaceMeshToOutline', (t) => {
+test('FromSurfaceMeshToOutline/solid', (t) => {
   const inputGraph = {
     edges: [
       { point: 0, next: 64, twin: 1, loop: 0 },
@@ -280,6 +280,59 @@ test('FromSurfaceMeshToOutline', (t) => {
       [-2.5, -2.5, 0],
       [2.5, -2.5, 0],
       [2.5, 2.5, 0],
+    ],
+  });
+});
+test('FromSurfaceMeshToOutline/surface', (t) => {
+  const inputGraph = {
+    edges: [
+      { point: 1, next: 8, twin: 1, loop: 0 },
+      null,
+      { point: 2, next: 4, twin: 3, loop: 1 },
+      null,
+      { point: 3, next: 9, twin: 5, loop: 1 },
+      null,
+      { point: 0, next: 0, twin: 7, loop: 0 },
+      null,
+      { point: 3, next: 6, twin: 9, loop: 0 },
+      { point: 1, next: 2, twin: 8, loop: 1 },
+    ],
+    faces: [
+      { loop: 0, plane: [0, 0, 1, 0] },
+      { loop: 1, plane: [0, 0, 1, 0] },
+    ],
+    loops: [
+      { edge: 8, face: 0 },
+      { edge: 9, face: 1 },
+    ],
+    points: [
+      [6.000000000000001, 6, 0],
+      [-6, 6.000000000000001, 0],
+      [-6.000000000000002, -5.999999999999999, 0],
+      [5.999999999999999, -6.000000000000002, 0],
+    ],
+  };
+  const mesh = fromGraphToSurfaceMesh(inputGraph);
+  t.true(mesh.is_valid(false));
+  const outline = outlineOfSurfaceMesh(mesh);
+  const outputGraph = fromSurfaceMeshToGraph(outline);
+  t.deepEqual(JSON.parse(JSON.stringify(outputGraph)), {
+    edges: [
+      { point: 0, next: 2, twin: 1, loop: 0 },
+      null,
+      { point: 1, next: 6, twin: 3, loop: 0 },
+      null,
+      { point: 3, next: 0, twin: 5, loop: 0 },
+      null,
+      { point: 2, next: 4, twin: 7, loop: 0 },
+    ],
+    faces: [{ loop: 0, plane: [0, 0, 1, 0] }],
+    loops: [{ edge: 2, face: 0 }],
+    points: [
+      [6, 6, 0],
+      [-6, 6, 0],
+      [-6, -6, 0],
+      [6, -6, 0],
     ],
   });
 });

@@ -18,6 +18,7 @@ export { fromSurfaceMeshToPolygons } from './fromSurfaceMeshToPolygons.js';
 export { fromSurfaceMeshToTriangles } from './fromSurfaceMeshToTriangles.js';
 export { initCgal } from './getCgal.js';
 export { intersectionOfNefPolyhedrons } from './intersectionOfNefPolyhedrons.js';
+export { outlineOfSurfaceMesh } from './outlineOfSurfaceMesh.js';
 export { sectionOfNefPolyhedron } from './sectionOfNefPolyhedron.js';
 export { smoothSurfaceMesh } from './smoothSurfaceMesh.js';
 export { unionOfNefPolyhedrons } from './unionOfNefPolyhedrons.js';
