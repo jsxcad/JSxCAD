@@ -1,11 +1,16 @@
 import { eachFace, eachFaceEdge, getPointNode } from './graph.js';
 
+import { fromSurfaceMesh } from './fromSurfaceMesh.js';
+import { outlineOfSurfaceMesh } from '@jsxcad/algorithm-cgal';
+import { toSurfaceMesh } from './toSurfaceMesh.js';
+
 export const outline = (graph) => {
   const paths = [];
-  eachFace(graph, (face) => {
+  const outline = fromSurfaceMesh(outlineOfSurfaceMesh(toSurfaceMesh(graph)));
+  eachFace(outline, (face) => {
     const path = [];
-    eachFaceEdge(graph, face, (edge, { point }) => {
-      path.push(getPointNode(graph, point));
+    eachFaceEdge(outline, face, (edge, { point }) => {
+      path.push(getPointNode(outline, point));
     });
     paths.push(path);
   });
