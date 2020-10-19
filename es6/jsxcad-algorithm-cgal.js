@@ -799,8 +799,8 @@ var Module = (function () {
     }
     var wasmMemory;
     var wasmTable = new WebAssembly.Table({
-      initial: 997,
-      maximum: 997,
+      initial: 1063,
+      maximum: 1063,
       element: 'anyfunc',
     });
     var ABORT = false;
@@ -1068,9 +1068,9 @@ var Module = (function () {
       Module['HEAPF32'] = HEAPF32 = new Float32Array(buf);
       Module['HEAPF64'] = HEAPF64 = new Float64Array(buf);
     }
-    var STACK_BASE = 5424960,
-      STACK_MAX = 182080,
-      DYNAMIC_BASE = 5424960;
+    var STACK_BASE = 5436800,
+      STACK_MAX = 193920,
+      DYNAMIC_BASE = 5436800;
     assert(STACK_BASE % 16 === 0, 'stack must start aligned');
     assert(DYNAMIC_BASE % 16 === 0, 'heap must start aligned');
     var TOTAL_STACK = 5242880;
@@ -4531,6 +4531,55 @@ var Module = (function () {
         return low;
       },
     };
+    function ___sys_fcntl64(fd, cmd, varargs) {
+      SYSCALLS.varargs = varargs;
+      try {
+        var stream = SYSCALLS.getStreamFromFD(fd);
+        switch (cmd) {
+          case 0: {
+            var arg = SYSCALLS.get();
+            if (arg < 0) {
+              return -28;
+            }
+            var newStream;
+            newStream = FS.open(stream.path, stream.flags, 0, arg);
+            return newStream.fd;
+          }
+          case 1:
+          case 2:
+            return 0;
+          case 3:
+            return stream.flags;
+          case 4: {
+            var arg = SYSCALLS.get();
+            stream.flags |= arg;
+            return 0;
+          }
+          case 12: {
+            var arg = SYSCALLS.get();
+            var offset = 0;
+            HEAP16[(arg + offset) >> 1] = 2;
+            return 0;
+          }
+          case 13:
+          case 14:
+            return 0;
+          case 16:
+          case 8:
+            return -28;
+          case 9:
+            setErrNo(28);
+            return -1;
+          default: {
+            return -28;
+          }
+        }
+      } catch (e) {
+        if (typeof FS === 'undefined' || !(e instanceof FS.ErrnoError))
+          abort(e);
+        return -e.errno;
+      }
+    }
     function ___sys_getrusage(who, usage) {
       try {
         _memset(usage, 0, 136);
@@ -4539,6 +4588,56 @@ var Module = (function () {
         HEAP32[(usage + 8) >> 2] = 3;
         HEAP32[(usage + 12) >> 2] = 4;
         return 0;
+      } catch (e) {
+        if (typeof FS === 'undefined' || !(e instanceof FS.ErrnoError))
+          abort(e);
+        return -e.errno;
+      }
+    }
+    function ___sys_ioctl(fd, op, varargs) {
+      SYSCALLS.varargs = varargs;
+      try {
+        var stream = SYSCALLS.getStreamFromFD(fd);
+        switch (op) {
+          case 21509:
+          case 21505: {
+            if (!stream.tty) return -59;
+            return 0;
+          }
+          case 21510:
+          case 21511:
+          case 21512:
+          case 21506:
+          case 21507:
+          case 21508: {
+            if (!stream.tty) return -59;
+            return 0;
+          }
+          case 21519: {
+            if (!stream.tty) return -59;
+            var argp = SYSCALLS.get();
+            HEAP32[argp >> 2] = 0;
+            return 0;
+          }
+          case 21520: {
+            if (!stream.tty) return -59;
+            return -28;
+          }
+          case 21531: {
+            var argp = SYSCALLS.get();
+            return FS.ioctl(stream, op, argp);
+          }
+          case 21523: {
+            if (!stream.tty) return -59;
+            return 0;
+          }
+          case 21524: {
+            if (!stream.tty) return -59;
+            return 0;
+          }
+          default:
+            abort('bad ioctl syscall ' + op);
+        }
       } catch (e) {
         if (typeof FS === 'undefined' || !(e instanceof FS.ErrnoError))
           abort(e);
@@ -4567,6 +4666,19 @@ var Module = (function () {
     function ___sys_munmap(addr, len) {
       try {
         return syscallMunmap(addr, len);
+      } catch (e) {
+        if (typeof FS === 'undefined' || !(e instanceof FS.ErrnoError))
+          abort(e);
+        return -e.errno;
+      }
+    }
+    function ___sys_open(path, flags, varargs) {
+      SYSCALLS.varargs = varargs;
+      try {
+        var pathname = SYSCALLS.getStr(path);
+        var mode = SYSCALLS.get();
+        var stream = FS.open(pathname, flags, mode);
+        return stream.fd;
       } catch (e) {
         if (typeof FS === 'undefined' || !(e instanceof FS.ErrnoError))
           abort(e);
@@ -6960,8 +7072,11 @@ var Module = (function () {
       __cxa_throw: ___cxa_throw,
       __indirect_function_table: wasmTable,
       __map_file: ___map_file,
+      __sys_fcntl64: ___sys_fcntl64,
       __sys_getrusage: ___sys_getrusage,
+      __sys_ioctl: ___sys_ioctl,
       __sys_munmap: ___sys_munmap,
+      __sys_open: ___sys_open,
       _embind_register_bool: __embind_register_bool,
       _embind_register_class: __embind_register_class,
       _embind_register_class_constructor: __embind_register_class_constructor,
@@ -6999,6 +7114,7 @@ var Module = (function () {
       '___wasm_call_ctors'
     ] = createExportWrapper('__wasm_call_ctors'));
     var _memset = (Module['_memset'] = createExportWrapper('memset'));
+    var _fflush = (Module['_fflush'] = createExportWrapper('fflush'));
     var _malloc = (Module['_malloc'] = createExportWrapper('malloc'));
     var _free = (Module['_free'] = createExportWrapper('free'));
     var ___getTypeName = (Module['___getTypeName'] = createExportWrapper(
@@ -7010,7 +7126,6 @@ var Module = (function () {
     var ___errno_location = (Module['___errno_location'] = createExportWrapper(
       '__errno_location'
     ));
-    var _fflush = (Module['_fflush'] = createExportWrapper('fflush'));
     var _setThrew = (Module['_setThrew'] = createExportWrapper('setThrew'));
     var stackSave = (Module['stackSave'] = createExportWrapper('stackSave'));
     var stackRestore = (Module['stackRestore'] = createExportWrapper(
@@ -9096,6 +9211,43 @@ const fromSurfaceMeshToPolygons = (mesh, triangulate = false) => {
 const fromSurfaceMeshToTriangles = (mesh) =>
   fromSurfaceMeshToPolygons(mesh, true);
 
+const insetOfPolygon = (offset, plane, border, holes = []) => {
+  const c = getCgal();
+  const [x, y, z, w] = plane;
+  const outputs = [];
+  let output;
+  let points;
+  c.InsetOfPolygon(
+    x,
+    y,
+    z,
+    w,
+    offset,
+    holes.length,
+    (boundary) => {
+      for (const [x, y, z] of border) {
+        c.addPoint(boundary, x, y, z);
+      }
+    },
+    (hole, nth) => {
+      for (const [x, y, z] of holes[nth]) {
+        c.addPoint(hole, x, y, z);
+      }
+    },
+    (isHole) => {
+      points = [];
+      if (isHole) {
+        output.holes.push(points);
+      } else {
+        output = { boundary: points, holes: [] };
+        outputs.push(output);
+      }
+    },
+    (x, y, z) => points.push([x, y, z])
+  );
+  return outputs;
+};
+
 const intersectionOfNefPolyhedrons = (a, b) =>
   getCgal().IntersectionOfNefPolyhedrons(a, b);
 
@@ -9116,4 +9268,4 @@ const smoothSurfaceMesh = (mesh) => getCgal().SmoothSurfaceMesh(mesh);
 const unionOfNefPolyhedrons = (a, b) =>
   getCgal().UnionOfNefPolyhedrons(a, b);
 
-export { differenceOfNefPolyhedrons, extrudeSurfaceMesh, fromGraphToNefPolyhedron, fromGraphToSurfaceMesh, fromNefPolyhedronFacetsToGraph, fromNefPolyhedronShellsToGraph, fromNefPolyhedronToPolygons, fromNefPolyhedronToSurfaceMesh, fromNefPolyhedronToTriangles, fromPointsToAlphaShapeAsSurfaceMesh, fromPointsToConvexHullAsSurfaceMesh, fromPointsToSurfaceMesh, fromPolygonsToNefPolyhedron, fromPolygonsToSurfaceMesh, fromSurfaceMeshToGraph, fromSurfaceMeshToNefPolyhedron, fromSurfaceMeshToPolygons, fromSurfaceMeshToTriangles, initCgal, intersectionOfNefPolyhedrons, outlineOfSurfaceMesh, sectionOfNefPolyhedron, smoothSurfaceMesh, unionOfNefPolyhedrons };
+export { differenceOfNefPolyhedrons, extrudeSurfaceMesh, fromGraphToNefPolyhedron, fromGraphToSurfaceMesh, fromNefPolyhedronFacetsToGraph, fromNefPolyhedronShellsToGraph, fromNefPolyhedronToPolygons, fromNefPolyhedronToSurfaceMesh, fromNefPolyhedronToTriangles, fromPointsToAlphaShapeAsSurfaceMesh, fromPointsToConvexHullAsSurfaceMesh, fromPointsToSurfaceMesh, fromPolygonsToNefPolyhedron, fromPolygonsToSurfaceMesh, fromSurfaceMeshToGraph, fromSurfaceMeshToNefPolyhedron, fromSurfaceMeshToPolygons, fromSurfaceMeshToTriangles, initCgal, insetOfPolygon, intersectionOfNefPolyhedrons, outlineOfSurfaceMesh, sectionOfNefPolyhedron, smoothSurfaceMesh, unionOfNefPolyhedrons };

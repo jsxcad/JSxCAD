@@ -6,20 +6,17 @@ export const addEdge = (graph, { point, next = -1, loop = -1, twin = -1 }) => {
   return edge;
 };
 
-export const addFace = (graph, { plane, loops = [] } = {}) => {
+export const addFace = (graph, { plane, loop = -1 } = {}) => {
   const face = graph.faces.length;
-  graph.faces.push({ plane, loops });
+  graph.faces.push({ plane, loop });
   return face;
 };
-
-export const addFaceLoop = (graph, face, loop) =>
-  getFaceNode(graph, face).loops.push(loop);
 
 export const addLoop = (graph, { edge = -1, face = -1 } = {}) => {
   const loop = graph.loops.length;
   graph.loops.push({ edge, face });
   if (face !== -1) {
-    getFaceNode(graph, face).loops.push(loop);
+    getFaceNode(graph, face).loop = loop;
   }
   return loop;
 };
@@ -97,6 +94,10 @@ export const getFaceNode = (graph, face) => graph.faces[face];
 export const getFacePlane = (graph, face) => graph.faces[face].plane;
 export const getLoopNode = (graph, loop) => graph.loops[loop];
 export const getPointNode = (graph, point) => graph.points[point];
+
+export const setFaceLoop = (graph, face, loop) => {
+  getFaceNode(graph, face).loop = loop;
+};
 
 export const spliceLoop = (graph, loop, targetEdge) => {
   const loopNode = getLoopNode(graph, loop);

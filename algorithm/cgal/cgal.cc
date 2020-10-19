@@ -27,16 +27,18 @@
 #include <CGAL/Polygon_mesh_processing/smooth_mesh.h>
 #include <CGAL/Polygon_mesh_processing/smooth_shape.h>
 #include <CGAL/Polygon_mesh_processing/triangulate_faces.h>
-#if 0
-#include <CGAL/Polyhedron_3.h>
-#include <CGAL/Polyhedron_items_with_id_3.h>
-#include <CGAL/PolyhedronItems_3::Face
-#endif
+#include <CGAL/Polygon_2.h>
+#include <CGAL/Polygon_with_holes_2.h>
+#include <CGAL/Projection_traits_xy_3.h>
+#include <CGAL/Projection_traits_xz_3.h>
+#include <CGAL/Projection_traits_yz_3.h>
 #include <CGAL/Surface_mesh.h>
+#include <CGAL/Unique_hash_map.h>
 #include <CGAL/boost/graph/Named_function_parameters.h>
 #include <CGAL/boost/graph/convert_nef_polyhedron_to_polygon_mesh.h>
 #include <CGAL/convex_hull_3.h>
-#include <CGAL/Unique_hash_map.h>
+#include <CGAL/create_offset_polygons_2.h>
+#include <CGAL/create_offset_polygons_from_polygon_with_holes_2.h>
 
 typedef CGAL::Simple_cartesian<CGAL::Gmpq> Kernel;
 // typedef CGAL::Exact_predicates_exact_constructions_kernel Kernel;
@@ -772,11 +774,62 @@ Surface_mesh* OutlineOfSurfaceMesh(Surface_mesh* input) {
   return mesh;
 }
 
+typedef Kernel Kernel_2;
+// typedef CGAL::Projection_traits_xy_3<Kernel> Kernel_2;
+// typedef CGAL::Projection_traits_xy_3<CGAL::Exact_predicates_inexact_constructions_kernel> Kernel_2;
+typedef CGAL::Polygon_2<Kernel_2> Polygon_2;
+typedef CGAL::Polygon_with_holes_2<Kernel_2> Polygon_with_holes_2;
+typedef CGAL::Straight_skeleton_2<Kernel_2> Straight_skeleton_2;
+
+void InsetOfPolygon(double x, double y, double z, double w, double offset, std::size_t hole_count, emscripten::val fill_boundary, emscripten::val fill_hole, emscripten::val emit_polygon, emscripten::val emit_point) {
+  Plane plane(x, y, z, w);
+  Polygon_2 boundary;
+  {
+    Points points;
+    Points* points_ptr = &points;
+    fill_boundary(points_ptr);
+    for (const auto& point : points) {
+      boundary.push_back(plane.to_2d(point));
+    }
+  }
+  std::vector<Polygon_2> holes;
+  for (std::size_t nth = 0; nth < hole_count; nth++) {
+    Points points;
+    Points* points_ptr = &points;
+    fill_hole(points_ptr, nth);
+    Polygon_2 hole;
+    for (const auto& point : points) {
+      hole.push_back(plane.to_2d(point));
+    }
+    holes.push_back(hole);
+  }
+  Polygon_with_holes_2 polygon(boundary, holes.begin(), holes.end());
+  std::vector<boost::shared_ptr<Polygon_with_holes_2>> offset_polygons = CGAL::create_interior_skeleton_and_offset_polygons_with_holes_2(offset, polygon, Kernel_2());
+  for (const auto& polygon : offset_polygons) {
+    const auto& outer = polygon->outer_boundary();
+    emit_polygon(false);
+    for (auto vertex = outer.vertices_begin(); vertex != outer.vertices_end(); ++vertex) {
+      auto p = plane.to_3d(*vertex);
+      emit_point(CGAL::to_double(p.x()), CGAL::to_double(p.y()), CGAL::to_double(p.z()));
+    }
+    for (auto hole = polygon->holes_begin(); hole != polygon->holes_end(); ++hole) {
+      emit_polygon(true);
+      for (auto vertex = hole->vertices_begin(); vertex != hole->vertices_end(); ++vertex) {
+        auto p = plane.to_3d(*vertex);
+        emit_point(CGAL::to_double(p.x()), CGAL::to_double(p.y()), CGAL::to_double(p.z()));
+      }
+    }
+  }
+}
+
 using emscripten::select_const;
 using emscripten::select_overload;
 
 EMSCRIPTEN_BINDINGS(module) {
   emscripten::class_<Kernel::FT>("FT").constructor<>();
+
+  emscripten::class_<Polygon_2>("Polygon_2").constructor<>();
+  emscripten::class_<Polygon_with_holes_2>("Polygon_with_holes_2").constructor<>();
 
   emscripten::function("addTriple", &addTriple, emscripten::allow_raw_pointers());
 
@@ -856,12 +909,6 @@ EMSCRIPTEN_BINDINGS(module) {
   emscripten::function("Surface_mesh__set_vertex_edge", &Surface_mesh__set_vertex_edge, emscripten::allow_raw_pointers());
   emscripten::function("Surface_mesh__set_vertex_halfedge_to_border_halfedge", &Surface_mesh__set_vertex_halfedge_to_border_halfedge, emscripten::allow_raw_pointers());
 
-#if 0
-  emscripten::class_<Polyhedron>("Polyhedron")
-    .function("is_closed", &Polyhedron::is_closed)
-    .function("is_valid", &Polyhedron::is_valid);
-#endif
-
   emscripten::class_<Point>("Point")
     .constructor<float, float, float>()
     .function("hx", &Point::hx)
@@ -901,4 +948,5 @@ EMSCRIPTEN_BINDINGS(module) {
   emscripten::function("ComputeConvexHullAsSurfaceMesh", &ComputeConvexHullAsSurfaceMesh, emscripten::allow_raw_pointers());
   emscripten::function("ComputeAlphaShapeAsSurfaceMesh", &ComputeAlphaShapeAsSurfaceMesh, emscripten::allow_raw_pointers());
   emscripten::function("OutlineOfSurfaceMesh", &OutlineOfSurfaceMesh, emscripten::allow_raw_pointers());
+  emscripten::function("InsetOfPolygon", &InsetOfPolygon, emscripten::allow_raw_pointers());
 }
