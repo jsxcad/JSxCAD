@@ -7,7 +7,7 @@ import { transform as transform$5, canonicalize as canonicalize$5, difference as
 import { equals, transform as transform$6, canonicalize as canonicalize$4, toPolygon } from './jsxcad-math-plane.js';
 import { transform as transform$4, canonicalize as canonicalize$3, eachPoint as eachPoint$5, flip as flip$4, measureBoundingBox as measureBoundingBox$1, union as union$1 } from './jsxcad-geometry-points.js';
 import { transform as transform$1, toPlane, canonicalize as canonicalize$2, makeWatertight as makeWatertight$2, eachPoint as eachPoint$2, flip as flip$2, makeConvex, measureArea as measureArea$1, measureBoundingBox as measureBoundingBox$3 } from './jsxcad-geometry-surface.js';
-import { transform as transform$2, difference as difference$3, fromSolid as fromSolid$1, eachPoint as eachPoint$1, extrude as extrude$1, intersection as intersection$2, measureBoundingBox as measureBoundingBox$5, outline as outline$1, section as section$1, smooth as smooth$1, union as union$4 } from './jsxcad-geometry-graph.js';
+import { transform as transform$2, difference as difference$3, fromSolid as fromSolid$1, eachPoint as eachPoint$1, extrude as extrude$1, intersection as intersection$2, measureBoundingBox as measureBoundingBox$5, toPaths, outline as outline$1, section as section$1, smooth as smooth$1, union as union$4 } from './jsxcad-geometry-graph.js';
 import { differenceSurface, fromSolid, fromSurface, toConvexSolids, unifyBspTrees, removeExteriorPaths, intersectSurface, intersection as intersection$1, union as union$3 } from './jsxcad-geometry-bsp.js';
 import { difference as difference$2 } from './jsxcad-geometry-solid-boolean.js';
 import { min, max } from './jsxcad-math-vec3.js';
@@ -1442,7 +1442,7 @@ const outlineImpl = (geometry, includeFaces = true, includeHoles = true) => {
     outlines.push(outlineSolid(solid, normalize));
   }
   for (const { graph } of getNonVoidGraphs(keptGeometry)) {
-    outlines.push(outline$1(graph));
+    outlines.push(toPaths(outline$1(graph)));
   }
   // This is a bit tricky -- let's consider an assembly that produces an effective surface.
   // For now, let's consolidate, and see what goes terribly wrong.

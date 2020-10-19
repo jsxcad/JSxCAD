@@ -9211,6 +9211,43 @@ const fromSurfaceMeshToPolygons = (mesh, triangulate = false) => {
 const fromSurfaceMeshToTriangles = (mesh) =>
   fromSurfaceMeshToPolygons(mesh, true);
 
+const insetOfPolygon = (offset, plane, border, holes = []) => {
+  const c = getCgal();
+  const [x, y, z, w] = plane;
+  const outputs = [];
+  let output;
+  let points;
+  c.InsetOfPolygon(
+    x,
+    y,
+    z,
+    w,
+    offset,
+    holes.length,
+    (boundary) => {
+      for (const [x, y, z] of border) {
+        c.addPoint(boundary, x, y, z);
+      }
+    },
+    (hole, nth) => {
+      for (const [x, y, z] of holes[nth]) {
+        c.addPoint(hole, x, y, z);
+      }
+    },
+    (isHole) => {
+      points = [];
+      if (isHole) {
+        output.holes.push(points);
+      } else {
+        output = { boundary: points, holes: [] };
+        outputs.push(output);
+      }
+    },
+    (x, y, z) => points.push([x, y, z])
+  );
+  return outputs;
+};
+
 const intersectionOfNefPolyhedrons = (a, b) =>
   getCgal().IntersectionOfNefPolyhedrons(a, b);
 
@@ -9231,4 +9268,4 @@ const smoothSurfaceMesh = (mesh) => getCgal().SmoothSurfaceMesh(mesh);
 const unionOfNefPolyhedrons = (a, b) =>
   getCgal().UnionOfNefPolyhedrons(a, b);
 
-export { differenceOfNefPolyhedrons, extrudeSurfaceMesh, fromGraphToNefPolyhedron, fromGraphToSurfaceMesh, fromNefPolyhedronFacetsToGraph, fromNefPolyhedronShellsToGraph, fromNefPolyhedronToPolygons, fromNefPolyhedronToSurfaceMesh, fromNefPolyhedronToTriangles, fromPointsToAlphaShapeAsSurfaceMesh, fromPointsToConvexHullAsSurfaceMesh, fromPointsToSurfaceMesh, fromPolygonsToNefPolyhedron, fromPolygonsToSurfaceMesh, fromSurfaceMeshToGraph, fromSurfaceMeshToNefPolyhedron, fromSurfaceMeshToPolygons, fromSurfaceMeshToTriangles, initCgal, intersectionOfNefPolyhedrons, outlineOfSurfaceMesh, sectionOfNefPolyhedron, smoothSurfaceMesh, unionOfNefPolyhedrons };
+export { differenceOfNefPolyhedrons, extrudeSurfaceMesh, fromGraphToNefPolyhedron, fromGraphToSurfaceMesh, fromNefPolyhedronFacetsToGraph, fromNefPolyhedronShellsToGraph, fromNefPolyhedronToPolygons, fromNefPolyhedronToSurfaceMesh, fromNefPolyhedronToTriangles, fromPointsToAlphaShapeAsSurfaceMesh, fromPointsToConvexHullAsSurfaceMesh, fromPointsToSurfaceMesh, fromPolygonsToNefPolyhedron, fromPolygonsToSurfaceMesh, fromSurfaceMeshToGraph, fromSurfaceMeshToNefPolyhedron, fromSurfaceMeshToPolygons, fromSurfaceMeshToTriangles, initCgal, insetOfPolygon, intersectionOfNefPolyhedrons, outlineOfSurfaceMesh, sectionOfNefPolyhedron, smoothSurfaceMesh, unionOfNefPolyhedrons };

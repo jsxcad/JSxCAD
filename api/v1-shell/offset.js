@@ -1,21 +1,28 @@
+import {
+  getNonVoidGraphs,
+  taggedGraph,
+  taggedGroup,
+} from '@jsxcad/geometry-tagged';
+
+import {
+  offset as offsetGraph,
+  outline as outlineGraph,
+} from '@jsxcad/geometry-graph';
+
 import { Shape } from '@jsxcad/api-v1-shape';
 
 export const offset = (shape, amount = 1) => {
-  /*
-  const normalize = createNormalize3();
-  const offsetPathsets = [];
-  for (const { tags, paths } of getNonVoidPaths(shape.toDisjointGeometry())) {
-    const offsetPaths = [];
-    // Offset each path separately.
-    for (const path of paths) {
-      offsetPaths.push(
-        ...offsetAlgorithm([deduplicate(path.map(normalize))], amount)
-      );
+  const group = [];
+  if (amount < 0) {
+    for (const { tags, graph } of getNonVoidGraphs(
+      shape.toDisjointGeometry()
+    )) {
+      const outlinedGraph = outlineGraph(graph);
+      const offsettedGraph = offsetGraph(outlinedGraph, amount);
+      group.push(taggedGraph({ tags }, offsettedGraph));
     }
-    offsetPathsets.push(taggedPaths({ tags }, offsetPaths));
   }
-  return Shape.fromGeometry(taggedGroup({}, ...offsetPathsets));
-*/
+  return Shape.fromGeometry(taggedGroup({}, ...group));
 };
 
 const offsetMethod = function (amount) {

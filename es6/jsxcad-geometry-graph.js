@@ -1,4 +1,4 @@
-import { fromSurfaceMeshToGraph, fromPointsToAlphaShapeAsSurfaceMesh, fromPointsToConvexHullAsSurfaceMesh, fromNefPolyhedronToSurfaceMesh, fromGraphToSurfaceMesh, fromSurfaceMeshToNefPolyhedron, differenceOfNefPolyhedrons, extrudeSurfaceMesh, fromPointsToSurfaceMesh, fromPolygonsToSurfaceMesh, intersectionOfNefPolyhedrons, outlineOfSurfaceMesh, fromNefPolyhedronFacetsToGraph, sectionOfNefPolyhedron, smoothSurfaceMesh, fromSurfaceMeshToTriangles, unionOfNefPolyhedrons } from './jsxcad-algorithm-cgal.js';
+import { fromSurfaceMeshToGraph, fromPointsToAlphaShapeAsSurfaceMesh, fromPointsToConvexHullAsSurfaceMesh, fromNefPolyhedronToSurfaceMesh, fromGraphToSurfaceMesh, fromSurfaceMeshToNefPolyhedron, differenceOfNefPolyhedrons, extrudeSurfaceMesh, fromPointsToSurfaceMesh, fromPolygonsToSurfaceMesh, intersectionOfNefPolyhedrons, insetOfPolygon, outlineOfSurfaceMesh, fromNefPolyhedronFacetsToGraph, sectionOfNefPolyhedron, smoothSurfaceMesh, fromSurfaceMeshToTriangles, unionOfNefPolyhedrons } from './jsxcad-algorithm-cgal.js';
 import { scale, min, max, dot, transform as transform$1 } from './jsxcad-math-vec3.js';
 import { toPlane, flip } from './jsxcad-math-poly3.js';
 import { transform as transform$2 } from './jsxcad-math-plane.js';
@@ -141,6 +141,39 @@ const measureBoundingBox = (graph) => {
   return [minPoint, maxPoint];
 };
 
+const create = () => ({ points: [], edges: [], loops: [], faces: [] });
+
+const addEdge = (graph, { point, next = -1, loop = -1, twin = -1 }) => {
+  const edge = graph.edges.length;
+  graph.edges.push({ point, loop, twin, next });
+  return edge;
+};
+
+const addFace = (graph, { plane, loop = -1 } = {}) => {
+  const face = graph.faces.length;
+  graph.faces.push({ plane, loop });
+  return face;
+};
+
+const addLoop = (graph, { edge = -1, face = -1 } = {}) => {
+  const loop = graph.loops.length;
+  graph.loops.push({ edge, face });
+  if (face !== -1) {
+    getFaceNode(graph, face).loop = loop;
+  }
+  return loop;
+};
+
+const addPoint = (graph, point) => {
+  const found = graph.points.indexOf(point);
+  if (found !== -1) {
+    return found;
+  }
+  const id = graph.points.length;
+  graph.points.push(point);
+  return id;
+};
+
 const eachEdge = (graph, start, op) => {
   if (start === -1) {
     return;
@@ -171,22 +204,48 @@ const eachFaceLoop = (graph, face, op) => {
 
 const eachLoopEdge = (graph, loop, op) =>
   eachEdge(graph, getLoopNode(graph, loop).edge, op);
+
+const getEdgeNode = (graph, edge) => graph.edges[edge];
 const getFaceNode = (graph, face) => graph.faces[face];
 const getLoopNode = (graph, loop) => graph.loops[loop];
 const getPointNode = (graph, point) => graph.points[point];
 
-const outline = (graph) => {
-  const paths = [];
-  const outline = fromSurfaceMesh(outlineOfSurfaceMesh(toSurfaceMesh(graph)));
-  eachFace(outline, (face) => {
-    const path = [];
-    eachFaceEdge(outline, face, (edge, { point }) => {
-      path.push(getPointNode(outline, point));
+const offset = (outlineGraph, amount) => {
+  const offsetGraph = create();
+  eachFace(outlineGraph, (face, { plane, loop, holes }) => {
+    const polygon = [];
+    eachLoopEdge(outlineGraph, loop, (edge, { point }) => {
+      polygon.push(getPointNode(outlineGraph, point));
     });
-    paths.push(path);
+    // FIX: Handle holes.
+    for (const { boundary } of insetOfPolygon(0 - amount, plane, polygon, [])) {
+      let offsetFace = addFace(offsetGraph, { plane });
+      let offsetLoop = addLoop(offsetGraph, { face: offsetFace });
+      let firstEdge;
+      let lastEdge;
+      for (const pointNode of boundary) {
+        const point = addPoint(offsetGraph, pointNode);
+        const edge = addEdge(offsetGraph, {
+          point,
+          next: firstEdge,
+          loop: offsetLoop,
+        });
+        if (firstEdge === undefined) {
+          firstEdge = edge;
+        }
+        if (lastEdge !== undefined) {
+          getEdgeNode(offsetGraph, lastEdge).next = edge;
+        }
+        lastEdge = edge;
+      }
+      getLoopNode(offsetGraph, offsetLoop).edge = firstEdge;
+    }
   });
-  return paths;
+  return offsetGraph;
 };
+
+const outline = (graph) =>
+  fromSurfaceMesh(outlineOfSurfaceMesh(toSurfaceMesh(graph)));
 
 const section = ([x, y, z, w], graph) =>
   fromNefPolyhedronFacetsToGraph(
@@ -195,6 +254,18 @@ const section = ([x, y, z, w], graph) =>
 
 const smooth = (graph) =>
   fromSurfaceMesh(smoothSurfaceMesh(toSurfaceMesh(graph)));
+
+const toPaths = (graph) => {
+  const paths = [];
+  eachFace(graph, (face) => {
+    const path = [];
+    eachFaceEdge(graph, face, (edge, { point }) => {
+      path.push(getPointNode(graph, point));
+    });
+    paths.push(path);
+  });
+  return paths;
+};
 
 var earcut_1 = earcut;
 var default_1 = earcut;
@@ -1048,4 +1119,4 @@ const union = (a, b) =>
     unionOfNefPolyhedrons(toNefPolyhedron(b), toNefPolyhedron(a))
   );
 
-export { alphaShape, convexHull, difference, eachPoint, extrude, fromPoints, fromPolygons, fromSolid, fromSurface, intersection, measureBoundingBox, outline, section, smooth, toSolid, toSurface, toTriangles, transform, union };
+export { alphaShape, convexHull, difference, eachPoint, extrude, fromPoints, fromPolygons, fromSolid, fromSurface, intersection, measureBoundingBox, offset, outline, section, smooth, toPaths, toSolid, toSurface, toTriangles, transform, union };

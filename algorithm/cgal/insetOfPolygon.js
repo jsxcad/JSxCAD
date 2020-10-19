@@ -1,6 +1,6 @@
 import { getCgal } from './getCgal.js';
 
-export const insetOfPolygon = (offset, plane, border, holes) => {
+export const insetOfPolygon = (offset, plane, border, holes = []) => {
   const c = getCgal();
   const [x, y, z, w] = plane;
   const outputs = [];
