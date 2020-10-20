@@ -181,6 +181,7 @@ test('FromSurfaceMeshToOutline/solid', (t) => {
   const outline = outlineOfSurfaceMesh(mesh);
   const outputGraph = fromSurfaceMeshToGraph(outline);
   t.deepEqual(JSON.parse(JSON.stringify(outputGraph)), {
+    isClosed: false,
     edges: [
       { point: 1, next: 2, twin: 1, loop: 0 },
       { point: 2, next: 26, twin: 0, loop: 3 },
@@ -317,6 +318,7 @@ test('FromSurfaceMeshToOutline/surface', (t) => {
   const outline = outlineOfSurfaceMesh(mesh);
   const outputGraph = fromSurfaceMeshToGraph(outline);
   t.deepEqual(JSON.parse(JSON.stringify(outputGraph)), {
+    isClosed: false,
     edges: [
       { point: 0, next: 2, twin: 1, loop: 0 },
       null,

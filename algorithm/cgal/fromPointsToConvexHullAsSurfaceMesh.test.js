@@ -23,6 +23,7 @@ test('FromPointsToConvexHullAsSurfaceMesh', (t) => {
   t.true(surfaceMesh.is_valid(false));
   const graph = fromSurfaceMeshToGraph(surfaceMesh);
   t.deepEqual(graph, {
+    isClosed: true,
     edges: [
       { point: 3, next: 2, twin: 1, loop: 0 },
       { point: 0, next: 32, twin: 0, loop: 8 },

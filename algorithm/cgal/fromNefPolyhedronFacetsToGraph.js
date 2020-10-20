@@ -1,14 +1,23 @@
-import { equals } from '@jsxcad/math-vec3';
+import { equals as equalsPlane } from '@jsxcad/math-plane';
+import { equals as equalsVec3 } from '@jsxcad/math-vec3';
 import { getCgal } from './getCgal.js';
 
-export const fromNefPolyhedronFacetsToGraph = (nefPolyhedron) => {
+export const fromNefPolyhedronFacetsToGraph = (nefPolyhedron, plane) => {
   const console = { log: () => undefined };
   const c = getCgal();
-  const graph = { points: [], edges: [], loops: [], faces: [], surfaces: [] };
+  const graph = {
+    points: [],
+    edges: [],
+    loops: [],
+    faces: [],
+    surfaces: [],
+    isClosed: false,
+    isOutline: true,
+  };
   const vertexMap = [];
   const addPoint = (vertex, point) => {
     for (let index = 0; index < graph.points.length; index++) {
-      if (equals(point, graph.points[index])) {
+      if (equalsVec3(point, graph.points[index])) {
         vertexMap[vertex] = index;
         return index;
       }
@@ -27,11 +36,17 @@ export const fromNefPolyhedronFacetsToGraph = (nefPolyhedron) => {
       console.log(`facet: ${facet}`);
       facetId = facet;
       facetPlane = [x, y, z, w];
+      if (plane && !equalsPlane(facetPlane, plane)) {
+        facetId = -1;
+      }
     },
     (loop, sface) => {
       loopId = loop;
     },
     (halfedge, vertex, next, twin) => {
+      if (facetId === -1) {
+        return;
+      }
       console.log(`edge: ${halfedge} ${vertex} ${next} ${twin}`);
       const point = vertexMap[vertex];
       graph.edges[halfedge] = { point, next, twin, loop: facetId };
@@ -54,7 +69,9 @@ export const fromNefPolyhedronFacetsToGraph = (nefPolyhedron) => {
         }
       }
     },
-    (vertex, x, y, z) => addPoint(vertex, [x, y, z])
+    (vertex, x, y, z) => {
+      addPoint(vertex, [x, y, z]);
+    }
   );
   return graph;
 };

@@ -221,6 +221,7 @@ test('fromNefPolyhedronShellsToGraph', (t) => {
   const torus = differenceOfNefPolyhedrons(outer, inner);
   const outputGraph = fromNefPolyhedronShellsToGraph(torus);
   t.deepEqual(JSON.parse(JSON.stringify(outputGraph)), {
+    isClosed: true,
     points: [
       [-0.5, -0.5, 0.5],
       [-0.5, -0.5, -0.5],

@@ -44,9 +44,6 @@ typedef CGAL::Simple_cartesian<CGAL::Gmpq> Kernel;
 // typedef CGAL::Exact_predicates_exact_constructions_kernel Kernel;
 
 typedef CGAL::Nef_polyhedron_3<Kernel, CGAL::SNC_indexed_items> Nef_polyhedron;
-#if 0
-typedef CGAL::Polyhedron_3<Kernel, CGAL::Polyhedron_items_with_id_3> Polyhedron;
-#endif
 typedef Kernel::Point_3 Point;
 typedef Kernel::Plane_3 Plane;
 typedef Kernel::Vector_3 Vector;
@@ -404,7 +401,8 @@ Nef_polyhedron* UnionOfNefPolyhedrons(Nef_polyhedron* a, Nef_polyhedron* b) {
 }
 
 Nef_polyhedron* SectionOfNefPolyhedron(Nef_polyhedron* a, double x, double y, double z, double w) {
-  return new Nef_polyhedron(a->intersection(Plane(x, y, z, w), Nef_polyhedron::Intersection_mode::PLANE_ONLY));
+  // return new Nef_polyhedron(a->intersection(Plane(x, y, z, w), Nef_polyhedron::Intersection_mode::PLANE_ONLY));
+  return new Nef_polyhedron(a->intersection(Plane(x, y, z, w), Nef_polyhedron::Intersection_mode::CLOSED_HALFSPACE));
 }
 
 #ifdef SURFACE_MESH_BOOLEANS
@@ -822,6 +820,10 @@ void InsetOfPolygon(double x, double y, double z, double w, double offset, std::
   }
 }
 
+bool Surface_mesh__is_closed(Surface_mesh* mesh) {
+  return CGAL::is_closed(*mesh);
+}
+
 using emscripten::select_const;
 using emscripten::select_overload;
 
@@ -949,4 +951,5 @@ EMSCRIPTEN_BINDINGS(module) {
   emscripten::function("ComputeAlphaShapeAsSurfaceMesh", &ComputeAlphaShapeAsSurfaceMesh, emscripten::allow_raw_pointers());
   emscripten::function("OutlineOfSurfaceMesh", &OutlineOfSurfaceMesh, emscripten::allow_raw_pointers());
   emscripten::function("InsetOfPolygon", &InsetOfPolygon, emscripten::allow_raw_pointers());
+  emscripten::function("Surface_mesh__is_closed", &Surface_mesh__is_closed, emscripten::allow_raw_pointers());
 }

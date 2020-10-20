@@ -95,6 +95,7 @@ test('fromNefPolyhedronToSurfaceMesh', (t) => {
   t.true(mesh.is_valid(false));
   const reconstitutedGraph = fromSurfaceMeshToGraph(mesh);
   t.deepEqual(reconstitutedGraph, {
+    isClosed: true,
     edges: [
       { point: 0, next: 24, twin: 1, loop: 0 },
       { point: 1, next: 14, twin: 0, loop: 2 },

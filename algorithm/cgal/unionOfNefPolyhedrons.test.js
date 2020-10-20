@@ -24,6 +24,7 @@ test('Difference of box and tetrahedron.', (t) => {
   const cNef = unionOfNefPolyhedrons(aNef, bNef);
   const graph = fromNefPolyhedronShellsToGraph(cNef);
   t.deepEqual(JSON.parse(JSON.stringify(graph)), {
+    isClosed: true,
     points: [
       [1, -1, -1],
       [-1, -1, 1],
