@@ -6,7 +6,13 @@ import { toSurfaceMesh } from './toSurfaceMesh.js';
 export const extrude = (graph, height, depth) => {
   if (graph.faces.length > 0) {
     // Arbitrarily pick the plane of the first graph to extrude along.
-    const normal = graph.faces[0].plane;
+    let normal;
+    for (const face of graph.faces) {
+      if (face && face.plane) {
+        normal = face.plane;
+        break;
+      }
+    }
     return fromSurfaceMesh(
       extrudeSurfaceMesh(
         toSurfaceMesh(graph),

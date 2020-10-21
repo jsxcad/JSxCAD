@@ -24,6 +24,7 @@ test('fromSolid', (t) => {
   const graph = fromSurface(square);
   const outlineGraph = outline(graph);
   t.deepEqual(JSON.parse(JSON.stringify(outlineGraph)), {
+    isClosed: false,
     edges: [
       { point: 1, next: 2, twin: 1, loop: 0 },
       null,

@@ -23,6 +23,7 @@ test('FromPointsToAlphaShapeAsSurfaceMesh', (t) => {
   t.true(surfaceMesh.is_valid(false));
   const graph = fromSurfaceMeshToGraph(surfaceMesh);
   t.deepEqual(JSON.parse(JSON.stringify(graph)), {
+    isClosed: false,
     edges: [
       { point: 1, next: 2, twin: 1, loop: 0 },
       null,

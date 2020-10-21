@@ -44,5 +44,6 @@ export const fromSurfaceMeshToGraph = (mesh) => {
       polygon.push(graph.points[point]);
     }
   );
+  graph.isClosed = c.Surface_mesh__is_closed(mesh);
   return graph;
 };

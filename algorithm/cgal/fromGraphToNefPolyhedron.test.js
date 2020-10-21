@@ -91,6 +91,7 @@ test('FromGraphToSurfaceMesh', (t) => {
   t.true(nefPolyhedron.is_valid(false, 1));
   const regeneratedGraph = fromNefPolyhedronShellsToGraph(nefPolyhedron);
   t.deepEqual(regeneratedGraph, {
+    isClosed: true,
     points: [
       [-0.5, -0.5, -0.5],
       [-0.5, 0.5, -0.5],

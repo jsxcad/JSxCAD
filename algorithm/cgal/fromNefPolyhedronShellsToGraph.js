@@ -4,7 +4,14 @@ import { getCgal } from './getCgal.js';
 export const fromNefPolyhedronShellsToGraph = (nefPolyhedron) => {
   const console = { log: () => undefined };
   const c = getCgal();
-  const graph = { points: [], edges: [], loops: [], faces: [], volumes: [] };
+  const graph = {
+    points: [],
+    edges: [],
+    loops: [],
+    faces: [],
+    volumes: [],
+    isClosed: true,
+  };
   const vertexMap = [];
   const addPoint = (vertex, point) => {
     for (let index = 0; index < graph.points.length; index++) {

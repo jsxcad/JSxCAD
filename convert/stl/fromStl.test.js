@@ -10,6 +10,7 @@ test('Read example', async (t) => {
   t.deepEqual(JSON.parse(JSON.stringify(geometry)), {
     type: 'graph',
     graph: {
+      isClosed: true,
       edges: [
         { point: 1, next: 2, twin: 1, loop: 0 },
         { point: 0, next: 23, twin: 0, loop: 5 },

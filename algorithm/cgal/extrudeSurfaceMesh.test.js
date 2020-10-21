@@ -23,6 +23,7 @@ test('Extrude/Triangle', (t) => {
   const extrusion = extrudeSurfaceMesh(surfaceMesh, 0, 0, 1, 0, 0, 0);
   const graph = fromSurfaceMeshToGraph(extrusion);
   t.deepEqual(JSON.parse(JSON.stringify(graph)), {
+    isClosed: true,
     edges: [
       { point: 0, next: 4, twin: 1, loop: 0 },
       { point: 1, next: 19, twin: 0, loop: 3 },

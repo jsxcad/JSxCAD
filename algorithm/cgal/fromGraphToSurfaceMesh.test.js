@@ -93,6 +93,7 @@ test('FromGraphToSurfaceMesh/solid', (t) => {
   t.false(mesh.is_empty());
   const regeneratedGraph = fromSurfaceMeshToGraph(mesh);
   t.deepEqual(regeneratedGraph, {
+    isClosed: true,
     edges: [
       { point: 1, next: 2, twin: 1, loop: 0 },
       { point: 0, next: 18, twin: 0, loop: 4 },
@@ -207,6 +208,7 @@ test('FromGraphToSurfaceMesh/surface', (t) => {
   t.false(mesh.is_empty());
   const regeneratedGraph = fromSurfaceMeshToGraph(mesh);
   t.deepEqual(JSON.parse(JSON.stringify(regeneratedGraph)), {
+    isClosed: false,
     edges: [
       { point: 0, next: 2, twin: 1, loop: 0 },
       null,

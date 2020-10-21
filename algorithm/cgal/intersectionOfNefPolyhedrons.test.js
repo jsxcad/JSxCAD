@@ -24,6 +24,7 @@ test('Intersection of box and tetrahedron.', (t) => {
   const cNef = intersectionOfNefPolyhedrons(aNef, bNef);
   const graph = fromNefPolyhedronShellsToGraph(cNef);
   t.deepEqual(JSON.parse(JSON.stringify(graph)), {
+    isClosed: true,
     points: [
       [-0.5, 0, -0.5],
       [-0.5, -0.5, 0],
