@@ -13,7 +13,23 @@ import '@jsxcad/api-v1-layout';
 import '@jsxcad/api-v1-pdf';
 import '@jsxcad/api-v1-plans';
 
+import {
+  apothem,
+  box,
+  cylinder,
+  diameter,
+  radius,
+} from '@jsxcad/geometry-plan';
+
 import { Peg } from '@jsxcad/api-v1-shapes';
+
+export { apothem, cylinder, box, diameter, radius };
+
+export const a = apothem;
+export const b = box;
+export const c = cylinder;
+export const d = diameter;
+export const r = radius;
 
 export const x = Peg([0, 0, 0], [0, 0, 1], [0, 1, 0]);
 export const y = Peg([0, 0, 0], [0, 0, 1], [-1, 0, 0]);

@@ -41,7 +41,27 @@ export const ofSlices = (op, { slices = 2, cap = true } = {}) =>
     )
   ).toGraph();
 
-export const Rod = ofRadius;
+export const ofPlan = (plan) => {
+  switch (plan.type) {
+    default: {
+      const width = Math.abs(plan.length);
+      const length = Math.abs(plan.width);
+      const height = Math.abs(plan.height);
+      return ofRadius()
+        .scale(width / 2, length / 2, height)
+        .move(...plan.center);
+    }
+  }
+};
+
+export const Rod = (...args) => {
+  if (typeof args[0] === 'object') {
+    return ofPlan(...args);
+  } else {
+    return ofRadius(...args);
+  }
+};
+
 export const RodOfRadius = ofRadius;
 export const RodOfApothem = ofApothem;
 export const RodOfDiameter = ofDiameter;
