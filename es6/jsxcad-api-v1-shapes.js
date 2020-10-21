@@ -1,5 +1,5 @@
 import Shape$1, { Shape, shapeMethod } from './jsxcad-api-v1-shape.js';
-import { toRadiusFromApothem as toRadiusFromApothem$1, buildRingSphere, regularPolygonEdgeLengthToRadius, buildRegularPrism, buildFromFunction, buildFromSlices, buildRegularPolygon, buildPolygonFromPoints, buildRegularIcosahedron, buildRegularTetrahedron } from './jsxcad-algorithm-shape.js';
+import { buildRingSphere, toRadiusFromApothem as toRadiusFromApothem$1, regularPolygonEdgeLengthToRadius, buildRegularPrism, buildFromFunction, buildFromSlices, buildRegularPolygon, buildPolygonFromPoints, buildRegularIcosahedron, buildRegularTetrahedron } from './jsxcad-algorithm-shape.js';
 import { taggedSolid, getPaths, taggedAssembly, taggedZ0Surface, getAnySurfaces, taggedDisjointAssembly, taggedLayers, taggedPoints } from './jsxcad-geometry-tagged.js';
 import { concatenate, rotateZ, translate as translate$1 } from './jsxcad-geometry-path.js';
 import { numbers, linear } from './jsxcad-api-v1-math.js';
@@ -21,7 +21,27 @@ const ofApothem = (apothem = 1, { resolution = 16 } = {}) =>
 const ofDiameter = (diameter = 1, { resolution = 16 } = {}) =>
   ofRadius(diameter / 2, { resolution });
 
-const Ball = ofRadius;
+const ofPlan = (plan) => {
+  switch (plan.type) {
+    default: {
+      const width = Math.abs(plan.length);
+      const length = Math.abs(plan.width);
+      const height = Math.abs(plan.height);
+      return unitSphere()
+        .scale(width / 2, length / 2, height / 2)
+        .move(...plan.center);
+    }
+  }
+};
+
+const Ball = (...args) => {
+  if (typeof args[0] === 'object') {
+    return ofPlan(...args);
+  } else {
+    return ofRadius(...args);
+  }
+};
+
 const BallOfApothem = ofApothem;
 const BallOfRadius = ofRadius;
 const BallOfDiameter = ofDiameter;
@@ -39,7 +59,20 @@ const unitCube = () =>
     .rotateZ(45)
     .scale(edgeScale, edgeScale, 1);
 
-// Cube Interfaces.
+// Box Interfaces.
+
+const ofPlan$1 = (plan) => {
+  switch (plan.type) {
+    default: {
+      const width = Math.abs(plan.length);
+      const length = Math.abs(plan.width);
+      const height = Math.abs(plan.height);
+      return unitCube()
+        .scale(width, length, height)
+        .move(...plan.center);
+    }
+  }
+};
 
 const ofSize = (width = 1, length = width, height = length) =>
   unitCube().scale(width, length, height);
@@ -67,7 +100,14 @@ const fromCorners = (corner1 = [1, 1, 1], corner2 = [0, 0, 0]) => {
     .move(...center);
 };
 
-const Box = ofSize;
+const Box = (...args) => {
+  if (typeof args[0] === 'object') {
+    return ofPlan$1(...args);
+  } else {
+    return ofSize(...args);
+  }
+};
+
 const BoxOfApothem = ofApothem$1;
 const BoxOfCorners = fromCorners;
 const BoxOfDiameter = ofDiameter$1;
@@ -117,7 +157,27 @@ const ofSlices = (op, { slices = 2, cap = true } = {}) =>
     )
   ).toGraph();
 
-const Rod = ofRadius$2;
+const ofPlan$2 = (plan) => {
+  switch (plan.type) {
+    default: {
+      const width = Math.abs(plan.length);
+      const length = Math.abs(plan.width);
+      const height = Math.abs(plan.height);
+      return ofRadius$2()
+        .scale(width / 2, length / 2, height)
+        .move(...plan.center);
+    }
+  }
+};
+
+const Rod = (...args) => {
+  if (typeof args[0] === 'object') {
+    return ofPlan$2(...args);
+  } else {
+    return ofRadius$2(...args);
+  }
+};
+
 const RodOfRadius = ofRadius$2;
 const RodOfApothem = ofApothem$2;
 const RodOfDiameter = ofDiameter$2;

@@ -58,6 +58,7 @@ cp geometry/graph/dist/main.js es6/jsxcad-geometry-graph.js
 cp geometry/halfedge/dist/main.js es6/jsxcad-geometry-halfedge.js
 cp geometry/path/dist/main.js es6/jsxcad-geometry-path.js
 cp geometry/paths/dist/main.js es6/jsxcad-geometry-paths.js
+cp geometry/plan/dist/main.js es6/jsxcad-geometry-plan.js
 cp geometry/points/dist/main.js es6/jsxcad-geometry-points.js
 cp geometry/polygons/dist/main.js es6/jsxcad-geometry-polygons.js
 cp geometry/solid-boolean/dist/main.js es6/jsxcad-geometry-solid-boolean.js

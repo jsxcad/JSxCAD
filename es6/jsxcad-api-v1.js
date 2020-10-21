@@ -8,6 +8,8 @@ import './jsxcad-api-v1-deform.js';
 import './jsxcad-api-v1-gcode.js';
 import './jsxcad-api-v1-pdf.js';
 import './jsxcad-api-v1-plans.js';
+import { apothem, box, cylinder, diameter, radius } from './jsxcad-geometry-plan.js';
+export { apothem, box, cylinder, diameter, radius } from './jsxcad-geometry-plan.js';
 import { Peg, Arc, Assembly, Ball, BallOfApothem, BallOfDiameter, BallOfRadius, Box, BoxOfApothem, BoxOfCorners, BoxOfDiameter, BoxOfEdge, BoxOfRadius, BoxOfSize, Circle, Cone, Difference, Empty, Group, Hershey, Hexagon, Icosahedron, Intersection, Line, Path, Plane, Point, Points, Polygon, Polyhedron, Prism, Rod, RodOfApothem, RodOfDiameter, RodOfFunction, RodOfRadius, RodOfSlices, Spiral, Square, Tetrahedron, Toolpath, Torus, Triangle, Union, Wave } from './jsxcad-api-v1-shapes.js';
 export { Arc, Assembly, Ball, BallOfApothem, BallOfDiameter, BallOfRadius, Box, BoxOfApothem, BoxOfCorners, BoxOfDiameter, BoxOfEdge, BoxOfRadius, BoxOfSize, Circle, Cone, Difference, Empty, Group, Hershey, Hexagon, Icosahedron, Intersection, Line, Path, Peg, Plane, Point, Points, Polygon, Polyhedron, Prism, Rod, RodOfApothem, RodOfDiameter, RodOfFunction, RodOfRadius, RodOfSlices, Spiral, Square, Tetrahedron, Toolpath, Torus, Triangle, Union, Wave } from './jsxcad-api-v1-shapes.js';
 import { X, Y, Z } from './jsxcad-api-v1-connector.js';
@@ -144,12 +146,28 @@ const source = (path, source) => addSource(`cache/${path}`, source);
  * the api uses.
  */
 
+const a = apothem;
+const b = box;
+const c = cylinder;
+const d = diameter;
+const r = radius;
+
 const x = Peg([0, 0, 0], [0, 0, 1], [0, 1, 0]);
 const y = Peg([0, 0, 0], [0, 0, 1], [-1, 0, 0]);
 const z = Peg([0, 0, 0], [0, 1, 0], [1, 0, 0]);
 
 var api = /*#__PURE__*/Object.freeze({
   __proto__: null,
+  apothem: apothem,
+  cylinder: cylinder,
+  box: box,
+  diameter: diameter,
+  radius: radius,
+  a: a,
+  b: b,
+  c: c,
+  d: d,
+  r: r,
   x: x,
   y: y,
   z: z,
@@ -322,4 +340,4 @@ registerDynamicModule(module('svg'), './jsxcad-api-v1-svg.js');
 registerDynamicModule(module('threejs'), './jsxcad-api-v1-threejs.js');
 registerDynamicModule(module('units'), './jsxcad-api-v1-units.js');
 
-export { checkBox, importModule, md, numberBox, selectBox, sliderBox, source, stringBox, x, y, z };
+export { a, b, c, checkBox, d, importModule, md, numberBox, r, selectBox, sliderBox, source, stringBox, x, y, z };

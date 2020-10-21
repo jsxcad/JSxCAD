@@ -15,7 +15,20 @@ const unitCube = () =>
     .rotateZ(45)
     .scale(edgeScale, edgeScale, 1);
 
-// Cube Interfaces.
+// Box Interfaces.
+
+export const ofPlan = (plan) => {
+  switch (plan.type) {
+    default: {
+      const width = Math.abs(plan.length);
+      const length = Math.abs(plan.width);
+      const height = Math.abs(plan.height);
+      return unitCube()
+        .scale(width, length, height)
+        .move(...plan.center);
+    }
+  }
+};
 
 export const ofSize = (width = 1, length = width, height = length) =>
   unitCube().scale(width, length, height);
@@ -43,7 +56,14 @@ export const fromCorners = (corner1 = [1, 1, 1], corner2 = [0, 0, 0]) => {
     .move(...center);
 };
 
-export const Box = ofSize;
+export const Box = (...args) => {
+  if (typeof args[0] === 'object') {
+    return ofPlan(...args);
+  } else {
+    return ofSize(...args);
+  }
+};
+
 export const BoxOfApothem = ofApothem;
 export const BoxOfCorners = fromCorners;
 export const BoxOfDiameter = ofDiameter;
