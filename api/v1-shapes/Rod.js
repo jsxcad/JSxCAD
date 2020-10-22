@@ -41,13 +41,13 @@ export const ofSlices = (op, { slices = 2, cap = true } = {}) =>
     )
   ).toGraph();
 
-export const ofPlan = (plan) => {
+export const ofPlan = (plan, { sides = 32 } = {}) => {
   switch (plan.type) {
     default: {
       const width = Math.abs(plan.length);
       const length = Math.abs(plan.width);
       const height = Math.abs(plan.height);
-      return ofRadius()
+      return ofRadius(1, 1, { sides })
         .scale(width / 2, length / 2, height)
         .move(...plan.center);
     }

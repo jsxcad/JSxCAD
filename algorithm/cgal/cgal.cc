@@ -39,13 +39,15 @@
 #include <CGAL/convex_hull_3.h>
 #include <CGAL/create_offset_polygons_2.h>
 #include <CGAL/create_offset_polygons_from_polygon_with_holes_2.h>
+#include <CGAL/intersections.h>
 
 typedef CGAL::Simple_cartesian<CGAL::Gmpq> Kernel;
 // typedef CGAL::Exact_predicates_exact_constructions_kernel Kernel;
 
 typedef CGAL::Nef_polyhedron_3<Kernel, CGAL::SNC_indexed_items> Nef_polyhedron;
-typedef Kernel::Point_3 Point;
+typedef Kernel::Line_3 Line;
 typedef Kernel::Plane_3 Plane;
+typedef Kernel::Point_3 Point;
 typedef Kernel::Vector_3 Vector;
 typedef std::vector<Point> Points;
 typedef CGAL::Surface_mesh<Point> Surface_mesh;
@@ -367,11 +369,13 @@ template<typename MAP>
 struct Project
 {
   Project(MAP map, Vector vector): map(map), vector(vector) {}
+
   template<typename VD, typename T>
-  void operator()(const T&,VD vd) const
+  void operator()(const T&, VD vd) const
   {
     put(map, vd, get(map, vd) + vector);
   }
+
   MAP map;
   Vector vector;
 };
@@ -382,6 +386,45 @@ Surface_mesh* ExtrusionOfSurfaceMesh(Surface_mesh* mesh, double high_x, double h
   typedef typename boost::property_map<Surface_mesh, CGAL::vertex_point_t>::type VPMap;
   Project<VPMap> bottom(get(CGAL::vertex_point, *extruded_mesh), Vector(high_x, high_y, high_z));
   Project<VPMap> top(get(CGAL::vertex_point, *extruded_mesh), Vector(low_x, low_y, low_z));
+
+  CGAL::Polygon_mesh_processing::extrude_mesh(*mesh, *extruded_mesh, bottom, top);
+
+  return extruded_mesh;
+}
+
+template<typename MAP>
+struct ProjectToPlane
+{
+  ProjectToPlane(MAP map, Vector vector, Plane plane): map(map), vector(vector), plane(plane) {}
+
+  template<typename VD, typename T>
+  void operator()(const T&, VD vd) const
+  {
+    Line line(get(map, vd), vector);
+    auto result = CGAL::intersection(Line(get(map, vd), vector), plane);
+    if (result) {
+      if (Point* point = boost::get<Point>(&*result)) {
+        put(map, vd, *point);
+      }
+    }
+  }
+
+  MAP map;
+  Vector vector;
+  Plane plane;
+};
+
+Surface_mesh* ExtrusionToPlaneOfSurfaceMesh(
+    Surface_mesh* mesh,
+    double high_x, double high_y, double high_z,
+    double high_plane_x, double high_plane_y, double high_plane_z,
+    double high_plane_w, double low_x, double low_y, double low_z,
+    double low_plane_x, double low_plane_y, double low_plane_z, double low_plane_w) {
+  Surface_mesh* extruded_mesh = new Surface_mesh();
+
+  typedef typename boost::property_map<Surface_mesh, CGAL::vertex_point_t>::type VPMap;
+  ProjectToPlane<VPMap> bottom(get(CGAL::vertex_point, *extruded_mesh), Vector(high_x, high_y, high_z), Plane(high_plane_x, high_plane_y, high_plane_z, high_plane_w));
+  ProjectToPlane<VPMap> top(get(CGAL::vertex_point, *extruded_mesh), Vector(low_x, low_y, low_z), Plane(low_plane_x, low_plane_y, low_plane_z, low_plane_w));
 
   CGAL::Polygon_mesh_processing::extrude_mesh(*mesh, *extruded_mesh, bottom, top);
 
@@ -891,6 +934,7 @@ EMSCRIPTEN_BINDINGS(module) {
 
   emscripten::function("Surface_mesh__EachFace", &Surface_mesh__EachFace, emscripten::allow_raw_pointers());
   emscripten::function("ExtrusionOfSurfaceMesh", &ExtrusionOfSurfaceMesh, emscripten::allow_raw_pointers());
+  emscripten::function("ExtrusionToPlaneOfSurfaceMesh", &ExtrusionToPlaneOfSurfaceMesh, emscripten::allow_raw_pointers());
 
   emscripten::function("Surface_mesh__halfedge_to_target", &Surface_mesh__halfedge_to_target, emscripten::allow_raw_pointers());
   emscripten::function("Surface_mesh__halfedge_to_face", &Surface_mesh__halfedge_to_face, emscripten::allow_raw_pointers());

@@ -3,6 +3,7 @@ export { convexHull } from './convexHull.js';
 export { difference } from './difference.js';
 export { eachPoint } from './eachPoint.js';
 export { extrude } from './extrude.js';
+export { extrudeToPlane } from './extrudeToPlane.js';
 export { fromPoints } from './fromPoints.js';
 export { fromPolygons } from './fromPolygons.js';
 export { fromSolid } from './fromSolid.js';

@@ -38,6 +38,7 @@ export { drop } from './drop.js';
 export { eachItem } from './eachItem.js';
 export { eachPoint } from './eachPoint.js';
 export { extrude } from './extrude.js';
+export { extrudeToPlane } from './extrudeToPlane.js';
 export { flip } from './flip.js';
 export { fix } from './fix.js';
 export { fresh } from './fresh.js';

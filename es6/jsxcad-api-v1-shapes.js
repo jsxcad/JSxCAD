@@ -21,13 +21,13 @@ const ofApothem = (apothem = 1, { resolution = 16 } = {}) =>
 const ofDiameter = (diameter = 1, { resolution = 16 } = {}) =>
   ofRadius(diameter / 2, { resolution });
 
-const ofPlan = (plan) => {
+const ofPlan = (plan, { resolution = 16 } = {}) => {
   switch (plan.type) {
     default: {
       const width = Math.abs(plan.length);
       const length = Math.abs(plan.width);
       const height = Math.abs(plan.height);
-      return unitSphere()
+      return unitSphere(1)
         .scale(width / 2, length / 2, height / 2)
         .move(...plan.center);
     }
@@ -157,13 +157,13 @@ const ofSlices = (op, { slices = 2, cap = true } = {}) =>
     )
   ).toGraph();
 
-const ofPlan$2 = (plan) => {
+const ofPlan$2 = (plan, { sides = 32 } = {}) => {
   switch (plan.type) {
     default: {
       const width = Math.abs(plan.length);
       const length = Math.abs(plan.width);
       const height = Math.abs(plan.height);
-      return ofRadius$2()
+      return ofRadius$2(1, 1, { sides })
         .scale(width / 2, length / 2, height)
         .move(...plan.center);
     }

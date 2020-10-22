@@ -1,4 +1,4 @@
-import { fromSurfaceMeshToGraph, fromPointsToAlphaShapeAsSurfaceMesh, fromPointsToConvexHullAsSurfaceMesh, fromPolygonsToSurfaceMesh, fromGraphToSurfaceMesh, extrudeSurfaceMesh, fromNefPolyhedronToSurfaceMesh, fromSurfaceMeshToNefPolyhedron, fromNefPolyhedronFacetsToGraph, sectionOfNefPolyhedron, differenceOfNefPolyhedrons, fromPointsToSurfaceMesh, intersectionOfNefPolyhedrons, insetOfPolygon, outlineOfSurfaceMesh, smoothSurfaceMesh, fromSurfaceMeshToTriangles, unionOfNefPolyhedrons } from './jsxcad-algorithm-cgal.js';
+import { fromSurfaceMeshToGraph, fromPointsToAlphaShapeAsSurfaceMesh, fromPointsToConvexHullAsSurfaceMesh, fromPolygonsToSurfaceMesh, fromGraphToSurfaceMesh, extrudeSurfaceMesh, fromNefPolyhedronToSurfaceMesh, fromSurfaceMeshToNefPolyhedron, fromNefPolyhedronFacetsToGraph, sectionOfNefPolyhedron, differenceOfNefPolyhedrons, extrudeToPlaneOfSurfaceMesh, fromPointsToSurfaceMesh, intersectionOfNefPolyhedrons, insetOfPolygon, outlineOfSurfaceMesh, smoothSurfaceMesh, fromSurfaceMeshToTriangles, unionOfNefPolyhedrons } from './jsxcad-algorithm-cgal.js';
 import { dot, scale, min, max, transform as transform$1 } from './jsxcad-math-vec3.js';
 import { toPlane, flip } from './jsxcad-math-poly3.js';
 import { transform as transform$2 } from './jsxcad-math-plane.js';
@@ -999,6 +999,30 @@ const eachPoint = (graph, op) => {
   }
 };
 
+const extrudeToPlane = (graph, highPlane, lowPlane) => {
+  if (graph.faces.length > 0) {
+    // Arbitrarily pick the plane of the first graph to extrude along.
+    let normal;
+    for (const face of graph.faces) {
+      if (face && face.plane) {
+        normal = face.plane;
+        break;
+      }
+    }
+    return fromSurfaceMesh(
+      extrudeToPlaneOfSurfaceMesh(
+        toSurfaceMesh(graph),
+        ...scale(1, normal),
+        ...highPlane,
+        ...scale(-1, normal),
+        ...lowPlane
+      )
+    );
+  } else {
+    return graph;
+  }
+};
+
 const fromPoints = (points) => {
   const mesh = fromPointsToSurfaceMesh(points);
   const graph = fromSurfaceMeshToGraph(mesh);
@@ -1160,4 +1184,4 @@ const union = (a, b) => {
   }
 };
 
-export { alphaShape, convexHull, difference, eachPoint, extrude, fromPoints, fromPolygons, fromSolid, fromSurface, intersection, measureBoundingBox, offset, outline, section, smooth, toPaths, toSolid, toSurface, toTriangles, transform, union };
+export { alphaShape, convexHull, difference, eachPoint, extrude, extrudeToPlane, fromPoints, fromPolygons, fromSolid, fromSurface, intersection, measureBoundingBox, offset, outline, section, smooth, toPaths, toSolid, toSurface, toTriangles, transform, union };
