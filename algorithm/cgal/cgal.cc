@@ -730,6 +730,7 @@ Surface_mesh* ComputeAlphaShapeAsSurfaceMesh(int component_limit, emscripten::va
 }
 
 Surface_mesh* OutlineOfSurfaceMesh(Surface_mesh* input) {
+  const double kColinearityThreshold = 0.999999;
   Surface_mesh* mesh = new Surface_mesh(*input);
   for (auto& edge : halfedges(*mesh)) {
     if (mesh->is_removed(edge) || is_border_edge(edge, *mesh)) {
@@ -743,7 +744,8 @@ Surface_mesh* OutlineOfSurfaceMesh(Surface_mesh* input) {
     } else {
       auto edge_face_normal = CGAL::Polygon_mesh_processing::compute_face_normal(edge_face, *mesh);
       auto twin_face_normal = CGAL::Polygon_mesh_processing::compute_face_normal(twin_face, *mesh);
-      if (edge_face_normal == twin_face_normal) {
+      // FIX: Figure out the limit properly and consider planar drift.
+      if (edge_face_normal * twin_face_normal > kColinearityThreshold) {
         CGAL::Euler::join_face(edge, *mesh);
       }
     }

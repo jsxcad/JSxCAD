@@ -1,6 +1,7 @@
 import { Group } from '@jsxcad/api-v1-shapes';
-import { Hull } from './Hull.js';
+// import { Hull } from './Hull.js';
 import { Shape } from '@jsxcad/api-v1-shape';
+import { distance } from '@jsxcad/math-vec3';
 import { getEdges } from '@jsxcad/geometry-path';
 import { getPaths } from '@jsxcad/geometry-tagged';
 
@@ -9,9 +10,10 @@ export const sweep = (toolpath, tool) => {
   const chains = [];
   for (const { paths } of getPaths(toolpath.toKeptGeometry())) {
     for (const path of paths) {
+      // FIX: Handle tool rotation around the vector of orientation, and corners.
       chains.push(
         ...getEdges(path).map(([start, end]) =>
-          Hull(tool.move(...start), tool.move(...end))
+          tool.orient({ from: start, at: end }).extrude(distance(start, end))
         )
       );
     }

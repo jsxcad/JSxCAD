@@ -29,11 +29,11 @@ const apothem = (apothem = 1, [x = 0, y = 0, z = 0] = []) => {
 };
 
 const box = (
-  left = 0,
   right = 0,
   back = 0,
-  front = 0,
   top = 0,
+  left = 0,
+  front = 0,
   bottom = 0
 ) => {
   if (left > right) [left, right] = [right, left];
