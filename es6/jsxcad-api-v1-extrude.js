@@ -11,7 +11,7 @@ import { cutOpen, section as section$2, fromSolid, containsPoint as containsPoin
 import { flip as flip$1, toPlane as toPlane$1, transform } from './jsxcad-geometry-surface.js';
 import { createNormalize3 } from './jsxcad-algorithm-quantize.js';
 import { fromTranslation } from './jsxcad-math-mat4.js';
-import { scale } from './jsxcad-math-vec3.js';
+import { scale, distance } from './jsxcad-math-vec3.js';
 import { toXYPlaneTransforms } from './jsxcad-math-plane.js';
 import { toolpath as toolpath$1 } from './jsxcad-algorithm-toolpath.js';
 
@@ -511,9 +511,10 @@ const sweep = (toolpath, tool) => {
   const chains = [];
   for (const { paths } of getPaths(toolpath.toKeptGeometry())) {
     for (const path of paths) {
+      // FIX: Handle tool rotation around the vector of orientation, and corners.
       chains.push(
         ...getEdges(path).map(([start, end]) =>
-          Hull(tool.move(...start), tool.move(...end))
+          tool.orient({ from: start, at: end }).extrude(distance(start, end))
         )
       );
     }

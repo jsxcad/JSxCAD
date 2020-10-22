@@ -20,6 +20,7 @@ import { Shape } from './Shape.js';
  * :::
  **/
 
+// FIX: Need to control rotation around the orientation axis.
 export const orient = (
   shape,
   { center = [0, 0, 0], facing = [0, 0, 1], at = [0, 0, 0], from = [0, 0, 0] }
@@ -31,7 +32,10 @@ export const orient = (
     (Math.acos(dot(normalizedFacing, normalizedAt)) * 180) / Math.PI;
   const axis = normalize(cross(normalizedFacing, normalizedAt));
 
-  return shape.move(negate(center)).rotate(angle, axis).move(from);
+  return shape
+    .move(...negate(center))
+    .rotate(angle, axis)
+    .move(...from);
 };
 
 const orientMethod = function (...args) {
