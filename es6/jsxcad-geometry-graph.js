@@ -10,12 +10,9 @@ const surfaceMeshSymbol = Symbol('surfaceMeshSymbol');
 const fromSurfaceMesh = (surfaceMesh) => {
   let graph = surfaceMesh[graphSymbol];
   if (graph === undefined) {
-    console.log(`QQ/fromSurfaceMesh/computed`);
     graph = fromSurfaceMeshToGraph(surfaceMesh);
     surfaceMesh[graphSymbol] = graph;
     graph[surfaceMeshSymbol] = surfaceMesh;
-  } else {
-    console.log(`QQ/fromSurfaceMesh/cached`);
   }
   return graph;
 };
@@ -905,7 +902,6 @@ const toSurface = (graph) => {
 const toSurfaceMesh = (graph) => {
   let surfaceMesh = graph[surfaceMeshSymbol];
   if (surfaceMesh === undefined) {
-    console.log(`QQ/toSurfaceMesh/computed`);
     if (graph.isOutline) {
       // SurfaceMesh can't handle outlines.
       surfaceMesh = fromGraphToSurfaceMesh(fromSurface(toSurface(graph)));
@@ -914,8 +910,6 @@ const toSurfaceMesh = (graph) => {
     }
     graph[surfaceMeshSymbol] = surfaceMesh;
     surfaceMesh[graphSymbol] = graph;
-  } else {
-    console.log(`QQ/toSurfaceMesh/cached`);
   }
   return surfaceMesh;
 };
@@ -947,13 +941,10 @@ const extrude = (graph, height, depth) => {
 const fromNefPolyhedron = (nefPolyhedron) => {
   let graph = nefPolyhedron[graphSymbol];
   if (graph === undefined) {
-    console.log(`QQ/fromNefPolyhedron/computed`);
     const surfaceMesh = fromNefPolyhedronToSurfaceMesh(nefPolyhedron);
     graph = fromSurfaceMesh(surfaceMesh);
     nefPolyhedron[graphSymbol] = graph;
     graph[nefPolyhedronSymbol] = nefPolyhedron;
-  } else {
-    console.log(`QQ/fromNefPolyhedron/cached`);
   }
   return graph;
 };
@@ -965,8 +956,6 @@ const toNefPolyhedron = (graph) => {
     nefPolyhedron = fromSurfaceMeshToNefPolyhedron(mesh);
     graph[nefPolyhedronSymbol] = nefPolyhedron;
     nefPolyhedron[graphSymbol] = graph;
-  } else {
-    console.log(`QQ/toNefPolyhedron/cached`);
   }
   return nefPolyhedron;
 };

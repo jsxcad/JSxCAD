@@ -11,7 +11,6 @@ export const toNefPolyhedron = (graph) => {
     graph[nefPolyhedronSymbol] = nefPolyhedron;
     nefPolyhedron[graphSymbol] = graph;
   } else {
-    console.log(`QQ/toNefPolyhedron/cached`);
   }
   return nefPolyhedron;
 };
