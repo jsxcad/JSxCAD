@@ -30,7 +30,7 @@ DrillPress(10, mill)(30).fix().view();
 md`The DrillPress cuts holes.`;
 
 md`## HoleRouter(depth, tool)(shape, x, y, z)`;
-HoleRouter(10, { ...mill, sweep: 'no' })(Square(20).bench())
+HoleRouter(10, { ...mill, sweep: 'show' })(Square(20).bench())
   .fix()
   .view();
 md`This tool cuts around the inside of a shape.`;
@@ -50,39 +50,32 @@ md`The ProfileRouter cuts around the outside of a shape.`;
 md`## Bevel(shape)(length)`;
 const Bevel = (shape) => (on, length) =>
   on.rotate(90).bench().cut(shape.extrude(length));
-
-const roundBevel = Bevel(y.Square(2).cut(y.Circle(1).move(1, 0, -1)));
-Cube(10)
+const roundBevel = Bevel(x.Circle(1));
+Box(10)
   .op(roundBevel, 10)
   .op(roundBevel, 10)
-  .op(roundBevel, 10)
-  .op(roundBevel, 10)
-  .fix()
-  .view();
-
-const archBevel = Bevel(y.Circle());
-Cube(10)
-  .op(archBevel, 10)
-  .op(archBevel, 10)
-  .op(archBevel, 10)
-  .op(archBevel, 10)
+  //.op(roundBevel, 10)
+  //.op(roundBevel, 10)
+  .outline()
   .fix()
   .view();
 
 const stepBevel = Bevel(y.Square());
-Cube(10)
+Box(10)
   .op(stepBevel, 10)
   .op(stepBevel, 10)
   .op(stepBevel, 10)
   .op(stepBevel, 10)
+  .outline()
   .fix()
   .view();
 
 const angleBevel = Bevel(y.Square(1).rotateY(45));
-Cube(10)
+Box(10)
   .op(angleBevel, 10)
   .op(angleBevel, 10)
-  .op(angleBevel, 10)
-  .op(angleBevel, 10)
+  //.op(angleBevel, 10)
+  //.op(angleBevel, 10)
+  .outline()
   .fix()
   .view();
