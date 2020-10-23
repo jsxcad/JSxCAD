@@ -15,7 +15,7 @@ const group = Group(Square(20), Triangle(5));
 group.topView();
 
 md`## Intersection(...shapes)`;
-const intersection = Intersection(Cube(10), Sphere(7));
+const intersection = Intersection(Box(10), Ball(7));
 intersection.view();
 md`The intersection of a 10x10x10 Cube and a Sphere of radius 7.`;
 
