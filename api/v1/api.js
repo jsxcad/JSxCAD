@@ -31,9 +31,13 @@ export const c = cylinder;
 export const d = diameter;
 export const r = radius;
 
-export const x = Peg([0, 0, 0], [0, 0, 1], [0, 1, 0]);
-export const y = Peg([0, 0, 0], [0, 0, 1], [-1, 0, 0]);
-export const z = Peg([0, 0, 0], [0, 1, 0], [1, 0, 0]);
+export const x = Peg([0, 0, 0], [0, 0, 1], [0, -1, 0]);
+export const y = Peg([0, 0, 0], [0, 0, 1], [1, 0, 0]);
+export const z = Peg([0, 0, 0], [0, 1, 0], [-1, 0, 0]);
+
+// export const x = Peg([0, 0, 0], [0, 0, 1], [0, 1, 0]);
+// export const y = Peg([0, 0, 0], [0, 0, 1], [-1, 0, 0]);
+// export const z = Peg([0, 0, 0], [0, 1, 0], [1, 0, 0]);
 
 export { Page, pack } from '@jsxcad/api-v1-layout';
 

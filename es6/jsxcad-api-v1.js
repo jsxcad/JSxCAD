@@ -152,9 +152,9 @@ const c = cylinder;
 const d = diameter;
 const r = radius;
 
-const x = Peg([0, 0, 0], [0, 0, 1], [0, 1, 0]);
-const y = Peg([0, 0, 0], [0, 0, 1], [-1, 0, 0]);
-const z = Peg([0, 0, 0], [0, 1, 0], [1, 0, 0]);
+const x = Peg([0, 0, 0], [0, 0, 1], [0, -1, 0]);
+const y = Peg([0, 0, 0], [0, 0, 1], [1, 0, 0]);
+const z = Peg([0, 0, 0], [0, 1, 0], [-1, 0, 0]);
 
 var api = /*#__PURE__*/Object.freeze({
   __proto__: null,
