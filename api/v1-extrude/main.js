@@ -4,6 +4,7 @@ import Hull from './Hull.js';
 import Loop from './Loop.js';
 import cloudSolid from './cloudSolid.js';
 import extrude from './extrude.js';
+import extrudeToPlane from './extrudeToPlane.js';
 import inline from './inline.js';
 import interior from './interior.js';
 import minkowski from './minkowski.js';
@@ -21,6 +22,7 @@ const api = {
   Hull,
   Loop,
   extrude,
+  extrudeToPlane,
   interior,
   minkowski,
   inline,
@@ -40,6 +42,7 @@ export {
   Loop,
   cloudSolid,
   extrude,
+  extrudeToPlane,
   inline,
   interior,
   minkowski,

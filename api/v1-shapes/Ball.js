@@ -17,13 +17,13 @@ export const ofApothem = (apothem = 1, { resolution = 16 } = {}) =>
 export const ofDiameter = (diameter = 1, { resolution = 16 } = {}) =>
   ofRadius(diameter / 2, { resolution });
 
-export const ofPlan = (plan) => {
+export const ofPlan = (plan, { resolution = 16 } = {}) => {
   switch (plan.type) {
     default: {
       const width = Math.abs(plan.length);
       const length = Math.abs(plan.width);
       const height = Math.abs(plan.height);
-      return unitSphere()
+      return unitSphere(1, { resolution })
         .scale(width / 2, length / 2, height / 2)
         .move(...plan.center);
     }
