@@ -1174,7 +1174,6 @@ Shape.prototype.withOpenEdges = withOpenEdgesMethod;
  * :::
  **/
 
-// FIX: Need to control rotation around the orientation axis.
 const orient = (
   shape,
   { center = [0, 0, 0], facing = [0, 0, 1], at = [0, 0, 0], from = [0, 0, 0] }
@@ -1234,36 +1233,25 @@ const pathsMethod = function (op) {
 };
 Shape.prototype.paths = pathsMethod;
 
-const getAngle = ([aX, aY], [bX, bY]) => {
-  const a2 = Math.atan2(aX, aY); // 0
-  const a1 = Math.atan2(bX, bY);
-  const sign = a1 > a2 ? 1 : -1;
-  const angle = a1 - a2; // a1
-  const K = -sign * Math.PI * 2;
-  const absoluteAngle =
-    Math.abs(K + angle) < Math.abs(angle) ? K + angle : angle;
-  return (absoluteAngle * 180) / Math.PI;
-};
-
 const getPegCoords = (shape) => {
   const coords = getPeg(shape.toTransformedGeometry());
   const origin = coords.slice(0, 3);
   const forward = coords.slice(3, 6);
   const right = coords.slice(6, 9);
-  const plane = fromPoints(right, forward, origin);
 
-  return { coords, origin, forward, right, plane };
+  return { coords, origin, forward, right };
+};
+
+const orient$1 = (origin, forward, right, shapeToPeg) => {
+  const plane = fromPoints(right, forward, origin);
+  const rightDirection = subtract(right, origin);
+  const [, from] = toXYPlaneTransforms(plane, rightDirection);
+  return shapeToPeg.transform(from).move(...origin);
 };
 
 const peg = (shape, shapeToPeg) => {
-  const { origin, right, plane } = getPegCoords(shape);
-  const [, from] = toXYPlaneTransforms(plane);
-  const orientation = subtract(right, origin);
-  const angle = getAngle([1, 0], orientation);
-  return shapeToPeg
-    .move(...origin)
-    .rotateZ(-angle)
-    .transform(from);
+  const { origin, right, forward } = getPegCoords(shape);
+  return orient$1(origin, right, forward, shapeToPeg);
 };
 
 const pegMethod = function (shapeToPeg) {
@@ -1768,4 +1756,4 @@ const logMethod = function (
 Shape.prototype.log = logMethod;
 
 export default Shape;
-export { Shape, getPegCoords, loadGeometry, log, saveGeometry, shapeMethod };
+export { Shape, getPegCoords, loadGeometry, log, orient$1 as orient, saveGeometry, shapeMethod };

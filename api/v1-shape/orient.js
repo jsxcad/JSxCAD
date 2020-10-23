@@ -20,7 +20,6 @@ import { Shape } from './Shape.js';
  * :::
  **/
 
-// FIX: Need to control rotation around the orientation axis.
 export const orient = (
   shape,
   { center = [0, 0, 0], facing = [0, 0, 1], at = [0, 0, 0], from = [0, 0, 0] }

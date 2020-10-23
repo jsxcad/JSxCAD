@@ -8,13 +8,11 @@ import { fromSurfaceMesh } from './fromSurfaceMesh.js';
 export const fromNefPolyhedron = (nefPolyhedron) => {
   let graph = nefPolyhedron[graphSymbol];
   if (graph === undefined) {
-    console.log(`QQ/fromNefPolyhedron/computed`);
     const surfaceMesh = fromNefPolyhedronToSurfaceMesh(nefPolyhedron);
     graph = fromSurfaceMesh(surfaceMesh);
     nefPolyhedron[graphSymbol] = graph;
     graph[nefPolyhedronSymbol] = nefPolyhedron;
   } else {
-    console.log(`QQ/fromNefPolyhedron/cached`);
   }
   return graph;
 };
