@@ -1,5 +1,6 @@
 import { fromSurfaceMeshToGraph, fromPointsToAlphaShapeAsSurfaceMesh, fromPointsToConvexHullAsSurfaceMesh, fromPolygonsToSurfaceMesh, fromGraphToSurfaceMesh, extrudeSurfaceMesh, fromNefPolyhedronToSurfaceMesh, fromSurfaceMeshToNefPolyhedron, fromNefPolyhedronFacetsToGraph, sectionOfNefPolyhedron, differenceOfNefPolyhedrons, extrudeToPlaneOfSurfaceMesh, fromPointsToSurfaceMesh, intersectionOfNefPolyhedrons, insetOfPolygon, outlineOfSurfaceMesh, smoothSurfaceMesh, fromSurfaceMeshToTriangles, unionOfNefPolyhedrons } from './jsxcad-algorithm-cgal.js';
 import { dot, scale, min, max, transform as transform$1 } from './jsxcad-math-vec3.js';
+import { deduplicate as deduplicate$1 } from './jsxcad-geometry-path.js';
 import { toPlane, flip } from './jsxcad-math-poly3.js';
 import { transform as transform$2 } from './jsxcad-math-plane.js';
 
@@ -23,8 +24,10 @@ const alphaShape = (points, componentLimit) =>
 const convexHull = (points) =>
   fromSurfaceMesh(fromPointsToConvexHullAsSurfaceMesh(points));
 
+const deduplicate = (surface) => surface.map(deduplicate$1);
+
 const fromSurface = (surface) =>
-  fromSurfaceMesh(fromPolygonsToSurfaceMesh(surface));
+  fromSurfaceMesh(fromPolygonsToSurfaceMesh(deduplicate(surface)));
 
 const create = () => ({ points: [], edges: [], loops: [], faces: [] });
 

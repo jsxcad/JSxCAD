@@ -1,4 +1,4 @@
-import { onBoot } from './jsxcad-sys.js';
+import { emit, onBoot } from './jsxcad-sys.js';
 import { equals, fromPolygon } from './jsxcad-math-plane.js';
 import { equals as equals$1 } from './jsxcad-math-vec3.js';
 
@@ -8824,6 +8824,12 @@ let cgal;
 const initCgal = async () => {
   if (cgal === undefined) {
     cgal = await Cgal({
+      print(...text) {
+        emit({ log: { text: text.join(' '), level: 'serious' } });
+      },
+      printErr(...text) {
+        emit({ log: { text: text.join(' '), level: 'serious' } });
+      },
       locateFile(path) {
         if (path === 'cgal.wasm') {
           let url = import.meta.url;

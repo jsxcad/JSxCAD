@@ -20,8 +20,14 @@ const resolveNotebook = async (path) => {
 const say = (message) => postMessage(message);
 
 const reportError = (error) => {
-  sys.emit({ log: { text: error.stack, level: 'serious' } });
-  sys.log({ op: 'text', text: error.stack, level: 'serious' });
+  sys.emit({
+    log: { text: error.stack ? error.stack : error, level: 'serious' },
+  });
+  sys.log({
+    op: 'text',
+    text: error.stack ? error.stack : error,
+    level: 'serious',
+  });
 };
 
 sys.setPendingErrorHandler(reportError);

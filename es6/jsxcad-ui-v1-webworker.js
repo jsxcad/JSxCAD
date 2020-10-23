@@ -22,13 +22,13 @@ const say = message => postMessage(message);
 const reportError = error => {
   emit({
     log: {
-      text: error.stack,
+      text: error.stack ? error.stack : error,
       level: 'serious'
     }
   });
   log({
     op: 'text',
-    text: error.stack,
+    text: error.stack ? error.stack : error,
     level: 'serious'
   });
 };
