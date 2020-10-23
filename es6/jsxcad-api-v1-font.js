@@ -46,7 +46,7 @@ const readFont = async (path) => {
   let data = await read(`source/${path}`, { sources: [path] });
   const font = toFont({ path }, data);
   const fontFactory = (size = 1) => (text) =>
-    Shape.fromGeometry(font({ emSize: toEmSizeFromMm(size) }, text));
+    Shape.fromGeometry(font({ emSize: toEmSizeFromMm(size) }, text)).toGraph();
   return fontFactory;
 };
 

@@ -949,6 +949,15 @@ const fromNefPolyhedron = (nefPolyhedron) => {
   return graph;
 };
 
+// FIX: Actually determine the principle plane.
+const principlePlane = (graph) => {
+  for (const face of graph.faces) {
+    if (face && face.plane) {
+      return face.plane;
+    }
+  }
+};
+
 const toNefPolyhedron = (graph) => {
   let nefPolyhedron = graph[nefPolyhedronSymbol];
   if (nefPolyhedron === undefined) {
@@ -970,7 +979,7 @@ const far = 10000;
 
 const difference = (a, b) => {
   if (!a.isClosed) {
-    return section(a.faces[0].plane, difference(extrude(a, far, 0), b));
+    return section(principlePlane(a), difference(extrude(a, far, 0), b));
   }
   if (!b.isClosed) {
     b = extrude(b, far, 0);
@@ -1040,7 +1049,7 @@ const far$1 = 10000;
 
 const intersection = (a, b) => {
   if (!a.isClosed) {
-    return section(a.faces[0].plane, intersection(extrude(a, far$1, 0), b));
+    return section(principlePlane(a), intersection(extrude(a, far$1, 0), b));
   }
   if (!b.isClosed) {
     b = extrude(b, far$1, 0);
@@ -1161,7 +1170,7 @@ const far$2 = 10000;
 
 const union = (a, b) => {
   if (!a.isClosed) {
-    return section(a.faces[0].plane, union(extrude(a, far$2, 0), b));
+    return section(principlePlane(a), union(extrude(a, far$2, 0), b));
   }
   if (b.isClosed) {
     fromNefPolyhedron(
