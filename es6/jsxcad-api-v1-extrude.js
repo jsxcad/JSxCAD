@@ -1,4 +1,4 @@
-import Shape$1, { Shape, getPegCoords } from './jsxcad-api-v1-shape.js';
+import Shape$1, { Shape, getPegCoords, orient } from './jsxcad-api-v1-shape.js';
 import { alphaShape, convexHull, fromPoints } from './jsxcad-geometry-graph.js';
 import { taggedGraph, taggedSurface, taggedSolid, getPaths, extrude as extrude$1, extrudeToPlane as extrudeToPlane$1, outline as outline$1, section as section$1, taggedGroup, taggedLayers, getSolids, union, taggedZ0Surface, getSurfaces, getZ0Surfaces, taggedPaths, getPlans, measureBoundingBox, taggedPoints, measureHeights } from './jsxcad-geometry-tagged.js';
 import { buildConvexSurfaceHull, buildConvexHull, loop, buildConvexMinkowskiSum, extrude as extrude$2 } from './jsxcad-algorithm-shape.js';
@@ -10,9 +10,9 @@ import { transform as transform$1, alignVertices, fromPolygons } from './jsxcad-
 import { cutOpen, section as section$2, fromSolid, containsPoint as containsPoint$1 } from './jsxcad-geometry-bsp.js';
 import { flip as flip$1, toPlane as toPlane$1, transform } from './jsxcad-geometry-surface.js';
 import { createNormalize3 } from './jsxcad-algorithm-quantize.js';
-import { fromTranslation } from './jsxcad-math-mat4.js';
-import { scale, distance } from './jsxcad-math-vec3.js';
-import { toXYPlaneTransforms } from './jsxcad-math-plane.js';
+import { fromTranslation, fromRotation } from './jsxcad-math-mat4.js';
+import { scale, add, normalize, subtract, transform as transform$3 } from './jsxcad-math-vec3.js';
+import { toXYPlaneTransforms, fromNormalAndPoint, fromPoints as fromPoints$1 } from './jsxcad-math-plane.js';
 import { toolpath as toolpath$1 } from './jsxcad-algorithm-toolpath.js';
 
 const Alpha = (shape, componentLimit = 1) => {
@@ -452,17 +452,53 @@ const method = function (...args) {
 };
 Shape.prototype.stretch = method;
 
+const START = 0;
+const END = 1;
+
+const planeOfBisection = (aStart, bStart, intersection) => {
+  const dA = normalize(subtract(aStart, intersection));
+  const dB = normalize(subtract(bStart, intersection));
+  const bis1 = add(dA, dB);
+  const bis2 = subtract(dA, dB);
+console.log(`QQ/bis1: ${JSON.stringify(bis1)}`);
+console.log(`QQ/bis2: ${JSON.stringify(bis2)}`);
+console.log(`QQ/intersection: ${JSON.stringify(intersection)}`);
+  return fromNormalAndPoint(bis2, intersection);
+};
+
 // FIX: This is a weak approximation assuming a 1d profile -- it will need to be redesigned.
 const sweep = (toolpath, tool) => {
   const chains = [];
   for (const { paths } of getPaths(toolpath.toKeptGeometry())) {
     for (const path of paths) {
+      const edges = getEdges(path);
+      const length = edges.length;
+      for (let nth = 0; nth < length; nth++) {
+        const prev = edges[nth];
+        const curr = edges[(nth + 1) % length];
+        const next = edges[(nth + 2) % length];
+        const a = planeOfBisection(prev[START], curr[END], curr[START]);
+        const b = planeOfBisection(curr[START], next[END], curr[END]);
+        const middle = scale(0.5, add(curr[START], curr[END]));
+        const plane = fromPoints$1(prev[START], curr[START], curr[END]);
+        const rotate90 = fromRotation(Math.PI / -2, plane);
+        const direction = normalize(subtract(curr[START], curr[END]));
+        const rightDirection = transform$3(rotate90, direction);
+        const right = add(middle, rightDirection);
+console.log(`QQ/rightDirection: ${rightDirection}`);
+        // chains.push(tool.orient({ from: scale(0.5, add(curr[START], curr[END])), at: curr[END] }).extrudeToPlane(a, b));
+        // chains.push(toward(tool, middle, curr[END], [0, 0.5, 0.5]));
+        // chains.push(orient(middle, add(middle, plane), right, tool).extrudeToPlane(a, b));
+        chains.push(orient(middle, add(middle, plane), right, tool).extrudeToPlane(a, b));
+      }
       // FIX: Handle tool rotation around the vector of orientation, and corners.
+/*
       chains.push(
         ...getEdges(path).map(([start, end]) =>
           tool.orient({ from: start, at: end }).extrude(distance(start, end))
         )
       );
+*/
     }
   }
   return Group(...chains);

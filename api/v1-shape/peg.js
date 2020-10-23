@@ -20,20 +20,25 @@ export const getPegCoords = (shape) => {
   const origin = coords.slice(0, 3);
   const forward = coords.slice(3, 6);
   const right = coords.slice(6, 9);
-  const plane = fromPoints(right, forward, origin);
 
-  return { coords, origin, forward, right, plane };
+  return { coords, origin, forward, right };
 };
 
-export const peg = (shape, shapeToPeg) => {
-  const { origin, right, plane } = getPegCoords(shape);
-  const [, from] = toXYPlaneTransforms(plane);
+export const orient = (origin, forward, right, shapeToPeg) => {
+  const plane = fromPoints(right, forward, origin);
+console.log(`QQ/orient/plane: ${plane}`);
+  const [, from] = toXYPlaneTransforms(plane, right);
   const orientation = subtract(right, origin);
   const angle = getAngle([1, 0], orientation);
   return shapeToPeg
     .move(...origin)
     .rotateZ(-angle)
     .transform(from);
+};
+
+export const peg = (shape, shapeToPeg) => {
+  const { origin, right, forward } = getPegCoords(shape);
+  return orient(origin, right, forward, shapeToPeg);
 };
 
 const pegMethod = function (shapeToPeg) {
