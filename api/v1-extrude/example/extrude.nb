@@ -38,7 +38,7 @@ stretch.view();
 md`Stretches a solid by extruding a section.`;
 
 md`path.sweep(shape)`;
-const sweep = Path(Point(0), Point(10), Point(10, 10)).sweep(Cube(1));
+const sweep = Triangle(10).outline().sweep(Hexagon(1));
 sweep.fix().view();
 md`Produces solids by sweeping a shape along a path`;
 
