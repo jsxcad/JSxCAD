@@ -1,11 +1,18 @@
+import { emit, onBoot } from '@jsxcad/sys';
+
 import Cgal from './cgal.cjs';
-import { onBoot } from '@jsxcad/sys';
 
 let cgal;
 
 export const initCgal = async () => {
   if (cgal === undefined) {
     cgal = await Cgal({
+      print(...text) {
+        emit({ log: { text: text.join(' '), level: 'serious' } });
+      },
+      printErr(...text) {
+        emit({ log: { text: text.join(' '), level: 'serious' } });
+      },
       locateFile(path) {
         if (path === 'cgal.wasm') {
           let url = import.meta.url;
