@@ -1,3 +1,5 @@
+#define SURFACE_MESH_BOOLEANS
+
 #include <emscripten/bind.h>
 
 #include <array>
@@ -869,6 +871,18 @@ bool Surface_mesh__is_closed(Surface_mesh* mesh) {
   return CGAL::is_closed(*mesh);
 }
 
+bool Surface_mesh__is_valid_halfedge_graph(Surface_mesh* mesh) {
+  return CGAL::is_valid_halfedge_graph(*mesh);
+}
+
+bool Surface_mesh__is_valid_face_graph(Surface_mesh* mesh) {
+  return CGAL::is_valid_face_graph(*mesh);
+}
+
+bool Surface_mesh__is_valid_polygon_mesh(Surface_mesh* mesh) {
+  return CGAL::is_valid_polygon_mesh(*mesh);
+}
+
 using emscripten::select_const;
 using emscripten::select_overload;
 
@@ -998,4 +1012,7 @@ EMSCRIPTEN_BINDINGS(module) {
   emscripten::function("OutlineOfSurfaceMesh", &OutlineOfSurfaceMesh, emscripten::allow_raw_pointers());
   emscripten::function("InsetOfPolygon", &InsetOfPolygon, emscripten::allow_raw_pointers());
   emscripten::function("Surface_mesh__is_closed", &Surface_mesh__is_closed, emscripten::allow_raw_pointers());
+  emscripten::function("Surface_mesh__is_valid_halfedge_graph", &Surface_mesh__is_valid_halfedge_graph, emscripten::allow_raw_pointers());
+  emscripten::function("Surface_mesh__is_valid_face_graph", &Surface_mesh__is_valid_face_graph, emscripten::allow_raw_pointers());
+  emscripten::function("Surface_mesh__is_valid_polygon_mesh", &Surface_mesh__is_valid_polygon_mesh, emscripten::allow_raw_pointers());
 }

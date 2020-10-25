@@ -8,27 +8,6 @@ const graphSymbol = Symbol('graph');
 const nefPolyhedronSymbol = Symbol('nefPolyhedron');
 const surfaceMeshSymbol = Symbol('surfaceMeshSymbol');
 
-const fromSurfaceMesh = (surfaceMesh) => {
-  let graph = surfaceMesh[graphSymbol];
-  if (graph === undefined) {
-    graph = fromSurfaceMeshToGraph(surfaceMesh);
-    surfaceMesh[graphSymbol] = graph;
-    graph[surfaceMeshSymbol] = surfaceMesh;
-  }
-  return graph;
-};
-
-const alphaShape = (points, componentLimit) =>
-  fromSurfaceMesh(fromPointsToAlphaShapeAsSurfaceMesh(points, componentLimit));
-
-const convexHull = (points) =>
-  fromSurfaceMesh(fromPointsToConvexHullAsSurfaceMesh(points));
-
-const deduplicate = (surface) => surface.map(deduplicate$1);
-
-const fromSurface = (surface) =>
-  fromSurfaceMesh(fromPolygonsToSurfaceMesh(deduplicate(surface)));
-
 const create = () => ({ points: [], edges: [], loops: [], faces: [] });
 
 const addEdge = (graph, { point, next = -1, loop = -1, twin = -1 }) => {
@@ -62,7 +41,26 @@ const addPoint = (graph, point) => {
   return id;
 };
 
-const eachEdge = (graph, start, op) => {
+const eachEdge = (graph, op) =>
+  graph.edges.forEach((node, nth) => {
+    if (node && node.isRemoved !== true) {
+      op(nth, node);
+    }
+  });
+
+const eachFace = (graph, op) =>
+  graph.faces.forEach((faceNode, face) => op(face, faceNode));
+
+const eachFaceEdge = (graph, face, op) =>
+  eachFaceLoop(graph, face, (loop) => eachLoopEdge(graph, loop, op));
+
+const eachFaceLoop = (graph, face, op) => {
+  const loop = getFaceNode(graph, face).loop;
+  op(loop, getLoopNode(graph, loop));
+};
+
+const eachLoopEdge = (graph, loop, op) => {
+  const start = getLoopNode(graph, loop).edge;
   if (start === -1) {
     return;
   }
@@ -79,24 +77,81 @@ const eachEdge = (graph, start, op) => {
   } while (edge !== start);
 };
 
-const eachFace = (graph, op) =>
-  graph.faces.forEach((faceNode, face) => op(face, faceNode));
-
-const eachFaceEdge = (graph, face, op) =>
-  eachFaceLoop(graph, face, (loop) => eachLoopEdge(graph, loop, op));
-
-const eachFaceLoop = (graph, face, op) => {
-  const loop = getFaceNode(graph, face).loop;
-  op(loop, getLoopNode(graph, loop));
-};
-
-const eachLoopEdge = (graph, loop, op) =>
-  eachEdge(graph, getLoopNode(graph, loop).edge, op);
-
 const getEdgeNode = (graph, edge) => graph.edges[edge];
 const getFaceNode = (graph, face) => graph.faces[face];
 const getLoopNode = (graph, loop) => graph.loops[loop];
 const getPointNode = (graph, point) => graph.points[point];
+
+const removeZeroLengthEdges = (graph) => {
+  let removed = false;
+  eachEdge(graph, (edge, edgeNode) => {
+    const nextEdgeNode = getEdgeNode(graph, edgeNode.next);
+    if (edgeNode.point === nextEdgeNode.point) {
+      // Cut the edge out of the loop.
+      edgeNode.next = nextEdgeNode.next;
+      // Ensure that the loop doesn't enter on the removed edge.
+      getLoopNode(graph, edgeNode.loop).edge = edge;
+      // Mark as removed for debugging purposes.
+      nextEdgeNode.isRemoved = true;
+      nextEdgeNode.next = -1;
+      // Any twin should be in the same situation and remove itself.
+      removed = true;
+    }
+  });
+  return removed;
+};
+
+const repair = (graph) => {
+  if (removeZeroLengthEdges(graph)) {
+    if (!checkGraph(graph)) ;
+    return true;
+  }
+  return false;
+};
+
+const checkTwins = (graph) => {
+  eachEdge(graph, (edge, edgeNode) => {
+    if (edgeNode.twin === -1) {
+      return;
+    }
+    const twinNode = getEdgeNode(graph, edge.twin);
+    if (!twinNode) {
+      return;
+    }
+    if (twinNode.isRemoved) {
+      throw Error('removed twin');
+    }
+  });
+  return true;
+};
+
+const checkGraph = (graph) => {
+  return checkTwins(graph);
+};
+
+const fromSurfaceMesh = (surfaceMesh) => {
+  let graph = surfaceMesh[graphSymbol];
+  if (graph === undefined) {
+    graph = fromSurfaceMeshToGraph(surfaceMesh);
+    if (!repair(fromSurfaceMeshToGraph(surfaceMesh))) {
+      // If the graph wasn't repaired, we can re-use the input mesh.
+      surfaceMesh[graphSymbol] = graph;
+      graph[surfaceMeshSymbol] = surfaceMesh;
+    }
+  }
+  return graph;
+};
+
+const alphaShape = (points, componentLimit) =>
+  fromSurfaceMesh(fromPointsToAlphaShapeAsSurfaceMesh(points, componentLimit));
+
+const convexHull = (points) =>
+  fromSurfaceMesh(fromPointsToConvexHullAsSurfaceMesh(points));
+
+const deduplicate = (surface) => surface.map(deduplicate$1);
+
+const fromSurface = (surface) =>
+  fromSurfaceMesh(fromPolygonsToSurfaceMesh(deduplicate(surface)));
 
 var earcut_1 = earcut;
 var default_1 = earcut;
