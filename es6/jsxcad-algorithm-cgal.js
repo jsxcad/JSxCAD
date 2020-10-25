@@ -799,8 +799,8 @@ var Module = (function () {
     }
     var wasmMemory;
     var wasmTable = new WebAssembly.Table({
-      initial: 1067,
-      maximum: 1067,
+      initial: 1070,
+      maximum: 1070,
       element: 'anyfunc',
     });
     var ABORT = false;
@@ -1068,9 +1068,9 @@ var Module = (function () {
       Module['HEAPF32'] = HEAPF32 = new Float32Array(buf);
       Module['HEAPF64'] = HEAPF64 = new Float64Array(buf);
     }
-    var STACK_BASE = 5436960,
-      STACK_MAX = 194080,
-      DYNAMIC_BASE = 5436960;
+    var STACK_BASE = 5437056,
+      STACK_MAX = 194176,
+      DYNAMIC_BASE = 5437056;
     assert(STACK_BASE % 16 === 0, 'stack must start aligned');
     assert(DYNAMIC_BASE % 16 === 0, 'heap must start aligned');
     var TOTAL_STACK = 5242880;
@@ -8934,7 +8934,26 @@ const fromGraphToSurfaceMesh = (graph) => {
 
 const fromSurfaceMeshToNefPolyhedron = (surfaceMesh) => {
   const c = getCgal();
+  if (!surfaceMesh.is_valid(false)) {
+    surfaceMesh.is_valid(true);
+    throw Error('not valid');
+  }
+  if (!c.Surface_mesh__is_closed(surfaceMesh)) {
+    throw Error('not closed');
+  }
+  if (!c.Surface_mesh__is_valid_halfedge_graph(surfaceMesh)) {
+    throw Error('not valid_halfedge_graph');
+  }
+  if (!c.Surface_mesh__is_valid_face_graph(surfaceMesh)) {
+    throw Error('not valid_face_graph');
+  }
+  if (!c.Surface_mesh__is_valid_polygon_mesh(surfaceMesh)) {
+    throw Error('not valid_polygon_mesh');
+  }
   const nefPolyhedron = c.FromSurfaceMeshToNefPolyhedron(surfaceMesh);
+  if (!nefPolyhedron.is_valid(false, 1)) {
+    throw Error('not valid');
+  }
   return nefPolyhedron;
 };
 

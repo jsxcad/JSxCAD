@@ -51,22 +51,12 @@ export const deleteLoop = (graph, loop) =>
     edgeNode.loop = -1;
   });
 
-export const eachEdge = (graph, start, op) => {
-  if (start === -1) {
-    return;
-  }
-  const limit = graph.edges.length;
-  let count = 0;
-  let edge = start;
-  do {
-    const edgeNode = graph.edges[edge];
-    op(edge, edgeNode);
-    edge = edgeNode.next;
-    if (count++ > limit) {
-      throw Error(`Infinite edge loop`);
+export const eachEdge = (graph, op) =>
+  graph.edges.forEach((node, nth) => {
+    if (node && node.isRemoved !== true) {
+      op(nth, node);
     }
-  } while (edge !== start);
-};
+  });
 
 export const eachFace = (graph, op) =>
   graph.faces.forEach((faceNode, face) => op(face, faceNode));
@@ -86,8 +76,23 @@ export const eachFaceHole = (graph, face, op) => {
   }
 };
 
-export const eachLoopEdge = (graph, loop, op) =>
-  eachEdge(graph, getLoopNode(graph, loop).edge, op);
+export const eachLoopEdge = (graph, loop, op) => {
+  const start = getLoopNode(graph, loop).edge;
+  if (start === -1) {
+    return;
+  }
+  const limit = graph.edges.length;
+  let count = 0;
+  let edge = start;
+  do {
+    const edgeNode = graph.edges[edge];
+    op(edge, edgeNode);
+    edge = edgeNode.next;
+    if (count++ > limit) {
+      throw Error(`Infinite edge loop`);
+    }
+  } while (edge !== start);
+};
 
 export const getEdgeNode = (graph, edge) => graph.edges[edge];
 export const getFaceNode = (graph, face) => graph.faces[face];
