@@ -3,6 +3,46 @@ import PropTypes from 'prop-types';
 import React from 'react';
 import { toDomElement } from '@jsxcad/ui-notebook';
 
+export class NoteUi extends React.PureComponent {
+  static get propTypes() {
+    return {
+      hash: PropTypes.string,
+      data: PropTypes.array,
+    };
+  }
+
+  constructor(props) {
+    super(props);
+    this.state = {};
+  }
+
+  render() {
+    const { data, hash } = this.props;
+    let ref;
+    const result = (
+      <div
+        ref={(value) => {
+          ref = value;
+        }}
+      />
+    );
+    setTimeout(async () => {
+      if (ref) {
+        while (ref.firstChild) {
+          ref.removeChild(ref.lastChild);
+        }
+        for (const note of data) {
+          if (note.hash === hash) {
+            console.log(`QQ/note.hash ${note.hash} === ${hash}`);
+            ref.appendChild(await toDomElement([note]));
+          }
+        }
+      }
+    }, 0);
+    return result;
+  }
+}
+
 export class NotebookUi extends React.PureComponent {
   static get propTypes() {
     return {
@@ -68,14 +108,19 @@ export class NotebookUi extends React.PureComponent {
           ref = value;
         }}
         style={{ height: '100%', overflow: 'scroll', marginLeft: '20px' }}
-      />
+      >
+        {data &&
+          data
+            .filter((note) => note.hash)
+            .map((note) => (
+              <NoteUi data={data} key={note.hash} hash={note.hash} />
+            ))}
+      </div>
     );
     setTimeout(async () => {
-      while (ref.firstChild) {
-        ref.removeChild(ref.lastChild);
+      if (ref) {
+        Mermaid.init(undefined, '.mermaid');
       }
-      ref.appendChild(await toDomElement(data));
-      Mermaid.init(undefined, '.mermaid');
     }, 0);
     return result;
   }

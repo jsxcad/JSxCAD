@@ -35,7 +35,8 @@
     "@jsxcad/math-mat4": "^0.0.79",
     "@jsxcad/math-plane": "^0.0.79",
     "@jsxcad/math-vec3": "^0.0.79",
-    "@jsxcad/sys": "^0.0.79"
+    "@jsxcad/sys": "^0.0.79",
+    "hash-sum": "^2.0.0"
   },
   "devDependencies": {
     "ava": "^3.9.0",

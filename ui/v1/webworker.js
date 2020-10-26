@@ -2,6 +2,7 @@
 
 import * as api from '@jsxcad/api-v1';
 import * as sys from '@jsxcad/sys';
+import hashSum from 'hash-sum';
 
 const resolveNotebook = async (path) => {
   await sys.resolvePending();
@@ -20,9 +21,9 @@ const resolveNotebook = async (path) => {
 const say = (message) => postMessage(message);
 
 const reportError = (error) => {
-  sys.emit({
-    log: { text: error.stack ? error.stack : error, level: 'serious' },
-  });
+  const log = { text: error.stack ? error.stack : error, level: 'serious' };
+  const hash = hashSum(log);
+  sys.emit({ log, hash });
   sys.log({
     op: 'text',
     text: error.stack ? error.stack : error,
@@ -35,9 +36,20 @@ sys.setPendingErrorHandler(reportError);
 const agent = async ({ ask, question }) => {
   await sys.log({ op: 'evaluate', status: 'run' });
   await sys.log({ op: 'text', text: 'Evaluation Started' });
+  let onEmitHandler;
   if (question.evaluate) {
     sys.setupFilesystem({ fileBase: question.workspace });
     sys.clearEmitted();
+    let nthNote = 0;
+    onEmitHandler = sys.addOnEmitHandler(async (note) => {
+      if (note.download) {
+        for (const entry of note.download.entries) {
+          entry.data = await entry.data;
+        }
+      }
+      ask({ note, nthNote });
+      nthNote += 1;
+    });
     try {
       const ecmascript = question.evaluate;
       console.log({ op: 'text', text: `QQ/script: ${question.evaluate}` });
@@ -66,6 +78,8 @@ const agent = async ({ ask, question }) => {
     } finally {
       await resolveNotebook(question.path);
       await sys.resolvePending();
+      ask({ notebookLength: nthNote });
+      sys.removeOnEmitHandler(onEmitHandler);
     }
     sys.setupFilesystem();
     return sys.getEmitted();

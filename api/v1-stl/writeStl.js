@@ -8,6 +8,7 @@ import {
 import { Shape } from '@jsxcad/api-v1-shape';
 import { toStl as convertToStl } from '@jsxcad/convert-stl';
 import { ensurePages } from '@jsxcad/api-v1-layout';
+import hashSum from 'hash-sum';
 
 export const prepareStl = (shape, name, options = {}) => {
   // CHECK: Should this be limited to Page plans?
@@ -27,7 +28,9 @@ export const prepareStl = (shape, name, options = {}) => {
 
 const downloadStlMethod = function (...args) {
   const entries = prepareStl(this, ...args);
-  emit({ download: { entries } });
+  const download = { entries };
+  const hash = hashSum(download);
+  emit({ download, hash });
   return this;
 };
 Shape.prototype.downloadStl = downloadStlMethod;
