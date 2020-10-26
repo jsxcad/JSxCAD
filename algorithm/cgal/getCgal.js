@@ -1,17 +1,28 @@
-import { emit, onBoot } from '@jsxcad/sys';
+import { emit, log, onBoot } from '@jsxcad/sys';
 
 import Cgal from './cgal.cjs';
+import hashSum from 'hash-sum';
 
 let cgal;
 
 export const initCgal = async () => {
   if (cgal === undefined) {
     cgal = await Cgal({
-      print(...text) {
-        emit({ log: { text: text.join(' '), level: 'serious' } });
+      print(...texts) {
+        const text = texts.join(' ');
+        const level = 'serious';
+        const logEntry = { text, level };
+        const hash = hashSum(log);
+        emit({ log: logEntry, hash });
+        log({ op: 'text', text, level });
       },
-      printErr(...text) {
-        emit({ log: { text: text.join(' '), level: 'serious' } });
+      printErr(...texts) {
+        const text = texts.join(' ');
+        const level = 'serious';
+        const logEntry = { text, level };
+        const hash = hashSum(log);
+        emit({ log: logEntry, hash });
+        log({ op: 'text', text, level });
       },
       locateFile(path) {
         if (path === 'cgal.wasm') {

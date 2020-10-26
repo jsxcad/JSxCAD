@@ -10,7 +10,6 @@ import {
   deleteFile,
   emit,
   getCurrentPath,
-  getEmitted,
   listFiles,
   listFilesystems,
   log,
@@ -163,6 +162,28 @@ class Ui extends React.PureComponent {
       } else if (question.touchFile) {
         const { path, workspace } = question.touchFile;
         return touch(path, { workspace });
+      } else if (question.note) {
+        const { note, nthNote } = question;
+        const { notebookData, notebookRef } = this.state;
+        // const updatedNotebook = [...notebookData];
+        const entry = notebookData[nthNote];
+        if (!entry || entry.hash !== note.hash) {
+          notebookData[nthNote] = note;
+          this.setState({ notebookData: notebookData });
+          if (notebookRef) {
+            notebookRef.forceUpdate();
+          }
+        }
+      } else if (question.notebookLength) {
+        const { notebookLength } = question;
+        const { notebookData, notebookRef } = this.state;
+        if (notebookData.length !== notebookLength) {
+          notebookData.length = notebookLength;
+          this.setState({ notebookData: notebookData });
+          if (notebookRef) {
+            notebookRef.forceUpdate();
+          }
+        }
       }
     };
 
@@ -172,7 +193,8 @@ class Ui extends React.PureComponent {
       workerType: 'module',
     };
 
-    const ask = async (question) => askService(serviceSpec, question);
+    const ask = async (question, context) =>
+      askService(serviceSpec, question, context);
 
     this.setState({
       ask,
@@ -328,7 +350,7 @@ class Ui extends React.PureComponent {
     const data = await read(file);
     const jsEditorData =
       typeof data === 'string' ? data : new TextDecoder('utf8').decode(data);
-    const notebookData = await read(`notebook/${path}`);
+    const notebookData = []; // await read(`notebook/${path}`);
     this.setState({ file, path, jsEditorData, notebookData });
 
     // Automatically run the notebook on load. The user can hit Stop.
@@ -647,8 +669,6 @@ class Ui extends React.PureComponent {
       // We don't know how to run these things, so just save and move on.
       return;
     }
-    let notebook;
-    let notebookData;
     try {
       this.setState({ running: true });
       await terminateActiveServices();
@@ -683,31 +703,13 @@ class Ui extends React.PureComponent {
           emit({ md: `'''\n${program}\n'''\n` });
         }
       }
-      notebook = await ask({ evaluate: ecmascript, workspace, path: file });
+      await ask({ evaluate: ecmascript, workspace, path: file });
       await resolvePending();
     } catch (error) {
       // Include any high level notebook errors in the output.
       emit({ log: { text: error.stack, level: 'serious' } });
-    }
-    // All reportable errors are included in the notebook at this point.
-    try {
-      const writeNotebook = async (path, notebook) => {
-        // Extend the notebook.
-        notebook.push(...getEmitted());
-        // Resolve any promises.
-        for (const note of notebook) {
-          if (note.download) {
-            for (const entry of note.download.entries) {
-              entry.data = await entry.data;
-            }
-          }
-        }
-        await write(`notebook/${path}`, notebook);
-        return notebook;
-      };
-      notebookData = await writeNotebook(path, notebook);
     } finally {
-      this.setState({ running: false, notebookData });
+      this.setState({ running: false });
     }
   }
 
@@ -903,6 +905,7 @@ class Ui extends React.PureComponent {
                     <Pane key="first" className="pane">
                       <NotebookUi
                         key={`notebook/${file}`}
+                        ref={(notebookRef) => this.setState({ notebookRef })}
                         sha={sha}
                         onRun={this.doRun}
                         data={notebookData}
