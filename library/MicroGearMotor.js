@@ -3,8 +3,8 @@ const FlatShaft = (
   length = 1,
   { flatLength = 0.1, flatOffset = 0.1, play = 0.0 }
 ) =>
-  Cylinder.ofDiameter(diameter + play, length + play * 2).cut(
-    Cube(diameter + play * 2, diameter + play * 2, flatLength).move(
+  Rod((diameter + play) / 2, length + play * 2).cut(
+    Box(diameter + play * 2, diameter + play * 2, flatLength).move(
       diameter - 0.5,
       0,
       (length - flatLength) / -2 + flatOffset
@@ -12,14 +12,14 @@ const FlatShaft = (
   );
 
 const Motor = ({ play = 0.0, motorWidth = 12 }) =>
-  Cylinder.ofDiameter(12 + play, 15 + play).clip(
-    Cube(10 + play * 2, motorWidth + play * 2, 15)
+  Rod((12 + play) / 2, 15 + play).clip(
+    Box(10 + play * 2, motorWidth + play * 2, 15)
   );
 
-const Terminal = () => Cube(5, 12, 2);
+const Terminal = () => Box(5, 12, 2);
 
 const Gearbox = ({ play = 0, motorWidth = 12 }) =>
-  Cube(10 + play * 2, motorWidth + play * 2, 10).moveZ((15 + 10) / 2);
+  Box(10 + play * 2, motorWidth + play * 2, 10).moveZ((15 + 10) / 2);
 
 export const MicroGearMotor = ({
   play = 0.2,
@@ -39,3 +39,5 @@ export const MicroGearMotor = ({
     .with(Terminal().moveZ((15 + 2) / -2));
 
 export const main = () => MicroGearMotor();
+
+MicroGearMotor().fix().view();
