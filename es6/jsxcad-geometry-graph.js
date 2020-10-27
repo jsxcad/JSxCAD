@@ -1,4 +1,4 @@
-import { fromSurfaceMeshToGraph, fromPointsToAlphaShapeAsSurfaceMesh, fromPointsToConvexHullAsSurfaceMesh, fromPolygonsToSurfaceMesh, fromGraphToSurfaceMesh, extrudeSurfaceMesh, fromNefPolyhedronToSurfaceMesh, fromSurfaceMeshToNefPolyhedron, fromNefPolyhedronFacetsToGraph, sectionOfNefPolyhedron, differenceOfNefPolyhedrons, extrudeToPlaneOfSurfaceMesh, fromPointsToSurfaceMesh, intersectionOfNefPolyhedrons, insetOfPolygon, outlineOfSurfaceMesh, smoothSurfaceMesh, fromSurfaceMeshToTriangles, unionOfNefPolyhedrons } from './jsxcad-algorithm-cgal.js';
+import { fromSurfaceMeshToGraph, fromPointsToAlphaShapeAsSurfaceMesh, fromPointsToConvexHullAsSurfaceMesh, fromPolygonsToSurfaceMesh, fromGraphToSurfaceMesh, extrudeSurfaceMesh, fromNefPolyhedronToSurfaceMesh, fromSurfaceMeshToNefPolyhedron, fromNefPolyhedronFacetsToGraph, sectionOfNefPolyhedron, differenceOfNefPolyhedrons, extrudeToPlaneOfSurfaceMesh, fromPointsToSurfaceMesh, fromSurfaceMeshToTriangles, intersectionOfNefPolyhedrons, insetOfPolygon, outlineOfSurfaceMesh, smoothSurfaceMesh, unionOfNefPolyhedrons } from './jsxcad-algorithm-cgal.js';
 import { dot, scale, min, max, transform as transform$1 } from './jsxcad-math-vec3.js';
 import { deduplicate as deduplicate$1 } from './jsxcad-geometry-path.js';
 import { toPlane, flip } from './jsxcad-math-poly3.js';
@@ -1103,6 +1103,18 @@ const fromSolid = (solid) => {
   return fromPolygons(polygons);
 };
 
+const toTriangles = (graph) => {
+  if (graph.isOutline) {
+    // Outlines aren't compatible with SurfaceMesh.
+    return toSurface(graph);
+  } else {
+    return fromSurfaceMeshToTriangles(toSurfaceMesh(graph));
+  }
+};
+
+// Convert an outline graph to a possibly closed surface.
+const interior = (graph) => fromPolygons(toTriangles(graph));
+
 const far$1 = 10000;
 
 const intersection = (a, b) => {
@@ -1163,8 +1175,14 @@ const offset = (outlineGraph, amount) => {
   return offsetGraph;
 };
 
-const outline = (graph) =>
-  fromSurfaceMesh(outlineOfSurfaceMesh(toSurfaceMesh(graph)));
+const outline = (graph) => {
+  const outlineGraph = fromSurfaceMesh(
+    outlineOfSurfaceMesh(toSurfaceMesh(graph))
+  );
+  outlineGraph.isOutline = true;
+  outlineGraph.isWireframe = true;
+  return outlineGraph;
+};
 
 const smooth = (graph) =>
   fromSurfaceMesh(smoothSurfaceMesh(toSurfaceMesh(graph)));
@@ -1197,9 +1215,6 @@ const toSolid = (graph) => {
   return solid;
 };
 
-const toTriangles = (graph) =>
-  fromSurfaceMeshToTriangles(toSurfaceMesh(graph));
-
 // FIX: Precision loss.
 const transform = (matrix, graph) => {
   const transformedPoints = [];
@@ -1231,7 +1246,7 @@ const union = (a, b) => {
     return section(principlePlane(a), union(extrude(a, far$2, 0), b));
   }
   if (b.isClosed) {
-    fromNefPolyhedron(
+    return fromNefPolyhedron(
       unionOfNefPolyhedrons(toNefPolyhedron(b), toNefPolyhedron(a))
     );
   } else {
@@ -1240,4 +1255,4 @@ const union = (a, b) => {
   }
 };
 
-export { alphaShape, convexHull, difference, eachPoint, extrude, extrudeToPlane, fromPoints, fromPolygons, fromSolid, fromSurface, intersection, measureBoundingBox, offset, outline, section, smooth, toPaths, toSolid, toSurface, toTriangles, transform, union };
+export { alphaShape, convexHull, difference, eachPoint, extrude, extrudeToPlane, fromPoints, fromPolygons, fromSolid, fromSurface, interior, intersection, measureBoundingBox, offset, outline, section, smooth, toPaths, toSolid, toSurface, toTriangles, transform, union };

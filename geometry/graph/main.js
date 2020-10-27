@@ -8,6 +8,7 @@ export { fromPoints } from './fromPoints.js';
 export { fromPolygons } from './fromPolygons.js';
 export { fromSolid } from './fromSolid.js';
 export { fromSurface } from './fromSurface.js';
+export { interior } from './interior.js';
 export { intersection } from './intersection.js';
 export { measureBoundingBox } from './measureBoundingBox.js';
 export { offset } from './offset.js';

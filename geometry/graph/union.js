@@ -12,7 +12,7 @@ export const union = (a, b) => {
     return section(principlePlane(a), union(extrude(a, far, 0), b));
   }
   if (b.isClosed) {
-    fromNefPolyhedron(
+    return fromNefPolyhedron(
       unionOfNefPolyhedrons(toNefPolyhedron(b), toNefPolyhedron(a))
     );
   } else {

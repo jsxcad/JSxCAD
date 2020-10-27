@@ -1,55 +1,13 @@
-import { Assembly } from '@jsxcad/api-v1-shapes';
 import { Shape } from '@jsxcad/api-v1-shape';
+import { interior as interiorGeometry } from '@jsxcad/geometry-tagged';
 
-import { getPaths } from '@jsxcad/geometry-tagged';
-import { isClosed } from '@jsxcad/geometry-path';
+export const interior = (shape) =>
+  Shape.fromGeometry(interiorGeometry(shape.toGeometry()));
 
-/**
- *
- * # Interior
- *
- * Generates a surface from the interior of a simple closed path.
- *
- * ::: illustration
- * ```
- * Circle(10)
- * ```
- * :::
- * ::: illustration
- * ```
- * Circle(10)
- *   .outline()
- * ```
- * :::
- * ::: illustration
- * ```
- * Circle(10)
- *   .outline()
- *   .interior()
- * ```
- * :::
- *
- **/
-
-export const interior = (shape) => {
-  const surfaces = [];
-  for (const { paths } of getPaths(shape.toKeptGeometry())) {
-    // FIX: Check paths for coplanarity.
-    surfaces.push(
-      Shape.fromPathsToSurface(
-        paths.filter(isClosed).filter((path) => path.length >= 3)
-      )
-    );
-  }
-  return Assembly(...surfaces);
+const interiorMethod = function () {
+  return interior(this);
 };
 
-const interiorMethod = function (...args) {
-  return interior(this, ...args);
-};
 Shape.prototype.interior = interiorMethod;
-
-interior.signature = 'interior(shape:Shape) -> Shape';
-interiorMethod.signature = 'Shape -> interior() -> Shape';
 
 export default interior;

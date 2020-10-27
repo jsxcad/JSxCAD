@@ -1,10 +1,10 @@
 import Shape$1, { Shape, getPegCoords, orient } from './jsxcad-api-v1-shape.js';
 import { alphaShape, convexHull, fromPoints } from './jsxcad-geometry-graph.js';
-import { taggedGraph, taggedSurface, taggedSolid, getPaths, extrude as extrude$1, extrudeToPlane as extrudeToPlane$1, outline as outline$1, section as section$1, taggedGroup, taggedLayers, getSolids, union, taggedZ0Surface, getSurfaces, getZ0Surfaces, taggedPaths, getPlans, measureBoundingBox, taggedPoints, measureHeights } from './jsxcad-geometry-tagged.js';
+import { taggedGraph, taggedSurface, taggedSolid, getPaths, extrude as extrude$1, extrudeToPlane as extrudeToPlane$1, outline as outline$1, interior as interior$1, section as section$1, taggedGroup, taggedLayers, getSolids, union, taggedZ0Surface, getSurfaces, getZ0Surfaces, taggedPaths, getPlans, measureBoundingBox, taggedPoints, measureHeights } from './jsxcad-geometry-tagged.js';
 import { buildConvexSurfaceHull, buildConvexHull, loop, buildConvexMinkowskiSum, extrude as extrude$2 } from './jsxcad-algorithm-shape.js';
 import { Assembly, Group } from './jsxcad-api-v1-shapes.js';
 import { Y as Y$1, Z as Z$2 } from './jsxcad-api-v1-connector.js';
-import { isClosed, isCounterClockwise, flip, transform as transform$2, getEdges } from './jsxcad-geometry-path.js';
+import { isCounterClockwise, flip, transform as transform$2, getEdges } from './jsxcad-geometry-path.js';
 import { toPlane } from './jsxcad-math-poly3.js';
 import { transform as transform$1, alignVertices, fromPolygons } from './jsxcad-geometry-solid.js';
 import { cutOpen, section as section$2, fromSolid, containsPoint as containsPoint$1 } from './jsxcad-geometry-bsp.js';
@@ -231,53 +231,14 @@ const withInlineMethod = function (options) {
 Shape$1.prototype.inline = inlineMethod;
 Shape$1.prototype.withInline = withInlineMethod;
 
-/**
- *
- * # Interior
- *
- * Generates a surface from the interior of a simple closed path.
- *
- * ::: illustration
- * ```
- * Circle(10)
- * ```
- * :::
- * ::: illustration
- * ```
- * Circle(10)
- *   .outline()
- * ```
- * :::
- * ::: illustration
- * ```
- * Circle(10)
- *   .outline()
- *   .interior()
- * ```
- * :::
- *
- **/
+const interior = (shape) =>
+  Shape.fromGeometry(interior$1(shape.toGeometry()));
 
-const interior = (shape) => {
-  const surfaces = [];
-  for (const { paths } of getPaths(shape.toKeptGeometry())) {
-    // FIX: Check paths for coplanarity.
-    surfaces.push(
-      Shape.fromPathsToSurface(
-        paths.filter(isClosed).filter((path) => path.length >= 3)
-      )
-    );
-  }
-  return Assembly(...surfaces);
-};
-
-const interiorMethod = function (...args) {
+const interiorMethod = function () {
   return interior(this);
 };
-Shape.prototype.interior = interiorMethod;
 
-interior.signature = 'interior(shape:Shape) -> Shape';
-interiorMethod.signature = 'Shape -> interior() -> Shape';
+Shape.prototype.interior = interiorMethod;
 
 /**
  *
