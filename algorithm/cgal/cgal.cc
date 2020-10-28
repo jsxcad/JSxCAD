@@ -1,4 +1,4 @@
-#define SURFACE_MESH_BOOLEANS
+// #define SURFACE_MESH_BOOLEANS
 
 #include <emscripten/bind.h>
 
@@ -18,7 +18,9 @@
 #include <CGAL/Alpha_shape_cell_base_3.h>
 #include <CGAL/Alpha_shape_vertex_base_3.h>
 #include <CGAL/Delaunay_triangulation_3.h>
+#ifdef SURFACE_MESH_BOOLEANS
 #include <CGAL/Polygon_mesh_processing/corefinement.h>
+#endif
 #include <CGAL/Polygon_mesh_processing/detect_features.h>
 #include <CGAL/Polygon_mesh_processing/extrude.h>
 #include <CGAL/Polygon_mesh_processing/orientation.h>
@@ -386,8 +388,8 @@ Surface_mesh* ExtrusionOfSurfaceMesh(Surface_mesh* mesh, double high_x, double h
   Surface_mesh* extruded_mesh = new Surface_mesh();
 
   typedef typename boost::property_map<Surface_mesh, CGAL::vertex_point_t>::type VPMap;
-  Project<VPMap> bottom(get(CGAL::vertex_point, *extruded_mesh), Vector(high_x, high_y, high_z));
-  Project<VPMap> top(get(CGAL::vertex_point, *extruded_mesh), Vector(low_x, low_y, low_z));
+  Project<VPMap> top(get(CGAL::vertex_point, *extruded_mesh), Vector(high_x, high_y, high_z));
+  Project<VPMap> bottom(get(CGAL::vertex_point, *extruded_mesh), Vector(low_x, low_y, low_z));
 
   CGAL::Polygon_mesh_processing::extrude_mesh(*mesh, *extruded_mesh, bottom, top);
 
@@ -425,8 +427,8 @@ Surface_mesh* ExtrusionToPlaneOfSurfaceMesh(
   Surface_mesh* extruded_mesh = new Surface_mesh();
 
   typedef typename boost::property_map<Surface_mesh, CGAL::vertex_point_t>::type VPMap;
-  ProjectToPlane<VPMap> bottom(get(CGAL::vertex_point, *extruded_mesh), Vector(high_x, high_y, high_z), Plane(high_plane_x, high_plane_y, high_plane_z, high_plane_w));
-  ProjectToPlane<VPMap> top(get(CGAL::vertex_point, *extruded_mesh), Vector(low_x, low_y, low_z), Plane(low_plane_x, low_plane_y, low_plane_z, low_plane_w));
+  ProjectToPlane<VPMap> top(get(CGAL::vertex_point, *extruded_mesh), Vector(high_x, high_y, high_z), Plane(high_plane_x, high_plane_y, high_plane_z, high_plane_w));
+  ProjectToPlane<VPMap> bottom(get(CGAL::vertex_point, *extruded_mesh), Vector(low_x, low_y, low_z), Plane(low_plane_x, low_plane_y, low_plane_z, low_plane_w));
 
   CGAL::Polygon_mesh_processing::extrude_mesh(*mesh, *extruded_mesh, bottom, top);
 

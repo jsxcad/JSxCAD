@@ -23,7 +23,6 @@ test('Extrude/Triangle', (t) => {
   const extrusion = extrudeSurfaceMesh(surfaceMesh, 0, 0, 1, 0, 0, 0);
   const graph = fromSurfaceMeshToGraph(extrusion);
   t.deepEqual(JSON.parse(JSON.stringify(graph)), {
-    isClosed: true,
     edges: [
       { point: 0, next: 4, twin: 1, loop: 0 },
       { point: 1, next: 19, twin: 0, loop: 3 },
@@ -51,14 +50,14 @@ test('Extrude/Triangle', (t) => {
       { point: 5, next: 17, twin: 22, loop: 7 },
     ],
     faces: [
-      { loop: 0, plane: [0, 0, -1, -1.5] },
-      { loop: 1, plane: [0, 0, 1, 0.5] },
-      { loop: 2, plane: [1, 0, 0, -0.5] },
-      { loop: 3, plane: [1, 0, 0, -0.5] },
-      { loop: 4, plane: [0, 1, 0, -0.5] },
-      { loop: 5, plane: [0, 1, 0, -0.5] },
-      { loop: 6, plane: [-0.7071067811865475, -0.7071067811865475, 0, 0] },
-      { loop: 7, plane: [-0.7071067811865475, -0.7071067811865475, 0, 0] },
+      { loop: 0, plane: [0, 0, -1, -0.5] },
+      { loop: 1, plane: [0, 0, 1, 1.5] },
+      { loop: 2, plane: [-1, 0, 0, 0.5] },
+      { loop: 3, plane: [-1, 0, 0, 0.5] },
+      { loop: 4, plane: [0, -1, 0, 0.5] },
+      { loop: 5, plane: [0, -1, 0, 0.5] },
+      { loop: 6, plane: [0.7071067811865475, 0.7071067811865475, 0, 0] },
+      { loop: 7, plane: [0.7071067811865475, 0.7071067811865475, 0, 0] },
     ],
     loops: [
       { edge: 2, face: 0 },
@@ -71,12 +70,13 @@ test('Extrude/Triangle', (t) => {
       { edge: 23, face: 7 },
     ],
     points: [
-      [-0.5, 0.5, 1.5],
-      [-0.5, -0.5, 1.5],
-      [0.5, -0.5, 1.5],
       [-0.5, 0.5, 0.5],
       [-0.5, -0.5, 0.5],
       [0.5, -0.5, 0.5],
+      [-0.5, 0.5, 1.5],
+      [-0.5, -0.5, 1.5],
+      [0.5, -0.5, 1.5],
     ],
+    isClosed: true,
   });
 });
