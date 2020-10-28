@@ -1,4 +1,5 @@
 import {
+  toPaths as toPathsFromGraph,
   toSolid as toSolidFromGraph,
   toSurface as toSurfaceFromGraph,
 } from '@jsxcad/geometry-graph';
@@ -130,7 +131,14 @@ export const toThreejsGeometry = (geometry, supertags) => {
         isThreejsGeometry: true,
       };
     case 'graph':
-      if (geometry.graph.volumes) {
+      if (geometry.graph.isWireframe) {
+        return {
+          type: 'paths',
+          threejsPaths: toPathsFromGraph(geometry.graph),
+          tags,
+          isThreejsGeometry: true,
+        };
+      } else if (geometry.graph.isClosed) {
         return {
           type: 'solid',
           threejsSolid: solidToThreejsSolid(toSolidFromGraph(geometry.graph)),

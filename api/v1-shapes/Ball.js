@@ -23,7 +23,7 @@ export const ofPlan = (plan, { resolution = 16 } = {}) => {
       const width = Math.abs(plan.length);
       const length = Math.abs(plan.width);
       const height = Math.abs(plan.height);
-      return unitSphere(1, { resolution })
+      return unitSphere(resolution)
         .scale(width / 2, length / 2, height / 2)
         .move(...plan.center);
     }

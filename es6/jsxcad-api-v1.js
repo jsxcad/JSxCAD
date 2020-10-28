@@ -368,12 +368,13 @@ const buildImportModule = (api) => async (name, { src } = {}) => {
       sources.push(src);
     }
     sources.push(name);
-    script = await read(path, { sources, decode: 'utf8' });
+    script = await read(path, { sources });
   }
   if (script === undefined) {
     throw Error(`Cannot import module ${name}`);
   }
-  const ecmascript = await toEcmascript(script);
+  const scriptText = new TextDecoder('utf8').decode(script);
+  const ecmascript = await toEcmascript(scriptText);
   const builder = new Function(
     `{ ${Object.keys(api).join(', ')} }`,
     `return async () => { ${ecmascript} };`

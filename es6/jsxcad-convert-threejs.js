@@ -1,4 +1,4 @@
-import { toSolid, toSurface } from './jsxcad-geometry-graph.js';
+import { toPaths, toSolid, toSurface } from './jsxcad-geometry-graph.js';
 import { toPlane } from './jsxcad-math-poly3.js';
 import { toTriangles } from './jsxcad-geometry-polygons.js';
 import { toDisjointGeometry } from './jsxcad-geometry-tagged.js';
@@ -127,7 +127,14 @@ const toThreejsGeometry = (geometry, supertags) => {
         isThreejsGeometry: true,
       };
     case 'graph':
-      if (geometry.graph.volumes) {
+      if (geometry.graph.isWireframe) {
+        return {
+          type: 'paths',
+          threejsPaths: toPaths(geometry.graph),
+          tags,
+          isThreejsGeometry: true,
+        };
+      } else if (geometry.graph.isClosed) {
         return {
           type: 'solid',
           threejsSolid: solidToThreejsSolid(toSolid(geometry.graph)),

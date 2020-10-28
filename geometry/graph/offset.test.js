@@ -25,6 +25,8 @@ test('fromSolid', (t) => {
   const outlineGraph = outline(graph);
   t.deepEqual(JSON.parse(JSON.stringify(outlineGraph)), {
     isClosed: false,
+    isOutline: true,
+    isWireframe: true,
     edges: [
       { point: 1, next: 2, twin: 1, loop: 0 },
       null,
