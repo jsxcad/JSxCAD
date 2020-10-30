@@ -14,9 +14,13 @@
 #include <CGAL/Nef_polyhedron_3.h>
 
 #include <CGAL/Advancing_front_surface_reconstruction.h>
+#include <CGAL/Alpha_shape_2.h>
 #include <CGAL/Alpha_shape_3.h>
 #include <CGAL/Alpha_shape_cell_base_3.h>
+#include <CGAL/Alpha_shape_face_base_2.h>
+#include <CGAL/Alpha_shape_vertex_base_2.h>
 #include <CGAL/Alpha_shape_vertex_base_3.h>
+#include <CGAL/Delaunay_triangulation_2.h>
 #include <CGAL/Delaunay_triangulation_3.h>
 #ifdef SURFACE_MESH_BOOLEANS
 #include <CGAL/Polygon_mesh_processing/corefinement.h>
@@ -49,17 +53,20 @@ typedef CGAL::Simple_cartesian<CGAL::Gmpq> Kernel;
 // typedef CGAL::Exact_predicates_exact_constructions_kernel Kernel;
 
 typedef CGAL::Nef_polyhedron_3<Kernel, CGAL::SNC_indexed_items> Nef_polyhedron;
+typedef Kernel::FT FT;
 typedef Kernel::Line_3 Line;
 typedef Kernel::Plane_3 Plane;
 typedef Kernel::Point_3 Point;
+typedef Kernel::Point_2 Point_2;
 typedef Kernel::Vector_3 Vector;
 typedef std::vector<Point> Points;
+typedef std::vector<Point_2> Point_2s;
 typedef CGAL::Surface_mesh<Point> Surface_mesh;
 typedef Surface_mesh::Halfedge_index Halfedge_index;
 typedef Surface_mesh::Face_index Face_index;
 typedef Surface_mesh::Vertex_index Vertex_index;
 
-typedef std::array<Kernel::FT, 3> Triple;
+typedef std::array<FT, 3> Triple;
 typedef std::vector<Triple> Triples;
 
 typedef std::vector<std::size_t> Polygon;
@@ -278,6 +285,10 @@ void addPoint(Points* points, double x, double y, double z) {
   points->emplace_back(Point{ x, y, z });
 }
 
+void addPoint_2(Point_2s* points, double x, double y) {
+  points->emplace_back(Point_2{ x, y });
+}
+
 std::size_t Surface_mesh__halfedge_to_target(Surface_mesh* mesh, std::size_t halfedge_index) {
   return std::size_t(mesh->target(Halfedge_index(halfedge_index)));
 }
@@ -484,7 +495,7 @@ Surface_mesh* UnionOfSurfaceMeshes(Surface_mesh* a, Surface_mesh* b) {
 }
 #endif
 
-double FT__to_double(const Kernel::FT& ft) {
+double FT__to_double(const FT& ft) {
   return CGAL::to_double(ft);
 }
 
@@ -776,6 +787,34 @@ Surface_mesh* ComputeAlphaShapeAsSurfaceMesh(int component_limit, emscripten::va
   return mesh;
 }
 
+void ComputeAlphaShape2AsPolygonSegments(size_t component_limit, double alpha, bool regularized, emscripten::val fill, emscripten::val emit) {
+  typedef CGAL::Alpha_shape_vertex_base_2<Kernel>                    VertexBase;
+  typedef CGAL::Alpha_shape_face_base_2<Kernel>                      FaceBase;
+  typedef CGAL::Triangulation_data_structure_2<VertexBase, FaceBase> TriangulationData;
+  typedef CGAL::Delaunay_triangulation_2<Kernel, TriangulationData>  Triangulation_2;
+  typedef CGAL::Alpha_shape_2<Triangulation_2>                       Alpha_shape_2;
+  typedef Alpha_shape_2::Alpha_shape_edges_iterator                  Alpha_shape_edges_iterator;
+
+  Point_2s points;
+  Point_2s* points_ptr = &points;
+  fill(points_ptr);
+
+  Alpha_shape_2 alpha_shape(points.begin(), points.end(), FT(alpha), regularized ? Alpha_shape_2::REGULARIZED : Alpha_shape_2::GENERAL);
+
+  if (component_limit > 0) {
+    auto optimizer = alpha_shape.find_optimal_alpha(component_limit);
+    alpha_shape.set_alpha(*optimizer);
+  }
+
+  Alpha_shape_edges_iterator it;
+  for (it = alpha_shape.alpha_shape_edges_begin(); it != alpha_shape.alpha_shape_edges_end(); ++it) {
+    const auto& segment = alpha_shape.segment(*it);
+    const auto& s = segment.source();
+    const auto& t = segment.target();
+    emit(CGAL::to_double(s.x()), CGAL::to_double(s.y()), CGAL::to_double(t.x()), CGAL::to_double(t.y()));
+  }
+}
+
 Surface_mesh* OutlineOfSurfaceMesh(Surface_mesh* input) {
   const double kColinearityThreshold = 0.999999;
   Surface_mesh* mesh = new Surface_mesh(*input);
@@ -889,7 +928,7 @@ using emscripten::select_const;
 using emscripten::select_overload;
 
 EMSCRIPTEN_BINDINGS(module) {
-  emscripten::class_<Kernel::FT>("FT").constructor<>();
+  emscripten::class_<FT>("FT").constructor<>();
 
   emscripten::class_<Polygon_2>("Polygon_2").constructor<>();
   emscripten::class_<Polygon_with_holes_2>("Polygon_with_holes_2").constructor<>();
@@ -904,6 +943,13 @@ EMSCRIPTEN_BINDINGS(module) {
   emscripten::function("addPoint", &addPoint, emscripten::allow_raw_pointers());
 
   emscripten::class_<Points>("Points")
+    .constructor<>()
+    .function("push_back", select_overload<void(const Point&)>(&Points::push_back))
+    .function("size", select_overload<size_t()const>(&Points::size));
+
+  emscripten::function("addPoint_2", &addPoint_2, emscripten::allow_raw_pointers());
+
+  emscripten::class_<Point_2s>("Point_2s")
     .constructor<>()
     .function("push_back", select_overload<void(const Point&)>(&Points::push_back))
     .function("size", select_overload<size_t()const>(&Points::size));
@@ -1011,6 +1057,7 @@ EMSCRIPTEN_BINDINGS(module) {
   emscripten::function("FromSurfaceMeshToPolygonSoup", &FromSurfaceMeshToPolygonSoup, emscripten::allow_raw_pointers());
   emscripten::function("ComputeConvexHullAsSurfaceMesh", &ComputeConvexHullAsSurfaceMesh, emscripten::allow_raw_pointers());
   emscripten::function("ComputeAlphaShapeAsSurfaceMesh", &ComputeAlphaShapeAsSurfaceMesh, emscripten::allow_raw_pointers());
+  emscripten::function("ComputeAlphaShape2AsPolygonSegments", &ComputeAlphaShape2AsPolygonSegments, emscripten::allow_raw_pointers());
   emscripten::function("OutlineOfSurfaceMesh", &OutlineOfSurfaceMesh, emscripten::allow_raw_pointers());
   emscripten::function("InsetOfPolygon", &InsetOfPolygon, emscripten::allow_raw_pointers());
   emscripten::function("Surface_mesh__is_closed", &Surface_mesh__is_closed, emscripten::allow_raw_pointers());

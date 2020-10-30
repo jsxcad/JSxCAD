@@ -43,6 +43,7 @@ import PropTypes from 'prop-types';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import Spinner from 'react-bootstrap/Spinner';
+import { fromPointsToAlphaShape2AsPolygonSegments } from '@jsxcad/algorithm-cgal';
 import { getNotebookControlData } from '@jsxcad/ui-notebook';
 import marked from 'marked';
 import { toEcmascript } from '@jsxcad/compiler';
@@ -716,16 +717,18 @@ class Ui extends React.PureComponent {
   async doSave(data) {
     const { file, jsEditorData } = this.state;
     const getCleanData = (data) => {
-      try {
-        // Just make a best attempt
-        data = Prettier.format(jsEditorData, {
-          trailingComma: 'es5',
-          singleQuote: true,
-          parser: 'babel',
-          plugins: [PrettierParserBabel],
-        });
-      } catch (e) {
-        // Then give up.
+      if (file.endsWith('.js') || file.endsWith('.nb')) {
+        try {
+          // Just make a best attempt
+          data = Prettier.format(jsEditorData, {
+            trailingComma: 'es5',
+            singleQuote: true,
+            parser: 'babel',
+            plugins: [PrettierParserBabel],
+          });
+        } catch (e) {
+          // Then give up.
+        }
       }
       return data;
     };
@@ -938,6 +941,94 @@ class Ui extends React.PureComponent {
                       src={`data:image/svg+xml;base64,${btoa(jsEditorData)}`}
                       style={{ width: '100%', height: '100%' }}
                     />
+                  </Pane>
+                  <Pane key="second" className="pane">
+                    <JsEditorUi
+                      key={`editScript/${file}`}
+                      onRun={this.doRun}
+                      onSave={this.doSave}
+                      onChange={this.onChangeJsEditor}
+                      onClickLink={this.onClickEditorLink}
+                      data={jsEditorData}
+                      file={file}
+                      ask={ask}
+                      workspace={workspace}
+                    />
+                  </Pane>
+                </SplitPane>
+              </div>
+            );
+          } else if (file.endsWith('.cloud')) {
+            const resolution = 0.25;
+            let svg;
+            let points = [];
+            for (const line of jsEditorData.split('\n')) {
+              try {
+                const [x = 0, y = 0] = JSON.parse(line);
+                points.push([x, y]);
+              } catch (e) {
+                // Ignore.
+              }
+            }
+            const segments = fromPointsToAlphaShape2AsPolygonSegments(
+              points,
+              0,
+              10,
+              false
+            );
+            const onSvgClick = (e) => {
+              const p = svg.createSVGPoint();
+              p.x = e.clientX;
+              p.y = e.clientY;
+              var ctm = svg.getScreenCTM().inverse();
+              const q = p.matrixTransform(ctm);
+              const x = Math.round(q.x / resolution) * resolution;
+              const y = Math.round(q.y / resolution) * resolution;
+              this.setState({ jsEditorData: `${jsEditorData}\n[${x}, ${y}]` });
+            };
+            const onPointClick = (e, index) => {
+              e.stopPropagation();
+              const lines = jsEditorData.split('\n');
+              lines.splice(index, 1);
+              const updated = lines.join('\n');
+              this.setState({ jsEditorData: updated });
+            };
+            panes.push(
+              <div>
+                <SplitPane split="vertical" defaultSize={paneWidth}>
+                  <Pane key="first" className="pane">
+                    <svg
+                      ref={(ref) => {
+                        svg = ref;
+                      }}
+                      viewBox="0 0 100 100"
+                      xmlns="http://www.w3.org/2000/svg"
+                      style={{ margin: '5px' }}
+                      onClick={onSvgClick}
+                    >
+                      {segments.map(
+                        ([[startX, startY], [endX, endY]], index) => (
+                          <line
+                            key={`l${index}`}
+                            x1={startX}
+                            y1={startY}
+                            x2={endX}
+                            y2={endY}
+                            stroke="blue"
+                            strokeWidth={resolution}
+                          />
+                        )
+                      )}
+                      {points.map(([x, y], index) => (
+                        <circle
+                          key={`c${index}`}
+                          cx={x}
+                          cy={y}
+                          r={resolution}
+                          onClick={(e) => onPointClick(e, index)}
+                        />
+                      ))}
+                    </svg>
                   </Pane>
                   <Pane key="second" className="pane">
                     <JsEditorUi
