@@ -33,8 +33,12 @@ export class NoteUi extends React.PureComponent {
         }
         for (const note of data) {
           if (note.hash === hash) {
-            console.log(`QQ/note.hash ${note.hash} === ${hash}`);
-            ref.appendChild(await toDomElement([note]));
+            const element = await toDomElement([note]);
+            if (note.view && note.view.inline) {
+              ref.style.width = `${note.view.inline}%`;
+              ref.style.display = 'inline-block';
+            }
+            ref.appendChild(element);
           }
         }
       }

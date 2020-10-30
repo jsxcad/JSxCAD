@@ -9,6 +9,7 @@ export { fromNefPolyhedronToSurfaceMesh } from './fromNefPolyhedronToSurfaceMesh
 export { fromNefPolyhedronToPolygons } from './fromNefPolyhedronToPolygons.js';
 export { fromNefPolyhedronToTriangles } from './fromNefPolyhedronToTriangles.js';
 export { fromPointsToAlphaShapeAsSurfaceMesh } from './fromPointsToAlphaShapeAsSurfaceMesh.js';
+export { fromPointsToAlphaShape2AsPolygonSegments } from './fromPointsToAlphaShape2AsPolygonSegments.js';
 export { fromPointsToConvexHullAsSurfaceMesh } from './fromPointsToConvexHullAsSurfaceMesh.js';
 export { fromPointsToSurfaceMesh } from './fromPointsToSurfaceMesh.js';
 export { fromPolygonsToNefPolyhedron } from './fromPolygonsToNefPolyhedron.js';

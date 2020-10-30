@@ -90,7 +90,7 @@ const buildLayoutGeometry = ({
   margin,
 }) => {
   const itemNames = getItemNames(layer);
-  const labelScale = 0.0125 * 5;
+  const labelScale = 0.0125 * 10;
   const size = [pageWidth, pageLength];
   const r = (v) => Math.floor(v * 100) / 100;
   const title = `${r(pageWidth)} x ${r(pageLength)} : ${itemNames.join(', ')}`;

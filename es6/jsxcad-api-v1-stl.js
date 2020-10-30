@@ -98,6 +98,7 @@ const prepareStl = (shape, name, options = {}) => {
 const downloadStlMethod = function (...args) {
   const entries = prepareStl(this, ...args);
   const download = { entries };
+  // FIX: This is hashing data when it is a promise.
   const hash = hashSum(download);
   emit({ download, hash });
   return this;
