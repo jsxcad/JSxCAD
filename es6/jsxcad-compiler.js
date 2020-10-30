@@ -6630,10 +6630,12 @@ const toEcmascript = async (
       if (declarator.init.type === 'ArrowFunctionExpression') {
         // We can't cache functions.
         out.push(declaration);
+        entry.isNotCacheable = true;
         return;
       } else if (declarator.init.type === 'Literal') {
         // Not much point in caching literals.
         out.push(declaration);
+        entry.isNotCacheable = true;
         return;
       }
     }

@@ -746,7 +746,10 @@ class Ui extends React.PureComponent {
       const graph = [];
       for (const [id, { dependencies }] of topLevel.entries()) {
         for (const dependency of dependencies) {
-          graph.push(`${dependency}(${dependency}  .) --> ${id}(${id}  .)`);
+          const entry = topLevel.get(dependency);
+          if (entry && !entry.isNotCacheable) {
+            graph.push(`${dependency}(${dependency}  .) --> ${id}(${id}  .)`);
+          }
         }
       }
       if (graph.length > 0) {
