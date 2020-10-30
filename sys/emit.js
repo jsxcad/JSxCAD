@@ -7,9 +7,10 @@ export const clearEmitted = () => {
 const onEmitHandlers = new Set();
 
 export const emit = (value) => {
+  const index = emitted.length;
   emitted.push(value);
   for (const onEmitHandler of onEmitHandlers) {
-    onEmitHandler(value);
+    onEmitHandler(value, index);
   }
 };
 

@@ -40,15 +40,15 @@ const agent = async ({ ask, question }) => {
   if (question.evaluate) {
     sys.setupFilesystem({ fileBase: question.workspace });
     sys.clearEmitted();
-    let nthNote = 0;
-    onEmitHandler = sys.addOnEmitHandler(async (note) => {
+    let nthNote;
+    onEmitHandler = sys.addOnEmitHandler(async (note, index) => {
+      nthNote += 1;
       if (note.download) {
         for (const entry of note.download.entries) {
           entry.data = await entry.data;
         }
       }
-      ask({ note, nthNote });
-      nthNote += 1;
+      ask({ note, index });
     });
     try {
       const ecmascript = question.evaluate;
