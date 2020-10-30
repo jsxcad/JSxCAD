@@ -26,7 +26,10 @@ export const buildImportModule = (api) => async (name, { src } = {}) => {
   if (script === undefined) {
     throw Error(`Cannot import module ${name}`);
   }
-  const scriptText = new TextDecoder('utf8').decode(script);
+  const scriptText =
+    typeof script === 'string'
+      ? script
+      : new TextDecoder('utf8').decode(script);
   const ecmascript = await toEcmascript(scriptText);
   const builder = new Function(
     `{ ${Object.keys(api).join(', ')} }`,
