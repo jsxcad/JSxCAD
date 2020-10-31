@@ -364,7 +364,7 @@ const DYNAMIC_MODULES = new Map();
 const registerDynamicModule = (bare, path) =>
   DYNAMIC_MODULES.set(bare, path);
 
-const buildImportModule = (api) => async (name, { src } = {}) => {
+const buildImportModule = (api) => async (name /*, { src } = {} */) => {
   const internalModule = DYNAMIC_MODULES.get(name);
   if (internalModule !== undefined) {
     const module = await import(internalModule);
@@ -374,9 +374,11 @@ const buildImportModule = (api) => async (name, { src } = {}) => {
   if (script === undefined) {
     const path = `source/${name}`;
     const sources = [];
+    /*
     if (src) {
       sources.push(src);
     }
+*/
     sources.push(name);
     script = await read(path, { sources });
   }
@@ -387,7 +389,7 @@ const buildImportModule = (api) => async (name, { src } = {}) => {
     typeof script === 'string'
       ? script
       : new TextDecoder('utf8').decode(script);
-  const ecmascript = await toEcmascript(scriptText);
+  const ecmascript = await toEcmascript(scriptText, { path: name });
   const builder = new Function(
     `{ ${Object.keys(api).join(', ')} }`,
     `return async () => { ${ecmascript} };`

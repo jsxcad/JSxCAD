@@ -32,7 +32,7 @@ export const strip = (ast) => {
 
 export const toEcmascript = async (
   script,
-  { path, topLevel = new Map() } = {}
+  { path = '', topLevel = new Map() } = {}
 ) => {
   const parseOptions = {
     allowAwaitOutsideFunction: true,
@@ -78,6 +78,8 @@ export const toEcmascript = async (
     const definition = { code, dependencies, dependencyShas };
     const sha = hash(definition);
 
+    let uncomputedInput = false;
+
     const generateSubprogram = () => {
       const body = [];
       const seen = new Set();
@@ -91,6 +93,9 @@ export const toEcmascript = async (
           if (entry === undefined) {
             continue;
           }
+          if (!entry.isComputed) {
+            uncomputedInput = true;
+          }
           walk(entry.dependencies);
           body.push(entry.code);
         }
@@ -103,7 +108,16 @@ export const toEcmascript = async (
 
     const program = generateSubprogram();
 
-    const entry = { code, definition, dependencies, program, sha };
+    const isAllInputComputed = !uncomputedInput;
+
+    const entry = {
+      code,
+      definition,
+      dependencies,
+      program,
+      sha,
+      isAllInputComputed,
+    };
     topLevel.set(id, entry);
 
     if (doExport) {
@@ -114,28 +128,37 @@ export const toEcmascript = async (
       if (declarator.init.type === 'ArrowFunctionExpression') {
         // We can't cache functions.
         out.push(declaration);
+        entry.isNotCacheable = true;
         return;
       } else if (declarator.init.type === 'Literal') {
         // Not much point in caching literals.
         out.push(declaration);
+        entry.isNotCacheable = true;
         return;
       }
     }
     // Now that we have the sha, we can predict if it can be read from cache.
-    const meta = await read(`meta/def/${id}`);
+    const meta = await read(`meta/def/${path}/${id}`);
     if (meta && meta.sha === sha) {
       const readCode = strip(
-        parse(`await loadGeometry('data/def/${id}')`, parseOptions)
+        parse(`await loadGeometry('data/def/${path}/${id}')`, parseOptions)
       );
       const readExpression = readCode.body[0].expression;
       const init = readExpression;
-      out.push({ ...declaration, declarations: [{ ...declarator, init }] });
+      const cacheLoadCode = {
+        ...declaration,
+        declarations: [{ ...declarator, init }],
+      };
+      out.push(cacheLoadCode);
+      entry.code = cacheLoadCode;
+      entry.program = generate({ type: 'Program', body: [cacheLoadCode] });
+      entry.isComputed = true;
     } else {
       out.push({ ...declaration, declarations: [declarator] });
       // Only cache Shapes.
       out.push(
         parse(
-          `${id} instanceof Shape && await saveGeometry('data/def/${id}', ${id}) && await write('meta/def/${id}', { sha: '${sha}' });`,
+          `${id} instanceof Shape && await saveGeometry('data/def/${path}/${id}', ${id}) && await write('meta/def/${path}/${id}', { sha: '${sha}' });`,
           parseOptions
         )
       );

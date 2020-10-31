@@ -3687,9 +3687,10 @@ const clearEmitted = () => {
 const onEmitHandlers = new Set();
 
 const emit$1 = (value) => {
+  const index = emitted.length;
   emitted.push(value);
   for (const onEmitHandler of onEmitHandlers) {
-    onEmitHandler(value);
+    onEmitHandler(value, index);
   }
 };
 

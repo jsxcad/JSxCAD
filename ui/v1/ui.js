@@ -45,6 +45,7 @@ import ReactDOM from 'react-dom';
 import Spinner from 'react-bootstrap/Spinner';
 import { fromPointsToAlphaShape2AsPolygonSegments } from '@jsxcad/algorithm-cgal';
 import { getNotebookControlData } from '@jsxcad/ui-notebook';
+import hashSum from 'hash-sum';
 import marked from 'marked';
 import { toEcmascript } from '@jsxcad/compiler';
 import { writeGist } from './gist.js';
@@ -121,6 +122,7 @@ class Ui extends React.PureComponent {
     this.doPublishGist = this.doPublishGist.bind(this);
     this.doPublishToGithub = this.doPublishToGithub.bind(this);
     this.doReload = this.doReload.bind(this);
+    this.doUncache = this.doUncache.bind(this);
     this.doRun = this.doRun.bind(this);
     this.doSave = this.doSave.bind(this);
     this.doStop = this.doStop.bind(this);
@@ -164,13 +166,11 @@ class Ui extends React.PureComponent {
         const { path, workspace } = question.touchFile;
         return touch(path, { workspace });
       } else if (question.note) {
-        const { note, nthNote } = question;
+        const { note, index } = question;
         const { notebookData, notebookRef } = this.state;
-        // const updatedNotebook = [...notebookData];
-        const entry = notebookData[nthNote];
+        const entry = notebookData[index];
         if (!entry || entry.hash !== note.hash) {
-          notebookData[nthNote] = note;
-          this.setState({ notebookData: notebookData });
+          notebookData[index] = note;
           if (notebookRef) {
             notebookRef.forceUpdate();
           }
@@ -585,6 +585,42 @@ class Ui extends React.PureComponent {
     });
   }
 
+  async doUncache(paths) {
+    const { files } = this.state;
+    const uncached = [];
+    for (const file of files) {
+      if (file.startsWith('data/def') || file.startsWith('meta/def')) {
+        await deleteFile({}, file);
+        uncached.push(file);
+      } else {
+        console.log(`QQ/uncache/no: ${file}`);
+      }
+    }
+    const cancel = () => this.setState({ modal: undefined });
+    this.setState({
+      modal: (
+        <Modal show={true} onHide={cancel}>
+          <Modal.Header closeButton>
+            <Modal.Title>Uncache</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            Computed geometry cache deleted.
+            <ul>
+              {uncached.map((file, index) => (
+                <li key={index}>{file}</li>
+              ))}
+            </ul>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={cancel}>
+              Close
+            </Button>
+          </Modal.Footer>
+        </Modal>
+      ),
+    });
+  }
+
   async doUnload(paths) {
     const cancel = () => this.setState({ modal: undefined });
     const unload = async () => {
@@ -663,6 +699,21 @@ class Ui extends React.PureComponent {
     }
   }
 
+  emitNote(note) {
+    const { notebookData } = this.state;
+    if (note.hash === undefined) {
+      note.hash = hashSum(note);
+    }
+    notebookData.push(note);
+  }
+
+  updateNotebook() {
+    const { notebookRef } = this.state;
+    if (notebookRef) {
+      notebookRef.forceUpdate();
+    }
+  }
+
   async doRun() {
     const { ask, file, jsEditorData, path, workspace } = this.state;
     await this.doSave();
@@ -670,6 +721,7 @@ class Ui extends React.PureComponent {
       // We don't know how to run these things, so just save and move on.
       return;
     }
+    const topLevel = new Map();
     try {
       this.setState({ running: true });
       await terminateActiveServices();
@@ -681,35 +733,35 @@ class Ui extends React.PureComponent {
       const notebookControlData = await getNotebookControlData();
       await write(`control/${getCurrentPath()}`, notebookControlData);
 
-      await log({ op: 'open' });
-      await log({ op: 'clear' });
-      await log({ op: 'text', text: 'Running', level: 'serious' });
       let script = jsEditorData;
-      const topLevel = new Map();
-      const ecmascript = await toEcmascript(script, { topLevel });
-      emit({ md: `---` });
-      emit({ md: `#### Dependency Tree` });
-      const graph = [];
-      for (const [id, { dependencies }] of topLevel.entries()) {
-        for (const dependency of dependencies) {
-          graph.push(`${dependency}(${dependency}  .) --> ${id}(${id}  .)`);
-        }
-      }
-      if (graph.length > 0) {
-        emit({ md: `'''\ngraph TD\n${graph.join('\n')}\n'''` });
-        emit({ md: `---` });
-        emit({ md: `#### Programs` });
-        for (const [id, { program }] of topLevel.entries()) {
-          emit({ md: `##### ${id}` });
-          emit({ md: `'''\n${program}\n'''\n` });
-        }
-      }
+      const ecmascript = await toEcmascript(script, { path, topLevel });
       await ask({ evaluate: ecmascript, workspace, path: file });
       await resolvePending();
     } catch (error) {
       // Include any high level notebook errors in the output.
       emit({ log: { text: error.stack, level: 'serious' } });
     } finally {
+      this.emitNote({ md: `---` });
+      this.emitNote({ md: `#### Dependency Tree` });
+      const graph = [];
+      for (const [id, { dependencies }] of topLevel.entries()) {
+        for (const dependency of dependencies) {
+          const entry = topLevel.get(dependency);
+          if (entry && !entry.isNotCacheable) {
+            graph.push(`${dependency}(${dependency}  .) --> ${id}(${id}  .)`);
+          }
+        }
+      }
+      if (graph.length > 0) {
+        this.emitNote({ md: `'''\ngraph TD\n${graph.join('\n')}\n'''` });
+        this.emitNote({ md: `---` });
+        this.emitNote({ md: `#### Programs` });
+        for (const [id, { program }] of topLevel.entries()) {
+          this.emitNote({ md: `##### ${id}` });
+          this.emitNote({ md: `'''\n${program}\n'''\n` });
+        }
+      }
+      this.updateNotebook();
       this.setState({ running: false });
     }
   }
@@ -890,6 +942,13 @@ class Ui extends React.PureComponent {
             <Nav key="reload" className="mr-auto">
               <Nav.Item onClick={() => this.doReload([path])}>
                 <Nav.Link>Reload</Nav.Link>
+              </Nav.Item>
+            </Nav>
+          );
+          navItems.push(
+            <Nav key="uncache" className="mr-auto">
+              <Nav.Item onClick={() => this.doUncache([path])}>
+                <Nav.Link>Uncache</Nav.Link>
               </Nav.Item>
             </Nav>
           );

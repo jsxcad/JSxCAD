@@ -125,7 +125,7 @@ export class NotebookUi extends React.PureComponent {
       if (ref) {
         Mermaid.init(undefined, '.mermaid');
       }
-    }, 0);
+    }, 100);
     return result;
   }
 }

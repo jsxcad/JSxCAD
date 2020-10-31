@@ -125,8 +125,10 @@ const agent = async ({
       fileBase: question.workspace
     });
     clearEmitted();
-    let nthNote = 0;
-    onEmitHandler = addOnEmitHandler(async note => {
+    let nthNote;
+    onEmitHandler = addOnEmitHandler(async (note, index) => {
+      nthNote += 1;
+
       if (note.download) {
         for (const entry of note.download.entries) {
           entry.data = await entry.data;
@@ -135,9 +137,8 @@ const agent = async ({
 
       ask({
         note,
-        nthNote
+        index
       });
-      nthNote += 1;
     });
 
     try {

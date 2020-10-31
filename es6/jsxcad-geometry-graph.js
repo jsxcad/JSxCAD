@@ -1,5 +1,5 @@
 import { fromSurfaceMeshToGraph, fromPointsToAlphaShapeAsSurfaceMesh, fromPointsToConvexHullAsSurfaceMesh, fromPolygonsToSurfaceMesh, fromGraphToSurfaceMesh, extrudeSurfaceMesh, fromNefPolyhedronToSurfaceMesh, fromSurfaceMeshToNefPolyhedron, fromNefPolyhedronFacetsToGraph, sectionOfNefPolyhedron, differenceOfNefPolyhedrons, extrudeToPlaneOfSurfaceMesh, fromPointsToSurfaceMesh, fromSurfaceMeshToTriangles, intersectionOfNefPolyhedrons, insetOfPolygon, outlineOfSurfaceMesh, smoothSurfaceMesh, unionOfNefPolyhedrons } from './jsxcad-algorithm-cgal.js';
-import { dot, scale, min, max, transform as transform$1 } from './jsxcad-math-vec3.js';
+import { min, max, dot, scale, transform as transform$1 } from './jsxcad-math-vec3.js';
 import { deduplicate as deduplicate$1 } from './jsxcad-geometry-path.js';
 import { toPlane, flip } from './jsxcad-math-poly3.js';
 import { transform as transform$2 } from './jsxcad-math-plane.js';
@@ -147,6 +147,51 @@ const alphaShape = (points, componentLimit) =>
 
 const convexHull = (points) =>
   fromSurfaceMesh(fromPointsToConvexHullAsSurfaceMesh(points));
+
+const measureBoundingBox = (graph) => {
+  let minPoint = [Infinity, Infinity, Infinity];
+  let maxPoint = [-Infinity, -Infinity, -Infinity];
+  for (const point of graph.points) {
+    if (point !== undefined) {
+      minPoint = min(minPoint, point);
+      maxPoint = max(maxPoint, point);
+    }
+  }
+  return [minPoint, maxPoint];
+};
+
+const iota = 1e-5;
+const X = 0;
+const Y = 1;
+const Z = 2;
+
+// Requires a conservative gap.
+const doesNotOverlap = (a, b) => {
+  if (a.length === 0 || b.length === 0) {
+    return true;
+  }
+  const [minA, maxA] = measureBoundingBox(a);
+  const [minB, maxB] = measureBoundingBox(b);
+  if (maxA[X] <= minB[X] - iota * 10) {
+    return true;
+  }
+  if (maxA[Y] <= minB[Y] - iota * 10) {
+    return true;
+  }
+  if (maxA[Z] <= minB[Z] - iota * 10) {
+    return true;
+  }
+  if (maxB[X] <= minA[X] - iota * 10) {
+    return true;
+  }
+  if (maxB[Y] <= minA[Y] - iota * 10) {
+    return true;
+  }
+  if (maxB[Z] <= minA[Z] - iota * 10) {
+    return true;
+  }
+  return false;
+};
 
 const deduplicate = (surface) => surface.map(deduplicate$1);
 
@@ -832,9 +877,9 @@ earcut.flatten = function (data) {
 };
 earcut_1.default = default_1;
 
-const X = 0;
-const Y = 1;
-const Z = 2;
+const X$1 = 0;
+const Y$1 = 1;
+const Z$1 = 2;
 
 const buildContourXy = (points, contour, graph, loop, selectJunction) => {
   const index = contour.length >>> 1;
@@ -842,7 +887,7 @@ const buildContourXy = (points, contour, graph, loop, selectJunction) => {
     const point = getPointNode(graph, edgeNode.point);
     if (selectJunction(point)) {
       points.push(point);
-      contour.push(point[X], point[Y]);
+      contour.push(point[X$1], point[Y$1]);
     }
   });
   return index;
@@ -854,7 +899,7 @@ const buildContourXz = (points, contour, graph, loop, selectJunction) => {
     const point = getPointNode(graph, edgeNode.point);
     if (selectJunction(edgeNode.point)) {
       points.push(point);
-      contour.push(point[X], point[Z]);
+      contour.push(point[X$1], point[Z$1]);
     }
   });
   return index;
@@ -866,7 +911,7 @@ const buildContourYz = (points, contour, graph, loop, selectJunction) => {
     const point = getPointNode(graph, edgeNode.point);
     if (selectJunction(edgeNode.point)) {
       points.push(point);
-      contour.push(point[Y], point[Z]);
+      contour.push(point[Y$1], point[Z$1]);
     }
   });
   return index;
@@ -1042,6 +1087,9 @@ const difference = (a, b) => {
   if (!b.isClosed) {
     b = extrude(b, far, 0);
   }
+  if (doesNotOverlap(a, b)) {
+    return a;
+  }
   return fromNefPolyhedron(
     differenceOfNefPolyhedrons(toNefPolyhedron(a), toNefPolyhedron(b))
   );
@@ -1127,18 +1175,6 @@ const intersection = (a, b) => {
   return fromNefPolyhedron(
     intersectionOfNefPolyhedrons(toNefPolyhedron(a), toNefPolyhedron(b))
   );
-};
-
-const measureBoundingBox = (graph) => {
-  let minPoint = [Infinity, Infinity, Infinity];
-  let maxPoint = [-Infinity, -Infinity, -Infinity];
-  for (const point of graph.points) {
-    if (point !== undefined) {
-      minPoint = min(minPoint, point);
-      maxPoint = max(maxPoint, point);
-    }
-  }
-  return [minPoint, maxPoint];
 };
 
 const offset = (outlineGraph, amount) => {
