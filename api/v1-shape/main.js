@@ -1,5 +1,6 @@
 import './add.js';
 import './addTo.js';
+import './align.js';
 import './as.js';
 import './bench.js';
 import './canonicalize.js';

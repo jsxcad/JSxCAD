@@ -32,7 +32,7 @@ export class NoteUi extends React.PureComponent {
           ref.removeChild(ref.lastChild);
         }
         for (const note of data) {
-          if (note.hash === hash) {
+          if (note && note.hash === hash) {
             const element = await toDomElement([note]);
             if (note.view && note.view.inline) {
               ref.style.width = `${note.view.inline}%`;
@@ -52,7 +52,7 @@ export class NotebookUi extends React.PureComponent {
     return {
       id: PropTypes.string,
       data: PropTypes.array,
-      // file: PropTypes.string,
+      path: PropTypes.string,
       onRun: PropTypes.func,
     };
   }
@@ -103,7 +103,7 @@ export class NotebookUi extends React.PureComponent {
   }
 
   render() {
-    const { data } = this.props;
+    const { data, path } = this.props;
     let ref;
     const result = (
       <div
@@ -116,9 +116,12 @@ export class NotebookUi extends React.PureComponent {
         {data &&
           data
             .filter((note) => note.hash)
-            .map((note) => (
-              <NoteUi data={data} key={note.hash} hash={note.hash} />
-            ))}
+            .map((note) => {
+              // FIX: Rename or differentiate 'text' and 'error'.
+              if (note.module === path || note.text) {
+                return <NoteUi data={data} key={note.hash} hash={note.hash} />;
+              }
+            })}
       </div>
     );
     setTimeout(async () => {

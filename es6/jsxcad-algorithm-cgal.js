@@ -799,8 +799,8 @@ var Module = (function () {
     }
     var wasmMemory;
     var wasmTable = new WebAssembly.Table({
-      initial: 1078,
-      maximum: 1078,
+      initial: 1098,
+      maximum: 1098,
       element: 'anyfunc',
     });
     var ABORT = false;
@@ -1068,9 +1068,9 @@ var Module = (function () {
       Module['HEAPF32'] = HEAPF32 = new Float32Array(buf);
       Module['HEAPF64'] = HEAPF64 = new Float64Array(buf);
     }
-    var STACK_BASE = 5438432,
-      STACK_MAX = 195552,
-      DYNAMIC_BASE = 5438432;
+    var STACK_BASE = 5439664,
+      STACK_MAX = 196784,
+      DYNAMIC_BASE = 5439664;
     assert(STACK_BASE % 16 === 0, 'stack must start aligned');
     assert(DYNAMIC_BASE % 16 === 0, 'heap must start aligned');
     var TOTAL_STACK = 5242880;
@@ -7114,8 +7114,8 @@ var Module = (function () {
       '___wasm_call_ctors'
     ] = createExportWrapper('__wasm_call_ctors'));
     var _memset = (Module['_memset'] = createExportWrapper('memset'));
-    var _fflush = (Module['_fflush'] = createExportWrapper('fflush'));
     var _malloc = (Module['_malloc'] = createExportWrapper('malloc'));
+    var _fflush = (Module['_fflush'] = createExportWrapper('fflush'));
     var _free = (Module['_free'] = createExportWrapper('free'));
     var ___getTypeName = (Module['___getTypeName'] = createExportWrapper(
       '__getTypeName'
@@ -8985,8 +8985,8 @@ const fromGraphToSurfaceMesh = (graph) => {
   const mesh = new c.Surface_mesh();
 
   const vertexIndex = [];
-  graph.points.forEach(([x, y, z]) =>
-    vertexIndex.push(c.Surface_mesh__add_vertex(mesh, x, y, z))
+  graph.exact.forEach(([x, y, z]) =>
+    vertexIndex.push(c.Surface_mesh__add_exact(mesh, x, y, z))
   );
 
   // Surface_mesh faces are loops.
@@ -9351,7 +9351,7 @@ const fromSurfaceMeshToGraph = (mesh) => {
   if (mesh.has_garbage()) {
     c.Surface_mesh__collect_garbage(mesh);
   }
-  const graph = { edges: [], faces: [], loops: [], points: [] };
+  const graph = { edges: [], faces: [], loops: [], points: [], exact: [] };
   const polygon = [];
   let face = -1;
   c.Surface_mesh__explore(
@@ -9366,7 +9366,7 @@ const fromSurfaceMeshToGraph = (mesh) => {
       polygon.length = 0;
       face = faceId;
     },
-    (point, x, y, z) => {
+    (point, x, y, z, exactX, exactY, exactZ) => {
       if (!isFinite(x) || !isFinite(y) || !isFinite(z)) {
         throw Error('die');
       }
@@ -9376,6 +9376,7 @@ const fromSurfaceMeshToGraph = (mesh) => {
         }
       }
       graph.points[point] = [x, y, z];
+      graph.exact[point] = [exactX, exactY, exactZ];
     },
     (point, edge, next, twin) => {
       graph.edges[edge] = { point, next, twin, loop: face };
@@ -9463,7 +9464,45 @@ const sectionOfNefPolyhedron = (
 
 const smoothSurfaceMesh = (mesh) => getCgal().SmoothSurfaceMesh(mesh);
 
+const transformSurfaceMesh = (mesh, matrix) => {
+  const [
+    m00,
+    m10,
+    m20,
+    ,
+    m01,
+    m11,
+    m21,
+    ,
+    m02,
+    m12,
+    m22,
+    ,
+    m03,
+    m13,
+    m23,
+    hw,
+  ] = matrix;
+
+  return getCgal().TransformSurfaceMesh(
+    mesh,
+    m00,
+    m01,
+    m02,
+    m03,
+    m10,
+    m11,
+    m12,
+    m13,
+    m20,
+    m21,
+    m22,
+    m23,
+    hw
+  );
+};
+
 const unionOfNefPolyhedrons = (a, b) =>
   getCgal().UnionOfNefPolyhedrons(a, b);
 
-export { differenceOfNefPolyhedrons, extrudeSurfaceMesh, extrudeToPlaneOfSurfaceMesh, fromGraphToNefPolyhedron, fromGraphToSurfaceMesh, fromNefPolyhedronFacetsToGraph, fromNefPolyhedronShellsToGraph, fromNefPolyhedronToPolygons, fromNefPolyhedronToSurfaceMesh, fromNefPolyhedronToTriangles, fromPointsToAlphaShape2AsPolygonSegments, fromPointsToAlphaShapeAsSurfaceMesh, fromPointsToConvexHullAsSurfaceMesh, fromPointsToSurfaceMesh, fromPolygonsToNefPolyhedron, fromPolygonsToSurfaceMesh, fromSurfaceMeshToGraph, fromSurfaceMeshToNefPolyhedron, fromSurfaceMeshToPolygons, fromSurfaceMeshToTriangles, initCgal, insetOfPolygon, intersectionOfNefPolyhedrons, outlineOfSurfaceMesh, sectionOfNefPolyhedron, smoothSurfaceMesh, unionOfNefPolyhedrons };
+export { differenceOfNefPolyhedrons, extrudeSurfaceMesh, extrudeToPlaneOfSurfaceMesh, fromGraphToNefPolyhedron, fromGraphToSurfaceMesh, fromNefPolyhedronFacetsToGraph, fromNefPolyhedronShellsToGraph, fromNefPolyhedronToPolygons, fromNefPolyhedronToSurfaceMesh, fromNefPolyhedronToTriangles, fromPointsToAlphaShape2AsPolygonSegments, fromPointsToAlphaShapeAsSurfaceMesh, fromPointsToConvexHullAsSurfaceMesh, fromPointsToSurfaceMesh, fromPolygonsToNefPolyhedron, fromPolygonsToSurfaceMesh, fromSurfaceMeshToGraph, fromSurfaceMeshToNefPolyhedron, fromSurfaceMeshToPolygons, fromSurfaceMeshToTriangles, initCgal, insetOfPolygon, intersectionOfNefPolyhedrons, outlineOfSurfaceMesh, sectionOfNefPolyhedron, smoothSurfaceMesh, transformSurfaceMesh, unionOfNefPolyhedrons };

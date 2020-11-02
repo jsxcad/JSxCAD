@@ -1,3 +1,11 @@
+import { fromSurfaceMesh } from './fromSurfaceMesh.js';
+import { toSurfaceMesh } from './toSurfaceMesh.js';
+import { transformSurfaceMesh } from '@jsxcad/algorithm-cgal';
+
+export const transform = (matrix, graph) =>
+  fromSurfaceMesh(transformSurfaceMesh(toSurfaceMesh(graph), matrix));
+
+/*
 import { nefPolyhedronSymbol, surfaceMeshSymbol } from './symbols.js';
 
 import { transform as transformPlane } from '@jsxcad/math-plane';
@@ -26,3 +34,4 @@ export const transform = (matrix, graph) => {
     [surfaceMeshSymbol]: undefined,
   };
 };
+*/

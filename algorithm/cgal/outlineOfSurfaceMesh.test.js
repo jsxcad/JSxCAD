@@ -157,23 +157,23 @@ test('FromSurfaceMeshToOutline/solid', (t) => {
       { edge: 81, face: 26 },
       { edge: 83, face: 27 },
     ],
-    points: [
-      [-5, -5, -5],
-      [-5, -5, 5],
-      [5, -5, 5],
-      [5, -5, -5],
-      [5, 5, -5],
-      [-5, 5, -5],
-      [-5, 5, 5],
-      [5, 5, 5],
-      [-2.5, -2.5, 5],
-      [2.5, -2.5, 5],
-      [2.5, 2.5, 5],
-      [-2.5, 2.5, 5],
-      [-2.5, 2.5, 0],
-      [-2.5, -2.5, 0],
-      [2.5, -2.5, 0],
-      [2.5, 2.5, 0],
+    exact: [
+      ['-5', '-5', '-5'],
+      ['-5', '-5', '5'],
+      ['5', '-5', '5'],
+      ['5', '-5', '-5'],
+      ['5', '5', '-5'],
+      ['-5', '5', '-5'],
+      ['-5', '5', '5'],
+      ['5', '5', '5'],
+      ['-25/10', '-25/10', '5'],
+      ['25/10', '-25/10', '5'],
+      ['25/10', '25/10', '5'],
+      ['-25/10', '25/10', '5'],
+      ['-25/10', '25/10', '0'],
+      ['-25/10', '-25/10', '0'],
+      ['25/10', '-25/10', '0'],
+      ['25/10', '25/10', '0'],
     ],
   };
   const mesh = fromGraphToSurfaceMesh(inputGraph);
@@ -181,7 +181,6 @@ test('FromSurfaceMeshToOutline/solid', (t) => {
   const outline = outlineOfSurfaceMesh(mesh);
   const outputGraph = fromSurfaceMeshToGraph(outline);
   t.deepEqual(JSON.parse(JSON.stringify(outputGraph)), {
-    isClosed: false,
     edges: [
       { point: 1, next: 2, twin: 1, loop: 0 },
       { point: 2, next: 26, twin: 0, loop: 3 },
@@ -282,6 +281,25 @@ test('FromSurfaceMeshToOutline/solid', (t) => {
       [2.5, -2.5, 0],
       [2.5, 2.5, 0],
     ],
+    exact: [
+      ['-5/1', '-5/1', '-5/1'],
+      ['-5/1', '-5/1', '5/1'],
+      ['5/1', '-5/1', '5/1'],
+      ['5/1', '-5/1', '-5/1'],
+      ['5/1', '5/1', '-5/1'],
+      ['-5/1', '5/1', '-5/1'],
+      ['-5/1', '5/1', '5/1'],
+      ['5/1', '5/1', '5/1'],
+      ['-5/2', '-5/2', '5/1'],
+      ['5/2', '-5/2', '5/1'],
+      ['5/2', '5/2', '5/1'],
+      ['-5/2', '5/2', '5/1'],
+      ['-5/2', '5/2', '0/1'],
+      ['-5/2', '-5/2', '0/1'],
+      ['5/2', '-5/2', '0/1'],
+      ['5/2', '5/2', '0/1'],
+    ],
+    isClosed: false,
   });
 });
 test('FromSurfaceMeshToOutline/surface', (t) => {
@@ -306,11 +324,11 @@ test('FromSurfaceMeshToOutline/surface', (t) => {
       { edge: 8, face: 0 },
       { edge: 9, face: 1 },
     ],
-    points: [
-      [6.000000000000001, 6, 0],
-      [-6, 6.000000000000001, 0],
-      [-6.000000000000002, -5.999999999999999, 0],
-      [5.999999999999999, -6.000000000000002, 0],
+    exact: [
+      ['6', '6', '0'],
+      ['-6', '6', '0'],
+      ['-6', '-6', '0'],
+      ['6', '-6', '0'],
     ],
   };
   const mesh = fromGraphToSurfaceMesh(inputGraph);
@@ -318,7 +336,6 @@ test('FromSurfaceMeshToOutline/surface', (t) => {
   const outline = outlineOfSurfaceMesh(mesh);
   const outputGraph = fromSurfaceMeshToGraph(outline);
   t.deepEqual(JSON.parse(JSON.stringify(outputGraph)), {
-    isClosed: false,
     edges: [
       { point: 0, next: 2, twin: 1, loop: 0 },
       null,
@@ -336,5 +353,12 @@ test('FromSurfaceMeshToOutline/surface', (t) => {
       [-6, -6, 0],
       [6, -6, 0],
     ],
+    exact: [
+      ['6/1', '6/1', '0/1'],
+      ['-6/1', '6/1', '0/1'],
+      ['-6/1', '-6/1', '0/1'],
+      ['6/1', '-6/1', '0/1'],
+    ],
+    isClosed: false,
   });
 });

@@ -83,7 +83,6 @@ test('fromSolid', (t) => {
   ];
   const graph = fromSolid(box);
   t.deepEqual(JSON.parse(JSON.stringify(graph)), {
-    isClosed: true,
     edges: [
       { point: 1, next: 2, twin: 1, loop: 0 },
       { point: 0, next: 18, twin: 0, loop: 4 },
@@ -160,5 +159,16 @@ test('fromSolid', (t) => {
       [-0.5, -0.5, -0.5],
       [0.5, -0.5, -0.5],
     ],
+    exact: [
+      ['-1/2', '1/2', '-1/2'],
+      ['-1/2', '1/2', '1/2'],
+      ['1/2', '1/2', '1/2'],
+      ['1/2', '1/2', '-1/2'],
+      ['1/2', '-1/2', '1/2'],
+      ['-1/2', '-1/2', '1/2'],
+      ['-1/2', '-1/2', '-1/2'],
+      ['1/2', '-1/2', '-1/2'],
+    ],
+    isClosed: true,
   });
 });

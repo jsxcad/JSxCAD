@@ -1,3 +1,11 @@
+const modules = [];
+
+export const getModule = () => modules[modules.length - 1];
+
+export const popModule = () => modules.pop();
+
+export const pushModule = (module) => modules.push(module);
+
 export const emitted = [];
 
 export const clearEmitted = () => {
@@ -7,6 +15,9 @@ export const clearEmitted = () => {
 const onEmitHandlers = new Set();
 
 export const emit = (value) => {
+  if (value.module === undefined) {
+    value.module = getModule();
+  }
   const index = emitted.length;
   emitted.push(value);
   for (const onEmitHandler of onEmitHandlers) {

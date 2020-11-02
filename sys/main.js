@@ -14,6 +14,9 @@ export {
   clearEmitted,
   emit,
   getEmitted,
+  getModule,
+  popModule,
+  pushModule,
   removeOnEmitHandler,
 } from './emit.js';
 export { getFilesystem, qualifyPath, setupFilesystem } from './filesystem.js';

@@ -1,4 +1,4 @@
-import { addPending, write, emit, read, getCurrentPath, addSource } from './jsxcad-sys.js';
+import { addPending, write, emit, read, getCurrentPath, addSource, pushModule, popModule } from './jsxcad-sys.js';
 export { emit, read, write } from './jsxcad-sys.js';
 import Shape, { Shape as Shape$1, loadGeometry, log, saveGeometry } from './jsxcad-api-v1-shape.js';
 export { Shape, loadGeometry, log, saveGeometry } from './jsxcad-api-v1-shape.js';
@@ -364,7 +364,7 @@ const DYNAMIC_MODULES = new Map();
 const registerDynamicModule = (bare, path) =>
   DYNAMIC_MODULES.set(bare, path);
 
-const buildImportModule = (api) => async (name /*, { src } = {} */) => {
+const buildImportModule = (api) => async (name) => {
   const internalModule = DYNAMIC_MODULES.get(name);
   if (internalModule !== undefined) {
     const module = await import(internalModule);
@@ -374,11 +374,6 @@ const buildImportModule = (api) => async (name /*, { src } = {} */) => {
   if (script === undefined) {
     const path = `source/${name}`;
     const sources = [];
-    /*
-    if (src) {
-      sources.push(src);
-    }
-*/
     sources.push(name);
     script = await read(path, { sources });
   }
@@ -395,8 +390,13 @@ const buildImportModule = (api) => async (name /*, { src } = {} */) => {
     `return async () => { ${ecmascript} };`
   );
   const module = await builder(api);
-  const exports = await module();
-  return exports;
+  try {
+    pushModule(name);
+    const exports = await module();
+    return exports;
+  } finally {
+    popModule();
+  }
 };
 
 const extendedApi = { ...api, toSvg };

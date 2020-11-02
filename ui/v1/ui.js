@@ -171,6 +171,16 @@ class Ui extends React.PureComponent {
         const entry = notebookData[index];
         if (!entry || entry.hash !== note.hash) {
           notebookData[index] = note;
+          // Erase duplicates of this note.
+          for (let nth = 0; nth < notebookData.length; nth++) {
+            if (nth === index) {
+              continue;
+            }
+            const other = notebookData[nth];
+            if (other && other.hash === note.hash) {
+              delete notebookData[nth];
+            }
+          }
           if (notebookRef) {
             notebookRef.forceUpdate();
           }
@@ -715,7 +725,7 @@ class Ui extends React.PureComponent {
   }
 
   async doRun() {
-    const { ask, file, jsEditorData, path, workspace } = this.state;
+    const { ask, jsEditorData, path, workspace } = this.state;
     await this.doSave();
     if (!path.endsWith('.js') && !path.endsWith('.nb')) {
       // We don't know how to run these things, so just save and move on.
@@ -735,7 +745,7 @@ class Ui extends React.PureComponent {
 
       let script = jsEditorData;
       const ecmascript = await toEcmascript(script, { path, topLevel });
-      await ask({ evaluate: ecmascript, workspace, path: file });
+      await ask({ evaluate: ecmascript, workspace, path });
       await resolvePending();
     } catch (error) {
       // Include any high level notebook errors in the output.
@@ -971,6 +981,7 @@ class Ui extends React.PureComponent {
                         sha={sha}
                         onRun={this.doRun}
                         data={notebookData}
+                        path={path}
                         workspace={workspace}
                       />
                     </Pane>

@@ -741,8 +741,8 @@ var Module = (function () {
     }
     var wasmMemory;
     var wasmTable = new WebAssembly.Table({
-      initial: 1078,
-      maximum: 1078,
+      initial: 1098,
+      maximum: 1098,
       element: 'anyfunc',
     });
     var ABORT = false;
@@ -1062,9 +1062,9 @@ var Module = (function () {
       Module['HEAPF32'] = HEAPF32 = new Float32Array(buf);
       Module['HEAPF64'] = HEAPF64 = new Float64Array(buf);
     }
-    var STACK_BASE = 5438432,
-      STACK_MAX = 195552,
-      DYNAMIC_BASE = 5438432;
+    var STACK_BASE = 5439664,
+      STACK_MAX = 196784,
+      DYNAMIC_BASE = 5439664;
     assert(STACK_BASE % 16 === 0, 'stack must start aligned');
     assert(DYNAMIC_BASE % 16 === 0, 'heap must start aligned');
     var TOTAL_STACK = 5242880;
@@ -7123,8 +7123,8 @@ var Module = (function () {
       '___wasm_call_ctors'
     ] = createExportWrapper('__wasm_call_ctors'));
     var _memset = (Module['_memset'] = createExportWrapper('memset'));
-    var _fflush = (Module['_fflush'] = createExportWrapper('fflush'));
     var _malloc = (Module['_malloc'] = createExportWrapper('malloc'));
+    var _fflush = (Module['_fflush'] = createExportWrapper('fflush'));
     var _free = (Module['_free'] = createExportWrapper('free'));
     var ___getTypeName = (Module['___getTypeName'] = createExportWrapper(
       '__getTypeName'

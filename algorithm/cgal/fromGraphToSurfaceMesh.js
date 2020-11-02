@@ -7,8 +7,8 @@ export const fromGraphToSurfaceMesh = (graph) => {
   const mesh = new c.Surface_mesh();
 
   const vertexIndex = [];
-  graph.points.forEach(([x, y, z]) =>
-    vertexIndex.push(c.Surface_mesh__add_vertex(mesh, x, y, z))
+  graph.exact.forEach(([x, y, z]) =>
+    vertexIndex.push(c.Surface_mesh__add_exact(mesh, x, y, z))
   );
 
   // Surface_mesh faces are loops.

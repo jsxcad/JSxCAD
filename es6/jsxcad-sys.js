@@ -3678,6 +3678,14 @@ const boot = async () => {
   }
 };
 
+const modules = [];
+
+const getModule = () => modules[modules.length - 1];
+
+const popModule = () => modules.pop();
+
+const pushModule = (module) => modules.push(module);
+
 const emitted = [];
 
 const clearEmitted = () => {
@@ -3687,6 +3695,9 @@ const clearEmitted = () => {
 const onEmitHandlers = new Set();
 
 const emit$1 = (value) => {
+  if (value.module === undefined) {
+    value.module = getModule();
+  }
   const index = emitted.length;
   emitted.push(value);
   for (const onEmitHandler of onEmitHandlers) {
@@ -3840,4 +3851,4 @@ const touch = async (path, { workspace } = {}) => {
   }
 };
 
-export { addOnEmitHandler, addPending, addSource, ask, askService, boot, clearEmitted, conversation, createService, deleteFile$1 as deleteFile, emit$1 as emit, getCurrentPath, getEmitted, getFilesystem, getPendingErrorHandler, getSources, isBrowser, isNode, isWebWorker, listFiles$1 as listFiles, listFilesystems, log, onBoot, qualifyPath, read, readFile, removeOnEmitHandler, resolvePending, setHandleAskUser, setPendingErrorHandler, setupFilesystem, terminateActiveServices, touch, unwatchFile, unwatchFileCreation, unwatchFileDeletion, unwatchFiles, unwatchLog, watchFile, watchFileCreation, watchFileDeletion, watchLog, write, writeFile };
+export { addOnEmitHandler, addPending, addSource, ask, askService, boot, clearEmitted, conversation, createService, deleteFile$1 as deleteFile, emit$1 as emit, getCurrentPath, getEmitted, getFilesystem, getModule, getPendingErrorHandler, getSources, isBrowser, isNode, isWebWorker, listFiles$1 as listFiles, listFilesystems, log, onBoot, popModule, pushModule, qualifyPath, read, readFile, removeOnEmitHandler, resolvePending, setHandleAskUser, setPendingErrorHandler, setupFilesystem, terminateActiveServices, touch, unwatchFile, unwatchFileCreation, unwatchFileDeletion, unwatchFiles, unwatchLog, watchFile, watchFileCreation, watchFileDeletion, watchLog, write, writeFile };
