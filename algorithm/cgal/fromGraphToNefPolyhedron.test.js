@@ -74,15 +74,15 @@ const graph = {
     { edge: 34 },
     { edge: 35 },
   ],
-  points: [
-    [-0.5, 0.5, -0.5],
-    [-0.5, 0.5, 0.5],
-    [0.5, 0.5, 0.5],
-    [0.5, 0.5, -0.5],
-    [0.5, -0.5, 0.5],
-    [-0.5, -0.5, 0.5],
-    [-0.5, -0.5, -0.5],
-    [0.5, -0.5, -0.5],
+  exact: [
+    ['-5/10', '5/10', '-5/10'],
+    ['-5/10', '5/10', '5/10'],
+    ['5/10', '5/10', '5/10'],
+    ['5/10', '5/10', '-5/10'],
+    ['5/10', '-5/10', '5/10'],
+    ['-5/10', '-5/10', '5/10'],
+    ['-5/10', '-5/10', '-5/10'],
+    ['5/10', '-5/10', '-5/10'],
   ],
 };
 
@@ -91,7 +91,6 @@ test('FromGraphToSurfaceMesh', (t) => {
   t.true(nefPolyhedron.is_valid(false, 1));
   const regeneratedGraph = fromNefPolyhedronShellsToGraph(nefPolyhedron);
   t.deepEqual(regeneratedGraph, {
-    isClosed: true,
     points: [
       [-0.5, -0.5, -0.5],
       [-0.5, 0.5, -0.5],
@@ -145,5 +144,6 @@ test('FromGraphToSurfaceMesh', (t) => {
       { plane: [0, 0, 1, -0.5], loop: 5 },
     ],
     volumes: [{ faces: [0, 1, 2, 3, 4, 5] }],
+    isClosed: true,
   });
 });

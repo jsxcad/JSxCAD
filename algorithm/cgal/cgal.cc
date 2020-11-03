@@ -34,6 +34,7 @@
 #include <CGAL/Polygon_mesh_processing/repair_polygon_soup.h>
 #include <CGAL/Polygon_mesh_processing/smooth_mesh.h>
 #include <CGAL/Polygon_mesh_processing/smooth_shape.h>
+#include <CGAL/Polygon_mesh_processing/transform.h>
 #include <CGAL/Polygon_mesh_processing/triangulate_faces.h>
 #include <CGAL/Polygon_2.h>
 #include <CGAL/Polygon_with_holes_2.h>
@@ -59,6 +60,7 @@ typedef Kernel::Plane_3 Plane;
 typedef Kernel::Point_3 Point;
 typedef Kernel::Point_2 Point_2;
 typedef Kernel::Vector_3 Vector;
+typedef CGAL::Aff_transformation_3<Kernel> Transformation;
 typedef std::vector<Point> Points;
 typedef std::vector<Point_2> Point_2s;
 typedef CGAL::Surface_mesh<Point> Surface_mesh;
@@ -269,6 +271,12 @@ Surface_mesh* SmoothSurfaceMesh(Surface_mesh* input) {
   return mesh;
 }
 
+Surface_mesh* TransformSurfaceMesh(Surface_mesh* input, double m00, double m01, double m02, double m03, double m10, double m11, double m12, double m13, double m20, double m21, double m22, double m23, double hw) {
+  Surface_mesh* output = new Surface_mesh(*input);
+  CGAL::Polygon_mesh_processing::transform(Transformation(FT(m00), FT(m01), FT(m02), FT(m03), FT(m10), FT(m11), FT(m12), FT(m13), FT(m20), FT(m21), FT(m22), FT(m23), FT(hw)), *output, CGAL::parameters::all_default());
+  return output;
+}
+
 void Surface_mesh__EachFace(Surface_mesh* mesh, emscripten::val op) {
   for (const auto& face_index : mesh->faces()) {
     if (!mesh->is_removed(face_index)) {
@@ -319,6 +327,12 @@ std::size_t Surface_mesh__face_to_halfedge(Surface_mesh* mesh, std::size_t face_
 
 const Point& Surface_mesh__vertex_to_point(Surface_mesh* mesh, std::size_t vertex_index) {
   return mesh->point(Vertex_index(vertex_index));
+}
+
+const std::size_t Surface_mesh__add_exact(Surface_mesh* mesh, std::string x, std::string y, std::string z) {
+  std::size_t index(mesh->add_vertex(Point{CGAL::Gmpq(x), CGAL::Gmpq(y), CGAL::Gmpq(z)}));
+  assert(index == std::size_t(Vertex_index(index)));
+  return index;
 }
 
 const std::size_t Surface_mesh__add_vertex(Surface_mesh* mesh, float x, float y, float z) {
@@ -703,7 +717,14 @@ class Surface_mesh_explorer {
       do {
         const auto& target = mesh.target(halfedge);
         const auto& p = mesh.point(target);
-        _emit_point((std::size_t)target, CGAL::to_double(p.x()), CGAL::to_double(p.y()), CGAL::to_double(p.z()));
+        {
+          std::ostringstream x; x << p.x(); std::string xs = x.str();
+          std::ostringstream y; y << p.y(); std::string ys = y.str();
+          std::ostringstream z; z << p.z(); std::string zs = z.str();
+          _emit_point((std::size_t)target, CGAL::to_double(p.x()), CGAL::to_double(p.y()), CGAL::to_double(p.z()),
+                      xs, ys, zs);
+        }
+                   
         const auto& next = mesh.next(halfedge);
         const auto& opposite = mesh.opposite(halfedge);
         _emit_edge((std::size_t)target,
@@ -1009,6 +1030,7 @@ EMSCRIPTEN_BINDINGS(module) {
   emscripten::function("Surface_mesh__collect_garbage", &Surface_mesh__collect_garbage, emscripten::allow_raw_pointers());
 
   emscripten::function("Surface_mesh__add_vertex", &Surface_mesh__add_vertex, emscripten::allow_raw_pointers());
+  emscripten::function("Surface_mesh__add_exact", &Surface_mesh__add_exact, emscripten::allow_raw_pointers());
   emscripten::function("Surface_mesh__add_face", &Surface_mesh__add_face, emscripten::allow_raw_pointers());
   emscripten::function("Surface_mesh__add_face_vertices", &Surface_mesh__add_face_vertices, emscripten::allow_raw_pointers());
   emscripten::function("Surface_mesh__add_edge", &Surface_mesh__add_edge, emscripten::allow_raw_pointers());
@@ -1054,6 +1076,7 @@ EMSCRIPTEN_BINDINGS(module) {
 
   emscripten::function("FromPointsToSurfaceMesh", &FromPointsToSurfaceMesh, emscripten::allow_raw_pointers());
   emscripten::function("SmoothSurfaceMesh", &SmoothSurfaceMesh, emscripten::allow_raw_pointers());
+  emscripten::function("TransformSurfaceMesh", &TransformSurfaceMesh, emscripten::allow_raw_pointers());
   emscripten::function("FromSurfaceMeshToPolygonSoup", &FromSurfaceMeshToPolygonSoup, emscripten::allow_raw_pointers());
   emscripten::function("ComputeConvexHullAsSurfaceMesh", &ComputeConvexHullAsSurfaceMesh, emscripten::allow_raw_pointers());
   emscripten::function("ComputeAlphaShapeAsSurfaceMesh", &ComputeAlphaShapeAsSurfaceMesh, emscripten::allow_raw_pointers());

@@ -1,7 +1,7 @@
 import { close, concatenate, open } from './jsxcad-geometry-path.js';
 import { taggedAssembly, eachPoint, flip, toDisjointGeometry as toDisjointGeometry$1, toTransformedGeometry, toPoints, transform, reconcile, isWatertight, makeWatertight, taggedPaths, taggedGraph, fromPathToSurface, fromPathsToSurface, taggedPoints, taggedSolid, taggedSurface, union as union$1, rewriteTags, canonicalize as canonicalize$1, measureBoundingBox as measureBoundingBox$1, intersection as intersection$1, allTags, difference as difference$1, getSolids, fix as fix$1, rewrite, taggedGroup, getAnySurfaces, getGraphs, taggedLayers, isVoid, assemble as assemble$1, getNonVoidPaths, getPeg, measureArea, taggedSketch, getNonVoidSolids, getAnyNonVoidSurfaces, getPaths, getNonVoidSurfaces, getNonVoidZ0Surfaces, hash } from './jsxcad-geometry-tagged.js';
 import { fromPolygons, findOpenEdges, fromSurface as fromSurface$1 } from './jsxcad-geometry-solid.js';
-import { scale as scale$1, add, negate, normalize, subtract, dot, cross, distance } from './jsxcad-math-vec3.js';
+import { add, scale as scale$1, negate, normalize, subtract, dot, cross, distance } from './jsxcad-math-vec3.js';
 import { toTagFromName } from './jsxcad-algorithm-color.js';
 import { createNormalize3 } from './jsxcad-algorithm-quantize.js';
 import { junctionSelector } from './jsxcad-geometry-halfedge.js';
@@ -252,6 +252,73 @@ const addToMethod = function (shape) {
 };
 Shape.prototype.addTo = addToMethod;
 
+const X = 0;
+const Y = 1;
+const Z = 2;
+
+const align = (shape, spec = 'xyz', origin = [0, 0, 0]) => {
+  const { max, min, center } = shape.size();
+  const offset = [0, 0, 0];
+
+  let index = 0;
+  while (index < spec.length) {
+    switch (spec[index++]) {
+      case 'x': {
+        switch (spec[index]) {
+          case '>':
+            offset[X] = -min[X];
+            index += 1;
+            break;
+          case '<':
+            offset[X] = -max[X];
+            index += 1;
+            break;
+          default:
+            offset[X] = -center[X];
+        }
+        break;
+      }
+      case 'y': {
+        switch (spec[index]) {
+          case '>':
+            offset[Y] = -min[Y];
+            index += 1;
+            break;
+          case '<':
+            offset[Y] = -max[Y];
+            index += 1;
+            break;
+          default:
+            offset[Y] = -center[Y];
+        }
+        break;
+      }
+      case 'z': {
+        switch (spec[index]) {
+          case '>':
+            offset[Z] = -min[Z];
+            index += 1;
+            break;
+          case '<':
+            offset[Z] = -max[Z];
+            index += 1;
+            break;
+          default:
+            offset[Z] = -center[Z];
+        }
+        break;
+      }
+    }
+  }
+  const moved = shape.move(...add(offset, origin));
+  return moved;
+};
+
+const alignMethod = function (spec, origin) {
+  return align(this, spec, origin);
+};
+Shape.prototype.align = alignMethod;
+
 /**
  *
  * # As
@@ -297,9 +364,9 @@ Shape.prototype.notAs = notAsMethod;
 asMethod.signature = 'Shape -> as(...tags:string) -> Shape';
 notAsMethod.signature = 'Shape -> as(...tags:string) -> Shape';
 
-const X = 0;
-const Y = 1;
-const Z = 2;
+const X$1 = 0;
+const Y$1 = 1;
+const Z$1 = 2;
 
 /**
  * Moves the left front corner to the left front corner of the bench
@@ -310,7 +377,7 @@ const Z = 2;
 
 const bench = (shape, x = 0, y = 0, z = 0) => {
   const { max, min } = shape.size();
-  return shape.move(0 - x - min[X], 0 - y - min[Y], 0 - z - max[Z]);
+  return shape.move(0 - x - min[X$1], 0 - y - min[Y$1], 0 - z - max[Z$1]);
 };
 
 const benchMethod = function (x, y, z) {
@@ -327,7 +394,7 @@ Shape.prototype.bench = benchMethod;
 
 const benchTop = (shape, x = 0, y = 0, z = 0) => {
   const { min } = shape.size();
-  return shape.move(0 - x - min[X], 0 - y - min[Y], 0 - z - min[Z]);
+  return shape.move(0 - x - min[X$1], 0 - y - min[Y$1], 0 - z - min[Z$1]);
 };
 
 const benchTopMethod = function (x, y, z) {
@@ -374,22 +441,9 @@ measureBoundingBox.signature = 'measureBoundingBox(shape:Shape) -> BoundingBox';
 measureBoundingBoxMethod.signature =
   'Shape -> measureBoundingBox() -> BoundingBox';
 
-/**
- *
- * # Center
- *
- * Moves the shape so that its bounding box is centered on the origin.
- *
- * ::: illustration { "view": { "position": [60, -60, 60], "target": [0, 0, 0] } }
- * ```
- * Circle(20).with(Cube(10).center())
- * ```
- * :::
- **/
-
-const X$1 = 0;
-const Y$1 = 1;
-const Z$1 = 2;
+const X$2 = 0;
+const Y$2 = 1;
+const Z$2 = 2;
 
 const center = (
   shape,
@@ -398,16 +452,16 @@ const center = (
   const [minPoint, maxPoint] = measureBoundingBox(shape);
   const center = scale$1(0.5, add(minPoint, maxPoint));
   if (!centerX) {
-    center[X$1] = 0;
+    center[X$2] = 0;
   }
   if (!centerY) {
-    center[Y$1] = 0;
+    center[Y$2] = 0;
   }
   if (!centerZ) {
-    center[Z$1] = 0;
+    center[Z$2] = 0;
   }
   // FIX: Find a more principled way to handle centering empty shapes.
-  if (isNaN(center[X$1]) || isNaN(center[Y$1]) || isNaN(center[Z$1])) {
+  if (isNaN(center[X$2]) || isNaN(center[Y$2]) || isNaN(center[Z$2])) {
     return shape;
   }
   const moved = shape.move(...negate(center));
@@ -1383,17 +1437,17 @@ const scaleMethod = function (x, y, z) {
 };
 Shape.prototype.scale = scaleMethod;
 
-const X$2 = 0;
-const Y$2 = 1;
-const Z$2 = 2;
+const X$3 = 0;
+const Y$3 = 1;
+const Z$3 = 2;
 
 const size = (shape) => {
   const geometry = shape.toKeptGeometry();
   const [min, max] = measureBoundingBox$1(geometry);
   const area = measureArea(geometry);
-  const length = max[X$2] - min[X$2];
-  const width = max[Y$2] - min[Y$2];
-  const height = max[Z$2] - min[Z$2];
+  const length = max[X$3] - min[X$3];
+  const width = max[Y$3] - min[Y$3];
+  const height = max[Z$3] - min[Z$3];
   const center = scale$1(0.5, add(min, max));
   const radius = distance(center, max);
   return { area, length, width, height, max, min, center, radius };

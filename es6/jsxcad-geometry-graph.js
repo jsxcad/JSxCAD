@@ -1,8 +1,7 @@
-import { fromSurfaceMeshToGraph, fromPointsToAlphaShapeAsSurfaceMesh, fromPointsToConvexHullAsSurfaceMesh, fromPolygonsToSurfaceMesh, fromGraphToSurfaceMesh, extrudeSurfaceMesh, fromNefPolyhedronToSurfaceMesh, fromSurfaceMeshToNefPolyhedron, fromNefPolyhedronFacetsToGraph, sectionOfNefPolyhedron, differenceOfNefPolyhedrons, extrudeToPlaneOfSurfaceMesh, fromPointsToSurfaceMesh, fromSurfaceMeshToTriangles, intersectionOfNefPolyhedrons, insetOfPolygon, outlineOfSurfaceMesh, smoothSurfaceMesh, unionOfNefPolyhedrons } from './jsxcad-algorithm-cgal.js';
-import { min, max, dot, scale, transform as transform$1 } from './jsxcad-math-vec3.js';
+import { fromSurfaceMeshToGraph, fromPointsToAlphaShapeAsSurfaceMesh, fromPointsToConvexHullAsSurfaceMesh, fromPolygonsToSurfaceMesh, fromGraphToSurfaceMesh, extrudeSurfaceMesh, fromNefPolyhedronToSurfaceMesh, fromSurfaceMeshToNefPolyhedron, fromNefPolyhedronFacetsToGraph, sectionOfNefPolyhedron, differenceOfNefPolyhedrons, extrudeToPlaneOfSurfaceMesh, fromPointsToSurfaceMesh, fromSurfaceMeshToTriangles, intersectionOfNefPolyhedrons, insetOfPolygon, outlineOfSurfaceMesh, smoothSurfaceMesh, transformSurfaceMesh, unionOfNefPolyhedrons } from './jsxcad-algorithm-cgal.js';
+import { min, max, dot, scale } from './jsxcad-math-vec3.js';
 import { deduplicate as deduplicate$1 } from './jsxcad-geometry-path.js';
 import { toPlane, flip } from './jsxcad-math-poly3.js';
-import { transform as transform$2 } from './jsxcad-math-plane.js';
 
 const graphSymbol = Symbol('graph');
 const nefPolyhedronSymbol = Symbol('nefPolyhedron');
@@ -1251,19 +1250,28 @@ const toSolid = (graph) => {
   return solid;
 };
 
+const transform = (matrix, graph) =>
+  fromSurfaceMesh(transformSurfaceMesh(toSurfaceMesh(graph), matrix));
+
+/*
+import { nefPolyhedronSymbol, surfaceMeshSymbol } from './symbols.js';
+
+import { transform as transformPlane } from './jsxcad-math-plane.js';
+import { transform as transformPoint } from './jsxcad-math-vec3.js';
+
 // FIX: Precision loss.
-const transform = (matrix, graph) => {
+export const transform = (matrix, graph) => {
   const transformedPoints = [];
   for (let nth = 0; nth < graph.points.length; nth++) {
     const point = graph.points[nth];
     if (point !== undefined) {
-      transformedPoints[nth] = transform$1(matrix, point);
+      transformedPoints[nth] = transformPoint(matrix, point);
     }
   }
 
   const transformedFaces = graph.faces.map((face) => ({
     ...face,
-    plane: face.plane ? transform$2(matrix, face.plane) : face.plane,
+    plane: face.plane ? transformPlane(matrix, face.plane) : face.plane,
   }));
 
   return {
@@ -1274,6 +1282,7 @@ const transform = (matrix, graph) => {
     [surfaceMeshSymbol]: undefined,
   };
 };
+*/
 
 const far$2 = 10000;
 

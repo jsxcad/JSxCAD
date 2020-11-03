@@ -4,7 +4,7 @@ import * as api from '@jsxcad/api-v1';
 import * as sys from '@jsxcad/sys';
 import hashSum from 'hash-sum';
 
-const resolveNotebook = async (path) => {
+const resolveNotebook = async () => {
   await sys.resolvePending();
   // Update the notebook.
   const notebook = sys.getEmitted();
@@ -40,7 +40,7 @@ const agent = async ({ ask, question }) => {
   if (question.evaluate) {
     sys.setupFilesystem({ fileBase: question.workspace });
     sys.clearEmitted();
-    let nthNote;
+    let nthNote = 0;
     onEmitHandler = sys.addOnEmitHandler(async (note, index) => {
       nthNote += 1;
       if (note.download) {
@@ -59,7 +59,12 @@ const agent = async ({ ask, question }) => {
         `return async () => { ${ecmascript} };`
       );
       const module = await builder(api);
-      await module();
+      try {
+        sys.pushModule(question.path);
+        await module();
+      } finally {
+        sys.popModule();
+      }
       await sys.log({
         op: 'text',
         text: 'Evaluation Succeeded',
@@ -76,7 +81,7 @@ const agent = async ({ ask, question }) => {
       });
       await sys.log({ op: 'evaluate', status: 'failure' });
     } finally {
-      await resolveNotebook(question.path);
+      await resolveNotebook();
       await sys.resolvePending();
       ask({ notebookLength: nthNote });
       sys.removeOnEmitHandler(onEmitHandler);

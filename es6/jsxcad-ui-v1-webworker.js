@@ -1,5 +1,5 @@
 import * as api from './jsxcad-api-v1.js';
-import { setPendingErrorHandler, emit, log, boot, conversation, setupFilesystem, clearEmitted, addOnEmitHandler, resolvePending, removeOnEmitHandler, getEmitted } from './jsxcad-sys.js';
+import { setPendingErrorHandler, emit, log, boot, conversation, setupFilesystem, clearEmitted, addOnEmitHandler, pushModule, popModule, resolvePending, removeOnEmitHandler, getEmitted } from './jsxcad-sys.js';
 
 function pad (hash, len) {
   while (hash.length < len) {
@@ -71,7 +71,7 @@ var hashSum = sum;
 
 /* global postMessage, onmessage:writable, self */
 
-const resolveNotebook = async path => {
+const resolveNotebook = async () => {
   await resolvePending(); // Update the notebook.
 
   const notebook = getEmitted(); // Resolve any promises.
@@ -125,7 +125,7 @@ const agent = async ({
       fileBase: question.workspace
     });
     clearEmitted();
-    let nthNote;
+    let nthNote = 0;
     onEmitHandler = addOnEmitHandler(async (note, index) => {
       nthNote += 1;
 
@@ -153,7 +153,14 @@ const agent = async ({
       });
       const builder = new Function(`{ ${Object.keys(api).join(', ')} }`, `return async () => { ${ecmascript} };`);
       const module = await builder(api);
-      await module();
+
+      try {
+        pushModule(question.path);
+        await module();
+      } finally {
+        popModule();
+      }
+
       await log({
         op: 'text',
         text: 'Evaluation Succeeded',
@@ -175,7 +182,7 @@ const agent = async ({
         status: 'failure'
       });
     } finally {
-      await resolveNotebook(question.path);
+      await resolveNotebook();
       await resolvePending();
       ask({
         notebookLength: nthNote

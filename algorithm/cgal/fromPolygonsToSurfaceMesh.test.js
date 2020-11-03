@@ -83,7 +83,6 @@ test('FromPolygonsToSurfaceMesh/Triangle', (t) => {
   t.true(surfaceMesh.number_of_edges() > 0);
   const graph = fromSurfaceMeshToGraph(surfaceMesh);
   t.deepEqual(JSON.parse(JSON.stringify(graph)), {
-    isClosed: false,
     edges: [
       { point: 1, next: 2, twin: 1, loop: 0 },
       null,
@@ -98,5 +97,11 @@ test('FromPolygonsToSurfaceMesh/Triangle', (t) => {
       [-0.5, 0.5, 0.5],
       [0.5, 0.5, 0.5],
     ],
+    exact: [
+      ['-1/2', '1/2', '-1/2'],
+      ['-1/2', '1/2', '1/2'],
+      ['1/2', '1/2', '1/2'],
+    ],
+    isClosed: false,
   });
 });

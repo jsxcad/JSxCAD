@@ -7,7 +7,7 @@ export const fromSurfaceMeshToGraph = (mesh) => {
   if (mesh.has_garbage()) {
     c.Surface_mesh__collect_garbage(mesh);
   }
-  const graph = { edges: [], faces: [], loops: [], points: [] };
+  const graph = { edges: [], faces: [], loops: [], points: [], exact: [] };
   const polygon = [];
   let face = -1;
   c.Surface_mesh__explore(
@@ -24,7 +24,7 @@ export const fromSurfaceMeshToGraph = (mesh) => {
       polygon.length = 0;
       face = faceId;
     },
-    (point, x, y, z) => {
+    (point, x, y, z, exactX, exactY, exactZ) => {
       if (!isFinite(x) || !isFinite(y) || !isFinite(z)) {
         throw Error('die');
       }
@@ -34,6 +34,7 @@ export const fromSurfaceMeshToGraph = (mesh) => {
         }
       }
       graph.points[point] = [x, y, z];
+      graph.exact[point] = [exactX, exactY, exactZ];
     },
     (point, edge, next, twin) => {
       graph.edges[edge] = { point, next, twin, loop: face };

@@ -24,9 +24,6 @@ test('fromSolid', (t) => {
   const graph = fromSurface(square);
   const outlineGraph = outline(graph);
   t.deepEqual(JSON.parse(JSON.stringify(outlineGraph)), {
-    isClosed: false,
-    isOutline: true,
-    isWireframe: true,
     edges: [
       { point: 1, next: 2, twin: 1, loop: 0 },
       null,
@@ -44,6 +41,15 @@ test('fromSolid', (t) => {
       [0.5, -0.5, -0.5],
       [-0.5, -0.5, -0.5],
     ],
+    exact: [
+      ['-1/2', '1/2', '-1/2'],
+      ['1/2', '1/2', '-1/2'],
+      ['1/2', '-1/2', '-1/2'],
+      ['-1/2', '-1/2', '-1/2'],
+    ],
+    isClosed: false,
+    isOutline: true,
+    isWireframe: true,
   });
   const offsetGraph = offset(outlineGraph, -0.2);
   t.deepEqual(JSON.parse(JSON.stringify(offsetGraph)), {
