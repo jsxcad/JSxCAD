@@ -1080,6 +1080,9 @@ const section = ([x, y, z, w], graph) =>
 const far = 10000;
 
 const difference = (a, b) => {
+  if (a.isEmpty || b.isEmpty) {
+    return a;
+  }
   if (!a.isClosed) {
     return section(principlePlane(a), difference(extrude(a, far, 0), b));
   }
@@ -1165,6 +1168,12 @@ const interior = (graph) => fromPolygons(toTriangles(graph));
 const far$1 = 10000;
 
 const intersection = (a, b) => {
+  if (a.isEmpty) {
+    return a;
+  }
+  if (b.isEmpty) {
+    return b;
+  }
   if (!a.isClosed) {
     return section(principlePlane(a), intersection(extrude(a, far$1, 0), b));
   }
@@ -1287,6 +1296,9 @@ export const transform = (matrix, graph) => {
 const far$2 = 10000;
 
 const union = (a, b) => {
+  if (a.isEmpty || b.isEmpty) {
+    return a;
+  }
   if (!a.isClosed) {
     return section(principlePlane(a), union(extrude(a, far$2, 0), b));
   }

@@ -1,6 +1,6 @@
 import { emit, log, onBoot } from './jsxcad-sys.js';
-import { equals, fromPolygon } from './jsxcad-math-plane.js';
-import { equals as equals$1 } from './jsxcad-math-vec3.js';
+import { dot, equals } from './jsxcad-math-vec3.js';
+import { fromPolygon } from './jsxcad-math-plane.js';
 
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -9053,7 +9053,7 @@ const fromNefPolyhedronFacetsToGraph = (nefPolyhedron, plane) => {
   const vertexMap = [];
   const addPoint = (vertex, point) => {
     for (let index = 0; index < graph.points.length; index++) {
-      if (equals$1(point, graph.points[index])) {
+      if (equals(point, graph.points[index])) {
         vertexMap[vertex] = index;
         return index;
       }
@@ -9072,7 +9072,7 @@ const fromNefPolyhedronFacetsToGraph = (nefPolyhedron, plane) => {
       console.log(`facet: ${facet}`);
       facetId = facet;
       facetPlane = [x, y, z, w];
-      if (plane && !equals(facetPlane, plane)) {
+      if (dot(plane, facetPlane) < 0.99) {
         facetId = -1;
       }
     },
@@ -9109,6 +9109,9 @@ const fromNefPolyhedronFacetsToGraph = (nefPolyhedron, plane) => {
       addPoint(vertex, [x, y, z]);
     }
   );
+  if (graph.faces.length === 0) {
+    graph.isEmpty = true;
+  }
   return graph;
 };
 
@@ -9126,7 +9129,7 @@ const fromNefPolyhedronShellsToGraph = (nefPolyhedron) => {
   const vertexMap = [];
   const addPoint = (vertex, point) => {
     for (let index = 0; index < graph.points.length; index++) {
-      if (equals$1(point, graph.points[index])) {
+      if (equals(point, graph.points[index])) {
         vertexMap[vertex] = index;
         return index;
       }
@@ -9234,7 +9237,7 @@ const fromPointsToAlphaShapeAsSurfaceMesh = (
   return c.ComputeAlphaShapeAsSurfaceMesh(componentLimit, (points) => {
     let addedPoints = [];
     for (const jsPoint of jsPoints) {
-      if (addedPoints.some((addedPoint) => equals$1(addedPoint, jsPoint))) {
+      if (addedPoints.some((addedPoint) => equals(addedPoint, jsPoint))) {
         continue;
       }
       addedPoints.push(jsPoint);
@@ -9262,7 +9265,7 @@ const fromPointsToAlphaShape2AsPolygonSegments = (
     (points) => {
       let addedPoints = [];
       for (const jsPoint of jsPoints) {
-        if (addedPoints.some((addedPoint) => equals$1(addedPoint, jsPoint))) {
+        if (addedPoints.some((addedPoint) => equals(addedPoint, jsPoint))) {
           continue;
         }
         addedPoints.push(jsPoint);
@@ -9295,7 +9298,7 @@ const fromPointsToSurfaceMesh = (points) => {
   const addedPoints = [];
   const isAddedPoint = (point) => {
     for (const addedPoint of addedPoints) {
-      if (equals$1(point, addedPoint)) {
+      if (equals(point, addedPoint)) {
         return true;
       }
       return false;
@@ -9371,7 +9374,7 @@ const fromSurfaceMeshToGraph = (mesh) => {
         throw Error('die');
       }
       if (graph.points[point]) {
-        if (!equals$1(graph.points[point], [x, y, z])) {
+        if (!equals(graph.points[point], [x, y, z])) {
           throw Error('die');
         }
       }
@@ -9388,6 +9391,9 @@ const fromSurfaceMeshToGraph = (mesh) => {
     }
   );
   graph.isClosed = c.Surface_mesh__is_closed(mesh);
+  if (graph.faces.length === 0) {
+    graph.isEmpty = true;
+  }
   return graph;
 };
 

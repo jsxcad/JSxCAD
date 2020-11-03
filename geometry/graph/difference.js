@@ -9,6 +9,9 @@ import { toNefPolyhedron } from './toNefPolyhedron.js';
 const far = 10000;
 
 export const difference = (a, b) => {
+  if (a.isEmpty || b.isEmpty) {
+    return a;
+  }
   if (!a.isClosed) {
     return section(principlePlane(a), difference(extrude(a, far, 0), b));
   }
