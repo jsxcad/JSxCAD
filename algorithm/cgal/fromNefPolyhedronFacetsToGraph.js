@@ -1,5 +1,5 @@
-import { equals as equalsPlane } from '@jsxcad/math-plane';
-import { equals as equalsVec3 } from '@jsxcad/math-vec3';
+import { dot, equals as equalsVec3 } from '@jsxcad/math-vec3';
+
 import { getCgal } from './getCgal.js';
 
 export const fromNefPolyhedronFacetsToGraph = (nefPolyhedron, plane) => {
@@ -36,7 +36,7 @@ export const fromNefPolyhedronFacetsToGraph = (nefPolyhedron, plane) => {
       console.log(`facet: ${facet}`);
       facetId = facet;
       facetPlane = [x, y, z, w];
-      if (plane && !equalsPlane(facetPlane, plane)) {
+      if (dot(plane, facetPlane) < 0.99) {
         facetId = -1;
       }
     },
@@ -73,5 +73,8 @@ export const fromNefPolyhedronFacetsToGraph = (nefPolyhedron, plane) => {
       addPoint(vertex, [x, y, z]);
     }
   );
+  if (graph.faces.length === 0) {
+    graph.isEmpty = true;
+  }
   return graph;
 };

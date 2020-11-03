@@ -88,13 +88,13 @@ const resolveNotebook = async () => {
 const say = message => postMessage(message);
 
 const reportError = error => {
-  const log$1 = {
+  const entry = {
     text: error.stack ? error.stack : error,
     level: 'serious'
   };
-  const hash = hashSum(log$1);
+  const hash = hashSum(entry);
   emit({
-    log: log$1,
+    error: entry,
     hash
   });
   log({

@@ -8,6 +8,12 @@ import { toNefPolyhedron } from './toNefPolyhedron.js';
 const far = 10000;
 
 export const intersection = (a, b) => {
+  if (a.isEmpty) {
+    return a;
+  }
+  if (b.isEmpty) {
+    return b;
+  }
   if (!a.isClosed) {
     return section(principlePlane(a), intersection(extrude(a, far, 0), b));
   }

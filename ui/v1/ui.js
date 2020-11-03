@@ -169,6 +169,11 @@ class Ui extends React.PureComponent {
         const { note, index } = question;
         const { notebookData, notebookRef } = this.state;
         const entry = notebookData[index];
+        if (entry && entry.noteRef) {
+          for (const child of entry.noteRef.getElementsByClassName('note')) {
+            child.style.removeProperty('filter');
+          }
+        }
         if (!entry || entry.hash !== note.hash) {
           notebookData[index] = note;
           // Erase duplicates of this note.
@@ -178,6 +183,13 @@ class Ui extends React.PureComponent {
             }
             const other = notebookData[nth];
             if (other && other.hash === note.hash) {
+              if (other.noteRef) {
+                for (const child of other.noteRef.getElementsByClassName(
+                  'note'
+                )) {
+                  child.style.removeProperty('filter');
+                }
+              }
               delete notebookData[nth];
             }
           }
@@ -737,6 +749,11 @@ class Ui extends React.PureComponent {
       await terminateActiveServices();
       clearEmitted();
 
+      for (const element of document.getElementsByClassName('note')) {
+        // element.style.backgroundColor = 'red';
+        element.style.filter = 'sepia(100%)';
+      }
+
       // FIX: This is a bit awkward.
       // The responsibility for updating the control values ought to be with what
       // renders the notebook.
@@ -772,6 +789,9 @@ class Ui extends React.PureComponent {
         }
       }
       this.updateNotebook();
+      for (const element of document.getElementsByClassName('note')) {
+        element.style.removeProperty('filter');
+      }
       this.setState({ running: false });
     }
   }

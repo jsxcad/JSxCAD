@@ -21,9 +21,9 @@ const resolveNotebook = async () => {
 const say = (message) => postMessage(message);
 
 const reportError = (error) => {
-  const log = { text: error.stack ? error.stack : error, level: 'serious' };
-  const hash = hashSum(log);
-  sys.emit({ log, hash });
+  const entry = { text: error.stack ? error.stack : error, level: 'serious' };
+  const hash = hashSum(entry);
+  sys.emit({ error: entry, hash });
   sys.log({
     op: 'text',
     text: error.stack ? error.stack : error,

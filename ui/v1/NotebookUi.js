@@ -39,6 +39,7 @@ export class NoteUi extends React.PureComponent {
               ref.style.display = 'inline-block';
             }
             ref.appendChild(element);
+            note.noteRef = ref;
           }
         }
       }
@@ -118,7 +119,7 @@ export class NotebookUi extends React.PureComponent {
             .filter((note) => note.hash)
             .map((note) => {
               // FIX: Rename or differentiate 'text' and 'error'.
-              if (note.module === path || note.text) {
+              if (note.module === path || note.text || note.error) {
                 return <NoteUi data={data} key={note.hash} hash={note.hash} />;
               }
             })}
