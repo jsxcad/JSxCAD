@@ -167,6 +167,7 @@ class Ui extends React.PureComponent {
         return touch(path, { workspace });
       } else if (question.note) {
         const { note, index } = question;
+        console.log(`QQ/question.note: ${index}`);
         const { notebookData, notebookRef } = this.state;
         const entry = notebookData[index];
         if (entry && entry.noteRef) {
@@ -199,6 +200,7 @@ class Ui extends React.PureComponent {
         }
       } else if (question.notebookLength) {
         const { notebookLength } = question;
+        console.log(`QQ/question.notebookLength: ${notebookLength}`);
         const { notebookData, notebookRef } = this.state;
         if (notebookData.length !== notebookLength) {
           notebookData.length = notebookLength;

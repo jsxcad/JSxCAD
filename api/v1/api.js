@@ -55,6 +55,12 @@ export { source } from './source.js';
 
 export { emit, read, write } from '@jsxcad/sys';
 
+export {
+  beginRecordingNotes,
+  replayRecordedNotes,
+  saveRecordedNotes,
+} from './recordNotes.js';
+
 export { X, Y, Z } from '@jsxcad/api-v1-connector';
 
 export { ChainedHull, Hull, Loop } from '@jsxcad/api-v1-extrude';

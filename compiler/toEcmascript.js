@@ -150,10 +150,19 @@ export const toEcmascript = async (
         declarations: [{ ...declarator, init }],
       };
       out.push(cacheLoadCode);
+      const replayRecordedNotes = parse(
+        `replayRecordedNotes('data/note/${path}/${id}')`,
+        parseOptions
+      );
+      out.push(replayRecordedNotes);
       entry.code = cacheLoadCode;
-      entry.program = generate({ type: 'Program', body: [cacheLoadCode] });
+      entry.program = generate({
+        type: 'Program',
+        body: [cacheLoadCode, replayRecordedNotes],
+      });
       entry.isComputed = true;
     } else {
+      out.push(parse('beginRecordingNotes()', parseOptions));
       out.push({ ...declaration, declarations: [declarator] });
       // Only cache Shapes.
       out.push(
@@ -161,6 +170,9 @@ export const toEcmascript = async (
           `${id} instanceof Shape && await saveGeometry('data/def/${path}/${id}', ${id}) && await write('meta/def/${path}/${id}', { sha: '${sha}' });`,
           parseOptions
         )
+      );
+      out.push(
+        parse(`saveRecordedNotes('data/note/${path}/${id}')`, parseOptions)
       );
     }
     out.push(parse(`Object.freeze(${id});`, parseOptions));
