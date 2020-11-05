@@ -1,5 +1,5 @@
 import { fromTranslation } from './jsxcad-math-mat4.js';
-import { transform as transform$1, canonicalize as canonicalize$1, max, min } from './jsxcad-math-vec3.js';
+import { transform as transform$1, canonicalize as canonicalize$1, subtract, max, min } from './jsxcad-math-vec3.js';
 
 // A point in a cloud may be supplemented by a 'forward' and a 'right' vector
 // allowing it to define a plane with a rotation.
@@ -35,6 +35,19 @@ const eachPoint = (thunk, points) => {
   }
 };
 
+const flip = (points) =>
+  points.map((point) => {
+    if (point.length <= 3) {
+      return point;
+    }
+    const [x, y, z, xF, yF, zF, xR, yR, zR] = point;
+    const [xFR, yFR, zFR] = subtract(
+      [x, y, z],
+      subtract([xR, yR, zR], [x, y, z])
+    );
+    return [x, y, z, xF, yF, zF, xFR, yFR, zFR];
+  });
+
 const fromPolygons = (polygons) => {
   const points = [];
   for (const polygon of polygons) {
@@ -57,7 +70,5 @@ const measureBoundingBox = (points) => {
 };
 
 const union = (...geometries) => [].concat(...geometries);
-
-const flip = (points) => points;
 
 export { canonicalize, eachPoint, flip, fromPolygons, measureBoundingBox, transform, translate, union };

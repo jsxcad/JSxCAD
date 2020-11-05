@@ -1,20 +1,8 @@
-import { transform, translate } from './ops.js';
+export { transform, translate } from './ops.js';
 
-import { canonicalize } from './canonicalize.js';
-import { eachPoint } from './eachPoint.js';
-import { fromPolygons } from './fromPolygons.js';
-import { measureBoundingBox } from './measureBoundingBox.js';
-import { union } from './union.js';
-
-const flip = (points) => points;
-
-export {
-  canonicalize,
-  eachPoint,
-  flip,
-  fromPolygons,
-  measureBoundingBox,
-  transform,
-  translate,
-  union,
-};
+export { canonicalize } from './canonicalize.js';
+export { eachPoint } from './eachPoint.js';
+export { flip } from './flip.js';
+export { fromPolygons } from './fromPolygons.js';
+export { measureBoundingBox } from './measureBoundingBox.js';
+export { union } from './union.js';
