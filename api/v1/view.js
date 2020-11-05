@@ -2,7 +2,7 @@ import { addPending, emit, write } from '@jsxcad/sys';
 
 import Shape from '@jsxcad/api-v1-shape';
 import { ensurePages } from '@jsxcad/api-v1-layout';
-import hashSum from 'hash-sum';
+import { hash as hashGeometry } from '@jsxcad/geometry-tagged';
 
 // FIX: Avoid the extra read-write cycle.
 const view = (
@@ -11,8 +11,8 @@ const view = (
   { path, width = 1024, height = 512, position = [100, -100, 100] } = {}
 ) => {
   let nth = 0;
+  const hash = hashGeometry(shape.toGeometry());
   for (const entry of ensurePages(shape.toDisjointGeometry())) {
-    const entryHash = hashSum(entry);
     if (path) {
       const nthPath = `${path}_${nth++}`;
       addPending(write(nthPath, entry));
@@ -22,10 +22,8 @@ const view = (
         position,
         path: nthPath,
         inline,
-        entryHash,
       };
-      const hash = hashSum(view);
-      emit({ view, hash });
+      emit({ view, hash: hash + nth });
     } else {
       const view = {
         width,
@@ -33,10 +31,8 @@ const view = (
         position,
         geometry: entry,
         inline,
-        entryHash,
       };
-      const hash = hashSum(view);
-      emit({ view, hash });
+      emit({ view, hash: hash + nth });
     }
   }
   return shape;

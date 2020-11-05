@@ -2,6 +2,7 @@ import Shape, { Shape as Shape$1 } from './jsxcad-api-v1-shape.js';
 import { fromStl, toStl } from './jsxcad-convert-stl.js';
 import { read, addPending, writeFile, getPendingErrorHandler, emit } from './jsxcad-sys.js';
 import { ensurePages } from './jsxcad-api-v1-layout.js';
+import { hash } from './jsxcad-geometry-tagged.js';
 
 const readStl = async (
   path,
@@ -95,12 +96,12 @@ const prepareStl = (shape, name, options = {}) => {
   return entries;
 };
 
-const downloadStlMethod = function (...args) {
-  const entries = prepareStl(this, ...args);
+const downloadStlMethod = function (name, options = {}) {
+  const entries = prepareStl(this, name, options);
   const download = { entries };
-  // FIX: This is hashing data when it is a promise.
-  const hash = hashSum(download);
-  emit({ download, hash });
+  // We should be saving the stl data in the filesystem.
+  const hash$1 = hashSum({ name, options }) + hash(this.toGeometry());
+  emit({ download, hash: hash$1 });
   return this;
 };
 Shape$1.prototype.downloadStl = downloadStlMethod;

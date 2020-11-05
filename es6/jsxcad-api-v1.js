@@ -1,9 +1,10 @@
-import { addPending, write, emit, read, getCurrentPath, addSource, pushModule, popModule } from './jsxcad-sys.js';
+import { addPending, write, emit, read, getCurrentPath, addSource, addOnEmitHandler, pushModule, popModule } from './jsxcad-sys.js';
 export { emit, read, write } from './jsxcad-sys.js';
 import Shape, { Shape as Shape$1, loadGeometry, log, saveGeometry } from './jsxcad-api-v1-shape.js';
 export { Shape, loadGeometry, log, saveGeometry } from './jsxcad-api-v1-shape.js';
 import { ensurePages, Page, pack } from './jsxcad-api-v1-layout.js';
 export { Page, pack } from './jsxcad-api-v1-layout.js';
+import { hash } from './jsxcad-geometry-tagged.js';
 import './jsxcad-api-v1-deform.js';
 import './jsxcad-api-v1-gcode.js';
 import './jsxcad-api-v1-pdf.js';
@@ -36,6 +37,68 @@ import { foot, inch, mm, mil, cm, m, thou, yard } from './jsxcad-api-v1-units.js
 export { cm, foot, inch, m, mil, mm, thou, yard } from './jsxcad-api-v1-units.js';
 import { toEcmascript } from './jsxcad-compiler.js';
 import { toSvg } from './jsxcad-convert-svg.js';
+
+// FIX: Avoid the extra read-write cycle.
+const view = (
+  shape,
+  inline,
+  { path, width = 1024, height = 512, position = [100, -100, 100] } = {}
+) => {
+  let nth = 0;
+  const hash$1 = hash(shape.toGeometry());
+  for (const entry of ensurePages(shape.toDisjointGeometry())) {
+    if (path) {
+      const nthPath = `${path}_${nth++}`;
+      addPending(write(nthPath, entry));
+      const view = {
+        width,
+        height,
+        position,
+        path: nthPath,
+        inline,
+      };
+      emit({ view, hash: hash$1 + nth });
+    } else {
+      const view = {
+        width,
+        height,
+        position,
+        geometry: entry,
+        inline,
+      };
+      emit({ view, hash: hash$1 + nth });
+    }
+  }
+  return shape;
+};
+
+Shape.prototype.view = function (
+  inline,
+  { path, width = 1024, height = 512, position = [100, -100, 100] } = {}
+) {
+  return view(this, inline, { path, width, height, position });
+};
+
+Shape.prototype.topView = function (
+  inline,
+  { path, width = 1024, height = 512, position = [0, 0, 100] } = {}
+) {
+  return view(this, inline, { path, width, height, position });
+};
+
+Shape.prototype.frontView = function (
+  inline,
+  { path, width = 1024, height = 512, position = [0, -100, 0] } = {}
+) {
+  return view(this, inline, { path, width, height, position });
+};
+
+Shape.prototype.sideView = function (
+  inline,
+  { path, width = 1024, height = 512, position = [100, 0, 0] } = {}
+) {
+  return view(this, inline, { path, width, height, position });
+};
 
 function pad (hash, len) {
   while (hash.length < len) {
@@ -105,72 +168,6 @@ function sum (o) {
 
 var hashSum = sum;
 
-// FIX: Avoid the extra read-write cycle.
-const view = (
-  shape,
-  inline,
-  { path, width = 1024, height = 512, position = [100, -100, 100] } = {}
-) => {
-  let nth = 0;
-  for (const entry of ensurePages(shape.toDisjointGeometry())) {
-    const entryHash = hashSum(entry);
-    if (path) {
-      const nthPath = `${path}_${nth++}`;
-      addPending(write(nthPath, entry));
-      const view = {
-        width,
-        height,
-        position,
-        path: nthPath,
-        inline,
-        entryHash,
-      };
-      const hash = hashSum(view);
-      emit({ view, hash });
-    } else {
-      const view = {
-        width,
-        height,
-        position,
-        geometry: entry,
-        inline,
-        entryHash,
-      };
-      const hash = hashSum(view);
-      emit({ view, hash });
-    }
-  }
-  return shape;
-};
-
-Shape.prototype.view = function (
-  inline,
-  { path, width = 1024, height = 512, position = [100, -100, 100] } = {}
-) {
-  return view(this, inline, { path, width, height, position });
-};
-
-Shape.prototype.topView = function (
-  inline,
-  { path, width = 1024, height = 512, position = [0, 0, 100] } = {}
-) {
-  return view(this, inline, { path, width, height, position });
-};
-
-Shape.prototype.frontView = function (
-  inline,
-  { path, width = 1024, height = 512, position = [0, -100, 0] } = {}
-) {
-  return view(this, inline, { path, width, height, position });
-};
-
-Shape.prototype.sideView = function (
-  inline,
-  { path, width = 1024, height = 512, position = [100, 0, 0] } = {}
-) {
-  return view(this, inline, { path, width, height, position });
-};
-
 const md = (strings, ...placeholders) => {
   const md = strings.reduce(
     (result, string, i) => result + placeholders[i - 1] + string
@@ -225,6 +222,46 @@ const selectBox = async (label, otherwise, options) => {
 
 const source = (path, source) => addSource(`cache/${path}`, source);
 
+const notes = [];
+
+let replaying = false;
+let handler;
+
+const recordNote = (note, index) => {
+  if (!replaying) {
+    notes.push({ note, index });
+  }
+};
+
+const beginRecordingNotes = () => {
+  if (handler === undefined) {
+    handler = addOnEmitHandler(recordNote);
+  }
+  notes.length = 0;
+};
+
+const saveRecordedNotes = async (path) => {
+  await write(path, notes);
+};
+
+const replayRecordedNotes = async (path) => {
+  try {
+    replaying = true;
+    const notes = await read(path);
+    if (notes === undefined) {
+      return;
+    }
+    if (notes.length === 0) {
+      return;
+    }
+    for (const { note } of notes) {
+      emit(note);
+    }
+  } finally {
+    replaying = false;
+  }
+};
+
 /**
  *
  * Defines the interface used by the api to access the rest of the system on
@@ -271,6 +308,9 @@ var api = /*#__PURE__*/Object.freeze({
   emit: emit,
   read: read,
   write: write,
+  beginRecordingNotes: beginRecordingNotes,
+  replayRecordedNotes: replayRecordedNotes,
+  saveRecordedNotes: saveRecordedNotes,
   X: X,
   Y: Y,
   Z: Z,
@@ -434,4 +474,4 @@ registerDynamicModule(module('svg'), './jsxcad-api-v1-svg.js');
 registerDynamicModule(module('threejs'), './jsxcad-api-v1-threejs.js');
 registerDynamicModule(module('units'), './jsxcad-api-v1-units.js');
 
-export { a, b, c, checkBox, d, importModule, md, numberBox, r, selectBox, sliderBox, source, stringBox, x, y, z };
+export { a, b, beginRecordingNotes, c, checkBox, d, importModule, md, numberBox, r, replayRecordedNotes, saveRecordedNotes, selectBox, sliderBox, source, stringBox, x, y, z };
