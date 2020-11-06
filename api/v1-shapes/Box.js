@@ -5,6 +5,7 @@ import {
   toRadiusFromApothem,
 } from '@jsxcad/algorithm-shape';
 
+import { Square } from './Square.js';
 import { taggedSolid } from '@jsxcad/geometry-tagged';
 
 const edgeScale = regularPolygonEdgeLengthToRadius(1, 4);
@@ -59,6 +60,8 @@ export const fromCorners = (corner1 = [1, 1, 1], corner2 = [0, 0, 0]) => {
 export const Box = (...args) => {
   if (typeof args[0] === 'object') {
     return ofPlan(...args);
+  } else if (args.length < 3) {
+    return Square(...args);
   } else {
     return ofSize(...args);
   }

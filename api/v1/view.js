@@ -23,7 +23,7 @@ const view = (
         path: nthPath,
         inline,
       };
-      emit({ view, hash: hash + nth });
+      emit({ view, hash: `${hash}_${nth}` });
     } else {
       const view = {
         width,
@@ -32,7 +32,7 @@ const view = (
         geometry: entry,
         inline,
       };
-      emit({ view, hash: hash + nth });
+      emit({ view, hash: `${hash}_${nth}` });
     }
   }
   return shape;

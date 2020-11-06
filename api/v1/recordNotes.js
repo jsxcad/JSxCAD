@@ -1,41 +1,46 @@
-import { addOnEmitHandler, emit, read, write } from '@jsxcad/sys';
+import { addOnEmitHandler, addPending, emit, read, write } from '@jsxcad/sys';
 
-const notes = [];
+let notes;
 
-let replaying = false;
+let recording = false;
 let handler;
 
 const recordNote = (note, index) => {
-  if (!replaying) {
+  if (recording) {
+    if (notes === undefined) {
+      throw Error('die');
+    }
     notes.push({ note, index });
   }
 };
 
 export const beginRecordingNotes = () => {
+  if (notes !== undefined) {
+    throw Error('die');
+  }
   if (handler === undefined) {
     handler = addOnEmitHandler(recordNote);
   }
-  notes.length = 0;
+  recording = true;
+  notes = [];
 };
 
-export const saveRecordedNotes = async (path) => {
-  await write(path, notes);
+export const saveRecordedNotes = (path) => {
+  let notesToSave = notes;
+  notes = undefined;
+  recording = false;
+  addPending(write(path, notesToSave));
 };
 
 export const replayRecordedNotes = async (path) => {
-  try {
-    replaying = true;
-    const notes = await read(path);
-    if (notes === undefined) {
-      return;
-    }
-    if (notes.length === 0) {
-      return;
-    }
-    for (const { note } of notes) {
-      emit(note);
-    }
-  } finally {
-    replaying = false;
+  const notes = await read(path);
+  if (notes === undefined) {
+    return;
+  }
+  if (notes.length === 0) {
+    return;
+  }
+  for (const { note } of notes) {
+    emit(note);
   }
 };

@@ -7,7 +7,7 @@ import { transform as transform$5, canonicalize as canonicalize$5, difference as
 import { equals, transform as transform$6, canonicalize as canonicalize$4, toPolygon } from './jsxcad-math-plane.js';
 import { transform as transform$4, canonicalize as canonicalize$3, eachPoint as eachPoint$5, flip as flip$4, measureBoundingBox as measureBoundingBox$1, union as union$1 } from './jsxcad-geometry-points.js';
 import { transform as transform$1, toPlane, canonicalize as canonicalize$2, makeWatertight as makeWatertight$2, eachPoint as eachPoint$2, flip as flip$2, makeConvex, measureArea as measureArea$1, measureBoundingBox as measureBoundingBox$3 } from './jsxcad-geometry-surface.js';
-import { transform as transform$2, difference as difference$3, fromSolid as fromSolid$1, eachPoint as eachPoint$1, extrude as extrude$1, extrudeToPlane as extrudeToPlane$1, interior as interior$1, fromPolygons, intersection as intersection$2, measureBoundingBox as measureBoundingBox$5, outline as outline$1, section as section$1, smooth as smooth$1, union as union$4 } from './jsxcad-geometry-graph.js';
+import { transform as transform$2, difference as difference$3, fromSolid as fromSolid$1, eachPoint as eachPoint$1, interior as interior$1, fromPolygons, extrude as extrude$1, extrudeToPlane as extrudeToPlane$1, intersection as intersection$2, measureBoundingBox as measureBoundingBox$5, outline as outline$1, section as section$1, smooth as smooth$1, union as union$4 } from './jsxcad-geometry-graph.js';
 import { differenceSurface, fromSolid, fromSurface, toConvexSolids, unifyBspTrees, removeExteriorPaths, intersectSurface, intersection as intersection$1, union as union$3 } from './jsxcad-geometry-bsp.js';
 import { difference as difference$2 } from './jsxcad-geometry-solid-boolean.js';
 import { min, max } from './jsxcad-math-vec3.js';
@@ -686,6 +686,142 @@ const eachPoint = (emit, geometry) => {
   visit(geometry, op);
 };
 
+const eachNonVoidItem = (geometry, op) => {
+  const walk = (geometry, descend) => {
+    // FIX: Sketches aren't real either -- but this is a bit unclear.
+    if (geometry.type !== 'sketch' && isNotVoid(geometry)) {
+      op(geometry);
+      descend();
+    }
+  };
+  visit(geometry, walk);
+};
+
+const getNonVoidGraphs = (geometry) => {
+  const graphs = [];
+  eachNonVoidItem(geometry, (item) => {
+    if (item.type === 'graph') {
+      graphs.push(item);
+    }
+  });
+  return graphs;
+};
+
+const getNonVoidPaths = (geometry) => {
+  const pathsets = [];
+  eachNonVoidItem(geometry, (item) => {
+    if (item.type === 'paths') {
+      pathsets.push(item);
+    }
+  });
+  return pathsets;
+};
+
+const taggedGroup = ({ tags }, ...content) => {
+  if (content.some((value) => !value)) {
+    throw Error(`Undefined Group content`);
+  }
+  if (content.some((value) => value.length)) {
+    throw Error(`Group content is an array`);
+  }
+  // FIX: Deprecate layers.
+  return { type: 'layers', tags, content };
+};
+
+const taggedDisjointAssembly = ({ tags }, ...content) => {
+  if (content.some((value) => !value)) {
+    throw Error(`Undefined DisjointAssembly content`);
+  }
+  if (content.some((value) => value.length)) {
+    throw Error(`DisjointAssembly content is an array`);
+  }
+  if (content.some((value) => value.geometry)) {
+    throw Error(`Likely Shape instance in DisjointAssembly content`);
+  }
+  if (tags !== undefined && tags.length === undefined) {
+    throw Error(`Bad tags`);
+  }
+  if (typeof tags === 'function') {
+    throw Error(`Tags is a function`);
+  }
+  const disjointAssembly = { type: 'disjointAssembly', tags, content };
+  visit(disjointAssembly, (geometry, descend) => {
+    if (geometry.type === 'transform') {
+      throw Error('DisjointAssembly contains transform.');
+    }
+    return descend();
+  });
+  return disjointAssembly;
+};
+
+const linkDisjointAssembly = Symbol('linkDisjointAssembly');
+
+const toDisjointGeometry = (geometry) => {
+  const op = (geometry, descend, walk) => {
+    if (geometry[linkDisjointAssembly]) {
+      return geometry[linkDisjointAssembly];
+    } else if (geometry.type === 'disjointAssembly') {
+      // Everything below this point is disjoint.
+      return geometry;
+    } else if (geometry.type === 'transform') {
+      return walk(toTransformedGeometry(geometry), op);
+    } else if (geometry.type === 'assembly') {
+      const assembly = geometry.content.map((entry) => rewrite(entry, op));
+      const disjointAssembly = [];
+      for (let i = assembly.length - 1; i >= 0; i--) {
+        disjointAssembly.unshift(difference(assembly[i], ...disjointAssembly));
+      }
+      const disjointed = taggedDisjointAssembly({}, ...disjointAssembly);
+      geometry[linkDisjointAssembly] = disjointed;
+      return disjointed;
+    } else {
+      return descend();
+    }
+  };
+  // FIX: Interleave toTransformedGeometry into this rewrite.
+  if (geometry.type === 'disjointAssembly') {
+    return geometry;
+  } else {
+    const disjointed = rewrite(geometry, op);
+    if (disjointed.type === 'disjointAssembly') {
+      geometry[linkDisjointAssembly] = disjointed;
+      return disjointed;
+    } else {
+      const wrapper = taggedDisjointAssembly({}, disjointed);
+      geometry[linkDisjointAssembly] = wrapper;
+      return wrapper;
+    }
+  }
+};
+
+// DEPRECATED
+const toKeptGeometry = (geometry) => toDisjointGeometry(geometry);
+
+const interior = (
+  geometry,
+  includeFaces = true,
+  includeHoles = true
+) => {
+  const keptGeometry = toKeptGeometry(geometry);
+  const interiors = [];
+  for (const { tags, graph } of getNonVoidGraphs(keptGeometry)) {
+    if (graph.isOutline) {
+      interiors.push(taggedGraph({ tags }, interior$1(graph)));
+    }
+  }
+  for (const { tags, paths } of getNonVoidPaths(keptGeometry)) {
+    for (let path of paths) {
+      if (!isClosed(path)) {
+        path = close(path);
+      }
+      // FIX: Check path is planar.
+      // FIX: This should consider arrangements with holes.
+      interiors.push(taggedGraph({ tags }, fromPolygons([path])));
+    }
+  }
+  return taggedGroup({}, ...interiors);
+};
+
 const extrude = (geometry, height, depth) => {
   const op = (geometry, descend) => {
     const { tags } = geometry;
@@ -699,10 +835,11 @@ const extrude = (geometry, height, depth) => {
       case 'solid':
       case 'z0Surface':
       case 'surface':
-      case 'paths':
       case 'points':
         // Not implemented yet.
         return geometry;
+      case 'paths':
+        return extrude(interior(geometry), height, depth);
       case 'plan':
       case 'assembly':
       case 'item':
@@ -785,72 +922,6 @@ const flip = (geometry) => {
   return rewrite(geometry, op);
 };
 
-const taggedDisjointAssembly = ({ tags }, ...content) => {
-  if (content.some((value) => !value)) {
-    throw Error(`Undefined DisjointAssembly content`);
-  }
-  if (content.some((value) => value.length)) {
-    throw Error(`DisjointAssembly content is an array`);
-  }
-  if (content.some((value) => value.geometry)) {
-    throw Error(`Likely Shape instance in DisjointAssembly content`);
-  }
-  if (tags !== undefined && tags.length === undefined) {
-    throw Error(`Bad tags`);
-  }
-  if (typeof tags === 'function') {
-    throw Error(`Tags is a function`);
-  }
-  const disjointAssembly = { type: 'disjointAssembly', tags, content };
-  visit(disjointAssembly, (geometry, descend) => {
-    if (geometry.type === 'transform') {
-      throw Error('DisjointAssembly contains transform.');
-    }
-    return descend();
-  });
-  return disjointAssembly;
-};
-
-const linkDisjointAssembly = Symbol('linkDisjointAssembly');
-
-const toDisjointGeometry = (geometry) => {
-  const op = (geometry, descend, walk) => {
-    if (geometry[linkDisjointAssembly]) {
-      return geometry[linkDisjointAssembly];
-    } else if (geometry.type === 'disjointAssembly') {
-      // Everything below this point is disjoint.
-      return geometry;
-    } else if (geometry.type === 'transform') {
-      return walk(toTransformedGeometry(geometry), op);
-    } else if (geometry.type === 'assembly') {
-      const assembly = geometry.content.map((entry) => rewrite(entry, op));
-      const disjointAssembly = [];
-      for (let i = assembly.length - 1; i >= 0; i--) {
-        disjointAssembly.unshift(difference(assembly[i], ...disjointAssembly));
-      }
-      const disjointed = taggedDisjointAssembly({}, ...disjointAssembly);
-      geometry[linkDisjointAssembly] = disjointed;
-      return disjointed;
-    } else {
-      return descend();
-    }
-  };
-  // FIX: Interleave toTransformedGeometry into this rewrite.
-  if (geometry.type === 'disjointAssembly') {
-    return geometry;
-  } else {
-    const disjointed = rewrite(geometry, op);
-    if (disjointed.type === 'disjointAssembly') {
-      geometry[linkDisjointAssembly] = disjointed;
-      return disjointed;
-    } else {
-      const wrapper = taggedDisjointAssembly({}, disjointed);
-      geometry[linkDisjointAssembly] = wrapper;
-      return wrapper;
-    }
-  }
-};
-
 const fix = (geometry) => {
   const op = (geometry, descend) => {
     const { tags } = geometry;
@@ -912,17 +983,6 @@ const fromSurfaceToPathsImpl = (surface) => {
 };
 
 const fromSurfaceToPaths = cache(fromSurfaceToPathsImpl);
-
-const eachNonVoidItem = (geometry, op) => {
-  const walk = (geometry, descend) => {
-    // FIX: Sketches aren't real either -- but this is a bit unclear.
-    if (geometry.type !== 'sketch' && isNotVoid(geometry)) {
-      op(geometry);
-      descend();
-    }
-  };
-  visit(geometry, walk);
-};
 
 const getAnyNonVoidSurfaces = (geometry) => {
   const surfaces = [];
@@ -999,16 +1059,6 @@ const getLeafs = (geometry) => {
   return leafs;
 };
 
-const getNonVoidGraphs = (geometry) => {
-  const graphs = [];
-  eachNonVoidItem(geometry, (item) => {
-    if (item.type === 'graph') {
-      graphs.push(item);
-    }
-  });
-  return graphs;
-};
-
 const getNonVoidItems = (geometry) => {
   const items = [];
   const op = (geometry, descend) => {
@@ -1020,16 +1070,6 @@ const getNonVoidItems = (geometry) => {
   };
   visit(geometry, op);
   return items;
-};
-
-const getNonVoidPaths = (geometry) => {
-  const pathsets = [];
-  eachNonVoidItem(geometry, (item) => {
-    if (item.type === 'paths') {
-      pathsets.push(item);
-    }
-  });
-  return pathsets;
 };
 
 const getNonVoidPlans = (geometry) => {
@@ -1240,44 +1280,6 @@ const hash = (geometry) => {
     geometry.hash = hashSum(geometry);
   }
   return geometry.hash;
-};
-
-const taggedGroup = ({ tags }, ...content) => {
-  if (content.some((value) => !value)) {
-    throw Error(`Undefined Group content`);
-  }
-  if (content.some((value) => value.length)) {
-    throw Error(`Group content is an array`);
-  }
-  // FIX: Deprecate layers.
-  return { type: 'layers', tags, content };
-};
-
-// DEPRECATED
-const toKeptGeometry = (geometry) => toDisjointGeometry(geometry);
-
-const interior = (
-  geometry,
-  includeFaces = true,
-  includeHoles = true
-) => {
-  const keptGeometry = toKeptGeometry(geometry);
-  const interiors = [];
-  for (const { tags, graph } of getNonVoidGraphs(keptGeometry)) {
-    if (graph.isOutline) {
-      interiors.push(taggedGraph({ tags }, interior$1(graph)));
-    }
-  }
-  for (const { tags, paths } of getNonVoidPaths(keptGeometry)) {
-    for (const path of paths) {
-      if (isClosed(path)) {
-        // FIX: Check path is planar.
-        // FIX: This should consider arrangements with holes.
-        interiors.push(taggedGraph({ tags }, fromPolygons([path])));
-      }
-    }
-  }
-  return taggedGroup({}, ...interiors);
 };
 
 const toBspTree = (geometry, normalize) => {

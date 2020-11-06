@@ -57,7 +57,7 @@ const view = (
         path: nthPath,
         inline,
       };
-      emit({ view, hash: hash$1 + nth });
+      emit({ view, hash: `${hash$1}_${nth}` });
     } else {
       const view = {
         width,
@@ -66,7 +66,7 @@ const view = (
         geometry: entry,
         inline,
       };
-      emit({ view, hash: hash$1 + nth });
+      emit({ view, hash: `${hash$1}_${nth}` });
     }
   }
   return shape;
@@ -222,43 +222,48 @@ const selectBox = async (label, otherwise, options) => {
 
 const source = (path, source) => addSource(`cache/${path}`, source);
 
-const notes = [];
+let notes;
 
-let replaying = false;
+let recording = false;
 let handler;
 
 const recordNote = (note, index) => {
-  if (!replaying) {
+  if (recording) {
+    if (notes === undefined) {
+      throw Error('die');
+    }
     notes.push({ note, index });
   }
 };
 
 const beginRecordingNotes = () => {
+  if (notes !== undefined) {
+    throw Error('die');
+  }
   if (handler === undefined) {
     handler = addOnEmitHandler(recordNote);
   }
-  notes.length = 0;
+  recording = true;
+  notes = [];
 };
 
-const saveRecordedNotes = async (path) => {
-  await write(path, notes);
+const saveRecordedNotes = (path) => {
+  let notesToSave = notes;
+  notes = undefined;
+  recording = false;
+  addPending(write(path, notesToSave));
 };
 
 const replayRecordedNotes = async (path) => {
-  try {
-    replaying = true;
-    const notes = await read(path);
-    if (notes === undefined) {
-      return;
-    }
-    if (notes.length === 0) {
-      return;
-    }
-    for (const { note } of notes) {
-      emit(note);
-    }
-  } finally {
-    replaying = false;
+  const notes = await read(path);
+  if (notes === undefined) {
+    return;
+  }
+  if (notes.length === 0) {
+    return;
+  }
+  for (const { note } of notes) {
+    emit(note);
   }
 };
 
