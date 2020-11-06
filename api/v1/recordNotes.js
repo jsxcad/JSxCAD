@@ -7,17 +7,11 @@ let handler;
 
 const recordNote = (note, index) => {
   if (recording) {
-    if (notes === undefined) {
-      throw Error('die');
-    }
     notes.push({ note, index });
   }
 };
 
 export const beginRecordingNotes = () => {
-  if (notes !== undefined) {
-    throw Error('die');
-  }
   if (handler === undefined) {
     handler = addOnEmitHandler(recordNote);
   }
