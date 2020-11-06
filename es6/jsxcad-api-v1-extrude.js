@@ -184,6 +184,7 @@ const extrudeMethod = function (height = 1, depth = 0) {
   return extrude(this, height, depth);
 };
 Shape$1.prototype.extrude = extrudeMethod;
+Shape$1.prototype.pull = extrudeMethod;
 
 const extrudeToPlane = (
   shape,

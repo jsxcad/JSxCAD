@@ -178,10 +178,7 @@ class Ui extends React.PureComponent {
         if (!entry || entry.hash !== note.hash) {
           notebookData[index] = note;
           // Erase duplicates of this note.
-          for (let nth = 0; nth < notebookData.length; nth++) {
-            if (nth === index) {
-              continue;
-            }
+          for (let nth = index + 1; nth < notebookData.length; nth++) {
             const other = notebookData[nth];
             if (other && other.hash === note.hash) {
               if (other.noteRef) {
