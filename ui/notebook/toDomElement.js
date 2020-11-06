@@ -83,6 +83,13 @@ export const toDomElement = async (notebook = []) => {
       entry.classList.add('note', 'log');
       container.appendChild(entry);
     }
+    if (note.error) {
+      const entry = document.createElement('div');
+      const text = document.createTextNode(note.error.text);
+      entry.appendChild(text);
+      entry.classList.add('note', 'error');
+      container.appendChild(entry);
+    }
     if (note.download) {
       const div = document.createElement('div');
       for (let { base64Data, data, filename, type } of note.download.entries) {
