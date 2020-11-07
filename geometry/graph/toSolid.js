@@ -1,9 +1,11 @@
 import { eachFace } from './graph.js';
 import { pushConvexPolygons } from './pushConvexPolygons.js';
 
+import { realizeGraph } from './realizeGraph.js';
+
 export const toSolid = (graph) => {
   const solid = [];
-  eachFace(graph, (face) => {
+  eachFace(realizeGraph(graph), (face) => {
     const surface = [];
     try {
       pushConvexPolygons(surface, graph, face);

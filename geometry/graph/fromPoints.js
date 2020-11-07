@@ -1,14 +1,5 @@
-import {
-  fromPointsToSurfaceMesh,
-  fromSurfaceMeshToGraph,
-} from '@jsxcad/algorithm-cgal';
+import { fromPointsToSurfaceMesh } from '@jsxcad/algorithm-cgal';
+import { fromSurfaceMeshLazy } from './fromSurfaceMeshLazy.js';
 
-import { graphSymbol, surfaceMeshSymbol } from './symbols.js';
-
-export const fromPoints = (points) => {
-  const mesh = fromPointsToSurfaceMesh(points);
-  const graph = fromSurfaceMeshToGraph(mesh);
-  graph[surfaceMeshSymbol] = mesh;
-  mesh[graphSymbol] = graph;
-  return graph;
-};
+export const fromPoints = (points) =>
+  fromSurfaceMeshLazy(fromPointsToSurfaceMesh(points));

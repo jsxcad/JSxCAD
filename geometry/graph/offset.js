@@ -12,10 +12,11 @@ import {
 } from './graph.js';
 
 import { insetOfPolygon } from '@jsxcad/algorithm-cgal';
+import { realizeGraph } from './realizeGraph.js';
 
 export const offset = (outlineGraph, amount) => {
   const offsetGraph = create();
-  eachFace(outlineGraph, (face, { plane, loop, holes }) => {
+  eachFace(realizeGraph(outlineGraph), (face, { plane, loop, holes }) => {
     const polygon = [];
     eachLoopEdge(outlineGraph, loop, (edge, { point }) => {
       polygon.push(getPointNode(outlineGraph, point));

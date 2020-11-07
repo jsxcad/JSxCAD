@@ -1,10 +1,10 @@
 import { addPending, write, emit, read, getCurrentPath, addSource, addOnEmitHandler, pushModule, popModule } from './jsxcad-sys.js';
 export { emit, read, write } from './jsxcad-sys.js';
+import { hash, realize } from './jsxcad-geometry-tagged.js';
 import Shape, { Shape as Shape$1, loadGeometry, log, saveGeometry } from './jsxcad-api-v1-shape.js';
 export { Shape, loadGeometry, log, saveGeometry } from './jsxcad-api-v1-shape.js';
 import { ensurePages, Page, pack } from './jsxcad-api-v1-layout.js';
 export { Page, pack } from './jsxcad-api-v1-layout.js';
-import { hash } from './jsxcad-geometry-tagged.js';
 import './jsxcad-api-v1-deform.js';
 import './jsxcad-api-v1-gcode.js';
 import './jsxcad-api-v1-pdf.js';
@@ -63,7 +63,7 @@ const view = (
         width,
         height,
         position,
-        geometry: entry,
+        geometry: realize(entry),
         inline,
       };
       emit({ view, hash: `${hash$1}_${nth}` });

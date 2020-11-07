@@ -7,12 +7,13 @@ import { transform as transform$5, canonicalize as canonicalize$5, difference as
 import { equals, transform as transform$6, canonicalize as canonicalize$4, toPolygon } from './jsxcad-math-plane.js';
 import { transform as transform$4, canonicalize as canonicalize$3, eachPoint as eachPoint$5, flip as flip$4, measureBoundingBox as measureBoundingBox$1, union as union$1 } from './jsxcad-geometry-points.js';
 import { transform as transform$1, toPlane, canonicalize as canonicalize$2, makeWatertight as makeWatertight$2, eachPoint as eachPoint$2, flip as flip$2, makeConvex, measureArea as measureArea$1, measureBoundingBox as measureBoundingBox$3 } from './jsxcad-geometry-surface.js';
-import { transform as transform$2, difference as difference$3, fromSolid as fromSolid$1, eachPoint as eachPoint$1, interior as interior$1, fromPolygons, extrude as extrude$1, extrudeToPlane as extrudeToPlane$1, intersection as intersection$2, measureBoundingBox as measureBoundingBox$5, outline as outline$1, section as section$1, smooth as smooth$1, union as union$4 } from './jsxcad-geometry-graph.js';
+import { transform as transform$2, difference as difference$3, fromSolid as fromSolid$1, eachPoint as eachPoint$1, interior as interior$1, fromPolygons, extrude as extrude$1, extrudeToPlane as extrudeToPlane$1, intersection as intersection$2, measureBoundingBox as measureBoundingBox$5, outline as outline$1, realizeGraph, section as section$1, smooth as smooth$1, union as union$4 } from './jsxcad-geometry-graph.js';
 import { differenceSurface, fromSolid, fromSurface, toConvexSolids, unifyBspTrees, removeExteriorPaths, intersectSurface, intersection as intersection$1, union as union$3 } from './jsxcad-geometry-bsp.js';
 import { difference as difference$2 } from './jsxcad-geometry-solid-boolean.js';
 import { min, max } from './jsxcad-math-vec3.js';
 import { measureBoundingBox as measureBoundingBox$2 } from './jsxcad-geometry-z0surface.js';
 import { outlineSolid, outlineSurface } from './jsxcad-geometry-halfedge.js';
+import { read as read$1, write as write$1 } from './jsxcad-sys.js';
 
 const transformImpl = (matrix, untransformed) => {
   if (untransformed.length) throw Error('die');
@@ -1546,6 +1547,37 @@ const outlineImpl = (geometry, includeFaces = true, includeHoles = true) => {
 
 const outline = cache(outlineImpl);
 
+const read = async (path) => read$1(path);
+
+const realize = (geometry, height, depth) => {
+  const op = (geometry, descend) => {
+    const { tags } = geometry;
+    switch (geometry.type) {
+      case 'graph':
+        return taggedGraph({ tags }, realizeGraph(geometry.graph));
+      case 'solid':
+      case 'z0Surface':
+      case 'surface':
+      case 'points':
+      case 'paths':
+        // No lazy representation to realize.
+        return geometry;
+      case 'plan':
+      case 'assembly':
+      case 'item':
+      case 'disjointAssembly':
+      case 'layers':
+      case 'layout':
+      case 'sketch':
+        return descend();
+      default:
+        throw Error(`Unexpected geometry: ${JSON.stringify(geometry)}`);
+    }
+  };
+
+  return rewrite(geometry, op);
+};
+
 const sectionImpl = (plane, geometry) => {
   const transformedGeometry = toTransformedGeometry(geometry);
   const sections = [];
@@ -1792,6 +1824,15 @@ const unionImpl = (geometry, ...geometries) => {
 
 const union = cache(unionImpl);
 
+const write = async (geometry, path) => {
+  const disjointGeometry = toDisjointGeometry(geometry);
+  // Ensure that the geometry carries a hash before saving.
+  hash(disjointGeometry);
+  const realizedGeometry = realize(disjointGeometry);
+  await write$1(path, realizedGeometry);
+  return realizedGeometry;
+};
+
 const rotateX = (angle, geometry) =>
   transform(fromXRotation((angle * Math.PI) / 180), geometry);
 const rotateY = (angle, geometry) =>
@@ -1803,4 +1844,4 @@ const translate = (vector, geometry) =>
 const scale = (vector, geometry) =>
   transform(fromScaling(vector), geometry);
 
-export { allTags, assemble, canonicalize, difference, drop, eachItem, eachPoint, extrude, extrudeToPlane, findOpenEdges, fix, flip, fresh, fromPathToSurface, fromPathsToSurface, fromSurfaceToPaths, getAnyNonVoidSurfaces, getAnySurfaces, getGraphs, getItems, getLayers, getLayouts, getLeafs, getNonVoidGraphs, getNonVoidItems, getNonVoidPaths, getNonVoidPlans, getNonVoidPoints, getNonVoidSolids, getNonVoidSurfaces, getNonVoidZ0Surfaces, getPaths, getPeg, getPlans, getPoints, getSolids, getSurfaces, getTags, getZ0Surfaces, hash, interior, intersection, isNotVoid, isVoid, isWatertight, keep, makeWatertight, measureArea, measureBoundingBox, measureHeights, outline, reconcile, rewrite, rewriteTags, rotateX, rotateY, rotateZ, scale, section, smooth, taggedAssembly, taggedDisjointAssembly, taggedGraph, taggedGroup, taggedItem, taggedLayers, taggedLayout, taggedPaths, taggedPoints, taggedSketch, taggedSolid, taggedSurface, taggedZ0Surface, toDisjointGeometry, toKeptGeometry, toPoints, toTransformedGeometry, transform, translate, union, update, visit };
+export { allTags, assemble, canonicalize, difference, drop, eachItem, eachPoint, extrude, extrudeToPlane, findOpenEdges, fix, flip, fresh, fromPathToSurface, fromPathsToSurface, fromSurfaceToPaths, getAnyNonVoidSurfaces, getAnySurfaces, getGraphs, getItems, getLayers, getLayouts, getLeafs, getNonVoidGraphs, getNonVoidItems, getNonVoidPaths, getNonVoidPlans, getNonVoidPoints, getNonVoidSolids, getNonVoidSurfaces, getNonVoidZ0Surfaces, getPaths, getPeg, getPlans, getPoints, getSolids, getSurfaces, getTags, getZ0Surfaces, hash, interior, intersection, isNotVoid, isVoid, isWatertight, keep, makeWatertight, measureArea, measureBoundingBox, measureHeights, outline, read, realize, reconcile, rewrite, rewriteTags, rotateX, rotateY, rotateZ, scale, section, smooth, taggedAssembly, taggedDisjointAssembly, taggedGraph, taggedGroup, taggedItem, taggedLayers, taggedLayout, taggedPaths, taggedPoints, taggedSketch, taggedSolid, taggedSurface, taggedZ0Surface, toDisjointGeometry, toKeptGeometry, toPoints, toTransformedGeometry, transform, translate, union, update, visit, write };

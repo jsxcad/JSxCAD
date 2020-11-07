@@ -1,9 +1,9 @@
-import { fromSurfaceMesh } from './fromSurfaceMesh.js';
+import { fromSurfaceMeshLazy } from './fromSurfaceMeshLazy.js';
 import { outlineOfSurfaceMesh } from '@jsxcad/algorithm-cgal';
 import { toSurfaceMesh } from './toSurfaceMesh.js';
 
 export const outline = (graph) => {
-  const outlineGraph = fromSurfaceMesh(
+  const outlineGraph = fromSurfaceMeshLazy(
     outlineOfSurfaceMesh(toSurfaceMesh(graph))
   );
   outlineGraph.isOutline = true;

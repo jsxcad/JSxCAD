@@ -9397,6 +9397,15 @@ const fromSurfaceMeshToGraph = (mesh) => {
   return graph;
 };
 
+const fromSurfaceMeshToLazyGraph = (mesh) => {
+  const c = getCgal();
+  const graph = {
+    isClosed: c.Surface_mesh__is_closed(mesh),
+    isLazy: true,
+  };
+  return graph;
+};
+
 const fromSurfaceMeshToPolygons = (mesh, triangulate = false) => {
   const c = getCgal();
   const polygons = [];
@@ -9511,4 +9520,4 @@ const transformSurfaceMesh = (mesh, matrix) => {
 const unionOfNefPolyhedrons = (a, b) =>
   getCgal().UnionOfNefPolyhedrons(a, b);
 
-export { differenceOfNefPolyhedrons, extrudeSurfaceMesh, extrudeToPlaneOfSurfaceMesh, fromGraphToNefPolyhedron, fromGraphToSurfaceMesh, fromNefPolyhedronFacetsToGraph, fromNefPolyhedronShellsToGraph, fromNefPolyhedronToPolygons, fromNefPolyhedronToSurfaceMesh, fromNefPolyhedronToTriangles, fromPointsToAlphaShape2AsPolygonSegments, fromPointsToAlphaShapeAsSurfaceMesh, fromPointsToConvexHullAsSurfaceMesh, fromPointsToSurfaceMesh, fromPolygonsToNefPolyhedron, fromPolygonsToSurfaceMesh, fromSurfaceMeshToGraph, fromSurfaceMeshToNefPolyhedron, fromSurfaceMeshToPolygons, fromSurfaceMeshToTriangles, initCgal, insetOfPolygon, intersectionOfNefPolyhedrons, outlineOfSurfaceMesh, sectionOfNefPolyhedron, smoothSurfaceMesh, transformSurfaceMesh, unionOfNefPolyhedrons };
+export { differenceOfNefPolyhedrons, extrudeSurfaceMesh, extrudeToPlaneOfSurfaceMesh, fromGraphToNefPolyhedron, fromGraphToSurfaceMesh, fromNefPolyhedronFacetsToGraph, fromNefPolyhedronShellsToGraph, fromNefPolyhedronToPolygons, fromNefPolyhedronToSurfaceMesh, fromNefPolyhedronToTriangles, fromPointsToAlphaShape2AsPolygonSegments, fromPointsToAlphaShapeAsSurfaceMesh, fromPointsToConvexHullAsSurfaceMesh, fromPointsToSurfaceMesh, fromPolygonsToNefPolyhedron, fromPolygonsToSurfaceMesh, fromSurfaceMeshToGraph, fromSurfaceMeshToLazyGraph, fromSurfaceMeshToNefPolyhedron, fromSurfaceMeshToPolygons, fromSurfaceMeshToTriangles, initCgal, insetOfPolygon, intersectionOfNefPolyhedrons, outlineOfSurfaceMesh, sectionOfNefPolyhedron, smoothSurfaceMesh, transformSurfaceMesh, unionOfNefPolyhedrons };

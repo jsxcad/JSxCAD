@@ -1,6 +1,7 @@
 import { boot } from '@jsxcad/sys';
 import { fromStl } from './fromStl.js';
 import { readFileSync } from 'fs';
+import { realize } from '@jsxcad/geometry-tagged';
 import test from 'ava';
 
 test('Read example', async (t) => {
@@ -8,6 +9,13 @@ test('Read example', async (t) => {
   const stl = readFileSync('fromStl.test.box.stl');
   const geometry = await fromStl(stl);
   t.deepEqual(JSON.parse(JSON.stringify(geometry)), {
+    type: 'graph',
+    graph: {
+      isClosed: true,
+      isLazy: true,
+    },
+  });
+  t.deepEqual(JSON.parse(JSON.stringify(realize(geometry))), {
     type: 'graph',
     graph: {
       edges: [
@@ -97,6 +105,7 @@ test('Read example', async (t) => {
         ['5/1', '-5/1', '5/1'],
       ],
       isClosed: true,
+      isLazy: false,
     },
   });
 });

@@ -1,4 +1,4 @@
-import { fromSurfaceMeshToGraph, fromPointsToAlphaShapeAsSurfaceMesh, fromPointsToConvexHullAsSurfaceMesh, fromPolygonsToSurfaceMesh, fromGraphToSurfaceMesh, extrudeSurfaceMesh, fromNefPolyhedronToSurfaceMesh, fromSurfaceMeshToNefPolyhedron, fromNefPolyhedronFacetsToGraph, sectionOfNefPolyhedron, differenceOfNefPolyhedrons, extrudeToPlaneOfSurfaceMesh, fromPointsToSurfaceMesh, fromSurfaceMeshToTriangles, intersectionOfNefPolyhedrons, insetOfPolygon, outlineOfSurfaceMesh, smoothSurfaceMesh, transformSurfaceMesh, unionOfNefPolyhedrons } from './jsxcad-algorithm-cgal.js';
+import { fromSurfaceMeshToGraph, fromPointsToAlphaShapeAsSurfaceMesh, fromSurfaceMeshToLazyGraph, fromPointsToConvexHullAsSurfaceMesh, fromPolygonsToSurfaceMesh, fromGraphToSurfaceMesh, extrudeSurfaceMesh, fromNefPolyhedronToSurfaceMesh, fromSurfaceMeshToNefPolyhedron, fromNefPolyhedronFacetsToGraph, sectionOfNefPolyhedron, differenceOfNefPolyhedrons, extrudeToPlaneOfSurfaceMesh, fromPointsToSurfaceMesh, fromSurfaceMeshToTriangles, intersectionOfNefPolyhedrons, insetOfPolygon, outlineOfSurfaceMesh, smoothSurfaceMesh, transformSurfaceMesh, unionOfNefPolyhedrons } from './jsxcad-algorithm-cgal.js';
 import { min, max, dot, scale } from './jsxcad-math-vec3.js';
 import { deduplicate as deduplicate$1 } from './jsxcad-geometry-path.js';
 import { toPlane, flip } from './jsxcad-math-poly3.js';
@@ -129,10 +129,18 @@ const checkGraph = (graph) => {
 };
 
 const fromSurfaceMesh = (surfaceMesh) => {
+  if (surfaceMesh === undefined) {
+    throw Error('die');
+  }
   let graph = surfaceMesh[graphSymbol];
-  if (graph === undefined) {
-    graph = fromSurfaceMeshToGraph(surfaceMesh);
-    if (!repair(fromSurfaceMeshToGraph(surfaceMesh))) {
+  if (graph === undefined || graph.isLazy) {
+    const converted = fromSurfaceMeshToGraph(surfaceMesh);
+    if (graph.isLazy) {
+      Object.assign(graph, converted, { isLazy: false });
+    } else {
+      graph = converted;
+    }
+    if (!repair(graph)) {
       // If the graph wasn't repaired, we can re-use the input mesh.
       surfaceMesh[graphSymbol] = graph;
       graph[surfaceMeshSymbol] = surfaceMesh;
@@ -144,13 +152,31 @@ const fromSurfaceMesh = (surfaceMesh) => {
 const alphaShape = (points, componentLimit) =>
   fromSurfaceMesh(fromPointsToAlphaShapeAsSurfaceMesh(points, componentLimit));
 
+const fromSurfaceMeshLazy = (surfaceMesh) => {
+  let graph = surfaceMesh[graphSymbol];
+  if (graph === undefined) {
+    graph = fromSurfaceMeshToLazyGraph(surfaceMesh);
+    surfaceMesh[graphSymbol] = graph;
+    graph[surfaceMeshSymbol] = surfaceMesh;
+  }
+  return graph;
+};
+
 const convexHull = (points) =>
-  fromSurfaceMesh(fromPointsToConvexHullAsSurfaceMesh(points));
+  fromSurfaceMeshLazy(fromPointsToConvexHullAsSurfaceMesh(points));
+
+const realizeGraph = (graph) => {
+  if (graph.isLazy) {
+    return fromSurfaceMesh(graph[surfaceMeshSymbol]);
+  } else {
+    return graph;
+  }
+};
 
 const measureBoundingBox = (graph) => {
   let minPoint = [Infinity, Infinity, Infinity];
   let maxPoint = [-Infinity, -Infinity, -Infinity];
-  for (const point of graph.points) {
+  for (const point of realizeGraph(graph).points) {
     if (point !== undefined) {
       minPoint = min(minPoint, point);
       maxPoint = max(maxPoint, point);
@@ -195,7 +221,7 @@ const doesNotOverlap = (a, b) => {
 const deduplicate = (surface) => surface.map(deduplicate$1);
 
 const fromSurface = (surface) =>
-  fromSurfaceMesh(fromPolygonsToSurfaceMesh(deduplicate(surface)));
+  fromSurfaceMeshLazy(fromPolygonsToSurfaceMesh(deduplicate(surface)));
 
 var earcut_1 = earcut;
 var default_1 = earcut;
@@ -995,7 +1021,7 @@ const pushConvexPolygons = (
 // FIX: Check coplanarity?
 const toSurface = (graph) => {
   const surface = [];
-  eachFace(graph, (face) => {
+  eachFace(realizeGraph(graph), (face) => {
     pushConvexPolygons(surface, graph, face);
   });
   return surface;
@@ -1017,6 +1043,7 @@ const toSurfaceMesh = (graph) => {
 };
 
 const extrude = (graph, height, depth) => {
+  realizeGraph(graph);
   if (graph.faces.length > 0) {
     // Arbitrarily pick the plane of the first graph to extrude along.
     let normal;
@@ -1026,7 +1053,7 @@ const extrude = (graph, height, depth) => {
         break;
       }
     }
-    return fromSurfaceMesh(
+    return fromSurfaceMeshLazy(
       extrudeSurfaceMesh(
         toSurfaceMesh(graph),
         ...scale(height, normal),
@@ -1044,7 +1071,7 @@ const fromNefPolyhedron = (nefPolyhedron) => {
   let graph = nefPolyhedron[graphSymbol];
   if (graph === undefined) {
     const surfaceMesh = fromNefPolyhedronToSurfaceMesh(nefPolyhedron);
-    graph = fromSurfaceMesh(surfaceMesh);
+    graph = fromSurfaceMeshLazy(surfaceMesh);
     nefPolyhedron[graphSymbol] = graph;
     graph[nefPolyhedronSymbol] = nefPolyhedron;
   }
@@ -1098,7 +1125,7 @@ const difference = (a, b) => {
 };
 
 const eachPoint = (graph, op) => {
-  for (const point of graph.points) {
+  for (const point of realizeGraph(graph).points) {
     if (point !== undefined) {
       op(point);
     }
@@ -1106,7 +1133,7 @@ const eachPoint = (graph, op) => {
 };
 
 const extrudeToPlane = (graph, highPlane, lowPlane) => {
-  if (graph.faces.length > 0) {
+  if (realizeGraph(graph).faces.length > 0) {
     // Arbitrarily pick the plane of the first graph to extrude along.
     let normal;
     for (const face of graph.faces) {
@@ -1115,7 +1142,7 @@ const extrudeToPlane = (graph, highPlane, lowPlane) => {
         break;
       }
     }
-    return fromSurfaceMesh(
+    return fromSurfaceMeshLazy(
       extrudeToPlaneOfSurfaceMesh(
         toSurfaceMesh(graph),
         ...scale(1, normal),
@@ -1129,21 +1156,11 @@ const extrudeToPlane = (graph, highPlane, lowPlane) => {
   }
 };
 
-const fromPoints = (points) => {
-  const mesh = fromPointsToSurfaceMesh(points);
-  const graph = fromSurfaceMeshToGraph(mesh);
-  graph[surfaceMeshSymbol] = mesh;
-  mesh[graphSymbol] = graph;
-  return graph;
-};
+const fromPoints = (points) =>
+  fromSurfaceMeshLazy(fromPointsToSurfaceMesh(points));
 
-const fromPolygons = (polygons) => {
-  const mesh = fromPolygonsToSurfaceMesh(polygons);
-  const graph = fromSurfaceMeshToGraph(mesh);
-  graph[surfaceMeshSymbol] = mesh;
-  mesh[graphSymbol] = graph;
-  return graph;
-};
+const fromPolygons = (polygons) =>
+  fromSurfaceMeshLazy(fromPolygonsToSurfaceMesh(polygons));
 
 const fromSolid = (solid) => {
   const polygons = [];
@@ -1187,7 +1204,7 @@ const intersection = (a, b) => {
 
 const offset = (outlineGraph, amount) => {
   const offsetGraph = create();
-  eachFace(outlineGraph, (face, { plane, loop, holes }) => {
+  eachFace(realizeGraph(outlineGraph), (face, { plane, loop, holes }) => {
     const polygon = [];
     eachLoopEdge(outlineGraph, loop, (edge, { point }) => {
       polygon.push(getPointNode(outlineGraph, point));
@@ -1220,7 +1237,7 @@ const offset = (outlineGraph, amount) => {
 };
 
 const outline = (graph) => {
-  const outlineGraph = fromSurfaceMesh(
+  const outlineGraph = fromSurfaceMeshLazy(
     outlineOfSurfaceMesh(toSurfaceMesh(graph))
   );
   outlineGraph.isOutline = true;
@@ -1229,11 +1246,11 @@ const outline = (graph) => {
 };
 
 const smooth = (graph) =>
-  fromSurfaceMesh(smoothSurfaceMesh(toSurfaceMesh(graph)));
+  fromSurfaceMeshLazy(smoothSurfaceMesh(toSurfaceMesh(graph)));
 
 const toPaths = (graph) => {
   const paths = [];
-  eachFace(graph, (face) => {
+  eachFace(realizeGraph(graph), (face) => {
     const path = [];
     eachFaceEdge(graph, face, (edge, { point }) => {
       path.push(getPointNode(graph, point));
@@ -1245,7 +1262,7 @@ const toPaths = (graph) => {
 
 const toSolid = (graph) => {
   const solid = [];
-  eachFace(graph, (face) => {
+  eachFace(realizeGraph(graph), (face) => {
     const surface = [];
     try {
       pushConvexPolygons(surface, graph, face);
@@ -1260,38 +1277,7 @@ const toSolid = (graph) => {
 };
 
 const transform = (matrix, graph) =>
-  fromSurfaceMesh(transformSurfaceMesh(toSurfaceMesh(graph), matrix));
-
-/*
-import { nefPolyhedronSymbol, surfaceMeshSymbol } from './symbols.js';
-
-import { transform as transformPlane } from './jsxcad-math-plane.js';
-import { transform as transformPoint } from './jsxcad-math-vec3.js';
-
-// FIX: Precision loss.
-export const transform = (matrix, graph) => {
-  const transformedPoints = [];
-  for (let nth = 0; nth < graph.points.length; nth++) {
-    const point = graph.points[nth];
-    if (point !== undefined) {
-      transformedPoints[nth] = transformPoint(matrix, point);
-    }
-  }
-
-  const transformedFaces = graph.faces.map((face) => ({
-    ...face,
-    plane: face.plane ? transformPlane(matrix, face.plane) : face.plane,
-  }));
-
-  return {
-    ...graph,
-    points: transformedPoints,
-    faces: transformedFaces,
-    [nefPolyhedronSymbol]: undefined,
-    [surfaceMeshSymbol]: undefined,
-  };
-};
-*/
+  fromSurfaceMeshLazy(transformSurfaceMesh(toSurfaceMesh(graph), matrix));
 
 const far$2 = 10000;
 
@@ -1312,4 +1298,4 @@ const union = (a, b) => {
   }
 };
 
-export { alphaShape, convexHull, difference, eachPoint, extrude, extrudeToPlane, fromPoints, fromPolygons, fromSolid, fromSurface, interior, intersection, measureBoundingBox, offset, outline, section, smooth, toPaths, toSolid, toSurface, toTriangles, transform, union };
+export { alphaShape, convexHull, difference, eachPoint, extrude, extrudeToPlane, fromPoints, fromPolygons, fromSolid, fromSurface, interior, intersection, measureBoundingBox, offset, outline, realizeGraph, section, smooth, toPaths, toSolid, toSurface, toTriangles, transform, union };

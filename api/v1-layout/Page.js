@@ -117,7 +117,7 @@ export const Page = (
         buildLayoutGeometry({ layer, packSize, pageWidth, pageLength, margin })
       );
     }
-    return Shape.fromGeometry(taggedLayers({}, ...plans)).canonicalize();
+    return Shape.fromGeometry(taggedLayers({}, ...plans));
   } else {
     const packSize = [];
     // Page fits to content size.
@@ -144,12 +144,12 @@ export const Page = (
           pageLength,
           margin,
         });
-        Shape.fromGeometry(layoutGeometry).canonicalize();
+        Shape.fromGeometry(layoutGeometry);
         plans.push(layoutGeometry);
       }
       return Shape.fromGeometry(taggedLayers({}, ...plans));
     } else {
-      return Empty().canonicalize();
+      return Empty();
     }
   }
 };

@@ -71,7 +71,7 @@ const box = [
   ],
 ];
 
-test('FromPolygonsToSurfaceMesh', (t) => {
+test('FromSurfaceMeshToGraph', (t) => {
   const surfaceMesh = fromPolygonsToSurfaceMesh(box);
   t.true(surfaceMesh.is_valid(false));
   const graph = fromSurfaceMeshToGraph(surfaceMesh);
