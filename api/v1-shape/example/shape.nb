@@ -1,48 +1,39 @@
 md`# Shape Operations`;
 
 md`## shape.add(...shapes)`;
-const add = Circle(10).color('blue').add(Square(17).color('red'));
-add.topView();
+const add = Circle(10).color('blue').add(Square(17).color('red')).topView();
 md`shape is extended to cover the space of the shapes.`;
 
 md`## shape.addTo(targetShape)`;
-const addTo = Circle(10).color('blue').addTo(Square(17).color('red'));
-addTo.topView();
+const addTo = Circle(10).color('blue').addTo(Square(17).color('red')).topView();
 md`targetShape is extend to cover the space of shape.`;
 
+md`## shape.align(spec)`;
+const center = Box(10).align('x>yz').fix().view();
+md`shape is moved to fix the spec. xyz aligns on those axes. x> aligns x to be greater than 0, etc.`;
+
 md`## shape.as(...tags)`;
-const as = Circle(10).as('circle');
-as.topView();
+const as = Circle(10).as('circle').topView();
 md`shape is tagged with the provided tags. See keep/drop.`;
 
 md`## shape.bench(x = 0, y = 0, z = 0)`;
-const bench = Cube(10).bench().fix();
-bench.view();
+const bench = Box(10).bench().fix().view();
 md`shape is moved so the left-front-top vertex as at the origin.`;
 
 md`## shape.benchTop(x = 0, y = 0, z = 0)`;
-const benchTop = Cube(10).benchTop().fix();
-benchTop.view();
+const benchTop = Box(10).benchTop().fix().view();
 md`shape is moved so the left-front-lower vertex as at the origin.`;
 
-md`## shape.center()`;
-const center = Cube(10).center();
-center.view();
-md`shape is moved so that the center of the bounding box is at the origin.`;
-
 md`## shape.clip(...shapes)`;
-const clip = Cube(10).color('blue').clip(Sphere(6).color('red'));
-clip.view();
+const clip = Box(10).color('blue').clip(Ball(6).color('red')).view();
 md`shape is restricted to only cover the space also covered by all shapes.`;
 
 md`## shape.clipFrom(targetShape)`;
-const clipFrom = Cube(10).color('blue').clipFrom(Sphere(6).color('red'));
-clipFrom.view();
+const clipFrom = Box(10).color('blue').clipFrom(Ball(6).color('red')).view();
 md`shape is restricted to only cover the space also covered by all shapes.`;
 
 md`## shape.color(name)`;
-const color = Square(10).color('cerulean');
-color.topView();
+const color = Square(10).color('cerulean').topView();
 md`shape is tagged with the named color.`;
 
 md`## shape.colors(name)
@@ -53,100 +44,91 @@ log(Square(10).color('cerulean').colors());
 md`The color tags of the shape are returned.`;
 
 md`## shape.constantLaser(level)`;
-const constantLaser = Square(10).outline().constantLaser(1000).trace();
-constantLaser.topView();
+const constantLaser = Square(10)
+  .outline()
+  .constantLaser(1000)
+  .trace()
+  .topView();
 md`Shape is tagged with a constant laser output level.`;
 
 md`## shape.cut(...shape)`;
-const cut = Cube(10).color('blue').cut(Cylinder(4, 10).color('red'));
-cut.view();
+const cut = Box(10).color('blue').cut(Rod(4, 10).color('red')).view();
 md`shape is restricted to not cover the space covered by shapes.`;
 
 md`## shape.cutFrom(targetShape)`;
-const cutFrom = Cube(10).color('blue').cutFrom(Cylinder(8, 10).color('red'));
-cutFrom.view();
+const cutFrom = Box(10).color('blue').cutFrom(Rod(8, 10).color('red')).view();
 md`targetShape is restricted to not cover the space covered by shape.`;
 
 md`## shape.faces(op = identity)`;
-const faces = Group(...Prism(1, 1, { sides: 5 }).faces());
+md`
+FIX
+const faces = Group(...Rod(1, 1, 0, { sides: 5 }).faces());
 faces.view();
+`;
 md`The faces of solids are produced as an array of surfaces transformed by op.`;
 
 md`## shape.feedRate(mmPerMinute)`;
-const feedRate = Square(10).outline().feedRate(1000).trace();
-feedRate.topView();
+const feedRate = Square(10).outline().feedRate(1000).trace().topView();
 md`Shape is tagged with a feed rate.`;
 
 md`## shape.fix()`;
-const fix = Square(10).move(5).fix();
-fix.topView();
+const fix = Square(10).move(5).fix().topView();
 md`Use a fixed layout for shape packing.`;
 
 md`## shape.inSolids(op = identity)`;
-const inSolids = Group(
-  Cube(10),
-  Square(20),
-  Cylinder(2, 5).move(5)
-).inSolids((s) => s.color('red'));
-inSolids.fix().view();
+const inSolids = Group(Box(10), Square(20), Rod(2, 10, 5))
+  .inSolids((s) => s.color('red'))
+  .item()
+  .view();
 md`Rewrite the solids in shape transformed by op.`;
 
 md`## shape.keep(tags)`;
-const keep = Assembly(Cube(10).as('cube'), Prism(4, 10).as('prism')).keep(
-  'cube'
-);
-keep.view();
+const keep = Assembly(Box(10).as('cube'), Rod(4, 10).as('prism'))
+  .keep('cube')
+  .view();
 md`The shapes without the provided tags become holes.`;
 
 md`## shape.drop(tags)`;
-const drop = Assembly(Cube(10).as('cube'), Prism(4, 10).as('prism')).drop(
-  'prism'
-);
-drop.view();
+const drop = Assembly(Box(10).as('cube'), Rod(4, 10).as('prism'))
+  .drop('prism')
+  .view();
 md`The shapes with the provided tags become holes`;
 
 md`## shape.group(...shapes)`;
-const groupMethod = Cube(10).color('orange').group(Circle(15));
-groupMethod.fix().view();
+const groupMethod = Box(10).color('orange').group(Circle(15)).item().view();
 md`shape forms a group with shapes.`;
 
 md`## shape.laserPower(level)`;
-const laserPower = Square(10).outline().laserPower(500).trace();
-laserPower.topView();
+const laserPower = Square(10).outline().laserPower(500).trace().topView();
 
 md`## shape.material(name)`;
-const material = Square(10).material('copper');
-material.topView();
+const material = Square(10).material('copper').topView();
 md`shape is made of the named material.`;
 
 md`## shape.move(x = 0, y = 0, z = 0)`;
-const move = Square(1).move(1, 1, 1);
-move.fix().topView();
+const move = Square(1).move(1, 1, 1).fix().topView();
 md`shape is moved by the specified offset.`;
 
 md`## shape.moveX(x = 0)`;
-const moveX = Square(1).moveX(1);
-moveX.fix().topView();
+const moveX = Square(1).moveX(1).fix().topView();
 md`shape is moved by the specified offset.`;
 
 md`## shape.moveY(y = 0)`;
-const moveY = Square(1).moveY(1);
-moveY.fix().topView();
+const moveY = Square(1).moveY(1).fix().topView();
 md`shape is moved by the specified offset.`;
 
 md`## shape.moveZ(z = 0)`;
-const moveZ = Square(1).moveZ(1);
-moveZ.fix().frontView();
+const moveZ = Square(1).moveZ(1).fix().frontView();
 md`shape is moved by the specified offset.`;
 
 md`## shape.noHoles()`;
-const noHoles = Assembly(Cube(10), Cylinder(4, 10).hole()).noHoles();
-noHoles.view();
+const noHoles = Assembly(Box(10), Rod(4, 10).hole()).noHoles().view();
 md`Hole geometry is removed from the shape, but voids remain.`;
 
 md`## shape.op(op)`;
-const op = Cube(10).op((s) => s.color('green'));
-op.view();
+const op = Box(10)
+  .op((s) => s.color('green'))
+  .view();
 md`Applies op to shape.`;
 
 md`## shape.pauseBefore()`;
@@ -155,90 +137,80 @@ md`## shape.pauseAfter();`;
 md`Adds a pause after following the toolpath`;
 
 md`## shape.paths(op = identity)`;
-const paths = Group(...Cube(10).outline().and(Cube(10)).paths());
-paths.view();
+const paths = Group(...Box(10).outline().and(Box(10)).paths()).view();
 md`Produces an array the paths shapes in shape.`;
 
 md`## shape.peg(shapeToPeg)`;
-const peg = y.peg(Square(10));
-peg.view();
+const peg = y.peg(Square(10)).view();
 md`Moves shapeToPeg to the origin of the peg found in shape.`;
 
 md`## shape.rotate(angle, axis = [0, 0, 1])`;
-const rotate = Cube(1, 1, 5).rotate(-45, [1, 1, 1]);
-rotate.view();
+const rotate = Box(1, 1, 5).rotate(-45, [1, 1, 1]).view();
 md`Rotates shape around axis by angle.`;
 
 md`## shape.rotateX(angle)`;
-const rotateX = Cube(1, 1, 5).rotateX(45);
-rotateX.view();
+const rotateX = Box(1, 1, 5).rotateX(45).view();
 md`Rotates shape around the X axis by angle.`;
 
 md`## shape.rotateY(angle)`;
-const rotateY = Cube(1, 1, 5).rotateY(45);
-rotateY.view();
+const rotateY = Box(1, 1, 5).rotateY(45).view();
 md`Rotates shape around the Y axis by angle.`;
 
 md`## shape.rotateZ(angle)`;
-const rotateZ = Cube(1, 1, 5).rotateZ(45);
-rotateZ.view();
+const rotateZ = Box(1, 1, 5).rotateZ(45).view();
 md`Rotates shape around the Z axis by angle.`;
 
 md`## shape.scale(x = 1, y = x, z = y)`;
-const scale = Cube(1).scale(1, 2, 3);
-scale.view();
+const scale = Box(1).scale(1, 2, 3).view();
 md`Scales shape along the axes.`;
 
 md`## shape.size()`;
-log(JSON.stringify(Cube().size(), null, 2));
+log(JSON.stringify(Box().size(), null, 2));
 md`Describes the dimensions of a shape.`;
 
 md`## shape.sketch()`;
-const sketch = Group(Cube(10).outline().sketch(), Cube(20));
-sketch.fix().view();
+const sketch = Group(Box(10).outline().sketch(), Box(20)).item().view();
 md`Converts a shape to an overlay sketch.`;
 
 md`## shape.solids(op = identity)`;
+md`
+FIX
 const solids = Group(
-  ...Group(Cube(10), Square(10)).solids((s) => s.color('orange'))
-);
-solids.view();
+  ...Group(Box(10), Square(10)).solids((s) => s.color('orange'))
+).view();`;
 md`Returns the solids of shape transformed by op;`;
 
 md`## shape.spindleRpm(rpm);`;
 md`Sets the spindle rpm for the toolpaths of shape.`;
 
 md`## shape.surfaces(op = identity)`;
+md`FIX
 const surfaces = Group(
-  ...Group(Cube(10), Square(10)).surfaces((s) => s.color('orange'))
-);
-surfaces.view();
+  ...Group(Box(10), Square(10)).surfaces((s) => s.color('orange'))
+).view();`;
 md`Returns the surfaces of shape transformed by op.`;
 
 md`## shape.tags()`;
-log(Group(Circle().as('circle'), Square().as('square')).tags());
+log(Group(Box().as('circle'), Square().as('square')).tags());
 
 md`## shape.toolpaths(op = identity)`;
 const toolpaths = Group(
   ...Toolpath(Point(0), Point(10), Point(10, 10), Point(0, 10)).toolpaths()
-);
-toolpaths.topView();
+).topView();
 md`Returns the toolpaths of the shape transformed by op.`;
 
 md`## shape.trace()`;
-const trace = Square(10).outline().trace();
-trace.topView();
+const trace = Square(10).outline().trace().topView();
 md`Animates a trace along a path, when viewing interactively.`;
 
 md`## shape.wireframe()`;
-const wireframe = Cube().wireframe();
-wireframe.view();
+md`FIX
+const wireframe = Box().wireframe().view();`;
 md`
 Shows a wireframe of a solid, exposing implementation details.
 Use shape.outline() for geometric structure
 `;
 
 md`## shape.with(...shapes)`;
-const withEx = Cube(10).with(Cylinder(6, 5).hole());
-withEx.view();
+const withEx = Box(10).pull(5, -5).with(Rod(6, 5).hole()).view();
 md`Assembles shape with shapes.`;
