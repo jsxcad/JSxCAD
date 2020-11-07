@@ -1,5 +1,6 @@
 import { fromSolid } from './fromSolid.js';
 import { initCgal } from '@jsxcad/algorithm-cgal';
+import { realizeGraph } from './realizeGraph.js';
 import test from 'ava';
 
 test.beforeEach(async (t) => {
@@ -83,6 +84,10 @@ test('fromSolid', (t) => {
   ];
   const graph = fromSolid(box);
   t.deepEqual(JSON.parse(JSON.stringify(graph)), {
+    isClosed: true,
+    isLazy: true,
+  });
+  t.deepEqual(JSON.parse(JSON.stringify(realizeGraph(graph))), {
     edges: [
       { point: 1, next: 2, twin: 1, loop: 0 },
       { point: 0, next: 18, twin: 0, loop: 4 },
@@ -170,5 +175,6 @@ test('fromSolid', (t) => {
       ['1/2', '-1/2', '-1/2'],
     ],
     isClosed: true,
+    isLazy: false,
   });
 });

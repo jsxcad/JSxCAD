@@ -1,8 +1,12 @@
 import { addPending, emit, write } from '@jsxcad/sys';
 
+import {
+  hash as hashGeometry,
+  realize as realizeGeometry,
+} from '@jsxcad/geometry-tagged';
+
 import Shape from '@jsxcad/api-v1-shape';
 import { ensurePages } from '@jsxcad/api-v1-layout';
-import { hash as hashGeometry } from '@jsxcad/geometry-tagged';
 
 // FIX: Avoid the extra read-write cycle.
 const view = (
@@ -29,7 +33,7 @@ const view = (
         width,
         height,
         position,
-        geometry: entry,
+        geometry: realizeGeometry(entry),
         inline,
       };
       emit({ view, hash: `${hash}_${nth}` });

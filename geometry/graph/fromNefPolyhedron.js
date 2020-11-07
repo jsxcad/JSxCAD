@@ -1,7 +1,7 @@
 import { graphSymbol, nefPolyhedronSymbol } from './symbols.js';
 
 import { fromNefPolyhedronToSurfaceMesh } from '@jsxcad/algorithm-cgal';
-import { fromSurfaceMesh } from './fromSurfaceMesh.js';
+import { fromSurfaceMeshLazy } from './fromSurfaceMeshLazy.js';
 
 // This is for a proper manifold, but will not produce a simplified outline.
 
@@ -9,7 +9,7 @@ export const fromNefPolyhedron = (nefPolyhedron) => {
   let graph = nefPolyhedron[graphSymbol];
   if (graph === undefined) {
     const surfaceMesh = fromNefPolyhedronToSurfaceMesh(nefPolyhedron);
-    graph = fromSurfaceMesh(surfaceMesh);
+    graph = fromSurfaceMeshLazy(surfaceMesh);
     nefPolyhedron[graphSymbol] = graph;
     graph[nefPolyhedronSymbol] = nefPolyhedron;
   } else {

@@ -1,6 +1,6 @@
-import { fromSurfaceMesh } from './fromSurfaceMesh.js';
+import { fromSurfaceMeshLazy } from './fromSurfaceMeshLazy.js';
 import { smoothSurfaceMesh } from '@jsxcad/algorithm-cgal';
 import { toSurfaceMesh } from './toSurfaceMesh.js';
 
 export const smooth = (graph) =>
-  fromSurfaceMesh(smoothSurfaceMesh(toSurfaceMesh(graph)));
+  fromSurfaceMeshLazy(smoothSurfaceMesh(toSurfaceMesh(graph)));

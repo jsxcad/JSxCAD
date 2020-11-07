@@ -8,7 +8,7 @@ test.beforeEach(async (t) => {
   await initCgal();
 });
 
-test('fromSolid', (t) => {
+test('offset', (t) => {
   const square = [
     [
       [-0.5, 0.5, -0.5],
@@ -24,30 +24,8 @@ test('fromSolid', (t) => {
   const graph = fromSurface(square);
   const outlineGraph = outline(graph);
   t.deepEqual(JSON.parse(JSON.stringify(outlineGraph)), {
-    edges: [
-      { point: 1, next: 2, twin: 1, loop: 0 },
-      null,
-      { point: 2, next: 6, twin: 3, loop: 0 },
-      null,
-      { point: 0, next: 0, twin: 5, loop: 0 },
-      null,
-      { point: 3, next: 4, twin: 7, loop: 0 },
-    ],
-    faces: [{ loop: 0, plane: [0, 0, -1, 0.5] }],
-    loops: [{ edge: 2, face: 0 }],
-    points: [
-      [-0.5, 0.5, -0.5],
-      [0.5, 0.5, -0.5],
-      [0.5, -0.5, -0.5],
-      [-0.5, -0.5, -0.5],
-    ],
-    exact: [
-      ['-1/2', '1/2', '-1/2'],
-      ['1/2', '1/2', '-1/2'],
-      ['1/2', '-1/2', '-1/2'],
-      ['-1/2', '-1/2', '-1/2'],
-    ],
     isClosed: false,
+    isLazy: true,
     isOutline: true,
     isWireframe: true,
   });

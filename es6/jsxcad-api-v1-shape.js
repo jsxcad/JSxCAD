@@ -1,5 +1,5 @@
 import { close, concatenate, open } from './jsxcad-geometry-path.js';
-import { taggedAssembly, eachPoint, flip, toDisjointGeometry as toDisjointGeometry$1, toTransformedGeometry, toPoints, transform, reconcile, isWatertight, makeWatertight, taggedPaths, taggedGraph, fromPathToSurface, fromPathsToSurface, taggedPoints, taggedSolid, taggedSurface, union as union$1, rewriteTags, canonicalize as canonicalize$1, measureBoundingBox as measureBoundingBox$1, intersection as intersection$1, allTags, difference as difference$1, getSolids, fix as fix$1, rewrite, taggedGroup, getAnySurfaces, getGraphs, taggedLayers, isVoid, assemble as assemble$1, getNonVoidPaths, getPeg, measureArea, taggedSketch, getNonVoidSolids, getAnyNonVoidSurfaces, getPaths, getNonVoidSurfaces, getNonVoidZ0Surfaces, hash } from './jsxcad-geometry-tagged.js';
+import { taggedAssembly, eachPoint, flip, toDisjointGeometry as toDisjointGeometry$1, toTransformedGeometry, toPoints, transform, reconcile, isWatertight, makeWatertight, taggedPaths, taggedGraph, fromPathToSurface, fromPathsToSurface, taggedPoints, taggedSolid, taggedSurface, union as union$1, rewriteTags, canonicalize as canonicalize$1, measureBoundingBox as measureBoundingBox$1, intersection as intersection$1, allTags, difference as difference$1, getSolids, fix as fix$1, rewrite, taggedGroup, getAnySurfaces, getGraphs, taggedLayers, isVoid, assemble as assemble$1, getNonVoidPaths, getPeg, measureArea, taggedSketch, getNonVoidSolids, getAnyNonVoidSurfaces, getPaths, getNonVoidSurfaces, getNonVoidZ0Surfaces, read, write } from './jsxcad-geometry-tagged.js';
 import { fromPolygons, findOpenEdges, fromSurface as fromSurface$1 } from './jsxcad-geometry-solid.js';
 import { add, scale as scale$1, negate, normalize, subtract, dot, cross, distance } from './jsxcad-math-vec3.js';
 import { toTagFromName } from './jsxcad-algorithm-color.js';
@@ -8,7 +8,7 @@ import { junctionSelector } from './jsxcad-geometry-halfedge.js';
 import { fromSolid, fromSurface, toSolid as toSolid$1 } from './jsxcad-geometry-graph.js';
 import { fromTranslation, fromRotation, fromXRotation, fromYRotation, fromZRotation, fromScaling } from './jsxcad-math-mat4.js';
 import { fromPoints, toXYPlaneTransforms } from './jsxcad-math-plane.js';
-import { emit, addPending, writeFile, read, write, log as log$1 } from './jsxcad-sys.js';
+import { emit, addPending, writeFile, log as log$1 } from './jsxcad-sys.js';
 import { segment } from './jsxcad-geometry-paths.js';
 
 class Shape {
@@ -1766,13 +1766,8 @@ Shape.prototype.writeShape = writeShapeMethod;
 const loadGeometry = async (path) =>
   Shape.fromGeometry(await read(path));
 
-const saveGeometry = async (path, shape) => {
-  const disjointGeometry = shape.toDisjointGeometry();
-  // Ensure that the geometry carries a hash before saving.
-  hash(disjointGeometry);
-  write(path, disjointGeometry);
-  return Shape.fromGeometry(disjointGeometry);
-};
+const saveGeometry = async (path, shape) =>
+  Shape.fromGeometry(await write(shape.toGeometry(), path));
 
 function pad (hash, len) {
   while (hash.length < len) {

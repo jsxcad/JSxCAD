@@ -1,9 +1,11 @@
 import { extrudeSurfaceMesh } from '@jsxcad/algorithm-cgal';
-import { fromSurfaceMesh } from './fromSurfaceMesh.js';
+import { fromSurfaceMeshLazy } from './fromSurfaceMeshLazy.js';
+import { realizeGraph } from './realizeGraph.js';
 import { scale } from '@jsxcad/math-vec3';
 import { toSurfaceMesh } from './toSurfaceMesh.js';
 
 export const extrude = (graph, height, depth) => {
+  realizeGraph(graph);
   if (graph.faces.length > 0) {
     // Arbitrarily pick the plane of the first graph to extrude along.
     let normal;
@@ -13,7 +15,7 @@ export const extrude = (graph, height, depth) => {
         break;
       }
     }
-    return fromSurfaceMesh(
+    return fromSurfaceMeshLazy(
       extrudeSurfaceMesh(
         toSurfaceMesh(graph),
         ...scale(height, normal),
