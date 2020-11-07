@@ -95,6 +95,7 @@ const differenceImpl = (geometry, ...geometries) => {
         // Not implemented yet.
         return geometry;
       }
+      case 'layout':
       case 'plan':
       case 'assembly':
       case 'item':

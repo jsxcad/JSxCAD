@@ -1,6 +1,6 @@
 import { addPending, write, emit, read, getCurrentPath, addSource, addOnEmitHandler, pushModule, popModule } from './jsxcad-sys.js';
 export { emit, read, write } from './jsxcad-sys.js';
-import { hash, realize } from './jsxcad-geometry-tagged.js';
+import { hash, soup, realize } from './jsxcad-geometry-tagged.js';
 import Shape, { Shape as Shape$1, loadGeometry, log, saveGeometry } from './jsxcad-api-v1-shape.js';
 export { Shape, loadGeometry, log, saveGeometry } from './jsxcad-api-v1-shape.js';
 import { ensurePages, Page, pack } from './jsxcad-api-v1-layout.js';
@@ -42,11 +42,13 @@ import { toSvg } from './jsxcad-convert-svg.js';
 const view = (
   shape,
   inline,
+  op = (x) => x,
   { path, width = 1024, height = 512, position = [100, -100, 100] } = {}
 ) => {
+  shape = op(shape);
   let nth = 0;
   const hash$1 = hash(shape.toGeometry());
-  for (const entry of ensurePages(shape.toDisjointGeometry())) {
+  for (const entry of ensurePages(soup(shape.toDisjointGeometry()))) {
     if (path) {
       const nthPath = `${path}_${nth++}`;
       addPending(write(nthPath, entry));
@@ -74,30 +76,34 @@ const view = (
 
 Shape.prototype.view = function (
   inline,
+  op,
   { path, width = 1024, height = 512, position = [100, -100, 100] } = {}
 ) {
-  return view(this, inline, { path, width, height, position });
+  return view(this, inline, op, { path, width, height, position });
 };
 
 Shape.prototype.topView = function (
   inline,
+  op,
   { path, width = 1024, height = 512, position = [0, 0, 100] } = {}
 ) {
-  return view(this, inline, { path, width, height, position });
+  return view(this, inline, op, { path, width, height, position });
 };
 
 Shape.prototype.frontView = function (
   inline,
+  op,
   { path, width = 1024, height = 512, position = [0, -100, 0] } = {}
 ) {
-  return view(this, inline, { path, width, height, position });
+  return view(this, inline, op, { path, width, height, position });
 };
 
 Shape.prototype.sideView = function (
   inline,
+  op,
   { path, width = 1024, height = 512, position = [100, 0, 0] } = {}
 ) {
-  return view(this, inline, { path, width, height, position });
+  return view(this, inline, op, { path, width, height, position });
 };
 
 function pad (hash, len) {
@@ -175,6 +181,13 @@ const md = (strings, ...placeholders) => {
   emit({ md, hash: hashSum(md) });
   return md;
 };
+
+const mdMethod = function (string, ...placeholders) {
+  md([string], ...placeholders);
+  return this;
+};
+
+Shape.prototype.md = mdMethod;
 
 // FIX: This needs to consider the current module.
 // FIX: Needs to communicate cache invalidation with other workers.

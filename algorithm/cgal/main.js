@@ -14,6 +14,7 @@ export { fromPointsToConvexHullAsSurfaceMesh } from './fromPointsToConvexHullAsS
 export { fromPointsToSurfaceMesh } from './fromPointsToSurfaceMesh.js';
 export { fromPolygonsToNefPolyhedron } from './fromPolygonsToNefPolyhedron.js';
 export { fromPolygonsToSurfaceMesh } from './fromPolygonsToSurfaceMesh.js';
+export { fromSurfaceMeshEmitBoundingBox } from './fromSurfaceMeshEmitBoundingBox.js';
 export { fromSurfaceMeshToGraph } from './fromSurfaceMeshToGraph.js';
 export { fromSurfaceMeshToLazyGraph } from './fromSurfaceMeshToLazyGraph.js';
 export { fromSurfaceMeshToNefPolyhedron } from './fromSurfaceMeshToNefPolyhedron.js';

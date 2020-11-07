@@ -12,7 +12,7 @@ import { flip as flip$1, toPlane as toPlane$1, transform } from './jsxcad-geomet
 import { createNormalize3 } from './jsxcad-algorithm-quantize.js';
 import { fromTranslation, fromRotation } from './jsxcad-math-mat4.js';
 import { scale, add, normalize, subtract, transform as transform$3 } from './jsxcad-math-vec3.js';
-import { toXYPlaneTransforms, fromPolygon, fromNormalAndPoint } from './jsxcad-math-plane.js';
+import { toXYPlaneTransforms, fromNormalAndPoint } from './jsxcad-math-plane.js';
 import { toolpath as toolpath$1 } from './jsxcad-algorithm-toolpath.js';
 
 const Alpha = (shape, componentLimit = 1) => {
@@ -428,13 +428,13 @@ const planeOfBisection = (aStart, bStart, intersection) => {
 const neg = ([a, b, c, d]) => [a, b, c, -d];
 
 // FIX: This is a weak approximation assuming a 1d profile -- it will need to be redesigned.
-const sweep = (toolpath, tool) => {
+const sweep = (toolpath, tool, up = [0, 0, 1, 0]) => {
   const chains = [];
   for (const { paths } of getPaths(toolpath.toKeptGeometry())) {
     for (const path of paths) {
       // FIX: Handle open paths and bent polygons.
       const edges = getEdges(path);
-      const plane = fromPolygon(path);
+      // const up = [0, 0, 1, 0]; // fromPolygon(path);
       const length = edges.length;
       for (let nth = 0; nth < length; nth++) {
         const prev = edges[nth];
@@ -443,12 +443,12 @@ const sweep = (toolpath, tool) => {
         const a = planeOfBisection(prev[START], curr[END], curr[START]);
         const b = planeOfBisection(curr[START], next[END], curr[END]);
         const middle = scale(0.5, add(curr[START], curr[END]));
-        const rotate90 = fromRotation(Math.PI / -2, plane);
+        const rotate90 = fromRotation(Math.PI / -2, up);
         const direction = normalize(subtract(curr[START], curr[END]));
         const rightDirection = transform$3(rotate90, direction);
         const right = add(middle, rightDirection);
         chains.push(
-          orient(middle, add(middle, plane), right, tool).extrudeToPlane(
+          orient(middle, add(middle, up), right, tool).extrudeToPlane(
             neg(b),
             neg(a)
           )
@@ -459,13 +459,13 @@ const sweep = (toolpath, tool) => {
   return Group(...chains);
 };
 
-const sweepMethod = function (tool, { resolution = 1 } = {}) {
-  return sweep(this, tool);
+const sweepMethod = function (tool, up) {
+  return sweep(this, tool, up);
 };
 
 Shape.prototype.sweep = sweepMethod;
-Shape.prototype.withSweep = function (tool, { resolution }) {
-  return this.with(sweep(this, tool));
+Shape.prototype.withSweep = function (tool, up) {
+  return this.with(sweep(this, tool, up));
 };
 
 const toolpath = (

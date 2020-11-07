@@ -1,5 +1,5 @@
-import { fromSurfaceMeshToGraph, fromPointsToAlphaShapeAsSurfaceMesh, fromSurfaceMeshToLazyGraph, fromPointsToConvexHullAsSurfaceMesh, fromPolygonsToSurfaceMesh, fromGraphToSurfaceMesh, extrudeSurfaceMesh, fromNefPolyhedronToSurfaceMesh, fromSurfaceMeshToNefPolyhedron, fromNefPolyhedronFacetsToGraph, sectionOfNefPolyhedron, differenceOfNefPolyhedrons, extrudeToPlaneOfSurfaceMesh, fromPointsToSurfaceMesh, fromSurfaceMeshToTriangles, intersectionOfNefPolyhedrons, insetOfPolygon, outlineOfSurfaceMesh, smoothSurfaceMesh, transformSurfaceMesh, unionOfNefPolyhedrons } from './jsxcad-algorithm-cgal.js';
-import { min, max, dot, scale } from './jsxcad-math-vec3.js';
+import { fromSurfaceMeshToGraph, fromPointsToAlphaShapeAsSurfaceMesh, fromSurfaceMeshToLazyGraph, fromPointsToConvexHullAsSurfaceMesh, fromPolygonsToSurfaceMesh, fromGraphToSurfaceMesh, fromSurfaceMeshEmitBoundingBox, extrudeSurfaceMesh, fromNefPolyhedronToSurfaceMesh, fromSurfaceMeshToNefPolyhedron, fromNefPolyhedronFacetsToGraph, sectionOfNefPolyhedron, differenceOfNefPolyhedrons, extrudeToPlaneOfSurfaceMesh, fromPointsToSurfaceMesh, fromSurfaceMeshToTriangles, intersectionOfNefPolyhedrons, insetOfPolygon, outlineOfSurfaceMesh, smoothSurfaceMesh, transformSurfaceMesh, unionOfNefPolyhedrons } from './jsxcad-algorithm-cgal.js';
+import { dot, min, max, scale } from './jsxcad-math-vec3.js';
 import { deduplicate as deduplicate$1 } from './jsxcad-geometry-path.js';
 import { toPlane, flip } from './jsxcad-math-poly3.js';
 
@@ -164,59 +164,6 @@ const fromSurfaceMeshLazy = (surfaceMesh) => {
 
 const convexHull = (points) =>
   fromSurfaceMeshLazy(fromPointsToConvexHullAsSurfaceMesh(points));
-
-const realizeGraph = (graph) => {
-  if (graph.isLazy) {
-    return fromSurfaceMesh(graph[surfaceMeshSymbol]);
-  } else {
-    return graph;
-  }
-};
-
-const measureBoundingBox = (graph) => {
-  let minPoint = [Infinity, Infinity, Infinity];
-  let maxPoint = [-Infinity, -Infinity, -Infinity];
-  for (const point of realizeGraph(graph).points) {
-    if (point !== undefined) {
-      minPoint = min(minPoint, point);
-      maxPoint = max(maxPoint, point);
-    }
-  }
-  return [minPoint, maxPoint];
-};
-
-const iota = 1e-5;
-const X = 0;
-const Y = 1;
-const Z = 2;
-
-// Requires a conservative gap.
-const doesNotOverlap = (a, b) => {
-  if (a.length === 0 || b.length === 0) {
-    return true;
-  }
-  const [minA, maxA] = measureBoundingBox(a);
-  const [minB, maxB] = measureBoundingBox(b);
-  if (maxA[X] <= minB[X] - iota * 10) {
-    return true;
-  }
-  if (maxA[Y] <= minB[Y] - iota * 10) {
-    return true;
-  }
-  if (maxA[Z] <= minB[Z] - iota * 10) {
-    return true;
-  }
-  if (maxB[X] <= minA[X] - iota * 10) {
-    return true;
-  }
-  if (maxB[Y] <= minA[Y] - iota * 10) {
-    return true;
-  }
-  if (maxB[Z] <= minA[Z] - iota * 10) {
-    return true;
-  }
-  return false;
-};
 
 const deduplicate = (surface) => surface.map(deduplicate$1);
 
@@ -902,9 +849,9 @@ earcut.flatten = function (data) {
 };
 earcut_1.default = default_1;
 
-const X$1 = 0;
-const Y$1 = 1;
-const Z$1 = 2;
+const X = 0;
+const Y = 1;
+const Z = 2;
 
 const buildContourXy = (points, contour, graph, loop, selectJunction) => {
   const index = contour.length >>> 1;
@@ -912,7 +859,7 @@ const buildContourXy = (points, contour, graph, loop, selectJunction) => {
     const point = getPointNode(graph, edgeNode.point);
     if (selectJunction(point)) {
       points.push(point);
-      contour.push(point[X$1], point[Y$1]);
+      contour.push(point[X], point[Y]);
     }
   });
   return index;
@@ -924,7 +871,7 @@ const buildContourXz = (points, contour, graph, loop, selectJunction) => {
     const point = getPointNode(graph, edgeNode.point);
     if (selectJunction(edgeNode.point)) {
       points.push(point);
-      contour.push(point[X$1], point[Z$1]);
+      contour.push(point[X], point[Z]);
     }
   });
   return index;
@@ -936,7 +883,7 @@ const buildContourYz = (points, contour, graph, loop, selectJunction) => {
     const point = getPointNode(graph, edgeNode.point);
     if (selectJunction(edgeNode.point)) {
       points.push(point);
-      contour.push(point[Y$1], point[Z$1]);
+      contour.push(point[Y], point[Z]);
     }
   });
   return index;
@@ -1018,6 +965,14 @@ const pushConvexPolygons = (
   }
 };
 
+const realizeGraph = (graph) => {
+  if (graph.isLazy) {
+    return fromSurfaceMesh(graph[surfaceMeshSymbol]);
+  } else {
+    return graph;
+  }
+};
+
 // FIX: Check coplanarity?
 const toSurface = (graph) => {
   const surface = [];
@@ -1031,8 +986,8 @@ const toSurfaceMesh = (graph) => {
   let surfaceMesh = graph[surfaceMeshSymbol];
   if (surfaceMesh === undefined) {
     if (graph.isOutline) {
-      // SurfaceMesh can't handle outlines.
-      surfaceMesh = fromGraphToSurfaceMesh(fromSurface(toSurface(graph)));
+      // SurfaceMesh can't handle outlines -- rebuild as a surface.
+      return toSurfaceMesh(fromSurface(toSurface(graph)));
     } else {
       surfaceMesh = fromGraphToSurfaceMesh(graph);
     }
@@ -1040,6 +995,68 @@ const toSurfaceMesh = (graph) => {
     surfaceMesh[graphSymbol] = graph;
   }
   return surfaceMesh;
+};
+
+const measureBoundingBox = (graph) => {
+  if (graph.boundingBox === undefined) {
+    if (graph.isLazy) {
+      fromSurfaceMeshEmitBoundingBox(
+        toSurfaceMesh(graph),
+        (xMin, yMin, zMin, xMax, yMax, zMax) => {
+          graph.boundingBox = [
+            [xMin, yMin, zMin],
+            [xMax, yMax, zMax],
+          ];
+        }
+      );
+    } else {
+      let minPoint = [Infinity, Infinity, Infinity];
+      let maxPoint = [-Infinity, -Infinity, -Infinity];
+      if (graph.points) {
+        for (const point of graph.points) {
+          if (point !== undefined) {
+            minPoint = min(minPoint, point);
+            maxPoint = max(maxPoint, point);
+          }
+        }
+      }
+      graph.boundingBox = [minPoint, maxPoint];
+    }
+  }
+  return graph.boundingBox;
+};
+
+const iota = 1e-5;
+const X$1 = 0;
+const Y$1 = 1;
+const Z$1 = 2;
+
+// Requires a conservative gap.
+const doesNotOverlap = (a, b) => {
+  if (a.isEmpty || b.isEmpty) {
+    return true;
+  }
+  const [minA, maxA] = measureBoundingBox(a);
+  const [minB, maxB] = measureBoundingBox(b);
+  if (maxA[X$1] <= minB[X$1] - iota * 10) {
+    return true;
+  }
+  if (maxA[Y$1] <= minB[Y$1] - iota * 10) {
+    return true;
+  }
+  if (maxA[Z$1] <= minB[Z$1] - iota * 10) {
+    return true;
+  }
+  if (maxB[X$1] <= minA[X$1] - iota * 10) {
+    return true;
+  }
+  if (maxB[Y$1] <= minA[Y$1] - iota * 10) {
+    return true;
+  }
+  if (maxB[Z$1] <= minA[Z$1] - iota * 10) {
+    return true;
+  }
+  return false;
 };
 
 const extrude = (graph, height, depth) => {
@@ -1080,7 +1097,7 @@ const fromNefPolyhedron = (nefPolyhedron) => {
 
 // FIX: Actually determine the principle plane.
 const principlePlane = (graph) => {
-  for (const face of graph.faces) {
+  for (const face of realizeGraph(graph).faces) {
     if (face && face.plane) {
       return face.plane;
     }
@@ -1197,6 +1214,9 @@ const intersection = (a, b) => {
   if (!b.isClosed) {
     b = extrude(b, far$1, 0);
   }
+  if (doesNotOverlap(a, b)) {
+    return { isEmpty: true };
+  }
   return fromNefPolyhedron(
     intersectionOfNefPolyhedrons(toNefPolyhedron(a), toNefPolyhedron(b))
   );
@@ -1288,14 +1308,16 @@ const union = (a, b) => {
   if (!a.isClosed) {
     return section(principlePlane(a), union(extrude(a, far$2, 0), b));
   }
-  if (b.isClosed) {
-    return fromNefPolyhedron(
-      unionOfNefPolyhedrons(toNefPolyhedron(b), toNefPolyhedron(a))
-    );
-  } else {
+  if (!b.isClosed) {
     // The union of a surface and a solid is the solid.
     return a;
   }
+  if (doesNotOverlap(a, b)) {
+    return a;
+  }
+  return fromNefPolyhedron(
+    unionOfNefPolyhedrons(toNefPolyhedron(b), toNefPolyhedron(a))
+  );
 };
 
 export { alphaShape, convexHull, difference, eachPoint, extrude, extrudeToPlane, fromPoints, fromPolygons, fromSolid, fromSurface, interior, intersection, measureBoundingBox, offset, outline, realizeGraph, section, smooth, toPaths, toSolid, toSurface, toTriangles, transform, union };
