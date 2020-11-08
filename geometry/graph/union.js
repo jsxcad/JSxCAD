@@ -1,3 +1,4 @@
+import { doesNotOverlap } from './doesNotOverlap.js';
 import { extrude } from './extrude.js';
 import { fromNefPolyhedron } from './fromNefPolyhedron.js';
 import { principlePlane } from './principlePlane.js';
@@ -14,12 +15,14 @@ export const union = (a, b) => {
   if (!a.isClosed) {
     return section(principlePlane(a), union(extrude(a, far, 0), b));
   }
-  if (b.isClosed) {
-    return fromNefPolyhedron(
-      unionOfNefPolyhedrons(toNefPolyhedron(b), toNefPolyhedron(a))
-    );
-  } else {
+  if (!b.isClosed) {
     // The union of a surface and a solid is the solid.
     return a;
   }
+  if (doesNotOverlap(a, b)) {
+    return a;
+  }
+  return fromNefPolyhedron(
+    unionOfNefPolyhedrons(toNefPolyhedron(b), toNefPolyhedron(a))
+  );
 };

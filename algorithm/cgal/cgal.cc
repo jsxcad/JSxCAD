@@ -22,6 +22,7 @@
 #include <CGAL/Alpha_shape_vertex_base_3.h>
 #include <CGAL/Delaunay_triangulation_2.h>
 #include <CGAL/Delaunay_triangulation_3.h>
+#include <CGAL/Polygon_mesh_processing/bbox.h>
 #ifdef SURFACE_MESH_BOOLEANS
 #include <CGAL/Polygon_mesh_processing/corefinement.h>
 #endif
@@ -945,6 +946,11 @@ bool Surface_mesh__is_valid_polygon_mesh(Surface_mesh* mesh) {
   return CGAL::is_valid_polygon_mesh(*mesh);
 }
 
+void Surface_mesh__bbox(Surface_mesh* mesh, emscripten::val emit) {
+  CGAL::Bbox_3 box = CGAL::Polygon_mesh_processing::bbox(*mesh);
+  emit(box.xmin(), box.ymin(), box.zmin(), box.xmax(), box.ymax(), box.zmax());
+}
+
 using emscripten::select_const;
 using emscripten::select_overload;
 
@@ -1087,4 +1093,5 @@ EMSCRIPTEN_BINDINGS(module) {
   emscripten::function("Surface_mesh__is_valid_halfedge_graph", &Surface_mesh__is_valid_halfedge_graph, emscripten::allow_raw_pointers());
   emscripten::function("Surface_mesh__is_valid_face_graph", &Surface_mesh__is_valid_face_graph, emscripten::allow_raw_pointers());
   emscripten::function("Surface_mesh__is_valid_polygon_mesh", &Surface_mesh__is_valid_polygon_mesh, emscripten::allow_raw_pointers());
+  emscripten::function("Surface_mesh__bbox", &Surface_mesh__bbox, emscripten::allow_raw_pointers());
 }

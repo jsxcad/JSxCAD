@@ -451,6 +451,29 @@ var Module = (function () {
         },
       });
     }
+    if (
+      !Object.getOwnPropertyDescriptor(
+        Module['ready'],
+        '__ZSt18uncaught_exceptionv'
+      )
+    ) {
+      Object.defineProperty(Module['ready'], '__ZSt18uncaught_exceptionv', {
+        configurable: true,
+        get: function () {
+          abort(
+            'You are getting __ZSt18uncaught_exceptionv on the Promise object, instead of the instance. Use .then() to get called back with the instance, see the MODULARIZE docs in src/settings.js'
+          );
+        },
+      });
+      Object.defineProperty(Module['ready'], '__ZSt18uncaught_exceptionv', {
+        configurable: true,
+        set: function () {
+          abort(
+            'You are setting __ZSt18uncaught_exceptionv on the Promise object, instead of the instance. Use .then() to get called back with the instance, see the MODULARIZE docs in src/settings.js'
+          );
+        },
+      });
+    }
     if (!Object.getOwnPropertyDescriptor(Module['ready'], '_setThrew')) {
       Object.defineProperty(Module['ready'], '_setThrew', {
         configurable: true,
@@ -772,6 +795,13 @@ var Module = (function () {
         err(text);
       }
     }
+    var tempRet0 = 0;
+    var setTempRet0 = function (value) {
+      tempRet0 = value;
+    };
+    var getTempRet0 = function () {
+      return tempRet0;
+    };
     var wasmBinary;
     if (Module['wasmBinary']) wasmBinary = Module['wasmBinary'];
     if (!Object.getOwnPropertyDescriptor(Module, 'wasmBinary'))
@@ -799,8 +829,8 @@ var Module = (function () {
     }
     var wasmMemory;
     var wasmTable = new WebAssembly.Table({
-      initial: 1098,
-      maximum: 1098,
+      initial: 1341,
+      maximum: 1341,
       element: 'anyfunc',
     });
     var ABORT = false;
@@ -1068,9 +1098,9 @@ var Module = (function () {
       Module['HEAPF32'] = HEAPF32 = new Float32Array(buf);
       Module['HEAPF64'] = HEAPF64 = new Float64Array(buf);
     }
-    var STACK_BASE = 5439664,
-      STACK_MAX = 196784,
-      DYNAMIC_BASE = 5439664;
+    var STACK_BASE = 5442608,
+      STACK_MAX = 199728,
+      DYNAMIC_BASE = 5442608;
     assert(STACK_BASE % 16 === 0, 'stack must start aligned');
     assert(DYNAMIC_BASE % 16 === 0, 'heap must start aligned');
     var TOTAL_STACK = 5242880;
@@ -1545,9 +1575,6 @@ var Module = (function () {
     function ___cxa_atexit(a0, a1) {
       return _atexit();
     }
-    function ___cxa_thread_atexit(a0, a1) {
-      return _atexit();
-    }
     function ExceptionInfo(excPtr) {
       this.excPtr = excPtr;
       this.ptr = excPtr - ExceptionInfoAttrs.SIZE;
@@ -1602,13 +1629,189 @@ var Module = (function () {
         return prev === 1;
       };
     }
+    function CatchInfo(ptr) {
+      this.free = function () {
+        _free(this.ptr);
+        this.ptr = 0;
+      };
+      this.set_base_ptr = function (basePtr) {
+        HEAP32[this.ptr >> 2] = basePtr;
+      };
+      this.get_base_ptr = function () {
+        return HEAP32[this.ptr >> 2];
+      };
+      this.set_adjusted_ptr = function (adjustedPtr) {
+        var ptrSize = 4;
+        HEAP32[(this.ptr + ptrSize) >> 2] = adjustedPtr;
+      };
+      this.get_adjusted_ptr = function () {
+        var ptrSize = 4;
+        return HEAP32[(this.ptr + ptrSize) >> 2];
+      };
+      this.get_exception_ptr = function () {
+        var isPointer = ___cxa_is_pointer_type(
+          this.get_exception_info().get_type()
+        );
+        if (isPointer) {
+          return HEAP32[this.get_base_ptr() >> 2];
+        }
+        var adjusted = this.get_adjusted_ptr();
+        if (adjusted !== 0) return adjusted;
+        return this.get_base_ptr();
+      };
+      this.get_exception_info = function () {
+        return new ExceptionInfo(this.get_base_ptr());
+      };
+      if (ptr === undefined) {
+        this.ptr = _malloc(8);
+        this.set_adjusted_ptr(0);
+      } else {
+        this.ptr = ptr;
+      }
+    }
+    var exceptionCaught = [];
+    function exception_addRef(info) {
+      info.add_ref();
+    }
+    function ___cxa_begin_catch(ptr) {
+      var catchInfo = new CatchInfo(ptr);
+      var info = catchInfo.get_exception_info();
+      if (!info.get_caught()) {
+        info.set_caught(true);
+        __ZSt18uncaught_exceptionv.uncaught_exceptions--;
+      }
+      info.set_rethrown(false);
+      exceptionCaught.push(catchInfo);
+      exception_addRef(info);
+      return catchInfo.get_exception_ptr();
+    }
+    var exceptionLast = 0;
+    function ___cxa_free_exception(ptr) {
+      try {
+        return _free(new ExceptionInfo(ptr).ptr);
+      } catch (e) {
+        err('exception during cxa_free_exception: ' + e);
+      }
+    }
+    function exception_decRef(info) {
+      if (info.release_ref() && !info.get_rethrown()) {
+        var destructor = info.get_destructor();
+        if (destructor) {
+          wasmTable.get(destructor)(info.excPtr);
+        }
+        ___cxa_free_exception(info.excPtr);
+      }
+    }
+    function ___cxa_end_catch() {
+      _setThrew(0);
+      assert(exceptionCaught.length > 0);
+      var catchInfo = exceptionCaught.pop();
+      exception_decRef(catchInfo.get_exception_info());
+      catchInfo.free();
+      exceptionLast = 0;
+    }
+    function ___resumeException(catchInfoPtr) {
+      var catchInfo = new CatchInfo(catchInfoPtr);
+      var ptr = catchInfo.get_base_ptr();
+      if (!exceptionLast) {
+        exceptionLast = ptr;
+      }
+      catchInfo.free();
+      throw ptr;
+    }
+    function ___cxa_find_matching_catch_2() {
+      var thrown = exceptionLast;
+      if (!thrown) {
+        return (setTempRet0(0), 0) | 0;
+      }
+      var info = new ExceptionInfo(thrown);
+      var thrownType = info.get_type();
+      var catchInfo = new CatchInfo();
+      catchInfo.set_base_ptr(thrown);
+      if (!thrownType) {
+        return (setTempRet0(0), catchInfo.ptr) | 0;
+      }
+      var typeArray = Array.prototype.slice.call(arguments);
+      var stackTop = stackSave();
+      var exceptionThrowBuf = stackAlloc(4);
+      HEAP32[exceptionThrowBuf >> 2] = thrown;
+      for (var i = 0; i < typeArray.length; i++) {
+        var caughtType = typeArray[i];
+        if (caughtType === 0 || caughtType === thrownType) {
+          break;
+        }
+        if (___cxa_can_catch(caughtType, thrownType, exceptionThrowBuf)) {
+          var adjusted = HEAP32[exceptionThrowBuf >> 2];
+          if (thrown !== adjusted) {
+            catchInfo.set_adjusted_ptr(adjusted);
+          }
+          return (setTempRet0(caughtType), catchInfo.ptr) | 0;
+        }
+      }
+      stackRestore(stackTop);
+      return (setTempRet0(thrownType), catchInfo.ptr) | 0;
+    }
+    function ___cxa_find_matching_catch_3() {
+      var thrown = exceptionLast;
+      if (!thrown) {
+        return (setTempRet0(0), 0) | 0;
+      }
+      var info = new ExceptionInfo(thrown);
+      var thrownType = info.get_type();
+      var catchInfo = new CatchInfo();
+      catchInfo.set_base_ptr(thrown);
+      if (!thrownType) {
+        return (setTempRet0(0), catchInfo.ptr) | 0;
+      }
+      var typeArray = Array.prototype.slice.call(arguments);
+      var stackTop = stackSave();
+      var exceptionThrowBuf = stackAlloc(4);
+      HEAP32[exceptionThrowBuf >> 2] = thrown;
+      for (var i = 0; i < typeArray.length; i++) {
+        var caughtType = typeArray[i];
+        if (caughtType === 0 || caughtType === thrownType) {
+          break;
+        }
+        if (___cxa_can_catch(caughtType, thrownType, exceptionThrowBuf)) {
+          var adjusted = HEAP32[exceptionThrowBuf >> 2];
+          if (thrown !== adjusted) {
+            catchInfo.set_adjusted_ptr(adjusted);
+          }
+          return (setTempRet0(caughtType), catchInfo.ptr) | 0;
+        }
+      }
+      stackRestore(stackTop);
+      return (setTempRet0(thrownType), catchInfo.ptr) | 0;
+    }
+    function ___cxa_rethrow() {
+      var catchInfo = exceptionCaught.pop();
+      var info = catchInfo.get_exception_info();
+      var ptr = catchInfo.get_base_ptr();
+      if (!info.get_rethrown()) {
+        exceptionCaught.push(catchInfo);
+        info.set_rethrown(true);
+      } else {
+        catchInfo.free();
+      }
+      exceptionLast = ptr;
+      throw ptr;
+    }
+    function ___cxa_thread_atexit(a0, a1) {
+      return _atexit();
+    }
     function ___cxa_throw(ptr, type, destructor) {
       var info = new ExceptionInfo(ptr);
       info.init(type, destructor);
-      throw (
-        ptr +
-        ' - Exception catching is disabled, this exception cannot be caught. Compile with -s DISABLE_EXCEPTION_CATCHING=0 or DISABLE_EXCEPTION_CATCHING=2 to catch.'
-      );
+      exceptionLast = ptr;
+      if (!('uncaught_exception' in __ZSt18uncaught_exceptionv)) {
+        __ZSt18uncaught_exceptionv.uncaught_exceptions = 1;
+      } else {
+        __ZSt18uncaught_exceptionv.uncaught_exceptions++;
+      }
+      throw ptr;
+    }
+    function ___cxa_uncaught_exceptions() {
+      return __ZSt18uncaught_exceptionv.uncaught_exceptions;
     }
     function setErrNo(value) {
       HEAP32[___errno_location() >> 2] = value;
@@ -6604,6 +6807,9 @@ var Module = (function () {
         return e.errno;
       }
     }
+    function _getTempRet0() {
+      return getTempRet0() | 0;
+    }
     function _raise(sig) {
       err('Calling stub instead of raise()');
       setErrNo(ERRNO_CODES.ENOSYS);
@@ -6611,6 +6817,7 @@ var Module = (function () {
       return -1;
     }
     function _setTempRet0($i) {
+      setTempRet0($i | 0);
     }
     function __isLeapYear(year) {
       return year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0);
@@ -7068,10 +7275,18 @@ var Module = (function () {
       __assert_fail: ___assert_fail,
       __cxa_allocate_exception: ___cxa_allocate_exception,
       __cxa_atexit: ___cxa_atexit,
+      __cxa_begin_catch: ___cxa_begin_catch,
+      __cxa_end_catch: ___cxa_end_catch,
+      __cxa_find_matching_catch_2: ___cxa_find_matching_catch_2,
+      __cxa_find_matching_catch_3: ___cxa_find_matching_catch_3,
+      __cxa_free_exception: ___cxa_free_exception,
+      __cxa_rethrow: ___cxa_rethrow,
       __cxa_thread_atexit: ___cxa_thread_atexit,
       __cxa_throw: ___cxa_throw,
+      __cxa_uncaught_exceptions: ___cxa_uncaught_exceptions,
       __indirect_function_table: wasmTable,
       __map_file: ___map_file,
+      __resumeException: ___resumeException,
       __sys_fcntl64: ___sys_fcntl64,
       __sys_getrusage: ___sys_getrusage,
       __sys_ioctl: ___sys_ioctl,
@@ -7103,6 +7318,29 @@ var Module = (function () {
       fd_read: _fd_read,
       fd_seek: _fd_seek,
       fd_write: _fd_write,
+      getTempRet0: _getTempRet0,
+      invoke_diii: invoke_diii,
+      invoke_fiii: invoke_fiii,
+      invoke_i: invoke_i,
+      invoke_ii: invoke_ii,
+      invoke_iii: invoke_iii,
+      invoke_iiii: invoke_iiii,
+      invoke_iiiii: invoke_iiiii,
+      invoke_iiiiii: invoke_iiiiii,
+      invoke_iiiiiii: invoke_iiiiiii,
+      invoke_iiiiiiii: invoke_iiiiiiii,
+      invoke_iiiiiiiiiii: invoke_iiiiiiiiiii,
+      invoke_iiiiiiiiiiii: invoke_iiiiiiiiiiii,
+      invoke_iiiiiiiiiiiii: invoke_iiiiiiiiiiiii,
+      invoke_jiiii: invoke_jiiii,
+      invoke_v: invoke_v,
+      invoke_vi: invoke_vi,
+      invoke_vii: invoke_vii,
+      invoke_viii: invoke_viii,
+      invoke_viiii: invoke_viiii,
+      invoke_viiiiiii: invoke_viiiiiii,
+      invoke_viiiiiiiiii: invoke_viiiiiiiiii,
+      invoke_viiiiiiiiiiiiiii: invoke_viiiiiiiiiiiiiii,
       memory: wasmMemory,
       raise: _raise,
       setTempRet0: _setTempRet0,
@@ -7113,9 +7351,9 @@ var Module = (function () {
     var ___wasm_call_ctors = (Module[
       '___wasm_call_ctors'
     ] = createExportWrapper('__wasm_call_ctors'));
-    var _memset = (Module['_memset'] = createExportWrapper('memset'));
     var _malloc = (Module['_malloc'] = createExportWrapper('malloc'));
     var _fflush = (Module['_fflush'] = createExportWrapper('fflush'));
+    var _memset = (Module['_memset'] = createExportWrapper('memset'));
     var _free = (Module['_free'] = createExportWrapper('free'));
     var ___getTypeName = (Module['___getTypeName'] = createExportWrapper(
       '__getTypeName'
@@ -7132,6 +7370,12 @@ var Module = (function () {
       'stackRestore'
     ));
     var stackAlloc = (Module['stackAlloc'] = createExportWrapper('stackAlloc'));
+    var __ZSt18uncaught_exceptionv = (Module[
+      '__ZSt18uncaught_exceptionv'
+    ] = createExportWrapper('_ZSt18uncaught_exceptionv'));
+    var dynCall_jiiii = (Module['dynCall_jiiii'] = createExportWrapper(
+      'dynCall_jiiii'
+    ));
     var dynCall_viijii = (Module['dynCall_viijii'] = createExportWrapper(
       'dynCall_viijii'
     ));
@@ -7150,6 +7394,335 @@ var Module = (function () {
     var __growWasmMemory = (Module['__growWasmMemory'] = createExportWrapper(
       '__growWasmMemory'
     ));
+    function invoke_iii(index, a1, a2) {
+      var sp = stackSave();
+      try {
+        return wasmTable.get(index)(a1, a2);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_vii(index, a1, a2) {
+      var sp = stackSave();
+      try {
+        wasmTable.get(index)(a1, a2);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_v(index) {
+      var sp = stackSave();
+      try {
+        wasmTable.get(index)();
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_iiii(index, a1, a2, a3) {
+      var sp = stackSave();
+      try {
+        return wasmTable.get(index)(a1, a2, a3);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_ii(index, a1) {
+      var sp = stackSave();
+      try {
+        return wasmTable.get(index)(a1);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_vi(index, a1) {
+      var sp = stackSave();
+      try {
+        wasmTable.get(index)(a1);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_iiiiii(index, a1, a2, a3, a4, a5) {
+      var sp = stackSave();
+      try {
+        return wasmTable.get(index)(a1, a2, a3, a4, a5);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_iiiiiiii(index, a1, a2, a3, a4, a5, a6, a7) {
+      var sp = stackSave();
+      try {
+        return wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_iiiiiiiiiii(
+      index,
+      a1,
+      a2,
+      a3,
+      a4,
+      a5,
+      a6,
+      a7,
+      a8,
+      a9,
+      a10
+    ) {
+      var sp = stackSave();
+      try {
+        return wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_iiiii(index, a1, a2, a3, a4) {
+      var sp = stackSave();
+      try {
+        return wasmTable.get(index)(a1, a2, a3, a4);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_viiii(index, a1, a2, a3, a4) {
+      var sp = stackSave();
+      try {
+        wasmTable.get(index)(a1, a2, a3, a4);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_iiiiiiiiiiiii(
+      index,
+      a1,
+      a2,
+      a3,
+      a4,
+      a5,
+      a6,
+      a7,
+      a8,
+      a9,
+      a10,
+      a11,
+      a12
+    ) {
+      var sp = stackSave();
+      try {
+        return wasmTable.get(index)(
+          a1,
+          a2,
+          a3,
+          a4,
+          a5,
+          a6,
+          a7,
+          a8,
+          a9,
+          a10,
+          a11,
+          a12
+        );
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_fiii(index, a1, a2, a3) {
+      var sp = stackSave();
+      try {
+        return wasmTable.get(index)(a1, a2, a3);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_diii(index, a1, a2, a3) {
+      var sp = stackSave();
+      try {
+        return wasmTable.get(index)(a1, a2, a3);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_i(index) {
+      var sp = stackSave();
+      try {
+        return wasmTable.get(index)();
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_viiiiiii(index, a1, a2, a3, a4, a5, a6, a7) {
+      var sp = stackSave();
+      try {
+        wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_iiiiiii(index, a1, a2, a3, a4, a5, a6) {
+      var sp = stackSave();
+      try {
+        return wasmTable.get(index)(a1, a2, a3, a4, a5, a6);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_iiiiiiiiiiii(
+      index,
+      a1,
+      a2,
+      a3,
+      a4,
+      a5,
+      a6,
+      a7,
+      a8,
+      a9,
+      a10,
+      a11
+    ) {
+      var sp = stackSave();
+      try {
+        return wasmTable.get(index)(
+          a1,
+          a2,
+          a3,
+          a4,
+          a5,
+          a6,
+          a7,
+          a8,
+          a9,
+          a10,
+          a11
+        );
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_viiiiiiiiii(
+      index,
+      a1,
+      a2,
+      a3,
+      a4,
+      a5,
+      a6,
+      a7,
+      a8,
+      a9,
+      a10
+    ) {
+      var sp = stackSave();
+      try {
+        wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_viii(index, a1, a2, a3) {
+      var sp = stackSave();
+      try {
+        wasmTable.get(index)(a1, a2, a3);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_viiiiiiiiiiiiiii(
+      index,
+      a1,
+      a2,
+      a3,
+      a4,
+      a5,
+      a6,
+      a7,
+      a8,
+      a9,
+      a10,
+      a11,
+      a12,
+      a13,
+      a14,
+      a15
+    ) {
+      var sp = stackSave();
+      try {
+        wasmTable.get(index)(
+          a1,
+          a2,
+          a3,
+          a4,
+          a5,
+          a6,
+          a7,
+          a8,
+          a9,
+          a10,
+          a11,
+          a12,
+          a13,
+          a14,
+          a15
+        );
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_jiiii(index, a1, a2, a3, a4) {
+      var sp = stackSave();
+      try {
+        return dynCall_jiiii(index, a1, a2, a3, a4);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
     if (!Object.getOwnPropertyDescriptor(Module, 'intArrayFromString'))
       Module['intArrayFromString'] = function () {
         abort(
@@ -9349,6 +9922,9 @@ const fromPolygonsToSurfaceMesh = (jsPolygons) => {
   return surfaceMesh;
 };
 
+const fromSurfaceMeshEmitBoundingBox = (mesh, emit) =>
+  getCgal().Surface_mesh__bbox(mesh, emit);
+
 const fromSurfaceMeshToGraph = (mesh) => {
   const c = getCgal();
   if (mesh.has_garbage()) {
@@ -9520,4 +10096,4 @@ const transformSurfaceMesh = (mesh, matrix) => {
 const unionOfNefPolyhedrons = (a, b) =>
   getCgal().UnionOfNefPolyhedrons(a, b);
 
-export { differenceOfNefPolyhedrons, extrudeSurfaceMesh, extrudeToPlaneOfSurfaceMesh, fromGraphToNefPolyhedron, fromGraphToSurfaceMesh, fromNefPolyhedronFacetsToGraph, fromNefPolyhedronShellsToGraph, fromNefPolyhedronToPolygons, fromNefPolyhedronToSurfaceMesh, fromNefPolyhedronToTriangles, fromPointsToAlphaShape2AsPolygonSegments, fromPointsToAlphaShapeAsSurfaceMesh, fromPointsToConvexHullAsSurfaceMesh, fromPointsToSurfaceMesh, fromPolygonsToNefPolyhedron, fromPolygonsToSurfaceMesh, fromSurfaceMeshToGraph, fromSurfaceMeshToLazyGraph, fromSurfaceMeshToNefPolyhedron, fromSurfaceMeshToPolygons, fromSurfaceMeshToTriangles, initCgal, insetOfPolygon, intersectionOfNefPolyhedrons, outlineOfSurfaceMesh, sectionOfNefPolyhedron, smoothSurfaceMesh, transformSurfaceMesh, unionOfNefPolyhedrons };
+export { differenceOfNefPolyhedrons, extrudeSurfaceMesh, extrudeToPlaneOfSurfaceMesh, fromGraphToNefPolyhedron, fromGraphToSurfaceMesh, fromNefPolyhedronFacetsToGraph, fromNefPolyhedronShellsToGraph, fromNefPolyhedronToPolygons, fromNefPolyhedronToSurfaceMesh, fromNefPolyhedronToTriangles, fromPointsToAlphaShape2AsPolygonSegments, fromPointsToAlphaShapeAsSurfaceMesh, fromPointsToConvexHullAsSurfaceMesh, fromPointsToSurfaceMesh, fromPolygonsToNefPolyhedron, fromPolygonsToSurfaceMesh, fromSurfaceMeshEmitBoundingBox, fromSurfaceMeshToGraph, fromSurfaceMeshToLazyGraph, fromSurfaceMeshToNefPolyhedron, fromSurfaceMeshToPolygons, fromSurfaceMeshToTriangles, initCgal, insetOfPolygon, intersectionOfNefPolyhedrons, outlineOfSurfaceMesh, sectionOfNefPolyhedron, smoothSurfaceMesh, transformSurfaceMesh, unionOfNefPolyhedrons };

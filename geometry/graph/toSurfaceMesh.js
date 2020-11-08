@@ -8,8 +8,8 @@ export const toSurfaceMesh = (graph) => {
   let surfaceMesh = graph[surfaceMeshSymbol];
   if (surfaceMesh === undefined) {
     if (graph.isOutline) {
-      // SurfaceMesh can't handle outlines.
-      surfaceMesh = fromGraphToSurfaceMesh(fromSurface(toSurface(graph)));
+      // SurfaceMesh can't handle outlines -- rebuild as a surface.
+      return toSurfaceMesh(fromSurface(toSurface(graph)));
     } else {
       surfaceMesh = fromGraphToSurfaceMesh(graph);
     }

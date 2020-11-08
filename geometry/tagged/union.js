@@ -102,6 +102,7 @@ const unionImpl = (geometry, ...geometries) => {
         }
         return taggedPoints({ tags }, pointsUnion(points, ...pointsets));
       }
+      case 'layout':
       case 'plan':
       case 'assembly':
       case 'item':

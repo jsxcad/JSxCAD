@@ -1,3 +1,4 @@
+import { doesNotOverlap } from './doesNotOverlap.js';
 import { extrude } from './extrude.js';
 import { fromNefPolyhedron } from './fromNefPolyhedron.js';
 import { intersectionOfNefPolyhedrons } from '@jsxcad/algorithm-cgal';
@@ -19,6 +20,9 @@ export const intersection = (a, b) => {
   }
   if (!b.isClosed) {
     b = extrude(b, far, 0);
+  }
+  if (doesNotOverlap(a, b)) {
+    return { isEmpty: true };
   }
   return fromNefPolyhedron(
     intersectionOfNefPolyhedrons(toNefPolyhedron(a), toNefPolyhedron(b))
