@@ -15,6 +15,9 @@ import { insetOfPolygon } from '@jsxcad/algorithm-cgal';
 import { realizeGraph } from './realizeGraph.js';
 
 export const offset = (outlineGraph, amount) => {
+  if (amount >= 0) {
+    return outlineGraph;
+  }
   const offsetGraph = create();
   eachFace(realizeGraph(outlineGraph), (face, { plane, loop, holes }) => {
     const polygon = [];
@@ -45,5 +48,10 @@ export const offset = (outlineGraph, amount) => {
       getLoopNode(offsetGraph, offsetLoop).edge = firstEdge;
     }
   });
+  offsetGraph.isClosed = false;
+  offsetGraph.isOutline = true;
+  if (offsetGraph.points.length === 0) {
+    offsetGraph.isEmpty = true;
+  }
   return offsetGraph;
 };

@@ -10,7 +10,7 @@ export const insetOfPolygon = (offset, plane, border, holes = []) => {
     x,
     y,
     z,
-    w,
+    -w,
     offset,
     holes.length,
     (boundary) => {

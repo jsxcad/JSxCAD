@@ -6,4 +6,4 @@ export const sectionOfNefPolyhedron = (
   y = 0,
   z = 0,
   w = 0
-) => getCgal().SectionOfNefPolyhedron(nefPolyhedron, x, y, z, w);
+) => getCgal().SectionOfNefPolyhedron(nefPolyhedron, x, y, z, -w);

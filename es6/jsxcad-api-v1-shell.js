@@ -1,5 +1,5 @@
 import { add, subtract, normalize, dot, transform, scale } from './jsxcad-math-vec3.js';
-import { getNonVoidSolids, getAnyNonVoidSurfaces, taggedSurface, union, taggedAssembly, getSolids, taggedLayers, getNonVoidGraphs, taggedGraph, taggedGroup } from './jsxcad-geometry-tagged.js';
+import { getNonVoidSolids, getAnyNonVoidSurfaces, taggedSurface, union, taggedAssembly, getSolids, taggedLayers, taggedGroup, getNonVoidGraphs, taggedGraph } from './jsxcad-geometry-tagged.js';
 import { Ball } from './jsxcad-api-v1-shapes.js';
 import { Hull } from './jsxcad-api-v1-extrude.js';
 import Shape$1, { Shape } from './jsxcad-api-v1-shape.js';
@@ -164,24 +164,49 @@ const growMethod = function (...args) {
 };
 Shape.prototype.grow = growMethod;
 
-const offset = (shape, amount = 1) => {
-  const group = [];
+const offset = (shape, amount = -1) => {
   if (amount < 0) {
-    for (const { tags, graph } of getNonVoidGraphs(
-      shape.toDisjointGeometry()
-    )) {
-      const outlinedGraph = outline(graph);
-      const offsettedGraph = offset$1(outlinedGraph, amount);
-      group.push(taggedGraph({ tags }, offsettedGraph));
-    }
+    return inset(shape, -amount);
+  } else {
+    return shape;
   }
-  return Shape.fromGeometry(taggedGroup({}, ...group));
 };
 
 const offsetMethod = function (amount) {
   return offset(this, amount);
 };
+
 Shape.prototype.offset = offsetMethod;
+
+// FIX: Support minimal radius requirements.
+const inset = (shape, initial = 1, step, limit) => {
+  const group = [];
+  for (const { tags, graph } of getNonVoidGraphs(shape.toDisjointGeometry())) {
+    const outlinedGraph = outline(graph);
+    let amount = initial;
+    for (;;) {
+      const offsettedGraph = offset$1(outlinedGraph, -amount);
+      if (offsettedGraph.isEmpty) {
+        break;
+      }
+      group.push(taggedGraph({ tags }, offsettedGraph));
+      if (step === undefined) {
+        break;
+      }
+      amount += step;
+      if (amount >= limit) {
+        break;
+      }
+    }
+  }
+  return Shape.fromGeometry(taggedGroup({}, ...group));
+};
+
+const insetMethod = function (initial, step, limit) {
+  return inset(this, initial, step, limit);
+};
+
+Shape.prototype.inset = insetMethod;
 
 const shrink = (shape, amount, { resolution = 3 } = {}) => {
   if (amount === 0) {

@@ -3,6 +3,7 @@
 #include <emscripten/bind.h>
 
 #include <array>
+#include <queue>
 
 #include <CGAL/MP_Float.h>
 #include <CGAL/Quotient.h>
@@ -20,6 +21,9 @@
 #include <CGAL/Alpha_shape_face_base_2.h>
 #include <CGAL/Alpha_shape_vertex_base_2.h>
 #include <CGAL/Alpha_shape_vertex_base_3.h>
+#include <CGAL/Arr_segment_traits_2.h>
+#include <CGAL/Arr_polyline_traits_2.h>
+#include <CGAL/Arrangement_2.h>
 #include <CGAL/Delaunay_triangulation_2.h>
 #include <CGAL/Delaunay_triangulation_3.h>
 #include <CGAL/Polygon_mesh_processing/bbox.h>
@@ -930,6 +934,80 @@ void InsetOfPolygon(double x, double y, double z, double w, double offset, std::
   }
 }
 
+void ArrangePaths(double x, double y, double z, double w, emscripten::val fill, emscripten::val emit_polygon, emscripten::val emit_point) {
+  typedef CGAL::Arr_segment_traits_2<Kernel>                Segment_traits_2;
+  typedef CGAL::Arr_polyline_traits_2<Segment_traits_2>     Geom_traits_2;
+  typedef CGAL::Arrangement_2<Geom_traits_2>                Arrangement_2;
+
+  typedef Geom_traits_2::Point_2                            Point_2;
+  typedef Geom_traits_2::Segment_2                          Segment_2;
+  typedef Geom_traits_2::Curve_2                            Polyline_2;
+
+  Geom_traits_2 traits;
+  Geom_traits_2::Construct_curve_2 polyline_construct = traits.construct_curve_2_object();
+
+  Arrangement_2 arrangement(&traits);
+
+  Plane plane(x, y, z, w);
+
+  for (;;) {
+    Points points;
+    auto* p = &points;
+    fill(p);
+    if (points.empty()) {
+      break;
+    }
+    Point_2s point_2s;
+    for (const auto& point : points) {
+      point_2s.push_back(plane.to_2d(point));
+    }
+    Polyline_2 line = polyline_construct(point_2s.begin(), point_2s.end());
+    insert(arrangement, line);
+  }
+
+  Arrangement_2::Face_handle unbounded = arrangement.unbounded_face();
+
+  std::queue<Arrangement_2::Face_handle> faces;
+
+  for (Arrangement_2::Hole_iterator exterior = unbounded->holes_begin(); exterior != unbounded->holes_end(); ++exterior) {
+    // Step through the hole to the face.
+    Arrangement_2::Face_handle face = (*exterior)->twin()->face();
+    faces.push(face);
+  }
+
+  while (!faces.empty()) {
+    Arrangement_2::Face_handle face = faces.front();
+    faces.pop();
+    Arrangement_2::Ccb_halfedge_const_circulator start = face->outer_ccb();
+    Arrangement_2::Ccb_halfedge_const_circulator edge = start;
+    emit_polygon(false);
+    do {
+      Point p = plane.to_3d(edge->source()->point());
+      emit_point(CGAL::to_double(p.x()), CGAL::to_double(p.y()), CGAL::to_double(p.z()));
+    } while (++edge != start);
+
+    // Step into the holes.
+    for (Arrangement_2::Hole_iterator hole = face->holes_begin(); hole != face->holes_end(); ++hole) {
+      emit_polygon(true);
+      Arrangement_2::Ccb_halfedge_const_circulator start = *hole;
+      Arrangement_2::Ccb_halfedge_const_circulator edge = start;
+      do {
+        Point p = plane.to_3d(edge->source()->point());
+        emit_point(CGAL::to_double(p.x()), CGAL::to_double(p.y()), CGAL::to_double(p.z()));
+      } while (++edge != start);
+
+      // Step through the hole to address it as a face.
+      Arrangement_2::Face_handle face = (*hole)->twin()->face();
+      for (Arrangement_2::Hole_iterator subhole = face->holes_begin(); subhole != face->holes_end(); ++subhole) {
+        // Step through the subhole to address it as a face.
+        Arrangement_2::Face_handle face = (*subhole)->twin()->face();
+        // Schedule it for traversal, since the hole of a hole is a face.
+        faces.push(face);
+      }
+    }
+  }
+}
+
 bool Surface_mesh__is_closed(Surface_mesh* mesh) {
   return CGAL::is_closed(*mesh);
 }
@@ -1094,4 +1172,5 @@ EMSCRIPTEN_BINDINGS(module) {
   emscripten::function("Surface_mesh__is_valid_face_graph", &Surface_mesh__is_valid_face_graph, emscripten::allow_raw_pointers());
   emscripten::function("Surface_mesh__is_valid_polygon_mesh", &Surface_mesh__is_valid_polygon_mesh, emscripten::allow_raw_pointers());
   emscripten::function("Surface_mesh__bbox", &Surface_mesh__bbox, emscripten::allow_raw_pointers());
+  emscripten::function("ArrangePaths", &ArrangePaths, emscripten::allow_raw_pointers());
 }

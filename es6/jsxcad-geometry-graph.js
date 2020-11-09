@@ -1223,6 +1223,9 @@ const intersection = (a, b) => {
 };
 
 const offset = (outlineGraph, amount) => {
+  if (amount >= 0) {
+    return outlineGraph;
+  }
   const offsetGraph = create();
   eachFace(realizeGraph(outlineGraph), (face, { plane, loop, holes }) => {
     const polygon = [];
@@ -1253,6 +1256,11 @@ const offset = (outlineGraph, amount) => {
       getLoopNode(offsetGraph, offsetLoop).edge = firstEdge;
     }
   });
+  offsetGraph.isClosed = false;
+  offsetGraph.isOutline = true;
+  if (offsetGraph.points.length === 0) {
+    offsetGraph.isEmpty = true;
+  }
   return offsetGraph;
 };
 

@@ -1832,9 +1832,11 @@ const unionImpl = (geometry, ...geometries) => {
       }
       case 'paths': {
         const { paths, tags } = geometry;
-        const pathsets = [];
-        for (const { paths } of getNonVoidPaths(geometry)) {
-          pathsets.push(paths);
+        const pathsets = [paths];
+        for (const input of geometries) {
+          for (const { paths } of getNonVoidPaths(input)) {
+            pathsets.push(paths);
+          }
         }
         return taggedPaths({ tags }, union$2(paths, ...pathsets));
       }

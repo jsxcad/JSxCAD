@@ -16,10 +16,10 @@ const view = (
   op = (x) => x,
   { path, width = 1024, height = 512, position = [100, -100, 100] } = {}
 ) => {
-  shape = op(shape);
+  const viewShape = op(shape);
   let nth = 0;
-  const hash = hashGeometry(shape.toGeometry());
-  for (const entry of ensurePages(soup(shape.toDisjointGeometry()))) {
+  const hash = hashGeometry(viewShape.toGeometry());
+  for (const entry of ensurePages(soup(viewShape.toDisjointGeometry()))) {
     if (path) {
       const nthPath = `${path}_${nth++}`;
       addPending(write(nthPath, entry));

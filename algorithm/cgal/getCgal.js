@@ -15,6 +15,7 @@ export const initCgal = async () => {
         const hash = hashSum(log);
         emit({ log: logEntry, hash });
         log({ op: 'text', text, level });
+        console.log(texts);
       },
       printErr(...texts) {
         const text = texts.join(' ');
@@ -23,6 +24,7 @@ export const initCgal = async () => {
         const hash = hashSum(log);
         emit({ log: logEntry, hash });
         log({ op: 'text', text, level });
+        console.log(texts);
       },
       locateFile(path) {
         if (path === 'cgal.wasm') {
