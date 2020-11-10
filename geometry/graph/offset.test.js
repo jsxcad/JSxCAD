@@ -32,10 +32,10 @@ test('offset', (t) => {
   const offsetGraph = offset(outlineGraph, -0.2);
   t.deepEqual(JSON.parse(JSON.stringify(offsetGraph)), {
     points: [
-      [0.3, -0.3, 0.5],
-      [-0.3, -0.3, 0.5],
-      [-0.3, 0.3, 0.5],
-      [0.3, 0.3, 0.5],
+      [0.3, -0.3, -0.5],
+      [-0.3, -0.3, -0.5],
+      [-0.3, 0.3, -0.5],
+      [0.3, 0.3, -0.5],
     ],
     edges: [
       { point: 0, loop: 0, twin: -1, next: 1 },
@@ -45,5 +45,7 @@ test('offset', (t) => {
     ],
     loops: [{ edge: 0, face: 0 }],
     faces: [{ plane: [0, 0, -1, 0.5], loop: 0 }],
+    isClosed: false,
+    isOutline: true,
   });
 });

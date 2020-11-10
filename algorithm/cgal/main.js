@@ -1,3 +1,4 @@
+export { arrangePaths } from './arrangePaths.js';
 export { differenceOfNefPolyhedrons } from './differenceOfNefPolyhedrons.js';
 export { extrudeSurfaceMesh } from './extrudeSurfaceMesh.js';
 export { extrudeToPlaneOfSurfaceMesh } from './extrudeToPlaneOfSurfaceMesh.js';

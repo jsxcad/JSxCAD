@@ -829,8 +829,8 @@ var Module = (function () {
     }
     var wasmMemory;
     var wasmTable = new WebAssembly.Table({
-      initial: 1341,
-      maximum: 1341,
+      initial: 1405,
+      maximum: 1405,
       element: 'anyfunc',
     });
     var ABORT = false;
@@ -1098,9 +1098,9 @@ var Module = (function () {
       Module['HEAPF32'] = HEAPF32 = new Float32Array(buf);
       Module['HEAPF64'] = HEAPF64 = new Float64Array(buf);
     }
-    var STACK_BASE = 5442608,
-      STACK_MAX = 199728,
-      DYNAMIC_BASE = 5442608;
+    var STACK_BASE = 5456336,
+      STACK_MAX = 213456,
+      DYNAMIC_BASE = 5456336;
     assert(STACK_BASE % 16 === 0, 'stack must start aligned');
     assert(DYNAMIC_BASE % 16 === 0, 'heap must start aligned');
     var TOTAL_STACK = 5242880;
@@ -9472,6 +9472,7 @@ const initCgal = async () => {
         const hash = hashSum(log);
         emit({ log: logEntry, hash });
         log({ op: 'text', text, level });
+        console.log(texts);
       },
       printErr(...texts) {
         const text = texts.join(' ');
@@ -9480,6 +9481,7 @@ const initCgal = async () => {
         const hash = hashSum(log);
         emit({ log: logEntry, hash });
         log({ op: 'text', text, level });
+        console.log(texts);
       },
       locateFile(path) {
         if (path === 'cgal.wasm') {
@@ -9501,6 +9503,46 @@ const initCgal = async () => {
 const getCgal = () => cgal;
 
 onBoot(initCgal);
+
+const arrangePaths = (x, y, z, w, paths) => {
+  const c = getCgal();
+  let nth = 0;
+  let target;
+  let polygon;
+  let polygons = [];
+  c.ArrangePaths(
+    x,
+    y,
+    z,
+    w,
+    (points) => {
+      const path = paths[nth++];
+      if (path) {
+        for (const [x, y, z] of path) {
+          c.addPoint(points, x, y, z);
+        }
+        for (const [x, y, z] of path) {
+          c.addPoint(points, x, y, z);
+          break;
+        }
+      }
+    },
+    (isHole) => {
+      if (isHole) {
+        target = [];
+        polygon.holes.push(target);
+      } else {
+        target = [];
+        polygon = { points: target, holes: [] };
+        polygons.push(polygon);
+      }
+    },
+    (x, y, z) => {
+      target.push([x, y, z]);
+    }
+  );
+  return polygons;
+};
 
 const differenceOfNefPolyhedrons = (a, b) =>
   getCgal().DifferenceOfNefPolyhedrons(a, b);
@@ -10011,7 +10053,7 @@ const insetOfPolygon = (offset, plane, border, holes = []) => {
     x,
     y,
     z,
-    w,
+    -w,
     offset,
     holes.length,
     (boundary) => {
@@ -10051,7 +10093,7 @@ const sectionOfNefPolyhedron = (
   y = 0,
   z = 0,
   w = 0
-) => getCgal().SectionOfNefPolyhedron(nefPolyhedron, x, y, z, w);
+) => getCgal().SectionOfNefPolyhedron(nefPolyhedron, x, y, z, -w);
 
 const smoothSurfaceMesh = (mesh) => getCgal().SmoothSurfaceMesh(mesh);
 
@@ -10096,4 +10138,4 @@ const transformSurfaceMesh = (mesh, matrix) => {
 const unionOfNefPolyhedrons = (a, b) =>
   getCgal().UnionOfNefPolyhedrons(a, b);
 
-export { differenceOfNefPolyhedrons, extrudeSurfaceMesh, extrudeToPlaneOfSurfaceMesh, fromGraphToNefPolyhedron, fromGraphToSurfaceMesh, fromNefPolyhedronFacetsToGraph, fromNefPolyhedronShellsToGraph, fromNefPolyhedronToPolygons, fromNefPolyhedronToSurfaceMesh, fromNefPolyhedronToTriangles, fromPointsToAlphaShape2AsPolygonSegments, fromPointsToAlphaShapeAsSurfaceMesh, fromPointsToConvexHullAsSurfaceMesh, fromPointsToSurfaceMesh, fromPolygonsToNefPolyhedron, fromPolygonsToSurfaceMesh, fromSurfaceMeshEmitBoundingBox, fromSurfaceMeshToGraph, fromSurfaceMeshToLazyGraph, fromSurfaceMeshToNefPolyhedron, fromSurfaceMeshToPolygons, fromSurfaceMeshToTriangles, initCgal, insetOfPolygon, intersectionOfNefPolyhedrons, outlineOfSurfaceMesh, sectionOfNefPolyhedron, smoothSurfaceMesh, transformSurfaceMesh, unionOfNefPolyhedrons };
+export { arrangePaths, differenceOfNefPolyhedrons, extrudeSurfaceMesh, extrudeToPlaneOfSurfaceMesh, fromGraphToNefPolyhedron, fromGraphToSurfaceMesh, fromNefPolyhedronFacetsToGraph, fromNefPolyhedronShellsToGraph, fromNefPolyhedronToPolygons, fromNefPolyhedronToSurfaceMesh, fromNefPolyhedronToTriangles, fromPointsToAlphaShape2AsPolygonSegments, fromPointsToAlphaShapeAsSurfaceMesh, fromPointsToConvexHullAsSurfaceMesh, fromPointsToSurfaceMesh, fromPolygonsToNefPolyhedron, fromPolygonsToSurfaceMesh, fromSurfaceMeshEmitBoundingBox, fromSurfaceMeshToGraph, fromSurfaceMeshToLazyGraph, fromSurfaceMeshToNefPolyhedron, fromSurfaceMeshToPolygons, fromSurfaceMeshToTriangles, initCgal, insetOfPolygon, intersectionOfNefPolyhedrons, outlineOfSurfaceMesh, sectionOfNefPolyhedron, smoothSurfaceMesh, transformSurfaceMesh, unionOfNefPolyhedrons };
