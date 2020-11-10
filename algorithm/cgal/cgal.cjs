@@ -1088,9 +1088,9 @@ var Module = (function () {
       Module['HEAPF32'] = HEAPF32 = new Float32Array(buf);
       Module['HEAPF64'] = HEAPF64 = new Float64Array(buf);
     }
-    var STACK_BASE = 5456448,
-      STACK_MAX = 213568,
-      DYNAMIC_BASE = 5456448;
+    var STACK_BASE = 5456336,
+      STACK_MAX = 213456,
+      DYNAMIC_BASE = 5456336;
     assert(STACK_BASE % 16 === 0, 'stack must start aligned');
     assert(DYNAMIC_BASE % 16 === 0, 'heap must start aligned');
     var TOTAL_STACK = 5242880;

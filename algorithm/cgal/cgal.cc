@@ -4,6 +4,7 @@
 
 #include <array>
 #include <queue>
+#include <boost/range/adaptor/reversed.hpp>
 
 #include <CGAL/MP_Float.h>
 #include <CGAL/Quotient.h>
@@ -961,8 +962,9 @@ void ArrangePaths(double x, double y, double z, double w, emscripten::val fill, 
     for (const auto& point : points) {
       point_2s.push_back(plane.to_2d(point));
     }
-    Polyline_2 line = polyline_construct(point_2s.begin(), point_2s.end());
-    insert(arrangement, line);
+    for (std::size_t i = 0; i < point_2s.size() - 1; i++) {
+      insert(arrangement, Segment_2(point_2s[i], point_2s[i + 1]));
+    }
   }
 
   Arrangement_2::Face_handle unbounded = arrangement.unbounded_face();
@@ -982,8 +984,17 @@ void ArrangePaths(double x, double y, double z, double w, emscripten::val fill, 
     Arrangement_2::Ccb_halfedge_const_circulator edge = start;
     emit_polygon(false);
     do {
-      Point p = plane.to_3d(edge->source()->point());
-      emit_point(CGAL::to_double(p.x()), CGAL::to_double(p.y()), CGAL::to_double(p.z()));
+      if (edge->source()->point() == edge->curve()[0].source()) {
+        for (const auto& p2 : edge->curve()) {
+          Point p3 = plane.to_3d(p2);
+          emit_point(CGAL::to_double(p3.x()), CGAL::to_double(p3.y()), CGAL::to_double(p3.z()));
+        }
+      } else {
+        for (const auto& p2 : boost::adaptors::reverse(edge->curve())) {
+          Point p3 = plane.to_3d(p2);
+          emit_point(CGAL::to_double(p3.x()), CGAL::to_double(p3.y()), CGAL::to_double(p3.z()));
+        }
+      }
     } while (++edge != start);
 
     // Step into the holes.
@@ -992,8 +1003,17 @@ void ArrangePaths(double x, double y, double z, double w, emscripten::val fill, 
       Arrangement_2::Ccb_halfedge_const_circulator start = *hole;
       Arrangement_2::Ccb_halfedge_const_circulator edge = start;
       do {
-        Point p = plane.to_3d(edge->source()->point());
-        emit_point(CGAL::to_double(p.x()), CGAL::to_double(p.y()), CGAL::to_double(p.z()));
+        if (edge->source()->point() == edge->curve()[0].source()) {
+          for (const auto& p2 : edge->curve()) {
+            Point p3 = plane.to_3d(p2);
+            emit_point(CGAL::to_double(p3.x()), CGAL::to_double(p3.y()), CGAL::to_double(p3.z()));
+          }
+        } else {
+          for (const auto& p2 : boost::adaptors::reverse(edge->curve())) {
+            Point p3 = plane.to_3d(p2);
+            emit_point(CGAL::to_double(p3.x()), CGAL::to_double(p3.y()), CGAL::to_double(p3.z()));
+          }
+        }
       } while (++edge != start);
 
       // Step through the hole to address it as a face.

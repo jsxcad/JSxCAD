@@ -1,12 +1,28 @@
-import {
-  makeConvex,
-  reorient,
-  union,
-} from '@jsxcad/geometry-z0surface-boolean';
+import { flip, isClockwise } from '@jsxcad/geometry-path';
+
+import { makeConvex, union } from '@jsxcad/geometry-z0surface-boolean';
+
 import { scale, taggedZ0Surface } from '@jsxcad/geometry-tagged';
 
 import OpenTypeJs from 'opentype.js/dist/opentype.js';
+import { arrangePaths } from '@jsxcad/algorithm-cgal';
 import { fromSvgPath } from '@jsxcad/convert-svg';
+
+const orientClockwise = (path) => (isClockwise(path) ? path : flip(path));
+const orientCounterClockwise = (path) =>
+  isClockwise(path) ? flip(path) : path;
+
+const reorient = (paths) => {
+  const arrangement = arrangePaths(0, 0, 1, 0, paths);
+  const reoriented = [];
+  for (const { points, holes } of arrangement) {
+    reoriented.push(orientCounterClockwise(points));
+    for (const hole of holes) {
+      reoriented.push(orientClockwise(hole));
+    }
+  }
+  return reoriented;
+};
 
 export const toFont = (options = {}, data) => {
   // Unfortunately opentype.js wants a buffer but doesn't take an offset.
