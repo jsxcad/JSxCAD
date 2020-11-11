@@ -75,31 +75,6 @@ const ChainedHullMethod = function (...args) {
 };
 Shape.prototype.ChainedHull = ChainedHullMethod;
 
-/*
-import {
-  buildConvexHull,
-  buildConvexSurfaceHull,
-} from './jsxcad-algorithm-shape.js';
-import { taggedSolid, taggedSurface } from './jsxcad-geometry-tagged.js';
-
-import { Shape } from './jsxcad-api-v1-shape.js';
-
-const Z = 2;
-
-export const Hull = (...shapes) => {
-  const points = [];
-  shapes.forEach((shape) => shape.eachPoint((point) => points.push(point)));
-  // FIX: Detect planar hulls properly.
-  if (points.every((point) => point[Z] === 0)) {
-    return Shape.fromGeometry(
-      taggedSurface({}, buildConvexSurfaceHull(points))
-    );
-  } else {
-    return Shape.fromGeometry(taggedSolid({}, buildConvexHull(points)));
-  }
-};
-*/
-
 const Hull = (...shapes) => {
   const points = [];
   shapes.forEach((shape) => shape.eachPoint((point) => points.push(point)));

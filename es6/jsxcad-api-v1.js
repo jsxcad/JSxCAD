@@ -11,8 +11,8 @@ import './jsxcad-api-v1-pdf.js';
 import './jsxcad-api-v1-plans.js';
 import { apothem, box, cylinder, diameter, radius } from './jsxcad-geometry-plan.js';
 export { apothem, box, cylinder, diameter, radius } from './jsxcad-geometry-plan.js';
-import { Peg, Arc, Assembly, Ball, BallOfApothem, BallOfDiameter, BallOfRadius, Box, BoxOfApothem, BoxOfCorners, BoxOfDiameter, BoxOfEdge, BoxOfRadius, BoxOfSize, Circle, Cone, Difference, Empty, Group, Hershey, Hexagon, Icosahedron, Intersection, Line, Path, Plane, Point, Points, Polygon, Polyhedron, Prism, Rod, RodOfApothem, RodOfDiameter, RodOfFunction, RodOfRadius, RodOfSlices, Spiral, Square, Tetrahedron, Toolpath, Torus, Triangle, Union, Wave } from './jsxcad-api-v1-shapes.js';
-export { Arc, Assembly, Ball, BallOfApothem, BallOfDiameter, BallOfRadius, Box, BoxOfApothem, BoxOfCorners, BoxOfDiameter, BoxOfEdge, BoxOfRadius, BoxOfSize, Circle, Cone, Difference, Empty, Group, Hershey, Hexagon, Icosahedron, Intersection, Line, Path, Peg, Plane, Point, Points, Polygon, Polyhedron, Prism, Rod, RodOfApothem, RodOfDiameter, RodOfFunction, RodOfRadius, RodOfSlices, Spiral, Square, Tetrahedron, Toolpath, Torus, Triangle, Union, Wave } from './jsxcad-api-v1-shapes.js';
+import { Peg, Arc, Assembly, Ball, Box, Circle, Cone, Difference, Empty, Group, Hershey, Hexagon, Icosahedron, Intersection, Line, Path, Plane, Point, Points, Polygon, Polyhedron, Prism, Rod, Spiral, Square, Toolpath, Torus, Triangle, Union, Wave } from './jsxcad-api-v1-shapes.js';
+export { Arc, Assembly, Ball, Box, Circle, Cone, Difference, Empty, Group, Hershey, Hexagon, Icosahedron, Intersection, Line, Path, Peg, Plane, Point, Points, Polygon, Polyhedron, Prism, Rod, Spiral, Square, Toolpath, Torus, Triangle, Union, Wave } from './jsxcad-api-v1-shapes.js';
 import { X, Y, Z } from './jsxcad-api-v1-connector.js';
 export { X, Y, Z } from './jsxcad-api-v1-connector.js';
 import { ChainedHull, Hull, Loop } from './jsxcad-api-v1-extrude.js';
@@ -345,16 +345,7 @@ var api = /*#__PURE__*/Object.freeze({
   Arc: Arc,
   Assembly: Assembly,
   Ball: Ball,
-  BallOfApothem: BallOfApothem,
-  BallOfDiameter: BallOfDiameter,
-  BallOfRadius: BallOfRadius,
   Box: Box,
-  BoxOfApothem: BoxOfApothem,
-  BoxOfCorners: BoxOfCorners,
-  BoxOfDiameter: BoxOfDiameter,
-  BoxOfEdge: BoxOfEdge,
-  BoxOfRadius: BoxOfRadius,
-  BoxOfSize: BoxOfSize,
   Circle: Circle,
   Cone: Cone,
   Difference: Difference,
@@ -374,14 +365,8 @@ var api = /*#__PURE__*/Object.freeze({
   Polyhedron: Polyhedron,
   Prism: Prism,
   Rod: Rod,
-  RodOfApothem: RodOfApothem,
-  RodOfDiameter: RodOfDiameter,
-  RodOfFunction: RodOfFunction,
-  RodOfRadius: RodOfRadius,
-  RodOfSlices: RodOfSlices,
   Spiral: Spiral,
   Square: Square,
-  Tetrahedron: Tetrahedron,
   Toolpath: Toolpath,
   Torus: Torus,
   Triangle: Triangle,
