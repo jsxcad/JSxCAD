@@ -14,7 +14,6 @@ import './cut.js';
 import './cutFrom.js';
 import './faces.js';
 import './feedRate.js';
-import './fix.js';
 import './hole.js';
 import './inSolids.js';
 import './intersection.js';

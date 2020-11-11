@@ -1,24 +1,7 @@
-import { Ball, BallOfApothem, BallOfDiameter, BallOfRadius } from './Ball.js';
-import {
-  Box,
-  BoxOfApothem,
-  BoxOfCorners,
-  BoxOfDiameter,
-  BoxOfEdge,
-  BoxOfRadius,
-  BoxOfSize,
-} from './Box.js';
-import {
-  Rod,
-  RodOfApothem,
-  RodOfDiameter,
-  RodOfFunction,
-  RodOfRadius,
-  RodOfSlices,
-} from './Rod.js';
-
 import Arc from './Arc.js';
 import Assembly from './Assembly.js';
+import Ball from './Ball.js';
+import Box from './Box.js';
 import Circle from './Circle.js';
 import Cone from './Cone.js';
 import Difference from './Difference.js';
@@ -37,10 +20,10 @@ import Points from './Points.js';
 import Polygon from './Polygon.js';
 import Polyhedron from './Polyhedron.js';
 import Prism from './Prism.js';
+import Rod from './Rod.js';
 import Sketch from './Sketch.js';
 import Spiral from './Spiral.js';
 import Square from './Square.js';
-import Tetrahedron from './Tetrahedron.js';
 import Toolpath from './Toolpath.js';
 import Torus from './Torus.js';
 import Triangle from './Triangle.js';
@@ -52,12 +35,6 @@ const api = {
   Assembly,
   Ball,
   Box,
-  BoxOfApothem,
-  BoxOfCorners,
-  BoxOfDiameter,
-  BoxOfRadius,
-  BoxOfEdge,
-  BoxOfSize,
   Circle,
   Cone,
   Difference,
@@ -77,15 +54,9 @@ const api = {
   Polyhedron,
   Prism,
   Rod,
-  RodOfApothem,
-  RodOfDiameter,
-  RodOfFunction,
-  RodOfRadius,
-  RodOfSlices,
   Sketch,
   Spiral,
   Square,
-  Tetrahedron,
   Toolpath,
   Torus,
   Triangle,
@@ -97,16 +68,7 @@ export {
   Arc,
   Assembly,
   Ball,
-  BallOfApothem,
-  BallOfDiameter,
-  BallOfRadius,
   Box,
-  BoxOfApothem,
-  BoxOfCorners,
-  BoxOfDiameter,
-  BoxOfRadius,
-  BoxOfEdge,
-  BoxOfSize,
   Circle,
   Cone,
   Difference,
@@ -126,16 +88,10 @@ export {
   Polyhedron,
   Prism,
   Rod,
-  RodOfApothem,
-  RodOfDiameter,
-  RodOfFunction,
-  RodOfRadius,
-  RodOfSlices,
   Sketch,
   Spiral,
   Square,
   Toolpath,
-  Tetrahedron,
   Torus,
   Triangle,
   Union,

@@ -1,11 +1,53 @@
 import Shape$1, { Shape, shapeMethod } from './jsxcad-api-v1-shape.js';
-import { buildRingSphere, toRadiusFromApothem as toRadiusFromApothem$1, regularPolygonEdgeLengthToRadius, buildRegularPolygon, buildRegularPrism, buildFromFunction, buildFromSlices, buildPolygonFromPoints, buildRegularIcosahedron, buildRegularTetrahedron } from './jsxcad-algorithm-shape.js';
-import { taggedSolid, taggedZ0Surface, getPaths, taggedAssembly, getAnySurfaces, taggedDisjointAssembly, taggedLayers, taggedPoints } from './jsxcad-geometry-tagged.js';
 import { concatenate, rotateZ, translate as translate$1 } from './jsxcad-geometry-path.js';
 import { numbers, linear } from './jsxcad-api-v1-math.js';
+import { taggedAssembly, taggedSolid, taggedZ0Surface, getAnySurfaces, taggedDisjointAssembly, taggedLayers, taggedPoints, getPaths } from './jsxcad-geometry-tagged.js';
+import { buildRingSphere, toRadiusFromApothem as toRadiusFromApothem$1, regularPolygonEdgeLengthToRadius, buildRegularPolygon, buildRegularPrism, buildPolygonFromPoints, buildFromFunction, buildFromSlices, buildRegularIcosahedron } from './jsxcad-algorithm-shape.js';
 import { translate } from './jsxcad-geometry-paths.js';
 import { add } from './jsxcad-math-vec3.js';
 import { toPolygon } from './jsxcad-math-plane.js';
+
+const Spiral = (
+  toPathFromAngle = (angle) => [[angle]],
+  { from = 0, to = 360, by, resolution } = {}
+) => {
+  if (by === undefined && resolution === undefined) {
+    by = 1;
+  }
+  let path = [null];
+  for (const angle of numbers((angle) => angle, { from, to, by, resolution })) {
+    const radians = (angle * Math.PI) / 180;
+    const subpath = toPathFromAngle(angle);
+    path = concatenate(path, rotateZ(radians, subpath));
+  }
+  return Shape.fromPath(path);
+};
+
+Shape.prototype.Spiral = shapeMethod(Spiral);
+
+const ofRadius = (radius, angle = 360, { start = 0, sides = 32 } = {}) =>
+  Spiral((a) => [[radius]], {
+    from: start,
+    to: start + angle,
+    resolution: sides,
+  });
+
+const Arc = (...args) => ofRadius(...args);
+Arc.ofRadius = ofRadius;
+
+Shape.prototype.Arc = shapeMethod(Arc);
+
+const isDefined = (value) => value !== undefined;
+
+const Assembly = (...shapes) =>
+  Shape.fromGeometry(
+    taggedAssembly(
+      {},
+      ...shapes.filter(isDefined).map((shape) => shape.toGeometry())
+    )
+  );
+
+Shape.prototype.Assembly = shapeMethod(Assembly);
 
 const unitSphere = (resolution = 16) => {
   const shape = Shape.fromGeometry(
@@ -14,12 +56,12 @@ const unitSphere = (resolution = 16) => {
   return shape.toGraph();
 };
 
-const ofRadius = (radius = 1, { resolution = 16 } = {}) =>
+const ofRadius$1 = (radius = 1, { resolution = 16 } = {}) =>
   unitSphere(resolution).scale(radius);
 const ofApothem = (apothem = 1, { resolution = 16 } = {}) =>
-  ofRadius(toRadiusFromApothem$1(apothem, (2 + resolution) * 2), { resolution });
+  ofRadius$1(toRadiusFromApothem$1(apothem, (2 + resolution) * 2), { resolution });
 const ofDiameter = (diameter = 1, { resolution = 16 } = {}) =>
-  ofRadius(diameter / 2, { resolution });
+  ofRadius$1(diameter / 2, { resolution });
 
 const ofPlan = (plan, { resolution = 16 } = {}) => {
   switch (plan.type) {
@@ -38,12 +80,12 @@ const Ball = (...args) => {
   if (typeof args[0] === 'object') {
     return ofPlan(...args);
   } else {
-    return ofRadius(...args);
+    return ofRadius$1(...args);
   }
 };
 
 const BallOfApothem = ofApothem;
-const BallOfRadius = ofRadius;
+const BallOfRadius = ofRadius$1;
 const BallOfDiameter = ofDiameter;
 
 Shape.prototype.Ball = shapeMethod(Ball);
@@ -62,13 +104,13 @@ const unitSquare = () =>
 
 const ofSize = (width = 1, length) =>
   unitSquare().scale(width, length, 1);
-const ofRadius$1 = (radius) =>
+const ofRadius$2 = (radius) =>
   Shape.fromGeometry(taggedZ0Surface({}, [buildRegularPolygon(4)]))
     .toGraph()
     .rotateZ(45)
     .scale(radius);
-const ofApothem$1 = (apothem) => ofRadius$1(toRadiusFromApothem(apothem));
-const ofDiameter$1 = (diameter) => ofRadius$1(diameter / 2);
+const ofApothem$1 = (apothem) => ofRadius$2(toRadiusFromApothem(apothem));
+const ofDiameter$1 = (diameter) => ofRadius$2(diameter / 2);
 
 const fromCorners = (corner1, corner2) => {
   const [c1x, c1y] = corner1;
@@ -82,7 +124,7 @@ const fromCorners = (corner1, corner2) => {
 const Square = (...args) => ofSize(...args);
 
 Square.ofSize = ofSize;
-Square.ofRadius = ofRadius$1;
+Square.ofRadius = ofRadius$2;
 Square.ofApothem = ofApothem$1;
 Square.ofDiameter = ofDiameter$1;
 Square.fromCorners = fromCorners;
@@ -117,14 +159,14 @@ const ofSize$1 = (width = 1, length = width, height = length) =>
 
 const ofEdge = (length = 1) => ofSize$1(1);
 
-const ofRadius$2 = (radius) =>
+const ofRadius$3 = (radius) =>
   Shape.fromGeometry(taggedSolid({}, buildRegularPrism(4)))
     .rotateZ(45)
     .scale(radius, radius, radius / edgeScale$1);
 
-const ofApothem$2 = (apothem) => ofRadius$2(toRadiusFromApothem$1(apothem, 4));
+const ofApothem$2 = (apothem) => ofRadius$3(toRadiusFromApothem$1(apothem, 4));
 
-const ofDiameter$2 = (diameter) => ofRadius$2(diameter / 2);
+const ofDiameter$2 = (diameter) => ofRadius$3(diameter / 2);
 
 const fromCorners$1 = (corner1 = [1, 1, 1], corner2 = [0, 0, 0]) => {
   const [c1x, c1y, c1z] = corner1;
@@ -152,7 +194,7 @@ const BoxOfApothem = ofApothem$2;
 const BoxOfCorners = fromCorners$1;
 const BoxOfDiameter = ofDiameter$2;
 const BoxOfEdge = ofEdge;
-const BoxOfRadius = ofRadius$2;
+const BoxOfRadius = ofRadius$3;
 const BoxOfSize = ofSize$1;
 
 Shape.prototype.Box = shapeMethod(Box);
@@ -163,116 +205,6 @@ Shape.prototype.BoxOfEdge = shapeMethod(BoxOfEdge);
 Shape.prototype.BoxOfRadius = shapeMethod(BoxOfRadius);
 Shape.prototype.BoxOfSize = shapeMethod(BoxOfSize);
 
-const buildPrism = (radius = 1, height = 1, sides = 32) =>
-  Shape.fromGeometry(taggedSolid({}, buildRegularPrism(sides)))
-    .toGraph()
-    .scale(radius, radius, height);
-
-const ofRadius$3 = (radius = 1, height = 1, { sides = 32 } = {}) =>
-  buildPrism(radius, height, sides);
-const ofApothem$3 = (apothem = 1, height = 1, { sides = 32 } = {}) =>
-  ofRadius$3(toRadiusFromApothem$1(apothem, sides), height, { sides });
-const ofDiameter$3 = (diameter = 1, ...args) =>
-  ofRadius$3(diameter / 2, ...args);
-
-const toPathFromShape = (shape) => {
-  for (const { paths } of getPaths(shape.toKeptGeometry())) {
-    for (const path of paths) {
-      return path;
-    }
-  }
-  return [];
-};
-
-const ofFunction = (op, { resolution, cap = true, context } = {}) =>
-  Shape.fromGeometry(
-    taggedSolid({}, buildFromFunction(op, resolution, cap, context))
-  ).toGraph();
-
-const ofSlices = (op, { slices = 2, cap = true } = {}) =>
-  Shape.fromGeometry(
-    taggedSolid(
-      {},
-      buildFromSlices((slice) => toPathFromShape(op(slice)), slices, cap)
-    )
-  ).toGraph();
-
-const ofPlan$2 = (plan, { sides = 32 } = {}) => {
-  switch (plan.type) {
-    default: {
-      const width = Math.abs(plan.length);
-      const length = Math.abs(plan.width);
-      const height = Math.abs(plan.height);
-      return ofRadius$3(1, 1, { sides })
-        .scale(width / 2, length / 2, height)
-        .move(...plan.center);
-    }
-  }
-};
-
-const Rod = (...args) => {
-  if (typeof args[0] === 'object') {
-    return ofPlan$2(...args);
-  } else {
-    return ofRadius$3(...args);
-  }
-};
-
-const RodOfRadius = ofRadius$3;
-const RodOfApothem = ofApothem$3;
-const RodOfDiameter = ofDiameter$3;
-const RodOfFunction = ofFunction;
-const RodOfSlices = ofSlices;
-
-Shape.prototype.Rod = shapeMethod(Rod);
-Shape.prototype.RodOfApothem = shapeMethod(RodOfApothem);
-Shape.prototype.RodOfDiameter = shapeMethod(RodOfDiameter);
-Shape.prototype.RodOfFunction = shapeMethod(RodOfFunction);
-Shape.prototype.RodOfRadius = shapeMethod(RodOfRadius);
-Shape.prototype.RodOfSlices = shapeMethod(RodOfSlices);
-
-const Spiral = (
-  toPathFromAngle = (angle) => [[angle]],
-  { from = 0, to = 360, by, resolution } = {}
-) => {
-  if (by === undefined && resolution === undefined) {
-    by = 1;
-  }
-  let path = [null];
-  for (const angle of numbers((angle) => angle, { from, to, by, resolution })) {
-    const radians = (angle * Math.PI) / 180;
-    const subpath = toPathFromAngle(angle);
-    path = concatenate(path, rotateZ(radians, subpath));
-  }
-  return Shape.fromPath(path);
-};
-
-Shape.prototype.Spiral = shapeMethod(Spiral);
-
-const ofRadius$4 = (radius, angle = 360, { start = 0, sides = 32 } = {}) =>
-  Spiral((a) => [[radius]], {
-    from: start,
-    to: start + angle,
-    resolution: sides,
-  });
-
-const Arc = (...args) => ofRadius$4(...args);
-Arc.ofRadius = ofRadius$4;
-
-Shape.prototype.Arc = shapeMethod(Arc);
-
-const isDefined = (value) => value !== undefined;
-
-const Assembly = (...shapes) =>
-  Shape.fromGeometry(
-    taggedAssembly(
-      {},
-      ...shapes.filter(isDefined).map((shape) => shape.toGeometry())
-    )
-  );
-
-Shape.prototype.Assembly = shapeMethod(Assembly);
-
 const unitPolygon = (sides = 16) =>
   Shape.fromGeometry(
     taggedZ0Surface({}, [buildRegularPolygon(sides)])
@@ -282,23 +214,23 @@ const unitPolygon = (sides = 16) =>
 const toRadiusFromEdge = (edge, sides) =>
   edge * regularPolygonEdgeLengthToRadius(1, sides);
 
-const ofRadius$5 = (radius, { sides = 16 } = {}) =>
+const ofRadius$4 = (radius, { sides = 16 } = {}) =>
   unitPolygon(sides).scale(radius);
 const ofEdge$1 = (edge, { sides = 16 }) =>
-  ofRadius$5(toRadiusFromEdge(edge, sides), { sides });
-const ofApothem$4 = (apothem, { sides = 16 }) =>
-  ofRadius$5(toRadiusFromApothem$1(apothem, sides), { sides });
-const ofDiameter$4 = (diameter, ...args) =>
-  ofRadius$5(diameter / 2, ...args);
+  ofRadius$4(toRadiusFromEdge(edge, sides), { sides });
+const ofApothem$3 = (apothem, { sides = 16 }) =>
+  ofRadius$4(toRadiusFromApothem$1(apothem, sides), { sides });
+const ofDiameter$3 = (diameter, ...args) =>
+  ofRadius$4(diameter / 2, ...args);
 const ofPoints = (points) =>
   Shape.fromGeometry(buildPolygonFromPoints(points)).toGraph();
 
-const Polygon = (...args) => ofRadius$5(...args);
+const Polygon = (...args) => ofRadius$4(...args);
 
 Polygon.ofEdge = ofEdge$1;
-Polygon.ofApothem = ofApothem$4;
-Polygon.ofRadius = ofRadius$5;
-Polygon.ofDiameter = ofDiameter$4;
+Polygon.ofApothem = ofApothem$3;
+Polygon.ofRadius = ofRadius$4;
+Polygon.ofDiameter = ofDiameter$3;
 Polygon.ofPoints = ofPoints;
 Polygon.toRadiusFromApothem = toRadiusFromApothem$1;
 
@@ -307,35 +239,35 @@ Shape.prototype.Polygon = shapeMethod(Polygon);
 const ofEdge$2 = (edge = 1, { sides = 32 } = {}) =>
   Polygon.ofEdge(edge, { sides });
 
-const ofRadius$6 = (radius = 1, { sides = 32 } = {}) =>
+const ofRadius$5 = (radius = 1, { sides = 32 } = {}) =>
   Polygon.ofRadius(radius, { sides });
 
-const ofApothem$5 = (apothem = 1, { sides = 32 } = {}) =>
+const ofApothem$4 = (apothem = 1, { sides = 32 } = {}) =>
   Polygon.ofApothem(apothem, { sides });
 
-const ofDiameter$5 = (diameter = 1, { sides = 32 } = {}) =>
+const ofDiameter$4 = (diameter = 1, { sides = 32 } = {}) =>
   Polygon.ofDiameter(diameter, { sides });
 
-const Circle = (...args) => ofRadius$6(...args);
+const Circle = (...args) => ofRadius$5(...args);
 
 Circle.ofEdge = ofEdge$2;
-Circle.ofApothem = ofApothem$5;
-Circle.ofRadius = ofRadius$6;
-Circle.ofDiameter = ofDiameter$5;
+Circle.ofApothem = ofApothem$4;
+Circle.ofRadius = ofRadius$5;
+Circle.ofDiameter = ofDiameter$4;
 Circle.toRadiusFromApothem = (radius = 1, sides = 32) =>
   Polygon.toRadiusFromApothem(radius, sides);
 
 Shape.prototype.Circle = shapeMethod(Circle);
 
-const buildPrism$1 = (radius = 1, height = 1, sides = 32) =>
+const buildPrism = (radius = 1, height = 1, sides = 32) =>
   Shape.fromGeometry(taggedSolid({}, buildRegularPrism(sides)))
     .toGraph()
     .scale(radius, radius, height);
 
-const ofRadius$7 = (radius = 1, height = 1, { sides = 3 } = {}) =>
-  buildPrism$1(radius, height, sides);
-const ofDiameter$6 = (diameter = 1, ...args) =>
-  ofRadius$7(diameter / 2, ...args);
+const ofRadius$6 = (radius = 1, height = 1, { sides = 3 } = {}) =>
+  buildPrism(radius, height, sides);
+const ofDiameter$5 = (diameter = 1, ...args) =>
+  ofRadius$6(diameter / 2, ...args);
 
 const toPathFromSurface = (shape) => {
   for (const { surface, z0Surface } of getAnySurfaces(shape.toKeptGeometry())) {
@@ -347,12 +279,12 @@ const toPathFromSurface = (shape) => {
   return [];
 };
 
-const ofFunction$1 = (op, { resolution, cap = true, context } = {}) =>
+const ofFunction = (op, { resolution, cap = true, context } = {}) =>
   Shape.fromGeometry(
     taggedSolid({}, buildFromFunction(op, resolution, cap, context))
   );
 
-const ofSlices$1 = (op, { slices = 2, cap = true } = {}) =>
+const ofSlices = (op, { slices = 2, cap = true } = {}) =>
   Shape.fromGeometry(
     taggedSolid(
       {},
@@ -360,32 +292,32 @@ const ofSlices$1 = (op, { slices = 2, cap = true } = {}) =>
     )
   );
 
-const Prism = (...args) => ofRadius$7(...args);
+const Prism = (...args) => ofRadius$6(...args);
 
-Prism.ofRadius = ofRadius$7;
-Prism.ofDiameter = ofDiameter$6;
-Prism.ofFunction = ofFunction$1;
-Prism.ofSlices = ofSlices$1;
+Prism.ofRadius = ofRadius$6;
+Prism.ofDiameter = ofDiameter$5;
+Prism.ofFunction = ofFunction;
+Prism.ofSlices = ofSlices;
 
 Shape.prototype.Prism = shapeMethod(Prism);
 
-const ofRadius$8 = (radius = 1, height = 1, { sides = 32 } = {}) => {
+const ofRadius$7 = (radius = 1, height = 1, { sides = 32 } = {}) => {
   const fn = linear(1, 0);
   return Prism.ofSlices((t) =>
     Circle(fn(t) * radius, { sides }).moveZ(t * height)
   ).toGraph();
 };
 
-const ofDiameter$7 = (diameter, ...args) =>
-  ofRadius$8(diameter / 2, ...args);
-const ofApothem$6 = (apothem, ...args) =>
-  ofRadius$8(toRadiusFromApothem$1(apothem), ...args);
+const ofDiameter$6 = (diameter, ...args) =>
+  ofRadius$7(diameter / 2, ...args);
+const ofApothem$5 = (apothem, ...args) =>
+  ofRadius$7(toRadiusFromApothem$1(apothem), ...args);
 
-const Cone = (...args) => ofRadius$8(...args);
+const Cone = (...args) => ofRadius$7(...args);
 
-Cone.ofRadius = ofRadius$8;
-Cone.ofDiameter = ofDiameter$7;
-Cone.ofApothem = ofApothem$6;
+Cone.ofRadius = ofRadius$7;
+Cone.ofDiameter = ofDiameter$6;
+Cone.ofApothem = ofApothem$5;
 
 Shape.prototype.Cone = shapeMethod(Cone);
 
@@ -1846,32 +1778,32 @@ Hershey.ofSize = ofSize$2;
 Hershey.toPaths = toPaths;
 
 const ofEdge$3 = (edge = 1) => Polygon.ofEdge(edge, { sides: 6 });
-const ofApothem$7 = (apothem = 1) =>
+const ofApothem$6 = (apothem = 1) =>
   Polygon.ofApothem(apothem, { sides: 6 });
-const ofRadius$9 = (radius = 1) => Polygon.ofRadius(radius, { sides: 6 });
-const ofDiameter$8 = (diameter = 1) =>
+const ofRadius$8 = (radius = 1) => Polygon.ofRadius(radius, { sides: 6 });
+const ofDiameter$7 = (diameter = 1) =>
   Polygon.ofDiameter(diameter, { sides: 6 });
 
-const Hexagon = (...args) => ofRadius$9(...args);
+const Hexagon = (...args) => ofRadius$8(...args);
 
-Hexagon.ofRadius = ofRadius$9;
+Hexagon.ofRadius = ofRadius$8;
 Hexagon.ofEdge = ofEdge$3;
-Hexagon.ofApothem = ofApothem$7;
-Hexagon.ofRadius = ofRadius$9;
-Hexagon.ofDiameter = ofDiameter$8;
+Hexagon.ofApothem = ofApothem$6;
+Hexagon.ofRadius = ofRadius$8;
+Hexagon.ofDiameter = ofDiameter$7;
 
 Shape.prototype.Hexagon = shapeMethod(Hexagon);
 
 const unitIcosahedron = () =>
   Shape.fromPolygonsToSolid(buildRegularIcosahedron({})).toGraph();
 
-const ofRadius$a = (radius = 1) => unitIcosahedron().scale(radius);
-const ofDiameter$9 = (diameter = 1) =>
+const ofRadius$9 = (radius = 1) => unitIcosahedron().scale(radius);
+const ofDiameter$8 = (diameter = 1) =>
   unitIcosahedron().scale(diameter / 2);
-const Icosahedron = (...args) => ofRadius$a(...args);
+const Icosahedron = (...args) => ofRadius$9(...args);
 
-Icosahedron.ofRadius = ofRadius$a;
-Icosahedron.ofDiameter = ofDiameter$9;
+Icosahedron.ofRadius = ofRadius$9;
+Icosahedron.ofDiameter = ofDiameter$8;
 
 Shape.prototype.Icosahedron = shapeMethod(Icosahedron);
 
@@ -1954,24 +1886,78 @@ Polyhedron.ofPointPaths = ofPointPaths;
 
 Shape.prototype.Polyhedron = shapeMethod(Polyhedron);
 
+const buildPrism$1 = (radius = 1, height = 1, sides = 32) =>
+  Shape.fromGeometry(taggedSolid({}, buildRegularPrism(sides)))
+    .toGraph()
+    .scale(radius, radius, height);
+
+const ofRadius$a = (radius = 1, height = 1, { sides = 32 } = {}) =>
+  buildPrism$1(radius, height, sides);
+const ofApothem$7 = (apothem = 1, height = 1, { sides = 32 } = {}) =>
+  ofRadius$a(toRadiusFromApothem$1(apothem, sides), height, { sides });
+const ofDiameter$9 = (diameter = 1, ...args) =>
+  ofRadius$a(diameter / 2, ...args);
+
+const toPathFromShape = (shape) => {
+  for (const { paths } of getPaths(shape.toKeptGeometry())) {
+    for (const path of paths) {
+      return path;
+    }
+  }
+  return [];
+};
+
+const ofFunction$1 = (op, { resolution, cap = true, context } = {}) =>
+  Shape.fromGeometry(
+    taggedSolid({}, buildFromFunction(op, resolution, cap, context))
+  ).toGraph();
+
+const ofSlices$1 = (op, { slices = 2, cap = true } = {}) =>
+  Shape.fromGeometry(
+    taggedSolid(
+      {},
+      buildFromSlices((slice) => toPathFromShape(op(slice)), slices, cap)
+    )
+  ).toGraph();
+
+const ofPlan$2 = (plan, { sides = 32 } = {}) => {
+  switch (plan.type) {
+    default: {
+      const width = Math.abs(plan.length);
+      const length = Math.abs(plan.width);
+      const height = Math.abs(plan.height);
+      return ofRadius$a(1, 1, { sides })
+        .scale(width / 2, length / 2, height)
+        .move(...plan.center);
+    }
+  }
+};
+
+const Rod = (...args) => {
+  if (typeof args[0] === 'object') {
+    return ofPlan$2(...args);
+  } else {
+    return ofRadius$a(...args);
+  }
+};
+
+const RodOfRadius = ofRadius$a;
+const RodOfApothem = ofApothem$7;
+const RodOfDiameter = ofDiameter$9;
+const RodOfFunction = ofFunction$1;
+const RodOfSlices = ofSlices$1;
+
+Shape.prototype.Rod = shapeMethod(Rod);
+Shape.prototype.RodOfApothem = shapeMethod(RodOfApothem);
+Shape.prototype.RodOfDiameter = shapeMethod(RodOfDiameter);
+Shape.prototype.RodOfFunction = shapeMethod(RodOfFunction);
+Shape.prototype.RodOfRadius = shapeMethod(RodOfRadius);
+Shape.prototype.RodOfSlices = shapeMethod(RodOfSlices);
+
 // FIX: This name is confusing wrt Shape.sketch().
 const Sketch = (shape) => shape.sketch();
 
 Shape.prototype.Sketch = shapeMethod(Sketch);
-
-const unitTetrahedron = () =>
-  Shape.fromGeometry(taggedSolid({}, buildRegularTetrahedron({}))).toGraph();
-
-const ofRadius$b = (radius = 1) => unitTetrahedron().scale(radius);
-const ofDiameter$a = (diameter = 1) =>
-  unitTetrahedron().scale(diameter / 2);
-
-const Tetrahedron = (...args) => ofRadius$b(...args);
-
-Tetrahedron.ofRadius = ofRadius$b;
-Tetrahedron.ofDiameter = ofDiameter$a;
-
-Shape.prototype.Tetrahedron = shapeMethod(Tetrahedron);
 
 const Toolpath = (...points) =>
   Path(...points).setTags(['path/Toolpath']);
@@ -1995,16 +1981,16 @@ Shape.prototype.Torus = shapeMethod(Torus);
 const ofEdge$4 = (edge = 1) => Polygon.ofEdge(edge, { sides: 3 });
 const ofApothem$8 = (apothem = 1) =>
   Polygon.ofApothem(apothem, { sides: 3 });
-const ofRadius$c = (radius = 1) => Polygon.ofRadius(radius, { sides: 3 });
-const ofDiameter$b = (diameter = 1) =>
+const ofRadius$b = (radius = 1) => Polygon.ofRadius(radius, { sides: 3 });
+const ofDiameter$a = (diameter = 1) =>
   Polygon.ofDiameter(diameter, { sides: 3 });
 
 const Triangle = (...args) => ofEdge$4(...args);
 
 Triangle.ofEdge = ofEdge$4;
 Triangle.ofApothem = ofApothem$8;
-Triangle.ofRadius = ofRadius$c;
-Triangle.ofDiameter = ofDiameter$b;
+Triangle.ofRadius = ofRadius$b;
+Triangle.ofDiameter = ofDiameter$a;
 
 Shape.prototype.Triangle = shapeMethod(Triangle);
 
@@ -2040,12 +2026,6 @@ const api = {
   Assembly,
   Ball,
   Box,
-  BoxOfApothem,
-  BoxOfCorners,
-  BoxOfDiameter,
-  BoxOfRadius,
-  BoxOfEdge,
-  BoxOfSize,
   Circle,
   Cone,
   Difference,
@@ -2065,15 +2045,9 @@ const api = {
   Polyhedron,
   Prism,
   Rod,
-  RodOfApothem,
-  RodOfDiameter,
-  RodOfFunction,
-  RodOfRadius,
-  RodOfSlices,
   Sketch,
   Spiral,
   Square,
-  Tetrahedron,
   Toolpath,
   Torus,
   Triangle,
@@ -2082,4 +2056,4 @@ const api = {
 };
 
 export default api;
-export { Arc, Assembly, Ball, BallOfApothem, BallOfDiameter, BallOfRadius, Box, BoxOfApothem, BoxOfCorners, BoxOfDiameter, BoxOfEdge, BoxOfRadius, BoxOfSize, Circle, Cone, Difference, Empty, Group, Hershey, Hexagon, Icosahedron, Intersection, Line, Path, Peg, Plane, Point, Points, Polygon, Polyhedron, Prism, Rod, RodOfApothem, RodOfDiameter, RodOfFunction, RodOfRadius, RodOfSlices, Sketch, Spiral, Square, Tetrahedron, Toolpath, Torus, Triangle, Union, Wave };
+export { Arc, Assembly, Ball, Box, Circle, Cone, Difference, Empty, Group, Hershey, Hexagon, Icosahedron, Intersection, Line, Path, Peg, Plane, Point, Points, Polygon, Polyhedron, Prism, Rod, Sketch, Spiral, Square, Toolpath, Torus, Triangle, Union, Wave };

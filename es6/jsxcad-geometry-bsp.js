@@ -7,7 +7,6 @@ import { createNormalize3 } from './jsxcad-algorithm-quantize.js';
 import { toPlane as toPlane$1, translate, flip as flip$1 } from './jsxcad-geometry-surface.js';
 import { getEdges, createOpenPath } from './jsxcad-geometry-path.js';
 import { outlineSurface } from './jsxcad-geometry-halfedge.js';
-import { buildConvexHull } from './jsxcad-algorithm-shape.js';
 
 const EPSILON = 1e-5;
 // const EPSILON2 = 1e-10;
@@ -1257,14 +1256,6 @@ const toConvexClouds = (bsp, normalize) => {
   return clouds;
 };
 
-const toConvexSolids = (bsp, normalize) => {
-  const solids = [];
-  for (const cloud of toConvexClouds(bsp, normalize)) {
-    solids.push(buildConvexHull(cloud));
-  }
-  return solids;
-};
-
 const toDot = (bsp) => {
   const lines = [];
   const dot = (text) => lines.push(text);
@@ -1415,4 +1406,4 @@ const union = (...solids) => {
   return fromPolygons$1(s[0], normalize);
 };
 
-export { containsPoint, cut, cutOpen, deform, difference, differenceSurface, fromPlanes, fromSolid, fromSolids, fromSurface, intersectSurface, intersection, removeExteriorPaths, removeExteriorPolygonsForSection, section, toConvexClouds, toConvexSolids, toDot, toPlanarPolygonsFromSolids, toPlanesFromSolid, toPolygonsFromPlanes, unifyBspTrees, union };
+export { containsPoint, cut, cutOpen, deform, difference, differenceSurface, fromPlanes, fromSolid, fromSolids, fromSurface, intersectSurface, intersection, removeExteriorPaths, removeExteriorPolygonsForSection, section, toConvexClouds, toDot, toPlanarPolygonsFromSolids, toPlanesFromSolid, toPolygonsFromPlanes, unifyBspTrees, union };

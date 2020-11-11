@@ -1,3 +1,5 @@
+import { equals as equalsPoint } from '@jsxcad/math-vec3';
+
 export const create = () => ({ points: [], edges: [], loops: [], faces: [] });
 
 export const addEdge = (graph, { point, next = -1, loop = -1, twin = -1 }) => {
@@ -21,6 +23,46 @@ export const addLoop = (graph, { edge = -1, face = -1 } = {}) => {
   return loop;
 };
 
+export const addLoopFromPoints = (graph, points, { face }) => {
+  const loop = addLoop(graph);
+  fillLoopFromPoints(graph, loop, points);
+  const loopNode = getLoopNode(graph, loop);
+  const faceNode = getFaceNode(graph, face);
+  faceNode.loop = loop;
+  loopNode.face = face;
+  return loop;
+};
+
+export const addHoleFromPoints = (graph, points, { face }) => {
+  const loop = addLoop(graph);
+  fillLoopFromPoints(graph, loop, points);
+  const loopNode = getLoopNode(graph, loop);
+  const faceNode = getFaceNode(graph, face);
+  if (!faceNode.holes) {
+    faceNode.holes = [];
+  }
+  faceNode.holes.push(loop);
+  loopNode.face = face;
+  return loop;
+};
+
+export const fillLoopFromPoints = (graph, loop, points) => {
+  const loopNode = getLoopNode(graph, loop);
+  let lastEdgeNode;
+  for (const coord of points) {
+    const point = addPoint(graph, coord);
+    const edge = addEdge(graph, { loop, point });
+    if (lastEdgeNode) {
+      lastEdgeNode.next = edge;
+    } else {
+      loopNode.edge = edge;
+    }
+    lastEdgeNode = getEdgeNode(graph, edge);
+  }
+  lastEdgeNode.next = loopNode.edge;
+  return loop;
+};
+
 export const addLoopEdge = (graph, loop, { point, twin = -1 }) => {
   const loopNode = getLoopNode(graph, loop);
   const edge = addEdge(graph, { loop, point, twin });
@@ -37,9 +79,10 @@ export const addLoopEdge = (graph, loop, { point, twin = -1 }) => {
 };
 
 export const addPoint = (graph, point) => {
-  const found = graph.points.indexOf(point);
-  if (found !== -1) {
-    return found;
+  for (let nth = 0; nth < graph.points.length; nth++) {
+    if (equalsPoint(graph.points[nth], point)) {
+      return nth;
+    }
   }
   const id = graph.points.length;
   graph.points.push(point);
@@ -71,8 +114,10 @@ export const eachFaceLoop = (graph, face, op) => {
 
 export const eachFaceHole = (graph, face, op) => {
   const faceNode = getFaceNode(graph, face);
-  for (const hole of faceNode.holes) {
-    op(hole, getLoopNode(graph, hole));
+  if (faceNode.holes) {
+    for (const hole of faceNode.holes) {
+      op(hole, getLoopNode(graph, hole));
+    }
   }
 };
 
