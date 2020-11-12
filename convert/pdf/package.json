@@ -24,9 +24,7 @@
   "license": "MIT",
   "dependencies": {
     "@jsxcad/algorithm-color": "^0.0.79",
-    "@jsxcad/algorithm-quantize": "^0.0.79",
     "@jsxcad/algorithm-shape": "^0.0.79",
-    "@jsxcad/geometry-surface": "^0.0.79",
     "@jsxcad/geometry-tagged": "^0.0.79",
     "@jsxcad/math-mat4": "^0.0.79"
   },

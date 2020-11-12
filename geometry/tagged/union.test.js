@@ -27,11 +27,11 @@ test('Surface', (t) => {
     {
       type: 'assembly',
       tags: undefined,
-      content: [{ type: 'z0Surface', z0Surface: [unitSquarePolygon] }],
+      content: [{ type: 'surface', surface: [unitSquarePolygon] }],
     },
     {
-      type: 'z0Surface',
-      z0Surface: scaleSurface(
+      type: 'surface',
+      surface: scaleSurface(
         [0.8, 0.8, 0.8],
         rotateSurface(Math.PI / 2, [unitRegularTrianglePolygon])
       ),
@@ -42,9 +42,9 @@ test('Surface', (t) => {
     tags: undefined,
     content: [
       {
-        type: 'z0Surface',
+        type: 'surface',
         tags: undefined,
-        z0Surface: [
+        surface: [
           [
             [-0.5, -0.06602, 0],
             [-0.69282, -0.4, 0],

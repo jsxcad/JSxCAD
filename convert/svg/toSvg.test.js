@@ -1,3 +1,5 @@
+import '@jsxcad/algorithm-cgal';
+
 import { boot } from '@jsxcad/sys';
 import { buildRegularPolygon } from '@jsxcad/algorithm-shape';
 import test from 'ava';
@@ -13,8 +15,8 @@ test('Triangle', async (t) => {
       type: 'disjointAssembly',
       content: [
         {
-          type: 'z0Surface',
-          z0Surface: [buildRegularPolygon(3)],
+          type: 'surface',
+          surface: [buildRegularPolygon(3)],
           tags: ['color/blue'],
         },
         {

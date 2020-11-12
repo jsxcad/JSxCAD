@@ -17,11 +17,11 @@ test('Simple', (t) => {
   const surface = intersection(
     {
       type: 'assembly',
-      content: [{ type: 'z0Surface', z0Surface: [unitSquarePolygon] }],
+      content: [{ type: 'surface', surface: [unitSquarePolygon] }],
     },
     {
-      type: 'z0Surface',
-      z0Surface: scale(
+      type: 'surface',
+      surface: scale(
         [0.8, 0.8, 0.8],
         rotateZ(Math.PI / 2, [unitRegularTrianglePolygon])
       ),
@@ -31,9 +31,9 @@ test('Simple', (t) => {
     type: 'assembly',
     content: [
       {
-        type: 'z0Surface',
+        type: 'surface',
         tags: undefined,
-        z0Surface: [
+        surface: [
           [
             [-0.5, -0.06602, 0],
             [-0.5, -0.4, 0],

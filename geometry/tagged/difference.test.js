@@ -31,9 +31,9 @@ test('Simple', (t) => {
     type: 'assembly',
     content: [
       {
-        type: 'z0Surface',
+        type: 'surface',
         tags: undefined,
-        z0Surface: [
+        surface: [
           [
             [0.5, -0.26602, 0],
             [0.5, 0.5, 0],
