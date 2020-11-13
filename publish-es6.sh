@@ -1,7 +1,6 @@
 #!/bin/bash
 
 cp algorithm/cgal/dist/main.js es6/jsxcad-algorithm-cgal.js
-cp algorithm/clipper/dist/main.js es6/jsxcad-algorithm-clipper.js
 cp algorithm/color/dist/main.js es6/jsxcad-algorithm-color.js
 cp algorithm/contour/dist/main.js es6/jsxcad-algorithm-contour.js
 cp algorithm/pack/dist/main.js es6/jsxcad-algorithm-pack.js
@@ -63,11 +62,8 @@ cp geometry/points/dist/main.js es6/jsxcad-geometry-points.js
 cp geometry/polygons/dist/main.js es6/jsxcad-geometry-polygons.js
 cp geometry/solid-boolean/dist/main.js es6/jsxcad-geometry-solid-boolean.js
 cp geometry/solid/dist/main.js es6/jsxcad-geometry-solid.js
-cp geometry/surface-boolean/dist/main.js es6/jsxcad-geometry-surface-boolean.js
 cp geometry/surface/dist/main.js es6/jsxcad-geometry-surface.js
 cp geometry/tagged/dist/main.js es6/jsxcad-geometry-tagged.js
-cp geometry/z0surface-boolean/dist/main.js es6/jsxcad-geometry-z0surface-boolean.js
-cp geometry/z0surface/dist/main.js es6/jsxcad-geometry-z0surface.js
 cp math/line2/dist/main.js es6/jsxcad-math-line2.js
 cp math/line3/dist/main.js es6/jsxcad-math-line3.js
 cp math/mat4/dist/main.js es6/jsxcad-math-mat4.js

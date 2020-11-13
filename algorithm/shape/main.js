@@ -1,8 +1,6 @@
 import { regularPolygonEdgeLengthToRadius } from './regularPolygonEdgeLengthToRadius.js';
 
 export { buildAdaptiveCubicBezierCurve } from './buildAdaptiveCubicBezierCurve.js';
-// export { buildFromFunction } from './buildFromFunction.js';
-// export { buildFromSlices } from './buildFromSlices.js';
 export { buildGeodesicSphere } from './buildGeodesicSphere.js';
 export { buildPolygonFromPoints } from './buildPolygonFromPoints.js';
 export { buildRegularIcosahedron } from './buildRegularIcosahedron.js';
