@@ -1,19 +1,18 @@
 import Shape$1, { Shape, getPegCoords, orient } from './jsxcad-api-v1-shape.js';
 import { alphaShape, fromPoints } from './jsxcad-geometry-graph.js';
-import { taggedGraph, getPaths, extrude as extrude$1, extrudeToPlane as extrudeToPlane$1, outline as outline$1, interior as interior$1, taggedSolid, section as section$1, taggedGroup, taggedLayers, getSolids, union, taggedZ0Surface, getSurfaces, getZ0Surfaces, taggedPaths, getPlans, measureBoundingBox, taggedPoints, measureHeights } from './jsxcad-geometry-tagged.js';
+import { taggedGraph, getPaths, extrude as extrude$1, extrudeToPlane as extrudeToPlane$1, outline as outline$1, interior as interior$1, section as section$1, taggedGroup, taggedLayers, getSolids, union, taggedZ0Surface, getSurfaces, getZ0Surfaces, taggedPaths, measureBoundingBox, taggedSolid, taggedPoints, measureHeights } from './jsxcad-geometry-tagged.js';
 import { Assembly, Group } from './jsxcad-api-v1-shapes.js';
-import { Y as Y$1, Z as Z$1 } from './jsxcad-api-v1-connector.js';
-import { loop, buildConvexMinkowskiSum, extrude as extrude$2 } from './jsxcad-algorithm-shape.js';
-import { isCounterClockwise, flip, transform as transform$2, getEdges } from './jsxcad-geometry-path.js';
+import { Y as Y$1 } from './jsxcad-api-v1-connector.js';
+import { loop } from './jsxcad-algorithm-shape.js';
+import { isCounterClockwise, flip, getEdges } from './jsxcad-geometry-path.js';
 import { toPlane } from './jsxcad-math-poly3.js';
-import { transform as transform$1, alignVertices, fromPolygons } from './jsxcad-geometry-solid.js';
-import { cutOpen, section as section$2, fromSolid, containsPoint as containsPoint$1 } from './jsxcad-geometry-bsp.js';
-import { flip as flip$1, toPlane as toPlane$1, transform } from './jsxcad-geometry-surface.js';
-import { createNormalize3 } from './jsxcad-algorithm-quantize.js';
-import { fromTranslation, fromRotation } from './jsxcad-math-mat4.js';
-import { scale, add, normalize, subtract, transform as transform$3 } from './jsxcad-math-vec3.js';
-import { toXYPlaneTransforms, fromNormalAndPoint } from './jsxcad-math-plane.js';
+import { scale, add, normalize, subtract, transform } from './jsxcad-math-vec3.js';
+import { fromNormalAndPoint } from './jsxcad-math-plane.js';
+import { fromRotation } from './jsxcad-math-mat4.js';
 import { toolpath as toolpath$1 } from './jsxcad-algorithm-toolpath.js';
+import { fromSolid, containsPoint as containsPoint$1 } from './jsxcad-geometry-bsp.js';
+import { createNormalize3 } from './jsxcad-algorithm-quantize.js';
+import { fromPolygons } from './jsxcad-geometry-solid.js';
 
 const Alpha = (shape, componentLimit = 1) => {
   const points = [];
@@ -158,37 +157,6 @@ const interiorMethod = function () {
 
 Shape.prototype.interior = interiorMethod;
 
-/**
- *
- * # Minkowski (convex)
- *
- * Generates the minkowski sum of a two convex shapes.
- *
- * ::: illustration { "view": { "position": [40, 40, 40] } }
- * ```
- * minkowski(Cube(10),
- *           Sphere(3));
- * ```
- * :::
- *
- **/
-
-// TODO: Generalize for more operands?
-const minkowski = (a, b) => {
-  const aPoints = [];
-  const bPoints = [];
-  a.eachPoint((point) => aPoints.push(point));
-  b.eachPoint((point) => bPoints.push(point));
-  return Shape.fromGeometry(
-    taggedSolid({}, buildConvexMinkowskiSum(aPoints, bPoints))
-  );
-};
-
-const minkowskiMethod = function (shape) {
-  return minkowski(this, shape);
-};
-Shape.prototype.minkowski = minkowskiMethod;
-
 const section = (shape, ...pegs) => {
   const planes = [];
   if (pegs.length === 0) {
@@ -263,74 +231,6 @@ const squashMethod = function () {
 };
 Shape$1.prototype.squash = squashMethod;
 
-/**
- *
- * # Stretch
- *
- **/
-
-const toPlaneFromConnector = (connector) => {
-  for (const entry of getPlans(connector.toKeptGeometry())) {
-    if (entry.plan && entry.plan.connector) {
-      return entry.planes[0];
-    }
-  }
-};
-
-const toSurface = (plane) => {
-  const max = +1e5;
-  const min = -1e5;
-  const [, from] = toXYPlaneTransforms(plane);
-  const path = [
-    [max, max, 0],
-    [min, max, 0],
-    [min, min, 0],
-    [max, min, 0],
-  ];
-  const polygon = transform$2(from, path);
-  return [polygon];
-};
-
-const stretch = (shape, length, connector = Z$1()) => {
-  const normalize = createNormalize3();
-  const stretches = [];
-  const planeSurface = toSurface(toPlaneFromConnector(connector));
-  for (const { solid, tags } of getSolids(shape.toKeptGeometry())) {
-    if (solid.length === 0) {
-      continue;
-    }
-    const bottom = cutOpen(solid, planeSurface, normalize);
-    const [profile] = section$2(solid, [planeSurface], normalize);
-    const top = cutOpen(solid, flip$1(planeSurface), normalize);
-    const [toZ0, fromZ0] = toXYPlaneTransforms(toPlane$1(profile));
-    const z0SolidGeometry = extrude$2(
-      transform(toZ0, profile),
-      length,
-      0,
-      false
-    );
-    const middle = transform$1(fromZ0, z0SolidGeometry);
-    const topMoved = transform$1(
-      fromTranslation(scale(length, toPlane$1(profile))),
-      top
-    );
-    stretches.push(
-      Shape.fromGeometry({
-        type: 'solid',
-        solid: alignVertices([...bottom, ...middle, ...topMoved], normalize),
-        tags,
-      })
-    );
-  }
-
-  return Assembly(...stretches);
-};
-
-const method = function (...args) {
-  return stretch(this, ...args);
-};
-Shape.prototype.stretch = method;
-
 const START = 0;
 const END = 1;
 
@@ -362,7 +262,7 @@ const sweep = (toolpath, tool, up = [0, 0, 1, 0]) => {
         const middle = scale(0.5, add(curr[START], curr[END]));
         const rotate90 = fromRotation(Math.PI / -2, up);
         const direction = normalize(subtract(curr[START], curr[END]));
-        const rightDirection = transform$3(rotate90, direction);
+        const rightDirection = transform(rotate90, direction);
         const right = add(middle, rightDirection);
         chains.push(
           orient(middle, add(middle, up), right, tool).extrudeToPlane(
@@ -395,11 +295,11 @@ const toolpath = (
     paths: toolpath$1(shape.toKeptGeometry(), diameter, overcut, solid),
   });
 
-const method$1 = function (...options) {
+const method = function (...options) {
   return toolpath(this, ...options);
 };
 
-Shape.prototype.toolpath = method$1;
+Shape.prototype.toolpath = method;
 Shape.prototype.withToolpath = function (...args) {
   return this.with(toolpath(this, ...args));
 };
@@ -617,16 +517,14 @@ const api = {
   extrude,
   extrudeToPlane,
   interior,
-  minkowski,
   inline,
   outline,
   section,
   squash,
-  stretch,
   sweep,
   toolpath,
   voxels,
 };
 
 export default api;
-export { Alpha, Loop, cloudSolid, extrude, extrudeToPlane, inline, interior, minkowski, outline, section, squash, stretch, sweep, toolpath, voxels };
+export { Alpha, Loop, cloudSolid, extrude, extrudeToPlane, inline, interior, outline, section, squash, sweep, toolpath, voxels };

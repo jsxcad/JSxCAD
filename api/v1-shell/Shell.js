@@ -1,3 +1,5 @@
+import { Ball, Hull } from '@jsxcad/api-v1-shapes';
+
 import {
   add,
   dot,
@@ -15,8 +17,6 @@ import {
   union,
 } from '@jsxcad/geometry-tagged';
 
-import { Ball } from '@jsxcad/api-v1-shapes';
-import { Hull } from '@jsxcad/api-v1-extrude';
 import { Shape } from '@jsxcad/api-v1-shape';
 import { createNormalize3 } from '@jsxcad/algorithm-quantize';
 import { fromRotation } from '@jsxcad/math-mat4';

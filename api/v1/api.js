@@ -63,7 +63,7 @@ export {
 
 export { X, Y, Z } from '@jsxcad/api-v1-connector';
 
-export { ChainedHull, Hull, Loop } from '@jsxcad/api-v1-extrude';
+export { Loop } from '@jsxcad/api-v1-extrude';
 
 export { Shape, loadGeometry, log, saveGeometry } from '@jsxcad/api-v1-shape';
 
@@ -87,6 +87,7 @@ export {
   Assembly,
   Ball,
   Box,
+  ChainedHull,
   Circle,
   Cone,
   Difference,
@@ -94,6 +95,7 @@ export {
   Group,
   Hershey,
   Hexagon,
+  Hull,
   Icosahedron,
   Intersection,
   Line,
@@ -104,7 +106,6 @@ export {
   Points,
   Polygon,
   Polyhedron,
-  Prism,
   Rod,
   Spiral,
   Square,

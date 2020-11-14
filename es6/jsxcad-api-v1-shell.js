@@ -1,7 +1,6 @@
+import { Hull, Ball } from './jsxcad-api-v1-shapes.js';
 import { add, subtract, normalize, dot, transform, scale } from './jsxcad-math-vec3.js';
 import { getNonVoidSolids, getAnyNonVoidSurfaces, taggedSurface, union, taggedAssembly, getSolids, taggedLayers, taggedGroup, getNonVoidGraphs, taggedGraph } from './jsxcad-geometry-tagged.js';
-import { Ball } from './jsxcad-api-v1-shapes.js';
-import { Hull } from './jsxcad-api-v1-extrude.js';
 import Shape$1, { Shape } from './jsxcad-api-v1-shape.js';
 import { createNormalize3 } from './jsxcad-algorithm-quantize.js';
 import { fromRotation } from './jsxcad-math-mat4.js';

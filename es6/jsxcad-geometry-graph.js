@@ -1162,6 +1162,8 @@ const section = ([x, y, z, w], graph) =>
     [x, y, z, w]
   );
 
+// import { toSurfaceMesh } from './toSurfaceMesh.js';
+
 const far = 10000;
 
 const difference = (a, b) => {
@@ -1180,6 +1182,7 @@ const difference = (a, b) => {
   return fromNefPolyhedron(
     differenceOfNefPolyhedrons(toNefPolyhedron(a), toNefPolyhedron(b))
   );
+  // return fromSurfaceMeshLazy(differenceOfSurfaceMeshes(toSurfaceMesh(a), toSurfaceMesh(b)));
 };
 
 const eachPoint = (graph, op) => {

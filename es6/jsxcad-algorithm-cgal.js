@@ -829,8 +829,8 @@ var Module = (function () {
     }
     var wasmMemory;
     var wasmTable = new WebAssembly.Table({
-      initial: 1405,
-      maximum: 1405,
+      initial: 1394,
+      maximum: 1394,
       element: 'anyfunc',
     });
     var ABORT = false;
@@ -1098,9 +1098,9 @@ var Module = (function () {
       Module['HEAPF32'] = HEAPF32 = new Float32Array(buf);
       Module['HEAPF64'] = HEAPF64 = new Float64Array(buf);
     }
-    var STACK_BASE = 5456336,
-      STACK_MAX = 213456,
-      DYNAMIC_BASE = 5456336;
+    var STACK_BASE = 5451184,
+      STACK_MAX = 208304,
+      DYNAMIC_BASE = 5451184;
     assert(STACK_BASE % 16 === 0, 'stack must start aligned');
     assert(DYNAMIC_BASE % 16 === 0, 'heap must start aligned');
     var TOTAL_STACK = 5242880;
@@ -9547,6 +9547,9 @@ const arrangePaths = (x, y, z, w, paths) => {
 const differenceOfNefPolyhedrons = (a, b) =>
   getCgal().DifferenceOfNefPolyhedrons(a, b);
 
+const differenceOfSurfaceMeshes = (a, b) =>
+  getCgal().DifferenceOfSurfaceMeshes(a, b);
+
 const extrudeSurfaceMesh = (
   mesh,
   highX,
@@ -10083,6 +10086,9 @@ const insetOfPolygon = (offset, plane, border, holes = []) => {
 const intersectionOfNefPolyhedrons = (a, b) =>
   getCgal().IntersectionOfNefPolyhedrons(a, b);
 
+const intersectionOfSurfaceMeshes = (a, b) =>
+  getCgal().IntersectionOfSurfaceMeshes(a, b);
+
 // Note that the topology of an outline is disconnected.
 const outlineOfSurfaceMesh = (mesh) =>
   getCgal().OutlineOfSurfaceMesh(mesh);
@@ -10138,4 +10144,7 @@ const transformSurfaceMesh = (mesh, matrix) => {
 const unionOfNefPolyhedrons = (a, b) =>
   getCgal().UnionOfNefPolyhedrons(a, b);
 
-export { arrangePaths, differenceOfNefPolyhedrons, extrudeSurfaceMesh, extrudeToPlaneOfSurfaceMesh, fromGraphToNefPolyhedron, fromGraphToSurfaceMesh, fromNefPolyhedronFacetsToGraph, fromNefPolyhedronShellsToGraph, fromNefPolyhedronToPolygons, fromNefPolyhedronToSurfaceMesh, fromNefPolyhedronToTriangles, fromPointsToAlphaShape2AsPolygonSegments, fromPointsToAlphaShapeAsSurfaceMesh, fromPointsToConvexHullAsSurfaceMesh, fromPointsToSurfaceMesh, fromPolygonsToNefPolyhedron, fromPolygonsToSurfaceMesh, fromSurfaceMeshEmitBoundingBox, fromSurfaceMeshToGraph, fromSurfaceMeshToLazyGraph, fromSurfaceMeshToNefPolyhedron, fromSurfaceMeshToPolygons, fromSurfaceMeshToTriangles, initCgal, insetOfPolygon, intersectionOfNefPolyhedrons, outlineOfSurfaceMesh, sectionOfNefPolyhedron, smoothSurfaceMesh, transformSurfaceMesh, unionOfNefPolyhedrons };
+const unionOfSurfaceMeshes = (a, b) =>
+  getCgal().UnionOfSurfaceMeshes(a, b);
+
+export { arrangePaths, differenceOfNefPolyhedrons, differenceOfSurfaceMeshes, extrudeSurfaceMesh, extrudeToPlaneOfSurfaceMesh, fromGraphToNefPolyhedron, fromGraphToSurfaceMesh, fromNefPolyhedronFacetsToGraph, fromNefPolyhedronShellsToGraph, fromNefPolyhedronToPolygons, fromNefPolyhedronToSurfaceMesh, fromNefPolyhedronToTriangles, fromPointsToAlphaShape2AsPolygonSegments, fromPointsToAlphaShapeAsSurfaceMesh, fromPointsToConvexHullAsSurfaceMesh, fromPointsToSurfaceMesh, fromPolygonsToNefPolyhedron, fromPolygonsToSurfaceMesh, fromSurfaceMeshEmitBoundingBox, fromSurfaceMeshToGraph, fromSurfaceMeshToLazyGraph, fromSurfaceMeshToNefPolyhedron, fromSurfaceMeshToPolygons, fromSurfaceMeshToTriangles, initCgal, insetOfPolygon, intersectionOfNefPolyhedrons, intersectionOfSurfaceMeshes, outlineOfSurfaceMesh, sectionOfNefPolyhedron, smoothSurfaceMesh, transformSurfaceMesh, unionOfNefPolyhedrons, unionOfSurfaceMeshes };
