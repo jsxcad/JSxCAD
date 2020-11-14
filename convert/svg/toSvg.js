@@ -3,13 +3,14 @@ import {
   getAnyNonVoidSurfaces,
   getNonVoidPaths,
   measureBoundingBox,
+  outline,
   scale,
+  taggedSurface,
   toTransformedGeometry,
   translate,
 } from '@jsxcad/geometry-tagged';
 
 import { createNormalize3 } from '@jsxcad/algorithm-quantize';
-import { outline } from '@jsxcad/geometry-surface';
 
 const X = 0;
 const Y = 1;
@@ -49,18 +50,21 @@ export const toSvg = async (baseGeometry, { padding = 0 } = {}) => {
     const anySurface = surface || z0Surface;
     if (anySurface === undefined) throw Error('die');
     const color = toColorFromTags(tags);
-    const paths = [];
-    for (const polygon of outline(anySurface, normalize)) {
-      paths.push(
-        `${polygon
-          .map(
-            (point, index) =>
-              `${index === 0 ? 'M' : 'L'}${point[0]} ${point[1]}`
-          )
-          .join(' ')} z`
-      );
+    const svgPaths = [];
+    const outlined = outline(taggedSurface({}, anySurface), normalize);
+    for (const { paths } of outlined) {
+      for (const polygon of paths) {
+        svgPaths.push(
+          `${polygon
+            .map(
+              (point, index) =>
+                `${index === 0 ? 'M' : 'L'}${point[0]} ${point[1]}`
+            )
+            .join(' ')} z`
+        );
+      }
     }
-    svg.push(`<path fill="${color}" stroke="none" d="${paths.join(' ')}"/>`);
+    svg.push(`<path fill="${color}" stroke="none" d="${svgPaths.join(' ')}"/>`);
   }
   for (const { paths, tags } of getNonVoidPaths(geometry)) {
     const color = toColorFromTags(tags);

@@ -1,12 +1,9 @@
-import { deduplicate, assertGood, flip, translate, scale as scale$1, rotateX, isClosed } from './jsxcad-geometry-path.js';
-import { cache as cache$1, cachePoints } from './jsxcad-cache.js';
-import { fromPolygons } from './jsxcad-geometry-solid.js';
-import { makeConvex, flip as flip$1, outline, translate as translate$1 } from './jsxcad-geometry-surface.js';
-import { fromPolygon } from './jsxcad-math-plane.js';
 import { fromPoints } from './jsxcad-math-poly3.js';
 import { scale, add, unit } from './jsxcad-math-vec3.js';
+import { cachePoints, cache as cache$1 } from './jsxcad-cache.js';
 import { fromAngleRadians } from './jsxcad-math-vec2.js';
-import { createNormalize2 } from './jsxcad-algorithm-quantize.js';
+import { scale as scale$1, translate, flip, assertGood, deduplicate, rotateX, isClosed } from './jsxcad-geometry-path.js';
+import { fromPolygons } from './jsxcad-geometry-solid.js';
 
 const sin = (a) => Math.sin((a / 360) * Math.PI * 2);
 
@@ -219,130 +216,6 @@ const buildAdaptiveCubicBezierCurve = (
   [start, c1, c2, end]
 ) => adaptiveBezierCurve(start, c1, c2, end, scale);
 
-const EPSILON = 1e-5;
-
-const buildWalls = (polygons, floor, roof) => {
-  for (
-    let start = floor.length - 1, end = 0;
-    end < floor.length;
-    start = end++
-  ) {
-    // Remember that we are walking CCW.
-    const a = deduplicate([floor[start], floor[end], roof[start]]);
-    const b = deduplicate([floor[end], roof[end], roof[start]]);
-
-    // Some of these polygons may become degenerate -- skip those.
-    if (fromPolygon(a)) {
-      polygons.push(a);
-    }
-
-    if (fromPolygon(b)) {
-      polygons.push(b);
-    }
-  }
-};
-
-const buildPath = (op, latitude, resolution, context) => {
-  const points = [];
-  const step = 1 / resolution;
-  for (let longitude = 0; longitude <= 1; longitude += step) {
-    points.push(op(latitude, longitude, context));
-  }
-  return points;
-};
-
-// Build a tube from generated path slices.
-// The paths are assumed to connect in a 1:1 vertical relationship before deduplication.
-const buildFromFunctionImpl = (op, resolution, cap = true, context) => {
-  const polygons = [];
-  const step = 1 / resolution;
-  let lastPath;
-  for (let latitude = 0; latitude <= 1 + EPSILON; latitude += step) {
-    const path = buildPath(op, latitude, resolution, context);
-    if (lastPath !== undefined) {
-      buildWalls(polygons, path, lastPath);
-    } else {
-      if (cap) {
-        const deduplicatedPath = deduplicate(path);
-        if (deduplicatedPath.length > 0) {
-          polygons.push(...makeConvex([deduplicatedPath]));
-        }
-      }
-    }
-    lastPath = path;
-  }
-  for (const polygon of polygons) {
-    assertGood(polygon);
-  }
-  if (cap) {
-    const deduplicatedPath = deduplicate(flip(lastPath));
-    if (deduplicatedPath.length > 0) {
-      polygons.push(...makeConvex([deduplicatedPath]));
-    }
-  }
-  const solid = { type: 'solid', solid: fromPolygons(polygons) };
-  return solid;
-};
-
-const buildFromFunction = cache$1(buildFromFunctionImpl);
-
-const buildWalls$1 = (polygons, floor, roof) => {
-  for (
-    let start = floor.length - 1, end = 0;
-    end < floor.length;
-    start = end++
-  ) {
-    // Remember that we are walking CCW.
-    const a = deduplicate([floor[start], floor[end], roof[start]]);
-    const b = deduplicate([floor[end], roof[end], roof[start]]);
-
-    // Some of these polygons may become degenerate -- skip those.
-    if (fromPolygon(a)) {
-      polygons.push(a);
-    }
-
-    if (fromPolygon(b)) {
-      polygons.push(b);
-    }
-  }
-};
-
-// Build a tube from generated path slices.
-// The paths are assumed to connect in a 1:1 vertical relationship before deduplication.
-const buildFromSlices = (buildPath, resolution, cap = true) => {
-  const polygons = [];
-  const step = 1 / resolution;
-  let lastPath;
-  for (let t = 0; t <= 1; t += step) {
-    const path = buildPath(t);
-    if (lastPath !== undefined) {
-      buildWalls$1(polygons, path, lastPath);
-    } else {
-      if (cap) {
-        const deduplicatedPath = deduplicate(path);
-        if (deduplicatedPath.length > 0) {
-          polygons.push(...makeConvex([deduplicatedPath]));
-        }
-      }
-    }
-    lastPath = path;
-  }
-  for (const polygon of polygons) {
-    assertGood(polygon);
-  }
-  if (cap) {
-    const deduplicatedPath = deduplicate(lastPath);
-    if (deduplicatedPath.length > 0) {
-      polygons.push(...flip$1(makeConvex([deduplicatedPath])));
-    }
-  }
-
-  return {
-    type: 'solid',
-    solid: fromPolygons(flip$1(polygons)),
-  };
-};
-
 /** @type {function(Point[], Path[]):Triangle[]} */
 const fromPointsAndPaths = (points = [], paths = []) => {
   /** @type {Polygon[]} */
@@ -498,68 +371,7 @@ const buildRegularPolygonImpl = (sides = 32) => {
 
 const buildRegularPolygon = cache$1(buildRegularPolygonImpl);
 
-/** @type {function(surface:Surface, height:number, depth:number, cap:boolean):Solid} */
-const extrudeImpl = (surface, height = 1, depth = 0, cap = true) => {
-  const normalize = createNormalize2();
-  const surfaceOutline = outline(surface, normalize);
-  /** @type {Polygon[]} */
-  const polygons = [];
-  const stepHeight = height - depth;
-
-  // Build the walls.
-  for (const polygon of surfaceOutline) {
-    const wall = flip(polygon);
-    const floor = translate([0, 0, depth + stepHeight * 0], wall);
-    const roof = translate([0, 0, depth + stepHeight * 1], wall);
-    // Walk around the floor to build the walls.
-    for (let i = 0; i < floor.length; i++) {
-      const floorStart = floor[i];
-      const floorEnd = floor[(i + 1) % floor.length];
-      const roofStart = roof[i];
-      const roofEnd = roof[(i + 1) % roof.length];
-      polygons.push([floorStart, roofStart, roofEnd, floorEnd]);
-    }
-  }
-
-  if (cap) {
-    // FIX: This is already Z0.
-    // FIX: This is bringing the vertices out of alignment?
-    const surface = makeConvex(surfaceOutline, normalize);
-
-    // Roof goes up.
-    const roof = translate$1([0, 0, height], surface);
-    polygons.push(...roof);
-
-    // floor faces down.
-    const floor = translate$1([0, 0, depth], flip$1(surface));
-    polygons.push(...floor);
-  }
-
-  const solid = fromPolygons(polygons);
-  return solid;
-};
-
-/**
- * Extrudes a surface vertically.
- * @type {function(Surface, height:number, depth:number, cap:boolean):Solid}
- */
-const extrude = cache$1(extrudeImpl);
-
-/** @type {function(edges:number):Solid} */
-const buildRegularPrismImpl = (edges = 32) => {
-  const path = buildRegularPolygon(edges);
-  /** @type {Surface} */
-  const surface = [translate([0, 0, -0.5], path)];
-  return extrude(surface, 1);
-};
-
-/**
- * Builds a regular prism of height 1 with the specified number of edges.
- * @type {function(edges:number):Solid}
- */
-const buildRegularPrism = cache$1(buildRegularPrismImpl);
-
-const buildWalls$2 = (polygons, floor, roof) => {
+const buildWalls = (polygons, floor, roof) => {
   for (
     let start = floor.length - 1, end = 0;
     end < floor.length;
@@ -603,7 +415,7 @@ const buildRingSphereImpl = (resolution = 20) => {
     const translatedPath = translate([0, 0, height], scaledPath);
     path = translatedPath;
     if (lastPath !== undefined) {
-      buildWalls$2(polygons, path, lastPath);
+      buildWalls(polygons, path, lastPath);
     } else {
       polygons.push(path);
     }
@@ -710,7 +522,7 @@ const buildUniformCubicBezierCurve = ({ segments = 8 }, points) => {
   return path;
 };
 
-const buildWalls$3 = (polygons, floor, roof) => {
+const buildWalls$1 = (polygons, floor, roof) => {
   for (
     let start = floor.length - 1, end = 0;
     end < floor.length;
@@ -750,12 +562,12 @@ const loopImpl = (
       rotateX(radians, path)
     );
     if (lastPath !== undefined) {
-      buildWalls$3(polygons, rotatedPath, lastPath);
+      buildWalls$1(polygons, rotatedPath, lastPath);
     }
     lastPath = rotatedPath;
   }
   if (lastPath !== undefined) {
-    buildWalls$3(
+    buildWalls$1(
       polygons,
       translate([pitchPerRadian * endRadians, 0, 0], rotateX(endRadians, path)),
       lastPath
@@ -886,4 +698,4 @@ const toRadiusFromApothem = (apothem, sides) =>
 const toRadiusFromEdge = (edge, sides) =>
   edge * regularPolygonEdgeLengthToRadius(1, sides);
 
-export { buildAdaptiveCubicBezierCurve, buildFromFunction, buildFromSlices, buildGeodesicSphere, buildPolygonFromPoints, buildRegularIcosahedron, buildRegularPolygon, buildRegularPrism, buildRingSphere, buildUniformCubicBezierCurve, extrude, loop, regularPolygonEdgeLengthToRadius, simplifyPath$1 as simplifyPath, subdivideTriangle, subdivideTriangularMesh, toRadiusFromApothem, toRadiusFromEdge };
+export { buildAdaptiveCubicBezierCurve, buildGeodesicSphere, buildPolygonFromPoints, buildRegularIcosahedron, buildRegularPolygon, buildRingSphere, buildUniformCubicBezierCurve, loop, regularPolygonEdgeLengthToRadius, simplifyPath$1 as simplifyPath, subdivideTriangle, subdivideTriangularMesh, toRadiusFromApothem, toRadiusFromEdge };

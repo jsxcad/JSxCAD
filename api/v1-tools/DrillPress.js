@@ -1,9 +1,4 @@
-import {
-  Assembly,
-  Point,
-  RodOfDiameter,
-  Toolpath,
-} from '@jsxcad/api-v1-shapes';
+import { Assembly, Point, Rod, Toolpath } from '@jsxcad/api-v1-shapes';
 
 export const DrillPress = (
   diameter = 10,
@@ -42,7 +37,7 @@ export const DrillPress = (
     Toolpath(...points),
     sweep === 'no'
       ? undefined
-      : RodOfDiameter(diameter, depth)
+      : Rod(diameter / 2, depth)
           .op((s) => (sweep === 'show' ? s : s.hole()))
           .moveZ(depth / -2)
   ).move(x, y, z);

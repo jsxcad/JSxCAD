@@ -11,12 +11,12 @@ import './jsxcad-api-v1-pdf.js';
 import './jsxcad-api-v1-plans.js';
 import { apothem, box, cylinder, diameter, radius } from './jsxcad-geometry-plan.js';
 export { apothem, box, cylinder, diameter, radius } from './jsxcad-geometry-plan.js';
-import { Peg, Arc, Assembly, Ball, Box, Circle, Cone, Difference, Empty, Group, Hershey, Hexagon, Icosahedron, Intersection, Line, Path, Plane, Point, Points, Polygon, Polyhedron, Prism, Rod, Spiral, Square, Toolpath, Torus, Triangle, Union, Wave } from './jsxcad-api-v1-shapes.js';
-export { Arc, Assembly, Ball, Box, Circle, Cone, Difference, Empty, Group, Hershey, Hexagon, Icosahedron, Intersection, Line, Path, Peg, Plane, Point, Points, Polygon, Polyhedron, Prism, Rod, Spiral, Square, Toolpath, Torus, Triangle, Union, Wave } from './jsxcad-api-v1-shapes.js';
+import { Peg, Arc, Assembly, Ball, Box, ChainedHull, Circle, Cone, Difference, Empty, Group, Hershey, Hexagon, Hull, Icosahedron, Intersection, Line, Path, Plane, Point, Points, Polygon, Polyhedron, Rod, Spiral, Square, Toolpath, Torus, Triangle, Union, Wave } from './jsxcad-api-v1-shapes.js';
+export { Arc, Assembly, Ball, Box, ChainedHull, Circle, Cone, Difference, Empty, Group, Hershey, Hexagon, Hull, Icosahedron, Intersection, Line, Path, Peg, Plane, Point, Points, Polygon, Polyhedron, Rod, Spiral, Square, Toolpath, Torus, Triangle, Union, Wave } from './jsxcad-api-v1-shapes.js';
 import { X, Y, Z } from './jsxcad-api-v1-connector.js';
 export { X, Y, Z } from './jsxcad-api-v1-connector.js';
-import { ChainedHull, Hull, Loop } from './jsxcad-api-v1-extrude.js';
-export { ChainedHull, Hull, Loop } from './jsxcad-api-v1-extrude.js';
+import { Loop } from './jsxcad-api-v1-extrude.js';
+export { Loop } from './jsxcad-api-v1-extrude.js';
 import { Line2 } from './jsxcad-api-v1-line2.js';
 export { Line2 } from './jsxcad-api-v1-line2.js';
 import { Plan } from './jsxcad-api-v1-plan.js';
@@ -326,8 +326,6 @@ var api = /*#__PURE__*/Object.freeze({
   X: X,
   Y: Y,
   Z: Z,
-  ChainedHull: ChainedHull,
-  Hull: Hull,
   Loop: Loop,
   Shape: Shape$1,
   loadGeometry: loadGeometry,
@@ -346,6 +344,7 @@ var api = /*#__PURE__*/Object.freeze({
   Assembly: Assembly,
   Ball: Ball,
   Box: Box,
+  ChainedHull: ChainedHull,
   Circle: Circle,
   Cone: Cone,
   Difference: Difference,
@@ -353,6 +352,7 @@ var api = /*#__PURE__*/Object.freeze({
   Group: Group,
   Hershey: Hershey,
   Hexagon: Hexagon,
+  Hull: Hull,
   Icosahedron: Icosahedron,
   Intersection: Intersection,
   Line: Line,
@@ -363,7 +363,6 @@ var api = /*#__PURE__*/Object.freeze({
   Points: Points,
   Polygon: Polygon,
   Polyhedron: Polyhedron,
-  Prism: Prism,
   Rod: Rod,
   Spiral: Spiral,
   Square: Square,

@@ -7,9 +7,9 @@ import { outlineSolid, outlineSurface } from '@jsxcad/geometry-halfedge';
 
 import { cache } from '@jsxcad/cache';
 import { createNormalize3 } from '@jsxcad/algorithm-quantize';
-import { getAnyNonVoidSurfaces } from './getAnyNonVoidSurfaces.js';
 import { getNonVoidGraphs } from './getNonVoidGraphs.js';
 import { getNonVoidSolids } from './getNonVoidSolids.js';
+import { getNonVoidSurfaces } from './getNonVoidSurfaces.js';
 import { taggedPaths } from './taggedPaths.js';
 import { toKeptGeometry } from './toKeptGeometry.js';
 
@@ -24,20 +24,18 @@ const outlineImpl = (geometry, includeFaces = true, includeHoles = true) => {
 
   const keptGeometry = toKeptGeometry(geometry);
   const outlines = [];
-  for (const { solid } of getNonVoidSolids(keptGeometry)) {
-    outlines.push(taggedPaths({}, outlineSolid(solid, normalize)));
+  for (const { tags, solid } of getNonVoidSolids(keptGeometry)) {
+    outlines.push(taggedPaths({ tags }, outlineSolid(solid, normalize)));
   }
-  for (const { graph } of getNonVoidGraphs(keptGeometry)) {
-    outlines.push(taggedPaths({}, toPathsFromGraph(outlineGraph(graph))));
+  for (const { tags, graph } of getNonVoidGraphs(keptGeometry)) {
+    outlines.push(taggedPaths({ tags }, toPathsFromGraph(outlineGraph(graph))));
   }
   // This is a bit tricky -- let's consider an assembly that produces an effective surface.
   // For now, let's consolidate, and see what goes terribly wrong.
-  for (const surface of getAnyNonVoidSurfaces(keptGeometry).map(
-    ({ surface, z0Surface }) => surface || z0Surface
-  )) {
+  for (const { tags, surface } of getNonVoidSurfaces(keptGeometry)) {
     outlines.push(
       taggedPaths(
-        {},
+        { tags },
         outlineSurface(surface, normalize, includeFaces, includeHoles)
       )
     );

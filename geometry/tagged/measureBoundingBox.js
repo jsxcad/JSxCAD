@@ -6,7 +6,6 @@ import { measureBoundingBox as measureBoundingBoxOfGraph } from '@jsxcad/geometr
 import { measureBoundingBox as measureBoundingBoxOfPoints } from '@jsxcad/geometry-points';
 import { measureBoundingBox as measureBoundingBoxOfSolid } from '@jsxcad/geometry-solid';
 import { measureBoundingBox as measureBoundingBoxOfSurface } from '@jsxcad/geometry-surface';
-import { measureBoundingBox as measureBoundingBoxOfZ0Surface } from '@jsxcad/geometry-z0surface';
 import { toKeptGeometry } from './toKeptGeometry.js';
 import { visit } from './visit.js';
 
@@ -49,8 +48,6 @@ export const measureBoundingBox = (geometry) => {
         return update(measureBoundingBoxOfSolid(geometry.solid));
       case 'surface':
         return update(measureBoundingBoxOfSurface(geometry.surface));
-      case 'z0Surface':
-        return update(measureBoundingBoxOfZ0Surface(geometry.z0Surface));
       case 'points':
         return update(measureBoundingBoxOfPoints(geometry.points));
       case 'paths':

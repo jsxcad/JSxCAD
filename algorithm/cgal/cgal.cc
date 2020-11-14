@@ -1,4 +1,5 @@
 // #define SURFACE_MESH_BOOLEANS
+#define HAS_NO_INTERVAL_SUPPORT
 
 #include <emscripten/bind.h>
 

@@ -1,20 +1,13 @@
-import {
-  equals as equalsPlane,
-  transform as transformPlane,
-} from '@jsxcad/math-plane';
 import { identityMatrix, multiply } from '@jsxcad/math-mat4';
-import {
-  toPlane as toPlaneFromSurface,
-  transform as transformSurface,
-} from '@jsxcad/geometry-surface';
 
 import { rewrite } from './visit.js';
 import { taggedSurface } from './taggedSurface.js';
-import { taggedZ0Surface } from './taggedZ0Surface.js';
 import { transform as transformGraph } from '@jsxcad/geometry-graph';
 import { transform as transformPaths } from '@jsxcad/geometry-paths';
+import { transform as transformPlane } from '@jsxcad/math-plane';
 import { transform as transformPoints } from '@jsxcad/geometry-points';
 import { transform as transformSolid } from '@jsxcad/geometry-solid';
+import { transform as transformSurface } from '@jsxcad/geometry-surface';
 
 const transformedGeometry = Symbol('transformedGeometry');
 
@@ -66,14 +59,10 @@ export const toTransformedGeometry = (geometry) => {
             // fresh one to avoid any caching.
             return taggedSurface({}, []);
           }
-          const transformedSurface = transformSurface(matrix, surface);
-          if (
-            equalsPlane(toPlaneFromSurface(transformedSurface), [0, 0, 1, 0])
-          ) {
-            return taggedZ0Surface({ tags: geometry.tags }, transformedSurface);
-          } else {
-            return taggedSurface({ tags: geometry.tags }, transformedSurface);
-          }
+          return taggedSurface(
+            { tags: geometry.tags },
+            transformSurface(matrix, surface)
+          );
         }
         default:
           throw Error(
