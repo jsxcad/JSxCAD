@@ -1,5 +1,6 @@
 import * as vec from '@jsxcad/math-vec3';
 
+import { each, numbers } from './numbers.js';
 import { ease, linear } from './ease.js';
 
 import Noise from './Noise.js';
@@ -8,7 +9,6 @@ import acos from './acos.js';
 import cos from './cos.js';
 import max from './max.js';
 import min from './min.js';
-import numbers from './numbers.js';
 import sin from './sin.js';
 import sqrt from './sqrt.js';
 
@@ -17,6 +17,7 @@ const api = {
   Random,
   acos,
   cos,
+  each,
   ease,
   linear,
   max,
@@ -32,6 +33,7 @@ export {
   Random,
   acos,
   cos,
+  each,
   ease,
   linear,
   max,

@@ -1,5 +1,4 @@
 // #define SURFACE_MESH_BOOLEANS
-#define HAS_NO_INTERVAL_SUPPORT
 
 #include <emscripten/bind.h>
 
@@ -57,8 +56,8 @@
 #include <CGAL/create_offset_polygons_from_polygon_with_holes_2.h>
 #include <CGAL/intersections.h>
 
-typedef CGAL::Simple_cartesian<CGAL::Gmpq> Kernel;
-// typedef CGAL::Exact_predicates_exact_constructions_kernel Kernel;
+// typedef CGAL::Simple_cartesian<CGAL::Gmpq> Kernel;
+typedef CGAL::Exact_predicates_exact_constructions_kernel Kernel;
 
 typedef CGAL::Nef_polyhedron_3<Kernel, CGAL::SNC_indexed_items> Nef_polyhedron;
 typedef Kernel::FT FT;

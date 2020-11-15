@@ -14,17 +14,21 @@ import Hull from './Hull.js';
 import Icosahedron from './Icosahedron.js';
 import Intersection from './Intersection.js';
 import Line from './Line.js';
+import Octagon from './Octagon.js';
 import Path from './Path.js';
 import Peg from './Peg.js';
+import Pentagon from './Pentagon.js';
 import Plane from './Plane.js';
 import Point from './Point.js';
 import Points from './Points.js';
 import Polygon from './Polygon.js';
 import Polyhedron from './Polyhedron.js';
 import Rod from './Rod.js';
+import Septagon from './Septagon.js';
 import Sketch from './Sketch.js';
 import Spiral from './Spiral.js';
 import Square from './Square.js';
+import Tetragon from './Tetragon.js';
 import Toolpath from './Toolpath.js';
 import Torus from './Torus.js';
 import Triangle from './Triangle.js';
@@ -48,17 +52,21 @@ const api = {
   Icosahedron,
   Intersection,
   Line,
+  Octagon,
   Path,
   Peg,
+  Pentagon,
   Plane,
   Point,
   Points,
   Polygon,
   Polyhedron,
   Rod,
+  Septagon,
   Sketch,
   Spiral,
   Square,
+  Tetragon,
   Toolpath,
   Torus,
   Triangle,
@@ -83,6 +91,8 @@ export {
   Icosahedron,
   Intersection,
   Line,
+  Octagon,
+  Pentagon,
   Path,
   Peg,
   Plane,
@@ -91,9 +101,11 @@ export {
   Polygon,
   Polyhedron,
   Rod,
+  Septagon,
   Sketch,
   Spiral,
   Square,
+  Tetragon,
   Toolpath,
   Torus,
   Triangle,

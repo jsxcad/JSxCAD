@@ -1,7 +1,8 @@
+import { Shape, shapeMethod } from '@jsxcad/api-v1-shape';
+
 import { Group } from './Group.js';
 import { Hull } from './Hull.js';
 import { Points } from './Points.js';
-import { Shape } from '@jsxcad/api-v1-shape';
 
 export const ChainedHull = (...shapes) => {
   const pointsets = shapes.map((shape) => shape.toPoints());
@@ -13,9 +14,11 @@ export const ChainedHull = (...shapes) => {
   return Group(...chain);
 };
 
-const ChainedHullMethod = function (...args) {
-  return ChainedHull(this, ...args);
+const chainHullMethod = function (...shapes) {
+  return ChainedHull(this, ...shapes);
 };
-Shape.prototype.ChainedHull = ChainedHullMethod;
+
+Shape.prototype.chainHull = chainHullMethod;
+Shape.prototype.ChainedHull = shapeMethod(ChainedHull);
 
 export default ChainedHull;
