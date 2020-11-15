@@ -9,5 +9,6 @@ const interiorMethod = function () {
 };
 
 Shape.prototype.interior = interiorMethod;
+Shape.prototype.fill = interiorMethod;
 
 export default interior;

@@ -18,32 +18,40 @@ test('Simple', (t) => {
     type: 'assembly',
     tags: undefined,
     content: [
-      { type: 'z0Surface', z0Surface: [unitSquarePolygon], tags: ['a'] },
+      { type: 'surface', surface: [unitSquarePolygon], tags: ['a'] },
       {
-        type: 'z0Surface',
-        z0Surface: [unitRegularTrianglePolygon],
+        type: 'surface',
+        surface: [unitRegularTrianglePolygon],
         tags: ['b'],
       },
       {
-        type: 'z0Surface',
-        z0Surface: rotateZ(Math.PI / 2, [unitRegularTrianglePolygon]),
+        type: 'surface',
+        surface: rotateZ(Math.PI / 2, [unitRegularTrianglePolygon]),
         tags: ['c'],
       },
     ],
   });
-  t.deepEqual(canonicalize(disjoint), {
+  t.deepEqual(JSON.parse(JSON.stringify(canonicalize(disjoint))), {
     type: 'disjointAssembly',
-    tags: undefined,
     content: [
       {
         type: 'surface',
         tags: ['a'],
         surface: [
           [
+            [0.5, -0.5, 0],
+            [0.5, -0.5, 0],
+            [0.40192, -0.5, 0],
+          ],
+          [
             [0.5, 0.5, 0],
             [0.28868, 0.5, 0],
             [0.36603, 0.36603, 0],
+          ],
+          [
+            [0.36603, 0.36603, 0],
             [0.5, 0.28868, 0],
+            [0.5, 0.5, 0],
           ],
         ],
       },
@@ -57,14 +65,14 @@ test('Simple', (t) => {
             [0.36603, 0.36603, 0],
           ],
           [
-            [-0.5, -0.5, 0],
-            [-0.5, -0.86603, 0],
-            [0.13398, -0.5, 0],
-          ],
-          [
             [-0.18301, 0.68302, 0],
             [-0.5, 0.86603, 0],
             [-0.5, 0.13398, 0],
+          ],
+          [
+            [0.13398, -0.5, 0],
+            [-0.5, -0.5, 0],
+            [-0.5, -0.86603, 0],
           ],
         ],
       },

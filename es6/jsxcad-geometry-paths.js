@@ -1,5 +1,5 @@
 import { fromScaling, fromTranslation } from './jsxcad-math-mat4.js';
-import { transform as transform$1, canonicalize as canonicalize$1, getEdges, flip as flip$1, toGeneric as toGeneric$1, toPolygon, toZ0Polygon } from './jsxcad-geometry-path.js';
+import { transform as transform$1, canonicalize as canonicalize$1, close as close$1, getEdges, flip as flip$1, toGeneric as toGeneric$1, toPolygon, toZ0Polygon } from './jsxcad-geometry-path.js';
 import { fromPoint, min, max, subtract, length, add, scale as scale$1, normalize } from './jsxcad-math-vec3.js';
 
 const transform = (matrix, paths) =>
@@ -15,6 +15,8 @@ const canonicalize = (paths) => {
   }
   return canonicalized;
 };
+
+const close = (paths) => paths.map(close$1);
 
 // FIX: Determine the correct behaviour here.
 
@@ -186,4 +188,4 @@ const scale = ([x = 1, y = 1, z = 1], paths) =>
 const translate = ([x = 0, y = 0, z = 0], paths) =>
   transform(fromTranslation([x, y, z]), paths);
 
-export { butLast, canonicalize, difference, eachPoint, findOpenEdges, flip, intersection, last, measureBoundingBox, scale, segment, segmented, toGeneric, toPoints, toPolygons, toZ0Polygons, transform, translate, union };
+export { butLast, canonicalize, close, difference, eachPoint, findOpenEdges, flip, intersection, last, measureBoundingBox, scale, segment, segmented, toGeneric, toPoints, toPolygons, toZ0Polygons, transform, translate, union };

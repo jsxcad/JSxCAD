@@ -156,6 +156,7 @@ const interiorMethod = function () {
 };
 
 Shape.prototype.interior = interiorMethod;
+Shape.prototype.fill = interiorMethod;
 
 const section = (shape, ...pegs) => {
   const planes = [];

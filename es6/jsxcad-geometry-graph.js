@@ -1380,10 +1380,14 @@ const union = (a, b) => {
     return a;
   }
   if (!a.isClosed) {
+    if (!b.isClosed) {
+      b = extrude(b, far$2, 0);
+    }
     return section(principlePlane(a), union(extrude(a, far$2, 0), b));
   }
   if (!b.isClosed) {
     // The union of a surface and a solid is the solid.
+    // Otherwise we'd end up with a union with the far extrusion.
     return a;
   }
   if (doesNotOverlap(a, b)) {

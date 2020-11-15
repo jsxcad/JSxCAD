@@ -3,6 +3,7 @@ import { transform } from './transform.js';
 
 export { butLast } from './butLast.js';
 export { canonicalize } from './canonicalize.js';
+export { close } from './close.js';
 export { difference } from './difference.js';
 export { eachPoint } from './eachPoint.js';
 export { findOpenEdges } from './findOpenEdges.js';

@@ -1,4 +1,4 @@
-import { Shape } from '@jsxcad/api-v1-shape';
+import { Shape, shapeMethod } from '@jsxcad/api-v1-shape';
 import { convexHull } from '@jsxcad/geometry-graph';
 import { taggedGraph } from '@jsxcad/geometry-tagged';
 
@@ -11,6 +11,8 @@ export const Hull = (...shapes) => {
 const hullMethod = function (...shapes) {
   return Hull(this, ...shapes);
 };
+
+Shape.prototype.Hull = shapeMethod(Hull);
 Shape.prototype.hull = hullMethod;
 
 export default Hull;

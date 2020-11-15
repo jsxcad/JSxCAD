@@ -34,7 +34,7 @@ export const numbers = (
     // Exclusive
     for (
       let number = from, nth = 0;
-      number < to - EPSILON;
+      number < upto - EPSILON;
       number += by, nth++
     ) {
       numbers.push(thunk(number, nth));
@@ -52,6 +52,6 @@ export const numbers = (
   return numbers;
 };
 
-export default numbers;
+export const each = numbers;
 
-numbers.signature = 'numbers(spec) -> numbers';
+export default numbers;

@@ -1,30 +1,12 @@
-// This one is a little trickier, as the construction should fit around the apothem, not within it.
-// But the ideal boundary remains the same.
-
-const apothem = (apothem = 1, [x = 0, y = 0, z = 0] = []) => {
-  const left = x - apothem;
-  const right = x + apothem;
-  const front = y + apothem;
-  const back = y - apothem;
-  const top = z + apothem;
-  const bottom = z - apothem;
-  const length = right - left;
-  const width = back - front;
-  const height = top - bottom;
-  const center = [(left + right) / 2, (front + back) / 2, (top + bottom) / 2];
+const apothem = (
+  apothem = 1,
+  { center = [0, 0, 0], sides = 32 } = {}
+) => {
   return {
     type: 'apothem',
-    left,
-    right,
-    back,
-    front,
-    top,
-    bottom,
-    length,
-    width,
-    height,
-    apothem,
     center,
+    apothem,
+    sides,
   };
 };
 
@@ -90,60 +72,122 @@ const cylinder = (
   };
 };
 
-const diameter = (diameter = 1, [x = 0, y = 0, z = 0] = []) => {
-  const radius = diameter / 2;
-  const left = x - radius;
-  const right = x + radius;
-  const front = y + radius;
-  const back = y - radius;
-  const top = z + radius;
-  const bottom = z - radius;
-  const length = right - left;
-  const width = back - front;
-  const height = top - bottom;
-  const center = [(left + right) / 2, (front + back) / 2, (top + bottom) / 2];
+const diameter = (
+  diameter = 1,
+  { center = [0, 0, 0], sides = 32 } = {}
+) => {
   return {
     type: 'diameter',
-    left,
-    right,
-    back,
-    front,
-    top,
-    bottom,
-    length,
-    width,
-    height,
-    radius,
-    diameter,
     center,
+    diameter,
+    sides,
   };
 };
 
-const radius = (radius = 1, [x = 0, y = 0, z = 0] = []) => {
-  const left = x - radius;
-  const right = x + radius;
-  const front = y + radius;
-  const back = y - radius;
-  const top = z + radius;
-  const bottom = z - radius;
-  const length = right - left;
-  const width = back - front;
-  const height = top - bottom;
-  const center = [(left + right) / 2, (front + back) / 2, (top + bottom) / 2];
+const radius = (radius = 1, { center = [0, 0, 0], sides = 32 } = {}) => {
   return {
     type: 'radius',
-    left,
-    right,
-    back,
-    front,
-    top,
-    bottom,
-    length,
-    width,
-    height,
-    radius,
     center,
+    radius,
+    sides,
   };
 };
 
-export { apothem, box, cylinder, diameter, radius };
+const getSides = (plan) => {
+  switch (plan.type) {
+    case 'radius':
+    case 'apothem':
+    case 'diameter':
+      return plan.sides;
+    default: {
+      const { sides = 32 } = plan;
+      return sides;
+    }
+  }
+};
+
+const toRadiusFromApothem = (apothem, sides = 32) =>
+  apothem / Math.cos(Math.PI / sides);
+
+const getRadius = (plan) => {
+  if (typeof plan === 'number') {
+    return plan;
+  }
+  switch (plan.type) {
+    case 'apothem':
+      return toRadiusFromApothem(plan.apothem, getSides(plan));
+    case 'diameter':
+      return plan.diameter / 2;
+    case 'radius':
+      return plan.radius;
+  }
+};
+
+const getBack = (plan) => {
+  if (typeof plan === 'number') {
+    return -plan;
+  }
+  switch (plan.type) {
+    default:
+      return -getRadius(plan);
+  }
+};
+
+const getBottom = (plan) => {
+  if (typeof plan === 'number') {
+    return -plan;
+  }
+  switch (plan.type) {
+    default:
+      return -getRadius(plan);
+  }
+};
+
+const getCenter = (plan) => {
+  if (typeof plan === 'number') {
+    return [0, 0, 0];
+  }
+  return plan.center || [0, 0, 0];
+};
+
+const getFront = (plan) => {
+  if (typeof plan === 'number') {
+    return plan;
+  }
+  switch (plan.type) {
+    default:
+      return getRadius(plan);
+  }
+};
+
+const getLeft = (plan) => {
+  if (typeof plan === 'number') {
+    return -plan;
+  }
+  switch (plan.type) {
+    default:
+      return -getRadius(plan);
+  }
+};
+
+const getRight = (plan) => {
+  if (typeof plan === 'number') {
+    return plan;
+  }
+  switch (plan.type) {
+    default:
+      return getRadius(plan);
+  }
+};
+
+const getTop = (plan) => {
+  if (typeof plan === 'number') {
+    return -plan;
+  }
+  switch (plan.type) {
+    default:
+      return -getRadius(plan);
+  }
+};
+
+export { apothem, box, cylinder, diameter, getBack, getBottom, getCenter, getFront, getLeft, getRadius, getRight, getSides, getTop, radius };

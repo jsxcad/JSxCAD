@@ -11,8 +11,8 @@ import './jsxcad-api-v1-pdf.js';
 import './jsxcad-api-v1-plans.js';
 import { apothem, box, cylinder, diameter, radius } from './jsxcad-geometry-plan.js';
 export { apothem, box, cylinder, diameter, radius } from './jsxcad-geometry-plan.js';
-import { Peg, Arc, Assembly, Ball, Box, ChainedHull, Circle, Cone, Difference, Empty, Group, Hershey, Hexagon, Hull, Icosahedron, Intersection, Line, Path, Plane, Point, Points, Polygon, Polyhedron, Rod, Spiral, Square, Toolpath, Torus, Triangle, Union, Wave } from './jsxcad-api-v1-shapes.js';
-export { Arc, Assembly, Ball, Box, ChainedHull, Circle, Cone, Difference, Empty, Group, Hershey, Hexagon, Hull, Icosahedron, Intersection, Line, Path, Peg, Plane, Point, Points, Polygon, Polyhedron, Rod, Spiral, Square, Toolpath, Torus, Triangle, Union, Wave } from './jsxcad-api-v1-shapes.js';
+import { Peg, Arc, Assembly, Ball, Box, ChainedHull, Circle, Cone, Difference, Empty, Group, Hershey, Hexagon, Hull, Icosahedron, Intersection, Line, Octagon, Path, Pentagon, Plane, Point, Points, Polygon, Polyhedron, Rod, Septagon, Spiral, Square, Tetragon, Toolpath, Torus, Triangle, Union, Wave } from './jsxcad-api-v1-shapes.js';
+export { Arc, Assembly, Ball, Box, ChainedHull, Circle, Cone, Difference, Empty, Group, Hershey, Hexagon, Hull, Icosahedron, Intersection, Line, Octagon, Path, Peg, Pentagon, Plane, Point, Points, Polygon, Polyhedron, Rod, Septagon, Spiral, Square, Tetragon, Toolpath, Torus, Triangle, Union, Wave } from './jsxcad-api-v1-shapes.js';
 import { X, Y, Z } from './jsxcad-api-v1-connector.js';
 export { X, Y, Z } from './jsxcad-api-v1-connector.js';
 import { Loop } from './jsxcad-api-v1-extrude.js';
@@ -27,8 +27,8 @@ import { BenchPlane, BenchSaw, DrillPress, HoleRouter, LineRouter, ProfileRouter
 export { BenchPlane, BenchSaw, DrillPress, HoleRouter, LineRouter, ProfileRouter } from './jsxcad-api-v1-tools.js';
 import { Item } from './jsxcad-api-v1-item.js';
 export { Item } from './jsxcad-api-v1-item.js';
-import { Noise, Random, acos, cos, ease, max, min, numbers, sin, sqrt, vec } from './jsxcad-api-v1-math.js';
-export { Noise, Random, acos, cos, ease, max, min, numbers, sin, sqrt, vec } from './jsxcad-api-v1-math.js';
+import { Noise, Random, acos, cos, each, ease, max, min, numbers, sin, sqrt, vec } from './jsxcad-api-v1-math.js';
+export { Noise, Random, acos, cos, each, ease, max, min, numbers, sin, sqrt, vec } from './jsxcad-api-v1-math.js';
 import { readSvg } from './jsxcad-api-v1-svg.js';
 export { readSvg } from './jsxcad-api-v1-svg.js';
 import { readStl } from './jsxcad-api-v1-stl.js';
@@ -356,16 +356,20 @@ var api = /*#__PURE__*/Object.freeze({
   Icosahedron: Icosahedron,
   Intersection: Intersection,
   Line: Line,
+  Octagon: Octagon,
   Path: Path,
   Peg: Peg,
+  Pentagon: Pentagon,
   Plane: Plane,
   Point: Point,
   Points: Points,
   Polygon: Polygon,
   Polyhedron: Polyhedron,
   Rod: Rod,
+  Septagon: Septagon,
   Spiral: Spiral,
   Square: Square,
+  Tetragon: Tetragon,
   Toolpath: Toolpath,
   Torus: Torus,
   Triangle: Triangle,
@@ -376,6 +380,7 @@ var api = /*#__PURE__*/Object.freeze({
   Random: Random,
   acos: acos,
   cos: cos,
+  each: each,
   ease: ease,
   max: max,
   min: min,
