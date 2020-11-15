@@ -1,25 +1,31 @@
 md`# Complex Construction`;
 
 md`## Assembly(...shapes)`;
-const assembly = Assembly(Square(20), Triangle(5));
-assembly.topView();
+const assembly = Assembly(Box(d(20)).fill(), Triangle(d(15)).fill()).topView();
 md`An assembly of a 20x20 square and a triangle of length 5.`;
 
 md`## Difference(...shapes)`;
-const difference = Difference(Square(20), Triangle(5));
-difference.topView();
+const difference = Difference(
+  Box(d(20)).fill(),
+  Triangle(d(15)).fill()
+).topView();
 md`A 20x20 square with a triangle of size 5 removed.`;
 
 md`## Group(...shapes)`;
-const group = Group(Square(20), Triangle(5));
-group.topView();
+const group = Group(
+  Box(d(20)).fill().color('red'),
+  Triangle(d(20)).fill().color('blue')
+)
+  .item()
+  .topView();
 
 md`## Intersection(...shapes)`;
-const intersection = Intersection(Box(10), Ball(7));
-intersection.view();
+const intersection = Intersection(
+  Box(d(10)).pull(10 / 2, 10 / -2),
+  Ball(7)
+).view();
 md`The intersection of a 10x10x10 Cube and a Sphere of radius 7.`;
 
 md`## Union(...shapes)`;
-const union = Union(Triangle(10), Circle(4));
-union.topView();
+const union = Union(Triangle(5).fill(), Circle(4).fill()).topView();
 md`A union of a triangle and a circle.`;
