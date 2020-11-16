@@ -5,6 +5,8 @@ export const getBack = (plan) => {
     return -plan;
   }
   switch (plan.type) {
+    case 'corners':
+      return plan.back;
     default:
       return -getRadius(plan);
   }

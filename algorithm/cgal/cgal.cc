@@ -1,4 +1,4 @@
-// #define SURFACE_MESH_BOOLEANS
+#define SURFACE_MESH_BOOLEANS
 
 #include <emscripten/bind.h>
 

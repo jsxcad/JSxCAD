@@ -350,16 +350,6 @@ const getGraphs = (geometry) => {
   return graphs;
 };
 
-const getPaths = (geometry) => {
-  const pathsets = [];
-  eachItem(geometry, (item) => {
-    if (item.type === 'paths') {
-      pathsets.push(item);
-    }
-  });
-  return pathsets;
-};
-
 const getSolids = (geometry) => {
   const solids = [];
   eachItem(geometry, (item) => {
@@ -386,10 +376,6 @@ const taggedGraph = ({ tags }, graph) => ({
   graph,
 });
 
-const taggedPaths = ({ tags }, paths) => {
-  return { type: 'paths', tags, paths };
-};
-
 const taggedSolid = ({ tags }, solid) => {
   return { type: 'solid', tags, solid };
 };
@@ -408,15 +394,34 @@ const differenceImpl = (geometry, ...geometries) => {
             differenced = difference$1(differenced, fromSolid(solid));
           }
           for (const { surface } of getSurfaces(geometry)) {
-            differenced = difference$1(differenced, fromSurface(surface));
+            differenced = difference$1(
+              differenced,
+              fromSurface(surface)
+            );
           }
         }
         return taggedGraph({ tags }, differenced);
       }
       case 'solid':
-        return taggedSolid({ tags }, toSolid(difference(taggedGraph({ tags }, fromSolid(geometry.solid)), ...geometries).graph));
+        return taggedSolid(
+          { tags },
+          toSolid(
+            difference(
+              taggedGraph({ tags }, fromSolid(geometry.solid)),
+              ...geometries
+            ).graph
+          )
+        );
       case 'surface':
-        return taggedSurface({ tags }, toSurface(difference(taggedGraph({ tags }, fromSurface(geometry.surface)), ...geometries).graph));
+        return taggedSurface(
+          { tags },
+          toSurface(
+            difference(
+              taggedGraph({ tags }, fromSurface(geometry.surface)),
+              ...geometries
+            ).graph
+          )
+        );
       case 'paths':
       case 'points': {
         // Not implemented yet.
@@ -1037,6 +1042,16 @@ const getNonVoidZ0Surfaces = (geometry) => {
   return z0Surfaces;
 };
 
+const getPaths = (geometry) => {
+  const pathsets = [];
+  eachItem(geometry, (item) => {
+    if (item.type === 'paths') {
+      pathsets.push(item);
+    }
+  });
+  return pathsets;
+};
+
 /**
  * Returns the first orientation peg found, or defaults to Z0.
  */
@@ -1133,6 +1148,10 @@ const hash = (geometry) => {
     geometry.hash = nanoid();
   }
   return geometry.hash;
+};
+
+const taggedPaths = ({ tags }, paths) => {
+  return { type: 'paths', tags, paths };
 };
 
 const toBspTree = (geometry, normalize) => {

@@ -5,6 +5,8 @@ export const getFront = (plan) => {
     return plan;
   }
   switch (plan.type) {
+    case 'corners':
+      return plan.front;
     default:
       return getRadius(plan);
   }

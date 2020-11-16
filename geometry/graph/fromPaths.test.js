@@ -30,18 +30,18 @@ test('fromPaths', (t) => {
   const graph = fromPaths(paths);
   t.deepEqual(graph, {
     points: [
-      [100, 100, 0],
       [-100, 100, 0],
       [-100, -100, 0],
       [100, -100, 0],
-      [-5, -5, 0],
+      [100, 100, 0],
       [-5, 5, 0],
       [5, 5, 0],
       [5, -5, 0],
-      [2, 2, 0],
+      [-5, -5, 0],
       [-2, 2, 0],
       [-2, -2, 0],
       [2, -2, 0],
+      [2, 2, 0],
     ],
     edges: [
       { point: 0, loop: 0, twin: -1, next: 1 },
@@ -75,8 +75,8 @@ test('fromPaths', (t) => {
       { edge: 16, face: 1 },
     ],
     faces: [
-      { plane: [0, 0, 1, 0], loop: 0, holes: [1] },
-      { plane: [0, 0, 1, 0], loop: 2 },
+      { plane: [0, 0, -1, 0], loop: 0, holes: [1] },
+      { plane: [0, 0, -1, 0], loop: 2 },
     ],
     isClosed: false,
     isOutline: true,

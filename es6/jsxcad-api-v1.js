@@ -9,8 +9,8 @@ import './jsxcad-api-v1-deform.js';
 import './jsxcad-api-v1-gcode.js';
 import './jsxcad-api-v1-pdf.js';
 import './jsxcad-api-v1-plans.js';
-import { apothem, box, cylinder, diameter, radius } from './jsxcad-geometry-plan.js';
-export { apothem, box, cylinder, diameter, radius } from './jsxcad-geometry-plan.js';
+import { apothem, corners, diameter, radius } from './jsxcad-geometry-plan.js';
+export { apothem, corners, diameter, radius } from './jsxcad-geometry-plan.js';
 import { Peg, Arc, Assembly, Ball, Box, ChainedHull, Circle, Cone, Difference, Empty, Group, Hershey, Hexagon, Hull, Icosahedron, Intersection, Line, Octagon, Path, Pentagon, Plane, Point, Points, Polygon, Polyhedron, Rod, Septagon, Spiral, Square, Tetragon, Toolpath, Torus, Triangle, Union, Wave } from './jsxcad-api-v1-shapes.js';
 export { Arc, Assembly, Ball, Box, ChainedHull, Circle, Cone, Difference, Empty, Group, Hershey, Hexagon, Hull, Icosahedron, Intersection, Line, Octagon, Path, Peg, Pentagon, Plane, Point, Points, Polygon, Polyhedron, Rod, Septagon, Spiral, Square, Tetragon, Toolpath, Torus, Triangle, Union, Wave } from './jsxcad-api-v1-shapes.js';
 import { X, Y, Z } from './jsxcad-api-v1-connector.js';
@@ -284,8 +284,7 @@ const replayRecordedNotes = async (path) => {
  */
 
 const a = apothem;
-const b = box;
-const c = cylinder;
+const c = corners;
 const d = diameter;
 const r = radius;
 
@@ -296,12 +295,10 @@ const z = Peg([0, 0, 0], [0, 1, 0], [-1, 0, 0]);
 var api = /*#__PURE__*/Object.freeze({
   __proto__: null,
   apothem: apothem,
-  cylinder: cylinder,
-  box: box,
+  corners: corners,
   diameter: diameter,
   radius: radius,
   a: a,
-  b: b,
   c: c,
   d: d,
   r: r,
@@ -475,4 +472,4 @@ registerDynamicModule(module('svg'), './jsxcad-api-v1-svg.js');
 registerDynamicModule(module('threejs'), './jsxcad-api-v1-threejs.js');
 registerDynamicModule(module('units'), './jsxcad-api-v1-units.js');
 
-export { a, b, beginRecordingNotes, c, checkBox, d, importModule, md, numberBox, r, replayRecordedNotes, saveRecordedNotes, selectBox, sliderBox, source, stringBox, x, y, z };
+export { a, beginRecordingNotes, c, checkBox, d, importModule, md, numberBox, r, replayRecordedNotes, saveRecordedNotes, selectBox, sliderBox, source, stringBox, x, y, z };

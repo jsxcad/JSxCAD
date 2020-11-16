@@ -10,64 +10,16 @@ const apothem = (
   };
 };
 
-const box = (
-  right = 0,
-  back = 0,
-  top = 0,
-  left = 0,
-  front = 0,
-  bottom = 0
-) => {
+const corners = (right = 0, back = 0, left = 0, front = 0) => {
   if (left > right) [left, right] = [right, left];
   if (front > back) [front, back] = [back, front];
-  if (top > bottom) [top, bottom] = [bottom, top];
-  const length = right - left;
-  const width = back - front;
-  const height = top - bottom;
-  const center = [(left + right) / 2, (front + back) / 2, (top + bottom) / 2];
+  const center = [(left + right) / 2, (front + back) / 2, 0];
   return {
-    type: 'box',
+    type: 'corners',
     left,
     right,
     back,
     front,
-    top,
-    bottom,
-    length,
-    width,
-    height,
-    center,
-  };
-};
-
-const cylinder = (
-  radius = 1,
-  up = 1,
-  down = 0,
-  [x = 0, y = 0, z = 0] = []
-) => {
-  const left = x - radius;
-  const right = x + radius;
-  const front = y + radius;
-  const back = y - radius;
-  const top = z + up;
-  const bottom = z + down;
-  const length = right - left;
-  const width = back - front;
-  const height = top - bottom;
-  const center = [(left + right) / 2, (front + back) / 2, (top + bottom) / 2];
-  return {
-    type: 'radius',
-    left,
-    right,
-    back,
-    front,
-    top,
-    bottom,
-    length,
-    width,
-    height,
-    radius,
     center,
   };
 };
@@ -128,6 +80,8 @@ const getBack = (plan) => {
     return -plan;
   }
   switch (plan.type) {
+    case 'corners':
+      return plan.back;
     default:
       return -getRadius(plan);
   }
@@ -155,6 +109,8 @@ const getFront = (plan) => {
     return plan;
   }
   switch (plan.type) {
+    case 'corners':
+      return plan.front;
     default:
       return getRadius(plan);
   }
@@ -165,6 +121,8 @@ const getLeft = (plan) => {
     return -plan;
   }
   switch (plan.type) {
+    case 'corners':
+      return plan.left;
     default:
       return -getRadius(plan);
   }
@@ -175,6 +133,8 @@ const getRight = (plan) => {
     return plan;
   }
   switch (plan.type) {
+    case 'corners':
+      return plan.right;
     default:
       return getRadius(plan);
   }
@@ -190,4 +150,4 @@ const getTop = (plan) => {
   }
 };
 
-export { apothem, box, cylinder, diameter, getBack, getBottom, getCenter, getFront, getLeft, getRadius, getRight, getSides, getTop, radius };
+export { apothem, corners, diameter, getBack, getBottom, getCenter, getFront, getLeft, getRadius, getRight, getSides, getTop, radius };

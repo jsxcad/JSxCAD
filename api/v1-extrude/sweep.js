@@ -18,9 +18,6 @@ const planeOfBisection = (aStart, bStart, intersection) => {
   return fromNormalAndPoint(bis2, intersection);
 };
 
-// CHECK: Not clear why we need to negate the dispacement.
-const neg = ([a, b, c, d]) => [a, b, c, -d];
-
 // FIX: This is a weak approximation assuming a 1d profile -- it will need to be redesigned.
 export const sweep = (toolpath, tool, up = [0, 0, 1, 0]) => {
   const chains = [];
@@ -42,10 +39,7 @@ export const sweep = (toolpath, tool, up = [0, 0, 1, 0]) => {
         const rightDirection = transform(rotate90, direction);
         const right = add(middle, rightDirection);
         chains.push(
-          orient(middle, add(middle, up), right, tool).extrudeToPlane(
-            neg(b),
-            neg(a)
-          )
+          orient(middle, add(middle, up), right, tool).extrudeToPlane(a, b)
         );
       }
     }
