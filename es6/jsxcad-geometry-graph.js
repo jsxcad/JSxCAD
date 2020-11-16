@@ -1,4 +1,4 @@
-import { fromSurfaceMeshToGraph, fromPointsToAlphaShapeAsSurfaceMesh, fromSurfaceMeshToLazyGraph, fromPointsToConvexHullAsSurfaceMesh, fromPolygonsToSurfaceMesh, fromGraphToSurfaceMesh, fromSurfaceMeshEmitBoundingBox, extrudeSurfaceMesh, fromNefPolyhedronToSurfaceMesh, fromSurfaceMeshToNefPolyhedron, fromNefPolyhedronFacetsToGraph, sectionOfNefPolyhedron, differenceOfNefPolyhedrons, extrudeToPlaneOfSurfaceMesh, arrangePaths, fromPointsToSurfaceMesh, fromSurfaceMeshToTriangles, intersectionOfNefPolyhedrons, insetOfPolygon, outlineOfSurfaceMesh, smoothSurfaceMesh, transformSurfaceMesh, unionOfNefPolyhedrons } from './jsxcad-algorithm-cgal.js';
+import { fromSurfaceMeshToGraph, fromPointsToAlphaShapeAsSurfaceMesh, fromSurfaceMeshToLazyGraph, fromPointsToConvexHullAsSurfaceMesh, fromPolygonsToSurfaceMesh, fromGraphToSurfaceMesh, fromSurfaceMeshEmitBoundingBox, extrudeSurfaceMesh, fromSurfaceMeshToNefPolyhedron, fromNefPolyhedronFacetsToGraph, sectionOfNefPolyhedron, differenceOfSurfaceMeshes, extrudeToPlaneOfSurfaceMesh, arrangePaths, fromPointsToSurfaceMesh, fromSurfaceMeshToTriangles, intersectionOfSurfaceMeshes, insetOfPolygon, outlineOfSurfaceMesh, smoothSurfaceMesh, transformSurfaceMesh, unionOfSurfaceMeshes } from './jsxcad-algorithm-cgal.js';
 import { equals as equals$1, dot, min, max, scale } from './jsxcad-math-vec3.js';
 import { deduplicate as deduplicate$1, isClockwise, flip as flip$1 } from './jsxcad-geometry-path.js';
 import { toPlane, flip } from './jsxcad-math-poly3.js';
@@ -1123,19 +1123,6 @@ const extrude = (graph, height, depth) => {
   }
 };
 
-// This is for a proper manifold, but will not produce a simplified outline.
-
-const fromNefPolyhedron = (nefPolyhedron) => {
-  let graph = nefPolyhedron[graphSymbol];
-  if (graph === undefined) {
-    const surfaceMesh = fromNefPolyhedronToSurfaceMesh(nefPolyhedron);
-    graph = fromSurfaceMeshLazy(surfaceMesh);
-    nefPolyhedron[graphSymbol] = graph;
-    graph[nefPolyhedronSymbol] = nefPolyhedron;
-  }
-  return graph;
-};
-
 // FIX: Actually determine the principle plane.
 const principlePlane = (graph) => {
   for (const face of realizeGraph(graph).faces) {
@@ -1162,8 +1149,6 @@ const section = ([x, y, z, w], graph) =>
     [x, y, z, w]
   );
 
-// import { toSurfaceMesh } from './toSurfaceMesh.js';
-
 const far = 10000;
 
 const difference = (a, b) => {
@@ -1179,10 +1164,10 @@ const difference = (a, b) => {
   if (doesNotOverlap(a, b)) {
     return a;
   }
-  return fromNefPolyhedron(
-    differenceOfNefPolyhedrons(toNefPolyhedron(a), toNefPolyhedron(b))
+  // return fromNefPolyhedron(differenceOfNefPolyhedrons(toNefPolyhedron(a), toNefPolyhedron(b)));
+  return fromSurfaceMeshLazy(
+    differenceOfSurfaceMeshes(toSurfaceMesh(a), toSurfaceMesh(b))
   );
-  // return fromSurfaceMeshLazy(differenceOfSurfaceMeshes(toSurfaceMesh(a), toSurfaceMesh(b)));
 };
 
 const eachPoint = (graph, op) => {
@@ -1223,7 +1208,7 @@ const orientCounterClockwise = (path) =>
 
 const fromPaths = (paths) => {
   // FIX: Discover the plane for planar graphs.
-  const plane = [0, 0, -1, 0];
+  const plane = [0, 0, 1, 0];
   const arrangement = arrangePaths(...plane, paths);
   const graph = create();
   for (const { points, holes } of arrangement) {
@@ -1283,8 +1268,9 @@ const intersection = (a, b) => {
   if (doesNotOverlap(a, b)) {
     return { isEmpty: true };
   }
-  return fromNefPolyhedron(
-    intersectionOfNefPolyhedrons(toNefPolyhedron(a), toNefPolyhedron(b))
+  // return fromNefPolyhedron(intersectionOfNefPolyhedrons(toNefPolyhedron(a), toNefPolyhedron(b)));
+  return fromSurfaceMeshLazy(
+    intersectionOfSurfaceMeshes(toSurfaceMesh(a), toSurfaceMesh(b))
   );
 };
 
@@ -1393,8 +1379,9 @@ const union = (a, b) => {
   if (doesNotOverlap(a, b)) {
     return a;
   }
-  return fromNefPolyhedron(
-    unionOfNefPolyhedrons(toNefPolyhedron(b), toNefPolyhedron(a))
+  // return fromNefPolyhedron(unionOfNefPolyhedrons(toNefPolyhedron(b), toNefPolyhedron(a)));
+  return fromSurfaceMeshLazy(
+    unionOfSurfaceMeshes(toSurfaceMesh(a), toSurfaceMesh(b))
   );
 };
 

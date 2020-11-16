@@ -1,15 +1,15 @@
 import {
-  differenceOfNefPolyhedrons,
-  // differenceOfSurfaceMeshes,
+  //   differenceOfNefPolyhedrons,
+  differenceOfSurfaceMeshes,
 } from '@jsxcad/algorithm-cgal';
 import { doesNotOverlap } from './doesNotOverlap.js';
 import { extrude } from './extrude.js';
-import { fromNefPolyhedron } from './fromNefPolyhedron.js';
-// import { fromSurfaceMeshLazy } from './fromSurfaceMeshLazy.js';
+// import { fromNefPolyhedron } from './fromNefPolyhedron.js';
+import { fromSurfaceMeshLazy } from './fromSurfaceMeshLazy.js';
 import { principlePlane } from './principlePlane.js';
 import { section } from './section.js';
-import { toNefPolyhedron } from './toNefPolyhedron.js';
-// import { toSurfaceMesh } from './toSurfaceMesh.js';
+// import { toNefPolyhedron } from './toNefPolyhedron.js';
+import { toSurfaceMesh } from './toSurfaceMesh.js';
 
 const far = 10000;
 
@@ -26,8 +26,8 @@ export const difference = (a, b) => {
   if (doesNotOverlap(a, b)) {
     return a;
   }
-  return fromNefPolyhedron(
-    differenceOfNefPolyhedrons(toNefPolyhedron(a), toNefPolyhedron(b))
+  // return fromNefPolyhedron(differenceOfNefPolyhedrons(toNefPolyhedron(a), toNefPolyhedron(b)));
+  return fromSurfaceMeshLazy(
+    differenceOfSurfaceMeshes(toSurfaceMesh(a), toSurfaceMesh(b))
   );
-  // return fromSurfaceMeshLazy(differenceOfSurfaceMeshes(toSurfaceMesh(a), toSurfaceMesh(b)));
 };

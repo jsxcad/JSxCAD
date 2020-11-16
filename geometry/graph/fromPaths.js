@@ -15,7 +15,7 @@ const orientCounterClockwise = (path) =>
 
 export const fromPaths = (paths) => {
   // FIX: Discover the plane for planar graphs.
-  const plane = [0, 0, -1, 0];
+  const plane = [0, 0, 1, 0];
   const arrangement = arrangePaths(...plane, paths);
   const graph = create();
   for (const { points, holes } of arrangement) {

@@ -22,6 +22,7 @@ test('Render a letter', async (t) => {
             type: 'graph',
             graph: {
               points: [
+                [28.30781, 9.35641, 0],
                 [30.31, 13.25, 0],
                 [30.49998, 13.74125, 0],
                 [30.47822, 14.40594, 0],
@@ -103,7 +104,6 @@ test('Render a letter', async (t) => {
                 [20.25026, 0.02147, 0],
                 [21.86222, 0.85319, 0],
                 [24.20824, 3.09736, 0],
-                [28.30781, 9.35641, 0],
               ],
               edges: [
                 { point: 0, loop: 0, twin: -1, next: 1 },
@@ -272,7 +272,7 @@ test('Render a letter', async (t) => {
                 { point: 0, loop: 0, twin: -1, next: 0 },
               ],
               loops: [{ edge: 0, face: 0 }],
-              faces: [{ plane: [0, 0, -1, 0], loop: 0 }],
+              faces: [{ plane: [0, 0, 1, 0], loop: 0 }],
               isClosed: false,
               isOutline: true,
               isWireframe: true,
@@ -288,6 +288,7 @@ test('Render a letter', async (t) => {
             type: 'graph',
             graph: {
               points: [
+                [45.32094, 42.59453, 0],
                 [44.06, 40.97, 0],
                 [41.59904, 36.98891, 0],
                 [36.11697, 26.84703, 0],
@@ -360,7 +361,6 @@ test('Render a letter', async (t) => {
                 [48.89, 44.5, 0],
                 [48.29691, 44.47178, 0],
                 [47.11918, 44.0783, 0],
-                [45.32094, 42.59453, 0],
               ],
               edges: [
                 { point: 0, loop: 0, twin: -1, next: 1 },
@@ -511,7 +511,7 @@ test('Render a letter', async (t) => {
                 { point: 0, loop: 0, twin: -1, next: 0 },
               ],
               loops: [{ edge: 0, face: 0 }],
-              faces: [{ plane: [0, 0, -1, 0], loop: 0 }],
+              faces: [{ plane: [0, 0, 1, 0], loop: 0 }],
               isClosed: false,
               isOutline: true,
               isWireframe: true,

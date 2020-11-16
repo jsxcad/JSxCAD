@@ -242,7 +242,9 @@ const planeOfBisection = (aStart, bStart, intersection) => {
   return fromNormalAndPoint(bis2, intersection);
 };
 
-// FIX: This is a weak approximation assuming a 1d profile -- it will need to be redesigned.
+const neg = ([x, y, z, w]) => [x, y, z, -w];
+
+// FIX: There is something very wrong with this -- rotating the profile around z can produce inversion.
 const sweep = (toolpath, tool, up = [0, 0, 1, 0]) => {
   const chains = [];
   for (const { paths } of getPaths(toolpath.toKeptGeometry())) {
@@ -263,7 +265,10 @@ const sweep = (toolpath, tool, up = [0, 0, 1, 0]) => {
         const rightDirection = transform(rotate90, direction);
         const right = add(middle, rightDirection);
         chains.push(
-          orient(middle, add(middle, up), right, tool).extrudeToPlane(a, b)
+          orient(middle, add(middle, up), right, tool).extrudeToPlane(
+            neg(b),
+            neg(a)
+          )
         );
       }
     }
