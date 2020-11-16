@@ -1,9 +1,9 @@
 import Shape$1, { Shape, shapeMethod } from './jsxcad-api-v1-shape.js';
-import { getSides, getRadius, getCenter, getLeft, getRight, getFront, getBack, radius } from './jsxcad-geometry-plan.js';
+import { getSides, getRadius, getCenter, radius, getLeft, getRight, getFront, getBack } from './jsxcad-geometry-plan.js';
 import { concatenate, rotateZ, translate as translate$1 } from './jsxcad-geometry-path.js';
 import { numbers } from './jsxcad-api-v1-math.js';
-import { taggedAssembly, taggedSolid, taggedLayers, taggedGraph, taggedZ0Surface, taggedDisjointAssembly, taggedPoints } from './jsxcad-geometry-tagged.js';
-import { buildRingSphere, toRadiusFromApothem as toRadiusFromApothem$1, buildRegularPolygon, regularPolygonEdgeLengthToRadius, buildPolygonFromPoints, buildRegularIcosahedron } from './jsxcad-algorithm-shape.js';
+import { taggedAssembly, taggedSolid, taggedLayers, taggedGraph, taggedDisjointAssembly, taggedPoints, taggedZ0Surface } from './jsxcad-geometry-tagged.js';
+import { buildRingSphere, toRadiusFromApothem as toRadiusFromApothem$1, buildRegularIcosahedron, buildRegularPolygon, regularPolygonEdgeLengthToRadius, buildPolygonFromPoints } from './jsxcad-algorithm-shape.js';
 import { convexHull } from './jsxcad-geometry-graph.js';
 import { translate } from './jsxcad-geometry-paths.js';
 import { add } from './jsxcad-math-vec3.js';
@@ -92,7 +92,16 @@ Shape.prototype.BallOfApothem = shapeMethod(BallOfApothem);
 Shape.prototype.BallOfDiameter = shapeMethod(BallOfDiameter);
 Shape.prototype.BallOfRadius = shapeMethod(BallOfRadius);
 
-const Box = (plan) => {
+const orRadius = (value) => {
+  if (typeof value === 'number') {
+    return radius(value);
+  } else {
+    return value;
+  }
+};
+
+const Box = (value = 1) => {
+  const plan = orRadius(value);
   const left = getLeft(plan);
   const right = getRight(plan);
   const front = getFront(plan);
@@ -158,73 +167,23 @@ const chainHullMethod = function (...shapes) {
 Shape.prototype.chainHull = chainHullMethod;
 Shape.prototype.ChainedHull = shapeMethod(ChainedHull);
 
-const unitPolygon = (sides = 16) =>
-  Shape.fromGeometry(
-    taggedZ0Surface({}, [buildRegularPolygon(sides)])
-  ).toGraph();
-
-// Note: radius here is circumradius.
-const toRadiusFromEdge = (edge, sides) =>
-  edge * regularPolygonEdgeLengthToRadius(1, sides);
-
-const ofRadius$1 = (radius, { sides = 16 } = {}) =>
-  unitPolygon(sides).scale(radius);
-const ofEdge = (edge, { sides = 16 }) =>
-  ofRadius$1(toRadiusFromEdge(edge, sides), { sides });
-const ofApothem$1 = (apothem, { sides = 16 }) =>
-  ofRadius$1(toRadiusFromApothem$1(apothem, sides), { sides });
-const ofDiameter$1 = (diameter, ...args) =>
-  ofRadius$1(diameter / 2, ...args);
-const ofPoints = (points) =>
-  Shape.fromGeometry(buildPolygonFromPoints(points)).toGraph();
-
-const Polygon = (...args) => ofRadius$1(...args);
-
-Polygon.ofEdge = ofEdge;
-Polygon.ofApothem = ofApothem$1;
-Polygon.ofRadius = ofRadius$1;
-Polygon.ofDiameter = ofDiameter$1;
-Polygon.ofPoints = ofPoints;
-Polygon.toRadiusFromApothem = toRadiusFromApothem$1;
-
-Shape.prototype.Polygon = shapeMethod(Polygon);
-
-const ofEdge$1 = (edge = 1, { sides = 32 } = {}) =>
-  Polygon.ofEdge(edge, { sides });
-
-const ofRadius$2 = (radius = 1, { sides = 32 } = {}) =>
-  Polygon.ofRadius(radius, { sides });
-
-const ofApothem$2 = (apothem = 1, { sides = 32 } = {}) =>
-  Polygon.ofApothem(apothem, { sides });
-
-const ofDiameter$2 = (diameter = 1, { sides = 32 } = {}) =>
-  Polygon.ofDiameter(diameter, { sides });
-
-const Circle = (...args) => ofRadius$2(...args);
-
-Circle.ofEdge = ofEdge$1;
-Circle.ofApothem = ofApothem$2;
-Circle.ofRadius = ofRadius$2;
-Circle.ofDiameter = ofDiameter$2;
-Circle.toRadiusFromApothem = (radius = 1, sides = 32) =>
-  Polygon.toRadiusFromApothem(radius, sides);
+const Circle = (plan = 1) => Arc(plan).close();
 
 Shape.prototype.Circle = shapeMethod(Circle);
 
-const ofRadius$3 = (radius = 1, height = 1, { sides = 32 } = {}) =>
+const ofRadius$1 = (radius = 1, height = 1, { sides = 32 } = {}) =>
   Hull(Circle(0.1).moveZ(height), Circle(radius));
 
-const ofDiameter$3 = (diameter, ...args) =>
-  ofRadius$3(diameter / 2, ...args);
-const ofApothem$3 = (apothem, ...args) =>
-  ofRadius$3(toRadiusFromApothem$1(apothem), ...args);
+const ofDiameter$1 = (diameter, ...args) =>
+  ofRadius$1(diameter / 2, ...args);
+const ofApothem$1 = (apothem, ...args) =>
+  ofRadius$1(toRadiusFromApothem$1(apothem), ...args);
 
-const Cone = (...args) => ofRadius$3(...args);
+const Cone = (...args) => ofRadius$1(...args);
 
-Cone.ofRadius = ofRadius$3;
-Cone.ofDiameter = ofDiameter$3;
-Cone.ofApothem = ofApothem$3;
+Cone.ofRadius = ofRadius$1;
+Cone.ofDiameter = ofDiameter$1;
+Cone.ofApothem = ofApothem$1;
 
 Shape.prototype.Cone = shapeMethod(Cone);
 
@@ -1672,14 +1631,6 @@ const Hershey = (size) => ofSize(size);
 Hershey.ofSize = ofSize;
 Hershey.toPaths = toPaths;
 
-const orRadius = (value) => {
-  if (typeof value === 'number') {
-    return radius(value);
-  } else {
-    return value;
-  }
-};
-
 const Hexagon = (plan = 1) => Arc({ ...orRadius(plan), sides: 6 });
 
 Shape.prototype.Hexagon = shapeMethod(Hexagon);
@@ -1687,13 +1638,13 @@ Shape.prototype.Hexagon = shapeMethod(Hexagon);
 const unitIcosahedron = () =>
   Shape.fromPolygonsToSolid(buildRegularIcosahedron({})).toGraph();
 
-const ofRadius$4 = (radius = 1) => unitIcosahedron().scale(radius);
-const ofDiameter$4 = (diameter = 1) =>
+const ofRadius$2 = (radius = 1) => unitIcosahedron().scale(radius);
+const ofDiameter$2 = (diameter = 1) =>
   unitIcosahedron().scale(diameter / 2);
-const Icosahedron = (...args) => ofRadius$4(...args);
+const Icosahedron = (...args) => ofRadius$2(...args);
 
-Icosahedron.ofRadius = ofRadius$4;
-Icosahedron.ofDiameter = ofDiameter$4;
+Icosahedron.ofRadius = ofRadius$2;
+Icosahedron.ofDiameter = ofDiameter$2;
 
 Shape.prototype.Icosahedron = shapeMethod(Icosahedron);
 
@@ -1762,6 +1713,37 @@ const Plane = (x = 0, y = 0, z = 1, w = 0) =>
 
 Shape.prototype.Plane = shapeMethod(Plane);
 
+const unitPolygon = (sides = 16) =>
+  Shape.fromGeometry(
+    taggedZ0Surface({}, [buildRegularPolygon(sides)])
+  ).toGraph();
+
+// Note: radius here is circumradius.
+const toRadiusFromEdge = (edge, sides) =>
+  edge * regularPolygonEdgeLengthToRadius(1, sides);
+
+const ofRadius$3 = (radius, { sides = 16 } = {}) =>
+  unitPolygon(sides).scale(radius);
+const ofEdge = (edge, { sides = 16 }) =>
+  ofRadius$3(toRadiusFromEdge(edge, sides), { sides });
+const ofApothem$2 = (apothem, { sides = 16 }) =>
+  ofRadius$3(toRadiusFromApothem$1(apothem, sides), { sides });
+const ofDiameter$3 = (diameter, ...args) =>
+  ofRadius$3(diameter / 2, ...args);
+const ofPoints = (points) =>
+  Shape.fromGeometry(buildPolygonFromPoints(points)).toGraph();
+
+const Polygon = (...args) => ofRadius$3(...args);
+
+Polygon.ofEdge = ofEdge;
+Polygon.ofApothem = ofApothem$2;
+Polygon.ofRadius = ofRadius$3;
+Polygon.ofDiameter = ofDiameter$3;
+Polygon.ofPoints = ofPoints;
+Polygon.toRadiusFromApothem = toRadiusFromApothem$1;
+
+Shape.prototype.Polygon = shapeMethod(Polygon);
+
 const ofPointPaths = (points = [], paths = []) => {
   const polygons = [];
   for (const path of paths) {
@@ -1800,13 +1782,13 @@ const unitSquare = () =>
 
 const ofSize$1 = (width = 1, length) =>
   unitSquare().scale(width, length, 1);
-const ofRadius$5 = (radius) =>
+const ofRadius$4 = (radius) =>
   Shape.fromGeometry(taggedZ0Surface({}, [buildRegularPolygon(4)]))
     .toGraph()
     .rotateZ(45)
     .scale(radius);
-const ofApothem$4 = (apothem) => ofRadius$5(toRadiusFromApothem(apothem));
-const ofDiameter$5 = (diameter) => ofRadius$5(diameter / 2);
+const ofApothem$3 = (apothem) => ofRadius$4(toRadiusFromApothem(apothem));
+const ofDiameter$4 = (diameter) => ofRadius$4(diameter / 2);
 
 const fromCorners = (corner1, corner2) => {
   const [c1x, c1y] = corner1;
@@ -1820,9 +1802,9 @@ const fromCorners = (corner1, corner2) => {
 const Square = (...args) => ofSize$1(...args);
 
 Square.ofSize = ofSize$1;
-Square.ofRadius = ofRadius$5;
-Square.ofApothem = ofApothem$4;
-Square.ofDiameter = ofDiameter$5;
+Square.ofRadius = ofRadius$4;
+Square.ofApothem = ofApothem$3;
+Square.ofDiameter = ofDiameter$4;
 Square.fromCorners = fromCorners;
 
 Shape.prototype.Square = shapeMethod(Square);
@@ -1841,7 +1823,7 @@ const Torus = (
   height = 1,
   { segments = 32, sides = 32, rotation = 0 } = {}
 ) =>
-  Circle(height / 2, { sides })
+  Circle(height / 2)
     .rotateZ(rotation)
     .moveY(radius)
     .Loop(360, { sides: segments })

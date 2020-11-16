@@ -18,10 +18,9 @@ const planeOfBisection = (aStart, bStart, intersection) => {
   return fromNormalAndPoint(bis2, intersection);
 };
 
-// CHECK: Not clear why we need to negate the dispacement.
-const neg = ([a, b, c, d]) => [a, b, c, -d];
+const neg = ([x, y, z, w]) => [x, y, z, -w];
 
-// FIX: This is a weak approximation assuming a 1d profile -- it will need to be redesigned.
+// FIX: There is something very wrong with this -- rotating the profile around z can produce inversion.
 export const sweep = (toolpath, tool, up = [0, 0, 1, 0]) => {
   const chains = [];
   for (const { paths } of getPaths(toolpath.toKeptGeometry())) {

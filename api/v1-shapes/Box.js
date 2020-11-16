@@ -1,4 +1,5 @@
 import { Shape, shapeMethod } from '@jsxcad/api-v1-shape';
+
 import {
   getBack,
   getCenter,
@@ -7,7 +8,10 @@ import {
   getRight,
 } from '@jsxcad/geometry-plan';
 
-export const Box = (plan) => {
+import { orRadius } from './orRadius.js';
+
+export const Box = (value = 1) => {
+  const plan = orRadius(value);
   const left = getLeft(plan);
   const right = getRight(plan);
   const front = getFront(plan);

@@ -1,10 +1,15 @@
 import { doesNotOverlap } from './doesNotOverlap.js';
 import { extrude } from './extrude.js';
-import { fromNefPolyhedron } from './fromNefPolyhedron.js';
-import { intersectionOfNefPolyhedrons } from '@jsxcad/algorithm-cgal';
+// import { fromNefPolyhedron } from './fromNefPolyhedron.js';
+import { fromSurfaceMeshLazy } from './fromSurfaceMeshLazy.js';
+import {
+  //  intersectionOfNefPolyhedrons,
+  intersectionOfSurfaceMeshes,
+} from '@jsxcad/algorithm-cgal';
 import { principlePlane } from './principlePlane.js';
 import { section } from './section.js';
-import { toNefPolyhedron } from './toNefPolyhedron.js';
+// import { toNefPolyhedron } from './toNefPolyhedron.js';
+import { toSurfaceMesh } from './toSurfaceMesh.js';
 
 const far = 10000;
 
@@ -24,7 +29,8 @@ export const intersection = (a, b) => {
   if (doesNotOverlap(a, b)) {
     return { isEmpty: true };
   }
-  return fromNefPolyhedron(
-    intersectionOfNefPolyhedrons(toNefPolyhedron(a), toNefPolyhedron(b))
+  // return fromNefPolyhedron(intersectionOfNefPolyhedrons(toNefPolyhedron(a), toNefPolyhedron(b)));
+  return fromSurfaceMeshLazy(
+    intersectionOfSurfaceMeshes(toSurfaceMesh(a), toSurfaceMesh(b))
   );
 };
