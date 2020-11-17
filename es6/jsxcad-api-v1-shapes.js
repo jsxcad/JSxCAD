@@ -1,5 +1,5 @@
 import Shape$1, { Shape, shapeMethod } from './jsxcad-api-v1-shape.js';
-import { getSides, getRadius, getCenter, radius, getLeft, getRight, getFront, getBack } from './jsxcad-geometry-plan.js';
+import { radius, getSides, getRadius, getCenter, getLeft, getRight, getFront, getBack } from './jsxcad-geometry-plan.js';
 import { concatenate, rotateZ, translate as translate$1 } from './jsxcad-geometry-path.js';
 import { numbers } from './jsxcad-api-v1-math.js';
 import { taggedAssembly, taggedSolid, taggedLayers, taggedGraph, taggedDisjointAssembly, taggedPoints, taggedZ0Surface } from './jsxcad-geometry-tagged.js';
@@ -11,13 +11,22 @@ import { toPolygon } from './jsxcad-math-plane.js';
 
 const Spiral = (
   toPathFromAngle = (angle) => [[angle]],
-  { from = 0, to = 360, by, resolution } = {}
+  { from = 0, to, upto, by, resolution } = {}
 ) => {
   if (by === undefined && resolution === undefined) {
     by = 1;
   }
+  if (to === undefined && upto === undefined) {
+    upto = 360;
+  }
   let path = [null];
-  for (const angle of numbers((angle) => angle, { from, to, by, resolution })) {
+  for (const angle of numbers((angle) => angle, {
+    from,
+    to,
+    upto,
+    by,
+    resolution,
+  })) {
     const radians = (angle * Math.PI) / 180;
     const subpath = toPathFromAngle(angle);
     path = concatenate(path, rotateZ(radians, subpath));
@@ -27,12 +36,22 @@ const Spiral = (
 
 Shape.prototype.Spiral = shapeMethod(Spiral);
 
-const Arc = (plan, angle = 360, start = 0) =>
-  Spiral((a) => [[getRadius(plan)]], {
+const orRadius = (value) => {
+  if (typeof value === 'number') {
+    return radius(value);
+  } else {
+    return value;
+  }
+};
+
+const Arc = (value = 1, angle = 360, start = 0) => {
+  const plan = orRadius(value);
+  return Spiral((a) => [[getRadius(plan)]], {
     from: start - 90,
-    to: start + angle - 90,
+    upto: start + angle - 90,
     by: 360 / getSides(plan),
   }).move(...getCenter(plan));
+};
 
 Shape.prototype.Arc = shapeMethod(Arc);
 
@@ -92,14 +111,6 @@ Shape.prototype.BallOfApothem = shapeMethod(BallOfApothem);
 Shape.prototype.BallOfDiameter = shapeMethod(BallOfDiameter);
 Shape.prototype.BallOfRadius = shapeMethod(BallOfRadius);
 
-const orRadius = (value) => {
-  if (typeof value === 'number') {
-    return radius(value);
-  } else {
-    return value;
-  }
-};
-
 const Box = (value = 1) => {
   const plan = orRadius(value);
   const left = getLeft(plan);
@@ -108,10 +119,10 @@ const Box = (value = 1) => {
   const back = getBack(plan);
   const [, , Z] = getCenter(plan);
   return Shape.fromPath([
-    [left, front, Z],
-    [right, front, Z],
-    [right, back, Z],
     [left, back, Z],
+    [right, back, Z],
+    [right, front, Z],
+    [left, front, Z],
   ]);
 };
 
