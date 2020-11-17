@@ -1,13 +1,13 @@
 import { identityMatrix, multiply, fromXRotation, fromYRotation, fromZRotation, fromTranslation, fromScaling } from './jsxcad-math-mat4.js';
 import { cacheTransform, cache, cacheRewriteTags, cacheSection } from './jsxcad-cache.js';
 import { reconcile as reconcile$1, makeWatertight as makeWatertight$1, isWatertight as isWatertight$1, findOpenEdges as findOpenEdges$1, transform as transform$3, canonicalize as canonicalize$1, eachPoint as eachPoint$3, flip as flip$1, fromSurface as fromSurface$2, measureBoundingBox as measureBoundingBox$3 } from './jsxcad-geometry-solid.js';
-import { close, isClosed, createOpenPath } from './jsxcad-geometry-path.js';
+import { close, createOpenPath } from './jsxcad-geometry-path.js';
 import { createNormalize3 } from './jsxcad-algorithm-quantize.js';
-import { transform as transform$5, canonicalize as canonicalize$5, eachPoint as eachPoint$4, flip as flip$3, union as union$2 } from './jsxcad-geometry-paths.js';
+import { transform as transform$5, canonicalize as canonicalize$5, eachPoint as eachPoint$4, close as close$1, flip as flip$3, union as union$2 } from './jsxcad-geometry-paths.js';
 import { transform as transform$6, canonicalize as canonicalize$4, toPolygon } from './jsxcad-math-plane.js';
 import { transform as transform$4, canonicalize as canonicalize$3, eachPoint as eachPoint$5, flip as flip$4, measureBoundingBox as measureBoundingBox$1, union as union$1 } from './jsxcad-geometry-points.js';
 import { transform as transform$1, canonicalize as canonicalize$2, eachPoint as eachPoint$2, flip as flip$2, makeWatertight as makeWatertight$2, measureArea as measureArea$1, measureBoundingBox as measureBoundingBox$2, toPlane } from './jsxcad-geometry-surface.js';
-import { transform as transform$2, toSurface, fromSurface, toSolid, fromSolid, difference as difference$1, eachPoint as eachPoint$1, interior as interior$1, fromPolygons, extrude as extrude$1, extrudeToPlane as extrudeToPlane$1, intersection as intersection$2, measureBoundingBox as measureBoundingBox$4, toPaths, outline as outline$1, realizeGraph, section as section$1, smooth as smooth$1, union as union$4 } from './jsxcad-geometry-graph.js';
+import { transform as transform$2, toSurface, fromSurface, toSolid, fromSolid, difference as difference$1, eachPoint as eachPoint$1, interior as interior$1, fromPaths, extrude as extrude$1, extrudeToPlane as extrudeToPlane$1, intersection as intersection$2, measureBoundingBox as measureBoundingBox$4, toPaths, outline as outline$1, realizeGraph, section as section$1, smooth as smooth$1, union as union$4 } from './jsxcad-geometry-graph.js';
 import { fromSolid as fromSolid$1, unifyBspTrees, fromSurface as fromSurface$1, removeExteriorPaths, intersectSurface, intersection as intersection$1, union as union$3 } from './jsxcad-geometry-bsp.js';
 import { min, max } from './jsxcad-math-vec3.js';
 import { outlineSolid, outlineSurface } from './jsxcad-geometry-halfedge.js';
@@ -763,14 +763,12 @@ const interior = (
     }
   }
   for (const { tags, paths } of getNonVoidPaths(keptGeometry)) {
-    for (let path of paths) {
-      if (!isClosed(path)) {
-        path = close(path);
-      }
-      // FIX: Check path is planar.
-      // FIX: This should consider arrangements with holes.
-      interiors.push(taggedGraph({ tags }, fromPolygons([path])));
-    }
+    interiors.push(
+      taggedGraph(
+        { tags },
+        interior$1(fromPaths(close$1(paths)))
+      )
+    );
   }
   return taggedGroup({}, ...interiors);
 };

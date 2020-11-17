@@ -18,10 +18,10 @@ export const Box = (value = 1) => {
   const back = getBack(plan);
   const [, , Z] = getCenter(plan);
   return Shape.fromPath([
-    [left, front, Z],
-    [right, front, Z],
-    [right, back, Z],
     [left, back, Z],
+    [right, back, Z],
+    [right, front, Z],
+    [left, front, Z],
   ]);
 };
 

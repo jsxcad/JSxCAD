@@ -1,3 +1,5 @@
+import '@jsxcad/algorithm-cgal';
+
 import { boot } from '@jsxcad/sys';
 import { fromSvg } from './fromSvg.js';
 import fs from 'fs';
