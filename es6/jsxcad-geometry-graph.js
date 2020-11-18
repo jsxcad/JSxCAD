@@ -1376,9 +1376,6 @@ const union = (a, b) => {
     // Otherwise we'd end up with a union with the far extrusion.
     return a;
   }
-  if (doesNotOverlap(a, b)) {
-    return a;
-  }
   // return fromNefPolyhedron(unionOfNefPolyhedrons(toNefPolyhedron(b), toNefPolyhedron(a)));
   return fromSurfaceMeshLazy(
     unionOfSurfaceMeshes(toSurfaceMesh(a), toSurfaceMesh(b))

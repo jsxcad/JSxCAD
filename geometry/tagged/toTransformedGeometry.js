@@ -4,7 +4,7 @@ import { rewrite } from './visit.js';
 import { taggedSurface } from './taggedSurface.js';
 import { transform as transformGraph } from '@jsxcad/geometry-graph';
 import { transform as transformPaths } from '@jsxcad/geometry-paths';
-import { transform as transformPlane } from '@jsxcad/math-plane';
+import { transform as transformPlan } from '@jsxcad/geometry-plan';
 import { transform as transformPoints } from '@jsxcad/geometry-points';
 import { transform as transformSolid } from '@jsxcad/geometry-solid';
 import { transform as transformSurface } from '@jsxcad/geometry-surface';
@@ -34,15 +34,7 @@ export const toTransformedGeometry = (geometry) => {
             return descend(undefined, matrix);
           }
         case 'plan':
-          return descend(
-            {
-              marks: transformPoints(matrix, geometry.marks),
-              planes: geometry.planes.map((plane) =>
-                transformPlane(matrix, plane)
-              ),
-            },
-            matrix
-          );
+          return transformPlan(matrix, geometry.plan);
         case 'paths':
           return descend({ paths: transformPaths(matrix, geometry.paths) });
         case 'points':

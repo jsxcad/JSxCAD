@@ -22,7 +22,9 @@
   ],
   "keywords": [],
   "license": "MIT",
-  "dependencies": {},
+  "dependencies": {
+    "@jsxcad/math-vec3": "^0.0.79"
+  },
   "devDependencies": {
     "depcheck": "^0.9.1",
     "eslint": "^7.0.0",

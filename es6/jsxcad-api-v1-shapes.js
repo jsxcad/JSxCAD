@@ -1,5 +1,5 @@
 import Shape$1, { Shape, shapeMethod } from './jsxcad-api-v1-shape.js';
-import { radius, getSides, getRadius, getCenter, getLeft, getRight, getFront, getBack } from './jsxcad-geometry-plan.js';
+import { radius, getSides, getRadius, getLeft, getRight, getFront, getBack, getCenter } from './jsxcad-geometry-plan.js';
 import { concatenate, rotateZ, translate as translate$1 } from './jsxcad-geometry-path.js';
 import { numbers } from './jsxcad-api-v1-math.js';
 import { taggedAssembly, taggedSolid, taggedLayers, taggedGraph, taggedDisjointAssembly, taggedPoints, taggedZ0Surface } from './jsxcad-geometry-tagged.js';
@@ -50,7 +50,7 @@ const Arc = (value = 1, angle = 360, start = 0) => {
     from: start - 90,
     upto: start + angle - 90,
     by: 360 / getSides(plan),
-  }).move(...getCenter(plan));
+  }).at(plan.at);
 };
 
 Shape.prototype.Arc = shapeMethod(Arc);
