@@ -1,10 +1,7 @@
-export const apothem = (
-  apothem = 1,
-  { center = [0, 0, 0], sides = 32 } = {}
-) => {
+export const apothem = (apothem = 1, { at = [0, 0, 0], sides = 32 } = {}) => {
   return {
     type: 'apothem',
-    center,
+    at,
     apothem,
     sides,
   };

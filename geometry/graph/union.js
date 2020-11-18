@@ -1,4 +1,3 @@
-import { doesNotOverlap } from './doesNotOverlap.js';
 import { extrude } from './extrude.js';
 // import { fromNefPolyhedron } from './fromNefPolyhedron.js';
 import { fromSurfaceMeshLazy } from './fromSurfaceMeshLazy.js';
@@ -26,9 +25,6 @@ export const union = (a, b) => {
   if (!b.isClosed) {
     // The union of a surface and a solid is the solid.
     // Otherwise we'd end up with a union with the far extrusion.
-    return a;
-  }
-  if (doesNotOverlap(a, b)) {
     return a;
   }
   // return fromNefPolyhedron(unionOfNefPolyhedrons(toNefPolyhedron(b), toNefPolyhedron(a)));

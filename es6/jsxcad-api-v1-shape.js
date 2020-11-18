@@ -1280,8 +1280,23 @@ const pathsMethod = function (op) {
 };
 Shape.prototype.paths = pathsMethod;
 
+const normalizeCoords = ([
+  x = 0,
+  y = 0,
+  z = 0,
+  fX = 0,
+  fY = 1,
+  fZ = 0,
+  rX = 1,
+  rY = 0,
+  rZ = 0,
+]) => [x, y, z, fX, fY, fZ, rX, rY, rZ];
+
 const getPegCoords = (shape) => {
-  const coords = getPeg(shape.toTransformedGeometry());
+  const coords =
+    shape.constructor === Shape
+      ? getPeg(shape.toTransformedGeometry())
+      : normalizeCoords(shape);
   const origin = coords.slice(0, 3);
   const forward = coords.slice(3, 6);
   const right = coords.slice(6, 9);
@@ -1307,6 +1322,12 @@ const pegMethod = function (shapeToPeg) {
 };
 
 Shape.prototype.peg = pegMethod;
+
+const atMethod = function (pegShape) {
+  return peg(pegShape, this);
+};
+
+Shape.prototype.at = atMethod;
 
 const shapeMethod = (build) => {
   return function (...args) {

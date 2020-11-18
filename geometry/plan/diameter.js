@@ -1,10 +1,7 @@
-export const diameter = (
-  diameter = 1,
-  { center = [0, 0, 0], sides = 32 } = {}
-) => {
+export const diameter = (diameter = 1, { at = [0, 0, 0], sides = 32 } = {}) => {
   return {
     type: 'diameter',
-    center,
+    at,
     diameter,
     sides,
   };

@@ -11,3 +11,4 @@ export { getRadius } from './getRadius.js';
 export { getRight } from './getRight.js';
 export { getSides } from './getSides.js';
 export { getTop } from './getTop.js';
+export { transform } from './transform.js';

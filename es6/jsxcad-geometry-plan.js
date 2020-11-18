@@ -1,10 +1,9 @@
-const apothem = (
-  apothem = 1,
-  { center = [0, 0, 0], sides = 32 } = {}
-) => {
+import { transform as transform$1 } from './jsxcad-math-vec3.js';
+
+const apothem = (apothem = 1, { at = [0, 0, 0], sides = 32 } = {}) => {
   return {
     type: 'apothem',
-    center,
+    at,
     apothem,
     sides,
   };
@@ -13,33 +12,30 @@ const apothem = (
 const corners = (right = 0, back = 0, left = 0, front = 0) => {
   if (left > right) [left, right] = [right, left];
   if (front > back) [front, back] = [back, front];
-  const center = [(left + right) / 2, (front + back) / 2, 0];
+  const at = [(left + right) / 2, (front + back) / 2, 0];
   return {
     type: 'corners',
     left,
     right,
     back,
     front,
-    center,
+    at,
   };
 };
 
-const diameter = (
-  diameter = 1,
-  { center = [0, 0, 0], sides = 32 } = {}
-) => {
+const diameter = (diameter = 1, { at = [0, 0, 0], sides = 32 } = {}) => {
   return {
     type: 'diameter',
-    center,
+    at,
     diameter,
     sides,
   };
 };
 
-const radius = (radius = 1, { center = [0, 0, 0], sides = 32 } = {}) => {
+const radius = (radius = 1, { at = [0, 0, 0], sides = 32 } = {}) => {
   return {
     type: 'radius',
-    center,
+    at,
     radius,
     sides,
   };
@@ -150,4 +146,24 @@ const getTop = (plan) => {
   }
 };
 
-export { apothem, corners, diameter, getBack, getBottom, getCenter, getFront, getLeft, getRadius, getRight, getSides, getTop, radius };
+const transform = (matrix, plan) => {
+  if (plan.at) {
+    const { at } = plan;
+    const transformedAt = transform$1(matrix, at);
+    if (at.length > 3) {
+      const forward = at.slice(3, 6);
+      const transformedForward = transform$1(matrix, forward);
+      transformedAt.push(...transformedForward);
+    }
+    if (at.length > 6) {
+      const right = at.slice(6, 9);
+      const transformedRight = transform$1(matrix, right);
+      transformedAt.push(...transformedRight);
+    }
+    return { ...plan, at: transformedAt };
+  } else {
+    return plan;
+  }
+};
+
+export { apothem, corners, diameter, getBack, getBottom, getCenter, getFront, getLeft, getRadius, getRight, getSides, getTop, radius, transform };
