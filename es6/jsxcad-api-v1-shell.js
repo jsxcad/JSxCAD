@@ -1,6 +1,6 @@
 import { Hull, Ball } from './jsxcad-api-v1-shapes.js';
 import { add, subtract, normalize, dot, transform, scale } from './jsxcad-math-vec3.js';
-import { getNonVoidSolids, getAnyNonVoidSurfaces, taggedSurface, union, taggedAssembly, getSolids, taggedLayers, taggedGroup, getNonVoidGraphs, taggedGraph } from './jsxcad-geometry-tagged.js';
+import { getNonVoidSolids, getAnyNonVoidSurfaces, taggedSurface, union, taggedAssembly, getSolids, taggedLayers, inset as inset$1 } from './jsxcad-geometry-tagged.js';
 import Shape$1, { Shape } from './jsxcad-api-v1-shape.js';
 import { createNormalize3 } from './jsxcad-algorithm-quantize.js';
 import { fromRotation } from './jsxcad-math-mat4.js';
@@ -9,7 +9,6 @@ import { closestSegmentBetweenLines } from './jsxcad-math-line3.js';
 import { outlineSurface } from './jsxcad-geometry-halfedge.js';
 import { toPlane } from './jsxcad-geometry-surface.js';
 import { toConvexClouds, fromSolid } from './jsxcad-geometry-bsp.js';
-import { outline, offset as offset$1 } from './jsxcad-geometry-graph.js';
 
 /**
  *
@@ -163,6 +162,13 @@ const growMethod = function (...args) {
 };
 Shape.prototype.grow = growMethod;
 
+/*
+import {
+  offset as offsetGraph,
+  outline as outlineGraph,
+} from './jsxcad-geometry-graph.js';
+*/
+
 const offset = (shape, amount = -1) => {
   if (amount < 0) {
     return inset(shape, -amount);
@@ -179,12 +185,13 @@ Shape.prototype.offset = offsetMethod;
 
 // FIX: Support minimal radius requirements.
 const inset = (shape, initial = 1, step, limit) => {
+  /*
   const group = [];
   for (const { tags, graph } of getNonVoidGraphs(shape.toDisjointGeometry())) {
-    const outlinedGraph = outline(graph);
+    const outlinedGraph = outlineGraph(graph);
     let amount = initial;
     for (;;) {
-      const offsettedGraph = offset$1(outlinedGraph, -amount);
+      const offsettedGraph = offsetGraph(outlinedGraph, -amount);
       if (offsettedGraph.isEmpty) {
         break;
       }
@@ -198,7 +205,10 @@ const inset = (shape, initial = 1, step, limit) => {
       }
     }
   }
-  return Shape.fromGeometry(taggedGroup({}, ...group));
+*/
+  return Shape.fromGeometry(
+    inset$1(shape.toGeometry(), initial, step, limit)
+  );
 };
 
 const insetMethod = function (initial, step, limit) {

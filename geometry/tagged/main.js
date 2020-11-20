@@ -68,6 +68,7 @@ export { getZ0Surfaces } from './getZ0Surfaces.js';
 export { hash } from './hash.js';
 export { interior } from './interior.js';
 export { intersection } from './intersection.js';
+export { inset } from './inset.js';
 export { keep } from './keep.js';
 export { measureArea } from './measureArea.js';
 export { measureBoundingBox } from './measureBoundingBox.js';

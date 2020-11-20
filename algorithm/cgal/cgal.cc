@@ -54,6 +54,8 @@
 #include <CGAL/convex_hull_3.h>
 #include <CGAL/create_offset_polygons_2.h>
 #include <CGAL/create_offset_polygons_from_polygon_with_holes_2.h>
+#include <CGAL/create_straight_skeleton_2.h>
+#include <CGAL/create_straight_skeleton_from_polygon_with_holes_2.h>
 #include <CGAL/intersections.h>
 
 // typedef CGAL::Simple_cartesian<CGAL::Gmpq> Kernel;
@@ -894,7 +896,7 @@ typedef CGAL::Polygon_2<Kernel_2> Polygon_2;
 typedef CGAL::Polygon_with_holes_2<Kernel_2> Polygon_with_holes_2;
 typedef CGAL::Straight_skeleton_2<Kernel_2> Straight_skeleton_2;
 
-void InsetOfPolygon(double x, double y, double z, double w, double offset, std::size_t hole_count, emscripten::val fill_boundary, emscripten::val fill_hole, emscripten::val emit_polygon, emscripten::val emit_point) {
+void InsetOfPolygon(double initial, double step, double limit, double x, double y, double z, double w, std::size_t hole_count, emscripten::val fill_boundary, emscripten::val fill_hole, emscripten::val emit_polygon, emscripten::val emit_point) {
   Plane plane(x, y, z, w);
   Polygon_2 boundary;
   {
@@ -917,20 +919,44 @@ void InsetOfPolygon(double x, double y, double z, double w, double offset, std::
     holes.push_back(hole);
   }
   Polygon_with_holes_2 polygon(boundary, holes.begin(), holes.end());
-  std::vector<boost::shared_ptr<Polygon_with_holes_2>> offset_polygons = CGAL::create_interior_skeleton_and_offset_polygons_with_holes_2(offset, polygon, Kernel_2());
-  for (const auto& polygon : offset_polygons) {
-    const auto& outer = polygon->outer_boundary();
-    emit_polygon(false);
-    for (auto vertex = outer.vertices_begin(); vertex != outer.vertices_end(); ++vertex) {
-      auto p = plane.to_3d(*vertex);
-      emit_point(CGAL::to_double(p.x()), CGAL::to_double(p.y()), CGAL::to_double(p.z()));
-    }
-    for (auto hole = polygon->holes_begin(); hole != polygon->holes_end(); ++hole) {
-      emit_polygon(true);
-      for (auto vertex = hole->vertices_begin(); vertex != hole->vertices_end(); ++vertex) {
+  // std::vector<boost::shared_ptr<Polygon_with_holes_2>> offset_polygons = CGAL::create_interior_skeleton_and_offset_polygons_with_holes_2(offset, polygon, Kernel_2());
+
+  boost::shared_ptr<Straight_skeleton_2> skeleton = CGAL::create_interior_straight_skeleton_2(polygon);
+
+  double offset = initial;
+
+  for (;;) {
+    std::vector<boost::shared_ptr<Polygon_with_holes_2>> offset_polygons = CGAL::arrange_offset_polygons_2(CGAL::create_offset_polygons_2(offset, *skeleton, Kernel_2()));
+    bool emitted = false;
+    for (const auto& polygon : offset_polygons) {
+      const auto& outer = polygon->outer_boundary();
+      emit_polygon(false);
+      for (auto vertex = outer.vertices_begin(); vertex != outer.vertices_end(); ++vertex) {
         auto p = plane.to_3d(*vertex);
         emit_point(CGAL::to_double(p.x()), CGAL::to_double(p.y()), CGAL::to_double(p.z()));
+        emitted = true;
       }
+      for (auto hole = polygon->holes_begin(); hole != polygon->holes_end(); ++hole) {
+        emit_polygon(true);
+        for (auto vertex = hole->vertices_begin(); vertex != hole->vertices_end(); ++vertex) {
+          auto p = plane.to_3d(*vertex);
+          emit_point(CGAL::to_double(p.x()), CGAL::to_double(p.y()), CGAL::to_double(p.z()));
+          emitted = true;
+        }
+      }
+    }
+    if (!emitted) {
+      break;
+    }
+    if (step <= 0) {
+      break;
+    }
+    offset += step;
+    if (limit <= 0) {
+      continue;
+    }
+    if (offset >= limit) {
+      break;
     }
   }
 }

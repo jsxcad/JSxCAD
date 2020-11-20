@@ -22,7 +22,7 @@ export const Box = (value = 1) => {
     [right, back, Z],
     [right, front, Z],
     [left, front, Z],
-  ]);
+  ]).at(plan.at);
 };
 
 Shape.prototype.Box = shapeMethod(Box);

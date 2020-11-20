@@ -1,17 +1,16 @@
 import { Shape, shapeMethod } from '@jsxcad/api-v1-shape';
 
 import { buildRegularIcosahedron } from '@jsxcad/algorithm-shape';
+import { getRadius } from '@jsxcad/geometry-plan';
+import { orRadius } from './orRadius.js';
 
 const unitIcosahedron = () =>
   Shape.fromPolygonsToSolid(buildRegularIcosahedron({})).toGraph();
 
-export const ofRadius = (radius = 1) => unitIcosahedron().scale(radius);
-export const ofDiameter = (diameter = 1) =>
-  unitIcosahedron().scale(diameter / 2);
-export const Icosahedron = (...args) => ofRadius(...args);
-
-Icosahedron.ofRadius = ofRadius;
-Icosahedron.ofDiameter = ofDiameter;
+export const Icosahedron = (value = 1) => {
+  const plan = orRadius(value);
+  return unitIcosahedron().scale(getRadius(plan)).at(plan.at);
+};
 
 export default Icosahedron;
 

@@ -8,7 +8,6 @@ import {
   boot,
   clearEmitted,
   deleteFile,
-  emit,
   getCurrentPath,
   listFiles,
   listFilesystems,
@@ -747,16 +746,17 @@ class Ui extends React.PureComponent {
 
   async doRun() {
     const { ask, jsEditorData, path, workspace } = this.state;
-    await this.doSave();
-    if (!path.endsWith('.js') && !path.endsWith('.nb')) {
-      // We don't know how to run these things, so just save and move on.
-      return;
-    }
     const topLevel = new Map();
     try {
       this.setState({ running: true });
       await terminateActiveServices();
       clearEmitted();
+
+      await this.doSave();
+      if (!path.endsWith('.js') && !path.endsWith('.nb')) {
+        // We don't know how to run these things, so just save and move on.
+        return;
+      }
 
       for (const element of document.getElementsByClassName('note')) {
         // element.style.backgroundColor = 'red';
@@ -775,7 +775,7 @@ class Ui extends React.PureComponent {
       await resolvePending();
     } catch (error) {
       // Include any high level notebook errors in the output.
-      emit({ log: { text: error.stack, level: 'serious' } });
+      this.emitNote({ error: { text: error.stack } });
     } finally {
       this.emitNote({ md: `---` });
       this.emitNote({ md: `#### Dependency Tree` });
@@ -809,17 +809,13 @@ class Ui extends React.PureComponent {
     const { file, jsEditorData } = this.state;
     const getCleanData = (data) => {
       if (file.endsWith('.js') || file.endsWith('.nb')) {
-        try {
-          // Just make a best attempt
-          data = Prettier.format(jsEditorData, {
-            trailingComma: 'es5',
-            singleQuote: true,
-            parser: 'babel',
-            plugins: [PrettierParserBabel],
-          });
-        } catch (e) {
-          // Then give up.
-        }
+        // Just make a best attempt
+        data = Prettier.format(jsEditorData, {
+          trailingComma: 'es5',
+          singleQuote: true,
+          parser: 'babel',
+          plugins: [PrettierParserBabel],
+        });
       }
       return data;
     };

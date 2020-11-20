@@ -1098,9 +1098,9 @@ var Module = (function () {
       Module['HEAPF32'] = HEAPF32 = new Float32Array(buf);
       Module['HEAPF64'] = HEAPF64 = new Float64Array(buf);
     }
-    var STACK_BASE = 5456192,
-      STACK_MAX = 213312,
-      DYNAMIC_BASE = 5456192;
+    var STACK_BASE = 5456144,
+      STACK_MAX = 213264,
+      DYNAMIC_BASE = 5456144;
     assert(STACK_BASE % 16 === 0, 'stack must start aligned');
     assert(DYNAMIC_BASE % 16 === 0, 'heap must start aligned');
     var TOTAL_STACK = 5242880;
@@ -10046,18 +10046,27 @@ const fromSurfaceMeshToPolygons = (mesh, triangulate = false) => {
 const fromSurfaceMeshToTriangles = (mesh) =>
   fromSurfaceMeshToPolygons(mesh, true);
 
-const insetOfPolygon = (offset, plane, border, holes = []) => {
+const insetOfPolygon = (
+  initial = 1,
+  step = -1,
+  limit = -1,
+  plane,
+  border,
+  holes = []
+) => {
   const c = getCgal();
   const [x, y, z, w] = plane;
   const outputs = [];
   let output;
   let points;
   c.InsetOfPolygon(
+    initial,
+    step,
+    limit,
     x,
     y,
     z,
     -w,
-    offset,
     holes.length,
     (boundary) => {
       for (const [x, y, z] of border) {

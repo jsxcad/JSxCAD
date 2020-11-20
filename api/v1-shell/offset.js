@@ -1,15 +1,18 @@
-import {
-  getNonVoidGraphs,
-  taggedGraph,
-  taggedGroup,
-} from '@jsxcad/geometry-tagged';
-
+/*
 import {
   offset as offsetGraph,
   outline as outlineGraph,
 } from '@jsxcad/geometry-graph';
+*/
 
 import { Shape } from '@jsxcad/api-v1-shape';
+
+import {
+  // getNonVoidGraphs,
+  inset as insetGeometry,
+  // taggedGraph,
+  // taggedGroup,
+} from '@jsxcad/geometry-tagged';
 
 export const offset = (shape, amount = -1) => {
   if (amount < 0) {
@@ -27,6 +30,7 @@ Shape.prototype.offset = offsetMethod;
 
 // FIX: Support minimal radius requirements.
 export const inset = (shape, initial = 1, step, limit) => {
+  /*
   const group = [];
   for (const { tags, graph } of getNonVoidGraphs(shape.toDisjointGeometry())) {
     const outlinedGraph = outlineGraph(graph);
@@ -46,7 +50,10 @@ export const inset = (shape, initial = 1, step, limit) => {
       }
     }
   }
-  return Shape.fromGeometry(taggedGroup({}, ...group));
+*/
+  return Shape.fromGeometry(
+    insetGeometry(shape.toGeometry(), initial, step, limit)
+  );
 };
 
 const insetMethod = function (initial, step, limit) {
