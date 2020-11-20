@@ -9,6 +9,7 @@ export { eachPoint } from './eachPoint.js';
 export { findOpenEdges } from './findOpenEdges.js';
 export { flip } from './flip.js';
 export { intersection } from './intersection.js';
+export { inset } from './inset.js';
 export { last } from './last.js';
 export { measureBoundingBox } from './measureBoundingBox.js';
 export { segment } from './segment.js';

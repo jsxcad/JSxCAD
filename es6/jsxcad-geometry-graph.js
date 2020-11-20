@@ -1,4 +1,4 @@
-import { fromSurfaceMeshToGraph, fromPointsToAlphaShapeAsSurfaceMesh, fromSurfaceMeshToLazyGraph, fromPointsToConvexHullAsSurfaceMesh, fromPolygonsToSurfaceMesh, fromGraphToSurfaceMesh, fromSurfaceMeshEmitBoundingBox, extrudeSurfaceMesh, fromSurfaceMeshToNefPolyhedron, fromNefPolyhedronFacetsToGraph, sectionOfNefPolyhedron, differenceOfSurfaceMeshes, extrudeToPlaneOfSurfaceMesh, arrangePaths, fromPointsToSurfaceMesh, fromSurfaceMeshToTriangles, intersectionOfSurfaceMeshes, insetOfPolygon, outlineOfSurfaceMesh, smoothSurfaceMesh, transformSurfaceMesh, unionOfSurfaceMeshes } from './jsxcad-algorithm-cgal.js';
+import { fromSurfaceMeshToGraph, fromPointsToAlphaShapeAsSurfaceMesh, fromSurfaceMeshToLazyGraph, fromPointsToConvexHullAsSurfaceMesh, fromPolygonsToSurfaceMesh, fromGraphToSurfaceMesh, fromSurfaceMeshEmitBoundingBox, extrudeSurfaceMesh, fromSurfaceMeshToNefPolyhedron, fromNefPolyhedronFacetsToGraph, sectionOfNefPolyhedron, differenceOfSurfaceMeshes, extrudeToPlaneOfSurfaceMesh, arrangePaths, fromPointsToSurfaceMesh, outlineOfSurfaceMesh, insetOfPolygon, fromSurfaceMeshToTriangles, intersectionOfSurfaceMeshes, smoothSurfaceMesh, transformSurfaceMesh, unionOfSurfaceMeshes } from './jsxcad-algorithm-cgal.js';
 import { equals as equals$1, dot, min, max, scale } from './jsxcad-math-vec3.js';
 import { deduplicate as deduplicate$1, isClockwise, flip as flip$1 } from './jsxcad-geometry-path.js';
 import { toPlane, flip } from './jsxcad-math-poly3.js';
@@ -97,6 +97,15 @@ const eachFaceEdge = (graph, face, op) =>
 const eachFaceLoop = (graph, face, op) => {
   const loop = getFaceNode(graph, face).loop;
   op(loop, getLoopNode(graph, loop));
+};
+
+const eachFaceHole = (graph, face, op) => {
+  const faceNode = getFaceNode(graph, face);
+  if (faceNode.holes) {
+    for (const hole of faceNode.holes) {
+      op(hole, getLoopNode(graph, hole));
+    }
+  }
 };
 
 const eachLoopEdge = (graph, loop, op) => {
@@ -1238,6 +1247,63 @@ const fromSolid = (solid) => {
   return fromPolygons(polygons);
 };
 
+const outline = (graph) => {
+  if (graph.isOutline) {
+    if (graph.isWireframe) {
+      return graph;
+    } else {
+      return { ...graph, isWireframe: true };
+    }
+  }
+  const outlineGraph = fromSurfaceMeshLazy(
+    outlineOfSurfaceMesh(toSurfaceMesh(graph))
+  );
+  outlineGraph.isOutline = true;
+  outlineGraph.isWireframe = true;
+  return outlineGraph;
+};
+
+const inset = (graph, initial, step, limit) => {
+  const outlineGraph = outline(graph);
+  const offsetGraph = create();
+  eachFace(realizeGraph(outlineGraph), (face, { plane, loop, holes }) => {
+    const polygon = [];
+    eachLoopEdge(outlineGraph, loop, (edge, { point }) => {
+      polygon.push(getPointNode(outlineGraph, point));
+    });
+    const polygonHoles = [];
+    if (holes) {
+      for (const hole of holes) {
+        const polygon = [];
+        eachLoopEdge(outlineGraph, hole, (edge, { point }) => {
+          polygon.push(getPointNode(outlineGraph, point));
+        });
+        polygonHoles.push(polygon);
+      }
+    }
+    for (const { boundary, holes } of insetOfPolygon(
+      initial,
+      step,
+      limit,
+      plane,
+      polygon,
+      polygonHoles
+    )) {
+      let offsetFace = addFace(offsetGraph, { plane });
+      addLoopFromPoints(offsetGraph, boundary, { face: offsetFace });
+      for (const hole of holes) {
+        addHoleFromPoints(offsetGraph, hole, { face: offsetFace });
+      }
+    }
+  });
+  offsetGraph.isClosed = false;
+  offsetGraph.isOutline = true;
+  if (offsetGraph.points.length === 0) {
+    offsetGraph.isEmpty = true;
+  }
+  return offsetGraph;
+};
+
 const toTriangles = (graph) => {
   if (graph.isOutline) {
     // Outlines aren't compatible with SurfaceMesh.
@@ -1277,52 +1343,9 @@ const intersection = (a, b) => {
 const offset = (outlineGraph, amount) => {
   if (amount >= 0) {
     return outlineGraph;
+  } else {
+    return inset(outlineGraph, 0 - amount, 0, 0);
   }
-  const offsetGraph = create();
-  eachFace(realizeGraph(outlineGraph), (face, { plane, loop, holes }) => {
-    const polygon = [];
-    eachLoopEdge(outlineGraph, loop, (edge, { point }) => {
-      polygon.push(getPointNode(outlineGraph, point));
-    });
-    // FIX: Handle holes.
-    for (const { boundary } of insetOfPolygon(0 - amount, plane, polygon, [])) {
-      let offsetFace = addFace(offsetGraph, { plane });
-      let offsetLoop = addLoop(offsetGraph, { face: offsetFace });
-      let firstEdge;
-      let lastEdge;
-      for (const pointNode of boundary) {
-        const point = addPoint(offsetGraph, pointNode);
-        const edge = addEdge(offsetGraph, {
-          point,
-          next: firstEdge,
-          loop: offsetLoop,
-        });
-        if (firstEdge === undefined) {
-          firstEdge = edge;
-        }
-        if (lastEdge !== undefined) {
-          getEdgeNode(offsetGraph, lastEdge).next = edge;
-        }
-        lastEdge = edge;
-      }
-      getLoopNode(offsetGraph, offsetLoop).edge = firstEdge;
-    }
-  });
-  offsetGraph.isClosed = false;
-  offsetGraph.isOutline = true;
-  if (offsetGraph.points.length === 0) {
-    offsetGraph.isEmpty = true;
-  }
-  return offsetGraph;
-};
-
-const outline = (graph) => {
-  const outlineGraph = fromSurfaceMeshLazy(
-    outlineOfSurfaceMesh(toSurfaceMesh(graph))
-  );
-  outlineGraph.isOutline = true;
-  outlineGraph.isWireframe = true;
-  return outlineGraph;
 };
 
 const smooth = (graph) =>
@@ -1336,6 +1359,13 @@ const toPaths = (graph) => {
       path.push(getPointNode(graph, point));
     });
     paths.push(path);
+    eachFaceHole(graph, face, (hole) => {
+      const path = [];
+      eachLoopEdge(graph, hole, (edge, { point }) => {
+        path.push(getPointNode(graph, point));
+      });
+      paths.push(path);
+    });
   });
   return paths;
 };
@@ -1382,4 +1412,4 @@ const union = (a, b) => {
   );
 };
 
-export { alphaShape, convexHull, difference, eachPoint, extrude, extrudeToPlane, fromPaths, fromPoints, fromPolygons, fromSolid, fromSurface, interior, intersection, measureBoundingBox, offset, outline, realizeGraph, section, smooth, toPaths, toSolid, toSurface, toTriangles, transform, union };
+export { alphaShape, convexHull, difference, eachPoint, extrude, extrudeToPlane, fromPaths, fromPoints, fromPolygons, fromSolid, fromSurface, inset, interior, intersection, measureBoundingBox, offset, outline, realizeGraph, section, smooth, toPaths, toSolid, toSurface, toTriangles, transform, union };

@@ -1,5 +1,6 @@
 import { fromScaling, fromTranslation } from './jsxcad-math-mat4.js';
 import { transform as transform$1, canonicalize as canonicalize$1, close as close$1, getEdges, flip as flip$1, toGeneric as toGeneric$1, toPolygon, toZ0Polygon } from './jsxcad-geometry-path.js';
+import { arrangePaths, insetOfPolygon } from './jsxcad-algorithm-cgal.js';
 import { fromPoint, min, max, subtract, length, add, scale as scale$1, normalize } from './jsxcad-math-vec3.js';
 
 const transform = (matrix, paths) =>
@@ -61,6 +62,31 @@ const findOpenEdges = (paths, isOpen) => {
 const flip = (paths) => paths.map(flip$1);
 
 const intersection = (pathset, ...pathsets) => pathset;
+
+const inset = (plane, paths, initial, step, limit) => {
+  const [x = 0, y = 0, z = 1, w = 0] = plane;
+  const output = [];
+  for (const { boundary: inputBoundary, holes: inputHoles } of arrangePaths(
+    x,
+    y,
+    z,
+    w,
+    paths
+  )) {
+    for (const { boundary, holes } of insetOfPolygon(
+      initial,
+      step,
+      limit,
+      [x, y, z, w],
+      inputBoundary,
+      inputHoles
+    )) {
+      output.push(boundary);
+      output.push(...holes);
+    }
+  }
+  return output;
+};
 
 const last = (paths) =>
   paths.length >= 1 ? paths[paths.length - 1] : [null];
@@ -188,4 +214,4 @@ const scale = ([x = 1, y = 1, z = 1], paths) =>
 const translate = ([x = 0, y = 0, z = 0], paths) =>
   transform(fromTranslation([x, y, z]), paths);
 
-export { butLast, canonicalize, close, difference, eachPoint, findOpenEdges, flip, intersection, last, measureBoundingBox, scale, segment, segmented, toGeneric, toPoints, toPolygons, toZ0Polygons, transform, translate, union };
+export { butLast, canonicalize, close, difference, eachPoint, findOpenEdges, flip, inset, intersection, last, measureBoundingBox, scale, segment, segmented, toGeneric, toPoints, toPolygons, toZ0Polygons, transform, translate, union };
