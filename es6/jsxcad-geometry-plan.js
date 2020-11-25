@@ -12,7 +12,7 @@ const apothem = (apothem = 1, { at = [0, 0, 0], sides = 32 } = {}) => {
 const corners = (right = 0, back = 0, left = 0, front = 0) => {
   if (left > right) [left, right] = [right, left];
   if (front > back) [front, back] = [back, front];
-  const at = [(left + right) / 2, (front + back) / 2, 0];
+  const at = [0, 0, 0];
   return {
     type: 'corners',
     left,

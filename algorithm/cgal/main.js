@@ -28,6 +28,7 @@ export { intersectionOfNefPolyhedrons } from './intersectionOfNefPolyhedrons.js'
 export { intersectionOfSurfaceMeshes } from './intersectionOfSurfaceMeshes.js';
 export { outlineOfSurfaceMesh } from './outlineOfSurfaceMesh.js';
 export { sectionOfNefPolyhedron } from './sectionOfNefPolyhedron.js';
+export { sectionOfSurfaceMesh } from './sectionOfSurfaceMesh.js';
 export { smoothSurfaceMesh } from './smoothSurfaceMesh.js';
 export { transformSurfaceMesh } from './transformSurfaceMesh.js';
 export { unionOfNefPolyhedrons } from './unionOfNefPolyhedrons.js';

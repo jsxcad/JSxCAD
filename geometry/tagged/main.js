@@ -66,7 +66,7 @@ export { getSurfaces } from './getSurfaces.js';
 export { getTags } from './getTags.js';
 export { getZ0Surfaces } from './getZ0Surfaces.js';
 export { hash } from './hash.js';
-export { interior } from './interior.js';
+export { fill } from './fill.js';
 export { intersection } from './intersection.js';
 export { inset } from './inset.js';
 export { keep } from './keep.js';

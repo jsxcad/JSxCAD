@@ -5,6 +5,7 @@ import {
 import { doesNotOverlap } from './doesNotOverlap.js';
 import { extrude } from './extrude.js';
 // import { fromNefPolyhedron } from './fromNefPolyhedron.js';
+import { fromPaths } from './fromPaths.js';
 import { fromSurfaceMeshLazy } from './fromSurfaceMeshLazy.js';
 import { principlePlane } from './principlePlane.js';
 import { section } from './section.js';
@@ -18,7 +19,9 @@ export const difference = (a, b) => {
     return a;
   }
   if (!a.isClosed) {
-    return section(principlePlane(a), difference(extrude(a, far, 0), b));
+    return fromPaths(
+      section(difference(extrude(a, far, 0), b), [principlePlane(a)])[0]
+    );
   }
   if (!b.isClosed) {
     b = extrude(b, far, 0);

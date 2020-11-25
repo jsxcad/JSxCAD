@@ -1,9 +1,9 @@
 import {
+  fromPaths as fromPathsToGraph,
   inset as insetGraph,
   toPaths as toPathsFromGraph,
 } from '@jsxcad/geometry-graph';
 
-import { interior } from './interior.js';
 import { rewrite } from './visit.js';
 import { taggedPaths } from './taggedPaths.js';
 import { toTransformedGeometry } from './toTransformedGeometry.js';
@@ -24,7 +24,12 @@ export const inset = (geometry, initial = 1, step, limit) => {
         // Not implemented yet.
         return geometry;
       case 'paths':
-        return inset(interior(geometry), initial, step, limit);
+        return taggedPaths(
+          { tags },
+          toPathsFromGraph(
+            insetGraph(fromPathsToGraph(geometry.paths), initial, step, limit)
+          )
+        );
       case 'plan':
       case 'assembly':
       case 'item':

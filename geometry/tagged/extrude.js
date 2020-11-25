@@ -1,5 +1,5 @@
 import { extrude as extrudeGraph } from '@jsxcad/geometry-graph';
-import { interior } from './interior.js';
+import { fill } from './fill.js';
 import { rewrite } from './visit.js';
 import { taggedGraph } from './taggedGraph.js';
 import { toTransformedGeometry } from './toTransformedGeometry.js';
@@ -21,7 +21,7 @@ export const extrude = (geometry, height, depth) => {
         // Not implemented yet.
         return geometry;
       case 'paths':
-        return extrude(interior(geometry), height, depth);
+        return extrude(fill(geometry), height, depth);
       case 'plan':
       case 'assembly':
       case 'item':
