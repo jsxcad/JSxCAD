@@ -1,12 +1,15 @@
 import {
+  fill as fillGeometry,
+  transform as transformGeometry,
+} from '@jsxcad/geometry-tagged';
+
+import {
   fromScaling,
   fromTranslation,
   fromZRotation,
   identity,
   multiply,
 } from '@jsxcad/math-mat4';
-
-import { interior, transform } from '@jsxcad/geometry-tagged';
 
 import SvgPoints from 'svg-points/cjs/index.js';
 import XmlDom from 'xmldom';
@@ -245,9 +248,9 @@ export const fromSvg = async (input, options = {}) => {
             // Does fill, etc, inherit?
             const tags = toTagsFromName(fill);
             geometry.content.push(
-              transform(
+              transformGeometry(
                 scale(matrix),
-                interior({
+                fillGeometry({
                   type: 'paths',
                   paths: paths,
                   tags,
@@ -273,7 +276,11 @@ export const fromSvg = async (input, options = {}) => {
             }
             const tags = toTagsFromName(stroke);
             geometry.content.push(
-              transform(scaledMatrix, { type: 'paths', paths: paths, tags })
+              transformGeometry(scaledMatrix, {
+                type: 'paths',
+                paths: paths,
+                tags,
+              })
             );
           }
         };

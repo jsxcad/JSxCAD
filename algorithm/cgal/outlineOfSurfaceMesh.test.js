@@ -302,6 +302,7 @@ test('FromSurfaceMeshToOutline/solid', (t) => {
     isClosed: false,
   });
 });
+
 test('FromSurfaceMeshToOutline/surface', (t) => {
   const inputGraph = {
     edges: [

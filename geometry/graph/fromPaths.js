@@ -5,7 +5,7 @@ import {
   create,
 } from './graph.js';
 
-import { flip, isClockwise } from '@jsxcad/geometry-path';
+import { deduplicate, flip, isClockwise } from '@jsxcad/geometry-path';
 
 import { arrangePaths } from '@jsxcad/algorithm-cgal';
 
@@ -16,7 +16,7 @@ const orientCounterClockwise = (path) =>
 export const fromPaths = (paths) => {
   // FIX: Discover the plane for planar graphs.
   const plane = [0, 0, 1, 0];
-  const arrangement = arrangePaths(...plane, paths);
+  const arrangement = arrangePaths(...plane, paths.map(deduplicate));
   const graph = create();
   for (const { points, holes } of arrangement) {
     const face = addFace(graph, { plane });

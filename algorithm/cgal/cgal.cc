@@ -42,6 +42,7 @@
 #include <CGAL/Polygon_mesh_processing/smooth_shape.h>
 #include <CGAL/Polygon_mesh_processing/transform.h>
 #include <CGAL/Polygon_mesh_processing/triangulate_faces.h>
+#include <CGAL/Polygon_mesh_slicer.h>
 #include <CGAL/Polygon_2.h>
 #include <CGAL/Polygon_with_holes_2.h>
 #include <CGAL/Projection_traits_xy_3.h>
@@ -78,6 +79,8 @@ typedef Surface_mesh::Vertex_index Vertex_index;
 
 typedef std::array<FT, 3> Triple;
 typedef std::vector<Triple> Triples;
+
+typedef std::array<FT, 4> Quadruple;
 
 typedef std::vector<std::size_t> Polygon;
 
@@ -297,6 +300,13 @@ void addTriple(Triples* triples, double x, double y, double z) {
   triples->emplace_back(Triple{ x, y, z });
 }
 
+void fillQuadruple(Quadruple* q, double x, double y, double z, double w) {
+  (*q)[0] = FT(x);
+  (*q)[1] = FT(y);
+  (*q)[2] = FT(z);
+  (*q)[3] = FT(w);
+}
+
 void addPoint(Points* points, double x, double y, double z) {
   points->emplace_back(Point{ x, y, z });
 }
@@ -482,7 +492,6 @@ Nef_polyhedron* UnionOfNefPolyhedrons(Nef_polyhedron* a, Nef_polyhedron* b) {
 
 Nef_polyhedron* SectionOfNefPolyhedron(Nef_polyhedron* a, double x, double y, double z, double w) {
   return new Nef_polyhedron(a->intersection(Plane(x, y, z, w), Nef_polyhedron::Intersection_mode::PLANE_ONLY));
-  // return new Nef_polyhedron(a->intersection(Plane(x, y, z, w), Nef_polyhedron::Intersection_mode::CLOSED_HALFSPACE));
 }
 
 #ifdef SURFACE_MESH_BOOLEANS
@@ -514,6 +523,27 @@ Surface_mesh* UnionOfSurfaceMeshes(Surface_mesh* a, Surface_mesh* b) {
       CGAL::Polygon_mesh_processing::parameters::throw_on_self_intersection(true),
       CGAL::Polygon_mesh_processing::parameters::throw_on_self_intersection(true));
   return c;
+}
+
+void SectionOfSurfaceMesh(Surface_mesh* mesh, std::size_t plane_count, emscripten::val fill_plane, emscripten::val emit_polyline, emscripten::val emit_point) {
+  typedef std::vector<Point> Polyline_type;
+  typedef std::list<Polyline_type> Polylines;
+
+  CGAL::Polygon_mesh_slicer<Surface_mesh, Kernel> slicer(*mesh);
+
+  while (plane_count-- > 0) {
+    Quadruple q;
+    Quadruple* qp =  &q;
+    fill_plane(qp);
+    Polylines polylines;
+    slicer(Plane(q[0], q[1], q[2], q[3]), std::back_inserter(polylines));
+    for (const auto& polyline : polylines) {
+      emit_polyline();
+      for (const auto& p : polyline) {
+        emit_point(CGAL::to_double(p.x()), CGAL::to_double(p.y()), CGAL::to_double(p.z()));
+      }
+    }
+  }
 }
 #endif
 
@@ -1091,6 +1121,9 @@ EMSCRIPTEN_BINDINGS(module) {
     .function("push_back", select_overload<void(const Triple&)>(&Triples::push_back))
     .function("size", select_overload<size_t()const>(&Triples::size));
 
+  emscripten::class_<Quadruple>("Quadruple").constructor<>();
+  emscripten::function("fillQuadruple", &fillQuadruple, emscripten::allow_raw_pointers());
+
   emscripten::function("addPoint", &addPoint, emscripten::allow_raw_pointers());
 
   emscripten::class_<Points>("Points")
@@ -1219,4 +1252,5 @@ EMSCRIPTEN_BINDINGS(module) {
   emscripten::function("Surface_mesh__is_valid_polygon_mesh", &Surface_mesh__is_valid_polygon_mesh, emscripten::allow_raw_pointers());
   emscripten::function("Surface_mesh__bbox", &Surface_mesh__bbox, emscripten::allow_raw_pointers());
   emscripten::function("ArrangePaths", &ArrangePaths, emscripten::allow_raw_pointers());
+  emscripten::function("SectionOfSurfaceMesh", &SectionOfSurfaceMesh, emscripten::allow_raw_pointers());
 }

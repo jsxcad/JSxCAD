@@ -1,8 +1,9 @@
+import { dot, subtract } from '@jsxcad/math-vec3';
+
 import { fromPoints, toXYPlaneTransforms } from '@jsxcad/math-plane';
 
 import Shape from './Shape.js';
 import { getPeg } from '@jsxcad/geometry-tagged';
-import { subtract } from '@jsxcad/math-vec3';
 
 const normalizeCoords = ([
   x = 0,
@@ -31,6 +32,10 @@ export const getPegCoords = (shape) => {
 
 export const orient = (origin, forward, right, shapeToPeg) => {
   const plane = fromPoints(right, forward, origin);
+  const d = Math.abs(dot(plane, [0, 0, 1, 0]));
+  if (d >= 0.99999) {
+    return shapeToPeg.move(...origin);
+  }
   const rightDirection = subtract(right, origin);
   const [, from] = toXYPlaneTransforms(plane, rightDirection);
   return shapeToPeg.transform(from).move(...origin);

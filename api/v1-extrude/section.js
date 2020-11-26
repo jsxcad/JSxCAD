@@ -1,8 +1,6 @@
 import { Shape, getPegCoords } from '@jsxcad/api-v1-shape';
-import {
-  section as sectionGeometry,
-  taggedGroup,
-} from '@jsxcad/geometry-tagged';
+
+import { section as sectionGeometry } from '@jsxcad/geometry-tagged';
 
 export const section = (shape, ...pegs) => {
   const planes = [];
@@ -14,15 +12,7 @@ export const section = (shape, ...pegs) => {
       planes.push(plane);
     }
   }
-  const sections = [];
-  for (const plane of planes) {
-    sections.push(sectionGeometry(plane, shape.toGeometry()));
-  }
-  if (sections.length > 1) {
-    return Shape.fromGeometry(taggedGroup({}, ...sections));
-  } else {
-    return Shape.fromGeometry(sections[0]);
-  }
+  return Shape.fromGeometry(sectionGeometry(shape.toGeometry(), planes));
 };
 
 const sectionMethod = function (...args) {

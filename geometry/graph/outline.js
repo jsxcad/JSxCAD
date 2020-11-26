@@ -2,6 +2,7 @@ import { fromSurfaceMeshLazy } from './fromSurfaceMeshLazy.js';
 import { outlineOfSurfaceMesh } from '@jsxcad/algorithm-cgal';
 import { toSurfaceMesh } from './toSurfaceMesh.js';
 
+// FIX: Rename to 'wire'?
 export const outline = (graph) => {
   if (graph.isOutline) {
     if (graph.isWireframe) {

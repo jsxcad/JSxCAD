@@ -1,6 +1,6 @@
 import { reallyQuantizeForSpace } from './jsxcad-math-utils.js';
+import { transform as transform$1, fill, scale, measureBoundingBox, translate, canonicalize as canonicalize$2, toTransformedGeometry, getAnyNonVoidSurfaces, outline, taggedSurface, getNonVoidPaths } from './jsxcad-geometry-tagged.js';
 import { fromScaling, identity, multiply, fromTranslation, fromZRotation } from './jsxcad-math-mat4.js';
-import { transform as transform$1, interior, scale, measureBoundingBox, translate, canonicalize as canonicalize$2, toTransformedGeometry, getAnyNonVoidSurfaces, outline, taggedSurface, getNonVoidPaths } from './jsxcad-geometry-tagged.js';
 import { assertGood, isClosed, canonicalize as canonicalize$1 } from './jsxcad-geometry-path.js';
 import { buildAdaptiveCubicBezierCurve } from './jsxcad-algorithm-shape.js';
 import { equals } from './jsxcad-math-vec2.js';
@@ -3645,14 +3645,14 @@ const fromSvg = async (input, options = {}) => {
             const [name, value] = entry.split(':');
             attributes[name] = value;
           }
-          const fill = attributes.fill;
-          if (fill !== undefined && fill !== 'none' && fill !== '') {
+          const fill$1 = attributes.fill;
+          if (fill$1 !== undefined && fill$1 !== 'none' && fill$1 !== '') {
             // Does fill, etc, inherit?
-            const tags = toTagsFromName(fill);
+            const tags = toTagsFromName(fill$1);
             geometry.content.push(
               transform$1(
                 scale(matrix),
-                interior({
+                fill({
                   type: 'paths',
                   paths: paths,
                   tags,
@@ -3678,7 +3678,11 @@ const fromSvg = async (input, options = {}) => {
             }
             const tags = toTagsFromName(stroke);
             geometry.content.push(
-              transform$1(scaledMatrix, { type: 'paths', paths: paths, tags })
+              transform$1(scaledMatrix, {
+                type: 'paths',
+                paths: paths,
+                tags,
+              })
             );
           }
         };

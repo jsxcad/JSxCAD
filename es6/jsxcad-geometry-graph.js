@@ -1,10 +1,9 @@
-import { fromSurfaceMeshToGraph, fromPointsToAlphaShapeAsSurfaceMesh, fromSurfaceMeshToLazyGraph, fromPointsToConvexHullAsSurfaceMesh, fromPolygonsToSurfaceMesh, fromGraphToSurfaceMesh, fromSurfaceMeshEmitBoundingBox, extrudeSurfaceMesh, fromSurfaceMeshToNefPolyhedron, fromNefPolyhedronFacetsToGraph, sectionOfNefPolyhedron, differenceOfSurfaceMeshes, extrudeToPlaneOfSurfaceMesh, arrangePaths, fromPointsToSurfaceMesh, outlineOfSurfaceMesh, insetOfPolygon, fromSurfaceMeshToTriangles, intersectionOfSurfaceMeshes, smoothSurfaceMesh, transformSurfaceMesh, unionOfSurfaceMeshes } from './jsxcad-algorithm-cgal.js';
+import { fromSurfaceMeshToGraph, fromPointsToAlphaShapeAsSurfaceMesh, fromSurfaceMeshToLazyGraph, fromPointsToConvexHullAsSurfaceMesh, fromPolygonsToSurfaceMesh, fromGraphToSurfaceMesh, fromSurfaceMeshEmitBoundingBox, extrudeSurfaceMesh, arrangePaths, sectionOfSurfaceMesh, differenceOfSurfaceMeshes, extrudeToPlaneOfSurfaceMesh, fromSurfaceMeshToTriangles, fromPointsToSurfaceMesh, outlineOfSurfaceMesh, insetOfPolygon, intersectionOfSurfaceMeshes, smoothSurfaceMesh, transformSurfaceMesh, unionOfSurfaceMeshes } from './jsxcad-algorithm-cgal.js';
 import { equals as equals$1, dot, min, max, scale } from './jsxcad-math-vec3.js';
 import { deduplicate as deduplicate$1, isClockwise, flip as flip$1 } from './jsxcad-geometry-path.js';
 import { toPlane, flip } from './jsxcad-math-poly3.js';
 
 const graphSymbol = Symbol('graph');
-const nefPolyhedronSymbol = Symbol('nefPolyhedron');
 const surfaceMeshSymbol = Symbol('surfaceMeshSymbol');
 
 const create = () => ({ points: [], edges: [], loops: [], faces: [] });
@@ -1132,6 +1131,28 @@ const extrude = (graph, height, depth) => {
   }
 };
 
+const orientClockwise = (path) => (isClockwise(path) ? path : flip$1(path));
+const orientCounterClockwise = (path) =>
+  isClockwise(path) ? flip$1(path) : path;
+
+const fromPaths = (paths) => {
+  // FIX: Discover the plane for planar graphs.
+  const plane = [0, 0, 1, 0];
+  const arrangement = arrangePaths(...plane, paths.map(deduplicate$1));
+  const graph = create();
+  for (const { points, holes } of arrangement) {
+    const face = addFace(graph, { plane });
+    addLoopFromPoints(graph, orientCounterClockwise(points), { face });
+    for (const hole of holes) {
+      addHoleFromPoints(graph, orientClockwise(hole), { face });
+    }
+  }
+  graph.isClosed = false;
+  graph.isOutline = true;
+  graph.isWireframe = true;
+  return graph;
+};
+
 // FIX: Actually determine the principle plane.
 const principlePlane = (graph) => {
   for (const face of realizeGraph(graph).faces) {
@@ -1141,22 +1162,8 @@ const principlePlane = (graph) => {
   }
 };
 
-const toNefPolyhedron = (graph) => {
-  let nefPolyhedron = graph[nefPolyhedronSymbol];
-  if (nefPolyhedron === undefined) {
-    const mesh = toSurfaceMesh(graph);
-    nefPolyhedron = fromSurfaceMeshToNefPolyhedron(mesh);
-    graph[nefPolyhedronSymbol] = nefPolyhedron;
-    nefPolyhedron[graphSymbol] = graph;
-  }
-  return nefPolyhedron;
-};
-
-const section = ([x, y, z, w], graph) =>
-  fromNefPolyhedronFacetsToGraph(
-    sectionOfNefPolyhedron(toNefPolyhedron(graph), x, y, z, w),
-    [x, y, z, w]
-  );
+const section = (graph, planes) =>
+  sectionOfSurfaceMesh(toSurfaceMesh(graph), planes);
 
 const far = 10000;
 
@@ -1165,7 +1172,9 @@ const difference = (a, b) => {
     return a;
   }
   if (!a.isClosed) {
-    return section(principlePlane(a), difference(extrude(a, far, 0), b));
+    return fromPaths(
+      section(difference(extrude(a, far, 0), b), [principlePlane(a)])[0]
+    );
   }
   if (!b.isClosed) {
     b = extrude(b, far, 0);
@@ -1211,33 +1220,23 @@ const extrudeToPlane = (graph, highPlane, lowPlane) => {
   }
 };
 
-const orientClockwise = (path) => (isClockwise(path) ? path : flip$1(path));
-const orientCounterClockwise = (path) =>
-  isClockwise(path) ? flip$1(path) : path;
+const fromPolygons = (polygons) =>
+  fromSurfaceMeshLazy(fromPolygonsToSurfaceMesh(polygons));
 
-const fromPaths = (paths) => {
-  // FIX: Discover the plane for planar graphs.
-  const plane = [0, 0, 1, 0];
-  const arrangement = arrangePaths(...plane, paths);
-  const graph = create();
-  for (const { points, holes } of arrangement) {
-    const face = addFace(graph, { plane });
-    addLoopFromPoints(graph, orientCounterClockwise(points), { face });
-    for (const hole of holes) {
-      addHoleFromPoints(graph, orientClockwise(hole), { face });
-    }
+const toTriangles = (graph) => {
+  if (graph.isOutline) {
+    // Outlines aren't compatible with SurfaceMesh.
+    return toSurface(graph);
+  } else {
+    return fromSurfaceMeshToTriangles(toSurfaceMesh(graph));
   }
-  graph.isClosed = false;
-  graph.isOutline = true;
-  graph.isWireframe = true;
-  return graph;
 };
+
+// Convert an outline graph to a possibly closed surface.
+const fill = (graph) => fromPolygons(toTriangles(graph));
 
 const fromPoints = (points) =>
   fromSurfaceMeshLazy(fromPointsToSurfaceMesh(points));
-
-const fromPolygons = (polygons) =>
-  fromSurfaceMeshLazy(fromPolygonsToSurfaceMesh(polygons));
 
 const fromSolid = (solid) => {
   const polygons = [];
@@ -1247,6 +1246,7 @@ const fromSolid = (solid) => {
   return fromPolygons(polygons);
 };
 
+// FIX: Rename to 'wire'?
 const outline = (graph) => {
   if (graph.isOutline) {
     if (graph.isWireframe) {
@@ -1304,18 +1304,6 @@ const inset = (graph, initial, step, limit) => {
   return offsetGraph;
 };
 
-const toTriangles = (graph) => {
-  if (graph.isOutline) {
-    // Outlines aren't compatible with SurfaceMesh.
-    return toSurface(graph);
-  } else {
-    return fromSurfaceMeshToTriangles(toSurfaceMesh(graph));
-  }
-};
-
-// Convert an outline graph to a possibly closed surface.
-const interior = (graph) => fromPolygons(toTriangles(graph));
-
 const far$1 = 10000;
 
 const intersection = (a, b) => {
@@ -1326,7 +1314,9 @@ const intersection = (a, b) => {
     return b;
   }
   if (!a.isClosed) {
-    return section(principlePlane(a), intersection(extrude(a, far$1, 0), b));
+    return fromPaths(
+      section(intersection(extrude(a, far$1, 0), b), [principlePlane(a)])[0]
+    );
   }
   if (!b.isClosed) {
     b = extrude(b, far$1, 0);
@@ -1399,7 +1389,9 @@ const union = (a, b) => {
     if (!b.isClosed) {
       b = extrude(b, far$2, 0);
     }
-    return section(principlePlane(a), union(extrude(a, far$2, 0), b));
+    return fromPaths(
+      section(union(extrude(a, far$2, 0), b), [principlePlane(a)])[0]
+    );
   }
   if (!b.isClosed) {
     // The union of a surface and a solid is the solid.
@@ -1412,4 +1404,4 @@ const union = (a, b) => {
   );
 };
 
-export { alphaShape, convexHull, difference, eachPoint, extrude, extrudeToPlane, fromPaths, fromPoints, fromPolygons, fromSolid, fromSurface, inset, interior, intersection, measureBoundingBox, offset, outline, realizeGraph, section, smooth, toPaths, toSolid, toSurface, toTriangles, transform, union };
+export { alphaShape, convexHull, difference, eachPoint, extrude, extrudeToPlane, fill, fromPaths, fromPoints, fromPolygons, fromSolid, fromSurface, inset, intersection, measureBoundingBox, offset, outline, realizeGraph, section, smooth, toPaths, toSolid, toSurface, toTriangles, transform, union };

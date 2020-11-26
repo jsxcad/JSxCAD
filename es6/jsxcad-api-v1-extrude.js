@@ -1,6 +1,6 @@
 import Shape$1, { Shape, getPegCoords, orient } from './jsxcad-api-v1-shape.js';
 import { alphaShape, fromPoints } from './jsxcad-geometry-graph.js';
-import { taggedGraph, getPaths, extrude as extrude$1, extrudeToPlane as extrudeToPlane$1, outline as outline$1, interior as interior$1, section as section$1, taggedGroup, taggedLayers, getSolids, union, taggedZ0Surface, getSurfaces, getZ0Surfaces, taggedPaths, measureBoundingBox, taggedSolid, taggedPoints, measureHeights } from './jsxcad-geometry-tagged.js';
+import { taggedGraph, getPaths, extrude as extrude$1, extrudeToPlane as extrudeToPlane$1, fill as fill$1, outline as outline$1, section as section$1, taggedLayers, getSolids, union, taggedZ0Surface, getSurfaces, getZ0Surfaces, taggedPaths, measureBoundingBox, taggedSolid, taggedPoints, measureHeights } from './jsxcad-geometry-tagged.js';
 import { Assembly, Group } from './jsxcad-api-v1-shapes.js';
 import { Y as Y$1 } from './jsxcad-api-v1-connector.js';
 import { loop } from './jsxcad-algorithm-shape.js';
@@ -117,6 +117,16 @@ const extrudeToPlaneMethod = function (highPlane, lowPlane) {
 };
 Shape$1.prototype.extrudeToPlane = extrudeToPlaneMethod;
 
+const fill = (shape) =>
+  Shape.fromGeometry(fill$1(shape.toGeometry()));
+
+const fillMethod = function () {
+  return fill(this);
+};
+
+Shape.prototype.interior = fillMethod;
+Shape.prototype.fill = fillMethod;
+
 const outline = (shape) =>
   Group(
     ...outline$1(shape.toGeometry()).map((outline) =>
@@ -148,16 +158,6 @@ const withInlineMethod = function (options) {
 Shape$1.prototype.inline = inlineMethod;
 Shape$1.prototype.withInline = withInlineMethod;
 
-const interior = (shape) =>
-  Shape.fromGeometry(interior$1(shape.toGeometry()));
-
-const interiorMethod = function () {
-  return interior(this);
-};
-
-Shape.prototype.interior = interiorMethod;
-Shape.prototype.fill = interiorMethod;
-
 const section = (shape, ...pegs) => {
   const planes = [];
   if (pegs.length === 0) {
@@ -168,15 +168,7 @@ const section = (shape, ...pegs) => {
       planes.push(plane);
     }
   }
-  const sections = [];
-  for (const plane of planes) {
-    sections.push(section$1(plane, shape.toGeometry()));
-  }
-  if (sections.length > 1) {
-    return Shape.fromGeometry(taggedGroup({}, ...sections));
-  } else {
-    return Shape.fromGeometry(sections[0]);
-  }
+  return Shape.fromGeometry(section$1(shape.toGeometry(), planes));
 };
 
 const sectionMethod = function (...args) {
@@ -516,7 +508,7 @@ const api = {
   Loop,
   extrude,
   extrudeToPlane,
-  interior,
+  fill,
   inline,
   outline,
   section,
@@ -527,4 +519,4 @@ const api = {
 };
 
 export default api;
-export { Alpha, Loop, cloudSolid, extrude, extrudeToPlane, inline, interior, outline, section, squash, sweep, toolpath, voxels };
+export { Alpha, Loop, cloudSolid, extrude, extrudeToPlane, fill, inline, outline, section, squash, sweep, toolpath, voxels };

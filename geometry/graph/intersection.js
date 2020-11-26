@@ -1,6 +1,7 @@
 import { doesNotOverlap } from './doesNotOverlap.js';
 import { extrude } from './extrude.js';
 // import { fromNefPolyhedron } from './fromNefPolyhedron.js';
+import { fromPaths } from './fromPaths.js';
 import { fromSurfaceMeshLazy } from './fromSurfaceMeshLazy.js';
 import {
   //  intersectionOfNefPolyhedrons,
@@ -21,7 +22,9 @@ export const intersection = (a, b) => {
     return b;
   }
   if (!a.isClosed) {
-    return section(principlePlane(a), intersection(extrude(a, far, 0), b));
+    return fromPaths(
+      section(intersection(extrude(a, far, 0), b), [principlePlane(a)])[0]
+    );
   }
   if (!b.isClosed) {
     b = extrude(b, far, 0);

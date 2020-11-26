@@ -1,6 +1,6 @@
 import {
+  fill as fillOutlineGraph,
   fromPaths as fromPathsToGraph,
-  interior as interiorOfOutlineGraph,
 } from '@jsxcad/geometry-graph';
 
 import { close as closePaths } from '@jsxcad/geometry-paths';
@@ -10,25 +10,21 @@ import { taggedGraph } from './taggedGraph.js';
 import { taggedGroup } from './taggedGroup.js';
 import { toKeptGeometry } from './toKeptGeometry.js';
 
-export const interior = (
-  geometry,
-  includeFaces = true,
-  includeHoles = true
-) => {
+export const fill = (geometry, includeFaces = true, includeHoles = true) => {
   const keptGeometry = toKeptGeometry(geometry);
-  const interiors = [];
+  const fills = [];
   for (const { tags, graph } of getNonVoidGraphs(keptGeometry)) {
     if (graph.isOutline) {
-      interiors.push(taggedGraph({ tags }, interiorOfOutlineGraph(graph)));
+      fills.push(taggedGraph({ tags }, fillOutlineGraph(graph)));
     }
   }
   for (const { tags, paths } of getNonVoidPaths(keptGeometry)) {
-    interiors.push(
+    fills.push(
       taggedGraph(
         { tags },
-        interiorOfOutlineGraph(fromPathsToGraph(closePaths(paths)))
+        fillOutlineGraph(fromPathsToGraph(closePaths(paths)))
       )
     );
   }
-  return taggedGroup({}, ...interiors);
+  return taggedGroup({}, ...fills);
 };

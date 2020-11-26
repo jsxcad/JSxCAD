@@ -3,8 +3,8 @@ import Loop from './Loop.js';
 import cloudSolid from './cloudSolid.js';
 import extrude from './extrude.js';
 import extrudeToPlane from './extrudeToPlane.js';
+import fill from './fill.js';
 import inline from './inline.js';
-import interior from './interior.js';
 import outline from './outline.js';
 import section from './section.js';
 import squash from './squash.js';
@@ -17,7 +17,7 @@ const api = {
   Loop,
   extrude,
   extrudeToPlane,
-  interior,
+  fill,
   inline,
   outline,
   section,
@@ -33,8 +33,8 @@ export {
   cloudSolid,
   extrude,
   extrudeToPlane,
+  fill,
   inline,
-  interior,
   outline,
   section,
   squash,

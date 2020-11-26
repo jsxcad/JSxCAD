@@ -1,5 +1,6 @@
 import { extrude } from './extrude.js';
 // import { fromNefPolyhedron } from './fromNefPolyhedron.js';
+import { fromPaths } from './fromPaths.js';
 import { fromSurfaceMeshLazy } from './fromSurfaceMeshLazy.js';
 import { principlePlane } from './principlePlane.js';
 import { section } from './section.js';
@@ -20,7 +21,9 @@ export const union = (a, b) => {
     if (!b.isClosed) {
       b = extrude(b, far, 0);
     }
-    return section(principlePlane(a), union(extrude(a, far, 0), b));
+    return fromPaths(
+      section(union(extrude(a, far, 0), b), [principlePlane(a)])[0]
+    );
   }
   if (!b.isClosed) {
     // The union of a surface and a solid is the solid.
