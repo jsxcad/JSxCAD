@@ -1,46 +1,24 @@
-import { addPending, emit, write } from '@jsxcad/sys';
+import { addPending, emit, getModule, write } from '@jsxcad/sys';
 
-import {
-  hash as hashGeometry,
-  realize as realizeGeometry,
-  soup,
-} from '@jsxcad/geometry-tagged';
+import { hash as hashGeometry, soup } from '@jsxcad/geometry-tagged';
 
 import Shape from '@jsxcad/api-v1-shape';
 import { ensurePages } from '@jsxcad/api-v1-layout';
+import { nanoid } from 'nanoid/non-secure';
 
 // FIX: Avoid the extra read-write cycle.
 const view = (
   shape,
   inline,
   op = (x) => x,
-  { path, width = 1024, height = 512, position = [100, -100, 100] } = {}
+  { width = 1024, height = 512, position = [100, -100, 100] } = {}
 ) => {
   const viewShape = op(shape);
-  let nth = 0;
   const hash = hashGeometry(viewShape.toGeometry());
   for (const entry of ensurePages(soup(viewShape.toDisjointGeometry()))) {
-    if (path) {
-      const nthPath = `${path}_${nth++}`;
-      addPending(write(nthPath, entry));
-      const view = {
-        width,
-        height,
-        position,
-        path: nthPath,
-        inline,
-      };
-      emit({ view, hash: `${hash}_${nth}` });
-    } else {
-      const view = {
-        width,
-        height,
-        position,
-        geometry: realizeGeometry(entry),
-        inline,
-      };
-      emit({ view, hash: `${hash}_${nth}` });
-    }
+    const path = `view/${getModule()}/${nanoid()}`;
+    addPending(write(path, entry));
+    emit({ hash, path, view: { width, height, position, inline } });
   }
   return shape;
 };

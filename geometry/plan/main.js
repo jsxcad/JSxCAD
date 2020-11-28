@@ -1,4 +1,5 @@
 export { apothem } from './apothem.js';
+export { box } from './box.js';
 export { corners } from './corners.js';
 export { diameter } from './diameter.js';
 export { radius } from './radius.js';

@@ -1,6 +1,6 @@
-import { addPending, write, emit, read, getCurrentPath, addSource, addOnEmitHandler, pushModule, popModule } from './jsxcad-sys.js';
+import { getModule, addPending, write, emit, read, getCurrentPath, addSource, addOnEmitHandler, pushModule, popModule } from './jsxcad-sys.js';
 export { emit, read, write } from './jsxcad-sys.js';
-import { hash, soup, realize } from './jsxcad-geometry-tagged.js';
+import { hash, soup } from './jsxcad-geometry-tagged.js';
 import Shape, { Shape as Shape$1, loadGeometry, log, saveGeometry } from './jsxcad-api-v1-shape.js';
 export { Shape, loadGeometry, log, saveGeometry } from './jsxcad-api-v1-shape.js';
 import { ensurePages, Page, pack } from './jsxcad-api-v1-layout.js';
@@ -9,8 +9,8 @@ import './jsxcad-api-v1-deform.js';
 import './jsxcad-api-v1-gcode.js';
 import './jsxcad-api-v1-pdf.js';
 import './jsxcad-api-v1-plans.js';
-import { apothem, corners, diameter, radius } from './jsxcad-geometry-plan.js';
-export { apothem, corners, diameter, radius } from './jsxcad-geometry-plan.js';
+import { apothem, box, corners, diameter, radius } from './jsxcad-geometry-plan.js';
+export { apothem, box, corners, diameter, radius } from './jsxcad-geometry-plan.js';
 import { Peg, Arc, Assembly, Ball, Box, ChainedHull, Circle, Cone, Difference, Empty, Group, Hershey, Hexagon, Hull, Icosahedron, Intersection, Line, Octagon, Path, Pentagon, Plane, Point, Points, Polygon, Polyhedron, Rod, Septagon, Spiral, Square, Tetragon, Toolpath, Torus, Triangle, Union, Wave } from './jsxcad-api-v1-shapes.js';
 export { Arc, Assembly, Ball, Box, ChainedHull, Circle, Cone, Difference, Empty, Group, Hershey, Hexagon, Hull, Icosahedron, Intersection, Line, Octagon, Path, Peg, Pentagon, Plane, Point, Points, Polygon, Polyhedron, Rod, Septagon, Spiral, Square, Tetragon, Toolpath, Torus, Triangle, Union, Wave } from './jsxcad-api-v1-shapes.js';
 import { X, Y, Z } from './jsxcad-api-v1-connector.js';
@@ -38,38 +38,35 @@ export { cm, foot, inch, m, mil, mm, thou, yard } from './jsxcad-api-v1-units.js
 import { toEcmascript } from './jsxcad-compiler.js';
 import { toSvg } from './jsxcad-convert-svg.js';
 
+// This alphabet uses `A-Za-z0-9_-` symbols. The genetic algorithm helped
+// optimize the gzip compression for this alphabet.
+let urlAlphabet =
+  'ModuleSymbhasOwnPr-0123456789ABCDEFGHNRVfgctiUvz_KqYTJkLxpZXIjQW';
+
+let nanoid = (size = 21) => {
+  let id = '';
+  // A compact alternative for `for (var i = 0; i < step; i++)`.
+  let i = size;
+  while (i--) {
+    // `| 0` is more compact and faster than `Math.floor()`.
+    id += urlAlphabet[(Math.random() * 64) | 0];
+  }
+  return id
+};
+
 // FIX: Avoid the extra read-write cycle.
 const view = (
   shape,
   inline,
   op = (x) => x,
-  { path, width = 1024, height = 512, position = [100, -100, 100] } = {}
+  { width = 1024, height = 512, position = [100, -100, 100] } = {}
 ) => {
   const viewShape = op(shape);
-  let nth = 0;
   const hash$1 = hash(viewShape.toGeometry());
   for (const entry of ensurePages(soup(viewShape.toDisjointGeometry()))) {
-    if (path) {
-      const nthPath = `${path}_${nth++}`;
-      addPending(write(nthPath, entry));
-      const view = {
-        width,
-        height,
-        position,
-        path: nthPath,
-        inline,
-      };
-      emit({ view, hash: `${hash$1}_${nth}` });
-    } else {
-      const view = {
-        width,
-        height,
-        position,
-        geometry: realize(entry),
-        inline,
-      };
-      emit({ view, hash: `${hash$1}_${nth}` });
-    }
+    const path = `view/${getModule()}/${nanoid()}`;
+    addPending(write(path, entry));
+    emit({ hash: hash$1, path, view: { width, height, position, inline } });
   }
   return shape;
 };
@@ -284,6 +281,7 @@ const replayRecordedNotes = async (path) => {
  */
 
 const a = apothem;
+const b = box;
 const c = corners;
 const d = diameter;
 const r = radius;
@@ -295,10 +293,12 @@ const z = Peg([0, 0, 0], [0, 1, 0], [-1, 0, 0]);
 var api = /*#__PURE__*/Object.freeze({
   __proto__: null,
   apothem: apothem,
+  box: box,
   corners: corners,
   diameter: diameter,
   radius: radius,
   a: a,
+  b: b,
   c: c,
   d: d,
   r: r,
@@ -472,4 +472,4 @@ registerDynamicModule(module('svg'), './jsxcad-api-v1-svg.js');
 registerDynamicModule(module('threejs'), './jsxcad-api-v1-threejs.js');
 registerDynamicModule(module('units'), './jsxcad-api-v1-units.js');
 
-export { a, beginRecordingNotes, c, checkBox, d, importModule, md, numberBox, r, replayRecordedNotes, saveRecordedNotes, selectBox, sliderBox, source, stringBox, x, y, z };
+export { a, b, beginRecordingNotes, c, checkBox, d, importModule, md, numberBox, r, replayRecordedNotes, saveRecordedNotes, selectBox, sliderBox, source, stringBox, x, y, z };
