@@ -20,9 +20,11 @@ export const fromPaths = (paths) => {
   const graph = create();
   for (const { points, holes } of arrangement) {
     const face = addFace(graph, { plane });
-    addLoopFromPoints(graph, orientCounterClockwise(points), { face });
+    const exterior = orientCounterClockwise(points);
+    addLoopFromPoints(graph, deduplicate(exterior), { face });
     for (const hole of holes) {
-      addHoleFromPoints(graph, orientClockwise(hole), { face });
+      const interior = orientClockwise(hole);
+      addHoleFromPoints(graph, deduplicate(interior), { face });
     }
   }
   graph.isClosed = false;

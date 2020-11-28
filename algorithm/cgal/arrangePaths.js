@@ -1,3 +1,5 @@
+import { close, isClosed } from '@jsxcad/geometry-path';
+
 import { getCgal } from './getCgal.js';
 
 export const arrangePaths = (x, y, z, w, paths) => {
@@ -14,12 +16,15 @@ export const arrangePaths = (x, y, z, w, paths) => {
     (points) => {
       const path = paths[nth++];
       if (path) {
-        for (const [x, y, z] of path) {
+        for (const [x, y, z] of close(path)) {
           c.addPoint(points, x, y, z);
         }
-        for (const [x, y, z] of path) {
-          c.addPoint(points, x, y, z);
-          break;
+        if (isClosed(path)) {
+          // Close the path with the starting point.
+          for (const [x, y, z] of path) {
+            c.addPoint(points, x, y, z);
+            break;
+          }
         }
       }
     },

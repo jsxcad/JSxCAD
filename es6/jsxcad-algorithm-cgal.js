@@ -1,3 +1,4 @@
+import { close, isClosed } from './jsxcad-geometry-path.js';
 import { emit, log, onBoot } from './jsxcad-sys.js';
 import { dot, equals } from './jsxcad-math-vec3.js';
 import { fromPolygon } from './jsxcad-math-plane.js';
@@ -1098,9 +1099,9 @@ var Module = (function () {
       Module['HEAPF32'] = HEAPF32 = new Float32Array(buf);
       Module['HEAPF64'] = HEAPF64 = new Float64Array(buf);
     }
-    var STACK_BASE = 5457424,
-      STACK_MAX = 214544,
-      DYNAMIC_BASE = 5457424;
+    var STACK_BASE = 5455040,
+      STACK_MAX = 212160,
+      DYNAMIC_BASE = 5455040;
     assert(STACK_BASE % 16 === 0, 'stack must start aligned');
     assert(DYNAMIC_BASE % 16 === 0, 'heap must start aligned');
     var TOTAL_STACK = 5242880;
@@ -9518,12 +9519,15 @@ const arrangePaths = (x, y, z, w, paths) => {
     (points) => {
       const path = paths[nth++];
       if (path) {
-        for (const [x, y, z] of path) {
+        for (const [x, y, z] of close(path)) {
           c.addPoint(points, x, y, z);
         }
-        for (const [x, y, z] of path) {
-          c.addPoint(points, x, y, z);
-          break;
+        if (isClosed(path)) {
+          // Close the path with the starting point.
+          for (const [x, y, z] of path) {
+            c.addPoint(points, x, y, z);
+            break;
+          }
         }
       }
     },
