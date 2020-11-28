@@ -143,7 +143,10 @@ const withOutlineMethod = function (op = (x) => x) {
 };
 
 Shape.prototype.outline = outlineMethod;
+Shape.prototype.wire = outlineMethod;
+
 Shape.prototype.withOutline = withOutlineMethod;
+Shape.prototype.withWire = withOutlineMethod;
 
 const inline = (shape) => outline(shape.flip());
 

@@ -84,6 +84,10 @@ export const pushConvexPolygons = (
   const points = [];
   const contour = [];
   buildContour(points, contour, graph, faceNode.loop, selectJunction);
+  if (points.length < 3) {
+    // We can't build a polygon from this.
+    return;
+  }
   if (points.length === 3) {
     // Triangles are easy.
     polygons.push(points);

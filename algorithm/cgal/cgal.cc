@@ -992,18 +992,14 @@ void InsetOfPolygon(double initial, double step, double limit, double x, double 
 }
 
 void ArrangePaths(double x, double y, double z, double w, emscripten::val fill, emscripten::val emit_polygon, emscripten::val emit_point) {
-  typedef CGAL::Arr_segment_traits_2<Kernel>                Segment_traits_2;
-  typedef CGAL::Arr_polyline_traits_2<Segment_traits_2>     Geom_traits_2;
-  typedef CGAL::Arrangement_2<Geom_traits_2>                Arrangement_2;
+  typedef CGAL::Arr_segment_traits_2<Kernel>            Traits_2;
+  typedef Traits_2::Point_2                             Point_2;
+  typedef Traits_2::X_monotone_curve_2                  Segment_2;
+  typedef CGAL::Arrangement_2<Traits_2>                 Arrangement_2;
+  typedef Arrangement_2::Vertex_handle                  Vertex_handle;
+  typedef Arrangement_2::Halfedge_handle                Halfedge_handle;
 
-  typedef Geom_traits_2::Point_2                            Point_2;
-  typedef Geom_traits_2::Segment_2                          Segment_2;
-  typedef Geom_traits_2::Curve_2                            Polyline_2;
-
-  Geom_traits_2 traits;
-  Geom_traits_2::Construct_curve_2 polyline_construct = traits.construct_curve_2_object();
-
-  Arrangement_2 arrangement(&traits);
+  Arrangement_2 arrangement;
 
   Plane plane(x, y, z, w);
 
@@ -1020,6 +1016,16 @@ void ArrangePaths(double x, double y, double z, double w, emscripten::val fill, 
     }
     for (std::size_t i = 0; i < point_2s.size() - 1; i++) {
       insert(arrangement, Segment_2(point_2s[i], point_2s[i + 1]));
+    }
+  }
+
+  // CHECK: Do we need to remove isolated vertices?
+  // Remove the isolated vertices located in the unbounded face.
+  Arrangement_2::Vertex_iterator curr, next = arrangement.vertices_begin();
+  for (curr = next++; curr != arrangement.vertices_end(); curr = next++) {
+    // Keep an iterator to the next vertex, as curr might be deleted.
+    if (curr->is_isolated()) {
+      arrangement.remove_isolated_vertex(curr);
     }
   }
 
@@ -1040,17 +1046,8 @@ void ArrangePaths(double x, double y, double z, double w, emscripten::val fill, 
     Arrangement_2::Ccb_halfedge_const_circulator edge = start;
     emit_polygon(false);
     do {
-      if (edge->source()->point() == edge->curve()[0].source()) {
-        for (const auto& p2 : edge->curve()) {
-          Point p3 = plane.to_3d(p2);
-          emit_point(CGAL::to_double(p3.x()), CGAL::to_double(p3.y()), CGAL::to_double(p3.z()));
-        }
-      } else {
-        for (const auto& p2 : boost::adaptors::reverse(edge->curve())) {
-          Point p3 = plane.to_3d(p2);
-          emit_point(CGAL::to_double(p3.x()), CGAL::to_double(p3.y()), CGAL::to_double(p3.z()));
-        }
-      }
+      Point p3 = plane.to_3d(edge->source()->point());
+      emit_point(CGAL::to_double(p3.x()), CGAL::to_double(p3.y()), CGAL::to_double(p3.z()));
     } while (++edge != start);
 
     // Step into the holes.
@@ -1059,17 +1056,8 @@ void ArrangePaths(double x, double y, double z, double w, emscripten::val fill, 
       Arrangement_2::Ccb_halfedge_const_circulator start = *hole;
       Arrangement_2::Ccb_halfedge_const_circulator edge = start;
       do {
-        if (edge->source()->point() == edge->curve()[0].source()) {
-          for (const auto& p2 : edge->curve()) {
-            Point p3 = plane.to_3d(p2);
-            emit_point(CGAL::to_double(p3.x()), CGAL::to_double(p3.y()), CGAL::to_double(p3.z()));
-          }
-        } else {
-          for (const auto& p2 : boost::adaptors::reverse(edge->curve())) {
-            Point p3 = plane.to_3d(p2);
-            emit_point(CGAL::to_double(p3.x()), CGAL::to_double(p3.y()), CGAL::to_double(p3.z()));
-          }
-        }
+        Point p3 = plane.to_3d(edge->source()->point());
+        emit_point(CGAL::to_double(p3.x()), CGAL::to_double(p3.y()), CGAL::to_double(p3.z()));
       } while (++edge != start);
 
       // Step through the hole to address it as a face.

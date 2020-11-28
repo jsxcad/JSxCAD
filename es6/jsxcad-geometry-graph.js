@@ -975,6 +975,10 @@ const pushConvexPolygons = (
   const points = [];
   const contour = [];
   buildContour(points, contour, graph, faceNode.loop, selectJunction);
+  if (points.length < 3) {
+    // We can't build a polygon from this.
+    return;
+  }
   if (points.length === 3) {
     // Triangles are easy.
     polygons.push(points);
@@ -1142,9 +1146,11 @@ const fromPaths = (paths) => {
   const graph = create();
   for (const { points, holes } of arrangement) {
     const face = addFace(graph, { plane });
-    addLoopFromPoints(graph, orientCounterClockwise(points), { face });
+    const exterior = orientCounterClockwise(points);
+    addLoopFromPoints(graph, deduplicate$1(exterior), { face });
     for (const hole of holes) {
-      addHoleFromPoints(graph, orientClockwise(hole), { face });
+      const interior = orientClockwise(hole);
+      addHoleFromPoints(graph, deduplicate$1(interior), { face });
     }
   }
   graph.isClosed = false;
