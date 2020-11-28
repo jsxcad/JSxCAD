@@ -13,13 +13,14 @@ import '@jsxcad/api-v1-layout';
 import '@jsxcad/api-v1-pdf';
 import '@jsxcad/api-v1-plans';
 
-import { apothem, corners, diameter, radius } from '@jsxcad/geometry-plan';
+import { apothem, box, corners, diameter, radius } from '@jsxcad/geometry-plan';
 
 import { Peg } from '@jsxcad/api-v1-shapes';
 
-export { apothem, corners, diameter, radius };
+export { apothem, box, corners, diameter, radius };
 
 export const a = apothem;
+export const b = box;
 export const c = corners;
 export const d = diameter;
 export const r = radius;

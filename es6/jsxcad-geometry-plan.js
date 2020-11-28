@@ -9,6 +9,16 @@ const apothem = (apothem = 1, { at = [0, 0, 0], sides = 32 } = {}) => {
   };
 };
 
+const box = (length, width) => {
+  const at = [0, 0, 0];
+  return {
+    type: 'box',
+    length,
+    width,
+    at,
+  };
+};
+
 const corners = (right = 0, back = 0, left = 0, front = 0) => {
   if (left > right) [left, right] = [right, left];
   if (front > back) [front, back] = [back, front];
@@ -68,6 +78,8 @@ const getRadius = (plan) => {
       return plan.diameter / 2;
     case 'radius':
       return plan.radius;
+    case 'box':
+      return Math.min(plan.length, plan.width) / 2;
   }
 };
 
@@ -78,6 +90,8 @@ const getBack = (plan) => {
   switch (plan.type) {
     case 'corners':
       return plan.back;
+    case 'box':
+      return plan.length / -2;
     default:
       return -getRadius(plan);
   }
@@ -107,6 +121,8 @@ const getFront = (plan) => {
   switch (plan.type) {
     case 'corners':
       return plan.front;
+    case 'box':
+      return plan.length / 2;
     default:
       return getRadius(plan);
   }
@@ -119,6 +135,8 @@ const getLeft = (plan) => {
   switch (plan.type) {
     case 'corners':
       return plan.left;
+    case 'box':
+      return plan.length / -2;
     default:
       return -getRadius(plan);
   }
@@ -131,6 +149,8 @@ const getRight = (plan) => {
   switch (plan.type) {
     case 'corners':
       return plan.right;
+    case 'box':
+      return plan.length / 2;
     default:
       return getRadius(plan);
   }
@@ -166,4 +186,4 @@ const transform = (matrix, plan) => {
   }
 };
 
-export { apothem, corners, diameter, getBack, getBottom, getCenter, getFront, getLeft, getRadius, getRight, getSides, getTop, radius, transform };
+export { apothem, box, corners, diameter, getBack, getBottom, getCenter, getFront, getLeft, getRadius, getRight, getSides, getTop, radius, transform };

@@ -5,7 +5,7 @@ export {
   setPendingErrorHandler,
 } from './pending.js';
 export { askService, createService } from './service.js';
-export { read, readFile } from './readFile.js';
+export { read, readFile, readOrWatch } from './readFile.js';
 export { addSource, getSources } from './source.js';
 export { ask, setHandleAskUser } from './ask.js';
 export { boot, onBoot } from './boot.js';

@@ -14,5 +14,7 @@ export const getRadius = (plan) => {
       return plan.diameter / 2;
     case 'radius':
       return plan.radius;
+    case 'box':
+      return Math.min(plan.length, plan.width) / 2;
   }
 };

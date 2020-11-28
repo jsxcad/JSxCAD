@@ -13,6 +13,7 @@ import {
   listFilesystems,
   log,
   read,
+  readOrWatch,
   resolvePending,
   setupFilesystem,
   terminateActiveServices,
@@ -46,6 +47,7 @@ import { fromPointsToAlphaShape2AsPolygonSegments } from '@jsxcad/algorithm-cgal
 import { getNotebookControlData } from '@jsxcad/ui-notebook';
 import hashSum from 'hash-sum';
 import marked from 'marked';
+import { nanoid } from 'nanoid/non-secure';
 import { toEcmascript } from '@jsxcad/compiler';
 import { writeGist } from './gist.js';
 import { writeToGithub } from './github.js';
@@ -166,6 +168,32 @@ class Ui extends React.PureComponent {
         return touch(path, { workspace });
       } else if (question.note) {
         const { note, index } = question;
+        const { notebookData, notebookRef } = this.state;
+        const entry = notebookData[index];
+        if (entry && entry.noteRef) {
+          for (const child of entry.noteRef.getElementsByClassName('note')) {
+            child.style.removeProperty('filter');
+          }
+        }
+        if (!entry || note.hash !== entry.hash) {
+          if (note.data === undefined && note.path) {
+            note.data = await readOrWatch(note.path);
+          }
+          for (const item of notebookData) {
+            if (!item) {
+              continue;
+            }
+            if (item.hash === note.hash) {
+              item.hash = nanoid();
+            }
+          }
+          notebookData[index] = note;
+          if (notebookRef) {
+            notebookRef.forceUpdate();
+          }
+        }
+        /*
+        const { note, index } = question;
         console.log(`QQ/question.note: ${index}`);
         const { notebookData, notebookRef } = this.state;
         const entry = notebookData[index];
@@ -204,6 +232,7 @@ class Ui extends React.PureComponent {
         if (changed && notebookRef) {
           notebookRef.forceUpdate();
         }
+*/
       } else if (question.notebookLength) {
         const { notebookLength } = question;
         console.log(`QQ/question.notebookLength: ${notebookLength}`);

@@ -492,6 +492,78 @@ const getFilesystem = () => {
   }
 };
 
+const files = new Map();
+const fileCreationWatchers = new Set();
+const fileDeletionWatchers = new Set();
+
+const getFile = async (options, unqualifiedPath) => {
+  if (typeof unqualifiedPath !== 'string') {
+    throw Error(`die: ${JSON.stringify(unqualifiedPath)}`);
+  }
+  const path = qualifyPath(unqualifiedPath);
+  let file = files.get(path);
+  if (file === undefined) {
+    file = { path: unqualifiedPath, watchers: new Set(), storageKey: path };
+    files.set(path, file);
+    for (const watcher of fileCreationWatchers) {
+      await watcher(options, file);
+    }
+  }
+  return file;
+};
+
+const listFiles = (set) => {
+  for (const file of files.keys()) {
+    set.add(file);
+  }
+};
+
+const deleteFile = async (options, unqualifiedPath) => {
+  const path = qualifyPath(unqualifiedPath);
+  let file = files.get(path);
+  if (file !== undefined) {
+    files.delete(path);
+  } else {
+    // It might not have been in the cache, but we still need to inform watchers.
+    file = { path: unqualifiedPath, storageKey: path };
+  }
+  for (const watcher of fileDeletionWatchers) {
+    await watcher(options, file);
+  }
+};
+
+const unwatchFiles = async (thunk) => {
+  for (const file of files.values()) {
+    file.watchers.delete(thunk);
+  }
+};
+
+const watchFileCreation = async (thunk) => {
+  fileCreationWatchers.add(thunk);
+  return thunk;
+};
+
+const unwatchFileCreation = async (thunk) => {
+  fileCreationWatchers.delete(thunk);
+  return thunk;
+};
+
+const watchFileDeletion = async (thunk) => {
+  fileDeletionWatchers.add(thunk);
+  return thunk;
+};
+
+const unwatchFileDeletion = async (thunk) => {
+  fileCreationWatchers.delete(thunk);
+  return thunk;
+};
+
+const watchFile = async (path, thunk) =>
+  (await getFile({}, path)).watchers.add(thunk);
+
+const unwatchFile = async (path, thunk) =>
+  (await getFile({}, path)).watchers.delete(thunk);
+
 var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
 
 function commonjsRequire () {
@@ -3316,72 +3388,6 @@ const db = () => {
   return dbInstance;
 };
 
-const files = new Map();
-const fileCreationWatchers = new Set();
-const fileDeletionWatchers = new Set();
-
-const getFile = async (options, unqualifiedPath) => {
-  if (typeof unqualifiedPath !== 'string') {
-    throw Error(`die: ${JSON.stringify(unqualifiedPath)}`);
-  }
-  const path = qualifyPath(unqualifiedPath);
-  let file = files.get(path);
-  if (file === undefined) {
-    file = { path: unqualifiedPath, watchers: new Set(), storageKey: path };
-    files.set(path, file);
-    for (const watcher of fileCreationWatchers) {
-      await watcher(options, file);
-    }
-  }
-  return file;
-};
-
-const listFiles = (set) => {
-  for (const file of files.keys()) {
-    set.add(file);
-  }
-};
-
-const deleteFile = async (options, unqualifiedPath) => {
-  const path = qualifyPath(unqualifiedPath);
-  let file = files.get(path);
-  if (file !== undefined) {
-    files.delete(path);
-  } else {
-    // It might not have been in the cache, but we still need to inform watchers.
-    file = { path: unqualifiedPath, storageKey: path };
-  }
-  for (const watcher of fileDeletionWatchers) {
-    await watcher(options, file);
-  }
-};
-
-const unwatchFiles = async (thunk) => {
-  for (const file of files.values()) {
-    file.watchers.delete(thunk);
-  }
-};
-
-const watchFileCreation = async (thunk) => {
-  fileCreationWatchers.add(thunk);
-  return thunk;
-};
-
-const unwatchFileCreation = async (thunk) => {
-  fileCreationWatchers.delete(thunk);
-  return thunk;
-};
-
-const watchFileDeletion = async (thunk) => {
-  fileDeletionWatchers.add(thunk);
-  return thunk;
-};
-
-const unwatchFileDeletion = async (thunk) => {
-  fileCreationWatchers.delete(thunk);
-  return thunk;
-};
-
 var nodeFetch = _ => _;
 
 // Copyright Joyent, Inc. and other Node contributors.
@@ -3619,6 +3625,21 @@ const readFile = async (options, path) => {
 
 const read = async (path, options = {}) => readFile(options, path);
 
+const readOrWatch = async (path, options = {}) => {
+  const data = await read(path);
+  if (data !== undefined) {
+    return data;
+  }
+  let resolveWatch;
+  const watch = new Promise((resolve) => {
+    resolveWatch = resolve;
+  });
+  const watcher = await watchFile(path, (file) => resolveWatch(path));
+  await watch;
+  await unwatchFile(path, watcher);
+  return read(path);
+};
+
 const sources = new Map();
 
 // Note: later additions will be used in preference to earlier additions.
@@ -3795,12 +3816,6 @@ const listFiles$1 = async ({ workspace } = {}) => {
   return files;
 };
 
-const watchFile = async (path, thunk) =>
-  (await getFile({}, path)).watchers.add(thunk);
-
-const unwatchFile = async (path, thunk) =>
-  (await getFile({}, path)).watchers.delete(thunk);
-
 /* global self */
 
 const { promises: promises$3 } = fs;
@@ -3851,4 +3866,4 @@ const touch = async (path, { workspace } = {}) => {
   }
 };
 
-export { addOnEmitHandler, addPending, addSource, ask, askService, boot, clearEmitted, conversation, createService, deleteFile$1 as deleteFile, emit$1 as emit, getCurrentPath, getEmitted, getFilesystem, getModule, getPendingErrorHandler, getSources, isBrowser, isNode, isWebWorker, listFiles$1 as listFiles, listFilesystems, log, onBoot, popModule, pushModule, qualifyPath, read, readFile, removeOnEmitHandler, resolvePending, setHandleAskUser, setPendingErrorHandler, setupFilesystem, terminateActiveServices, touch, unwatchFile, unwatchFileCreation, unwatchFileDeletion, unwatchFiles, unwatchLog, watchFile, watchFileCreation, watchFileDeletion, watchLog, write, writeFile };
+export { addOnEmitHandler, addPending, addSource, ask, askService, boot, clearEmitted, conversation, createService, deleteFile$1 as deleteFile, emit$1 as emit, getCurrentPath, getEmitted, getFilesystem, getModule, getPendingErrorHandler, getSources, isBrowser, isNode, isWebWorker, listFiles$1 as listFiles, listFilesystems, log, onBoot, popModule, pushModule, qualifyPath, read, readFile, readOrWatch, removeOnEmitHandler, resolvePending, setHandleAskUser, setPendingErrorHandler, setupFilesystem, terminateActiveServices, touch, unwatchFile, unwatchFileCreation, unwatchFileDeletion, unwatchFiles, unwatchLog, watchFile, watchFileCreation, watchFileDeletion, watchLog, write, writeFile };
