@@ -12,20 +12,52 @@ import '@jsxcad/api-v1-gcode';
 import '@jsxcad/api-v1-layout';
 import '@jsxcad/api-v1-pdf';
 import '@jsxcad/api-v1-plans';
-import '@jsxcad/api-v1-svg';
-import '@jsxcad/api-v1-stl';
+
+import { apothem, box, corners, diameter, radius } from '@jsxcad/geometry-plan';
+
+import { Peg } from '@jsxcad/api-v1-shapes';
+
+export { apothem, box, corners, diameter, radius };
+
+export const a = apothem;
+export const b = box;
+export const c = corners;
+export const d = diameter;
+export const r = radius;
+
+export const x = Peg([0, 0, 0], [0, 0, 1], [0, -1, 0]);
+export const y = Peg([0, 0, 0], [0, 0, 1], [1, 0, 0]);
+export const z = Peg([0, 0, 0], [0, 1, 0], [-1, 0, 0]);
+
+// export const x = Peg([0, 0, 0], [0, 0, 1], [0, 1, 0]);
+// export const y = Peg([0, 0, 0], [0, 0, 1], [-1, 0, 0]);
+// export const z = Peg([0, 0, 0], [0, 1, 0], [1, 0, 0]);
 
 export { Page, pack } from '@jsxcad/api-v1-layout';
 
 export { md } from './md.js';
 
+export {
+  checkBox,
+  numberBox,
+  selectBox,
+  sliderBox,
+  stringBox,
+} from './control.js';
+
 export { source } from './source.js';
 
 export { emit, read, write } from '@jsxcad/sys';
 
-export { Connector, X, Y, Z } from '@jsxcad/api-v1-connector';
+export {
+  beginRecordingNotes,
+  replayRecordedNotes,
+  saveRecordedNotes,
+} from './recordNotes.js';
 
-export { ChainedHull, Hull, Loop } from '@jsxcad/api-v1-extrude';
+export { X, Y, Z } from '@jsxcad/api-v1-connector';
+
+export { Loop } from '@jsxcad/api-v1-extrude';
 
 export { Shape, loadGeometry, log, saveGeometry } from '@jsxcad/api-v1-shape';
 
@@ -47,31 +79,38 @@ export {
 export {
   Arc,
   Assembly,
+  Ball,
+  Box,
+  ChainedHull,
   Circle,
   Cone,
-  Cube,
-  Cylinder,
   Difference,
   Empty,
+  Group,
+  Hershey,
   Hexagon,
+  Hull,
   Icosahedron,
   Intersection,
-  Layers,
   Line,
+  Octagon,
   Path,
+  Peg,
+  Pentagon,
+  Plane,
   Point,
   Points,
   Polygon,
   Polyhedron,
-  Prism,
-  Sphere,
+  Rod,
+  Septagon,
   Spiral,
   Square,
-  Tetrahedron,
+  Tetragon,
+  Toolpath,
   Torus,
   Triangle,
   Union,
-  Void,
   Wave,
 } from '@jsxcad/api-v1-shapes';
 
@@ -82,6 +121,7 @@ export {
   Random,
   acos,
   cos,
+  each,
   ease,
   max,
   min,
@@ -90,5 +130,9 @@ export {
   sqrt,
   vec,
 } from '@jsxcad/api-v1-math';
+
+export { readSvg } from '@jsxcad/api-v1-svg';
+
+export { readStl } from '@jsxcad/api-v1-stl';
 
 export { foot, inch, mm, mil, cm, m, thou, yard } from '@jsxcad/api-v1-units';

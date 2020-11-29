@@ -1,9 +1,9 @@
 import '@jsxcad/api-v1-pdf';
 
-Cube(30)
-  .add(Cube(30).move(5, 5), Cube(30).move(-5, -5))
+Box(30)
+  .add(Box(30).move(5, 5), Box(30).move(-5, -5))
   .section()
-  .Item()
+  .item()
   .Page()
   .view()
   .writePdf('cutCubes');

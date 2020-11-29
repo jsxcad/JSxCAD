@@ -1,5 +1,7 @@
 const pending = [];
 
+let pendingErrorHandler = (error) => console.log(error);
+
 const addPending = (promise) => pending.push(promise);
 
 const resolvePending = async () => {
@@ -8,53 +10,9 @@ const resolvePending = async () => {
   }
 };
 
-var empty = {};
-
-var fs = /*#__PURE__*/Object.freeze({
-  __proto__: null,
-  'default': empty
-});
-
-var v8 = {};
-
-var v8$1 = /*#__PURE__*/Object.freeze({
-  __proto__: null,
-  'default': v8
-});
-
-// When base is undefined the persistent filesystem is disabled.
-let base;
-
-const getBase = () => base;
-
-const qualifyPath = (path = '', workspace) => {
-  if (workspace !== undefined) {
-    return `jsxcad/${workspace}/${path}`;
-  } else if (base !== undefined) {
-    return `jsxcad/${base}${path}`;
-  } else {
-    return `jsxcad//${path}`;
-  }
-};
-
-const setupFilesystem = ({ fileBase } = {}) => {
-  // A prefix used to partition the persistent filesystem for multiple workspaces.
-  if (fileBase !== undefined) {
-    if (fileBase.endsWith('/')) {
-      base = fileBase;
-    } else {
-      base = `${fileBase}/`;
-    }
-  } else {
-    base = undefined;
-  }
-};
-
-const getFilesystem = () => {
-  if (base !== undefined) {
-    const [filesystem] = base.split('/');
-    return filesystem;
-  }
+const getPendingErrorHandler = () => pendingErrorHandler;
+const setPendingErrorHandler = (handler) => {
+  pendingErrorHandler = handler;
 };
 
 var global$1 = (typeof global !== "undefined" ? global :
@@ -305,6 +263,307 @@ const isNode =
   process.versions != null &&
   process.versions.node != null;
 
+const nodeService = () => {};
+
+let serviceLimit = 5;
+let idleServiceLimit = 5;
+const activeServices = new Set();
+const idleServices = [];
+const pending$1 = [];
+
+// TODO: Consider different specifications.
+
+const acquireService = async (spec, newService) => {
+  if (idleServices.length > 0) {
+    // Recycle an existing service.
+    // FIX: We might have multiple paths to consider in the future.
+    // For now, just assume that the path is correct.
+    const service = idleServices.pop();
+    activeServices.add(service);
+    return service;
+  } else if (activeServices.size < serviceLimit) {
+    // Create a new service.
+    const service = await newService(spec);
+    activeServices.add(service);
+    return service;
+  } else {
+    // Wait for a service to become available.
+    return new Promise((resolve, reject) =>
+      pending$1.push({ spec, newService, resolve })
+    );
+  }
+};
+
+const releaseService = async (spec, service) => {
+  if (pending$1.length > 0) {
+    // Send it directly to someone who needs it.
+    // FIX: Consider different specifications.
+    const request = pending$1.shift();
+    request.resolve(service);
+  } else if (idleServices.length < idleServiceLimit) {
+    // Recycle the service.
+    activeServices.delete(service);
+    idleServices.push(service);
+  } else {
+    // Drop the service.
+    activeServices.delete(service);
+  }
+};
+
+const getServiceCount = () => activeServices.size + idleServices.length;
+
+const terminateActiveServices = async () => {
+  for (const { terminate } of activeServices) {
+    await terminate();
+  }
+  activeServices.clear();
+  // TODO: Enable up to activeService worth of pending tasks.
+  while (pending$1.length < 0 && getServiceCount() < serviceLimit) {
+    const { spec, newService, resolve } = pending$1.shift();
+    const service = await newService(spec);
+    activeServices.add(service);
+    resolve(service);
+  }
+};
+
+const conversation = ({ agent, say }) => {
+  let id = 0;
+  const openQuestions = new Map();
+  const ask = (question) => {
+    const promise = new Promise((resolve, reject) => {
+      openQuestions.set(id, { resolve, reject });
+    });
+    say({ id, question });
+    id += 1;
+    return promise;
+  };
+  const hear = async (message) => {
+    const { id, question, answer, error } = message;
+    // Check hasOwnProperty to detect undefined values.
+    if (message.hasOwnProperty('answer')) {
+      const { resolve, reject } = openQuestions.get(id);
+      if (error) {
+        reject(error);
+      } else {
+        resolve(answer);
+      }
+      openQuestions.delete(id);
+    } else if (message.hasOwnProperty('question')) {
+      const answer = await agent({ ask, question });
+      say({ id, answer });
+    } else {
+      throw Error('die');
+    }
+  };
+  return { ask, hear };
+};
+
+/* global self */
+
+const watchers = new Set();
+
+const log = async (entry) => {
+  if (isWebWorker) {
+    return self.ask({ log: { entry } });
+  }
+
+  for (const watcher of watchers) {
+    watcher(entry);
+  }
+};
+
+const watchLog = (thunk) => {
+  watchers.add(thunk);
+  return thunk;
+};
+
+const unwatchLog = (thunk) => {
+  watchers.delete(thunk);
+};
+
+/* global Worker */
+
+// Sets up a worker with conversational interface.
+const webService = async ({
+  nodeWorker,
+  webWorker,
+  agent,
+  workerType,
+}) => {
+  try {
+    return await acquireService(
+      { webWorker, type: workerType },
+      ({ webWorker, type }) => {
+        const worker = new Worker(webWorker, { type: workerType });
+        const say = (message) => worker.postMessage(message);
+        const { ask, hear } = conversation({ agent, say });
+        const terminate = async () => worker.terminate();
+        worker.onmessage = ({ data }) => hear(data);
+        worker.onerror = (error) => {
+          console.log(`QQ/webWorker/error: ${error}`);
+        };
+        const service = { ask, terminate };
+        service.release = async () =>
+          releaseService({ webWorker, type: workerType }, service);
+        return service;
+      }
+    );
+  } catch (e) {
+    log({ op: 'text', text: '' + e, level: 'serious', duration: 6000000 });
+    throw Error('die');
+  }
+};
+
+// Sets up a worker with conversational interface.
+const createService = async ({
+  nodeWorker,
+  webWorker,
+  agent,
+  workerType,
+}) => {
+  if (isNode) {
+    return nodeService();
+  } else if (isBrowser) {
+    return webService({ nodeWorker, webWorker, agent, workerType });
+  } else {
+    throw Error('die');
+  }
+};
+
+const askService = async (spec, question) => {
+  const { ask, release } = await createService(spec);
+  let answer;
+  try {
+    answer = await ask(question);
+  } catch (error) {
+    console.log(`QQ/askService: ${error.stack}`);
+  } finally {
+    await release();
+  }
+  return answer;
+};
+
+var empty = {};
+
+var fs = /*#__PURE__*/Object.freeze({
+  __proto__: null,
+  'default': empty
+});
+
+var v8 = {};
+
+var v8$1 = /*#__PURE__*/Object.freeze({
+  __proto__: null,
+  'default': v8
+});
+
+// When base is undefined the persistent filesystem is disabled.
+let base;
+
+const getBase = () => base;
+
+const qualifyPath = (path = '', workspace) => {
+  if (workspace !== undefined) {
+    return `jsxcad/${workspace}/${path}`;
+  } else if (base !== undefined) {
+    return `jsxcad/${base}${path}`;
+  } else {
+    return `jsxcad//${path}`;
+  }
+};
+
+const setupFilesystem = ({ fileBase } = {}) => {
+  // A prefix used to partition the persistent filesystem for multiple workspaces.
+  if (fileBase !== undefined) {
+    if (fileBase.endsWith('/')) {
+      base = fileBase;
+    } else {
+      base = `${fileBase}/`;
+    }
+  } else {
+    base = undefined;
+  }
+};
+
+const getFilesystem = () => {
+  if (base !== undefined) {
+    const [filesystem] = base.split('/');
+    return filesystem;
+  }
+};
+
+const files = new Map();
+const fileCreationWatchers = new Set();
+const fileDeletionWatchers = new Set();
+
+const getFile = async (options, unqualifiedPath) => {
+  if (typeof unqualifiedPath !== 'string') {
+    throw Error(`die: ${JSON.stringify(unqualifiedPath)}`);
+  }
+  const path = qualifyPath(unqualifiedPath);
+  let file = files.get(path);
+  if (file === undefined) {
+    file = { path: unqualifiedPath, watchers: new Set(), storageKey: path };
+    files.set(path, file);
+    for (const watcher of fileCreationWatchers) {
+      await watcher(options, file);
+    }
+  }
+  return file;
+};
+
+const listFiles = (set) => {
+  for (const file of files.keys()) {
+    set.add(file);
+  }
+};
+
+const deleteFile = async (options, unqualifiedPath) => {
+  const path = qualifyPath(unqualifiedPath);
+  let file = files.get(path);
+  if (file !== undefined) {
+    files.delete(path);
+  } else {
+    // It might not have been in the cache, but we still need to inform watchers.
+    file = { path: unqualifiedPath, storageKey: path };
+  }
+  for (const watcher of fileDeletionWatchers) {
+    await watcher(options, file);
+  }
+};
+
+const unwatchFiles = async (thunk) => {
+  for (const file of files.values()) {
+    file.watchers.delete(thunk);
+  }
+};
+
+const watchFileCreation = async (thunk) => {
+  fileCreationWatchers.add(thunk);
+  return thunk;
+};
+
+const unwatchFileCreation = async (thunk) => {
+  fileCreationWatchers.delete(thunk);
+  return thunk;
+};
+
+const watchFileDeletion = async (thunk) => {
+  fileDeletionWatchers.add(thunk);
+  return thunk;
+};
+
+const unwatchFileDeletion = async (thunk) => {
+  fileCreationWatchers.delete(thunk);
+  return thunk;
+};
+
+const watchFile = async (path, thunk) =>
+  (await getFile({}, path)).watchers.add(thunk);
+
+const unwatchFile = async (path, thunk) =>
+  (await getFile({}, path)).watchers.delete(thunk);
+
 var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
 
 function commonjsRequire () {
@@ -318,7 +577,7 @@ function createCommonjsModule(fn, module) {
 var localforage = createCommonjsModule(function (module, exports) {
 /*!
     localForage -- Offline Storage, Improved
-    Version 1.8.1
+    Version 1.9.0
     https://localforage.github.io/localForage
     (c) 2013-2017 Mozilla, Apache License 2.0
 */
@@ -3129,95 +3388,6 @@ const db = () => {
   return dbInstance;
 };
 
-const files = new Map();
-const fileCreationWatchers = new Set();
-const fileDeletionWatchers = new Set();
-
-const getFile = async (options, unqualifiedPath) => {
-  if (typeof unqualifiedPath !== 'string') {
-    throw Error(`die: ${JSON.stringify(unqualifiedPath)}`);
-  }
-  const path = qualifyPath(unqualifiedPath);
-  let file = files.get(path);
-  if (file === undefined) {
-    file = { path: unqualifiedPath, watchers: new Set(), storageKey: path };
-    files.set(path, file);
-    for (const watcher of fileCreationWatchers) {
-      await watcher(options, file);
-    }
-  }
-  return file;
-};
-
-const listFiles = (set) => {
-  for (const file of files.keys()) {
-    set.add(file);
-  }
-};
-
-const deleteFile = async (options, unqualifiedPath) => {
-  const path = qualifyPath(unqualifiedPath);
-  let file = files.get(path);
-  if (file !== undefined) {
-    files.delete(path);
-  } else {
-    // It might not have been in the cache, but we still need to inform watchers.
-    file = { path: unqualifiedPath, storageKey: path };
-  }
-  for (const watcher of fileDeletionWatchers) {
-    await watcher(options, file);
-  }
-};
-
-const unwatchFiles = async (thunk) => {
-  for (const file of files.values()) {
-    file.watchers.delete(thunk);
-  }
-};
-
-const watchFileCreation = async (thunk) => {
-  fileCreationWatchers.add(thunk);
-  return thunk;
-};
-
-const unwatchFileCreation = async (thunk) => {
-  fileCreationWatchers.delete(thunk);
-  return thunk;
-};
-
-const watchFileDeletion = async (thunk) => {
-  fileDeletionWatchers.add(thunk);
-  return thunk;
-};
-
-const unwatchFileDeletion = async (thunk) => {
-  fileCreationWatchers.delete(thunk);
-  return thunk;
-};
-
-/* global self */
-
-const watchers = new Set();
-
-const log = async (entry) => {
-  if (isWebWorker) {
-    return self.ask({ log: { entry } });
-  }
-
-  for (const watcher of watchers) {
-    watcher(entry);
-  }
-};
-
-const watchLog = (thunk) => {
-  watchers.add(thunk);
-  return thunk;
-};
-
-const unwatchLog = (thunk) => {
-  watchers.delete(thunk);
-};
-
 var nodeFetch = _ => _;
 
 // Copyright Joyent, Inc. and other Node contributors.
@@ -3389,7 +3559,7 @@ const fetchSources = async (sources) => {
       try {
         if (source.startsWith('http:') || source.startsWith('https:')) {
           log({ op: 'text', text: `# Fetching ${source}` });
-          const response = await fetchUrl(source);
+          const response = await fetchUrl(source, { cache: 'reload' });
           if (response.ok) {
             return new Uint8Array(await response.arrayBuffer());
           }
@@ -3455,6 +3625,21 @@ const readFile = async (options, path) => {
 
 const read = async (path, options = {}) => readFile(options, path);
 
+const readOrWatch = async (path, options = {}) => {
+  const data = await read(path);
+  if (data !== undefined) {
+    return data;
+  }
+  let resolveWatch;
+  const watch = new Promise((resolve) => {
+    resolveWatch = resolve;
+  });
+  const watcher = await watchFile(path, (file) => resolveWatch(path));
+  await watch;
+  await unwatchFile(path, watcher);
+  return read(path);
+};
+
 const sources = new Map();
 
 // Note: later additions will be used in preference to earlier additions.
@@ -3514,15 +3699,41 @@ const boot = async () => {
   }
 };
 
+const modules = [];
+
+const getModule = () => modules[modules.length - 1];
+
+const popModule = () => modules.pop();
+
+const pushModule = (module) => modules.push(module);
+
 const emitted = [];
 
 const clearEmitted = () => {
   emitted.length = 0;
 };
 
-const emit$1 = (value) => emitted.push(value);
+const onEmitHandlers = new Set();
+
+const emit$1 = (value) => {
+  if (value.module === undefined) {
+    value.module = getModule();
+  }
+  const index = emitted.length;
+  emitted.push(value);
+  for (const onEmitHandler of onEmitHandlers) {
+    onEmitHandler(value, index);
+  }
+};
 
 const getEmitted = () => [...emitted];
+
+const addOnEmitHandler = (handler) => {
+  onEmitHandlers.add(handler);
+  return handler;
+};
+
+const removeOnEmitHandler = (handler) => onEmitHandlers.delete(handler);
 
 const { promises: promises$2 } = fs;
 
@@ -3605,87 +3816,6 @@ const listFiles$1 = async ({ workspace } = {}) => {
   return files;
 };
 
-const watchFile = async (path, thunk) =>
-  (await getFile({}, path)).watchers.add(thunk);
-
-const unwatchFile = async (path, thunk) =>
-  (await getFile({}, path)).watchers.delete(thunk);
-
-const conversation = ({ agent, say }) => {
-  let id = 0;
-  const openQuestions = {};
-  const ask = (question) => {
-    const promise = new Promise((resolve, reject) => {
-      openQuestions[id] = { resolve, reject };
-    });
-    say({ id, question });
-    id += 1;
-    return promise;
-  };
-  const hear = async (message) => {
-    const { id, question, answer, error } = message;
-    // Check hasOwnProperty to detect undefined values.
-    if (message.hasOwnProperty('answer')) {
-      const { resolve, reject } = openQuestions[id];
-      if (error) {
-        reject(error);
-      } else {
-        resolve(answer);
-      }
-      delete openQuestions[id];
-    } else if (message.hasOwnProperty('question')) {
-      const answer = await agent({ ask, question });
-      say({ id, answer });
-    } else {
-      throw Error('die');
-    }
-  };
-  return { ask, hear };
-};
-
-const nodeService = () => {};
-
-/* global Worker */
-
-// Sets up a worker with conversational interface.
-const webService = async ({
-  nodeWorker,
-  webWorker,
-  agent,
-  workerType,
-}) => {
-  let worker;
-  try {
-    worker = new Worker(webWorker, { type: workerType });
-  } catch (e) {
-    log({ op: 'text', text: '' + e, level: 'serious', duration: 6000000 });
-    throw Error('die');
-  }
-  const say = (message) => worker.postMessage(message);
-  const { ask, hear } = conversation({ agent, say });
-  worker.onmessage = ({ data }) => hear(data);
-  worker.onerror = (error) => {
-    console.log(`QQ/webWorker/error: ${error}`);
-  };
-  return { ask };
-};
-
-// Sets up a worker with conversational interface.
-const createService = async ({
-  nodeWorker,
-  webWorker,
-  agent,
-  workerType,
-}) => {
-  if (isNode) {
-    return nodeService();
-  } else if (isBrowser) {
-    return webService({ nodeWorker, webWorker, agent, workerType });
-  } else {
-    throw Error('die');
-  }
-};
-
 /* global self */
 
 const { promises: promises$3 } = fs;
@@ -3714,6 +3844,8 @@ const deleteFile$1 = async (options, path) => {
   await deleteFile(options, path);
 };
 
+const getCurrentPath = () => '.';
+
 const touch = async (path, { workspace } = {}) => {
   let originalWorkspace = getFilesystem();
   if (workspace !== originalWorkspace) {
@@ -3734,4 +3866,4 @@ const touch = async (path, { workspace } = {}) => {
   }
 };
 
-export { addPending, addSource, ask, boot, clearEmitted, conversation, createService, deleteFile$1 as deleteFile, emit$1 as emit, getEmitted, getFilesystem, getSources, isBrowser, isNode, isWebWorker, listFiles$1 as listFiles, listFilesystems, log, onBoot, qualifyPath, read, readFile, resolvePending, setHandleAskUser, setupFilesystem, touch, unwatchFile, unwatchFileCreation, unwatchFileDeletion, unwatchFiles, unwatchLog, watchFile, watchFileCreation, watchFileDeletion, watchLog, write, writeFile };
+export { addOnEmitHandler, addPending, addSource, ask, askService, boot, clearEmitted, conversation, createService, deleteFile$1 as deleteFile, emit$1 as emit, getCurrentPath, getEmitted, getFilesystem, getModule, getPendingErrorHandler, getSources, isBrowser, isNode, isWebWorker, listFiles$1 as listFiles, listFilesystems, log, onBoot, popModule, pushModule, qualifyPath, read, readFile, readOrWatch, removeOnEmitHandler, resolvePending, setHandleAskUser, setPendingErrorHandler, setupFilesystem, terminateActiveServices, touch, unwatchFile, unwatchFileCreation, unwatchFileDeletion, unwatchFiles, unwatchLog, watchFile, watchFileCreation, watchFileDeletion, watchLog, write, writeFile };

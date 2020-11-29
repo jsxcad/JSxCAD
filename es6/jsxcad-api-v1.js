@@ -1,5 +1,6 @@
-import { addPending, write, emit, addSource, read } from './jsxcad-sys.js';
+import { getModule, addPending, write, emit, read, getCurrentPath, addSource, addOnEmitHandler, pushModule, popModule } from './jsxcad-sys.js';
 export { emit, read, write } from './jsxcad-sys.js';
+import { hash, soup } from './jsxcad-geometry-tagged.js';
 import Shape, { Shape as Shape$1, loadGeometry, log, saveGeometry } from './jsxcad-api-v1-shape.js';
 export { Shape, loadGeometry, log, saveGeometry } from './jsxcad-api-v1-shape.js';
 import { ensurePages, Page, pack } from './jsxcad-api-v1-layout.js';
@@ -8,12 +9,14 @@ import './jsxcad-api-v1-deform.js';
 import './jsxcad-api-v1-gcode.js';
 import './jsxcad-api-v1-pdf.js';
 import './jsxcad-api-v1-plans.js';
-import './jsxcad-api-v1-svg.js';
-import './jsxcad-api-v1-stl.js';
-import { Connector, X, Y, Z } from './jsxcad-api-v1-connector.js';
-export { Connector, X, Y, Z } from './jsxcad-api-v1-connector.js';
-import { ChainedHull, Hull, Loop } from './jsxcad-api-v1-extrude.js';
-export { ChainedHull, Hull, Loop } from './jsxcad-api-v1-extrude.js';
+import { apothem, box, corners, diameter, radius } from './jsxcad-geometry-plan.js';
+export { apothem, box, corners, diameter, radius } from './jsxcad-geometry-plan.js';
+import { Peg, Arc, Assembly, Ball, Box, ChainedHull, Circle, Cone, Difference, Empty, Group, Hershey, Hexagon, Hull, Icosahedron, Intersection, Line, Octagon, Path, Pentagon, Plane, Point, Points, Polygon, Polyhedron, Rod, Septagon, Spiral, Square, Tetragon, Toolpath, Torus, Triangle, Union, Wave } from './jsxcad-api-v1-shapes.js';
+export { Arc, Assembly, Ball, Box, ChainedHull, Circle, Cone, Difference, Empty, Group, Hershey, Hexagon, Hull, Icosahedron, Intersection, Line, Octagon, Path, Peg, Pentagon, Plane, Point, Points, Polygon, Polyhedron, Rod, Septagon, Spiral, Square, Tetragon, Toolpath, Torus, Triangle, Union, Wave } from './jsxcad-api-v1-shapes.js';
+import { X, Y, Z } from './jsxcad-api-v1-connector.js';
+export { X, Y, Z } from './jsxcad-api-v1-connector.js';
+import { Loop } from './jsxcad-api-v1-extrude.js';
+export { Loop } from './jsxcad-api-v1-extrude.js';
 import { Line2 } from './jsxcad-api-v1-line2.js';
 export { Line2 } from './jsxcad-api-v1-line2.js';
 import { Plan } from './jsxcad-api-v1-plan.js';
@@ -22,152 +25,251 @@ import { Shell } from './jsxcad-api-v1-shell.js';
 export { Shell } from './jsxcad-api-v1-shell.js';
 import { BenchPlane, BenchSaw, DrillPress, HoleRouter, LineRouter, ProfileRouter } from './jsxcad-api-v1-tools.js';
 export { BenchPlane, BenchSaw, DrillPress, HoleRouter, LineRouter, ProfileRouter } from './jsxcad-api-v1-tools.js';
-import { Arc, Assembly, Circle, Cone, Cube, Cylinder, Difference, Empty, Hexagon, Icosahedron, Intersection, Layers, Line, Path, Point, Points, Polygon, Polyhedron, Prism, Sphere, Spiral, Square, Tetrahedron, Torus, Triangle, Union, Void, Wave } from './jsxcad-api-v1-shapes.js';
-export { Arc, Assembly, Circle, Cone, Cube, Cylinder, Difference, Empty, Hexagon, Icosahedron, Intersection, Layers, Line, Path, Point, Points, Polygon, Polyhedron, Prism, Sphere, Spiral, Square, Tetrahedron, Torus, Triangle, Union, Void, Wave } from './jsxcad-api-v1-shapes.js';
 import { Item } from './jsxcad-api-v1-item.js';
 export { Item } from './jsxcad-api-v1-item.js';
-import { Noise, Random, acos, cos, ease, max, min, numbers, sin, sqrt, vec } from './jsxcad-api-v1-math.js';
-export { Noise, Random, acos, cos, ease, max, min, numbers, sin, sqrt, vec } from './jsxcad-api-v1-math.js';
+import { Noise, Random, acos, cos, each, ease, max, min, numbers, sin, sqrt, vec } from './jsxcad-api-v1-math.js';
+export { Noise, Random, acos, cos, each, ease, max, min, numbers, sin, sqrt, vec } from './jsxcad-api-v1-math.js';
+import { readSvg } from './jsxcad-api-v1-svg.js';
+export { readSvg } from './jsxcad-api-v1-svg.js';
+import { readStl } from './jsxcad-api-v1-stl.js';
+export { readStl } from './jsxcad-api-v1-stl.js';
 import { foot, inch, mm, mil, cm, m, thou, yard } from './jsxcad-api-v1-units.js';
 export { cm, foot, inch, m, mil, mm, thou, yard } from './jsxcad-api-v1-units.js';
 import { toEcmascript } from './jsxcad-compiler.js';
 import { toSvg } from './jsxcad-convert-svg.js';
 
+// This alphabet uses `A-Za-z0-9_-` symbols. The genetic algorithm helped
+// optimize the gzip compression for this alphabet.
+let urlAlphabet =
+  'ModuleSymbhasOwnPr-0123456789ABCDEFGHNRVfgctiUvz_KqYTJkLxpZXIjQW';
+
+let nanoid = (size = 21) => {
+  let id = '';
+  // A compact alternative for `for (var i = 0; i < step; i++)`.
+  let i = size;
+  while (i--) {
+    // `| 0` is more compact and faster than `Math.floor()`.
+    id += urlAlphabet[(Math.random() * 64) | 0];
+  }
+  return id
+};
+
 // FIX: Avoid the extra read-write cycle.
 const view = (
   shape,
-  { path, width = 1024, height = 512, position = [100, -100, 100] } = {}
+  inline,
+  op = (x) => x,
+  { width = 1024, height = 512, position = [100, -100, 100] } = {}
 ) => {
-  let nth = 0;
-  for (const entry of ensurePages(shape.toDisjointGeometry())) {
-    if (path) {
-      const nthPath = `${path}_${nth++}`;
-      addPending(write(nthPath, entry));
-      emit({ view: { width, height, position, path: nthPath } });
-    } else {
-      emit({ view: { width, height, position, geometry: entry } });
-    }
+  const viewShape = op(shape);
+  const hash$1 = hash(viewShape.toGeometry());
+  for (const entry of ensurePages(soup(viewShape.toDisjointGeometry()))) {
+    const path = `view/${getModule()}/${nanoid()}`;
+    addPending(write(path, entry));
+    emit({ hash: hash$1, path, view: { width, height, position, inline } });
   }
   return shape;
 };
 
-Shape.prototype.view = function ({
-  path,
-  width = 512,
-  height = 256,
-  position = [100, -100, 100],
-} = {}) {
-  return view(this, { path, width, height, position });
+Shape.prototype.view = function (
+  inline,
+  op,
+  { path, width = 1024, height = 512, position = [100, -100, 100] } = {}
+) {
+  return view(this, inline, op, { path, width, height, position });
 };
 
-Shape.prototype.smallView = function ({
-  path,
-  width = 256,
-  height = 128,
-  position = [100, -100, 100],
-} = {}) {
-  return view(this, { path, width, height, position });
+Shape.prototype.topView = function (
+  inline,
+  op,
+  { path, width = 1024, height = 512, position = [0, 0, 100] } = {}
+) {
+  return view(this, inline, op, { path, width, height, position });
 };
 
-Shape.prototype.bigView = function ({
-  path,
-  width = 1024,
-  height = 512,
-  position = [100, -100, 100],
-} = {}) {
-  return view(this, { path, width, height, position });
+Shape.prototype.frontView = function (
+  inline,
+  op,
+  { path, width = 1024, height = 512, position = [0, -100, 0] } = {}
+) {
+  return view(this, inline, op, { path, width, height, position });
 };
 
-Shape.prototype.topView = function ({
-  path,
-  width = 512,
-  height = 256,
-  position = [0, 0, 100],
-} = {}) {
-  return view(this, { path, width, height, position });
+Shape.prototype.sideView = function (
+  inline,
+  op,
+  { path, width = 1024, height = 512, position = [100, 0, 0] } = {}
+) {
+  return view(this, inline, op, { path, width, height, position });
 };
 
-Shape.prototype.smallTopView = function ({
-  path,
-  width = 256,
-  height = 128,
-  position = [0, 0, 100],
-} = {}) {
-  return view(this, { path, width, height, position });
-};
+function pad (hash, len) {
+  while (hash.length < len) {
+    hash = '0' + hash;
+  }
+  return hash;
+}
 
-Shape.prototype.bigTopView = function ({
-  path,
-  width = 1024,
-  height = 512,
-  position = [0, 0, 100],
-} = {}) {
-  return view(this, { path, width, height, position });
-};
+function fold (hash, text) {
+  var i;
+  var chr;
+  var len;
+  if (text.length === 0) {
+    return hash;
+  }
+  for (i = 0, len = text.length; i < len; i++) {
+    chr = text.charCodeAt(i);
+    hash = ((hash << 5) - hash) + chr;
+    hash |= 0;
+  }
+  return hash < 0 ? hash * -2 : hash;
+}
 
-Shape.prototype.frontView = function ({
-  path,
-  width = 512,
-  height = 256,
-  position = [0, -100, 0],
-} = {}) {
-  return view(this, { path, width, height, position });
-};
+function foldObject (hash, o, seen) {
+  return Object.keys(o).sort().reduce(foldKey, hash);
+  function foldKey (hash, key) {
+    return foldValue(hash, o[key], key, seen);
+  }
+}
 
-Shape.prototype.smallFrontView = function ({
-  path,
-  width = 256,
-  height = 128,
-  position = [0, -100, 0],
-} = {}) {
-  return view(this, { path, width, height, position });
-};
+function foldValue (input, value, key, seen) {
+  var hash = fold(fold(fold(input, key), toString(value)), typeof value);
+  if (value === null) {
+    return fold(hash, 'null');
+  }
+  if (value === undefined) {
+    return fold(hash, 'undefined');
+  }
+  if (typeof value === 'object' || typeof value === 'function') {
+    if (seen.indexOf(value) !== -1) {
+      return fold(hash, '[Circular]' + key);
+    }
+    seen.push(value);
 
-Shape.prototype.bigFrontView = function ({
-  path,
-  width = 1024,
-  height = 512,
-  position = [0, -100, 0],
-} = {}) {
-  return view(this, { path, width, height, position });
-};
+    var objHash = foldObject(hash, value, seen);
 
-Shape.prototype.sideView = function ({
-  path,
-  width = 512,
-  height = 256,
-  position = [100, 0, 0],
-} = {}) {
-  return view(this, { path, width, height, position });
-};
+    if (!('valueOf' in value) || typeof value.valueOf !== 'function') {
+      return objHash;
+    }
 
-Shape.prototype.smallSideView = function ({
-  path,
-  width = 256,
-  height = 128,
-  position = [100, 0, 0],
-} = {}) {
-  return view(this, { path, width, height, position });
-};
+    try {
+      return fold(objHash, String(value.valueOf()))
+    } catch (err) {
+      return fold(objHash, '[valueOf exception]' + (err.stack || err.message))
+    }
+  }
+  return fold(hash, value.toString());
+}
 
-Shape.prototype.bigSideView = function ({
-  path,
-  width = 1024,
-  height = 512,
-  position = [100, 0, 0],
-} = {}) {
-  return view(this, { path, width, height, position });
-};
+function toString (o) {
+  return Object.prototype.toString.call(o);
+}
+
+function sum (o) {
+  return pad(foldValue(0, o, '', []).toString(16), 8);
+}
+
+var hashSum = sum;
 
 const md = (strings, ...placeholders) => {
   const md = strings.reduce(
     (result, string, i) => result + placeholders[i - 1] + string
   );
-  emit({ md });
+  emit({ md, hash: hashSum(md) });
   return md;
 };
 
+const mdMethod = function (string, ...placeholders) {
+  md([string], ...placeholders);
+  return this;
+};
+
+Shape.prototype.md = mdMethod;
+
+// FIX: This needs to consider the current module.
+// FIX: Needs to communicate cache invalidation with other workers.
+const getControlValues = async () =>
+  (await read(`control/${getCurrentPath()}`, { useCache: false })) || {};
+
+const stringBox = async (label, otherwise) => {
+  const { [label]: value = otherwise } = await getControlValues();
+  emit({ control: { type: 'stringBox', label, value } });
+  return value;
+};
+
+const numberBox = async (label, otherwise) =>
+  Number(await stringBox(label, otherwise));
+
+const sliderBox = async (
+  label,
+  otherwise,
+  { min = 0, max = 100, step = 1 } = {}
+) => {
+  const { [label]: value = otherwise } = await getControlValues();
+  const control = {
+    control: { type: 'sliderBox', label, value, min, max, step },
+  };
+  const hash = hashSum(control);
+  emit({ control, hash });
+  return Number(value);
+};
+
+const checkBox = async (label, otherwise) => {
+  const { [label]: value = otherwise } = await getControlValues();
+  const control = { type: 'checkBox', label, value };
+  const hash = hashSum(control);
+  emit({ control, hash });
+  return Boolean(value);
+};
+
+const selectBox = async (label, otherwise, options) => {
+  const { [label]: value = otherwise } = await getControlValues();
+  const control = { type: 'selectBox', label, value, options };
+  const hash = hashSum(control);
+  emit({ control, hash });
+  return value;
+};
+
 const source = (path, source) => addSource(`cache/${path}`, source);
+
+let notes;
+
+let recording = false;
+let handler;
+
+const recordNote = (note, index) => {
+  if (recording) {
+    notes.push({ note, index });
+  }
+};
+
+const beginRecordingNotes = () => {
+  if (handler === undefined) {
+    handler = addOnEmitHandler(recordNote);
+  }
+  recording = true;
+  notes = [];
+};
+
+const saveRecordedNotes = (path) => {
+  let notesToSave = notes;
+  notes = undefined;
+  recording = false;
+  addPending(write(path, notesToSave));
+};
+
+const replayRecordedNotes = async (path) => {
+  const notes = await read(path);
+  if (notes === undefined) {
+    return;
+  }
+  if (notes.length === 0) {
+    return;
+  }
+  for (const { note } of notes) {
+    emit(note);
+  }
+};
 
 /**
  *
@@ -178,21 +280,49 @@ const source = (path, source) => addSource(`cache/${path}`, source);
  * the api uses.
  */
 
+const a = apothem;
+const b = box;
+const c = corners;
+const d = diameter;
+const r = radius;
+
+const x = Peg([0, 0, 0], [0, 0, 1], [0, -1, 0]);
+const y = Peg([0, 0, 0], [0, 0, 1], [1, 0, 0]);
+const z = Peg([0, 0, 0], [0, 1, 0], [-1, 0, 0]);
+
 var api = /*#__PURE__*/Object.freeze({
   __proto__: null,
+  apothem: apothem,
+  box: box,
+  corners: corners,
+  diameter: diameter,
+  radius: radius,
+  a: a,
+  b: b,
+  c: c,
+  d: d,
+  r: r,
+  x: x,
+  y: y,
+  z: z,
   Page: Page,
   pack: pack,
   md: md,
+  checkBox: checkBox,
+  numberBox: numberBox,
+  selectBox: selectBox,
+  sliderBox: sliderBox,
+  stringBox: stringBox,
   source: source,
   emit: emit,
   read: read,
   write: write,
-  Connector: Connector,
+  beginRecordingNotes: beginRecordingNotes,
+  replayRecordedNotes: replayRecordedNotes,
+  saveRecordedNotes: saveRecordedNotes,
   X: X,
   Y: Y,
   Z: Z,
-  ChainedHull: ChainedHull,
-  Hull: Hull,
   Loop: Loop,
   Shape: Shape$1,
   loadGeometry: loadGeometry,
@@ -209,37 +339,45 @@ var api = /*#__PURE__*/Object.freeze({
   ProfileRouter: ProfileRouter,
   Arc: Arc,
   Assembly: Assembly,
+  Ball: Ball,
+  Box: Box,
+  ChainedHull: ChainedHull,
   Circle: Circle,
   Cone: Cone,
-  Cube: Cube,
-  Cylinder: Cylinder,
   Difference: Difference,
   Empty: Empty,
+  Group: Group,
+  Hershey: Hershey,
   Hexagon: Hexagon,
+  Hull: Hull,
   Icosahedron: Icosahedron,
   Intersection: Intersection,
-  Layers: Layers,
   Line: Line,
+  Octagon: Octagon,
   Path: Path,
+  Peg: Peg,
+  Pentagon: Pentagon,
+  Plane: Plane,
   Point: Point,
   Points: Points,
   Polygon: Polygon,
   Polyhedron: Polyhedron,
-  Prism: Prism,
-  Sphere: Sphere,
+  Rod: Rod,
+  Septagon: Septagon,
   Spiral: Spiral,
   Square: Square,
-  Tetrahedron: Tetrahedron,
+  Tetragon: Tetragon,
+  Toolpath: Toolpath,
   Torus: Torus,
   Triangle: Triangle,
   Union: Union,
-  Void: Void,
   Wave: Wave,
   Item: Item,
   Noise: Noise,
   Random: Random,
   acos: acos,
   cos: cos,
+  each: each,
   ease: ease,
   max: max,
   min: min,
@@ -247,6 +385,8 @@ var api = /*#__PURE__*/Object.freeze({
   sin: sin,
   sqrt: sqrt,
   vec: vec,
+  readSvg: readSvg,
+  readStl: readStl,
   foot: foot,
   inch: inch,
   mm: mm,
@@ -262,7 +402,7 @@ const DYNAMIC_MODULES = new Map();
 const registerDynamicModule = (bare, path) =>
   DYNAMIC_MODULES.set(bare, path);
 
-const buildImportModule = (api) => async (name, { src } = {}) => {
+const buildImportModule = (api) => async (name) => {
   const internalModule = DYNAMIC_MODULES.get(name);
   if (internalModule !== undefined) {
     const module = await import(internalModule);
@@ -272,23 +412,29 @@ const buildImportModule = (api) => async (name, { src } = {}) => {
   if (script === undefined) {
     const path = `source/${name}`;
     const sources = [];
-    if (src) {
-      sources.push(src);
-    }
     sources.push(name);
-    script = await read(path, { sources, decode: 'utf8' });
+    script = await read(path, { sources });
   }
   if (script === undefined) {
     throw Error(`Cannot import module ${name}`);
   }
-  const ecmascript = await toEcmascript(script);
+  const scriptText =
+    typeof script === 'string'
+      ? script
+      : new TextDecoder('utf8').decode(script);
+  const ecmascript = await toEcmascript(scriptText, { path: name });
   const builder = new Function(
     `{ ${Object.keys(api).join(', ')} }`,
     `return async () => { ${ecmascript} };`
   );
   const module = await builder(api);
-  const exports = await module();
-  return exports;
+  try {
+    pushModule(name);
+    const exports = await module();
+    return exports;
+  } finally {
+    popModule();
+  }
 };
 
 const extendedApi = { ...api, toSvg };
@@ -326,4 +472,4 @@ registerDynamicModule(module('svg'), './jsxcad-api-v1-svg.js');
 registerDynamicModule(module('threejs'), './jsxcad-api-v1-threejs.js');
 registerDynamicModule(module('units'), './jsxcad-api-v1-units.js');
 
-export { importModule, md, source };
+export { a, b, beginRecordingNotes, c, checkBox, d, importModule, md, numberBox, r, replayRecordedNotes, saveRecordedNotes, selectBox, sliderBox, source, stringBox, x, y, z };

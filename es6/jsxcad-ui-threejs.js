@@ -53353,7 +53353,7 @@ const applyBoxUVImpl = (geom, transformMatrix, bbox, bboxMaxSize) => {
   coords.length = (2 * geom.attributes.position.array.length) / 3;
 
   if (geom.attributes.uv === undefined) {
-    geom.addAttribute('uv', new Float32BufferAttribute(coords, 2));
+    geom.setAttribute('uv', new Float32BufferAttribute(coords, 2));
   }
 
   // maps 3 verts of 1 face on the better side of the cube
@@ -53543,6 +53543,7 @@ const buildMeshes = async ({
         opacity,
       });
       const color = new Color$1(setColor(tags, {}, [0, 0, 0]).color);
+      const colors = [];
       const positions = [];
       const index = [];
       for (const path of paths) {
@@ -53552,8 +53553,28 @@ const buildMeshes = async ({
           const start = path[last];
           const end = path[nth];
           if (start === null || end === null) continue;
+          if (!start.every(isFinite) || !end.every(isFinite)) {
+            // Not sure where these non-finite path values are coming from.
+            continue;
+          }
           const [aX = 0, aY = 0, aZ = 0] = start;
           const [bX = 0, bY = 0, bZ = 0] = end;
+          colors.push(
+            color.r,
+            color.g,
+            color.b,
+            opacity,
+            color.r,
+            color.g,
+            color.b,
+            opacity
+          );
+          if (!isFinite(aX)) throw Error('die');
+          if (!isFinite(aY)) throw Error('die');
+          if (!isFinite(aZ)) throw Error('die');
+          if (!isFinite(bX)) throw Error('die');
+          if (!isFinite(bY)) throw Error('die');
+          if (!isFinite(bZ)) throw Error('die');
           positions.push(aX, aY, aZ, bX, bY, bZ);
           entry.length += 2;
         }
@@ -53565,7 +53586,7 @@ const buildMeshes = async ({
         'position',
         new Float32BufferAttribute(positions, 3)
       );
-      // geometry.setAttribute('color', new Float32BufferAttribute(colors, 4));
+      geometry.setAttribute('color', new Float32BufferAttribute(colors, 4));
       dataset.mesh = new LineSegments(geometry, material);
       dataset.mesh.layers.set(layer);
       dataset.name = toName(threejsGeometry);
@@ -53617,11 +53638,11 @@ const buildMeshes = async ({
       const { positions, normals } = threejsGeometry.threejsSolid;
       const dataset = {};
       const geometry = new BufferGeometry();
-      geometry.addAttribute(
+      geometry.setAttribute(
         'position',
         new Float32BufferAttribute(positions, 3)
       );
-      geometry.addAttribute('normal', new Float32BufferAttribute(normals, 3));
+      geometry.setAttribute('normal', new Float32BufferAttribute(normals, 3));
       applyBoxUV(geometry);
       const material = await buildMeshMaterial(tags);
       dataset.mesh = new Mesh(geometry, material);
@@ -53636,13 +53657,14 @@ const buildMeshes = async ({
       const { positions, normals } = threejsGeometry.threejsSurface;
       const dataset = {};
       const geometry = new BufferGeometry();
-      geometry.addAttribute(
+      geometry.setAttribute(
         'position',
         new Float32BufferAttribute(positions, 3)
       );
-      geometry.addAttribute('normal', new Float32BufferAttribute(normals, 3));
+      geometry.setAttribute('normal', new Float32BufferAttribute(normals, 3));
       applyBoxUV(geometry);
       const material = await buildMeshMaterial(tags);
+      material.side = DoubleSide;
       dataset.mesh = new Mesh(geometry, material);
       dataset.mesh.layers.set(layer);
       dataset.name = toName(threejsGeometry);

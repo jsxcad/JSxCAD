@@ -1,0 +1,113 @@
+import { GearProfile } from 'https://gitcdn.link/cdn/jsxcad/JSxCAD/master/library/InvoluteGear.js';
+
+const motorProfile = Circle(12 / 2).clip(Square(9.8, 12));
+motorProfile.item('motor profile').topView(20);
+
+const gearboxProfile = Square(9.8, 11.8);
+gearboxProfile.item('gearbox profile').topView(20);
+
+const axleProfile = Circle(3.2 / 2);
+axleProfile.item('axle profile').topView(20);
+
+const axleFlatProfile = axleProfile.clip(Square(3.2).move(0.5));
+axleFlatProfile.item('axle flat profile').topView(20);
+
+const rearHubProfile = Circle(4.8 / 2);
+rearHubProfile.item('rear hub profile').topView(20);
+
+const wireThickness = 0.8;
+
+const motor = Group(
+  axleFlatProfile.extrude(13.5 + 9.1, 13.5 + 9.1 + 10.8),
+  gearboxProfile.extrude(13.5, 13.5 + 9.1),
+  motorProfile.extrude(13.5, 0)
+).item('micro gear motor');
+motor.view(20);
+
+const wireChannelProfile = Square(wireThickness, wireThickness * 5).move(5.3);
+
+const capProfile = Square(9.8 + 2, 12 + 2)
+  .with(Square(wireThickness * 2, wireThickness * 7).move(5.3 + 0.4))
+  .item();
+capProfile.topView(20);
+
+const sheath = capProfile
+  .cut(motorProfile, wireChannelProfile)
+  .extrude(0, 5)
+  .item('sheath');
+
+sheath.view(20);
+
+const cap = Group(capProfile.extrude(-2, -0.0), sheath);
+cap.fix().view(20);
+
+const gear = GearProfile().interior().cut(axleFlatProfile).extrude(2);
+gear.view(20);
+
+const LegoBoard = (length, width) => {
+  const sockets = [];
+  for (let x = 0; x < length; x++) {
+    for (let y = 0; y < width; y++) {
+      sockets.push(Rod(c(5 / 2, 2, 0, [x * 8, y * 8])));
+    }
+  }
+  return Group(...sockets).center({ centerZ: false });
+};
+
+const motorDriverBoard = Square(20.8 + 0.1, 24.6).extrude(4, 5.5);
+const motorDriverSpace = Square(20.4, 24.6).extrude(2, 6);
+const motorDriverBlock = Square(8 * 3, 8 * 3).extrude(0, 6);
+const motorDriverLegoBoard = LegoBoard(3, 3);
+
+const motorDriverHolder = Assembly(
+  motorDriverBlock,
+  motorDriverSpace.hole(),
+  motorDriverBoard.hole(),
+  motorDriverLegoBoard.hole()
+);
+
+motorDriverHolder.view(20);
+
+const wemosDriverBoard = Square(25.7, 34.4 - 0.1).extrude(12.9, 12.9 - 2.3);
+const wemosDriverBracket = Square(24, 4).extrude(2, 3.2 * 5);
+const wemosLegoBoard = Square(3 * 8, 5 * 8)
+  .extrude(0, 2)
+  .cut(LegoBoard(3, 5));
+const wemosDriverHolder = Assembly(
+  wemosDriverBracket.moveY((5 * 8) / -2 + 2),
+  wemosDriverBracket.moveY((5 * 8) / 2 - 2),
+  Square(2 * 8, 5 * 8)
+    .extrude(3.2 * 2, 3.2 * 5)
+    .hole(),
+  wemosDriverBoard.hole(),
+  wemosLegoBoard
+);
+wemosDriverHolder.fix().view(20);
+
+const motorHolderLegoBoard = Square(3 * 8, 3 * 8)
+  .extrude(0, 2)
+  .cut(LegoBoard(3, 3))
+  .moveY(6);
+const motorHolderMotor = Group(motor, sheath.moveZ(9.1 - 0.7), cap)
+  .rotateX(90)
+  .rotateY(-90)
+  .center({ centerZ: false })
+  .moveZ(16 / 2);
+const motorHolderBoard = Box(16, 3 * 8, 10 - 3).move(0, 6, 7 - 3 / 2);
+const motorHolder = Assembly(
+  motorHolderBoard,
+  motorHolderLegoBoard,
+  motorHolderMotor.hole()
+).item('motor');
+motorHolder.fix().view(20);
+
+md`STL Files`;
+
+sheath.downloadStl('sheath1');
+cap.fix().downloadStl('cap');
+gear.downloadStl('gear2');
+motorDriverHolder.downloadStl('motor_driver_holder1');
+wemosDriverHolder.fix().downloadStl('wemos_holder2');
+motorHolder.fix().downloadStl('motor_holder');
+
+// export { motor, sheath, cap, motorHolder };

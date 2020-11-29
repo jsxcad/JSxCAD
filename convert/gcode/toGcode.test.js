@@ -9,6 +9,7 @@ test('Spindle Triangle', async (t) => {
   const code = await toGcode(
     {
       type: 'paths',
+      tags: ['toolpath/pause_afterward'],
       paths: [unitRegularTrianglePolygon],
     },
     { toolType: 'spindle', spindleRpm: 7000, feedRate: 500 }
@@ -19,13 +20,28 @@ test('Spindle Triangle', async (t) => {
   t.deepEqual(new TextDecoder('utf8').decode(code), expected);
 });
 
-test('Constant Laser Triangle', async (t) => {
+test('Laser Triangle', async (t) => {
   const code = await toGcode(
     {
       type: 'paths',
       paths: [unitRegularTrianglePolygon],
     },
-    { toolType: 'constantLaser', laserPower: 1000, feedRate: 10000 }
+    { toolType: 'laser', laserPower: 1000, feedRate: 10000 }
+  );
+  const expected = await readFile('laser_triangle.gcode', {
+    encoding: 'utf8',
+  });
+  t.deepEqual(new TextDecoder('utf8').decode(code), expected);
+});
+
+test('Constant Laser Triangle', async (t) => {
+  const code = await toGcode(
+    {
+      type: 'paths',
+      tags: ['toolpath/constant_laser'],
+      paths: [unitRegularTrianglePolygon],
+    },
+    { toolType: 'laser', laserPower: 1000, feedRate: 10000 }
   );
   const expected = await readFile('constant_laser_triangle.gcode', {
     encoding: 'utf8',
@@ -33,15 +49,30 @@ test('Constant Laser Triangle', async (t) => {
   t.deepEqual(new TextDecoder('utf8').decode(code), expected);
 });
 
-test('Dynamic Laser Triangle', async (t) => {
+test('Tag changes reset', async (t) => {
   const code = await toGcode(
     {
-      type: 'paths',
-      paths: [unitRegularTrianglePolygon],
+      type: 'disjointAssembly',
+      content: [
+        {
+          type: 'paths',
+          tags: ['toolpath/feed_rate/800'],
+          paths: [unitRegularTrianglePolygon],
+        },
+        {
+          type: 'paths',
+          tags: ['toolpath/spindle_rpm/1200'],
+          paths: [unitRegularTrianglePolygon],
+        },
+        {
+          type: 'paths',
+          paths: [unitRegularTrianglePolygon],
+        },
+      ],
     },
-    { toolType: 'dynamicLaser', laserPower: 1000, feedRate: 10000 }
+    { toolType: 'spindle', spindleRpm: 7000, feedRate: 500 }
   );
-  const expected = await readFile('dynamic_laser_triangle.gcode', {
+  const expected = await readFile('tags.gcode', {
     encoding: 'utf8',
   });
   t.deepEqual(new TextDecoder('utf8').decode(code), expected);

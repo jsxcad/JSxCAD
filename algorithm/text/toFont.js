@@ -1,11 +1,7 @@
-import {
-  makeConvex,
-  reorient,
-  union,
-} from '@jsxcad/geometry-z0surface-boolean';
-import { scale, taggedZ0Surface } from '@jsxcad/geometry-tagged';
+import { scale, taggedGraph, taggedGroup } from '@jsxcad/geometry-tagged';
 
 import OpenTypeJs from 'opentype.js/dist/opentype.js';
+import { fromPaths as fromPathsToGraph } from '@jsxcad/geometry-graph';
 import { fromSvgPath } from '@jsxcad/convert-svg';
 
 export const toFont = (options = {}, data) => {
@@ -35,19 +31,20 @@ export const toFont = (options = {}, data) => {
         svgPaths.push(glyph.getPath(x, y, fontSize, options).toPathData());
       }
     );
-    const pathsets = [];
+    const group = [];
     for (let { paths } of svgPaths.map((svgPath) =>
       fromSvgPath(new TextEncoder('utf8').encode(svgPath), {
         curveSegments: curveSegments,
       })
     )) {
-      // Outlining forces re-orientation.
-      pathsets.push(reorient(paths));
+      group.push(
+        scale(
+          [factor, factor, factor],
+          taggedGraph({}, fromPathsToGraph(paths))
+        )
+      );
     }
-    return scale(
-      [factor, factor, factor],
-      taggedZ0Surface({}, makeConvex(union(...pathsets)))
-    );
+    return taggedGroup({}, ...group);
   };
 
   return font;

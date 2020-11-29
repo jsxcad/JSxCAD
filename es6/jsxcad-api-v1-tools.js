@@ -1,4 +1,4 @@
-import { Point, Assembly, Toolpath, Cube, Cylinder } from './jsxcad-api-v1-shapes.js';
+import { Point, Assembly, Toolpath, Square, Rod } from './jsxcad-api-v1-shapes.js';
 import Shape, { Shape as Shape$1 } from './jsxcad-api-v1-shape.js';
 import { taggedPaths, getNonVoidPaths } from './jsxcad-geometry-tagged.js';
 import { toolpath } from './jsxcad-algorithm-toolpath.js';
@@ -7,23 +7,24 @@ const BenchPlane = (
   width = 50,
   {
     cutDepth = 0.3,
-    cutHeight = 1000,
+    cutHeight = 0,
     toolDiameter = 3.175,
     axialRate = 0.25,
     millingStyle = 'any',
     sweep = 'cut',
   } = {}
-) => (length, depth) => {
+) => (length, depth, { x = 0, y = 0, z = 0 } = {}) => {
   let points = [];
   const pointset = [points];
   const toolRadius = toolDiameter / 2;
-  const advances = Math.ceil(length / (toolDiameter * axialRate));
-  const actualAdvance = length / advances;
+  const minX = toolRadius;
+  const maxX = length - toolRadius;
+  const advances = Math.ceil((maxX - minX) / (toolDiameter * axialRate));
+  const xAdvance = (maxX - minX) / advances;
   // An extra leveling pass at the end if we ramp.
   const cuts = Math.ceil(depth / Math.min(depth, cutDepth));
   const actualCut = depth / cuts;
-  for (let advance = 0; advance < advances; advance++) {
-    const x = toolRadius + advance * actualAdvance;
+  for (let x = toolRadius; x <= maxX; x += xAdvance) {
     for (let cut = 0; cut < cuts; cut++) {
       const startZ = Math.max(0 - actualCut * cut, 0 - depth);
       const endZ = Math.max(startZ - actualCut, 0 - depth);
@@ -72,14 +73,15 @@ const BenchPlane = (
     }
   }
   return Assembly(
+    Point(0, 0, 0), // Add a zero point for rebenching.
     ...pointset.map((points) => Toolpath(...points)),
     sweep === 'no'
       ? undefined
-      : Cube(length, width, cutHeight + cutDepth)
-          .benchTop()
-          .moveZ(-depth)
-          .op((s) => (sweep === 'show' ? s : s.Void()))
-  );
+      : Square(length, width)
+          .extrude(0, depth)
+          .bench()
+          .op((s) => (sweep === 'show' ? s : s.hole()))
+  ).move(x, y, z);
 };
 
 const BenchSaw = (
@@ -91,19 +93,19 @@ const BenchSaw = (
     millingStyle = 'any',
     sweep = 'cut',
   } = {}
-) => (length, depth) =>
+) => (length, depth, { x = 0, y = 0, z = 0 } = {}) =>
   BenchPlane(length, {
     toolDiameter,
     cutDepth,
     axialRate,
     millingStyle,
     sweep,
-  })(width, depth).moveX(-width);
+  })(width, depth, { x, y, z }).moveX(-width);
 
 const DrillPress = (
   diameter = 10,
   { toolDiameter = 3.175, cutDepth = 0.3, sides = 16, sweep = 'cut' } = {}
-) => (depth = 0, x = 0, y = 0) => {
+) => (depth = 0, { x = 0, y = 0, z = 0 } = {}) => {
   const radius = diameter / 2;
   const points = [];
   const toolRadius = toolDiameter / 2;
@@ -133,19 +135,20 @@ const DrillPress = (
   // Move back to the middle so we don't rub the wall on the way up.
   points.push(Point(0, 0, 0));
   return Assembly(
+    Point(x, y, 0), // Add a zero point for rebenching.
     Toolpath(...points),
     sweep === 'no'
       ? undefined
-      : Cylinder.ofDiameter(diameter, depth)
-          .op((s) => (sweep === 'show' ? s : s.Void()))
+      : Rod(diameter / 2, depth)
+          .op((s) => (sweep === 'show' ? s : s.hole()))
           .moveZ(depth / -2)
-  ).move(x, y);
+  ).move(x, y, z);
 };
 
 const HoleRouter = (
   depth = 10,
   { toolDiameter = 3.175, cutDepth = 0.3, toolLength = 17, sweep = 'cut' } = {}
-) => (shape, x = 0, y = 0, z = 0) => {
+) => (shape, { x = 0, y = 0, z = 0 } = {}) => {
   const cuts = Math.ceil(depth / Math.min(depth, cutDepth));
   const actualCutDepth = depth / cuts;
   const design = [];
@@ -169,18 +172,22 @@ const HoleRouter = (
     if (sweep !== 'no') {
       sweeps.push(
         paths
-          .sweep(Cylinder.ofDiameter(toolDiameter, depth).moveZ(depth / -2))
-          .op((s) => (sweep === 'show' ? s : s.Void()))
+          .sweep(Rod(toolDiameter / 2, depth).moveZ(depth / -2))
+          .op((s) => (sweep === 'show' ? s : s.hole()))
       );
     }
   }
-  return Assembly(...design, ...sweeps);
+  return Assembly(
+    Point(x, y, 0), // Add a zero point for rebenching.
+    ...design,
+    ...sweeps
+  );
 };
 
 const LineRouter = (
   depth = 10,
   { toolDiameter = 3.175, cutDepth = 0.3, toolLength = 17, sweep = 'no' } = {}
-) => (shape, x = 0, y = 0, z = 0) => {
+) => (shape, { x = 0, y = 0, z = 0 } = {}) => {
   const cuts = Math.ceil(depth / Math.min(cutDepth, depth));
   const actualCutDepth = depth / cuts;
   const design = [];
@@ -199,29 +206,40 @@ const LineRouter = (
       // Generally a v bit.
       sweeps.push(
         Shape$1.fromGeometry(taggedPaths({}, paths))
-          .sweep(Cylinder.ofDiameter(toolDiameter, depth).moveZ(depth / -2))
-          .op((s) => (sweep === 'show' ? s : s.Void()))
+          .sweep(Rod(toolDiameter / 2, depth).moveZ(depth / -2))
+          .op((s) => (sweep === 'show' ? s : s.hole()))
       );
     }
   }
-  return Assembly(...design, ...sweeps);
+  return Assembly(
+    Point(x, y, 0), // Add a zero point for rebenching.
+    ...design,
+    ...sweeps
+  );
 };
 
 const ProfileRouter = (
   depth = 10,
   { toolDiameter = 3.175, cutDepth = 0.3, toolLength = 17, sweep = 'no' } = {}
-) => (shape, x = 0, y = 0, z = 0) => {
+) => (shape, { x = 0, y = 0, z = 0 } = {}) => {
   const cuts = Math.ceil(depth / Math.min(cutDepth, depth));
   const actualCutDepth = depth / cuts;
   const design = [];
   const sweeps = [];
+  let shapes = [];
   for (const surface of shape.surfaces()) {
+    shapes.push(surface.outline());
+  }
+  for (const paths of shape.paths()) {
+    shapes.push(paths);
+  }
+  for (const shape of shapes) {
     // FIX: This assumes a plunging tool.
     const paths = Shape.fromGeometry(
       taggedPaths(
         { tags: ['path/Toolpath'] },
         toolpath(
-          surface.bench(-x, -y, -z).outline().toTransformedGeometry(),
+          shape.bench(-x, -y, -z).toTransformedGeometry(),
           toolDiameter,
           /* overcut= */ false,
           /* solid= */ true
@@ -234,12 +252,16 @@ const ProfileRouter = (
     if (sweep !== 'no') {
       sweeps.push(
         paths
-          .sweep(Cylinder.ofDiameter(toolDiameter, depth).moveZ(depth / -2))
-          .op((s) => (sweep === 'show' ? s : s.Void()))
+          .sweep(Rod(toolDiameter / 2, depth).moveZ(depth / -2))
+          .op((s) => (sweep === 'show' ? s : s.hole()))
       );
     }
   }
-  return Assembly(...design, ...sweeps);
+  return Assembly(
+    Point(x, y, 0), // Add a zero point for rebenching.
+    ...design,
+    ...sweeps
+  );
 };
 
 export { BenchPlane, BenchSaw, DrillPress, HoleRouter, LineRouter, ProfileRouter };

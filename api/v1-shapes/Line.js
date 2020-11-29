@@ -1,6 +1,9 @@
-import Path from './Path.js';
+import { Shape, shapeMethod } from '@jsxcad/api-v1-shape';
 
-export const Line = (length) => Path([0, 0, length / -2], [0, 0, length / 2]);
+import Path from './Path.js';
+import Point from './Point.js';
+
+export const Line = (length) => Path(Point(0), Point(length));
 export default Line;
 
-Line.signature = 'Line(length:number) -> Shape';
+Shape.prototype.Line = shapeMethod(Line);

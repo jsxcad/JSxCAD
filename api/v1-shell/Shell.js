@@ -1,3 +1,5 @@
+import { Ball, Hull } from '@jsxcad/api-v1-shapes';
+
 import {
   add,
   dot,
@@ -15,9 +17,7 @@ import {
   union,
 } from '@jsxcad/geometry-tagged';
 
-import { Hull } from '@jsxcad/api-v1-extrude';
 import { Shape } from '@jsxcad/api-v1-shape';
-import { Sphere } from '@jsxcad/api-v1-shapes';
 import { createNormalize3 } from '@jsxcad/algorithm-quantize';
 import { fromRotation } from '@jsxcad/math-mat4';
 import { getEdges } from '@jsxcad/geometry-path';
@@ -55,7 +55,7 @@ export const Shell = (radius = 1, resolution = 3, ...shapes) => {
           pieces.push(
             Hull(
               ...polygon.map((point) =>
-                Sphere(radius, { resolution }).move(...point)
+                Ball(radius, { resolution }).move(...point)
               )
             )
               .setTags(tags)

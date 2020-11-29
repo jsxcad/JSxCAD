@@ -1,0 +1,39 @@
+md`# Control`;
+
+md`Notebooks support a number of interactive controls.`;
+
+md`## Controls`;
+
+md`
+'''
+async stringBox(name, defaultValue);
+async numberBox(name, defaultValue);
+async sliderBox(name, defaultValue, { min = 0, max = 100, step = 1 } = {});
+async checkBox(name, defaultValue);
+async selectBox(name, defaultValue, options);
+'''`;
+
+md`## Example`;
+const name = await stringBox('name', 'foo');
+const height = await numberBox('height', 10);
+const angle = await sliderBox('angle', 90, { min: 0, max: 360 });
+const triangle = await checkBox('triangle', true);
+const color = await selectBox('color', 'chartreuse', [
+  'chartreuse',
+  'crimson',
+  'cyan',
+]);
+
+Group(
+  Hershey(8)(name).color('black').sketch(),
+  triangle ? Triangle(50).color('orange') : undefined,
+  Line(20).color('black').sketch(),
+  Square(15, 1)
+    .move(15 / 2)
+    .rotate(angle)
+    .extrude(height)
+    .color(color)
+    .withOutline((o) => o.color('black'))
+)
+  .fix()
+  .view();

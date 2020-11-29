@@ -1,31 +1,46 @@
+import {
+  outline as outlineGraph,
+  toPaths as toPathsFromGraph,
+} from '@jsxcad/geometry-graph';
+
 import { outlineSolid, outlineSurface } from '@jsxcad/geometry-halfedge';
 
 import { cache } from '@jsxcad/cache';
 import { createNormalize3 } from '@jsxcad/algorithm-quantize';
-import { getAnyNonVoidSurfaces } from './getAnyNonVoidSurfaces.js';
+import { getNonVoidGraphs } from './getNonVoidGraphs.js';
 import { getNonVoidSolids } from './getNonVoidSolids.js';
+import { getNonVoidSurfaces } from './getNonVoidSurfaces.js';
 import { taggedPaths } from './taggedPaths.js';
 import { toKeptGeometry } from './toKeptGeometry.js';
 
+// FIX: The semantics here are a bit off.
+// Let's consider the case of Assembly(Square(10), Square(10).outline()).outline().
+// This will drop the Square(10).outline() as it will not be outline-able.
+// Currently we need this so that things like withOutline() will work properly,
+// but ideally outline would be idempotent and rewrite shapes as their outlines,
+// unless already outlined, and handle the withOutline case within this.
 const outlineImpl = (geometry, includeFaces = true, includeHoles = true) => {
   const normalize = createNormalize3();
 
-  // FIX: This assumes general coplanarity.
   const keptGeometry = toKeptGeometry(geometry);
   const outlines = [];
-  for (const { solid } of getNonVoidSolids(keptGeometry)) {
-    outlines.push(outlineSolid(solid, normalize));
+  for (const { tags, solid } of getNonVoidSolids(keptGeometry)) {
+    outlines.push(taggedPaths({ tags }, outlineSolid(solid, normalize)));
+  }
+  for (const { tags, graph } of getNonVoidGraphs(keptGeometry)) {
+    outlines.push(taggedPaths({ tags }, toPathsFromGraph(outlineGraph(graph))));
   }
   // This is a bit tricky -- let's consider an assembly that produces an effective surface.
   // For now, let's consolidate, and see what goes terribly wrong.
-  for (const surface of getAnyNonVoidSurfaces(keptGeometry).map(
-    ({ surface, z0Surface }) => surface || z0Surface
-  )) {
+  for (const { tags, surface } of getNonVoidSurfaces(keptGeometry)) {
     outlines.push(
-      outlineSurface(surface, normalize, includeFaces, includeHoles)
+      taggedPaths(
+        { tags },
+        outlineSurface(surface, normalize, includeFaces, includeHoles)
+      )
     );
   }
-  return outlines.map((outline) => taggedPaths({}, outline));
+  return outlines;
 };
 
 export const outline = cache(outlineImpl);

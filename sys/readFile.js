@@ -10,7 +10,10 @@ import {
   qualifyPath,
   setupFilesystem,
 } from './filesystem.js';
+
 import { isBrowser, isNode, isWebWorker } from './browserOrNode.js';
+
+import { unwatchFile, watchFile } from './watchFile.js';
 
 import { db } from './db.js';
 import { getFile } from './files.js';
@@ -83,7 +86,7 @@ const fetchSources = async (sources) => {
       try {
         if (source.startsWith('http:') || source.startsWith('https:')) {
           log({ op: 'text', text: `# Fetching ${source}` });
-          const response = await fetchUrl(source);
+          const response = await fetchUrl(source, { cache: 'reload' });
           if (response.ok) {
             return new Uint8Array(await response.arrayBuffer());
           }
@@ -148,3 +151,18 @@ export const readFile = async (options, path) => {
 };
 
 export const read = async (path, options = {}) => readFile(options, path);
+
+export const readOrWatch = async (path, options = {}) => {
+  const data = await read(path);
+  if (data !== undefined) {
+    return data;
+  }
+  let resolveWatch;
+  const watch = new Promise((resolve) => {
+    resolveWatch = resolve;
+  });
+  const watcher = await watchFile(path, (file) => resolveWatch(path));
+  await watch;
+  await unwatchFile(path, watcher);
+  return read(path);
+};

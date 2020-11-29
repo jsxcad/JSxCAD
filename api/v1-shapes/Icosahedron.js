@@ -1,50 +1,17 @@
-import Shape from '@jsxcad/api-v1-shape';
-import { buildRegularIcosahedron } from '@jsxcad/algorithm-shape';
+import { Shape, shapeMethod } from '@jsxcad/api-v1-shape';
 
-/**
- *
- * # Icosahedron
- *
- * Generates tetrahedrons.
- *
- * ::: illustration { "view": { "position": [8, 8, 8] } }
- * ```
- * Icosahedron()
- * ```
- * :::
- * ::: illustration { "view": { "position": [80, 80, 80] } }
- * ```
- * Icosahedron(10)
- * ```
- * :::
- * ::: illustration { "view": { "position": [60, 60, 60] } }
- * ```
- * Icosahedron({ radius: 8 })
- * ```
- * :::
- * ::: illustration { "view": { "position": [60, 60, 60] } }
- * ```
- * Icosahedron({ diameter: 16 })
- * ```
- * :::
- *
- **/
+import { buildRegularIcosahedron } from '@jsxcad/algorithm-shape';
+import { getRadius } from '@jsxcad/geometry-plan';
+import { orRadius } from './orRadius.js';
 
 const unitIcosahedron = () =>
-  Shape.fromPolygonsToSolid(buildRegularIcosahedron({}));
+  Shape.fromPolygonsToSolid(buildRegularIcosahedron({})).toGraph();
 
-export const ofRadius = (radius = 1) => unitIcosahedron().scale(radius);
-export const ofDiameter = (diameter = 1) =>
-  unitIcosahedron().scale(diameter / 2);
-export const Icosahedron = (...args) => ofRadius(...args);
-
-Icosahedron.ofRadius = ofRadius;
-Icosahedron.ofDiameter = ofDiameter;
+export const Icosahedron = (value = 1) => {
+  const plan = orRadius(value);
+  return unitIcosahedron().scale(getRadius(plan)).at(plan.at);
+};
 
 export default Icosahedron;
 
-Icosahedron.signature = 'Icosahedron(radius:number = 1) -> Shape';
-Icosahedron.ofRadius.signature =
-  'Icosahedron.ofRadius(radius:number = 1) -> Shape';
-Icosahedron.ofDiameter.signature =
-  'Icosahedron.ofDiameter(diameter:number = 1) -> Shape';
+Shape.prototype.Icosahedron = shapeMethod(Icosahedron);

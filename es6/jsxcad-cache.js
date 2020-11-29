@@ -857,10 +857,12 @@ const isMatchingCutKey = ([aPlane, aGeometry], [bPlane, bGeometry]) =>
 
 const cacheCut = (op) => memoize(op, { isMatchingKey: isMatchingCutKey, maxSize });
 
+const cacheSection = (op) => memoize(op, { isMatchingKey: isMatchingCutKey, maxSize });
+
 // Keyed by points structure.
 
 const isMatchingPointsKey = ([aPoints], [bPoints]) => deepEqual(aPoints, bPoints);
 
 const cachePoints = (op) => memoize(op, { isMatchingKey: isMatchingPointsKey, maxSize });
 
-export { cache, cacheCut, cachePoints, cacheRewriteTags, cacheTransform, clearCache };
+export { cache, cacheCut, cachePoints, cacheRewriteTags, cacheSection, cacheTransform, clearCache };

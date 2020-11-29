@@ -1,9 +1,35 @@
+const modules = [];
+
+export const getModule = () => modules[modules.length - 1];
+
+export const popModule = () => modules.pop();
+
+export const pushModule = (module) => modules.push(module);
+
 export const emitted = [];
 
 export const clearEmitted = () => {
   emitted.length = 0;
 };
 
-export const emit = (value) => emitted.push(value);
+const onEmitHandlers = new Set();
+
+export const emit = (value) => {
+  if (value.module === undefined) {
+    value.module = getModule();
+  }
+  const index = emitted.length;
+  emitted.push(value);
+  for (const onEmitHandler of onEmitHandlers) {
+    onEmitHandler(value, index);
+  }
+};
 
 export const getEmitted = () => [...emitted];
+
+export const addOnEmitHandler = (handler) => {
+  onEmitHandlers.add(handler);
+  return handler;
+};
+
+export const removeOnEmitHandler = (handler) => onEmitHandlers.delete(handler);

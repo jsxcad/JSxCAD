@@ -31,17 +31,15 @@ export const orient = (
     (Math.acos(dot(normalizedFacing, normalizedAt)) * 180) / Math.PI;
   const axis = normalize(cross(normalizedFacing, normalizedAt));
 
-  return shape.move(negate(center)).rotate(angle, axis).move(from);
+  return shape
+    .move(...negate(center))
+    .rotate(angle, axis)
+    .move(...from);
 };
 
 const orientMethod = function (...args) {
   return orient(this, ...args);
 };
 Shape.prototype.orient = orientMethod;
-
-orient.signature =
-  'orient(Shape:shape, { center:Point, facing:Vector, at:Point, from:Point }) -> Shape';
-orientMethod.signature =
-  'Shape -> orient({ center:Point, facing:Vector, at:Point, from:Point }) -> Shape';
 
 export default orient;

@@ -1,6 +1,7 @@
-import { fromPolygons, makeWatertight } from './jsxcad-geometry-solid.js';
-import { canonicalize, toTriangles } from './jsxcad-geometry-polygons.js';
-import { toDisjointGeometry, getNonVoidSolids } from './jsxcad-geometry-tagged.js';
+import { taggedPaths, taggedGraph, toDisjointGeometry, getNonVoidSolids, getNonVoidGraphs } from './jsxcad-geometry-tagged.js';
+import { fromPolygons, toTriangles } from './jsxcad-geometry-graph.js';
+import { canonicalize, toTriangles as toTriangles$1 } from './jsxcad-geometry-polygons.js';
+import { makeWatertight } from './jsxcad-geometry-solid.js';
 import { toPlane } from './jsxcad-math-poly3.js';
 
 function parse(str) {
@@ -104,7 +105,7 @@ const parse$1 = (data) => {
 const toParser = (format) => {
   switch (format) {
     case 'ascii':
-      return parseStlAscii;
+      return (data) => parseStlAscii(new TextDecoder('utf8').decode(data));
     case 'binary':
       return parse$1;
     default:
@@ -112,19 +113,44 @@ const toParser = (format) => {
   }
 };
 
-const fromStl = async (stl, { format = 'ascii' } = {}) => {
+const fromStl = async (
+  stl,
+  { format = 'ascii', geometry = 'graph' } = {}
+) => {
   const parse = toParser(format);
   const { positions, cells } = parse(stl);
   const polygons = [];
   for (const [a, b, c] of cells) {
-    polygons.push([positions[a], positions[b], positions[c]]);
+    const pa = positions[a];
+    const pb = positions[b];
+    const pc = positions[c];
+    if (pa.some((value) => !isFinite(value))) continue;
+    if (pb.some((value) => !isFinite(value))) continue;
+    if (pc.some((value) => !isFinite(value))) continue;
+    polygons.push([[...pa], [...pb], [...pc]]);
   }
-  return { type: 'solid', solid: fromPolygons(polygons) };
+  for (const polygon of polygons) {
+    for (const point of polygon) {
+      for (const value of point) {
+        if (!isFinite(value)) {
+          throw Error('die');
+        }
+      }
+    }
+  }
+  switch (geometry) {
+    case 'graph':
+      return taggedGraph({}, fromPolygons(polygons));
+    case 'paths':
+      return taggedPaths({}, polygons);
+    default:
+      throw Error(`Unknown geometry type ${geometry}`);
+  }
 };
 
 const fromSolidToTriangles = (solid, triangles) => {
   for (const surface of makeWatertight(solid)) {
-    for (const triangle of toTriangles({}, surface)) {
+    for (const triangle of toTriangles$1({}, surface)) {
       triangles.push(triangle);
     }
   }
@@ -160,6 +186,9 @@ const toStl = async (geometry, options = {}) => {
   const triangles = [];
   for (const { solid } of getNonVoidSolids(keptGeometry)) {
     fromSolidToTriangles(solid, triangles);
+  }
+  for (const { graph } of getNonVoidGraphs(keptGeometry)) {
+    triangles.push(...toTriangles(graph));
   }
   const output = `solid JSxCAD\n${convertToFacets(
     options,

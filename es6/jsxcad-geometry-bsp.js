@@ -7,7 +7,6 @@ import { createNormalize3 } from './jsxcad-algorithm-quantize.js';
 import { toPlane as toPlane$1, translate, flip as flip$1 } from './jsxcad-geometry-surface.js';
 import { getEdges, createOpenPath } from './jsxcad-geometry-path.js';
 import { outlineSurface } from './jsxcad-geometry-halfedge.js';
-import { buildConvexHull } from './jsxcad-algorithm-shape.js';
 
 const EPSILON = 1e-5;
 // const EPSILON2 = 1e-10;
@@ -136,7 +135,6 @@ const splitPolygon = (
       }
       pushWhenValid(front, frontPoints, polygonPlane);
       pushWhenValid(back, backPoints, polygonPlane);
-      break;
     }
   }
 };
@@ -548,82 +546,78 @@ const removeExteriorPolygonsForCutKeepingOverlap = (
   }
 };
 
-const removeInteriorPolygonsForDifference = (bsp, polygons, normalize) => {
-  if (bsp === inLeaf) {
-    return [];
-  } else if (bsp === outLeaf) {
-    return keepOut(polygons);
+const removeInteriorPolygonForDifference = (bsp, polygon, normalize, emit) => {
+  if (polygon === undefined) return;
+  if (bsp === inLeaf) ; else if (bsp === outLeaf) {
+    return polygon;
   } else {
     const outward = [];
     const inward = [];
-    for (let i = 0; i < polygons.length; i++) {
-      splitPolygon(
-        normalize,
-        bsp.plane,
-        polygons[i],
-        /* back= */ inward,
-        /* abutting= */ outward, // dropward
-        /* overlapping= */ inward, // dropward
-        /* front= */ outward
-      );
-    }
-    const trimmedFront = removeInteriorPolygonsForDifference(
+    splitPolygon(
+      normalize,
+      bsp.plane,
+      polygon,
+      /* back= */ inward,
+      /* abutting= */ outward, // dropward
+      /* overlapping= */ inward, // dropward
+      /* front= */ outward
+    );
+    const front = removeInteriorPolygonForDifference(
       bsp.front,
-      outward,
-      normalize
+      outward[0],
+      normalize,
+      emit
     );
-    const trimmedBack = removeInteriorPolygonsForDifference(
+    const back = removeInteriorPolygonForDifference(
       bsp.back,
-      inward,
-      normalize
+      inward[0],
+      normalize,
+      emit
     );
-
-    if (trimmedFront.length === 0) {
-      return trimmedBack;
-    } else if (trimmedBack.length === 0) {
-      return trimmedFront;
-    } else {
-      return merge(trimmedFront, trimmedBack);
+    if (front && back) {
+      return polygon;
+    } else if (front) {
+      emit(front);
+    } else if (back) {
+      emit(back);
     }
   }
 };
 
-const removeExteriorPolygonsForDifference = (bsp, polygons, normalize) => {
+const removeExteriorPolygonForDifference = (bsp, polygon, normalize, emit) => {
+  if (polygon === undefined) return;
   if (bsp === inLeaf) {
-    return keepIn(polygons);
-  } else if (bsp === outLeaf) {
-    return [];
-  } else {
+    return polygon;
+  } else if (bsp === outLeaf) ; else {
     const outward = [];
     const inward = [];
-    for (let i = 0; i < polygons.length; i++) {
-      splitPolygon(
-        normalize,
-        bsp.plane,
-        polygons[i],
-        /* back= */ inward,
-        /* abutting= */ outward, // dropward
-        /* overlapping= */ outward, // dropward
-        /* front= */ outward
-      );
-    }
-    const trimmedFront = removeExteriorPolygonsForDifference(
+    splitPolygon(
+      normalize,
+      bsp.plane,
+      polygon,
+      /* back= */ inward,
+      /* abutting= */ outward, // dropward
+      /* overlapping= */ outward, // dropward
+      /* front= */ outward
+    );
+    const front = removeExteriorPolygonForDifference(
       bsp.front,
-      outward,
-      normalize
+      outward[0],
+      normalize,
+      emit
     );
-    const trimmedBack = removeExteriorPolygonsForDifference(
+    const back = removeExteriorPolygonForDifference(
       bsp.back,
-      inward,
-      normalize
+      inward[0],
+      normalize,
+      emit
     );
-
-    if (trimmedFront.length === 0) {
-      return trimmedBack;
-    } else if (trimmedBack.length === 0) {
-      return trimmedFront;
-    } else {
-      return merge(trimmedFront, trimmedBack);
+    if (front && back) {
+      return polygon;
+    } else if (front) {
+      emit(front);
+    } else if (back) {
+      emit(back);
     }
   }
 };
@@ -1018,18 +1012,33 @@ const difference = (aSolid, ...bSolids) => {
       }
     } else {
       // Remove the parts of a that are inside b.
-      const aTrimmed = removeInteriorPolygonsForDifference(
-        bBsp,
-        aIn,
-        normalize
-      );
+      const aTrimmed = [];
+      const aEmit = (polygon) => aTrimmed.push(polygon);
+      for (const aPolygon of aIn) {
+        const kept = removeInteriorPolygonForDifference(
+          bBsp,
+          aPolygon,
+          normalize,
+          aEmit
+        );
+        if (kept) {
+          aEmit(kept);
+        }
+      }
       // Remove the parts of b that are outside a.
-      const bTrimmed = removeExteriorPolygonsForDifference(
-        aBsp,
-        bIn,
-        normalize
-      );
-
+      const bTrimmed = [];
+      const bEmit = (polygon) => bTrimmed.push(polygon);
+      for (const bPolygon of bIn) {
+        const kept = removeExteriorPolygonForDifference(
+          aBsp,
+          bPolygon,
+          normalize,
+          bEmit
+        );
+        if (kept) {
+          bEmit(kept);
+        }
+      }
       a = clean([...aOut, ...aTrimmed, ...flip(bTrimmed)]);
     }
   }
@@ -1247,14 +1256,6 @@ const toConvexClouds = (bsp, normalize) => {
   return clouds;
 };
 
-const toConvexSolids = (bsp, normalize) => {
-  const solids = [];
-  for (const cloud of toConvexClouds(bsp, normalize)) {
-    solids.push(buildConvexHull(cloud));
-  }
-  return solids;
-};
-
 const toDot = (bsp) => {
   const lines = [];
   const dot = (text) => lines.push(text);
@@ -1405,4 +1406,4 @@ const union = (...solids) => {
   return fromPolygons$1(s[0], normalize);
 };
 
-export { containsPoint, cut, cutOpen, deform, difference, differenceSurface, fromPlanes, fromSolid, fromSolids, fromSurface, intersectSurface, intersection, removeExteriorPaths, removeExteriorPolygonsForSection, section, toConvexClouds, toConvexSolids, toDot, toPlanarPolygonsFromSolids, toPlanesFromSolid, toPolygonsFromPlanes, unifyBspTrees, union };
+export { containsPoint, cut, cutOpen, deform, difference, differenceSurface, fromPlanes, fromSolid, fromSolids, fromSurface, intersectSurface, intersection, removeExteriorPaths, removeExteriorPolygonsForSection, section, toConvexClouds, toDot, toPlanarPolygonsFromSolids, toPlanesFromSolid, toPolygonsFromPlanes, unifyBspTrees, union };

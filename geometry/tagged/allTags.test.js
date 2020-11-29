@@ -10,7 +10,7 @@ test('Extract tags', (t) => {
       {
         type: 'disjointAssembly',
         content: [
-          { type: 'z0Surface', z0Surface: [], tags: ['c', 'd'] },
+          { type: 'surface', surface: [], tags: ['c', 'd'] },
           { type: 'paths', paths: [], tags: ['a', 'c'] },
         ],
       },

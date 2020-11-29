@@ -1,13 +1,11 @@
 import { reallyQuantizeForSpace } from './jsxcad-math-utils.js';
-import { makeConvex, toPlane, flip, outline } from './jsxcad-geometry-surface.js';
+import { transform as transform$1, fill, scale, measureBoundingBox, translate, canonicalize as canonicalize$2, toTransformedGeometry, getAnyNonVoidSurfaces, outline, taggedSurface, getNonVoidPaths } from './jsxcad-geometry-tagged.js';
 import { fromScaling, identity, multiply, fromTranslation, fromZRotation } from './jsxcad-math-mat4.js';
-import { assertGood, isClosed, canonicalize as canonicalize$1, close } from './jsxcad-geometry-path.js';
+import { assertGood, isClosed, canonicalize as canonicalize$1 } from './jsxcad-geometry-path.js';
 import { buildAdaptiveCubicBezierCurve } from './jsxcad-algorithm-shape.js';
 import { equals } from './jsxcad-math-vec2.js';
 import { transform } from './jsxcad-geometry-paths.js';
-import { dot } from './jsxcad-math-vec3.js';
 import { toTagsFromName } from './jsxcad-algorithm-color.js';
-import { transform as transform$1, measureBoundingBox, translate, canonicalize as canonicalize$2, toKeptGeometry, getAnyNonVoidSurfaces, getNonVoidPaths } from './jsxcad-geometry-tagged.js';
 import { createNormalize3 } from './jsxcad-algorithm-quantize.js';
 
 const canonicalizeSegment = ([directive, ...args]) => [
@@ -3427,16 +3425,6 @@ const fromSvgPath$1 = (svgPath, options = {}) =>
     Object.assign({ normalizeCoordinateSystem: false }, options)
   );
 
-const fromPathsToSurface = (paths) => {
-  const surface = makeConvex(close(paths));
-  const plane = toPlane(surface);
-  if (dot(plane, [0, 0, 1]) < 0) {
-    return flip(surface);
-  } else {
-    return surface;
-  }
-};
-
 const ELEMENT_NODE$1 = 1;
 const ATTRIBUTE_NODE$1 = 2;
 const TEXT_NODE$1 = 3;
@@ -3650,26 +3638,37 @@ const fromSvg = async (input, options = {}) => {
           const attributes = {
             fill: node.getAttribute('fill'),
             stroke: node.getAttribute('stroke'),
+            'stroke-width': node.getAttribute('stroke-width'),
           };
           const style = node.getAttribute('style');
           for (const entry of style.split(';')) {
             const [name, value] = entry.split(':');
             attributes[name] = value;
           }
-          const fill = attributes.fill;
-          if (fill !== undefined && fill !== 'none' && fill !== '') {
+          const fill$1 = attributes.fill;
+          if (fill$1 !== undefined && fill$1 !== 'none' && fill$1 !== '') {
             // Does fill, etc, inherit?
-            const tags = toTagsFromName(fill);
+            const tags = toTagsFromName(fill$1);
             geometry.content.push(
-              transform$1(scale(matrix), {
-                type: 'z0Surface',
-                z0Surface: fromPathsToSurface(paths),
-                tags,
-              })
+              transform$1(
+                scale(matrix),
+                fill({
+                  type: 'paths',
+                  paths: paths,
+                  tags,
+                })
+              )
             );
           }
           const stroke = attributes.stroke;
-          if (stroke !== undefined && stroke !== 'none' && stroke !== '') {
+          const hasStroke =
+            stroke !== undefined && stroke !== 'none' && stroke !== '';
+          const strokeWidth = attributes['stroke-width'];
+          const hasStrokeWidth =
+            strokeWidth !== undefined &&
+            strokeWidth !== 'none' &&
+            strokeWidth !== '';
+          if (hasStroke || hasStrokeWidth) {
             if (matrix.some((element) => isNaN(element))) {
               throw Error(`die: Bad element in matrix ${matrix}.`);
             }
@@ -3679,7 +3678,11 @@ const fromSvg = async (input, options = {}) => {
             }
             const tags = toTagsFromName(stroke);
             geometry.content.push(
-              transform$1(scaledMatrix, { type: 'paths', paths: paths, tags })
+              transform$1(scaledMatrix, {
+                type: 'paths',
+                paths: paths,
+                tags,
+              })
             );
           }
         };
@@ -3757,11 +3760,12 @@ const toColorFromTags = (tags, otherwise = 'black') => {
 
 const toSvg = async (baseGeometry, { padding = 0 } = {}) => {
   const normalize = createNormalize3();
-  const [min, max] = measureBoundingBox(await baseGeometry);
+  const flippedGeometry = scale([1, -1, 1], await baseGeometry);
+  const [min, max] = measureBoundingBox(flippedGeometry);
   const width = max[X] - min[X];
   const height = max[Y] - min[Y];
-  const translated = translate([width / 2, height / 2, 0], await baseGeometry);
-  const geometry = canonicalize$2(toKeptGeometry(translated));
+  const translated = translate([width / 2, height / 2, 0], flippedGeometry);
+  const geometry = canonicalize$2(toTransformedGeometry(translated));
 
   const svg = [
     `<?xml version="1.0" encoding="UTF-8"?>`,
@@ -3778,18 +3782,21 @@ const toSvg = async (baseGeometry, { padding = 0 } = {}) => {
     const anySurface = surface || z0Surface;
     if (anySurface === undefined) throw Error('die');
     const color = toColorFromTags(tags);
-    const paths = [];
-    for (const polygon of outline(anySurface, normalize)) {
-      paths.push(
-        `${polygon
-          .map(
-            (point, index) =>
-              `${index === 0 ? 'M' : 'L'}${point[0]} ${point[1]}`
-          )
-          .join(' ')} z`
-      );
+    const svgPaths = [];
+    const outlined = outline(taggedSurface({}, anySurface), normalize);
+    for (const { paths } of outlined) {
+      for (const polygon of paths) {
+        svgPaths.push(
+          `${polygon
+            .map(
+              (point, index) =>
+                `${index === 0 ? 'M' : 'L'}${point[0]} ${point[1]}`
+            )
+            .join(' ')} z`
+        );
+      }
     }
-    svg.push(`<path fill="${color}" stroke="none" d="${paths.join(' ')}"/>`);
+    svg.push(`<path fill="${color}" stroke="none" d="${svgPaths.join(' ')}"/>`);
   }
   for (const { paths, tags } of getNonVoidPaths(geometry)) {
     const color = toColorFromTags(tags);

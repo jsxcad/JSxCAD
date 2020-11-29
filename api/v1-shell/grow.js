@@ -1,12 +1,13 @@
+import { Ball, Hull } from '@jsxcad/api-v1-shapes';
+
 import {
   fromSolid as fromSolidToBspTree,
   toConvexClouds as toConvexCloudsFromBspTree,
 } from '@jsxcad/geometry-bsp';
+
 import { getSolids, taggedLayers } from '@jsxcad/geometry-tagged';
 
-import { Hull } from '@jsxcad/api-v1-extrude';
 import { Shape } from '@jsxcad/api-v1-shape';
-import { Sphere } from '@jsxcad/api-v1-shapes';
 import { createNormalize3 } from '@jsxcad/algorithm-quantize';
 
 export const grow = (shape, amount = 1, { resolution = 3 } = {}) => {
@@ -19,7 +20,7 @@ export const grow = (shape, amount = 1, { resolution = 3 } = {}) => {
       normalize
     )) {
       pieces.push(
-        Hull(...cloud.map((point) => Sphere(amount, resolution).move(...point)))
+        Hull(...cloud.map((point) => Ball(amount, resolution).move(...point)))
           .setTags(tags)
           .toGeometry()
       );

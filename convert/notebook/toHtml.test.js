@@ -11,7 +11,7 @@ test.beforeEach(async (t) => {
   await boot();
 });
 
-test('Geodesic sphere', async (t) => {
+test('Test notebook', async (t) => {
   const notebook = [
     { md: '# Test Notebook.' },
     { md: '## A Sphere.' },

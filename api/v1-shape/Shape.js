@@ -7,12 +7,13 @@ import {
 import {
   eachPoint,
   flip,
-  fromPathToSurface,
-  fromPathsToSurface,
+  //  fromPathToSurface,
+  //  fromPathsToSurface,
   isWatertight,
   makeWatertight,
   reconcile,
   taggedAssembly,
+  taggedGraph,
   taggedPaths,
   taggedPoints,
   taggedSolid,
@@ -94,6 +95,10 @@ export class Shape {
     return toPoints(this.toDisjointGeometry()).points;
   }
 
+  points() {
+    return Shape.fromGeometry(toPoints(this.toTransformedGeometry()));
+  }
+
   transform(matrix) {
     if (matrix.some((item) => typeof item !== 'number' || isNaN(item))) {
       throw Error('die: matrix is malformed');
@@ -129,16 +134,18 @@ const isSingleOpenPath = ({ paths }) =>
 Shape.fromClosedPath = (path, context) =>
   fromGeometry(taggedPaths({}, [closePath(path)]), context);
 Shape.fromGeometry = (geometry, context) => new Shape(geometry, context);
+Shape.fromGraph = (graph, context) =>
+  new Shape(taggedGraph({}, graph), context);
 Shape.fromOpenPath = (path, context) =>
   fromGeometry(taggedPaths({}, [openPath(path)]), context);
 Shape.fromPath = (path, context) =>
   fromGeometry(taggedPaths({}, [path]), context);
 Shape.fromPaths = (paths, context) =>
   fromGeometry(taggedPaths({}, paths), context);
-Shape.fromPathToSurface = (path, context) =>
-  fromGeometry(fromPathToSurface(path), context);
-Shape.fromPathsToSurface = (paths, context) =>
-  fromGeometry(fromPathsToSurface(paths), context);
+// Shape.fromPathToSurface = (path, context) =>
+//  fromGeometry(fromPathToSurface(path), context);
+// Shape.fromPathsToSurface = (paths, context) =>
+//  fromGeometry(fromPathsToSurface(paths), context);
 Shape.fromPoint = (point, context) =>
   fromGeometry(taggedPoints({}, [point]), context);
 Shape.fromPoints = (points, context) =>

@@ -1,39 +1,26 @@
+import { Shape, shapeMethod } from '@jsxcad/api-v1-shape';
 import { concatenate, rotateZ } from '@jsxcad/geometry-path';
 
-import Shape from '@jsxcad/api-v1-shape';
 import { numbers } from '@jsxcad/api-v1-math';
-
-/**
- *
- * # Spiral
- *
- * These take a function mapping angle to radius.
- *
- * ::: illustration { "view": { "position": [0, 0, 10] } }
- * ```
- * Spiral(angle => [angle],
- *        { to: 360 * 5 });
- * ```
- * :::
- * ::: illustration { "view": { "position": [0, 0, 10] } }
- * ```
- * Spiral({ to: 360 },
- *        (angle) => [[2 + sin(angle * 20)]])
- *   .close()
- *   .interior()
- * ```
- * :::
- **/
 
 export const Spiral = (
   toPathFromAngle = (angle) => [[angle]],
-  { from = 0, to = 360, by, resolution } = {}
+  { from = 0, to, upto, by, resolution } = {}
 ) => {
   if (by === undefined && resolution === undefined) {
     by = 1;
   }
+  if (to === undefined && upto === undefined) {
+    upto = 360;
+  }
   let path = [null];
-  for (const angle of numbers((angle) => angle, { from, to, by, resolution })) {
+  for (const angle of numbers((angle) => angle, {
+    from,
+    to,
+    upto,
+    by,
+    resolution,
+  })) {
     const radians = (angle * Math.PI) / 180;
     const subpath = toPathFromAngle(angle);
     path = concatenate(path, rotateZ(radians, subpath));
@@ -42,3 +29,5 @@ export const Spiral = (
 };
 
 export default Spiral;
+
+Shape.prototype.Spiral = shapeMethod(Spiral);

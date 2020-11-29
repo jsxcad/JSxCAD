@@ -1,0 +1,13 @@
+md`# Point Construction`;
+
+const peg = Peg([0, 0, 0], [0, 1, 0], [0, 0, 1]).Square(10);
+peg.view();
+md`A peg with a square attached.`;
+
+const point = Point();
+point.topView();
+md`A point at the origin.`;
+
+const points = Points([0], [1], [2], [3]);
+points.topView();
+md`A set of points along the x axis.`;

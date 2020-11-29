@@ -1,85 +1,136 @@
-import { readFile, unwatchFiles, watchFile } from '@jsxcad/sys';
-
-import Col from 'react-bootstrap/Col';
-import Container from 'react-bootstrap/Container';
-import Pane from './Pane.js';
+import Mermaid from 'mermaid';
 import PropTypes from 'prop-types';
 import React from 'react';
-import Row from 'react-bootstrap/Row';
 import { toDomElement } from '@jsxcad/ui-notebook';
 
-export class NotebookUi extends Pane {
+export class NoteUi extends React.PureComponent {
   static get propTypes() {
     return {
-      id: PropTypes.string,
+      hash: PropTypes.string,
+      data: PropTypes.array,
     };
   }
 
   constructor(props) {
     super(props);
-    this.update = this.update.bind(this);
+    this.state = {};
   }
 
-  async componentDidMount() {
-    const { file } = this.props;
-    const watcher = await watchFile(`notebook/${file}`, this.update);
-    this.setState({ watcher, refs: [] });
-    await this.update();
-  }
-
-  async componentWillUnmount() {
-    const { watcher } = this.state;
-
-    if (watcher) {
-      await unwatchFiles(watcher);
-    }
-  }
-
-  async update() {
-    const { file } = this.props;
-    const { refs } = this.state;
-    const notebook = await readFile({}, `notebook/${file}`);
-    const newDomElement = await toDomElement(notebook);
-    if (refs[0]) {
-      refs[0].removeChild(refs[0].firstChild);
-      refs[0].appendChild(newDomElement);
-    }
-    this.setState({ notebook, domElement: newDomElement });
-  }
-
-  renderToolbar() {
-    return super.renderToolbar();
-  }
-
-  renderPane() {
-    const { id } = this.props;
-    const { domElement, refs } = this.state;
-
-    const notebook = domElement ? (
+  render() {
+    const { data, hash } = this.props;
+    let ref;
+    const result = (
       <div
-        ref={(ref) => {
-          if (ref) {
-            refs[0] = ref;
-            ref.appendChild(domElement);
-          }
+        ref={(value) => {
+          ref = value;
         }}
-      ></div>
-    ) : (
-      <div />
+      />
     );
+    setTimeout(async () => {
+      if (ref) {
+        while (ref.firstChild) {
+          ref.removeChild(ref.lastChild);
+        }
+        for (const note of data) {
+          if (note && note.hash === hash) {
+            const element = await toDomElement([note]);
+            if (note.view && note.view.inline) {
+              ref.style.width = `${note.view.inline}%`;
+              ref.style.display = 'inline-block';
+            }
+            ref.appendChild(element);
+            note.noteRef = ref;
+          }
+        }
+      }
+    }, 0);
+    return result;
+  }
+}
 
-    return (
-      <Container
-        key={id}
-        style={{ height: '100%', display: 'flex', flexFlow: 'column' }}
+export class NotebookUi extends React.PureComponent {
+  static get propTypes() {
+    return {
+      id: PropTypes.string,
+      data: PropTypes.array,
+      path: PropTypes.string,
+      onRun: PropTypes.func,
+    };
+  }
+
+  constructor(props) {
+    super(props);
+    this.state = {};
+    this.onKeyDown = this.onKeyDown.bind(this);
+  }
+
+  stop(e) {
+    e.stopPropagation();
+  }
+
+  preventDefault(e) {
+    e.preventDefault();
+    return false;
+  }
+
+  onKeyDown(e) {
+    const ENTER = 13;
+    const SHIFT = 16;
+    const CONTROL = 17;
+
+    const key = e.which || e.keyCode || 0;
+
+    switch (key) {
+      case CONTROL:
+      case SHIFT:
+        return true;
+    }
+
+    const { shiftKey } = e;
+    switch (key) {
+      case ENTER: {
+        if (shiftKey) {
+          const { onRun } = this.props;
+          e.preventDefault();
+          e.stopPropagation();
+          if (onRun) {
+            onRun();
+          }
+          return false;
+        }
+        break;
+      }
+    }
+  }
+
+  render() {
+    const { data, path } = this.props;
+    let ref;
+    const result = (
+      <div
+        onKeyDown={this.onKeyDown}
+        ref={(value) => {
+          ref = value;
+        }}
+        style={{ height: '100%', overflow: 'scroll', marginLeft: '20px' }}
       >
-        <Row style={{ width: '100%', height: '100%', flex: '1 1 auto' }}>
-          <Col style={{ width: '100%', height: '100%', overflow: 'auto' }}>
-            {notebook}
-          </Col>
-        </Row>
-      </Container>
+        {data &&
+          data
+            .filter((note) => note.hash)
+            .map((note) => {
+              // FIX: Rename or differentiate 'text' and 'error'.
+              if (note.module === path || note.text || note.error) {
+                return <NoteUi data={data} key={note.hash} hash={note.hash} />;
+              }
+            })}
+      </div>
     );
+    setTimeout(async () => {
+      if (ref) {
+        Mermaid.init(undefined, '.mermaid');
+      }
+    }, 100);
+    return result;
   }
 }
 

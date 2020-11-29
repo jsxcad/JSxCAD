@@ -1,121 +1,31 @@
-import { buildConvexSurfaceHull, buildConvexHull, loop, extrude as extrude$1, buildConvexMinkowskiSum } from './jsxcad-algorithm-shape.js';
-import { Assembly, Layers } from './jsxcad-api-v1-shapes.js';
-import Shape$1, { Shape } from './jsxcad-api-v1-shape.js';
-import { taggedSurface, taggedSolid, getPaths, getZ0Surfaces, getSurfaces, getPlans, outline as outline$1, getSolids, taggedLayers, union, taggedZ0Surface, taggedPaths, measureBoundingBox, taggedPoints, measureHeights } from './jsxcad-geometry-tagged.js';
-import { Y as Y$1, Z as Z$3 } from './jsxcad-api-v1-connector.js';
-import { alignVertices, transform as transform$1, fromPolygons } from './jsxcad-geometry-solid.js';
-import { toPlane as toPlane$1, transform, makeConvex, flip as flip$1 } from './jsxcad-geometry-surface.js';
-import { toXYPlaneTransforms } from './jsxcad-math-plane.js';
-import { isClosed, transform as transform$2, isCounterClockwise, flip, getEdges } from './jsxcad-geometry-path.js';
-import { section as section$1, cutOpen, fromSolid, containsPoint as containsPoint$1 } from './jsxcad-geometry-bsp.js';
-import { createNormalize3 } from './jsxcad-algorithm-quantize.js';
-import { toPlane as toPlane$2 } from './jsxcad-math-poly3.js';
-import { fromTranslation } from './jsxcad-math-mat4.js';
-import { scale } from './jsxcad-math-vec3.js';
+import Shape$1, { Shape, getPegCoords, orient } from './jsxcad-api-v1-shape.js';
+import { alphaShape, fromPoints } from './jsxcad-geometry-graph.js';
+import { taggedGraph, getPaths, extrude as extrude$1, extrudeToPlane as extrudeToPlane$1, fill as fill$1, outline as outline$1, section as section$1, taggedLayers, getSolids, union, taggedZ0Surface, getSurfaces, getZ0Surfaces, taggedPaths, measureBoundingBox, taggedSolid, taggedPoints, measureHeights } from './jsxcad-geometry-tagged.js';
+import { Assembly, Group } from './jsxcad-api-v1-shapes.js';
+import { Y as Y$1 } from './jsxcad-api-v1-connector.js';
+import { loop } from './jsxcad-algorithm-shape.js';
+import { isCounterClockwise, flip, getEdges } from './jsxcad-geometry-path.js';
+import { toPlane } from './jsxcad-math-poly3.js';
+import { scale, add, normalize, subtract, transform } from './jsxcad-math-vec3.js';
+import { fromNormalAndPoint } from './jsxcad-math-plane.js';
+import { fromRotation } from './jsxcad-math-mat4.js';
 import { toolpath as toolpath$1 } from './jsxcad-algorithm-toolpath.js';
+import { fromSolid, containsPoint as containsPoint$1 } from './jsxcad-geometry-bsp.js';
+import { createNormalize3 } from './jsxcad-algorithm-quantize.js';
+import { fromPolygons } from './jsxcad-geometry-solid.js';
 
-/**
- *
- * # Chained Hull
- *
- * Builds a convex hull between adjacent pairs in a sequence of shapes.
- *
- * ::: illustration { "view": { "position": [30, 30, 30] } }
- * ```
- * chainHull(Cube(3).move(-5, 5),
- *           Sphere(3).move(5, -5),
- *           Cylinder(3, 10).move(-10, -10))
- *   .move(10, 10)
- * ```
- * :::
- * ::: illustration { "view": { "position": [80, 80, 0] } }
- * ```
- * chainHull(Circle(20).moveZ(-10),
- *           Circle(10),
- *           Circle(20).moveZ(10))
- * ```
- * :::
- *
- **/
-
-const Z = 2;
-
-const ChainedHull = (...shapes) => {
-  const pointsets = shapes.map((shape) => shape.toPoints());
-  const chain = [];
-  for (let nth = 1; nth < pointsets.length; nth++) {
-    const points = [...pointsets[nth - 1], ...pointsets[nth]];
-    if (points.every((point) => point[Z] === 0)) {
-      chain.push(Shape.fromGeometry(buildConvexSurfaceHull(points)));
-    } else {
-      chain.push(Shape.fromGeometry(buildConvexHull(points)));
-    }
-  }
-  return Assembly(...chain);
-};
-
-const ChainedHullMethod = function (...args) {
-  return ChainedHull(this, ...args);
-};
-Shape.prototype.ChainedHull = ChainedHullMethod;
-
-ChainedHull.signature = 'ChainedHull(...shapes:Shape) -> Shape';
-
-/**
- *
- * # Hull
- *
- * Builds the convex hull of a set of shapes.
- *
- * ::: illustration { "view": { "position": [30, 30, 30] } }
- * ```
- * hull(Point([0, 0, 10]),
- *      Circle(10))
- * ```
- * :::
- * ::: illustration { "view": { "position": [30, 30, 30] } }
- * ```
- * assemble(Point([0, 0, 10]),
- *          Circle(10))
- *   .hull()
- * ```
- * :::
- * ::: illustration { "view": { "position": [30, 30, 30] } }
- * ```
- * Point([0, 0, 10]).hull(Circle(10))
- * ```
- * :::
- * ::: illustration { "view": { "position": [30, 30, 30] } }
- * ```
- * hull(Circle(4),
- *      Circle(2).move(8));
- * ```
- * :::
- *
- **/
-
-const Z$1 = 2;
-
-const Hull = (...shapes) => {
+const Alpha = (shape, componentLimit = 1) => {
   const points = [];
-  shapes.forEach((shape) => shape.eachPoint((point) => points.push(point)));
-  // FIX: Detect planar hulls properly.
-  if (points.every((point) => point[Z$1] === 0)) {
-    return Shape.fromGeometry(
-      taggedSurface({}, buildConvexSurfaceHull(points))
-    );
-  } else {
-    return Shape.fromGeometry(taggedSolid({}, buildConvexHull(points)));
-  }
+  shape.eachPoint((point) => points.push(point));
+  return Shape.fromGeometry(
+    taggedGraph({}, alphaShape(points, componentLimit))
+  );
 };
 
-const HullMethod = function (...shapes) {
-  return Hull(this, ...shapes);
+const alphaMethod = function (componentLimit = 1) {
+  return Alpha(this, componentLimit);
 };
-Shape.prototype.Hull = HullMethod;
-
-Hull.signature = 'Hull(shape:Shape, ...shapes:Shape) -> Shape';
-HullMethod.signature = 'Shape -> Hull(...shapes:Shape) -> Shape';
+Shape.prototype.alpha = alphaMethod;
 
 /**
  *
@@ -164,123 +74,79 @@ const LoopMethod = function (...args) {
 };
 Shape.prototype.Loop = LoopMethod;
 
-/**
- *
- * # Extrude
- *
- * Generates a solid from a surface by linear extrusion.
- *
- * ```
- * shape.extrude(height, depth, { twist = 0, steps = 1 })
- * ```
- *
- * ::: illustration
- * ```
- * Circle(10).cut(Circle(8))
- * ```
- * :::
- * ::: illustration { "view": { "position": [40, 40, 60] } }
- * ```
- * Circle(10).cut(Circle(8)).extrude(10)
- * ```
- * :::
- *
- * ::: illustration { "view": { "position": [40, 40, 60] } }
- * ```
- * Triangle(10).extrude(5, -2)
- * ```
- * :::
- * ::: illustration { "view": { "position": [40, 40, 60] } }
- * ```
- * Triangle(10).extrude(10, 0, { twist: 90, steps: 10 })
- * ```
- * :::
- *
- **/
+const cloudSolid = (shape) => {
+  const points = shape.toPoints();
+  return Shape.fromGeometry(taggedGraph({}, fromPoints(points)));
+};
+
+const cloudSolidMethod = function () {
+  return cloudSolid(this);
+};
+Shape.prototype.cloudSolid = cloudSolidMethod;
+
+const withCloudSolidMethod = function () {
+  return this.with(cloudSolid(this));
+};
+Shape.prototype.withCloudSolid = withCloudSolidMethod;
 
 const extrude = (shape, height = 1, depth = 0) => {
   if (height < depth) {
     [height, depth] = [depth, height];
   }
-  // FIX: Handle extrusion along a vector properly.
-  const solids = [];
-  const keptGeometry = shape.toKeptGeometry();
-  for (const { z0Surface, tags } of getZ0Surfaces(keptGeometry)) {
-    if (z0Surface.length > 0) {
-      const solid = alignVertices(extrude$1(z0Surface, height, depth));
-      solids.push(Shape.fromGeometry({ type: 'solid', solid, tags }));
-    }
-  }
-  for (const { surface, tags } of getSurfaces(keptGeometry)) {
-    if (surface.length > 0) {
-      const plane = toPlane$1(surface);
-      if (
-        plane[0] === 0 &&
-        plane[1] === 0 &&
-        plane[2] === 1 &&
-        plane[3] === 0
-      ) {
-        // Detect Z0.
-        // const solid = alignVertices(extrudeAlgorithm(surface, height, depth));
-        const solid = extrude$1(surface, height, depth);
-        solids.push(Shape.fromGeometry({ type: 'solid', solid, tags }));
-      } else {
-        const [toZ0, fromZ0] = toXYPlaneTransforms(toPlane$1(surface));
-        const z0SolidGeometry = extrude$1(
-          transform(toZ0, surface),
-          height,
-          depth
-        );
-        const solid = alignVertices(transform$1(fromZ0, z0SolidGeometry));
-        solids.push(Shape.fromGeometry({ type: 'solid', solid, tags }));
-      }
-    }
-  }
-  // Keep plans.
-  for (const entry of getPlans(keptGeometry)) {
-    solids.push(entry);
-  }
-  return Assembly(...solids);
+  return Shape$1.fromGeometry(extrude$1(shape.toGeometry(), height, depth));
 };
 
-const extrudeMethod = function (...args) {
-  return extrude(this, ...args);
+const extrudeMethod = function (height = 1, depth = 0) {
+  return extrude(this, height, depth);
 };
-Shape.prototype.extrude = extrudeMethod;
+Shape$1.prototype.extrude = extrudeMethod;
+Shape$1.prototype.pull = extrudeMethod;
 
-extrude.signature =
-  'extrude(shape:Shape, height:number = 1, depth:number = 1) -> Shape';
-extrudeMethod.signature =
-  'Shape -> extrude(height:number = 1, depth:number = 1) -> Shape';
-
-const outline = (
+const extrudeToPlane = (
   shape,
-  { includeFaces = true, includeHoles = true } = {}
-) =>
-  Assembly(
-    ...outline$1(
-      shape.toGeometry(),
-      includeFaces,
-      includeHoles
-    ).map((outline) => Shape.fromGeometry(outline))
+  highPlane = [0, 0, 1, 1],
+  lowPlane = [0, 0, 1, -1]
+) => {
+  return Shape$1.fromGeometry(
+    extrudeToPlane$1(shape.toGeometry(), highPlane, lowPlane)
+  );
+};
+
+const extrudeToPlaneMethod = function (highPlane, lowPlane) {
+  return extrudeToPlane(this, highPlane, lowPlane);
+};
+Shape$1.prototype.extrudeToPlane = extrudeToPlaneMethod;
+
+const fill = (shape) =>
+  Shape.fromGeometry(fill$1(shape.toGeometry()));
+
+const fillMethod = function () {
+  return fill(this);
+};
+
+Shape.prototype.interior = fillMethod;
+Shape.prototype.fill = fillMethod;
+
+const outline = (shape) =>
+  Group(
+    ...outline$1(shape.toGeometry()).map((outline) =>
+      Shape.fromGeometry(outline)
+    )
   );
 
-const outlineMethod = function ({
-  includeFaces = true,
-  includeHoles = true,
-} = {}) {
-  return outline(this, { includeFaces, includeHoles });
+const outlineMethod = function () {
+  return outline(this);
 };
 
-const withOutlineMethod = function ({
-  includeFaces = true,
-  includeHoles = true,
-} = {}) {
-  return this.with(outline(this, { includeFaces, includeHoles }));
+const withOutlineMethod = function (op = (x) => x) {
+  return this.with(op(outline(this)));
 };
 
 Shape.prototype.outline = outlineMethod;
+Shape.prototype.wire = outlineMethod;
+
 Shape.prototype.withOutline = withOutlineMethod;
+Shape.prototype.withWire = withOutlineMethod;
 
 const inline = (shape) => outline(shape.flip());
 
@@ -295,156 +161,17 @@ const withInlineMethod = function (options) {
 Shape$1.prototype.inline = inlineMethod;
 Shape$1.prototype.withInline = withInlineMethod;
 
-/**
- *
- * # Interior
- *
- * Generates a surface from the interior of a simple closed path.
- *
- * ::: illustration
- * ```
- * Circle(10)
- * ```
- * :::
- * ::: illustration
- * ```
- * Circle(10)
- *   .outline()
- * ```
- * :::
- * ::: illustration
- * ```
- * Circle(10)
- *   .outline()
- *   .interior()
- * ```
- * :::
- *
- **/
-
-const interior = (shape) => {
-  const surfaces = [];
-  for (const { paths } of getPaths(shape.toKeptGeometry())) {
-    // FIX: Check paths for coplanarity.
-    surfaces.push(
-      Shape.fromPathsToSurface(
-        paths.filter(isClosed).filter((path) => path.length >= 3)
-      )
-    );
-  }
-  return Assembly(...surfaces);
-};
-
-const interiorMethod = function (...args) {
-  return interior(this);
-};
-Shape.prototype.interior = interiorMethod;
-
-interior.signature = 'interior(shape:Shape) -> Shape';
-interiorMethod.signature = 'Shape -> interior() -> Shape';
-
-/**
- *
- * # Minkowski (convex)
- *
- * Generates the minkowski sum of a two convex shapes.
- *
- * ::: illustration { "view": { "position": [40, 40, 40] } }
- * ```
- * minkowski(Cube(10),
- *           Sphere(3));
- * ```
- * :::
- *
- **/
-
-// TODO: Generalize for more operands?
-const minkowski = (a, b) => {
-  const aPoints = [];
-  const bPoints = [];
-  a.eachPoint((point) => aPoints.push(point));
-  b.eachPoint((point) => bPoints.push(point));
-  return Shape.fromGeometry(buildConvexMinkowskiSum(aPoints, bPoints));
-};
-
-const minkowskiMethod = function (shape) {
-  return minkowski(this, shape);
-};
-Shape.prototype.minkowski = minkowskiMethod;
-
-minkowski.signature = 'minkowski(a:Shape, b:Shape) -> Shape';
-
-/**
- *
- * # Section
- *
- * Produces a cross-section of a solid as a surface.
- *
- * ::: illustration { "view": { "position": [40, 40, 60] } }
- * ```
- * difference(Cylinder(10, 10),
- *            Cylinder(8, 10))
- * ```
- * :::
- * ::: illustration
- * ```
- * difference(Sphere(10),
- *            Sphere(8))
- *   .section()
- * ```
- * :::
- * ::: illustration
- * ```
- * difference(Sphere(10),
- *            Sphere(8))
- *   .section()
- *   .outline()
- * ```
- * :::
- *
- **/
-
-const toPlane = (connector) => {
-  for (const entry of getPlans(connector.toKeptGeometry())) {
-    if (entry.plan && entry.plan.connector) {
-      return entry.planes[0];
+const section = (shape, ...pegs) => {
+  const planes = [];
+  if (pegs.length === 0) {
+    planes.push([0, 0, 1, 0]);
+  } else {
+    for (const peg of pegs) {
+      const { plane } = getPegCoords(peg);
+      planes.push(plane);
     }
   }
-};
-
-const toSurface = (plane) => {
-  const max = +1e5;
-  const min = -1e5;
-  const [, from] = toXYPlaneTransforms(plane);
-  const path = [
-    [max, max, 0],
-    [min, max, 0],
-    [min, min, 0],
-    [max, min, 0],
-  ];
-  const polygon = transform$2(from, path);
-  return [polygon];
-};
-
-const section = (solidShape, ...connectors) => {
-  if (connectors.length === 0) {
-    connectors.push(Z$3(0));
-  }
-  const planes = connectors.map(toPlane);
-  const planeSurfaces = planes.map(toSurface);
-  const shapes = [];
-  const normalize = createNormalize3();
-  for (const { solid, tags } of getSolids(solidShape.toKeptGeometry())) {
-    const sections = section$1(solid, planeSurfaces, normalize);
-    const surfaces = sections.map((section) => makeConvex(section, normalize));
-    for (let i = 0; i < surfaces.length; i++) {
-      surfaces[i].plane = planes[i];
-      shapes.push(
-        Shape.fromGeometry({ type: 'surface', surface: surfaces[i], tags })
-      );
-    }
-  }
-  return Layers(...shapes);
+  return Shape.fromGeometry(section$1(shape.toGeometry(), planes));
 };
 
 const sectionMethod = function (...args) {
@@ -460,7 +187,7 @@ const squash = (shape) => {
     for (const surface of solid) {
       for (const path of surface) {
         const flat = path.map(([x, y]) => [x, y, 0]);
-        if (toPlane$2(flat) === undefined) continue;
+        if (toPlane(flat) === undefined) continue;
         polygons.push(isCounterClockwise(flat) ? flat : flip(flat));
       }
     }
@@ -472,7 +199,7 @@ const squash = (shape) => {
     const polygons = [];
     for (const path of surface) {
       const flat = path.map(([x, y]) => [x, y, 0]);
-      if (toPlane$2(flat) === undefined) continue;
+      if (toPlane(flat) === undefined) continue;
       polygons.push(isCounterClockwise(flat) ? flat : flip(flat));
     }
     result.content.push(taggedZ0Surface({ tags }, polygons));
@@ -500,104 +227,57 @@ const squashMethod = function () {
 };
 Shape$1.prototype.squash = squashMethod;
 
-/**
- *
- * # Stretch
- *
- **/
+const START = 0;
+const END = 1;
 
-const toPlaneFromConnector = (connector) => {
-  for (const entry of getPlans(connector.toKeptGeometry())) {
-    if (entry.plan && entry.plan.connector) {
-      return entry.planes[0];
-    }
-  }
+const planeOfBisection = (aStart, bStart, intersection) => {
+  const dA = normalize(subtract(aStart, intersection));
+  const dB = normalize(subtract(bStart, intersection));
+  const bis2 = subtract(dA, dB);
+  return fromNormalAndPoint(bis2, intersection);
 };
 
-const toSurface$1 = (plane) => {
-  const max = +1e5;
-  const min = -1e5;
-  const [, from] = toXYPlaneTransforms(plane);
-  const path = [
-    [max, max, 0],
-    [min, max, 0],
-    [min, min, 0],
-    [max, min, 0],
-  ];
-  const polygon = transform$2(from, path);
-  return [polygon];
-};
+const neg = ([x, y, z, w]) => [x, y, z, -w];
 
-const stretch = (shape, length, connector = Z$3()) => {
-  const normalize = createNormalize3();
-  const stretches = [];
-  const planeSurface = toSurface$1(toPlaneFromConnector(connector));
-  for (const { solid, tags } of getSolids(shape.toKeptGeometry())) {
-    if (solid.length === 0) {
-      continue;
-    }
-    const bottom = cutOpen(solid, planeSurface, normalize);
-    const [profile] = section$1(solid, [planeSurface], normalize);
-    const top = cutOpen(solid, flip$1(planeSurface), normalize);
-    const [toZ0, fromZ0] = toXYPlaneTransforms(toPlane$1(profile));
-    const z0SolidGeometry = extrude$1(
-      transform(toZ0, profile),
-      length,
-      0,
-      false
-    );
-    const middle = transform$1(fromZ0, z0SolidGeometry);
-    const topMoved = transform$1(
-      fromTranslation(scale(length, toPlane$1(profile))),
-      top
-    );
-    stretches.push(
-      Shape.fromGeometry({
-        type: 'solid',
-        solid: alignVertices([...bottom, ...middle, ...topMoved], normalize),
-        tags,
-      })
-    );
-  }
-
-  return Assembly(...stretches);
-};
-
-const method = function (...args) {
-  return stretch(this, ...args);
-};
-Shape.prototype.stretch = method;
-
-/**
- *
- * # Sweep
- *
- * Sweep a tool profile along a path, to produce a surface.
- *
- **/
-
-// FIX: This is a weak approximation assuming a 1d profile -- it will need to be redesigned.
-const sweep = (toolpath, tool) => {
+// FIX: There is something very wrong with this -- rotating the profile around z can produce inversion.
+const sweep = (toolpath, tool, up = [0, 0, 1, 0]) => {
   const chains = [];
   for (const { paths } of getPaths(toolpath.toKeptGeometry())) {
     for (const path of paths) {
-      chains.push(
-        ...getEdges(path).map(([start, end]) =>
-          Hull(tool.move(...start), tool.move(...end))
-        )
-      );
+      // FIX: Handle open paths and bent polygons.
+      const edges = getEdges(path);
+      // const up = [0, 0, 1, 0]; // fromPolygon(path);
+      const length = edges.length;
+      for (let nth = 0; nth < length; nth++) {
+        const prev = edges[nth];
+        const curr = edges[(nth + 1) % length];
+        const next = edges[(nth + 2) % length];
+        const a = planeOfBisection(prev[START], curr[END], curr[START]);
+        const b = planeOfBisection(curr[START], next[END], curr[END]);
+        const middle = scale(0.5, add(curr[START], curr[END]));
+        const rotate90 = fromRotation(Math.PI / -2, up);
+        const direction = normalize(subtract(curr[START], curr[END]));
+        const rightDirection = transform(rotate90, direction);
+        const right = add(middle, rightDirection);
+        chains.push(
+          orient(middle, add(middle, up), right, tool).extrudeToPlane(
+            neg(b),
+            neg(a)
+          )
+        );
+      }
     }
   }
-  return Assembly(...chains);
+  return Group(...chains);
 };
 
-const sweepMethod = function (tool) {
-  return sweep(this, tool);
+const sweepMethod = function (tool, up) {
+  return sweep(this, tool, up);
 };
 
 Shape.prototype.sweep = sweepMethod;
-Shape.prototype.withSweep = function (tool) {
-  return this.with(sweep(this, tool));
+Shape.prototype.withSweep = function (tool, up) {
+  return this.with(sweep(this, tool, up));
 };
 
 const toolpath = (
@@ -610,18 +290,18 @@ const toolpath = (
     paths: toolpath$1(shape.toKeptGeometry(), diameter, overcut, solid),
   });
 
-const method$1 = function (...options) {
+const method = function (...options) {
   return toolpath(this, ...options);
 };
 
-Shape.prototype.toolpath = method$1;
+Shape.prototype.toolpath = method;
 Shape.prototype.withToolpath = function (...args) {
   return this.with(toolpath(this, ...args));
 };
 
 const X = 0;
 const Y = 1;
-const Z$2 = 2;
+const Z = 2;
 
 const floor = (value, resolution) =>
   Math.floor(value / resolution) * resolution;
@@ -660,7 +340,7 @@ const voxels = (shape, resolution = 1) => {
   const polygons = [];
   for (let x = min[X] - offset; x <= max[X] + offset; x += resolution) {
     for (let y = min[Y] - offset; y <= max[Y] + offset; y += resolution) {
-      for (let z = min[Z$2] - offset; z <= max[Z$2] + offset; z += resolution) {
+      for (let z = min[Z] - offset; z <= max[Z] + offset; z += resolution) {
         const state = test([x, y, z]);
         if (state !== test([x + resolution, y, z])) {
           const face = [
@@ -722,7 +402,7 @@ const surfaceCloud = (shape, resolution = 1) => {
   const paths = [];
   for (let x = min[X] - offset; x <= max[X] + offset; x += resolution) {
     for (let y = min[Y] - offset; y <= max[Y] + offset; y += resolution) {
-      for (let z = min[Z$2] - offset; z <= max[Z$2] + offset; z += resolution) {
+      for (let z = min[Z] - offset; z <= max[Z] + offset; z += resolution) {
         const state = test([x, y, z]);
         if (state !== test([x + resolution, y, z])) {
           paths.push([null, [x, y, z], [x + resolution, y, z]]);
@@ -784,7 +464,7 @@ const cloud = (shape, resolution = 1) => {
   const points = [];
   for (let x = min[X] - offset; x <= max[X] + offset; x += resolution) {
     for (let y = min[Y] - offset; y <= max[Y] + offset; y += resolution) {
-      for (let z = min[Z$2] - offset; z <= max[Z$2] + offset; z += resolution) {
+      for (let z = min[Z] - offset; z <= max[Z] + offset; z += resolution) {
         if (test([x, y, z])) {
           points.push([x, y, z]);
         }
@@ -827,21 +507,19 @@ const heightCloudMethod = function (resolution) {
 Shape.prototype.heightCloud = heightCloudMethod;
 
 const api = {
-  ChainedHull,
-  Hull,
+  Alpha,
   Loop,
   extrude,
-  interior,
-  minkowski,
+  extrudeToPlane,
+  fill,
   inline,
   outline,
   section,
   squash,
-  stretch,
   sweep,
   toolpath,
   voxels,
 };
 
 export default api;
-export { ChainedHull, Hull, Loop, extrude, inline, interior, minkowski, outline, section, squash, stretch, sweep, toolpath, voxels };
+export { Alpha, Loop, cloudSolid, extrude, extrudeToPlane, fill, inline, outline, section, squash, sweep, toolpath, voxels };

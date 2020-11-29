@@ -1558,15 +1558,18 @@ var loglevel = createCommonjsModule(function (module) {
     function Logger(name, defaultLevel, factory) {
       var self = this;
       var currentLevel;
+
       var storageKey = "loglevel";
-      if (name) {
+      if (typeof name === "string") {
         storageKey += ":" + name;
+      } else if (typeof name === "symbol") {
+        storageKey = undefined;
       }
 
       function persistLevelIfPossible(levelNum) {
           var levelName = (logMethods[levelNum] || 'silent').toUpperCase();
 
-          if (typeof window === undefinedType) return;
+          if (typeof window === undefinedType || !storageKey) return;
 
           // Use localStorage if available
           try {
@@ -1584,7 +1587,7 @@ var loglevel = createCommonjsModule(function (module) {
       function getPersistedLevel() {
           var storedLevel;
 
-          if (typeof window === undefinedType) return;
+          if (typeof window === undefinedType || !storageKey) return;
 
           try {
               storedLevel = window.localStorage[storageKey];
@@ -1677,7 +1680,7 @@ var loglevel = createCommonjsModule(function (module) {
 
     var _loggersByName = {};
     defaultLogger.getLogger = function getLogger(name) {
-        if (typeof name !== "string" || name === "") {
+        if ((typeof name !== "symbol" && typeof name !== "string") || name === "") {
           throw new TypeError("You must supply a name when creating a logger.");
         }
 
@@ -1703,6 +1706,9 @@ var loglevel = createCommonjsModule(function (module) {
     defaultLogger.getLoggers = function getLoggers() {
         return _loggersByName;
     };
+
+    // ES6 default export, for compatibility
+    defaultLogger['default'] = defaultLogger;
 
     return defaultLogger;
 }));
@@ -2739,11 +2745,15 @@ class Polyline
     /**
      * @param {array} points - Array of points like [ [x1, y1], [x2, y2, bulge]... ]
      * @param {boolean} closed
+     * @param {number} startWidth
+     * @param {number} endWidth
      */
-    constructor(points, closed = false)
+    constructor(points, closed = false, startWidth = 0, endWidth = 0)
     {
         this.points = points;
         this.closed = closed;
+        this.startWidth = startWidth;
+        this.endWidth = endWidth;
     }
 
     toDxfString()
@@ -2753,6 +2763,9 @@ class Polyline
         let s = `0\nPOLYLINE\n`;
         s += `8\n${this.layer.name}\n`;
         s += `66\n1\n70\n${this.closed ? 1 : 0}\n`;
+        if (this.startWidth !== 0 || this.endWidth !== 0) {
+            s += `40\n${this.startWidth}\n41\n${this.endWidth}\n`;
+        }
 
         for (let i = 0; i < this.points.length; ++i)
         {
@@ -2972,10 +2985,13 @@ class Drawing
 
     /**
      * @param {array} points - Array of points like [ [x1, y1], [x2, y2]... ] 
+     * @param {boolean} closed - Closed polyline flag
+     * @param {number} startWidth - Default start width
+     * @param {number} endWidth - Default end width
      */
-    drawPolyline(points, closed)
+    drawPolyline(points, closed = false, startWidth = 0, endWidth = 0)
     {
-        this.activeLayer.addShape(new Polyline_1(points, closed));
+        this.activeLayer.addShape(new Polyline_1(points, closed, startWidth, endWidth));
         return this;
     }
 

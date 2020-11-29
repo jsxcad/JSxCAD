@@ -26,15 +26,17 @@
   "dependencies": {
     "@jsxcad/algorithm-color": "^0.0.79",
     "@jsxcad/algorithm-quantize": "^0.0.79",
+    "@jsxcad/geometry-graph": "^0.0.79",
     "@jsxcad/geometry-path": "^0.0.79",
     "@jsxcad/geometry-paths": "^0.0.79",
     "@jsxcad/geometry-halfedge": "^0.0.79",
     "@jsxcad/geometry-solid": "^0.0.79",
-    "@jsxcad/geometry-surface": "^0.0.79",
     "@jsxcad/geometry-tagged": "^0.0.79",
     "@jsxcad/math-mat4": "^0.0.79",
+    "@jsxcad/math-plane": "^0.0.79",
     "@jsxcad/math-vec3": "^0.0.79",
-    "@jsxcad/sys": "^0.0.79"
+    "@jsxcad/sys": "^0.0.79",
+    "hash-sum": "^2.0.0"
   },
   "devDependencies": {
     "ava": "^3.9.0",

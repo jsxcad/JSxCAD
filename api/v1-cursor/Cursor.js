@@ -27,7 +27,7 @@ const normalizeVector = (...params) => {
  *       .forward(5)
  *       .right(45)
  *       .forward(5)
- *       .interior()
+ *       .fill()
  * ```
  * :::
  * ::: illustration { "view": { "position": [0, -1, 40] } }
@@ -52,8 +52,8 @@ export class Cursor {
     return new Cursor({ matrix: this.matrix, path: close(this.path) });
   }
 
-  interior() {
-    return this.close().toShape().interior();
+  fill() {
+    return this.close().toShape().fill();
   }
 
   move(...params) {

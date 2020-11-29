@@ -1,11 +1,8 @@
-import Shape from '@jsxcad/api-v1-shape';
+import { Shape, shapeMethod } from '@jsxcad/api-v1-shape';
 
 // FIX: This name is confusing wrt Shape.sketch().
-export const Sketch = (shape) => shape.Void().with(shape.sketch());
-
-const SketchMethod = function () {
-  return Sketch(this);
-};
-Shape.prototype.Sketch = SketchMethod;
+export const Sketch = (shape) => shape.sketch();
 
 export default Sketch;
+
+Shape.prototype.Sketch = shapeMethod(Sketch);

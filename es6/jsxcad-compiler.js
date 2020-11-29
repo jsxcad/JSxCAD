@@ -3456,7 +3456,7 @@ pp$3.parseLiteral = function(value) {
   var node = this.startNode();
   node.value = value;
   node.raw = this.input.slice(this.start, this.end);
-  if (node.raw.charCodeAt(node.raw.length - 1) === 110) { node.bigint = node.raw.slice(0, -1); }
+  if (node.raw.charCodeAt(node.raw.length - 1) === 110) { node.bigint = node.raw.slice(0, -1).replace(/_/g, ""); }
   this.next();
   return this.finishNode(node, "Literal")
 };
@@ -5622,7 +5622,13 @@ pp$9.readToken_mult_modulo_exp = function(code) { // '%*'
 
 pp$9.readToken_pipe_amp = function(code) { // '|&'
   var next = this.input.charCodeAt(this.pos + 1);
-  if (next === code) { return this.finishOp(code === 124 ? types.logicalOR : types.logicalAND, 2) }
+  if (next === code) {
+    if (this.options.ecmaVersion >= 12) {
+      var next2 = this.input.charCodeAt(this.pos + 2);
+      if (next2 === 61) { return this.finishOp(types.assign, 3) }
+    }
+    return this.finishOp(code === 124 ? types.logicalOR : types.logicalAND, 2)
+  }
   if (next === 61) { return this.finishOp(types.assign, 2) }
   return this.finishOp(code === 124 ? types.bitwiseOR : types.bitwiseAND, 1)
 };
@@ -5679,13 +5685,20 @@ pp$9.readToken_eq_excl = function(code) { // '=!'
 };
 
 pp$9.readToken_question = function() { // '?'
-  if (this.options.ecmaVersion >= 11) {
+  var ecmaVersion = this.options.ecmaVersion;
+  if (ecmaVersion >= 11) {
     var next = this.input.charCodeAt(this.pos + 1);
     if (next === 46) {
       var next2 = this.input.charCodeAt(this.pos + 2);
       if (next2 < 48 || next2 > 57) { return this.finishOp(types.questionDot, 2) }
     }
-    if (next === 63) { return this.finishOp(types.coalesce, 2) }
+    if (next === 63) {
+      if (ecmaVersion >= 12) {
+        var next2$1 = this.input.charCodeAt(this.pos + 2);
+        if (next2$1 === 61) { return this.finishOp(types.assign, 3) }
+      }
+      return this.finishOp(types.coalesce, 2)
+    }
   }
   return this.finishOp(types.question, 1)
 };
@@ -5814,22 +5827,59 @@ pp$9.readRegexp = function() {
 // were read, the integer value otherwise. When `len` is given, this
 // will return `null` unless the integer has exactly `len` digits.
 
-pp$9.readInt = function(radix, len) {
-  var start = this.pos, total = 0;
-  for (var i = 0, e = len == null ? Infinity : len; i < e; ++i) {
+pp$9.readInt = function(radix, len, maybeLegacyOctalNumericLiteral) {
+  // `len` is used for character escape sequences. In that case, disallow separators.
+  var allowSeparators = this.options.ecmaVersion >= 12 && len === undefined;
+
+  // `maybeLegacyOctalNumericLiteral` is true if it doesn't have prefix (0x,0o,0b)
+  // and isn't fraction part nor exponent part. In that case, if the first digit
+  // is zero then disallow separators.
+  var isLegacyOctalNumericLiteral = maybeLegacyOctalNumericLiteral && this.input.charCodeAt(this.pos) === 48;
+
+  var start = this.pos, total = 0, lastCode = 0;
+  for (var i = 0, e = len == null ? Infinity : len; i < e; ++i, ++this.pos) {
     var code = this.input.charCodeAt(this.pos), val = (void 0);
+
+    if (allowSeparators && code === 95) {
+      if (isLegacyOctalNumericLiteral) { this.raiseRecoverable(this.pos, "Numeric separator is not allowed in legacy octal numeric literals"); }
+      if (lastCode === 95) { this.raiseRecoverable(this.pos, "Numeric separator must be exactly one underscore"); }
+      if (i === 0) { this.raiseRecoverable(this.pos, "Numeric separator is not allowed at the first of digits"); }
+      lastCode = code;
+      continue
+    }
+
     if (code >= 97) { val = code - 97 + 10; } // a
     else if (code >= 65) { val = code - 65 + 10; } // A
     else if (code >= 48 && code <= 57) { val = code - 48; } // 0-9
     else { val = Infinity; }
     if (val >= radix) { break }
-    ++this.pos;
+    lastCode = code;
     total = total * radix + val;
   }
+
+  if (allowSeparators && lastCode === 95) { this.raiseRecoverable(this.pos - 1, "Numeric separator is not allowed at the last of digits"); }
   if (this.pos === start || len != null && this.pos - start !== len) { return null }
 
   return total
 };
+
+function stringToNumber(str, isLegacyOctalNumericLiteral) {
+  if (isLegacyOctalNumericLiteral) {
+    return parseInt(str, 8)
+  }
+
+  // `parseFloat(value)` stops parsing at the first numeric separator then returns a wrong value.
+  return parseFloat(str.replace(/_/g, ""))
+}
+
+function stringToBigInt(str) {
+  if (typeof BigInt !== "function") {
+    return null
+  }
+
+  // `BigInt(value)` throws syntax error if the string contains numeric separators.
+  return BigInt(str.replace(/_/g, ""))
+}
 
 pp$9.readRadixNumber = function(radix) {
   var start = this.pos;
@@ -5837,7 +5887,7 @@ pp$9.readRadixNumber = function(radix) {
   var val = this.readInt(radix);
   if (val == null) { this.raise(this.start + 2, "Expected number in radix " + radix); }
   if (this.options.ecmaVersion >= 11 && this.input.charCodeAt(this.pos) === 110) {
-    val = typeof BigInt !== "undefined" ? BigInt(this.input.slice(start, this.pos)) : null;
+    val = stringToBigInt(this.input.slice(start, this.pos));
     ++this.pos;
   } else if (isIdentifierStart(this.fullCharCodeAtPos())) { this.raise(this.pos, "Identifier directly after number"); }
   return this.finishToken(types.num, val)
@@ -5847,13 +5897,12 @@ pp$9.readRadixNumber = function(radix) {
 
 pp$9.readNumber = function(startsWithDot) {
   var start = this.pos;
-  if (!startsWithDot && this.readInt(10) === null) { this.raise(start, "Invalid number"); }
+  if (!startsWithDot && this.readInt(10, undefined, true) === null) { this.raise(start, "Invalid number"); }
   var octal = this.pos - start >= 2 && this.input.charCodeAt(start) === 48;
   if (octal && this.strict) { this.raise(start, "Invalid number"); }
   var next = this.input.charCodeAt(this.pos);
   if (!octal && !startsWithDot && this.options.ecmaVersion >= 11 && next === 110) {
-    var str$1 = this.input.slice(start, this.pos);
-    var val$1 = typeof BigInt !== "undefined" ? BigInt(str$1) : null;
+    var val$1 = stringToBigInt(this.input.slice(start, this.pos));
     ++this.pos;
     if (isIdentifierStart(this.fullCharCodeAtPos())) { this.raise(this.pos, "Identifier directly after number"); }
     return this.finishToken(types.num, val$1)
@@ -5871,8 +5920,7 @@ pp$9.readNumber = function(startsWithDot) {
   }
   if (isIdentifierStart(this.fullCharCodeAtPos())) { this.raise(this.pos, "Identifier directly after number"); }
 
-  var str = this.input.slice(start, this.pos);
-  var val = octal ? parseInt(str, 8) : parseFloat(str);
+  var val = stringToNumber(this.input.slice(start, this.pos), octal);
   return this.finishToken(types.num, val)
 };
 
@@ -6131,7 +6179,7 @@ pp$9.readWord = function() {
 
 // Acorn is a tiny, fast JavaScript parser written in JavaScript.
 
-var version = "7.3.1";
+var version = "7.4.0";
 
 Parser.acorn = {
   Parser: Parser,
@@ -6464,10 +6512,9 @@ const strip = (ast) => {
   } else if (ast instanceof Object) {
     const stripped = {};
     for (const key of Object.keys(ast)) {
-      if (['end', 'loc', 'start'].includes(key)) {
-        continue;
+      if (!['end', 'loc', 'start', 'parent'].includes(key)) {
+        stripped[key] = strip(ast[key]);
       }
-      stripped[key] = strip(ast[key]);
     }
     return stripped;
   } else {
@@ -6485,20 +6532,22 @@ const strip = (ast) => {
  * @param {function(path:string} options.import - A method for resolving imports.
  */
 
-const toEcmascript = async (script, { path } = {}) => {
+const toEcmascript = async (
+  script,
+  { path = '', topLevel = new Map() } = {}
+) => {
   const parseOptions = {
     allowAwaitOutsideFunction: true,
     allowReturnOutsideFunction: true,
     sourceType: 'module',
   };
+
   let ast = parse(script, parseOptions);
 
   const exportNames = [];
 
   const body = ast.body;
   const out = [];
-
-  const topLevel = new Map();
 
   const fromIdToSha = (id) => {
     const entry = topLevel.get(id);
@@ -6513,7 +6562,11 @@ const toEcmascript = async (script, { path } = {}) => {
     { doExport = false } = {}
   ) => {
     const id = declarator.id.name;
-    const code = strip(declarator);
+    const code = {
+      type: 'VariableDeclaration',
+      kind: declaration.kind,
+      declarations: [strip(declarator)],
+    };
     const dependencies = [];
 
     const Identifier = (node, state, c) => {
@@ -6526,8 +6579,49 @@ const toEcmascript = async (script, { path } = {}) => {
 
     const definition = { code, dependencies, dependencyShas };
     const sha = object_hash(definition);
-    const entry = { sha, definition };
+
+    let uncomputedInput = false;
+
+    const generateSubprogram = () => {
+      const body = [];
+      const seen = new Set();
+      const walk = (dependencies) => {
+        for (const dependency of dependencies) {
+          if (seen.has(dependency)) {
+            continue;
+          }
+          seen.add(dependency);
+          const entry = topLevel.get(dependency);
+          if (entry === undefined) {
+            continue;
+          }
+          if (!entry.isComputed) {
+            uncomputedInput = true;
+          }
+          walk(entry.dependencies);
+          body.push(entry.code);
+        }
+      };
+      walk(dependencies);
+      body.push(code);
+      const program = { type: 'Program', body };
+      return generate(program);
+    };
+
+    const program = generateSubprogram();
+
+    const isAllInputComputed = !uncomputedInput;
+
+    const entry = {
+      code,
+      definition,
+      dependencies,
+      program,
+      sha,
+      isAllInputComputed,
+    };
     topLevel.set(id, entry);
+
     if (doExport) {
       exportNames.push(id);
     }
@@ -6536,30 +6630,51 @@ const toEcmascript = async (script, { path } = {}) => {
       if (declarator.init.type === 'ArrowFunctionExpression') {
         // We can't cache functions.
         out.push(declaration);
+        entry.isNotCacheable = true;
         return;
       } else if (declarator.init.type === 'Literal') {
         // Not much point in caching literals.
         out.push(declaration);
+        entry.isNotCacheable = true;
         return;
       }
     }
     // Now that we have the sha, we can predict if it can be read from cache.
-    const meta = await read(`meta/def/${id}`);
+    const meta = await read(`meta/def/${path}/${id}`);
     if (meta && meta.sha === sha) {
       const readCode = strip(
-        parse(`await loadGeometry('data/def/${id}')`, parseOptions)
+        parse(`await loadGeometry('data/def/${path}/${id}')`, parseOptions)
       );
       const readExpression = readCode.body[0].expression;
       const init = readExpression;
-      out.push({ ...declaration, declarations: [{ ...declarator, init }] });
+      const cacheLoadCode = {
+        ...declaration,
+        declarations: [{ ...declarator, init }],
+      };
+      out.push(cacheLoadCode);
+      const replayRecordedNotes = parse(
+        `replayRecordedNotes('data/note/${path}/${id}')`,
+        parseOptions
+      );
+      out.push(replayRecordedNotes);
+      entry.code = cacheLoadCode;
+      entry.program = generate({
+        type: 'Program',
+        body: [cacheLoadCode, replayRecordedNotes],
+      });
+      entry.isComputed = true;
     } else {
+      out.push(parse('beginRecordingNotes()', parseOptions));
       out.push({ ...declaration, declarations: [declarator] });
       // Only cache Shapes.
       out.push(
         parse(
-          `${id} instanceof Shape && await saveGeometry('data/def/${id}', ${id}) && await write('meta/def/${id}', { sha: '${sha}' });`,
+          `${id} instanceof Shape && await saveGeometry('data/def/${path}/${id}', ${id}) && await write('meta/def/${path}/${id}', { sha: '${sha}' });`,
           parseOptions
         )
+      );
+      out.push(
+        parse(`saveRecordedNotes('data/note/${path}/${id}')`, parseOptions)
       );
     }
     out.push(parse(`Object.freeze(${id});`, parseOptions));
@@ -6644,6 +6759,7 @@ const toEcmascript = async (script, { path } = {}) => {
 
   const result =
     '\n' + generate(parse(out.map(generate).join('\n'), parseOptions));
+
   return result;
 };
 

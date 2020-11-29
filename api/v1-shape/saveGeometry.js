@@ -1,4 +1,4 @@
-import { read, write } from '@jsxcad/sys';
+import { read, write } from '@jsxcad/geometry-tagged';
 
 import Shape from './Shape.js';
 
@@ -6,4 +6,4 @@ export const loadGeometry = async (path) =>
   Shape.fromGeometry(await read(path));
 
 export const saveGeometry = async (path, shape) =>
-  write(path, shape.toGeometry());
+  Shape.fromGeometry(await write(shape.toGeometry(), path));

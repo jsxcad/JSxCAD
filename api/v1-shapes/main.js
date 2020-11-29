@@ -1,97 +1,115 @@
 import Arc from './Arc.js';
 import Assembly from './Assembly.js';
+import Ball from './Ball.js';
+import Box from './Box.js';
+import ChainedHull from './ChainedHull.js';
 import Circle from './Circle.js';
 import Cone from './Cone.js';
-import Cube from './Cube.js';
-import Cylinder from './Cylinder.js';
 import Difference from './Difference.js';
 import Empty from './Empty.js';
+import Group from './Group.js';
+import Hershey from './Hershey.js';
 import Hexagon from './Hexagon.js';
+import Hull from './Hull.js';
 import Icosahedron from './Icosahedron.js';
 import Intersection from './Intersection.js';
-import Layers from './Layers.js';
 import Line from './Line.js';
+import Octagon from './Octagon.js';
 import Path from './Path.js';
+import Peg from './Peg.js';
+import Pentagon from './Pentagon.js';
+import Plane from './Plane.js';
 import Point from './Point.js';
 import Points from './Points.js';
 import Polygon from './Polygon.js';
 import Polyhedron from './Polyhedron.js';
-import Prism from './Prism.js';
+import Rod from './Rod.js';
+import Septagon from './Septagon.js';
 import Sketch from './Sketch.js';
-import Sphere from './Sphere.js';
 import Spiral from './Spiral.js';
 import Square from './Square.js';
-import Tetrahedron from './Tetrahedron.js';
+import Tetragon from './Tetragon.js';
 import Toolpath from './Toolpath.js';
 import Torus from './Torus.js';
 import Triangle from './Triangle.js';
 import Union from './Union.js';
-import Void from './Void.js';
 import Wave from './Wave.js';
 
 const api = {
   Arc,
   Assembly,
+  Ball,
+  Box,
+  ChainedHull,
   Circle,
   Cone,
-  Cube,
-  Cylinder,
   Difference,
   Empty,
+  Group,
+  Hershey,
   Hexagon,
+  Hull,
   Icosahedron,
   Intersection,
-  Layers,
   Line,
+  Octagon,
   Path,
+  Peg,
+  Pentagon,
+  Plane,
   Point,
   Points,
   Polygon,
   Polyhedron,
-  Prism,
+  Rod,
+  Septagon,
   Sketch,
-  Sphere,
   Spiral,
   Square,
-  Tetrahedron,
+  Tetragon,
   Toolpath,
   Torus,
   Triangle,
   Union,
-  Void,
   Wave,
 };
 
 export {
   Arc,
   Assembly,
+  Ball,
+  Box,
+  ChainedHull,
   Circle,
   Cone,
-  Cube,
-  Cylinder,
   Difference,
   Empty,
+  Group,
+  Hershey,
   Hexagon,
+  Hull,
   Icosahedron,
   Intersection,
-  Layers,
   Line,
+  Octagon,
+  Pentagon,
   Path,
+  Peg,
+  Plane,
   Point,
   Points,
   Polygon,
   Polyhedron,
-  Prism,
+  Rod,
+  Septagon,
   Sketch,
-  Sphere,
   Spiral,
   Square,
+  Tetragon,
   Toolpath,
-  Tetrahedron,
   Torus,
   Triangle,
   Union,
-  Void,
   Wave,
 };
 

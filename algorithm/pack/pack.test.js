@@ -342,9 +342,9 @@ test('Bad fit', (t) => {
   const [packed, unpacked] = pack(
     { size: [30, 120] },
     {
-      type: 'z0Surface',
+      type: 'surface',
       tags: undefined,
-      z0Surface: [
+      surface: [
         [
           [5.000000000000001, 20, 0],
           [-5, 20.000000000000004, 0],
@@ -354,9 +354,9 @@ test('Bad fit', (t) => {
       ],
     },
     {
-      type: 'z0Surface',
+      type: 'surface',
       tags: undefined,
-      z0Surface: [
+      surface: [
         [
           [5.000000000000001, 20, 0],
           [-5, 20.000000000000004, 0],
@@ -372,9 +372,9 @@ test('Bad fit', (t) => {
       tags: undefined,
       content: [
         {
-          type: 'z0Surface',
+          type: 'surface',
           tags: undefined,
-          z0Surface: [
+          surface: [
             [
               [1, -14, 0],
               [-9, -14, 0],
@@ -390,9 +390,9 @@ test('Bad fit', (t) => {
       tags: undefined,
       content: [
         {
-          type: 'z0Surface',
+          type: 'surface',
           tags: undefined,
-          z0Surface: [
+          surface: [
             [
               [1, 28, 0],
               [-9, 28, 0],

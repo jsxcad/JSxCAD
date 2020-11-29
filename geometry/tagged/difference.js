@@ -1,20 +1,17 @@
 import {
-  differenceSurface,
-  fromSolid as fromSolidToBsp,
-  fromSurface as fromSurfaceToBsp,
-} from '@jsxcad/geometry-bsp';
+  fromSolid as fromSolidToGraph,
+  fromSurface as fromSurfaceToGraph,
+  difference as graphDifference,
+  toSolid as toSolidFromGraph,
+  toSurface as toSurfaceFromGraph,
+} from '@jsxcad/geometry-graph';
 
 import { cache } from '@jsxcad/cache';
-import { createNormalize3 } from '@jsxcad/algorithm-quantize';
-import { fromSurface as fromSurfaceToSolid } from '@jsxcad/geometry-solid';
-import { getAnySurfaces } from './getAnySurfaces.js';
-import { getPaths } from './getPaths.js';
+import { getGraphs } from './getGraphs.js';
 import { getSolids } from './getSolids.js';
-import { makeWatertight as makeWatertightSurface } from '@jsxcad/geometry-surface';
-import { difference as pathsDifference } from '@jsxcad/geometry-paths';
+import { getSurfaces } from './getSurfaces.js';
 import { rewrite } from './visit.js';
-import { difference as solidDifference } from '@jsxcad/geometry-solid-boolean';
-import { taggedPaths } from './taggedPaths.js';
+import { taggedGraph } from './taggedGraph.js';
 import { taggedSolid } from './taggedSolid.js';
 import { taggedSurface } from './taggedSurface.js';
 
@@ -22,60 +19,50 @@ const differenceImpl = (geometry, ...geometries) => {
   const op = (geometry, descend) => {
     const { tags } = geometry;
     switch (geometry.type) {
-      case 'solid': {
-        const normalize = createNormalize3();
-        const todo = [];
+      case 'graph': {
+        let differenced = geometry.graph;
         for (const geometry of geometries) {
+          for (const { graph } of getGraphs(geometry)) {
+            differenced = graphDifference(differenced, graph);
+          }
           for (const { solid } of getSolids(geometry)) {
-            todo.push(solid);
+            differenced = graphDifference(differenced, fromSolidToGraph(solid));
           }
-          for (const { surface, z0Surface } of getAnySurfaces(geometry)) {
-            todo.push(fromSurfaceToSolid(surface || z0Surface, normalize));
-          }
-        }
-        return taggedSolid({ tags }, solidDifference(geometry.solid, ...todo));
-      }
-      case 'z0Surface':
-      case 'surface': {
-        const normalize = createNormalize3();
-        let thisSurface = geometry.surface || geometry.z0Surface;
-        for (const geometry of geometries) {
-          for (const { solid } of getSolids(geometry)) {
-            const differencedSurface = [];
-            differenceSurface(
-              fromSolidToBsp(solid),
-              thisSurface,
-              normalize,
-              (surface) => differencedSurface.push(...surface)
+          for (const { surface } of getSurfaces(geometry)) {
+            differenced = graphDifference(
+              differenced,
+              fromSurfaceToGraph(surface)
             );
-            thisSurface = differencedSurface;
-          }
-          for (const { surface, z0Surface } of getAnySurfaces(geometry)) {
-            const differencedSurface = [];
-            differenceSurface(
-              fromSurfaceToBsp(surface || z0Surface, normalize),
-              thisSurface,
-              normalize,
-              (surface) => differencedSurface.push(...surface)
-            );
-            thisSurface = differencedSurface;
           }
         }
-        return taggedSurface({ tags }, makeWatertightSurface(thisSurface));
+        return taggedGraph({ tags }, differenced);
       }
-      case 'paths': {
-        const todo = [];
-        for (const geometry of geometries) {
-          for (const { paths } of getPaths(geometry)) {
-            todo.push(paths);
-          }
-        }
-        return taggedPaths({ tags }, pathsDifference(geometry.paths, ...todo));
-      }
+      case 'solid':
+        return taggedSolid(
+          { tags },
+          toSolidFromGraph(
+            difference(
+              taggedGraph({ tags }, fromSolidToGraph(geometry.solid)),
+              ...geometries
+            ).graph
+          )
+        );
+      case 'surface':
+        return taggedSurface(
+          { tags },
+          toSurfaceFromGraph(
+            difference(
+              taggedGraph({ tags }, fromSurfaceToGraph(geometry.surface)),
+              ...geometries
+            ).graph
+          )
+        );
+      case 'paths':
       case 'points': {
         // Not implemented yet.
         return geometry;
       }
+      case 'layout':
       case 'plan':
       case 'assembly':
       case 'item':

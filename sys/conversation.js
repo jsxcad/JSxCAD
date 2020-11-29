@@ -1,9 +1,9 @@
 export const conversation = ({ agent, say }) => {
   let id = 0;
-  const openQuestions = {};
+  const openQuestions = new Map();
   const ask = (question) => {
     const promise = new Promise((resolve, reject) => {
-      openQuestions[id] = { resolve, reject };
+      openQuestions.set(id, { resolve, reject });
     });
     say({ id, question });
     id += 1;
@@ -13,13 +13,13 @@ export const conversation = ({ agent, say }) => {
     const { id, question, answer, error } = message;
     // Check hasOwnProperty to detect undefined values.
     if (message.hasOwnProperty('answer')) {
-      const { resolve, reject } = openQuestions[id];
+      const { resolve, reject } = openQuestions.get(id);
       if (error) {
         reject(error);
       } else {
         resolve(answer);
       }
-      delete openQuestions[id];
+      openQuestions.delete(id);
     } else if (message.hasOwnProperty('question')) {
       const answer = await agent({ ask, question });
       say({ id, answer });

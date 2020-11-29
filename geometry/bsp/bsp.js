@@ -557,82 +557,80 @@ const removeInteriorPolygons = (bsp, polygons, normalize) => {
   }
 };
 
-const removeInteriorPolygonsForDifference = (bsp, polygons, normalize) => {
+const removeInteriorPolygonForDifference = (bsp, polygon, normalize, emit) => {
+  if (polygon === undefined) return;
   if (bsp === inLeaf) {
-    return [];
   } else if (bsp === outLeaf) {
-    return keepOut(polygons);
+    return polygon;
   } else {
     const outward = [];
     const inward = [];
-    for (let i = 0; i < polygons.length; i++) {
-      splitPolygon(
-        normalize,
-        bsp.plane,
-        polygons[i],
-        /* back= */ inward,
-        /* abutting= */ outward, // dropward
-        /* overlapping= */ inward, // dropward
-        /* front= */ outward
-      );
-    }
-    const trimmedFront = removeInteriorPolygonsForDifference(
+    splitPolygon(
+      normalize,
+      bsp.plane,
+      polygon,
+      /* back= */ inward,
+      /* abutting= */ outward, // dropward
+      /* overlapping= */ inward, // dropward
+      /* front= */ outward
+    );
+    const front = removeInteriorPolygonForDifference(
       bsp.front,
-      outward,
-      normalize
+      outward[0],
+      normalize,
+      emit
     );
-    const trimmedBack = removeInteriorPolygonsForDifference(
+    const back = removeInteriorPolygonForDifference(
       bsp.back,
-      inward,
-      normalize
+      inward[0],
+      normalize,
+      emit
     );
-
-    if (trimmedFront.length === 0) {
-      return trimmedBack;
-    } else if (trimmedBack.length === 0) {
-      return trimmedFront;
-    } else {
-      return merge(trimmedFront, trimmedBack);
+    if (front && back) {
+      return polygon;
+    } else if (front) {
+      emit(front);
+    } else if (back) {
+      emit(back);
     }
   }
 };
 
-const removeExteriorPolygonsForDifference = (bsp, polygons, normalize) => {
+const removeExteriorPolygonForDifference = (bsp, polygon, normalize, emit) => {
+  if (polygon === undefined) return;
   if (bsp === inLeaf) {
-    return keepIn(polygons);
+    return polygon;
   } else if (bsp === outLeaf) {
-    return [];
   } else {
     const outward = [];
     const inward = [];
-    for (let i = 0; i < polygons.length; i++) {
-      splitPolygon(
-        normalize,
-        bsp.plane,
-        polygons[i],
-        /* back= */ inward,
-        /* abutting= */ outward, // dropward
-        /* overlapping= */ outward, // dropward
-        /* front= */ outward
-      );
-    }
-    const trimmedFront = removeExteriorPolygonsForDifference(
+    splitPolygon(
+      normalize,
+      bsp.plane,
+      polygon,
+      /* back= */ inward,
+      /* abutting= */ outward, // dropward
+      /* overlapping= */ outward, // dropward
+      /* front= */ outward
+    );
+    const front = removeExteriorPolygonForDifference(
       bsp.front,
-      outward,
-      normalize
+      outward[0],
+      normalize,
+      emit
     );
-    const trimmedBack = removeExteriorPolygonsForDifference(
+    const back = removeExteriorPolygonForDifference(
       bsp.back,
-      inward,
-      normalize
+      inward[0],
+      normalize,
+      emit
     );
-
-    if (trimmedFront.length === 0) {
-      return trimmedBack;
-    } else if (trimmedBack.length === 0) {
-      return trimmedFront;
-    } else {
-      return merge(trimmedFront, trimmedBack);
+    if (front && back) {
+      return polygon;
+    } else if (front) {
+      emit(front);
+    } else if (back) {
+      emit(back);
     }
   }
 };
@@ -883,13 +881,13 @@ export {
   removeExteriorPolygonsForSection,
   removeExteriorPolygonsForCutDroppingOverlap,
   removeExteriorPolygonsForCutKeepingOverlap,
-  removeExteriorPolygonsForDifference,
+  removeExteriorPolygonForDifference,
   removeInteriorPolygons,
   removeInteriorPolygonsForUnionKeepingOverlap,
   removeInteriorPolygonsForUnionDroppingOverlap,
   removeExteriorPolygonsForIntersectionDroppingOverlap,
   removeExteriorPolygonsForIntersectionKeepingOverlap,
-  removeInteriorPolygonsForDifference,
+  removeInteriorPolygonForDifference,
   removeInteriorPolygonsForSurface,
   toPolygons,
   toPlanarPolygons,

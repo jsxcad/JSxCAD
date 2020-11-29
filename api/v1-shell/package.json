@@ -25,7 +25,6 @@
   "license": "MIT",
   "dependencies": {
     "@jsxcad/algorithm-quantize": "^0.0.79",
-    "@jsxcad/api-v1-extrude": "^0.0.79",
     "@jsxcad/api-v1-shape": "^0.0.79",
     "@jsxcad/api-v1-shapes": "^0.0.79",
     "@jsxcad/geometry-bsp": "^0.0.79",
@@ -35,6 +34,7 @@
     "@jsxcad/geometry-tagged": "^0.0.79",
     "@jsxcad/math-line3": "^0.0.79",
     "@jsxcad/math-mat4": "^0.0.79",
+    "@jsxcad/math-plane": "^0.0.79",
     "@jsxcad/math-vec3": "^0.0.79"
   },
   "devDependencies": {

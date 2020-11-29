@@ -1,0 +1,15 @@
+md`
+# Shell Operations`;
+
+md`## path.offset(amount)`;
+md`FIX
+Circle(5)
+  .outline()
+  .op((s) => Group(s, s.offset(-1), s.offset(-2), s.offset(-3), s.offset(-4)))
+  .fix()
+  .topView();`;
+
+md`## shape.grow(1)`;
+md`
+FIX
+Box(10).grow(1).view();`;

@@ -1,5 +1,5 @@
-import { reorient, makeConvex, union } from './jsxcad-geometry-z0surface-boolean.js';
-import { scale, taggedZ0Surface } from './jsxcad-geometry-tagged.js';
+import { scale, taggedGraph, taggedGroup } from './jsxcad-geometry-tagged.js';
+import { fromPaths } from './jsxcad-geometry-graph.js';
 import { fromSvgPath } from './jsxcad-convert-svg.js';
 
 var global$1 = (typeof global !== "undefined" ? global :
@@ -15876,19 +15876,20 @@ const toFont = (options = {}, data) => {
         svgPaths.push(glyph.getPath(x, y, fontSize, options).toPathData());
       }
     );
-    const pathsets = [];
+    const group = [];
     for (let { paths } of svgPaths.map((svgPath) =>
       fromSvgPath(new TextEncoder('utf8').encode(svgPath), {
         curveSegments: curveSegments,
       })
     )) {
-      // Outlining forces re-orientation.
-      pathsets.push(reorient(paths));
+      group.push(
+        scale(
+          [factor, factor, factor],
+          taggedGraph({}, fromPaths(paths))
+        )
+      );
     }
-    return scale(
-      [factor, factor, factor],
-      taggedZ0Surface({}, makeConvex(union(...pathsets)))
-    );
+    return taggedGroup({}, ...group);
   };
 
   return font;

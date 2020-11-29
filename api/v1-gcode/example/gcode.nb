@@ -1,0 +1,61 @@
+md`# GCODE conversion`;
+
+md`This produces GRBL style gcode, supporting laser and spindle tools.`;
+
+md`
+'''
+const tool = {
+  // toolType: 'laser'
+  toolType: 'spindle',
+  spindleRpm: 6000,
+  // laserPower: 1000,
+  feedRate: 650,
+  toolDiameter: 1, // The diameter of the tool for kerf compensation.
+  maxCutZ: -10, // The tool will not cut below this Z depth.
+  maxFeedRate: 10000, // Feedrate cannot exceed this amount.
+  topZ: 0, // This is the assumed Z of the top of the work surface.
+  jumpHeight: 1, // The tool will raise to topZ + jumpHeight to switch paths.
+  millingStyle: 'conventional', // climb, any
+};
+'''
+`;
+const tool = {
+  // toolType: 'laser'
+  toolType: 'spindle',
+  spindleRpm: 6000,
+  // laserPower: 1000,
+  feedRate: 650,
+  toolDiameter: 1, // The diameter of the tool for kerf compensation.
+  maxCutZ: -10, // The tool will not cut below this Z depth.
+  maxFeedRate: 10000, // Feedrate cannot exceed this amount.
+  topZ: 0, // This is the assumed Z of the top of the work surface.
+  jumpHeight: 1, // The tool will raise to topZ + jumpHeight to switch paths.
+  millingStyle: 'conventional', // climb, any
+};
+
+const toolpath = Square(10).outline().toolpath(1);
+toolpath.view().downloadGcode('square', tool);
+
+md`
+---
+Now square_0.gcode should contain
+'''
+G21
+$32=0
+G0 X0.000 Y0.000 Z1.000
+M3
+S6000.000
+G0 X0.000 Y0.000 Z1.000
+G0 X5.500 Y5.500 Z1.000
+G0 X5.500 Y5.500 Z0.000
+G1 X-5.500 Y5.500 Z0.000 F650.000
+G1 X-5.500 Y-5.500 Z0.000 F650.000
+G1 X5.500 Y-5.500 Z0.000 F650.000
+G1 X5.500 Y5.500 Z0.000 F650.000
+G1 X5.500 Y5.500 Z0.000 F650.000
+M5
+G0 X5.500 Y5.500 Z1.000
+G0 X0.000 Y0.000 Z1.000
+G0 X0.000 Y0.000 Z0.000
+'''
+`;

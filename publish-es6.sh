@@ -1,6 +1,6 @@
 #!/bin/bash
 
-cp algorithm/clipper/dist/main.js es6/jsxcad-algorithm-clipper.js
+cp algorithm/cgal/dist/main.js es6/jsxcad-algorithm-cgal.js
 cp algorithm/color/dist/main.js es6/jsxcad-algorithm-color.js
 cp algorithm/contour/dist/main.js es6/jsxcad-algorithm-contour.js
 cp algorithm/pack/dist/main.js es6/jsxcad-algorithm-pack.js
@@ -53,18 +53,17 @@ cp convert/svg/dist/main.js es6/jsxcad-convert-svg.js
 cp convert/threejs/dist/main.js es6/jsxcad-convert-threejs.js
 cp data/shape/dist/main.js es6/jsxcad-data-shape.js
 cp geometry/bsp/dist/main.js es6/jsxcad-geometry-bsp.js
+cp geometry/graph/dist/main.js es6/jsxcad-geometry-graph.js
 cp geometry/halfedge/dist/main.js es6/jsxcad-geometry-halfedge.js
 cp geometry/path/dist/main.js es6/jsxcad-geometry-path.js
 cp geometry/paths/dist/main.js es6/jsxcad-geometry-paths.js
+cp geometry/plan/dist/main.js es6/jsxcad-geometry-plan.js
 cp geometry/points/dist/main.js es6/jsxcad-geometry-points.js
 cp geometry/polygons/dist/main.js es6/jsxcad-geometry-polygons.js
 cp geometry/solid-boolean/dist/main.js es6/jsxcad-geometry-solid-boolean.js
 cp geometry/solid/dist/main.js es6/jsxcad-geometry-solid.js
-cp geometry/surface-boolean/dist/main.js es6/jsxcad-geometry-surface-boolean.js
 cp geometry/surface/dist/main.js es6/jsxcad-geometry-surface.js
 cp geometry/tagged/dist/main.js es6/jsxcad-geometry-tagged.js
-cp geometry/z0surface-boolean/dist/main.js es6/jsxcad-geometry-z0surface-boolean.js
-cp geometry/z0surface/dist/main.js es6/jsxcad-geometry-z0surface.js
 cp math/line2/dist/main.js es6/jsxcad-math-line2.js
 cp math/line3/dist/main.js es6/jsxcad-math-line3.js
 cp math/mat4/dist/main.js es6/jsxcad-math-mat4.js

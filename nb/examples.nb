@@ -1,0 +1,27 @@
+md`
+# JSxCAD Examples
+
+* API
+ * [Control](#JSxCAD@https://gitcdn.link/cdn/jsxcad/JSxCAD/master/api/v1-control/example/control.nb)
+ * Conversion
+   * [GCODE](#JSxCAD@https://gitcdn.link/cdn/jsxcad/JSxCAD/master/api/v1-gcode/example/gcode.nb)
+   * [PDF](#JSxCAD@https://gitcdn.link/cdn/jsxcad/JSxCAD/master/api/v1-pdf/example/pdf.nb)
+   * [STL](#JSxCAD@https://gitcdn.link/cdn/jsxcad/JSxCAD/master/api/v1-stl/example/stl.nb)
+   * [SVG](#JSxCAD@https://gitcdn.link/cdn/jsxcad/JSxCAD/master/api/v1-svg/example/svg.nb)
+ * [Known Defects](#JSxCAD@https://gitcdn.link/cdn/jsxcad/JSxCAD/master/nb/known-defects/known-defects.nb)
+ * [Layout](#JSxCAD@https://gitcdn.link/cdn/jsxcad/JSxCAD/master/api/v1-layout/example/layout.nb)
+ * Shape
+   * Construction
+     * [Complex](#JSxCAD@https://gitcdn.link/cdn/jsxcad/JSxCAD/master/api/v1-shapes/example/complex.nb)
+     * [Path](#JSxCAD@https://gitcdn.link/cdn/jsxcad/JSxCAD/master/api/v1-shapes/example/path.nb)
+     * [Points](#JSxCAD@https://gitcdn.link/cdn/jsxcad/JSxCAD/master/api/v1-shapes/example/points.nb)
+     * [Solid](#JSxCAD@https://gitcdn.link/cdn/jsxcad/JSxCAD/master/api/v1-shapes/example/solid.nb)
+     * [Surface](#JSxCAD@https://gitcdn.link/cdn/jsxcad/JSxCAD/master/api/v1-shapes/example/surface.nb)
+   * Operation
+     * [Deform](#JSxCAD@https://gitcdn.link/cdn/jsxcad/JSxCAD/master/api/v1-deform/example/deform.nb)
+     * [Extrude](#JSxCAD@https://gitcdn.link/cdn/jsxcad/JSxCAD/master/api/v1-extrude/example/extrude.nb)
+     * [Shape](#JSxCAD@https://gitcdn.link/cdn/jsxcad/JSxCAD/master/api/v1-shape/example/shape.nb)
+     * [Shell](#JSxCAD@https://gitcdn.link/cdn/jsxcad/JSxCAD/master/api/v1-shell/example/shell.nb)
+ * [Tools](#JSxCAD@https://gitcdn.link/cdn/jsxcad/JSxCAD/master/api/v1-tools/example/tools.nb)
+* [Projects](#JSxCAD@https://gitcdn.link/cdn/jsxcad/JSxCAD/master/nb/projects/index.nb)
+`;

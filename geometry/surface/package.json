@@ -28,8 +28,6 @@
     "@jsxcad/geometry-halfedge": "^0.0.79",
     "@jsxcad/geometry-path": "^0.0.79",
     "@jsxcad/geometry-polygons": "^0.0.79",
-    "@jsxcad/geometry-z0surface": "^0.0.79",
-    "@jsxcad/geometry-z0surface-boolean": "^0.0.79",
     "@jsxcad/math-mat4": "^0.0.79",
     "@jsxcad/math-plane": "^0.0.79",
     "@jsxcad/math-poly3": "^0.0.79",

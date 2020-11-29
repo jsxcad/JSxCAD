@@ -1,12 +1,9 @@
 import Shape, { Shape as Shape$1, log } from './jsxcad-api-v1-shape.js';
-import { add, orthogonal, scale, dot, subtract, negate } from './jsxcad-math-vec3.js';
+import { orthogonal, add, scale, dot } from './jsxcad-math-vec3.js';
 import Plan from './jsxcad-api-v1-plan.js';
-import { visit, getSolids, getAnySurfaces, getPlans, getSurfaces, getZ0Surfaces, toKeptGeometry, drop } from './jsxcad-geometry-tagged.js';
-import { toPlane as toPlane$1, cut as cut$1 } from './jsxcad-geometry-surface.js';
-import { Assembly } from './jsxcad-api-v1-shapes.js';
-import { cut } from './jsxcad-geometry-bsp.js';
+import { visit, getSolids, getSurfaces, getZ0Surfaces } from './jsxcad-geometry-tagged.js';
+import { toPlane } from './jsxcad-geometry-surface.js';
 import { toXYPlaneTransforms } from './jsxcad-math-plane.js';
-import { transform } from './jsxcad-geometry-path.js';
 
 /**
  *
@@ -197,7 +194,7 @@ const faceConnector = (shape, id, scoreOrientation, scorePosition) => {
   }
 
   // FIX: We should have a consistent rule for deciding the rotational position of the connector.
-  const plane = toPlane$1(bestSurface);
+  const plane = toPlane(bestSurface);
   return shape.toConnector(
     Connector(id, {
       plane,
@@ -210,7 +207,7 @@ const faceConnector = (shape, id, scoreOrientation, scorePosition) => {
 const toConnector = (shape, surface, id) => {
   const center = toPosition(surface);
   // FIX: Adding y + 1 is not always correct.
-  const plane = toPlane$1(surface);
+  const plane = toPlane(surface);
   return Connector(id, { plane, center, right: orthogonal(plane) });
 };
 
@@ -225,7 +222,7 @@ const back = (shape) =>
   faceConnector(
     shape,
     'back',
-    (surface) => dot(toPlane$1(surface), [0, 1, 0, 0]),
+    (surface) => dot(toPlane(surface), [0, 1, 0, 0]),
     (point) => point[Y]
   );
 
@@ -244,7 +241,7 @@ const bottom = (shape) =>
   faceConnector(
     shape,
     'bottom',
-    (surface) => dot(toPlane$1(surface), [0, 0, -1, 0]),
+    (surface) => dot(toPlane(surface), [0, 0, -1, 0]),
     (point) => -point[Z]
   );
 
@@ -256,91 +253,7 @@ Shape.prototype.bottom = bottomMethod;
 bottom.signature = 'bottom(shape:Shape) -> Shape';
 bottomMethod.signature = 'Shape -> bottom() -> Shape';
 
-// Ideally this would be a plane of infinite extent.
-// Unfortunately this makes things like interpolation tricky,
-// so we approximate it with a very large polygon instead.
-
-const Z$1 = (z = 0) => {
-  const size = 1e5;
-  const min = -size;
-  const max = size;
-  // FIX: Why aren't we createing the connector directly?
-  const sheet = Shape$1.fromPathToSurface([
-    [max, min, z],
-    [max, max, z],
-    [min, max, z],
-    [min, min, z],
-  ]);
-  return toConnector(sheet, sheet.toGeometry().surface, 'top');
-};
-
-/**
- *
- * # Chop
- *
- * Remove the parts of a shape above surface, defaulting to Z(0).
- *
- * ::: illustration { "view": { "position": [60, -60, 60], "target": [0, 0, 0] } }
- * ```
- * Cube(10).with(Cube(10).moveX(10).chop(Z(0)));
- * ```
- * :::
- * ::: illustration { "view": { "position": [60, -60, 60], "target": [0, 0, 0] } }
- * ```
- * Cube(10).with(Cube(10).moveX(10).chop(Z(0).flip()));
- * ```
- * :::
- *
- **/
-
-const toPlane = (connector) => {
-  for (const entry of getPlans(connector.toKeptGeometry())) {
-    if (entry.plan && entry.plan.connector) {
-      return entry.planes[0];
-    }
-  }
-};
-
-const toSurface = (plane) => {
-  const max = +1e5;
-  const min = -1e5;
-  const [, from] = toXYPlaneTransforms(plane);
-  const path = [
-    [max, max, 0],
-    [min, max, 0],
-    [min, min, 0],
-    [max, min, 0],
-  ];
-  const polygon = transform(from, path);
-  return [polygon];
-};
-
-const chop = (shape, connector = Z$1()) => {
-  const cuts = [];
-  const planeSurface = toSurface(toPlane(connector));
-  for (const { solid, tags } of getSolids(shape.toKeptGeometry())) {
-    const cutResult = cut(solid, planeSurface);
-    cuts.push(Shape$1.fromGeometry({ type: 'solid', solid: cutResult, tags }));
-  }
-  for (const { surface, z0Surface, tags } of getAnySurfaces(
-    shape.toKeptGeometry()
-  )) {
-    const cutSurface = surface || z0Surface;
-    const cutResult = cut$1(planeSurface, cutSurface);
-    cuts.push(
-      Shape$1.fromGeometry({ type: 'surface', surface: cutResult, tags })
-    );
-  }
-
-  return Assembly(...cuts);
-};
-
-const chopMethod = function (surface) {
-  return chop(this, surface);
-};
-Shape$1.prototype.chop = chopMethod;
-
-const Z$2 = 2;
+const Z$1 = 2;
 
 const findFlatTransforms = (shape) => {
   let bestDepth = Infinity;
@@ -349,12 +262,12 @@ const findFlatTransforms = (shape) => {
   let bestSurface;
 
   const assay = (surface) => {
-    const plane = toPlane$1(surface);
+    const plane = toPlane(surface);
     if (plane !== undefined) {
       const [to, from] = toXYPlaneTransforms(plane);
       const flatShape = shape.transform(to);
       const [min, max] = flatShape.measureBoundingBox();
-      const depth = max[Z$2] - min[Z$2];
+      const depth = max[Z$1] - min[Z$1];
       if (depth < bestDepth) {
         bestDepth = depth;
         bestTo = to;
@@ -413,7 +326,7 @@ const front = (shape) =>
   faceConnector(
     shape,
     'front',
-    (surface) => dot(toPlane$1(surface), [0, -1, 0, 0]),
+    (surface) => dot(toPlane(surface), [0, -1, 0, 0]),
     (point) => -point[Y$1]
   );
 
@@ -432,7 +345,7 @@ const left = (shape) =>
   faceConnector(
     shape,
     'left',
-    (surface) => dot(toPlane$1(surface), [-1, 0, 0, 0]),
+    (surface) => dot(toPlane(surface), [-1, 0, 0, 0]),
     (point) => -point[X]
   );
 
@@ -460,7 +373,7 @@ const right = (shape) =>
   faceConnector(
     shape,
     'right',
-    (surface) => dot(toPlane$1(surface), [1, 0, 0, 0]),
+    (surface) => dot(toPlane(surface), [1, 0, 0, 0]),
     (point) => point[X$1]
   );
 
@@ -472,15 +385,15 @@ Shape.prototype.right = rightMethod;
 right.signature = 'right(shape:Shape) -> Shape';
 rightMethod.signature = 'Shape -> right() -> Shape';
 
-const Z$3 = 2;
+const Z$2 = 2;
 
 const top = (shape) =>
   shape.connector('top') ||
   faceConnector(
     shape,
     'top',
-    (surface) => dot(toPlane$1(surface), [0, 0, 1, 0]),
-    (point) => point[Z$3]
+    (surface) => dot(toPlane(surface), [0, 0, 1, 0]),
+    (point) => point[Z$2]
   );
 
 const topMethod = function () {
@@ -595,142 +508,29 @@ const Y$2 = (y = 0) => {
   return toConnector(sheet, sheet.toGeometry().surface, 'top');
 };
 
-/**
- *
- * # Connect
- *
- * Connects two connectors.
- *
- * ::: illustration { "view": { "position": [60, -60, 0], "target": [0, 0, 0] } }
- * ```
- * Cube(10).Connector('top').moveZ(5)
- *         .connect(Sphere(10).Connector('bottom').flip().moveZ(-9))
- * ```
- * :::
- **/
+// Ideally this would be a plane of infinite extent.
+// Unfortunately this makes things like interpolation tricky,
+// so we approximate it with a very large polygon instead.
 
-const toShape = (connector) => connector.getContext(shapeToConnect);
-
-const dropConnector = (shape, ...connectors) => {
-  if (shape !== undefined) {
-    return Shape.fromGeometry(
-      drop(
-        connectors.map((connector) => `connector/${connector}`),
-        shape.toGeometry()
-      )
-    );
-  }
+const Z$3 = (z = 0) => {
+  const size = 1e5;
+  const min = -size;
+  const max = size;
+  // FIX: Why aren't we createing the connector directly?
+  const sheet = Shape$1.fromPathToSurface([
+    [max, min, z],
+    [max, max, z],
+    [min, max, z],
+    [min, min, z],
+  ]);
+  return toConnector(sheet, sheet.toGeometry().surface, 'top');
 };
-
-const dropConnectorMethod = function (...connectors) {
-  return dropConnector(this, ...connectors);
-};
-Shape.prototype.dropConnector = dropConnectorMethod;
-
-const CENTER = 0;
-const RIGHT = 1;
-
-const measureAngle = ([aX, aY], [bX, bY]) => {
-  const a2 = Math.atan2(aX, aY);
-  const a1 = Math.atan2(bX, bY);
-  const sign = a1 > a2 ? 1 : -1;
-  const angle = a1 - a2;
-  const K = -sign * Math.PI * 2;
-  const absoluteAngle =
-    Math.abs(K + angle) < Math.abs(angle) ? K + angle : angle;
-  return (absoluteAngle * 180) / Math.PI;
-};
-
-// FIX: Separate the doConnect dispatched interfaces.
-// Connect two shapes at the specified connector.
-const connect = (
-  aConnectorShape,
-  bConnectorShape,
-  { doConnect = false, doAssemble = true } = {}
-) => {
-  const aConnector = toKeptGeometry(aConnectorShape.toGeometry()).content[0];
-  const aShape = toShape(aConnectorShape);
-  const [aTo] = toXYPlaneTransforms(
-    aConnector.planes[0],
-    subtract(aConnector.marks[RIGHT], aConnector.marks[CENTER])
-  );
-
-  const bConnector = toKeptGeometry(bConnectorShape.flip().toGeometry())
-    .content[0];
-  const bShape = toShape(bConnectorShape);
-  const [bTo, bFrom] = toXYPlaneTransforms(
-    bConnector.planes[0],
-    subtract(bConnector.marks[RIGHT], bConnector.marks[CENTER])
-  );
-
-  // Flatten a.
-  const aFlatShape = aShape.transform(aTo);
-  const aFlatConnector = aConnectorShape.transform(aTo);
-  const aMarks = aFlatConnector.toKeptGeometry().content[0].marks;
-  const aFlatOriginShape = aFlatShape.move(...negate(aMarks[CENTER]));
-  // const aFlatOriginConnector = aFlatConnector.move(...negate(aMarks[CENTER]));
-
-  // Flatten b's connector.
-  const bFlatConnector = toKeptGeometry(
-    bConnectorShape.transform(bTo).toGeometry()
-  ).content[0];
-  const bMarks = bFlatConnector.marks;
-
-  // Rotate into alignment.
-  const aOrientation = subtract(aMarks[RIGHT], aMarks[CENTER]);
-  const bOrientation = subtract(bMarks[RIGHT], bMarks[CENTER]);
-  const angle = measureAngle(aOrientation, bOrientation);
-  const aFlatOriginRotatedShape = aFlatOriginShape.rotateZ(-angle);
-  // const aFlatOriginRotatedConnector = aFlatOriginConnector.rotateZ(-angle);
-
-  // Move a to the flat position of b.
-  const aFlatBShape = aFlatOriginRotatedShape.move(...bMarks[CENTER]);
-  // const aFlatBConnector = aFlatOriginRotatedConnector.move(...bMarks[CENTER]);
-  // Move a to the oriented position of b.
-  const aMovedShape = aFlatBShape.transform(bFrom);
-  // const aMovedConnector = aFlatBConnector.transform(bFrom);
-
-  if (doConnect) {
-    if (doAssemble) {
-      return dropConnector(aMovedShape, aConnector.plan.connector)
-        .Item()
-        .with(dropConnector(bShape, bConnector.plan.connector))
-        .Item();
-    } else {
-      return dropConnector(aMovedShape, aConnector.plan.connector)
-        .Item()
-        .layer(dropConnector(bShape, bConnector.plan.connector))
-        .Item();
-    }
-  } else {
-    return aMovedShape;
-  }
-};
-
-const toMethod = function (connector, options) {
-  return connect(this, connector, options);
-};
-Shape.prototype.to = toMethod;
-
-const fromMethod = function (connector, options) {
-  return connect(connector, this, options);
-};
-Shape.prototype.from = fromMethod;
-
-const atMethod = function (connector, options) {
-  return connect(this, connector, { ...options, doConnect: false });
-};
-Shape.prototype.at = atMethod;
 
 const api = {
-  Connector,
   X: X$2,
   Y: Y$2,
-  Z: Z$1,
-  connect,
-  faceConnector,
-  toConnector,
+  Z: Z$3,
 };
 
 export default api;
-export { Connector, X$2 as X, Y$2 as Y, Z$1 as Z, connect, faceConnector, toConnector };
+export { X$2 as X, Y$2 as Y, Z$3 as Z };

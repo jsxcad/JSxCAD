@@ -1,4 +1,7 @@
-import { flip, makeConvex, toPlane } from '@jsxcad/geometry-surface';
+import {
+  fill as fillGeometry,
+  transform as transformGeometry,
+} from '@jsxcad/geometry-tagged';
 
 import {
   fromScaling,
@@ -11,10 +14,7 @@ import {
 import SvgPoints from 'svg-points/cjs/index.js';
 import XmlDom from 'xmldom';
 import { fromSvgPath as baseFromSvgPath } from './fromSvgPath.js';
-import { close } from '@jsxcad/geometry-path';
-import { dot } from '@jsxcad/math-vec3';
 import { toTagsFromName } from '@jsxcad/algorithm-color';
-import { transform } from '@jsxcad/geometry-tagged';
 
 // Normally svgPathToPaths normalized the coordinate system, but this would interfere with our own normalization.
 const fromSvgPath = (svgPath, options = {}) =>
@@ -22,16 +22,6 @@ const fromSvgPath = (svgPath, options = {}) =>
     new TextEncoder('utf8').encode(svgPath),
     Object.assign({ normalizeCoordinateSystem: false }, options)
   );
-
-const fromPathsToSurface = (paths) => {
-  const surface = makeConvex(close(paths));
-  const plane = toPlane(surface);
-  if (dot(plane, [0, 0, 1]) < 0) {
-    return flip(surface);
-  } else {
-    return surface;
-  }
-};
 
 const ELEMENT_NODE = 1;
 const ATTRIBUTE_NODE = 2;
@@ -246,6 +236,7 @@ export const fromSvg = async (input, options = {}) => {
           const attributes = {
             fill: node.getAttribute('fill'),
             stroke: node.getAttribute('stroke'),
+            'stroke-width': node.getAttribute('stroke-width'),
           };
           const style = node.getAttribute('style');
           for (const entry of style.split(';')) {
@@ -257,15 +248,25 @@ export const fromSvg = async (input, options = {}) => {
             // Does fill, etc, inherit?
             const tags = toTagsFromName(fill);
             geometry.content.push(
-              transform(scale(matrix), {
-                type: 'z0Surface',
-                z0Surface: fromPathsToSurface(paths),
-                tags,
-              })
+              transformGeometry(
+                scale(matrix),
+                fillGeometry({
+                  type: 'paths',
+                  paths: paths,
+                  tags,
+                })
+              )
             );
           }
           const stroke = attributes.stroke;
-          if (stroke !== undefined && stroke !== 'none' && stroke !== '') {
+          const hasStroke =
+            stroke !== undefined && stroke !== 'none' && stroke !== '';
+          const strokeWidth = attributes['stroke-width'];
+          const hasStrokeWidth =
+            strokeWidth !== undefined &&
+            strokeWidth !== 'none' &&
+            strokeWidth !== '';
+          if (hasStroke || hasStrokeWidth) {
             if (matrix.some((element) => isNaN(element))) {
               throw Error(`die: Bad element in matrix ${matrix}.`);
             }
@@ -275,7 +276,11 @@ export const fromSvg = async (input, options = {}) => {
             }
             const tags = toTagsFromName(stroke);
             geometry.content.push(
-              transform(scaledMatrix, { type: 'paths', paths: paths, tags })
+              transformGeometry(scaledMatrix, {
+                type: 'paths',
+                paths: paths,
+                tags,
+              })
             );
           }
         };

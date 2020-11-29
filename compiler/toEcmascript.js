@@ -10,10 +10,9 @@ export const strip = (ast) => {
   } else if (ast instanceof Object) {
     const stripped = {};
     for (const key of Object.keys(ast)) {
-      if (['end', 'loc', 'start'].includes(key)) {
-        continue;
+      if (!['end', 'loc', 'start', 'parent'].includes(key)) {
+        stripped[key] = strip(ast[key]);
       }
-      stripped[key] = strip(ast[key]);
     }
     return stripped;
   } else {
@@ -31,20 +30,22 @@ export const strip = (ast) => {
  * @param {function(path:string} options.import - A method for resolving imports.
  */
 
-export const toEcmascript = async (script, { path } = {}) => {
+export const toEcmascript = async (
+  script,
+  { path = '', topLevel = new Map() } = {}
+) => {
   const parseOptions = {
     allowAwaitOutsideFunction: true,
     allowReturnOutsideFunction: true,
     sourceType: 'module',
   };
+
   let ast = parse(script, parseOptions);
 
   const exportNames = [];
 
   const body = ast.body;
   const out = [];
-
-  const topLevel = new Map();
 
   const fromIdToSha = (id) => {
     const entry = topLevel.get(id);
@@ -59,7 +60,11 @@ export const toEcmascript = async (script, { path } = {}) => {
     { doExport = false } = {}
   ) => {
     const id = declarator.id.name;
-    const code = strip(declarator);
+    const code = {
+      type: 'VariableDeclaration',
+      kind: declaration.kind,
+      declarations: [strip(declarator)],
+    };
     const dependencies = [];
 
     const Identifier = (node, state, c) => {
@@ -72,8 +77,49 @@ export const toEcmascript = async (script, { path } = {}) => {
 
     const definition = { code, dependencies, dependencyShas };
     const sha = hash(definition);
-    const entry = { sha, definition };
+
+    let uncomputedInput = false;
+
+    const generateSubprogram = () => {
+      const body = [];
+      const seen = new Set();
+      const walk = (dependencies) => {
+        for (const dependency of dependencies) {
+          if (seen.has(dependency)) {
+            continue;
+          }
+          seen.add(dependency);
+          const entry = topLevel.get(dependency);
+          if (entry === undefined) {
+            continue;
+          }
+          if (!entry.isComputed) {
+            uncomputedInput = true;
+          }
+          walk(entry.dependencies);
+          body.push(entry.code);
+        }
+      };
+      walk(dependencies);
+      body.push(code);
+      const program = { type: 'Program', body };
+      return generate(program);
+    };
+
+    const program = generateSubprogram();
+
+    const isAllInputComputed = !uncomputedInput;
+
+    const entry = {
+      code,
+      definition,
+      dependencies,
+      program,
+      sha,
+      isAllInputComputed,
+    };
     topLevel.set(id, entry);
+
     if (doExport) {
       exportNames.push(id);
     }
@@ -82,30 +128,51 @@ export const toEcmascript = async (script, { path } = {}) => {
       if (declarator.init.type === 'ArrowFunctionExpression') {
         // We can't cache functions.
         out.push(declaration);
+        entry.isNotCacheable = true;
         return;
       } else if (declarator.init.type === 'Literal') {
         // Not much point in caching literals.
         out.push(declaration);
+        entry.isNotCacheable = true;
         return;
       }
     }
     // Now that we have the sha, we can predict if it can be read from cache.
-    const meta = await read(`meta/def/${id}`);
+    const meta = await read(`meta/def/${path}/${id}`);
     if (meta && meta.sha === sha) {
       const readCode = strip(
-        parse(`await loadGeometry('data/def/${id}')`, parseOptions)
+        parse(`await loadGeometry('data/def/${path}/${id}')`, parseOptions)
       );
       const readExpression = readCode.body[0].expression;
       const init = readExpression;
-      out.push({ ...declaration, declarations: [{ ...declarator, init }] });
+      const cacheLoadCode = {
+        ...declaration,
+        declarations: [{ ...declarator, init }],
+      };
+      out.push(cacheLoadCode);
+      const replayRecordedNotes = parse(
+        `replayRecordedNotes('data/note/${path}/${id}')`,
+        parseOptions
+      );
+      out.push(replayRecordedNotes);
+      entry.code = cacheLoadCode;
+      entry.program = generate({
+        type: 'Program',
+        body: [cacheLoadCode, replayRecordedNotes],
+      });
+      entry.isComputed = true;
     } else {
+      out.push(parse('beginRecordingNotes()', parseOptions));
       out.push({ ...declaration, declarations: [declarator] });
       // Only cache Shapes.
       out.push(
         parse(
-          `${id} instanceof Shape && await saveGeometry('data/def/${id}', ${id}) && await write('meta/def/${id}', { sha: '${sha}' });`,
+          `${id} instanceof Shape && await saveGeometry('data/def/${path}/${id}', ${id}) && await write('meta/def/${path}/${id}', { sha: '${sha}' });`,
           parseOptions
         )
+      );
+      out.push(
+        parse(`saveRecordedNotes('data/note/${path}/${id}')`, parseOptions)
       );
     }
     out.push(parse(`Object.freeze(${id});`, parseOptions));
@@ -190,5 +257,6 @@ export const toEcmascript = async (script, { path } = {}) => {
 
   const result =
     '\n' + generate(parse(out.map(generate).join('\n'), parseOptions));
+
   return result;
 };

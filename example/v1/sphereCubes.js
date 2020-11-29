@@ -1,7 +1,7 @@
 let x = assemble(
-  Sphere().as('a'),
-  Cube().translate([0.5, 0.5, 0.5]).as('b'),
-  Cube().translate([0.5, 0, 0]).as('c')
+  Ball().as('a'),
+  Box().translate([0.5, 0.5, 0.5]).as('b'),
+  Box().translate([0.5, 0, 0]).as('c')
 );
 
 x.view().writeStl('sphereCubes');

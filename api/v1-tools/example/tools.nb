@@ -1,0 +1,81 @@
+md`
+# Tools
+
+Sometimes it can be useful to think in terms of applying tools rather than geometric shapes.`;
+
+const mill = {
+  cutDepth: 1,
+  toolDiameter: 1,
+  millingStyle: 'conventional',
+  sweep: 'show',
+  toolType: 'spindle',
+  minCutZ: -10,
+  axialRate: 1,
+};
+
+md`## BenchPlane(width, tool)(length, depth)`;
+BenchPlane(5, mill)(10, 2)
+  .with(Square(10, 5).outline().sketch().bench())
+  .fix()
+  .view()
+  .downloadGcode('bench_plane', mill);
+md`This shows the volume removed by the plane and a milling toolpath to achieve it.`;
+
+md`## BenchSaw(width, tool)(length, depth)`;
+BenchSaw(1, mill)(50, 10).fix().view();
+md`The saw cuts across the bench.`;
+
+md`## DrillPress(diameter, tool)(depth, x, y)`;
+DrillPress(10, mill)(30).fix().view();
+md`The DrillPress cuts holes.`;
+
+md`## HoleRouter(depth, tool)(shape, x, y, z)`;
+HoleRouter(10, { ...mill, sweep: 'show' })(Square(20).bench())
+  .fix()
+  .view();
+md`This tool cuts around the inside of a shape.`;
+
+md`## LineRouter(depth, tool)(shape, x, y, z)`;
+LineRouter(10, { ...mill, sweep: 'no' })(Hershey(50)('Hello').bench())
+  .fix()
+  .view();
+md`The LineRouter cuts along the center of the lines of the shape.`;
+
+md`## ProfileRouter(depth, tool)(shape, x, y, z)`;
+ProfileRouter(10, { ...mill, sweep: 'no' })(Triangle(20).bench())
+  .fix()
+  .view();
+md`The ProfileRouter cuts around the outside of a shape.`;
+
+md`## Bevel(shape)(length)`;
+const Bevel = (shape) => (on, length) =>
+  on.rotate(90).bench().cut(shape.extrude(length));
+const roundBevel = Bevel(x.Circle(1));
+Box(10)
+  .op(roundBevel, 10)
+  .op(roundBevel, 10)
+  //.op(roundBevel, 10)
+  //.op(roundBevel, 10)
+  .outline()
+  .fix()
+  .view();
+
+const stepBevel = Bevel(y.Square());
+Box(10)
+  .op(stepBevel, 10)
+  .op(stepBevel, 10)
+  .op(stepBevel, 10)
+  .op(stepBevel, 10)
+  .outline()
+  .fix()
+  .view();
+
+const angleBevel = Bevel(y.Square(1).rotateY(45));
+Box(10)
+  .op(angleBevel, 10)
+  .op(angleBevel, 10)
+  //.op(angleBevel, 10)
+  //.op(angleBevel, 10)
+  .outline()
+  .fix()
+  .view();

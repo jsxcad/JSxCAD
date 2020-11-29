@@ -144,9 +144,9 @@ return {};
 
 test('Reuse and Redefine', async (t) => {
   // Establish
-  await write('data/def/A', 1);
-  await write('meta/def/A', {
-    sha: 'a94dbf09d58bc3979357ff42d7171daf5ca410f0',
+  await write('data/def//A', 1);
+  await write('meta/def//A', {
+    sha: 'd20ea9544ceb910f702b8ab8167cbe3e5fb7a2a2',
   });
 
   // Reuse
@@ -156,7 +156,8 @@ test('Reuse and Redefine', async (t) => {
   t.is(
     reuse,
     `
-const A = await loadGeometry('data/def/A');
+const A = await loadGeometry('data/def//A');
+replayRecordedNotes('data/note//A');
 Object.freeze(A);
 const B = () => 2;
 function C() {}
@@ -171,10 +172,12 @@ return {};
   t.is(
     redefine,
     `
+beginRecordingNotes();
 const A = bar();
-A instanceof Shape && (await saveGeometry('data/def/A', A)) && (await write('meta/def/A', {
-  sha: '8e0d3a8ac5c7a9b2684fa19794087e7e4223cd53'
+A instanceof Shape && (await saveGeometry('data/def//A', A)) && (await write('meta/def//A', {
+  sha: '998f2a52e6cffab9dfbdadd70971164741f7538f'
 }));
+saveRecordedNotes('data/note//A');
 Object.freeze(A);
 const B = () => 2;
 function C() {}
@@ -185,13 +188,13 @@ return {};
 
 test('Indirect Redefinition', async (t) => {
   // Establish
-  await write('data/def/D', 1);
-  await write('meta/def/D', {
-    sha: 'dbefe81bda93e322be22b4a3ccf53c3c43173192',
+  await write('data/def//D', 1);
+  await write('meta/def//D', {
+    sha: '132b04f13d83839780310820e22fa068e6e12f3b',
   });
-  await write('data/def/E', 1);
-  await write('meta/def/E', {
-    sha: '38106474eafb9ef3606469a77c07042e325a4bb0',
+  await write('data/def//E', 1);
+  await write('meta/def//E', {
+    sha: '91c534153aa9d64e620465cee99c4fa0739c4472',
   });
 
   // Demonstrate reuse.
@@ -199,7 +202,8 @@ test('Indirect Redefinition', async (t) => {
   t.is(
     reuse,
     `
-const D = await loadGeometry('data/def/D');
+const D = await loadGeometry('data/def//D');
+replayRecordedNotes('data/note//D');
 Object.freeze(D);
 const E = () => D;
 return {};
@@ -209,8 +213,8 @@ return {};
 
 test('Reuse', async (t) => {
   // Demonstrate defined case.
-  await write('meta/def/mountainView', {
-    sha: 'b59f37ba343f2a4a9ddf44b1091190f973b19743',
+  await write('meta/def//mountainView', {
+    sha: 'c3b0ad66f1281cd0078066eea1b208fef9ffc133',
   });
   const define = await toEcmascript(
     `
@@ -224,7 +228,8 @@ mountainView.frontView({ position: [0, -100, 50] });
     define,
     `
 const Mountain = () => foo();
-const mountainView = await loadGeometry('data/def/mountainView');
+const mountainView = await loadGeometry('data/def//mountainView');
+replayRecordedNotes('data/note//mountainView');
 Object.freeze(mountainView);
 mountainView.frontView({
   position: [0, -100, 50]
@@ -245,10 +250,12 @@ mountainView.frontView({ position: [0, -100, 50] });
     redefine,
     `
 const Mountain = () => bar();
+beginRecordingNotes();
 const mountainView = Mountain().scale(0.5).Page();
-mountainView instanceof Shape && (await saveGeometry('data/def/mountainView', mountainView)) && (await write('meta/def/mountainView', {
-  sha: 'bdf04f14234eed622dfca3aa405abd88911ea304'
+mountainView instanceof Shape && (await saveGeometry('data/def//mountainView', mountainView)) && (await write('meta/def//mountainView', {
+  sha: 'ff13df28379e2578fac3d15154411d6bf1b707a8'
 }));
+saveRecordedNotes('data/note//mountainView');
 Object.freeze(mountainView);
 mountainView.frontView({
   position: [0, -100, 50]
@@ -268,13 +275,38 @@ log(a);
   t.is(
     script,
     `
+beginRecordingNotes();
 const a = [];
-a instanceof Shape && (await saveGeometry('data/def/a', a)) && (await write('meta/def/a', {
-  sha: 'b0e5d6b61a0feb61ed104d4688df2b0dd8884cd4'
+a instanceof Shape && (await saveGeometry('data/def//a', a)) && (await write('meta/def//a', {
+  sha: '008e21a56df83b743c52799ddf689ac20ea2bb8c'
 }));
+saveRecordedNotes('data/note//a');
 Object.freeze(a);
 log(a);
 return {};
 `
+  );
+});
+
+test('Top level definitions generate sub-programs', async (t) => {
+  const topLevel = new Map();
+  await toEcmascript(
+    `
+let bar = () => 1;
+const Mountain = () => bar();
+const mountainView = Mountain().scale(0.5).Page();
+mountainView.frontView({ position: [0, -100, 50] });
+`,
+    { topLevel }
+  );
+
+  t.deepEqual(topLevel.get('bar').program, 'let bar = () => 1;\n');
+  t.deepEqual(
+    topLevel.get('Mountain').program,
+    'let bar = () => 1;\nconst Mountain = () => bar();\n'
+  );
+  t.deepEqual(
+    topLevel.get('mountainView').program,
+    'let bar = () => 1;\nconst Mountain = () => bar();\nconst mountainView = Mountain().scale(0.5).Page();\n'
   );
 });

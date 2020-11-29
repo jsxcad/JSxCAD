@@ -17,38 +17,51 @@ test('Simple', (t) => {
   const geometry = difference(
     {
       type: 'assembly',
-      content: [{ type: 'z0Surface', z0Surface: [unitSquarePolygon] }],
+      content: [{ type: 'surface', surface: [unitSquarePolygon] }],
     },
     {
-      type: 'z0Surface',
-      z0Surface: scale(
+      type: 'surface',
+      surface: scale(
         [0.6, 0.6, 0.6],
         rotateZ(Math.PI / 2, [unitRegularTrianglePolygon])
       ),
     }
   );
-  t.deepEqual(canonicalize(geometry), {
+  t.deepEqual(JSON.parse(JSON.stringify(canonicalize(geometry))), {
     type: 'assembly',
     content: [
       {
-        type: 'z0Surface',
-        tags: undefined,
-        z0Surface: [
-          [
-            [0.5, -0.26602, 0],
-            [0.5, 0.5, 0],
-            [0.05774, 0.5, 0],
-          ],
-          [
-            [-0.5, -0.5, 0],
-            [0.5, -0.5, 0],
-            [0.5, -0.3, 0],
-            [-0.5, -0.3, 0],
-          ],
+        type: 'surface',
+        surface: [
           [
             [-0.5, 0.5, 0],
             [-0.5, -0.26602, 0],
+            [-0.21962, 0.21962, 0],
+          ],
+          [
+            [-0.21962, 0.21962, 0],
             [-0.05774, 0.5, 0],
+            [-0.5, 0.5, 0],
+          ],
+          [
+            [0.5, 0.5, 0],
+            [0.05774, 0.5, 0],
+            [0.5, -0.26602, 0],
+          ],
+          [
+            [-0.5, -0.3, 0],
+            [-0.5, -0.5, 0],
+            [0.5, -0.5, 0],
+          ],
+          [
+            [0.5, -0.5, 0],
+            [0.5, -0.3, 0],
+            [0.3, -0.3, 0],
+          ],
+          [
+            [0.3, -0.3, 0],
+            [-0.5, -0.3, 0],
+            [0.5, -0.5, 0],
           ],
         ],
       },

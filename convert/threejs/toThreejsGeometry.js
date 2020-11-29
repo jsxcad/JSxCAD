@@ -1,3 +1,9 @@
+import {
+  toPaths as toPathsFromGraph,
+  toSolid as toSolidFromGraph,
+  toSurface as toSurfaceFromGraph,
+} from '@jsxcad/geometry-graph';
+
 import { toPlane } from '@jsxcad/math-poly3';
 import { toTriangles } from '@jsxcad/geometry-polygons';
 
@@ -124,6 +130,31 @@ export const toThreejsGeometry = (geometry, supertags) => {
         tags,
         isThreejsGeometry: true,
       };
+    case 'graph':
+      if (geometry.graph.isWireframe) {
+        return {
+          type: 'paths',
+          threejsPaths: toPathsFromGraph(geometry.graph),
+          tags,
+          isThreejsGeometry: true,
+        };
+      } else if (geometry.graph.isClosed) {
+        return {
+          type: 'solid',
+          threejsSolid: solidToThreejsSolid(toSolidFromGraph(geometry.graph)),
+          tags,
+          isThreejsGeometry: true,
+        };
+      } else {
+        return {
+          type: 'surface',
+          threejsSurface: surfaceToThreejsSurface(
+            toSurfaceFromGraph(geometry.graph)
+          ),
+          tags,
+          isThreejsGeometry: true,
+        };
+      }
     default:
       throw Error(`Unexpected geometry: ${geometry.type}`);
   }

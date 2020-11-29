@@ -48,6 +48,8 @@ const isMatchingCutKey = ([aPlane, aGeometry], [bPlane, bGeometry]) =>
 
 export const cacheCut = (op) => memoize(op, { isMatchingKey: isMatchingCutKey, maxSize });
 
+export const cacheSection = (op) => memoize(op, { isMatchingKey: isMatchingCutKey, maxSize });
+
 // Keyed by points structure.
 
 const isMatchingPointsKey = ([aPoints], [bPoints]) => deepEqual(aPoints, bPoints);

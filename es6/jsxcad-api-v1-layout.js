@@ -1,6 +1,5 @@
-import { Empty, Square } from './jsxcad-api-v1-shapes.js';
+import { Empty, Square, Hershey } from './jsxcad-api-v1-shapes.js';
 import { getLeafs, taggedItem, taggedDisjointAssembly, toDisjointGeometry, taggedLayers, measureBoundingBox, taggedLayout, getLayouts, visit, isNotVoid } from './jsxcad-geometry-tagged.js';
-import { Hershey } from './jsxcad-api-v1-font.js';
 import Shape from './jsxcad-api-v1-shape.js';
 import { max } from './jsxcad-api-v1-math.js';
 import { pack as pack$1 } from './jsxcad-algorithm-pack.js';
@@ -91,7 +90,7 @@ const buildLayoutGeometry = ({
   margin,
 }) => {
   const itemNames = getItemNames(layer);
-  const labelScale = 0.0125 * 5;
+  const labelScale = 0.0125 * 10;
   const size = [pageWidth, pageLength];
   const r = (v) => Math.floor(v * 100) / 100;
   const title = `${r(pageWidth)} x ${r(pageLength)} : ${itemNames.join(', ')}`;
@@ -107,7 +106,7 @@ const buildLayoutGeometry = ({
       )
     )
     .color('red')
-    .Sketch()
+    .sketch()
     .toGeometry();
   return taggedLayout(
     { size, margin, title, marks: packSize },
@@ -162,7 +161,7 @@ const Page = (
         buildLayoutGeometry({ layer, packSize, pageWidth, pageLength, margin })
       );
     }
-    return Shape.fromGeometry(taggedLayers({}, ...plans)).canonicalize();
+    return Shape.fromGeometry(taggedLayers({}, ...plans));
   } else {
     const packSize = [];
     // Page fits to content size.
@@ -189,12 +188,12 @@ const Page = (
           pageLength,
           margin,
         });
-        Shape.fromGeometry(layoutGeometry).canonicalize();
+        Shape.fromGeometry(layoutGeometry);
         plans.push(layoutGeometry);
       }
       return Shape.fromGeometry(taggedLayers({}, ...plans));
     } else {
-      return Empty().canonicalize();
+      return Empty();
     }
   }
 };
@@ -202,7 +201,8 @@ const Page = (
 const PageMethod = function (options = {}) {
   return Page(options, this);
 };
-Shape.prototype.Page = PageMethod;
+Shape.prototype.Page = PageMethod; // Deprecate
+Shape.prototype.page = PageMethod;
 
 const ensurePages = (geometry, depth = 0) => {
   const pages = getLayouts(geometry);
@@ -215,6 +215,18 @@ const ensurePages = (geometry, depth = 0) => {
     return pages;
   }
 };
+
+const PackMethod = function (options = {}) {
+  return Page(options, this);
+};
+Shape.prototype.Pack = PackMethod; // Deprecate
+Shape.prototype.pack = PackMethod;
+
+const FixMethod = function (options = {}) {
+  return Page({ ...options, pack: false }, this);
+};
+Shape.prototype.Fix = FixMethod; // Deprecate
+Shape.prototype.fix = FixMethod;
 
 const api = {
   pack,

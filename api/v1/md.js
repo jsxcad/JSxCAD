@@ -1,9 +1,18 @@
+import Shape from '@jsxcad/api-v1-shape';
 import { emit } from '@jsxcad/sys';
+import hashSum from 'hash-sum';
 
 export const md = (strings, ...placeholders) => {
   const md = strings.reduce(
     (result, string, i) => result + placeholders[i - 1] + string
   );
-  emit({ md });
+  emit({ md, hash: hashSum(md) });
   return md;
 };
+
+const mdMethod = function (string, ...placeholders) {
+  md([string], ...placeholders);
+  return this;
+};
+
+Shape.prototype.md = mdMethod;

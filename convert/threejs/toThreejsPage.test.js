@@ -33,8 +33,8 @@ test('Geodesic sphere', async (t) => {
         tags: ['solid'],
       },
       {
-        type: 'z0Surface',
-        z0Surface: scaleSurface([2, 2, 2], [unitSquarePolygon]),
+        type: 'surface',
+        surface: scaleSurface([2, 2, 2], [unitSquarePolygon]),
         tags: ['surface'],
       },
     ],

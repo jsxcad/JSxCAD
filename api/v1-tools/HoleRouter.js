@@ -1,4 +1,4 @@
-import { Assembly, Cylinder } from '@jsxcad/api-v1-shapes';
+import { Assembly, Point, Rod } from '@jsxcad/api-v1-shapes';
 
 import Shape from '@jsxcad/api-v1-shape';
 import { taggedPaths } from '@jsxcad/geometry-tagged';
@@ -7,7 +7,7 @@ import { toolpath } from '@jsxcad/algorithm-toolpath';
 export const HoleRouter = (
   depth = 10,
   { toolDiameter = 3.175, cutDepth = 0.3, toolLength = 17, sweep = 'cut' } = {}
-) => (shape, x = 0, y = 0, z = 0) => {
+) => (shape, { x = 0, y = 0, z = 0 } = {}) => {
   const cuts = Math.ceil(depth / Math.min(depth, cutDepth));
   const actualCutDepth = depth / cuts;
   const design = [];
@@ -31,12 +31,16 @@ export const HoleRouter = (
     if (sweep !== 'no') {
       sweeps.push(
         paths
-          .sweep(Cylinder.ofDiameter(toolDiameter, depth).moveZ(depth / -2))
-          .op((s) => (sweep === 'show' ? s : s.Void()))
+          .sweep(Rod(toolDiameter / 2, depth).moveZ(depth / -2))
+          .op((s) => (sweep === 'show' ? s : s.hole()))
       );
     }
   }
-  return Assembly(...design, ...sweeps);
+  return Assembly(
+    Point(x, y, 0), // Add a zero point for rebenching.
+    ...design,
+    ...sweeps
+  );
 };
 
 export default HoleRouter;

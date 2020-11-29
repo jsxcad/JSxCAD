@@ -11,8 +11,8 @@
     "lint": "eslint *.js",
     "lintfix": "eslint --fix *.js",
     "rollup": "rollup -c rollup_main.js",
-    "test": "ava",
-    "tests": "ava *.test.js"
+    "test": "ava --timeout=600s",
+    "tests": "ava --timeout=600s *.test.js"
   },
   "contributors": [
     {
@@ -23,6 +23,7 @@
   "keywords": [],
   "license": "MIT",
   "dependencies": {
+    "@jsxcad/geometry-graph": "^0.0.79",
     "@jsxcad/geometry-polygons": "^0.0.79",
     "@jsxcad/geometry-solid": "^0.0.79",
     "@jsxcad/geometry-surface": "^0.0.79",
