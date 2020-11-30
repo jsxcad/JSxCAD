@@ -1019,29 +1019,64 @@ void ArrangePaths(double x, double y, double z, double w, emscripten::val fill, 
     }
   }
 
-  // CHECK: Do we need to remove isolated vertices?
-  // Remove the isolated vertices located in the unbounded face.
-  Arrangement_2::Vertex_iterator curr, next = arrangement.vertices_begin();
-  for (curr = next++; curr != arrangement.vertices_end(); curr = next++) {
-    // Keep an iterator to the next vertex, as curr might be deleted.
-    if (curr->is_isolated()) {
-      arrangement.remove_isolated_vertex(curr);
+  Arrangement_2::Face_const_handle unbounded = arrangement.unbounded_face();
+
+  std::queue<Arrangement_2::Face_const_handle> undecided;
+  CGAL::Unique_hash_map<Arrangement_2::Face_const_handle, bool> positive_faces;
+  CGAL::Unique_hash_map<Arrangement_2::Face_const_handle, bool> negative_faces;
+
+  for (Arrangement_2::Face_iterator face = arrangement.faces_begin(); face != arrangement.faces_end(); ++face) {
+    if (!face->has_outer_ccb()) {
+      negative_faces[face] = true;
+    } else {
+      undecided.push(face);
     }
   }
 
-  Arrangement_2::Face_handle unbounded = arrangement.unbounded_face();
-
-  std::queue<Arrangement_2::Face_handle> faces;
-
-  for (Arrangement_2::Hole_iterator exterior = unbounded->holes_begin(); exterior != unbounded->holes_end(); ++exterior) {
-    // Step through the hole to the face.
-    Arrangement_2::Face_handle face = (*exterior)->twin()->face();
-    faces.push(face);
+  while (!undecided.empty()) {
+    Arrangement_2::Face_const_handle face = undecided.front();
+    undecided.pop();
+    if (positive_faces[face]) {
+      for (Arrangement_2::Hole_const_iterator hole = face->holes_begin(); hole != face->holes_end(); ++hole) {
+        negative_faces[(*hole)->twin()->face()] = true;
+        positive_faces[(*hole)->twin()->face()] = false;
+      }
+      continue;
+    }
+    if (negative_faces[face]) {
+      for (Arrangement_2::Hole_const_iterator hole = face->holes_begin(); hole != face->holes_end(); ++hole) {
+        positive_faces[(*hole)->twin()->face()] = true;
+        negative_faces[(*hole)->twin()->face()] = false;
+      }
+      continue;
+    }
+    bool decided = false;
+    Arrangement_2::Ccb_halfedge_const_circulator start = face->outer_ccb();
+    Arrangement_2::Ccb_halfedge_const_circulator edge = start;
+    do {
+      if (negative_faces[edge->twin()->face()]) {
+        positive_faces[face] = true;
+        decided = true;
+        break;
+      }
+    } while (++edge != start);
+    if (!decided) {
+      edge = start;
+      do {
+        if (positive_faces[edge->twin()->face()]) {
+          negative_faces[face] = true;
+          decided = true;
+          break;
+        }
+      } while (++edge != start);
+    }
+    undecided.push(face);
   }
-
-  while (!faces.empty()) {
-    Arrangement_2::Face_handle face = faces.front();
-    faces.pop();
+    
+  for (Arrangement_2::Face_iterator face = arrangement.faces_begin(); face != arrangement.faces_end(); ++face) {
+    if (!positive_faces[face] || !face->has_outer_ccb()) {
+      continue;
+    }
     Arrangement_2::Ccb_halfedge_const_circulator start = face->outer_ccb();
     Arrangement_2::Ccb_halfedge_const_circulator edge = start;
     emit_polygon(false);
@@ -1050,7 +1085,7 @@ void ArrangePaths(double x, double y, double z, double w, emscripten::val fill, 
       emit_point(CGAL::to_double(p3.x()), CGAL::to_double(p3.y()), CGAL::to_double(p3.z()));
     } while (++edge != start);
 
-    // Step into the holes.
+    // Emit holes
     for (Arrangement_2::Hole_iterator hole = face->holes_begin(); hole != face->holes_end(); ++hole) {
       emit_polygon(true);
       Arrangement_2::Ccb_halfedge_const_circulator start = *hole;
@@ -1059,15 +1094,6 @@ void ArrangePaths(double x, double y, double z, double w, emscripten::val fill, 
         Point p3 = plane.to_3d(edge->source()->point());
         emit_point(CGAL::to_double(p3.x()), CGAL::to_double(p3.y()), CGAL::to_double(p3.z()));
       } while (++edge != start);
-
-      // Step through the hole to address it as a face.
-      Arrangement_2::Face_handle face = (*hole)->twin()->face();
-      for (Arrangement_2::Hole_iterator subhole = face->holes_begin(); subhole != face->holes_end(); ++subhole) {
-        // Step through the subhole to address it as a face.
-        Arrangement_2::Face_handle face = (*subhole)->twin()->face();
-        // Schedule it for traversal, since the hole of a hole is a face.
-        faces.push(face);
-      }
     }
   }
 }
