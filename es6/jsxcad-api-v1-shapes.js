@@ -46,11 +46,16 @@ const orRadius = (value) => {
 
 const Arc = (value = 1, angle = 360, start = 0) => {
   const plan = orRadius(value);
-  return Spiral((a) => [[getRadius(plan)]], {
+  const spiral = Spiral((a) => [[getRadius(plan)]], {
     from: start - 90,
     upto: start + angle - 90,
     by: 360 / getSides(plan),
   }).at(plan.at);
+  if (angle - start === 360) {
+    return spiral.close();
+  } else {
+    return spiral;
+  }
 };
 
 Shape.prototype.Arc = shapeMethod(Arc);
@@ -1652,7 +1657,13 @@ Point.fromPoint = fromPoint;
 
 Shape.prototype.Point = shapeMethod(Point);
 
-const Line = (length) => Path(Point(0), Point(length));
+const Line = (forward, backward = 0) => {
+  if (backward > forward) {
+    return Path(Point(forward), Point(backward));
+  } else {
+    return Path(Point(backward), Point(forward));
+  }
+};
 
 Shape.prototype.Line = shapeMethod(Line);
 
