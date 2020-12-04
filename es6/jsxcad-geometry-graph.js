@@ -1,4 +1,4 @@
-import { fromSurfaceMeshToGraph, fromPointsToAlphaShapeAsSurfaceMesh, fromSurfaceMeshToLazyGraph, fromPointsToConvexHullAsSurfaceMesh, fromPolygonsToSurfaceMesh, fromGraphToSurfaceMesh, fromSurfaceMeshEmitBoundingBox, extrudeSurfaceMesh, arrangePaths, sectionOfSurfaceMesh, differenceOfSurfaceMeshes, extrudeToPlaneOfSurfaceMesh, fromSurfaceMeshToTriangles, fromPointsToSurfaceMesh, outlineOfSurfaceMesh, insetOfPolygon, intersectionOfSurfaceMeshes, smoothSurfaceMesh, transformSurfaceMesh, unionOfSurfaceMeshes } from './jsxcad-algorithm-cgal.js';
+import { fromSurfaceMeshToGraph, fromPointsToAlphaShapeAsSurfaceMesh, fromSurfaceMeshToLazyGraph, fromPointsToConvexHullAsSurfaceMesh, fromPolygonsToSurfaceMesh, fromGraphToSurfaceMesh, fromSurfaceMeshEmitBoundingBox, extrudeSurfaceMesh, arrangePaths, sectionOfSurfaceMesh, differenceOfSurfaceMeshes, extrudeToPlaneOfSurfaceMesh, fromSurfaceMeshToTriangles, fromPointsToSurfaceMesh, outlineOfSurfaceMesh, insetOfPolygon, intersectionOfSurfaceMeshes, offsetOfPolygon, smoothSurfaceMesh, transformSurfaceMesh, unionOfSurfaceMeshes } from './jsxcad-algorithm-cgal.js';
 import { equals as equals$1, dot, min, max, scale } from './jsxcad-math-vec3.js';
 import { deduplicate as deduplicate$1, isClockwise, flip as flip$1 } from './jsxcad-geometry-path.js';
 import { toPlane, flip } from './jsxcad-math-poly3.js';
@@ -1336,12 +1336,45 @@ const intersection = (a, b) => {
   );
 };
 
-const offset = (outlineGraph, amount) => {
-  if (amount >= 0) {
-    return outlineGraph;
-  } else {
-    return inset(outlineGraph, 0 - amount, 0, 0);
+const offset = (graph, initial, step, limit) => {
+  const outlineGraph = outline(graph);
+  const offsetGraph = create();
+  eachFace(realizeGraph(outlineGraph), (face, { plane, loop, holes }) => {
+    const polygon = [];
+    eachLoopEdge(outlineGraph, loop, (edge, { point }) => {
+      polygon.push(getPointNode(outlineGraph, point));
+    });
+    const polygonHoles = [];
+    if (holes) {
+      for (const hole of holes) {
+        const polygon = [];
+        eachLoopEdge(outlineGraph, hole, (edge, { point }) => {
+          polygon.push(getPointNode(outlineGraph, point));
+        });
+        polygonHoles.push(polygon);
+      }
+    }
+    for (const { boundary, holes } of offsetOfPolygon(
+      initial,
+      step,
+      limit,
+      plane,
+      polygon,
+      polygonHoles
+    )) {
+      let offsetFace = addFace(offsetGraph, { plane });
+      addLoopFromPoints(offsetGraph, boundary, { face: offsetFace });
+      for (const hole of holes) {
+        addHoleFromPoints(offsetGraph, hole, { face: offsetFace });
+      }
+    }
+  });
+  offsetGraph.isClosed = false;
+  offsetGraph.isOutline = true;
+  if (offsetGraph.points.length === 0) {
+    offsetGraph.isEmpty = true;
   }
+  return offsetGraph;
 };
 
 const smooth = (graph) =>
