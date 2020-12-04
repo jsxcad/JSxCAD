@@ -8,7 +8,12 @@ const fillMethod = function () {
   return fill(this);
 };
 
+const withFillMethod = function () {
+  return this.group(this.fill());
+};
+
 Shape.prototype.interior = fillMethod;
 Shape.prototype.fill = fillMethod;
+Shape.prototype.withFill = withFillMethod;
 
 export default fill;

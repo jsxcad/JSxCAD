@@ -7,7 +7,7 @@ import { transform as transform$5, canonicalize as canonicalize$5, eachPoint as 
 import { canonicalize as canonicalize$4, toPolygon } from './jsxcad-math-plane.js';
 import { transform as transform$4, canonicalize as canonicalize$3, eachPoint as eachPoint$5, flip as flip$4, measureBoundingBox as measureBoundingBox$1, union as union$1 } from './jsxcad-geometry-points.js';
 import { transform as transform$1, canonicalize as canonicalize$2, eachPoint as eachPoint$2, flip as flip$2, makeWatertight as makeWatertight$2, measureArea as measureArea$1, measureBoundingBox as measureBoundingBox$2, toPlane } from './jsxcad-geometry-surface.js';
-import { transform as transform$2, toSurface, fromSurface, toSolid, fromSolid, difference as difference$1, eachPoint as eachPoint$1, fill as fill$1, fromPaths, extrude as extrude$1, extrudeToPlane as extrudeToPlane$1, intersection as intersection$2, toPaths, inset as inset$1, measureBoundingBox as measureBoundingBox$4, outline as outline$1, realizeGraph, section as section$1, smooth as smooth$1, union as union$4 } from './jsxcad-geometry-graph.js';
+import { transform as transform$2, toSurface, fromSurface, toSolid, fromSolid, difference as difference$1, eachPoint as eachPoint$1, fill as fill$1, fromPaths, extrude as extrude$1, extrudeToPlane as extrudeToPlane$1, intersection as intersection$2, toPaths, inset as inset$1, measureBoundingBox as measureBoundingBox$4, offset as offset$1, outline as outline$1, realizeGraph, section as section$1, smooth as smooth$1, union as union$4 } from './jsxcad-geometry-graph.js';
 import { transform as transform$6 } from './jsxcad-geometry-plan.js';
 import { fromSolid as fromSolid$1, unifyBspTrees, fromSurface as fromSurface$1, removeExteriorPaths, intersectSurface, intersection as intersection$1, union as union$3 } from './jsxcad-geometry-bsp.js';
 import { min, max } from './jsxcad-math-vec3.js';
@@ -1463,6 +1463,47 @@ const measureHeights = (geometry, resolution = 1) => {
   return [...heights.values()];
 };
 
+const offset = (geometry, initial = 1, step, limit) => {
+  const op = (geometry, descend) => {
+    const { tags } = geometry;
+    switch (geometry.type) {
+      case 'graph':
+        return taggedPaths(
+          { tags },
+          toPaths(offset$1(geometry.graph, initial, step, limit))
+        );
+      case 'solid':
+      case 'z0Surface':
+      case 'surface':
+      case 'points':
+        // Not implemented yet.
+        return geometry;
+      case 'paths':
+        return taggedPaths(
+          { tags },
+          toPaths(
+            offset$1(fromPaths(geometry.paths), initial, step, limit)
+          )
+        );
+      case 'plan':
+      case 'assembly':
+      case 'item':
+      case 'disjointAssembly':
+      case 'layers': {
+        return descend();
+      }
+      case 'sketch': {
+        // Sketches aren't real for offset.
+        return geometry;
+      }
+      default:
+        throw Error(`Unexpected geometry: ${JSON.stringify(geometry)}`);
+    }
+  };
+
+  return rewrite(toTransformedGeometry(geometry), op);
+};
+
 // FIX: The semantics here are a bit off.
 // Let's consider the case of Assembly(Square(10), Square(10).outline()).outline().
 // This will drop the Square(10).outline() as it will not be outline-able.
@@ -1841,4 +1882,4 @@ const translate = (vector, geometry) =>
 const scale = (vector, geometry) =>
   transform(fromScaling(vector), geometry);
 
-export { allTags, assemble, canonicalize, difference, drop, eachItem, eachPoint, extrude, extrudeToPlane, fill, findOpenEdges, flip, fresh, fromSurfaceToPaths, getAnyNonVoidSurfaces, getAnySurfaces, getGraphs, getItems, getLayers, getLayouts, getLeafs, getNonVoidGraphs, getNonVoidItems, getNonVoidPaths, getNonVoidPlans, getNonVoidPoints, getNonVoidSolids, getNonVoidSurfaces, getNonVoidZ0Surfaces, getPaths, getPeg, getPlans, getPoints, getSolids, getSurfaces, getTags, getZ0Surfaces, hash, inset, intersection, isNotVoid, isVoid, isWatertight, keep, makeWatertight, measureArea, measureBoundingBox, measureHeights, outline, read, realize, reconcile, rewrite, rewriteTags, rotateX, rotateY, rotateZ, scale, section, smooth, soup, taggedAssembly, taggedDisjointAssembly, taggedGraph, taggedGroup, taggedItem, taggedLayers, taggedLayout, taggedPaths, taggedPoints, taggedSketch, taggedSolid, taggedSurface, taggedZ0Surface, toDisjointGeometry, toKeptGeometry, toPoints, toTransformedGeometry, transform, translate, union, update, visit, write };
+export { allTags, assemble, canonicalize, difference, drop, eachItem, eachPoint, extrude, extrudeToPlane, fill, findOpenEdges, flip, fresh, fromSurfaceToPaths, getAnyNonVoidSurfaces, getAnySurfaces, getGraphs, getItems, getLayers, getLayouts, getLeafs, getNonVoidGraphs, getNonVoidItems, getNonVoidPaths, getNonVoidPlans, getNonVoidPoints, getNonVoidSolids, getNonVoidSurfaces, getNonVoidZ0Surfaces, getPaths, getPeg, getPlans, getPoints, getSolids, getSurfaces, getTags, getZ0Surfaces, hash, inset, intersection, isNotVoid, isVoid, isWatertight, keep, makeWatertight, measureArea, measureBoundingBox, measureHeights, offset, outline, read, realize, reconcile, rewrite, rewriteTags, rotateX, rotateY, rotateZ, scale, section, smooth, soup, taggedAssembly, taggedDisjointAssembly, taggedGraph, taggedGroup, taggedItem, taggedLayers, taggedLayout, taggedPaths, taggedPoints, taggedSketch, taggedSolid, taggedSurface, taggedZ0Surface, toDisjointGeometry, toKeptGeometry, toPoints, toTransformedGeometry, transform, translate, union, update, visit, write };

@@ -1,11 +1,11 @@
-#define SURFACE_MESH_BOOLEANS
-
 #include <emscripten/bind.h>
 
 #include <array>
 #include <queue>
 #include <boost/range/adaptor/reversed.hpp>
 
+#include <CGAL/Arr_conic_traits_2.h>
+#include <CGAL/CORE_algebraic_number_traits.h>
 #include <CGAL/MP_Float.h>
 #include <CGAL/Quotient.h>
 #include <CGAL/Extended_cartesian.h>
@@ -25,12 +25,12 @@
 #include <CGAL/Arr_segment_traits_2.h>
 #include <CGAL/Arr_polyline_traits_2.h>
 #include <CGAL/Arrangement_2.h>
+#include <CGAL/Boolean_set_operations_2.h>
 #include <CGAL/Delaunay_triangulation_2.h>
 #include <CGAL/Delaunay_triangulation_3.h>
+#include <CGAL/Gps_traits_2.h>
 #include <CGAL/Polygon_mesh_processing/bbox.h>
-#ifdef SURFACE_MESH_BOOLEANS
 #include <CGAL/Polygon_mesh_processing/corefinement.h>
-#endif
 #include <CGAL/Polygon_mesh_processing/detect_features.h>
 #include <CGAL/Polygon_mesh_processing/extrude.h>
 #include <CGAL/Polygon_mesh_processing/orientation.h>
@@ -50,14 +50,17 @@
 #include <CGAL/Projection_traits_yz_3.h>
 #include <CGAL/Surface_mesh.h>
 #include <CGAL/Unique_hash_map.h>
+#include <CGAL/approximated_offset_2.h>
 #include <CGAL/boost/graph/Named_function_parameters.h>
 #include <CGAL/boost/graph/convert_nef_polyhedron_to_polygon_mesh.h>
+#include <CGAL/cartesian_homogeneous_conversion.h>
 #include <CGAL/convex_hull_3.h>
 #include <CGAL/create_offset_polygons_2.h>
 #include <CGAL/create_offset_polygons_from_polygon_with_holes_2.h>
 #include <CGAL/create_straight_skeleton_2.h>
 #include <CGAL/create_straight_skeleton_from_polygon_with_holes_2.h>
 #include <CGAL/intersections.h>
+#include <CGAL/offset_polygon_2.h>
 
 // typedef CGAL::Simple_cartesian<CGAL::Gmpq> Kernel;
 typedef CGAL::Exact_predicates_exact_constructions_kernel Kernel;
@@ -66,8 +69,9 @@ typedef CGAL::Nef_polyhedron_3<Kernel, CGAL::SNC_indexed_items> Nef_polyhedron;
 typedef Kernel::FT FT;
 typedef Kernel::Line_3 Line;
 typedef Kernel::Plane_3 Plane;
-typedef Kernel::Point_3 Point;
 typedef Kernel::Point_2 Point_2;
+typedef Kernel::Point_3 Point;
+typedef Kernel::Vector_2 Vector_2;
 typedef Kernel::Vector_3 Vector;
 typedef CGAL::Aff_transformation_3<Kernel> Transformation;
 typedef std::vector<Point> Points;
@@ -494,7 +498,6 @@ Nef_polyhedron* SectionOfNefPolyhedron(Nef_polyhedron* a, double x, double y, do
   return new Nef_polyhedron(a->intersection(Plane(x, y, z, w), Nef_polyhedron::Intersection_mode::PLANE_ONLY));
 }
 
-#ifdef SURFACE_MESH_BOOLEANS
 Surface_mesh* DifferenceOfSurfaceMeshes(Surface_mesh* a, Surface_mesh* b) {
   Surface_mesh* c = new Surface_mesh();
   CGAL::Polygon_mesh_processing::corefine_and_compute_difference(
@@ -545,7 +548,6 @@ void SectionOfSurfaceMesh(Surface_mesh* mesh, std::size_t plane_count, emscripte
     }
   }
 }
-#endif
 
 double FT__to_double(const FT& ft) {
   return CGAL::to_double(ft);
@@ -920,13 +922,11 @@ Surface_mesh* OutlineOfSurfaceMesh(Surface_mesh* input) {
 }
 
 typedef Kernel Kernel_2;
-// typedef CGAL::Projection_traits_xy_3<Kernel> Kernel_2;
-// typedef CGAL::Projection_traits_xy_3<CGAL::Exact_predicates_inexact_constructions_kernel> Kernel_2;
 typedef CGAL::Polygon_2<Kernel_2> Polygon_2;
 typedef CGAL::Polygon_with_holes_2<Kernel_2> Polygon_with_holes_2;
 typedef CGAL::Straight_skeleton_2<Kernel_2> Straight_skeleton_2;
 
-void InsetOfPolygon(double initial, double step, double limit, double x, double y, double z, double w, std::size_t hole_count, emscripten::val fill_boundary, emscripten::val fill_hole, emscripten::val emit_polygon, emscripten::val emit_point) {
+void SkeletalInsetOfPolygon(double initial, double step, double limit, double x, double y, double z, double w, std::size_t hole_count, emscripten::val fill_boundary, emscripten::val fill_hole, emscripten::val emit_polygon, emscripten::val emit_point) {
   Plane plane(x, y, z, w);
   Polygon_2 boundary;
   {
@@ -946,10 +946,10 @@ void InsetOfPolygon(double initial, double step, double limit, double x, double 
     for (const auto& point : points) {
       hole.push_back(plane.to_2d(point));
     }
+    std::reverse(hole.begin(), hole.end());
     holes.push_back(hole);
   }
   Polygon_with_holes_2 polygon(boundary, holes.begin(), holes.end());
-  // std::vector<boost::shared_ptr<Polygon_with_holes_2>> offset_polygons = CGAL::create_interior_skeleton_and_offset_polygons_with_holes_2(offset, polygon, Kernel_2());
 
   boost::shared_ptr<Straight_skeleton_2> skeleton = CGAL::create_interior_straight_skeleton_2(polygon);
 
@@ -975,6 +975,234 @@ void InsetOfPolygon(double initial, double step, double limit, double x, double 
         }
       }
     }
+    if (!emitted) {
+      break;
+    }
+    if (step <= 0) {
+      break;
+    }
+    offset += step;
+    if (limit <= 0) {
+      continue;
+    }
+    if (offset >= limit) {
+      break;
+    }
+  }
+}
+
+void OffsetOfPolygon(double initial, double step, double limit, double x, double y, double z, double w, std::size_t hole_count, emscripten::val fill_boundary, emscripten::val fill_hole, emscripten::val emit_polygon, emscripten::val emit_point) {
+  typedef CGAL::Gps_circle_segment_traits_2<Kernel> Traits;
+  Kernel::Plane_3 plane(x, y, z, w);
+  Polygon_2 boundary;
+  {
+    Points points;
+    Points* points_ptr = &points;
+    fill_boundary(points_ptr);
+    for (const auto& point : points) {
+      boundary.push_back(plane.to_2d(point));
+    }
+  }
+  std::vector<Polygon_2> holes;
+  for (std::size_t nth = 0; nth < hole_count; nth++) {
+    Points points;
+    Points* points_ptr = &points;
+    fill_hole(points_ptr, nth);
+    Polygon_2 hole;
+    for (const auto& point : points) {
+      hole.push_back(plane.to_2d(point));
+    }
+    holes.push_back(hole);
+  }
+  Polygon_with_holes_2 polygon(boundary, holes.begin(), holes.end());
+
+  Traits traits;
+
+  double offset = initial;
+
+  for (;;) {
+    Traits::Polygon_with_holes_2 offset_polygon = CGAL::approximated_offset_2(polygon, offset, 0.00001);
+    bool emitted = false;
+    const auto& outer = offset_polygon.outer_boundary();
+    emit_polygon(false);
+    for (auto curve = outer.curves_begin(); curve != outer.curves_end(); ++curve) {
+      const auto& x = curve->source().x();
+      const auto& y = curve->source().y();
+      auto p = plane.to_3d(Point_2(x.a0() + x.a1() * sqrt(CGAL::to_double(x.root())),
+                                   y.a0() + y.a1() * sqrt(CGAL::to_double(y.root()))));
+      emit_point(CGAL::to_double(p.x()), CGAL::to_double(p.y()), CGAL::to_double(p.z()));
+      emitted = true;
+    }
+    for (auto hole = offset_polygon.holes_begin(); hole != offset_polygon.holes_end(); ++hole) {
+      emit_polygon(true);
+      for (auto curve = hole->curves_begin(); curve != hole->curves_end(); ++curve) {
+        const auto& x = curve->source().x();
+        const auto& y = curve->source().y();
+        auto p = plane.to_3d(Point_2(x.a0() + x.a1() * sqrt(CGAL::to_double(x.root())),
+                                     y.a0() + y.a1() * sqrt(CGAL::to_double(y.root()))));
+        emit_point(CGAL::to_double(p.x()), CGAL::to_double(p.y()), CGAL::to_double(p.z()));
+        emitted = true;
+      }
+    }
+    if (!emitted) {
+      break;
+    }
+    if (step <= 0) {
+      break;
+    }
+    offset += step;
+    if (limit <= 0) {
+      continue;
+    }
+    if (offset >= limit) {
+      break;
+    }
+  }
+}
+
+template <class Curve>
+void emitCircularCurve(const Plane& plane, Curve& curve, emscripten::val& emit_point) {
+  // General loss of precision.
+  const auto& source = curve->source();
+  const auto& target = curve->target();
+  const auto& circle = curve->supporting_circle();
+  double cx = CGAL::to_double(circle.center().x());
+  double cy = CGAL::to_double(circle.center().y());
+  double sx = CGAL::to_double(source.x());
+  double sy = CGAL::to_double(source.y());
+  double tx = CGAL::to_double(target.x());
+  double ty = CGAL::to_double(target.y());
+  double source_angle = atan2(sy - cy, sx - cx);
+  double target_angle = atan2(ty - cy, tx - cx);
+  if (circle.orientation() == CGAL::CLOCKWISE) {
+    {
+      auto p = plane.to_3d(Point_2(sx, sy));
+      emit_point(CGAL::to_double(p.x()), CGAL::to_double(p.y()), CGAL::to_double(p.z()));
+    }
+    if (target_angle > source_angle) {
+      target_angle -= M_PI * 2;
+    }
+    const double step = M_PI / 32.0;
+    double ox = sx - cx;
+    double oy = sy - cy;
+    double angle_limit = source_angle - target_angle;
+    for (double angle = step; angle < angle_limit; angle += step) {
+      auto p = plane.to_3d(Point_2(cos(-angle) * ox - sin(-angle) * oy + cx, sin(-angle) * ox + cos(-angle) * oy + cy));
+      emit_point(CGAL::to_double(p.x()), CGAL::to_double(p.y()), CGAL::to_double(p.z()));
+    }
+    {
+      auto p = plane.to_3d(Point_2(tx, ty));
+      emit_point(CGAL::to_double(p.x()), CGAL::to_double(p.y()), CGAL::to_double(p.z()));
+    }
+  } else {
+    // COUNTER-CLOCKWISE
+    {
+      auto p = plane.to_3d(Point_2(sx, sy));
+      emit_point(CGAL::to_double(p.x()), CGAL::to_double(p.y()), CGAL::to_double(p.z()));
+    }
+    if (target_angle < source_angle) {
+      target_angle += M_PI * 2;
+    }
+    const double step = M_PI / 32.0;
+    double ox = sx - cx;
+    double oy = sy - cy;
+    double angle_limit = target_angle - source_angle;
+    for (double angle = step; angle < angle_limit; angle += step) {
+      auto p = plane.to_3d(Point_2(cos(angle) * ox - sin(angle) * oy + cx, sin(angle) * ox + cos(angle) * oy + cy));
+      emit_point(CGAL::to_double(p.x()), CGAL::to_double(p.y()), CGAL::to_double(p.z()));
+    }
+    {
+      auto p = plane.to_3d(Point_2(tx, ty));
+      emit_point(CGAL::to_double(p.x()), CGAL::to_double(p.y()), CGAL::to_double(p.z()));
+    }
+  }
+}
+
+// FIX: Consider producing an exact outline mesh.
+void InsetOfPolygon(double initial, double step, double limit, double x, double y, double z, double w, std::size_t hole_count, emscripten::val fill_boundary, emscripten::val fill_hole, emscripten::val emit_polygon, emscripten::val emit_point) {
+  typedef CGAL::Gps_circle_segment_traits_2<Kernel> Traits;
+  Kernel::Plane_3 plane(x, y, z, w);
+
+  double offset = initial;
+
+  Polygon_2 boundary;
+  std::vector<Polygon_2> holes;
+
+  {
+    Points points;
+    Points* points_ptr = &points;
+    fill_boundary(points_ptr);
+    for (const auto& point : points) {
+      boundary.push_back(plane.to_2d(point));
+    }
+  }
+
+  for (std::size_t nth = 0; nth < hole_count; nth++) {
+    Points points;
+    Points* points_ptr = &points;
+    fill_hole(points_ptr, nth);
+    Polygon_2 hole;
+    for (const auto& point : points) {
+      hole.push_back(plane.to_2d(point));
+    }
+    if (hole.orientation() == CGAL::Sign::NEGATIVE) {
+      hole.reverse_orientation();
+    }
+    holes.push_back(hole);
+  }
+
+  for (;;) {
+    CGAL::General_polygon_set_2<Traits> boundaries;
+    {
+      std::vector<Traits::Polygon_2> inset_boundaries;
+      CGAL::approximated_inset_2(boundary, offset, 0.00001, std::back_inserter(inset_boundaries));
+      for (auto& inset_boundary : inset_boundaries) {
+        if (inset_boundary.orientation() == CGAL::Sign::NEGATIVE) {
+          inset_boundary.reverse_orientation();
+        }
+        boundaries.join(CGAL::General_polygon_set_2<Traits>(inset_boundary));
+      }
+    }
+
+    for (const auto& hole : holes) {
+      boundaries.difference(CGAL::General_polygon_set_2<Traits>(CGAL::approximated_offset_2(hole, offset, 0.00001)));
+    }
+  
+    bool emitted = false;
+
+    std::vector<Traits::Polygon_with_holes_2> polygons;
+    boundaries.polygons_with_holes(std::back_inserter(polygons));
+
+    for (const Traits::Polygon_with_holes_2& polygon : polygons) {
+      const auto& outer = polygon.outer_boundary();
+      emit_polygon(false);
+      for (auto curve = outer.curves_begin(); curve != outer.curves_end(); ++curve) {
+        if (curve->is_linear()) {
+          const auto& source = curve->source();
+          const auto& target = curve->target();
+          auto p = plane.to_3d(Point_2(CGAL::to_double(source.x()), CGAL::to_double(source.y())));
+          emit_point(CGAL::to_double(p.x()), CGAL::to_double(p.y()), CGAL::to_double(p.z()));
+        } else if (curve->is_circular()) {
+          emitCircularCurve(plane, curve, emit_point);
+        }
+        emitted = true;
+      }
+      for (auto hole = polygon.holes_begin(); hole != polygon.holes_end(); ++hole) {
+        emit_polygon(true);
+        for (auto curve = hole->curves_begin(); curve != hole->curves_end(); ++curve) {
+          if (curve->is_linear()) {
+            const auto& source = curve->source();
+            const auto& target = curve->target();
+            auto p = plane.to_3d(Point_2(CGAL::to_double(source.x()), CGAL::to_double(source.y())));
+            emit_point(CGAL::to_double(p.x()), CGAL::to_double(p.y()), CGAL::to_double(p.z()));
+          } else if (curve->is_circular()) {
+            emitCircularCurve(plane, curve, emit_point);
+          }
+          emitted = true;
+        }
+      }
+    }
+
     if (!emitted) {
       break;
     }
@@ -1239,11 +1467,9 @@ EMSCRIPTEN_BINDINGS(module) {
   emscripten::function("UnionOfNefPolyhedrons", &UnionOfNefPolyhedrons, emscripten::allow_raw_pointers());
   emscripten::function("SectionOfNefPolyhedron", &SectionOfNefPolyhedron, emscripten::allow_raw_pointers());
 
-#ifdef SURFACE_MESH_BOOLEANS
   emscripten::function("DifferenceOfSurfaceMeshes", &DifferenceOfSurfaceMeshes, emscripten::allow_raw_pointers());
   emscripten::function("IntersectionOfSurfaceMeshes", &IntersectionOfSurfaceMeshes, emscripten::allow_raw_pointers());
   emscripten::function("UnionOfSurfaceMeshes", &UnionOfSurfaceMeshes, emscripten::allow_raw_pointers());
-#endif
 
   emscripten::function("FT__to_double", &FT__to_double, emscripten::allow_raw_pointers());
 
@@ -1259,6 +1485,9 @@ EMSCRIPTEN_BINDINGS(module) {
   emscripten::function("ComputeAlphaShapeAsSurfaceMesh", &ComputeAlphaShapeAsSurfaceMesh, emscripten::allow_raw_pointers());
   emscripten::function("ComputeAlphaShape2AsPolygonSegments", &ComputeAlphaShape2AsPolygonSegments, emscripten::allow_raw_pointers());
   emscripten::function("OutlineOfSurfaceMesh", &OutlineOfSurfaceMesh, emscripten::allow_raw_pointers());
+  emscripten::function("SkeletalInsetOfPolygon", &SkeletalInsetOfPolygon, emscripten::allow_raw_pointers());
+  // emscripten::function("ApproximatedOffsetOfPolygon", &ApproximatedOffsetOfPolygon, emscripten::allow_raw_pointers());
+  emscripten::function("OffsetOfPolygon", &OffsetOfPolygon, emscripten::allow_raw_pointers());
   emscripten::function("InsetOfPolygon", &InsetOfPolygon, emscripten::allow_raw_pointers());
   emscripten::function("Surface_mesh__is_closed", &Surface_mesh__is_closed, emscripten::allow_raw_pointers());
   emscripten::function("Surface_mesh__is_valid_halfedge_graph", &Surface_mesh__is_valid_halfedge_graph, emscripten::allow_raw_pointers());

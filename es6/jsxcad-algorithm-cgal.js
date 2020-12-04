@@ -830,8 +830,8 @@ var Module = (function () {
     }
     var wasmMemory;
     var wasmTable = new WebAssembly.Table({
-      initial: 1402,
-      maximum: 1402,
+      initial: 1940,
+      maximum: 1940,
       element: 'anyfunc',
     });
     var ABORT = false;
@@ -1099,9 +1099,9 @@ var Module = (function () {
       Module['HEAPF32'] = HEAPF32 = new Float32Array(buf);
       Module['HEAPF64'] = HEAPF64 = new Float64Array(buf);
     }
-    var STACK_BASE = 5455024,
-      STACK_MAX = 212144,
-      DYNAMIC_BASE = 5455024;
+    var STACK_BASE = 5536304,
+      STACK_MAX = 293424,
+      DYNAMIC_BASE = 5536304;
     assert(STACK_BASE % 16 === 0, 'stack must start aligned');
     assert(DYNAMIC_BASE % 16 === 0, 'heap must start aligned');
     var TOTAL_STACK = 5242880;
@@ -7395,6 +7395,16 @@ var Module = (function () {
     var __growWasmMemory = (Module['__growWasmMemory'] = createExportWrapper(
       '__growWasmMemory'
     ));
+    function invoke_ii(index, a1) {
+      var sp = stackSave();
+      try {
+        return wasmTable.get(index)(a1);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
     function invoke_iii(index, a1, a2) {
       var sp = stackSave();
       try {
@@ -7429,16 +7439,6 @@ var Module = (function () {
       var sp = stackSave();
       try {
         return wasmTable.get(index)(a1, a2, a3);
-      } catch (e) {
-        stackRestore(sp);
-        if (e !== e + 0 && e !== 'longjmp') throw e;
-        _setThrew(1, 0);
-      }
-    }
-    function invoke_ii(index, a1) {
-      var sp = stackSave();
-      try {
-        return wasmTable.get(index)(a1);
       } catch (e) {
         stackRestore(sp);
         if (e !== e + 0 && e !== 'longjmp') throw e;
@@ -9987,9 +9987,7 @@ const fromSurfaceMeshToGraph = (mesh) => {
     (faceId) => {
       if (polygon.length >= 3) {
         graph.faces[face].plane = fromPolygon(polygon);
-        if (graph.faces[face].plane === undefined) {
-          console.log(`QQ/bent: ${JSON.stringify(polygon)}`);
-        }
+        if (graph.faces[face].plane === undefined) ;
       }
       polygon.length = 0;
       face = faceId;
@@ -10102,6 +10100,52 @@ const intersectionOfNefPolyhedrons = (a, b) =>
 const intersectionOfSurfaceMeshes = (a, b) =>
   getCgal().IntersectionOfSurfaceMeshes(a, b);
 
+const offsetOfPolygon = (
+  initial = 1,
+  step = -1,
+  limit = -1,
+  plane,
+  border,
+  holes = []
+) => {
+  const c = getCgal();
+  const [x, y, z, w] = plane;
+  const outputs = [];
+  let output;
+  let points;
+  c.OffsetOfPolygon(
+    initial,
+    step,
+    limit,
+    x,
+    y,
+    z,
+    -w,
+    holes.length,
+    (boundary) => {
+      for (const [x, y, z] of border) {
+        c.addPoint(boundary, x, y, z);
+      }
+    },
+    (hole, nth) => {
+      for (const [x, y, z] of holes[nth]) {
+        c.addPoint(hole, x, y, z);
+      }
+    },
+    (isHole) => {
+      points = [];
+      if (isHole) {
+        output.holes.push(points);
+      } else {
+        output = { boundary: points, holes: [] };
+        outputs.push(output);
+      }
+    },
+    (x, y, z) => points.push([x, y, z])
+  );
+  return outputs;
+};
+
 // Note that the topology of an outline is disconnected.
 const outlineOfSurfaceMesh = (mesh) =>
   getCgal().OutlineOfSurfaceMesh(mesh);
@@ -10145,6 +10189,52 @@ const sectionOfSurfaceMesh = (mesh, planes) => {
     }
   }
   return sections;
+};
+
+const skeletalInsetOfPolygon = (
+  initial = 1,
+  step = -1,
+  limit = -1,
+  plane,
+  border,
+  holes = []
+) => {
+  const c = getCgal();
+  const [x, y, z, w] = plane;
+  const outputs = [];
+  let output;
+  let points;
+  c.SkeletalInsetOfPolygon(
+    initial,
+    step,
+    limit,
+    x,
+    y,
+    z,
+    -w,
+    holes.length,
+    (boundary) => {
+      for (const [x, y, z] of border) {
+        c.addPoint(boundary, x, y, z);
+      }
+    },
+    (hole, nth) => {
+      for (const [x, y, z] of holes[nth]) {
+        c.addPoint(hole, x, y, z);
+      }
+    },
+    (isHole) => {
+      points = [];
+      if (isHole) {
+        output.holes.push(points);
+      } else {
+        output = { boundary: points, holes: [] };
+        outputs.push(output);
+      }
+    },
+    (x, y, z) => points.push([x, y, z])
+  );
+  return outputs;
 };
 
 const smoothSurfaceMesh = (mesh) => getCgal().SmoothSurfaceMesh(mesh);
@@ -10193,4 +10283,4 @@ const unionOfNefPolyhedrons = (a, b) =>
 const unionOfSurfaceMeshes = (a, b) =>
   getCgal().UnionOfSurfaceMeshes(a, b);
 
-export { arrangePaths, differenceOfNefPolyhedrons, differenceOfSurfaceMeshes, extrudeSurfaceMesh, extrudeToPlaneOfSurfaceMesh, fromGraphToNefPolyhedron, fromGraphToSurfaceMesh, fromNefPolyhedronFacetsToGraph, fromNefPolyhedronShellsToGraph, fromNefPolyhedronToPolygons, fromNefPolyhedronToSurfaceMesh, fromNefPolyhedronToTriangles, fromPointsToAlphaShape2AsPolygonSegments, fromPointsToAlphaShapeAsSurfaceMesh, fromPointsToConvexHullAsSurfaceMesh, fromPointsToSurfaceMesh, fromPolygonsToNefPolyhedron, fromPolygonsToSurfaceMesh, fromSurfaceMeshEmitBoundingBox, fromSurfaceMeshToGraph, fromSurfaceMeshToLazyGraph, fromSurfaceMeshToNefPolyhedron, fromSurfaceMeshToPolygons, fromSurfaceMeshToTriangles, initCgal, insetOfPolygon, intersectionOfNefPolyhedrons, intersectionOfSurfaceMeshes, outlineOfSurfaceMesh, sectionOfNefPolyhedron, sectionOfSurfaceMesh, smoothSurfaceMesh, transformSurfaceMesh, unionOfNefPolyhedrons, unionOfSurfaceMeshes };
+export { arrangePaths, differenceOfNefPolyhedrons, differenceOfSurfaceMeshes, extrudeSurfaceMesh, extrudeToPlaneOfSurfaceMesh, fromGraphToNefPolyhedron, fromGraphToSurfaceMesh, fromNefPolyhedronFacetsToGraph, fromNefPolyhedronShellsToGraph, fromNefPolyhedronToPolygons, fromNefPolyhedronToSurfaceMesh, fromNefPolyhedronToTriangles, fromPointsToAlphaShape2AsPolygonSegments, fromPointsToAlphaShapeAsSurfaceMesh, fromPointsToConvexHullAsSurfaceMesh, fromPointsToSurfaceMesh, fromPolygonsToNefPolyhedron, fromPolygonsToSurfaceMesh, fromSurfaceMeshEmitBoundingBox, fromSurfaceMeshToGraph, fromSurfaceMeshToLazyGraph, fromSurfaceMeshToNefPolyhedron, fromSurfaceMeshToPolygons, fromSurfaceMeshToTriangles, initCgal, insetOfPolygon, intersectionOfNefPolyhedrons, intersectionOfSurfaceMeshes, offsetOfPolygon, outlineOfSurfaceMesh, sectionOfNefPolyhedron, sectionOfSurfaceMesh, skeletalInsetOfPolygon, smoothSurfaceMesh, transformSurfaceMesh, unionOfNefPolyhedrons, unionOfSurfaceMeshes };

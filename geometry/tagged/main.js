@@ -73,6 +73,7 @@ export { keep } from './keep.js';
 export { measureArea } from './measureArea.js';
 export { measureBoundingBox } from './measureBoundingBox.js';
 export { measureHeights } from './measureHeights.js';
+export { offset } from './offset.js';
 export { outline } from './outline.js';
 export { read } from './read.js';
 export { realize } from './realize.js';
