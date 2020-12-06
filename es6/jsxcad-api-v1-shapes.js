@@ -1,4 +1,4 @@
-import Shape$1, { Shape, shapeMethod } from './jsxcad-api-v1-shape.js';
+import Shape$1, { Shape, shapeMethod, weld } from './jsxcad-api-v1-shape.js';
 import { radius, getSides, getRadius, getLeft, getRight, getFront, getBack, getCenter } from './jsxcad-geometry-plan.js';
 import { concatenate, rotateZ, translate as translate$1 } from './jsxcad-geometry-path.js';
 import { numbers } from './jsxcad-api-v1-math.js';
@@ -1852,6 +1852,10 @@ const Wave = (
 
 Shape.prototype.Wave = shapeMethod(Wave);
 
+const Weld = (...shapes) => weld(...shapes);
+
+Shape.prototype.Weld = shapeMethod(Weld);
+
 const api = {
   Arc,
   Assembly,
@@ -1889,7 +1893,8 @@ const api = {
   Triangle,
   Union,
   Wave,
+  Weld,
 };
 
 export default api;
-export { Arc, Assembly, Ball, Box, ChainedHull, Circle, Cone, Difference, Empty, Group, Hershey, Hexagon, Hull, Icosahedron, Intersection, Line, Octagon, Path, Peg, Pentagon, Plane, Point, Points, Polygon, Polyhedron, Rod, Septagon, Sketch, Spiral, Square, Tetragon, Toolpath, Torus, Triangle, Union, Wave };
+export { Arc, Assembly, Ball, Box, ChainedHull, Circle, Cone, Difference, Empty, Group, Hershey, Hexagon, Hull, Icosahedron, Intersection, Line, Octagon, Path, Peg, Pentagon, Plane, Point, Points, Polygon, Polyhedron, Rod, Septagon, Sketch, Spiral, Square, Tetragon, Toolpath, Torus, Triangle, Union, Wave, Weld };

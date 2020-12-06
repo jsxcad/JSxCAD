@@ -1629,6 +1629,22 @@ const wallMethod = function () {
 };
 Shape.prototype.wall = wallMethod;
 
+const weld = (...shapes) => {
+  const weld = [];
+  for (const shape of shapes) {
+    for (const { paths } of getNonVoidPaths(shape.toTransformedGeometry())) {
+      weld.push(...paths);
+    }
+  }
+  return Shape.fromGeometry(taggedPaths({}, weld));
+};
+
+const weldMethod = function (...shapes) {
+  return weld(this, ...shapes);
+};
+
+Shape.prototype.weld = weldMethod;
+
 const toWireframeFromSolid = (solid) => {
   const paths = [];
   for (const surface of solid) {
@@ -1857,4 +1873,4 @@ const logMethod = function (
 Shape.prototype.log = logMethod;
 
 export default Shape;
-export { Shape, getPegCoords, loadGeometry, log, orient$1 as orient, saveGeometry, shapeMethod };
+export { Shape, getPegCoords, loadGeometry, log, orient$1 as orient, saveGeometry, shapeMethod, weld };

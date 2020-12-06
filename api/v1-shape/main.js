@@ -70,4 +70,6 @@ import log from './log.js';
 export { Shape, loadGeometry, log, saveGeometry };
 export { getPegCoords, orient, shapeMethod } from './peg.js';
 
+export { weld } from './weld.js';
+
 export default Shape;
