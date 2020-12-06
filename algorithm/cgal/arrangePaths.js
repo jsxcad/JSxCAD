@@ -1,6 +1,10 @@
-import { close, isClosed } from '@jsxcad/geometry-path';
-
+import { equals } from '@jsxcad/math-vec3';
 import { getCgal } from './getCgal.js';
+import { getEdges } from '@jsxcad/geometry-path';
+
+const X = 0;
+const Y = 1;
+const Z = 2;
 
 export const arrangePaths = (x, y, z, w, paths) => {
   const c = getCgal();
@@ -16,15 +20,12 @@ export const arrangePaths = (x, y, z, w, paths) => {
     (points) => {
       const path = paths[nth++];
       if (path) {
-        for (const [x, y, z] of close(path)) {
-          c.addPoint(points, x, y, z);
-        }
-        if (isClosed(path)) {
-          // Close the path with the starting point.
-          for (const [x, y, z] of path) {
-            c.addPoint(points, x, y, z);
-            break;
+        for (const [start, end] of getEdges(path)) {
+          if (equals(start, end)) {
+            continue;
           }
+          c.addPoint(points, start[X], start[Y], start[Z]);
+          c.addPoint(points, end[X], end[Y], end[Z]);
         }
       }
     },

@@ -1,13 +1,15 @@
 import {
+  fromPaths as fromPathsToGraph,
+  fromSolid as fromSolidToGraph,
+  union as graphUnion,
+  toPaths as toPathsFromGraph,
+} from '@jsxcad/geometry-graph';
+
+import {
   fromSolid as fromSolidToBsp,
   intersectSurface,
   union as solidUnion,
 } from '@jsxcad/geometry-bsp';
-
-import {
-  fromSolid as fromSolidToGraph,
-  union as graphUnion,
-} from '@jsxcad/geometry-graph';
 
 import {
   makeWatertight as makeWatertightSurface,
@@ -22,7 +24,6 @@ import { getNonVoidPaths } from './getNonVoidPaths.js';
 import { getNonVoidPoints } from './getNonVoidPoints.js';
 import { getNonVoidSolids } from './getNonVoidSolids.js';
 import { getNonVoidSurfaces } from './getNonVoidSurfaces.js';
-import { union as pathsUnion } from '@jsxcad/geometry-paths';
 import { union as pointsUnion } from '@jsxcad/geometry-points';
 import { rewrite } from './visit.js';
 import { taggedGraph } from './taggedGraph.js';
@@ -45,6 +46,9 @@ const unionImpl = (geometry, ...geometries) => {
           }
           for (const { solid } of getNonVoidSolids(geometry)) {
             unified = graphUnion(unified, fromSolidToGraph(solid));
+          }
+          for (const { paths } of getNonVoidPaths(geometry)) {
+            unified = graphUnion(unified, fromPathsToGraph(paths));
           }
         }
         return taggedGraph({ tags }, unified);
@@ -86,6 +90,16 @@ const unionImpl = (geometry, ...geometries) => {
         );
       }
       case 'paths': {
+        return taggedPaths(
+          { tags },
+          toPathsFromGraph(
+            union(
+              taggedGraph({ tags }, fromPathsToGraph(geometry.paths)),
+              ...geometries
+            ).graph
+          )
+        );
+        /*
         const { paths, tags } = geometry;
         const pathsets = [paths];
         for (const input of geometries) {
@@ -94,6 +108,7 @@ const unionImpl = (geometry, ...geometries) => {
           }
         }
         return taggedPaths({ tags }, pathsUnion(paths, ...pathsets));
+*/
       }
       case 'points': {
         const { points, tags } = geometry;

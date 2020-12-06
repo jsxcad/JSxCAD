@@ -1,6 +1,6 @@
-import { close, isClosed } from './jsxcad-geometry-path.js';
+import { equals, dot } from './jsxcad-math-vec3.js';
 import { emit, log, onBoot } from './jsxcad-sys.js';
-import { dot, equals } from './jsxcad-math-vec3.js';
+import { getEdges } from './jsxcad-geometry-path.js';
 import { fromPolygon } from './jsxcad-math-plane.js';
 
 // Copyright Joyent, Inc. and other Node contributors.
@@ -9505,6 +9505,10 @@ const getCgal = () => cgal;
 
 onBoot(initCgal);
 
+const X = 0;
+const Y = 1;
+const Z = 2;
+
 const arrangePaths = (x, y, z, w, paths) => {
   const c = getCgal();
   let nth = 0;
@@ -9519,15 +9523,12 @@ const arrangePaths = (x, y, z, w, paths) => {
     (points) => {
       const path = paths[nth++];
       if (path) {
-        for (const [x, y, z] of close(path)) {
-          c.addPoint(points, x, y, z);
-        }
-        if (isClosed(path)) {
-          // Close the path with the starting point.
-          for (const [x, y, z] of path) {
-            c.addPoint(points, x, y, z);
-            break;
+        for (const [start, end] of getEdges(path)) {
+          if (equals(start, end)) {
+            continue;
           }
+          c.addPoint(points, start[X], start[Y], start[Z]);
+          c.addPoint(points, end[X], end[Y], end[Z]);
         }
       }
     },

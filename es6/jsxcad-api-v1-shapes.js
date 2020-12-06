@@ -17,7 +17,7 @@ const Spiral = (
     by = 1;
   }
   if (to === undefined && upto === undefined) {
-    upto = 360;
+    to = 360;
   }
   let path = [null];
   for (const angle of numbers((angle) => angle, {
@@ -79,9 +79,9 @@ const unitBall = (resolution = 16) => {
   return shape.toGraph();
 };
 
-const Ball = (value = 1) => {
+const Ball = (value = 1, { resolution = 16 } = {}) => {
   const plan = orRadius(value);
-  return unitBall().scale(getRadius(plan)).at(plan.at);
+  return unitBall(resolution).scale(getRadius(plan)).at(plan.at);
 };
 
 Shape.prototype.Ball = shapeMethod(Ball);
@@ -153,7 +153,7 @@ const chainHullMethod = function (...shapes) {
 Shape.prototype.chainHull = chainHullMethod;
 Shape.prototype.ChainedHull = shapeMethod(ChainedHull);
 
-const Circle = (plan = 1) => Arc(plan).close();
+const Circle = (plan = 1) => Arc(plan).fill();
 
 Shape.prototype.Circle = shapeMethod(Circle);
 

@@ -1242,7 +1242,7 @@ void ArrangePaths(double x, double y, double z, double w, emscripten::val fill, 
     for (const auto& point : points) {
       point_2s.push_back(plane.to_2d(point));
     }
-    for (std::size_t i = 0; i < point_2s.size() - 1; i++) {
+    for (std::size_t i = 0; i < point_2s.size(); i += 2) {
       insert(arrangement, Segment_2(point_2s[i], point_2s[i + 1]));
     }
   }

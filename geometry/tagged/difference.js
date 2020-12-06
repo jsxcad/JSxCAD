@@ -1,17 +1,21 @@
 import {
+  fromPaths as fromPathsToGraph,
   fromSolid as fromSolidToGraph,
   fromSurface as fromSurfaceToGraph,
   difference as graphDifference,
+  toPaths as toPathsFromGraph,
   toSolid as toSolidFromGraph,
   toSurface as toSurfaceFromGraph,
 } from '@jsxcad/geometry-graph';
 
 import { cache } from '@jsxcad/cache';
 import { getGraphs } from './getGraphs.js';
+import { getPaths } from './getPaths.js';
 import { getSolids } from './getSolids.js';
 import { getSurfaces } from './getSurfaces.js';
 import { rewrite } from './visit.js';
 import { taggedGraph } from './taggedGraph.js';
+import { taggedPaths } from './taggedPaths.js';
 import { taggedSolid } from './taggedSolid.js';
 import { taggedSurface } from './taggedSurface.js';
 
@@ -33,6 +37,9 @@ const differenceImpl = (geometry, ...geometries) => {
               differenced,
               fromSurfaceToGraph(surface)
             );
+          }
+          for (const { paths } of getPaths(geometry)) {
+            differenced = graphDifference(differenced, fromPathsToGraph(paths));
           }
         }
         return taggedGraph({ tags }, differenced);
@@ -58,6 +65,15 @@ const differenceImpl = (geometry, ...geometries) => {
           )
         );
       case 'paths':
+        return taggedPaths(
+          { tags },
+          toPathsFromGraph(
+            difference(
+              taggedGraph({ tags }, fromPathsToGraph(geometry.paths)),
+              ...geometries
+            ).graph
+          )
+        );
       case 'points': {
         // Not implemented yet.
         return geometry;
