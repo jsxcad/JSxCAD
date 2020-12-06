@@ -38,5 +38,6 @@ export const extrude = (geometry, height, depth) => {
     }
   };
 
+  // CHECK: Why does this need transformed geometry?
   return rewrite(toTransformedGeometry(geometry), op);
 };

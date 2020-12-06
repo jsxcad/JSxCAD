@@ -1,15 +1,15 @@
 import { identityMatrix, multiply, fromXRotation, fromYRotation, fromZRotation, fromTranslation, fromScaling } from './jsxcad-math-mat4.js';
 import { cacheTransform, cache, cacheRewriteTags, cacheSection } from './jsxcad-cache.js';
-import { reconcile as reconcile$1, makeWatertight as makeWatertight$1, isWatertight as isWatertight$1, findOpenEdges as findOpenEdges$1, transform as transform$3, canonicalize as canonicalize$1, eachPoint as eachPoint$3, flip as flip$1, fromSurface as fromSurface$2, measureBoundingBox as measureBoundingBox$3 } from './jsxcad-geometry-solid.js';
+import { reconcile as reconcile$1, makeWatertight as makeWatertight$1, isWatertight as isWatertight$1, findOpenEdges as findOpenEdges$1, transform as transform$3, canonicalize as canonicalize$1, eachPoint as eachPoint$3, flip as flip$1, fromSurface as fromSurface$1, measureBoundingBox as measureBoundingBox$3 } from './jsxcad-geometry-solid.js';
 import { close, createOpenPath } from './jsxcad-geometry-path.js';
 import { createNormalize3 } from './jsxcad-algorithm-quantize.js';
-import { transform as transform$5, canonicalize as canonicalize$5, eachPoint as eachPoint$4, close as close$1, flip as flip$3, union as union$2 } from './jsxcad-geometry-paths.js';
+import { transform as transform$5, canonicalize as canonicalize$5, eachPoint as eachPoint$4, close as close$1, flip as flip$3 } from './jsxcad-geometry-paths.js';
 import { canonicalize as canonicalize$4, toPolygon } from './jsxcad-math-plane.js';
 import { transform as transform$4, canonicalize as canonicalize$3, eachPoint as eachPoint$5, flip as flip$4, measureBoundingBox as measureBoundingBox$1, union as union$1 } from './jsxcad-geometry-points.js';
 import { transform as transform$1, canonicalize as canonicalize$2, eachPoint as eachPoint$2, flip as flip$2, makeWatertight as makeWatertight$2, measureArea as measureArea$1, measureBoundingBox as measureBoundingBox$2, toPlane } from './jsxcad-geometry-surface.js';
-import { transform as transform$2, toSurface, fromSurface, toSolid, fromSolid, difference as difference$1, eachPoint as eachPoint$1, fill as fill$1, fromPaths, extrude as extrude$1, extrudeToPlane as extrudeToPlane$1, intersection as intersection$2, toPaths, inset as inset$1, measureBoundingBox as measureBoundingBox$4, offset as offset$1, outline as outline$1, realizeGraph, section as section$1, smooth as smooth$1, union as union$4 } from './jsxcad-geometry-graph.js';
+import { transform as transform$2, toPaths, fromPaths, toSurface, fromSurface, toSolid, fromSolid, difference as difference$1, eachPoint as eachPoint$1, fill as fill$1, extrude as extrude$1, extrudeToPlane as extrudeToPlane$1, intersection as intersection$2, inset as inset$1, measureBoundingBox as measureBoundingBox$4, offset as offset$1, outline as outline$1, realizeGraph, section as section$1, smooth as smooth$1, union as union$3 } from './jsxcad-geometry-graph.js';
 import { transform as transform$6 } from './jsxcad-geometry-plan.js';
-import { fromSolid as fromSolid$1, unifyBspTrees, fromSurface as fromSurface$1, removeExteriorPaths, intersectSurface, intersection as intersection$1, union as union$3 } from './jsxcad-geometry-bsp.js';
+import { intersectSurface, fromSolid as fromSolid$1, intersection as intersection$1, unifyBspTrees, fromSurface as fromSurface$2, removeExteriorPaths, union as union$2 } from './jsxcad-geometry-bsp.js';
 import { min, max } from './jsxcad-math-vec3.js';
 import { outlineSolid, outlineSurface } from './jsxcad-geometry-halfedge.js';
 import { read as read$1, write as write$1 } from './jsxcad-sys.js';
@@ -343,6 +343,16 @@ const getGraphs = (geometry) => {
   return graphs;
 };
 
+const getPaths = (geometry) => {
+  const pathsets = [];
+  eachItem(geometry, (item) => {
+    if (item.type === 'paths') {
+      pathsets.push(item);
+    }
+  });
+  return pathsets;
+};
+
 const getSolids = (geometry) => {
   const solids = [];
   eachItem(geometry, (item) => {
@@ -369,6 +379,10 @@ const taggedGraph = ({ tags }, graph) => ({
   graph,
 });
 
+const taggedPaths = ({ tags }, paths) => {
+  return { type: 'paths', tags, paths };
+};
+
 const taggedSolid = ({ tags }, solid) => {
   return { type: 'solid', tags, solid };
 };
@@ -391,6 +405,9 @@ const differenceImpl = (geometry, ...geometries) => {
               differenced,
               fromSurface(surface)
             );
+          }
+          for (const { paths } of getPaths(geometry)) {
+            differenced = difference$1(differenced, fromPaths(paths));
           }
         }
         return taggedGraph({ tags }, differenced);
@@ -416,6 +433,15 @@ const differenceImpl = (geometry, ...geometries) => {
           )
         );
       case 'paths':
+        return taggedPaths(
+          { tags },
+          toPaths(
+            difference(
+              taggedGraph({ tags }, fromPaths(geometry.paths)),
+              ...geometries
+            ).graph
+          )
+        );
       case 'points': {
         // Not implemented yet.
         return geometry;
@@ -796,6 +822,7 @@ const extrude = (geometry, height, depth) => {
     }
   };
 
+  // CHECK: Why does this need transformed geometry?
   return rewrite(toTransformedGeometry(geometry), op);
 };
 
@@ -1029,16 +1056,6 @@ const getNonVoidZ0Surfaces = (geometry) => {
   return z0Surfaces;
 };
 
-const getPaths = (geometry) => {
-  const pathsets = [];
-  eachItem(geometry, (item) => {
-    if (item.type === 'paths') {
-      pathsets.push(item);
-    }
-  });
-  return pathsets;
-};
-
 /**
  * Returns the first orientation peg found, or defaults to Z0.
  */
@@ -1137,50 +1154,7 @@ const hash = (geometry) => {
   return geometry.hash;
 };
 
-const taggedPaths = ({ tags }, paths) => {
-  return { type: 'paths', tags, paths };
-};
-
-const toBspTree = (geometry, normalize) => {
-  // Start with an empty tree.
-  let bspTree = fromSolid$1([], normalize);
-  const op = (geometry, descend) => {
-    switch (geometry.type) {
-      case 'solid': {
-        bspTree = unifyBspTrees(
-          bspTree,
-          fromSolid$1(geometry.solid, normalize)
-        );
-        return descend();
-      }
-      // FIX: We want some distinction between volumes for membership and volumes for composition.
-      case 'surface':
-      case 'z0Surface': {
-        bspTree = unifyBspTrees(
-          bspTree,
-          fromSurface$1(geometry.surface || geometry.z0Surface, normalize)
-        );
-        return descend();
-      }
-      case 'paths':
-      case 'points':
-      case 'plan':
-      case 'assembly':
-      case 'item':
-      case 'disjointAssembly':
-      case 'layers':
-      case 'sketch': {
-        return descend();
-      }
-      default:
-        throw Error(`Unexpected geometry: ${JSON.stringify(geometry)}`);
-    }
-  };
-
-  visit(geometry, op);
-
-  return bspTree;
-};
+// import { toBspTree } from './toBspTree.js';
 
 const intersectionImpl = (geometry, ...geometries) => {
   const op = (geometry, descend) => {
@@ -1198,6 +1172,12 @@ const intersectionImpl = (geometry, ...geometries) => {
               fromSolid(solid)
             );
           }
+          for (const { paths } of getNonVoidPaths(geometry)) {
+            intersected = intersection$2(
+              intersected,
+              fromPaths(paths)
+            );
+          }
         }
         return taggedGraph({ tags }, intersected);
       }
@@ -1209,7 +1189,7 @@ const intersectionImpl = (geometry, ...geometries) => {
           ...getAnyNonVoidSurfaces(
             otherGeometry
           ).map(({ surface, z0Surface }) =>
-            fromSurface$2(surface || z0Surface, normalize)
+            fromSurface$1(surface || z0Surface, normalize)
           ),
         ];
         const intersections = solids
@@ -1237,7 +1217,7 @@ const intersectionImpl = (geometry, ...geometries) => {
           ...getAnyNonVoidSurfaces(
             otherGeometry
           ).map(({ surface, z0Surface }) =>
-            fromSurface$2(surface || z0Surface, normalize)
+            fromSurface$1(surface || z0Surface, normalize)
           ),
         ];
         const intersections = solids
@@ -1267,6 +1247,16 @@ const intersectionImpl = (geometry, ...geometries) => {
         }
       }
       case 'paths': {
+        return taggedPaths(
+          { tags },
+          toPaths(
+            intersection(
+              taggedGraph({ tags }, fromPaths(geometry.paths)),
+              ...geometries
+            ).graph
+          )
+        );
+        /*
         const normalize = createNormalize3();
         let thisPaths = geometry.paths;
         for (const geometry of geometries) {
@@ -1278,6 +1268,7 @@ const intersectionImpl = (geometry, ...geometries) => {
           thisPaths = clippedPaths;
         }
         return taggedPaths({ tags }, thisPaths);
+*/
       }
       case 'points': {
         // Not implemented yet.
@@ -1428,6 +1419,47 @@ const measureBoundingBox = (geometry) => {
   return [minPoint, maxPoint];
 };
 
+const toBspTree = (geometry, normalize) => {
+  // Start with an empty tree.
+  let bspTree = fromSolid$1([], normalize);
+  const op = (geometry, descend) => {
+    switch (geometry.type) {
+      case 'solid': {
+        bspTree = unifyBspTrees(
+          bspTree,
+          fromSolid$1(geometry.solid, normalize)
+        );
+        return descend();
+      }
+      // FIX: We want some distinction between volumes for membership and volumes for composition.
+      case 'surface':
+      case 'z0Surface': {
+        bspTree = unifyBspTrees(
+          bspTree,
+          fromSurface$2(geometry.surface || geometry.z0Surface, normalize)
+        );
+        return descend();
+      }
+      case 'paths':
+      case 'points':
+      case 'plan':
+      case 'assembly':
+      case 'item':
+      case 'disjointAssembly':
+      case 'layers':
+      case 'sketch': {
+        return descend();
+      }
+      default:
+        throw Error(`Unexpected geometry: ${JSON.stringify(geometry)}`);
+    }
+  };
+
+  visit(geometry, op);
+
+  return bspTree;
+};
+
 const X = 0;
 const Y = 1;
 const Z = 2;
@@ -1538,7 +1570,7 @@ const outline = cache(outlineImpl);
 
 const read = async (path) => read$1(path);
 
-const realize = (geometry, height, depth) => {
+const realize = (geometry) => {
   const op = (geometry, descend) => {
     const { tags } = geometry;
     switch (geometry.type) {
@@ -1778,10 +1810,13 @@ const unionImpl = (geometry, ...geometries) => {
         let unified = geometry.graph;
         for (const geometry of geometries) {
           for (const { graph } of getNonVoidGraphs(geometry)) {
-            unified = union$4(unified, graph);
+            unified = union$3(unified, graph);
           }
           for (const { solid } of getNonVoidSolids(geometry)) {
-            unified = union$4(unified, fromSolid(solid));
+            unified = union$3(unified, fromSolid(solid));
+          }
+          for (const { paths } of getNonVoidPaths(geometry)) {
+            unified = union$3(unified, fromPaths(paths));
           }
         }
         return taggedGraph({ tags }, unified);
@@ -1794,7 +1829,7 @@ const unionImpl = (geometry, ...geometries) => {
           }
         }
         // No meaningful way to unify with a surface.
-        return taggedSolid({ tags }, union$3(geometry.solid, ...solids));
+        return taggedSolid({ tags }, union$2(geometry.solid, ...solids));
       }
       case 'surface': {
         const normalize = createNormalize3();
@@ -1806,10 +1841,10 @@ const unionImpl = (geometry, ...geometries) => {
             solids.push(solid);
           }
           for (const { surface } of getNonVoidSurfaces(input)) {
-            solids.push(fromSurface$2(surface, normalize));
+            solids.push(fromSurface$1(surface, normalize));
           }
         }
-        const unionedSolid = union$3(...solids);
+        const unionedSolid = union$2(...solids);
         const clippedPolygons = [];
         intersectSurface(
           fromSolid$1(unionedSolid, normalize),
@@ -1823,6 +1858,16 @@ const unionImpl = (geometry, ...geometries) => {
         );
       }
       case 'paths': {
+        return taggedPaths(
+          { tags },
+          toPaths(
+            union(
+              taggedGraph({ tags }, fromPaths(geometry.paths)),
+              ...geometries
+            ).graph
+          )
+        );
+        /*
         const { paths, tags } = geometry;
         const pathsets = [paths];
         for (const input of geometries) {
@@ -1830,7 +1875,8 @@ const unionImpl = (geometry, ...geometries) => {
             pathsets.push(paths);
           }
         }
-        return taggedPaths({ tags }, union$2(paths, ...pathsets));
+        return taggedPaths({ tags }, pathsUnion(paths, ...pathsets));
+*/
       }
       case 'points': {
         const { points, tags } = geometry;

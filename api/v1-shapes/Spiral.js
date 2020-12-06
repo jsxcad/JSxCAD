@@ -11,7 +11,7 @@ export const Spiral = (
     by = 1;
   }
   if (to === undefined && upto === undefined) {
-    upto = 360;
+    to = 360;
   }
   let path = [null];
   for (const angle of numbers((angle) => angle, {

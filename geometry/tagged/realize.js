@@ -2,7 +2,7 @@ import { realizeGraph } from '@jsxcad/geometry-graph';
 import { rewrite } from './visit.js';
 import { taggedGraph } from './taggedGraph.js';
 
-export const realize = (geometry, height, depth) => {
+export const realize = (geometry) => {
   const op = (geometry, descend) => {
     const { tags } = geometry;
     switch (geometry.type) {
