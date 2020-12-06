@@ -112,6 +112,7 @@ export {
   Triangle,
   Union,
   Wave,
+  Weld,
 } from '@jsxcad/api-v1-shapes';
 
 export { Item } from '@jsxcad/api-v1-item';

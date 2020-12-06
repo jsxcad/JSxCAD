@@ -34,6 +34,7 @@ import Torus from './Torus.js';
 import Triangle from './Triangle.js';
 import Union from './Union.js';
 import Wave from './Wave.js';
+import Weld from './Weld.js';
 
 const api = {
   Arc,
@@ -72,6 +73,7 @@ const api = {
   Triangle,
   Union,
   Wave,
+  Weld,
 };
 
 export {
@@ -111,6 +113,7 @@ export {
   Triangle,
   Union,
   Wave,
+  Weld,
 };
 
 export default api;
