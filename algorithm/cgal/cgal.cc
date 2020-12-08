@@ -60,6 +60,7 @@
 #include <CGAL/create_straight_skeleton_2.h>
 #include <CGAL/create_straight_skeleton_from_polygon_with_holes_2.h>
 #include <CGAL/intersections.h>
+#include <CGAL/minkowski_sum_2.h>
 #include <CGAL/offset_polygon_2.h>
 
 // typedef CGAL::Simple_cartesian<CGAL::Gmpq> Kernel;
@@ -1016,8 +1017,6 @@ void OffsetOfPolygon(double initial, double step, double limit, double x, double
   }
   Polygon_with_holes_2 polygon(boundary, holes.begin(), holes.end());
 
-  Traits traits;
-
   double offset = initial;
 
   for (;;) {
@@ -1118,25 +1117,47 @@ void emitCircularCurve(const Plane& plane, Curve& curve, emscripten::val& emit_p
   }
 }
 
-// FIX: Consider producing an exact outline mesh.
 void InsetOfPolygon(double initial, double step, double limit, double x, double y, double z, double w, std::size_t hole_count, emscripten::val fill_boundary, emscripten::val fill_hole, emscripten::val emit_polygon, emscripten::val emit_point) {
-  typedef CGAL::Gps_circle_segment_traits_2<Kernel> Traits;
+  typedef CGAL::Gps_segment_traits_2<Kernel> Traits;
   Kernel::Plane_3 plane(x, y, z, w);
 
-  double offset = initial;
-
-  Polygon_2 boundary;
-  std::vector<Polygon_2> holes;
+  Polygon_with_holes_2 insetting_boundary;
 
   {
     Points points;
     Points* points_ptr = &points;
     fill_boundary(points_ptr);
+    Polygon_2 boundary;
     for (const auto& point : points) {
       boundary.push_back(plane.to_2d(point));
     }
+    if (boundary.orientation() == CGAL::Sign::POSITIVE) {
+      boundary.reverse_orientation();
+    }
+    if (!boundary.is_simple()) {
+      std::cout << "Boundary is not simple" << std::endl;
+      return;
+    }
+
+    // Stick a box around the boundary (which will now form a hole).
+    CGAL::Bbox_2 bb = boundary.bbox();
+    bb.dilate(10);
+
+    Polygon_2 frame;
+    frame.push_back(Point_2(bb.xmin(), bb.ymin()));
+    frame.push_back(Point_2(bb.xmax(), bb.ymin()));
+    frame.push_back(Point_2(bb.xmax(), bb.ymax()));
+    frame.push_back(Point_2(bb.xmin(), bb.ymax()));
+    if (frame.orientation() == CGAL::Sign::NEGATIVE) {
+      frame.reverse_orientation();
+    }
+
+    std::vector<Polygon_2> boundaries { boundary };
+
+    insetting_boundary = Polygon_with_holes_2(frame, boundaries.begin(), boundaries.end());
   }
 
+  std::vector<Polygon_2> holes;
   for (std::size_t nth = 0; nth < hole_count; nth++) {
     Points points;
     Points* points_ptr = &points;
@@ -1148,26 +1169,45 @@ void InsetOfPolygon(double initial, double step, double limit, double x, double 
     if (hole.orientation() == CGAL::Sign::NEGATIVE) {
       hole.reverse_orientation();
     }
+    if (!hole.is_simple()) {
+      std::cout << "Hole is not simple" << std::endl;
+      return;
+    }
     holes.push_back(hole);
   }
 
+  double offset = initial;
+
   for (;;) {
     CGAL::General_polygon_set_2<Traits> boundaries;
-    {
-      std::vector<Traits::Polygon_2> inset_boundaries;
-      CGAL::approximated_inset_2(boundary, offset, 0.00001, std::back_inserter(inset_boundaries));
-      for (auto& inset_boundary : inset_boundaries) {
-        if (inset_boundary.orientation() == CGAL::Sign::NEGATIVE) {
-          inset_boundary.reverse_orientation();
-        }
-        boundaries.join(CGAL::General_polygon_set_2<Traits>(inset_boundary));
+
+    Polygon_2 tool;
+    for (double a = 0; a < M_PI * 2; a += M_PI / 16) {
+      tool.push_back(Point_2(sin(-a) * offset, cos(-a) * offset));
+    }
+    if (tool.orientation() == CGAL::Sign::NEGATIVE) {
+std::cout << "Reverse tool" << std::endl;
+      tool.reverse_orientation();
+    }
+
+    Polygon_with_holes_2 inset_boundary = CGAL::minkowski_sum_2(insetting_boundary, tool);
+
+    // We just extract the holes, which are the inset boundary.
+    for (auto hole = inset_boundary.holes_begin(); hole != inset_boundary.holes_end(); ++hole) {
+      if (hole->orientation() == CGAL::Sign::NEGATIVE) {
+        Polygon_2 boundary = *hole;
+        boundary.reverse_orientation();
+        boundaries.join(CGAL::General_polygon_set_2<Traits>(boundary));
+      } else {
+        boundaries.join(CGAL::General_polygon_set_2<Traits>(*hole));
       }
     }
 
     for (const auto& hole : holes) {
-      boundaries.difference(CGAL::General_polygon_set_2<Traits>(CGAL::approximated_offset_2(hole, offset, 0.00001)));
+      Polygon_with_holes_2 offset_hole = CGAL::minkowski_sum_2(hole, tool);
+      boundaries.difference(CGAL::General_polygon_set_2<Traits>(offset_hole));
     }
-  
+
     bool emitted = false;
 
     std::vector<Traits::Polygon_with_holes_2> polygons;
@@ -1176,28 +1216,18 @@ void InsetOfPolygon(double initial, double step, double limit, double x, double 
     for (const Traits::Polygon_with_holes_2& polygon : polygons) {
       const auto& outer = polygon.outer_boundary();
       emit_polygon(false);
-      for (auto curve = outer.curves_begin(); curve != outer.curves_end(); ++curve) {
-        if (curve->is_linear()) {
-          const auto& source = curve->source();
-          const auto& target = curve->target();
-          auto p = plane.to_3d(Point_2(CGAL::to_double(source.x()), CGAL::to_double(source.y())));
-          emit_point(CGAL::to_double(p.x()), CGAL::to_double(p.y()), CGAL::to_double(p.z()));
-        } else if (curve->is_circular()) {
-          emitCircularCurve(plane, curve, emit_point);
-        }
+      for (auto edge = outer.edges_begin(); edge != outer.edges_end(); ++edge) {
+        const auto& source = edge->source();
+        auto p = plane.to_3d(Point_2(CGAL::to_double(source.x()), CGAL::to_double(source.y())));
+        emit_point(CGAL::to_double(p.x()), CGAL::to_double(p.y()), CGAL::to_double(p.z()));
         emitted = true;
       }
       for (auto hole = polygon.holes_begin(); hole != polygon.holes_end(); ++hole) {
         emit_polygon(true);
-        for (auto curve = hole->curves_begin(); curve != hole->curves_end(); ++curve) {
-          if (curve->is_linear()) {
-            const auto& source = curve->source();
-            const auto& target = curve->target();
-            auto p = plane.to_3d(Point_2(CGAL::to_double(source.x()), CGAL::to_double(source.y())));
-            emit_point(CGAL::to_double(p.x()), CGAL::to_double(p.y()), CGAL::to_double(p.z()));
-          } else if (curve->is_circular()) {
-            emitCircularCurve(plane, curve, emit_point);
-          }
+        for (auto edge = hole->edges_begin(); edge != hole->edges_end(); ++edge) {
+          const auto& source = edge->source();
+          auto p = plane.to_3d(Point_2(CGAL::to_double(source.x()), CGAL::to_double(source.y())));
+          emit_point(CGAL::to_double(p.x()), CGAL::to_double(p.y()), CGAL::to_double(p.z()));
           emitted = true;
         }
       }
@@ -1218,6 +1248,124 @@ void InsetOfPolygon(double initial, double step, double limit, double x, double 
     }
   }
 }
+
+#if 0
+// FIX: Consider producing an exact outline mesh.
+void InsetOfPolygon(double initial, double step, double limit, double x, double y, double z, double w, std::size_t hole_count, emscripten::val fill_boundary, emscripten::val fill_hole, emscripten::val emit_polygon, emscripten::val emit_point) {
+  typedef CGAL::Gps_circle_segment_traits_2<Kernel> Traits;
+  Kernel::Plane_3 plane(x, y, z, w);
+
+  double offset = initial;
+
+  Polygon_2 boundary;
+  std::vector<Polygon_2> holes;
+
+  {
+    Points points;
+    Points* points_ptr = &points;
+    fill_boundary(points_ptr);
+    for (const auto& point : points) {
+      boundary.push_back(plane.to_2d(point));
+    }
+    if (boundary.orientation() == CGAL::Sign::NEGATIVE) {
+      boundary.reverse_orientation();
+    }
+    if (!boundary.is_simple()) {
+      std::cout << "Boundary is not simple" << std::endl;
+      return;
+    }
+  }
+
+  for (std::size_t nth = 0; nth < hole_count; nth++) {
+    Points points;
+    Points* points_ptr = &points;
+    fill_hole(points_ptr, nth);
+    Polygon_2 hole;
+    for (const auto& point : points) {
+      hole.push_back(plane.to_2d(point));
+    }
+    if (hole.orientation() == CGAL::Sign::NEGATIVE) {
+      hole.reverse_orientation();
+    }
+    if (!hole.is_simple()) {
+      std::cout << "Hole is not simple" << std::endl;
+      return;
+    }
+    holes.push_back(hole);
+  }
+
+  Traits traits;
+
+  for (;;) {
+    CGAL::General_polygon_set_2<Traits> boundaries;
+    {
+      std::vector<Traits::Polygon_2> inset_boundaries;
+      CGAL::approximated_inset_2(boundary, offset, 0.00001, std::back_inserter(inset_boundaries));
+      for (auto& inset_boundary : inset_boundaries) {
+        if (inset_boundary.orientation() == CGAL::Sign::NEGATIVE) {
+          inset_boundary.reverse_orientation();
+        }
+        boundaries.join(CGAL::General_polygon_set_2<Traits>(inset_boundary));
+      }
+    }
+
+    for (const auto& hole : holes) {
+      boundaries.difference(CGAL::General_polygon_set_2<Traits>(CGAL::approximated_offset_2(hole, offset, 0.00001)));
+    }
+
+    bool emitted = false;
+
+    std::vector<Traits::Polygon_with_holes_2> polygons;
+    boundaries.polygons_with_holes(std::back_inserter(polygons));
+
+    for (const Traits::Polygon_with_holes_2& polygon : polygons) {
+      const auto& outer = polygon.outer_boundary();
+      emit_polygon(false);
+      for (auto curve = outer.curves_begin(); curve != outer.curves_end(); ++curve) {
+        if (curve->is_linear()) {
+          const auto& source = curve->source();
+          const auto& target = curve->target();
+          auto p = plane.to_3d(Point_2(CGAL::to_double(source.x()), CGAL::to_double(source.y())));
+          emit_point(CGAL::to_double(p.x()), CGAL::to_double(p.y()), CGAL::to_double(p.z()));
+          emitted = true;
+        } else if (curve->is_circular()) {
+          emitCircularCurve(plane, curve, emit_point);
+          emitted = true;
+        }
+      }
+      for (auto hole = polygon.holes_begin(); hole != polygon.holes_end(); ++hole) {
+        emit_polygon(true);
+        for (auto curve = hole->curves_begin(); curve != hole->curves_end(); ++curve) {
+          if (curve->is_linear()) {
+            const auto& source = curve->source();
+            const auto& target = curve->target();
+            auto p = plane.to_3d(Point_2(CGAL::to_double(source.x()), CGAL::to_double(source.y())));
+            emit_point(CGAL::to_double(p.x()), CGAL::to_double(p.y()), CGAL::to_double(p.z()));
+            emitted = true;
+          } else if (curve->is_circular()) {
+            emitCircularCurve(plane, curve, emit_point);
+            emitted = true;
+          }
+        }
+      }
+    }
+
+    if (!emitted) {
+      break;
+    }
+    if (step <= 0) {
+      break;
+    }
+    offset += step;
+    if (limit <= 0) {
+      continue;
+    }
+    if (offset >= limit) {
+      break;
+    }
+  }
+}
+#endif
 
 void ArrangePaths(double x, double y, double z, double w, emscripten::val fill, emscripten::val emit_polygon, emscripten::val emit_point) {
   typedef CGAL::Arr_segment_traits_2<Kernel>            Traits_2;

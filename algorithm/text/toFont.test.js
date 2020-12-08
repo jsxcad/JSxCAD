@@ -190,7 +190,7 @@ test('Render a letter', async (t) => {
                 { point: 81, loop: 0, twin: -1, next: 0 },
               ],
               loops: [{ edge: 0, face: 0 }],
-              faces: [{ plane: [0, 0, 1, 0], loop: 0 }],
+              faces: [{ plane: [0, 0, 0.9999999999999999, 0], loop: 0 }],
               isClosed: false,
               isOutline: true,
               isWireframe: true,

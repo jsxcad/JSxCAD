@@ -1,5 +1,8 @@
 import { getCgal } from './getCgal.js';
 
+// FIX: Remove this rounding hack.
+const round = (n) => Math.round(n * 10000) / 10000;
+
 export const insetOfPolygon = (
   initial = 1,
   step = -1,
@@ -23,13 +26,13 @@ export const insetOfPolygon = (
     -w,
     holes.length,
     (boundary) => {
-      for (const [x, y, z] of border) {
-        c.addPoint(boundary, x, y, z);
+      for (let [x, y, z] of border) {
+        c.addPoint(boundary, round(x), round(y), round(z));
       }
     },
     (hole, nth) => {
       for (const [x, y, z] of holes[nth]) {
-        c.addPoint(hole, x, y, z);
+        c.addPoint(hole, round(x), round(y), round(z));
       }
     },
     (isHole) => {
@@ -41,7 +44,9 @@ export const insetOfPolygon = (
         outputs.push(output);
       }
     },
-    (x, y, z) => points.push([x, y, z])
+    (x, y, z) => {
+      points.push([x, y, z]);
+    }
   );
   return outputs;
 };

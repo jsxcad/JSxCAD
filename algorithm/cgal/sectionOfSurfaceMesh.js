@@ -11,7 +11,7 @@ export const sectionOfSurfaceMesh = (mesh, planes) => {
     planes.length,
     (plane) => {
       const [x, y, z, w] = planes[nthPlane++];
-      c.fillQuadruple(plane, x, y, z, w);
+      c.fillQuadruple(plane, x, y, z, -w);
       section = [];
       sections.push(section);
     },

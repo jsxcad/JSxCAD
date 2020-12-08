@@ -2,6 +2,8 @@ import { fromSurfaceMeshToGraph, fromPointsToAlphaShapeAsSurfaceMesh, fromSurfac
 import { equals as equals$1, dot, min, max, scale } from './jsxcad-math-vec3.js';
 import { deduplicate as deduplicate$1, isClockwise, flip as flip$1 } from './jsxcad-geometry-path.js';
 import { toPlane, flip } from './jsxcad-math-poly3.js';
+import { canonicalize } from './jsxcad-geometry-paths.js';
+import { fromPolygon, canonicalize as canonicalize$1 } from './jsxcad-math-plane.js';
 
 const graphSymbol = Symbol('graph');
 const surfaceMeshSymbol = Symbol('surfaceMeshSymbol');
@@ -1139,18 +1141,21 @@ const orientClockwise = (path) => (isClockwise(path) ? path : flip$1(path));
 const orientCounterClockwise = (path) =>
   isClockwise(path) ? flip$1(path) : path;
 
-const fromPaths = (paths) => {
-  // FIX: Discover the plane for planar graphs.
-  const plane = [0, 0, 1, 0];
-  const arrangement = arrangePaths(...plane, paths);
+const fromPaths = (inputPaths) => {
+  const paths = canonicalize(inputPaths);
   const graph = create();
-  for (const { points, holes } of arrangement) {
-    const face = addFace(graph, { plane });
-    const exterior = orientCounterClockwise(points);
-    addLoopFromPoints(graph, deduplicate$1(exterior), { face });
-    for (const hole of holes) {
-      const interior = orientClockwise(hole);
-      addHoleFromPoints(graph, deduplicate$1(interior), { face });
+  // FIX: Check planar coherence.
+  const plane = fromPolygon(paths[0] || []);
+  if (plane) {
+    const arrangement = arrangePaths(...plane, paths);
+    for (const { points, holes } of arrangement) {
+      const face = addFace(graph, { plane });
+      const exterior = orientCounterClockwise(points);
+      addLoopFromPoints(graph, deduplicate$1(exterior), { face });
+      for (const hole of holes) {
+        const interior = orientClockwise(hole);
+        addHoleFromPoints(graph, deduplicate$1(interior), { face });
+      }
     }
   }
   graph.isClosed = false;
@@ -1291,7 +1296,7 @@ const inset = (graph, initial, step, limit) => {
       initial,
       step,
       limit,
-      plane,
+      canonicalize$1(plane), // FIX: Use exact transforms to avoid drift.
       polygon,
       polygonHoles
     )) {
