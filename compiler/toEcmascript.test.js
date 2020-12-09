@@ -157,7 +157,7 @@ test('Reuse and Redefine', async (t) => {
     reuse,
     `
 const A = await loadGeometry('data/def//A');
-replayRecordedNotes('data/note//A');
+await replayRecordedNotes('data/note//A');
 Object.freeze(A);
 const B = () => 2;
 function C() {}
@@ -177,7 +177,7 @@ const A = bar();
 A instanceof Shape && (await saveGeometry('data/def//A', A)) && (await write('meta/def//A', {
   sha: '998f2a52e6cffab9dfbdadd70971164741f7538f'
 }));
-saveRecordedNotes('data/note//A');
+await saveRecordedNotes('data/note//A');
 Object.freeze(A);
 const B = () => 2;
 function C() {}
@@ -203,7 +203,7 @@ test('Indirect Redefinition', async (t) => {
     reuse,
     `
 const D = await loadGeometry('data/def//D');
-replayRecordedNotes('data/note//D');
+await replayRecordedNotes('data/note//D');
 Object.freeze(D);
 const E = () => D;
 return {};
@@ -229,7 +229,7 @@ mountainView.frontView({ position: [0, -100, 50] });
     `
 const Mountain = () => foo();
 const mountainView = await loadGeometry('data/def//mountainView');
-replayRecordedNotes('data/note//mountainView');
+await replayRecordedNotes('data/note//mountainView');
 Object.freeze(mountainView);
 mountainView.frontView({
   position: [0, -100, 50]
@@ -255,7 +255,7 @@ const mountainView = Mountain().scale(0.5).Page();
 mountainView instanceof Shape && (await saveGeometry('data/def//mountainView', mountainView)) && (await write('meta/def//mountainView', {
   sha: 'ff13df28379e2578fac3d15154411d6bf1b707a8'
 }));
-saveRecordedNotes('data/note//mountainView');
+await saveRecordedNotes('data/note//mountainView');
 Object.freeze(mountainView);
 mountainView.frontView({
   position: [0, -100, 50]
@@ -280,7 +280,7 @@ const a = [];
 a instanceof Shape && (await saveGeometry('data/def//a', a)) && (await write('meta/def//a', {
   sha: '008e21a56df83b743c52799ddf689ac20ea2bb8c'
 }));
-saveRecordedNotes('data/note//a');
+await saveRecordedNotes('data/note//a');
 Object.freeze(a);
 log(a);
 return {};
