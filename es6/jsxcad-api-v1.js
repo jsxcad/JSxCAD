@@ -38,71 +38,6 @@ export { cm, foot, inch, m, mil, mm, thou, yard } from './jsxcad-api-v1-units.js
 import { toEcmascript } from './jsxcad-compiler.js';
 import { toSvg } from './jsxcad-convert-svg.js';
 
-// This alphabet uses `A-Za-z0-9_-` symbols. The genetic algorithm helped
-// optimize the gzip compression for this alphabet.
-let urlAlphabet =
-  'ModuleSymbhasOwnPr-0123456789ABCDEFGHNRVfgctiUvz_KqYTJkLxpZXIjQW';
-
-let nanoid = (size = 21) => {
-  let id = '';
-  // A compact alternative for `for (var i = 0; i < step; i++)`.
-  let i = size;
-  while (i--) {
-    // `| 0` is more compact and faster than `Math.floor()`.
-    id += urlAlphabet[(Math.random() * 64) | 0];
-  }
-  return id
-};
-
-// FIX: Avoid the extra read-write cycle.
-const view = (
-  shape,
-  inline,
-  op = (x) => x,
-  { width = 1024, height = 512, position = [100, -100, 100] } = {}
-) => {
-  const viewShape = op(shape);
-  const hash$1 = hash(viewShape.toGeometry());
-  for (const entry of ensurePages(soup(viewShape.toDisjointGeometry()))) {
-    const path = `view/${getModule()}/${nanoid()}`;
-    addPending(write(path, entry));
-    emit({ hash: hash$1, path, view: { width, height, position, inline } });
-  }
-  return shape;
-};
-
-Shape.prototype.view = function (
-  inline,
-  op,
-  { path, width = 1024, height = 512, position = [100, -100, 100] } = {}
-) {
-  return view(this, inline, op, { path, width, height, position });
-};
-
-Shape.prototype.topView = function (
-  inline,
-  op,
-  { path, width = 1024, height = 512, position = [0, 0, 100] } = {}
-) {
-  return view(this, inline, op, { path, width, height, position });
-};
-
-Shape.prototype.frontView = function (
-  inline,
-  op,
-  { path, width = 1024, height = 512, position = [0, -100, 0] } = {}
-) {
-  return view(this, inline, op, { path, width, height, position });
-};
-
-Shape.prototype.sideView = function (
-  inline,
-  op,
-  { path, width = 1024, height = 512, position = [100, 0, 0] } = {}
-) {
-  return view(this, inline, op, { path, width, height, position });
-};
-
 function pad (hash, len) {
   while (hash.length < len) {
     hash = '0' + hash;
@@ -170,6 +105,73 @@ function sum (o) {
 }
 
 var hashSum = sum;
+
+// This alphabet uses `A-Za-z0-9_-` symbols. The genetic algorithm helped
+// optimize the gzip compression for this alphabet.
+let urlAlphabet =
+  'ModuleSymbhasOwnPr-0123456789ABCDEFGHNRVfgctiUvz_KqYTJkLxpZXIjQW';
+
+let nanoid = (size = 21) => {
+  let id = '';
+  // A compact alternative for `for (var i = 0; i < step; i++)`.
+  let i = size;
+  while (i--) {
+    // `| 0` is more compact and faster than `Math.floor()`.
+    id += urlAlphabet[(Math.random() * 64) | 0];
+  }
+  return id
+};
+
+// FIX: Avoid the extra read-write cycle.
+const view = (
+  shape,
+  inline,
+  op = (x) => x,
+  { width = 1024, height = 512, position = [100, -100, 100] } = {}
+) => {
+  const viewShape = op(shape);
+  const geometryHash = hash(viewShape.toGeometry());
+  for (const entry of ensurePages(soup(viewShape.toDisjointGeometry()))) {
+    const path = `view/${getModule()}/${nanoid()}`;
+    addPending(write(path, entry));
+    const view = { width, height, position, inline };
+    const hash = hashSum({ geometryHash, view });
+    emit({ hash, path, view });
+  }
+  return shape;
+};
+
+Shape.prototype.view = function (
+  inline,
+  op,
+  { path, width = 1024, height = 512, position = [100, -100, 100] } = {}
+) {
+  return view(this, inline, op, { path, width, height, position });
+};
+
+Shape.prototype.topView = function (
+  inline,
+  op,
+  { path, width = 1024, height = 512, position = [0, 0, 100] } = {}
+) {
+  return view(this, inline, op, { path, width, height, position });
+};
+
+Shape.prototype.frontView = function (
+  inline,
+  op,
+  { path, width = 1024, height = 512, position = [0, -100, 0] } = {}
+) {
+  return view(this, inline, op, { path, width, height, position });
+};
+
+Shape.prototype.sideView = function (
+  inline,
+  op,
+  { path, width = 1024, height = 512, position = [100, 0, 0] } = {}
+) {
+  return view(this, inline, op, { path, width, height, position });
+};
 
 const md = (strings, ...placeholders) => {
   const md = strings.reduce(
