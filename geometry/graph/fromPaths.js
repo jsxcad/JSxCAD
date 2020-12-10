@@ -49,6 +49,9 @@ export const fromPaths = (inputPaths) => {
       }
     }
   }
+  if (graph.edges.length === 0) {
+    graph.isEmpty = true;
+  }
   graph.isClosed = false;
   graph.isOutline = true;
   graph.isWireframe = true;

@@ -46,7 +46,7 @@ export const fromSurfaceMeshToGraph = (mesh) => {
     }
   );
   graph.isClosed = c.Surface_mesh__is_closed(mesh);
-  if (graph.faces.length === 0) {
+  if (graph.edges.length === 0) {
     graph.isEmpty = true;
   }
   return graph;
