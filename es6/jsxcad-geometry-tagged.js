@@ -3,7 +3,7 @@ import { cacheTransform, cache, cacheRewriteTags, cacheSection } from './jsxcad-
 import { reconcile as reconcile$1, makeWatertight as makeWatertight$1, isWatertight as isWatertight$1, findOpenEdges as findOpenEdges$1, transform as transform$3, canonicalize as canonicalize$1, eachPoint as eachPoint$3, flip as flip$1, fromSurface as fromSurface$1, measureBoundingBox as measureBoundingBox$3 } from './jsxcad-geometry-solid.js';
 import { close, createOpenPath } from './jsxcad-geometry-path.js';
 import { createNormalize3 } from './jsxcad-algorithm-quantize.js';
-import { transform as transform$5, canonicalize as canonicalize$5, eachPoint as eachPoint$4, close as close$1, flip as flip$3 } from './jsxcad-geometry-paths.js';
+import { transform as transform$5, canonicalize as canonicalize$5, eachPoint as eachPoint$4, flip as flip$3 } from './jsxcad-geometry-paths.js';
 import { canonicalize as canonicalize$4, toPolygon } from './jsxcad-math-plane.js';
 import { transform as transform$4, canonicalize as canonicalize$3, eachPoint as eachPoint$5, flip as flip$4, measureBoundingBox as measureBoundingBox$1, union as union$1 } from './jsxcad-geometry-points.js';
 import { transform as transform$1, canonicalize as canonicalize$2, eachPoint as eachPoint$2, flip as flip$2, makeWatertight as makeWatertight$2, measureArea as measureArea$1, measureBoundingBox as measureBoundingBox$2, toPlane } from './jsxcad-geometry-surface.js';
@@ -333,6 +333,20 @@ const eachItem = (geometry, op) => {
   visit(geometry, walk);
 };
 
+const getFaceablePaths = (geometry) => {
+  const pathsets = [];
+  eachItem(geometry, (item) => {
+    if (item.type !== 'paths') {
+      return;
+    }
+    if (item.tags && item.tags.includes('paths/Wire')) {
+      return;
+    }
+    pathsets.push(item);
+  });
+  return pathsets;
+};
+
 const getGraphs = (geometry) => {
   const graphs = [];
   eachItem(geometry, (item) => {
@@ -341,16 +355,6 @@ const getGraphs = (geometry) => {
     }
   });
   return graphs;
-};
-
-const getPaths = (geometry) => {
-  const pathsets = [];
-  eachItem(geometry, (item) => {
-    if (item.type === 'paths') {
-      pathsets.push(item);
-    }
-  });
-  return pathsets;
 };
 
 const getSolids = (geometry) => {
@@ -406,7 +410,7 @@ const differenceImpl = (geometry, ...geometries) => {
               fromSurface(surface)
             );
           }
-          for (const { paths } of getPaths(geometry)) {
+          for (const { paths } of getFaceablePaths(geometry)) {
             differenced = difference$1(differenced, fromPaths(paths));
           }
         }
@@ -433,6 +437,9 @@ const differenceImpl = (geometry, ...geometries) => {
           )
         );
       case 'paths':
+        if (tags && tags.includes('paths/Wire')) {
+          return geometry;
+        }
         return taggedPaths(
           { tags },
           toPaths(
@@ -773,16 +780,19 @@ const fill = (geometry, includeFaces = true, includeHoles = true) => {
   const keptGeometry = toKeptGeometry(geometry);
   const fills = [];
   for (const { tags, graph } of getNonVoidGraphs(keptGeometry)) {
+    if (tags && tags.includes('path/Wire')) {
+      continue;
+    }
     if (graph.isOutline) {
       fills.push(taggedGraph({ tags }, fill$1(graph)));
     }
   }
   for (const { tags, paths } of getNonVoidPaths(keptGeometry)) {
+    if (tags && tags.includes('path/Wire')) {
+      continue;
+    }
     fills.push(
-      taggedGraph(
-        { tags },
-        fill$1(fromPaths(close$1(paths)))
-      )
+      taggedGraph({ tags }, fill$1(fromPaths(paths)))
     );
   }
   return taggedGroup({}, ...fills);
@@ -1006,6 +1016,20 @@ const getNonVoidItems = (geometry) => {
   return items;
 };
 
+const getNonVoidFaceablePaths = (geometry) => {
+  const pathsets = [];
+  eachNonVoidItem(geometry, (item) => {
+    if (item.type !== 'paths') {
+      return;
+    }
+    if (item.tags && item.tags.includes('paths/Wire')) {
+      return;
+    }
+    pathsets.push(item);
+  });
+  return pathsets;
+};
+
 const getNonVoidPlans = (geometry) => {
   const plans = [];
   eachNonVoidItem(geometry, (item) => {
@@ -1054,6 +1078,16 @@ const getNonVoidZ0Surfaces = (geometry) => {
     }
   });
   return z0Surfaces;
+};
+
+const getPaths = (geometry) => {
+  const pathsets = [];
+  eachItem(geometry, (item) => {
+    if (item.type === 'paths') {
+      pathsets.push(item);
+    }
+  });
+  return pathsets;
 };
 
 /**
@@ -1172,7 +1206,7 @@ const intersectionImpl = (geometry, ...geometries) => {
               fromSolid(solid)
             );
           }
-          for (const { paths } of getNonVoidPaths(geometry)) {
+          for (const { paths } of getNonVoidFaceablePaths(geometry)) {
             intersected = intersection$2(
               intersected,
               fromPaths(paths)
@@ -1247,6 +1281,9 @@ const intersectionImpl = (geometry, ...geometries) => {
         }
       }
       case 'paths': {
+        if (tags && tags.includes('paths/Wire')) {
+          return geometry;
+        }
         return taggedPaths(
           { tags },
           toPaths(
@@ -1256,19 +1293,6 @@ const intersectionImpl = (geometry, ...geometries) => {
             ).graph
           )
         );
-        /*
-        const normalize = createNormalize3();
-        let thisPaths = geometry.paths;
-        for (const geometry of geometries) {
-          const bsp = toBspTree(geometry, normalize);
-          const clippedPaths = [];
-          removeExteriorPaths(bsp, thisPaths, normalize, (paths) =>
-            clippedPaths.push(...paths)
-          );
-          thisPaths = clippedPaths;
-        }
-        return taggedPaths({ tags }, thisPaths);
-*/
       }
       case 'points': {
         // Not implemented yet.
@@ -1553,6 +1577,10 @@ const outlineImpl = (geometry, includeFaces = true, includeHoles = true) => {
   for (const { tags, graph } of getNonVoidGraphs(keptGeometry)) {
     outlines.push(taggedPaths({ tags }, toPaths(outline$1(graph))));
   }
+  // Turn paths into wires.
+  for (const { tags = [], paths } of getNonVoidPaths(keptGeometry)) {
+    outlines.push(taggedPaths({ tags: [...tags, 'path/Wire'] }, paths));
+  }
   // This is a bit tricky -- let's consider an assembly that produces an effective surface.
   // For now, let's consolidate, and see what goes terribly wrong.
   for (const { tags, surface } of getNonVoidSurfaces(keptGeometry)) {
@@ -1815,7 +1843,7 @@ const unionImpl = (geometry, ...geometries) => {
           for (const { solid } of getNonVoidSolids(geometry)) {
             unified = union$3(unified, fromSolid(solid));
           }
-          for (const { paths } of getNonVoidPaths(geometry)) {
+          for (const { paths } of getNonVoidFaceablePaths(geometry)) {
             unified = union$3(unified, fromPaths(paths));
           }
         }
@@ -1858,6 +1886,9 @@ const unionImpl = (geometry, ...geometries) => {
         );
       }
       case 'paths': {
+        if (tags && tags.includes('path/Wire')) {
+          return geometry;
+        }
         return taggedPaths(
           { tags },
           toPaths(
@@ -1867,16 +1898,6 @@ const unionImpl = (geometry, ...geometries) => {
             ).graph
           )
         );
-        /*
-        const { paths, tags } = geometry;
-        const pathsets = [paths];
-        for (const input of geometries) {
-          for (const { paths } of getNonVoidPaths(input)) {
-            pathsets.push(paths);
-          }
-        }
-        return taggedPaths({ tags }, pathsUnion(paths, ...pathsets));
-*/
       }
       case 'points': {
         const { points, tags } = geometry;
@@ -1928,4 +1949,4 @@ const translate = (vector, geometry) =>
 const scale = (vector, geometry) =>
   transform(fromScaling(vector), geometry);
 
-export { allTags, assemble, canonicalize, difference, drop, eachItem, eachPoint, extrude, extrudeToPlane, fill, findOpenEdges, flip, fresh, fromSurfaceToPaths, getAnyNonVoidSurfaces, getAnySurfaces, getGraphs, getItems, getLayers, getLayouts, getLeafs, getNonVoidGraphs, getNonVoidItems, getNonVoidPaths, getNonVoidPlans, getNonVoidPoints, getNonVoidSolids, getNonVoidSurfaces, getNonVoidZ0Surfaces, getPaths, getPeg, getPlans, getPoints, getSolids, getSurfaces, getTags, getZ0Surfaces, hash, inset, intersection, isNotVoid, isVoid, isWatertight, keep, makeWatertight, measureArea, measureBoundingBox, measureHeights, offset, outline, read, realize, reconcile, rewrite, rewriteTags, rotateX, rotateY, rotateZ, scale, section, smooth, soup, taggedAssembly, taggedDisjointAssembly, taggedGraph, taggedGroup, taggedItem, taggedLayers, taggedLayout, taggedPaths, taggedPoints, taggedSketch, taggedSolid, taggedSurface, taggedZ0Surface, toDisjointGeometry, toKeptGeometry, toPoints, toTransformedGeometry, transform, translate, union, update, visit, write };
+export { allTags, assemble, canonicalize, difference, drop, eachItem, eachPoint, extrude, extrudeToPlane, fill, findOpenEdges, flip, fresh, fromSurfaceToPaths, getAnyNonVoidSurfaces, getAnySurfaces, getFaceablePaths, getGraphs, getItems, getLayers, getLayouts, getLeafs, getNonVoidFaceablePaths, getNonVoidGraphs, getNonVoidItems, getNonVoidPaths, getNonVoidPlans, getNonVoidPoints, getNonVoidSolids, getNonVoidSurfaces, getNonVoidZ0Surfaces, getPaths, getPeg, getPlans, getPoints, getSolids, getSurfaces, getTags, getZ0Surfaces, hash, inset, intersection, isNotVoid, isVoid, isWatertight, keep, makeWatertight, measureArea, measureBoundingBox, measureHeights, offset, outline, read, realize, reconcile, rewrite, rewriteTags, rotateX, rotateY, rotateZ, scale, section, smooth, soup, taggedAssembly, taggedDisjointAssembly, taggedGraph, taggedGroup, taggedItem, taggedLayers, taggedLayout, taggedPaths, taggedPoints, taggedSketch, taggedSolid, taggedSurface, taggedZ0Surface, toDisjointGeometry, toKeptGeometry, toPoints, toTransformedGeometry, transform, translate, union, update, visit, write };

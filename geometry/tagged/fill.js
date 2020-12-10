@@ -3,7 +3,6 @@ import {
   fromPaths as fromPathsToGraph,
 } from '@jsxcad/geometry-graph';
 
-import { close as closePaths } from '@jsxcad/geometry-paths';
 import { getNonVoidGraphs } from './getNonVoidGraphs.js';
 import { getNonVoidPaths } from './getNonVoidPaths.js';
 import { taggedGraph } from './taggedGraph.js';
@@ -14,16 +13,19 @@ export const fill = (geometry, includeFaces = true, includeHoles = true) => {
   const keptGeometry = toKeptGeometry(geometry);
   const fills = [];
   for (const { tags, graph } of getNonVoidGraphs(keptGeometry)) {
+    if (tags && tags.includes('path/Wire')) {
+      continue;
+    }
     if (graph.isOutline) {
       fills.push(taggedGraph({ tags }, fillOutlineGraph(graph)));
     }
   }
   for (const { tags, paths } of getNonVoidPaths(keptGeometry)) {
+    if (tags && tags.includes('path/Wire')) {
+      continue;
+    }
     fills.push(
-      taggedGraph(
-        { tags },
-        fillOutlineGraph(fromPathsToGraph(closePaths(paths)))
-      )
+      taggedGraph({ tags }, fillOutlineGraph(fromPathsToGraph(paths)))
     );
   }
   return taggedGroup({}, ...fills);

@@ -2,7 +2,7 @@ import Shape$1, { Shape, shapeMethod, weld } from './jsxcad-api-v1-shape.js';
 import { radius, getSides, getRadius, getLeft, getRight, getFront, getBack, getCenter } from './jsxcad-geometry-plan.js';
 import { concatenate, rotateZ, translate as translate$1 } from './jsxcad-geometry-path.js';
 import { numbers } from './jsxcad-api-v1-math.js';
-import { taggedAssembly, taggedSolid, taggedLayers, taggedGraph, taggedDisjointAssembly, taggedPoints, taggedZ0Surface } from './jsxcad-geometry-tagged.js';
+import { taggedAssembly, taggedSolid, taggedLayers, taggedGraph, taggedDisjointAssembly, taggedPaths, taggedPoints, taggedZ0Surface } from './jsxcad-geometry-tagged.js';
 import { buildRingSphere, toRadiusFromApothem as toRadiusFromApothem$1, buildRegularIcosahedron, buildRegularPolygon, regularPolygonEdgeLengthToRadius, buildPolygonFromPoints } from './jsxcad-algorithm-shape.js';
 import { convexHull } from './jsxcad-geometry-graph.js';
 import { translate } from './jsxcad-geometry-paths.js';
@@ -1606,9 +1606,9 @@ const toPaths = (letters) => {
     mergedPaths.push(...translate([xOffset, 0, 0], paths));
     xOffset += hersheyWidth[code] || 0;
   }
-  return Shape$1.fromGeometry({ type: 'paths', paths: mergedPaths }).scale(
-    1 / 28
-  );
+  return Shape$1.fromGeometry(taggedPaths({}, mergedPaths))
+    .scale(1 / 28)
+    .wire();
 };
 
 const ofSize = (size) => (text) => toPaths(text).scale(size);

@@ -19,8 +19,8 @@ import {
 import { cache } from '@jsxcad/cache';
 import { createNormalize3 } from '@jsxcad/algorithm-quantize';
 import { fromSurface as fromSurfaceToSolid } from '@jsxcad/geometry-solid';
+import { getNonVoidFaceablePaths } from './getNonVoidFaceablePaths.js';
 import { getNonVoidGraphs } from './getNonVoidGraphs.js';
-import { getNonVoidPaths } from './getNonVoidPaths.js';
 import { getNonVoidPoints } from './getNonVoidPoints.js';
 import { getNonVoidSolids } from './getNonVoidSolids.js';
 import { getNonVoidSurfaces } from './getNonVoidSurfaces.js';
@@ -47,7 +47,7 @@ const unionImpl = (geometry, ...geometries) => {
           for (const { solid } of getNonVoidSolids(geometry)) {
             unified = graphUnion(unified, fromSolidToGraph(solid));
           }
-          for (const { paths } of getNonVoidPaths(geometry)) {
+          for (const { paths } of getNonVoidFaceablePaths(geometry)) {
             unified = graphUnion(unified, fromPathsToGraph(paths));
           }
         }
@@ -90,6 +90,9 @@ const unionImpl = (geometry, ...geometries) => {
         );
       }
       case 'paths': {
+        if (tags && tags.includes('path/Wire')) {
+          return geometry;
+        }
         return taggedPaths(
           { tags },
           toPathsFromGraph(
@@ -99,16 +102,6 @@ const unionImpl = (geometry, ...geometries) => {
             ).graph
           )
         );
-        /*
-        const { paths, tags } = geometry;
-        const pathsets = [paths];
-        for (const input of geometries) {
-          for (const { paths } of getNonVoidPaths(input)) {
-            pathsets.push(paths);
-          }
-        }
-        return taggedPaths({ tags }, pathsUnion(paths, ...pathsets));
-*/
       }
       case 'points': {
         const { points, tags } = geometry;

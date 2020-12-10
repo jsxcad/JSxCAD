@@ -15,8 +15,6 @@ const moveXMethod = function (x) {
   return moveX(this, x);
 };
 Shape.prototype.moveX = moveXMethod;
+Shape.prototype.x = moveXMethod;
 
 export default moveX;
-
-moveX.signature = 'moveX(shape:Shape, x:number = 0) -> Shape';
-moveXMethod.signature = 'Shape -> moveX(x:number = 0) -> Shape';

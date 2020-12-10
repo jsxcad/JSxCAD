@@ -3,7 +3,7 @@ import { equals as equals$1, dot, min, max, scale } from './jsxcad-math-vec3.js'
 import { deduplicate as deduplicate$1, isClockwise, flip as flip$1 } from './jsxcad-geometry-path.js';
 import { toPlane, flip } from './jsxcad-math-poly3.js';
 import { canonicalize } from './jsxcad-geometry-paths.js';
-import { fromPolygon, canonicalize as canonicalize$1 } from './jsxcad-math-plane.js';
+import { canonicalize as canonicalize$1 } from './jsxcad-math-plane.js';
 
 const graphSymbol = Symbol('graph');
 const surfaceMeshSymbol = Symbol('surfaceMeshSymbol');
@@ -1141,11 +1141,29 @@ const orientClockwise = (path) => (isClockwise(path) ? path : flip$1(path));
 const orientCounterClockwise = (path) =>
   isClockwise(path) ? flip$1(path) : path;
 
+const Z$2 = 2;
+const W = 3;
+
 const fromPaths = (inputPaths) => {
   const paths = canonicalize(inputPaths);
   const graph = create();
-  // FIX: Check planar coherence.
-  const plane = fromPolygon(paths[0] || []);
+  let plane = [0, 0, 1, 0];
+  let updated = false;
+  // FIX: Figure out a better way to get a principle plane.
+  // Pick some point elevation.
+  for (const path of paths) {
+    for (const point of path) {
+      if (point === null) {
+        continue;
+      }
+      plane[W] = point[Z$2];
+      updated = true;
+      break;
+    }
+    if (updated) {
+      break;
+    }
+  }
   if (plane) {
     const arrangement = arrangePaths(...plane, paths);
     for (const { points, holes } of arrangement) {
@@ -1157,6 +1175,9 @@ const fromPaths = (inputPaths) => {
         addHoleFromPoints(graph, deduplicate$1(interior), { face });
       }
     }
+  }
+  if (graph.edges.length === 0) {
+    graph.isEmpty = true;
   }
   graph.isClosed = false;
   graph.isOutline = true;

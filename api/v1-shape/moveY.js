@@ -15,8 +15,6 @@ const moveYMethod = function (y) {
   return moveY(this, y);
 };
 Shape.prototype.moveY = moveYMethod;
+Shape.prototype.y = moveYMethod;
 
 export default moveY;
-
-moveY.signature = 'moveY(shape:Shape, y:number = 0) -> Shape';
-moveYMethod.signature = 'Shape -> moveY(y:number = 0) -> Shape';

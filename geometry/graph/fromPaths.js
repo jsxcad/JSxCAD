@@ -9,17 +9,34 @@ import { deduplicate, flip, isClockwise } from '@jsxcad/geometry-path';
 
 import { arrangePaths } from '@jsxcad/algorithm-cgal';
 import { canonicalize as canonicalizePaths } from '@jsxcad/geometry-paths';
-import { fromPolygon } from '@jsxcad/math-plane';
 
 const orientClockwise = (path) => (isClockwise(path) ? path : flip(path));
 const orientCounterClockwise = (path) =>
   isClockwise(path) ? flip(path) : path;
 
+const Z = 2;
+const W = 3;
+
 export const fromPaths = (inputPaths) => {
   const paths = canonicalizePaths(inputPaths);
   const graph = create();
-  // FIX: Check planar coherence.
-  const plane = fromPolygon(paths[0] || []);
+  let plane = [0, 0, 1, 0];
+  let updated = false;
+  // FIX: Figure out a better way to get a principle plane.
+  // Pick some point elevation.
+  for (const path of paths) {
+    for (const point of path) {
+      if (point === null) {
+        continue;
+      }
+      plane[W] = point[Z];
+      updated = true;
+      break;
+    }
+    if (updated) {
+      break;
+    }
+  }
   if (plane) {
     const arrangement = arrangePaths(...plane, paths);
     for (const { points, holes } of arrangement) {
@@ -31,6 +48,9 @@ export const fromPaths = (inputPaths) => {
         addHoleFromPoints(graph, deduplicate(interior), { face });
       }
     }
+  }
+  if (graph.edges.length === 0) {
+    graph.isEmpty = true;
   }
   graph.isClosed = false;
   graph.isOutline = true;

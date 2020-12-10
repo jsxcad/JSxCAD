@@ -15,8 +15,6 @@ const moveZMethod = function (z) {
   return moveZ(this, z);
 };
 Shape.prototype.moveZ = moveZMethod;
+Shape.prototype.z = moveZMethod;
 
 export default moveZ;
-
-moveZ.signature = 'moveZ(shape:Shape, z:number = 0) -> Shape';
-moveZMethod.signature = 'Shape -> moveZ(z:number = 0) -> Shape';
