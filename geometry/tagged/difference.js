@@ -9,8 +9,8 @@ import {
 } from '@jsxcad/geometry-graph';
 
 import { cache } from '@jsxcad/cache';
+import { getFaceablePaths } from './getFaceablePaths.js';
 import { getGraphs } from './getGraphs.js';
-import { getPaths } from './getPaths.js';
 import { getSolids } from './getSolids.js';
 import { getSurfaces } from './getSurfaces.js';
 import { rewrite } from './visit.js';
@@ -38,7 +38,7 @@ const differenceImpl = (geometry, ...geometries) => {
               fromSurfaceToGraph(surface)
             );
           }
-          for (const { paths } of getPaths(geometry)) {
+          for (const { paths } of getFaceablePaths(geometry)) {
             differenced = graphDifference(differenced, fromPathsToGraph(paths));
           }
         }
@@ -65,6 +65,9 @@ const differenceImpl = (geometry, ...geometries) => {
           )
         );
       case 'paths':
+        if (tags && tags.includes('paths/Wire')) {
+          return geometry;
+        }
         return taggedPaths(
           { tags },
           toPathsFromGraph(

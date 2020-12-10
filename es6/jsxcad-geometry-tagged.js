@@ -3,7 +3,7 @@ import { cacheTransform, cache, cacheRewriteTags, cacheSection } from './jsxcad-
 import { reconcile as reconcile$1, makeWatertight as makeWatertight$1, isWatertight as isWatertight$1, findOpenEdges as findOpenEdges$1, transform as transform$3, canonicalize as canonicalize$1, eachPoint as eachPoint$3, flip as flip$1, fromSurface as fromSurface$1, measureBoundingBox as measureBoundingBox$3 } from './jsxcad-geometry-solid.js';
 import { close, createOpenPath } from './jsxcad-geometry-path.js';
 import { createNormalize3 } from './jsxcad-algorithm-quantize.js';
-import { transform as transform$5, canonicalize as canonicalize$5, eachPoint as eachPoint$4, close as close$1, flip as flip$3 } from './jsxcad-geometry-paths.js';
+import { transform as transform$5, canonicalize as canonicalize$5, eachPoint as eachPoint$4, flip as flip$3 } from './jsxcad-geometry-paths.js';
 import { canonicalize as canonicalize$4, toPolygon } from './jsxcad-math-plane.js';
 import { transform as transform$4, canonicalize as canonicalize$3, eachPoint as eachPoint$5, flip as flip$4, measureBoundingBox as measureBoundingBox$1, union as union$1 } from './jsxcad-geometry-points.js';
 import { transform as transform$1, canonicalize as canonicalize$2, eachPoint as eachPoint$2, flip as flip$2, makeWatertight as makeWatertight$2, measureArea as measureArea$1, measureBoundingBox as measureBoundingBox$2, toPlane } from './jsxcad-geometry-surface.js';
@@ -781,7 +781,7 @@ const fill = (geometry, includeFaces = true, includeHoles = true) => {
     fills.push(
       taggedGraph(
         { tags },
-        fill$1(fromPaths(close$1(paths)))
+        fill$1(fromPaths(paths))
       )
     );
   }

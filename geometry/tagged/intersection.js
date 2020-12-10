@@ -16,8 +16,8 @@ import { cache } from '@jsxcad/cache';
 import { createNormalize3 } from '@jsxcad/algorithm-quantize';
 import { fromSurface as fromSurfaceToSolid } from '@jsxcad/geometry-solid';
 import { getAnyNonVoidSurfaces } from './getAnyNonVoidSurfaces.js';
+import { getNonVoidFaceablePaths } from './getNonVoidFaceablePaths.js';
 import { getNonVoidGraphs } from './getNonVoidGraphs.js';
-import { getNonVoidPaths } from './getNonVoidPaths.js';
 import { getNonVoidSolids } from './getNonVoidSolids.js';
 import { makeWatertight as makeWatertightSurface } from '@jsxcad/geometry-surface';
 import { rewrite } from './visit.js';
@@ -44,7 +44,7 @@ const intersectionImpl = (geometry, ...geometries) => {
               fromSolidToGraph(solid)
             );
           }
-          for (const { paths } of getNonVoidPaths(geometry)) {
+          for (const { paths } of getNonVoidFaceablePaths(geometry)) {
             intersected = graphIntersection(
               intersected,
               fromPathsToGraph(paths)
@@ -119,6 +119,9 @@ const intersectionImpl = (geometry, ...geometries) => {
         }
       }
       case 'paths': {
+        if (tags && tags.includes('paths/Wire')) {
+          return geometry;
+        }
         return taggedPaths(
           { tags },
           toPathsFromGraph(
@@ -128,19 +131,6 @@ const intersectionImpl = (geometry, ...geometries) => {
             ).graph
           )
         );
-        /*
-        const normalize = createNormalize3();
-        let thisPaths = geometry.paths;
-        for (const geometry of geometries) {
-          const bsp = toBspTree(geometry, normalize);
-          const clippedPaths = [];
-          removeExteriorPaths(bsp, thisPaths, normalize, (paths) =>
-            clippedPaths.push(...paths)
-          );
-          thisPaths = clippedPaths;
-        }
-        return taggedPaths({ tags }, thisPaths);
-*/
       }
       case 'points': {
         // Not implemented yet.

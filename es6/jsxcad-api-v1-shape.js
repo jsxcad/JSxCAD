@@ -1062,9 +1062,7 @@ const moveXMethod = function (x) {
   return moveX(this, x);
 };
 Shape.prototype.moveX = moveXMethod;
-
-moveX.signature = 'moveX(shape:Shape, x:number = 0) -> Shape';
-moveXMethod.signature = 'Shape -> moveX(x:number = 0) -> Shape';
+Shape.prototype.x = moveXMethod;
 
 /**
  *
@@ -1080,9 +1078,7 @@ const moveYMethod = function (y) {
   return moveY(this, y);
 };
 Shape.prototype.moveY = moveYMethod;
-
-moveY.signature = 'moveY(shape:Shape, y:number = 0) -> Shape';
-moveYMethod.signature = 'Shape -> moveY(y:number = 0) -> Shape';
+Shape.prototype.y = moveYMethod;
 
 /**
  *
@@ -1098,9 +1094,7 @@ const moveZMethod = function (z) {
   return moveZ(this, z);
 };
 Shape.prototype.moveZ = moveZMethod;
-
-moveZ.signature = 'moveZ(shape:Shape, z:number = 0) -> Shape';
-moveZMethod.signature = 'Shape -> moveZ(z:number = 0) -> Shape';
+Shape.prototype.z = moveZMethod;
 
 const noHoles = (shape, tags, select) => {
   const op = (geometry, descend) => {
