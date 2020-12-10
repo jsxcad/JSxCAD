@@ -12,9 +12,9 @@ const unitBall = (resolution = 16) => {
   return shape.toGraph();
 };
 
-export const Ball = (value = 1) => {
+export const Ball = (value = 1, { resolution = 16 } = {}) => {
   const plan = orRadius(value);
-  return unitBall().scale(getRadius(plan)).at(plan.at);
+  return unitBall(resolution).scale(getRadius(plan)).at(plan.at);
 };
 
 Shape.prototype.Ball = shapeMethod(Ball);

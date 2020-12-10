@@ -16,7 +16,7 @@ export const fromSurfaceMeshToGraph = (mesh) => {
       if (polygon.length >= 3) {
         graph.faces[face].plane = fromPolygonToPlane(polygon);
         if (graph.faces[face].plane === undefined) {
-          console.log(`QQ/bent: ${JSON.stringify(polygon)}`);
+          // console.log(`QQ/bent: ${JSON.stringify(polygon)}`);
         }
       } else {
         // console.log(`QQ/degenerate: ${JSON.stringify(polygon)}`);
@@ -46,7 +46,7 @@ export const fromSurfaceMeshToGraph = (mesh) => {
     }
   );
   graph.isClosed = c.Surface_mesh__is_closed(mesh);
-  if (graph.faces.length === 0) {
+  if (graph.edges.length === 0) {
     graph.isEmpty = true;
   }
   return graph;

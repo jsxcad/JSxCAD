@@ -1,19 +1,22 @@
-import { extrude as extrudeGraph } from '@jsxcad/geometry-graph';
-import { fill } from './fill.js';
+import {
+  fromPaths as fromPathsToGraph,
+  offset as offsetGraph,
+  toPaths as toPathsFromGraph,
+} from '@jsxcad/geometry-graph';
+
 import { rewrite } from './visit.js';
-import { taggedGraph } from './taggedGraph.js';
+import { taggedPaths } from './taggedPaths.js';
 import { toTransformedGeometry } from './toTransformedGeometry.js';
 
-export const extrude = (geometry, height, depth) => {
+export const offset = (geometry, initial = 1, step, limit) => {
   const op = (geometry, descend) => {
     const { tags } = geometry;
     switch (geometry.type) {
-      case 'graph': {
-        return taggedGraph(
+      case 'graph':
+        return taggedPaths(
           { tags },
-          extrudeGraph(geometry.graph, height, depth)
+          toPathsFromGraph(offsetGraph(geometry.graph, initial, step, limit))
         );
-      }
       case 'solid':
       case 'z0Surface':
       case 'surface':
@@ -21,7 +24,12 @@ export const extrude = (geometry, height, depth) => {
         // Not implemented yet.
         return geometry;
       case 'paths':
-        return extrude(fill(geometry), height, depth);
+        return taggedPaths(
+          { tags },
+          toPathsFromGraph(
+            offsetGraph(fromPathsToGraph(geometry.paths), initial, step, limit)
+          )
+        );
       case 'plan':
       case 'assembly':
       case 'item':
@@ -30,7 +38,7 @@ export const extrude = (geometry, height, depth) => {
         return descend();
       }
       case 'sketch': {
-        // Sketches aren't real for extrude.
+        // Sketches aren't real for offset.
         return geometry;
       }
       default:
@@ -38,6 +46,5 @@ export const extrude = (geometry, height, depth) => {
     }
   };
 
-  // CHECK: Why does this need transformed geometry?
   return rewrite(toTransformedGeometry(geometry), op);
 };

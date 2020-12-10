@@ -1,5 +1,6 @@
 import {
   fill as fillGeometry,
+  taggedGroup,
   transform as transformGeometry,
 } from '@jsxcad/geometry-tagged';
 
@@ -163,7 +164,7 @@ const applyTransforms = ({ matrix }, transformText) => {
 
 export const fromSvg = async (input, options = {}) => {
   const svgString = new TextDecoder('utf8').decode(input);
-  const geometry = { type: 'assembly', content: [] };
+  const geometry = taggedGroup({});
   const svg = new XmlDom.DOMParser().parseFromString(
     await svgString,
     'image/svg+xml'

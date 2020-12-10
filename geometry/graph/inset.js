@@ -8,6 +8,7 @@ import {
   getPointNode,
 } from './graph.js';
 
+import { canonicalize as canonicalizePlane } from '@jsxcad/math-plane';
 import { insetOfPolygon } from '@jsxcad/algorithm-cgal';
 import { outline } from './outline.js';
 import { realizeGraph } from './realizeGraph.js';
@@ -34,7 +35,7 @@ export const inset = (graph, initial, step, limit) => {
       initial,
       step,
       limit,
-      plane,
+      canonicalizePlane(plane), // FIX: Use exact transforms to avoid drift.
       polygon,
       polygonHoles
     )) {

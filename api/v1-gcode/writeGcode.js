@@ -7,6 +7,8 @@ import {
 
 import Shape from '@jsxcad/api-v1-shape';
 import { ensurePages } from '@jsxcad/api-v1-layout';
+import { hash as hashGeometry } from '@jsxcad/geometry-tagged';
+import hashSum from 'hash-sum';
 import { toGcode } from '@jsxcad/convert-gcode';
 
 export const prepareGcode = (shape, name, options = {}) => {
@@ -25,9 +27,11 @@ export const prepareGcode = (shape, name, options = {}) => {
   return entries;
 };
 
-const downloadGcodeMethod = function (...args) {
-  const entries = prepareGcode(this, ...args);
-  emit({ download: { entries } });
+const downloadGcodeMethod = function (name, options = {}) {
+  const entries = prepareGcode(this, name, options);
+  const download = { entries };
+  const hash = hashSum({ name, options }) + hashGeometry(this.toGeometry());
+  emit({ download, hash });
   return this;
 };
 Shape.prototype.downloadGcode = downloadGcodeMethod;

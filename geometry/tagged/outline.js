@@ -8,6 +8,7 @@ import { outlineSolid, outlineSurface } from '@jsxcad/geometry-halfedge';
 import { cache } from '@jsxcad/cache';
 import { createNormalize3 } from '@jsxcad/algorithm-quantize';
 import { getNonVoidGraphs } from './getNonVoidGraphs.js';
+import { getNonVoidPaths } from './getNonVoidPaths.js';
 import { getNonVoidSolids } from './getNonVoidSolids.js';
 import { getNonVoidSurfaces } from './getNonVoidSurfaces.js';
 import { taggedPaths } from './taggedPaths.js';
@@ -29,6 +30,10 @@ const outlineImpl = (geometry, includeFaces = true, includeHoles = true) => {
   }
   for (const { tags, graph } of getNonVoidGraphs(keptGeometry)) {
     outlines.push(taggedPaths({ tags }, toPathsFromGraph(outlineGraph(graph))));
+  }
+  // Turn paths into wires.
+  for (const { tags = [], paths } of getNonVoidPaths(keptGeometry)) {
+    outlines.push(taggedPaths({ tags: [...tags, 'path/Wire'] }, paths));
   }
   // This is a bit tricky -- let's consider an assembly that produces an effective surface.
   // For now, let's consolidate, and see what goes terribly wrong.

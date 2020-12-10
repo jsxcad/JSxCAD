@@ -1,19 +1,22 @@
 import {
-  fromSolid as fromSolidToBspTree,
-  intersectSurface,
-  removeExteriorPaths,
-  intersection as solidIntersection,
-} from '@jsxcad/geometry-bsp';
-
-import {
+  fromPaths as fromPathsToGraph,
   fromSolid as fromSolidToGraph,
   intersection as graphIntersection,
+  toPaths as toPathsFromGraph,
 } from '@jsxcad/geometry-graph';
+
+import {
+  fromSolid as fromSolidToBspTree,
+  intersectSurface,
+  // removeExteriorPaths,
+  intersection as solidIntersection,
+} from '@jsxcad/geometry-bsp';
 
 import { cache } from '@jsxcad/cache';
 import { createNormalize3 } from '@jsxcad/algorithm-quantize';
 import { fromSurface as fromSurfaceToSolid } from '@jsxcad/geometry-solid';
 import { getAnyNonVoidSurfaces } from './getAnyNonVoidSurfaces.js';
+import { getNonVoidFaceablePaths } from './getNonVoidFaceablePaths.js';
 import { getNonVoidGraphs } from './getNonVoidGraphs.js';
 import { getNonVoidSolids } from './getNonVoidSolids.js';
 import { makeWatertight as makeWatertightSurface } from '@jsxcad/geometry-surface';
@@ -23,7 +26,7 @@ import { taggedGroup } from './taggedGroup.js';
 import { taggedPaths } from './taggedPaths.js';
 import { taggedSolid } from './taggedSolid.js';
 import { taggedSurface } from './taggedSurface.js';
-import { toBspTree } from './toBspTree.js';
+// import { toBspTree } from './toBspTree.js';
 
 const intersectionImpl = (geometry, ...geometries) => {
   const op = (geometry, descend) => {
@@ -39,6 +42,12 @@ const intersectionImpl = (geometry, ...geometries) => {
             intersected = graphIntersection(
               intersected,
               fromSolidToGraph(solid)
+            );
+          }
+          for (const { paths } of getNonVoidFaceablePaths(geometry)) {
+            intersected = graphIntersection(
+              intersected,
+              fromPathsToGraph(paths)
             );
           }
         }
@@ -110,17 +119,18 @@ const intersectionImpl = (geometry, ...geometries) => {
         }
       }
       case 'paths': {
-        const normalize = createNormalize3();
-        let thisPaths = geometry.paths;
-        for (const geometry of geometries) {
-          const bsp = toBspTree(geometry, normalize);
-          const clippedPaths = [];
-          removeExteriorPaths(bsp, thisPaths, normalize, (paths) =>
-            clippedPaths.push(...paths)
-          );
-          thisPaths = clippedPaths;
+        if (tags && tags.includes('paths/Wire')) {
+          return geometry;
         }
-        return taggedPaths({ tags }, thisPaths);
+        return taggedPaths(
+          { tags },
+          toPathsFromGraph(
+            intersection(
+              taggedGraph({ tags }, fromPathsToGraph(geometry.paths)),
+              ...geometries
+            ).graph
+          )
+        );
       }
       case 'points': {
         // Not implemented yet.

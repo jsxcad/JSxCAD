@@ -1,9 +1,9 @@
 import { addPending, emit, getModule, write } from '@jsxcad/sys';
-
 import { hash as hashGeometry, soup } from '@jsxcad/geometry-tagged';
 
 import Shape from '@jsxcad/api-v1-shape';
 import { ensurePages } from '@jsxcad/api-v1-layout';
+import hashSum from 'hash-sum';
 import { nanoid } from 'nanoid/non-secure';
 
 // FIX: Avoid the extra read-write cycle.
@@ -14,11 +14,13 @@ const view = (
   { width = 1024, height = 512, position = [100, -100, 100] } = {}
 ) => {
   const viewShape = op(shape);
-  const hash = hashGeometry(viewShape.toGeometry());
+  const geometryHash = hashGeometry(viewShape.toGeometry());
   for (const entry of ensurePages(soup(viewShape.toDisjointGeometry()))) {
     const path = `view/${getModule()}/${nanoid()}`;
     addPending(write(path, entry));
-    emit({ hash, path, view: { width, height, position, inline } });
+    const view = { width, height, position, inline };
+    const hash = hashSum({ geometryHash, view });
+    emit({ hash, path, view });
   }
   return shape;
 };

@@ -1,4 +1,5 @@
 import {
+  fromPaths,
   fromSolid,
   fromSurface,
   toSolid as toSolidFromGraph,
@@ -7,6 +8,7 @@ import {
 import {
   getAnySurfaces,
   getGraphs,
+  getPaths,
   getSolids,
   taggedGraph,
   taggedGroup,
@@ -26,6 +28,9 @@ export const toGraph = (shape) => {
     shape.toTransformedGeometry()
   )) {
     graphs.push(taggedGraph({ tags }, fromSurface(surface || z0Surface)));
+  }
+  for (const { tags, paths } of getPaths(shape.toTransformedGeometry())) {
+    graphs.push(taggedGraph({ tags }, fromPaths(paths)));
   }
   return Shape.fromGeometry(taggedGroup({}, ...graphs));
 };

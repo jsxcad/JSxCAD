@@ -1,60 +1,23 @@
-/*
 import {
-  offset as offsetGraph,
-  outline as outlineGraph,
-} from '@jsxcad/geometry-graph';
-*/
+  inset as insetGeometry,
+  offset as offsetGeometry,
+} from '@jsxcad/geometry-tagged';
 
 import { Shape } from '@jsxcad/api-v1-shape';
 
-import {
-  // getNonVoidGraphs,
-  inset as insetGeometry,
-  // taggedGraph,
-  // taggedGroup,
-} from '@jsxcad/geometry-tagged';
+export const offset = (shape, initial = 1, step, limit) =>
+  Shape.fromGeometry(offsetGeometry(shape.toGeometry(), initial, step, limit));
 
-export const offset = (shape, amount = -1) => {
-  if (amount < 0) {
-    return inset(shape, -amount);
-  } else {
-    return shape;
-  }
-};
-
-const offsetMethod = function (amount) {
-  return offset(this, amount);
+const offsetMethod = function (initial, step, limit) {
+  return offset(this, initial, step, limit);
 };
 
 Shape.prototype.offset = offsetMethod;
 
-// FIX: Support minimal radius requirements.
-export const inset = (shape, initial = 1, step, limit) => {
-  /*
-  const group = [];
-  for (const { tags, graph } of getNonVoidGraphs(shape.toDisjointGeometry())) {
-    const outlinedGraph = outlineGraph(graph);
-    let amount = initial;
-    for (;;) {
-      const offsettedGraph = offsetGraph(outlinedGraph, -amount);
-      if (offsettedGraph.isEmpty) {
-        break;
-      }
-      group.push(taggedGraph({ tags }, offsettedGraph));
-      if (step === undefined) {
-        break;
-      }
-      amount += step;
-      if (amount >= limit) {
-        break;
-      }
-    }
-  }
-*/
-  return Shape.fromGeometry(
-    insetGeometry(shape.toGeometry(), initial, step, limit)
-  );
-};
+export default offset;
+
+export const inset = (shape, initial = 1, step, limit) =>
+  Shape.fromGeometry(insetGeometry(shape.toGeometry(), initial, step, limit));
 
 const insetMethod = function (initial, step, limit) {
   return inset(this, initial, step, limit);
@@ -62,4 +25,9 @@ const insetMethod = function (initial, step, limit) {
 
 Shape.prototype.inset = insetMethod;
 
-export default offset;
+// CHECK: Using 'with' for may be confusing, but andInset looks odd.
+const withInsetMethod = function (initial, step, limit) {
+  return this.group(inset(this, initial, step, limit));
+};
+
+Shape.prototype.withInset = withInsetMethod;

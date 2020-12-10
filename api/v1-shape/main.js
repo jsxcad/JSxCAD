@@ -2,6 +2,7 @@ import './add.js';
 import './addTo.js';
 import './align.js';
 import './as.js';
+import './assemble.js';
 import './bench.js';
 import './canonicalize.js';
 import './center.js';
@@ -55,6 +56,7 @@ import './turnY.js';
 import './turnZ.js';
 import './union.js';
 import './wall.js';
+import './weld.js';
 import './wireframe.js';
 import './wireframeFaces.js';
 import './with.js';
@@ -67,5 +69,7 @@ import log from './log.js';
 
 export { Shape, loadGeometry, log, saveGeometry };
 export { getPegCoords, orient, shapeMethod } from './peg.js';
+
+export { weld } from './weld.js';
 
 export default Shape;

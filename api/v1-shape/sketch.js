@@ -9,7 +9,11 @@ Shape.prototype.sketch = function () {
   return sketch(this);
 };
 
-Shape.prototype.withSketch = function () {
+Shape.prototype.plan = function () {
+  return sketch(this);
+};
+
+Shape.prototype.withPlan = function () {
   return assemble(this, sketch(this));
 };
 
