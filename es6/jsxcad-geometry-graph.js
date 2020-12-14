@@ -1403,8 +1403,13 @@ const offset = (graph, initial, step, limit) => {
   return offsetGraph;
 };
 
-const smooth = (graph) =>
-  fromSurfaceMeshLazy(smoothSurfaceMesh(toSurfaceMesh(graph)));
+const smooth = (graph, options) => {
+  const smoothedGraph = fromSurfaceMeshLazy(
+    smoothSurfaceMesh(toSurfaceMesh(graph), options)
+  );
+  smoothedGraph.isWireframe = true;
+  return smoothedGraph;
+};
 
 const toPaths = (graph) => {
   const paths = [];

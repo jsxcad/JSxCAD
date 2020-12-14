@@ -14,6 +14,7 @@ import Hull from './Hull.js';
 import Icosahedron from './Icosahedron.js';
 import Intersection from './Intersection.js';
 import Line from './Line.js';
+import LoopedHull from './LoopedHull.js';
 import Octagon from './Octagon.js';
 import Path from './Path.js';
 import Peg from './Peg.js';
@@ -53,6 +54,7 @@ const api = {
   Icosahedron,
   Intersection,
   Line,
+  LoopedHull,
   Octagon,
   Path,
   Peg,
@@ -93,6 +95,7 @@ export {
   Icosahedron,
   Intersection,
   Line,
+  LoopedHull,
   Octagon,
   Pentagon,
   Path,

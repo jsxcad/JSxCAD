@@ -3,12 +3,12 @@ import { smooth as smoothGraph } from '@jsxcad/geometry-graph';
 import { taggedGraph } from './taggedGraph.js';
 import { toTransformedGeometry } from './toTransformedGeometry.js';
 
-export const smooth = (geometry) => {
+export const smooth = (geometry, options) => {
   const op = (geometry, descend) => {
     const { tags } = geometry;
     switch (geometry.type) {
       case 'graph': {
-        return taggedGraph({ tags }, smoothGraph(geometry.graph));
+        return taggedGraph({ tags }, smoothGraph(geometry.graph, options));
       }
       case 'solid':
       case 'z0Surface':

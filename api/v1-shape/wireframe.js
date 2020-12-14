@@ -1,36 +1,38 @@
 import {
+  getNonVoidGraphs,
   getNonVoidSolids,
   getNonVoidSurfaces,
-  getNonVoidZ0Surfaces,
+  taggedGroup,
+  taggedPaths,
 } from '@jsxcad/geometry-tagged';
 
 import { Shape } from './Shape.js';
-import { assemble } from './assemble.js';
+import { toPaths as toPathsFromGraph } from '@jsxcad/geometry-graph';
 
 const toWireframeFromSolid = (solid) => {
   const paths = [];
   for (const surface of solid) {
     paths.push(...surface);
   }
-  return Shape.fromPaths(paths);
+  return taggedPaths({}, paths);
 };
 
 const toWireframeFromSurface = (surface) => {
-  return Shape.fromPaths(surface);
+  return taggedPaths({}, surface);
 };
 
 export const wireframe = (options = {}, shape) => {
   const pieces = [];
+  for (const { graph } of getNonVoidGraphs(shape.toKeptGeometry())) {
+    pieces.push(toPathsFromGraph(graph));
+  }
   for (const { solid } of getNonVoidSolids(shape.toKeptGeometry())) {
     pieces.push(toWireframeFromSolid(solid));
   }
   for (const { surface } of getNonVoidSurfaces(shape.toKeptGeometry())) {
     pieces.push(toWireframeFromSurface(surface));
   }
-  for (const { z0Surface } of getNonVoidZ0Surfaces(shape.toKeptGeometry())) {
-    pieces.push(toWireframeFromSurface(z0Surface));
-  }
-  return assemble(...pieces);
+  return Shape.fromGeometry(taggedGroup({}, ...pieces));
 };
 
 const method = function (options) {
@@ -39,5 +41,5 @@ const method = function (options) {
 
 Shape.prototype.wireframe = method;
 Shape.prototype.withWireframe = function (options) {
-  return assemble(this, wireframe(options, this));
+  return this.and(wireframe(options, this));
 };

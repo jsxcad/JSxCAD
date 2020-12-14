@@ -1667,6 +1667,24 @@ const Line = (forward, backward = 0) => {
 
 Shape.prototype.Line = shapeMethod(Line);
 
+const LoopedHull = (...shapes) => {
+  const pointsets = shapes.map((shape) => shape.toPoints());
+  const loop = [];
+  for (let nth = 1; nth < pointsets.length; nth++) {
+    const points = [...pointsets[nth - 1], ...pointsets[nth]];
+    loop.push(Hull(Points(...points)));
+  }
+  loop.push(Hull(Points(...pointsets[pointsets.length - 1], ...pointsets[0])));
+  return Group(...loop);
+};
+
+const loopHullMethod = function (...shapes) {
+  return LoopedHull(this, ...shapes);
+};
+
+Shape.prototype.loopHull = loopHullMethod;
+Shape.prototype.LoopedHull = shapeMethod(LoopedHull);
+
 const Octagon = (plan = 1) => Arc({ ...orRadius(plan), sides: 8 });
 
 Shape.prototype.Octagon = shapeMethod(Octagon);
@@ -1873,6 +1891,7 @@ const api = {
   Icosahedron,
   Intersection,
   Line,
+  LoopedHull,
   Octagon,
   Path,
   Peg,
@@ -1897,4 +1916,4 @@ const api = {
 };
 
 export default api;
-export { Arc, Assembly, Ball, Box, ChainedHull, Circle, Cone, Difference, Empty, Group, Hershey, Hexagon, Hull, Icosahedron, Intersection, Line, Octagon, Path, Peg, Pentagon, Plane, Point, Points, Polygon, Polyhedron, Rod, Septagon, Sketch, Spiral, Square, Tetragon, Toolpath, Torus, Triangle, Union, Wave, Weld };
+export { Arc, Assembly, Ball, Box, ChainedHull, Circle, Cone, Difference, Empty, Group, Hershey, Hexagon, Hull, Icosahedron, Intersection, Line, LoopedHull, Octagon, Path, Peg, Pentagon, Plane, Point, Points, Polygon, Polyhedron, Rod, Septagon, Sketch, Spiral, Square, Tetragon, Toolpath, Torus, Triangle, Union, Wave, Weld };

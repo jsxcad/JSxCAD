@@ -93,6 +93,7 @@ export {
   Icosahedron,
   Intersection,
   Line,
+  LoopedHull,
   Octagon,
   Path,
   Peg,
