@@ -1640,12 +1640,12 @@ const sectionImpl = (geometry, planes) => {
 
 const section = cacheSection(sectionImpl);
 
-const smooth = (geometry) => {
+const smooth = (geometry, options) => {
   const op = (geometry, descend) => {
     const { tags } = geometry;
     switch (geometry.type) {
       case 'graph': {
-        return taggedGraph({ tags }, smooth$1(geometry.graph));
+        return taggedGraph({ tags }, smooth$1(geometry.graph, options));
       }
       case 'solid':
       case 'z0Surface':
@@ -1673,6 +1673,19 @@ const smooth = (geometry) => {
   return rewrite(toTransformedGeometry(geometry), op);
 };
 
+const taggedItem = ({ tags }, ...content) => {
+  if (tags !== undefined && tags.length === undefined) {
+    throw Error(`Bad tags: ${tags}`);
+  }
+  if (content.some((value) => value === undefined)) {
+    throw Error(`Undefined Item content`);
+  }
+  if (content.length !== 1) {
+    throw Error(`Item expects a single content geometry`);
+  }
+  return { type: 'item', tags, content };
+};
+
 const soup = (geometry) => {
   const op = (geometry, descend) => {
     const { tags } = geometry;
@@ -1684,7 +1697,15 @@ const soup = (geometry) => {
         } else if (graph.isClosed) {
           return taggedSolid({ tags }, toSolid(graph));
         } else {
-          return taggedSurface({ tags }, toSurface(graph));
+          // FIX: Simplify this arrangement.
+          return taggedItem(
+            {},
+            taggedGroup(
+              {},
+              taggedSurface({ tags }, toSurface(graph)),
+              ...outline(geometry)
+            )
+          );
         }
       }
       case 'solid':
@@ -1699,12 +1720,9 @@ const soup = (geometry) => {
       case 'assembly':
       case 'item':
       case 'disjointAssembly':
+      case 'sketch':
       case 'layers': {
         return descend();
-      }
-      case 'sketch': {
-        // Sketches aren't real for extrude.
-        return geometry;
       }
       default:
         throw Error(`Unexpected geometry: ${JSON.stringify(geometry)}`);
@@ -1712,19 +1730,6 @@ const soup = (geometry) => {
   };
 
   return rewrite(toTransformedGeometry(geometry), op);
-};
-
-const taggedItem = ({ tags }, ...content) => {
-  if (tags !== undefined && tags.length === undefined) {
-    throw Error(`Bad tags: ${tags}`);
-  }
-  if (content.some((value) => value === undefined)) {
-    throw Error(`Undefined Item content`);
-  }
-  if (content.length !== 1) {
-    throw Error(`Item expects a single content geometry`);
-  }
-  return { type: 'item', tags, content };
 };
 
 const taggedLayers = ({ tags }, ...content) => {
