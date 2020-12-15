@@ -1,5 +1,9 @@
 import { toPaths, toSolid, toSurface } from '@jsxcad/geometry-graph';
+
+import { outline } from './outline.js';
 import { rewrite } from './visit.js';
+import { taggedGroup } from './taggedGroup.js';
+import { taggedItem } from './taggedItem.js';
 import { taggedPaths } from './taggedPaths.js';
 import { taggedSolid } from './taggedSolid.js';
 import { taggedSurface } from './taggedSurface.js';
@@ -16,7 +20,15 @@ export const soup = (geometry) => {
         } else if (graph.isClosed) {
           return taggedSolid({ tags }, toSolid(graph));
         } else {
-          return taggedSurface({ tags }, toSurface(graph));
+          // FIX: Simplify this arrangement.
+          return taggedItem(
+            {},
+            taggedGroup(
+              {},
+              taggedSurface({ tags }, toSurface(graph)),
+              ...outline(geometry)
+            )
+          );
         }
       }
       case 'solid':
@@ -31,12 +43,9 @@ export const soup = (geometry) => {
       case 'assembly':
       case 'item':
       case 'disjointAssembly':
+      case 'sketch':
       case 'layers': {
         return descend();
-      }
-      case 'sketch': {
-        // Sketches aren't real for extrude.
-        return geometry;
       }
       default:
         throw Error(`Unexpected geometry: ${JSON.stringify(geometry)}`);

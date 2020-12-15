@@ -238,50 +238,31 @@ Surface_mesh* FromPointsToSurfaceMesh(emscripten::val fill) {
   return mesh;
 }
 
-Surface_mesh* SmoothSurfaceMesh(Surface_mesh* input) {
+Surface_mesh* SmoothSurfaceMesh(Surface_mesh* input, double edge_length, int iterations) {
   typedef boost::graph_traits<Surface_mesh>::edge_descriptor edge_descriptor;
 
   Surface_mesh* mesh = new Surface_mesh(*input);
 
 #if 0
-  CGAL::Polygon_mesh_processing::split_long_edges(
-    mesh->edges(),
-    1,
-    *mesh);
+  CGAL::Polygon_mesh_processing::smooth_shape(*mesh, edge_length, CGAL::Polygon_mesh_processing::parameters::number_of_iterations(iterations));
 #endif
 
+#if 0
+  std::vector<Surface_mesh::Face_index>  new_facets;
+  std::vector<Surface_mesh::Vertex_index> new_vertices;
+  CGAL::Polygon_mesh_processing::refine(*mesh,
+                  faces(*mesh),
+                  std::back_inserter(new_facets),
+                  std::back_inserter(new_vertices),
+                  CGAL::Polygon_mesh_processing::parameters::density_control_factor(2.));
+#endif
+
+#if 1
   CGAL::Polygon_mesh_processing::isotropic_remeshing(
     mesh->faces(),
-    5,
+    edge_length,
     *mesh,
-    CGAL::Polygon_mesh_processing::parameters::number_of_iterations(1));
-
-#if 0
-  typedef boost::property_map<Surface_mesh, CGAL::edge_is_feature_t>::type EIFMap;
-  EIFMap eif = get(CGAL::edge_is_feature, *mesh);
-  // Constrain edges with a dihedral angle over the limit.
-  CGAL::Polygon_mesh_processing::detect_sharp_edges(*mesh, 60, eif);
-
-  int sharp_counter = 0;
-  for (edge_descriptor e : edges(*mesh)) {
-    if(get(eif, e)) {
-      ++sharp_counter;
-    }
-  }
-#endif
-
-  const unsigned int nb_iterations = 1;
-
-#if 0
-  CGAL::Polygon_mesh_processing::smooth_shape(mesh->faces(), *mesh, 1, CGAL::Polygon_mesh_processing::parameters::number_of_iterations(nb_iterations));
-#else
-  // Smooth with both angle and area criteria + Delaunay flips
-  CGAL::Polygon_mesh_processing::smooth_mesh(
-      *mesh,
-      CGAL::Polygon_mesh_processing::parameters::number_of_iterations(nb_iterations)
-          // .use_safety_constraints(false) // authorize all moves
-          // .edge_is_constrained_map(eif)
-  );
+    CGAL::Polygon_mesh_processing::parameters::number_of_iterations(iterations));
 #endif
 
   return mesh;
@@ -992,73 +973,6 @@ void SkeletalInsetOfPolygon(double initial, double step, double limit, double x,
   }
 }
 
-void OffsetOfPolygon(double initial, double step, double limit, double x, double y, double z, double w, std::size_t hole_count, emscripten::val fill_boundary, emscripten::val fill_hole, emscripten::val emit_polygon, emscripten::val emit_point) {
-  typedef CGAL::Gps_circle_segment_traits_2<Kernel> Traits;
-  Kernel::Plane_3 plane(x, y, z, w);
-  Polygon_2 boundary;
-  {
-    Points points;
-    Points* points_ptr = &points;
-    fill_boundary(points_ptr);
-    for (const auto& point : points) {
-      boundary.push_back(plane.to_2d(point));
-    }
-  }
-  std::vector<Polygon_2> holes;
-  for (std::size_t nth = 0; nth < hole_count; nth++) {
-    Points points;
-    Points* points_ptr = &points;
-    fill_hole(points_ptr, nth);
-    Polygon_2 hole;
-    for (const auto& point : points) {
-      hole.push_back(plane.to_2d(point));
-    }
-    holes.push_back(hole);
-  }
-  Polygon_with_holes_2 polygon(boundary, holes.begin(), holes.end());
-
-  double offset = initial;
-
-  for (;;) {
-    Traits::Polygon_with_holes_2 offset_polygon = CGAL::approximated_offset_2(polygon, offset, 0.00001);
-    bool emitted = false;
-    const auto& outer = offset_polygon.outer_boundary();
-    emit_polygon(false);
-    for (auto curve = outer.curves_begin(); curve != outer.curves_end(); ++curve) {
-      const auto& x = curve->source().x();
-      const auto& y = curve->source().y();
-      auto p = plane.to_3d(Point_2(x.a0() + x.a1() * sqrt(CGAL::to_double(x.root())),
-                                   y.a0() + y.a1() * sqrt(CGAL::to_double(y.root()))));
-      emit_point(CGAL::to_double(p.x()), CGAL::to_double(p.y()), CGAL::to_double(p.z()));
-      emitted = true;
-    }
-    for (auto hole = offset_polygon.holes_begin(); hole != offset_polygon.holes_end(); ++hole) {
-      emit_polygon(true);
-      for (auto curve = hole->curves_begin(); curve != hole->curves_end(); ++curve) {
-        const auto& x = curve->source().x();
-        const auto& y = curve->source().y();
-        auto p = plane.to_3d(Point_2(x.a0() + x.a1() * sqrt(CGAL::to_double(x.root())),
-                                     y.a0() + y.a1() * sqrt(CGAL::to_double(y.root()))));
-        emit_point(CGAL::to_double(p.x()), CGAL::to_double(p.y()), CGAL::to_double(p.z()));
-        emitted = true;
-      }
-    }
-    if (!emitted) {
-      break;
-    }
-    if (step <= 0) {
-      break;
-    }
-    offset += step;
-    if (limit <= 0) {
-      continue;
-    }
-    if (offset >= limit) {
-      break;
-    }
-  }
-}
-
 template <class Curve>
 void emitCircularCurve(const Plane& plane, Curve& curve, emscripten::val& emit_point) {
   // General loss of precision.
@@ -1113,6 +1027,84 @@ void emitCircularCurve(const Plane& plane, Curve& curve, emscripten::val& emit_p
     {
       auto p = plane.to_3d(Point_2(tx, ty));
       emit_point(CGAL::to_double(p.x()), CGAL::to_double(p.y()), CGAL::to_double(p.z()));
+    }
+  }
+}
+
+
+void OffsetOfPolygon(double initial, double step, double limit, double x, double y, double z, double w, std::size_t hole_count, emscripten::val fill_boundary, emscripten::val fill_hole, emscripten::val emit_polygon, emscripten::val emit_point) {
+  typedef CGAL::Gps_circle_segment_traits_2<Kernel> Traits;
+  Kernel::Plane_3 plane(x, y, z, w);
+  Polygon_2 boundary;
+  {
+    Points points;
+    Points* points_ptr = &points;
+    fill_boundary(points_ptr);
+    for (const auto& point : points) {
+      boundary.push_back(plane.to_2d(point));
+    }
+  }
+  std::vector<Polygon_2> holes;
+  for (std::size_t nth = 0; nth < hole_count; nth++) {
+    Points points;
+    Points* points_ptr = &points;
+    fill_hole(points_ptr, nth);
+    Polygon_2 hole;
+    for (const auto& point : points) {
+      hole.push_back(plane.to_2d(point));
+    }
+    holes.push_back(hole);
+  }
+  Polygon_with_holes_2 polygon(boundary, holes.begin(), holes.end());
+
+  double offset = initial;
+
+  for (;;) {
+    Traits::Polygon_with_holes_2 offset_polygon = CGAL::approximated_offset_2(polygon, offset, 0.00001);
+    bool emitted = false;
+    const auto& outer = offset_polygon.outer_boundary();
+    emit_polygon(false);
+    for (auto curve = outer.curves_begin(); curve != outer.curves_end(); ++curve) {
+      if (curve->is_linear()) {
+        const auto& x = curve->source().x();
+        const auto& y = curve->source().y();
+        auto p = plane.to_3d(Point_2(x.a0() + x.a1() * sqrt(CGAL::to_double(x.root())),
+                                     y.a0() + y.a1() * sqrt(CGAL::to_double(y.root()))));
+        emit_point(CGAL::to_double(p.x()), CGAL::to_double(p.y()), CGAL::to_double(p.z()));
+        emitted = true;
+      } else if (curve->is_circular()) {
+        emitCircularCurve(plane, curve, emit_point);
+        emitted = true;
+      }
+    }
+    for (auto hole = offset_polygon.holes_begin(); hole != offset_polygon.holes_end(); ++hole) {
+      emit_polygon(true);
+      for (auto curve = hole->curves_begin(); curve != hole->curves_end(); ++curve) {
+        if (curve->is_linear()) {
+          const auto& x = curve->source().x();
+          const auto& y = curve->source().y();
+          auto p = plane.to_3d(Point_2(x.a0() + x.a1() * sqrt(CGAL::to_double(x.root())),
+                                       y.a0() + y.a1() * sqrt(CGAL::to_double(y.root()))));
+          emit_point(CGAL::to_double(p.x()), CGAL::to_double(p.y()), CGAL::to_double(p.z()));
+          emitted = true;
+        } else {
+          emitCircularCurve(plane, curve, emit_point);
+          emitted = true;
+        }
+      }
+    }
+    if (!emitted) {
+      break;
+    }
+    if (step <= 0) {
+      break;
+    }
+    offset += step;
+    if (limit <= 0) {
+      continue;
+    }
+    if (offset >= limit) {
+      break;
     }
   }
 }
@@ -1379,6 +1371,8 @@ void ArrangePaths(double x, double y, double z, double w, emscripten::val fill, 
 
   Plane plane(x, y, z, w);
 
+  std::set<std::vector<Kernel::FT>> segments;
+
   for (;;) {
     Points points;
     auto* p = &points;
@@ -1391,7 +1385,16 @@ void ArrangePaths(double x, double y, double z, double w, emscripten::val fill, 
       point_2s.push_back(plane.to_2d(point));
     }
     for (std::size_t i = 0; i < point_2s.size(); i += 2) {
-      insert(arrangement, Segment_2(point_2s[i], point_2s[i + 1]));
+      if (segments.find({ point_2s[i].x(), point_2s[i].y(), point_2s[i + 1].x(), point_2s[i + 1].y() }) != segments.end()) {
+        continue;
+      }
+      // Add the segment
+      insert(arrangement, Segment_2 { point_2s[i], point_2s[i + 1] });
+
+      // Remember the edges we've inserted.
+      segments.insert({ point_2s[i].x(), point_2s[i].y(), point_2s[i + 1].x(), point_2s[i + 1].y() });
+      // In both directions.
+      segments.insert({ point_2s[i + 1].x(), point_2s[i + 1].y(), point_2s[i].x(), point_2s[i].y() });
     }
   }
 

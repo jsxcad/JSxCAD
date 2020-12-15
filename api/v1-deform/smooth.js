@@ -1,12 +1,12 @@
 import Shape from '@jsxcad/api-v1-shape';
 import { smooth as smoothGeometry } from '@jsxcad/geometry-tagged';
 
-export const smooth = (shape) => {
-  return Shape.fromGeometry(smoothGeometry(shape.toGeometry()));
+export const smooth = (shape, options) => {
+  return Shape.fromGeometry(smoothGeometry(shape.toGeometry(), options));
 };
 
-const smoothMethod = function () {
-  return smooth(this);
+const smoothMethod = function (options) {
+  return smooth(this, options);
 };
 Shape.prototype.smooth = smoothMethod;
 

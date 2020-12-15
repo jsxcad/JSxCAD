@@ -410,7 +410,7 @@ class Ui extends React.PureComponent {
     const data = await read(file);
     const jsEditorData =
       typeof data === 'string' ? data : new TextDecoder('utf8').decode(data);
-    const notebookData = []; // await read(`notebook/${path}`);
+    const notebookData = [];
     this.setState({ file, path, jsEditorData, notebookData });
 
     // Automatically run the notebook on load. The user can hit Stop.
