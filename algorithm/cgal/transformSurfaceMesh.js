@@ -37,3 +37,6 @@ export const transformSurfaceMesh = (mesh, matrix) => {
     hw
   );
 };
+
+export const transformSurfaceMeshByTransform = (mesh, transform) =>
+  getCgal().TransformSurfaceMeshByTransform(mesh, transform);

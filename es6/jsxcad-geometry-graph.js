@@ -1,4 +1,4 @@
-import { fromSurfaceMeshToGraph, fromPointsToAlphaShapeAsSurfaceMesh, fromSurfaceMeshToLazyGraph, fromPointsToConvexHullAsSurfaceMesh, fromPolygonsToSurfaceMesh, fromGraphToSurfaceMesh, fromSurfaceMeshEmitBoundingBox, extrudeSurfaceMesh, arrangePaths, sectionOfSurfaceMesh, differenceOfSurfaceMeshes, extrudeToPlaneOfSurfaceMesh, fromSurfaceMeshToTriangles, fromPointsToSurfaceMesh, outlineOfSurfaceMesh, insetOfPolygon, intersectionOfSurfaceMeshes, offsetOfPolygon, smoothSurfaceMesh, transformSurfaceMesh, unionOfSurfaceMeshes } from './jsxcad-algorithm-cgal.js';
+import { fromSurfaceMeshToGraph, fromPointsToAlphaShapeAsSurfaceMesh, fromSurfaceMeshToLazyGraph, fromPointsToConvexHullAsSurfaceMesh, fromPolygonsToSurfaceMesh, fromGraphToSurfaceMesh, fromSurfaceMeshEmitBoundingBox, extrudeSurfaceMesh, arrangePaths, sectionOfSurfaceMesh, differenceOfSurfaceMeshes, extrudeToPlaneOfSurfaceMesh, fromSurfaceMeshToTriangles, fromPointsToSurfaceMesh, outlineOfSurfaceMesh, insetOfPolygon, intersectionOfSurfaceMeshes, offsetOfPolygon, smoothSurfaceMesh, fromExactToTransform, fromApproximateToTransform, transformSurfaceMeshByTransform, unionOfSurfaceMeshes } from './jsxcad-algorithm-cgal.js';
 import { equals as equals$1, dot, min, max, scale } from './jsxcad-math-vec3.js';
 import { deduplicate as deduplicate$1, isClockwise, flip as flip$1 } from './jsxcad-geometry-path.js';
 import { toPlane, flip } from './jsxcad-math-poly3.js';
@@ -7,6 +7,7 @@ import { canonicalize as canonicalize$1 } from './jsxcad-math-plane.js';
 
 const graphSymbol = Symbol('graph');
 const surfaceMeshSymbol = Symbol('surfaceMeshSymbol');
+const transformSymbol = Symbol('transform');
 
 const create = () => ({ points: [], edges: [], loops: [], faces: [] });
 
@@ -1446,8 +1447,52 @@ const toSolid = (graph) => {
   return solid;
 };
 
-const transform = (matrix, graph) =>
-  fromSurfaceMeshLazy(transformSurfaceMesh(toSurfaceMesh(graph), matrix));
+const transform = (matrix, graph) => {
+  let transform = matrix[transformSymbol];
+  if (transform === undefined) {
+    if (matrix.length > 16) {
+      transform = fromExactToTransform(...matrix.slice(16));
+    } else {
+      const [
+        m00,
+        m10,
+        m20,
+        ,
+        m01,
+        m11,
+        m21,
+        ,
+        m02,
+        m12,
+        m22,
+        ,
+        m03,
+        m13,
+        m23,
+        hw,
+      ] = matrix;
+      transform = fromApproximateToTransform(
+        m00,
+        m01,
+        m02,
+        m03,
+        m10,
+        m11,
+        m12,
+        m13,
+        m20,
+        m21,
+        m22,
+        m23,
+        hw
+      );
+    }
+    matrix[transformSymbol] = transform;
+  }
+  return fromSurfaceMeshLazy(
+    transformSurfaceMeshByTransform(toSurfaceMesh(graph), transform)
+  );
+};
 
 const far$2 = 10000;
 

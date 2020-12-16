@@ -2,10 +2,13 @@
 
 #include <array>
 #include <queue>
+#include <boost/algorithm/string/split.hpp>       
+#include <boost/algorithm/string.hpp>  
 #include <boost/range/adaptor/reversed.hpp>
 
 #include <CGAL/Arr_conic_traits_2.h>
 #include <CGAL/CORE_algebraic_number_traits.h>
+#include <CGAL/IO/io.h>
 #include <CGAL/MP_Float.h>
 #include <CGAL/Quotient.h>
 #include <CGAL/Extended_cartesian.h>
@@ -16,6 +19,7 @@
 #include <CGAL/Nef_polyhedron_3.h>
 
 #include <CGAL/Advancing_front_surface_reconstruction.h>
+#include <CGAL/Aff_transformation_3.h>
 #include <CGAL/Alpha_shape_2.h>
 #include <CGAL/Alpha_shape_3.h>
 #include <CGAL/Alpha_shape_cell_base_3.h>
@@ -36,6 +40,7 @@
 #include <CGAL/Polygon_mesh_processing/orientation.h>
 #include <CGAL/Polygon_mesh_processing/polygon_mesh_to_polygon_soup.h>
 #include <CGAL/Polygon_mesh_processing/polygon_soup_to_polygon_mesh.h>
+#include <CGAL/Polygon_mesh_processing/random_perturbation.h>
 #include <CGAL/Polygon_mesh_processing/remesh.h>
 #include <CGAL/Polygon_mesh_processing/repair_polygon_soup.h>
 #include <CGAL/Polygon_mesh_processing/smooth_mesh.h>
@@ -68,13 +73,14 @@ typedef CGAL::Exact_predicates_exact_constructions_kernel Kernel;
 
 typedef CGAL::Nef_polyhedron_3<Kernel, CGAL::SNC_indexed_items> Nef_polyhedron;
 typedef Kernel::FT FT;
+typedef Kernel::RT RT;
 typedef Kernel::Line_3 Line;
 typedef Kernel::Plane_3 Plane;
 typedef Kernel::Point_2 Point_2;
 typedef Kernel::Point_3 Point;
 typedef Kernel::Vector_2 Vector_2;
 typedef Kernel::Vector_3 Vector;
-typedef CGAL::Aff_transformation_3<Kernel> Transformation;
+typedef Kernel::Aff_transformation_3 Transformation;
 typedef std::vector<Point> Points;
 typedef std::vector<Point_2> Point_2s;
 typedef CGAL::Surface_mesh<Point> Surface_mesh;
@@ -243,26 +249,31 @@ Surface_mesh* SmoothSurfaceMesh(Surface_mesh* input, double edge_length, int ite
 
   Surface_mesh* mesh = new Surface_mesh(*input);
 
-#if 0
-  CGAL::Polygon_mesh_processing::smooth_shape(*mesh, edge_length, CGAL::Polygon_mesh_processing::parameters::number_of_iterations(iterations));
-#endif
-
-#if 0
-  std::vector<Surface_mesh::Face_index>  new_facets;
-  std::vector<Surface_mesh::Vertex_index> new_vertices;
-  CGAL::Polygon_mesh_processing::refine(*mesh,
-                  faces(*mesh),
-                  std::back_inserter(new_facets),
-                  std::back_inserter(new_vertices),
-                  CGAL::Polygon_mesh_processing::parameters::density_control_factor(2.));
-#endif
-
 #if 1
+  CGAL::Polygon_mesh_processing::triangulate_faces(*mesh);
+  CGAL::Polygon_mesh_processing::split_long_edges(edges(*mesh), edge_length, *mesh);
+
+  // Constrain edges with a dihedral angle over 60°
+  typedef boost::property_map<Surface_mesh, CGAL::edge_is_feature_t>::type EIFMap;
+  EIFMap eif = get(CGAL::edge_is_feature, *mesh);
+  CGAL::Polygon_mesh_processing::detect_sharp_edges(*mesh, 10, eif);
+
+
   CGAL::Polygon_mesh_processing::isotropic_remeshing(
     mesh->faces(),
     edge_length,
     *mesh,
-    CGAL::Polygon_mesh_processing::parameters::number_of_iterations(iterations));
+    CGAL::Polygon_mesh_processing::parameters::number_of_iterations(iterations)
+        .protect_constraints(true)
+        .edge_is_constrained_map(eif));
+
+
+  // CGAL::Polygon_mesh_processing::random_perturbation(vertices(*mesh), *mesh, 1, CGAL::Polygon_mesh_processing::parameters::all_default());
+
+#endif
+
+#if 0
+  CGAL::Polygon_mesh_processing::triangulate_faces(*mesh);
 #endif
 
   return mesh;
@@ -271,6 +282,12 @@ Surface_mesh* SmoothSurfaceMesh(Surface_mesh* input, double edge_length, int ite
 Surface_mesh* TransformSurfaceMesh(Surface_mesh* input, double m00, double m01, double m02, double m03, double m10, double m11, double m12, double m13, double m20, double m21, double m22, double m23, double hw) {
   Surface_mesh* output = new Surface_mesh(*input);
   CGAL::Polygon_mesh_processing::transform(Transformation(FT(m00), FT(m01), FT(m02), FT(m03), FT(m10), FT(m11), FT(m12), FT(m13), FT(m20), FT(m21), FT(m22), FT(m23), FT(hw)), *output, CGAL::parameters::all_default());
+  return output;
+}
+
+Surface_mesh* TransformSurfaceMeshByTransform(Surface_mesh* input, Transformation* transform) {
+  Surface_mesh* output = new Surface_mesh(*input);
+  CGAL::Polygon_mesh_processing::transform(*transform, *output, CGAL::parameters::all_default());
   return output;
 }
 
@@ -993,9 +1010,9 @@ void emitCircularCurve(const Plane& plane, Curve& curve, emscripten::val& emit_p
       emit_point(CGAL::to_double(p.x()), CGAL::to_double(p.y()), CGAL::to_double(p.z()));
     }
     if (target_angle > source_angle) {
-      target_angle -= M_PI * 2;
+      target_angle -= CGAL_PI * 2;
     }
-    const double step = M_PI / 32.0;
+    const double step = CGAL_PI / 32.0;
     double ox = sx - cx;
     double oy = sy - cy;
     double angle_limit = source_angle - target_angle;
@@ -1014,9 +1031,9 @@ void emitCircularCurve(const Plane& plane, Curve& curve, emscripten::val& emit_p
       emit_point(CGAL::to_double(p.x()), CGAL::to_double(p.y()), CGAL::to_double(p.z()));
     }
     if (target_angle < source_angle) {
-      target_angle += M_PI * 2;
+      target_angle += CGAL_PI * 2;
     }
-    const double step = M_PI / 32.0;
+    const double step = CGAL_PI / 32.0;
     double ox = sx - cx;
     double oy = sy - cy;
     double angle_limit = target_angle - source_angle;
@@ -1174,7 +1191,7 @@ void InsetOfPolygon(double initial, double step, double limit, double x, double 
     CGAL::General_polygon_set_2<Traits> boundaries;
 
     Polygon_2 tool;
-    for (double a = 0; a < M_PI * 2; a += M_PI / 16) {
+    for (double a = 0; a < CGAL_PI * 2; a += CGAL_PI / 16) {
       tool.push_back(Point_2(sin(-a) * offset, cos(-a) * offset));
     }
     if (tool.orientation() == CGAL::Sign::NEGATIVE) {
@@ -1498,11 +1515,145 @@ void Surface_mesh__bbox(Surface_mesh* mesh, emscripten::val emit) {
   emit(box.xmin(), box.ymin(), box.zmin(), box.xmax(), box.ymax(), box.zmax());
 }
 
+Transformation* Transformation__identity() {
+  Transformation* out = new Transformation(CGAL::IDENTITY);
+  return out;
+}
+
+void Transformation__to_exact(Transformation* t, emscripten::val put) {
+  for (int i = 0; i < 3; i++) {
+    for (int j = 0; j < 4; j++) { 
+      FT value = t->cartesian(i, j);
+      std::ostringstream serialization;
+      serialization << value;
+      put(serialization.str());
+    }
+  }
+
+  FT value = t->cartesian(3, 3);
+  std::ostringstream serialization;
+  serialization << value;
+  put(serialization.str());
+}
+
+void Transformation__to_approximate(Transformation* t, emscripten::val put) {
+  for (int i = 0; i < 3; i++) {
+    for (int j = 0; j < 4; j++) { 
+      FT value = t->cartesian(i, j);
+      put(CGAL::to_double(value));
+    }
+  }
+
+  FT value = t->cartesian(3, 3);
+  put(CGAL::to_double(value));
+}
+
+double get_double(emscripten::val get) {
+  return get().as<double>();
+}
+
+std::string get_string(emscripten::val get) {
+  return get().as<std::string>();
+}
+
+Transformation* Transformation__from_exact(emscripten::val get) {
+  using CGAL::Gmpq;
+  Transformation* t = new Transformation(
+    Gmpq(get_string(get)), Gmpq(get_string(get)), Gmpq(get_string(get)), Gmpq(get_string(get)),
+    Gmpq(get_string(get)), Gmpq(get_string(get)), Gmpq(get_string(get)), Gmpq(get_string(get)),
+    Gmpq(get_string(get)), Gmpq(get_string(get)), Gmpq(get_string(get)), Gmpq(get_string(get)),
+    Gmpq(get_string(get)));
+  return t;
+}
+
+Transformation* Transformation__from_approximate(emscripten::val get) {
+  using CGAL::Gmpq;
+  Transformation* t = new Transformation(
+    Gmpq(get_double(get)), Gmpq(get_double(get)), Gmpq(get_double(get)), Gmpq(get_double(get)),
+    Gmpq(get_double(get)), Gmpq(get_double(get)), Gmpq(get_double(get)), Gmpq(get_double(get)),
+    Gmpq(get_double(get)), Gmpq(get_double(get)), Gmpq(get_double(get)), Gmpq(get_double(get)),
+    Gmpq(get_double(get)));
+  return t;
+}
+
+Transformation* Transformation__translate(Transformation *in, double x, double y, double z) {
+  Transformation t(CGAL::TRANSLATION, Vector(x, y, z));
+  Transformation* out = new Transformation(*in * t);
+  return out;
+}
+
+Transformation* Transformation__scale(Transformation *in, double x, double y, double z) {
+  Transformation t(
+    x, 0, 0, 0,
+    0, y, 0, 0,
+    0, 0, z, 0,
+    1);
+  Transformation* out = new Transformation(*in * t);
+  return out;
+}
+
+void compute_angle(double a, RT& sin_alpha, RT& cos_alpha, RT& w) {
+  // Convert angle to radians.
+  double radians = a * M_PI / 180.0;
+  double sin_double = std::sin(radians);
+  double cos_double = std::cos(radians);
+  CGAL::rational_rotation_approximation(radians, sin_alpha, cos_alpha, w, RT(1), RT(1000000));
+}
+
+Transformation* Transformation__rotate_x(Transformation *in, double a) {
+  RT sin_alpha, cos_alpha, w;
+  compute_angle(a, sin_alpha, cos_alpha, w);
+  double r = a * CGAL_PI / 180;
+  Transformation t(
+      1, 0, 0, 0,
+      0, cos_alpha, -sin_alpha, 0,
+      0, sin_alpha, cos_alpha,  0,
+      w);
+  Transformation* out = new Transformation(*in * t);
+  return out;
+}
+
+Transformation* Transformation__rotate_y(Transformation *in, double a) {
+  RT sin_alpha, cos_alpha, w;
+  compute_angle(a, sin_alpha, cos_alpha, w);
+  Transformation t(
+      cos_alpha, 0, -sin_alpha, 0,
+      0, 1, 0, 0,
+      sin_alpha, 0, cos_alpha,  0,
+      w);
+  Transformation* out = new Transformation(*in * t);
+  return out;
+}
+
+Transformation* Transformation__rotate_z(Transformation *in, double a) {
+  RT sin_alpha, cos_alpha, w;
+  compute_angle(a, sin_alpha, cos_alpha, w);
+  Transformation t(
+      cos_alpha, sin_alpha, 0, 0,
+      -sin_alpha, cos_alpha, 0, 0,
+      0, 0, 1,  0,
+      w);
+  Transformation* out = new Transformation(*in * t);
+  return out;
+}
+
 using emscripten::select_const;
 using emscripten::select_overload;
 
 EMSCRIPTEN_BINDINGS(module) {
   emscripten::class_<FT>("FT").constructor<>();
+
+  emscripten::class_<Transformation>("Transformation").constructor<>();
+  emscripten::function("Transformation__identity", &Transformation__identity, emscripten::allow_raw_pointers());
+  emscripten::function("Transformation__from_approximate", &Transformation__from_approximate, emscripten::allow_raw_pointers());
+  emscripten::function("Transformation__from_exact", &Transformation__from_exact, emscripten::allow_raw_pointers());
+  emscripten::function("Transformation__to_approximate", &Transformation__to_approximate, emscripten::allow_raw_pointers());
+  emscripten::function("Transformation__to_exact", &Transformation__to_exact, emscripten::allow_raw_pointers());
+  emscripten::function("Transformation__translate", &Transformation__translate, emscripten::allow_raw_pointers());
+  emscripten::function("Transformation__scale", &Transformation__scale, emscripten::allow_raw_pointers());
+  emscripten::function("Transformation__rotate_x", &Transformation__rotate_x, emscripten::allow_raw_pointers());
+  emscripten::function("Transformation__rotate_y", &Transformation__rotate_y, emscripten::allow_raw_pointers());
+  emscripten::function("Transformation__rotate_z", &Transformation__rotate_z, emscripten::allow_raw_pointers());
 
   emscripten::class_<Polygon_2>("Polygon_2").constructor<>();
   emscripten::class_<Polygon_with_holes_2>("Polygon_with_holes_2").constructor<>();
@@ -1631,6 +1782,7 @@ EMSCRIPTEN_BINDINGS(module) {
   emscripten::function("FromPointsToSurfaceMesh", &FromPointsToSurfaceMesh, emscripten::allow_raw_pointers());
   emscripten::function("SmoothSurfaceMesh", &SmoothSurfaceMesh, emscripten::allow_raw_pointers());
   emscripten::function("TransformSurfaceMesh", &TransformSurfaceMesh, emscripten::allow_raw_pointers());
+  emscripten::function("TransformSurfaceMeshByTransform", &TransformSurfaceMeshByTransform, emscripten::allow_raw_pointers());
   emscripten::function("FromSurfaceMeshToPolygonSoup", &FromSurfaceMeshToPolygonSoup, emscripten::allow_raw_pointers());
   emscripten::function("ComputeConvexHullAsSurfaceMesh", &ComputeConvexHullAsSurfaceMesh, emscripten::allow_raw_pointers());
   emscripten::function("ComputeAlphaShapeAsSurfaceMesh", &ComputeAlphaShapeAsSurfaceMesh, emscripten::allow_raw_pointers());
