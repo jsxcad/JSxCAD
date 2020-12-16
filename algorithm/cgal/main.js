@@ -1,3 +1,14 @@
+export {
+  fromApproximateToTransform,
+  fromExactToTransform,
+  identity,
+  rotateX,
+  rotateY,
+  rotateZ,
+  scale,
+  translate,
+} from './transform.js';
+
 export { arrangePaths } from './arrangePaths.js';
 export { differenceOfNefPolyhedrons } from './differenceOfNefPolyhedrons.js';
 export { differenceOfSurfaceMeshes } from './differenceOfSurfaceMeshes.js';
@@ -32,6 +43,9 @@ export { sectionOfNefPolyhedron } from './sectionOfNefPolyhedron.js';
 export { sectionOfSurfaceMesh } from './sectionOfSurfaceMesh.js';
 export { skeletalInsetOfPolygon } from './skeletalInsetOfPolygon.js';
 export { smoothSurfaceMesh } from './smoothSurfaceMesh.js';
-export { transformSurfaceMesh } from './transformSurfaceMesh.js';
+export {
+  transformSurfaceMesh,
+  transformSurfaceMeshByTransform,
+} from './transformSurfaceMesh.js';
 export { unionOfNefPolyhedrons } from './unionOfNefPolyhedrons.js';
 export { unionOfSurfaceMeshes } from './unionOfSurfaceMeshes.js';

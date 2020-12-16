@@ -1,5 +1,5 @@
-import { equals, dot } from './jsxcad-math-vec3.js';
 import { emit, log, onBoot } from './jsxcad-sys.js';
+import { equals, dot } from './jsxcad-math-vec3.js';
 import { getEdges } from './jsxcad-geometry-path.js';
 import { fromPolygon } from './jsxcad-math-plane.js';
 
@@ -830,8 +830,8 @@ var Module = (function () {
     }
     var wasmMemory;
     var wasmTable = new WebAssembly.Table({
-      initial: 2226,
-      maximum: 2226,
+      initial: 2260,
+      maximum: 2260,
       element: 'anyfunc',
     });
     var ABORT = false;
@@ -1099,9 +1099,9 @@ var Module = (function () {
       Module['HEAPF32'] = HEAPF32 = new Float32Array(buf);
       Module['HEAPF64'] = HEAPF64 = new Float64Array(buf);
     }
-    var STACK_BASE = 5562096,
-      STACK_MAX = 319216,
-      DYNAMIC_BASE = 5562096;
+    var STACK_BASE = 5563488,
+      STACK_MAX = 320608,
+      DYNAMIC_BASE = 5563488;
     assert(STACK_BASE % 16 === 0, 'stack must start aligned');
     assert(DYNAMIC_BASE % 16 === 0, 'heap must start aligned');
     var TOTAL_STACK = 5242880;
@@ -6610,6 +6610,11 @@ var Module = (function () {
       var rv = handle.apply(undefined, args);
       return __emval_register(rv);
     }
+    function __emval_incref(handle) {
+      if (handle > 4) {
+        emval_handle_array[handle].refcount += 1;
+      }
+    }
     function __emval_run_destructors(handle) {
       var destructors = emval_handle_array[handle].value;
       runDestructors(destructors);
@@ -7308,6 +7313,7 @@ var Module = (function () {
       _emval_as: __emval_as,
       _emval_call: __emval_call,
       _emval_decref: __emval_decref,
+      _emval_incref: __emval_incref,
       _emval_run_destructors: __emval_run_destructors,
       abort: _abort,
       emscripten_memcpy_big: _emscripten_memcpy_big,
@@ -9516,6 +9522,29 @@ const getCgal = () => cgal;
 
 onBoot(initCgal);
 
+const identity = () => getCgal().Transformation__identity();
+
+const fromExactToTransform = (...exact) =>
+  getCgal().Transformation__from_exact(() => exact.shift());
+
+const fromApproximateToTransform = (...approximate) =>
+  getCgal().Transformation__from_approximate(() => approximate.shift());
+
+const rotateX = (transform, angle) =>
+  getCgal().Transformation__rotate_x(transform, angle);
+
+const rotateY = (transform, angle) =>
+  getCgal().Transformation__rotate_y(transform, angle);
+
+const rotateZ = (transform, angle) =>
+  getCgal().Transformation__rotate_z(transform, angle);
+
+const translate = (transform, x = 0, y = 0, z = 0) =>
+  getCgal().Transformation__translate(transform, x, y, z);
+
+const scale = (transform, x = 0, y = 0, z = 0) =>
+  getCgal().Transformation__scale(transform, x, y, z);
+
 const X = 0;
 const Y = 1;
 const Z = 2;
@@ -10297,10 +10326,13 @@ const transformSurfaceMesh = (mesh, matrix) => {
   );
 };
 
+const transformSurfaceMeshByTransform = (mesh, transform) =>
+  getCgal().TransformSurfaceMeshByTransform(mesh, transform);
+
 const unionOfNefPolyhedrons = (a, b) =>
   getCgal().UnionOfNefPolyhedrons(a, b);
 
 const unionOfSurfaceMeshes = (a, b) =>
   getCgal().UnionOfSurfaceMeshes(a, b);
 
-export { arrangePaths, differenceOfNefPolyhedrons, differenceOfSurfaceMeshes, extrudeSurfaceMesh, extrudeToPlaneOfSurfaceMesh, fromGraphToNefPolyhedron, fromGraphToSurfaceMesh, fromNefPolyhedronFacetsToGraph, fromNefPolyhedronShellsToGraph, fromNefPolyhedronToPolygons, fromNefPolyhedronToSurfaceMesh, fromNefPolyhedronToTriangles, fromPointsToAlphaShape2AsPolygonSegments, fromPointsToAlphaShapeAsSurfaceMesh, fromPointsToConvexHullAsSurfaceMesh, fromPointsToSurfaceMesh, fromPolygonsToNefPolyhedron, fromPolygonsToSurfaceMesh, fromSurfaceMeshEmitBoundingBox, fromSurfaceMeshToGraph, fromSurfaceMeshToLazyGraph, fromSurfaceMeshToNefPolyhedron, fromSurfaceMeshToPolygons, fromSurfaceMeshToTriangles, initCgal, insetOfPolygon, intersectionOfNefPolyhedrons, intersectionOfSurfaceMeshes, offsetOfPolygon, outlineOfSurfaceMesh, sectionOfNefPolyhedron, sectionOfSurfaceMesh, skeletalInsetOfPolygon, smoothSurfaceMesh, transformSurfaceMesh, unionOfNefPolyhedrons, unionOfSurfaceMeshes };
+export { arrangePaths, differenceOfNefPolyhedrons, differenceOfSurfaceMeshes, extrudeSurfaceMesh, extrudeToPlaneOfSurfaceMesh, fromApproximateToTransform, fromExactToTransform, fromGraphToNefPolyhedron, fromGraphToSurfaceMesh, fromNefPolyhedronFacetsToGraph, fromNefPolyhedronShellsToGraph, fromNefPolyhedronToPolygons, fromNefPolyhedronToSurfaceMesh, fromNefPolyhedronToTriangles, fromPointsToAlphaShape2AsPolygonSegments, fromPointsToAlphaShapeAsSurfaceMesh, fromPointsToConvexHullAsSurfaceMesh, fromPointsToSurfaceMesh, fromPolygonsToNefPolyhedron, fromPolygonsToSurfaceMesh, fromSurfaceMeshEmitBoundingBox, fromSurfaceMeshToGraph, fromSurfaceMeshToLazyGraph, fromSurfaceMeshToNefPolyhedron, fromSurfaceMeshToPolygons, fromSurfaceMeshToTriangles, identity, initCgal, insetOfPolygon, intersectionOfNefPolyhedrons, intersectionOfSurfaceMeshes, offsetOfPolygon, outlineOfSurfaceMesh, rotateX, rotateY, rotateZ, scale, sectionOfNefPolyhedron, sectionOfSurfaceMesh, skeletalInsetOfPolygon, smoothSurfaceMesh, transformSurfaceMesh, transformSurfaceMeshByTransform, translate, unionOfNefPolyhedrons, unionOfSurfaceMeshes };
