@@ -830,8 +830,8 @@ var Module = (function () {
     }
     var wasmMemory;
     var wasmTable = new WebAssembly.Table({
-      initial: 2260,
-      maximum: 2260,
+      initial: 2262,
+      maximum: 2262,
       element: 'anyfunc',
     });
     var ABORT = false;
@@ -1099,9 +1099,9 @@ var Module = (function () {
       Module['HEAPF32'] = HEAPF32 = new Float32Array(buf);
       Module['HEAPF64'] = HEAPF64 = new Float64Array(buf);
     }
-    var STACK_BASE = 5563488,
-      STACK_MAX = 320608,
-      DYNAMIC_BASE = 5563488;
+    var STACK_BASE = 5563504,
+      STACK_MAX = 320624,
+      DYNAMIC_BASE = 5563504;
     assert(STACK_BASE % 16 === 0, 'stack must start aligned');
     assert(DYNAMIC_BASE % 16 === 0, 'heap must start aligned');
     var TOTAL_STACK = 5242880;
@@ -9522,28 +9522,133 @@ const getCgal = () => cgal;
 
 onBoot(initCgal);
 
-const identity = () => getCgal().Transformation__identity();
+const M00 = 0;
+const M01 = 1;
+const M02 = 2;
+const M03 = 3;
+const M10 = 4;
+const M11 = 5;
+const M12 = 6;
+const M13 = 7;
+const M20 = 8;
+const M21 = 9;
+const M22 = 10;
+const M23 = 11;
+const HW = 12;
 
-const fromExactToTransform = (...exact) =>
+const transformSymbol = Symbol('transform');
+
+const toJsTransformFromCgalTransform = (cgalTransform) => {
+  const a = [];
+  getCgal().Transformation__to_approximate(cgalTransform, (value) =>
+    a.push(value)
+  );
+  const jsTransform = [
+    a[M00],
+    a[M10],
+    a[M20],
+    0,
+    a[M01],
+    a[M11],
+    a[M21],
+    0,
+    a[M02],
+    a[M12],
+    a[M22],
+    0,
+    a[M03],
+    a[M13],
+    a[M23],
+    a[HW],
+  ];
+  getCgal().Transformation__to_exact(cgalTransform, (value) =>
+    jsTransform.push(value)
+  );
+  jsTransform[transformSymbol] = cgalTransform;
+  return jsTransform;
+};
+
+const toCgalTransformFromJsTransform = (jsTransform) => {
+  let cgalTransform = jsTransform[transformSymbol];
+  if (cgalTransform === undefined) {
+    if (jsTransform.length > 16) {
+      cgalTransform = fromExactToCgalTransform(...jsTransform.slice(16));
+    } else {
+      const [
+        m00,
+        m10,
+        m20,
+        ,
+        m01,
+        m11,
+        m21,
+        ,
+        m02,
+        m12,
+        m22,
+        ,
+        m03,
+        m13,
+        m23,
+        hw,
+      ] = jsTransform;
+      cgalTransform = fromApproximateToCgalTransform(
+        m00,
+        m01,
+        m02,
+        m03,
+        m10,
+        m11,
+        m12,
+        m13,
+        m20,
+        m21,
+        m22,
+        m23,
+        hw
+      );
+    }
+    jsTransform[transformSymbol] = cgalTransform;
+  }
+  return cgalTransform;
+};
+
+const composeTransforms = (a, b) => {
+  return toJsTransformFromCgalTransform(
+    getCgal().Transformation__compose(
+      toCgalTransformFromJsTransform(a),
+      toCgalTransformFromJsTransform(b)
+    )
+  );
+};
+
+const fromExactToCgalTransform = (...exact) =>
   getCgal().Transformation__from_exact(() => exact.shift());
 
-const fromApproximateToTransform = (...approximate) =>
+const fromApproximateToCgalTransform = (...approximate) =>
   getCgal().Transformation__from_approximate(() => approximate.shift());
 
-const rotateX = (transform, angle) =>
-  getCgal().Transformation__rotate_x(transform, angle);
+const fromIdentityToCgalTransform = () =>
+  toJsTransformFromCgalTransform(getCgal().Transformation__identity());
 
-const rotateY = (transform, angle) =>
-  getCgal().Transformation__rotate_y(transform, angle);
+const fromRotateXToTransform = (angle) => {
+  const t = toJsTransformFromCgalTransform(
+    getCgal().Transformation__rotate_x(angle)
+  );
+  return t;
+};
 
-const rotateZ = (transform, angle) =>
-  getCgal().Transformation__rotate_z(transform, angle);
+const fromRotateYToTransform = (angle) =>
+  toJsTransformFromCgalTransform(getCgal().Transformation__rotate_y(angle));
 
-const translate = (transform, x = 0, y = 0, z = 0) =>
-  getCgal().Transformation__translate(transform, x, y, z);
+const fromRotateZToTransform = (angle) =>
+  toJsTransformFromCgalTransform(getCgal().Transformation__rotate_z(angle));
 
-const scale = (transform, x = 0, y = 0, z = 0) =>
-  getCgal().Transformation__scale(transform, x, y, z);
+const fromTranslateToTransform = (x = 0, y = 0, z = 0) =>
+  toJsTransformFromCgalTransform(getCgal().Transformation__translate(x, y, z));
+
+const fromScaleToTransform = (x = 0, y = 0, z = 0) =>
+  toJsTransformFromCgalTransform(getCgal().Transformation__scale(x, y, z));
 
 const X = 0;
 const Y = 1;
@@ -10288,46 +10393,11 @@ const smoothSurfaceMesh = (
   { targetLength = 1, iterations = 1 } = {}
 ) => getCgal().SmoothSurfaceMesh(mesh, targetLength, iterations);
 
-const transformSurfaceMesh = (mesh, matrix) => {
-  const [
-    m00,
-    m10,
-    m20,
-    ,
-    m01,
-    m11,
-    m21,
-    ,
-    m02,
-    m12,
-    m22,
-    ,
-    m03,
-    m13,
-    m23,
-    hw,
-  ] = matrix;
-
-  return getCgal().TransformSurfaceMesh(
+const transformSurfaceMesh = (mesh, jsTransform) =>
+  getCgal().TransformSurfaceMeshByTransform(
     mesh,
-    m00,
-    m01,
-    m02,
-    m03,
-    m10,
-    m11,
-    m12,
-    m13,
-    m20,
-    m21,
-    m22,
-    m23,
-    hw
+    toCgalTransformFromJsTransform(jsTransform)
   );
-};
-
-const transformSurfaceMeshByTransform = (mesh, transform) =>
-  getCgal().TransformSurfaceMeshByTransform(mesh, transform);
 
 const unionOfNefPolyhedrons = (a, b) =>
   getCgal().UnionOfNefPolyhedrons(a, b);
@@ -10335,4 +10405,4 @@ const unionOfNefPolyhedrons = (a, b) =>
 const unionOfSurfaceMeshes = (a, b) =>
   getCgal().UnionOfSurfaceMeshes(a, b);
 
-export { arrangePaths, differenceOfNefPolyhedrons, differenceOfSurfaceMeshes, extrudeSurfaceMesh, extrudeToPlaneOfSurfaceMesh, fromApproximateToTransform, fromExactToTransform, fromGraphToNefPolyhedron, fromGraphToSurfaceMesh, fromNefPolyhedronFacetsToGraph, fromNefPolyhedronShellsToGraph, fromNefPolyhedronToPolygons, fromNefPolyhedronToSurfaceMesh, fromNefPolyhedronToTriangles, fromPointsToAlphaShape2AsPolygonSegments, fromPointsToAlphaShapeAsSurfaceMesh, fromPointsToConvexHullAsSurfaceMesh, fromPointsToSurfaceMesh, fromPolygonsToNefPolyhedron, fromPolygonsToSurfaceMesh, fromSurfaceMeshEmitBoundingBox, fromSurfaceMeshToGraph, fromSurfaceMeshToLazyGraph, fromSurfaceMeshToNefPolyhedron, fromSurfaceMeshToPolygons, fromSurfaceMeshToTriangles, identity, initCgal, insetOfPolygon, intersectionOfNefPolyhedrons, intersectionOfSurfaceMeshes, offsetOfPolygon, outlineOfSurfaceMesh, rotateX, rotateY, rotateZ, scale, sectionOfNefPolyhedron, sectionOfSurfaceMesh, skeletalInsetOfPolygon, smoothSurfaceMesh, transformSurfaceMesh, transformSurfaceMeshByTransform, translate, unionOfNefPolyhedrons, unionOfSurfaceMeshes };
+export { arrangePaths, composeTransforms, differenceOfNefPolyhedrons, differenceOfSurfaceMeshes, extrudeSurfaceMesh, extrudeToPlaneOfSurfaceMesh, fromApproximateToCgalTransform, fromExactToCgalTransform, fromGraphToNefPolyhedron, fromGraphToSurfaceMesh, fromIdentityToCgalTransform, fromNefPolyhedronFacetsToGraph, fromNefPolyhedronShellsToGraph, fromNefPolyhedronToPolygons, fromNefPolyhedronToSurfaceMesh, fromNefPolyhedronToTriangles, fromPointsToAlphaShape2AsPolygonSegments, fromPointsToAlphaShapeAsSurfaceMesh, fromPointsToConvexHullAsSurfaceMesh, fromPointsToSurfaceMesh, fromPolygonsToNefPolyhedron, fromPolygonsToSurfaceMesh, fromRotateXToTransform, fromRotateYToTransform, fromRotateZToTransform, fromScaleToTransform, fromSurfaceMeshEmitBoundingBox, fromSurfaceMeshToGraph, fromSurfaceMeshToLazyGraph, fromSurfaceMeshToNefPolyhedron, fromSurfaceMeshToPolygons, fromSurfaceMeshToTriangles, fromTranslateToTransform, initCgal, insetOfPolygon, intersectionOfNefPolyhedrons, intersectionOfSurfaceMeshes, offsetOfPolygon, outlineOfSurfaceMesh, sectionOfNefPolyhedron, sectionOfSurfaceMesh, skeletalInsetOfPolygon, smoothSurfaceMesh, toCgalTransformFromJsTransform, transformSurfaceMesh, unionOfNefPolyhedrons, unionOfSurfaceMeshes };

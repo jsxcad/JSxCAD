@@ -1,12 +1,14 @@
 export {
-  fromApproximateToTransform,
-  fromExactToTransform,
-  identity,
-  rotateX,
-  rotateY,
-  rotateZ,
-  scale,
-  translate,
+  composeTransforms,
+  fromApproximateToCgalTransform,
+  fromExactToCgalTransform,
+  fromIdentityToCgalTransform,
+  fromRotateXToTransform,
+  fromRotateYToTransform,
+  fromRotateZToTransform,
+  fromScaleToTransform,
+  fromTranslateToTransform,
+  toCgalTransformFromJsTransform,
 } from './transform.js';
 
 export { arrangePaths } from './arrangePaths.js';
@@ -43,9 +45,6 @@ export { sectionOfNefPolyhedron } from './sectionOfNefPolyhedron.js';
 export { sectionOfSurfaceMesh } from './sectionOfSurfaceMesh.js';
 export { skeletalInsetOfPolygon } from './skeletalInsetOfPolygon.js';
 export { smoothSurfaceMesh } from './smoothSurfaceMesh.js';
-export {
-  transformSurfaceMesh,
-  transformSurfaceMeshByTransform,
-} from './transformSurfaceMesh.js';
+export { transformSurfaceMesh } from './transformSurfaceMesh.js';
 export { unionOfNefPolyhedrons } from './unionOfNefPolyhedrons.js';
 export { unionOfSurfaceMeshes } from './unionOfSurfaceMeshes.js';

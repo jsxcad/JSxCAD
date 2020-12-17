@@ -1195,7 +1195,7 @@ void InsetOfPolygon(double initial, double step, double limit, double x, double 
       tool.push_back(Point_2(sin(-a) * offset, cos(-a) * offset));
     }
     if (tool.orientation() == CGAL::Sign::NEGATIVE) {
-std::cout << "Reverse tool" << std::endl;
+      std::cout << "Reverse tool" << std::endl;
       tool.reverse_orientation();
     }
 
@@ -1516,8 +1516,11 @@ void Surface_mesh__bbox(Surface_mesh* mesh, emscripten::val emit) {
 }
 
 Transformation* Transformation__identity() {
-  Transformation* out = new Transformation(CGAL::IDENTITY);
-  return out;
+  return new Transformation(CGAL::IDENTITY);
+}
+
+Transformation* Transformation__compose(Transformation* a, Transformation* b) {
+  return new Transformation(*a * *b);
 }
 
 void Transformation__to_exact(Transformation* t, emscripten::val put) {
@@ -1576,65 +1579,53 @@ Transformation* Transformation__from_approximate(emscripten::val get) {
   return t;
 }
 
-Transformation* Transformation__translate(Transformation *in, double x, double y, double z) {
-  Transformation t(CGAL::TRANSLATION, Vector(x, y, z));
-  Transformation* out = new Transformation(*in * t);
-  return out;
+Transformation* Transformation__translate(double x, double y, double z) {
+  return new Transformation(CGAL::TRANSLATION, Vector(x, y, z));
 }
 
-Transformation* Transformation__scale(Transformation *in, double x, double y, double z) {
-  Transformation t(
+Transformation* Transformation__scale(double x, double y, double z) {
+  return new Transformation(
     x, 0, 0, 0,
     0, y, 0, 0,
     0, 0, z, 0,
     1);
-  Transformation* out = new Transformation(*in * t);
-  return out;
 }
 
 void compute_angle(double a, RT& sin_alpha, RT& cos_alpha, RT& w) {
   // Convert angle to radians.
   double radians = a * M_PI / 180.0;
-  double sin_double = std::sin(radians);
-  double cos_double = std::cos(radians);
-  CGAL::rational_rotation_approximation(radians, sin_alpha, cos_alpha, w, RT(1), RT(1000000));
+  CGAL::rational_rotation_approximation(radians, sin_alpha, cos_alpha, w, RT(1), RT(1000));
 }
 
-Transformation* Transformation__rotate_x(Transformation *in, double a) {
+Transformation* Transformation__rotate_x(double a) {
   RT sin_alpha, cos_alpha, w;
   compute_angle(a, sin_alpha, cos_alpha, w);
   double r = a * CGAL_PI / 180;
-  Transformation t(
-      1, 0, 0, 0,
+  return new Transformation(
+      w, 0, 0, 0,
       0, cos_alpha, -sin_alpha, 0,
       0, sin_alpha, cos_alpha,  0,
       w);
-  Transformation* out = new Transformation(*in * t);
-  return out;
 }
 
-Transformation* Transformation__rotate_y(Transformation *in, double a) {
+Transformation* Transformation__rotate_y(double a) {
   RT sin_alpha, cos_alpha, w;
   compute_angle(a, sin_alpha, cos_alpha, w);
-  Transformation t(
+  return new Transformation(
       cos_alpha, 0, -sin_alpha, 0,
-      0, 1, 0, 0,
+      0, w, 0, 0,
       sin_alpha, 0, cos_alpha,  0,
       w);
-  Transformation* out = new Transformation(*in * t);
-  return out;
 }
 
-Transformation* Transformation__rotate_z(Transformation *in, double a) {
+Transformation* Transformation__rotate_z(double a) {
   RT sin_alpha, cos_alpha, w;
   compute_angle(a, sin_alpha, cos_alpha, w);
-  Transformation t(
+  return new Transformation(
       cos_alpha, sin_alpha, 0, 0,
       -sin_alpha, cos_alpha, 0, 0,
-      0, 0, 1,  0,
+      0, 0, w,  0,
       w);
-  Transformation* out = new Transformation(*in * t);
-  return out;
 }
 
 using emscripten::select_const;
@@ -1644,6 +1635,7 @@ EMSCRIPTEN_BINDINGS(module) {
   emscripten::class_<FT>("FT").constructor<>();
 
   emscripten::class_<Transformation>("Transformation").constructor<>();
+  emscripten::function("Transformation__compose", &Transformation__compose, emscripten::allow_raw_pointers());
   emscripten::function("Transformation__identity", &Transformation__identity, emscripten::allow_raw_pointers());
   emscripten::function("Transformation__from_approximate", &Transformation__from_approximate, emscripten::allow_raw_pointers());
   emscripten::function("Transformation__from_exact", &Transformation__from_exact, emscripten::allow_raw_pointers());

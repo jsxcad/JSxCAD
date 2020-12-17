@@ -1,26 +1,9 @@
 import { Shape } from './Shape.js';
-import { fromYRotation } from '@jsxcad/math-mat4';
-
-/**
- *
- * # Rotate Y
- *
- * Rotates the shape around the Y axis.
- *
- * ::: illustration { "view": { "position": [40, 40, 40] } }
- * ```
- * Square(10)
- * ```
- * :::
- * ::: illustration { "view": { "position": [40, 40, 40] } }
- * ```
- * Square(10).rotateY(90)
- * ```
- * :::
- **/
+// import { fromYRotation } from '@jsxcad/math-mat4';
+import { fromRotateYToTransform } from '@jsxcad/algorithm-cgal';
 
 export const rotateY = (shape, angle) =>
-  shape.transform(fromYRotation(angle * 0.017453292519943295));
+  shape.transform(fromRotateYToTransform(angle));
 
 const rotateYMethod = function (angle) {
   return rotateY(this, angle);

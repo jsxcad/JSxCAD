@@ -25,6 +25,7 @@
   "license": "MIT",
   "dependencies": {
     "@jsxcad/cache": "^0.0.79",
+    "@jsxcad/algorithm-cgal": "^0.0.79",
     "@jsxcad/algorithm-quantize": "^0.0.79",
     "@jsxcad/geometry-bsp": "^0.0.79",
     "@jsxcad/geometry-graph": "^0.0.79",
