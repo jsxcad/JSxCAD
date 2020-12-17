@@ -100,9 +100,6 @@ export class Shape {
   }
 
   transform(matrix) {
-    if (matrix.some((item) => typeof item !== 'number' || isNaN(item))) {
-      throw Error('die: matrix is malformed');
-    }
     return fromGeometry(transform(matrix, this.toGeometry()), this.context);
   }
 

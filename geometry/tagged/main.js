@@ -95,6 +95,7 @@ export { taggedPoints } from './taggedPoints.js';
 export { taggedSketch } from './taggedSketch.js';
 export { taggedSolid } from './taggedSolid.js';
 export { taggedSurface } from './taggedSurface.js';
+export { taggedTransform } from './taggedTransform.js';
 export { taggedZ0Surface } from './taggedZ0Surface.js';
 export { toDisjointGeometry } from './toDisjointGeometry.js';
 export { toKeptGeometry } from './toKeptGeometry.js';

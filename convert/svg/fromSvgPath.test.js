@@ -1,3 +1,4 @@
+import { boot } from '@jsxcad/sys';
 import { canonicalize } from '@jsxcad/geometry-tagged';
 import { fromSvgPath } from './fromSvgPath.js';
 import fs from 'fs';
@@ -5,6 +6,10 @@ import test from 'ava';
 import { toPdf } from '@jsxcad/convert-pdf';
 
 const { readFile } = fs.promises;
+
+test.beforeEach(async (t) => {
+  await boot();
+});
 
 // TODO: Add colinear point simplification.
 

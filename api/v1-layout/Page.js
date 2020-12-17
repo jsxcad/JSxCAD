@@ -45,7 +45,7 @@ const buildLayoutGeometry = ({
   pageLength,
   margin,
 }) => {
-  const itemNames = getItemNames(layer);
+  const itemNames = getItemNames(layer).filter((name) => name !== '');
   const labelScale = 0.0125 * 10;
   const size = [pageWidth, pageLength];
   const r = (v) => Math.floor(v * 100) / 100;

@@ -1,9 +1,14 @@
+import { boot } from '@jsxcad/sys';
 import fs from 'fs';
 import test from 'ava';
 import { toGcode } from './toGcode.js';
 import { unitRegularTrianglePolygon } from '@jsxcad/data-shape';
 
 const { readFile } = fs.promises;
+
+test.beforeEach(async (t) => {
+  await boot();
+});
 
 test('Spindle Triangle', async (t) => {
   const code = await toGcode(

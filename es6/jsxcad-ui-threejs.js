@@ -53742,7 +53742,7 @@ const moveToFit = ({
 /* global ResizeObserver, requestAnimationFrame */
 
 const orbitDisplay = async (
-  { view = {}, geometry, canvas } = {},
+  { view = {}, geometry, canvas, withAxes = false, withGrid = false } = {},
   page
 ) => {
   let datasets = [];
@@ -53762,7 +53762,8 @@ const orbitDisplay = async (
     view,
     geometryLayers,
     planLayers,
-    withAxes: false,
+    withAxes,
+    withGrid,
   });
 
   const render = () => {

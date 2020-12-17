@@ -1,10 +1,14 @@
 import SvgShapes from 'svg-shapes';
-
 import absolutifySvgPath from 'abs-svg-path';
+import { boot } from '@jsxcad/sys';
 import { canonicalize } from './canonicalize.js';
 import curvifySvgPath from 'curvify-svg-path';
 import parseSvgPath from 'parse-svg-path';
 import test from 'ava';
+
+test.beforeEach(async (t) => {
+  await boot();
+});
 
 test('Circle as cubic bezier.', (t) => {
   const circlePath = SvgShapes.toPath(
