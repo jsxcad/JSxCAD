@@ -31,7 +31,6 @@ export const orbitDisplay = async (
     geometryLayers,
     planLayers,
     withAxes,
-    withGrid,
   });
 
   const render = () => {
@@ -81,7 +80,7 @@ export const orbitDisplay = async (
 
     await buildMeshes({ datasets, threejsGeometry, scene, render });
 
-    moveToFit({ view, camera, controls: trackball, scene });
+    moveToFit({ view, camera, controls: trackball, scene, withGrid });
 
     render();
   };

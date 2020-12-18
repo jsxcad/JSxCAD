@@ -1,4 +1,4 @@
-import { Box3, Vector3 } from 'three';
+import { Box3, GridHelper, LineSegments, Mesh, Vector3 } from 'three';
 
 export const moveToFit = ({
   view,
@@ -6,6 +6,7 @@ export const moveToFit = ({
   controls,
   scene,
   fitOffset = 1.2,
+  withGrid = false,
 } = {}) => {
   const { fit = true } = view;
 
@@ -13,9 +14,50 @@ export const moveToFit = ({
     return;
   }
 
-  const box = new Box3();
-  box.setFromObject(scene);
-  // for( const object of selection ) box.expandByObject( object );
+  let box;
+
+  scene.traverse((object) => {
+    if (object instanceof GridHelper) {
+      return;
+    }
+    if (object instanceof LineSegments || object instanceof Mesh) {
+      const objectBox = new Box3();
+      objectBox.setFromObject(object);
+      if (box) {
+        box = box.union(objectBox);
+      } else {
+        box = objectBox;
+      }
+    }
+  });
+
+  if (!box) {
+    box = new Box3();
+    box.setFromObject(scene);
+  }
+
+  if (withGrid) {
+    const x = Math.max(Math.abs(box.min.x), Math.abs(box.max.x));
+    const y = Math.max(Math.abs(box.min.y), Math.abs(box.max.y));
+    const length = Math.max(x, y);
+    // This is how large we want the smallest grid to be.
+    const scale = Math.pow(10, Math.ceil(Math.log10(length)));
+    const size = scale;
+    {
+      const grid = new GridHelper(size * 2, 200, 0x000080, 0xc0f0c0);
+      grid.rotation.x = -Math.PI / 2;
+      grid.position.set(0, 0, -0.002);
+      grid.layers.set(1);
+      scene.add(grid);
+    }
+    {
+      const grid = new GridHelper(size * 2, 20, 0x000080, 0xc0c0f0);
+      grid.rotation.x = -Math.PI / 2;
+      grid.position.set(0, 0, -0.001);
+      grid.layers.set(1);
+      scene.add(grid);
+    }
+  }
 
   const center = box.getCenter(new Vector3());
   const size = box.getSize(new Vector3());

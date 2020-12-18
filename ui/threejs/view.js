@@ -22,11 +22,13 @@ export const staticView = async (
     up = UP,
     width = 256,
     height = 128,
+    withAxes = false,
+    withGrid = false,
   } = {}
 ) => {
   const threejsGeometry = toThreejsGeometry(shape.toKeptGeometry());
   const { renderer } = await staticDisplay(
-    { view: { target, position, up }, threejsGeometry },
+    { view: { target, position, up }, threejsGeometry, withAxes, withGrid },
     { offsetWidth: width, offsetHeight: height }
   );
   const canvas = toCanvasFromWebglContext(renderer.getContext());
