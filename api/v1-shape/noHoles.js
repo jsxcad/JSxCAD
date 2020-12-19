@@ -10,11 +10,13 @@ const noHoles = (shape, tags, select) => {
     }
   };
 
-  const rewritten = rewrite(shape.toKeptGeometry(), op);
+  const rewritten = rewrite(shape.toDisjointGeometry(), op);
   return Shape.fromGeometry(rewritten);
 };
 
 const noHolesMethod = function (...tags) {
   return noHoles(this, tags);
 };
+
 Shape.prototype.noHoles = noHolesMethod;
+Shape.prototype.noVoid = noHolesMethod;
