@@ -20,4 +20,10 @@ export const assemble = (...shapes) => {
   }
 };
 
+const assembleMethod = function (op) {
+  return assemble(...this.each(op));
+};
+
+Shape.prototype.assemble = assembleMethod;
+
 export default assemble;

@@ -1,5 +1,5 @@
 import { close, concatenate, open } from './jsxcad-geometry-path.js';
-import { taggedAssembly, eachPoint, flip, toDisjointGeometry as toDisjointGeometry$1, toTransformedGeometry, toPoints, transform, reconcile, isWatertight, makeWatertight, taggedPaths, taggedGraph, taggedPoints, taggedSolid, taggedSurface, union as union$1, rewriteTags, assemble as assemble$1, canonicalize as canonicalize$1, measureBoundingBox as measureBoundingBox$1, intersection as intersection$1, allTags, difference as difference$1, getSolids, rewrite, taggedGroup, getAnySurfaces, getPaths, getGraphs, taggedLayers, isVoid, getNonVoidPaths, getPeg, measureArea, taggedSketch, getNonVoidSolids, getAnyNonVoidSurfaces, getNonVoidGraphs, getNonVoidSurfaces, read, write } from './jsxcad-geometry-tagged.js';
+import { taggedAssembly, eachPoint, flip, toDisjointGeometry as toDisjointGeometry$1, toTransformedGeometry, toPoints, transform, reconcile, isWatertight, makeWatertight, taggedPaths, taggedGraph, taggedPoints, taggedSolid, taggedSurface, union as union$1, rewriteTags, assemble as assemble$1, canonicalize as canonicalize$1, measureBoundingBox as measureBoundingBox$1, intersection as intersection$1, allTags, difference as difference$1, getLeafs, getSolids, rewrite, taggedGroup, getAnySurfaces, getPaths, getGraphs, taggedLayers, isVoid, getNonVoidPaths, getPeg, measureArea, taggedSketch, getNonVoidSolids, getAnyNonVoidSurfaces, getNonVoidGraphs, getNonVoidSurfaces, read, write } from './jsxcad-geometry-tagged.js';
 import { fromPolygons, findOpenEdges, fromSurface as fromSurface$1 } from './jsxcad-geometry-solid.js';
 import { add, scale as scale$1, negate, normalize, subtract, dot, cross, distance } from './jsxcad-math-vec3.js';
 import { toTagFromName } from './jsxcad-algorithm-color.js';
@@ -377,6 +377,12 @@ const assemble = (...shapes) => {
   }
 };
 
+const assembleMethod = function (op) {
+  return assemble(...this.each(op));
+};
+
+Shape.prototype.assemble = assembleMethod;
+
 const X$1 = 0;
 const Y$1 = 1;
 const Z$1 = 2;
@@ -694,6 +700,17 @@ const cutFromMethod = function (shape) {
 Shape.prototype.cutFrom = cutFromMethod;
 
 cutFromMethod.signature = 'Shape -> cutFrom(...shapes:Shape) -> Shape';
+
+const each = (shape, op = (x) => x) =>
+  getLeafs(shape.toDisjointGeometry()).map((leaf) =>
+    op(Shape.fromGeometry(leaf))
+  );
+
+const eachMethod = function (op) {
+  return each(this, op);
+};
+
+Shape.prototype.each = eachMethod;
 
 const faces = (shape, op = (x) => x) => {
   const faces = [];
@@ -1095,14 +1112,16 @@ const noHoles = (shape, tags, select) => {
     }
   };
 
-  const rewritten = rewrite(shape.toKeptGeometry(), op);
+  const rewritten = rewrite(shape.toDisjointGeometry(), op);
   return Shape.fromGeometry(rewritten);
 };
 
 const noHolesMethod = function (...tags) {
   return noHoles(this);
 };
+
 Shape.prototype.noHoles = noHolesMethod;
+Shape.prototype.noVoid = noHolesMethod;
 
 const opMethod = function (op, ...args) {
   return op(this, ...args);
