@@ -57,25 +57,34 @@ const keepOrDrop = (shape, tags, select) => {
 
   const op = (geometry, descend) => {
     // FIX: Need a more reliable way to detect leaf structure.
-    if (
-      geometry.solid ||
-      geometry.surface ||
-      geometry.z0Surface ||
-      geometry.points ||
-      geometry.paths ||
-      geometry.item
-    ) {
-      if (select(matchTags, geometry.tags)) {
+    switch (geometry.type) {
+      case 'assembly':
+      case 'disjointAssembly':
+      case 'layers':
+      case 'layout': {
         return descend();
-      } else {
-        // Operate on the shape.
-        const shape = Shape.fromGeometry(geometry);
-        // Note that this transform does not violate geometry disjunction.
-        const dropped = shape.hole().toGeometry();
-        return dropped;
       }
-    } else {
-      return descend();
+      case 'item': {
+        if (
+          geometry.tags === undefined ||
+          !geometry.tags.some((tag) => matchTags.includes(tag))
+        ) {
+          // If the item isn't involved with these tags; treat it as a branch.
+          return descend();
+        }
+      }
+      // falls through to deal with item as a leaf.
+      default: {
+        if (select(matchTags, geometry.tags)) {
+          return descend();
+        } else {
+          // Operate on the shape.
+          const shape = Shape.fromGeometry(geometry);
+          // Note that this transform does not violate geometry disjunction.
+          const dropped = shape.hole().toGeometry();
+          return dropped;
+        }
+      }
     }
   };
 
