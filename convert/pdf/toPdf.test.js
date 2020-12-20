@@ -1,6 +1,11 @@
+import { boot } from '@jsxcad/sys';
 import { buildRegularPolygon } from '@jsxcad/algorithm-shape';
 import test from 'ava';
 import { toPdf } from './toPdf.js';
+
+test.beforeEach(async (t) => {
+  await boot();
+});
 
 test('Triangle', async (t) => {
   // A surface is a set of paths.

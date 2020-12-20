@@ -767,8 +767,8 @@ var Module = (function () {
     }
     var wasmMemory;
     var wasmTable = new WebAssembly.Table({
-      initial: 2226,
-      maximum: 2226,
+      initial: 2262,
+      maximum: 2262,
       element: 'anyfunc',
     });
     var ABORT = false;
@@ -1088,9 +1088,9 @@ var Module = (function () {
       Module['HEAPF32'] = HEAPF32 = new Float32Array(buf);
       Module['HEAPF64'] = HEAPF64 = new Float64Array(buf);
     }
-    var STACK_BASE = 5562096,
-      STACK_MAX = 319216,
-      DYNAMIC_BASE = 5562096;
+    var STACK_BASE = 5563504,
+      STACK_MAX = 320624,
+      DYNAMIC_BASE = 5563504;
     assert(STACK_BASE % 16 === 0, 'stack must start aligned');
     assert(DYNAMIC_BASE % 16 === 0, 'heap must start aligned');
     var TOTAL_STACK = 5242880;
@@ -6602,6 +6602,11 @@ var Module = (function () {
       var rv = handle.apply(undefined, args);
       return __emval_register(rv);
     }
+    function __emval_incref(handle) {
+      if (handle > 4) {
+        emval_handle_array[handle].refcount += 1;
+      }
+    }
     function __emval_run_destructors(handle) {
       var destructors = emval_handle_array[handle].value;
       runDestructors(destructors);
@@ -7301,6 +7306,7 @@ var Module = (function () {
       _emval_as: __emval_as,
       _emval_call: __emval_call,
       _emval_decref: __emval_decref,
+      _emval_incref: __emval_incref,
       _emval_run_destructors: __emval_run_destructors,
       abort: _abort,
       emscripten_memcpy_big: _emscripten_memcpy_big,

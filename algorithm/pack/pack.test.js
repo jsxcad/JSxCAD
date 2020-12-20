@@ -1,7 +1,12 @@
+import { boot } from '@jsxcad/sys';
 import { canonicalize } from '@jsxcad/geometry-tagged';
 
 import pack from './pack.js';
 import test from 'ava';
+
+test.beforeEach(async (t) => {
+  await boot();
+});
 
 test('Partial fit', (t) => {
   const [packed, unpacked] = pack(

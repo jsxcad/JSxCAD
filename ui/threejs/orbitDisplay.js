@@ -10,7 +10,7 @@ import { moveToFit } from './moveToFit.js';
 import { toThreejsGeometry } from '@jsxcad/convert-threejs';
 
 export const orbitDisplay = async (
-  { view = {}, geometry, canvas } = {},
+  { view = {}, geometry, canvas, withAxes = false, withGrid = false } = {},
   page
 ) => {
   let datasets = [];
@@ -30,7 +30,7 @@ export const orbitDisplay = async (
     view,
     geometryLayers,
     planLayers,
-    withAxes: false,
+    withAxes,
   });
 
   const render = () => {
@@ -80,7 +80,7 @@ export const orbitDisplay = async (
 
     await buildMeshes({ datasets, threejsGeometry, scene, render });
 
-    moveToFit({ view, camera, controls: trackball, scene });
+    moveToFit({ view, camera, controls: trackball, scene, withGrid });
 
     render();
   };

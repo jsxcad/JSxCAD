@@ -1,5 +1,5 @@
-import { identityMatrix, multiply } from '@jsxcad/math-mat4';
-
+import { composeTransforms } from '@jsxcad/algorithm-cgal';
+import { identityMatrix } from '@jsxcad/math-mat4';
 import { rewrite } from './visit.js';
 import { taggedSurface } from './taggedSurface.js';
 import { transform as transformGraph } from '@jsxcad/geometry-graph';
@@ -18,7 +18,10 @@ export const toTransformedGeometry = (geometry) => {
         case 'transform':
           // Preserve any tags applied to the untransformed geometry.
           // FIX: Ensure tags are merged between transformed and untransformed upon resolution.
-          return walk(geometry.content[0], multiply(matrix, geometry.matrix));
+          return walk(
+            geometry.content[0],
+            composeTransforms(matrix, geometry.matrix)
+          );
         case 'assembly':
         case 'layout':
         case 'layers':

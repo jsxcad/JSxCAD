@@ -3,7 +3,7 @@ import { taggedAssembly, taggedItem } from '@jsxcad/geometry-tagged';
 import Shape from '@jsxcad/api-v1-shape';
 
 // Constructs an item from the designator.
-export const Item = (id, ...shapes) =>
+export const Item = (id = '', ...shapes) =>
   Shape.fromGeometry(
     taggedItem(
       { tags: [`item/${id}`] },

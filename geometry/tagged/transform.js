@@ -1,16 +1,7 @@
 import { cacheTransform } from '@jsxcad/cache';
+import { taggedTransform } from './taggedTransform.js';
 
-const transformImpl = (matrix, untransformed) => {
-  if (untransformed.length) throw Error('die');
-  if (matrix.some((value) => typeof value !== 'number' || isNaN(value))) {
-    throw Error('die');
-  }
-  return {
-    type: 'transform',
-    matrix,
-    content: [untransformed],
-    tags: untransformed.tags,
-  };
-};
+const transformImpl = (matrix, untransformed) =>
+  taggedTransform({}, matrix, untransformed);
 
 export const transform = cacheTransform(transformImpl);

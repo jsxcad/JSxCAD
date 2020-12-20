@@ -13,6 +13,7 @@ import './colors.js';
 import './constantLaser.js';
 import './cut.js';
 import './cutFrom.js';
+import './each.js';
 import './faces.js';
 import './feedRate.js';
 import './hole.js';

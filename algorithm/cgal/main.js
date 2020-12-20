@@ -1,3 +1,16 @@
+export {
+  composeTransforms,
+  fromApproximateToCgalTransform,
+  fromExactToCgalTransform,
+  fromIdentityToCgalTransform,
+  fromRotateXToTransform,
+  fromRotateYToTransform,
+  fromRotateZToTransform,
+  fromScaleToTransform,
+  fromTranslateToTransform,
+  toCgalTransformFromJsTransform,
+} from './transform.js';
+
 export { arrangePaths } from './arrangePaths.js';
 export { differenceOfNefPolyhedrons } from './differenceOfNefPolyhedrons.js';
 export { differenceOfSurfaceMeshes } from './differenceOfSurfaceMeshes.js';

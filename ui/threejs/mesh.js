@@ -15,6 +15,7 @@ import {
   Vector3,
   VertexColors,
 } from 'three';
+
 import { GEOMETRY_LAYER, SKETCH_LAYER } from './layers.js';
 
 import { buildMeshMaterial } from './material.js';

@@ -1,7 +1,6 @@
 import {
   AxesHelper,
   DirectionalLight,
-  GridHelper,
   HemisphereLight,
   Object3D,
   PerspectiveCamera,
@@ -33,7 +32,6 @@ export const buildScene = ({
   width,
   height,
   view,
-  withGrid = false,
   withAxes = true,
   renderer,
 }) => {
@@ -53,13 +51,6 @@ export const buildScene = ({
     const axes = new AxesHelper(5);
     axes.layers.set(1);
     scene.add(axes);
-  }
-
-  if (withGrid) {
-    const grid = new GridHelper(1000, 100, 0x000080, 0xc0c0c0);
-    grid.rotation.x = -Math.PI / 2;
-    grid.layers.set(1);
-    scene.add(grid);
   }
 
   var hemiLight = new HemisphereLight(0xffffff, 0x444444, 0.5);
