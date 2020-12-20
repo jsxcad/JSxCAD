@@ -866,7 +866,8 @@ const keepOrDrop = (shape, tags, select) => {
       case 'layout': {
         return descend();
       }
-      case 'item': {
+      case 'item':
+      /* {
         if (
           geometry.tags === undefined ||
           !geometry.tags.some((tag) => matchTags.includes(tag))
@@ -875,6 +876,7 @@ const keepOrDrop = (shape, tags, select) => {
           return descend();
         }
       }
+*/
       // falls through to deal with item as a leaf.
       default: {
         if (select(matchTags, geometry.tags)) {
