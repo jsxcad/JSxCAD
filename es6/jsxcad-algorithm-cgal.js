@@ -1099,9 +1099,9 @@ var Module = (function () {
       Module['HEAPF32'] = HEAPF32 = new Float32Array(buf);
       Module['HEAPF64'] = HEAPF64 = new Float64Array(buf);
     }
-    var STACK_BASE = 5563504,
-      STACK_MAX = 320624,
-      DYNAMIC_BASE = 5563504;
+    var STACK_BASE = 5563248,
+      STACK_MAX = 320368,
+      DYNAMIC_BASE = 5563248;
     assert(STACK_BASE % 16 === 0, 'stack must start aligned');
     assert(DYNAMIC_BASE % 16 === 0, 'heap must start aligned');
     var TOTAL_STACK = 5242880;
@@ -10388,10 +10388,14 @@ const skeletalInsetOfPolygon = (
   return outputs;
 };
 
-const smoothSurfaceMesh = (
-  mesh,
-  { targetLength = 1, iterations = 1 } = {}
-) => getCgal().SmoothSurfaceMesh(mesh, targetLength, iterations);
+const smoothSurfaceMesh = (mesh, length, angle) =>
+  getCgal().RemeshSurfaceMesh(
+    mesh,
+    length,
+    angle,
+    /* relaxation_steps= */ 1,
+    /* iterations= */ 1
+  );
 
 const transformSurfaceMesh = (mesh, jsTransform) =>
   getCgal().TransformSurfaceMeshByTransform(

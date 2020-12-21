@@ -244,37 +244,28 @@ Surface_mesh* FromPointsToSurfaceMesh(emscripten::val fill) {
   return mesh;
 }
 
-Surface_mesh* SmoothSurfaceMesh(Surface_mesh* input, double edge_length, int iterations) {
+Surface_mesh* RemeshSurfaceMesh(Surface_mesh* input, double edge_length, double edge_angle, int relaxation_steps, int iterations) {
+  // std::cout << "RemeshSurfaceMesh: edge_length=" << edge_length << " edge_angle=" << edge_angle << " relaxation_steps=" << relaxation_steps << " iterations=" << iterations << std::endl;
   typedef boost::graph_traits<Surface_mesh>::edge_descriptor edge_descriptor;
 
   Surface_mesh* mesh = new Surface_mesh(*input);
 
-#if 1
   CGAL::Polygon_mesh_processing::triangulate_faces(*mesh);
   CGAL::Polygon_mesh_processing::split_long_edges(edges(*mesh), edge_length, *mesh);
 
-  // Constrain edges with a dihedral angle over 60°
+  // Constrain edges with a dihedral angle over 10°
   typedef boost::property_map<Surface_mesh, CGAL::edge_is_feature_t>::type EIFMap;
   EIFMap eif = get(CGAL::edge_is_feature, *mesh);
-  CGAL::Polygon_mesh_processing::detect_sharp_edges(*mesh, 10, eif);
-
+  CGAL::Polygon_mesh_processing::detect_sharp_edges(*mesh, edge_angle, eif);
 
   CGAL::Polygon_mesh_processing::isotropic_remeshing(
     mesh->faces(),
     edge_length,
     *mesh,
-    CGAL::Polygon_mesh_processing::parameters::number_of_iterations(iterations)
-        .protect_constraints(true)
-        .edge_is_constrained_map(eif));
-
-
-  // CGAL::Polygon_mesh_processing::random_perturbation(vertices(*mesh), *mesh, 1, CGAL::Polygon_mesh_processing::parameters::all_default());
-
-#endif
-
-#if 0
-  CGAL::Polygon_mesh_processing::triangulate_faces(*mesh);
-#endif
+    CGAL::Polygon_mesh_processing::parameters::number_of_iterations(1)
+        .relax_constraints(true)
+        .edge_is_constrained_map(eif)
+        .number_of_relaxation_steps(relaxation_steps));
 
   return mesh;
 }
@@ -1772,7 +1763,7 @@ EMSCRIPTEN_BINDINGS(module) {
   emscripten::function("Surface_mesh__explore", &Surface_mesh__explore, emscripten::allow_raw_pointers());
 
   emscripten::function("FromPointsToSurfaceMesh", &FromPointsToSurfaceMesh, emscripten::allow_raw_pointers());
-  emscripten::function("SmoothSurfaceMesh", &SmoothSurfaceMesh, emscripten::allow_raw_pointers());
+  emscripten::function("RemeshSurfaceMesh", &RemeshSurfaceMesh, emscripten::allow_raw_pointers());
   emscripten::function("TransformSurfaceMesh", &TransformSurfaceMesh, emscripten::allow_raw_pointers());
   emscripten::function("TransformSurfaceMeshByTransform", &TransformSurfaceMeshByTransform, emscripten::allow_raw_pointers());
   emscripten::function("FromSurfaceMeshToPolygonSoup", &FromSurfaceMeshToPolygonSoup, emscripten::allow_raw_pointers());
