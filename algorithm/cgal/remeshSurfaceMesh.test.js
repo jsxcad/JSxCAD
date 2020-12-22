@@ -1,7 +1,7 @@
 import { fromGraphToSurfaceMesh } from './fromGraphToSurfaceMesh.js';
 import { fromSurfaceMeshToGraph } from './fromSurfaceMeshToGraph.js';
 import { initCgal } from './getCgal.js';
-import { smoothSurfaceMesh } from './smoothSurfaceMesh.js';
+import { remeshSurfaceMesh } from './remeshSurfaceMesh.js';
 import test from 'ava';
 
 test.beforeEach(async (t) => {
@@ -101,9 +101,9 @@ test('FromPointsToSurfaceMesh', (t) => {
   const mesh = fromGraphToSurfaceMesh(graph);
   t.true(mesh.is_valid(false));
   t.false(mesh.is_empty());
-  const smoothMesh = smoothSurfaceMesh(mesh, 0.4, 10);
-  const smoothGraph = fromSurfaceMeshToGraph(smoothMesh);
-  t.deepEqual(smoothGraph, {
+  const remeshedMesh = remeshSurfaceMesh(mesh, { length: 0.4, angle: 10 });
+  const remeshedGraph = fromSurfaceMeshToGraph(remeshedMesh);
+  t.deepEqual(remeshedGraph, {
     edges: [
       { point: 40, next: 141, twin: 1, loop: 62 },
       { point: 25, next: 32, twin: 0, loop: 65 },

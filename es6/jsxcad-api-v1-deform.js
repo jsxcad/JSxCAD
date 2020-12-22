@@ -3731,14 +3731,11 @@ const skewMethod = function (...args) {
 };
 Shape.prototype.skew = skewMethod;
 
-const smooth = (shape, length, angle) => {
-  return Shape.fromGeometry(
-    smooth$1(shape.toGeometry(), { length, angle })
-  );
-};
+const smooth = (shape, options) =>
+  Shape.fromGeometry(smooth$1(shape.toGeometry(), options));
 
-const smoothMethod = function (length, { angle } = {}) {
-  return smooth(this, length, angle);
+const smoothMethod = function (options = {}) {
+  return smooth(this, options);
 };
 Shape.prototype.smooth = smoothMethod;
 
