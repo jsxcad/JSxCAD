@@ -53,6 +53,7 @@
 #include <CGAL/Projection_traits_xy_3.h>
 #include <CGAL/Projection_traits_xz_3.h>
 #include <CGAL/Projection_traits_yz_3.h>
+#include <CGAL/Subdivision_method_3/subdivision_methods_3.h>
 #include <CGAL/Surface_mesh.h>
 #include <CGAL/Unique_hash_map.h>
 #include <CGAL/approximated_offset_2.h>
@@ -244,8 +245,43 @@ Surface_mesh* FromPointsToSurfaceMesh(emscripten::val fill) {
   return mesh;
 }
 
+Surface_mesh* SubdivideSurfaceMesh(Surface_mesh* input, int method, int iterations) {
+  typedef boost::graph_traits<Surface_mesh>::edge_descriptor edge_descriptor;
+
+  Surface_mesh* mesh = new Surface_mesh(*input);
+
+  CGAL::Polygon_mesh_processing::triangulate_faces(*mesh);
+  switch (method) {
+    case 0:
+      CGAL::Subdivision_method_3::CatmullClark_subdivision(*mesh, CGAL::Polygon_mesh_processing::parameters::number_of_iterations(iterations));
+      break;
+    case 1:
+      CGAL::Subdivision_method_3::DooSabin_subdivision(*mesh, CGAL::Polygon_mesh_processing::parameters::number_of_iterations(iterations));
+      break;
+    // case 2:
+    //  CGAL::Subdivision_method_3::DQQ(*mesh, CGAL::Polygon_mesh_processing::parameters::number_of_iterations(iterations));
+    //  break;
+    case 3:
+      CGAL::Subdivision_method_3::Loop_subdivision(*mesh, CGAL::Polygon_mesh_processing::parameters::number_of_iterations(iterations));
+      break;
+    //case 4:
+    //  CGAL::Subdivision_method_3::PQQ(*mesh, CGAL::Polygon_mesh_processing::parameters::number_of_iterations(iterations));
+    //  break;
+    //case 5:
+    //  CGAL::Subdivision_method_3::PTQ(*mesh, CGAL::Polygon_mesh_processing::parameters::number_of_iterations(iterations));
+    //  break;
+    //case 6:
+    //  CGAL::Subdivision_method_3::Sqrt3(*mesh, CGAL::Polygon_mesh_processing::parameters::number_of_iterations(iterations));
+    //  break;
+    case 7:
+      CGAL::Subdivision_method_3::Sqrt3_subdivision(*mesh, CGAL::Polygon_mesh_processing::parameters::number_of_iterations(iterations));
+      break;
+  }
+
+  return mesh;
+}
+
 Surface_mesh* RemeshSurfaceMesh(Surface_mesh* input, double edge_length, double edge_angle, int relaxation_steps, int iterations) {
-  // std::cout << "RemeshSurfaceMesh: edge_length=" << edge_length << " edge_angle=" << edge_angle << " relaxation_steps=" << relaxation_steps << " iterations=" << iterations << std::endl;
   typedef boost::graph_traits<Surface_mesh>::edge_descriptor edge_descriptor;
 
   Surface_mesh* mesh = new Surface_mesh(*input);
@@ -1764,6 +1800,7 @@ EMSCRIPTEN_BINDINGS(module) {
 
   emscripten::function("FromPointsToSurfaceMesh", &FromPointsToSurfaceMesh, emscripten::allow_raw_pointers());
   emscripten::function("RemeshSurfaceMesh", &RemeshSurfaceMesh, emscripten::allow_raw_pointers());
+  emscripten::function("SubdivideSurfaceMesh", &SubdivideSurfaceMesh, emscripten::allow_raw_pointers());
   emscripten::function("TransformSurfaceMesh", &TransformSurfaceMesh, emscripten::allow_raw_pointers());
   emscripten::function("TransformSurfaceMeshByTransform", &TransformSurfaceMeshByTransform, emscripten::allow_raw_pointers());
   emscripten::function("FromSurfaceMeshToPolygonSoup", &FromSurfaceMeshToPolygonSoup, emscripten::allow_raw_pointers());
