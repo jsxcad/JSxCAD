@@ -2,12 +2,13 @@ import {
   getNonVoidGraphs,
   getNonVoidSolids,
   getNonVoidSurfaces,
+  realize,
+  taggedGraph,
   taggedGroup,
   taggedPaths,
 } from '@jsxcad/geometry-tagged';
 
 import { Shape } from './Shape.js';
-import { toPaths as toPathsFromGraph } from '@jsxcad/geometry-graph';
 
 const toWireframeFromSolid = (solid) => {
   const paths = [];
@@ -23,8 +24,9 @@ const toWireframeFromSurface = (surface) => {
 
 export const wireframe = (options = {}, shape) => {
   const pieces = [];
-  for (const { graph } of getNonVoidGraphs(shape.toKeptGeometry())) {
-    pieces.push(toPathsFromGraph(graph));
+  for (const geometry of getNonVoidGraphs(shape.toKeptGeometry())) {
+    const { graph } = realize(geometry);
+    pieces.push(taggedGraph({}, { ...graph, isWireframe: true }));
   }
   for (const { solid } of getNonVoidSolids(shape.toKeptGeometry())) {
     pieces.push(toWireframeFromSolid(solid));
