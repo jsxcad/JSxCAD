@@ -77,6 +77,7 @@ export { measureBoundingBox } from './measureBoundingBox.js';
 export { measureHeights } from './measureHeights.js';
 export { offset } from './offset.js';
 export { outline } from './outline.js';
+export { projectToPlane } from './projectToPlane.js';
 export { read } from './read.js';
 export { realize } from './realize.js';
 export { rewriteTags } from './rewriteTags.js';

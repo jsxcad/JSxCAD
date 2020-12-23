@@ -80,7 +80,7 @@ export const orbitDisplay = async (
 
     await buildMeshes({ datasets, threejsGeometry, scene, render });
 
-    moveToFit({ view, camera, controls: trackball, scene, withGrid });
+    moveToFit({ datasets, view, camera, controls: trackball, scene, withGrid });
 
     render();
   };

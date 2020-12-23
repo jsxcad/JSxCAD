@@ -40,6 +40,7 @@ export { insetOfPolygon } from './insetOfPolygon.js';
 export { intersectionOfNefPolyhedrons } from './intersectionOfNefPolyhedrons.js';
 export { intersectionOfSurfaceMeshes } from './intersectionOfSurfaceMeshes.js';
 export { offsetOfPolygon } from './offsetOfPolygon.js';
+export { projectToPlaneOfSurfaceMesh } from './projectToPlaneOfSurfaceMesh.js';
 export { outlineOfSurfaceMesh } from './outlineOfSurfaceMesh.js';
 export { sectionOfNefPolyhedron } from './sectionOfNefPolyhedron.js';
 export { sectionOfSurfaceMesh } from './sectionOfSurfaceMesh.js';
