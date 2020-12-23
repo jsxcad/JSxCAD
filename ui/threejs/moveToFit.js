@@ -1,6 +1,7 @@
 import { Box3, GridHelper, LineSegments, Mesh, Vector3 } from 'three';
 
 export const moveToFit = ({
+  datasets,
   view,
   camera,
   controls,
@@ -51,6 +52,7 @@ export const moveToFit = ({
       grid.position.set(0, 0, -0.002);
       grid.layers.set(1);
       scene.add(grid);
+      datasets.push({ mesh: grid });
     }
     {
       const grid = new GridHelper(size * 2, 4, 0x000040, 0x4040f0);
@@ -60,6 +62,7 @@ export const moveToFit = ({
       grid.position.set(0, 0, -0.001);
       grid.layers.set(1);
       scene.add(grid);
+      datasets.push({ mesh: grid });
     }
   }
 

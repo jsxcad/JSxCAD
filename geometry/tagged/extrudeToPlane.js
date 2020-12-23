@@ -3,14 +3,14 @@ import { rewrite } from './visit.js';
 import { taggedGraph } from './taggedGraph.js';
 import { toTransformedGeometry } from './toTransformedGeometry.js';
 
-export const extrudeToPlane = (geometry, highPlane, lowPlane) => {
+export const extrudeToPlane = (geometry, highPlane, lowPlane, direction) => {
   const op = (geometry, descend) => {
     const { tags } = geometry;
     switch (geometry.type) {
       case 'graph': {
         return taggedGraph(
           { tags },
-          extrudeToPlaneOfGraph(geometry.graph, highPlane, lowPlane)
+          extrudeToPlaneOfGraph(geometry.graph, highPlane, lowPlane, direction)
         );
       }
       case 'solid':
