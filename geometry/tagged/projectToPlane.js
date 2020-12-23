@@ -1,25 +1,34 @@
-import { extrudeToPlane as extrudeToPlaneOfGraph } from '@jsxcad/geometry-graph';
+import {
+  fromPaths as fromPathsToGraph,
+  projectToPlane as projectToPlaneOfGraph,
+} from '@jsxcad/geometry-graph';
+
 import { rewrite } from './visit.js';
 import { taggedGraph } from './taggedGraph.js';
 import { toTransformedGeometry } from './toTransformedGeometry.js';
 
-export const extrudeToPlane = (geometry, highPlane, lowPlane, direction) => {
+export const projectToPlane = (geometry, plane, direction) => {
   const op = (geometry, descend) => {
     const { tags } = geometry;
     switch (geometry.type) {
       case 'graph': {
         return taggedGraph(
           { tags },
-          extrudeToPlaneOfGraph(geometry.graph, highPlane, lowPlane, direction)
+          projectToPlaneOfGraph(geometry.graph, plane, direction)
         );
       }
       case 'solid':
       case 'z0Surface':
       case 'surface':
-      case 'paths':
       case 'points':
         // Not implemented yet.
         return geometry;
+      case 'paths':
+        return projectToPlane(
+          taggedGraph({ tags }, fromPathsToGraph(geometry.paths)),
+          plane,
+          direction
+        );
       case 'plan':
       case 'assembly':
       case 'item':
@@ -28,7 +37,7 @@ export const extrudeToPlane = (geometry, highPlane, lowPlane, direction) => {
         return descend();
       }
       case 'sketch': {
-        // Sketches aren't real for extrudeToPlane.
+        // Sketches aren't real for projectToPlane.
         return geometry;
       }
       default:

@@ -15,6 +15,7 @@ export { intersection } from './intersection.js';
 export { measureBoundingBox } from './measureBoundingBox.js';
 export { offset } from './offset.js';
 export { outline } from './outline.js';
+export { projectToPlane } from './projectToPlane.js';
 export { realizeGraph } from './realizeGraph.js';
 export { section } from './section.js';
 export { smooth } from './smooth.js';

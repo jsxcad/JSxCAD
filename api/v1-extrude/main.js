@@ -6,6 +6,7 @@ import extrudeToPlane from './extrudeToPlane.js';
 import fill from './fill.js';
 import inline from './inline.js';
 import outline from './outline.js';
+import projectToPlane from './projectToPlane.js';
 import section from './section.js';
 import squash from './squash.js';
 import sweep from './sweep.js';
@@ -20,6 +21,7 @@ const api = {
   fill,
   inline,
   outline,
+  projectToPlane,
   section,
   squash,
   sweep,
@@ -36,6 +38,7 @@ export {
   fill,
   inline,
   outline,
+  projectToPlane,
   section,
   squash,
   sweep,

@@ -508,6 +508,30 @@ Surface_mesh* ExtrusionToPlaneOfSurfaceMesh(
   return extruded_mesh;
 }
 
+Surface_mesh* ProjectionToPlaneOfSurfaceMesh(
+    Surface_mesh* mesh,
+    double direction_x, double direction_y, double direction_z,
+    double plane_x, double plane_y, double plane_z, double plane_w) {
+  Surface_mesh* projected_mesh = new Surface_mesh(*mesh);
+  auto& input_map = mesh->points();
+  auto& output_map = projected_mesh->points();
+
+  Plane plane(plane_x, plane_y, plane_z, plane_w);
+  Vector vector(direction_x, direction_y, direction_z);
+
+  // CHECK: Could this project a point multiple times?
+  // Are points shared between vertices?
+  for (auto& vertex : mesh->vertices()) {
+    auto result = CGAL::intersection(Line(get(input_map, vertex), get(input_map, vertex) + vector), plane);
+    if (result) {
+      if (Point* point = boost::get<Point>(&*result)) {
+        put(output_map, vertex, *point);
+      }
+    }
+  }
+  return projected_mesh;
+}
+
 Nef_polyhedron* DifferenceOfNefPolyhedrons(Nef_polyhedron* a, Nef_polyhedron* b) {
   return new Nef_polyhedron(*a - *b);
 }
@@ -1744,6 +1768,7 @@ EMSCRIPTEN_BINDINGS(module) {
   emscripten::function("Surface_mesh__EachFace", &Surface_mesh__EachFace, emscripten::allow_raw_pointers());
   emscripten::function("ExtrusionOfSurfaceMesh", &ExtrusionOfSurfaceMesh, emscripten::allow_raw_pointers());
   emscripten::function("ExtrusionToPlaneOfSurfaceMesh", &ExtrusionToPlaneOfSurfaceMesh, emscripten::allow_raw_pointers());
+  emscripten::function("ProjectionToPlaneOfSurfaceMesh", &ProjectionToPlaneOfSurfaceMesh, emscripten::allow_raw_pointers());
 
   emscripten::function("Surface_mesh__halfedge_to_target", &Surface_mesh__halfedge_to_target, emscripten::allow_raw_pointers());
   emscripten::function("Surface_mesh__halfedge_to_face", &Surface_mesh__halfedge_to_face, emscripten::allow_raw_pointers());
