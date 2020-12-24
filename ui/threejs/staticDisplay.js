@@ -64,7 +64,7 @@ export const staticDisplay = async (
 
   await buildMeshes({ datasets, threejsGeometry, scene });
 
-  moveToFit({ view, camera, scene, withGrid });
+  moveToFit({ datasets, view, camera, scene, withGrid });
 
   render();
 

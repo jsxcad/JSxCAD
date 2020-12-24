@@ -103,6 +103,10 @@ const Box = (value = 1) => {
 
 Shape.prototype.Box = shapeMethod(Box);
 
+const Block = (radius, height, depth) => Box(radius).pull(height, depth);
+
+Shape.prototype.Block = shapeMethod(Block);
+
 const isDefined$1 = (value) => value;
 
 const Group = (...shapes) =>
@@ -1878,6 +1882,7 @@ const api = {
   Arc,
   Assembly,
   Ball,
+  Block,
   Box,
   ChainedHull,
   Circle,
@@ -1916,4 +1921,4 @@ const api = {
 };
 
 export default api;
-export { Arc, Assembly, Ball, Box, ChainedHull, Circle, Cone, Difference, Empty, Group, Hershey, Hexagon, Hull, Icosahedron, Intersection, Line, LoopedHull, Octagon, Path, Peg, Pentagon, Plane, Point, Points, Polygon, Polyhedron, Rod, Septagon, Sketch, Spiral, Square, Tetragon, Toolpath, Torus, Triangle, Union, Wave, Weld };
+export { Arc, Assembly, Ball, Block, Box, ChainedHull, Circle, Cone, Difference, Empty, Group, Hershey, Hexagon, Hull, Icosahedron, Intersection, Line, LoopedHull, Octagon, Path, Peg, Pentagon, Plane, Point, Points, Polygon, Polyhedron, Rod, Septagon, Sketch, Spiral, Square, Tetragon, Toolpath, Torus, Triangle, Union, Wave, Weld };
