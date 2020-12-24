@@ -80,6 +80,7 @@ export {
   Arc,
   Assembly,
   Ball,
+  Block,
   Box,
   ChainedHull,
   Circle,

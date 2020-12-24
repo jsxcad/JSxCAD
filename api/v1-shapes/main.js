@@ -1,6 +1,7 @@
 import Arc from './Arc.js';
 import Assembly from './Assembly.js';
 import Ball from './Ball.js';
+import Block from './Block.js';
 import Box from './Box.js';
 import ChainedHull from './ChainedHull.js';
 import Circle from './Circle.js';
@@ -41,6 +42,7 @@ const api = {
   Arc,
   Assembly,
   Ball,
+  Block,
   Box,
   ChainedHull,
   Circle,
@@ -82,6 +84,7 @@ export {
   Arc,
   Assembly,
   Ball,
+  Block,
   Box,
   ChainedHull,
   Circle,

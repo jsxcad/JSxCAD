@@ -3,7 +3,6 @@ import { toPaths, toSolid, toSurface } from '@jsxcad/geometry-graph';
 import { outline } from './outline.js';
 import { rewrite } from './visit.js';
 import { taggedGroup } from './taggedGroup.js';
-import { taggedItem } from './taggedItem.js';
 import { taggedPaths } from './taggedPaths.js';
 import { taggedSolid } from './taggedSolid.js';
 import { taggedSurface } from './taggedSurface.js';
@@ -18,16 +17,17 @@ export const soup = (geometry) => {
         if (graph.isWireframe) {
           return taggedPaths({ tags }, toPaths(graph));
         } else if (graph.isClosed) {
-          return taggedSolid({ tags }, toSolid(graph));
+          return taggedGroup(
+            {},
+            taggedSolid({ tags }, toSolid(graph)),
+            ...outline(geometry)
+          );
         } else {
           // FIX: Simplify this arrangement.
-          return taggedItem(
+          return taggedGroup(
             {},
-            taggedGroup(
-              {},
-              taggedSurface({ tags }, toSurface(graph)),
-              ...outline(geometry)
-            )
+            taggedSurface({ tags }, toSurface(graph)),
+            ...outline(geometry)
           );
         }
       }
