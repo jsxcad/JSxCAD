@@ -1,0 +1,42 @@
+const ThreadProfile = (pitch, angle = 60) => {
+  const h = (1 / (2 * Math.tan(((angle / 2) * Math.PI) / 180))) * pitch;
+  return Weld(
+    Line(pitch / 2 + 1, pitch / -2 - 1).rotate(90),
+    Line(0, 2)
+      .rotate(angle / -2)
+      .x(-h),
+    Line(0, 2)
+      .rotate(angle / 2)
+      .x(-h)
+  ).rotate(180);
+};
+
+const Thread = (radius = 10, pitch = 0.25, angle = 60) => {
+  const profile = ThreadProfile(pitch, angle).fill();
+  return Union(
+    ...Spiral((a) => [[radius, 0, (a / 360) * pitch]], {
+      to: 360 * 2.5,
+      by: 360 / 36,
+    })
+      .sweep(profile)
+      .each()
+  ).z(-pitch);
+};
+
+const Bolt = (radius = 10, height = 100, pitch = 0.25, angle = 60) => {
+  const segments = [];
+  const segment = Rod(radius * 0.98, pitch).cut(Thread(radius, pitch, angle));
+
+  for (let z = 0; z < height; z += pitch) {
+    segments.push(segment.z(z));
+  }
+  return Group(...segments);
+};
+
+const M1_6 = (length) => Bolt(1.6 / 2, length, 0.35);
+const M8 = (length) => Bolt(8 / 2, length, 1.25);
+
+export const M8x8ThreadedRod = M8(8)
+  .material('steel')
+  .item('M8x8 threaded rod')
+  .view();
