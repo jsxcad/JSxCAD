@@ -4,9 +4,11 @@ const unYetGul = await readFont('https://jsxcad.js.org/ttf/UnYetgul.ttf?a=1');
 
 const tool = { toolType: 'spindle', spindleRpm: 7000, feedRate: 650 };
 
-const text = unYetGul(25);
+const font = unYetGul(25);
 
-const hwi = text('輝')
+const text = await stringBox('Engraving', '輝');
+
+const hwi = unYetGul(25)(text)
   .align('xy')
   .weld(Box(b(30, 26)))
   .pull(-1)
