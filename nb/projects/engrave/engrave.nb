@@ -6,16 +6,18 @@ const tool = { toolType: 'spindle', spindleRpm: 7000, feedRate: 650 };
 
 const font = unYetGul(25);
 
+// FIX: Caching means that this control doesn't update properly.
+// Edit the default value directly for now.
 const text = await stringBox('Engraving', '輝');
 
-const hwi = unYetGul(25)(text)
+const model = unYetGul(25)(text)
   .align('xy')
   .weld(Box(b(30, 26)))
   .pull(-1)
   .view()
   .md('Model');
 
-const section = hwi
+const section = model
   .section(...each((n) => z.z(0 - n), { upto: 0.4, from: 0.2, by: 0.2 }))
   .gridView()
   .md('Model Section');
