@@ -13,5 +13,6 @@ const extrudeMethod = function (height = 1, depth = 0) {
 };
 Shape.prototype.extrude = extrudeMethod;
 Shape.prototype.pull = extrudeMethod;
+Shape.prototype.ex = extrudeMethod;
 
 export default extrude;

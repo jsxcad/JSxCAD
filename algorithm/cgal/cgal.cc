@@ -30,8 +30,12 @@
 #include <CGAL/Arr_polyline_traits_2.h>
 #include <CGAL/Arrangement_2.h>
 #include <CGAL/Boolean_set_operations_2.h>
+#include <CGAL/Complex_2_in_triangulation_3.h>
 #include <CGAL/Delaunay_triangulation_2.h>
 #include <CGAL/Delaunay_triangulation_3.h>
+#include <CGAL/make_surface_mesh.h>
+#include <CGAL/IO/facets_in_complex_2_to_triangle_mesh.h>
+#include <CGAL/Implicit_surface_3.h>
 #include <CGAL/Gps_traits_2.h>
 #include <CGAL/Polygon_mesh_processing/bbox.h>
 #include <CGAL/Polygon_mesh_processing/corefinement.h>
@@ -55,6 +59,7 @@
 #include <CGAL/Projection_traits_yz_3.h>
 #include <CGAL/Subdivision_method_3/subdivision_methods_3.h>
 #include <CGAL/Surface_mesh.h>
+#include <CGAL/Surface_mesh_default_triangulation_3.h>
 #include <CGAL/Unique_hash_map.h>
 #include <CGAL/approximated_offset_2.h>
 #include <CGAL/boost/graph/Named_function_parameters.h>
@@ -150,6 +155,41 @@ void FromSurfaceMeshToPolygonSoup(Surface_mesh* mesh, bool triangulate, emscript
       emit_point(CGAL::to_double(p.x()), CGAL::to_double(p.y()), CGAL::to_double(p.z()));
     }
   }
+}
+
+#if 0
+FT sphere_function (Point_3 p) {
+  const FT x2=p.x()*p.x(), y2=p.y()*p.y(), z2=p.z()*p.z();
+  return x2+y2+z2-1;
+}
+#endif
+
+Surface_mesh* FromFunctionToSurfaceMesh(double radius, double angular_bound, double radius_bound, double distance_bound, emscripten::val function) {
+  // default triangulation for Surface_mesher
+  typedef CGAL::Surface_mesh_default_triangulation_3 Tr;
+  // c2t3
+  typedef CGAL::Complex_2_in_triangulation_3<Tr> C2t3;
+  typedef Tr::Geom_traits GT;
+  typedef GT::Sphere_3 Sphere_3;
+  typedef GT::Point_3 Point_3;
+  typedef GT::FT FT;
+  typedef FT (*Function)(Point_3);
+  typedef CGAL::Implicit_surface_3<GT, Function> Surface_3;
+  // typedef CGAL::Surface_mesh<Point_3> Surface_mesh;
+
+  Tr tr;            // 3D-Delaunay triangulation
+  C2t3 c2t3 (tr);   // 2D-complex in 3D-Delaunay triangulation
+  // defining the surface
+  Surface_3 surface([&](const Point_3& p) { return FT(function(CGAL::to_double(p.x()), CGAL::to_double(p.y()), CGAL::to_double(p.z())).as<double>()); },
+                    Sphere_3(CGAL::ORIGIN, radius * radius));
+  CGAL::Surface_mesh_default_criteria_3<Tr> criteria(angular_bound, radius_bound, distance_bound);
+
+  // meshing surface
+  CGAL::make_surface_mesh(c2t3, surface, criteria, CGAL::Manifold_tag());
+
+  Surface_mesh* mesh = new Surface_mesh();
+  CGAL::facets_in_complex_2_to_triangle_mesh(c2t3, *mesh);
+  return mesh;
 }
 
 Nef_polyhedron* FromPolygonSoupToNefPolyhedron(emscripten::val load) {
@@ -1829,12 +1869,12 @@ EMSCRIPTEN_BINDINGS(module) {
   emscripten::function("TransformSurfaceMesh", &TransformSurfaceMesh, emscripten::allow_raw_pointers());
   emscripten::function("TransformSurfaceMeshByTransform", &TransformSurfaceMeshByTransform, emscripten::allow_raw_pointers());
   emscripten::function("FromSurfaceMeshToPolygonSoup", &FromSurfaceMeshToPolygonSoup, emscripten::allow_raw_pointers());
+  emscripten::function("FromFunctionToSurfaceMesh", &FromFunctionToSurfaceMesh, emscripten::allow_raw_pointers());
   emscripten::function("ComputeConvexHullAsSurfaceMesh", &ComputeConvexHullAsSurfaceMesh, emscripten::allow_raw_pointers());
   emscripten::function("ComputeAlphaShapeAsSurfaceMesh", &ComputeAlphaShapeAsSurfaceMesh, emscripten::allow_raw_pointers());
   emscripten::function("ComputeAlphaShape2AsPolygonSegments", &ComputeAlphaShape2AsPolygonSegments, emscripten::allow_raw_pointers());
   emscripten::function("OutlineOfSurfaceMesh", &OutlineOfSurfaceMesh, emscripten::allow_raw_pointers());
   emscripten::function("SkeletalInsetOfPolygon", &SkeletalInsetOfPolygon, emscripten::allow_raw_pointers());
-  // emscripten::function("ApproximatedOffsetOfPolygon", &ApproximatedOffsetOfPolygon, emscripten::allow_raw_pointers());
   emscripten::function("OffsetOfPolygon", &OffsetOfPolygon, emscripten::allow_raw_pointers());
   emscripten::function("InsetOfPolygon", &InsetOfPolygon, emscripten::allow_raw_pointers());
   emscripten::function("Surface_mesh__is_closed", &Surface_mesh__is_closed, emscripten::allow_raw_pointers());
