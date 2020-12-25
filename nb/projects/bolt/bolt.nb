@@ -75,11 +75,15 @@ const HexBolt = (diameter = 10, height = 2) =>
 
 export const M1_6Bolt = (length) => Bolt(1.6, length, 0.35);
 export const M4Bolt = (length) => Bolt(4, length, 0.7);
-export const M4HexNut = (length) => HexNut(8, 4, length, 0.7);
+export const M6Bolt = (length) => Bolt(6, length, 1);
 export const M8Bolt = (length) => Bolt(8, length, 1.25);
 
+export const M4HexNut = (length) => HexNut(8, 4, length, 0.7);
+export const M6HexNut = (length) => HexNut(11.5, 6, length, 1);
+
 const m4HexHead = HexHead(8, 3.0);
-const m8HexHead = HexHead(13, 5.3);
+const m6HexHead = HexHead(11.5, 5.0);
+const m8HexHead = HexHead(13, 6.5);
 
 export const M8x8ThreadedRod = M8Bolt(8)
   .material('steel')
@@ -88,13 +92,27 @@ export const M8x8ThreadedRod = M8Bolt(8)
 export const M4HexBolt = (length) =>
   M4Bolt(length).and(m4HexHead).material('steel').item(`M4x${length} hex bolt`);
 
+export const M6HexBolt = (length) =>
+  M6Bolt(length).and(m6HexHead).material('steel').item(`M6x${length} hex bolt`);
+
 export const m4x3HexNut = M4HexNut(3)
   .material('steel')
   .item(`M4x3 hex nut`)
   .gridView()
   .downloadStl('M4x3HexNut');
 
+export const m6x5HexNut = M6HexNut(5)
+  .material('steel')
+  .item(`M6x5 hex nut`)
+  .gridView()
+  .downloadStl('M6x5HexNut');
+
 export const m4x8HexBolt = M4HexBolt(8)
   .rotateX(180)
   .gridView()
   .downloadStl('M4x8HexBolt');
+
+export const m6x8HexBolt = M6HexBolt(8)
+  .rotateX(180)
+  .gridView()
+  .downloadStl('M6x8HexBolt');
