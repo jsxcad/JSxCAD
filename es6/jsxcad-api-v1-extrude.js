@@ -101,6 +101,7 @@ const extrudeMethod = function (height = 1, depth = 0) {
 };
 Shape$1.prototype.extrude = extrudeMethod;
 Shape$1.prototype.pull = extrudeMethod;
+Shape$1.prototype.ex = extrudeMethod;
 
 const extrudeToPlane = (
   shape,
