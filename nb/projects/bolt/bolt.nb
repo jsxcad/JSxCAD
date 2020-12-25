@@ -1,5 +1,16 @@
+md`
+# Metric Nuts and Bolts
+
+The nuts are a tight fit, but work well with the printed and machined bolts.
+
+These have been tested on a Prusa Mini with a 0.1 layer height.
+`;
+
+const toHeightFromPitchAngle = (pitch, angle = 60) =>
+  (1 / (2 * Math.tan(((angle / 2) * Math.PI) / 180))) * pitch;
+
 const ThreadProfile = (pitch, angle = 60) => {
-  const h = (1 / (2 * Math.tan(((angle / 2) * Math.PI) / 180))) * pitch;
+  const h = toHeightFromPitchAngle(pitch, angle);
   return Weld(
     Line(pitch / 2 + 1, pitch / -2 - 1).rotate(90),
     Line(0, 2)
@@ -11,10 +22,10 @@ const ThreadProfile = (pitch, angle = 60) => {
   ).rotate(180);
 };
 
-const Thread = (radius = 10, pitch = 0.25, angle = 60) => {
+const Thread = (diameter = 10, pitch = 0.25, angle = 60) => {
   const profile = ThreadProfile(pitch, angle).fill();
   return Union(
-    ...Spiral((a) => [[radius, 0, (a / 360) * pitch]], {
+    ...Spiral((a) => [[diameter / 2, 0, (a / 360) * pitch]], {
       to: 360 * 2.5,
       by: 360 / 36,
     })
@@ -23,20 +34,67 @@ const Thread = (radius = 10, pitch = 0.25, angle = 60) => {
   ).z(-pitch);
 };
 
-const Bolt = (radius = 10, height = 100, pitch = 0.25, angle = 60) => {
+const Bolt = (diameter = 10, height = 100, pitch = 0.25, angle = 60) => {
+  const h = toHeightFromPitchAngle(pitch, angle);
   const segments = [];
-  const segment = Rod(radius * 0.98, pitch).cut(Thread(radius, pitch, angle));
-
+  const segment = Rod(d(diameter - h / 4), pitch).cut(
+    Thread(diameter, pitch, angle)
+  );
   for (let z = 0; z < height; z += pitch) {
     segments.push(segment.z(z));
   }
-  return Group(...segments);
+  return Group(...segments).align('z<');
 };
 
-const M1_6 = (length) => Bolt(1.6 / 2, length, 0.35);
-const M8 = (length) => Bolt(8 / 2, length, 1.25);
+const HexNut = (
+  outer_diameter = 20,
+  inner_diameter = 10,
+  height = 100,
+  pitch = 0.25,
+  angle = 60
+) => {
+  const h = toHeightFromPitchAngle(pitch, angle);
+  const ring = Hexagon(d(outer_diameter))
+    .cut(Arc(d(inner_diameter + h / 2)))
+    .ex(pitch);
+  const segments = [ring];
+  const segment = Thread(inner_diameter + h / 2, pitch, angle).clip(
+    Block(d(outer_diameter), pitch)
+  );
+  for (let z = 0; z < height; z += pitch) {
+    segments.push(ring.z(z), segment.z(z));
+  }
+  return Group(...segments).align('z<');
+};
 
-export const M8x8ThreadedRod = M8(8)
+const HexHead = (diameter = 10, height = 2) =>
+  Hexagon(d(diameter)).ex(height).material('steel');
+
+const HexBolt = (diameter = 10, height = 2) =>
+  Hexagon(d(diameter)).ex(height).material('steel');
+
+export const M1_6Bolt = (length) => Bolt(1.6, length, 0.35);
+export const M4Bolt = (length) => Bolt(4, length, 0.7);
+export const M4HexNut = (length) => HexNut(8, 4, length, 0.7);
+export const M8Bolt = (length) => Bolt(8, length, 1.25);
+
+const m4HexHead = HexHead(8, 3.0);
+const m8HexHead = HexHead(13, 5.3);
+
+export const M8x8ThreadedRod = M8Bolt(8)
   .material('steel')
-  .item('M8x8 threaded rod')
-  .view();
+  .item('M8x8 threaded rod');
+
+export const M4HexBolt = (length) =>
+  M4Bolt(length).and(m4HexHead).material('steel').item(`M4x${length} hex bolt`);
+
+export const m4x3HexNut = M4HexNut(3)
+  .material('steel')
+  .item(`M4x3 hex nut`)
+  .gridView()
+  .downloadStl('M4x3HexNut');
+
+export const m4x8HexBolt = M4HexBolt(8)
+  .rotateX(180)
+  .gridView()
+  .downloadStl('M4x8HexBolt');
