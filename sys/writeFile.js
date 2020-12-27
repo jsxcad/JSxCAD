@@ -15,6 +15,7 @@ import { db } from './db.js';
 import { dirname } from 'path';
 import { getFile } from './files.js';
 import { log } from './log.js';
+import { touch } from './touch.js';
 
 const { promises } = fs;
 const { serialize } = v8;
@@ -26,10 +27,6 @@ export const writeFile = async (options, path, data) => {
     throw Error('source/source');
   }
   data = await data;
-  // FIX: Should be checking for a proxy fs, not webworker.
-  // if (false && isWebWorker) {
-  //  return self.ask({ writeFile: { options: { ...options, as: 'bytes' }, path, data: await data } });
-  // }
 
   const {
     doSerialize = true,
@@ -63,6 +60,7 @@ export const writeFile = async (options, path, data) => {
           data = serialize(data);
         }
         await promises.writeFile(persistentPath, data);
+        await touch(persistentPath, { workspace, doClear: false });
       } catch (error) {}
     } else if (isBrowser || isWebWorker) {
       await db().setItem(persistentPath, data);

@@ -13,6 +13,7 @@ import Hershey from './Hershey.js';
 import Hexagon from './Hexagon.js';
 import Hull from './Hull.js';
 import Icosahedron from './Icosahedron.js';
+import Implicit from './Implicit.js';
 import Intersection from './Intersection.js';
 import Line from './Line.js';
 import LoopedHull from './LoopedHull.js';
@@ -54,6 +55,7 @@ const api = {
   Hexagon,
   Hull,
   Icosahedron,
+  Implicit,
   Intersection,
   Line,
   LoopedHull,
@@ -96,6 +98,7 @@ export {
   Hexagon,
   Hull,
   Icosahedron,
+  Implicit,
   Intersection,
   Line,
   LoopedHull,

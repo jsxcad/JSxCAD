@@ -16,6 +16,7 @@ export { differenceOfNefPolyhedrons } from './differenceOfNefPolyhedrons.js';
 export { differenceOfSurfaceMeshes } from './differenceOfSurfaceMeshes.js';
 export { extrudeSurfaceMesh } from './extrudeSurfaceMesh.js';
 export { extrudeToPlaneOfSurfaceMesh } from './extrudeToPlaneOfSurfaceMesh.js';
+export { fromFunctionToSurfaceMesh } from './fromFunctionToSurfaceMesh.js';
 export { fromGraphToNefPolyhedron } from './fromGraphToNefPolyhedron.js';
 export { fromGraphToSurfaceMesh } from './fromGraphToSurfaceMesh.js';
 export { fromNefPolyhedronFacetsToGraph } from './fromNefPolyhedronFacetsToGraph.js';
