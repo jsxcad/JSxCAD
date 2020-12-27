@@ -1,10 +1,10 @@
-import { taggedAssembly, taggedPaths } from '@jsxcad/geometry-tagged';
+import { taggedGroup, taggedPaths } from '@jsxcad/geometry-tagged';
 
 import Shape from '@jsxcad/api-v1-shape';
 import { fromPng } from '@jsxcad/convert-png';
 import { fromRaster } from '@jsxcad/algorithm-contour';
 import { numbers } from '@jsxcad/api-v1-math';
-import { readFile } from '@jsxcad/sys';
+import { read } from '@jsxcad/sys';
 import { simplifyPath } from '@jsxcad/algorithm-shape';
 
 /**
@@ -13,10 +13,10 @@ import { simplifyPath } from '@jsxcad/algorithm-shape';
  *
  **/
 
-export const readPng = async (path, { src }) => {
-  let data = await readFile({ doSerialize: false }, `source/${path}`);
+export const readPng = async (path) => {
+  let data = await read(`source/${path}`, { sources: [path] });
   if (data === undefined) {
-    data = await readFile({ sources: [src] }, `cache/${path}`);
+    throw Error(`Cannot read png from ${path}`);
   }
   const raster = await fromPng(data);
   return raster;
@@ -24,9 +24,9 @@ export const readPng = async (path, { src }) => {
 
 export const readPngAsContours = async (
   path,
-  { src, by = 10, tolerance = 5 } = {}
+  { by = 10, tolerance = 5, to = 256 } = {}
 ) => {
-  const { width, height, pixels } = await readPng(path, { src });
+  const { width, height, pixels } = await readPng(path);
   // FIX: This uses the red channel for the value.
   const getPixel = (x, y) => pixels[(y * width + x) << 2];
   const data = Array(height);
@@ -36,7 +36,7 @@ export const readPngAsContours = async (
       data[y][x] = getPixel(x, y);
     }
   }
-  const bands = numbers((a) => a, { to: 256, by });
+  const bands = numbers((a) => a, { to, by });
   const contours = await fromRaster(data, bands);
   const pathsets = [];
   for (const contour of contours) {
@@ -45,7 +45,7 @@ export const readPngAsContours = async (
     );
     pathsets.push(taggedPaths({}, simplifiedContour));
   }
-  return Shape.fromGeometry(taggedAssembly({}, ...pathsets));
+  return Shape.fromGeometry(taggedGroup({}, ...pathsets));
 };
 
 export default readPng;

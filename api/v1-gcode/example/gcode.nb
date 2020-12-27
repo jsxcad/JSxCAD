@@ -33,7 +33,7 @@ const tool = {
   millingStyle: 'conventional', // climb, any
 };
 
-const toolpath = Square(10).outline().toolpath(1);
+const toolpath = Box(10).toolpath(1);
 toolpath.view().downloadGcode('square', tool);
 
 md`

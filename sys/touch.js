@@ -2,7 +2,7 @@ import { getFilesystem, setupFilesystem } from './filesystem.js';
 
 import { getFile } from './files.js';
 
-export const touch = async (path, { workspace } = {}) => {
+export const touch = async (path, { workspace, doClear = true } = {}) => {
   let originalWorkspace = getFilesystem();
   if (workspace !== originalWorkspace) {
     // Switch to the source filesystem, if necessary.
@@ -10,7 +10,9 @@ export const touch = async (path, { workspace } = {}) => {
   }
   const file = await getFile({}, path);
   if (file !== undefined) {
-    file.data = undefined;
+    if (doClear) {
+      file.data = undefined;
+    }
 
     for (const watcher of file.watchers) {
       await watcher({}, file);

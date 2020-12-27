@@ -26,14 +26,11 @@ const color = await selectBox('color', 'chartreuse', [
 
 Group(
   Hershey(8)(name).color('black').sketch(),
-  triangle ? Triangle(50).color('orange') : undefined,
+  triangle ? Triangle(50).fill().color('orange') : undefined,
   Line(20).color('black').sketch(),
   Square(15, 1)
     .move(15 / 2)
     .rotate(angle)
     .extrude(height)
     .color(color)
-    .withOutline((o) => o.color('black'))
-)
-  .fix()
-  .view();
+).view();

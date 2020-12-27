@@ -6,10 +6,11 @@ md`
 We can generate shapes and download as SVG.
 `;
 
-Circle(15)
-  .add(Triangle(40))
+Arc(15)
+  .add(Triangle(20))
   .rotate(30)
   .cut(Square(10))
+  .fill()
   .topView()
   .downloadSvg('example');
 
@@ -23,7 +24,7 @@ We can also read SVG in as shapes.
 const svg = await readSvg(
   'https://gitcdn.link/cdn/jsxcad/JSxCAD/master/api/v1-svg/example/example.svg'
 );
-svg.topView();
+svg.pack().topView();
 
 md`
 You can also Control-Click on the example.svg url in the editor to edit the example.svg directly.

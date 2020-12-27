@@ -10,5 +10,6 @@ const holeMethod = function () {
   return hole(this);
 };
 Shape.prototype.hole = holeMethod;
+Shape.prototype.void = holeMethod;
 
 export default hole;

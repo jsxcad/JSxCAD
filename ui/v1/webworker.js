@@ -37,7 +37,10 @@ const agent = async ({ ask, question }) => {
   await sys.log({ op: 'evaluate', status: 'run' });
   await sys.log({ op: 'text', text: 'Evaluation Started' });
   let onEmitHandler;
-  if (question.evaluate) {
+  if (question.touchFile) {
+    const { path, workspace } = question.touchFile;
+    await sys.touch(path, { workspace });
+  } else if (question.evaluate) {
     sys.setupFilesystem({ fileBase: question.workspace });
     sys.clearEmitted();
     let nthNote = 0;

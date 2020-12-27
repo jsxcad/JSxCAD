@@ -9,7 +9,9 @@ const getControlValues = async () =>
 
 export const stringBox = async (label, otherwise) => {
   const { [label]: value = otherwise } = await getControlValues();
-  emit({ control: { type: 'stringBox', label, value } });
+  const control = { type: 'stringBox', label, value };
+  const hash = hashSum(control);
+  emit({ control, hash });
   return value;
 };
 
@@ -22,9 +24,7 @@ export const sliderBox = async (
   { min = 0, max = 100, step = 1 } = {}
 ) => {
   const { [label]: value = otherwise } = await getControlValues();
-  const control = {
-    control: { type: 'sliderBox', label, value, min, max, step },
-  };
+  const control = { type: 'sliderBox', label, value, min, max, step };
   const hash = hashSum(control);
   emit({ control, hash });
   return Number(value);
