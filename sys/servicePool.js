@@ -66,3 +66,9 @@ export const terminateActiveServices = async () => {
     resolve(service);
   }
 };
+
+export const askServices = async (question) => {
+  for (const { ask } of [...idleServices, ...activeServices]) {
+    await ask(question);
+  }
+};

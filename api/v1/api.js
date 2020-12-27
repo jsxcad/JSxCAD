@@ -92,6 +92,7 @@ export {
   Hexagon,
   Hull,
   Icosahedron,
+  Implicit,
   Intersection,
   Line,
   LoopedHull,

@@ -4,7 +4,7 @@ import { concatenate, rotateZ, translate as translate$1 } from './jsxcad-geometr
 import { numbers } from './jsxcad-api-v1-math.js';
 import { taggedAssembly, taggedSolid, taggedLayers, taggedGraph, taggedDisjointAssembly, taggedPaths, taggedPoints, taggedZ0Surface } from './jsxcad-geometry-tagged.js';
 import { buildRingSphere, toRadiusFromApothem as toRadiusFromApothem$1, buildRegularIcosahedron, buildRegularPolygon, regularPolygonEdgeLengthToRadius, buildPolygonFromPoints } from './jsxcad-algorithm-shape.js';
-import { convexHull } from './jsxcad-geometry-graph.js';
+import { convexHull, fromFunction } from './jsxcad-geometry-graph.js';
 import { translate } from './jsxcad-geometry-paths.js';
 import { add } from './jsxcad-math-vec3.js';
 import { toPolygon } from './jsxcad-math-plane.js';
@@ -1635,6 +1635,11 @@ const Icosahedron = (value = 1) => {
 
 Shape.prototype.Icosahedron = shapeMethod(Icosahedron);
 
+const Implicit = (op, options) =>
+  Shape.fromGraph(fromFunction(op, options));
+
+Shape.prototype.Implicit = shapeMethod(Implicit);
+
 const Intersection = (first, ...rest) => first.clip(...rest);
 
 Shape.prototype.Intersection = shapeMethod(Intersection);
@@ -1894,6 +1899,7 @@ const api = {
   Hexagon,
   Hull,
   Icosahedron,
+  Implicit,
   Intersection,
   Line,
   LoopedHull,
@@ -1921,4 +1927,4 @@ const api = {
 };
 
 export default api;
-export { Arc, Assembly, Ball, Block, Box, ChainedHull, Circle, Cone, Difference, Empty, Group, Hershey, Hexagon, Hull, Icosahedron, Intersection, Line, LoopedHull, Octagon, Path, Peg, Pentagon, Plane, Point, Points, Polygon, Polyhedron, Rod, Septagon, Sketch, Spiral, Square, Tetragon, Toolpath, Torus, Triangle, Union, Wave, Weld };
+export { Arc, Assembly, Ball, Block, Box, ChainedHull, Circle, Cone, Difference, Empty, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Intersection, Line, LoopedHull, Octagon, Path, Peg, Pentagon, Plane, Point, Points, Polygon, Polyhedron, Rod, Septagon, Sketch, Spiral, Square, Tetragon, Toolpath, Torus, Triangle, Union, Wave, Weld };

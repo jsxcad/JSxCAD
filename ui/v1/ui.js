@@ -4,6 +4,7 @@ import SplitPane, { Pane } from 'react-split-pane';
 
 import {
   askService,
+  askServices,
   ask as askSys,
   boot,
   clearEmitted,
@@ -165,7 +166,9 @@ class Ui extends React.PureComponent {
         return log(entry);
       } else if (question.touchFile) {
         const { path, workspace } = question.touchFile;
-        return touch(path, { workspace });
+        await touch(path, { workspace });
+        // Invalidate the path in all workers.
+        await askServices({ touchFile: { path, workspace } });
       } else if (question.note) {
         const { note, index } = question;
         const { notebookData, notebookRef } = this.state;
