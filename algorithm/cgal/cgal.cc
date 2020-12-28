@@ -141,8 +141,8 @@ Surface_mesh* FromPolygonSoupToSurfaceMesh(emscripten::val fill) {
   Polygons* polygons_ptr = &polygons;
   fill(triples_ptr, polygons_ptr);
   CGAL::Polygon_mesh_processing::repair_polygon_soup(triples, polygons, CGAL::parameters::geom_traits(Triple_array_traits()));
-  Surface_mesh* mesh = new Surface_mesh();
   CGAL::Polygon_mesh_processing::orient_polygon_soup(triples, polygons);
+  Surface_mesh* mesh = new Surface_mesh();
   CGAL::Polygon_mesh_processing::polygon_soup_to_polygon_mesh(triples, polygons, *mesh);
   assert(CGAL::Polygon_mesh_processing::triangulate_faces(*mesh) == true);
   return mesh;
@@ -207,6 +207,7 @@ Surface_mesh* FromFunctionToSurfaceMesh(double radius, double angular_bound, dou
 
 #if 1
 Surface_mesh* FromFunctionToSurfaceMesh(double radius, double angular_bound, double radius_bound, double distance_bound, emscripten::val function) {
+  std::cout << "QQ/FFTSM/1" << std::endl;
   // default triangulation for Surface_mesher
   typedef CGAL::Surface_mesh_default_triangulation_3 Tr;
   // c2t3
@@ -221,19 +222,24 @@ Surface_mesh* FromFunctionToSurfaceMesh(double radius, double angular_bound, dou
 
   const double resolution = 0.1;
 
+  std::cout << "QQ/FFTSM/2" << std::endl;
   Tr tr;            // 3D-Delaunay triangulation
   C2t3 c2t3 (tr);   // 2D-complex in 3D-Delaunay triangulation
   // defining the surface
   Surface_3 surface([&](const Point_3& p) { return FT(function(CGAL::to_double(p.x()), CGAL::to_double(p.y()), CGAL::to_double(p.z())).as<double>()); },
                     Sphere_3(CGAL::ORIGIN, radius * radius), resolution);
+  std::cout << "QQ/FFTSM/3" << std::endl;
   CGAL::Surface_mesh_default_criteria_3<Tr> criteria(angular_bound, radius_bound, distance_bound);
 
+  std::cout << "QQ/FFTSM/4" << std::endl;
   // meshing surface
   CGAL::make_surface_mesh(c2t3, surface, criteria, CGAL::Manifold_tag());
+  std::cout << "QQ/FFTSM/5" << std::endl;
 
-  Surface_mesh* mesh = new Surface_mesh();
-  CGAL::facets_in_complex_2_to_triangle_mesh(c2t3, *mesh);
-  return mesh;
+  Surface_mesh* epeck_mesh = new Surface_mesh();
+  CGAL::facets_in_complex_2_to_triangle_mesh(c2t3, *epeck_mesh);
+  std::cout << "QQ/FFTSM/6" << std::endl;
+  return epeck_mesh;
 }
 #endif
 
