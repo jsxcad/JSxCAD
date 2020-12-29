@@ -97,6 +97,7 @@ export {
   Line,
   LoopedHull,
   Octagon,
+  Orb,
   Path,
   Peg,
   Pentagon,

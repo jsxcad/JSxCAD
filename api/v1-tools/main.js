@@ -1,3 +1,5 @@
+import './carve.js';
+
 export { BenchPlane } from './BenchPlane.js';
 export { BenchSaw } from './BenchSaw.js';
 export { DrillPress } from './DrillPress.js';
