@@ -18,5 +18,6 @@ export const Ball = (value = 1, { resolution = 16 } = {}) => {
 };
 
 Shape.prototype.Ball = shapeMethod(Ball);
+Shape.prototype.Orb = shapeMethod(Ball);
 
 export default Ball;

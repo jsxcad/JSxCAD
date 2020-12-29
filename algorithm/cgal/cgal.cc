@@ -141,8 +141,8 @@ Surface_mesh* FromPolygonSoupToSurfaceMesh(emscripten::val fill) {
   Polygons* polygons_ptr = &polygons;
   fill(triples_ptr, polygons_ptr);
   CGAL::Polygon_mesh_processing::repair_polygon_soup(triples, polygons, CGAL::parameters::geom_traits(Triple_array_traits()));
-  Surface_mesh* mesh = new Surface_mesh();
   CGAL::Polygon_mesh_processing::orient_polygon_soup(triples, polygons);
+  Surface_mesh* mesh = new Surface_mesh();
   CGAL::Polygon_mesh_processing::polygon_soup_to_polygon_mesh(triples, polygons, *mesh);
   assert(CGAL::Polygon_mesh_processing::triangulate_faces(*mesh) == true);
   return mesh;
@@ -166,16 +166,10 @@ void FromSurfaceMeshToPolygonSoup(Surface_mesh* mesh, bool triangulate, emscript
 }
 
 #if 0
-FT sphere_function (Point_3 p) {
-  const FT x2=p.x()*p.x(), y2=p.y()*p.y(), z2=p.z()*p.z();
-  return x2+y2+z2-1;
-}
-#endif
-
-#if 0
-Surface_mesh* FromFunctionToSurfaceMesh(double radius, double angular_bound, double radius_bound, double distance_bound, emscripten::val function) {
+Surface_mesh* FromFunctionToSurfaceMesh(double radius, double angular_bound, double radius_bound, double distance_bound, double error_bound, emscripten::val function) {
   // Domain
-  typedef CGAL::Exact_predicates_inexact_constructions_kernel K;
+  // typedef CGAL::Exact_predicates_inexact_constructions_kernel K;
+  typedef CGAL::Exact_predicates_exact_constructions_kernel K;
   typedef K::FT FT;
   typedef K::Point_3 Point;
   typedef FT (Function)(const Point&);
@@ -205,8 +199,16 @@ Surface_mesh* FromFunctionToSurfaceMesh(double radius, double angular_bound, dou
 }
 #endif
 
-#if 1
-Surface_mesh* FromFunctionToSurfaceMesh(double radius, double angular_bound, double radius_bound, double distance_bound, emscripten::val function) {
+#if 0
+FT sphere_function (Point_3 p) {
+  const FT x2=p.x()*p.x(), y2=p.y()*p.y(), z2=p.z()*p.z();
+  return x2+y2+z2-1;
+}
+#endif
+
+#if 0
+Surface_mesh* FromFunctionToSurfaceMesh(double radius, double angular_bound, double radius_bound, double distance_bound, double error_bound, emscripten::val function) {
+  std::cout << "QQ/FFTSM/1" << " radius: " << radius << " angular_bound: " << angular_bound << " radius_bound: " << radius_bound << " distance_bound: " << distance_bound << " error_bound: " << error_bound << std::endl;
   // default triangulation for Surface_mesher
   typedef CGAL::Surface_mesh_default_triangulation_3 Tr;
   // c2t3
@@ -217,23 +219,31 @@ Surface_mesh* FromFunctionToSurfaceMesh(double radius, double angular_bound, dou
   typedef GT::FT FT;
   typedef FT (*Function)(Point_3);
   typedef CGAL::Implicit_surface_3<GT, Function> Surface_3;
-  typedef CGAL::Surface_mesh<Point_3> Epick_Surface_mesh;
+  // typedef CGAL::Surface_mesh<Point_3> Epick_Surface_mesh;
 
-  const double resolution = 0.1;
-
+  std::cout << "QQ/FFTSM/2" << std::endl;
   Tr tr;            // 3D-Delaunay triangulation
   C2t3 c2t3 (tr);   // 2D-complex in 3D-Delaunay triangulation
   // defining the surface
+#if 1
   Surface_3 surface([&](const Point_3& p) { return FT(function(CGAL::to_double(p.x()), CGAL::to_double(p.y()), CGAL::to_double(p.z())).as<double>()); },
-                    Sphere_3(CGAL::ORIGIN, radius * radius), resolution);
+                    Sphere_3(CGAL::ORIGIN, radius * radius), error_bound);
+#else
+  Surface_3 surface([&](const Point_3& p) { const FT x2=p.x()*p.x(), y2=p.y()*p.y(), z2=p.z()*p.z(); return x2+y2+z2-1; },
+                    Sphere_3(CGAL::ORIGIN, radius * radius), error_bound);
+#endif
+  std::cout << "QQ/FFTSM/3" << std::endl;
   CGAL::Surface_mesh_default_criteria_3<Tr> criteria(angular_bound, radius_bound, distance_bound);
 
+  std::cout << "QQ/FFTSM/4" << std::endl;
   // meshing surface
   CGAL::make_surface_mesh(c2t3, surface, criteria, CGAL::Manifold_tag());
+  std::cout << "QQ/FFTSM/5" << std::endl;
 
-  Surface_mesh* mesh = new Surface_mesh();
-  CGAL::facets_in_complex_2_to_triangle_mesh(c2t3, *mesh);
-  return mesh;
+  Surface_mesh* epeck_mesh = new Surface_mesh();
+  CGAL::facets_in_complex_2_to_triangle_mesh(c2t3, *epeck_mesh);
+  std::cout << "QQ/FFTSM/6" << std::endl;
+  return epeck_mesh;
 }
 #endif
 
@@ -1053,7 +1063,24 @@ Surface_mesh* OutlineOfSurfaceMesh(Surface_mesh* input) {
       auto edge_source = source(edge, *mesh);
       auto edge_next_next_source = source(edge_next_next, *mesh);
       if (edge_source == edge_next_next_source && edge != edge_next_next) {
-        CGAL::Euler::split_face(prev(edge, *mesh), edge_next, *mesh);
+
+        const auto& h1 = prev(edge, *mesh);
+        const auto& h2 = edge_next;
+
+        // Enforce pre-conditions.
+        if (face(h1, *mesh) != face(h2, *mesh)) {
+          continue;
+        }
+        if (h1 == h2) {
+          continue;
+        }
+        if (next(h1, *mesh) == h2) {
+          continue;
+        }
+        if (next(h2, *mesh) == h1) {
+          continue;
+        }
+        CGAL::Euler::split_face(h1, h2, *mesh);
         CGAL::Euler::remove_face(edge_next, *mesh);
         collapsed = true;
       }
@@ -1921,7 +1948,7 @@ EMSCRIPTEN_BINDINGS(module) {
   emscripten::function("TransformSurfaceMesh", &TransformSurfaceMesh, emscripten::allow_raw_pointers());
   emscripten::function("TransformSurfaceMeshByTransform", &TransformSurfaceMeshByTransform, emscripten::allow_raw_pointers());
   emscripten::function("FromSurfaceMeshToPolygonSoup", &FromSurfaceMeshToPolygonSoup, emscripten::allow_raw_pointers());
-  emscripten::function("FromFunctionToSurfaceMesh", &FromFunctionToSurfaceMesh, emscripten::allow_raw_pointers());
+  // emscripten::function("FromFunctionToSurfaceMesh", &FromFunctionToSurfaceMesh, emscripten::allow_raw_pointers());
   emscripten::function("ComputeConvexHullAsSurfaceMesh", &ComputeConvexHullAsSurfaceMesh, emscripten::allow_raw_pointers());
   emscripten::function("ComputeAlphaShapeAsSurfaceMesh", &ComputeAlphaShapeAsSurfaceMesh, emscripten::allow_raw_pointers());
   emscripten::function("ComputeAlphaShape2AsPolygonSegments", &ComputeAlphaShape2AsPolygonSegments, emscripten::allow_raw_pointers());
