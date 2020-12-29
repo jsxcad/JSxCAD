@@ -39,6 +39,8 @@ import Union from './Union.js';
 import Wave from './Wave.js';
 import Weld from './Weld.js';
 
+const Orb = Ball;
+
 const api = {
   Arc,
   Assembly,
@@ -60,6 +62,7 @@ const api = {
   Line,
   LoopedHull,
   Octagon,
+  Orb,
   Path,
   Peg,
   Pentagon,
@@ -103,6 +106,7 @@ export {
   Line,
   LoopedHull,
   Octagon,
+  Orb,
   Pentagon,
   Path,
   Peg,
