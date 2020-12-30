@@ -9,5 +9,6 @@ const rotateZMethod = function (angle) {
   return rotateZ(this, angle);
 };
 Shape.prototype.rotateZ = rotateZMethod;
+Shape.prototype.rz = rotateZMethod;
 
 export default rotateZ;
