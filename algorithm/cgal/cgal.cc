@@ -35,6 +35,7 @@
 #include <CGAL/Delaunay_triangulation_2.h>
 #include <CGAL/Delaunay_triangulation_3.h>
 #include <CGAL/exude_mesh_3.h>
+#include <CGAL/linear_least_squares_fitting_3.h>
 #include <CGAL/make_mesh_3.h>
 #include <CGAL/make_surface_mesh.h>
 #include <CGAL/perturb_mesh_3.h>
@@ -104,6 +105,9 @@ typedef Surface_mesh::Vertex_index Vertex_index;
 
 typedef std::array<FT, 3> Triple;
 typedef std::vector<Triple> Triples;
+
+typedef std::array<double, 3> DoubleTriple;
+typedef std::vector<DoubleTriple> DoubleTriples;
 
 typedef std::array<FT, 4> Quadruple;
 
@@ -324,11 +328,11 @@ struct TriangularSurfaceMeshBuilder {
   TriangularSurfaceMeshBuilder operator++(int) { return *this; }
 };
 
-Surface_mesh* FromPointsToSurfaceMesh(emscripten::val fill) {
+Surface_mesh* FromPointsToSurfaceMesh(emscripten::val fill_triples) {
   Surface_mesh* mesh = new Surface_mesh();
   std::vector<Triple> triples;
   std::vector<Triple>* triples_ptr = &triples;
-  fill(triples_ptr);
+  fill_triples(triples_ptr);
   std::vector<Point> points;
   for (const auto& triple : triples) {
     points.emplace_back(Point{ triple[0], triple[1], triple[2] });
@@ -338,6 +342,23 @@ Surface_mesh* FromPointsToSurfaceMesh(emscripten::val fill) {
                                                points.end(),
                                                builder);
   return mesh;
+}
+
+void FitPlaneToPoints(emscripten::val fill_triples, emscripten::val emit_plane) {
+  typedef CGAL::Epick::Plane_3 Plane;
+  typedef CGAL::Epick::Point_3 Point;
+  DoubleTriples triples;
+  std::vector<DoubleTriple>* triples_ptr = &triples;
+  fill_triples(triples_ptr);
+  std::vector<Point> points;
+  for (const auto& triple : triples) {
+    points.emplace_back(Point{ triple[0], triple[1], triple[2] });
+  }
+  Plane plane;
+  if (points.size() > 0) {
+    linear_least_squares_fitting_3(points.begin(), points.end(), plane, CGAL::Dimension_tag<0>());
+    emit_plane(CGAL::to_double(plane.a()), CGAL::to_double(plane.b()), CGAL::to_double(plane.c()), CGAL::to_double(plane.d()));
+  }
 }
 
 Surface_mesh* SubdivideSurfaceMesh(Surface_mesh* input, int method, int iterations) {
@@ -423,6 +444,10 @@ void Surface_mesh__EachFace(Surface_mesh* mesh, emscripten::val op) {
 
 void addTriple(Triples* triples, double x, double y, double z) {
   triples->emplace_back(Triple{ x, y, z });
+}
+
+void addDoubleTriple(DoubleTriples* triples, double x, double y, double z) {
+  triples->emplace_back(DoubleTriple{ x, y, z });
 }
 
 void fillQuadruple(Quadruple* q, double x, double y, double z, double w) {
@@ -1820,12 +1845,19 @@ EMSCRIPTEN_BINDINGS(module) {
   emscripten::class_<Polygon_2>("Polygon_2").constructor<>();
   emscripten::class_<Polygon_with_holes_2>("Polygon_with_holes_2").constructor<>();
 
-  emscripten::function("addTriple", &addTriple, emscripten::allow_raw_pointers());
-
   emscripten::class_<Triples>("Triples")
     .constructor<>()
     .function("push_back", select_overload<void(const Triple&)>(&Triples::push_back))
     .function("size", select_overload<size_t()const>(&Triples::size));
+
+  emscripten::function("addTriple", &addTriple, emscripten::allow_raw_pointers());
+
+  emscripten::class_<DoubleTriples>("DoubleTriples")
+    .constructor<>()
+    .function("push_back", select_overload<void(const DoubleTriple&)>(&DoubleTriples::push_back))
+    .function("size", select_overload<size_t()const>(&DoubleTriples::size));
+
+  emscripten::function("addDoubleTriple", &addDoubleTriple, emscripten::allow_raw_pointers());
 
   emscripten::class_<Quadruple>("Quadruple").constructor<>();
   emscripten::function("fillQuadruple", &fillQuadruple, emscripten::allow_raw_pointers());
@@ -1943,6 +1975,7 @@ EMSCRIPTEN_BINDINGS(module) {
   emscripten::function("Surface_mesh__explore", &Surface_mesh__explore, emscripten::allow_raw_pointers());
 
   emscripten::function("FromPointsToSurfaceMesh", &FromPointsToSurfaceMesh, emscripten::allow_raw_pointers());
+  emscripten::function("FitPlaneToPoints", &FitPlaneToPoints, emscripten::allow_raw_pointers());
   emscripten::function("RemeshSurfaceMesh", &RemeshSurfaceMesh, emscripten::allow_raw_pointers());
   emscripten::function("SubdivideSurfaceMesh", &SubdivideSurfaceMesh, emscripten::allow_raw_pointers());
   emscripten::function("TransformSurfaceMesh", &TransformSurfaceMesh, emscripten::allow_raw_pointers());
