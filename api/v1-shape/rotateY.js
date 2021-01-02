@@ -9,5 +9,6 @@ const rotateYMethod = function (angle) {
   return rotateY(this, angle);
 };
 Shape.prototype.rotateY = rotateYMethod;
+Shape.prototype.ry = rotateYMethod;
 
 export default rotateY;

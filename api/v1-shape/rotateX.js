@@ -9,5 +9,6 @@ const rotateXMethod = function (angle) {
   return rotateX(this, angle);
 };
 Shape.prototype.rotateX = rotateXMethod;
+Shape.prototype.rx = rotateXMethod;
 
 export default rotateX;
