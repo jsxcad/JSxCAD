@@ -1,5 +1,5 @@
 import Alpha from './Alpha.js';
-import Loop from './Loop.js';
+// import Loop from './Loop.js';
 import cloudSolid from './cloudSolid.js';
 import extrude from './extrude.js';
 import extrudeToPlane from './extrudeToPlane.js';
@@ -15,7 +15,7 @@ import voxels from './voxels.js';
 
 const api = {
   Alpha,
-  Loop,
+  // Loop,
   extrude,
   extrudeToPlane,
   fill,
@@ -31,7 +31,7 @@ const api = {
 
 export {
   Alpha,
-  Loop,
+  // Loop,
   cloudSolid,
   extrude,
   extrudeToPlane,

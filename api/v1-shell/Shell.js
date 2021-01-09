@@ -1,4 +1,4 @@
-import { Ball, Hull } from '@jsxcad/api-v1-shapes';
+import { Hull, Orb } from '@jsxcad/api-v1-shapes';
 
 import {
   add,
@@ -55,7 +55,7 @@ export const Shell = (radius = 1, resolution = 3, ...shapes) => {
           pieces.push(
             Hull(
               ...polygon.map((point) =>
-                Ball(radius, { resolution }).move(...point)
+                Orb(radius, { resolution }).move(...point)
               )
             )
               .setTags(tags)

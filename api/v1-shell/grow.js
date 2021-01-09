@@ -1,4 +1,4 @@
-import { Ball, Hull } from '@jsxcad/api-v1-shapes';
+import { Hull, Orb } from '@jsxcad/api-v1-shapes';
 
 import {
   fromSolid as fromSolidToBspTree,
@@ -20,7 +20,7 @@ export const grow = (shape, amount = 1, { resolution = 3 } = {}) => {
       normalize
     )) {
       pieces.push(
-        Hull(...cloud.map((point) => Ball(amount, resolution).move(...point)))
+        Hull(...cloud.map((point) => Orb(amount, resolution).move(...point)))
           .setTags(tags)
           .toGeometry()
       );

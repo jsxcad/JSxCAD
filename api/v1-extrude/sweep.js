@@ -5,7 +5,7 @@ import { add, normalize, subtract, transform } from '@jsxcad/math-vec3';
 import { fromNormalAndPoint } from '@jsxcad/math-plane';
 import { fromRotation } from '@jsxcad/math-mat4';
 import { getEdges } from '@jsxcad/geometry-path';
-import { getPaths } from '@jsxcad/geometry-tagged';
+import { outline } from '@jsxcad/geometry-tagged';
 
 const START = 0;
 const END = 1;
@@ -20,7 +20,7 @@ const planeOfBisection = (aStart, bStart, intersection) => {
 // FIX: There is something very wrong with this -- rotating the profile around z can produce inversion.
 export const sweep = (toolpath, tool, up = [0, 0, 1, 0]) => {
   const chains = [];
-  for (const { paths } of getPaths(toolpath.toKeptGeometry())) {
+  for (const { paths } of outline(toolpath.toKeptGeometry())) {
     for (const path of paths) {
       // FIX: Handle open paths and bent polygons.
       const tools = [];

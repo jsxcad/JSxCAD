@@ -4,7 +4,6 @@ import { rewrite } from './visit.js';
 import { taggedSurface } from './taggedSurface.js';
 import { transform as transformGraph } from '@jsxcad/geometry-graph';
 import { transform as transformPaths } from '@jsxcad/geometry-paths';
-import { transform as transformPlan } from '@jsxcad/geometry-plan';
 import { transform as transformPoints } from '@jsxcad/geometry-points';
 import { transform as transformSolid } from '@jsxcad/geometry-solid';
 import { transform as transformSurface } from '@jsxcad/geometry-surface';
@@ -37,7 +36,15 @@ export const toTransformedGeometry = (geometry) => {
             return descend(undefined, matrix);
           }
         case 'plan':
-          return transformPlan(matrix, geometry.plan);
+          return descend({
+            plan: {
+              ...geometry.plan,
+              matrix: composeTransforms(
+                matrix,
+                geometry.plan.matrix || identityMatrix
+              ),
+            },
+          });
         case 'paths':
           return descend({ paths: transformPaths(matrix, geometry.paths) });
         case 'points':

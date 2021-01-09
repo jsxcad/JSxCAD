@@ -1,11 +1,12 @@
-export const getSides = (plan) => {
+export const getSides = (plan, value = 32) => {
   switch (plan.type) {
+    case 'edge':
     case 'radius':
     case 'apothem':
     case 'diameter':
-      return plan.sides;
+      return plan._sides;
     default: {
-      const { sides = 32 } = plan;
+      const { sides = value } = plan;
       return sides;
     }
   }

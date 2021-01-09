@@ -33,7 +33,6 @@
     "@jsxcad/geometry-path": "^0.0.79",
     "@jsxcad/geometry-paths": "^0.0.79",
     "@jsxcad/geometry-points": "^0.0.79",
-    "@jsxcad/geometry-plan": "^0.0.79",
     "@jsxcad/geometry-solid": "^0.0.79",
     "@jsxcad/geometry-surface": "^0.0.79",
     "@jsxcad/math-mat4": "^0.0.79",

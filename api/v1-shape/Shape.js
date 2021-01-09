@@ -25,6 +25,7 @@ import {
 } from '@jsxcad/geometry-tagged';
 
 import { fromPolygons as fromPolygonsToSolid } from '@jsxcad/geometry-solid';
+import { identityMatrix } from '@jsxcad/math-mat4';
 
 export class Shape {
   close() {
@@ -100,7 +101,11 @@ export class Shape {
   }
 
   transform(matrix) {
-    return fromGeometry(transform(matrix, this.toGeometry()), this.context);
+    if (matrix === identityMatrix) {
+      return this;
+    } else {
+      return fromGeometry(transform(matrix, this.toGeometry()), this.context);
+    }
   }
 
   reconcile() {

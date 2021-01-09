@@ -8,21 +8,30 @@
  */
 
 import '@jsxcad/api-v1-deform';
+import '@jsxcad/api-v1-extrude';
 import '@jsxcad/api-v1-gcode';
 import '@jsxcad/api-v1-layout';
 import '@jsxcad/api-v1-pdf';
 import '@jsxcad/api-v1-plans';
 
-import { apothem, box, corners, diameter, radius } from '@jsxcad/geometry-plan';
+import {
+  apothem,
+  box,
+  corners,
+  diameter,
+  edge,
+  radius,
+} from '@jsxcad/geometry-plan';
 
 import { Peg } from '@jsxcad/api-v1-shapes';
 
-export { apothem, box, corners, diameter, radius };
+export { apothem, box, corners, diameter, edge, radius };
 
 export const a = apothem;
 export const b = box;
 export const c = corners;
 export const d = diameter;
+export const e = edge;
 export const r = radius;
 
 export const x = Peg([0, 0, 0], [0, 0, 1], [0, -1, 0]);
@@ -55,9 +64,9 @@ export {
   saveRecordedNotes,
 } from './recordNotes.js';
 
-export { X, Y, Z } from '@jsxcad/api-v1-connector';
+// export { X, Y, Z } from '@jsxcad/api-v1-connector';
 
-export { Loop } from '@jsxcad/api-v1-extrude';
+// export { Loop } from '@jsxcad/api-v1-extrude';
 
 export { Shape, loadGeometry, log, saveGeometry } from '@jsxcad/api-v1-shape';
 
@@ -79,7 +88,6 @@ export {
 export {
   Arc,
   Assembly,
-  Ball,
   Block,
   Box,
   ChainedHull,
@@ -106,6 +114,7 @@ export {
   Points,
   Polygon,
   Polyhedron,
+  RegularPolygon,
   Rod,
   Septagon,
   Spiral,

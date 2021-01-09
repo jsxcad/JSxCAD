@@ -1,6 +1,5 @@
 import Arc from './Arc.js';
 import Assembly from './Assembly.js';
-import Ball from './Ball.js';
 import Block from './Block.js';
 import Box from './Box.js';
 import ChainedHull from './ChainedHull.js';
@@ -18,6 +17,7 @@ import Intersection from './Intersection.js';
 import Line from './Line.js';
 import LoopedHull from './LoopedHull.js';
 import Octagon from './Octagon.js';
+import Orb from './Orb.js';
 import Path from './Path.js';
 import Peg from './Peg.js';
 import Pentagon from './Pentagon.js';
@@ -26,6 +26,7 @@ import Point from './Point.js';
 import Points from './Points.js';
 import Polygon from './Polygon.js';
 import Polyhedron from './Polyhedron.js';
+import RegularPolygon from './RegularPolygon.js';
 import Rod from './Rod.js';
 import Septagon from './Septagon.js';
 import Sketch from './Sketch.js';
@@ -39,12 +40,9 @@ import Union from './Union.js';
 import Wave from './Wave.js';
 import Weld from './Weld.js';
 
-const Orb = Ball;
-
 const api = {
   Arc,
   Assembly,
-  Ball,
   Block,
   Box,
   ChainedHull,
@@ -71,6 +69,7 @@ const api = {
   Points,
   Polygon,
   Polyhedron,
+  RegularPolygon,
   Rod,
   Septagon,
   Sketch,
@@ -88,7 +87,6 @@ const api = {
 export {
   Arc,
   Assembly,
-  Ball,
   Block,
   Box,
   ChainedHull,
@@ -115,6 +113,7 @@ export {
   Points,
   Polygon,
   Polyhedron,
+  RegularPolygon,
   Rod,
   Septagon,
   Sketch,
