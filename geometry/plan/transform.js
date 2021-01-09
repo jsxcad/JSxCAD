@@ -1,5 +1,6 @@
 import { transform as transformPoint } from '@jsxcad/math-vec3';
 
+// FIX: Need to rethink this.
 export const transform = (matrix, plan) => {
   if (plan.at) {
     const { at } = plan;

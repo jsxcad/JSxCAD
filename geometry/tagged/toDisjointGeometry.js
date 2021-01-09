@@ -1,4 +1,5 @@
 import { difference } from './difference.js';
+import { reify } from './reify.js';
 import { rewrite } from './visit.js';
 import { taggedDisjointAssembly } from './taggedDisjointAssembly.js';
 import { toTransformedGeometry } from './toTransformedGeometry.js';
@@ -12,6 +13,8 @@ export const toDisjointGeometry = (geometry) => {
     } else if (geometry.type === 'disjointAssembly') {
       // Everything below this point is disjoint.
       return geometry;
+    } else if (geometry.type === 'plan') {
+      return walk(reify(geometry), op);
     } else if (geometry.type === 'transform') {
       return walk(toTransformedGeometry(geometry), op);
     } else if (geometry.type === 'assembly') {

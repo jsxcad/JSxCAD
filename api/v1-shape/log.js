@@ -40,9 +40,7 @@ export const logOp = (shape, op) => {
   return sysLog({ op: 'text', text });
 };
 
-const logMethod = function (
-  op = (shape) => JSON.stringify(shape.toKeptGeometry())
-) {
+const logMethod = function (op = (shape) => JSON.stringify(shape)) {
   logOp(this, op);
   return this;
 };

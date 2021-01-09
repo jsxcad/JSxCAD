@@ -1,23 +1,38 @@
 import { Shape, shapeMethod } from '@jsxcad/api-v1-shape';
+import {
+  getBase,
+  getCenter,
+  getDiameter,
+  getFrom,
+  getMatrix,
+  getSides,
+  getTo,
+  getTop,
+} from '@jsxcad/geometry-plan';
+import { reify, taggedPlan } from '@jsxcad/geometry-tagged';
 
-import Circle from './Circle.js';
+import Arc from './Arc.js';
 import Hull from './Hull.js';
-import { toRadiusFromApothem } from '@jsxcad/algorithm-shape';
+import Point from './Point.js';
 
-export const ofRadius = (radius = 1, height = 1, { sides = 32 } = {}) =>
-  Hull(Circle(0.1).moveZ(height), Circle(radius));
+reify.Cone = (plan) => {
+  const [length, width] = getDiameter(plan);
+  return Hull(
+    Arc(length, width).sides(getSides(plan)).z(getBase(plan)),
+    Point(0, 0, getTop(plan))
+  )
+    .orient({ center: getCenter(plan), from: getFrom(plan), at: getTo(plan) })
+    .transform(getMatrix(plan))
+    .toGeometry();
+};
 
-export const ofDiameter = (diameter, ...args) =>
-  ofRadius(diameter / 2, ...args);
-export const ofApothem = (apothem, ...args) =>
-  ofRadius(toRadiusFromApothem(apothem), ...args);
-
-export const Cone = (...args) => ofRadius(...args);
-
-Cone.ofRadius = ofRadius;
-Cone.ofDiameter = ofDiameter;
-Cone.ofApothem = ofApothem;
-
-export default Cone;
+export const Cone = (diameter = 1, top = 1, base = 0) =>
+  Shape.fromGeometry(
+    taggedPlan({}, { diameter: [diameter, diameter, 0], type: 'Cone' })
+  )
+    .top(top)
+    .base(base);
 
 Shape.prototype.Cone = shapeMethod(Cone);
+
+export default Cone;

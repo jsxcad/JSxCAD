@@ -1,3 +1,4 @@
+/*
 import './back.js';
 import './bottom.js';
 import './flat.js';
@@ -21,3 +22,4 @@ const api = {
 export { X, Y, Z };
 
 export default api;
+*/
