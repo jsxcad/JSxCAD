@@ -1050,12 +1050,40 @@ Surface_mesh* OutlineOfSurfaceMesh(Surface_mesh* input) {
     auto edge_face = face(edge, *mesh);
     auto twin_face = face(twin, *mesh);
     if (edge_face == twin_face) {
-      CGAL::Euler::split_face(edge, twin, *mesh);
+      const auto& h1 = edge;
+      const auto& h2 = twin;
+
+      // Enforce pre-conditions.
+      if (face(h1, *mesh) != face(h2, *mesh)) {
+        // std::cout << "VV/1" << std::endl;
+        continue;
+      }
+      if (h1 == h2) {
+        // std::cout << "VV/2" << std::endl;
+        continue;
+      }
+      if (next(h1, *mesh) == h2) {
+        // std::cout << "VV/3" << std::endl;
+        continue;
+      }
+      if (next(h2, *mesh) == h1) {
+        // std::cout << "VV/4" << std::endl;
+        continue;
+      }
+      CGAL::Euler::split_face(h1, h2, *mesh);
     } else {
       auto edge_face_normal = CGAL::Polygon_mesh_processing::compute_face_normal(edge_face, *mesh);
       auto twin_face_normal = CGAL::Polygon_mesh_processing::compute_face_normal(twin_face, *mesh);
       // FIX: Figure out the limit properly and consider planar drift.
       if (edge_face_normal * twin_face_normal > kColinearityThreshold) {
+        if (out_degree(source(edge, *mesh), *mesh) < 3) {
+        // std::cout << "VV/5" << std::endl;
+          continue;
+        }
+        if (out_degree(target(edge, *mesh), *mesh) < 3) {
+        // std::cout << "VV/6" << std::endl;
+          continue;
+        }
         CGAL::Euler::join_face(edge, *mesh);
       }
     }
@@ -1078,20 +1106,25 @@ Surface_mesh* OutlineOfSurfaceMesh(Surface_mesh* input) {
 
         // Enforce pre-conditions.
         if (face(h1, *mesh) != face(h2, *mesh)) {
+          // std::cout << "VV/7" << std::endl;
           continue;
         }
         if (h1 == h2) {
+          // std::cout << "VV/8" << std::endl;
           continue;
         }
         if (next(h1, *mesh) == h2) {
+          // std::cout << "VV/9" << std::endl;
           continue;
         }
         if (next(h2, *mesh) == h1) {
+          // std::cout << "VV/10" << std::endl;
           continue;
         }
         CGAL::Euler::split_face(h1, h2, *mesh);
         CGAL::Euler::remove_face(edge_next, *mesh);
         collapsed = true;
+        break;
       }
     }
     if (collapsed == false) {
