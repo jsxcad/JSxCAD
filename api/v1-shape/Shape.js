@@ -12,6 +12,7 @@ import {
   isWatertight,
   makeWatertight,
   reconcile,
+  rewriteTags,
   taggedAssembly,
   taggedGraph,
   taggedPaths,
@@ -66,10 +67,6 @@ export class Shape {
 
   flip() {
     return fromGeometry(flip(toDisjointGeometry(this)), this.context);
-  }
-
-  setTags(tags) {
-    return fromGeometry({ ...toGeometry(this), tags }, this.context);
   }
 
   toKeptGeometry(options = {}) {
@@ -127,6 +124,11 @@ export class Shape {
     return fromGeometry(
       makeWatertight(this.toDisjointGeometry(), undefined, undefined, threshold)
     );
+  }
+
+  // Low level setter for reifiers.
+  setTags(tags = []) {
+    return Shape.fromGeometry(rewriteTags(tags, [], this.toGeometry()));
   }
 }
 

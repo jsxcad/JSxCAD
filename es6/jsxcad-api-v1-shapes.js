@@ -36,7 +36,7 @@ const Spiral = (
 
 Shape.prototype.Spiral = shapeMethod(Spiral);
 
-reify.Arc = (plan) => {
+reify.Arc = ({ tags, plan }) => {
   const { start = 0, end = 360 } = plan.angle || {};
   const spiral = Spiral((a) => [[1]], {
     from: start - 90,
@@ -51,11 +51,13 @@ reify.Arc = (plan) => {
       .ex(getTop(plan), getBottom(plan))
       .orient({ center: getCenter(plan), from: getFrom(plan), at: getTo(plan) })
       .transform(getMatrix(plan))
+      .setTags(tags)
       .toGeometry();
   } else {
     return spiral
       .move(...getCenter(plan))
       .transform(getMatrix(plan))
+      .setTags(tags)
       .toGeometry();
   }
 };
@@ -77,7 +79,7 @@ const Assembly = (...shapes) =>
 
 Shape.prototype.Assembly = shapeMethod(Assembly);
 
-reify.Box = (plan) => {
+reify.Box = ({ tags, plan }) => {
   const left = getLeft(plan);
   const right = getRight(plan);
   const front = getFront(plan);
@@ -95,6 +97,7 @@ reify.Box = (plan) => {
     .ex(top, bottom)
     .orient({ center: getCenter(plan), from: getFrom(plan), at: getTo(plan) })
     .transform(getMatrix(plan))
+    .setTags(tags)
     .toGeometry();
 };
 
@@ -168,7 +171,7 @@ Point.fromPoint = fromPoint;
 
 Shape.prototype.Point = shapeMethod(Point);
 
-reify.Cone = (plan) => {
+reify.Cone = ({ tags, plan }) => {
   const [length, width] = getDiameter(plan);
   return Hull(
     Arc(length, width).sides(getSides(plan)).z(getBase(plan)),
@@ -176,6 +179,7 @@ reify.Cone = (plan) => {
   )
     .orient({ center: getCenter(plan), from: getFrom(plan), at: getTo(plan) })
     .transform(getMatrix(plan))
+    .setTags(tags)
     .toGeometry();
 };
 
@@ -1638,12 +1642,13 @@ Shape.prototype.Hexagon = shapeMethod(Hexagon);
 
 const Z = 2;
 
-reify.Icosahedron = (plan) =>
+reify.Icosahedron = ({ tags, plan }) =>
   Shape.fromPolygonsToSolid(buildRegularIcosahedron({}))
     .toGraph()
     .scale(...getRadius(plan))
     .z(getRadius(plan)[Z] + getBase(plan))
     .orient({ center: getCenter(plan), from: getFrom(plan), at: getTo(plan) })
+    .setTags(tags)
     .toGeometry();
 
 const Icosahedron = (x = 1, y = x, z = x) =>
@@ -1712,12 +1717,13 @@ Shape.prototype.Octagon = shapeMethod(Octagon);
 
 const Z$1 = 2;
 
-reify.Orb = (plan) =>
+reify.Orb = ({ tags, plan }) =>
   Shape.fromGeometry(taggedSolid({}, buildRingSphere(getSides(plan, 16))))
     .toGraph()
     .scale(...getRadius(plan))
     .z(getRadius(plan)[Z$1] + getBase(plan))
     .orient({ center: getCenter(plan), from: getFrom(plan), at: getTo(plan) })
+    .setTags({ tags, plan })
     .toGeometry();
 
 const Orb = (x = 1, y = x, z = x) =>

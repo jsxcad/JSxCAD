@@ -775,7 +775,7 @@ const reify = (geometry) => {
               `Do not know how to reify plan: ${JSON.stringify(geometry.plan)}`
             );
           }
-          return reify(reifier(geometry.plan));
+          return reify(reifier(geometry));
         }
         case 'assembly':
         case 'item':
@@ -907,6 +907,7 @@ const extrude = (geometry, height, depth) => {
       case 'paths':
         return extrude(fill(geometry), height, depth);
       case 'plan':
+        return extrude(reify(geometry), height, depth);
       case 'assembly':
       case 'item':
       case 'disjointAssembly':

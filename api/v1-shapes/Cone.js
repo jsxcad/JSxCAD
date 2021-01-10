@@ -15,7 +15,7 @@ import Arc from './Arc.js';
 import Hull from './Hull.js';
 import Point from './Point.js';
 
-reify.Cone = (plan) => {
+reify.Cone = ({ tags, plan }) => {
   const [length, width] = getDiameter(plan);
   return Hull(
     Arc(length, width).sides(getSides(plan)).z(getBase(plan)),
@@ -23,6 +23,7 @@ reify.Cone = (plan) => {
   )
     .orient({ center: getCenter(plan), from: getFrom(plan), at: getTo(plan) })
     .transform(getMatrix(plan))
+    .setTags(tags)
     .toGeometry();
 };
 

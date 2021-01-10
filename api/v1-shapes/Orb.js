@@ -13,12 +13,13 @@ import { buildRingSphere } from '@jsxcad/algorithm-shape';
 
 const Z = 2;
 
-reify.Orb = (plan) =>
+reify.Orb = ({ tags, plan }) =>
   Shape.fromGeometry(taggedSolid({}, buildRingSphere(getSides(plan, 16))))
     .toGraph()
     .scale(...getRadius(plan))
     .z(getRadius(plan)[Z] + getBase(plan))
     .orient({ center: getCenter(plan), from: getFrom(plan), at: getTo(plan) })
+    .setTags({ tags, plan })
     .toGeometry();
 
 export const Orb = (x = 1, y = x, z = x) =>
