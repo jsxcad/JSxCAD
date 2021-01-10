@@ -19,7 +19,7 @@ reify.Orb = ({ tags, plan }) =>
     .scale(...getRadius(plan))
     .z(getRadius(plan)[Z] + getBase(plan))
     .orient({ center: getCenter(plan), from: getFrom(plan), at: getTo(plan) })
-    .setTags({ tags, plan })
+    .setTags(tags)
     .toGeometry();
 
 export const Orb = (x = 1, y = x, z = x) =>
