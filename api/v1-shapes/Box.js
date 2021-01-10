@@ -15,7 +15,7 @@ import {
 
 import { reify, taggedPlan } from '@jsxcad/geometry-tagged';
 
-reify.Box = (plan) => {
+reify.Box = ({ tags, plan }) => {
   const left = getLeft(plan);
   const right = getRight(plan);
   const front = getFront(plan);
@@ -33,6 +33,7 @@ reify.Box = (plan) => {
     .ex(top, bottom)
     .orient({ center: getCenter(plan), from: getFrom(plan), at: getTo(plan) })
     .transform(getMatrix(plan))
+    .setTags(tags)
     .toGeometry();
 };
 

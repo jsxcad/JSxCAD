@@ -21,7 +21,7 @@ export const reify = (geometry) => {
               `Do not know how to reify plan: ${JSON.stringify(geometry.plan)}`
             );
           }
-          return reify(reifier(geometry.plan));
+          return reify(reifier(geometry));
         }
         case 'assembly':
         case 'item':

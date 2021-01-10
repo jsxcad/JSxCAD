@@ -42,6 +42,3 @@ const notAsMethod = function (...tags) {
 
 Shape.prototype.as = asMethod;
 Shape.prototype.notAs = notAsMethod;
-
-asMethod.signature = 'Shape -> as(...tags:string) -> Shape';
-notAsMethod.signature = 'Shape -> as(...tags:string) -> Shape';

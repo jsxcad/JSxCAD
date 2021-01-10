@@ -13,7 +13,7 @@ import { reify, taggedPlan } from '@jsxcad/geometry-tagged';
 
 import Spiral from './Spiral.js';
 
-reify.Arc = (plan) => {
+reify.Arc = ({ tags, plan }) => {
   const { start = 0, end = 360 } = plan.angle || {};
   const spiral = Spiral((a) => [[1]], {
     from: start - 90,
@@ -28,11 +28,13 @@ reify.Arc = (plan) => {
       .ex(getTop(plan), getBottom(plan))
       .orient({ center: getCenter(plan), from: getFrom(plan), at: getTo(plan) })
       .transform(getMatrix(plan))
+      .setTags(tags)
       .toGeometry();
   } else {
     return spiral
       .move(...getCenter(plan))
       .transform(getMatrix(plan))
+      .setTags(tags)
       .toGeometry();
   }
 };

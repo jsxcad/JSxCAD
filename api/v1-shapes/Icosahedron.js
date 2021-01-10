@@ -12,12 +12,13 @@ import { buildRegularIcosahedron } from '@jsxcad/algorithm-shape';
 
 const Z = 2;
 
-reify.Icosahedron = (plan) =>
+reify.Icosahedron = ({ tags, plan }) =>
   Shape.fromPolygonsToSolid(buildRegularIcosahedron({}))
     .toGraph()
     .scale(...getRadius(plan))
     .z(getRadius(plan)[Z] + getBase(plan))
     .orient({ center: getCenter(plan), from: getFrom(plan), at: getTo(plan) })
+    .setTags(tags)
     .toGeometry();
 
 export const Icosahedron = (x = 1, y = x, z = x) =>
