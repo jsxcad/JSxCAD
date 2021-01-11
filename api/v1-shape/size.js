@@ -25,6 +25,3 @@ const sizeMethod = function () {
 Shape.prototype.size = sizeMethod;
 
 export default size;
-
-size.signature = 'size(shape:Shape) -> Size';
-sizeMethod.signature = 'Shape -> size() -> Size';

@@ -36,6 +36,7 @@ import './orient.js';
 import './pause.js';
 import './paths.js';
 import './peg.js';
+import './plan.js';
 import './readShape.js';
 import './rotate.js';
 import './rotateX.js';

@@ -1,5 +1,6 @@
 import { extrude as extrudeGraph } from '@jsxcad/geometry-graph';
 import { fill } from './fill.js';
+import { reify } from './reify.js';
 import { rewrite } from './visit.js';
 import { taggedGraph } from './taggedGraph.js';
 import { toTransformedGeometry } from './toTransformedGeometry.js';
@@ -23,6 +24,7 @@ export const extrude = (geometry, height, depth) => {
       case 'paths':
         return extrude(fill(geometry), height, depth);
       case 'plan':
+        return extrude(reify(geometry), height, depth);
       case 'assembly':
       case 'item':
       case 'disjointAssembly':

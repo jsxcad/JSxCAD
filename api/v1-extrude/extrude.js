@@ -2,6 +2,10 @@ import Shape from '@jsxcad/api-v1-shape';
 import { extrude as extrudeGeometry } from '@jsxcad/geometry-tagged';
 
 export const extrude = (shape, height = 1, depth = 0) => {
+  if (height === depth) {
+    // Return unextruded geometry at this height, instead.
+    return shape.z(height);
+  }
   if (height < depth) {
     [height, depth] = [depth, height];
   }

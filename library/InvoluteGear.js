@@ -84,8 +84,10 @@ export const GearProfile = (
 
   let profile = Shape.fromOpenPath([]);
   for (let i = 0; i < numberOfTeeth - teethToHide; i++) {
-    profile = profile.concat(toothProfile.rotateZ((i * 360) / numberOfTeeth));
+    profile = profile.concat(toothProfile.rotateZ((-i * 360) / numberOfTeeth));
   }
 
   return profile.close();
 };
+
+const example = GearProfile().gridView();

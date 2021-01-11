@@ -12,6 +12,7 @@ import {
   isWatertight,
   makeWatertight,
   reconcile,
+  rewriteTags,
   taggedAssembly,
   taggedGraph,
   taggedPaths,
@@ -25,6 +26,7 @@ import {
 } from '@jsxcad/geometry-tagged';
 
 import { fromPolygons as fromPolygonsToSolid } from '@jsxcad/geometry-solid';
+import { identityMatrix } from '@jsxcad/math-mat4';
 
 export class Shape {
   close() {
@@ -67,10 +69,6 @@ export class Shape {
     return fromGeometry(flip(toDisjointGeometry(this)), this.context);
   }
 
-  setTags(tags) {
-    return fromGeometry({ ...toGeometry(this), tags }, this.context);
-  }
-
   toKeptGeometry(options = {}) {
     return this.toDisjointGeometry();
   }
@@ -100,7 +98,11 @@ export class Shape {
   }
 
   transform(matrix) {
-    return fromGeometry(transform(matrix, this.toGeometry()), this.context);
+    if (matrix === identityMatrix) {
+      return this;
+    } else {
+      return fromGeometry(transform(matrix, this.toGeometry()), this.context);
+    }
   }
 
   reconcile() {
@@ -122,6 +124,11 @@ export class Shape {
     return fromGeometry(
       makeWatertight(this.toDisjointGeometry(), undefined, undefined, threshold)
     );
+  }
+
+  // Low level setter for reifiers.
+  setTags(tags = []) {
+    return Shape.fromGeometry(rewriteTags(tags, [], this.toGeometry()));
   }
 }
 

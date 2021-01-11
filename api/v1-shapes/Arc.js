@@ -1,22 +1,46 @@
 import { Shape, shapeMethod } from '@jsxcad/api-v1-shape';
-import { getRadius, getSides } from '@jsxcad/geometry-plan';
+import {
+  getBottom,
+  getCenter,
+  getFrom,
+  getMatrix,
+  getRadius,
+  getSides,
+  getTo,
+  getTop,
+} from '@jsxcad/geometry-plan';
+import { reify, taggedPlan } from '@jsxcad/geometry-tagged';
 
 import Spiral from './Spiral.js';
-import { orRadius } from './orRadius.js';
 
-export const Arc = (value = 1, angle = 360, start = 0) => {
-  const plan = orRadius(value);
-  const spiral = Spiral((a) => [[getRadius(plan)]], {
+reify.Arc = ({ tags, plan }) => {
+  const { start = 0, end = 360 } = plan.angle || {};
+  const spiral = Spiral((a) => [[1]], {
     from: start - 90,
-    upto: start + angle - 90,
+    upto: end - 90,
     by: 360 / getSides(plan),
-  }).at(plan.at);
-  if (angle - start === 360) {
-    return spiral.close();
+  }).scale(...getRadius(plan));
+  if (end - start === 360) {
+    // return spiral.close().fill().ex(getTop(plan), getBottom(plan)).move(...getCenter(plan)).transform(getMatrix(plan)).toGeometry();
+    return spiral
+      .close()
+      .fill()
+      .ex(getTop(plan), getBottom(plan))
+      .orient({ center: getCenter(plan), from: getFrom(plan), at: getTo(plan) })
+      .transform(getMatrix(plan))
+      .setTags(tags)
+      .toGeometry();
   } else {
-    return spiral;
+    return spiral
+      .move(...getCenter(plan))
+      .transform(getMatrix(plan))
+      .setTags(tags)
+      .toGeometry();
   }
 };
+
+export const Arc = (x = 1, y = x, z = 0) =>
+  Shape.fromGeometry(taggedPlan({}, { diameter: [x, y, z], type: 'Arc' }));
 
 Shape.prototype.Arc = shapeMethod(Arc);
 

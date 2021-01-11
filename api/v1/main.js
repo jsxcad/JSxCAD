@@ -19,7 +19,7 @@ extendedApi.importModule = importModule;
 const module = (name) => `@jsxcad/api-v1-${name}`;
 
 registerDynamicModule(module('armature'), '@jsxcad/api-v1-armature');
-registerDynamicModule(module('connector'), '@jsxcad/api-v1-connector');
+// registerDynamicModule(module('connector'), '@jsxcad/api-v1-connector');
 registerDynamicModule(module('cursor'), '@jsxcad/api-v1-cursor');
 registerDynamicModule(module('deform'), '@jsxcad/api-v1-deform');
 registerDynamicModule(module('dst'), '@jsxcad/api-v1-dst');
