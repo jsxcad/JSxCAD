@@ -4,6 +4,7 @@ import {
   toPaths as toPathsFromGraph,
 } from '@jsxcad/geometry-graph';
 
+import { reify } from './reify.js';
 import { rewrite } from './visit.js';
 import { taggedPaths } from './taggedPaths.js';
 import { toTransformedGeometry } from './toTransformedGeometry.js';
@@ -31,6 +32,7 @@ export const offset = (geometry, initial = 1, step, limit) => {
           )
         );
       case 'plan':
+        return offset(reify(geometry), initial, step, limit);
       case 'assembly':
       case 'item':
       case 'disjointAssembly':

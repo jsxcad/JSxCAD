@@ -1633,6 +1633,7 @@ const offset = (geometry, initial = 1, step, limit) => {
           )
         );
       case 'plan':
+        return offset(reify(geometry), initial, step, limit);
       case 'assembly':
       case 'item':
       case 'disjointAssembly':
