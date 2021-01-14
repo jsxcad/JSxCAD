@@ -1,5 +1,5 @@
-import { GEOMETRY_LAYER, SKETCH_LAYER } from './layers.js';
 import { Box3, GridHelper, LineSegments, Mesh, Vector3 } from 'three';
+import { SKETCH_LAYER } from './layers.js';
 
 export const moveToFit = ({
   datasets,
