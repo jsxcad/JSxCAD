@@ -14,6 +14,7 @@ export {
 export { arrangePaths } from './arrangePaths.js';
 export { differenceOfNefPolyhedrons } from './differenceOfNefPolyhedrons.js';
 export { differenceOfSurfaceMeshes } from './differenceOfSurfaceMeshes.js';
+export { doesSelfIntersectOfSurfaceMesh } from './doesSelfIntersectOfSurfaceMesh.js';
 export { extrudeSurfaceMesh } from './extrudeSurfaceMesh.js';
 export { extrudeToPlaneOfSurfaceMesh } from './extrudeToPlaneOfSurfaceMesh.js';
 export { fitPlaneToPoints } from './fitPlaneToPoints.js';

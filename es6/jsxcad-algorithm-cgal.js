@@ -830,8 +830,8 @@ var Module = (function () {
     }
     var wasmMemory;
     var wasmTable = new WebAssembly.Table({
-      initial: 2458,
-      maximum: 2458,
+      initial: 2459,
+      maximum: 2459,
       element: 'anyfunc',
     });
     var ABORT = false;
@@ -1099,9 +1099,9 @@ var Module = (function () {
       Module['HEAPF32'] = HEAPF32 = new Float32Array(buf);
       Module['HEAPF64'] = HEAPF64 = new Float64Array(buf);
     }
-    var STACK_BASE = 5594432,
-      STACK_MAX = 351552,
-      DYNAMIC_BASE = 5594432;
+    var STACK_BASE = 5594464,
+      STACK_MAX = 351584,
+      DYNAMIC_BASE = 5594464;
     assert(STACK_BASE % 16 === 0, 'stack must start aligned');
     assert(DYNAMIC_BASE % 16 === 0, 'heap must start aligned');
     var TOTAL_STACK = 5242880;
@@ -9700,6 +9700,26 @@ const differenceOfNefPolyhedrons = (a, b) =>
 const differenceOfSurfaceMeshes = (a, b) =>
   getCgal().DifferenceOfSurfaceMeshes(a, b);
 
+const doesSelfIntersectOfSurfaceMesh = (mesh) => {
+  try {
+    return getCgal().DoesSelfIntersectOfSurfaceMesh(mesh);
+  } catch (e) {
+    if (typeof e === 'number') {
+      // This otherwise uncaught exception indicates a self-intersection.
+      return true;
+    } else {
+      throw e;
+    }
+  }
+};
+
+const checkSelfIntersection = (mesh) => {
+  if (doesSelfIntersectOfSurfaceMesh(mesh)) {
+    throw Error('Self intersection');
+  }
+  return mesh;
+};
+
 const extrudeSurfaceMesh = (
   mesh,
   highX,
@@ -9709,7 +9729,17 @@ const extrudeSurfaceMesh = (
   lowY,
   lowZ
 ) =>
-  getCgal().ExtrusionOfSurfaceMesh(mesh, highX, highY, highZ, lowX, lowY, lowZ);
+  checkSelfIntersection(
+    getCgal().ExtrusionOfSurfaceMesh(
+      mesh,
+      highX,
+      highY,
+      highZ,
+      lowX,
+      lowY,
+      lowZ
+    )
+  );
 
 const extrudeToPlaneOfSurfaceMesh = (
   mesh,
@@ -10494,4 +10524,4 @@ const unionOfNefPolyhedrons = (a, b) =>
 const unionOfSurfaceMeshes = (a, b) =>
   getCgal().UnionOfSurfaceMeshes(a, b);
 
-export { arrangePaths, composeTransforms, differenceOfNefPolyhedrons, differenceOfSurfaceMeshes, extrudeSurfaceMesh, extrudeToPlaneOfSurfaceMesh, fitPlaneToPoints, fromApproximateToCgalTransform, fromExactToCgalTransform, fromFunctionToSurfaceMesh, fromGraphToNefPolyhedron, fromGraphToSurfaceMesh, fromIdentityToCgalTransform, fromNefPolyhedronFacetsToGraph, fromNefPolyhedronShellsToGraph, fromNefPolyhedronToPolygons, fromNefPolyhedronToSurfaceMesh, fromNefPolyhedronToTriangles, fromPointsToAlphaShape2AsPolygonSegments, fromPointsToAlphaShapeAsSurfaceMesh, fromPointsToConvexHullAsSurfaceMesh, fromPointsToSurfaceMesh, fromPolygonsToNefPolyhedron, fromPolygonsToSurfaceMesh, fromRotateXToTransform, fromRotateYToTransform, fromRotateZToTransform, fromScaleToTransform, fromSurfaceMeshEmitBoundingBox, fromSurfaceMeshToGraph, fromSurfaceMeshToLazyGraph, fromSurfaceMeshToNefPolyhedron, fromSurfaceMeshToPolygons, fromSurfaceMeshToTriangles, fromTranslateToTransform, initCgal, insetOfPolygon, intersectionOfNefPolyhedrons, intersectionOfSurfaceMeshes, offsetOfPolygon, outlineOfSurfaceMesh, projectToPlaneOfSurfaceMesh, remeshSurfaceMesh, sectionOfNefPolyhedron, sectionOfSurfaceMesh, skeletalInsetOfPolygon, subdivideSurfaceMesh, toCgalTransformFromJsTransform, transformSurfaceMesh, unionOfNefPolyhedrons, unionOfSurfaceMeshes };
+export { arrangePaths, composeTransforms, differenceOfNefPolyhedrons, differenceOfSurfaceMeshes, doesSelfIntersectOfSurfaceMesh, extrudeSurfaceMesh, extrudeToPlaneOfSurfaceMesh, fitPlaneToPoints, fromApproximateToCgalTransform, fromExactToCgalTransform, fromFunctionToSurfaceMesh, fromGraphToNefPolyhedron, fromGraphToSurfaceMesh, fromIdentityToCgalTransform, fromNefPolyhedronFacetsToGraph, fromNefPolyhedronShellsToGraph, fromNefPolyhedronToPolygons, fromNefPolyhedronToSurfaceMesh, fromNefPolyhedronToTriangles, fromPointsToAlphaShape2AsPolygonSegments, fromPointsToAlphaShapeAsSurfaceMesh, fromPointsToConvexHullAsSurfaceMesh, fromPointsToSurfaceMesh, fromPolygonsToNefPolyhedron, fromPolygonsToSurfaceMesh, fromRotateXToTransform, fromRotateYToTransform, fromRotateZToTransform, fromScaleToTransform, fromSurfaceMeshEmitBoundingBox, fromSurfaceMeshToGraph, fromSurfaceMeshToLazyGraph, fromSurfaceMeshToNefPolyhedron, fromSurfaceMeshToPolygons, fromSurfaceMeshToTriangles, fromTranslateToTransform, initCgal, insetOfPolygon, intersectionOfNefPolyhedrons, intersectionOfSurfaceMeshes, offsetOfPolygon, outlineOfSurfaceMesh, projectToPlaneOfSurfaceMesh, remeshSurfaceMesh, sectionOfNefPolyhedron, sectionOfSurfaceMesh, skeletalInsetOfPolygon, subdivideSurfaceMesh, toCgalTransformFromJsTransform, transformSurfaceMesh, unionOfNefPolyhedrons, unionOfSurfaceMeshes };

@@ -1,3 +1,4 @@
+import { checkSelfIntersection } from './doesSelfIntersectOfSurfaceMesh.js';
 import { getCgal } from './getCgal.js';
 
 export const extrudeSurfaceMesh = (
@@ -9,4 +10,14 @@ export const extrudeSurfaceMesh = (
   lowY,
   lowZ
 ) =>
-  getCgal().ExtrusionOfSurfaceMesh(mesh, highX, highY, highZ, lowX, lowY, lowZ);
+  checkSelfIntersection(
+    getCgal().ExtrusionOfSurfaceMesh(
+      mesh,
+      highX,
+      highY,
+      highZ,
+      lowX,
+      lowY,
+      lowZ
+    )
+  );
