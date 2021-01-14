@@ -381,6 +381,11 @@ Surface_mesh* SubdivideSurfaceMesh(Surface_mesh* input, int method, int iteratio
   return mesh;
 }
 
+bool DoesSelfIntersectOfSurfaceMesh(Surface_mesh* mesh) {
+  CGAL::Polygon_mesh_processing::triangulate_faces(*mesh);
+  return CGAL::Polygon_mesh_processing::does_self_intersect(*mesh, CGAL::parameters::all_default());
+}
+
 Surface_mesh* RemeshSurfaceMesh(Surface_mesh* input, double edge_length, double edge_angle, int relaxation_steps, int iterations) {
   typedef boost::graph_traits<Surface_mesh>::edge_descriptor edge_descriptor;
 
@@ -1984,6 +1989,8 @@ EMSCRIPTEN_BINDINGS(module) {
   emscripten::function("DifferenceOfSurfaceMeshes", &DifferenceOfSurfaceMeshes, emscripten::allow_raw_pointers());
   emscripten::function("IntersectionOfSurfaceMeshes", &IntersectionOfSurfaceMeshes, emscripten::allow_raw_pointers());
   emscripten::function("UnionOfSurfaceMeshes", &UnionOfSurfaceMeshes, emscripten::allow_raw_pointers());
+
+  emscripten::function("DoesSelfIntersectOfSurfaceMesh", &DoesSelfIntersectOfSurfaceMesh, emscripten::allow_raw_pointers());
 
   emscripten::function("FT__to_double", &FT__to_double, emscripten::allow_raw_pointers());
 
