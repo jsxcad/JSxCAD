@@ -5,7 +5,7 @@ import Shape from './Shape.js';
 export const weld = (...shapes) => {
   const weld = [];
   for (const shape of shapes) {
-    for (const { paths } of getNonVoidPaths(shape.toTransformedGeometry())) {
+    for (const { paths } of getNonVoidPaths(shape.toDisjointGeometry())) {
       weld.push(...paths);
     }
   }

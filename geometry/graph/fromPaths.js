@@ -10,6 +10,8 @@ import { deduplicate, flip, isClockwise } from '@jsxcad/geometry-path';
 import { canonicalize as canonicalizePaths } from '@jsxcad/geometry-paths';
 import { dot } from '@jsxcad/math-vec3';
 
+const clean = (path) => deduplicate(path);
+
 const orientClockwise = (path) => (isClockwise(path) ? path : flip(path));
 const orientCounterClockwise = (path) =>
   isClockwise(path) ? flip(path) : path;
@@ -37,12 +39,20 @@ export const fromPaths = (inputPaths) => {
     }
     const arrangement = arrangePaths(...plane, paths);
     for (const { points, holes } of arrangement) {
-      const face = addFace(graph, { plane });
       const exterior = orientCounterClockwise(points);
-      addLoopFromPoints(graph, deduplicate(exterior), { face });
+      const cleaned = clean(exterior);
+      if (cleaned.length < 3) {
+        continue;
+      }
+      const face = addFace(graph, { plane });
+      addLoopFromPoints(graph, cleaned, { face });
       for (const hole of holes) {
         const interior = orientClockwise(hole);
-        addHoleFromPoints(graph, deduplicate(interior), { face });
+        const cleaned = clean(interior);
+        if (cleaned.length < 3) {
+          continue;
+        }
+        addHoleFromPoints(graph, cleaned, { face });
       }
     }
   }

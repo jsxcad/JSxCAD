@@ -49,6 +49,7 @@ import './solids.js';
 import './spindleRpm.js';
 import './surfaces.js';
 import './tags.js';
+import './test.js';
 import './toolpaths.js';
 import './trace.js';
 import './translate.js';

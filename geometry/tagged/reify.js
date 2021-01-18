@@ -2,6 +2,7 @@ import { rewrite } from './visit.js';
 
 const reifiedGeometry = Symbol('reifiedGeometry');
 
+// FIX: The reified geometry should be the content of the plan.
 export const reify = (geometry) => {
   if (geometry[reifiedGeometry] === undefined) {
     const op = (geometry, descend) => {
