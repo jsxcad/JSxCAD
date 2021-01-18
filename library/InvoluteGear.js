@@ -17,7 +17,7 @@ const iang = (r1, r2) =>
 
 export const ToothProfile = ({ r, b, c, k, numberOfTeeth }) => {
   const path = [
-    polar(r, r < b ? -k : 179 / numberOfTeeth),
+    polar(r, -k),
     q7(0 / 5, r, b, c, k, -1),
     q7(1 / 5, r, b, c, k, -1),
     q7(2 / 5, r, b, c, k, -1),
@@ -30,11 +30,10 @@ export const ToothProfile = ({ r, b, c, k, numberOfTeeth }) => {
     q7(2 / 5, r, b, c, k, 1),
     q7(1 / 5, r, b, c, k, 1),
     q7(0 / 5, r, b, c, k, 1),
-    polar(r, r < b ? k : -179 / numberOfTeeth),
   ];
 
   if (r < b) {
-    path.push(polar(r, -180 / numberOfTeeth));
+    path.push(polar(r, k));
   }
 
   return Shape.fromOpenPath(path);
