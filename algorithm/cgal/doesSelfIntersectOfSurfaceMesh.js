@@ -1,5 +1,8 @@
 import { getCgal } from './getCgal.js';
 
+// Set this to true to throw an exception on self intersection.
+const CHECK_SELF_INTERSECTION = true;
+
 export const doesSelfIntersectOfSurfaceMesh = (mesh) => {
   try {
     return getCgal().DoesSelfIntersectOfSurfaceMesh(mesh);
@@ -14,7 +17,7 @@ export const doesSelfIntersectOfSurfaceMesh = (mesh) => {
 };
 
 export const checkSelfIntersection = (mesh) => {
-  if (doesSelfIntersectOfSurfaceMesh(mesh)) {
+  if (CHECK_SELF_INTERSECTION && doesSelfIntersectOfSurfaceMesh(mesh)) {
     throw Error('Self intersection');
   }
   return mesh;

@@ -30,6 +30,9 @@ export const getPegCoords = (shape) => {
   return { coords, origin, forward, right, plane };
 };
 
+// See also:
+// https://gist.github.com/kevinmoran/b45980723e53edeb8a5a43c49f134724
+
 export const orient = (origin, forward, right, shapeToPeg) => {
   const plane = fromPoints(right, forward, origin);
   const d = Math.abs(dot(plane, [0, 0, 1, 0]));

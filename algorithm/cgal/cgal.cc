@@ -381,6 +381,10 @@ Surface_mesh* SubdivideSurfaceMesh(Surface_mesh* input, int method, int iteratio
   return mesh;
 }
 
+void TriangulateFacesOfSurfaceMesh(Surface_mesh* mesh) {
+  CGAL::Polygon_mesh_processing::triangulate_faces(*mesh);
+}
+
 bool DoesSelfIntersectOfSurfaceMesh(Surface_mesh* mesh) {
   CGAL::Polygon_mesh_processing::triangulate_faces(*mesh);
   return CGAL::Polygon_mesh_processing::does_self_intersect(*mesh, CGAL::parameters::all_default());
@@ -1990,6 +1994,7 @@ EMSCRIPTEN_BINDINGS(module) {
   emscripten::function("IntersectionOfSurfaceMeshes", &IntersectionOfSurfaceMeshes, emscripten::allow_raw_pointers());
   emscripten::function("UnionOfSurfaceMeshes", &UnionOfSurfaceMeshes, emscripten::allow_raw_pointers());
 
+  emscripten::function("TriangulateFacesOfSurfaceMesh", &TriangulateFacesOfSurfaceMesh, emscripten::allow_raw_pointers());
   emscripten::function("DoesSelfIntersectOfSurfaceMesh", &DoesSelfIntersectOfSurfaceMesh, emscripten::allow_raw_pointers());
 
   emscripten::function("FT__to_double", &FT__to_double, emscripten::allow_raw_pointers());

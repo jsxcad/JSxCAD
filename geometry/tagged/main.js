@@ -100,6 +100,7 @@ export { taggedSolid } from './taggedSolid.js';
 export { taggedSurface } from './taggedSurface.js';
 export { taggedTransform } from './taggedTransform.js';
 export { taggedZ0Surface } from './taggedZ0Surface.js';
+export { test } from './test.js';
 export { toDisjointGeometry } from './toDisjointGeometry.js';
 export { toKeptGeometry } from './toKeptGeometry.js';
 export { toTransformedGeometry } from './toTransformedGeometry.js';

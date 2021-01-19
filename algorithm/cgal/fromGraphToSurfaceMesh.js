@@ -11,7 +11,7 @@ export const fromGraphToSurfaceMesh = (graph) => {
     vertexIndex.push(c.Surface_mesh__add_exact(mesh, x, y, z))
   );
 
-  // Surface_mesh faces are loops.
+  // Surface_mesh faces are facets, represented by loops.
 
   graph.loops.forEach(({ edge }, loop) => {
     if (
