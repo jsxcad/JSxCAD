@@ -1,5 +1,5 @@
 import { close, concatenate, open } from './jsxcad-geometry-path.js';
-import { taggedAssembly, eachPoint, flip, toDisjointGeometry as toDisjointGeometry$1, toTransformedGeometry, toPoints, transform, reconcile, isWatertight, makeWatertight, rewriteTags, taggedPaths, taggedGraph, taggedPoints, taggedSolid, taggedSurface, union as union$1, assemble as assemble$1, canonicalize as canonicalize$1, measureBoundingBox as measureBoundingBox$1, intersection as intersection$1, allTags, difference as difference$1, getLeafs, getSolids, rewrite, taggedGroup, getAnySurfaces, getPaths, getGraphs, taggedLayers, isVoid, getNonVoidPaths, getPeg, taggedPlan, measureArea, taggedSketch, getNonVoidSolids, getAnyNonVoidSurfaces, test as test$1, getNonVoidGraphs, realize, getNonVoidSurfaces, read, write } from './jsxcad-geometry-tagged.js';
+import { taggedAssembly, eachPoint, flip, toDisjointGeometry as toDisjointGeometry$1, toTransformedGeometry, toPoints, transform, reconcile, isWatertight, makeWatertight, rewriteTags, taggedPaths, taggedGraph, taggedPoints, taggedSolid, taggedSurface, union as union$1, assemble as assemble$1, canonicalize as canonicalize$1, measureBoundingBox as measureBoundingBox$1, intersection as intersection$1, allTags, difference as difference$1, getLeafs, getSolids, rewrite, taggedGroup, getAnySurfaces, getPaths, getGraphs, taggedLayers, isVoid, getNonVoidPaths, getPeg, taggedPlan, measureArea, taggedSketch, getNonVoidSolids, getAnyNonVoidSurfaces, test as test$1, outline, getNonVoidGraphs, realize, getNonVoidSurfaces, read, write } from './jsxcad-geometry-tagged.js';
 import { fromPolygons, findOpenEdges, fromSurface as fromSurface$1 } from './jsxcad-geometry-solid.js';
 import { identityMatrix, fromTranslation, fromRotation, fromScaling } from './jsxcad-math-mat4.js';
 import { add, scale as scale$1, negate, normalize, subtract, dot, cross, distance } from './jsxcad-math-vec3.js';
@@ -1724,7 +1724,7 @@ Shape.prototype.wall = wallMethod;
 const weld = (...shapes) => {
   const weld = [];
   for (const shape of shapes) {
-    for (const { paths } of getNonVoidPaths(shape.toDisjointGeometry())) {
+    for (const { paths } of outline(shape.toTransformedGeometry())) {
       weld.push(...paths);
     }
   }

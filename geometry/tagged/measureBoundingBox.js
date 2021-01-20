@@ -6,6 +6,7 @@ import { measureBoundingBox as measureBoundingBoxOfGraph } from '@jsxcad/geometr
 import { measureBoundingBox as measureBoundingBoxOfPoints } from '@jsxcad/geometry-points';
 import { measureBoundingBox as measureBoundingBoxOfSolid } from '@jsxcad/geometry-solid';
 import { measureBoundingBox as measureBoundingBoxOfSurface } from '@jsxcad/geometry-surface';
+import { reify } from './reify.js';
 import { toKeptGeometry } from './toKeptGeometry.js';
 import { visit } from './visit.js';
 
@@ -33,11 +34,11 @@ export const measureBoundingBox = (geometry) => {
       return;
     }
     switch (geometry.type) {
+      case 'plan':
       case 'assembly':
       case 'layers':
       case 'disjointAssembly':
       case 'item':
-      case 'plan':
       case 'sketch':
         return descend();
       case 'graph':
@@ -57,7 +58,7 @@ export const measureBoundingBox = (geometry) => {
     }
   };
 
-  visit(toKeptGeometry(geometry), op);
+  visit(toKeptGeometry(reify(geometry)), op);
 
   return [minPoint, maxPoint];
 };
