@@ -1,11 +1,11 @@
-import { getNonVoidPaths, taggedPaths } from '@jsxcad/geometry-tagged';
+import { outline, taggedPaths } from '@jsxcad/geometry-tagged';
 
 import Shape from './Shape.js';
 
 export const weld = (...shapes) => {
   const weld = [];
   for (const shape of shapes) {
-    for (const { paths } of getNonVoidPaths(shape.toDisjointGeometry())) {
+    for (const { paths } of outline(shape.toTransformedGeometry())) {
       weld.push(...paths);
     }
   }

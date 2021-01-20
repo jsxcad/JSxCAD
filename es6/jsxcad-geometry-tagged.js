@@ -758,6 +758,9 @@ const reifiedGeometry = Symbol('reifiedGeometry');
 
 // FIX: The reified geometry should be the content of the plan.
 const reify = (geometry) => {
+  if (geometry.type === 'plan' && geometry.content.length > 0) {
+    return geometry;
+  }
   if (geometry[reifiedGeometry] === undefined) {
     const op = (geometry, descend) => {
       switch (geometry.type) {
@@ -770,13 +773,24 @@ const reify = (geometry) => {
           // No plan to realize.
           return geometry;
         case 'plan': {
-          const reifier = reify[geometry.plan.type];
-          if (reifier === undefined) {
-            throw Error(
-              `Do not know how to reify plan: ${JSON.stringify(geometry.plan)}`
-            );
+          if (geometry.content.length > 0) {
+            // Already reified, keep going.
+            return descend();
+          } else {
+            const reifier = reify[geometry.plan.type];
+            if (reifier === undefined) {
+              throw Error(
+                `Do not know how to reify plan: ${JSON.stringify(
+                  geometry.plan
+                )}`
+              );
+            }
+            const reification = {
+              ...geometry,
+              content: [reify(reifier(geometry))],
+            };
+            return reification;
           }
-          return reify(reifier(geometry));
         }
         case 'assembly':
         case 'item':
@@ -832,7 +846,7 @@ const toDisjointGeometry = (geometry) => {
       // Everything below this point is disjoint.
       return geometry;
     } else if (geometry.type === 'plan') {
-      return walk(reify(geometry), op);
+      return walk(reify(geometry).content[0], op);
     } else if (geometry.type === 'transform') {
       return walk(toTransformedGeometry(geometry), op);
     } else if (geometry.type === 'assembly') {
@@ -1506,11 +1520,11 @@ const measureBoundingBox = (geometry) => {
       return;
     }
     switch (geometry.type) {
+      case 'plan':
       case 'assembly':
       case 'layers':
       case 'disjointAssembly':
       case 'item':
-      case 'plan':
       case 'sketch':
         return descend();
       case 'graph':
@@ -1530,7 +1544,7 @@ const measureBoundingBox = (geometry) => {
     }
   };
 
-  visit(toKeptGeometry(geometry), op);
+  visit(toKeptGeometry(reify(geometry)), op);
 
   return [minPoint, maxPoint];
 };
@@ -1874,6 +1888,7 @@ const taggedPlan = ({ tags }, plan) => ({
   type: 'plan',
   tags,
   plan,
+  content: [],
 });
 
 const taggedPoints = ({ tags }, points) => {

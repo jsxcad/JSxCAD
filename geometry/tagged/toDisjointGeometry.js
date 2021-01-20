@@ -14,7 +14,7 @@ export const toDisjointGeometry = (geometry) => {
       // Everything below this point is disjoint.
       return geometry;
     } else if (geometry.type === 'plan') {
-      return walk(reify(geometry), op);
+      return walk(reify(geometry).content[0], op);
     } else if (geometry.type === 'transform') {
       return walk(toTransformedGeometry(geometry), op);
     } else if (geometry.type === 'assembly') {

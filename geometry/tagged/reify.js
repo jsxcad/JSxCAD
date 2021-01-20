@@ -4,6 +4,9 @@ const reifiedGeometry = Symbol('reifiedGeometry');
 
 // FIX: The reified geometry should be the content of the plan.
 export const reify = (geometry) => {
+  if (geometry.type === 'plan' && geometry.content.length > 0) {
+    return geometry;
+  }
   if (geometry[reifiedGeometry] === undefined) {
     const op = (geometry, descend) => {
       switch (geometry.type) {
@@ -16,13 +19,24 @@ export const reify = (geometry) => {
           // No plan to realize.
           return geometry;
         case 'plan': {
-          const reifier = reify[geometry.plan.type];
-          if (reifier === undefined) {
-            throw Error(
-              `Do not know how to reify plan: ${JSON.stringify(geometry.plan)}`
-            );
+          if (geometry.content.length > 0) {
+            // Already reified, keep going.
+            return descend();
+          } else {
+            const reifier = reify[geometry.plan.type];
+            if (reifier === undefined) {
+              throw Error(
+                `Do not know how to reify plan: ${JSON.stringify(
+                  geometry.plan
+                )}`
+              );
+            }
+            const reification = {
+              ...geometry,
+              content: [reify(reifier(geometry))],
+            };
+            return reification;
           }
-          return reify(reifier(geometry));
         }
         case 'assembly':
         case 'item':
