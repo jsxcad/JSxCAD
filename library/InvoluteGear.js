@@ -15,9 +15,9 @@ const q7 = (f, r, b, r2, t, s) => q6(b, s, t, (1 - f) * max(b, r) + f * r2);
 const iang = (r1, r2) =>
   (sqrt((r2 / r1) * (r2 / r1) - 1) / Math.PI) * 180 - acos(r1 / r2);
 
-export const ToothProfile = ({ r, b, c, k, numberOfTeeth }) =>
-  Shape.fromOpenPath([
-    polar(r, r < b ? -k : 180 / numberOfTeeth),
+export const ToothProfile = ({ r, b, c, k, numberOfTeeth }) => {
+  const path = [
+    polar(r, -k),
     q7(0 / 5, r, b, c, k, -1),
     q7(1 / 5, r, b, c, k, -1),
     q7(2 / 5, r, b, c, k, -1),
@@ -30,9 +30,14 @@ export const ToothProfile = ({ r, b, c, k, numberOfTeeth }) =>
     q7(2 / 5, r, b, c, k, 1),
     q7(1 / 5, r, b, c, k, 1),
     q7(0 / 5, r, b, c, k, 1),
-    polar(r, r < b ? k : -180 / numberOfTeeth),
-    polar(r, -181 / numberOfTeeth),
-  ]);
+  ];
+
+  if (r < b) {
+    path.push(polar(r, k));
+  }
+
+  return Shape.fromOpenPath(path);
+};
 
 export const pitchRadius = (mmPerTooth = Math.PI, numberOfTeeth = 16) =>
   (mmPerTooth * numberOfTeeth) / Math.PI / 2;
@@ -84,8 +89,10 @@ export const GearProfile = (
 
   let profile = Shape.fromOpenPath([]);
   for (let i = 0; i < numberOfTeeth - teethToHide; i++) {
-    profile = profile.concat(toothProfile.rotateZ((i * 360) / numberOfTeeth));
+    profile = profile.concat(toothProfile.rotateZ((-i * 360) / numberOfTeeth));
   }
 
   return profile.close();
 };
+
+const example = GearProfile().gridView();

@@ -1,36 +1,29 @@
 md`# Solid Construction`;
 
 md`## Ball(radius, { resolution: 32 })`;
-const ball = Ball(20);
-ball.view();
-md`Produces a spherical ball of the given radius.`;
+const ball = Ball(20)
+  .view()
+  .md('Produces a spherical ball of the given radius.');
 
-md`## Box(length = 1, width = length, height = width)`;
-const box = Box(20, 10, 5);
-box.view();
-md`Produces a cuboid box of the given dimensions.`;
+md`## Block(radius = 1, height = 1, depth = 0)`;
+const box = Block(20, 10, 5)
+  .view()
+  .md('Produces a block of the given dimensions.');
 
 md`## ChainedHull(...shapes)`;
 const chainedHull = ChainedHull(
   Circle(20),
   Square(10).moveZ(20),
   Triangle(30).moveZ(30)
-);
-chainedHull.fix().view();
-
-md`FIX: Cone(5, 50).view();`;
-
-md`FIX: Empty().topView();`;
+).view();
 
 md`## Hull(...shapes)`;
-const hull = Hull(Circle(20), Square(10).moveZ(30));
-hull.view();
-md`Produces a solid from the convex hull of the shapes provided.`;
+const hull = Hull(Circle(20), Square(10).moveZ(30))
+  .view()
+  .md('Produces a solid from the convex hull of the shapes provided.');
 
 md`## Icosahedron(radius)`;
-const icosahedron = Icosahedron(10);
-icosahedron.view();
-md`An icosahedron of radius 10.`;
+const icosahedron = Icosahedron(10).view().md('An icosahedron of radius 10.');
 
 md`## Polyhedron(vertices, face)`;
 const polyhedron = Polyhedron(
@@ -49,26 +42,11 @@ const polyhedron = Polyhedron(
     [3, 0, 1],
     [3, 1, 2],
   ]
-);
-polyhedron.view();
-md`A polyhedron.`;
-
-md`## Prism(radius, height, { sides = 5 } = {})`;
-const prism = Prism(5, 10, { sides: 5 });
-prism.view();
-md`A five sided prism of radius 5 and height 10.`;
+)
+  .view()
+  .md('A polyhedron.');
 
 md`## Rod(radius, height, { sides = 32 } = {})`;
-const rod = Rod(5, 10);
-rod.view();
-md`Produces a cylindical rod of the given radius and length.`;
-
-md`## Tetrahedron(radius)`;
-const tetrahedron = Tetrahedron(10);
-tetrahedron.frontView();
-md`A tetrahedron of radius 10.`;
-
-md`## Torus(radius, thickness)`;
-md`FIX: const torus = Torus(20, 2);
-torus.view();
-A torus of radius 20 and thickness 2.`;
+const rod = Rod(5, 10)
+  .view()
+  .md('Produces a cylindical rod of the given radius and length.');

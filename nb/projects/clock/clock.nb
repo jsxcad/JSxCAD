@@ -23,7 +23,7 @@ const face = {
 
 md`## Parts`;
 
-const hourHand = { face, reach: 0.75, tipRadius: 1.75, thickness: 3 };
+const hourHand = { face, reach: 0.65, tipRadius: 1.75, thickness: 3 };
 const minuteHand = { face, reach: 0.9, tipRadius: 1.5, thickness: 3 };
 const clock = { face, hourHand, minuteHand };
 
@@ -52,13 +52,12 @@ const Face = ({ axleRadius, faceRadius, thickness, fontSize }) =>
       )
     );
 
-Face(face).fix().topView();
-md`The clock face.`;
+Face(face).item().md('The clock face').topView();
 
-Hand(hourHand).withOutline().fix().topView();
+Hand(hourHand).fix().topView();
 md`The hour hand.`;
 
-Hand(minuteHand).withOutline().fix().topView();
+Hand(minuteHand).fix().topView();
 md`The minute hand.`;
 
 const Clock = ({ face, hourHand, minuteHand }) =>
@@ -70,5 +69,5 @@ const Clock = ({ face, hourHand, minuteHand }) =>
 
 md`## Assembly`;
 
-Clock(clock).withOutline().fix().topView();
+Clock(clock).fix().topView();
 md`A complete clock.`;
