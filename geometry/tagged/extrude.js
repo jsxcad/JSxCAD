@@ -24,7 +24,7 @@ export const extrude = (geometry, height, depth) => {
       case 'paths':
         return extrude(fill(geometry), height, depth);
       case 'plan':
-        return extrude(reify(geometry), height, depth);
+        return extrude(reify(geometry).content[0], height, depth);
       case 'assembly':
       case 'item':
       case 'disjointAssembly':

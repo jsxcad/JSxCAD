@@ -922,7 +922,7 @@ const extrude = (geometry, height, depth) => {
       case 'paths':
         return extrude(fill(geometry), height, depth);
       case 'plan':
-        return extrude(reify(geometry), height, depth);
+        return extrude(reify(geometry).content[0], height, depth);
       case 'assembly':
       case 'item':
       case 'disjointAssembly':
@@ -1648,7 +1648,7 @@ const offset = (geometry, initial = 1, step, limit) => {
           )
         );
       case 'plan':
-        return offset(reify(geometry), initial, step, limit);
+        return offset(reify(geometry).content[0], initial, step, limit);
       case 'assembly':
       case 'item':
       case 'disjointAssembly':
@@ -1921,7 +1921,7 @@ const test = (geometry) => {
       case 'paths':
         return;
       case 'plan':
-        return test(reify(geometry));
+        return test(reify(geometry).content[0]);
       case 'transform':
       case 'layout':
       case 'assembly':

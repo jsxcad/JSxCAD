@@ -32,7 +32,7 @@ export const offset = (geometry, initial = 1, step, limit) => {
           )
         );
       case 'plan':
-        return offset(reify(geometry), initial, step, limit);
+        return offset(reify(geometry).content[0], initial, step, limit);
       case 'assembly':
       case 'item':
       case 'disjointAssembly':
