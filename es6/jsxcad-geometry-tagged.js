@@ -285,16 +285,22 @@ const toTransformedGeometry = (geometry) => {
           } else {
             return descend(undefined, matrix);
           }
-        case 'plan':
-          return descend({
-            plan: {
-              ...geometry.plan,
-              matrix: composeTransforms(
-                matrix,
-                geometry.plan.matrix || identityMatrix
-              ),
+        case 'plan': {
+          const composedMatrix = composeTransforms(
+            matrix,
+            geometry.plan.matrix || identityMatrix
+          );
+          return descend(
+            {
+              ...geometry,
+              plan: {
+                ...geometry.plan,
+                matrix: composedMatrix,
+              },
             },
-          });
+            composedMatrix
+          );
+        }
         case 'paths':
           return descend({ paths: transform$5(matrix, geometry.paths) });
         case 'points':
@@ -1449,6 +1455,7 @@ const inset = (geometry, initial = 1, step, limit) => {
           )
         );
       case 'plan':
+        return inset(reify(geometry).content[0], initial, step, limit);
       case 'assembly':
       case 'item':
       case 'disjointAssembly':
@@ -1747,7 +1754,7 @@ const projectToPlane = (geometry, plane, direction) => {
 const read = async (path) => read$1(path);
 
 const sectionImpl = (geometry, planes) => {
-  const transformedGeometry = toTransformedGeometry(geometry);
+  const transformedGeometry = toTransformedGeometry(reify(geometry));
   const sections = [];
   for (const { tags, graph } of getNonVoidGraphs(transformedGeometry)) {
     for (const paths of section$1(graph, planes)) {

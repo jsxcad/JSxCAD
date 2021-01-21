@@ -1,4 +1,5 @@
 import { Peg } from '@jsxcad/api-v1-shapes';
+
 import { Shape } from '@jsxcad/api-v1-shape';
 import { each } from '@jsxcad/api-v1-math';
 
@@ -28,3 +29,26 @@ function carveMethod(tool, ...shapes) {
 }
 
 Shape.prototype.carve = carveMethod;
+
+const mill = (negative, { toolDiameter = 1, cutDepth = 1 } = {}) => {
+  const { max, min } = negative.size();
+  const depth = max[Z] - min[Z];
+  const cuts = Math.ceil(depth / cutDepth);
+  const effectiveCutDepth = depth / cuts;
+  return negative
+    .section(
+      ...each((l) => z.z(l), {
+        from: min[Z],
+        upto: max[Z],
+        by: effectiveCutDepth,
+      })
+    )
+    .inset(toolDiameter / 2, toolDiameter / 2)
+    .z(-max[Z]);
+};
+
+function millMethod(tool, ...shapes) {
+  return mill(this, tool, ...shapes);
+}
+
+Shape.prototype.mill = millMethod;

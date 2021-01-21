@@ -17,11 +17,3 @@ Note that the result is red, since the red square was extended to cover the area
 
 We can also add the shape of a Prism to a Square.
 This adds the area of the prism in the plane of the square to the square.
-
-![Image](add.md.2.png)
-
----
-
-And we can add a Prism to a Cube.
-
-![Image](add.md.3.png)

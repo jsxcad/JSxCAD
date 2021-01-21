@@ -1,4 +1,10 @@
-import { boot, clearEmitted, getEmitted, resolvePending } from '@jsxcad/sys';
+import {
+  boot,
+  clearEmitted,
+  getEmitted,
+  read,
+  resolvePending,
+} from '@jsxcad/sys';
 import { importModule, log } from '@jsxcad/api-v1';
 import { readFileSync, writeFileSync } from 'fs';
 
@@ -41,6 +47,9 @@ export const updateNotebook = async (target) => {
     if (note.log) {
       console.log(note.log.text);
     }
+    if (note.path) {
+      note.data = await read(note.path);
+    }
   }
   const html = await toHtml(notebook);
   writeFileSync(`${target}.html`, html);
@@ -57,7 +66,8 @@ export const updateNotebook = async (target) => {
   } catch (error) {
     if (error.code === 'ENOENT') {
       // We have no expectation -- generate one.
-      writeFileSync(`${target}.png`, pngjs.PNG.sync.write(pngData));
+      const buffer = pngjs.PNG.sync.write(observedPng);
+      writeFileSync(`${target}.png`, buffer);
       return;
     }
     throw error;

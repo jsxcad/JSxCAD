@@ -1,15 +1,14 @@
 md`
 # Shell Operations`;
 
-md`## path.offset(amount)`;
-md`FIX
-Circle(5)
-  .outline()
-  .op((s) => Group(s, s.offset(-1), s.offset(-2), s.offset(-3), s.offset(-4)))
-  .fix()
-  .topView();`;
+md`## path.inset(amount, step, limit)`;
 
-md`## shape.grow(1)`;
-md`
-FIX
-Box(10).grow(1).view();`;
+Arc(10)
+  .op((s) => s.and(s.inset(0.25, 0.5, 2.5).color('blue')))
+  .topView();
+
+md`## path.offset(amount, step, limit)`;
+
+Arc(10)
+  .op((s) => s.and(s.offset(0.25, 0.5, 2.5).color('blue')))
+  .topView();

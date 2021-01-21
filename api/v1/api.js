@@ -13,6 +13,7 @@ import '@jsxcad/api-v1-gcode';
 import '@jsxcad/api-v1-layout';
 import '@jsxcad/api-v1-pdf';
 import '@jsxcad/api-v1-plans';
+import '@jsxcad/api-v1-tools';
 
 import {
   apothem,
@@ -75,15 +76,6 @@ export { Line2 } from '@jsxcad/api-v1-line2';
 export { Plan } from '@jsxcad/api-v1-plan';
 
 export { Shell } from '@jsxcad/api-v1-shell';
-
-export {
-  BenchPlane,
-  BenchSaw,
-  DrillPress,
-  HoleRouter,
-  LineRouter,
-  ProfileRouter,
-} from '@jsxcad/api-v1-tools';
 
 export {
   Arc,
