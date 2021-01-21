@@ -14,7 +14,7 @@ export const test = (geometry) => {
       case 'paths':
         return;
       case 'plan':
-        return test(reify(geometry));
+        return test(reify(geometry).content[0]);
       case 'transform':
       case 'layout':
       case 'assembly':
