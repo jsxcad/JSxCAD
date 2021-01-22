@@ -162,7 +162,7 @@ const applyTransforms = ({ matrix }, transformText) => {
   return { matrix };
 };
 
-export const fromSvg = async (input, options = {}) => {
+export const fromSvg = async (input, { definitions } = {}) => {
   const svgString = new TextDecoder('utf8').decode(input);
   const geometry = taggedGroup({});
   const svg = new XmlDom.DOMParser().parseFromString(
@@ -247,7 +247,7 @@ export const fromSvg = async (input, options = {}) => {
           const fill = attributes.fill;
           if (fill !== undefined && fill !== 'none' && fill !== '') {
             // Does fill, etc, inherit?
-            const tags = toTagsFromName(fill);
+            const tags = toTagsFromName(fill, definitions);
             geometry.content.push(
               transformGeometry(
                 scale(matrix),
@@ -275,7 +275,7 @@ export const fromSvg = async (input, options = {}) => {
             if (scaledMatrix.some((element) => isNaN(element))) {
               throw Error(`die: Bad element in matrix ${matrix}.`);
             }
-            const tags = toTagsFromName(stroke);
+            const tags = toTagsFromName(stroke, definitions);
             geometry.content.push(
               transformGeometry(scaledMatrix, {
                 type: 'paths',

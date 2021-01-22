@@ -17,7 +17,7 @@ import '@jsxcad/api-v1-tools';
 
 import { Peg } from '@jsxcad/api-v1-shapes';
 
-export { define } from './define.js';
+export { define, defRgbColor } from './define.js';
 
 export const x = Peg([0, 0, 0], [0, 0, 1], [0, -1, 0]);
 export const y = Peg([0, 0, 0], [0, 0, 1], [1, 0, 0]);
