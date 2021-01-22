@@ -38,7 +38,10 @@ export const toDomElement = async (notebook = []) => {
     div.classList.add('note', 'orbitView');
     const body = window.document.body;
     body.insertBefore(div, body.firstChild);
-    await orbitDisplay({ view, geometry: data, withAxes, withGrid, definitions }, div);
+    await orbitDisplay(
+      { view, geometry: data, withAxes, withGrid, definitions },
+      div
+    );
     const onKeyDown = (event) => {
       if (
         event.key === 'Escape' ||

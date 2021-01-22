@@ -53172,7 +53172,12 @@ const buildScene = ({
 const GEOMETRY_LAYER = 0;
 const SKETCH_LAYER = 1;
 
-const setColor = (definitions, tags = [], parameters = {}, otherwise = [0, 0, 0]) => {
+const setColor = (
+  definitions,
+  tags = [],
+  parameters = {},
+  otherwise = [0, 0, 0]
+) => {
   // Use supplied definition
   for (const tag of tags) {
     const data = definitions.get(tag);
@@ -53516,7 +53521,7 @@ const buildMeshes = async ({
   scene,
   layer = GEOMETRY_LAYER,
   render,
-  definitions
+  definitions,
 }) => {
   if (threejsGeometry === undefined) {
     return;
@@ -53709,12 +53714,9 @@ const moveToFit = ({
   scene,
   fitOffset = 1.2,
   withGrid = false,
+  gridLayer = SKETCH_LAYER,
 } = {}) => {
   const { fit = true } = view;
-
-  if (!fit) {
-    return;
-  }
 
   let box;
 
@@ -53751,7 +53753,7 @@ const moveToFit = ({
       grid.material.opacity = 0.5;
       grid.rotation.x = -Math.PI / 2;
       grid.position.set(0, 0, -0.002);
-      grid.layers.set(1);
+      grid.layers.set(gridLayer);
       scene.add(grid);
       datasets.push({ mesh: grid });
     }
@@ -53761,10 +53763,14 @@ const moveToFit = ({
       grid.material.opacity = 0.5;
       grid.rotation.x = -Math.PI / 2;
       grid.position.set(0, 0, -0.001);
-      grid.layers.set(1);
+      grid.layers.set(gridLayer);
       scene.add(grid);
       datasets.push({ mesh: grid });
     }
+  }
+
+  if (!fit) {
+    return;
   }
 
   const center = box.getCenter(new Vector3());
@@ -53801,7 +53807,15 @@ const moveToFit = ({
 /* global ResizeObserver, requestAnimationFrame */
 
 const orbitDisplay = async (
-  { view = {}, geometry, canvas, withAxes = false, withGrid = false, definitions } = {},
+  {
+    view = {},
+    geometry,
+    canvas,
+    withAxes = false,
+    withGrid = false,
+    gridLayer = SKETCH_LAYER,
+    definitions,
+  } = {},
   page
 ) => {
   let datasets = [];
@@ -53869,9 +53883,23 @@ const orbitDisplay = async (
     // Build new datasets from the written data, and display them.
     datasets = [];
 
-    await buildMeshes({ datasets, threejsGeometry, scene, render, definitions });
+    await buildMeshes({
+      datasets,
+      threejsGeometry,
+      scene,
+      render,
+      definitions,
+    });
 
-    moveToFit({ datasets, view, camera, controls: trackball, scene, withGrid });
+    moveToFit({
+      datasets,
+      view,
+      camera,
+      controls: trackball,
+      scene,
+      withGrid,
+      gridLayer,
+    });
 
     render();
   };
@@ -53913,7 +53941,13 @@ const release = async () => {
 };
 
 const staticDisplay = async (
-  { view = {}, threejsGeometry, withAxes = false, withGrid = false, definitions } = {},
+  {
+    view = {},
+    threejsGeometry,
+    withAxes = false,
+    withGrid = false,
+    definitions,
+  } = {},
   page
 ) => {
   if (locked === true) await acquire();
@@ -53987,7 +54021,13 @@ const staticView = async (
 ) => {
   const threejsGeometry = toThreejsGeometry(shape.toKeptGeometry());
   const { renderer } = await staticDisplay(
-    { view: { target, position, up }, threejsGeometry, withAxes, withGrid, definitions },
+    {
+      view: { target, position, up },
+      threejsGeometry,
+      withAxes,
+      withGrid,
+      definitions,
+    },
     { offsetWidth: width, offsetHeight: height }
   );
   const canvas = toCanvasFromWebglContext(renderer.getContext());

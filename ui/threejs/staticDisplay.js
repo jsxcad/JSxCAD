@@ -26,7 +26,13 @@ const release = async () => {
 };
 
 export const staticDisplay = async (
-  { view = {}, threejsGeometry, withAxes = false, withGrid = false, definitions } = {},
+  {
+    view = {},
+    threejsGeometry,
+    withAxes = false,
+    withGrid = false,
+    definitions,
+  } = {},
   page
 ) => {
   if (locked === true) await acquire();

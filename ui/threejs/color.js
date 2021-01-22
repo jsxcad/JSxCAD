@@ -1,6 +1,11 @@
 import { toRgbFromTags } from '@jsxcad/algorithm-color';
 
-export const setColor = (definitions, tags = [], parameters = {}, otherwise = [0, 0, 0]) => {
+export const setColor = (
+  definitions,
+  tags = [],
+  parameters = {},
+  otherwise = [0, 0, 0]
+) => {
   // Use supplied definition
   for (const tag of tags) {
     const data = definitions.get(tag);

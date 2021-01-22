@@ -24,9 +24,7 @@ export const reify = (geometry) => {
           const reifier = registry.get(geometry.plan.type);
           if (reifier === undefined) {
             throw Error(
-              `Do not know how to reify plan: ${JSON.stringify(
-                geometry.plan
-              )}`
+              `Do not know how to reify plan: ${JSON.stringify(geometry.plan)}`
             );
           }
           geometry.content = [reifier(geometry)];

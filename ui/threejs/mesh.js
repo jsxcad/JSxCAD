@@ -195,7 +195,7 @@ export const buildMeshes = async ({
   scene,
   layer = GEOMETRY_LAYER,
   render,
-  definitions
+  definitions,
 }) => {
   if (threejsGeometry === undefined) {
     return;

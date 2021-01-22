@@ -7,7 +7,11 @@ import {
   getSides,
   getTo,
 } from '@jsxcad/geometry-plan';
-import { registerReifier, taggedPlan, taggedSolid } from '@jsxcad/geometry-tagged';
+import {
+  registerReifier,
+  taggedPlan,
+  taggedSolid,
+} from '@jsxcad/geometry-tagged';
 
 import { buildRingSphere } from '@jsxcad/algorithm-shape';
 
@@ -20,7 +24,8 @@ registerReifier('Orb', ({ tags, plan }) =>
     .z(getRadius(plan)[Z] + getBase(plan))
     .orient({ center: getCenter(plan), from: getFrom(plan), at: getTo(plan) })
     .setTags(tags)
-    .toGeometry());
+    .toGeometry()
+);
 
 export const Orb = (x = 1, y = x, z = x) =>
   Shape.fromGeometry(taggedPlan({}, { diameter: [x, y, z], type: 'Orb' }));

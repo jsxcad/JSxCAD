@@ -1649,7 +1649,8 @@ registerReifier('Icosahedron', ({ tags, plan }) =>
     .z(getRadius(plan)[Z] + getBase(plan))
     .orient({ center: getCenter(plan), from: getFrom(plan), at: getTo(plan) })
     .setTags(tags)
-    .toGeometry());
+    .toGeometry()
+);
 
 const Icosahedron = (x = 1, y = x, z = x) =>
   Shape.fromGeometry(
@@ -1724,7 +1725,8 @@ registerReifier('Orb', ({ tags, plan }) =>
     .z(getRadius(plan)[Z$1] + getBase(plan))
     .orient({ center: getCenter(plan), from: getFrom(plan), at: getTo(plan) })
     .setTags(tags)
-    .toGeometry());
+    .toGeometry()
+);
 
 const Orb = (x = 1, y = x, z = x) =>
   Shape.fromGeometry(taggedPlan({}, { diameter: [x, y, z], type: 'Orb' }));

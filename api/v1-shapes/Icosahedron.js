@@ -19,7 +19,8 @@ registerReifier('Icosahedron', ({ tags, plan }) =>
     .z(getRadius(plan)[Z] + getBase(plan))
     .orient({ center: getCenter(plan), from: getFrom(plan), at: getTo(plan) })
     .setTags(tags)
-    .toGeometry());
+    .toGeometry()
+);
 
 export const Icosahedron = (x = 1, y = x, z = x) =>
   Shape.fromGeometry(

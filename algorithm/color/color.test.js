@@ -11,9 +11,9 @@ test('Blue works.', (t) => {
 });
 
 test('255 works.', (t) => {
-  t.is(toTagFromRgbInt(255), 'color/blue');
+  t.is(toTagFromRgbInt(255), 'color/#0000ff');
 });
 
 test('123214 works.', (t) => {
-  t.is(toTagFromRgbInt(123214), 'color/malachite');
+  t.is(toTagFromRgbInt(123214), 'color/#01e14e');
 });

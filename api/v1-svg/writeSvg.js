@@ -8,8 +8,8 @@ import {
 import Shape from '@jsxcad/api-v1-shape';
 import { ensurePages } from '@jsxcad/api-v1-layout';
 import { hash as hashGeometry } from '@jsxcad/geometry-tagged';
-import { toSvg } from '@jsxcad/convert-svg';
 import hashSum from 'hash-sum';
+import { toSvg } from '@jsxcad/convert-svg';
 
 export const prepareSvg = (shape, name, options = {}) => {
   let index = 0;
