@@ -195,6 +195,7 @@ export const buildMeshes = async ({
   scene,
   layer = GEOMETRY_LAYER,
   render,
+  definitions,
 }) => {
   if (threejsGeometry === undefined) {
     return;
@@ -226,8 +227,8 @@ export const buildMeshes = async ({
         transparent,
         opacity,
       });
-      const color = new Color(setColor(tags, {}, [0, 0, 0]).color);
-      const colors = [];
+      const color = new Color(setColor(definitions, tags, {}, [0, 0, 0]).color);
+      const pathColors = [];
       const positions = [];
       const index = [];
       for (const path of paths) {
@@ -243,7 +244,7 @@ export const buildMeshes = async ({
           }
           const [aX = 0, aY = 0, aZ = 0] = start;
           const [bX = 0, bY = 0, bZ = 0] = end;
-          colors.push(
+          pathColors.push(
             color.r,
             color.g,
             color.b,
@@ -270,7 +271,7 @@ export const buildMeshes = async ({
         'position',
         new Float32BufferAttribute(positions, 3)
       );
-      geometry.setAttribute('color', new Float32BufferAttribute(colors, 4));
+      geometry.setAttribute('color', new Float32BufferAttribute(pathColors, 4));
       dataset.mesh = new LineSegments(geometry, material);
       dataset.mesh.layers.set(layer);
       dataset.name = toName(threejsGeometry);
@@ -304,11 +305,10 @@ export const buildMeshes = async ({
       const dataset = {};
       const geometry = new Geometry();
       const material = new PointsMaterial({
-        color: setColor(tags, {}, [0, 0, 0]).color,
+        color: setColor(definitions, tags, {}, [0, 0, 0]).color,
         size: 0.5,
       });
       for (const [aX = 0, aY = 0, aZ = 0] of points) {
-        // geometry.colors.push(color, color);
         geometry.vertices.push(new Vector3(aX, aY, aZ));
       }
       dataset.mesh = new Points(geometry, material);
@@ -328,7 +328,7 @@ export const buildMeshes = async ({
       );
       geometry.setAttribute('normal', new Float32BufferAttribute(normals, 3));
       applyBoxUV(geometry);
-      const material = await buildMeshMaterial(tags);
+      const material = await buildMeshMaterial(definitions, tags);
       if (tags.includes('compose/non-positive')) {
         material.transparent = true;
         material.opacity *= 0.2;
@@ -351,7 +351,7 @@ export const buildMeshes = async ({
       );
       geometry.setAttribute('normal', new Float32BufferAttribute(normals, 3));
       applyBoxUV(geometry);
-      const material = await buildMeshMaterial(tags);
+      const material = await buildMeshMaterial(definitions, tags);
       material.transparent = true;
       material.opacity = 0.1;
       material.side = DoubleSide;
@@ -374,6 +374,7 @@ export const buildMeshes = async ({
         scene,
         layer,
         render,
+        definitions,
       });
     }
   }

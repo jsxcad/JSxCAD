@@ -31,15 +31,22 @@ export class NoteUi extends React.PureComponent {
         while (ref.firstChild) {
           ref.removeChild(ref.lastChild);
         }
+        const notes = [];
         for (const note of data) {
+          if (note && note.define) {
+            // Include preceeding definition notes to support rendering.
+            notes.push(note);
+          }
           if (note && note.hash === hash) {
-            const element = await toDomElement([note]);
+            notes.push(note);
+            const element = await toDomElement(notes);
             if (note.view && note.view.inline) {
               ref.style.width = `${note.view.inline}%`;
               ref.style.display = 'inline-block';
             }
             ref.appendChild(element);
             note.noteRef = ref;
+            break;
           }
         }
       }

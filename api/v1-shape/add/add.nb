@@ -9,12 +9,12 @@ Shape.add extends a shape to cover the other shapes.
 
 ---
 
-For example, we can add the shape of a blue Circle to a red Square.
-Note that the result is red, since the red square was extended to cover the area of the blue circle.
+For example, we can add the shape of a blue Arc to a red Box.
+Note that the result is red, since the red box was extended to cover the area of the blue arc.
 `;
   
-Square(20).color('red')
-  .add(Circle(12).color('blue'))
+Box(20).color('red')
+  .add(Arc(12).color('blue'))
   .topView();
 
 md`
@@ -24,8 +24,8 @@ We can also add the shape of a Prism to a Square.
 This adds the area of the prism in the plane of the square to the square.
 `;
   
-Square(20)
-  .add(Prism(16, 6))
+Box(20)
+  .add(Rod(16, 6).sides(5))
   .topView();
 
 md`
@@ -34,6 +34,6 @@ md`
 And we can add a Prism to a Cube.
 `;
   
-Prism(7, 16)
-  .add(Cube(12))
+Rod(7, 16).sides(5)
+  .add(Box(6, 6, 6))
   .view();

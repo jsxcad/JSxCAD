@@ -25,6 +25,8 @@ marked.use({
 });
 
 export const toDomElement = async (notebook = []) => {
+  const definitions = new Map();
+
   const container = document.createElement('div');
   container.classList.add('notebook');
 
@@ -36,7 +38,10 @@ export const toDomElement = async (notebook = []) => {
     div.classList.add('note', 'orbitView');
     const body = window.document.body;
     body.insertBefore(div, body.firstChild);
-    await orbitDisplay({ view, geometry: data, withAxes, withGrid }, div);
+    await orbitDisplay(
+      { view, geometry: data, withAxes, withGrid, definitions },
+      div
+    );
     const onKeyDown = (event) => {
       if (
         event.key === 'Escape' ||
@@ -51,6 +56,15 @@ export const toDomElement = async (notebook = []) => {
   };
 
   for (const note of notebook) {
+    if (note.define) {
+      // NOTE: This can have interesting effects if definitions are redefined incompatibly while rendering, since some operations are async and might occur out of order.
+      let entry = definitions.get(note.define.tag);
+      if (entry === undefined) {
+        entry = {};
+        definitions.set(note.define.tag, entry);
+      }
+      Object.assign(entry, note.define.data);
+    }
     if (note.view) {
       const div = document.createElement('div');
       const { data, view } = note;
@@ -63,6 +77,7 @@ export const toDomElement = async (notebook = []) => {
         position,
         withAxes,
         withGrid,
+        definitions,
       });
       const image = document.createElement('img');
       image.classList.add('note', 'view');

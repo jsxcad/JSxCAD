@@ -133,10 +133,10 @@ export const setMaterial = async (tags, parameters) => {
   }
 };
 
-export const buildMeshMaterial = async (tags) => {
+export const buildMeshMaterial = async (definitions, tags) => {
   if (tags !== undefined) {
     const parameters = {};
-    const color = setColor(tags, parameters, null);
+    const color = setColor(definitions, tags, parameters, null);
     const material = await setMaterial(tags, parameters);
     if (material) {
       return new MeshPhysicalMaterial(parameters);

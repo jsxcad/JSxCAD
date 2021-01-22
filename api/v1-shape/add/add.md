@@ -8,8 +8,8 @@ Shape.add extends a shape to cover the other shapes.
 
 ---
 
-For example, we can add the shape of a blue Circle to a red Square.
-Note that the result is red, since the red square was extended to cover the area of the blue circle.
+For example, we can add the shape of a blue Arc to a red Box.
+Note that the result is red, since the red box was extended to cover the area of the blue arc.
 
 ![Image](add.md.1.png)
 

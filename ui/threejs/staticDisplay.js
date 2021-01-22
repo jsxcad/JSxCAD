@@ -26,7 +26,13 @@ const release = async () => {
 };
 
 export const staticDisplay = async (
-  { view = {}, threejsGeometry, withAxes = false, withGrid = false } = {},
+  {
+    view = {},
+    threejsGeometry,
+    withAxes = false,
+    withGrid = false,
+    definitions,
+  } = {},
   page
 ) => {
   if (locked === true) await acquire();
@@ -62,7 +68,7 @@ export const staticDisplay = async (
     renderer.render(scene, camera);
   };
 
-  await buildMeshes({ datasets, threejsGeometry, scene });
+  await buildMeshes({ datasets, threejsGeometry, scene, definitions });
 
   moveToFit({ datasets, view, camera, scene, withGrid });
 

@@ -27,7 +27,9 @@
     "@jsxcad/api-v1-layout": "^0.0.79",
     "@jsxcad/api-v1-shape": "^0.0.79",
     "@jsxcad/convert-svg": "^0.0.79",
-    "@jsxcad/sys": "^0.0.79"
+    "@jsxcad/geometry-tagged": "^0.0.79",
+    "@jsxcad/sys": "^0.0.79",
+    "hash-sum": "^2.0.0"
   },
   "devDependencies": {
     "ava": "^3.9.0",

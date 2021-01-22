@@ -3,11 +3,9 @@ Some examples of constructive solid geometry.
 ![Image](csg.md.1.png)
 
 '''
-Cube(10, 10, 20)
-.add(Cube(20, 10, 10))
-.add(Cube(10, 20, 10))
-.withOutline()
-.Item()
+Box(10, 10, 20)
+.add(Box(20, 10, 10))
+.add(Box(10, 20, 10))
 .view();
 '''
 
@@ -16,34 +14,22 @@ Cube(10, 10, 20)
 ![Image](csg.md.2.png)
 
 '''
-Cube(20)
-.cut(Cylinder(12, 12))
-.withOutline()
-.Item()
+Box(20)
+.cut(Rod(12, 12))
 .view();
 '''
 
 ---
 
 '''
-const sphere = Sphere(10).clip(Cube(19.5));
+const orb = Sphere(10).clip(Cube(19.5));
 '''
 
 ![Image](csg.md.3.png)
-
-'''
-sphere
-.withOutline()
-.Item()
-.view();
-'''
-
 ![Image](csg.md.4.png)
 
 '''
-Cube(18)
-.cut(sphere)
-.withOutline()
-.Item()
+Box(18, 18, 18)
+.cut(orb)
 .view();
 '''

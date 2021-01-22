@@ -10,8 +10,7 @@ import './jsxcad-api-v1-extrude.js';
 import './jsxcad-api-v1-gcode.js';
 import './jsxcad-api-v1-pdf.js';
 import './jsxcad-api-v1-plans.js';
-import { apothem, box, corners, diameter, edge, radius } from './jsxcad-geometry-plan.js';
-export { apothem, box, corners, diameter, edge, radius } from './jsxcad-geometry-plan.js';
+import './jsxcad-api-v1-tools.js';
 import { Peg, Arc, Assembly, Block, Box, ChainedHull, Circle, Cone, Difference, Empty, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Intersection, Line, LoopedHull, Octagon, Orb, Path, Pentagon, Plane, Point, Points, Polygon, Polyhedron, RegularPolygon, Rod, Septagon, Spiral, Square, Tetragon, Toolpath, Torus, Triangle, Union, Wave, Weld } from './jsxcad-api-v1-shapes.js';
 export { Arc, Assembly, Block, Box, ChainedHull, Circle, Cone, Difference, Empty, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Intersection, Line, LoopedHull, Octagon, Orb, Path, Peg, Pentagon, Plane, Point, Points, Polygon, Polyhedron, RegularPolygon, Rod, Septagon, Spiral, Square, Tetragon, Toolpath, Torus, Triangle, Union, Wave, Weld } from './jsxcad-api-v1-shapes.js';
 import { Line2 } from './jsxcad-api-v1-line2.js';
@@ -20,8 +19,6 @@ import { Plan } from './jsxcad-api-v1-plan.js';
 export { Plan } from './jsxcad-api-v1-plan.js';
 import { Shell } from './jsxcad-api-v1-shell.js';
 export { Shell } from './jsxcad-api-v1-shell.js';
-import { BenchPlane, BenchSaw, DrillPress, HoleRouter, LineRouter, ProfileRouter } from './jsxcad-api-v1-tools.js';
-export { BenchPlane, BenchSaw, DrillPress, HoleRouter, LineRouter, ProfileRouter } from './jsxcad-api-v1-tools.js';
 import { Item } from './jsxcad-api-v1-item.js';
 export { Item } from './jsxcad-api-v1-item.js';
 import { Noise, Random, acos, cos, each, ease, max, min, numbers, sin, sqrt, vec } from './jsxcad-api-v1-math.js';
@@ -252,6 +249,12 @@ function sum (o) {
 
 var hashSum = sum;
 
+const define = (tag, data) => {
+  const define = { tag, data };
+  emit({ define, hash: hashSum(define) });
+  return define;
+};
+
 const md = (strings, ...placeholders) => {
   const md = strings.reduce(
     (result, string, i) => result + placeholders[i - 1] + string
@@ -361,34 +364,16 @@ const replayRecordedNotes = async (path) => {
  * the api uses.
  */
 
-const a = apothem;
-const b = box;
-const c = corners;
-const d = diameter;
-const e = edge;
-const r = radius;
-
 const x = Peg([0, 0, 0], [0, 0, 1], [0, -1, 0]);
 const y = Peg([0, 0, 0], [0, 0, 1], [1, 0, 0]);
 const z = Peg([0, 0, 0], [0, 1, 0], [-1, 0, 0]);
 
 var api = /*#__PURE__*/Object.freeze({
   __proto__: null,
-  apothem: apothem,
-  box: box,
-  corners: corners,
-  diameter: diameter,
-  edge: edge,
-  radius: radius,
-  a: a,
-  b: b,
-  c: c,
-  d: d,
-  e: e,
-  r: r,
   x: x,
   y: y,
   z: z,
+  define: define,
   Page: Page,
   pack: pack,
   md: md,
@@ -411,12 +396,6 @@ var api = /*#__PURE__*/Object.freeze({
   Line2: Line2,
   Plan: Plan,
   Shell: Shell,
-  BenchPlane: BenchPlane,
-  BenchSaw: BenchSaw,
-  DrillPress: DrillPress,
-  HoleRouter: HoleRouter,
-  LineRouter: LineRouter,
-  ProfileRouter: ProfileRouter,
   Arc: Arc,
   Assembly: Assembly,
   Block: Block,
@@ -557,4 +536,4 @@ registerDynamicModule(module('svg'), './jsxcad-api-v1-svg.js');
 registerDynamicModule(module('threejs'), './jsxcad-api-v1-threejs.js');
 registerDynamicModule(module('units'), './jsxcad-api-v1-units.js');
 
-export { a, b, beginRecordingNotes, c, checkBox, d, e, importModule, md, numberBox, r, replayRecordedNotes, saveRecordedNotes, selectBox, sliderBox, source, stringBox, x, y, z };
+export { beginRecordingNotes, checkBox, define, importModule, md, numberBox, replayRecordedNotes, saveRecordedNotes, selectBox, sliderBox, source, stringBox, x, y, z };

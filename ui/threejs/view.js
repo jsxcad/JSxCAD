@@ -24,11 +24,18 @@ export const staticView = async (
     height = 128,
     withAxes = false,
     withGrid = false,
+    definitions,
   } = {}
 ) => {
   const threejsGeometry = toThreejsGeometry(shape.toKeptGeometry());
   const { renderer } = await staticDisplay(
-    { view: { target, position, up }, threejsGeometry, withAxes, withGrid },
+    {
+      view: { target, position, up },
+      threejsGeometry,
+      withAxes,
+      withGrid,
+      definitions,
+    },
     { offsetWidth: width, offsetHeight: height }
   );
   const canvas = toCanvasFromWebglContext(renderer.getContext());
@@ -49,7 +56,7 @@ export const image = async (...args) => {
 
 export const orbitView = async (
   shape,
-  { target, position, up = UP, width = 256, height = 128 } = {}
+  { target, position, up = UP, width = 256, height = 128, definitions } = {}
 ) => {
   const container = document.createElement('div');
   container.style = `width: ${width}px; height: ${height}px`;
@@ -57,6 +64,6 @@ export const orbitView = async (
   const geometry = shape.toKeptGeometry();
   const view = { target, position, up };
 
-  await orbitDisplay({ geometry, view }, container);
+  await orbitDisplay({ geometry, view, definitions }, container);
   return container;
 };

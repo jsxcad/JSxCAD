@@ -24,11 +24,9 @@
   "keywords": [],
   "license": "MIT",
   "dependencies": {
-    "@jsxcad/algorithm-toolpath": "^0.0.79",
     "@jsxcad/api-v1-math": "^0.0.79",
     "@jsxcad/api-v1-shape": "^0.0.79",
-    "@jsxcad/api-v1-shapes": "^0.0.79",
-    "@jsxcad/geometry-tagged": "^0.0.79"
+    "@jsxcad/api-v1-shapes": "^0.0.79"
   },
   "devDependencies": {
     "ava": "^3.9.0",

@@ -9,13 +9,13 @@ import {
   getTo,
   getTop,
 } from '@jsxcad/geometry-plan';
-import { reify, taggedPlan } from '@jsxcad/geometry-tagged';
+import { registerReifier, taggedPlan } from '@jsxcad/geometry-tagged';
 
 import Arc from './Arc.js';
 import Hull from './Hull.js';
 import Point from './Point.js';
 
-reify.Cone = ({ tags, plan }) => {
+registerReifier('Cone', ({ tags, plan }) => {
   const [length, width] = getDiameter(plan);
   return Hull(
     Arc(length, width).sides(getSides(plan)).z(getBase(plan)),
@@ -25,7 +25,7 @@ reify.Cone = ({ tags, plan }) => {
     .transform(getMatrix(plan))
     .setTags(tags)
     .toGeometry();
-};
+});
 
 export const Cone = (diameter = 1, top = 1, base = 0) =>
   Shape.fromGeometry(

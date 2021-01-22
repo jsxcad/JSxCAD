@@ -13,9 +13,9 @@ import {
   getTop,
 } from '@jsxcad/geometry-plan';
 
-import { reify, taggedPlan } from '@jsxcad/geometry-tagged';
+import { registerReifier, taggedPlan } from '@jsxcad/geometry-tagged';
 
-reify.Box = ({ tags, plan }) => {
+registerReifier('Box', ({ tags, plan }) => {
   const left = getLeft(plan);
   const right = getRight(plan);
   const front = getFront(plan);
@@ -35,7 +35,7 @@ reify.Box = ({ tags, plan }) => {
     .transform(getMatrix(plan))
     .setTags(tags)
     .toGeometry();
-};
+});
 
 export const Box = (x, y = x, z = 0) =>
   Shape.fromGeometry(taggedPlan({}, { diameter: [x, y, z], type: 'Box' }));

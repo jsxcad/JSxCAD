@@ -1,19 +1,4 @@
 import colors from './colors.js';
-import { proximity } from './proximity.js';
-
-const toEntryFromRgbInt = (rgbInt) => {
-  const rgb = toArrayFromRgbInt(rgbInt);
-  let bestDistance = Infinity;
-  let best;
-  for (const entry of colors) {
-    const distance = proximity(rgb, toArrayFromRgbInt(entry.rgb));
-    if (distance < bestDistance) {
-      best = entry;
-      bestDistance = distance;
-    }
-  }
-  return best;
-};
 
 const toRgbIntFromName = (name, defaultRgbInt = 0) => {
   let rgbInt;
@@ -58,12 +43,16 @@ export const toRgbIntFromTags = (tags = [], defaultRgb = [0, 0, 0]) => {
   return rgb;
 };
 
+// FIX: Apply normalizations here.
 export const toTagFromName = (name) => {
+  return `color/${name}`;
+  /*
   const entry = toEntryFromRgbInt(toRgbIntFromName(name));
   if (entry !== undefined) {
     return `color/${entry.name.toLowerCase()}`;
   }
   return `color/unknown`;
+*/
 };
 
 export const toTagFromRgbInt = (rgbInt, defaultTag = 'color/black') =>

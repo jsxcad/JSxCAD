@@ -2,77 +2,50 @@ md`
 Some examples of constructive solid geometry.
 `
 
-Cube(10, 10, 20)
-  .add(Cube(20, 10, 10))
-  .add(Cube(10, 20, 10))
-  .withOutline()
-  .Item()
+Box(10, 10, 20)
+  .add(Box(20, 10, 10))
+  .add(Box(10, 20, 10))
   .view();
 
 md`
 '''
-Cube(10, 10, 20)
-  .add(Cube(20, 10, 10))
-  .add(Cube(10, 20, 10))
-  .withOutline()
-  .Item()
+Box(10, 10, 20)
+  .add(Box(20, 10, 10))
+  .add(Box(10, 20, 10))
   .view();
 '''
 ---
 `;
 
-Cube(20)
-  .cut(Cylinder(12, 12))
-  .withOutline()
-  .Item()
+Box(20)
+  .cut(Rod(12, 12))
   .view();
 
 md`
 '''
-Cube(20)
-  .cut(Cylinder(12, 12))
-  .withOutline()
-  .Item()
+Box(20)
+  .cut(Rod(12, 12))
   .view();
 '''
 ---
 `;
 
-const sphere = Sphere(10).clip(Cube(19.5));
-
-
 md`
 '''
-const sphere = Sphere(10).clip(Cube(19.5));
+const orb = Sphere(10).clip(Cube(19.5));
 '''
 `;
 
-sphere
-  .withOutline()
-  .Item()
+const orb = Orb(10).clip(Box(19.5, 19.5, 19.5)).view();
+
+Box(18, 18, 18)
+  .cut(orb)
   .view();
 
 md`
 '''
-sphere
-  .withOutline()
-  .Item()
-  .view();
-'''
-`;
-
-Cube(18)
-  .cut(sphere)
-  .withOutline()
-  .Item()
-  .view();
-
-md`
-'''
-Cube(18)
-  .cut(sphere)
-  .withOutline()
-  .Item()
+Box(18, 18, 18)
+  .cut(orb)
   .view();
 '''
 `;

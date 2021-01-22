@@ -1,0 +1,8 @@
+import { emit } from '@jsxcad/sys';
+import hashSum from 'hash-sum';
+
+export const define = (tag, data) => {
+  const define = { tag, data };
+  emit({ define, hash: hashSum(define) });
+  return define;
+};

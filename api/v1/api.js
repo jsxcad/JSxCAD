@@ -13,26 +13,11 @@ import '@jsxcad/api-v1-gcode';
 import '@jsxcad/api-v1-layout';
 import '@jsxcad/api-v1-pdf';
 import '@jsxcad/api-v1-plans';
-
-import {
-  apothem,
-  box,
-  corners,
-  diameter,
-  edge,
-  radius,
-} from '@jsxcad/geometry-plan';
+import '@jsxcad/api-v1-tools';
 
 import { Peg } from '@jsxcad/api-v1-shapes';
 
-export { apothem, box, corners, diameter, edge, radius };
-
-export const a = apothem;
-export const b = box;
-export const c = corners;
-export const d = diameter;
-export const e = edge;
-export const r = radius;
+export { define } from './define.js';
 
 export const x = Peg([0, 0, 0], [0, 0, 1], [0, -1, 0]);
 export const y = Peg([0, 0, 0], [0, 0, 1], [1, 0, 0]);
@@ -75,15 +60,6 @@ export { Line2 } from '@jsxcad/api-v1-line2';
 export { Plan } from '@jsxcad/api-v1-plan';
 
 export { Shell } from '@jsxcad/api-v1-shell';
-
-export {
-  BenchPlane,
-  BenchSaw,
-  DrillPress,
-  HoleRouter,
-  LineRouter,
-  ProfileRouter,
-} from '@jsxcad/api-v1-tools';
 
 export {
   Arc,

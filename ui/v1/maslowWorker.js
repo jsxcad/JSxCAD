@@ -215,7 +215,9 @@ const agent = async ({ ask, question }) => {
         values = values.map(api.Shape.fromGeometry);
         return Hull(...values).toKeptGeometry();
       case 'intersection':
-        return api.Shape.fromGeometry(values[0]).cut(shape(1)).toDisjointGeometry();
+        return api.Shape.fromGeometry(values[0])
+          .cut(shape(1))
+          .toDisjointGeometry();
       case 'rectangle':
         return api.Square(values[0], values[1]).toKeptGeometry();
       case 'Over Cut Inside Corners':
@@ -351,9 +353,13 @@ const agent = async ({ ask, question }) => {
       case 'size':
         return api.Shape.fromGeometry(values[0]).size();
       case 'tag':
-        return api.Shape.fromGeometry(values[0]).as(values[1]).toDisjointGeometry();
+        return api.Shape.fromGeometry(values[0])
+          .as(values[1])
+          .toDisjointGeometry();
       case 'specify':
-        return api.Shape.fromGeometry(values[0]).Item(values[1]).toDisjointGeometry();
+        return api.Shape.fromGeometry(values[0])
+          .Item(values[1])
+          .toDisjointGeometry();
       case 'translate':
         return api.Shape.fromGeometry(values[0])
           .move(values[1], values[2], values[3])
@@ -361,7 +367,9 @@ const agent = async ({ ask, question }) => {
       case 'getBOM':
         return api.Shape.fromGeometry(values[0]).bom();
       case 'union':
-        return api.Shape.fromGeometry(values[0]).add(shape(1)).toDisjointGeometry();
+        return api.Shape.fromGeometry(values[0])
+          .add(shape(1))
+          .toDisjointGeometry();
       default:
         return -1;
     }

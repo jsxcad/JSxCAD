@@ -35,16 +35,22 @@ export const toTransformedGeometry = (geometry) => {
           } else {
             return descend(undefined, matrix);
           }
-        case 'plan':
-          return descend({
-            plan: {
-              ...geometry.plan,
-              matrix: composeTransforms(
-                matrix,
-                geometry.plan.matrix || identityMatrix
-              ),
+        case 'plan': {
+          const composedMatrix = composeTransforms(
+            matrix,
+            geometry.plan.matrix || identityMatrix
+          );
+          return descend(
+            {
+              ...geometry,
+              plan: {
+                ...geometry.plan,
+                matrix: composedMatrix,
+              },
             },
-          });
+            composedMatrix
+          );
+        }
         case 'paths':
           return descend({ paths: transformPaths(matrix, geometry.paths) });
         case 'points':
