@@ -9,11 +9,11 @@ import {
   getTo,
   getTop,
 } from '@jsxcad/geometry-plan';
-import { reify, taggedPlan } from '@jsxcad/geometry-tagged';
+import { registerReifier, taggedPlan } from '@jsxcad/geometry-tagged';
 
 import Spiral from './Spiral.js';
 
-reify.Arc = ({ tags, plan }) => {
+registerReifier('Arc', ({ tags, plan }) => {
   const { start = 0, end = 360 } = plan.angle || {};
   const spiral = Spiral((a) => [[1]], {
     from: start - 90,
@@ -37,7 +37,7 @@ reify.Arc = ({ tags, plan }) => {
       .setTags(tags)
       .toGeometry();
   }
-};
+});
 
 export const Arc = (x = 1, y = x, z = 0) =>
   Shape.fromGeometry(taggedPlan({}, { diameter: [x, y, z], type: 'Arc' }));

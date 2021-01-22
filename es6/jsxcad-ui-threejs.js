@@ -53172,7 +53172,20 @@ const buildScene = ({
 const GEOMETRY_LAYER = 0;
 const SKETCH_LAYER = 1;
 
-const setColor = (tags = [], parameters = {}, otherwise = [0, 0, 0]) => {
+const setColor = (definitions, tags = [], parameters = {}, otherwise = [0, 0, 0]) => {
+  // Use supplied definition
+  for (const tag of tags) {
+    const data = definitions.get(tag);
+    if (data) {
+      if (data.rgb) {
+        const [r, g, b] = data.rgb;
+        const color = ((r << 16) | (g << 8) | b) >>> 0;
+        parameters.color = color;
+        return parameters;
+      }
+    }
+  }
+  // Fall back
   let rgb = toRgbFromTags(tags, null);
   if (rgb === null) {
     rgb = otherwise;
@@ -53311,10 +53324,10 @@ const setMaterial = async (tags, parameters) => {
   }
 };
 
-const buildMeshMaterial = async (tags) => {
+const buildMeshMaterial = async (definitions, tags) => {
   if (tags !== undefined) {
     const parameters = {};
-    const color = setColor(tags, parameters, null);
+    const color = setColor(definitions, tags, parameters, null);
     const material = await setMaterial(tags, parameters);
     if (material) {
       return new MeshPhysicalMaterial(parameters);
@@ -53503,6 +53516,7 @@ const buildMeshes = async ({
   scene,
   layer = GEOMETRY_LAYER,
   render,
+  definitions
 }) => {
   if (threejsGeometry === undefined) {
     return;
@@ -53534,8 +53548,8 @@ const buildMeshes = async ({
         transparent,
         opacity,
       });
-      const color = new Color$1(setColor(tags, {}, [0, 0, 0]).color);
-      const colors = [];
+      const color = new Color$1(setColor(definitions, tags, {}, [0, 0, 0]).color);
+      const pathColors = [];
       const positions = [];
       const index = [];
       for (const path of paths) {
@@ -53551,7 +53565,7 @@ const buildMeshes = async ({
           }
           const [aX = 0, aY = 0, aZ = 0] = start;
           const [bX = 0, bY = 0, bZ = 0] = end;
-          colors.push(
+          pathColors.push(
             color.r,
             color.g,
             color.b,
@@ -53578,7 +53592,7 @@ const buildMeshes = async ({
         'position',
         new Float32BufferAttribute(positions, 3)
       );
-      geometry.setAttribute('color', new Float32BufferAttribute(colors, 4));
+      geometry.setAttribute('color', new Float32BufferAttribute(pathColors, 4));
       dataset.mesh = new LineSegments(geometry, material);
       dataset.mesh.layers.set(layer);
       dataset.name = toName(threejsGeometry);
@@ -53612,11 +53626,10 @@ const buildMeshes = async ({
       const dataset = {};
       const geometry = new Geometry();
       const material = new PointsMaterial({
-        color: setColor(tags, {}, [0, 0, 0]).color,
+        color: setColor(definitions, tags, {}, [0, 0, 0]).color,
         size: 0.5,
       });
       for (const [aX = 0, aY = 0, aZ = 0] of points) {
-        // geometry.colors.push(color, color);
         geometry.vertices.push(new Vector3(aX, aY, aZ));
       }
       dataset.mesh = new Points(geometry, material);
@@ -53636,7 +53649,7 @@ const buildMeshes = async ({
       );
       geometry.setAttribute('normal', new Float32BufferAttribute(normals, 3));
       applyBoxUV(geometry);
-      const material = await buildMeshMaterial(tags);
+      const material = await buildMeshMaterial(definitions, tags);
       if (tags.includes('compose/non-positive')) {
         material.transparent = true;
         material.opacity *= 0.2;
@@ -53659,7 +53672,7 @@ const buildMeshes = async ({
       );
       geometry.setAttribute('normal', new Float32BufferAttribute(normals, 3));
       applyBoxUV(geometry);
-      const material = await buildMeshMaterial(tags);
+      const material = await buildMeshMaterial(definitions, tags);
       material.transparent = true;
       material.opacity = 0.1;
       material.side = DoubleSide;
@@ -53682,6 +53695,7 @@ const buildMeshes = async ({
         scene,
         layer,
         render,
+        definitions,
       });
     }
   }
@@ -53787,7 +53801,7 @@ const moveToFit = ({
 /* global ResizeObserver, requestAnimationFrame */
 
 const orbitDisplay = async (
-  { view = {}, geometry, canvas, withAxes = false, withGrid = false } = {},
+  { view = {}, geometry, canvas, withAxes = false, withGrid = false, definitions } = {},
   page
 ) => {
   let datasets = [];
@@ -53855,7 +53869,7 @@ const orbitDisplay = async (
     // Build new datasets from the written data, and display them.
     datasets = [];
 
-    await buildMeshes({ datasets, threejsGeometry, scene, render });
+    await buildMeshes({ datasets, threejsGeometry, scene, render, definitions });
 
     moveToFit({ datasets, view, camera, controls: trackball, scene, withGrid });
 
@@ -53899,7 +53913,7 @@ const release = async () => {
 };
 
 const staticDisplay = async (
-  { view = {}, threejsGeometry, withAxes = false, withGrid = false } = {},
+  { view = {}, threejsGeometry, withAxes = false, withGrid = false, definitions } = {},
   page
 ) => {
   if (locked === true) await acquire();
@@ -53935,7 +53949,7 @@ const staticDisplay = async (
     renderer.render(scene, camera);
   };
 
-  await buildMeshes({ datasets, threejsGeometry, scene });
+  await buildMeshes({ datasets, threejsGeometry, scene, definitions });
 
   moveToFit({ datasets, view, camera, scene, withGrid });
 
@@ -53968,11 +53982,12 @@ const staticView = async (
     height = 128,
     withAxes = false,
     withGrid = false,
+    definitions,
   } = {}
 ) => {
   const threejsGeometry = toThreejsGeometry(shape.toKeptGeometry());
   const { renderer } = await staticDisplay(
-    { view: { target, position, up }, threejsGeometry, withAxes, withGrid },
+    { view: { target, position, up }, threejsGeometry, withAxes, withGrid, definitions },
     { offsetWidth: width, offsetHeight: height }
   );
   const canvas = toCanvasFromWebglContext(renderer.getContext());
@@ -53993,7 +54008,7 @@ const image = async (...args) => {
 
 const orbitView = async (
   shape,
-  { target, position, up = UP, width = 256, height = 128 } = {}
+  { target, position, up = UP, width = 256, height = 128, definitions } = {}
 ) => {
   const container = document.createElement('div');
   container.style = `width: ${width}px; height: ${height}px`;
@@ -54001,7 +54016,7 @@ const orbitView = async (
   const geometry = shape.toKeptGeometry();
   const view = { target, position, up };
 
-  await orbitDisplay({ geometry, view }, container);
+  await orbitDisplay({ geometry, view, definitions }, container);
   return container;
 };
 

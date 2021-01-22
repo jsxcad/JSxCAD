@@ -80,7 +80,7 @@ export { outline } from './outline.js';
 export { projectToPlane } from './projectToPlane.js';
 export { read } from './read.js';
 export { realize } from './realize.js';
-export { reify } from './reify.js';
+export { registerReifier, reify } from './reify.js';
 export { rewriteTags } from './rewriteTags.js';
 export { section } from './section.js';
 export { smooth } from './smooth.js';

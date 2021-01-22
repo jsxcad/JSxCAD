@@ -195,47 +195,6 @@ class Ui extends React.PureComponent {
             notebookRef.forceUpdate();
           }
         }
-        /*
-        const { note, index } = question;
-        console.log(`QQ/question.note: ${index}`);
-        const { notebookData, notebookRef } = this.state;
-        const entry = notebookData[index];
-        if (entry && entry.noteRef) {
-          for (const child of entry.noteRef.getElementsByClassName('note')) {
-            child.style.removeProperty('filter');
-          }
-        }
-        let changed = false;
-        if (!entry || entry.hash !== note.hash) {
-          notebookData[index] = note;
-          changed = true;
-        }
-        // Detect duplicate sends of this note.
-        for (let nth = 0; nth < index; nth++) {
-          const other = notebookData[nth];
-          if (other && other.hash === note.hash) {
-            throw Error('die');
-          }
-        }
-        // Erase duplicates of this note.
-        for (let nth = index + 1; nth < notebookData.length; nth++) {
-          const other = notebookData[nth];
-          if (other && other.hash === note.hash) {
-            if (other.noteRef) {
-              for (const child of other.noteRef.getElementsByClassName(
-                'note'
-              )) {
-                child.style.removeProperty('filter');
-              }
-            }
-            delete notebookData[nth];
-            changed = true;
-          }
-        }
-        if (changed && notebookRef) {
-          notebookRef.forceUpdate();
-        }
-*/
       } else if (question.notebookLength) {
         const { notebookLength } = question;
         console.log(`QQ/question.notebookLength: ${notebookLength}`);

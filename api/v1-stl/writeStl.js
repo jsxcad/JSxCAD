@@ -6,17 +6,17 @@ import {
 } from '@jsxcad/sys';
 
 import { Shape } from '@jsxcad/api-v1-shape';
-import { toStl as convertToStl } from '@jsxcad/convert-stl';
 import { ensurePages } from '@jsxcad/api-v1-layout';
 import { hash as hashGeometry } from '@jsxcad/geometry-tagged';
 import hashSum from 'hash-sum';
+import { toStl } from '@jsxcad/convert-stl';
 
 export const prepareStl = (shape, name, options = {}) => {
   // CHECK: Should this be limited to Page plans?
   let index = 0;
   const entries = [];
   for (const entry of ensurePages(shape.toKeptGeometry())) {
-    const op = convertToStl(entry, options).catch(getPendingErrorHandler());
+    const op = toStl(entry, options).catch(getPendingErrorHandler());
     addPending(op);
     entries.push({
       data: op,

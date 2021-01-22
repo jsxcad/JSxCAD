@@ -1,27 +1,29 @@
 md`# Shape Operations`;
 
+return;
+
 md`## shape.add(...shapes)`;
-const add = Circle(10).color('blue').add(Square(17).color('red')).topView();
+const add = Arc(10).color('blue').add(Box(17).color('red')).topView();
 md`shape is extended to cover the space of the shapes.`;
 
 md`## shape.addTo(targetShape)`;
-const addTo = Circle(10).color('blue').addTo(Square(17).color('red')).topView();
+const addTo = Arc(10).color('blue').addTo(Box(17).color('red')).topView();
 md`targetShape is extend to cover the space of shape.`;
 
 md`## shape.align(spec)`;
-const center = Box(10).align('x>yz').fix().view();
-md`shape is moved to fix the spec. xyz aligns on those axes. x> aligns x to be greater than 0, etc.`;
+const center = Box(10).align('x>yz').view();
+md`xyz aligns on those axes. x> aligns x to be greater than 0, etc.`;
 
 md`## shape.as(...tags)`;
-const as = Circle(10).as('circle').topView();
+const as = Arc(10).as('circle').topView();
 md`shape is tagged with the provided tags. See keep/drop.`;
 
 md`## shape.bench(x = 0, y = 0, z = 0)`;
-const bench = Box(10).bench().fix().view();
+const bench = Box(10).bench().view();
 md`shape is moved so the left-front-top vertex as at the origin.`;
 
 md`## shape.benchTop(x = 0, y = 0, z = 0)`;
-const benchTop = Box(10).benchTop().fix().view();
+const benchTop = Box(10).benchTop().view();
 md`shape is moved so the left-front-lower vertex as at the origin.`;
 
 md`## shape.clip(...shapes)`;
@@ -95,7 +97,7 @@ const drop = Assembly(Box(10).as('cube'), Rod(4, 10).as('prism'))
 md`The shapes with the provided tags become holes`;
 
 md`## shape.group(...shapes)`;
-const groupMethod = Box(10).color('orange').group(Circle(15)).item().view();
+const groupMethod = Box(10).color('orange').group(Arc(15)).item().view();
 md`shape forms a group with shapes.`;
 
 md`## shape.laserPower(level)`;
@@ -106,19 +108,19 @@ const material = Square(10).material('copper').topView();
 md`shape is made of the named material.`;
 
 md`## shape.move(x = 0, y = 0, z = 0)`;
-const move = Square(1).move(1, 1, 1).fix().topView();
+const move = Square(1).move(1, 1, 1).topView();
 md`shape is moved by the specified offset.`;
 
 md`## shape.moveX(x = 0)`;
-const moveX = Square(1).moveX(1).fix().topView();
+const moveX = Square(1).moveX(1).topView();
 md`shape is moved by the specified offset.`;
 
 md`## shape.moveY(y = 0)`;
-const moveY = Square(1).moveY(1).fix().topView();
+const moveY = Square(1).moveY(1).topView();
 md`shape is moved by the specified offset.`;
 
 md`## shape.moveZ(z = 0)`;
-const moveZ = Square(1).moveZ(1).fix().frontView();
+const moveZ = Square(1).moveZ(1).frontView();
 md`shape is moved by the specified offset.`;
 
 md`## shape.noHoles()`;

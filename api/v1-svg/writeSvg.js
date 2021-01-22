@@ -7,7 +7,9 @@ import {
 
 import Shape from '@jsxcad/api-v1-shape';
 import { ensurePages } from '@jsxcad/api-v1-layout';
+import { hash as hashGeometry } from '@jsxcad/geometry-tagged';
 import { toSvg } from '@jsxcad/convert-svg';
+import hashSum from 'hash-sum';
 
 export const prepareSvg = (shape, name, options = {}) => {
   let index = 0;
@@ -24,9 +26,11 @@ export const prepareSvg = (shape, name, options = {}) => {
   return entries;
 };
 
-const downloadSvgMethod = function (...args) {
-  const entries = prepareSvg(this, ...args);
-  emit({ download: { entries } });
+const downloadSvgMethod = function (name, options = {}) {
+  const entries = prepareSvg(this, name, options);
+  const download = { entries };
+  const hash = hashSum({ name, options }) + hashGeometry(this.toGeometry());
+  emit({ download, hash });
   return this;
 };
 Shape.prototype.downloadSvg = downloadSvgMethod;

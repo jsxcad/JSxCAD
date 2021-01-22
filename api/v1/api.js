@@ -15,25 +15,9 @@ import '@jsxcad/api-v1-pdf';
 import '@jsxcad/api-v1-plans';
 import '@jsxcad/api-v1-tools';
 
-import {
-  apothem,
-  box,
-  corners,
-  diameter,
-  edge,
-  radius,
-} from '@jsxcad/geometry-plan';
-
 import { Peg } from '@jsxcad/api-v1-shapes';
 
-export { apothem, box, corners, diameter, edge, radius };
-
-export const a = apothem;
-export const b = box;
-export const c = corners;
-export const d = diameter;
-export const e = edge;
-export const r = radius;
+export { define } from './define.js';
 
 export const x = Peg([0, 0, 0], [0, 0, 1], [0, -1, 0]);
 export const y = Peg([0, 0, 0], [0, 0, 1], [1, 0, 0]);

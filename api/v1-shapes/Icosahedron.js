@@ -6,20 +6,20 @@ import {
   getRadius,
   getTo,
 } from '@jsxcad/geometry-plan';
-import { reify, taggedPlan } from '@jsxcad/geometry-tagged';
+import { registerReifier, taggedPlan } from '@jsxcad/geometry-tagged';
 
 import { buildRegularIcosahedron } from '@jsxcad/algorithm-shape';
 
 const Z = 2;
 
-reify.Icosahedron = ({ tags, plan }) =>
+registerReifier('Icosahedron', ({ tags, plan }) =>
   Shape.fromPolygonsToSolid(buildRegularIcosahedron({}))
     .toGraph()
     .scale(...getRadius(plan))
     .z(getRadius(plan)[Z] + getBase(plan))
     .orient({ center: getCenter(plan), from: getFrom(plan), at: getTo(plan) })
     .setTags(tags)
-    .toGeometry();
+    .toGeometry());
 
 export const Icosahedron = (x = 1, y = x, z = x) =>
   Shape.fromGeometry(
