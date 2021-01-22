@@ -3,46 +3,29 @@ md`## Extrude operations`;
 md`These operations need some reorganization.`;
 
 md`surface.extrude(height = 1, depth = 0)`;
-const extrude = Triangle(10).rotateX(90).extrude(1);
-extrude.view();
-md`Extrudes a surface along its normal by height or back by depth.`;
+const extrude = Triangle(10)
+  .fill()
+  .rotateX(90)
+  .pull(1)
+  .view()
+  .md('Extrudes a surface along its normal by height or back by depth.');
 
-md`closedPath.interior()`;
-const interior = Square(10).outline().interior();
-interior.view();
-md`Produces a surface from a closed path.`;
-
-md`shape.minkowski(otherShape)`;
-const minkowski = Cube(10).minkowski(Sphere(3));
-minkowski.view();
-
-md`shape.outline()`;
-const outline = Group(Cube(10), Triangle(10)).outline();
-outline.view();
-md`Produces closed paths from surfaces and solids.`;
+md`shape.wire()`;
+const outline = Group(Block(10, 10), Triangle(10))
+  .wire()
+  .view()
+  .md('Produces closed paths from surfaces and solids.');
 
 md`shape.section()`;
-const section = Cube(10).cut(Sphere(2)).section();
-section.view();
-md`Produces surfaces from the section of solids.`;
-
-md`shape.squash()`;
-const squash = Cube(10).with(Cube(10).move(5, 5, 10)).squash();
-squash.fix().view();
-md`Produces surfaces by projecting solids onto Z0`;
-
-md`shape.stretch()`;
-log('FIXME');
-const stretch = Sphere(5).stretch(20);
-stretch.view();
-md`Stretches a solid by extruding a section.`;
+const section = Block(10)
+  .cut(Ball(2))
+  .section()
+  .view()
+  .md('Produces surfaces from the section of solids.');
 
 md`path.sweep(shape)`;
-const sweep = Triangle(10).outline().sweep(Hexagon(1));
-sweep.fix().view();
-md`Produces solids by sweeping a shape along a path`;
-
-md`shape.voxels(size = 1);`;
-const voxels = Sphere(10).voxels(1);
-voxels.view();
-md`Produces a solid by generating cubes of size around point samples of a shape.`;
+const sweep = Arc(10)
+  .sweep(Hexagon(1).fill())
+  .fix()
+  .view()
+  .md('Produces solids by sweeping a shape along a path');

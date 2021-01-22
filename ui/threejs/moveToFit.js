@@ -1,4 +1,5 @@
 import { Box3, GridHelper, LineSegments, Mesh, Vector3 } from 'three';
+import { SKETCH_LAYER } from './layers.js';
 
 export const moveToFit = ({
   datasets,
@@ -8,12 +9,9 @@ export const moveToFit = ({
   scene,
   fitOffset = 1.2,
   withGrid = false,
+  gridLayer = SKETCH_LAYER,
 } = {}) => {
   const { fit = true } = view;
-
-  if (!fit) {
-    return;
-  }
 
   let box;
 
@@ -50,7 +48,7 @@ export const moveToFit = ({
       grid.material.opacity = 0.5;
       grid.rotation.x = -Math.PI / 2;
       grid.position.set(0, 0, -0.002);
-      grid.layers.set(1);
+      grid.layers.set(gridLayer);
       scene.add(grid);
       datasets.push({ mesh: grid });
     }
@@ -60,10 +58,14 @@ export const moveToFit = ({
       grid.material.opacity = 0.5;
       grid.rotation.x = -Math.PI / 2;
       grid.position.set(0, 0, -0.001);
-      grid.layers.set(1);
+      grid.layers.set(gridLayer);
       scene.add(grid);
       datasets.push({ mesh: grid });
     }
+  }
+
+  if (!fit) {
+    return;
   }
 
   const center = box.getCenter(new Vector3());

@@ -6,7 +6,7 @@ md`
 We can write out 3D geometry as STL.
 `;
 
-Cube(10).view().downloadStl('cube');
+Block(10, 5, -5).view().downloadStl('cube');
 
 md`
 ## Input
