@@ -19,6 +19,7 @@ export {
   pushModule,
   removeOnEmitHandler,
 } from './emit.js';
+export { getDefinitions } from './getDefinitions.js';
 export { getFilesystem, qualifyPath, setupFilesystem } from './filesystem.js';
 export { isBrowser, isNode, isWebWorker } from './browserOrNode.js';
 export { listFiles, listFilesystems } from './listFiles.js';

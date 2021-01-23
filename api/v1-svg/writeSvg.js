@@ -1,6 +1,7 @@
 import {
   addPending,
   emit,
+  getDefinitions,
   getPendingErrorHandler,
   writeFile,
 } from '@jsxcad/sys';
@@ -27,13 +28,17 @@ export const prepareSvg = (shape, name, options = {}) => {
 };
 
 const downloadSvgMethod = function (name, options = {}) {
-  const entries = prepareSvg(this, name, options);
+  const entries = prepareSvg(this, name, {
+    definitions: getDefinitions(),
+    ...options,
+  });
   const download = { entries };
   const hash = hashSum({ name, options }) + hashGeometry(this.toGeometry());
   emit({ download, hash });
   return this;
 };
 Shape.prototype.downloadSvg = downloadSvgMethod;
+Shape.prototype.svg = downloadSvgMethod;
 
 export const writeSvg = (shape, name, options = {}) => {
   for (const { data, filename } of prepareSvg(shape, name, {})) {

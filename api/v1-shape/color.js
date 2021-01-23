@@ -1,6 +1,6 @@
 import Shape from './Shape.js';
 import { rewriteTags } from '@jsxcad/geometry-tagged';
-import { toTagFromName } from '@jsxcad/algorithm-color';
+import { toTagsFromName } from '@jsxcad/algorithm-color';
 
 /**
  *
@@ -23,9 +23,7 @@ import { toTagFromName } from '@jsxcad/algorithm-color';
  **/
 
 export const fromName = (shape, name) =>
-  Shape.fromGeometry(
-    rewriteTags([toTagFromName(name)], [], shape.toGeometry())
-  );
+  Shape.fromGeometry(rewriteTags(toTagsFromName(name), [], shape.toGeometry()));
 
 export const color = (...args) => fromName(...args);
 

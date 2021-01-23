@@ -11,7 +11,7 @@ const toStrokeColor = (rgb) =>
     rgb[2] / 255
   ).toFixed(9)} RG`;
 
-const black = '#000000';
+const black = [0, 0, 0];
 
 // Not entirely sure how conformant this is, but it seems to work for simple
 // cases.
