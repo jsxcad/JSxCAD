@@ -255,7 +255,10 @@ const define = (tag, data) => {
   return define;
 };
 
-const defRgbColor = (name, rgb) => define(`color/${name}`, rgb);
+const defRgbColor = (name, rgb) => define(`color/${name}`, { rgb });
+
+const defThreejsMaterial = (name, definition) =>
+  define(`material/${name}`, { threejsMaterial: definition });
 
 const md = (strings, ...placeholders) => {
   const md = strings.reduce(
@@ -377,6 +380,7 @@ var api = /*#__PURE__*/Object.freeze({
   z: z,
   define: define,
   defRgbColor: defRgbColor,
+  defThreejsMaterial: defThreejsMaterial,
   Page: Page,
   pack: pack,
   md: md,
@@ -539,4 +543,4 @@ registerDynamicModule(module('svg'), './jsxcad-api-v1-svg.js');
 registerDynamicModule(module('threejs'), './jsxcad-api-v1-threejs.js');
 registerDynamicModule(module('units'), './jsxcad-api-v1-units.js');
 
-export { beginRecordingNotes, checkBox, defRgbColor, define, importModule, md, numberBox, replayRecordedNotes, saveRecordedNotes, selectBox, sliderBox, source, stringBox, x, y, z };
+export { beginRecordingNotes, checkBox, defRgbColor, defThreejsMaterial, define, importModule, md, numberBox, replayRecordedNotes, saveRecordedNotes, selectBox, sliderBox, source, stringBox, x, y, z };
