@@ -7,4 +7,7 @@ export const define = (tag, data) => {
   return define;
 };
 
-export const defRgbColor = (name, rgb) => define(`color/${name}`, rgb);
+export const defRgbColor = (name, rgb) => define(`color/${name}`, { rgb });
+
+export const defThreejsMaterial = (name, definition) =>
+  define(`material/${name}`, { threejsMaterial: definition });

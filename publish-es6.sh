@@ -3,6 +3,7 @@
 cp algorithm/cgal/dist/main.js es6/jsxcad-algorithm-cgal.js
 cp algorithm/color/dist/main.js es6/jsxcad-algorithm-color.js
 cp algorithm/contour/dist/main.js es6/jsxcad-algorithm-contour.js
+cp algorithm/material/dist/main.js es6/jsxcad-algorithm-material.js
 cp algorithm/pack/dist/main.js es6/jsxcad-algorithm-pack.js
 cp algorithm/quantize/dist/main.js es6/jsxcad-algorithm-quantize.js
 cp algorithm/shape/dist/main.js es6/jsxcad-algorithm-shape.js

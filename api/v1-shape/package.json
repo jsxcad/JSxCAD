@@ -26,6 +26,7 @@
   "dependencies": {
     "@jsxcad/algorithm-cgal": "^0.0.79",
     "@jsxcad/algorithm-color": "^0.0.79",
+    "@jsxcad/algorithm-material": "^0.0.79",
     "@jsxcad/algorithm-quantize": "^0.0.79",
     "@jsxcad/geometry-graph": "^0.0.79",
     "@jsxcad/geometry-path": "^0.0.79",

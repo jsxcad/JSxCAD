@@ -7,6 +7,7 @@ import { toTagsFromName } from './jsxcad-algorithm-color.js';
 import { createNormalize3 } from './jsxcad-algorithm-quantize.js';
 import { junctionSelector } from './jsxcad-geometry-halfedge.js';
 import { fromSolid, fromSurface, fromPaths, toSolid as toSolid$1 } from './jsxcad-geometry-graph.js';
+import { toTagsFromName as toTagsFromName$1 } from './jsxcad-algorithm-material.js';
 import { fromPoints, toXYPlaneTransforms } from './jsxcad-math-plane.js';
 import { emit, addPending, writeFile, log as log$1 } from './jsxcad-sys.js';
 import { fromRotateXToTransform, fromRotateYToTransform, fromRotateZToTransform } from './jsxcad-algorithm-cgal.js';
@@ -999,22 +1000,13 @@ Shape.prototype.laserPower = laserPowerMethod;
  *
  **/
 
-const material = (shape, ...tags) =>
-  Shape.fromGeometry(
-    rewriteTags(
-      tags.map((tag) => `material/${tag}`),
-      [],
-      shape.toGeometry()
-    )
-  );
+const material = (shape, name) =>
+  Shape.fromGeometry(rewriteTags(toTagsFromName$1(name), [], shape.toGeometry()));
 
-const materialMethod = function (...tags) {
-  return material(this, ...tags);
+const materialMethod = function (name) {
+  return material(this, name);
 };
 Shape.prototype.material = materialMethod;
-
-material.signature = 'material(shape:Shape) -> Shape';
-materialMethod.signature = 'Shape -> material() -> Shape';
 
 /**
  *

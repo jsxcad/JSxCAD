@@ -7,6 +7,7 @@ import {
 } from 'three';
 
 import { setColor } from './color.js';
+import { toThreejsMaterialFromTags } from '@jsxcad/algorithm-material';
 
 const loader = new TextureLoader();
 
@@ -19,6 +20,7 @@ const loadTexture = (url) =>
     texture.repeat.set(1, 1);
   });
 
+/*
 const basic = { metalness: 0.0, roughness: 0.5, reflectivity: 0.5 };
 const metal = { metalness: 0.0, roughness: 0.5, reflectivity: 0.8 };
 const transparent = { opacity: 0.5, transparent: true };
@@ -109,6 +111,7 @@ const materialProperties = {
     map: 'https://jsxcad.js.org/texture/wet-glass.png',
   },
 };
+*/
 
 const merge = async (properties, parameters) => {
   for (const key of Object.keys(properties)) {
@@ -120,6 +123,7 @@ const merge = async (properties, parameters) => {
   }
 };
 
+/*
 export const setMaterial = async (tags, parameters) => {
   for (const tag of tags) {
     if (tag.startsWith('material/')) {
@@ -132,16 +136,28 @@ export const setMaterial = async (tags, parameters) => {
     }
   }
 };
+*/
+
+export const setMaterial = async (definitions, tags, parameters) => {
+  const threejsMaterial = toThreejsMaterialFromTags(tags, definitions);
+  if (threejsMaterial !== undefined) {
+    await merge(threejsMaterial, parameters);
+    return threejsMaterial;
+  }
+};
 
 export const buildMeshMaterial = async (definitions, tags) => {
   if (tags !== undefined) {
     const parameters = {};
     const color = setColor(definitions, tags, parameters, null);
-    const material = await setMaterial(tags, parameters);
+    const material = await setMaterial(definitions, tags, parameters);
     if (material) {
       return new MeshPhysicalMaterial(parameters);
     } else if (color) {
-      await merge(materialProperties['color'], parameters);
+      await merge(
+        toThreejsMaterialFromTags(['material/color'], definitions),
+        parameters
+      );
       parameters.emissive = parameters.color;
       return new MeshPhongMaterial(parameters);
     }
