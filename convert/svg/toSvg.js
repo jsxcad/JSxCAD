@@ -10,24 +10,15 @@ import {
   translate,
 } from '@jsxcad/geometry-tagged';
 
-import { createNormalize3 } from '@jsxcad/algorithm-quantize';
+import { toRgbColorFromTags } from '@jsxcad/algorithm-color';
 
 const X = 0;
 const Y = 1;
 
-const toColorFromTags = (tags, otherwise = 'black') => {
-  if (tags !== undefined) {
-    for (const tag of tags) {
-      if (tag.startsWith('color/')) {
-        return tag.substring(6);
-      }
-    }
-  }
-  return otherwise;
-};
-
-export const toSvg = async (baseGeometry, { padding = 0 } = {}) => {
-  const normalize = createNormalize3();
+export const toSvg = async (
+  baseGeometry,
+  { padding = 0, definitions } = {}
+) => {
   const flippedGeometry = scale([1, -1, 1], await baseGeometry);
   const [min, max] = measureBoundingBox(flippedGeometry);
   const width = max[X] - min[X];
@@ -49,9 +40,9 @@ export const toSvg = async (baseGeometry, { padding = 0 } = {}) => {
   for (const { surface, z0Surface, tags } of getAnyNonVoidSurfaces(geometry)) {
     const anySurface = surface || z0Surface;
     if (anySurface === undefined) throw Error('die');
-    const color = toColorFromTags(tags);
+    const color = toRgbColorFromTags(tags, definitions);
     const svgPaths = [];
-    const outlined = outline(taggedSurface({}, anySurface), normalize);
+    const outlined = outline(taggedSurface({}, anySurface));
     for (const { paths } of outlined) {
       for (const polygon of paths) {
         svgPaths.push(
@@ -67,7 +58,7 @@ export const toSvg = async (baseGeometry, { padding = 0 } = {}) => {
     svg.push(`<path fill="${color}" stroke="none" d="${svgPaths.join(' ')}"/>`);
   }
   for (const { paths, tags } of getNonVoidPaths(geometry)) {
-    const color = toColorFromTags(tags);
+    const color = toRgbColorFromTags(tags);
     for (const path of paths) {
       if (path[0] === null) {
         svg.push(

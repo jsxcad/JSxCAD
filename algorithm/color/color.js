@@ -1,5 +1,7 @@
-import colors from './colors.js';
+// import colors from './colors.js';
+import { standardColorDefinitions } from './standardColorDefinitions.js';
 
+/*
 const toRgbIntFromName = (name, defaultRgbInt = 0) => {
   let rgbInt;
   // Handle '#00ffbb'.
@@ -43,30 +45,53 @@ export const toRgbIntFromTags = (tags = [], defaultRgb = [0, 0, 0]) => {
   return rgb;
 };
 
-// FIX: Apply normalizations here.
-export const toTagFromName = (name) => {
-  return `color/${name}`;
-  /*
-  const entry = toEntryFromRgbInt(toRgbIntFromName(name));
-  if (entry !== undefined) {
-    return `color/${entry.name.toLowerCase()}`;
-  }
-  return `color/unknown`;
+export const toRgbFromName = (name) =>
+  toArrayFromRgbInt(toRgbIntFromName(name));
 */
-};
 
-export const toTagFromRgbInt = (rgbInt, defaultTag = 'color/black') =>
-  toTagFromName(`#${rgbInt.toString(16).padStart(6, '0')}`);
+// FIX: Apply normalizations here.
+const toTagFromName = (name) => {
+  return `color/${name}`;
+};
 
 export const toTagsFromName = (name) => [toTagFromName(name)];
 
-export const toRgbFromName = (name) =>
-  toArrayFromRgbInt(toRgbIntFromName(name));
+export const toTagFromRgbInt = (rgbInt, defaultTag = 'color/#000000') =>
+  toTagFromName(`#${rgbInt.toString(16).padStart(6, '0')}`);
 
-export const toRgbFromTags = (tags, defaultRgb) => {
-  const rgbInt = toRgbIntFromTags(tags, null);
-  if (rgbInt === null) {
-    return defaultRgb;
+export const toRgbColorFromTags = (
+  tags = [],
+  customDefinitions = {},
+  otherwise = '#000000'
+) => {
+  for (const tag of tags) {
+    if (tag.startsWith('color/')) {
+      for (const definitions of [standardColorDefinitions, customDefinitions]) {
+        const definition = definitions[tag];
+        if (definition && definition.rgb) {
+          return definition.rgb;
+        }
+      }
+      if (tag.startsWith('color/#')) {
+        // Assume tags that start with # are rgb colors.
+        return tag.substring(6);
+      }
+    }
   }
-  return toArrayFromRgbInt(rgbInt);
+  return otherwise;
+};
+
+export const toRgbFromTags = (
+  tags = [],
+  customDefinitions = {},
+  otherwise = '#000000'
+) => {
+  const rgbColor = toRgbColorFromTags(tags, customDefinitions, otherwise);
+  const rgbInt = parseInt(rgbColor.substring(1), 16);
+  const rgb = [
+    (rgbInt >> 16) & 0xff,
+    (rgbInt >> 8) & 0xff,
+    (rgbInt >> 0) & 0xff,
+  ];
+  return rgb;
 };

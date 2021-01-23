@@ -6,3 +6,5 @@ export const define = (tag, data) => {
   emit({ define, hash: hashSum(define) });
   return define;
 };
+
+export const defRgbColor = (name, rgb) => define(`color/${name}`, rgb);
