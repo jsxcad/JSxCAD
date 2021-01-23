@@ -25,7 +25,7 @@ marked.use({
 });
 
 export const toDomElement = async (notebook = []) => {
-  const definitions = new Map();
+  const definitions = {};
 
   const container = document.createElement('div');
   container.classList.add('notebook');
@@ -58,10 +58,10 @@ export const toDomElement = async (notebook = []) => {
   for (const note of notebook) {
     if (note.define) {
       // NOTE: This can have interesting effects if definitions are redefined incompatibly while rendering, since some operations are async and might occur out of order.
-      let entry = definitions.get(note.define.tag);
+      let entry = definitions[note.define.tag];
       if (entry === undefined) {
         entry = {};
-        definitions.set(note.define.tag, entry);
+        definitions[note.define.tag] = entry;
       }
       Object.assign(entry, note.define.data);
     }

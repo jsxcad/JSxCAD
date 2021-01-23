@@ -1769,9 +1769,12 @@ const toRgbColorFromTags = (
 const toRgbFromTags = (
   tags = [],
   customDefinitions = {},
-  otherwise = '#000000'
+  otherwise = [0, 0, 0]
 ) => {
   const rgbColor = toRgbColorFromTags(tags, customDefinitions, otherwise);
+  if (rgbColor === otherwise) {
+    return otherwise;
+  }
   const rgbInt = parseInt(rgbColor.substring(1), 16);
   const rgb = [
     (rgbInt >> 16) & 0xff,

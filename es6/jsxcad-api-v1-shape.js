@@ -3,7 +3,7 @@ import { taggedAssembly, eachPoint, flip, toDisjointGeometry as toDisjointGeomet
 import { fromPolygons, findOpenEdges, fromSurface as fromSurface$1 } from './jsxcad-geometry-solid.js';
 import { identityMatrix, fromTranslation, fromRotation, fromScaling } from './jsxcad-math-mat4.js';
 import { add, scale as scale$1, negate, normalize, subtract, dot, cross, distance } from './jsxcad-math-vec3.js';
-import { toTagFromName } from './jsxcad-algorithm-color.js';
+import { toTagsFromName } from './jsxcad-algorithm-color.js';
 import { createNormalize3 } from './jsxcad-algorithm-quantize.js';
 import { junctionSelector } from './jsxcad-geometry-halfedge.js';
 import { fromSolid, fromSurface, fromPaths, toSolid as toSolid$1 } from './jsxcad-geometry-graph.js';
@@ -593,9 +593,7 @@ clipFromMethod.signature = 'Shape -> clipFrom(...to:Shape) -> Shape';
  **/
 
 const fromName = (shape, name) =>
-  Shape.fromGeometry(
-    rewriteTags([toTagFromName(name)], [], shape.toGeometry())
-  );
+  Shape.fromGeometry(rewriteTags(toTagsFromName(name), [], shape.toGeometry()));
 
 const color = (...args) => fromName(...args);
 

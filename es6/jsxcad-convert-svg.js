@@ -1,5 +1,5 @@
 import { reallyQuantizeForSpace } from './jsxcad-math-utils.js';
-import { taggedGroup, transform as transform$1, fill, scale, measureBoundingBox, translate, canonicalize as canonicalize$2, toTransformedGeometry, getAnyNonVoidSurfaces, outline, taggedSurface, getNonVoidPaths } from './jsxcad-geometry-tagged.js';
+import { taggedGroup, transform as transform$1, fill, scale, measureBoundingBox, translate, canonicalize as canonicalize$2, toTransformedGeometry, outline } from './jsxcad-geometry-tagged.js';
 import { fromScaling, identity, multiply, fromTranslation, fromZRotation } from './jsxcad-math-mat4.js';
 import { assertGood, isClosed, canonicalize as canonicalize$1 } from './jsxcad-geometry-path.js';
 import { buildAdaptiveCubicBezierCurve } from './jsxcad-algorithm-shape.js';
@@ -3768,48 +3768,30 @@ const toSvg = async (
     }" version="1.1" stroke="black" stroke-width=".1" fill="none" xmlns="http://www.w3.org/2000/svg">`,
   ];
 
-  for (const { surface, z0Surface, tags } of getAnyNonVoidSurfaces(geometry)) {
-    const anySurface = surface || z0Surface;
-    if (anySurface === undefined) throw Error('die');
+  for (const { tags, paths } of outline(geometry)) {
     const color = toRgbColorFromTags(tags, definitions);
-    const svgPaths = [];
-    const outlined = outline(taggedSurface({}, anySurface));
-    for (const { paths } of outlined) {
-      for (const polygon of paths) {
-        svgPaths.push(
-          `${polygon
-            .map(
-              (point, index) =>
-                `${index === 0 ? 'M' : 'L'}${point[0]} ${point[1]}`
-            )
-            .join(' ')} z`
-        );
-      }
-    }
-    svg.push(`<path fill="${color}" stroke="none" d="${svgPaths.join(' ')}"/>`);
-  }
-  for (const { paths, tags } of getNonVoidPaths(geometry)) {
-    const color = toRgbColorFromTags(tags);
     for (const path of paths) {
-      if (path[0] === null) {
-        svg.push(
-          `<path stroke="${color}" fill="none" d="${path
-            .slice(1)
-            .map(
-              (point, index) =>
-                `${index === 0 ? 'M' : 'L'}${point[0]} ${point[1]}`
-            )
-            .join(' ')}"/>`
+      if (isClosed(path)) {
+        const d = path.map(
+          (point, index) => `${index === 0 ? 'M' : 'L'}${point[0]} ${point[1]}`
         );
+        if (tags && tags.includes('path/Wire')) {
+          svg.push(
+            `<path fill="none" stroke="${color}" d="${d.join(' ')} z"/>`
+          );
+        } else {
+          svg.push(
+            `<path fill="${color}" stroke="${color}" d="${d.join(' ')} z"/>`
+          );
+        }
       } else {
-        svg.push(
-          `<path stroke="${color}" fill="none" d="${path
-            .map(
-              (point, index) =>
-                `${index === 0 ? 'M' : 'L'}${point[0]} ${point[1]}`
-            )
-            .join(' ')} z"/>`
-        );
+        const d = path
+          .slice(1)
+          .map(
+            (point, index) =>
+              `${index === 0 ? 'M' : 'L'}${point[0]} ${point[1]}`
+          );
+        svg.push(`<path fill="none" stroke="${color}" d="${d.join(' ')}"/>`);
       }
     }
   }
