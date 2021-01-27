@@ -16,7 +16,10 @@ export const prepareSvg = (shape, name, options = {}) => {
   let index = 0;
   const entries = [];
   for (const entry of ensurePages(shape.toKeptGeometry())) {
-    const op = toSvg(entry, options).catch(getPendingErrorHandler());
+    const op = toSvg(entry, {
+      definitions: getDefinitions(),
+      ...options,
+    }).catch(getPendingErrorHandler());
     addPending(op);
     entries.push({
       data: op,
@@ -28,10 +31,7 @@ export const prepareSvg = (shape, name, options = {}) => {
 };
 
 const downloadSvgMethod = function (name, options = {}) {
-  const entries = prepareSvg(this, name, {
-    definitions: getDefinitions(),
-    ...options,
-  });
+  const entries = prepareSvg(this, name, options);
   const download = { entries };
   const hash = hashSum({ name, options }) + hashGeometry(this.toGeometry());
   emit({ download, hash });

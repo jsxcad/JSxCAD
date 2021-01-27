@@ -14,71 +14,52 @@ test('Spindle Triangle', async (t) => {
   const code = await toGcode(
     {
       type: 'paths',
-      tags: ['toolpath/pause_afterward'],
+      tags: ['toolpath/pause_afterward', 'tool/cnc'],
       paths: [unitRegularTrianglePolygon],
     },
-    { toolType: 'spindle', spindleRpm: 7000, feedRate: 500 }
+    {
+      definitions: {
+        'tool/cnc': {
+          grbl: {
+            type: 'spindle',
+            feedRate: 500,
+            cutSpeed: 7000,
+            jumpSpeed: 7000,
+          },
+        },
+      },
+    }
   );
   const expected = await readFile('spindle_triangle.gcode', {
     encoding: 'utf8',
   });
-  t.deepEqual(new TextDecoder('utf8').decode(code), expected);
+  const observed = new TextDecoder('utf8').decode(code);
+  t.deepEqual(observed, expected);
 });
 
 test('Laser Triangle', async (t) => {
   const code = await toGcode(
     {
       type: 'paths',
+      tags: ['tool/laser'],
       paths: [unitRegularTrianglePolygon],
     },
-    { toolType: 'laser', laserPower: 1000, feedRate: 10000 }
+    {
+      definitions: {
+        'tool/laser': {
+          grbl: {
+            type: 'laser',
+            feedRate: 10000,
+            cutSpeed: -1000,
+            jumpSpeed: -1000,
+          },
+        },
+      },
+    }
   );
   const expected = await readFile('laser_triangle.gcode', {
     encoding: 'utf8',
   });
-  t.deepEqual(new TextDecoder('utf8').decode(code), expected);
-});
-
-test('Constant Laser Triangle', async (t) => {
-  const code = await toGcode(
-    {
-      type: 'paths',
-      tags: ['toolpath/constant_laser'],
-      paths: [unitRegularTrianglePolygon],
-    },
-    { toolType: 'laser', laserPower: 1000, feedRate: 10000 }
-  );
-  const expected = await readFile('constant_laser_triangle.gcode', {
-    encoding: 'utf8',
-  });
-  t.deepEqual(new TextDecoder('utf8').decode(code), expected);
-});
-
-test('Tag changes reset', async (t) => {
-  const code = await toGcode(
-    {
-      type: 'disjointAssembly',
-      content: [
-        {
-          type: 'paths',
-          tags: ['toolpath/feed_rate/800'],
-          paths: [unitRegularTrianglePolygon],
-        },
-        {
-          type: 'paths',
-          tags: ['toolpath/spindle_rpm/1200'],
-          paths: [unitRegularTrianglePolygon],
-        },
-        {
-          type: 'paths',
-          paths: [unitRegularTrianglePolygon],
-        },
-      ],
-    },
-    { toolType: 'spindle', spindleRpm: 7000, feedRate: 500 }
-  );
-  const expected = await readFile('tags.gcode', {
-    encoding: 'utf8',
-  });
-  t.deepEqual(new TextDecoder('utf8').decode(code), expected);
+  const observed = new TextDecoder('utf8').decode(code);
+  t.deepEqual(observed, expected);
 });
