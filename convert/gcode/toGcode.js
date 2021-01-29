@@ -1,6 +1,6 @@
+import { add, negate, normalize, scale, subtract } from '@jsxcad/math-vec3';
 import { outline, toDisjointGeometry } from '@jsxcad/geometry-tagged';
 
-import { equals } from '@jsxcad/math-vec3';
 import { getEdges } from '@jsxcad/geometry-path';
 import { toToolFromTags } from '@jsxcad/algorithm-tool';
 
@@ -8,25 +8,9 @@ const X = 0;
 const Y = 1;
 const Z = 2;
 
-/** Checks for equality, ignoring z. */
-const equalsXY = ([aX, aY], [bX, bY]) => equals([aX, aY, 0], [bX, bY, 0]);
-
-/** Checks for equality, ignoring x and y */
-const equalsZ = ([, , aZ], [, , bZ]) => equals([0, 0, aZ], [0, 0, bZ]);
-
 // FIX: This is actually GRBL.
-export const toGcode = async (
-  geometry,
-  {
-    topZ = 0,
-    jumpHeight = 1,
-    definitions,
-    calibrateLaserPower = 0,
-    m4Wait = 0,
-  } = {}
-) => {
-  const jumpZ = topZ + jumpHeight;
-
+export const toGcode = async (geometry, { definitions } = {}) => {
+  const topZ = 0;
   const codes = [];
   const _ = undefined;
 
@@ -35,7 +19,7 @@ export const toGcode = async (
     // Where is the tool
     position: [0, 0, 0],
     // How 'fast' the tool is running (rpm or power).
-    speed: 0,
+    speed: undefined,
     laserMode: false,
   };
 
@@ -48,6 +32,13 @@ export const toGcode = async (
     z = state.position[Z],
     f = state.tool.feedRate
   ) => {
+    if (
+      x === state.position[X] &&
+      y === state.position[Y] &&
+      z === state.position[Z]
+    ) {
+      return;
+    }
     emit(`G0 X${x.toFixed(3)} Y${y.toFixed(3)} Z${z.toFixed(3)}`);
     state.position = [x, y, z];
   };
@@ -57,9 +48,17 @@ export const toGcode = async (
     x = state.position[X],
     y = state.position[Y],
     z = state.position[Z],
-    f = state.tool.feedRate
+    f = state.tool.feedRate,
+    s = state.tool.cutSpeed
   ) => {
-    setSpeed(state.tool.cutSpeed);
+    setSpeed(s);
+    if (
+      x === state.position[X] &&
+      y === state.position[Y] &&
+      z === state.position[Z]
+    ) {
+      return;
+    }
     emit(
       `G1 X${x.toFixed(3)} Y${y.toFixed(3)} Z${z.toFixed(3)} F${f.toFixed(3)}`
     );
@@ -68,16 +67,12 @@ export const toGcode = async (
 
   const setSpeed = (value) => {
     if (state.speed !== value) {
-      if (Math.sign(state.speed) !== Math.sign(value)) {
+      if (Math.sign(state.speed || 0) !== Math.sign(value)) {
         if (value === 0) {
-          // Stop
           emit('M5');
         } else if (value < 0) {
           // Reverse
           emit('M4');
-          if (m4Wait > 0) {
-            emit(`G4 P${m4Wait}`); // A little pause for the laser to wake up.
-          }
         } else {
           // Forward
           emit('M3');
@@ -85,21 +80,6 @@ export const toGcode = async (
       }
       emit(`S${Math.abs(value).toFixed(3)}`);
       state.speed = value;
-    }
-  };
-
-  // Only use constant laser for calibration.
-  const enableLaserMode = () => {
-    if (state.laserMode !== true) {
-      emit('$32=1');
-      state.laserMode = true;
-    }
-  };
-
-  const disableLaserMode = () => {
-    if (state.laserMode !== true) {
-      emit('$32=0');
-      state.laserMode = false;
     }
   };
 
@@ -117,15 +97,17 @@ export const toGcode = async (
     // Accept tool change.
     state.tool = tool;
     switch (state.tool.type) {
-      case 'laser':
-        enableLaserMode();
-        break;
+      case 'dynamicLaser':
+      case 'constantLaser':
       case 'spindle':
-        disableLaserMode();
         break;
       default:
         throw Error(`Unknown tool: ${state.tool.type}`);
     }
+  };
+
+  const stop = () => {
+    emit('M5');
   };
 
   /*
@@ -138,55 +120,67 @@ export const toGcode = async (
   };
   */
 
-  const raise = () => {
-    rapid(_, _, jumpZ); // up
-  };
-
-  const jump = (x, y, speed = state.tool.jumpSpeed) => {
-    raise();
-    setSpeed(speed);
-    rapid(x, y, jumpZ); // across
-    rapid(x, y, topZ); // down
+  const jump = (x, y) => {
+    if (x === state.position[X] && y === state.position[Y]) {
+      // Already there.
+      return;
+    }
+    const speed = state.tool.jumpSpeed || 0;
+    const jumpRate = state.tool.jumpRate || state.tool.feedRate;
+    if (speed !== 0) {
+      // For some tools (some lasers) it is better to keep the beam on (at reduced power)
+      // while jumping.
+      setSpeed(speed);
+      cut(_, _, state.tool.jumpZ, jumpRate, speed); // up
+      cut(x, y, _, jumpRate, speed); // across
+      cut(_, _, topZ, jumpRate, speed); // down
+    } else {
+      rapid(_, _, state.tool.jumpZ); // up
+      rapid(x, y, _); // across
+      rapid(_, _, topZ); // down
+    }
   };
 
   const park = () => {
-    jump(0, 0, 0);
+    jump(0, 0);
+    stop();
   };
 
   const useMetric = () => emit('G21');
 
   useMetric();
 
-  if (calibrateLaserPower > 0) {
-    emit('$32=0');
-    emit('M3');
-    emit(`S${calibrateLaserPower.toFixed(3)}`);
-    emit('G1 X0 Y0 Z0 F1000');
-    emit('M0');
-    emit('M3');
-  }
-
   // FIX: Should handle points as well as paths.
   for (const { tags, paths } of outline(toDisjointGeometry(geometry))) {
     toolChange(toToolFromTags('grbl', tags, definitions));
     for (const path of paths) {
-      for (const [start, end] of getEdges(path)) {
-        if (!equalsXY(start, state.position)) {
-          // We assume that we can plunge or raise vertically without issue.
-          // This avoids raising before plunging.
-          // FIX: This whole approach is essentially wrong, and needs to consider if the tool can plunge or not.
-          jump(...start);
+      for (let [start, end] of getEdges(path)) {
+        if (state.tool.lead) {
+          // Keep the tool on for the lead in.
+          const leadSpeed = state.tool.leadSpeed || 1;
+          // Do a zero power lead in and lead out for slow lasers.
+          const direction = normalize(subtract(end, start));
+          const leadIn = add(start, scale(state.tool.lead, negate(direction)));
+          const leadOut = add(end, scale(state.tool.lead, direction));
+
+          jump(...leadIn);
+          // Accelerate to cut speed without cutting.
+          cut(...start, _, leadSpeed);
+          // Do the cut at speed.
+          cut(...end);
+          // Brake without cutting.
+          cut(...leadOut, _, leadSpeed);
+        } else {
+          jump(...start); // jump to the start x, y
+          cut(...start); // may need to drill down to the start z
+          cut(...end); // cut across
         }
-        if (!equalsZ(start, state.position)) {
-          cut(...start); // cut down
-        }
-        cut(...end); // cut across
       }
     }
   }
 
   park();
 
-  codes.push(``);
+  codes.push('');
   return new TextEncoder('utf8').encode(codes.join('\n'));
 };

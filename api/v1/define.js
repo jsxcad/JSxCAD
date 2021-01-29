@@ -16,21 +16,29 @@ export const defTool = (name, definition) => define(`tool/${name}`, definition);
 
 export const defDynamicGrblLaser = (
   name,
-  { power = 1500, speed = 1000 } = {}
+  { jumpPower = 0, power = 1000, speed = 1000 } = {}
 ) =>
   defTool(name, {
     grbl: {
-      type: 'laser',
+      type: 'dynamicLaser',
       cutSpeed: -power,
-      jumpSpeed: -power,
+      jumpRate: speed,
+      jumpSpeed: -jumpPower,
       feedRate: speed,
     },
   });
 
 export const defConstantGrblLaser = (
   name,
-  { power = 1500, speed = 1000 } = {}
+  { jumpPower, power = 1000, speed = 1000, lead } = {}
 ) =>
   defTool(name, {
-    grbl: { type: 'laser', cutSpeed: power, jumpSpeed: power, feedRate: speed },
+    grbl: {
+      type: 'constantLaser',
+      cutSpeed: power,
+      jumpRate: speed,
+      jumpSpeed: jumpPower,
+      feedRate: speed,
+      lead,
+    },
   });

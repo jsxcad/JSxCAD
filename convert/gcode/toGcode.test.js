@@ -15,7 +15,7 @@ test('Spindle Triangle', async (t) => {
     {
       type: 'paths',
       tags: ['toolpath/pause_afterward', 'tool/cnc'],
-      paths: [unitRegularTrianglePolygon],
+      paths: [unitRegularTrianglePolygon.map(([x, y]) => [x, y, -1])],
     },
     {
       definitions: {
@@ -24,7 +24,7 @@ test('Spindle Triangle', async (t) => {
             type: 'spindle',
             feedRate: 500,
             cutSpeed: 7000,
-            jumpSpeed: 7000,
+            jumpZ: 1,
           },
         },
       },
@@ -37,7 +37,7 @@ test('Spindle Triangle', async (t) => {
   t.deepEqual(observed, expected);
 });
 
-test('Laser Triangle', async (t) => {
+test('Dynamic Laser', async (t) => {
   const code = await toGcode(
     {
       type: 'paths',
@@ -48,7 +48,7 @@ test('Laser Triangle', async (t) => {
       definitions: {
         'tool/laser': {
           grbl: {
-            type: 'laser',
+            type: 'dynamicLaser',
             feedRate: 10000,
             cutSpeed: -1000,
             jumpSpeed: -1000,
@@ -57,7 +57,34 @@ test('Laser Triangle', async (t) => {
       },
     }
   );
-  const expected = await readFile('laser_triangle.gcode', {
+  const expected = await readFile('dynamic_laser.gcode', {
+    encoding: 'utf8',
+  });
+  const observed = new TextDecoder('utf8').decode(code);
+  t.deepEqual(observed, expected);
+});
+
+test('Constant Laser', async (t) => {
+  const code = await toGcode(
+    {
+      type: 'paths',
+      tags: ['tool/laser'],
+      paths: [unitRegularTrianglePolygon],
+    },
+    {
+      definitions: {
+        'tool/laser': {
+          grbl: {
+            type: 'constantLaser',
+            feedRate: 1000,
+            cutSpeed: 500,
+            lead: 10,
+          },
+        },
+      },
+    }
+  );
+  const expected = await readFile('constant_laser.gcode', {
     encoding: 'utf8',
   });
   const observed = new TextDecoder('utf8').decode(code);
