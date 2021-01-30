@@ -1,4 +1,3 @@
-import { add, negate, normalize, scale, subtract } from '@jsxcad/math-vec3';
 import { outline, toDisjointGeometry } from '@jsxcad/geometry-tagged';
 
 import { getEdges } from '@jsxcad/geometry-path';
@@ -21,6 +20,7 @@ export const toGcode = async (geometry, { definitions } = {}) => {
     // How 'fast' the tool is running (rpm or power).
     speed: undefined,
     laserMode: false,
+    jumped: false,
   };
 
   const emit = (code) => codes.push(code);
@@ -51,6 +51,13 @@ export const toGcode = async (geometry, { definitions } = {}) => {
     f = state.tool.feedRate,
     s = state.tool.cutSpeed
   ) => {
+    if (state.jumped && state.tool.warmupDuration) {
+      // CHECK: Will we need this on every jump?
+      setSpeed(state.tool.warmupSpeed);
+      emit(`G1 F1`);
+      emit(`G4 P${state.tool.warmupDuration.toFixed(3)}`);
+    }
+    state.jumped = false;
     setSpeed(s);
     if (
       x === state.position[X] &&
@@ -138,6 +145,7 @@ export const toGcode = async (geometry, { definitions } = {}) => {
       rapid(_, _, state.tool.jumpZ); // up
       rapid(x, y, _); // across
       rapid(_, _, topZ); // down
+      state.jumped = true;
     }
   };
 
@@ -155,26 +163,9 @@ export const toGcode = async (geometry, { definitions } = {}) => {
     toolChange(toToolFromTags('grbl', tags, definitions));
     for (const path of paths) {
       for (let [start, end] of getEdges(path)) {
-        if (state.tool.lead) {
-          // Keep the tool on for the lead in.
-          const leadSpeed = state.tool.leadSpeed || 1;
-          // Do a zero power lead in and lead out for slow lasers.
-          const direction = normalize(subtract(end, start));
-          const leadIn = add(start, scale(state.tool.lead, negate(direction)));
-          const leadOut = add(end, scale(state.tool.lead, direction));
-
-          jump(...leadIn);
-          // Accelerate to cut speed without cutting.
-          cut(...start, _, leadSpeed);
-          // Do the cut at speed.
-          cut(...end);
-          // Brake without cutting.
-          cut(...leadOut, _, leadSpeed);
-        } else {
-          jump(...start); // jump to the start x, y
-          cut(...start); // may need to drill down to the start z
-          cut(...end); // cut across
-        }
+        jump(...start); // jump to the start x, y
+        cut(...start); // may need to drill down to the start z
+        cut(...end); // cut across
       }
     }
   }
