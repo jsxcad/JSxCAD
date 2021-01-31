@@ -2,11 +2,17 @@ import { Peg } from '@jsxcad/api-v1-shapes';
 
 import { Shape } from '@jsxcad/api-v1-shape';
 import { each } from '@jsxcad/api-v1-math';
+import { getDefinitions } from '@jsxcad/sys';
+import { toToolFromTags } from '@jsxcad/algorithm-tool';
 
 const Z = 2;
 const z = Peg([0, 0, 0], [0, 1, 0], [-1, 0, 0]);
 
 const carve = (block, { toolDiameter = 1, cutDepth = 1 } = {}, ...shapes) => {
+  const { diameter = 1 } = toToolFromTags(
+    block.toGeometry.tags,
+    getDefinitions()
+  );
   const negative = block.cut(...shapes);
   const { max, min } = block.size();
   const depth = max[Z] - min[Z];
@@ -20,7 +26,7 @@ const carve = (block, { toolDiameter = 1, cutDepth = 1 } = {}, ...shapes) => {
         by: effectiveCutDepth,
       })
     )
-    .inset(toolDiameter / 2, toolDiameter / 2)
+    .inset(diameter / 2, diameter / 2)
     .z(-max[Z]);
 };
 
@@ -31,6 +37,10 @@ function carveMethod(tool, ...shapes) {
 Shape.prototype.carve = carveMethod;
 
 const mill = (negative, { toolDiameter = 1, cutDepth = 1 } = {}) => {
+  const { diameter = 1 } = toToolFromTags(
+    negative.toGeometry.tags,
+    getDefinitions()
+  );
   const { max, min } = negative.size();
   const depth = max[Z] - min[Z];
   const cuts = Math.ceil(depth / cutDepth);
@@ -43,7 +53,7 @@ const mill = (negative, { toolDiameter = 1, cutDepth = 1 } = {}) => {
         by: effectiveCutDepth,
       })
     )
-    .inset(toolDiameter / 2, toolDiameter / 2)
+    .inset(diameter / 2, diameter / 2)
     .z(-max[Z]);
 };
 

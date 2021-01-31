@@ -17,7 +17,14 @@ import '@jsxcad/api-v1-tools';
 
 import { Peg } from '@jsxcad/api-v1-shapes';
 
-export { define, defRgbColor, defThreejsMaterial } from './define.js';
+export {
+  define,
+  defConstantGrblLaser,
+  defDynamicGrblLaser,
+  defRgbColor,
+  defThreejsMaterial,
+  defTool,
+} from './define.js';
 
 export const x = Peg([0, 0, 0], [0, 0, 1], [0, -1, 0]);
 export const y = Peg([0, 0, 0], [0, 0, 1], [1, 0, 0]);

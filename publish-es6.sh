@@ -8,6 +8,7 @@ cp algorithm/pack/dist/main.js es6/jsxcad-algorithm-pack.js
 cp algorithm/quantize/dist/main.js es6/jsxcad-algorithm-quantize.js
 cp algorithm/shape/dist/main.js es6/jsxcad-algorithm-shape.js
 cp algorithm/text/dist/main.js es6/jsxcad-algorithm-text.js
+cp algorithm/tool/dist/main.js es6/jsxcad-algorithm-tool.js
 cp algorithm/toolpath/dist/main.js es6/jsxcad-algorithm-toolpath.js
 cp algorithm/verlet/dist/main.js es6/jsxcad-algorithm-verlet.js
 cp algorithm/watertight/dist/main.js es6/jsxcad-algorithm-watertight.js
