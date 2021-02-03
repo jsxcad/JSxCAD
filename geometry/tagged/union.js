@@ -31,10 +31,12 @@ import { taggedPaths } from './taggedPaths.js';
 import { taggedPoints } from './taggedPoints.js';
 import { taggedSolid } from './taggedSolid.js';
 import { taggedSurface } from './taggedSurface.js';
+import { toDisjointGeometry } from './toDisjointGeometry.js';
 import { toPolygon as toPolygonFromPlane } from '@jsxcad/math-plane';
 
 // Union is a little more complex, since it can violate disjointAssembly invariants.
 const unionImpl = (geometry, ...geometries) => {
+  geometries = geometries.map(toDisjointGeometry);
   const op = (geometry, descend) => {
     const { tags } = geometry;
     switch (geometry.type) {
@@ -128,7 +130,7 @@ const unionImpl = (geometry, ...geometries) => {
     }
   };
 
-  return rewrite(geometry, op);
+  return rewrite(toDisjointGeometry(geometry), op);
 };
 
 export const union = cache(unionImpl);

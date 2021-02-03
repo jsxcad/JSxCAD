@@ -22,6 +22,8 @@ export const soup = (geometry) => {
             taggedSolid({ tags }, toSolid(graph)),
             ...outline(geometry)
           );
+        } else if (graph.isEmpty) {
+          return taggedGroup({});
         } else {
           // FIX: Simplify this arrangement.
           return taggedGroup(

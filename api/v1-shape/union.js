@@ -75,6 +75,3 @@ const unionMethod = function (...shapes) {
 Shape.prototype.union = unionMethod;
 
 export default union;
-
-union.signature = 'union(shape:Shape, ...shapes:Shape) -> Shape';
-unionMethod.signature = 'Shape -> union(...shapes:Shape) -> Shape';

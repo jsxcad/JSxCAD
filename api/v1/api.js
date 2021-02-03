@@ -19,8 +19,9 @@ import { Peg } from '@jsxcad/api-v1-shapes';
 
 export {
   define,
-  defConstantGrblLaser,
-  defDynamicGrblLaser,
+  defGrblConstantLaser,
+  defGrblDynamicLaser,
+  defGrblSpindle,
   defRgbColor,
   defThreejsMaterial,
   defTool,
