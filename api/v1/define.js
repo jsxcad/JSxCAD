@@ -14,7 +14,12 @@ export const defThreejsMaterial = (name, definition) =>
 
 export const defTool = (name, definition) => define(`tool/${name}`, definition);
 
-export const defDynamicGrblLaser = (
+export const defGrblSpindle = (name, { rpm, feedRate, diameter }) =>
+  defTool(name, {
+    grbl: { type: 'spindle', cutSpeed: rpm, feedRate, diameter },
+  });
+
+export const defGrblDynamicLaser = (
   name,
   {
     jumpPower = 0,
@@ -36,7 +41,7 @@ export const defDynamicGrblLaser = (
     },
   });
 
-export const defConstantGrblLaser = (
+export const defGrblConstantLaser = (
   name,
   {
     jumpPower,

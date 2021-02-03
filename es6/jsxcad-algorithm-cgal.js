@@ -9714,9 +9714,6 @@ const doesSelfIntersectOfSurfaceMesh = (mesh) => {
 };
 
 const checkSelfIntersection = (mesh) => {
-  if ( doesSelfIntersectOfSurfaceMesh(mesh)) {
-    throw Error('Self intersection');
-  }
   return mesh;
 };
 

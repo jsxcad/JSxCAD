@@ -7,8 +7,6 @@ import {
 import {
   eachPoint,
   flip,
-  //  fromPathToSurface,
-  //  fromPathsToSurface,
   isWatertight,
   makeWatertight,
   reconcile,

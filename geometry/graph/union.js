@@ -9,7 +9,10 @@ import { unionOfSurfaceMeshes } from '@jsxcad/algorithm-cgal';
 const far = 10000;
 
 export const union = (a, b) => {
-  if (a.isEmpty || b.isEmpty) {
+  if (a.isEmpty) {
+    return b;
+  }
+  if (b.isEmpty) {
     return a;
   }
   if (!a.isClosed) {

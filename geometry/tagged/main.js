@@ -37,6 +37,7 @@ export { difference } from './difference.js';
 export { drop } from './drop.js';
 export { eachItem } from './eachItem.js';
 export { eachPoint } from './eachPoint.js';
+export { empty } from './empty.js';
 export { extrude } from './extrude.js';
 export { extrudeToPlane } from './extrudeToPlane.js';
 export { flip } from './flip.js';
