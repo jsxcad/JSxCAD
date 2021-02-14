@@ -4,18 +4,23 @@ export const SocketBoard = (length, width, height, { sockets = [] } = {}) => {
     if (sockets[y] === undefined) return false;
     return sockets[y][x] === '_';
   };
-  const board = [];
-  const flat = Box(8).pull(height);
-  const socket = Box(8)
-    .pull(height)
-    .cut(Rod(cylinder(5 / 2, height)));
+  const board = [
+    Box(length * 8, width * 8)
+      .x(length * 4)
+      .y(width * 4),
+  ];
+  const socket = Arc(5).move(4, 4);
   for (let x = 0; x < length; x++) {
     for (let y = 0; y < width; y++) {
-      const part = isFlat(x, y) ? flat : socket;
-      board.push(part.move(x * 8, y * 8));
+      if (!isFlat(x, y)) {
+        board.push(socket.move(x * 8, y * 8));
+      }
     }
   }
-  return Group(...board).align('xy');
+  return Weld(...board)
+    .pull(height)
+    .align('xy')
+    .item(`SocketBoard ${length} x ${width} x ${height}`);
 };
 
 export const StudBoard = (length, width, height, { studs = [] } = {}) => {
@@ -25,18 +30,20 @@ export const StudBoard = (length, width, height, { studs = [] } = {}) => {
     return studs[y][x] === '_';
   };
   const board = [];
-  const flat = Box(8).pull(height);
+  const flat = Box(8).ex(height);
   const stud = Box(8)
     .pull(height)
-    .add(Rod(cylinder(5 / 2, height, height + 1.6)))
-    .add(Rod(cylinder(4.8 / 2, height + 1.6, height + 1.8)));
+    .add(Rod(5, height, height + 1.6))
+    .add(Rod(4.8, height + 1.6, height + 1.8));
   for (let x = 0; x < length; x++) {
     for (let y = 0; y < width; y++) {
       const part = isFlat(x, y) ? flat : stud;
       board.push(part.move(x * 8, y * 8));
     }
   }
-  return Group(...board).align('xy');
+  return Group(...board)
+    .align('xy')
+    .item(`StudBoard ${length} x ${width} x ${height}`);
 };
 
 export const Block = (
@@ -49,23 +56,27 @@ export const Block = (
     SocketBoard(length, width, 2.1, { sockets }),
     StudBoard(length, width, height - 2.1, { studs }).moveZ(2.1)
   );
-/*
-export const studBoard16x16x2 = StudBoard(2, 2, 2)
+
+export const socketBoard16x16x2 = SocketBoard(2, 2, 2)
   .item()
-  .view(20)
-  .downloadStl('stud_board_16x16x2a');
-  */
+  .md('SocketBoard 16x16x2')
+  .view(20);
 
-export const socketBoard16x16x2 = SocketBoard(2, 2, 2).item().view(20);
+export const socketBoard32x8x3_2 = SocketBoard(4, 1, 3.2)
+  .item()
+  .md('SocketBoard 32x32x3.2')
+  .view(20);
 
-export const socketBoard32x8x3_2 = SocketBoard(4, 1, 3.2).item().view(20);
-
-export const axleHole = Group(
-  RodOfApothem(5.2 / 2, 8.00001),
-  RodOfApothem(4 / 2, 8.00001).moveY(1.5 / 2)
+export const axleHole = Union(
+  Arc().apothem(5.2 / 2),
+  Arc()
+    .apothem(4 / 2)
+    .moveY(1.5 / 2)
 )
+  .pull(4.00001, -4.00001)
   .rotateX(90)
-  .moveZ(5.6);
+  .moveZ(5.6)
+  .view();
 
 export const block8x8x3_2 = Block(1, 1, 3.2)
   .item('lego block 8x8x3.2')
@@ -101,6 +112,31 @@ export const block32x8x9_6 = Block(4, 1, 3.2 * 3)
   .view(20)
   .downloadStl('block32x8x9_6e');
 
+export const AxleProfile = () => {
+  const length = 4.8 + 0.1;
+  const width = 1.8 + 0.1;
+  const diameter = 5 + 0.1;
+  const line = Line(length / 2, length / -2);
+  const bar = Weld(
+    line.y(width / 2),
+    line.y(width / -2),
+    Arc(diameter).angle(90).rotate(50),
+    Arc(diameter)
+      .angle(90)
+      .rotate(50 + 180)
+  ).fill();
+  return Union(bar, bar.rotate(90));
+};
+
+export const axleProfile = AxleProfile().md('Axle Profile').topView(20);
+
+export const AxleJoiner = (length) => Arc(8).cut(axleProfile).ex(length);
+
+export const axleJoiner16 = AxleJoiner(16)
+  .md('Axle Joiner 16mm')
+  .view(20)
+  .downloadStl('AxleJoiner16');
+
 export const gearBox4x4 = Group(
   block16x8x9_6.moveY(12),
   block16x8x9_6.moveY(-12),
@@ -110,7 +146,3 @@ export const gearBox4x4 = Group(
   .item()
   .view(20)
   .downloadStl('gearBox4x4c');
-
-Block(4, 1, 3.2, { studs: ['o__o'] })
-  .item('?')
-  .view(20);
