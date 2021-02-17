@@ -7,14 +7,9 @@ import { toSurfaceMesh } from './toSurfaceMesh.js';
 export const extrude = (graph, height, depth) => {
   realizeGraph(graph);
   if (graph.faces.length > 0) {
-    // Arbitrarily pick the plane of the first graph to extrude along.
-    let normal;
-    for (const face of graph.faces) {
-      if (face && face.plane) {
-        normal = face.plane;
-        break;
-      }
-    }
+    // Arbitrarily pick the first face normal.
+    // FIX: use exactPlane.
+    const normal = graph.faces[0].plane;
     return fromSurfaceMeshLazy(
       extrudeSurfaceMesh(
         toSurfaceMesh(graph),

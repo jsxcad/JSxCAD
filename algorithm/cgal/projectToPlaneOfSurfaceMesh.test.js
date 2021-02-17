@@ -33,24 +33,27 @@ test('Project/Triangle', (t) => {
   const graph = fromSurfaceMeshToGraph(projection);
   t.deepEqual(JSON.parse(JSON.stringify(graph)), {
     edges: [
-      { point: 1, next: 2, twin: 1, loop: 0 },
-      null,
-      { point: 2, next: 4, twin: 3, loop: 0 },
-      null,
-      { point: 0, next: 0, twin: 5, loop: 0 },
+      { point: 0, next: 2, twin: 1, facet: 0, face: 0 },
+      { point: 1, next: 5, twin: 0, facet: -1, face: -1 },
+      { point: 1, next: 4, twin: 3, facet: 0, face: 0 },
+      { point: 2, next: 1, twin: 2, facet: -1, face: -1 },
+      { point: 2, next: 0, twin: 5, facet: 0, face: 0 },
+      { point: 0, next: 3, twin: 4, facet: -1, face: -1 },
     ],
-    faces: [{ loop: 0, plane: [0, 0, 1, 2] }],
-    loops: [{ edge: 4, face: 0 }],
     points: [
       [-0.5, 0.5, 2],
       [-0.5, -0.5, 2],
       [0.5, -0.5, 2],
     ],
-    exact: [
+    exactPoints: [
       ['-1/2', '1/2', '2/1'],
       ['-1/2', '-1/2', '2/1'],
       ['1/2', '-1/2', '2/1'],
     ],
+    faces: [
+      { plane: [0, 0, 1, -2], exactPlane: ['0/1', '0/1', '1/1', '-2/1'] },
+    ],
+    facets: [{ edge: 4 }],
     isClosed: false,
   });
 });

@@ -1,8 +1,3 @@
-import {
-  outline as outlineGraph,
-  toPaths as toPathsFromGraph,
-} from '@jsxcad/geometry-graph';
-
 import { outlineSolid, outlineSurface } from '@jsxcad/geometry-halfedge';
 
 import { cache } from '@jsxcad/cache';
@@ -13,6 +8,7 @@ import { getNonVoidSolids } from './getNonVoidSolids.js';
 import { getNonVoidSurfaces } from './getNonVoidSurfaces.js';
 import { taggedPaths } from './taggedPaths.js';
 import { toKeptGeometry } from './toKeptGeometry.js';
+import { toPaths as toPathsFromGraph } from '@jsxcad/geometry-graph';
 
 // FIX: The semantics here are a bit off.
 // Let's consider the case of Assembly(Square(10), Square(10).outline()).outline().
@@ -29,7 +25,7 @@ const outlineImpl = (geometry, includeFaces = true, includeHoles = true) => {
     outlines.push(taggedPaths({ tags }, outlineSolid(solid, normalize)));
   }
   for (const { tags, graph } of getNonVoidGraphs(keptGeometry)) {
-    outlines.push(taggedPaths({ tags }, toPathsFromGraph(outlineGraph(graph))));
+    outlines.push(taggedPaths({ tags }, toPathsFromGraph(graph)));
   }
   // Turn paths into wires.
   for (const { tags = [], paths } of getNonVoidPaths(keptGeometry)) {

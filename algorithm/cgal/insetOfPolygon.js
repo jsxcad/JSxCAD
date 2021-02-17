@@ -40,7 +40,7 @@ export const insetOfPolygon = (
       if (isHole) {
         output.holes.push(points);
       } else {
-        output = { boundary: points, holes: [] };
+        output = { boundary: points, holes: [], plane };
         outputs.push(output);
       }
     },

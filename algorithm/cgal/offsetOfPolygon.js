@@ -37,7 +37,7 @@ export const offsetOfPolygon = (
       if (isHole) {
         output.holes.push(points);
       } else {
-        output = { boundary: points, holes: [] };
+        output = { boundary: points, holes: [], plane };
         outputs.push(output);
       }
     },

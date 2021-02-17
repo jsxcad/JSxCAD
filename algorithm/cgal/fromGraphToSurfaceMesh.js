@@ -11,11 +11,15 @@ export const fromGraphToSurfaceMesh = (graph) => {
     vertexIndex.push(c.Surface_mesh__add_exact(mesh, x, y, z))
   );
 
-  // Surface_mesh faces are facets, represented by loops.
+  const seen = new Set();
 
-  graph.loops.forEach(({ edge }, loop) => {
+  graph.edges.forEach((edgeNode, edge) => {
+    if (!edgeNode || seen.has(edge)) {
+      return;
+    }
     if (
       c.Surface_mesh__add_face_vertices(mesh, () => {
+        seen.add(edge);
         const edgeNode = graph.edges[edge];
         edge = edgeNode.next;
         return vertexIndex[edgeNode.point];

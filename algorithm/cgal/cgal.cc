@@ -9,43 +9,14 @@
 #include <boost/range/adaptor/reversed.hpp>
 
 // Extend NT_converter
-#include <CGAL/NT_converter.h>
-#include <CGAL/Gmpq.h>
-
-// ./CGAL/Cartesian_converter.h:286:24: error: no matching function for call to object of type 'const CGAL::NT_converter<double, CGAL::Gmpq>'
-
-#if 0
-template <>
-struct CGAL::NT_converter < double, CGAL::Gmpq >
-  : public CGAL::cpp98::unary_function< double, CGAL::Gmpq >
-{
-    CGAL::Gmpq
-    operator()(const double &a) const
-    {
-        return CGAL::Gmpq(a);
-    }
-};
-
-template <>
-struct CGAL::NT_converter < CGAL::Gmpq, double >
-  : public CGAL::cpp98::unary_function< CGAL::Gmpq, double >
-{
-    double
-    operator()(const CGAL::Gmpq &a) const
-    {
-        return CGAL::to_double(a);
-    }
-};
-#endif
-
+// #include <CGAL/NT_converter.h>
+// #include <CGAL/Gmpq.h>
 // End Extend NT_converter
 
 #include <CGAL/Arr_conic_traits_2.h>
 #include <CGAL/CORE_algebraic_number_traits.h>
 #include <CGAL/IO/io.h>
-// #include <CGAL/MP_Float.h>
 #include <CGAL/Quotient.h>
-// #include <CGAL/Extended_cartesian.h>
 #include <CGAL/Simple_cartesian.h>
 #include <CGAL/Bounded_kernel.h>
 
@@ -233,55 +204,6 @@ Surface_mesh* FromFunctionToSurfaceMesh(double radius, double angular_bound, dou
   Surface_mesh* epeck_mesh = new Surface_mesh();
   copy_face_graph(epick_mesh, *epeck_mesh);
   return epeck_mesh;
-}
-
-Nef_polyhedron* FromPolygonSoupToNefPolyhedron(emscripten::val load) {
-  Triples triples;
-  Polygons polygons;
-  // Workaround for emscripten::val() bindings.
-  Triples* triples_ptr = &triples;
-  Polygons* polygons_ptr = &polygons;
-  load(triples_ptr, polygons_ptr);
-  CGAL::Nef_nary_union_3<Nef_polyhedron> nary_union;
-  for (const auto& polygon : polygons) {
-    std::vector<Point> points;
-    for (const auto& index : polygon) {
-      const auto& triple = triples[index];
-      points.emplace_back(Point{ triple[0], triple[1], triple[2] });
-    }
-    Nef_polyhedron nef_polygon(points.begin(), points.end());
-    if (!nef_polygon.is_empty()) {
-      nary_union.add_polyhedron(nef_polygon);
-    }
-  }
-  Nef_polyhedron* nef = new Nef_polyhedron(nary_union.get_union());
-  CGAL::Mark_bounded_volumes<Nef_polyhedron> mbv(true);
-  nef->delegate(mbv);
-  return nef;
-}
-
-Nef_polyhedron* FromSurfaceMeshToNefPolyhedron(const Surface_mesh* surface_mesh) {
-  return new Nef_polyhedron(*surface_mesh);
-}
-
-void FromNefPolyhedronToPolygons(Nef_polyhedron* nef_polyhedron, bool triangulate, emscripten::val emit_point, emscripten::val emit_polygon) {
-  Points points;
-  Polygons polygons;
-  convert_nef_polyhedron_to_polygon_soup(*nef_polyhedron, points, polygons, triangulate);
-  for (const auto& polygon : polygons) {
-    emit_polygon();
-    for (const auto& index : polygon) {
-      const auto& p = points[index];
-      emit_point(CGAL::to_double(p.x()), CGAL::to_double(p.y()), CGAL::to_double(p.z()));
-    }
-  }
-}
-
-Surface_mesh* FromNefPolyhedronToSurfaceMesh(Nef_polyhedron* nef_polyhedron) {
-  Surface_mesh* mesh = new Surface_mesh();
-  CGAL::convert_nef_polyhedron_to_polygon_mesh(*nef_polyhedron, *mesh);
-  assert(CGAL::Polygon_mesh_processing::triangulate_faces(*mesh) == true);
-  return mesh;
 }
 
 struct TriangularSurfaceMeshBuilder {
@@ -654,22 +576,6 @@ Surface_mesh* ProjectionToPlaneOfSurfaceMesh(
   return projected_mesh;
 }
 
-Nef_polyhedron* DifferenceOfNefPolyhedrons(Nef_polyhedron* a, Nef_polyhedron* b) {
-  return new Nef_polyhedron(*a - *b);
-}
-
-Nef_polyhedron* IntersectionOfNefPolyhedrons(Nef_polyhedron* a, Nef_polyhedron* b) {
-  return new Nef_polyhedron(*a * *b);
-}
-
-Nef_polyhedron* UnionOfNefPolyhedrons(Nef_polyhedron* a, Nef_polyhedron* b) {
-  return new Nef_polyhedron(*a + *b);
-}
-
-Nef_polyhedron* SectionOfNefPolyhedron(Nef_polyhedron* a, double x, double y, double z, double w) {
-  return new Nef_polyhedron(a->intersection(Plane(x, y, z, w), Nef_polyhedron::Intersection_mode::PLANE_ONLY));
-}
-
 Surface_mesh* DifferenceOfSurfaceMeshes(Surface_mesh* a, Surface_mesh* b) {
   Surface_mesh* c = new Surface_mesh();
   CGAL::Polygon_mesh_processing::corefine_and_compute_difference(
@@ -725,242 +631,133 @@ double FT__to_double(const FT& ft) {
   return CGAL::to_double(ft);
 }
 
-void Nef_polyhedron__EachHalfedge(Nef_polyhedron* nef, emscripten::val op) {
-  for (auto it = nef->halfedges_begin(); it != nef->halfedges_end(); ++it) {
-  }
-}
-
-typedef Nef_polyhedron::Vertex_const_handle Vertex_const_handle;
-typedef Nef_polyhedron::Halfedge_const_handle Halfedge_const_handle;
-typedef Nef_polyhedron::Halffacet_const_handle Halffacet_const_handle;
-typedef Nef_polyhedron::Halffacet_cycle_const_iterator Halffacet_cycle_const_iterator;
-typedef Nef_polyhedron::SHalfedge_handle SHalfedge_handle;
-typedef Nef_polyhedron::SHalfedge_const_handle SHalfedge_const_handle;
-typedef Nef_polyhedron::SHalfloop_const_handle SHalfloop_const_handle;
-typedef Nef_polyhedron::SHalfedge_around_facet_const_circulator SHalfedge_around_facet_const_circulator;
-typedef Nef_polyhedron::SHalfedge_around_sface_const_circulator SHalfedge_around_sface_const_circulator;
-typedef Nef_polyhedron::SFace_const_handle SFace_const_handle;
-typedef Nef_polyhedron::SFace_cycle_const_iterator SFace_cycle_const_iterator;
-typedef Nef_polyhedron::SVertex_const_handle SVertex_const_handle;
-typedef Nef_polyhedron::Volume_const_iterator Volume_const_iterator;
-typedef Nef_polyhedron::Shell_entry_const_iterator Shell_entry_const_iterator;
-
-class Facet_explorer {
-public:
-  Facet_explorer(emscripten::val& emit_halffacet, emscripten::val& emit_loop, emscripten::val& emit_shalfedge, emscripten::val& emit_svertex)
-    : _emit_halffacet(emit_halffacet), _emit_loop(emit_loop),_emit_shalfedge(emit_shalfedge), _emit_svertex(emit_svertex) {}
-
-  void Explore(Halffacet_const_handle h) {
-    Halffacet_const_handle f = h->twin();
-
-    const Plane& p = f->plane();
-
-    _emit_halffacet(
-        halffacet_id(f),
-        CGAL::to_double(p.a()), 
-        CGAL::to_double(p.b()), 
-        CGAL::to_double(p.c()), 
-        CGAL::to_double(p.d()));
-
-    Halffacet_cycle_const_iterator fci;
-    for (fci = f->facet_cycles_begin(); fci != f->facet_cycles_end(); ++fci) {
-      if (fci.is_shalfedge()) {
-        SHalfedge_const_handle loop = SHalfedge_const_handle(fci);
-        _emit_loop(shalfedge_id(loop), sface_id(loop->incident_sface()));
-        SHalfedge_around_facet_const_circulator sfc(fci);
-        SHalfedge_around_facet_const_circulator send(sfc);
-        CGAL_For_all(sfc, send) {
-          SHalfedge_around_facet_const_circulator sfc_next = sfc;
-          ++sfc_next;
-          const Halfedge_const_handle& e = sfc->source();
-          const Halfedge_const_handle& next = sfc_next->source();
-          _emit_shalfedge(halfedge_id(e), vertex_id(e->source()), halfedge_id(next), halfedge_id(sfc->twin()->source()));
-        }
-      }
-    }
-  }
-
- private:
-   std::size_t svertex_id(SVertex_const_handle h) {
-     if (_svertex_ids.is_defined(h)) {
-       return _svertex_ids[h];
-     }
-     size_t index = _svertex_count++;
-     _svertex_ids[h] = index;
-     const auto& p = h->point();
-     _emit_svertex(index, CGAL::to_double(p.x()), CGAL::to_double(p.y()), CGAL::to_double(p.z()));
-     return index;
-   }
-
-   std::size_t vertex_id(Vertex_const_handle h) {
-     if (_vertex_ids.is_defined(h)) {
-       return _vertex_ids[h];
-     }
-     std::size_t index = _vertex_count++;
-     _vertex_ids[h] = index;
-     const auto& p = h->point();
-     _emit_svertex(index, CGAL::to_double(p.x()), CGAL::to_double(p.y()), CGAL::to_double(p.z()));
-     return index;
-   }
-
-   std::size_t shalfedge_id(SHalfedge_const_handle h) {
-     if (_shalfedge_ids.is_defined(h)) {
-       return _shalfedge_ids[h];
-     }
-     std::size_t index = _shalfedge_count++;
-     _shalfedge_ids[h] = index;
-     return index;
-   }
-
-   std::size_t halfedge_id(Halfedge_const_handle h) {
-     if (_halfedge_ids.is_defined(h)) {
-       return _halfedge_ids[h];
-     }
-     std::size_t index = _halfedge_count++;
-     _halfedge_ids[h] = index;
-     return index;
-   }
-
-   std::size_t halffacet_id(Halffacet_const_handle h) {
-     if (_halffacet_ids.is_defined(h)) {
-       return _halffacet_ids[h];
-     }
-     std::size_t index = _halffacet_count++;
-     _halffacet_ids[h] = index;
-     return index;
-   }
-
-   std::size_t sface_id(SFace_const_handle h) {
-     if (_sface_ids.is_defined(h)) {
-       return _sface_ids[h];
-     }
-     std::size_t index = _sface_count++;
-     _sface_ids[h] = index;
-     return index;
-   }
-
-  emscripten::val& _emit_halffacet;
-  emscripten::val& _emit_loop;
-  emscripten::val& _emit_shalfedge;
-  emscripten::val& _emit_svertex;
-
-  std::size_t _svertex_count = 0;
-  CGAL::Unique_hash_map<SVertex_const_handle, size_t> _svertex_ids;
-
-  std::size_t _vertex_count = 0;
-  CGAL::Unique_hash_map<Vertex_const_handle, size_t> _vertex_ids;
-
-  std::size_t _shalfedge_count = 0;
-  CGAL::Unique_hash_map<SHalfedge_const_handle, size_t> _shalfedge_ids;
-
-  std::size_t _halfedge_count = 0;
-  CGAL::Unique_hash_map<Halfedge_const_handle, size_t> _halfedge_ids;
-
-  std::size_t _halffacet_count = 0;
-  CGAL::Unique_hash_map<Halffacet_const_handle, size_t> _halffacet_ids;
-
-  std::size_t _sface_count = 0;
-  CGAL::Unique_hash_map<SFace_const_handle, size_t> _sface_ids;
-};
-
-class Shell_explorer {
-public:
-  Shell_explorer(emscripten::val& emit_halffacet, emscripten::val& emit_loop, emscripten::val& emit_shalfedge, emscripten::val& emit_svertex)
-    // : _emit_halffacet(emit_halffacet), _emit_loop(emit_loop),_emit_shalfedge(emit_shalfedge), _emit_svertex(emit_svertex) {}
-    : _facet_explorer(emit_halffacet, emit_loop, emit_shalfedge, emit_svertex) {}
-
-  void visit(SHalfloop_const_handle) {}
-  void visit(Vertex_const_handle) {}
-  void visit(SHalfedge_const_handle) {}
-  void visit(Halfedge_const_handle) {}
-  void visit(SFace_const_handle sf) {}
-
-  void visit(Halffacet_const_handle h) {
-    _facet_explorer.Explore(h);
-  }
-
-  Facet_explorer _facet_explorer;
-};
-
-void Nef_polyhedron__explore_shells(const Nef_polyhedron* nef, emscripten::val emit_volume, emscripten::val emit_shell, emscripten::val emit_facet, emscripten::val emit_loop, emscripten::val emit_shalfedge, emscripten::val emit_svertex) {
-  Volume_const_iterator vol_it = nef->volumes_begin();
-  Volume_const_iterator vol_end = nef->volumes_end();
-  Shell_explorer shell_explorer(emit_facet, emit_loop, emit_shalfedge, emit_svertex);
-  ++vol_it; // Skip the unbounded volume.
-  int volume_id = 0;
-  while (vol_it != vol_end) {
-    emit_volume(volume_id++);
-    auto shell_it = vol_it->shells_begin();
-    auto shell_end = vol_it->shells_end();
-    while (shell_it != shell_end) {
-      emit_shell();
-      nef->visit_shell_objects(SFace_const_handle(shell_it), shell_explorer);
-      ++shell_it;
-    }
-    ++vol_it;
-  }
-  // Terminate the final loop.
-  emit_loop((std::size_t)-1, (std::size_t)-1);
-}
-
-void Nef_polyhedron__explore_facets(const Nef_polyhedron* nef, emscripten::val emit_facet, emscripten::val emit_loop, emscripten::val emit_shalfedge, emscripten::val emit_svertex) {
-  Facet_explorer explorer(emit_facet, emit_loop, emit_shalfedge, emit_svertex);
-  Halffacet_const_handle facet;
-  CGAL_forall_halffacets(facet, *nef) {
-    explorer.Explore(facet);
-  }
-  // Terminate the final loop.
-  emit_loop((std::size_t)-1, (std::size_t)-1);
-}
-
 class Surface_mesh_explorer {
  public:
-  Surface_mesh_explorer(emscripten::val& emit_face, emscripten::val& emit_point, emscripten::val& emit_edge)
-    : _emit_face(emit_face),_emit_point(emit_point), _emit_edge(emit_edge) {}
+  Surface_mesh_explorer(emscripten::val& emit_point, emscripten::val& emit_edge, emscripten::val& emit_face)
+    : _emit_point(emit_point), _emit_edge(emit_edge), _emit_face(emit_face) {}
+
+  std::map<std::int32_t, std::int32_t> facet_to_face;
+
+  const std::int32_t mapFacetToFace(std::int32_t facet) {
+    std::int32_t face = (std::int32_t)facet;
+    std::set<std::int32_t> seen;
+    for (;;) {
+      seen.insert(face);
+      std::int32_t next_face = facet_to_face[face];
+      if (next_face == face) {
+        break;
+      }
+      if (seen.find(next_face) != seen.end()) {
+        // This should be impossible.
+        std::cout << "EE/m/cycle" << std::endl;
+        return face;
+      }
+      face = next_face;
+    }
+    return face;
+  }
 
   void Explore(const Surface_mesh& mesh) {
-    for (const auto& face : mesh.faces()) {
-      _emit_face((std::size_t)face);
-      const auto& start = mesh.halfedge(face);
+    // Publish the vertices.
+    for (const auto& vertex : mesh.vertices()) {
+      if (mesh.is_removed(vertex)) {
+        continue;
+      }
+      const auto& p = mesh.point(vertex);
+      std::ostringstream x; x << p.x(); std::string xs = x.str();
+      std::ostringstream y; y << p.y(); std::string ys = y.str();
+      std::ostringstream z; z << p.z(); std::string zs = z.str();
+      _emit_point((std::int32_t)vertex, CGAL::to_double(p.x()), CGAL::to_double(p.y()), CGAL::to_double(p.z()),
+                  xs, ys, zs);
+    }
+
+    // Consolidate facets into faces.
+    const double kColinearityThreshold = 0.999999;
+
+    facet_to_face[mesh.null_face()] = -1;
+
+    for (const auto& facet : mesh.faces()) {
+      // Initially each facet is an individual face.
+      facet_to_face[(std::int32_t)facet] = (std::int32_t)facet;
+    }
+
+    // FIX: Make this more efficient.
+    for (const auto& facet : mesh.faces()) {
+      const auto facet_normal = CGAL::Polygon_mesh_processing::compute_face_normal(facet, mesh);
+      const auto& start = mesh.halfedge(facet);
       if (mesh.is_removed(start)) {
         continue;
       }
-      Halfedge_index halfedge = start;
+      std::int32_t face = mapFacetToFace(facet);
+      Halfedge_index edge = start;
       do {
-        const auto& target = mesh.target(halfedge);
-        const auto& p = mesh.point(target);
-        {
-          std::ostringstream x; x << p.x(); std::string xs = x.str();
-          std::ostringstream y; y << p.y(); std::string ys = y.str();
-          std::ostringstream z; z << p.z(); std::string zs = z.str();
-          _emit_point((std::size_t)target, CGAL::to_double(p.x()), CGAL::to_double(p.y()), CGAL::to_double(p.z()),
-                      xs, ys, zs);
+        const auto& opposite_facet = mesh.face(mesh.opposite(edge));
+        if (opposite_facet != mesh.null_face()) {
+          const auto opposite_facet_normal = CGAL::Polygon_mesh_processing::compute_face_normal(opposite_facet, mesh);
+          if (facet_normal * opposite_facet_normal > kColinearityThreshold) {
+            std::int32_t opposite_face = mapFacetToFace(opposite_facet);
+            if (opposite_face < face) {
+              facet_to_face[face] = opposite_face;
+              face = opposite_face;
+            } else {
+              facet_to_face[opposite_face] = face;
+            }
+          }
         }
-                   
-        const auto& next = mesh.next(halfedge);
-        const auto& opposite = mesh.opposite(halfedge);
-        _emit_edge((std::size_t)target,
-                   (std::size_t)halfedge, 
-                   (std::size_t)next,
-                   (std::size_t)opposite);
-        halfedge = next;
-      } while (halfedge != start);
+        const auto& next = mesh.next(edge);
+        edge = next;
+      } while (edge != start);
+    }
+
+    std::map<std::int32_t, Surface_mesh::Vertex_index> facet_to_vertex;
+
+    // Publish the half-edges.
+    for (const auto& edge : mesh.halfedges()) {
+      if (mesh.is_removed(edge)) {
+        continue;
+      }
+      const auto& next = mesh.next(edge);
+      const auto& source = mesh.source(edge);
+      const auto& opposite = mesh.opposite(edge);
+      const auto& facet = mesh.face(edge);
+      facet_to_vertex[facet] = source;
+      std::int32_t face = mapFacetToFace(facet);
+      _emit_edge((std::int32_t)edge,
+                 (std::int32_t)source,
+                 (std::int32_t)next,
+                 (std::int32_t)opposite,
+                 (std::int32_t)facet,
+                 (std::int32_t)face,
+                 face);
+    }
+
+    // Publish the faces.
+    for (const auto& entry : facet_to_face) {
+      const auto& facet = entry.first;
+      const auto& face = entry.second;
+      if (face == -1 || facet != face) {
+        continue;
+      }
+      const auto facet_normal = CGAL::Polygon_mesh_processing::compute_face_normal(Surface_mesh::Face_index(facet), mesh);
+      const auto& point = mesh.point(facet_to_vertex[facet]);
+      const Plane plane(point, facet_normal);
+      std::ostringstream x; x << plane.a(); std::string xs = x.str();
+      std::ostringstream y; y << plane.b(); std::string ys = y.str();
+      std::ostringstream z; z << plane.c(); std::string zs = z.str();
+      std::ostringstream w; w << plane.d(); std::string ws = w.str();
+      _emit_face(facet, CGAL::to_double(plane.a()), CGAL::to_double(plane.b()), CGAL::to_double(plane.c()), CGAL::to_double(plane.d()), xs, ys, zs, ws);
     }
   }
 
  private:
-
-  emscripten::val& _emit_face;
   emscripten::val& _emit_point;
   emscripten::val& _emit_edge;
+  emscripten::val& _emit_face;
 };
 
-void Surface_mesh__explore(const Surface_mesh* mesh, emscripten::val emit_face, emscripten::val emit_point, emscripten::val emit_edge) {
-  Surface_mesh_explorer explorer(emit_face, emit_point, emit_edge);
+void Surface_mesh__explore(const Surface_mesh* mesh, emscripten::val emit_point, emscripten::val emit_edge, emscripten::val emit_face) {
+  Surface_mesh_explorer explorer(emit_point, emit_edge, emit_face);
   explorer.Explore(*mesh);
-  // Indicate that the previous face has finished.
-  // The number doesn't matter, but let's make it distinctive.
-  emit_face((std::size_t)-1);
 }
 
 Surface_mesh* ComputeConvexHullAsSurfaceMesh(emscripten::val fill) {
@@ -1046,101 +843,6 @@ void ComputeAlphaShape2AsPolygonSegments(size_t component_limit, double alpha, b
     const auto& t = segment.target();
     emit(CGAL::to_double(s.x()), CGAL::to_double(s.y()), CGAL::to_double(t.x()), CGAL::to_double(t.y()));
   }
-}
-
-Surface_mesh* OutlineOfSurfaceMesh(Surface_mesh* input) {
-  const double kColinearityThreshold = 0.999999;
-  Surface_mesh* mesh = new Surface_mesh(*input);
-  for (auto& edge : halfedges(*mesh)) {
-    if (mesh->is_removed(edge) || is_border_edge(edge, *mesh)) {
-      continue;
-    }
-    auto twin = opposite(edge, *mesh);
-    auto edge_face = face(edge, *mesh);
-    auto twin_face = face(twin, *mesh);
-    if (edge_face == twin_face) {
-      const auto& h1 = edge;
-      const auto& h2 = twin;
-
-      // Enforce pre-conditions.
-      if (face(h1, *mesh) != face(h2, *mesh)) {
-        // std::cout << "VV/1" << std::endl;
-        continue;
-      }
-      if (h1 == h2) {
-        // std::cout << "VV/2" << std::endl;
-        continue;
-      }
-      if (next(h1, *mesh) == h2) {
-        // std::cout << "VV/3" << std::endl;
-        continue;
-      }
-      if (next(h2, *mesh) == h1) {
-        // std::cout << "VV/4" << std::endl;
-        continue;
-      }
-      CGAL::Euler::split_face(h1, h2, *mesh);
-    } else {
-      auto edge_face_normal = CGAL::Polygon_mesh_processing::compute_face_normal(edge_face, *mesh);
-      auto twin_face_normal = CGAL::Polygon_mesh_processing::compute_face_normal(twin_face, *mesh);
-      // FIX: Figure out the limit properly and consider planar drift.
-      if (edge_face_normal * twin_face_normal > kColinearityThreshold) {
-        if (out_degree(source(edge, *mesh), *mesh) < 3) {
-        // std::cout << "VV/5" << std::endl;
-          continue;
-        }
-        if (out_degree(target(edge, *mesh), *mesh) < 3) {
-        // std::cout << "VV/6" << std::endl;
-          continue;
-        }
-        CGAL::Euler::join_face(edge, *mesh);
-      }
-    }
-  }
-  // Collapse spurs.
-  for (;;) {
-    bool collapsed = false;
-    for (auto& edge : halfedges(*mesh)) {
-      if (mesh->is_removed(edge)) {
-        continue;
-      }
-      auto edge_next = next(edge, *mesh);
-      auto edge_next_next = next(edge_next, *mesh);
-      auto edge_source = source(edge, *mesh);
-      auto edge_next_next_source = source(edge_next_next, *mesh);
-      if (edge_source == edge_next_next_source && edge != edge_next_next) {
-
-        const auto& h1 = prev(edge, *mesh);
-        const auto& h2 = edge_next;
-
-        // Enforce pre-conditions.
-        if (face(h1, *mesh) != face(h2, *mesh)) {
-          // std::cout << "VV/7" << std::endl;
-          continue;
-        }
-        if (h1 == h2) {
-          // std::cout << "VV/8" << std::endl;
-          continue;
-        }
-        if (next(h1, *mesh) == h2) {
-          // std::cout << "VV/9" << std::endl;
-          continue;
-        }
-        if (next(h2, *mesh) == h1) {
-          // std::cout << "VV/10" << std::endl;
-          continue;
-        }
-        CGAL::Euler::split_face(h1, h2, *mesh);
-        CGAL::Euler::remove_face(edge_next, *mesh);
-        collapsed = true;
-        break;
-      }
-    }
-    if (collapsed == false) {
-      break;
-    }
-  }
-  return mesh;
 }
 
 typedef Kernel Kernel_2;
@@ -1481,124 +1183,6 @@ void InsetOfPolygon(double initial, double step, double limit, double x, double 
   }
 }
 
-#if 0
-// FIX: Consider producing an exact outline mesh.
-void InsetOfPolygon(double initial, double step, double limit, double x, double y, double z, double w, std::size_t hole_count, emscripten::val fill_boundary, emscripten::val fill_hole, emscripten::val emit_polygon, emscripten::val emit_point) {
-  typedef CGAL::Gps_circle_segment_traits_2<Kernel> Traits;
-  Kernel::Plane_3 plane(x, y, z, w);
-
-  double offset = initial;
-
-  Polygon_2 boundary;
-  std::vector<Polygon_2> holes;
-
-  {
-    Points points;
-    Points* points_ptr = &points;
-    fill_boundary(points_ptr);
-    for (const auto& point : points) {
-      boundary.push_back(plane.to_2d(point));
-    }
-    if (boundary.orientation() == CGAL::Sign::NEGATIVE) {
-      boundary.reverse_orientation();
-    }
-    if (!boundary.is_simple()) {
-      std::cout << "Boundary is not simple" << std::endl;
-      return;
-    }
-  }
-
-  for (std::size_t nth = 0; nth < hole_count; nth++) {
-    Points points;
-    Points* points_ptr = &points;
-    fill_hole(points_ptr, nth);
-    Polygon_2 hole;
-    for (const auto& point : points) {
-      hole.push_back(plane.to_2d(point));
-    }
-    if (hole.orientation() == CGAL::Sign::NEGATIVE) {
-      hole.reverse_orientation();
-    }
-    if (!hole.is_simple()) {
-      std::cout << "Hole is not simple" << std::endl;
-      return;
-    }
-    holes.push_back(hole);
-  }
-
-  Traits traits;
-
-  for (;;) {
-    CGAL::General_polygon_set_2<Traits> boundaries;
-    {
-      std::vector<Traits::Polygon_2> inset_boundaries;
-      CGAL::approximated_inset_2(boundary, offset, 0.00001, std::back_inserter(inset_boundaries));
-      for (auto& inset_boundary : inset_boundaries) {
-        if (inset_boundary.orientation() == CGAL::Sign::NEGATIVE) {
-          inset_boundary.reverse_orientation();
-        }
-        boundaries.join(CGAL::General_polygon_set_2<Traits>(inset_boundary));
-      }
-    }
-
-    for (const auto& hole : holes) {
-      boundaries.difference(CGAL::General_polygon_set_2<Traits>(CGAL::approximated_offset_2(hole, offset, 0.00001)));
-    }
-
-    bool emitted = false;
-
-    std::vector<Traits::Polygon_with_holes_2> polygons;
-    boundaries.polygons_with_holes(std::back_inserter(polygons));
-
-    for (const Traits::Polygon_with_holes_2& polygon : polygons) {
-      const auto& outer = polygon.outer_boundary();
-      emit_polygon(false);
-      for (auto curve = outer.curves_begin(); curve != outer.curves_end(); ++curve) {
-        if (curve->is_linear()) {
-          const auto& source = curve->source();
-          const auto& target = curve->target();
-          auto p = plane.to_3d(Point_2(CGAL::to_double(source.x()), CGAL::to_double(source.y())));
-          emit_point(CGAL::to_double(p.x()), CGAL::to_double(p.y()), CGAL::to_double(p.z()));
-          emitted = true;
-        } else if (curve->is_circular()) {
-          emitCircularCurve(plane, curve, emit_point);
-          emitted = true;
-        }
-      }
-      for (auto hole = polygon.holes_begin(); hole != polygon.holes_end(); ++hole) {
-        emit_polygon(true);
-        for (auto curve = hole->curves_begin(); curve != hole->curves_end(); ++curve) {
-          if (curve->is_linear()) {
-            const auto& source = curve->source();
-            const auto& target = curve->target();
-            auto p = plane.to_3d(Point_2(CGAL::to_double(source.x()), CGAL::to_double(source.y())));
-            emit_point(CGAL::to_double(p.x()), CGAL::to_double(p.y()), CGAL::to_double(p.z()));
-            emitted = true;
-          } else if (curve->is_circular()) {
-            emitCircularCurve(plane, curve, emit_point);
-            emitted = true;
-          }
-        }
-      }
-    }
-
-    if (!emitted) {
-      break;
-    }
-    if (step <= 0) {
-      break;
-    }
-    offset += step;
-    if (limit <= 0) {
-      continue;
-    }
-    if (offset >= limit) {
-      break;
-    }
-  }
-}
-#endif
-
 void ArrangePaths(double x, double y, double z, double w, emscripten::val fill, emscripten::val emit_polygon, emscripten::val emit_point) {
   typedef CGAL::Arr_segment_traits_2<Kernel>            Traits_2;
   typedef Traits_2::Point_2                             Point_2;
@@ -1853,8 +1437,6 @@ using emscripten::select_const;
 using emscripten::select_overload;
 
 EMSCRIPTEN_BINDINGS(module) {
-  // emscripten::class_<FT>("FT").constructor<>();
-
   emscripten::class_<Transformation>("Transformation").constructor<>();
   emscripten::function("Transformation__compose", &Transformation__compose, emscripten::allow_raw_pointers());
   emscripten::function("Transformation__identity", &Transformation__identity, emscripten::allow_raw_pointers());
@@ -1913,17 +1495,6 @@ EMSCRIPTEN_BINDINGS(module) {
     .function("push_back", select_overload<void(const Polygon&)>(&Polygons::push_back))
     .function("size", select_overload<size_t()const>(&Polygons::size));
 
-  emscripten::class_<Nef_polyhedron>("Nef_polyhedron")
-    .constructor<>()
-    .function("number_of_vertices", &Nef_polyhedron::number_of_vertices)
-    .function("number_of_halfedges", &Nef_polyhedron::number_of_halfedges)
-    .function("number_of_edges", &Nef_polyhedron::number_of_edges)
-    .function("number_of_halffacets", &Nef_polyhedron::number_of_halffacets)
-    .function("number_of_facets", &Nef_polyhedron::number_of_facets)
-    .function("number_of_volumes", select_overload<size_t()const>(&Nef_polyhedron::number_of_volumes))
-    .function("is_valid", &Nef_polyhedron::is_valid)
-    .function("is_empty", &Nef_polyhedron::is_empty);
-
   emscripten::class_<Face_index>("Face_index").constructor<std::size_t>();
   emscripten::class_<Halfedge_index>("Halfedge_index").constructor<std::size_t>();
   emscripten::class_<Vertex_index>("Vertex_index").constructor<std::size_t>();
@@ -1980,16 +1551,6 @@ EMSCRIPTEN_BINDINGS(module) {
     .function("z", &Point::z);
 
   emscripten::function("FromPolygonSoupToSurfaceMesh", &FromPolygonSoupToSurfaceMesh, emscripten::allow_raw_pointers());
-  emscripten::function("FromPolygonSoupToNefPolyhedron", &FromPolygonSoupToNefPolyhedron, emscripten::allow_raw_pointers());
-  emscripten::function("FromSurfaceMeshToNefPolyhedron", &FromSurfaceMeshToNefPolyhedron, emscripten::allow_raw_pointers());
-  emscripten::function("FromNefPolyhedronToPolygons", &FromNefPolyhedronToPolygons, emscripten::allow_raw_pointers());
-  emscripten::function("FromNefPolyhedronToSurfaceMesh", &FromNefPolyhedronToSurfaceMesh, emscripten::allow_raw_pointers());
-
-  emscripten::function("DifferenceOfNefPolyhedrons", &DifferenceOfNefPolyhedrons, emscripten::allow_raw_pointers());
-  emscripten::function("IntersectionOfNefPolyhedrons", &IntersectionOfNefPolyhedrons, emscripten::allow_raw_pointers());
-  emscripten::function("UnionOfNefPolyhedrons", &UnionOfNefPolyhedrons, emscripten::allow_raw_pointers());
-  emscripten::function("SectionOfNefPolyhedron", &SectionOfNefPolyhedron, emscripten::allow_raw_pointers());
-
   emscripten::function("DifferenceOfSurfaceMeshes", &DifferenceOfSurfaceMeshes, emscripten::allow_raw_pointers());
   emscripten::function("IntersectionOfSurfaceMeshes", &IntersectionOfSurfaceMeshes, emscripten::allow_raw_pointers());
   emscripten::function("UnionOfSurfaceMeshes", &UnionOfSurfaceMeshes, emscripten::allow_raw_pointers());
@@ -1999,8 +1560,6 @@ EMSCRIPTEN_BINDINGS(module) {
 
   emscripten::function("FT__to_double", &FT__to_double, emscripten::allow_raw_pointers());
 
-  emscripten::function("Nef_polyhedron__explore_shells", &Nef_polyhedron__explore_shells, emscripten::allow_raw_pointers());
-  emscripten::function("Nef_polyhedron__explore_facets", &Nef_polyhedron__explore_facets, emscripten::allow_raw_pointers());
   emscripten::function("Surface_mesh__explore", &Surface_mesh__explore, emscripten::allow_raw_pointers());
 
   emscripten::function("FromPointsToSurfaceMesh", &FromPointsToSurfaceMesh, emscripten::allow_raw_pointers());
@@ -2014,7 +1573,6 @@ EMSCRIPTEN_BINDINGS(module) {
   emscripten::function("ComputeConvexHullAsSurfaceMesh", &ComputeConvexHullAsSurfaceMesh, emscripten::allow_raw_pointers());
   emscripten::function("ComputeAlphaShapeAsSurfaceMesh", &ComputeAlphaShapeAsSurfaceMesh, emscripten::allow_raw_pointers());
   emscripten::function("ComputeAlphaShape2AsPolygonSegments", &ComputeAlphaShape2AsPolygonSegments, emscripten::allow_raw_pointers());
-  emscripten::function("OutlineOfSurfaceMesh", &OutlineOfSurfaceMesh, emscripten::allow_raw_pointers());
   emscripten::function("SkeletalInsetOfPolygon", &SkeletalInsetOfPolygon, emscripten::allow_raw_pointers());
   emscripten::function("OffsetOfPolygon", &OffsetOfPolygon, emscripten::allow_raw_pointers());
   emscripten::function("InsetOfPolygon", &InsetOfPolygon, emscripten::allow_raw_pointers());

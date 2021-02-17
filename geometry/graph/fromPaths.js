@@ -1,14 +1,9 @@
-import {
-  addFace,
-  addHoleFromPoints,
-  addLoopFromPoints,
-  create,
-} from './graph.js';
 import { arrangePaths, fitPlaneToPoints } from '@jsxcad/algorithm-cgal';
 import { deduplicate, flip, isClockwise } from '@jsxcad/geometry-path';
 
 import { canonicalize as canonicalizePaths } from '@jsxcad/geometry-paths';
 import { dot } from '@jsxcad/math-vec3';
+import { fromArrangements } from './fromArrangements.js';
 
 const clean = (path) => deduplicate(path);
 
@@ -21,7 +16,6 @@ const Z = 2;
 // This imposes a planar arrangement.
 export const fromPaths = (inputPaths) => {
   const paths = canonicalizePaths(inputPaths);
-  const graph = create();
   const points = [];
   for (const path of paths) {
     for (const point of path) {
@@ -30,6 +24,7 @@ export const fromPaths = (inputPaths) => {
       }
     }
   }
+  const orientedArrangements = [];
   let plane = fitPlaneToPoints(points);
   if (plane) {
     // Orient planes up by default.
@@ -38,24 +33,28 @@ export const fromPaths = (inputPaths) => {
       plane[Z] *= -1;
     }
     const arrangement = arrangePaths(...plane, paths);
-    for (const { points, holes } of arrangement) {
-      const exterior = orientCounterClockwise(points);
+    for (const { boundary, holes } of arrangement) {
+      const exterior = orientCounterClockwise(boundary);
       const cleaned = clean(exterior);
       if (cleaned.length < 3) {
         continue;
       }
-      const face = addFace(graph, { plane });
-      addLoopFromPoints(graph, cleaned, { face });
+      const orientedArrangement = { boundary: cleaned, holes: [], plane };
+      // const face = addFace(graph, { plane });
+      // addLoopFromPoints(graph, cleaned, { face });
       for (const hole of holes) {
         const interior = orientClockwise(hole);
         const cleaned = clean(interior);
         if (cleaned.length < 3) {
           continue;
         }
-        addHoleFromPoints(graph, cleaned, { face });
+        orientedArrangement.holes.push(cleaned);
+        // addHoleFromPoints(graph, cleaned, { face });
       }
+      orientedArrangements.push(orientedArrangement);
     }
   }
+  const graph = fromArrangements(orientedArrangements);
   if (graph.edges.length === 0) {
     graph.isEmpty = true;
   }

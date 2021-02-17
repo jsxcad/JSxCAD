@@ -40,6 +40,7 @@ test('insetOfPolygon/bow', (t) => {
         [0.6886999999999999, 0.3270475176134254, 0],
       ],
       holes: [],
+      plane: [0, 0, 1, 0],
     },
     {
       boundary: [
@@ -63,6 +64,7 @@ test('insetOfPolygon/bow', (t) => {
         [0.6386999999999999, 0.24057127642013804, 0],
       ],
       holes: [],
+      plane: [0, 0, 1, 0],
     },
     {
       boundary: [
@@ -75,6 +77,7 @@ test('insetOfPolygon/bow', (t) => {
         [-0.0887, 0.15409503522685072, 0],
       ],
       holes: [],
+      plane: [0, 0, 1, 0],
     },
     {
       boundary: [
@@ -87,6 +90,7 @@ test('insetOfPolygon/bow', (t) => {
         [0.5886999999999999, 0.15409503522685078, 0],
       ],
       holes: [],
+      plane: [0, 0, 1, 0],
     },
     {
       boundary: [
@@ -95,6 +99,7 @@ test('insetOfPolygon/bow', (t) => {
         [-0.03870000000000001, 0.06761879403356345, 0],
       ],
       holes: [],
+      plane: [0, 0, 1, 0],
     },
     {
       boundary: [
@@ -103,6 +108,7 @@ test('insetOfPolygon/bow', (t) => {
         [0.5387, 0.06761879403356348, 0],
       ],
       holes: [],
+      plane: [0, 0, 1, 0],
     },
   ]);
 });

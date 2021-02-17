@@ -1,5 +1,6 @@
-import { Peg } from '@jsxcad/api-v1-shapes';
+import { outline, taggedGroup, translate } from '@jsxcad/geometry-tagged';
 
+import { Peg } from '@jsxcad/api-v1-shapes';
 import { Shape } from '@jsxcad/api-v1-shape';
 import { each } from '@jsxcad/api-v1-math';
 import { getDefinitions } from '@jsxcad/sys';
@@ -8,10 +9,10 @@ import { toToolFromTags } from '@jsxcad/algorithm-tool';
 const Z = 2;
 const z = Peg([0, 0, 0], [0, 1, 0], [-1, 0, 0]);
 
-const carve = (block, { toolDiameter = 1, cutDepth = 1 } = {}, ...shapes) => {
-  const { diameter = 1 } = toToolFromTags(
+const carve = (block, ...shapes) => {
+  const { diameter = 1, cutDepth = 0.2 } = toToolFromTags(
     'grbl',
-    block.toGeometry.tags,
+    block.toGeometry().tags,
     getDefinitions()
   );
   const negative = block.cut(...shapes);
@@ -31,15 +32,16 @@ const carve = (block, { toolDiameter = 1, cutDepth = 1 } = {}, ...shapes) => {
     .z(-max[Z]);
 };
 
-function carveMethod(tool, ...shapes) {
-  return carve(this, tool, ...shapes);
+function carveMethod(...shapes) {
+  return carve(this, ...shapes);
 }
 
 Shape.prototype.carve = carveMethod;
 
-const mill = (negative, { toolDiameter = 1, cutDepth = 1 } = {}) => {
-  const { diameter = 1 } = toToolFromTags(
-    negative.toGeometry.tags,
+const mill = (negative) => {
+  const { diameter = 1, cutDepth = 0.2 } = toToolFromTags(
+    'grbl',
+    negative.toGeometry().tags,
     getDefinitions()
   );
   const { max, min } = negative.size();
@@ -63,3 +65,26 @@ function millMethod(tool, ...shapes) {
 }
 
 Shape.prototype.mill = millMethod;
+
+const engrave = (paths, depth = 0.5) => {
+  const { cutDepth = 0.2 } = toToolFromTags(
+    'grbl',
+    paths.toGeometry().tags,
+    getDefinitions()
+  );
+  const cuts = Math.ceil(depth / cutDepth);
+  const effectiveCutDepth = depth / cuts;
+  const toolpaths = [];
+  for (let cut = 1; cut <= cuts; cut++) {
+    for (const path of outline(paths.toGeometry())) {
+      toolpaths.push(translate([0, 0, cut * -effectiveCutDepth], path));
+    }
+  }
+  return Shape.fromGeometry(taggedGroup({}, ...toolpaths));
+};
+
+function engraveMethod(tool, ...shapes) {
+  return engrave(this, tool, ...shapes);
+}
+
+Shape.prototype.engrave = engraveMethod;

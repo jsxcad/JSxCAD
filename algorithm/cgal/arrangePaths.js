@@ -35,7 +35,7 @@ export const arrangePaths = (x, y, z, w, paths) => {
         polygon.holes.push(target);
       } else {
         target = [];
-        polygon = { points: target, holes: [] };
+        polygon = { boundary: target, holes: [], plane: [x, y, z, w] };
         polygons.push(polygon);
       }
     },
