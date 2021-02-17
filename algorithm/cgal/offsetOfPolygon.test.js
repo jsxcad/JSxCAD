@@ -124,6 +124,7 @@ test('offsetOfPolygon/bow', (t) => {
         [0.8886751294136047, -0.5, 0],
       ],
       holes: [],
+      plane: [0, 0, 1, 0],
     },
     {
       boundary: [
@@ -231,6 +232,7 @@ test('offsetOfPolygon/bow', (t) => {
         [0.9386751294136048, -0.5, 0],
       ],
       holes: [],
+      plane: [0, 0, 1, 0],
     },
     {
       boundary: [
@@ -338,6 +340,7 @@ test('offsetOfPolygon/bow', (t) => {
         [0.9886751294136047, -0.5, 0],
       ],
       holes: [],
+      plane: [0, 0, 1, 0],
     },
     {
       boundary: [
@@ -445,6 +448,7 @@ test('offsetOfPolygon/bow', (t) => {
         [1.0386751294136047, -0.5, 0],
       ],
       holes: [],
+      plane: [0, 0, 1, 0],
     },
     {
       boundary: [
@@ -550,6 +554,7 @@ test('offsetOfPolygon/bow', (t) => {
         [1.0886751294136046, -0.5, 0],
       ],
       holes: [],
+      plane: [0, 0, 1, 0],
     },
     {
       boundary: [
@@ -655,6 +660,7 @@ test('offsetOfPolygon/bow', (t) => {
         [1.1386751294136046, -0.5, 0],
       ],
       holes: [],
+      plane: [0, 0, 1, 0],
     },
     {
       boundary: [
@@ -760,6 +766,7 @@ test('offsetOfPolygon/bow', (t) => {
         [1.1886751294136046, -0.5, 0],
       ],
       holes: [],
+      plane: [0, 0, 1, 0],
     },
     {
       boundary: [
@@ -865,6 +872,7 @@ test('offsetOfPolygon/bow', (t) => {
         [1.2386751294136047, -0.5, 0],
       ],
       holes: [],
+      plane: [0, 0, 1, 0],
     },
     {
       boundary: [
@@ -970,6 +978,7 @@ test('offsetOfPolygon/bow', (t) => {
         [1.2886751294136045, -0.5, 0],
       ],
       holes: [],
+      plane: [0, 0, 1, 0],
     },
   ]);
 });

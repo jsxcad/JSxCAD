@@ -767,8 +767,8 @@ var Module = (function () {
     }
     var wasmMemory;
     var wasmTable = new WebAssembly.Table({
-      initial: 2460,
-      maximum: 2460,
+      initial: 2274,
+      maximum: 2274,
       element: 'anyfunc',
     });
     var ABORT = false;
@@ -1088,9 +1088,9 @@ var Module = (function () {
       Module['HEAPF32'] = HEAPF32 = new Float32Array(buf);
       Module['HEAPF64'] = HEAPF64 = new Float64Array(buf);
     }
-    var STACK_BASE = 5594496,
-      STACK_MAX = 351616,
-      DYNAMIC_BASE = 5594496;
+    var STACK_BASE = 5565936,
+      STACK_MAX = 323056,
+      DYNAMIC_BASE = 5565936;
     assert(STACK_BASE % 16 === 0, 'stack must start aligned');
     assert(DYNAMIC_BASE % 16 === 0, 'heap must start aligned');
     var TOTAL_STACK = 5242880;

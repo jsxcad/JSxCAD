@@ -1,10 +1,19 @@
 import { equals as equalsPoint } from '@jsxcad/math-vec3';
 
-export const create = () => ({ points: [], edges: [], loops: [], faces: [] });
+export const create = () => ({
+  exactPoints: [],
+  points: [],
+  edges: [],
+  faces: [],
+  facets: [],
+});
 
-export const addEdge = (graph, { point, next = -1, loop = -1, twin = -1 }) => {
+export const addEdge = (
+  graph,
+  { point, next = -1, facet = -1, face = -1, twin = -1 }
+) => {
   const edge = graph.edges.length;
-  graph.edges.push({ point, loop, twin, next });
+  graph.edges.push({ point, facet, face, twin, next });
   return edge;
 };
 
@@ -63,6 +72,23 @@ export const fillLoopFromPoints = (graph, loop, points) => {
   return loop;
 };
 
+export const fillFacetFromPoints = (graph, facet, face, points) => {
+  let lastEdgeNode;
+  let firstEdge;
+  for (const coord of points) {
+    const point = addPoint(graph, coord);
+    const edge = addEdge(graph, { facet, face, point });
+    if (lastEdgeNode) {
+      lastEdgeNode.next = edge;
+    } else {
+      firstEdge = edge;
+    }
+    lastEdgeNode = getEdgeNode(graph, edge);
+  }
+  lastEdgeNode.next = firstEdge;
+  return firstEdge;
+};
+
 export const addLoopEdge = (graph, loop, { point, twin = -1 }) => {
   const loopNode = getLoopNode(graph, loop);
   const edge = addEdge(graph, { loop, point, twin });
@@ -101,8 +127,32 @@ export const eachEdge = (graph, op) =>
     }
   });
 
+export const eachPoint = (graph, op) =>
+  graph.points.forEach((node, nth) => {
+    if (node && node.isRemoved !== true) {
+      op(nth, node);
+    }
+  });
+
 export const eachFace = (graph, op) =>
   graph.faces.forEach((faceNode, face) => op(face, faceNode));
+
+export const eachFacet = (graph, op) =>
+  graph.facets.forEach((facetNode, facet) => op(facet, facetNode));
+
+export const eachEdgeLoop = (graph, start, op) => {
+  const limit = graph.edges.length;
+  let count = 0;
+  let edge = start;
+  do {
+    const edgeNode = graph.edges[edge];
+    op(edge, edgeNode);
+    edge = edgeNode.next;
+    if (count++ > limit) {
+      throw Error(`Infinite edge loop`);
+    }
+  } while (edge !== start);
+};
 
 export const eachFaceEdge = (graph, face, op) =>
   eachFaceLoop(graph, face, (loop) => eachLoopEdge(graph, loop, op));

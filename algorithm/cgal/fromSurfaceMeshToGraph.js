@@ -1,5 +1,4 @@
 import { equals } from '@jsxcad/math-vec3';
-import { fromPolygon as fromPolygonToPlane } from '@jsxcad/math-plane';
 import { getCgal } from './getCgal.js';
 
 export const fromSurfaceMeshToGraph = (mesh) => {
@@ -7,23 +6,15 @@ export const fromSurfaceMeshToGraph = (mesh) => {
   if (mesh.has_garbage()) {
     c.Surface_mesh__collect_garbage(mesh);
   }
-  const graph = { edges: [], faces: [], loops: [], points: [], exact: [] };
-  const polygon = [];
-  let face = -1;
+  const graph = {
+    edges: [],
+    points: [],
+    exactPoints: [],
+    faces: [],
+    facets: [],
+  };
   c.Surface_mesh__explore(
     mesh,
-    (faceId) => {
-      if (polygon.length >= 3) {
-        graph.faces[face].plane = fromPolygonToPlane(polygon);
-        if (graph.faces[face].plane === undefined) {
-          // console.log(`QQ/bent: ${JSON.stringify(polygon)}`);
-        }
-      } else {
-        // console.log(`QQ/degenerate: ${JSON.stringify(polygon)}`);
-      }
-      polygon.length = 0;
-      face = faceId;
-    },
     (point, x, y, z, exactX, exactY, exactZ) => {
       if (!isFinite(x) || !isFinite(y) || !isFinite(z)) {
         throw Error('die');
@@ -34,15 +25,17 @@ export const fromSurfaceMeshToGraph = (mesh) => {
         }
       }
       graph.points[point] = [x, y, z];
-      graph.exact[point] = [exactX, exactY, exactZ];
+      graph.exactPoints[point] = [exactX, exactY, exactZ];
     },
-    (point, edge, next, twin) => {
-      graph.edges[edge] = { point, next, twin, loop: face };
-      if (graph.faces[face] === undefined) {
-        graph.faces[face] = { loop: face };
-        graph.loops[face] = { edge, face };
-      }
-      polygon.push(graph.points[point]);
+    (edge, point, next, twin, facet, face) => {
+      graph.edges[edge] = { point, next, twin, facet, face };
+      graph.facets[facet] = { edge };
+    },
+    (face, x, y, z, w, exactX, exactY, exactZ, exactW) => {
+      graph.faces[face] = {
+        plane: [x, y, z, w],
+        exactPlane: [exactX, exactY, exactZ, exactW],
+      };
     }
   );
   graph.isClosed = c.Surface_mesh__is_closed(mesh);

@@ -31,7 +31,7 @@ test('arrangePaths', (t) => {
   const arrangement = arrangePaths(0, 0, 1, 0, paths);
   t.deepEqual(arrangement, [
     {
-      points: [
+      boundary: [
         [100, 100, 0],
         [-100, 100, 0],
         [-100, -100, 0],
@@ -45,15 +45,17 @@ test('arrangePaths', (t) => {
           [5, -5, 0],
         ],
       ],
+      plane: [0, 0, 1, 0],
     },
     {
-      points: [
+      boundary: [
         [2, 2, 0],
         [-2, 2, 0],
         [-2, -2, 0],
         [2, -2, 0],
       ],
       holes: [],
+      plane: [0, 0, 1, 0],
     },
   ]);
 });
