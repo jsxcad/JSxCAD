@@ -21,6 +21,7 @@ export { projectToPlane } from './projectToPlane.js';
 export { realizeGraph } from './realizeGraph.js';
 export { section } from './section.js';
 export { smooth } from './smooth.js';
+export { stitch } from './stitch.js';
 export { test } from './test.js';
 export { toPaths } from './toPaths.js';
 export { toSolid } from './toSolid.js';
