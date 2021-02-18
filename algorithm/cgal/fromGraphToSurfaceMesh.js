@@ -13,20 +13,13 @@ export const fromGraphToSurfaceMesh = (graph) => {
 
   const seen = new Set();
 
-  graph.edges.forEach((edgeNode, edge) => {
-    if (!edgeNode || seen.has(edge)) {
-      return;
-    }
-    if (
-      c.Surface_mesh__add_face_vertices(mesh, () => {
-        seen.add(edge);
-        const edgeNode = graph.edges[edge];
-        edge = edgeNode.next;
-        return vertexIndex[edgeNode.point];
-      }) > 1000000
-    ) {
-      throw Error('die');
-    }
+  graph.facets.forEach(({ edge }) => {
+    c.Surface_mesh__add_face_vertices(mesh, () => {
+      seen.add(edge);
+      const edgeNode = graph.edges[edge];
+      edge = edgeNode.next;
+      return vertexIndex[edgeNode.point];
+    });
   });
 
   if (!mesh.is_valid(false)) {
