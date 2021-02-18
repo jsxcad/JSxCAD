@@ -7,7 +7,7 @@ export const fromGraphToSurfaceMesh = (graph) => {
   const mesh = new c.Surface_mesh();
 
   const vertexIndex = [];
-  graph.exact.forEach(([x, y, z]) =>
+  graph.exactPoints.forEach(([x, y, z]) =>
     vertexIndex.push(c.Surface_mesh__add_exact(mesh, x, y, z))
   );
 
