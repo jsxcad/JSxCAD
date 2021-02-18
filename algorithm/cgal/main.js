@@ -34,8 +34,6 @@ export { insetOfPolygon } from './insetOfPolygon.js';
 export { intersectionOfSurfaceMeshes } from './intersectionOfSurfaceMeshes.js';
 export { offsetOfPolygon } from './offsetOfPolygon.js';
 export { projectToPlaneOfSurfaceMesh } from './projectToPlaneOfSurfaceMesh.js';
-// export { outlineOfSurfaceMesh } from './outlineOfSurfaceMesh.js';
-// export { outlinePathsOfSurfaceMesh } from './outlinePathsOfSurfaceMesh.js';
 export { sectionOfSurfaceMesh } from './sectionOfSurfaceMesh.js';
 export { skeletalInsetOfPolygon } from './skeletalInsetOfPolygon.js';
 export { remeshSurfaceMesh } from './remeshSurfaceMesh.js';

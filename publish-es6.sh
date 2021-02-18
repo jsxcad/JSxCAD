@@ -27,6 +27,7 @@ cp api/v1-item/dist/main.js es6/jsxcad-api-v1-item.js
 cp api/v1-layout/dist/main.js es6/jsxcad-api-v1-layout.js
 cp api/v1-line2/dist/main.js es6/jsxcad-api-v1-line2.js
 cp api/v1-math/dist/main.js es6/jsxcad-api-v1-math.js
+cp api/v1-off/dist/main.js es6/jsxcad-api-v1-off.js
 cp api/v1-pdf/dist/main.js es6/jsxcad-api-v1-pdf.js
 cp api/v1-plan/dist/main.js es6/jsxcad-api-v1-plan.js
 cp api/v1-plans/dist/main.js es6/jsxcad-api-v1-plans.js
@@ -47,6 +48,7 @@ cp convert/dxf/dist/main.js es6/jsxcad-convert-dxf.js
 cp convert/gcode/dist/main.js es6/jsxcad-convert-gcode.js
 cp convert/ldraw/dist/main.js es6/jsxcad-convert-ldraw.js
 cp convert/notebook/dist/main.js es6/jsxcad-convert-notebook.js
+cp convert/off/dist/main.js es6/jsxcad-convert-off.js
 cp convert/pdf/dist/main.js es6/jsxcad-convert-pdf.js
 cp convert/png/dist/main.js es6/jsxcad-convert-png.js
 cp convert/shapefile/dist/main.js es6/jsxcad-convert-shapefile.js

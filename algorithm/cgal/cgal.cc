@@ -577,9 +577,11 @@ Surface_mesh* ProjectionToPlaneOfSurfaceMesh(
 }
 
 Surface_mesh* DifferenceOfSurfaceMeshes(Surface_mesh* a, Surface_mesh* b) {
+  Surface_mesh working_a(*a);
+  Surface_mesh working_b(*b);
   Surface_mesh* c = new Surface_mesh();
   CGAL::Polygon_mesh_processing::corefine_and_compute_difference(
-      *a, *b, *c,
+      working_a, working_b, *c,
       CGAL::Polygon_mesh_processing::parameters::throw_on_self_intersection(true),
       CGAL::Polygon_mesh_processing::parameters::throw_on_self_intersection(true),
       CGAL::Polygon_mesh_processing::parameters::throw_on_self_intersection(true));
@@ -587,9 +589,11 @@ Surface_mesh* DifferenceOfSurfaceMeshes(Surface_mesh* a, Surface_mesh* b) {
 }
 
 Surface_mesh* IntersectionOfSurfaceMeshes(Surface_mesh* a, Surface_mesh* b) {
+  Surface_mesh working_a(*a);
+  Surface_mesh working_b(*b);
   Surface_mesh* c = new Surface_mesh();
   CGAL::Polygon_mesh_processing::corefine_and_compute_intersection(
-      *a, *b, *c,
+      working_a, working_b, *c,
       CGAL::Polygon_mesh_processing::parameters::throw_on_self_intersection(true),
       CGAL::Polygon_mesh_processing::parameters::throw_on_self_intersection(true),
       CGAL::Polygon_mesh_processing::parameters::throw_on_self_intersection(true));
@@ -597,9 +601,11 @@ Surface_mesh* IntersectionOfSurfaceMeshes(Surface_mesh* a, Surface_mesh* b) {
 }
 
 Surface_mesh* UnionOfSurfaceMeshes(Surface_mesh* a, Surface_mesh* b) {
+  Surface_mesh working_a(*a);
+  Surface_mesh working_b(*b);
   Surface_mesh* c = new Surface_mesh();
   CGAL::Polygon_mesh_processing::corefine_and_compute_union(
-      *a, *b, *c,
+      working_a, working_b, *c,
       CGAL::Polygon_mesh_processing::parameters::throw_on_self_intersection(true),
       CGAL::Polygon_mesh_processing::parameters::throw_on_self_intersection(true),
       CGAL::Polygon_mesh_processing::parameters::throw_on_self_intersection(true));

@@ -2,9 +2,9 @@ import { graphSymbol, surfaceMeshSymbol } from './symbols.js';
 
 import { fromSurfaceMeshToLazyGraph } from '@jsxcad/algorithm-cgal';
 
-export const fromSurfaceMeshLazy = (surfaceMesh) => {
+export const fromSurfaceMeshLazy = (surfaceMesh, forceNewGraph = false) => {
   let graph = surfaceMesh[graphSymbol];
-  if (graph === undefined) {
+  if (forceNewGraph || graph === undefined) {
     graph = fromSurfaceMeshToLazyGraph(surfaceMesh);
     surfaceMesh[graphSymbol] = graph;
     graph[surfaceMeshSymbol] = surfaceMesh;

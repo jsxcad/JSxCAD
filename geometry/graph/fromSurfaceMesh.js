@@ -5,7 +5,7 @@ import { repair } from './repair.js';
 
 export const fromSurfaceMesh = (surfaceMesh) => {
   if (surfaceMesh === undefined) {
-    throw Error('die');
+    throw Error('No surface mesh provided');
   }
   let graph = surfaceMesh[graphSymbol];
   if (graph === undefined || graph.isLazy) {

@@ -133,4 +133,6 @@ export { readSvg } from '@jsxcad/api-v1-svg';
 
 export { readStl } from '@jsxcad/api-v1-stl';
 
+export { fromOff, readOff } from '@jsxcad/api-v1-off';
+
 export { foot, inch, mm, mil, cm, m, thou, yard } from '@jsxcad/api-v1-units';

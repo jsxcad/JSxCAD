@@ -1098,9 +1098,9 @@ var Module = (function () {
       Module['HEAPF32'] = HEAPF32 = new Float32Array(buf);
       Module['HEAPF64'] = HEAPF64 = new Float64Array(buf);
     }
-    var STACK_BASE = 5565936,
-      STACK_MAX = 323056,
-      DYNAMIC_BASE = 5565936;
+    var STACK_BASE = 5565920,
+      STACK_MAX = 323040,
+      DYNAMIC_BASE = 5565920;
     assert(STACK_BASE % 16 === 0, 'stack must start aligned');
     assert(DYNAMIC_BASE % 16 === 0, 'heap must start aligned');
     var TOTAL_STACK = 5242880;
@@ -9819,19 +9819,19 @@ const fromGraphToSurfaceMesh = (graph) => {
   const mesh = new c.Surface_mesh();
 
   const vertexIndex = [];
-  graph.exactPoints.forEach(([x, y, z]) =>
-    vertexIndex.push(c.Surface_mesh__add_exact(mesh, x, y, z))
-  );
+  graph.exactPoints.forEach(([x, y, z]) => {
+    vertexIndex.push(c.Surface_mesh__add_exact(mesh, x, y, z));
+  });
 
-  const seen = new Set();
-
-  graph.facets.forEach(({ edge }) => {
-    c.Surface_mesh__add_face_vertices(mesh, () => {
-      seen.add(edge);
+  graph.facets.forEach(({ edge }, facet) => {
+    const faceIndex = c.Surface_mesh__add_face_vertices(mesh, () => {
       const edgeNode = graph.edges[edge];
       edge = edgeNode.next;
       return vertexIndex[edgeNode.point];
     });
+    if (faceIndex === 4294967295 /* -1 */) {
+      throw Error(`Face could not be added`);
+    }
   });
 
   if (!mesh.is_valid(false)) {

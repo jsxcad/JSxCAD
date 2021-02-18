@@ -128,7 +128,7 @@ const checkGraph = (graph) => {
 
 const fromSurfaceMesh = (surfaceMesh) => {
   if (surfaceMesh === undefined) {
-    throw Error('die');
+    throw Error('No surface mesh provided');
   }
   let graph = surfaceMesh[graphSymbol];
   if (graph === undefined || graph.isLazy) {
@@ -150,9 +150,9 @@ const fromSurfaceMesh = (surfaceMesh) => {
 const alphaShape = (points, componentLimit) =>
   fromSurfaceMesh(fromPointsToAlphaShapeAsSurfaceMesh(points, componentLimit));
 
-const fromSurfaceMeshLazy = (surfaceMesh) => {
+const fromSurfaceMeshLazy = (surfaceMesh, forceNewGraph = false) => {
   let graph = surfaceMesh[graphSymbol];
-  if (graph === undefined) {
+  if (forceNewGraph || graph === undefined) {
     graph = fromSurfaceMeshToLazyGraph(surfaceMesh);
     surfaceMesh[graphSymbol] = graph;
     graph[surfaceMeshSymbol] = surfaceMesh;
@@ -619,6 +619,9 @@ const smooth = (graph, options = {}) => {
   }
 };
 
+const stitch = (graph) =>
+  fromSurfaceMeshLazy(toSurfaceMesh(graph), /* forceNewGraph= */ true);
+
 const test = (graph) => {
   if (doesSelfIntersectOfSurfaceMesh(toSurfaceMesh(graph))) {
     throw Error('Self-intersection detected');
@@ -667,4 +670,4 @@ const union = (a, b) => {
   );
 };
 
-export { alphaShape, convexHull, difference, eachPoint, extrude, extrudeToPlane, fill, fromEmpty, fromFunction, fromPaths, fromPoints, fromPolygons, fromSolid, fromSurface, inset, intersection, measureBoundingBox, offset, outline, projectToPlane, realizeGraph, section, smooth, test, toPaths, toSolid, toSurface, toTriangles, transform, union };
+export { alphaShape, convexHull, difference, eachPoint, extrude, extrudeToPlane, fill, fromEmpty, fromFunction, fromPaths, fromPoints, fromPolygons, fromSolid, fromSurface, inset, intersection, measureBoundingBox, offset, outline, projectToPlane, realizeGraph, section, smooth, stitch, test, toPaths, toSolid, toSurface, toTriangles, transform, union };
