@@ -35,6 +35,8 @@
     "@jsxcad/api-v1-layout": "^0.0.79",
     "@jsxcad/api-v1-line2": "^0.0.79",
     "@jsxcad/api-v1-math": "^0.0.79",
+    "@jsxcad/api-v1-obj": "^0.0.79",
+    "@jsxcad/api-v1-off": "^0.0.79",
     "@jsxcad/api-v1-pdf": "^0.0.79",
     "@jsxcad/api-v1-plan": "^0.0.79",
     "@jsxcad/api-v1-plans": "^0.0.79",

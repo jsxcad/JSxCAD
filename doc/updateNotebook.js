@@ -94,6 +94,6 @@ export const updateNotebook = async (target) => {
       `${target}.difference.png`,
       pngjs.PNG.sync.write(differencePng)
     );
-    console.log(`${target}.difference.png`);
+    console.log(`${process.cwd()}/${target}.difference.png`);
   }
 };
