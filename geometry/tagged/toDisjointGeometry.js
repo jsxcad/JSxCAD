@@ -6,6 +6,11 @@ import { toTransformedGeometry } from './toTransformedGeometry.js';
 
 const linkDisjointAssembly = Symbol('linkDisjointAssembly');
 
+export const clearDisjointGeometry = (geometry) => {
+  delete geometry[linkDisjointAssembly];
+  return geometry;
+};
+
 export const toDisjointGeometry = (geometry) => {
   const op = (geometry, descend, walk) => {
     if (geometry[linkDisjointAssembly]) {

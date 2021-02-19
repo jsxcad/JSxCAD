@@ -10,6 +10,11 @@ import { transform as transformSurface } from '@jsxcad/geometry-surface';
 
 const transformedGeometry = Symbol('transformedGeometry');
 
+export const clearTransformedGeometry = (geometry) => {
+  delete geometry[transformedGeometry];
+  return geometry;
+};
+
 export const toTransformedGeometry = (geometry) => {
   if (geometry[transformedGeometry] === undefined) {
     const op = (geometry, descend, walk, matrix) => {
