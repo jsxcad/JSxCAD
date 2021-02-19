@@ -829,8 +829,8 @@ var Module = (function () {
     }
     var wasmMemory;
     var wasmTable = new WebAssembly.Table({
-      initial: 2274,
-      maximum: 2274,
+      initial: 2276,
+      maximum: 2276,
       element: 'anyfunc',
     });
     var ABORT = false;
@@ -1098,9 +1098,9 @@ var Module = (function () {
       Module['HEAPF32'] = HEAPF32 = new Float32Array(buf);
       Module['HEAPF64'] = HEAPF64 = new Float64Array(buf);
     }
-    var STACK_BASE = 5566016,
-      STACK_MAX = 323136,
-      DYNAMIC_BASE = 5566016;
+    var STACK_BASE = 5566064,
+      STACK_MAX = 323184,
+      DYNAMIC_BASE = 5566064;
     assert(STACK_BASE % 16 === 0, 'stack must start aligned');
     assert(DYNAMIC_BASE % 16 === 0, 'heap must start aligned');
     var TOTAL_STACK = 5242880;
@@ -9812,6 +9812,10 @@ const fromFunctionToSurfaceMesh = (
     op
   );
 
+const X$2 = 0;
+const Y$2 = 1;
+const Z$2 = 2;
+
 // Note: This assumes a graph without holes.
 const fromGraphToSurfaceMesh = (graph) => {
   const c = getCgal();
@@ -9819,9 +9823,28 @@ const fromGraphToSurfaceMesh = (graph) => {
   const mesh = new c.Surface_mesh();
 
   const vertexIndex = [];
-  graph.exactPoints.forEach(([x, y, z]) => {
-    vertexIndex.push(c.Surface_mesh__add_exact(mesh, x, y, z));
-  });
+  for (let nthPoint = 0; ; nthPoint++) {
+    const exact = graph.exactPoints[nthPoint];
+    if (exact) {
+      vertexIndex.push(
+        c.Surface_mesh__add_exact(mesh, exact[X$2], exact[Y$2], exact[Z$2])
+      );
+      continue;
+    }
+    const approximate = graph.points[nthPoint];
+    if (approximate) {
+      vertexIndex.push(
+        c.Surface_mesh__add_vertex(
+          mesh,
+          approximate[X$2],
+          approximate[Y$2],
+          approximate[Z$2]
+        )
+      );
+      continue;
+    }
+    break;
+  }
 
   graph.facets.forEach(({ edge }, facet) => {
     const faceIndex = c.Surface_mesh__add_face_vertices(mesh, () => {
@@ -10139,6 +10162,9 @@ const projectToPlaneOfSurfaceMesh = (
     -planeW
   );
 
+const reverseFaceOrientationsOfSurfaceMesh = (mesh) =>
+  getCgal().ReverseFaceOrientationsOfSurfaceMesh(mesh);
+
 const sectionOfSurfaceMesh = (mesh, planes) => {
   const c = getCgal();
   let nthPlane = 0;
@@ -10257,4 +10283,4 @@ const transformSurfaceMesh = (mesh, jsTransform) =>
 const unionOfSurfaceMeshes = (a, b) =>
   getCgal().UnionOfSurfaceMeshes(a, b);
 
-export { arrangePaths, composeTransforms, differenceOfSurfaceMeshes, doesSelfIntersectOfSurfaceMesh, extrudeSurfaceMesh, extrudeToPlaneOfSurfaceMesh, fitPlaneToPoints, fromApproximateToCgalTransform, fromExactToCgalTransform, fromFunctionToSurfaceMesh, fromGraphToSurfaceMesh, fromIdentityToCgalTransform, fromPointsToAlphaShape2AsPolygonSegments, fromPointsToAlphaShapeAsSurfaceMesh, fromPointsToConvexHullAsSurfaceMesh, fromPointsToSurfaceMesh, fromPolygonsToSurfaceMesh, fromRotateXToTransform, fromRotateYToTransform, fromRotateZToTransform, fromScaleToTransform, fromSurfaceMeshEmitBoundingBox, fromSurfaceMeshToGraph, fromSurfaceMeshToLazyGraph, fromSurfaceMeshToPolygons, fromSurfaceMeshToTriangles, fromTranslateToTransform, initCgal, insetOfPolygon, intersectionOfSurfaceMeshes, offsetOfPolygon, projectToPlaneOfSurfaceMesh, remeshSurfaceMesh, sectionOfSurfaceMesh, skeletalInsetOfPolygon, subdivideSurfaceMesh, toCgalTransformFromJsTransform, transformSurfaceMesh, unionOfSurfaceMeshes };
+export { arrangePaths, composeTransforms, differenceOfSurfaceMeshes, doesSelfIntersectOfSurfaceMesh, extrudeSurfaceMesh, extrudeToPlaneOfSurfaceMesh, fitPlaneToPoints, fromApproximateToCgalTransform, fromExactToCgalTransform, fromFunctionToSurfaceMesh, fromGraphToSurfaceMesh, fromIdentityToCgalTransform, fromPointsToAlphaShape2AsPolygonSegments, fromPointsToAlphaShapeAsSurfaceMesh, fromPointsToConvexHullAsSurfaceMesh, fromPointsToSurfaceMesh, fromPolygonsToSurfaceMesh, fromRotateXToTransform, fromRotateYToTransform, fromRotateZToTransform, fromScaleToTransform, fromSurfaceMeshEmitBoundingBox, fromSurfaceMeshToGraph, fromSurfaceMeshToLazyGraph, fromSurfaceMeshToPolygons, fromSurfaceMeshToTriangles, fromTranslateToTransform, initCgal, insetOfPolygon, intersectionOfSurfaceMeshes, offsetOfPolygon, projectToPlaneOfSurfaceMesh, remeshSurfaceMesh, reverseFaceOrientationsOfSurfaceMesh, sectionOfSurfaceMesh, skeletalInsetOfPolygon, subdivideSurfaceMesh, toCgalTransformFromJsTransform, transformSurfaceMesh, unionOfSurfaceMeshes };
