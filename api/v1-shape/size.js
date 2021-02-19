@@ -8,7 +8,7 @@ const Y = 1;
 const Z = 2;
 
 export const size = (shape) => {
-  const geometry = shape.toKeptGeometry();
+  const geometry = shape.toDisjointGeometry();
   const [min, max] = measureBoundingBox(geometry);
   const area = measureArea(geometry);
   const length = max[X] - min[X];

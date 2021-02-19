@@ -1,74 +1,84 @@
-
 <html>
- <head>
-  <title>JSxCAD Viewer</title>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
-  <style>
-    .note.log {
-      font-family: "Arial Black", Gadget, sans-serif;
-      color: red
-    }
+  <head>
+    <title>JSxCAD Viewer</title>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0"
+    />
+    <style>
+      .note.log {
+        font-family: 'Arial Black', Gadget, sans-serif;
+        color: red;
+      }
 
-    .note.view {
-      border: 1px dashed dodgerblue;
-      margin: 4px 4px;
-      padding: 4px 4px;
-    }
+      .note.view {
+        border: 1px dashed dodgerblue;
+        margin: 4px 4px;
+        padding: 4px 4px;
+      }
 
-    .note.orbitView {
-      position: absolute;
-      top: 0;
-      width: 100%;
-      height: 100%;
-      z-index: 10000;
-    }
+      .note.orbitView {
+        position: absolute;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 10000;
+      }
 
-    button.note.download {
-      border: 2px solid black;
-      border-radius: 5px;
-      background-color: white;
-      margin: 4px 4px;
-      padding: 10px 24px;
-      font-size: 16px;
-      cursor: pointer;
-      border-color: #2196F3;
-      color: dodgerblue
-    }
+      button.note.download {
+        border: 2px solid black;
+        border-radius: 5px;
+        background-color: white;
+        margin: 4px 4px;
+        padding: 10px 24px;
+        font-size: 16px;
+        cursor: pointer;
+        border-color: #2196f3;
+        color: dodgerblue;
+      }
 
-    button.note.download:hover {
-      background: #2196F3;
-      color: white;
-    }
+      button.note.download:hover {
+        background: #2196f3;
+        color: white;
+      }
 
-    .note th,td {
-      border: 1px solid dodgerblue;
-      padding: 5px;
-    }
-  </style>
- </head>
- <body>
-  <script type='module'>
-    import { toDomElement } from 'https://gitcdn.link/cdn/jsxcad/JSxCAD/master/es6/jsxcad-ui-notebook.js';
+      .note th,
+      td {
+        border: 1px solid dodgerblue;
+        padding: 5px;
+      }
+    </style>
+  </head>
+  <body>
+    <script type="module">
+      import { toDomElement } from 'https://gitcdn.link/cdn/jsxcad/JSxCAD/master/es6/jsxcad-ui-notebook.js';
 
-    const notebook = [{"md":"# Bill of Material","hash":"4720386c","module":"bom/bom.nb"},{"md":"\n| Item | Count |\n| ---- | ----- |\n| Fish | 2 |\n| Pepper fish | 1 |\n| Pepper | 1 |\n| Screw | 1 |\n","module":"bom/bom.nb"}];
+      const notebook = [
+        { md: '# Bill of Material', hash: '4720386c', module: 'bom/bom.nb' },
+        {
+          md:
+            '\n| Item | Count |\n| ---- | ----- |\n| Fish | 2 |\n| Pepper fish | 1 |\n| Pepper | 1 |\n| Screw | 1 |\n',
+          module: 'bom/bom.nb',
+        },
+      ];
 
-    const run = async () => {
-      const body = document.getElementsByTagName('body')[0];
-      const notebookElement = await toDomElement(notebook);
-      notebookElement.classList.add('notebook', 'loaded');
-      body.appendChild(notebookElement);
-    };
-
-    if (document.readyState === 'complete') {
-      run();
-    } else {
-      document.onreadystatechange = () => {
-        if (document.readyState === 'complete') {
-          run();
-        }
+      const run = async () => {
+        const body = document.getElementsByTagName('body')[0];
+        const notebookElement = await toDomElement(notebook);
+        notebookElement.classList.add('notebook', 'loaded');
+        body.appendChild(notebookElement);
       };
-    }
-  </script>
- </body>
+
+      if (document.readyState === 'complete') {
+        run();
+      } else {
+        document.onreadystatechange = () => {
+          if (document.readyState === 'complete') {
+            run();
+          }
+        };
+      }
+    </script>
+  </body>
 </html>
