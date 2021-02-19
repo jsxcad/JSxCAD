@@ -1,9 +1,7 @@
-import { visit } from './visit.js';
+import { rewrite } from './visit.js';
 
 const registry = new Map();
 
-// The plan is destructively updated with the reification as its content.
-// This should be safe as reification is idempotent.
 export const reify = (geometry) => {
   if (geometry.type === 'plan' && geometry.content.length > 0) {
     return geometry;
@@ -27,9 +25,9 @@ export const reify = (geometry) => {
               `Do not know how to reify plan: ${JSON.stringify(geometry.plan)}`
             );
           }
-          geometry.content = [reifier(geometry)];
+          return descend({ content: [reifier(geometry)] });
         }
-        return descend();
+        return geometry;
       }
       case 'assembly':
       case 'item':
@@ -44,9 +42,7 @@ export const reify = (geometry) => {
     }
   };
 
-  visit(geometry, op);
-
-  return geometry;
+  return rewrite(geometry, op);
 };
 
 // We expect the type to be uniquely qualified.
