@@ -27,8 +27,10 @@ import { readSvg } from './jsxcad-api-v1-svg.js';
 export { readSvg } from './jsxcad-api-v1-svg.js';
 import { readStl } from './jsxcad-api-v1-stl.js';
 export { readStl } from './jsxcad-api-v1-stl.js';
-import { fromOff, readOff } from './jsxcad-api-v1-off.js';
-export { fromOff, readOff } from './jsxcad-api-v1-off.js';
+import { readObj } from './jsxcad-api-v1-obj.js';
+export { readObj } from './jsxcad-api-v1-obj.js';
+import { readOff } from './jsxcad-api-v1-off.js';
+export { readOff } from './jsxcad-api-v1-off.js';
 import { foot, inch, mm, mil, cm, m, thou, yard } from './jsxcad-api-v1-units.js';
 export { cm, foot, inch, m, mil, mm, thou, yard } from './jsxcad-api-v1-units.js';
 import { toEcmascript } from './jsxcad-compiler.js';
@@ -529,7 +531,7 @@ var api = /*#__PURE__*/Object.freeze({
   vec: vec,
   readSvg: readSvg,
   readStl: readStl,
-  fromOff: fromOff,
+  readObj: readObj,
   readOff: readOff,
   foot: foot,
   inch: inch,
