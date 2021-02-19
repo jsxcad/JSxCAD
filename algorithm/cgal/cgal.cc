@@ -576,40 +576,99 @@ Surface_mesh* ProjectionToPlaneOfSurfaceMesh(
   return projected_mesh;
 }
 
+const double iota = 10e-5;
+
 Surface_mesh* DifferenceOfSurfaceMeshes(Surface_mesh* a, Surface_mesh* b) {
-  Surface_mesh working_a(*a);
-  Surface_mesh working_b(*b);
+  double x = 0, y = 0, z = 0;
   Surface_mesh* c = new Surface_mesh();
-  CGAL::Polygon_mesh_processing::corefine_and_compute_difference(
-      working_a, working_b, *c,
-      CGAL::Polygon_mesh_processing::parameters::throw_on_self_intersection(true),
-      CGAL::Polygon_mesh_processing::parameters::throw_on_self_intersection(true),
-      CGAL::Polygon_mesh_processing::parameters::throw_on_self_intersection(true));
-  return c;
+  for (int shift = 0x11; ; shift++) {
+    Surface_mesh working_a(*a);
+    Surface_mesh working_b(*b);
+    if (x != 0 || y != 0 || z != 0) {
+      std::cout << "Note: Shifting difference by x=" << x << " y=" << y << " z=" << z << std::endl;
+      Transformation translation(CGAL::TRANSLATION, Vector(x, y, z));
+      CGAL::Polygon_mesh_processing::transform(translation, working_b, CGAL::parameters::all_default());
+    }
+    if (CGAL::Polygon_mesh_processing::corefine_and_compute_difference(
+        working_a, working_b, *c,
+        CGAL::Polygon_mesh_processing::parameters::throw_on_self_intersection(true),
+        CGAL::Polygon_mesh_processing::parameters::throw_on_self_intersection(true),
+        CGAL::Polygon_mesh_processing::parameters::throw_on_self_intersection(true))) {
+      return c;
+    }
+    const double direction = ((shift & (1 << 3)) ? -1 : 1) * (shift >> 4);
+    if (shift & (1 << 0)) {
+      x += iota * direction;
+    }
+    if (shift & (1 << 1)) {
+      y += iota * direction;
+    }
+    if (shift & (1 << 2)) {
+      z += iota * direction;
+    }
+  }
 }
 
 Surface_mesh* IntersectionOfSurfaceMeshes(Surface_mesh* a, Surface_mesh* b) {
-  Surface_mesh working_a(*a);
-  Surface_mesh working_b(*b);
+  double x = 0, y = 0, z = 0;
   Surface_mesh* c = new Surface_mesh();
-  CGAL::Polygon_mesh_processing::corefine_and_compute_intersection(
-      working_a, working_b, *c,
-      CGAL::Polygon_mesh_processing::parameters::throw_on_self_intersection(true),
-      CGAL::Polygon_mesh_processing::parameters::throw_on_self_intersection(true),
-      CGAL::Polygon_mesh_processing::parameters::throw_on_self_intersection(true));
-  return c;
+  for (int shift = 0x11; ; shift++) {
+    Surface_mesh working_a(*a);
+    Surface_mesh working_b(*b);
+    if (x != 0 || y != 0 || z != 0) {
+      std::cout << "Note: Shifting intersection x=" << x << " y=" << y << " z=" << z << std::endl;
+      Transformation translation(CGAL::TRANSLATION, Vector(x, y, z));
+      CGAL::Polygon_mesh_processing::transform(translation, working_b, CGAL::parameters::all_default());
+    }
+    if (CGAL::Polygon_mesh_processing::corefine_and_compute_intersection(
+        working_a, working_b, *c,
+        CGAL::Polygon_mesh_processing::parameters::throw_on_self_intersection(true),
+        CGAL::Polygon_mesh_processing::parameters::throw_on_self_intersection(true),
+        CGAL::Polygon_mesh_processing::parameters::throw_on_self_intersection(true))) {
+      return c;
+    }
+    const double direction = ((shift & (1 << 3)) ? -1 : 1) * (shift >> 4);
+    if (shift & (1 << 0)) {
+      x = iota * direction;
+    }
+    if (shift & (1 << 1)) {
+      y = iota * direction;
+    }
+    if (shift & (1 << 2)) {
+      z = iota * direction;
+    }
+  }
 }
 
 Surface_mesh* UnionOfSurfaceMeshes(Surface_mesh* a, Surface_mesh* b) {
-  Surface_mesh working_a(*a);
-  Surface_mesh working_b(*b);
+  double x = 0, y = 0, z = 0;
   Surface_mesh* c = new Surface_mesh();
-  CGAL::Polygon_mesh_processing::corefine_and_compute_union(
-      working_a, working_b, *c,
-      CGAL::Polygon_mesh_processing::parameters::throw_on_self_intersection(true),
-      CGAL::Polygon_mesh_processing::parameters::throw_on_self_intersection(true),
-      CGAL::Polygon_mesh_processing::parameters::throw_on_self_intersection(true));
-  return c;
+  for (int shift = 0x11; ; shift++) {
+    Surface_mesh working_a(*a);
+    Surface_mesh working_b(*b);
+    if (x != 0 || y != 0 || z != 0) {
+      std::cout << "Note: Shifting union by x=" << x << " y=" << y << " z=" << z << std::endl;
+      Transformation translation(CGAL::TRANSLATION, Vector(x, y, z));
+      CGAL::Polygon_mesh_processing::transform(translation, working_b, CGAL::parameters::all_default());
+    }
+    if (CGAL::Polygon_mesh_processing::corefine_and_compute_intersection(
+        working_a, working_b, *c,
+        CGAL::Polygon_mesh_processing::parameters::throw_on_self_intersection(true),
+        CGAL::Polygon_mesh_processing::parameters::throw_on_self_intersection(true),
+        CGAL::Polygon_mesh_processing::parameters::throw_on_self_intersection(true))) {
+      return c;
+    }
+    const double direction = ((shift & (1 << 3)) ? -1 : 1) * (shift >> 4);
+    if (shift & (1 << 0)) {
+      x = iota * direction;
+    }
+    if (shift & (1 << 1)) {
+      y = iota * direction;
+    }
+    if (shift & (1 << 2)) {
+      z = iota * direction;
+    }
+  }
 }
 
 void SectionOfSurfaceMesh(Surface_mesh* mesh, std::size_t plane_count, emscripten::val fill_plane, emscripten::val emit_polyline, emscripten::val emit_point) {
