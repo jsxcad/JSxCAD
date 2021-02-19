@@ -1451,7 +1451,7 @@ const Y$3 = 1;
 const Z$3 = 2;
 
 const size = (shape) => {
-  const geometry = shape.toKeptGeometry();
+  const geometry = shape.toDisjointGeometry();
   const [min, max] = measureBoundingBox$1(geometry);
   const area = measureArea(geometry);
   const length = max[X$3] - min[X$3];

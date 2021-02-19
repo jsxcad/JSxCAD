@@ -24,7 +24,7 @@ const build = async (baseDirectory = '.') => {
   };
   await walk(baseDirectory);
   for (const notebook of notebooks) {
-    console.log(`QQ/notebook: ${notebook}`);
+    console.log(`QQ/notebook: ${process.cwd()}/${notebook}.nb`);
     await updateNotebook(notebook);
   }
 };

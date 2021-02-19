@@ -604,13 +604,19 @@ Surface_mesh* DifferenceOfSurfaceMeshes(Surface_mesh* a, Surface_mesh* b) {
     }
     const double direction = ((shift & (1 << 3)) ? -1 : 1) * (shift >> 4);
     if (shift & (1 << 0)) {
-      x += iota * direction;
+      x = iota * direction;
+    } else {
+      x = 0;
     }
     if (shift & (1 << 1)) {
-      y += iota * direction;
+      y = iota * direction;
+    } else {
+      y = 0;
     }
     if (shift & (1 << 2)) {
-      z += iota * direction;
+      z = iota * direction;
+    } else {
+      z = 0;
     }
   }
 }
@@ -636,12 +642,18 @@ Surface_mesh* IntersectionOfSurfaceMeshes(Surface_mesh* a, Surface_mesh* b) {
     const double direction = ((shift & (1 << 3)) ? -1 : 1) * (shift >> 4);
     if (shift & (1 << 0)) {
       x = iota * direction;
+    } else {
+      x = 0;
     }
     if (shift & (1 << 1)) {
       y = iota * direction;
+    } else {
+      y = 0;
     }
     if (shift & (1 << 2)) {
       z = iota * direction;
+    } else {
+      z = 0;
     }
   }
 }
@@ -667,12 +679,18 @@ Surface_mesh* UnionOfSurfaceMeshes(Surface_mesh* a, Surface_mesh* b) {
     const double direction = ((shift & (1 << 3)) ? -1 : 1) * (shift >> 4);
     if (shift & (1 << 0)) {
       x = iota * direction;
+    } else {
+      x = 0;
     }
     if (shift & (1 << 1)) {
       y = iota * direction;
+    } else {
+      y = 0;
     }
     if (shift & (1 << 2)) {
       z = iota * direction;
+    } else {
+      z = 0;
     }
   }
 }
