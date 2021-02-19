@@ -2,9 +2,9 @@ import Shape from '@jsxcad/api-v1-shape';
 import { fromOff } from '@jsxcad/convert-off';
 import { read } from '@jsxcad/sys';
 
-export const readOff = async (path, { src } = {}) => {
+export const readOff = async (path, { src, invert = false } = {}) => {
   const data = await read(`source/${path}`, { sources: [path] });
-  return Shape.fromGeometry(await fromOff(data));
+  return Shape.fromGeometry(await fromOff(data, { invert }));
 };
 
 export default readOff;

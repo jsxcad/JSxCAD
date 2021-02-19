@@ -1,4 +1,4 @@
-import { fromSurfaceMeshToGraph, fromPointsToAlphaShapeAsSurfaceMesh, fromSurfaceMeshToLazyGraph, fromPointsToConvexHullAsSurfaceMesh, fromPolygonsToSurfaceMesh, fromGraphToSurfaceMesh, fromSurfaceMeshEmitBoundingBox, extrudeSurfaceMesh, fitPlaneToPoints, arrangePaths, sectionOfSurfaceMesh, differenceOfSurfaceMeshes, extrudeToPlaneOfSurfaceMesh, fromSurfaceMeshToTriangles, fromFunctionToSurfaceMesh, fromPointsToSurfaceMesh, insetOfPolygon, intersectionOfSurfaceMeshes, offsetOfPolygon, projectToPlaneOfSurfaceMesh, subdivideSurfaceMesh, remeshSurfaceMesh, doesSelfIntersectOfSurfaceMesh, transformSurfaceMesh, unionOfSurfaceMeshes } from './jsxcad-algorithm-cgal.js';
+import { fromSurfaceMeshToGraph, fromPointsToAlphaShapeAsSurfaceMesh, fromSurfaceMeshToLazyGraph, fromPointsToConvexHullAsSurfaceMesh, fromPolygonsToSurfaceMesh, fromGraphToSurfaceMesh, fromSurfaceMeshEmitBoundingBox, extrudeSurfaceMesh, fitPlaneToPoints, arrangePaths, sectionOfSurfaceMesh, differenceOfSurfaceMeshes, extrudeToPlaneOfSurfaceMesh, fromSurfaceMeshToTriangles, fromFunctionToSurfaceMesh, fromPointsToSurfaceMesh, insetOfPolygon, intersectionOfSurfaceMeshes, offsetOfPolygon, projectToPlaneOfSurfaceMesh, reverseFaceOrientationsOfSurfaceMesh, subdivideSurfaceMesh, remeshSurfaceMesh, doesSelfIntersectOfSurfaceMesh, transformSurfaceMesh, unionOfSurfaceMeshes } from './jsxcad-algorithm-cgal.js';
 import { equals, min, max, scale, dot } from './jsxcad-math-vec3.js';
 import { deduplicate as deduplicate$1, isClockwise, flip } from './jsxcad-geometry-path.js';
 import { canonicalize } from './jsxcad-geometry-paths.js';
@@ -605,6 +605,14 @@ const projectToPlane = (graph, plane, direction) => {
   }
 };
 
+const rerealizeGraph = (graph) =>
+  fromSurfaceMeshLazy(toSurfaceMesh(graph), /* forceNewGraph= */ true);
+
+const reverseFaceOrientations = (graph) =>
+  fromSurfaceMeshLazy(
+    reverseFaceOrientationsOfSurfaceMesh(toSurfaceMesh(graph))
+  );
+
 const smooth = (graph, options = {}) => {
   const { method = 'Remesh' } = options;
   switch (method) {
@@ -618,9 +626,6 @@ const smooth = (graph, options = {}) => {
       );
   }
 };
-
-const stitch = (graph) =>
-  fromSurfaceMeshLazy(toSurfaceMesh(graph), /* forceNewGraph= */ true);
 
 const test = (graph) => {
   if (doesSelfIntersectOfSurfaceMesh(toSurfaceMesh(graph))) {
@@ -670,4 +675,4 @@ const union = (a, b) => {
   );
 };
 
-export { alphaShape, convexHull, difference, eachPoint, extrude, extrudeToPlane, fill, fromEmpty, fromFunction, fromPaths, fromPoints, fromPolygons, fromSolid, fromSurface, inset, intersection, measureBoundingBox, offset, outline, projectToPlane, realizeGraph, section, smooth, stitch, test, toPaths, toSolid, toSurface, toTriangles, transform, union };
+export { alphaShape, convexHull, difference, eachPoint, extrude, extrudeToPlane, fill, fromEmpty, fromFunction, fromPaths, fromPoints, fromPolygons, fromSolid, fromSurface, inset, intersection, measureBoundingBox, offset, outline, projectToPlane, realizeGraph, rerealizeGraph, reverseFaceOrientations, section, smooth, test, toPaths, toSolid, toSurface, toTriangles, transform, union };

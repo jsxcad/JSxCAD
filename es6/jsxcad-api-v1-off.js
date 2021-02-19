@@ -2,15 +2,17 @@ import { fromOff as fromOff$1, fromOffSync } from './jsxcad-convert-off.js';
 import Shape from './jsxcad-api-v1-shape.js';
 import { read } from './jsxcad-sys.js';
 
-const fromOff = async (data) =>
-  Shape.fromGeometry(await fromOff$1(data));
+const fromOff = async (data, { invert = false } = {}) =>
+  Shape.fromGeometry(await fromOff$1(data, { invert }));
 
-Shape.fromOff = (data) =>
-  Shape.fromGeometry(fromOffSync(new TextEncoder('utf8').encode(data)));
+Shape.fromOff = (data, { invert = false } = {}) =>
+  Shape.fromGeometry(
+    fromOffSync(new TextEncoder('utf8').encode(data), { invert })
+  );
 
-const readOff = async (path, { src } = {}) => {
+const readOff = async (path, { src, invert = false } = {}) => {
   const data = await read(`source/${path}`, { sources: [path] });
-  return Shape.fromGeometry(await fromOff$1(data));
+  return Shape.fromGeometry(await fromOff$1(data, { invert }));
 };
 
 const api = {
