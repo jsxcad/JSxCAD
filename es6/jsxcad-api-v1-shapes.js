@@ -106,7 +106,7 @@ const Box = (x, y = x, z = 0) =>
 
 Shape.prototype.Box = shapeMethod(Box);
 
-const Block = (diameter = 1, top = 1, base = 0) =>
+const Block = (diameter = 1, top = 1, base = -top) =>
   Box(diameter).top(top).base(base);
 
 Shape.prototype.Block = shapeMethod(Block);
@@ -183,7 +183,7 @@ registerReifier('Cone', ({ tags, plan }) => {
     .toGeometry();
 });
 
-const Cone = (diameter = 1, top = 1, base = 0) =>
+const Cone = (diameter = 1, top = 1, base = -top) =>
   Shape.fromGeometry(
     taggedPlan({}, { diameter: [diameter, diameter, 0], type: 'Cone' })
   )
@@ -1807,7 +1807,7 @@ const RegularPolygon = (value = 1, sides = 5) => {
 
 Shape.prototype.RegularPolygon = shapeMethod(RegularPolygon);
 
-const Rod = (diameter = 1, top = 1, base = 0) =>
+const Rod = (diameter = 1, top = 1, base = -top) =>
   Arc(diameter).top(top).base(base);
 
 Shape.prototype.Rod = shapeMethod(Rod);

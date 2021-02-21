@@ -7,7 +7,7 @@ const X = 0;
 const Y = 1;
 const Z = 2;
 
-export const size = (shape) => {
+export const size = (shape, op = (_, size) => size) => {
   const geometry = shape.toDisjointGeometry();
   const [min, max] = measureBoundingBox(geometry);
   const area = measureArea(geometry);
@@ -16,11 +16,20 @@ export const size = (shape) => {
   const height = max[Z] - min[Z];
   const center = scale(0.5, add(min, max));
   const radius = distance(center, max);
-  return { area, length, width, height, max, min, center, radius };
+  return op(Shape.fromGeometry(geometry), {
+    area,
+    length,
+    width,
+    height,
+    max,
+    min,
+    center,
+    radius,
+  });
 };
 
-const sizeMethod = function () {
-  return size(this);
+const sizeMethod = function (op) {
+  return size(this, op);
 };
 Shape.prototype.size = sizeMethod;
 

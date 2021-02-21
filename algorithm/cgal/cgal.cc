@@ -40,6 +40,7 @@
 #include <CGAL/Complex_2_in_triangulation_3.h>
 #include <CGAL/Delaunay_triangulation_2.h>
 #include <CGAL/Delaunay_triangulation_3.h>
+#include <CGAL/Polygon_triangulation_decomposition_2.h>
 #include <CGAL/exude_mesh_3.h>
 #include <CGAL/linear_least_squares_fitting_3.h>
 #include <CGAL/make_mesh_3.h>
@@ -669,7 +670,7 @@ Surface_mesh* UnionOfSurfaceMeshes(Surface_mesh* a, Surface_mesh* b) {
       Transformation translation(CGAL::TRANSLATION, Vector(x, y, z));
       CGAL::Polygon_mesh_processing::transform(translation, working_b, CGAL::parameters::all_default());
     }
-    if (CGAL::Polygon_mesh_processing::corefine_and_compute_intersection(
+    if (CGAL::Polygon_mesh_processing::corefine_and_compute_union(
         working_a, working_b, *c,
         CGAL::Polygon_mesh_processing::parameters::throw_on_self_intersection(true),
         CGAL::Polygon_mesh_processing::parameters::throw_on_self_intersection(true),
@@ -1272,7 +1273,8 @@ void InsetOfPolygon(double initial, double step, double limit, double x, double 
   }
 }
 
-void ArrangePaths(double x, double y, double z, double w, emscripten::val fill, emscripten::val emit_polygon, emscripten::val emit_point) {
+// FIX: Accept exact plane.
+void ArrangePaths(Plane plane, bool do_triangulate, emscripten::val fill, emscripten::val emit_polygon, emscripten::val emit_point) {
   typedef CGAL::Arr_segment_traits_2<Kernel>            Traits_2;
   typedef Traits_2::Point_2                             Point_2;
   typedef Traits_2::X_monotone_curve_2                  Segment_2;
@@ -1281,8 +1283,6 @@ void ArrangePaths(double x, double y, double z, double w, emscripten::val fill, 
   typedef Arrangement_2::Halfedge_handle                Halfedge_handle;
 
   Arrangement_2 arrangement;
-
-  Plane plane(x, y, z, w);
 
   std::set<std::vector<Kernel::FT>> segments;
 
@@ -1364,31 +1364,88 @@ void ArrangePaths(double x, double y, double z, double w, emscripten::val fill, 
     }
     undecided.push(face);
   }
-    
-  for (Arrangement_2::Face_iterator face = arrangement.faces_begin(); face != arrangement.faces_end(); ++face) {
-    if (!positive_faces[face] || !face->has_outer_ccb()) {
-      continue;
-    }
-    Arrangement_2::Ccb_halfedge_const_circulator start = face->outer_ccb();
-    Arrangement_2::Ccb_halfedge_const_circulator edge = start;
-    emit_polygon(false);
-    do {
-      Point p3 = plane.to_3d(edge->source()->point());
-      emit_point(CGAL::to_double(p3.x()), CGAL::to_double(p3.y()), CGAL::to_double(p3.z()));
-    } while (++edge != start);
 
-    // Emit holes
-    for (Arrangement_2::Hole_iterator hole = face->holes_begin(); hole != face->holes_end(); ++hole) {
-      emit_polygon(true);
-      Arrangement_2::Ccb_halfedge_const_circulator start = *hole;
+  CGAL::Polygon_triangulation_decomposition_2<Kernel> triangulate;
+    
+  if (do_triangulate) {
+    for (Arrangement_2::Face_iterator face = arrangement.faces_begin(); face != arrangement.faces_end(); ++face) {
+      if (!positive_faces[face] || !face->has_outer_ccb()) {
+        continue;
+      }
+      Arrangement_2::Ccb_halfedge_const_circulator start = face->outer_ccb();
       Arrangement_2::Ccb_halfedge_const_circulator edge = start;
+      Polygon_2 polygon;
+      do {
+        polygon.push_back(edge->source()->point());
+      } while (++edge != start);
+  
+      std::vector<Polygon_2> holes;
+      for (Arrangement_2::Hole_iterator hole = face->holes_begin(); hole != face->holes_end(); ++hole) {
+        Polygon_2 polygon;
+        Arrangement_2::Ccb_halfedge_const_circulator start = *hole;
+        Arrangement_2::Ccb_halfedge_const_circulator edge = start;
+        do {
+          polygon.push_back(edge->source()->point());
+        } while (++edge != start);
+        holes.push_back(polygon);
+      }
+      Polygon_with_holes_2 polygon_with_holes(polygon, holes.begin(), holes.end());
+      std::vector<Polygon_2> triangles;
+      triangulate(polygon_with_holes, std::back_inserter(triangles));
+      for (const auto& triangle : triangles) {
+        emit_polygon(false);
+        for (const auto& p2 : triangle) {
+          Point p3 = plane.to_3d(p2);
+          std::ostringstream x; x << p3.x();
+          std::ostringstream y; y << p3.y();
+          std::ostringstream z; z << p3.z();
+          emit_point(CGAL::to_double(p3.x()), CGAL::to_double(p3.y()), CGAL::to_double(p3.z()), x.str(), y.str(), z.str());
+        }
+      }
+    }
+  } else {
+    for (Arrangement_2::Face_iterator face = arrangement.faces_begin(); face != arrangement.faces_end(); ++face) {
+      if (!positive_faces[face] || !face->has_outer_ccb()) {
+        continue;
+      }
+      Arrangement_2::Ccb_halfedge_const_circulator start = face->outer_ccb();
+      Arrangement_2::Ccb_halfedge_const_circulator edge = start;
+      // Can we build Polygon_with_holes_2 here?
+      // Then we can use Polygon_triangulation_decomposition_2 to triangulate it.
+      emit_polygon(false);
       do {
         Point p3 = plane.to_3d(edge->source()->point());
-        emit_point(CGAL::to_double(p3.x()), CGAL::to_double(p3.y()), CGAL::to_double(p3.z()));
+        std::ostringstream x; x << p3.x();
+        std::ostringstream y; y << p3.y();
+        std::ostringstream z; z << p3.z();
+        emit_point(CGAL::to_double(p3.x()), CGAL::to_double(p3.y()), CGAL::to_double(p3.z()), x.str(), y.str(), z.str());
       } while (++edge != start);
+  
+      // Emit holes
+      for (Arrangement_2::Hole_iterator hole = face->holes_begin(); hole != face->holes_end(); ++hole) {
+        emit_polygon(true);
+        Arrangement_2::Ccb_halfedge_const_circulator start = *hole;
+        Arrangement_2::Ccb_halfedge_const_circulator edge = start;
+        do {
+          Point p3 = plane.to_3d(edge->source()->point());
+          std::ostringstream x; x << p3.x();
+          std::ostringstream y; y << p3.y();
+          std::ostringstream z; z << p3.z();
+          emit_point(CGAL::to_double(p3.x()), CGAL::to_double(p3.y()), CGAL::to_double(p3.z()), x.str(), y.str(), z.str());
+        } while (++edge != start);
+      }
     }
   }
 }
+
+void ArrangePathsApproximate(double x, double y, double z, double w, bool triangulate, emscripten::val fill, emscripten::val emit_polygon, emscripten::val emit_point) {
+  ArrangePaths(Plane(x, y, z, w), triangulate, fill, emit_polygon, emit_point);
+}
+
+void ArrangePathsExact(std::string x, std::string y, std::string z, std::string w, bool triangulate, emscripten::val fill, emscripten::val emit_polygon, emscripten::val emit_point) {
+  ArrangePaths(Plane(to_FT(x), to_FT(y), to_FT(z), to_FT(w)), triangulate, fill, emit_polygon, emit_point);
+}
+
 
 bool Surface_mesh__is_closed(Surface_mesh* mesh) {
   return CGAL::is_closed(*mesh);
@@ -1671,6 +1728,7 @@ EMSCRIPTEN_BINDINGS(module) {
   emscripten::function("Surface_mesh__is_valid_face_graph", &Surface_mesh__is_valid_face_graph, emscripten::allow_raw_pointers());
   emscripten::function("Surface_mesh__is_valid_polygon_mesh", &Surface_mesh__is_valid_polygon_mesh, emscripten::allow_raw_pointers());
   emscripten::function("Surface_mesh__bbox", &Surface_mesh__bbox, emscripten::allow_raw_pointers());
-  emscripten::function("ArrangePaths", &ArrangePaths, emscripten::allow_raw_pointers());
+  emscripten::function("ArrangePathsApproximate", &ArrangePathsApproximate, emscripten::allow_raw_pointers());
+  emscripten::function("ArrangePathsExact", &ArrangePathsExact, emscripten::allow_raw_pointers());
   emscripten::function("SectionOfSurfaceMesh", &SectionOfSurfaceMesh, emscripten::allow_raw_pointers());
 }

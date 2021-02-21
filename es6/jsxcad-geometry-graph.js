@@ -1,4 +1,4 @@
-import { fromSurfaceMeshToGraph, fromPointsToAlphaShapeAsSurfaceMesh, fromSurfaceMeshToLazyGraph, fromPointsToConvexHullAsSurfaceMesh, fromPolygonsToSurfaceMesh, fromGraphToSurfaceMesh, fromSurfaceMeshEmitBoundingBox, extrudeSurfaceMesh, fitPlaneToPoints, arrangePaths, sectionOfSurfaceMesh, differenceOfSurfaceMeshes, extrudeToPlaneOfSurfaceMesh, fromSurfaceMeshToTriangles, fromFunctionToSurfaceMesh, fromPointsToSurfaceMesh, insetOfPolygon, intersectionOfSurfaceMeshes, offsetOfPolygon, projectToPlaneOfSurfaceMesh, reverseFaceOrientationsOfSurfaceMesh, subdivideSurfaceMesh, remeshSurfaceMesh, doesSelfIntersectOfSurfaceMesh, transformSurfaceMesh, unionOfSurfaceMeshes } from './jsxcad-algorithm-cgal.js';
+import { fromSurfaceMeshToGraph, fromPointsToAlphaShapeAsSurfaceMesh, fromSurfaceMeshToLazyGraph, fromPointsToConvexHullAsSurfaceMesh, fromPolygonsToSurfaceMesh, fromGraphToSurfaceMesh, fromSurfaceMeshEmitBoundingBox, extrudeSurfaceMesh, fitPlaneToPoints, arrangePaths, sectionOfSurfaceMesh, differenceOfSurfaceMeshes, extrudeToPlaneOfSurfaceMesh, fromSurfaceMeshToTriangles, fromFunctionToSurfaceMesh, fromPointsToSurfaceMesh, insetOfPolygonWithHoles, intersectionOfSurfaceMeshes, offsetOfPolygonWithHoles, projectToPlaneOfSurfaceMesh, reverseFaceOrientationsOfSurfaceMesh, subdivideSurfaceMesh, remeshSurfaceMesh, doesSelfIntersectOfSurfaceMesh, transformSurfaceMesh, unionOfSurfaceMeshes } from './jsxcad-algorithm-cgal.js';
 import { equals, min, max, scale, dot } from './jsxcad-math-vec3.js';
 import { deduplicate as deduplicate$1, isClockwise, flip } from './jsxcad-geometry-path.js';
 import { canonicalize } from './jsxcad-geometry-paths.js';
@@ -23,11 +23,21 @@ const addEdge = (
   return edge;
 };
 
-const fillFacetFromPoints = (graph, facet, face, points) => {
+const fillFacetFromPoints = (
+  graph,
+  facet,
+  face,
+  points,
+  exactPoints
+) => {
   let lastEdgeNode;
   let firstEdge;
-  for (const coord of points) {
-    const point = addPoint(graph, coord);
+  for (let nth = 0; nth < points.length; nth++) {
+    const point = addPoint(
+      graph,
+      points[nth],
+      exactPoints ? exactPoints[nth] : undefined
+    );
     const edge = addEdge(graph, { facet, face, point });
     if (lastEdgeNode) {
       lastEdgeNode.next = edge;
@@ -40,7 +50,8 @@ const fillFacetFromPoints = (graph, facet, face, points) => {
   return firstEdge;
 };
 
-const addPoint = (graph, point) => {
+const addPoint = (graph, point, exactPoint) => {
+  // FIX: This deduplication doesn't consider exact points.
   for (let nth = 0; nth < graph.points.length; nth++) {
     if (equals(graph.points[nth], point)) {
       return nth;
@@ -48,6 +59,7 @@ const addPoint = (graph, point) => {
   }
   const id = graph.points.length;
   graph.points.push(point);
+  graph.exactPoints.push(exactPoint);
   return id;
 };
 
@@ -286,22 +298,59 @@ const extrude = (graph, height, depth) => {
   }
 };
 
-const fromArrangements = (arrangements) => {
+const X$1 = 0;
+const Y$1 = 1;
+const Z$1 = 2;
+const W = 3;
+
+const fromPolygonsWithHoles = (polygonsWithHoles) => {
   const graph = create();
   let facet = 0;
-  for (const { boundary, holes, plane } of arrangements) {
+  const ensureFace = (plane, exactPlane) => {
+    for (let nth = 0; nth < graph.faces.length; nth++) {
+      const face = graph.faces[nth];
+      // FIX: Use exactPlane.
+      if (
+        face.plane[X$1] === plane[X$1] &&
+        face.plane[Y$1] === plane[Y$1] &&
+        face.plane[Z$1] === plane[Z$1] &&
+        face.plane[W] === plane[W]
+      ) {
+        return nth;
+      }
+    }
+    const faceId = graph.faces.length;
+    graph.faces[faceId] = { plane, exactPlane };
+  };
+  for (const {
+    points,
+    exactPoints,
+    holes,
+    plane,
+    exactPlane,
+  } of polygonsWithHoles) {
     // FIX: No face association.
     graph.facets[facet] = {
-      edge: fillFacetFromPoints(graph, facet, facet, boundary),
+      edge: fillFacetFromPoints(
+        graph,
+        facet,
+        ensureFace(plane, exactPlane),
+        points,
+        exactPoints
+      ),
     };
-    graph.faces[facet] = { plane };
     facet += 1;
-    for (const hole of holes) {
+    for (const { points, exactPoints } of holes) {
       // FIX: No relationship between hole and boundary.
       graph.facets[facet] = {
-        edge: fillFacetFromPoints(graph, facet, facet, hole),
+        edge: fillFacetFromPoints(
+          graph,
+          facet,
+          ensureFace(plane, exactPlane),
+          points,
+          exactPoints
+        ),
       };
-      graph.faces[facet] = { plane };
       facet += 1;
     }
   }
@@ -314,7 +363,7 @@ const orientClockwise = (path) => (isClockwise(path) ? path : flip(path));
 const orientCounterClockwise = (path) =>
   isClockwise(path) ? flip(path) : path;
 
-const Z$1 = 2;
+const Z$2 = 2;
 
 // This imposes a planar arrangement.
 const fromPaths = (inputPaths) => {
@@ -327,37 +376,38 @@ const fromPaths = (inputPaths) => {
       }
     }
   }
-  const orientedArrangements = [];
+  const orientedPolygonsWithHoles = [];
   let plane = fitPlaneToPoints(points);
   if (plane) {
     // Orient planes up by default.
     // FIX: Remove this hack.
     if (dot(plane, [0, 0, 1, 0]) < -0.1) {
-      plane[Z$1] *= -1;
+      plane[Z$2] *= -1;
     }
-    const arrangement = arrangePaths(...plane, paths);
-    for (const { boundary, holes } of arrangement) {
-      const exterior = orientCounterClockwise(boundary);
+    for (const { points, holes } of arrangePaths(
+      plane,
+      undefined,
+      paths,
+      /* triangulate= */ true
+    )) {
+      const exterior = orientCounterClockwise(points);
       const cleaned = clean(exterior);
       if (cleaned.length < 3) {
         continue;
       }
-      const orientedArrangement = { boundary: cleaned, holes: [], plane };
-      // const face = addFace(graph, { plane });
-      // addLoopFromPoints(graph, cleaned, { face });
-      for (const hole of holes) {
-        const interior = orientClockwise(hole);
+      const orientedPolygonWithHoles = { points: cleaned, holes: [], plane };
+      for (const { points } of holes) {
+        const interior = orientClockwise(points);
         const cleaned = clean(interior);
         if (cleaned.length < 3) {
           continue;
         }
-        orientedArrangement.holes.push(cleaned);
-        // addHoleFromPoints(graph, cleaned, { face });
+        orientedPolygonWithHoles.holes.push({ points: cleaned });
       }
-      orientedArrangements.push(orientedArrangement);
+      orientedPolygonsWithHoles.push(orientedPolygonWithHoles);
     }
   }
-  const graph = fromArrangements(orientedArrangements);
+  const graph = fromPolygonsWithHoles(orientedPolygonsWithHoles);
   if (graph.edges.length === 0) {
     graph.isEmpty = true;
   }
@@ -500,7 +550,7 @@ const outline = (graph) => {
   for (const [face, edges] of faceEdges) {
     const paths = [];
     // FIX: Use exact plane.
-    const plane = graph.faces[face].plane;
+    const { plane, exactPlane } = graph.faces[face];
     for (const { point, next } of edges) {
       paths.push([
         null,
@@ -508,33 +558,28 @@ const outline = (graph) => {
         graph.points[graph.edges[next].point],
       ]);
     }
-    arrangements.push(...arrangePaths(...plane, paths));
+    arrangements.push(
+      ...arrangePaths(plane, exactPlane, paths, /* triangulate= */ false)
+    );
   }
 
   return arrangements;
 };
 
 const inset = (graph, initial, step, limit) => {
-  const offsetArrangements = [];
-  for (const arrangement of outline(graph)) {
-    for (const offsetArrangement of insetOfPolygon(
-      initial,
-      step,
-      limit,
-      arrangement.plane,
-      arrangement.boundary,
-      arrangement.holes
-    )) {
-      offsetArrangements.push(offsetArrangement);
-    }
+  const insetPolygonsWithHoles = [];
+  for (const polygonWithHoles of outline(graph)) {
+    insetPolygonsWithHoles.push(
+      ...insetOfPolygonWithHoles(initial, step, limit, polygonWithHoles)
+    );
   }
-  const offsetGraph = fromArrangements(offsetArrangements);
-  offsetGraph.isClosed = false;
-  offsetGraph.isOutline = true;
-  if (offsetGraph.points.length === 0) {
-    offsetGraph.isEmpty = true;
+  const insetGraph = fromPolygonsWithHoles(insetPolygonsWithHoles);
+  insetGraph.isClosed = false;
+  insetGraph.isOutline = true;
+  if (insetGraph.points.length === 0) {
+    insetGraph.isEmpty = true;
   }
-  return offsetGraph;
+  return insetGraph;
 };
 
 const far$1 = 10000;
@@ -560,20 +605,13 @@ const intersection = (a, b) => {
 };
 
 const offset = (graph, initial, step, limit) => {
-  const offsetArrangements = [];
-  for (const arrangement of outline(graph)) {
-    for (const offsetArrangement of offsetOfPolygon(
-      initial,
-      step,
-      limit,
-      arrangement.plane,
-      arrangement.boundary,
-      arrangement.holes
-    )) {
-      offsetArrangements.push(offsetArrangement);
-    }
+  const offsetPolygonsWithHoles = [];
+  for (const polygonWithHoles of outline(graph)) {
+    offsetPolygonsWithHoles.push(
+      ...offsetOfPolygonWithHoles(initial, step, limit, polygonWithHoles)
+    );
   }
-  const offsetGraph = fromArrangements(offsetArrangements);
+  const offsetGraph = fromPolygonsWithHoles(offsetPolygonsWithHoles);
   offsetGraph.isClosed = false;
   offsetGraph.isOutline = true;
   if (offsetGraph.points.length === 0) {
@@ -636,8 +674,11 @@ const test = (graph) => {
 
 const toPaths = (graph) => {
   const paths = [];
-  for (const { boundary, holes } of outline(graph)) {
-    paths.push(boundary, ...holes);
+  for (const { points, holes } of outline(graph)) {
+    paths.push(points);
+    for (const { points } of holes) {
+      paths.push(points);
+    }
   }
   return paths;
 };

@@ -1,5 +1,5 @@
 import { initCgal } from './getCgal.js';
-import { insetOfPolygon } from './insetOfPolygon.js';
+import { insetOfPolygonWithHoles } from './insetOfPolygonWithHoles.js';
 import test from 'ava';
 
 test.beforeEach(async (t) => {
@@ -16,10 +16,14 @@ test('insetOfPolygon/bow', (t) => {
     [-0.28867512941360474, -0.5, 0],
   ];
   const xyPlane = [0, 0, 1, 0];
-  const inset = insetOfPolygon(0.1, 0.05, 0.5, xyPlane, polygon, []);
-  t.deepEqual(inset, [
+  const inset = insetOfPolygonWithHoles(0.1, 0.05, 0.5, {
+    plane: xyPlane,
+    points: polygon,
+    holes: [],
+  });
+  t.deepEqual(JSON.parse(JSON.stringify(inset)), [
     {
-      boundary: [
+      points: [
         [0.30555702330196033, 0.10585303876974556, 0],
         [0.2882683432365091, 0.09661204674887136, 0],
         [0.2695090322016129, 0.09092147195967698, 0],
@@ -43,7 +47,7 @@ test('insetOfPolygon/bow', (t) => {
       plane: [0, 0, 1, 0],
     },
     {
-      boundary: [
+      points: [
         [0.3333355349529405, 0.06427955815461832, 0],
         [0.3074025148547636, 0.05041807012330704, 0],
         [0.27926354830241934, 0.04188220793951544, 0],
@@ -67,7 +71,7 @@ test('insetOfPolygon/bow', (t) => {
       plane: [0, 0, 1, 0],
     },
     {
-      boundary: [
+      points: [
         [-0.0887, -0.15409503522685075, 0],
         [0.13888595339607956, -0.022706077539490943, 0],
         [0.17346331352698202, -0.004224093497742637, 0],
@@ -80,7 +84,7 @@ test('insetOfPolygon/bow', (t) => {
       plane: [0, 0, 1, 0],
     },
     {
-      boundary: [
+      points: [
         [0.36111404660392066, 0.02270607753949111, 0],
         [0.32653668647301815, 0.00422409349774272, 0],
         [0.31261171637771146, 1.1286320259481528e-17, 0],
@@ -93,7 +97,7 @@ test('insetOfPolygon/bow', (t) => {
       plane: [0, 0, 1, 0],
     },
     {
-      boundary: [
+      points: [
         [-0.03870000000000001, -0.06761879403356348, 0],
         [0.07842618760733325, -1.3877787807814457e-17, 0],
         [-0.03870000000000001, 0.06761879403356345, 0],
@@ -102,7 +106,7 @@ test('insetOfPolygon/bow', (t) => {
       plane: [0, 0, 1, 0],
     },
     {
-      boundary: [
+      points: [
         [0.4215738123926667, 5.050566734215747e-17, 0],
         [0.5387, -0.06761879403356338, 0],
         [0.5387, 0.06761879403356348, 0],

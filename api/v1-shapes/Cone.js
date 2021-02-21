@@ -27,7 +27,7 @@ registerReifier('Cone', ({ tags, plan }) => {
     .toGeometry();
 });
 
-export const Cone = (diameter = 1, top = 1, base = 0) =>
+export const Cone = (diameter = 1, top = 1, base = -top) =>
   Shape.fromGeometry(
     taggedPlan({}, { diameter: [diameter, diameter, 0], type: 'Cone' })
   )
