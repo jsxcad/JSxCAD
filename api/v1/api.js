@@ -77,7 +77,6 @@ export {
   ChainedHull,
   Circle,
   Cone,
-  Difference,
   Empty,
   Group,
   Hershey,
@@ -85,7 +84,6 @@ export {
   Hull,
   Icosahedron,
   Implicit,
-  Intersection,
   Line,
   LoopedHull,
   Octagon,
@@ -107,7 +105,6 @@ export {
   Toolpath,
   Torus,
   Triangle,
-  Union,
   Wave,
   Weld,
 } from '@jsxcad/api-v1-shapes';

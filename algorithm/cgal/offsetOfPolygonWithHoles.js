@@ -1,15 +1,13 @@
 import { getCgal } from './getCgal.js';
 
-export const offsetOfPolygon = (
+export const offsetOfPolygonWithHoles = (
   initial = 1,
   step = -1,
   limit = -1,
-  plane,
-  border,
-  holes = []
+  polygon
 ) => {
   const c = getCgal();
-  const [x, y, z, w] = plane;
+  const [x, y, z, w] = polygon.plane;
   const outputs = [];
   let output;
   let points;
@@ -21,23 +19,28 @@ export const offsetOfPolygon = (
     y,
     z,
     -w,
-    holes.length,
+    polygon.holes.length,
     (boundary) => {
-      for (const [x, y, z] of border) {
+      for (const [x, y, z] of polygon.points) {
         c.addPoint(boundary, x, y, z);
       }
     },
     (hole, nth) => {
-      for (const [x, y, z] of holes[nth]) {
+      for (const [x, y, z] of polygon.holes[nth]) {
         c.addPoint(hole, x, y, z);
       }
     },
     (isHole) => {
       points = [];
       if (isHole) {
-        output.holes.push(points);
+        output.holes.push.push({ points });
       } else {
-        output = { boundary: points, holes: [], plane };
+        output = {
+          points,
+          holes: [],
+          plane: polygon.plane,
+          exactPlane: polygon.exactPlane,
+        };
         outputs.push(output);
       }
     },

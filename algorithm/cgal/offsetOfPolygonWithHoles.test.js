@@ -1,5 +1,5 @@
 import { initCgal } from './getCgal.js';
-import { offsetOfPolygon } from './offsetOfPolygon.js';
+import { offsetOfPolygonWithHoles } from './offsetOfPolygonWithHoles.js';
 import test from 'ava';
 
 test.beforeEach(async (t) => {
@@ -16,10 +16,14 @@ test('offsetOfPolygon/bow', (t) => {
     [-0.28867512941360474, -0.5, 0],
   ];
   const xyPlane = [0, 0, 1, 0];
-  const offset = offsetOfPolygon(0.1, 0.05, 0.5, xyPlane, polygon, []);
-  t.deepEqual(offset, [
+  const offset = offsetOfPolygonWithHoles(0.1, 0.05, 0.5, {
+    plane: xyPlane,
+    points: polygon,
+    holes: [],
+  });
+  t.deepEqual(JSON.parse(JSON.stringify(offset)), [
     {
-      boundary: [
+      points: [
         [0.8886751294136047, 0.5, 0],
         [0.8881936020808244, 0.509801714032956, 0],
         [0.8867536574539278, 0.5195090322016128, 0],
@@ -127,7 +131,7 @@ test('offsetOfPolygon/bow', (t) => {
       plane: [0, 0, 1, 0],
     },
     {
-      boundary: [
+      points: [
         [0.9386751294136048, 0.5, 0],
         [0.9379528384144343, 0.5147025710494341, 0],
         [0.9357929214740893, 0.5292635483024193, 0],
@@ -235,7 +239,7 @@ test('offsetOfPolygon/bow', (t) => {
       plane: [0, 0, 1, 0],
     },
     {
-      boundary: [
+      points: [
         [0.9886751294136047, 0.5, 0],
         [0.9877120747480441, 0.5196034280659121, 0],
         [0.9848321854942508, 0.5390180644032256, 0],
@@ -343,7 +347,7 @@ test('offsetOfPolygon/bow', (t) => {
       plane: [0, 0, 1, 0],
     },
     {
-      boundary: [
+      points: [
         [1.0386751294136047, 0.5, 0],
         [1.037471311081654, 0.5245042850823901, 0],
         [1.0338714495144123, 0.5487725805040321, 0],
@@ -451,7 +455,7 @@ test('offsetOfPolygon/bow', (t) => {
       plane: [0, 0, 1, 0],
     },
     {
-      boundary: [
+      points: [
         [1.0886751294136046, 0.5, 0],
         [1.0872305474152637, 0.5294051420988681, 0],
         [1.0829107135345737, 0.5585270966048385, 0],
@@ -557,7 +561,7 @@ test('offsetOfPolygon/bow', (t) => {
       plane: [0, 0, 1, 0],
     },
     {
-      boundary: [
+      points: [
         [1.1386751294136046, 0.5, 0],
         [1.1369897837488736, 0.5343059991153462, 0],
         [1.1319499775547353, 0.5682816127056449, 0],
@@ -663,7 +667,7 @@ test('offsetOfPolygon/bow', (t) => {
       plane: [0, 0, 1, 0],
     },
     {
-      boundary: [
+      points: [
         [1.1886751294136046, 0.5, 0],
         [1.1867490200824835, 0.5392068561318242, 0],
         [1.1809892415748968, 0.5780361288064513, 0],
@@ -769,7 +773,7 @@ test('offsetOfPolygon/bow', (t) => {
       plane: [0, 0, 1, 0],
     },
     {
-      boundary: [
+      points: [
         [1.2386751294136047, 0.5, 0],
         [1.2365082564160934, 0.5441077131483023, 0],
         [1.2300285055950584, 0.5877906449072577, 0],
@@ -875,7 +879,7 @@ test('offsetOfPolygon/bow', (t) => {
       plane: [0, 0, 1, 0],
     },
     {
-      boundary: [
+      points: [
         [1.2886751294136045, 0.5, 0],
         [1.2862674927497029, 0.5490085701647803, 0],
         [1.2790677696152197, 0.5975451610080641, 0],

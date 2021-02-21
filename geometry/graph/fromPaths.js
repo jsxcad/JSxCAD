@@ -3,7 +3,7 @@ import { deduplicate, flip, isClockwise } from '@jsxcad/geometry-path';
 
 import { canonicalize as canonicalizePaths } from '@jsxcad/geometry-paths';
 import { dot } from '@jsxcad/math-vec3';
-import { fromArrangements } from './fromArrangements.js';
+import { fromPolygonsWithHoles } from './fromPolygonsWithHoles.js';
 
 const clean = (path) => deduplicate(path);
 
@@ -24,7 +24,7 @@ export const fromPaths = (inputPaths) => {
       }
     }
   }
-  const orientedArrangements = [];
+  const orientedPolygonsWithHoles = [];
   let plane = fitPlaneToPoints(points);
   if (plane) {
     // Orient planes up by default.
@@ -32,29 +32,30 @@ export const fromPaths = (inputPaths) => {
     if (dot(plane, [0, 0, 1, 0]) < -0.1) {
       plane[Z] *= -1;
     }
-    const arrangement = arrangePaths(...plane, paths);
-    for (const { boundary, holes } of arrangement) {
-      const exterior = orientCounterClockwise(boundary);
+    for (const { points, holes } of arrangePaths(
+      plane,
+      undefined,
+      paths,
+      /* triangulate= */ true
+    )) {
+      const exterior = orientCounterClockwise(points);
       const cleaned = clean(exterior);
       if (cleaned.length < 3) {
         continue;
       }
-      const orientedArrangement = { boundary: cleaned, holes: [], plane };
-      // const face = addFace(graph, { plane });
-      // addLoopFromPoints(graph, cleaned, { face });
-      for (const hole of holes) {
-        const interior = orientClockwise(hole);
+      const orientedPolygonWithHoles = { points: cleaned, holes: [], plane };
+      for (const { points } of holes) {
+        const interior = orientClockwise(points);
         const cleaned = clean(interior);
         if (cleaned.length < 3) {
           continue;
         }
-        orientedArrangement.holes.push(cleaned);
-        // addHoleFromPoints(graph, cleaned, { face });
+        orientedPolygonWithHoles.holes.push({ points: cleaned });
       }
-      orientedArrangements.push(orientedArrangement);
+      orientedPolygonsWithHoles.push(orientedPolygonWithHoles);
     }
   }
-  const graph = fromArrangements(orientedArrangements);
+  const graph = fromPolygonsWithHoles(orientedPolygonsWithHoles);
   if (graph.edges.length === 0) {
     graph.isEmpty = true;
   }

@@ -11,8 +11,8 @@ import './jsxcad-api-v1-gcode.js';
 import './jsxcad-api-v1-pdf.js';
 import './jsxcad-api-v1-plans.js';
 import './jsxcad-api-v1-tools.js';
-import { Peg, Arc, Assembly, Block, Box, ChainedHull, Circle, Cone, Difference, Empty, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Intersection, Line, LoopedHull, Octagon, Orb, Path, Pentagon, Plane, Point, Points, Polygon, Polyhedron, RegularPolygon, Rod, Septagon, Spiral, Square, Tetragon, Toolpath, Torus, Triangle, Union, Wave, Weld } from './jsxcad-api-v1-shapes.js';
-export { Arc, Assembly, Block, Box, ChainedHull, Circle, Cone, Difference, Empty, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Intersection, Line, LoopedHull, Octagon, Orb, Path, Peg, Pentagon, Plane, Point, Points, Polygon, Polyhedron, RegularPolygon, Rod, Septagon, Spiral, Square, Tetragon, Toolpath, Torus, Triangle, Union, Wave, Weld } from './jsxcad-api-v1-shapes.js';
+import { Peg, Arc, Assembly, Block, Box, ChainedHull, Circle, Cone, Empty, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Line, LoopedHull, Octagon, Orb, Path, Pentagon, Plane, Point, Points, Polygon, Polyhedron, RegularPolygon, Rod, Septagon, Spiral, Square, Tetragon, Toolpath, Torus, Triangle, Wave, Weld } from './jsxcad-api-v1-shapes.js';
+export { Arc, Assembly, Block, Box, ChainedHull, Circle, Cone, Empty, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Line, LoopedHull, Octagon, Orb, Path, Peg, Pentagon, Plane, Point, Points, Polygon, Polyhedron, RegularPolygon, Rod, Septagon, Spiral, Square, Tetragon, Toolpath, Torus, Triangle, Wave, Weld } from './jsxcad-api-v1-shapes.js';
 import { Line2 } from './jsxcad-api-v1-line2.js';
 export { Line2 } from './jsxcad-api-v1-line2.js';
 import { Plan } from './jsxcad-api-v1-plan.js';
@@ -483,7 +483,6 @@ var api = /*#__PURE__*/Object.freeze({
   ChainedHull: ChainedHull,
   Circle: Circle,
   Cone: Cone,
-  Difference: Difference,
   Empty: Empty,
   Group: Group,
   Hershey: Hershey,
@@ -491,7 +490,6 @@ var api = /*#__PURE__*/Object.freeze({
   Hull: Hull,
   Icosahedron: Icosahedron,
   Implicit: Implicit,
-  Intersection: Intersection,
   Line: Line,
   LoopedHull: LoopedHull,
   Octagon: Octagon,
@@ -513,7 +511,6 @@ var api = /*#__PURE__*/Object.freeze({
   Toolpath: Toolpath,
   Torus: Torus,
   Triangle: Triangle,
-  Union: Union,
   Wave: Wave,
   Weld: Weld,
   Item: Item,

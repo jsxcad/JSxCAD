@@ -34,7 +34,7 @@ export const outline = (graph) => {
   for (const [face, edges] of faceEdges) {
     const paths = [];
     // FIX: Use exact plane.
-    const plane = graph.faces[face].plane;
+    const { plane, exactPlane } = graph.faces[face];
     for (const { point, next } of edges) {
       paths.push([
         null,
@@ -42,7 +42,9 @@ export const outline = (graph) => {
         graph.points[graph.edges[next].point],
       ]);
     }
-    arrangements.push(...arrangePaths(...plane, paths));
+    arrangements.push(
+      ...arrangePaths(plane, exactPlane, paths, /* triangulate= */ false)
+    );
   }
 
   return arrangements;

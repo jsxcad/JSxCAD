@@ -72,11 +72,21 @@ export const fillLoopFromPoints = (graph, loop, points) => {
   return loop;
 };
 
-export const fillFacetFromPoints = (graph, facet, face, points) => {
+export const fillFacetFromPoints = (
+  graph,
+  facet,
+  face,
+  points,
+  exactPoints
+) => {
   let lastEdgeNode;
   let firstEdge;
-  for (const coord of points) {
-    const point = addPoint(graph, coord);
+  for (let nth = 0; nth < points.length; nth++) {
+    const point = addPoint(
+      graph,
+      points[nth],
+      exactPoints ? exactPoints[nth] : undefined
+    );
     const edge = addEdge(graph, { facet, face, point });
     if (lastEdgeNode) {
       lastEdgeNode.next = edge;
@@ -104,7 +114,8 @@ export const addLoopEdge = (graph, loop, { point, twin = -1 }) => {
   return edge;
 };
 
-export const addPoint = (graph, point) => {
+export const addPoint = (graph, point, exactPoint) => {
+  // FIX: This deduplication doesn't consider exact points.
   for (let nth = 0; nth < graph.points.length; nth++) {
     if (equalsPoint(graph.points[nth], point)) {
       return nth;
@@ -112,6 +123,7 @@ export const addPoint = (graph, point) => {
   }
   const id = graph.points.length;
   graph.points.push(point);
+  graph.exactPoints.push(exactPoint);
   return id;
 };
 

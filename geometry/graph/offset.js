@@ -1,22 +1,15 @@
-import { fromArrangements } from './fromArrangements.js';
-import { offsetOfPolygon } from '@jsxcad/algorithm-cgal';
+import { fromPolygonsWithHoles } from './fromPolygonsWithHoles.js';
+import { offsetOfPolygonWithHoles } from '@jsxcad/algorithm-cgal';
 import { outline } from './outline.js';
 
 export const offset = (graph, initial, step, limit) => {
-  const offsetArrangements = [];
-  for (const arrangement of outline(graph)) {
-    for (const offsetArrangement of offsetOfPolygon(
-      initial,
-      step,
-      limit,
-      arrangement.plane,
-      arrangement.boundary,
-      arrangement.holes
-    )) {
-      offsetArrangements.push(offsetArrangement);
-    }
+  const offsetPolygonsWithHoles = [];
+  for (const polygonWithHoles of outline(graph)) {
+    offsetPolygonsWithHoles.push(
+      ...offsetOfPolygonWithHoles(initial, step, limit, polygonWithHoles)
+    );
   }
-  const offsetGraph = fromArrangements(offsetArrangements);
+  const offsetGraph = fromPolygonsWithHoles(offsetPolygonsWithHoles);
   offsetGraph.isClosed = false;
   offsetGraph.isOutline = true;
   if (offsetGraph.points.length === 0) {

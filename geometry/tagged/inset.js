@@ -1,12 +1,11 @@
 import {
   fromPaths as fromPathsToGraph,
   inset as insetGraph,
-  toPaths as toPathsFromGraph,
 } from '@jsxcad/geometry-graph';
 
 import { reify } from './reify.js';
 import { rewrite } from './visit.js';
-import { taggedPaths } from './taggedPaths.js';
+import { taggedGraph } from './taggedGraph.js';
 import { toTransformedGeometry } from './toTransformedGeometry.js';
 
 export const inset = (geometry, initial = 1, step, limit) => {
@@ -14,9 +13,9 @@ export const inset = (geometry, initial = 1, step, limit) => {
     const { tags } = geometry;
     switch (geometry.type) {
       case 'graph':
-        return taggedPaths(
+        return taggedGraph(
           { tags },
-          toPathsFromGraph(insetGraph(geometry.graph, initial, step, limit))
+          insetGraph(geometry.graph, initial, step, limit)
         );
       case 'solid':
       case 'z0Surface':
@@ -25,11 +24,9 @@ export const inset = (geometry, initial = 1, step, limit) => {
         // Not implemented yet.
         return geometry;
       case 'paths':
-        return taggedPaths(
+        return taggedGraph(
           { tags },
-          toPathsFromGraph(
-            insetGraph(fromPathsToGraph(geometry.paths), initial, step, limit)
-          )
+          insetGraph(fromPathsToGraph(geometry.paths), initial, step, limit)
         );
       case 'plan':
         return inset(reify(geometry).content[0], initial, step, limit);

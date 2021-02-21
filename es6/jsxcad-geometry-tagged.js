@@ -1245,9 +1245,9 @@ const inset = (geometry, initial = 1, step, limit) => {
     const { tags } = geometry;
     switch (geometry.type) {
       case 'graph':
-        return taggedPaths(
+        return taggedGraph(
           { tags },
-          toPaths(inset$1(geometry.graph, initial, step, limit))
+          inset$1(geometry.graph, initial, step, limit)
         );
       case 'solid':
       case 'z0Surface':
@@ -1256,11 +1256,9 @@ const inset = (geometry, initial = 1, step, limit) => {
         // Not implemented yet.
         return geometry;
       case 'paths':
-        return taggedPaths(
+        return taggedGraph(
           { tags },
-          toPaths(
-            inset$1(fromPaths(geometry.paths), initial, step, limit)
-          )
+          inset$1(fromPaths(geometry.paths), initial, step, limit)
         );
       case 'plan':
         return inset(reify(geometry).content[0], initial, step, limit);
@@ -1445,9 +1443,9 @@ const offset = (geometry, initial = 1, step, limit) => {
     const { tags } = geometry;
     switch (geometry.type) {
       case 'graph':
-        return taggedPaths(
+        return taggedGraph(
           { tags },
-          toPaths(offset$1(geometry.graph, initial, step, limit))
+          offset$1(geometry.graph, initial, step, limit)
         );
       case 'solid':
       case 'z0Surface':
@@ -1456,11 +1454,9 @@ const offset = (geometry, initial = 1, step, limit) => {
         // Not implemented yet.
         return geometry;
       case 'paths':
-        return taggedPaths(
+        return taggedGraph(
           { tags },
-          toPaths(
-            offset$1(fromPaths(geometry.paths), initial, step, limit)
-          )
+          offset$1(fromPaths(geometry.paths), initial, step, limit)
         );
       case 'plan':
         return offset(reify(geometry).content[0], initial, step, limit);

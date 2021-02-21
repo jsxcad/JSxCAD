@@ -2,8 +2,11 @@ import { outline } from './outline.js';
 
 export const toPaths = (graph) => {
   const paths = [];
-  for (const { boundary, holes } of outline(graph)) {
-    paths.push(boundary, ...holes);
+  for (const { points, holes } of outline(graph)) {
+    paths.push(points);
+    for (const { points } of holes) {
+      paths.push(points);
+    }
   }
   return paths;
 };
