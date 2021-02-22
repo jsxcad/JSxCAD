@@ -1561,8 +1561,8 @@ const sectionImpl = (geometry, planes) => {
   const transformedGeometry = toTransformedGeometry(reify(geometry));
   const sections = [];
   for (const { tags, graph } of getNonVoidGraphs(transformedGeometry)) {
-    for (const paths of section$1(graph, planes)) {
-      sections.push(taggedPaths({ tags }, paths));
+    for (const section of section$1(graph, planes)) {
+      sections.push(taggedGraph({ tags }, section));
     }
   }
   return taggedGroup({}, ...sections);

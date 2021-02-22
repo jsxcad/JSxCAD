@@ -1,7 +1,6 @@
 import { differenceOfSurfaceMeshes } from '@jsxcad/algorithm-cgal';
 import { doesNotOverlap } from './doesNotOverlap.js';
 import { extrude } from './extrude.js';
-import { fromPaths } from './fromPaths.js';
 import { fromSurfaceMeshLazy } from './fromSurfaceMeshLazy.js';
 import { principlePlane } from './principlePlane.js';
 import { section } from './section.js';
@@ -14,9 +13,7 @@ export const difference = (a, b) => {
     return a;
   }
   if (!a.isClosed) {
-    return fromPaths(
-      section(difference(extrude(a, far, 0), b), [principlePlane(a)])[0]
-    );
+    return section(difference(extrude(a, far, 0), b), [principlePlane(a)]);
   }
   if (!b.isClosed) {
     b = extrude(b, far, 0);

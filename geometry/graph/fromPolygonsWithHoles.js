@@ -1,10 +1,12 @@
 import { create, fillFacetFromPoints } from './graph.js';
+import { rerealizeGraph } from './rerealizeGraph.js';
 
 const X = 0;
 const Y = 1;
 const Z = 2;
 const W = 3;
 
+// FIX: Actually, this doesn't do holes.
 export const fromPolygonsWithHoles = (polygonsWithHoles) => {
   const graph = create();
   let facet = 0;
@@ -24,13 +26,7 @@ export const fromPolygonsWithHoles = (polygonsWithHoles) => {
     const faceId = graph.faces.length;
     graph.faces[faceId] = { plane, exactPlane };
   };
-  for (const {
-    points,
-    exactPoints,
-    holes,
-    plane,
-    exactPlane,
-  } of polygonsWithHoles) {
+  for (const { points, exactPoints, plane, exactPlane } of polygonsWithHoles) {
     // FIX: No face association.
     graph.facets[facet] = {
       edge: fillFacetFromPoints(
@@ -42,19 +38,7 @@ export const fromPolygonsWithHoles = (polygonsWithHoles) => {
       ),
     };
     facet += 1;
-    for (const { points, exactPoints } of holes) {
-      // FIX: No relationship between hole and boundary.
-      graph.facets[facet] = {
-        edge: fillFacetFromPoints(
-          graph,
-          facet,
-          ensureFace(plane, exactPlane),
-          points,
-          exactPoints
-        ),
-      };
-      facet += 1;
-    }
   }
-  return graph;
+  // We didn't build a stitched graph.
+  return rerealizeGraph(graph);
 };

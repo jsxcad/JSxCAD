@@ -12,14 +12,34 @@ test('Section of tetrahedron.', (t) => {
   const mesh = fromPolygonsToSurfaceMesh(unitRegularTetrahedronPolygons);
   const plane = [0, 0, 1, 0];
   const sections = sectionOfSurfaceMesh(mesh, [plane]);
-  t.deepEqual(sections, [
-    [
-      [
+  t.deepEqual(JSON.parse(JSON.stringify(sections)), [
+    {
+      points: [
+        [0, -1, 0],
         [0, 1, 0],
         [-1, 0, 0],
+      ],
+      exactPoints: [
+        ['0/1', '-1/1', '0/1'],
+        ['0/1', '1/1', '0/1'],
+        ['-1/1', '0/1', '0/1'],
+      ],
+      holes: [],
+      plane: [0, 0, 1, 0],
+    },
+    {
+      points: [
         [0, -1, 0],
         [1, 0, 0],
+        [0, 1, 0],
       ],
-    ],
+      exactPoints: [
+        ['0/1', '-1/1', '0/1'],
+        ['1/1', '0/1', '0/1'],
+        ['0/1', '1/1', '0/1'],
+      ],
+      holes: [],
+      plane: [0, 0, 1, 0],
+    },
   ]);
 });

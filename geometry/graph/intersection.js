@@ -1,7 +1,6 @@
 import { doesNotOverlap } from './doesNotOverlap.js';
 import { extrude } from './extrude.js';
 import { fromEmpty } from './fromEmpty.js';
-import { fromPaths } from './fromPaths.js';
 import { fromSurfaceMeshLazy } from './fromSurfaceMeshLazy.js';
 import { intersectionOfSurfaceMeshes } from '@jsxcad/algorithm-cgal';
 import { principlePlane } from './principlePlane.js';
@@ -15,9 +14,7 @@ export const intersection = (a, b) => {
     return fromEmpty();
   }
   if (!a.isClosed) {
-    return fromPaths(
-      section(intersection(extrude(a, far, 0), b), [principlePlane(a)])[0]
-    );
+    return section(intersection(extrude(a, far, 0), b), [principlePlane(a)]);
   }
   if (!b.isClosed) {
     b = extrude(b, far, 0);
