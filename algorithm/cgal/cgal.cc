@@ -696,6 +696,7 @@ Surface_mesh* UnionOfSurfaceMeshes(Surface_mesh* a, Surface_mesh* b) {
   }
 }
 
+// CHECK: Should this produce Polygons_with_holes?
 void SectionOfSurfaceMesh(Surface_mesh* mesh, std::size_t plane_count, emscripten::val fill_plane, emscripten::val emit_polyline, emscripten::val emit_point) {
   typedef std::vector<Point> Polyline_type;
   typedef std::list<Polyline_type> Polylines;

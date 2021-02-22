@@ -1,7 +1,6 @@
-import { fromSurfaceMeshToGraph, fromPointsToAlphaShapeAsSurfaceMesh, fromSurfaceMeshToLazyGraph, fromPointsToConvexHullAsSurfaceMesh, fromPolygonsToSurfaceMesh, fromGraphToSurfaceMesh, fromSurfaceMeshEmitBoundingBox, extrudeSurfaceMesh, fitPlaneToPoints, arrangePaths, sectionOfSurfaceMesh, differenceOfSurfaceMeshes, extrudeToPlaneOfSurfaceMesh, fromSurfaceMeshToTriangles, fromFunctionToSurfaceMesh, fromPointsToSurfaceMesh, insetOfPolygonWithHoles, intersectionOfSurfaceMeshes, offsetOfPolygonWithHoles, projectToPlaneOfSurfaceMesh, reverseFaceOrientationsOfSurfaceMesh, subdivideSurfaceMesh, remeshSurfaceMesh, doesSelfIntersectOfSurfaceMesh, transformSurfaceMesh, unionOfSurfaceMeshes } from './jsxcad-algorithm-cgal.js';
-import { equals, min, max, scale, dot } from './jsxcad-math-vec3.js';
+import { fromSurfaceMeshToGraph, fromPointsToAlphaShapeAsSurfaceMesh, fromSurfaceMeshToLazyGraph, fromPointsToConvexHullAsSurfaceMesh, fromPolygonsToSurfaceMesh, fromGraphToSurfaceMesh, fromSurfaceMeshEmitBoundingBox, extrudeSurfaceMesh, sectionOfSurfaceMesh, differenceOfSurfaceMeshes, extrudeToPlaneOfSurfaceMesh, fromSurfaceMeshToTriangles, fromFunctionToSurfaceMesh, arrangePaths, fromPointsToSurfaceMesh, insetOfPolygonWithHoles, intersectionOfSurfaceMeshes, offsetOfPolygonWithHoles, projectToPlaneOfSurfaceMesh, reverseFaceOrientationsOfSurfaceMesh, subdivideSurfaceMesh, remeshSurfaceMesh, doesSelfIntersectOfSurfaceMesh, transformSurfaceMesh, unionOfSurfaceMeshes } from './jsxcad-algorithm-cgal.js';
+import { equals, min, max, scale } from './jsxcad-math-vec3.js';
 import { deduplicate as deduplicate$1, isClockwise, flip } from './jsxcad-geometry-path.js';
-import { canonicalize } from './jsxcad-geometry-paths.js';
 
 const graphSymbol = Symbol('graph');
 const surfaceMeshSymbol = Symbol('surfaceMeshSymbol');
@@ -298,11 +297,24 @@ const extrude = (graph, height, depth) => {
   }
 };
 
+// FIX: Actually determine the principle plane.
+const principlePlane = (graph) => {
+  for (const face of realizeGraph(graph).faces) {
+    if (face && face.plane) {
+      return face.plane;
+    }
+  }
+};
+
+const rerealizeGraph = (graph) =>
+  fromSurfaceMeshLazy(toSurfaceMesh(graph), /* forceNewGraph= */ true);
+
 const X$1 = 0;
 const Y$1 = 1;
 const Z$1 = 2;
 const W = 3;
 
+// FIX: Actually, this doesn't do holes.
 const fromPolygonsWithHoles = (polygonsWithHoles) => {
   const graph = create();
   let facet = 0;
@@ -322,13 +334,7 @@ const fromPolygonsWithHoles = (polygonsWithHoles) => {
     const faceId = graph.faces.length;
     graph.faces[faceId] = { plane, exactPlane };
   };
-  for (const {
-    points,
-    exactPoints,
-    holes,
-    plane,
-    exactPlane,
-  } of polygonsWithHoles) {
+  for (const { points, exactPoints, plane, exactPlane } of polygonsWithHoles) {
     // FIX: No face association.
     graph.facets[facet] = {
       edge: fillFacetFromPoints(
@@ -340,94 +346,13 @@ const fromPolygonsWithHoles = (polygonsWithHoles) => {
       ),
     };
     facet += 1;
-    for (const { points, exactPoints } of holes) {
-      // FIX: No relationship between hole and boundary.
-      graph.facets[facet] = {
-        edge: fillFacetFromPoints(
-          graph,
-          facet,
-          ensureFace(plane, exactPlane),
-          points,
-          exactPoints
-        ),
-      };
-      facet += 1;
-    }
   }
-  return graph;
-};
-
-const clean = (path) => deduplicate$1(path);
-
-const orientClockwise = (path) => (isClockwise(path) ? path : flip(path));
-const orientCounterClockwise = (path) =>
-  isClockwise(path) ? flip(path) : path;
-
-const Z$2 = 2;
-
-// This imposes a planar arrangement.
-const fromPaths = (inputPaths) => {
-  const paths = canonicalize(inputPaths);
-  const points = [];
-  for (const path of paths) {
-    for (const point of path) {
-      if (point !== null) {
-        points.push(point);
-      }
-    }
-  }
-  const orientedPolygonsWithHoles = [];
-  let plane = fitPlaneToPoints(points);
-  if (plane) {
-    // Orient planes up by default.
-    // FIX: Remove this hack.
-    if (dot(plane, [0, 0, 1, 0]) < -0.1) {
-      plane[Z$2] *= -1;
-    }
-    for (const { points, holes } of arrangePaths(
-      plane,
-      undefined,
-      paths,
-      /* triangulate= */ true
-    )) {
-      const exterior = orientCounterClockwise(points);
-      const cleaned = clean(exterior);
-      if (cleaned.length < 3) {
-        continue;
-      }
-      const orientedPolygonWithHoles = { points: cleaned, holes: [], plane };
-      for (const { points } of holes) {
-        const interior = orientClockwise(points);
-        const cleaned = clean(interior);
-        if (cleaned.length < 3) {
-          continue;
-        }
-        orientedPolygonWithHoles.holes.push({ points: cleaned });
-      }
-      orientedPolygonsWithHoles.push(orientedPolygonWithHoles);
-    }
-  }
-  const graph = fromPolygonsWithHoles(orientedPolygonsWithHoles);
-  if (graph.edges.length === 0) {
-    graph.isEmpty = true;
-  }
-  graph.isClosed = false;
-  graph.isOutline = true;
-  graph.isWireframe = true;
-  return graph;
-};
-
-// FIX: Actually determine the principle plane.
-const principlePlane = (graph) => {
-  for (const face of realizeGraph(graph).faces) {
-    if (face && face.plane) {
-      return face.plane;
-    }
-  }
+  // We didn't build a stitched graph.
+  return rerealizeGraph(graph);
 };
 
 const section = (graph, planes) =>
-  sectionOfSurfaceMesh(toSurfaceMesh(graph), planes);
+  fromPolygonsWithHoles(sectionOfSurfaceMesh(toSurfaceMesh(graph), planes));
 
 const far = 10000;
 
@@ -436,9 +361,7 @@ const difference = (a, b) => {
     return a;
   }
   if (!a.isClosed) {
-    return fromPaths(
-      section(difference(extrude(a, far, 0), b), [principlePlane(a)])[0]
-    );
+    return section(difference(extrude(a, far, 0), b), [principlePlane(a)]);
   }
   if (!b.isClosed) {
     b = extrude(b, far, 0);
@@ -505,6 +428,39 @@ const fromFunction = (op, options) =>
   );
 
 const fromEmpty = () => ({ isEmpty: true });
+
+const clean = (path) => deduplicate$1(path);
+
+const orientCounterClockwise = (path) =>
+  isClockwise(path) ? flip(path) : path;
+
+// This imposes a planar arrangement.
+const fromPaths = (paths, plane = [0, 0, 1, 0]) => {
+  const orientedPolygons = [];
+  for (const { points } of arrangePaths(
+    plane,
+    undefined,
+    paths,
+    /* triangulate= */ true
+  )) {
+    const exterior = orientCounterClockwise(points);
+    const cleaned = clean(exterior);
+    if (cleaned.length < 3) {
+      continue;
+    }
+    const orientedPolygon = { points: cleaned, plane };
+    orientedPolygons.push(orientedPolygon);
+  }
+  // Note: These cannot have holes due to 'triangulate' above.
+  const graph = realizeGraph(fromPolygonsWithHoles(orientedPolygons));
+  if (graph.edges.length === 0) {
+    graph.isEmpty = true;
+  }
+  graph.isClosed = false;
+  graph.isOutline = true;
+  graph.isWireframe = true;
+  return graph;
+};
 
 const fromPoints = (points) =>
   fromSurfaceMeshLazy(fromPointsToSurfaceMesh(points));
@@ -573,7 +529,9 @@ const inset = (graph, initial, step, limit) => {
       ...insetOfPolygonWithHoles(initial, step, limit, polygonWithHoles)
     );
   }
-  const insetGraph = fromPolygonsWithHoles(insetPolygonsWithHoles);
+  const insetGraph = realizeGraph(
+    fromPolygonsWithHoles(insetPolygonsWithHoles)
+  );
   insetGraph.isClosed = false;
   insetGraph.isOutline = true;
   if (insetGraph.points.length === 0) {
@@ -589,9 +547,7 @@ const intersection = (a, b) => {
     return fromEmpty();
   }
   if (!a.isClosed) {
-    return fromPaths(
-      section(intersection(extrude(a, far$1, 0), b), [principlePlane(a)])[0]
-    );
+    return section(intersection(extrude(a, far$1, 0), b), [principlePlane(a)]);
   }
   if (!b.isClosed) {
     b = extrude(b, far$1, 0);
@@ -611,7 +567,9 @@ const offset = (graph, initial, step, limit) => {
       ...offsetOfPolygonWithHoles(initial, step, limit, polygonWithHoles)
     );
   }
-  const offsetGraph = fromPolygonsWithHoles(offsetPolygonsWithHoles);
+  const offsetGraph = realizeGraph(
+    fromPolygonsWithHoles(offsetPolygonsWithHoles)
+  );
   offsetGraph.isClosed = false;
   offsetGraph.isOutline = true;
   if (offsetGraph.points.length === 0) {
@@ -642,9 +600,6 @@ const projectToPlane = (graph, plane, direction) => {
     return graph;
   }
 };
-
-const rerealizeGraph = (graph) =>
-  fromSurfaceMeshLazy(toSurfaceMesh(graph), /* forceNewGraph= */ true);
 
 const reverseFaceOrientations = (graph) =>
   fromSurfaceMeshLazy(
@@ -702,9 +657,7 @@ const union = (a, b) => {
     if (!b.isClosed) {
       b = extrude(b, far$2, 0);
     }
-    return fromPaths(
-      section(union(extrude(a, far$2, 0), b), [principlePlane(a)])[0]
-    );
+    return section(union(extrude(a, far$2, 0), b), [principlePlane(a)]);
   }
   if (!b.isClosed) {
     // The union of a surface and a solid is the solid.
