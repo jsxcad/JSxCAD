@@ -1,6 +1,5 @@
 import Arc from './Arc.js';
 import Assembly from './Assembly.js';
-import Block from './Block.js';
 import Box from './Box.js';
 import ChainedHull from './ChainedHull.js';
 import Circle from './Circle.js';
@@ -27,7 +26,6 @@ import Points from './Points.js';
 import Polygon from './Polygon.js';
 import Polyhedron from './Polyhedron.js';
 import RegularPolygon from './RegularPolygon.js';
-import Rod from './Rod.js';
 import Septagon from './Septagon.js';
 import Sketch from './Sketch.js';
 import Spiral from './Spiral.js';
@@ -43,7 +41,6 @@ import Weld from './Weld.js';
 const api = {
   Arc,
   Assembly,
-  Block,
   Box,
   ChainedHull,
   Circle,
@@ -70,7 +67,6 @@ const api = {
   Polygon,
   Polyhedron,
   RegularPolygon,
-  Rod,
   Septagon,
   Sketch,
   Spiral,
@@ -87,7 +83,6 @@ const api = {
 export {
   Arc,
   Assembly,
-  Block,
   Box,
   ChainedHull,
   Circle,
@@ -114,7 +109,6 @@ export {
   Polygon,
   Polyhedron,
   RegularPolygon,
-  Rod,
   Septagon,
   Sketch,
   Spiral,

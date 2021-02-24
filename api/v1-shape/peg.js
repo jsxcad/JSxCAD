@@ -55,11 +55,11 @@ const pegMethod = function (shapeToPeg) {
 
 Shape.prototype.peg = pegMethod;
 
-const atMethod = function (pegShape) {
+const putMethod = function (pegShape) {
   return peg(pegShape, this);
 };
 
-Shape.prototype.at = atMethod;
+Shape.prototype.put = putMethod;
 
 export const shapeMethod = (build) => {
   return function (...args) {

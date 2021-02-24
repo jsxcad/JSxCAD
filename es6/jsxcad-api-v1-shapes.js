@@ -1,13 +1,42 @@
 import Shape$1, { Shape, shapeMethod, weld } from './jsxcad-api-v1-shape.js';
-import { getSides, getRadius, getTop, getBottom, getCenter, getFrom, getTo, getMatrix, getLeft, getRight, getFront, getBack, getDiameter, getBase, radius } from './jsxcad-geometry-plan.js';
+import { scale, subtract, add, negate } from './jsxcad-math-vec3.js';
+import { identity } from './jsxcad-math-mat4.js';
 import { registerReifier, taggedPlan, taggedAssembly, taggedLayers, taggedGraph, taggedDisjointAssembly, taggedPaths, taggedSolid, taggedPoints, taggedZ0Surface } from './jsxcad-geometry-tagged.js';
 import { concatenate, rotateZ, translate as translate$1 } from './jsxcad-geometry-path.js';
 import { numbers } from './jsxcad-api-v1-math.js';
 import { convexHull, fromFunction, fromPaths } from './jsxcad-geometry-graph.js';
 import { translate } from './jsxcad-geometry-paths.js';
 import { buildRegularIcosahedron, buildRingSphere, regularPolygonEdgeLengthToRadius, buildRegularPolygon } from './jsxcad-algorithm-shape.js';
-import { add } from './jsxcad-math-vec3.js';
 import { toPolygon } from './jsxcad-math-plane.js';
+import { radius, getRadius, getCenter } from './jsxcad-geometry-plan.js';
+
+const find = (plan, key, otherwise) => {
+  for (let nth = plan.history.length - 1; nth >= 0; nth--) {
+    if (plan.history[nth][key] !== undefined) {
+      return plan.history[nth][key];
+    }
+  }
+  return otherwise;
+};
+
+const getAngle = (plan) => find(plan, 'angle', {});
+const getAt = (plan) => find(plan, 'at', [0, 0, 0]);
+const getCorner1 = (plan) => find(plan, 'corner1', [0, 0, 0]);
+const getCorner2 = (plan) => find(plan, 'corner2', [0, 0, 0]);
+const getFrom = (plan) => find(plan, 'from', [0, 0, 0]);
+const getMatrix = (plan) => plan.matrix || identity();
+const getTo = (plan) => find(plan, 'to', [0, 0, 0]);
+const getSides = (plan, otherwise = 32) =>
+  find(plan, 'sides', otherwise);
+
+const getScale = (plan) => {
+  const corner1 = getCorner1(plan);
+  const corner2 = getCorner2(plan);
+  return [
+    scale(0.5, subtract(corner2, corner1)),
+    scale(0.5, add(corner2, corner1)),
+  ];
+};
 
 const Spiral = (
   toPathFromAngle = (angle) => [[angle]],
@@ -36,26 +65,40 @@ const Spiral = (
 
 Shape.prototype.Spiral = shapeMethod(Spiral);
 
+const Z = 2;
+
 registerReifier('Arc', ({ tags, plan }) => {
-  const { start = 0, end = 360 } = plan.angle || {};
+  const { start = 0, end = 360 } = getAngle(plan);
+  const [scale, middle] = getScale(plan);
+  const corner1 = getCorner1(plan);
+  const corner2 = getCorner2(plan);
+  const top = corner2[Z];
+  const bottom = corner1[Z];
+
+  // FIX: corner1 is not really right.
   const spiral = Spiral((a) => [[1]], {
     from: start - 90,
     upto: end - 90,
-    by: 360 / getSides(plan),
-  }).scale(...getRadius(plan));
+    by: 360 / getSides(plan, 32),
+  })
+    .scale(...scale)
+    .move(...middle);
   if (end - start === 360) {
-    // return spiral.close().fill().ex(getTop(plan), getBottom(plan)).move(...getCenter(plan)).transform(getMatrix(plan)).toGeometry();
     return spiral
       .close()
       .fill()
-      .ex(getTop(plan), getBottom(plan))
-      .orient({ center: getCenter(plan), from: getFrom(plan), at: getTo(plan) })
+      .ex(top, bottom)
+      .orient({
+        center: negate(getAt(plan)),
+        from: getFrom(plan),
+        at: getTo(plan),
+      })
       .transform(getMatrix(plan))
       .setTags(tags)
       .toGeometry();
   } else {
     return spiral
-      .move(...getCenter(plan))
+      .move(...getAt(plan))
       .transform(getMatrix(plan))
       .setTags(tags)
       .toGeometry();
@@ -63,7 +106,7 @@ registerReifier('Arc', ({ tags, plan }) => {
 });
 
 const Arc = (x = 1, y = x, z = 0) =>
-  Shape.fromGeometry(taggedPlan({}, { diameter: [x, y, z], type: 'Arc' }));
+  Shape.fromGeometry(taggedPlan({}, { type: 'Arc' })).diameter(x, y, z);
 
 Shape.prototype.Arc = shapeMethod(Arc);
 
@@ -79,37 +122,42 @@ const Assembly = (...shapes) =>
 
 Shape.prototype.Assembly = shapeMethod(Assembly);
 
+const X = 0;
+const Y = 1;
+const Z$1 = 2;
+
 registerReifier('Box', ({ tags, plan }) => {
-  const left = getLeft(plan);
-  const right = getRight(plan);
-  const front = getFront(plan);
-  const back = getBack(plan);
-  const top = getTop(plan);
-  const bottom = getBottom(plan);
-  const [, , Z] = getCenter(plan);
+  const corner1 = getCorner1(plan);
+  const corner2 = getCorner2(plan);
+  const left = corner1[X];
+  const right = corner2[X];
+  const front = corner1[Y];
+  const back = corner2[Y];
+  const top = corner2[Z$1];
+  const bottom = corner1[Z$1];
+
   return Shape.fromPath([
-    [left, back, Z],
-    [right, back, Z],
-    [right, front, Z],
-    [left, front, Z],
+    [left, back, bottom],
+    [right, back, bottom],
+    [right, front, bottom],
+    [left, front, bottom],
   ])
     .fill()
     .ex(top, bottom)
-    .orient({ center: getCenter(plan), from: getFrom(plan), at: getTo(plan) })
+    .orient({
+      center: negate(getAt(plan)),
+      from: getFrom(plan),
+      at: getTo(plan),
+    })
     .transform(getMatrix(plan))
     .setTags(tags)
     .toGeometry();
 });
 
 const Box = (x, y = x, z = 0) =>
-  Shape.fromGeometry(taggedPlan({}, { diameter: [x, y, z], type: 'Box' }));
+  Shape.fromGeometry(taggedPlan({}, { type: 'Box' })).diameter(x, y, z);
 
 Shape.prototype.Box = shapeMethod(Box);
-
-const Block = (diameter = 1, top = 1, base = -top) =>
-  Box(diameter).top(top).base(base);
-
-Shape.prototype.Block = shapeMethod(Block);
 
 const isDefined$1 = (value) => value;
 
@@ -171,24 +219,28 @@ Point.fromPoint = fromPoint;
 
 Shape.prototype.Point = shapeMethod(Point);
 
-registerReifier('Cone', ({ tags, plan }) => {
-  const [length, width] = getDiameter(plan);
-  return Hull(
-    Arc(length, width).sides(getSides(plan)).z(getBase(plan)),
-    Point(0, 0, getTop(plan))
+const Z$2 = 2;
+
+// FIX: This looks wrong.
+registerReifier('Cone', ({ tags, plan }) =>
+  Hull(
+    Arc(...getCorner2(plan)).sides(getSides(plan, 32)),
+    Point(0, 0, getCorner1(plan)[Z$2])
   )
-    .orient({ center: getCenter(plan), from: getFrom(plan), at: getTo(plan) })
+    .orient({
+      center: negate(getAt(plan)),
+      from: getFrom(plan),
+      at: getTo(plan),
+    })
     .transform(getMatrix(plan))
     .setTags(tags)
-    .toGeometry();
-});
+    .toGeometry()
+);
 
 const Cone = (diameter = 1, top = 1, base = -top) =>
-  Shape.fromGeometry(
-    taggedPlan({}, { diameter: [diameter, diameter, 0], type: 'Cone' })
-  )
-    .top(top)
-    .base(base);
+  Shape.fromGeometry(taggedPlan({}, { type: 'Cone' }))
+    .corner1(0, 0, top)
+    .corner2(diameter, diameter, base);
 
 Shape.prototype.Cone = shapeMethod(Cone);
 
@@ -1640,17 +1692,20 @@ const Hexagon = (x, y, z) => Arc(x, y, z).sides(6);
 
 Shape.prototype.Hexagon = shapeMethod(Hexagon);
 
-const Z = 2;
-
-registerReifier('Icosahedron', ({ tags, plan }) =>
-  Shape.fromPolygonsToSolid(buildRegularIcosahedron({}))
+registerReifier('Icosahedron', ({ tags, plan }) => {
+  const [scale, middle] = getScale(plan);
+  return Shape.fromPolygonsToSolid(buildRegularIcosahedron({}))
     .toGraph()
-    .scale(...getRadius(plan))
-    .z(getRadius(plan)[Z] + getBase(plan))
-    .orient({ center: getCenter(plan), from: getFrom(plan), at: getTo(plan) })
+    .scale(...scale)
+    .move(...middle)
+    .orient({
+      center: negate(getAt(plan)),
+      from: getFrom(plan),
+      at: getTo(plan),
+    })
     .setTags(tags)
-    .toGeometry()
-);
+    .toGeometry();
+});
 
 const Icosahedron = (x = 1, y = x, z = x) =>
   Shape.fromGeometry(
@@ -1716,26 +1771,31 @@ const Octagon = (x, y, z) => Arc(x, y, z).sides(8);
 
 Shape.prototype.Octagon = shapeMethod(Octagon);
 
-const Z$1 = 2;
-
-registerReifier('Orb', ({ tags, plan }) =>
-  Shape.fromGeometry(taggedSolid({}, buildRingSphere(getSides(plan, 16))))
+registerReifier('Orb', ({ tags, plan }) => {
+  const [scale, middle] = getScale(plan);
+  return Shape.fromGeometry(
+    taggedSolid({}, buildRingSphere(getSides(plan, 16)))
+  )
     .toGraph()
-    .scale(...getRadius(plan))
-    .z(getRadius(plan)[Z$1] + getBase(plan))
-    .orient({ center: getCenter(plan), from: getFrom(plan), at: getTo(plan) })
+    .scale(...scale)
+    .move(...middle)
+    .orient({
+      center: negate(getAt(plan)),
+      from: getFrom(plan),
+      at: getTo(plan),
+    })
     .setTags(tags)
-    .toGeometry()
-);
+    .toGeometry();
+});
 
 const Orb = (x = 1, y = x, z = x) =>
-  Shape.fromGeometry(taggedPlan({}, { diameter: [x, y, z], type: 'Orb' }));
+  Shape.fromGeometry(taggedPlan({}, { type: 'Orb' })).diameter(x, y, z);
 
 Shape.prototype.Orb = shapeMethod(Orb);
 
-const X = 0;
-const Y = 1;
-const Z$2 = 2;
+const X$1 = 0;
+const Y$1 = 1;
+const Z$3 = 2;
 
 const Peg = (
   origin = [0, 0, 0],
@@ -1747,7 +1807,7 @@ const Peg = (
   const r = add(origin, right);
   return Shape.fromGeometry(
     taggedPoints({ tags: ['peg'] }, [
-      [o[X], o[Y], o[Z$2], f[X], f[Y], f[Z$2], r[X], r[Y], r[Z$2]],
+      [o[X$1], o[Y$1], o[Z$3], f[X$1], f[Y$1], f[Z$3], r[X$1], r[Y$1], r[Z$3]],
     ])
   );
 };
@@ -1806,11 +1866,6 @@ const RegularPolygon = (value = 1, sides = 5) => {
 };
 
 Shape.prototype.RegularPolygon = shapeMethod(RegularPolygon);
-
-const Rod = (diameter = 1, top = 1, base = -top) =>
-  Arc(diameter).top(top).base(base);
-
-Shape.prototype.Rod = shapeMethod(Rod);
 
 const Septagon = (x, y, z) => Arc(x, y, z).sides(7);
 
@@ -1920,7 +1975,6 @@ Shape.prototype.Weld = shapeMethod(Weld);
 const api = {
   Arc,
   Assembly,
-  Block,
   Box,
   ChainedHull,
   Circle,
@@ -1947,7 +2001,6 @@ const api = {
   Polygon,
   Polyhedron,
   RegularPolygon,
-  Rod,
   Septagon,
   Sketch,
   Spiral,
@@ -1962,4 +2015,4 @@ const api = {
 };
 
 export default api;
-export { Arc, Assembly, Block, Box, ChainedHull, Circle, Cone, Difference, Empty, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Intersection, Line, LoopedHull, Octagon, Orb, Path, Peg, Pentagon, Plane, Point, Points, Polygon, Polyhedron, RegularPolygon, Rod, Septagon, Sketch, Spiral, Square, Tetragon, Toolpath, Torus, Triangle, Union, Wave, Weld };
+export { Arc, Assembly, Box, ChainedHull, Circle, Cone, Difference, Empty, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Intersection, Line, LoopedHull, Octagon, Orb, Path, Peg, Pentagon, Plane, Point, Points, Polygon, Polyhedron, RegularPolygon, Septagon, Sketch, Spiral, Square, Tetragon, Toolpath, Torus, Triangle, Union, Wave, Weld };
