@@ -8,7 +8,6 @@ import { negate } from '@jsxcad/math-vec3';
 registerReifier('Icosahedron', ({ tags, plan }) => {
   const [scale, middle] = getScale(plan);
   return Shape.fromPolygonsToSolid(buildRegularIcosahedron({}))
-    .toGraph()
     .scale(...scale)
     .move(...middle)
     .orient({

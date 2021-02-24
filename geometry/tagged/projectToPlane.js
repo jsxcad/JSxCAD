@@ -17,9 +17,7 @@ export const projectToPlane = (geometry, plane, direction) => {
           projectToPlaneOfGraph(geometry.graph, plane, direction)
         );
       }
-      case 'solid':
-      case 'z0Surface':
-      case 'surface':
+      case 'triangles':
       case 'points':
         // Not implemented yet.
         return geometry;

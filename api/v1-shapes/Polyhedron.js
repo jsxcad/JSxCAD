@@ -5,7 +5,7 @@ export const ofPointPaths = (points = [], paths = []) => {
   for (const path of paths) {
     polygons.push(path.map((point) => points[point]));
   }
-  return Shape.fromPolygonsToSolid(polygons).toGraph();
+  return Shape.fromPolygons(polygons);
 };
 
 export const Polyhedron = (...args) => ofPointPaths(...args);

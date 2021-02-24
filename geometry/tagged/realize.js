@@ -8,9 +8,7 @@ export const realize = (geometry) => {
     switch (geometry.type) {
       case 'graph':
         return taggedGraph({ tags }, realizeGraph(geometry.graph));
-      case 'solid':
-      case 'z0Surface':
-      case 'surface':
+      case 'triangles':
       case 'points':
       case 'paths':
         // No lazy representation to realize.
@@ -28,6 +26,7 @@ export const realize = (geometry) => {
       case 'layers':
       case 'layout':
       case 'sketch':
+      case 'transform':
         return descend();
       default:
         throw Error(`Unexpected geometry: ${JSON.stringify(geometry)}`);

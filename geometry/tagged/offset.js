@@ -17,9 +17,7 @@ export const offset = (geometry, initial = 1, step, limit) => {
           { tags },
           offsetGraph(geometry.graph, initial, step, limit)
         );
-      case 'solid':
-      case 'z0Surface':
-      case 'surface':
+      case 'triangles':
       case 'points':
         // Not implemented yet.
         return geometry;

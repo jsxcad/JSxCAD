@@ -19,13 +19,6 @@ export const translate = (vector, geometry) =>
 export const scale = (vector, geometry) =>
   transform(fromScaling(vector), geometry);
 
-export {
-  findOpenEdges,
-  isWatertight,
-  makeWatertight,
-  reconcile,
-} from './makeWatertight.js';
-
 export { isNotVoid, isVoid } from './isNotVoid.js';
 
 export { rewrite, visit } from './visit.js';
@@ -55,27 +48,19 @@ export { getNonVoidPaths } from './getNonVoidPaths.js';
 export { getNonVoidFaceablePaths } from './getNonVoidFaceablePaths.js';
 export { getNonVoidPlans } from './getNonVoidPlans.js';
 export { getNonVoidPoints } from './getNonVoidPoints.js';
-export { getNonVoidSolids } from './getNonVoidSolids.js';
-export { getNonVoidSurfaces } from './getNonVoidSurfaces.js';
-export { getNonVoidZ0Surfaces } from './getNonVoidZ0Surfaces.js';
 export { getFaceablePaths } from './getFaceablePaths.js';
 export { getGraphs } from './getGraphs.js';
 export { getPaths } from './getPaths.js';
 export { getPeg } from './getPeg.js';
 export { getPlans } from './getPlans.js';
 export { getPoints } from './getPoints.js';
-export { getSolids } from './getSolids.js';
-export { getSurfaces } from './getSurfaces.js';
 export { getTags } from './getTags.js';
-export { getZ0Surfaces } from './getZ0Surfaces.js';
 export { hash } from './hash.js';
 export { fill } from './fill.js';
 export { intersection } from './intersection.js';
 export { inset } from './inset.js';
 export { keep } from './keep.js';
-export { measureArea } from './measureArea.js';
 export { measureBoundingBox } from './measureBoundingBox.js';
-export { measureHeights } from './measureHeights.js';
 export { offset } from './offset.js';
 export { outline } from './outline.js';
 export { projectToPlane } from './projectToPlane.js';
@@ -97,10 +82,8 @@ export { taggedPaths } from './taggedPaths.js';
 export { taggedPlan } from './taggedPlan.js';
 export { taggedPoints } from './taggedPoints.js';
 export { taggedSketch } from './taggedSketch.js';
-export { taggedSolid } from './taggedSolid.js';
-export { taggedSurface } from './taggedSurface.js';
 export { taggedTransform } from './taggedTransform.js';
-export { taggedZ0Surface } from './taggedZ0Surface.js';
+export { taggedTriangles } from './taggedTriangles.js';
 export { test } from './test.js';
 export { toDisjointGeometry } from './toDisjointGeometry.js';
 export { toKeptGeometry } from './toKeptGeometry.js';

@@ -7,7 +7,6 @@
  * the api uses.
  */
 
-import '@jsxcad/api-v1-deform';
 import '@jsxcad/api-v1-extrude';
 import '@jsxcad/api-v1-gcode';
 import '@jsxcad/api-v1-layout';
@@ -57,24 +56,17 @@ export {
   saveRecordedNotes,
 } from './recordNotes.js';
 
-// export { X, Y, Z } from '@jsxcad/api-v1-connector';
-
-// export { Loop } from '@jsxcad/api-v1-extrude';
-
 export { Shape, loadGeometry, log, saveGeometry } from '@jsxcad/api-v1-shape';
 
 export { Line2 } from '@jsxcad/api-v1-line2';
 
 export { Plan } from '@jsxcad/api-v1-plan';
 
-export { Shell } from '@jsxcad/api-v1-shell';
-
 export {
   Arc,
   Assembly,
   Box,
   ChainedHull,
-  Circle,
   Cone,
   Empty,
   Group,
@@ -97,7 +89,6 @@ export {
   Polyhedron,
   Septagon,
   Spiral,
-  Square,
   Tetragon,
   Toolpath,
   Torus,

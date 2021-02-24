@@ -4,8 +4,7 @@ import { eachPoint } from './eachPoint.js';
 import { isVoid } from './isNotVoid.js';
 import { measureBoundingBox as measureBoundingBoxOfGraph } from '@jsxcad/geometry-graph';
 import { measureBoundingBox as measureBoundingBoxOfPoints } from '@jsxcad/geometry-points';
-import { measureBoundingBox as measureBoundingBoxOfSolid } from '@jsxcad/geometry-solid';
-import { measureBoundingBox as measureBoundingBoxOfSurface } from '@jsxcad/geometry-surface';
+import { measureBoundingBox as measureBoundingBoxOfPolygons } from '@jsxcad/geometry-polygons';
 import { reify } from './reify.js';
 import { toKeptGeometry } from './toKeptGeometry.js';
 import { visit } from './visit.js';
@@ -45,14 +44,12 @@ export const measureBoundingBox = (geometry) => {
         return update(measureBoundingBoxOfGraph(geometry.graph));
       case 'layout':
         return update(geometry.marks);
-      case 'solid':
-        return update(measureBoundingBoxOfSolid(geometry.solid));
-      case 'surface':
-        return update(measureBoundingBoxOfSurface(geometry.surface));
       case 'points':
         return update(measureBoundingBoxOfPoints(geometry.points));
       case 'paths':
         return update(measureBoundingBoxGeneric(geometry));
+      case 'triangles':
+        return update(measureBoundingBoxOfPolygons(geometry.triangles));
       default:
         throw Error(`Unknown geometry: ${geometry.type}`);
     }

@@ -10,9 +10,7 @@ export const smooth = (geometry, options) => {
       case 'graph': {
         return taggedGraph({ tags }, smoothGraph(geometry.graph, options));
       }
-      case 'solid':
-      case 'z0Surface':
-      case 'surface':
+      case 'triangles':
       case 'paths':
       case 'points':
         // Not implemented yet.

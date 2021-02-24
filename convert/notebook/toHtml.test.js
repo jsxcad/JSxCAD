@@ -1,5 +1,4 @@
 import { boot } from '@jsxcad/sys';
-import { fromPolygons } from '@jsxcad/geometry-solid';
 import fs from 'fs';
 import test from 'ava';
 import { toHtml } from './toHtml.js';
@@ -18,8 +17,8 @@ test('Test notebook', async (t) => {
     {
       view: {
         geometry: {
-          type: 'solid',
-          solid: fromPolygons(unitGeodesicSphere20Polygons),
+          type: 'triangles',
+          triangles: unitGeodesicSphere20Polygons,
           tags: ['solid'],
         },
       },

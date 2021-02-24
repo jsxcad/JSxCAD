@@ -1,9 +1,7 @@
 import Shape from './Shape.js';
-import union from './union.js';
-
-// x.addTo(y) === y.add(x)
+import { add } from './add.js';
 
 const addToMethod = function (shape) {
-  return union(shape, this);
+  return add(shape, this);
 };
 Shape.prototype.addTo = addToMethod;
