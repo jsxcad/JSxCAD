@@ -1,23 +1,9 @@
-import { canonicalize, toTriangles } from '@jsxcad/geometry-polygons';
-import {
-  getNonVoidGraphs,
-  getNonVoidSolids,
-  toDisjointGeometry,
-} from '@jsxcad/geometry-tagged';
+import { getNonVoidGraphs, toDisjointGeometry } from '@jsxcad/geometry-tagged';
 
-import { makeWatertight } from '@jsxcad/geometry-solid';
 import { toPlane } from '@jsxcad/math-poly3';
 import { toTriangles as toTrianglesFromGraph } from '@jsxcad/geometry-graph';
 
-const fromSolidToTriangles = (solid, triangles) => {
-  for (const surface of makeWatertight(solid)) {
-    for (const triangle of toTriangles({}, surface)) {
-      triangles.push(triangle);
-    }
-  }
-};
-
-const convertToFacets = (options, polygons) =>
+const convertToFacets = (polygons) =>
   polygons
     .map(convertToFacet)
     .filter((facet) => facet !== undefined)
@@ -45,15 +31,11 @@ const convertToFacet = (polygon) => {
 export const toStl = async (geometry, options = {}) => {
   const keptGeometry = toDisjointGeometry(await geometry);
   const triangles = [];
-  for (const { solid } of getNonVoidSolids(keptGeometry)) {
-    fromSolidToTriangles(solid, triangles);
-  }
   for (const { graph } of getNonVoidGraphs(keptGeometry)) {
     triangles.push(...toTrianglesFromGraph(graph));
   }
   const output = `solid JSxCAD\n${convertToFacets(
-    options,
-    canonicalize(triangles)
+    triangles
   )}\nendsolid JSxCAD\n`;
   return new TextEncoder('utf8').encode(output);
 };

@@ -13,9 +13,7 @@ export const extrudeToPlane = (geometry, highPlane, lowPlane, direction) => {
           extrudeToPlaneOfGraph(geometry.graph, highPlane, lowPlane, direction)
         );
       }
-      case 'solid':
-      case 'z0Surface':
-      case 'surface':
+      case 'triangles':
       case 'paths':
       case 'points':
         // Not implemented yet.

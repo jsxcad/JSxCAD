@@ -1,15 +1,7 @@
-import Shell from './Shell.js';
-import grow from './grow.js';
-import offset from './offset.js';
-import shrink from './shrink.js';
+import { inset, offset } from './offset.js';
 
-const api = {
-  Shell,
-  grow,
-  offset,
-  shrink,
-};
+export { offset, inset };
 
-export { Shell, grow, offset, shrink };
+const api = { offset, inset };
 
 export default api;

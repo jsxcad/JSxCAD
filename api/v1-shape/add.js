@@ -1,25 +1,12 @@
 import Shape from './Shape.js';
-import union from './union.js';
+import { union } from '@jsxcad/geometry-tagged';
 
-/**
- *
- * # shape.add(...shapes)
- *
- * Produces a version of shape with the regions overlapped by shapes added.
- *
- * shape.add(...shapes) is equivalent to union(shape, ...shapes).
- *
- * ::: illustration { "view": { "position": [40, 40, 40] } }
- * ```
- * Cube(10).below().add(Cube(5).moveX(5).below())
- * ```
- * :::
- *
- **/
+export const add = (shape, ...shapes) =>
+  Shape.fromGeometry(
+    union(shape.toGeometry(), ...shapes.map((shape) => shape.toGeometry()))
+  );
 
 const addMethod = function (...shapes) {
-  return union(this, ...shapes);
+  return add(this, ...shapes);
 };
 Shape.prototype.add = addMethod;
-
-addMethod.signature = 'Shape -> (...Shapes) -> Shape';

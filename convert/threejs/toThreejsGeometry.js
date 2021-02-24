@@ -1,37 +1,11 @@
-import {
-  toPaths as toPathsFromGraph,
-  toSolid as toSolidFromGraph,
-  toSurface as toSurfaceFromGraph,
-} from '@jsxcad/geometry-graph';
-
 import { toPlane } from '@jsxcad/math-poly3';
-import { toTriangles } from '@jsxcad/geometry-polygons';
 
 const pointsToThreejsPoints = (points) => points;
 
-const solidToThreejsSolid = (solid) => {
+const trianglesToThreejsTriangles = (triangles) => {
   const normals = [];
   const positions = [];
-  for (const surface of solid) {
-    for (const triangle of toTriangles({}, surface)) {
-      const plane = toPlane(triangle);
-      if (plane === undefined) {
-        continue;
-      }
-      const [px, py, pz] = plane;
-      for (const [x = 0, y = 0, z = 0] of triangle) {
-        normals.push(px, py, pz);
-        positions.push(x, y, z);
-      }
-    }
-  }
-  return { normals, positions };
-};
-
-const surfaceToThreejsSurface = (surface) => {
-  const normals = [];
-  const positions = [];
-  for (const triangle of toTriangles({}, surface)) {
+  for (const triangle of triangles) {
     const plane = toPlane(triangle);
     if (plane === undefined) {
       continue;
@@ -109,27 +83,14 @@ export const toThreejsGeometry = (geometry, supertags) => {
         tags,
         isThreejsGeometry: true,
       };
-    case 'solid':
+    case 'triangles':
       return {
-        type: 'solid',
-        threejsSolid: solidToThreejsSolid(geometry.solid),
+        type: 'triangles',
+        threejsTriangles: trianglesToThreejsTriangles(geometry.triangles),
         tags,
         isThreejsGeometry: true,
       };
-    case 'surface':
-      return {
-        type: 'surface',
-        threejsSurface: surfaceToThreejsSurface(geometry.surface),
-        tags,
-        isThreejsGeometry: true,
-      };
-    case 'z0Surface':
-      return {
-        type: 'surface',
-        threejsSurface: surfaceToThreejsSurface(geometry.z0Surface),
-        tags,
-        isThreejsGeometry: true,
-      };
+    /*
     case 'graph':
       if (geometry.graph.isWireframe) {
         return {
@@ -155,6 +116,7 @@ export const toThreejsGeometry = (geometry, supertags) => {
           isThreejsGeometry: true,
         };
       }
+*/
     default:
       throw Error(`Unexpected geometry: ${geometry.type}`);
   }

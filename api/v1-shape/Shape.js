@@ -7,23 +7,18 @@ import {
 import {
   eachPoint,
   flip,
-  isWatertight,
-  makeWatertight,
-  reconcile,
   rewriteTags,
   taggedAssembly,
   taggedGraph,
   taggedPaths,
   taggedPoints,
-  taggedSolid,
-  taggedSurface,
   toDisjointGeometry as toDisjointTaggedGeometry,
   toPoints,
   toTransformedGeometry as toTransformedTaggedGeometry,
   transform,
 } from '@jsxcad/geometry-tagged';
 
-import { fromPolygons as fromPolygonsToSolid } from '@jsxcad/geometry-solid';
+import { fromPolygons } from '@jsxcad/geometry-graph';
 import { identityMatrix } from '@jsxcad/math-mat4';
 
 export class Shape {
@@ -103,27 +98,6 @@ export class Shape {
     }
   }
 
-  reconcile() {
-    return fromGeometry(reconcile(this.toDisjointGeometry()));
-  }
-
-  assertWatertight() {
-    if (!this.isWatertight()) {
-      throw Error('not watertight');
-    }
-    return this;
-  }
-
-  isWatertight() {
-    return isWatertight(this.toDisjointGeometry());
-  }
-
-  makeWatertight(threshold) {
-    return fromGeometry(
-      makeWatertight(this.toDisjointGeometry(), undefined, undefined, threshold)
-    );
-  }
-
   // Low level setter for reifiers.
   setTags(tags = []) {
     return Shape.fromGeometry(rewriteTags(tags, [], this.toGeometry()));
@@ -148,14 +122,8 @@ Shape.fromPoint = (point, context) =>
   fromGeometry(taggedPoints({}, [point]), context);
 Shape.fromPoints = (points, context) =>
   fromGeometry(taggedPoints({}, points), context);
-Shape.fromPolygonsToSolid = (polygons, context) =>
-  fromGeometry(taggedSolid({}, fromPolygonsToSolid(polygons)), context);
-Shape.fromPolygonsToSurface = (polygons, context) =>
-  fromGeometry(taggedSurface({}, polygons), context);
-Shape.fromSurfaces = (surfaces, context) =>
-  fromGeometry(taggedSolid({}, surfaces), context);
-Shape.fromSolid = (solid, context) =>
-  fromGeometry(taggedSolid({}, solid), context);
+Shape.fromPolygons = (polygons, context) =>
+  fromGeometry(taggedGraph({}, fromPolygons(polygons)), context);
 
 export const fromGeometry = Shape.fromGeometry;
 export const toGeometry = (shape) => shape.toGeometry();

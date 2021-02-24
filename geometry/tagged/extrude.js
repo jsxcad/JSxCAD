@@ -15,9 +15,7 @@ export const extrude = (geometry, height, depth) => {
           extrudeGraph(geometry.graph, height, depth)
         );
       }
-      case 'solid':
-      case 'z0Surface':
-      case 'surface':
+      case 'triangles':
       case 'points':
         // Not implemented yet.
         return geometry;

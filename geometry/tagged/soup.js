@@ -1,11 +1,10 @@
-import { toPaths, toSolid, toSurface } from '@jsxcad/geometry-graph';
+import { toPaths, toTriangles } from '@jsxcad/geometry-graph';
 
 import { outline } from './outline.js';
 import { rewrite } from './visit.js';
 import { taggedGroup } from './taggedGroup.js';
 import { taggedPaths } from './taggedPaths.js';
-import { taggedSolid } from './taggedSolid.js';
-import { taggedSurface } from './taggedSurface.js';
+import { taggedTriangles } from './taggedTriangles.js';
 import { toTransformedGeometry } from './toTransformedGeometry.js';
 
 export const soup = (geometry) => {
@@ -19,7 +18,7 @@ export const soup = (geometry) => {
         } else if (graph.isClosed) {
           return taggedGroup(
             {},
-            taggedSolid({ tags }, toSolid(graph)),
+            taggedTriangles({ tags }, toTriangles(graph)),
             ...outline(geometry)
           );
         } else if (graph.isEmpty) {
@@ -28,14 +27,11 @@ export const soup = (geometry) => {
           // FIX: Simplify this arrangement.
           return taggedGroup(
             {},
-            taggedSurface({ tags }, toSurface(graph)),
+            taggedTriangles({ tags }, toTriangles(graph)),
             ...outline(geometry)
           );
         }
       }
-      case 'solid':
-      case 'z0Surface':
-      case 'surface':
       case 'points':
       case 'paths':
         // Already soupy enough.

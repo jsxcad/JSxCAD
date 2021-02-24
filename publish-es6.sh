@@ -15,9 +15,7 @@ cp algorithm/watertight/dist/main.js es6/jsxcad-algorithm-watertight.js
 cp api/observablehq/dist/main.js es6/jsxcad-api-observablehq.js
 cp api/v1/dist/main.js es6/jsxcad-api-v1.js
 cp api/v1-armature/dist/main.js es6/jsxcad-api-v1-armature.js
-cp api/v1-connector/dist/main.js es6/jsxcad-api-v1-connector.js
 cp api/v1-cursor/dist/main.js es6/jsxcad-api-v1-cursor.js
-cp api/v1-deform/dist/main.js es6/jsxcad-api-v1-deform.js
 cp api/v1-dst/dist/main.js es6/jsxcad-api-v1-dst.js
 cp api/v1-dxf/dist/main.js es6/jsxcad-api-v1-dxf.js
 cp api/v1-extrude/dist/main.js es6/jsxcad-api-v1-extrude.js
@@ -58,17 +56,12 @@ cp convert/stl/dist/main.js es6/jsxcad-convert-stl.js
 cp convert/svg/dist/main.js es6/jsxcad-convert-svg.js
 cp convert/threejs/dist/main.js es6/jsxcad-convert-threejs.js
 cp data/shape/dist/main.js es6/jsxcad-data-shape.js
-cp geometry/bsp/dist/main.js es6/jsxcad-geometry-bsp.js
 cp geometry/graph/dist/main.js es6/jsxcad-geometry-graph.js
-cp geometry/halfedge/dist/main.js es6/jsxcad-geometry-halfedge.js
 cp geometry/path/dist/main.js es6/jsxcad-geometry-path.js
 cp geometry/paths/dist/main.js es6/jsxcad-geometry-paths.js
 cp geometry/plan/dist/main.js es6/jsxcad-geometry-plan.js
 cp geometry/points/dist/main.js es6/jsxcad-geometry-points.js
 cp geometry/polygons/dist/main.js es6/jsxcad-geometry-polygons.js
-cp geometry/solid-boolean/dist/main.js es6/jsxcad-geometry-solid-boolean.js
-cp geometry/solid/dist/main.js es6/jsxcad-geometry-solid.js
-cp geometry/surface/dist/main.js es6/jsxcad-geometry-surface.js
 cp geometry/tagged/dist/main.js es6/jsxcad-geometry-tagged.js
 cp math/line2/dist/main.js es6/jsxcad-math-line2.js
 cp math/line3/dist/main.js es6/jsxcad-math-line3.js

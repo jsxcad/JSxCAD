@@ -2,7 +2,6 @@ import { fromScaling, fromTranslation, multiply } from '@jsxcad/math-mat4';
 import {
   getNonVoidGraphs,
   getNonVoidPaths,
-  getNonVoidSurfaces,
   outline,
   toKeptGeometry,
   transform,
@@ -83,10 +82,7 @@ export const toPdf = async (
     fromScaling([scale, scale, scale])
   );
   const keptGeometry = toKeptGeometry(transform(matrix, await geometry));
-  for (const surface of [
-    ...getNonVoidSurfaces(keptGeometry),
-    ...getNonVoidGraphs(keptGeometry),
-  ]) {
+  for (const surface of getNonVoidGraphs(keptGeometry)) {
     for (const { tags, paths } of outline(surface)) {
       lines.push(toFillColor(toRgbFromTags(tags, definitions, black)));
       lines.push(toStrokeColor(toRgbFromTags(tags, definitions, black)));

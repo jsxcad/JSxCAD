@@ -9,9 +9,7 @@ export const reify = (geometry) => {
   const op = (geometry, descend) => {
     switch (geometry.type) {
       case 'graph':
-      case 'solid':
-      case 'z0Surface':
-      case 'surface':
+      case 'triangles':
       case 'points':
       case 'paths':
         // No plan to realize.

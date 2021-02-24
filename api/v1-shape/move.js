@@ -1,10 +1,11 @@
 import Shape from './Shape.js';
-import translate from './translate.js';
+import { fromTranslation } from '@jsxcad/math-mat4';
 
-export const move = (...args) => translate(...args);
+export const move = (shape, x = 0, y = 0, z = 0) =>
+  shape.transform(fromTranslation([x, y, z]));
 
 const moveMethod = function (...params) {
-  return translate(this, ...params);
+  return move(this, ...params);
 };
 Shape.prototype.move = moveMethod;
 

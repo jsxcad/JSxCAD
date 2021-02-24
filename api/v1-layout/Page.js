@@ -1,4 +1,4 @@
-import { Empty, Hershey, Square } from '@jsxcad/api-v1-shapes';
+import { Box, Empty, Hershey } from '@jsxcad/api-v1-shapes';
 import {
   getLayouts,
   getLeafs,
@@ -50,7 +50,7 @@ const buildLayoutGeometry = ({
   const size = [pageWidth, pageLength];
   const r = (v) => Math.floor(v * 100) / 100;
   const title = `${r(pageWidth)} x ${r(pageLength)} : ${itemNames.join(', ')}`;
-  const visualization = Square(
+  const visualization = Box(
     Math.max(pageWidth, margin),
     Math.max(pageLength, margin)
   )
@@ -159,7 +159,6 @@ export const Page = (
 const PageMethod = function (options = {}) {
   return Page(options, this);
 };
-Shape.prototype.Page = PageMethod; // Deprecate
 Shape.prototype.page = PageMethod;
 
 export default Page;
@@ -179,11 +178,9 @@ export const ensurePages = (geometry, depth = 0) => {
 const PackMethod = function (options = {}) {
   return Page(options, this);
 };
-Shape.prototype.Pack = PackMethod; // Deprecate
 Shape.prototype.pack = PackMethod;
 
 const FixMethod = function (options = {}) {
   return Page({ ...options, pack: false }, this);
 };
-Shape.prototype.Fix = FixMethod; // Deprecate
 Shape.prototype.fix = FixMethod;

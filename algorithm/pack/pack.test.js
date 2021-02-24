@@ -347,9 +347,9 @@ test('Bad fit', (t) => {
   const [packed, unpacked] = pack(
     { size: [30, 120] },
     {
-      type: 'surface',
+      type: 'triangles',
       tags: undefined,
-      surface: [
+      triangles: [
         [
           [5.000000000000001, 20, 0],
           [-5, 20.000000000000004, 0],
@@ -359,9 +359,9 @@ test('Bad fit', (t) => {
       ],
     },
     {
-      type: 'surface',
+      type: 'triangles',
       tags: undefined,
-      surface: [
+      triangles: [
         [
           [5.000000000000001, 20, 0],
           [-5, 20.000000000000004, 0],
@@ -377,9 +377,9 @@ test('Bad fit', (t) => {
       tags: undefined,
       content: [
         {
-          type: 'surface',
+          type: 'triangles',
           tags: undefined,
-          surface: [
+          triangles: [
             [
               [1, -14, 0],
               [-9, -14, 0],
@@ -395,9 +395,9 @@ test('Bad fit', (t) => {
       tags: undefined,
       content: [
         {
-          type: 'surface',
+          type: 'triangles',
           tags: undefined,
-          surface: [
+          triangles: [
             [
               [1, 28, 0],
               [-9, 28, 0],

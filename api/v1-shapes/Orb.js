@@ -2,21 +2,14 @@ import { Shape, shapeMethod } from '@jsxcad/api-v1-shape';
 
 import { getAt, getFrom, getScale, getSides, getTo } from './plan.js';
 
-import {
-  registerReifier,
-  taggedPlan,
-  taggedSolid,
-} from '@jsxcad/geometry-tagged';
+import { registerReifier, taggedPlan } from '@jsxcad/geometry-tagged';
 
 import { buildRingSphere } from '@jsxcad/algorithm-shape';
 import { negate } from '@jsxcad/math-vec3';
 
 registerReifier('Orb', ({ tags, plan }) => {
   const [scale, middle] = getScale(plan);
-  return Shape.fromGeometry(
-    taggedSolid({}, buildRingSphere(getSides(plan, 16)))
-  )
-    .toGraph()
+  return Shape.fromPolygons(buildRingSphere(getSides(plan, 16)))
     .scale(...scale)
     .move(...middle)
     .orient({

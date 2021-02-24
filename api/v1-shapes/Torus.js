@@ -11,8 +11,7 @@ export const Torus = (
     .rotateZ(rotation)
     .moveY(radius)
     .Loop(360, { sides: segments })
-    .rotateY(90)
-    .toGraph();
+    .rotateY(90);
 
 export default Torus;
 

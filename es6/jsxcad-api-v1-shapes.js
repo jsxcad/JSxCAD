@@ -1,7 +1,7 @@
 import Shape$1, { Shape, shapeMethod, weld } from './jsxcad-api-v1-shape.js';
 import { scale, subtract, add, negate } from './jsxcad-math-vec3.js';
 import { identity } from './jsxcad-math-mat4.js';
-import { registerReifier, taggedPlan, taggedAssembly, taggedLayers, taggedGraph, taggedDisjointAssembly, taggedPaths, taggedSolid, taggedPoints } from './jsxcad-geometry-tagged.js';
+import { registerReifier, taggedPlan, taggedAssembly, taggedLayers, taggedGraph, taggedDisjointAssembly, taggedPaths, taggedPoints } from './jsxcad-geometry-tagged.js';
 import { concatenate, rotateZ, translate as translate$1 } from './jsxcad-geometry-path.js';
 import { numbers } from './jsxcad-api-v1-math.js';
 import { convexHull, fromFunction, fromPaths } from './jsxcad-geometry-graph.js';
@@ -1686,7 +1686,6 @@ Shape.prototype.Hexagon = shapeMethod(Hexagon);
 registerReifier('Icosahedron', ({ tags, plan }) => {
   const [scale, middle] = getScale(plan);
   return Shape.fromPolygonsToSolid(buildRegularIcosahedron({}))
-    .toGraph()
     .scale(...scale)
     .move(...middle)
     .orient({
@@ -1760,10 +1759,7 @@ Shape.prototype.Octagon = shapeMethod(Octagon);
 
 registerReifier('Orb', ({ tags, plan }) => {
   const [scale, middle] = getScale(plan);
-  return Shape.fromGeometry(
-    taggedSolid({}, buildRingSphere(getSides(plan, 16)))
-  )
-    .toGraph()
+  return Shape.fromPolygons(buildRingSphere(getSides(plan, 16)))
     .scale(...scale)
     .move(...middle)
     .orient({
@@ -1826,7 +1822,7 @@ const ofPointPaths = (points = [], paths = []) => {
   for (const path of paths) {
     polygons.push(path.map((point) => points[point]));
   }
-  return Shape.fromPolygonsToSolid(polygons).toGraph();
+  return Shape.fromPolygons(polygons);
 };
 
 const Polyhedron = (...args) => ofPointPaths(...args);
@@ -1862,8 +1858,7 @@ const Torus = (
     .rotateZ(rotation)
     .moveY(radius)
     .Loop(360, { sides: segments })
-    .rotateY(90)
-    .toGraph();
+    .rotateY(90);
 
 Shape.prototype.Torus = shapeMethod(Torus);
 

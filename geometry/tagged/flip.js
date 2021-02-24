@@ -1,7 +1,5 @@
 import { flip as flipPaths } from '@jsxcad/geometry-paths';
 import { flip as flipPoints } from '@jsxcad/geometry-points';
-import { flip as flipSolid } from '@jsxcad/geometry-solid';
-import { flip as flipSurface } from '@jsxcad/geometry-surface';
 
 import { rewrite } from './visit.js';
 
@@ -12,12 +10,6 @@ export const flip = (geometry) => {
         return { ...geometry, points: flipPoints(geometry.points) };
       case 'paths':
         return { ...geometry, paths: flipPaths(geometry.paths) };
-      case 'surface':
-        return { ...geometry, surface: flipSurface(geometry.surface) };
-      case 'z0Surface':
-        return { ...geometry, surface: flipSurface(geometry.z0Surface) };
-      case 'solid':
-        return { ...geometry, solid: flipSolid(geometry.solid) };
       case 'assembly':
       case 'disjointAssembly':
       case 'layers':
