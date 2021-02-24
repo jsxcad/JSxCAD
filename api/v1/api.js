@@ -95,7 +95,6 @@ export {
   Points,
   Polygon,
   Polyhedron,
-  RegularPolygon,
   Septagon,
   Spiral,
   Square,

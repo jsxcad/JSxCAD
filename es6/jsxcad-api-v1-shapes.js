@@ -1,14 +1,13 @@
 import Shape$1, { Shape, shapeMethod, weld } from './jsxcad-api-v1-shape.js';
 import { scale, subtract, add, negate } from './jsxcad-math-vec3.js';
 import { identity } from './jsxcad-math-mat4.js';
-import { registerReifier, taggedPlan, taggedAssembly, taggedLayers, taggedGraph, taggedDisjointAssembly, taggedPaths, taggedSolid, taggedPoints, taggedZ0Surface } from './jsxcad-geometry-tagged.js';
+import { registerReifier, taggedPlan, taggedAssembly, taggedLayers, taggedGraph, taggedDisjointAssembly, taggedPaths, taggedSolid, taggedPoints } from './jsxcad-geometry-tagged.js';
 import { concatenate, rotateZ, translate as translate$1 } from './jsxcad-geometry-path.js';
 import { numbers } from './jsxcad-api-v1-math.js';
 import { convexHull, fromFunction, fromPaths } from './jsxcad-geometry-graph.js';
 import { translate } from './jsxcad-geometry-paths.js';
-import { buildRegularIcosahedron, buildRingSphere, regularPolygonEdgeLengthToRadius, buildRegularPolygon } from './jsxcad-algorithm-shape.js';
+import { buildRegularIcosahedron, buildRingSphere } from './jsxcad-algorithm-shape.js';
 import { toPolygon } from './jsxcad-math-plane.js';
-import { radius, getRadius, getCenter } from './jsxcad-geometry-plan.js';
 
 const find = (plan, key, otherwise) => {
   for (let nth = plan.history.length - 1; nth >= 0; nth--) {
@@ -209,10 +208,6 @@ const chainHullMethod = function (...shapes) {
 Shape.prototype.chainHull = chainHullMethod;
 Shape.prototype.ChainedHull = shapeMethod(ChainedHull);
 
-const Circle = Arc;
-
-Shape.prototype.Circle = shapeMethod(Circle);
-
 const fromPoint = ([x = 0, y = 0, z = 0]) => Shape.fromPoint([x, y, z]);
 const Point = (...args) => fromPoint([...args]);
 Point.fromPoint = fromPoint;
@@ -243,10 +238,6 @@ const Cone = (diameter = 1, top = 1, base = -top) =>
     .corner2(diameter, diameter, base);
 
 Shape.prototype.Cone = shapeMethod(Cone);
-
-const Difference = (first, ...rest) => first.cut(...rest);
-
-Shape.prototype.Difference = shapeMethod(Difference);
 
 const Empty = (...shapes) =>
   Shape.fromGeometry(taggedDisjointAssembly({}));
@@ -1719,10 +1710,6 @@ const Implicit = (op, options) =>
 
 Shape.prototype.Implicit = shapeMethod(Implicit);
 
-const Intersection = (first, ...rest) => first.clip(...rest);
-
-Shape.prototype.Intersection = shapeMethod(Intersection);
-
 const fromVec3 = (...points) =>
   Shape.fromOpenPath(points.map(([x = 0, y = 0, z = 0]) => [x, y, z]));
 
@@ -1848,25 +1835,6 @@ Polyhedron.ofPointPaths = ofPointPaths;
 
 Shape.prototype.Polyhedron = shapeMethod(Polyhedron);
 
-const orRadius = (value) => {
-  if (typeof value === 'number') {
-    return radius(value);
-  } else {
-    return value;
-  }
-};
-
-const RegularPolygon = (value = 1, sides = 5) => {
-  const plan = orRadius(value);
-  const spiral = Spiral((a) => [[getRadius(plan)]], {
-    upto: 360,
-    by: 360 / sides,
-  }).at(getCenter(plan));
-  return spiral.close();
-};
-
-Shape.prototype.RegularPolygon = shapeMethod(RegularPolygon);
-
 const Septagon = (x, y, z) => Arc(x, y, z).sides(7);
 
 Shape.prototype.Septagon = shapeMethod(Septagon);
@@ -1875,44 +1843,6 @@ Shape.prototype.Septagon = shapeMethod(Septagon);
 const Sketch = (shape) => shape.sketch();
 
 Shape.prototype.Sketch = shapeMethod(Sketch);
-
-const toRadiusFromApothem = (apothem) => apothem / Math.cos(Math.PI / 4);
-
-const edgeScale = regularPolygonEdgeLengthToRadius(1, 4);
-const unitSquare = () =>
-  Shape.fromGeometry(taggedZ0Surface({}, [buildRegularPolygon(4)]))
-    .toGraph()
-    .rotateZ(45)
-    .scale(edgeScale);
-
-const ofSize$1 = (width = 1, length) =>
-  unitSquare().scale(width, length, 1);
-const ofRadius = (radius) =>
-  Shape.fromGeometry(taggedZ0Surface({}, [buildRegularPolygon(4)]))
-    .toGraph()
-    .rotateZ(45)
-    .scale(radius);
-const ofApothem = (apothem) => ofRadius(toRadiusFromApothem(apothem));
-const ofDiameter = (diameter) => ofRadius(diameter / 2);
-
-const fromCorners = (corner1, corner2) => {
-  const [c1x, c1y] = corner1;
-  const [c2x, c2y] = corner2;
-  const length = c2x - c1x;
-  const width = c2y - c1y;
-  const center = [(c1x + c2x) / 2, (c1y + c2y) / 2];
-  return unitSquare().scale(length, width, 1).translate(center);
-};
-
-const Square = (...args) => ofSize$1(...args);
-
-Square.ofSize = ofSize$1;
-Square.ofRadius = ofRadius;
-Square.ofApothem = ofApothem;
-Square.ofDiameter = ofDiameter;
-Square.fromCorners = fromCorners;
-
-Shape.prototype.Square = shapeMethod(Square);
 
 const Tetragon = (x, y, z) => Arc(x, y, z).sides(4);
 
@@ -1941,16 +1871,6 @@ const Triangle = (x, y, z) => Arc(x, y, z).sides(3);
 
 Shape.prototype.Triangle = shapeMethod(Triangle);
 
-const Union = (first, ...rest) => {
-  if (first === undefined) {
-    return Empty();
-  } else {
-    return first.add(...rest);
-  }
-};
-
-Shape.prototype.Union = shapeMethod(Union);
-
 const Wave = (
   toPathFromXDistance = (xDistance) => [[0]],
   { from = 0, to = 360, by, resolution } = {}
@@ -1977,9 +1897,7 @@ const api = {
   Assembly,
   Box,
   ChainedHull,
-  Circle,
   Cone,
-  Difference,
   Empty,
   Group,
   Hershey,
@@ -1987,7 +1905,6 @@ const api = {
   Hull,
   Icosahedron,
   Implicit,
-  Intersection,
   Line,
   LoopedHull,
   Octagon,
@@ -2000,19 +1917,16 @@ const api = {
   Points,
   Polygon,
   Polyhedron,
-  RegularPolygon,
   Septagon,
   Sketch,
   Spiral,
-  Square,
   Tetragon,
   Toolpath,
   Torus,
   Triangle,
-  Union,
   Wave,
   Weld,
 };
 
 export default api;
-export { Arc, Assembly, Box, ChainedHull, Circle, Cone, Difference, Empty, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Intersection, Line, LoopedHull, Octagon, Orb, Path, Peg, Pentagon, Plane, Point, Points, Polygon, Polyhedron, RegularPolygon, Septagon, Sketch, Spiral, Square, Tetragon, Toolpath, Torus, Triangle, Union, Wave, Weld };
+export { Arc, Assembly, Box, ChainedHull, Cone, Empty, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Line, LoopedHull, Octagon, Orb, Path, Peg, Pentagon, Plane, Point, Points, Polygon, Polyhedron, Septagon, Sketch, Spiral, Tetragon, Toolpath, Torus, Triangle, Wave, Weld };
