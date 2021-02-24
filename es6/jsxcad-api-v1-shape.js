@@ -1,8 +1,8 @@
 import { close, concatenate, open } from './jsxcad-geometry-path.js';
-import { taggedAssembly, eachPoint, flip, toDisjointGeometry as toDisjointGeometry$1, toTransformedGeometry, toPoints, transform, reconcile, isWatertight, makeWatertight, rewriteTags, taggedPaths, taggedGraph, taggedPoints, taggedSolid, taggedSurface, union as union$1, assemble as assemble$1, canonicalize as canonicalize$1, measureBoundingBox as measureBoundingBox$1, intersection as intersection$1, allTags, difference as difference$1, getLeafs, getSolids, empty, rewrite, taggedGroup, getAnySurfaces, getPaths, getGraphs, taggedLayers, isVoid, getNonVoidPaths, getPeg, taggedPlan, measureArea, taggedSketch, getNonVoidSolids, getAnyNonVoidSurfaces, test as test$1, outline, getNonVoidGraphs, realize, getNonVoidSurfaces, read, write } from './jsxcad-geometry-tagged.js';
+import { taggedAssembly, eachPoint, flip, toDisjointGeometry as toDisjointGeometry$1, toTransformedGeometry, toPoints, transform, reconcile, isWatertight, makeWatertight, rewriteTags, taggedPaths, taggedGraph, taggedPoints, taggedSolid, taggedSurface, union as union$1, assemble as assemble$1, canonicalize as canonicalize$1, intersection as intersection$1, allTags, difference as difference$1, getLeafs, getSolids, empty, rewrite, taggedGroup, getAnySurfaces, getPaths, getGraphs, taggedLayers, isVoid, getNonVoidPaths, getPeg, taggedPlan, measureBoundingBox, measureArea, taggedSketch, getNonVoidSolids, getAnyNonVoidSurfaces, test as test$1, outline, getNonVoidGraphs, realize, getNonVoidSurfaces, read, write } from './jsxcad-geometry-tagged.js';
 import { fromPolygons, findOpenEdges } from './jsxcad-geometry-solid.js';
 import { identityMatrix, fromTranslation, fromRotation, fromScaling } from './jsxcad-math-mat4.js';
-import { add, scale as scale$1, negate, normalize, subtract, dot, cross, distance } from './jsxcad-math-vec3.js';
+import { add, negate, normalize, subtract, dot, cross, scale as scale$1, distance } from './jsxcad-math-vec3.js';
 import { toTagsFromName } from './jsxcad-algorithm-color.js';
 import { fromSolid, fromSurface, fromPaths, toSolid as toSolid$1 } from './jsxcad-geometry-graph.js';
 import { toTagsFromName as toTagsFromName$1 } from './jsxcad-algorithm-material.js';
@@ -423,69 +423,6 @@ const canonicalizeMethod = function () {
   return canonicalize(this);
 };
 Shape.prototype.canonicalize = canonicalizeMethod;
-
-/**
- *
- * # Measure Bounding Box
- *
- * Provides the corners of the smallest orthogonal box containing the shape.
- *
- * ::: illustration { "view": { "position": [40, 40, 40] } }
- * ```
- * Sphere(7)
- * ```
- * :::
- * ::: illustration { "view": { "position": [40, 40, 40] } }
- * ```
- * const [corner1, corner2] = Sphere(7).measureBoundingBox();
- * Cube.fromCorners(corner1, corner2)
- * ```
- * :::
- **/
-
-const measureBoundingBox = (shape) =>
-  measureBoundingBox$1(shape.toGeometry());
-
-const measureBoundingBoxMethod = function () {
-  return measureBoundingBox(this);
-};
-Shape.prototype.measureBoundingBox = measureBoundingBoxMethod;
-
-measureBoundingBox.signature = 'measureBoundingBox(shape:Shape) -> BoundingBox';
-measureBoundingBoxMethod.signature =
-  'Shape -> measureBoundingBox() -> BoundingBox';
-
-const X$2 = 0;
-const Y$2 = 1;
-const Z$2 = 2;
-
-const center = (
-  shape,
-  { centerX = true, centerY = true, centerZ = true } = {}
-) => {
-  const [minPoint, maxPoint] = measureBoundingBox(shape);
-  const center = scale$1(0.5, add(minPoint, maxPoint));
-  if (!centerX) {
-    center[X$2] = 0;
-  }
-  if (!centerY) {
-    center[Y$2] = 0;
-  }
-  if (!centerZ) {
-    center[Z$2] = 0;
-  }
-  // FIX: Find a more principled way to handle centering empty shapes.
-  if (isNaN(center[X$2]) || isNaN(center[Y$2]) || isNaN(center[Z$2])) {
-    return shape;
-  }
-  const moved = shape.move(...negate(center));
-  return moved;
-};
-
-const centerMethod = function (...params) {
-  return center(this, ...params);
-};
-Shape.prototype.center = centerMethod;
 
 /**
  *
@@ -1256,11 +1193,11 @@ const pegMethod = function (shapeToPeg) {
 
 Shape.prototype.peg = pegMethod;
 
-const atMethod = function (pegShape) {
+const putMethod = function (pegShape) {
   return peg(pegShape, this);
 };
 
-Shape.prototype.at = atMethod;
+Shape.prototype.put = putMethod;
 
 const shapeMethod = (build) => {
   return function (...args) {
@@ -1268,69 +1205,73 @@ const shapeMethod = (build) => {
   };
 };
 
-const updatePlan = (shape, update) => {
+const updatePlan = (shape, ...updates) => {
   const geometry = shape.toTransformedGeometry();
   if (geometry.type !== 'plan') {
     throw Error(`Shape is not a plan`);
   }
-  const updated = Object.assign({}, geometry.plan, update);
-  return Shape.fromGeometry(taggedPlan({ tags: geometry.tags }, updated));
+  return Shape.fromGeometry(
+    taggedPlan(
+      { tags: geometry.tags },
+      {
+        ...geometry.plan,
+        history: [...(geometry.plan.history || []), ...updates],
+      }
+    )
+  );
 };
 
-const updatePlanMethod = function (update) {
-  return updatePlan(this, update);
+const updatePlanMethod = function (...updates) {
+  return updatePlan(this, ...updates);
 };
 
 Shape.prototype.updatePlan = updatePlanMethod;
 
-const apothem = (shape, x = 1, y = x, z = 0) =>
-  shape.updatePlan({
-    apothem: [x, y, z],
-    diameter: undefined,
-    radius: undefined,
-    corner1: undefined,
-    corner2: undefined,
-  });
 const angle = (shape, end = 360, start = 0) =>
   shape.updatePlan({ angle: { start, end } });
-const base = (shape, base) =>
-  shape.updatePlan({ base, from: undefined });
-const corner1 = (shape, x = 1, y = x, z = 0) =>
+const base = (shape, base) => shape.updatePlan({ base });
+const at = (shape, x = 0, y = 0, z = 0) =>
+  shape.updatePlan({
+    at: [x, y, z],
+  });
+const corner1 = (shape, x = 0, y = x, z = 0) =>
   shape.updatePlan({
     corner1: [x, y, z],
-    apothem: undefined,
-    diameter: undefined,
-    radius: undefined,
   });
-const corner2 = (shape, x = 1, y = x, z = 0) =>
+const corner2 = (shape, x = 0, y = x, z = 0) =>
   shape.updatePlan({
     corner2: [x, y, z],
-    apothem: undefined,
-    diameter: undefined,
-    radius: undefined,
   });
 const diameter = (shape, x = 1, y = x, z = 0) =>
-  shape.updatePlan({
-    diameter: [x, y, z],
-    apothem: undefined,
-    radius: undefined,
-    corner1: undefined,
-    corner2: undefined,
-  });
+  shape.updatePlan(
+    { corner1: [x / 2, y / 2, z / 2] },
+    { corner2: [x / -2, y / -2, z / -2] }
+  );
 const radius = (shape, x = 1, y = x, z = 0) =>
-  shape.updatePlan({
-    radius: [x, y, z],
-    apothem: undefined,
-    diameter: undefined,
-    corner1: undefined,
-    corner2: undefined,
-  });
+  shape.updatePlan(
+    {
+      corner1: [x, y, z],
+    },
+    {
+      corner2: [-x, -y, -z],
+    }
+  );
+const apothem = (shape, x = 1, y = x, z = 0) =>
+  shape.updatePlan(
+    {
+      corner1: [x, y, z],
+    },
+    {
+      corner2: [-x, -y, -z],
+    },
+    { apothem: [x, y, z] }
+  );
 const from = (shape, x = 0, y = 0, z = 0) =>
   shape.updatePlan({ from: [x, y, z] });
 const sides = (shape, sides = 1) => shape.updatePlan({ sides });
 const to = (shape, x = 0, y = 0, z = 0) =>
   shape.updatePlan({ to: [x, y, z], top: undefined });
-const top = (shape, top) => shape.updatePlan({ top, to: undefined });
+const top = (shape, top) => shape.updatePlan({ top });
 
 const apothemMethod = function (x, y, z) {
   return apothem(this, x, y, z);
@@ -1340,6 +1281,9 @@ const angleMethod = function (end, start) {
 };
 const baseMethod = function (height) {
   return base(this, height);
+};
+const atMethod = function (x, y, z) {
+  return at(this, x, y, z);
 };
 const corner1Method = function (x, y, z) {
   return corner1(this, x, y, z);
@@ -1368,6 +1312,7 @@ const topMethod = function (height) {
 
 Shape.prototype.apothem = apothemMethod;
 Shape.prototype.angle = angleMethod;
+Shape.prototype.at = atMethod;
 Shape.prototype.base = baseMethod;
 Shape.prototype.corner1 = corner1Method;
 Shape.prototype.c1 = corner1Method;
@@ -1446,17 +1391,17 @@ const scaleMethod = function (x, y, z) {
 };
 Shape.prototype.scale = scaleMethod;
 
-const X$3 = 0;
-const Y$3 = 1;
-const Z$3 = 2;
+const X$2 = 0;
+const Y$2 = 1;
+const Z$2 = 2;
 
 const size = (shape, op = (_, size) => size) => {
   const geometry = shape.toDisjointGeometry();
-  const [min, max] = measureBoundingBox$1(geometry);
+  const [min, max] = measureBoundingBox(geometry);
   const area = measureArea(geometry);
-  const length = max[X$3] - min[X$3];
-  const width = max[Y$3] - min[Y$3];
-  const height = max[Z$3] - min[Z$3];
+  const length = max[X$2] - min[X$2];
+  const width = max[Y$2] - min[Y$2];
+  const height = max[Z$2] - min[Z$2];
   const center = scale$1(0.5, add(min, max));
   const radius = distance(center, max);
   return op(Shape.fromGeometry(geometry), {

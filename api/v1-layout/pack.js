@@ -48,11 +48,7 @@ export const pack = (
   }
   let packedShape = Shape.fromGeometry(taggedLayers({}, ...packedLayers));
   if (size === undefined) {
-    packedShape = packedShape.center({
-      centerX: true,
-      centerY: true,
-      centerZ: false,
-    });
+    packedShape = packedShape.align('xy');
   }
   return packedShape;
 };

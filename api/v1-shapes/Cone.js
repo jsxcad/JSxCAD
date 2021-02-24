@@ -1,38 +1,42 @@
 import { Shape, shapeMethod } from '@jsxcad/api-v1-shape';
 import {
-  getBase,
-  getCenter,
-  getDiameter,
+  getAt,
+  getCorner1,
+  getCorner2,
   getFrom,
   getMatrix,
   getSides,
   getTo,
-  getTop,
-} from '@jsxcad/geometry-plan';
+} from './plan.js';
 import { registerReifier, taggedPlan } from '@jsxcad/geometry-tagged';
 
 import Arc from './Arc.js';
 import Hull from './Hull.js';
 import Point from './Point.js';
+import { negate } from '@jsxcad/math-vec3';
 
-registerReifier('Cone', ({ tags, plan }) => {
-  const [length, width] = getDiameter(plan);
-  return Hull(
-    Arc(length, width).sides(getSides(plan)).z(getBase(plan)),
-    Point(0, 0, getTop(plan))
+const Z = 2;
+
+// FIX: This looks wrong.
+registerReifier('Cone', ({ tags, plan }) =>
+  Hull(
+    Arc(...getCorner2(plan)).sides(getSides(plan, 32)),
+    Point(0, 0, getCorner1(plan)[Z])
   )
-    .orient({ center: getCenter(plan), from: getFrom(plan), at: getTo(plan) })
+    .orient({
+      center: negate(getAt(plan)),
+      from: getFrom(plan),
+      at: getTo(plan),
+    })
     .transform(getMatrix(plan))
     .setTags(tags)
-    .toGeometry();
-});
+    .toGeometry()
+);
 
 export const Cone = (diameter = 1, top = 1, base = -top) =>
-  Shape.fromGeometry(
-    taggedPlan({}, { diameter: [diameter, diameter, 0], type: 'Cone' })
-  )
-    .top(top)
-    .base(base);
+  Shape.fromGeometry(taggedPlan({}, { type: 'Cone' }))
+    .corner1(0, 0, top)
+    .corner2(diameter, diameter, base);
 
 Shape.prototype.Cone = shapeMethod(Cone);
 

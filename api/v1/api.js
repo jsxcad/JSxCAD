@@ -72,7 +72,6 @@ export { Shell } from '@jsxcad/api-v1-shell';
 export {
   Arc,
   Assembly,
-  Block,
   Box,
   ChainedHull,
   Circle,
@@ -96,8 +95,6 @@ export {
   Points,
   Polygon,
   Polyhedron,
-  RegularPolygon,
-  Rod,
   Septagon,
   Spiral,
   Square,

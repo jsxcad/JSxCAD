@@ -1,44 +1,50 @@
 import { Shape, shapeMethod } from '@jsxcad/api-v1-shape';
-
 import {
-  getBack,
-  getBottom,
-  getCenter,
+  getAt,
+  getCorner1,
+  getCorner2,
   getFrom,
-  getFront,
-  getLeft,
   getMatrix,
-  getRight,
   getTo,
-  getTop,
-} from '@jsxcad/geometry-plan';
-
+} from './plan.js';
 import { registerReifier, taggedPlan } from '@jsxcad/geometry-tagged';
 
+import { negate } from '@jsxcad/math-vec3';
+
+const X = 0;
+const Y = 1;
+const Z = 2;
+
 registerReifier('Box', ({ tags, plan }) => {
-  const left = getLeft(plan);
-  const right = getRight(plan);
-  const front = getFront(plan);
-  const back = getBack(plan);
-  const top = getTop(plan);
-  const bottom = getBottom(plan);
-  const [, , Z] = getCenter(plan);
+  const corner1 = getCorner1(plan);
+  const corner2 = getCorner2(plan);
+  const left = corner1[X];
+  const right = corner2[X];
+  const front = corner1[Y];
+  const back = corner2[Y];
+  const top = corner2[Z];
+  const bottom = corner1[Z];
+
   return Shape.fromPath([
-    [left, back, Z],
-    [right, back, Z],
-    [right, front, Z],
-    [left, front, Z],
+    [left, back, bottom],
+    [right, back, bottom],
+    [right, front, bottom],
+    [left, front, bottom],
   ])
     .fill()
     .ex(top, bottom)
-    .orient({ center: getCenter(plan), from: getFrom(plan), at: getTo(plan) })
+    .orient({
+      center: negate(getAt(plan)),
+      from: getFrom(plan),
+      at: getTo(plan),
+    })
     .transform(getMatrix(plan))
     .setTags(tags)
     .toGeometry();
 });
 
 export const Box = (x, y = x, z = 0) =>
-  Shape.fromGeometry(taggedPlan({}, { diameter: [x, y, z], type: 'Box' }));
+  Shape.fromGeometry(taggedPlan({}, { type: 'Box' })).diameter(x, y, z);
 
 Shape.prototype.Box = shapeMethod(Box);
 
