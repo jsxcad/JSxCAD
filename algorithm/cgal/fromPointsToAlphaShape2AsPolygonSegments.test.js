@@ -6,7 +6,7 @@ test.beforeEach(async (t) => {
   await initCgal();
 });
 
-test('FromPointsToAlphaShapeAsSurfaceMesh', (t) => {
+test('FromPointsToAlphaShape2AsSurfaceMesh', (t) => {
   const points = [
     [25, 20],
     [65, 20],

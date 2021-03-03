@@ -29,7 +29,7 @@ test('Deferred translation.', (t) => {
   const transformed = toTransformedGeometry(geometry);
   t.deepEqual(transformed, {
     type: 'points',
-    points: [[1, 1, 1]],
+    points: [[1.0000000000000002, 1.0000000000000002, 1.0000000000000002]],
     tags: ['a'],
   });
 });
@@ -57,7 +57,7 @@ test('Deferred rotated translation.', (t) => {
   const transformed = toTransformedGeometry(geometry);
   t.deepEqual(transformed, {
     type: 'points',
-    points: [[-1, -1, 1]],
+    points: [[-1.0000000000000002, -1.0000000000000002, 1.0000000000000002]],
   });
 });
 

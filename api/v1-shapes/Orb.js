@@ -1,6 +1,13 @@
 import { Shape, shapeMethod } from '@jsxcad/api-v1-shape';
 
-import { getAt, getFrom, getScale, getSides, getTo } from './plan.js';
+import {
+  getAt,
+  getFrom,
+  getMatrix,
+  getScale,
+  getSides,
+  getTo,
+} from './plan.js';
 
 import { registerReifier, taggedPlan } from '@jsxcad/geometry-tagged';
 
@@ -17,6 +24,7 @@ registerReifier('Orb', ({ tags, plan }) => {
       from: getFrom(plan),
       at: getTo(plan),
     })
+    .transform(getMatrix(plan))
     .setTags(tags)
     .toGeometry();
 });

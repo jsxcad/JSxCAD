@@ -36,7 +36,6 @@ export { offsetOfPolygonWithHoles } from './offsetOfPolygonWithHoles.js';
 export { projectToPlaneOfSurfaceMesh } from './projectToPlaneOfSurfaceMesh.js';
 export { reverseFaceOrientationsOfSurfaceMesh } from './reverseFaceOrientationsOfSurfaceMesh.js';
 export { sectionOfSurfaceMesh } from './sectionOfSurfaceMesh.js';
-export { skeletalInsetOfPolygon } from './skeletalInsetOfPolygon.js';
 export { remeshSurfaceMesh } from './remeshSurfaceMesh.js';
 export { subdivideSurfaceMesh } from './subdivideSurfaceMesh.js';
 export { transformSurfaceMesh } from './transformSurfaceMesh.js';
