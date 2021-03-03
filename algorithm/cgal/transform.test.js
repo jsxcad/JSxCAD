@@ -13,19 +13,19 @@ test('serialize', (t) => {
   const exact = [];
   c.Transformation__to_exact(identity, (value) => exact.push(value));
   t.deepEqual(exact, [
-    '1/1',
-    '0/1',
-    '0/1',
-    '0/1',
-    '0/1',
-    '1/1',
-    '0/1',
-    '0/1',
-    '0/1',
-    '0/1',
-    '1/1',
-    '0/1',
-    '1/1',
+    '1',
+    '0',
+    '0',
+    '0',
+    '0',
+    '1',
+    '0',
+    '0',
+    '0',
+    '0',
+    '1',
+    '0',
+    '1',
   ]);
 
   const approximate = [];
@@ -40,38 +40,38 @@ false &&
     const c = getCgal();
 
     const input = [
-      '1/1',
-      '0/1',
-      '0/1',
-      '0/1',
-      '0/1',
-      '1/1',
-      '0/1',
-      '0/1',
-      '0/1',
-      '0/1',
-      '1/1',
-      '0/1',
-      '1/1',
+      '1',
+      '0',
+      '0',
+      '0',
+      '0',
+      '1',
+      '0',
+      '0',
+      '0',
+      '0',
+      '1',
+      '0',
+      '1',
     ];
     const transform = c.Transformation__from_exact(() => input.shift());
 
     const output = [];
     c.Transformation__to_exact(transform, (value) => output.push(value));
     t.deepEqual(output, [
-      '1/1',
-      '0/1',
-      '0/1',
-      '0/1',
-      '0/1',
-      '1/1',
-      '0/1',
-      '0/1',
-      '0/1',
-      '0/1',
-      '1/1',
-      '0/1',
-      '1/1',
+      '1',
+      '0',
+      '0',
+      '0',
+      '0',
+      '1',
+      '0',
+      '0',
+      '0',
+      '0',
+      '1',
+      '0',
+      '1',
     ]);
   });
 
@@ -81,18 +81,18 @@ test('rotate z 90', (t) => {
   const output = [];
   c.Transformation__to_exact(transform, (value) => output.push(value));
   t.deepEqual(output, [
-    '0/1',
-    '1/1',
-    '0/1',
-    '0/1',
-    '-1/1',
-    '0/1',
-    '0/1',
-    '0/1',
-    '0/1',
-    '0/1',
-    '1/1',
-    '0/1',
-    '1/1',
+    '0',
+    '1',
+    '0',
+    '0',
+    '-1',
+    '0',
+    '0',
+    '0',
+    '0',
+    '0',
+    '1',
+    '0',
+    '1',
   ]);
 });

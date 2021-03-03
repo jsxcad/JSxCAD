@@ -6,7 +6,7 @@ test.beforeEach(async (t) => {
   await initCgal();
 });
 
-test('insetOfPolygon/bow', (t) => {
+test('insetOfPolygonWithHoles/bow', (t) => {
   const polygon = [
     [0.25, -0.18899576365947723, 0],
     [0.7886751294136047, -0.5, 0],

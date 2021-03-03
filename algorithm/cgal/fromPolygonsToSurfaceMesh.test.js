@@ -101,9 +101,7 @@ test('FromPolygonsToSurfaceMesh/Triangle', (t) => {
       ['-1/2', '1/2', '1/2'],
       ['1/2', '1/2', '1/2'],
     ],
-    faces: [
-      { plane: [0, 1, 0, -0.5], exactPlane: ['0/1', '1/1', '0/1', '-1/2'] },
-    ],
+    faces: [{ plane: [0, 1, 0, -0.5], exactPlane: ['0', '1', '0', '-1/2'] }],
     facets: [{ edge: 4 }],
     isClosed: false,
   });

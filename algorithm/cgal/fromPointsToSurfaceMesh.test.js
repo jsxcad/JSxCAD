@@ -21,6 +21,7 @@ test('FromPointsToSurfaceMesh', (t) => {
 
   const surfaceMesh = fromPointsToSurfaceMesh(points);
   t.true(surfaceMesh.is_valid(false));
+  // FIX: Rename this to advancing front or something.
   const graph = fromSurfaceMeshToGraph(surfaceMesh);
   t.deepEqual(graph, {
     edges: [
@@ -82,16 +83,32 @@ test('FromPointsToSurfaceMesh', (t) => {
       ['1/2', '-1/2', '1/2'],
     ],
     faces: [
-      { plane: [0, -1, 0, 0.5], exactPlane: ['0/1', '-1/1', '0/1', '1/2'] },
-      { plane: [0, 0, 1, 0.5], exactPlane: ['0/1', '0/1', '1/1', '1/2'] },
-      { plane: [-1, 0, 0, 0.5], exactPlane: ['-1/1', '0/1', '0/1', '1/2'] },
-      { plane: [0, 1, 0, 0.5], exactPlane: ['0/1', '1/1', '0/1', '1/2'] },
-      { plane: [1, 0, 0, 0.5], exactPlane: ['1/1', '0/1', '0/1', '1/2'] },
+      { plane: [0, -1, 0, 0.5], exactPlane: ['0', '-1', '0', '1/2'] },
+      { plane: [0, 0, 1, 0.5], exactPlane: ['0', '0', '1', '1/2'] },
+      {
+        plane: [-0.9999999999999996, 0, 0, 0.4999999999999998],
+        exactPlane: [
+          '-2251799813685248/2251799813685249',
+          '0',
+          '0',
+          '1125899906842624/2251799813685249',
+        ],
+      },
+      { plane: [0, 1, 0, 0.5], exactPlane: ['0', '1', '0', '1/2'] },
+      {
+        plane: [0.9999999999999996, 0, 0, 0.4999999999999998],
+        exactPlane: [
+          '2251799813685248/2251799813685249',
+          '0',
+          '0',
+          '1125899906842624/2251799813685249',
+        ],
+      },
       undefined,
       undefined,
       undefined,
       undefined,
-      { plane: [0, 0, -1, 0.5], exactPlane: ['0/1', '0/1', '-1/1', '1/2'] },
+      { plane: [0, 0, -1, 0.5], exactPlane: ['0', '0', '-1', '1/2'] },
     ],
     facets: [
       { edge: 4 },
