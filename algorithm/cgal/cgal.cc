@@ -169,7 +169,7 @@ void FromSurfaceMeshToPolygonSoup(Surface_mesh* mesh, bool triangulate, emscript
     emit_polygon();
     for (const auto& index : polygon) {
       const auto& p = points[index];
-      emit_point(CGAL::to_double(p.x()), CGAL::to_double(p.y()), CGAL::to_double(p.z()));
+      emit_point(CGAL::to_double(p.x().exact()), CGAL::to_double(p.y().exact()), CGAL::to_double(p.z().exact()));
     }
   }
 }
@@ -714,7 +714,7 @@ void SectionOfSurfaceMesh(Surface_mesh* mesh, std::size_t plane_count, emscripte
     for (const auto& polyline : polylines) {
       emit_polyline();
       for (const auto& p : polyline) {
-        emit_point(CGAL::to_double(p.x()), CGAL::to_double(p.y()), CGAL::to_double(p.z()));
+        emit_point(CGAL::to_double(p.x().exact()), CGAL::to_double(p.y().exact()), CGAL::to_double(p.z().exact()));
       }
     }
   }
@@ -760,7 +760,7 @@ class Surface_mesh_explorer {
       std::ostringstream x; x << p.x().exact(); std::string xs = x.str();
       std::ostringstream y; y << p.y().exact(); std::string ys = y.str();
       std::ostringstream z; z << p.z().exact(); std::string zs = z.str();
-      _emit_point((std::int32_t)vertex, CGAL::to_double(p.x()), CGAL::to_double(p.y()), CGAL::to_double(p.z()),
+      _emit_point((std::int32_t)vertex, CGAL::to_double(p.x().exact()), CGAL::to_double(p.y().exact()), CGAL::to_double(p.z().exact()),
                   xs, ys, zs);
     }
 
@@ -838,7 +838,7 @@ class Surface_mesh_explorer {
       std::ostringstream y; y << plane.b().exact(); std::string ys = y.str();
       std::ostringstream z; z << plane.c().exact(); std::string zs = z.str();
       std::ostringstream w; w << plane.d().exact(); std::string ws = w.str();
-      _emit_face(facet, CGAL::to_double(plane.a()), CGAL::to_double(plane.b()), CGAL::to_double(plane.c()), CGAL::to_double(plane.d()), xs, ys, zs, ws);
+      _emit_face(facet, CGAL::to_double(plane.a().exact()), CGAL::to_double(plane.b().exact()), CGAL::to_double(plane.c().exact()), CGAL::to_double(plane.d().exact()), xs, ys, zs, ws);
     }
   }
 
@@ -934,7 +934,7 @@ void ComputeAlphaShape2AsPolygonSegments(size_t component_limit, double alpha, b
     const auto& segment = alpha_shape.segment(*it);
     const auto& s = segment.source();
     const auto& t = segment.target();
-    emit(CGAL::to_double(s.x()), CGAL::to_double(s.y()), CGAL::to_double(t.x()), CGAL::to_double(t.y()));
+    emit(CGAL::to_double(s.x().exact()), CGAL::to_double(s.y().exact()), CGAL::to_double(t.x().exact()), CGAL::to_double(t.y().exact()));
   }
 }
 
@@ -976,14 +976,14 @@ void SkeletalInsetOfPolygon(double initial, double step, double limit, double x,
       emit_polygon(false);
       for (auto vertex = outer.vertices_begin(); vertex != outer.vertices_end(); ++vertex) {
         auto p = plane.to_3d(*vertex);
-        emit_point(CGAL::to_double(p.x()), CGAL::to_double(p.y()), CGAL::to_double(p.z()));
+        emit_point(CGAL::to_double(p.x().exact()), CGAL::to_double(p.y().exact()), CGAL::to_double(p.z().exact()));
         emitted = true;
       }
       for (auto hole = polygon->holes_begin(); hole != polygon->holes_end(); ++hole) {
         emit_polygon(true);
         for (auto vertex = hole->vertices_begin(); vertex != hole->vertices_end(); ++vertex) {
           auto p = plane.to_3d(*vertex);
-          emit_point(CGAL::to_double(p.x()), CGAL::to_double(p.y()), CGAL::to_double(p.z()));
+          emit_point(CGAL::to_double(p.x().exact()), CGAL::to_double(p.y().exact()), CGAL::to_double(p.z().exact()));
           emitted = true;
         }
       }
@@ -1242,16 +1242,16 @@ void InsetOfPolygon(double initial, double step, double limit, double x, double 
       emit_polygon(false);
       for (auto edge = outer.edges_begin(); edge != outer.edges_end(); ++edge) {
         const auto& source = edge->source();
-        auto p = plane.to_3d(Point_2(CGAL::to_double(source.x()), CGAL::to_double(source.y())));
-        emit_point(CGAL::to_double(p.x()), CGAL::to_double(p.y()), CGAL::to_double(p.z()));
+        auto p = plane.to_3d(Point_2(CGAL::to_double(source.x().exact()), CGAL::to_double(source.y().exact())));
+        emit_point(CGAL::to_double(p.x().exact()), CGAL::to_double(p.y().exact()), CGAL::to_double(p.z().exact()));
         emitted = true;
       }
       for (auto hole = polygon.holes_begin(); hole != polygon.holes_end(); ++hole) {
         emit_polygon(true);
         for (auto edge = hole->edges_begin(); edge != hole->edges_end(); ++edge) {
           const auto& source = edge->source();
-          auto p = plane.to_3d(Point_2(CGAL::to_double(source.x()), CGAL::to_double(source.y())));
-          emit_point(CGAL::to_double(p.x()), CGAL::to_double(p.y()), CGAL::to_double(p.z()));
+          auto p = plane.to_3d(Point_2(CGAL::to_double(source.x().exact()), CGAL::to_double(source.y().exact())));
+          emit_point(CGAL::to_double(p.x().exact()), CGAL::to_double(p.y().exact()), CGAL::to_double(p.z().exact()));
           emitted = true;
         }
       }
@@ -1400,7 +1400,7 @@ void ArrangePaths(Plane plane, bool do_triangulate, emscripten::val fill, emscri
           std::ostringstream x; x << e3.x();
           std::ostringstream y; y << e3.y();
           std::ostringstream z; z << e3.z();
-          emit_point(CGAL::to_double(p3.x()), CGAL::to_double(p3.y()), CGAL::to_double(p3.z()), x.str(), y.str(), z.str());
+          emit_point(CGAL::to_double(p3.x().exact()), CGAL::to_double(p3.y().exact()), CGAL::to_double(p3.z().exact()), x.str(), y.str(), z.str());
         }
       }
     }
@@ -1420,7 +1420,7 @@ void ArrangePaths(Plane plane, bool do_triangulate, emscripten::val fill, emscri
         std::ostringstream x; x << e3.x();
         std::ostringstream y; y << e3.y();
         std::ostringstream z; z << e3.z();
-        emit_point(CGAL::to_double(p3.x()), CGAL::to_double(p3.y()), CGAL::to_double(p3.z()), x.str(), y.str(), z.str());
+        emit_point(CGAL::to_double(p3.x().exact()), CGAL::to_double(p3.y().exact()), CGAL::to_double(p3.z().exact()), x.str(), y.str(), z.str());
       } while (++edge != start);
   
       // Emit holes
@@ -1434,7 +1434,7 @@ void ArrangePaths(Plane plane, bool do_triangulate, emscripten::val fill, emscri
           std::ostringstream x; x << e3.x();
           std::ostringstream y; y << e3.y();
           std::ostringstream z; z << e3.z();
-          emit_point(CGAL::to_double(p3.x()), CGAL::to_double(p3.y()), CGAL::to_double(p3.z()), x.str(), y.str(), z.str());
+          emit_point(CGAL::to_double(p3.x().exact()), CGAL::to_double(p3.y().exact()), CGAL::to_double(p3.z().exact()), x.str(), y.str(), z.str());
         } while (++edge != start);
       }
     }
@@ -1499,12 +1499,12 @@ void Transformation__to_approximate(Transformation* t, emscripten::val put) {
   for (int i = 0; i < 3; i++) {
     for (int j = 0; j < 4; j++) { 
       FT value = t->cartesian(i, j);
-      put(CGAL::to_double(value));
+      put(CGAL::to_double(value.exact()));
     }
   }
 
   FT value = t->cartesian(3, 3);
-  put(CGAL::to_double(value));
+  put(CGAL::to_double(value.exact()));
 }
 
 FT get_double(emscripten::val get) {
