@@ -13,7 +13,7 @@ export const difference = (a, b) => {
     return a;
   }
   if (!a.isClosed) {
-    return section(difference(extrude(a, far, 0), b), [principlePlane(a)]);
+    return section(difference(extrude(a, far, 0), b), principlePlane(a));
   }
   if (!b.isClosed) {
     b = extrude(b, far, 0);

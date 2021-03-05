@@ -21,7 +21,7 @@ export { projectToPlane } from './projectToPlane.js';
 export { realizeGraph } from './realizeGraph.js';
 export { rerealizeGraph } from './rerealizeGraph.js';
 export { reverseFaceOrientations } from './reverseFaceOrientations.js';
-export { section } from './section.js';
+export { section, sections } from './section.js';
 export { smooth } from './smooth.js';
 export { test } from './test.js';
 export { toPaths } from './toPaths.js';
