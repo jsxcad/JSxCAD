@@ -6,7 +6,6 @@ cp algorithm/contour/dist/main.js es6/jsxcad-algorithm-contour.js
 cp algorithm/material/dist/main.js es6/jsxcad-algorithm-material.js
 cp algorithm/pack/dist/main.js es6/jsxcad-algorithm-pack.js
 cp algorithm/quantize/dist/main.js es6/jsxcad-algorithm-quantize.js
-cp algorithm/shape/dist/main.js es6/jsxcad-algorithm-shape.js
 cp algorithm/text/dist/main.js es6/jsxcad-algorithm-text.js
 cp algorithm/tool/dist/main.js es6/jsxcad-algorithm-tool.js
 cp algorithm/toolpath/dist/main.js es6/jsxcad-algorithm-toolpath.js

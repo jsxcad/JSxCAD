@@ -1,8 +1,18 @@
 import { scale, translate } from '@jsxcad/geometry-tagged';
 
 import DxfParser from 'dxf-parser';
-import { buildRegularPolygon } from '@jsxcad/algorithm-shape';
+import { fromAngleRadians } from '@jsxcad/math-vec2';
 import { toTagFromRgbInt } from '@jsxcad/algorithm-color';
+
+const buildRegularPolygon = (sides = 32) => {
+  let points = [];
+  for (let i = 0; i < sides; i++) {
+    let radians = (2 * Math.PI * i) / sides;
+    let [x, y] = fromAngleRadians(radians);
+    points.push([x, y, 0]);
+  }
+  return points;
+};
 
 export const fromDxf = async (data) => {
   const parser = new DxfParser();

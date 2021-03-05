@@ -1,5 +1,4 @@
 import { boot } from '@jsxcad/sys';
-import { buildRegularPolygon } from '@jsxcad/algorithm-shape';
 import test from 'ava';
 import { toPdf } from './toPdf.js';
 
@@ -7,12 +6,18 @@ test.beforeEach(async (t) => {
   await boot();
 });
 
+const triangle = [
+  [1, 0, 0],
+  [-0.4999999999999998, 0.8660254037844387, 0],
+  [-0.5000000000000004, -0.8660254037844385, 0],
+];
+
 test('Triangle', async (t) => {
   // A surface is a set of paths.
   const pdf = await toPdf({
     tags: ['color/blue'],
     type: 'paths',
-    paths: [buildRegularPolygon(3)],
+    paths: [triangle],
   });
   t.is(
     new TextDecoder('utf8').decode(pdf),
@@ -48,7 +53,7 @@ test('Triangle', async (t) => {
 test('Triangle with a custom page size', async (t) => {
   // A surface is a set of paths.
   const pdf = await toPdf(
-    { type: 'paths', paths: [buildRegularPolygon(3)] },
+    { type: 'paths', paths: [triangle] },
     { size: [100, 200] }
   );
   t.is(
