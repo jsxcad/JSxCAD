@@ -2,6 +2,7 @@ import { emit, log as sysLog } from '@jsxcad/sys';
 
 import Shape from './Shape.js';
 import hashSum from 'hash-sum';
+import { realize } from '@jsxcad/geometry-tagged';
 
 /**
  *
@@ -41,7 +42,7 @@ export const logOp = (shape, op) => {
 };
 
 const logMethod = function (op = (shape) => JSON.stringify(shape)) {
-  logOp(this, op);
+  logOp(Shape.fromGeometry(realize(this.toGeometry())), op);
   return this;
 };
 Shape.prototype.log = logMethod;

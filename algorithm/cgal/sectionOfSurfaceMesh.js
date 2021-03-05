@@ -32,11 +32,11 @@ export const sectionOfSurfaceMesh = (mesh, planes) => {
       path.pop();
     }
   }
-  const polygons = [];
+  const sectionPolygons = [];
   for (const { section, plane } of sections) {
-    polygons.push(
-      ...arrangePaths(plane, undefined, section, /* triangulate= */ true)
+    sectionPolygons.push(
+      arrangePaths(plane, undefined, section, /* triangulate= */ true)
     );
   }
-  return polygons;
+  return sectionPolygons;
 };

@@ -118,6 +118,8 @@ typedef CGAL::Polygon_2<Kernel_2> Polygon_2;
 typedef CGAL::Polygon_with_holes_2<Kernel_2> Polygon_with_holes_2;
 typedef CGAL::Straight_skeleton_2<Kernel_2> Straight_skeleton_2;
 
+#ifndef TEST_ONLY
+
 void Polygon__push_back(Polygon* polygon, std::size_t index) {
   polygon->push_back(index);
 }
@@ -1302,7 +1304,8 @@ void ArrangePaths(Plane plane, bool do_triangulate, emscripten::val fill, emscri
         continue;
       }
       // Add the segment
-      insert(arrangement, Segment_2 { point_2s[i], point_2s[i + 1] });
+      Segment_2 segment { point_2s[i], point_2s[i + 1] };
+      insert(arrangement, segment);
 
       // Remember the edges we've inserted.
       segments.insert({ point_2s[i].x(), point_2s[i].y(), point_2s[i + 1].x(), point_2s[i + 1].y() });
@@ -1365,9 +1368,8 @@ void ArrangePaths(Plane plane, bool do_triangulate, emscripten::val fill, emscri
     undecided.push(face);
   }
 
-  CGAL::Polygon_triangulation_decomposition_2<Kernel> triangulate;
-    
   if (do_triangulate) {
+    CGAL::Polygon_triangulation_decomposition_2<Kernel> triangulate;
     for (Arrangement_2::Face_iterator face = arrangement.faces_begin(); face != arrangement.faces_end(); ++face) {
       if (!positive_faces[face] || !face->has_outer_ccb()) {
         continue;
@@ -1397,9 +1399,9 @@ void ArrangePaths(Plane plane, bool do_triangulate, emscripten::val fill, emscri
         for (const auto& p2 : triangle) {
           Point p3 = plane.to_3d(p2);
           auto e3 = p3;
-          std::ostringstream x; x << e3.x();
-          std::ostringstream y; y << e3.y();
-          std::ostringstream z; z << e3.z();
+          std::ostringstream x; x << e3.x().exact();
+          std::ostringstream y; y << e3.y().exact();
+          std::ostringstream z; z << e3.z().exact();
           emit_point(CGAL::to_double(p3.x().exact()), CGAL::to_double(p3.y().exact()), CGAL::to_double(p3.z().exact()), x.str(), y.str(), z.str());
         }
       }
@@ -1412,14 +1414,13 @@ void ArrangePaths(Plane plane, bool do_triangulate, emscripten::val fill, emscri
       Arrangement_2::Ccb_halfedge_const_circulator start = face->outer_ccb();
       Arrangement_2::Ccb_halfedge_const_circulator edge = start;
       // Can we build Polygon_with_holes_2 here?
-      // Then we can use Polygon_triangulation_decomposition_2 to triangulate it.
       emit_polygon(false);
       do {
         Point p3 = plane.to_3d(edge->source()->point());
         auto e3 = p3;
-        std::ostringstream x; x << e3.x();
-        std::ostringstream y; y << e3.y();
-        std::ostringstream z; z << e3.z();
+        std::ostringstream x; x << e3.x().exact();
+        std::ostringstream y; y << e3.y().exact();
+        std::ostringstream z; z << e3.z().exact();
         emit_point(CGAL::to_double(p3.x().exact()), CGAL::to_double(p3.y().exact()), CGAL::to_double(p3.z().exact()), x.str(), y.str(), z.str());
       } while (++edge != start);
   
@@ -1431,9 +1432,9 @@ void ArrangePaths(Plane plane, bool do_triangulate, emscripten::val fill, emscri
         do {
           Point p3 = plane.to_3d(edge->source()->point());
           auto e3 = p3;
-          std::ostringstream x; x << e3.x();
-          std::ostringstream y; y << e3.y();
-          std::ostringstream z; z << e3.z();
+          std::ostringstream x; x << e3.x().exact();
+          std::ostringstream y; y << e3.y().exact();
+          std::ostringstream z; z << e3.z().exact();
           emit_point(CGAL::to_double(p3.x().exact()), CGAL::to_double(p3.y().exact()), CGAL::to_double(p3.z().exact()), x.str(), y.str(), z.str());
         } while (++edge != start);
       }
@@ -1582,10 +1583,36 @@ Transformation* Transformation__rotate_z(double a) {
       w);
 }
 
+#else // TEST_ONLY
+
+struct TestException : public std::exception {
+  const char* what () const throw () {
+    return "MyException";
+  }
+};
+
+void test() {
+#if 1
+  try {
+    std::cout << "Thrown" << std::endl;
+    throw TestException();
+  } catch(TestException& e) {
+    std::cout << "Caught" << std::endl;
+  }
+#endif
+  std::cout << "Done" << std::endl;
+}
+
+#endif
+
 using emscripten::select_const;
 using emscripten::select_overload;
 
 EMSCRIPTEN_BINDINGS(module) {
+#ifdef TEST_ONLY
+  emscripten::function("test", &test, emscripten::allow_raw_pointers());
+#else
+  
   emscripten::class_<Transformation>("Transformation").constructor<>();
   emscripten::function("Transformation__compose", &Transformation__compose, emscripten::allow_raw_pointers());
   emscripten::function("Transformation__identity", &Transformation__identity, emscripten::allow_raw_pointers());
@@ -1734,4 +1761,5 @@ EMSCRIPTEN_BINDINGS(module) {
   emscripten::function("ArrangePathsApproximate", &ArrangePathsApproximate, emscripten::allow_raw_pointers());
   emscripten::function("ArrangePathsExact", &ArrangePathsExact, emscripten::allow_raw_pointers());
   emscripten::function("SectionOfSurfaceMesh", &SectionOfSurfaceMesh, emscripten::allow_raw_pointers());
+#endif
 }
