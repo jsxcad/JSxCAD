@@ -8,14 +8,9 @@ import { soup } from './jsxcad-geometry-tagged.js';
 import './jsxcad-api-v1-extrude.js';
 import './jsxcad-api-v1-gcode.js';
 import './jsxcad-api-v1-pdf.js';
-import './jsxcad-api-v1-plans.js';
 import './jsxcad-api-v1-tools.js';
 import { Peg, Arc, Assembly, Box, ChainedHull, Cone, Empty, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Line, LoopedHull, Octagon, Orb, Path, Pentagon, Plane, Point, Points, Polygon, Polyhedron, Septagon, Spiral, Tetragon, Toolpath, Torus, Triangle, Wave, Weld } from './jsxcad-api-v1-shapes.js';
 export { Arc, Assembly, Box, ChainedHull, Cone, Empty, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Line, LoopedHull, Octagon, Orb, Path, Peg, Pentagon, Plane, Point, Points, Polygon, Polyhedron, Septagon, Spiral, Tetragon, Toolpath, Torus, Triangle, Wave, Weld } from './jsxcad-api-v1-shapes.js';
-import { Line2 } from './jsxcad-api-v1-line2.js';
-export { Line2 } from './jsxcad-api-v1-line2.js';
-import { Plan } from './jsxcad-api-v1-plan.js';
-export { Plan } from './jsxcad-api-v1-plan.js';
 import { Item } from './jsxcad-api-v1-item.js';
 export { Item } from './jsxcad-api-v1-item.js';
 import { Noise, Random, acos, cos, each, ease, max, min, numbers, sin, sqrt, vec } from './jsxcad-api-v1-math.js';
@@ -470,8 +465,6 @@ var api = /*#__PURE__*/Object.freeze({
   loadGeometry: loadGeometry,
   log: log,
   saveGeometry: saveGeometry,
-  Line2: Line2,
-  Plan: Plan,
   Arc: Arc,
   Assembly: Assembly,
   Box: Box,
@@ -599,7 +592,6 @@ registerDynamicModule(module('png'), './jsxcad-api-v1-png.js');
 registerDynamicModule(module('shape'), './jsxcad-api-v1-shape.js');
 registerDynamicModule(module('shapefile'), './jsxcad-api-v1-shapefile.js');
 registerDynamicModule(module('shapes'), './jsxcad-api-v1-shapes.js');
-registerDynamicModule(module('shell'), './jsxcad-api-v1-shell.js');
 registerDynamicModule(module('stl'), './jsxcad-api-v1-stl.js');
 registerDynamicModule(module('svg'), './jsxcad-api-v1-svg.js');
 registerDynamicModule(module('threejs'), './jsxcad-api-v1-threejs.js');

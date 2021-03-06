@@ -1,20 +1,5 @@
-import {
-  inset as insetGeometry,
-  offset as offsetGeometry,
-} from '@jsxcad/geometry-tagged';
-
-import { Shape } from '@jsxcad/api-v1-shape';
-
-export const offset = (shape, initial = 1, step, limit) =>
-  Shape.fromGeometry(offsetGeometry(shape.toGeometry(), initial, step, limit));
-
-const offsetMethod = function (initial, step, limit) {
-  return offset(this, initial, step, limit);
-};
-
-Shape.prototype.offset = offsetMethod;
-
-export default offset;
+import Shape from './Shape.js';
+import { inset as insetGeometry } from '@jsxcad/geometry-tagged';
 
 export const inset = (shape, initial = 1, step, limit) =>
   Shape.fromGeometry(insetGeometry(shape.toGeometry(), initial, step, limit));
