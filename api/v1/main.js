@@ -36,7 +36,6 @@ registerDynamicModule(module('png'), '@jsxcad/api-v1-png');
 registerDynamicModule(module('shape'), '@jsxcad/api-v1-shape');
 registerDynamicModule(module('shapefile'), '@jsxcad/api-v1-shapefile');
 registerDynamicModule(module('shapes'), '@jsxcad/api-v1-shapes');
-registerDynamicModule(module('shell'), '@jsxcad/api-v1-shell');
 registerDynamicModule(module('stl'), '@jsxcad/api-v1-stl');
 registerDynamicModule(module('svg'), '@jsxcad/api-v1-svg');
 registerDynamicModule(module('threejs'), '@jsxcad/api-v1-threejs');

@@ -1,5 +1,5 @@
 import { close, concatenate, open } from './jsxcad-geometry-path.js';
-import { taggedAssembly, eachPoint, flip, toDisjointGeometry as toDisjointGeometry$1, toTransformedGeometry, toPoints, transform, rewriteTags, taggedPaths, taggedGraph, taggedPoints, union, assemble as assemble$1, canonicalize as canonicalize$1, intersection, allTags, difference, getLeafs, empty, rewrite, taggedLayers, isVoid, getNonVoidPaths, getPeg, taggedPlan, measureBoundingBox, taggedSketch, getAnyNonVoidSurfaces, test as test$1, getPaths, outline, read, write, realize } from './jsxcad-geometry-tagged.js';
+import { taggedAssembly, eachPoint, flip, toDisjointGeometry as toDisjointGeometry$1, toTransformedGeometry, toPoints, transform, rewriteTags, taggedPaths, taggedGraph, taggedPoints, union, assemble as assemble$1, canonicalize as canonicalize$1, intersection, allTags, difference, getLeafs, empty, rewrite, inset as inset$1, taggedLayers, isVoid, offset as offset$1, getNonVoidPaths, getPeg, taggedPlan, measureBoundingBox, taggedSketch, getAnyNonVoidSurfaces, test as test$1, getPaths, outline, read, write, realize } from './jsxcad-geometry-tagged.js';
 import { fromPolygons } from './jsxcad-geometry-graph.js';
 import { identityMatrix, fromTranslation, fromRotation, fromScaling } from './jsxcad-math-mat4.js';
 import { add as add$1, negate, normalize, subtract, dot, cross, scale as scale$1, distance } from './jsxcad-math-vec3.js';
@@ -440,6 +440,22 @@ const inSolidsMethod = function (...args) {
 };
 Shape.prototype.inSolids = inSolidsMethod;
 
+const inset = (shape, initial = 1, step, limit) =>
+  Shape.fromGeometry(inset$1(shape.toGeometry(), initial, step, limit));
+
+const insetMethod = function (initial, step, limit) {
+  return inset(this, initial, step, limit);
+};
+
+Shape.prototype.inset = insetMethod;
+
+// CHECK: Using 'with' for may be confusing, but andInset looks odd.
+const withInsetMethod = function (initial, step, limit) {
+  return this.group(inset(this, initial, step, limit));
+};
+
+Shape.prototype.withInset = withInsetMethod;
+
 /**
  *
  * # Keep in assembly
@@ -672,6 +688,15 @@ const noHolesMethod = function (...tags) {
 
 Shape.prototype.noHoles = noHolesMethod;
 Shape.prototype.noVoid = noHolesMethod;
+
+const offset = (shape, initial = 1, step, limit) =>
+  Shape.fromGeometry(offset$1(shape.toGeometry(), initial, step, limit));
+
+const offsetMethod = function (initial, step, limit) {
+  return offset(this, initial, step, limit);
+};
+
+Shape.prototype.offset = offsetMethod;
 
 const opMethod = function (op, ...args) {
   return op(this, ...args);

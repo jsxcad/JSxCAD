@@ -11,7 +11,6 @@ import '@jsxcad/api-v1-extrude';
 import '@jsxcad/api-v1-gcode';
 import '@jsxcad/api-v1-layout';
 import '@jsxcad/api-v1-pdf';
-import '@jsxcad/api-v1-plans';
 import '@jsxcad/api-v1-tools';
 
 import { Peg } from '@jsxcad/api-v1-shapes';
@@ -57,10 +56,6 @@ export {
 } from './recordNotes.js';
 
 export { Shape, loadGeometry, log, saveGeometry } from '@jsxcad/api-v1-shape';
-
-export { Line2 } from '@jsxcad/api-v1-line2';
-
-export { Plan } from '@jsxcad/api-v1-plan';
 
 export {
   Arc,
