@@ -2,15 +2,14 @@ import { getModule, addPending, write, emit, read, getCurrentPath, addSource, ad
 export { emit, read, write } from './jsxcad-sys.js';
 import Shape, { Shape as Shape$1, loadGeometry, log, saveGeometry } from './jsxcad-api-v1-shape.js';
 export { Shape, loadGeometry, log, saveGeometry } from './jsxcad-api-v1-shape.js';
-import { ensurePages, Page, pack } from './jsxcad-api-v1-layout.js';
-export { Page, pack } from './jsxcad-api-v1-layout.js';
+import { ensurePages } from './jsxcad-api-v1-layout.js';
 import { soup } from './jsxcad-geometry-tagged.js';
 import './jsxcad-api-v1-extrude.js';
 import './jsxcad-api-v1-gcode.js';
 import './jsxcad-api-v1-pdf.js';
 import './jsxcad-api-v1-tools.js';
-import { Peg, Arc, Assembly, Box, ChainedHull, Cone, Empty, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Line, LoopedHull, Octagon, Orb, Path, Pentagon, Plane, Point, Points, Polygon, Polyhedron, Septagon, Spiral, Tetragon, Toolpath, Torus, Triangle, Wave, Weld } from './jsxcad-api-v1-shapes.js';
-export { Arc, Assembly, Box, ChainedHull, Cone, Empty, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Line, LoopedHull, Octagon, Orb, Path, Peg, Pentagon, Plane, Point, Points, Polygon, Polyhedron, Septagon, Spiral, Tetragon, Toolpath, Torus, Triangle, Wave, Weld } from './jsxcad-api-v1-shapes.js';
+import { Peg, Arc, Assembly, Box, ChainedHull, Cone, Empty, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Line, LoopedHull, Octagon, Orb, Page, Path, Pentagon, Plane, Point, Points, Polygon, Polyhedron, Septagon, Spiral, Tetragon, Toolpath, Torus, Triangle, Wave, Weld } from './jsxcad-api-v1-shapes.js';
+export { Arc, Assembly, Box, ChainedHull, Cone, Empty, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Line, LoopedHull, Octagon, Orb, Page, Path, Peg, Pentagon, Plane, Point, Points, Polygon, Polyhedron, Septagon, Spiral, Tetragon, Toolpath, Torus, Triangle, Wave, Weld } from './jsxcad-api-v1-shapes.js';
 import { Item } from './jsxcad-api-v1-item.js';
 export { Item } from './jsxcad-api-v1-item.js';
 import { Noise, Random, acos, cos, each, ease, max, min, numbers, sin, sqrt, vec } from './jsxcad-api-v1-math.js';
@@ -446,8 +445,6 @@ var api = /*#__PURE__*/Object.freeze({
   defRgbColor: defRgbColor,
   defThreejsMaterial: defThreejsMaterial,
   defTool: defTool,
-  Page: Page,
-  pack: pack,
   md: md,
   checkBox: checkBox,
   numberBox: numberBox,
@@ -481,6 +478,7 @@ var api = /*#__PURE__*/Object.freeze({
   LoopedHull: LoopedHull,
   Octagon: Octagon,
   Orb: Orb,
+  Page: Page,
   Path: Path,
   Peg: Peg,
   Pentagon: Pentagon,

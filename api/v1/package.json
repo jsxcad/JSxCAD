@@ -30,7 +30,6 @@
     "@jsxcad/api-v1-font": "^0.0.79",
     "@jsxcad/api-v1-gcode": "^0.0.79",
     "@jsxcad/api-v1-item": "^0.0.79",
-    "@jsxcad/api-v1-layout": "^0.0.79",
     "@jsxcad/api-v1-math": "^0.0.79",
     "@jsxcad/api-v1-obj": "^0.0.79",
     "@jsxcad/api-v1-off": "^0.0.79",

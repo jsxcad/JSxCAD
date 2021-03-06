@@ -6,7 +6,7 @@ import {
 } from '@jsxcad/sys';
 
 import Shape from '@jsxcad/api-v1-shape';
-import { ensurePages } from '@jsxcad/api-v1-layout';
+import { ensurePages } from '@jsxcad/api-v1-shapes';
 import { toDxf } from '@jsxcad/convert-dxf';
 
 export const prepareDxf = (shape, name, options = {}) => {

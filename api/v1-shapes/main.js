@@ -1,3 +1,5 @@
+import { Page, ensurePages } from './Page.js';
+
 import Arc from './Arc.js';
 import Assembly from './Assembly.js';
 import Box from './Box.js';
@@ -49,6 +51,7 @@ const api = {
   LoopedHull,
   Octagon,
   Orb,
+  Page,
   Path,
   Peg,
   Pentagon,
@@ -85,9 +88,10 @@ export {
   LoopedHull,
   Octagon,
   Orb,
-  Pentagon,
+  Page,
   Path,
   Peg,
+  Pentagon,
   Plane,
   Point,
   Points,
@@ -102,6 +106,7 @@ export {
   Triangle,
   Wave,
   Weld,
+  ensurePages,
 };
 
 export default api;

@@ -1,4 +1,3 @@
-import { Box, Empty, Hershey } from '@jsxcad/api-v1-shapes';
 import {
   getLayouts,
   getLeafs,
@@ -9,9 +8,11 @@ import {
   visit,
 } from '@jsxcad/geometry-tagged';
 
+import Box from './Box.js';
+import Empty from './Empty.js';
+import Hershey from './Hershey.js';
 import Shape from '@jsxcad/api-v1-shape';
 import { max } from '@jsxcad/api-v1-math';
-import { pack as packOp } from './pack.js';
 
 const MIN = 0;
 const MAX = 1;
@@ -101,7 +102,7 @@ export const Page = (
   } else if (size) {
     // Content fits to page size.
     const packSize = [];
-    const content = packOp(Shape.fromGeometry(taggedLayers({}, ...layers)), {
+    const content = Shape.fromGeometry(taggedLayers({}, ...layers)).pack({
       size,
       pageMargin,
       itemMargin,
@@ -123,7 +124,7 @@ export const Page = (
   } else {
     const packSize = [];
     // Page fits to content size.
-    const content = packOp(Shape.fromGeometry(taggedLayers({}, ...layers)), {
+    const content = Shape.fromGeometry(taggedLayers({}, ...layers)).pack({
       pageMargin,
       itemMargin,
       perLayout: itemsPerPage,

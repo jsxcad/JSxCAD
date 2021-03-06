@@ -27,6 +27,7 @@ import './noHoles.js';
 import './offset.js';
 import './op.js';
 import './orient.js';
+import './pack.js';
 import './pause.js';
 import './paths.js';
 import './peg.js';

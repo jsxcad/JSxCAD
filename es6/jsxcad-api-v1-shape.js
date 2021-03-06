@@ -1,10 +1,11 @@
 import { close, concatenate, open } from './jsxcad-geometry-path.js';
-import { taggedAssembly, eachPoint, flip, toDisjointGeometry as toDisjointGeometry$1, toTransformedGeometry, toPoints, transform, rewriteTags, taggedPaths, taggedGraph, taggedPoints, union, assemble as assemble$1, canonicalize as canonicalize$1, intersection, allTags, difference, getLeafs, empty, rewrite, inset as inset$1, taggedLayers, isVoid, offset as offset$1, getNonVoidPaths, getPeg, taggedPlan, measureBoundingBox, taggedSketch, getAnyNonVoidSurfaces, test as test$1, getPaths, outline, read, write, realize } from './jsxcad-geometry-tagged.js';
+import { taggedAssembly, eachPoint, flip, toDisjointGeometry as toDisjointGeometry$1, toTransformedGeometry, toPoints, transform, rewriteTags, taggedPaths, taggedGraph, taggedPoints, union, assemble as assemble$1, canonicalize as canonicalize$1, intersection, allTags, difference, getLeafs, empty, rewrite, inset as inset$1, taggedLayers, isVoid, offset as offset$1, taggedItem, taggedDisjointAssembly, getNonVoidPaths, getPeg, taggedPlan, measureBoundingBox, taggedSketch, getAnyNonVoidSurfaces, test as test$1, getPaths, outline, read, write, realize } from './jsxcad-geometry-tagged.js';
 import { fromPolygons } from './jsxcad-geometry-graph.js';
 import { identityMatrix, fromTranslation, fromRotation, fromScaling } from './jsxcad-math-mat4.js';
 import { add as add$1, negate, normalize, subtract, dot, cross, scale as scale$1, distance } from './jsxcad-math-vec3.js';
 import { toTagsFromName } from './jsxcad-algorithm-color.js';
 import { toTagsFromName as toTagsFromName$1 } from './jsxcad-algorithm-material.js';
+import { pack as pack$1 } from './jsxcad-algorithm-pack.js';
 import { fromPoints, toXYPlaneTransforms } from './jsxcad-math-plane.js';
 import { emit, addPending, writeFile, log as log$1 } from './jsxcad-sys.js';
 import { fromRotateXToTransform, fromRotateYToTransform, fromRotateZToTransform } from './jsxcad-algorithm-cgal.js';
@@ -747,6 +748,55 @@ const orientMethod = function (...args) {
   return orient(this, ...args);
 };
 Shape.prototype.orient = orientMethod;
+
+const pack = (
+  shape,
+  { size, pageMargin = 5, itemMargin = 1, perLayout = Infinity, packSize = [] }
+) => {
+  if (perLayout === 0) {
+    // Packing was disabled -- do nothing.
+    return shape;
+  }
+
+  let todo = [];
+  for (const leaf of getLeafs(shape.toKeptGeometry())) {
+    todo.push(leaf);
+  }
+  const packedLayers = [];
+  while (todo.length > 0) {
+    const input = [];
+    while (todo.length > 0 && input.length < perLayout) {
+      input.push(todo.shift());
+    }
+    const [packed, unpacked, minPoint, maxPoint] = pack$1(
+      { size, pageMargin, itemMargin },
+      ...input
+    );
+    packSize[0] = minPoint;
+    packSize[1] = maxPoint;
+    if (packed.length === 0) {
+      break;
+    } else {
+      packedLayers.push(
+        taggedItem(
+          {},
+          taggedDisjointAssembly({}, ...packed.map(toDisjointGeometry$1))
+        )
+      );
+    }
+    todo.unshift(...unpacked);
+  }
+  let packedShape = Shape.fromGeometry(taggedLayers({}, ...packedLayers));
+  if (size === undefined) {
+    packedShape = packedShape.align('xy');
+  }
+  return packedShape;
+};
+
+const packMethod = function (...args) {
+  return pack(this, ...args);
+};
+Shape.prototype.pack = packMethod;
 
 /** Pause after the path is complete, waiting for the user to continue. */
 

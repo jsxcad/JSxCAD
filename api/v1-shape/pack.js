@@ -6,7 +6,7 @@ import {
   toDisjointGeometry,
 } from '@jsxcad/geometry-tagged';
 
-import Shape from '@jsxcad/api-v1-shape';
+import Shape from './Shape.js';
 import { pack as packAlgorithm } from '@jsxcad/algorithm-pack';
 
 export const pack = (

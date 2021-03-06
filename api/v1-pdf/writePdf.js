@@ -7,7 +7,7 @@ import {
 
 import Shape from '@jsxcad/api-v1-shape';
 import { toPdf as convertToPdf } from '@jsxcad/convert-pdf';
-import { ensurePages } from '@jsxcad/api-v1-layout';
+import { ensurePages } from '@jsxcad/api-v1-shapes';
 
 export const preparePdf = (shape, name, { lineWidth = 0.096 } = {}) => {
   let index = 0;
