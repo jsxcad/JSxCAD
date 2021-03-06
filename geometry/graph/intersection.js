@@ -14,7 +14,7 @@ export const intersection = (a, b) => {
     return fromEmpty();
   }
   if (!a.isClosed) {
-    return section(intersection(extrude(a, far, 0), b), [principlePlane(a)]);
+    return section(intersection(extrude(a, far, 0), b), principlePlane(a));
   }
   if (!b.isClosed) {
     b = extrude(b, far, 0);

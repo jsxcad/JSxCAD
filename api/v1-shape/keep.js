@@ -83,7 +83,7 @@ const keepOrDrop = (shape, tags, select) => {
           // Operate on the shape.
           const shape = Shape.fromGeometry(geometry);
           // Note that this transform does not violate geometry disjunction.
-          const dropped = shape.hole().toGeometry();
+          const dropped = shape.void().toGeometry();
           return dropped;
         }
       }

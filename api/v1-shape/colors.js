@@ -1,17 +1,17 @@
 import { Shape } from './Shape.js';
 import { allTags } from '@jsxcad/geometry-tagged';
 
-export const colors = (shape) =>
-  [...allTags(shape.toGeometry())]
-    .filter((tag) => tag.startsWith('color/'))
-    .map((tag) => tag.substring(6));
+export const colors = (shape, op = (colors, shape) => colors) =>
+  op(
+    [...allTags(shape.toGeometry())]
+      .filter((tag) => tag.startsWith('color/'))
+      .map((tag) => tag.substring(6)),
+    shape
+  );
 
-const colorsMethod = function () {
-  return colors(this);
+const colorsMethod = function (op) {
+  return colors(this, op);
 };
 Shape.prototype.colors = colorsMethod;
 
 export default colors;
-
-colors.signature = 'colors(shape:Shape) -> strings';
-colorsMethod.signature = 'Shape -> colors() -> strings';

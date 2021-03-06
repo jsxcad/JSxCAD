@@ -1,15 +1,12 @@
 import Shape from './Shape.js';
 import { rewriteTags } from '@jsxcad/geometry-tagged';
 
-export const hole = (shape) =>
+export const voidFn = (shape) =>
   Shape.fromGeometry(
     rewriteTags(['compose/non-positive'], [], shape.toGeometry())
   );
 
-const holeMethod = function () {
-  return hole(this);
+const voidMethod = function () {
+  return voidFn(this);
 };
-Shape.prototype.hole = holeMethod;
-Shape.prototype.void = holeMethod;
-
-export default hole;
+Shape.prototype.void = voidMethod;

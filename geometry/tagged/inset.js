@@ -6,6 +6,7 @@ import {
 import { reify } from './reify.js';
 import { rewrite } from './visit.js';
 import { taggedGraph } from './taggedGraph.js';
+import { taggedGroup } from './taggedGroup.js';
 import { toTransformedGeometry } from './toTransformedGeometry.js';
 
 export const inset = (geometry, initial = 1, step, limit) => {
@@ -13,19 +14,18 @@ export const inset = (geometry, initial = 1, step, limit) => {
     const { tags } = geometry;
     switch (geometry.type) {
       case 'graph':
-        return taggedGraph(
+        return taggedGroup(
           { tags },
-          insetGraph(geometry.graph, initial, step, limit)
+          ...insetGraph(geometry.graph, initial, step, limit).map((graph) =>
+            taggedGraph({}, graph)
+          )
         );
       case 'triangles':
       case 'points':
         // Not implemented yet.
         return geometry;
       case 'paths':
-        return taggedGraph(
-          { tags },
-          insetGraph(fromPathsToGraph(geometry.paths), initial, step, limit)
-        );
+        return inset(fromPathsToGraph(geometry.paths), initial, step, limit);
       case 'plan':
         return inset(reify(geometry).content[0], initial, step, limit);
       case 'assembly':

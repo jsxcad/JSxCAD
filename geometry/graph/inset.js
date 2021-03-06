@@ -1,22 +1,19 @@
-import { fromPolygonsWithHoles } from './fromPolygonsWithHoles.js';
+import { fromPaths } from './fromPaths.js';
+import { fromPolygonWithHolesToPaths } from './fromPolygonWithHolesToPaths.js';
 import { insetOfPolygonWithHoles } from '@jsxcad/algorithm-cgal';
 import { outline } from './outline.js';
-import { realizeGraph } from './realizeGraph.js';
 
 export const inset = (graph, initial, step, limit) => {
-  const insetPolygonsWithHoles = [];
+  const insetGraphs = [];
   for (const polygonWithHoles of outline(graph)) {
-    insetPolygonsWithHoles.push(
-      ...insetOfPolygonWithHoles(initial, step, limit, polygonWithHoles)
-    );
+    for (const insetPolygon of insetOfPolygonWithHoles(
+      initial,
+      step,
+      limit,
+      polygonWithHoles
+    )) {
+      insetGraphs.push(fromPaths(fromPolygonWithHolesToPaths(insetPolygon)));
+    }
   }
-  const insetGraph = realizeGraph(
-    fromPolygonsWithHoles(insetPolygonsWithHoles)
-  );
-  insetGraph.isClosed = false;
-  insetGraph.isOutline = true;
-  if (insetGraph.points.length === 0) {
-    insetGraph.isEmpty = true;
-  }
-  return insetGraph;
+  return insetGraphs;
 };
