@@ -3,16 +3,10 @@ md`
 
 Sometimes it can be useful to think in terms of applying tools rather than geometric shapes.`;
 
-const mill = {
+defGrblSpindle('mill', {
   cutDepth: 1,
-  toolDiameter: 1,
-  millingStyle: 'conventional',
-  sweep: 'show',
-  toolType: 'spindle',
-  minCutZ: -10,
-  axialRate: 1,
-};
+  diameter: 1,
+  feedRate: 700,
+});
 
-const rod = Box(6, 6, 3)
-  .carve({ toolDiameter: 1, cutDepth: 0.2 }, Rod(1, 3))
-  .view();
+const rod = Box(15.1).ex(5).tool('mill').carve(Box(5).ex(6)).view();
