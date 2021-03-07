@@ -25,11 +25,8 @@ import Points from './Points.js';
 import Polygon from './Polygon.js';
 import Polyhedron from './Polyhedron.js';
 import Septagon from './Septagon.js';
-import Sketch from './Sketch.js';
 import Spiral from './Spiral.js';
 import Tetragon from './Tetragon.js';
-import Toolpath from './Toolpath.js';
-import Torus from './Torus.js';
 import Triangle from './Triangle.js';
 import Wave from './Wave.js';
 import Weld from './Weld.js';
@@ -61,11 +58,8 @@ const api = {
   Polygon,
   Polyhedron,
   Septagon,
-  Sketch,
   Spiral,
   Tetragon,
-  Toolpath,
-  Torus,
   Triangle,
   Wave,
   Weld,
@@ -98,11 +92,8 @@ export {
   Polygon,
   Polyhedron,
   Septagon,
-  Sketch,
   Spiral,
   Tetragon,
-  Toolpath,
-  Torus,
   Triangle,
   Wave,
   Weld,

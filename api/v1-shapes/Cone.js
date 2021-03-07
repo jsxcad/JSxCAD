@@ -18,9 +18,10 @@ import { negate } from '@jsxcad/math-vec3';
 const Z = 2;
 
 // FIX: This looks wrong.
-registerReifier('Cone', ({ tags, plan }) =>
-  Hull(
-    Arc(...getCorner2(plan)).sides(getSides(plan, 32)),
+registerReifier('Cone', ({ tags, plan }) => {
+  const [x, y, z] = getCorner2(plan);
+  return Hull(
+    Arc(x, y).sides(getSides(plan, 32)).z(z),
     Point(0, 0, getCorner1(plan)[Z])
   )
     .orient({
@@ -30,8 +31,8 @@ registerReifier('Cone', ({ tags, plan }) =>
     })
     .transform(getMatrix(plan))
     .setTags(tags)
-    .toGeometry()
-);
+    .toGeometry();
+});
 
 export const Cone = (diameter = 1, top = 1, base = -top) =>
   Shape.fromGeometry(taggedPlan({}, { type: 'Cone' }))

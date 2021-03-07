@@ -80,8 +80,6 @@ export {
   Septagon,
   Spiral,
   Tetragon,
-  Toolpath,
-  Torus,
   Triangle,
   Wave,
   Weld,
