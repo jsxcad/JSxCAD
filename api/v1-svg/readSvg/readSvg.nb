@@ -1,7 +1,0 @@
-import { readSvg } from '@jsxcad/api-v1-svg';
-
-md`A dinosaur silhoutte, from https://suncatcherstudio.com/image-editor/`;
-const dinosaur = await readSvg('readSvg/dinosaur.svg');
-
-dinosaur.outline().scale(0.1).topView();
-dinosaur.color('black').topView();

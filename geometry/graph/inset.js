@@ -12,7 +12,9 @@ export const inset = (graph, initial, step, limit) => {
       limit,
       polygonWithHoles
     )) {
-      insetGraphs.push(fromPaths(fromPolygonWithHolesToPaths(insetPolygon)));
+      insetGraphs.push(
+        fromPaths(fromPolygonWithHolesToPaths(insetPolygon), insetPolygon.plane)
+      );
     }
   }
   return insetGraphs;
