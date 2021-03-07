@@ -1721,17 +1721,19 @@ registerReifier('Arc', ({ tags, plan }) => {
   const corner2 = getCorner2(plan);
   const top = corner2[Z$1];
   const bottom = corner1[Z$1];
+  const step = 360 / getSides(plan, 32);
+  const steps = Math.ceil((end - start) / step);
+  const effectiveStep = (end - start) / steps;
 
   // FIX: corner1 is not really right.
-  const spiral = Spiral((a) => [[1]], {
-    from: start - 90,
-    upto: end - 90,
-    by: 360 / getSides(plan, 32),
-  })
-    .scale(...scale)
-    .move(...middle);
   if (end - start === 360) {
-    return spiral
+    return Spiral((a) => [[1]], {
+      from: start - 90,
+      upto: end - 90,
+      by: effectiveStep,
+    })
+      .scale(...scale)
+      .move(...middle)
       .close()
       .fill()
       .ex(top, bottom)
@@ -1744,7 +1746,13 @@ registerReifier('Arc', ({ tags, plan }) => {
       .setTags(tags)
       .toGeometry();
   } else {
-    return spiral
+    return Spiral((a) => [[1]], {
+      from: start - 90,
+      to: end - 90,
+      by: effectiveStep,
+    })
+      .scale(...scale)
+      .move(...middle)
       .move(...getAt(plan))
       .transform(getMatrix(plan))
       .setTags(tags)
@@ -1828,9 +1836,10 @@ Shape.prototype.Point = shapeMethod(Point);
 const Z$2 = 2;
 
 // FIX: This looks wrong.
-registerReifier('Cone', ({ tags, plan }) =>
-  Hull(
-    Arc(...getCorner2(plan)).sides(getSides(plan, 32)),
+registerReifier('Cone', ({ tags, plan }) => {
+  const [x, y, z] = getCorner2(plan);
+  return Hull(
+    Arc(x, y).sides(getSides(plan, 32)).z(z),
     Point(0, 0, getCorner1(plan)[Z$2])
   )
     .orient({
@@ -1840,8 +1849,8 @@ registerReifier('Cone', ({ tags, plan }) =>
     })
     .transform(getMatrix(plan))
     .setTags(tags)
-    .toGeometry()
-);
+    .toGeometry();
+});
 
 const Cone = (diameter = 1, top = 1, base = -top) =>
   Shape.fromGeometry(taggedPlan({}, { type: 'Cone' }))
@@ -1918,7 +1927,7 @@ const buildRegularIcosahedron = () => {
 
 registerReifier('Icosahedron', ({ tags, plan }) => {
   const [scale, middle] = getScale(plan);
-  return Shape.fromPolygonsToSolid(buildRegularIcosahedron())
+  return Shape.fromPolygons(buildRegularIcosahedron())
     .scale(...scale)
     .move(...middle)
     .orient({
@@ -1931,9 +1940,7 @@ registerReifier('Icosahedron', ({ tags, plan }) => {
 });
 
 const Icosahedron = (x = 1, y = x, z = x) =>
-  Shape.fromGeometry(
-    taggedPlan({}, { diameter: [x, y, z], type: 'Icosahedron' })
-  );
+  Shape.fromGeometry(taggedPlan({}, { type: 'Icosahedron' })).diameter(x, y, z);
 
 Shape.prototype.Icosahedron = shapeMethod(Icosahedron);
 
@@ -2135,32 +2142,9 @@ const Septagon = (x, y, z) => Arc(x, y, z).sides(7);
 
 Shape.prototype.Septagon = shapeMethod(Septagon);
 
-// FIX: This name is confusing wrt Shape.sketch().
-const Sketch = (shape) => shape.sketch();
-
-Shape.prototype.Sketch = shapeMethod(Sketch);
-
 const Tetragon = (x, y, z) => Arc(x, y, z).sides(4);
 
 Shape.prototype.Tetragon = shapeMethod(Tetragon);
-
-const Toolpath = (...points) =>
-  Path(...points).setTags(['path/Toolpath']);
-
-Shape.prototype.Toolpath = shapeMethod(Toolpath);
-
-const Torus = (
-  radius = 1,
-  height = 1,
-  { segments = 32, sides = 32, rotation = 0 } = {}
-) =>
-  Arc(height / 2, { sides })
-    .rotateZ(rotation)
-    .moveY(radius)
-    .Loop(360, { sides: segments })
-    .rotateY(90);
-
-Shape.prototype.Torus = shapeMethod(Torus);
 
 const Triangle = (x, y, z) => Arc(x, y, z).sides(3);
 
@@ -2214,15 +2198,12 @@ const api = {
   Polygon,
   Polyhedron,
   Septagon,
-  Sketch,
   Spiral,
   Tetragon,
-  Toolpath,
-  Torus,
   Triangle,
   Wave,
   Weld,
 };
 
 export default api;
-export { Arc, Assembly, Box, ChainedHull, Cone, Empty, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Line, LoopedHull, Octagon, Orb, Page, Path, Peg, Pentagon, Plane, Point, Points, Polygon, Polyhedron, Septagon, Sketch, Spiral, Tetragon, Toolpath, Torus, Triangle, Wave, Weld, ensurePages };
+export { Arc, Assembly, Box, ChainedHull, Cone, Empty, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Line, LoopedHull, Octagon, Orb, Page, Path, Peg, Pentagon, Plane, Point, Points, Polygon, Polyhedron, Septagon, Spiral, Tetragon, Triangle, Wave, Weld, ensurePages };

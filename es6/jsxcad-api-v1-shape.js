@@ -149,7 +149,7 @@ const Y = 1;
 const Z = 2;
 
 const align = (shape, spec = 'xyz', origin = [0, 0, 0]) =>
-  shape.size((shape, { max, min, center }) => {
+  shape.size(({ max, min, center }, shape) => {
     const offset = [0, 0, 0];
 
     let index = 0;
@@ -751,7 +751,9 @@ const updatePlanMethod = function (...updates) {
 Shape.prototype.updatePlan = updatePlanMethod;
 
 const angle = (shape, end = 360, start = 0) =>
-  shape.updatePlan({ angle: { start, end } });
+  start > end
+    ? shape.updatePlan({ angle: { start: end, end: start } })
+    : shape.updatePlan({ angle: { start: start, end: end } });
 const base = (shape, base) => shape.updatePlan({ base });
 const at = (shape, x = 0, y = 0, z = 0) =>
   shape.updatePlan({

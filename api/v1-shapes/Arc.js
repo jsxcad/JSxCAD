@@ -24,17 +24,19 @@ registerReifier('Arc', ({ tags, plan }) => {
   const corner2 = getCorner2(plan);
   const top = corner2[Z];
   const bottom = corner1[Z];
+  const step = 360 / getSides(plan, 32);
+  const steps = Math.ceil((end - start) / step);
+  const effectiveStep = (end - start) / steps;
 
   // FIX: corner1 is not really right.
-  const spiral = Spiral((a) => [[1]], {
-    from: start - 90,
-    upto: end - 90,
-    by: 360 / getSides(plan, 32),
-  })
-    .scale(...scale)
-    .move(...middle);
   if (end - start === 360) {
-    return spiral
+    return Spiral((a) => [[1]], {
+      from: start - 90,
+      upto: end - 90,
+      by: effectiveStep,
+    })
+      .scale(...scale)
+      .move(...middle)
       .close()
       .fill()
       .ex(top, bottom)
@@ -47,7 +49,13 @@ registerReifier('Arc', ({ tags, plan }) => {
       .setTags(tags)
       .toGeometry();
   } else {
-    return spiral
+    return Spiral((a) => [[1]], {
+      from: start - 90,
+      to: end - 90,
+      by: effectiveStep,
+    })
+      .scale(...scale)
+      .move(...middle)
       .move(...getAt(plan))
       .transform(getMatrix(plan))
       .setTags(tags)

@@ -69,7 +69,7 @@ const buildRegularIcosahedron = () => {
 
 registerReifier('Icosahedron', ({ tags, plan }) => {
   const [scale, middle] = getScale(plan);
-  return Shape.fromPolygonsToSolid(buildRegularIcosahedron({}))
+  return Shape.fromPolygons(buildRegularIcosahedron({}))
     .scale(...scale)
     .move(...middle)
     .orient({
@@ -82,9 +82,7 @@ registerReifier('Icosahedron', ({ tags, plan }) => {
 });
 
 export const Icosahedron = (x = 1, y = x, z = x) =>
-  Shape.fromGeometry(
-    taggedPlan({}, { diameter: [x, y, z], type: 'Icosahedron' })
-  );
+  Shape.fromGeometry(taggedPlan({}, { type: 'Icosahedron' })).diameter(x, y, z);
 
 export default Icosahedron;
 

@@ -6,7 +6,7 @@ const Y = 1;
 const Z = 2;
 
 export const align = (shape, spec = 'xyz', origin = [0, 0, 0]) =>
-  shape.size((shape, { max, min, center }) => {
+  shape.size(({ max, min, center }, shape) => {
     const offset = [0, 0, 0];
 
     let index = 0;
