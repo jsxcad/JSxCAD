@@ -18,7 +18,7 @@ export const union = (a, b) => {
     if (!b.isClosed) {
       b = extrude(b, far, 0);
     }
-    return section(union(extrude(a, far, 0), b), [principlePlane(a)]);
+    return section(union(extrude(a, far, 0), b), principlePlane(a));
   }
   if (!b.isClosed) {
     // The union of a surface and a solid is the solid.

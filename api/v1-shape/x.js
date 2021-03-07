@@ -14,7 +14,6 @@ export const moveX = (shape, x = 0) => move(shape, x);
 const moveXMethod = function (x) {
   return moveX(this, x);
 };
-Shape.prototype.moveX = moveXMethod;
 Shape.prototype.x = moveXMethod;
 
 export default moveX;

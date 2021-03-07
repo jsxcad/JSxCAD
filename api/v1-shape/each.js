@@ -1,9 +1,12 @@
 import Shape from './Shape.js';
 import { getLeafs } from '@jsxcad/geometry-tagged';
 
-export const each = (shape, op = (x) => x) =>
-  getLeafs(shape.toDisjointGeometry()).map((leaf) =>
-    op(Shape.fromGeometry(leaf))
+export const each = (shape, op = (leafs, shape) => leafs) =>
+  op(
+    getLeafs(shape.toDisjointGeometry()).map((leaf) =>
+      Shape.fromGeometry(leaf)
+    ),
+    shape
   );
 
 const eachMethod = function (op) {

@@ -6,7 +6,7 @@ import {
 } from '@jsxcad/sys';
 
 import { Shape } from '@jsxcad/api-v1-shape';
-import { ensurePages } from '@jsxcad/api-v1-layout';
+import { ensurePages } from '@jsxcad/api-v1-shapes';
 import { hash as hashGeometry } from '@jsxcad/geometry-tagged';
 import hashSum from 'hash-sum';
 import { toStl } from '@jsxcad/convert-stl';

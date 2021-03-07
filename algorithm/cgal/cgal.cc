@@ -707,16 +707,24 @@ void SectionOfSurfaceMesh(Surface_mesh* mesh, std::size_t plane_count, emscripte
 
   CGAL::Polygon_mesh_slicer<Surface_mesh, Kernel> slicer(*mesh);
 
+std::cout << "QQ/1" << std::endl;
   while (plane_count-- > 0) {
+std::cout << "QQ/2" << std::endl;
     Quadruple q;
     Quadruple* qp =  &q;
     fill_plane(qp);
     Polylines polylines;
+std::cout << "QQ/3" << std::endl;
     slicer(Plane(q[0], q[1], q[2], q[3]), std::back_inserter(polylines));
+std::cout << "QQ/4" << std::endl;
     for (const auto& polyline : polylines) {
+std::cout << "QQ/5" << std::endl;
       emit_polyline();
+std::cout << "QQ/6" << std::endl;
       for (const auto& p : polyline) {
+std::cout << "QQ/7" << std::endl;
         emit_point(CGAL::to_double(p.x().exact()), CGAL::to_double(p.y().exact()), CGAL::to_double(p.z().exact()));
+std::cout << "QQ/9" << std::endl;
       }
     }
   }
@@ -939,73 +947,6 @@ void ComputeAlphaShape2AsPolygonSegments(size_t component_limit, double alpha, b
     emit(CGAL::to_double(s.x().exact()), CGAL::to_double(s.y().exact()), CGAL::to_double(t.x().exact()), CGAL::to_double(t.y().exact()));
   }
 }
-
-#if 0
-void SkeletalInsetOfPolygon(double initial, double step, double limit, double x, double y, double z, double w, std::size_t hole_count, emscripten::val fill_boundary, emscripten::val fill_hole, emscripten::val emit_polygon, emscripten::val emit_point) {
-  Plane plane(x, y, z, w);
-  Polygon_2 boundary;
-  {
-    Points points;
-    Points* points_ptr = &points;
-    fill_boundary(points_ptr);
-    for (const auto& point : points) {
-      boundary.push_back(plane.to_2d(point));
-    }
-  }
-  std::vector<Polygon_2> holes;
-  for (std::size_t nth = 0; nth < hole_count; nth++) {
-    Points points;
-    Points* points_ptr = &points;
-    fill_hole(points_ptr, nth);
-    Polygon_2 hole;
-    for (const auto& point : points) {
-      hole.push_back(plane.to_2d(point));
-    }
-    std::reverse(hole.begin(), hole.end());
-    holes.push_back(hole);
-  }
-  Polygon_with_holes_2 polygon(boundary, holes.begin(), holes.end());
-
-  boost::shared_ptr<Straight_skeleton_2> skeleton = CGAL::create_interior_straight_skeleton_2(polygon);
-
-  double offset = initial;
-
-  for (;;) {
-    std::vector<boost::shared_ptr<Polygon_with_holes_2>> offset_polygons = CGAL::arrange_offset_polygons_2(CGAL::create_offset_polygons_2(offset, *skeleton, Kernel_2()));
-    bool emitted = false;
-    for (const auto& polygon : offset_polygons) {
-      const auto& outer = polygon->outer_boundary();
-      emit_polygon(false);
-      for (auto vertex = outer.vertices_begin(); vertex != outer.vertices_end(); ++vertex) {
-        auto p = plane.to_3d(*vertex);
-        emit_point(CGAL::to_double(p.x().exact()), CGAL::to_double(p.y().exact()), CGAL::to_double(p.z().exact()));
-        emitted = true;
-      }
-      for (auto hole = polygon->holes_begin(); hole != polygon->holes_end(); ++hole) {
-        emit_polygon(true);
-        for (auto vertex = hole->vertices_begin(); vertex != hole->vertices_end(); ++vertex) {
-          auto p = plane.to_3d(*vertex);
-          emit_point(CGAL::to_double(p.x().exact()), CGAL::to_double(p.y().exact()), CGAL::to_double(p.z().exact()));
-          emitted = true;
-        }
-      }
-    }
-    if (!emitted) {
-      break;
-    }
-    if (step <= 0) {
-      break;
-    }
-    offset += step;
-    if (limit <= 0) {
-      continue;
-    }
-    if (offset >= limit) {
-      break;
-    }
-  }
-}
-#endif
 
 template <class Curve>
 void emitCircularCurve(const Plane& plane, Curve& curve, emscripten::val& emit_point) {
