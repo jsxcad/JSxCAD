@@ -527,7 +527,9 @@ const inset = (graph, initial, step, limit) => {
       limit,
       polygonWithHoles
     )) {
-      insetGraphs.push(fromPaths(fromPolygonWithHolesToPaths(insetPolygon)));
+      insetGraphs.push(
+        fromPaths(fromPolygonWithHolesToPaths(insetPolygon), insetPolygon.plane)
+      );
     }
   }
   return insetGraphs;
@@ -562,7 +564,12 @@ const offset = (graph, initial, step, limit) => {
       limit,
       polygonWithHoles
     )) {
-      offsetGraphs.push(fromPaths(fromPolygonWithHolesToPaths(offsetPolygon)));
+      offsetGraphs.push(
+        fromPaths(
+          fromPolygonWithHolesToPaths(offsetPolygon),
+          offsetPolygon.plane
+        )
+      );
     }
   }
   return offsetGraphs;

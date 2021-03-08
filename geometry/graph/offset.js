@@ -12,7 +12,12 @@ export const offset = (graph, initial, step, limit) => {
       limit,
       polygonWithHoles
     )) {
-      offsetGraphs.push(fromPaths(fromPolygonWithHolesToPaths(offsetPolygon)));
+      offsetGraphs.push(
+        fromPaths(
+          fromPolygonWithHolesToPaths(offsetPolygon),
+          offsetPolygon.plane
+        )
+      );
     }
   }
   return offsetGraphs;

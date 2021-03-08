@@ -1,5 +1,4 @@
 import { readFont } from '@jsxcad/api-v1-font';
-
 const Text = await readFont(
   'https://gitcdn.link/cdn/googlefonts/noto-cjk/master/NotoSerifCJKkr-Regular.otf'
 );
