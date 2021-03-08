@@ -29,45 +29,48 @@ const clock = { face, hourHand, minuteHand };
 
 const Hand = ({ reach, tipRadius, face, axleRadius, thickness }) =>
   Hull(
-    Circle(face.axleRadius + 2.5),
-    Circle(tipRadius).move(reach * face.faceRadius)
-  ).cut(Circle(face.axleRadius));
+    Arc().radius(face.axleRadius + 2.5),
+    Arc()
+      .radius(tipRadius)
+      .move(reach * face.faceRadius)
+  ).cut(Arc().radius(face.axleRadius));
 
 const aladinRegular = await readFont(
   'https://gitcdn.link/repo/google/fonts/master/ofl/aladin/Aladin-Regular.ttf'
 );
 
-const font = (c) => aladinRegular(face.fontSize)(c).outline().center();
+const font = (c) => aladinRegular(face.fontSize)(c).outline().align();
 
 const Face = ({ axleRadius, faceRadius, thickness, fontSize }) =>
-  Circle(faceRadius)
-    .cut(Circle(axleRadius))
+  Arc()
+    .radius(faceRadius)
+    .cut(Arc().radius(axleRadius))
     .and(
       ...numbers(
         (n) =>
           font(`${n}`)
-            .moveY(faceRadius - fontSize)
-            .rotate((-n / 12) * 360),
+            .y(faceRadius - fontSize)
+            .rz((-n / 12) * 360),
         { from: 1, to: 12 }
       )
     );
 
-Face(face).item().md('The clock face').topView();
+Face(face).md('The clock face').topView();
 
-Hand(hourHand).fix().topView();
+Hand(hourHand).topView();
 md`The hour hand.`;
 
-Hand(minuteHand).fix().topView();
+Hand(minuteHand).topView();
 md`The minute hand.`;
 
 const Clock = ({ face, hourHand, minuteHand }) =>
   Group(
     Face(face),
-    Hand(hourHand).rotate(45).moveZ(face.thickness),
-    Hand(minuteHand).moveZ(face.thickness + hourHand.thickness)
+    Hand(hourHand).rz(45).z(face.thickness),
+    Hand(minuteHand).z(face.thickness + hourHand.thickness)
   );
 
 md`## Assembly`;
 
-Clock(clock).fix().topView();
+Clock(clock).topView();
 md`A complete clock.`;
