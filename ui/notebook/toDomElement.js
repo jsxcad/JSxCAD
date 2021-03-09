@@ -27,9 +27,6 @@ marked.use({
 export const toDomElement = async (notebook = []) => {
   const definitions = {};
 
-  const container = document.createElement('div');
-  container.classList.add('notebook');
-
   const showOrbitView = async (event, note) => {
     const { data } = note;
     const { target, up, position, withAxes, withGrid } = note.view;
@@ -54,6 +51,9 @@ export const toDomElement = async (notebook = []) => {
     };
     body.addEventListener('keydown', onKeyDown, true);
   };
+
+  const container = document.createElement('div');
+  container.classList.add('notebook');
 
   for (const note of notebook) {
     if (note.define) {
