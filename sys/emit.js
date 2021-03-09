@@ -8,6 +8,8 @@ export const pushModule = (module) => modules.push(module);
 
 export const emitted = [];
 
+let context;
+
 export const clearEmitted = () => {
   emitted.length = 0;
 };
@@ -17,6 +19,12 @@ const onEmitHandlers = new Set();
 export const emit = (value) => {
   if (value.module === undefined) {
     value.module = getModule();
+  }
+  if (value.setContext) {
+    context = value.setContext;
+  }
+  if (context) {
+    value.context = context;
   }
   const index = emitted.length;
   emitted.push(value);

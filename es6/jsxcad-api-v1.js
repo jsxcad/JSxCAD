@@ -320,6 +320,14 @@ const defGrblConstantLaser = (
     },
   });
 
+const card = (strings, ...placeholders) => {
+  const card = strings.reduce(
+    (result, string, i) => result + placeholders[i - 1] + string
+  );
+  emit({ hash: hashSum(card), setContext: { card } });
+  return card;
+};
+
 const md = (strings, ...placeholders) => {
   const md = strings.reduce(
     (result, string, i) => result + placeholders[i - 1] + string
@@ -445,6 +453,7 @@ var api = /*#__PURE__*/Object.freeze({
   defRgbColor: defRgbColor,
   defThreejsMaterial: defThreejsMaterial,
   defTool: defTool,
+  card: card,
   md: md,
   checkBox: checkBox,
   numberBox: numberBox,
@@ -593,4 +602,4 @@ registerDynamicModule(module('svg'), './jsxcad-api-v1-svg.js');
 registerDynamicModule(module('threejs'), './jsxcad-api-v1-threejs.js');
 registerDynamicModule(module('units'), './jsxcad-api-v1-units.js');
 
-export { beginRecordingNotes, checkBox, defGrblConstantLaser, defGrblDynamicLaser, defGrblSpindle, defRgbColor, defThreejsMaterial, defTool, define, importModule, md, numberBox, replayRecordedNotes, saveRecordedNotes, selectBox, sliderBox, source, stringBox, x, y, z };
+export { beginRecordingNotes, card, checkBox, defGrblConstantLaser, defGrblDynamicLaser, defGrblSpindle, defRgbColor, defThreejsMaterial, defTool, define, importModule, md, numberBox, replayRecordedNotes, saveRecordedNotes, selectBox, sliderBox, source, stringBox, x, y, z };

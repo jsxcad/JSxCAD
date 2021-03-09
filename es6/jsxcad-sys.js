@@ -436,7 +436,8 @@ const createService = async ({
   }
 };
 
-const askService = async (spec, question) => {
+/*
+export const askService = async (spec, question) => {
   const { ask, release } = await createService(spec);
   let answer;
   try {
@@ -447,6 +448,26 @@ const askService = async (spec, question) => {
     await release();
   }
   return answer;
+};
+*/
+
+const askService = async (spec, question) => {
+  const { ask, release, terminate } = await createService(spec);
+  let cancel;
+  const promise = new Promise((resolve, reject) => {
+    ask(question)
+      .then(resolve)
+      .then(() => release())
+      .catch((error) => {
+        console.log(`QQ/askService: ${error.stack}`);
+      });
+    cancel = () => {
+      terminate();
+      reject(Error('Terminated'));
+    };
+  });
+  promise.cancel = cancel;
+  return promise;
 };
 
 var empty = {};
@@ -3760,6 +3781,8 @@ const pushModule = (module) => modules.push(module);
 
 const emitted = [];
 
+let context;
+
 const clearEmitted = () => {
   emitted.length = 0;
 };
@@ -3769,6 +3792,12 @@ const onEmitHandlers = new Set();
 const emit$1 = (value) => {
   if (value.module === undefined) {
     value.module = getModule();
+  }
+  if (value.setContext) {
+    context = value.setContext;
+  }
+  if (context) {
+    value.context = context;
   }
   const index = emitted.length;
   emitted.push(value);
