@@ -19,34 +19,32 @@ export const createService = async ({
   }
 };
 
-/*
-export const askService = async (spec, question) => {
-  const { ask, release } = await createService(spec);
-  let answer;
-  try {
-    answer = await ask(question);
-  } catch (error) {
-    console.log(`QQ/askService: ${error.stack}`);
-  } finally {
-    await release();
-  }
-  return answer;
-};
-*/
-
-export const askService = async (spec, question) => {
-  const { ask, release, terminate } = await createService(spec);
+export const askService = (spec, question) => {
   let cancel;
   const promise = new Promise((resolve, reject) => {
-    ask(question)
-      .then(resolve)
-      .then(() => release())
+    let ask, release, terminate;
+    createService(spec)
+      .then((service) => {
+        ask = service.ask;
+        release = service.release;
+        terminate = service.terminate;
+        cancel = () => {
+          terminate();
+          reject(Error('Terminated'));
+        };
+      })
+      .then(() => ask(question))
+      .then((answer) => {
+        if (release) {
+          release();
+        }
+        resolve(answer);
+      })
       .catch((error) => {
         console.log(`QQ/askService: ${error.stack}`);
       });
     cancel = () => {
-      terminate();
-      reject(Error('Terminated'));
+      reject(Error('Cancelled'));
     };
   });
   promise.cancel = cancel;
