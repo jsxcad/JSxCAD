@@ -1,0 +1,16 @@
+md`# Inset`;
+
+const shape = Box(20)
+  .cut(Triangle(8))
+  .gridView(50)
+  .md(`We can take a shape (with holes)`);
+
+const insets = shape
+  .and(shape.inset(1, 0.5))
+  .gridView(50)
+  .md(`And inset by some initial (1) and repeating (0.5) amount`);
+
+const packed = insets
+  .pack()
+  .gridView(50)
+  .md(`Packing the insets can make it easier to see what's been produced`);
