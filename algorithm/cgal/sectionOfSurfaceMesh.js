@@ -19,7 +19,7 @@ export const sectionOfSurfaceMesh = (mesh, planes) => {
     },
     () => {
       path = [];
-      section.push(path);
+      section.push({ points: path });
     },
     (x, y, z) => {
       path.push([x, y, z]);
@@ -28,8 +28,8 @@ export const sectionOfSurfaceMesh = (mesh, planes) => {
   // Trim the last vertex, which is a duplicate of the first.
   // FIX: Do this in cgal.cc
   for (const { section } of sections) {
-    for (const path of section) {
-      path.pop();
+    for (const { points } of section) {
+      points.pop();
     }
   }
   const sectionPolygons = [];

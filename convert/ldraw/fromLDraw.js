@@ -1,10 +1,19 @@
-import { flip, isStrictlyCoplanar } from '@jsxcad/math-poly3';
+import {
+  flip,
+  isStrictlyCoplanar,
+  transform as transformOfPoly3,
+} from '@jsxcad/math-poly3';
 import { rotateX, scale, taggedGraph } from '@jsxcad/geometry-tagged';
 
 import { fromPolygons } from '@jsxcad/geometry-graph';
 import { fromValues as fromValuesToMatrix } from '@jsxcad/math-mat4';
 import { readFile } from '@jsxcad/sys';
-import { transform } from '@jsxcad/geometry-polygons';
+
+export const transform = (matrix, polygons) =>
+  polygons.map((polygon) => ({
+    ...polygon,
+    points: transformOfPoly3(matrix, polygon.points),
+  }));
 
 const RESOLUTION = 10000;
 
@@ -146,9 +155,9 @@ const fromPartToPolygons = async (
         ];
         if (!isStrictlyCoplanar(polygon)) throw Error('die');
         if (Direction() === 'CW') {
-          polygons.push(flip(polygon));
+          polygons.push({ points: flip(polygon) });
         } else {
-          polygons.push(polygon);
+          polygons.push({ points: polygon });
         }
         break;
       }
@@ -163,17 +172,17 @@ const fromPartToPolygons = async (
         ];
         if (Direction() === 'CW') {
           if (isStrictlyCoplanar(p)) {
-            polygons.push(flip(p));
+            polygons.push({ points: flip(p) });
           } else {
-            polygons.push(flip([p[0], p[1], p[3]]));
-            polygons.push(flip([p[2], p[3], p[1]]));
+            polygons.push({ points: flip([p[0], p[1], p[3]]) });
+            polygons.push({ points: flip([p[2], p[3], p[1]]) });
           }
         } else {
           if (isStrictlyCoplanar(p)) {
-            polygons.push(p);
+            polygons.push({ points: p });
           } else {
-            polygons.push([p[0], p[1], p[3]]);
-            polygons.push([p[2], p[3], p[1]]);
+            polygons.push({ points: [p[0], p[1], p[3]] });
+            polygons.push({ points: [p[2], p[3], p[1]] });
           }
         }
         break;

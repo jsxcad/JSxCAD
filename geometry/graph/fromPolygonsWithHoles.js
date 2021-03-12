@@ -41,5 +41,7 @@ export const fromPolygonsWithHoles = (polygonsWithHoles) => {
     facet += 1;
   }
   // We didn't build a stitched graph.
-  return rerealizeGraph(graph);
+  const rerealized = rerealizeGraph(graph);
+  rerealized.provenance = 'fromPolygonsWithHoles';
+  return rerealized;
 };

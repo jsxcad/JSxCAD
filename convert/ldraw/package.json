@@ -23,7 +23,6 @@
   "keywords": [],
   "license": "MIT",
   "dependencies": {
-    "@jsxcad/geometry-polygons": "^0.0.79",
     "@jsxcad/geometry-graph": "^0.0.79",
     "@jsxcad/geometry-tagged": "^0.0.79",
     "@jsxcad/math-mat4": "^0.0.79",

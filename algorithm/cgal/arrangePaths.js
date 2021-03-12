@@ -15,7 +15,7 @@ export const arrangePaths = (plane, exactPlane, paths, triangulate = false) => {
   const fill = (points) => {
     const path = paths[nth++];
     if (path) {
-      for (const [start, end] of getEdges(path)) {
+      for (const [start, end] of getEdges(path.points)) {
         if (equals(start, end)) {
           continue;
         }
@@ -56,3 +56,6 @@ export const arrangePaths = (plane, exactPlane, paths, triangulate = false) => {
   }
   return polygons;
 };
+
+export const arrangePathsIntoTriangles = (plane, exactPlane, paths) =>
+  arrangePaths(plane, exactPlane, paths, /* triangulate= */ true);

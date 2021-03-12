@@ -32,15 +32,22 @@ export const outline = (graph) => {
 
   // Arrange the edges per face.
   for (const [face, edges] of faceEdges) {
+    if (face === -1) {
+      // We can't arrange edges that aren't in a face.
+      // FIX: Sometimes we'll want edges that aren't in faces or facets.
+      continue;
+    }
     const paths = [];
     // FIX: Use exact plane.
     const { plane, exactPlane } = graph.faces[face];
     for (const { point, next } of edges) {
-      paths.push([
-        null,
-        graph.points[point],
-        graph.points[graph.edges[next].point],
-      ]);
+      paths.push({
+        points: [
+          null,
+          graph.points[point],
+          graph.points[graph.edges[next].point],
+        ],
+      });
     }
     arrangements.push(
       ...arrangePaths(plane, exactPlane, paths, /* triangulate= */ false)

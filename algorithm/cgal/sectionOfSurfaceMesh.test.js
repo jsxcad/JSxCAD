@@ -2,11 +2,41 @@ import { fromPolygonsToSurfaceMesh } from './fromPolygonsToSurfaceMesh.js';
 import { initCgal } from './getCgal.js';
 import { sectionOfSurfaceMesh } from './sectionOfSurfaceMesh.js';
 import test from 'ava';
-import { unitRegularTetrahedronPolygons } from '@jsxcad/data-shape';
 
 test.beforeEach(async (t) => {
   await initCgal();
 });
+
+export const unitRegularTetrahedronPolygons = [
+  {
+    points: [
+      [-1, 1, -1],
+      [1, 1, 1],
+      [1, -1, -1],
+    ],
+  },
+  {
+    points: [
+      [-1, -1, 1],
+      [1, 1, 1],
+      [-1, 1, -1],
+    ],
+  },
+  {
+    points: [
+      [-1, -1, 1],
+      [1, -1, -1],
+      [1, 1, 1],
+    ],
+  },
+  {
+    points: [
+      [-1, -1, 1],
+      [-1, 1, -1],
+      [1, -1, -1],
+    ],
+  },
+];
 
 test('Section of tetrahedron.', (t) => {
   const mesh = fromPolygonsToSurfaceMesh(unitRegularTetrahedronPolygons);

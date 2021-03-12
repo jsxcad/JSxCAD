@@ -32,6 +32,9 @@ export const fromSurfaceMeshToGraph = (mesh) => {
       graph.facets[facet] = { edge };
     },
     (face, x, y, z, w, exactX, exactY, exactZ, exactW) => {
+      if (x === 0 && y === 0 && z === 0 && w === 0) {
+        throw Error(`Zero plane`);
+      }
       graph.faces[face] = {
         plane: [x, y, z, w],
         exactPlane: [exactX, exactY, exactZ, exactW],

@@ -678,7 +678,12 @@ const fill = (geometry, includeFaces = true, includeHoles = true) => {
       continue;
     }
     fills.push(
-      taggedGraph({ tags }, fill$1(fromPaths(paths)))
+      taggedGraph(
+        { tags },
+        fill$1(
+          fromPaths(paths.map((path) => ({ points: path })))
+        )
+      )
     );
   }
   return taggedGroup({}, ...fills);
