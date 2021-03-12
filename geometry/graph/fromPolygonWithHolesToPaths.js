@@ -1,8 +1,12 @@
 export const fromPolygonWithHolesToPaths = (polygon) => {
   const paths = [];
-  paths.push(polygon.points);
+  if (polygon.points.length >= 3) {
+    paths.push(polygon.points);
+  }
   for (const hole of polygon.holes) {
-    paths.push(hole.points);
+    if (hole.points.length >= 3) {
+      paths.push(hole.points);
+    }
   }
   return paths;
 };

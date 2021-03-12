@@ -11,11 +11,13 @@ test.beforeEach(async (t) => {
 
 test('Extrude/Triangle', (t) => {
   const triangle = [
-    [
-      [-0.5, 0.5, 0.5],
-      [-0.5, -0.5, 0.5],
-      [0.5, -0.5, 0.5],
-    ],
+    {
+      points: [
+        [-0.5, 0.5, 0.5],
+        [-0.5, -0.5, 0.5],
+        [0.5, -0.5, 0.5],
+      ],
+    },
   ];
   const surfaceMesh = fromPolygonsToSurfaceMesh(triangle);
   t.true(surfaceMesh.is_valid(false));

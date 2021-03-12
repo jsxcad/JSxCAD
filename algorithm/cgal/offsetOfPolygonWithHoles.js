@@ -1,5 +1,9 @@
 import { getCgal } from './getCgal.js';
 
+const X = 0;
+const Y = 1;
+const Z = 2;
+
 export const offsetOfPolygonWithHoles = (
   initial = 1,
   step = -1,
@@ -11,7 +15,8 @@ export const offsetOfPolygonWithHoles = (
   const outputs = [];
   let output;
   let points;
-  c.OffsetOfPolygon(
+  let lastPoint;
+  c.OffsetOfPolygonWithHoles(
     initial,
     step,
     limit,
@@ -26,14 +31,15 @@ export const offsetOfPolygonWithHoles = (
       }
     },
     (hole, nth) => {
-      for (const [x, y, z] of polygon.holes[nth]) {
+      for (const [x, y, z] of polygon.holes[nth].points) {
         c.addPoint(hole, x, y, z);
       }
     },
     (isHole) => {
       points = [];
+      lastPoint = undefined;
       if (isHole) {
-        output.holes.push.push({ points });
+        output.holes.push({ points });
       } else {
         output = {
           points,
@@ -44,7 +50,17 @@ export const offsetOfPolygonWithHoles = (
         outputs.push(output);
       }
     },
-    (x, y, z) => points.push([x, y, z])
+    (x, y, z) => {
+      if (
+        !lastPoint ||
+        lastPoint[X] !== x ||
+        lastPoint[Y] !== y ||
+        lastPoint[Z] !== z
+      ) {
+        lastPoint = [x, y, z];
+        points.push(lastPoint);
+      }
+    }
   );
   return outputs;
 };

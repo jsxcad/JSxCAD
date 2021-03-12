@@ -1,5 +1,6 @@
 import { fromPaths } from './fromPaths.js';
 import { initCgal } from '@jsxcad/algorithm-cgal';
+import { realizeGraph } from './realizeGraph.js';
 import test from 'ava';
 
 test.beforeEach(async (t) => {
@@ -8,27 +9,33 @@ test.beforeEach(async (t) => {
 
 test('fromPaths', (t) => {
   const paths = [
-    [
-      [-100, 100, 0],
-      [-100, -100, 0],
-      [100, -100, 0],
-      [100, 100, 0],
-    ],
-    [
-      [-5, 5, 0],
-      [-5, -5, 0],
-      [5, -5, 0],
-      [5, 5, 0],
-    ],
-    [
-      [-2, 2, 0],
-      [-2, -2, 0],
-      [2, -2, 0],
-      [2, 2, 0],
-    ],
+    {
+      points: [
+        [-100, 100, 0],
+        [-100, -100, 0],
+        [100, -100, 0],
+        [100, 100, 0],
+      ],
+    },
+    {
+      points: [
+        [-5, 5, 0],
+        [-5, -5, 0],
+        [5, -5, 0],
+        [5, 5, 0],
+      ],
+    },
+    {
+      points: [
+        [-2, 2, 0],
+        [-2, -2, 0],
+        [2, -2, 0],
+        [2, 2, 0],
+      ],
+    },
   ];
   const graph = fromPaths(paths);
-  t.deepEqual(JSON.parse(JSON.stringify(graph)), {
+  t.deepEqual(JSON.parse(JSON.stringify(realizeGraph(graph))), {
     isClosed: false,
     isLazy: false,
     edges: [
@@ -126,7 +133,5 @@ test('fromPaths', (t) => {
       { edge: 36 },
       { edge: 40 },
     ],
-    isOutline: true,
-    isWireframe: true,
   });
 });

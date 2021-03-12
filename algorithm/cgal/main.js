@@ -11,7 +11,7 @@ export {
   toCgalTransformFromJsTransform,
 } from './transform.js';
 
-export { arrangePaths } from './arrangePaths.js';
+export { arrangePaths, arrangePathsIntoTriangles } from './arrangePaths.js';
 export { differenceOfSurfaceMeshes } from './differenceOfSurfaceMeshes.js';
 export { doesSelfIntersectOfSurfaceMesh } from './doesSelfIntersectOfSurfaceMesh.js';
 export { extrudeSurfaceMesh } from './extrudeSurfaceMesh.js';

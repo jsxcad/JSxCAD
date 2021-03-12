@@ -22,7 +22,7 @@ test('Triangle', async (t) => {
       content: [
         {
           type: 'graph',
-          graph: fromPolygons([triangle]),
+          graph: fromPolygons([{ points: triangle }]),
           tags: ['color/blue'],
         },
         {

@@ -454,13 +454,29 @@ const std::size_t Surface_mesh__add_face_vertices(Surface_mesh* mesh, emscripten
   std::vector<Vertex_index> vertices;
   for (;;) {
     Vertex_index vertex(next_vertex().as<std::size_t>());
-    if (!vertices.empty() && vertex == vertices[0]) {
-      break;
+    if (!vertices.empty()) {
+      if (vertex == vertices[0]) {
+        break;
+      } else if (vertex == vertices.back()) {
+        std::cout << "Duplicate vertex in add face." << std::endl;
+        continue;
+      }
     }
     vertices.push_back(vertex);
   }
-  std::size_t index(mesh->add_face(vertices));
-  return index;
+  if (vertices.size() < 3) {
+    return -1;
+  } else {
+    auto facet = mesh->add_face(vertices);
+    const auto facet_normal = CGAL::Polygon_mesh_processing::compute_face_normal(facet, *mesh);
+    if (facet_normal == CGAL::NULL_VECTOR) {
+      std::cout << "Adding degenerate face/facet" << facet << std::endl;
+      std::cout << "Adding degenerate face/mesh" << *mesh << std::endl;
+      return -1;
+    }
+    std::size_t index(facet);
+    return index;
+  }
 }
 
 const std::size_t Surface_mesh__add_edge(Surface_mesh* mesh) {
@@ -707,24 +723,16 @@ void SectionOfSurfaceMesh(Surface_mesh* mesh, std::size_t plane_count, emscripte
 
   CGAL::Polygon_mesh_slicer<Surface_mesh, Kernel> slicer(*mesh);
 
-std::cout << "QQ/1" << std::endl;
   while (plane_count-- > 0) {
-std::cout << "QQ/2" << std::endl;
     Quadruple q;
     Quadruple* qp =  &q;
     fill_plane(qp);
     Polylines polylines;
-std::cout << "QQ/3" << std::endl;
     slicer(Plane(q[0], q[1], q[2], q[3]), std::back_inserter(polylines));
-std::cout << "QQ/4" << std::endl;
     for (const auto& polyline : polylines) {
-std::cout << "QQ/5" << std::endl;
       emit_polyline();
-std::cout << "QQ/6" << std::endl;
       for (const auto& p : polyline) {
-std::cout << "QQ/7" << std::endl;
         emit_point(CGAL::to_double(p.x().exact()), CGAL::to_double(p.y().exact()), CGAL::to_double(p.z().exact()));
-std::cout << "QQ/9" << std::endl;
       }
     }
   }
@@ -791,13 +799,20 @@ class Surface_mesh_explorer {
         continue;
       }
       const auto facet_normal = CGAL::Polygon_mesh_processing::compute_face_normal(facet, mesh);
+      if (facet_normal == CGAL::NULL_VECTOR) {
+        std::cout << "Null face normal/facet: " << facet << std::endl;
+        std::cout << "Null face normal/mesh: " << mesh << std::endl;
+        // This is a degenerate facet, so it does not fit into a face.
+        facet_to_face[facet] = -1;
+      }
       std::int32_t face = mapFacetToFace(facet);
       Halfedge_index edge = start;
       do {
         const auto& opposite_facet = mesh.face(mesh.opposite(edge));
         if (opposite_facet != mesh.null_face()) {
           const auto opposite_facet_normal = CGAL::Polygon_mesh_processing::compute_face_normal(opposite_facet, mesh);
-          if (facet_normal * opposite_facet_normal > kColinearityThreshold) {
+          // CHECK: Why are we using a threshold here?
+          if (opposite_facet_normal != CGAL::NULL_VECTOR && facet_normal * opposite_facet_normal > kColinearityThreshold) {
             std::int32_t opposite_face = mapFacetToFace(opposite_facet);
             if (opposite_face < face) {
               facet_to_face[face] = opposite_face;
@@ -842,6 +857,10 @@ class Surface_mesh_explorer {
         continue;
       }
       const auto facet_normal = CGAL::Polygon_mesh_processing::compute_face_normal(Surface_mesh::Face_index(facet), mesh);
+      if (facet_normal == CGAL::NULL_VECTOR) {
+        std::cout << "Null face normal" << std::endl;
+        continue;
+      }
       const auto& point = mesh.point(facet_to_vertex[facet]);
       const Plane plane(point, facet_normal);
       std::ostringstream x; x << plane.a().exact(); std::string xs = x.str();
@@ -1007,7 +1026,7 @@ void emitCircularCurve(const Plane& plane, Curve& curve, emscripten::val& emit_p
 }
 
 
-void OffsetOfPolygon(double initial, double step, double limit, double x, double y, double z, double w, std::size_t hole_count, emscripten::val fill_boundary, emscripten::val fill_hole, emscripten::val emit_polygon, emscripten::val emit_point) {
+void OffsetOfPolygonWithHoles(double initial, double step, double limit, double x, double y, double z, double w, std::size_t hole_count, emscripten::val fill_boundary, emscripten::val fill_hole, emscripten::val emit_polygon, emscripten::val emit_point) {
   typedef CGAL::Gps_circle_segment_traits_2<Kernel> Traits;
   Kernel::Plane_3 plane(x, y, z, w);
   Polygon_2 boundary;
@@ -1238,10 +1257,15 @@ void ArrangePaths(Plane plane, bool do_triangulate, emscripten::val fill, emscri
     }
     Point_2s point_2s;
     for (const auto& point : points) {
-      point_2s.push_back(plane.to_2d(point));
+      auto point_2 = plane.to_2d(point);
+      point_2s.push_back(point_2);
     }
-    for (std::size_t i = 0; i < point_2s.size(); i += 2) {
+    for (std::size_t i = 0; i + 1 < point_2s.size(); i += 2) {
       if (segments.find({ point_2s[i].x(), point_2s[i].y(), point_2s[i + 1].x(), point_2s[i + 1].y() }) != segments.end()) {
+        continue;
+      }
+      if (point_2s[i] == point_2s[i + 1]) {
+        // Skip zero length segments.
         continue;
       }
       // Add the segment
@@ -1691,8 +1715,7 @@ EMSCRIPTEN_BINDINGS(module) {
   emscripten::function("ComputeConvexHullAsSurfaceMesh", &ComputeConvexHullAsSurfaceMesh, emscripten::allow_raw_pointers());
   emscripten::function("ComputeAlphaShapeAsSurfaceMesh", &ComputeAlphaShapeAsSurfaceMesh, emscripten::allow_raw_pointers());
   emscripten::function("ComputeAlphaShape2AsPolygonSegments", &ComputeAlphaShape2AsPolygonSegments, emscripten::allow_raw_pointers());
-  // emscripten::function("SkeletalInsetOfPolygon", &SkeletalInsetOfPolygon, emscripten::allow_raw_pointers());
-  emscripten::function("OffsetOfPolygon", &OffsetOfPolygon, emscripten::allow_raw_pointers());
+  emscripten::function("OffsetOfPolygonWithHoles", &OffsetOfPolygonWithHoles, emscripten::allow_raw_pointers());
   emscripten::function("InsetOfPolygon", &InsetOfPolygon, emscripten::allow_raw_pointers());
   emscripten::function("Surface_mesh__is_closed", &Surface_mesh__is_closed, emscripten::allow_raw_pointers());
   emscripten::function("Surface_mesh__is_valid_halfedge_graph", &Surface_mesh__is_valid_halfedge_graph, emscripten::allow_raw_pointers());

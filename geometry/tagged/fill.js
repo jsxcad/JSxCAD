@@ -25,7 +25,12 @@ export const fill = (geometry, includeFaces = true, includeHoles = true) => {
       continue;
     }
     fills.push(
-      taggedGraph({ tags }, fillOutlineGraph(fromPathsToGraph(paths)))
+      taggedGraph(
+        { tags },
+        fillOutlineGraph(
+          fromPathsToGraph(paths.map((path) => ({ points: path })))
+        )
+      )
     );
   }
   return taggedGroup({}, ...fills);

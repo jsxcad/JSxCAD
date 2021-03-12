@@ -8,6 +8,8 @@ import { toPdf } from '@jsxcad/convert-pdf';
 
 const { readFile, writeFile } = fs.promises;
 
+Error.stackTraceLimit = Infinity;
+
 test.beforeEach(async (t) => {
   await boot();
 });

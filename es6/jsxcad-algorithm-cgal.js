@@ -870,8 +870,8 @@ var Module = (function () {
     }
     var wasmMemory;
     var wasmTable = new WebAssembly.Table({
-      initial: 5466,
-      maximum: 5466,
+      initial: 5469,
+      maximum: 5469,
       element: 'anyfunc',
     });
     var ABORT = false;
@@ -1139,9 +1139,9 @@ var Module = (function () {
       Module['HEAPF32'] = HEAPF32 = new Float32Array(buf);
       Module['HEAPF64'] = HEAPF64 = new Float64Array(buf);
     }
-    var STACK_BASE = 5615088,
-      STACK_MAX = 372208,
-      DYNAMIC_BASE = 5615088;
+    var STACK_BASE = 5615952,
+      STACK_MAX = 373072,
+      DYNAMIC_BASE = 5615952;
     assert(STACK_BASE % 16 === 0, 'stack must start aligned');
     assert(DYNAMIC_BASE % 16 === 0, 'heap must start aligned');
     var TOTAL_STACK = 5242880;
@@ -7289,6 +7289,7 @@ var Module = (function () {
       invoke_vi: invoke_vi,
       invoke_vid: invoke_vid,
       invoke_vidd: invoke_vidd,
+      invoke_viddd: invoke_viddd,
       invoke_vidiii: invoke_vidiii,
       invoke_vii: invoke_vii,
       invoke_viii: invoke_viii,
@@ -8073,6 +8074,16 @@ var Module = (function () {
           a12,
           a13
         );
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_viddd(index, a1, a2, a3, a4) {
+      var sp = stackSave();
+      try {
+        wasmTable.get(index)(a1, a2, a3, a4);
       } catch (e) {
         stackRestore(sp);
         if (e !== e + 0 && e !== 'longjmp') throw e;
@@ -10201,7 +10212,7 @@ const arrangePaths = (plane, exactPlane, paths, triangulate = false) => {
   const fill = (points) => {
     const path = paths[nth++];
     if (path) {
-      for (const [start, end] of getEdges(path)) {
+      for (const [start, end] of getEdges(path.points)) {
         if (equals(start, end)) {
           continue;
         }
@@ -10242,6 +10253,9 @@ const arrangePaths = (plane, exactPlane, paths, triangulate = false) => {
   }
   return polygons;
 };
+
+const arrangePathsIntoTriangles = (plane, exactPlane, paths) =>
+  arrangePaths(plane, exactPlane, paths, /* triangulate= */ true);
 
 const differenceOfSurfaceMeshes = (a, b) =>
   getCgal().DifferenceOfSurfaceMeshes(a, b);
@@ -10369,7 +10383,6 @@ const Z$2 = 2;
 // Note: This assumes a graph without holes.
 const fromGraphToSurfaceMesh = (graph) => {
   const c = getCgal();
-
   const mesh = new c.Surface_mesh();
 
   const vertexIndex = [];
@@ -10504,9 +10517,11 @@ const fromPolygonsToSurfaceMesh = (jsPolygons) => {
   const c = getCgal();
   const surfaceMesh = c.FromPolygonSoupToSurfaceMesh((triples, polygons) => {
     let index = 0;
-    for (const jsPolygon of jsPolygons) {
+    // FIX: Prefer exactPoints
+    for (const { points } of jsPolygons) {
+      // FIX: Clean this up and use exactPoints.
       const polygon = new c.Polygon();
-      for (const [x, y, z] of jsPolygon) {
+      for (const [x, y, z] of points) {
         c.addTriple(triples, x, y, z);
         c.Polygon__push_back(polygon, index++);
       }
@@ -10550,6 +10565,9 @@ const fromSurfaceMeshToGraph = (mesh) => {
       graph.facets[facet] = { edge };
     },
     (face, x, y, z, w, exactX, exactY, exactZ, exactW) => {
+      if (x === 0 && y === 0 && z === 0 && w === 0) {
+        throw Error(`Zero plane`);
+      }
       graph.faces[face] = {
         plane: [x, y, z, w],
         exactPlane: [exactX, exactY, exactZ, exactW],
@@ -10648,6 +10666,10 @@ const insetOfPolygonWithHoles = (
 const intersectionOfSurfaceMeshes = (a, b) =>
   getCgal().IntersectionOfSurfaceMeshes(a, b);
 
+const X$3 = 0;
+const Y$3 = 1;
+const Z$3 = 2;
+
 const offsetOfPolygonWithHoles = (
   initial = 1,
   step = -1,
@@ -10659,7 +10681,8 @@ const offsetOfPolygonWithHoles = (
   const outputs = [];
   let output;
   let points;
-  c.OffsetOfPolygon(
+  let lastPoint;
+  c.OffsetOfPolygonWithHoles(
     initial,
     step,
     limit,
@@ -10674,14 +10697,15 @@ const offsetOfPolygonWithHoles = (
       }
     },
     (hole, nth) => {
-      for (const [x, y, z] of polygon.holes[nth]) {
+      for (const [x, y, z] of polygon.holes[nth].points) {
         c.addPoint(hole, x, y, z);
       }
     },
     (isHole) => {
       points = [];
+      lastPoint = undefined;
       if (isHole) {
-        output.holes.push.push({ points });
+        output.holes.push({ points });
       } else {
         output = {
           points,
@@ -10692,7 +10716,17 @@ const offsetOfPolygonWithHoles = (
         outputs.push(output);
       }
     },
-    (x, y, z) => points.push([x, y, z])
+    (x, y, z) => {
+      if (
+        !lastPoint ||
+        lastPoint[X$3] !== x ||
+        lastPoint[Y$3] !== y ||
+        lastPoint[Z$3] !== z
+      ) {
+        lastPoint = [x, y, z];
+        points.push(lastPoint);
+      }
+    }
   );
   return outputs;
 };
@@ -10739,7 +10773,7 @@ const sectionOfSurfaceMesh = (mesh, planes) => {
     },
     () => {
       path = [];
-      section.push(path);
+      section.push({ points: path });
     },
     (x, y, z) => {
       path.push([x, y, z]);
@@ -10748,8 +10782,8 @@ const sectionOfSurfaceMesh = (mesh, planes) => {
   // Trim the last vertex, which is a duplicate of the first.
   // FIX: Do this in cgal.cc
   for (const { section } of sections) {
-    for (const path of section) {
-      path.pop();
+    for (const { points } of section) {
+      points.pop();
     }
   }
   const sectionPolygons = [];
@@ -10800,4 +10834,4 @@ const transformSurfaceMesh = (mesh, jsTransform) =>
 const unionOfSurfaceMeshes = (a, b) =>
   getCgal().UnionOfSurfaceMeshes(a, b);
 
-export { arrangePaths, composeTransforms, differenceOfSurfaceMeshes, doesSelfIntersectOfSurfaceMesh, extrudeSurfaceMesh, extrudeToPlaneOfSurfaceMesh, fitPlaneToPoints, fromApproximateToCgalTransform, fromExactToCgalTransform, fromFunctionToSurfaceMesh, fromGraphToSurfaceMesh, fromIdentityToCgalTransform, fromPointsToAlphaShape2AsPolygonSegments, fromPointsToAlphaShapeAsSurfaceMesh, fromPointsToConvexHullAsSurfaceMesh, fromPointsToSurfaceMesh, fromPolygonsToSurfaceMesh, fromRotateXToTransform, fromRotateYToTransform, fromRotateZToTransform, fromScaleToTransform, fromSurfaceMeshEmitBoundingBox, fromSurfaceMeshToGraph, fromSurfaceMeshToLazyGraph, fromSurfaceMeshToPolygons, fromSurfaceMeshToTriangles, fromTranslateToTransform, initCgal, insetOfPolygonWithHoles, intersectionOfSurfaceMeshes, offsetOfPolygonWithHoles, projectToPlaneOfSurfaceMesh, remeshSurfaceMesh, reverseFaceOrientationsOfSurfaceMesh, sectionOfSurfaceMesh, subdivideSurfaceMesh, toCgalTransformFromJsTransform, transformSurfaceMesh, unionOfSurfaceMeshes };
+export { arrangePaths, arrangePathsIntoTriangles, composeTransforms, differenceOfSurfaceMeshes, doesSelfIntersectOfSurfaceMesh, extrudeSurfaceMesh, extrudeToPlaneOfSurfaceMesh, fitPlaneToPoints, fromApproximateToCgalTransform, fromExactToCgalTransform, fromFunctionToSurfaceMesh, fromGraphToSurfaceMesh, fromIdentityToCgalTransform, fromPointsToAlphaShape2AsPolygonSegments, fromPointsToAlphaShapeAsSurfaceMesh, fromPointsToConvexHullAsSurfaceMesh, fromPointsToSurfaceMesh, fromPolygonsToSurfaceMesh, fromRotateXToTransform, fromRotateYToTransform, fromRotateZToTransform, fromScaleToTransform, fromSurfaceMeshEmitBoundingBox, fromSurfaceMeshToGraph, fromSurfaceMeshToLazyGraph, fromSurfaceMeshToPolygons, fromSurfaceMeshToTriangles, fromTranslateToTransform, initCgal, insetOfPolygonWithHoles, intersectionOfSurfaceMeshes, offsetOfPolygonWithHoles, projectToPlaneOfSurfaceMesh, remeshSurfaceMesh, reverseFaceOrientationsOfSurfaceMesh, sectionOfSurfaceMesh, subdivideSurfaceMesh, toCgalTransformFromJsTransform, transformSurfaceMesh, unionOfSurfaceMeshes };

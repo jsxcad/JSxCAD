@@ -1,5 +1,4 @@
 import { fromPaths } from './fromPaths.js';
-import { fromPolygonWithHolesToPaths } from './fromPolygonWithHolesToPaths.js';
 import { offsetOfPolygonWithHoles } from '@jsxcad/algorithm-cgal';
 import { outline } from './outline.js';
 
@@ -12,12 +11,7 @@ export const offset = (graph, initial, step, limit) => {
       limit,
       polygonWithHoles
     )) {
-      offsetGraphs.push(
-        fromPaths(
-          fromPolygonWithHolesToPaths(offsetPolygon),
-          offsetPolygon.plane
-        )
-      );
+      offsetGraphs.push(fromPaths([offsetPolygon], offsetPolygon.plane));
     }
   }
   return offsetGraphs;

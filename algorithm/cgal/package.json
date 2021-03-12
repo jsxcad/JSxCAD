@@ -22,9 +22,8 @@
     }
   ],
   "keywords": [],
-  "license": "MIT",
+  "license": "LGPL",
   "dependencies": {
-    "@jsxcad/data-shape": "^0.0.79",
     "@jsxcad/geometry-path": "^0.0.79",
     "@jsxcad/math-vec3": "^0.0.79",
     "@jsxcad/sys": "^0.0.79",

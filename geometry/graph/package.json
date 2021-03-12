@@ -25,9 +25,7 @@
   "dependencies": {
     "@jsxcad/algorithm-cgal": "^0.0.79",
     "@jsxcad/geometry-path": "^0.0.79",
-    "@jsxcad/math-poly3": "^0.0.79",
-    "@jsxcad/math-vec3": "^0.0.79",
-    "earcut": "^2.2.2"
+    "@jsxcad/math-vec3": "^0.0.79"
   },
   "devDependencies": {
     "ava": "^3.9.0",
