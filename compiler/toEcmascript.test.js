@@ -173,6 +173,7 @@ return {};
     redefine,
     `
 beginRecordingNotes();
+card\`/A\`;
 const A = bar();
 A instanceof Shape && (await saveGeometry('data/def//A', A)) && (await write('meta/def//A', {
   sha: '998f2a52e6cffab9dfbdadd70971164741f7538f'
@@ -251,6 +252,7 @@ mountainView.frontView({ position: [0, -100, 50] });
     `
 const Mountain = () => bar();
 beginRecordingNotes();
+card\`/mountainView\`;
 const mountainView = Mountain().scale(0.5).Page();
 mountainView instanceof Shape && (await saveGeometry('data/def//mountainView', mountainView)) && (await write('meta/def//mountainView', {
   sha: 'ff13df28379e2578fac3d15154411d6bf1b707a8'
@@ -276,6 +278,7 @@ log(a);
     script,
     `
 beginRecordingNotes();
+card\`/a\`;
 const a = [];
 a instanceof Shape && (await saveGeometry('data/def//a', a)) && (await write('meta/def//a', {
   sha: '008e21a56df83b743c52799ddf689ac20ea2bb8c'

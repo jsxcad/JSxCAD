@@ -163,6 +163,8 @@ export const toEcmascript = async (
       entry.isComputed = true;
     } else {
       out.push(parse('beginRecordingNotes()', parseOptions));
+      // FIX: Let's not hard-code card declarations.
+      out.push(parse(`card\`${path}/${id}\`;`, parseOptions));
       out.push({ ...declaration, declarations: [declarator] });
       // Only cache Shapes.
       out.push(
