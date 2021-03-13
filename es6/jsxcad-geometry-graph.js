@@ -422,19 +422,6 @@ const fromPoints = (points) =>
 const fromPolygons = (polygons) =>
   fromSurfaceMeshLazy(fromPolygonsToSurfaceMesh(polygons));
 
-const fromPolygonWithHolesToPaths = (polygon) => {
-  const paths = [];
-  if (polygon.points.length >= 3) {
-    paths.push(polygon.points);
-  }
-  for (const hole of polygon.holes) {
-    if (hole.points.length >= 3) {
-      paths.push(hole.points);
-    }
-  }
-  return paths;
-};
-
 const outline = (graph) => {
   graph = realizeGraph(graph);
 
@@ -500,9 +487,7 @@ const inset = (graph, initial, step, limit) => {
       limit,
       polygonWithHoles
     )) {
-      insetGraphs.push(
-        fromPaths(fromPolygonWithHolesToPaths(insetPolygon), insetPolygon.plane)
-      );
+      insetGraphs.push(fromPaths([insetPolygon], insetPolygon.plane));
     }
   }
   return insetGraphs;

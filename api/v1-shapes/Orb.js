@@ -33,9 +33,9 @@ const buildWalls = (polygons, floor, roof) => {
     start = end++
   ) {
     // Remember that we are walking CCW.
-    polygons.push(
-      deduplicate([floor[start], floor[end], roof[end], roof[start]])
-    );
+    polygons.push({
+      points: deduplicate([floor[start], floor[end], roof[end], roof[start]]),
+    });
   }
 };
 
@@ -72,12 +72,12 @@ const buildRingSphere = (resolution = 20) => {
     if (lastPath !== undefined) {
       buildWalls(polygons, path, lastPath);
     } else {
-      polygons.push(path);
+      polygons.push({ points: path });
     }
     lastPath = path;
   }
   if (path) {
-    polygons.push(flip(path));
+    polygons.push({ points: flip(path) });
   }
   return polygons;
 };

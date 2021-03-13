@@ -113,25 +113,58 @@ export class NotebookUi extends React.PureComponent {
   render() {
     const { data, path } = this.props;
     let ref;
+
+    // Organize by card.
+    const cards = [];
+    const cardNotes = new Map();
+
+    if (data) {
+      for (const note of data) {
+        if (
+          !note ||
+          !note.hash ||
+          (!note.text && !note.error && note.module !== path)
+        ) {
+          continue;
+        }
+        let card = '';
+        if (note.context && note.context.card) {
+          card = note.context.card;
+        }
+        if (!cardNotes.has(card)) {
+          cards.push(card);
+          cardNotes.set(card, []);
+        }
+        cardNotes.get(card).push(note);
+      }
+    }
+
     const result = (
       <div
         onKeyDown={this.onKeyDown}
         ref={(value) => {
           ref = value;
         }}
-        style={{ height: '100%', overflow: 'scroll', marginLeft: '20px' }}
+        style={{
+          height: '100%',
+          overflow: 'scroll',
+          marginLeft: '20px',
+          display: 'flex',
+          flexWrap: 'wrap',
+          justifyContent: 'flex-start',
+        }}
       >
-        {data &&
-          data
-            .filter((note) => note.hash)
-            .map((note) => {
-              // FIX: Rename or differentiate 'text' and 'error'.
-              if (note.module === path || note.text || note.error) {
-                return <NoteUi data={data} key={note.hash} hash={note.hash} />;
-              }
-            })}
+        {cards.map((card) => (
+          <div className="note card" key={card}>
+            <br />
+            {cardNotes.get(card).map((note) => (
+              <NoteUi data={data} key={note.hash} hash={note.hash} />
+            ))}
+          </div>
+        ))}
       </div>
     );
+
     setTimeout(async () => {
       if (ref) {
         Mermaid.init(undefined, '.mermaid');

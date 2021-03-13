@@ -1868,7 +1868,7 @@ const fromPointsAndPaths = (points = [], paths = []) => {
   /** @type {Polygon[]} */
   const polygons = [];
   for (const path of paths) {
-    polygons.push(fromPoints$2(path.map((nth) => points[nth])));
+    polygons.push({ points: fromPoints$2(path.map((nth) => points[nth])) });
   }
   return polygons;
 };
@@ -2014,9 +2014,9 @@ const buildWalls = (polygons, floor, roof) => {
     start = end++
   ) {
     // Remember that we are walking CCW.
-    polygons.push(
-      deduplicate([floor[start], floor[end], roof[end], roof[start]])
-    );
+    polygons.push({
+      points: deduplicate([floor[start], floor[end], roof[end], roof[start]]),
+    });
   }
 };
 
@@ -2053,12 +2053,12 @@ const buildRingSphere = (resolution = 20) => {
     if (lastPath !== undefined) {
       buildWalls(polygons, path, lastPath);
     } else {
-      polygons.push(path);
+      polygons.push({ points: path });
     }
     lastPath = path;
   }
   if (path) {
-    polygons.push(flip(path));
+    polygons.push({ points: flip(path) });
   }
   return polygons;
 };
@@ -2119,7 +2119,7 @@ const Polygon = (...points) => {
   for (const point of points) {
     point.eachPoint((p) => path.push(p));
   }
-  return Shape.fromGraph(fromPaths([path]));
+  return Shape.fromGraph(fromPaths([{ points: path }]));
 };
 
 Shape.prototype.Polygon = shapeMethod(Polygon);
@@ -2127,7 +2127,7 @@ Shape.prototype.Polygon = shapeMethod(Polygon);
 const ofPointPaths = (points = [], paths = []) => {
   const polygons = [];
   for (const path of paths) {
-    polygons.push(path.map((point) => points[point]));
+    polygons.push({ points: path.map((point) => points[point]) });
   }
   return Shape.fromPolygons(polygons);
 };

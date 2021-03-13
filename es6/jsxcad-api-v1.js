@@ -46,9 +46,10 @@ let nanoid = (size = 21) => {
 // FIX: Avoid the extra read-write cycle.
 const view = (
   shape,
-  inline,
+  size,
   op = (x) => x,
   {
+    inline,
     width = 1024,
     height = 512,
     position = [100, -100, 100],
@@ -56,6 +57,10 @@ const view = (
     withGrid = false,
   } = {}
 ) => {
+  if (size !== undefined) {
+    width = size;
+    height = size / 2;
+  }
   const viewShape = op(shape);
   for (const entry of ensurePages(soup(viewShape.toDisjointGeometry()))) {
     const path = `view/${getModule()}/${nanoid()}`;
@@ -67,7 +72,7 @@ const view = (
 };
 
 Shape.prototype.view = function (
-  inline,
+  size = 256,
   op,
   {
     path,
@@ -78,7 +83,7 @@ Shape.prototype.view = function (
     withGrid,
   } = {}
 ) {
-  return view(this, inline, op, {
+  return view(this, size, op, {
     path,
     width,
     height,
@@ -89,7 +94,7 @@ Shape.prototype.view = function (
 };
 
 Shape.prototype.topView = function (
-  inline,
+  size = 256,
   op,
   {
     path,
@@ -100,7 +105,7 @@ Shape.prototype.topView = function (
     withGrid,
   } = {}
 ) {
-  return view(this, inline, op, {
+  return view(this, size, op, {
     path,
     width,
     height,
@@ -111,7 +116,7 @@ Shape.prototype.topView = function (
 };
 
 Shape.prototype.gridView = function (
-  inline,
+  size = 256,
   op,
   {
     path,
@@ -122,7 +127,7 @@ Shape.prototype.gridView = function (
     withGrid = true,
   } = {}
 ) {
-  return view(this, inline, op, {
+  return view(this, size, op, {
     path,
     width,
     height,
@@ -133,7 +138,7 @@ Shape.prototype.gridView = function (
 };
 
 Shape.prototype.frontView = function (
-  inline,
+  size = 256,
   op,
   {
     path,
@@ -144,7 +149,7 @@ Shape.prototype.frontView = function (
     withGrid,
   } = {}
 ) {
-  return view(this, inline, op, {
+  return view(this, size, op, {
     path,
     width,
     height,
@@ -155,7 +160,7 @@ Shape.prototype.frontView = function (
 };
 
 Shape.prototype.sideView = function (
-  inline,
+  size = 256,
   op,
   {
     path,
@@ -166,7 +171,7 @@ Shape.prototype.sideView = function (
     withGrid,
   } = {}
 ) {
-  return view(this, inline, op, {
+  return view(this, size, op, {
     path,
     width,
     height,
