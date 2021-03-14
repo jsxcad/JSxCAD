@@ -9,7 +9,6 @@ import {
   boot,
   clearEmitted,
   deleteFile,
-  getCurrentPath,
   listFiles,
   listFilesystems,
   log,
@@ -758,7 +757,7 @@ class Ui extends React.PureComponent {
       // The responsibility for updating the control values ought to be with what
       // renders the notebook.
       const notebookControlData = await getNotebookControlData();
-      await write(`control/${getCurrentPath()}`, notebookControlData);
+      await write(`control/${path}`, notebookControlData);
 
       let script = jsEditorData;
       const ecmascript = await toEcmascript(script, { path, topLevel });

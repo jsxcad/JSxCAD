@@ -5,6 +5,7 @@ export {
   setPendingErrorHandler,
 } from './pending.js';
 export { askService, createService } from './service.js';
+export { getControlValue, setControlValue } from './control.js';
 export { read, readFile, readOrWatch } from './readFile.js';
 export { addSource, getSources } from './source.js';
 export { ask, setHandleAskUser } from './ask.js';
@@ -35,7 +36,6 @@ export {
 
 export { conversation } from './conversation.js';
 export { deleteFile } from './deleteFile.js';
-export { getCurrentPath } from './current.js';
 export { askServices, terminateActiveServices } from './servicePool.js';
 export { touch } from './touch.js';
 export { write, writeFile } from './writeFile.js';

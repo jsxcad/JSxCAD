@@ -12,6 +12,7 @@ let context;
 
 export const clearEmitted = () => {
   emitted.length = 0;
+  context = undefined;
 };
 
 const onEmitHandlers = new Set();

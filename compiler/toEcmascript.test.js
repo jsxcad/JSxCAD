@@ -39,6 +39,33 @@ return {};
   );
 });
 
+test('Replace control with constant default.', async (t) => {
+  const ecmascript = await toEcmascript(
+    `const length = control('length', 10, 'number');`
+  );
+  t.is(
+    ecmascript,
+    `
+const length = control('length', 10, 'number');
+return {};
+`
+  );
+});
+
+test('Replace control with constant setting.', async (t) => {
+  await write('control/', { length: 16 });
+  const ecmascript = await toEcmascript(
+    `const length = control('length', 10, 'number');`
+  );
+  t.is(
+    ecmascript,
+    `
+const length = control('length', 16, 'number');
+return {};
+`
+  );
+});
+
 test('Bind await to calls properly.', async (t) => {
   const ecmascript = await toEcmascript(`foo().bar()`);
   t.is(

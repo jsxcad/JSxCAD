@@ -1,46 +1,35 @@
-import { emit, getCurrentPath, read } from '@jsxcad/sys';
+import {
+  emit,
+  getControlValue,
+  getModule,
+  read,
+  setControlValue,
+} from '@jsxcad/sys';
 
 import hashSum from 'hash-sum';
 
-// FIX: This needs to consider the current module.
-// FIX: Needs to communicate cache invalidation with other workers.
-const getControlValues = async () =>
-  (await read(`control/${getCurrentPath()}`, { useCache: false })) || {};
-
-export const stringBox = async (label, otherwise) => {
-  const { [label]: value = otherwise } = await getControlValues();
-  const control = { type: 'stringBox', label, value };
-  const hash = hashSum(control);
-  emit({ control, hash });
-  return value;
+export const loadControlValues = async () => {
+  for (const { label, value } of (await read(`control/${getModule()}`, {
+    useCache: false,
+  })) || []) {
+    setControlValue(getModule(), label, value);
+  }
 };
 
-export const numberBox = async (label, otherwise) =>
-  Number(await stringBox(label, otherwise));
+/*
+  Options
+  slider: { min, max, step }
+  select: { options }
+*/
 
-export const sliderBox = async (
-  label,
-  otherwise,
-  { min = 0, max = 100, step = 1 } = {}
-) => {
-  const { [label]: value = otherwise } = await getControlValues();
-  const control = { type: 'sliderBox', label, value, min, max, step };
-  const hash = hashSum(control);
-  emit({ control, hash });
-  return Number(value);
-};
-
-export const checkBox = async (label, otherwise) => {
-  const { [label]: value = otherwise } = await getControlValues();
-  const control = { type: 'checkBox', label, value };
-  const hash = hashSum(control);
-  emit({ control, hash });
-  return Boolean(value);
-};
-
-export const selectBox = async (label, otherwise, options) => {
-  const { [label]: value = otherwise } = await getControlValues();
-  const control = { type: 'selectBox', label, value, options };
+export const control = (label, value, type, options) => {
+  const control = {
+    type,
+    label,
+    value: getControlValue(getModule(), label, value),
+    options,
+    path: getModule(),
+  };
   const hash = hashSum(control);
   emit({ control, hash });
   return value;

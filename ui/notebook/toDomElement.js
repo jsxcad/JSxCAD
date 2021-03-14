@@ -128,9 +128,9 @@ export const toDomElement = async (notebook = []) => {
     }
     if (note.control) {
       const div = document.createElement('div');
-      const { type, label, value } = note.control;
+      const { type, label, value, options } = note.control;
       switch (type) {
-        case 'stringBox': {
+        case 'input': {
           const input = document.createElement('input');
           input.classList.add('note', 'control', 'input', 'box');
           input.name = label;
@@ -138,7 +138,7 @@ export const toDomElement = async (notebook = []) => {
           div.appendChild(input);
           break;
         }
-        case 'checkBox': {
+        case 'check': {
           const input = document.createElement('input');
           input.classList.add('note', 'control', 'input', 'checkbox');
           input.name = label;
@@ -147,13 +147,12 @@ export const toDomElement = async (notebook = []) => {
           div.appendChild(input);
           break;
         }
-        case 'selectBox': {
-          const { options = [] } = note.control;
+        case 'select': {
           const input = document.createElement('select');
           input.classList.add('note', 'control', 'input', 'checkbox');
           input.name = label;
           input.value = value;
-          for (const optionValue of options) {
+          for (const optionValue of options.options || []) {
             const option = document.createElement('option');
             option.value = optionValue;
             if (optionValue === value) {
@@ -165,8 +164,8 @@ export const toDomElement = async (notebook = []) => {
           div.appendChild(input);
           break;
         }
-        case 'sliderBox': {
-          const { min = 0, max = 100, step = 1 } = note.control;
+        case 'slider': {
+          const { min = 0, max = 100, step = 1 } = options;
           const output = document.createElement('span');
           output.innerText = value;
           div.appendChild(output);
