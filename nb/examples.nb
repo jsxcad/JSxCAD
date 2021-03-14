@@ -1,6 +1,14 @@
 md`
 # JSxCAD Examples
 
+* [Inset](#JSxCAD@https://gitcdn.link/cdn/jsxcad/JSxCAD/master/api/nb/inset/inset.nb)
+* [Offset](#JSxCAD@https://gitcdn.link/cdn/jsxcad/JSxCAD/master/api/nb/offset/offset.nb)
+
+---
+Old
+
+---
+
 * API
  * [Control](#JSxCAD@https://gitcdn.link/cdn/jsxcad/JSxCAD/master/api/v1-control/example/control.nb)
  * Conversion
