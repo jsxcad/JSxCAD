@@ -27,7 +27,6 @@ registerDynamicModule(module('extrude'), '@jsxcad/api-v1-extrude');
 registerDynamicModule(module('font'), '@jsxcad/api-v1-font');
 registerDynamicModule(module('gcode'), '@jsxcad/api-v1-gcode');
 registerDynamicModule(module('item'), '@jsxcad/api-v1-item');
-registerDynamicModule(module('layout'), '@jsxcad/api-v1-layout');
 registerDynamicModule(module('math'), '@jsxcad/api-v1-math');
 registerDynamicModule(module('pdf'), '@jsxcad/api-v1-pdf');
 registerDynamicModule(module('plan'), '@jsxcad/api-v1-plan');

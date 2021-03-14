@@ -736,6 +736,7 @@ class Ui extends React.PureComponent {
 
   async doRun() {
     const { ask, jsEditorData, path, workspace } = this.state;
+    const { sha } = this.props;
     const topLevel = new Map();
     try {
       this.setState({ running: true });
@@ -761,7 +762,7 @@ class Ui extends React.PureComponent {
 
       let script = jsEditorData;
       const ecmascript = await toEcmascript(script, { path, topLevel });
-      await ask({ evaluate: ecmascript, workspace, path });
+      await ask({ evaluate: ecmascript, workspace, path, sha });
       await resolvePending();
     } catch (error) {
       // Include any high level notebook errors in the output.
