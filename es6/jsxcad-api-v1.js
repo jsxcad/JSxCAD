@@ -1,4 +1,4 @@
-import { getModule, addPending, write, emit, read, getCurrentPath, addSource, addOnEmitHandler, pushModule, popModule } from './jsxcad-sys.js';
+import { getModule, addPending, write, emit, getControlValue, addSource, addOnEmitHandler, read, pushModule, popModule } from './jsxcad-sys.js';
 export { emit, read, write } from './jsxcad-sys.js';
 import Shape, { Shape as Shape$1, loadGeometry, log, saveGeometry } from './jsxcad-api-v1-shape.js';
 export { Shape, loadGeometry, log, saveGeometry } from './jsxcad-api-v1-shape.js';
@@ -348,45 +348,20 @@ const mdMethod = function (string, ...placeholders) {
 
 Shape.prototype.md = mdMethod;
 
-// FIX: This needs to consider the current module.
-// FIX: Needs to communicate cache invalidation with other workers.
-const getControlValues = async () =>
-  (await read(`control/${getCurrentPath()}`, { useCache: false })) || {};
+/*
+  Options
+  slider: { min, max, step }
+  select: { options }
+*/
 
-const stringBox = async (label, otherwise) => {
-  const { [label]: value = otherwise } = await getControlValues();
-  const control = { type: 'stringBox', label, value };
-  const hash = hashSum(control);
-  emit({ control, hash });
-  return value;
-};
-
-const numberBox = async (label, otherwise) =>
-  Number(await stringBox(label, otherwise));
-
-const sliderBox = async (
-  label,
-  otherwise,
-  { min = 0, max = 100, step = 1 } = {}
-) => {
-  const { [label]: value = otherwise } = await getControlValues();
-  const control = { type: 'sliderBox', label, value, min, max, step };
-  const hash = hashSum(control);
-  emit({ control, hash });
-  return Number(value);
-};
-
-const checkBox = async (label, otherwise) => {
-  const { [label]: value = otherwise } = await getControlValues();
-  const control = { type: 'checkBox', label, value };
-  const hash = hashSum(control);
-  emit({ control, hash });
-  return Boolean(value);
-};
-
-const selectBox = async (label, otherwise, options) => {
-  const { [label]: value = otherwise } = await getControlValues();
-  const control = { type: 'selectBox', label, value, options };
+const control = (label, value, type, options) => {
+  const control = {
+    type,
+    label,
+    value: getControlValue(getModule(), label, value),
+    options,
+    path: getModule(),
+  };
   const hash = hashSum(control);
   emit({ control, hash });
   return value;
@@ -460,11 +435,7 @@ var api = /*#__PURE__*/Object.freeze({
   defTool: defTool,
   card: card,
   md: md,
-  checkBox: checkBox,
-  numberBox: numberBox,
-  selectBox: selectBox,
-  sliderBox: sliderBox,
-  stringBox: stringBox,
+  control: control,
   source: source,
   emit: emit,
   read: read,
@@ -607,4 +578,4 @@ registerDynamicModule(module('svg'), './jsxcad-api-v1-svg.js');
 registerDynamicModule(module('threejs'), './jsxcad-api-v1-threejs.js');
 registerDynamicModule(module('units'), './jsxcad-api-v1-units.js');
 
-export { beginRecordingNotes, card, checkBox, defGrblConstantLaser, defGrblDynamicLaser, defGrblSpindle, defRgbColor, defThreejsMaterial, defTool, define, importModule, md, numberBox, replayRecordedNotes, saveRecordedNotes, selectBox, sliderBox, source, stringBox, x, y, z };
+export { beginRecordingNotes, card, control, defGrblConstantLaser, defGrblDynamicLaser, defGrblSpindle, defRgbColor, defThreejsMaterial, defTool, define, importModule, md, replayRecordedNotes, saveRecordedNotes, source, x, y, z };

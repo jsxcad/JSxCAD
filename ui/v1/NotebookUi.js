@@ -151,6 +151,7 @@ export class NotebookUi extends React.PureComponent {
           marginLeft: '20px',
           display: 'flex',
           flexWrap: 'wrap',
+          alignContent: 'flex-start',
           justifyContent: 'flex-start',
         }}
       >

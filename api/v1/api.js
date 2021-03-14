@@ -33,13 +33,7 @@ export { card } from './card.js';
 
 export { md } from './md.js';
 
-export {
-  checkBox,
-  numberBox,
-  selectBox,
-  sliderBox,
-  stringBox,
-} from './control.js';
+export { control } from './control.js';
 
 export { source } from './source.js';
 
