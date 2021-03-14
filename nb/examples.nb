@@ -1,6 +1,7 @@
 md`
 # JSxCAD Examples
 
+* [Controls](#JSxCAD@https://gitcdn.link/cdn/jsxcad/JSxCAD/master/api/nb/controls/controls.nb)
 * [Inset](#JSxCAD@https://gitcdn.link/cdn/jsxcad/JSxCAD/master/api/nb/inset/inset.nb)
 * [Offset](#JSxCAD@https://gitcdn.link/cdn/jsxcad/JSxCAD/master/api/nb/offset/offset.nb)
 
