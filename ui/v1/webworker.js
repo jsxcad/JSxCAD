@@ -1,6 +1,6 @@
 /* global postMessage, onmessage:writable, self */
 
-import * as api from '@jsxcad/api-v1';
+import * as baseApi from '@jsxcad/api-v1';
 import * as sys from '@jsxcad/sys';
 import hashSum from 'hash-sum';
 
@@ -58,6 +58,7 @@ const agent = async ({ ask, question }) => {
       const ecmascript = question.evaluate;
       console.log({ op: 'text', text: `QQ/script: ${question.evaluate}` });
       console.log({ op: 'text', text: `QQ/ecmascript: ${ecmascript}` });
+      const api = { ...baseApi, sha: question.sha || 'master' };
       const builder = new Function(
         `{ ${Object.keys(api).join(', ')} }`,
         `return async () => { ${ecmascript} };`

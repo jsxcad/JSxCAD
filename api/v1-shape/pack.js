@@ -11,7 +11,13 @@ import { pack as packAlgorithm } from '@jsxcad/algorithm-pack';
 
 export const pack = (
   shape,
-  { size, pageMargin = 5, itemMargin = 1, perLayout = Infinity, packSize = [] }
+  {
+    size,
+    pageMargin = 5,
+    itemMargin = 1,
+    perLayout = Infinity,
+    packSize = [],
+  } = {}
 ) => {
   if (perLayout === 0) {
     // Packing was disabled -- do nothing.

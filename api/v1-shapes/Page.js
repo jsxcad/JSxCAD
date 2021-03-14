@@ -176,11 +176,6 @@ export const ensurePages = (geometry, depth = 0) => {
   }
 };
 
-const PackMethod = function (options = {}) {
-  return Page(options, this);
-};
-Shape.prototype.pack = PackMethod;
-
 const FixMethod = function (options = {}) {
   return Page({ ...options, pack: false }, this);
 };
