@@ -237,7 +237,8 @@ const realizeGraph = (graph) => {
 };
 
 const extrude = (graph, height, depth) => {
-  realizeGraph(graph);
+  graph = realizeGraph(graph);
+  console.log(graph);
   if (graph.faces.length > 0) {
     // Arbitrarily pick the first face normal.
     // FIX: use exactPlane.
@@ -354,7 +355,8 @@ const eachPoint = (graph, op) => {
 };
 
 const extrudeToPlane = (graph, highPlane, lowPlane, direction) => {
-  if (realizeGraph(graph).faces.length > 0) {
+  graph = realizeGraph(graph);
+  if (graph.faces.length > 0) {
     // Arbitrarily pick the plane of the first graph to extrude along.
     if (direction === undefined) {
       for (const face of graph.faces) {
@@ -529,7 +531,8 @@ const offset = (graph, initial, step, limit) => {
 };
 
 const projectToPlane = (graph, plane, direction) => {
-  if (realizeGraph(graph).faces.length > 0) {
+  graph = realizeGraph(graph);
+  if (graph.faces.length > 0) {
     // Arbitrarily pick the plane of the first graph to project along.
     if (direction === undefined) {
       for (const face of graph.faces) {

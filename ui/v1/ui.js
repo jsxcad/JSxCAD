@@ -1302,7 +1302,7 @@ const setupUi = async (sha) => {
     const workspace = decodeURIComponent(encodedWorkspace) || 'JSxCAD';
     const path = encodedFile
       ? decodeURIComponent(encodedFile)
-      : 'https://gitcdn.link/cdn/jsxcad/JSxCAD/master/nb/start.nb';
+      : `https://gitcdn.link/cdn/jsxcad/JSxCAD/${sha}/nb/start.nb`;
     const file = `source/${path}`;
     return [path, file, workspace];
   };
