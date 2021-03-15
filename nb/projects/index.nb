@@ -3,6 +3,6 @@ md`
 
 These example projects may be useful to see what can be done and to get started on your own.
 
-* [Clock](#JSxCAD@https://gitcdn.link/cdn/jsxcad/JSxCAD/master/nb/projects/clock/clock.nb)
-* [Wooden Train](#JSxCAD@https://gitcdn.link/cdn/jsxcad/JSxCAD/master/nb/projects/wooden_train/wooden_train.nb)
+* [Clock](#JSxCAD@https://gitcdn.link/cdn/jsxcad/JSxCAD/${sha}/nb/projects/clock/clock.nb)
+* [Lego](#JSxCAD@https://gitcdn.link/cdn/jsxcad/JSxCAD/${sha}/nb/projects/lego/lego.nb)
 `;
