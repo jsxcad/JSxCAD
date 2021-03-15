@@ -5,7 +5,8 @@ import { scale } from '@jsxcad/math-vec3';
 import { toSurfaceMesh } from './toSurfaceMesh.js';
 
 export const projectToPlane = (graph, plane, direction) => {
-  if (realizeGraph(graph).faces.length > 0) {
+  graph = realizeGraph(graph);
+  if (graph.faces.length > 0) {
     // Arbitrarily pick the plane of the first graph to project along.
     if (direction === undefined) {
       for (const face of graph.faces) {

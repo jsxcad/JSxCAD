@@ -5,7 +5,7 @@ import { scale } from '@jsxcad/math-vec3';
 import { toSurfaceMesh } from './toSurfaceMesh.js';
 
 export const extrude = (graph, height, depth) => {
-  realizeGraph(graph);
+  graph = realizeGraph(graph);
   if (graph.faces.length > 0) {
     // Arbitrarily pick the first face normal.
     // FIX: use exactPlane.
