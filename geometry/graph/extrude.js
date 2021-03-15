@@ -6,7 +6,6 @@ import { toSurfaceMesh } from './toSurfaceMesh.js';
 
 export const extrude = (graph, height, depth) => {
   graph = realizeGraph(graph);
-  console.log(graph);
   if (graph.faces.length > 0) {
     // Arbitrarily pick the first face normal.
     // FIX: use exactPlane.
