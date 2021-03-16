@@ -1,16 +1,23 @@
 md`# Inset`;
 
+md`Insetting allows us to find shapes by iteratively removing a fixed radius border.`;
+
+md`    Shape.inset(initial, [step], [limit])`;
+
 const shape = Box(20)
-  .cut(Triangle(8))
-  .gridView(50)
-  .md(`We can take a shape (with holes)`);
+  .cut(Triangle(13))
+  .md(`An example shape`)
+  .gridView()
+  .md(`(A box with a triangular hole)`);
 
 const insets = shape
   .and(shape.inset(1, 0.5))
-  .gridView(50)
+  .md(`The example inset by 1, stepped by 0.5`)
+  .gridView()
   .md(`And inset by some initial (1) and repeating (0.5) amount`);
 
 const packed = insets
   .pack()
-  .gridView(50)
+  .md(`The insets packed`)
+  .gridView()
   .md(`Packing the insets can make it easier to see what's been produced`);

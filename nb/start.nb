@@ -5,15 +5,15 @@ Press Shift-Enter or click Run above to generate notebook.
 
 ## Links
 
-1. [Examples](#JSxCAD@https://gitcdn.link/cdn/jsxcad/JSxCAD/master/nb/examples.nb)
-1. [Regression](#JSxCAD@https://gitcdn.link/cdn/jsxcad/JSxCAD/master/nb/regression.nb)
-1. [Projects](#JSxCAD@https://gitcdn.link/cdn/jsxcad/JSxCAD/master/nb/projects/index.nb)
+1. [Examples](#JSxCAD@https://gitcdn.link/cdn/jsxcad/JSxCAD/${sha}/nb/examples.nb)
+1. [Regression](#JSxCAD@https://gitcdn.link/cdn/jsxcad/JSxCAD/${sha}/nb/regression.nb)
+1. [Projects](#JSxCAD@https://gitcdn.link/cdn/jsxcad/JSxCAD/${sha}/nb/projects/index.nb)
 
 ## Introduction
 
 JSxCAD allows CAD design as notebooks.`;
 
-Hershey(20)('JSxCAD').page({ itemMargin: 5 }).topView();
+Hershey(20)('JSxCAD').color('purple').align('xy').gridView(512);
 
 md`
 Clicking on a view maximizes and allows rotation and animation; use Escape to return.
