@@ -95,4 +95,24 @@ export const GearProfile = (
   return profile.close();
 };
 
-const example = GearProfile().gridView();
+// Gear Generator
+
+const numberOfTeeth = control('number of teeth', 16, 'input');
+const mmPerTooth = control('mm per tooth', Math.PI, 'input');
+const teethToHide = control('teeth to hide', 0, 'input');
+const pressureAngle = control('pressure angle', 20, 'input');
+const clearance = control('clearance', 0, 'input');
+const backlash = control('backlash', 0, 'input');
+const thickness = control('thickness', 2, 'input');
+
+const example = GearProfile(numberOfTeeth, {
+  mmPerTooth,
+  teethToHide,
+  pressureAngle,
+  clearance,
+  backlash,
+})
+  .ex(thickness)
+  .material('wood')
+  .view(1024)
+  .downloadStl(`gear_${numberOfTeeth}`);
