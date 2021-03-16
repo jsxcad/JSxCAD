@@ -1,0 +1,23 @@
+md`# Offset`;
+
+md`Offsetting allows us to find shapes by iteratively adding a fixed radius border.`;
+
+md`    Shape.offset(initial, [step], [limit])`;
+
+const shape = Box(20)
+  .md(`An example shape with a hole`)
+  .cut(Triangle(16))
+  .gridView();
+
+const offset = shape.offset(1).md(`The example offset by 1`).gridView();
+
+const offsets = shape
+  .and(shape.offset(1, 1, 5))
+  .md(`The example offset initially by 1.`)
+  .md(`Then 0.5 up to 10.`)
+  .gridView();
+
+const packed = offsets
+  .pack()
+  .md(`The offsets packed separately for display`)
+  .gridView();
