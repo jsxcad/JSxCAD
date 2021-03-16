@@ -4,8 +4,8 @@ const Text = await readFont(
 );
 
 md`# Parameters`;
-const string = await stringBox('string', '앙연');
-const size = await numberBox('size', 10);
+const string = await control('string', '앙연', 'input');
+const size = await control('size', 10, 'input');
 
 md`# "${string}" at size ${size}`;
 

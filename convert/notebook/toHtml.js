@@ -37,6 +37,16 @@ export const toHtml = async (
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
   <style>
+    div.book {
+      height: 100%;
+      overflow: scroll;
+      margin-left: 20px;
+      display: flex;
+      flex-wrap: wrap;
+      align-content: flex-start;
+      justify-content: flex-start;
+    }
+
     div.note.card {
       border: 1px dashed crimson;
       margin: 4px 4px;
@@ -96,7 +106,6 @@ export const toHtml = async (
 
     const run = async () => {
       const body = document.getElementsByTagName('body')[0];
-
       const bookElement = document.createElement('div');
 
       // Organize by card.
@@ -123,7 +132,7 @@ export const toHtml = async (
         bookElement.appendChild(cardElement);
       }
 
-      bookElement.classList.add('notebook', 'loaded');
+      bookElement.classList.add('book', 'notebook', 'loaded');
       body.appendChild(bookElement);
     };
 

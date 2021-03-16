@@ -10645,7 +10645,12 @@ const insetOfPolygonWithHoles = (
     (isHole) => {
       points = [];
       if (isHole) {
-        output.holes.push({ points, holes: [], plane: polygon.plane, exactPlane: polygon.exactPlane });
+        output.holes.push({
+          points,
+          holes: [],
+          plane: polygon.plane,
+          exactPlane: polygon.exactPlane,
+        });
       } else {
         output = {
           points,
