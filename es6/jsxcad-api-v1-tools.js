@@ -19,6 +19,7 @@ const carve = (block, ...shapes) => {
   const depth = max[Z] - min[Z];
   const cuts = Math.ceil(depth / cutDepth);
   const effectiveCutDepth = depth / cuts;
+console.log(JSON.stringify({ max, min, cuts, effectiveCutDepth }));
   return negative
     .section(
       ...each((l) => z.z(l), {
@@ -27,7 +28,7 @@ const carve = (block, ...shapes) => {
         by: effectiveCutDepth,
       })
     )
-    .inset(diameter / 2, diameter / 2)
+    // .inset(diameter / 2, diameter / 2)
     .z(-max[Z]);
 };
 

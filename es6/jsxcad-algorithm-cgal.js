@@ -10223,7 +10223,7 @@ const arrangePaths = (plane, exactPlane, paths, triangulate = false) => {
   };
   const emitPolygon = (isHole) => {
     if (isHole) {
-      target = { points: [], exactPoints: [] };
+      target = { points: [], exactPoints: [], holes: [], plane, exactPlane };
       polygon.holes.push(target);
     } else {
       polygon = { points: [], exactPoints: [], holes: [], plane, exactPlane };
@@ -10645,7 +10645,7 @@ const insetOfPolygonWithHoles = (
     (isHole) => {
       points = [];
       if (isHole) {
-        output.holes.push({ points });
+        output.holes.push({ points, holes: [], plane: polygon.plane, exactPlane: polygon.exactPlane });
       } else {
         output = {
           points,

@@ -1,4 +1,6 @@
 import { create, fillFacetFromPoints } from './graph.js';
+
+import { fromPolygonsWithHolesToTriangles } from './fromPolygonsWithHolesToTriangles.js';
 import { rerealizeGraph } from './rerealizeGraph.js';
 
 const X = 0;
@@ -26,8 +28,12 @@ export const fromPolygonsWithHoles = (polygonsWithHoles) => {
     const faceId = graph.faces.length;
     graph.faces[faceId] = { plane, exactPlane };
   };
-  // FIX: If we want to build a graph, these need to be triangulated.
-  for (const { points, exactPoints, plane, exactPlane } of polygonsWithHoles) {
+  for (const {
+    points,
+    exactPoints,
+    plane,
+    exactPlane,
+  } of fromPolygonsWithHolesToTriangles(polygonsWithHoles)) {
     // FIX: No face association.
     graph.facets[facet] = {
       edge: fillFacetFromPoints(

@@ -26,7 +26,7 @@ export const arrangePaths = (plane, exactPlane, paths, triangulate = false) => {
   };
   const emitPolygon = (isHole) => {
     if (isHole) {
-      target = { points: [], exactPoints: [] };
+      target = { points: [], exactPoints: [], holes: [], plane, exactPlane };
       polygon.holes.push(target);
     } else {
       polygon = { points: [], exactPoints: [], holes: [], plane, exactPlane };
