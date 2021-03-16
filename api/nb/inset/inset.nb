@@ -6,18 +6,18 @@ md`    Shape.inset(initial, [step], [limit])`;
 
 const shape = Box(20)
   .cut(Triangle(13))
-  .md(`##### An example shape`)
+  .md(`An example shape`)
   .gridView()
   .md(`(A box with a triangular hole)`);
 
 const insets = shape
   .and(shape.inset(1, 0.5))
-  .md(`##### The example inset by 1, stepped by 0.5`)
+  .md(`The example inset by 1, stepped by 0.5`)
   .gridView()
   .md(`And inset by some initial (1) and repeating (0.5) amount`);
 
 const packed = insets
   .pack()
-  .md(`##### The insets packed`)
+  .md(`The insets packed`)
   .gridView()
   .md(`Packing the insets can make it easier to see what's been produced`);
