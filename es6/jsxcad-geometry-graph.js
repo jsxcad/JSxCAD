@@ -1,4 +1,4 @@
-import { fromSurfaceMeshToGraph, fromPointsToAlphaShapeAsSurfaceMesh, fromSurfaceMeshToLazyGraph, fromPointsToConvexHullAsSurfaceMesh, fromGraphToSurfaceMesh, fromSurfaceMeshEmitBoundingBox, extrudeSurfaceMesh, sectionOfSurfaceMesh, differenceOfSurfaceMeshes, extrudeToPlaneOfSurfaceMesh, fromFunctionToSurfaceMesh, arrangePathsIntoTriangles, fromPolygonsToSurfaceMesh, fromPointsToSurfaceMesh, arrangePaths, insetOfPolygonWithHoles, intersectionOfSurfaceMeshes, offsetOfPolygonWithHoles, projectToPlaneOfSurfaceMesh, reverseFaceOrientationsOfSurfaceMesh, subdivideSurfaceMesh, remeshSurfaceMesh, doesSelfIntersectOfSurfaceMesh, fromSurfaceMeshToTriangles, transformSurfaceMesh, unionOfSurfaceMeshes } from './jsxcad-algorithm-cgal.js';
+import { fromSurfaceMeshToGraph, fromPointsToAlphaShapeAsSurfaceMesh, fromSurfaceMeshToLazyGraph, fromPointsToConvexHullAsSurfaceMesh, fromGraphToSurfaceMesh, fromSurfaceMeshEmitBoundingBox, extrudeSurfaceMesh, arrangePaths, sectionOfSurfaceMesh, differenceOfSurfaceMeshes, extrudeToPlaneOfSurfaceMesh, fromFunctionToSurfaceMesh, arrangePathsIntoTriangles, fromPolygonsToSurfaceMesh, fromPointsToSurfaceMesh, insetOfPolygonWithHoles, intersectionOfSurfaceMeshes, offsetOfPolygonWithHoles, projectToPlaneOfSurfaceMesh, reverseFaceOrientationsOfSurfaceMesh, subdivideSurfaceMesh, remeshSurfaceMesh, doesSelfIntersectOfSurfaceMesh, fromSurfaceMeshToTriangles, transformSurfaceMesh, unionOfSurfaceMeshes } from './jsxcad-algorithm-cgal.js';
 import { equals, min, max, scale } from './jsxcad-math-vec3.js';
 import { isClockwise, flip, deduplicate } from './jsxcad-geometry-path.js';
 
@@ -263,6 +263,22 @@ const principlePlane = (graph) => {
   }
 };
 
+const fromPolygonsWithHolesToTriangles = (polygonsWithHoles) => {
+  const triangles = [];
+  for (const polygonWithHoles of polygonsWithHoles) {
+    const paths = [polygonWithHoles, ...polygonWithHoles.holes];
+    triangles.push(
+      ...arrangePaths(
+        polygonWithHoles.plane,
+        polygonWithHoles.exactPlane,
+        paths,
+        /* triangulate= */ true
+      )
+    );
+  }
+  return triangles;
+};
+
 const rerealizeGraph = (graph) =>
   fromSurfaceMeshLazy(toSurfaceMesh(graph), /* forceNewGraph= */ true);
 
@@ -291,8 +307,12 @@ const fromPolygonsWithHoles = (polygonsWithHoles) => {
     const faceId = graph.faces.length;
     graph.faces[faceId] = { plane, exactPlane };
   };
-  // FIX: If we want to build a graph, these need to be triangulated.
-  for (const { points, exactPoints, plane, exactPlane } of polygonsWithHoles) {
+  for (const {
+    points,
+    exactPoints,
+    plane,
+    exactPlane,
+  } of fromPolygonsWithHolesToTriangles(polygonsWithHoles)) {
     // FIX: No face association.
     graph.facets[facet] = {
       edge: fillFacetFromPoints(
@@ -488,7 +508,7 @@ const inset = (graph, initial, step, limit) => {
       limit,
       polygonWithHoles
     )) {
-      insetGraphs.push(fromPaths([insetPolygon], insetPolygon.plane));
+      insetGraphs.push(fromPolygonsWithHoles([insetPolygon]));
     }
   }
   return insetGraphs;
@@ -523,7 +543,7 @@ const offset = (graph, initial, step, limit) => {
       limit,
       polygonWithHoles
     )) {
-      offsetGraphs.push(fromPaths([offsetPolygon], offsetPolygon.plane));
+      offsetGraphs.push(fromPolygonsWithHoles([offsetPolygon]));
     }
   }
   return offsetGraphs;

@@ -1,4 +1,4 @@
-import { fromPaths } from './fromPaths.js';
+import { fromPolygonsWithHoles } from './fromPolygonsWithHoles.js';
 import { insetOfPolygonWithHoles } from '@jsxcad/algorithm-cgal';
 import { outline } from './outline.js';
 
@@ -11,7 +11,7 @@ export const inset = (graph, initial, step, limit) => {
       limit,
       polygonWithHoles
     )) {
-      insetGraphs.push(fromPaths([insetPolygon], insetPolygon.plane));
+      insetGraphs.push(fromPolygonsWithHoles([insetPolygon]));
     }
   }
   return insetGraphs;

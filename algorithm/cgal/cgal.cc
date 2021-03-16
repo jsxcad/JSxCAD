@@ -177,6 +177,7 @@ void FromSurfaceMeshToPolygonSoup(Surface_mesh* mesh, bool triangulate, emscript
 }
 
 Surface_mesh* FromFunctionToSurfaceMesh(double radius, double angular_bound, double radius_bound, double distance_bound, double error_bound, emscripten::val function) {
+  auto op = [&](const Point_3& p) { return FT(function(CGAL::to_double(p.x()), CGAL::to_double(p.y()), CGAL::to_double(p.z())).as<double>()); };
   typedef CGAL::Surface_mesh_default_triangulation_3 Tr;
   // c2t3
   typedef CGAL::Complex_2_in_triangulation_3<Tr> C2t3;
@@ -191,7 +192,6 @@ Surface_mesh* FromFunctionToSurfaceMesh(double radius, double angular_bound, dou
   Tr tr;            // 3D-Delaunay triangulation
   C2t3 c2t3 (tr);   // 2D-complex in 3D-Delaunay triangulation
   // defining the surface
-  auto op = [&](const Point_3& p) { return FT(function(CGAL::to_double(p.x()), CGAL::to_double(p.y()), CGAL::to_double(p.z())).as<double>()); };
   Surface_3 surface(op,             // pointer to function
                     Sphere_3(CGAL::ORIGIN, radius * radius)); // bounding sphere
   CGAL::Surface_mesh_default_criteria_3<Tr> criteria(angular_bound,  // angular bound
