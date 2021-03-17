@@ -1,5 +1,5 @@
 import { reallyQuantizeForSpace } from './jsxcad-math-utils.js';
-import { taggedGroup, transform as transform$1, fill, scale, measureBoundingBox, translate, canonicalize as canonicalize$2, toTransformedGeometry, outline } from './jsxcad-geometry-tagged.js';
+import { taggedGroup, transform as transform$1, fill, scale, measureBoundingBox, translate, canonicalize as canonicalize$2, toTransformedGeometry, toPolygonsWithHoles } from './jsxcad-geometry-tagged.js';
 import { fromScaling, identity, multiply, fromTranslation, fromZRotation } from './jsxcad-math-mat4.js';
 import { assertGood, isClosed, canonicalize as canonicalize$1 } from './jsxcad-geometry-path.js';
 import { equals } from './jsxcad-math-vec2.js';
@@ -3972,6 +3972,40 @@ const toSvg = async (
     }" version="1.1" stroke="black" stroke-width=".1" fill="none" xmlns="http://www.w3.org/2000/svg">`,
   ];
 
+  for (const { tags, polygonsWithHoles } of toPolygonsWithHoles(geometry)) {
+    for (const polygonWithHoles of polygonsWithHoles) {
+      const { points, holes } = polygonWithHoles;
+      const color = toRgbColorFromTags(tags, definitions);
+      const d = [];
+      d.push(
+        points
+          .map(
+            (point, index) =>
+              `${index === 0 ? 'M' : 'L'}${point[0]} ${point[1]}`
+          )
+          .join(' ')
+      );
+      for (const { points } of holes) {
+        d.push(
+          points
+            .map(
+              (point, index) =>
+                `${index === 0 ? 'M' : 'L'}${point[0]} ${point[1]}`
+            )
+            .join(' ')
+        );
+      }
+      if (tags && tags.includes('path/Wire')) {
+        svg.push(`<path fill="none" stroke="${color}" d="${d.join(' ')} z"/>`);
+      } else {
+        svg.push(
+          `<path fill="${color}" stroke="${color}" d="${d.join(' ')} z"/>`
+        );
+      }
+    }
+  }
+
+  /*
   for (const { tags, paths } of outline(geometry)) {
     const color = toRgbColorFromTags(tags, definitions);
     for (const path of paths) {
@@ -3999,6 +4033,7 @@ const toSvg = async (
       }
     }
   }
+*/
   svg.push('</svg>');
   const output = svg.join('\n');
   return new TextEncoder('utf8').encode(output);

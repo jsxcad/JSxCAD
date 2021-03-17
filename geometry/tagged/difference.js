@@ -1,7 +1,7 @@
 import {
+  fill as fillOutlineGraph,
   fromPaths as fromPathsToGraph,
   difference as graphDifference,
-  toPaths as toPathsFromGraph,
 } from '@jsxcad/geometry-graph';
 
 import { cache } from '@jsxcad/cache';
@@ -9,7 +9,6 @@ import { getFaceablePaths } from './getFaceablePaths.js';
 import { getGraphs } from './getGraphs.js';
 import { rewrite } from './visit.js';
 import { taggedGraph } from './taggedGraph.js';
-import { taggedPaths } from './taggedPaths.js';
 import { toDisjointGeometry } from './toDisjointGeometry.js';
 
 const differenceImpl = (geometry, ...geometries) => {
@@ -30,17 +29,15 @@ const differenceImpl = (geometry, ...geometries) => {
         return taggedGraph({ tags }, differenced);
       }
       case 'paths':
-        if (tags && tags.includes('paths/Wire')) {
-          return geometry;
-        }
-        return taggedPaths(
-          { tags },
-          toPathsFromGraph(
-            difference(
-              taggedGraph({ tags }, fromPathsToGraph(geometry.paths)),
-              ...geometries
-            ).graph
-          )
+        // This will have problems with open paths, but we want to phase this out anyhow.
+        return difference(
+          taggedGraph(
+            tags,
+            fillOutlineGraph(
+              fromPathsToGraph(geometry.paths.map((path) => ({ points: path })))
+            )
+          ),
+          ...geometries
         );
       case 'points': {
         // Not implemented yet.

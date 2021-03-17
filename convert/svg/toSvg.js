@@ -1,16 +1,12 @@
 import {
   canonicalize,
-  // getAnyNonVoidSurfaces,
-  // getNonVoidPaths,
   measureBoundingBox,
-  outline,
   scale,
-  // taggedSurface,
+  toPolygonsWithHoles,
   toTransformedGeometry,
   translate,
 } from '@jsxcad/geometry-tagged';
 
-import { isClosed } from '@jsxcad/geometry-path';
 import { toRgbColorFromTags } from '@jsxcad/algorithm-color';
 
 const X = 0;
@@ -38,6 +34,40 @@ export const toSvg = async (
     }" version="1.1" stroke="black" stroke-width=".1" fill="none" xmlns="http://www.w3.org/2000/svg">`,
   ];
 
+  for (const { tags, polygonsWithHoles } of toPolygonsWithHoles(geometry)) {
+    for (const polygonWithHoles of polygonsWithHoles) {
+      const { points, holes } = polygonWithHoles;
+      const color = toRgbColorFromTags(tags, definitions);
+      const d = [];
+      d.push(
+        points
+          .map(
+            (point, index) =>
+              `${index === 0 ? 'M' : 'L'}${point[0]} ${point[1]}`
+          )
+          .join(' ')
+      );
+      for (const { points } of holes) {
+        d.push(
+          points
+            .map(
+              (point, index) =>
+                `${index === 0 ? 'M' : 'L'}${point[0]} ${point[1]}`
+            )
+            .join(' ')
+        );
+      }
+      if (tags && tags.includes('path/Wire')) {
+        svg.push(`<path fill="none" stroke="${color}" d="${d.join(' ')} z"/>`);
+      } else {
+        svg.push(
+          `<path fill="${color}" stroke="${color}" d="${d.join(' ')} z"/>`
+        );
+      }
+    }
+  }
+
+  /*
   for (const { tags, paths } of outline(geometry)) {
     const color = toRgbColorFromTags(tags, definitions);
     for (const path of paths) {
@@ -65,6 +95,7 @@ export const toSvg = async (
       }
     }
   }
+*/
   svg.push('</svg>');
   const output = svg.join('\n');
   return new TextEncoder('utf8').encode(output);
