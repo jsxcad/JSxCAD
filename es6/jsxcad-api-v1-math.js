@@ -99,6 +99,7 @@ function createCommonjsModule(fn, module) {
 
 var constants = createCommonjsModule(function (module, exports) {
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.p4D = exports.p3D = exports.p2D = exports.lookupPairs4D = exports.lookupPairs3D = exports.lookupPairs2D = exports.gradients4D = exports.gradients3D = exports.gradients2D = exports.base4D = exports.base3D = exports.base2D = exports.STRETCH_4D = exports.STRETCH_3D = exports.STRETCH_2D = exports.SQUISH_4D = exports.SQUISH_3D = exports.SQUISH_2D = exports.NORM_4D = exports.NORM_3D = exports.NORM_2D = void 0;
 exports.NORM_2D = 1.0 / 47.0;
 exports.NORM_3D = 1.0 / 103.0;
 exports.NORM_4D = 1.0 / 30.0;
@@ -3398,30 +3399,31 @@ exports.p4D = [
 });
 
 unwrapExports(constants);
-var constants_1 = constants.NORM_2D;
-var constants_2 = constants.NORM_3D;
-var constants_3 = constants.NORM_4D;
-var constants_4 = constants.SQUISH_2D;
-var constants_5 = constants.SQUISH_3D;
-var constants_6 = constants.SQUISH_4D;
-var constants_7 = constants.STRETCH_2D;
-var constants_8 = constants.STRETCH_3D;
-var constants_9 = constants.STRETCH_4D;
-var constants_10 = constants.base2D;
+var constants_1 = constants.p4D;
+var constants_2 = constants.p3D;
+var constants_3 = constants.p2D;
+var constants_4 = constants.lookupPairs4D;
+var constants_5 = constants.lookupPairs3D;
+var constants_6 = constants.lookupPairs2D;
+var constants_7 = constants.gradients4D;
+var constants_8 = constants.gradients3D;
+var constants_9 = constants.gradients2D;
+var constants_10 = constants.base4D;
 var constants_11 = constants.base3D;
-var constants_12 = constants.base4D;
-var constants_13 = constants.gradients2D;
-var constants_14 = constants.gradients3D;
-var constants_15 = constants.gradients4D;
-var constants_16 = constants.lookupPairs2D;
-var constants_17 = constants.lookupPairs3D;
-var constants_18 = constants.lookupPairs4D;
-var constants_19 = constants.p2D;
-var constants_20 = constants.p3D;
-var constants_21 = constants.p4D;
+var constants_12 = constants.base2D;
+var constants_13 = constants.STRETCH_4D;
+var constants_14 = constants.STRETCH_3D;
+var constants_15 = constants.STRETCH_2D;
+var constants_16 = constants.SQUISH_4D;
+var constants_17 = constants.SQUISH_3D;
+var constants_18 = constants.SQUISH_2D;
+var constants_19 = constants.NORM_4D;
+var constants_20 = constants.NORM_3D;
+var constants_21 = constants.NORM_2D;
 
 var lib = createCommonjsModule(function (module, exports) {
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.makeNoise4D = exports.makeNoise3D = exports.makeNoise2D = void 0;
 
 function contribution2D(multiplier, xsb, ysb) {
     return {
@@ -3716,9 +3718,9 @@ function shuffleSeed(seed) {
 });
 
 var OpenSimplexNoise = unwrapExports(lib);
-var lib_1 = lib.makeNoise2D;
+var lib_1 = lib.makeNoise4D;
 var lib_2 = lib.makeNoise3D;
-var lib_3 = lib.makeNoise4D;
+var lib_3 = lib.makeNoise2D;
 
 const Noise = (seed = 0) => {
   const generator = OpenSimplexNoise.makeNoise3D(seed);
