@@ -443,7 +443,7 @@ const fromPoints = (points) =>
 const fromPolygons = (polygons) =>
   fromSurfaceMeshLazy(fromPolygonsToSurfaceMesh(polygons));
 
-const outline = (graph) => {
+const toPolygonsWithHoles = (graph) => {
   graph = realizeGraph(graph);
 
   const faceEdges = new Map();
@@ -470,7 +470,7 @@ const outline = (graph) => {
     getFaceEdges(edge.face).push(edge);
   }
 
-  const arrangements = [];
+  const polygonWithHoles = [];
 
   // Arrange the edges per face.
   for (const [face, edges] of faceEdges) {
@@ -491,13 +491,15 @@ const outline = (graph) => {
         ],
       });
     }
-    arrangements.push(
+    polygonWithHoles.push(
       ...arrangePaths(plane, exactPlane, paths, /* triangulate= */ false)
     );
   }
 
-  return arrangements;
+  return polygonWithHoles;
 };
+
+const outline = (graph) => toPolygonsWithHoles(graph);
 
 const inset = (graph, initial, step, limit) => {
   const insetGraphs = [];
@@ -601,7 +603,7 @@ const test = (graph) => {
 
 const toPaths = (graph) => {
   const paths = [];
-  for (const { points, holes } of outline(graph)) {
+  for (const { points, holes } of toPolygonsWithHoles(graph)) {
     paths.push(points);
     for (const { points } of holes) {
       paths.push(points);
@@ -642,4 +644,4 @@ const union = (a, b) => {
   );
 };
 
-export { alphaShape, convexHull, difference, eachPoint, extrude, extrudeToPlane, fill, fromEmpty, fromFunction, fromPaths, fromPoints, fromPolygons, inset, intersection, measureBoundingBox, offset, outline, projectToPlane, realizeGraph, rerealizeGraph, reverseFaceOrientations, section, sections, smooth, test, toPaths, toTriangles, transform, union };
+export { alphaShape, convexHull, difference, eachPoint, extrude, extrudeToPlane, fill, fromEmpty, fromFunction, fromPaths, fromPoints, fromPolygons, inset, intersection, measureBoundingBox, offset, outline, projectToPlane, realizeGraph, rerealizeGraph, reverseFaceOrientations, section, sections, smooth, test, toPaths, toPolygonsWithHoles, toTriangles, transform, union };

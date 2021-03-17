@@ -23,6 +23,7 @@ export { section, sections } from './section.js';
 export { smooth } from './smooth.js';
 export { test } from './test.js';
 export { toPaths } from './toPaths.js';
+export { toPolygonsWithHoles } from './toPolygonsWithHoles.js';
 export { toTriangles } from './toTriangles.js';
 export { transform } from './transform.js';
 export { union } from './union.js';
