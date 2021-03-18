@@ -113,7 +113,7 @@ const motorHolderMotor = Group(motor, sheath.z(9.1 - 0.7), cap)
   .md('Motor holder moter')
   .view();
 
-const motorHolderBoard = Box(16, 2 * 8)
+const motorHolderBoard = Box(17, 2 * 8)
   .ex(8)
   .move(0, 6, 2)
   .md('Motor holder board')
@@ -126,7 +126,6 @@ const motorHolder = Assembly(
   //block16x8x9_6.move(0, -16, 3.2),
   motorHolderMotor.void()
 )
-  .withOutline()
   .item('motor')
   .md('Motor holder')
   .view()
