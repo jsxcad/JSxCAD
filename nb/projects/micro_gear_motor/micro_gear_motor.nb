@@ -126,7 +126,7 @@ const motorHolder = Assembly(
   //block16x8x9_6.move(0, -16, 3.2),
   motorHolderMotor.void()
 )
-  .item('motor')
+  .item('motor holder')
   .md('Motor holder')
   .view()
   .downloadStl('motor_holder_c');
