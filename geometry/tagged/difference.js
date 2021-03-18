@@ -23,7 +23,10 @@ const differenceImpl = (geometry, ...geometries) => {
             differenced = graphDifference(differenced, graph);
           }
           for (const { paths } of getFaceablePaths(geometry)) {
-            differenced = graphDifference(differenced, fromPathsToGraph(paths));
+            differenced = graphDifference(differenced,
+              fillOutlineGraph(
+                fromPathsToGraph(paths.map((path) => ({ points: path })))
+              ));
           }
         }
         return taggedGraph({ tags }, differenced);
@@ -32,7 +35,7 @@ const differenceImpl = (geometry, ...geometries) => {
         // This will have problems with open paths, but we want to phase this out anyhow.
         return difference(
           taggedGraph(
-            tags,
+            { tags },
             fillOutlineGraph(
               fromPathsToGraph(geometry.paths.map((path) => ({ points: path })))
             )

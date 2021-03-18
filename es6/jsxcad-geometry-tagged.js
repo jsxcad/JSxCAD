@@ -470,7 +470,10 @@ const differenceImpl = (geometry, ...geometries) => {
             differenced = difference$1(differenced, graph);
           }
           for (const { paths } of getFaceablePaths(geometry)) {
-            differenced = difference$1(differenced, fromPaths(paths));
+            differenced = difference$1(differenced,
+              fill$1(
+                fromPaths(paths.map((path) => ({ points: path })))
+              ));
           }
         }
         return taggedGraph({ tags }, differenced);
@@ -479,7 +482,7 @@ const differenceImpl = (geometry, ...geometries) => {
         // This will have problems with open paths, but we want to phase this out anyhow.
         return difference(
           taggedGraph(
-            tags,
+            { tags },
             fill$1(
               fromPaths(geometry.paths.map((path) => ({ points: path })))
             )
@@ -1233,10 +1236,12 @@ const outlineImpl = (geometry, includeFaces = true, includeHoles = true) => {
   for (const { tags, graph } of getNonVoidGraphs(disjointGeometry)) {
     outlines.push(taggedPaths({ tags }, toPaths(graph)));
   }
+/*
   // Turn paths into wires.
   for (const { tags = [], paths } of getNonVoidPaths(disjointGeometry)) {
     outlines.push(taggedPaths({ tags: [...tags, 'path/Wire'] }, paths));
   }
+*/
   return outlines;
 };
 

@@ -10212,6 +10212,10 @@ const arrangePaths = (plane, exactPlane, paths, triangulate = false) => {
   const fill = (points) => {
     const path = paths[nth++];
     if (path) {
+      if (path === undefined || path.points === undefined) {
+Error.stackTraceLimit = Infinity;
+throw Error(`die: ${JSON.stringify(path)}`);
+      }
       for (const [start, end] of getEdges(path.points)) {
         if (equals(start, end)) {
           continue;
