@@ -23,10 +23,12 @@ const differenceImpl = (geometry, ...geometries) => {
             differenced = graphDifference(differenced, graph);
           }
           for (const { paths } of getFaceablePaths(geometry)) {
-            differenced = graphDifference(differenced,
+            differenced = graphDifference(
+              differenced,
               fillOutlineGraph(
                 fromPathsToGraph(paths.map((path) => ({ points: path })))
-              ));
+              )
+            );
           }
         }
         return taggedGraph({ tags }, differenced);

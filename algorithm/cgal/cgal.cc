@@ -177,7 +177,6 @@ void FromSurfaceMeshToPolygonSoup(Surface_mesh* mesh, bool triangulate, emscript
 }
 
 Surface_mesh* FromFunctionToSurfaceMesh(double radius, double angular_bound, double radius_bound, double distance_bound, double error_bound, emscripten::val function) {
-  auto op = [&](const Point_3& p) { return FT(function(CGAL::to_double(p.x()), CGAL::to_double(p.y()), CGAL::to_double(p.z())).as<double>()); };
   typedef CGAL::Surface_mesh_default_triangulation_3 Tr;
   // c2t3
   typedef CGAL::Complex_2_in_triangulation_3<Tr> C2t3;
@@ -192,6 +191,7 @@ Surface_mesh* FromFunctionToSurfaceMesh(double radius, double angular_bound, dou
   Tr tr;            // 3D-Delaunay triangulation
   C2t3 c2t3 (tr);   // 2D-complex in 3D-Delaunay triangulation
   // defining the surface
+  auto op = [&](const Point_3& p) { return FT(function(CGAL::to_double(p.x()), CGAL::to_double(p.y()), CGAL::to_double(p.z())).as<double>()); };
   Surface_3 surface(op,             // pointer to function
                     Sphere_3(CGAL::ORIGIN, radius * radius)); // bounding sphere
   CGAL::Surface_mesh_default_criteria_3<Tr> criteria(angular_bound,  // angular bound
@@ -856,6 +856,7 @@ class Surface_mesh_explorer {
       if (face == -1 || facet != face) {
         continue;
       }
+#if 0
       const auto facet_normal = CGAL::Polygon_mesh_processing::compute_face_normal(Surface_mesh::Face_index(facet), mesh);
       if (facet_normal == CGAL::NULL_VECTOR) {
         std::cout << "Null face normal" << std::endl;
@@ -863,6 +864,11 @@ class Surface_mesh_explorer {
       }
       const auto& point = mesh.point(facet_to_vertex[facet]);
       const Plane plane(point, facet_normal);
+#endif
+      const auto h = mesh.halfedge(Surface_mesh::Face_index(facet));
+      const Plane plane(mesh.point(mesh.source(h)),
+                        mesh.point(mesh.source(mesh.next(h))),
+                        mesh.point(mesh.source(mesh.next(mesh.next(h)))));
       std::ostringstream x; x << plane.a().exact(); std::string xs = x.str();
       std::ostringstream y; y << plane.b().exact(); std::string ys = y.str();
       std::ostringstream z; z << plane.c().exact(); std::string zs = z.str();

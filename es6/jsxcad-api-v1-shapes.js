@@ -1,10 +1,10 @@
-import { registerReifier, taggedPlan, taggedDisjointAssembly, taggedPaths, getLeafs, taggedLayers, measureBoundingBox, taggedLayout, getLayouts, visit, isNotVoid, taggedAssembly, taggedGraph, taggedPoints } from './jsxcad-geometry-tagged.js';
+import { registerReifier, taggedPlan, taggedDisjointAssembly, taggedLayers, taggedPaths, getLeafs, measureBoundingBox, taggedLayout, getLayouts, visit, isNotVoid, taggedAssembly, taggedGraph, taggedPoints } from './jsxcad-geometry-tagged.js';
 import Shape$1, { Shape, shapeMethod, weld } from './jsxcad-api-v1-shape.js';
 import { scale, subtract, add, negate } from './jsxcad-math-vec3.js';
 import { identity } from './jsxcad-math-mat4.js';
 import { translate } from './jsxcad-geometry-paths.js';
-import { max, numbers } from './jsxcad-api-v1-math.js';
 import { concatenate, rotateZ, scale as scale$1, translate as translate$1, flip, deduplicate } from './jsxcad-geometry-path.js';
+import { numbers } from './jsxcad-api-v1-math.js';
 import { convexHull, fromFunction, fromPaths } from './jsxcad-geometry-graph.js';
 import { fromPoints as fromPoints$2 } from './jsxcad-math-poly3.js';
 import { fromAngleRadians } from './jsxcad-math-vec2.js';
@@ -79,6 +79,18 @@ const Empty = (...shapes) =>
   Shape.fromGeometry(taggedDisjointAssembly({}));
 
 Shape.prototype.Empty = shapeMethod(Empty);
+
+const isDefined = (value) => value;
+
+const Group = (...shapes) =>
+  Shape.fromGeometry(
+    taggedLayers(
+      {},
+      ...shapes.filter(isDefined).map((shape) => shape.toGeometry())
+    )
+  );
+
+Shape.prototype.Group = shapeMethod(Group);
 
 // Hershey simplex one line font.
 // See: http://paulbourke.net/dataformats/hershey/
@@ -1551,17 +1563,21 @@ const buildLayoutGeometry = ({
   const labelScale = 0.0125 * 10;
   const size = [pageWidth, pageLength];
   const r = (v) => Math.floor(v * 100) / 100;
-  const title = `${r(pageWidth)} x ${r(pageLength)} : ${itemNames.join(', ')}`;
+  // const title = `${r(pageWidth)} x ${r(pageLength)} : ${itemNames.join(', ')}`;
+  const fontHeight = Math.max(pageWidth, pageLength) * labelScale;
+  const font = Hershey(fontHeight);
+  const title = [];
+  title.push(font(`${r(pageWidth)} x ${r(pageLength)}`));
+  for (let nth = 0; nth < itemNames.length; nth++) {
+    title.push(font(itemNames[nth]).y((nth + 1) * fontHeight));
+  }
   const visualization = Box(
     Math.max(pageWidth, margin),
     Math.max(pageLength, margin)
   )
     .outline()
     .and(
-      Hershey(max(pageWidth, pageLength) * labelScale)(title).move(
-        pageWidth / -2,
-        (pageLength * (1 + labelScale)) / 2
-      )
+      Group(...title).move(pageWidth / -2, (pageLength * (1 + labelScale)) / 2)
     )
     .color('red')
     .sketch()
@@ -1760,29 +1776,17 @@ const Arc = (x = 1, y = x, z = 0) =>
 
 Shape.prototype.Arc = shapeMethod(Arc);
 
-const isDefined = (value) => value !== undefined;
+const isDefined$1 = (value) => value !== undefined;
 
 const Assembly = (...shapes) =>
   Shape.fromGeometry(
     taggedAssembly(
       {},
-      ...shapes.filter(isDefined).map((shape) => shape.toGeometry())
-    )
-  );
-
-Shape.prototype.Assembly = shapeMethod(Assembly);
-
-const isDefined$1 = (value) => value;
-
-const Group = (...shapes) =>
-  Shape.fromGeometry(
-    taggedLayers(
-      {},
       ...shapes.filter(isDefined$1).map((shape) => shape.toGeometry())
     )
   );
 
-Shape.prototype.Group = shapeMethod(Group);
+Shape.prototype.Assembly = shapeMethod(Assembly);
 
 const Hull = (...shapes) => {
   const points = [];

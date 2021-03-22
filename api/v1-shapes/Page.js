@@ -10,9 +10,9 @@ import {
 
 import Box from './Box.js';
 import Empty from './Empty.js';
+import Group from './Group.js';
 import Hershey from './Hershey.js';
 import Shape from '@jsxcad/api-v1-shape';
-import { max } from '@jsxcad/api-v1-math';
 
 const MIN = 0;
 const MAX = 1;
@@ -50,17 +50,21 @@ const buildLayoutGeometry = ({
   const labelScale = 0.0125 * 10;
   const size = [pageWidth, pageLength];
   const r = (v) => Math.floor(v * 100) / 100;
-  const title = `${r(pageWidth)} x ${r(pageLength)} : ${itemNames.join(', ')}`;
+  // const title = `${r(pageWidth)} x ${r(pageLength)} : ${itemNames.join(', ')}`;
+  const fontHeight = Math.max(pageWidth, pageLength) * labelScale;
+  const font = Hershey(fontHeight);
+  const title = [];
+  title.push(font(`${r(pageWidth)} x ${r(pageLength)}`));
+  for (let nth = 0; nth < itemNames.length; nth++) {
+    title.push(font(itemNames[nth]).y((nth + 1) * fontHeight));
+  }
   const visualization = Box(
     Math.max(pageWidth, margin),
     Math.max(pageLength, margin)
   )
     .outline()
     .and(
-      Hershey(max(pageWidth, pageLength) * labelScale)(title).move(
-        pageWidth / -2,
-        (pageLength * (1 + labelScale)) / 2
-      )
+      Group(...title).move(pageWidth / -2, (pageLength * (1 + labelScale)) / 2)
     )
     .color('red')
     .sketch()

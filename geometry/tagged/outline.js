@@ -14,8 +14,10 @@ import { toPaths as toPathsFromGraph } from '@jsxcad/geometry-graph';
 const outlineImpl = (geometry, includeFaces = true, includeHoles = true) => {
   const disjointGeometry = toDisjointGeometry(geometry);
   const outlines = [];
-  for (const { tags, graph } of getNonVoidGraphs(disjointGeometry)) {
-    outlines.push(taggedPaths({ tags }, toPathsFromGraph(graph)));
+  for (const { tags = [], graph } of getNonVoidGraphs(disjointGeometry)) {
+    outlines.push(
+      taggedPaths({ tags: [...tags, 'path/Wire'] }, toPathsFromGraph(graph))
+    );
   }
   // Turn paths into wires.
   for (const { tags = [], paths } of getNonVoidPaths(disjointGeometry)) {

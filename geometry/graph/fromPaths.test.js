@@ -111,7 +111,7 @@ test('fromPaths', (t) => {
       ['2', '2', '0'],
     ],
     faces: [
-      { plane: [0, 0, 1, 0], exactPlane: ['0', '0', '1', '0'] },
+      { plane: [0, 0, 19000, 0], exactPlane: ['0', '0', '19000', '0'] },
       null,
       null,
       null,
@@ -119,7 +119,7 @@ test('fromPaths', (t) => {
       null,
       null,
       null,
-      { plane: [0, 0, 1, 0], exactPlane: ['0', '0', '1', '0'] },
+      { plane: [0, 0, 16, 0], exactPlane: ['0', '0', '16', '0'] },
     ],
     facets: [
       { edge: 4 },
