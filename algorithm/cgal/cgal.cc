@@ -869,11 +869,21 @@ class Surface_mesh_explorer {
       const Plane plane(mesh.point(mesh.source(h)),
                         mesh.point(mesh.source(mesh.next(h))),
                         mesh.point(mesh.source(mesh.next(mesh.next(h)))));
-      std::ostringstream x; x << plane.a().exact(); std::string xs = x.str();
-      std::ostringstream y; y << plane.b().exact(); std::string ys = y.str();
-      std::ostringstream z; z << plane.c().exact(); std::string zs = z.str();
-      std::ostringstream w; w << plane.d().exact(); std::string ws = w.str();
-      _emit_face(facet, CGAL::to_double(plane.a().exact()), CGAL::to_double(plane.b().exact()), CGAL::to_double(plane.c().exact()), CGAL::to_double(plane.d().exact()), xs, ys, zs, ws);
+      const auto a = plane.a().exact();
+      const auto b = plane.b().exact();
+      const auto c = plane.c().exact();
+      const auto d = plane.d().exact();
+      std::ostringstream x; x << a; std::string xs = x.str();
+      std::ostringstream y; y << b; std::string ys = y.str();
+      std::ostringstream z; z << c; std::string zs = z.str();
+      std::ostringstream w; w << d; std::string ws = w.str();
+      const double xd = CGAL::to_double(a);
+      const double yd = CGAL::to_double(b);
+      const double zd = CGAL::to_double(c);
+      const double ld = std::sqrt(xd * xd + yd * yd + zd * zd);
+      const double wd = CGAL::to_double(d);
+      // Normalize the approximate plane normal.
+      _emit_face(facet, xd / ld, yd / ld, zd / ld, wd, xs, ys, zs, ws);
     }
   }
 

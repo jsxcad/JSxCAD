@@ -746,7 +746,7 @@ test('offset', (t) => {
         ],
         faces: [
           {
-            plane: [0, 0, 0.01413272004697412, 0],
+            plane: [0, 0, 1, 0],
             exactPlane: [
               '0',
               '0',
@@ -769,7 +769,7 @@ test('offset', (t) => {
           null,
           null,
           {
-            plane: [0, 0, 0.00003775834571971795, 0],
+            plane: [0, 0, 1, 0],
             exactPlane: [
               '0',
               '0',
@@ -792,7 +792,7 @@ test('offset', (t) => {
           null,
           null,
           {
-            plane: [0, 0, 0.01413272004697412, 0],
+            plane: [0, 0, 1, 0],
             exactPlane: [
               '0',
               '0',
@@ -815,7 +815,7 @@ test('offset', (t) => {
           null,
           null,
           {
-            plane: [0, 0, 0.00003775834571971795, 0],
+            plane: [0, 0, 1, 0],
             exactPlane: [
               '0',
               '0',
@@ -838,7 +838,7 @@ test('offset', (t) => {
           null,
           null,
           {
-            plane: [0, 0, 0.12000000000000002, 0],
+            plane: [0, 0, 1, 0],
             exactPlane: [
               '0',
               '0',
