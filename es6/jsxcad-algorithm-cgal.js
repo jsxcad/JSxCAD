@@ -870,8 +870,8 @@ var Module = (function () {
     }
     var wasmMemory;
     var wasmTable = new WebAssembly.Table({
-      initial: 5469,
-      maximum: 5469,
+      initial: 5474,
+      maximum: 5474,
       element: 'anyfunc',
     });
     var ABORT = false;
@@ -1139,9 +1139,9 @@ var Module = (function () {
       Module['HEAPF32'] = HEAPF32 = new Float32Array(buf);
       Module['HEAPF64'] = HEAPF64 = new Float64Array(buf);
     }
-    var STACK_BASE = 5615952,
-      STACK_MAX = 373072,
-      DYNAMIC_BASE = 5615952;
+    var STACK_BASE = 5616288,
+      STACK_MAX = 373408,
+      DYNAMIC_BASE = 5616288;
     assert(STACK_BASE % 16 === 0, 'stack must start aligned');
     assert(DYNAMIC_BASE % 16 === 0, 'heap must start aligned');
     var TOTAL_STACK = 5242880;
@@ -7701,6 +7701,55 @@ var Module = (function () {
         _setThrew(1, 0);
       }
     }
+    function invoke_viiiiiiiiiiiii(
+      index,
+      a1,
+      a2,
+      a3,
+      a4,
+      a5,
+      a6,
+      a7,
+      a8,
+      a9,
+      a10,
+      a11,
+      a12,
+      a13
+    ) {
+      var sp = stackSave();
+      try {
+        wasmTable.get(index)(
+          a1,
+          a2,
+          a3,
+          a4,
+          a5,
+          a6,
+          a7,
+          a8,
+          a9,
+          a10,
+          a11,
+          a12,
+          a13
+        );
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_id(index, a1) {
+      var sp = stackSave();
+      try {
+        return wasmTable.get(index)(a1);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
     function invoke_viiiiiiiiii(
       index,
       a1,
@@ -7717,16 +7766,6 @@ var Module = (function () {
       var sp = stackSave();
       try {
         wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10);
-      } catch (e) {
-        stackRestore(sp);
-        if (e !== e + 0 && e !== 'longjmp') throw e;
-        _setThrew(1, 0);
-      }
-    }
-    function invoke_id(index, a1) {
-      var sp = stackSave();
-      try {
-        return wasmTable.get(index)(a1);
       } catch (e) {
         stackRestore(sp);
         if (e !== e + 0 && e !== 'longjmp') throw e;
@@ -7851,45 +7890,6 @@ var Module = (function () {
       var sp = stackSave();
       try {
         wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7, a8, a9);
-      } catch (e) {
-        stackRestore(sp);
-        if (e !== e + 0 && e !== 'longjmp') throw e;
-        _setThrew(1, 0);
-      }
-    }
-    function invoke_viiiiiiiiiiiii(
-      index,
-      a1,
-      a2,
-      a3,
-      a4,
-      a5,
-      a6,
-      a7,
-      a8,
-      a9,
-      a10,
-      a11,
-      a12,
-      a13
-    ) {
-      var sp = stackSave();
-      try {
-        wasmTable.get(index)(
-          a1,
-          a2,
-          a3,
-          a4,
-          a5,
-          a6,
-          a7,
-          a8,
-          a9,
-          a10,
-          a11,
-          a12,
-          a13
-        );
       } catch (e) {
         stackRestore(sp);
         if (e !== e + 0 && e !== 'longjmp') throw e;
@@ -10212,6 +10212,10 @@ const arrangePaths = (plane, exactPlane, paths, triangulate = false) => {
   const fill = (points) => {
     const path = paths[nth++];
     if (path) {
+      if (path === undefined || path.points === undefined) {
+        Error.stackTraceLimit = Infinity;
+        throw Error(`die: ${JSON.stringify(path)}`);
+      }
       for (const [start, end] of getEdges(path.points)) {
         if (equals(start, end)) {
           continue;

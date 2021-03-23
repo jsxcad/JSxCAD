@@ -28,6 +28,7 @@ import './rotateX.js';
 import './rotateY.js';
 import './rotateZ.js';
 import './scale.js';
+import './smooth.js';
 import './size.js';
 import './sketch.js';
 import './tags.js';

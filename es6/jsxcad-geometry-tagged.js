@@ -470,7 +470,12 @@ const differenceImpl = (geometry, ...geometries) => {
             differenced = difference$1(differenced, graph);
           }
           for (const { paths } of getFaceablePaths(geometry)) {
-            differenced = difference$1(differenced, fromPaths(paths));
+            differenced = difference$1(
+              differenced,
+              fill$1(
+                fromPaths(paths.map((path) => ({ points: path })))
+              )
+            );
           }
         }
         return taggedGraph({ tags }, differenced);
@@ -479,7 +484,7 @@ const differenceImpl = (geometry, ...geometries) => {
         // This will have problems with open paths, but we want to phase this out anyhow.
         return difference(
           taggedGraph(
-            tags,
+            { tags },
             fill$1(
               fromPaths(geometry.paths.map((path) => ({ points: path })))
             )
@@ -1230,8 +1235,10 @@ const offset = (geometry, initial = 1, step, limit) => {
 const outlineImpl = (geometry, includeFaces = true, includeHoles = true) => {
   const disjointGeometry = toDisjointGeometry(geometry);
   const outlines = [];
-  for (const { tags, graph } of getNonVoidGraphs(disjointGeometry)) {
-    outlines.push(taggedPaths({ tags }, toPaths(graph)));
+  for (const { tags = [], graph } of getNonVoidGraphs(disjointGeometry)) {
+    outlines.push(
+      taggedPaths({ tags: [...tags, 'path/Wire'] }, toPaths(graph))
+    );
   }
   // Turn paths into wires.
   for (const { tags = [], paths } of getNonVoidPaths(disjointGeometry)) {
@@ -1309,6 +1316,7 @@ const smooth = (geometry, options) => {
         // Not implemented yet.
         return geometry;
       case 'plan':
+        return smooth(reify(geometry).content[0], options);
       case 'assembly':
       case 'item':
       case 'disjointAssembly':

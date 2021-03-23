@@ -1,3 +1,4 @@
+import { reify } from './reify.js';
 import { rewrite } from './visit.js';
 import { smooth as smoothGraph } from '@jsxcad/geometry-graph';
 import { taggedGraph } from './taggedGraph.js';
@@ -16,6 +17,7 @@ export const smooth = (geometry, options) => {
         // Not implemented yet.
         return geometry;
       case 'plan':
+        return smooth(reify(geometry).content[0], options);
       case 'assembly':
       case 'item':
       case 'disjointAssembly':

@@ -177,7 +177,6 @@ void FromSurfaceMeshToPolygonSoup(Surface_mesh* mesh, bool triangulate, emscript
 }
 
 Surface_mesh* FromFunctionToSurfaceMesh(double radius, double angular_bound, double radius_bound, double distance_bound, double error_bound, emscripten::val function) {
-  auto op = [&](const Point_3& p) { return FT(function(CGAL::to_double(p.x()), CGAL::to_double(p.y()), CGAL::to_double(p.z())).as<double>()); };
   typedef CGAL::Surface_mesh_default_triangulation_3 Tr;
   // c2t3
   typedef CGAL::Complex_2_in_triangulation_3<Tr> C2t3;
@@ -192,6 +191,7 @@ Surface_mesh* FromFunctionToSurfaceMesh(double radius, double angular_bound, dou
   Tr tr;            // 3D-Delaunay triangulation
   C2t3 c2t3 (tr);   // 2D-complex in 3D-Delaunay triangulation
   // defining the surface
+  auto op = [&](const Point_3& p) { return FT(function(CGAL::to_double(p.x()), CGAL::to_double(p.y()), CGAL::to_double(p.z())).as<double>()); };
   Surface_3 surface(op,             // pointer to function
                     Sphere_3(CGAL::ORIGIN, radius * radius)); // bounding sphere
   CGAL::Surface_mesh_default_criteria_3<Tr> criteria(angular_bound,  // angular bound
@@ -856,6 +856,7 @@ class Surface_mesh_explorer {
       if (face == -1 || facet != face) {
         continue;
       }
+#if 0
       const auto facet_normal = CGAL::Polygon_mesh_processing::compute_face_normal(Surface_mesh::Face_index(facet), mesh);
       if (facet_normal == CGAL::NULL_VECTOR) {
         std::cout << "Null face normal" << std::endl;
@@ -863,11 +864,26 @@ class Surface_mesh_explorer {
       }
       const auto& point = mesh.point(facet_to_vertex[facet]);
       const Plane plane(point, facet_normal);
-      std::ostringstream x; x << plane.a().exact(); std::string xs = x.str();
-      std::ostringstream y; y << plane.b().exact(); std::string ys = y.str();
-      std::ostringstream z; z << plane.c().exact(); std::string zs = z.str();
-      std::ostringstream w; w << plane.d().exact(); std::string ws = w.str();
-      _emit_face(facet, CGAL::to_double(plane.a().exact()), CGAL::to_double(plane.b().exact()), CGAL::to_double(plane.c().exact()), CGAL::to_double(plane.d().exact()), xs, ys, zs, ws);
+#endif
+      const auto h = mesh.halfedge(Surface_mesh::Face_index(facet));
+      const Plane plane(mesh.point(mesh.source(h)),
+                        mesh.point(mesh.source(mesh.next(h))),
+                        mesh.point(mesh.source(mesh.next(mesh.next(h)))));
+      const auto a = plane.a().exact();
+      const auto b = plane.b().exact();
+      const auto c = plane.c().exact();
+      const auto d = plane.d().exact();
+      std::ostringstream x; x << a; std::string xs = x.str();
+      std::ostringstream y; y << b; std::string ys = y.str();
+      std::ostringstream z; z << c; std::string zs = z.str();
+      std::ostringstream w; w << d; std::string ws = w.str();
+      const double xd = CGAL::to_double(a);
+      const double yd = CGAL::to_double(b);
+      const double zd = CGAL::to_double(c);
+      const double ld = std::sqrt(xd * xd + yd * yd + zd * zd);
+      const double wd = CGAL::to_double(d);
+      // Normalize the approximate plane normal.
+      _emit_face(facet, xd / ld, yd / ld, zd / ld, wd, xs, ys, zs, ws);
     }
   }
 
