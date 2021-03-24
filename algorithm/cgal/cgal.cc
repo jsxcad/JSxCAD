@@ -95,6 +95,7 @@ typedef Kernel::Point_2 Point_2;
 typedef Kernel::Point_3 Point;
 typedef Kernel::Vector_2 Vector_2;
 typedef Kernel::Vector_3 Vector;
+typedef Kernel::Direction_3 Direction;
 typedef Kernel::Aff_transformation_3 Transformation;
 typedef std::vector<Point> Points;
 typedef std::vector<Point_2> Point_2s;
@@ -528,16 +529,70 @@ struct Project
   Vector vector;
 };
 
-Surface_mesh* ExtrusionOfSurfaceMesh(Surface_mesh* mesh, double high_x, double high_y, double high_z, double low_x, double low_y, double low_z) {
+Plane PlaneOfSurfaceMeshFacet(const Surface_mesh& mesh, Face_index facet) {
+  const auto h = mesh.halfedge(facet);
+  const Plane plane(mesh.point(mesh.source(h)),
+                    mesh.point(mesh.source(mesh.next(h))),
+                    mesh.point(mesh.source(mesh.next(mesh.next(h)))));
+  return plane;
+}
+
+Vector NormalOfSurfaceMeshFacet(const Surface_mesh& mesh, Face_index facet) {
+  const auto h = mesh.halfedge(facet);
+  return CGAL::normal(mesh.point(mesh.source(h)),
+                      mesh.point(mesh.source(mesh.next(h))),
+                      mesh.point(mesh.source(mesh.next(mesh.next(h)))));
+}
+
+Surface_mesh* ExtrusionOfSurfaceMesh(Surface_mesh* mesh, double height, double depth) {
   Surface_mesh* extruded_mesh = new Surface_mesh();
 
-  typedef typename boost::property_map<Surface_mesh, CGAL::vertex_point_t>::type VPMap;
-  Project<VPMap> top(get(CGAL::vertex_point, *extruded_mesh), Vector(high_x, high_y, high_z));
-  Project<VPMap> bottom(get(CGAL::vertex_point, *extruded_mesh), Vector(low_x, low_y, low_z));
+  for (const auto& facet : mesh->faces()) {
+    Vector normal = NormalOfSurfaceMeshFacet(*mesh, facet);
+    Vector up;
+    Vector down;
+    // Could we precisely align with z-up, extrude, and then realign?
+    // Probably not, since if we could, we wouldn't need to.
+    if (normal.direction() == Vector(0, 0, 1).direction()) {
+      // Handle vertical extrusion precisely.
+      up = Vector(0, 0, 1) * height;
+      down = Vector(0, 0, 1) * depth;
+    } else if (normal.direction() == Vector(0, 0, -1).direction()) {
+      // Handle vertical extrusion precisely.
+      up = Vector(0, 0, -1) * height;
+      down = Vector(0, 0, -1) * depth;
+    } else if (normal.direction() == Vector(0, 1, 0).direction()) {
+      // Handle vertical extrusion precisely.
+      up = Vector(0, 1, 0) * height;
+      down = Vector(0, 1, 0) * depth;
+    } else if (normal.direction() == Vector(0, -1, 0).direction()) {
+      // Handle vertical extrusion precisely.
+      up = Vector(0, -1, 0) * height;
+      down = Vector(0, -1, 0) * depth;
+    } else if (normal.direction() == Vector(1, 0, 0).direction()) {
+      // Handle vertical extrusion precisely.
+      up = Vector(1, 0, 0) * height;
+      down = Vector(1, 0, 0) * depth;
+    } else if (normal.direction() == Vector(-1, 0, 0).direction()) {
+      // Handle vertical extrusion precisely.
+      up = Vector(-1, 0, 0) * height;
+      down = Vector(-1, 0, 0) * depth;
+    } else {
+      // Generally we need a unit normal, unfortunately this requires an approximation.
+      double length = sqrt(CGAL::to_double(normal.squared_length()));
+      up = normal * (height / length);
+      down = normal * (depth / length);
+    }
 
-  CGAL::Polygon_mesh_processing::extrude_mesh(*mesh, *extruded_mesh, bottom, top);
+    typedef typename boost::property_map<Surface_mesh, CGAL::vertex_point_t>::type VPMap;
+    Project<VPMap> top(get(CGAL::vertex_point, *extruded_mesh), up);
+    Project<VPMap> bottom(get(CGAL::vertex_point, *extruded_mesh), down);
+    CGAL::Polygon_mesh_processing::extrude_mesh(*mesh, *extruded_mesh, bottom, top);
 
-  return extruded_mesh;
+    return extruded_mesh;
+  }
+
+  return nullptr;
 }
 
 template<typename MAP>
@@ -865,10 +920,13 @@ class Surface_mesh_explorer {
       const auto& point = mesh.point(facet_to_vertex[facet]);
       const Plane plane(point, facet_normal);
 #endif
+#if 0
       const auto h = mesh.halfedge(Surface_mesh::Face_index(facet));
       const Plane plane(mesh.point(mesh.source(h)),
                         mesh.point(mesh.source(mesh.next(h))),
                         mesh.point(mesh.source(mesh.next(mesh.next(h)))));
+#endif
+      const Plane plane = PlaneOfSurfaceMeshFacet(mesh, Surface_mesh::Face_index(facet));
       const auto a = plane.a().exact();
       const auto b = plane.b().exact();
       const auto c = plane.c().exact();
