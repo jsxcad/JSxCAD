@@ -22,7 +22,7 @@ test('Extrude/Triangle', (t) => {
   const surfaceMesh = fromPolygonsToSurfaceMesh(triangle);
   t.true(surfaceMesh.is_valid(false));
   t.true(!surfaceMesh.is_empty());
-  const extrusion = extrudeSurfaceMesh(surfaceMesh, 0, 0, 1, 0, 0, 0);
+  const extrusion = extrudeSurfaceMesh(surfaceMesh, 1, 0);
   const graph = fromSurfaceMeshToGraph(extrusion);
   t.deepEqual(JSON.parse(JSON.stringify(graph)), {
     edges: [
