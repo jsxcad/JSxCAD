@@ -1,0 +1,132 @@
+// Probably derived from https://github.com/sadr0b0t/pd-gears/blob/master/pd-gears.scad
+// Public Domain Parametric Involute Spur Gear (and involute helical gear and involute rack)
+// version 1.1 by Leemon Baird, 2011, Leemon@Leemon.com
+
+// convert polar to cartesian coordinates
+const polar = (radius, theta) => [radius * sin(theta), radius * cos(theta)];
+
+// point at radius d on the involute curve
+const q6 = (baseCircle, side, angle, pitchRadius) =>
+  polar(pitchRadius, side * (iang(baseCircle, pitchRadius) + angle));
+
+// radius a fraction f up the curved side of the tooth
+const q7 = (fraction, rootRadius, baseRadius, outerRadius, angle, side) =>
+  q6(
+    baseRadius,
+    side,
+    angle,
+    (1 - fraction) * max(baseRadius, rootRadius) + fraction * outerRadius
+  );
+
+// unwind a string this many degrees to go from radius r1 to radius r2
+const iang = (baseRadius, pitchRadius) =>
+  (sqrt((pitchRadius / baseRadius) * (pitchRadius / baseRadius) - 1) /
+    Math.PI) *
+    180 -
+  acos(baseRadius / pitchRadius);
+
+export const ToothProfile = (
+  rootRadius = 7,
+  baseRadius = 7.517540966287267,
+  outerRadius = 9,
+  angle = -6.478958291841238,
+  resolution = 5
+) => {
+  const path = [polar(rootRadius, -angle)];
+  for (let i = 0; i <= resolution; i++) {
+    path.push(
+      q7(i / resolution, rootRadius, baseRadius, outerRadius, angle, -1)
+    );
+  }
+  for (let i = resolution; i >= 0; i--) {
+    path.push(
+      q7(i / resolution, rootRadius, baseRadius, outerRadius, angle, 1)
+    );
+  }
+  if (rootRadius < baseRadius) {
+    path.push(polar(rootRadius, angle));
+  }
+
+  return Shape.fromOpenPath(path);
+};
+
+export const pitchRadius = (mmPerTooth = Math.PI, numberOfTeeth = 16) =>
+  (mmPerTooth * numberOfTeeth) / Math.PI / 2;
+
+export const outerRadius = (
+  mmPerTooth = Math.PI,
+  numberOfTeeth = 16,
+  clearance = 0
+) => pitchRadius(mmPerTooth, numberOfTeeth) + mmPerTooth / Math.PI - clearance;
+
+export const baseRadius = (
+  mmPerTooth = Math.PI,
+  numberOfTeeth = 16,
+  pressureAngle = 20
+) => pitchRadius(mmPerTooth, numberOfTeeth) * cos(pressureAngle);
+
+export const rootRadius = (
+  mmPerTooth = Math.PI,
+  numberOfTeeth = 16,
+  clearance = 0
+) => {
+  const p = pitchRadius(mmPerTooth, numberOfTeeth);
+  const c = outerRadius(mmPerTooth, numberOfTeeth);
+  return p - (c - p) - clearance;
+};
+
+export const GearProfile = (
+  numberOfTeeth = 16,
+  {
+    mmPerTooth = Math.PI,
+    teethToHide = 0,
+    pressureAngle = 20,
+    clearance = 0,
+    backlash = 0,
+    toothResolution = 5,
+  } = {}
+) => {
+  const pi = Math.PI;
+  // const p = mmPerTooth * numberOfTeeth / pi / 2; // radius of pitch circle
+  const p = pitchRadius(mmPerTooth, numberOfTeeth);
+  const c = outerRadius(mmPerTooth, numberOfTeeth, clearance);
+  const b = baseRadius(mmPerTooth, numberOfTeeth, pressureAngle);
+  const r = rootRadius(mmPerTooth, numberOfTeeth, clearance);
+  const t = mmPerTooth / 2 - backlash / 2;
+
+  // angle to where involute meets base circle on each side of tooth
+  const k = -iang(b, p) - (t / 2 / p / pi) * 180;
+
+  const toothProfile = ToothProfile(r, b, c, k, toothResolution);
+
+  let profile = Shape.fromOpenPath([]);
+  for (let i = 0; i < numberOfTeeth - teethToHide; i++) {
+    profile = profile.concat(toothProfile.rotateZ((-i * 360) / numberOfTeeth));
+  }
+
+  return profile.close();
+};
+
+// Gear Generator
+
+const numberOfTeeth = control('number of teeth', 16, 'input');
+const mmPerTooth = control('mm per tooth', Math.PI, 'input');
+const teethToHide = control('teeth to hide', 0, 'input');
+const pressureAngle = control('pressure angle', 20, 'input');
+const clearance = control('clearance', 0, 'input');
+const backlash = control('backlash', 0, 'input');
+const thickness = control('thickness', 2, 'input');
+const toothResolution = control('toothResolution', 5, 'input');
+
+const example = GearProfile(numberOfTeeth, {
+  mmPerTooth,
+  teethToHide,
+  pressureAngle,
+  clearance,
+  backlash,
+  toothResolution,
+})
+  .ex(thickness)
+  .material('wood')
+  .view(1024)
+  .downloadStl(`gear_${numberOfTeeth}`);
