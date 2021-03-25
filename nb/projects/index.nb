@@ -3,5 +3,6 @@ md`
 
 These example projects may be useful to see what can be done and to get started on your own.
 
+* [Gear](#JSxCAD@https://gitcdn.link/cdn/jsxcad/JSxCAD/${sha}/nb/projects/gear/gear.nb)
 * [Lego](#JSxCAD@https://gitcdn.link/cdn/jsxcad/JSxCAD/${sha}/nb/projects/lego/lego.nb)
 `;
