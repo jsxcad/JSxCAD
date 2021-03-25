@@ -951,7 +951,9 @@ class Surface_mesh_explorer {
   emscripten::val& _emit_face;
 };
 
-void Surface_mesh__explore(const Surface_mesh* mesh, emscripten::val emit_point, emscripten::val emit_edge, emscripten::val emit_face) {
+void Surface_mesh__explore(Surface_mesh* mesh, emscripten::val emit_point, emscripten::val emit_edge, emscripten::val emit_face) {
+  // We expect the serialized mesh to be triangulated.
+  CGAL::Polygon_mesh_processing::triangulate_faces(mesh->faces(), *mesh);
   Surface_mesh_explorer explorer(emit_point, emit_edge, emit_face);
   explorer.Explore(*mesh);
 }
