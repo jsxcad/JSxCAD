@@ -1,13 +1,14 @@
 import { toPaths, toTriangles } from '@jsxcad/geometry-graph';
 
-import { outline } from './outline.js';
+import { outline as outlineOp } from './outline.js';
 import { rewrite } from './visit.js';
 import { taggedGroup } from './taggedGroup.js';
 import { taggedPaths } from './taggedPaths.js';
 import { taggedTriangles } from './taggedTriangles.js';
 import { toTransformedGeometry } from './toTransformedGeometry.js';
 
-export const soup = (geometry) => {
+export const soup = (geometry, { doOutline = true } = {}) => {
+  const outline = doOutline ? outlineOp : () => [];
   const op = (geometry, descend) => {
     const { tags } = geometry;
     switch (geometry.type) {
