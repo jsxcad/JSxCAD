@@ -1,6 +1,7 @@
-import { readFont } from '@jsxcad/api-v1-font';
-const Text = await readFont(
-  'https://gitcdn.link/cdn/googlefonts/noto-cjk/master/NotoSerifCJKkr-Regular.otf'
+import { Text, readFont } from '@jsxcad/api-v1-font';
+
+const font = await readFont(
+  'https://gitcdn.xyz/cdn/googlefonts/noto-cjk/master/NotoSerifCJKkr-Regular.otf'
 );
 
 md`# Parameters`;
@@ -9,4 +10,4 @@ const size = await control('size', 10, 'input');
 
 md`# "${string}" at size ${size}`;
 
-Text(size)(string).fill().align().gridView().downloadSvg(string);
+Text(font, string, size).align('xy').gridView().downloadSvg(string);

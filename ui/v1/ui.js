@@ -463,7 +463,7 @@ class Ui extends React.PureComponent {
     for (const gitcdnPath of paths) {
       const [, , owner, repository, branch, path] =
         gitcdnPath.match(
-          /^(http|https):[/][/]gitcdn.link[/]cdn[/]([^/]*)[/]([^/]*)[/]([^/]*)[/](.*)$/
+          /^(http|https):[/][/]gitcdn.xyz[/]cdn[/]([^/]*)[/]([^/]*)[/]([^/]*)[/](.*)$/
         ) || [];
       if (owner && repository && branch && path) {
         const unit = `${owner}/${repository}/${branch}`;
@@ -1302,7 +1302,7 @@ const setupUi = async (sha) => {
     const workspace = decodeURIComponent(encodedWorkspace) || 'JSxCAD';
     const path = encodedFile
       ? decodeURIComponent(encodedFile)
-      : `https://gitcdn.link/cdn/jsxcad/JSxCAD/${sha}/nb/start.nb`;
+      : `https://gitcdn.xyz/cdn/jsxcad/JSxCAD/${sha}/nb/start.nb`;
     const file = `source/${path}`;
     return [path, file, workspace];
   };

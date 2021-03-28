@@ -62,7 +62,7 @@ export default {
       transform(code, id) {
         return code.replace(
           /'@jsxcad\/([^']*)'/g,
-          "'https://gitcdn.link/cdn/jsxcad/JSxCAD/master/es6/jsxcad-$1.js'"
+          "'https://gitcdn.xyz/cdn/jsxcad/JSxCAD/master/es6/jsxcad-$1.js'"
         );
       },
     },
