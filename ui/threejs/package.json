@@ -24,7 +24,7 @@
   "dependencies": {
     "@jsxcad/algorithm-color": "^0.0.79",
     "@jsxcad/algorithm-material": "^0.0.79",
-    "@jsxcad/convert-threejs": "^0.0.79",
+    "@jsxcad/math-poly3": "^0.0.79",
     "dat.gui": "0.7.6",
     "three": "^0.117.1"
   },

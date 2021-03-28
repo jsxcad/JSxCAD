@@ -7,7 +7,6 @@ import { Layers } from 'three';
 import { buildMeshes } from './mesh.js';
 import { buildTrackballControls } from './controls.js';
 import { moveToFit } from './moveToFit.js';
-import { toThreejsGeometry } from '@jsxcad/convert-threejs';
 
 export const orbitDisplay = async (
   {
@@ -81,14 +80,12 @@ export const orbitDisplay = async (
       scene.remove(mesh);
     }
 
-    const threejsGeometry = toThreejsGeometry(geometry);
-
     // Build new datasets from the written data, and display them.
     datasets = [];
 
     await buildMeshes({
       datasets,
-      threejsGeometry,
+      geometry,
       scene,
       render,
       definitions,

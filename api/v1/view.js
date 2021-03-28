@@ -3,7 +3,6 @@ import { addPending, emit, getModule, write } from '@jsxcad/sys';
 import Shape from '@jsxcad/api-v1-shape';
 import { ensurePages } from '@jsxcad/api-v1-shapes';
 import { nanoid } from 'nanoid/non-secure';
-import { soup } from '@jsxcad/geometry-tagged';
 
 // FIX: Avoid the extra read-write cycle.
 const view = (
@@ -24,7 +23,7 @@ const view = (
     height = size / 2;
   }
   const viewShape = op(shape);
-  for (const entry of ensurePages(soup(viewShape.toDisjointGeometry()))) {
+  for (const entry of ensurePages(viewShape.toDisplayGeometry())) {
     const path = `view/${getModule()}/${nanoid()}`;
     addPending(write(path, entry));
     const view = { width, height, position, inline, withAxes, withGrid };
