@@ -11,7 +11,7 @@ import { buildScene, createResizer } from './scene.js';
 import { Layers } from 'three';
 import { buildMeshes } from './mesh.js';
 
-export const display = async ({ view = {}, threejsGeometry } = {}, page) => {
+export const display = async ({ view = {}, geometry } = {}, page) => {
   const datasets = [];
   const width = page.offsetWidth;
   const height = page.offsetHeight;
@@ -64,7 +64,7 @@ export const display = async ({ view = {}, threejsGeometry } = {}, page) => {
   resize();
   new ResizeObserver(resize).observe(container);
 
-  await buildMeshes({ datasets, threejsGeometry, scene });
+  await buildMeshes({ datasets, geometry, scene });
   buildGuiControls({ datasets, gui });
 
   const animate = () => {

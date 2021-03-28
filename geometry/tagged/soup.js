@@ -33,6 +33,8 @@ export const soup = (geometry, { doOutline = true } = {}) => {
           );
         }
       }
+      // Unreachable.
+      case 'triangles':
       case 'points':
       case 'paths':
         // Already soupy enough.

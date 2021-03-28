@@ -1,7 +1,8 @@
-import { toPlane } from '@jsxcad/math-poly3';
+// import { toPlane } from '@jsxcad/math-poly3';
 
-const pointsToThreejsPoints = (points) => points;
+// const pointsToThreejsPoints = (points) => points;
 
+/*
 const trianglesToThreejsTriangles = (triangles) => {
   const normals = [];
   const positions = [];
@@ -18,8 +19,11 @@ const trianglesToThreejsTriangles = (triangles) => {
   }
   return { normals, positions };
 };
+*/
 
 export const toThreejsGeometry = (geometry, supertags) => {
+  return geometry;
+  /*
   const tags = [...(supertags || []), ...(geometry.tags || [])];
   // if (tags.includes('compose/non-positive')) {
   //   return;
@@ -93,4 +97,5 @@ export const toThreejsGeometry = (geometry, supertags) => {
     default:
       throw Error(`Unexpected geometry: ${geometry.type}`);
   }
+*/
 };

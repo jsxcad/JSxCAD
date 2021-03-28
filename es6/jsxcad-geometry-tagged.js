@@ -1375,6 +1375,8 @@ const soup = (geometry, { doOutline = true } = {}) => {
           );
         }
       }
+      // Unreachable.
+      case 'triangles':
       case 'points':
       case 'paths':
         // Already soupy enough.
@@ -1491,6 +1493,9 @@ const test = (geometry) => {
   visit(geometry, op);
   return geometry;
 };
+
+const toDisplayGeometry = (geometry, options) =>
+  soup(toDisjointGeometry(geometry), options);
 
 // The resolution is 1 / multiplier.
 const multiplier = 1e5;
@@ -1661,4 +1666,4 @@ const translate = (vector, geometry) =>
 const scale = (vector, geometry) =>
   transform(fromScaling(vector), geometry);
 
-export { allTags, assemble, canonicalize, difference, drop, eachItem, eachPoint, empty, extrude, extrudeToPlane, fill, flip, fresh, fromSurfaceToPaths, getAnyNonVoidSurfaces, getAnySurfaces, getFaceablePaths, getGraphs, getItems, getLayers, getLayouts, getLeafs, getNonVoidFaceablePaths, getNonVoidGraphs, getNonVoidItems, getNonVoidPaths, getNonVoidPlans, getNonVoidPoints, getPaths, getPeg, getPlans, getPoints, getTags, hash, inset, intersection, isNotVoid, isVoid, keep, measureBoundingBox, offset, outline, projectToPlane, read, realize, registerReifier, reify, rewrite, rewriteTags, rotateX, rotateY, rotateZ, scale, section, smooth, soup, taggedAssembly, taggedDisjointAssembly, taggedGraph, taggedGroup, taggedItem, taggedLayers, taggedLayout, taggedPaths, taggedPlan, taggedPoints, taggedSketch, taggedTransform, taggedTriangles, test, toDisjointGeometry, toKeptGeometry, toPoints, toPolygonsWithHoles, toTransformedGeometry, transform, translate, union, update, visit, write };
+export { allTags, assemble, canonicalize, difference, drop, eachItem, eachPoint, empty, extrude, extrudeToPlane, fill, flip, fresh, fromSurfaceToPaths, getAnyNonVoidSurfaces, getAnySurfaces, getFaceablePaths, getGraphs, getItems, getLayers, getLayouts, getLeafs, getNonVoidFaceablePaths, getNonVoidGraphs, getNonVoidItems, getNonVoidPaths, getNonVoidPlans, getNonVoidPoints, getPaths, getPeg, getPlans, getPoints, getTags, hash, inset, intersection, isNotVoid, isVoid, keep, measureBoundingBox, offset, outline, projectToPlane, read, realize, registerReifier, reify, rewrite, rewriteTags, rotateX, rotateY, rotateZ, scale, section, smooth, soup, taggedAssembly, taggedDisjointAssembly, taggedGraph, taggedGroup, taggedItem, taggedLayers, taggedLayout, taggedPaths, taggedPlan, taggedPoints, taggedSketch, taggedTransform, taggedTriangles, test, toDisjointGeometry, toDisplayGeometry, toKeptGeometry, toPoints, toPolygonsWithHoles, toTransformedGeometry, transform, translate, union, update, visit, write };

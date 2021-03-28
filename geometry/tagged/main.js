@@ -86,6 +86,7 @@ export { taggedTransform } from './taggedTransform.js';
 export { taggedTriangles } from './taggedTriangles.js';
 export { test } from './test.js';
 export { toDisjointGeometry } from './toDisjointGeometry.js';
+export { toDisplayGeometry } from './toDisplayGeometry.js';
 export { toKeptGeometry } from './toKeptGeometry.js';
 export { toTransformedGeometry } from './toTransformedGeometry.js';
 export { toPoints } from './toPoints.js';

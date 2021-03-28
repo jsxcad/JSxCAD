@@ -13,6 +13,7 @@ import {
   taggedPaths,
   taggedPoints,
   toDisjointGeometry as toDisjointTaggedGeometry,
+  toDisplayGeometry,
   toPoints,
   toTransformedGeometry as toTransformedTaggedGeometry,
   transform,
@@ -60,6 +61,10 @@ export class Shape {
 
   flip() {
     return fromGeometry(flip(toDisjointGeometry(this)), this.context);
+  }
+
+  toDisplayGeometry() {
+    return toDisplayGeometry(toGeometry(this));
   }
 
   toKeptGeometry(options = {}) {

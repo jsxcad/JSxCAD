@@ -1,6 +1,5 @@
 import { orbitDisplay } from './orbitDisplay.js';
 import { staticDisplay } from './staticDisplay.js';
-import { toThreejsGeometry } from '@jsxcad/convert-threejs';
 
 const toCanvasFromWebglContext = (webgl) => {
   const { width, height } = webgl.canvas;
@@ -27,11 +26,10 @@ export const staticView = async (
     definitions,
   } = {}
 ) => {
-  const threejsGeometry = toThreejsGeometry(shape.toKeptGeometry());
   const { renderer } = await staticDisplay(
     {
       view: { target, position, up },
-      threejsGeometry,
+      geometry: shape.toDisplayGeometry(),
       withAxes,
       withGrid,
       definitions,
