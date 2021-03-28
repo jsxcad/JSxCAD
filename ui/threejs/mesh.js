@@ -200,7 +200,7 @@ export const buildMeshes = async ({
   if (geometry === undefined) {
     return;
   }
-  const { tags } = geometry;
+  const { tags = [] } = geometry;
   switch (geometry.type) {
     case 'assembly':
     case 'disjointAssembly':
