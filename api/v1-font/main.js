@@ -1,1 +1,1 @@
-export { readFont } from './readFont.js';
+export { Text, readFont } from './readFont.js';

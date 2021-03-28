@@ -25,7 +25,12 @@ export const inset = (geometry, initial = 1, step, limit) => {
         // Not implemented yet.
         return geometry;
       case 'paths':
-        return inset(fromPathsToGraph(geometry.paths), initial, step, limit);
+        return inset(
+          fromPathsToGraph(geometry.paths.map((path) => ({ points: path }))),
+          initial,
+          step,
+          limit
+        );
       case 'plan':
         return inset(reify(geometry).content[0], initial, step, limit);
       case 'assembly':

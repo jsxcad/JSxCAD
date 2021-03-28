@@ -66,6 +66,29 @@ return {};
   );
 });
 
+test('Control can be used with cached output.', async (t) => {
+  await write('control/', { length: 16 });
+  await write('data/def//foo', 1);
+  await write('meta/def//foo', {
+    sha: '8def1b9857f29dfc6864ae9d23f8c56a590192e1',
+  });
+  const ecmascript = await toEcmascript(
+    `
+const length = control('length', 10, 'number');
+const foo = bar(length);`
+  );
+  t.is(
+    ecmascript,
+    `
+const length = control('length', 16, 'number');
+const foo = await loadGeometry('data/def//foo');
+await replayRecordedNotes('data/note//foo');
+Object.freeze(foo);
+return {};
+`
+  );
+});
+
 test('Bind await to calls properly.', async (t) => {
   const ecmascript = await toEcmascript(`foo().bar()`);
   t.is(

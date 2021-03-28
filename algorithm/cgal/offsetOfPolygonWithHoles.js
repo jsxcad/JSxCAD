@@ -1,8 +1,8 @@
 import { getCgal } from './getCgal.js';
 
-const X = 0;
-const Y = 1;
-const Z = 2;
+// const X = 0;
+// const Y = 1;
+// const Z = 2;
 
 export const offsetOfPolygonWithHoles = (
   initial = 1,
@@ -15,7 +15,7 @@ export const offsetOfPolygonWithHoles = (
   const outputs = [];
   let output;
   let points;
-  let lastPoint;
+  let exactPoints;
   c.OffsetOfPolygonWithHoles(
     initial,
     step,
@@ -26,23 +26,37 @@ export const offsetOfPolygonWithHoles = (
     -w,
     polygon.holes.length,
     (boundary) => {
-      for (const [x, y, z] of polygon.points) {
-        c.addPoint(boundary, x, y, z);
+      if (polygon.exactPoints) {
+        for (const [x, y, z] of polygon.exactPoints) {
+          c.addExactPoint(boundary, x, y, z);
+        }
+      } else {
+        for (const [x, y, z] of polygon.points) {
+          c.addPoint(boundary, x, y, z);
+        }
       }
     },
     (hole, nth) => {
-      for (const [x, y, z] of polygon.holes[nth].points) {
-        c.addPoint(hole, x, y, z);
+      if (polygon.holes[nth].exactPoints) {
+        for (const [x, y, z] of polygon.holes[nth].exactPoints) {
+          c.addExactPoint(hole, x, y, z);
+        }
+      } else {
+        for (const [x, y, z] of polygon.holes[nth].points) {
+          c.addPoint(hole, x, y, z);
+        }
       }
     },
     (isHole) => {
       points = [];
-      lastPoint = undefined;
+      exactPoints = [];
+      // lastPoint = undefined;
       if (isHole) {
-        output.holes.push({ points });
+        output.holes.push({ points, exactPoints });
       } else {
         output = {
           points,
+          exactPoints,
           holes: [],
           plane: polygon.plane,
           exactPlane: polygon.exactPlane,
@@ -50,16 +64,9 @@ export const offsetOfPolygonWithHoles = (
         outputs.push(output);
       }
     },
-    (x, y, z) => {
-      if (
-        !lastPoint ||
-        lastPoint[X] !== x ||
-        lastPoint[Y] !== y ||
-        lastPoint[Z] !== z
-      ) {
-        lastPoint = [x, y, z];
-        points.push(lastPoint);
-      }
+    (x, y, z, exactX, exactY, exactZ) => {
+      points.push([x, y, z]);
+      exactPoints.push([exactX, exactY, exactX]);
     }
   );
   return outputs;

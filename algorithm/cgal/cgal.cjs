@@ -808,8 +808,8 @@ var Module = (function () {
     }
     var wasmMemory;
     var wasmTable = new WebAssembly.Table({
-      initial: 5482,
-      maximum: 5482,
+      initial: 5172,
+      maximum: 5172,
       element: 'anyfunc',
     });
     var ABORT = false;
@@ -1129,9 +1129,9 @@ var Module = (function () {
       Module['HEAPF32'] = HEAPF32 = new Float32Array(buf);
       Module['HEAPF64'] = HEAPF64 = new Float64Array(buf);
     }
-    var STACK_BASE = 5616624,
-      STACK_MAX = 373744,
-      DYNAMIC_BASE = 5616624;
+    var STACK_BASE = 5594240,
+      STACK_MAX = 351360,
+      DYNAMIC_BASE = 5594240;
     assert(STACK_BASE % 16 === 0, 'stack must start aligned');
     assert(DYNAMIC_BASE % 16 === 0, 'heap must start aligned');
     var TOTAL_STACK = 5242880;
@@ -8035,6 +8035,16 @@ var Module = (function () {
         _setThrew(1, 0);
       }
     }
+    function invoke_viddd(index, a1, a2, a3, a4) {
+      var sp = stackSave();
+      try {
+        wasmTable.get(index)(a1, a2, a3, a4);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
     function invoke_iiiiiiiiiiiiii(
       index,
       a1,
@@ -8068,16 +8078,6 @@ var Module = (function () {
           a12,
           a13
         );
-      } catch (e) {
-        stackRestore(sp);
-        if (e !== e + 0 && e !== 'longjmp') throw e;
-        _setThrew(1, 0);
-      }
-    }
-    function invoke_viddd(index, a1, a2, a3, a4) {
-      var sp = stackSave();
-      try {
-        wasmTable.get(index)(a1, a2, a3, a4);
       } catch (e) {
         stackRestore(sp);
         if (e !== e + 0 && e !== 'longjmp') throw e;
