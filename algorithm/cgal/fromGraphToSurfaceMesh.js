@@ -34,15 +34,21 @@ export const fromGraphToSurfaceMesh = (graph) => {
   }
 
   graph.facets.forEach(({ edge }, facet) => {
+    const points = [];
     const faceIndex = c.Surface_mesh__add_face_vertices(mesh, () => {
       const edgeNode = graph.edges[edge];
       edge = edgeNode.next;
+      points.push(graph.points[edgeNode.point]);
       return vertexIndex[edgeNode.point];
     });
     if (faceIndex === 4294967295 /* -1 */) {
-      throw Error(`Face could not be added`);
+      throw Error(`Face could not be added: ${JSON.stringify(points)}`);
     }
   });
+
+  if (!c.Surface_mesh__triangulate_faces(mesh)) {
+    throw Error('triangulation failed');
+  }
 
   if (!mesh.is_valid(false)) {
     throw Error('die');

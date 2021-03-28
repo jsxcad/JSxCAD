@@ -24,6 +24,7 @@
   "license": "MIT",
   "dependencies": {
     "@jsxcad/convert-svg": "^0.0.79",
+    "@jsxcad/geometry-graph": "^0.0.79",
     "@jsxcad/geometry-tagged": "^0.0.79",
     "@jsxcad/sys": "^0.0.79",
     "opentype.js": "^0.11.0"

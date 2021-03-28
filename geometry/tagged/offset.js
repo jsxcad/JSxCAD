@@ -25,7 +25,12 @@ export const offset = (geometry, initial = 1, step, limit) => {
         // Not implemented yet.
         return geometry;
       case 'paths':
-        return offset(fromPathsToGraph(geometry.paths), initial, step, limit);
+        return offset(
+          fromPathsToGraph(geometry.paths.map((path) => ({ points: path }))),
+          initial,
+          step,
+          limit
+        );
       case 'plan':
         return offset(reify(geometry).content[0], initial, step, limit);
       case 'assembly':

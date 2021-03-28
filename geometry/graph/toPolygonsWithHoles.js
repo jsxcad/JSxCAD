@@ -47,6 +47,11 @@ export const toPolygonsWithHoles = (graph) => {
           graph.points[point],
           graph.points[graph.edges[next].point],
         ],
+        exactPoints: [
+          null,
+          graph.exactPoints[point],
+          graph.exactPoints[graph.edges[next].point],
+        ],
       });
     }
     polygonWithHoles.push(

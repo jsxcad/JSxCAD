@@ -1,6 +1,7 @@
-import { scale, taggedGroup, taggedPaths } from '@jsxcad/geometry-tagged';
+import { scale, taggedGraph, taggedGroup } from '@jsxcad/geometry-tagged';
 
 import OpenTypeJs from 'opentype.js/dist/opentype.js';
+import { fromPaths } from '@jsxcad/geometry-graph';
 import { fromSvgPath } from '@jsxcad/convert-svg';
 
 export const toFont = (options = {}, data) => {
@@ -36,7 +37,12 @@ export const toFont = (options = {}, data) => {
         curveSegments: curveSegments,
       })
     )) {
-      group.push(scale([factor, factor, factor], taggedPaths({}, paths)));
+      group.push(
+        scale(
+          [factor, factor, factor],
+          taggedGraph({}, fromPaths(paths.map((path) => ({ points: path }))))
+        )
+      );
     }
     return taggedGroup({}, ...group);
   };

@@ -6,36 +6,46 @@ const X = 0;
 const Y = 1;
 const Z = 2;
 
-export const arrangePaths = (plane, exactPlane, paths, triangulate = false) => {
+export const arrangePaths = (
+  plane,
+  exactPlane,
+  inputPolygons,
+  triangulate = false
+) => {
   const c = getCgal();
   let nth = 0;
   let target;
   let polygon;
   let polygons = [];
-  const fill = (points) => {
-    const path = paths[nth++];
-    if (path) {
-      if (path === undefined || path.points === undefined) {
-        Error.stackTraceLimit = Infinity;
-        throw Error(`die: ${JSON.stringify(path)}`);
-      }
-      for (const [start, end] of getEdges(path.points)) {
-        if (equals(start, end)) {
-          continue;
+  const fill = (out) => {
+    if (nth < inputPolygons.length) {
+      const { exactPoints, points } = inputPolygons[nth++];
+      if (exactPoints) {
+        for (const [start, end] of getEdges(exactPoints)) {
+          if (equals(start, end)) {
+            continue;
+          }
+          c.addExactPoint(out, start[X], start[Y], start[Z]);
+          c.addExactPoint(out, end[X], end[Y], end[Z]);
         }
-        c.addPoint(points, start[X], start[Y], start[Z]);
-        c.addPoint(points, end[X], end[Y], end[Z]);
+      } else if (points) {
+        for (const [start, end] of getEdges(points)) {
+          if (equals(start, end)) {
+            continue;
+          }
+          c.addPoint(out, start[X], start[Y], start[Z]);
+          c.addPoint(out, end[X], end[Y], end[Z]);
+        }
       }
     }
   };
   const emitPolygon = (isHole) => {
+    target = { points: [], exactPoints: [], holes: [], plane, exactPlane };
     if (isHole) {
-      target = { points: [], exactPoints: [], holes: [], plane, exactPlane };
       polygon.holes.push(target);
     } else {
-      polygon = { points: [], exactPoints: [], holes: [], plane, exactPlane };
-      polygons.push(polygon);
-      target = polygon;
+      polygons.push(target);
+      polygon = target;
     }
   };
   const emitPoint = (x, y, z, exactX, exactY, exactZ) => {
@@ -61,5 +71,5 @@ export const arrangePaths = (plane, exactPlane, paths, triangulate = false) => {
   return polygons;
 };
 
-export const arrangePathsIntoTriangles = (plane, exactPlane, paths) =>
-  arrangePaths(plane, exactPlane, paths, /* triangulate= */ true);
+export const arrangePathsIntoTriangles = (plane, exactPlane, polygons) =>
+  arrangePaths(plane, exactPlane, polygons, /* triangulate= */ true);
