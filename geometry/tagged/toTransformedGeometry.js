@@ -43,9 +43,10 @@ export const toTransformedGeometry = (geometry) => {
             matrix,
             geometry.plan.matrix || identityMatrix
           );
-          return descend(
+          const planUpdate = descend(
             {
-              ...geometry,
+              tags: geometry.tags,
+              type: geometry.type,
               plan: {
                 ...geometry.plan,
                 matrix: composedMatrix,
@@ -53,6 +54,7 @@ export const toTransformedGeometry = (geometry) => {
             },
             composedMatrix
           );
+          return planUpdate;
         }
         case 'triangles':
           return descend({

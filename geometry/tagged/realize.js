@@ -8,6 +8,7 @@ export const realize = (geometry) => {
     switch (geometry.type) {
       case 'graph':
         return taggedGraph({ tags }, realizeGraph(geometry.graph));
+      case 'displayGeometry':
       case 'triangles':
       case 'points':
       case 'paths':

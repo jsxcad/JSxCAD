@@ -1,8 +1,8 @@
 /* global postMessage, onmessage:writable, self */
 
-import * as api from 'https://gitcdn.link/cdn/jsxcad/JSxCAD/master/es6/jsxcad-api-v1.js';
-import * as sys from 'https://gitcdn.link/cdn/jsxcad/JSxCAD/master/es6/jsxcad-sys.js';
-import { toEcmascript } from 'https://gitcdn.link/cdn/jsxcad/JSxCAD/master/es6/jsxcad-compiler.js';
+import * as api from 'https://gitcdn.xyz/cdn/jsxcad/JSxCAD/master/es6/jsxcad-api-v1.js';
+import * as sys from 'https://gitcdn.xyz/cdn/jsxcad/JSxCAD/master/es6/jsxcad-sys.js';
+import { toEcmascript } from 'https://gitcdn.xyz/cdn/jsxcad/JSxCAD/master/es6/jsxcad-compiler.js';
 
 const say = (message) => postMessage(message);
 const agent = async ({ ask, question }) => {

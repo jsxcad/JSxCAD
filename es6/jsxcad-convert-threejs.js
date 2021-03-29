@@ -116,8 +116,8 @@ const toThreejsPage = async (
  </head>
  <body>
   <script type='module'>
-    import { dataUrl } from 'https://gitcdn.link/cdn/jsxcad/JSxCAD/master/es6/jsxcad-ui-threejs.js';
-    import { Shape } from 'https://gitcdn.link/cdn/jsxcad/JSxCAD/master/es6/jsxcad-api-v1-shape.js';
+    import { dataUrl } from 'https://gitcdn.xyz/cdn/jsxcad/JSxCAD/master/es6/jsxcad-ui-threejs.js';
+    import { Shape } from 'https://gitcdn.xyz/cdn/jsxcad/JSxCAD/master/es6/jsxcad-api-v1-shape.js';
 
     const geometry = ${JSON.stringify(disjointGeometry)};
 

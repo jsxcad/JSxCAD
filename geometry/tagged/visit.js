@@ -19,13 +19,13 @@ export const rewrite = (geometry, op, state) => {
     if (geometry.content) {
       return op(
         geometry,
-        (changes, state) =>
+        (changes, newState = state) =>
           update(
             geometry,
             {
               content: validateContent(
                 geometry,
-                geometry.content?.map?.((entry) => walk(entry, state))
+                geometry.content?.map?.((entry) => walk(entry, newState))
               ),
             },
             changes

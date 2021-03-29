@@ -27,7 +27,7 @@ export const toHtml = async (
   {
     view,
     title = 'JSxCAD Viewer',
-    modulePath = 'https://gitcdn.link/cdn/jsxcad/JSxCAD/master/es6',
+    modulePath = 'https://gitcdn.xyz/cdn/jsxcad/JSxCAD/master/es6',
   } = {}
 ) => {
   const html = `

@@ -1,6 +1,6 @@
 /* globals location */
 
-import { writeFile } from 'https://gitcdn.link/cdn/jsxcad/JSxCAD/master/es6/jsxcad-sys.js';
+import { writeFile } from 'https://gitcdn.xyz/cdn/jsxcad/JSxCAD/master/es6/jsxcad-sys.js';
 
 window.bootstrap = async () => {
   const { search } = location;

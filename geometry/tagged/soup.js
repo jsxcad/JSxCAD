@@ -39,6 +39,9 @@ export const soup = (geometry, { doOutline = true } = {}) => {
       case 'paths':
         // Already soupy enough.
         return geometry;
+      case 'displayGeometry':
+        // soup can handle displayGeometry.
+        return descend();
       case 'layout':
       case 'plan':
       case 'assembly':
