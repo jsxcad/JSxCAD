@@ -245,7 +245,6 @@ const toTransformedGeometry = (geometry) => {
             },
             composedMatrix
           );
-          console.log(`QQ/planUpdate: ${JSON.stringify(planUpdate)}`);
           return planUpdate;
         }
         case 'triangles':
@@ -416,7 +415,9 @@ const taggedDisjointAssembly = ({ tags }, ...content) => {
   const disjointAssembly = { type: 'disjointAssembly', tags, content };
   visit(disjointAssembly, (geometry, descend) => {
     if (geometry.type === 'transform') {
-      throw Error(`DisjointAssembly contains transform: ${JSON.stringify(geometry)}`);
+      throw Error(
+        `DisjointAssembly contains transform: ${JSON.stringify(geometry)}`
+      );
     }
     return descend();
   });
@@ -473,7 +474,10 @@ const toDisjointGeometry = (geometry, mode = DISJUNCTION_TOTAL) => {
         // disjointAssembly.
         // This is acceptable for displayGeometry, but otherwise problematic.
         // For this reason we wrap the output as DisplayGeometry.
-        return taggedDisplayGeometry({}, toTransformedGeometry(reify(geometry)));
+        return taggedDisplayGeometry(
+          {},
+          toTransformedGeometry(reify(geometry))
+        );
       }
       const assembly = geometry.content.map((entry) => rewrite(entry, op));
       const disjointAssembly = [];
@@ -503,7 +507,8 @@ const toDisjointGeometry = (geometry, mode = DISJUNCTION_TOTAL) => {
   }
 };
 
-const toVisiblyDisjointGeometry = (geometry) => toDisjointGeometry(geometry, DISJUNCTION_VISIBLE);
+const toVisiblyDisjointGeometry = (geometry) =>
+  toDisjointGeometry(geometry, DISJUNCTION_VISIBLE);
 
 const differenceImpl = (geometry, ...geometries) => {
   geometries = geometries.map(toDisjointGeometry);
@@ -1544,8 +1549,6 @@ const test = (geometry) => {
   visit(geometry, op);
   return geometry;
 };
-
-Error.stackTraceLimit = Infinity;
 
 const toDisplayGeometry = (geometry, options) =>
   soup(toVisiblyDisjointGeometry(geometry), options);

@@ -51,7 +51,10 @@ export const toDisjointGeometry = (geometry, mode = DISJUNCTION_TOTAL) => {
         // disjointAssembly.
         // This is acceptable for displayGeometry, but otherwise problematic.
         // For this reason we wrap the output as DisplayGeometry.
-        return taggedDisplayGeometry({}, toTransformedGeometry(reify(geometry)));
+        return taggedDisplayGeometry(
+          {},
+          toTransformedGeometry(reify(geometry))
+        );
       }
       const assembly = geometry.content.map((entry) => rewrite(entry, op));
       const disjointAssembly = [];
@@ -81,4 +84,5 @@ export const toDisjointGeometry = (geometry, mode = DISJUNCTION_TOTAL) => {
   }
 };
 
-export const toVisiblyDisjointGeometry = (geometry) => toDisjointGeometry(geometry, DISJUNCTION_VISIBLE);
+export const toVisiblyDisjointGeometry = (geometry) =>
+  toDisjointGeometry(geometry, DISJUNCTION_VISIBLE);

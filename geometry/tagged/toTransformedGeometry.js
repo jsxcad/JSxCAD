@@ -54,7 +54,6 @@ export const toTransformedGeometry = (geometry) => {
             },
             composedMatrix
           );
-          console.log(`QQ/planUpdate: ${JSON.stringify(planUpdate)}`);
           return planUpdate;
         }
         case 'triangles':

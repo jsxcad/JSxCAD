@@ -1,5 +1,3 @@
-Error.stackTraceLimit = Infinity;
-
 import { soup } from './soup.js';
 import { toVisiblyDisjointGeometry } from './toDisjointGeometry.js';
 
