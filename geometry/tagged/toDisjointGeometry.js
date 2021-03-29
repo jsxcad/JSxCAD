@@ -1,7 +1,9 @@
 import { difference } from './difference.js';
+import { isVoid } from './isNotVoid.js';
 import { reify } from './reify.js';
 import { rewrite } from './visit.js';
 import { taggedDisjointAssembly } from './taggedDisjointAssembly.js';
+import { taggedDisplayGeometry } from './taggedDisplayGeometry.js';
 import { toTransformedGeometry } from './toTransformedGeometry.js';
 
 const linkDisjointAssembly = Symbol('linkDisjointAssembly');
@@ -11,18 +13,46 @@ export const clearDisjointGeometry = (geometry) => {
   return geometry;
 };
 
-export const toDisjointGeometry = (geometry) => {
-  const op = (geometry, descend, walk) => {
+const hasVoidGeometry = (geometry) => {
+  if (isVoid(geometry)) {
+    return true;
+  }
+  if (geometry.content) {
+    for (const content of geometry.content) {
+      if (hasVoidGeometry(content)) {
+        return true;
+      }
+    }
+  }
+};
+
+export const DISJUNCTION_TOTAL = 'complete';
+export const DISJUNCTION_VISIBLE = 'visible';
+
+export const toDisjointGeometry = (geometry, mode = DISJUNCTION_TOTAL) => {
+  const op = (geometry, descend, walk, state) => {
     if (geometry[linkDisjointAssembly]) {
       return geometry[linkDisjointAssembly];
     } else if (geometry.type === 'disjointAssembly') {
       // Everything below this point is disjoint.
+      return geometry;
+    } else if (geometry.type === 'displayGeometry') {
+      // We pretend that everything below this point is disjoint.
       return geometry;
     } else if (geometry.type === 'plan') {
       return walk(reify(geometry).content[0], op);
     } else if (geometry.type === 'transform') {
       return walk(toTransformedGeometry(geometry), op);
     } else if (geometry.type === 'assembly') {
+      if (mode === DISJUNCTION_VISIBLE && !hasVoidGeometry(geometry)) {
+        console.log(`QQ/Visible Disjunction Skipped`);
+        // This leads to some potential invariant violations.
+        // With toVisiblyDisjoint geometry we may get assembly within
+        // disjointAssembly.
+        // This is acceptable for displayGeometry, but otherwise problematic.
+        // For this reason we wrap the output as DisplayGeometry.
+        return taggedDisplayGeometry({}, toTransformedGeometry(reify(geometry)));
+      }
       const assembly = geometry.content.map((entry) => rewrite(entry, op));
       const disjointAssembly = [];
       for (let i = assembly.length - 1; i >= 0; i--) {
@@ -50,3 +80,5 @@ export const toDisjointGeometry = (geometry) => {
     }
   }
 };
+
+export const toVisiblyDisjointGeometry = (geometry) => toDisjointGeometry(geometry, DISJUNCTION_VISIBLE);

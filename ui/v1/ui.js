@@ -139,11 +139,11 @@ class Ui extends React.PureComponent {
       await ensureFile(file, path, { workspace });
     }
 
-    const fileUpdater = async () =>
-      this.setState({
-        workspaces: await listFilesystems(),
-        files: await listFiles(),
-      });
+    const fileUpdater = async () => {
+      const workspaces = await listFilesystems();
+      const files = await listFiles();
+      this.setState({ workspaces, files });
+    }
     const creationWatcher = await watchFileCreation(fileUpdater);
     const deletionWatcher = await watchFileDeletion(fileUpdater);
 

@@ -19,7 +19,7 @@ export const taggedDisjointAssembly = ({ tags }, ...content) => {
   const disjointAssembly = { type: 'disjointAssembly', tags, content };
   visit(disjointAssembly, (geometry, descend) => {
     if (geometry.type === 'transform') {
-      throw Error('DisjointAssembly contains transform.');
+      throw Error(`DisjointAssembly contains transform: ${JSON.stringify(geometry)}`);
     }
     return descend();
   });

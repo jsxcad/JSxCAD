@@ -39,6 +39,7 @@ export const measureBoundingBox = (geometry) => {
       case 'disjointAssembly':
       case 'item':
       case 'sketch':
+      case 'displayGeometry':
         return descend();
       case 'graph':
         return update(measureBoundingBoxOfGraph(geometry.graph));
