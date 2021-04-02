@@ -15,7 +15,7 @@ import { toSvg } from '@jsxcad/convert-svg';
 export const prepareSvg = (shape, name, options = {}) => {
   let index = 0;
   const entries = [];
-  for (const entry of ensurePages(shape.toKeptGeometry())) {
+  for (const entry of ensurePages(shape.toDisjointGeometry())) {
     const op = toSvg(entry, {
       definitions: getDefinitions(),
       ...options,

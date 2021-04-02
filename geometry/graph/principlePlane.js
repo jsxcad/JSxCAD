@@ -4,7 +4,7 @@ import { realizeGraph } from './realizeGraph.js';
 export const principlePlane = (graph) => {
   for (const face of realizeGraph(graph).faces) {
     if (face && face.plane) {
-      return face.plane;
+      return face;
     }
   }
 };
