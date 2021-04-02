@@ -12,6 +12,12 @@ export {
 } from './transform.js';
 
 export { arrangePaths, arrangePathsIntoTriangles } from './arrangePaths.js';
+export {
+  BOOLEAN_ADD,
+  BOOLEAN_CUT,
+  BOOLEAN_CLIP,
+  booleansOfPolygonsWithHoles,
+} from './booleansOfPolygonsWithHoles.js';
 export { differenceOfSurfaceMeshes } from './differenceOfSurfaceMeshes.js';
 export { doesSelfIntersectOfSurfaceMesh } from './doesSelfIntersectOfSurfaceMesh.js';
 export { extrudeSurfaceMesh } from './extrudeSurfaceMesh.js';

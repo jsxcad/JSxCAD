@@ -25,7 +25,8 @@ export const getPegCoords = (shape) => {
   const origin = coords.slice(0, 3);
   const forward = coords.slice(3, 6);
   const right = coords.slice(6, 9);
-  const plane = fromPoints(right, forward, origin);
+  // const plane = fromPoints(right, forward, origin);
+  const plane = fromPoints(origin, forward, right);
 
   return { coords, origin, forward, right, plane };
 };

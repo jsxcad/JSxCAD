@@ -1,9 +1,5 @@
 import { getCgal } from './getCgal.js';
 
-// const X = 0;
-// const Y = 1;
-// const Z = 2;
-
 export const offsetOfPolygonWithHoles = (
   initial = 1,
   step = -1,
@@ -50,7 +46,6 @@ export const offsetOfPolygonWithHoles = (
     (isHole) => {
       points = [];
       exactPoints = [];
-      // lastPoint = undefined;
       if (isHole) {
         output.holes.push({ points, exactPoints });
       } else {

@@ -1,42 +1,23 @@
-import { arrangePaths } from './arrangePaths.js';
+// import { arrangePaths } from './arrangePaths.js';
 import { getCgal } from './getCgal.js';
 
 export const sectionOfSurfaceMesh = (mesh, planes) => {
-  const c = getCgal();
-  let nthPlane = 0;
+  const g = getCgal();
   const sections = [];
-  let section;
-  let path;
-  c.SectionOfSurfaceMesh(
+  g.SectionOfSurfaceMesh(
     mesh,
     planes.length,
-    (out) => {
-      const plane = planes[nthPlane++];
-      const [x, y, z, w] = plane;
-      c.fillQuadruple(out, x, y, z, -w);
-      section = [];
-      sections.push({ section, plane: [x, y, z, -w] });
+    (nth, out) => {
+      const { plane, exactPlane } = planes[nth];
+      if (exactPlane) {
+        const [a, b, c, d] = exactPlane;
+        g.fillExactQuadruple(out, a, b, c, d);
+      } else if (plane) {
+        const [x, y, z, w] = plane;
+        g.fillQuadruple(out, x, y, z, -w);
+      }
     },
-    () => {
-      path = [];
-      section.push({ points: path });
-    },
-    (x, y, z) => {
-      path.push([x, y, z]);
-    }
+    (section) => sections.push(section)
   );
-  // Trim the last vertex, which is a duplicate of the first.
-  // FIX: Do this in cgal.cc
-  for (const { section } of sections) {
-    for (const { points } of section) {
-      points.pop();
-    }
-  }
-  const sectionPolygons = [];
-  for (const { section, plane } of sections) {
-    sectionPolygons.push(
-      arrangePaths(plane, undefined, section, /* triangulate= */ true)
-    );
-  }
-  return sectionPolygons;
+  return sections;
 };
