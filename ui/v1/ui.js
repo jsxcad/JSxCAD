@@ -182,10 +182,7 @@ class Ui extends React.PureComponent {
             note.data = await readOrWatch(note.path);
           }
           for (const item of notebookData) {
-            if (!item) {
-              continue;
-            }
-            if (item.hash === note.hash) {
+            if (item && item.hash === note.hash) {
               item.hash = nanoid();
             }
           }

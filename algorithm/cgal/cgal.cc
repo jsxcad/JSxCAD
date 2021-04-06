@@ -35,6 +35,7 @@
 #include <CGAL/linear_least_squares_fitting_3.h>
 #include <CGAL/make_mesh_3.h>
 #include <CGAL/make_surface_mesh.h>
+#include <CGAL/minkowski_sum_3.h>
 #include <CGAL/perturb_mesh_3.h>
 #include <CGAL/IO/facets_in_complex_2_to_triangle_mesh.h>
 #include <CGAL/Implicit_surface_3.h>
@@ -389,6 +390,44 @@ Surface_mesh* TransformSurfaceMeshByTransform(Surface_mesh* input, Transformatio
   return output;
 }
 
+void compute_angle(double a, RT& sin_alpha, RT& cos_alpha, RT& w) {
+  // Convert angle to radians.
+  double radians = a * M_PI / 180.0;
+  CGAL::rational_rotation_approximation(radians, sin_alpha, cos_alpha, w, RT(1), RT(1000));
+}
+
+Surface_mesh* TwistSurfaceMesh(Surface_mesh* input, double degreesPerZ) {
+  Surface_mesh* c = new Surface_mesh(*input);
+  // This does not look very efficient.
+  // CHECK: Figure out deformations.
+  for (const Surface_mesh::Vertex_index vertex : c->vertices()) {
+    Point& point = c->point(vertex);
+    double a = CGAL::to_double(point.z()) * degreesPerZ;
+    RT sin_alpha, cos_alpha, w;
+    compute_angle(a, sin_alpha, cos_alpha, w);
+    Transformation transformation(
+        cos_alpha, sin_alpha, 0, 0,
+        -sin_alpha, cos_alpha, 0, 0,
+        0, 0, w,  0,
+        w);
+    point = point.transform(transformation);
+  }
+  return c;
+}
+
+Surface_mesh* PushSurfaceMesh(Surface_mesh* input, double force, double minimum_distance, double maximum_distance) {
+  Surface_mesh* c = new Surface_mesh(*input);
+  Point origin(0, 0, 0);
+  for (const Surface_mesh::Vertex_index vertex : c->vertices()) {
+    Point& point = c->point(vertex);
+    Vector vector = Vector(origin, point);
+    double distance = sqrt(CGAL::to_double(vector.squared_length()));
+    // TODO: Apply a logistic decay.
+    point += vector * (force / distance);
+  }
+  return c;
+}
+
 void Surface_mesh__EachFace(Surface_mesh* mesh, emscripten::val op) {
   for (const auto& face_index : mesh->faces()) {
     if (!mesh->is_removed(face_index)) {
@@ -598,57 +637,64 @@ Vector NormalOfSurfaceMeshFacet(const Surface_mesh& mesh, Face_index facet) {
                       mesh.point(mesh.source(mesh.next(mesh.next(h)))));
 }
 
+Vector SomeNormalOfSurfaceMesh(const Surface_mesh& mesh) {
+  for (const auto& facet : mesh.faces()) {
+    return NormalOfSurfaceMeshFacet(mesh, facet);
+  }
+  return CGAL::NULL_VECTOR;
+}
+
 Surface_mesh* ExtrusionOfSurfaceMesh(Surface_mesh* mesh, double height, double depth) {
   Surface_mesh* extruded_mesh = new Surface_mesh();
 
-  for (const auto& facet : mesh->faces()) {
-    Vector normal = NormalOfSurfaceMeshFacet(*mesh, facet);
-    Vector up;
-    Vector down;
-    // Could we precisely align with z-up, extrude, and then realign?
-    // Probably not, since if we could, we wouldn't need to.
-    if (normal.direction() == Vector(0, 0, 1).direction()) {
-      // Handle vertical extrusion precisely.
-      up = Vector(0, 0, 1) * height;
-      down = Vector(0, 0, 1) * depth;
-    } else if (normal.direction() == Vector(0, 0, -1).direction()) {
-      // Handle vertical extrusion precisely.
-      up = Vector(0, 0, -1) * height;
-      down = Vector(0, 0, -1) * depth;
-    } else if (normal.direction() == Vector(0, 1, 0).direction()) {
-      // Handle vertical extrusion precisely.
-      up = Vector(0, 1, 0) * height;
-      down = Vector(0, 1, 0) * depth;
-    } else if (normal.direction() == Vector(0, -1, 0).direction()) {
-      // Handle vertical extrusion precisely.
-      up = Vector(0, -1, 0) * height;
-      down = Vector(0, -1, 0) * depth;
-    } else if (normal.direction() == Vector(1, 0, 0).direction()) {
-      // Handle vertical extrusion precisely.
-      up = Vector(1, 0, 0) * height;
-      down = Vector(1, 0, 0) * depth;
-    } else if (normal.direction() == Vector(-1, 0, 0).direction()) {
-      // Handle vertical extrusion precisely.
-      up = Vector(-1, 0, 0) * height;
-      down = Vector(-1, 0, 0) * depth;
-    } else {
-      // Generally we need a unit normal, unfortunately this requires an approximation.
-      double length = sqrt(CGAL::to_double(normal.squared_length()));
-      up = normal * (height / length);
-      down = normal * (depth / length);
-    }
+  Vector normal = SomeNormalOfSurfaceMesh(*mesh);
 
-    typedef typename boost::property_map<Surface_mesh, CGAL::vertex_point_t>::type VPMap;
-    Project<VPMap> top(get(CGAL::vertex_point, *extruded_mesh), up);
-    Project<VPMap> bottom(get(CGAL::vertex_point, *extruded_mesh), down);
-    CGAL::Polygon_mesh_processing::extrude_mesh(*mesh, *extruded_mesh, bottom, top);
-
-    return extruded_mesh;
+  if (normal == CGAL::NULL_VECTOR) {
+    std::cout << "Extrusion couldn't find any faces: " << *mesh << std::endl;
+    return nullptr;
   }
 
-  std::cout << "Extrusion couldn't find any faces: " << *mesh << std::endl;
+  Vector up;
+  Vector down;
+  // Could we precisely align with z-up, extrude, and then realign?
+  // Probably not, since if we could, we wouldn't need to.
+  if (normal.direction() == Vector(0, 0, 1).direction()) {
+    // Handle vertical extrusion precisely.
+    up = Vector(0, 0, 1) * height;
+    down = Vector(0, 0, 1) * depth;
+  } else if (normal.direction() == Vector(0, 0, -1).direction()) {
+    // Handle vertical extrusion precisely.
+    up = Vector(0, 0, -1) * height;
+    down = Vector(0, 0, -1) * depth;
+  } else if (normal.direction() == Vector(0, 1, 0).direction()) {
+    // Handle vertical extrusion precisely.
+    up = Vector(0, 1, 0) * height;
+    down = Vector(0, 1, 0) * depth;
+  } else if (normal.direction() == Vector(0, -1, 0).direction()) {
+    // Handle vertical extrusion precisely.
+    up = Vector(0, -1, 0) * height;
+    down = Vector(0, -1, 0) * depth;
+  } else if (normal.direction() == Vector(1, 0, 0).direction()) {
+    // Handle vertical extrusion precisely.
+    up = Vector(1, 0, 0) * height;
+    down = Vector(1, 0, 0) * depth;
+  } else if (normal.direction() == Vector(-1, 0, 0).direction()) {
+    // Handle vertical extrusion precisely.
+    up = Vector(-1, 0, 0) * height;
+    down = Vector(-1, 0, 0) * depth;
+  } else {
+    // Generally we need a unit normal, unfortunately this requires an approximation.
+    double length = sqrt(CGAL::to_double(normal.squared_length()));
+    up = normal * (height / length);
+    down = normal * (depth / length);
+  }
 
-  return nullptr;
+  typedef typename boost::property_map<Surface_mesh, CGAL::vertex_point_t>::type VPMap;
+  Project<VPMap> top(get(CGAL::vertex_point, *extruded_mesh), up);
+  Project<VPMap> bottom(get(CGAL::vertex_point, *extruded_mesh), down);
+  CGAL::Polygon_mesh_processing::extrude_mesh(*mesh, *extruded_mesh, bottom, top);
+
+  return extruded_mesh;
 }
 
 template<typename MAP>
@@ -924,11 +970,13 @@ const double kExtrusionMinimumSquared = kExtrusionMinimum * kExtrusionMinimum;
 void PlanarSurfaceMeshToVolumetricSurfaceMesh(const Plane& plane, const Surface_mesh& planar, Surface_mesh& volumetric) {
   // Difference with the excessive extrusion of the other.
   Surface_mesh extruded;
-  Vector normal = plane.orthogonal_vector();
+  Vector normal = SomeNormalOfSurfaceMesh(planar);
+
   // CHECK: There's probably a better way to do this.
   while (normal.squared_length() < kExtrusionMinimumSquared) {
     normal *= kExtrusionMinimum;
   }
+
   CGAL::Polygon_mesh_processing::extrude_mesh(planar, volumetric, normal);
 }
 
@@ -1059,9 +1107,7 @@ Surface_mesh* UnionOfSurfaceMeshes(Surface_mesh* a, Surface_mesh* b) {
       return GeneralPolygonSetToSurfaceMesh(plane, set);
     }
   } else if (IsPlanarSurfaceMesh(plane, *b)) {
-    Surface_mesh volumetric_b;
-    PlanarSurfaceMeshToVolumetricSurfaceMesh(plane, *b, volumetric_b);
-    return UnionOfSurfaceMeshes(a, &volumetric_b);
+    return a;
   }
   double x = 0, y = 0, z = 0;
   Surface_mesh* c = new Surface_mesh();
@@ -1928,6 +1974,16 @@ void ArrangePathsExact(std::string x, std::string y, std::string z, std::string 
   ArrangePaths(Plane(to_FT(x), to_FT(y), to_FT(z), to_FT(w)), triangulate, fill, emit_polygon, emit_point);
 }
 
+Surface_mesh* MinkowskiSumOfSurfaceMeshes(Surface_mesh* input_mesh, Surface_mesh* offset_mesh) {
+  typedef CGAL::Nef_polyhedron_3<Kernel> Nef_polyhedron;
+
+  Nef_polyhedron input_nef(*input_mesh);
+  Nef_polyhedron offset_nef(*offset_mesh);
+  Nef_polyhedron result_nef = minkowski_sum_3(input_nef, offset_nef);
+  Surface_mesh* result_mesh = new Surface_mesh;
+  CGAL::convert_nef_polyhedron_to_polygon_mesh(result_nef, *result_mesh);
+  return result_mesh;
+}
 
 bool Surface_mesh__is_closed(Surface_mesh* mesh) {
   return CGAL::is_closed(*mesh);
@@ -2022,12 +2078,6 @@ Transformation* Transformation__scale(double x, double y, double z) {
     0, y, 0, 0,
     0, 0, z, 0,
     1);
-}
-
-void compute_angle(double a, RT& sin_alpha, RT& cos_alpha, RT& w) {
-  // Convert angle to radians.
-  double radians = a * M_PI / 180.0;
-  CGAL::rational_rotation_approximation(radians, sin_alpha, cos_alpha, w, RT(1), RT(1000));
 }
 
 Transformation* Transformation__rotate_x(double a) {
@@ -2211,6 +2261,9 @@ EMSCRIPTEN_BINDINGS(module) {
   emscripten::function("IntersectionOfSurfaceMeshes", &IntersectionOfSurfaceMeshes, emscripten::allow_raw_pointers());
   emscripten::function("UnionOfSurfaceMeshes", &UnionOfSurfaceMeshes, emscripten::allow_raw_pointers());
 
+  emscripten::function("TwistSurfaceMesh", &TwistSurfaceMesh, emscripten::allow_raw_pointers());
+  emscripten::function("PushSurfaceMesh", &PushSurfaceMesh, emscripten::allow_raw_pointers());
+
   emscripten::function("BooleansOfPolygonsWithHolesApproximate", &BooleansOfPolygonsWithHolesApproximate);
   emscripten::function("BooleansOfPolygonsWithHolesExact", &BooleansOfPolygonsWithHolesExact);
 
@@ -2236,6 +2289,7 @@ EMSCRIPTEN_BINDINGS(module) {
   emscripten::function("ComputeAlphaShape2AsPolygonSegments", &ComputeAlphaShape2AsPolygonSegments, emscripten::allow_raw_pointers());
   emscripten::function("OffsetOfPolygonWithHoles", &OffsetOfPolygonWithHoles, emscripten::allow_raw_pointers());
   emscripten::function("InsetOfPolygonWithHoles", &InsetOfPolygonWithHoles, emscripten::allow_raw_pointers());
+  emscripten::function("MinkowskiSumOfSurfaceMeshes", &MinkowskiSumOfSurfaceMeshes, emscripten::allow_raw_pointers());
   emscripten::function("Surface_mesh__is_closed", &Surface_mesh__is_closed, emscripten::allow_raw_pointers());
   emscripten::function("Surface_mesh__is_valid_halfedge_graph", &Surface_mesh__is_valid_halfedge_graph, emscripten::allow_raw_pointers());
   emscripten::function("Surface_mesh__is_valid_face_graph", &Surface_mesh__is_valid_face_graph, emscripten::allow_raw_pointers());

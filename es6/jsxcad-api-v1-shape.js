@@ -1,5 +1,5 @@
 import { close, concatenate, open } from './jsxcad-geometry-path.js';
-import { taggedAssembly, eachPoint, flip, toDisplayGeometry, toDisjointGeometry as toDisjointGeometry$1, toTransformedGeometry, toPoints, transform, rewriteTags, taggedPaths, taggedGraph, taggedPoints, union, taggedLayers, intersection, allTags, difference, getLeafs, empty, inset as inset$1, rewrite, isVoid, offset as offset$1, assemble as assemble$1, taggedItem, taggedDisjointAssembly, getPeg, taggedPlan, smooth as smooth$1, measureBoundingBox, taggedSketch, test as test$1, outline, read, write, realize } from './jsxcad-geometry-tagged.js';
+import { taggedAssembly, eachPoint, flip, toDisplayGeometry, toDisjointGeometry as toDisjointGeometry$1, toTransformedGeometry, toPoints, transform, rewriteTags, taggedPaths, taggedGraph, taggedPoints, union, taggedLayers, intersection, allTags, difference, getLeafs, empty, inset as inset$1, rewrite, minkowskiSum as minkowskiSum$1, isVoid, offset as offset$1, assemble as assemble$1, taggedItem, taggedDisjointAssembly, push as push$1, getPeg, taggedPlan, remesh as remesh$1, smooth as smooth$1, measureBoundingBox, taggedSketch, test as test$1, twist as twist$1, outline, read, write, realize } from './jsxcad-geometry-tagged.js';
 import { fromPolygons } from './jsxcad-geometry-graph.js';
 import { identityMatrix, fromTranslation, fromRotation, fromScaling } from './jsxcad-math-mat4.js';
 import { add as add$1, negate, normalize, subtract, dot, cross, scale as scale$1, distance } from './jsxcad-math-vec3.js';
@@ -101,6 +101,14 @@ class Shape {
 const isSingleOpenPath = ({ paths }) =>
   paths !== undefined && paths.length === 1 && paths[0][0] === null;
 
+const registerShapeMethod = (name, method) => {
+  if (Shape.prototype.hasOwnProperty(name)) {
+    throw Error(`Method ${name} is already in use.`);
+  }
+  Shape.prototype[name] = method;
+  return method;
+};
+
 Shape.fromClosedPath = (path, context) =>
   fromGeometry(taggedPaths({}, [close(path)]), context);
 Shape.fromGeometry = (geometry, context) => new Shape(geometry, context);
@@ -118,6 +126,7 @@ Shape.fromPoints = (points, context) =>
   fromGeometry(taggedPoints({}, points), context);
 Shape.fromPolygons = (polygons, context) =>
   fromGeometry(taggedGraph({}, fromPolygons(polygons)), context);
+Shape.registerMethod = registerShapeMethod;
 
 const fromGeometry = Shape.fromGeometry;
 const toGeometry = (shape) => shape.toGeometry();
@@ -520,6 +529,17 @@ const materialMethod = function (name) {
 };
 Shape.prototype.material = materialMethod;
 
+const minkowskiSum = (shape, offset) =>
+  Shape.fromGeometry(
+    minkowskiSum$1(shape.toGeometry(), offset.toGeometry())
+  );
+
+const minkowskiSumMethod = function (offset) {
+  return minkowskiSum(this, offset);
+};
+
+Shape.registerMethod('minkowskiSum', minkowskiSumMethod);
+
 const move = (shape, x = 0, y = 0, z = 0) =>
   shape.transform(fromTranslation([x, y, z]));
 
@@ -675,6 +695,26 @@ const packMethod = function (...args) {
   return pack(this, ...args);
 };
 Shape.prototype.pack = packMethod;
+
+const push = (
+  shape,
+  force = 0.1,
+  minimumDistance = 1,
+  maximumDistance = 10
+) =>
+  Shape.fromGeometry(
+    push$1(shape.toGeometry(), {
+      force,
+      minimumDistance,
+      maximumDistance,
+    })
+  );
+
+const pushMethod = function (force = 0.1, minimumDistance, maximumDistance) {
+  return push(this, force, minimumDistance, maximumDistance);
+};
+
+Shape.prototype.push = pushMethod;
 
 const normalizeCoords = ([
   x = 0,
@@ -861,6 +901,15 @@ Shape.prototype.sides = sidesMethod;
 Shape.prototype.to = toMethod;
 Shape.prototype.top = topMethod;
 
+const remesh = (shape, options = {}) =>
+  Shape.fromGeometry(remesh$1(shape.toGeometry(), options));
+
+const remeshMethod = function (options) {
+  return remesh(this, options);
+};
+
+Shape.prototype.remesh = remeshMethod;
+
 /**
  *
  * # Rotate
@@ -1017,6 +1066,15 @@ const toolMethod = function (name) {
   return tool(this, name);
 };
 Shape.prototype.tool = toolMethod;
+
+const twist = (shape, degreesPerZ) =>
+  Shape.fromGeometry(twist$1(shape.toGeometry(), degreesPerZ));
+
+const twistMethod = function (degreesPerZ) {
+  return twist(this, degreesPerZ);
+};
+
+Shape.prototype.twist = twistMethod;
 
 const voidFn = (shape) =>
   Shape.fromGeometry(

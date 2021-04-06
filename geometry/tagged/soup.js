@@ -7,8 +7,14 @@ import { taggedPaths } from './taggedPaths.js';
 import { taggedTriangles } from './taggedTriangles.js';
 import { toTransformedGeometry } from './toTransformedGeometry.js';
 
-export const soup = (geometry, { doOutline = true } = {}) => {
+export const soup = (
+  geometry,
+  { doOutline = true, doWireframe = false } = {}
+) => {
   const outline = doOutline ? outlineOp : () => [];
+  const wireframe = doWireframe
+    ? (triangles) => [taggedPaths({ tags: ['color/red'] }, triangles)]
+    : () => [];
   const op = (geometry, descend) => {
     const { tags } = geometry;
     switch (geometry.type) {
@@ -20,6 +26,7 @@ export const soup = (geometry, { doOutline = true } = {}) => {
           return taggedGroup(
             {},
             taggedTriangles({ tags }, toTriangles(graph)),
+            ...wireframe(toTriangles(graph)),
             ...outline(geometry)
           );
         } else if (graph.isEmpty) {
@@ -29,6 +36,7 @@ export const soup = (geometry, { doOutline = true } = {}) => {
           return taggedGroup(
             {},
             taggedTriangles({ tags }, toTriangles(graph)),
+            ...wireframe(toTriangles(graph)),
             ...outline(geometry)
           );
         }

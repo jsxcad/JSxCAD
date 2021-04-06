@@ -1,5 +1,7 @@
 import { realizeGraph } from './realizeGraph.js';
 
+Error.stackTraceLimit = Infinity;
+
 export const toTriangles = (graph) => {
   const triangles = [];
   // The realized graph should already be triangulated.
