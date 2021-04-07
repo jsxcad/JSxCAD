@@ -112,6 +112,14 @@ export class Shape {
 const isSingleOpenPath = ({ paths }) =>
   paths !== undefined && paths.length === 1 && paths[0][0] === null;
 
+export const registerShapeMethod = (name, method) => {
+  if (Shape.prototype.hasOwnProperty(name)) {
+    throw Error(`Method ${name} is already in use.`);
+  }
+  Shape.prototype[name] = method;
+  return method;
+};
+
 Shape.fromClosedPath = (path, context) =>
   fromGeometry(taggedPaths({}, [closePath(path)]), context);
 Shape.fromGeometry = (geometry, context) => new Shape(geometry, context);
@@ -129,6 +137,7 @@ Shape.fromPoints = (points, context) =>
   fromGeometry(taggedPoints({}, points), context);
 Shape.fromPolygons = (polygons, context) =>
   fromGeometry(taggedGraph({}, fromPolygons(polygons)), context);
+Shape.registerMethod = registerShapeMethod;
 
 export const fromGeometry = Shape.fromGeometry;
 export const toGeometry = (shape) => shape.toGeometry();

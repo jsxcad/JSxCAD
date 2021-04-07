@@ -1,4 +1,4 @@
-import { fromSurfaceMeshToGraph, fromPointsToAlphaShapeAsSurfaceMesh, fromSurfaceMeshToLazyGraph, fromPointsToConvexHullAsSurfaceMesh, fromGraphToSurfaceMesh, differenceOfSurfaceMeshes, extrudeSurfaceMesh, extrudeToPlaneOfSurfaceMesh, fromFunctionToSurfaceMesh, arrangePathsIntoTriangles, fromPolygonsToSurfaceMesh, fromPointsToSurfaceMesh, arrangePaths, insetOfPolygonWithHoles, intersectionOfSurfaceMeshes, fromSurfaceMeshEmitBoundingBox, offsetOfPolygonWithHoles, projectToPlaneOfSurfaceMesh, reverseFaceOrientationsOfSurfaceMesh, sectionOfSurfaceMesh, subdivideSurfaceMesh, remeshSurfaceMesh, doesSelfIntersectOfSurfaceMesh, transformSurfaceMesh, unionOfSurfaceMeshes } from './jsxcad-algorithm-cgal.js';
+import { fromSurfaceMeshToGraph, fromPointsToAlphaShapeAsSurfaceMesh, fromSurfaceMeshToLazyGraph, fromPointsToConvexHullAsSurfaceMesh, fromGraphToSurfaceMesh, differenceOfSurfaceMeshes, extrudeSurfaceMesh, extrudeToPlaneOfSurfaceMesh, fromFunctionToSurfaceMesh, arrangePathsIntoTriangles, fromPolygonsToSurfaceMesh, fromPointsToSurfaceMesh, arrangePaths, insetOfPolygonWithHoles, intersectionOfSurfaceMeshes, fromSurfaceMeshEmitBoundingBox, minkowskiSumOfSurfaceMeshes, offsetOfPolygonWithHoles, projectToPlaneOfSurfaceMesh, pushSurfaceMesh, remeshSurfaceMesh, reverseFaceOrientationsOfSurfaceMesh, sectionOfSurfaceMesh, subdivideSurfaceMesh, doesSelfIntersectOfSurfaceMesh, transformSurfaceMesh, twistSurfaceMesh, unionOfSurfaceMeshes } from './jsxcad-algorithm-cgal.js';
 import { scale, min, max } from './jsxcad-math-vec3.js';
 import { isClockwise, flip, deduplicate } from './jsxcad-geometry-path.js';
 
@@ -345,6 +345,15 @@ const measureBoundingBox = (graph) => {
   return graph.boundingBox;
 };
 
+const minkowskiSum = (a, b) => {
+  if (a.isEmpty || b.isEmpty) {
+    return a;
+  }
+  return fromSurfaceMeshLazy(
+    minkowskiSumOfSurfaceMeshes(toSurfaceMesh(a), toSurfaceMesh(b))
+  );
+};
+
 const offset = (graph, initial, step, limit) => {
   const offsetGraphs = [];
   for (const polygonWithHoles of outline(graph)) {
@@ -383,6 +392,19 @@ const projectToPlane = (graph, plane, direction) => {
     return graph;
   }
 };
+
+const push = (graph, force, minimumDistance, maximumDistance) =>
+  fromSurfaceMeshLazy(
+    pushSurfaceMesh(
+      toSurfaceMesh(graph),
+      force,
+      minimumDistance,
+      maximumDistance
+    )
+  );
+
+const remesh = (graph, options = {}) =>
+  fromSurfaceMeshLazy(remeshSurfaceMesh(toSurfaceMesh(graph), options));
 
 const rerealizeGraph = (graph) =>
   fromSurfaceMeshLazy(toSurfaceMesh(graph), /* forceNewGraph= */ true);
@@ -441,6 +463,8 @@ const toPaths = (graph) => {
   return paths;
 };
 
+Error.stackTraceLimit = Infinity;
+
 const toTriangles = (graph) => {
   const triangles = [];
   // The realized graph should already be triangulated.
@@ -460,6 +484,9 @@ const toTriangles = (graph) => {
 const transform = (matrix, graph) =>
   fromSurfaceMeshLazy(transformSurfaceMesh(toSurfaceMesh(graph), matrix));
 
+const twist = (graph, degreesPerZ) =>
+  fromSurfaceMeshLazy(twistSurfaceMesh(toSurfaceMesh(graph), degreesPerZ));
+
 const union = (a, b) => {
   if (a.isEmpty) {
     return b;
@@ -472,4 +499,4 @@ const union = (a, b) => {
   );
 };
 
-export { alphaShape, convexHull, difference, eachPoint, extrude, extrudeToPlane, fill, fromEmpty, fromFunction, fromPaths, fromPoints, fromPolygons, inset, intersection, measureBoundingBox, offset, outline, projectToPlane, realizeGraph, rerealizeGraph, reverseFaceOrientations, section, sections, smooth, test, toPaths, toPolygonsWithHoles, toTriangles, transform, union };
+export { alphaShape, convexHull, difference, eachPoint, extrude, extrudeToPlane, fill, fromEmpty, fromFunction, fromPaths, fromPoints, fromPolygons, inset, intersection, measureBoundingBox, minkowskiSum, offset, outline, projectToPlane, push, realizeGraph, remesh, rerealizeGraph, reverseFaceOrientations, section, sections, smooth, test, toPaths, toPolygonsWithHoles, toTriangles, transform, twist, union };
