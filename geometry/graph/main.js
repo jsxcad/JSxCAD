@@ -16,6 +16,7 @@ export { measureBoundingBox } from './measureBoundingBox.js';
 export { minkowskiSum } from './minkowskiSum.js';
 export { offset } from './offset.js';
 export { outline } from './outline.js';
+export { prepareForSerialization } from './prepareForSerialization.js';
 export { projectToPlane } from './projectToPlane.js';
 export { push } from './push.js';
 export { realizeGraph } from './realizeGraph.js';

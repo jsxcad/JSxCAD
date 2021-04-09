@@ -9,11 +9,14 @@ import { toTransformedGeometry } from './toTransformedGeometry.js';
 
 export const soup = (
   geometry,
-  { doOutline = true, doWireframe = false } = {}
+  { doTriangles = true, doOutline = true, doWireframe = false } = {}
 ) => {
   const outline = doOutline ? outlineOp : () => [];
   const wireframe = doWireframe
     ? (triangles) => [taggedPaths({ tags: ['color/red'] }, triangles)]
+    : () => [];
+  const triangles = doTriangles
+    ? (tags, triangles) => [taggedTriangles({ tags }, triangles)]
     : () => [];
   const op = (geometry, descend) => {
     const { tags } = geometry;
@@ -25,7 +28,7 @@ export const soup = (
         } else if (graph.isClosed) {
           return taggedGroup(
             {},
-            taggedTriangles({ tags }, toTriangles(graph)),
+            ...triangles(tags, toTriangles(graph)),
             ...wireframe(toTriangles(graph)),
             ...outline(geometry)
           );
@@ -35,7 +38,7 @@ export const soup = (
           // FIX: Simplify this arrangement.
           return taggedGroup(
             {},
-            taggedTriangles({ tags }, toTriangles(graph)),
+            ...triangles(tags, toTriangles(graph)),
             ...wireframe(toTriangles(graph)),
             ...outline(geometry)
           );

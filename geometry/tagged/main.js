@@ -65,6 +65,7 @@ export { minkowskiSum } from './minkowskiSum.js';
 export { offset } from './offset.js';
 export { outline } from './outline.js';
 export { projectToPlane } from './projectToPlane.js';
+export { prepareForSerialization } from './prepareForSerialization.js';
 export { push } from './push.js';
 export { read } from './read.js';
 export { realize } from './realize.js';

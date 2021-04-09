@@ -770,34 +770,6 @@ Surface_mesh::Vertex_index ensureVertex(Surface_mesh& mesh, std::map<Point, Vert
   return it->second;
 }
 
-#if 0
-void PlanarSurfaceMeshToPolygonSet(const Plane& plane, const Surface_mesh& mesh, General_polygon_set_2& set) {
-  std::set<Point_2> points;
-  for (const auto& face : mesh.faces()) {
-    Polygon_2 polygon;
-    const auto start = mesh.halfedge(face);
-    auto edge = start;
-    bool seen = false;
-    do {
-      Point_2 p = plane.to_2d(mesh.point(mesh.source(edge)));
-      if (!points.insert(p).second) {
-        seen = true;
-      }
-      polygon.push_back(p);
-      edge = mesh.next(edge);
-    } while (edge != start);
-    // These polygons do not have holes, but this gives us a relaxed disjunction requirement
-    // which permits intersection at the vertices.
-    Polygon_with_holes_2 polygon_with_holes(polygon);
-    if (seen) {
-      set.join(polygon_with_holes);
-    } else {
-      set.insert(polygon_with_holes);
-    }
-  }
-}
-#endif
-
 void ArrangementToPolygonsWithHoles(Arrangement_2& arrangement, std::vector<Polygon_with_holes_2>& out) {
   std::vector<Arrangement_2::Face_const_handle> todo;
   todo.push_back(arrangement.unbounded_face());
@@ -1174,6 +1146,52 @@ void SectionOfSurfaceMesh(Surface_mesh* mesh, std::size_t plane_count, emscripte
   }
 }
 
+Plane ensureFacetPlane(Surface_mesh& mesh, std::map<Face_index, Plane>& facet_to_plane, Face_index facet) {
+  auto it = facet_to_plane.find(facet);
+  if (it == facet_to_plane.end()) {
+    Plane facet_plane = PlaneOfSurfaceMeshFacet(mesh, facet);
+    facet_to_plane[facet] = facet_plane;
+    return facet_plane;
+  } else {
+    return it->second;
+  }
+}
+
+void OutlineSurfaceMesh(Surface_mesh* input, emscripten::val emit_approximate_segment) {
+  Surface_mesh& mesh = *input;
+
+  std::map<Face_index, Plane> facet_to_plane;
+
+  // FIX: Make this more efficient.
+  for (const auto& facet : mesh.faces()) {
+    const auto& start = mesh.halfedge(facet);
+    if (mesh.is_removed(start)) {
+      continue;
+    }
+    const Plane facet_plane = ensureFacetPlane(mesh, facet_to_plane, facet);
+    Halfedge_index edge = start;
+    do {
+      bool corner = false;
+      const auto& opposite_facet = mesh.face(mesh.opposite(edge));
+      if (opposite_facet == mesh.null_face()) {
+        corner = true;
+      } else {
+        const Plane opposite_facet_plane = ensureFacetPlane(mesh, facet_to_plane, opposite_facet);
+        if (facet_plane != opposite_facet_plane) {
+          corner = true;
+        }
+      }
+      if (corner) {
+        Point& s = mesh.point(mesh.source(edge));
+        Point& t = mesh.point(mesh.target(edge));
+        emit_approximate_segment(CGAL::to_double(s.x()), CGAL::to_double(s.y()), CGAL::to_double(s.z()), CGAL::to_double(t.x()), CGAL::to_double(t.y()), CGAL::to_double(t.z()));
+      }
+      const auto& next = mesh.next(edge);
+      edge = next;
+    } while (edge != start);
+  }
+}
+
 double FT__to_double(const FT& ft) {
   return CGAL::to_double(ft);
 }
@@ -1217,9 +1235,6 @@ class Surface_mesh_explorer {
       _emit_point((std::int32_t)vertex, CGAL::to_double(p.x().exact()), CGAL::to_double(p.y().exact()), CGAL::to_double(p.z().exact()),
                   xs, ys, zs);
     }
-
-    // Consolidate facets into faces.
-    const double kColinearityThreshold = 0.999999;
 
     facet_to_face[mesh.null_face()] = -1;
 
@@ -1315,6 +1330,19 @@ void Surface_mesh__explore(Surface_mesh* mesh, emscripten::val emit_point, emscr
   CGAL::Polygon_mesh_processing::triangulate_faces(mesh->faces(), *mesh);
   Surface_mesh_explorer explorer(emit_point, emit_edge, emit_face);
   explorer.Explore(*mesh);
+}
+
+std::string SerializeSurfaceMesh(const Surface_mesh* mesh) {
+  std::ostringstream stream;
+  stream << *mesh;
+  return stream.str();
+}
+
+Surface_mesh* DeserializeSurfaceMesh(std::string serialization) {
+  Surface_mesh* mesh = new Surface_mesh();
+  std::istringstream input(serialization);
+  input >> *mesh;
+  return mesh;
 }
 
 bool Surface_mesh__triangulate_faces(Surface_mesh *mesh) {
@@ -2256,6 +2284,9 @@ EMSCRIPTEN_BINDINGS(module) {
     .function("y", &Point::y)
     .function("z", &Point::z);
 
+  emscripten::function("SerializeSurfaceMesh", &SerializeSurfaceMesh, emscripten::allow_raw_pointers());
+  emscripten::function("DeserializeSurfaceMesh", &DeserializeSurfaceMesh, emscripten::allow_raw_pointers());
+
   emscripten::function("FromPolygonSoupToSurfaceMesh", &FromPolygonSoupToSurfaceMesh, emscripten::allow_raw_pointers());
   emscripten::function("DifferenceOfSurfaceMeshes", &DifferenceOfSurfaceMeshes, emscripten::allow_raw_pointers());
   emscripten::function("IntersectionOfSurfaceMeshes", &IntersectionOfSurfaceMeshes, emscripten::allow_raw_pointers());
@@ -2263,6 +2294,7 @@ EMSCRIPTEN_BINDINGS(module) {
 
   emscripten::function("TwistSurfaceMesh", &TwistSurfaceMesh, emscripten::allow_raw_pointers());
   emscripten::function("PushSurfaceMesh", &PushSurfaceMesh, emscripten::allow_raw_pointers());
+  emscripten::function("OutlineSurfaceMesh", &OutlineSurfaceMesh, emscripten::allow_raw_pointers());
 
   emscripten::function("BooleansOfPolygonsWithHolesApproximate", &BooleansOfPolygonsWithHolesApproximate);
   emscripten::function("BooleansOfPolygonsWithHolesExact", &BooleansOfPolygonsWithHolesExact);
@@ -2272,6 +2304,7 @@ EMSCRIPTEN_BINDINGS(module) {
   emscripten::function("DoesSelfIntersectOfSurfaceMesh", &DoesSelfIntersectOfSurfaceMesh, emscripten::allow_raw_pointers());
 
   emscripten::function("FT__to_double", &FT__to_double, emscripten::allow_raw_pointers());
+
 
   emscripten::function("Surface_mesh__explore", &Surface_mesh__explore, emscripten::allow_raw_pointers());
   emscripten::function("Surface_mesh__triangulate_faces", &Surface_mesh__triangulate_faces, emscripten::allow_raw_pointers());

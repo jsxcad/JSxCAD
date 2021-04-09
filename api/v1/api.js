@@ -36,7 +36,7 @@ export { control } from './control.js';
 
 export { source } from './source.js';
 
-export { emit, read, write } from '@jsxcad/sys';
+export { elapsed, emit, read, write } from '@jsxcad/sys';
 
 export {
   beginRecordingNotes,
