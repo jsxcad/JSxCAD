@@ -45,7 +45,6 @@ const agent = async ({ ask, question }) => {
     sys.clearEmitted();
     let nthNote = 0;
     onEmitHandler = sys.addOnEmitHandler(async (note, index) => {
-      console.log(`QQ/onEmitHandler: index ${index} hash ${note.hash}`);
       nthNote += 1;
       if (note.download) {
         for (const entry of note.download.entries) {

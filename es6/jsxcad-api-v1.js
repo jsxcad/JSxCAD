@@ -415,9 +415,9 @@ const replayRecordedNotes = async (path) => {
  * the api uses.
  */
 
-const x = Peg([0, 0, 0], [0, 0, 1], [0, -1, 0]);
-const y = Peg([0, 0, 0], [0, 0, 1], [1, 0, 0]);
-const z = Peg([0, 0, 0], [0, 1, 0], [-1, 0, 0]);
+const x = Peg('x', [0, 0, 0], [0, 0, 1], [0, -1, 0]);
+const y = Peg('y', [0, 0, 0], [0, 0, 1], [1, 0, 0]);
+const z = Peg('z', [0, 0, 0], [0, 1, 0], [-1, 0, 0]);
 
 var api = /*#__PURE__*/Object.freeze({
   __proto__: null,

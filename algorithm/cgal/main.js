@@ -12,6 +12,7 @@ export {
 } from './transform.js';
 
 export { arrangePaths, arrangePathsIntoTriangles } from './arrangePaths.js';
+export { arrangePolygonsWithHoles } from './arrangePolygonsWithHoles.js';
 export {
   BOOLEAN_ADD,
   BOOLEAN_CUT,
@@ -35,6 +36,7 @@ export { fromSurfaceMeshEmitBoundingBox } from './fromSurfaceMeshEmitBoundingBox
 export { fromSurfaceMeshToGraph } from './fromSurfaceMeshToGraph.js';
 export { fromSurfaceMeshToLazyGraph } from './fromSurfaceMeshToLazyGraph.js';
 export { fromSurfaceMeshToPolygons } from './fromSurfaceMeshToPolygons.js';
+export { fromSurfaceMeshToPolygonsWithHoles } from './fromSurfaceMeshToPolygonsWithHoles.js';
 export { fromSurfaceMeshToTriangles } from './fromSurfaceMeshToTriangles.js';
 export { initCgal } from './getCgal.js';
 export { insetOfPolygonWithHoles } from './insetOfPolygonWithHoles.js';

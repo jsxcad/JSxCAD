@@ -1333,7 +1333,10 @@ const outlineImpl = (geometry, includeFaces = true, includeHoles = true) => {
   const outlines = [];
   for (const { tags = [], graph } of getNonVoidGraphs(disjointGeometry)) {
     outlines.push(
-      taggedPaths({ tags: [...tags, 'path/Wire'] }, outline$1(graph).map(path => [null, ...path]))
+      taggedPaths(
+        { tags: [...tags, 'path/Wire'] },
+        outline$1(graph).map((path) => [null, ...path])
+      )
     );
   }
   // Turn paths into wires.
@@ -1389,7 +1392,10 @@ const prepareForSerialization = (geometry) => {
     const { tags } = geometry;
     switch (geometry.type) {
       case 'graph':
-        return taggedGraph({ tags }, prepareForSerialization$1(geometry.graph));
+        return taggedGraph(
+          { tags },
+          prepareForSerialization$1(geometry.graph)
+        );
       case 'displayGeometry':
       case 'triangles':
       case 'points':
@@ -1540,7 +1546,7 @@ const taggedTriangles = ({ tags }, triangles) => {
 
 const soup = (
   geometry,
-  { doTriangles = true, doOutline = true, doWireframe = false } = {}
+  { doTriangles = true, doOutline = true, doWireframe = true } = {}
 ) => {
   const outline$1 = doOutline ? outline : () => [];
   const wireframe = doWireframe
@@ -1697,8 +1703,15 @@ const test = (geometry) => {
   return geometry;
 };
 
-const toDisplayGeometry = (geometry, { doTriangles = true, doOutline = true, doWireframe = false } = {}) =>
-  soup(toVisiblyDisjointGeometry(geometry), { doTriangles, doOutline, doWireframe });
+const toDisplayGeometry = (
+  geometry,
+  { doTriangles = true, doOutline = true, doWireframe = true } = {}
+) =>
+  soup(toVisiblyDisjointGeometry(geometry), {
+    doTriangles,
+    doOutline,
+    doWireframe,
+  });
 
 // The resolution is 1 / multiplier.
 const multiplier = 1e5;
@@ -1753,15 +1766,25 @@ const toPoints = (geometry) => {
 };
 
 const toPolygonsWithHoles = (geometry) => {
-  const polygonsWithHoles = [];
+  const output = [];
 
   const op = (geometry, descend) => {
     switch (geometry.type) {
       case 'graph': {
-        polygonsWithHoles.push({
-          tags: geometry.tags,
-          polygonsWithHoles: toPolygonsWithHoles$1(geometry.graph),
-        });
+        for (const {
+          plane,
+          exactPlane,
+          polygonsWithHoles,
+        } of toPolygonsWithHoles$1(geometry.graph)) {
+          // FIX: Are we going to make polygonsWithHoles proper geometry?
+          output.push({
+            tags: geometry.tags,
+            type: 'polygonsWithHoles',
+            plane,
+            exactPlane,
+            polygonsWithHoles,
+          });
+        }
         break;
       }
       // FIX: Support 'triangles'?
@@ -1782,9 +1805,9 @@ const toPolygonsWithHoles = (geometry) => {
     }
   };
 
-  visit(toTransformedGeometry(geometry), op);
+  visit(toDisjointGeometry(geometry), op);
 
-  return polygonsWithHoles;
+  return output;
 };
 
 const twist = (geometry, degreesPerZ) => {

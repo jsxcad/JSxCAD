@@ -1,17 +1,27 @@
+import { toDisjointGeometry } from './toDisjointGeometry.js';
 import { toPolygonsWithHoles as toPolygonsWithHolesFromGraph } from '@jsxcad/geometry-graph';
-import { toTransformedGeometry } from './toTransformedGeometry.js';
 import { visit } from './visit.js';
 
 export const toPolygonsWithHoles = (geometry) => {
-  const polygonsWithHoles = [];
+  const output = [];
 
   const op = (geometry, descend) => {
     switch (geometry.type) {
       case 'graph': {
-        polygonsWithHoles.push({
-          tags: geometry.tags,
-          polygonsWithHoles: toPolygonsWithHolesFromGraph(geometry.graph),
-        });
+        for (const {
+          plane,
+          exactPlane,
+          polygonsWithHoles,
+        } of toPolygonsWithHolesFromGraph(geometry.graph)) {
+          // FIX: Are we going to make polygonsWithHoles proper geometry?
+          output.push({
+            tags: geometry.tags,
+            type: 'polygonsWithHoles',
+            plane,
+            exactPlane,
+            polygonsWithHoles,
+          });
+        }
         break;
       }
       // FIX: Support 'triangles'?
@@ -32,7 +42,7 @@ export const toPolygonsWithHoles = (geometry) => {
     }
   };
 
-  visit(toTransformedGeometry(geometry), op);
+  visit(toDisjointGeometry(geometry), op);
 
-  return polygonsWithHoles;
+  return output;
 };

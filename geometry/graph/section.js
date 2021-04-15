@@ -11,7 +11,6 @@ export const section = (graph, plane) => {
 };
 
 export const sections = (graph, planes) => {
-  console.log(`QQ/section/planes: ${JSON.stringify(planes)}`);
   const graphs = [];
   for (const planarMesh of sectionOfSurfaceMesh(toSurfaceMesh(graph), planes)) {
     graphs.push(fromSurfaceMeshLazy(planarMesh));

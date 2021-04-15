@@ -1,4 +1,5 @@
 export { alphaShape } from './alphaShape.js';
+export { arrangePolygonsWithHoles } from './arrangePolygonsWithHoles.js';
 export { convexHull } from './convexHull.js';
 export { difference } from './difference.js';
 export { eachPoint } from './eachPoint.js';
@@ -10,6 +11,8 @@ export { fromEmpty } from './fromEmpty.js';
 export { fromPaths } from './fromPaths.js';
 export { fromPoints } from './fromPoints.js';
 export { fromPolygons } from './fromPolygons.js';
+export { fromPolygonsWithHolesToTriangles } from './fromPolygonsWithHolesToTriangles.js';
+export { fromTriangles } from './fromTriangles.js';
 export { inset } from './inset.js';
 export { intersection } from './intersection.js';
 export { measureBoundingBox } from './measureBoundingBox.js';

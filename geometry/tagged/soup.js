@@ -9,7 +9,7 @@ import { toTransformedGeometry } from './toTransformedGeometry.js';
 
 export const soup = (
   geometry,
-  { doTriangles = true, doOutline = true, doWireframe = false } = {}
+  { doTriangles = true, doOutline = true, doWireframe = true } = {}
 ) => {
   const outline = doOutline ? outlineOp : () => [];
   const wireframe = doWireframe

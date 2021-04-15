@@ -35,13 +35,21 @@ export const getPegCoords = (shape) => {
 // https://gist.github.com/kevinmoran/b45980723e53edeb8a5a43c49f134724
 
 export const orient = (origin, forward, right, shapeToPeg) => {
-  const plane = fromPoints(right, forward, origin);
+  console.log(`QQ/orient`);
+  console.log(`QQ/right: ${JSON.stringify(right)}`);
+  console.log(`QQ/forward: ${JSON.stringify(forward)}`);
+  console.log(`QQ/origin: ${JSON.stringify(origin)}`);
+  // const plane = fromPoints(right, forward, origin);
+  const plane = fromPoints(origin, forward, right);
+  console.log(`QQ/orient/plane: ${JSON.stringify(plane)}`);
   const d = Math.abs(dot(plane, [0, 0, 1, 0]));
   if (d >= 0.99999) {
     return shapeToPeg.move(...origin);
   }
   const rightDirection = subtract(right, origin);
+  console.log(`QQ/orient/rightDirection: ${JSON.stringify(rightDirection)}`);
   const [, from] = toXYPlaneTransforms(plane, rightDirection);
+  console.log(`QQ/orient/from: ${JSON.stringify(from)}`);
   return shapeToPeg.transform(from).move(...origin);
 };
 

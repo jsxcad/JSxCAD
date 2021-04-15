@@ -808,8 +808,8 @@ var Module = (function () {
     }
     var wasmMemory;
     var wasmTable = new WebAssembly.Table({
-      initial: 6253,
-      maximum: 6253,
+      initial: 6200,
+      maximum: 6200,
       element: 'anyfunc',
     });
     var ABORT = false;
@@ -1129,9 +1129,9 @@ var Module = (function () {
       Module['HEAPF32'] = HEAPF32 = new Float32Array(buf);
       Module['HEAPF64'] = HEAPF64 = new Float64Array(buf);
     }
-    var STACK_BASE = 5644096,
-      STACK_MAX = 401216,
-      DYNAMIC_BASE = 5644096;
+    var STACK_BASE = 5642864,
+      STACK_MAX = 399984,
+      DYNAMIC_BASE = 5642864;
     assert(STACK_BASE % 16 === 0, 'stack must start aligned');
     assert(DYNAMIC_BASE % 16 === 0, 'heap must start aligned');
     var TOTAL_STACK = 5242880;
@@ -7278,7 +7278,6 @@ var Module = (function () {
       invoke_jiiii: invoke_jiiii,
       invoke_v: invoke_v,
       invoke_vdddddddiiiii: invoke_vdddddddiiiii,
-      invoke_vddddi: invoke_vddddi,
       invoke_vddddiiii: invoke_vddddiiii,
       invoke_vddddiiiii: invoke_vddddiiiii,
       invoke_vdiii: invoke_vdiii,
@@ -7304,7 +7303,6 @@ var Module = (function () {
       invoke_viiiiiiiiiiiiiiii: invoke_viiiiiiiiiiiiiiii,
       invoke_viiiiiiiiiiiiiiiii: invoke_viiiiiiiiiiiiiiiii,
       invoke_viiiiiiiiiiiiiiiiii: invoke_viiiiiiiiiiiiiiiiii,
-      invoke_viijii: invoke_viijii,
       llvm_eh_typeid_for: _llvm_eh_typeid_for,
       memory: wasmMemory,
       raise: _raise,
@@ -7316,9 +7314,9 @@ var Module = (function () {
     var ___wasm_call_ctors = (Module[
       '___wasm_call_ctors'
     ] = createExportWrapper('__wasm_call_ctors'));
+    var _memset = (Module['_memset'] = createExportWrapper('memset'));
     var _malloc = (Module['_malloc'] = createExportWrapper('malloc'));
     var _fflush = (Module['_fflush'] = createExportWrapper('fflush'));
-    var _memset = (Module['_memset'] = createExportWrapper('memset'));
     var _free = (Module['_free'] = createExportWrapper('free'));
     var ___getTypeName = (Module['___getTypeName'] = createExportWrapper(
       '__getTypeName'
@@ -7344,11 +7342,11 @@ var Module = (function () {
     var ___cxa_is_pointer_type = (Module[
       '___cxa_is_pointer_type'
     ] = createExportWrapper('__cxa_is_pointer_type'));
-    var dynCall_viijii = (Module['dynCall_viijii'] = createExportWrapper(
-      'dynCall_viijii'
-    ));
     var dynCall_jiiii = (Module['dynCall_jiiii'] = createExportWrapper(
       'dynCall_jiiii'
+    ));
+    var dynCall_viijii = (Module['dynCall_viijii'] = createExportWrapper(
+      'dynCall_viijii'
     ));
     var dynCall_jiji = (Module['dynCall_jiji'] = createExportWrapper(
       'dynCall_jiji'
@@ -7688,6 +7686,16 @@ var Module = (function () {
         _setThrew(1, 0);
       }
     }
+    function invoke_iiiiiiiiii(index, a1, a2, a3, a4, a5, a6, a7, a8, a9) {
+      var sp = stackSave();
+      try {
+        return wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7, a8, a9);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
     function invoke_i(index) {
       var sp = stackSave();
       try {
@@ -7781,16 +7789,6 @@ var Module = (function () {
           a16,
           a17
         );
-      } catch (e) {
-        stackRestore(sp);
-        if (e !== e + 0 && e !== 'longjmp') throw e;
-        _setThrew(1, 0);
-      }
-    }
-    function invoke_iiiiiiiiii(index, a1, a2, a3, a4, a5, a6, a7, a8, a9) {
-      var sp = stackSave();
-      try {
-        return wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7, a8, a9);
       } catch (e) {
         stackRestore(sp);
         if (e !== e + 0 && e !== 'longjmp') throw e;
@@ -8203,16 +8201,6 @@ var Module = (function () {
         _setThrew(1, 0);
       }
     }
-    function invoke_vddddi(index, a1, a2, a3, a4, a5) {
-      var sp = stackSave();
-      try {
-        wasmTable.get(index)(a1, a2, a3, a4, a5);
-      } catch (e) {
-        stackRestore(sp);
-        if (e !== e + 0 && e !== 'longjmp') throw e;
-        _setThrew(1, 0);
-      }
-    }
     function invoke_vddddiiiii(index, a1, a2, a3, a4, a5, a6, a7, a8, a9) {
       var sp = stackSave();
       try {
@@ -8291,16 +8279,6 @@ var Module = (function () {
       var sp = stackSave();
       try {
         return wasmTable.get(index)(a1, a2, a3);
-      } catch (e) {
-        stackRestore(sp);
-        if (e !== e + 0 && e !== 'longjmp') throw e;
-        _setThrew(1, 0);
-      }
-    }
-    function invoke_viijii(index, a1, a2, a3, a4, a5, a6) {
-      var sp = stackSave();
-      try {
-        dynCall_viijii(index, a1, a2, a3, a4, a5, a6);
       } catch (e) {
         stackRestore(sp);
         if (e !== e + 0 && e !== 'longjmp') throw e;

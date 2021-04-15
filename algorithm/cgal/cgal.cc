@@ -101,6 +101,7 @@ typedef Surface_mesh::Face_index Face_index;
 typedef Surface_mesh::Vertex_index Vertex_index;
 typedef CGAL::Arr_segment_traits_2<Kernel> Traits_2;
 typedef CGAL::Arrangement_2<Traits_2> Arrangement_2;
+typedef Traits_2::X_monotone_curve_2 Segment_2;
 
 typedef std::array<FT, 3> Triple;
 typedef std::vector<Triple> Triples;
@@ -614,6 +615,30 @@ struct Project
   Vector vector;
 };
 
+#if 0
+template <typename R> static
+CGAL::Plane_3<R> normalized(const CGAL::Plane_3<R>& h) { 
+  CGAL_assertion(!(h.a()==0 && h.b()==0 && h.c()==0 && h.d()==0));
+  typedef typename R::RT     RT;
+  RT x = (h.a()==0) ? ((h.b()==0) ? ((h.c()==0) ? ((h.d()==0) ? 1 : h.d()) : h.c()) : h.b()) : h.a();
+  if (h.b() != 0) {
+    x = CGAL_NTS gcd(x,h.b());
+  }
+  if (h.c() != 0) {
+    x = CGAL_NTS gcd(x,h.c());
+  }
+  if (h.d() != 0) {
+    x = CGAL_NTS gcd(x,h.d());
+  }
+  x = CGAL_NTS abs(x);
+  RT pa = h.a() / x;
+  RT pb = h.b() / x;
+  RT pc = h.c() / x;
+  RT pd = h.d() / x;
+  return typename R::Plane_3(pa,pb,pc,pd);
+}
+#endif
+
 Plane PlaneOfSurfaceMeshFacet(const Surface_mesh& mesh, Face_index facet) {
   const auto h = mesh.halfedge(facet);
   const Plane plane(mesh.point(mesh.source(h)),
@@ -770,45 +795,87 @@ Surface_mesh::Vertex_index ensureVertex(Surface_mesh& mesh, std::map<Point, Vert
   return it->second;
 }
 
-void ArrangementToPolygonsWithHoles(Arrangement_2& arrangement, std::vector<Polygon_with_holes_2>& out) {
-  std::vector<Arrangement_2::Face_const_handle> todo;
-  todo.push_back(arrangement.unbounded_face());
+void convertArrangementToPolygonsWithHoles(const Arrangement_2& arrangement, std::vector<Polygon_with_holes_2>& out) {
+  std::queue<Arrangement_2::Face_const_handle> undecided;
+  CGAL::Unique_hash_map<Arrangement_2::Face_const_handle, bool> positive_faces;
+  CGAL::Unique_hash_map<Arrangement_2::Face_const_handle, bool> negative_faces;
 
-  do {
-    Arrangement_2::Face_const_handle outer = todo.back();
-    todo.pop_back();
+  for (Arrangement_2::Face_const_iterator face = arrangement.faces_begin(); face != arrangement.faces_end(); ++face) {
+    if (!face->has_outer_ccb()) {
+      negative_faces[face] = true;
+    } else {
+      undecided.push(face);
+    }
+  }
 
-    for (Arrangement_2::Hole_const_iterator hole = outer->holes_begin(); hole != outer->holes_end(); ++hole) {
-      Arrangement_2::Face_const_handle face = (*hole)->twin()->face();
+  while (!undecided.empty()) {
+    Arrangement_2::Face_const_handle face = undecided.front();
+    undecided.pop();
+    if (positive_faces[face]) {
+      for (Arrangement_2::Hole_const_iterator hole = face->holes_begin(); hole != face->holes_end(); ++hole) {
+        negative_faces[(*hole)->twin()->face()] = true;
+        positive_faces[(*hole)->twin()->face()] = false;
+      }
+      continue;
+    }
+    if (negative_faces[face]) {
+      for (Arrangement_2::Hole_const_iterator hole = face->holes_begin(); hole != face->holes_end(); ++hole) {
+        positive_faces[(*hole)->twin()->face()] = true;
+        negative_faces[(*hole)->twin()->face()] = false;
+      }
+      continue;
+    }
+    bool decided = false;
+    Arrangement_2::Ccb_halfedge_const_circulator start = face->outer_ccb();
+    Arrangement_2::Ccb_halfedge_const_circulator edge = start;
+    do {
+      if (negative_faces[edge->twin()->face()]) {
+        positive_faces[face] = true;
+        decided = true;
+        break;
+      }
+    } while (++edge != start);
+    if (!decided) {
+      edge = start;
+      do {
+        if (positive_faces[edge->twin()->face()]) {
+          negative_faces[face] = true;
+          decided = true;
+          break;
+        }
+      } while (++edge != start);
+    }
+    undecided.push(face);
+  }
 
-      Polygon_2 polygon_boundary;
+  for (Arrangement_2::Face_const_iterator face = arrangement.faces_begin(); face != arrangement.faces_end(); ++face) {
+    if (!positive_faces[face]) {
+      continue;
+    }
+    Polygon_2 polygon_boundary;
 
-      Arrangement_2::Ccb_halfedge_const_circulator start = face->outer_ccb();
+    Arrangement_2::Ccb_halfedge_const_circulator start = face->outer_ccb();
+    Arrangement_2::Ccb_halfedge_const_circulator edge = start;
+    do {
+      polygon_boundary.push_back(edge->source()->point());
+    } while (++edge != start);
+
+    std::vector<Polygon_2> polygon_holes;
+    for (Arrangement_2::Hole_const_iterator hole = face->holes_begin(); hole != face->holes_end(); ++hole) {
+      Polygon_2 polygon_hole;
+      Arrangement_2::Ccb_halfedge_const_circulator start = *hole;
       Arrangement_2::Ccb_halfedge_const_circulator edge = start;
       do {
-        polygon_boundary.push_back(edge->source()->point());
+        polygon_hole.push_back(edge->source()->point());
       } while (++edge != start);
 
-      std::vector<Polygon_2> polygon_holes;
-      for (Arrangement_2::Hole_const_iterator hole = face->holes_begin(); hole != face->holes_end(); ++hole) {
-        Polygon_2 polygon_hole;
-        Arrangement_2::Ccb_halfedge_const_circulator start = *hole;
-        Arrangement_2::Ccb_halfedge_const_circulator edge = start;
-        do {
-          polygon_hole.push_back(edge->source()->point());
-        } while (++edge != start);
-  
-        if (polygon_hole.orientation() == CGAL::Sign::POSITIVE) {
-          polygon_hole.reverse_orientation();
-        }
-        polygon_holes.push_back(polygon_hole);
-
-        // The interior of the hole is another outer region to explore.
-        todo.push_back((*hole)->twin()->face());
+      if (polygon_hole.orientation() == CGAL::Sign::POSITIVE) {
+        polygon_hole.reverse_orientation();
       }
-      out.push_back(Polygon_with_holes_2(polygon_boundary, polygon_holes.begin(), polygon_holes.end()));
+      polygon_holes.push_back(polygon_hole);
     }
-  } while (!todo.empty());
+    out.push_back(Polygon_with_holes_2(polygon_boundary, polygon_holes.begin(), polygon_holes.end()));
+  }
 }
 
 void PlanarSurfaceMeshToPolygonSet(const Plane& plane, const Surface_mesh& mesh, General_polygon_set_2& set) {
@@ -836,7 +903,7 @@ void PlanarSurfaceMeshToPolygonSet(const Plane& plane, const Surface_mesh& mesh,
   }
 
   std::vector<Polygon_with_holes_2> polygons;
-  ArrangementToPolygonsWithHoles(arrangement, polygons);
+  convertArrangementToPolygonsWithHoles(arrangement, polygons);
   for (const auto& polygon : polygons) {
     set.join(polygon);
   }
@@ -1140,16 +1207,16 @@ void SectionOfSurfaceMesh(Surface_mesh* mesh, std::size_t plane_count, emscripte
       }
     }
     std::vector<Polygon_with_holes_2> polygons;
-    ArrangementToPolygonsWithHoles(arrangement, polygons);
+    convertArrangementToPolygonsWithHoles(arrangement, polygons);
     Surface_mesh* c = PolygonsWithHolesToSurfaceMesh(plane, polygons);
     emit_mesh(c);
   }
 }
 
-Plane ensureFacetPlane(Surface_mesh& mesh, std::map<Face_index, Plane>& facet_to_plane, Face_index facet) {
+Plane ensureNormalizedFacetPlane(Surface_mesh& mesh, std::unordered_map<Face_index, Plane>& facet_to_plane, Face_index facet) {
   auto it = facet_to_plane.find(facet);
   if (it == facet_to_plane.end()) {
-    Plane facet_plane = PlaneOfSurfaceMeshFacet(mesh, facet);
+    Plane facet_plane = normalized(PlaneOfSurfaceMeshFacet(mesh, facet));
     facet_to_plane[facet] = facet_plane;
     return facet_plane;
   } else {
@@ -1160,7 +1227,7 @@ Plane ensureFacetPlane(Surface_mesh& mesh, std::map<Face_index, Plane>& facet_to
 void OutlineSurfaceMesh(Surface_mesh* input, emscripten::val emit_approximate_segment) {
   Surface_mesh& mesh = *input;
 
-  std::map<Face_index, Plane> facet_to_plane;
+  std::unordered_map<Face_index, Plane> facet_to_plane;
 
   // FIX: Make this more efficient.
   for (const auto& facet : mesh.faces()) {
@@ -1168,7 +1235,7 @@ void OutlineSurfaceMesh(Surface_mesh* input, emscripten::val emit_approximate_se
     if (mesh.is_removed(start)) {
       continue;
     }
-    const Plane facet_plane = ensureFacetPlane(mesh, facet_to_plane, facet);
+    const Plane facet_plane = ensureNormalizedFacetPlane(mesh, facet_to_plane, facet);
     Halfedge_index edge = start;
     do {
       bool corner = false;
@@ -1176,7 +1243,7 @@ void OutlineSurfaceMesh(Surface_mesh* input, emscripten::val emit_approximate_se
       if (opposite_facet == mesh.null_face()) {
         corner = true;
       } else {
-        const Plane opposite_facet_plane = ensureFacetPlane(mesh, facet_to_plane, opposite_facet);
+        const Plane opposite_facet_plane = ensureNormalizedFacetPlane(mesh, facet_to_plane, opposite_facet);
         if (facet_plane != opposite_facet_plane) {
           corner = true;
         }
@@ -1333,15 +1400,81 @@ void Surface_mesh__explore(Surface_mesh* mesh, emscripten::val emit_point, emscr
 }
 
 std::string SerializeSurfaceMesh(const Surface_mesh* mesh) {
-  std::ostringstream stream;
-  stream << *mesh;
-  return stream.str();
+  // CHECK: We assume the mesh is compact.
+
+  std::ostringstream s;
+  // stream << *mesh;
+
+  s << mesh->number_of_vertices() << "\n";
+  for (const Vertex_index vertex : mesh->vertices()) {
+    const Point& p = mesh->point(vertex);
+    s << p.x().exact() << " " << p.y().exact() << " " << p.z().exact() << "\n";
+  }
+  s << "\n";
+
+  s << mesh->number_of_faces() << "\n";
+  for (const Face_index facet : mesh->faces()) {
+    const auto& start = mesh->halfedge(facet);
+    std::size_t edge_count = 0;
+    {
+      Halfedge_index edge = start;
+      do {
+        edge_count++;
+        edge = mesh->next(edge);
+      } while (edge != start);
+    }
+    s << edge_count;
+    {
+      Halfedge_index edge = start;
+      do {
+        s << " " << std::size_t(mesh->source(edge));
+        edge = mesh->next(edge);
+      } while (edge != start);
+    }
+    s << "\n";
+  }
+
+  return s.str();
 }
 
 Surface_mesh* DeserializeSurfaceMesh(std::string serialization) {
   Surface_mesh* mesh = new Surface_mesh();
-  std::istringstream input(serialization);
-  input >> *mesh;
+  std::istringstream s(serialization);
+
+  std::size_t number_of_vertices;
+
+  s >> number_of_vertices;
+
+  for (std::size_t vertex = 0; vertex < number_of_vertices; vertex++) {
+    FT x;
+    s >> x;
+
+    FT y;
+    s >> y;
+
+    FT z;
+    s >> z;
+
+    mesh->add_vertex(Point{ x, y, z });
+  }
+
+  std::size_t number_of_facets;
+
+  s >> number_of_facets;
+
+  for (std::size_t facet = 0; facet < number_of_facets; facet++) {
+    std::size_t number_of_vertices;
+    s >> number_of_vertices;
+    std::vector<Vertex_index> vertices;
+    for (std::size_t nth = 0; nth < number_of_vertices; nth++) {
+      std::size_t vertex;
+      s >> vertex;
+
+      vertices.push_back(Vertex_index(vertex));
+    }
+    mesh->add_face(vertices);
+  }
+
   return mesh;
 }
 
@@ -1710,9 +1843,68 @@ void InsetOfPolygonWithHoles(double initial, double step, double limit, double x
   }
 }
 
+void admitPlane(Plane& plane, emscripten::val fill_plane) {
+  Quadruple q;
+  Quadruple* qp = &q;
+  fill_plane(qp);
+  plane = Plane(q[0], q[1], q[2], q[3]);
+}
+
+template <typename P>
+bool admitPolygonWithHoles(std::size_t nth_polygon, const Plane& plane, P& polygon, emscripten::val fill_boundary, emscripten::val fill_hole) {
+  Points points;
+  Points* points_ptr = &points;
+  fill_boundary(points_ptr, nth_polygon);
+  if (points.size() == 0) {
+    return false;
+  }
+  Polygon_2 boundary;
+  for (const auto& point : points) {
+    boundary.push_back(plane.to_2d(point));
+  }
+    if (boundary.orientation() == CGAL::Sign::NEGATIVE) {
+    boundary.reverse_orientation();
+  }
+  if (!boundary.is_simple()) {
+    std::cout << "Boundary is not simple" << std::endl;
+    return false;
+  }
+
+  std::vector<Polygon_2> holes;
+  for (;;) {
+    Points points;
+    Points* points_ptr = &points;
+    fill_hole(points_ptr, nth_polygon, holes.size());
+    if (points.size() == 0) {
+      break;
+    }
+    Polygon_2 hole;
+    for (const auto& point : points) {
+      hole.push_back(plane.to_2d(point));
+    }
+    if (hole.orientation() == CGAL::Sign::POSITIVE) {
+      hole.reverse_orientation();
+    }
+    if (!hole.is_simple()) {
+      std::cout << "Hole is not simple" << std::endl;
+      return false;
+    }
+    holes.push_back(hole);
+  }
+
+  polygon = P(boundary, holes.begin(), holes.end());
+  return true;
+}
+
 template <typename P>
 void admitPolygonsWithHoles(const Plane& plane, std::vector<P>& polygons, emscripten::val fill_boundary, emscripten::val fill_hole) {
   for (;;) {
+    Polygon_with_holes_2 polygon;
+    if (!admitPolygonWithHoles(polygons.size(), plane, polygon, fill_boundary, fill_hole)) {
+      return;
+    }
+    polygons.push_back(polygon);
+/*
     Points points;
     Points* points_ptr = &points;
     fill_boundary(points_ptr, polygons.size());
@@ -1754,7 +1946,26 @@ void admitPolygonsWithHoles(const Plane& plane, std::vector<P>& polygons, emscri
     }
 
     polygons.emplace_back(boundary, holes.begin(), holes.end());
+*/
   }
+}
+
+void emitPlane(const Plane& plane, emscripten::val& emit_plane) {
+  const auto a = plane.a().exact();
+  const auto b = plane.b().exact();
+  const auto c = plane.c().exact();
+  const auto d = plane.d().exact();
+  std::ostringstream x; x << a; std::string xs = x.str();
+  std::ostringstream y; y << b; std::string ys = y.str();
+  std::ostringstream z; z << c; std::string zs = z.str();
+  std::ostringstream w; w << d; std::string ws = w.str();
+  const double xd = CGAL::to_double(a);
+  const double yd = CGAL::to_double(b);
+  const double zd = CGAL::to_double(c);
+  const double ld = std::sqrt(xd * xd + yd * yd + zd * zd);
+  const double wd = CGAL::to_double(d);
+  // Normalize the approximate plane normal.
+  emit_plane(xd / ld, yd / ld, zd / ld, wd, xs, ys, zs, ws);
 }
 
 template <typename P>
@@ -1822,6 +2033,87 @@ void BooleansOfPolygonsWithHolesApproximate(double x, double y, double z, double
 
 void BooleansOfPolygonsWithHolesExact(std::string a, std::string b, std::string c, std::string d, emscripten::val get_operation, emscripten::val fill_boundary, emscripten::val fill_hole, emscripten::val emit_polygon, emscripten::val emit_point) {
   BooleansOfPolygonsWithHoles(Plane(to_FT(a), to_FT(b), to_FT(c), to_FT(d)), get_operation, fill_boundary, fill_hole, emit_polygon, emit_point);
+}
+
+namespace std {
+
+template <typename K> struct hash<CGAL::Plane_3<K> > {
+  std::size_t operator() (const CGAL::Plane_3<K>& plane) const {
+    // FIX: We can do better than this.
+    return 1;
+  }
+};
+
+}
+
+void convertSurfaceMeshFacesToArrangements(Surface_mesh& mesh, std::unordered_map<Plane, Arrangement_2>& arrangements) {
+  std::unordered_map<Face_index, Plane> facet_to_plane;
+
+  // FIX: Make this more efficient.
+  for (const auto& facet : mesh.faces()) {
+    const auto& start = mesh.halfedge(facet);
+    if (mesh.is_removed(start)) {
+      continue;
+    }
+    const Plane facet_plane = ensureNormalizedFacetPlane(mesh, facet_to_plane, facet);
+    // const Plane facet_plane(0, 0, 1, 0);
+    Arrangement_2& arrangement = arrangements[facet_plane];
+    Halfedge_index edge = start;
+    do {
+      bool corner = false;
+      const auto& opposite_facet = mesh.face(mesh.opposite(edge));
+      if (opposite_facet == mesh.null_face()) {
+        corner = true;
+      } else {
+        const Plane opposite_facet_plane = ensureNormalizedFacetPlane(mesh, facet_to_plane, opposite_facet);
+        if (facet_plane != opposite_facet_plane) {
+          corner = true;
+        }
+      }
+      if (corner) {
+        Point_2 s = facet_plane.to_2d(mesh.point(mesh.source(edge)));
+        Point_2 t = facet_plane.to_2d(mesh.point(mesh.target(edge)));
+
+        Segment_2 segment { s, t };
+        insert(arrangement, segment);
+      }
+      const auto& next = mesh.next(edge);
+      edge = next;
+    } while (edge != start);
+  }
+}
+
+void emitArrangementsAsPolygonsWithHoles(const std::unordered_map<Plane, Arrangement_2>& arrangements, emscripten::val emit_plane, emscripten::val emit_polygon, emscripten::val emit_point) {
+  for (const auto& entry : arrangements) {
+    const Plane& plane = entry.first;
+    const Arrangement_2& arrangement = entry.second;
+    std::vector<Polygon_with_holes_2> polygons;
+    convertArrangementToPolygonsWithHoles(arrangement, polygons);
+    emitPlane(plane, emit_plane);
+    emitPolygonsWithHoles(plane, polygons, emit_polygon, emit_point);
+  }
+}
+
+void ArrangePolygonsWithHoles(std::size_t count, emscripten::val fill_plane, emscripten::val fill_boundary, emscripten::val fill_hole, emscripten::val emit_plane, emscripten::val emit_polygon, emscripten::val emit_point) {
+  std::unordered_map<Plane, Arrangement_2> arrangements;
+
+  for (std::size_t nth_polygon = 0; nth_polygon < count; nth_polygon++) {
+    Plane plane;
+    admitPlane(plane, fill_plane);
+    Arrangement_2& arrangement = arrangements[plane];
+    Polygon_with_holes_2 polygon;
+    admitPolygonWithHoles(nth_polygon, plane, polygon, fill_boundary, fill_hole);
+    for (auto it = polygon.outer_boundary().edges_begin(); it != polygon.outer_boundary().edges_end(); ++it) {
+      insert(arrangement, *it);
+    }
+    for (auto hole = polygon.holes_begin(); hole != polygon.holes_end(); ++hole) {
+      for (auto it = hole->edges_begin(); it != hole->edges_end(); ++it) {
+        insert(arrangement, *it);
+      }
+    }
+  }
+
+  emitArrangementsAsPolygonsWithHoles(arrangements, emit_plane, emit_polygon, emit_point);
 }
 
 // FIX: Accept exact plane.
@@ -2000,6 +2292,12 @@ void ArrangePathsApproximate(double x, double y, double z, double w, bool triang
 
 void ArrangePathsExact(std::string x, std::string y, std::string z, std::string w, bool triangulate, emscripten::val fill, emscripten::val emit_polygon, emscripten::val emit_point) {
   ArrangePaths(Plane(to_FT(x), to_FT(y), to_FT(z), to_FT(w)), triangulate, fill, emit_polygon, emit_point);
+}
+
+void FromSurfaceMeshToPolygonsWithHoles(Surface_mesh* mesh, emscripten::val emit_plane, emscripten::val emit_polygon, emscripten::val emit_point) {
+  std::unordered_map<Plane, Arrangement_2> arrangements;
+  convertSurfaceMeshFacesToArrangements(*mesh, arrangements);
+  emitArrangementsAsPolygonsWithHoles(arrangements, emit_plane, emit_polygon, emit_point);
 }
 
 Surface_mesh* MinkowskiSumOfSurfaceMeshes(Surface_mesh* input_mesh, Surface_mesh* offset_mesh) {
@@ -2295,6 +2593,7 @@ EMSCRIPTEN_BINDINGS(module) {
   emscripten::function("TwistSurfaceMesh", &TwistSurfaceMesh, emscripten::allow_raw_pointers());
   emscripten::function("PushSurfaceMesh", &PushSurfaceMesh, emscripten::allow_raw_pointers());
   emscripten::function("OutlineSurfaceMesh", &OutlineSurfaceMesh, emscripten::allow_raw_pointers());
+  emscripten::function("FromSurfaceMeshToPolygonsWithHoles", &FromSurfaceMeshToPolygonsWithHoles, emscripten::allow_raw_pointers());
 
   emscripten::function("BooleansOfPolygonsWithHolesApproximate", &BooleansOfPolygonsWithHolesApproximate);
   emscripten::function("BooleansOfPolygonsWithHolesExact", &BooleansOfPolygonsWithHolesExact);
@@ -2330,6 +2629,7 @@ EMSCRIPTEN_BINDINGS(module) {
   emscripten::function("Surface_mesh__bbox", &Surface_mesh__bbox, emscripten::allow_raw_pointers());
   emscripten::function("ArrangePathsApproximate", &ArrangePathsApproximate, emscripten::allow_raw_pointers());
   emscripten::function("ArrangePathsExact", &ArrangePathsExact, emscripten::allow_raw_pointers());
+  emscripten::function("ArrangePolygonsWithHoles", &ArrangePolygonsWithHoles, emscripten::allow_raw_pointers());
   emscripten::function("SectionOfSurfaceMesh", &SectionOfSurfaceMesh, emscripten::allow_raw_pointers());
 #endif
 }
