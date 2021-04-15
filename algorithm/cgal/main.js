@@ -12,12 +12,14 @@ export {
 } from './transform.js';
 
 export { arrangePaths, arrangePathsIntoTriangles } from './arrangePaths.js';
+export { arrangePolygonsWithHoles } from './arrangePolygonsWithHoles.js';
 export {
   BOOLEAN_ADD,
   BOOLEAN_CUT,
   BOOLEAN_CLIP,
   booleansOfPolygonsWithHoles,
 } from './booleansOfPolygonsWithHoles.js';
+export { deserializeSurfaceMesh } from './deserializeSurfaceMesh.js';
 export { differenceOfSurfaceMeshes } from './differenceOfSurfaceMeshes.js';
 export { doesSelfIntersectOfSurfaceMesh } from './doesSelfIntersectOfSurfaceMesh.js';
 export { extrudeSurfaceMesh } from './extrudeSurfaceMesh.js';
@@ -34,17 +36,20 @@ export { fromSurfaceMeshEmitBoundingBox } from './fromSurfaceMeshEmitBoundingBox
 export { fromSurfaceMeshToGraph } from './fromSurfaceMeshToGraph.js';
 export { fromSurfaceMeshToLazyGraph } from './fromSurfaceMeshToLazyGraph.js';
 export { fromSurfaceMeshToPolygons } from './fromSurfaceMeshToPolygons.js';
+export { fromSurfaceMeshToPolygonsWithHoles } from './fromSurfaceMeshToPolygonsWithHoles.js';
 export { fromSurfaceMeshToTriangles } from './fromSurfaceMeshToTriangles.js';
 export { initCgal } from './getCgal.js';
 export { insetOfPolygonWithHoles } from './insetOfPolygonWithHoles.js';
 export { intersectionOfSurfaceMeshes } from './intersectionOfSurfaceMeshes.js';
 export { offsetOfPolygonWithHoles } from './offsetOfPolygonWithHoles.js';
+export { outlineSurfaceMesh } from './outlineSurfaceMesh.js';
 export { minkowskiSumOfSurfaceMeshes } from './minkowskiSumOfSurfaceMeshes.js';
 export { projectToPlaneOfSurfaceMesh } from './projectToPlaneOfSurfaceMesh.js';
 export { pushSurfaceMesh } from './pushSurfaceMesh.js';
 export { reverseFaceOrientationsOfSurfaceMesh } from './reverseFaceOrientationsOfSurfaceMesh.js';
 export { sectionOfSurfaceMesh } from './sectionOfSurfaceMesh.js';
 export { remeshSurfaceMesh } from './remeshSurfaceMesh.js';
+export { serializeSurfaceMesh } from './serializeSurfaceMesh.js';
 export { subdivideSurfaceMesh } from './subdivideSurfaceMesh.js';
 export { transformSurfaceMesh } from './transformSurfaceMesh.js';
 export { twistSurfaceMesh } from './twistSurfaceMesh.js';

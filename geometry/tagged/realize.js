@@ -14,13 +14,7 @@ export const realize = (geometry) => {
       case 'paths':
         // No lazy representation to realize.
         return geometry;
-      case 'plan': {
-        const realizer = realize[geometry.plan.realize];
-        if (realizer === undefined) {
-          throw Error(`Do not know how to realize plan: ${geometry.plan}`);
-        }
-        return realizer(geometry.plan);
-      }
+      case 'plan':
       case 'assembly':
       case 'item':
       case 'disjointAssembly':

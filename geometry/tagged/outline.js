@@ -1,9 +1,9 @@
 import { cache } from '@jsxcad/cache';
 import { getNonVoidGraphs } from './getNonVoidGraphs.js';
 import { getNonVoidPaths } from './getNonVoidPaths.js';
+import { outline as outlineGraph } from '@jsxcad/geometry-graph';
 import { taggedPaths } from './taggedPaths.js';
 import { toDisjointGeometry } from './toDisjointGeometry.js';
-import { toPaths as toPathsFromGraph } from '@jsxcad/geometry-graph';
 
 // FIX: The semantics here are a bit off.
 // Let's consider the case of Assembly(Square(10), Square(10).outline()).outline().
@@ -16,7 +16,10 @@ const outlineImpl = (geometry, includeFaces = true, includeHoles = true) => {
   const outlines = [];
   for (const { tags = [], graph } of getNonVoidGraphs(disjointGeometry)) {
     outlines.push(
-      taggedPaths({ tags: [...tags, 'path/Wire'] }, toPathsFromGraph(graph))
+      taggedPaths(
+        { tags: [...tags, 'path/Wire'] },
+        outlineGraph(graph).map((path) => [null, ...path])
+      )
     );
   }
   // Turn paths into wires.

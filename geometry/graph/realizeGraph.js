@@ -1,9 +1,9 @@
 import { fromSurfaceMesh } from './fromSurfaceMesh.js';
-import { surfaceMeshSymbol } from './symbols.js';
+import { toSurfaceMesh } from './toSurfaceMesh.js';
 
 export const realizeGraph = (graph) => {
   if (graph.isLazy) {
-    return fromSurfaceMesh(graph[surfaceMeshSymbol]);
+    return fromSurfaceMesh(toSurfaceMesh(graph));
   } else {
     return graph;
   }

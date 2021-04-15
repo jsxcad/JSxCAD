@@ -4,7 +4,7 @@ import { transform as transform$3, canonicalize as canonicalize$4, eachPoint as 
 import { canonicalize as canonicalize$2 } from './jsxcad-math-plane.js';
 import { transform as transform$2, canonicalize as canonicalize$1, eachPoint as eachPoint$3, flip as flip$2, measureBoundingBox as measureBoundingBox$2, union as union$1 } from './jsxcad-geometry-points.js';
 import { transform as transform$4, canonicalize as canonicalize$3, measureBoundingBox as measureBoundingBox$1 } from './jsxcad-geometry-polygons.js';
-import { realizeGraph, transform as transform$1, fill as fill$1, fromPaths, difference as difference$1, eachPoint as eachPoint$1, fromEmpty, extrude as extrude$1, extrudeToPlane as extrudeToPlane$1, toPaths, intersection as intersection$1, inset as inset$1, measureBoundingBox as measureBoundingBox$3, minkowskiSum as minkowskiSum$1, offset as offset$1, projectToPlane as projectToPlane$1, push as push$1, remesh as remesh$1, sections, smooth as smooth$1, toTriangles, test as test$1, toPolygonsWithHoles as toPolygonsWithHoles$1, twist as twist$1, union as union$2 } from './jsxcad-geometry-graph.js';
+import { realizeGraph, transform as transform$1, fill as fill$1, fromPaths, difference as difference$1, eachPoint as eachPoint$1, fromEmpty, extrude as extrude$1, extrudeToPlane as extrudeToPlane$1, toPaths, intersection as intersection$1, inset as inset$1, measureBoundingBox as measureBoundingBox$3, minkowskiSum as minkowskiSum$1, offset as offset$1, outline as outline$1, projectToPlane as projectToPlane$1, prepareForSerialization as prepareForSerialization$1, push as push$1, remesh as remesh$1, sections, smooth as smooth$1, toTriangles, test as test$1, toPolygonsWithHoles as toPolygonsWithHoles$1, twist as twist$1, union as union$2 } from './jsxcad-geometry-graph.js';
 import { composeTransforms } from './jsxcad-algorithm-cgal.js';
 import { min, max } from './jsxcad-math-vec3.js';
 import { read as read$1, write as write$1 } from './jsxcad-sys.js';
@@ -179,13 +179,7 @@ const realize = (geometry) => {
       case 'paths':
         // No lazy representation to realize.
         return geometry;
-      case 'plan': {
-        const realizer = realize[geometry.plan.realize];
-        if (realizer === undefined) {
-          throw Error(`Do not know how to realize plan: ${geometry.plan}`);
-        }
-        return realizer(geometry.plan);
-      }
+      case 'plan':
       case 'assembly':
       case 'item':
       case 'disjointAssembly':
@@ -1339,7 +1333,10 @@ const outlineImpl = (geometry, includeFaces = true, includeHoles = true) => {
   const outlines = [];
   for (const { tags = [], graph } of getNonVoidGraphs(disjointGeometry)) {
     outlines.push(
-      taggedPaths({ tags: [...tags, 'path/Wire'] }, toPaths(graph))
+      taggedPaths(
+        { tags: [...tags, 'path/Wire'] },
+        outline$1(graph).map((path) => [null, ...path])
+      )
     );
   }
   // Turn paths into wires.
@@ -1388,6 +1385,37 @@ const projectToPlane = (geometry, plane, direction) => {
   };
 
   return rewrite(toTransformedGeometry(geometry), op);
+};
+
+const prepareForSerialization = (geometry) => {
+  const op = (geometry, descend) => {
+    const { tags } = geometry;
+    switch (geometry.type) {
+      case 'graph':
+        return taggedGraph(
+          { tags },
+          prepareForSerialization$1(geometry.graph)
+        );
+      case 'displayGeometry':
+      case 'triangles':
+      case 'points':
+      case 'paths':
+        return geometry;
+      case 'assembly':
+      case 'item':
+      case 'disjointAssembly':
+      case 'layers':
+      case 'layout':
+      case 'sketch':
+      case 'transform':
+      case 'plan':
+        return descend();
+      default:
+        throw Error(`Unexpected geometry: ${JSON.stringify(geometry)}`);
+    }
+  };
+
+  return rewrite(geometry, op);
 };
 
 const push = (
@@ -1518,11 +1546,14 @@ const taggedTriangles = ({ tags }, triangles) => {
 
 const soup = (
   geometry,
-  { doOutline = true, doWireframe = false } = {}
+  { doTriangles = true, doOutline = true, doWireframe = true } = {}
 ) => {
   const outline$1 = doOutline ? outline : () => [];
   const wireframe = doWireframe
     ? (triangles) => [taggedPaths({ tags: ['color/red'] }, triangles)]
+    : () => [];
+  const triangles = doTriangles
+    ? (tags, triangles) => [taggedTriangles({ tags }, triangles)]
     : () => [];
   const op = (geometry, descend) => {
     const { tags } = geometry;
@@ -1534,7 +1565,7 @@ const soup = (
         } else if (graph.isClosed) {
           return taggedGroup(
             {},
-            taggedTriangles({ tags }, toTriangles(graph)),
+            ...triangles(tags, toTriangles(graph)),
             ...wireframe(toTriangles(graph)),
             ...outline$1(geometry)
           );
@@ -1544,7 +1575,7 @@ const soup = (
           // FIX: Simplify this arrangement.
           return taggedGroup(
             {},
-            taggedTriangles({ tags }, toTriangles(graph)),
+            ...triangles(tags, toTriangles(graph)),
             ...wireframe(toTriangles(graph)),
             ...outline$1(geometry)
           );
@@ -1672,8 +1703,15 @@ const test = (geometry) => {
   return geometry;
 };
 
-const toDisplayGeometry = (geometry, options) =>
-  soup(toVisiblyDisjointGeometry(geometry), options);
+const toDisplayGeometry = (
+  geometry,
+  { doTriangles = true, doOutline = true, doWireframe = true } = {}
+) =>
+  soup(toVisiblyDisjointGeometry(geometry), {
+    doTriangles,
+    doOutline,
+    doWireframe,
+  });
 
 // The resolution is 1 / multiplier.
 const multiplier = 1e5;
@@ -1728,15 +1766,25 @@ const toPoints = (geometry) => {
 };
 
 const toPolygonsWithHoles = (geometry) => {
-  const polygonsWithHoles = [];
+  const output = [];
 
   const op = (geometry, descend) => {
     switch (geometry.type) {
       case 'graph': {
-        polygonsWithHoles.push({
-          tags: geometry.tags,
-          polygonsWithHoles: toPolygonsWithHoles$1(geometry.graph),
-        });
+        for (const {
+          plane,
+          exactPlane,
+          polygonsWithHoles,
+        } of toPolygonsWithHoles$1(geometry.graph)) {
+          // FIX: Are we going to make polygonsWithHoles proper geometry?
+          output.push({
+            tags: geometry.tags,
+            type: 'polygonsWithHoles',
+            plane,
+            exactPlane,
+            polygonsWithHoles,
+          });
+        }
         break;
       }
       // FIX: Support 'triangles'?
@@ -1757,9 +1805,9 @@ const toPolygonsWithHoles = (geometry) => {
     }
   };
 
-  visit(toTransformedGeometry(geometry), op);
+  visit(toDisjointGeometry(geometry), op);
 
-  return polygonsWithHoles;
+  return output;
 };
 
 const twist = (geometry, degreesPerZ) => {
@@ -1860,9 +1908,9 @@ const write = async (geometry, path) => {
   const disjointGeometry = toDisjointGeometry(geometry);
   // Ensure that the geometry carries a hash before saving.
   hash(disjointGeometry);
-  const realizedGeometry = realize(disjointGeometry);
-  await write$1(path, realizedGeometry);
-  return realizedGeometry;
+  const preparedGeometry = prepareForSerialization(disjointGeometry);
+  await write$1(path, preparedGeometry);
+  return preparedGeometry;
 };
 
 const rotateX = (angle, geometry) =>
@@ -1876,4 +1924,4 @@ const translate = (vector, geometry) =>
 const scale = (vector, geometry) =>
   transform(fromScaling(vector), geometry);
 
-export { allTags, assemble, canonicalize, difference, drop, eachItem, eachPoint, empty, extrude, extrudeToPlane, fill, flip, fresh, fromSurfaceToPaths, getAnyNonVoidSurfaces, getAnySurfaces, getFaceablePaths, getGraphs, getItems, getLayers, getLayouts, getLeafs, getNonVoidFaceablePaths, getNonVoidGraphs, getNonVoidItems, getNonVoidPaths, getNonVoidPlans, getNonVoidPoints, getPaths, getPeg, getPlans, getPoints, getTags, hash, inset, intersection, isNotVoid, isVoid, keep, measureBoundingBox, minkowskiSum, offset, outline, projectToPlane, push, read, realize, registerReifier, reify, remesh, rewrite, rewriteTags, rotateX, rotateY, rotateZ, scale, section, smooth, soup, taggedAssembly, taggedDisjointAssembly, taggedDisplayGeometry, taggedGraph, taggedGroup, taggedItem, taggedLayers, taggedLayout, taggedPaths, taggedPlan, taggedPoints, taggedSketch, taggedTransform, taggedTriangles, test, toDisjointGeometry, toDisplayGeometry, toKeptGeometry, toPoints, toPolygonsWithHoles, toTransformedGeometry, toVisiblyDisjointGeometry, transform, translate, twist, union, update, visit, write };
+export { allTags, assemble, canonicalize, difference, drop, eachItem, eachPoint, empty, extrude, extrudeToPlane, fill, flip, fresh, fromSurfaceToPaths, getAnyNonVoidSurfaces, getAnySurfaces, getFaceablePaths, getGraphs, getItems, getLayers, getLayouts, getLeafs, getNonVoidFaceablePaths, getNonVoidGraphs, getNonVoidItems, getNonVoidPaths, getNonVoidPlans, getNonVoidPoints, getPaths, getPeg, getPlans, getPoints, getTags, hash, inset, intersection, isNotVoid, isVoid, keep, measureBoundingBox, minkowskiSum, offset, outline, prepareForSerialization, projectToPlane, push, read, realize, registerReifier, reify, remesh, rewrite, rewriteTags, rotateX, rotateY, rotateZ, scale, section, smooth, soup, taggedAssembly, taggedDisjointAssembly, taggedDisplayGeometry, taggedGraph, taggedGroup, taggedItem, taggedLayers, taggedLayout, taggedPaths, taggedPlan, taggedPoints, taggedSketch, taggedTransform, taggedTriangles, test, toDisjointGeometry, toDisplayGeometry, toKeptGeometry, toPoints, toPolygonsWithHoles, toTransformedGeometry, toVisiblyDisjointGeometry, transform, translate, twist, union, update, visit, write };

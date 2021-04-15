@@ -13,6 +13,7 @@ export { boot, onBoot } from './boot.js';
 export {
   addOnEmitHandler,
   clearEmitted,
+  elapsed,
   emit,
   getEmitted,
   getModule,

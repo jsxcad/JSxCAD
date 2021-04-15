@@ -4,7 +4,6 @@ const X = 0;
 const Y = 1;
 const Z = 2;
 
-// Note: This assumes a graph without holes.
 export const fromGraphToSurfaceMesh = (graph) => {
   const c = getCgal();
   const mesh = new c.Surface_mesh();

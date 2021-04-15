@@ -1,4 +1,5 @@
-import { fromSurfaceMeshToGraph, fromPointsToAlphaShapeAsSurfaceMesh, fromSurfaceMeshToLazyGraph, fromPointsToConvexHullAsSurfaceMesh, fromGraphToSurfaceMesh, differenceOfSurfaceMeshes, extrudeSurfaceMesh, extrudeToPlaneOfSurfaceMesh, fromFunctionToSurfaceMesh, arrangePathsIntoTriangles, fromPolygonsToSurfaceMesh, fromPointsToSurfaceMesh, arrangePaths, insetOfPolygonWithHoles, intersectionOfSurfaceMeshes, fromSurfaceMeshEmitBoundingBox, minkowskiSumOfSurfaceMeshes, offsetOfPolygonWithHoles, projectToPlaneOfSurfaceMesh, pushSurfaceMesh, remeshSurfaceMesh, reverseFaceOrientationsOfSurfaceMesh, sectionOfSurfaceMesh, subdivideSurfaceMesh, doesSelfIntersectOfSurfaceMesh, transformSurfaceMesh, twistSurfaceMesh, unionOfSurfaceMeshes } from './jsxcad-algorithm-cgal.js';
+import { fromSurfaceMeshToGraph, fromPointsToAlphaShapeAsSurfaceMesh, fromSurfaceMeshToLazyGraph, fromPointsToConvexHullAsSurfaceMesh, deserializeSurfaceMesh, fromGraphToSurfaceMesh, differenceOfSurfaceMeshes, extrudeSurfaceMesh, extrudeToPlaneOfSurfaceMesh, fromFunctionToSurfaceMesh, arrangePathsIntoTriangles, fromPolygonsToSurfaceMesh, fromPointsToSurfaceMesh, arrangePaths, outlineSurfaceMesh, insetOfPolygonWithHoles, intersectionOfSurfaceMeshes, fromSurfaceMeshEmitBoundingBox, minkowskiSumOfSurfaceMeshes, fromSurfaceMeshToPolygonsWithHoles, offsetOfPolygonWithHoles, serializeSurfaceMesh, projectToPlaneOfSurfaceMesh, pushSurfaceMesh, remeshSurfaceMesh, reverseFaceOrientationsOfSurfaceMesh, sectionOfSurfaceMesh, subdivideSurfaceMesh, doesSelfIntersectOfSurfaceMesh, fromSurfaceMeshToTriangles, transformSurfaceMesh, twistSurfaceMesh, unionOfSurfaceMeshes } from './jsxcad-algorithm-cgal.js';
+export { arrangePolygonsWithHoles } from './jsxcad-algorithm-cgal.js';
 import { scale, min, max } from './jsxcad-math-vec3.js';
 import { isClockwise, flip, deduplicate } from './jsxcad-geometry-path.js';
 
@@ -101,11 +102,16 @@ const convexHull = (points) =>
 
 const toSurfaceMesh = (graph) => {
   let surfaceMesh = graph[surfaceMeshSymbol];
-  if (surfaceMesh === undefined) {
-    surfaceMesh = fromGraphToSurfaceMesh(graph);
-    graph[surfaceMeshSymbol] = surfaceMesh;
-    surfaceMesh[graphSymbol] = graph;
+  if (surfaceMesh !== undefined) {
+    return surfaceMesh;
   }
+  if (graph.serializedSurfaceMesh) {
+    surfaceMesh = deserializeSurfaceMesh(graph.serializedSurfaceMesh);
+  } else {
+    surfaceMesh = fromGraphToSurfaceMesh(graph);
+  }
+  graph[surfaceMeshSymbol] = surfaceMesh;
+  surfaceMesh[graphSymbol] = graph;
   return surfaceMesh;
 };
 
@@ -120,7 +126,7 @@ const difference = (a, b) => {
 
 const realizeGraph = (graph) => {
   if (graph.isLazy) {
-    return fromSurfaceMesh(graph[surfaceMeshSymbol]);
+    return fromSurfaceMesh(toSurfaceMesh(graph));
   } else {
     return graph;
   }
@@ -229,68 +235,9 @@ const fromTriangles = (triangles) =>
 const fromPolygonsWithHoles = (polygonsWithHoles) =>
   fromTriangles(fromPolygonsWithHolesToTriangles(polygonsWithHoles));
 
-const toPolygonsWithHoles = (graph) => {
-  graph = realizeGraph(graph);
+// import { toPolygonsWithHoles } from './toPolygonsWithHoles.js';
 
-  const faceEdges = new Map();
-
-  const getFaceEdges = (face) => {
-    let edges = faceEdges.get(face);
-    if (edges === undefined) {
-      edges = [];
-      faceEdges.set(face, edges);
-    }
-    return edges;
-  };
-
-  // Collect edges per face.
-  for (const edge of graph.edges) {
-    if (!edge || edge.face === -1) {
-      continue;
-    }
-    const twin = graph.edges[edge.twin];
-    if (twin && twin.face === edge.face) {
-      // This is an edge within a face.
-      continue;
-    }
-    getFaceEdges(edge.face).push(edge);
-  }
-
-  const polygonWithHoles = [];
-
-  // Arrange the edges per face.
-  for (const [face, edges] of faceEdges) {
-    if (face === -1) {
-      // We can't arrange edges that aren't in a face.
-      // FIX: Sometimes we'll want edges that aren't in faces or facets.
-      continue;
-    }
-    const paths = [];
-    // FIX: Use exact plane.
-    const { plane, exactPlane } = graph.faces[face];
-    for (const { point, next } of edges) {
-      paths.push({
-        points: [
-          null,
-          graph.points[point],
-          graph.points[graph.edges[next].point],
-        ],
-        exactPoints: [
-          null,
-          graph.exactPoints[point],
-          graph.exactPoints[graph.edges[next].point],
-        ],
-      });
-    }
-    polygonWithHoles.push(
-      ...arrangePaths(plane, exactPlane, paths, /* triangulate= */ false)
-    );
-  }
-
-  return polygonWithHoles;
-};
-
-const outline = (graph) => toPolygonsWithHoles(graph);
+const outline = (graph) => outlineSurfaceMesh(toSurfaceMesh(graph));
 
 const inset = (graph, initial, step, limit) => {
   const insetGraphs = [];
@@ -354,19 +301,97 @@ const minkowskiSum = (a, b) => {
   );
 };
 
+const toPolygonsWithHoles = (graph) => {
+  const mesh = toSurfaceMesh(graph);
+  const polygonsWithHoles = fromSurfaceMeshToPolygonsWithHoles(mesh);
+  return polygonsWithHoles;
+};
+
+/*
+export const toPolygonsWithHoles = (graph) => {
+  graph = realizeGraph(graph);
+
+  const faceEdges = new Map();
+
+  const getFaceEdges = (face) => {
+    let edges = faceEdges.get(face);
+    if (edges === undefined) {
+      edges = [];
+      faceEdges.set(face, edges);
+    }
+    return edges;
+  };
+
+  // Collect edges per face.
+  for (const edge of graph.edges) {
+    if (!edge || edge.face === -1) {
+      continue;
+    }
+    const twin = graph.edges[edge.twin];
+    if (twin && twin.face === edge.face) {
+      // This is an edge within a face.
+      continue;
+    }
+    getFaceEdges(edge.face).push(edge);
+  }
+
+  const polygonWithHoles = [];
+
+  // Arrange the edges per face.
+  for (const [face, edges] of faceEdges) {
+    if (face === -1) {
+      // We can't arrange edges that aren't in a face.
+      // FIX: Sometimes we'll want edges that aren't in faces or facets.
+      continue;
+    }
+    const paths = [];
+    // FIX: Use exact plane.
+    const { plane, exactPlane } = graph.faces[face];
+    for (const { point, next } of edges) {
+      paths.push({
+        points: [
+          null,
+          graph.points[point],
+          graph.points[graph.edges[next].point],
+        ],
+        exactPoints: [
+          null,
+          graph.exactPoints[point],
+          graph.exactPoints[graph.edges[next].point],
+        ],
+      });
+    }
+    polygonWithHoles.push(
+      ...arrangePaths(plane, exactPlane, paths, // triangulate= // false)
+    );
+  }
+
+  return polygonWithHoles;
+};
+*/
+
 const offset = (graph, initial, step, limit) => {
   const offsetGraphs = [];
-  for (const polygonWithHoles of outline(graph)) {
-    for (const offsetPolygon of offsetOfPolygonWithHoles(
-      initial,
-      step,
-      limit,
-      polygonWithHoles
-    )) {
-      offsetGraphs.push(fromPolygonsWithHoles([offsetPolygon]));
+  for (const { polygonsWithHoles } of toPolygonsWithHoles(graph)) {
+    for (const polygonWithHoles of polygonsWithHoles) {
+      for (const offsetPolygon of offsetOfPolygonWithHoles(
+        initial,
+        step,
+        limit,
+        polygonWithHoles
+      )) {
+        offsetGraphs.push(fromPolygonsWithHoles([offsetPolygon]));
+      }
     }
   }
   return offsetGraphs;
+};
+
+const prepareForSerialization = (graph) => {
+  if (!graph.serializedSurfaceMesh) {
+    graph.serializedSurfaceMesh = serializeSurfaceMesh(toSurfaceMesh(graph));
+  }
+  return graph;
 };
 
 const projectToPlane = (graph, plane, direction) => {
@@ -423,7 +448,6 @@ const section = (graph, plane) => {
 };
 
 const sections = (graph, planes) => {
-  console.log(`QQ/section/planes: ${JSON.stringify(planes)}`);
   const graphs = [];
   for (const planarMesh of sectionOfSurfaceMesh(toSurfaceMesh(graph), planes)) {
     graphs.push(fromSurfaceMeshLazy(planarMesh));
@@ -466,19 +490,22 @@ const toPaths = (graph) => {
 Error.stackTraceLimit = Infinity;
 
 const toTriangles = (graph) => {
-  const triangles = [];
-  // The realized graph should already be triangulated.
-  graph = realizeGraph(graph);
-  for (let { edge } of graph.facets) {
-    const triangle = [];
-    const start = edge;
-    do {
-      triangle.push(graph.points[graph.edges[edge].point]);
-      edge = graph.edges[edge].next;
-    } while (start !== edge);
-    triangles.push(triangle);
+  if (graph.isLazy) {
+    return fromSurfaceMeshToTriangles(toSurfaceMesh(graph));
+  } else {
+    const triangles = [];
+    // A realized graph should already be triangulated.
+    for (let { edge } of graph.facets) {
+      const triangle = [];
+      const start = edge;
+      do {
+        triangle.push(graph.points[graph.edges[edge].point]);
+        edge = graph.edges[edge].next;
+      } while (start !== edge);
+      triangles.push(triangle);
+    }
+    return triangles;
   }
-  return triangles;
 };
 
 const transform = (matrix, graph) =>
@@ -499,4 +526,4 @@ const union = (a, b) => {
   );
 };
 
-export { alphaShape, convexHull, difference, eachPoint, extrude, extrudeToPlane, fill, fromEmpty, fromFunction, fromPaths, fromPoints, fromPolygons, inset, intersection, measureBoundingBox, minkowskiSum, offset, outline, projectToPlane, push, realizeGraph, remesh, rerealizeGraph, reverseFaceOrientations, section, sections, smooth, test, toPaths, toPolygonsWithHoles, toTriangles, transform, twist, union };
+export { alphaShape, convexHull, difference, eachPoint, extrude, extrudeToPlane, fill, fromEmpty, fromFunction, fromPaths, fromPoints, fromPolygons, fromPolygonsWithHolesToTriangles, fromTriangles, inset, intersection, measureBoundingBox, minkowskiSum, offset, outline, prepareForSerialization, projectToPlane, push, realizeGraph, remesh, rerealizeGraph, reverseFaceOrientations, section, sections, smooth, test, toPaths, toPolygonsWithHoles, toTriangles, transform, twist, union };

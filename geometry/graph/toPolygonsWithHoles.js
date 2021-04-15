@@ -1,6 +1,13 @@
-import { arrangePaths } from '@jsxcad/algorithm-cgal';
-import { realizeGraph } from './realizeGraph.js';
+import { fromSurfaceMeshToPolygonsWithHoles } from '@jsxcad/algorithm-cgal';
+import { toSurfaceMesh } from './toSurfaceMesh.js';
 
+export const toPolygonsWithHoles = (graph) => {
+  const mesh = toSurfaceMesh(graph);
+  const polygonsWithHoles = fromSurfaceMeshToPolygonsWithHoles(mesh);
+  return polygonsWithHoles;
+};
+
+/*
 export const toPolygonsWithHoles = (graph) => {
   graph = realizeGraph(graph);
 
@@ -55,9 +62,10 @@ export const toPolygonsWithHoles = (graph) => {
       });
     }
     polygonWithHoles.push(
-      ...arrangePaths(plane, exactPlane, paths, /* triangulate= */ false)
+      ...arrangePaths(plane, exactPlane, paths, // triangulate= // false)
     );
   }
 
   return polygonWithHoles;
 };
+*/

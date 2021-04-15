@@ -10,7 +10,12 @@ export const emitted = [];
 
 let context;
 
+let startTime = new Date();
+
+export const elapsed = () => new Date() - startTime;
+
 export const clearEmitted = () => {
+  startTime = new Date();
   emitted.length = 0;
   context = undefined;
 };
