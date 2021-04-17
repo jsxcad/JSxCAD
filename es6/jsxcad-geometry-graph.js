@@ -1,4 +1,4 @@
-import { fromSurfaceMeshToGraph, fromPointsToAlphaShapeAsSurfaceMesh, fromSurfaceMeshToLazyGraph, fromPointsToConvexHullAsSurfaceMesh, deserializeSurfaceMesh, fromGraphToSurfaceMesh, differenceOfSurfaceMeshes, extrudeSurfaceMesh, extrudeToPlaneOfSurfaceMesh, fromFunctionToSurfaceMesh, arrangePathsIntoTriangles, fromPolygonsToSurfaceMesh, fromPointsToSurfaceMesh, arrangePaths, outlineSurfaceMesh, insetOfPolygonWithHoles, intersectionOfSurfaceMeshes, fromSurfaceMeshEmitBoundingBox, minkowskiSumOfSurfaceMeshes, fromSurfaceMeshToPolygonsWithHoles, offsetOfPolygonWithHoles, serializeSurfaceMesh, projectToPlaneOfSurfaceMesh, pushSurfaceMesh, remeshSurfaceMesh, reverseFaceOrientationsOfSurfaceMesh, sectionOfSurfaceMesh, subdivideSurfaceMesh, doesSelfIntersectOfSurfaceMesh, fromSurfaceMeshToTriangles, transformSurfaceMesh, twistSurfaceMesh, unionOfSurfaceMeshes } from './jsxcad-algorithm-cgal.js';
+import { fromSurfaceMeshToGraph, fromPointsToAlphaShapeAsSurfaceMesh, fromSurfaceMeshToLazyGraph, fromPointsToConvexHullAsSurfaceMesh, deserializeSurfaceMesh, fromGraphToSurfaceMesh, differenceOfSurfaceMeshes, extrudeSurfaceMesh, extrudeToPlaneOfSurfaceMesh, fromFunctionToSurfaceMesh, arrangePathsIntoTriangles, fromPolygonsToSurfaceMesh, fromPointsToSurfaceMesh, arrangePaths, fromSurfaceMeshToPolygonsWithHoles, insetOfPolygonWithHoles, intersectionOfSurfaceMeshes, fromSurfaceMeshEmitBoundingBox, minkowskiSumOfSurfaceMeshes, offsetOfPolygonWithHoles, outlineSurfaceMesh, serializeSurfaceMesh, projectToPlaneOfSurfaceMesh, pushSurfaceMesh, remeshSurfaceMesh, reverseFaceOrientationsOfSurfaceMesh, sectionOfSurfaceMesh, subdivideSurfaceMesh, doesSelfIntersectOfSurfaceMesh, fromSurfaceMeshToTriangles, transformSurfaceMesh, twistSurfaceMesh, unionOfSurfaceMeshes } from './jsxcad-algorithm-cgal.js';
 export { arrangePolygonsWithHoles } from './jsxcad-algorithm-cgal.js';
 import { scale, min, max } from './jsxcad-math-vec3.js';
 import { isClockwise, flip, deduplicate } from './jsxcad-geometry-path.js';
@@ -235,72 +235,6 @@ const fromTriangles = (triangles) =>
 const fromPolygonsWithHoles = (polygonsWithHoles) =>
   fromTriangles(fromPolygonsWithHolesToTriangles(polygonsWithHoles));
 
-// import { toPolygonsWithHoles } from './toPolygonsWithHoles.js';
-
-const outline = (graph) => outlineSurfaceMesh(toSurfaceMesh(graph));
-
-const inset = (graph, initial, step, limit) => {
-  const insetGraphs = [];
-  for (const polygonWithHoles of outline(graph)) {
-    for (const insetPolygon of insetOfPolygonWithHoles(
-      initial,
-      step,
-      limit,
-      polygonWithHoles
-    )) {
-      insetGraphs.push(fromPolygonsWithHoles([insetPolygon]));
-    }
-  }
-  return insetGraphs;
-};
-
-const intersection = (a, b) => {
-  if (a.isEmpty || b.isEmpty) {
-    return fromEmpty();
-  }
-  return fromSurfaceMeshLazy(
-    intersectionOfSurfaceMeshes(toSurfaceMesh(a), toSurfaceMesh(b))
-  );
-};
-
-const measureBoundingBox = (graph) => {
-  if (graph.boundingBox === undefined) {
-    if (graph.isLazy) {
-      fromSurfaceMeshEmitBoundingBox(
-        toSurfaceMesh(graph),
-        (xMin, yMin, zMin, xMax, yMax, zMax) => {
-          graph.boundingBox = [
-            [xMin, yMin, zMin],
-            [xMax, yMax, zMax],
-          ];
-        }
-      );
-    } else {
-      let minPoint = [Infinity, Infinity, Infinity];
-      let maxPoint = [-Infinity, -Infinity, -Infinity];
-      if (graph.points) {
-        for (const point of graph.points) {
-          if (point !== undefined) {
-            minPoint = min(minPoint, point);
-            maxPoint = max(maxPoint, point);
-          }
-        }
-      }
-      graph.boundingBox = [minPoint, maxPoint];
-    }
-  }
-  return graph.boundingBox;
-};
-
-const minkowskiSum = (a, b) => {
-  if (a.isEmpty || b.isEmpty) {
-    return a;
-  }
-  return fromSurfaceMeshLazy(
-    minkowskiSumOfSurfaceMeshes(toSurfaceMesh(a), toSurfaceMesh(b))
-  );
-};
-
 const toPolygonsWithHoles = (graph) => {
   const mesh = toSurfaceMesh(graph);
   const polygonsWithHoles = fromSurfaceMeshToPolygonsWithHoles(mesh);
@@ -370,6 +304,79 @@ export const toPolygonsWithHoles = (graph) => {
 };
 */
 
+const inset = (graph, initial, step, limit) => {
+  const insetGraphs = [];
+  for (const { plane, exactPlane, polygonsWithHoles } of toPolygonsWithHoles(
+    graph
+  )) {
+    console.log(`QQ/inset/group: ${JSON.stringify({ plane, exactPlane })}`);
+    for (const polygonWithHoles of polygonsWithHoles) {
+      console.log(
+        `QQ/inset/polygon: ${JSON.stringify({
+          plane: polygonWithHoles.plane,
+          exactPlane: polygonWithHoles.exactPlane,
+        })}`
+      );
+      for (const insetPolygon of insetOfPolygonWithHoles(
+        initial,
+        step,
+        limit,
+        polygonWithHoles
+      )) {
+        insetGraphs.push(fromPolygonsWithHoles([insetPolygon]));
+      }
+    }
+  }
+  return insetGraphs;
+};
+
+const intersection = (a, b) => {
+  if (a.isEmpty || b.isEmpty) {
+    return fromEmpty();
+  }
+  return fromSurfaceMeshLazy(
+    intersectionOfSurfaceMeshes(toSurfaceMesh(a), toSurfaceMesh(b))
+  );
+};
+
+const measureBoundingBox = (graph) => {
+  if (graph.boundingBox === undefined) {
+    if (graph.isLazy) {
+      fromSurfaceMeshEmitBoundingBox(
+        toSurfaceMesh(graph),
+        (xMin, yMin, zMin, xMax, yMax, zMax) => {
+          graph.boundingBox = [
+            [xMin, yMin, zMin],
+            [xMax, yMax, zMax],
+          ];
+        }
+      );
+    } else {
+      let minPoint = [Infinity, Infinity, Infinity];
+      let maxPoint = [-Infinity, -Infinity, -Infinity];
+      if (graph.points) {
+        for (const point of graph.points) {
+          if (point !== undefined) {
+            minPoint = min(minPoint, point);
+            maxPoint = max(maxPoint, point);
+          }
+        }
+      }
+      graph.boundingBox = [minPoint, maxPoint];
+    }
+  }
+  return graph.boundingBox;
+};
+
+const minkowskiSum = (a, b) => {
+  if (a.isEmpty || b.isEmpty) {
+    return a;
+  }
+  return fromSurfaceMeshLazy(
+    minkowskiSumOfSurfaceMeshes(toSurfaceMesh(a), toSurfaceMesh(b))
+  );
+};
+
 const offset = (graph, initial, step, limit) => {
   const offsetGraphs = [];
   for (const { polygonsWithHoles } of toPolygonsWithHoles(graph)) {
@@ -386,6 +393,10 @@ const offset = (graph, initial, step, limit) => {
   }
   return offsetGraphs;
 };
+
+// import { toPolygonsWithHoles } from './toPolygonsWithHoles.js';
+
+const outline = (graph) => outlineSurfaceMesh(toSurfaceMesh(graph));
 
 const prepareForSerialization = (graph) => {
   if (!graph.serializedSurfaceMesh) {

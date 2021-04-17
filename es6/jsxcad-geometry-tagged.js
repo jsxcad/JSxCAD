@@ -462,7 +462,6 @@ const toDisjointGeometry = (geometry, mode = DISJUNCTION_TOTAL) => {
       return walk(toTransformedGeometry(geometry), op);
     } else if (geometry.type === 'assembly') {
       if (mode === DISJUNCTION_VISIBLE && !hasVoidGeometry(geometry)) {
-        console.log(`QQ/Visible Disjunction Skipped`);
         // This leads to some potential invariant violations.
         // With toVisiblyDisjoint geometry we may get assembly within
         // disjointAssembly.
@@ -1705,13 +1704,17 @@ const test = (geometry) => {
 
 const toDisplayGeometry = (
   geometry,
-  { doTriangles = true, doOutline = true, doWireframe = true } = {}
-) =>
-  soup(toVisiblyDisjointGeometry(geometry), {
-    doTriangles,
-    doOutline,
-    doWireframe,
+  { triangles = true, outline = true, wireframe = false } = {}
+) => {
+  if (!geometry) {
+    throw Error('die');
+  }
+  return soup(toVisiblyDisjointGeometry(geometry), {
+    doTriangles: triangles,
+    doOutline: outline,
+    doWireframe: wireframe,
   });
+};
 
 // The resolution is 1 / multiplier.
 const multiplier = 1e5;

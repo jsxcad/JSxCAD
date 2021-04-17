@@ -3,10 +3,14 @@ import { toVisiblyDisjointGeometry } from './toDisjointGeometry.js';
 
 export const toDisplayGeometry = (
   geometry,
-  { doTriangles = true, doOutline = true, doWireframe = true } = {}
-) =>
-  soup(toVisiblyDisjointGeometry(geometry), {
-    doTriangles,
-    doOutline,
-    doWireframe,
+  { triangles = true, outline = true, wireframe = false } = {}
+) => {
+  if (!geometry) {
+    throw Error('die');
+  }
+  return soup(toVisiblyDisjointGeometry(geometry), {
+    doTriangles: triangles,
+    doOutline: outline,
+    doWireframe: wireframe,
   });
+};
