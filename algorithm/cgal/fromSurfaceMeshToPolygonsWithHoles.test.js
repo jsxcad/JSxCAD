@@ -110,12 +110,12 @@ test('fromSurfaceMeshToPolygonsWithHoles', (t) => {
 
   t.deepEqual(polygons, [
     {
-      plane: [0, -1, 0, -1],
-      exactPlane: ['0', '-2', '0', '-1'],
+      plane: [0, -1, 0, -0.5],
+      exactPlane: ['0', '-1', '0', '-1/2'],
       polygonsWithHoles: [
         {
-          plane: [0, -1, 0, -1],
-          exactPlane: ['0', '-2', '0', '-1'],
+          plane: [0, -1, 0, -0.5],
+          exactPlane: ['0', '-1', '0', '-1/2'],
           points: [
             [0.5, -0.5, -0.5],
             [0.5, -0.5, 0.5],
@@ -133,12 +133,12 @@ test('fromSurfaceMeshToPolygonsWithHoles', (t) => {
       ],
     },
     {
-      plane: [1, 0, 0, -1],
-      exactPlane: ['2', '0', '0', '-1'],
+      plane: [1, 0, 0, -0.5],
+      exactPlane: ['1', '0', '0', '-1/2'],
       polygonsWithHoles: [
         {
-          plane: [1, 0, 0, -1],
-          exactPlane: ['2', '0', '0', '-1'],
+          plane: [1, 0, 0, -0.5],
+          exactPlane: ['1', '0', '0', '-1/2'],
           points: [
             [0.5, -0.5, -0.5],
             [0.5, 0.5, -0.5],
@@ -156,12 +156,12 @@ test('fromSurfaceMeshToPolygonsWithHoles', (t) => {
       ],
     },
     {
-      plane: [0, 0, -1, -1],
-      exactPlane: ['0', '0', '-2', '-1'],
+      plane: [0, 0, -1, -0.5],
+      exactPlane: ['0', '0', '-1', '-1/2'],
       polygonsWithHoles: [
         {
-          plane: [0, 0, -1, -1],
-          exactPlane: ['0', '0', '-2', '-1'],
+          plane: [0, 0, -1, -0.5],
+          exactPlane: ['0', '0', '-1', '-1/2'],
           points: [
             [-0.5, -0.5, -0.5],
             [-0.5, 0.5, -0.5],
@@ -179,12 +179,12 @@ test('fromSurfaceMeshToPolygonsWithHoles', (t) => {
       ],
     },
     {
-      plane: [-1, 0, 0, -1],
-      exactPlane: ['-2', '0', '0', '-1'],
+      plane: [-1, 0, 0, -0.5],
+      exactPlane: ['-1', '0', '0', '-1/2'],
       polygonsWithHoles: [
         {
-          plane: [-1, 0, 0, -1],
-          exactPlane: ['-2', '0', '0', '-1'],
+          plane: [-1, 0, 0, -0.5],
+          exactPlane: ['-1', '0', '0', '-1/2'],
           points: [
             [-0.5, -0.5, 0.5],
             [-0.5, 0.5, 0.5],
@@ -202,12 +202,12 @@ test('fromSurfaceMeshToPolygonsWithHoles', (t) => {
       ],
     },
     {
-      plane: [0, 0, 1, -1],
-      exactPlane: ['0', '0', '2', '-1'],
+      plane: [0, 0, 1, -0.5],
+      exactPlane: ['0', '0', '1', '-1/2'],
       polygonsWithHoles: [
         {
-          plane: [0, 0, 1, -1],
-          exactPlane: ['0', '0', '2', '-1'],
+          plane: [0, 0, 1, -0.5],
+          exactPlane: ['0', '0', '1', '-1/2'],
           points: [
             [-0.5, -0.5, 0.5],
             [0.5, -0.5, 0.5],
@@ -225,12 +225,12 @@ test('fromSurfaceMeshToPolygonsWithHoles', (t) => {
       ],
     },
     {
-      plane: [0, 1, 0, -1],
-      exactPlane: ['0', '2', '0', '-1'],
+      plane: [0, 1, 0, -0.5],
+      exactPlane: ['0', '1', '0', '-1/2'],
       polygonsWithHoles: [
         {
-          plane: [0, 1, 0, -1],
-          exactPlane: ['0', '2', '0', '-1'],
+          plane: [0, 1, 0, -0.5],
+          exactPlane: ['0', '1', '0', '-1/2'],
           points: [
             [0.5, 0.5, -0.5],
             [-0.5, 0.5, -0.5],

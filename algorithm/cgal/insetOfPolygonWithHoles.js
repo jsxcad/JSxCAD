@@ -1,48 +1,49 @@
 import { getCgal } from './getCgal.js';
 
-// const round = (n) => Math.round(n * 10000) / 10000;
-const round = (n) => n;
-
 export const insetOfPolygonWithHoles = (
   initial = 1,
   step = -1,
   limit = -1,
   polygon
 ) => {
-  const c = getCgal();
-  const [x, y, z, w] = polygon.plane;
+  const g = getCgal();
   const outputs = [];
   let output;
   let points;
   let exactPoints;
-  c.InsetOfPolygonWithHoles(
+  g.InsetOfPolygonWithHoles(
     initial,
     step,
     limit,
-    x,
-    y,
-    z,
-    -w,
     polygon.holes.length,
+    (out) => {
+      if (polygon.exactPlane) {
+        const [a, b, c, d] = polygon.exactPlane;
+        g.fillExactQuadruple(out, a, b, c, d);
+      } else {
+        const [x, y, z, w] = polygon.plane;
+        g.fillQuadruple(out, x, y, z, -w);
+      }
+    },
     (boundary) => {
       if (polygon.exactPoints) {
-        for (let [x, y, z] of polygon.exactPoints) {
-          c.addExactPoint(boundary, x, y, z);
+        for (const [x, y, z] of polygon.exactPoints) {
+          g.addExactPoint(boundary, x, y, z);
         }
       } else {
-        for (let [x, y, z] of polygon.points) {
-          c.addPoint(boundary, round(x), round(y), round(z));
+        for (const [x, y, z] of polygon.points) {
+          g.addPoint(boundary, x, y, z);
         }
       }
     },
     (hole, nth) => {
       if (polygon.holes[nth].exactPoints) {
         for (const [x, y, z] of polygon.holes[nth].exactPoints) {
-          c.addExactPoint(hole, x, y, z);
+          g.addExactPoint(hole, x, y, z);
         }
       } else {
         for (const [x, y, z] of polygon.holes[nth].points) {
-          c.addPoint(hole, round(x), round(y), round(z));
+          g.addPoint(hole, x, y, z);
         }
       }
     },

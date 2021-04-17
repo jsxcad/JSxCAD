@@ -63,8 +63,8 @@ export class Shape {
     return fromGeometry(flip(toDisjointGeometry(this)), this.context);
   }
 
-  toDisplayGeometry() {
-    return toDisplayGeometry(toGeometry(this));
+  toDisplayGeometry(options) {
+    return toDisplayGeometry(toGeometry(this), options);
   }
 
   toKeptGeometry(options = {}) {

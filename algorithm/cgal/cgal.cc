@@ -120,6 +120,17 @@ typedef CGAL::Straight_skeleton_2<Kernel_2> Straight_skeleton_2;
 
 typedef CGAL::General_polygon_set_2<CGAL::Gps_segment_traits_2<Kernel>> General_polygon_set_2;
 
+namespace std {
+
+template <typename K> struct hash<CGAL::Plane_3<K> > {
+  std::size_t operator() (const CGAL::Plane_3<K>& plane) const {
+    // FIX: We can do better than this.
+    return 1;
+  }
+};
+
+}
+
 #ifndef TEST_ONLY
 
 double time_base = -1;
@@ -402,6 +413,9 @@ Surface_mesh* TwistSurfaceMesh(Surface_mesh* input, double degreesPerZ) {
   // This does not look very efficient.
   // CHECK: Figure out deformations.
   for (const Surface_mesh::Vertex_index vertex : c->vertices()) {
+    if (c->is_removed(vertex)) {
+      continue;
+    }
     Point& point = c->point(vertex);
     double a = CGAL::to_double(point.z()) * degreesPerZ;
     RT sin_alpha, cos_alpha, w;
@@ -416,15 +430,24 @@ Surface_mesh* TwistSurfaceMesh(Surface_mesh* input, double degreesPerZ) {
   return c;
 }
 
-Surface_mesh* PushSurfaceMesh(Surface_mesh* input, double force, double minimum_distance, double maximum_distance) {
+Surface_mesh* PushSurfaceMesh(Surface_mesh* input, double force, double minimum_distance, double scale) {
   Surface_mesh* c = new Surface_mesh(*input);
   Point origin(0, 0, 0);
   for (const Surface_mesh::Vertex_index vertex : c->vertices()) {
+    if (c->is_removed(vertex)) {
+      continue;
+    }
     Point& point = c->point(vertex);
     Vector vector = Vector(origin, point);
-    double distance = sqrt(CGAL::to_double(vector.squared_length()));
-    // TODO: Apply a logistic decay.
-    point += vector * (force / distance);
+    double distance = sqrt(CGAL::to_double(vector.squared_length())) * scale;
+    FT effect;
+    if ((distance - minimum_distance) <= 1.0) {
+      effect = 1.0;
+    } else {
+      effect = 1.0 - (1.0 / (distance - minimum_distance));
+    }
+    point += vector * (force * effect);
+std::cout << "QQ/Push/point: " << point << std::endl;
   }
   return c;
 }
@@ -638,6 +661,28 @@ CGAL::Plane_3<R> normalized(const CGAL::Plane_3<R>& h) {
   return typename R::Plane_3(pa,pb,pc,pd);
 }
 #endif
+
+Plane unitPlane(const Plane& p) { 
+  Vector normal = p.orthogonal_vector();
+  // We can handle the axis aligned planes exactly.
+  if (normal.direction() == Vector(0, 0, 1).direction()) {
+    return Plane(p.point(), Vector(0, 0, 1));
+  } else if (normal.direction() == Vector(0, 0, -1).direction()) {
+    return Plane(p.point(), Vector(0, 0, -1));
+  } else if (normal.direction() == Vector(0, 1, 0).direction()) {
+    return Plane(p.point(), Vector(0, 1, 0));
+  } else if (normal.direction() == Vector(0, -1, 0).direction()) {
+    return Plane(p.point(), Vector(0, -1, 0));
+  } else if (normal.direction() == Vector(1, 0, 0).direction()) {
+    return Plane(p.point(), Vector(1, 0, 0));
+  } else if (normal.direction() == Vector(-1, 0, 0).direction()) {
+    return Plane(p.point(), Vector(-1, 0, 0));
+  } else {
+    // But the general case requires an approximation.
+    Vector unit_normal = normal / CGAL_NTS approximate_sqrt(normal.squared_length());
+    return Plane(p.point(), unit_normal);
+  }
+}
 
 Plane PlaneOfSurfaceMeshFacet(const Surface_mesh& mesh, Face_index facet) {
   const auto h = mesh.halfedge(facet);
@@ -1016,7 +1061,10 @@ void PlanarSurfaceMeshToVolumetricSurfaceMesh(const Plane& plane, const Surface_
     normal *= kExtrusionMinimum;
   }
 
-  CGAL::Polygon_mesh_processing::extrude_mesh(planar, volumetric, normal);
+  typedef typename boost::property_map<Surface_mesh, CGAL::vertex_point_t>::type VPMap;
+  Project<VPMap> top(get(CGAL::vertex_point, volumetric), normal);
+  Project<VPMap> bottom(get(CGAL::vertex_point, volumetric), CGAL::NULL_VECTOR);
+  CGAL::Polygon_mesh_processing::extrude_mesh(planar, volumetric, bottom, top);
 }
 
 const double kIota = 10e-5;
@@ -1213,12 +1261,23 @@ void SectionOfSurfaceMesh(Surface_mesh* mesh, std::size_t plane_count, emscripte
   }
 }
 
-Plane ensureNormalizedFacetPlane(Surface_mesh& mesh, std::unordered_map<Face_index, Plane>& facet_to_plane, Face_index facet) {
+Plane ensureFacetPlane(Surface_mesh& mesh, std::unordered_map<Face_index, Plane>& facet_to_plane, std::unordered_set<Plane>& planes, Face_index facet) {
   auto it = facet_to_plane.find(facet);
   if (it == facet_to_plane.end()) {
-    Plane facet_plane = normalized(PlaneOfSurfaceMeshFacet(mesh, facet));
-    facet_to_plane[facet] = facet_plane;
-    return facet_plane;
+    Plane facet_plane = PlaneOfSurfaceMeshFacet(mesh, facet);
+    // We canonicalize the planes so that the 2d projections match.
+    auto canonical_plane = planes.find(facet_plane);
+    if (canonical_plane == planes.end()) {
+      planes.insert(facet_plane);
+      facet_to_plane[facet] = facet_plane;
+      return facet_plane;
+    } else {
+      facet_to_plane[facet] = *canonical_plane;
+      if (*canonical_plane != facet_plane) {
+        std::cout << "QQ/ensureFacetPlane/mismatch" << std::endl;
+      }
+      return *canonical_plane;
+    }
   } else {
     return it->second;
   }
@@ -1227,6 +1286,7 @@ Plane ensureNormalizedFacetPlane(Surface_mesh& mesh, std::unordered_map<Face_ind
 void OutlineSurfaceMesh(Surface_mesh* input, emscripten::val emit_approximate_segment) {
   Surface_mesh& mesh = *input;
 
+  std::unordered_set<Plane> planes;
   std::unordered_map<Face_index, Plane> facet_to_plane;
 
   // FIX: Make this more efficient.
@@ -1235,7 +1295,7 @@ void OutlineSurfaceMesh(Surface_mesh* input, emscripten::val emit_approximate_se
     if (mesh.is_removed(start)) {
       continue;
     }
-    const Plane facet_plane = ensureNormalizedFacetPlane(mesh, facet_to_plane, facet);
+    const Plane facet_plane = ensureFacetPlane(mesh, facet_to_plane, planes, facet);
     Halfedge_index edge = start;
     do {
       bool corner = false;
@@ -1243,7 +1303,7 @@ void OutlineSurfaceMesh(Surface_mesh* input, emscripten::val emit_approximate_se
       if (opposite_facet == mesh.null_face()) {
         corner = true;
       } else {
-        const Plane opposite_facet_plane = ensureNormalizedFacetPlane(mesh, facet_to_plane, opposite_facet);
+        const Plane opposite_facet_plane = ensureFacetPlane(mesh, facet_to_plane, planes, opposite_facet);
         if (facet_plane != opposite_facet_plane) {
           corner = true;
         }
@@ -1567,9 +1627,47 @@ void ComputeAlphaShape2AsPolygonSegments(size_t component_limit, double alpha, b
   }
 }
 
-void OffsetOfPolygonWithHoles(double initial, double step, double limit, double x, double y, double z, double w, std::size_t hole_count, emscripten::val fill_boundary, emscripten::val fill_hole, emscripten::val emit_polygon, emscripten::val emit_point) {
+template<class Kernel, class Container>
+void print_polygon (const CGAL::Polygon_2<Kernel, Container>& P)
+{
+  typename CGAL::Polygon_2<Kernel, Container>::Vertex_const_iterator vit;
+  std::cout << "[ " << P.size() << " vertices:";
+  for (vit = P.vertices_begin(); vit != P.vertices_end(); ++vit)
+    std::cout << " (" << *vit << ')';
+  std::cout << " ]" << std::endl;
+}
+
+template<class Kernel, class Container>
+void print_polygon_with_holes(const CGAL::Polygon_with_holes_2<Kernel, Container> & pwh)
+{
+  if (! pwh.is_unbounded()) {
+    std::cout << "{ Outer boundary = ";
+    print_polygon (pwh.outer_boundary());
+  } else
+    std::cout << "{ Unbounded polygon." << std::endl;
+  typename CGAL::Polygon_with_holes_2<Kernel,Container>::Hole_const_iterator hit;
+  unsigned int k = 1;
+  std::cout << " " << pwh.number_of_holes() << " holes:" << std::endl;
+  for (hit = pwh.holes_begin(); hit != pwh.holes_end(); ++hit, ++k) {
+    std::cout << " Hole #" << k << " = ";
+    print_polygon (*hit);
+  }
+  std::cout << " }" << std::endl;
+}
+
+void admitPlane(Plane& plane, emscripten::val fill_plane) {
+  Quadruple q;
+  Quadruple* qp = &q;
+  fill_plane(qp);
+  plane = Plane(q[0], q[1], q[2], q[3]);
+}
+
+void OffsetOfPolygonWithHoles(double initial, double step, double limit, std::size_t hole_count, emscripten::val fill_plane, emscripten::val fill_boundary, emscripten::val fill_hole, emscripten::val emit_polygon, emscripten::val emit_point) {
   typedef CGAL::Gps_segment_traits_2<Kernel> Traits;
-  Kernel::Plane_3 plane(x, y, z, w);
+  Plane plane;
+  admitPlane(plane, fill_plane);
+  plane = unitPlane(plane);
+  std::cout << "QQ/Offset/plane: " << plane << std::endl;
 
   Polygon_with_holes_2 insetting_boundary;
   std::vector<Polygon_2> holes;
@@ -1582,7 +1680,7 @@ void OffsetOfPolygonWithHoles(double initial, double step, double limit, double 
     for (const auto& point : points) {
       hole.push_back(plane.to_2d(point));
     }
-    if (hole.orientation() == CGAL::Sign::NEGATIVE) {
+    if (hole.orientation() == CGAL::Sign::POSITIVE) {
       hole.reverse_orientation();
     }
     if (!hole.is_simple()) {
@@ -1645,15 +1743,16 @@ void OffsetOfPolygonWithHoles(double initial, double step, double limit, double 
     Polygon_with_holes_2 inset_boundary = CGAL::minkowski_sum_2(insetting_boundary, tool);
 
     Polygon_with_holes_2 offset_boundary = CGAL::minkowski_sum_2(boundary, tool);
+
     boundaries.join(CGAL::General_polygon_set_2<Traits>(offset_boundary));
 
     // We just extract the holes, which are the offset holes.
     for (auto hole = inset_boundary.holes_begin(); hole != inset_boundary.holes_end(); ++hole) {
       if (hole->orientation() == CGAL::Sign::NEGATIVE) {
         Polygon_2 boundary = *hole;
+        boundary.reverse_orientation();
         boundaries.difference(CGAL::General_polygon_set_2<Traits>(boundary));
       } else {
-        boundary.reverse_orientation();
         boundaries.difference(CGAL::General_polygon_set_2<Traits>(*hole));
       }
     }
@@ -1705,9 +1804,11 @@ void OffsetOfPolygonWithHoles(double initial, double step, double limit, double 
   }
 }
 
-void InsetOfPolygonWithHoles(double initial, double step, double limit, double x, double y, double z, double w, std::size_t hole_count, emscripten::val fill_boundary, emscripten::val fill_hole, emscripten::val emit_polygon, emscripten::val emit_point) {
+void InsetOfPolygonWithHoles(double initial, double step, double limit, std::size_t hole_count, emscripten::val fill_plane, emscripten::val fill_boundary, emscripten::val fill_hole, emscripten::val emit_polygon, emscripten::val emit_point) {
   typedef CGAL::Gps_segment_traits_2<Kernel> Traits;
-  Kernel::Plane_3 plane(x, y, z, w);
+  Plane plane;
+  admitPlane(plane, fill_plane);
+  plane = unitPlane(plane);
 
   Polygon_with_holes_2 insetting_boundary;
 
@@ -1841,13 +1942,6 @@ void InsetOfPolygonWithHoles(double initial, double step, double limit, double x
       break;
     }
   }
-}
-
-void admitPlane(Plane& plane, emscripten::val fill_plane) {
-  Quadruple q;
-  Quadruple* qp = &q;
-  fill_plane(qp);
-  plane = Plane(q[0], q[1], q[2], q[3]);
 }
 
 template <typename P>
@@ -2035,18 +2129,8 @@ void BooleansOfPolygonsWithHolesExact(std::string a, std::string b, std::string 
   BooleansOfPolygonsWithHoles(Plane(to_FT(a), to_FT(b), to_FT(c), to_FT(d)), get_operation, fill_boundary, fill_hole, emit_polygon, emit_point);
 }
 
-namespace std {
-
-template <typename K> struct hash<CGAL::Plane_3<K> > {
-  std::size_t operator() (const CGAL::Plane_3<K>& plane) const {
-    // FIX: We can do better than this.
-    return 1;
-  }
-};
-
-}
-
 void convertSurfaceMeshFacesToArrangements(Surface_mesh& mesh, std::unordered_map<Plane, Arrangement_2>& arrangements) {
+  std::unordered_set<Plane> planes;
   std::unordered_map<Face_index, Plane> facet_to_plane;
 
   // FIX: Make this more efficient.
@@ -2055,8 +2139,7 @@ void convertSurfaceMeshFacesToArrangements(Surface_mesh& mesh, std::unordered_ma
     if (mesh.is_removed(start)) {
       continue;
     }
-    const Plane facet_plane = ensureNormalizedFacetPlane(mesh, facet_to_plane, facet);
-    // const Plane facet_plane(0, 0, 1, 0);
+    const Plane facet_plane = ensureFacetPlane(mesh, facet_to_plane, planes, facet);
     Arrangement_2& arrangement = arrangements[facet_plane];
     Halfedge_index edge = start;
     do {
@@ -2065,7 +2148,7 @@ void convertSurfaceMeshFacesToArrangements(Surface_mesh& mesh, std::unordered_ma
       if (opposite_facet == mesh.null_face()) {
         corner = true;
       } else {
-        const Plane opposite_facet_plane = ensureNormalizedFacetPlane(mesh, facet_to_plane, opposite_facet);
+        const Plane opposite_facet_plane = ensureFacetPlane(mesh, facet_to_plane, planes, opposite_facet);
         if (facet_plane != opposite_facet_plane) {
           corner = true;
         }

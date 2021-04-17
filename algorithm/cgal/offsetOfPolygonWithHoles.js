@@ -6,40 +6,44 @@ export const offsetOfPolygonWithHoles = (
   limit = -1,
   polygon
 ) => {
-  const c = getCgal();
-  const [x, y, z, w] = polygon.plane;
+  const g = getCgal();
   const outputs = [];
   let output;
   let points;
   let exactPoints;
-  c.OffsetOfPolygonWithHoles(
+  g.OffsetOfPolygonWithHoles(
     initial,
     step,
     limit,
-    x,
-    y,
-    z,
-    -w,
     polygon.holes.length,
+    (out) => {
+      if (polygon.exactPlane) {
+        const [a, b, c, d] = polygon.exactPlane;
+        g.fillExactQuadruple(out, a, b, c, d);
+      } else {
+        const [x, y, z, w] = polygon.plane;
+        g.fillQuadruple(out, x, y, z, -w);
+      }
+    },
     (boundary) => {
       if (polygon.exactPoints) {
         for (const [x, y, z] of polygon.exactPoints) {
-          c.addExactPoint(boundary, x, y, z);
+          g.addExactPoint(boundary, x, y, z);
         }
       } else {
         for (const [x, y, z] of polygon.points) {
-          c.addPoint(boundary, x, y, z);
+          g.addPoint(boundary, x, y, z);
         }
       }
     },
     (hole, nth) => {
       if (polygon.holes[nth].exactPoints) {
         for (const [x, y, z] of polygon.holes[nth].exactPoints) {
-          c.addExactPoint(hole, x, y, z);
+          g.addExactPoint(hole, x, y, z);
         }
       } else {
         for (const [x, y, z] of polygon.holes[nth].points) {
-          c.addPoint(hole, x, y, z);
+          g.addPoint(hole, x, y, z);
         }
       }
     },
@@ -47,7 +51,13 @@ export const offsetOfPolygonWithHoles = (
       points = [];
       exactPoints = [];
       if (isHole) {
-        output.holes.push({ points, exactPoints });
+        output.holes.push({
+          points,
+          exactPoints,
+          holes: [],
+          plane: polygon.plane,
+          exactPlane: polygon.exactPlane,
+        });
       } else {
         output = {
           points,
@@ -61,7 +71,7 @@ export const offsetOfPolygonWithHoles = (
     },
     (x, y, z, exactX, exactY, exactZ) => {
       points.push([x, y, z]);
-      exactPoints.push([exactX, exactY, exactX]);
+      exactPoints.push([exactX, exactY, exactZ]);
     }
   );
   return outputs;

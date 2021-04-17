@@ -45,7 +45,6 @@ export const toDisjointGeometry = (geometry, mode = DISJUNCTION_TOTAL) => {
       return walk(toTransformedGeometry(geometry), op);
     } else if (geometry.type === 'assembly') {
       if (mode === DISJUNCTION_VISIBLE && !hasVoidGeometry(geometry)) {
-        console.log(`QQ/Visible Disjunction Skipped`);
         // This leads to some potential invariant violations.
         // With toVisiblyDisjoint geometry we may get assembly within
         // disjointAssembly.

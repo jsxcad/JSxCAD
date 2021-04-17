@@ -7,7 +7,7 @@ import { nanoid } from 'nanoid/non-secure';
 // FIX: Avoid the extra read-write cycle.
 const view = (
   shape,
-  size,
+  { size, triangles = true, outline = true, wireframe = false },
   op = (x) => x,
   {
     inline,
@@ -23,7 +23,9 @@ const view = (
     height = size / 2;
   }
   const viewShape = op(shape);
-  for (const entry of ensurePages(viewShape.toDisplayGeometry())) {
+  for (const entry of ensurePages(
+    viewShape.toDisplayGeometry({ triangles, outline, wireframe })
+  )) {
     const path = `view/${getModule()}/${nanoid()}`;
     addPending(write(path, entry));
     const view = { width, height, position, inline, withAxes, withGrid };
@@ -33,7 +35,7 @@ const view = (
 };
 
 Shape.prototype.view = function (
-  size = 256,
+  { size = 256, triangles = true, outline = true, wireframe = false } = {},
   op,
   {
     path,
@@ -44,7 +46,7 @@ Shape.prototype.view = function (
     withGrid,
   } = {}
 ) {
-  return view(this, size, op, {
+  return view(this, { size, triangles, outline, wireframe }, op, {
     path,
     width,
     height,
@@ -55,7 +57,7 @@ Shape.prototype.view = function (
 };
 
 Shape.prototype.topView = function (
-  size = 256,
+  { size = 256, triangles = true, outline = true, wireframe = false } = {},
   op,
   {
     path,
@@ -66,7 +68,7 @@ Shape.prototype.topView = function (
     withGrid,
   } = {}
 ) {
-  return view(this, size, op, {
+  return view(this, { size, triangles, outline, wireframe }, op, {
     path,
     width,
     height,
@@ -77,7 +79,7 @@ Shape.prototype.topView = function (
 };
 
 Shape.prototype.gridView = function (
-  size = 256,
+  { size = 256, triangles = true, outline = true, wireframe = false } = {},
   op,
   {
     path,
@@ -88,7 +90,7 @@ Shape.prototype.gridView = function (
     withGrid = true,
   } = {}
 ) {
-  return view(this, size, op, {
+  return view(this, { size, triangles, outline, wireframe }, op, {
     path,
     width,
     height,
@@ -99,7 +101,7 @@ Shape.prototype.gridView = function (
 };
 
 Shape.prototype.frontView = function (
-  size = 256,
+  { size = 256, triangles = true, outline = true, wireframe = false } = {},
   op,
   {
     path,
@@ -110,7 +112,7 @@ Shape.prototype.frontView = function (
     withGrid,
   } = {}
 ) {
-  return view(this, size, op, {
+  return view(this, { size, triangles, outline, wireframe }, op, {
     path,
     width,
     height,
@@ -121,7 +123,7 @@ Shape.prototype.frontView = function (
 };
 
 Shape.prototype.sideView = function (
-  size = 256,
+  { size = 256, triangles = true, outline = true, wireframe = false } = {},
   op,
   {
     path,
@@ -132,7 +134,7 @@ Shape.prototype.sideView = function (
     withGrid,
   } = {}
 ) {
-  return view(this, size, op, {
+  return view(this, { size, triangles, outline, wireframe }, op, {
     path,
     width,
     height,
