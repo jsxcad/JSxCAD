@@ -62,7 +62,6 @@ const box1Solid = [
 
 test('Correctly render a box', async (t) => {
   const stl = await toStl(taggedGraph({}, fromPolygons(box1Solid)));
-  console.log(new TextDecoder('utf8').decode(stl));
   t.is(
     new TextDecoder('utf8').decode(stl),
     readFileSync('toStl.test.box.stl', { encoding: 'utf8' })

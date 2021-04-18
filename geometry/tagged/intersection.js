@@ -36,6 +36,9 @@ const intersectionImpl = (geometry, ...geometries) => {
             );
           }
         }
+        if (intersection.hash) {
+          throw Error(`hash`);
+        }
         return taggedGroup({ tags }, ...intersections);
       }
       case 'paths': {

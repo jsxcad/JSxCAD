@@ -31,6 +31,9 @@ const differenceImpl = (geometry, ...geometries) => {
             );
           }
         }
+        if (differenced.hash) {
+          throw Error(`hash`);
+        }
         return taggedGraph({ tags }, differenced);
       }
       case 'paths':
