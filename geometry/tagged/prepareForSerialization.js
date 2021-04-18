@@ -1,21 +1,17 @@
 import { prepareForSerialization as prepareForSerializationOfGraph } from '@jsxcad/geometry-graph';
-import { rewrite } from './visit.js';
-import { taggedGraph } from './taggedGraph.js';
+import { visit } from './visit.js';
 
 export const prepareForSerialization = (geometry) => {
   const op = (geometry, descend) => {
-    const { tags } = geometry;
     switch (geometry.type) {
       case 'graph':
-        return taggedGraph(
-          { tags },
-          prepareForSerializationOfGraph(geometry.graph)
-        );
+        prepareForSerializationOfGraph(geometry.graph);
+        return;
       case 'displayGeometry':
       case 'triangles':
       case 'points':
       case 'paths':
-        return geometry;
+        return;
       case 'assembly':
       case 'item':
       case 'disjointAssembly':
@@ -30,5 +26,7 @@ export const prepareForSerialization = (geometry) => {
     }
   };
 
-  return rewrite(geometry, op);
+  visit(geometry, op);
+
+  return geometry;
 };

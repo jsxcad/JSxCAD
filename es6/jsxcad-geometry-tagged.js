@@ -38,9 +38,15 @@ const update = (geometry, updates, changes) => {
   }
   const updated = {};
   for (const key of Object.keys(geometry)) {
-    if (typeof key !== 'symbol') {
-      updated[key] = geometry[key];
+    if (key === 'hash') {
+      // Hash is a bit like a symbol, but we want it to persist.
+      continue;
     }
+    if (typeof key === 'symbol') {
+      // Don't copy symbols.
+      continue;
+    }
+    updated[key] = geometry[key];
   }
   let changed = false;
   for (const key of Object.keys(updates)) {
@@ -522,6 +528,9 @@ const differenceImpl = (geometry, ...geometries) => {
               )
             );
           }
+        }
+        if (differenced.hash) {
+          throw Error(`hash`);
         }
         return taggedGraph({ tags }, differenced);
       }
@@ -1070,6 +1079,9 @@ let nanoid = (size = 21) => {
 const hash = (geometry) => {
   if (geometry.hash === undefined) {
     geometry.hash = nanoid();
+    console.log(`QQ/hash/new: ${geometry.hash}`);
+  } else {
+    console.log(`QQ/hash/old: ${geometry.hash}`);
   }
   return geometry.hash;
 };
@@ -1100,6 +1112,9 @@ const intersectionImpl = (geometry, ...geometries) => {
               )
             );
           }
+        }
+        if (intersection.hash) {
+          throw Error(`hash`);
         }
         return taggedGroup({ tags }, ...intersections);
       }
@@ -1388,18 +1403,15 @@ const projectToPlane = (geometry, plane, direction) => {
 
 const prepareForSerialization = (geometry) => {
   const op = (geometry, descend) => {
-    const { tags } = geometry;
     switch (geometry.type) {
       case 'graph':
-        return taggedGraph(
-          { tags },
-          prepareForSerialization$1(geometry.graph)
-        );
+        prepareForSerialization$1(geometry.graph);
+        return;
       case 'displayGeometry':
       case 'triangles':
       case 'points':
       case 'paths':
-        return geometry;
+        return;
       case 'assembly':
       case 'item':
       case 'disjointAssembly':
@@ -1414,7 +1426,9 @@ const prepareForSerialization = (geometry) => {
     }
   };
 
-  return rewrite(geometry, op);
+  visit(geometry, op);
+
+  return geometry;
 };
 
 const push = (
@@ -1860,6 +1874,9 @@ const unionImpl = (geometry, ...geometries) => {
           for (const { paths } of getNonVoidFaceablePaths(geometry)) {
             unified = union$2(unified, fromPaths(paths));
           }
+        }
+        if (unified.hash) {
+          throw Error(`hash`);
         }
         return taggedGraph({ tags }, unified);
       }

@@ -350,7 +350,7 @@ void TriangulateFacesOfSurfaceMesh(Surface_mesh* mesh) {
   CGAL::Polygon_mesh_processing::triangulate_faces(*mesh);
 }
 
-bool DoesSelfIntersectOfSurfaceMesh(Surface_mesh* mesh) {
+bool IsBadSurfaceMesh(Surface_mesh* mesh) {
   CGAL::Polygon_mesh_processing::triangulate_faces(*mesh);
   if (CGAL::Polygon_mesh_processing::does_self_intersect(*mesh, CGAL::parameters::all_default())) {
     std::vector<std::pair<Surface_mesh::Face_index, Surface_mesh::Face_index>> face_pairs;
@@ -360,9 +360,16 @@ bool DoesSelfIntersectOfSurfaceMesh(Surface_mesh* mesh) {
     }
     std::cout << std::setprecision(20) << *mesh << std::endl;
     return true;
-  } else {
-    return false;
   }
+
+  for (const Vertex_index vertex : vertices(*mesh)) {
+    if (CGAL::Polygon_mesh_processing::is_non_manifold_vertex(vertex, *mesh)) {
+      std::cout << "Non-manifold vertex " << vertex << std::endl;
+      return true;
+    }
+  }
+
+  return false;
 }
 
 Surface_mesh* RemeshSurfaceMesh(Surface_mesh* input, double edge_length, double edge_angle, int relaxation_steps, int iterations) {
@@ -2683,7 +2690,8 @@ EMSCRIPTEN_BINDINGS(module) {
 
   emscripten::function("ReverseFaceOrientationsOfSurfaceMesh", &ReverseFaceOrientationsOfSurfaceMesh, emscripten::allow_raw_pointers());
   emscripten::function("TriangulateFacesOfSurfaceMesh", &TriangulateFacesOfSurfaceMesh, emscripten::allow_raw_pointers());
-  emscripten::function("DoesSelfIntersectOfSurfaceMesh", &DoesSelfIntersectOfSurfaceMesh, emscripten::allow_raw_pointers());
+
+  emscripten::function("IsBadSurfaceMesh", &IsBadSurfaceMesh, emscripten::allow_raw_pointers());
 
   emscripten::function("FT__to_double", &FT__to_double, emscripten::allow_raw_pointers());
 

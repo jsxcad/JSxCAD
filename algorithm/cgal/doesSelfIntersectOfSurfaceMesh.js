@@ -5,7 +5,8 @@ const CHECK_SELF_INTERSECTION = false;
 
 export const doesSelfIntersectOfSurfaceMesh = (mesh) => {
   try {
-    return getCgal().DoesSelfIntersectOfSurfaceMesh(mesh);
+    // FIX: This doesn't just check for self-intersection.
+    return getCgal().IsBadSurfaceMesh(mesh);
   } catch (e) {
     if (typeof e === 'number') {
       // This otherwise uncaught exception indicates a self-intersection.

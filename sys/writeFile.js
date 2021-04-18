@@ -23,9 +23,6 @@ const { serialize } = v8;
 // FIX Convert data by representation.
 
 export const writeFile = async (options, path, data) => {
-  if (path.startsWith('source/source/')) {
-    throw Error('source/source');
-  }
   data = await data;
 
   const {

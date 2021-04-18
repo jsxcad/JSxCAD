@@ -26,11 +26,11 @@ export const prepareStl = (shape, name, options = {}) => {
   return entries;
 };
 
-const downloadStlMethod = function (name, options = {}) {
-  const entries = prepareStl(this, name, options);
+const downloadStlMethod = function (name, { tolerance = 0.001 } = {}) {
+  const entries = prepareStl(this, name, { tolerance });
   const download = { entries };
   // We should be saving the stl data in the filesystem.
-  const hash = hashSum({ name, options }) + hashGeometry(this.toGeometry());
+  const hash = hashSum({ name, tolerance }) + hashGeometry(this.toGeometry());
   emit({ download, hash });
   return this;
 };

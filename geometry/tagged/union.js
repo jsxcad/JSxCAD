@@ -31,6 +31,9 @@ const unionImpl = (geometry, ...geometries) => {
             unified = graphUnion(unified, fromPathsToGraph(paths));
           }
         }
+        if (unified.hash) {
+          throw Error(`hash`);
+        }
         return taggedGraph({ tags }, unified);
       }
       case 'paths': {

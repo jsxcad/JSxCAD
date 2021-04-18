@@ -7,9 +7,15 @@ export const update = (geometry, updates, changes) => {
   }
   const updated = {};
   for (const key of Object.keys(geometry)) {
-    if (typeof key !== 'symbol') {
-      updated[key] = geometry[key];
+    if (key === 'hash') {
+      // Hash is a bit like a symbol, but we want it to persist.
+      continue;
     }
+    if (typeof key === 'symbol') {
+      // Don't copy symbols.
+      continue;
+    }
+    updated[key] = geometry[key];
   }
   let changed = false;
   for (const key of Object.keys(updates)) {
