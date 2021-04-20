@@ -28,7 +28,7 @@ export const x = Peg('x', [0, 0, 0], [0, 0, 1], [0, -1, 0]);
 export const y = Peg('y', [0, 0, 0], [0, 0, 1], [1, 0, 0]);
 export const z = Peg('z', [0, 0, 0], [0, 1, 0], [-1, 0, 0]);
 
-export { card } from './card.js';
+export { card, emitSourceLocation } from './card.js';
 
 export { md } from './md.js';
 

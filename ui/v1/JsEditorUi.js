@@ -6,8 +6,10 @@ import React from 'react';
 
 import { aceEditorAuxiliary } from './AceEditorAuxiliary';
 import { aceEditorCompleter } from './AceEditorCompleter';
+import { aceEditorLineWidgets } from './AceEditorLineWidgets';
 import { aceEditorSnippetManager } from './AceEditorSnippetManager';
 import { prismJsAuxiliary } from './PrismJSAuxiliary';
+import { toDomElement } from '@jsxcad/ui-notebook';
 
 if (!aceEditorAuxiliary) throw Error('die');
 if (!prismJsAuxiliary) throw Error('die');
@@ -67,6 +69,7 @@ export class JsEditorUi extends React.PureComponent {
       onChange: PropTypes.func,
       onClickLink: PropTypes.func,
       workspace: PropTypes.string,
+      notebookData: PropTypes.array,
     };
   }
 
@@ -104,11 +107,96 @@ export class JsEditorUi extends React.PureComponent {
   }
 
   async componentDidMount() {
-    this.aceEditor.editor.on('linkClick', ({ token }) => {
+    const { editor } = this.aceEditor;
+
+    editor.on('linkClick', ({ token }) => {
       const { value = '' } = token;
       const [url = ''] = ExtractUrls(value);
       this.props.onClickLink(url);
     });
+
+    editor.session.notebookElements = {};
+
+    if (!editor.session.widgetManager) {
+      editor.session.widgetManager = new aceEditorLineWidgets.LineWidgets(
+        editor.session
+      );
+      editor.session.widgetManager.attach(editor);
+    }
+
+    const widgetManager = editor.session.widgetManager;
+    const notebookData = this.props.notebookData;
+
+    if (!notebookData.listeners) {
+      notebookData.listeners = [];
+    }
+
+    const domElementByHash = new Map();
+
+    const hashNotes = (notes) => notes.map((note) => note.hash || '').join('/');
+
+    const widgets = [];
+
+    const update = async () => {
+      const usedHashes = new Set();
+
+      for (const widget of widgets) {
+        widgetManager.removeLineWidget(widget);
+      }
+
+      let context = {};
+      const notesByLine = [];
+      const definitions = [];
+
+      for (let note of notebookData) {
+        if (!note) {
+          continue;
+        }
+        if (note.setContext) {
+          context = Object.assign(context, note.setContext);
+        }
+        note = Object.assign({}, note, { context });
+        if (note.define) {
+          definitions.push(note);
+        }
+        if (note.context && note.context.sourceLocation) {
+          const line = note.context.sourceLocation.line || 0;
+          if (!notesByLine[line]) {
+            notesByLine[line] = [...definitions];
+          }
+          notesByLine[line].push(note);
+        }
+      }
+
+      for (const line of Object.keys(notesByLine)) {
+        const notes = notesByLine[line];
+        const hash = hashNotes(notes);
+        usedHashes.add(hash);
+        let el;
+        if (!domElementByHash.has(hash)) {
+          el = await toDomElement(notes);
+          domElementByHash.set(hash, el);
+        } else {
+          el = domElementByHash.get(hash);
+        }
+        const widget = {
+          row: parseInt(line),
+          coverLine: true,
+          fixedWidth: true,
+          el,
+        };
+        widgets.push(widget);
+        widgetManager.addLineWidget(widget);
+      }
+
+      for (const hash of domElementByHash.keys()) {
+        if (!usedHashes.has(hash)) {
+          domElementByHash.delete(hash);
+        }
+      }
+    };
+
+    notebookData.listeners = [update];
   }
 
   async update() {}

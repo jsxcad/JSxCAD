@@ -8,3 +8,8 @@ export const card = (strings, ...placeholders) => {
   emit({ hash: hashSum(card), setContext: { card } });
   return card;
 };
+
+export const emitSourceLocation = ({ line, column }) => {
+  emit({ setContext: { sourceLocation: { line, column } } });
+  return card;
+};

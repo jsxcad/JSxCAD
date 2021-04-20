@@ -38,6 +38,7 @@ export const toEcmascript = async (
     allowAwaitOutsideFunction: true,
     allowReturnOutsideFunction: true,
     sourceType: 'module',
+    locations: true,
   };
 
   let ast = parse(script, parseOptions);
@@ -172,6 +173,13 @@ export const toEcmascript = async (
         return;
       }
     }
+
+    out.push(
+      parse(
+        `emitSourceLocation({ line: ${declaration.loc.end.line}, column: ${declaration.loc.end.column} })`,
+        parseOptions
+      )
+    );
 
     // Now that we have the sha, we can predict if it can be read from cache.
     const meta = await read(`meta/def/${path}/${id}`);
