@@ -116,6 +116,7 @@ class Ui extends React.PureComponent {
       workspace: this.props.workspace,
       files: [],
       selectedPaths: [],
+      notebookData: [],
     };
 
     this.onChangeJsEditor = this.onChangeJsEditor.bind(this);
@@ -190,6 +191,9 @@ class Ui extends React.PureComponent {
           if (notebookRef) {
             notebookRef.forceUpdate();
           }
+          if (notebookData.listeners) {
+            notebookData.listeners.forEach((listener) => listener());
+          }
         }
       } else if (question.notebookLength) {
         const { notebookLength } = question;
@@ -200,6 +204,9 @@ class Ui extends React.PureComponent {
           this.setState({ notebookData: notebookData });
           if (notebookRef) {
             notebookRef.forceUpdate();
+          }
+          if (notebookData.listeners) {
+            notebookData.listeners.forEach((listener) => listener());
           }
         }
       }
@@ -359,7 +366,7 @@ class Ui extends React.PureComponent {
     );
   }
   async loadJsEditor(path, { shouldUpdateUrl = true } = {}) {
-    const { workspace } = this.state;
+    const { notebookData, workspace } = this.state;
     const file = `source/${path}`;
     await ensureFile(file, path, { workspace });
     if (shouldUpdateUrl) {
@@ -368,8 +375,8 @@ class Ui extends React.PureComponent {
     const data = await read(file);
     const jsEditorData =
       typeof data === 'string' ? data : new TextDecoder('utf8').decode(data);
-    const notebookData = [];
-    this.setState({ file, path, jsEditorData, notebookData });
+    notebookData.length = 0;
+    this.setState({ file, path, jsEditorData });
 
     // Automatically run the notebook on load. The user can hit Stop.
     await this.doRun();
@@ -1009,6 +1016,7 @@ class Ui extends React.PureComponent {
                         file={file}
                         ask={ask}
                         workspace={workspace}
+                        notebookData={notebookData}
                       />
                     </Pane>
                   </SplitPane>

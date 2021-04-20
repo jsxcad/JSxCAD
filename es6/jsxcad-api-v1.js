@@ -333,6 +333,11 @@ const card = (strings, ...placeholders) => {
   return card;
 };
 
+const emitSourceLocation = ({ line, column }) => {
+  emit({ setContext: { sourceLocation: { line, column } } });
+  return card;
+};
+
 const md = (strings, ...placeholders) => {
   const md = strings.reduce(
     (result, string, i) => result + placeholders[i - 1] + string
@@ -434,6 +439,7 @@ var api = /*#__PURE__*/Object.freeze({
   defThreejsMaterial: defThreejsMaterial,
   defTool: defTool,
   card: card,
+  emitSourceLocation: emitSourceLocation,
   md: md,
   control: control,
   source: source,
@@ -578,4 +584,4 @@ registerDynamicModule(module('svg'), './jsxcad-api-v1-svg.js');
 registerDynamicModule(module('threejs'), './jsxcad-api-v1-threejs.js');
 registerDynamicModule(module('units'), './jsxcad-api-v1-units.js');
 
-export { beginRecordingNotes, card, control, defGrblConstantLaser, defGrblDynamicLaser, defGrblSpindle, defRgbColor, defThreejsMaterial, defTool, define, importModule, md, replayRecordedNotes, saveRecordedNotes, source, x, y, z };
+export { beginRecordingNotes, card, control, defGrblConstantLaser, defGrblDynamicLaser, defGrblSpindle, defRgbColor, defThreejsMaterial, defTool, define, emitSourceLocation, importModule, md, replayRecordedNotes, saveRecordedNotes, source, x, y, z };

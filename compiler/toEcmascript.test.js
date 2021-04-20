@@ -81,6 +81,10 @@ const foo = bar(length);`
     ecmascript,
     `
 const length = control('length', 16, 'number');
+emitSourceLocation({
+  line: 3,
+  column: 24
+});
 const foo = await loadGeometry('data/def//foo');
 await replayRecordedNotes('data/note//foo');
 Object.freeze(foo);
@@ -206,6 +210,10 @@ test('Reuse and Redefine', async (t) => {
   t.is(
     reuse,
     `
+emitSourceLocation({
+  line: 1,
+  column: 19
+});
 const A = await loadGeometry('data/def//A');
 await replayRecordedNotes('data/note//A');
 Object.freeze(A);
@@ -222,6 +230,10 @@ return {};
   t.is(
     redefine,
     `
+emitSourceLocation({
+  line: 1,
+  column: 16
+});
 beginRecordingNotes();
 card\`/A\`;
 const A = bar();
@@ -253,6 +265,10 @@ test('Indirect Redefinition', async (t) => {
   t.is(
     reuse,
     `
+emitSourceLocation({
+  line: 1,
+  column: 16
+});
 const D = await loadGeometry('data/def//D');
 await replayRecordedNotes('data/note//D');
 Object.freeze(D);
@@ -279,6 +295,10 @@ mountainView.frontView({ position: [0, -100, 50] });
     define,
     `
 const Mountain = () => foo();
+emitSourceLocation({
+  line: 3,
+  column: 50
+});
 const mountainView = await loadGeometry('data/def//mountainView');
 await replayRecordedNotes('data/note//mountainView');
 Object.freeze(mountainView);
@@ -301,6 +321,10 @@ mountainView.frontView({ position: [0, -100, 50] });
     redefine,
     `
 const Mountain = () => bar();
+emitSourceLocation({
+  line: 3,
+  column: 50
+});
 beginRecordingNotes();
 card\`/mountainView\`;
 const mountainView = Mountain().scale(0.5).Page();
@@ -327,6 +351,10 @@ log(a);
   t.is(
     script,
     `
+emitSourceLocation({
+  line: 2,
+  column: 13
+});
 beginRecordingNotes();
 card\`/a\`;
 const a = [];
