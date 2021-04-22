@@ -36,7 +36,6 @@ import Mermaid from 'mermaid';
 import Modal from 'react-bootstrap/Modal';
 import Nav from 'react-bootstrap/Nav';
 import Navbar from 'react-bootstrap/Navbar';
-import NotebookUi from './NotebookUi';
 import Prettier from 'prettier/standalone.js';
 import PrettierParserBabel from 'prettier/parser-babel.js';
 import PropTypes from 'prop-types';
@@ -157,6 +156,7 @@ class Ui extends React.PureComponent {
         return read(path, options);
       } else if (question.writeFile) {
         const { options, path, data } = question.writeFile;
+        console.log(`QQ/writeFile/path: ${path} ${workspace}`);
         return write(path, data, options);
       } else if (question.deleteFile) {
         const { options, path } = question.deleteFile;
@@ -166,6 +166,7 @@ class Ui extends React.PureComponent {
         return log(entry);
       } else if (question.touchFile) {
         const { path, workspace } = question.touchFile;
+        console.log(`QQ/touchFile/path: ${path} ${workspace}`);
         await touch(path, { workspace });
         // Invalidate the path in all workers.
         await askServices({ touchFile: { path, workspace } });
@@ -772,6 +773,7 @@ class Ui extends React.PureComponent {
       // Include any high level notebook errors in the output.
       this.emitNote({ error: { text: error.stack } });
     } finally {
+      /*
       this.emitNote({ md: `---` });
       this.emitNote({ md: `#### Dependency Tree` });
       const graph = [];
@@ -792,6 +794,7 @@ class Ui extends React.PureComponent {
           this.emitNote({ md: `'''\n${program}\n'''\n` });
         }
       }
+*/
       this.updateNotebook();
       for (const element of document.getElementsByClassName('note')) {
         element.style.removeProperty('filter');
@@ -834,7 +837,6 @@ class Ui extends React.PureComponent {
       selectedPaths,
       workspace,
     } = this.state;
-    const { sha } = this.props;
 
     const paneWidth = Math.floor(window.innerWidth / 2);
 
@@ -994,17 +996,10 @@ class Ui extends React.PureComponent {
               <div style={{ width: '100%', height: '100%', margin: '0px' }}>
                 <Col style={{ width: '100%', height: '100%' }}>
                   <SplitPane split="vertical" defaultSize={paneWidth}>
-                    <Pane key="first" className="pane">
-                      <NotebookUi
-                        key={`notebook/${file}`}
-                        ref={(notebookRef) => this.setState({ notebookRef })}
-                        sha={sha}
-                        onRun={this.doRun}
-                        data={notebookData}
-                        path={path}
-                        workspace={workspace}
-                      />
-                    </Pane>
+                    <Pane
+                      key="first"
+                      className="pane orbit-view-container"
+                    ></Pane>
                     <Pane key="second" className="pane">
                       <JsEditorUi
                         key={`editScript/${file}`}

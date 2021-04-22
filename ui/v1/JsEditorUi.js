@@ -68,6 +68,7 @@ export class JsEditorUi extends React.PureComponent {
       onSave: PropTypes.func,
       onChange: PropTypes.func,
       onClickLink: PropTypes.func,
+      onSelectView: PropTypes.func,
       workspace: PropTypes.string,
       notebookData: PropTypes.array,
     };
@@ -127,6 +128,12 @@ export class JsEditorUi extends React.PureComponent {
     const widgetManager = editor.session.widgetManager;
     const notebookData = this.props.notebookData;
 
+    let openView = -1;
+
+    const onClickView = (event, note) => {
+      openView = note.nthView;
+    };
+
     if (!notebookData.listeners) {
       notebookData.listeners = [];
     }
@@ -147,6 +154,7 @@ export class JsEditorUi extends React.PureComponent {
       let context = {};
       const notesByLine = [];
       const definitions = [];
+      let nthView = 0;
 
       for (let note of notebookData) {
         if (!note) {
@@ -158,6 +166,11 @@ export class JsEditorUi extends React.PureComponent {
         note = Object.assign({}, note, { context });
         if (note.define) {
           definitions.push(note);
+        }
+        if (note.view) {
+          note.nthView = nthView;
+          note.openView = nthView === openView;
+          nthView++;
         }
         if (note.context && note.context.sourceLocation) {
           const line = note.context.sourceLocation.line || 0;
@@ -174,7 +187,7 @@ export class JsEditorUi extends React.PureComponent {
         usedHashes.add(hash);
         let el;
         if (!domElementByHash.has(hash)) {
-          el = await toDomElement(notes);
+          el = await toDomElement(notes, { onClickView });
           domElementByHash.set(hash, el);
         } else {
           el = domElementByHash.get(hash);

@@ -1342,10 +1342,13 @@ const offset = (geometry, initial = 1, step, limit) => {
 // Currently we need this so that things like withOutline() will work properly,
 // but ideally outline would be idempotent and rewrite shapes as their outlines,
 // unless already outlined, and handle the withOutline case within this.
-const outlineImpl = (geometry, includeFaces = true, includeHoles = true) => {
+const outlineImpl = (geometry, tagsOverride) => {
   const disjointGeometry = toDisjointGeometry(geometry);
   const outlines = [];
-  for (const { tags = [], graph } of getNonVoidGraphs(disjointGeometry)) {
+  for (let { tags = [], graph } of getNonVoidGraphs(disjointGeometry)) {
+    if (tagsOverride) {
+      tags = tagsOverride;
+    }
     outlines.push(
       taggedPaths(
         { tags: [...tags, 'path/Wire'] },
@@ -1354,7 +1357,10 @@ const outlineImpl = (geometry, includeFaces = true, includeHoles = true) => {
     );
   }
   // Turn paths into wires.
-  for (const { tags = [], paths } of getNonVoidPaths(disjointGeometry)) {
+  for (let { tags = [], paths } of getNonVoidPaths(disjointGeometry)) {
+    if (tagsOverride) {
+      tags = tagsOverride;
+    }
     outlines.push(taggedPaths({ tags: [...tags, 'path/Wire'] }, paths));
   }
   return outlines;
@@ -1580,7 +1586,7 @@ const soup = (
             {},
             ...triangles(tags, toTriangles(graph)),
             ...wireframe(toTriangles(graph)),
-            ...outline$1(geometry)
+            ...outline$1(geometry, ['color/black'])
           );
         } else if (graph.isEmpty) {
           return taggedGroup({});
@@ -1590,7 +1596,7 @@ const soup = (
             {},
             ...triangles(tags, toTriangles(graph)),
             ...wireframe(toTriangles(graph)),
-            ...outline$1(geometry)
+            ...outline$1(geometry, ['color/black'])
           );
         }
       }

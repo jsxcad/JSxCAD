@@ -597,11 +597,18 @@ const unwatchFileDeletion = async (thunk) => {
   return thunk;
 };
 
-const watchFile = async (path, thunk) =>
-  (await getFile({}, path)).watchers.add(thunk);
+const watchFile = async (path, thunk) => {
+  if (thunk) {
+    (await getFile({}, path)).watchers.add(thunk);
+    return thunk;
+  }
+};
 
-const unwatchFile = async (path, thunk) =>
-  (await getFile({}, path)).watchers.delete(thunk);
+const unwatchFile = async (path, thunk) => {
+  if (thunk) {
+    return (await getFile({}, path)).watchers.delete(thunk);
+  }
+};
 
 var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
 

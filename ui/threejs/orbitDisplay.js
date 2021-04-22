@@ -12,6 +12,7 @@ export const orbitDisplay = async (
   {
     view = {},
     geometry,
+    path,
     canvas,
     withAxes = false,
     withGrid = false,
