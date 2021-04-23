@@ -24,7 +24,7 @@ marked.use({
   },
 });
 
-export const toDomElement = async (notebook = []) => {
+export const toDomElement = async (notebook = [], { onClickView } = {}) => {
   const definitions = {};
 
   const showOrbitView = async (event, note) => {
@@ -33,23 +33,27 @@ export const toDomElement = async (notebook = []) => {
     const view = { target, up, position };
     const div = document.createElement('div');
     div.classList.add('note', 'orbitView');
-    const body = window.document.body;
-    body.insertBefore(div, body.firstChild);
+    const containers = window.document.getElementsByClassName(
+      'orbit-view-container'
+    );
+    const container =
+      containers.length === 0 ? window.document.body : containers[0];
+    container.insertBefore(div, container.firstChild);
     await orbitDisplay(
       { view, geometry: data, withAxes, withGrid, definitions },
       div
     );
-    const onKeyDown = (event) => {
+    const onKeyDown = async (event) => {
       if (
         event.key === 'Escape' ||
         event.key === 'Esc' ||
         event.keyCode === 27
       ) {
-        body.removeEventListener('keydown', onKeyDown, true);
-        body.removeChild(div);
+        container.removeEventListener('keydown', onKeyDown, true);
+        container.removeChild(div);
       }
     };
-    body.addEventListener('keydown', onKeyDown, true);
+    container.addEventListener('keydown', onKeyDown, true);
   };
 
   const container = document.createElement('div');
@@ -67,7 +71,7 @@ export const toDomElement = async (notebook = []) => {
     }
     if (note.view) {
       const div = document.createElement('div');
-      const { data, view } = note;
+      const { data, view, openView } = note;
       const { width, height, target, up, position, withAxes, withGrid } = view;
       const url = await dataUrl(Shape.fromGeometry(data), {
         width,
@@ -82,9 +86,15 @@ export const toDomElement = async (notebook = []) => {
       const image = document.createElement('img');
       image.classList.add('note', 'view');
       image.src = url;
-      image.addEventListener('click', (event) => showOrbitView(event, note));
+      image.addEventListener('click', (event) => {
+        showOrbitView(event, note);
+        onClickView(event, note);
+      });
       div.appendChild(image);
       container.appendChild(div);
+      if (openView) {
+        showOrbitView(undefined, note);
+      }
     }
     if (note.md) {
       const markup = document.createElement('div');

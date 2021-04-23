@@ -30,7 +30,7 @@ export const soup = (
             {},
             ...triangles(tags, toTriangles(graph)),
             ...wireframe(toTriangles(graph)),
-            ...outline(geometry)
+            ...outline(geometry, ['color/black'])
           );
         } else if (graph.isEmpty) {
           return taggedGroup({});
@@ -40,7 +40,7 @@ export const soup = (
             {},
             ...triangles(tags, toTriangles(graph)),
             ...wireframe(toTriangles(graph)),
-            ...outline(geometry)
+            ...outline(geometry, ['color/black'])
           );
         }
       }

@@ -11,10 +11,13 @@ import { toDisjointGeometry } from './toDisjointGeometry.js';
 // Currently we need this so that things like withOutline() will work properly,
 // but ideally outline would be idempotent and rewrite shapes as their outlines,
 // unless already outlined, and handle the withOutline case within this.
-const outlineImpl = (geometry, includeFaces = true, includeHoles = true) => {
+const outlineImpl = (geometry, tagsOverride) => {
   const disjointGeometry = toDisjointGeometry(geometry);
   const outlines = [];
-  for (const { tags = [], graph } of getNonVoidGraphs(disjointGeometry)) {
+  for (let { tags = [], graph } of getNonVoidGraphs(disjointGeometry)) {
+    if (tagsOverride) {
+      tags = tagsOverride;
+    }
     outlines.push(
       taggedPaths(
         { tags: [...tags, 'path/Wire'] },
@@ -23,7 +26,10 @@ const outlineImpl = (geometry, includeFaces = true, includeHoles = true) => {
     );
   }
   // Turn paths into wires.
-  for (const { tags = [], paths } of getNonVoidPaths(disjointGeometry)) {
+  for (let { tags = [], paths } of getNonVoidPaths(disjointGeometry)) {
+    if (tagsOverride) {
+      tags = tagsOverride;
+    }
     outlines.push(taggedPaths({ tags: [...tags, 'path/Wire'] }, paths));
   }
   return outlines;

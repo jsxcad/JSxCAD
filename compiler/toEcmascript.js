@@ -288,6 +288,14 @@ export const toEcmascript = async (
           }
         }
       }
+    } else if (entry.type === 'ExpressionStatement') {
+      out.push(
+        parse(
+          `emitSourceLocation({ line: ${entry.loc.end.line}, column: ${entry.loc.end.column} })`,
+          parseOptions
+        )
+      );
+      out.push(entry);
     } else {
       out.push(entry);
     }
