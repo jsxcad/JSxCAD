@@ -193,8 +193,8 @@ export class JsEditorUi extends React.PureComponent {
           el = domElementByHash.get(hash);
         }
         const widget = {
-          row: parseInt(line),
-          coverLine: true,
+          row: parseInt(line) - 1,
+          coverLine: false,
           fixedWidth: true,
           el,
         };

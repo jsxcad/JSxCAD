@@ -98,6 +98,10 @@ test('Bind await to calls properly.', async (t) => {
   t.is(
     ecmascript,
     `
+emitSourceLocation({
+  line: 1,
+  column: 11
+});
 foo().bar();
 return {};
 `
@@ -109,6 +113,10 @@ test('Top level await.', async (t) => {
   t.is(
     ecmascript,
     `
+emitSourceLocation({
+  line: 1,
+  column: 11
+});
 await foo();
 return {};
 `
@@ -124,7 +132,15 @@ await bar({ aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
   t.is(
     ecmascript,
     `
+emitSourceLocation({
+  line: 2,
+  column: 6
+});
 foo();
+emitSourceLocation({
+  line: 4,
+  column: 182
+});
 await bar({
   aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaagh: 1
 }, 2);
@@ -302,6 +318,10 @@ emitSourceLocation({
 const mountainView = await loadGeometry('data/def//mountainView');
 await replayRecordedNotes('data/note//mountainView');
 Object.freeze(mountainView);
+emitSourceLocation({
+  line: 4,
+  column: 52
+});
 mountainView.frontView({
   position: [0, -100, 50]
 });
@@ -333,6 +353,10 @@ mountainView instanceof Shape && (await saveGeometry('data/def//mountainView', m
 }));
 await saveRecordedNotes('data/note//mountainView');
 Object.freeze(mountainView);
+emitSourceLocation({
+  line: 4,
+  column: 52
+});
 mountainView.frontView({
   position: [0, -100, 50]
 });
@@ -363,6 +387,10 @@ a instanceof Shape && (await saveGeometry('data/def//a', a)) && (await write('me
 }));
 await saveRecordedNotes('data/note//a');
 Object.freeze(a);
+emitSourceLocation({
+  line: 3,
+  column: 7
+});
 log(a);
 return {};
 `
