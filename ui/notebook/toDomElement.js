@@ -38,7 +38,10 @@ export const toDomElement = async (notebook = [], { onClickView } = {}) => {
     );
     const container =
       containers.length === 0 ? window.document.body : containers[0];
-    container.insertBefore(div, container.firstChild);
+    while (container.firstChild) {
+      container.removeChild(container.firstChild);
+    }
+    container.appendChild(div, container.firstChild);
     await orbitDisplay(
       { view, geometry: data, withAxes, withGrid, definitions },
       div

@@ -198,8 +198,17 @@ export class JsEditorUi extends React.PureComponent {
           fixedWidth: true,
           el,
         };
+
         widgets.push(widget);
         widgetManager.addLineWidget(widget);
+
+        // Adjust the widget height to be a multiple of line height, otherwise line selection is thrown off.
+        const lineHeight = editor.renderer.layerConfig.lineHeight;
+        if (el.offsetHeight % lineHeight !== 0) {
+          el.style.height = `${
+            Math.ceil(el.offsetHeight / lineHeight) * lineHeight
+          }px`;
+        }
       }
 
       for (const hash of domElementByHash.keys()) {
@@ -207,6 +216,8 @@ export class JsEditorUi extends React.PureComponent {
           domElementByHash.delete(hash);
         }
       }
+
+      editor.resize();
     };
 
     notebookData.listeners = [update];
