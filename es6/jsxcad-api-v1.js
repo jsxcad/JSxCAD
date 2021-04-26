@@ -72,7 +72,7 @@ const view = (
 };
 
 Shape.prototype.view = function (
-  { size = 256, triangles = true, outline = true, wireframe = false } = {},
+  { size = 512, triangles = true, outline = true, wireframe = false } = {},
   op,
   {
     path,
@@ -94,7 +94,7 @@ Shape.prototype.view = function (
 };
 
 Shape.prototype.topView = function (
-  { size = 256, triangles = true, outline = true, wireframe = false } = {},
+  { size = 512, triangles = true, outline = true, wireframe = false } = {},
   op,
   {
     path,
@@ -116,7 +116,7 @@ Shape.prototype.topView = function (
 };
 
 Shape.prototype.gridView = function (
-  { size = 256, triangles = true, outline = true, wireframe = false } = {},
+  { size = 512, triangles = true, outline = true, wireframe = false } = {},
   op,
   {
     path,
@@ -138,7 +138,7 @@ Shape.prototype.gridView = function (
 };
 
 Shape.prototype.frontView = function (
-  { size = 256, triangles = true, outline = true, wireframe = false } = {},
+  { size = 512, triangles = true, outline = true, wireframe = false } = {},
   op,
   {
     path,
@@ -160,7 +160,7 @@ Shape.prototype.frontView = function (
 };
 
 Shape.prototype.sideView = function (
-  { size = 256, triangles = true, outline = true, wireframe = false } = {},
+  { size = 512, triangles = true, outline = true, wireframe = false } = {},
   op,
   {
     path,
