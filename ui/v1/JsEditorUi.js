@@ -294,9 +294,6 @@ export class JsEditorUi extends React.PureComponent {
           commands={[this.runShortcut(), this.saveShortcut()]}
           editorProps={{ $blockScrolling: true }}
           setOptions={{
-            // enableBasicAutocompletion: true,
-            // enableLiveAutocompletion: true,
-            // enableSnippets: true,
             enableLinking: true,
             useWorker: false,
           }}

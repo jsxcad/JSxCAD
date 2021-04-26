@@ -454,7 +454,6 @@ Surface_mesh* PushSurfaceMesh(Surface_mesh* input, double force, double minimum_
       effect = 1.0 - (1.0 / (distance - minimum_distance));
     }
     point += vector * (force * effect);
-std::cout << "QQ/Push/point: " << point << std::endl;
   }
   return c;
 }
@@ -865,8 +864,8 @@ void convertArrangementToPolygonsWithHoles(const Arrangement_2& arrangement, std
     undecided.pop();
     if (positive_faces[face]) {
       for (Arrangement_2::Hole_const_iterator hole = face->holes_begin(); hole != face->holes_end(); ++hole) {
-        negative_faces[(*hole)->twin()->face()] = true;
         positive_faces[(*hole)->twin()->face()] = false;
+        negative_faces[(*hole)->twin()->face()] = true;
       }
       continue;
     }
@@ -883,6 +882,7 @@ void convertArrangementToPolygonsWithHoles(const Arrangement_2& arrangement, std
     do {
       if (negative_faces[edge->twin()->face()]) {
         positive_faces[face] = true;
+        negative_faces[face] = false;
         decided = true;
         break;
       }
@@ -891,6 +891,7 @@ void convertArrangementToPolygonsWithHoles(const Arrangement_2& arrangement, std
       edge = start;
       do {
         if (positive_faces[edge->twin()->face()]) {
+          positive_faces[face] = false;
           negative_faces[face] = true;
           decided = true;
           break;
@@ -2190,6 +2191,7 @@ void ArrangePolygonsWithHoles(std::size_t count, emscripten::val fill_plane, ems
   for (std::size_t nth_polygon = 0; nth_polygon < count; nth_polygon++) {
     Plane plane;
     admitPlane(plane, fill_plane);
+    plane = unitPlane(plane);
     Arrangement_2& arrangement = arrangements[plane];
     Polygon_with_holes_2 polygon;
     admitPolygonWithHoles(nth_polygon, plane, polygon, fill_boundary, fill_hole);
