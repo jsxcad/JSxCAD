@@ -547,6 +547,8 @@ const moveMethod = function (...params) {
   return move(this, ...params);
 };
 Shape.prototype.move = moveMethod;
+Shape.prototype.xyz = moveMethod;
+Shape.prototype.xy = moveMethod;
 
 const noVoid = (shape, tags, select) => {
   const op = (geometry, descend) => {
@@ -1105,6 +1107,7 @@ const weld = (...shapes) => {
   }
   const welds = [];
   const arrangements = arrangePolygonsWithHoles(unwelded);
+  console.log(`QQ/arrangements: ${JSON.stringify(arrangements)}`);
   for (const { polygonsWithHoles } of arrangements) {
     // Keep the planar grouping.
     const triangles = fromPolygonsWithHolesToTriangles(polygonsWithHoles);

@@ -8,5 +8,7 @@ const moveMethod = function (...params) {
   return move(this, ...params);
 };
 Shape.prototype.move = moveMethod;
+Shape.prototype.xyz = moveMethod;
+Shape.prototype.xy = moveMethod;
 
 export default move;

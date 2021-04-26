@@ -53,11 +53,13 @@ export const arrangePolygonsWithHoles = (polygons) => {
   let outputExactPlane;
   let outputPolygons;
   let outputPolygon;
+  let outputPolygonOrHole;
 
   const emitPlane = (x, y, z, w, a, b, c, d) => {
     outputPlane = [x, y, z, w];
     outputExactPlane = [a, b, c, d];
     outputPolygon = undefined;
+    outputPolygonOrHole = undefined;
     outputPolygons = [];
     arrangements.push({
       plane: outputPlane,
@@ -78,13 +80,14 @@ export const arrangePolygonsWithHoles = (polygons) => {
       outputPolygon.holes.push(polygon);
     } else {
       outputPolygons.push(polygon);
+      outputPolygon = polygon;
     }
-    outputPolygon = polygon;
+    outputPolygonOrHole = polygon;
   };
 
   const emitPoint = (x, y, z, exactX, exactY, exactZ) => {
-    outputPolygon.points.push([x, y, z]);
-    outputPolygon.exactPoints.push([exactX, exactY, exactZ]);
+    outputPolygonOrHole.points.push([x, y, z]);
+    outputPolygonOrHole.exactPoints.push([exactX, exactY, exactZ]);
   };
 
   g.ArrangePolygonsWithHoles(
