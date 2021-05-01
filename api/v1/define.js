@@ -4,7 +4,7 @@ import hashSum from 'hash-sum';
 export const define = (tag, data) => {
   const define = { tag, data };
   emit({ define, hash: hashSum(define) });
-  return define;
+  return data;
 };
 
 export const defRgbColor = (name, rgb) => define(`color/${name}`, { rgb });

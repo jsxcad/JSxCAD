@@ -910,6 +910,10 @@ void convertArrangementToPolygonsWithHoles(const Arrangement_2& arrangement, std
     Arrangement_2::Ccb_halfedge_const_circulator start = face->outer_ccb();
     Arrangement_2::Ccb_halfedge_const_circulator edge = start;
     do {
+      if (edge->source()->point() == edge->target()->point()) {
+        // Skip zero length edges.
+        continue;
+      }
       polygon_boundary.push_back(edge->source()->point());
     } while (++edge != start);
 
@@ -919,6 +923,10 @@ void convertArrangementToPolygonsWithHoles(const Arrangement_2& arrangement, std
       Arrangement_2::Ccb_halfedge_const_circulator start = *hole;
       Arrangement_2::Ccb_halfedge_const_circulator edge = start;
       do {
+        if (edge->source()->point() == edge->target()->point()) {
+          // Skip zero length edges.
+          continue;
+        }
         polygon_hole.push_back(edge->source()->point());
       } while (++edge != start);
 
@@ -1675,7 +1683,6 @@ void OffsetOfPolygonWithHoles(double initial, double step, double limit, std::si
   Plane plane;
   admitPlane(plane, fill_plane);
   plane = unitPlane(plane);
-  std::cout << "QQ/Offset/plane: " << plane << std::endl;
 
   Polygon_with_holes_2 insetting_boundary;
   std::vector<Polygon_2> holes;
@@ -1773,9 +1780,8 @@ void OffsetOfPolygonWithHoles(double initial, double step, double limit, std::si
     for (const Traits::Polygon_with_holes_2& polygon : polygons) {
       const auto& outer = polygon.outer_boundary();
       emit_polygon(false);
-      for (auto edge = outer.edges_begin(); edge != outer.edges_end(); ++edge) {
-        const auto& source = edge->source();
-        auto p = plane.to_3d(Point_2(CGAL::to_double(source.x().exact()), CGAL::to_double(source.y().exact())));
+      for (auto vertex = outer.vertices_begin(); vertex != outer.vertices_end(); ++vertex) {
+        auto p = plane.to_3d(Point_2(CGAL::to_double(vertex->x().exact()), CGAL::to_double(vertex->y().exact())));
         std::ostringstream x; x << p.x().exact();
         std::ostringstream y; y << p.y().exact();
         std::ostringstream z; z << p.z().exact();
@@ -1784,9 +1790,8 @@ void OffsetOfPolygonWithHoles(double initial, double step, double limit, std::si
       }
       for (auto hole = polygon.holes_begin(); hole != polygon.holes_end(); ++hole) {
         emit_polygon(true);
-        for (auto edge = hole->edges_begin(); edge != hole->edges_end(); ++edge) {
-          const auto& source = edge->source();
-          auto p = plane.to_3d(Point_2(CGAL::to_double(source.x().exact()), CGAL::to_double(source.y().exact())));
+        for (auto vertex = hole->vertices_begin(); vertex != hole->vertices_end(); ++vertex) {
+          auto p = plane.to_3d(Point_2(CGAL::to_double(vertex->x().exact()), CGAL::to_double(vertex->y().exact())));
           std::ostringstream x; x << p.x().exact();
           std::ostringstream y; y << p.y().exact();
           std::ostringstream z; z << p.z().exact();
@@ -1914,8 +1919,11 @@ void InsetOfPolygonWithHoles(double initial, double step, double limit, std::siz
       const auto& outer = polygon.outer_boundary();
       emit_polygon(false);
       for (auto edge = outer.edges_begin(); edge != outer.edges_end(); ++edge) {
-        const auto& source = edge->source();
-        auto p = plane.to_3d(Point_2(CGAL::to_double(source.x().exact()), CGAL::to_double(source.y().exact())));
+        if (edge->source() == edge->target()) {
+          std::cout << "QQ/skip zero length edge" << std::endl;
+          continue;
+        }
+        auto p = plane.to_3d(Point_2(CGAL::to_double(edge->source().x().exact()), CGAL::to_double(edge->source().y().exact())));
         std::ostringstream x; x << p.x().exact();
         std::ostringstream y; y << p.y().exact();
         std::ostringstream z; z << p.z().exact();
@@ -1925,8 +1933,11 @@ void InsetOfPolygonWithHoles(double initial, double step, double limit, std::siz
       for (auto hole = polygon.holes_begin(); hole != polygon.holes_end(); ++hole) {
         emit_polygon(true);
         for (auto edge = hole->edges_begin(); edge != hole->edges_end(); ++edge) {
-          const auto& source = edge->source();
-          auto p = plane.to_3d(Point_2(CGAL::to_double(source.x().exact()), CGAL::to_double(source.y().exact())));
+          if (edge->source() == edge->target()) {
+            std::cout << "QQ/skip zero length edge" << std::endl;
+            continue;
+          }
+          auto p = plane.to_3d(Point_2(CGAL::to_double(edge->source().x().exact()), CGAL::to_double(edge->source().y().exact())));
           std::ostringstream x; x << p.x().exact();
           std::ostringstream y; y << p.y().exact();
           std::ostringstream z; z << p.z().exact();
@@ -2006,49 +2017,6 @@ void admitPolygonsWithHoles(const Plane& plane, std::vector<P>& polygons, emscri
       return;
     }
     polygons.push_back(polygon);
-/*
-    Points points;
-    Points* points_ptr = &points;
-    fill_boundary(points_ptr, polygons.size());
-    if (points.size() == 0) {
-      return;
-    }
-    Polygon_2 boundary;
-    for (const auto& point : points) {
-      boundary.push_back(plane.to_2d(point));
-    }
-    if (boundary.orientation() == CGAL::Sign::NEGATIVE) {
-      boundary.reverse_orientation();
-    }
-    if (!boundary.is_simple()) {
-      std::cout << "Boundary is not simple" << std::endl;
-      return;
-    }
-
-    std::vector<Polygon_2> holes;
-    for (;;) {
-      Points points;
-      Points* points_ptr = &points;
-      fill_hole(points_ptr, polygons.size(), holes.size());
-      if (points.size() == 0) {
-        break;
-      }
-      Polygon_2 hole;
-      for (const auto& point : points) {
-        hole.push_back(plane.to_2d(point));
-      }
-      if (hole.orientation() == CGAL::Sign::POSITIVE) {
-        hole.reverse_orientation();
-      }
-      if (!hole.is_simple()) {
-        std::cout << "Hole is not simple" << std::endl;
-        return;
-      }
-      holes.push_back(hole);
-    }
-
-    polygons.emplace_back(boundary, holes.begin(), holes.end());
-*/
   }
 }
 
@@ -2073,11 +2041,55 @@ void emitPlane(const Plane& plane, emscripten::val& emit_plane) {
 template <typename P>
 void emitPolygonsWithHoles(const Plane& plane, const std::vector<P>& polygons, emscripten::val& emit_polygon, emscripten::val& emit_point) {
   for (const P& polygon : polygons) {
+    // std::cout << "QQ/emitPolygonsWithHoles: " << std::endl;
+    // print_polygon_with_holes(polygon);
     const auto& outer = polygon.outer_boundary();
     emit_polygon(false);
+#if 0
+    bool has_last = false;
+    Point last;
+    Point_2 last_2;
+#endif
     for (auto edge = outer.edges_begin(); edge != outer.edges_end(); ++edge) {
-      const auto& source = edge->source();
-      auto p = plane.to_3d(Point_2(CGAL::to_double(source.x().exact()), CGAL::to_double(source.y().exact())));
+      if (edge->source() == edge->target()) {
+        // Skip zero length edges.
+        std::cout << "QQ/skip zero length edge" << std::endl;
+        continue;
+      }
+      auto p = plane.to_3d(Point_2(CGAL::to_double(edge->source().x().exact()), CGAL::to_double(edge->source().y().exact())));
+      auto p2 = plane.to_3d(Point_2(CGAL::to_double(edge->target().x().exact()), CGAL::to_double(edge->target().y().exact())));
+      if (p == p2) {
+        // This produced a zero length edge in 3 space.
+        // CHECK: For some mysterious reason this might not be a zero length edge in 2 space.
+        std::cout << "QQ/dup" << std::endl;
+        continue;
+      }
+#if 0
+      if (has_last) {
+        if (edge->source() == last_2) {
+          std::cout << "QQ/dup_2" << std::endl;
+        }
+        if (has_last && p == last) {
+          // It is mysterious that p == last can be true while last_2 != edge->source() can be true.
+          continue;
+          std::cout << "QQ/dup_1: " << std::endl;
+          std::cout << "QQ/dup_1/plane: " << plane << std::endl;
+          std::cout << "QQ/dup_1/p/x: " << p.x().exact() << std::endl;
+          std::cout << "QQ/dup_1/p/y: " << p.y().exact() << std::endl;
+          std::cout << "QQ/dup_1/p/z: " << p.z().exact() << std::endl;
+          std::cout << "QQ/dup_1/last/x: " << last.x().exact() << std::endl;
+          std::cout << "QQ/dup_1/last/y: " << last.y().exact() << std::endl;
+          std::cout << "QQ/dup_1/last/z: " << last.z().exact() << std::endl;
+          std::cout << "QQ/dup_1/source/x: " << edge->source().x().exact() << std::endl;
+          std::cout << "QQ/dup_1/source/y: " << edge->source().y().exact() << std::endl;
+          std::cout << "QQ/dup_1/last_2/x: " << last_2.x().exact() << std::endl;
+          std::cout << "QQ/dup_1/last_2/y: " << last_2.y().exact() << std::endl;
+        }
+      }
+      has_last = true;
+      last = p;
+      last_2 = edge->source();
+#endif
       std::ostringstream x; x << p.x().exact();
       std::ostringstream y; y << p.y().exact();
       std::ostringstream z; z << p.z().exact();
@@ -2086,8 +2098,12 @@ void emitPolygonsWithHoles(const Plane& plane, const std::vector<P>& polygons, e
     for (auto hole = polygon.holes_begin(); hole != polygon.holes_end(); ++hole) {
       emit_polygon(true);
       for (auto edge = hole->edges_begin(); edge != hole->edges_end(); ++edge) {
-        const auto& source = edge->source();
-        auto p = plane.to_3d(Point_2(CGAL::to_double(source.x().exact()), CGAL::to_double(source.y().exact())));
+        if (edge->source() == edge->target()) {
+          // Skip zero length edges.
+          std::cout << "QQ/skip zero length edge" << std::endl;
+          continue;
+        }
+        auto p = plane.to_3d(Point_2(CGAL::to_double(edge->source().x().exact()), CGAL::to_double(edge->source().y().exact())));
         std::ostringstream x; x << p.x().exact();
         std::ostringstream y; y << p.y().exact();
         std::ostringstream z; z << p.z().exact();
@@ -2387,6 +2403,7 @@ void ArrangePathsExact(std::string x, std::string y, std::string z, std::string 
 }
 
 void FromSurfaceMeshToPolygonsWithHoles(Surface_mesh* mesh, emscripten::val emit_plane, emscripten::val emit_polygon, emscripten::val emit_point) {
+  // std::cout << "QQ/fsmtpwh" << std::endl;
   std::unordered_map<Plane, Arrangement_2> arrangements;
   convertSurfaceMeshFacesToArrangements(*mesh, arrangements);
   emitArrangementsAsPolygonsWithHoles(arrangements, emit_plane, emit_polygon, emit_point);

@@ -252,7 +252,7 @@ var hashSum = sum;
 const define = (tag, data) => {
   const define = { tag, data };
   emit({ define, hash: hashSum(define) });
-  return define;
+  return data;
 };
 
 const defRgbColor = (name, rgb) => define(`color/${name}`, { rgb });

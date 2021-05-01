@@ -808,8 +808,8 @@ var Module = (function () {
     }
     var wasmMemory;
     var wasmTable = new WebAssembly.Table({
-      initial: 6206,
-      maximum: 6206,
+      initial: 6205,
+      maximum: 6205,
       element: 'anyfunc',
     });
     var ABORT = false;
@@ -7686,20 +7686,20 @@ var Module = (function () {
         _setThrew(1, 0);
       }
     }
-    function invoke_i(index) {
+    function invoke_iiiiiiiiii(index, a1, a2, a3, a4, a5, a6, a7, a8, a9) {
       var sp = stackSave();
       try {
-        return wasmTable.get(index)();
+        return wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7, a8, a9);
       } catch (e) {
         stackRestore(sp);
         if (e !== e + 0 && e !== 'longjmp') throw e;
         _setThrew(1, 0);
       }
     }
-    function invoke_iiiiiiiiii(index, a1, a2, a3, a4, a5, a6, a7, a8, a9) {
+    function invoke_i(index) {
       var sp = stackSave();
       try {
-        return wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7, a8, a9);
+        return wasmTable.get(index)();
       } catch (e) {
         stackRestore(sp);
         if (e !== e + 0 && e !== 'longjmp') throw e;

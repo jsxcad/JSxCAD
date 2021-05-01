@@ -306,17 +306,8 @@ export const toPolygonsWithHoles = (graph) => {
 
 const inset = (graph, initial, step, limit) => {
   const insetGraphs = [];
-  for (const { plane, exactPlane, polygonsWithHoles } of toPolygonsWithHoles(
-    graph
-  )) {
-    console.log(`QQ/inset/group: ${JSON.stringify({ plane, exactPlane })}`);
+  for (const { polygonsWithHoles } of toPolygonsWithHoles(graph)) {
     for (const polygonWithHoles of polygonsWithHoles) {
-      console.log(
-        `QQ/inset/polygon: ${JSON.stringify({
-          plane: polygonWithHoles.plane,
-          exactPlane: polygonWithHoles.exactPlane,
-        })}`
-      );
       for (const insetPolygon of insetOfPolygonWithHoles(
         initial,
         step,
