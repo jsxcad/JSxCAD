@@ -11,6 +11,9 @@ export const insetOfPolygonWithHoles = (
   let output;
   let points;
   let exactPoints;
+  if (JSON.stringify(polygon.points[0]) === JSON.stringify(polygon.points[1])) {
+    console.log(`dup`);
+  }
   g.InsetOfPolygonWithHoles(
     initial,
     step,

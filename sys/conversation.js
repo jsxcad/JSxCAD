@@ -24,7 +24,11 @@ export const conversation = ({ agent, say }) => {
       const answer = await agent({ ask, question });
       say({ id, answer });
     } else {
-      throw Error('die');
+      throw Error(
+        `Expected { answer } or { question } but received ${JSON.stringify(
+          message
+        )}`
+      );
     }
   };
   return { ask, hear };

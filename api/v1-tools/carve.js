@@ -7,14 +7,11 @@ import { getDefinitions } from '@jsxcad/sys';
 import { toToolFromTags } from '@jsxcad/algorithm-tool';
 
 const Z = 2;
-const z = Peg([0, 0, 0], [0, 1, 0], [-1, 0, 0]);
+const z = Peg('z', [0, 0, 0], [0, 1, 0], [-1, 0, 0]);
 
-const carve = (block, ...shapes) => {
-  const { diameter = 1, cutDepth = 0.2 } = toToolFromTags(
-    'grbl',
-    block.toGeometry().tags,
-    getDefinitions()
-  );
+const carve = (block, tool = {}, ...shapes) => {
+  const { grbl = {} } = tool;
+  const { diameter = 1, cutDepth = 0.2 } = grbl;
   const negative = block.cut(...shapes);
   const { max, min } = block.size();
   const depth = max[Z] - min[Z];
@@ -26,24 +23,20 @@ const carve = (block, ...shapes) => {
         from: min[Z],
         upto: max[Z],
         by: effectiveCutDepth,
-      })
+      }).reverse()
     )
-    .inset(diameter / 2, diameter / 2)
-    .z(-max[Z]);
+    .inset(diameter / 2, diameter / 2);
 };
 
-function carveMethod(...shapes) {
-  return carve(this, ...shapes);
+function carveMethod(tool, ...shapes) {
+  return carve(this, tool, ...shapes);
 }
 
 Shape.prototype.carve = carveMethod;
 
-const mill = (negative) => {
-  const { diameter = 1, cutDepth = 0.2 } = toToolFromTags(
-    'grbl',
-    negative.toGeometry().tags,
-    getDefinitions()
-  );
+const mill = (negative, tool = {}) => {
+  const { grbl = {} } = tool;
+  const { diameter = 1, cutDepth = 0.2 } = grbl;
   const { max, min } = negative.size();
   const depth = max[Z] - min[Z];
   const cuts = Math.ceil(depth / cutDepth);
@@ -54,14 +47,13 @@ const mill = (negative) => {
         from: min[Z],
         upto: max[Z],
         by: effectiveCutDepth,
-      })
+      }).reverse()
     )
-    .inset(diameter / 2, diameter / 2)
-    .z(-max[Z]);
+    .inset(diameter / 2, diameter / 2);
 };
 
-function millMethod(tool, ...shapes) {
-  return mill(this, tool, ...shapes);
+function millMethod(tool) {
+  return mill(this, tool);
 }
 
 Shape.prototype.mill = millMethod;
