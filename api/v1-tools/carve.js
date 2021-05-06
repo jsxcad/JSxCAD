@@ -18,7 +18,7 @@ const carve = (block, tool = {}, ...shapes) => {
   const cuts = Math.ceil(depth / cutDepth);
   const effectiveCutDepth = depth / cuts;
   return negative
-    .section(
+    .sectionProfile(
       ...each((l) => z.z(l), {
         from: min[Z],
         upto: max[Z],
@@ -42,7 +42,7 @@ const mill = (negative, tool = {}) => {
   const cuts = Math.ceil(depth / cutDepth);
   const effectiveCutDepth = depth / cuts;
   return negative
-    .section(
+    .sectionProfile(
       ...each((l) => z.z(l), {
         from: min[Z],
         upto: max[Z],

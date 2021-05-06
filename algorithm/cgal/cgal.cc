@@ -644,30 +644,6 @@ struct Project
   Vector vector;
 };
 
-#if 0
-template <typename R> static
-CGAL::Plane_3<R> normalized(const CGAL::Plane_3<R>& h) { 
-  CGAL_assertion(!(h.a()==0 && h.b()==0 && h.c()==0 && h.d()==0));
-  typedef typename R::RT     RT;
-  RT x = (h.a()==0) ? ((h.b()==0) ? ((h.c()==0) ? ((h.d()==0) ? 1 : h.d()) : h.c()) : h.b()) : h.a();
-  if (h.b() != 0) {
-    x = CGAL_NTS gcd(x,h.b());
-  }
-  if (h.c() != 0) {
-    x = CGAL_NTS gcd(x,h.c());
-  }
-  if (h.d() != 0) {
-    x = CGAL_NTS gcd(x,h.d());
-  }
-  x = CGAL_NTS abs(x);
-  RT pa = h.a() / x;
-  RT pb = h.b() / x;
-  RT pc = h.c() / x;
-  RT pd = h.d() / x;
-  return typename R::Plane_3(pa,pb,pc,pd);
-}
-#endif
-
 Plane unitPlane(const Plane& p) { 
   Vector normal = p.orthogonal_vector();
   // We can handle the axis aligned planes exactly.
@@ -1249,18 +1225,25 @@ Surface_mesh* UnionOfSurfaceMeshes(Surface_mesh* a, Surface_mesh* b) {
 }
 
 // CHECK: Should this produce Polygons_with_holes?
-void SectionOfSurfaceMesh(Surface_mesh* mesh, std::size_t plane_count, emscripten::val fill_plane, emscripten::val emit_mesh) {
-  typedef Traits_2::X_monotone_curve_2                  Segment_2;
+void SectionOfSurfaceMesh(Surface_mesh* mesh, std::size_t plane_count, emscripten::val fill_plane, emscripten::val emit_mesh, bool profile) {
+  typedef Traits_2::X_monotone_curve_2 Segment_2;
   typedef std::vector<Point> Polyline_type;
   typedef std::list<Polyline_type> Polylines;
 
   CGAL::Polygon_mesh_slicer<Surface_mesh, Kernel> slicer(*mesh);
+
+  bool has_last_gps = false;
+  General_polygon_set_2 last_gps;
 
   for (std::size_t nth_plane = 0; nth_plane < plane_count; nth_plane++) {
     Quadruple q;
     Quadruple* qp =  &q;
     fill_plane(nth_plane, qp);
     Plane plane(q[0], q[1], q[2], q[3]);
+    if (profile) {
+      // We need the 2d forms to be interoperable.
+      plane = unitPlane(plane);
+    }
     Arrangement_2 arrangement;
     Polylines polylines;
     slicer(plane, std::back_inserter(polylines));
@@ -1272,6 +1255,22 @@ void SectionOfSurfaceMesh(Surface_mesh* mesh, std::size_t plane_count, emscripte
     }
     std::vector<Polygon_with_holes_2> polygons;
     convertArrangementToPolygonsWithHoles(arrangement, polygons);
+
+    if (profile) {
+      // Clip each section to the previous section, allowing overhangs to be eliminated.
+      General_polygon_set_2 this_gps;
+      for (const auto& polygon : polygons) {
+        this_gps.join(polygon);
+      }
+      if (has_last_gps) {
+        this_gps.intersection(last_gps);
+        polygons.clear();
+        this_gps.polygons_with_holes(std::back_inserter(polygons));
+      }
+      last_gps = this_gps;
+      has_last_gps = true;
+    }
+
     Surface_mesh* c = PolygonsWithHolesToSurfaceMesh(plane, polygons);
     emit_mesh(c);
   }
@@ -2409,14 +2408,105 @@ void FromSurfaceMeshToPolygonsWithHoles(Surface_mesh* mesh, emscripten::val emit
   emitArrangementsAsPolygonsWithHoles(arrangements, emit_plane, emit_polygon, emit_point);
 }
 
+Surface_mesh* MinkowskiDifferenceOfSurfaceMeshes(Surface_mesh* input_mesh, Surface_mesh* offset_mesh) {
+  typedef CGAL::Nef_polyhedron_3<Kernel> Nef_polyhedron;
+
+  Nef_polyhedron input_nef(*input_mesh);
+  Nef_polyhedron input_nef_boundary = input_nef.boundary();
+  Nef_polyhedron offset_nef(*offset_mesh);
+  // Subtract the shell of the nef.
+  Nef_polyhedron outer_nef = input_nef - minkowski_sum_3(input_nef_boundary, offset_nef);
+
+  std::vector<Surface_mesh> input_meshes;
+  CGAL::Polygon_mesh_processing::split_connected_components(*input_mesh, input_meshes);
+
+  // Unfortunately minkowski sum doesn't do cavities, so let's do them here and cut them out.
+
+  for (const Surface_mesh& hole : input_meshes) {
+    if (!CGAL::Polygon_mesh_processing::does_bound_a_volume(hole)) {
+      continue;
+    }
+    if (CGAL::Polygon_mesh_processing::is_outward_oriented(hole)) {
+      // Not a cavity.
+      continue;
+    }
+    Nef_polyhedron input_nef(hole);
+    Nef_polyhedron input_nef_boundary = input_nef.boundary();
+    // Add the shell of the nef.
+    Nef_polyhedron result_nef = input_nef + minkowski_sum_3(input_nef_boundary, offset_nef);
+    outer_nef -= result_nef;
+  }
+
+  Surface_mesh* result_mesh = new Surface_mesh;
+  CGAL::convert_nef_polyhedron_to_polygon_mesh(outer_nef, *result_mesh);
+  return result_mesh;
+}
+
 Surface_mesh* MinkowskiSumOfSurfaceMeshes(Surface_mesh* input_mesh, Surface_mesh* offset_mesh) {
   typedef CGAL::Nef_polyhedron_3<Kernel> Nef_polyhedron;
 
   Nef_polyhedron input_nef(*input_mesh);
+  Nef_polyhedron input_nef_boundary = input_nef.boundary();
   Nef_polyhedron offset_nef(*offset_mesh);
-  Nef_polyhedron result_nef = minkowski_sum_3(input_nef, offset_nef);
+  // Add the shell of the nef.
+  Nef_polyhedron outer_nef = input_nef + minkowski_sum_3(input_nef_boundary, offset_nef);
+
+  std::vector<Surface_mesh> input_meshes;
+  CGAL::Polygon_mesh_processing::split_connected_components(*input_mesh, input_meshes);
+
+  // Unfortunately minkowski sum doesn't do cavities, so let's do them here and cut them out.
+
+  for (const Surface_mesh& hole : input_meshes) {
+    if (!CGAL::Polygon_mesh_processing::does_bound_a_volume(hole)) {
+      continue;
+    }
+    if (CGAL::Polygon_mesh_processing::is_outward_oriented(hole)) {
+      // Not a cavity.
+      continue;
+    }
+    Nef_polyhedron input_nef(hole);
+    Nef_polyhedron input_nef_boundary = input_nef.boundary();
+    // Subtract the shell of the nef.
+    Nef_polyhedron result_nef = input_nef - minkowski_sum_3(input_nef_boundary, offset_nef);
+    outer_nef -= result_nef;
+  }
+
   Surface_mesh* result_mesh = new Surface_mesh;
-  CGAL::convert_nef_polyhedron_to_polygon_mesh(result_nef, *result_mesh);
+  CGAL::convert_nef_polyhedron_to_polygon_mesh(outer_nef, *result_mesh);
+  return result_mesh;
+}
+
+Surface_mesh* MinkowskiShellOfSurfaceMeshes(Surface_mesh* input_mesh, Surface_mesh* offset_mesh) {
+  typedef CGAL::Nef_polyhedron_3<Kernel> Nef_polyhedron;
+
+  Nef_polyhedron input_nef(*input_mesh);
+  Nef_polyhedron input_nef_boundary = input_nef.boundary();
+  Nef_polyhedron offset_nef(*offset_mesh);
+  // Take the shell of the nef.
+  Nef_polyhedron outer_nef = minkowski_sum_3(input_nef_boundary, offset_nef);
+
+  std::vector<Surface_mesh> input_meshes;
+  CGAL::Polygon_mesh_processing::split_connected_components(*input_mesh, input_meshes);
+
+  // Unfortunately minkowski sum doesn't do cavities, so let's do them here and cut them out.
+
+  for (const Surface_mesh& hole : input_meshes) {
+    if (!CGAL::Polygon_mesh_processing::does_bound_a_volume(hole)) {
+      continue;
+    }
+    if (CGAL::Polygon_mesh_processing::is_outward_oriented(hole)) {
+      // Not a cavity.
+      continue;
+    }
+    Nef_polyhedron input_nef(hole);
+    Nef_polyhedron input_nef_boundary = input_nef.boundary();
+    // Take the shell of the nef.
+    Nef_polyhedron result_nef = minkowski_sum_3(input_nef_boundary, offset_nef);
+    outer_nef += result_nef;
+  }
+
+  Surface_mesh* result_mesh = new Surface_mesh;
+  CGAL::convert_nef_polyhedron_to_polygon_mesh(outer_nef, *result_mesh);
   return result_mesh;
 }
 
@@ -2731,6 +2821,8 @@ EMSCRIPTEN_BINDINGS(module) {
   emscripten::function("ComputeAlphaShape2AsPolygonSegments", &ComputeAlphaShape2AsPolygonSegments, emscripten::allow_raw_pointers());
   emscripten::function("OffsetOfPolygonWithHoles", &OffsetOfPolygonWithHoles, emscripten::allow_raw_pointers());
   emscripten::function("InsetOfPolygonWithHoles", &InsetOfPolygonWithHoles, emscripten::allow_raw_pointers());
+  emscripten::function("MinkowskiDifferenceOfSurfaceMeshes", &MinkowskiDifferenceOfSurfaceMeshes, emscripten::allow_raw_pointers());
+  emscripten::function("MinkowskiShellOfSurfaceMeshes", &MinkowskiShellOfSurfaceMeshes, emscripten::allow_raw_pointers());
   emscripten::function("MinkowskiSumOfSurfaceMeshes", &MinkowskiSumOfSurfaceMeshes, emscripten::allow_raw_pointers());
   emscripten::function("Surface_mesh__is_closed", &Surface_mesh__is_closed, emscripten::allow_raw_pointers());
   emscripten::function("Surface_mesh__is_valid_halfedge_graph", &Surface_mesh__is_valid_halfedge_graph, emscripten::allow_raw_pointers());

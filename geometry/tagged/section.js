@@ -6,11 +6,11 @@ import { taggedGraph } from './taggedGraph.js';
 import { taggedGroup } from './taggedGroup.js';
 import { toTransformedGeometry } from './toTransformedGeometry.js';
 
-const sectionImpl = (geometry, planes) => {
+const sectionImpl = (geometry, planes, { profile = false }) => {
   const transformedGeometry = toTransformedGeometry(reify(geometry));
   const sections = [];
   for (const { tags, graph } of getNonVoidGraphs(transformedGeometry)) {
-    for (const section of sectionsOfGraph(graph, planes)) {
+    for (const section of sectionsOfGraph(graph, planes, { profile })) {
       sections.push(taggedGraph({ tags }, section));
     }
   }

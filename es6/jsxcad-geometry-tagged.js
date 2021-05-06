@@ -4,7 +4,7 @@ import { transform as transform$3, canonicalize as canonicalize$4, eachPoint as 
 import { canonicalize as canonicalize$2 } from './jsxcad-math-plane.js';
 import { transform as transform$2, canonicalize as canonicalize$1, eachPoint as eachPoint$3, flip as flip$2, measureBoundingBox as measureBoundingBox$2, union as union$1 } from './jsxcad-geometry-points.js';
 import { transform as transform$4, canonicalize as canonicalize$3, measureBoundingBox as measureBoundingBox$1 } from './jsxcad-geometry-polygons.js';
-import { realizeGraph, transform as transform$1, fill as fill$1, fromPaths, difference as difference$1, eachPoint as eachPoint$1, fromEmpty, extrude as extrude$1, extrudeToPlane as extrudeToPlane$1, toPaths, intersection as intersection$1, inset as inset$1, measureBoundingBox as measureBoundingBox$3, minkowskiSum as minkowskiSum$1, offset as offset$1, outline as outline$1, projectToPlane as projectToPlane$1, prepareForSerialization as prepareForSerialization$1, push as push$1, remesh as remesh$1, sections, smooth as smooth$1, toTriangles, test as test$1, toPolygonsWithHoles as toPolygonsWithHoles$1, twist as twist$1, union as union$2 } from './jsxcad-geometry-graph.js';
+import { realizeGraph, transform as transform$1, fill as fill$1, fromPaths, difference as difference$1, eachPoint as eachPoint$1, fromEmpty, extrude as extrude$1, extrudeToPlane as extrudeToPlane$1, toPaths, intersection as intersection$1, inset as inset$1, measureBoundingBox as measureBoundingBox$3, minkowskiDifference as minkowskiDifference$1, minkowskiShell as minkowskiShell$1, minkowskiSum as minkowskiSum$1, offset as offset$1, outline as outline$1, projectToPlane as projectToPlane$1, prepareForSerialization as prepareForSerialization$1, push as push$1, remesh as remesh$1, sections, smooth as smooth$1, toTriangles, test as test$1, toPolygonsWithHoles as toPolygonsWithHoles$1, twist as twist$1, union as union$2 } from './jsxcad-geometry-graph.js';
 import { composeTransforms } from './jsxcad-algorithm-cgal.js';
 import { min, max } from './jsxcad-math-vec3.js';
 import { read as read$1, write as write$1 } from './jsxcad-sys.js';
@@ -1255,6 +1255,87 @@ const measureBoundingBox = (geometry) => {
   return [minPoint, maxPoint];
 };
 
+const minkowskiDifference = (geometry, offset) => {
+  offset = reify(offset);
+  const op = (geometry, descend) => {
+    const { tags } = geometry;
+    switch (geometry.type) {
+      case 'graph': {
+        const differences = [];
+        for (const { graph } of getNonVoidGraphs(offset)) {
+          differences.push(
+            taggedGraph(
+              { tags },
+              minkowskiDifference$1(geometry.graph, graph)
+            )
+          );
+        }
+        return taggedGroup({}, ...differences);
+      }
+      case 'triangles':
+      case 'paths':
+      case 'points':
+        // Not implemented yet.
+        return geometry;
+      case 'plan':
+        return minkowskiDifference(reify(geometry).content[0], offset);
+      case 'assembly':
+      case 'item':
+      case 'disjointAssembly':
+      case 'layers': {
+        return descend();
+      }
+      case 'sketch': {
+        // Sketches aren't real.
+        return geometry;
+      }
+      default:
+        throw Error(`Unexpected geometry: ${JSON.stringify(geometry)}`);
+    }
+  };
+
+  return rewrite(toTransformedGeometry(geometry), op);
+};
+
+const minkowskiShell = (geometry, offset) => {
+  offset = reify(offset);
+  const op = (geometry, descend) => {
+    const { tags } = geometry;
+    switch (geometry.type) {
+      case 'graph': {
+        const sums = [];
+        for (const { graph } of getNonVoidGraphs(offset)) {
+          sums.push(
+            taggedGraph({ tags }, minkowskiShell$1(geometry.graph, graph))
+          );
+        }
+        return taggedGroup({}, ...sums);
+      }
+      case 'triangles':
+      case 'paths':
+      case 'points':
+        // Not implemented yet.
+        return geometry;
+      case 'plan':
+        return minkowskiShell(reify(geometry).content[0], offset);
+      case 'assembly':
+      case 'item':
+      case 'disjointAssembly':
+      case 'layers': {
+        return descend();
+      }
+      case 'sketch': {
+        // Sketches aren't real for push.
+        return geometry;
+      }
+      default:
+        throw Error(`Unexpected geometry: ${JSON.stringify(geometry)}`);
+    }
+  };
+
+  return rewrite(toTransformedGeometry(geometry), op);
+};
+
 const minkowskiSum = (geometry, offset) => {
   offset = reify(offset);
   const op = (geometry, descend) => {
@@ -1514,11 +1595,11 @@ const remesh = (geometry, options) => {
   return rewrite(toTransformedGeometry(geometry), op);
 };
 
-const sectionImpl = (geometry, planes) => {
+const sectionImpl = (geometry, planes, { profile = false }) => {
   const transformedGeometry = toTransformedGeometry(reify(geometry));
   const sections$1 = [];
   for (const { tags, graph } of getNonVoidGraphs(transformedGeometry)) {
-    for (const section of sections(graph, planes)) {
+    for (const section of sections(graph, planes, { profile })) {
       sections$1.push(taggedGraph({ tags }, section));
     }
   }
@@ -1950,4 +2031,4 @@ const translate = (vector, geometry) =>
 const scale = (vector, geometry) =>
   transform(fromScaling(vector), geometry);
 
-export { allTags, assemble, canonicalize, difference, drop, eachItem, eachPoint, empty, extrude, extrudeToPlane, fill, flip, fresh, fromSurfaceToPaths, getAnyNonVoidSurfaces, getAnySurfaces, getFaceablePaths, getGraphs, getItems, getLayers, getLayouts, getLeafs, getNonVoidFaceablePaths, getNonVoidGraphs, getNonVoidItems, getNonVoidPaths, getNonVoidPlans, getNonVoidPoints, getPaths, getPeg, getPlans, getPoints, getTags, hash, inset, intersection, isNotVoid, isVoid, keep, measureBoundingBox, minkowskiSum, offset, outline, prepareForSerialization, projectToPlane, push, read, realize, registerReifier, reify, remesh, rewrite, rewriteTags, rotateX, rotateY, rotateZ, scale, section, smooth, soup, taggedAssembly, taggedDisjointAssembly, taggedDisplayGeometry, taggedGraph, taggedGroup, taggedItem, taggedLayers, taggedLayout, taggedPaths, taggedPlan, taggedPoints, taggedSketch, taggedTransform, taggedTriangles, test, toDisjointGeometry, toDisplayGeometry, toKeptGeometry, toPoints, toPolygonsWithHoles, toTransformedGeometry, toVisiblyDisjointGeometry, transform, translate, twist, union, update, visit, write };
+export { allTags, assemble, canonicalize, difference, drop, eachItem, eachPoint, empty, extrude, extrudeToPlane, fill, flip, fresh, fromSurfaceToPaths, getAnyNonVoidSurfaces, getAnySurfaces, getFaceablePaths, getGraphs, getItems, getLayers, getLayouts, getLeafs, getNonVoidFaceablePaths, getNonVoidGraphs, getNonVoidItems, getNonVoidPaths, getNonVoidPlans, getNonVoidPoints, getPaths, getPeg, getPlans, getPoints, getTags, hash, inset, intersection, isNotVoid, isVoid, keep, measureBoundingBox, minkowskiDifference, minkowskiShell, minkowskiSum, offset, outline, prepareForSerialization, projectToPlane, push, read, realize, registerReifier, reify, remesh, rewrite, rewriteTags, rotateX, rotateY, rotateZ, scale, section, smooth, soup, taggedAssembly, taggedDisjointAssembly, taggedDisplayGeometry, taggedGraph, taggedGroup, taggedItem, taggedLayers, taggedLayout, taggedPaths, taggedPlan, taggedPoints, taggedSketch, taggedTransform, taggedTriangles, test, toDisjointGeometry, toDisplayGeometry, toKeptGeometry, toPoints, toPolygonsWithHoles, toTransformedGeometry, toVisiblyDisjointGeometry, transform, translate, twist, union, update, visit, write };

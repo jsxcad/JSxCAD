@@ -14,6 +14,8 @@ import './fuse.js';
 import './inset.js';
 import './keep.js';
 import './material.js';
+import './minkowskiDifference.js';
+import './minkowskiShell.js';
 import './minkowskiSum.js';
 import './move.js';
 import './noVoid.js';

@@ -43,6 +43,8 @@ export { insetOfPolygonWithHoles } from './insetOfPolygonWithHoles.js';
 export { intersectionOfSurfaceMeshes } from './intersectionOfSurfaceMeshes.js';
 export { offsetOfPolygonWithHoles } from './offsetOfPolygonWithHoles.js';
 export { outlineSurfaceMesh } from './outlineSurfaceMesh.js';
+export { minkowskiDifferenceOfSurfaceMeshes } from './minkowskiDifferenceOfSurfaceMeshes.js';
+export { minkowskiShellOfSurfaceMeshes } from './minkowskiShellOfSurfaceMeshes.js';
 export { minkowskiSumOfSurfaceMeshes } from './minkowskiSumOfSurfaceMeshes.js';
 export { projectToPlaneOfSurfaceMesh } from './projectToPlaneOfSurfaceMesh.js';
 export { pushSurfaceMesh } from './pushSurfaceMesh.js';

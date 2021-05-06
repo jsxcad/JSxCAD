@@ -1,5 +1,5 @@
 import { close, concatenate, open } from './jsxcad-geometry-path.js';
-import { taggedAssembly, eachPoint, flip, toDisplayGeometry, toDisjointGeometry as toDisjointGeometry$1, toTransformedGeometry, toPoints, transform, rewriteTags, taggedPaths, taggedGraph, taggedPoints, union, taggedLayers, intersection, allTags, difference, getLeafs, empty, inset as inset$1, rewrite, minkowskiSum as minkowskiSum$1, isVoid, offset as offset$1, assemble as assemble$1, taggedItem, taggedDisjointAssembly, push as push$1, getPeg, taggedPlan, remesh as remesh$1, smooth as smooth$1, measureBoundingBox, taggedSketch, test as test$1, twist as twist$1, toPolygonsWithHoles, taggedGroup, read, write, realize } from './jsxcad-geometry-tagged.js';
+import { taggedAssembly, eachPoint, flip, toDisplayGeometry, toDisjointGeometry as toDisjointGeometry$1, toTransformedGeometry, toPoints, transform, rewriteTags, taggedPaths, taggedGraph, taggedPoints, union, taggedLayers, intersection, allTags, difference, getLeafs, empty, inset as inset$1, rewrite, minkowskiDifference as minkowskiDifference$1, minkowskiShell as minkowskiShell$1, minkowskiSum as minkowskiSum$1, isVoid, offset as offset$1, assemble as assemble$1, taggedItem, taggedDisjointAssembly, push as push$1, getPeg, taggedPlan, remesh as remesh$1, smooth as smooth$1, measureBoundingBox, taggedSketch, test as test$1, twist as twist$1, toPolygonsWithHoles, taggedGroup, read, write, realize } from './jsxcad-geometry-tagged.js';
 import { fromPolygons, arrangePolygonsWithHoles, fromPolygonsWithHolesToTriangles, fromTriangles } from './jsxcad-geometry-graph.js';
 import { identityMatrix, fromTranslation, fromRotation, fromScaling } from './jsxcad-math-mat4.js';
 import { add as add$1, negate, normalize, subtract, dot, cross, scale as scale$1, distance } from './jsxcad-math-vec3.js';
@@ -528,6 +528,28 @@ const materialMethod = function (name) {
   return material(this, name);
 };
 Shape.prototype.material = materialMethod;
+
+const minkowskiDifference = (shape, offset) =>
+  Shape.fromGeometry(
+    minkowskiDifference$1(shape.toGeometry(), offset.toGeometry())
+  );
+
+const minkowskiDifferenceMethod = function (offset) {
+  return minkowskiDifference(this, offset);
+};
+
+Shape.registerMethod('minkowskiDifference', minkowskiDifferenceMethod);
+
+const minkowskiShell = (shape, offset) =>
+  Shape.fromGeometry(
+    minkowskiShell$1(shape.toGeometry(), offset.toGeometry())
+  );
+
+const minkowskiShellMethod = function (offset) {
+  return minkowskiShell(this, offset);
+};
+
+Shape.registerMethod('minkowskiShell', minkowskiShellMethod);
 
 const minkowskiSum = (shape, offset) =>
   Shape.fromGeometry(

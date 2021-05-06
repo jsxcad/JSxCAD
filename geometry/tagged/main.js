@@ -61,6 +61,8 @@ export { intersection } from './intersection.js';
 export { inset } from './inset.js';
 export { keep } from './keep.js';
 export { measureBoundingBox } from './measureBoundingBox.js';
+export { minkowskiDifference } from './minkowskiDifference.js';
+export { minkowskiShell } from './minkowskiShell.js';
 export { minkowskiSum } from './minkowskiSum.js';
 export { offset } from './offset.js';
 export { outline } from './outline.js';
