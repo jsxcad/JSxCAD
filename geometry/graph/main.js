@@ -13,6 +13,7 @@ export { fromPoints } from './fromPoints.js';
 export { fromPolygons } from './fromPolygons.js';
 export { fromPolygonsWithHolesToTriangles } from './fromPolygonsWithHolesToTriangles.js';
 export { fromTriangles } from './fromTriangles.js';
+export { grow } from './grow.js';
 export { inset } from './inset.js';
 export { intersection } from './intersection.js';
 export { measureBoundingBox } from './measureBoundingBox.js';

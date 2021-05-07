@@ -55,6 +55,7 @@ export { getPeg } from './getPeg.js';
 export { getPlans } from './getPlans.js';
 export { getPoints } from './getPoints.js';
 export { getTags } from './getTags.js';
+export { grow } from './grow.js';
 export { hash } from './hash.js';
 export { fill } from './fill.js';
 export { intersection } from './intersection.js';

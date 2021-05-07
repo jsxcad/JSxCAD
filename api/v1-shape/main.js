@@ -11,6 +11,7 @@ import './cut.js';
 import './cutFrom.js';
 import './each.js';
 import './fuse.js';
+import './grow.js';
 import './inset.js';
 import './keep.js';
 import './material.js';

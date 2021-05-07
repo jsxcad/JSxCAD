@@ -458,6 +458,33 @@ Surface_mesh* PushSurfaceMesh(Surface_mesh* input, double force, double minimum_
   return c;
 }
 
+Vector unitVector(const Vector& vector);
+Vector NormalOfSurfaceMeshFacet(const Surface_mesh& mesh, Face_index facet);
+
+Surface_mesh* GrowSurfaceMesh(Surface_mesh* input, double amount) {
+  Surface_mesh* result = new Surface_mesh(*input);
+  for (const Surface_mesh::Vertex_index vertex : input->vertices()) {
+    const Surface_mesh::Halfedge_index start = input->halfedge(vertex);
+    Surface_mesh::Halfedge_index edge = start;
+    std::vector<Vector> normals;
+    Vector average = CGAL::NULL_VECTOR;
+    do {
+      Surface_mesh::Face_index facet = input->face(edge);
+      Vector unit = unitVector(NormalOfSurfaceMeshFacet(*input, facet));
+      if (std::find(normals.begin(), normals.end(), unit) == normals.end()) {
+        normals.push_back(unit);
+        average += unit;
+      }
+      edge = input->next_around_target(edge);
+    } while (edge != start);
+
+    Point& point = result->point(vertex);
+    Vector offset = average * (amount / normals.size());
+    point += offset;
+  }
+  return result;
+}
+
 void Surface_mesh__EachFace(Surface_mesh* mesh, emscripten::val op) {
   for (const auto& face_index : mesh->faces()) {
     if (!mesh->is_removed(face_index)) {
@@ -663,6 +690,27 @@ Plane unitPlane(const Plane& p) {
     // But the general case requires an approximation.
     Vector unit_normal = normal / CGAL_NTS approximate_sqrt(normal.squared_length());
     return Plane(p.point(), unit_normal);
+  }
+}
+
+Vector unitVector(const Vector& vector) { 
+  // We can handle the axis aligned planes exactly.
+  if (vector.direction() == Vector(0, 0, 1).direction()) {
+    return Vector(0, 0, 1);
+  } else if (vector.direction() == Vector(0, 0, -1).direction()) {
+    return Vector(0, 0, -1);
+  } else if (vector.direction() == Vector(0, 1, 0).direction()) {
+    return Vector(0, 1, 0);
+  } else if (vector.direction() == Vector(0, -1, 0).direction()) {
+    return Vector(0, -1, 0);
+  } else if (vector.direction() == Vector(1, 0, 0).direction()) {
+    return Vector(1, 0, 0);
+  } else if (vector.direction() == Vector(-1, 0, 0).direction()) {
+    return Vector(-1, 0, 0);
+  } else {
+    // But the general case requires an approximation.
+    Vector unit_vector = vector / CGAL_NTS approximate_sqrt(vector.squared_length());
+    return unit_vector;
   }
 }
 
@@ -2824,6 +2872,7 @@ EMSCRIPTEN_BINDINGS(module) {
   emscripten::function("MinkowskiDifferenceOfSurfaceMeshes", &MinkowskiDifferenceOfSurfaceMeshes, emscripten::allow_raw_pointers());
   emscripten::function("MinkowskiShellOfSurfaceMeshes", &MinkowskiShellOfSurfaceMeshes, emscripten::allow_raw_pointers());
   emscripten::function("MinkowskiSumOfSurfaceMeshes", &MinkowskiSumOfSurfaceMeshes, emscripten::allow_raw_pointers());
+  emscripten::function("GrowSurfaceMesh", &GrowSurfaceMesh, emscripten::allow_raw_pointers());
   emscripten::function("Surface_mesh__is_closed", &Surface_mesh__is_closed, emscripten::allow_raw_pointers());
   emscripten::function("Surface_mesh__is_valid_halfedge_graph", &Surface_mesh__is_valid_halfedge_graph, emscripten::allow_raw_pointers());
   emscripten::function("Surface_mesh__is_valid_face_graph", &Surface_mesh__is_valid_face_graph, emscripten::allow_raw_pointers());

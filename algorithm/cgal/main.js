@@ -38,6 +38,7 @@ export { fromSurfaceMeshToLazyGraph } from './fromSurfaceMeshToLazyGraph.js';
 export { fromSurfaceMeshToPolygons } from './fromSurfaceMeshToPolygons.js';
 export { fromSurfaceMeshToPolygonsWithHoles } from './fromSurfaceMeshToPolygonsWithHoles.js';
 export { fromSurfaceMeshToTriangles } from './fromSurfaceMeshToTriangles.js';
+export { growSurfaceMesh } from './growSurfaceMesh.js';
 export { initCgal } from './getCgal.js';
 export { insetOfPolygonWithHoles } from './insetOfPolygonWithHoles.js';
 export { intersectionOfSurfaceMeshes } from './intersectionOfSurfaceMeshes.js';
