@@ -2,7 +2,7 @@ import { Shape, getPegCoords } from '@jsxcad/api-v1-shape';
 
 import { section as sectionGeometry } from '@jsxcad/geometry-tagged';
 
-export const section = (shape, ...pegs) => {
+export const section = (shape, { profile = false }, ...pegs) => {
   const planes = [];
   if (pegs.length === 0) {
     planes.push({ plane: [0, 0, 1, 0] });
@@ -12,12 +12,19 @@ export const section = (shape, ...pegs) => {
       planes.push({ plane });
     }
   }
-  return Shape.fromGeometry(sectionGeometry(shape.toGeometry(), planes));
+  return Shape.fromGeometry(
+    sectionGeometry(shape.toGeometry(), planes, { profile })
+  );
 };
 
 const sectionMethod = function (...args) {
-  return section(this, ...args);
+  return section(this, { profile: false }, ...args);
 };
 Shape.prototype.section = sectionMethod;
+
+const sectionProfileMethod = function (...args) {
+  return section(this, { profile: true }, ...args);
+};
+Shape.prototype.sectionProfile = sectionProfileMethod;
 
 export default section;

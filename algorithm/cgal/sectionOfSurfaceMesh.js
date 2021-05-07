@@ -1,7 +1,7 @@
 // import { arrangePaths } from './arrangePaths.js';
 import { getCgal } from './getCgal.js';
 
-export const sectionOfSurfaceMesh = (mesh, planes) => {
+export const sectionOfSurfaceMesh = (mesh, planes, profile = false) => {
   const g = getCgal();
   const sections = [];
   g.SectionOfSurfaceMesh(
@@ -17,7 +17,8 @@ export const sectionOfSurfaceMesh = (mesh, planes) => {
         g.fillQuadruple(out, x, y, z, -w);
       }
     },
-    (section) => sections.push(section)
+    (section) => sections.push(section),
+    profile
   );
   return sections;
 };
