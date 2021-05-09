@@ -101,9 +101,10 @@ const messageBootQueue = [];
 onmessage = ({ data }) => messageBootQueue.push(data);
 
 const bootstrap = async () => {
-  await sys.boot();
   const { ask, hear } = sys.conversation({ agent, say });
   self.ask = ask;
+  // sys/log depends on ask, so set that up before we boot.
+  await sys.boot();
   onmessage = ({ data }) => hear(data);
   // Now that we're ready, drain the buffer.
   if (self.messageBootQueue !== undefined) {

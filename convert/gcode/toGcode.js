@@ -8,7 +8,7 @@ const Y = 1;
 const Z = 2;
 
 // FIX: This is actually GRBL.
-export const toGcode = async (geometry, { definitions } = {}) => {
+export const toGcode = async (geometry, tool, { definitions } = {}) => {
   // const topZ = 0;
   const codes = [];
   const _ = undefined;
@@ -163,7 +163,7 @@ export const toGcode = async (geometry, { definitions } = {}) => {
     const dX = x - state.position[X];
     const dY = y - state.position[Y];
     const dZ = z - state.position[Z];
-    const cost = Math.sqrt(dX * dX + dY * dY + dZ * 1000 * dZ * 1000);
+    const cost = Math.sqrt(dX * dX + dY * dY) - z * 1000000;
     return cost;
   };
 
@@ -180,7 +180,8 @@ export const toGcode = async (geometry, { definitions } = {}) => {
 
   // FIX: Should handle points as well as paths.
   for (const { tags, paths } of outline(toDisjointGeometry(geometry))) {
-    toolChange(toToolFromTags('grbl', tags, definitions));
+    // toolChange(toToolFromTags('grbl', tags, definitions));
+    toolChange(tool);
     const todo = new Set();
     for (const path of paths) {
       for (let [start, end] of getEdges(path)) {

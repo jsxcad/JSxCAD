@@ -2092,11 +2092,6 @@ void emitPolygonsWithHoles(const Plane& plane, const std::vector<P>& polygons, e
     // print_polygon_with_holes(polygon);
     const auto& outer = polygon.outer_boundary();
     emit_polygon(false);
-#if 0
-    bool has_last = false;
-    Point last;
-    Point_2 last_2;
-#endif
     for (auto edge = outer.edges_begin(); edge != outer.edges_end(); ++edge) {
       if (edge->source() == edge->target()) {
         // Skip zero length edges.
@@ -2108,35 +2103,9 @@ void emitPolygonsWithHoles(const Plane& plane, const std::vector<P>& polygons, e
       if (p == p2) {
         // This produced a zero length edge in 3 space.
         // CHECK: For some mysterious reason this might not be a zero length edge in 2 space.
-        std::cout << "QQ/dup" << std::endl;
+        // std::cout << "QQ/dup" << std::endl;
         continue;
       }
-#if 0
-      if (has_last) {
-        if (edge->source() == last_2) {
-          std::cout << "QQ/dup_2" << std::endl;
-        }
-        if (has_last && p == last) {
-          // It is mysterious that p == last can be true while last_2 != edge->source() can be true.
-          continue;
-          std::cout << "QQ/dup_1: " << std::endl;
-          std::cout << "QQ/dup_1/plane: " << plane << std::endl;
-          std::cout << "QQ/dup_1/p/x: " << p.x().exact() << std::endl;
-          std::cout << "QQ/dup_1/p/y: " << p.y().exact() << std::endl;
-          std::cout << "QQ/dup_1/p/z: " << p.z().exact() << std::endl;
-          std::cout << "QQ/dup_1/last/x: " << last.x().exact() << std::endl;
-          std::cout << "QQ/dup_1/last/y: " << last.y().exact() << std::endl;
-          std::cout << "QQ/dup_1/last/z: " << last.z().exact() << std::endl;
-          std::cout << "QQ/dup_1/source/x: " << edge->source().x().exact() << std::endl;
-          std::cout << "QQ/dup_1/source/y: " << edge->source().y().exact() << std::endl;
-          std::cout << "QQ/dup_1/last_2/x: " << last_2.x().exact() << std::endl;
-          std::cout << "QQ/dup_1/last_2/y: " << last_2.y().exact() << std::endl;
-        }
-      }
-      has_last = true;
-      last = p;
-      last_2 = edge->source();
-#endif
       std::ostringstream x; x << p.x().exact();
       std::ostringstream y; y << p.y().exact();
       std::ostringstream z; z << p.z().exact();
@@ -2454,6 +2423,83 @@ void FromSurfaceMeshToPolygonsWithHoles(Surface_mesh* mesh, emscripten::val emit
   std::unordered_map<Plane, Arrangement_2> arrangements;
   convertSurfaceMeshFacesToArrangements(*mesh, arrangements);
   emitArrangementsAsPolygonsWithHoles(arrangements, emit_plane, emit_polygon, emit_point);
+}
+
+bool computeFitPolygon(const Polygon_with_holes_2& space, const Polygon_with_holes_2& shape, Point_2& picked) {
+  Polygon_with_holes_2 insetting_boundary;
+
+  {
+    // Stick a box around the boundary (which will now form a hole).
+    CGAL::Bbox_2 bb = space.outer_boundary().bbox();
+    // 10 is wrong -- it should be a dilated boundary box of shape.
+    bb.dilate(10);
+
+    Polygon_2 frame;
+    frame.push_back(Point_2(bb.xmin(), bb.ymin()));
+    frame.push_back(Point_2(bb.xmax(), bb.ymin()));
+    frame.push_back(Point_2(bb.xmax(), bb.ymax()));
+    frame.push_back(Point_2(bb.xmin(), bb.ymax()));
+    if (frame.orientation() == CGAL::Sign::NEGATIVE) {
+      frame.reverse_orientation();
+    }
+
+    std::vector<Polygon_2> boundaries { space.outer_boundary() };
+
+    insetting_boundary = Polygon_with_holes_2(frame, boundaries.begin(), boundaries.end());
+  }
+
+  std::vector<Polygon_2> holes;
+  for (auto it = space.holes_begin(); it != space.holes_end(); ++it) {
+    Polygon_2 hole = *it;
+    if (hole.orientation() == CGAL::Sign::NEGATIVE) {
+      hole.reverse_orientation();
+    }
+    if (!hole.is_simple()) {
+      std::cout << "Hole is not simple" << std::endl;
+      return false;
+    }
+    holes.push_back(hole);
+  }
+
+  General_polygon_set_2 boundaries;
+
+  Polygon_with_holes_2 inset_boundary = CGAL::minkowski_sum_2(insetting_boundary, shape);
+
+  // We just extract the holes, which are the inset boundary.
+  for (auto hole = inset_boundary.holes_begin(); hole != inset_boundary.holes_end(); ++hole) {
+    if (hole->orientation() == CGAL::Sign::NEGATIVE) {
+      Polygon_2 boundary = *hole;
+      boundary.reverse_orientation();
+      boundaries.join(General_polygon_set_2(boundary));
+    } else {
+      boundaries.join(General_polygon_set_2(*hole));
+    }
+  }
+
+  for (const auto& hole : holes) {
+    Polygon_with_holes_2 offset_hole = CGAL::minkowski_sum_2(hole, shape);
+    boundaries.difference(General_polygon_set_2(offset_hole));
+  }
+
+  std::vector<Polygon_with_holes_2> polygons;
+  boundaries.polygons_with_holes(std::back_inserter(polygons));
+
+  std::vector<Point_2> points;
+  for (const auto& polygon : polygons) {
+    points.insert(std::end(points), polygon.outer_boundary().vertices_begin(), polygon.outer_boundary().vertices_end());
+    for (const auto& point : polygon.outer_boundary()) {
+      points.push_back(point);
+    }
+    for (auto hole = polygon.holes_begin(); hole != polygon.holes_end(); ++hole) {
+      points.insert(std::end(points), hole->vertices_begin(), hole->vertices_end());
+    }
+  }
+
+  // Just pick the first point for now.
+
+  picked = points[0];
+
+  return true;
 }
 
 Surface_mesh* MinkowskiDifferenceOfSurfaceMeshes(Surface_mesh* input_mesh, Surface_mesh* offset_mesh) {
