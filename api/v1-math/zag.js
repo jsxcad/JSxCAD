@@ -2,7 +2,10 @@
 // See: https://math.stackexchange.com/questions/4132060/compute-number-of-regular-polgy-sides-to-approximate-circle-to-defined-precision
 
 export const zag = (diameter, tolerance = 1) => {
-  const k = tolerance / diameter;
+  const r = diameter / 2;
+  const k = tolerance / r;
   const s = Math.ceil(Math.PI / Math.sqrt(k * 2));
   return s;
 };
+
+export default zag;
