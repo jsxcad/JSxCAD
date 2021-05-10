@@ -10,8 +10,8 @@ import './jsxcad-api-v1-pdf.js';
 import './jsxcad-api-v1-tools.js';
 import { Item } from './jsxcad-api-v1-item.js';
 export { Item } from './jsxcad-api-v1-item.js';
-import { Noise, Random, acos, cos, each, ease, max, min, numbers, sin, sqrt, vec } from './jsxcad-api-v1-math.js';
-export { Noise, Random, acos, cos, each, ease, max, min, numbers, sin, sqrt, vec } from './jsxcad-api-v1-math.js';
+import { Noise, Random, acos, cos, each, ease, max, min, numbers, sin, sqrt, vec, zag } from './jsxcad-api-v1-math.js';
+export { Noise, Random, acos, cos, each, ease, max, min, numbers, sin, sqrt, vec, zag } from './jsxcad-api-v1-math.js';
 import { readSvg } from './jsxcad-api-v1-svg.js';
 export { readSvg } from './jsxcad-api-v1-svg.js';
 import { readStl } from './jsxcad-api-v1-stl.js';
@@ -498,6 +498,7 @@ var api = /*#__PURE__*/Object.freeze({
   sin: sin,
   sqrt: sqrt,
   vec: vec,
+  zag: zag,
   readSvg: readSvg,
   readStl: readStl,
   readObj: readObj,

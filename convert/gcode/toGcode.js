@@ -178,7 +178,7 @@ export const toGcode = async (geometry, tool, { definitions } = {}) => {
 
   // FIX: Should handle points as well as paths.
   for (const { paths } of outline(toDisjointGeometry(geometry))) {
-    toolChange(tool);
+    toolChange(tool.grbl);
     const todo = new Set();
     for (const path of paths) {
       for (let [start, end] of getEdges(path)) {
