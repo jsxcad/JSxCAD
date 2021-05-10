@@ -21,7 +21,7 @@ export const Spiral = (
     by,
     resolution,
   })) {
-    const radians = (angle * Math.PI) / 180;
+    const radians = (-angle * Math.PI) / 180;
     const subpath = toPathFromAngle(angle);
     path = concatenate(path, rotateZ(radians, subpath));
   }
