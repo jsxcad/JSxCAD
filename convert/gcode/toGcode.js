@@ -1,7 +1,6 @@
 import { outline, toDisjointGeometry } from '@jsxcad/geometry-tagged';
 
 import { getEdges } from '@jsxcad/geometry-path';
-import { toToolFromTags } from '@jsxcad/algorithm-tool';
 
 const X = 0;
 const Y = 1;
@@ -162,7 +161,6 @@ export const toGcode = async (geometry, tool, { definitions } = {}) => {
   const computeDistance = ([x, y, z]) => {
     const dX = x - state.position[X];
     const dY = y - state.position[Y];
-    const dZ = z - state.position[Z];
     const cost = Math.sqrt(dX * dX + dY * dY) - z * 1000000;
     return cost;
   };
@@ -179,8 +177,7 @@ export const toGcode = async (geometry, tool, { definitions } = {}) => {
   };
 
   // FIX: Should handle points as well as paths.
-  for (const { tags, paths } of outline(toDisjointGeometry(geometry))) {
-    // toolChange(toToolFromTags('grbl', tags, definitions));
+  for (const { paths } of outline(toDisjointGeometry(geometry))) {
     toolChange(tool);
     const todo = new Set();
     for (const path of paths) {
