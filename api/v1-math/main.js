@@ -11,6 +11,7 @@ import max from './max.js';
 import min from './min.js';
 import sin from './sin.js';
 import sqrt from './sqrt.js';
+import zag from './zag.js';
 
 const api = {
   Noise,
@@ -26,6 +27,7 @@ const api = {
   sin,
   sqrt,
   vec,
+  zag,
 };
 
 export {
@@ -42,6 +44,7 @@ export {
   sin,
   sqrt,
   vec,
+  zag,
 };
 
 export default api;

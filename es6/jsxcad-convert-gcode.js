@@ -1,13 +1,12 @@
 import { outline, toDisjointGeometry } from './jsxcad-geometry-tagged.js';
 import { getEdges } from './jsxcad-geometry-path.js';
-import { toToolFromTags } from './jsxcad-algorithm-tool.js';
 
 const X = 0;
 const Y = 1;
 const Z = 2;
 
 // FIX: This is actually GRBL.
-const toGcode = async (geometry, { definitions } = {}) => {
+const toGcode = async (geometry, tool, { definitions } = {}) => {
   // const topZ = 0;
   const codes = [];
   const _ = undefined;
@@ -161,8 +160,7 @@ const toGcode = async (geometry, { definitions } = {}) => {
   const computeDistance = ([x, y, z]) => {
     const dX = x - state.position[X];
     const dY = y - state.position[Y];
-    const dZ = z - state.position[Z];
-    const cost = Math.sqrt(dX * dX + dY * dY + dZ * 1000 * dZ * 1000);
+    const cost = Math.sqrt(dX * dX + dY * dY) - z * 1000000;
     return cost;
   };
 
@@ -178,8 +176,8 @@ const toGcode = async (geometry, { definitions } = {}) => {
   };
 
   // FIX: Should handle points as well as paths.
-  for (const { tags, paths } of outline(toDisjointGeometry(geometry))) {
-    toolChange(toToolFromTags('grbl', tags, definitions));
+  for (const { paths } of outline(toDisjointGeometry(geometry))) {
+    toolChange(tool.grbl);
     const todo = new Set();
     for (const path of paths) {
       for (let [start, end] of getEdges(path)) {

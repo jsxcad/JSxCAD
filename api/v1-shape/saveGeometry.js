@@ -2,8 +2,19 @@ import { read, write } from '@jsxcad/geometry-tagged';
 
 import Shape from './Shape.js';
 
-export const loadGeometry = async (path) =>
-  Shape.fromGeometry(await read(path));
+const fromUndefined = () => Shape.fromGeometry();
+
+export const loadGeometry = async (
+  path,
+  { otherwise = fromUndefined } = {}
+) => {
+  const data = await read(path);
+  if (data === undefined) {
+    return otherwise();
+  } else {
+    return Shape.fromGeometry(data);
+  }
+};
 
 export const saveGeometry = async (path, shape) =>
   Shape.fromGeometry(await write(shape.toGeometry(), path));

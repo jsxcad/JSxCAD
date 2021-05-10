@@ -95,6 +95,7 @@ export {
   sin,
   sqrt,
   vec,
+  zag,
 } from '@jsxcad/api-v1-math';
 
 export { readSvg } from '@jsxcad/api-v1-svg';

@@ -9,6 +9,7 @@ import './color.js';
 import './colors.js';
 import './cut.js';
 import './cutFrom.js';
+import './do.js';
 import './each.js';
 import './fuse.js';
 import './grow.js';

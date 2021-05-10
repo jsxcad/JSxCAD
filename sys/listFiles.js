@@ -2,7 +2,7 @@ import * as fs from 'fs';
 
 import { getFilesystem, qualifyPath } from './filesystem.js';
 
-import { isBrowser, isNode } from './browserOrNode.js';
+import { isBrowser, isNode, isWebWorker } from './browserOrNode.js';
 
 import {
   listFiles as listEphemeralFiles,
@@ -37,7 +37,7 @@ const getFileLister = async () => {
       listEphemeralFiles(qualifiedPaths);
       return qualifiedPaths;
     };
-  } else if (isBrowser) {
+  } else if (isBrowser || isWebWorker) {
     // FIX: Make localstorage optional.
     return async () => {
       const qualifiedPaths = new Set(await db().keys());
@@ -45,7 +45,7 @@ const getFileLister = async () => {
       return qualifiedPaths;
     };
   } else {
-    throw Error('die');
+    throw Error('Did not detect node, browser, or webworker');
   }
 };
 

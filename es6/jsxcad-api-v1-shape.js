@@ -344,6 +344,13 @@ const cutFromMethod = function (shape) {
 };
 Shape.prototype.cutFrom = cutFromMethod;
 
+const doMethod = function (op, ...args) {
+  op(this, ...args);
+  return this;
+};
+
+Shape.prototype.do = doMethod;
+
 const each = (shape, op = (leafs, shape) => leafs) =>
   op(
     getLeafs(shape.toDisjointGeometry()).map((leaf) =>
@@ -1254,8 +1261,19 @@ const moveZMethod = function (z) {
 };
 Shape.prototype.z = moveZMethod;
 
-const loadGeometry = async (path) =>
-  Shape.fromGeometry(await read(path));
+const fromUndefined = () => Shape.fromGeometry();
+
+const loadGeometry = async (
+  path,
+  { otherwise = fromUndefined } = {}
+) => {
+  const data = await read(path);
+  if (data === undefined) {
+    return otherwise();
+  } else {
+    return Shape.fromGeometry(data);
+  }
+};
 
 const saveGeometry = async (path, shape) =>
   Shape.fromGeometry(await write(shape.toGeometry(), path));
