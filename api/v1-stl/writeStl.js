@@ -12,10 +12,10 @@ import hashSum from 'hash-sum';
 import { toStl } from '@jsxcad/convert-stl';
 
 export const prepareStl = (shape, name, options = {}) => {
-  const { preprocessStl = (s) => s } = options;
+  const { prepareStl = (s) => s } = options;
   let index = 0;
   const entries = [];
-  for (const entry of ensurePages(preprocessStl(shape).toDisjointGeometry())) {
+  for (const entry of ensurePages(prepareStl(shape).toDisjointGeometry())) {
     const op = toStl(entry, options).catch(getPendingErrorHandler());
     addPending(op);
     entries.push({
@@ -27,14 +27,11 @@ export const prepareStl = (shape, name, options = {}) => {
   return entries;
 };
 
-const downloadStlMethod = function (
-  name,
-  { tolerance = 0.001, preprocessStl } = {}
-) {
-  const entries = prepareStl(this, name, { tolerance });
+const downloadStlMethod = function (name, options) {
+  const entries = prepareStl(this, name, options);
   const download = { entries };
   // We should be saving the stl data in the filesystem.
-  const hash = hashSum({ name, tolerance }) + hashGeometry(this.toGeometry());
+  const hash = hashSum({ name }) + hashGeometry(this.toGeometry());
   emit({ download, hash });
   return this;
 };

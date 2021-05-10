@@ -69,18 +69,24 @@ export const moveToFit = ({
   }
 
   const center = box.getCenter(new Vector3());
-  const size = box.getSize(new Vector3());
+  // const size = box.getSize(new Vector3());
+
+  const size = {
+    x: Math.max(Math.abs(box.min.x), Math.abs(box.max.x)),
+    y: Math.max(Math.abs(box.min.y), Math.abs(box.max.y)),
+    z: Math.max(Math.abs(box.min.z), Math.abs(box.max.z)),
+  };
 
   const maxSize = Math.max(size.x, size.y, size.z);
   const fitHeightDistance =
     maxSize / (2 * Math.atan((Math.PI * camera.fov) / 360));
   const fitWidthDistance = fitHeightDistance / (camera.aspect || 1);
-  const zoomOut = 1;
+  const zoomOut = 1.5;
   const distance =
     fitOffset * Math.max(fitHeightDistance, fitWidthDistance) * zoomOut;
 
   // const target = controls ? controls.target.clone() : center.clone();
-  const target = center;
+  const target = new Vector3(0, 0, 0);
 
   const direction = target
     .clone()

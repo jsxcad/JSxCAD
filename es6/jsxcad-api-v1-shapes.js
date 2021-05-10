@@ -1610,9 +1610,21 @@ const Page = (
     const layer = taggedLayers({}, ...layers);
     const packSize = measureBoundingBox(layer);
     const pageWidth =
-      Math.max(1, packSize[MAX][X$1] - packSize[MIN][X$1]) + pageMargin * 2;
+      // Math.max(1, packSize[MAX][X] - packSize[MIN][X]) + pageMargin * 2;
+      Math.max(
+        1,
+        Math.abs(packSize[MAX][X$1] * 2),
+        Math.abs(packSize[MIN][X$1] * 2)
+      ) +
+      pageMargin * 2;
     const pageLength =
-      Math.max(1, packSize[MAX][Y$1] - packSize[MIN][Y$1]) + pageMargin * 2;
+      // Math.max(1, packSize[MAX][Y] - packSize[MIN][Y]) + pageMargin * 2;
+      Math.max(
+        1,
+        Math.abs(packSize[MAX][Y$1] * 2),
+        Math.abs(packSize[MIN][Y$1] * 2)
+      ) +
+      pageMargin * 2;
     return Shape$1.fromGeometry(
       buildLayoutGeometry({ layer, packSize, pageWidth, pageLength, margin })
     );
@@ -1714,7 +1726,7 @@ const Spiral = (
     by,
     resolution,
   })) {
-    const radians = (angle * Math.PI) / 180;
+    const radians = (-angle * Math.PI) / 180;
     const subpath = toPathFromAngle(angle);
     path = concatenate(path, rotateZ(radians, subpath));
   }
@@ -1726,7 +1738,7 @@ Shape.prototype.Spiral = shapeMethod(Spiral);
 const Z$1 = 2;
 
 registerReifier('Arc', ({ tags, plan }) => {
-  const { start = 0, end = 360 } = getAngle(plan);
+  let { start = 0, end = 360 } = getAngle(plan);
   const [scale, middle] = getScale(plan);
   const corner1 = getCorner1(plan);
   const corner2 = getCorner2(plan);

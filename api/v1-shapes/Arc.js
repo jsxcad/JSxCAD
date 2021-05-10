@@ -18,7 +18,7 @@ import { negate } from '@jsxcad/math-vec3';
 const Z = 2;
 
 registerReifier('Arc', ({ tags, plan }) => {
-  const { start = 0, end = 360 } = getAngle(plan);
+  let { start = 0, end = 360 } = getAngle(plan);
   const [scale, middle] = getScale(plan);
   const corner1 = getCorner1(plan);
   const corner2 = getCorner2(plan);

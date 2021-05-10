@@ -97,9 +97,21 @@ export const Page = (
     const layer = taggedLayers({}, ...layers);
     const packSize = measureBoundingBox(layer);
     const pageWidth =
-      Math.max(1, packSize[MAX][X] - packSize[MIN][X]) + pageMargin * 2;
+      // Math.max(1, packSize[MAX][X] - packSize[MIN][X]) + pageMargin * 2;
+      Math.max(
+        1,
+        Math.abs(packSize[MAX][X] * 2),
+        Math.abs(packSize[MIN][X] * 2)
+      ) +
+      pageMargin * 2;
     const pageLength =
-      Math.max(1, packSize[MAX][Y] - packSize[MIN][Y]) + pageMargin * 2;
+      // Math.max(1, packSize[MAX][Y] - packSize[MIN][Y]) + pageMargin * 2;
+      Math.max(
+        1,
+        Math.abs(packSize[MAX][Y] * 2),
+        Math.abs(packSize[MIN][Y] * 2)
+      ) +
+      pageMargin * 2;
     return Shape.fromGeometry(
       buildLayoutGeometry({ layer, packSize, pageWidth, pageLength, margin })
     );
