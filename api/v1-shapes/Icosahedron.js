@@ -1,5 +1,5 @@
 import { Shape, shapeMethod } from '@jsxcad/api-v1-shape';
-import { getAt, getFrom, getScale, getTo } from './plan.js';
+import { getAt, getFrom, getScale, getTo } from './Plan.js';
 import { registerReifier, taggedPlan } from '@jsxcad/geometry-tagged';
 
 import { fromPoints } from '@jsxcad/math-poly3';

@@ -1,1 +1,1 @@
-export { fromLDraw } from './fromLDraw.js';
+export { fromLDraw, fromLDrawPart } from './fromLDraw.js';

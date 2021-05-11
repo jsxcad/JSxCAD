@@ -6,8 +6,4 @@ export const minkowskiDifference = (shape, offset) =>
     minkowskiDifferenceOfGeometry(shape.toGeometry(), offset.toGeometry())
   );
 
-const minkowskiDifferenceMethod = function (offset) {
-  return minkowskiDifference(this, offset);
-};
-
-Shape.registerMethod('minkowskiDifference', minkowskiDifferenceMethod);
+Shape.registerMethod('minkowskiDifference', minkowskiDifference);

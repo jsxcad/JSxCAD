@@ -1,4 +1,5 @@
 import { Page, ensurePages } from './Page.js';
+import { Plan, ofPlan } from './Plan.js';
 
 import Arc from './Arc.js';
 import Assembly from './Assembly.js';
@@ -52,6 +53,7 @@ const api = {
   Path,
   Peg,
   Pentagon,
+  Plan,
   Plane,
   Point,
   Points,
@@ -86,6 +88,7 @@ export {
   Path,
   Peg,
   Pentagon,
+  Plan,
   Plane,
   Point,
   Points,
@@ -98,6 +101,7 @@ export {
   Wave,
   Weld,
   ensurePages,
+  ofPlan,
 };
 
 export default api;

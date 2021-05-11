@@ -6,8 +6,4 @@ export const minkowskiShell = (shape, offset) =>
     minkowskiShellOfGeometry(shape.toGeometry(), offset.toGeometry())
   );
 
-const minkowskiShellMethod = function (offset) {
-  return minkowskiShell(this, offset);
-};
-
-Shape.registerMethod('minkowskiShell', minkowskiShellMethod);
+Shape.registerMethod('minkowskiShell', minkowskiShell);

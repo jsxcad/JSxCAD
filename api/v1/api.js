@@ -67,6 +67,7 @@ export {
   Path,
   Peg,
   Pentagon,
+  Plan,
   Plane,
   Point,
   Points,
@@ -78,6 +79,7 @@ export {
   Triangle,
   Wave,
   Weld,
+  ofPlan,
 } from '@jsxcad/api-v1-shapes';
 
 export { Item } from '@jsxcad/api-v1-item';
