@@ -991,7 +991,11 @@ class Ui extends React.PureComponent {
               </Nav.Item>
             </Nav>
           );
-          if (file.endsWith('.js') || file.endsWith('.nb') || file.endsWith('.dat')) {
+          if (
+            file.endsWith('.js') ||
+            file.endsWith('.nb') ||
+            file.endsWith('.dat')
+          ) {
             panes.push(
               <div style={{ width: '100%', height: '100%', margin: '0px' }}>
                 <Col style={{ width: '100%', height: '100%' }}>

@@ -21,7 +21,13 @@ const URL_PREFIX = 'https://jsxcad.js.org/ldraw/ldraw';
 
 const readPart = async (part, { allowFetch = true } = {}) => {
   part = part.toLowerCase().replace(/\\/, '/');
-  return read(`cache/ldraw/part/${part}`, { sources: [`${URL_PREFIX}/p/48/${part}`, `${URL_PREFIX}/parts/${part}`, `${URL_PREFIX}/p/${part}`] });
+  return read(`cache/ldraw/part/${part}`, {
+    sources: [
+      `${URL_PREFIX}/p/48/${part}`,
+      `${URL_PREFIX}/parts/${part}`,
+      `${URL_PREFIX}/p/${part}`,
+    ],
+  });
 };
 
 const fromDataToCode = (data) => {
@@ -196,7 +202,6 @@ export const fromLDrawPart = async (part, { allowFetch = true } = {}) => {
 
 export const fromLDraw = async (data, { allowFetch = true } = {}) => {
   const code = fromDataToCode(data);
-console.log(JSON.stringify(code));
   const polygons = await fromCodeToPolygons(code, { allowFetch });
   const geometry = fromPolygons(polygons);
   return rotateX(-90, scale([0.4, 0.4, 0.4], taggedGraph({}, geometry)));

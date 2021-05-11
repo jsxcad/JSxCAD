@@ -114,13 +114,17 @@ const isSingleOpenPath = ({ paths }) =>
   paths !== undefined && paths.length === 1 && paths[0][0] === null;
 
 export const registerShapeMethod = (name, op) => {
-/*
+  /*
   // FIX: See if we can switch these to dispatching via define?
   if (Shape.prototype.hasOwnProperty(name)) {
     throw Error(`Method ${name} is already in use.`);
   }
 */
-  const { [name]: method } = { [name]: function (...args) { return op(this, ...args); } };
+  const { [name]: method } = {
+    [name]: function (...args) {
+      return op(this, ...args);
+    },
+  };
   Shape.prototype[name] = method;
   return method;
 };

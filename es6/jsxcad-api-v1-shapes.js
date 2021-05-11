@@ -21,9 +21,13 @@ const eachEntry = (plan, op, otherwise) => {
 };
 
 const find = (plan, key, otherwise) =>
-  eachEntry(plan, (entry) => {
-    return entry[key];
-  }, otherwise);
+  eachEntry(
+    plan,
+    (entry) => {
+      return entry[key];
+    },
+    otherwise
+  );
 
 const ofPlan = find;
 
@@ -43,13 +47,17 @@ const getSides = (plan, otherwise = 32) => {
   {
     otherwise = zag(Math.max(length, width) * 2, defaultZag);
   }
-  return eachEntry(plan, (entry) => {
-    if (entry.sides !== undefined) {
-      return entry.sides;
-    } else if (entry.zag !== undefined) {
-      return zag(Math.max(length, width), entry.zag);
-    }
-  }, otherwise);
+  return eachEntry(
+    plan,
+    (entry) => {
+      if (entry.sides !== undefined) {
+        return entry.sides;
+      } else if (entry.zag !== undefined) {
+        return zag(Math.max(length, width), entry.zag);
+      }
+    },
+    otherwise
+  );
 };
 
 const getScale = (plan) => {
@@ -61,8 +69,7 @@ const getScale = (plan) => {
   ];
 };
 
-const Plan = (type) =>
-  Shape.fromGeometry(taggedPlan({}, { type }));
+const Plan = (type) => Shape.fromGeometry(taggedPlan({}, { type }));
 
 const X = 0;
 const Y = 1;

@@ -107,7 +107,9 @@ const fetchSources = async (sources) => {
 
 // Deprecated
 export const readFile = async (options, path) => {
-  const { allowFetch = true, ephemeral,
+  const {
+    allowFetch = true,
+    ephemeral,
     sources = [],
     workspace = getFilesystem(),
     useCache = true,
