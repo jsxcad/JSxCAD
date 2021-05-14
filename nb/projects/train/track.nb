@@ -1,0 +1,130 @@
+const prepareStl = (s) => s.keep('stl');
+
+const trackProfile = Box(10, 5).align('y>').cut(Box(6, 3).align('y>')).view();
+
+const rail = trackProfile
+  .rz(-90)
+  .put(x)
+  .align('z>')
+  .ex(20 - 0.1, -20 + 0.1)
+  .cut(Arc(5).x(-20 + 4), Arc(5).x(20 - 4))
+  .view()
+  .downloadStl('rail');
+const sleeper = Box(5, 40).ex(2).view();
+
+const track = Group(sleeper.x(-10), sleeper.x(10), rail.y(13), rail.y(-13))
+  .view()
+  .downloadStl('track');
+const square = Box(40, 40).view();
+
+const Wedge = (diameter, angleA, angleB) =>
+  Arc(diameter).angle(angleA, angleB).hull(Point(0, 0));
+
+const tilesA = Group(
+  square.x(-20).y(120),
+  square.x(-60).y(120),
+  square.x(-100).y(80),
+  square.x(-60).y(80),
+  square.x(-20).y(80),
+  square.x(-100).y(120)
+)
+  .y(20)
+  .ex(-2)
+  .material('wood');
+
+const tilesB = Group(
+  square.x(-100).y(120),
+  square.x(-100).y(80),
+  square.x(-60).y(80),
+  square.x(-140).y(80),
+  square.x(-140).y(40),
+  square.x(-140).y(0),
+  square.x(-100).y(0),
+  square.x(-100).y(40)
+)
+  .y(20)
+  .ex(-2)
+  .material('wood');
+
+const Holes = (diameter) =>
+  Group(
+    Arc(5)
+      .y(diameter / 2 + 13)
+      .x(-4),
+    Arc(5)
+      .y(diameter / 2 + 13)
+      .x(+4)
+      .rz(-45),
+    Arc(5)
+      .y(diameter / 2 - 13)
+      .x(-4),
+    Arc(5)
+      .y(diameter / 2 - 13)
+      .x(+4)
+      .rz(-45)
+  );
+
+const holes = Holes(240).and(Holes(240).rz(-45)).view();
+
+const CurvedTrack = (diameter) =>
+  Group(
+    Arc(diameter + 36)
+      .sides(zag(diameter, 1))
+      .cut(Arc(diameter + 36 - 20))
+      .ex(2),
+    Arc(diameter + 36)
+      .cut(Arc(diameter + 36 - 4))
+      .ex(5, 2),
+    Arc(diameter + 36 - 16)
+      .cut(Arc(diameter + 36 - 20))
+      .ex(5, 2),
+    Arc(diameter - 16)
+      .cut(Arc(diameter - 16 - 20))
+      .ex(2),
+    Arc(diameter - 16)
+      .cut(Arc(diameter - 16 - 4))
+      .ex(5, 2),
+    Arc(diameter - 16 - 20 + 4)
+      .cut(Arc(diameter - 16 - 20))
+      .ex(5, 2),
+    sleeper.y(diameter / 2).rz(-45 * (1 / 8)),
+    sleeper.y(diameter / 2).rz(-45 * (3 / 8)),
+    sleeper.y(diameter / 2).rz(-45 * (5 / 8)),
+    sleeper.y(diameter / 2).rz(-45 * (7 / 8)),
+    sleeper.y(diameter / 2).rz(-45 * (9 / 8)),
+    sleeper.y(diameter / 2).rz(-45 * (11 / 8)),
+    sleeper.y(diameter / 2).rz(-45 * (13 / 8)),
+    sleeper.y(diameter / 2).rz(-45 * (15 / 8))
+  )
+    .cut(Holes(diameter), Holes(diameter).rz(-45))
+    .as('stl');
+
+const curvedTrack = CurvedTrack(240).view();
+
+const CurvedTrackA = (diameter) =>
+  Group(
+    Group(tilesA, CurvedTrack(diameter).material('steel')).clip(
+      Wedge(diameter + 240, 360 - 45, 360)
+        .inset(0.1)
+        .ex(-2, 5)
+    )
+  );
+
+const CurvedTrackB = (diameter) =>
+  Group(
+    Group(tilesB, CurvedTrack(diameter).material('steel')).clip(
+      Wedge(diameter + 240, 360 - 90, 360 - 45)
+        .inset(0.1)
+        .ex(-2, 5)
+    )
+  );
+
+const curveA = CurvedTrackA(280)
+  .gridView()
+  .downloadStl(`curve A 240`, { prepareStl });
+
+const curveB = CurvedTrackB(280)
+  .gridView()
+  .downloadStl(`curve B 240`, { prepareStl });
+
+const matedCurves = curveA.and(curveB).gridView();
