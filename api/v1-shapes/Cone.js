@@ -7,7 +7,7 @@ import {
   getMatrix,
   getSides,
   getTo,
-} from './plan.js';
+} from './Plan.js';
 import { registerReifier, taggedPlan } from '@jsxcad/geometry-tagged';
 
 import Arc from './Arc.js';

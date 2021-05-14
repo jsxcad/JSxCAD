@@ -466,9 +466,9 @@ class Ui extends React.PureComponent {
 
     // Decode gitcdn paths.
     for (const gitcdnPath of paths) {
-      const [, , owner, repository, branch, path] =
+      const [, , , owner, repository, branch, path] =
         gitcdnPath.match(
-          /^(http|https):[/][/]gitcdn.xyz[/]cdn[/]([^/]*)[/]([^/]*)[/]([^/]*)[/](.*)$/
+          /^(http|https):[/][/]gitcdn.(xyz|link)[/]cdn[/]([^/]*)[/]([^/]*)[/]([^/]*)[/](.*)$/
         ) || [];
       if (owner && repository && branch && path) {
         const unit = `${owner}/${repository}/${branch}`;
@@ -614,7 +614,11 @@ class Ui extends React.PureComponent {
     const { files } = this.state;
     const uncached = [];
     for (const file of files) {
-      if (file.startsWith('data/def') || file.startsWith('meta/def')) {
+      if (
+        file.startsWith('data/def') ||
+        file.startsWith('meta/def') ||
+        file.startsWith('cache')
+      ) {
         await deleteFile({}, file);
         uncached.push(file);
       } else {
@@ -991,7 +995,11 @@ class Ui extends React.PureComponent {
               </Nav.Item>
             </Nav>
           );
-          if (file.endsWith('.js') || file.endsWith('.nb')) {
+          if (
+            file.endsWith('.js') ||
+            file.endsWith('.nb') ||
+            file.endsWith('.dat')
+          ) {
             panes.push(
               <div style={{ width: '100%', height: '100%', margin: '0px' }}>
                 <Col style={{ width: '100%', height: '100%' }}>

@@ -6,8 +6,4 @@ export const minkowskiSum = (shape, offset) =>
     minkowskiSumOfGeometry(shape.toGeometry(), offset.toGeometry())
   );
 
-const minkowskiSumMethod = function (offset) {
-  return minkowskiSum(this, offset);
-};
-
-Shape.registerMethod('minkowskiSum', minkowskiSumMethod);
+Shape.registerMethod('minkowskiSum', minkowskiSum);

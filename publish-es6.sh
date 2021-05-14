@@ -17,6 +17,7 @@ cp api/v1-extrude/dist/main.js es6/jsxcad-api-v1-extrude.js
 cp api/v1-font/dist/main.js es6/jsxcad-api-v1-font.js
 cp api/v1-gcode/dist/main.js es6/jsxcad-api-v1-gcode.js
 cp api/v1-item/dist/main.js es6/jsxcad-api-v1-item.js
+cp api/v1-ldraw/dist/main.js es6/jsxcad-api-v1-ldraw.js
 cp api/v1-math/dist/main.js es6/jsxcad-api-v1-math.js
 cp api/v1-obj/dist/main.js es6/jsxcad-api-v1-obj.js
 cp api/v1-off/dist/main.js es6/jsxcad-api-v1-off.js

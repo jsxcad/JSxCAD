@@ -7,6 +7,7 @@ import {
 import {
   eachPoint,
   flip,
+  registerReifier,
   rewriteTags,
   taggedAssembly,
   taggedGraph,
@@ -112,10 +113,18 @@ export class Shape {
 const isSingleOpenPath = ({ paths }) =>
   paths !== undefined && paths.length === 1 && paths[0][0] === null;
 
-export const registerShapeMethod = (name, method) => {
+export const registerShapeMethod = (name, op) => {
+  /*
+  // FIX: See if we can switch these to dispatching via define?
   if (Shape.prototype.hasOwnProperty(name)) {
     throw Error(`Method ${name} is already in use.`);
   }
+*/
+  const { [name]: method } = {
+    [name]: function (...args) {
+      return op(this, ...args);
+    },
+  };
   Shape.prototype[name] = method;
   return method;
 };
@@ -138,6 +147,9 @@ Shape.fromPoints = (points, context) =>
 Shape.fromPolygons = (polygons, context) =>
   fromGeometry(taggedGraph({}, fromPolygons(polygons)), context);
 Shape.registerMethod = registerShapeMethod;
+// Let's consider 'method' instead of 'registerMethod'.
+Shape.method = registerShapeMethod;
+Shape.reifier = (name, op) => registerReifier(name, op);
 
 export const fromGeometry = Shape.fromGeometry;
 export const toGeometry = (shape) => shape.toGeometry();

@@ -70,55 +70,38 @@ export const sides = (shape, sides = 1) => shape.updatePlan({ sides });
 export const to = (shape, x = 0, y = 0, z = 0) =>
   shape.updatePlan({ to: [x, y, z], top: undefined });
 export const top = (shape, top) => shape.updatePlan({ top });
+export const zag = (shape, zag) => shape.updatePlan({ zag });
 
-const apothemMethod = function (x, y, z) {
-  return apothem(this, x, y, z);
-};
-const angleMethod = function (end, start) {
-  return angle(this, end, start);
-};
-const baseMethod = function (height) {
-  return base(this, height);
-};
-const atMethod = function (x, y, z) {
-  return at(this, x, y, z);
-};
-const corner1Method = function (x, y, z) {
-  return corner1(this, x, y, z);
-};
-const corner2Method = function (x, y, z) {
-  return corner2(this, x, y, z);
-};
-const diameterMethod = function (x, y, z) {
-  return diameter(this, x, y, z);
-};
-const fromMethod = function (x, y, z) {
-  return from(this, x, y, z);
-};
-const radiusMethod = function (x, y, z) {
-  return radius(this, x, y, z);
-};
-const sidesMethod = function (value) {
-  return sides(this, value);
-};
-const toMethod = function (x, y, z) {
-  return to(this, x, y, z);
-};
-const topMethod = function (height) {
-  return top(this, height);
-};
+Shape.registerMethod('apothem', apothem);
+Shape.registerMethod('angle', angle);
+Shape.registerMethod('at', at);
+Shape.registerMethod('base', base);
+Shape.registerMethod('corner1', corner1);
+Shape.registerMethod('c1', corner1);
+Shape.registerMethod('corner2', corner2);
+Shape.registerMethod('c2', corner2);
+Shape.registerMethod('diameter', diameter);
+Shape.registerMethod('from', from);
+Shape.registerMethod('radius', radius);
+Shape.registerMethod('sides', sides);
+Shape.registerMethod('to', to);
+Shape.registerMethod('top', top);
+Shape.registerMethod('zag', zag);
 
-Shape.prototype.apothem = apothemMethod;
-Shape.prototype.angle = angleMethod;
-Shape.prototype.at = atMethod;
-Shape.prototype.base = baseMethod;
-Shape.prototype.corner1 = corner1Method;
-Shape.prototype.c1 = corner1Method;
-Shape.prototype.corner2 = corner2Method;
-Shape.prototype.c2 = corner2Method;
-Shape.prototype.diameter = diameterMethod;
-Shape.prototype.from = fromMethod;
-Shape.prototype.radius = radiusMethod;
-Shape.prototype.sides = sidesMethod;
-Shape.prototype.to = toMethod;
-Shape.prototype.top = topMethod;
+// Let's consider migrating to a 'has' prefix for planning.
+
+Shape.registerMethod('hasApothem', apothem);
+Shape.registerMethod('hasAngle', angle);
+Shape.registerMethod('hasAt', at);
+Shape.registerMethod('hasBase', base);
+Shape.registerMethod('hasCorner1', corner1);
+Shape.registerMethod('hasC1', corner1);
+Shape.registerMethod('hasCorner2', corner2);
+Shape.registerMethod('hasC2', corner2);
+Shape.registerMethod('hasDiameter', diameter);
+Shape.registerMethod('hasFrom', from);
+Shape.registerMethod('hasRadius', radius);
+Shape.registerMethod('hasSides', sides);
+Shape.registerMethod('hasTo', to);
+Shape.registerMethod('hasTop', top);
+Shape.registerMethod('hasZag', zag);

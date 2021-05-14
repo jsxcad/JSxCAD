@@ -2,8 +2,8 @@ import { getModule, addPending, write, emit, getControlValue, addSource, addOnEm
 export { elapsed, emit, read, write } from './jsxcad-sys.js';
 import Shape, { Shape as Shape$1, loadGeometry, log, saveGeometry } from './jsxcad-api-v1-shape.js';
 export { Shape, loadGeometry, log, saveGeometry } from './jsxcad-api-v1-shape.js';
-import { ensurePages, Peg, Arc, Assembly, Box, ChainedHull, Cone, Empty, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Line, LoopedHull, Octagon, Orb, Page, Path, Pentagon, Plane, Point, Points, Polygon, Polyhedron, Septagon, Spiral, Tetragon, Triangle, Wave, Weld } from './jsxcad-api-v1-shapes.js';
-export { Arc, Assembly, Box, ChainedHull, Cone, Empty, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Line, LoopedHull, Octagon, Orb, Page, Path, Peg, Pentagon, Plane, Point, Points, Polygon, Polyhedron, Septagon, Spiral, Tetragon, Triangle, Wave, Weld } from './jsxcad-api-v1-shapes.js';
+import { ensurePages, Peg, Arc, Assembly, Box, ChainedHull, Cone, Empty, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Line, LoopedHull, Octagon, Orb, Page, Path, Pentagon, Plan, Plane, Point, Points, Polygon, Polyhedron, Septagon, Spiral, Tetragon, Triangle, Wave, Weld, ofPlan } from './jsxcad-api-v1-shapes.js';
+export { Arc, Assembly, Box, ChainedHull, Cone, Empty, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Line, LoopedHull, Octagon, Orb, Page, Path, Peg, Pentagon, Plan, Plane, Point, Points, Polygon, Polyhedron, Septagon, Spiral, Tetragon, Triangle, Wave, Weld, ofPlan } from './jsxcad-api-v1-shapes.js';
 import './jsxcad-api-v1-extrude.js';
 import './jsxcad-api-v1-gcode.js';
 import './jsxcad-api-v1-pdf.js';
@@ -474,6 +474,7 @@ var api = /*#__PURE__*/Object.freeze({
   Path: Path,
   Peg: Peg,
   Pentagon: Pentagon,
+  Plan: Plan,
   Plane: Plane,
   Point: Point,
   Points: Points,
@@ -485,6 +486,7 @@ var api = /*#__PURE__*/Object.freeze({
   Triangle: Triangle,
   Wave: Wave,
   Weld: Weld,
+  ofPlan: ofPlan,
   Item: Item,
   Noise: Noise,
   Random: Random,
@@ -572,6 +574,7 @@ registerDynamicModule(module('extrude'), './jsxcad-api-v1-extrude.js');
 registerDynamicModule(module('font'), './jsxcad-api-v1-font.js');
 registerDynamicModule(module('gcode'), './jsxcad-api-v1-gcode.js');
 registerDynamicModule(module('item'), './jsxcad-api-v1-item.js');
+registerDynamicModule(module('ldraw'), './jsxcad-api-v1-ldraw.js');
 registerDynamicModule(module('math'), './jsxcad-api-v1-math.js');
 registerDynamicModule(module('pdf'), './jsxcad-api-v1-pdf.js');
 registerDynamicModule(module('plan'), './jsxcad-api-v1-plan.js');

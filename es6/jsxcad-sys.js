@@ -3646,8 +3646,9 @@ const fetchSources = async (sources) => {
 
 // Deprecated
 const readFile = async (options, path) => {
-  const { allowFetch = true, ephemeral } = options;
   const {
+    allowFetch = true,
+    ephemeral,
     sources = [],
     workspace = getFilesystem(),
     useCache = true,
@@ -3674,11 +3675,13 @@ const readFile = async (options, path) => {
     if (decode) {
       data = new TextDecoder(decode).decode(data);
     }
-    file.data = data;
     if (!ephemeral && file.data !== undefined) {
       // Update persistent cache.
-      await writeFile({ ...options, doSerialize: true }, path, file.data);
+      await writeFile({ ...options, doSerialize: true }, path, data);
     }
+    // The writeFile above can trigger a touch which can invalidate the cache
+    // so we need to set the cached value after that is resolved.
+    file.data = data;
   }
   if (file.data !== undefined) {
     if (file.data.then) {

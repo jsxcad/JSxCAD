@@ -33,6 +33,7 @@ export const request = async (
     }
     console.log(`QQ/request/headers: ${JSON.stringify(headers)}`);
     console.log(`QQ/request/body: ${JSON.stringify(body)}`);
+    console.log(`QQ/request/path: ${JSON.stringify(path)}`);
     const response = await window.fetch(
       `https://api.github.com/${path}`,
       request
