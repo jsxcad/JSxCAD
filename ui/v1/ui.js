@@ -614,7 +614,11 @@ class Ui extends React.PureComponent {
     const { files } = this.state;
     const uncached = [];
     for (const file of files) {
-      if (file.startsWith('data/def') || file.startsWith('meta/def')) {
+      if (
+        file.startsWith('data/def') ||
+        file.startsWith('meta/def') ||
+        file.startsWith('cache')
+      ) {
         await deleteFile({}, file);
         uncached.push(file);
       } else {

@@ -359,7 +359,7 @@ export const buildMeshes = async ({
       const material = await buildMeshMaterial(definitions, tags);
       if (tags.includes('compose/non-positive')) {
         material.transparent = true;
-        material.opacity *= 0.2;
+        material.opacity *= 0.5;
       }
       dataset.mesh = new Mesh(bufferGeometry, material);
       dataset.mesh.layers.set(layer);

@@ -14,15 +14,31 @@ const RESOLUTION = 10000;
 
 const URL_PREFIX = 'https://jsxcad.js.org/ldraw/ldraw';
 
+// Three numerics at the start seem to indicate parts vs primitives.
+
 const readPart = async (part, { allowFetch = true } = {}) => {
   part = part.toLowerCase().replace(/\\/, '/');
-  return read(`cache/ldraw/part/${part}`, {
-    sources: [
-      `${URL_PREFIX}/p/48/${part}`,
-      `${URL_PREFIX}/parts/${part}`,
-      `${URL_PREFIX}/p/${part}`,
-    ],
-  });
+  if (part.match(/^u[0-9]{4}/)) {
+    return read(`cache/ldraw/part/${part}`, {
+      sources: [`${URL_PREFIX}/parts/${part}`],
+    });
+  } else if (part.match(/^[0-9]{3}/)) {
+    return read(`cache/ldraw/part/${part}`, {
+      sources: [`${URL_PREFIX}/parts/${part}`],
+    });
+  } else if (part.match(/^s[/]/)) {
+    return read(`cache/ldraw/part/${part}`, {
+      sources: [`${URL_PREFIX}/parts/${part}`],
+    });
+  } else if (part.match(/^48[/]/)) {
+    return read(`cache/ldraw/primitive/${part}`, {
+      sources: [`${URL_PREFIX}/p/${part}`],
+    });
+  } else {
+    return read(`cache/ldraw/primitive/${part}`, {
+      sources: [`${URL_PREFIX}/p/48/${part}`, `${URL_PREFIX}/p/${part}`],
+    });
+  }
 };
 
 const fromDataToCode = (data) => {
