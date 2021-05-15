@@ -1,0 +1,208 @@
+const wheelModel = await readStl(
+  'https://gitcdn.link/cdn/jsxcad/JSxCAD/master/nb/projects/train/wheel.stl'
+);
+
+const technicPlug = Group(
+  Arc(4.8).zag(0.01).ex(-0.8, -8),
+  Arc(5.8).zag(0.01).ex(0, -0.8)
+)
+  .view()
+  .downloadStl('technic_plug');
+
+const halfAxle = Group(
+  Arc(6).zag(0.01).ex(3.5, 2.5),
+  Arc(5).zag(0.01).ex(2.5, 0),
+  Arc(4.8).zag(0.01).ex(0, -7),
+  Arc(4.7).zag(0.01).ex(-7, -8)
+)
+  .view()
+  .downloadStl('axle');
+
+const wheel = wheelModel
+  .rx(90)
+  .and(halfAxle.rx(90).grow(0.1).void())
+  .view()
+  .downloadStl('wheel');
+
+const truck = Group(
+  Assembly(
+    Assembly(
+      Box(38, 20).ex(4, -4).as('chassis'),
+      technicPlug.grow(0.1).z(4).x(-4).void().as('ventral'),
+      technicPlug.grow(0.1).z(4).x(4).void().as('ventral'),
+      technicPlug
+        .grow(0.1)
+        .ry(90)
+        .x(38 / -2)
+        .void()
+        .as('spinal'),
+      technicPlug
+        .grow(0.1)
+        .ry(-90)
+        .x(38 / 2)
+        .void()
+        .as('spinal')
+    ),
+    Group(
+      wheel.y(-10.5).x(10.5),
+      wheel.y(-10.5).x(-10.5),
+      wheel.rz(180).y(10.5).x(10.5),
+      wheel.rz(180).y(10.5).x(-10.5)
+    ).as('wheel')
+  ).material('glass')
+)
+  .view()
+  .downloadStl('truck', { prepareStl: (s) => s.drop('wheel') });
+
+const coupling = Group(
+  technicPlug.ry(-90),
+  Triangle(6)
+    .offset(1)
+    .rz(-30)
+    .x(2)
+    .ex(1 / 2, -1 / 2)
+    .op((s) => Group(s.z(-5 / 2), s.z(5 / 2))),
+  Arc(2)
+    .ex(5 / 2, -5 / 2)
+    .x(4)
+)
+  .ry(90)
+  .view()
+  .downloadStl('coupling');
+
+const CouplingBar = (length) =>
+  Assembly(
+    Arc(5)
+      .cut(Arc(3))
+      .ex(1, -1)
+      .and(
+        Arc(5)
+          .cut(Arc(3))
+          .ex(1, -1)
+          .x(length + 4)
+      )
+      .and(
+        x
+          .Arc(2)
+          .ex(3 - length)
+          .x(2)
+      )
+      .x(-length),
+    coupling
+      .ry(-90)
+      .x(-6 - length)
+      .void(),
+    coupling.ry(90).x(10).void()
+  );
+
+const couplingBar4 = CouplingBar(4).view().downloadStl('coupling_bar_4');
+const magneticCouplingBar = Assembly(
+  Arc(6)
+    .cut(Arc(3))
+    .ex(2.6 / 2, -2.6 / 2)
+    .and(x.Arc(2.6).ex(-7).x(2))
+    .with(
+      Arc(7)
+        .with(Arc(4.9).void())
+        .ex(2.6 / 2, -2.6 / 2)
+        .rx(90)
+        .x(9)
+        .z(7 / 2 - 2.6 / 2)
+    )
+    .x(-4),
+  coupling
+    .ry(-90)
+    .x(-10 - 0.3 + 4.5 / 2)
+    .y(4.5 / 2)
+    .void()
+  // coupling.ry(90).x(10).void()
+)
+  .view()
+  .downloadStl('magnetic_coupling_bar');
+
+md`The undercarriage should be limited to 22 degrees of deviation to either side.`;
+const turntable = Group(
+  technicPlug.x(-4),
+  technicPlug.x(4),
+  Arc(20).ex(1, 0),
+  Arc(20).cut(Arc(19)).ex(3, 1),
+  Arc(20).cut(Arc(18)).ex(3, 4),
+  Arc(2).x(8).ex(4)
+)
+  .view()
+  .downloadStl('turntable');
+
+const turntable_inset = Group(
+  x.Arc(5).ex(6, -6).align('z<').z(-0.5),
+  x.Box(1, 2).ex(6, -6).align('z<'),
+  Arc(18.5)
+    .cut(
+      Arc(20)
+        .angle(-22 - 5 + 5, 22 + 5 - 5) // 5 was overcompensating..
+        .hull(Point())
+        .cut(Arc(13))
+    )
+    .ex(-1)
+)
+  .view()
+  .downloadStl('turntable_inset');
+
+const undercarriage_2a = Group(
+  turntable_inset
+    .rz(90)
+    .z(7 + 4 + 1)
+    .as('turntable'),
+  Group(
+    technicPlug.x(-4),
+    technicPlug.x(4),
+    Arc(6).x(-4).hull(Arc(6).x(4)).ex(1),
+    Arc(6).z(0).hull(Arc(4, 18).z(1)).as('anchor'),
+    y
+      .Arc(8)
+      .cut(y.Box(6, 8).z(4.5))
+      .ex(8, -8)
+      .cut(y.Arc(5.4).ex(7, -7))
+      .cut(y.Arc(4.2).ex(8, -8))
+      .z(5)
+  )
+    .as('undercarriage')
+    .z(4),
+  truck
+)
+  .view()
+  .downloadStl('undercarriage_2', {
+    prepareStl: (s) => s.keep('undercarriage'),
+  });
+
+const undercarriage = Group(
+  Group(
+    technicPlug.x(-4),
+    technicPlug.x(4),
+    Arc(6).x(-4).hull(Arc(6).x(4)).ex(1),
+    Arc(6).z(1).hull(Arc(7).z(5)).as('anchor'),
+    Orb(8).clip(Arc(8).ex(2, -2)).z(7),
+    y.Arc(8).cut(y.Arc(6)).clip(y.Box(8).z(4)).ex(10, 8).z(7).hull(Point()),
+    y.Arc(8).cut(y.Arc(6)).clip(y.Box(8).z(4)).ex(-10, -8).z(7).hull(Point())
+  )
+    .cut(Orb(7).z(7))
+    .as('undercarriage')
+    .z(4),
+  Orb(6)
+    .and(Arc(4).ex(5), technicPlug.ry(180).z(4 - 1))
+    .as('connector')
+    .z(7 + 4),
+
+  truck
+)
+  .view()
+  .downloadStl('undercarriage', { prepareStl: (s) => s.keep('undercarriage') });
+
+const undercarriageConnector = undercarriage
+  .keep('connector')
+  .view()
+  .downloadStl('undercarriage_connector');
+
+const sphericalCoupling = Orb(5.2)
+  .and(Arc(4.9).ex(2.5 / 2, -2.5 / 2))
+  .material('glass')
+  .view();
