@@ -21,6 +21,7 @@ const halfAxle = Group(
 const wheel = wheelModel
   .rx(90)
   .and(halfAxle.rx(90).grow(0.1).void())
+  .rx(-90)
   .view()
   .downloadStl('wheel');
 
@@ -42,12 +43,12 @@ const truck = Group(
         .x(38 / 2)
         .void()
         .as('spinal')
-    ),
+    ).color('blue'),
     Group(
-      wheel.y(-10.5).x(10.5),
-      wheel.y(-10.5).x(-10.5),
-      wheel.rz(180).y(10.5).x(10.5),
-      wheel.rz(180).y(10.5).x(-10.5)
+      wheel.rx(90).y(-10.5).x(10.5),
+      wheel.rx(90).y(-10.5).x(-10.5),
+      wheel.rx(-90).y(10.5).x(10.5),
+      wheel.rx(-90).y(10.5).x(-10.5)
     ).as('wheel')
   ).material('glass')
 )
@@ -81,12 +82,7 @@ const CouplingBar = (length) =>
           .ex(1, -1)
           .x(length + 4)
       )
-      .and(
-        x
-          .Arc(2)
-          .ex(3 - length)
-          .x(2)
-      )
+      .and(x.Arc(2).ex(-4).x(2))
       .x(-length),
     coupling
       .ry(-90)
@@ -96,29 +92,6 @@ const CouplingBar = (length) =>
   );
 
 const couplingBar4 = CouplingBar(4).view().downloadStl('coupling_bar_4');
-const magneticCouplingBar = Assembly(
-  Arc(6)
-    .cut(Arc(3))
-    .ex(2.6 / 2, -2.6 / 2)
-    .and(x.Arc(2.6).ex(-7).x(2))
-    .with(
-      Arc(7)
-        .with(Arc(4.9).void())
-        .ex(2.6 / 2, -2.6 / 2)
-        .rx(90)
-        .x(9)
-        .z(7 / 2 - 2.6 / 2)
-    )
-    .x(-4),
-  coupling
-    .ry(-90)
-    .x(-10 - 0.3 + 4.5 / 2)
-    .y(4.5 / 2)
-    .void()
-  // coupling.ry(90).x(10).void()
-)
-  .view()
-  .downloadStl('magnetic_coupling_bar');
 
 md`The undercarriage should be limited to 22 degrees of deviation to either side.`;
 const turntable = Group(
@@ -129,6 +102,7 @@ const turntable = Group(
   Arc(20).cut(Arc(18)).ex(3, 4),
   Arc(2).x(8).ex(4)
 )
+  .rx(180)
   .view()
   .downloadStl('turntable');
 
@@ -138,17 +112,19 @@ const turntable_inset = Group(
   Arc(18.5)
     .cut(
       Arc(20)
-        .angle(-22 - 5 + 5, 22 + 5 - 5) // 5 was overcompensating..
+        .angle(-22, 22) // This is a bit less than 22 degrees.
         .hull(Point())
         .cut(Arc(13))
     )
     .ex(-1)
 )
+  .rx(180)
   .view()
   .downloadStl('turntable_inset');
 
-const undercarriage_2a = Group(
+const undercarriage = Group(
   turntable_inset
+    .rx(180)
     .rz(90)
     .z(7 + 4 + 1)
     .as('turntable'),
@@ -170,39 +146,35 @@ const undercarriage_2a = Group(
   truck
 )
   .view()
-  .downloadStl('undercarriage_2', {
+  .downloadStl('undercarriage', {
     prepareStl: (s) => s.keep('undercarriage'),
   });
 
-const undercarriage = Group(
-  Group(
-    technicPlug.x(-4),
-    technicPlug.x(4),
-    Arc(6).x(-4).hull(Arc(6).x(4)).ex(1),
-    Arc(6).z(1).hull(Arc(7).z(5)).as('anchor'),
-    Orb(8).clip(Arc(8).ex(2, -2)).z(7),
-    y.Arc(8).cut(y.Arc(6)).clip(y.Box(8).z(4)).ex(10, 8).z(7).hull(Point()),
-    y.Arc(8).cut(y.Arc(6)).clip(y.Box(8).z(4)).ex(-10, -8).z(7).hull(Point())
-  )
-    .cut(Orb(7).z(7))
-    .as('undercarriage')
-    .z(4),
-  Orb(6)
-    .and(Arc(4).ex(5), technicPlug.ry(180).z(4 - 1))
-    .as('connector')
-    .z(7 + 4),
-
-  truck
-)
-  .view()
-  .downloadStl('undercarriage', { prepareStl: (s) => s.keep('undercarriage') });
-
-const undercarriageConnector = undercarriage
-  .keep('connector')
-  .view()
-  .downloadStl('undercarriage_connector');
-
-const sphericalCoupling = Orb(5.2)
-  .and(Arc(4.9).ex(2.5 / 2, -2.5 / 2))
-  .material('glass')
+const magneticBall = Orb(5)
+  .sides(12)
+  .clip(Box(4, 5, 5))
+  .and(Arc(4).ex(-5))
   .view();
+
+const magneticCoupling = Box(20, 8)
+  .inset(2)
+  .offset(2)
+  .ex(-5)
+  .cut(
+    Arc(4.9)
+      .x(6)
+      .ex(-2.5 - 1),
+    Arc(4.9)
+      .x(-6)
+      .ex(-2.5 - 1)
+  )
+  .align('z')
+  .material('glass')
+
+  .with(
+    magneticBall.op((s) => s.grow(0.5).void().and(s).z(0.5).cut(Box(50).z(2.5)))
+  )
+  .and(technicPlug.z(-2.5 - 1))
+  .rx(180)
+  .view()
+  .downloadStl('magnetic_coupling');
