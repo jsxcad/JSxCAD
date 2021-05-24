@@ -1,14 +1,49 @@
 // Probably from https://www.pinterest.de/pin/200410252158492924/
 
-const dinosaur2 = await readSvg(
+const sheath = Arc(10.1)
+  .op((s) => s.cutFrom(s.offset(2)))
+  .ex(10 + 12)
+  .cut(
+    Arc(1)
+      .ex(10 + 12, 10 + 6)
+      .x(7)
+      .op((s) => s.rz(180 + 45).and(s.rz(180 - 45)))
+  )
+  .and(
+    Box(2.5, 9.9)
+      .op((s) => s.cutFrom(s.offset(2)))
+      .ex(10)
+      .x(8)
+  )
+  .view()
+  .stl('sheath');
+const ring = Arc(10.1)
+  .offset(2)
+  .op((s) => s.cutFrom(s.offset(1)))
+  .ex(8)
+  .view()
+  .stl('ring');
+
+const dinosaur = await readSvg(
   'https://gitcdn.xyz/cdn/jsxcad/JSxCAD/master/nb/projects/plotter/dinosaur.svg'
 );
 
-const scaled = dinosaur2.scale(10).view();
-
 const plotter = defGrblPlotter('plotter');
 
-const aligned = scaled
+const aligned = dinosaur
+  .scale(10)
   .align('xy')
   .view({ outline: false })
   .downloadGcode('dinosaur', plotter);
+
+const mandala = await readSvg(
+  'https://gitcdn.xyz/cdn/jsxcad/JSxCAD/master/nb/projects/plotter/mandala.svg'
+);
+
+const scaledMandala = mandala
+  .align('xy')
+  .scale(11)
+  .view({ outline: false })
+  .downloadGcode('mandala', plotter, { doPlan: false });
+
+const circle = Arc(101).gcode('circle', plotter);
