@@ -41,7 +41,9 @@ export const orbitDisplay = async (
     withAxes,
   });
 
-  const render = () => {
+  let isRendering = false;
+
+  const doRender = () => {
     renderer.clear();
     camera.layers.set(GEOMETRY_LAYER);
     renderer.render(scene, camera);
@@ -50,6 +52,16 @@ export const orbitDisplay = async (
 
     camera.layers.set(SKETCH_LAYER);
     renderer.render(scene, camera);
+
+    isRendering = false;
+  };
+
+  const render = () => {
+    if (isRendering) {
+      return;
+    }
+    isRendering = true;
+    requestAnimationFrame(doRender);
   };
 
   if (!canvas) {
@@ -107,16 +119,31 @@ export const orbitDisplay = async (
 
   if (geometry) {
     await updateGeometry(geometry);
-    render();
   }
 
-  const animate = () => {
-    requestAnimationFrame(animate);
-    trackball.update();
+  trackball.addEventListener('change', () => {
     render();
+  });
+
+  let isUpdating = false;
+
+  const update = () => {
+    trackball.update();
+    if (isUpdating) {
+      requestAnimationFrame(update);
+    }
   };
 
-  animate();
+  trackball.addEventListener('start', () => {
+    if (!isUpdating) {
+      isUpdating = true;
+      requestAnimationFrame(update);
+    }
+  });
+
+  trackball.addEventListener('end', () => {
+    isUpdating = false;
+  });
 
   return { canvas: displayCanvas, render, updateGeometry, trackball };
 };

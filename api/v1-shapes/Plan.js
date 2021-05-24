@@ -34,7 +34,7 @@ export const getFrom = (plan) => find(plan, 'from', [0, 0, 0]);
 export const getMatrix = (plan) => plan.matrix || identity();
 export const getTo = (plan) => find(plan, 'to', [0, 0, 0]);
 
-const defaultZag = 0.1;
+const defaultZag = 0.01;
 
 export const getSides = (plan, otherwise = 32) => {
   const [scale] = getScale(plan);

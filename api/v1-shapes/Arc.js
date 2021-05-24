@@ -19,6 +19,11 @@ const Z = 2;
 
 registerReifier('Arc', ({ tags, plan }) => {
   let { start = 0, end = 360 } = getAngle(plan);
+
+  while (start > end) {
+    start -= 360;
+  }
+
   const [scale, middle] = getScale(plan);
   const corner1 = getCorner1(plan);
   const corner2 = getCorner2(plan);
