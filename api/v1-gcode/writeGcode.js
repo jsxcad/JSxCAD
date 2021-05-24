@@ -12,11 +12,11 @@ import { hash as hashGeometry } from '@jsxcad/geometry-tagged';
 import hashSum from 'hash-sum';
 import { toGcode } from '@jsxcad/convert-gcode';
 
-export const prepareGcode = (shape, name, options = {}) => {
+export const prepareGcode = (shape, name, tool, options = {}) => {
   let index = 0;
   const entries = [];
   for (const entry of ensurePages(shape.toKeptGeometry())) {
-    const op = toGcode(entry, {
+    const op = toGcode(entry, tool, {
       definitions: getDefinitions(),
       ...options,
     }).catch(getPendingErrorHandler());
@@ -31,17 +31,19 @@ export const prepareGcode = (shape, name, options = {}) => {
   return entries;
 };
 
-const downloadGcodeMethod = function (name, options = {}) {
-  const entries = prepareGcode(this, name, options);
+const downloadGcodeMethod = function (name, tool, options = {}) {
+  const entries = prepareGcode(this, name, tool, options);
   const download = { entries };
-  const hash = hashSum({ name, options }) + hashGeometry(this.toGeometry());
+  const hash =
+    hashSum({ name, tool, options }) + hashGeometry(this.toGeometry());
   emit({ download, hash });
   return this;
 };
 Shape.prototype.downloadGcode = downloadGcodeMethod;
+Shape.prototype.gcode = downloadGcodeMethod;
 
-export const writeGcode = (shape, name, options = {}) => {
-  for (const { data, filename } of prepareGcode(shape, name, options)) {
+export const writeGcode = (shape, name, tool, options = {}) => {
+  for (const { data, filename } of prepareGcode(shape, name, tool, options)) {
     addPending(writeFile({ doSerialize: false }, `output/${filename}`, data));
   }
   return shape;
