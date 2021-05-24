@@ -1,4 +1,5 @@
 import {
+  getNonVoidPaths,
   measureBoundingBox,
   scale,
   toPolygonsWithHoles,
@@ -6,6 +7,7 @@ import {
   translate,
 } from '@jsxcad/geometry-tagged';
 
+import { isClosed } from '@jsxcad/geometry-path';
 import { toRgbColorFromTags } from '@jsxcad/algorithm-color';
 
 const X = 0;
@@ -62,8 +64,7 @@ export const toSvg = async (
     }
   }
 
-  /*
-  for (const { tags, paths } of outline(geometry)) {
+  for (const { tags, paths } of getNonVoidPaths(geometry)) {
     const color = toRgbColorFromTags(tags, definitions);
     for (const path of paths) {
       if (isClosed(path)) {
@@ -90,7 +91,7 @@ export const toSvg = async (
       }
     }
   }
-*/
+
   svg.push('</svg>');
   const output = svg.join('\n');
   return new TextEncoder('utf8').encode(output);

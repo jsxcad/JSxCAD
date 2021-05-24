@@ -213,7 +213,7 @@ export const fromSvg = async (input, { definitions } = {}) => {
           }
         } else {
           if (attr === 'points' || attr === 'd') {
-            result[attr] = value;
+            result[attr] = value.trim();
           } else {
             result[attr] = parseFloat(value);
           }
@@ -235,9 +235,9 @@ export const fromSvg = async (input, { definitions } = {}) => {
         const output = (svgPath) => {
           const paths = fromSvgPath(svgPath).paths;
           const attributes = {
-            fill: node.getAttribute('fill'),
-            stroke: node.getAttribute('stroke'),
-            'stroke-width': node.getAttribute('stroke-width'),
+            fill: node.getAttribute('fill') || 'black',
+            stroke: node.getAttribute('stroke') || 'none',
+            'stroke-width': node.getAttribute('stroke-width') || '1',
           };
           const style = node.getAttribute('style');
           for (const entry of style.split(';')) {

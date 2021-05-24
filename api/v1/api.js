@@ -18,6 +18,7 @@ export {
   define,
   defGrblConstantLaser,
   defGrblDynamicLaser,
+  defGrblPlotter,
   defGrblSpindle,
   defRgbColor,
   defThreejsMaterial,

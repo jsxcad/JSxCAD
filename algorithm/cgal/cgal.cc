@@ -1272,6 +1272,7 @@ Surface_mesh* UnionOfSurfaceMeshes(Surface_mesh* a, Surface_mesh* b) {
   }
 }
 
+// FIX: The case where we take a section coplanar with a surface with a hole in it.
 // CHECK: Should this produce Polygons_with_holes?
 void SectionOfSurfaceMesh(Surface_mesh* mesh, std::size_t plane_count, emscripten::val fill_plane, emscripten::val emit_mesh, bool profile) {
   typedef Traits_2::X_monotone_curve_2 Segment_2;

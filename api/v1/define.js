@@ -16,7 +16,7 @@ export const defTool = (name, definition) => define(`tool/${name}`, definition);
 
 export const defGrblSpindle = (
   name,
-  { cutDepth = 0.2, rpm, feedRate, diameter, jumpZ = 1 }
+  { cutDepth = 0.2, rpm, feedRate, drillRate, diameter, jumpZ = 1 } = {}
 ) =>
   defTool(name, {
     grbl: {
@@ -24,6 +24,7 @@ export const defGrblSpindle = (
       cutDepth,
       cutSpeed: rpm,
       feedRate,
+      drillRate,
       diameter,
       jumpZ,
     },
@@ -33,6 +34,7 @@ export const defGrblDynamicLaser = (
   name,
   {
     cutDepth = 0.2,
+    diameter = 0.09,
     jumpPower = 0,
     power = 1000,
     speed = 1000,
@@ -45,6 +47,7 @@ export const defGrblDynamicLaser = (
       type: 'dynamicLaser',
       cutDepth,
       cutSpeed: -power,
+      diameter,
       jumpRate: speed,
       jumpSpeed: -jumpPower,
       feedRate: speed,
@@ -57,6 +60,7 @@ export const defGrblConstantLaser = (
   name,
   {
     cutDepth = 0.2,
+    diameter = 0.09,
     jumpPower,
     power = 1000,
     speed = 1000,
@@ -69,6 +73,7 @@ export const defGrblConstantLaser = (
       type: 'constantLaser',
       cutDepth,
       cutSpeed: power,
+      diameter,
       jumpRate: speed,
       jumpSpeed: jumpPower,
       feedRate: speed,
@@ -76,3 +81,6 @@ export const defGrblConstantLaser = (
       warmupSpeed: warmupPower,
     },
   });
+
+export const defGrblPlotter = (name, { feedRate = 1000 } = {}) =>
+  defTool(name, { grbl: { type: 'plotter', feedRate, cutSpeed: 1 } });
