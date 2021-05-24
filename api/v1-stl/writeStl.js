@@ -36,6 +36,7 @@ const downloadStlMethod = function (name, options) {
   return this;
 };
 Shape.prototype.downloadStl = downloadStlMethod;
+Shape.prototype.stl = downloadStlMethod;
 
 export const writeStl = (shape, name, options = {}) => {
   for (const { data, filename } of prepareStl(shape, name, {})) {

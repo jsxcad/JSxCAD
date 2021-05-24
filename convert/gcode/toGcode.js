@@ -1,5 +1,6 @@
 import { outline, toDisjointGeometry } from '@jsxcad/geometry-tagged';
 
+import KdBush from 'kdbush';
 import { getEdges } from '@jsxcad/geometry-path';
 
 const X = 0;
@@ -7,7 +8,11 @@ const Y = 1;
 const Z = 2;
 
 // FIX: This is actually GRBL.
-export const toGcode = async (geometry, tool, { definitions } = {}) => {
+export const toGcode = async (
+  geometry,
+  tool,
+  { definitions, doPlan = true } = {}
+) => {
   // const topZ = 0;
   const codes = [];
   const _ = undefined;
@@ -171,36 +176,88 @@ export const toGcode = async (geometry, tool, { definitions } = {}) => {
     return cost;
   };
 
-  const computeCost = (entry) => {
-    const [start, end] = entry;
-    const startDistance = computeDistance(start);
-    const endDistance = computeDistance(end);
-    if (startDistance < endDistance) {
-      return [startDistance, start, end, entry];
-    } else {
-      return [endDistance, end, start, entry];
-    }
-  };
+  toolChange(tool.grbl);
 
+  {
+    let pendingEdges = 0;
+    const points = [];
+    for (const { paths } of outline(toDisjointGeometry(geometry))) {
+      for (const path of paths) {
+        for (const edge of getEdges(path)) {
+          points.push([edge[0], edge]);
+          points.push([edge[1], edge]);
+          pendingEdges += 1;
+        }
+      }
+    }
+
+    const kd = new KdBush(
+      points,
+      (p) => p[0][0],
+      (p) => p[0][1]
+    );
+
+    while (pendingEdges > 0) {
+      const [x, y] = state.position;
+      for (let range = 1; range < Infinity; range *= 2) {
+        let bestStart;
+        let bestEdge;
+        let bestDistance = Infinity;
+        for (const index of kd.within(x, y, range)) {
+          const [start, edge] = points[index];
+          if (edge.planned) {
+            continue;
+          }
+          const distance = computeDistance(start);
+          if (distance < bestDistance) {
+            bestDistance = distance;
+            bestEdge = edge;
+            bestStart = start;
+          }
+        }
+        if (bestDistance === Infinity) {
+          continue;
+        }
+        pendingEdges -= 1;
+        bestEdge.planned = true;
+        const bestEnd = bestEdge[0] === bestStart ? bestEdge[1] : bestEdge[0];
+        jump(...bestStart); // jump to the start x, y
+        cut(...bestStart); // may need to drill down to the start z
+        cut(...bestEnd); // cut across
+        break;
+      }
+    }
+  }
+
+  /*
   // FIX: Should handle points as well as paths.
   for (const { paths } of outline(toDisjointGeometry(geometry))) {
     toolChange(tool.grbl);
-    const todo = new Set();
-    for (const path of paths) {
-      for (let [start, end] of getEdges(path)) {
-        todo.add([start, end]);
+    if (doPlan) {
+      const todo = new Set();
+      for (const path of paths) {
+        for (let [start, end] of getEdges(path)) {
+          todo.add([start, end]);
+        }
+      }
+      while (todo.size > 0) {
+        // Find the cheapest segment to cut.
+        const costs = [...todo].map(computeCost).sort();
+        const [, start, end, entry] = costs[0];
+        todo.delete(entry);
+        jump(...start); // jump to the start x, y
+        cut(...start); // may need to drill down to the start z
+        cut(...end); // cut across
+      }
+    } else {
+      for (const [start, end] of paths) {
+        jump(...start); // jump to the start x, y
+        cut(...start); // may need to drill down to the start z
+        cut(...end); // cut across
       }
     }
-    while (todo.size > 0) {
-      // Find the cheapest segment to cut.
-      const costs = [...todo].map(computeCost).sort();
-      const [, start, end, entry] = costs[0];
-      todo.delete(entry);
-      jump(...start); // jump to the start x, y
-      cut(...start); // may need to drill down to the start z
-      cut(...end); // cut across
-    }
   }
+*/
 
   park();
 
