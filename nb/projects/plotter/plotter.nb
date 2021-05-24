@@ -1,7 +1,7 @@
 // Probably from https://www.pinterest.de/pin/200410252158492924/
 
 const dinosaur2 = await readSvg(
-  'https://gitcdn.link/cdn/jsxcad/JSxCAD/master/nb/projects/plotter/dinosaur.svg'
+  'https://gitcdn.xyz/cdn/jsxcad/JSxCAD/master/nb/projects/plotter/dinosaur.svg'
 );
 
 const scaled = dinosaur2.scale(10).view();
