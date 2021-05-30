@@ -1,0 +1,105 @@
+const sheath = Arc(10.1)
+  .offset(2)
+  .op((s) => s.offset(1).ex(20, -15).with(s.ex(20, -15).void()))
+  .view()
+  .stl('sheath');
+
+const puck = Group(
+  x
+    .Arc(5)
+    .clip(x.Box(5).z(-5 / 2))
+    .add(x.Box(3, 2))
+    .cut(x.Box(1, 8).z(-2))
+    .op((s) => s.ex(6, 50).and(s.ex(-6, -50)))
+    .and(Orb(5).op((s) => Group(s.x(-50), s.x(50))))
+    .align('z>'),
+  y
+    .Arc(5)
+    .clip(y.Box(5).z(-5 / 2))
+    .add(y.Box(3, 2))
+    .cut(y.Box(1, 8).z(-2))
+    .ex(50, 6)
+    .and(Orb(5).y(-50))
+    .align('z>')
+)
+  .with(
+    sheath
+      .rx(-45)
+      .clip(Box(50))
+      .clip(
+        Box(50)
+          .rx(90 - 70)
+          .y(5)
+      )
+  )
+  .and(
+    x
+      .Arc(2)
+      .op((s) => s.ex(7, 0.5).and(s.ex(-0.5, -7)))
+      .and(x.Arc(1.5).op((s) => s.ex(0.5).and(s.ex(-0.5))))
+      .y(-1.5 / 2 - 1)
+      .z(2 / 2 + 0.5)
+  )
+  .cut(Arc(2).rx(-45).ex(5, -5));
+
+const puckPrint = puck.rz(45).view().stl('puck');
+
+const cam = Spiral((a) => [[a / 20 + 5]])
+  .close()
+  .cut(Box().c1(5, 0).c2(60, 60))
+  .cut(Arc(4.9))
+  .ex(2)
+  .view()
+  .stl('cam');
+
+const servoMount = Assembly(
+  Box(10, 23 + 4).ex(-5 / 2, 12.4 + 3),
+  Box(10, 22.8 + 0.5 - 0.2)
+    .ex(1, 12.3 + 0.5 + 0.2 + 0.5 - 0.2)
+    .void()
+)
+  .align('z>')
+  .clip(x.Arc(30, 40).ex(5, -5).z(13.5))
+  .with(
+    y
+      .Arc(5)
+      .clip(y.Box(5).z(-5 / 2))
+      .align('z>')
+      .ex(120)
+      .grow(0.1)
+      .void()
+      .y(80)
+  )
+  .cut(
+    Box(6, 23 + 4)
+      .ex(12.3 + 0.5 + 0.2 + 0.5 + 1)
+      .color('green')
+      .x(2)
+      .z(5 / 2 + 1)
+  )
+  .view()
+  .rx(180)
+  .align('xyz>')
+  .stl('servo_mount');
+
+const servoMount2 = Assembly(
+  Box(10, 23 + 4).ex(-5 / 2, 12.4 + 3),
+  Box(10, 22.8 + 0.5)
+    .ex(1, 12.3 + 0.5 + 0.2 + 0.5)
+    .void()
+)
+  .align('z>')
+  .cut(
+    Box(6, 23 + 4)
+      .ex(12.3 + 0.5 + 0.2 + 0.5 + 1)
+      .color('green')
+      .x(2)
+      .z(5 / 2 + 1)
+  )
+  .cut(y.Box(4, 2).ex(20, -20))
+  .view()
+  .rx(180)
+  .align('xyz>')
+  .stl('servo_mount_2');
+
+const tab = Box(2, 20).ex(4).view().stl('tab');
