@@ -93,11 +93,14 @@ export const Page = (
       layers.push(leaf);
     }
   }
-  if (!pack) {
+  if (!pack && size) {
     const layer = taggedLayers({}, ...layers);
-    const packSize = measureBoundingBox(layer);
+    const [width, height] = size;
+    const packSize = [
+      [-width / 2, -height / 2, 0],
+      [width / 2, height / 2, 0],
+    ];
     const pageWidth =
-      // Math.max(1, packSize[MAX][X] - packSize[MIN][X]) + pageMargin * 2;
       Math.max(
         1,
         Math.abs(packSize[MAX][X] * 2),
@@ -105,7 +108,6 @@ export const Page = (
       ) +
       pageMargin * 2;
     const pageLength =
-      // Math.max(1, packSize[MAX][Y] - packSize[MIN][Y]) + pageMargin * 2;
       Math.max(
         1,
         Math.abs(packSize[MAX][Y] * 2),
@@ -115,7 +117,27 @@ export const Page = (
     return Shape.fromGeometry(
       buildLayoutGeometry({ layer, packSize, pageWidth, pageLength, margin })
     );
-  } else if (size) {
+  } else if (!pack && !size) {
+    const layer = taggedLayers({}, ...layers);
+    const packSize = measureBoundingBox(layer);
+    const pageWidth =
+      Math.max(
+        1,
+        Math.abs(packSize[MAX][X] * 2),
+        Math.abs(packSize[MIN][X] * 2)
+      ) +
+      pageMargin * 2;
+    const pageLength =
+      Math.max(
+        1,
+        Math.abs(packSize[MAX][Y] * 2),
+        Math.abs(packSize[MIN][Y] * 2)
+      ) +
+      pageMargin * 2;
+    return Shape.fromGeometry(
+      buildLayoutGeometry({ layer, packSize, pageWidth, pageLength, margin })
+    );
+  } else if (pack && size) {
     // Content fits to page size.
     const packSize = [];
     const content = Shape.fromGeometry(taggedLayers({}, ...layers)).pack({
@@ -137,7 +159,7 @@ export const Page = (
       );
     }
     return Shape.fromGeometry(taggedLayers({}, ...plans));
-  } else {
+  } else if (pack && !size) {
     const packSize = [];
     // Page fits to content size.
     const content = Shape.fromGeometry(taggedLayers({}, ...layers)).pack({

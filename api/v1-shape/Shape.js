@@ -105,6 +105,10 @@ export class Shape {
   }
 
   // Low level setter for reifiers.
+  getTags() {
+    return this.toGeometry().tags || [];
+  }
+
   setTags(tags = []) {
     return Shape.fromGeometry(rewriteTags(tags, [], this.toGeometry()));
   }

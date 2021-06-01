@@ -17,6 +17,7 @@ import { unwatchFile, watchFile } from './watchFile.js';
 
 import { db } from './db.js';
 import { getFile } from './files.js';
+import { info } from './emit.js';
 import { log } from './log.js';
 import nodeFetch from 'node-fetch';
 import { writeFile } from './writeFile.js';
@@ -86,12 +87,14 @@ const fetchSources = async (sources) => {
       try {
         if (source.startsWith('http:') || source.startsWith('https:')) {
           log({ op: 'text', text: `# Fetching ${source}` });
+          info(`Fetching url ${source}`);
           const response = await fetchUrl(source, { cache: 'reload' });
           if (response.ok) {
             return new Uint8Array(await response.arrayBuffer());
           }
         } else {
           log({ op: 'text', text: `# Fetching ${source}` });
+          info(`Fetching file ${source}`);
           // Assume a file path.
           const data = await fetchFile(source);
           if (data !== undefined) {
@@ -122,6 +125,7 @@ export const readFile = async (options, path) => {
     setupFilesystem({ fileBase: workspace });
   } else {
     log({ op: 'text', text: `Read ${path}` });
+    // info(`Read ${path}`);
   }
   const file = await getFile(options, path);
   if (file.data === undefined || useCache === false) {

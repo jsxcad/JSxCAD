@@ -171,6 +171,22 @@ class Ui extends React.PureComponent {
         // Invalidate the path in all workers.
         await askServices({ touchFile: { path, workspace } });
       } else if (question.note) {
+        if (question.note.info) {
+          // Copy out info.
+          const now = new Date();
+          const { logElement, logStartDate, logLastDate } = this.state;
+          if (logElement) {
+            const div = document.createElement('div');
+            const total = (now - logStartDate) / 1000;
+            const elapsed = (now - logLastDate) / 1000;
+            div.textContent = `${total.toFixed(1)}s (${elapsed.toFixed(2)}): ${
+              question.note.info
+            }`;
+            logElement.prepend(div);
+          }
+          this.setState({ logLastDate: now });
+        }
+
         const { note, index } = question;
         const { notebookData, notebookRef } = this.state;
         const entry = notebookData[index];
@@ -743,6 +759,17 @@ class Ui extends React.PureComponent {
     }
   }
 
+  clearLog() {
+    const { logElement } = this.state;
+    if (logElement) {
+      while (logElement.firstChild) {
+        logElement.removeChild(logElement.firstChild);
+      }
+    }
+    const logStartDate = new Date();
+    this.setState({ logStartDate });
+  }
+
   async doRun() {
     const { ask, jsEditorData, path, workspace } = this.state;
     const { sha } = this.props;
@@ -751,6 +778,7 @@ class Ui extends React.PureComponent {
       this.setState({ running: true });
       await terminateActiveServices();
       clearEmitted();
+      this.clearLog();
 
       await this.doSave();
       if (!path.endsWith('.js') && !path.endsWith('.nb')) {
@@ -842,7 +870,7 @@ class Ui extends React.PureComponent {
       workspace,
     } = this.state;
 
-    const paneWidth = Math.floor(window.innerWidth / 2);
+    const windowWidth = Math.floor(window.innerWidth);
 
     const fileChoices = [
       ...new Set(
@@ -995,41 +1023,10 @@ class Ui extends React.PureComponent {
               </Nav.Item>
             </Nav>
           );
-          if (
-            file.endsWith('.js') ||
-            file.endsWith('.nb') ||
-            file.endsWith('.dat')
-          ) {
-            panes.push(
-              <div style={{ width: '100%', height: '100%', margin: '0px' }}>
-                <Col style={{ width: '100%', height: '100%' }}>
-                  <SplitPane split="vertical" defaultSize={paneWidth}>
-                    <Pane
-                      key="first"
-                      className="pane orbit-view-container"
-                    ></Pane>
-                    <Pane key="second" className="pane">
-                      <JsEditorUi
-                        key={`editScript/${file}`}
-                        onRun={this.doRun}
-                        onSave={this.doSave}
-                        onChange={this.onChangeJsEditor}
-                        onClickLink={this.onClickEditorLink}
-                        data={jsEditorData}
-                        file={file}
-                        ask={ask}
-                        workspace={workspace}
-                        notebookData={notebookData}
-                      />
-                    </Pane>
-                  </SplitPane>
-                </Col>
-              </div>
-            );
-          } else if (file.endsWith('.svg')) {
+          if (file.endsWith('.svg')) {
             panes.push(
               <div>
-                <SplitPane split="vertical" defaultSize={paneWidth}>
+                <SplitPane split="vertical" defaultSize={windowWidth / 2}>
                   <Pane key="first" className="pane">
                     <img
                       src={`data:image/svg+xml;base64,${btoa(jsEditorData)}`}
@@ -1089,7 +1086,7 @@ class Ui extends React.PureComponent {
             };
             panes.push(
               <div>
-                <SplitPane split="vertical" defaultSize={paneWidth}>
+                <SplitPane split="vertical" defaultSize={windowWidth / 2}>
                   <Pane key="first" className="pane">
                     <svg
                       ref={(ref) => {
@@ -1143,7 +1140,7 @@ class Ui extends React.PureComponent {
           } else if (file.endsWith('.stl')) {
             panes.push(
               <div>
-                <SplitPane split="vertical" defaultSize={paneWidth}>
+                <SplitPane split="vertical" defaultSize={windowWidth / 2}>
                   <Pane key="first" className="pane">
                     <JsEditorUi
                       key={`editScript/${file}`}
@@ -1163,7 +1160,7 @@ class Ui extends React.PureComponent {
           } else if (file.endsWith('.md')) {
             panes.push(
               <div>
-                <SplitPane split="vertical" defaultSize={paneWidth}>
+                <SplitPane split="vertical" defaultSize={windowWidth / 2}>
                   <Pane key="first" className="pane">
                     <div
                       dangerouslySetInnerHTML={{ __html: marked(jsEditorData) }}
@@ -1186,6 +1183,66 @@ class Ui extends React.PureComponent {
               </div>
             );
             setTimeout(() => Mermaid.init(undefined, '.mermaid'), 0);
+          } else {
+            // Try to edit it.
+            panes.push(
+              <div style={{ width: '100%', height: '100%', margin: '0px' }}>
+                <Col style={{ width: '100%', height: '100%' }}>
+                  <SplitPane split="vertical" defaultSize={128}>
+                    <Pane key="first" className="pane">
+                      <div
+                        style={{ width: '100%', height: '100%', margin: '0px' }}
+                      >
+                        <Col
+                          style={{
+                            width: '100%',
+                            height: '100%',
+                            backgroundColor: 'aliceblue',
+                            whiteSpace: 'nowrap',
+                            overflowX: 'hidden',
+                            overflowY: 'scroll',
+                          }}
+                          ref={(ref) => {
+                            this.setState({ logElement: ref });
+                          }}
+                        ></Col>
+                      </div>
+                    </Pane>
+                    <Pane key="second" className="pane">
+                      <div
+                        style={{ width: '100%', height: '100%', margin: '0px' }}
+                      >
+                        <Col style={{ width: '100%', height: '100%' }}>
+                          <SplitPane
+                            split="vertical"
+                            defaultSize={windowWidth / 2 - 256}
+                          >
+                            <Pane
+                              key="first"
+                              className="pane orbit-view-container"
+                            ></Pane>
+                            <Pane key="second" className="pane">
+                              <JsEditorUi
+                                key={`editScript/${file}`}
+                                onRun={this.doRun}
+                                onSave={this.doSave}
+                                onChange={this.onChangeJsEditor}
+                                onClickLink={this.onClickEditorLink}
+                                data={jsEditorData}
+                                file={file}
+                                ask={ask}
+                                workspace={workspace}
+                                notebookData={notebookData}
+                              />
+                            </Pane>
+                          </SplitPane>
+                        </Col>
+                      </div>
+                    </Pane>
+                  </SplitPane>
+                </Col>
+              </div>
+            );
           }
         }
         break;

@@ -17,6 +17,7 @@ export {
   emit,
   getEmitted,
   getModule,
+  info,
   popModule,
   pushModule,
   removeOnEmitHandler,

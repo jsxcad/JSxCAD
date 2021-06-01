@@ -179,11 +179,27 @@ export const toGcode = async (
   toolChange(tool.grbl);
 
   {
+    const seen = new Set();
     let pendingEdges = 0;
     const points = [];
     for (const { paths } of outline(toDisjointGeometry(geometry))) {
       for (const path of paths) {
         for (const edge of getEdges(path)) {
+          // Deduplicate edges.
+          {
+            const forward = JSON.stringify(edge);
+            if (seen.has(forward)) {
+              continue;
+            } else {
+              seen.add(forward);
+            }
+            const backward = JSON.stringify([...edge].reverse());
+            if (seen.has(backward)) {
+              continue;
+            } else {
+              seen.add(backward);
+            }
+          }
           points.push([edge[0], edge]);
           points.push([edge[1], edge]);
           pendingEdges += 1;
