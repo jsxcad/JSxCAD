@@ -1,8 +1,27 @@
-const sheath = Arc(10.1)
-  .offset(2)
-  .op((s) => s.offset(1).ex(20, -15).with(s.ex(20, -15).void()))
+const sheath = Arc(16)
+  .ex(30, -15)
+  .with(Arc(14.2).ex(30, -15).void())
+  //.and(Path(Point().z(-20), Point().z(35)).color('black'))
   .view()
   .stl('sheath');
+
+const foot = Orb(14)
+  .sides(20)
+  .with(Orb(12).void())
+  //.align('z>')
+  //.cut(Arc(10.7).ex(6).align('z>'))
+  .clip(Box(20).z(-3))
+  .cut(Box(20).z(6))
+  .with(Orb(10.7).sides(10).material('steel').void())
+  .align('z>')
+  .z(2.8)
+  .and(
+    Arc(12)
+      .cut(Arc(12 - 0.6))
+      .ex(0, 2.8)
+  )
+  .view({ outline: false })
+  .stl('foot');
 
 const puck = Group(
   x
@@ -10,28 +29,22 @@ const puck = Group(
     .clip(x.Box(5).z(-5 / 2))
     .add(x.Box(3, 2))
     .cut(x.Box(1, 8).z(-2))
-    .op((s) => s.ex(6, 50).and(s.ex(-6, -50)))
-    .and(Orb(5).op((s) => Group(s.x(-50), s.x(50))))
-    .align('z>'),
+    .op((s) => s.ex(2, 50).and(s.ex(-2, -50)))
+    .align('z>')
+    .z(5 / 2)
+    .with(foot.op((s) => Group(s.x(-50), s.x(50))))
+    .y(1),
   y
     .Arc(5)
     .clip(y.Box(5).z(-5 / 2))
     .add(y.Box(3, 2))
     .cut(y.Box(1, 8).z(-2))
-    .ex(50, 6)
-    .and(Orb(5).y(-50))
+    .ex(50, 2)
     .align('z>')
+    .z(5 / 2)
+    .with(foot.y(-50))
 )
-  .with(
-    sheath
-      .rx(-45)
-      .clip(Box(50))
-      .clip(
-        Box(50)
-          .rx(90 - 70)
-          .y(5)
-      )
-  )
+  .with(sheath.rx(-45).clip(Box(100)))
   .and(
     x
       .Arc(2)
@@ -40,11 +53,18 @@ const puck = Group(
       .y(-1.5 / 2 - 1)
       .z(2 / 2 + 0.5)
   )
-  .cut(Arc(2).rx(-45).ex(5, -5));
+  .cut(Arc(2).rx(-45).ex(5, -5))
+  .cut(
+    Box(50)
+      .rx(180 + 90 - 70)
+      .y(-3)
+  )
+  .and(Path(Point(), Point().z(5)).color('black'))
+  .and(Path(Point().x(-50), Point().x(50)).color('black'));
 
-const puckPrint = puck.rz(45).view().stl('puck');
+const puckPrint = puck.rz(45).view({ outline: false }).stl('puck');
 
-const cam = Spiral((a) => [[a / 20 + 5]])
+const cam = Spiral((a) => [[a / 15 + 5]])
   .close()
   .cut(Box().c1(5, 0).c2(60, 60))
   .cut(Arc(4.9))
