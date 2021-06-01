@@ -85,6 +85,7 @@ emitSourceLocation({
   line: 3,
   column: 24
 });
+info('define foo');
 const foo = await loadGeometry('data/def//foo');
 await replayRecordedNotes('data/note//foo');
 Object.freeze(foo);
@@ -230,6 +231,7 @@ emitSourceLocation({
   line: 1,
   column: 19
 });
+info('define A');
 const A = await loadGeometry('data/def//A');
 await replayRecordedNotes('data/note//A');
 Object.freeze(A);
@@ -250,6 +252,7 @@ emitSourceLocation({
   line: 1,
   column: 16
 });
+info('define A');
 beginRecordingNotes();
 card\`/A\`;
 const A = bar();
@@ -285,6 +288,7 @@ emitSourceLocation({
   line: 1,
   column: 16
 });
+info('define D');
 const D = await loadGeometry('data/def//D');
 await replayRecordedNotes('data/note//D');
 Object.freeze(D);
@@ -315,6 +319,7 @@ emitSourceLocation({
   line: 3,
   column: 50
 });
+info('define mountainView');
 const mountainView = await loadGeometry('data/def//mountainView');
 await replayRecordedNotes('data/note//mountainView');
 Object.freeze(mountainView);
@@ -345,6 +350,7 @@ emitSourceLocation({
   line: 3,
   column: 50
 });
+info('define mountainView');
 beginRecordingNotes();
 card\`/mountainView\`;
 const mountainView = Mountain().scale(0.5).Page();
@@ -379,6 +385,7 @@ emitSourceLocation({
   line: 2,
   column: 13
 });
+info('define a');
 beginRecordingNotes();
 card\`/a\`;
 const a = [];

@@ -47,3 +47,5 @@ export const addOnEmitHandler = (handler) => {
 };
 
 export const removeOnEmitHandler = (handler) => onEmitHandlers.delete(handler);
+
+export const info = (text) => emit({ info: text });

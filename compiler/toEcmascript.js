@@ -180,6 +180,7 @@ export const toEcmascript = async (
         parseOptions
       )
     );
+    out.push(parse(`info('define ${id}');`, parseOptions));
 
     // Now that we have the sha, we can predict if it can be read from cache.
     const meta = await read(`meta/def/${path}/${id}`);

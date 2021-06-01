@@ -50,6 +50,7 @@ export const toDisjointGeometry = (geometry, mode = DISJUNCTION_TOTAL) => {
         // disjointAssembly.
         // This is acceptable for displayGeometry, but otherwise problematic.
         // For this reason we wrap the output as DisplayGeometry.
+        // FIX: This is leaking backward via parent linkDisjointAssembly.
         return taggedDisplayGeometry(
           {},
           toTransformedGeometry(reify(geometry))

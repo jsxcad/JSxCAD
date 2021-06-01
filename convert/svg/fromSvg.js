@@ -162,7 +162,10 @@ const applyTransforms = ({ matrix }, transformText) => {
   return { matrix };
 };
 
-export const fromSvg = async (input, { definitions } = {}) => {
+export const fromSvg = async (
+  input,
+  { definitions, doFill = true, doStroke = true } = {}
+) => {
   const svgString = new TextDecoder('utf8').decode(input);
   const geometry = taggedGroup({});
   const svg = new XmlDom.DOMParser().parseFromString(
@@ -245,7 +248,7 @@ export const fromSvg = async (input, { definitions } = {}) => {
             attributes[name] = value;
           }
           const fill = attributes.fill;
-          if (fill !== undefined && fill !== 'none' && fill !== '') {
+          if (doFill && fill !== undefined && fill !== 'none' && fill !== '') {
             // Does fill, etc, inherit?
             const tags = toTagsFromName(fill, definitions);
             geometry.content.push(
@@ -267,7 +270,7 @@ export const fromSvg = async (input, { definitions } = {}) => {
             strokeWidth !== undefined &&
             strokeWidth !== 'none' &&
             strokeWidth !== '';
-          if (hasStroke || hasStrokeWidth) {
+          if (doStroke && (hasStroke || hasStrokeWidth)) {
             if (matrix.some((element) => isNaN(element))) {
               throw Error(`die: Bad element in matrix ${matrix}.`);
             }
