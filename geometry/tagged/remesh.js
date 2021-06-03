@@ -1,5 +1,5 @@
 import { reify } from './reify.js';
-import { remesh as remeshGraph } from '@jsxcad/geometry-graph';
+import { remesh as remeshGraph } from '../graph/remesh.js';
 import { rewrite } from './visit.js';
 import { taggedGraph } from './taggedGraph.js';
 import { toTransformedGeometry } from './toTransformedGeometry.js';

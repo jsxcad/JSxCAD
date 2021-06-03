@@ -1,12 +1,10 @@
 import {
-  close as closePath,
-  concatenate as concatenatePath,
-  open as openPath,
-} from '@jsxcad/geometry-path';
-
-import {
+  closePath,
+  concatenatePath,
   eachPoint,
   flip,
+  fromPolygonsToGraph,
+  openPath,
   registerReifier,
   rewriteTags,
   taggedAssembly,
@@ -18,9 +16,8 @@ import {
   toPoints,
   toTransformedGeometry as toTransformedTaggedGeometry,
   transform,
-} from '@jsxcad/geometry-tagged';
+} from '@jsxcad/geometry';
 
-import { fromPolygons } from '@jsxcad/geometry-graph';
 import { identityMatrix } from '@jsxcad/math-mat4';
 
 export class Shape {
@@ -149,7 +146,7 @@ Shape.fromPoint = (point, context) =>
 Shape.fromPoints = (points, context) =>
   fromGeometry(taggedPoints({}, points), context);
 Shape.fromPolygons = (polygons, context) =>
-  fromGeometry(taggedGraph({}, fromPolygons(polygons)), context);
+  fromGeometry(taggedGraph({}, fromPolygonsToGraph(polygons)), context);
 Shape.registerMethod = registerShapeMethod;
 // Let's consider 'method' instead of 'registerMethod'.
 Shape.method = registerShapeMethod;

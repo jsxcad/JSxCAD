@@ -1,7 +1,7 @@
 import { cache } from '@jsxcad/cache';
 import { getNonVoidGraphs } from './getNonVoidGraphs.js';
 import { getNonVoidPaths } from './getNonVoidPaths.js';
-import { outline as outlineGraph } from '@jsxcad/geometry-graph';
+import { outline as outlineGraph } from '../graph/outline.js';
 import { taggedPaths } from './taggedPaths.js';
 import { toDisjointGeometry } from './toDisjointGeometry.js';
 

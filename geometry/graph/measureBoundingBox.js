@@ -3,7 +3,7 @@ import { max, min } from '@jsxcad/math-vec3';
 import { fromSurfaceMeshEmitBoundingBox } from '@jsxcad/algorithm-cgal';
 import { toSurfaceMesh } from './toSurfaceMesh.js';
 
-export const measureBoundingBox = (graph) => {
+export const measureBoundingBox = ({ graph }) => {
   if (graph.boundingBox === undefined) {
     if (graph.isLazy) {
       fromSurfaceMeshEmitBoundingBox(

@@ -1,6 +1,6 @@
-import { eachPoint as eachPointOfGraph } from '@jsxcad/geometry-graph';
-import { eachPoint as eachPointOfPaths } from '@jsxcad/geometry-paths';
-import { eachPoint as eachPointOfPoints } from '@jsxcad/geometry-points';
+import { eachPoint as eachPointOfGraph } from '../graph/eachPoint.js';
+import { eachPoint as eachPointOfPaths } from '../paths/eachPoint.js';
+import { eachPoint as eachPointOfPoints } from '../points/eachPoint.js';
 import { visit } from './visit.js';
 
 export const eachPoint = (emit, geometry) => {

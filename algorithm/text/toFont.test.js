@@ -1,6 +1,6 @@
 import { boot, readFile } from '@jsxcad/sys';
 
-import { realize } from '@jsxcad/geometry-tagged';
+import { realize } from '@jsxcad/geometry';
 import test from 'ava';
 import { toFont } from './toFont.js';
 

@@ -5,10 +5,10 @@ import { info } from '@jsxcad/sys';
 import { toSurfaceMesh } from './toSurfaceMesh.js';
 
 export const difference = (a, b) => {
-  if (a.isEmpty || b.isEmpty) {
+  if (a.graph.isEmpty || b.graph.isEmpty) {
     return a;
   }
-  if (a.isClosed && b.isClosed && doesNotOverlap(a, b)) {
+  if (a.graph.isClosed && b.graph.isClosed && doesNotOverlap(a, b)) {
     return a;
   }
   info('difference begin');

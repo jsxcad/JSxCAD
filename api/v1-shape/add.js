@@ -1,5 +1,5 @@
 import Shape from './Shape.js';
-import { union } from '@jsxcad/geometry-tagged';
+import { union } from '@jsxcad/geometry';
 
 export const add = (shape, ...shapes) =>
   Shape.fromGeometry(

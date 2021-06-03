@@ -1,5 +1,5 @@
 import { Shape, shapeMethod } from '@jsxcad/api-v1-shape';
-import { concatenate, translate } from '@jsxcad/geometry-path';
+import { concatenatePath, translatePath } from '@jsxcad/geometry';
 
 import { numbers } from '@jsxcad/api-v1-math';
 
@@ -13,7 +13,7 @@ export const Wave = (
   let path = [null];
   for (const xDistance of numbers((distance) => distance, { from, to, by })) {
     const subpath = toPathFromXDistance(xDistance);
-    path = concatenate(path, translate([xDistance, 0, 0], subpath));
+    path = concatenatePath(path, translatePath([xDistance, 0, 0], subpath));
   }
   return Shape.fromPath(path);
 };

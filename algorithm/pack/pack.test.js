@@ -1,5 +1,5 @@
 import { boot } from '@jsxcad/sys';
-import { canonicalize } from '@jsxcad/geometry-tagged';
+import { canonicalize } from '@jsxcad/geometry';
 
 import pack from './pack.js';
 import test from 'ava';

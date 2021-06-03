@@ -1,5 +1,5 @@
 import { Shape } from './Shape.js';
-import { getPaths as getPathsetsFromGeometry } from '@jsxcad/geometry-tagged';
+import { getPaths as getPathsetsFromGeometry } from '@jsxcad/geometry';
 
 /**
  *

@@ -1,9 +1,9 @@
 import {
   rerealizeGraph,
-  reverseFaceOrientations,
-} from '@jsxcad/geometry-graph';
-
-import { taggedGraph, taggedGroup } from '@jsxcad/geometry-tagged';
+  reverseFaceOrientationsOfGraph,
+  taggedGraph,
+  taggedGroup,
+} from '@jsxcad/geometry';
 
 import ObjFile from 'obj-file-parser';
 
@@ -33,7 +33,7 @@ export const fromObjSync = (data, { invert = false } = {}) => {
       graph.facets[facet] = { edge: firstEdgeId };
     }
     if (invert) {
-      graph = reverseFaceOrientations(graph);
+      graph = reverseFaceOrientationsOfGraph(graph);
     }
     group.push(taggedGraph({}, rerealizeGraph(graph)));
   }

@@ -1,4 +1,4 @@
-import { extrude as extrudeGraph } from '@jsxcad/geometry-graph';
+import { extrude as extrudeGraph } from '../graph/extrude.js';
 import { fill } from './fill.js';
 import { reify } from './reify.js';
 import { rewrite } from './visit.js';

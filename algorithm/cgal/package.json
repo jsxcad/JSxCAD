@@ -24,7 +24,7 @@
   "keywords": [],
   "license": "LGPL",
   "dependencies": {
-    "@jsxcad/geometry-path": "^0.0.79",
+    "@jsxcad/geometry": "^0.0.79",
     "@jsxcad/math-vec3": "^0.0.79",
     "@jsxcad/sys": "^0.0.79",
     "hash-sum": "^2.0.0"

@@ -4,7 +4,7 @@ import {
   taggedItem,
   taggedLayers,
   toDisjointGeometry,
-} from '@jsxcad/geometry-tagged';
+} from '@jsxcad/geometry';
 
 import Shape from './Shape.js';
 import { pack as packAlgorithm } from '@jsxcad/algorithm-pack';

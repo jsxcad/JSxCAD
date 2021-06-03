@@ -1,6 +1,6 @@
 import { Shape, shapeMethod } from '@jsxcad/api-v1-shape';
 import { getAt, getFrom, getScale, getTo } from './Plan.js';
-import { registerReifier, taggedPlan } from '@jsxcad/geometry-tagged';
+import { registerReifier, taggedPlan } from '@jsxcad/geometry';
 
 import { fromPoints } from '@jsxcad/math-poly3';
 import { negate } from '@jsxcad/math-vec3';

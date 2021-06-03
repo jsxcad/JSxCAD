@@ -1,4 +1,4 @@
-import { scale, translate } from '@jsxcad/geometry-tagged';
+import { scale, translate } from '@jsxcad/geometry';
 
 import DxfParser from 'dxf-parser';
 import { fromAngleRadians } from '@jsxcad/math-vec2';

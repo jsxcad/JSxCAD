@@ -24,7 +24,7 @@ import {
   Y_SUB_9,
 } from './dst.js';
 
-import { scale } from '@jsxcad/geometry-paths';
+import { scalePaths } from '@jsxcad/geometry';
 
 export const createByteFetcher = (bytes) => {
   const bytesLength = bytes.length;
@@ -170,6 +170,6 @@ export const fromDst = async (data, options = {}) => {
   const header = fetchHeader({}, fetcher);
   return {
     type: 'paths',
-    paths: scale([0.1, 0.1, 0.1], fetchStitches(header, fetcher)),
+    paths: scalePaths([0.1, 0.1, 0.1], fetchStitches(header, fetcher)),
   };
 };

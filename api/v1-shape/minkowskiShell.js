@@ -1,5 +1,5 @@
 import Shape from './Shape.js';
-import { minkowskiShell as minkowskiShellOfGeometry } from '@jsxcad/geometry-tagged';
+import { minkowskiShell as minkowskiShellOfGeometry } from '@jsxcad/geometry';
 
 export const minkowskiShell = (shape, offset) =>
   Shape.fromGeometry(

@@ -1,4 +1,4 @@
-import { grow as growGraph } from '@jsxcad/geometry-graph';
+import { grow as growGraph } from '../graph/grow.js';
 import { reify } from './reify.js';
 import { rewrite } from './visit.js';
 import { taggedGraph } from './taggedGraph.js';

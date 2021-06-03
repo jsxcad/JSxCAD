@@ -1,5 +1,5 @@
 import { toTransformedGeometry } from './toTransformedGeometry.js';
-import { toTriangles as toTrianglesFromGraph } from '@jsxcad/geometry-graph';
+import { toTriangles as toTrianglesFromGraph } from '../geometry-graph';
 import { visit } from './visit.js';
 
 export const toTriangles = (geometry) => {

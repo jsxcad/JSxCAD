@@ -1,10 +1,7 @@
-import {
-  fill as fillOutlineGraph,
-  fromPaths as fromPathsToGraph,
-} from '@jsxcad/geometry-graph';
-
 import { getNonVoidGraphs } from './getNonVoidGraphs.js';
 import { getNonVoidPaths } from './getNonVoidPaths.js';
+import { fill as fillOutlineGraph } from '../graph/fill.js';
+import { fromPaths as fromPathsToGraph } from '../graph/fromPaths.js';
 import { taggedGraph } from './taggedGraph.js';
 import { taggedGroup } from './taggedGroup.js';
 import { toKeptGeometry } from './toKeptGeometry.js';

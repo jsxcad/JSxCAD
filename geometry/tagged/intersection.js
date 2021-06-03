@@ -1,17 +1,14 @@
-import {
-  fromPaths as fromPathsToGraph,
-  intersection as graphIntersection,
-  toPaths as toPathsFromGraph,
-} from '@jsxcad/geometry-graph';
-
 import { cache } from '@jsxcad/cache';
+import { fromPaths as fromPathsToGraph } from '../graph/fromPaths.js';
 import { getNonVoidFaceablePaths } from './getNonVoidFaceablePaths.js';
 import { getNonVoidGraphs } from './getNonVoidGraphs.js';
+import { intersection as graphIntersection } from '../graph/intersection.js';
 import { rewrite } from './visit.js';
 import { taggedGraph } from './taggedGraph.js';
 import { taggedGroup } from './taggedGroup.js';
 import { taggedPaths } from './taggedPaths.js';
 import { toDisjointGeometry } from './toDisjointGeometry.js';
+import { toPaths as toPathsFromGraph } from '../graph/toPaths.js';
 
 const intersectionImpl = (geometry, ...geometries) => {
   geometries = geometries.map(toDisjointGeometry);
@@ -22,10 +19,8 @@ const intersectionImpl = (geometry, ...geometries) => {
         let input = geometry.graph;
         const intersections = [];
         for (const geometry of geometries) {
-          for (const { graph } of getNonVoidGraphs(geometry)) {
-            intersections.push(
-              taggedGraph({ tags }, graphIntersection(input, graph))
-            );
+          for (const graph of getNonVoidGraphs(geometry)) {
+            intersections.push(graphIntersection(input, graph));
           }
           for (const { paths } of getNonVoidFaceablePaths(geometry)) {
             intersections.push(

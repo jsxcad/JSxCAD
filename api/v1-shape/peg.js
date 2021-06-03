@@ -3,7 +3,7 @@ import { dot, subtract } from '@jsxcad/math-vec3';
 import { fromPoints, toXYPlaneTransforms } from '@jsxcad/math-plane';
 
 import Shape from './Shape.js';
-import { getPeg } from '@jsxcad/geometry-tagged';
+import { getPeg } from '@jsxcad/geometry';
 
 const normalizeCoords = ([
   x = 0,

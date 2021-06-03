@@ -5,7 +5,7 @@ import {
   toDisjointGeometry,
   toPolygonsWithHoles,
   transform,
-} from '@jsxcad/geometry-tagged';
+} from '@jsxcad/geometry';
 
 import { toRgbFromTags } from '@jsxcad/algorithm-color';
 

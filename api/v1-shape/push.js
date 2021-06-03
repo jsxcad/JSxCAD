@@ -1,5 +1,5 @@
 import Shape from './Shape.js';
-import { push as pushGeometry } from '@jsxcad/geometry-tagged';
+import { push as pushGeometry } from '@jsxcad/geometry';
 
 export const push = (
   shape,

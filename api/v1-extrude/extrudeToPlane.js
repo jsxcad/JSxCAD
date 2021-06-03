@@ -1,5 +1,5 @@
 import Shape from '@jsxcad/api-v1-shape';
-import { extrudeToPlane as extrudeToPlaneOfGeometry } from '@jsxcad/geometry-tagged';
+import { extrudeToPlane as extrudeToPlaneOfGeometry } from '@jsxcad/geometry';
 
 export const extrudeToPlane = (
   shape,

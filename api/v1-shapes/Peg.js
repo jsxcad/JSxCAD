@@ -1,7 +1,7 @@
 import { Shape, shapeMethod } from '@jsxcad/api-v1-shape';
 
 import { add } from '@jsxcad/math-vec3';
-import { taggedPoints } from '@jsxcad/geometry-tagged';
+import { taggedPoints } from '@jsxcad/geometry';
 
 const X = 0;
 const Y = 1;

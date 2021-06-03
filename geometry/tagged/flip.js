@@ -1,5 +1,5 @@
-import { flip as flipPaths } from '@jsxcad/geometry-paths';
-import { flip as flipPoints } from '@jsxcad/geometry-points';
+import { flip as flipPaths } from '../paths/flip.js';
+import { flip as flipPoints } from '../points/flip.js';
 
 import { rewrite } from './visit.js';
 

@@ -1,5 +1,5 @@
 import Shape from '@jsxcad/api-v1-shape';
-import { getLeafs } from '@jsxcad/geometry-tagged';
+import { getLeafs } from '@jsxcad/geometry';
 
 export const leafs = (shape, op = (_) => _) => {
   const leafs = [];
@@ -13,8 +13,5 @@ const leafsMethod = function (...args) {
   return leafs(this, ...args);
 };
 Shape.prototype.leafs = leafsMethod;
-
-leafs.signature = 'leafs(shape:Shape, op:function) -> Shapes';
-leafsMethod.signature = 'Shape -> leafs(op:function) -> Shapes';
 
 export default leafs;

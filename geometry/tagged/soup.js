@@ -1,11 +1,11 @@
-import { toPaths, toTriangles } from '@jsxcad/geometry-graph';
-
 import { outline as outlineOp } from './outline.js';
 import { rewrite } from './visit.js';
 import { taggedGroup } from './taggedGroup.js';
 import { taggedPaths } from './taggedPaths.js';
 import { taggedTriangles } from './taggedTriangles.js';
+import { toPaths } from '../graph/toPaths.js';
 import { toTransformedGeometry } from './toTransformedGeometry.js';
+import { toTriangles } from '../graph/toTriangles.js';
 
 export const soup = (
   geometry,

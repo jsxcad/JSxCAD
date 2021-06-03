@@ -1,4 +1,4 @@
-import { read, write } from '@jsxcad/geometry-tagged';
+import { read, write } from '@jsxcad/geometry';
 
 import Shape from './Shape.js';
 

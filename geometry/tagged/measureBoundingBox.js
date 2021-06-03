@@ -2,9 +2,9 @@ import { max, min } from '@jsxcad/math-vec3';
 
 import { eachPoint } from './eachPoint.js';
 import { isVoid } from './isNotVoid.js';
-import { measureBoundingBox as measureBoundingBoxOfGraph } from '@jsxcad/geometry-graph';
-import { measureBoundingBox as measureBoundingBoxOfPoints } from '@jsxcad/geometry-points';
-import { measureBoundingBox as measureBoundingBoxOfPolygons } from '@jsxcad/geometry-polygons';
+import { measureBoundingBox as measureBoundingBoxOfGraph } from '../graph/measureBoundingBox.js';
+import { measureBoundingBox as measureBoundingBoxOfPoints } from '../points/measureBoundingBox.js';
+import { measureBoundingBox as measureBoundingBoxOfPolygons } from '../polygons/measureBoundingBox.js';
 import { reify } from './reify.js';
 import { toKeptGeometry } from './toKeptGeometry.js';
 import { visit } from './visit.js';

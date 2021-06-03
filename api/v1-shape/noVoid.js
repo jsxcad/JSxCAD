@@ -1,4 +1,4 @@
-import { isVoid, rewrite, taggedLayers } from '@jsxcad/geometry-tagged';
+import { isVoid, rewrite, taggedLayers } from '@jsxcad/geometry';
 import { Shape } from './Shape.js';
 
 const noVoid = (shape, tags, select) => {

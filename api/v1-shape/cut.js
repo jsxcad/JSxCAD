@@ -1,5 +1,5 @@
 import Shape from './Shape.js';
-import { difference } from '@jsxcad/geometry-tagged';
+import { difference } from '@jsxcad/geometry';
 
 export const cut = (shape, ...shapes) =>
   Shape.fromGeometry(

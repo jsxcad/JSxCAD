@@ -1,4 +1,8 @@
-import { deduplicate, isClockwise, translate } from '@jsxcad/geometry-path';
+import {
+  deduplicatePath,
+  isClockwisePath,
+  translatePath,
+} from '@jsxcad/geometry';
 
 import MarchingSquares from 'marchingsquares/dist/marchingsquares.js';
 import { fromPolygon as toPlaneFromPolygon } from '@jsxcad/math-plane';
@@ -12,9 +16,9 @@ export const fromRaster = async (raster, bands) => {
     const high = bands[nth + 1];
     const paths = [];
     for (const band of MarchingSquares.isoBands(preprocessedData, low, high)) {
-      const deduplicated = translate([0, 0, low], deduplicate(band));
+      const deduplicated = translatePath([0, 0, low], deduplicatePath(band));
       if (deduplicated.length >= 3 && toPlaneFromPolygon(deduplicated)) {
-        if (isClockwise(deduplicated)) {
+        if (isClockwisePath(deduplicated)) {
           // Ensure path is counter-clockwise.
           paths.push([...deduplicated].reverse());
         } else {

@@ -7,7 +7,7 @@ import {
   getMatrix,
   getTo,
 } from './Plan.js';
-import { registerReifier, taggedPlan } from '@jsxcad/geometry-tagged';
+import { registerReifier, taggedPlan } from '@jsxcad/geometry';
 
 import { negate } from '@jsxcad/math-vec3';
 

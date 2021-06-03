@@ -6,7 +6,7 @@ import {
   taggedLayers,
   taggedLayout,
   visit,
-} from '@jsxcad/geometry-tagged';
+} from '@jsxcad/geometry';
 
 import Box from './Box.js';
 import Empty from './Empty.js';

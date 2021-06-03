@@ -1,5 +1,5 @@
 import { getNonVoidGraphs } from './getNonVoidGraphs.js';
-import { minkowskiSum as minkowskiSumOfGraphs } from '@jsxcad/geometry-graph';
+import { minkowskiSum as minkowskiSumOfGraphs } from '../graph/minkowskiSum.js';
 import { reify } from './reify.js';
 import { rewrite } from './visit.js';
 import { taggedGraph } from './taggedGraph.js';

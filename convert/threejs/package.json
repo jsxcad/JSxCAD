@@ -23,7 +23,7 @@
   "keywords": [],
   "license": "MIT",
   "dependencies": {
-    "@jsxcad/geometry-tagged": "^0.0.79",
+    "@jsxcad/geometry": "^0.0.79",
     "@jsxcad/sys": "^0.0.79"
   },
   "devDependencies": {

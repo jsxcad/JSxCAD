@@ -1,5 +1,5 @@
 import { Shape } from './Shape.js';
-import { rewrite } from '@jsxcad/geometry-tagged';
+import { rewrite } from '@jsxcad/geometry';
 
 /**
  *

@@ -1,4 +1,4 @@
-import { prepareForSerialization as prepareForSerializationOfGraph } from '@jsxcad/geometry-graph';
+import { prepareForSerialization as prepareForSerializationOfGraph } from '../graph/prepareForSerialization.js';
 import { visit } from './visit.js';
 
 export const prepareForSerialization = (geometry) => {

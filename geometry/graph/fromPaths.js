@@ -2,9 +2,11 @@ import {
   arrangePathsIntoTriangles,
   fromPolygonsToSurfaceMesh,
 } from '@jsxcad/algorithm-cgal';
-import { deduplicate, flip, isClockwise } from '@jsxcad/geometry-path';
 
+import { deduplicate } from '../path/deduplicate.js';
+import { flip } from '../path/flip.js';
 import { fromSurfaceMeshLazy } from './fromSurfaceMeshLazy.js';
+import { isClockwise } from '../path/isClockwise.js';
 
 const clean = (path) => deduplicate(path);
 

@@ -1,5 +1,5 @@
 import { Shape } from './Shape.js';
-import { measureBoundingBox as measureBoundingBoxOfGeometry } from '@jsxcad/geometry-tagged';
+import { measureBoundingBox as measureBoundingBoxOfGeometry } from '@jsxcad/geometry';
 
 /**
  *

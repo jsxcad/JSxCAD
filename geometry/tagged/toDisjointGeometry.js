@@ -1,10 +1,7 @@
-import { difference } from './difference.js';
-import { isVoid } from './isNotVoid.js';
 import { reify } from './reify.js';
-import { rewrite } from './visit.js';
-import { taggedDisjointAssembly } from './taggedDisjointAssembly.js';
-import { taggedDisplayGeometry } from './taggedDisplayGeometry.js';
-import { toTransformedGeometry } from './toTransformedGeometry.js';
+
+/*
+import { visit } from './visit.js';
 
 const linkDisjointAssembly = Symbol('linkDisjointAssembly');
 
@@ -83,6 +80,10 @@ export const toDisjointGeometry = (geometry, mode = DISJUNCTION_TOTAL) => {
     }
   }
 };
+*/
+
+// FIX: Remove toDisjointGeometry and replace with a more meaningful operation.
+export const toDisjointGeometry = (geometry) => reify(geometry);
 
 export const toVisiblyDisjointGeometry = (geometry) =>
   toDisjointGeometry(geometry, DISJUNCTION_VISIBLE);

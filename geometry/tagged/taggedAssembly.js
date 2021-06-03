@@ -1,3 +1,6 @@
+import { disjoint } from './disjoint.js';
+
+// FIX: Remove tags from branches.
 export const taggedAssembly = ({ tags }, ...content) => {
   if (content.some((value) => !value)) {
     throw Error(`Undefined Assembly content`);
@@ -14,5 +17,5 @@ export const taggedAssembly = ({ tags }, ...content) => {
   if (typeof tags === 'function') {
     throw Error(`Tags is a function`);
   }
-  return { type: 'assembly', tags, content };
+  return disjoint(...content);
 };

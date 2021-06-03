@@ -1,7 +1,10 @@
-import { getNonVoidGraphs, toDisjointGeometry } from '@jsxcad/geometry-tagged';
+import {
+  getNonVoidGraphs,
+  toDisjointGeometry,
+  toTrianglesFromGraph,
+} from '@jsxcad/geometry';
 
 import { toPlane } from '@jsxcad/math-poly3';
-import { toTriangles as toTrianglesFromGraph } from '@jsxcad/geometry-graph';
 
 const equals = ([aX, aY, aZ], [bX, bY, bZ]) =>
   aX === bX && aY === bY && aZ === bZ;

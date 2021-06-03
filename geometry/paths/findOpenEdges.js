@@ -1,4 +1,4 @@
-import { getEdges } from '@jsxcad/geometry-path';
+import { getEdges } from '../geometry-path';
 
 // Expects aligned vertices.
 

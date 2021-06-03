@@ -1,6 +1,6 @@
+import { taggedPaths, translatePaths } from '@jsxcad/geometry';
+
 import Shape from '@jsxcad/api-v1-shape';
-import { taggedPaths } from '@jsxcad/geometry-tagged';
-import { translate } from '@jsxcad/geometry-paths';
 
 // Hershey simplex one line font.
 // See: http://paulbourke.net/dataformats/hershey/
@@ -1423,7 +1423,7 @@ export const toPaths = (letters) => {
   for (const letter of letters) {
     const code = letter.charCodeAt(0);
     const paths = hersheyPaths[code] || [];
-    mergedPaths.push(...translate([xOffset, 0, 0], paths));
+    mergedPaths.push(...translatePaths([xOffset, 0, 0], paths));
     xOffset += hersheyWidth[code] || 0;
   }
   return Shape.fromGeometry(taggedPaths({}, mergedPaths))

@@ -1,10 +1,10 @@
 import { composeTransforms } from '@jsxcad/algorithm-cgal';
 import { identityMatrix } from '@jsxcad/math-mat4';
 import { rewrite } from './visit.js';
-import { transform as transformGraph } from '@jsxcad/geometry-graph';
-import { transform as transformPaths } from '@jsxcad/geometry-paths';
-import { transform as transformPoints } from '@jsxcad/geometry-points';
-import { transform as transformPolygons } from '@jsxcad/geometry-polygons';
+import { transform as transformGraph } from '../graph/transform.js';
+import { transform as transformPaths } from '../paths/transform.js';
+import { transform as transformPoints } from '../points/ops.js';
+import { transform as transformPolygons } from '../polygons/transform.js';
 
 const transformedGeometry = Symbol('transformedGeometry');
 

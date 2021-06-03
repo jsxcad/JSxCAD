@@ -1,5 +1,5 @@
 import { add, length, normalize, scale, subtract } from '@jsxcad/math-vec3';
-import { getEdges } from '@jsxcad/geometry-path';
+import { getEdges } from '../geometry-path';
 
 export const segment = (paths, start, end) => {
   const segments = [];

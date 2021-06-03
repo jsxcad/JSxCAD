@@ -1,6 +1,6 @@
 import { boot } from '@jsxcad/sys';
 import { fromOff } from './fromOff.js';
-import { realizeGraph } from '@jsxcad/geometry-graph';
+import { realizeGraph } from '@jsxcad/geometry';
 import test from 'ava';
 
 test.beforeEach(async (t) => {

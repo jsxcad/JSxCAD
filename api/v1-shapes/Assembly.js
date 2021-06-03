@@ -1,6 +1,6 @@
 import { Shape, shapeMethod } from '@jsxcad/api-v1-shape';
 
-import { taggedAssembly } from '@jsxcad/geometry-tagged';
+import { taggedAssembly } from '@jsxcad/geometry';
 
 const isDefined = (value) => value !== undefined;
 

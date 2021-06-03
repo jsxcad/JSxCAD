@@ -1,7 +1,7 @@
 import { boot, writeFile } from '@jsxcad/sys';
 
 import { fromLDrawPart } from './fromLDraw.js';
-import { realize } from '@jsxcad/geometry-tagged';
+import { realize } from '@jsxcad/geometry';
 import test from 'ava';
 
 test('Load a file', async (t) => {

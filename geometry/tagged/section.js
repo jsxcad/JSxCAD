@@ -1,7 +1,7 @@
 import { cacheSection } from '@jsxcad/cache';
 import { getNonVoidGraphs } from './getNonVoidGraphs.js';
 import { reify } from './reify.js';
-import { sections as sectionsOfGraph } from '@jsxcad/geometry-graph';
+import { sections as sectionsOfGraph } from '../graph/section.js';
 import { taggedGraph } from './taggedGraph.js';
 import { taggedGroup } from './taggedGroup.js';
 import { toTransformedGeometry } from './toTransformedGeometry.js';

@@ -1,5 +1,5 @@
 import { Shape, fromGeometry } from './Shape.js';
-import { empty, union as unionGeometry } from '@jsxcad/geometry-tagged';
+import { empty, union as unionGeometry } from '@jsxcad/geometry';
 
 export const fuse = (shape) => {
   const geometry = shape.toGeometry();

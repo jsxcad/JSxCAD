@@ -1,4 +1,4 @@
-import { taggedAssembly, taggedItem } from '@jsxcad/geometry-tagged';
+import { taggedAssembly, taggedItem } from '@jsxcad/geometry';
 
 import Shape from '@jsxcad/api-v1-shape';
 

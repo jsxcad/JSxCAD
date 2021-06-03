@@ -2,7 +2,7 @@ import { emit, log as sysLog } from '@jsxcad/sys';
 
 import Shape from './Shape.js';
 import hashSum from 'hash-sum';
-import { realize } from '@jsxcad/geometry-tagged';
+import { realize } from '@jsxcad/geometry';
 
 /**
  *

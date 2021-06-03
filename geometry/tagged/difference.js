@@ -1,12 +1,9 @@
-import {
-  fill as fillOutlineGraph,
-  fromPaths as fromPathsToGraph,
-  difference as graphDifference,
-} from '@jsxcad/geometry-graph';
-
 import { cache } from '@jsxcad/cache';
+import { difference as graphDifference } from '../graph/difference.js';
 import { getFaceablePaths } from './getFaceablePaths.js';
 import { getGraphs } from './getGraphs.js';
+import { fill as fillOutlineGraph } from '../graph/fill.js';
+import { fromPaths as fromPathsToGraph } from '../graph/fromPaths.js';
 import { rewrite } from './visit.js';
 import { taggedGraph } from './taggedGraph.js';
 import { toDisjointGeometry } from './toDisjointGeometry.js';
@@ -19,7 +16,7 @@ const differenceImpl = (geometry, ...geometries) => {
       case 'graph': {
         let differenced = geometry.graph;
         for (const geometry of geometries) {
-          for (const { graph } of getGraphs(geometry)) {
+          for (const graph of getGraphs(geometry)) {
             differenced = graphDifference(differenced, graph);
           }
           for (const { paths } of getFaceablePaths(geometry)) {

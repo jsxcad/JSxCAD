@@ -10,7 +10,7 @@ import {
   getSides,
   getTo,
 } from './Plan.js';
-import { registerReifier, taggedPlan } from '@jsxcad/geometry-tagged';
+import { registerReifier, taggedPlan } from '@jsxcad/geometry';
 
 import Spiral from './Spiral.js';
 import { negate } from '@jsxcad/math-vec3';

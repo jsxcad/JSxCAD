@@ -2,7 +2,7 @@ import { reify } from './reify.js';
 import { rewrite } from './visit.js';
 import { taggedGraph } from './taggedGraph.js';
 import { toTransformedGeometry } from './toTransformedGeometry.js';
-import { twist as twistGraph } from '@jsxcad/geometry-graph';
+import { twist as twistGraph } from '../graph/twist.js';
 
 export const twist = (geometry, degreesPerZ) => {
   const op = (geometry, descend) => {

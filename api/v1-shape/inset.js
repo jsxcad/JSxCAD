@@ -1,5 +1,5 @@
 import Shape from './Shape.js';
-import { inset as insetGeometry } from '@jsxcad/geometry-tagged';
+import { inset as insetGeometry } from '@jsxcad/geometry';
 
 export const inset = (shape, initial = 1, step, limit) =>
   Shape.fromGeometry(insetGeometry(shape.toGeometry(), initial, step, limit));

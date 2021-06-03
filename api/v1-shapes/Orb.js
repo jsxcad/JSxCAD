@@ -1,6 +1,13 @@
 import { Shape, shapeMethod } from '@jsxcad/api-v1-shape';
 
-import { deduplicate, flip, scale, translate } from '@jsxcad/geometry-path';
+import {
+  deduplicatePath,
+  flipPath,
+  registerReifier,
+  scalePath,
+  taggedPlan,
+  translatePath,
+} from '@jsxcad/geometry';
 
 import {
   getAt,
@@ -10,8 +17,6 @@ import {
   getSides,
   getTo,
 } from './Plan.js';
-
-import { registerReifier, taggedPlan } from '@jsxcad/geometry-tagged';
 
 import { fromAngleRadians } from '@jsxcad/math-vec2';
 import { negate } from '@jsxcad/math-vec3';
@@ -34,7 +39,12 @@ const buildWalls = (polygons, floor, roof) => {
   ) {
     // Remember that we are walking CCW.
     polygons.push({
-      points: deduplicate([floor[start], floor[end], roof[end], roof[start]]),
+      points: deduplicatePath([
+        floor[start],
+        floor[end],
+        roof[end],
+        roof[start],
+      ]),
     });
   }
 };
@@ -66,8 +76,8 @@ const buildRingSphere = (resolution = 20) => {
     const height = Math.cos(angle);
     const radius = Math.sin(angle);
     const points = ring;
-    const scaledPath = scale([radius, radius, radius], points);
-    const translatedPath = translate([0, 0, height], scaledPath);
+    const scaledPath = scalePath([radius, radius, radius], points);
+    const translatedPath = translatePath([0, 0, height], scaledPath);
     path = translatedPath;
     if (lastPath !== undefined) {
       buildWalls(polygons, path, lastPath);
@@ -77,7 +87,7 @@ const buildRingSphere = (resolution = 20) => {
     lastPath = path;
   }
   if (path) {
-    polygons.push({ points: flip(path) });
+    polygons.push({ points: flipPath(path) });
   }
   return polygons;
 };

@@ -2,7 +2,7 @@ import { add, scale, subtract } from '@jsxcad/math-vec3';
 
 import { Shape } from '@jsxcad/api-v1-shape';
 import { identity } from '@jsxcad/math-mat4';
-import { taggedPlan } from '@jsxcad/geometry-tagged';
+import { taggedPlan } from '@jsxcad/geometry';
 import { zag } from '@jsxcad/api-v1-math';
 
 const eachEntry = (plan, op, otherwise) => {

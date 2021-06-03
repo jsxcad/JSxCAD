@@ -1,5 +1,5 @@
 import Shape from './Shape.js';
-import { rewriteTags } from '@jsxcad/geometry-tagged';
+import { rewriteTags } from '@jsxcad/geometry';
 
 export const voidFn = (shape) =>
   Shape.fromGeometry(

@@ -45,8 +45,7 @@
     "@jsxcad/api-v1-units": "^0.0.79",
     "@jsxcad/convert-svg": "^0.0.79",
     "@jsxcad/compiler": "^0.0.79",
-    "@jsxcad/geometry-plan": "^0.0.79",
-    "@jsxcad/geometry-tagged": "^0.0.79",
+    "@jsxcad/geometry": "^0.0.79",
     "@jsxcad/sys": "^0.0.79",
     "hash-sum": "^2.0.0"
   },

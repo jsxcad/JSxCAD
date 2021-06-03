@@ -8,7 +8,7 @@ import {
   getSides,
   getTo,
 } from './Plan.js';
-import { registerReifier, taggedPlan } from '@jsxcad/geometry-tagged';
+import { registerReifier, taggedPlan } from '@jsxcad/geometry';
 
 import Arc from './Arc.js';
 import Hull from './Hull.js';
