@@ -7,9 +7,9 @@ import { fromPoints as fromPoints$2 } from './jsxcad-math-poly3.js';
 import { fromAngleRadians } from './jsxcad-math-vec2.js';
 import { toPolygon } from './jsxcad-math-plane.js';
 
-const eachEntry = (plan, op, otherwise) => {
-  for (let nth = plan.history.length - 1; nth >= 0; nth--) {
-    const result = op(plan.history[nth]);
+const eachEntry = (geometry, op, otherwise) => {
+  for (let nth = geometry.plan.history.length - 1; nth >= 0; nth--) {
+    const result = op(geometry.plan.history[nth]);
     if (result !== undefined) {
       return result;
     }
@@ -17,9 +17,9 @@ const eachEntry = (plan, op, otherwise) => {
   return otherwise;
 };
 
-const find = (plan, key, otherwise) =>
+const find = (geometry, key, otherwise) =>
   eachEntry(
-    plan,
+    geometry,
     (entry) => {
       return entry[key];
     },
@@ -28,24 +28,24 @@ const find = (plan, key, otherwise) =>
 
 const ofPlan = find;
 
-const getAngle = (plan) => find(plan, 'angle', {});
-const getAt = (plan) => find(plan, 'at', [0, 0, 0]);
-const getCorner1 = (plan) => find(plan, 'corner1', [0, 0, 0]);
-const getCorner2 = (plan) => find(plan, 'corner2', [0, 0, 0]);
-const getFrom = (plan) => find(plan, 'from', [0, 0, 0]);
-const getMatrix = (plan) => plan.matrix || identity();
-const getTo = (plan) => find(plan, 'to', [0, 0, 0]);
+const getAngle = (geometry) => find(geometry, 'angle', {});
+const getAt = (geometry) => find(geometry, 'at', [0, 0, 0]);
+const getCorner1 = (geometry) => find(geometry, 'corner1', [0, 0, 0]);
+const getCorner2 = (geometry) => find(geometry, 'corner2', [0, 0, 0]);
+const getFrom = (geometry) => find(geometry, 'from', [0, 0, 0]);
+const getMatrix = (geometry) => geometry.matrix || identity();
+const getTo = (geometry) => find(geometry, 'to', [0, 0, 0]);
 
 const defaultZag = 0.01;
 
-const getSides = (plan, otherwise = 32) => {
-  const [scale] = getScale(plan);
+const getSides = (geometry, otherwise = 32) => {
+  const [scale] = getScale(geometry);
   const [length, width] = scale;
   {
     otherwise = zag(Math.max(length, width) * 2, defaultZag);
   }
   return eachEntry(
-    plan,
+    geometry,
     (entry) => {
       if (entry.sides !== undefined) {
         return entry.sides;
@@ -57,9 +57,9 @@ const getSides = (plan, otherwise = 32) => {
   );
 };
 
-const getScale = (plan) => {
-  const corner1 = getCorner1(plan);
-  const corner2 = getCorner2(plan);
+const getScale = (geometry) => {
+  const corner1 = getCorner1(geometry);
+  const corner2 = getCorner2(geometry);
   return [
     scale(0.5, subtract(corner1, corner2)),
     scale(0.5, add(corner1, corner2)),
@@ -72,9 +72,9 @@ const X = 0;
 const Y = 1;
 const Z = 2;
 
-registerReifier('Box', ({ tags, plan }) => {
-  const corner1 = getCorner1(plan);
-  const corner2 = getCorner2(plan);
+registerReifier('Box', (geometry) => {
+  const corner1 = getCorner1(geometry);
+  const corner2 = getCorner2(geometry);
   const left = corner1[X];
   const right = corner2[X];
   const front = corner1[Y];
@@ -91,12 +91,12 @@ registerReifier('Box', ({ tags, plan }) => {
     .fill()
     .ex(top, bottom)
     .orient({
-      center: negate(getAt(plan)),
-      from: getFrom(plan),
-      at: getTo(plan),
+      center: negate(getAt(geometry)),
+      from: getFrom(geometry),
+      at: getTo(geometry),
     })
-    .transform(getMatrix(plan))
-    .setTags(tags)
+    .transform(getMatrix(geometry))
+    .setTags(geometry.tags)
     .toGeometry();
 });
 
@@ -1702,7 +1702,13 @@ const Page = (
       const plans = [];
       for (const layer of content.toDisjointGeometry().content[0].content) {
         plans.push(
-          buildLayoutGeometry({ layer, packSize, pageWidth, pageLength, margin })
+          buildLayoutGeometry({
+            layer,
+            packSize,
+            pageWidth,
+            pageLength,
+            margin,
+          })
         );
       }
       return Shape$1.fromGeometry(taggedLayers({}, ...plans));
@@ -1796,19 +1802,19 @@ Shape.prototype.Spiral = shapeMethod(Spiral);
 
 const Z$1 = 2;
 
-registerReifier('Arc', ({ tags, plan }) => {
-  let { start = 0, end = 360 } = getAngle(plan);
+registerReifier('Arc', (geometry) => {
+  let { start = 0, end = 360 } = getAngle(geometry);
 
   while (start > end) {
     start -= 360;
   }
 
-  const [scale, middle] = getScale(plan);
-  const corner1 = getCorner1(plan);
-  const corner2 = getCorner2(plan);
+  const [scale, middle] = getScale(geometry);
+  const corner1 = getCorner1(geometry);
+  const corner2 = getCorner2(geometry);
   const top = corner2[Z$1];
   const bottom = corner1[Z$1];
-  const step = 360 / getSides(plan, 32);
+  const step = 360 / getSides(geometry, 32);
   const steps = Math.ceil((end - start) / step);
   const effectiveStep = (end - start) / steps;
 
@@ -1825,12 +1831,12 @@ registerReifier('Arc', ({ tags, plan }) => {
       .fill()
       .ex(top, bottom)
       .orient({
-        center: negate(getAt(plan)),
-        from: getFrom(plan),
-        at: getTo(plan),
+        center: negate(getAt(geometry)),
+        from: getFrom(geometry),
+        at: getTo(geometry),
       })
-      .transform(getMatrix(plan))
-      .setTags(tags)
+      .transform(getMatrix(geometry))
+      .setTags(geometry.tags)
       .toGeometry();
   } else {
     return Spiral((a) => [[1]], {
@@ -1840,9 +1846,9 @@ registerReifier('Arc', ({ tags, plan }) => {
     })
       .scale(...scale)
       .move(...middle)
-      .move(...getAt(plan))
-      .transform(getMatrix(plan))
-      .setTags(tags)
+      .move(...getAt(geometry))
+      .transform(getMatrix(geometry))
+      .setTags(geometry.tags)
       .toGeometry();
   }
 });
@@ -1911,19 +1917,19 @@ Shape.prototype.Point = shapeMethod(Point);
 const Z$2 = 2;
 
 // FIX: This looks wrong.
-registerReifier('Cone', ({ tags, plan }) => {
-  const [x, y, z] = getCorner2(plan);
+registerReifier('Cone', (geometry) => {
+  const [x, y, z] = getCorner2(geometry);
   return Hull(
-    Arc(x, y).sides(getSides(plan, 32)).z(z),
-    Point(0, 0, getCorner1(plan)[Z$2])
+    Arc(x, y).sides(getSides(geometry, 32)).z(z),
+    Point(0, 0, getCorner1(geometry)[Z$2])
   )
     .orient({
-      center: negate(getAt(plan)),
-      from: getFrom(plan),
-      at: getTo(plan),
+      center: negate(getAt(geometry)),
+      from: getFrom(geometry),
+      at: getTo(geometry),
     })
-    .transform(getMatrix(plan))
-    .setTags(tags)
+    .transform(getMatrix(geometry))
+    .setTags(geometry.tags)
     .toGeometry();
 });
 
@@ -2000,18 +2006,19 @@ const buildRegularIcosahedron = () => {
   return fromPointsAndPaths(points, paths);
 };
 
-registerReifier('Icosahedron', ({ tags, plan }) => {
-  const [scale, middle] = getScale(plan);
-  return Shape.fromPolygons(buildRegularIcosahedron())
-    .scale(...scale)
-    .move(...middle)
-    .orient({
-      center: negate(getAt(plan)),
-      from: getFrom(plan),
-      at: getTo(plan),
-    })
-    .setTags(tags)
-    .toGeometry();
+registerReifier('Icosahedron', (geometry) => {
+  const [scale, middle] = getScale(geometry);
+  const a = Shape.fromPolygons(buildRegularIcosahedron());
+  const b = a.scale(...scale);
+  const c = b.move(...middle);
+  const d = c.orient({
+    center: negate(getAt(geometry)),
+    from: getFrom(geometry),
+    at: getTo(geometry),
+  });
+  const e = d.setTags(geometry.tags);
+  const f = e.toGeometry();
+  return f;
 });
 
 const Icosahedron = (x = 1, y = x, z = x) =>
@@ -2143,18 +2150,18 @@ const buildRingSphere = (resolution = 20) => {
   return polygons;
 };
 
-registerReifier('Orb', ({ tags, plan }) => {
-  const [scale, middle] = getScale(plan);
-  return Shape.fromPolygons(buildRingSphere(getSides(plan, 16)))
+registerReifier('Orb', (geometry) => {
+  const [scale, middle] = getScale(geometry);
+  return Shape.fromPolygons(buildRingSphere(getSides(geometry, 16)))
     .scale(...scale)
     .move(...middle)
     .orient({
-      center: negate(getAt(plan)),
-      from: getFrom(plan),
-      at: getTo(plan),
+      center: negate(getAt(geometry)),
+      from: getFrom(geometry),
+      at: getTo(geometry),
     })
-    .transform(getMatrix(plan))
-    .setTags(tags)
+    .transform(getMatrix(geometry))
+    .setTags(geometry.tags)
     .toGeometry();
 });
 

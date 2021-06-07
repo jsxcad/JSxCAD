@@ -6646,6 +6646,7 @@ const toEcmascript = async (
       program,
       sha,
       isAllInputComputed,
+      sourceLocation: declaration.loc,
     };
     topLevel.set(id, entry);
 

@@ -15,9 +15,9 @@ const X = 0;
 const Y = 1;
 const Z = 2;
 
-registerReifier('Box', ({ tags, plan }) => {
-  const corner1 = getCorner1(plan);
-  const corner2 = getCorner2(plan);
+registerReifier('Box', (geometry) => {
+  const corner1 = getCorner1(geometry);
+  const corner2 = getCorner2(geometry);
   const left = corner1[X];
   const right = corner2[X];
   const front = corner1[Y];
@@ -34,12 +34,12 @@ registerReifier('Box', ({ tags, plan }) => {
     .fill()
     .ex(top, bottom)
     .orient({
-      center: negate(getAt(plan)),
-      from: getFrom(plan),
-      at: getTo(plan),
+      center: negate(getAt(geometry)),
+      from: getFrom(geometry),
+      at: getTo(geometry),
     })
-    .transform(getMatrix(plan))
-    .setTags(tags)
+    .transform(getMatrix(geometry))
+    .setTags(geometry.tags)
     .toGeometry();
 });
 

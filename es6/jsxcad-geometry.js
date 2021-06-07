@@ -633,9 +633,12 @@ const getGraphs = (geometry) => {
 };
 
 const measureBoundingBox = (geometry) => {
-  if (geometry.cache === undefined || geometry.cache.boundingBox === undefined) {
+  if (
+    geometry.cache === undefined ||
+    geometry.cache.boundingBox === undefined
+  ) {
     if (geometry.cache === undefined) {
-     geometry.cache = {};
+      geometry.cache = {};
     }
     const { graph } = geometry;
     if (graph.isLazy) {
@@ -737,8 +740,6 @@ const reify = (geometry) => {
             );
           }
           const reified = reifier(geometry);
-          // Inherit the matrix from the plan.
-          reified.matrix = geometry.matrix;
           geometry.content.push(reified);
           return descend();
         }
@@ -766,7 +767,8 @@ const reify = (geometry) => {
 // We expect the type to be uniquely qualified.
 const registerReifier = (type, reifier) => registry.set(type, reifier);
 
-const toConcreteGeometry = (geometry) => toTransformedGeometry(reify(geometry));
+const toConcreteGeometry = (geometry) =>
+  toTransformedGeometry(reify(geometry));
 
 const differenceImpl = (geometry, ...geometries) => {
   geometries = geometries.map(toConcreteGeometry);
@@ -899,7 +901,7 @@ const eachPoint$3 = (emit, geometry) => {
     switch (geometry.type) {
       case 'plan':
         reify(geometry);
-        // fallthrough
+      // fallthrough
       case 'assembly':
       case 'disjointAssembly':
       case 'layers':

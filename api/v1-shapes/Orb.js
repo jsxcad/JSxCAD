@@ -92,18 +92,18 @@ const buildRingSphere = (resolution = 20) => {
   return polygons;
 };
 
-registerReifier('Orb', ({ tags, plan }) => {
-  const [scale, middle] = getScale(plan);
-  return Shape.fromPolygons(buildRingSphere(getSides(plan, 16)))
+registerReifier('Orb', (geometry) => {
+  const [scale, middle] = getScale(geometry);
+  return Shape.fromPolygons(buildRingSphere(getSides(geometry, 16)))
     .scale(...scale)
     .move(...middle)
     .orient({
-      center: negate(getAt(plan)),
-      from: getFrom(plan),
-      at: getTo(plan),
+      center: negate(getAt(geometry)),
+      from: getFrom(geometry),
+      at: getTo(geometry),
     })
-    .transform(getMatrix(plan))
-    .setTags(tags)
+    .transform(getMatrix(geometry))
+    .setTags(geometry.tags)
     .toGeometry();
 });
 

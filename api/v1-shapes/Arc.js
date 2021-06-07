@@ -17,19 +17,19 @@ import { negate } from '@jsxcad/math-vec3';
 
 const Z = 2;
 
-registerReifier('Arc', ({ tags, plan }) => {
-  let { start = 0, end = 360 } = getAngle(plan);
+registerReifier('Arc', (geometry) => {
+  let { start = 0, end = 360 } = getAngle(geometry);
 
   while (start > end) {
     start -= 360;
   }
 
-  const [scale, middle] = getScale(plan);
-  const corner1 = getCorner1(plan);
-  const corner2 = getCorner2(plan);
+  const [scale, middle] = getScale(geometry);
+  const corner1 = getCorner1(geometry);
+  const corner2 = getCorner2(geometry);
   const top = corner2[Z];
   const bottom = corner1[Z];
-  const step = 360 / getSides(plan, 32);
+  const step = 360 / getSides(geometry, 32);
   const steps = Math.ceil((end - start) / step);
   const effectiveStep = (end - start) / steps;
 
@@ -46,12 +46,12 @@ registerReifier('Arc', ({ tags, plan }) => {
       .fill()
       .ex(top, bottom)
       .orient({
-        center: negate(getAt(plan)),
-        from: getFrom(plan),
-        at: getTo(plan),
+        center: negate(getAt(geometry)),
+        from: getFrom(geometry),
+        at: getTo(geometry),
       })
-      .transform(getMatrix(plan))
-      .setTags(tags)
+      .transform(getMatrix(geometry))
+      .setTags(geometry.tags)
       .toGeometry();
   } else {
     return Spiral((a) => [[1]], {
@@ -61,9 +61,9 @@ registerReifier('Arc', ({ tags, plan }) => {
     })
       .scale(...scale)
       .move(...middle)
-      .move(...getAt(plan))
-      .transform(getMatrix(plan))
-      .setTags(tags)
+      .move(...getAt(geometry))
+      .transform(getMatrix(geometry))
+      .setTags(geometry.tags)
       .toGeometry();
   }
 });
