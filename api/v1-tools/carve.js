@@ -1,4 +1,4 @@
-import { outline, taggedGroup, translate } from '@jsxcad/geometry-tagged';
+import { outline, taggedGroup, translate } from '@jsxcad/geometry';
 
 import { Peg } from '@jsxcad/api-v1-shapes';
 import { Shape } from '@jsxcad/api-v1-shape';

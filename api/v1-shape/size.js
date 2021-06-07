@@ -1,14 +1,14 @@
 import { add, distance, scale } from '@jsxcad/math-vec3';
 
 import Shape from './Shape.js';
-import { measureBoundingBox } from '@jsxcad/geometry-tagged';
+import { measureBoundingBox } from '@jsxcad/geometry';
 
 const X = 0;
 const Y = 1;
 const Z = 2;
 
 export const size = (shape, op = (size, shape) => size) => {
-  const geometry = shape.toDisjointGeometry();
+  const geometry = shape.toConcreteGeometry();
   const [min, max] = measureBoundingBox(geometry);
   const length = max[X] - min[X];
   const width = max[Y] - min[Y];

@@ -1,4 +1,8 @@
-import { assertGood, canonicalize, isClosed } from '@jsxcad/geometry-path';
+import {
+  canonicalizePath,
+  isClosedPath,
+  transformPaths,
+} from '@jsxcad/geometry';
 
 import absolutifySvgPath from 'abs-svg-path';
 import { buildAdaptiveCubicBezierCurve } from './buildAdaptiveCubicBezierCurve.js';
@@ -7,10 +11,9 @@ import { equals } from '@jsxcad/math-vec2';
 import { fromScaling } from '@jsxcad/math-mat4';
 import parseSvgPath from 'parse-svg-path';
 import simplifyPath from 'simplify-path';
-import { transform } from '@jsxcad/geometry-paths';
 
 const simplify = (path, tolerance) => {
-  if (isClosed(path)) {
+  if (isClosedPath(path)) {
     return simplifyPath(path, tolerance);
   } else {
     return [null, ...simplifyPath(path.slice(1), tolerance)];
@@ -49,7 +52,7 @@ const toPaths = (
   };
 
   const maybeClosePath = () => {
-    path = removeRepeatedPoints(canonicalize(path));
+    path = removeRepeatedPoints(canonicalizePath(path));
     if (path.length > 3) {
       if (path[0] === null && equals(path[1], path[path.length - 1])) {
         // The path is closed, remove the leading null, and the duplicate point at the end.
@@ -96,7 +99,7 @@ const toPaths = (
 
   if (normalizeCoordinateSystem) {
     // Turn it upside down.
-    return transform(fromScaling([1, -1, 0]), simplifiedPaths);
+    return transformPaths(fromScaling([1, -1, 0]), simplifiedPaths);
   } else {
     return simplifiedPaths;
   }
@@ -109,9 +112,6 @@ export const fromSvgPath = (svgPath, options = {}) => {
       absolutifySvgPath(parseSvgPath(new TextDecoder('utf8').decode(svgPath)))
     )
   );
-  for (const path of paths) {
-    assertGood(path);
-  }
   const geometry = { type: 'paths', paths };
   return geometry;
 };

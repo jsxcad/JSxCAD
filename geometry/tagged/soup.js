@@ -1,11 +1,11 @@
-import { toPaths, toTriangles } from '@jsxcad/geometry-graph';
-
 import { outline as outlineOp } from './outline.js';
 import { rewrite } from './visit.js';
 import { taggedGroup } from './taggedGroup.js';
 import { taggedPaths } from './taggedPaths.js';
 import { taggedTriangles } from './taggedTriangles.js';
+import { toPaths } from '../graph/toPaths.js';
 import { toTransformedGeometry } from './toTransformedGeometry.js';
+import { toTriangles } from '../graph/toTriangles.js';
 
 export const soup = (
   geometry,
@@ -28,8 +28,8 @@ export const soup = (
         } else if (graph.isClosed) {
           return taggedGroup(
             {},
-            ...triangles(tags, toTriangles(graph)),
-            ...wireframe(toTriangles(graph)),
+            ...triangles(tags, toTriangles(geometry)),
+            ...wireframe(toTriangles(geometry)),
             ...outline(geometry, ['color/black'])
           );
         } else if (graph.isEmpty) {
@@ -38,8 +38,8 @@ export const soup = (
           // FIX: Simplify this arrangement.
           return taggedGroup(
             {},
-            ...triangles(tags, toTriangles(graph)),
-            ...wireframe(toTriangles(graph)),
+            ...triangles(tags, toTriangles(geometry)),
+            ...wireframe(toTriangles(geometry)),
             ...outline(geometry, ['color/black'])
           );
         }

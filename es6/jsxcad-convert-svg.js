@@ -1,9 +1,7 @@
 import { reallyQuantizeForSpace } from './jsxcad-math-utils.js';
-import { taggedGroup, transform as transform$1, fill, scale, measureBoundingBox, toPolygonsWithHoles, getNonVoidPaths } from './jsxcad-geometry-tagged.js';
+import { transformPaths, isClosedPath, canonicalizePath, taggedGroup, transform, fill, scale, measureBoundingBox, toPolygonsWithHoles, getNonVoidPaths } from './jsxcad-geometry.js';
 import { fromScaling, identity, multiply, fromTranslation, fromZRotation } from './jsxcad-math-mat4.js';
-import { assertGood, isClosed, canonicalize as canonicalize$1 } from './jsxcad-geometry-path.js';
 import { equals } from './jsxcad-math-vec2.js';
-import { transform } from './jsxcad-geometry-paths.js';
 import { toTagsFromName, toRgbColorFromTags } from './jsxcad-algorithm-color.js';
 
 const canonicalizeSegment = ([directive, ...args]) => [
@@ -3813,7 +3811,7 @@ simplifyPath.radialDistance = radialDistance$1;
 simplifyPath.douglasPeucker = douglasPeucker$1;
 
 const simplify = (path, tolerance) => {
-  if (isClosed(path)) {
+  if (isClosedPath(path)) {
     return simplifyPath(path, tolerance);
   } else {
     return [null, ...simplifyPath(path.slice(1), tolerance)];
@@ -3852,7 +3850,7 @@ const toPaths = (
   };
 
   const maybeClosePath = () => {
-    path = removeRepeatedPoints(canonicalize$1(path));
+    path = removeRepeatedPoints(canonicalizePath(path));
     if (path.length > 3) {
       if (path[0] === null && equals(path[1], path[path.length - 1])) {
         // The path is closed, remove the leading null, and the duplicate point at the end.
@@ -3899,7 +3897,7 @@ const toPaths = (
 
   if (normalizeCoordinateSystem) {
     // Turn it upside down.
-    return transform(fromScaling([1, -1, 0]), simplifiedPaths);
+    return transformPaths(fromScaling([1, -1, 0]), simplifiedPaths);
   } else {
     return simplifiedPaths;
   }
@@ -3912,9 +3910,6 @@ const fromSvgPath = (svgPath, options = {}) => {
       absSvgPath(parseSvgPath(new TextDecoder('utf8').decode(svgPath)))
     )
   );
-  for (const path of paths) {
-    assertGood(path);
-  }
   const geometry = { type: 'paths', paths };
   return geometry;
 };
@@ -4154,7 +4149,7 @@ const fromSvg = async (
             // Does fill, etc, inherit?
             const tags = toTagsFromName(fill$1, definitions);
             geometry.content.push(
-              transform$1(
+              transform(
                 scale(matrix),
                 fill({
                   type: 'paths',
@@ -4182,7 +4177,7 @@ const fromSvg = async (
             }
             const tags = toTagsFromName(stroke, definitions);
             geometry.content.push(
-              transform$1(scaledMatrix, {
+              transform(scaledMatrix, {
                 type: 'paths',
                 paths: paths,
                 tags,
@@ -4304,7 +4299,7 @@ const toSvg = async (
   for (const { tags, paths } of getNonVoidPaths(geometry)) {
     const color = toRgbColorFromTags(tags, definitions);
     for (const path of paths) {
-      if (isClosed(path)) {
+      if (isClosedPath(path)) {
         const d = path.map(
           (point, index) => `${index === 0 ? 'M' : 'L'}${point[0]} ${point[1]}`
         );

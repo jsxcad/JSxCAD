@@ -6,7 +6,7 @@ import {
   taggedLayers,
   taggedLayout,
   visit,
-} from '@jsxcad/geometry-tagged';
+} from '@jsxcad/geometry';
 
 import Box from './Box.js';
 import Empty from './Empty.js';
@@ -50,7 +50,6 @@ const buildLayoutGeometry = ({
   const labelScale = 0.0125 * 10;
   const size = [pageWidth, pageLength];
   const r = (v) => Math.floor(v * 100) / 100;
-  // const title = `${r(pageWidth)} x ${r(pageLength)} : ${itemNames.join(', ')}`;
   const fontHeight = Math.max(pageWidth, pageLength) * labelScale;
   const font = Hershey(fontHeight);
   const title = [];
@@ -134,9 +133,13 @@ export const Page = (
         Math.abs(packSize[MIN][Y] * 2)
       ) +
       pageMargin * 2;
-    return Shape.fromGeometry(
-      buildLayoutGeometry({ layer, packSize, pageWidth, pageLength, margin })
-    );
+    if (isFinite(pageWidth) && isFinite(pageLength)) {
+      return Shape.fromGeometry(
+        buildLayoutGeometry({ layer, packSize, pageWidth, pageLength, margin })
+      );
+    } else {
+      return Empty();
+    }
   } else if (pack && size) {
     // Content fits to page size.
     const packSize = [];
@@ -152,13 +155,23 @@ export const Page = (
     }
     const pageWidth = Math.max(1, packSize[MAX][X] - packSize[MIN][X]);
     const pageLength = Math.max(1, packSize[MAX][Y] - packSize[MIN][Y]);
-    const plans = [];
-    for (const layer of content.toDisjointGeometry().content[0].content) {
-      plans.push(
-        buildLayoutGeometry({ layer, packSize, pageWidth, pageLength, margin })
-      );
+    if (isFinite(pageWidth) && isFinite(pageLength)) {
+      const plans = [];
+      for (const layer of content.toDisjointGeometry().content[0].content) {
+        plans.push(
+          buildLayoutGeometry({
+            layer,
+            packSize,
+            pageWidth,
+            pageLength,
+            margin,
+          })
+        );
+      }
+      return Shape.fromGeometry(taggedLayers({}, ...plans));
+    } else {
+      return Empty();
     }
-    return Shape.fromGeometry(taggedLayers({}, ...plans));
   } else if (pack && !size) {
     const packSize = [];
     // Page fits to content size.

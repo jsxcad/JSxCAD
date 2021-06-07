@@ -1,6 +1,6 @@
 import Shape from './Shape.js';
 import assemble from './assemble.js';
-import { taggedSketch } from '@jsxcad/geometry-tagged';
+import { taggedSketch } from '@jsxcad/geometry';
 
 export const sketch = (shape) =>
   Shape.fromGeometry(taggedSketch({}, shape.toGeometry()));

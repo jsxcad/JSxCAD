@@ -1,6 +1,6 @@
 import { equals } from '@jsxcad/math-vec3';
 import { getCgal } from './getCgal.js';
-import { getEdges } from '@jsxcad/geometry-path';
+import { getPathEdges } from '@jsxcad/geometry';
 
 const X = 0;
 const Y = 1;
@@ -21,7 +21,7 @@ export const arrangePaths = (
     if (nth < inputPolygons.length) {
       const { exactPoints, points } = inputPolygons[nth++];
       if (exactPoints) {
-        for (const [start, end] of getEdges(exactPoints)) {
+        for (const [start, end] of getPathEdges(exactPoints)) {
           if (equals(start, end)) {
             continue;
           }
@@ -29,7 +29,7 @@ export const arrangePaths = (
           c.addExactPoint(out, end[X], end[Y], end[Z]);
         }
       } else if (points) {
-        for (const [start, end] of getEdges(points)) {
+        for (const [start, end] of getPathEdges(points)) {
           if (equals(start, end)) {
             continue;
           }

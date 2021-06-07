@@ -1,10 +1,8 @@
-import { composeTransforms } from '@jsxcad/algorithm-cgal';
-import { identityMatrix } from '@jsxcad/math-mat4';
 import { rewrite } from './visit.js';
-import { transform as transformGraph } from '@jsxcad/geometry-graph';
-import { transform as transformPaths } from '@jsxcad/geometry-paths';
-import { transform as transformPoints } from '@jsxcad/geometry-points';
-import { transform as transformPolygons } from '@jsxcad/geometry-polygons';
+import { transform as transformGraph } from '../graph/transform.js';
+import { transform as transformPaths } from '../paths/transform.js';
+import { transform as transformPoints } from '../points/ops.js';
+import { transform as transformPolygons } from '../polygons/transform.js';
 
 const transformedGeometry = Symbol('transformedGeometry');
 
@@ -15,57 +13,44 @@ export const clearTransformedGeometry = (geometry) => {
 
 export const toTransformedGeometry = (geometry) => {
   if (geometry[transformedGeometry] === undefined) {
-    const op = (geometry, descend, walk, matrix) => {
+    const op = (geometry, descend, walk) => {
+      if (geometry.matrix === undefined) {
+        return descend();
+      }
       switch (geometry.type) {
-        case 'transform':
-          // Preserve any tags applied to the untransformed geometry.
-          // FIX: Ensure tags are merged between transformed and untransformed upon resolution.
-          return walk(
-            geometry.content[0],
-            composeTransforms(matrix, geometry.matrix)
-          );
+        // Branch
         case 'assembly':
         case 'layout':
         case 'layers':
         case 'item':
         case 'sketch':
-          return descend(undefined, matrix);
         case 'disjointAssembly':
-          if (matrix === identityMatrix) {
-            // A disjointAssembly does not contain any untransformed geometry.
-            // There is no transform, so we can stop here.
-            return geometry;
-          } else {
-            return descend(undefined, matrix);
-          }
-        case 'plan': {
-          const composedMatrix = composeTransforms(
-            matrix,
-            geometry.plan.matrix || identityMatrix
-          );
-          const planUpdate = descend(
-            {
-              tags: geometry.tags,
-              type: geometry.type,
-              plan: {
-                ...geometry.plan,
-                matrix: composedMatrix,
-              },
-            },
-            composedMatrix
-          );
-          return planUpdate;
-        }
+        case 'plan':
+          return descend();
+        // Leaf
         case 'triangles':
           return descend({
-            triangles: transformPolygons(matrix, geometry.triangles),
+            triangles: transformPolygons(geometry.matrix, geometry.triangles),
+            matrix: undefined,
           });
         case 'paths':
-          return descend({ paths: transformPaths(matrix, geometry.paths) });
+          return descend({
+            paths: transformPaths(geometry.matrix, geometry.paths),
+            matrix: undefined,
+          });
         case 'points':
-          return descend({ points: transformPoints(matrix, geometry.points) });
+          return descend({
+            points: transformPoints(geometry.matrix, geometry.points),
+            matrix: undefined,
+          });
         case 'graph':
-          return descend({ graph: transformGraph(matrix, geometry.graph) });
+          if (!geometry.graph) {
+            console.log(`invalid`);
+          }
+          return descend({
+            graph: transformGraph(geometry.matrix, geometry.graph),
+            matrix: undefined,
+          });
         default:
           throw Error(
             `Unexpected geometry ${geometry.type} see ${JSON.stringify(
@@ -74,7 +59,7 @@ export const toTransformedGeometry = (geometry) => {
           );
       }
     };
-    geometry[transformedGeometry] = rewrite(geometry, op, identityMatrix);
+    geometry[transformedGeometry] = rewrite(geometry, op);
   }
   return geometry[transformedGeometry];
 };

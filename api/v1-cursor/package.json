@@ -24,7 +24,7 @@
   "license": "MIT",
   "dependencies": {
     "@jsxcad/api-v1-shape": "^0.0.79",
-    "@jsxcad/geometry-path": "^0.0.79",
+    "@jsxcad/geometry": "^0.0.79",
     "@jsxcad/math-mat4": "^0.0.79",
     "@jsxcad/math-vec3": "^0.0.79"
   },

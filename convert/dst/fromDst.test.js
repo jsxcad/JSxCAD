@@ -1,6 +1,6 @@
 import { createByteFetcher, fetchHeader, fromDst } from './fromDst.js';
 
-import { canonicalize } from '@jsxcad/geometry-tagged';
+import { canonicalize } from '@jsxcad/geometry';
 import { readFileSync } from 'fs';
 import test from 'ava';
 

@@ -1,7 +1,7 @@
 import { boot } from '@jsxcad/sys';
 import { fromStl } from './fromStl.js';
 import { readFileSync } from 'fs';
-import { realize } from '@jsxcad/geometry-tagged';
+import { realize } from '@jsxcad/geometry';
 import test from 'ava';
 
 test('Read example', async (t) => {

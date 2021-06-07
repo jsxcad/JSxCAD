@@ -1,11 +1,11 @@
-import { prepareForSerialization as prepareForSerializationOfGraph } from '@jsxcad/geometry-graph';
+import { prepareForSerialization as prepareForSerializationOfGraph } from '../graph/prepareForSerialization.js';
 import { visit } from './visit.js';
 
 export const prepareForSerialization = (geometry) => {
   const op = (geometry, descend) => {
     switch (geometry.type) {
       case 'graph':
-        prepareForSerializationOfGraph(geometry.graph);
+        prepareForSerializationOfGraph(geometry);
         return;
       case 'displayGeometry':
       case 'triangles':

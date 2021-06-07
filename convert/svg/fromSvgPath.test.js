@@ -1,5 +1,5 @@
 import { boot } from '@jsxcad/sys';
-import { canonicalize } from '@jsxcad/geometry-tagged';
+import { canonicalize } from '@jsxcad/geometry';
 import { fromSvgPath } from './fromSvgPath.js';
 import test from 'ava';
 import { toPdf } from '@jsxcad/convert-pdf';

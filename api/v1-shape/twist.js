@@ -1,5 +1,5 @@
 import Shape from './Shape.js';
-import { twist as twistGeometry } from '@jsxcad/geometry-tagged';
+import { twist as twistGeometry } from '@jsxcad/geometry';
 
 export const twist = (shape, degreesPerZ) =>
   Shape.fromGeometry(twistGeometry(shape.toGeometry(), degreesPerZ));

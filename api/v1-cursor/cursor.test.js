@@ -1,5 +1,5 @@
 import Cursor from './Cursor.js';
-import { canonicalize } from '@jsxcad/geometry-path';
+import { canonicalizePath } from '@jsxcad/geometry';
 import test from 'ava';
 
 test('Simple', (t) => {
@@ -9,5 +9,5 @@ test('Simple', (t) => {
     .translate(1)
     .rotateZ(90)
     .toPath();
-  t.deepEqual(canonicalize(path), [null, [0, 0, 0], [1, 0, 0], [1, 1, 0]]);
+  t.deepEqual(canonicalizePath(path), [null, [0, 0, 0], [1, 0, 0], [1, 1, 0]]);
 });

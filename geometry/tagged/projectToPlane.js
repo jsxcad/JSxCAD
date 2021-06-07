@@ -1,8 +1,5 @@
-import {
-  fromPaths as fromPathsToGraph,
-  projectToPlane as projectToPlaneOfGraph,
-} from '@jsxcad/geometry-graph';
-
+import { fromPaths as fromPathsToGraph } from '../graph/fromPaths.js';
+import { projectToPlane as projectToPlaneOfGraph } from '../graph/projectToPlane.js';
 import { rewrite } from './visit.js';
 import { taggedGraph } from './taggedGraph.js';
 import { toTransformedGeometry } from './toTransformedGeometry.js';

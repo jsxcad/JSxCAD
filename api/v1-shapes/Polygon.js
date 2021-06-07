@@ -1,13 +1,13 @@
 import { Shape, shapeMethod } from '@jsxcad/api-v1-shape';
 
-import { fromPaths } from '@jsxcad/geometry-graph';
+import { fromPathsToGraph } from '@jsxcad/geometry';
 
 export const Polygon = (...points) => {
   const path = [];
   for (const point of points) {
     point.eachPoint((p) => path.push(p));
   }
-  return Shape.fromGraph(fromPaths([{ points: path }]));
+  return Shape.fromGraph(fromPathsToGraph([{ points: path }]));
 };
 
 export default Polygon;

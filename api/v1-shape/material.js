@@ -1,6 +1,6 @@
 import Shape from './Shape.js';
 
-import { rewriteTags } from '@jsxcad/geometry-tagged';
+import { rewriteTags } from '@jsxcad/geometry';
 import { toTagsFromName } from '@jsxcad/algorithm-material';
 
 /**

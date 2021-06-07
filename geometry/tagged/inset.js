@@ -1,8 +1,5 @@
-import {
-  fromPaths as fromPathsToGraph,
-  inset as insetGraph,
-} from '@jsxcad/geometry-graph';
-
+import { fromPaths as fromPathsToGraph } from '../graph/fromPaths.js';
+import { inset as insetGraph } from '../graph/inset.js';
 import { reify } from './reify.js';
 import { rewrite } from './visit.js';
 import { taggedGraph } from './taggedGraph.js';

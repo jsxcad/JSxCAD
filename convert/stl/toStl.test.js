@@ -1,7 +1,7 @@
+import { fromPolygonsToGraph, taggedGraph } from '@jsxcad/geometry';
+
 import { boot } from '@jsxcad/sys';
-import { fromPolygons } from '@jsxcad/geometry-graph';
 import { readFileSync } from 'fs';
-import { taggedGraph } from '@jsxcad/geometry-tagged';
 import test from 'ava';
 import { toStl } from './toStl.js';
 
@@ -61,7 +61,7 @@ const box1Solid = [
 ];
 
 test('Correctly render a box', async (t) => {
-  const stl = await toStl(taggedGraph({}, fromPolygons(box1Solid)));
+  const stl = await toStl(taggedGraph({}, fromPolygonsToGraph(box1Solid)));
   t.is(
     new TextDecoder('utf8').decode(stl),
     readFileSync('toStl.test.box.stl', { encoding: 'utf8' })

@@ -1,6 +1,6 @@
 import { Shape } from './Shape.js';
 
-import { allTags } from '@jsxcad/geometry-tagged';
+import { allTags } from '@jsxcad/geometry';
 
 export const tags = (shape, op = (tags, shape) => tags) =>
   op(

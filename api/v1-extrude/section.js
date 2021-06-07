@@ -1,6 +1,6 @@
 import { Shape, getPegCoords } from '@jsxcad/api-v1-shape';
 
-import { section as sectionGeometry } from '@jsxcad/geometry-tagged';
+import { section as sectionGeometry } from '@jsxcad/geometry';
 
 export const section = (shape, { profile = false }, ...pegs) => {
   const planes = [];

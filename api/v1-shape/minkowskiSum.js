@@ -1,5 +1,5 @@
 import Shape from './Shape.js';
-import { minkowskiSum as minkowskiSumOfGeometry } from '@jsxcad/geometry-tagged';
+import { minkowskiSum as minkowskiSumOfGeometry } from '@jsxcad/geometry';
 
 export const minkowskiSum = (shape, offset) =>
   Shape.fromGeometry(

@@ -1,4 +1,4 @@
-import { toDisjointGeometry } from '@jsxcad/geometry-tagged';
+import { toDisjointGeometry } from '@jsxcad/geometry';
 
 export const toThreejsPage = async (
   geometry,

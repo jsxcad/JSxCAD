@@ -1,5 +1,5 @@
 import { Shape } from '@jsxcad/api-v1-shape';
-import { fill as fillGeometry } from '@jsxcad/geometry-tagged';
+import { fill as fillGeometry } from '@jsxcad/geometry';
 
 export const fill = (shape) =>
   Shape.fromGeometry(fillGeometry(shape.toGeometry()));

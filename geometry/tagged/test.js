@@ -1,5 +1,5 @@
 import { reify } from './reify.js';
-import { test as testGraph } from '@jsxcad/geometry-graph';
+import { test as testGraph } from '../graph/test.js';
 import { visit } from './visit.js';
 
 export const test = (geometry) => {

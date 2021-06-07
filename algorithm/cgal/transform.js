@@ -1,4 +1,5 @@
 import { getCgal } from './getCgal.js';
+import { identityMatrix } from '@jsxcad/math-mat4';
 
 const M00 = 0;
 const M01 = 1;
@@ -46,49 +47,56 @@ export const toJsTransformFromCgalTransform = (cgalTransform) => {
   return jsTransform;
 };
 
-export const toCgalTransformFromJsTransform = (jsTransform) => {
-  let cgalTransform = jsTransform[transformSymbol];
-  if (cgalTransform === undefined) {
-    if (jsTransform.length > 16) {
-      cgalTransform = fromExactToCgalTransform(...jsTransform.slice(16));
-    } else {
-      const [
-        m00,
-        m10,
-        m20,
-        ,
-        m01,
-        m11,
-        m21,
-        ,
-        m02,
-        m12,
-        m22,
-        ,
-        m03,
-        m13,
-        m23,
-        hw,
-      ] = jsTransform;
-      cgalTransform = fromApproximateToCgalTransform(
-        m00,
-        m01,
-        m02,
-        m03,
-        m10,
-        m11,
-        m12,
-        m13,
-        m20,
-        m21,
-        m22,
-        m23,
-        hw
-      );
+export const toCgalTransformFromJsTransform = (
+  jsTransform = identityMatrix
+) => {
+  try {
+    let cgalTransform = jsTransform[transformSymbol];
+    if (cgalTransform === undefined) {
+      if (jsTransform.length > 16) {
+        cgalTransform = fromExactToCgalTransform(...jsTransform.slice(16));
+      } else {
+        const [
+          m00,
+          m10,
+          m20,
+          ,
+          m01,
+          m11,
+          m21,
+          ,
+          m02,
+          m12,
+          m22,
+          ,
+          m03,
+          m13,
+          m23,
+          hw,
+        ] = jsTransform;
+        cgalTransform = fromApproximateToCgalTransform(
+          m00,
+          m01,
+          m02,
+          m03,
+          m10,
+          m11,
+          m12,
+          m13,
+          m20,
+          m21,
+          m22,
+          m23,
+          hw
+        );
+      }
+      jsTransform[transformSymbol] = cgalTransform;
     }
-    jsTransform[transformSymbol] = cgalTransform;
+    return cgalTransform;
+  } catch (e) {
+    console.log('oops');
+    throw e;
   }
-  return cgalTransform;
 };
 
 export const composeTransforms = (a, b) => {

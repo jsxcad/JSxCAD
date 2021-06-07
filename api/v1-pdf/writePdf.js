@@ -8,7 +8,7 @@ import {
 
 import Shape from '@jsxcad/api-v1-shape';
 import { ensurePages } from '@jsxcad/api-v1-shapes';
-import { hash as hashGeometry } from '@jsxcad/geometry-tagged';
+import { hash as hashGeometry } from '@jsxcad/geometry';
 import hashSum from 'hash-sum';
 import { toPdf } from '@jsxcad/convert-pdf';
 

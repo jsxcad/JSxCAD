@@ -7,6 +7,10 @@ export const update = (geometry, updates, changes) => {
   }
   const updated = {};
   for (const key of Object.keys(geometry)) {
+    if (key === 'cache') {
+      // Caches contains derivations from the original object.
+      continue;
+    }
     if (key === 'hash') {
       // Hash is a bit like a symbol, but we want it to persist.
       continue;

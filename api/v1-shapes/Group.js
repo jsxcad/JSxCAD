@@ -1,12 +1,12 @@
 import { Shape, shapeMethod } from '@jsxcad/api-v1-shape';
 
-import { taggedLayers } from '@jsxcad/geometry-tagged';
+import { taggedGroup } from '@jsxcad/geometry';
 
 const isDefined = (value) => value;
 
 export const Group = (...shapes) =>
   Shape.fromGeometry(
-    taggedLayers(
+    taggedGroup(
       {},
       ...shapes.filter(isDefined).map((shape) => shape.toGeometry())
     )

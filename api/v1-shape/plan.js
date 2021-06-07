@@ -1,5 +1,5 @@
 import Shape from './Shape.js';
-import { taggedPlan } from '@jsxcad/geometry-tagged';
+import { taggedPlan } from '@jsxcad/geometry';
 
 const updatePlan = (shape, ...updates) => {
   const geometry = shape.toTransformedGeometry();

@@ -1,11 +1,15 @@
-import { eachPoint as eachPointOfGraph } from '@jsxcad/geometry-graph';
-import { eachPoint as eachPointOfPaths } from '@jsxcad/geometry-paths';
-import { eachPoint as eachPointOfPoints } from '@jsxcad/geometry-points';
+import { eachPoint as eachPointOfGraph } from '../graph/eachPoint.js';
+import { eachPoint as eachPointOfPaths } from '../paths/eachPoint.js';
+import { eachPoint as eachPointOfPoints } from '../points/eachPoint.js';
+import { reify } from './reify.js';
 import { visit } from './visit.js';
 
 export const eachPoint = (emit, geometry) => {
   const op = (geometry, descend) => {
     switch (geometry.type) {
+      case 'plan':
+        reify(geometry);
+      // fallthrough
       case 'assembly':
       case 'disjointAssembly':
       case 'layers':
@@ -17,7 +21,7 @@ export const eachPoint = (emit, geometry) => {
       case 'paths':
         return eachPointOfPaths(emit, geometry.paths);
       case 'graph':
-        return eachPointOfGraph(geometry.graph, emit);
+        return eachPointOfGraph(geometry, emit);
       default:
         throw Error(
           `Unexpected geometry ${geometry.type} ${JSON.stringify(geometry)}`

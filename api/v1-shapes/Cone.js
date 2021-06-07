@@ -8,7 +8,7 @@ import {
   getSides,
   getTo,
 } from './Plan.js';
-import { registerReifier, taggedPlan } from '@jsxcad/geometry-tagged';
+import { registerReifier, taggedPlan } from '@jsxcad/geometry';
 
 import Arc from './Arc.js';
 import Hull from './Hull.js';
@@ -18,19 +18,19 @@ import { negate } from '@jsxcad/math-vec3';
 const Z = 2;
 
 // FIX: This looks wrong.
-registerReifier('Cone', ({ tags, plan }) => {
-  const [x, y, z] = getCorner2(plan);
+registerReifier('Cone', (geometry) => {
+  const [x, y, z] = getCorner2(geometry);
   return Hull(
-    Arc(x, y).sides(getSides(plan, 32)).z(z),
-    Point(0, 0, getCorner1(plan)[Z])
+    Arc(x, y).sides(getSides(geometry, 32)).z(z),
+    Point(0, 0, getCorner1(geometry)[Z])
   )
     .orient({
-      center: negate(getAt(plan)),
-      from: getFrom(plan),
-      at: getTo(plan),
+      center: negate(getAt(geometry)),
+      from: getFrom(geometry),
+      at: getTo(geometry),
     })
-    .transform(getMatrix(plan))
-    .setTags(tags)
+    .transform(getMatrix(geometry))
+    .setTags(geometry.tags)
     .toGeometry();
 });
 

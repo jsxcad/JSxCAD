@@ -1,6 +1,6 @@
 import Shape from './Shape.js';
 
-import { test as testGeometry } from '@jsxcad/geometry-tagged';
+import { test as testGeometry } from '@jsxcad/geometry';
 
 export const test = (shape, md) => {
   if (md) {

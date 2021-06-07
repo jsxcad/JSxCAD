@@ -3,7 +3,7 @@ import {
   measureBoundingBox,
   toKeptGeometry,
   translate,
-} from '@jsxcad/geometry-tagged';
+} from '@jsxcad/geometry';
 
 import BinPackingEs from 'bin-packing-es/build/bin-packing.js';
 

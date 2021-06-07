@@ -1,4 +1,4 @@
-import { rewrite, update } from '@jsxcad/geometry-tagged';
+import { rewrite, update } from '@jsxcad/geometry';
 
 import Shape from '@jsxcad/api-v1-shape';
 

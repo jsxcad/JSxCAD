@@ -1,5 +1,5 @@
 import { Shape } from './Shape.js';
-import { allTags } from '@jsxcad/geometry-tagged';
+import { allTags } from '@jsxcad/geometry';
 
 export const colors = (shape, op = (colors, shape) => colors) =>
   op(

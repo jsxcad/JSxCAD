@@ -1,4 +1,4 @@
-import { realizeGraph } from '@jsxcad/geometry-graph';
+import { realizeGraph } from '../graph/realizeGraph.js';
 import { rewrite } from './visit.js';
 import { taggedGraph } from './taggedGraph.js';
 

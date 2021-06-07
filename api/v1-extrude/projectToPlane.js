@@ -1,5 +1,5 @@
 import Shape from '@jsxcad/api-v1-shape';
-import { projectToPlane as projectToPlaneOfGeometry } from '@jsxcad/geometry-tagged';
+import { projectToPlane as projectToPlaneOfGeometry } from '@jsxcad/geometry';
 
 export const projectToPlane = (
   shape,

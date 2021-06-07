@@ -24,9 +24,9 @@ export { isNotVoid, isVoid } from './isNotVoid.js';
 export { rewrite, visit } from './visit.js';
 
 export { allTags } from './allTags.js';
-export { assemble } from './assemble.js';
 export { canonicalize } from './canonicalize.js';
 export { difference } from './difference.js';
+export { disjoint } from './disjoint.js';
 export { doesNotOverlap } from './doesNotOverlap.js';
 export { drop } from './drop.js';
 export { eachItem } from './eachItem.js';

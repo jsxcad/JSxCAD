@@ -1,5 +1,5 @@
 import { toDisjointGeometry } from './toDisjointGeometry.js';
-import { toPolygonsWithHoles as toPolygonsWithHolesFromGraph } from '@jsxcad/geometry-graph';
+import { toPolygonsWithHoles as toPolygonsWithHolesFromGraph } from '../graph/toPolygonsWithHoles.js';
 import { visit } from './visit.js';
 
 export const toPolygonsWithHoles = (geometry) => {

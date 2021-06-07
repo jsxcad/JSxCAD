@@ -1,7 +1,6 @@
-import { outline, toDisjointGeometry } from '@jsxcad/geometry-tagged';
+import { getPathEdges, outline, toDisjointGeometry } from '@jsxcad/geometry';
 
 import KdBush from 'kdbush';
-import { getEdges } from '@jsxcad/geometry-path';
 
 const X = 0;
 const Y = 1;
@@ -184,7 +183,7 @@ export const toGcode = async (
     const points = [];
     for (const { paths } of outline(toDisjointGeometry(geometry))) {
       for (const path of paths) {
-        for (const edge of getEdges(path)) {
+        for (const edge of getPathEdges(path)) {
           // Deduplicate edges.
           {
             const forward = JSON.stringify(edge);

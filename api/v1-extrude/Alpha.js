@@ -1,6 +1,5 @@
+import { alphaShape, taggedGraph } from '@jsxcad/geometry';
 import { Shape } from '@jsxcad/api-v1-shape';
-import { alphaShape } from '@jsxcad/geometry-graph';
-import { taggedGraph } from '@jsxcad/geometry-tagged';
 
 export const Alpha = (shape, componentLimit = 1) => {
   const points = [];

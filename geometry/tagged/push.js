@@ -1,4 +1,4 @@
-import { push as pushGraph } from '@jsxcad/geometry-graph';
+import { push as pushGraph } from '../graph/push.js';
 import { reify } from './reify.js';
 import { rewrite } from './visit.js';
 import { taggedGraph } from './taggedGraph.js';

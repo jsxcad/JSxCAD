@@ -20,7 +20,7 @@
     "data/*",
     "doc",
     "example/*",
-    "geometry/*",
+    "geometry",
     "math/*",
     "sys",
     "typecheck",

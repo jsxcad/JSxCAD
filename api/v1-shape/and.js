@@ -1,5 +1,5 @@
 import Shape from './Shape.js';
-import { taggedLayers } from '@jsxcad/geometry-tagged';
+import { taggedLayers } from '@jsxcad/geometry';
 
 export const and = (...shapes) =>
   Shape.fromGeometry(

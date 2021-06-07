@@ -1,5 +1,5 @@
 import Shape from './Shape.js';
-import { remesh as remeshGeometry } from '@jsxcad/geometry-tagged';
+import { remesh as remeshGeometry } from '@jsxcad/geometry';
 
 export const remesh = (shape, options = {}) =>
   Shape.fromGeometry(remeshGeometry(shape.toGeometry(), options));

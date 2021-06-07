@@ -1,7 +1,10 @@
-import { getNonVoidGraphs, toDisjointGeometry } from '@jsxcad/geometry-tagged';
+import {
+  getNonVoidGraphs,
+  toDisjointGeometry,
+  toTrianglesFromGraph,
+} from '@jsxcad/geometry';
 
 import { toPlane } from '@jsxcad/math-poly3';
-import { toTriangles as toTrianglesFromGraph } from '@jsxcad/geometry-graph';
 
 const equals = ([aX, aY, aZ], [bX, bY, bZ]) =>
   aX === bX && aY === bY && aZ === bZ;
@@ -51,8 +54,8 @@ const convertToFacet = (polygon) => {
 export const toStl = async (geometry, { tolerance = 0.001 } = {}) => {
   const keptGeometry = toDisjointGeometry(await geometry);
   const triangles = [];
-  for (const { graph } of getNonVoidGraphs(keptGeometry)) {
-    for (const [a, b, c] of toTrianglesFromGraph(graph)) {
+  for (const graphGeometry of getNonVoidGraphs(keptGeometry)) {
+    for (const [a, b, c] of toTrianglesFromGraph(graphGeometry)) {
       triangles.push([
         roundVertex(a, tolerance),
         roundVertex(b, tolerance),

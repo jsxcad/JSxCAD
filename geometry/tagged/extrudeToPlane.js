@@ -1,4 +1,4 @@
-import { extrudeToPlane as extrudeToPlaneOfGraph } from '@jsxcad/geometry-graph';
+import { extrudeToPlane as extrudeToPlaneOfGraph } from '../graph/extrudeToPlane.js';
 import { rewrite } from './visit.js';
 import { taggedGraph } from './taggedGraph.js';
 import { toTransformedGeometry } from './toTransformedGeometry.js';

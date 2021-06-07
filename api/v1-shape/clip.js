@@ -1,5 +1,5 @@
 import { Shape } from './Shape.js';
-import { intersection } from '@jsxcad/geometry-tagged';
+import { intersection } from '@jsxcad/geometry';
 
 export const clip = (shape, ...shapes) =>
   Shape.fromGeometry(

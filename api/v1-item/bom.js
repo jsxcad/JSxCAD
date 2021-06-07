@@ -1,6 +1,6 @@
 import Shape from '@jsxcad/api-v1-shape';
 import { emit } from '@jsxcad/sys';
-import { visit } from '@jsxcad/geometry-tagged';
+import { visit } from '@jsxcad/geometry';
 
 export const bom = (shape) => {
   const bom = [];

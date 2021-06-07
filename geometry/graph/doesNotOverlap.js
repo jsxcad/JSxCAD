@@ -7,7 +7,7 @@ const Z = 2;
 
 // Requires a conservative gap.
 export const doesNotOverlap = (a, b) => {
-  if (a.isEmpty || b.isEmpty) {
+  if (a.graph.isEmpty || b.graph.isEmpty) {
     return true;
   }
   const [minA, maxA] = measureBoundingBox(a);

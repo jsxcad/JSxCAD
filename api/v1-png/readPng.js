@@ -1,15 +1,14 @@
-import { taggedGroup, taggedPaths } from '@jsxcad/geometry-tagged';
+import { isClosedPath, taggedGroup, taggedPaths } from '@jsxcad/geometry';
 
 import Shape from '@jsxcad/api-v1-shape';
 import { fromPng } from '@jsxcad/convert-png';
 import { fromRaster } from '@jsxcad/algorithm-contour';
-import { isClosed } from '@jsxcad/geometry-path';
 import { numbers } from '@jsxcad/api-v1-math';
 import { read } from '@jsxcad/sys';
 import simplifyPathAlgorithm from 'simplify-path';
 
 export const simplifyPath = (path, tolerance = 0.01) => {
-  if (isClosed(path)) {
+  if (isClosedPath(path)) {
     return simplifyPathAlgorithm(path, tolerance);
   } else {
     return [null, ...simplifyPathAlgorithm(path.slice(1), tolerance)];

@@ -1,5 +1,5 @@
 import Shape from './Shape.js';
-import { getLeafs } from '@jsxcad/geometry-tagged';
+import { getLeafs } from '@jsxcad/geometry';
 
 export const each = (shape, op = (leafs, shape) => leafs) =>
   op(

@@ -1,5 +1,5 @@
 import { getNonVoidGraphs } from './getNonVoidGraphs.js';
-import { minkowskiShell as minkowskiShellOfGraphs } from '@jsxcad/geometry-graph';
+import { minkowskiShell as minkowskiShellOfGraphs } from '../graph/minkowskiShell.js';
 import { reify } from './reify.js';
 import { rewrite } from './visit.js';
 import { taggedGraph } from './taggedGraph.js';

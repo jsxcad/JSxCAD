@@ -2,7 +2,7 @@ import {
   fill as fillGeometry,
   taggedGroup,
   transform as transformGeometry,
-} from '@jsxcad/geometry-tagged';
+} from '@jsxcad/geometry';
 
 import {
   fromScaling,

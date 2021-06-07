@@ -1,5 +1,5 @@
 import Shape from '@jsxcad/api-v1-shape';
-import { extrude as extrudeGeometry } from '@jsxcad/geometry-tagged';
+import { extrude as extrudeGeometry } from '@jsxcad/geometry';
 
 export const extrude = (shape, height = 1, depth = 0) => {
   if (height === depth) {

@@ -1,3 +1,3 @@
-import { isClosed } from '@jsxcad/geometry-path';
+import { isClosed } from '../geometry-path';
 
 export const isTriangle = (path) => isClosed(path) && path.length === 3;

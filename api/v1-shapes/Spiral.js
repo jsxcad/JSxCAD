@@ -1,5 +1,5 @@
 import { Shape, shapeMethod } from '@jsxcad/api-v1-shape';
-import { concatenate, rotateZ } from '@jsxcad/geometry-path';
+import { concatenatePath, rotateZPath } from '@jsxcad/geometry';
 
 import { numbers } from '@jsxcad/api-v1-math';
 
@@ -23,7 +23,7 @@ export const Spiral = (
   })) {
     const radians = (-angle * Math.PI) / 180;
     const subpath = toPathFromAngle(angle);
-    path = concatenate(path, rotateZ(radians, subpath));
+    path = concatenatePath(path, rotateZPath(radians, subpath));
   }
   return Shape.fromPath(path);
 };

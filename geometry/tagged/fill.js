@@ -1,8 +1,5 @@
-import {
-  fill as fillOutlineGraph,
-  fromPaths as fromPathsToGraph,
-} from '@jsxcad/geometry-graph';
-
+import { fill as fillOutlineGraph } from '../graph/fill.js';
+import { fromPaths as fromPathsToGraph } from '../graph/fromPaths.js';
 import { getNonVoidGraphs } from './getNonVoidGraphs.js';
 import { getNonVoidPaths } from './getNonVoidPaths.js';
 import { taggedGraph } from './taggedGraph.js';

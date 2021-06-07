@@ -1,5 +1,5 @@
 import { getNonVoidGraphs } from './getNonVoidGraphs.js';
-import { minkowskiDifference as minkowskiDifferenceOfGraphs } from '@jsxcad/geometry-graph';
+import { minkowskiDifference as minkowskiDifferenceOfGraphs } from '../graph/minkowskiDifference.js';
 import { reify } from './reify.js';
 import { rewrite } from './visit.js';
 import { taggedGraph } from './taggedGraph.js';

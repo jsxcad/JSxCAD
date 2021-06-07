@@ -1,5 +1,4 @@
-import { scale, taggedGraph, taggedGroup } from './jsxcad-geometry-tagged.js';
-import { fromPaths } from './jsxcad-geometry-graph.js';
+import { scale, taggedGraph, fromPathsToGraph, taggedGroup } from './jsxcad-geometry.js';
 import { fromSvgPath } from './jsxcad-convert-svg.js';
 
 var global$1 = (typeof global !== "undefined" ? global :
@@ -15885,7 +15884,10 @@ const toFont = (options = {}, data) => {
       group.push(
         scale(
           [factor, factor, factor],
-          taggedGraph({}, fromPaths(paths.map((path) => ({ points: path }))))
+          taggedGraph(
+            {},
+            fromPathsToGraph(paths.map((path) => ({ points: path })))
+          )
         )
       );
     }

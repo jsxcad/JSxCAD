@@ -1,9 +1,6 @@
 import { Shape, fromGeometry, toGeometry } from './Shape.js';
 
-import {
-  assemble as assembleGeometry,
-  taggedAssembly,
-} from '@jsxcad/geometry-tagged';
+import { taggedAssembly } from '@jsxcad/geometry';
 
 export const assemble = (...shapes) => {
   shapes = shapes.filter((shape) => shape !== undefined);
@@ -15,7 +12,7 @@ export const assemble = (...shapes) => {
       return shapes[0];
     }
     default: {
-      return fromGeometry(assembleGeometry(...shapes.map(toGeometry)));
+      return fromGeometry(taggedAssembly({}, ...shapes.map(toGeometry)));
     }
   }
 };

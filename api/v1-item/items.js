@@ -1,5 +1,5 @@
 import Shape from '@jsxcad/api-v1-shape';
-import { getItems } from '@jsxcad/geometry-tagged';
+import { getItems } from '@jsxcad/geometry';
 
 export const items = (shape, op = (_) => _) => {
   const items = [];

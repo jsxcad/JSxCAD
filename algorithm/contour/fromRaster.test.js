@@ -1,4 +1,4 @@
-import { canonicalize } from '@jsxcad/geometry-paths';
+import { canonicalizePaths } from '@jsxcad/geometry';
 import { fromRaster } from './fromRaster.js';
 import test from 'ava';
 
@@ -10,7 +10,7 @@ test('Simple', async (t) => {
     [77, 81, 86, 99],
   ];
   const result = await fromRaster(raster, [0, 25, 50, 75, 100]);
-  t.deepEqual(result.map(canonicalize), [
+  t.deepEqual(result.map(canonicalizePaths), [
     [
       [
         [0, 0.57143, 0],

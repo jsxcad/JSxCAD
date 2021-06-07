@@ -1,3 +1,5 @@
+import { composeTransforms } from '@jsxcad/algorithm-cgal';
+import { identityMatrix } from '@jsxcad/math-mat4';
 import { rewrite } from './visit.js';
 
 const registry = new Map();
@@ -23,7 +25,9 @@ export const reify = (geometry) => {
               `Do not know how to reify plan: ${JSON.stringify(geometry.plan)}`
             );
           }
-          return descend({ content: [reifier(geometry)] });
+          const reified = reifier(geometry);
+          geometry.content.push(reified);
+          return descend();
         }
         return geometry;
       }

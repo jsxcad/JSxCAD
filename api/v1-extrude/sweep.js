@@ -1,10 +1,9 @@
 import { ChainedHull, Group } from '@jsxcad/api-v1-shapes';
 import { Shape, orient } from '@jsxcad/api-v1-shape';
 import { add, normalize, subtract } from '@jsxcad/math-vec3';
+import { getPathEdges, outline } from '@jsxcad/geometry';
 
 import { fromNormalAndPoint } from '@jsxcad/math-plane';
-import { getEdges } from '@jsxcad/geometry-path';
-import { outline } from '@jsxcad/geometry-tagged';
 
 const START = 0;
 const END = 1;
@@ -25,7 +24,7 @@ export const sweep = (toolpath, tool, up = [0, 0, 1, 0]) => {
     for (const path of paths) {
       // FIX: Handle open paths and bent polygons.
       const tools = [];
-      const edges = getEdges(path);
+      const edges = getPathEdges(path);
       const up = [0, 0, 1, 0];
       const length = edges.length;
       for (let nth = 0; nth < length + 1; nth++) {

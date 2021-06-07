@@ -1,30 +1,27 @@
-import {
-  fromPaths as fromPathsToGraph,
-  union as graphUnion,
-  toPaths as toPathsFromGraph,
-} from '@jsxcad/geometry-graph';
-
 import { cache } from '@jsxcad/cache';
+import { fromPaths as fromPathsToGraph } from '../graph/fromPaths.js';
 import { getNonVoidFaceablePaths } from './getNonVoidFaceablePaths.js';
 import { getNonVoidGraphs } from './getNonVoidGraphs.js';
 import { getNonVoidPoints } from './getNonVoidPoints.js';
-import { union as pointsUnion } from '@jsxcad/geometry-points';
+import { union as graphUnion } from '../graph/union.js';
+import { union as pointsUnion } from '../points/union.js';
 import { rewrite } from './visit.js';
 import { taggedGraph } from './taggedGraph.js';
 import { taggedPaths } from './taggedPaths.js';
 import { taggedPoints } from './taggedPoints.js';
-import { toDisjointGeometry } from './toDisjointGeometry.js';
+import { toConcreteGeometry } from './toConcreteGeometry.js';
+import { toPaths as toPathsFromGraph } from '../graph/toPaths.js';
 
 // Union is a little more complex, since it can violate disjointAssembly invariants.
 const unionImpl = (geometry, ...geometries) => {
-  geometries = geometries.map(toDisjointGeometry);
+  geometries = geometries.map(toConcreteGeometry);
   const op = (geometry, descend) => {
     const { tags } = geometry;
     switch (geometry.type) {
       case 'graph': {
-        let unified = geometry.graph;
+        let unified = geometry;
         for (const geometry of geometries) {
-          for (const { graph } of getNonVoidGraphs(geometry)) {
+          for (const graph of getNonVoidGraphs(geometry)) {
             unified = graphUnion(unified, graph);
           }
           for (const { paths } of getNonVoidFaceablePaths(geometry)) {
@@ -34,7 +31,7 @@ const unionImpl = (geometry, ...geometries) => {
         if (unified.hash) {
           throw Error(`hash`);
         }
-        return taggedGraph({ tags }, unified);
+        return unified;
       }
       case 'paths': {
         if (tags && tags.includes('path/Wire')) {
@@ -75,7 +72,7 @@ const unionImpl = (geometry, ...geometries) => {
     }
   };
 
-  return rewrite(toDisjointGeometry(geometry), op);
+  return rewrite(toConcreteGeometry(geometry), op);
 };
 
 export const union = cache(unionImpl);

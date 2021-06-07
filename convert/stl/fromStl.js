@@ -1,6 +1,8 @@
-import { taggedGraph, taggedPaths } from '@jsxcad/geometry-tagged';
-
-import { fromPolygons } from '@jsxcad/geometry-graph';
+import {
+  fromPolygonsToGraph,
+  taggedGraph,
+  taggedPaths,
+} from '@jsxcad/geometry';
 import parseStlAscii from 'parse-stl-ascii';
 import { parse as parseStlBinary } from './parseStlBinary.js';
 
@@ -33,7 +35,7 @@ export const fromStl = async (
   }
   switch (geometry) {
     case 'graph':
-      return taggedGraph({}, fromPolygons(polygons));
+      return taggedGraph({}, fromPolygonsToGraph(polygons));
     case 'paths':
       return taggedPaths({}, polygons);
     default:

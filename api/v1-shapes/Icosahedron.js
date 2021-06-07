@@ -1,6 +1,6 @@
 import { Shape, shapeMethod } from '@jsxcad/api-v1-shape';
 import { getAt, getFrom, getScale, getTo } from './Plan.js';
-import { registerReifier, taggedPlan } from '@jsxcad/geometry-tagged';
+import { registerReifier, taggedPlan } from '@jsxcad/geometry';
 
 import { fromPoints } from '@jsxcad/math-poly3';
 import { negate } from '@jsxcad/math-vec3';
@@ -67,18 +67,19 @@ const buildRegularIcosahedron = () => {
   return fromPointsAndPaths(points, paths);
 };
 
-registerReifier('Icosahedron', ({ tags, plan }) => {
-  const [scale, middle] = getScale(plan);
-  return Shape.fromPolygons(buildRegularIcosahedron({}))
-    .scale(...scale)
-    .move(...middle)
-    .orient({
-      center: negate(getAt(plan)),
-      from: getFrom(plan),
-      at: getTo(plan),
-    })
-    .setTags(tags)
-    .toGeometry();
+registerReifier('Icosahedron', (geometry) => {
+  const [scale, middle] = getScale(geometry);
+  const a = Shape.fromPolygons(buildRegularIcosahedron({}));
+  const b = a.scale(...scale);
+  const c = b.move(...middle);
+  const d = c.orient({
+    center: negate(getAt(geometry)),
+    from: getFrom(geometry),
+    at: getTo(geometry),
+  });
+  const e = d.setTags(geometry.tags);
+  const f = e.toGeometry();
+  return f;
 });
 
 export const Icosahedron = (x = 1, y = x, z = x) =>

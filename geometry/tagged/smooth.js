@@ -1,6 +1,6 @@
 import { reify } from './reify.js';
 import { rewrite } from './visit.js';
-import { smooth as smoothGraph } from '@jsxcad/geometry-graph';
+import { smooth as smoothGraph } from '../graph/smooth.js';
 import { taggedGraph } from './taggedGraph.js';
 import { toTransformedGeometry } from './toTransformedGeometry.js';
 

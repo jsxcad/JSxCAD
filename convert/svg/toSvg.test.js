@@ -1,7 +1,7 @@
 import '@jsxcad/algorithm-cgal';
 
 import { boot } from '@jsxcad/sys';
-import { fromPolygons } from '@jsxcad/geometry-graph';
+import { fromPolygonsToGraph } from '@jsxcad/geometry';
 import test from 'ava';
 import { toSvg } from './toSvg.js';
 
@@ -22,7 +22,7 @@ test('Triangle', async (t) => {
       content: [
         {
           type: 'graph',
-          graph: fromPolygons([{ points: triangle }]),
+          graph: fromPolygonsToGraph([{ points: triangle }]),
           tags: ['color/blue'],
         },
         {

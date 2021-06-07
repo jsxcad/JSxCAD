@@ -1,6 +1,6 @@
 import { Shape, fromGeometry } from './Shape.js';
 
-import { getItems } from '@jsxcad/geometry-tagged';
+import { getItems } from '@jsxcad/geometry';
 
 // DEPRECATED: See 'Shape.items'
 export const toItems = (shape) =>

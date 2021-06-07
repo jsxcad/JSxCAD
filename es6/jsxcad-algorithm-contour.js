@@ -1,4 +1,4 @@
-import { translate, deduplicate, isClockwise } from './jsxcad-geometry-path.js';
+import { translatePath, deduplicatePath, isClockwisePath } from './jsxcad-geometry.js';
 import { fromPolygon } from './jsxcad-math-plane.js';
 
 var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
@@ -3446,9 +3446,9 @@ const fromRaster = async (raster, bands) => {
     const high = bands[nth + 1];
     const paths = [];
     for (const band of MarchingSquares.isoBands(preprocessedData, low, high)) {
-      const deduplicated = translate([0, 0, low], deduplicate(band));
+      const deduplicated = translatePath([0, 0, low], deduplicatePath(band));
       if (deduplicated.length >= 3 && fromPolygon(deduplicated)) {
-        if (isClockwise(deduplicated)) {
+        if (isClockwisePath(deduplicated)) {
           // Ensure path is counter-clockwise.
           paths.push([...deduplicated].reverse());
         } else {
