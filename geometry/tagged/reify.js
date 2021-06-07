@@ -23,7 +23,11 @@ export const reify = (geometry) => {
               `Do not know how to reify plan: ${JSON.stringify(geometry.plan)}`
             );
           }
-          return descend({ content: [reifier(geometry)] });
+          const reified = reifier(geometry);
+          // Inherit the matrix from the plan.
+          reified.matrix = geometry.matrix;
+          geometry.content.push(reified);
+          return descend();
         }
         return geometry;
       }

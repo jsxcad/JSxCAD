@@ -11,7 +11,7 @@ import {
   taggedGraph,
   taggedPaths,
   taggedPoints,
-  toDisjointGeometry as toDisjointTaggedGeometry,
+  toConcreteGeometry as toConcreteTaggedGeometry,
   toDisplayGeometry,
   toPoints,
   toTransformedGeometry as toTransformedTaggedGeometry,
@@ -22,25 +22,25 @@ import { identityMatrix } from '@jsxcad/math-mat4';
 
 export class Shape {
   close() {
-    const geometry = this.toDisjointGeometry();
-    if (!isSingleOpenPath(geometry.content[0])) {
+    const geometry = this.toConcreteGeometry();
+    if (!isSingleOpenPath(geometry)) {
       throw Error('Close requires a single open path.');
     }
-    return Shape.fromClosedPath(closePath(geometry.content[0].paths[0]));
+    return Shape.fromClosedPath(closePath(geometry.paths[0]));
   }
 
   concat(...shapes) {
     const paths = [];
     for (const shape of [this, ...shapes]) {
-      const geometry = shape.toDisjointGeometry();
-      if (!isSingleOpenPath(geometry.content[0])) {
+      const geometry = shape.toConcreteGeometry();
+      if (!isSingleOpenPath(geometry)) {
         throw Error(
           `Concatenation requires single open paths: ${JSON.stringify(
             geometry
           )}`
         );
       }
-      paths.push(geometry.content[0].paths[0]);
+      paths.push(geometry.paths[0]);
     }
     return Shape.fromOpenPath(concatenatePath(...paths));
   }
@@ -54,11 +54,11 @@ export class Shape {
   }
 
   eachPoint(operation) {
-    eachPoint(operation, this.toDisjointGeometry());
+    eachPoint(operation, this.toConcreteGeometry());
   }
 
   flip() {
-    return fromGeometry(flip(toDisjointGeometry(this)), this.context);
+    return fromGeometry(flip(toConcreteTaggedGeometry(this)), this.context);
   }
 
   toDisplayGeometry(options) {
@@ -66,11 +66,15 @@ export class Shape {
   }
 
   toKeptGeometry(options = {}) {
-    return this.toDisjointGeometry();
+    return this.toConcreteGeometry();
+  }
+
+  toConcreteGeometry(options = {}) {
+    return toConcreteTaggedGeometry(toGeometry(this));
   }
 
   toDisjointGeometry(options = {}) {
-    return toDisjointTaggedGeometry(toGeometry(this));
+    return toConcreteTaggedGeometry(toGeometry(this));
   }
 
   toTransformedGeometry(options = {}) {
@@ -86,7 +90,7 @@ export class Shape {
   }
 
   toPoints() {
-    return toPoints(this.toDisjointGeometry()).points;
+    return toPoints(this.toConcreteGeometry()).points;
   }
 
   points() {
@@ -154,7 +158,8 @@ Shape.reifier = (name, op) => registerReifier(name, op);
 
 export const fromGeometry = Shape.fromGeometry;
 export const toGeometry = (shape) => shape.toGeometry();
-export const toDisjointGeometry = (shape) => shape.toDisjointGeometry();
-export const toKeptGeometry = (shape) => shape.toDisjointGeometry();
+export const toConcreteGeometry = (shape) => shape.toConcreteGeometry();
+export const toDisjointGeometry = (shape) => shape.toConcreteGeometry();
+export const toKeptGeometry = (shape) => shape.toConcreteGeometry();
 
 export default Shape;

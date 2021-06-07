@@ -1,11 +1,18 @@
 import { getCgal } from './getCgal.js';
+import { toCgalTransformFromJsTransform } from './transform.js';
 
-export const fromSurfaceMeshToPolygons = (mesh, triangulate = false) => {
+export const fromSurfaceMeshToPolygons = (
+  mesh,
+  transform,
+  triangulate = false,
+  matrix
+) => {
   const c = getCgal();
   const polygons = [];
   let polygon;
   c.FromSurfaceMeshToPolygonSoup(
     mesh,
+    toCgalTransformFromJsTransform(transform),
     triangulate,
     () => {
       polygon = [];

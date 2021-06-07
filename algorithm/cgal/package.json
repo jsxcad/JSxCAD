@@ -25,6 +25,7 @@
   "license": "LGPL",
   "dependencies": {
     "@jsxcad/geometry": "^0.0.79",
+    "@jsxcad/math-mat4": "^0.0.79",
     "@jsxcad/math-vec3": "^0.0.79",
     "@jsxcad/sys": "^0.0.79",
     "hash-sum": "^2.0.0"

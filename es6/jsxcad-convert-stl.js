@@ -1,5 +1,4 @@
-import { taggedPaths, taggedGraph, toDisjointGeometry, getNonVoidGraphs } from './jsxcad-geometry-tagged.js';
-import { fromPolygons, toTriangles } from './jsxcad-geometry-graph.js';
+import { taggedPaths, taggedGraph, fromPolygonsToGraph, toDisjointGeometry, getNonVoidGraphs, toTrianglesFromGraph } from './jsxcad-geometry.js';
 import { toPlane } from './jsxcad-math-poly3.js';
 
 function parse(str) {
@@ -129,7 +128,7 @@ const fromStl = async (
   }
   switch (geometry) {
     case 'graph':
-      return taggedGraph({}, fromPolygons(polygons));
+      return taggedGraph({}, fromPolygonsToGraph(polygons));
     case 'paths':
       return taggedPaths({}, polygons);
     default:
@@ -185,8 +184,8 @@ const convertToFacet = (polygon) => {
 const toStl = async (geometry, { tolerance = 0.001 } = {}) => {
   const keptGeometry = toDisjointGeometry(await geometry);
   const triangles = [];
-  for (const { graph } of getNonVoidGraphs(keptGeometry)) {
-    for (const [a, b, c] of toTriangles(graph)) {
+  for (const graphGeometry of getNonVoidGraphs(keptGeometry)) {
+    for (const [a, b, c] of toTrianglesFromGraph(graphGeometry)) {
       triangles.push([
         roundVertex(a, tolerance),
         roundVertex(b, tolerance),

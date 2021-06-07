@@ -1,6 +1,4 @@
-import { close, concatenate, open } from './jsxcad-geometry-path.js';
-import { taggedAssembly, eachPoint, flip, toDisplayGeometry, toDisjointGeometry as toDisjointGeometry$1, toTransformedGeometry, toPoints, transform, rewriteTags, taggedPaths, taggedGraph, taggedPoints, registerReifier, union, taggedLayers, intersection, allTags, difference, getLeafs, empty, grow as grow$1, inset as inset$1, rewrite, minkowskiDifference as minkowskiDifference$1, minkowskiShell as minkowskiShell$1, minkowskiSum as minkowskiSum$1, isVoid, offset as offset$1, assemble as assemble$1, taggedItem, taggedDisjointAssembly, push as push$1, getPeg, taggedPlan, remesh as remesh$1, smooth as smooth$1, measureBoundingBox, taggedSketch, test as test$1, twist as twist$1, toPolygonsWithHoles, taggedGroup, read, write, realize } from './jsxcad-geometry-tagged.js';
-import { fromPolygons, arrangePolygonsWithHoles, fromPolygonsWithHolesToTriangles, fromTriangles } from './jsxcad-geometry-graph.js';
+import { closePath, concatenatePath, taggedAssembly, eachPoint, flip, toConcreteGeometry, toDisplayGeometry, toTransformedGeometry, toPoints, transform, rewriteTags, taggedPaths, taggedGraph, openPath, taggedPoints, fromPolygonsToGraph, registerReifier, union, taggedLayers, intersection, allTags, difference, getLeafs, empty, grow as grow$1, inset as inset$1, rewrite, minkowskiDifference as minkowskiDifference$1, minkowskiShell as minkowskiShell$1, minkowskiSum as minkowskiSum$1, isVoid, offset as offset$1, taggedItem, taggedDisjointAssembly, toDisjointGeometry, push as push$1, getPeg, taggedPlan, remesh as remesh$1, smooth as smooth$1, measureBoundingBox, taggedSketch, test as test$1, twist as twist$1, toPolygonsWithHoles, arrangePolygonsWithHoles, fromPolygonsWithHolesToTriangles, fromTrianglesToGraph, taggedGroup, read, write, realize } from './jsxcad-geometry.js';
 import { identityMatrix, fromTranslation, fromRotation, fromScaling } from './jsxcad-math-mat4.js';
 import { add as add$1, negate, normalize, subtract, dot, cross, scale as scale$1, distance } from './jsxcad-math-vec3.js';
 import { toTagsFromName } from './jsxcad-algorithm-color.js';
@@ -13,27 +11,27 @@ import { toTagsFromName as toTagsFromName$2 } from './jsxcad-algorithm-tool.js';
 
 class Shape {
   close() {
-    const geometry = this.toDisjointGeometry();
-    if (!isSingleOpenPath(geometry.content[0])) {
+    const geometry = this.toConcreteGeometry();
+    if (!isSingleOpenPath(geometry)) {
       throw Error('Close requires a single open path.');
     }
-    return Shape.fromClosedPath(close(geometry.content[0].paths[0]));
+    return Shape.fromClosedPath(closePath(geometry.paths[0]));
   }
 
   concat(...shapes) {
     const paths = [];
     for (const shape of [this, ...shapes]) {
-      const geometry = shape.toDisjointGeometry();
-      if (!isSingleOpenPath(geometry.content[0])) {
+      const geometry = shape.toConcreteGeometry();
+      if (!isSingleOpenPath(geometry)) {
         throw Error(
           `Concatenation requires single open paths: ${JSON.stringify(
             geometry
           )}`
         );
       }
-      paths.push(geometry.content[0].paths[0]);
+      paths.push(geometry.paths[0]);
     }
-    return Shape.fromOpenPath(concatenate(...paths));
+    return Shape.fromOpenPath(concatenatePath(...paths));
   }
 
   constructor(geometry = taggedAssembly({}), context) {
@@ -45,11 +43,11 @@ class Shape {
   }
 
   eachPoint(operation) {
-    eachPoint(operation, this.toDisjointGeometry());
+    eachPoint(operation, this.toConcreteGeometry());
   }
 
   flip() {
-    return fromGeometry(flip(toDisjointGeometry(this)), this.context);
+    return fromGeometry(flip(toConcreteGeometry(this)), this.context);
   }
 
   toDisplayGeometry(options) {
@@ -57,11 +55,15 @@ class Shape {
   }
 
   toKeptGeometry(options = {}) {
-    return this.toDisjointGeometry();
+    return this.toConcreteGeometry();
+  }
+
+  toConcreteGeometry(options = {}) {
+    return toConcreteGeometry(toGeometry(this));
   }
 
   toDisjointGeometry(options = {}) {
-    return toDisjointGeometry$1(toGeometry(this));
+    return toConcreteGeometry(toGeometry(this));
   }
 
   toTransformedGeometry(options = {}) {
@@ -77,7 +79,7 @@ class Shape {
   }
 
   toPoints() {
-    return toPoints(this.toDisjointGeometry()).points;
+    return toPoints(this.toConcreteGeometry()).points;
   }
 
   points() {
@@ -122,12 +124,12 @@ const registerShapeMethod = (name, op) => {
 };
 
 Shape.fromClosedPath = (path, context) =>
-  fromGeometry(taggedPaths({}, [close(path)]), context);
+  fromGeometry(taggedPaths({}, [closePath(path)]), context);
 Shape.fromGeometry = (geometry, context) => new Shape(geometry, context);
 Shape.fromGraph = (graph, context) =>
   new Shape(taggedGraph({}, graph), context);
 Shape.fromOpenPath = (path, context) =>
-  fromGeometry(taggedPaths({}, [open(path)]), context);
+  fromGeometry(taggedPaths({}, [openPath(path)]), context);
 Shape.fromPath = (path, context) =>
   fromGeometry(taggedPaths({}, [path]), context);
 Shape.fromPaths = (paths, context) =>
@@ -137,7 +139,7 @@ Shape.fromPoint = (point, context) =>
 Shape.fromPoints = (points, context) =>
   fromGeometry(taggedPoints({}, points), context);
 Shape.fromPolygons = (polygons, context) =>
-  fromGeometry(taggedGraph({}, fromPolygons(polygons)), context);
+  fromGeometry(taggedGraph({}, fromPolygonsToGraph(polygons)), context);
 Shape.registerMethod = registerShapeMethod;
 // Let's consider 'method' instead of 'registerMethod'.
 Shape.method = registerShapeMethod;
@@ -145,7 +147,6 @@ Shape.reifier = (name, op) => registerReifier(name, op);
 
 const fromGeometry = Shape.fromGeometry;
 const toGeometry = (shape) => shape.toGeometry();
-const toDisjointGeometry = (shape) => shape.toDisjointGeometry();
 
 const add = (shape, ...shapes) =>
   Shape.fromGeometry(
@@ -625,7 +626,7 @@ const assemble = (...shapes) => {
       return shapes[0];
     }
     default: {
-      return fromGeometry(assemble$1(...shapes.map(toGeometry)));
+      return fromGeometry(taggedAssembly({}, ...shapes.map(toGeometry)));
     }
   }
 };
@@ -717,7 +718,7 @@ const pack = (
       packedLayers.push(
         taggedItem(
           {},
-          taggedDisjointAssembly({}, ...packed.map(toDisjointGeometry$1))
+          taggedDisjointAssembly({}, ...packed.map(toDisjointGeometry))
         )
       );
     }
@@ -1018,7 +1019,7 @@ const Y$1 = 1;
 const Z$1 = 2;
 
 const size = (shape, op = (size, shape) => size) => {
-  const geometry = shape.toDisjointGeometry();
+  const geometry = shape.toConcreteGeometry();
   const [min, max] = measureBoundingBox(geometry);
   const length = max[X$1] - min[X$1];
   const width = max[Y$1] - min[Y$1];
@@ -1129,7 +1130,7 @@ const weld = (...shapes) => {
   for (const { polygonsWithHoles } of arrangements) {
     // Keep the planar grouping.
     const triangles = fromPolygonsWithHolesToTriangles(polygonsWithHoles);
-    const graph = fromTriangles(triangles);
+    const graph = fromTrianglesToGraph(triangles);
     welds.push(taggedGraph({}, graph));
   }
   // A group of planar welds.

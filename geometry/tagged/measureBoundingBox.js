@@ -5,8 +5,7 @@ import { isVoid } from './isNotVoid.js';
 import { measureBoundingBox as measureBoundingBoxOfGraph } from '../graph/measureBoundingBox.js';
 import { measureBoundingBox as measureBoundingBoxOfPoints } from '../points/measureBoundingBox.js';
 import { measureBoundingBox as measureBoundingBoxOfPolygons } from '../polygons/measureBoundingBox.js';
-import { reify } from './reify.js';
-import { toKeptGeometry } from './toKeptGeometry.js';
+import { toConcreteGeometry } from './toConcreteGeometry.js';
 import { visit } from './visit.js';
 
 const measureBoundingBoxGeneric = (geometry) => {
@@ -42,7 +41,7 @@ export const measureBoundingBox = (geometry) => {
       case 'displayGeometry':
         return descend();
       case 'graph':
-        return update(measureBoundingBoxOfGraph(geometry.graph));
+        return update(measureBoundingBoxOfGraph(geometry));
       case 'layout':
         return update(geometry.marks);
       case 'points':
@@ -56,7 +55,7 @@ export const measureBoundingBox = (geometry) => {
     }
   };
 
-  visit(toKeptGeometry(reify(geometry)), op);
+  visit(toConcreteGeometry(geometry), op);
 
   return [minPoint, maxPoint];
 };

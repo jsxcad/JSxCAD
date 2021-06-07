@@ -1,7 +1,6 @@
-import { translate, scale, toKeptGeometry, getNonVoidPaths } from './jsxcad-geometry-tagged.js';
+import { translate, scale, toKeptGeometry, getNonVoidPaths, getPathEdges } from './jsxcad-geometry.js';
 import { fromAngleRadians } from './jsxcad-math-vec2.js';
 import { toTagFromRgbInt } from './jsxcad-algorithm-color.js';
-import { getEdges } from './jsxcad-geometry-path.js';
 
 /**
  * DxfArrayScanner
@@ -3397,7 +3396,7 @@ const toDxf = async (geometry, options = {}) => {
   const keptGeometry = toKeptGeometry(await geometry);
   for (const { paths } of getNonVoidPaths(keptGeometry)) {
     for (const path of paths) {
-      for (const [[x1, y1], [x2, y2]] of getEdges(path)) {
+      for (const [[x1, y1], [x2, y2]] of getPathEdges(path)) {
         drawing.drawLine(x1, y1, x2, y2);
       }
     }

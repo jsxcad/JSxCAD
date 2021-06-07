@@ -3,19 +3,20 @@ import { fromEmpty } from './fromEmpty.js';
 import { fromSurfaceMeshLazy } from './fromSurfaceMeshLazy.js';
 import { info } from '@jsxcad/sys';
 import { intersectionOfSurfaceMeshes } from '@jsxcad/algorithm-cgal';
+import { taggedGraph } from '../tagged/taggedGraph.js';
 import { toSurfaceMesh } from './toSurfaceMesh.js';
 
 export const intersection = (a, b) => {
-  if (a.isEmpty || b.isEmpty) {
+  if (a.graph.isEmpty || b.graph.isEmpty) {
     return fromEmpty();
   }
-  if (a.isClosed && b.isClosed && doesNotOverlap(a, b)) {
+  if (a.graph.isClosed && b.graph.isClosed && doesNotOverlap(a, b)) {
     return fromEmpty();
   }
   info('intersection begin');
   const result = fromSurfaceMeshLazy(
-    intersectionOfSurfaceMeshes(toSurfaceMesh(a), toSurfaceMesh(b))
+    intersectionOfSurfaceMeshes(toSurfaceMesh(a.graph), toSurfaceMesh(b.graph))
   );
   info('intersection end');
-  return result;
+  return taggedGraph({ tags: a.tags }, result);
 };

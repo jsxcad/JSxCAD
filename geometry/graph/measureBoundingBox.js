@@ -3,13 +3,20 @@ import { max, min } from '@jsxcad/math-vec3';
 import { fromSurfaceMeshEmitBoundingBox } from '@jsxcad/algorithm-cgal';
 import { toSurfaceMesh } from './toSurfaceMesh.js';
 
-export const measureBoundingBox = ({ graph }) => {
-  if (graph.boundingBox === undefined) {
+export const measureBoundingBox = (geometry) => {
+  if (
+    geometry.cache === undefined ||
+    geometry.cache.boundingBox === undefined
+  ) {
+    if (geometry.cache === undefined) {
+      geometry.cache = {};
+    }
+    const { graph } = geometry;
     if (graph.isLazy) {
       fromSurfaceMeshEmitBoundingBox(
         toSurfaceMesh(graph),
         (xMin, yMin, zMin, xMax, yMax, zMax) => {
-          graph.boundingBox = [
+          geometry.cache.boundingBox = [
             [xMin, yMin, zMin],
             [xMax, yMax, zMax],
           ];
@@ -26,8 +33,8 @@ export const measureBoundingBox = ({ graph }) => {
           }
         }
       }
-      graph.boundingBox = [minPoint, maxPoint];
+      geometry.cache.boundingBox = [minPoint, maxPoint];
     }
   }
-  return graph.boundingBox;
+  return geometry.cache.boundingBox;
 };

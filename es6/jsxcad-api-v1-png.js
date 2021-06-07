@@ -1,8 +1,7 @@
-import { taggedPaths, taggedGroup } from './jsxcad-geometry-tagged.js';
+import { taggedPaths, taggedGroup, isClosedPath } from './jsxcad-geometry.js';
 import Shape from './jsxcad-api-v1-shape.js';
 import { fromPng } from './jsxcad-convert-png.js';
 import { fromRaster } from './jsxcad-algorithm-contour.js';
-import { isClosed } from './jsxcad-geometry-path.js';
 import { numbers } from './jsxcad-api-v1-math.js';
 import { read } from './jsxcad-sys.js';
 
@@ -114,7 +113,7 @@ simplifyPath.radialDistance = radialDistance$1;
 simplifyPath.douglasPeucker = douglasPeucker$1;
 
 const simplifyPath$1 = (path, tolerance = 0.01) => {
-  if (isClosed(path)) {
+  if (isClosedPath(path)) {
     return simplifyPath(path, tolerance);
   } else {
     return [null, ...simplifyPath(path.slice(1), tolerance)];

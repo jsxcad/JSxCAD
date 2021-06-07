@@ -5,7 +5,7 @@ export const prepareForSerialization = (geometry) => {
   const op = (geometry, descend) => {
     switch (geometry.type) {
       case 'graph':
-        prepareForSerializationOfGraph(geometry.graph);
+        prepareForSerializationOfGraph(geometry);
         return;
       case 'displayGeometry':
       case 'triangles':

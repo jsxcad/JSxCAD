@@ -17,5 +17,5 @@ export const taggedAssembly = ({ tags }, ...content) => {
   if (typeof tags === 'function') {
     throw Error(`Tags is a function`);
   }
-  return disjoint(...content);
+  return disjoint(content);
 };

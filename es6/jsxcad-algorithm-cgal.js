@@ -1,6 +1,7 @@
 import { emit, log, onBoot } from './jsxcad-sys.js';
+import { identityMatrix } from './jsxcad-math-mat4.js';
 import { equals } from './jsxcad-math-vec3.js';
-import { getEdges } from './jsxcad-geometry-path.js';
+import { getPathEdges } from './jsxcad-geometry.js';
 
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -10114,49 +10115,56 @@ const toJsTransformFromCgalTransform = (cgalTransform) => {
   return jsTransform;
 };
 
-const toCgalTransformFromJsTransform = (jsTransform) => {
-  let cgalTransform = jsTransform[transformSymbol];
-  if (cgalTransform === undefined) {
-    if (jsTransform.length > 16) {
-      cgalTransform = fromExactToCgalTransform(...jsTransform.slice(16));
-    } else {
-      const [
-        m00,
-        m10,
-        m20,
-        ,
-        m01,
-        m11,
-        m21,
-        ,
-        m02,
-        m12,
-        m22,
-        ,
-        m03,
-        m13,
-        m23,
-        hw,
-      ] = jsTransform;
-      cgalTransform = fromApproximateToCgalTransform(
-        m00,
-        m01,
-        m02,
-        m03,
-        m10,
-        m11,
-        m12,
-        m13,
-        m20,
-        m21,
-        m22,
-        m23,
-        hw
-      );
+const toCgalTransformFromJsTransform = (
+  jsTransform = identityMatrix
+) => {
+  try {
+    let cgalTransform = jsTransform[transformSymbol];
+    if (cgalTransform === undefined) {
+      if (jsTransform.length > 16) {
+        cgalTransform = fromExactToCgalTransform(...jsTransform.slice(16));
+      } else {
+        const [
+          m00,
+          m10,
+          m20,
+          ,
+          m01,
+          m11,
+          m21,
+          ,
+          m02,
+          m12,
+          m22,
+          ,
+          m03,
+          m13,
+          m23,
+          hw,
+        ] = jsTransform;
+        cgalTransform = fromApproximateToCgalTransform(
+          m00,
+          m01,
+          m02,
+          m03,
+          m10,
+          m11,
+          m12,
+          m13,
+          m20,
+          m21,
+          m22,
+          m23,
+          hw
+        );
+      }
+      jsTransform[transformSymbol] = cgalTransform;
     }
-    jsTransform[transformSymbol] = cgalTransform;
+    return cgalTransform;
+  } catch (e) {
+    console.log('oops');
+    throw e;
   }
-  return cgalTransform;
 };
 
 const composeTransforms = (a, b) => {
@@ -10215,7 +10223,7 @@ const arrangePaths = (
     if (nth < inputPolygons.length) {
       const { exactPoints, points } = inputPolygons[nth++];
       if (exactPoints) {
-        for (const [start, end] of getEdges(exactPoints)) {
+        for (const [start, end] of getPathEdges(exactPoints)) {
           if (equals(start, end)) {
             continue;
           }
@@ -10223,7 +10231,7 @@ const arrangePaths = (
           c.addExactPoint(out, end[X], end[Y], end[Z]);
         }
       } else if (points) {
-        for (const [start, end] of getEdges(points)) {
+        for (const [start, end] of getPathEdges(points)) {
           if (equals(start, end)) {
             continue;
           }
@@ -10574,40 +10582,46 @@ const fromGraphToSurfaceMesh = (graph) => {
 
   const vertexIndex = [];
   for (let nthPoint = 0; ; nthPoint++) {
-    const exact = graph.exactPoints[nthPoint];
-    if (exact) {
-      vertexIndex.push(
-        c.Surface_mesh__add_exact(mesh, exact[X$2], exact[Y$2], exact[Z$2])
-      );
-      continue;
+    if (graph.exactPoints) {
+      const exact = graph.exactPoints[nthPoint];
+      if (exact) {
+        vertexIndex.push(
+          c.Surface_mesh__add_exact(mesh, exact[X$2], exact[Y$2], exact[Z$2])
+        );
+        continue;
+      }
     }
-    const approximate = graph.points[nthPoint];
-    if (approximate) {
-      vertexIndex.push(
-        c.Surface_mesh__add_vertex(
-          mesh,
-          approximate[X$2],
-          approximate[Y$2],
-          approximate[Z$2]
-        )
-      );
-      continue;
+    if (graph.points) {
+      const approximate = graph.points[nthPoint];
+      if (approximate) {
+        vertexIndex.push(
+          c.Surface_mesh__add_vertex(
+            mesh,
+            approximate[X$2],
+            approximate[Y$2],
+            approximate[Z$2]
+          )
+        );
+        continue;
+      }
     }
     break;
   }
 
-  graph.facets.forEach(({ edge }, facet) => {
-    const points = [];
-    const faceIndex = c.Surface_mesh__add_face_vertices(mesh, () => {
-      const edgeNode = graph.edges[edge];
-      edge = edgeNode.next;
-      points.push(graph.points[edgeNode.point]);
-      return vertexIndex[edgeNode.point];
+  if (graph.facets) {
+    graph.facets.forEach(({ edge }, facet) => {
+      const points = [];
+      const faceIndex = c.Surface_mesh__add_face_vertices(mesh, () => {
+        const edgeNode = graph.edges[edge];
+        edge = edgeNode.next;
+        points.push(graph.points[edgeNode.point]);
+        return vertexIndex[edgeNode.point];
+      });
+      if (faceIndex === 4294967295 /* -1 */) {
+        throw Error(`Face could not be added: ${JSON.stringify(points)}`);
+      }
     });
-    if (faceIndex === 4294967295 /* -1 */) {
-      throw Error(`Face could not be added: ${JSON.stringify(points)}`);
-    }
-  });
+  }
 
   if (!c.Surface_mesh__triangulate_faces(mesh)) {
     throw Error('triangulation failed');
@@ -10783,12 +10797,18 @@ const fromSurfaceMeshToLazyGraph = (mesh) => {
   return graph;
 };
 
-const fromSurfaceMeshToPolygons = (mesh, triangulate = false) => {
+const fromSurfaceMeshToPolygons = (
+  mesh,
+  transform,
+  triangulate = false,
+  matrix
+) => {
   const c = getCgal();
   const polygons = [];
   let polygon;
   c.FromSurfaceMeshToPolygonSoup(
     mesh,
+    toCgalTransformFromJsTransform(transform),
     triangulate,
     () => {
       polygon = [];
@@ -10846,8 +10866,8 @@ const fromSurfaceMeshToPolygonsWithHoles = (mesh) => {
   return arrangements;
 };
 
-const fromSurfaceMeshToTriangles = (mesh) =>
-  fromSurfaceMeshToPolygons(mesh, true);
+const fromSurfaceMeshToTriangles = (mesh, matrix) =>
+  fromSurfaceMeshToPolygons(mesh, matrix, true);
 
 const growSurfaceMesh = (mesh, amount) =>
   getCgal().GrowSurfaceMesh(mesh, amount);

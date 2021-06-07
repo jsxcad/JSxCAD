@@ -28,8 +28,8 @@ export const soup = (
         } else if (graph.isClosed) {
           return taggedGroup(
             {},
-            ...triangles(tags, toTriangles(graph)),
-            ...wireframe(toTriangles(graph)),
+            ...triangles(tags, toTriangles(geometry)),
+            ...wireframe(toTriangles(geometry)),
             ...outline(geometry, ['color/black'])
           );
         } else if (graph.isEmpty) {
@@ -38,8 +38,8 @@ export const soup = (
           // FIX: Simplify this arrangement.
           return taggedGroup(
             {},
-            ...triangles(tags, toTriangles(graph)),
-            ...wireframe(toTriangles(graph)),
+            ...triangles(tags, toTriangles(geometry)),
+            ...wireframe(toTriangles(geometry)),
             ...outline(geometry, ['color/black'])
           );
         }

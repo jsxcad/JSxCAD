@@ -1,11 +1,8 @@
-import { taggedPlan, registerReifier, taggedDisjointAssembly, taggedLayers, taggedPaths, getLeafs, taggedLayout, measureBoundingBox, getLayouts, visit, isNotVoid, taggedAssembly, taggedGraph, taggedPoints } from './jsxcad-geometry-tagged.js';
+import { taggedPlan, registerReifier, taggedDisjointAssembly, taggedGroup, taggedPaths, translatePaths, getLeafs, taggedLayers, taggedLayout, measureBoundingBox, getLayouts, visit, isNotVoid, concatenatePath, rotateZPath, taggedAssembly, taggedGraph, convexHullToGraph, fromFunctionToGraph, scalePath, translatePath, flipPath, deduplicatePath, taggedPoints, fromPathsToGraph } from './jsxcad-geometry.js';
 import Shape$1, { Shape, shapeMethod, weld } from './jsxcad-api-v1-shape.js';
 import { scale, subtract, add, negate } from './jsxcad-math-vec3.js';
 import { identity } from './jsxcad-math-mat4.js';
 import { zag, numbers } from './jsxcad-api-v1-math.js';
-import { translate } from './jsxcad-geometry-paths.js';
-import { concatenate, rotateZ, scale as scale$1, translate as translate$1, flip, deduplicate } from './jsxcad-geometry-path.js';
-import { convexHull, fromFunction, fromPaths } from './jsxcad-geometry-graph.js';
 import { fromPoints as fromPoints$2 } from './jsxcad-math-poly3.js';
 import { fromAngleRadians } from './jsxcad-math-vec2.js';
 import { toPolygon } from './jsxcad-math-plane.js';
@@ -117,7 +114,7 @@ const isDefined = (value) => value;
 
 const Group = (...shapes) =>
   Shape.fromGeometry(
-    taggedLayers(
+    taggedGroup(
       {},
       ...shapes.filter(isDefined).map((shape) => shape.toGeometry())
     )
@@ -1546,7 +1543,7 @@ const toPaths = (letters) => {
   for (const letter of letters) {
     const code = letter.charCodeAt(0);
     const paths = hersheyPaths[code] || [];
-    mergedPaths.push(...translate([xOffset, 0, 0], paths));
+    mergedPaths.push(...translatePaths([xOffset, 0, 0], paths));
     xOffset += hersheyWidth[code] || 0;
   }
   return Shape$1.fromGeometry(taggedPaths({}, mergedPaths))
@@ -1596,7 +1593,6 @@ const buildLayoutGeometry = ({
   const labelScale = 0.0125 * 10;
   const size = [pageWidth, pageLength];
   const r = (v) => Math.floor(v * 100) / 100;
-  // const title = `${r(pageWidth)} x ${r(pageLength)} : ${itemNames.join(', ')}`;
   const fontHeight = Math.max(pageWidth, pageLength) * labelScale;
   const font = Hershey(fontHeight);
   const title = [];
@@ -1680,9 +1676,13 @@ const Page = (
         Math.abs(packSize[MIN][Y$1] * 2)
       ) +
       pageMargin * 2;
-    return Shape$1.fromGeometry(
-      buildLayoutGeometry({ layer, packSize, pageWidth, pageLength, margin })
-    );
+    if (isFinite(pageWidth) && isFinite(pageLength)) {
+      return Shape$1.fromGeometry(
+        buildLayoutGeometry({ layer, packSize, pageWidth, pageLength, margin })
+      );
+    } else {
+      return Empty();
+    }
   } else if (pack && size) {
     // Content fits to page size.
     const packSize = [];
@@ -1698,13 +1698,17 @@ const Page = (
     }
     const pageWidth = Math.max(1, packSize[MAX][X$1] - packSize[MIN][X$1]);
     const pageLength = Math.max(1, packSize[MAX][Y$1] - packSize[MIN][Y$1]);
-    const plans = [];
-    for (const layer of content.toDisjointGeometry().content[0].content) {
-      plans.push(
-        buildLayoutGeometry({ layer, packSize, pageWidth, pageLength, margin })
-      );
+    if (isFinite(pageWidth) && isFinite(pageLength)) {
+      const plans = [];
+      for (const layer of content.toDisjointGeometry().content[0].content) {
+        plans.push(
+          buildLayoutGeometry({ layer, packSize, pageWidth, pageLength, margin })
+        );
+      }
+      return Shape$1.fromGeometry(taggedLayers({}, ...plans));
+    } else {
+      return Empty();
     }
-    return Shape$1.fromGeometry(taggedLayers({}, ...plans));
   } else if (pack && !size) {
     const packSize = [];
     // Page fits to content size.
@@ -1783,7 +1787,7 @@ const Spiral = (
   })) {
     const radians = (-angle * Math.PI) / 180;
     const subpath = toPathFromAngle(angle);
-    path = concatenate(path, rotateZ(radians, subpath));
+    path = concatenatePath(path, rotateZPath(radians, subpath));
   }
   return Shape.fromPath(path);
 };
@@ -1863,7 +1867,7 @@ Shape.prototype.Assembly = shapeMethod(Assembly);
 const Hull = (...shapes) => {
   const points = [];
   shapes.forEach((shape) => shape.eachPoint((point) => points.push(point)));
-  return Shape.fromGeometry(taggedGraph({}, convexHull(points)));
+  return Shape.fromGeometry(taggedGraph({}, convexHullToGraph(points)));
 };
 
 const hullMethod = function (...shapes) {
@@ -2016,7 +2020,7 @@ const Icosahedron = (x = 1, y = x, z = x) =>
 Shape.prototype.Icosahedron = shapeMethod(Icosahedron);
 
 const Implicit = (op, options) =>
-  Shape.fromGraph(fromFunction(op, options));
+  Shape.fromGraph(fromFunctionToGraph(op, options));
 
 Shape.prototype.Implicit = shapeMethod(Implicit);
 
@@ -2086,7 +2090,12 @@ const buildWalls = (polygons, floor, roof) => {
   ) {
     // Remember that we are walking CCW.
     polygons.push({
-      points: deduplicate([floor[start], floor[end], roof[end], roof[start]]),
+      points: deduplicatePath([
+        floor[start],
+        floor[end],
+        roof[end],
+        roof[start],
+      ]),
     });
   }
 };
@@ -2118,8 +2127,8 @@ const buildRingSphere = (resolution = 20) => {
     const height = Math.cos(angle);
     const radius = Math.sin(angle);
     const points = ring;
-    const scaledPath = scale$1([radius, radius, radius], points);
-    const translatedPath = translate$1([0, 0, height], scaledPath);
+    const scaledPath = scalePath([radius, radius, radius], points);
+    const translatedPath = translatePath([0, 0, height], scaledPath);
     path = translatedPath;
     if (lastPath !== undefined) {
       buildWalls(polygons, path, lastPath);
@@ -2129,7 +2138,7 @@ const buildRingSphere = (resolution = 20) => {
     lastPath = path;
   }
   if (path) {
-    polygons.push({ points: flip(path) });
+    polygons.push({ points: flipPath(path) });
   }
   return polygons;
 };
@@ -2195,7 +2204,7 @@ const Polygon = (...points) => {
   for (const point of points) {
     point.eachPoint((p) => path.push(p));
   }
-  return Shape.fromGraph(fromPaths([{ points: path }]));
+  return Shape.fromGraph(fromPathsToGraph([{ points: path }]));
 };
 
 Shape.prototype.Polygon = shapeMethod(Polygon);
@@ -2236,7 +2245,7 @@ const Wave = (
   let path = [null];
   for (const xDistance of numbers((distance) => distance, { from, to, by })) {
     const subpath = toPathFromXDistance(xDistance);
-    path = concatenate(path, translate$1([xDistance, 0, 0], subpath));
+    path = concatenatePath(path, translatePath([xDistance, 0, 0], subpath));
   }
   return Shape.fromPath(path);
 };

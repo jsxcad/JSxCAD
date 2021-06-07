@@ -1,4 +1,4 @@
 import { fromSurfaceMeshToPolygons } from './fromSurfaceMeshToPolygons.js';
 
-export const fromSurfaceMeshToTriangles = (mesh) =>
-  fromSurfaceMeshToPolygons(mesh, true);
+export const fromSurfaceMeshToTriangles = (mesh, matrix) =>
+  fromSurfaceMeshToPolygons(mesh, matrix, true);

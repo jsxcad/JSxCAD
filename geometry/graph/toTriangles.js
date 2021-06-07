@@ -3,21 +3,12 @@ import { toSurfaceMesh } from './toSurfaceMesh.js';
 
 Error.stackTraceLimit = Infinity;
 
-export const toTriangles = (graph) => {
-  if (graph.isLazy) {
-    return fromSurfaceMeshToTriangles(toSurfaceMesh(graph));
-  } else {
-    const triangles = [];
-    // A realized graph should already be triangulated.
-    for (let { edge } of graph.facets) {
-      const triangle = [];
-      const start = edge;
-      do {
-        triangle.push(graph.points[graph.edges[edge].point]);
-        edge = graph.edges[edge].next;
-      } while (start !== edge);
-      triangles.push(triangle);
-    }
-    return triangles;
+export const toTriangles = (geometry) => {
+  geometry.cache = geometry.cache || {};
+  if (!geometry.cache.triangles) {
+    const { matrix, graph } = geometry;
+    const triangles = fromSurfaceMeshToTriangles(toSurfaceMesh(graph), matrix);
+    geometry.cache.triangles = triangles;
   }
+  return geometry.cache.triangles;
 };

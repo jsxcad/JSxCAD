@@ -1,4 +1,7 @@
-import { reify } from './reify.js';
+import { toConcreteGeometry } from './toConcreteGeometry.js';
+
+export const DISJUNCTION_TOTAL = 'complete';
+export const DISJUNCTION_VISIBLE = 'visible';
 
 /*
 import { visit } from './visit.js';
@@ -22,9 +25,6 @@ const hasVoidGeometry = (geometry) => {
     }
   }
 };
-
-export const DISJUNCTION_TOTAL = 'complete';
-export const DISJUNCTION_VISIBLE = 'visible';
 
 export const toDisjointGeometry = (geometry, mode = DISJUNCTION_TOTAL) => {
   const op = (geometry, descend, walk, state) => {
@@ -83,7 +83,7 @@ export const toDisjointGeometry = (geometry, mode = DISJUNCTION_TOTAL) => {
 */
 
 // FIX: Remove toDisjointGeometry and replace with a more meaningful operation.
-export const toDisjointGeometry = (geometry) => reify(geometry);
+export const toDisjointGeometry = (geometry) => toConcreteGeometry(geometry);
 
 export const toVisiblyDisjointGeometry = (geometry) =>
   toDisjointGeometry(geometry, DISJUNCTION_VISIBLE);

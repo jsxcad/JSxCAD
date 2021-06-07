@@ -195,7 +195,7 @@ Surface_mesh* FromPolygonSoupToSurfaceMesh(emscripten::val fill) {
   return mesh;
 }
 
-void FromSurfaceMeshToPolygonSoup(Surface_mesh* mesh, bool triangulate, emscripten::val emit_polygon, emscripten::val emit_point) {
+void FromSurfaceMeshToPolygonSoup(Surface_mesh* mesh, Transformation* transformation, bool triangulate, emscripten::val emit_polygon, emscripten::val emit_point) {
   if (triangulate) {
     // Note: Destructive update.
     CGAL::Polygon_mesh_processing::triangulate_faces(mesh->faces(), *mesh);
@@ -206,7 +206,7 @@ void FromSurfaceMeshToPolygonSoup(Surface_mesh* mesh, bool triangulate, emscript
   for (const auto& polygon : polygons) {
     emit_polygon();
     for (const auto& index : polygon) {
-      const auto& p = points[index];
+      const auto p = points[index].transform(*transformation);
       emit_point(CGAL::to_double(p.x().exact()), CGAL::to_double(p.y().exact()), CGAL::to_double(p.z().exact()));
     }
   }

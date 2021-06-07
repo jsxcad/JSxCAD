@@ -7,16 +7,16 @@ import { rewrite } from './visit.js';
 import { taggedGraph } from './taggedGraph.js';
 import { taggedGroup } from './taggedGroup.js';
 import { taggedPaths } from './taggedPaths.js';
-import { toDisjointGeometry } from './toDisjointGeometry.js';
+import { toConcreteGeometry } from './toConcreteGeometry.js';
 import { toPaths as toPathsFromGraph } from '../graph/toPaths.js';
 
 const intersectionImpl = (geometry, ...geometries) => {
-  geometries = geometries.map(toDisjointGeometry);
+  geometries = geometries.map(toConcreteGeometry);
   const op = (geometry, descend) => {
     const { tags } = geometry;
     switch (geometry.type) {
       case 'graph': {
-        let input = geometry.graph;
+        let input = geometry;
         const intersections = [];
         for (const geometry of geometries) {
           for (const graph of getNonVoidGraphs(geometry)) {
@@ -71,7 +71,7 @@ const intersectionImpl = (geometry, ...geometries) => {
     }
   };
 
-  return rewrite(toDisjointGeometry(geometry), op);
+  return rewrite(toConcreteGeometry(geometry), op);
 };
 
 export const intersection = cache(intersectionImpl);
