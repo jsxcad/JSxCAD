@@ -25,22 +25,23 @@ registerReifier('Box', (geometry) => {
   const top = corner2[Z];
   const bottom = corner1[Z];
 
-  return Shape.fromPath([
+  const a = Shape.fromPath([
     [left, back, bottom],
     [right, back, bottom],
     [right, front, bottom],
     [left, front, bottom],
-  ])
-    .fill()
-    .ex(top, bottom)
-    .orient({
-      center: negate(getAt(geometry)),
-      from: getFrom(geometry),
-      at: getTo(geometry),
-    })
-    .transform(getMatrix(geometry))
-    .setTags(geometry.tags)
-    .toGeometry();
+  ]);
+  const b = a.fill();
+  const c = b.ex(top, bottom);
+  const d = c.orient({
+    center: negate(getAt(geometry)),
+    from: getFrom(geometry),
+    at: getTo(geometry),
+  });
+  const e = d.transform(getMatrix(geometry));
+  const f = e.setTags(geometry.tags);
+  const g = f.toGeometry();
+  return g;
 });
 
 export const Box = (x, y = x, z = 0) =>

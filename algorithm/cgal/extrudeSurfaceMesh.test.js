@@ -1,6 +1,7 @@
 import { extrudeSurfaceMesh } from './extrudeSurfaceMesh.js';
 import { fromPolygonsToSurfaceMesh } from './fromPolygonsToSurfaceMesh.js';
 import { fromSurfaceMeshToGraph } from './fromSurfaceMeshToGraph.js';
+import { identityMatrix } from '@jsxcad/math-mat4';
 import { initCgal } from './getCgal.js';
 
 import test from 'ava';
@@ -22,7 +23,7 @@ test('Extrude/Triangle', (t) => {
   const surfaceMesh = fromPolygonsToSurfaceMesh(triangle);
   t.true(surfaceMesh.is_valid(false));
   t.true(!surfaceMesh.is_empty());
-  const extrusion = extrudeSurfaceMesh(surfaceMesh, 1, 0);
+  const extrusion = extrudeSurfaceMesh(surfaceMesh, identityMatrix, 1, 0);
   const graph = fromSurfaceMeshToGraph(extrusion);
   t.deepEqual(JSON.parse(JSON.stringify(graph)), {
     edges: [

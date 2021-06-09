@@ -14,7 +14,12 @@ export const difference = (a, b) => {
   }
   info('difference begin');
   const result = fromSurfaceMeshLazy(
-    differenceOfSurfaceMeshes(toSurfaceMesh(a.graph), toSurfaceMesh(b.graph))
+    differenceOfSurfaceMeshes(
+      toSurfaceMesh(a.graph),
+      a.matrix,
+      toSurfaceMesh(b.graph),
+      b.matrix
+    )
   );
   info('difference end');
   return taggedGraph({ tags: a.tags }, result);

@@ -3,10 +3,10 @@ import { info } from '@jsxcad/sys';
 import { insetOfPolygonWithHoles } from '@jsxcad/algorithm-cgal';
 import { toPolygonsWithHoles } from './toPolygonsWithHoles.js';
 
-export const inset = (graph, initial, step, limit) => {
+export const inset = (geometry, initial, step, limit) => {
   info('inset begin');
   const insetGraphs = [];
-  for (const { polygonsWithHoles } of toPolygonsWithHoles(graph)) {
+  for (const { polygonsWithHoles } of toPolygonsWithHoles(geometry)) {
     for (const polygonWithHoles of polygonsWithHoles) {
       for (const insetPolygon of insetOfPolygonWithHoles(
         initial,

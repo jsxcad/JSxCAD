@@ -1,7 +1,7 @@
 import { taggedPlan, registerReifier, taggedDisjointAssembly, taggedGroup, taggedPaths, translatePaths, getLeafs, taggedLayers, taggedLayout, measureBoundingBox, getLayouts, visit, isNotVoid, concatenatePath, rotateZPath, taggedAssembly, taggedGraph, convexHullToGraph, fromFunctionToGraph, scalePath, translatePath, flipPath, deduplicatePath, taggedPoints, fromPathsToGraph } from './jsxcad-geometry.js';
 import Shape$1, { Shape, shapeMethod, weld } from './jsxcad-api-v1-shape.js';
 import { scale, subtract, add, negate } from './jsxcad-math-vec3.js';
-import { identity } from './jsxcad-math-mat4.js';
+import { identityMatrix } from './jsxcad-math-mat4.js';
 import { zag, numbers } from './jsxcad-api-v1-math.js';
 import { fromPoints as fromPoints$2 } from './jsxcad-math-poly3.js';
 import { fromAngleRadians } from './jsxcad-math-vec2.js';
@@ -33,7 +33,7 @@ const getAt = (geometry) => find(geometry, 'at', [0, 0, 0]);
 const getCorner1 = (geometry) => find(geometry, 'corner1', [0, 0, 0]);
 const getCorner2 = (geometry) => find(geometry, 'corner2', [0, 0, 0]);
 const getFrom = (geometry) => find(geometry, 'from', [0, 0, 0]);
-const getMatrix = (geometry) => geometry.matrix || identity();
+const getMatrix = (geometry) => geometry.matrix || identityMatrix;
 const getTo = (geometry) => find(geometry, 'to', [0, 0, 0]);
 
 const defaultZag = 0.01;
@@ -82,22 +82,23 @@ registerReifier('Box', (geometry) => {
   const top = corner2[Z];
   const bottom = corner1[Z];
 
-  return Shape.fromPath([
+  const a = Shape.fromPath([
     [left, back, bottom],
     [right, back, bottom],
     [right, front, bottom],
     [left, front, bottom],
-  ])
-    .fill()
-    .ex(top, bottom)
-    .orient({
-      center: negate(getAt(geometry)),
-      from: getFrom(geometry),
-      at: getTo(geometry),
-    })
-    .transform(getMatrix(geometry))
-    .setTags(geometry.tags)
-    .toGeometry();
+  ]);
+  const b = a.fill();
+  const c = b.ex(top, bottom);
+  const d = c.orient({
+    center: negate(getAt(geometry)),
+    from: getFrom(geometry),
+    at: getTo(geometry),
+  });
+  const e = d.transform(getMatrix(geometry));
+  const f = e.setTags(geometry.tags);
+  const g = f.toGeometry();
+  return g;
 });
 
 const Box = (x, y = x, z = 0) =>

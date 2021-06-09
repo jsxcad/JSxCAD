@@ -2,19 +2,13 @@ import { extrude as extrudeGraph } from '../graph/extrude.js';
 import { fill } from './fill.js';
 import { reify } from './reify.js';
 import { rewrite } from './visit.js';
-import { taggedGraph } from './taggedGraph.js';
 import { toTransformedGeometry } from './toTransformedGeometry.js';
 
 export const extrude = (geometry, height, depth) => {
   const op = (geometry, descend) => {
-    const { tags } = geometry;
     switch (geometry.type) {
-      case 'graph': {
-        return taggedGraph(
-          { tags },
-          extrudeGraph(geometry.graph, height, depth)
-        );
-      }
+      case 'graph':
+        return extrudeGraph(geometry, height, depth);
       case 'triangles':
       case 'points':
         // Not implemented yet.

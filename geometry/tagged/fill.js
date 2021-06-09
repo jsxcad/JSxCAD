@@ -2,19 +2,19 @@ import { fill as fillOutlineGraph } from '../graph/fill.js';
 import { fromPaths as fromPathsToGraph } from '../graph/fromPaths.js';
 import { getNonVoidGraphs } from './getNonVoidGraphs.js';
 import { getNonVoidPaths } from './getNonVoidPaths.js';
-import { taggedGraph } from './taggedGraph.js';
 import { taggedGroup } from './taggedGroup.js';
 import { toKeptGeometry } from './toKeptGeometry.js';
 
 export const fill = (geometry, includeFaces = true, includeHoles = true) => {
   const keptGeometry = toKeptGeometry(geometry);
   const fills = [];
-  for (const { tags, graph } of getNonVoidGraphs(keptGeometry)) {
+  for (const geometry of getNonVoidGraphs(keptGeometry)) {
+    const { tags } = geometry;
     if (tags && tags.includes('path/Wire')) {
       continue;
     }
-    if (graph.isOutline) {
-      fills.push(taggedGraph({ tags }, fillOutlineGraph(graph)));
+    if (geometry.graph.isOutline) {
+      fills.push(fillOutlineGraph(geometry));
     }
   }
   for (const { tags, paths } of getNonVoidPaths(keptGeometry)) {
@@ -22,10 +22,10 @@ export const fill = (geometry, includeFaces = true, includeHoles = true) => {
       continue;
     }
     fills.push(
-      taggedGraph(
-        { tags },
-        fillOutlineGraph(
-          fromPathsToGraph(paths.map((path) => ({ points: path })))
+      fillOutlineGraph(
+        fromPathsToGraph(
+          { tags },
+          paths.map((path) => ({ points: path }))
         )
       )
     );

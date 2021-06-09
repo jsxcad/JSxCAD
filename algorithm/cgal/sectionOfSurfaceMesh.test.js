@@ -1,5 +1,6 @@
 import { fromPolygonsToSurfaceMesh } from './fromPolygonsToSurfaceMesh.js';
 import { fromSurfaceMeshToGraph } from './fromSurfaceMeshToGraph.js';
+import { identityMatrix } from '@jsxcad/math-mat4';
 import { initCgal } from './getCgal.js';
 import { sectionOfSurfaceMesh } from './sectionOfSurfaceMesh.js';
 import test from 'ava';
@@ -42,7 +43,7 @@ export const unitRegularTetrahedronPolygons = [
 test('Section of tetrahedron.', (t) => {
   const mesh = fromPolygonsToSurfaceMesh(unitRegularTetrahedronPolygons);
   const plane = [0, 0, 1, 0];
-  const sections = sectionOfSurfaceMesh(mesh, [{ plane }]);
+  const sections = sectionOfSurfaceMesh(mesh, identityMatrix, [{ plane }]);
   const graphs = sections.map((mesh) => fromSurfaceMeshToGraph(mesh));
   t.deepEqual(JSON.parse(JSON.stringify(graphs)), [
     {

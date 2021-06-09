@@ -1,5 +1,3 @@
-import { composeTransforms } from '@jsxcad/algorithm-cgal';
-import { identityMatrix } from '@jsxcad/math-mat4';
 import { rewrite } from './visit.js';
 
 const registry = new Map();

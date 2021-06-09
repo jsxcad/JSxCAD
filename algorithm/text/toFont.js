@@ -1,9 +1,4 @@
-import {
-  fromPathsToGraph,
-  scale,
-  taggedGraph,
-  taggedGroup,
-} from '@jsxcad/geometry';
+import { fromPathsToGraph, scale, taggedGroup } from '@jsxcad/geometry';
 
 import OpenTypeJs from 'opentype.js/dist/opentype.js';
 import { fromSvgPath } from '@jsxcad/convert-svg';
@@ -44,9 +39,9 @@ export const toFont = (options = {}, data) => {
       group.push(
         scale(
           [factor, factor, factor],
-          taggedGraph(
+          fromPathsToGraph(
             {},
-            fromPathsToGraph(paths.map((path) => ({ points: path })))
+            paths.map((path) => ({ points: path }))
           )
         )
       );

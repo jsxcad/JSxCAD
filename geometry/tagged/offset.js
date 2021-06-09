@@ -2,7 +2,6 @@ import { fromPaths as fromPathsToGraph } from '../graph/fromPaths.js';
 import { offset as offsetGraph } from '../graph/offset.js';
 import { reify } from './reify.js';
 import { rewrite } from './visit.js';
-import { taggedGraph } from './taggedGraph.js';
 import { taggedGroup } from './taggedGroup.js';
 import { toTransformedGeometry } from './toTransformedGeometry.js';
 
@@ -13,9 +12,7 @@ export const offset = (geometry, initial = 1, step, limit) => {
       case 'graph':
         return taggedGroup(
           { tags },
-          ...offsetGraph(geometry.graph, initial, step, limit).map((graph) =>
-            taggedGraph({}, graph)
-          )
+          ...offsetGraph(geometry, initial, step, limit)
         );
       case 'triangles':
       case 'points':

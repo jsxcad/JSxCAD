@@ -1,5 +1,5 @@
 import { fromPolygonsWithHolesToTriangles } from './fromPolygonsWithHolesToTriangles.js';
 import { fromTriangles } from './fromTriangles.js';
 
-export const fromPolygonsWithHoles = (polygonsWithHoles) =>
-  fromTriangles(fromPolygonsWithHolesToTriangles(polygonsWithHoles));
+export const fromPolygonsWithHoles = ({ tags }, polygonsWithHoles) =>
+  fromTriangles({ tags }, fromPolygonsWithHolesToTriangles(polygonsWithHoles));

@@ -1,24 +1,32 @@
 import { fromSurfaceMeshLazy } from './fromSurfaceMeshLazy.js';
 import { sectionOfSurfaceMesh } from '@jsxcad/algorithm-cgal';
+import { taggedGraph } from '../tagged/taggedGraph.js';
 import { toSurfaceMesh } from './toSurfaceMesh.js';
 
-export const section = (graph, plane) => {
-  for (const planarMesh of sectionOfSurfaceMesh(toSurfaceMesh(graph), [
-    plane,
-    /* profile= */ false,
-  ])) {
-    return fromSurfaceMeshLazy(planarMesh);
+export const section = (geometry, plane) => {
+  for (const planarMesh of sectionOfSurfaceMesh(
+    toSurfaceMesh(geometry.graph),
+    geometry.matrix,
+    [plane, /* profile= */ false]
+  )) {
+    return taggedGraph(
+      { tags: geometry.tags },
+      fromSurfaceMeshLazy(planarMesh)
+    );
   }
 };
 
-export const sections = (graph, planes, { profile = false } = {}) => {
+export const sections = (geometry, planes, { profile = false } = {}) => {
   const graphs = [];
   for (const planarMesh of sectionOfSurfaceMesh(
-    toSurfaceMesh(graph),
+    toSurfaceMesh(geometry.graph),
+    geometry.matrix,
     planes,
     /* profile= */ profile
   )) {
-    graphs.push(fromSurfaceMeshLazy(planarMesh));
+    graphs.push(
+      taggedGraph({ tags: geometry.tags }, fromSurfaceMeshLazy(planarMesh))
+    );
   }
   return graphs;
 };

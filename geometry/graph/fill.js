@@ -4,4 +4,7 @@
 // Convert an outline graph to a possibly closed surface.
 // export const fill = (graph) => fromPolygons(toTriangles(graph));
 
-export const fill = (graph) => ({ ...graph, isOutline: false });
+export const fill = (geometry) => ({
+  ...geometry,
+  graph: { ...geometry.graph, isOutline: true },
+});

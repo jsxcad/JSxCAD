@@ -1,6 +1,7 @@
 import {
   fill as fillGeometry,
   taggedGroup,
+  taggedPaths,
   transform as transformGeometry,
 } from '@jsxcad/geometry';
 
@@ -254,11 +255,7 @@ export const fromSvg = async (
             geometry.content.push(
               transformGeometry(
                 scale(matrix),
-                fillGeometry({
-                  type: 'paths',
-                  paths: paths,
-                  tags,
-                })
+                fillGeometry(taggedPaths({ tags }, paths))
               )
             );
           }

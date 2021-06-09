@@ -1,11 +1,18 @@
 // import { arrangePaths } from './arrangePaths.js';
 import { getCgal } from './getCgal.js';
+import { toCgalTransformFromJsTransform } from './transform.js';
 
-export const sectionOfSurfaceMesh = (mesh, planes, profile = false) => {
+export const sectionOfSurfaceMesh = (
+  mesh,
+  transform,
+  planes,
+  profile = false
+) => {
   const g = getCgal();
   const sections = [];
   g.SectionOfSurfaceMesh(
     mesh,
+    toCgalTransformFromJsTransform(transform),
     planes.length,
     (nth, out) => {
       const { plane, exactPlane } = planes[nth];

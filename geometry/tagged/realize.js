@@ -1,13 +1,11 @@
 import { realizeGraph } from '../graph/realizeGraph.js';
 import { rewrite } from './visit.js';
-import { taggedGraph } from './taggedGraph.js';
 
 export const realize = (geometry) => {
   const op = (geometry, descend) => {
-    const { tags } = geometry;
     switch (geometry.type) {
       case 'graph':
-        return taggedGraph({ tags }, realizeGraph(geometry.graph));
+        return realizeGraph(geometry);
       case 'displayGeometry':
       case 'triangles':
       case 'points':

@@ -1,7 +1,9 @@
 import { getCgal } from './getCgal.js';
+import { toCgalTransformFromJsTransform } from './transform.js';
 
 export const projectToPlaneOfSurfaceMesh = (
   mesh,
+  transform,
   directionX,
   directionY,
   directionZ,
@@ -12,6 +14,7 @@ export const projectToPlaneOfSurfaceMesh = (
 ) =>
   getCgal().ProjectionToPlaneOfSurfaceMesh(
     mesh,
+    toCgalTransformFromJsTransform(transform),
     directionX,
     directionY,
     directionZ,

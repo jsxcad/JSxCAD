@@ -1,15 +1,13 @@
 import { grow as growGraph } from '../graph/grow.js';
 import { reify } from './reify.js';
 import { rewrite } from './visit.js';
-import { taggedGraph } from './taggedGraph.js';
 import { toTransformedGeometry } from './toTransformedGeometry.js';
 
 export const grow = (geometry, amount) => {
   const op = (geometry, descend) => {
-    const { tags } = geometry;
     switch (geometry.type) {
       case 'graph':
-        return taggedGraph({ tags }, growGraph(geometry.graph, amount));
+        return growGraph(geometry, amount);
       case 'triangles':
       case 'paths':
       case 'points':

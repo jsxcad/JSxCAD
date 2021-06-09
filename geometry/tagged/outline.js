@@ -14,14 +14,15 @@ import { toDisjointGeometry } from './toDisjointGeometry.js';
 const outlineImpl = (geometry, tagsOverride) => {
   const disjointGeometry = toDisjointGeometry(geometry);
   const outlines = [];
-  for (let { tags = [], graph } of getNonVoidGraphs(disjointGeometry)) {
+  for (let graphGeometry of getNonVoidGraphs(disjointGeometry)) {
+    let tags = graphGeometry.tags;
     if (tagsOverride) {
       tags = tagsOverride;
     }
     outlines.push(
       taggedPaths(
         { tags: [...tags, 'path/Wire'] },
-        outlineGraph(graph).map((path) => [null, ...path])
+        outlineGraph(graphGeometry).map((path) => [null, ...path])
       )
     );
   }

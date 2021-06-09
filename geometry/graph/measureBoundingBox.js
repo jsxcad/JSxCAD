@@ -15,6 +15,7 @@ export const measureBoundingBox = (geometry) => {
     if (graph.isLazy) {
       fromSurfaceMeshEmitBoundingBox(
         toSurfaceMesh(graph),
+        geometry.matrix,
         (xMin, yMin, zMin, xMax, yMax, zMax) => {
           geometry.cache.boundingBox = [
             [xMin, yMin, zMin],
