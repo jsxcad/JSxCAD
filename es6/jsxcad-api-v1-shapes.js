@@ -2017,9 +2017,10 @@ registerReifier('Icosahedron', (geometry) => {
     from: getFrom(geometry),
     at: getTo(geometry),
   });
-  const e = d.setTags(geometry.tags);
-  const f = e.toGeometry();
-  return f;
+  const e = d.transform(getMatrix(geometry));
+  const f = e.setTags(geometry.tags);
+  const g = f.toGeometry();
+  return g;
 });
 
 const Icosahedron = (x = 1, y = x, z = x) =>
