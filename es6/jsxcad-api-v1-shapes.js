@@ -122,6 +122,7 @@ const Group = (...shapes) =>
   );
 
 Shape.prototype.Group = shapeMethod(Group);
+Shape.Group = Group;
 
 // Hershey simplex one line font.
 // See: http://paulbourke.net/dataformats/hershey/

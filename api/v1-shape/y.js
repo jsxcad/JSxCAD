@@ -9,10 +9,11 @@ import move from './move.js';
  *
  */
 
-export const moveY = (shape, y = 0) => move(shape, 0, y);
+export const moveY = (shape, ...y) =>
+  Shape.Group(...y.map((y) => move(shape, 0, y)));
 
-const moveYMethod = function (y) {
-  return moveY(this, y);
+const moveYMethod = function (...y) {
+  return moveY(this, ...y);
 };
 Shape.prototype.y = moveYMethod;
 

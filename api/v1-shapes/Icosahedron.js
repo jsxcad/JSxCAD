@@ -77,7 +77,7 @@ registerReifier('Icosahedron', (geometry) => {
     from: getFrom(geometry),
     at: getTo(geometry),
   });
-  const e = d.transform(getMatrix(geometry))
+  const e = d.transform(getMatrix(geometry));
   const f = e.setTags(geometry.tags);
   const g = f.toGeometry();
   return g;
