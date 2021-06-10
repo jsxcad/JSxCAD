@@ -3,10 +3,10 @@ import { info } from '@jsxcad/sys';
 import { offsetOfPolygonWithHoles } from '@jsxcad/algorithm-cgal';
 import { toPolygonsWithHoles } from './toPolygonsWithHoles.js';
 
-export const offset = (graph, initial, step, limit) => {
+export const offset = (geometry, initial, step, limit) => {
   info('offset begin');
   const offsetGraphs = [];
-  for (const { polygonsWithHoles } of toPolygonsWithHoles(graph)) {
+  for (const { polygonsWithHoles } of toPolygonsWithHoles(geometry)) {
     for (const polygonWithHoles of polygonsWithHoles) {
       for (const offsetPolygon of offsetOfPolygonWithHoles(
         initial,
@@ -14,7 +14,9 @@ export const offset = (graph, initial, step, limit) => {
         limit,
         polygonWithHoles
       )) {
-        offsetGraphs.push(fromPolygonsWithHoles([offsetPolygon]));
+        offsetGraphs.push(
+          fromPolygonsWithHoles({ tags: geometry.tags }, [offsetPolygon])
+        );
       }
     }
   }

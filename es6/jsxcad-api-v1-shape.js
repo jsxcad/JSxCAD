@@ -139,7 +139,7 @@ Shape.fromPoint = (point, context) =>
 Shape.fromPoints = (points, context) =>
   fromGeometry(taggedPoints({}, points), context);
 Shape.fromPolygons = (polygons, context) =>
-  fromGeometry(taggedGraph({}, fromPolygonsToGraph(polygons)), context);
+  fromGeometry(fromPolygonsToGraph({}, polygons), context);
 Shape.registerMethod = registerShapeMethod;
 // Let's consider 'method' instead of 'registerMethod'.
 Shape.method = registerShapeMethod;
@@ -1205,10 +1205,11 @@ Shape.prototype.writeShape = writeShapeMethod;
  *
  */
 
-const moveX = (shape, x = 0) => move(shape, x);
+const moveX = (shape, ...x) =>
+  Shape.Group(...x.map((x) => move(shape, x)));
 
-const moveXMethod = function (x) {
-  return moveX(this, x);
+const moveXMethod = function (...x) {
+  return moveX(this, ...x);
 };
 Shape.prototype.x = moveXMethod;
 
@@ -1220,10 +1221,11 @@ Shape.prototype.x = moveXMethod;
  *
  */
 
-const moveY = (shape, y = 0) => move(shape, 0, y);
+const moveY = (shape, ...y) =>
+  Shape.Group(...y.map((y) => move(shape, 0, y)));
 
-const moveYMethod = function (y) {
-  return moveY(this, y);
+const moveYMethod = function (...y) {
+  return moveY(this, ...y);
 };
 Shape.prototype.y = moveYMethod;
 
@@ -1235,10 +1237,11 @@ Shape.prototype.y = moveYMethod;
  *
  */
 
-const moveZ = (shape, z = 0) => move(shape, 0, 0, z);
+const moveZ = (shape, ...z) =>
+  Shape.Group(...z.map((z) => move(shape, 0, 0, z)));
 
-const moveZMethod = function (z) {
-  return moveZ(this, z);
+const moveZMethod = function (...z) {
+  return moveZ(this, ...z);
 };
 Shape.prototype.z = moveZMethod;
 

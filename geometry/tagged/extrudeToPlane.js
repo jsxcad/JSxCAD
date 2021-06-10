@@ -1,18 +1,17 @@
 import { extrudeToPlane as extrudeToPlaneOfGraph } from '../graph/extrudeToPlane.js';
 import { rewrite } from './visit.js';
-import { taggedGraph } from './taggedGraph.js';
 import { toTransformedGeometry } from './toTransformedGeometry.js';
 
 export const extrudeToPlane = (geometry, highPlane, lowPlane, direction) => {
   const op = (geometry, descend) => {
-    const { tags } = geometry;
     switch (geometry.type) {
-      case 'graph': {
-        return taggedGraph(
-          { tags },
-          extrudeToPlaneOfGraph(geometry.graph, highPlane, lowPlane, direction)
+      case 'graph':
+        return extrudeToPlaneOfGraph(
+          geometry.graph,
+          highPlane,
+          lowPlane,
+          direction
         );
-      }
       case 'triangles':
       case 'paths':
       case 'points':

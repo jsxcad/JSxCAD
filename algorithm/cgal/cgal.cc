@@ -415,8 +415,10 @@ void compute_angle(double a, RT& sin_alpha, RT& cos_alpha, RT& w) {
   CGAL::rational_rotation_approximation(radians, sin_alpha, cos_alpha, w, RT(1), RT(1000));
 }
 
-Surface_mesh* TwistSurfaceMesh(Surface_mesh* input, double degreesPerZ) {
+Surface_mesh* TwistSurfaceMesh(Surface_mesh* input, Transformation* transform, double degreesPerZ) {
   Surface_mesh* c = new Surface_mesh(*input);
+  CGAL::Polygon_mesh_processing::transform(*transform, *c, CGAL::parameters::all_default());
+  
   // This does not look very efficient.
   // CHECK: Figure out deformations.
   for (const Surface_mesh::Vertex_index vertex : c->vertices()) {
@@ -437,8 +439,9 @@ Surface_mesh* TwistSurfaceMesh(Surface_mesh* input, double degreesPerZ) {
   return c;
 }
 
-Surface_mesh* PushSurfaceMesh(Surface_mesh* input, double force, double minimum_distance, double scale) {
+Surface_mesh* PushSurfaceMesh(Surface_mesh* input, Transformation* transform, double force, double minimum_distance, double scale) {
   Surface_mesh* c = new Surface_mesh(*input);
+  CGAL::Polygon_mesh_processing::transform(*transform, *c, CGAL::parameters::all_default());
   Point origin(0, 0, 0);
   for (const Surface_mesh::Vertex_index vertex : c->vertices()) {
     if (c->is_removed(vertex)) {
@@ -461,21 +464,24 @@ Surface_mesh* PushSurfaceMesh(Surface_mesh* input, double force, double minimum_
 Vector unitVector(const Vector& vector);
 Vector NormalOfSurfaceMeshFacet(const Surface_mesh& mesh, Face_index facet);
 
-Surface_mesh* GrowSurfaceMesh(Surface_mesh* input, double amount) {
-  Surface_mesh* result = new Surface_mesh(*input);
-  for (const Surface_mesh::Vertex_index vertex : input->vertices()) {
-    const Surface_mesh::Halfedge_index start = input->halfedge(vertex);
+Surface_mesh* GrowSurfaceMesh(Surface_mesh* input, Transformation* transformation, double amount) {
+  Surface_mesh mesh(*input);
+  CGAL::Polygon_mesh_processing::transform(*transformation, mesh, CGAL::parameters::all_default());
+
+  Surface_mesh* result = new Surface_mesh(mesh);
+  for (const Surface_mesh::Vertex_index vertex : mesh.vertices()) {
+    const Surface_mesh::Halfedge_index start = mesh.halfedge(vertex);
     Surface_mesh::Halfedge_index edge = start;
     std::vector<Vector> normals;
     Vector average = CGAL::NULL_VECTOR;
     do {
-      Surface_mesh::Face_index facet = input->face(edge);
-      Vector unit = unitVector(NormalOfSurfaceMeshFacet(*input, facet));
+      Surface_mesh::Face_index facet = mesh.face(edge);
+      Vector unit = unitVector(NormalOfSurfaceMeshFacet(mesh, facet));
       if (std::find(normals.begin(), normals.end(), unit) == normals.end()) {
         normals.push_back(unit);
         average += unit;
       }
-      edge = input->next_around_target(edge);
+      edge = mesh.next_around_target(edge);
     } while (edge != start);
 
     Point& point = result->point(vertex);
@@ -744,13 +750,16 @@ Vector SomeNormalOfSurfaceMesh(const Surface_mesh& mesh) {
   return CGAL::NULL_VECTOR;
 }
 
-Surface_mesh* ExtrusionOfSurfaceMesh(Surface_mesh* mesh, double height, double depth) {
+Surface_mesh* ExtrusionOfSurfaceMesh(Surface_mesh* input, Transformation* transformation, double height, double depth) {
+  Surface_mesh mesh(*input);
+  CGAL::Polygon_mesh_processing::transform(*transformation, mesh, CGAL::parameters::all_default());
+
   Surface_mesh* extruded_mesh = new Surface_mesh();
 
-  Vector normal = SomeNormalOfSurfaceMesh(*mesh);
+  Vector normal = SomeNormalOfSurfaceMesh(mesh);
 
   if (normal == CGAL::NULL_VECTOR) {
-    std::cout << "Extrusion couldn't find any faces: " << *mesh << std::endl;
+    std::cout << "Extrusion couldn't find any faces: " << mesh << std::endl;
     return nullptr;
   }
 
@@ -792,7 +801,7 @@ Surface_mesh* ExtrusionOfSurfaceMesh(Surface_mesh* mesh, double height, double d
   typedef typename boost::property_map<Surface_mesh, CGAL::vertex_point_t>::type VPMap;
   Project<VPMap> top(get(CGAL::vertex_point, *extruded_mesh), up);
   Project<VPMap> bottom(get(CGAL::vertex_point, *extruded_mesh), down);
-  CGAL::Polygon_mesh_processing::extrude_mesh(*mesh, *extruded_mesh, bottom, top);
+  CGAL::Polygon_mesh_processing::extrude_mesh(mesh, *extruded_mesh, bottom, top);
 
   return extruded_mesh;
 }
@@ -820,28 +829,36 @@ struct ProjectToPlane
 };
 
 Surface_mesh* ExtrusionToPlaneOfSurfaceMesh(
-    Surface_mesh* mesh,
+    Surface_mesh* input,
+    Transformation* transformation,
     double high_x, double high_y, double high_z,
     double high_plane_x, double high_plane_y, double high_plane_z,
     double high_plane_w, double low_x, double low_y, double low_z,
     double low_plane_x, double low_plane_y, double low_plane_z, double low_plane_w) {
+  Surface_mesh mesh(*input);
+  CGAL::Polygon_mesh_processing::transform(*transformation, mesh, CGAL::parameters::all_default());
+  
   Surface_mesh* extruded_mesh = new Surface_mesh();
 
   typedef typename boost::property_map<Surface_mesh, CGAL::vertex_point_t>::type VPMap;
   ProjectToPlane<VPMap> top(get(CGAL::vertex_point, *extruded_mesh), Vector(high_x, high_y, high_z), Plane(high_plane_x, high_plane_y, high_plane_z, high_plane_w));
   ProjectToPlane<VPMap> bottom(get(CGAL::vertex_point, *extruded_mesh), Vector(low_x, low_y, low_z), Plane(low_plane_x, low_plane_y, low_plane_z, low_plane_w));
 
-  CGAL::Polygon_mesh_processing::extrude_mesh(*mesh, *extruded_mesh, bottom, top);
+  CGAL::Polygon_mesh_processing::extrude_mesh(mesh, *extruded_mesh, bottom, top);
 
   return extruded_mesh;
 }
 
 Surface_mesh* ProjectionToPlaneOfSurfaceMesh(
-    Surface_mesh* mesh,
+    Surface_mesh* input,
+    Transformation* transformation,
     double direction_x, double direction_y, double direction_z,
     double plane_x, double plane_y, double plane_z, double plane_w) {
-  Surface_mesh* projected_mesh = new Surface_mesh(*mesh);
-  auto& input_map = mesh->points();
+  Surface_mesh mesh(*input);
+  CGAL::Polygon_mesh_processing::transform(*transformation, mesh, CGAL::parameters::all_default());
+
+  Surface_mesh* projected_mesh = new Surface_mesh(mesh);
+  auto& input_map = mesh.points();
   auto& output_map = projected_mesh->points();
 
   Plane plane(plane_x, plane_y, plane_z, plane_w);
@@ -849,7 +866,7 @@ Surface_mesh* ProjectionToPlaneOfSurfaceMesh(
 
   // CHECK: Could this project a point multiple times?
   // Are points shared between vertices?
-  for (auto& vertex : mesh->vertices()) {
+  for (auto& vertex : mesh.vertices()) {
     auto result = CGAL::intersection(Line(get(input_map, vertex), get(input_map, vertex) + vector), plane);
     if (result) {
       if (Point* point = boost::get<Point>(&*result)) {
@@ -1109,7 +1126,16 @@ void PlanarSurfaceMeshToVolumetricSurfaceMesh(const Plane& plane, const Surface_
 
 const double kIota = 10e-5;
 
-Surface_mesh* DifferenceOfSurfaceMeshes(Surface_mesh* a, Surface_mesh* b) {
+Surface_mesh* DifferenceOfSurfaceMeshes(Surface_mesh* a, Transformation* a_transform, Surface_mesh* b, Transformation* b_transform) {
+  if (a_transform) {
+    Surface_mesh transformed(*a);
+    CGAL::Polygon_mesh_processing::transform(*a_transform, transformed, CGAL::parameters::all_default());
+    return DifferenceOfSurfaceMeshes(&transformed, nullptr, b, b_transform);
+  } else if (b_transform) {
+    Surface_mesh transformed(*b);
+    CGAL::Polygon_mesh_processing::transform(*b_transform, transformed, CGAL::parameters::all_default());
+    return DifferenceOfSurfaceMeshes(a, a_transform, &transformed, nullptr);
+  }
   Plane plane;
   if (IsPlanarSurfaceMesh(plane, *a)) {
     if (IsCoplanarSurfaceMesh(plane, *b)) {
@@ -1126,7 +1152,7 @@ Surface_mesh* DifferenceOfSurfaceMeshes(Surface_mesh* a, Surface_mesh* b) {
   } else if (IsPlanarSurfaceMesh(plane, *b)) {
     Surface_mesh volumetric_b;
     PlanarSurfaceMeshToVolumetricSurfaceMesh(plane, *b, volumetric_b);
-    return DifferenceOfSurfaceMeshes(a, &volumetric_b);
+    return DifferenceOfSurfaceMeshes(a, a_transform, &volumetric_b, b_transform);
   }
   double x = 0, y = 0, z = 0;
   Surface_mesh* c = new Surface_mesh();
@@ -1164,7 +1190,16 @@ Surface_mesh* DifferenceOfSurfaceMeshes(Surface_mesh* a, Surface_mesh* b) {
   }
 }
 
-Surface_mesh* IntersectionOfSurfaceMeshes(Surface_mesh* a, Surface_mesh* b) {
+Surface_mesh* IntersectionOfSurfaceMeshes(Surface_mesh* a, Transformation* a_transform, Surface_mesh* b, Transformation* b_transform) {
+  if (a_transform) {
+    Surface_mesh transformed(*a);
+    CGAL::Polygon_mesh_processing::transform(*a_transform, transformed, CGAL::parameters::all_default());
+    return IntersectionOfSurfaceMeshes(&transformed, nullptr, b, b_transform);
+  } else if (b_transform) {
+    Surface_mesh transformed(*b);
+    CGAL::Polygon_mesh_processing::transform(*b_transform, transformed, CGAL::parameters::all_default());
+    return IntersectionOfSurfaceMeshes(a, a_transform, &transformed, nullptr);
+  }
   Plane plane;
   if (IsPlanarSurfaceMesh(plane, *a)) {
     if (IsCoplanarSurfaceMesh(plane, *b)) {
@@ -1181,7 +1216,7 @@ Surface_mesh* IntersectionOfSurfaceMeshes(Surface_mesh* a, Surface_mesh* b) {
   } else if (IsPlanarSurfaceMesh(plane, *b)) {
     Surface_mesh volumetric_b;
     PlanarSurfaceMeshToVolumetricSurfaceMesh(plane, *b, volumetric_b);
-    return IntersectionOfSurfaceMeshes(a, &volumetric_b);
+    return IntersectionOfSurfaceMeshes(a, a_transform, &volumetric_b, b_transform);
   }
   double x = 0, y = 0, z = 0;
   Surface_mesh* c = new Surface_mesh();
@@ -1219,7 +1254,16 @@ Surface_mesh* IntersectionOfSurfaceMeshes(Surface_mesh* a, Surface_mesh* b) {
   }
 }
 
-Surface_mesh* UnionOfSurfaceMeshes(Surface_mesh* a, Surface_mesh* b) {
+Surface_mesh* UnionOfSurfaceMeshes(Surface_mesh* a, Transformation* a_transform, Surface_mesh* b, Transformation* b_transform) {
+  if (a_transform) {
+    Surface_mesh transformed(*a);
+    CGAL::Polygon_mesh_processing::transform(*a_transform, transformed, CGAL::parameters::all_default());
+    return UnionOfSurfaceMeshes(&transformed, nullptr, b, b_transform);
+  } else if (b_transform) {
+    Surface_mesh transformed(*b);
+    CGAL::Polygon_mesh_processing::transform(*b_transform, transformed, CGAL::parameters::all_default());
+    return UnionOfSurfaceMeshes(a, a_transform, &transformed, nullptr);
+  }
   Plane plane;
   if (IsPlanarSurfaceMesh(plane, *a)) {
     if (IsCoplanarSurfaceMesh(plane, *b)) {
@@ -1274,12 +1318,16 @@ Surface_mesh* UnionOfSurfaceMeshes(Surface_mesh* a, Surface_mesh* b) {
 
 // FIX: The case where we take a section coplanar with a surface with a hole in it.
 // CHECK: Should this produce Polygons_with_holes?
-void SectionOfSurfaceMesh(Surface_mesh* mesh, std::size_t plane_count, emscripten::val fill_plane, emscripten::val emit_mesh, bool profile) {
+void SectionOfSurfaceMesh(Surface_mesh* input, Transformation* transform, std::size_t plane_count, emscripten::val fill_plane, emscripten::val emit_mesh, bool profile) {
+  // We could possibly be clever and transform the plane and output?
+  Surface_mesh mesh(*input);
+  CGAL::Polygon_mesh_processing::transform(*transform, mesh, CGAL::parameters::all_default());
+
   typedef Traits_2::X_monotone_curve_2 Segment_2;
   typedef std::vector<Point> Polyline_type;
   typedef std::list<Polyline_type> Polylines;
 
-  CGAL::Polygon_mesh_slicer<Surface_mesh, Kernel> slicer(*mesh);
+  CGAL::Polygon_mesh_slicer<Surface_mesh, Kernel> slicer(mesh);
 
   bool has_last_gps = false;
   General_polygon_set_2 last_gps;
@@ -1347,7 +1395,7 @@ Plane ensureFacetPlane(Surface_mesh& mesh, std::unordered_map<Face_index, Plane>
   }
 }
 
-void OutlineSurfaceMesh(Surface_mesh* input, emscripten::val emit_approximate_segment) {
+void OutlineSurfaceMesh(Surface_mesh* input, Transformation* transformation, emscripten::val emit_approximate_segment) {
   Surface_mesh& mesh = *input;
 
   std::unordered_set<Plane> planes;
@@ -1373,9 +1421,9 @@ void OutlineSurfaceMesh(Surface_mesh* input, emscripten::val emit_approximate_se
         }
       }
       if (corner) {
-        Point& s = mesh.point(mesh.source(edge));
-        Point& t = mesh.point(mesh.target(edge));
-        emit_approximate_segment(CGAL::to_double(s.x()), CGAL::to_double(s.y()), CGAL::to_double(s.z()), CGAL::to_double(t.x()), CGAL::to_double(t.y()), CGAL::to_double(t.z()));
+        Point s = mesh.point(mesh.source(edge)).transform(*transformation);
+        Point t = mesh.point(mesh.target(edge)).transform(*transformation);
+        emit_approximate_segment(CGAL::to_double(s.x().exact()), CGAL::to_double(s.y().exact()), CGAL::to_double(s.z().exact()), CGAL::to_double(t.x().exact()), CGAL::to_double(t.y().exact()), CGAL::to_double(t.z().exact()));
       }
       const auto& next = mesh.next(edge);
       edge = next;
@@ -2419,10 +2467,13 @@ void ArrangePathsExact(std::string x, std::string y, std::string z, std::string 
   ArrangePaths(Plane(to_FT(x), to_FT(y), to_FT(z), to_FT(w)), triangulate, fill, emit_polygon, emit_point);
 }
 
-void FromSurfaceMeshToPolygonsWithHoles(Surface_mesh* mesh, emscripten::val emit_plane, emscripten::val emit_polygon, emscripten::val emit_point) {
+void FromSurfaceMeshToPolygonsWithHoles(Surface_mesh* input, Transformation* transform, emscripten::val emit_plane, emscripten::val emit_polygon, emscripten::val emit_point) {
+  Surface_mesh mesh(*input);
+  CGAL::Polygon_mesh_processing::transform(*transform, mesh, CGAL::parameters::all_default());
+   
   // std::cout << "QQ/fsmtpwh" << std::endl;
   std::unordered_map<Plane, Arrangement_2> arrangements;
-  convertSurfaceMeshFacesToArrangements(*mesh, arrangements);
+  convertSurfaceMeshFacesToArrangements(mesh, arrangements);
   emitArrangementsAsPolygonsWithHoles(arrangements, emit_plane, emit_polygon, emit_point);
 }
 
@@ -2621,8 +2672,10 @@ bool Surface_mesh__is_valid_polygon_mesh(Surface_mesh* mesh) {
   return CGAL::is_valid_polygon_mesh(*mesh);
 }
 
-void Surface_mesh__bbox(Surface_mesh* mesh, emscripten::val emit) {
-  CGAL::Bbox_3 box = CGAL::Polygon_mesh_processing::bbox(*mesh);
+void Surface_mesh__bbox(Surface_mesh* input, Transformation* transform, emscripten::val emit) {
+  Surface_mesh mesh(*input);
+  CGAL::Polygon_mesh_processing::transform(*transform, mesh, CGAL::parameters::all_default());
+  CGAL::Bbox_3 box = CGAL::Polygon_mesh_processing::bbox(mesh);
   emit(box.xmin(), box.ymin(), box.zmin(), box.xmax(), box.ymax(), box.zmax());
 }
 

@@ -94,7 +94,7 @@ export const toCgalTransformFromJsTransform = (
     }
     return cgalTransform;
   } catch (e) {
-    console.log('oops');
+    console.log('Malformed transform');
     throw e;
   }
 };

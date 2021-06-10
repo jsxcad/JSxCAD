@@ -1,6 +1,7 @@
 import { extrudeToPlaneOfSurfaceMesh } from './extrudeToPlaneOfSurfaceMesh.js';
 import { fromPolygonsToSurfaceMesh } from './fromPolygonsToSurfaceMesh.js';
 import { fromSurfaceMeshToGraph } from './fromSurfaceMeshToGraph.js';
+import { identityMatrix } from '@jsxcad/math-mat4';
 import { initCgal } from './getCgal.js';
 
 import test from 'ava';
@@ -24,6 +25,7 @@ test('Extrude/Triangle', (t) => {
   t.true(!surfaceMesh.is_empty());
   const extrusion = extrudeToPlaneOfSurfaceMesh(
     surfaceMesh,
+    identityMatrix,
     0,
     0,
     1,

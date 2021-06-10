@@ -1,5 +1,5 @@
 import { Shape, shapeMethod } from '@jsxcad/api-v1-shape';
-import { getAt, getFrom, getScale, getTo } from './Plan.js';
+import { getAt, getFrom, getMatrix, getScale, getTo } from './Plan.js';
 import { registerReifier, taggedPlan } from '@jsxcad/geometry';
 
 import { fromPoints } from '@jsxcad/math-poly3';
@@ -77,9 +77,10 @@ registerReifier('Icosahedron', (geometry) => {
     from: getFrom(geometry),
     at: getTo(geometry),
   });
-  const e = d.setTags(geometry.tags);
-  const f = e.toGeometry();
-  return f;
+  const e = d.transform(getMatrix(geometry));
+  const f = e.setTags(geometry.tags);
+  const g = f.toGeometry();
+  return g;
 });
 
 export const Icosahedron = (x = 1, y = x, z = x) =>

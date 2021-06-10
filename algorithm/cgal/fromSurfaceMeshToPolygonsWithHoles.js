@@ -1,6 +1,7 @@
 import { getCgal } from './getCgal.js';
+import { toCgalTransformFromJsTransform } from './transform.js';
 
-export const fromSurfaceMeshToPolygonsWithHoles = (mesh) => {
+export const fromSurfaceMeshToPolygonsWithHoles = (mesh, transform) => {
   const g = getCgal();
   const arrangements = [];
 
@@ -42,7 +43,13 @@ export const fromSurfaceMeshToPolygonsWithHoles = (mesh) => {
     outputPolygon.exactPoints.push([exactX, exactY, exactZ]);
   };
 
-  g.FromSurfaceMeshToPolygonsWithHoles(mesh, emitPlane, emitPolygon, emitPoint);
+  g.FromSurfaceMeshToPolygonsWithHoles(
+    mesh,
+    toCgalTransformFromJsTransform(transform),
+    emitPlane,
+    emitPolygon,
+    emitPoint
+  );
 
   return arrangements;
 };

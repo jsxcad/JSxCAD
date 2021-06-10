@@ -871,8 +871,8 @@ var Module = (function () {
     }
     var wasmMemory;
     var wasmTable = new WebAssembly.Table({
-      initial: 6267,
-      maximum: 6267,
+      initial: 6272,
+      maximum: 6272,
       element: 'anyfunc',
     });
     var ABORT = false;
@@ -1140,9 +1140,9 @@ var Module = (function () {
       Module['HEAPF32'] = HEAPF32 = new Float32Array(buf);
       Module['HEAPF64'] = HEAPF64 = new Float64Array(buf);
     }
-    var STACK_BASE = 5643920,
-      STACK_MAX = 401040,
-      DYNAMIC_BASE = 5643920;
+    var STACK_BASE = 5644016,
+      STACK_MAX = 401136,
+      DYNAMIC_BASE = 5644016;
     assert(STACK_BASE % 16 === 0, 'stack must start aligned');
     assert(DYNAMIC_BASE % 16 === 0, 'heap must start aligned');
     var TOTAL_STACK = 5242880;
@@ -10037,7 +10037,7 @@ const initCgal = async () => {
         const hash = hashSum(log);
         emit({ log: logEntry, hash });
         log({ op: 'text', text, level });
-        // console.log(texts);
+        console.log(texts);
       },
       printErr(...texts) {
         const text = texts.join(' ');
@@ -10046,7 +10046,7 @@ const initCgal = async () => {
         const hash = hashSum(log);
         emit({ log: logEntry, hash });
         log({ op: 'text', text, level });
-        // console.log(texts);
+        console.log(texts);
       },
       locateFile(path) {
         if (path === 'cgal.wasm') {
@@ -10162,7 +10162,7 @@ const toCgalTransformFromJsTransform = (
     }
     return cgalTransform;
   } catch (e) {
-    console.log('oops');
+    console.log('Malformed transform');
     throw e;
   }
 };
@@ -10470,8 +10470,13 @@ const booleansOfPolygonsWithHoles = (operations, polygons) => {
 const deserializeSurfaceMesh = (mesh) =>
   getCgal().DeserializeSurfaceMesh(mesh);
 
-const differenceOfSurfaceMeshes = (a, b) =>
-  getCgal().DifferenceOfSurfaceMeshes(a, b);
+const differenceOfSurfaceMeshes = (a, aTransform, b, bTransform) =>
+  getCgal().DifferenceOfSurfaceMeshes(
+    a,
+    toCgalTransformFromJsTransform(aTransform),
+    b,
+    toCgalTransformFromJsTransform(bTransform)
+  );
 
 const doesSelfIntersectOfSurfaceMesh = (mesh) => {
   try {
@@ -10491,11 +10496,19 @@ const checkSelfIntersection = (mesh) => {
   return mesh;
 };
 
-const extrudeSurfaceMesh = (mesh, height, depth) =>
-  checkSelfIntersection(getCgal().ExtrusionOfSurfaceMesh(mesh, height, depth));
+const extrudeSurfaceMesh = (mesh, transform, height, depth) =>
+  checkSelfIntersection(
+    getCgal().ExtrusionOfSurfaceMesh(
+      mesh,
+      toCgalTransformFromJsTransform(transform),
+      height,
+      depth
+    )
+  );
 
 const extrudeToPlaneOfSurfaceMesh = (
   mesh,
+  transform,
   highX,
   highY,
   highZ,
@@ -10513,6 +10526,7 @@ const extrudeToPlaneOfSurfaceMesh = (
 ) =>
   getCgal().ExtrusionToPlaneOfSurfaceMesh(
     mesh,
+    toCgalTransformFromJsTransform(transform),
     highX,
     highY,
     highZ,
@@ -10738,8 +10752,12 @@ const fromPolygonsToSurfaceMesh = (jsPolygons) => {
   return surfaceMesh;
 };
 
-const fromSurfaceMeshEmitBoundingBox = (mesh, emit) =>
-  getCgal().Surface_mesh__bbox(mesh, emit);
+const fromSurfaceMeshEmitBoundingBox = (mesh, transform, emit) =>
+  getCgal().Surface_mesh__bbox(
+    mesh,
+    toCgalTransformFromJsTransform(transform),
+    emit
+  );
 
 const fromSurfaceMeshToGraph = (mesh) => {
   const c = getCgal();
@@ -10800,8 +10818,7 @@ const fromSurfaceMeshToLazyGraph = (mesh) => {
 const fromSurfaceMeshToPolygons = (
   mesh,
   transform,
-  triangulate = false,
-  matrix
+  triangulate = false
 ) => {
   const c = getCgal();
   const polygons = [];
@@ -10819,7 +10836,7 @@ const fromSurfaceMeshToPolygons = (
   return polygons;
 };
 
-const fromSurfaceMeshToPolygonsWithHoles = (mesh) => {
+const fromSurfaceMeshToPolygonsWithHoles = (mesh, transform) => {
   const g = getCgal();
   const arrangements = [];
 
@@ -10861,7 +10878,13 @@ const fromSurfaceMeshToPolygonsWithHoles = (mesh) => {
     outputPolygon.exactPoints.push([exactX, exactY, exactZ]);
   };
 
-  g.FromSurfaceMeshToPolygonsWithHoles(mesh, emitPlane, emitPolygon, emitPoint);
+  g.FromSurfaceMeshToPolygonsWithHoles(
+    mesh,
+    toCgalTransformFromJsTransform(transform),
+    emitPlane,
+    emitPolygon,
+    emitPoint
+  );
 
   return arrangements;
 };
@@ -10869,8 +10892,12 @@ const fromSurfaceMeshToPolygonsWithHoles = (mesh) => {
 const fromSurfaceMeshToTriangles = (mesh, matrix) =>
   fromSurfaceMeshToPolygons(mesh, matrix, true);
 
-const growSurfaceMesh = (mesh, amount) =>
-  getCgal().GrowSurfaceMesh(mesh, amount);
+const growSurfaceMesh = (mesh, transform, amount) =>
+  getCgal().GrowSurfaceMesh(
+    mesh,
+    toCgalTransformFromJsTransform(transform),
+    amount
+  );
 
 const insetOfPolygonWithHoles = (
   initial = 1,
@@ -10952,8 +10979,13 @@ const insetOfPolygonWithHoles = (
   return outputs;
 };
 
-const intersectionOfSurfaceMeshes = (a, b) =>
-  getCgal().IntersectionOfSurfaceMeshes(a, b);
+const intersectionOfSurfaceMeshes = (a, aTransform, b, bTransform) =>
+  getCgal().IntersectionOfSurfaceMeshes(
+    a,
+    toCgalTransformFromJsTransform(aTransform),
+    b,
+    toCgalTransformFromJsTransform(bTransform)
+  );
 
 const offsetOfPolygonWithHoles = (
   initial = 1,
@@ -11032,28 +11064,62 @@ const offsetOfPolygonWithHoles = (
   return outputs;
 };
 
-const outlineSurfaceMesh = (mesh) => {
+const outlineSurfaceMesh = (mesh, transform) => {
   const segments = [];
-  getCgal().OutlineSurfaceMesh(mesh, (sx, sy, sz, tx, ty, tz) =>
-    segments.push([
-      [sx, sy, sz],
-      [tx, ty, tz],
-    ])
+  getCgal().OutlineSurfaceMesh(
+    mesh,
+    toCgalTransformFromJsTransform(transform),
+    (sx, sy, sz, tx, ty, tz) =>
+      segments.push([
+        [sx, sy, sz],
+        [tx, ty, tz],
+      ])
   );
   return segments;
 };
 
-const minkowskiDifferenceOfSurfaceMeshes = (mesh, offset) =>
-  getCgal().MinkowskiDifferenceOfSurfaceMeshes(mesh, offset);
+const minkowskiDifferenceOfSurfaceMeshes = (
+  mesh,
+  meshTransform,
+  offset,
+  offsetTransform
+) =>
+  getCgal().MinkowskiDifferenceOfSurfaceMeshes(
+    mesh,
+    toCgalTransformFromJsTransform(meshTransform),
+    offset,
+    toCgalTransformFromJsTransform(offsetTransform)
+  );
 
-const minkowskiShellOfSurfaceMeshes = (mesh, offset) =>
-  getCgal().MinkowskiShellOfSurfaceMeshes(mesh, offset);
+const minkowskiShellOfSurfaceMeshes = (
+  mesh,
+  meshTransform,
+  offset,
+  offsetTransform
+) =>
+  getCgal().MinkowskiShellOfSurfaceMeshes(
+    mesh,
+    toCgalTransformFromJsTransform(meshTransform),
+    offset,
+    toCgalTransformFromJsTransform(offsetTransform)
+  );
 
-const minkowskiSumOfSurfaceMeshes = (mesh, offset) =>
-  getCgal().MinkowskiSumOfSurfaceMeshes(mesh, offset);
+const minkowskiSumOfSurfaceMeshes = (
+  mesh,
+  meshTransform,
+  offset,
+  offsetTransform
+) =>
+  getCgal().MinkowskiSumOfSurfaceMeshes(
+    mesh,
+    toCgalTransformFromJsTransform(meshTransform),
+    offset,
+    toCgalTransformFromJsTransform(offsetTransform)
+  );
 
 const projectToPlaneOfSurfaceMesh = (
   mesh,
+  transform,
   directionX,
   directionY,
   directionZ,
@@ -11064,6 +11130,7 @@ const projectToPlaneOfSurfaceMesh = (
 ) =>
   getCgal().ProjectionToPlaneOfSurfaceMesh(
     mesh,
+    toCgalTransformFromJsTransform(transform),
     directionX,
     directionY,
     directionZ,
@@ -11073,19 +11140,37 @@ const projectToPlaneOfSurfaceMesh = (
     -planeW
   );
 
-const pushSurfaceMesh = (mesh, force, minimumDistance, scale = 1) =>
-  getCgal().PushSurfaceMesh(mesh, force, minimumDistance, scale);
+const pushSurfaceMesh = (
+  mesh,
+  transform,
+  force,
+  minimumDistance,
+  scale = 1
+) =>
+  getCgal().PushSurfaceMesh(
+    mesh,
+    toCgalTransformFromJsTransform(transform),
+    force,
+    minimumDistance,
+    scale
+  );
 
 const reverseFaceOrientationsOfSurfaceMesh = (mesh) =>
   getCgal().ReverseFaceOrientationsOfSurfaceMesh(mesh);
 
 // import { arrangePaths } from './arrangePaths.js';
 
-const sectionOfSurfaceMesh = (mesh, planes, profile = false) => {
+const sectionOfSurfaceMesh = (
+  mesh,
+  transform,
+  planes,
+  profile = false
+) => {
   const g = getCgal();
   const sections = [];
   g.SectionOfSurfaceMesh(
     mesh,
+    toCgalTransformFromJsTransform(transform),
     planes.length,
     (nth, out) => {
       const { plane, exactPlane } = planes[nth];
@@ -11142,10 +11227,19 @@ const transformSurfaceMesh = (mesh, jsTransform) =>
     toCgalTransformFromJsTransform(jsTransform)
   );
 
-const twistSurfaceMesh = (mesh, degreesPerZ) =>
-  getCgal().TwistSurfaceMesh(mesh, degreesPerZ);
+const twistSurfaceMesh = (mesh, transform, degreesPerZ) =>
+  getCgal().TwistSurfaceMesh(
+    mesh,
+    toCgalTransformFromJsTransform(transform),
+    degreesPerZ
+  );
 
-const unionOfSurfaceMeshes = (a, b) =>
-  getCgal().UnionOfSurfaceMeshes(a, b);
+const unionOfSurfaceMeshes = (a, aTransform, b, bTransform) =>
+  getCgal().UnionOfSurfaceMeshes(
+    a,
+    toCgalTransformFromJsTransform(aTransform),
+    b,
+    toCgalTransformFromJsTransform(bTransform)
+  );
 
 export { BOOLEAN_ADD, BOOLEAN_CLIP, BOOLEAN_CUT, arrangePaths, arrangePathsIntoTriangles, arrangePolygonsWithHoles, booleansOfPolygonsWithHoles, composeTransforms, deserializeSurfaceMesh, differenceOfSurfaceMeshes, doesSelfIntersectOfSurfaceMesh, extrudeSurfaceMesh, extrudeToPlaneOfSurfaceMesh, fitPlaneToPoints, fromApproximateToCgalTransform, fromExactToCgalTransform, fromFunctionToSurfaceMesh, fromGraphToSurfaceMesh, fromIdentityToCgalTransform, fromPointsToAlphaShape2AsPolygonSegments, fromPointsToAlphaShapeAsSurfaceMesh, fromPointsToConvexHullAsSurfaceMesh, fromPointsToSurfaceMesh, fromPolygonsToSurfaceMesh, fromRotateXToTransform, fromRotateYToTransform, fromRotateZToTransform, fromScaleToTransform, fromSurfaceMeshEmitBoundingBox, fromSurfaceMeshToGraph, fromSurfaceMeshToLazyGraph, fromSurfaceMeshToPolygons, fromSurfaceMeshToPolygonsWithHoles, fromSurfaceMeshToTriangles, fromTranslateToTransform, growSurfaceMesh, initCgal, insetOfPolygonWithHoles, intersectionOfSurfaceMeshes, minkowskiDifferenceOfSurfaceMeshes, minkowskiShellOfSurfaceMeshes, minkowskiSumOfSurfaceMeshes, offsetOfPolygonWithHoles, outlineSurfaceMesh, projectToPlaneOfSurfaceMesh, pushSurfaceMesh, remeshSurfaceMesh, reverseFaceOrientationsOfSurfaceMesh, sectionOfSurfaceMesh, serializeSurfaceMesh, subdivideSurfaceMesh, toCgalTransformFromJsTransform, transformSurfaceMesh, twistSurfaceMesh, unionOfSurfaceMeshes };

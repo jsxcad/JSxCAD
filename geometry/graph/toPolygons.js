@@ -2,13 +2,13 @@ import { eachEdgeLoop, eachFacet, getPointNode } from './graph.js';
 
 import { realizeGraph } from './realizeGraph.js';
 
-export const toPolygons = (graph) => {
+export const toPolygons = (geometry) => {
   // CHECK: This should already be triangulated.
   const surface = [];
-  eachFacet(realizeGraph(graph), (facet, { edge }) => {
+  eachFacet(realizeGraph(geometry.graph), (facet, { edge }) => {
     const polygon = [];
-    eachEdgeLoop(graph, edge, (edge, { point }) => {
-      polygon.push(getPointNode(graph, point));
+    eachEdgeLoop(geometry.graph, edge, (edge, { point }) => {
+      polygon.push(getPointNode(geometry.graph, point));
     });
     surface.push(polygon);
   });

@@ -1,7 +1,9 @@
 import { getCgal } from './getCgal.js';
+import { toCgalTransformFromJsTransform } from './transform.js';
 
 export const extrudeToPlaneOfSurfaceMesh = (
   mesh,
+  transform,
   highX,
   highY,
   highZ,
@@ -19,6 +21,7 @@ export const extrudeToPlaneOfSurfaceMesh = (
 ) =>
   getCgal().ExtrusionToPlaneOfSurfaceMesh(
     mesh,
+    toCgalTransformFromJsTransform(transform),
     highX,
     highY,
     highZ,

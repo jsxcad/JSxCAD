@@ -4,18 +4,25 @@ import {
 } from '@jsxcad/algorithm-cgal';
 
 import { fromSurfaceMeshLazy } from './fromSurfaceMeshLazy.js';
+import { taggedGraph } from '../tagged/taggedGraph.js';
 import { toSurfaceMesh } from './toSurfaceMesh.js';
 
-export const smooth = (graph, options = {}) => {
+export const smooth = (geometry, options = {}) => {
   const { method = 'Remesh' } = options;
   switch (method) {
     case 'Remesh':
-      return fromSurfaceMeshLazy(
-        remeshSurfaceMesh(toSurfaceMesh(graph), options)
+      return taggedGraph(
+        { tags: geometry.tags },
+        fromSurfaceMeshLazy(
+          remeshSurfaceMesh(toSurfaceMesh(geometry.graph), options)
+        )
       );
     default:
-      return fromSurfaceMeshLazy(
-        subdivideSurfaceMesh(toSurfaceMesh(graph), options)
+      return taggedGraph(
+        { tags: geometry.tags },
+        fromSurfaceMeshLazy(
+          subdivideSurfaceMesh(toSurfaceMesh(geometry.graph), options)
+        )
       );
   }
 };

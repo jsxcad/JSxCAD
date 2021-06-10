@@ -15,7 +15,12 @@ export const intersection = (a, b) => {
   }
   info('intersection begin');
   const result = fromSurfaceMeshLazy(
-    intersectionOfSurfaceMeshes(toSurfaceMesh(a.graph), toSurfaceMesh(b.graph))
+    intersectionOfSurfaceMeshes(
+      toSurfaceMesh(a.graph),
+      a.matrix,
+      toSurfaceMesh(b.graph),
+      b.matrix
+    )
   );
   info('intersection end');
   return taggedGraph({ tags: a.tags }, result);

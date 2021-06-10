@@ -1,3 +1,4 @@
 import { taggedGraph } from '../tagged/taggedGraph.js';
 
-export const fromEmpty = () => taggedGraph({}, { isEmpty: true });
+export const fromEmpty = ({ tags } = {}) =>
+  taggedGraph({ tags }, { isEmpty: true });

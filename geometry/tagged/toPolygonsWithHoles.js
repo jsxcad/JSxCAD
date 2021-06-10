@@ -12,7 +12,7 @@ export const toPolygonsWithHoles = (geometry) => {
           plane,
           exactPlane,
           polygonsWithHoles,
-        } of toPolygonsWithHolesFromGraph(geometry.graph)) {
+        } of toPolygonsWithHolesFromGraph(geometry)) {
           // FIX: Are we going to make polygonsWithHoles proper geometry?
           output.push({
             tags: geometry.tags,

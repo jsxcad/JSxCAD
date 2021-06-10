@@ -4,8 +4,7 @@ import { toCgalTransformFromJsTransform } from './transform.js';
 export const fromSurfaceMeshToPolygons = (
   mesh,
   transform,
-  triangulate = false,
-  matrix
+  triangulate = false
 ) => {
   const c = getCgal();
   const polygons = [];

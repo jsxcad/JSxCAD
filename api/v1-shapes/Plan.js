@@ -1,7 +1,7 @@
 import { add, scale, subtract } from '@jsxcad/math-vec3';
 
 import { Shape } from '@jsxcad/api-v1-shape';
-import { identity } from '@jsxcad/math-mat4';
+import { identityMatrix } from '@jsxcad/math-mat4';
 import { taggedPlan } from '@jsxcad/geometry';
 import { zag } from '@jsxcad/api-v1-math';
 
@@ -31,7 +31,7 @@ export const getAt = (geometry) => find(geometry, 'at', [0, 0, 0]);
 export const getCorner1 = (geometry) => find(geometry, 'corner1', [0, 0, 0]);
 export const getCorner2 = (geometry) => find(geometry, 'corner2', [0, 0, 0]);
 export const getFrom = (geometry) => find(geometry, 'from', [0, 0, 0]);
-export const getMatrix = (geometry) => geometry.matrix || identity();
+export const getMatrix = (geometry) => geometry.matrix || identityMatrix;
 export const getTo = (geometry) => find(geometry, 'to', [0, 0, 0]);
 
 const defaultZag = 0.01;

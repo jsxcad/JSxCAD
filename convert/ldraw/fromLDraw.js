@@ -3,12 +3,7 @@ import {
   isStrictlyCoplanar,
   transform as transformOfPoly3,
 } from '@jsxcad/math-poly3';
-import {
-  fromPolygonsToGraph,
-  rotateX,
-  scale,
-  taggedGraph,
-} from '@jsxcad/geometry';
+import { fromPolygonsToGraph, rotateX, scale } from '@jsxcad/geometry';
 
 import { fromValues as fromValuesToMatrix } from '@jsxcad/math-mat4';
 import { read } from '@jsxcad/sys';
@@ -216,13 +211,13 @@ const fromCodeToPolygons = async (
 
 export const fromLDrawPart = async (part, { allowFetch = true } = {}) => {
   const polygons = await fromPartToPolygons(`${part}.dat`, { allowFetch });
-  const geometry = fromPolygonsToGraph(polygons);
-  return rotateX(-90, scale([0.4, 0.4, 0.4], taggedGraph({}, geometry)));
+  const geometry = fromPolygonsToGraph({}, polygons);
+  return rotateX(-90, scale([0.4, 0.4, 0.4], geometry));
 };
 
 export const fromLDraw = async (data, { allowFetch = true } = {}) => {
   const code = fromDataToCode(data);
   const polygons = await fromCodeToPolygons(code, { allowFetch });
   const geometry = fromPolygonsToGraph(polygons);
-  return rotateX(-90, scale([0.4, 0.4, 0.4], taggedGraph({}, geometry)));
+  return rotateX(-90, scale([0.4, 0.4, 0.4], geometry));
 };

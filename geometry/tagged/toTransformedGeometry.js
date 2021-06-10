@@ -1,5 +1,5 @@
 import { rewrite } from './visit.js';
-import { transform as transformGraph } from '../graph/transform.js';
+// import { transform as transformGraph } from '../graph/transform.js';
 import { transform as transformPaths } from '../paths/transform.js';
 import { transform as transformPoints } from '../points/ops.js';
 import { transform as transformPolygons } from '../polygons/transform.js';
@@ -44,13 +44,8 @@ export const toTransformedGeometry = (geometry) => {
             matrix: undefined,
           });
         case 'graph':
-          if (!geometry.graph) {
-            console.log(`invalid`);
-          }
-          return descend({
-            graph: transformGraph(geometry.matrix, geometry.graph),
-            matrix: undefined,
-          });
+          // Graphs don't need a transformed version.
+          return descend(geometry);
         default:
           throw Error(
             `Unexpected geometry ${geometry.type} see ${JSON.stringify(

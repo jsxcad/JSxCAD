@@ -14,7 +14,12 @@ export const union = (a, b) => {
   // FIX: In an ideal world, if a and b do not overlap, we would generate a disjointAssembly of the two.
   info('union begin');
   const result = fromSurfaceMeshLazy(
-    unionOfSurfaceMeshes(toSurfaceMesh(a.graph), toSurfaceMesh(b.graph))
+    unionOfSurfaceMeshes(
+      toSurfaceMesh(a.graph),
+      a.matrix,
+      toSurfaceMesh(b.graph),
+      b.matrix
+    )
   );
   info('union end');
   return taggedGraph({ tags: a.tags }, result);

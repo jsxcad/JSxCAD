@@ -1,5 +1,5 @@
 import { reallyQuantizeForSpace } from './jsxcad-math-utils.js';
-import { transformPaths, isClosedPath, canonicalizePath, taggedGroup, transform, fill, scale, measureBoundingBox, toPolygonsWithHoles, getNonVoidPaths } from './jsxcad-geometry.js';
+import { transformPaths, isClosedPath, canonicalizePath, taggedGroup, transform, fill, taggedPaths, scale, measureBoundingBox, toPolygonsWithHoles, getNonVoidPaths } from './jsxcad-geometry.js';
 import { fromScaling, identity, multiply, fromTranslation, fromZRotation } from './jsxcad-math-mat4.js';
 import { equals } from './jsxcad-math-vec2.js';
 import { toTagsFromName, toRgbColorFromTags } from './jsxcad-algorithm-color.js';
@@ -4151,11 +4151,7 @@ const fromSvg = async (
             geometry.content.push(
               transform(
                 scale(matrix),
-                fill({
-                  type: 'paths',
-                  paths: paths,
-                  tags,
-                })
+                fill(taggedPaths({ tags }, paths))
               )
             );
           }

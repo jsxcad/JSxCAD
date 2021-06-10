@@ -1,6 +1,16 @@
 import { fromSurfaceMeshLazy } from './fromSurfaceMeshLazy.js';
+import { taggedGraph } from '../tagged/taggedGraph.js';
 import { toSurfaceMesh } from './toSurfaceMesh.js';
 import { twistSurfaceMesh } from '@jsxcad/algorithm-cgal';
 
-export const twist = (graph, degreesPerZ) =>
-  fromSurfaceMeshLazy(twistSurfaceMesh(toSurfaceMesh(graph), degreesPerZ));
+export const twist = (geometry, degreesPerZ) =>
+  taggedGraph(
+    { tags: geometry.tags },
+    fromSurfaceMeshLazy(
+      twistSurfaceMesh(
+        toSurfaceMesh(geometry.graph),
+        geometry.matrix,
+        degreesPerZ
+      )
+    )
+  );

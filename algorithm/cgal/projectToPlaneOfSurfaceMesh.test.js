@@ -1,5 +1,6 @@
 import { fromPolygonsToSurfaceMesh } from './fromPolygonsToSurfaceMesh.js';
 import { fromSurfaceMeshToGraph } from './fromSurfaceMeshToGraph.js';
+import { identityMatrix } from '@jsxcad/math-mat4';
 import { initCgal } from './getCgal.js';
 import { projectToPlaneOfSurfaceMesh } from './projectToPlaneOfSurfaceMesh.js';
 
@@ -24,6 +25,7 @@ test('Project/Triangle', (t) => {
   t.true(!surfaceMesh.is_empty());
   const projection = projectToPlaneOfSurfaceMesh(
     surfaceMesh,
+    identityMatrix,
     0,
     0,
     1,

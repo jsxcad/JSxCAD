@@ -13,5 +13,6 @@ export const Group = (...shapes) =>
   );
 
 Shape.prototype.Group = shapeMethod(Group);
+Shape.Group = Group;
 
 export default Group;
