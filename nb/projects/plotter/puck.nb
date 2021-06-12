@@ -1,27 +1,61 @@
+const anchor = x
+  .Arc(2)
+  .ex(7, -7)
+  .cut(y.Arc(1).ex(2, -2).z(0.75))
+  .y(-1.5 / 2 - 1)
+  .z(2 / 2 + 0.5)
+  .view();
+
 const sheath = Arc(16)
-  .ex(30, -15)
-  .with(Arc(14.2).ex(30, -15).void())
-  //.and(Path(Point().z(-20), Point().z(35)).color('black'))
+  .ex(60, 30)
+  .with(Arc(14.1).ex(60, -15).void())
   .view()
   .stl('sheath');
+
+const Sabot = (d) =>
+  Arc(14)
+    .cut(Arc(d + 0.2))
+    .ex(2, 22)
+    .and(
+      Arc(16)
+        .cut(Arc(d + 0.2))
+        .ex(2)
+    )
+    .view()
+    .stl('sabot');
+const sabot98 = Sabot(9.8).view().stl('sabot_98');
+const sabot97 = Sabot(9.7).view().stl('sabot_97');
+const sabot96 = Sabot(9.6).view().stl('sabot_96');
+
+const sabot95 = Sabot(9.5).view().stl('sabot_95');
 
 const foot = Orb(14)
   .sides(20)
   .with(Orb(12).void())
-  //.align('z>')
-  //.cut(Arc(10.7).ex(6).align('z>'))
   .clip(Box(20).z(-3))
   .cut(Box(20).z(6))
   .with(Orb(10.7).sides(10).material('steel').void())
   .align('z>')
   .z(2.8)
-  .and(
+  /*.and(
     Arc(12)
       .cut(Arc(12 - 0.6))
       .ex(0, 2.8)
-  )
+  )*/
   .view({ outline: false })
   .stl('foot');
+
+const footWithGuide = foot
+  .and(
+    Arc(5)
+      .ex(11.8, 20)
+      .op((s) => s.x(2).and(s.x(-2)))
+  )
+  .cut(y.Arc(3).z(15).ex(5, -5))
+  .cut(Arc(5))
+  .view({ outline: false });
+
+const bearing = Orb(10.8).view({ outline: false }).stl('bearing_108');
 
 const puck = Group(
   x
@@ -32,7 +66,7 @@ const puck = Group(
     .op((s) => s.ex(2, 50).and(s.ex(-2, -50)))
     .align('z>')
     .z(5 / 2)
-    .with(foot.op((s) => Group(s.x(-50), s.x(50))))
+    .with(foot.op((s) => Group(s.x(-56), s.x(56))))
     .y(1),
   y
     .Arc(5)
@@ -42,17 +76,10 @@ const puck = Group(
     .ex(50, 2)
     .align('z>')
     .z(5 / 2)
-    .with(foot.y(-50))
+    .with(footWithGuide.y(-56))
 )
-  .with(sheath.rx(-45).clip(Box(100)))
-  .and(
-    x
-      .Arc(2)
-      .op((s) => s.ex(7, 0.5).and(s.ex(-0.5, -7)))
-      .and(x.Arc(1.5).op((s) => s.ex(0.5).and(s.ex(-0.5))))
-      .y(-1.5 / 2 - 1)
-      .z(2 / 2 + 0.5)
-  )
+  .with(sheath.rx(-25).clip(Box(100))) // 45 -> 35 -> 25
+  .and(anchor.align('y<').z(2 / 2 + 0.5))
   .cut(Arc(2).rx(-45).ex(5, -5))
   .cut(
     Box(50)
@@ -64,7 +91,83 @@ const puck = Group(
 
 const puckPrint = puck.rz(45).view({ outline: false }).stl('puck');
 
-const cam = Spiral((a) => [[a / 15 + 5]])
+const puckBase = Group(
+  x
+    .Arc(5)
+    .clip(x.Box(5).z(-5 / 2))
+    .add(x.Box(3, 2))
+    .cut(x.Box(1, 8).z(-2))
+    .op((s) => s.ex(5, 50).and(s.ex(-5, -50)))
+    .align('z>')
+    .with(foot.align('z>').x(56, -56))
+
+    .y(1),
+  y
+    .Arc(5)
+    .clip(y.Box(5).z(-5 / 2))
+    .add(y.Box(3, 2))
+    .cut(y.Box(1, 8).z(-2))
+    .ex(-5, -50)
+    .align('z>')
+    .with(foot.y(56).align('z>')),
+  y
+    .Arc(5)
+    .clip(y.Box(5).z(-5 / 2))
+    .add(y.Box(3, 2))
+    .cut(y.Box(1, 8).z(-2))
+    .ex(5, 50)
+    .align('z>')
+    .with(footWithGuide.y(-56).align('z>')),
+  Arc(25)
+    .y(5)
+    //.cut(Arc(10))
+    .ex(5 / 2 + 1)
+).z(5 / 2);
+
+const puck2 = puckBase
+  //.with(sheath.rx(-45).clip(Box(100))) // 45 -> 35 -> 25
+  //.and(anchor.align('y<').z(10))
+  //.add(y.Arc(2).ex(10, -10).z(10))
+  .add(Arc(2).rx(-45).ex(5, -5).void())
+  .and(Path(Point(), Point().z(5)).color('black'))
+  .and(Path(Point().x(-50), Point().x(50)).color('black'))
+  .view({ outline: false });
+
+const puck3 = puck2
+  .with(sheath.and(Box(10).y(-12).ex(60, 30)).rx(-45).color('red').as('sheath'))
+  .with(
+    Box(5 + 0.1) // 0.15 is a bit loose, trying 0.10
+      .y(-12)
+      .rx(-45)
+      .ex(-5, 60)
+      .void()
+  )
+  .and(Box(5).y(-12).rx(-45).ex(-5, 60))
+  .and(
+    anchor.align('y<').z(8.5),
+    Arc(2)
+      .align('y<')
+      .ex(5 / 2 + 1, 7 + 3 + 1)
+      .x(7, -7)
+  )
+  .with(Arc(12).rx(-45).ex(-40, 40).void())
+  .view({ outline: false })
+  .stl('puck3', { prepareStl: (s) => s.drop('sheath') })
+  .stl('sheath3', { prepareStl: (s) => s.keep('sheath') });
+
+const puck4 = Group(
+  Arc(40).cut(Arc(20)).ex(1, -1),
+  Arc(42)
+    .cut(Arc(20))
+    .ex(-1, -2 - 5 / 2 - 0.5),
+  Arc(42).cut(Arc(20)).ex(1, 2)
+)
+  .z(8.5 - 1)
+  .with(puck3)
+  .view({ outline: false })
+  .stl('puck4', { prepareStl: (s) => s.drop('sheath') });
+
+const cam = Spiral((a) => [[a / 15 + 10]])
   .close()
   .cut(Box().c1(5, 0).c2(60, 60))
   .cut(Arc(4.9))
