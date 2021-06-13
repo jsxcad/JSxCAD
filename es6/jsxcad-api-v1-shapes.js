@@ -1,4 +1,4 @@
-import { taggedPlan, registerReifier, taggedDisjointAssembly, taggedGroup, taggedPaths, translatePaths, getLeafs, taggedLayers, taggedLayout, measureBoundingBox, getLayouts, visit, isNotVoid, concatenatePath, rotateZPath, taggedAssembly, taggedGraph, convexHullToGraph, fromFunctionToGraph, scalePath, translatePath, flipPath, deduplicatePath, taggedPoints, fromPathsToGraph } from './jsxcad-geometry.js';
+import { taggedPlan, taggedDisjointAssembly, registerReifier, taggedGroup, taggedPaths, translatePaths, getLeafs, taggedLayers, taggedLayout, measureBoundingBox, getLayouts, visit, isNotVoid, concatenatePath, rotateZPath, taggedAssembly, convexHullToGraph, fromFunctionToGraph, scalePath, translatePath, flipPath, deduplicatePath, taggedPoints, fromPathsToGraph } from './jsxcad-geometry.js';
 import Shape$1, { Shape, shapeMethod, weld } from './jsxcad-api-v1-shape.js';
 import { scale, subtract, add, negate } from './jsxcad-math-vec3.js';
 import { identityMatrix } from './jsxcad-math-mat4.js';
@@ -68,6 +68,11 @@ const getScale = (geometry) => {
 
 const Plan = (type) => Shape.fromGeometry(taggedPlan({}, { type }));
 
+const Empty = (...shapes) =>
+  Shape.fromGeometry(taggedDisjointAssembly({}));
+
+Shape.prototype.Empty = shapeMethod(Empty);
+
 const X = 0;
 const Y = 1;
 const Z = 2;
@@ -81,6 +86,10 @@ registerReifier('Box', (geometry) => {
   const back = corner2[Y];
   const top = corner2[Z];
   const bottom = corner1[Z];
+
+  if (left <= right || front <= back) {
+    return Empty().toGeometry();
+  }
 
   const a = Shape.fromPath([
     [left, back, bottom],
@@ -105,11 +114,6 @@ const Box = (x, y = x, z = 0) =>
   Shape.fromGeometry(taggedPlan({}, { type: 'Box' })).diameter(x, y, z);
 
 Shape.prototype.Box = shapeMethod(Box);
-
-const Empty = (...shapes) =>
-  Shape.fromGeometry(taggedDisjointAssembly({}));
-
-Shape.prototype.Empty = shapeMethod(Empty);
 
 const isDefined = (value) => value;
 
@@ -1875,7 +1879,7 @@ Shape.prototype.Assembly = shapeMethod(Assembly);
 const Hull = (...shapes) => {
   const points = [];
   shapes.forEach((shape) => shape.eachPoint((point) => points.push(point)));
-  return Shape.fromGeometry(taggedGraph({}, convexHullToGraph(points)));
+  return Shape.fromGeometry(convexHullToGraph({}, points));
 };
 
 const hullMethod = function (...shapes) {

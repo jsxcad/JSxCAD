@@ -578,8 +578,18 @@ const minkowskiSum = (shape, offset) =>
 
 Shape.registerMethod('minkowskiSum', minkowskiSum);
 
-const move = (shape, x = 0, y = 0, z = 0) =>
-  shape.transform(fromTranslation([x, y, z]));
+const move = (shape, x = 0, y = 0, z = 0) => {
+  if (!isFinite(x)) {
+    x = 0;
+  }
+  if (!isFinite(y)) {
+    y = 0;
+  }
+  if (!isFinite(z)) {
+    z = 0;
+  }
+  return shape.transform(fromTranslation([x, y, z]));
+};
 
 const moveMethod = function (...params) {
   return move(this, ...params);

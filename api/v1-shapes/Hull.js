@@ -1,10 +1,11 @@
 import { Shape, shapeMethod } from '@jsxcad/api-v1-shape';
-import { convexHullToGraph, taggedGraph } from '@jsxcad/geometry';
+
+import { convexHullToGraph } from '@jsxcad/geometry';
 
 export const Hull = (...shapes) => {
   const points = [];
   shapes.forEach((shape) => shape.eachPoint((point) => points.push(point)));
-  return Shape.fromGeometry(taggedGraph({}, convexHullToGraph(points)));
+  return Shape.fromGeometry(convexHullToGraph({}, points));
 };
 
 const hullMethod = function (...shapes) {

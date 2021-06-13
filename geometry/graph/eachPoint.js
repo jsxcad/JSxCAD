@@ -4,7 +4,7 @@ import { transform } from '@jsxcad/math-vec3';
 
 // FIX: Let's avoid a complete realization of the graph.
 export const eachPoint = (geometry, op) => {
-  for (const point of realizeGraph(geometry.graph).points) {
+  for (const point of realizeGraph(geometry).graph.points) {
     if (point !== undefined) {
       op(transform(geometry.matrix || identityMatrix, point));
     }

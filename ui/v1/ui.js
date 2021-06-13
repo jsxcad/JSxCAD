@@ -116,6 +116,7 @@ class Ui extends React.PureComponent {
       files: [],
       selectedPaths: [],
       notebookData: [],
+      domElementByHash: new Map(),
     };
 
     this.onChangeJsEditor = this.onChangeJsEditor.bind(this);
@@ -209,7 +210,9 @@ class Ui extends React.PureComponent {
             notebookRef.forceUpdate();
           }
           if (notebookData.listeners) {
-            notebookData.listeners.forEach((listener) => listener());
+            for (const listener of notebookData.listeners) {
+              await listener();
+            }
           }
         }
       } else if (question.notebookLength) {
@@ -858,6 +861,7 @@ class Ui extends React.PureComponent {
   render() {
     const {
       ask,
+      domElementByHash,
       file,
       path,
       jsEditorData = '',
@@ -1044,6 +1048,7 @@ class Ui extends React.PureComponent {
                       file={file}
                       ask={ask}
                       workspace={workspace}
+                      domElementByHash={domElementByHash}
                     />
                   </Pane>
                 </SplitPane>
@@ -1132,6 +1137,7 @@ class Ui extends React.PureComponent {
                       file={file}
                       ask={ask}
                       workspace={workspace}
+                      domElementByHash={domElementByHash}
                     />
                   </Pane>
                 </SplitPane>
@@ -1152,6 +1158,7 @@ class Ui extends React.PureComponent {
                       file={file}
                       ask={ask}
                       workspace={workspace}
+                      domElementByHash={domElementByHash}
                     />
                   </Pane>
                 </SplitPane>
@@ -1177,6 +1184,7 @@ class Ui extends React.PureComponent {
                       file={file}
                       ask={ask}
                       workspace={workspace}
+                      domElementByHash={domElementByHash}
                     />
                   </Pane>
                 </SplitPane>
@@ -1233,6 +1241,7 @@ class Ui extends React.PureComponent {
                                 ask={ask}
                                 workspace={workspace}
                                 notebookData={notebookData}
+                                domElementByHash={domElementByHash}
                               />
                             </Pane>
                           </SplitPane>

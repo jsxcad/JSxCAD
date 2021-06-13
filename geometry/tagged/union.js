@@ -6,7 +6,6 @@ import { getNonVoidPoints } from './getNonVoidPoints.js';
 import { union as graphUnion } from '../graph/union.js';
 import { union as pointsUnion } from '../points/union.js';
 import { rewrite } from './visit.js';
-import { taggedGraph } from './taggedGraph.js';
 import { taggedPaths } from './taggedPaths.js';
 import { taggedPoints } from './taggedPoints.js';
 import { toConcreteGeometry } from './toConcreteGeometry.js';
@@ -24,8 +23,14 @@ const unionImpl = (geometry, ...geometries) => {
           for (const graph of getNonVoidGraphs(geometry)) {
             unified = graphUnion(unified, graph);
           }
-          for (const { paths } of getNonVoidFaceablePaths(geometry)) {
-            unified = graphUnion(unified, fromPathsToGraph(paths));
+          for (const pathsGeometry of getNonVoidFaceablePaths(geometry)) {
+            unified = graphUnion(
+              unified,
+              fromPathsToGraph(
+                { tags: pathsGeometry.tags },
+                pathsGeometry.paths
+              )
+            );
           }
         }
         if (unified.hash) {
@@ -41,7 +46,7 @@ const unionImpl = (geometry, ...geometries) => {
           { tags },
           toPathsFromGraph(
             union(
-              taggedGraph({ tags }, fromPathsToGraph(geometry.paths)),
+              fromPathsToGraph({ tags: geometry.tags }, geometry.paths),
               ...geometries
             ).graph
           )
