@@ -4,7 +4,6 @@ import { getNonVoidFaceablePaths } from './getNonVoidFaceablePaths.js';
 import { getNonVoidGraphs } from './getNonVoidGraphs.js';
 import { intersection as graphIntersection } from '../graph/intersection.js';
 import { rewrite } from './visit.js';
-import { taggedGraph } from './taggedGraph.js';
 import { taggedGroup } from './taggedGroup.js';
 import { taggedPaths } from './taggedPaths.js';
 import { toConcreteGeometry } from './toConcreteGeometry.js';
@@ -22,11 +21,14 @@ const intersectionImpl = (geometry, ...geometries) => {
           for (const graph of getNonVoidGraphs(geometry)) {
             intersections.push(graphIntersection(input, graph));
           }
-          for (const { paths } of getNonVoidFaceablePaths(geometry)) {
+          for (const pathsGeometry of getNonVoidFaceablePaths(geometry)) {
             intersections.push(
-              taggedGraph(
+              graphIntersection(
                 { tags },
-                graphIntersection(input, fromPathsToGraph(paths))
+                fromPathsToGraph(
+                  { tags: pathsGeometry.tags },
+                  pathsGeometry.paths
+                )
               )
             );
           }
@@ -44,7 +46,7 @@ const intersectionImpl = (geometry, ...geometries) => {
           { tags },
           toPathsFromGraph(
             intersection(
-              taggedGraph({ tags }, fromPathsToGraph(geometry.paths)),
+              fromPathsToGraph({ tags }, geometry.paths),
               ...geometries
             ).graph
           )

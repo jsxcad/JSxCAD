@@ -8,8 +8,6 @@ test('Default works.', (t) => {
 
 test('Glass.', (t) => {
   t.deepEqual(toThreejsMaterialFromTags(['material/glass']), {
-    clearCoat: 1,
-    clearCoatRoughness: 0,
     metalness: 0,
     opacity: 0.5,
     transparent: true,

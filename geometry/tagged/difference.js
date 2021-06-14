@@ -5,7 +5,6 @@ import { getFaceablePaths } from './getFaceablePaths.js';
 import { getGraphs } from './getGraphs.js';
 import { difference as graphDifference } from '../graph/difference.js';
 import { rewrite } from './visit.js';
-import { taggedGraph } from './taggedGraph.js';
 import { toConcreteGeometry } from './toConcreteGeometry.js';
 
 const differenceImpl = (geometry, ...geometries) => {
@@ -19,11 +18,14 @@ const differenceImpl = (geometry, ...geometries) => {
           for (const graph of getGraphs(geometry)) {
             differenced = graphDifference(differenced, graph);
           }
-          for (const { paths } of getFaceablePaths(geometry)) {
+          for (const pathsGeometry of getFaceablePaths(geometry)) {
             differenced = graphDifference(
               differenced,
               fillOutlineGraph(
-                fromPathsToGraph(paths.map((path) => ({ points: path })))
+                fromPathsToGraph(
+                  { tags: pathsGeometry.tags },
+                  pathsGeometry.map((path) => ({ points: path }))
+                )
               )
             );
           }
@@ -36,10 +38,10 @@ const differenceImpl = (geometry, ...geometries) => {
       case 'paths':
         // This will have problems with open paths, but we want to phase this out anyhow.
         return difference(
-          taggedGraph(
-            { tags },
-            fillOutlineGraph(
-              fromPathsToGraph(geometry.paths.map((path) => ({ points: path })))
+          fillOutlineGraph(
+            fromPathsToGraph(
+              { tags },
+              geometry.paths.map((path) => ({ points: path }))
             )
           ),
           ...geometries

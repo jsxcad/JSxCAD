@@ -62,6 +62,7 @@ export class JsEditorUi extends React.PureComponent {
     return {
       ask: PropTypes.func,
       data: PropTypes.string,
+      domElementByHash: PropTypes.object,
       file: PropTypes.string,
       id: PropTypes.string,
       onRun: PropTypes.func,
@@ -109,6 +110,7 @@ export class JsEditorUi extends React.PureComponent {
 
   async componentDidMount() {
     const { editor } = this.aceEditor;
+    const { domElementByHash } = this.props;
 
     editor.on('linkClick', ({ token }) => {
       const { value = '' } = token;
@@ -138,7 +140,7 @@ export class JsEditorUi extends React.PureComponent {
       notebookData.listeners = [];
     }
 
-    const domElementByHash = new Map();
+    // const domElementByHash = new Map();
 
     const hashNotes = (notes) => notes.map((note) => note.hash || '').join('/');
 
@@ -172,12 +174,21 @@ export class JsEditorUi extends React.PureComponent {
           note.openView = nthView === openView;
           nthView++;
         }
-        if (note.context && note.context.sourceLocation) {
+        if (note.context && note.context.sourceLocation && !note.info) {
           const line = note.context.sourceLocation.line || 0;
           if (!notesByLine[line]) {
             notesByLine[line] = [...definitions];
           }
           notesByLine[line].push(note);
+          if (note.hash) {
+            if (!domElementByHash.has(note.hash)) {
+              console.log(`QQ/dom/cache/miss: ${note.hash}`);
+              const el = await toDomElement([note, ...definitions], {
+                onClickView,
+              });
+              domElementByHash.set(note.hash, el);
+            }
+          }
         }
       }
 
@@ -185,12 +196,14 @@ export class JsEditorUi extends React.PureComponent {
         const notes = notesByLine[line];
         const hash = hashNotes(notes);
         usedHashes.add(hash);
-        let el;
-        if (!domElementByHash.has(hash)) {
-          el = await toDomElement(notes, { onClickView });
-          domElementByHash.set(hash, el);
-        } else {
-          el = domElementByHash.get(hash);
+        const el = document.createElement('div');
+        for (const note of notes) {
+          if (note.hash) {
+            const dom = domElementByHash.get(note.hash);
+            if (dom) {
+              el.appendChild(dom);
+            }
+          }
         }
         const widget = {
           row: parseInt(line) - 1,
@@ -211,11 +224,13 @@ export class JsEditorUi extends React.PureComponent {
         }
       }
 
+      /*
       for (const hash of domElementByHash.keys()) {
         if (!usedHashes.has(hash)) {
           domElementByHash.delete(hash);
         }
       }
+      */
 
       editor.resize();
     };
@@ -225,7 +240,10 @@ export class JsEditorUi extends React.PureComponent {
 
   async update() {}
 
-  async componentWillUnmount() {}
+  async componentWillUnmount() {
+    const notebookData = this.props.notebookData;
+    notebookData.listeners = [];
+  }
 
   onValueChange(data) {
     this.props.onChange(data);

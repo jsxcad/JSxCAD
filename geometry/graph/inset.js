@@ -14,7 +14,9 @@ export const inset = (geometry, initial, step, limit) => {
         limit,
         polygonWithHoles
       )) {
-        insetGraphs.push(fromPolygonsWithHoles([insetPolygon]));
+        insetGraphs.push(
+          fromPolygonsWithHoles({ tags: geometry.tags }, [insetPolygon])
+        );
       }
     }
   }

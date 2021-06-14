@@ -9,6 +9,7 @@ import {
 } from './Plan.js';
 import { registerReifier, taggedPlan } from '@jsxcad/geometry';
 
+import { Empty } from './Empty.js';
 import { negate } from '@jsxcad/math-vec3';
 
 const X = 0;
@@ -24,6 +25,10 @@ registerReifier('Box', (geometry) => {
   const back = corner2[Y];
   const top = corner2[Z];
   const bottom = corner1[Z];
+
+  if (left <= right || front <= back) {
+    return Empty().toGeometry();
+  }
 
   const a = Shape.fromPath([
     [left, back, bottom],

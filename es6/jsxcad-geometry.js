@@ -502,8 +502,25 @@ const fromSurfaceMeshLazy = (surfaceMesh, forceNewGraph = false) => {
   return graph;
 };
 
-const convexHull = (points) =>
-  fromSurfaceMeshLazy(fromPointsToConvexHullAsSurfaceMesh(points));
+const taggedGraph = ({ tags }, graph) => {
+  if (graph.length > 0) {
+    throw Error('Graph should not be an array');
+  }
+  if (graph.graph) {
+    throw Error('malformed graph');
+  }
+  return {
+    type: 'graph',
+    tags,
+    graph,
+  };
+};
+
+const convexHull = ({ tags }, points) =>
+  taggedGraph(
+    { tags },
+    fromSurfaceMeshLazy(fromPointsToConvexHullAsSurfaceMesh(points))
+  );
 
 const deduplicate = (path) => {
   const unique = [];
@@ -557,20 +574,6 @@ const measureArea = (path) => {
 };
 
 const isClockwise = (path) => measureArea(path) < 0;
-
-const taggedGraph = ({ tags }, graph) => {
-  if (graph.length > 0) {
-    throw Error('Graph should not be an array');
-  }
-  if (graph.graph) {
-    throw Error('malformed graph');
-  }
-  return {
-    type: 'graph',
-    tags,
-    graph,
-  };
-};
 
 const clean = (path) => deduplicate(path);
 
@@ -793,11 +796,14 @@ const differenceImpl = (geometry, ...geometries) => {
           for (const graph of getGraphs(geometry)) {
             differenced = difference(differenced, graph);
           }
-          for (const { paths } of getFaceablePaths(geometry)) {
+          for (const pathsGeometry of getFaceablePaths(geometry)) {
             differenced = difference(
               differenced,
               fill(
-                fromPaths(paths.map((path) => ({ points: path })))
+                fromPaths(
+                  { tags: pathsGeometry.tags },
+                  pathsGeometry.map((path) => ({ points: path }))
+                )
               )
             );
           }
@@ -810,10 +816,10 @@ const differenceImpl = (geometry, ...geometries) => {
       case 'paths':
         // This will have problems with open paths, but we want to phase this out anyhow.
         return difference$1(
-          taggedGraph(
-            { tags },
-            fill(
-              fromPaths(geometry.paths.map((path) => ({ points: path })))
+          fill(
+            fromPaths(
+              { tags },
+              geometry.paths.map((path) => ({ points: path }))
             )
           ),
           ...geometries
@@ -885,7 +891,7 @@ const disjoint = (geometries) => {
 
 // FIX: Let's avoid a complete realization of the graph.
 const eachPoint = (geometry, op) => {
-  for (const point of realizeGraph(geometry.graph).points) {
+  for (const point of realizeGraph(geometry).graph.points) {
     if (point !== undefined) {
       op(transform$5(geometry.matrix || identityMatrix, point));
     }
@@ -1841,11 +1847,14 @@ const intersectionImpl = (geometry, ...geometries) => {
           for (const graph of getNonVoidGraphs(geometry)) {
             intersections.push(intersection(input, graph));
           }
-          for (const { paths } of getNonVoidFaceablePaths(geometry)) {
+          for (const pathsGeometry of getNonVoidFaceablePaths(geometry)) {
             intersections.push(
-              taggedGraph(
+              intersection(
                 { tags },
-                intersection(input, fromPaths(paths))
+                fromPaths(
+                  { tags: pathsGeometry.tags },
+                  pathsGeometry.paths
+                )
               )
             );
           }
@@ -1863,7 +1872,7 @@ const intersectionImpl = (geometry, ...geometries) => {
           { tags },
           toPaths(
             intersection$1(
-              taggedGraph({ tags }, fromPaths(geometry.paths)),
+              fromPaths({ tags }, geometry.paths),
               ...geometries
             ).graph
           )
@@ -1909,7 +1918,9 @@ const inset = (geometry, initial, step, limit) => {
         limit,
         polygonWithHoles
       )) {
-        insetGraphs.push(fromPolygonsWithHoles([insetPolygon]));
+        insetGraphs.push(
+          fromPolygonsWithHoles({ tags: geometry.tags }, [insetPolygon])
+        );
       }
     }
   }
@@ -2484,9 +2495,9 @@ const sections = (geometry, planes, { profile = false } = {}) => {
 const sectionImpl = (geometry, planes, { profile = false }) => {
   const transformedGeometry = toTransformedGeometry(reify(geometry));
   const sections$1 = [];
-  for (const { tags, graph } of getNonVoidGraphs(transformedGeometry)) {
-    for (const section of sections(graph, planes, { profile })) {
-      sections$1.push(taggedGraph({ tags }, section));
+  for (const geometry of getNonVoidGraphs(transformedGeometry)) {
+    for (const section of sections(geometry, planes, { profile })) {
+      sections$1.push(section);
     }
   }
   return taggedGroup({}, ...sections$1);
@@ -2960,8 +2971,14 @@ const unionImpl = (geometry, ...geometries) => {
           for (const graph of getNonVoidGraphs(geometry)) {
             unified = union(unified, graph);
           }
-          for (const { paths } of getNonVoidFaceablePaths(geometry)) {
-            unified = union(unified, fromPaths(paths));
+          for (const pathsGeometry of getNonVoidFaceablePaths(geometry)) {
+            unified = union(
+              unified,
+              fromPaths(
+                { tags: pathsGeometry.tags },
+                pathsGeometry.paths
+              )
+            );
           }
         }
         if (unified.hash) {
@@ -2977,7 +2994,7 @@ const unionImpl = (geometry, ...geometries) => {
           { tags },
           toPaths(
             union$2(
-              taggedGraph({ tags }, fromPaths(geometry.paths)),
+              fromPaths({ tags: geometry.tags }, geometry.paths),
               ...geometries
             ).graph
           )

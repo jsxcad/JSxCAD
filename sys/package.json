@@ -24,7 +24,8 @@
   "license": "MIT",
   "dependencies": {
     "localforage": "^1.7.3",
-    "node-fetch": "^2.6.1"
+    "node-fetch": "^2.6.1",
+    "hash-sum": "^2.0.0"
   },
   "devDependencies": {
     "ava": "^3.9.0",

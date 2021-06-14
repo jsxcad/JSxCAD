@@ -1,3 +1,5 @@
+import hashSum from 'hash-sum';
+
 const modules = [];
 
 export const getModule = () => modules[modules.length - 1];
@@ -48,4 +50,8 @@ export const addOnEmitHandler = (handler) => {
 
 export const removeOnEmitHandler = (handler) => onEmitHandlers.delete(handler);
 
-export const info = (text) => emit({ info: text });
+export const info = (text) => {
+  const entry = { info: text };
+  const hash = hashSum(entry);
+  emit({ info: text, hash });
+};
