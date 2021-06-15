@@ -105,5 +105,10 @@ export default {
         return code.replace(/'@jsxcad\/([^']*)'/g, "'./jsxcad-$1.js'");
       },
     },
+    {
+      transform(code, id) {
+        return code.replace(/process.env.NODE_ENV/g, "'development'");
+      },
+    },
   ],
 };
