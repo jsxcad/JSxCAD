@@ -251,12 +251,7 @@ var _require_path_ = /*#__PURE__*/Object.freeze({
   'default': path
 });
 
-var empty = {};
-
-var _require_crypto_ = /*#__PURE__*/Object.freeze({
-  __proto__: null,
-  'default': empty
-});
+var _require_crypto_ = {};
 
 var Module$1 = (function () {
   var _scriptDir =
