@@ -1,7 +1,7 @@
 import { taggedPaths, fromPolygonsToGraph, toDisjointGeometry, getNonVoidGraphs, toTrianglesFromGraph } from './jsxcad-geometry.js';
 import { toPlane } from './jsxcad-math-poly3.js';
 
-function parse(str) {
+function parse$1(str) {
   if(typeof str !== 'string') {
     str = str.toString();
   }
@@ -51,7 +51,7 @@ function parse(str) {
   };
 }
 
-var parseStlAscii = parse;
+var parseStlAscii = parse$1;
 
 // Adapted for ArrayBuffer from parse-stl-binary version ^1.0.1.
 
@@ -63,7 +63,7 @@ const readVector = (view, off) => [
   view.getFloat32(off + 8, LITTLE_ENDIAN),
 ];
 
-const parse$1 = (data) => {
+const parse = (data) => {
   const view = new DataView(data.buffer);
   var off = 80; // skip header
 
@@ -104,7 +104,7 @@ const toParser = (format) => {
     case 'ascii':
       return (data) => parseStlAscii(new TextDecoder('utf8').decode(data));
     case 'binary':
-      return parse$1;
+      return parse;
     default:
       throw Error('die');
   }

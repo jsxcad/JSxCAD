@@ -13,7 +13,7 @@ function createCommonjsModule(fn, module) {
 
 var binPacking = createCommonjsModule(function (module, exports) {
 (function (global, factory) {
-   factory(exports) ;
+  factory(exports) ;
 }(commonjsGlobal, (function (exports) {
 /******************************************************************************
 

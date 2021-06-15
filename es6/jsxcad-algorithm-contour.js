@@ -23,7 +23,7 @@ var marchingsquares = createCommonjsModule(function (module, exports) {
 
 
 (function (global, factory) {
-   factory(exports) ;
+  factory(exports) ;
 }(commonjsGlobal, (function (exports) {
   /*
    *  Compute the distance of a value 'v' from 'a' through linear interpolation

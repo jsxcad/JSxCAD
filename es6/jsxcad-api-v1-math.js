@@ -275,7 +275,7 @@ var p2D = [
 });
 
 unwrapExports(_2d);
-var _2d_1 = _2d.makeNoise2D;
+_2d.makeNoise2D;
 
 var _3d = createCommonjsModule(function (module, exports) {
 // This is free and unencumbered software released into the public domain
@@ -826,7 +826,7 @@ var p3D = [
 });
 
 unwrapExports(_3d);
-var _3d_1 = _3d.makeNoise3D;
+_3d.makeNoise3D;
 
 var _4d = createCommonjsModule(function (module, exports) {
 // This is free and unencumbered software released into the public domain
@@ -3719,7 +3719,7 @@ var p4D = [
 });
 
 unwrapExports(_4d);
-var _4d_1 = _4d.makeNoise4D;
+_4d.makeNoise4D;
 
 var mod = createCommonjsModule(function (module, exports) {
 // This is free and unencumbered software released into the public domain
@@ -3734,9 +3734,9 @@ Object.defineProperty(exports, "makeNoise4D", { enumerable: true, get: function 
 });
 
 var OpenSimplexNoise = unwrapExports(mod);
-var mod_1 = mod.makeNoise4D;
-var mod_2 = mod.makeNoise3D;
-var mod_3 = mod.makeNoise2D;
+mod.makeNoise4D;
+mod.makeNoise3D;
+mod.makeNoise2D;
 
 const Noise = (seed = 0) => {
   const generator = OpenSimplexNoise.makeNoise3D(seed);

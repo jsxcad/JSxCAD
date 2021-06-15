@@ -2410,7 +2410,7 @@ pp$1.parseClass = function(node, isStatement) {
 };
 
 pp$1.parseClassElement = function(constructorAllowsSuper) {
-  var this$1 = this;
+  var this$1$1 = this;
 
   if (this.eat(types.semi)) { return null }
 
@@ -2418,14 +2418,14 @@ pp$1.parseClassElement = function(constructorAllowsSuper) {
   var tryContextual = function (k, noLineBreak) {
     if ( noLineBreak === void 0 ) noLineBreak = false;
 
-    var start = this$1.start, startLoc = this$1.startLoc;
-    if (!this$1.eatContextual(k)) { return false }
-    if (this$1.type !== types.parenL && (!noLineBreak || !this$1.canInsertSemicolon())) { return true }
-    if (method.key) { this$1.unexpected(); }
+    var start = this$1$1.start, startLoc = this$1$1.startLoc;
+    if (!this$1$1.eatContextual(k)) { return false }
+    if (this$1$1.type !== types.parenL && (!noLineBreak || !this$1$1.canInsertSemicolon())) { return true }
+    if (method.key) { this$1$1.unexpected(); }
     method.computed = false;
-    method.key = this$1.startNodeAt(start, startLoc);
+    method.key = this$1$1.startNodeAt(start, startLoc);
     method.key.name = k;
-    this$1.finishNode(method.key, "Identifier");
+    this$1$1.finishNode(method.key, "Identifier");
     return false
   };
 
@@ -5436,11 +5436,11 @@ pp$9.getToken = function() {
 // If we're in an ES6 environment, make parsers iterable
 if (typeof Symbol !== "undefined")
   { pp$9[Symbol.iterator] = function() {
-    var this$1 = this;
+    var this$1$1 = this;
 
     return {
       next: function () {
-        var token = this$1.getToken();
+        var token = this$1$1.getToken();
         return {
           done: token.type === types.eof,
           value: token

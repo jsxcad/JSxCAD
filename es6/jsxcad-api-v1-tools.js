@@ -77,7 +77,7 @@ const engrave = (paths, depth = 0.5) => {
 };
 
 function engraveMethod(tool, ...shapes) {
-  return engrave(this, tool);
+  return engrave(this, tool, ...shapes);
 }
 
 Shape.prototype.engrave = engraveMethod;
