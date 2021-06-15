@@ -73,19 +73,19 @@ const Empty = (...shapes) =>
 
 Shape.prototype.Empty = shapeMethod(Empty);
 
-const X = 0;
-const Y = 1;
-const Z = 2;
+const X$2 = 0;
+const Y$2 = 1;
+const Z$3 = 2;
 
 registerReifier('Box', (geometry) => {
   const corner1 = getCorner1(geometry);
   const corner2 = getCorner2(geometry);
-  const left = corner1[X];
-  const right = corner2[X];
-  const front = corner1[Y];
-  const back = corner2[Y];
-  const top = corner2[Z];
-  const bottom = corner1[Z];
+  const left = corner1[X$2];
+  const right = corner2[X$2];
+  const front = corner1[Y$2];
+  const back = corner2[Y$2];
+  const top = corner2[Z$3];
+  const bottom = corner1[Z$3];
 
   if (left <= right || front <= back) {
     return Empty().toGeometry();
@@ -115,13 +115,13 @@ const Box = (x, y = x, z = 0) =>
 
 Shape.prototype.Box = shapeMethod(Box);
 
-const isDefined = (value) => value;
+const isDefined$1 = (value) => value;
 
 const Group = (...shapes) =>
   Shape.fromGeometry(
     taggedGroup(
       {},
-      ...shapes.filter(isDefined).map((shape) => shape.toGeometry())
+      ...shapes.filter(isDefined$1).map((shape) => shape.toGeometry())
     )
   );
 
@@ -1806,7 +1806,7 @@ const Spiral = (
 
 Shape.prototype.Spiral = shapeMethod(Spiral);
 
-const Z$1 = 2;
+const Z$2 = 2;
 
 registerReifier('Arc', (geometry) => {
   let { start = 0, end = 360 } = getAngle(geometry);
@@ -1818,8 +1818,8 @@ registerReifier('Arc', (geometry) => {
   const [scale, middle] = getScale(geometry);
   const corner1 = getCorner1(geometry);
   const corner2 = getCorner2(geometry);
-  const top = corner2[Z$1];
-  const bottom = corner1[Z$1];
+  const top = corner2[Z$2];
+  const bottom = corner1[Z$2];
   const step = 360 / getSides(geometry, 32);
   const steps = Math.ceil((end - start) / step);
   const effectiveStep = (end - start) / steps;
@@ -1864,13 +1864,13 @@ const Arc = (x = 1, y = x, z = 0) =>
 
 Shape.prototype.Arc = shapeMethod(Arc);
 
-const isDefined$1 = (value) => value !== undefined;
+const isDefined = (value) => value !== undefined;
 
 const Assembly = (...shapes) =>
   Shape.fromGeometry(
     taggedAssembly(
       {},
-      ...shapes.filter(isDefined$1).map((shape) => shape.toGeometry())
+      ...shapes.filter(isDefined).map((shape) => shape.toGeometry())
     )
   );
 
@@ -1889,11 +1889,11 @@ const hullMethod = function (...shapes) {
 Shape.prototype.Hull = shapeMethod(Hull);
 Shape.prototype.hull = hullMethod;
 
-const fromPoints = (...args) =>
+const fromPoints$1 = (...args) =>
   Shape.fromPoints(args.map(([x = 0, y = 0, z = 0]) => [x, y, z]));
 
-const Points = (...args) => fromPoints(...args);
-Points.fromPoints = fromPoints;
+const Points = (...args) => fromPoints$1(...args);
+Points.fromPoints = fromPoints$1;
 
 Shape.prototype.Points = shapeMethod(Points);
 
@@ -1920,14 +1920,14 @@ Point.fromPoint = fromPoint;
 
 Shape.prototype.Point = shapeMethod(Point);
 
-const Z$2 = 2;
+const Z$1 = 2;
 
 // FIX: This looks wrong.
 registerReifier('Cone', (geometry) => {
   const [x, y, z] = getCorner2(geometry);
   return Hull(
     Arc(x, y).sides(getSides(geometry, 32)).z(z),
-    Point(0, 0, getCorner1(geometry)[Z$2])
+    Point(0, 0, getCorner1(geometry)[Z$1])
   )
     .orient({
       center: negate(getAt(geometry)),
@@ -2041,7 +2041,7 @@ Shape.prototype.Implicit = shapeMethod(Implicit);
 const fromVec3 = (...points) =>
   Shape.fromOpenPath(points.map(([x = 0, y = 0, z = 0]) => [x, y, z]));
 
-const fromPoints$1 = (...shapes) => {
+const fromPoints = (...shapes) => {
   const vec3List = [];
   for (const shape of shapes) {
     shape.eachPoint((vec3) => vec3List.push(vec3));
@@ -2049,7 +2049,7 @@ const fromPoints$1 = (...shapes) => {
   return fromVec3(...vec3List);
 };
 
-const Path = (...points) => fromPoints$1(...points);
+const Path = (...points) => fromPoints(...points);
 Path.fromVec3 = fromVec3;
 
 Shape.prototype.Path = shapeMethod(Path);
@@ -2177,9 +2177,9 @@ const Orb = (x = 1, y = x, z = x) =>
 
 Shape.prototype.Orb = shapeMethod(Orb);
 
-const X$2 = 0;
-const Y$2 = 1;
-const Z$3 = 2;
+const X = 0;
+const Y = 1;
+const Z = 2;
 
 const Peg = (
   name,
@@ -2196,7 +2196,7 @@ const Peg = (
   }
   return Shape.fromGeometry(
     taggedPoints({ tags }, [
-      [o[X$2], o[Y$2], o[Z$3], f[X$2], f[Y$2], f[Z$3], r[X$2], r[Y$2], r[Z$3]],
+      [o[X], o[Y], o[Z], f[X], f[Y], f[Z], r[X], r[Y], r[Z]],
     ])
   );
 };

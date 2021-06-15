@@ -286,9 +286,9 @@ function createComparator(createIsEqual) {
 }
 
 var deepEqual = createComparator();
-var shallowEqual = createComparator(function () { return sameValueZeroEqual; });
-var circularDeepEqual = createComparator(createCircularEqualCreator());
-var circularShallowEqual = createComparator(createCircularEqualCreator(sameValueZeroEqual));
+createComparator(function () { return sameValueZeroEqual; });
+createComparator(createCircularEqualCreator());
+createComparator(createCircularEqualCreator(sameValueZeroEqual));
 
 /**
  * @constant DEFAULT_OPTIONS_KEYS the default options keys

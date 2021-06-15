@@ -173,9 +173,9 @@ const addToMethod = function (shape) {
 };
 Shape.prototype.addTo = addToMethod;
 
-const X = 0;
-const Y = 1;
-const Z = 2;
+const X$1 = 0;
+const Y$1 = 1;
+const Z$1 = 2;
 
 const align = (shape, spec = 'xyz', origin = [0, 0, 0]) =>
   shape.size(({ max, min, center }, shape) => {
@@ -187,45 +187,45 @@ const align = (shape, spec = 'xyz', origin = [0, 0, 0]) =>
         case 'x': {
           switch (spec[index]) {
             case '>':
-              offset[X] = -min[X];
+              offset[X$1] = -min[X$1];
               index += 1;
               break;
             case '<':
-              offset[X] = -max[X];
+              offset[X$1] = -max[X$1];
               index += 1;
               break;
             default:
-              offset[X] = -center[X];
+              offset[X$1] = -center[X$1];
           }
           break;
         }
         case 'y': {
           switch (spec[index]) {
             case '>':
-              offset[Y] = -min[Y];
+              offset[Y$1] = -min[Y$1];
               index += 1;
               break;
             case '<':
-              offset[Y] = -max[Y];
+              offset[Y$1] = -max[Y$1];
               index += 1;
               break;
             default:
-              offset[Y] = -center[Y];
+              offset[Y$1] = -center[Y$1];
           }
           break;
         }
         case 'z': {
           switch (spec[index]) {
             case '>':
-              offset[Z] = -min[Z];
+              offset[Z$1] = -min[Z$1];
               index += 1;
               break;
             case '<':
-              offset[Z] = -max[Z];
+              offset[Z$1] = -max[Z$1];
               index += 1;
               break;
             default:
-              offset[Z] = -center[Z];
+              offset[Z$1] = -center[Z$1];
           }
           break;
         }
@@ -669,7 +669,7 @@ Shape.prototype.withOp = withOpMethod;
  * :::
  **/
 
-const orient = (
+const orient$1 = (
   shape,
   { center = [0, 0, 0], facing = [0, 0, 1], at = [0, 0, 0], from = [0, 0, 0] }
 ) => {
@@ -687,7 +687,7 @@ const orient = (
 };
 
 const orientMethod = function (...args) {
-  return orient(this, ...args);
+  return orient$1(this, ...args);
 };
 Shape.prototype.orient = orientMethod;
 
@@ -795,7 +795,7 @@ const getPegCoords = (shape) => {
 // See also:
 // https://gist.github.com/kevinmoran/b45980723e53edeb8a5a43c49f134724
 
-const orient$1 = (origin, forward, right, shapeToPeg) => {
+const orient = (origin, forward, right, shapeToPeg) => {
   console.log(`QQ/orient`);
   console.log(`QQ/right: ${JSON.stringify(right)}`);
   console.log(`QQ/forward: ${JSON.stringify(forward)}`);
@@ -816,7 +816,7 @@ const orient$1 = (origin, forward, right, shapeToPeg) => {
 
 const peg = (shape, shapeToPeg) => {
   const { origin, right, forward } = getPegCoords(shape);
-  return orient$1(origin, right, forward, shapeToPeg);
+  return orient(origin, right, forward, shapeToPeg);
 };
 
 const pegMethod = function (shapeToPeg) {
@@ -981,7 +981,9 @@ const rotateMethod = function (...args) {
 Shape.prototype.rotate = rotateMethod;
 
 const rotateX = (shape, ...angles) =>
-  Shape.Group(...angles.map((angle) => shape.transform(fromRotateXToTransform(angle))));
+  Shape.Group(
+    ...angles.map((angle) => shape.transform(fromRotateXToTransform(angle)))
+  );
 
 const rotateXMethod = function (...angles) {
   return rotateX(this, ...angles);
@@ -990,7 +992,9 @@ Shape.prototype.rotateX = rotateXMethod;
 Shape.prototype.rx = rotateXMethod;
 
 const rotateY = (shape, ...angles) =>
-  Shape.Group(...angles.map((angle) => shape.transform(fromRotateYToTransform(angle))));
+  Shape.Group(
+    ...angles.map((angle) => shape.transform(fromRotateYToTransform(angle)))
+  );
 
 const rotateYMethod = function (...angles) {
   return rotateY(this, ...angles);
@@ -999,7 +1003,9 @@ Shape.prototype.rotateY = rotateYMethod;
 Shape.prototype.ry = rotateYMethod;
 
 const rotateZ = (shape, ...angles) =>
-  Shape.Group(...angles.map((angle) => shape.transform(fromRotateZToTransform(angle))));
+  Shape.Group(
+    ...angles.map((angle) => shape.transform(fromRotateZToTransform(angle)))
+  );
 
 const rotateZMethod = function (...angles) {
   return rotateZ(this, ...angles);
@@ -1024,16 +1030,16 @@ const smoothMethod = function (options) {
 
 Shape.prototype.smooth = smoothMethod;
 
-const X$1 = 0;
-const Y$1 = 1;
-const Z$1 = 2;
+const X = 0;
+const Y = 1;
+const Z = 2;
 
 const size = (shape, op = (size, shape) => size) => {
   const geometry = shape.toConcreteGeometry();
   const [min, max] = measureBoundingBox(geometry);
-  const length = max[X$1] - min[X$1];
-  const width = max[Y$1] - min[Y$1];
-  const height = max[Z$1] - min[Z$1];
+  const length = max[X] - min[X];
+  const width = max[Y] - min[Y];
+  const height = max[Z] - min[Z];
   const center = scale$1(0.5, add$1(min, max));
   const radius = distance(center, max);
   return op(
@@ -1384,4 +1390,4 @@ const logMethod = function (op = (shape) => JSON.stringify(shape)) {
 Shape.prototype.log = logMethod;
 
 export default Shape;
-export { Shape, getPegCoords, loadGeometry, log, orient$1 as orient, saveGeometry, shapeMethod, weld };
+export { Shape, getPegCoords, loadGeometry, log, orient, saveGeometry, shapeMethod, weld };

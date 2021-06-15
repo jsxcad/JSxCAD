@@ -416,7 +416,7 @@ var AUTO_CAD_COLOR_INDEX = [
  * Returns the truecolor value of the given AutoCad color index value
  * @return {Number} truecolor value as a number
  */
-function getAcadColor(index) {
+function getAcadColor$1(index) {
 	return AUTO_CAD_COLOR_INDEX[index];
 }
 
@@ -482,7 +482,7 @@ function checkCommonEntityProperties(entity, curr) {
             break;
         case 62: // Acad Index Color. 0 inherits ByBlock. 256 inherits ByLayer. Default is bylayer
             entity.colorIndex = curr.value;
-            entity.color = getAcadColor(Math.abs(curr.value));
+            entity.color = getAcadColor$1(Math.abs(curr.value));
             break;
         case 67:
             entity.inPaperSpace = curr.value !== 0;
@@ -521,11 +521,11 @@ function checkCommonEntityProperties(entity, curr) {
     return true;
 }
 
-function EntityParser() {}
+function EntityParser$f() {}
 
-EntityParser.ForEntityName = '3DFACE';
+EntityParser$f.ForEntityName = '3DFACE';
 
-EntityParser.prototype.parseEntity = function(scanner, curr) {
+EntityParser$f.prototype.parseEntity = function(scanner, curr) {
 
     var entity = { type: curr.value, vertices: [] };
     curr = scanner.next();
@@ -601,11 +601,11 @@ function parse3dFaceVertices(scanner, curr) {
     return vertices;
 }
 
-function EntityParser$1() {}
+function EntityParser$e() {}
 
-EntityParser$1.ForEntityName = 'ARC';
+EntityParser$e.ForEntityName = 'ARC';
 
-EntityParser$1.prototype.parseEntity = function(scanner, curr) {
+EntityParser$e.prototype.parseEntity = function(scanner, curr) {
     var entity;
     entity = { type: curr.value };
     curr = scanner.next();
@@ -635,11 +635,11 @@ EntityParser$1.prototype.parseEntity = function(scanner, curr) {
     return entity;
 };
 
-function EntityParser$2() {}
+function EntityParser$d() {}
 
-EntityParser$2.ForEntityName = 'ATTDEF';
+EntityParser$d.ForEntityName = 'ATTDEF';
 
-EntityParser$2.prototype.parseEntity = function(scanner, curr) {
+EntityParser$d.prototype.parseEntity = function(scanner, curr) {
     var entity = {
         type: curr.value,
         scale: 1,
@@ -726,11 +726,11 @@ EntityParser$2.prototype.parseEntity = function(scanner, curr) {
     return entity;
 };
 
-function EntityParser$3() {}
+function EntityParser$c() {}
 
-EntityParser$3.ForEntityName = 'CIRCLE';
+EntityParser$c.ForEntityName = 'CIRCLE';
 
-EntityParser$3.prototype.parseEntity = function(scanner, curr) {
+EntityParser$c.prototype.parseEntity = function(scanner, curr) {
     var entity, endAngle;
     entity = { type: curr.value };
     curr = scanner.next();
@@ -764,11 +764,11 @@ EntityParser$3.prototype.parseEntity = function(scanner, curr) {
     return entity;
 };
 
-function EntityParser$4() {}
+function EntityParser$b() {}
 
-EntityParser$4.ForEntityName = 'DIMENSION';
+EntityParser$b.ForEntityName = 'DIMENSION';
 
-EntityParser$4.prototype.parseEntity = function(scanner, curr) {
+EntityParser$b.prototype.parseEntity = function(scanner, curr) {
     var entity;
 		entity = { type: curr.value };
 		curr = scanner.next();
@@ -825,11 +825,11 @@ EntityParser$4.prototype.parseEntity = function(scanner, curr) {
 		return entity;
 };
 
-function EntityParser$5() {}
+function EntityParser$a() {}
 
-EntityParser$5.ForEntityName = 'ELLIPSE';
+EntityParser$a.ForEntityName = 'ELLIPSE';
 
-EntityParser$5.prototype.parseEntity = function(scanner, curr) {
+EntityParser$a.prototype.parseEntity = function(scanner, curr) {
     var entity;
     entity = { type: curr.value };
     curr = scanner.next();
@@ -866,11 +866,11 @@ EntityParser$5.prototype.parseEntity = function(scanner, curr) {
     return entity;
 };
 
-function EntityParser$6() {}
+function EntityParser$9() {}
 
-EntityParser$6.ForEntityName = 'INSERT';
+EntityParser$9.ForEntityName = 'INSERT';
 
-EntityParser$6.prototype.parseEntity = function(scanner, curr) {
+EntityParser$9.prototype.parseEntity = function(scanner, curr) {
     var entity;
     entity = { type: curr.value };
     curr = scanner.next();
@@ -921,11 +921,11 @@ EntityParser$6.prototype.parseEntity = function(scanner, curr) {
     return entity;
 };
 
-function EntityParser$7() {}
+function EntityParser$8() {}
 
-EntityParser$7.ForEntityName = 'LINE';
+EntityParser$8.ForEntityName = 'LINE';
 
-EntityParser$7.prototype.parseEntity = function(scanner, curr) {
+EntityParser$8.prototype.parseEntity = function(scanner, curr) {
     var entity = { type: curr.value, vertices: [] };
     curr = scanner.next();
     while(curr !== 'EOF') {
@@ -953,11 +953,11 @@ EntityParser$7.prototype.parseEntity = function(scanner, curr) {
     return entity;
 };
 
-function EntityParser$8() {}
+function EntityParser$7() {}
 
-EntityParser$8.ForEntityName = 'LWPOLYLINE';
+EntityParser$7.ForEntityName = 'LWPOLYLINE';
 
-EntityParser$8.prototype.parseEntity = function(scanner, curr) {
+EntityParser$7.prototype.parseEntity = function(scanner, curr) {
     var entity = { type: curr.value, vertices: [] },
         numberOfVertices = 0;
     curr = scanner.next();
@@ -1057,11 +1057,11 @@ function parseLWPolylineVertices(n, scanner) {
     return vertices;
 }
 
-function EntityParser$9() {}
+function EntityParser$6() {}
 
-EntityParser$9.ForEntityName = 'MTEXT';
+EntityParser$6.ForEntityName = 'MTEXT';
 
-EntityParser$9.prototype.parseEntity = function(scanner, curr) {
+EntityParser$6.prototype.parseEntity = function(scanner, curr) {
     var entity = { type: curr.value };
 		curr = scanner.next();
     while(curr !== 'EOF') {
@@ -1102,11 +1102,11 @@ EntityParser$9.prototype.parseEntity = function(scanner, curr) {
     return entity;
 };
 
-function EntityParser$a() {}
+function EntityParser$5() {}
 
-EntityParser$a.ForEntityName = 'POINT';
+EntityParser$5.ForEntityName = 'POINT';
 
-EntityParser$a.prototype.parseEntity = function(scanner, curr) {
+EntityParser$5.prototype.parseEntity = function(scanner, curr) {
     var entity;
     entity = { type: curr.value };
     curr = scanner.next();
@@ -1135,11 +1135,11 @@ EntityParser$a.prototype.parseEntity = function(scanner, curr) {
     return entity;
 };
 
-function EntityParser$b() {}
+function EntityParser$4() {}
 
-EntityParser$b.ForEntityName = 'VERTEX';
+EntityParser$4.ForEntityName = 'VERTEX';
 
-EntityParser$b.prototype.parseEntity = function(scanner, curr) {
+EntityParser$4.prototype.parseEntity = function(scanner, curr) {
     var entity = { type: curr.value };
     curr = scanner.next();
     while(curr !== 'EOF') {
@@ -1195,11 +1195,11 @@ EntityParser$b.prototype.parseEntity = function(scanner, curr) {
     return entity;
 };
 
-function EntityParser$c() {}
+function EntityParser$3() {}
 
-EntityParser$c.ForEntityName = 'POLYLINE';
+EntityParser$3.ForEntityName = 'POLYLINE';
 
-EntityParser$c.prototype.parseEntity = function(scanner, curr) {
+EntityParser$3.prototype.parseEntity = function(scanner, curr) {
     var entity = { type: curr.value, vertices: [] };
 		curr = scanner.next();
 		while(curr !== 'EOF') {
@@ -1255,7 +1255,7 @@ EntityParser$c.prototype.parseEntity = function(scanner, curr) {
 };
 
 function parsePolylineVertices(scanner, curr) {
-    var vertexParser = new EntityParser$b();
+    var vertexParser = new EntityParser$4();
 
     var vertices = [];
     while (!scanner.isEOF()) {
@@ -1283,11 +1283,11 @@ function parseSeqEnd(scanner, curr) {
     return entity;
 }
 
-function EntityParser$d() {}
+function EntityParser$2() {}
 
-EntityParser$d.ForEntityName = 'SOLID';
+EntityParser$2.ForEntityName = 'SOLID';
 
-EntityParser$d.prototype.parseEntity = function(scanner, currentGroup) {
+EntityParser$2.prototype.parseEntity = function(scanner, currentGroup) {
     var entity;
     entity = { type: currentGroup.value };
     entity.points = [];
@@ -1321,11 +1321,11 @@ EntityParser$d.prototype.parseEntity = function(scanner, currentGroup) {
     return entity;
 };
 
-function EntityParser$e() {}
+function EntityParser$1() {}
 
-EntityParser$e.ForEntityName = 'SPLINE';
+EntityParser$1.ForEntityName = 'SPLINE';
 
-EntityParser$e.prototype.parseEntity = function(scanner, curr) {
+EntityParser$1.prototype.parseEntity = function(scanner, curr) {
     var entity;
     entity = { type: curr.value };
     curr = scanner.next();
@@ -1389,11 +1389,11 @@ EntityParser$e.prototype.parseEntity = function(scanner, curr) {
     return entity;
 };
 
-function EntityParser$f() {}
+function EntityParser() {}
 
-EntityParser$f.ForEntityName = 'TEXT';
+EntityParser.ForEntityName = 'TEXT';
 
-EntityParser$f.prototype.parseEntity = function(scanner, curr) {
+EntityParser.prototype.parseEntity = function(scanner, curr) {
     var entity;
 		entity = { type: curr.value };
     curr = scanner.next();
@@ -1448,7 +1448,7 @@ var loglevel = createCommonjsModule(function (module) {
 * Licensed under the MIT license.
 */
 (function (root, definition) {
-    if ( module.exports) {
+    if (module.exports) {
         module.exports = definition();
     } else {
         root.log = definition();
@@ -1722,21 +1722,21 @@ loglevel.setLevel('error');
 
 function registerDefaultEntityHandlers(dxfParser) {
 	// Supported entities here (some entity code is still being refactored into this flow)
-	dxfParser.registerEntityHandler(EntityParser);
-	dxfParser.registerEntityHandler(EntityParser$1);
-	dxfParser.registerEntityHandler(EntityParser$2);
-	dxfParser.registerEntityHandler(EntityParser$3);
-	dxfParser.registerEntityHandler(EntityParser$4);
-	dxfParser.registerEntityHandler(EntityParser$5);
-	dxfParser.registerEntityHandler(EntityParser$6);
-	dxfParser.registerEntityHandler(EntityParser$7);
-	dxfParser.registerEntityHandler(EntityParser$8);
-	dxfParser.registerEntityHandler(EntityParser$9);
-	dxfParser.registerEntityHandler(EntityParser$a);
-	dxfParser.registerEntityHandler(EntityParser$c);
-	dxfParser.registerEntityHandler(EntityParser$d);
-	dxfParser.registerEntityHandler(EntityParser$e);
 	dxfParser.registerEntityHandler(EntityParser$f);
+	dxfParser.registerEntityHandler(EntityParser$e);
+	dxfParser.registerEntityHandler(EntityParser$d);
+	dxfParser.registerEntityHandler(EntityParser$c);
+	dxfParser.registerEntityHandler(EntityParser$b);
+	dxfParser.registerEntityHandler(EntityParser$a);
+	dxfParser.registerEntityHandler(EntityParser$9);
+	dxfParser.registerEntityHandler(EntityParser$8);
+	dxfParser.registerEntityHandler(EntityParser$7);
+	dxfParser.registerEntityHandler(EntityParser$6);
+	dxfParser.registerEntityHandler(EntityParser$5);
+	dxfParser.registerEntityHandler(EntityParser$3);
+	dxfParser.registerEntityHandler(EntityParser$2);
+	dxfParser.registerEntityHandler(EntityParser$1);
+	dxfParser.registerEntityHandler(EntityParser);
 	//dxfParser.registerEntityHandler(require('./entities/vertex'));
 }
 
@@ -2286,7 +2286,7 @@ DxfParser.prototype._parse = function(dxfString) {
 					layer.visible = curr.value >= 0;
 					// TODO 0 and 256 are BYBLOCK and BYLAYER respectively. Need to handle these values for layers?.
 					layer.colorIndex = Math.abs(curr.value);
-					layer.color = getAcadColor$1(layer.colorIndex);
+					layer.color = getAcadColor(layer.colorIndex);
 					curr = scanner.next();
 					break;
 				case 70: // frozen layer
@@ -2437,7 +2437,7 @@ function debugCode(curr) {
  * Returns the truecolor value of the given AutoCad color index value
  * @return {Number} truecolor value as a number
  */
-function getAcadColor$1(index) {
+function getAcadColor(index) {
 	return AUTO_CAD_COLOR_INDEX[index];
 }
 
@@ -3280,7 +3280,7 @@ class Drawing
      * @param {string} unit see Drawing.UNITS
      */
     setUnits(unit) {
-        let value = (typeof Drawing.UNITS[unit] != 'undefined') ? Drawing.UNITS[unit]:Drawing.UNITS['Unitless'];
+        (typeof Drawing.UNITS[unit] != 'undefined') ? Drawing.UNITS[unit]:Drawing.UNITS['Unitless'];
         this.header('INSUNITS', [[70, Drawing.UNITS[unit]]]);
         return this;
     }
