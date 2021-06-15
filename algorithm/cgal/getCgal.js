@@ -1,12 +1,14 @@
-import { emit, log, onBoot } from '@jsxcad/sys';
+import { emit, isNode, log, onBoot } from '@jsxcad/sys';
 
-import Cgal from './cgal.cjs';
+import CgalBrowser from './cgal_browser.cjs';
+import CgalNode from './cgal_node.cjs';
 import hashSum from 'hash-sum';
 
 let cgal;
 
 export const initCgal = async () => {
   if (cgal === undefined) {
+    const Cgal = isNode ? CgalNode : CgalBrowser;
     cgal = await Cgal({
       print(...texts) {
         const text = texts.join(' ');
@@ -27,15 +29,20 @@ export const initCgal = async () => {
         console.log(texts);
       },
       locateFile(path) {
-        if (path === 'cgal.wasm') {
+        if (path === 'cgal_node.wasm' || path === 'cgal_browser.wasm') {
           let url = import.meta.url;
           if (url.startsWith('file://')) {
             url = url.substring(7);
+            const parts = url.split('/');
+            parts.pop();
+            parts.push('cgal_node.wasm');
+            return parts.join('/');
+          } else {
+            const parts = url.split('/');
+            parts.pop();
+            parts.push('cgal_browser.wasm');
+            return parts.join('/');
           }
-          const parts = url.split('/');
-          parts.pop();
-          parts.push('cgal.wasm');
-          return parts.join('/');
         }
         return path;
       },

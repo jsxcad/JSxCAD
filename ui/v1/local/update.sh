@@ -5,4 +5,4 @@ cp ../dist/auth.js .
 (cd ../../../; . ./publish-es6.sh; . ./publish-wasm.sh)
 rm ./jsxcad-*.js
 cp ../../../es6/jsxcad-*.js .
-cp ../../../es6/*.wasm .
+cp ../../../es6/cgal_browser.wasm .

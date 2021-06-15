@@ -31,7 +31,12 @@ export const orbitDisplay = async (
   const planLayers = new Layers();
   planLayers.set(SKETCH_LAYER);
 
-  const { camera, canvas: displayCanvas, renderer, scene } = buildScene({
+  const {
+    camera,
+    canvas: displayCanvas,
+    renderer,
+    scene,
+  } = buildScene({
     canvas,
     width,
     height,

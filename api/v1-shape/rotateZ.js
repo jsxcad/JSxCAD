@@ -3,7 +3,9 @@ import { Shape } from './Shape.js';
 import { fromRotateZToTransform } from '@jsxcad/algorithm-cgal';
 
 export const rotateZ = (shape, ...angles) =>
-  Shape.Group(...angles.map((angle) => shape.transform(fromRotateZToTransform(angle))));
+  Shape.Group(
+    ...angles.map((angle) => shape.transform(fromRotateZToTransform(angle)))
+  );
 
 const rotateZMethod = function (...angles) {
   return rotateZ(this, ...angles);

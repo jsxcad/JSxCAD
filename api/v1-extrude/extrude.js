@@ -18,7 +18,9 @@ export const extrude = (shape, ...heights) => {
     if (height < depth) {
       [height, depth] = [depth, height];
     }
-    extrusions.push(Shape.fromGeometry(extrudeGeometry(shape.toGeometry(), height, depth)));
+    extrusions.push(
+      Shape.fromGeometry(extrudeGeometry(shape.toGeometry(), height, depth))
+    );
   }
   return Shape.Group(...extrusions);
 };

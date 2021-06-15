@@ -36,7 +36,7 @@ import Mermaid from 'mermaid';
 import Modal from 'react-bootstrap/Modal';
 import Nav from 'react-bootstrap/Nav';
 import Navbar from 'react-bootstrap/Navbar';
-import Prettier from 'prettier/standalone.js';
+import Prettier from 'prettier';
 import PrettierParserBabel from 'prettier/parser-babel.js';
 import PropTypes from 'prop-types';
 import React from 'react';
