@@ -4,7 +4,10 @@ export const OK = 200;
 export const CREATED = 201;
 export const CONFLICT = 409;
 
-export const eq = (...values) => (match) => values.includes(match);
+export const eq =
+  (...values) =>
+  (match) =>
+    values.includes(match);
 
 export const request = async (
   isOk,

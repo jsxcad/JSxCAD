@@ -41,7 +41,7 @@
     "@jsxcad/api-v1-cursor": "^0.0.79",
     "@jsxcad/api-v1-extrude": "^0.0.79",
     "ava": "^3.9.0",
-    "depcheck": "^0.9.1",
+    "depcheck": "^1.4.1",
     "eslint": "^7.0.0",
     "babel-eslint": "^10.0.1",
     "eslint-config-standard": "^12.0.0",

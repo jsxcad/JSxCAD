@@ -10,7 +10,6 @@ import globals from 'rollup-plugin-node-globals';
 import hypothetical from 'rollup-plugin-hypothetical-windows-fix';
 import json from 'rollup-plugin-json';
 import nodeResolve from 'rollup-plugin-node-resolve';
-import sizes from 'rollup-plugin-sizes';
 
 export const watcher = {
   transform(code, id) {
@@ -97,7 +96,6 @@ export default {
     builtins(),
     nodeResolve({ preferBuiltins: true }),
     json(),
-    sizes(),
     {
       transform(code, id) {
         return code.replace(/'@jsxcad\/([^']*)'/g, "'./jsxcad-$1.js'");

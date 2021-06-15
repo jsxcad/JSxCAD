@@ -4,7 +4,7 @@
   "description": "Javascript CAD",
   "repository": "https://github.com/jsxcad/JSxCAD",
   "scripts": {
-    "bootstrap": "lerna bootstrap --hoist --loglevel debug",
+    "bootstrap": "lerna bootstrap --hoist",
     "depcheck": "lerna run depcheck",
     "lint": "lerna run lint",
     "lintfix": "lerna run lintfix",
@@ -13,7 +13,7 @@
     "rollup": "lerna run rollup",
     "doc": "lerna run doc",
     "test": "lerna run tests",
-    "tests": "lerna run tests -- --verbose"
+    "tests": "lerna run tests"
   },
   "contributors": [
     {

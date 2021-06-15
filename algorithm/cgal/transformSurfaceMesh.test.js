@@ -102,24 +102,10 @@ test('transformSurfaceMesh', (t) => {
   const mesh = fromGraphToSurfaceMesh(solid);
   t.true(mesh.is_valid(false));
   t.false(mesh.is_empty());
-  const transformedMesh = transformSurfaceMesh(mesh, [
-    1,
-    0,
-    0,
-    0,
-    0,
-    1,
-    0,
-    0,
-    0,
-    0,
-    1,
-    0,
-    2,
-    4,
-    6,
-    1,
-  ]);
+  const transformedMesh = transformSurfaceMesh(
+    mesh,
+    [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 2, 4, 6, 1]
+  );
   const transformedGraph = fromSurfaceMeshToGraph(transformedMesh);
   t.deepEqual(transformedGraph, {
     edges: [

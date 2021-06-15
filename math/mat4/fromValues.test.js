@@ -26,22 +26,8 @@ test('mat4: fromValues() should return a new mat4 with correct values', (t) => {
     -14,
     -15
   );
-  t.deepEqual(obs2, [
-    0,
-    -1,
-    -2,
-    -3,
-    -4,
-    -5,
-    -6,
-    -7,
-    -8,
-    -9,
-    -10,
-    -11,
-    -12,
-    -13,
-    -14,
-    -15,
-  ]);
+  t.deepEqual(
+    obs2,
+    [0, -1, -2, -3, -4, -5, -6, -7, -8, -9, -10, -11, -12, -13, -14, -15]
+  );
 });

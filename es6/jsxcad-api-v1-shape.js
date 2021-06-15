@@ -980,29 +980,29 @@ const rotateMethod = function (...args) {
 };
 Shape.prototype.rotate = rotateMethod;
 
-const rotateX = (shape, angle) =>
-  shape.transform(fromRotateXToTransform(angle));
+const rotateX = (shape, ...angles) =>
+  Shape.Group(...angles.map((angle) => shape.transform(fromRotateXToTransform(angle))));
 
-const rotateXMethod = function (angle) {
-  return rotateX(this, angle);
+const rotateXMethod = function (...angles) {
+  return rotateX(this, ...angles);
 };
 Shape.prototype.rotateX = rotateXMethod;
 Shape.prototype.rx = rotateXMethod;
 
-const rotateY = (shape, angle) =>
-  shape.transform(fromRotateYToTransform(angle));
+const rotateY = (shape, ...angles) =>
+  Shape.Group(...angles.map((angle) => shape.transform(fromRotateYToTransform(angle))));
 
-const rotateYMethod = function (angle) {
-  return rotateY(this, angle);
+const rotateYMethod = function (...angles) {
+  return rotateY(this, ...angles);
 };
 Shape.prototype.rotateY = rotateYMethod;
 Shape.prototype.ry = rotateYMethod;
 
-const rotateZ = (shape, angle) =>
-  shape.transform(fromRotateZToTransform(angle));
+const rotateZ = (shape, ...angles) =>
+  Shape.Group(...angles.map((angle) => shape.transform(fromRotateZToTransform(angle))));
 
-const rotateZMethod = function (angle) {
-  return rotateZ(this, angle);
+const rotateZMethod = function (...angles) {
+  return rotateZ(this, ...angles);
 };
 Shape.prototype.rotateZ = rotateZMethod;
 Shape.prototype.rz = rotateZMethod;
