@@ -6,5 +6,7 @@ import { toSurfaceMesh } from './toSurfaceMesh.js';
 export const remesh = (geometry, options = {}) =>
   taggedGraph(
     { tags: geometry.tags },
-    fromSurfaceMeshLazy(remeshSurfaceMesh(toSurfaceMesh(geometry), options))
+    fromSurfaceMeshLazy(
+      remeshSurfaceMesh(toSurfaceMesh(geometry.graph), options)
+    )
   );

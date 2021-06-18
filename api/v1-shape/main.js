@@ -3,6 +3,7 @@ import './and.js';
 import './addTo.js';
 import './align.js';
 import './as.js';
+import './bend.js';
 import './clip.js';
 import './clipFrom.js';
 import './color.js';

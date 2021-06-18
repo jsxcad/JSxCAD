@@ -1,8 +1,13 @@
-import { addPending, emit, getModule, write } from '@jsxcad/sys';
+import {
+  addPending,
+  emit,
+  generateUniqueId,
+  getModule,
+  write,
+} from '@jsxcad/sys';
 
 import Shape from '@jsxcad/api-v1-shape';
 import { ensurePages } from '@jsxcad/api-v1-shapes';
-import { nanoid } from 'nanoid/non-secure';
 
 // FIX: Avoid the extra read-write cycle.
 const view = (
@@ -26,10 +31,10 @@ const view = (
   for (const entry of ensurePages(
     viewShape.toDisplayGeometry({ triangles, outline, wireframe })
   )) {
-    const path = `view/${getModule()}/${nanoid()}`;
+    const path = `view/${getModule()}/${generateUniqueId()}`;
     addPending(write(path, entry));
     const view = { width, height, position, inline, withAxes, withGrid };
-    emit({ hash: nanoid(), path, view });
+    emit({ hash: generateUniqueId(), path, view });
   }
   return shape;
 };

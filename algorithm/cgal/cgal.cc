@@ -415,9 +415,10 @@ void compute_angle(double a, RT& sin_alpha, RT& cos_alpha, RT& w) {
   CGAL::rational_rotation_approximation(radians, sin_alpha, cos_alpha, w, RT(1), RT(1000));
 }
 
-Surface_mesh* TwistSurfaceMesh(Surface_mesh* input, Transformation* transform, double degreesPerZ) {
+Surface_mesh* BendSurfaceMesh(Surface_mesh* input, Transformation* transform, double degreesPerMm) {
   Surface_mesh* c = new Surface_mesh(*input);
   CGAL::Polygon_mesh_processing::transform(*transform, *c, CGAL::parameters::all_default());
+  CGAL::Polygon_mesh_processing::triangulate_faces(*c);
   
   // This does not look very efficient.
   // CHECK: Figure out deformations.
@@ -426,7 +427,32 @@ Surface_mesh* TwistSurfaceMesh(Surface_mesh* input, Transformation* transform, d
       continue;
     }
     Point& point = c->point(vertex);
-    double a = CGAL::to_double(point.z()) * degreesPerZ;
+    FT lx = point.x();
+    FT ly = point.y();
+    FT radians = ((90 - lx * degreesPerMm) * CGAL_PI) / 180.0;
+    FT radius = ly;
+    RT sin_alpha, cos_alpha, w;
+    CGAL::rational_rotation_approximation(CGAL::to_double(radians.exact()), sin_alpha, cos_alpha, w, RT(1), RT(1000));
+    FT cx = (cos_alpha * radius) / w;
+    FT cy = (sin_alpha * radius) / w;
+    point = Point(cx, cy, point.z());
+  }
+  return c;
+}
+
+Surface_mesh* TwistSurfaceMesh(Surface_mesh* input, Transformation* transform, double degreesPerMm) {
+  Surface_mesh* c = new Surface_mesh(*input);
+  CGAL::Polygon_mesh_processing::transform(*transform, *c, CGAL::parameters::all_default());
+  CGAL::Polygon_mesh_processing::triangulate_faces(*c);
+  
+  // This does not look very efficient.
+  // CHECK: Figure out deformations.
+  for (const Surface_mesh::Vertex_index vertex : c->vertices()) {
+    if (c->is_removed(vertex)) {
+      continue;
+    }
+    Point& point = c->point(vertex);
+    double a = CGAL::to_double(point.z()) * degreesPerMm;
     RT sin_alpha, cos_alpha, w;
     compute_angle(a, sin_alpha, cos_alpha, w);
     Transformation transformation(
@@ -2938,6 +2964,7 @@ EMSCRIPTEN_BINDINGS(module) {
   emscripten::function("UnionOfSurfaceMeshes", &UnionOfSurfaceMeshes, emscripten::allow_raw_pointers());
 
   emscripten::function("TwistSurfaceMesh", &TwistSurfaceMesh, emscripten::allow_raw_pointers());
+  emscripten::function("BendSurfaceMesh", &BendSurfaceMesh, emscripten::allow_raw_pointers());
   emscripten::function("PushSurfaceMesh", &PushSurfaceMesh, emscripten::allow_raw_pointers());
   emscripten::function("OutlineSurfaceMesh", &OutlineSurfaceMesh, emscripten::allow_raw_pointers());
   emscripten::function("FromSurfaceMeshToPolygonsWithHoles", &FromSurfaceMeshToPolygonsWithHoles, emscripten::allow_raw_pointers());

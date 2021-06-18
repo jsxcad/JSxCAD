@@ -12,7 +12,7 @@ export const soup = (
 ) => {
   const outline = doOutline ? outlineOp : () => [];
   const wireframe = doWireframe
-    ? (geometry) => [toTriangles(geometry)]
+    ? (geometry) => [taggedPaths({ tags: geometry.tags }, toPaths(geometry))]
     : () => [];
   const triangles = doTriangles
     ? (geometry) => [toTriangles(geometry)]

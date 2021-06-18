@@ -136,18 +136,17 @@ export class JsEditorUi extends React.PureComponent {
       openView = note.nthView;
     };
 
-    if (!notebookData.listeners) {
-      notebookData.listeners = [];
-    }
-
     // const domElementByHash = new Map();
 
     const hashNotes = (notes) => notes.map((note) => note.hash || '').join('/');
 
     const widgets = [];
 
-    const update = async () => {
-      const usedHashes = new Set();
+    let usedHashes = new Set();
+    let lastUpdate;
+
+    const doUpdate = async () => {
+      lastUpdate = new Date();
 
       for (const widget of widgets) {
         widgetManager.removeLineWidget(widget);
@@ -224,25 +223,46 @@ export class JsEditorUi extends React.PureComponent {
         }
       }
 
-      /*
+      editor.resize();
+    };
+
+    let updateScheduled = false;
+
+    const update = () => {
+      if (updateScheduled) {
+        return;
+      }
+      const now = new Date();
+      if (lastUpdate && now < lastUpdate + 5000) {
+        updateScheduled = true;
+        setTimeout(() => {
+          doUpdate();
+          updateScheduled = false;
+        }, 1000);
+      } else {
+        doUpdate();
+      }
+    };
+
+    const finished = () => {
       for (const hash of domElementByHash.keys()) {
         if (!usedHashes.has(hash)) {
           domElementByHash.delete(hash);
         }
       }
-      */
-
-      editor.resize();
+      usedHashes.clear();
     };
 
-    notebookData.listeners = [update];
+    notebookData.onUpdate = update;
+    notebookData.onFinished = finished;
   }
 
   async update() {}
 
   async componentWillUnmount() {
     const notebookData = this.props.notebookData;
-    notebookData.listeners = [];
+    notebookData.onUpdate = undefined;
+    notebookData.onFinished = undefined;
   }
 
   onValueChange(data) {

@@ -1,4 +1,4 @@
-import { closePath, concatenatePath, taggedAssembly, eachPoint, flip, toConcreteGeometry, toDisplayGeometry, toTransformedGeometry, toPoints, transform, rewriteTags, taggedPaths, taggedGraph, openPath, taggedPoints, fromPolygonsToGraph, registerReifier, union, taggedLayers, intersection, allTags, difference, getLeafs, empty, grow as grow$1, inset as inset$1, rewrite, minkowskiDifference as minkowskiDifference$1, minkowskiShell as minkowskiShell$1, minkowskiSum as minkowskiSum$1, isVoid, offset as offset$1, taggedItem, taggedDisjointAssembly, toDisjointGeometry, push as push$1, getPeg, taggedPlan, remesh as remesh$1, smooth as smooth$1, measureBoundingBox, taggedSketch, test as test$1, twist as twist$1, toPolygonsWithHoles, arrangePolygonsWithHoles, fromPolygonsWithHolesToTriangles, fromTrianglesToGraph, taggedGroup, read, write, realize } from './jsxcad-geometry.js';
+import { closePath, concatenatePath, taggedAssembly, eachPoint, flip, toConcreteGeometry, toDisplayGeometry, toTransformedGeometry, toPoints, transform, rewriteTags, taggedPaths, taggedGraph, openPath, taggedPoints, fromPolygonsToGraph, registerReifier, union, taggedLayers, bend as bend$1, intersection, allTags, difference, getLeafs, empty, grow as grow$1, inset as inset$1, rewrite, minkowskiDifference as minkowskiDifference$1, minkowskiShell as minkowskiShell$1, minkowskiSum as minkowskiSum$1, isVoid, offset as offset$1, taggedItem, taggedDisjointAssembly, toDisjointGeometry, push as push$1, getPeg, taggedPlan, remesh as remesh$1, smooth as smooth$1, measureBoundingBox, taggedSketch, test as test$1, twist as twist$1, toPolygonsWithHoles, arrangePolygonsWithHoles, fromPolygonsWithHolesToTriangles, fromTrianglesToGraph, taggedGroup, read, write, realize } from './jsxcad-geometry.js';
 import { identityMatrix, fromTranslation, fromRotation, fromScaling } from './jsxcad-math-mat4.js';
 import { add as add$1, negate, normalize, subtract, dot, cross, scale as scale$1, distance } from './jsxcad-math-vec3.js';
 import { toTagsFromName } from './jsxcad-algorithm-color.js';
@@ -281,6 +281,11 @@ const notAsMethod = function (...tags) {
 
 Shape.prototype.as = asMethod;
 Shape.prototype.notAs = notAsMethod;
+
+const bend = (shape, degreesPerMm = 1) =>
+  Shape.fromGeometry(bend$1(shape.toGeometry(), degreesPerMm));
+
+Shape.registerMethod('bend', bend);
 
 const clip = (shape, ...shapes) =>
   Shape.fromGeometry(
@@ -1112,14 +1117,10 @@ const toolMethod = function (name) {
 };
 Shape.prototype.tool = toolMethod;
 
-const twist = (shape, degreesPerZ) =>
-  Shape.fromGeometry(twist$1(shape.toGeometry(), degreesPerZ));
+const twist = (shape, degreesPerMm = 1) =>
+  Shape.fromGeometry(twist$1(shape.toGeometry(), degreesPerMm));
 
-const twistMethod = function (degreesPerZ) {
-  return twist(this, degreesPerZ);
-};
-
-Shape.prototype.twist = twistMethod;
+Shape.registerMethod('twist', twist);
 
 const voidFn = (shape) =>
   Shape.fromGeometry(

@@ -26,7 +26,8 @@
     "file-saver": "^2.0.2",
     "marked": "^1.1.1",
     "@jsxcad/api-v1-shape": "^0.0.79",
-    "@jsxcad/ui-threejs": "^0.0.79"
+    "@jsxcad/ui-threejs": "^0.0.79",
+    "@jsxcad/sys": "^0.0.79"
   },
   "devDependencies": {
     "depcheck": "^1.4.1",
