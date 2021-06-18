@@ -14,7 +14,6 @@
     "doc": "lerna run doc",
     "test": "lerna run tests",
     "tests": "lerna run tests"
-    "ci": "npm run bootstrap && npm run depcheck && npm run prettier && npm run lint && npm run test && npm run rollup && ./publish-es6.sh && ./publish-wasm.sh && echo 'DONE'"
   },
   "contributors": [
     {
