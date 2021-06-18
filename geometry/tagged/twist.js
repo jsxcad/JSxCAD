@@ -1,15 +1,13 @@
 import { reify } from './reify.js';
 import { rewrite } from './visit.js';
-import { taggedGraph } from './taggedGraph.js';
 import { toTransformedGeometry } from './toTransformedGeometry.js';
 import { twist as twistGraph } from '../graph/twist.js';
 
-export const twist = (geometry, degreesPerZ) => {
+export const twist = (geometry, degreesPerMm, axis) => {
   const op = (geometry, descend) => {
-    const { tags } = geometry;
     switch (geometry.type) {
       case 'graph': {
-        return taggedGraph({ tags }, twistGraph(geometry.graph, degreesPerZ));
+        return twistGraph(geometry, degreesPerMm, axis);
       }
       case 'triangles':
       case 'paths':
@@ -17,7 +15,7 @@ export const twist = (geometry, degreesPerZ) => {
         // Not implemented yet.
         return geometry;
       case 'plan':
-        return twist(reify(geometry).content[0], degreesPerZ);
+        return twist(reify(geometry).content[0], degreesPerMm, axis);
       case 'assembly':
       case 'item':
       case 'disjointAssembly':

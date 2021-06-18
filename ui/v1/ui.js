@@ -149,6 +149,23 @@ class Ui extends React.PureComponent {
     const deletionWatcher = await watchFileDeletion(fileUpdater);
 
     const agent = async ({ ask, question }) => {
+      /*
+      if (question) {
+        const text = JSON.stringify(question);
+        const length = text.length;
+        // Copy out info.
+        const { logElement } = this.state;
+        if (logElement) {
+          const div = document.createElement('div');
+          if (length > 4096) {
+            div.textContent = `received ${length}: ${text.substr(0, 1024)}`;
+          } else {
+            div.textContent = `received ${length}`;
+          }
+          logElement.prepend(div);
+        }
+      }
+*/
       if (question.ask) {
         const { identifier, options } = question.ask;
         return askSys(identifier, options);
@@ -209,10 +226,8 @@ class Ui extends React.PureComponent {
           if (notebookRef) {
             notebookRef.forceUpdate();
           }
-          if (notebookData.listeners) {
-            for (const listener of notebookData.listeners) {
-              await listener();
-            }
+          if (notebookData.onUpdate) {
+            await notebookData.onUpdate();
           }
         }
       } else if (question.notebookLength) {
@@ -225,8 +240,8 @@ class Ui extends React.PureComponent {
           if (notebookRef) {
             notebookRef.forceUpdate();
           }
-          if (notebookData.listeners) {
-            notebookData.listeners.forEach((listener) => listener());
+          if (notebookData.onFinished) {
+            await notebookData.onFinished();
           }
         }
       }

@@ -11,6 +11,8 @@ export const outline = (geometry) => {
       geometry.matrix
     );
     info('outline end');
+  } else {
+    info('outline cached');
   }
   return geometry.cache.outline;
 };

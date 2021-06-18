@@ -1,5 +1,6 @@
 import { dataUrl, orbitDisplay } from './jsxcad-ui-threejs.js';
 import { Shape } from './jsxcad-api-v1-shape.js';
+import { read } from './jsxcad-sys.js';
 
 var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
 
@@ -2695,7 +2696,10 @@ var FileSaver_min = createCommonjsModule(function (module, exports) {
 
 /* global Blob */
 
-const downloadFile = async (event, filename, data, type) => {
+const downloadFile = async (event, filename, path, data, type) => {
+  if (!data) {
+    data = await read(path);
+  }
   const blob = new Blob([data], { type });
   FileSaver_min(blob, filename);
 };
@@ -2812,7 +2816,8 @@ const toDomElement = async (notebook = [], { onClickView } = {}) => {
     }
     if (note.download) {
       const div = document.createElement('div');
-      for (let { base64Data, data, filename, type } of note.download.entries) {
+      for (let { path, base64Data, data, filename, type } of note.download
+        .entries) {
         if (base64Data) {
           data = base64Arraybuffer.decode(base64Data);
         }
@@ -2821,7 +2826,7 @@ const toDomElement = async (notebook = [], { onClickView } = {}) => {
         const text = document.createTextNode(filename);
         button.appendChild(text);
         button.addEventListener('click', (event) =>
-          downloadFile(event, filename, data, type)
+          downloadFile(event, filename, path, data, type)
         );
         div.appendChild(button);
       }

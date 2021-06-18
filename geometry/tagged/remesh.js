@@ -1,15 +1,13 @@
 import { reify } from './reify.js';
 import { remesh as remeshGraph } from '../graph/remesh.js';
 import { rewrite } from './visit.js';
-import { taggedGraph } from './taggedGraph.js';
 import { toTransformedGeometry } from './toTransformedGeometry.js';
 
 export const remesh = (geometry, options) => {
   const op = (geometry, descend) => {
-    const { tags } = geometry;
     switch (geometry.type) {
       case 'graph': {
-        return taggedGraph({ tags }, remeshGraph(geometry.graph, options));
+        return remeshGraph(geometry, options);
       }
       case 'triangles':
       case 'paths':

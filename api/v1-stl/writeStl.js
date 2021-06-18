@@ -1,7 +1,10 @@
 import {
   addPending,
   emit,
+  generateUniqueId,
+  getModule,
   getPendingErrorHandler,
+  write,
   writeFile,
 } from '@jsxcad/sys';
 
@@ -16,10 +19,14 @@ export const prepareStl = (shape, name, options = {}) => {
   let index = 0;
   const entries = [];
   for (const entry of ensurePages(prepareStl(shape).toDisjointGeometry())) {
-    const op = toStl(entry, options).catch(getPendingErrorHandler());
+    const path = `stl/${getModule()}/${generateUniqueId()}`;
+    const op = toStl(entry, options)
+      .then((data) => write(path, data))
+      .catch(getPendingErrorHandler());
     addPending(op);
     entries.push({
-      data: op,
+      // data: op,
+      path,
       filename: `${name}_${index++}.stl`,
       type: 'application/sla',
     });

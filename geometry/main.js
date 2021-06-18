@@ -26,6 +26,7 @@ export { rewrite, visit } from './tagged/visit.js';
 export { allTags } from './tagged/allTags.js';
 export { alphaShape } from './graph/alphaShape.js';
 export { arrangePolygonsWithHoles } from './graph/arrangePolygonsWithHoles.js';
+export { bend } from './tagged/bend.js';
 export { close as closePath } from './path/close.js';
 export { concatenate as concatenatePath } from './path/concatenate.js';
 export { canonicalize } from './tagged/canonicalize.js';

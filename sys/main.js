@@ -41,3 +41,4 @@ export { deleteFile } from './deleteFile.js';
 export { askServices, terminateActiveServices } from './servicePool.js';
 export { touch } from './touch.js';
 export { write, writeFile } from './writeFile.js';
+export { generateUniqueId } from './generateUniqueId.js';

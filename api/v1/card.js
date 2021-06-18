@@ -5,11 +5,13 @@ export const card = (strings, ...placeholders) => {
   const card = strings.reduce(
     (result, string, i) => result + placeholders[i - 1] + string
   );
-  emit({ hash: hashSum(card), setContext: { card } });
+  const setContext = { card };
+  emit({ hash: hashSum(setContext), setContext });
   return card;
 };
 
 export const emitSourceLocation = ({ line, column }) => {
-  emit({ setContext: { sourceLocation: { line, column } } });
+  const setContext = { sourceLocation: { line, column } };
+  emit({ hash: hashSum(setContext), setContext });
   return card;
 };

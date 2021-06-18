@@ -1,11 +1,7 @@
 import Shape from './Shape.js';
 import { twist as twistGeometry } from '@jsxcad/geometry';
 
-export const twist = (shape, degreesPerZ) =>
-  Shape.fromGeometry(twistGeometry(shape.toGeometry(), degreesPerZ));
+export const twist = (shape, degreesPerMm = 1) =>
+  Shape.fromGeometry(twistGeometry(shape.toGeometry(), degreesPerMm));
 
-const twistMethod = function (degreesPerZ) {
-  return twist(this, degreesPerZ);
-};
-
-Shape.prototype.twist = twistMethod;
+Shape.registerMethod('twist', twist);
