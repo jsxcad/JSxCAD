@@ -1,5 +1,4 @@
 import { Shape } from './Shape.js';
-// import { fromXRotation } from '@jsxcad/math-mat4';
 import { fromRotateXToTransform } from '@jsxcad/algorithm-cgal';
 
 export const rotateX = (shape, ...angles) =>
@@ -7,10 +6,15 @@ export const rotateX = (shape, ...angles) =>
     ...angles.map((angle) => shape.transform(fromRotateXToTransform(angle)))
   );
 
-const rotateXMethod = function (...angles) {
-  return rotateX(this, ...angles);
-};
-Shape.prototype.rotateX = rotateXMethod;
-Shape.prototype.rx = rotateXMethod;
+// rx is in terms of turns -- 1/2 is a half turn.
+export const rx = (shape, ...angles) =>
+  Shape.Group(
+    ...angles.map((angle) =>
+      shape.transform(fromRotateXToTransform(angle * 360))
+    )
+  );
+
+Shape.registerMethod('rotateX', rotateX);
+Shape.registerMethod('rx', rx);
 
 export default rotateX;

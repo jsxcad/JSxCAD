@@ -980,43 +980,54 @@ Shape.prototype.remesh = remeshMethod;
 const rotate = (shape, angle = 0, axis = [0, 0, 1]) =>
   shape.transform(fromRotation(angle * 0.017453292519943295, axis));
 
-const rotateMethod = function (...args) {
-  return rotate(this, ...args);
-};
-Shape.prototype.rotate = rotateMethod;
+Shape.registerMethod('rotate', rotate);
 
 const rotateX = (shape, ...angles) =>
   Shape.Group(
     ...angles.map((angle) => shape.transform(fromRotateXToTransform(angle)))
   );
 
-const rotateXMethod = function (...angles) {
-  return rotateX(this, ...angles);
-};
-Shape.prototype.rotateX = rotateXMethod;
-Shape.prototype.rx = rotateXMethod;
+// rx is in terms of turns -- 1/2 is a half turn.
+const rx = (shape, ...angles) =>
+  Shape.Group(
+    ...angles.map((angle) =>
+      shape.transform(fromRotateXToTransform(angle * 360))
+    )
+  );
+
+Shape.registerMethod('rotateX', rotateX);
+Shape.registerMethod('rx', rx);
 
 const rotateY = (shape, ...angles) =>
   Shape.Group(
     ...angles.map((angle) => shape.transform(fromRotateYToTransform(angle)))
   );
 
-const rotateYMethod = function (...angles) {
-  return rotateY(this, ...angles);
-};
-Shape.prototype.rotateY = rotateYMethod;
-Shape.prototype.ry = rotateYMethod;
+// ry is in terms of turns -- 1/2 is a half turn.
+const ry = (shape, ...angles) =>
+  Shape.Group(
+    ...angles.map((angle) =>
+      shape.transform(fromRotateYToTransform(angle * 360))
+    )
+  );
+
+Shape.registerMethod('rotateY', rotateY);
+Shape.registerMethod('ry', ry);
 
 const rotateZ = (shape, ...angles) =>
   Shape.Group(
     ...angles.map((angle) => shape.transform(fromRotateZToTransform(angle)))
   );
 
-const rotateZMethod = function (...angles) {
-  return rotateZ(this, ...angles);
-};
-Shape.prototype.rotateZ = rotateZMethod;
-Shape.prototype.rz = rotateZMethod;
+const rz = (shape, ...angles) =>
+  Shape.Group(
+    ...angles.map((angle) =>
+      shape.transform(fromRotateZToTransform(angle * 360))
+    )
+  );
+
+Shape.registerMethod('rotateZ', rotateZ);
+Shape.registerMethod('rz', rz);
 
 const scale = (shape, x = 1, y = x, z = y) =>
   shape.transform(fromScaling([x, y, z]));

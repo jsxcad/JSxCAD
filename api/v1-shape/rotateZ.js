@@ -7,10 +7,14 @@ export const rotateZ = (shape, ...angles) =>
     ...angles.map((angle) => shape.transform(fromRotateZToTransform(angle)))
   );
 
-const rotateZMethod = function (...angles) {
-  return rotateZ(this, ...angles);
-};
-Shape.prototype.rotateZ = rotateZMethod;
-Shape.prototype.rz = rotateZMethod;
+export const rz = (shape, ...angles) =>
+  Shape.Group(
+    ...angles.map((angle) =>
+      shape.transform(fromRotateZToTransform(angle * 360))
+    )
+  );
+
+Shape.registerMethod('rotateZ', rotateZ);
+Shape.registerMethod('rz', rz);
 
 export default rotateZ;

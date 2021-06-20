@@ -776,6 +776,21 @@ Vector SomeNormalOfSurfaceMesh(const Surface_mesh& mesh) {
   return CGAL::NULL_VECTOR;
 }
 
+Surface_mesh* LoftWalls(Surface_mesh* input_a, Surface_mesh* b) {
+  Surface_mesh* loft = new Surface_mesh();
+  Surface_mesh a(*input_a);
+  CGAL::Polygon_mesh_processing::reverse_face_orientations(a.faces(), a);
+  std::unordered_map<Vertex_index, Vertex_index> b_map;
+  for (const auto h : a->halfedges()) {
+    if (a->is_border(h)) {
+      auto b_source = b_map.find(h.source());
+      if (b_source == b_map.end()) {
+        loft->add_vertex();
+      }
+    }
+  }
+}
+
 Surface_mesh* ExtrusionOfSurfaceMesh(Surface_mesh* input, Transformation* transformation, double height, double depth) {
   Surface_mesh mesh(*input);
   CGAL::Polygon_mesh_processing::transform(*transformation, mesh, CGAL::parameters::all_default());
