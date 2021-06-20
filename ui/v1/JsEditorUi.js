@@ -146,6 +146,7 @@ export class JsEditorUi extends React.PureComponent {
     let usedHashes = new Set();
     let lastUpdate;
     let marker;
+    let sourceLocation;
 
     const doUpdate = async () => {
       lastUpdate = new Date();
@@ -158,8 +159,6 @@ export class JsEditorUi extends React.PureComponent {
       const notesByLine = [];
       const definitions = [];
       let nthView = 0;
-
-      let sourceLocation;
 
       for (let note of notebookData) {
         if (!note) {
@@ -297,6 +296,7 @@ export class JsEditorUi extends React.PureComponent {
         }
       }
       usedHashes.clear();
+      sourceLocation = undefined;
     };
 
     notebookData.onUpdate = update;
