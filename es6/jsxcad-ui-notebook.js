@@ -2753,6 +2753,9 @@ const toDomElement = async (notebook = [], { onClickView } = {}) => {
 
   const container = document.createElement('div');
   container.classList.add('notebook');
+  container.style.padding = '0px';
+  container.style.border = '0px';
+  container.style.margin = '0px';
 
   for (const note of notebook) {
     if (note.define) {
@@ -2765,7 +2768,6 @@ const toDomElement = async (notebook = [], { onClickView } = {}) => {
       Object.assign(entry, note.define.data);
     }
     if (note.view) {
-      const div = document.createElement('div');
       const { data, view, openView } = note;
       const { width, height, target, up, position, withAxes, withGrid } = view;
       const url = await dataUrl(Shape.fromGeometry(data), {
@@ -2779,14 +2781,17 @@ const toDomElement = async (notebook = [], { onClickView } = {}) => {
         definitions,
       });
       const image = document.createElement('img');
+      image.style.height = `${21 * 13}px`;
+      image.style.padding = '0px';
+      image.style.border = '0px';
+      image.style.margin = '0px';
       image.classList.add('note', 'view');
       image.src = url;
       image.addEventListener('click', (event) => {
         showOrbitView(event, note);
         onClickView(event, note);
       });
-      div.appendChild(image);
-      container.appendChild(div);
+      container.appendChild(image);
       if (openView) {
         showOrbitView(undefined, note);
       }
@@ -2815,7 +2820,6 @@ const toDomElement = async (notebook = [], { onClickView } = {}) => {
       container.appendChild(entry);
     }
     if (note.download) {
-      const div = document.createElement('div');
       for (let { path, base64Data, data, filename, type } of note.download
         .entries) {
         if (base64Data) {
@@ -2823,14 +2827,17 @@ const toDomElement = async (notebook = [], { onClickView } = {}) => {
         }
         const button = document.createElement('button');
         button.classList.add('note', 'download');
-        const text = document.createTextNode(filename);
+        button.style.height = `${21 * 1}px`;
+        button.style.padding = '0px';
+        button.style.border = '0px';
+        button.style.margin = '0px';
+        const text = document.createTextNode(`Download "${filename}"`);
         button.appendChild(text);
         button.addEventListener('click', (event) =>
           downloadFile(event, filename, path, data, type)
         );
-        div.appendChild(button);
+        container.appendChild(button);
       }
-      container.appendChild(div);
     }
     if (note.control) {
       const div = document.createElement('div');

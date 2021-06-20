@@ -110,6 +110,7 @@ export class JsEditorUi extends React.PureComponent {
 
   async componentDidMount() {
     const { editor } = this.aceEditor;
+    const { session } = editor;
     const { domElementByHash } = this.props;
 
     editor.on('linkClick', ({ token }) => {
@@ -120,14 +121,14 @@ export class JsEditorUi extends React.PureComponent {
 
     editor.session.notebookElements = {};
 
-    if (!editor.session.widgetManager) {
-      editor.session.widgetManager = new aceEditorLineWidgets.LineWidgets(
-        editor.session
-      );
-      editor.session.widgetManager.attach(editor);
+    const { LineWidgets, Range } = aceEditorLineWidgets;
+
+    if (!session.widgetManager) {
+      session.widgetManager = new LineWidgets(session);
+      session.widgetManager.attach(editor);
     }
 
-    const widgetManager = editor.session.widgetManager;
+    const widgetManager = session.widgetManager;
     const notebookData = this.props.notebookData;
 
     let openView = -1;
@@ -144,6 +145,7 @@ export class JsEditorUi extends React.PureComponent {
 
     let usedHashes = new Set();
     let lastUpdate;
+    let marker;
 
     const doUpdate = async () => {
       lastUpdate = new Date();
@@ -156,6 +158,8 @@ export class JsEditorUi extends React.PureComponent {
       const notesByLine = [];
       const definitions = [];
       let nthView = 0;
+
+      let sourceLocation;
 
       for (let note of notebookData) {
         if (!note) {
@@ -189,6 +193,9 @@ export class JsEditorUi extends React.PureComponent {
             }
           }
         }
+        if (note.context && note.context.sourceLocation) {
+          sourceLocation = note.context.sourceLocation;
+        }
       }
 
       for (const line of Object.keys(notesByLine)) {
@@ -211,19 +218,58 @@ export class JsEditorUi extends React.PureComponent {
           el,
         };
 
-        widgets.push(widget);
-        widgetManager.addLineWidget(widget);
+        el.style.overflow = 'hidden';
+        el.style.padding = 0;
+        el.style.border = 0;
+        el.style.margin = 0;
+
+        // Add to the dom, so we can calculate the height.
+        el.style.visibility = 'hidden';
+        document.body.appendChild(el);
 
         // Adjust the widget height to be a multiple of line height, otherwise line selection is thrown off.
         const lineHeight = editor.renderer.layerConfig.lineHeight;
+        let elHeight;
+        if (el.offsetHeight % lineHeight === 0) {
+          elHeight = Math.ceil(el.offsetHeight / lineHeight) * lineHeight;
+        } else {
+          elHeight = Math.ceil(el.offsetHeight / lineHeight) * lineHeight;
+        }
+        el.style.height = `${elHeight}px`;
         if (el.offsetHeight % lineHeight !== 0) {
-          el.style.height = `${
-            Math.ceil(el.offsetHeight / lineHeight) * lineHeight
-          }px`;
+          console.log(
+            `QQ/Height not aligned: line: ${line} offsetHeight: ${el.offsetHeight} lineHeight: ${lineHeight}`
+          );
+        }
+
+        widgets.push(widget);
+        widgetManager.addLineWidget(widget);
+
+        // Make it visible now that it is in the right place.
+        el.style.visibility = '';
+
+        if (widget.pixelHeight !== lineHeight * widget.rowCount) {
+          console.log(
+            `QQ/widget: line ${line} pixelHeight ${widget.pixelHeight} vs ${
+              lineHeight * widget.rowCount
+            } rowCount ${widget.rowCount} lineHeight ${lineHeight}`
+          );
         }
       }
 
       editor.resize();
+
+      if (marker) {
+        session.removeMarker(marker);
+      }
+      if (sourceLocation) {
+        const { line, column } = sourceLocation;
+        marker = session.addMarker(
+          new Range(0, 0, line - 1, column),
+          'progress-marker',
+          'text'
+        );
+      }
     };
 
     let updateScheduled = false;
