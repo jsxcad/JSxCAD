@@ -81,6 +81,7 @@ export { inset } from './tagged/inset.js';
 export { isClockwise as isClockwisePath } from './path/isClockwise.js';
 export { isClosed as isClosedPath } from './path/isClosed.js';
 export { keep } from './tagged/keep.js';
+export { loft } from './tagged/loft.js';
 export { measureBoundingBox } from './tagged/measureBoundingBox.js';
 export { minkowskiDifference } from './tagged/minkowskiDifference.js';
 export { minkowskiShell } from './tagged/minkowskiShell.js';

@@ -776,19 +776,59 @@ Vector SomeNormalOfSurfaceMesh(const Surface_mesh& mesh) {
   return CGAL::NULL_VECTOR;
 }
 
-Surface_mesh* LoftWalls(Surface_mesh* input_a, Surface_mesh* b) {
-  Surface_mesh* loft = new Surface_mesh();
-  Surface_mesh a(*input_a);
-  CGAL::Polygon_mesh_processing::reverse_face_orientations(a.faces(), a);
+Surface_mesh* LoftBetweenCongruentSurfaceMeshes(Surface_mesh* a, Transformation* a_transform, Surface_mesh* b, Transformation* b_transform) {
+  Surface_mesh* loft = new Surface_mesh(*a);
+  CGAL::Polygon_mesh_processing::transform(*a_transform, *loft, CGAL::parameters::all_default());
+  CGAL::Polygon_mesh_processing::reverse_face_orientations(loft->faces(), *loft);
   std::unordered_map<Vertex_index, Vertex_index> b_map;
-  for (const auto h : a->halfedges()) {
-    if (a->is_border(h)) {
-      auto b_source = b_map.find(h.source());
-      if (b_source == b_map.end()) {
-        loft->add_vertex();
+  std::vector<Halfedge_index> base_edges;
+  for (const auto h : loft->halfedges()) {
+    base_edges.push_back(h);
+  }
+  for (const auto h : base_edges) {
+    if (loft->is_border(h)) {
+      auto a_source = loft->source(h);
+      auto b_source_it = b_map.find(a_source);
+      Vertex_index b_source;
+      if (b_source_it == b_map.end()) {
+        b_source = loft->add_vertex(b->point(a_source).transform(*b_transform));
+        b_map[a_source] = b_source;
+      } else {
+        b_source = b_source_it->second;
       }
+      auto a_target = loft->target(h);
+      auto b_target_it = b_map.find(a_target);
+      Vertex_index b_target;
+      if (b_target_it == b_map.end()) {
+        b_target = loft->add_vertex(b->point(a_target).transform(*b_transform));
+        b_map[a_target] = b_target;
+      } else {
+        b_target = b_target_it->second;
+      }
+      auto face = loft->add_face(b_source, a_source, a_target, b_target);
+    } else {
     }
   }
+  for (auto face : b->faces()) {
+    std::vector<Vertex_index> loft_vertices;
+    Halfedge_index start = b->halfedge(face);
+    Halfedge_index h = start;
+    do {
+      Vertex_index b_vertex = b->source(h);
+      auto b_vertex_it = b_map.find(b_vertex);
+      Vertex_index loft_vertex;
+      if (b_vertex_it == b_map.end()) {
+        loft_vertex = loft->add_vertex(b->point(b_vertex).transform(*b_transform));
+        b_map[b_vertex] = loft_vertex;
+      } else {
+        loft_vertex = b_vertex_it->second;
+      }
+      loft_vertices.push_back(loft_vertex);
+      h = b->next(h);
+    } while (h != start);
+    loft->add_face(loft_vertices);
+  }
+  return loft;
 }
 
 Surface_mesh* ExtrusionOfSurfaceMesh(Surface_mesh* input, Transformation* transformation, double height, double depth) {
@@ -2934,6 +2974,7 @@ EMSCRIPTEN_BINDINGS(module) {
     .function("has_garbage", &Surface_mesh::has_garbage);
 
   emscripten::function("Surface_mesh__EachFace", &Surface_mesh__EachFace, emscripten::allow_raw_pointers());
+  emscripten::function("LoftBetweenCongruentSurfaceMeshes", &LoftBetweenCongruentSurfaceMeshes, emscripten::allow_raw_pointers());
   emscripten::function("ExtrusionOfSurfaceMesh", &ExtrusionOfSurfaceMesh, emscripten::allow_raw_pointers());
   emscripten::function("ExtrusionToPlaneOfSurfaceMesh", &ExtrusionToPlaneOfSurfaceMesh, emscripten::allow_raw_pointers());
   emscripten::function("ProjectionToPlaneOfSurfaceMesh", &ProjectionToPlaneOfSurfaceMesh, emscripten::allow_raw_pointers());

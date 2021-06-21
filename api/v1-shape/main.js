@@ -16,6 +16,7 @@ import './fuse.js';
 import './grow.js';
 import './inset.js';
 import './keep.js';
+import './loft.js';
 import './material.js';
 import './minkowskiDifference.js';
 import './minkowskiShell.js';
