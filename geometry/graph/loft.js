@@ -3,15 +3,16 @@ import { loftBetweenCongruentSurfaceMeshes } from '@jsxcad/algorithm-cgal';
 import { taggedGraph } from '../tagged/taggedGraph.js';
 import { toSurfaceMesh } from './toSurfaceMesh.js';
 
-export const loft = (a, b) =>
+export const loft = (closed, ...geometries) =>
   taggedGraph(
-    { tags: a.tags },
+    { tags: geometries[0].tags },
     fromSurfaceMeshLazy(
       loftBetweenCongruentSurfaceMeshes(
-        toSurfaceMesh(a.graph),
-        a.matrix,
-        toSurfaceMesh(b.graph),
-        b.matrix
+        closed,
+        ...geometries.map((geometry) => [
+          toSurfaceMesh(geometry.graph),
+          geometry.matrix,
+        ])
       )
     )
   );

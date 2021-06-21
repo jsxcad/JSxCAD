@@ -2021,29 +2021,33 @@ const inset = (geometry, initial = 1, step, limit) => {
 const keep = (tags, geometry) =>
   rewriteTags(['compose/non-positive'], [], geometry, tags, 'has not');
 
-const loft$1 = (a, b) =>
+const loft$1 = (closed, ...geometries) =>
   taggedGraph(
-    { tags: a.tags },
+    { tags: geometries[0].tags },
     fromSurfaceMeshLazy(
       loftBetweenCongruentSurfaceMeshes(
-        toSurfaceMesh(a.graph),
-        a.matrix,
-        toSurfaceMesh(b.graph),
-        b.matrix
+        closed,
+        ...geometries.map((geometry) => [
+          toSurfaceMesh(geometry.graph),
+          geometry.matrix,
+        ])
       )
     )
   );
 
-const loft = (a, b) => {
-  b = reify(b);
+const loft = (closed, geometry, ...geometries) => {
+  geometries = geometries.map(reify);
   const op = (geometry, descend) => {
     switch (geometry.type) {
       case 'graph': {
-        const lofts = [];
-        for (const bGraph of getNonVoidGraphs(b)) {
-          lofts.push(loft$1(geometry, bGraph));
+        const lofts = [geometry];
+        // This is a bit fragile -- let's consider expressing this in terms of transforms.
+        for (const otherGeometry of geometries) {
+          for (const otherGraphGeometry of getNonVoidGraphs(otherGeometry)) {
+            lofts.push(otherGraphGeometry);
+          }
         }
-        return taggedGroup({}, ...lofts);
+        return loft$1(closed, ...lofts);
       }
       case 'triangles':
       case 'paths':
@@ -2051,7 +2055,7 @@ const loft = (a, b) => {
         // Not implemented yet.
         return geometry;
       case 'plan':
-        return loft(reify(geometry).content[0], b);
+        return loft(closed, reify(geometry).content[0], ...geometries);
       case 'assembly':
       case 'item':
       case 'disjointAssembly':
@@ -2067,7 +2071,7 @@ const loft = (a, b) => {
     }
   };
 
-  return rewrite(a, op);
+  return rewrite(geometry, op);
 };
 
 const minkowskiDifference$1 = (a, b) => {

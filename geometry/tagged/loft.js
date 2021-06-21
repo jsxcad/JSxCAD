@@ -2,18 +2,20 @@ import { getNonVoidGraphs } from './getNonVoidGraphs.js';
 import { loft as loftGraph } from '../graph/loft.js';
 import { reify } from './reify.js';
 import { rewrite } from './visit.js';
-import { taggedGroup } from './taggedGroup.js';
 
-export const loft = (a, b) => {
-  b = reify(b);
+export const loft = (closed, geometry, ...geometries) => {
+  geometries = geometries.map(reify);
   const op = (geometry, descend) => {
     switch (geometry.type) {
       case 'graph': {
-        const lofts = [];
-        for (const bGraph of getNonVoidGraphs(b)) {
-          lofts.push(loftGraph(geometry, bGraph));
+        const lofts = [geometry];
+        // This is a bit fragile -- let's consider expressing this in terms of transforms.
+        for (const otherGeometry of geometries) {
+          for (const otherGraphGeometry of getNonVoidGraphs(otherGeometry)) {
+            lofts.push(otherGraphGeometry);
+          }
         }
-        return taggedGroup({}, ...lofts);
+        return loftGraph(closed, ...lofts);
       }
       case 'triangles':
       case 'paths':
@@ -21,7 +23,7 @@ export const loft = (a, b) => {
         // Not implemented yet.
         return geometry;
       case 'plan':
-        return loft(reify(geometry).content[0], b);
+        return loft(closed, reify(geometry).content[0], ...geometries);
       case 'assembly':
       case 'item':
       case 'disjointAssembly':
@@ -37,5 +39,5 @@ export const loft = (a, b) => {
     }
   };
 
-  return rewrite(a, op);
+  return rewrite(geometry, op);
 };

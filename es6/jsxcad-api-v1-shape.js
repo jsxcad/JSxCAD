@@ -538,10 +538,27 @@ const dropMethod = function (...tags) {
 };
 Shape.prototype.drop = dropMethod;
 
-const loft = (shape, op) =>
-  Shape.fromGeometry(loft$1(shape.toGeometry(), op(shape).toGeometry()));
+const loft = (shape, ...ops) =>
+  Shape.fromGeometry(
+    loft$1(
+      /* closed= */ false,
+      shape.toGeometry(),
+      ...ops.map((op) => op(shape).toGeometry())
+    )
+  );
 
 Shape.registerMethod('loft', loft);
+
+const loop = (shape, ...ops) =>
+  Shape.fromGeometry(
+    loft$1(
+      /* closed= */ true,
+      shape.toGeometry(),
+      ...ops.map((op) => op(shape).toGeometry())
+    )
+  );
+
+Shape.registerMethod('loop', loop);
 
 /**
  *

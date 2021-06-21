@@ -776,58 +776,160 @@ Vector SomeNormalOfSurfaceMesh(const Surface_mesh& mesh) {
   return CGAL::NULL_VECTOR;
 }
 
-Surface_mesh* LoftBetweenCongruentSurfaceMeshes(Surface_mesh* a, Transformation* a_transform, Surface_mesh* b, Transformation* b_transform) {
-  Surface_mesh* loft = new Surface_mesh(*a);
-  CGAL::Polygon_mesh_processing::transform(*a_transform, *loft, CGAL::parameters::all_default());
-  CGAL::Polygon_mesh_processing::reverse_face_orientations(loft->faces(), *loft);
-  std::unordered_map<Vertex_index, Vertex_index> b_map;
-  std::vector<Halfedge_index> base_edges;
-  for (const auto h : loft->halfedges()) {
-    base_edges.push_back(h);
+class SurfaceMeshAndTransform {
+  public:
+   SurfaceMeshAndTransform() : fill_(nullptr) {};
+   SurfaceMeshAndTransform(emscripten::val* fill) : fill_(fill) {};
+
+   emscripten::val* fill_;
+   Surface_mesh* mesh_;
+   Transformation* transform_;
+
+   void set_mesh(Surface_mesh* mesh) { mesh_ = mesh; }
+   void set_transform(Transformation* transform) { transform_ = transform; }
+   bool fill(Surface_mesh*& mesh, Transformation*& transform) {
+     SurfaceMeshAndTransform* self = this;
+     if ((*fill_)(self).as<bool>()) {
+       mesh = mesh_;
+       transform = transform_;
+       return true;
+     } else {
+       return false;
+     }
+   }
+};
+
+Surface_mesh* LoftBetweenCongruentSurfaceMeshes(bool closed, emscripten::val fill) {
+  SurfaceMeshAndTransform admit(&fill);
+
+  Surface_mesh* a;
+  Surface_mesh* b;
+  Transformation* a_transform;
+  Transformation* b_transform;
+
+  if (!admit.fill(a, a_transform) || !admit.fill(b, b_transform)) {
+    return nullptr;
   }
-  for (const auto h : base_edges) {
-    if (loft->is_border(h)) {
-      auto a_source = loft->source(h);
-      auto b_source_it = b_map.find(a_source);
-      Vertex_index b_source;
-      if (b_source_it == b_map.end()) {
-        b_source = loft->add_vertex(b->point(a_source).transform(*b_transform));
-        b_map[a_source] = b_source;
-      } else {
-        b_source = b_source_it->second;
-      }
-      auto a_target = loft->target(h);
-      auto b_target_it = b_map.find(a_target);
-      Vertex_index b_target;
-      if (b_target_it == b_map.end()) {
-        b_target = loft->add_vertex(b->point(a_target).transform(*b_transform));
-        b_map[a_target] = b_target;
-      } else {
-        b_target = b_target_it->second;
-      }
-      auto face = loft->add_face(b_source, a_source, a_target, b_target);
-    } else {
+
+  Surface_mesh* loft = new Surface_mesh();
+  Surface_mesh* base = a;
+
+  std::unordered_map<Vertex_index, Vertex_index> base_map;
+  std::unordered_map<Vertex_index, Vertex_index> a_map;
+  std::unordered_map<Vertex_index, Vertex_index> b_map;
+
+  // Build the base of the wall.
+  for (const auto h : a->halfedges()) {
+    if (a->is_border(h)) {
+      auto a_source = a->source(h);
+      a_map[a_source] = loft->add_vertex(a->point(a_source).transform(*a_transform));
     }
   }
-  for (auto face : b->faces()) {
-    std::vector<Vertex_index> loft_vertices;
-    Halfedge_index start = b->halfedge(face);
-    Halfedge_index h = start;
-    do {
-      Vertex_index b_vertex = b->source(h);
-      auto b_vertex_it = b_map.find(b_vertex);
-      Vertex_index loft_vertex;
-      if (b_vertex_it == b_map.end()) {
-        loft_vertex = loft->add_vertex(b->point(b_vertex).transform(*b_transform));
-        b_map[b_vertex] = loft_vertex;
-      } else {
-        loft_vertex = b_vertex_it->second;
-      }
-      loft_vertices.push_back(loft_vertex);
-      h = b->next(h);
-    } while (h != start);
-    loft->add_face(loft_vertices);
+
+  if (closed) {
+    base = a;
+    base_map = a_map;
+  } else {
+    // Build the lower cap.
+    for (auto face : a->faces()) {
+      std::vector<Vertex_index> loft_vertices;
+      Halfedge_index start = a->halfedge(face);
+      Halfedge_index h = start;
+      do {
+        Vertex_index a_vertex = a->source(h);
+        auto a_vertex_it = a_map.find(a_vertex);
+        Vertex_index loft_vertex;
+        if (a_vertex_it == a_map.end()) {
+          loft_vertex = loft->add_vertex(a->point(a_vertex).transform(*a_transform));
+          a_map[a_vertex] = loft_vertex;
+        } else {
+          loft_vertex = a_vertex_it->second;
+        }
+        loft_vertices.push_back(loft_vertex);
+        // Walk backward, so that the face is reversed.
+        h = a->prev(h);
+      } while (h != start);
+      loft->add_face(loft_vertices);
+    }
   }
+
+  bool closing = false;
+
+  // Extend the wall, step by step.
+  for (;;) {
+    std::vector<Halfedge_index> base_edges;
+    for (const auto h : a->halfedges()) {
+      base_edges.push_back(h);
+    }
+    for (const auto h : base_edges) {
+      if (a->is_border(h)) {
+        auto a_source = a->source(h);
+        auto b_source_it = b_map.find(a_source);
+        Vertex_index b_source;
+        if (b_source_it == b_map.end()) {
+          b_source = loft->add_vertex(b->point(a_source).transform(*b_transform));
+          b_map[a_source] = b_source;
+        } else {
+          b_source = b_source_it->second;
+        }
+        auto a_target = a->target(h);
+        auto b_target_it = b_map.find(a_target);
+        Vertex_index b_target;
+        if (b_target_it == b_map.end()) {
+          b_target = loft->add_vertex(b->point(a_target).transform(*b_transform));
+          b_map[a_target] = b_target;
+        } else {
+          b_target = b_target_it->second;
+        }
+        auto face = loft->add_face(b_target, a_map[a_target], a_map[a_source], b_source);
+      }
+    }
+
+    Surface_mesh* next;
+    if (closing) {
+      // We just finished closing off the final walls.
+      break;
+    } else if (admit.fill(next, b_transform)) {
+      // Continue with the next wall.
+      a = b;
+      b = next;
+      a_map = b_map;
+      b_map.clear();
+      continue;
+    } else if (closed) {
+      // We need to build a wall back to the base.
+      a = b;
+      b = base;
+      a_map = b_map;
+      b_map = base_map;
+      closing = true;
+      continue;
+    } else {
+      // Build the upper cap.
+      for (auto face : b->faces()) {
+        std::vector<Vertex_index> loft_vertices;
+        Halfedge_index start = b->halfedge(face);
+        Halfedge_index h = start;
+        do {
+          Vertex_index b_vertex = b->source(h);
+          auto b_vertex_it = b_map.find(b_vertex);
+          Vertex_index loft_vertex;
+          if (b_vertex_it == b_map.end()) {
+            loft_vertex = loft->add_vertex(b->point(b_vertex).transform(*b_transform));
+            b_map[b_vertex] = loft_vertex;
+          } else {
+            loft_vertex = b_vertex_it->second;
+          }
+          loft_vertices.push_back(loft_vertex);
+          h = b->next(h);
+        } while (h != start);
+        loft->add_face(loft_vertices);
+      }
+      break;
+    }
+  }
+
+  CGAL::Polygon_mesh_processing::triangulate_faces(*loft);
   return loft;
 }
 
@@ -2910,6 +3012,11 @@ EMSCRIPTEN_BINDINGS(module) {
 
   emscripten::class_<Polygon_2>("Polygon_2").constructor<>();
   emscripten::class_<Polygon_with_holes_2>("Polygon_with_holes_2").constructor<>();
+
+  emscripten::class_<SurfaceMeshAndTransform>("SurfaceMeshAndTransform")
+    .constructor<>()
+    .function("set_mesh", &SurfaceMeshAndTransform::set_mesh, emscripten::allow_raw_pointers())
+    .function("set_transform", &SurfaceMeshAndTransform::set_transform, emscripten::allow_raw_pointers());
 
   emscripten::class_<Triples>("Triples")
     .constructor<>()
