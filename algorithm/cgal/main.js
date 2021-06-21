@@ -43,6 +43,7 @@ export { growSurfaceMesh } from './growSurfaceMesh.js';
 export { initCgal } from './getCgal.js';
 export { insetOfPolygonWithHoles } from './insetOfPolygonWithHoles.js';
 export { intersectionOfSurfaceMeshes } from './intersectionOfSurfaceMeshes.js';
+export { loftBetweenCongruentSurfaceMeshes } from './loftBetweenCongruentSurfaceMeshes.js';
 export { offsetOfPolygonWithHoles } from './offsetOfPolygonWithHoles.js';
 export { outlineSurfaceMesh } from './outlineSurfaceMesh.js';
 export { minkowskiDifferenceOfSurfaceMeshes } from './minkowskiDifferenceOfSurfaceMeshes.js';

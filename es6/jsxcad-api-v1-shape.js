@@ -1,4 +1,4 @@
-import { closePath, concatenatePath, taggedAssembly, eachPoint, flip, toConcreteGeometry, toDisplayGeometry, toTransformedGeometry, toPoints, transform, rewriteTags, taggedPaths, taggedGraph, openPath, taggedPoints, fromPolygonsToGraph, registerReifier, union, taggedLayers, bend as bend$1, intersection, allTags, difference, getLeafs, empty, grow as grow$1, inset as inset$1, rewrite, minkowskiDifference as minkowskiDifference$1, minkowskiShell as minkowskiShell$1, minkowskiSum as minkowskiSum$1, isVoid, offset as offset$1, taggedItem, taggedDisjointAssembly, toDisjointGeometry, push as push$1, getPeg, taggedPlan, remesh as remesh$1, smooth as smooth$1, measureBoundingBox, taggedSketch, test as test$1, twist as twist$1, toPolygonsWithHoles, arrangePolygonsWithHoles, fromPolygonsWithHolesToTriangles, fromTrianglesToGraph, taggedGroup, read, write, realize } from './jsxcad-geometry.js';
+import { closePath, concatenatePath, taggedAssembly, eachPoint, flip, toConcreteGeometry, toDisplayGeometry, toTransformedGeometry, toPoints, transform, rewriteTags, taggedPaths, taggedGraph, openPath, taggedPoints, fromPolygonsToGraph, registerReifier, union, taggedLayers, bend as bend$1, intersection, allTags, difference, getLeafs, empty, grow as grow$1, inset as inset$1, rewrite, loft as loft$1, minkowskiDifference as minkowskiDifference$1, minkowskiShell as minkowskiShell$1, minkowskiSum as minkowskiSum$1, isVoid, offset as offset$1, taggedItem, taggedDisjointAssembly, toDisjointGeometry, push as push$1, getPeg, taggedPlan, remesh as remesh$1, smooth as smooth$1, measureBoundingBox, taggedSketch, test as test$1, twist as twist$1, toPolygonsWithHoles, arrangePolygonsWithHoles, fromPolygonsWithHolesToTriangles, fromTrianglesToGraph, taggedGroup, read, write, realize } from './jsxcad-geometry.js';
 import { identityMatrix, fromTranslation, fromRotation, fromScaling } from './jsxcad-math-mat4.js';
 import { add as add$1, negate, normalize, subtract, dot, cross, scale as scale$1, distance } from './jsxcad-math-vec3.js';
 import { toTagsFromName } from './jsxcad-algorithm-color.js';
@@ -537,6 +537,28 @@ const dropMethod = function (...tags) {
   return drop(this, tags);
 };
 Shape.prototype.drop = dropMethod;
+
+const loft = (shape, ...ops) =>
+  Shape.fromGeometry(
+    loft$1(
+      /* closed= */ false,
+      shape.toGeometry(),
+      ...ops.map((op) => op(shape).toGeometry())
+    )
+  );
+
+Shape.registerMethod('loft', loft);
+
+const loop = (shape, ...ops) =>
+  Shape.fromGeometry(
+    loft$1(
+      /* closed= */ true,
+      shape.toGeometry(),
+      ...ops.map((op) => op(shape).toGeometry())
+    )
+  );
+
+Shape.registerMethod('loop', loop);
 
 /**
  *
