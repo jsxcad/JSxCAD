@@ -542,7 +542,6 @@ const loft = (shape, ...ops) =>
   Shape.fromGeometry(
     loft$1(
       /* closed= */ false,
-      shape.toGeometry(),
       ...ops.map((op) => op(shape).toGeometry())
     )
   );
@@ -551,11 +550,7 @@ Shape.registerMethod('loft', loft);
 
 const loop = (shape, ...ops) =>
   Shape.fromGeometry(
-    loft$1(
-      /* closed= */ true,
-      shape.toGeometry(),
-      ...ops.map((op) => op(shape).toGeometry())
-    )
+    loft$1(/* closed= */ true, ...ops.map((op) => op(shape).toGeometry()))
   );
 
 Shape.registerMethod('loop', loop);

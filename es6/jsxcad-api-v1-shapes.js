@@ -1,10 +1,9 @@
-import { taggedPlan, taggedDisjointAssembly, registerReifier, taggedGroup, taggedPaths, translatePaths, getLeafs, taggedLayers, taggedLayout, measureBoundingBox, getLayouts, visit, isNotVoid, concatenatePath, rotateZPath, taggedAssembly, convexHullToGraph, fromFunctionToGraph, scalePath, translatePath, flipPath, deduplicatePath, taggedPoints, fromPathsToGraph } from './jsxcad-geometry.js';
+import { taggedPlan, taggedDisjointAssembly, registerReifier, taggedGroup, taggedPaths, translatePaths, getLeafs, taggedLayers, taggedLayout, measureBoundingBox, getLayouts, visit, isNotVoid, concatenatePath, rotateZPath, taggedAssembly, convexHullToGraph, fromFunctionToGraph, taggedPoints, fromPathsToGraph, translatePath } from './jsxcad-geometry.js';
 import Shape$1, { Shape, shapeMethod, weld } from './jsxcad-api-v1-shape.js';
 import { scale, subtract, add, negate } from './jsxcad-math-vec3.js';
 import { identityMatrix } from './jsxcad-math-mat4.js';
 import { zag, numbers } from './jsxcad-api-v1-math.js';
 import { fromPoints as fromPoints$2 } from './jsxcad-math-poly3.js';
-import { fromAngleRadians } from './jsxcad-math-vec2.js';
 import { toPolygon } from './jsxcad-math-plane.js';
 
 const eachEntry = (geometry, op, otherwise) => {
@@ -2086,46 +2085,10 @@ const Octagon = (x, y, z) => Arc(x, y, z).sides(8);
 
 Shape.prototype.Octagon = shapeMethod(Octagon);
 
-const buildRegularPolygon = (sides = 32) => {
-  let points = [];
-  for (let i = 0; i < sides; i++) {
-    let radians = (2 * Math.PI * i) / sides;
-    let [x, y] = fromAngleRadians(radians);
-    points.push([x, y, 0]);
-  }
-  return points;
-};
-
-const buildWalls = (polygons, floor, roof) => {
-  for (
-    let start = floor.length - 1, end = 0;
-    end < floor.length;
-    start = end++
-  ) {
-    // Remember that we are walking CCW.
-    polygons.push({
-      points: deduplicatePath([
-        floor[start],
-        floor[end],
-        roof[end],
-        roof[start],
-      ]),
-    });
-  }
-};
-
 // Approximates a UV sphere.
-const buildRingSphere = (resolution = 20) => {
-  /** @type {Polygon[]} */
-  const polygons = [];
-  let lastPath;
+const extrudeSphere = (shape, height = 1, { sides = 20 } = {}) => {
+  const lofts = [];
 
-  const latitudinalResolution = 2 + resolution;
-  const longitudinalResolution = 2 * latitudinalResolution;
-
-  // Trace out latitudinal rings.
-  const ring = buildRegularPolygon(longitudinalResolution);
-  let path;
   const getEffectiveSlice = (slice) => {
     if (slice === 0) {
       return 0.5;
@@ -2135,31 +2098,26 @@ const buildRingSphere = (resolution = 20) => {
       return slice;
     }
   };
+
+  const latitudinalResolution = sides;
+
   for (let slice = 0; slice <= latitudinalResolution; slice++) {
     const angle =
       (Math.PI * 1.0 * getEffectiveSlice(slice)) / latitudinalResolution;
-    const height = Math.cos(angle);
+    const z = Math.cos(angle);
     const radius = Math.sin(angle);
-    const points = ring;
-    const scaledPath = scalePath([radius, radius, radius], points);
-    const translatedPath = translatePath([0, 0, height], scaledPath);
-    path = translatedPath;
-    if (lastPath !== undefined) {
-      buildWalls(polygons, path, lastPath);
-    } else {
-      polygons.push({ points: path });
-    }
-    lastPath = path;
+    lofts.push((s) => s.scale(radius, radius, 1).z(z * height * 0.5));
   }
-  if (path) {
-    polygons.push({ points: flipPath(path) });
-  }
-  return polygons;
+  return shape.loft(...lofts.reverse());
 };
+
+Shape.registerMethod('extrudeSphere', extrudeSphere);
+Shape.registerMethod('sx', extrudeSphere);
 
 registerReifier('Orb', (geometry) => {
   const [scale, middle] = getScale(geometry);
-  return Shape.fromPolygons(buildRingSphere(getSides(geometry, 16)))
+  const sides = getSides(geometry, 16);
+  return extrudeSphere(Arc().sides(sides * 2), 1, { sides: 2 + sides })
     .scale(...scale)
     .move(...middle)
     .orient({
