@@ -1,15 +1,6 @@
 import { Shape, shapeMethod } from '@jsxcad/api-v1-shape';
 
 import {
-  deduplicatePath,
-  flipPath,
-  registerReifier,
-  scalePath,
-  taggedPlan,
-  translatePath,
-} from '@jsxcad/geometry';
-
-import {
   getAt,
   getFrom,
   getMatrix,
@@ -18,49 +9,15 @@ import {
   getTo,
 } from './Plan.js';
 
-import { fromAngleRadians } from '@jsxcad/math-vec2';
+import { registerReifier, taggedPlan } from '@jsxcad/geometry';
+
+import Arc from './Arc.js';
 import { negate } from '@jsxcad/math-vec3';
 
-const buildRegularPolygon = (sides = 32) => {
-  let points = [];
-  for (let i = 0; i < sides; i++) {
-    let radians = (2 * Math.PI * i) / sides;
-    let [x, y] = fromAngleRadians(radians);
-    points.push([x, y, 0]);
-  }
-  return points;
-};
-
-const buildWalls = (polygons, floor, roof) => {
-  for (
-    let start = floor.length - 1, end = 0;
-    end < floor.length;
-    start = end++
-  ) {
-    // Remember that we are walking CCW.
-    polygons.push({
-      points: deduplicatePath([
-        floor[start],
-        floor[end],
-        roof[end],
-        roof[start],
-      ]),
-    });
-  }
-};
-
 // Approximates a UV sphere.
-const buildRingSphere = (resolution = 20) => {
-  /** @type {Polygon[]} */
-  const polygons = [];
-  let lastPath;
+const extrudeSphere = (shape, height = 1, { sides = 20 } = {}) => {
+  const lofts = [];
 
-  const latitudinalResolution = 2 + resolution;
-  const longitudinalResolution = 2 * latitudinalResolution;
-
-  // Trace out latitudinal rings.
-  const ring = buildRegularPolygon(longitudinalResolution);
-  let path;
   const getEffectiveSlice = (slice) => {
     if (slice === 0) {
       return 0.5;
@@ -70,31 +27,26 @@ const buildRingSphere = (resolution = 20) => {
       return slice;
     }
   };
+
+  const latitudinalResolution = sides;
+
   for (let slice = 0; slice <= latitudinalResolution; slice++) {
     const angle =
       (Math.PI * 1.0 * getEffectiveSlice(slice)) / latitudinalResolution;
-    const height = Math.cos(angle);
+    const z = Math.cos(angle);
     const radius = Math.sin(angle);
-    const points = ring;
-    const scaledPath = scalePath([radius, radius, radius], points);
-    const translatedPath = translatePath([0, 0, height], scaledPath);
-    path = translatedPath;
-    if (lastPath !== undefined) {
-      buildWalls(polygons, path, lastPath);
-    } else {
-      polygons.push({ points: path });
-    }
-    lastPath = path;
+    lofts.push((s) => s.scale(radius, radius, 1).z(z * height * 0.5));
   }
-  if (path) {
-    polygons.push({ points: flipPath(path) });
-  }
-  return polygons;
+  return shape.loft(...lofts.reverse());
 };
+
+Shape.registerMethod('extrudeSphere', extrudeSphere);
+Shape.registerMethod('sx', extrudeSphere);
 
 registerReifier('Orb', (geometry) => {
   const [scale, middle] = getScale(geometry);
-  return Shape.fromPolygons(buildRingSphere(getSides(geometry, 16)))
+  const sides = getSides(geometry, 16);
+  return extrudeSphere(Arc().sides(sides * 2), 1, { sides: 2 + sides })
     .scale(...scale)
     .move(...middle)
     .orient({
