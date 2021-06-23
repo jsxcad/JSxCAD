@@ -1329,22 +1329,6 @@ void SurfaceMeshSectionToPolygonSet(const Plane& plane, Surface_mesh& a, General
 const double kExtrusionMinimum = 10000.0;
 const double kExtrusionMinimumSquared = kExtrusionMinimum * kExtrusionMinimum;
 
-void PlanarSurfaceMeshToVolumetricSurfaceMesh(const Plane& plane, const Surface_mesh& planar, Surface_mesh& volumetric) {
-  // Difference with the excessive extrusion of the other.
-  Surface_mesh extruded;
-  Vector normal = SomeNormalOfSurfaceMesh(planar);
-
-  // CHECK: There's probably a better way to do this.
-  while (normal.squared_length() < kExtrusionMinimumSquared) {
-    normal *= kExtrusionMinimum;
-  }
-
-  typedef typename boost::property_map<Surface_mesh, CGAL::vertex_point_t>::type VPMap;
-  Project<VPMap> top(get(CGAL::vertex_point, volumetric), normal);
-  Project<VPMap> bottom(get(CGAL::vertex_point, volumetric), CGAL::NULL_VECTOR);
-  CGAL::Polygon_mesh_processing::extrude_mesh(planar, volumetric, bottom, top);
-}
-
 const double kIota = 10e-5;
 
 Surface_mesh* DifferenceOfSurfaceMeshes(Surface_mesh* a, Transformation* a_transform, Surface_mesh* b, Transformation* b_transform) {
@@ -1371,9 +1355,7 @@ Surface_mesh* DifferenceOfSurfaceMeshes(Surface_mesh* a, Transformation* a_trans
       return GeneralPolygonSetToSurfaceMesh(plane, set);
     }
   } else if (IsPlanarSurfaceMesh(plane, *b)) {
-    Surface_mesh volumetric_b;
-    PlanarSurfaceMeshToVolumetricSurfaceMesh(plane, *b, volumetric_b);
-    return DifferenceOfSurfaceMeshes(a, a_transform, &volumetric_b, b_transform);
+    return a;
   }
   double x = 0, y = 0, z = 0;
   Surface_mesh* c = new Surface_mesh();
@@ -1435,9 +1417,7 @@ Surface_mesh* IntersectionOfSurfaceMeshes(Surface_mesh* a, Transformation* a_tra
       return GeneralPolygonSetToSurfaceMesh(plane, set);
     }
   } else if (IsPlanarSurfaceMesh(plane, *b)) {
-    Surface_mesh volumetric_b;
-    PlanarSurfaceMeshToVolumetricSurfaceMesh(plane, *b, volumetric_b);
-    return IntersectionOfSurfaceMeshes(a, a_transform, &volumetric_b, b_transform);
+    return new Surface_mesh();
   }
   double x = 0, y = 0, z = 0;
   Surface_mesh* c = new Surface_mesh();
