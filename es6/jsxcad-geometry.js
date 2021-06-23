@@ -814,7 +814,7 @@ const difference$1 = (a, b) => {
   if (a.graph.isEmpty || b.graph.isEmpty) {
     return a;
   }
-  if (a.graph.isClosed && b.graph.isClosed && doesNotOverlap$1(a, b)) {
+  if (doesNotOverlap$1(a, b)) {
     return a;
   }
   info('difference begin');
@@ -1840,7 +1840,7 @@ const intersection$1 = (a, b) => {
   if (a.graph.isEmpty || b.graph.isEmpty) {
     return fromEmpty();
   }
-  if (a.graph.isClosed && b.graph.isClosed && doesNotOverlap$1(a, b)) {
+  if (doesNotOverlap$1(a, b)) {
     return fromEmpty();
   }
   info('intersection begin');

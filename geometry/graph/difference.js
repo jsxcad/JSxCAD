@@ -9,7 +9,7 @@ export const difference = (a, b) => {
   if (a.graph.isEmpty || b.graph.isEmpty) {
     return a;
   }
-  if (a.graph.isClosed && b.graph.isClosed && doesNotOverlap(a, b)) {
+  if (doesNotOverlap(a, b)) {
     return a;
   }
   info('difference begin');

@@ -10,7 +10,7 @@ export const intersection = (a, b) => {
   if (a.graph.isEmpty || b.graph.isEmpty) {
     return fromEmpty();
   }
-  if (a.graph.isClosed && b.graph.isClosed && doesNotOverlap(a, b)) {
+  if (doesNotOverlap(a, b)) {
     return fromEmpty();
   }
   info('intersection begin');
