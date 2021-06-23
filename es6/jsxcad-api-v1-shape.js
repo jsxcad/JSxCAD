@@ -1,4 +1,4 @@
-import { closePath, concatenatePath, taggedAssembly, eachPoint, flip, toConcreteGeometry, toDisplayGeometry, toTransformedGeometry, toPoints, transform, rewriteTags, taggedPaths, taggedGraph, openPath, taggedPoints, fromPolygonsToGraph, registerReifier, union, taggedLayers, bend as bend$1, intersection, allTags, difference, getLeafs, empty, grow as grow$1, inset as inset$1, rewrite, loft as loft$1, minkowskiDifference as minkowskiDifference$1, minkowskiShell as minkowskiShell$1, minkowskiSum as minkowskiSum$1, isVoid, offset as offset$1, taggedItem, taggedDisjointAssembly, toDisjointGeometry, push as push$1, getPeg, taggedPlan, remesh as remesh$1, smooth as smooth$1, measureBoundingBox, taggedSketch, test as test$1, twist as twist$1, toPolygonsWithHoles, arrangePolygonsWithHoles, fromPolygonsWithHolesToTriangles, fromTrianglesToGraph, taggedGroup, read, write, realize } from './jsxcad-geometry.js';
+import { closePath, concatenatePath, taggedAssembly, eachPoint, flip, toConcreteGeometry, toDisplayGeometry, toTransformedGeometry, toPoints, transform, rewriteTags, taggedPaths, taggedGraph, openPath, taggedPoints, fromPolygonsToGraph, registerReifier, union, taggedLayers, bend as bend$1, intersection, allTags, difference, getLeafs, empty, grow as grow$1, inset as inset$1, rewrite, loft as loft$1, minkowskiDifference as minkowskiDifference$1, minkowskiShell as minkowskiShell$1, minkowskiSum as minkowskiSum$1, isVoid, offset as offset$1, taggedItem, taggedDisjointAssembly, toDisjointGeometry, push as push$1, getPeg, taggedPlan, remesh as remesh$1, smooth as smooth$1, measureBoundingBox, taggedSketch, split as split$1, test as test$1, twist as twist$1, toPolygonsWithHoles, arrangePolygonsWithHoles, fromPolygonsWithHolesToTriangles, fromTrianglesToGraph, taggedGroup, read, write, realize } from './jsxcad-geometry.js';
 import { identityMatrix, fromTranslation, fromRotation, fromScaling } from './jsxcad-math-mat4.js';
 import { add as add$1, negate, normalize, subtract, dot, cross, scale as scale$1, distance } from './jsxcad-math-vec3.js';
 import { toTagsFromName } from './jsxcad-algorithm-color.js';
@@ -962,14 +962,10 @@ Shape.registerMethod('hasTo', to);
 Shape.registerMethod('hasTop', top);
 Shape.registerMethod('hasZag', zag);
 
-const remesh = (shape, options = {}) =>
-  Shape.fromGeometry(remesh$1(shape.toGeometry(), options));
+const remesh = (shape, ...lengths) =>
+  Shape.fromGeometry(remesh$1(shape.toGeometry(), { lengths }));
 
-const remeshMethod = function (options) {
-  return remesh(this, options);
-};
-
-Shape.prototype.remesh = remeshMethod;
+Shape.registerMethod('remesh', remesh);
 
 /**
  *
@@ -1108,6 +1104,25 @@ Shape.prototype.plan = function () {
 Shape.prototype.withPlan = function () {
   return assemble(this, sketch(this));
 };
+
+const split = (
+  shape,
+  {
+    keepVolumes = true,
+    keepCavitiesInVolumes = true,
+    keepCavitiesAsVolumes = false,
+  } = {}
+) =>
+  Shape.fromGeometry(
+    split$1(
+      shape.toGeometry(),
+      keepVolumes,
+      keepCavitiesInVolumes,
+      keepCavitiesAsVolumes
+    )
+  );
+
+Shape.registerMethod('split', split);
 
 const tags = (shape, op = (tags, shape) => tags) =>
   op(

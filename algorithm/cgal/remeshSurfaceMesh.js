@@ -1,7 +1,10 @@
 import { getCgal } from './getCgal.js';
 
-export const remeshSurfaceMesh = (
-  mesh,
-  { length = 1, angle = 10, relaxationSteps = 1, iterations = 1 }
-) =>
-  getCgal().RemeshSurfaceMesh(mesh, length, angle, relaxationSteps, iterations);
+export const remeshSurfaceMesh = (mesh, ...lengths) =>
+  getCgal().RemeshSurfaceMesh(mesh, () => {
+    if (lengths.length > 0) {
+      return lengths.shift();
+    } else {
+      return -1;
+    }
+  });

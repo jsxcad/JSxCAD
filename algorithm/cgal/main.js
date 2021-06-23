@@ -53,6 +53,7 @@ export { projectToPlaneOfSurfaceMesh } from './projectToPlaneOfSurfaceMesh.js';
 export { pushSurfaceMesh } from './pushSurfaceMesh.js';
 export { reverseFaceOrientationsOfSurfaceMesh } from './reverseFaceOrientationsOfSurfaceMesh.js';
 export { sectionOfSurfaceMesh } from './sectionOfSurfaceMesh.js';
+export { splitSurfaceMesh } from './splitSurfaceMesh.js';
 export { remeshSurfaceMesh } from './remeshSurfaceMesh.js';
 export { serializeSurfaceMesh } from './serializeSurfaceMesh.js';
 export { subdivideSurfaceMesh } from './subdivideSurfaceMesh.js';

@@ -7,9 +7,9 @@ export const loftBetweenCongruentSurfaceMeshes = (
 ) => {
   return getCgal().LoftBetweenCongruentSurfaceMeshes(closed, (fill) => {
     if (entries.length > 0) {
-      const [mesh, matrix] = entries.shift();
+      const [mesh, transform] = entries.shift();
       fill.set_mesh(mesh);
-      fill.set_transform(toCgalTransformFromJsTransform(matrix));
+      fill.set_transform(toCgalTransformFromJsTransform(transform));
       return true;
     } else {
       return false;

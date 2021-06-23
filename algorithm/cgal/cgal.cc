@@ -45,6 +45,7 @@
 #include <CGAL/Mesh_criteria_3.h>
 #include <CGAL/Mesh_triangulation_3.h>
 #include <CGAL/Polygon_mesh_processing/bbox.h>
+#include <CGAL/Polygon_mesh_processing/clip.h>
 #include <CGAL/Polygon_mesh_processing/corefinement.h>
 #include <CGAL/Polygon_mesh_processing/detect_features.h>
 #include <CGAL/Polygon_mesh_processing/extrude.h>
@@ -372,27 +373,18 @@ bool IsBadSurfaceMesh(Surface_mesh* mesh) {
   return false;
 }
 
-Surface_mesh* RemeshSurfaceMesh(Surface_mesh* input, double edge_length, double edge_angle, int relaxation_steps, int iterations) {
+Surface_mesh* RemeshSurfaceMesh(Surface_mesh* input, emscripten::val get_length) {
   typedef boost::graph_traits<Surface_mesh>::edge_descriptor edge_descriptor;
 
   Surface_mesh* mesh = new Surface_mesh(*input);
 
   CGAL::Polygon_mesh_processing::triangulate_faces(*mesh);
-  CGAL::Polygon_mesh_processing::split_long_edges(edges(*mesh), edge_length, *mesh);
 
-  // Constrain edges with a dihedral angle over 10°
-  typedef boost::property_map<Surface_mesh, CGAL::edge_is_feature_t>::type EIFMap;
-  EIFMap eif = get(CGAL::edge_is_feature, *mesh);
-  CGAL::Polygon_mesh_processing::detect_sharp_edges(*mesh, edge_angle, eif);
+  double edge_length;
 
-  CGAL::Polygon_mesh_processing::isotropic_remeshing(
-    mesh->faces(),
-    edge_length,
-    *mesh,
-    CGAL::Polygon_mesh_processing::parameters::number_of_iterations(1)
-        .relax_constraints(true)
-        .edge_is_constrained_map(eif)
-        .number_of_relaxation_steps(relaxation_steps));
+  while (edge_length = get_length().as<double>(), edge_length > 0) {
+    CGAL::Polygon_mesh_processing::split_long_edges(edges(*mesh), edge_length, *mesh);
+  }
 
   return mesh;
 }
@@ -932,6 +924,52 @@ Surface_mesh* LoftBetweenCongruentSurfaceMeshes(bool closed, emscripten::val fil
   CGAL::Polygon_mesh_processing::triangulate_faces(*loft);
   return loft;
 }
+
+void SplitSurfaceMesh(Surface_mesh* input, bool keep_volumes, bool keep_cavities_in_volumes, bool keep_cavities_as_volumes, emscripten::val emit_mesh) {
+  std::vector<Surface_mesh> meshes;
+  std::vector<Surface_mesh> cavities;
+  std::vector<Surface_mesh> volumes;
+  CGAL::Polygon_mesh_processing::split_connected_components(*input, meshes);
+
+  // CHECK: Can we leverage volume_connected_components() here?
+  for (auto& mesh : meshes) {
+    // CHECK: Do we have an expensive move here?
+    if (CGAL::Polygon_mesh_processing::is_outward_oriented(mesh)) {
+      volumes.push_back(mesh);
+    } else {
+      cavities.push_back(mesh);
+    }
+  }
+
+  if (keep_volumes) {
+    for (auto& mesh : volumes) {
+      if (keep_cavities_in_volumes) {
+        CGAL::Side_of_triangle_mesh<Surface_mesh, Kernel> inside(mesh);
+        for (auto& cavity : cavities) {
+          for (const auto vertex : cavity.vertices()) {
+            if (inside(cavity.point(vertex)) == CGAL::ON_BOUNDED_SIDE) {
+              // Include the cavity in the mesh.
+              mesh.join(cavity);
+            }
+            // A single test is sufficient.
+            break;
+          }
+        }
+      }
+      Surface_mesh* output = new Surface_mesh(mesh);
+      emit_mesh(output);
+    }
+  }
+
+  if (keep_cavities_as_volumes) {
+    for (auto& mesh : cavities) {
+      CGAL::Polygon_mesh_processing::reverse_face_orientations(mesh);
+      Surface_mesh* output = new Surface_mesh(mesh);
+      emit_mesh(output);
+    }
+  }
+}
+
 
 Surface_mesh* ExtrusionOfSurfaceMesh(Surface_mesh* input, Transformation* transformation, double height, double depth) {
   Surface_mesh mesh(*input);
@@ -1499,6 +1537,25 @@ Surface_mesh* UnionOfSurfaceMeshes(Surface_mesh* a, Transformation* a_transform,
   }
 }
 
+void admitPlane(Plane& plane, emscripten::val fill_plane) {
+  Quadruple q;
+  Quadruple* qp = &q;
+  fill_plane(qp);
+  plane = Plane(q[0], q[1], q[2], q[3]);
+}
+
+bool didAdmitPlane(Plane& plane, emscripten::val fill_plane) {
+  Quadruple q;
+  Quadruple* qp = &q;
+  bool result = fill_plane(qp).as<bool>();
+  if (result) {
+    plane = Plane(q[0], q[1], q[2], q[3]);
+    return true;
+  } else {
+    return false;
+  }
+}
+
 // FIX: The case where we take a section coplanar with a surface with a hole in it.
 // CHECK: Should this produce Polygons_with_holes?
 void SectionOfSurfaceMesh(Surface_mesh* input, Transformation* transform, std::size_t plane_count, emscripten::val fill_plane, emscripten::val emit_mesh, bool profile) {
@@ -1948,13 +2005,6 @@ void print_polygon_with_holes(const CGAL::Polygon_with_holes_2<Kernel, Container
     print_polygon (*hit);
   }
   std::cout << " }" << std::endl;
-}
-
-void admitPlane(Plane& plane, emscripten::val fill_plane) {
-  Quadruple q;
-  Quadruple* qp = &q;
-  fill_plane(qp);
-  plane = Plane(q[0], q[1], q[2], q[3]);
 }
 
 void OffsetOfPolygonWithHoles(double initial, double step, double limit, std::size_t hole_count, emscripten::val fill_plane, emscripten::val fill_boundary, emscripten::val fill_hole, emscripten::val emit_polygon, emscripten::val emit_point) {
@@ -3125,6 +3175,7 @@ EMSCRIPTEN_BINDINGS(module) {
   emscripten::function("DifferenceOfSurfaceMeshes", &DifferenceOfSurfaceMeshes, emscripten::allow_raw_pointers());
   emscripten::function("IntersectionOfSurfaceMeshes", &IntersectionOfSurfaceMeshes, emscripten::allow_raw_pointers());
   emscripten::function("UnionOfSurfaceMeshes", &UnionOfSurfaceMeshes, emscripten::allow_raw_pointers());
+  emscripten::function("SplitSurfaceMesh", &SplitSurfaceMesh, emscripten::allow_raw_pointers());
 
   emscripten::function("TwistSurfaceMesh", &TwistSurfaceMesh, emscripten::allow_raw_pointers());
   emscripten::function("BendSurfaceMesh", &BendSurfaceMesh, emscripten::allow_raw_pointers());

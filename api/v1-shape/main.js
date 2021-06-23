@@ -40,6 +40,7 @@ import './scale.js';
 import './smooth.js';
 import './size.js';
 import './sketch.js';
+import './split.js';
 import './tags.js';
 import './test.js';
 import './tool.js';
