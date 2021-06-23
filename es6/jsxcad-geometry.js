@@ -1,5 +1,5 @@
 import { identityMatrix, fromTranslation, fromZRotation, fromScaling, fromXRotation, fromYRotation } from './jsxcad-math-mat4.js';
-import { composeTransforms, fromSurfaceMeshToGraph, fromPointsToAlphaShapeAsSurfaceMesh, fromSurfaceMeshToLazyGraph, deserializeSurfaceMesh, fromGraphToSurfaceMesh, bendSurfaceMesh, fromPointsToConvexHullAsSurfaceMesh, arrangePathsIntoTriangles, fromPolygonsToSurfaceMesh, fromSurfaceMeshEmitBoundingBox, differenceOfSurfaceMeshes, extrudeSurfaceMesh, extrudeToPlaneOfSurfaceMesh, fromFunctionToSurfaceMesh, fromPointsToSurfaceMesh, arrangePaths, growSurfaceMesh, intersectionOfSurfaceMeshes, fromSurfaceMeshToPolygonsWithHoles, insetOfPolygonWithHoles, loftBetweenCongruentSurfaceMeshes, minkowskiDifferenceOfSurfaceMeshes, minkowskiShellOfSurfaceMeshes, minkowskiSumOfSurfaceMeshes, offsetOfPolygonWithHoles, outlineSurfaceMesh, projectToPlaneOfSurfaceMesh, serializeSurfaceMesh, pushSurfaceMesh, remeshSurfaceMesh, reverseFaceOrientationsOfSurfaceMesh, sectionOfSurfaceMesh, subdivideSurfaceMesh, fromSurfaceMeshToTriangles, doesSelfIntersectOfSurfaceMesh, twistSurfaceMesh, unionOfSurfaceMeshes } from './jsxcad-algorithm-cgal.js';
+import { composeTransforms, fromSurfaceMeshToGraph, fromPointsToAlphaShapeAsSurfaceMesh, fromSurfaceMeshToLazyGraph, deserializeSurfaceMesh, fromGraphToSurfaceMesh, bendSurfaceMesh, fromPointsToConvexHullAsSurfaceMesh, arrangePathsIntoTriangles, fromPolygonsToSurfaceMesh, fromSurfaceMeshEmitBoundingBox, differenceOfSurfaceMeshes, extrudeSurfaceMesh, extrudeToPlaneOfSurfaceMesh, fromFunctionToSurfaceMesh, fromPointsToSurfaceMesh, arrangePaths, growSurfaceMesh, intersectionOfSurfaceMeshes, fromSurfaceMeshToPolygonsWithHoles, insetOfPolygonWithHoles, loftBetweenCongruentSurfaceMeshes, minkowskiDifferenceOfSurfaceMeshes, minkowskiShellOfSurfaceMeshes, minkowskiSumOfSurfaceMeshes, offsetOfPolygonWithHoles, outlineSurfaceMesh, projectToPlaneOfSurfaceMesh, serializeSurfaceMesh, pushSurfaceMesh, remeshSurfaceMesh, reverseFaceOrientationsOfSurfaceMesh, sectionOfSurfaceMesh, subdivideSurfaceMesh, splitSurfaceMesh, fromSurfaceMeshToTriangles, doesSelfIntersectOfSurfaceMesh, twistSurfaceMesh, unionOfSurfaceMeshes } from './jsxcad-algorithm-cgal.js';
 export { arrangePolygonsWithHoles } from './jsxcad-algorithm-cgal.js';
 import { transform as transform$5, canonicalize as canonicalize$5, equals, min, max, scale as scale$3, subtract } from './jsxcad-math-vec3.js';
 import { transform as transform$6, canonicalize as canonicalize$6 } from './jsxcad-math-poly3.js';
@@ -2522,11 +2522,11 @@ const push = (
 
 const read = async (path) => read$1(path);
 
-const remesh$1 = (geometry, options = {}) =>
+const remesh$1 = (geometry, { lengths = [1] } = {}) =>
   taggedGraph(
     { tags: geometry.tags },
     fromSurfaceMeshLazy(
-      remeshSurfaceMesh(toSurfaceMesh(geometry.graph), options)
+      remeshSurfaceMesh(toSurfaceMesh(geometry.graph), ...lengths)
     )
   );
 
@@ -2661,6 +2661,72 @@ const smooth = (geometry, options) => {
   };
 
   return rewrite(toTransformedGeometry(geometry), op);
+};
+
+const split$1 = (
+  geometry,
+  keepVolumes = true,
+  keepCavitiesInVolumes = true,
+  keepCavitiesAsVolumes = false
+) =>
+  taggedGroup(
+    {},
+    ...splitSurfaceMesh(
+      toSurfaceMesh(geometry.graph),
+      keepVolumes,
+      keepCavitiesInVolumes,
+      keepCavitiesAsVolumes
+    ).map((mesh) =>
+      taggedGraph(
+        { tags: geometry.tags, matrix: geometry.matrix },
+        fromSurfaceMeshLazy(mesh)
+      )
+    )
+  );
+
+const split = (
+  geometry,
+  keepVolumes = true,
+  keepCavitiesInVolumes = true,
+  keepCavitiesAsVolumes = false
+) => {
+  const op = (geometry, descend) => {
+    switch (geometry.type) {
+      case 'graph':
+        return split$1(
+          geometry,
+          keepVolumes,
+          keepCavitiesInVolumes,
+          keepCavitiesAsVolumes
+        );
+      case 'triangles':
+      case 'paths':
+      case 'points':
+        // Not implemented yet.
+        return geometry;
+      case 'plan':
+        return split(
+          reify(geometry).content[0],
+          keepVolumes,
+          keepCavitiesInVolumes,
+          keepCavitiesAsVolumes
+        );
+      case 'assembly':
+      case 'item':
+      case 'disjointAssembly':
+      case 'layers': {
+        return descend();
+      }
+      case 'sketch': {
+        // Sketches aren't real.
+        return geometry;
+      }
+      default:
+        throw Error(`Unexpected geometry: ${JSON.stringify(geometry)}`);
+    }
+  };
+
+  return rewrite(geometry, op);
 };
 
 const taggedTriangles = ({ tags }, triangles) => {
@@ -3155,4 +3221,4 @@ const translate = (vector, geometry) =>
 const scale = (vector, geometry) =>
   transform$4(fromScaling(vector), geometry);
 
-export { allTags, alphaShape, bend, canonicalize, canonicalize$4 as canonicalizePath, canonicalize$3 as canonicalizePaths, close as closePath, concatenate as concatenatePath, convexHull as convexHullToGraph, deduplicate as deduplicatePath, difference, disjoint, doesNotOverlap, drop, eachItem, eachPoint, empty, extrude, extrudeToPlane, fill, flip, flip$3 as flipPath, fresh, fromFunction as fromFunctionToGraph, fromPaths as fromPathsToGraph, fromPoints as fromPointsToGraph, fromPolygons as fromPolygonsToGraph, fromPolygonsWithHolesToTriangles, fromSurfaceToPaths, fromTriangles as fromTrianglesToGraph, getAnyNonVoidSurfaces, getAnySurfaces, getFaceablePaths, getGraphs, getItems, getLayers, getLayouts, getLeafs, getNonVoidFaceablePaths, getNonVoidGraphs, getNonVoidItems, getNonVoidPaths, getNonVoidPlans, getNonVoidPoints, getEdges as getPathEdges, getPaths, getPeg, getPlans, getPoints, getTags, grow, hash, inset, intersection, isClockwise as isClockwisePath, isClosed as isClosedPath, isNotVoid, isVoid, keep, loft, measureBoundingBox, minkowskiDifference, minkowskiShell, minkowskiSum, offset, open as openPath, outline, prepareForSerialization, projectToPlane, push, read, realize, realizeGraph, registerReifier, reify, remesh, rerealizeGraph, reverseFaceOrientations as reverseFaceOrientationsOfGraph, rewrite, rewriteTags, rotateX, rotateY, rotateZ, rotateZ$1 as rotateZPath, scale, scale$2 as scalePath, scale$1 as scalePaths, section, smooth, soup, taggedAssembly, taggedDisjointAssembly, taggedDisplayGeometry, taggedGraph, taggedGroup, taggedItem, taggedLayers, taggedLayout, taggedPaths, taggedPlan, taggedPoints, taggedSketch, taggedTransform, taggedTriangles, test, toConcreteGeometry, toDisjointGeometry, toDisplayGeometry, toKeptGeometry, toPoints, toPolygonsWithHoles, toTransformedGeometry, toTriangles as toTrianglesFromGraph, toVisiblyDisjointGeometry, transform$4 as transform, transform$2 as transformPaths, translate, translate$2 as translatePath, translate$1 as translatePaths, twist, union, update, visit, write };
+export { allTags, alphaShape, bend, canonicalize, canonicalize$4 as canonicalizePath, canonicalize$3 as canonicalizePaths, close as closePath, concatenate as concatenatePath, convexHull as convexHullToGraph, deduplicate as deduplicatePath, difference, disjoint, doesNotOverlap, drop, eachItem, eachPoint, empty, extrude, extrudeToPlane, fill, flip, flip$3 as flipPath, fresh, fromFunction as fromFunctionToGraph, fromPaths as fromPathsToGraph, fromPoints as fromPointsToGraph, fromPolygons as fromPolygonsToGraph, fromPolygonsWithHolesToTriangles, fromSurfaceToPaths, fromTriangles as fromTrianglesToGraph, getAnyNonVoidSurfaces, getAnySurfaces, getFaceablePaths, getGraphs, getItems, getLayers, getLayouts, getLeafs, getNonVoidFaceablePaths, getNonVoidGraphs, getNonVoidItems, getNonVoidPaths, getNonVoidPlans, getNonVoidPoints, getEdges as getPathEdges, getPaths, getPeg, getPlans, getPoints, getTags, grow, hash, inset, intersection, isClockwise as isClockwisePath, isClosed as isClosedPath, isNotVoid, isVoid, keep, loft, measureBoundingBox, minkowskiDifference, minkowskiShell, minkowskiSum, offset, open as openPath, outline, prepareForSerialization, projectToPlane, push, read, realize, realizeGraph, registerReifier, reify, remesh, rerealizeGraph, reverseFaceOrientations as reverseFaceOrientationsOfGraph, rewrite, rewriteTags, rotateX, rotateY, rotateZ, rotateZ$1 as rotateZPath, scale, scale$2 as scalePath, scale$1 as scalePaths, section, smooth, soup, split, taggedAssembly, taggedDisjointAssembly, taggedDisplayGeometry, taggedGraph, taggedGroup, taggedItem, taggedLayers, taggedLayout, taggedPaths, taggedPlan, taggedPoints, taggedSketch, taggedTransform, taggedTriangles, test, toConcreteGeometry, toDisjointGeometry, toDisplayGeometry, toKeptGeometry, toPoints, toPolygonsWithHoles, toTransformedGeometry, toTriangles as toTrianglesFromGraph, toVisiblyDisjointGeometry, transform$4 as transform, transform$2 as transformPaths, translate, translate$2 as translatePath, translate$1 as translatePaths, twist, union, update, visit, write };

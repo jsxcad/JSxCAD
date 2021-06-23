@@ -1,11 +1,7 @@
 import Shape from './Shape.js';
 import { remesh as remeshGeometry } from '@jsxcad/geometry';
 
-export const remesh = (shape, options = {}) =>
-  Shape.fromGeometry(remeshGeometry(shape.toGeometry(), options));
+export const remesh = (shape, ...lengths) =>
+  Shape.fromGeometry(remeshGeometry(shape.toGeometry(), { lengths }));
 
-const remeshMethod = function (options) {
-  return remesh(this, options);
-};
-
-Shape.prototype.remesh = remeshMethod;
+Shape.registerMethod('remesh', remesh);
