@@ -35,7 +35,7 @@ const extrudeSphere = (shape, height = 1, { sides = 20 } = {}) => {
       (Math.PI * 1.0 * getEffectiveSlice(slice)) / latitudinalResolution;
     const z = Math.cos(angle);
     const radius = Math.sin(angle);
-    lofts.push((s) => s.scale(radius, radius, 1).z(z * height * 0.5));
+    lofts.push((s) => s.scale(radius, radius, 1).z(z * height));
   }
   return shape.loft(...lofts.reverse());
 };
@@ -46,7 +46,7 @@ Shape.registerMethod('sx', extrudeSphere);
 registerReifier('Orb', (geometry) => {
   const [scale, middle] = getScale(geometry);
   const sides = getSides(geometry, 16);
-  return extrudeSphere(Arc().sides(sides * 2), 1, { sides: 2 + sides })
+  return extrudeSphere(Arc(2).sides(sides * 2), 1, { sides: 2 + sides })
     .scale(...scale)
     .move(...middle)
     .orient({
