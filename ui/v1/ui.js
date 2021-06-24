@@ -117,6 +117,7 @@ class Ui extends React.PureComponent {
       selectedPaths: [],
       notebookData: [],
       domElementByHash: new Map(),
+      jsEditorAdvice: {},
     };
 
     this.onChangeJsEditor = this.onChangeJsEditor.bind(this);
@@ -789,7 +790,7 @@ class Ui extends React.PureComponent {
   }
 
   async doRun() {
-    const { ask, jsEditorData, path, workspace } = this.state;
+    const { ask, jsEditorData, jsEditorAdvice, path, workspace } = this.state;
     const { sha } = this.props;
     const topLevel = new Map();
     try {
@@ -817,6 +818,7 @@ class Ui extends React.PureComponent {
 
       let script = jsEditorData;
       const ecmascript = await toEcmascript(script, { path, topLevel });
+      jsEditorAdvice.definitions = topLevel;
       await ask({ evaluate: ecmascript, workspace, path, sha });
       await resolvePending();
     } catch (error) {
@@ -880,6 +882,7 @@ class Ui extends React.PureComponent {
       file,
       path,
       jsEditorData = '',
+      jsEditorAdvice,
       files,
       mode = 'Notebook',
       modal,
@@ -1252,6 +1255,7 @@ class Ui extends React.PureComponent {
                                 onChange={this.onChangeJsEditor}
                                 onClickLink={this.onClickEditorLink}
                                 data={jsEditorData}
+                                advice={jsEditorAdvice}
                                 file={file}
                                 ask={ask}
                                 workspace={workspace}

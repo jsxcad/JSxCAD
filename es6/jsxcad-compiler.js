@@ -6655,6 +6655,9 @@ const toEcmascript = async (
     }
 
     if (declarator.init) {
+      if (declarator.init.loc) {
+        entry.initSourceLocation = declarator.init.loc;
+      }
       if (declarator.init.type === 'ArrowFunctionExpression') {
         // We can't cache functions.
         out.push(declaration);

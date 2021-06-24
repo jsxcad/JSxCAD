@@ -62,6 +62,7 @@ export class JsEditorUi extends React.PureComponent {
     return {
       ask: PropTypes.func,
       data: PropTypes.string,
+      advice: PropTypes.object,
       domElementByHash: PropTypes.object,
       file: PropTypes.string,
       id: PropTypes.string,
@@ -111,7 +112,7 @@ export class JsEditorUi extends React.PureComponent {
   async componentDidMount() {
     const { editor } = this.aceEditor;
     const { session } = editor;
-    const { domElementByHash } = this.props;
+    const { advice, domElementByHash } = this.props;
 
     editor.on('linkClick', ({ token }) => {
       const { value = '' } = token;
@@ -121,7 +122,12 @@ export class JsEditorUi extends React.PureComponent {
 
     editor.session.notebookElements = {};
 
-    const { LineWidgets, Range } = aceEditorLineWidgets;
+    const { JavascriptMode, LineWidgets, Range } = aceEditorLineWidgets;
+
+    const mode = new JavascriptMode();
+    delete mode.foldingRules;
+
+    session.setMode(mode);
 
     if (!session.widgetManager) {
       session.widgetManager = new LineWidgets(session);
@@ -149,6 +155,20 @@ export class JsEditorUi extends React.PureComponent {
     let sourceLocation;
 
     const doUpdate = async () => {
+      if (advice && advice.definitions) {
+        for (const definition of advice.definitions.keys()) {
+          const { initSourceLocation } = advice.definitions.get(definition);
+          console.log(JSON.stringify(initSourceLocation));
+          if (initSourceLocation) {
+            const { start, end } = initSourceLocation;
+            session.addFold(
+              definition,
+              new Range(start.line - 1, start.column, end.line - 1, end.column)
+            );
+          }
+        }
+      }
+
       lastUpdate = new Date();
 
       for (const widget of widgets) {
@@ -211,7 +231,7 @@ export class JsEditorUi extends React.PureComponent {
           }
         }
         const widget = {
-          row: parseInt(line) - 1,
+          row: parseInt(line), // We want to be on the next line.
           coverLine: false,
           fixedWidth: true,
           el,
