@@ -1,6 +1,23 @@
 import { equals } from '@jsxcad/math-vec3';
 import { getCgal } from './getCgal.js';
-import { getPathEdges } from '@jsxcad/geometry';
+
+export const getPathEdges = (path) => {
+  const edges = [];
+  let last = null;
+  for (const point of path) {
+    if (point === null) {
+      continue;
+    }
+    if (last !== null) {
+      edges.push([last, point]);
+    }
+    last = point;
+  }
+  if (path[0] !== null) {
+    edges.push([last, path[0]]);
+  }
+  return edges;
+};
 
 const X = 0;
 const Y = 1;

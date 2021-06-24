@@ -10,7 +10,6 @@
     "depcheck": "depcheck --ignores '@jsxcad/eslint*,eslint*,babel-eslint'",
     "lint": "eslint *.js",
     "lintfix": "eslint --fix graph/*.js path/*.js paths/*.js plan/*.js points/*.js polygons/*.js tagged/*.js",
-    "prettier": "prettier --write .",
     "rollup": "rollup -c rollup_main.js",
     "test": "ava --timeout=600s",
     "tests": "ava --timeout=600s */*.test.js"
@@ -49,8 +48,7 @@
     "eslint-plugin-node": "^8.0.1",
     "eslint-plugin-promise": "^4.0.1",
     "eslint-plugin-react": "^7.17.0",
-    "eslint-plugin-standard": "^4.0.0",
-    "prettier": "^2.0.5"
+    "eslint-plugin-standard": "^4.0.0"
   },
   "publishConfig": {
     "access": "public"

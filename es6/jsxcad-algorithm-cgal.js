@@ -1,7 +1,6 @@
 import { emit, log, onBoot, isNode } from './jsxcad-sys.js';
 import { identityMatrix } from './jsxcad-math-mat4.js';
 import { equals } from './jsxcad-math-vec3.js';
-import { getPathEdges } from './jsxcad-geometry.js';
 
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -538,6 +537,24 @@ const fromTranslateToTransform = (x = 0, y = 0, z = 0) =>
 
 const fromScaleToTransform = (x = 0, y = 0, z = 0) =>
   toJsTransformFromCgalTransform(getCgal().Transformation__scale(x, y, z));
+
+const getPathEdges = (path) => {
+  const edges = [];
+  let last = null;
+  for (const point of path) {
+    if (point === null) {
+      continue;
+    }
+    if (last !== null) {
+      edges.push([last, point]);
+    }
+    last = point;
+  }
+  if (path[0] !== null) {
+    edges.push([last, path[0]]);
+  }
+  return edges;
+};
 
 const X$2 = 0;
 const Y$2 = 1;
