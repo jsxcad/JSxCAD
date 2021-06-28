@@ -63,7 +63,6 @@ export class JsEditorUi extends React.PureComponent {
       ask: PropTypes.func,
       data: PropTypes.string,
       advice: PropTypes.object,
-      domElementByHash: PropTypes.object,
       file: PropTypes.string,
       id: PropTypes.string,
       onRun: PropTypes.func,
@@ -112,7 +111,19 @@ export class JsEditorUi extends React.PureComponent {
   async componentDidMount() {
     const { editor } = this.aceEditor;
     const { session } = editor;
-    const { advice, domElementByHash } = this.props;
+    const { advice } = this.props;
+
+    if (!advice.domElementByHash) {
+      advice.domElementByHash = new Map();
+    }
+    if (!advice.domUsedElements) {
+      advice.domUsedElements = new Set();
+    }
+    if (!advice.widgets) {
+      advice.widgets = new Map();
+    }
+
+    const { domElementByHash, domUsedElements, widgets } = advice;
 
     editor.on('linkClick', ({ token }) => {
       const { value = '' } = token;
@@ -122,7 +133,8 @@ export class JsEditorUi extends React.PureComponent {
 
     editor.session.notebookElements = {};
 
-    const { JavascriptMode, LineWidgets, Range } = aceEditorLineWidgets;
+    // const { JavascriptMode, LineWidgets, Range } = aceEditorLineWidgets;
+    const { JavascriptMode, LineWidgets } = aceEditorLineWidgets;
 
     const mode = new JavascriptMode();
     delete mode.foldingRules;
@@ -143,40 +155,46 @@ export class JsEditorUi extends React.PureComponent {
       openView = note.nthView;
     };
 
-    // const domElementByHash = new Map();
-
-    const hashNotes = (notes) => notes.map((note) => note.hash || '').join('/');
-
-    const widgets = [];
-
-    let usedHashes = new Set();
     let lastUpdate;
     let marker;
-    let sourceLocation;
 
     const doUpdate = async () => {
-      if (advice && advice.definitions) {
-        for (const definition of advice.definitions.keys()) {
-          const { initSourceLocation } = advice.definitions.get(definition);
-          console.log(JSON.stringify(initSourceLocation));
-          if (initSourceLocation) {
-            const { start, end } = initSourceLocation;
-            session.addFold(
-              definition,
-              new Range(start.line - 1, start.column, end.line - 1, end.column)
-            );
+      if (advice) {
+        if (advice.definitions) {
+          for (const definition of advice.definitions.keys()) {
+            const { initSourceLocation } = advice.definitions.get(definition);
+            console.log(JSON.stringify({ definition, initSourceLocation }));
+            /*
+            if (initSourceLocation) {
+              const { start, end } = initSourceLocation;
+              session.addFold(
+                definition,
+                new Range(
+                  start.line - 1,
+                  start.column,
+                  end.line - 1,
+                  end.column
+                )
+              );
+            }
+*/
+          }
+          for (const definition of advice.widgets.keys()) {
+            // if (!advice.definitions.has(definition)) {
+            // Remove widgets for definitions that don't exist.
+            // FIX: Or which now have a different position.
+            const widget = advice.widgets.get(definition);
+            widgetManager.removeLineWidget(widget);
+            advice.widgets.delete(definition);
+            // }
           }
         }
       }
 
       lastUpdate = new Date();
 
-      for (const widget of widgets) {
-        widgetManager.removeLineWidget(widget);
-      }
-
-      let context = {};
-      const notesByLine = [];
+      // let context = {};
+      const notesByDefinition = new Map();
       const definitions = [];
       let nthView = 0;
 
@@ -184,54 +202,51 @@ export class JsEditorUi extends React.PureComponent {
         if (!note) {
           continue;
         }
-        if (note.setContext) {
-          context = Object.assign(context, note.setContext);
-        }
-        note = Object.assign({}, note, { context });
+        console.log(JSON.stringify({ ...note, data: undefined }));
         if (note.define) {
           definitions.push(note);
+        }
+        if (note.info) {
+          // Filter out info.
+          continue;
         }
         if (note.view) {
           note.nthView = nthView;
           note.openView = nthView === openView;
           nthView++;
         }
-        if (note.context && note.context.sourceLocation && !note.info) {
-          const line = note.context.sourceLocation.line || 0;
-          if (!notesByLine[line]) {
-            notesByLine[line] = [...definitions];
+        if (note.context && note.context.recording) {
+          const definition = note.context.recording.id;
+          if (!notesByDefinition.has(definition)) {
+            notesByDefinition.set(definition, [...definitions]);
           }
-          notesByLine[line].push(note);
+          notesByDefinition.get(definition).push(note);
           if (note.hash) {
             if (!domElementByHash.has(note.hash)) {
               console.log(`QQ/dom/cache/miss: ${note.hash}`);
-              const el = await toDomElement([note, ...definitions], {
+              const element = await toDomElement([note, ...definitions], {
                 onClickView,
               });
-              domElementByHash.set(note.hash, el);
+              domElementByHash.set(note.hash, element);
             }
+            note.domElement = domElementByHash.get(note.hash);
           }
-        }
-        if (note.context && note.context.sourceLocation) {
-          sourceLocation = note.context.sourceLocation;
         }
       }
 
-      for (const line of Object.keys(notesByLine)) {
-        const notes = notesByLine[line];
-        const hash = hashNotes(notes);
-        usedHashes.add(hash);
+      // Construct the LineWidgets
+      for (const definition of notesByDefinition.keys()) {
+        const { initSourceLocation } = advice.definitions.get(definition);
+        const notes = notesByDefinition.get(definition);
         const el = document.createElement('div');
         for (const note of notes) {
-          if (note.hash) {
-            const dom = domElementByHash.get(note.hash);
-            if (dom) {
-              el.appendChild(dom);
-            }
+          if (note.domElement) {
+            el.appendChild(note.domElement);
+            domUsedElements.add(note.domElement);
           }
         }
         const widget = {
-          row: parseInt(line), // We want to be on the next line.
+          row: initSourceLocation.end.line - 1,
           coverLine: false,
           fixedWidth: true,
           el,
@@ -257,11 +272,11 @@ export class JsEditorUi extends React.PureComponent {
         el.style.height = `${elHeight}px`;
         if (el.offsetHeight % lineHeight !== 0) {
           console.log(
-            `QQ/Height not aligned: line: ${line} offsetHeight: ${el.offsetHeight} lineHeight: ${lineHeight}`
+            `QQ/Height not aligned: definition: ${definition} offsetHeight: ${el.offsetHeight} lineHeight: ${lineHeight}`
           );
         }
 
-        widgets.push(widget);
+        widgets.set(definition, widget);
         widgetManager.addLineWidget(widget);
 
         // Make it visible now that it is in the right place.
@@ -269,9 +284,11 @@ export class JsEditorUi extends React.PureComponent {
 
         if (widget.pixelHeight !== lineHeight * widget.rowCount) {
           console.log(
-            `QQ/widget: line ${line} pixelHeight ${widget.pixelHeight} vs ${
-              lineHeight * widget.rowCount
-            } rowCount ${widget.rowCount} lineHeight ${lineHeight}`
+            `QQ/widget: definition ${definition} pixelHeight ${
+              widget.pixelHeight
+            } vs ${lineHeight * widget.rowCount} rowCount ${
+              widget.rowCount
+            } lineHeight ${lineHeight}`
           );
         }
       }
@@ -280,14 +297,6 @@ export class JsEditorUi extends React.PureComponent {
 
       if (marker) {
         session.removeMarker(marker);
-      }
-      if (sourceLocation) {
-        const { line, column } = sourceLocation;
-        marker = session.addMarker(
-          new Range(0, 0, line - 1, column),
-          'progress-marker',
-          'text'
-        );
       }
     };
 
@@ -311,12 +320,15 @@ export class JsEditorUi extends React.PureComponent {
 
     const finished = () => {
       for (const hash of domElementByHash.keys()) {
-        if (!usedHashes.has(hash)) {
+        const element = domElementByHash.get(hash);
+        if (!domUsedElements.has(element)) {
           domElementByHash.delete(hash);
+          if (element.parentNode) {
+            element.parentNode.removeChild(element);
+          }
         }
       }
-      usedHashes.clear();
-      sourceLocation = undefined;
+      domUsedElements.clear();
     };
 
     notebookData.onUpdate = update;

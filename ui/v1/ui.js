@@ -116,7 +116,6 @@ class Ui extends React.PureComponent {
       files: [],
       selectedPaths: [],
       notebookData: [],
-      domElementByHash: new Map(),
       jsEditorAdvice: {},
     };
 
@@ -878,7 +877,6 @@ class Ui extends React.PureComponent {
   render() {
     const {
       ask,
-      domElementByHash,
       file,
       path,
       jsEditorData = '',
@@ -1066,7 +1064,6 @@ class Ui extends React.PureComponent {
                       file={file}
                       ask={ask}
                       workspace={workspace}
-                      domElementByHash={domElementByHash}
                     />
                   </Pane>
                 </SplitPane>
@@ -1155,7 +1152,6 @@ class Ui extends React.PureComponent {
                       file={file}
                       ask={ask}
                       workspace={workspace}
-                      domElementByHash={domElementByHash}
                     />
                   </Pane>
                 </SplitPane>
@@ -1176,7 +1172,6 @@ class Ui extends React.PureComponent {
                       file={file}
                       ask={ask}
                       workspace={workspace}
-                      domElementByHash={domElementByHash}
                     />
                   </Pane>
                 </SplitPane>
@@ -1202,7 +1197,6 @@ class Ui extends React.PureComponent {
                       file={file}
                       ask={ask}
                       workspace={workspace}
-                      domElementByHash={domElementByHash}
                     />
                   </Pane>
                 </SplitPane>
@@ -1260,7 +1254,6 @@ class Ui extends React.PureComponent {
                                 ask={ask}
                                 workspace={workspace}
                                 notebookData={notebookData}
-                                domElementByHash={domElementByHash}
                               />
                             </Pane>
                           </SplitPane>

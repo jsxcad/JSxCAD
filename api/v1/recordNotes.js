@@ -1,4 +1,11 @@
-import { addOnEmitHandler, addPending, emit, read, write } from '@jsxcad/sys';
+import {
+  addOnEmitHandler,
+  addPending,
+  emit,
+  hash,
+  read,
+  write,
+} from '@jsxcad/sys';
 
 let notes;
 
@@ -11,7 +18,10 @@ const recordNote = (note, index) => {
   }
 };
 
-export const beginRecordingNotes = () => {
+export const beginRecordingNotes = (path, id, sourceLocation) => {
+  const setContext = { recording: { path, id } };
+  emit({ hash: hash(setContext), setContext });
+
   if (handler === undefined) {
     handler = addOnEmitHandler(recordNote);
   }
@@ -19,15 +29,19 @@ export const beginRecordingNotes = () => {
   notes = [];
 };
 
-export const saveRecordedNotes = (path) => {
+export const saveRecordedNotes = (path, id) => {
   let notesToSave = notes;
   notes = undefined;
   recording = false;
-  addPending(write(path, notesToSave));
+  addPending(write(`data/note/${path}/${id}`, notesToSave));
 };
 
-export const replayRecordedNotes = async (path) => {
-  const notes = await read(path);
+export const replayRecordedNotes = async (path, id) => {
+  const setContext = { recording: { path, id } };
+  emit({ hash: hash(setContext), setContext });
+
+  const notes = await read(`data/note/${path}/${id}`);
+
   if (notes === undefined) {
     return;
   }

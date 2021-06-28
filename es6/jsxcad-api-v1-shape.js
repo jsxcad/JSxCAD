@@ -1,4 +1,4 @@
-import { closePath, concatenatePath, taggedAssembly, eachPoint, flip, toConcreteGeometry, toDisplayGeometry, toTransformedGeometry, toPoints, transform, rewriteTags, taggedPaths, taggedGraph, openPath, taggedPoints, fromPolygonsToGraph, registerReifier, union, taggedLayers, bend as bend$1, intersection, allTags, difference, getLeafs, empty, grow as grow$1, inset as inset$1, rewrite, loft as loft$1, minkowskiDifference as minkowskiDifference$1, minkowskiShell as minkowskiShell$1, minkowskiSum as minkowskiSum$1, isVoid, offset as offset$1, taggedItem, taggedDisjointAssembly, toDisjointGeometry, push as push$1, getPeg, taggedPlan, remesh as remesh$1, smooth as smooth$1, measureBoundingBox, taggedSketch, split as split$1, test as test$1, twist as twist$1, toPolygonsWithHoles, arrangePolygonsWithHoles, fromPolygonsWithHolesToTriangles, fromTrianglesToGraph, taggedGroup, read, write, realize } from './jsxcad-geometry.js';
+import { closePath, concatenatePath, taggedAssembly, eachPoint, flip, toConcreteGeometry, toDisplayGeometry, toTransformedGeometry, toPoints, transform, rewriteTags, taggedPaths, taggedGraph, openPath, taggedPoints, fromPolygonsToGraph, registerReifier, union, taggedLayers, bend as bend$1, intersection, allTags, difference, getLeafs, empty, grow, inset as inset$1, rewrite, loft as loft$1, minkowskiDifference as minkowskiDifference$1, minkowskiShell as minkowskiShell$1, minkowskiSum as minkowskiSum$1, isVoid, offset as offset$1, taggedItem, taggedDisjointAssembly, toDisjointGeometry, push as push$1, getPeg, taggedPlan, remesh as remesh$1, smooth as smooth$1, measureBoundingBox, taggedSketch, split as split$1, test as test$1, twist as twist$1, toPolygonsWithHoles, arrangePolygonsWithHoles, fromPolygonsWithHolesToTriangles, fromTrianglesToGraph, taggedGroup, read, write, realize } from './jsxcad-geometry.js';
 import { identityMatrix, fromTranslation, fromRotation, fromScaling } from './jsxcad-math-mat4.js';
 import { add as add$1, negate, normalize, subtract, dot, cross, scale as scale$1, distance } from './jsxcad-math-vec3.js';
 import { toTagsFromName } from './jsxcad-algorithm-color.js';
@@ -396,10 +396,10 @@ const fuseMethod = function (...shapes) {
 };
 Shape.prototype.fuse = fuseMethod;
 
-const grow = (shape, amount) =>
-  Shape.fromGeometry(grow$1(shape.toGeometry(), amount));
+const growMethod = (shape, amount) =>
+  Shape.fromGeometry(grow(shape.toGeometry(), amount));
 
-Shape.registerMethod('grow', grow);
+Shape.registerMethod('grow', growMethod);
 
 const inset = (shape, initial = 1, step, limit) =>
   Shape.fromGeometry(inset$1(shape.toGeometry(), initial, step, limit));

@@ -872,19 +872,19 @@ exports.values = values;
 
 unwrapExports(cjsCompat);
 cjsCompat.clear;
-var cjsCompat_2 = cjsCompat.createStore;
-var cjsCompat_3 = cjsCompat.del;
+cjsCompat.createStore;
+cjsCompat.del;
 cjsCompat.entries;
-var cjsCompat_5 = cjsCompat.get;
+cjsCompat.get;
 cjsCompat.getMany;
-var cjsCompat_7 = cjsCompat.keys;
+cjsCompat.keys;
 cjsCompat.promisifyRequest;
-var cjsCompat_9 = cjsCompat.set;
+cjsCompat.set;
 cjsCompat.setMany;
 cjsCompat.update;
 cjsCompat.values;
 
-createCommonjsModule(function (module, exports) {
+var localforage = createCommonjsModule(function (module, exports) {
 /*!
     localForage -- Offline Storage, Improved
     Version 1.9.0
@@ -3684,31 +3684,22 @@ module.exports = localforage_js;
 });
 });
 
-let idbKeyvalDbInstance;
+let localForageDbInstance;
 
-const idbKeyvalDb = () => {
-  if (idbKeyvalDbInstance === undefined) {
-    const store = cjsCompat_2('jsxcad', 'jsxcad');
-    idbKeyvalDbInstance = {
-      removeItem(path) {
-        return cjsCompat_3(path, store);
-      },
-      getItem(path) {
-        return cjsCompat_5(path, store);
-      },
-      keys() {
-        return cjsCompat_7(store);
-      },
-      setItem(path, value) {
-        return cjsCompat_9(path, value, store);
-      },
-    };
+const localForageDb = () => {
+  if (localForageDbInstance === undefined) {
+    localForageDbInstance = localforage.createInstance({
+      name: 'jsxcad',
+      driver: localforage.INDEXEDDB,
+      storeName: 'jsxcad',
+      description: 'jsxcad local filesystem',
+    });
   }
-  return idbKeyvalDbInstance;
+  return localForageDbInstance;
 };
 
-// export const db = localForageDb;
-const db = idbKeyvalDb;
+const db = localForageDb;
+// export const db = idbKeyvalDb;
 
 function pad (hash, len) {
   while (hash.length < len) {
@@ -4203,6 +4194,8 @@ const getDefinitions = () => {
   return definitions;
 };
 
+const hash = (item) => hashSum(item);
+
 const { promises: promises$1 } = fs;
 
 const getFileLister = async () => {
@@ -4330,4 +4323,4 @@ let nanoid = (size = 21) => {
 
 const generateUniqueId = () => nanoid();
 
-export { addOnEmitHandler, addPending, addSource, ask, askService, askServices, boot, clearEmitted, conversation, createService, deleteFile, elapsed, emit, generateUniqueId, getControlValue, getDefinitions, getEmitted, getFilesystem, getModule, getPendingErrorHandler, getSources, info, isBrowser, isNode, isWebWorker, listFiles, listFilesystems, log, onBoot, popModule, pushModule, qualifyPath, read, readFile, readOrWatch, removeOnEmitHandler, resolvePending, setControlValue, setHandleAskUser, setPendingErrorHandler, setupFilesystem, terminateActiveServices, touch, unwatchFile, unwatchFileCreation, unwatchFileDeletion, unwatchFiles, unwatchLog, watchFile, watchFileCreation, watchFileDeletion, watchLog, write, writeFile };
+export { addOnEmitHandler, addPending, addSource, ask, askService, askServices, boot, clearEmitted, conversation, createService, deleteFile, elapsed, emit, generateUniqueId, getControlValue, getDefinitions, getEmitted, getFilesystem, getModule, getPendingErrorHandler, getSources, hash, info, isBrowser, isNode, isWebWorker, listFiles, listFilesystems, log, onBoot, popModule, pushModule, qualifyPath, read, readFile, readOrWatch, removeOnEmitHandler, resolvePending, setControlValue, setHandleAskUser, setPendingErrorHandler, setupFilesystem, terminateActiveServices, touch, unwatchFile, unwatchFileCreation, unwatchFileDeletion, unwatchFiles, unwatchLog, watchFile, watchFileCreation, watchFileDeletion, watchLog, write, writeFile };

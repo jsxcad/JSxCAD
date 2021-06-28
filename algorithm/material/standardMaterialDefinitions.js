@@ -17,6 +17,7 @@ export const standardMaterialDefinitions = {
     threejsMaterial: {
       opacity: 0.5,
       transparent: true,
+      depthWrite: false,
     },
   },
   'material/glass': {
@@ -24,6 +25,7 @@ export const standardMaterialDefinitions = {
       opacity: 0.5,
       transparent: true,
       metalness: 0.0,
+      depthWrite: false,
     },
   },
   'material/color': {
@@ -160,6 +162,7 @@ export const standardMaterialDefinitions = {
       clearCoat: 1,
       clearCoatRoughness: 0,
       map: 'https://jsxcad.js.org/texture/wet-glass.png',
+      depthWrite: false,
     },
   },
 };
