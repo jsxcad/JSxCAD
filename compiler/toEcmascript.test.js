@@ -28,6 +28,27 @@ return {
   );
 });
 
+test('Top level expressions become variables.', async (t) => {
+  const ecmascript = await toEcmascript('1 + 2;');
+  t.is(
+    ecmascript,
+    `
+info('define $1');
+beginRecordingNotes('', '$1', {
+  line: 1,
+  column: 0
+});
+const $1 = 1 + 2;
+$1 instanceof Shape && (await saveGeometry('data/def//$1', $1)) && (await write('meta/def//$1', {
+  sha: '6cd739b6b0d5172a2164a0bb14d4c99a3cb661f7'
+}));
+await saveRecordedNotes('', '$1');
+Object.freeze($1);
+return {};
+`
+  );
+});
+
 test("Don't return declarations.", async (t) => {
   const ecmascript = await toEcmascript(`let a = 10;`);
   t.is(
@@ -81,13 +102,9 @@ const foo = bar(length);`
     ecmascript,
     `
 const length = control('length', 16, 'number');
-emitSourceLocation({
-  line: 3,
-  column: 24
-});
 info('define foo');
 const foo = await loadGeometry('data/def//foo');
-await replayRecordedNotes('data/note//foo');
+await replayRecordedNotes('', 'foo');
 Object.freeze(foo);
 return {};
 `
@@ -99,11 +116,17 @@ test('Bind await to calls properly.', async (t) => {
   t.is(
     ecmascript,
     `
-emitSourceLocation({
+info('define $1');
+beginRecordingNotes('', '$1', {
   line: 1,
-  column: 11
+  column: 0
 });
-foo().bar();
+const $1 = foo().bar();
+$1 instanceof Shape && (await saveGeometry('data/def//$1', $1)) && (await write('meta/def//$1', {
+  sha: 'f1ba20d047a38ae14951a33eb07abc4e8ce86a58'
+}));
+await saveRecordedNotes('', '$1');
+Object.freeze($1);
 return {};
 `
   );
@@ -114,11 +137,17 @@ test('Top level await.', async (t) => {
   t.is(
     ecmascript,
     `
-emitSourceLocation({
+info('define $1');
+beginRecordingNotes('', '$1', {
   line: 1,
-  column: 11
+  column: 0
 });
-await foo();
+const $1 = await foo();
+$1 instanceof Shape && (await saveGeometry('data/def//$1', $1)) && (await write('meta/def//$1', {
+  sha: '2f4394138c05757310464b13560b310c6e092bbe'
+}));
+await saveRecordedNotes('', '$1');
+Object.freeze($1);
 return {};
 `
   );
@@ -133,18 +162,30 @@ await bar({ aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
   t.is(
     ecmascript,
     `
-emitSourceLocation({
-  line: 2,
-  column: 6
+info('define $1');
+beginRecordingNotes('', '$1', {
+  line: 1,
+  column: 0
 });
-foo();
-emitSourceLocation({
-  line: 4,
-  column: 182
+const $1 = foo();
+$1 instanceof Shape && (await saveGeometry('data/def//$1', $1)) && (await write('meta/def//$1', {
+  sha: 'cfc22c60c0ee7327c485872b8edd0ca7f0f5a393'
+}));
+await saveRecordedNotes('', '$1');
+Object.freeze($1);
+info('define $2');
+beginRecordingNotes('', '$2', {
+  line: 1,
+  column: 0
 });
-await bar({
+const $2 = await bar({
   aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaagh: 1
 }, 2);
+$2 instanceof Shape && (await saveGeometry('data/def//$2', $2)) && (await write('meta/def//$2', {
+  sha: '2508716645a52f147e0e52d6b5db9aaa2fcd959b'
+}));
+await saveRecordedNotes('', '$2');
+Object.freeze($2);
 return {};
 `
   );
@@ -227,13 +268,9 @@ test('Reuse and Redefine', async (t) => {
   t.is(
     reuse,
     `
-emitSourceLocation({
-  line: 1,
-  column: 19
-});
 info('define A');
 const A = await loadGeometry('data/def//A');
-await replayRecordedNotes('data/note//A');
+await replayRecordedNotes('', 'A');
 Object.freeze(A);
 const B = () => 2;
 function C() {}
@@ -248,18 +285,16 @@ return {};
   t.is(
     redefine,
     `
-emitSourceLocation({
-  line: 1,
-  column: 16
-});
 info('define A');
-beginRecordingNotes();
-card\`/A\`;
+beginRecordingNotes('', 'A', {
+  line: 1,
+  column: 0
+});
 const A = bar();
 A instanceof Shape && (await saveGeometry('data/def//A', A)) && (await write('meta/def//A', {
   sha: '998f2a52e6cffab9dfbdadd70971164741f7538f'
 }));
-await saveRecordedNotes('data/note//A');
+await saveRecordedNotes('', 'A');
 Object.freeze(A);
 const B = () => 2;
 function C() {}
@@ -284,13 +319,9 @@ test('Indirect Redefinition', async (t) => {
   t.is(
     reuse,
     `
-emitSourceLocation({
-  line: 1,
-  column: 16
-});
 info('define D');
 const D = await loadGeometry('data/def//D');
-await replayRecordedNotes('data/note//D');
+await replayRecordedNotes('', 'D');
 Object.freeze(D);
 const E = () => D;
 return {};
@@ -315,21 +346,23 @@ mountainView.frontView({ position: [0, -100, 50] });
     define,
     `
 const Mountain = () => foo();
-emitSourceLocation({
-  line: 3,
-  column: 50
-});
 info('define mountainView');
 const mountainView = await loadGeometry('data/def//mountainView');
-await replayRecordedNotes('data/note//mountainView');
+await replayRecordedNotes('', 'mountainView');
 Object.freeze(mountainView);
-emitSourceLocation({
-  line: 4,
-  column: 52
+info('define $1');
+beginRecordingNotes('', '$1', {
+  line: 1,
+  column: 0
 });
-mountainView.frontView({
+const $1 = mountainView.frontView({
   position: [0, -100, 50]
 });
+$1 instanceof Shape && (await saveGeometry('data/def//$1', $1)) && (await write('meta/def//$1', {
+  sha: '02a507c50a75df23ccf0d75d1b20c813fffda121'
+}));
+await saveRecordedNotes('', '$1');
+Object.freeze($1);
 return {};
 `
   );
@@ -346,26 +379,30 @@ mountainView.frontView({ position: [0, -100, 50] });
     redefine,
     `
 const Mountain = () => bar();
-emitSourceLocation({
-  line: 3,
-  column: 50
-});
 info('define mountainView');
-beginRecordingNotes();
-card\`/mountainView\`;
+beginRecordingNotes('', 'mountainView', {
+  line: 3,
+  column: 0
+});
 const mountainView = Mountain().scale(0.5).Page();
 mountainView instanceof Shape && (await saveGeometry('data/def//mountainView', mountainView)) && (await write('meta/def//mountainView', {
   sha: 'ff13df28379e2578fac3d15154411d6bf1b707a8'
 }));
-await saveRecordedNotes('data/note//mountainView');
+await saveRecordedNotes('', 'mountainView');
 Object.freeze(mountainView);
-emitSourceLocation({
-  line: 4,
-  column: 52
+info('define $1');
+beginRecordingNotes('', '$1', {
+  line: 1,
+  column: 0
 });
-mountainView.frontView({
+const $1 = mountainView.frontView({
   position: [0, -100, 50]
 });
+$1 instanceof Shape && (await saveGeometry('data/def//$1', $1)) && (await write('meta/def//$1', {
+  sha: '5dfb25d06c9ee5b1dc85dba3e0df726e91f4502b'
+}));
+await saveRecordedNotes('', '$1');
+Object.freeze($1);
 return {};
 `
   );
@@ -381,24 +418,28 @@ log(a);
   t.is(
     script,
     `
-emitSourceLocation({
-  line: 2,
-  column: 13
-});
 info('define a');
-beginRecordingNotes();
-card\`/a\`;
+beginRecordingNotes('', 'a', {
+  line: 2,
+  column: 0
+});
 const a = [];
 a instanceof Shape && (await saveGeometry('data/def//a', a)) && (await write('meta/def//a', {
   sha: '008e21a56df83b743c52799ddf689ac20ea2bb8c'
 }));
-await saveRecordedNotes('data/note//a');
+await saveRecordedNotes('', 'a');
 Object.freeze(a);
-emitSourceLocation({
-  line: 3,
-  column: 7
+info('define $1');
+beginRecordingNotes('', '$1', {
+  line: 1,
+  column: 0
 });
-log(a);
+const $1 = log(a);
+$1 instanceof Shape && (await saveGeometry('data/def//$1', $1)) && (await write('meta/def//$1', {
+  sha: 'febfc480508dc06dad7d4001bede9553949663bc'
+}));
+await saveRecordedNotes('', '$1');
+Object.freeze($1);
 return {};
 `
   );

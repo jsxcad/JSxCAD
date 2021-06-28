@@ -1,4 +1,4 @@
-export const taggedGraph = ({ tags }, graph) => {
+export const taggedGraph = ({ tags, matrix }, graph) => {
   if (graph.length > 0) {
     throw Error('Graph should not be an array');
   }
@@ -9,5 +9,6 @@ export const taggedGraph = ({ tags }, graph) => {
     type: 'graph',
     tags,
     graph,
+    matrix,
   };
 };

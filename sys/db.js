@@ -38,5 +38,5 @@ export const idbKeyvalDb = () => {
   return idbKeyvalDbInstance;
 };
 
-// export const db = localForageDb;
-export const db = idbKeyvalDb;
+export const db = localForageDb;
+// export const db = idbKeyvalDb;

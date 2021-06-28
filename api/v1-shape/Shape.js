@@ -127,6 +127,7 @@ export const registerShapeMethod = (name, op) => {
 */
   const { [name]: method } = {
     [name]: function (...args) {
+      // FIX: Switch to return op(...args)(this); to support curryable methods.
       return op(this, ...args);
     },
   };

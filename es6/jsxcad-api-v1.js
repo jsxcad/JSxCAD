@@ -1,4 +1,4 @@
-import { getModule, generateUniqueId, addPending, write, emit, getControlValue, addSource, addOnEmitHandler, read, elapsed, info, pushModule, popModule } from './jsxcad-sys.js';
+import { getModule, generateUniqueId, addPending, write, emit, getControlValue, addSource, hash, addOnEmitHandler, read, elapsed, info, pushModule, popModule } from './jsxcad-sys.js';
 export { elapsed, emit, info, read, write } from './jsxcad-sys.js';
 import Shape, { Shape as Shape$1, loadGeometry, log, saveGeometry } from './jsxcad-api-v1-shape.js';
 export { Shape, loadGeometry, log, saveGeometry } from './jsxcad-api-v1-shape.js';
@@ -28,9 +28,12 @@ import { toSvg } from './jsxcad-convert-svg.js';
 // FIX: Avoid the extra read-write cycle.
 const view = (
   shape,
-  { size, triangles = true, outline = true, wireframe = false },
-  op = (x) => x,
   {
+    size,
+    skin = true,
+    outline = true,
+    wireframe = false,
+    prepareView = (x) => x,
     inline,
     width = 1024,
     height = 512,
@@ -43,9 +46,9 @@ const view = (
     width = size;
     height = size / 2;
   }
-  const viewShape = op(shape);
+  const viewShape = prepareView(shape);
   for (const entry of ensurePages(
-    viewShape.toDisplayGeometry({ triangles, outline, wireframe })
+    viewShape.toDisplayGeometry({ skin, outline, wireframe })
   )) {
     const path = `view/${getModule()}/${generateUniqueId()}`;
     addPending(write(path, entry));
@@ -55,41 +58,25 @@ const view = (
   return shape;
 };
 
-Shape.prototype.view = function (
-  { size = 512, triangles = true, outline = true, wireframe = false } = {},
-  op,
-  {
-    path,
-    width = 1024,
-    height = 512,
-    position = [100, -100, 100],
-    withAxes,
-    withGrid,
-  } = {}
-) {
-  return view(this, { size, triangles, outline, wireframe }, op, {
-    path,
-    width,
-    height,
-    position,
-    withAxes,
-    withGrid,
-  });
-};
-
-Shape.prototype.topView = function (
-  { size = 512, triangles = true, outline = true, wireframe = false } = {},
-  op,
-  {
-    path,
-    width = 1024,
-    height = 512,
-    position = [0, 0, 100],
-    withAxes,
-    withGrid,
-  } = {}
-) {
-  return view(this, { size, triangles, outline, wireframe }, op, {
+Shape.prototype.view = function ({
+  size = 512,
+  skin = true,
+  outline = true,
+  wireframe = false,
+  prepareView,
+  path,
+  width = 1024,
+  height = 512,
+  position = [100, -100, 100],
+  withAxes,
+  withGrid,
+} = {}) {
+  return view(this, {
+    size,
+    skin,
+    outline,
+    wireframe,
+    prepareView,
     path,
     width,
     height,
@@ -99,41 +86,25 @@ Shape.prototype.topView = function (
   });
 };
 
-Shape.prototype.gridView = function (
-  { size = 512, triangles = true, outline = true, wireframe = false } = {},
-  op,
-  {
-    path,
-    width = 1024,
-    height = 512,
-    position = [0, 0, 100],
-    withAxes,
-    withGrid = true,
-  } = {}
-) {
-  return view(this, { size, triangles, outline, wireframe }, op, {
-    path,
-    width,
-    height,
-    position,
-    withAxes,
-    withGrid,
-  });
-};
-
-Shape.prototype.frontView = function (
-  { size = 512, triangles = true, outline = true, wireframe = false } = {},
-  op,
-  {
-    path,
-    width = 1024,
-    height = 512,
-    position = [0, -100, 0],
-    withAxes,
-    withGrid,
-  } = {}
-) {
-  return view(this, { size, triangles, outline, wireframe }, op, {
+Shape.prototype.topView = function ({
+  size = 512,
+  skin = true,
+  outline = true,
+  wireframe = false,
+  prepareView,
+  path,
+  width = 1024,
+  height = 512,
+  position = [0, 0, 100],
+  withAxes,
+  withGrid,
+} = {}) {
+  return view(this, {
+    size,
+    skin,
+    outline,
+    wireframe,
+    prepareView,
     path,
     width,
     height,
@@ -143,19 +114,81 @@ Shape.prototype.frontView = function (
   });
 };
 
-Shape.prototype.sideView = function (
-  { size = 512, triangles = true, outline = true, wireframe = false } = {},
-  op,
-  {
+Shape.prototype.gridView = function ({
+  size = 512,
+  skin = true,
+  outline = true,
+  wireframe = false,
+  prepareView,
+  path,
+  width = 1024,
+  height = 512,
+  position = [0, 0, 100],
+  withAxes,
+  withGrid = true,
+} = {}) {
+  return view(this, {
+    size,
+    skin,
+    outline,
+    wireframe,
+    prepareView,
     path,
-    width = 1024,
-    height = 512,
-    position = [100, 0, 0],
+    width,
+    height,
+    position,
     withAxes,
     withGrid,
-  } = {}
-) {
-  return view(this, { size, triangles, outline, wireframe }, op, {
+  });
+};
+
+Shape.prototype.frontView = function ({
+  size = 512,
+  skin = true,
+  outline = true,
+  wireframe = false,
+  prepareView,
+  path,
+  width = 1024,
+  height = 512,
+  position = [0, -100, 0],
+  withAxes,
+  withGrid,
+} = {}) {
+  return view(this, {
+    size,
+    skin,
+    outline,
+    wireframe,
+    prepareView,
+    path,
+    width,
+    height,
+    position,
+    withAxes,
+    withGrid,
+  });
+};
+
+Shape.prototype.sideView = function ({
+  size = 512,
+  skin = true,
+  outline = true,
+  wireframe = false,
+  prepareView,
+  path,
+  width = 1024,
+  height = 512,
+  position = [100, 0, 0],
+  withAxes,
+  withGrid,
+} = {}) {
+  return view(this, {
+    size,
+    skin,
+    outline,
+    wireframe,
+    prepareView,
     path,
     width,
     height,
@@ -382,7 +415,10 @@ const recordNote = (note, index) => {
   }
 };
 
-const beginRecordingNotes = () => {
+const beginRecordingNotes = (path, id, sourceLocation) => {
+  const setContext = { recording: { path, id } };
+  emit({ hash: hash(setContext), setContext });
+
   if (handler === undefined) {
     handler = addOnEmitHandler(recordNote);
   }
@@ -390,15 +426,19 @@ const beginRecordingNotes = () => {
   notes = [];
 };
 
-const saveRecordedNotes = (path) => {
+const saveRecordedNotes = (path, id) => {
   let notesToSave = notes;
   notes = undefined;
   recording = false;
-  addPending(write(path, notesToSave));
+  addPending(write(`data/note/${path}/${id}`, notesToSave));
 };
 
-const replayRecordedNotes = async (path) => {
-  const notes = await read(path);
+const replayRecordedNotes = async (path, id) => {
+  const setContext = { recording: { path, id } };
+  emit({ hash: hash(setContext), setContext });
+
+  const notes = await read(`data/note/${path}/${id}`);
+
   if (notes === undefined) {
     return;
   }

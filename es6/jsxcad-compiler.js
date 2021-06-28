@@ -6545,6 +6545,8 @@ const toEcmascript = async (
 
   let ast = parse(script, parseOptions);
 
+  let toplevelExpressionCount = 0;
+
   const exportNames = [];
 
   const body = ast.body;
@@ -6680,12 +6682,6 @@ const toEcmascript = async (
       }
     }
 
-    out.push(
-      parse(
-        `emitSourceLocation({ line: ${declaration.loc.end.line}, column: ${declaration.loc.end.column} })`,
-        parseOptions
-      )
-    );
     out.push(parse(`info('define ${id}');`, parseOptions));
 
     // Now that we have the sha, we can predict if it can be read from cache.
@@ -6702,7 +6698,7 @@ const toEcmascript = async (
       };
       out.push(cacheLoadCode);
       const replayRecordedNotes = parse(
-        `await replayRecordedNotes('data/note/${path}/${id}')`,
+        `await replayRecordedNotes('${path}', '${id}')`,
         parseOptions
       );
       out.push(replayRecordedNotes);
@@ -6713,10 +6709,15 @@ const toEcmascript = async (
       });
       entry.isComputed = true;
     } else {
-      out.push(parse('beginRecordingNotes()', parseOptions));
+      out.push(
+        parse(
+          `beginRecordingNotes('${path}', '${id}', { line: ${declaration.loc.start.line}, column: ${declaration.loc.start.column} })`,
+          parseOptions
+        )
+      );
       // FIX: Let's not hard-code card declarations.
-      out.push(parse(`card\`${path}/${id}\`;`, parseOptions));
-      out.push({ ...declaration, declarations: [declarator] });
+      const patched = { ...declaration, declarations: [declarator] };
+      out.push(patched);
       // Only cache Shapes.
       out.push(
         parse(
@@ -6725,10 +6726,7 @@ const toEcmascript = async (
         )
       );
       out.push(
-        parse(
-          `await saveRecordedNotes('data/note/${path}/${id}')`,
-          parseOptions
-        )
+        parse(`await saveRecordedNotes('${path}', '${id}')`, parseOptions)
       );
     }
     out.push(parse(`Object.freeze(${id});`, parseOptions));
@@ -6796,6 +6794,14 @@ const toEcmascript = async (
         }
       }
     } else if (entry.type === 'ExpressionStatement') {
+      // This is an ugly way of turning top level expressions into declarations.
+      const declaration = parse(
+        `const $${++toplevelExpressionCount} = ${generate(entry)}`,
+        parseOptions
+      ).body[0];
+      const declarator = declaration.declarations[0];
+      await declareVariable(declaration, declarator);
+      /*
       out.push(
         parse(
           `emitSourceLocation({ line: ${entry.loc.end.line}, column: ${entry.loc.end.column} })`,
@@ -6803,6 +6809,7 @@ const toEcmascript = async (
         )
       );
       out.push(entry);
+*/
     } else {
       out.push(entry);
     }

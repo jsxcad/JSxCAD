@@ -11,5 +11,6 @@ test('Glass.', (t) => {
     metalness: 0,
     opacity: 0.5,
     transparent: true,
+    depthWrite: false,
   });
 });
