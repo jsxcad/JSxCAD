@@ -1,7 +1,5 @@
 import { Shape } from './Shape.js';
 import { clip } from './clip.js';
 
-const clipFromMethod = function (shape) {
-  return clip(shape, this);
-};
-Shape.prototype.clipFrom = clipFromMethod;
+export const clipFrom = (other) => (shape) => clip(other, shape);
+Shape.registerMethod('clipFrom', clipFrom);

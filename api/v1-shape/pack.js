@@ -9,59 +9,55 @@ import {
 import Shape from './Shape.js';
 import { pack as packAlgorithm } from '@jsxcad/algorithm-pack';
 
-export const pack = (
-  shape,
-  {
+export const pack =
+  ({
     size,
     pageMargin = 5,
     itemMargin = 1,
     perLayout = Infinity,
     packSize = [],
-  } = {}
-) => {
-  if (perLayout === 0) {
-    // Packing was disabled -- do nothing.
-    return shape;
-  }
-
-  let todo = [];
-  for (const leaf of getLeafs(shape.toKeptGeometry())) {
-    todo.push(leaf);
-  }
-  const packedLayers = [];
-  while (todo.length > 0) {
-    const input = [];
-    while (todo.length > 0 && input.length < perLayout) {
-      input.push(todo.shift());
+  } = {}) =>
+  (shape) => {
+    if (perLayout === 0) {
+      // Packing was disabled -- do nothing.
+      return shape;
     }
-    const [packed, unpacked, minPoint, maxPoint] = packAlgorithm(
-      { size, pageMargin, itemMargin },
-      ...input
-    );
-    packSize[0] = minPoint;
-    packSize[1] = maxPoint;
-    if (packed.length === 0) {
-      break;
-    } else {
-      packedLayers.push(
-        taggedItem(
-          {},
-          taggedDisjointAssembly({}, ...packed.map(toDisjointGeometry))
-        )
+
+    let todo = [];
+    for (const leaf of getLeafs(shape.toKeptGeometry())) {
+      todo.push(leaf);
+    }
+    const packedLayers = [];
+    while (todo.length > 0) {
+      const input = [];
+      while (todo.length > 0 && input.length < perLayout) {
+        input.push(todo.shift());
+      }
+      const [packed, unpacked, minPoint, maxPoint] = packAlgorithm(
+        { size, pageMargin, itemMargin },
+        ...input
       );
+      packSize[0] = minPoint;
+      packSize[1] = maxPoint;
+      if (packed.length === 0) {
+        break;
+      } else {
+        packedLayers.push(
+          taggedItem(
+            {},
+            taggedDisjointAssembly({}, ...packed.map(toDisjointGeometry))
+          )
+        );
+      }
+      todo.unshift(...unpacked);
     }
-    todo.unshift(...unpacked);
-  }
-  let packedShape = Shape.fromGeometry(taggedLayers({}, ...packedLayers));
-  if (size === undefined) {
-    packedShape = packedShape.align('xy');
-  }
-  return packedShape;
-};
+    let packedShape = Shape.fromGeometry(taggedLayers({}, ...packedLayers));
+    if (size === undefined) {
+      packedShape = packedShape.align('xy');
+    }
+    return packedShape;
+  };
 
-const packMethod = function (...args) {
-  return pack(this, ...args);
-};
-Shape.prototype.pack = packMethod;
+Shape.registerMethod('pack', pack);
 
 export default pack;

@@ -1,4 +1,9 @@
+import { colord, extend } from 'colord';
+
+import mixPlugin from 'colord/plugins/mix';
 import { standardColorDefinitions } from './standardColorDefinitions.js';
+
+extend([mixPlugin]);
 
 // FIX: Apply normalizations here.
 const toTagFromName = (name) => {
@@ -15,21 +20,33 @@ export const toRgbColorFromTags = (
   customDefinitions = {},
   otherwise = '#000000'
 ) => {
+  const collected = [];
   for (const tag of tags) {
     if (tag.startsWith('color/')) {
       for (const definitions of [standardColorDefinitions, customDefinitions]) {
         const definition = definitions[tag];
         if (definition && definition.rgb) {
-          return definition.rgb;
+          collected.push(definition.rgb);
         }
       }
       if (tag.startsWith('color/#')) {
         // Assume tags that start with # are rgb colors.
-        return tag.substring(6);
+        collected.push(tag.substring(6));
       }
     }
   }
-  return otherwise;
+  if (collected.length === 0) {
+    return otherwise;
+  } else if (collected.length === 1) {
+    return collected[0];
+  } else {
+    let color = colord('#ffffff');
+    let nth = 0;
+    for (const rgb of collected) {
+      color = color.mix(rgb, 1 / ++nth);
+    }
+    return color.toHex();
+  }
 };
 
 export const toRgbFromTags = (

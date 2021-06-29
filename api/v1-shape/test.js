@@ -2,7 +2,7 @@ import Shape from './Shape.js';
 
 import { test as testGeometry } from '@jsxcad/geometry';
 
-export const test = (shape, md) => {
+export const test = (md) => (shape) => {
   if (md) {
     shape.md(md);
   }
@@ -10,8 +10,4 @@ export const test = (shape, md) => {
   return shape;
 };
 
-const testMethod = function (md) {
-  return test(this, md);
-};
-
-Shape.prototype.test = testMethod;
+Shape.registerMethod('test', test);

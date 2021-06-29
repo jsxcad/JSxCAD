@@ -118,6 +118,8 @@ export class Shape {
 const isSingleOpenPath = ({ paths }) =>
   paths !== undefined && paths.length === 1 && paths[0][0] === null;
 
+Shape.method = {};
+
 export const registerShapeMethod = (name, op) => {
   /*
   // FIX: See if we can switch these to dispatching via define?
@@ -125,10 +127,12 @@ export const registerShapeMethod = (name, op) => {
     throw Error(`Method ${name} is already in use.`);
   }
 */
+  // Make the operation constructor available e.g., Shape.grow(1)(s)
+  Shape[name] = op;
+  // Make the operation application available e.g., s.grow(1)
   const { [name]: method } = {
     [name]: function (...args) {
-      // FIX: Switch to return op(...args)(this); to support curryable methods.
-      return op(this, ...args);
+      return op(...args)(this);
     },
   };
   Shape.prototype[name] = method;

@@ -6,7 +6,4 @@ export const voidFn = (shape) =>
     rewriteTags(['compose/non-positive'], [], shape.toGeometry())
   );
 
-const voidMethod = function () {
-  return voidFn(this);
-};
-Shape.prototype.void = voidMethod;
+Shape.registerMethod('void', voidFn);

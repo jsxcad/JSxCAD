@@ -1,14 +1,17 @@
 import Shape from './Shape.js';
 import { taggedLayers } from '@jsxcad/geometry';
 
-export const and = (...shapes) =>
-  Shape.fromGeometry(
-    taggedLayers({}, ...shapes.map((shape) => shape.toGeometry()))
-  );
+export const and =
+  (...shapes) =>
+  (shape) =>
+    Shape.fromGeometry(
+      taggedLayers(
+        {},
+        shape.toGeometry(),
+        ...shapes.map((shape) => shape.toGeometry())
+      )
+    );
 
-const andMethod = function (...shapes) {
-  return and(this, ...shapes);
-};
-Shape.prototype.and = andMethod;
+Shape.registerMethod('and', and);
 
 export default and;

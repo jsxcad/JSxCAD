@@ -1,42 +1,6 @@
 import { Shape } from './Shape.js';
 import { rewrite } from '@jsxcad/geometry';
 
-/**
- *
- * # Keep in assembly
- *
- * Generates an assembly from components in an assembly with a tag.
- *
- * ::: illustration
- * ```
- * assemble(Circle(10).as('A'),
- *          Square(10).as('B'))
- * ```
- * :::
- * ::: illustration
- * ```
- * assemble(Circle(10).as('A'),
- *          Square(10).as('B'))
- *   .keep('A')
- * ```
- * :::
- * ::: illustration
- * ```
- * assemble(Circle(10).as('A'),
- *          Square(10).as('B'))
- *   .keep('B')
- * ```
- * :::
- * ::: illustration
- * ```
- * assemble(Circle(10).as('A'),
- *          Square(10).as('B'))
- *   .keep('A', 'B')
- * ```
- * :::
- *
- **/
-
 const selectToKeep = (matchTags, geometryTags) => {
   if (geometryTags === undefined) {
     return false;
@@ -94,7 +58,7 @@ const keepOrDrop = (shape, tags, select) => {
   return Shape.fromGeometry(rewritten);
 };
 
-export const keep = (shape, tags) => {
+export const keep = (tags) => (shape) => {
   if (tags === undefined) {
     // Dropping no tags is an unconditional keep.
     return keepOrDrop(shape, [], selectToDrop);
@@ -103,7 +67,7 @@ export const keep = (shape, tags) => {
   }
 };
 
-export const drop = (shape, tags) => {
+export const drop = (tags) => (shape) => {
   if (tags === undefined) {
     // Keeping no tags is an unconditional drop.
     return keepOrDrop(shape, [], selectToKeep);
@@ -112,12 +76,5 @@ export const drop = (shape, tags) => {
   }
 };
 
-const keepMethod = function (...tags) {
-  return keep(this, tags);
-};
-Shape.prototype.keep = keepMethod;
-
-const dropMethod = function (...tags) {
-  return drop(this, tags);
-};
-Shape.prototype.drop = dropMethod;
+Shape.registerMethod('keep', keep);
+Shape.registerMethod('drop', drop);

@@ -1,12 +1,14 @@
 import Shape from './Shape.js';
 import { difference } from '@jsxcad/geometry';
 
-export const cut = (shape, ...shapes) =>
-  Shape.fromGeometry(
-    difference(shape.toGeometry(), ...shapes.map((shape) => shape.toGeometry()))
-  );
+export const cut =
+  (...shapes) =>
+  (shape) =>
+    Shape.fromGeometry(
+      difference(
+        shape.toGeometry(),
+        ...shapes.map((shape) => shape.toGeometry())
+      )
+    );
 
-const cutMethod = function (...shapes) {
-  return cut(this, ...shapes);
-};
-Shape.prototype.cut = cutMethod;
+Shape.registerMethod('cut', cut);

@@ -1,66 +1,79 @@
-import './add.js';
-import './and.js';
-import './addTo.js';
-import './align.js';
-import './as.js';
-import './bend.js';
-import './clip.js';
-import './clipFrom.js';
-import './color.js';
-import './colors.js';
-import './cut.js';
-import './cutFrom.js';
-import './do.js';
-import './each.js';
-import './fuse.js';
-import './grow.js';
-import './inset.js';
-import './keep.js';
-import './loft.js';
-import './material.js';
-import './minkowskiDifference.js';
-import './minkowskiShell.js';
-import './minkowskiSum.js';
-import './move.js';
-import './noVoid.js';
-import './offset.js';
-import './op.js';
 import './orient.js';
-import './pack.js';
-import './push.js';
-import './peg.js';
-import './plan.js';
 import './readShape.js';
-import './remesh.js';
-import './rotate.js';
-import './rotateX.js';
-import './rotateY.js';
-import './rotateZ.js';
-import './scale.js';
-import './smooth.js';
-import './size.js';
-import './sketch.js';
-import './split.js';
-import './tags.js';
-import './test.js';
-import './tool.js';
-import './twist.js';
-import './void.js';
-import './weld.js';
-import './with.js';
 import './writeShape.js';
-import './x.js';
-import './y.js';
-import './z.js';
 
 import { loadGeometry, saveGeometry } from './saveGeometry.js';
 
 import Shape from './Shape.js';
 import log from './log.js';
+export { drop, keep } from './keep.js';
+export { loft, loop } from './loft.js';
+export { material } from './material.js';
+export { minkowskiDifference } from './minkowskiDifference.js';
+export { minkowskiShell } from './minkowskiShell.js';
+export { minkowskiSum } from './minkowskiSum.js';
+export { move } from './move.js';
+export { noVoid } from './noVoid.js';
+export { offset } from './offset.js';
+export { op, withOp } from './op.js';
+export { pack } from './pack.js';
+export { push } from './push.js';
+export { peg } from './peg.js';
+export {
+  hasApothem,
+  hasAngle,
+  hasAt,
+  hasBase,
+  hasCorner1,
+  hasC1,
+  hasC2,
+  hasDiameter,
+  hasFrom,
+  hasRadius,
+  hasSides,
+  hasTo,
+  hasTop,
+  hasZag,
+} from './plan.js';
+export { remesh } from './remesh.js';
+export { rotate } from './rotate.js';
+export { rotateX, rx } from './rotateX.js';
+export { rotateY, ry } from './rotateY.js';
+export { rotateZ, rz } from './rotateZ.js';
+export { scale } from './scale.js';
+export { smooth } from './smooth.js';
+export { size } from './size.js';
+export { sketch } from './sketch.js';
+export { split } from './split.js';
+export { tags } from './tags.js';
+export { test } from './test.js';
+export { tool } from './tool.js';
+export { twist } from './twist.js';
+export { voidFn } from './void.js';
+export { weld } from './weld.js';
+export { withFn } from './with.js';
+export { x } from './x.js';
+export { y } from './y.js';
+export { z } from './z.js';
+export { add } from './add.js';
+export { and } from './and.js';
+export { addTo } from './addTo.js';
+export { align } from './align.js';
+export { as, notAs } from './as.js';
+export { bend } from './bend.js';
+export { clip } from './clip.js';
+export { clipFrom } from './clipFrom.js';
+export { color, tint } from './color.js';
+export { colors } from './colors.js';
+export { cut } from './cut.js';
+export { cutFrom } from './cutFrom.js';
+export { each } from './each.js';
+export { fuse } from './fuse.js';
+export { inset, withInset } from './inset.js';
 
 export { Shape, loadGeometry, log, saveGeometry };
 export { getPegCoords, orient, shapeMethod } from './peg.js';
 
-export { weld } from './weld.js';
+export { grow } from './grow.js';
 
 export default Shape;
