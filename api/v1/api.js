@@ -45,7 +45,13 @@ export {
   saveRecordedNotes,
 } from './recordNotes.js';
 
-export { Shape, loadGeometry, log, saveGeometry } from '@jsxcad/api-v1-shape';
+export {
+  Shape,
+  grow,
+  loadGeometry,
+  log,
+  saveGeometry,
+} from '@jsxcad/api-v1-shape';
 
 export {
   Arc,

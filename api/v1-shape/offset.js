@@ -1,13 +1,13 @@
 import Shape from './Shape.js';
 import { offset as offsetGeometry } from '@jsxcad/geometry';
 
-export const offset = (shape, initial = 1, step, limit) =>
-  Shape.fromGeometry(offsetGeometry(shape.toGeometry(), initial, step, limit));
+export const offset =
+  (initial = 1, step, limit) =>
+  (shape) =>
+    Shape.fromGeometry(
+      offsetGeometry(shape.toGeometry(), initial, step, limit)
+    );
 
-const offsetMethod = function (initial, step, limit) {
-  return offset(this, initial, step, limit);
-};
-
-Shape.prototype.offset = offsetMethod;
+Shape.registerMethod('offset', offset);
 
 export default offset;

@@ -1,7 +1,7 @@
 import Shape from './Shape.js';
 import { minkowskiDifference as minkowskiDifferenceOfGeometry } from '@jsxcad/geometry';
 
-export const minkowskiDifference = (shape, offset) =>
+export const minkowskiDifference = (offset) => (shape) =>
   Shape.fromGeometry(
     minkowskiDifferenceOfGeometry(shape.toGeometry(), offset.toGeometry())
   );

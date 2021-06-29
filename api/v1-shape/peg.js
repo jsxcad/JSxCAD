@@ -53,22 +53,16 @@ export const orient = (origin, forward, right, shapeToPeg) => {
   return shapeToPeg.transform(from).move(...origin);
 };
 
-export const peg = (shape, shapeToPeg) => {
+export const peg = (shapeToPeg) => (shape) => {
   const { origin, right, forward } = getPegCoords(shape);
   return orient(origin, right, forward, shapeToPeg);
 };
 
-const pegMethod = function (shapeToPeg) {
-  return peg(this, shapeToPeg);
-};
+Shape.registerMethod('peg', peg);
 
-Shape.prototype.peg = pegMethod;
+export const put = (pegShape) => (shape) => peg(shape)(pegShape);
 
-const putMethod = function (pegShape) {
-  return peg(pegShape, this);
-};
-
-Shape.prototype.put = putMethod;
+Shape.registerMethod('put', put);
 
 export const shapeMethod = (build) => {
   return function (...args) {

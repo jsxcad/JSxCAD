@@ -1,7 +1,5 @@
 import Shape from './Shape.js';
 import { add } from './add.js';
 
-const addToMethod = function (shape) {
-  return add(shape, this);
-};
-Shape.prototype.addTo = addToMethod;
+export const addTo = (other) => (shape) => add(other, shape);
+Shape.registerMethod('addTo', addTo);

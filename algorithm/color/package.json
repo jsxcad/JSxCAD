@@ -22,7 +22,9 @@
   ],
   "keywords": [],
   "license": "MIT",
-  "dependencies": {},
+  "dependencies": {
+    "colord": "^2.0.1"
+  },
   "devDependencies": {
     "ava": "^3.9.0",
     "depcheck": "^1.4.1",
