@@ -391,7 +391,7 @@ const keepOrDrop = (shape, tags, select) => {
   return Shape.fromGeometry(rewritten);
 };
 
-const keep = (tags) => (shape) => {
+const keep = (...tags) => (shape) => {
   if (tags === undefined) {
     // Dropping no tags is an unconditional keep.
     return keepOrDrop(shape, [], selectToDrop);
@@ -400,7 +400,7 @@ const keep = (tags) => (shape) => {
   }
 };
 
-const drop = (tags) => (shape) => {
+const drop = (...tags) => (shape) => {
   if (tags === undefined) {
     // Keeping no tags is an unconditional drop.
     return keepOrDrop(shape, [], selectToKeep);
@@ -923,7 +923,7 @@ const twist =
 
 Shape.registerMethod('twist', twist);
 
-const voidFn = (shape) =>
+const voidFn = () => (shape) =>
   Shape.fromGeometry(
     rewriteTags(['compose/non-positive'], [], shape.toGeometry())
   );
@@ -981,21 +981,21 @@ Shape.registerMethod('with', withFn);
 const x =
   (...x) =>
   (shape) =>
-    Shape.Group(...x.map((x) => move(shape, x)));
+    Shape.Group(...x.map((x) => move(x)(shape)));
 
 Shape.registerMethod('x', x);
 
 const y =
   (...y) =>
   (shape) =>
-    Shape.Group(...y.map((y) => move(shape, 0, y)));
+    Shape.Group(...y.map((y) => move(0, y)(shape)));
 
 Shape.registerMethod('y', y);
 
 const z =
   (...z) =>
   (shape) =>
-    Shape.Group(...z.map((z) => move(shape, 0, 0)));
+    Shape.Group(...z.map((z) => move(0, 0, z)(shape)));
 
 Shape.registerMethod('z', z);
 

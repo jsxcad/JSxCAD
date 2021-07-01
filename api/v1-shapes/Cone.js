@@ -21,7 +21,7 @@ const Z = 2;
 registerReifier('Cone', (geometry) => {
   const [x, y, z] = getCorner2(geometry);
   return Hull(
-    Arc(x, y).sides(getSides(geometry, 32)).z(z),
+    Arc(x, y).hasSides(getSides(geometry, 32)).z(z),
     Point(0, 0, getCorner1(geometry)[Z])
   )
     .orient({
@@ -36,8 +36,8 @@ registerReifier('Cone', (geometry) => {
 
 export const Cone = (diameter = 1, top = 1, base = -top) =>
   Shape.fromGeometry(taggedPlan({}, { type: 'Cone' }))
-    .corner1(0, 0, top)
-    .corner2(diameter, diameter, base);
+    .hasCorner1(0, 0, top)
+    .hasCorner2(diameter, diameter, base);
 
 Shape.prototype.Cone = shapeMethod(Cone);
 

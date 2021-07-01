@@ -110,7 +110,7 @@ registerReifier('Box', (geometry) => {
 });
 
 const Box = (x, y = x, z = 0) =>
-  Shape.fromGeometry(taggedPlan({}, { type: 'Box' })).diameter(x, y, z);
+  Shape.fromGeometry(taggedPlan({}, { type: 'Box' })).hasDiameter(x, y, z);
 
 Shape.prototype.Box = shapeMethod(Box);
 
@@ -1859,7 +1859,7 @@ registerReifier('Arc', (geometry) => {
 });
 
 const Arc = (x = 1, y = x, z = 0) =>
-  Shape.fromGeometry(taggedPlan({}, { type: 'Arc' })).diameter(x, y, z);
+  Shape.fromGeometry(taggedPlan({}, { type: 'Arc' })).hasDiameter(x, y, z);
 
 Shape.prototype.Arc = shapeMethod(Arc);
 
@@ -1925,7 +1925,7 @@ const Z$1 = 2;
 registerReifier('Cone', (geometry) => {
   const [x, y, z] = getCorner2(geometry);
   return Hull(
-    Arc(x, y).sides(getSides(geometry, 32)).z(z),
+    Arc(x, y).hasSides(getSides(geometry, 32)).z(z),
     Point(0, 0, getCorner1(geometry)[Z$1])
   )
     .orient({
@@ -1940,12 +1940,12 @@ registerReifier('Cone', (geometry) => {
 
 const Cone = (diameter = 1, top = 1, base = -top) =>
   Shape.fromGeometry(taggedPlan({}, { type: 'Cone' }))
-    .corner1(0, 0, top)
-    .corner2(diameter, diameter, base);
+    .hasCorner1(0, 0, top)
+    .hasCorner2(diameter, diameter, base);
 
 Shape.prototype.Cone = shapeMethod(Cone);
 
-const Hexagon = (x, y, z) => Arc(x, y, z).sides(6);
+const Hexagon = (x, y, z) => Arc(x, y, z).hasSides(6);
 
 Shape.prototype.Hexagon = shapeMethod(Hexagon);
 
@@ -2028,7 +2028,7 @@ registerReifier('Icosahedron', (geometry) => {
 });
 
 const Icosahedron = (x = 1, y = x, z = x) =>
-  Shape.fromGeometry(taggedPlan({}, { type: 'Icosahedron' })).diameter(x, y, z);
+  Shape.fromGeometry(taggedPlan({}, { type: 'Icosahedron' })).hasDiameter(x, y, z);
 
 Shape.prototype.Icosahedron = shapeMethod(Icosahedron);
 
@@ -2081,7 +2081,7 @@ const loopHullMethod = function (...shapes) {
 Shape.prototype.loopHull = loopHullMethod;
 Shape.prototype.LoopedHull = shapeMethod(LoopedHull);
 
-const Octagon = (x, y, z) => Arc(x, y, z).sides(8);
+const Octagon = (x, y, z) => Arc(x, y, z).hasSides(8);
 
 Shape.prototype.Octagon = shapeMethod(Octagon);
 
@@ -2117,7 +2117,7 @@ Shape.registerMethod('sx', extrudeSphere);
 registerReifier('Orb', (geometry) => {
   const [scale, middle] = getScale(geometry);
   const sides = getSides(geometry, 16);
-  return extrudeSphere(Arc(2).sides(sides * 2), 1, { sides: 2 + sides })
+  return extrudeSphere(Arc(2).hasSides(sides * 2), 1, { sides: 2 + sides })
     .scale(...scale)
     .move(...middle)
     .orient({
@@ -2131,7 +2131,7 @@ registerReifier('Orb', (geometry) => {
 });
 
 const Orb = (x = 1, y = x, z = x) =>
-  Shape.fromGeometry(taggedPlan({}, { type: 'Orb' })).diameter(x, y, z);
+  Shape.fromGeometry(taggedPlan({}, { type: 'Orb' })).hasDiameter(x, y, z);
 
 Shape.prototype.Orb = shapeMethod(Orb);
 
@@ -2161,7 +2161,7 @@ const Peg = (
 
 Shape.prototype.Peg = shapeMethod(Peg);
 
-const Pentagon = (x, y, z) => Arc(x, y, z).sides(5);
+const Pentagon = (x, y, z) => Arc(x, y, z).hasSides(5);
 
 Shape.prototype.Pentagon = shapeMethod(Pentagon);
 
@@ -2195,15 +2195,15 @@ Polyhedron.ofPointPaths = ofPointPaths;
 
 Shape.prototype.Polyhedron = shapeMethod(Polyhedron);
 
-const Septagon = (x, y, z) => Arc(x, y, z).sides(7);
+const Septagon = (x, y, z) => Arc(x, y, z).hasSides(7);
 
 Shape.prototype.Septagon = shapeMethod(Septagon);
 
-const Tetragon = (x, y, z) => Arc(x, y, z).sides(4);
+const Tetragon = (x, y, z) => Arc(x, y, z).hasSides(4);
 
 Shape.prototype.Tetragon = shapeMethod(Tetragon);
 
-const Triangle = (x, y, z) => Arc(x, y, z).sides(3);
+const Triangle = (x, y, z) => Arc(x, y, z).hasSides(3);
 
 Shape.prototype.Triangle = shapeMethod(Triangle);
 

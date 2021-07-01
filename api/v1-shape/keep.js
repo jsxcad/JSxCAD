@@ -58,7 +58,7 @@ const keepOrDrop = (shape, tags, select) => {
   return Shape.fromGeometry(rewritten);
 };
 
-export const keep = (tags) => (shape) => {
+export const keep = (...tags) => (shape) => {
   if (tags === undefined) {
     // Dropping no tags is an unconditional keep.
     return keepOrDrop(shape, [], selectToDrop);
@@ -67,7 +67,7 @@ export const keep = (tags) => (shape) => {
   }
 };
 
-export const drop = (tags) => (shape) => {
+export const drop = (...tags) => (shape) => {
   if (tags === undefined) {
     // Keeping no tags is an unconditional drop.
     return keepOrDrop(shape, [], selectToKeep);

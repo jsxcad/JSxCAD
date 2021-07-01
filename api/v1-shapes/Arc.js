@@ -69,7 +69,7 @@ registerReifier('Arc', (geometry) => {
 });
 
 export const Arc = (x = 1, y = x, z = 0) =>
-  Shape.fromGeometry(taggedPlan({}, { type: 'Arc' })).diameter(x, y, z);
+  Shape.fromGeometry(taggedPlan({}, { type: 'Arc' })).hasDiameter(x, y, z);
 
 Shape.prototype.Arc = shapeMethod(Arc);
 
