@@ -24,10 +24,8 @@ export const loft = (closed, geometry, ...geometries) => {
         return geometry;
       case 'plan':
         return loft(closed, reify(geometry).content[0], ...geometries);
-      case 'assembly':
       case 'item':
-      case 'disjointAssembly':
-      case 'layers': {
+      case 'group': {
         return descend();
       }
       case 'sketch': {

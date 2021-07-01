@@ -15,10 +15,8 @@ export const grow = (geometry, amount) => {
         return geometry;
       case 'plan':
         return grow(reify(geometry).content[0], amount);
-      case 'assembly':
       case 'item':
-      case 'disjointAssembly':
-      case 'layers': {
+      case 'group': {
         return descend();
       }
       case 'sketch': {

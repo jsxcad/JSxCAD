@@ -5,12 +5,10 @@ export const transform = (matrix, geometry) => {
   const op = (geometry, descend, walk) => {
     switch (geometry.type) {
       // Branch
-      case 'assembly':
       case 'layout':
-      case 'layers':
+      case 'group':
       case 'item':
       case 'sketch':
-      case 'disjointAssembly':
         return descend();
       // Leaf
       case 'plan':

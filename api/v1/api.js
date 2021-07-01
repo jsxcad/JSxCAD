@@ -83,7 +83,9 @@ export {
   peg,
   remesh,
   rotate,
-  rx, ry, rz,
+  rx,
+  ry,
+  rz,
   rotateX,
   rotateY,
   rotateZ,
@@ -103,7 +105,9 @@ export {
   withFn,
   withInset,
   withOp,
-  x, y, z,
+  x,
+  y,
+  z,
 } from '@jsxcad/api-v1-shape';
 
 export {

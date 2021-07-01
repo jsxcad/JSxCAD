@@ -10,9 +10,7 @@ export const eachPoint = (emit, geometry) => {
       case 'plan':
         reify(geometry);
       // fallthrough
-      case 'assembly':
-      case 'disjointAssembly':
-      case 'layers':
+      case 'group':
       case 'item':
       case 'layout':
         return descend();

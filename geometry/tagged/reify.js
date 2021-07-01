@@ -32,10 +32,8 @@ export const reify = (geometry) => {
       case 'displayGeometry':
         // CHECK: Should this taint the results if there is a plan?
         return geometry;
-      case 'assembly':
       case 'item':
-      case 'disjointAssembly':
-      case 'layers':
+      case 'group':
       case 'layout':
       case 'sketch':
       case 'transform':

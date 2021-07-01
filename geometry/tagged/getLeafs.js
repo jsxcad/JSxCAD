@@ -6,9 +6,7 @@ export const getLeafs = (geometry) => {
   const leafs = [];
   const op = (geometry, descend) => {
     switch (geometry.type) {
-      case 'assembly':
-      case 'disjointAssembly':
-      case 'layers':
+      case 'group':
       case 'layout':
         return descend();
       default:

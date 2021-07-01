@@ -33,9 +33,7 @@ export const measureBoundingBox = (geometry) => {
     }
     switch (geometry.type) {
       case 'plan':
-      case 'assembly':
-      case 'layers':
-      case 'disjointAssembly':
+      case 'group':
       case 'item':
       case 'sketch':
       case 'displayGeometry':

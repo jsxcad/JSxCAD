@@ -1,4 +1,4 @@
-import { taggedPlan, taggedDisjointAssembly, registerReifier, taggedGroup, taggedPaths, translatePaths, getLeafs, taggedLayers, taggedLayout, measureBoundingBox, getLayouts, visit, isNotVoid, concatenatePath, rotateZPath, taggedAssembly, convexHullToGraph, fromFunctionToGraph, taggedPoints, fromPathsToGraph, translatePath } from './jsxcad-geometry.js';
+import { taggedPlan, taggedGroup, registerReifier, taggedPaths, translatePaths, getLeafs, taggedLayout, measureBoundingBox, getLayouts, visit, isNotVoid, concatenatePath, rotateZPath, assemble, convexHullToGraph, fromFunctionToGraph, taggedPoints, fromPathsToGraph, translatePath } from './jsxcad-geometry.js';
 import Shape$1, { Shape, shapeMethod, weld } from './jsxcad-api-v1-shape.js';
 import { scale, subtract, add, negate } from './jsxcad-math-vec3.js';
 import { identityMatrix } from './jsxcad-math-mat4.js';
@@ -67,8 +67,7 @@ const getScale = (geometry) => {
 
 const Plan = (type) => Shape.fromGeometry(taggedPlan({}, { type }));
 
-const Empty = (...shapes) =>
-  Shape.fromGeometry(taggedDisjointAssembly({}));
+const Empty = (...shapes) => Shape.fromGeometry(taggedGroup({}));
 
 Shape.prototype.Empty = shapeMethod(Empty);
 
@@ -1641,7 +1640,7 @@ const Page = (
     }
   }
   if (!pack && size) {
-    const layer = taggedLayers({}, ...layers);
+    const layer = taggedGroup({}, ...layers);
     const [width, height] = size;
     const packSize = [
       [-width / 2, -height / 2, 0],
@@ -1665,7 +1664,7 @@ const Page = (
       buildLayoutGeometry({ layer, packSize, pageWidth, pageLength, margin })
     );
   } else if (!pack && !size) {
-    const layer = taggedLayers({}, ...layers);
+    const layer = taggedGroup({}, ...layers);
     const packSize = measureBoundingBox(layer);
     const pageWidth =
       Math.max(
@@ -1691,7 +1690,7 @@ const Page = (
   } else if (pack && size) {
     // Content fits to page size.
     const packSize = [];
-    const content = Shape$1.fromGeometry(taggedLayers({}, ...layers)).pack({
+    const content = Shape$1.fromGeometry(taggedGroup({}, ...layers)).pack({
       size,
       pageMargin,
       itemMargin,
@@ -1716,14 +1715,14 @@ const Page = (
           })
         );
       }
-      return Shape$1.fromGeometry(taggedLayers({}, ...plans));
+      return Shape$1.fromGeometry(taggedGroup({}, ...plans));
     } else {
       return Empty();
     }
   } else if (pack && !size) {
     const packSize = [];
     // Page fits to content size.
-    const content = Shape$1.fromGeometry(taggedLayers({}, ...layers)).pack({
+    const content = Shape$1.fromGeometry(taggedGroup({}, ...layers)).pack({
       pageMargin,
       itemMargin,
       perLayout: itemsPerPage,
@@ -1749,7 +1748,7 @@ const Page = (
         Shape$1.fromGeometry(layoutGeometry);
         plans.push(layoutGeometry);
       }
-      return Shape$1.fromGeometry(taggedLayers({}, ...plans));
+      return Shape$1.fromGeometry(taggedGroup({}, ...plans));
     } else {
       return Empty();
     }
@@ -1867,10 +1866,7 @@ const isDefined = (value) => value !== undefined;
 
 const Assembly = (...shapes) =>
   Shape.fromGeometry(
-    taggedAssembly(
-      {},
-      ...shapes.filter(isDefined).map((shape) => shape.toGeometry())
-    )
+    assemble(...shapes.filter(isDefined).map((shape) => shape.toGeometry()))
   );
 
 Shape.prototype.Assembly = shapeMethod(Assembly);
@@ -2028,7 +2024,11 @@ registerReifier('Icosahedron', (geometry) => {
 });
 
 const Icosahedron = (x = 1, y = x, z = x) =>
-  Shape.fromGeometry(taggedPlan({}, { type: 'Icosahedron' })).hasDiameter(x, y, z);
+  Shape.fromGeometry(taggedPlan({}, { type: 'Icosahedron' })).hasDiameter(
+    x,
+    y,
+    z
+  );
 
 Shape.prototype.Icosahedron = shapeMethod(Icosahedron);
 

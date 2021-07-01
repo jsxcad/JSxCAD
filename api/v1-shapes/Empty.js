@@ -1,9 +1,8 @@
 import { Shape, shapeMethod } from '@jsxcad/api-v1-shape';
 
-import { taggedDisjointAssembly } from '@jsxcad/geometry';
+import { taggedGroup } from '@jsxcad/geometry';
 
-export const Empty = (...shapes) =>
-  Shape.fromGeometry(taggedDisjointAssembly({}));
+export const Empty = (...shapes) => Shape.fromGeometry(taggedGroup({}));
 
 export default Empty;
 

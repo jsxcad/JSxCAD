@@ -13,7 +13,7 @@ test('Render a letter', async (t) => {
   const font = toFont({}, bytes);
   const letterA = font({}, 'ab');
   t.deepEqual(JSON.parse(JSON.stringify(realize(letterA))), {
-    type: 'layers',
+    type: 'group',
     content: [
       {
         type: 'graph',

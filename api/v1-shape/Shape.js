@@ -1,4 +1,5 @@
 import {
+  assemble,
   closePath,
   concatenatePath,
   eachPoint,
@@ -7,7 +8,6 @@ import {
   openPath,
   registerReifier,
   rewriteTags,
-  taggedAssembly,
   taggedGraph,
   taggedPaths,
   taggedPoints,
@@ -45,7 +45,7 @@ export class Shape {
     return Shape.fromOpenPath(concatenatePath(...paths));
   }
 
-  constructor(geometry = taggedAssembly({}), context) {
+  constructor(geometry = assemble(), context) {
     if (geometry.geometry) {
       throw Error('die: { geometry: ... } is not valid geometry.');
     }

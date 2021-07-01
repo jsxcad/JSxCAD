@@ -19,12 +19,10 @@ export const toTransformedGeometry = (geometry) => {
       }
       switch (geometry.type) {
         // Branch
-        case 'assembly':
         case 'layout':
-        case 'layers':
+        case 'group':
         case 'item':
         case 'sketch':
-        case 'disjointAssembly':
         case 'plan':
           return descend();
         // Leaf

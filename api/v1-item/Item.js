@@ -1,4 +1,4 @@
-import { taggedAssembly, taggedItem } from '@jsxcad/geometry';
+import { assemble, taggedItem } from '@jsxcad/geometry';
 
 import Shape from '@jsxcad/api-v1-shape';
 
@@ -7,7 +7,7 @@ export const Item = (id = '', ...shapes) =>
   Shape.fromGeometry(
     taggedItem(
       { tags: [`item/${id}`] },
-      taggedAssembly({}, ...shapes.map((shape) => shape.toGeometry()))
+      assemble(...shapes.map((shape) => shape.toGeometry()))
     )
   );
 

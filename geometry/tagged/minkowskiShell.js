@@ -27,10 +27,8 @@ export const minkowskiShell = (geometry, offset) => {
         return geometry;
       case 'plan':
         return minkowskiShell(reify(geometry).content[0], offset);
-      case 'assembly':
       case 'item':
-      case 'disjointAssembly':
-      case 'layers': {
+      case 'group': {
         return descend();
       }
       case 'sketch': {

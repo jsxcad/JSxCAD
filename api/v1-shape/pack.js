@@ -1,8 +1,7 @@
 import {
   getLeafs,
-  taggedDisjointAssembly,
+  taggedGroup,
   taggedItem,
-  taggedLayers,
   toDisjointGeometry,
 } from '@jsxcad/geometry';
 
@@ -43,15 +42,12 @@ export const pack =
         break;
       } else {
         packedLayers.push(
-          taggedItem(
-            {},
-            taggedDisjointAssembly({}, ...packed.map(toDisjointGeometry))
-          )
+          taggedItem({}, taggedGroup({}, ...packed.map(toDisjointGeometry)))
         );
       }
       todo.unshift(...unpacked);
     }
-    let packedShape = Shape.fromGeometry(taggedLayers({}, ...packedLayers));
+    let packedShape = Shape.fromGeometry(taggedGroup({}, ...packedLayers));
     if (size === undefined) {
       packedShape = packedShape.align('xy');
     }

@@ -58,23 +58,27 @@ const keepOrDrop = (shape, tags, select) => {
   return Shape.fromGeometry(rewritten);
 };
 
-export const keep = (...tags) => (shape) => {
-  if (tags === undefined) {
-    // Dropping no tags is an unconditional keep.
-    return keepOrDrop(shape, [], selectToDrop);
-  } else {
-    return keepOrDrop(shape, tags, selectToKeep);
-  }
-};
+export const keep =
+  (...tags) =>
+  (shape) => {
+    if (tags === undefined) {
+      // Dropping no tags is an unconditional keep.
+      return keepOrDrop(shape, [], selectToDrop);
+    } else {
+      return keepOrDrop(shape, tags, selectToKeep);
+    }
+  };
 
-export const drop = (...tags) => (shape) => {
-  if (tags === undefined) {
-    // Keeping no tags is an unconditional drop.
-    return keepOrDrop(shape, [], selectToKeep);
-  } else {
-    return keepOrDrop(shape, tags, selectToDrop);
-  }
-};
+export const drop =
+  (...tags) =>
+  (shape) => {
+    if (tags === undefined) {
+      // Keeping no tags is an unconditional drop.
+      return keepOrDrop(shape, [], selectToKeep);
+    } else {
+      return keepOrDrop(shape, tags, selectToDrop);
+    }
+  };
 
 Shape.registerMethod('keep', keep);
 Shape.registerMethod('drop', drop);

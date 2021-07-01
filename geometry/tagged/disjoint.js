@@ -1,7 +1,6 @@
 import { difference } from './difference.js';
-import { taggedDisjointAssembly } from './taggedDisjointAssembly.js';
+import { taggedGroup } from './taggedGroup.js';
 
-// FIX: This is wrong.
 export const disjoint = (geometries) => {
   geometries = [...geometries];
   for (let sup = geometries.length - 1; sup >= 0; sup--) {
@@ -9,5 +8,5 @@ export const disjoint = (geometries) => {
       geometries[sup] = difference(geometries[sup], geometries[sub]);
     }
   }
-  return taggedDisjointAssembly({}, ...geometries);
+  return taggedGroup({}, ...geometries);
 };

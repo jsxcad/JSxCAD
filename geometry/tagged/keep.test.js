@@ -2,16 +2,16 @@ import { keep } from './keep.js';
 import test from 'ava';
 
 test('Deep keep', (t) => {
-  const assembly = {
-    type: 'assembly',
+  const group = {
+    type: 'group',
     content: [
       { type: 'solid', solid: [], tags: ['plate'] },
       {
-        type: 'assembly',
+        type: 'group',
         content: [
           { type: 'solid', solid: [] },
           {
-            type: 'assembly',
+            type: 'group',
             content: [
               { type: 'solid', solid: [], tags: ['void'] },
               { type: 'solid', solid: [], tags: ['void'] },
@@ -22,17 +22,17 @@ test('Deep keep', (t) => {
       },
     ],
   };
-  const kept = keep(['void'], assembly);
+  const kept = keep(['void'], group);
   t.deepEqual(kept, {
-    type: 'assembly',
+    type: 'group',
     content: [
       { type: 'solid', solid: [], tags: ['compose/non-positive', 'plate'] },
       {
-        type: 'assembly',
+        type: 'group',
         content: [
           { type: 'solid', solid: [], tags: ['compose/non-positive'] },
           {
-            type: 'assembly',
+            type: 'group',
             content: [
               { type: 'solid', solid: [], tags: ['void'] },
               { type: 'solid', solid: [], tags: ['void'] },

@@ -16,10 +16,8 @@ export const twist = (geometry, degreesPerMm, axis) => {
         return geometry;
       case 'plan':
         return twist(reify(geometry).content[0], degreesPerMm, axis);
-      case 'assembly':
       case 'item':
-      case 'disjointAssembly':
-      case 'layers': {
+      case 'group': {
         return descend();
       }
       case 'sketch': {

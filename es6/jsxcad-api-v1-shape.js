@@ -1,5 +1,5 @@
 import { normalize, subtract, dot, cross, negate, scale as scale$1, add as add$1, distance } from './jsxcad-math-vec3.js';
-import { closePath, concatenatePath, taggedAssembly, eachPoint, flip, toConcreteGeometry, toDisplayGeometry, toTransformedGeometry, toPoints, transform, rewriteTags, taggedPaths, taggedGraph, openPath, taggedPoints, fromPolygonsToGraph, registerReifier, read, write, realize, rewrite, loft as loft$1, minkowskiDifference as minkowskiDifference$1, minkowskiShell as minkowskiShell$1, minkowskiSum as minkowskiSum$1, isVoid, taggedLayers, offset as offset$1, getLeafs, taggedItem, taggedDisjointAssembly, toDisjointGeometry, push as push$1, getPeg, taggedPlan, remesh as remesh$1, smooth as smooth$1, measureBoundingBox, taggedSketch, split as split$1, allTags, test as test$1, twist as twist$1, toPolygonsWithHoles, arrangePolygonsWithHoles, fromPolygonsWithHolesToTriangles, fromTrianglesToGraph, taggedGroup, union, bend as bend$1, intersection, difference, empty, inset as inset$1, grow as grow$1 } from './jsxcad-geometry.js';
+import { closePath, concatenatePath, assemble as assemble$1, eachPoint, flip, toConcreteGeometry, toDisplayGeometry, toTransformedGeometry, toPoints, transform, rewriteTags, taggedPaths, taggedGraph, openPath, taggedPoints, fromPolygonsToGraph, registerReifier, read, write, realize, rewrite, loft as loft$1, minkowskiDifference as minkowskiDifference$1, minkowskiShell as minkowskiShell$1, minkowskiSum as minkowskiSum$1, isVoid, taggedGroup, offset as offset$1, getLeafs, taggedItem, toDisjointGeometry, push as push$1, getPeg, taggedPlan, remesh as remesh$1, smooth as smooth$1, measureBoundingBox, taggedSketch, split as split$1, allTags, test as test$1, twist as twist$1, toPolygonsWithHoles, arrangePolygonsWithHoles, fromPolygonsWithHolesToTriangles, fromTrianglesToGraph, union, bend as bend$1, intersection, difference, empty, inset as inset$1, grow as grow$1 } from './jsxcad-geometry.js';
 import { identityMatrix, fromTranslation, fromRotation, fromScaling } from './jsxcad-math-mat4.js';
 import { emit, addPending, writeFile, log as log$1 } from './jsxcad-sys.js';
 import { toTagsFromName } from './jsxcad-algorithm-material.js';
@@ -34,7 +34,7 @@ class Shape {
     return Shape.fromOpenPath(concatenatePath(...paths));
   }
 
-  constructor(geometry = taggedAssembly({}), context) {
+  constructor(geometry = assemble$1(), context) {
     if (geometry.geometry) {
       throw Error('die: { geometry: ... } is not valid geometry.');
     }
@@ -391,23 +391,27 @@ const keepOrDrop = (shape, tags, select) => {
   return Shape.fromGeometry(rewritten);
 };
 
-const keep = (...tags) => (shape) => {
-  if (tags === undefined) {
-    // Dropping no tags is an unconditional keep.
-    return keepOrDrop(shape, [], selectToDrop);
-  } else {
-    return keepOrDrop(shape, tags, selectToKeep);
-  }
-};
+const keep =
+  (...tags) =>
+  (shape) => {
+    if (tags === undefined) {
+      // Dropping no tags is an unconditional keep.
+      return keepOrDrop(shape, [], selectToDrop);
+    } else {
+      return keepOrDrop(shape, tags, selectToKeep);
+    }
+  };
 
-const drop = (...tags) => (shape) => {
-  if (tags === undefined) {
-    // Keeping no tags is an unconditional drop.
-    return keepOrDrop(shape, [], selectToKeep);
-  } else {
-    return keepOrDrop(shape, tags, selectToDrop);
-  }
-};
+const drop =
+  (...tags) =>
+  (shape) => {
+    if (tags === undefined) {
+      // Keeping no tags is an unconditional drop.
+      return keepOrDrop(shape, [], selectToKeep);
+    } else {
+      return keepOrDrop(shape, tags, selectToDrop);
+    }
+  };
 
 Shape.registerMethod('keep', keep);
 Shape.registerMethod('drop', drop);
@@ -482,7 +486,7 @@ Shape.registerMethod('move', move);
 const noVoid = (tags, select) => (shape) => {
   const op = (geometry, descend) => {
     if (isVoid(geometry)) {
-      return taggedLayers({});
+      return taggedGroup({});
     } else {
       return descend();
     }
@@ -544,15 +548,12 @@ const pack =
         break;
       } else {
         packedLayers.push(
-          taggedItem(
-            {},
-            taggedDisjointAssembly({}, ...packed.map(toDisjointGeometry))
-          )
+          taggedItem({}, taggedGroup({}, ...packed.map(toDisjointGeometry)))
         );
       }
       todo.unshift(...unpacked);
     }
-    let packedShape = Shape.fromGeometry(taggedLayers({}, ...packedLayers));
+    let packedShape = Shape.fromGeometry(taggedGroup({}, ...packedLayers));
     if (size === undefined) {
       packedShape = packedShape.align('xy');
     }
@@ -960,13 +961,13 @@ const assemble = (...shapes) => {
   shapes = shapes.filter((shape) => shape !== undefined);
   switch (shapes.length) {
     case 0: {
-      return Shape.fromGeometry(taggedAssembly({}));
+      return Shape.fromGeometry(assemble$1());
     }
     case 1: {
       return shapes[0];
     }
     default: {
-      return fromGeometry(taggedAssembly({}, ...shapes.map(toGeometry)));
+      return fromGeometry(assemble$1(...shapes.map(toGeometry)));
     }
   }
 };
@@ -1012,7 +1013,7 @@ const and =
   (...shapes) =>
   (shape) =>
     Shape.fromGeometry(
-      taggedLayers(
+      taggedGroup(
         {},
         shape.toGeometry(),
         ...shapes.map((shape) => shape.toGeometry())

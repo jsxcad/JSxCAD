@@ -3,7 +3,7 @@ import {
   getLeafs,
   isNotVoid,
   measureBoundingBox,
-  taggedLayers,
+  taggedGroup,
   taggedLayout,
   visit,
 } from '@jsxcad/geometry';
@@ -93,7 +93,7 @@ export const Page = (
     }
   }
   if (!pack && size) {
-    const layer = taggedLayers({}, ...layers);
+    const layer = taggedGroup({}, ...layers);
     const [width, height] = size;
     const packSize = [
       [-width / 2, -height / 2, 0],
@@ -117,7 +117,7 @@ export const Page = (
       buildLayoutGeometry({ layer, packSize, pageWidth, pageLength, margin })
     );
   } else if (!pack && !size) {
-    const layer = taggedLayers({}, ...layers);
+    const layer = taggedGroup({}, ...layers);
     const packSize = measureBoundingBox(layer);
     const pageWidth =
       Math.max(
@@ -143,7 +143,7 @@ export const Page = (
   } else if (pack && size) {
     // Content fits to page size.
     const packSize = [];
-    const content = Shape.fromGeometry(taggedLayers({}, ...layers)).pack({
+    const content = Shape.fromGeometry(taggedGroup({}, ...layers)).pack({
       size,
       pageMargin,
       itemMargin,
@@ -168,14 +168,14 @@ export const Page = (
           })
         );
       }
-      return Shape.fromGeometry(taggedLayers({}, ...plans));
+      return Shape.fromGeometry(taggedGroup({}, ...plans));
     } else {
       return Empty();
     }
   } else if (pack && !size) {
     const packSize = [];
     // Page fits to content size.
-    const content = Shape.fromGeometry(taggedLayers({}, ...layers)).pack({
+    const content = Shape.fromGeometry(taggedGroup({}, ...layers)).pack({
       pageMargin,
       itemMargin,
       perLayout: itemsPerPage,
@@ -201,7 +201,7 @@ export const Page = (
         Shape.fromGeometry(layoutGeometry);
         plans.push(layoutGeometry);
       }
-      return Shape.fromGeometry(taggedLayers({}, ...plans));
+      return Shape.fromGeometry(taggedGroup({}, ...plans));
     } else {
       return Empty();
     }

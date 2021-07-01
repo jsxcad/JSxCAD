@@ -30,11 +30,9 @@ export const toPolygonsWithHoles = (geometry) => {
         break;
       case 'layout':
       case 'plan':
-      case 'assembly':
       case 'item':
-      case 'disjointAssembly':
       case 'sketch':
-      case 'layers': {
+      case 'group': {
         return descend();
       }
       default:

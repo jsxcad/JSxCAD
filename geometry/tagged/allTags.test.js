@@ -8,7 +8,7 @@ test('Extract tags', (t) => {
     content: [
       { type: 'solid', solid: [], tags: ['b'] },
       {
-        type: 'disjointAssembly',
+        type: 'group',
         content: [
           { type: 'surface', surface: [], tags: ['c', 'd'] },
           { type: 'paths', paths: [], tags: ['a', 'c'] },
