@@ -25,9 +25,9 @@ export {
   defTool,
 } from './define.js';
 
-export const x = Peg('x', [0, 0, 0], [0, 0, 1], [0, -1, 0]);
-export const y = Peg('y', [0, 0, 0], [0, 0, 1], [1, 0, 0]);
-export const z = Peg('z', [0, 0, 0], [0, 1, 0], [-1, 0, 0]);
+export const yz = Peg('x', [0, 0, 0], [0, 0, 1], [0, -1, 0]);
+export const xz = Peg('y', [0, 0, 0], [0, 0, 1], [1, 0, 0]);
+export const xy = Peg('z', [0, 0, 0], [0, 1, 0], [-1, 0, 0]);
 
 export { card, emitSourceLocation } from './card.js';
 
@@ -47,10 +47,67 @@ export {
 
 export {
   Shape,
+  add,
+  and,
+  addTo,
+  align,
+  as,
+  bend,
+  clip,
+  clipFrom,
+  color,
+  colors,
+  cut,
+  cutFrom,
+  drop,
+  // each,
+  fuse,
   grow,
+  inset,
+  keep,
   loadGeometry,
+  loft,
   log,
+  loop,
+  material,
+  minkowskiDifference,
+  minkowskiShell,
+  minkowskiSum,
+  move,
+  noVoid,
+  notAs,
+  offset,
+  op,
+  pack,
+  push,
+  peg,
+  remesh,
+  rotate,
+  rx,
+  ry,
+  rz,
+  rotateX,
+  rotateY,
+  rotateZ,
   saveGeometry,
+  scale,
+  smooth,
+  size,
+  sketch,
+  split,
+  tags,
+  test,
+  tint,
+  tool,
+  twist,
+  voidFn,
+  weld,
+  withFn,
+  withInset,
+  withOp,
+  x,
+  y,
+  z,
 } from '@jsxcad/api-v1-shape';
 
 export {

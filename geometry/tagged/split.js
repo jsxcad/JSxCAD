@@ -29,10 +29,8 @@ export const split = (
           keepCavitiesInVolumes,
           keepCavitiesAsVolumes
         );
-      case 'assembly':
       case 'item':
-      case 'disjointAssembly':
-      case 'layers': {
+      case 'group': {
         return descend();
       }
       case 'sketch': {

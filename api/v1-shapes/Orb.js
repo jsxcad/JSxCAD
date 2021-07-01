@@ -46,7 +46,7 @@ Shape.registerMethod('sx', extrudeSphere);
 registerReifier('Orb', (geometry) => {
   const [scale, middle] = getScale(geometry);
   const sides = getSides(geometry, 16);
-  return extrudeSphere(Arc(2).sides(sides * 2), 1, { sides: 2 + sides })
+  return extrudeSphere(Arc(2).hasSides(sides * 2), 1, { sides: 2 + sides })
     .scale(...scale)
     .move(...middle)
     .orient({
@@ -60,7 +60,7 @@ registerReifier('Orb', (geometry) => {
 });
 
 export const Orb = (x = 1, y = x, z = x) =>
-  Shape.fromGeometry(taggedPlan({}, { type: 'Orb' })).diameter(x, y, z);
+  Shape.fromGeometry(taggedPlan({}, { type: 'Orb' })).hasDiameter(x, y, z);
 
 Shape.prototype.Orb = shapeMethod(Orb);
 

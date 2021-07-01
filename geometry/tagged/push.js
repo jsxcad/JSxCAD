@@ -29,10 +29,8 @@ export const push = (
           minimumDistance,
           maximumDistance,
         });
-      case 'assembly':
       case 'item':
-      case 'disjointAssembly':
-      case 'layers': {
+      case 'group': {
         return descend();
       }
       case 'sketch': {

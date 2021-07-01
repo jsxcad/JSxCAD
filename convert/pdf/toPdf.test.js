@@ -89,10 +89,10 @@ test('Triangle with a custom page size', async (t) => {
 
 test('Complex', async (t) => {
   const pdf = await toPdf({
-    type: 'layers',
+    type: 'group',
     content: [
       {
-        type: 'layers',
+        type: 'group',
         matrix: [0.1, 0, 0, 0, 0, -0.1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1],
         content: [
           {
@@ -112,7 +112,7 @@ test('Complex', async (t) => {
         tags: ['color/violet'],
       },
       {
-        type: 'layers',
+        type: 'group',
         matrix: [0.1, 0, 0, 0, 0, -0.1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1],
         content: [
           {
@@ -164,7 +164,7 @@ test('Complex', async (t) => {
         tags: ['color/yellow'],
       },
       {
-        type: 'layers',
+        type: 'group',
         matrix: [0.1, 0, 0, 0, 0, -0.1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1],
         content: [
           {

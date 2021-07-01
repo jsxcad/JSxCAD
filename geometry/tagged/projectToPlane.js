@@ -25,10 +25,8 @@ export const projectToPlane = (geometry, plane, direction) => {
           direction
         );
       case 'plan':
-      case 'assembly':
       case 'item':
-      case 'disjointAssembly':
-      case 'layers': {
+      case 'group': {
         return descend();
       }
       case 'sketch': {

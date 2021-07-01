@@ -16,10 +16,8 @@ export const remesh = (geometry, options) => {
         return geometry;
       case 'plan':
         return remesh(reify(geometry).content[0], options);
-      case 'assembly':
       case 'item':
-      case 'disjointAssembly':
-      case 'layers': {
+      case 'group': {
         return descend();
       }
       case 'sketch': {

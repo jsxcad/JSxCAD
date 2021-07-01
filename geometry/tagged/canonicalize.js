@@ -30,9 +30,7 @@ export const canonicalize = (geometry) => {
         });
       }
       case 'item':
-      case 'assembly':
-      case 'disjointAssembly':
-      case 'layers':
+      case 'group':
       case 'layout':
       case 'sketch':
         return descend();

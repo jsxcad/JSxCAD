@@ -62,10 +62,8 @@ const unionImpl = (geometry, ...geometries) => {
       }
       case 'layout':
       case 'plan':
-      case 'assembly':
       case 'item':
-      case 'disjointAssembly':
-      case 'layers': {
+      case 'group': {
         return descend();
       }
       case 'sketch': {

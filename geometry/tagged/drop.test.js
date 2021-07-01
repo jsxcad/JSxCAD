@@ -2,16 +2,16 @@ import { drop } from './drop.js';
 import test from 'ava';
 
 test('Deep drop', (t) => {
-  const assembly = {
-    type: 'assembly',
+  const group = {
+    type: 'group',
     content: [
       { type: 'solid', solid: [], tags: ['plate'] },
       {
-        type: 'assembly',
+        type: 'group',
         content: [
           { type: 'solid', solid: [] },
           {
-            type: 'assembly',
+            type: 'group',
             content: [
               { type: 'solid', solid: [], tags: ['void'] },
               { type: 'solid', solid: [], tags: ['void'] },
@@ -22,17 +22,17 @@ test('Deep drop', (t) => {
       },
     ],
   };
-  const dropped = drop(['void'], assembly);
+  const dropped = drop(['void'], group);
   t.deepEqual(dropped, {
-    type: 'assembly',
+    type: 'group',
     content: [
       { type: 'solid', solid: [], tags: ['plate'] },
       {
-        type: 'assembly',
+        type: 'group',
         content: [
           { type: 'solid', solid: [] },
           {
-            type: 'assembly',
+            type: 'group',
             content: [
               {
                 type: 'solid',

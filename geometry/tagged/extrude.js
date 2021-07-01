@@ -17,10 +17,8 @@ export const extrude = (geometry, height, depth) => {
         return extrude(fill(geometry), height, depth);
       case 'plan':
         return extrude(reify(geometry).content[0], height, depth);
-      case 'assembly':
       case 'item':
-      case 'disjointAssembly':
-      case 'layers': {
+      case 'group': {
         return descend();
       }
       case 'sketch': {

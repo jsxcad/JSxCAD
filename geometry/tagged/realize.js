@@ -13,10 +13,8 @@ export const realize = (geometry) => {
         // No lazy representation to realize.
         return geometry;
       case 'plan':
-      case 'assembly':
       case 'item':
-      case 'disjointAssembly':
-      case 'layers':
+      case 'group':
       case 'layout':
       case 'sketch':
       case 'transform':

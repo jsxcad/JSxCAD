@@ -27,10 +27,8 @@ export const minkowskiSum = (geometry, offset) => {
         return geometry;
       case 'plan':
         return minkowskiSum(reify(geometry).content[0], offset);
-      case 'assembly':
       case 'item':
-      case 'disjointAssembly':
-      case 'layers': {
+      case 'group': {
         return descend();
       }
       case 'sketch': {

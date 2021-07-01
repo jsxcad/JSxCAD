@@ -17,10 +17,8 @@ export const test = (geometry) => {
         return test(reify(geometry).content[0]);
       case 'transform':
       case 'layout':
-      case 'assembly':
       case 'item':
-      case 'disjointAssembly':
-      case 'layers':
+      case 'group':
       case 'sketch':
         return descend();
       default:

@@ -84,7 +84,11 @@ registerReifier('Icosahedron', (geometry) => {
 });
 
 export const Icosahedron = (x = 1, y = x, z = x) =>
-  Shape.fromGeometry(taggedPlan({}, { type: 'Icosahedron' })).diameter(x, y, z);
+  Shape.fromGeometry(taggedPlan({}, { type: 'Icosahedron' })).hasDiameter(
+    x,
+    y,
+    z
+  );
 
 export default Icosahedron;
 

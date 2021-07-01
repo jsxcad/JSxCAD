@@ -12,10 +12,8 @@ export const prepareForSerialization = (geometry) => {
       case 'points':
       case 'paths':
         return;
-      case 'assembly':
       case 'item':
-      case 'disjointAssembly':
-      case 'layers':
+      case 'group':
       case 'layout':
       case 'sketch':
       case 'transform':

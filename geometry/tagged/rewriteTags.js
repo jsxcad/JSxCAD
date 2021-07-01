@@ -34,9 +34,7 @@ const rewriteTagsImpl = (
   };
   const op = (geometry, descend) => {
     switch (geometry.type) {
-      case 'assembly':
-      case 'disjointAssembly':
-      case 'layers':
+      case 'group':
         return descend();
       default:
         const composedTags = composeTags(geometry.tags);

@@ -18,10 +18,8 @@ export const extrudeToPlane = (geometry, highPlane, lowPlane, direction) => {
         // Not implemented yet.
         return geometry;
       case 'plan':
-      case 'assembly':
       case 'item':
-      case 'disjointAssembly':
-      case 'layers': {
+      case 'group': {
         return descend();
       }
       case 'sketch': {

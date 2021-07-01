@@ -8,6 +8,5 @@ export const taggedGroup = ({ tags }, ...content) => {
   if (content.length === 1) {
     return content[0];
   }
-  // FIX: Deprecate layers.
-  return { type: 'layers', tags, content };
+  return { type: 'group', tags, content };
 };

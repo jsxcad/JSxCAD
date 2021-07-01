@@ -50,7 +50,7 @@ registerReifier('Box', (geometry) => {
 });
 
 export const Box = (x, y = x, z = 0) =>
-  Shape.fromGeometry(taggedPlan({}, { type: 'Box' })).diameter(x, y, z);
+  Shape.fromGeometry(taggedPlan({}, { type: 'Box' })).hasDiameter(x, y, z);
 
 Shape.prototype.Box = shapeMethod(Box);
 

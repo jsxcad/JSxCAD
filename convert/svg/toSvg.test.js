@@ -18,7 +18,7 @@ const triangle = [
 test('Triangle', async (t) => {
   const svg = await toSvg(
     {
-      type: 'disjointAssembly',
+      type: 'group',
       content: [
         fromPolygonsToGraph({ tags: ['color/blue'] }, [{ points: triangle }]),
         {

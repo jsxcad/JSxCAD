@@ -10,9 +10,7 @@ export const flip = (geometry) => {
         return { ...geometry, points: flipPoints(geometry.points) };
       case 'paths':
         return { ...geometry, paths: flipPaths(geometry.paths) };
-      case 'assembly':
-      case 'disjointAssembly':
-      case 'layers':
+      case 'group':
       case 'layout':
       case 'plan':
       case 'item':

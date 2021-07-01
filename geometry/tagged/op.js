@@ -18,10 +18,8 @@ export const op =
         case 'plan':
           reify(geometry);
         // fall through
-        case 'assembly':
         case 'item':
-        case 'disjointAssembly':
-        case 'layers': {
+        case 'group': {
           return descend();
         }
         case 'sketch': {

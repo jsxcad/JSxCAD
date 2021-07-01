@@ -190,6 +190,9 @@ class Ui extends React.PureComponent {
         await askServices({ touchFile: { path, workspace } });
       } else if (question.note) {
         if (question.note.info) {
+          return;
+        }
+        if (question.note.info) {
           // Copy out info.
           const now = new Date();
           const { logElement, logStartDate, logLastDate } = this.state;

@@ -18,10 +18,8 @@ export const smooth = (geometry, options) => {
         return geometry;
       case 'plan':
         return smooth(reify(geometry).content[0], options);
-      case 'assembly':
       case 'item':
-      case 'disjointAssembly':
-      case 'layers': {
+      case 'group': {
         return descend();
       }
       case 'sketch': {

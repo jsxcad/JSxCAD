@@ -4,6 +4,6 @@ import move from './move.js';
 export const y =
   (...y) =>
   (shape) =>
-    Shape.Group(...y.map((y) => move(shape, 0, y)));
+    Shape.Group(...y.map((y) => move(0, y)(shape)));
 
 Shape.registerMethod('y', y);

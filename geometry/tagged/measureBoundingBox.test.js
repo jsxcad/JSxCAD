@@ -1,9 +1,9 @@
 import { measureBoundingBox } from './measureBoundingBox.js';
 import test from 'ava';
 
-test('Check points in assembly are measured.', (t) => {
+test('Check points in group are measured.', (t) => {
   const geometry = {
-    type: 'assembly',
+    type: 'group',
     content: [
       { type: 'points', points: [[0, 0, 0]] },
       { type: 'points', points: [[100, 0, 0]] },

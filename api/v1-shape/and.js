@@ -1,11 +1,11 @@
 import Shape from './Shape.js';
-import { taggedLayers } from '@jsxcad/geometry';
+import { taggedGroup } from '@jsxcad/geometry';
 
 export const and =
   (...shapes) =>
   (shape) =>
     Shape.fromGeometry(
-      taggedLayers(
+      taggedGroup(
         {},
         shape.toGeometry(),
         ...shapes.map((shape) => shape.toGeometry())
