@@ -4,7 +4,6 @@ import SplitPane, { Pane } from 'react-split-pane';
 
 import {
   askService,
-  askServices,
   ask as askSys,
   boot,
   clearEmitted,
@@ -16,6 +15,7 @@ import {
   readOrWatch,
   resolvePending,
   setupFilesystem,
+  tellServices,
   terminateActiveServices,
   touch,
   unwatchFileCreation,
@@ -187,11 +187,8 @@ class Ui extends React.PureComponent {
         console.log(`QQ/touchFile/path: ${path} ${workspace}`);
         await touch(path, { workspace });
         // Invalidate the path in all workers.
-        await askServices({ touchFile: { path, workspace } });
+        await tellServices({ touchFile: { path, workspace } });
       } else if (question.note) {
-        if (question.note.info) {
-          return;
-        }
         if (question.note.info) {
           // Copy out info.
           const now = new Date();
@@ -206,6 +203,7 @@ class Ui extends React.PureComponent {
             logElement.prepend(div);
           }
           this.setState({ logLastDate: now });
+          return;
         }
 
         const { note, index } = question;

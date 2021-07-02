@@ -72,3 +72,9 @@ export const askServices = async (question) => {
     await ask(question);
   }
 };
+
+export const tellServices = (question) => {
+  for (const { tell } of [...idleServices, ...activeServices]) {
+    tell(question);
+  }
+};

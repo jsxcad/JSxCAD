@@ -9,7 +9,7 @@ import { taggedPaths } from './taggedPaths.js';
 import { toConcreteGeometry } from './toConcreteGeometry.js';
 import { toPaths as toPathsFromGraph } from '../graph/toPaths.js';
 
-const intersectionImpl = (geometry, ...geometries) => {
+export const intersection = (geometry, ...geometries) => {
   geometries = geometries.map(toConcreteGeometry);
   const op = (geometry, descend) => {
     const { tags } = geometry;
@@ -48,7 +48,7 @@ const intersectionImpl = (geometry, ...geometries) => {
             intersection(
               fromPathsToGraph({ tags }, geometry.paths),
               ...geometries
-            ).graph
+            )
           )
         );
       }
@@ -74,4 +74,4 @@ const intersectionImpl = (geometry, ...geometries) => {
   return rewrite(toConcreteGeometry(geometry), op);
 };
 
-export const intersection = cache(intersectionImpl);
+// export const intersection = cache(intersectionImpl);

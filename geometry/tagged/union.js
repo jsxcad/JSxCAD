@@ -48,7 +48,7 @@ const unionImpl = (geometry, ...geometries) => {
             union(
               fromPathsToGraph({ tags: geometry.tags }, geometry.paths),
               ...geometries
-            ).graph
+            )
           )
         );
       }

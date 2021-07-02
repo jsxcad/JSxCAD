@@ -332,6 +332,12 @@ const askServices = async (question) => {
   }
 };
 
+const tellServices = (question) => {
+  for (const { tell } of [...idleServices, ...activeServices]) {
+    tell(question);
+  }
+};
+
 const conversation = ({ agent, say }) => {
   let id = 0;
   const openQuestions = new Map();
@@ -344,7 +350,7 @@ const conversation = ({ agent, say }) => {
     return promise;
   };
   const hear = async (message) => {
-    const { id, question, answer, error } = message;
+    const { id, question, answer, error, statement } = message;
     // Check hasOwnProperty to detect undefined values.
     if (message.hasOwnProperty('answer')) {
       const { resolve, reject } = openQuestions.get(id);
@@ -357,6 +363,8 @@ const conversation = ({ agent, say }) => {
     } else if (message.hasOwnProperty('question')) {
       const answer = await agent({ ask, question });
       say({ id, answer });
+    } else if (message.hasOwnProperty('statement')) {
+      await agent({ ask, statement });
     } else {
       throw Error(
         `Expected { answer } or { question } but received ${JSON.stringify(
@@ -407,12 +415,13 @@ const webService = async ({
         const worker = new Worker(webWorker, { type: workerType });
         const say = (message) => worker.postMessage(message);
         const { ask, hear } = conversation({ agent, say });
+        const tell = (statement) => say({ statement });
         const terminate = async () => worker.terminate();
         worker.onmessage = ({ data }) => hear(data);
         worker.onerror = (error) => {
           console.log(`QQ/webWorker/error: ${error}`);
         };
-        const service = { ask, terminate };
+        const service = { ask, tell, terminate };
         service.release = async () =>
           releaseService({ webWorker, type: workerType }, service);
         return service;
@@ -4323,4 +4332,4 @@ let nanoid = (size = 21) => {
 
 const generateUniqueId = () => nanoid();
 
-export { addOnEmitHandler, addPending, addSource, ask, askService, askServices, boot, clearEmitted, conversation, createService, deleteFile, elapsed, emit, generateUniqueId, getControlValue, getDefinitions, getEmitted, getFilesystem, getModule, getPendingErrorHandler, getSources, hash, info, isBrowser, isNode, isWebWorker, listFiles, listFilesystems, log, onBoot, popModule, pushModule, qualifyPath, read, readFile, readOrWatch, removeOnEmitHandler, resolvePending, setControlValue, setHandleAskUser, setPendingErrorHandler, setupFilesystem, terminateActiveServices, touch, unwatchFile, unwatchFileCreation, unwatchFileDeletion, unwatchFiles, unwatchLog, watchFile, watchFileCreation, watchFileDeletion, watchLog, write, writeFile };
+export { addOnEmitHandler, addPending, addSource, ask, askService, askServices, boot, clearEmitted, conversation, createService, deleteFile, elapsed, emit, generateUniqueId, getControlValue, getDefinitions, getEmitted, getFilesystem, getModule, getPendingErrorHandler, getSources, hash, info, isBrowser, isNode, isWebWorker, listFiles, listFilesystems, log, onBoot, popModule, pushModule, qualifyPath, read, readFile, readOrWatch, removeOnEmitHandler, resolvePending, setControlValue, setHandleAskUser, setPendingErrorHandler, setupFilesystem, tellServices, terminateActiveServices, touch, unwatchFile, unwatchFileCreation, unwatchFileDeletion, unwatchFiles, unwatchLog, watchFile, watchFileCreation, watchFileDeletion, watchLog, write, writeFile };
