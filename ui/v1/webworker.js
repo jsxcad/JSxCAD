@@ -33,12 +33,12 @@ const reportError = (error) => {
 
 sys.setPendingErrorHandler(reportError);
 
-const agent = async ({ ask, question }) => {
+const agent = async ({ ask, question, statement }) => {
   await sys.log({ op: 'evaluate', status: 'run' });
   await sys.log({ op: 'text', text: 'Evaluation Started' });
   let onEmitHandler;
-  if (question.touchFile) {
-    const { path, workspace } = question.touchFile;
+  if ((statement || question).touchFile) {
+    const { path, workspace } = (statement || question).touchFile;
     await sys.touch(path, { workspace });
   } else if (question.evaluate) {
     sys.setupFilesystem({ fileBase: question.workspace });

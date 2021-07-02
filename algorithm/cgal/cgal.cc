@@ -55,6 +55,7 @@
 #include <CGAL/Polygon_mesh_processing/random_perturbation.h>
 #include <CGAL/Polygon_mesh_processing/remesh.h>
 #include <CGAL/Polygon_mesh_processing/repair_polygon_soup.h>
+#include <CGAL/Polygon_mesh_processing/repair_self_intersections.h>
 #include <CGAL/Polygon_mesh_processing/smooth_mesh.h>
 #include <CGAL/Polygon_mesh_processing/smooth_shape.h>
 #include <CGAL/Polygon_mesh_processing/transform.h>
@@ -429,6 +430,15 @@ Surface_mesh* BendSurfaceMesh(Surface_mesh* input, Transformation* transform, do
     FT cy = (sin_alpha * radius) / w;
     point = Point(cx, cy, point.z());
   }
+
+  if (CGAL::Polygon_mesh_processing::does_self_intersect(*c, CGAL::parameters::all_default())) {
+std::cout << "Bend: Removing self intersections" << std::endl;
+    CGAL::Polygon_mesh_processing::experimental::remove_self_intersections(*c, CGAL::parameters::preserve_genus(false));
+    if (CGAL::Polygon_mesh_processing::does_self_intersect(*c, CGAL::parameters::all_default())) {
+std::cout << "Bend: Removing self intersections failed" << std::endl;
+    }
+  }
+
   return c;
 }
 

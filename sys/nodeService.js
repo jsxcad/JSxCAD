@@ -14,9 +14,10 @@ export const nodeService = async ({
     const worker = new Worker(nodeWorker);
     const say = (message) => worker.postMessage(message);
     const { ask, hear } = conversation({ agent, say });
+    const tell = (statement) => say({ statement });
     const terminate = async () => worker.terminate();
     worker.on('message', hear);
-    const service = { ask, terminate };
+    const service = { ask, tell, terminate };
     service.release = async () => releaseService({ nodeWorker }, service);
     return service;
   });

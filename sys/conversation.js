@@ -10,7 +10,7 @@ export const conversation = ({ agent, say }) => {
     return promise;
   };
   const hear = async (message) => {
-    const { id, question, answer, error } = message;
+    const { id, question, answer, error, statement } = message;
     // Check hasOwnProperty to detect undefined values.
     if (message.hasOwnProperty('answer')) {
       const { resolve, reject } = openQuestions.get(id);
@@ -23,6 +23,8 @@ export const conversation = ({ agent, say }) => {
     } else if (message.hasOwnProperty('question')) {
       const answer = await agent({ ask, question });
       say({ id, answer });
+    } else if (message.hasOwnProperty('statement')) {
+      await agent({ ask, statement });
     } else {
       throw Error(
         `Expected { answer } or { question } but received ${JSON.stringify(

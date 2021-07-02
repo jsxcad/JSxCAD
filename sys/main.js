@@ -39,7 +39,11 @@ export {
 
 export { conversation } from './conversation.js';
 export { deleteFile } from './deleteFile.js';
-export { askServices, terminateActiveServices } from './servicePool.js';
+export {
+  askServices,
+  tellServices,
+  terminateActiveServices,
+} from './servicePool.js';
 export { touch } from './touch.js';
 export { write, writeFile } from './writeFile.js';
 export { generateUniqueId } from './generateUniqueId.js';

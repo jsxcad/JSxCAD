@@ -1729,7 +1729,7 @@ const toPaths = (geometry) => {
   return paths;
 };
 
-const intersectionImpl = (geometry, ...geometries) => {
+const intersection = (geometry, ...geometries) => {
   geometries = geometries.map(toConcreteGeometry);
   const op = (geometry, descend) => {
     const { tags } = geometry;
@@ -1768,7 +1768,7 @@ const intersectionImpl = (geometry, ...geometries) => {
             intersection(
               fromPaths({ tags }, geometry.paths),
               ...geometries
-            ).graph
+            )
           )
         );
       }
@@ -1794,7 +1794,7 @@ const intersectionImpl = (geometry, ...geometries) => {
   return rewrite(toConcreteGeometry(geometry), op);
 };
 
-const intersection = cache(intersectionImpl);
+// export const intersection = cache(intersectionImpl);
 
 const fromPolygonsWithHoles = ({ tags }, polygonsWithHoles) =>
   fromTriangles({ tags }, fromPolygonsWithHolesToTriangles(polygonsWithHoles));
@@ -2944,7 +2944,7 @@ const unionImpl = (geometry, ...geometries) => {
             union(
               fromPaths({ tags: geometry.tags }, geometry.paths),
               ...geometries
-            ).graph
+            )
           )
         );
       }
