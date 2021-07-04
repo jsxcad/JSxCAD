@@ -23,7 +23,6 @@ registerDynamicModule(module('cursor'), '@jsxcad/api-v1-cursor');
 registerDynamicModule(module('deform'), '@jsxcad/api-v1-deform');
 registerDynamicModule(module('dst'), '@jsxcad/api-v1-dst');
 registerDynamicModule(module('dxf'), '@jsxcad/api-v1-dxf');
-registerDynamicModule(module('extrude'), '@jsxcad/api-v1-extrude');
 registerDynamicModule(module('font'), '@jsxcad/api-v1-font');
 registerDynamicModule(module('gcode'), '@jsxcad/api-v1-gcode');
 registerDynamicModule(module('ldraw'), '@jsxcad/api-v1-ldraw');

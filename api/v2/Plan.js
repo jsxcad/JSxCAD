@@ -1,4 +1,4 @@
-import { add, scale, subtract } from '@jsxcad/api-vec3';
+import { add, scale, subtract } from '@jsxcad/math-vec3';
 
 import { Shape } from '@jsxcad/api-v1-shape';
 import { identityMatrix } from '@jsxcad/math-mat4';

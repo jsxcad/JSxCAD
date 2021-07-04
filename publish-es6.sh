@@ -12,7 +12,6 @@ cp api/v1-armature/dist/main.js es6/jsxcad-api-v1-armature.js
 cp api/v1-cursor/dist/main.js es6/jsxcad-api-v1-cursor.js
 cp api/v1-dst/dist/main.js es6/jsxcad-api-v1-dst.js
 cp api/v1-dxf/dist/main.js es6/jsxcad-api-v1-dxf.js
-cp api/v1-extrude/dist/main.js es6/jsxcad-api-v1-extrude.js
 cp api/v1-font/dist/main.js es6/jsxcad-api-v1-font.js
 cp api/v1-gcode/dist/main.js es6/jsxcad-api-v1-gcode.js
 cp api/v1-ldraw/dist/main.js es6/jsxcad-api-v1-ldraw.js

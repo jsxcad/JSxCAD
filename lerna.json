@@ -19,7 +19,6 @@
     "convert/*",
     "data/*",
     "doc",
-    "example/*",
     "geometry",
     "math/*",
     "sys",
