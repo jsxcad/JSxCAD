@@ -1,7 +1,6 @@
-import Shape$1, { Shape } from './jsxcad-api-v1-shape.js';
+import Shape$1, { Shape, ensurePages } from './jsxcad-api-v2.js';
 import { fromSvgPath, fromSvg, toSvg } from './jsxcad-convert-svg.js';
 import { read, addPending, writeFile, getDefinitions, getPendingErrorHandler, emit } from './jsxcad-sys.js';
-import { ensurePages } from './jsxcad-api-v1-shapes.js';
 import { hash } from './jsxcad-geometry.js';
 
 /**
@@ -146,8 +145,8 @@ const downloadSvgMethod = function (name, options = {}) {
   emit({ download, hash: hash$1 });
   return this;
 };
-Shape$1.prototype.downloadSvg = downloadSvgMethod;
-Shape$1.prototype.svg = downloadSvgMethod;
+Shape.prototype.downloadSvg = downloadSvgMethod;
+Shape.prototype.svg = downloadSvgMethod;
 
 const writeSvg = (shape, name, options = {}) => {
   for (const { data, filename } of prepareSvg(shape, name, {})) {
@@ -159,7 +158,7 @@ const writeSvg = (shape, name, options = {}) => {
 const writeSvgMethod = function (...args) {
   return writeSvg(this, ...args);
 };
-Shape$1.prototype.writeSvg = writeSvgMethod;
+Shape.prototype.writeSvg = writeSvgMethod;
 
 const api = { SvgPath, readSvg, readSvgPath, writeSvg };
 

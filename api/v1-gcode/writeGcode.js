@@ -1,3 +1,4 @@
+import { Shape, ensurePages } from '@jsxcad/api-v2';
 import {
   addPending,
   emit,
@@ -6,8 +7,6 @@ import {
   writeFile,
 } from '@jsxcad/sys';
 
-import Shape from '@jsxcad/api-v1-shape';
-import { ensurePages } from '@jsxcad/api-v1-shapes';
 import { hash as hashGeometry } from '@jsxcad/geometry';
 import hashSum from 'hash-sum';
 import { toGcode } from '@jsxcad/convert-gcode';

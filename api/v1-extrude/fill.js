@@ -1,4 +1,4 @@
-import { Shape } from '@jsxcad/api-v1-shape';
+import { Shape } from '@jsxcad/api-v2';
 import { fill as fillGeometry } from '@jsxcad/geometry';
 
 export const fill = (shape) =>

@@ -1,5 +1,4 @@
-import { ChainedHull, Group } from '@jsxcad/api-v1-shapes';
-import { Shape, orient } from '@jsxcad/api-v1-shape';
+import { ChainedHull, Group, Shape, orient } from '@jsxcad/api-v2';
 import { add, normalize, subtract } from '@jsxcad/math-vec3';
 import { getPathEdges, outline } from '@jsxcad/geometry';
 

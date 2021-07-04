@@ -1,3 +1,4 @@
+import { Shape, ensurePages } from '@jsxcad/api-v2';
 import {
   addPending,
   emit,
@@ -5,8 +6,6 @@ import {
   writeFile,
 } from '@jsxcad/sys';
 
-import Shape from '@jsxcad/api-v1-shape';
-import { ensurePages } from '@jsxcad/api-v1-shapes';
 import { toThreejsPage } from '@jsxcad/convert-threejs';
 
 export const prepareThreejsPage = (shape, name, options = {}) => {

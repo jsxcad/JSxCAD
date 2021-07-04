@@ -1,4 +1,4 @@
-import Shape from '@jsxcad/api-v1-shape';
+import Shape from '@jsxcad/api-v2';
 import { outline } from './outline.js';
 
 export const inline = (shape) => outline(shape.flip());

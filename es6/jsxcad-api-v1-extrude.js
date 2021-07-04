@@ -1,6 +1,5 @@
 import { taggedGraph, alphaShape, fromPointsToGraph, extrude as extrude$1, extrudeToPlane as extrudeToPlane$1, fill as fill$1, outline as outline$1, projectToPlane as projectToPlane$1, section as section$1, getPathEdges } from './jsxcad-geometry.js';
-import Shape$1, { Shape, getPegCoords, orient } from './jsxcad-api-v1-shape.js';
-import { Group, ChainedHull } from './jsxcad-api-v1-shapes.js';
+import Shape$1, { Shape, Group, getPegCoords, orient, ChainedHull } from './jsxcad-api-v2.js';
 import { add, normalize, subtract } from './jsxcad-math-vec3.js';
 import { fromNormalAndPoint } from './jsxcad-math-plane.js';
 

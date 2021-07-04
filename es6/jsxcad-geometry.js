@@ -672,9 +672,6 @@ const differenceImpl = (geometry, ...geometries) => {
             );
           }
         }
-        if (differenced.hash) {
-          throw Error(`hash`);
-        }
         return differenced;
       }
       case 'paths':
@@ -1753,9 +1750,6 @@ const intersection = (geometry, ...geometries) => {
             );
           }
         }
-        if (intersection.hash) {
-          throw Error(`hash`);
-        }
         return taggedGroup({ tags }, ...intersections);
       }
       case 'paths': {
@@ -1793,8 +1787,6 @@ const intersection = (geometry, ...geometries) => {
 
   return rewrite(toConcreteGeometry(geometry), op);
 };
-
-// export const intersection = cache(intersectionImpl);
 
 const fromPolygonsWithHoles = ({ tags }, polygonsWithHoles) =>
   fromTriangles({ tags }, fromPolygonsWithHolesToTriangles(polygonsWithHoles));
@@ -2928,9 +2920,6 @@ const unionImpl = (geometry, ...geometries) => {
               )
             );
           }
-        }
-        if (unified.hash) {
-          throw Error(`hash`);
         }
         return unified;
       }

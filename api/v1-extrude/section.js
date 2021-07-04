@@ -1,4 +1,4 @@
-import { Shape, getPegCoords } from '@jsxcad/api-v1-shape';
+import { Shape, getPegCoords } from '@jsxcad/api-v2';
 
 import { section as sectionGeometry } from '@jsxcad/geometry';
 

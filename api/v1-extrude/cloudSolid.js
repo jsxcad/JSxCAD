@@ -1,6 +1,6 @@
 import { fromPointsToGraph, taggedGraph } from '@jsxcad/geometry';
 
-import { Shape } from '@jsxcad/api-v1-shape';
+import { Shape } from '@jsxcad/api-v2';
 
 export const cloudSolid = (shape) => {
   const points = shape.toPoints();

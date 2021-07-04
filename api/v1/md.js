@@ -1,4 +1,4 @@
-import Shape from '@jsxcad/api-v1-shape';
+import Shape from '@jsxcad/api-v2';
 import { emit } from '@jsxcad/sys';
 import hashSum from 'hash-sum';
 

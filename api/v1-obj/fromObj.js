@@ -1,6 +1,6 @@
 import { fromObjSync, fromObj as fromObjToGeometry } from '@jsxcad/convert-obj';
 
-import Shape from '@jsxcad/api-v1-shape';
+import Shape from '@jsxcad/api-v2';
 
 export const fromObj = async (data, { invert = false } = {}) =>
   Shape.fromGeometry(await fromObjToGeometry(data, { invert }));

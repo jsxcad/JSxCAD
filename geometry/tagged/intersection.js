@@ -1,4 +1,3 @@
-import { cache } from '@jsxcad/cache';
 import { fromPaths as fromPathsToGraph } from '../graph/fromPaths.js';
 import { getNonVoidFaceablePaths } from './getNonVoidFaceablePaths.js';
 import { getNonVoidGraphs } from './getNonVoidGraphs.js';
@@ -32,9 +31,6 @@ export const intersection = (geometry, ...geometries) => {
               )
             );
           }
-        }
-        if (intersection.hash) {
-          throw Error(`hash`);
         }
         return taggedGroup({ tags }, ...intersections);
       }
@@ -73,5 +69,3 @@ export const intersection = (geometry, ...geometries) => {
 
   return rewrite(toConcreteGeometry(geometry), op);
 };
-
-// export const intersection = cache(intersectionImpl);

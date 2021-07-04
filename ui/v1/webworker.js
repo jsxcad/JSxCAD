@@ -1,6 +1,6 @@
 /* global postMessage, onmessage:writable, self */
 
-import * as baseApi from '@jsxcad/api-v1';
+import * as baseApi from '@jsxcad/api-v2';
 import * as sys from '@jsxcad/sys';
 import hashSum from 'hash-sum';
 

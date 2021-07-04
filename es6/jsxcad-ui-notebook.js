@@ -1,5 +1,5 @@
 import { dataUrl, orbitDisplay } from './jsxcad-ui-threejs.js';
-import { Shape } from './jsxcad-api-v1-shape.js';
+import { Shape } from './jsxcad-api-v2.js';
 import { read } from './jsxcad-sys.js';
 
 var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};

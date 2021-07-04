@@ -8,7 +8,6 @@ cp algorithm/pack/dist/main.js es6/jsxcad-algorithm-pack.js
 cp algorithm/text/dist/main.js es6/jsxcad-algorithm-text.js
 cp algorithm/tool/dist/main.js es6/jsxcad-algorithm-tool.js
 cp algorithm/verlet/dist/main.js es6/jsxcad-algorithm-verlet.js
-cp api/v1/dist/main.js es6/jsxcad-api-v1.js
 cp api/v1-armature/dist/main.js es6/jsxcad-api-v1-armature.js
 cp api/v1-cursor/dist/main.js es6/jsxcad-api-v1-cursor.js
 cp api/v1-dst/dist/main.js es6/jsxcad-api-v1-dst.js
@@ -16,7 +15,6 @@ cp api/v1-dxf/dist/main.js es6/jsxcad-api-v1-dxf.js
 cp api/v1-extrude/dist/main.js es6/jsxcad-api-v1-extrude.js
 cp api/v1-font/dist/main.js es6/jsxcad-api-v1-font.js
 cp api/v1-gcode/dist/main.js es6/jsxcad-api-v1-gcode.js
-cp api/v1-item/dist/main.js es6/jsxcad-api-v1-item.js
 cp api/v1-ldraw/dist/main.js es6/jsxcad-api-v1-ldraw.js
 cp api/v1-math/dist/main.js es6/jsxcad-api-v1-math.js
 cp api/v1-obj/dist/main.js es6/jsxcad-api-v1-obj.js
@@ -31,6 +29,7 @@ cp api/v1-svg/dist/main.js es6/jsxcad-api-v1-svg.js
 cp api/v1-threejs/dist/main.js es6/jsxcad-api-v1-threejs.js
 cp api/v1-tools/dist/main.js es6/jsxcad-api-v1-tools.js
 cp api/v1-units/dist/main.js es6/jsxcad-api-v1-units.js
+cp api/v2/dist/main.js es6/jsxcad-api-v2.js
 cp cache/dist/main.js es6/jsxcad-cache.js
 cp compiler/dist/main.js es6/jsxcad-compiler.js
 cp convert/dst/dist/main.js es6/jsxcad-convert-dst.js

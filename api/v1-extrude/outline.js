@@ -1,5 +1,4 @@
-import { Group } from '@jsxcad/api-v1-shapes';
-import { Shape } from '@jsxcad/api-v1-shape';
+import { Group, Shape } from '@jsxcad/api-v2';
 import { outline as outlineGeometry } from '@jsxcad/geometry';
 
 export const outline = (shape) =>

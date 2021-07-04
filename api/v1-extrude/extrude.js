@@ -1,4 +1,4 @@
-import Shape from '@jsxcad/api-v1-shape';
+import Shape from '@jsxcad/api-v2';
 import { extrude as extrudeGeometry } from '@jsxcad/geometry';
 
 export const extrude = (shape, ...heights) => {
