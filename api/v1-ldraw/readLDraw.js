@@ -1,6 +1,6 @@
 import { fromLDraw, fromLDrawPart } from '@jsxcad/convert-ldraw';
 
-import Shape from '@jsxcad/api-v2';
+import { Shape } from '@jsxcad/api-shape';
 import { read } from '@jsxcad/sys';
 
 export const readLDraw = async (path) => {

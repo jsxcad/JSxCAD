@@ -163,7 +163,7 @@ export class JsEditorUi extends React.PureComponent {
         if (advice.definitions) {
           for (const definition of advice.definitions.keys()) {
             const { initSourceLocation } = advice.definitions.get(definition);
-            console.log(JSON.stringify({ definition, initSourceLocation }));
+            // console.log(JSON.stringify({ definition, initSourceLocation }));
             /*
             if (initSourceLocation) {
               const { start, end } = initSourceLocation;
@@ -202,7 +202,7 @@ export class JsEditorUi extends React.PureComponent {
         if (!note) {
           continue;
         }
-        console.log(JSON.stringify({ ...note, data: undefined }));
+        // console.log(JSON.stringify({ ...note, data: undefined }));
         if (note.define) {
           definitions.push(note);
         }

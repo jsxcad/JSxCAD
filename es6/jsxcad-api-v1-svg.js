@@ -1,4 +1,4 @@
-import Shape$1, { Shape, ensurePages } from './jsxcad-api-v2.js';
+import { Shape, ensurePages } from './jsxcad-api-shape.js';
 import { fromSvgPath, fromSvg, toSvg } from './jsxcad-convert-svg.js';
 import { read, addPending, writeFile, getDefinitions, getPendingErrorHandler, emit } from './jsxcad-sys.js';
 import { hash } from './jsxcad-geometry.js';
@@ -29,7 +29,7 @@ const readSvg = async (path, { fill = true, stroke = true } = {}) => {
   if (data === undefined) {
     throw Error(`Cannot read svg from ${path}`);
   }
-  return Shape$1.fromGeometry(
+  return Shape.fromGeometry(
     await fromSvg(data, { doFill: fill, doStroke: stroke })
   );
 };
@@ -49,7 +49,7 @@ const readSvgPath = async (options) => {
   if (data === undefined) {
     data = await read(`cache/${path}`, { sources: [path] });
   }
-  return Shape$1.fromGeometry(await fromSvgPath(options, data));
+  return Shape.fromGeometry(await fromSvgPath(options, data));
 };
 
 function pad (hash, len) {

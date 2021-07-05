@@ -1,5 +1,5 @@
 import { taggedPaths, taggedGroup, isClosedPath } from './jsxcad-geometry.js';
-import Shape from './jsxcad-api-v2.js';
+import { Shape } from './jsxcad-api-shape.js';
 import { fromPng } from './jsxcad-convert-png.js';
 import { fromRaster } from './jsxcad-algorithm-contour.js';
 import { numbers } from './jsxcad-api-v1-math.js';

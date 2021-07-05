@@ -1,4 +1,4 @@
-import Shape, { Shape as Shape$1, ensurePages } from './jsxcad-api-v2.js';
+import { Shape, ensurePages } from './jsxcad-api-shape.js';
 import { fromDxf, toDxf } from './jsxcad-convert-dxf.js';
 import { read, addPending, writeFile, getPendingErrorHandler, emit } from './jsxcad-sys.js';
 
@@ -30,7 +30,7 @@ const downloadDxfMethod = function (...args) {
   emit({ download: { entries } });
   return this;
 };
-Shape$1.prototype.downloadDxf = downloadDxfMethod;
+Shape.prototype.downloadDxf = downloadDxfMethod;
 
 const writeDxf = (shape, name, options = {}) => {
   for (const { data, filename } of prepareDxf(shape, name, {})) {
@@ -42,7 +42,7 @@ const writeDxf = (shape, name, options = {}) => {
 const writeDxfMethod = function (...args) {
   return writeDxf(this, ...args);
 };
-Shape$1.prototype.writeDxf = writeDxfMethod;
+Shape.prototype.writeDxf = writeDxfMethod;
 
 const api = { readDxf, writeDxf };
 

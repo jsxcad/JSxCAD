@@ -1,4 +1,4 @@
-import { Shape, ensurePages } from './jsxcad-api-v2.js';
+import { Shape, ensurePages } from './jsxcad-api-shape.js';
 import { emit, getDefinitions, getPendingErrorHandler, addPending } from './jsxcad-sys.js';
 import { hash } from './jsxcad-geometry.js';
 import { toPdf } from './jsxcad-convert-pdf.js';

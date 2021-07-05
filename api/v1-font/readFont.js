@@ -1,4 +1,4 @@
-import Shape from '@jsxcad/api-v2';
+import { Shape } from '@jsxcad/api-shape';
 import { read } from '@jsxcad/sys';
 import { toFont } from '@jsxcad/algorithm-text';
 

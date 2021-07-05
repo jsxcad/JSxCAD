@@ -1,4 +1,4 @@
-import { Shape, ensurePages } from '@jsxcad/api-v2';
+import { Shape, ensurePages } from '@jsxcad/api-shape';
 import {
   addPending,
   emit,

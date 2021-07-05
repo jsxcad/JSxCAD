@@ -1,4 +1,4 @@
-import Shape from '@jsxcad/api-v2';
+import { Shape } from '@jsxcad/api-shape';
 import { fromSvg } from '@jsxcad/convert-svg';
 import { read } from '@jsxcad/sys';
 

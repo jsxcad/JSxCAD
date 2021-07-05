@@ -1,4 +1,4 @@
-import Shape from '@jsxcad/api-v2';
+import { Shape } from '@jsxcad/api-shape';
 import { fromStl } from '@jsxcad/convert-stl';
 import { read } from '@jsxcad/sys';
 

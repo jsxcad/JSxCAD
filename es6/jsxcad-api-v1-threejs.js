@@ -1,4 +1,4 @@
-import { Shape, ensurePages } from './jsxcad-api-v2.js';
+import { Shape, ensurePages } from './jsxcad-api-shape.js';
 import { emit, addPending, writeFile, getPendingErrorHandler } from './jsxcad-sys.js';
 import { toThreejsPage } from './jsxcad-convert-threejs.js';
 

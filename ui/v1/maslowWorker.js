@@ -1,6 +1,6 @@
 /* global postMessage, onmessage:writable, self */
 
-import * as api from '../../es6/jsxcad-api-v2.js';
+import * as api from '../../es6/jsxcad-api.js';
 import * as convertThree from '../../es6/jsxcad-convert-threejs.js';
 import * as sys from '../../es6/jsxcad-sys.js';
 import { add, normalize, scale, subtract } from '../../es6/jsxcad-math-vec3.js';

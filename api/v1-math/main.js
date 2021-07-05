@@ -46,5 +46,3 @@ export {
   vec,
   zag,
 };
-
-export default api;
