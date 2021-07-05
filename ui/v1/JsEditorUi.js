@@ -161,10 +161,10 @@ export class JsEditorUi extends React.PureComponent {
     const doUpdate = async () => {
       if (advice) {
         if (advice.definitions) {
+          /*
           for (const definition of advice.definitions.keys()) {
             const { initSourceLocation } = advice.definitions.get(definition);
-            // console.log(JSON.stringify({ definition, initSourceLocation }));
-            /*
+            console.log(JSON.stringify({ definition, initSourceLocation }));
             if (initSourceLocation) {
               const { start, end } = initSourceLocation;
               session.addFold(
@@ -177,8 +177,8 @@ export class JsEditorUi extends React.PureComponent {
                 )
               );
             }
-*/
           }
+*/
           for (const definition of advice.widgets.keys()) {
             // if (!advice.definitions.has(definition)) {
             // Remove widgets for definitions that don't exist.

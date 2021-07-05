@@ -19,12 +19,16 @@ const baseSection =
     );
   };
 
-export const section = (...pegs) => (shape) =>
-  baseSection({ profile: false }, ...pegs)(shape);
+export const section =
+  (...pegs) =>
+  (shape) =>
+    baseSection({ profile: false }, ...pegs)(shape);
 
 Shape.registerMethod('section', section);
 
-export const sectionProfile = (...pegs) => (shape) =>
-  baseSection({ profile: true }, ...pegs)(shape);
+export const sectionProfile =
+  (...pegs) =>
+  (shape) =>
+    baseSection({ profile: true }, ...pegs)(shape);
 
 Shape.registerMethod('sectionProfile', sectionProfile);

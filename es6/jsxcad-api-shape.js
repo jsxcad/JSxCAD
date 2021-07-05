@@ -3052,13 +3052,17 @@ const baseSection =
     );
   };
 
-const section = (...pegs) => (shape) =>
-  baseSection({ profile: false }, ...pegs)(shape);
+const section =
+  (...pegs) =>
+  (shape) =>
+    baseSection({ profile: false }, ...pegs)(shape);
 
 Shape.registerMethod('section', section);
 
-const sectionProfile = (...pegs) => (shape) =>
-  baseSection({ profile: true }, ...pegs)(shape);
+const sectionProfile =
+  (...pegs) =>
+  (shape) =>
+    baseSection({ profile: true }, ...pegs)(shape);
 
 Shape.registerMethod('sectionProfile', sectionProfile);
 

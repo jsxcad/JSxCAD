@@ -13,23 +13,6 @@ import sin from './sin.js';
 import sqrt from './sqrt.js';
 import zag from './zag.js';
 
-const api = {
-  Noise,
-  Random,
-  acos,
-  cos,
-  each,
-  ease,
-  linear,
-  max,
-  min,
-  numbers,
-  sin,
-  sqrt,
-  vec,
-  zag,
-};
-
 export {
   Noise,
   Random,
