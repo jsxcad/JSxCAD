@@ -1,7 +1,8 @@
 /* global postMessage, onmessage:writable, self */
 
-import * as baseApi from '@jsxcad/api-v1';
 import * as sys from '@jsxcad/sys';
+
+import baseApi from '@jsxcad/api';
 import hashSum from 'hash-sum';
 
 const resolveNotebook = async () => {

@@ -1,4 +1,4 @@
-import * as baseApi from './jsxcad-api-v1.js';
+import baseApi from './jsxcad-api.js';
 import * as sys from './jsxcad-sys.js';
 
 function pad (hash, len) {

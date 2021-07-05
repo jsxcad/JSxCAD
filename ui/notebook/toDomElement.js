@@ -3,7 +3,7 @@
 import { dataUrl, orbitDisplay } from '@jsxcad/ui-threejs';
 
 import Base64ArrayBuffer from 'base64-arraybuffer';
-import { Shape } from '@jsxcad/api-v1-shape';
+import { Shape } from '@jsxcad/api-shape';
 import marked from 'marked';
 import { read } from '@jsxcad/sys';
 import saveAs from 'file-saver';

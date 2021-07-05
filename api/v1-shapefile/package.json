@@ -23,7 +23,7 @@
   "keywords": [],
   "license": "MIT",
   "dependencies": {
-    "@jsxcad/api-v1-shape": "^0.0.79",
+    "@jsxcad/api-shape": "^0.0.79",
     "@jsxcad/convert-shapefile": "^0.0.79",
     "@jsxcad/sys": "^0.0.79"
   },

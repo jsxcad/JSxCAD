@@ -33,9 +33,6 @@ const unionImpl = (geometry, ...geometries) => {
             );
           }
         }
-        if (unified.hash) {
-          throw Error(`hash`);
-        }
         return unified;
       }
       case 'paths': {

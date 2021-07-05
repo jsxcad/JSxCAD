@@ -1,3 +1,4 @@
+import { Shape, ensurePages } from '@jsxcad/api-shape';
 import {
   addPending,
   emit,
@@ -5,8 +6,6 @@ import {
   writeFile,
 } from '@jsxcad/sys';
 
-import Shape from '@jsxcad/api-v1-shape';
-import { ensurePages } from '@jsxcad/api-v1-shapes';
 import { toDxf } from '@jsxcad/convert-dxf';
 
 export const prepareDxf = (shape, name, options = {}) => {

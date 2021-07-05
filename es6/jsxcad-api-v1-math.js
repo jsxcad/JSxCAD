@@ -1,5 +1,5 @@
-import * as vec from './jsxcad-math-vec3.js';
-export { vec };
+import * as jsxcadMathVec3_js from './jsxcad-math-vec3.js';
+export { jsxcadMathVec3_js as vec };
 
 /**
  *
@@ -4046,22 +4046,4 @@ const zag = (diameter, tolerance = 1) => {
   return s;
 };
 
-const api = {
-  Noise,
-  Random,
-  acos,
-  cos,
-  each,
-  ease,
-  linear,
-  max,
-  min,
-  numbers,
-  sin,
-  sqrt,
-  vec,
-  zag,
-};
-
-export default api;
 export { Noise, Random, acos, cos, each, ease, linear, max, min, numbers, sin, sqrt, zag };

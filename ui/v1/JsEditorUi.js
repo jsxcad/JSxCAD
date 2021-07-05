@@ -161,10 +161,10 @@ export class JsEditorUi extends React.PureComponent {
     const doUpdate = async () => {
       if (advice) {
         if (advice.definitions) {
+          /*
           for (const definition of advice.definitions.keys()) {
             const { initSourceLocation } = advice.definitions.get(definition);
             console.log(JSON.stringify({ definition, initSourceLocation }));
-            /*
             if (initSourceLocation) {
               const { start, end } = initSourceLocation;
               session.addFold(
@@ -177,8 +177,8 @@ export class JsEditorUi extends React.PureComponent {
                 )
               );
             }
-*/
           }
+*/
           for (const definition of advice.widgets.keys()) {
             // if (!advice.definitions.has(definition)) {
             // Remove widgets for definitions that don't exist.
@@ -202,7 +202,7 @@ export class JsEditorUi extends React.PureComponent {
         if (!note) {
           continue;
         }
-        console.log(JSON.stringify({ ...note, data: undefined }));
+        // console.log(JSON.stringify({ ...note, data: undefined }));
         if (note.define) {
           definitions.push(note);
         }
@@ -236,60 +236,65 @@ export class JsEditorUi extends React.PureComponent {
 
       // Construct the LineWidgets
       for (const definition of notesByDefinition.keys()) {
-        const { initSourceLocation } = advice.definitions.get(definition);
-        const notes = notesByDefinition.get(definition);
-        const el = document.createElement('div');
-        for (const note of notes) {
-          if (note.domElement) {
-            el.appendChild(note.domElement);
-            domUsedElements.add(note.domElement);
+        try {
+          const { initSourceLocation } = advice.definitions.get(definition);
+          const notes = notesByDefinition.get(definition);
+          const el = document.createElement('div');
+          for (const note of notes) {
+            if (note.domElement) {
+              el.appendChild(note.domElement);
+              domUsedElements.add(note.domElement);
+            }
           }
-        }
-        const widget = {
-          row: initSourceLocation.end.line - 1,
-          coverLine: false,
-          fixedWidth: true,
-          el,
-        };
+          const widget = {
+            row: initSourceLocation.end.line - 1,
+            coverLine: false,
+            fixedWidth: true,
+            el,
+          };
 
-        el.style.overflow = 'hidden';
-        el.style.padding = 0;
-        el.style.border = 0;
-        el.style.margin = 0;
+          el.style.overflow = 'hidden';
+          el.style.padding = 0;
+          el.style.border = 0;
+          el.style.margin = 0;
 
-        // Add to the dom, so we can calculate the height.
-        el.style.visibility = 'hidden';
-        document.body.appendChild(el);
+          // Add to the dom, so we can calculate the height.
+          el.style.visibility = 'hidden';
+          document.body.appendChild(el);
 
-        // Adjust the widget height to be a multiple of line height, otherwise line selection is thrown off.
-        const lineHeight = editor.renderer.layerConfig.lineHeight;
-        let elHeight;
-        if (el.offsetHeight % lineHeight === 0) {
-          elHeight = Math.ceil(el.offsetHeight / lineHeight) * lineHeight;
-        } else {
-          elHeight = Math.ceil(el.offsetHeight / lineHeight) * lineHeight;
-        }
-        el.style.height = `${elHeight}px`;
-        if (el.offsetHeight % lineHeight !== 0) {
-          console.log(
-            `QQ/Height not aligned: definition: ${definition} offsetHeight: ${el.offsetHeight} lineHeight: ${lineHeight}`
-          );
-        }
+          // Adjust the widget height to be a multiple of line height, otherwise line selection is thrown off.
+          const lineHeight = editor.renderer.layerConfig.lineHeight;
+          let elHeight;
+          if (el.offsetHeight % lineHeight === 0) {
+            elHeight = Math.ceil(el.offsetHeight / lineHeight) * lineHeight;
+          } else {
+            elHeight = Math.ceil(el.offsetHeight / lineHeight) * lineHeight;
+          }
+          el.style.height = `${elHeight}px`;
+          if (el.offsetHeight % lineHeight !== 0) {
+            console.log(
+              `QQ/Height not aligned: definition: ${definition} offsetHeight: ${el.offsetHeight} lineHeight: ${lineHeight}`
+            );
+          }
 
-        widgets.set(definition, widget);
-        widgetManager.addLineWidget(widget);
+          widgets.set(definition, widget);
+          widgetManager.addLineWidget(widget);
 
-        // Make it visible now that it is in the right place.
-        el.style.visibility = '';
+          // Make it visible now that it is in the right place.
+          el.style.visibility = '';
 
-        if (widget.pixelHeight !== lineHeight * widget.rowCount) {
-          console.log(
-            `QQ/widget: definition ${definition} pixelHeight ${
-              widget.pixelHeight
-            } vs ${lineHeight * widget.rowCount} rowCount ${
-              widget.rowCount
-            } lineHeight ${lineHeight}`
-          );
+          if (widget.pixelHeight !== lineHeight * widget.rowCount) {
+            console.log(
+              `QQ/widget: definition ${definition} pixelHeight ${
+                widget.pixelHeight
+              } vs ${lineHeight * widget.rowCount} rowCount ${
+                widget.rowCount
+              } lineHeight ${lineHeight}`
+            );
+          }
+        } catch (e) {
+          console.log(e.stack);
+          throw e;
         }
       }
 

@@ -1,6 +1,6 @@
 import { fromOffSync, fromOff as fromOffToGeometry } from '@jsxcad/convert-off';
 
-import Shape from '@jsxcad/api-v1-shape';
+import { Shape } from '@jsxcad/api-shape';
 
 export const fromOff = async (data, { invert = false } = {}) =>
   Shape.fromGeometry(await fromOffToGeometry(data, { invert }));
