@@ -8,6 +8,7 @@ import {
   boot,
   clearEmitted,
   deleteFile,
+  getServicePoolInfo,
   listFiles,
   listFilesystems,
   log,
@@ -15,11 +16,13 @@ import {
   readOrWatch,
   resolvePending,
   setupFilesystem,
+  sleep,
   tellServices,
   terminateActiveServices,
   touch,
   unwatchFileCreation,
   unwatchFileDeletion,
+  waitServices,
   watchFileCreation,
   watchFileDeletion,
   write,
@@ -772,7 +775,17 @@ class Ui extends React.PureComponent {
         updates,
       });
       jsEditorAdvice.definitions = topLevel;
+      const pending = new Set();
       for (;;) {
+        console.log(
+          `QQ/servicePoolInfo: ${JSON.stringify(getServicePoolInfo())}`
+        );
+        while (getServicePoolInfo().activeServiceCount > 5) {
+          await waitServices();
+          console.log(
+            `QQ/servicePoolInfo: ${JSON.stringify(getServicePoolInfo())}`
+          );
+        }
         const todo = Object.keys(updates);
         if (todo.length === 0) {
           console.log('Updates complete');
@@ -781,20 +794,32 @@ class Ui extends React.PureComponent {
         console.log(`Updates remaining ${todo.join(', ')}`);
         let updated = false;
         for (const id of todo) {
+          if (pending.has(id)) {
+            continue;
+          }
           const entry = updates[id];
           const outstandingDependencies = entry.dependencies.filter(
             (dependency) => updates[dependency]
           );
           if (outstandingDependencies.length === 0) {
-            console.log(`Evaluating: ${id}`);
-            await ask({ evaluate: updates[id].program, workspace, path, sha });
-            await resolvePending();
-            delete updates[id];
+            console.log(`Scheduling: ${id}`);
+            pending.add(id);
+            ask({ evaluate: updates[id].program, workspace, path, sha })
+              .then(() => {
+                console.log(`Completed ${id}`);
+                delete updates[id];
+              })
+              .catch((e) => window.alert(e.stack));
             updated = true;
+            // Avoid overscheduling.
+            break;
           }
         }
-        if (updated === false) {
-          throw Error('Update deadlocked');
+        if (updated === false && getServicePoolInfo().activeServiceCount > 0) {
+          await waitServices();
+        } else {
+          // Yield to allow pending to update.
+          await sleep(0);
         }
       }
       await ask({ evaluate: ecmascript, workspace, path, sha });
@@ -1330,6 +1355,7 @@ class Ui extends React.PureComponent {
     const spinner = running ? (
       <Spinner animation="border" role="status">
         <span className="sr-only">Running</span>
+        {getServicePoolInfo().activeServiceCount}
       </Spinner>
     ) : (
       <span></span>

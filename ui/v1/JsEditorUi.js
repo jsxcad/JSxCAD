@@ -71,7 +71,7 @@ export class JsEditorUi extends React.PureComponent {
       onClickLink: PropTypes.func,
       onSelectView: PropTypes.func,
       workspace: PropTypes.string,
-      notebookData: PropTypes.array,
+      notebookData: PropTypes.object,
     };
   }
 
