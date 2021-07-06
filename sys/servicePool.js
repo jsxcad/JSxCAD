@@ -3,6 +3,7 @@ let idleServiceLimit = 5;
 const activeServices = new Set();
 const idleServices = [];
 const pending = [];
+const watchers = new Set();
 
 // TODO: Consider different specifications.
 
@@ -41,9 +42,12 @@ export const releaseService = async (spec, service) => {
     // Drop the service.
     activeServices.delete(service);
   }
+  for (const watcher of watchers) {
+    watcher();
+  }
 };
 
-export const getServicePoolInfo = async () => ({
+export const getServicePoolInfo = () => ({
   activeServiceCount: activeServices.size,
   serviceLimit,
   idleServiceLimit,
@@ -77,4 +81,25 @@ export const tellServices = (question) => {
   for (const { tell } of [...idleServices, ...activeServices]) {
     tell(question);
   }
+};
+
+export const waitServices = () => {
+  return new Promise((resolve, reject) => {
+    let watcher;
+    watcher = () => {
+      unwatchServices(watcher);
+      resolve();
+    };
+    watchServices(watcher);
+  });
+};
+
+export const watchServices = (watcher) => {
+  watchers.add(watcher);
+  return watcher;
+};
+
+export const unwatchServices = (watcher) => {
+  watchers.delete(watcher);
+  return watcher;
 };

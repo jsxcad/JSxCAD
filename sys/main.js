@@ -41,9 +41,14 @@ export { conversation } from './conversation.js';
 export { deleteFile } from './deleteFile.js';
 export {
   askServices,
+  getServicePoolInfo,
   tellServices,
   terminateActiveServices,
+  unwatchServices,
+  waitServices,
+  watchServices,
 } from './servicePool.js';
+export { sleep } from './sleep.js';
 export { touch } from './touch.js';
 export { write, writeFile } from './writeFile.js';
 export { generateUniqueId } from './generateUniqueId.js';
