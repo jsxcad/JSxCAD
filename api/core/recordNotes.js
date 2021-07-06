@@ -12,9 +12,9 @@ let notes;
 let recording = false;
 let handler;
 
-const recordNote = (note, index) => {
+const recordNote = (note) => {
   if (recording) {
-    notes.push({ note, index });
+    notes.push(note);
   }
 };
 
@@ -48,7 +48,7 @@ export const replayRecordedNotes = async (path, id) => {
   if (notes.length === 0) {
     return;
   }
-  for (const { note } of notes) {
+  for (const note of notes) {
     emit(note);
   }
 };
