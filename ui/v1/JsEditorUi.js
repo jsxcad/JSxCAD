@@ -198,7 +198,8 @@ export class JsEditorUi extends React.PureComponent {
       const definitions = [];
       let nthView = 0;
 
-      for (let note of notebookData) {
+      for (let hash of Object.keys(notebookData)) {
+        const note = notebookData[hash];
         if (!note) {
           continue;
         }
@@ -336,8 +337,8 @@ export class JsEditorUi extends React.PureComponent {
       domUsedElements.clear();
     };
 
-    notebookData.onUpdate = update;
-    notebookData.onFinished = finished;
+    advice.onUpdate = update;
+    advice.onFinished = finished;
   }
 
   async update() {}

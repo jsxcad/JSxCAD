@@ -44,9 +44,7 @@ import ReactDOM from 'react-dom';
 import Spinner from 'react-bootstrap/Spinner';
 import { fromPointsToAlphaShape2AsPolygonSegments } from '@jsxcad/algorithm-cgal';
 import { getNotebookControlData } from '@jsxcad/ui-notebook';
-import hashSum from 'hash-sum';
 import marked from 'marked';
-import { nanoid } from 'nanoid/non-secure';
 import { toEcmascript } from '@jsxcad/compiler';
 import { writeGist } from './gist.js';
 import { writeToGithub } from './github.js';
@@ -115,7 +113,7 @@ class Ui extends React.PureComponent {
       workspace: this.props.workspace,
       files: [],
       selectedPaths: [],
-      notebookData: [],
+      notebookData: {},
       jsEditorAdvice: {},
     };
 
@@ -133,7 +131,7 @@ class Ui extends React.PureComponent {
   }
 
   async componentDidMount() {
-    const { workspace } = this.state;
+    const { jsEditorAdvice, workspace } = this.state;
     const { file, path, sha } = this.props;
 
     if (file && path) {
@@ -149,23 +147,6 @@ class Ui extends React.PureComponent {
     const deletionWatcher = await watchFileDeletion(fileUpdater);
 
     const agent = async ({ ask, question }) => {
-      /*
-      if (question) {
-        const text = JSON.stringify(question);
-        const length = text.length;
-        // Copy out info.
-        const { logElement } = this.state;
-        if (logElement) {
-          const div = document.createElement('div');
-          if (length > 4096) {
-            div.textContent = `received ${length}: ${text.substr(0, 1024)}`;
-          } else {
-            div.textContent = `received ${length}`;
-          }
-          logElement.prepend(div);
-        }
-      }
-*/
       if (question.ask) {
         const { identifier, options } = question.ask;
         return askSys(identifier, options);
@@ -206,44 +187,24 @@ class Ui extends React.PureComponent {
           return;
         }
 
-        const { note, index } = question;
+        const { note } = question;
         const { notebookData, notebookRef } = this.state;
-        const entry = notebookData[index];
-        if (entry && entry.noteRef) {
-          for (const child of entry.noteRef.getElementsByClassName('note')) {
-            child.style.removeProperty('filter');
-          }
+        if (notebookData[note.hash]) {
+          // It's already in the notebook.
+          notebookData[note.hash].updated = true;
+          return;
+        } else {
+          notebookData[note.hash] = note;
         }
-        if (!entry || note.hash !== entry.hash) {
-          if (note.data === undefined && note.path) {
-            note.data = await readOrWatch(note.path);
-          }
-          for (const item of notebookData) {
-            if (item && item.hash === note.hash) {
-              item.hash = nanoid();
-            }
-          }
-          notebookData[index] = note;
-          if (notebookRef) {
-            notebookRef.forceUpdate();
-          }
-          if (notebookData.onUpdate) {
-            await notebookData.onUpdate();
-          }
+        note.updated = true;
+        if (note.data === undefined && note.path) {
+          note.data = await readOrWatch(note.path);
         }
-      } else if (question.notebookLength) {
-        const { notebookLength } = question;
-        console.log(`QQ/question.notebookLength: ${notebookLength}`);
-        const { notebookData, notebookRef } = this.state;
-        if (notebookData.length !== notebookLength) {
-          notebookData.length = notebookLength;
-          this.setState({ notebookData: notebookData });
-          if (notebookRef) {
-            notebookRef.forceUpdate();
-          }
-          if (notebookData.onFinished) {
-            await notebookData.onFinished();
-          }
+        if (notebookRef) {
+          notebookRef.forceUpdate();
+        }
+        if (jsEditorAdvice.onUpdate) {
+          await jsEditorAdvice.onUpdate();
         }
       }
     };
@@ -763,14 +724,6 @@ class Ui extends React.PureComponent {
     }
   }
 
-  emitNote(note) {
-    const { notebookData } = this.state;
-    if (note.hash === undefined) {
-      note.hash = hashSum(note);
-    }
-    notebookData.push(note);
-  }
-
   updateNotebook() {
     const { notebookRef } = this.state;
     if (notebookRef) {
@@ -805,11 +758,6 @@ class Ui extends React.PureComponent {
         return;
       }
 
-      for (const element of document.getElementsByClassName('note')) {
-        // element.style.backgroundColor = 'red';
-        element.style.filter = 'sepia(100%)';
-      }
-
       // FIX: This is a bit awkward.
       // The responsibility for updating the control values ought to be with what
       // renders the notebook.
@@ -817,40 +765,70 @@ class Ui extends React.PureComponent {
       await write(`control/${path}`, notebookControlData);
 
       let script = jsEditorData;
-      const ecmascript = await toEcmascript(script, { path, topLevel });
+      const updates = {};
+      const ecmascript = await toEcmascript(script, {
+        path,
+        topLevel,
+        updates,
+      });
       jsEditorAdvice.definitions = topLevel;
+      for (;;) {
+        const todo = Object.keys(updates);
+        if (todo.length === 0) {
+          console.log('Updates complete');
+          break;
+        }
+        console.log(`Updates remaining ${todo.join(', ')}`);
+        let updated = false;
+        for (const id of todo) {
+          const entry = updates[id];
+          const outstandingDependencies = entry.dependencies.filter(
+            (dependency) => updates[dependency]
+          );
+          if (outstandingDependencies.length === 0) {
+            console.log(`Evaluating: ${id}`);
+            await ask({ evaluate: updates[id].program, workspace, path, sha });
+            await resolvePending();
+            delete updates[id];
+            updated = true;
+          }
+        }
+        if (updated === false) {
+          throw Error('Update deadlocked');
+        }
+      }
       await ask({ evaluate: ecmascript, workspace, path, sha });
       await resolvePending();
-    } catch (error) {
-      // Include any high level notebook errors in the output.
-      this.emitNote({ error: { text: error.stack } });
-    } finally {
-      /*
-      this.emitNote({ md: `---` });
-      this.emitNote({ md: `#### Dependency Tree` });
-      const graph = [];
-      for (const [id, { dependencies }] of topLevel.entries()) {
-        for (const dependency of dependencies) {
-          const entry = topLevel.get(dependency);
-          if (entry && !entry.isNotCacheable) {
-            graph.push(`${dependency}(${dependency}  .) --> ${id}(${id}  .)`);
+      // Finalize the notebook
+      {
+        const { notebookData, notebookRef } = this.state;
+        let deleted = false;
+        for (const hash of Object.keys(notebookData)) {
+          const note = notebookData[hash];
+          if (!note.updated) {
+            delete notebookData[hash];
+            deleted = true;
+          } else {
+            delete note.updated;
+          }
+        }
+        if (deleted) {
+          if (notebookRef) {
+            notebookRef.forceUpdate();
+          }
+          if (jsEditorAdvice.onUpdate) {
+            await jsEditorAdvice.onUpdate();
+          }
+          if (jsEditorAdvice.onFinished) {
+            await jsEditorAdvice.onFinished();
           }
         }
       }
-      if (graph.length > 0) {
-        this.emitNote({ md: `'''\ngraph TD\n${graph.join('\n')}\n'''` });
-        this.emitNote({ md: `---` });
-        this.emitNote({ md: `#### Programs` });
-        for (const [id, { program }] of topLevel.entries()) {
-          this.emitNote({ md: `##### ${id}` });
-          this.emitNote({ md: `'''\n${program}\n'''\n` });
-        }
-      }
-*/
+    } catch (error) {
+      // Include any high level notebook errors in the output.
+      window.alert(error.stack);
+    } finally {
       this.updateNotebook();
-      for (const element of document.getElementsByClassName('note')) {
-        element.style.removeProperty('filter');
-      }
       this.setState({ running: false });
     }
   }

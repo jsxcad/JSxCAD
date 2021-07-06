@@ -32,7 +32,7 @@ export const strip = (ast) => {
 
 export const toEcmascript = async (
   script,
-  { path = '', topLevel = new Map() } = {}
+  { path = '', topLevel = new Map(), updates = [] } = {}
 ) => {
   const parseOptions = {
     allowAwaitOutsideFunction: true,
@@ -109,7 +109,42 @@ export const toEcmascript = async (
 
     let uncomputedInput = false;
 
-    const generateSubprogram = () => {
+    const generateCacheLoadCode = ({ isNotCacheable, code, path, id }) => {
+      if (isNotCacheable) {
+        return [code];
+      }
+      return [
+        parse(
+          `const ${id} = await loadGeometry('data/def/${path}/${id}')`,
+          parseOptions
+        ),
+        parse(`Object.freeze(${id});`, parseOptions),
+      ];
+    };
+
+    const generateReplayCode = ({ isNotCacheable, code, path, id }) => {
+      if (isNotCacheable) {
+        return [code];
+      }
+      const cacheLoadCode = generateCacheLoadCode(entry);
+      const replayRecordedNotes = parse(
+        `await replayRecordedNotes('${path}', '${id}')`,
+        parseOptions
+      );
+      return [...cacheLoadCode, replayRecordedNotes];
+    };
+
+    const generateUpdateCode = ({
+      isNotCacheable,
+      code,
+      dependencies,
+      path,
+      id,
+    }) => {
+      if (isNotCacheable) {
+        return [code];
+      }
+
       const body = [];
       const seen = new Set();
       const walk = (dependencies) => {
@@ -126,28 +161,45 @@ export const toEcmascript = async (
             uncomputedInput = true;
           }
           walk(entry.dependencies);
-          body.push(entry.code);
+          body.push(...generateCacheLoadCode(entry));
         }
       };
       walk(dependencies);
+      body.push(parse(`info('define ${id}');`, parseOptions));
+      body.push(
+        parse(
+          `beginRecordingNotes('${path}', '${id}', { line: ${declaration.loc.start.line}, column: ${declaration.loc.start.column} })`,
+          parseOptions
+        )
+      );
       body.push(code);
+      // Only cache Shapes.
+      body.push(
+        parse(
+          `${id} instanceof Shape && await saveGeometry('data/def/${path}/${id}', ${id}) && await write('meta/def/${path}/${id}', { sha: '${sha}' });`,
+          parseOptions
+        )
+      );
+      body.push(
+        parse(`await saveRecordedNotes('${path}', '${id}')`, parseOptions)
+      );
       const program = { type: 'Program', body };
       return generate(program);
     };
 
-    const program = generateSubprogram();
-
     const isAllInputComputed = !uncomputedInput;
 
     const entry = {
+      path,
+      id,
       code,
       definition,
       dependencies,
-      program,
       sha,
       isAllInputComputed,
       sourceLocation: declaration.loc,
     };
+
     topLevel.set(id, entry);
 
     if (doExport) {
@@ -180,7 +232,19 @@ export const toEcmascript = async (
       }
     }
 
+    out.push(...generateReplayCode(entry));
+
+    const meta = await read(`meta/def/${path}/${id}`);
+    if (!meta || meta.sha !== sha) {
+      updates[`${path}/${id}`] = {
+        dependencies,
+        program: generateUpdateCode(entry),
+      };
+    }
+
+    /*
     out.push(parse(`info('define ${id}');`, parseOptions));
+    const meta = await read(`meta/def/${path}/${id}`);
 
     // Now that we have the sha, we can predict if it can be read from cache.
     const meta = await read(`meta/def/${path}/${id}`);
@@ -228,6 +292,7 @@ export const toEcmascript = async (
       );
     }
     out.push(parse(`Object.freeze(${id});`, parseOptions));
+*/
   };
 
   for (let nth = 0; nth < body.length; nth++) {
@@ -299,15 +364,6 @@ export const toEcmascript = async (
       ).body[0];
       const declarator = declaration.declarations[0];
       await declareVariable(declaration, declarator);
-      /*
-      out.push(
-        parse(
-          `emitSourceLocation({ line: ${entry.loc.end.line}, column: ${entry.loc.end.column} })`,
-          parseOptions
-        )
-      );
-      out.push(entry);
-*/
     } else {
       out.push(entry);
     }
