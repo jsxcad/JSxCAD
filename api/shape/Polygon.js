@@ -7,7 +7,7 @@ export const Polygon = (...points) => {
   for (const point of points) {
     point.eachPoint((p) => path.push(p));
   }
-  return Shape.fromGraph(fromPathsToGraph([{ points: path }]));
+  return Shape.fromGeometry(fromPathsToGraph({}, [{ points: path }]));
 };
 
 export default Polygon;

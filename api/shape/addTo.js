@@ -1,5 +1,4 @@
 import Shape from './Shape.js';
-import { add } from './add.js';
 
-export const addTo = (other) => (shape) => add(other, shape);
+export const addTo = (other) => (shape) => other.add(shape);
 Shape.registerMethod('addTo', addTo);

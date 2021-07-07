@@ -1094,6 +1094,9 @@ const fromPointsToSurfaceMesh = (points) => {
 };
 
 const fromPolygonsToSurfaceMesh = (jsPolygons) => {
+  if (!Array.isArray(jsPolygons)) {
+    throw Error('Expected an array');
+  }
   const c = getCgal();
   const surfaceMesh = c.FromPolygonSoupToSurfaceMesh((triples, polygons) => {
     let index = 0;
