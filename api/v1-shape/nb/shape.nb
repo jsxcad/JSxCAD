@@ -4,7 +4,10 @@ const add = Triangle(10)
   .gridView(256)
   .md(`Triangle(10).color('red').add(Box(5).color('blue'))`);
 
-const and = Box(5).and(Arc(5)).gridView(256).md(`Box(5).and(Arc(5))`);
+const and = Box(5)
+  .and(Arc(5))
+  .gridView({ size: 800, triangles: false, outline: true, wireframe: false })
+  .md(`Box(5).and(Arc(5))`);
 
 const addTo = Triangle(10)
   .color('red')
@@ -103,7 +106,7 @@ const pack = Group(...each((n) => Arc(n), { from: 1, to: 20 }))
   .gridView()
   .md(`Group(...each((n) => Arc(n), { from: 1, to: 20 })).pack()`);
 
-const peg = x.peg(Box(5)).view().md(`x.peg(Box(5))`);
+const peg = yz.peg(Box(5)).view().md(`x.peg(Box(5))`);
 
 const rotate = Box(5).rotate(45).gridView().md(`Box(5).rotate(45)`);
 
