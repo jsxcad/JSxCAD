@@ -830,6 +830,9 @@ class Ui extends React.PureComponent {
         let deleted = false;
         for (const hash of Object.keys(notebookData)) {
           const note = notebookData[hash];
+          if (!note) {
+            continue;
+          }
           if (!note.updated) {
             delete notebookData[hash];
             deleted = true;

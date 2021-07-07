@@ -2,7 +2,6 @@ import {
   arrangePolygonsWithHoles,
   fromPolygonsWithHolesToTriangles,
   fromTrianglesToGraph,
-  taggedGraph,
   taggedGroup,
   toPolygonsWithHoles,
 } from '@jsxcad/geometry';
@@ -26,8 +25,8 @@ export const weld =
     for (const { polygonsWithHoles } of arrangements) {
       // Keep the planar grouping.
       const triangles = fromPolygonsWithHolesToTriangles(polygonsWithHoles);
-      const graph = fromTrianglesToGraph(triangles);
-      welds.push(taggedGraph({}, graph));
+      const graph = fromTrianglesToGraph({}, triangles);
+      welds.push(graph);
     }
     // A group of planar welds.
     return Shape.fromGeometry(taggedGroup({}, ...welds));
@@ -35,7 +34,7 @@ export const weld =
 
 Shape.registerMethod('weld', weld);
 
-export const Weld = (...shapes) => weld(...shapes);
+export const Weld = (first, ...rest) => first.weld(...rest);
 
 Shape.prototype.Weld = Shape.shapeMethod(Weld);
 

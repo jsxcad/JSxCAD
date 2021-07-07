@@ -12,3 +12,6 @@ export const rz =
     );
 
 Shape.registerMethod('rz', rz);
+
+export const rotateZ = rz;
+Shape.registerMethod('rotateZ', rz);

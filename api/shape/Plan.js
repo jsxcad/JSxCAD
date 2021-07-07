@@ -1,4 +1,4 @@
-import { add, scale, subtract } from '@jsxcad/math-vec3';
+import { abs, add, scale, subtract } from '@jsxcad/math-vec3';
 
 import { Shape } from './Shape.js';
 import { identityMatrix } from '@jsxcad/math-mat4';
@@ -148,7 +148,7 @@ const defaultZag = 0.01;
 
 export const getSides = (geometry, otherwise = 32) => {
   const [scale] = getScale(geometry);
-  const [length, width] = scale;
+  let [length, width] = abs(scale);
   if (defaultZag !== undefined) {
     otherwise = zag(Math.max(length, width) * 2, defaultZag);
   }

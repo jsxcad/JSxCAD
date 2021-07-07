@@ -1,4 +1,3 @@
-import '@jsxcad/api-shape';
 import '@jsxcad/api-v1-gcode';
 import '@jsxcad/api-v1-pdf';
 import '@jsxcad/api-v1-tools';

@@ -2,9 +2,9 @@ import Shape from './Shape.js';
 import { fromRotation } from '@jsxcad/math-mat4';
 
 export const rotate =
-  (angle = 0, axis = [0, 0, 1]) =>
+  (turn = 0, axis = [0, 0, 1]) =>
   (shape) =>
-    shape.transform(fromRotation(angle * 0.017453292519943295, axis));
+    shape.transform(fromRotation(turn * Math.PI * 2, axis));
 
 Shape.registerMethod('rotate', rotate);
 

@@ -18,10 +18,10 @@ import { negate } from '@jsxcad/math-vec3';
 const Z = 2;
 
 registerReifier('Arc', (geometry) => {
-  let { start = 0, end = 360 } = getAngle(geometry);
+  let { start = 0, end = 1 } = getAngle(geometry);
 
   while (start > end) {
-    start -= 360;
+    start -= 1;
   }
 
   const [scale, middle] = getScale(geometry);
@@ -29,15 +29,15 @@ registerReifier('Arc', (geometry) => {
   const corner2 = getCorner2(geometry);
   const top = corner2[Z];
   const bottom = corner1[Z];
-  const step = 360 / getSides(geometry, 32);
+  const step = 1 / getSides(geometry, 32);
   const steps = Math.ceil((end - start) / step);
   const effectiveStep = (end - start) / steps;
 
   // FIX: corner1 is not really right.
-  if (end - start === 360) {
+  if (end - start === 1) {
     return Spiral((a) => [[1]], {
-      from: start - 90,
-      upto: end - 90,
+      from: start - 1 / 4,
+      upto: end - 1 / 4,
       by: effectiveStep,
     })
       .scale(...scale)
@@ -55,8 +55,8 @@ registerReifier('Arc', (geometry) => {
       .toGeometry();
   } else {
     return Spiral((a) => [[1]], {
-      from: start - 90,
-      to: end - 90,
+      from: start - 1 / 4,
+      to: end - 1 / 4,
       by: effectiveStep,
     })
       .scale(...scale)
