@@ -38,7 +38,7 @@ const clipFrom = Box(5)
 
 const color = Box(5).color('green').gridView().md(`Box(5).color('orange')`);
 
-const colors = Box(5)
+const colorsEx = Box(5)
   .color('green')
   .colors((colors, s) => {
     md`Colors are ${colors}`;
@@ -101,7 +101,7 @@ const orient = Line(10)
   .gridView()
   .md(`Line(10).orient({ at: [40, 50]})`);
 
-const pack = Group(...each((n) => Arc(n), { from: 1, to: 20 }))
+const pack = Group(...seq((n) => Arc(n), { from: 1, to: 20 }))
   .pack()
   .gridView()
   .md(`Group(...each((n) => Arc(n), { from: 1, to: 20 })).pack()`);
@@ -131,7 +131,7 @@ const rz = Box(1, 2, 3).rz(45).gridView().md(`Box(1, 2, 3).rz(45)`);
 
 const scale = Box(5).scale(1, 2).gridView().md(`Box(5).scale(1, 2)`);
 
-const size = Box(1, 2, 3)
+const sizeEx = Box(1, 2, 3)
   .size((size, shape) => {
     md`${JSON.stringify(size)}`;
     return shape;
