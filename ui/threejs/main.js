@@ -1,6 +1,6 @@
 export {
-  buildGui,
-  buildGuiControls,
+  // buildGui,
+  // buildGuiControls,
   buildTrackballControls,
 } from './controls.js';
 export { buildScene, createResizer } from './scene.js';

@@ -17,10 +17,18 @@ export const webService = async ({
       { webWorker, type: workerType },
       ({ webWorker, type }) => {
         const worker = new Worker(webWorker, { type: workerType });
-        const say = (message) => worker.postMessage(message);
+        const say = (message, transfer) =>
+          worker.postMessage(message, transfer);
         const { ask, hear } = conversation({ agent, say });
         const tell = (statement) => say({ statement });
-        const terminate = async () => worker.terminate();
+        const terminate = async () => {
+          worker.terminate();
+          releaseService(
+            { webWorker, type: workerType },
+            service,
+            /* terminated= */ true
+          );
+        };
         worker.onmessage = ({ data }) => hear(data);
         worker.onerror = (error) => {
           console.log(`QQ/webWorker/error: ${error}`);

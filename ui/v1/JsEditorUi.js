@@ -238,7 +238,12 @@ export class JsEditorUi extends React.PureComponent {
       // Construct the LineWidgets
       for (const definition of notesByDefinition.keys()) {
         try {
-          const { initSourceLocation } = advice.definitions.get(definition);
+          const entry = advice.definitions.get(definition);
+          if (!entry) {
+            console.log(`Missing definition: ${definition}`);
+            continue;
+          }
+          const { initSourceLocation } = entry;
           const notes = notesByDefinition.get(definition);
           const el = document.createElement('div');
           for (const note of notes) {

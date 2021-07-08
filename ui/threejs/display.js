@@ -1,15 +1,15 @@
 /* global ResizeObserver */
 
 import { GEOMETRY_LAYER, SKETCH_LAYER } from './layers.js';
-import {
-  buildGui,
-  buildGuiControls,
-  buildTrackballControls,
-} from './controls.js';
 import { buildScene, createResizer } from './scene.js';
 
 import { Layers } from 'three';
 import { buildMeshes } from './mesh.js';
+import {
+  // buildGui,
+  // buildGuiControls,
+  buildTrackballControls,
+} from './controls.js';
 
 export const display = async ({ view = {}, geometry } = {}, page) => {
   const datasets = [];
@@ -30,7 +30,7 @@ export const display = async ({ view = {}, geometry } = {}, page) => {
     planLayers,
   });
 
-  const { gui } = buildGui({ viewerElement });
+  // const { gui } = buildGui({ viewerElement });
   const render = () => {
     camera.layers.set(GEOMETRY_LAYER);
     renderer.render(scene, camera);
@@ -65,7 +65,7 @@ export const display = async ({ view = {}, geometry } = {}, page) => {
   new ResizeObserver(resize).observe(container);
 
   await buildMeshes({ datasets, geometry, scene });
-  buildGuiControls({ datasets, gui });
+  // buildGuiControls({ datasets /*, gui */ });
 
   const animate = () => {
     updateHud();

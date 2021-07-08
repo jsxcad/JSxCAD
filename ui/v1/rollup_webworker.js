@@ -6,10 +6,11 @@ import '@babel/preset-react';
 import babel from 'rollup-plugin-babel';
 import builtins from 'rollup-plugin-node-builtins';
 import commonjs from 'rollup-plugin-commonjs';
-import globals from 'rollup-plugin-node-globals';
 import hypothetical from 'rollup-plugin-hypothetical-windows-fix';
 import json from 'rollup-plugin-json';
 import nodeResolve from 'rollup-plugin-node-resolve';
+
+Error.stackTraceLimit = Infinity;
 
 export const watcher = {
   transform(code, id) {
@@ -62,12 +63,9 @@ export default {
         ],
         '../../node_modules/react-dom/index.js': ['findDOMNode'],
         '../../node_modules/react-recollect/index.js': ['collect'],
-        // '../../node_modules/ace-builds/src-noconflict/ext-language_tools': [
-        //   'addCompleter', 'setCompleters', 'snippetManager',
-        // ]
       },
     }),
-    globals(),
+    // globals(),
     hypothetical({
       allowFallthrough: true,
       allowRealFiles: true,

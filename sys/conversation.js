@@ -1,11 +1,11 @@
 export const conversation = ({ agent, say }) => {
   let id = 0;
   const openQuestions = new Map();
-  const ask = (question) => {
+  const ask = (question, transfer) => {
     const promise = new Promise((resolve, reject) => {
       openQuestions.set(id, { resolve, reject });
     });
-    say({ id, question });
+    say({ id, question }, transfer);
     id += 1;
     return promise;
   };

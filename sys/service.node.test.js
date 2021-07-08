@@ -36,18 +36,18 @@ test('Echo service', async (t) => {
 
     t.is(await askService(spec, 'A'), 'Worker Secret A');
     t.deepEqual(await getServicePoolInfo(), {
-      idleServiceCount: 1,
+      idleServiceCount: 0,
       idleServiceLimit: 5,
       pendingCount: 0,
-      activeServiceCount: 0,
+      activeServiceCount: 1,
       serviceLimit: 5,
     });
     t.is(await askService(spec, 'B'), 'Worker Secret B');
     t.deepEqual(await getServicePoolInfo(), {
-      idleServiceCount: 1,
+      idleServiceCount: 0,
       idleServiceLimit: 5,
       pendingCount: 0,
-      activeServiceCount: 0,
+      activeServiceCount: 1,
       serviceLimit: 5,
     });
   }
