@@ -94,7 +94,7 @@ export const orbitDisplay = async (
 
   const updateGeometry = async (
     geometry,
-    { withGrid = true, fit = true} = {}
+    { withGrid = true, fit = true } = {}
   ) => {
     // Delete any previous dataset in the window.
     for (const { mesh } of datasets) {
