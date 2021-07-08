@@ -1,9 +1,12 @@
-/* global postMessage, onmessage:writable, self */
+/* global FileReaderSync, postMessage, onmessage:writable, self */
 
 import * as sys from '@jsxcad/sys';
 
 import baseApi from '@jsxcad/api';
 import hashSum from 'hash-sum';
+
+// Compatibility with threejs.
+self.window = {};
 
 const resolveNotebook = async () => {
   await sys.resolvePending();
@@ -41,6 +44,18 @@ const agent = async ({ ask, question, statement }) => {
   if ((statement || question).touchFile) {
     const { path, workspace } = (statement || question).touchFile;
     await sys.touch(path, { workspace });
+  } else if (question.staticView) {
+    const { path, workspace, view, offscreenCanvas } = question.staticView;
+    const geometry = await sys.readOrWatch(path, { workspace });
+    const { staticView } = await import('@jsxcad/ui-threejs');
+    await staticView(baseApi.Shape.fromGeometry(geometry), {
+      ...view,
+      canvas: offscreenCanvas,
+    });
+    const blob = await offscreenCanvas.convertToBlob({ type: 'image/png' });
+    const dataURL = new FileReaderSync().readAsDataURL(blob);
+    console.log(`QQ/rendered: ${path}`);
+    return dataURL;
   } else if (question.evaluate) {
     sys.setupFilesystem({ fileBase: question.workspace });
     sys.clearEmitted();

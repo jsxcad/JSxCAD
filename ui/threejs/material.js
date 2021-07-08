@@ -1,24 +1,43 @@
 import {
+  CanvasTexture,
+  ImageBitmapLoader,
   MeshNormalMaterial,
   MeshPhongMaterial,
   MeshPhysicalMaterial,
   RepeatWrapping,
-  TextureLoader,
+  // TextureLoader,
 } from 'three';
 
 import { setColor } from './color.js';
 import { toThreejsMaterialFromTags } from '@jsxcad/algorithm-material';
 
-const loader = new TextureLoader();
+// Map of url to texture promises;
+const textureCache = new Map();
 
-// FIX: Make this lazy.
-const loadTexture = (url) =>
-  new Promise((resolve, reject) => {
-    const texture = loader.load(url, resolve);
-    texture.wrapS = texture.wrapT = RepeatWrapping;
-    texture.offset.set(0, 0);
-    texture.repeat.set(1, 1);
-  });
+const loadTexture = (url) => {
+  if (!textureCache.has(url)) {
+    textureCache.set(
+      url,
+      new Promise((resolve, reject) => {
+        const loader = new ImageBitmapLoader();
+        loader.setOptions({ imageOrientation: 'flipY' });
+        loader.load(
+          url,
+          (imageBitmap) => {
+            const texture = new CanvasTexture(imageBitmap);
+            texture.wrapS = texture.wrapT = RepeatWrapping;
+            texture.offset.set(0, 0);
+            texture.repeat.set(1, 1);
+            resolve(texture);
+          },
+          (progress) => console.log(`Loading: ${url}`),
+          reject
+        );
+      })
+    );
+  }
+  return textureCache.get(url);
+};
 
 const merge = async (properties, parameters) => {
   for (const key of Object.keys(properties)) {

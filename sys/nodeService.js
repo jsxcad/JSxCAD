@@ -12,10 +12,13 @@ export const nodeService = async ({
   const { Worker } = await import('worker_threads');
   return acquireService({ nodeWorker }, ({ nodeWorker }) => {
     const worker = new Worker(nodeWorker);
-    const say = (message) => worker.postMessage(message);
+    const say = (message, transfer) => worker.postMessage(message, transfer);
     const { ask, hear } = conversation({ agent, say });
     const tell = (statement) => say({ statement });
-    const terminate = async () => worker.terminate();
+    const terminate = async () => {
+      worker.terminate();
+      releaseService({ nodeWorker }, service, /* terminated= */ true);
+    };
     worker.on('message', hear);
     const service = { ask, tell, terminate };
     service.release = async () => releaseService({ nodeWorker }, service);

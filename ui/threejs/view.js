@@ -1,15 +1,16 @@
 import { orbitDisplay } from './orbitDisplay.js';
 import { staticDisplay } from './staticDisplay.js';
 
-const toCanvasFromWebglContext = (webgl) => {
-  const { width, height } = webgl.canvas;
-  const outCanvas = document.createElement('canvas');
+/*
+export const toCanvasFromWebglCanvas = (canvas, webglCanvas) => {
+  const { width, height } = webglCanvas;
   outCanvas.width = width;
   outCanvas.height = height;
   const outContext = outCanvas.getContext('2d');
-  outContext.drawImage(webgl.canvas, 0, 0, width, height);
+  outContext.drawImage(webglCanvas, 0, 0, width, height);
   return outCanvas;
 };
+*/
 
 const UP = [0, 0.0001, 1];
 
@@ -24,11 +25,13 @@ export const staticView = async (
     withAxes = false,
     withGrid = false,
     definitions,
+    canvas,
   } = {}
 ) => {
-  const { renderer } = await staticDisplay(
+  const { canvas: rendererCanvas } = await staticDisplay(
     {
       view: { target, position, up },
+      canvas,
       geometry: shape.toDisplayGeometry(),
       withAxes,
       withGrid,
@@ -36,18 +39,21 @@ export const staticView = async (
     },
     { offsetWidth: width, offsetHeight: height }
   );
-  const canvas = toCanvasFromWebglContext(renderer.getContext());
-  canvas.style = `width: ${width}px; height: ${height}px`;
-  renderer.forceContextLoss();
-  return canvas;
+  // const canvas = toCanvasFromWebglContext(renderer.getContext());
+  // canvas.style = `width: ${width}px; height: ${height}px`;
+  // const canvas = renderer.domElement;
+  // renderer.forceContextLoss();
+  return rendererCanvas;
 };
 
-export const dataUrl = async (...args) =>
-  (await staticView(...args)).toDataURL('png');
+export const dataUrl = async (shape, options) => {
+  const dataUrl = (await staticView(shape, options)).toDataURL('png');
+  return dataUrl;
+};
 
-export const image = async (...args) => {
+export const image = async (shape, options) => {
   const image = document.createElement('img');
-  const dataUrl = (await staticView(...args)).toDataURL('png');
+  const dataUrl = (await staticView(shape, options)).toDataURL('png');
   image.src = dataUrl;
   return image;
 };

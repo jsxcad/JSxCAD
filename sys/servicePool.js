@@ -17,7 +17,7 @@ export const acquireService = async (spec, newService) => {
     return service;
   } else if (activeServices.size < serviceLimit) {
     // Create a new service.
-    const service = await newService(spec);
+    const service = newService(spec);
     activeServices.add(service);
     return service;
   } else {
@@ -28,8 +28,10 @@ export const acquireService = async (spec, newService) => {
   }
 };
 
-export const releaseService = async (spec, service) => {
-  if (pending.length > 0) {
+export const releaseService = async (spec, service, terminated = false) => {
+  if (terminated) {
+    activeServices.drop(service);
+  } else if (pending.length > 0) {
     // Send it directly to someone who needs it.
     // FIX: Consider different specifications.
     const request = pending.shift();
@@ -65,7 +67,7 @@ export const terminateActiveServices = async () => {
   // TODO: Enable up to activeService worth of pending tasks.
   while (pending.length < 0 && getServiceCount() < serviceLimit) {
     const { spec, newService, resolve } = pending.shift();
-    const service = await newService(spec);
+    const service = newService(spec);
     activeServices.add(service);
     resolve(service);
   }

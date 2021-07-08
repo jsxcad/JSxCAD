@@ -19,7 +19,7 @@ export const createService = async ({
   }
 };
 
-export const askService = (spec, question) => {
+export const askService = (spec, question, transfer) => {
   let cancel;
   const promise = new Promise((resolve, reject) => {
     let ask, release, terminate;
@@ -30,22 +30,23 @@ export const askService = (spec, question) => {
         terminate = service.terminate;
         cancel = () => {
           terminate();
+          release = false;
           reject(Error('Terminated'));
         };
       })
-      .then(() => ask(question))
+      .then(() => ask(question, transfer))
       .then((answer) => {
-        if (release) {
-          release();
-        }
         resolve(answer);
       })
       .catch((error) => {
         console.log(`QQ/askService: ${error.stack}`);
+        reject(error);
+      })
+      .finally(() => {
+        if (release) {
+          release();
+        }
       });
-    cancel = () => {
-      reject(Error('Cancelled'));
-    };
   });
   promise.cancel = cancel;
   return promise;

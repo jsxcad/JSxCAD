@@ -1,4 +1,4 @@
-import * as dat from 'dat.gui';
+// import * as dat from 'dat.gui';
 
 import { TrackballControls } from 'three/examples/jsm/controls/TrackballControls';
 
@@ -21,6 +21,7 @@ export const buildTrackballControls = ({
   return { trackball };
 };
 
+/*
 export const buildGui = ({ viewerElement }) => {
   const gui = new dat.GUI({ autoPlace: false, closed: true });
   gui.domElement.style = 'padding: 5px; z-index: 3';
@@ -54,3 +55,4 @@ export const buildGuiControls = ({ datasets, gui }) => {
 
   return count;
 };
+*/
