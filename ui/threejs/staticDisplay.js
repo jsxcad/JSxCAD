@@ -26,7 +26,14 @@ const release = async () => {
 };
 
 export const staticDisplay = async (
-  { view = {}, geometry, withAxes = false, withGrid = false, definitions } = {},
+  {
+    view = {},
+    canvas,
+    geometry,
+    withAxes = false,
+    withGrid = false,
+    definitions,
+  } = {},
   page
 ) => {
   if (locked === true) await acquire();
@@ -42,13 +49,20 @@ export const staticDisplay = async (
   const planLayers = new Layers();
   planLayers.set(SKETCH_LAYER);
 
-  const { camera, canvas, renderer, scene } = buildScene({
+  const {
+    camera,
+    canvas: displayCanvas,
+    renderer,
+    scene,
+  } = buildScene({
+    canvas,
     width,
     height,
     view,
     geometryLayers,
     planLayers,
     withAxes,
+    preserveDrawingBuffer: true,
   });
 
   const render = () => {
@@ -70,7 +84,7 @@ export const staticDisplay = async (
 
   await release();
 
-  return { canvas, renderer };
+  return { canvas: displayCanvas, renderer };
 };
 
 export default staticDisplay;

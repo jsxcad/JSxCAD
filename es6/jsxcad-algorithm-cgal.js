@@ -1,4 +1,4 @@
-import { emit, log, onBoot, isNode } from './jsxcad-sys.js';
+import { onBoot, emit, log, isNode } from './jsxcad-sys.js';
 import { identityMatrix } from './jsxcad-math-mat4.js';
 import { equals } from './jsxcad-math-vec3.js';
 

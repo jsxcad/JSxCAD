@@ -16,7 +16,6 @@ import {
   readOrWatch,
   resolvePending,
   setupFilesystem,
-  sleep,
   tellServices,
   terminateActiveServices,
   touch,
@@ -192,6 +191,9 @@ class Ui extends React.PureComponent {
 
         const { note } = question;
         const { notebookData, notebookRef } = this.state;
+        if (note.data === undefined && note.path) {
+          note.data = await readOrWatch(note.path);
+        }
         if (notebookData[note.hash]) {
           // It's already in the notebook.
           notebookData[note.hash].updated = true;
@@ -199,10 +201,21 @@ class Ui extends React.PureComponent {
         } else {
           notebookData[note.hash] = note;
         }
-        note.updated = true;
-        if (note.data === undefined && note.path) {
-          note.data = await readOrWatch(note.path);
+        const entry = notebookData[note.hash];
+        if (entry.view && !entry.url) {
+          const { path, view } = note;
+          const { width, height } = view;
+          const canvas = document.createElement('canvas');
+          canvas.width = width;
+          canvas.height = height;
+          const offscreenCanvas = canvas.transferControlToOffscreen();
+          ask({ staticView: { path, workspace, view, offscreenCanvas } }, [
+            offscreenCanvas,
+          ]).then((url) => {
+            entry.domElement.src = url;
+          });
         }
+        note.updated = true;
         if (notebookRef) {
           notebookRef.forceUpdate();
         }
@@ -218,8 +231,8 @@ class Ui extends React.PureComponent {
       workerType: 'module',
     };
 
-    const ask = async (question, context) =>
-      askService(serviceSpec, question, context);
+    const ask = async (question, transfer) =>
+      askService(serviceSpec, question, transfer);
 
     this.setState({
       ask,
@@ -775,7 +788,36 @@ class Ui extends React.PureComponent {
         updates,
       });
       jsEditorAdvice.definitions = topLevel;
-      const pending = new Set();
+      const scheduled = new Map();
+      const pending = new Set(Object.keys(updates));
+      const schedule = () => {
+        console.log(`Updates remaining ${[...pending].join(', ')}`);
+        for (const id of [...pending]) {
+          const entry = updates[id];
+          const outstandingDependencies = entry.dependencies.filter(
+            (dependency) => updates[dependency]
+          );
+          if (outstandingDependencies.length === 0) {
+            console.log(`Scheduling: ${id}`);
+            pending.delete(id);
+            scheduled.set(
+              id,
+              ask({ evaluate: updates[id].program, workspace, path, sha })
+                .then(() => {
+                  console.log(`Completed ${id}`);
+                  delete updates[id];
+                })
+                .catch((e) => window.alert(e.stack))
+            );
+          }
+        }
+      };
+      while (pending.size > 0) {
+        schedule();
+        await waitServices();
+      }
+      /*
+      const scheduled = new Set();
       for (;;) {
         console.log(
           `QQ/servicePoolInfo: ${JSON.stringify(getServicePoolInfo())}`
@@ -794,7 +836,7 @@ class Ui extends React.PureComponent {
         console.log(`Updates remaining ${todo.join(', ')}`);
         let updated = false;
         for (const id of todo) {
-          if (pending.has(id)) {
+          if (scheduled.has(id)) {
             continue;
           }
           const entry = updates[id];
@@ -803,7 +845,7 @@ class Ui extends React.PureComponent {
           );
           if (outstandingDependencies.length === 0) {
             console.log(`Scheduling: ${id}`);
-            pending.add(id);
+            scheduled.add(id);
             ask({ evaluate: updates[id].program, workspace, path, sha })
               .then(() => {
                 console.log(`Completed ${id}`);
@@ -818,10 +860,11 @@ class Ui extends React.PureComponent {
         if (updated === false && getServicePoolInfo().activeServiceCount > 0) {
           await waitServices();
         } else {
-          // Yield to allow pending to update.
+          // We can get stuck here if a task failed.
           await sleep(0);
         }
       }
+*/
       await ask({ evaluate: ecmascript, workspace, path, sha });
       await resolvePending();
       // Finalize the notebook

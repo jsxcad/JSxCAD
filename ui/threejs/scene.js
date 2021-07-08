@@ -34,6 +34,7 @@ export const buildScene = ({
   view,
   withAxes = true,
   renderer,
+  preserveDrawingBuffer = false,
 }) => {
   const { target = [0, 0, 0], position = [40, 40, 40], up = [0, 1, 1] } = view;
   Object3D.DefaultUp.set(...up);
@@ -63,9 +64,13 @@ export const buildScene = ({
   camera.add(light);
 
   if (renderer === undefined) {
-    renderer = new WebGLRenderer({ antialias: true, canvas });
+    renderer = new WebGLRenderer({
+      antialias: true,
+      canvas,
+      preserveDrawingBuffer,
+    });
     renderer.autoClear = false;
-    renderer.setSize(width, height);
+    renderer.setSize(width, height, /* updateStyle= */ false);
     renderer.setClearColor(0xffffff);
     renderer.antiAlias = false;
     renderer.inputGamma = true;
