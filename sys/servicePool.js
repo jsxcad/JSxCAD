@@ -30,7 +30,7 @@ export const acquireService = async (spec, newService) => {
 
 export const releaseService = async (spec, service, terminated = false) => {
   if (terminated) {
-    activeServices.drop(service);
+    activeServices.delete(service);
   } else if (pending.length > 0) {
     // Send it directly to someone who needs it.
     // FIX: Consider different specifications.
