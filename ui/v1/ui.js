@@ -1,7 +1,6 @@
 /* global FileReader, btoa, history, location */
 
 import SplitPane, { Pane } from 'react-split-pane';
-
 import {
   askService,
   ask as askSys,
@@ -21,7 +20,7 @@ import {
   touch,
   unwatchFileCreation,
   unwatchFileDeletion,
-  waitServices,
+  // waitServices,
   watchFileCreation,
   watchFileDeletion,
   write,
@@ -44,10 +43,11 @@ import PropTypes from 'prop-types';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import Spinner from 'react-bootstrap/Spinner';
+import { execute } from '@jsxcad/api';
 import { fromPointsToAlphaShape2AsPolygonSegments } from '@jsxcad/algorithm-cgal';
 import { getNotebookControlData } from '@jsxcad/ui-notebook';
 import marked from 'marked';
-import { toEcmascript } from '@jsxcad/compiler';
+// import { toEcmascript } from '@jsxcad/compiler';
 import { writeGist } from './gist.js';
 import { writeToGithub } from './github.js';
 
@@ -212,6 +212,7 @@ class Ui extends React.PureComponent {
           ask({ staticView: { path, workspace, view, offscreenCanvas } }, [
             offscreenCanvas,
           ]).then((url) => {
+            // Is there a race condition here?
             entry.domElement.src = url;
           });
         }
@@ -781,6 +782,16 @@ class Ui extends React.PureComponent {
       await write(`control/${path}`, notebookControlData);
 
       let script = jsEditorData;
+      const evaluate = (script) =>
+        ask({ evaluate: script, workspace, path, sha });
+      jsEditorAdvice.definitions = topLevel;
+      await execute(script, {
+        evaluate,
+        path,
+        topLevel,
+        onError: (e) => window.alert(e.stack),
+      });
+      /*
       const updates = {};
       const ecmascript = await toEcmascript(script, {
         path,
@@ -816,56 +827,8 @@ class Ui extends React.PureComponent {
         schedule();
         await waitServices();
       }
-      /*
-      const scheduled = new Set();
-      for (;;) {
-        console.log(
-          `QQ/servicePoolInfo: ${JSON.stringify(getServicePoolInfo())}`
-        );
-        while (getServicePoolInfo().activeServiceCount > 5) {
-          await waitServices();
-          console.log(
-            `QQ/servicePoolInfo: ${JSON.stringify(getServicePoolInfo())}`
-          );
-        }
-        const todo = Object.keys(updates);
-        if (todo.length === 0) {
-          console.log('Updates complete');
-          break;
-        }
-        console.log(`Updates remaining ${todo.join(', ')}`);
-        let updated = false;
-        for (const id of todo) {
-          if (scheduled.has(id)) {
-            continue;
-          }
-          const entry = updates[id];
-          const outstandingDependencies = entry.dependencies.filter(
-            (dependency) => updates[dependency]
-          );
-          if (outstandingDependencies.length === 0) {
-            console.log(`Scheduling: ${id}`);
-            scheduled.add(id);
-            ask({ evaluate: updates[id].program, workspace, path, sha })
-              .then(() => {
-                console.log(`Completed ${id}`);
-                delete updates[id];
-              })
-              .catch((e) => window.alert(e.stack));
-            updated = true;
-            // Avoid overscheduling.
-            break;
-          }
-        }
-        if (updated === false && getServicePoolInfo().activeServiceCount > 0) {
-          await waitServices();
-        } else {
-          // We can get stuck here if a task failed.
-          await sleep(0);
-        }
-      }
-*/
       await ask({ evaluate: ecmascript, workspace, path, sha });
+*/
       await resolvePending();
       // Finalize the notebook
       {

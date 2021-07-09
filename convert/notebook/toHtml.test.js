@@ -15,13 +15,12 @@ test('Test notebook', async (t) => {
     { md: '# Test Notebook.' },
     { md: '## A Sphere.' },
     {
-      view: {
-        geometry: {
-          type: 'triangles',
-          triangles: unitGeodesicSphere20Polygons,
-          tags: ['solid'],
-        },
+      data: {
+        type: 'triangles',
+        triangles: unitGeodesicSphere20Polygons,
+        tags: ['solid'],
       },
+      view: { width: 512, height: 512, position: [50, 50, 50] },
     },
   ];
   const html = await toHtml(notebook);
