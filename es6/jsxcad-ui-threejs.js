@@ -51223,6 +51223,8 @@ const moveToFit = ({
     return;
   }
 
+  controls.reset();
+
   const center = box.getCenter(new Vector3());
   // const size = box.getSize(new Vector3());
 
@@ -51346,11 +51348,16 @@ const orbitDisplay = async (
     render();
   }).observe(page);
 
-  const updateGeometry = async (geometry) => {
+  const updateGeometry = async (
+    geometry,
+    { withGrid = true, fit = true } = {}
+  ) => {
     // Delete any previous dataset in the window.
     for (const { mesh } of datasets) {
       scene.remove(mesh);
     }
+
+    view = { ...view, fit };
 
     // Build new datasets from the written data, and display them.
     datasets = [];

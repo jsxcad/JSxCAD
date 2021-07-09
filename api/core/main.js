@@ -53,4 +53,6 @@ registerDynamicModule(module('svg'), '@jsxcad/api-v1-svg');
 registerDynamicModule(module('threejs'), '@jsxcad/api-v1-threejs');
 registerDynamicModule(module('units'), '@jsxcad/api-v1-units');
 
+export { evaluate, execute } from './evaluate.js';
+
 export default api;

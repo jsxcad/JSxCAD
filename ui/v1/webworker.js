@@ -2,7 +2,7 @@
 
 import * as sys from '@jsxcad/sys';
 
-import baseApi from '@jsxcad/api';
+import baseApi, { evaluate } from '@jsxcad/api';
 import hashSum from 'hash-sum';
 
 // Compatibility with threejs.
@@ -71,9 +71,12 @@ const agent = async ({ ask, question, statement }) => {
     });
     try {
       const ecmascript = question.evaluate;
+      const { path, sha = 'master' } = question;
       console.log({ op: 'text', text: `QQ/script: ${question.evaluate}` });
       console.log({ op: 'text', text: `QQ/ecmascript: ${ecmascript}` });
-      const api = { ...baseApi, sha: question.sha || 'master' };
+      const api = { ...baseApi, sha };
+      const exports = await evaluate(ecmascript, { api, path });
+      /*
       const builder = new Function(
         `{ ${Object.keys(api).join(', ')} }`,
         `return async () => { ${ecmascript} };`
@@ -85,6 +88,7 @@ const agent = async ({ ask, question, statement }) => {
       } finally {
         sys.popModule();
       }
+*/
       await sys.log({
         op: 'text',
         text: 'Evaluation Succeeded',
@@ -92,6 +96,7 @@ const agent = async ({ ask, question, statement }) => {
       });
       await sys.log({ op: 'evaluate', status: 'success' });
       // Wait for any pending operations.
+      return exports;
     } catch (error) {
       reportError(error);
       await sys.log({
