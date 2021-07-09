@@ -1,8 +1,11 @@
-const arc = Arc(5).angle(45, 270).gridView().md(`Arc(5).angle(45, 270)`);
+const arc = Arc(5)
+  .hasAngle(45 / 360, 270 / 360)
+  .gridView()
+  .md(`Arc(5).angle(45/360, 270/360)`);
 
 const assembly = Assembly(Box(10), Arc(8), Triangle(5))
   .pack()
-  .gridView()
+  .gridView({ size: 801, triangles: false, wireframe: false })
   .md(`Assembly(Box(10), Arc(8), Triangle(5))`);
 
 const box = Box(5, 7, 8).view().md(`Box(5, 7, 8)`);
@@ -58,17 +61,9 @@ const implicit = Implicit(torusFn, { radius: 2 })
 
 const line = Line(5, -1).rz(45).gridView().md(`Line(5, -1)`);
 
-const loopedHull = LoopedHull(
-  ...each((a) => Arc(5).x(5).ry(a), { to: 360, by: 360 / 12 })
-)
-  .view()
-  .md(
-    `LoopedHull(...each((a) => Arc(5).x(5).ry(a), { to: 360, by: 360 / 12 }))`
-  );
-
 const octagon = Octagon(5).gridView().md(`Octagon(5)`);
 
-const orb = Orb(5).view().md(`Orb(5)`);
+const orb = Orb(5).hasSides(20).view().md(`Orb(5)`);
 
 const path = Path(Point(0), Point(5), Point(5, 5), Point(0))
   .rz(45 / 2)
@@ -89,9 +84,9 @@ const points = Points([0.5, 0.5], [-0.5, -0.5])
   .md(`Points([0.5, 0.5], [-0.5, -0.5])`);
 
 const polygon = Polygon(Point(0), Point(5), Point(5, 5))
-  .rz(45 / 2)
+  .rz(1 / 16)
   .gridView()
-  .md(`Polygon(Point(0), Point(5), Point(5, 5)).rz(45 / 2)`);
+  .md(`Polygon(Point(0), Point(5), Point(5, 5)).rz(1 / 16)`);
 
 const polyhedron = Polyhedron(
   [

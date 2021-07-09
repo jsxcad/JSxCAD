@@ -92,11 +92,16 @@ export const orbitDisplay = async (
     render();
   }).observe(page);
 
-  const updateGeometry = async (geometry) => {
+  const updateGeometry = async (
+    geometry,
+    { withGrid = true, fit = true } = {}
+  ) => {
     // Delete any previous dataset in the window.
     for (const { mesh } of datasets) {
       scene.remove(mesh);
     }
+
+    view = { ...view, fit };
 
     // Build new datasets from the written data, and display them.
     datasets = [];
