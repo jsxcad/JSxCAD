@@ -101,7 +101,7 @@ export const orbitDisplay = async (
       scene.remove(mesh);
     }
 
-    view.fit = fit;
+    view = { ...view, fit };
 
     // Build new datasets from the written data, and display them.
     datasets = [];
