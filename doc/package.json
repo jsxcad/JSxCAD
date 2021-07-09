@@ -26,7 +26,7 @@
   "keywords": [],
   "license": "MIT",
   "dependencies": {
-    "@jsxcad/api-v1": "^0.0.79",
+    "@jsxcad/api": "^0.0.79",
     "@jsxcad/convert-notebook": "^0.0.79",
     "@jsxcad/sys": "^0.0.79",
     "image-data-uri": "^2.0.1",

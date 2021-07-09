@@ -91,6 +91,7 @@ typedef Kernel::Line_3 Line;
 typedef Kernel::Plane_3 Plane;
 typedef Kernel::Point_2 Point_2;
 typedef Kernel::Point_3 Point;
+typedef Kernel::Segment_3 Segment;
 typedef Kernel::Vector_2 Vector_2;
 typedef Kernel::Vector_3 Vector;
 typedef Kernel::Direction_3 Direction;
@@ -935,7 +936,49 @@ Surface_mesh* LoftBetweenCongruentSurfaceMeshes(bool closed, emscripten::val fil
   return loft;
 }
 
-void SplitSurfaceMesh(Surface_mesh* input, bool keep_volumes, bool keep_cavities_in_volumes, bool keep_cavities_as_volumes, emscripten::val emit_mesh) {
+class SurfaceMeshQuery {
+ typedef CGAL::AABB_face_graph_triangle_primitive<Surface_mesh> Primitive;
+ typedef CGAL::AABB_traits<Kernel, Primitive> Traits;
+ typedef CGAL::AABB_tree<Traits> Tree;
+ typedef boost::optional<Tree::Intersection_and_primitive_id<Point>::Type> Point_intersection;
+ typedef boost::optional<Tree::Intersection_and_primitive_id<Segment>::Type> Segment_intersection;
+
+ public:
+  SurfaceMeshQuery(Surface_mesh* mesh) {
+    tree_.reset(new Tree(faces(*mesh).first, faces(*mesh).second, *mesh));
+  }
+
+  bool isIntersectingPointApproximate(double x, double y, double z) {
+    return tree_->do_intersect(Point(x, y, z));
+  }
+
+  void clipSegmentApproximate(double source_x, double source_y, double source_z, double target_x, double target_y, double target_z, emscripten::val emit_segment) {
+    Segment segment_query(Point(source_x, source_y, source_z), Point(target_x, target_y, target_z));
+    std::list<Segment_intersection> intersections;
+    tree_->all_intersections(segment_query, std::back_inserter(intersections));
+    for (const auto& intersection : intersections) {
+      if (!intersection) {
+        continue;
+      }
+      // Note: intersection->second is the intersected face index.
+      if (const Segment* segment = boost::get<Segment>(&intersection->first)) {
+        const auto& source = segment->source();
+        const auto& target = segment->target();
+        emit_segment(CGAL::to_double(source.x().exact()),
+                     CGAL::to_double(source.y().exact()),
+                     CGAL::to_double(source.z().exact()),
+                     CGAL::to_double(target.x().exact()),
+                     CGAL::to_double(target.y().exact()),
+                     CGAL::to_double(target.z().exact()));
+      }
+    }
+  }
+
+ private:
+  std::unique_ptr<Tree> tree_;
+};
+
+void SeparateSurfaceMesh(Surface_mesh* input, bool keep_volumes, bool keep_cavities_in_volumes, bool keep_cavities_as_volumes, emscripten::val emit_mesh) {
   std::vector<Surface_mesh> meshes;
   std::vector<Surface_mesh> cavities;
   std::vector<Surface_mesh> volumes;
@@ -1668,7 +1711,7 @@ double FT__to_double(const FT& ft) {
 class Surface_mesh_explorer {
  public:
   Surface_mesh_explorer(emscripten::val& emit_point, emscripten::val& emit_edge, emscripten::val& emit_face)
-    : _emit_point(emit_point), _emit_edge(emit_edge), _emit_face(emit_face) {}
+    : emit_point_(emit_point), emit_edge_(emit_edge), emit_face_(emit_face) {}
 
   std::map<std::int32_t, std::int32_t> facet_to_face;
 
@@ -1701,7 +1744,7 @@ class Surface_mesh_explorer {
       std::ostringstream x; x << p.x().exact(); std::string xs = x.str();
       std::ostringstream y; y << p.y().exact(); std::string ys = y.str();
       std::ostringstream z; z << p.z().exact(); std::string zs = z.str();
-      _emit_point((std::int32_t)vertex, CGAL::to_double(p.x().exact()), CGAL::to_double(p.y().exact()), CGAL::to_double(p.z().exact()),
+      emit_point_((std::int32_t)vertex, CGAL::to_double(p.x().exact()), CGAL::to_double(p.y().exact()), CGAL::to_double(p.z().exact()),
                   xs, ys, zs);
     }
 
@@ -1754,7 +1797,7 @@ class Surface_mesh_explorer {
       const auto& facet = mesh.face(edge);
       facet_to_vertex[facet] = source;
       std::int32_t face = mapFacetToFace(facet);
-      _emit_edge((std::int32_t)edge,
+      emit_edge_((std::int32_t)edge,
                  (std::int32_t)source,
                  (std::int32_t)next,
                  (std::int32_t)opposite,
@@ -1785,14 +1828,14 @@ class Surface_mesh_explorer {
       const double ld = std::sqrt(xd * xd + yd * yd + zd * zd);
       const double wd = CGAL::to_double(d);
       // Normalize the approximate plane normal.
-      _emit_face(facet, xd / ld, yd / ld, zd / ld, wd, xs, ys, zs, ws);
+      emit_face_(facet, xd / ld, yd / ld, zd / ld, wd, xs, ys, zs, ws);
     }
   }
 
  private:
-  emscripten::val& _emit_point;
-  emscripten::val& _emit_edge;
-  emscripten::val& _emit_face;
+  emscripten::val& emit_point_;
+  emscripten::val& emit_edge_;
+  emscripten::val& emit_face_;
 };
 
 void Surface_mesh__explore(Surface_mesh* mesh, emscripten::val emit_point, emscripten::val emit_edge, emscripten::val emit_face) {
@@ -3158,6 +3201,9 @@ EMSCRIPTEN_BINDINGS(module) {
     .function("y", &Point::y)
     .function("z", &Point::z);
 
+  emscripten::class_<SurfaceMeshQuery>("SurfaceMeshQuery")
+    .constructor<Surface_mesh*>();
+
   emscripten::function("SerializeSurfaceMesh", &SerializeSurfaceMesh, emscripten::allow_raw_pointers());
   emscripten::function("DeserializeSurfaceMesh", &DeserializeSurfaceMesh, emscripten::allow_raw_pointers());
 
@@ -3165,7 +3211,7 @@ EMSCRIPTEN_BINDINGS(module) {
   emscripten::function("DifferenceOfSurfaceMeshes", &DifferenceOfSurfaceMeshes, emscripten::allow_raw_pointers());
   emscripten::function("IntersectionOfSurfaceMeshes", &IntersectionOfSurfaceMeshes, emscripten::allow_raw_pointers());
   emscripten::function("UnionOfSurfaceMeshes", &UnionOfSurfaceMeshes, emscripten::allow_raw_pointers());
-  emscripten::function("SplitSurfaceMesh", &SplitSurfaceMesh, emscripten::allow_raw_pointers());
+  emscripten::function("SeparateSurfaceMesh", &SeparateSurfaceMesh, emscripten::allow_raw_pointers());
 
   emscripten::function("TwistSurfaceMesh", &TwistSurfaceMesh, emscripten::allow_raw_pointers());
   emscripten::function("BendSurfaceMesh", &BendSurfaceMesh, emscripten::allow_raw_pointers());

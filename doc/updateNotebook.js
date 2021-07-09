@@ -5,9 +5,9 @@ import {
   read,
   resolvePending,
 } from '@jsxcad/sys';
-import { importModule, log } from '@jsxcad/api-v1';
 import { readFileSync, writeFileSync } from 'fs';
 
+import api from '@jsxcad/api';
 import imageDataUri from 'image-data-uri';
 import pathModule from 'path';
 import pixelmatch from 'pixelmatch';
@@ -34,13 +34,17 @@ const writeMarkdown = (path, notebook, imageUrls) => {
 };
 
 export const updateNotebook = async (target) => {
+  console.log(`QQ/updateNotebook/0`);
   clearEmitted();
   await boot();
+  console.log(`QQ/updateNotebook/1`);
   try {
-    await importModule(`${target}.nb`);
+    await api.importModule(`${target}.nb`);
   } catch (error) {
-    log(error.stack);
+    console.log(`QQ/updateNotebook/1/error`);
+    api.log(error.stack);
   }
+  console.log(`QQ/updateNotebook/2`);
   await resolvePending();
   const notebook = getEmitted();
   for (const note of notebook) {
@@ -51,16 +55,21 @@ export const updateNotebook = async (target) => {
       note.data = await read(note.path);
     }
   }
+  console.log(`QQ/updateNotebook/3`);
   const html = await toHtml(notebook);
+  console.log(`QQ/updateNotebook/4`);
   writeFileSync(`${target}.html`, html);
+  console.log(`QQ/updateNotebook/5`);
   const { pngData, imageUrls } = await screenshot(
     new TextDecoder('utf8').decode(html),
     `${target}.png`
   );
+  console.log(`QQ/updateNotebook/6`);
   await writeMarkdown(target, notebook, imageUrls);
   writeFileSync(`${target}.observed.png`, pngData);
   const observedPng = pngjs.PNG.sync.read(pngData);
   let expectedPng;
+  console.log(`QQ/updateNotebook/7`);
   try {
     expectedPng = pngjs.PNG.sync.read(readFileSync(`${target}.png`));
   } catch (error) {

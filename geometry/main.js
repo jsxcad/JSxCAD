@@ -105,7 +105,7 @@ export { scale as scalePath } from './path/ops.js';
 export { scale as scalePaths } from './paths/ops.js';
 export { section } from './tagged/section.js';
 export { smooth } from './tagged/smooth.js';
-export { split } from './tagged/split.js';
+export { separate } from './tagged/separate.js';
 export { soup } from './tagged/soup.js';
 export { taggedItem } from './tagged/taggedItem.js';
 export { taggedDisplayGeometry } from './tagged/taggedDisplayGeometry.js';
