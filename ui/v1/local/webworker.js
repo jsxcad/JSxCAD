@@ -196,17 +196,17 @@ const agent = async ({
         path
       });
       /*
-            const builder = new Function(
-              `{ ${Object.keys(api).join(', ')} }`,
-              `return async () => { ${ecmascript} };`
-            );
-            const module = await builder(api);
-            try {
-              sys.pushModule(question.path);
-              await module();
-            } finally {
-              sys.popModule();
-            }
+      const builder = new Function(
+        `{ ${Object.keys(api).join(', ')} }`,
+        `return async () => { ${ecmascript} };`
+      );
+      const module = await builder(api);
+      try {
+        sys.pushModule(question.path);
+        await module();
+      } finally {
+        sys.popModule();
+      }
       */
 
       await sys.log({

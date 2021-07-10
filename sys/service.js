@@ -26,14 +26,12 @@ export const askService = (spec, question, transfer) => {
   };
   const promise = new Promise((resolve, reject) => {
     let service;
-    let release = true;
     createService(spec)
       .then((createdService) => {
         service = createdService;
         terminate = () => {
-          service.terminate();
-          release = false;
-          reject(Error('Terminated'));
+          terminated = true;
+          throw Error('Terminated');
         };
         if (terminated) {
           terminate();
@@ -48,9 +46,10 @@ export const askService = (spec, question, transfer) => {
         reject(error);
       })
       .finally(() => {
-        if (release) {
-          service.release();
+        if (terminated) {
+           service.terminate();
         }
+        service.release(terminated);
       });
   });
   promise.terminate = () => terminate();

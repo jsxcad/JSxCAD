@@ -34,8 +34,8 @@ export const webService = async ({
           console.log(`QQ/webWorker/error: ${error}`);
         };
         const service = { ask, tell, terminate };
-        service.release = async () =>
-          releaseService({ webWorker, type: workerType }, service);
+        service.release = async (terminated = false) =>
+          releaseService({ webWorker, type: workerType }, service, terminated);
         return service;
       }
     );
