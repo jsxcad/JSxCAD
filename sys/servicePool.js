@@ -1,4 +1,6 @@
-let serviceLimit = 5;
+import { createService } from './service.js';
+
+let activeServiceLimit = 5;
 let idleServiceLimit = 5;
 const activeServices = new Set();
 const idleServices = [];
@@ -7,42 +9,47 @@ const watchers = new Set();
 
 // TODO: Consider different specifications.
 
-export const acquireService = async (spec, newService) => {
+export const acquireService = async (spec) => {
   if (idleServices.length > 0) {
-    // Recycle an existing service.
+    // Recycle an existing worker.
     // FIX: We might have multiple paths to consider in the future.
     // For now, just assume that the path is correct.
     const service = idleServices.pop();
     activeServices.add(service);
+    if (service.released) {
+      throw Error('die');
+    }
     return service;
-  } else if (activeServices.size < serviceLimit) {
+  } else if (activeServices.size < activeServiceLimit) {
     // Create a new service.
-    const service = newService(spec);
+    const service = createService({ ...spec, release: releaseService });
     activeServices.add(service);
+    if (service.released) {
+      throw Error('die');
+    }
     return service;
   } else {
     // Wait for a service to become available.
-    return new Promise((resolve, reject) =>
-      pending.push({ spec, newService, resolve })
-    );
+    return new Promise((resolve, reject) => pending.push({ spec, resolve }));
   }
 };
 
-export const releaseService = async (spec, service, terminated = false) => {
-  if (terminated) {
-    activeServices.delete(service);
-  } else if (pending.length > 0) {
-    // Send it directly to someone who needs it.
-    // FIX: Consider different specifications.
+export const releaseService = (spec, service, terminate = false) => {
+  service.poolReleased = true;
+  activeServices.delete(service);
+  const worker = service.releaseWorker();
+  if (worker) {
+    if (terminate || idleServices.length >= idleServiceLimit) {
+      worker.terminate();
+    } else {
+      idleServices.push(
+        createService({ ...spec, release: releaseService }, worker)
+      );
+    }
+  }
+  if (pending.length > 0 && activeServices.size < activeServiceLimit) {
     const request = pending.shift();
-    request.resolve(service);
-  } else if (idleServices.length < idleServiceLimit) {
-    // Recycle the service.
-    activeServices.delete(service);
-    idleServices.push(service);
-  } else {
-    // Drop the service.
-    activeServices.delete(service);
+    request.resolve(acquireService(request.spec));
   }
   for (const watcher of watchers) {
     watcher();
@@ -51,26 +58,44 @@ export const releaseService = async (spec, service, terminated = false) => {
 
 export const getServicePoolInfo = () => ({
   activeServiceCount: activeServices.size,
-  serviceLimit,
+  activeServiceLimit,
   idleServiceLimit,
   idleServiceCount: idleServices.length,
   pendingCount: pending.length,
 });
 
-const getServiceCount = () => activeServices.size + idleServices.length;
-
-export const terminateActiveServices = async () => {
+export const terminateActiveServices = () => {
   for (const { terminate } of activeServices) {
-    await terminate();
+    terminate();
   }
-  activeServices.clear();
-  // TODO: Enable up to activeService worth of pending tasks.
-  while (pending.length < 0 && getServiceCount() < serviceLimit) {
-    const { spec, newService, resolve } = pending.shift();
-    const service = newService(spec);
-    activeServices.add(service);
-    resolve(service);
-  }
+};
+
+export const askService = (spec, question, transfer) => {
+  let terminated;
+  let terminate = () => {
+    terminated = true;
+  };
+  let service;
+  const promise = acquireService(spec)
+    .then((result) => {
+      service = result;
+      if (service.released) {
+        return Promise.reject(Error('Terminated'));
+      }
+      terminate = () => {
+        service.terminate();
+        throw Error('Terminated');
+      };
+      if (terminated) {
+        terminate();
+      }
+      return service.ask(question, transfer);
+    })
+    .finally(() => {
+      service.release();
+    });
+  promise.terminate = () => terminate();
+  return promise;
 };
 
 export const askServices = async (question) => {

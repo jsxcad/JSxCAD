@@ -18,7 +18,8 @@ export const nodeService = async ({
     const terminate = async () => worker.terminate();
     worker.on('message', hear);
     const service = { ask, tell, terminate };
-    service.release = async (terminated = false) => releaseService({ nodeWorker }, service, terminated);
+    service.release = async (terminated = false) =>
+      releaseService({ nodeWorker }, service, terminated);
     return service;
   });
 };

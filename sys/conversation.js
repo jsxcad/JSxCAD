@@ -22,7 +22,12 @@ export const conversation = ({ agent, say }) => {
       openQuestions.delete(id);
     } else if (message.hasOwnProperty('question')) {
       const answer = await agent({ ask, question });
-      say({ id, answer });
+      try {
+        say({ id, answer });
+      } catch (e) {
+        console.log(`QQ/say/error: ${e.stack}`);
+        throw e;
+      }
     } else if (message.hasOwnProperty('statement')) {
       await agent({ ask, statement });
     } else {
