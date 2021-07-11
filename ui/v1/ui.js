@@ -148,7 +148,11 @@ class Ui extends React.PureComponent {
     const creationWatcher = await watchFileCreation(fileUpdater);
     const deletionWatcher = await watchFileDeletion(fileUpdater);
 
-    const agent = async ({ ask, question }) => {
+    const askToplevelQuestion = async (question, transfer) =>
+      askService(serviceSpec, question, transfer);
+
+    const agent = async ({ ask, question, statement }) => {
+      question = question || statement;
       if (question.ask) {
         const { identifier, options } = question.ask;
         return askSys(identifier, options);
@@ -210,9 +214,10 @@ class Ui extends React.PureComponent {
           canvas.height = height;
           const offscreenCanvas = canvas.transferControlToOffscreen();
           const render = () =>
-            ask({ staticView: { path, workspace, view, offscreenCanvas } }, [
-              offscreenCanvas,
-            ])
+            askToplevelQuestion(
+              { staticView: { path, workspace, view, offscreenCanvas } },
+              [offscreenCanvas]
+            )
               .then((url) => {
                 // Is there a race condition here?
                 entry.domElement.src = url;
@@ -243,11 +248,8 @@ class Ui extends React.PureComponent {
       workerType: 'module',
     };
 
-    const ask = async (question, transfer) =>
-      askService(serviceSpec, question, transfer);
-
     this.setState({
-      ask,
+      ask: askToplevelQuestion,
       creationWatcher,
       deletionWatcher,
       file,
@@ -794,10 +796,13 @@ class Ui extends React.PureComponent {
 
       let script = jsEditorData;
       const evaluate = (script) =>
-        ask({ evaluate: script, workspace, path, sha });
+        ask({ evaluate: script, workspace, path, sha, emitNotes: true });
+      const replay = (script) =>
+        ask({ evaluate: script, workspace, path, sha, emitNotes: true });
       jsEditorAdvice.definitions = topLevel;
       await execute(script, {
         evaluate,
+        replay,
         path,
         topLevel,
       });

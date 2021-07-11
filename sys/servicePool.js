@@ -75,25 +75,28 @@ export const askService = (spec, question, transfer) => {
   let terminate = () => {
     terminated = true;
   };
-  let service;
-  const promise = acquireService(spec)
-    .then((result) => {
-      service = result;
-      if (service.released) {
-        return Promise.reject(Error('Terminated'));
-      }
-      terminate = () => {
-        service.terminate();
-        throw Error('Terminated');
-      };
-      if (terminated) {
-        terminate();
-      }
-      return service.ask(question, transfer);
-    })
-    .finally(() => {
-      service.release();
-    });
+  const flow = async () => {
+    const service = await acquireService(spec);
+    if (service.released) {
+      return Promise.reject(Error('Terminated'));
+    }
+    terminate = () => {
+      service.terminate();
+      throw Error('Terminated');
+    };
+    if (terminated) {
+      terminate();
+    }
+    const answer = service.ask(question, transfer);
+    console.log(`QQ/askService/release`);
+    await service.waitToFinish();
+    service.finished = true;
+    service.release();
+    return answer;
+  };
+  const promise = flow();
+  // Avoid a race in which the service might be terminated before
+  // acquireService returns.
   promise.terminate = () => terminate();
   return promise;
 };

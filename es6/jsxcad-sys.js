@@ -266,6 +266,9 @@ const isNode =
 const conversation = ({ agent, say }) => {
   let id = 0;
   const openQuestions = new Map();
+  const waiters = [];
+  const waitToFinish = () =>
+    new Promise((resolve, reject) => waiters.push(resolve));
   const ask = (question, transfer) => {
     const promise = new Promise((resolve, reject) => {
       openQuestions.set(id, { resolve, reject });
@@ -274,19 +277,34 @@ const conversation = ({ agent, say }) => {
     id += 1;
     return promise;
   };
+  const tell = (statement, transfer) => say({ statement }, transfer);
   const hear = async (message) => {
+    console.log(
+      `QQ/hear: ${isWebWorker ? 'worker' : 'browser'} open: ${
+        openQuestions.size
+      } ${JSON.stringify(message)}`
+    );
     const { id, question, answer, error, statement } = message;
     // Check hasOwnProperty to detect undefined values.
     if (message.hasOwnProperty('answer')) {
-      const { resolve, reject } = openQuestions.get(id);
+      const question = openQuestions.get(id);
+      if (!question) {
+        console.log(`QQ/Hear/answer/unexpected: ${JSON.stringify(message)}`);
+      }
+      const { resolve, reject } = question;
       if (error) {
         reject(error);
       } else {
         resolve(answer);
       }
       openQuestions.delete(id);
+      if (openQuestions.size === 0) {
+        while (waiters.length > 0) {
+          waiters.pop()();
+        }
+      }
     } else if (message.hasOwnProperty('question')) {
-      const answer = await agent({ ask, question });
+      const answer = await agent({ ask, question, tell });
       try {
         say({ id, answer });
       } catch (e) {
@@ -294,7 +312,7 @@ const conversation = ({ agent, say }) => {
         throw e;
       }
     } else if (message.hasOwnProperty('statement')) {
-      await agent({ ask, statement });
+      await agent({ ask, statement, tell });
     } else {
       throw Error(
         `Expected { answer } or { question } but received ${JSON.stringify(
@@ -303,7 +321,7 @@ const conversation = ({ agent, say }) => {
       );
     }
   };
-  return { ask, hear };
+  return { ask, hear, tell, waitToFinish };
 };
 
 /* global self */
@@ -312,7 +330,7 @@ const watchers$1 = new Set();
 
 const log = async (entry) => {
   if (isWebWorker) {
-    return self.ask({ log: { entry } });
+    return self.tell({ log: { entry } });
   }
 
   for (const watcher of watchers$1) {
@@ -364,7 +382,11 @@ const createService = (spec, worker) => {
         throw e;
       }
     };
-    const { ask, hear } = conversation({ agent: spec.agent, say: service.say });
+    const { ask, hear, waitToFinish } = conversation({
+      agent: spec.agent,
+      say: service.say,
+    });
+    service.waitToFinish = waitToFinish;
     service.ask = ask;
     service.hear = hear;
     service.tell = (statement) => service.say({ statement });
@@ -4288,25 +4310,28 @@ const askService = (spec, question, transfer) => {
   let terminate = () => {
     terminated = true;
   };
-  let service;
-  const promise = acquireService(spec)
-    .then((result) => {
-      service = result;
-      if (service.released) {
-        return Promise.reject(Error('Terminated'));
-      }
-      terminate = () => {
-        service.terminate();
-        throw Error('Terminated');
-      };
-      if (terminated) {
-        terminate();
-      }
-      return service.ask(question, transfer);
-    })
-    .finally(() => {
-      service.release();
-    });
+  const flow = async () => {
+    const service = await acquireService(spec);
+    if (service.released) {
+      return Promise.reject(Error('Terminated'));
+    }
+    terminate = () => {
+      service.terminate();
+      throw Error('Terminated');
+    };
+    if (terminated) {
+      terminate();
+    }
+    const answer = service.ask(question, transfer);
+    console.log(`QQ/askService/release`);
+    await service.waitToFinish();
+    service.finished = true;
+    service.release();
+    return answer;
+  };
+  const promise = flow();
+  // Avoid a race in which the service might be terminated before
+  // acquireService returns.
   promise.terminate = () => terminate();
   return promise;
 };

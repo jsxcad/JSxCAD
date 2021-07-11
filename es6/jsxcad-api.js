@@ -84,7 +84,10 @@ const evaluate = async (ecmascript, { api, path }) => {
   }
 };
 
-const execute = async (script, { evaluate, path, topLevel = {} }) => {
+const execute = async (
+  script,
+  { evaluate, replay, path, topLevel = {} }
+) => {
   try {
     console.log(`QQ/execute/0`);
     const updates = {};
@@ -129,7 +132,7 @@ const execute = async (script, { evaluate, path, topLevel = {} }) => {
         await somethingHappens;
       }
     }
-    return evaluate(ecmascript, { path });
+    return replay(ecmascript, { path });
   } catch (error) {
     throw error;
   }

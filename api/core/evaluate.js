@@ -16,7 +16,10 @@ export const evaluate = async (ecmascript, { api, path }) => {
   }
 };
 
-export const execute = async (script, { evaluate, path, topLevel = {} }) => {
+export const execute = async (
+  script,
+  { evaluate, replay, path, topLevel = {} }
+) => {
   try {
     console.log(`QQ/execute/0`);
     const updates = {};
@@ -61,7 +64,7 @@ export const execute = async (script, { evaluate, path, topLevel = {} }) => {
         await somethingHappens;
       }
     }
-    return evaluate(ecmascript, { path });
+    return replay(ecmascript, { path });
   } catch (error) {
     throw error;
   }

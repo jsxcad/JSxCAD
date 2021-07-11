@@ -33,7 +33,11 @@ export const createService = (spec, worker) => {
         throw e;
       }
     };
-    const { ask, hear } = conversation({ agent: spec.agent, say: service.say });
+    const { ask, hear, waitToFinish } = conversation({
+      agent: spec.agent,
+      say: service.say,
+    });
+    service.waitToFinish = waitToFinish;
     service.ask = ask;
     service.hear = hear;
     service.tell = (statement) => service.say({ statement });
