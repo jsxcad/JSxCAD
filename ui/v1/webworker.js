@@ -37,7 +37,7 @@ const reportError = (error) => {
 
 sys.setPendingErrorHandler(reportError);
 
-const agent = async ({ ask, question, statement }) => {
+const agent = async ({ ask, question, statement, tell }) => {
   await sys.log({ op: 'evaluate', status: 'run' });
   await sys.log({ op: 'text', text: 'Evaluation Started' });
   let onEmitHandler;
@@ -59,36 +59,23 @@ const agent = async ({ ask, question, statement }) => {
   } else if (question.evaluate) {
     sys.setupFilesystem({ fileBase: question.workspace });
     sys.clearEmitted();
-    let nthNote = 0;
-    onEmitHandler = sys.addOnEmitHandler(async (note, index) => {
-      nthNote += 1;
-      if (note.download) {
-        for (const entry of note.download.entries) {
-          entry.data = await entry.data;
+    if (question.emitNotes) {
+      onEmitHandler = sys.addOnEmitHandler(async (note, index) => {
+        if (note.download) {
+          for (const entry of note.download.entries) {
+            entry.data = await entry.data;
+          }
         }
-      }
-      ask({ note, index });
-    });
+        tell({ note });
+      });
+    }
     try {
       const ecmascript = question.evaluate;
       const { path, sha = 'master' } = question;
       console.log({ op: 'text', text: `QQ/script: ${question.evaluate}` });
       console.log({ op: 'text', text: `QQ/ecmascript: ${ecmascript}` });
       const api = { ...baseApi, sha };
-      const exports = await evaluate(ecmascript, { api, path });
-      /*
-      const builder = new Function(
-        `{ ${Object.keys(api).join(', ')} }`,
-        `return async () => { ${ecmascript} };`
-      );
-      const module = await builder(api);
-      try {
-        sys.pushModule(question.path);
-        await module();
-      } finally {
-        sys.popModule();
-      }
-*/
+      await evaluate(ecmascript, { api, path });
       await sys.log({
         op: 'text',
         text: 'Evaluation Succeeded',
@@ -96,7 +83,9 @@ const agent = async ({ ask, question, statement }) => {
       });
       await sys.log({ op: 'evaluate', status: 'success' });
       // Wait for any pending operations.
-      return exports;
+      await resolveNotebook();
+      // Finally answer the top level question.
+      return true;
     } catch (error) {
       reportError(error);
       await sys.log({
@@ -105,14 +94,14 @@ const agent = async ({ ask, question, statement }) => {
         level: 'serious',
       });
       await sys.log({ op: 'evaluate', status: 'failure' });
-    } finally {
       await resolveNotebook();
-      await sys.resolvePending();
-      ask({ notebookLength: nthNote });
-      sys.removeOnEmitHandler(onEmitHandler);
+      return false;
+    } finally {
+      if (question.emitNotes) {
+        sys.removeOnEmitHandler(onEmitHandler);
+      }
+      sys.setupFilesystem();
     }
-    sys.setupFilesystem();
-    return sys.getEmitted();
   }
 };
 
@@ -122,8 +111,9 @@ const messageBootQueue = [];
 onmessage = ({ data }) => messageBootQueue.push(data);
 
 const bootstrap = async () => {
-  const { ask, hear } = sys.conversation({ agent, say });
+  const { ask, hear, tell } = sys.conversation({ agent, say });
   self.ask = ask;
+  self.tell = tell;
   // sys/log depends on ask, so set that up before we boot.
   await sys.boot();
   onmessage = ({ data }) => hear(data);

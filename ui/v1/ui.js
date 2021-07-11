@@ -148,7 +148,11 @@ class Ui extends React.PureComponent {
     const creationWatcher = await watchFileCreation(fileUpdater);
     const deletionWatcher = await watchFileDeletion(fileUpdater);
 
-    const agent = async ({ ask, question }) => {
+    const askToplevelQuestion = async (question, transfer) =>
+      askService(serviceSpec, question, transfer);
+
+    const agent = async ({ ask, question, statement }) => {
+      question = question || statement;
       if (question.ask) {
         const { identifier, options } = question.ask;
         return askSys(identifier, options);
@@ -209,12 +213,24 @@ class Ui extends React.PureComponent {
           canvas.width = width;
           canvas.height = height;
           const offscreenCanvas = canvas.transferControlToOffscreen();
-          ask({ staticView: { path, workspace, view, offscreenCanvas } }, [
-            offscreenCanvas,
-          ]).then((url) => {
-            // Is there a race condition here?
-            entry.domElement.src = url;
-          });
+          const render = () =>
+            askToplevelQuestion(
+              { staticView: { path, workspace, view, offscreenCanvas } },
+              [offscreenCanvas]
+            )
+              .then((url) => {
+                // Is there a race condition here?
+                entry.domElement.src = url;
+              })
+              .catch((error) => {
+                if (error.message === 'Terminated') {
+                  // Try again.
+                  render();
+                } else {
+                  window.alert(error.stack);
+                }
+              });
+          render();
         }
         note.updated = true;
         if (notebookRef) {
@@ -232,11 +248,8 @@ class Ui extends React.PureComponent {
       workerType: 'module',
     };
 
-    const ask = async (question, transfer) =>
-      askService(serviceSpec, question, transfer);
-
     this.setState({
-      ask,
+      ask: askToplevelQuestion,
       creationWatcher,
       deletionWatcher,
       file,
@@ -783,52 +796,16 @@ class Ui extends React.PureComponent {
 
       let script = jsEditorData;
       const evaluate = (script) =>
-        ask({ evaluate: script, workspace, path, sha });
+        ask({ evaluate: script, workspace, path, sha, emitNotes: true });
+      const replay = (script) =>
+        ask({ evaluate: script, workspace, path, sha, emitNotes: true });
       jsEditorAdvice.definitions = topLevel;
       await execute(script, {
         evaluate,
+        replay,
         path,
         topLevel,
-        onError: (e) => window.alert(e.stack),
       });
-      /*
-      const updates = {};
-      const ecmascript = await toEcmascript(script, {
-        path,
-        topLevel,
-        updates,
-      });
-      jsEditorAdvice.definitions = topLevel;
-      const scheduled = new Map();
-      const pending = new Set(Object.keys(updates));
-      const schedule = () => {
-        console.log(`Updates remaining ${[...pending].join(', ')}`);
-        for (const id of [...pending]) {
-          const entry = updates[id];
-          const outstandingDependencies = entry.dependencies.filter(
-            (dependency) => updates[dependency]
-          );
-          if (outstandingDependencies.length === 0) {
-            console.log(`Scheduling: ${id}`);
-            pending.delete(id);
-            scheduled.set(
-              id,
-              ask({ evaluate: updates[id].program, workspace, path, sha })
-                .then(() => {
-                  console.log(`Completed ${id}`);
-                  delete updates[id];
-                })
-                .catch((e) => window.alert(e.stack))
-            );
-          }
-        }
-      };
-      while (pending.size > 0) {
-        schedule();
-        await waitServices();
-      }
-      await ask({ evaluate: ecmascript, workspace, path, sha });
-*/
       await resolvePending();
       // Finalize the notebook
       {

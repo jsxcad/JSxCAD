@@ -6,7 +6,7 @@ const watchers = new Set();
 
 export const log = async (entry) => {
   if (isWebWorker) {
-    return self.ask({ log: { entry } });
+    return self.tell({ log: { entry } });
   }
 
   for (const watcher of watchers) {

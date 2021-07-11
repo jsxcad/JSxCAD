@@ -263,119 +263,12 @@ const isNode =
   process.versions != null &&
   process.versions.node != null;
 
-const nodeService = () => {};
-
-let serviceLimit = 5;
-let idleServiceLimit = 5;
-const activeServices = new Set();
-const idleServices = [];
-const pending$1 = [];
-const watchers$1 = new Set();
-
-// TODO: Consider different specifications.
-
-const acquireService = async (spec, newService) => {
-  if (idleServices.length > 0) {
-    // Recycle an existing service.
-    // FIX: We might have multiple paths to consider in the future.
-    // For now, just assume that the path is correct.
-    const service = idleServices.pop();
-    activeServices.add(service);
-    return service;
-  } else if (activeServices.size < serviceLimit) {
-    // Create a new service.
-    const service = newService(spec);
-    activeServices.add(service);
-    return service;
-  } else {
-    // Wait for a service to become available.
-    return new Promise((resolve, reject) =>
-      pending$1.push({ spec, newService, resolve })
-    );
-  }
-};
-
-const releaseService = async (spec, service, terminated = false) => {
-  if (terminated) {
-    activeServices.delete(service);
-  } else if (pending$1.length > 0) {
-    // Send it directly to someone who needs it.
-    // FIX: Consider different specifications.
-    const request = pending$1.shift();
-    request.resolve(service);
-  } else if (idleServices.length < idleServiceLimit) {
-    // Recycle the service.
-    activeServices.delete(service);
-    idleServices.push(service);
-  } else {
-    // Drop the service.
-    activeServices.delete(service);
-  }
-  for (const watcher of watchers$1) {
-    watcher();
-  }
-};
-
-const getServicePoolInfo = () => ({
-  activeServiceCount: activeServices.size,
-  serviceLimit,
-  idleServiceLimit,
-  idleServiceCount: idleServices.length,
-  pendingCount: pending$1.length,
-});
-
-const getServiceCount = () => activeServices.size + idleServices.length;
-
-const terminateActiveServices = async () => {
-  for (const { terminate } of activeServices) {
-    await terminate();
-  }
-  activeServices.clear();
-  // TODO: Enable up to activeService worth of pending tasks.
-  while (pending$1.length < 0 && getServiceCount() < serviceLimit) {
-    const { spec, newService, resolve } = pending$1.shift();
-    const service = newService(spec);
-    activeServices.add(service);
-    resolve(service);
-  }
-};
-
-const askServices = async (question) => {
-  for (const { ask } of [...idleServices, ...activeServices]) {
-    await ask(question);
-  }
-};
-
-const tellServices = (question) => {
-  for (const { tell } of [...idleServices, ...activeServices]) {
-    tell(question);
-  }
-};
-
-const waitServices = () => {
-  return new Promise((resolve, reject) => {
-    let watcher;
-    watcher = () => {
-      unwatchServices(watcher);
-      resolve();
-    };
-    watchServices(watcher);
-  });
-};
-
-const watchServices = (watcher) => {
-  watchers$1.add(watcher);
-  return watcher;
-};
-
-const unwatchServices = (watcher) => {
-  watchers$1.delete(watcher);
-  return watcher;
-};
-
 const conversation = ({ agent, say }) => {
   let id = 0;
   const openQuestions = new Map();
+  const waiters = [];
+  const waitToFinish = () =>
+    new Promise((resolve, reject) => waiters.push(resolve));
   const ask = (question, transfer) => {
     const promise = new Promise((resolve, reject) => {
       openQuestions.set(id, { resolve, reject });
@@ -384,22 +277,42 @@ const conversation = ({ agent, say }) => {
     id += 1;
     return promise;
   };
+  const tell = (statement, transfer) => say({ statement }, transfer);
   const hear = async (message) => {
+    console.log(
+      `QQ/hear: ${isWebWorker ? 'worker' : 'browser'} open: ${
+        openQuestions.size
+      } ${JSON.stringify(message)}`
+    );
     const { id, question, answer, error, statement } = message;
     // Check hasOwnProperty to detect undefined values.
     if (message.hasOwnProperty('answer')) {
-      const { resolve, reject } = openQuestions.get(id);
+      const question = openQuestions.get(id);
+      if (!question) {
+        console.log(`QQ/Hear/answer/unexpected: ${JSON.stringify(message)}`);
+      }
+      const { resolve, reject } = question;
       if (error) {
         reject(error);
       } else {
         resolve(answer);
       }
       openQuestions.delete(id);
+      if (openQuestions.size === 0) {
+        while (waiters.length > 0) {
+          waiters.pop()();
+        }
+      }
     } else if (message.hasOwnProperty('question')) {
-      const answer = await agent({ ask, question });
-      say({ id, answer });
+      const answer = await agent({ ask, question, tell });
+      try {
+        say({ id, answer });
+      } catch (e) {
+        console.log(`QQ/say/error: ${e.stack}`);
+        throw e;
+      }
     } else if (message.hasOwnProperty('statement')) {
-      await agent({ ask, statement });
+      await agent({ ask, statement, tell });
     } else {
       throw Error(
         `Expected { answer } or { question } but received ${JSON.stringify(
@@ -408,126 +321,105 @@ const conversation = ({ agent, say }) => {
       );
     }
   };
-  return { ask, hear };
+  return { ask, hear, tell, waitToFinish };
 };
 
 /* global self */
 
-const watchers = new Set();
+const watchers$1 = new Set();
 
 const log = async (entry) => {
   if (isWebWorker) {
-    return self.ask({ log: { entry } });
+    return self.tell({ log: { entry } });
   }
 
-  for (const watcher of watchers) {
+  for (const watcher of watchers$1) {
     watcher(entry);
   }
 };
 
 const watchLog = (thunk) => {
-  watchers.add(thunk);
+  watchers$1.add(thunk);
   return thunk;
 };
 
 const unwatchLog = (thunk) => {
-  watchers.delete(thunk);
+  watchers$1.delete(thunk);
 };
+
+const nodeWorker = () => {};
 
 /* global Worker */
 
-// Sets up a worker with conversational interface.
-const webService = async ({
-  nodeWorker,
-  webWorker,
-  agent,
-  workerType,
-}) => {
-  try {
-    return await acquireService(
-      { webWorker, type: workerType },
-      ({ webWorker, type }) => {
-        const worker = new Worker(webWorker, { type: workerType });
-        const say = (message, transfer) =>
-          worker.postMessage(message, transfer);
-        const { ask, hear } = conversation({ agent, say });
-        const tell = (statement) => say({ statement });
-        const terminate = async () => {
-          worker.terminate();
-          releaseService(
-            { webWorker, type: workerType },
-            service,
-            /* terminated= */ true
-          );
-        };
-        worker.onmessage = ({ data }) => hear(data);
-        worker.onerror = (error) => {
-          console.log(`QQ/webWorker/error: ${error}`);
-        };
-        const service = { ask, tell, terminate };
-        service.release = async () =>
-          releaseService({ webWorker, type: workerType }, service);
-        return service;
-      }
-    );
-  } catch (e) {
-    log({ op: 'text', text: '' + e, level: 'serious', duration: 6000000 });
-    throw Error('die');
-  }
-};
+const webWorker = (spec) =>
+  new Worker(spec.webWorker, { type: spec.workerType });
 
-// Sets up a worker with conversational interface.
-const createService = async ({
-  nodeWorker,
-  webWorker,
-  agent,
-  workerType,
-}) => {
+const newWorker = (spec) => {
   if (isNode) {
-    return nodeService();
+    return nodeWorker();
   } else if (isBrowser) {
-    return webService({ nodeWorker, webWorker, agent, workerType });
+    return webWorker(spec);
   } else {
     throw Error('die');
   }
 };
 
-const askService = (spec, question, transfer) => {
-  let terminated = false;
-  let terminate = () => {
-    terminated = true;
-  };
-  const promise = new Promise((resolve, reject) => {
-    let service;
-    let release = true;
-    createService(spec)
-      .then((createdService) => {
-        service = createdService;
-        terminate = () => {
+// Sets up a worker with conversational interface.
+const createService = (spec, worker) => {
+  try {
+    let service = {};
+    service.released = false;
+    if (worker === undefined) {
+      service.worker = newWorker(spec);
+    } else {
+      service.worker = worker;
+    }
+    service.say = (message, transfer) => {
+      try {
+        service.worker.postMessage(message, transfer);
+      } catch (e) {
+        console.log(e.stack);
+        throw e;
+      }
+    };
+    const { ask, hear, waitToFinish } = conversation({
+      agent: spec.agent,
+      say: service.say,
+    });
+    service.waitToFinish = waitToFinish;
+    service.ask = ask;
+    service.hear = hear;
+    service.tell = (statement) => service.say({ statement });
+    service.worker.onmessage = ({ data }) => service.hear(data);
+    service.worker.onerror = (error) => {
+      console.log(`QQ/worker/error: ${error}`);
+    };
+    service.release = (terminate) => {
+      if (!service.released) {
+        service.released = true;
+        if (spec.release) {
+          spec.release(spec, service, terminate);
+        } else {
           service.terminate();
-          release = false;
-          reject(Error('Terminated'));
-        };
-        if (terminated) {
-          terminate();
         }
-      })
-      .then(() => service.ask(question, transfer))
-      .then((answer) => {
-        resolve(answer);
-      })
-      .catch((error) => {
-        console.log(`QQ/askService: ${error.stack}`);
-        reject(error);
-      })
-      .finally(() => {
-        if (release) {
-          service.release();
-        }
-      });
-  });
-  promise.terminate = () => terminate();
-  return promise;
+      }
+    };
+    service.releaseWorker = () => {
+      if (service.worker) {
+        const worker = service.worker;
+        service.worker = undefined;
+        return worker;
+      } else {
+        return undefined;
+      }
+    };
+    service.terminate = () => service.release(true);
+    return service;
+  } catch (e) {
+    log({ op: 'text', text: '' + e, level: 'serious', duration: 6000000 });
+    console.log(e.stack);
+    throw e;
+  }
 };
 
 const controlValue = new Map();
@@ -4157,26 +4049,6 @@ const readOrWatch = async (path, options = {}) => {
   return read(path);
 };
 
-const sources = new Map();
-
-// Note: later additions will be used in preference to earlier additions.
-// This will allow overriding defective or unavailable sources.
-const addSource = (path, source) => {
-  if (sources.has(path)) {
-    sources.get(path).unshift(source);
-  } else {
-    sources.set(path, [source]);
-  }
-};
-
-const getSources = (path) => {
-  if (sources.has(path)) {
-    return sources.get(path);
-  } else {
-    return [];
-  }
-};
-
 /* global self */
 
 let handleAskUser;
@@ -4215,7 +4087,7 @@ const BOOTED = 'booted';
 
 let status = UNBOOTED;
 
-const pending = [];
+const pending$1 = [];
 
 // Execute tasks to complete before using system.
 const boot = async () => {
@@ -4226,7 +4098,7 @@ const boot = async () => {
   if (status === BOOTING) {
     // Wait for the system to boot.
     return new Promise((resolve, reject) => {
-      pending.push(resolve);
+      pending$1.push(resolve);
     });
   }
   // Initiate boot.
@@ -4237,8 +4109,8 @@ const boot = async () => {
   // Complete boot.
   status = BOOTED;
   // Release the pending clients.
-  while (pending.length > 0) {
-    pending.pop()();
+  while (pending$1.length > 0) {
+    pending$1.pop()();
   }
 };
 
@@ -4363,6 +4235,140 @@ const deleteFile = async (options, path) => {
   await deleteFile$1(options, path);
 };
 
+let activeServiceLimit = 5;
+let idleServiceLimit = 5;
+const activeServices = new Set();
+const idleServices = [];
+const pending = [];
+const watchers = new Set();
+
+// TODO: Consider different specifications.
+
+const acquireService = async (spec) => {
+  if (idleServices.length > 0) {
+    // Recycle an existing worker.
+    // FIX: We might have multiple paths to consider in the future.
+    // For now, just assume that the path is correct.
+    const service = idleServices.pop();
+    activeServices.add(service);
+    if (service.released) {
+      throw Error('die');
+    }
+    return service;
+  } else if (activeServices.size < activeServiceLimit) {
+    // Create a new service.
+    const service = createService({ ...spec, release: releaseService });
+    activeServices.add(service);
+    if (service.released) {
+      throw Error('die');
+    }
+    return service;
+  } else {
+    // Wait for a service to become available.
+    return new Promise((resolve, reject) => pending.push({ spec, resolve }));
+  }
+};
+
+const releaseService = (spec, service, terminate = false) => {
+  service.poolReleased = true;
+  activeServices.delete(service);
+  const worker = service.releaseWorker();
+  if (worker) {
+    if (terminate || idleServices.length >= idleServiceLimit) {
+      worker.terminate();
+    } else {
+      idleServices.push(
+        createService({ ...spec, release: releaseService }, worker)
+      );
+    }
+  }
+  if (pending.length > 0 && activeServices.size < activeServiceLimit) {
+    const request = pending.shift();
+    request.resolve(acquireService(request.spec));
+  }
+  for (const watcher of watchers) {
+    watcher();
+  }
+};
+
+const getServicePoolInfo = () => ({
+  activeServiceCount: activeServices.size,
+  activeServiceLimit,
+  idleServiceLimit,
+  idleServiceCount: idleServices.length,
+  pendingCount: pending.length,
+});
+
+const terminateActiveServices = () => {
+  for (const { terminate } of activeServices) {
+    terminate();
+  }
+};
+
+const askService = (spec, question, transfer) => {
+  let terminated;
+  let terminate = () => {
+    terminated = true;
+  };
+  const flow = async () => {
+    const service = await acquireService(spec);
+    if (service.released) {
+      return Promise.reject(Error('Terminated'));
+    }
+    terminate = () => {
+      service.terminate();
+      throw Error('Terminated');
+    };
+    if (terminated) {
+      terminate();
+    }
+    const answer = service.ask(question, transfer);
+    console.log(`QQ/askService/release`);
+    await service.waitToFinish();
+    service.finished = true;
+    service.release();
+    return answer;
+  };
+  const promise = flow();
+  // Avoid a race in which the service might be terminated before
+  // acquireService returns.
+  promise.terminate = () => terminate();
+  return promise;
+};
+
+const askServices = async (question) => {
+  for (const { ask } of [...idleServices, ...activeServices]) {
+    await ask(question);
+  }
+};
+
+const tellServices = (question) => {
+  for (const { tell } of [...idleServices, ...activeServices]) {
+    tell(question);
+  }
+};
+
+const waitServices = () => {
+  return new Promise((resolve, reject) => {
+    let watcher;
+    watcher = () => {
+      unwatchServices(watcher);
+      resolve();
+    };
+    watchServices(watcher);
+  });
+};
+
+const watchServices = (watcher) => {
+  watchers.add(watcher);
+  return watcher;
+};
+
+const unwatchServices = (watcher) => {
+  watchers.delete(watcher);
+  return watcher;
+};
+
 const sleep = (ms = 0) =>
   new Promise((resolve, reject) => {
     setTimeout(resolve, ms);
@@ -4386,4 +4392,4 @@ let nanoid = (size = 21) => {
 
 const generateUniqueId = () => nanoid();
 
-export { addOnEmitHandler, addPending, addSource, ask, askService, askServices, boot, clearEmitted, conversation, createService, deleteFile, elapsed, emit, generateUniqueId, getControlValue, getDefinitions, getEmitted, getFilesystem, getModule, getPendingErrorHandler, getServicePoolInfo, getSources, hash, info, isBrowser, isNode, isWebWorker, listFiles, listFilesystems, log, onBoot, popModule, pushModule, qualifyPath, read, readFile, readOrWatch, removeOnEmitHandler, resolvePending, setControlValue, setHandleAskUser, setPendingErrorHandler, setupFilesystem, sleep, tellServices, terminateActiveServices, touch, unwatchFile, unwatchFileCreation, unwatchFileDeletion, unwatchFiles, unwatchLog, unwatchServices, waitServices, watchFile, watchFileCreation, watchFileDeletion, watchLog, watchServices, write, writeFile };
+export { addOnEmitHandler, addPending, ask, askService, askServices, boot, clearEmitted, conversation, createService, deleteFile, elapsed, emit, generateUniqueId, getControlValue, getDefinitions, getEmitted, getFilesystem, getModule, getPendingErrorHandler, getServicePoolInfo, hash, info, isBrowser, isNode, isWebWorker, listFiles, listFilesystems, log, onBoot, popModule, pushModule, qualifyPath, read, readFile, readOrWatch, removeOnEmitHandler, resolvePending, setControlValue, setHandleAskUser, setPendingErrorHandler, setupFilesystem, sleep, tellServices, terminateActiveServices, touch, unwatchFile, unwatchFileCreation, unwatchFileDeletion, unwatchFiles, unwatchLog, unwatchServices, waitServices, watchFile, watchFileCreation, watchFileDeletion, watchLog, watchServices, write, writeFile };

@@ -4,10 +4,9 @@ export {
   resolvePending,
   setPendingErrorHandler,
 } from './pending.js';
-export { askService, createService } from './service.js';
+export { createService } from './service.js';
 export { getControlValue, setControlValue } from './control.js';
 export { read, readFile, readOrWatch } from './readFile.js';
-export { addSource, getSources } from './source.js';
 export { ask, setHandleAskUser } from './ask.js';
 export { boot, onBoot } from './boot.js';
 export {
@@ -40,6 +39,7 @@ export {
 export { conversation } from './conversation.js';
 export { deleteFile } from './deleteFile.js';
 export {
+  askService,
   askServices,
   getServicePoolInfo,
   tellServices,
