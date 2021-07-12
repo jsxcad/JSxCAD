@@ -2,14 +2,13 @@
 
 import * as sys from '@jsxcad/sys';
 
-import baseApi, { evaluate } from '@jsxcad/api';
+import baseApi, { evaluate as evaluateScript } from '@jsxcad/api';
 import hashSum from 'hash-sum';
 
 // Compatibility with threejs.
 self.window = {};
 
 const resolveNotebook = async () => {
-  await sys.resolvePending();
   // Update the notebook.
   const notebook = sys.getEmitted();
   // Resolve any promises.
@@ -20,9 +19,13 @@ const resolveNotebook = async () => {
       }
     }
   }
+  await sys.resolvePending();
 };
 
-const say = (message) => postMessage(message);
+const say = (message) => {
+  // console.log(`QQ/webworker/say: ${JSON.stringify(message)}`);
+  postMessage(message);
+};
 
 const reportError = (error) => {
   const entry = { text: error.stack ? error.stack : error, level: 'serious' };
@@ -37,71 +40,74 @@ const reportError = (error) => {
 
 sys.setPendingErrorHandler(reportError);
 
-const agent = async ({ ask, question, statement, tell }) => {
+const agent = async ({ ask, message, type, tell }) => {
+  const { op } = message;
   await sys.log({ op: 'evaluate', status: 'run' });
   await sys.log({ op: 'text', text: 'Evaluation Started' });
-  let onEmitHandler;
-  if ((statement || question).touchFile) {
-    const { path, workspace } = (statement || question).touchFile;
-    await sys.touch(path, { workspace });
-  } else if (question.staticView) {
-    const { path, workspace, view, offscreenCanvas } = question.staticView;
-    const geometry = await sys.readOrWatch(path, { workspace });
-    const { staticView } = await import('@jsxcad/ui-threejs');
-    await staticView(baseApi.Shape.fromGeometry(geometry), {
-      ...view,
-      canvas: offscreenCanvas,
-    });
-    const blob = await offscreenCanvas.convertToBlob({ type: 'image/png' });
-    const dataURL = new FileReaderSync().readAsDataURL(blob);
-    console.log(`QQ/rendered: ${path}`);
-    return dataURL;
-  } else if (question.evaluate) {
-    sys.setupFilesystem({ fileBase: question.workspace });
-    sys.clearEmitted();
-    if (question.emitNotes) {
-      onEmitHandler = sys.addOnEmitHandler(async (note, index) => {
-        if (note.download) {
-          for (const entry of note.download.entries) {
-            entry.data = await entry.data;
-          }
+  const {
+    script,
+    path,
+    workspace,
+    view,
+    offscreenCanvas,
+    sha = 'master',
+  } = message;
+
+  if (workspace) {
+    sys.setupFilesystem({ fileBase: workspace });
+  }
+
+  try {
+    switch (op) {
+      case 'touchFile':
+        await sys.touch(path, { workspace });
+        return;
+      case 'staticView':
+        sys.info('Load Geometry');
+        const geometry = await sys.readOrWatch(path, { workspace });
+        const { staticView } = await import('@jsxcad/ui-threejs');
+        sys.info('Render');
+        await staticView(baseApi.Shape.fromGeometry(geometry), {
+          ...view,
+          canvas: offscreenCanvas,
+        });
+        sys.info('Convert to PNG');
+        const blob = await offscreenCanvas.convertToBlob({ type: 'image/png' });
+        const dataURL = new FileReaderSync().readAsDataURL(blob);
+        sys.info('Done');
+        return dataURL;
+      case 'evaluate':
+        sys.clearEmitted();
+        try {
+          // console.log({ op: 'text', text: `QQ/script: ${script}` });
+          const api = { ...baseApi, sha };
+          await evaluateScript(script, { api, path });
+          await sys.log({
+            op: 'text',
+            text: 'Evaluation Succeeded',
+            level: 'serious',
+          });
+          await sys.log({ op: 'evaluate', status: 'success' });
+          // Wait for any pending operations.
+          await resolveNotebook();
+          // Finally answer the top level question.
+          return true;
+        } catch (error) {
+          reportError(error);
+          await sys.log({
+            op: 'text',
+            text: 'Evaluation Failed',
+            level: 'serious',
+          });
+          await sys.log({ op: 'evaluate', status: 'failure' });
+          await resolveNotebook();
+          return false;
         }
-        tell({ note });
-      });
+      default:
+        throw Error(`Unknown operation ${op}`);
     }
-    try {
-      const ecmascript = question.evaluate;
-      const { path, sha = 'master' } = question;
-      console.log({ op: 'text', text: `QQ/script: ${question.evaluate}` });
-      console.log({ op: 'text', text: `QQ/ecmascript: ${ecmascript}` });
-      const api = { ...baseApi, sha };
-      await evaluate(ecmascript, { api, path });
-      await sys.log({
-        op: 'text',
-        text: 'Evaluation Succeeded',
-        level: 'serious',
-      });
-      await sys.log({ op: 'evaluate', status: 'success' });
-      // Wait for any pending operations.
-      await resolveNotebook();
-      // Finally answer the top level question.
-      return true;
-    } catch (error) {
-      reportError(error);
-      await sys.log({
-        op: 'text',
-        text: 'Evaluation Failed',
-        level: 'serious',
-      });
-      await sys.log({ op: 'evaluate', status: 'failure' });
-      await resolveNotebook();
-      return false;
-    } finally {
-      if (question.emitNotes) {
-        sys.removeOnEmitHandler(onEmitHandler);
-      }
-      sys.setupFilesystem();
-    }
+  } catch (error) {
+    sys.info(error.stack);
   }
 };
 
@@ -111,11 +117,23 @@ const messageBootQueue = [];
 onmessage = ({ data }) => messageBootQueue.push(data);
 
 const bootstrap = async () => {
-  const { ask, hear, tell } = sys.conversation({ agent, say });
+  const { ask, hear, tell } = sys.createConversation({ agent, say });
+
   self.ask = ask;
   self.tell = tell;
   // sys/log depends on ask, so set that up before we boot.
   await sys.boot();
+
+  sys.addOnEmitHandler(async (note, index) => {
+    if (note.download) {
+      for (const entry of note.download.entries) {
+        entry.data = await entry.data;
+      }
+    }
+    // console.log(`QQ/webworker/emitHandler: ${JSON.stringify(note)}`);
+    self.tell({ op: 'note', note });
+  });
+
   onmessage = ({ data }) => hear(data);
   // Now that we're ready, drain the buffer.
   if (self.messageBootQueue !== undefined) {

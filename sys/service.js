@@ -1,9 +1,11 @@
 import { isBrowser, isNode } from './browserOrNode.js';
 
-import { conversation } from './conversation.js';
+import { createConversation } from './conversation.js';
 import { log } from './log.js';
 import { nodeWorker } from './nodeWorker.js';
 import { webWorker } from './webWorker.js';
+
+let serviceId = 0;
 
 const newWorker = (spec) => {
   if (isNode) {
@@ -19,6 +21,7 @@ const newWorker = (spec) => {
 export const createService = (spec, worker) => {
   try {
     let service = {};
+    service.id = serviceId++;
     service.released = false;
     if (worker === undefined) {
       service.worker = newWorker(spec);
@@ -33,11 +36,15 @@ export const createService = (spec, worker) => {
         throw e;
       }
     };
-    const { ask, hear, waitToFinish } = conversation({
+    service.conversation = createConversation({
       agent: spec.agent,
       say: service.say,
     });
-    service.waitToFinish = waitToFinish;
+    const { ask, hear, waitToFinish } = service.conversation;
+    service.waitToFinish = () => {
+      service.waiting = true;
+      return waitToFinish();
+    };
     service.ask = ask;
     service.hear = hear;
     service.tell = (statement) => service.say({ statement });
@@ -51,7 +58,10 @@ export const createService = (spec, worker) => {
         if (spec.release) {
           spec.release(spec, service, terminate);
         } else {
-          service.terminate();
+          const worker = service.releaseWorker();
+          if (worker) {
+            worker.terminate();
+          }
         }
       }
     };

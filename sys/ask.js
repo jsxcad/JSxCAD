@@ -1,5 +1,6 @@
 /* global self */
 
+import { addPending } from './pending.js';
 import { isWebWorker } from './browserOrNode.js';
 
 let handleAskUser;
@@ -14,7 +15,7 @@ const askUser = async (identifier, options) => {
 
 export const ask = async (identifier, options = {}) => {
   if (isWebWorker) {
-    return self.ask({ ask: { identifier, options } });
+    return addPending(self.ask({ op: 'ask', identifier, options }));
   }
 
   return askUser(identifier, options);

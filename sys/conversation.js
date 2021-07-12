@@ -1,34 +1,44 @@
-import { isWebWorker } from './browserOrNode.js';
+export const createConversation = ({ agent, say }) => {
+  const conversation = {
+    agent,
+    history: [],
+    id: 0,
+    openQuestions: new Map(),
+    waiters: [],
+    say,
+  };
 
-export const conversation = ({ agent, say }) => {
-  let id = 0;
-  const openQuestions = new Map();
-  const waiters = [];
-  const waitToFinish = () =>
-    new Promise((resolve, reject) => waiters.push(resolve));
-  const ask = (question, transfer) => {
+  conversation.waitToFinish = () =>
+    new Promise((resolve, reject) => conversation.waiters.push(resolve));
+
+  conversation.ask = (question, transfer) => {
+    const { id, openQuestions, say } = conversation;
+    conversation.id += 1;
     const promise = new Promise((resolve, reject) => {
-      openQuestions.set(id, { resolve, reject });
+      openQuestions.set(id, { question, resolve, reject });
     });
     say({ id, question }, transfer);
-    id += 1;
     return promise;
   };
-  const tell = (statement, transfer) => say({ statement }, transfer);
-  const hear = async (message) => {
-    console.log(
-      `QQ/hear: ${isWebWorker ? 'worker' : 'browser'} open: ${
-        openQuestions.size
-      } ${JSON.stringify(message)}`
-    );
+
+  conversation.tell = (statement, transfer) => say({ statement }, transfer);
+
+  conversation.hear = async (message) => {
+    const { ask, history, openQuestions, tell, waiters } = conversation;
+
+    history.unshift(message);
+    while (history.length > 3) {
+      history.pop();
+    }
+
     const { id, question, answer, error, statement } = message;
     // Check hasOwnProperty to detect undefined values.
     if (message.hasOwnProperty('answer')) {
-      const question = openQuestions.get(id);
-      if (!question) {
-        console.log(`QQ/Hear/answer/unexpected: ${JSON.stringify(message)}`);
+      const openQuestion = openQuestions.get(id);
+      if (!openQuestion) {
+        throw Error(`Unexpected answer: ${JSON.stringify(message)}`);
       }
-      const { resolve, reject } = question;
+      const { resolve, reject } = openQuestion;
       if (error) {
         reject(error);
       } else {
@@ -41,7 +51,12 @@ export const conversation = ({ agent, say }) => {
         }
       }
     } else if (message.hasOwnProperty('question')) {
-      const answer = await agent({ ask, question, tell });
+      const answer = await agent({
+        ask,
+        message: question,
+        type: 'question',
+        tell,
+      });
       try {
         say({ id, answer });
       } catch (e) {
@@ -49,7 +64,7 @@ export const conversation = ({ agent, say }) => {
         throw e;
       }
     } else if (message.hasOwnProperty('statement')) {
-      await agent({ ask, statement, tell });
+      await agent({ ask, message: statement, type: 'statement', tell });
     } else {
       throw Error(
         `Expected { answer } or { question } but received ${JSON.stringify(
@@ -58,5 +73,6 @@ export const conversation = ({ agent, say }) => {
       );
     }
   };
-  return { ask, hear, tell, waitToFinish };
+
+  return conversation;
 };

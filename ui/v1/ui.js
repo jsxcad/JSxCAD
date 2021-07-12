@@ -15,12 +15,12 @@ import {
   readOrWatch,
   resolvePending,
   setupFilesystem,
+  sleep,
   tellServices,
   terminateActiveServices,
   touch,
   unwatchFileCreation,
   unwatchFileDeletion,
-  // waitServices,
   watchFileCreation,
   watchFileDeletion,
   write,
@@ -47,7 +47,6 @@ import { execute } from '@jsxcad/api';
 import { fromPointsToAlphaShape2AsPolygonSegments } from '@jsxcad/algorithm-cgal';
 import { getNotebookControlData } from '@jsxcad/ui-notebook';
 import marked from 'marked';
-// import { toEcmascript } from '@jsxcad/compiler';
 import { writeGist } from './gist.js';
 import { writeToGithub } from './github.js';
 
@@ -140,6 +139,16 @@ class Ui extends React.PureComponent {
       await ensureFile(file, path, { workspace });
     }
 
+    const clock = async () => {
+      for (;;) {
+        let { tick = 0 } = this.state;
+        tick += 1;
+        this.setState({ tick });
+        await sleep(1000);
+      }
+    };
+    clock();
+
     const fileUpdater = async () => {
       const workspaces = await listFilesystems();
       const files = await listFiles();
@@ -151,94 +160,89 @@ class Ui extends React.PureComponent {
     const askToplevelQuestion = async (question, transfer) =>
       askService(serviceSpec, question, transfer);
 
-    const agent = async ({ ask, question, statement }) => {
-      question = question || statement;
-      if (question.ask) {
-        const { identifier, options } = question.ask;
-        return askSys(identifier, options);
-      } else if (question.readFile) {
-        const { options, path } = question.readFile;
-        return read(path, options);
-      } else if (question.writeFile) {
-        const { options, path, data } = question.writeFile;
-        console.log(`QQ/writeFile/path: ${path} ${workspace}`);
-        return write(path, data, options);
-      } else if (question.deleteFile) {
-        const { options, path } = question.deleteFile;
-        return deleteFile(options, path);
-      } else if (question.log) {
-        const { entry } = question.log;
-        return log(entry);
-      } else if (question.touchFile) {
-        const { path, workspace } = question.touchFile;
-        console.log(`QQ/touchFile/path: ${path} ${workspace}`);
-        await touch(path, { workspace });
-        // Invalidate the path in all workers.
-        await tellServices({ touchFile: { path, workspace } });
-      } else if (question.note) {
-        if (question.note.info) {
-          // Copy out info.
-          const now = new Date();
-          const { logElement, logStartDate, logLastDate } = this.state;
-          if (logElement) {
-            const div = document.createElement('div');
-            const total = (now - logStartDate) / 1000;
-            const elapsed = (now - logLastDate) / 1000;
-            div.textContent = `${total.toFixed(1)}s (${elapsed.toFixed(2)}): ${
-              question.note.info
-            }`;
-            logElement.prepend(div);
-          }
-          this.setState({ logLastDate: now });
+    const agent = async ({ ask, message, type }) => {
+      const { op, entry, identifier, note, options, path, workspace } = message;
+      switch (op) {
+        case 'ask':
+          return askSys(identifier, options);
+        case 'deleteFile':
+          return deleteFile(options, path);
+        case 'log':
+          return log(entry);
+        case 'touchFile':
+          await touch(path, { workspace });
+          // Invalidate the path in all workers.
+          await tellServices({ op: 'touchFile', path, workspace });
           return;
-        }
+        case 'note':
+          {
+            if (note.info) {
+              // Copy out info.
+              const now = new Date();
+              const { logElement, logStartDate, logLastDate } = this.state;
+              if (logElement) {
+                const div = document.createElement('div');
+                const total = (now - logStartDate) / 1000;
+                const elapsed = (now - logLastDate) / 1000;
+                div.textContent = `${total.toFixed(1)}s (${elapsed.toFixed(
+                  2
+                )}): ${note.info}`;
+                logElement.prepend(div);
+              }
+              this.setState({ logLastDate: now });
+              return;
+            }
 
-        const { note } = question;
-        const { notebookData, notebookRef } = this.state;
-        if (note.data === undefined && note.path) {
-          note.data = await readOrWatch(note.path);
-        }
-        if (notebookData[note.hash]) {
-          // It's already in the notebook.
-          notebookData[note.hash].updated = true;
+            const { notebookData, notebookRef } = this.state;
+            if (note.data === undefined && note.path) {
+              note.data = await readOrWatch(note.path);
+            }
+            if (notebookData[note.hash]) {
+              // It's already in the notebook.
+              notebookData[note.hash].updated = true;
+              return;
+            } else {
+              notebookData[note.hash] = note;
+            }
+            const entry = notebookData[note.hash];
+            if (entry.view && !entry.url) {
+              const { workspace } = this.state;
+              const { path, view } = note;
+              const { width, height } = view;
+              const canvas = document.createElement('canvas');
+              canvas.width = width;
+              canvas.height = height;
+              const offscreenCanvas = canvas.transferControlToOffscreen();
+              const render = () =>
+                askToplevelQuestion(
+                  { op: 'staticView', path, workspace, view, offscreenCanvas },
+                  [offscreenCanvas]
+                )
+                  .then((url) => {
+                    // Is there a race condition here?
+                    entry.domElement.src = url;
+                  })
+                  .catch((error) => {
+                    if (error.message === 'Terminated') {
+                      // Try again.
+                      render();
+                    } else {
+                      window.alert(error.stack);
+                    }
+                  });
+              render();
+            }
+            note.updated = true;
+            if (notebookRef) {
+              notebookRef.forceUpdate();
+            }
+            if (jsEditorAdvice.onUpdate) {
+              await jsEditorAdvice.onUpdate();
+            }
+          }
           return;
-        } else {
-          notebookData[note.hash] = note;
-        }
-        const entry = notebookData[note.hash];
-        if (entry.view && !entry.url) {
-          const { path, view } = note;
-          const { width, height } = view;
-          const canvas = document.createElement('canvas');
-          canvas.width = width;
-          canvas.height = height;
-          const offscreenCanvas = canvas.transferControlToOffscreen();
-          const render = () =>
-            askToplevelQuestion(
-              { staticView: { path, workspace, view, offscreenCanvas } },
-              [offscreenCanvas]
-            )
-              .then((url) => {
-                // Is there a race condition here?
-                entry.domElement.src = url;
-              })
-              .catch((error) => {
-                if (error.message === 'Terminated') {
-                  // Try again.
-                  render();
-                } else {
-                  window.alert(error.stack);
-                }
-              });
-          render();
-        }
-        note.updated = true;
-        if (notebookRef) {
-          notebookRef.forceUpdate();
-        }
-        if (jsEditorAdvice.onUpdate) {
-          await jsEditorAdvice.onUpdate();
-        }
+        default:
+          throw Error(`Unknown operation ${op}`);
       }
     };
 
@@ -796,9 +800,9 @@ class Ui extends React.PureComponent {
 
       let script = jsEditorData;
       const evaluate = (script) =>
-        ask({ evaluate: script, workspace, path, sha, emitNotes: true });
+        ask({ op: 'evaluate', script, workspace, path, sha });
       const replay = (script) =>
-        ask({ evaluate: script, workspace, path, sha, emitNotes: true });
+        ask({ op: 'evaluate', script, workspace, path, sha });
       jsEditorAdvice.definitions = topLevel;
       await execute(script, {
         evaluate,
@@ -1194,6 +1198,33 @@ class Ui extends React.PureComponent {
             );
             setTimeout(() => Mermaid.init(undefined, '.mermaid'), 0);
           } else {
+            const serviceInfo = [];
+            for (const service of getServicePoolInfo().activeServices) {
+              const { finished, released, worker, waiting } = service;
+              serviceInfo.push(
+                <p>
+                  {service.id}{' '}
+                  {JSON.stringify({
+                    finished,
+                    released,
+                    hasWorker: !!worker,
+                    waiting,
+                  })}
+                  <br />
+                </p>
+              );
+              for (const { question } of [
+                ...service.conversation.openQuestions.values(),
+              ]) {
+                serviceInfo.push(<p>{JSON.stringify(question)}</p>);
+              }
+              serviceInfo.push(<hr />);
+              for (const entry of service.conversation.history) {
+                serviceInfo.push(<p>{JSON.stringify(entry)}</p>);
+              }
+              serviceInfo.push(<hr />);
+              serviceInfo.push(<hr />);
+            }
             // Try to edit it.
             panes.push(
               <div style={{ width: '100%', height: '100%', margin: '0px' }}>
@@ -1212,10 +1243,14 @@ class Ui extends React.PureComponent {
                             overflowX: 'hidden',
                             overflowY: 'scroll',
                           }}
+                          /*
                           ref={(ref) => {
                             this.setState({ logElement: ref });
                           }}
-                        ></Col>
+*/
+                        >
+                          {serviceInfo}
+                        </Col>
                       </div>
                     </Pane>
                     <Pane key="second" className="pane">
