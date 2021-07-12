@@ -1,12 +1,13 @@
 /* global self */
 
+import { addPending } from './pending.js';
 import { isWebWorker } from './browserOrNode.js';
 
 const watchers = new Set();
 
 export const log = async (entry) => {
   if (isWebWorker) {
-    return self.tell({ log: { entry } });
+    return addPending(self.tell({ op: 'log', entry }));
   }
 
   for (const watcher of watchers) {

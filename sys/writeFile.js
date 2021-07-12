@@ -11,10 +11,11 @@ import {
 } from './filesystem.js';
 import { isBrowser, isNode, isWebWorker } from './browserOrNode.js';
 
+import { addPending } from './pending.js';
 import { db } from './db.js';
 import { dirname } from 'path';
 import { getFile } from './files.js';
-import { log } from './log.js';
+import { info } from './emit.js';
 import { touch } from './touch.js';
 
 const { promises } = fs;
@@ -32,12 +33,12 @@ export const writeFile = async (options, path, data) => {
   } = options;
   let originalWorkspace = getFilesystem();
   if (workspace !== originalWorkspace) {
-    log({ op: 'text', text: `Write ${path} of ${workspace}` });
+    info(`Write ${path} of ${workspace}`);
     // Switch to the source filesystem, if necessary.
     setupFilesystem({ fileBase: workspace });
   }
 
-  await log({ op: 'text', text: `Write ${path}` });
+  info(`Write ${path}`);
   const file = await getFile(options, path);
   file.data = data;
 
@@ -62,7 +63,9 @@ export const writeFile = async (options, path, data) => {
     } else if (isBrowser || isWebWorker) {
       await db().setItem(persistentPath, data);
       if (isWebWorker) {
-        await self.ask({ touchFile: { path, workspace: workspace } });
+        addPending(
+          await self.ask({ op: 'touchFile', path, workspace: workspace })
+        );
       }
     }
   }

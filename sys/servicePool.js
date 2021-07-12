@@ -57,8 +57,10 @@ export const releaseService = (spec, service, terminate = false) => {
 };
 
 export const getServicePoolInfo = () => ({
+  activeServices: [...activeServices],
   activeServiceCount: activeServices.size,
   activeServiceLimit,
+  idleServices: [...idleServices],
   idleServiceLimit,
   idleServiceCount: idleServices.length,
   pendingCount: pending.length,
@@ -88,7 +90,6 @@ export const askService = (spec, question, transfer) => {
       terminate();
     }
     const answer = service.ask(question, transfer);
-    console.log(`QQ/askService/release`);
     await service.waitToFinish();
     service.finished = true;
     service.release();

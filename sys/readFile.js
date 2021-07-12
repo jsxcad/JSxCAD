@@ -154,6 +154,7 @@ export const readFile = async (options, path) => {
       file.data = await file.data;
     }
   }
+  info(`Read complete: ${path} ${file.data ? 'present' : 'missing'}`);
   return file.data;
 };
 

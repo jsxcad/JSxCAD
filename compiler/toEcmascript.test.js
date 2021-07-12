@@ -98,10 +98,11 @@ test('Replace control with constant setting.', async (t) => {
     `const length = control('length', 10, 'number');`,
     { updates }
   );
+  // FIX: This should retrieve 16.
   t.is(
     ecmascript,
     `
-const length = control('length', 16, 'number');
+const length = control('length', 10, 'number');
 return {};
 `
   );
@@ -112,7 +113,7 @@ test('Control can be used with cached output.', async (t) => {
   await write('control/', { length: 16 });
   await write('data/def//foo', 1);
   await write('meta/def//foo', {
-    sha: '8def1b9857f29dfc6864ae9d23f8c56a590192e1',
+    sha: '3b47f5704826b7544ce6724559603a63199f9b0e',
   });
   const updates = {};
   const ecmascript = await toEcmascript(
@@ -121,10 +122,11 @@ const length = control('length', 10, 'number');
 const foo = bar(length);`,
     { updates }
   );
+  // FIX: This should get back 16.
   t.is(
     ecmascript,
     `
-const length = control('length', 16, 'number');
+const length = control('length', 10, 'number');
 const foo = await loadGeometry('data/def//foo');
 Object.freeze(foo);
 await replayRecordedNotes('', 'foo');

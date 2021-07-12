@@ -263,35 +263,47 @@ const isNode =
   process.versions != null &&
   process.versions.node != null;
 
-const conversation = ({ agent, say }) => {
-  let id = 0;
-  const openQuestions = new Map();
-  const waiters = [];
-  const waitToFinish = () =>
-    new Promise((resolve, reject) => waiters.push(resolve));
-  const ask = (question, transfer) => {
+const createConversation = ({ agent, say }) => {
+  const conversation = {
+    agent,
+    history: [],
+    id: 0,
+    openQuestions: new Map(),
+    waiters: [],
+    say,
+  };
+
+  conversation.waitToFinish = () =>
+    new Promise((resolve, reject) => conversation.waiters.push(resolve));
+
+  conversation.ask = (question, transfer) => {
+    const { id, openQuestions, say } = conversation;
+    conversation.id += 1;
     const promise = new Promise((resolve, reject) => {
-      openQuestions.set(id, { resolve, reject });
+      openQuestions.set(id, { question, resolve, reject });
     });
     say({ id, question }, transfer);
-    id += 1;
     return promise;
   };
-  const tell = (statement, transfer) => say({ statement }, transfer);
-  const hear = async (message) => {
-    console.log(
-      `QQ/hear: ${isWebWorker ? 'worker' : 'browser'} open: ${
-        openQuestions.size
-      } ${JSON.stringify(message)}`
-    );
+
+  conversation.tell = (statement, transfer) => say({ statement }, transfer);
+
+  conversation.hear = async (message) => {
+    const { ask, history, openQuestions, tell, waiters } = conversation;
+
+    history.unshift(message);
+    while (history.length > 3) {
+      history.pop();
+    }
+
     const { id, question, answer, error, statement } = message;
     // Check hasOwnProperty to detect undefined values.
     if (message.hasOwnProperty('answer')) {
-      const question = openQuestions.get(id);
-      if (!question) {
-        console.log(`QQ/Hear/answer/unexpected: ${JSON.stringify(message)}`);
+      const openQuestion = openQuestions.get(id);
+      if (!openQuestion) {
+        throw Error(`Unexpected answer: ${JSON.stringify(message)}`);
       }
-      const { resolve, reject } = question;
+      const { resolve, reject } = openQuestion;
       if (error) {
         reject(error);
       } else {
@@ -304,7 +316,12 @@ const conversation = ({ agent, say }) => {
         }
       }
     } else if (message.hasOwnProperty('question')) {
-      const answer = await agent({ ask, question, tell });
+      const answer = await agent({
+        ask,
+        message: question,
+        type: 'question',
+        tell,
+      });
       try {
         say({ id, answer });
       } catch (e) {
@@ -312,7 +329,7 @@ const conversation = ({ agent, say }) => {
         throw e;
       }
     } else if (message.hasOwnProperty('statement')) {
-      await agent({ ask, statement, tell });
+      await agent({ ask, message: statement, type: 'statement', tell });
     } else {
       throw Error(
         `Expected { answer } or { question } but received ${JSON.stringify(
@@ -321,7 +338,8 @@ const conversation = ({ agent, say }) => {
       );
     }
   };
-  return { ask, hear, tell, waitToFinish };
+
+  return conversation;
 };
 
 /* global self */
@@ -330,7 +348,7 @@ const watchers$1 = new Set();
 
 const log = async (entry) => {
   if (isWebWorker) {
-    return self.tell({ log: { entry } });
+    return addPending(self.tell({ op: 'log', entry }));
   }
 
   for (const watcher of watchers$1) {
@@ -354,6 +372,8 @@ const nodeWorker = () => {};
 const webWorker = (spec) =>
   new Worker(spec.webWorker, { type: spec.workerType });
 
+let serviceId = 0;
+
 const newWorker = (spec) => {
   if (isNode) {
     return nodeWorker();
@@ -368,6 +388,7 @@ const newWorker = (spec) => {
 const createService = (spec, worker) => {
   try {
     let service = {};
+    service.id = serviceId++;
     service.released = false;
     if (worker === undefined) {
       service.worker = newWorker(spec);
@@ -382,11 +403,15 @@ const createService = (spec, worker) => {
         throw e;
       }
     };
-    const { ask, hear, waitToFinish } = conversation({
+    service.conversation = createConversation({
       agent: spec.agent,
       say: service.say,
     });
-    service.waitToFinish = waitToFinish;
+    const { ask, hear, waitToFinish } = service.conversation;
+    service.waitToFinish = () => {
+      service.waiting = true;
+      return waitToFinish();
+    };
     service.ask = ask;
     service.hear = hear;
     service.tell = (statement) => service.say({ statement });
@@ -400,7 +425,10 @@ const createService = (spec, worker) => {
         if (spec.release) {
           spec.release(spec, service, terminate);
         } else {
-          service.terminate();
+          const worker = service.releaseWorker();
+          if (worker) {
+            worker.terminate();
+          }
         }
       }
     };
@@ -3844,12 +3872,12 @@ const writeFile = async (options, path, data) => {
   } = options;
   let originalWorkspace = getFilesystem();
   if (workspace !== originalWorkspace) {
-    log({ op: 'text', text: `Write ${path} of ${workspace}` });
+    info(`Write ${path} of ${workspace}`);
     // Switch to the source filesystem, if necessary.
     setupFilesystem({ fileBase: workspace });
   }
 
-  await log({ op: 'text', text: `Write ${path}` });
+  info(`Write ${path}`);
   const file = await getFile(options, path);
   file.data = data;
 
@@ -3874,7 +3902,9 @@ const writeFile = async (options, path, data) => {
     } else if (isBrowser || isWebWorker) {
       await db().setItem(persistentPath, data);
       if (isWebWorker) {
-        await self.ask({ touchFile: { path, workspace: workspace } });
+        addPending(
+          await self.ask({ op: 'touchFile', path, workspace: workspace })
+        );
       }
     }
   }
@@ -4029,6 +4059,7 @@ const readFile = async (options, path) => {
       file.data = await file.data;
     }
   }
+  info(`Read complete: ${path} ${file.data ? 'present' : 'missing'}`);
   return file.data;
 };
 
@@ -4063,7 +4094,7 @@ const askUser = async (identifier, options) => {
 
 const ask = async (identifier, options = {}) => {
   if (isWebWorker) {
-    return self.ask({ ask: { identifier, options } });
+    return addPending(self.ask({ op: 'ask', identifier, options }));
   }
 
   return askUser(identifier, options);
@@ -4228,7 +4259,7 @@ const getFileDeleter = async () => {
 
 const deleteFile = async (options, path) => {
   if (isWebWorker) {
-    return self.ask({ deleteFile: { options, path } });
+    return addPending(self.ask({ op: 'deleteFile', options, path }));
   }
   const deleter = await getFileDeleter();
   await deleter(path);
@@ -4292,8 +4323,10 @@ const releaseService = (spec, service, terminate = false) => {
 };
 
 const getServicePoolInfo = () => ({
+  activeServices: [...activeServices],
   activeServiceCount: activeServices.size,
   activeServiceLimit,
+  idleServices: [...idleServices],
   idleServiceLimit,
   idleServiceCount: idleServices.length,
   pendingCount: pending.length,
@@ -4323,7 +4356,6 @@ const askService = (spec, question, transfer) => {
       terminate();
     }
     const answer = service.ask(question, transfer);
-    console.log(`QQ/askService/release`);
     await service.waitToFinish();
     service.finished = true;
     service.release();
@@ -4392,4 +4424,4 @@ let nanoid = (size = 21) => {
 
 const generateUniqueId = () => nanoid();
 
-export { addOnEmitHandler, addPending, ask, askService, askServices, boot, clearEmitted, conversation, createService, deleteFile, elapsed, emit, generateUniqueId, getControlValue, getDefinitions, getEmitted, getFilesystem, getModule, getPendingErrorHandler, getServicePoolInfo, hash, info, isBrowser, isNode, isWebWorker, listFiles, listFilesystems, log, onBoot, popModule, pushModule, qualifyPath, read, readFile, readOrWatch, removeOnEmitHandler, resolvePending, setControlValue, setHandleAskUser, setPendingErrorHandler, setupFilesystem, sleep, tellServices, terminateActiveServices, touch, unwatchFile, unwatchFileCreation, unwatchFileDeletion, unwatchFiles, unwatchLog, unwatchServices, waitServices, watchFile, watchFileCreation, watchFileDeletion, watchLog, watchServices, write, writeFile };
+export { addOnEmitHandler, addPending, ask, askService, askServices, boot, clearEmitted, createConversation, createService, deleteFile, elapsed, emit, generateUniqueId, getControlValue, getDefinitions, getEmitted, getFilesystem, getModule, getPendingErrorHandler, getServicePoolInfo, hash, info, isBrowser, isNode, isWebWorker, listFiles, listFilesystems, log, onBoot, popModule, pushModule, qualifyPath, read, readFile, readOrWatch, removeOnEmitHandler, resolvePending, setControlValue, setHandleAskUser, setPendingErrorHandler, setupFilesystem, sleep, tellServices, terminateActiveServices, touch, unwatchFile, unwatchFileCreation, unwatchFileDeletion, unwatchFiles, unwatchLog, unwatchServices, waitServices, watchFile, watchFileCreation, watchFileDeletion, watchLog, watchServices, write, writeFile };

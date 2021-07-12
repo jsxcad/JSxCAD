@@ -36,7 +36,7 @@ export {
   watchFileDeletion,
 } from './files.js';
 
-export { conversation } from './conversation.js';
+export { createConversation } from './conversation.js';
 export { deleteFile } from './deleteFile.js';
 export {
   askService,
