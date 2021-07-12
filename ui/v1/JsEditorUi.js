@@ -202,7 +202,7 @@ export class JsEditorUi extends React.PureComponent {
           notesByDefinition.get(definition).push(note);
           if (note.hash) {
             if (!domElementByHash.has(note.hash)) {
-              console.log(`QQ/dom/cache/miss: ${note.hash}`);
+              // console.log(`QQ/dom/cache/miss: ${note.hash}`);
               const element = await toDomElement([note, ...definitions], {
                 onClickView,
               });
@@ -256,9 +256,7 @@ export class JsEditorUi extends React.PureComponent {
           }
           el.style.height = `${elHeight}px`;
           if (el.offsetHeight % lineHeight !== 0) {
-            console.log(
-              `QQ/Height not aligned: definition: ${definition} offsetHeight: ${el.offsetHeight} lineHeight: ${lineHeight}`
-            );
+            // console.log( `QQ/Height not aligned: definition: ${definition} offsetHeight: ${el.offsetHeight} lineHeight: ${lineHeight}`);
           }
 
           widgets.set(definition, widget);
@@ -268,13 +266,7 @@ export class JsEditorUi extends React.PureComponent {
           el.style.visibility = '';
 
           if (widget.pixelHeight !== lineHeight * widget.rowCount) {
-            console.log(
-              `QQ/widget: definition ${definition} pixelHeight ${
-                widget.pixelHeight
-              } vs ${lineHeight * widget.rowCount} rowCount ${
-                widget.rowCount
-              } lineHeight ${lineHeight}`
-            );
+            // console.log( `QQ/widget: definition ${definition} pixelHeight ${ widget.pixelHeight } vs ${lineHeight * widget.rowCount} rowCount ${ widget.rowCount } lineHeight ${lineHeight}`);
           }
         } catch (e) {
           console.log(e.stack);

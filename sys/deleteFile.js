@@ -4,6 +4,7 @@ import * as fs from 'fs';
 
 import { isBrowser, isNode, isWebWorker } from './browserOrNode.js';
 
+import { addPending } from './pending.js';
 import { db } from './db.js';
 import { deleteFile as deleteCachedFile } from './files.js';
 import { qualifyPath } from './filesystem.js';
@@ -27,7 +28,7 @@ const getFileDeleter = async () => {
 
 export const deleteFile = async (options, path) => {
   if (isWebWorker) {
-    return self.ask({ deleteFile: { options, path } });
+    return addPending(self.ask({ op: 'deleteFile', options, path }));
   }
   const deleter = await getFileDeleter();
   await deleter(path);

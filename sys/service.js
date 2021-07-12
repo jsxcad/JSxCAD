@@ -1,58 +1,84 @@
 import { isBrowser, isNode } from './browserOrNode.js';
 
-import { nodeService } from './nodeService.js';
-import { webService } from './webService.js';
+import { createConversation } from './conversation.js';
+import { log } from './log.js';
+import { nodeWorker } from './nodeWorker.js';
+import { webWorker } from './webWorker.js';
 
-// Sets up a worker with conversational interface.
-export const createService = async ({
-  nodeWorker,
-  webWorker,
-  agent,
-  workerType,
-}) => {
+let serviceId = 0;
+
+const newWorker = (spec) => {
   if (isNode) {
-    return nodeService({ nodeWorker, webWorker, agent, workerType });
+    return nodeWorker(spec);
   } else if (isBrowser) {
-    return webService({ nodeWorker, webWorker, agent, workerType });
+    return webWorker(spec);
   } else {
     throw Error('die');
   }
 };
 
-export const askService = (spec, question, transfer) => {
-  let terminated = false;
-  let terminate = () => {
-    terminated = true;
-  };
-  const promise = new Promise((resolve, reject) => {
-    let service;
-    let release = true;
-    createService(spec)
-      .then((createdService) => {
-        service = createdService;
-        terminate = () => {
-          service.terminate();
-          release = false;
-          reject(Error('Terminated'));
-        };
-        if (terminated) {
-          terminate();
+// Sets up a worker with conversational interface.
+export const createService = (spec, worker) => {
+  try {
+    let service = {};
+    service.id = serviceId++;
+    service.released = false;
+    if (worker === undefined) {
+      service.worker = newWorker(spec);
+    } else {
+      service.worker = worker;
+    }
+    service.say = (message, transfer) => {
+      try {
+        service.worker.postMessage(message, transfer);
+      } catch (e) {
+        console.log(e.stack);
+        throw e;
+      }
+    };
+    service.conversation = createConversation({
+      agent: spec.agent,
+      say: service.say,
+    });
+    const { ask, hear, waitToFinish } = service.conversation;
+    service.waitToFinish = () => {
+      service.waiting = true;
+      return waitToFinish();
+    };
+    service.ask = ask;
+    service.hear = hear;
+    service.tell = (statement) => service.say({ statement });
+    service.worker.onmessage = ({ data }) => service.hear(data);
+    service.worker.onerror = (error) => {
+      console.log(`QQ/worker/error: ${error}`);
+    };
+    service.release = (terminate) => {
+      if (!service.released) {
+        service.released = true;
+        if (spec.release) {
+          spec.release(spec, service, terminate);
+        } else {
+          const worker = service.releaseWorker();
+          if (worker) {
+            worker.terminate();
+          }
         }
-      })
-      .then(() => service.ask(question, transfer))
-      .then((answer) => {
-        resolve(answer);
-      })
-      .catch((error) => {
-        console.log(`QQ/askService: ${error.stack}`);
-        reject(error);
-      })
-      .finally(() => {
-        if (release) {
-          service.release();
-        }
-      });
-  });
-  promise.terminate = () => terminate();
-  return promise;
+      }
+    };
+    service.releaseWorker = () => {
+      if (service.worker) {
+        const worker = service.worker;
+        service.worker = undefined;
+        return worker;
+      } else {
+        return undefined;
+      }
+    };
+    service.terminate = () => service.release(true);
+    return service;
+  } catch (e) {
+    log({ op: 'text', text: '' + e, level: 'serious', duration: 6000000 });
+    console.log(e.stack);
+    throw e;
+  }
 };
