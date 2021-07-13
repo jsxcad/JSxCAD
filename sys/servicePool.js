@@ -84,7 +84,7 @@ export const askService = (spec, question, transfer) => {
     }
     terminate = () => {
       service.terminate();
-      throw Error('Terminated');
+      return Promise.reject(Error('Terminated'));
     };
     if (terminated) {
       terminate();
