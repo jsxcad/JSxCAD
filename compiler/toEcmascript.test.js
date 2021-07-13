@@ -278,6 +278,45 @@ return {};
   t.deepEqual(updates, {});
 });
 
+test('Used Import', async (t) => {
+  const updates = {};
+  const ecmascript = await toEcmascript(
+    'import Foo from "bar"; const foo = Foo();',
+    { updates }
+  );
+  t.is(
+    ecmascript,
+    `
+const Foo = (await importModule('bar')).default;
+const foo = await loadGeometry('data/def//foo');
+Object.freeze(foo);
+await replayRecordedNotes('', 'foo');
+return {};
+`
+  );
+  // FIX: This should include the Foo import.
+  t.deepEqual(updates, {
+    '/foo': {
+      dependencies: ['Foo'],
+      program: `info('define foo');
+
+beginRecordingNotes('', 'foo', {
+  line: 1,
+  column: 23
+});
+
+const foo = Foo();
+foo instanceof Shape && (await saveGeometry('data/def//foo', foo)) && (await write('meta/def//foo', {
+  sha: 'c0cbbabfcb882064503b22a28964b57f224a1d9f'
+}));
+
+await saveRecordedNotes('', 'foo');
+
+`,
+    },
+  });
+});
+
 test('Unassigned Import', async (t) => {
   const updates = {};
   const ecmascript = await toEcmascript('import "bar";', { updates });

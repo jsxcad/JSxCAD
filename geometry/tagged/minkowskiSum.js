@@ -2,7 +2,6 @@ import { getNonVoidGraphs } from './getNonVoidGraphs.js';
 import { minkowskiSum as minkowskiSumOfGraphs } from '../graph/minkowskiSum.js';
 import { reify } from './reify.js';
 import { rewrite } from './visit.js';
-import { taggedGraph } from './taggedGraph.js';
 import { taggedGroup } from './taggedGroup.js';
 import { toTransformedGeometry } from './toTransformedGeometry.js';
 
@@ -13,10 +12,8 @@ export const minkowskiSum = (geometry, offset) => {
     switch (geometry.type) {
       case 'graph': {
         const sums = [];
-        for (const { graph } of getNonVoidGraphs(offset)) {
-          sums.push(
-            taggedGraph({ tags }, minkowskiSumOfGraphs(geometry.graph, graph))
-          );
+        for (const otherGeometry of getNonVoidGraphs(offset)) {
+          sums.push(minkowskiSumOfGraphs({ tags }, geometry, otherGeometry));
         }
         return taggedGroup({}, ...sums);
       }

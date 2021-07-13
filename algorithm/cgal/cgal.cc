@@ -2820,12 +2820,14 @@ bool computeFitPolygon(const Polygon_with_holes_2& space, const Polygon_with_hol
   return true;
 }
 
-Surface_mesh* MinkowskiDifferenceOfSurfaceMeshes(Surface_mesh* input_mesh, Surface_mesh* offset_mesh) {
+Surface_mesh* MinkowskiDifferenceOfSurfaceMeshes(Surface_mesh* input_mesh, Transformation* input_transform, Surface_mesh* offset_mesh, Transformation* offset_transform) {
   typedef CGAL::Nef_polyhedron_3<Kernel> Nef_polyhedron;
 
   Nef_polyhedron input_nef(*input_mesh);
+  input_nef.transform(*input_transform);
   Nef_polyhedron input_nef_boundary = input_nef.boundary();
   Nef_polyhedron offset_nef(*offset_mesh);
+  offset_nef.transform(*offset_transform);
   // Subtract the shell of the nef.
   Nef_polyhedron outer_nef = input_nef - minkowski_sum_3(input_nef_boundary, offset_nef);
 
@@ -2854,12 +2856,14 @@ Surface_mesh* MinkowskiDifferenceOfSurfaceMeshes(Surface_mesh* input_mesh, Surfa
   return result_mesh;
 }
 
-Surface_mesh* MinkowskiSumOfSurfaceMeshes(Surface_mesh* input_mesh, Surface_mesh* offset_mesh) {
+Surface_mesh* MinkowskiSumOfSurfaceMeshes(Surface_mesh* input_mesh, Transformation* input_transform, Surface_mesh* offset_mesh, Transformation* offset_transform) {
   typedef CGAL::Nef_polyhedron_3<Kernel> Nef_polyhedron;
 
   Nef_polyhedron input_nef(*input_mesh);
+  input_nef.transform(*input_transform);
   Nef_polyhedron input_nef_boundary = input_nef.boundary();
   Nef_polyhedron offset_nef(*offset_mesh);
+  offset_nef.transform(*offset_transform);
   // Add the shell of the nef.
   Nef_polyhedron outer_nef = input_nef + minkowski_sum_3(input_nef_boundary, offset_nef);
 
@@ -2888,12 +2892,14 @@ Surface_mesh* MinkowskiSumOfSurfaceMeshes(Surface_mesh* input_mesh, Surface_mesh
   return result_mesh;
 }
 
-Surface_mesh* MinkowskiShellOfSurfaceMeshes(Surface_mesh* input_mesh, Surface_mesh* offset_mesh) {
+Surface_mesh* MinkowskiShellOfSurfaceMeshes(Surface_mesh* input_mesh, Transformation* input_transform, Surface_mesh* offset_mesh, Transformation* offset_transform) {
   typedef CGAL::Nef_polyhedron_3<Kernel> Nef_polyhedron;
 
   Nef_polyhedron input_nef(*input_mesh);
+  input_nef.transform(*input_transform);
   Nef_polyhedron input_nef_boundary = input_nef.boundary();
   Nef_polyhedron offset_nef(*offset_mesh);
+  offset_nef.transform(*offset_transform);
   // Take the shell of the nef.
   Nef_polyhedron outer_nef = minkowski_sum_3(input_nef_boundary, offset_nef);
 
