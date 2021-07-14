@@ -1,0 +1,5 @@
+[
+  "../../node_modules/rollup-plugin-node-builtins/src/es6/empty.js",
+  "cgal_browser.cjs",
+  "cgal_node.cjs"
+]
