@@ -1,5 +1,3 @@
-/* global self */
-
 import * as fs from 'fs';
 import * as v8 from 'v8';
 
@@ -11,7 +9,6 @@ import {
 } from './filesystem.js';
 import { isBrowser, isNode, isWebWorker } from './browserOrNode.js';
 
-import { addPending } from './pending.js';
 import { db } from './db.js';
 import { dirname } from 'path';
 import { getFile } from './files.js';
@@ -52,22 +49,22 @@ export const writeFile = async (options, path, data) => {
     if (isNode) {
       try {
         await promises.mkdir(dirname(persistentPath), { recursive: true });
-      } catch (error) {}
+      } catch (error) {
+        throw error;
+      }
       try {
         if (doSerialize) {
           data = serialize(data);
         }
         await promises.writeFile(persistentPath, data);
-        await touch(persistentPath, { workspace, doClear: false });
-      } catch (error) {}
+      } catch (error) {
+        throw error;
+      }
     } else if (isBrowser || isWebWorker) {
       await db().setItem(persistentPath, data);
-      if (isWebWorker) {
-        addPending(
-          await self.ask({ op: 'touchFile', path, workspace: workspace })
-        );
-      }
     }
+    // Let everyone know the file has changed.
+    await touch(persistentPath, { workspace, clear: false });
   }
 
   if (workspace !== originalWorkspace) {
