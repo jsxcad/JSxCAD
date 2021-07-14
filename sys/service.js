@@ -75,6 +75,7 @@ export const createService = (spec, worker) => {
       }
     };
     service.terminate = () => service.release(true);
+    service.tell({ op: 'sys/attach', id: service.id });
     return service;
   } catch (e) {
     log({ op: 'text', text: '' + e, level: 'serious', duration: 6000000 });

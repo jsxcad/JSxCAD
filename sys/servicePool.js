@@ -84,7 +84,7 @@ export const askService = (spec, question, transfer) => {
     }
     terminate = () => {
       service.terminate();
-      throw Error('Terminated');
+      return Promise.reject(Error('Terminated'));
     };
     if (terminated) {
       terminate();
@@ -108,9 +108,9 @@ export const askServices = async (question) => {
   }
 };
 
-export const tellServices = (question) => {
+export const tellServices = (statement) => {
   for (const { tell } of [...idleServices, ...activeServices]) {
-    tell(question);
+    tell(statement);
   }
 };
 
