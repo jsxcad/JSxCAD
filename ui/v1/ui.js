@@ -16,7 +16,6 @@ import {
   resolvePending,
   setupFilesystem,
   sleep,
-  tellServices,
   terminateActiveServices,
   touch,
   unwatchFileCreation,
@@ -161,19 +160,18 @@ class Ui extends React.PureComponent {
       askService(serviceSpec, question, transfer);
 
     const agent = async ({ ask, message, type }) => {
-      const { op, entry, identifier, note, options, path, workspace } = message;
+      const { op, entry, id, identifier, note, options, path, workspace } =
+        message;
       switch (op) {
+        case 'sys/touch':
+          await touch(path, { workspace, id, clear: true, broadcast: true });
+          return;
         case 'ask':
           return askSys(identifier, options);
         case 'deleteFile':
           return deleteFile(options, path);
         case 'log':
           return log(entry);
-        case 'touchFile':
-          await touch(path, { workspace });
-          // Invalidate the path in all workers.
-          await tellServices({ op: 'touchFile', path, workspace });
-          return;
         case 'note':
           {
             if (note.info) {
