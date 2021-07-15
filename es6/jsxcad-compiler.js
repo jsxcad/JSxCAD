@@ -6506,6 +6506,13 @@ base.MethodDefinition = base.Property = function (node, st, c) {
   c(node.value, st, "Expression");
 };
 
+const parseOptions = {
+  allowAwaitOutsideFunction: true,
+  allowReturnOutsideFunction: true,
+  sourceType: 'module',
+  locations: true,
+};
+
 const strip = (ast) => {
   if (ast instanceof Array) {
     return ast.map(strip);
@@ -6522,6 +6529,177 @@ const strip = (ast) => {
   }
 };
 
+const collectDependencies = (declarator) => {
+  const dependencies = [];
+
+  const Identifier = (node, state, c) => {
+    dependencies.push(node.name);
+  };
+
+  recursive(declarator, undefined, { Identifier });
+
+  return dependencies;
+};
+
+const generateCacheLoadCode = ({ isNotCacheable, code, path, id }) => {
+  if (isNotCacheable) {
+    return [code];
+  }
+  return [
+    parse(
+      `const ${id} = await loadGeometry('data/def/${path}/${id}')`,
+      parseOptions
+    ),
+    parse(`Object.freeze(${id});`, parseOptions),
+  ];
+};
+
+const generateReplayCode = ({ isNotCacheable, code, path, id }) => {
+  if (isNotCacheable) {
+    return [code];
+  }
+  const cacheLoadCode = generateCacheLoadCode({
+    isNotCacheable,
+    code,
+    path,
+    id,
+  });
+  const replayRecordedNotes = parse(
+    `await replayRecordedNotes('${path}', '${id}')`,
+    parseOptions
+  );
+  return [...cacheLoadCode, replayRecordedNotes];
+};
+
+const generateUpdateCode = (
+  { isNotCacheable, code, dependencies, path, id },
+  { declaration, sha, topLevel, state }
+) => {
+  if (isNotCacheable) {
+    return [code];
+  }
+
+  const body = [];
+  const seen = new Set();
+  const walk = (dependencies) => {
+    for (const dependency of dependencies) {
+      if (seen.has(dependency)) {
+        continue;
+      }
+      seen.add(dependency);
+      const entry = topLevel.get(dependency);
+      if (entry === undefined) {
+        continue;
+      }
+      walk(entry.dependencies);
+      body.push(...generateCacheLoadCode(entry));
+    }
+  };
+  walk(dependencies);
+  body.push(parse(`info('define ${id}');`, parseOptions));
+  body.push(
+    parse(
+      `beginRecordingNotes('${path}', '${id}', { line: ${declaration.loc.start.line}, column: ${declaration.loc.start.column} })`,
+      parseOptions
+    )
+  );
+  body.push(code);
+  // Only cache Shapes.
+  body.push(
+    parse(
+      `${id} instanceof Shape && await saveGeometry('data/def/${path}/${id}', ${id}) && await write('meta/def/${path}/${id}', { sha: '${sha}' });`,
+      parseOptions
+    )
+  );
+  body.push(parse(`await saveRecordedNotes('${path}', '${id}')`, parseOptions));
+  const program = { type: 'Program', body };
+  return `
+try {
+${generate(program)}
+} catch (error) { throw error; }
+`;
+};
+
+const fixControlCalls = (declarator, controls) => {
+  if (
+    declarator.init &&
+    declarator.init.type === 'CallExpression' &&
+    declarator.init.callee.type === 'Identifier' &&
+    declarator.init.callee.name === 'control'
+  ) {
+    const [label, value] = declarator.init.arguments;
+    let controlValue = controls[label.value];
+    if (controlValue !== undefined) {
+      // FIX: Let check these are valid.
+      switch (typeof value.value) {
+        case 'string':
+          // FIX: Quotes
+          value.raw = `'${controlValue}'`;
+          value.value = String(controlValue);
+          break;
+        default:
+          value.raw = `${controlValue}`;
+          value.value = controlValue;
+      }
+    }
+  }
+};
+
+const rewriteImportStatements = (entry) => {
+  const output = [];
+  if (entry.type === 'ImportDeclaration') {
+    // Rewrite
+    //   import { foo } from 'bar';
+    //   import Foo from 'bar';
+    // to
+    //   const { foo } = importModule('bar');
+    //   const Foo = importModule('bar');
+    //
+    // FIX: Handle other variations.
+    const { specifiers, source } = entry;
+
+    if (specifiers.length === 0) {
+      output.push(
+        parse(`await importModule('${source.value}');`, parseOptions)
+      );
+    } else {
+      for (const { imported, local, type } of specifiers) {
+        switch (type) {
+          case 'ImportDefaultSpecifier':
+            output.push(
+              ...parse(
+                `const ${local.name} = (await importModule('${source.value}')).default;`,
+                parseOptions
+              ).body
+            );
+            break;
+          case 'ImportSpecifier':
+            if (local.name !== imported.name) {
+              output.push(
+                ...parse(
+                  `const ${local.name} = (await importModule('${source.value}')).${imported.name};`,
+                  parseOptions
+                ).body
+              );
+            } else {
+              output.push(
+                ...parse(
+                  `const ${imported.name} = (await importModule('${source.value}')).${imported.name};`,
+                  parseOptions
+                ).body
+              );
+            }
+            break;
+        }
+      }
+    }
+  } else {
+    output.push(entry);
+  }
+
+  return output;
+};
+
 /**
  * Convert a module to executable ecmascript function.
  * The conversion includes caching constant variables for reuse, and tree pruning.
@@ -6536,13 +6714,6 @@ const toEcmascript = async (
   script,
   { path = '', topLevel = new Map(), updates = [] } = {}
 ) => {
-  const parseOptions = {
-    allowAwaitOutsideFunction: true,
-    allowReturnOutsideFunction: true,
-    sourceType: 'module',
-    locations: true,
-  };
-
   let ast = parse(script, parseOptions);
 
   let toplevelExpressionCount = 0;
@@ -6567,129 +6738,20 @@ const toEcmascript = async (
     declarator,
     { doExport = false } = {}
   ) => {
-    if (
-      declarator.init &&
-      declarator.init.type === 'CallExpression' &&
-      declarator.init.callee.type === 'Identifier' &&
-      declarator.init.callee.name === 'control'
-    ) {
-      const [label, value] = declarator.init.arguments;
-      let controlValue = controls[label.value];
-      if (controlValue !== undefined) {
-        // FIX: Let check these are valid.
-        switch (typeof value.value) {
-          case 'string':
-            // FIX: Quotes
-            value.raw = `'${controlValue}'`;
-            value.value = String(controlValue);
-            break;
-          default:
-            value.raw = `${controlValue}`;
-            value.value = controlValue;
-        }
-      }
-    }
+    fixControlCalls(declarator, controls);
 
     const id = declarator.id.name;
+
     const code = {
       type: 'VariableDeclaration',
       kind: declaration.kind,
       declarations: [strip(declarator)],
     };
-    const dependencies = [];
 
-    const Identifier = (node, state, c) => {
-      dependencies.push(node.name);
-    };
-
-    recursive(declarator, undefined, { Identifier });
-
+    const dependencies = collectDependencies(declarator);
     const dependencyShas = dependencies.map(fromIdToSha);
-
     const definition = { code, dependencies, dependencyShas };
     const sha = object_hash(definition);
-
-    let uncomputedInput = false;
-
-    const generateCacheLoadCode = ({ isNotCacheable, code, path, id }) => {
-      if (isNotCacheable) {
-        return [code];
-      }
-      return [
-        parse(
-          `const ${id} = await loadGeometry('data/def/${path}/${id}')`,
-          parseOptions
-        ),
-        parse(`Object.freeze(${id});`, parseOptions),
-      ];
-    };
-
-    const generateReplayCode = ({ isNotCacheable, code, path, id }) => {
-      if (isNotCacheable) {
-        return [code];
-      }
-      const cacheLoadCode = generateCacheLoadCode(entry);
-      const replayRecordedNotes = parse(
-        `await replayRecordedNotes('${path}', '${id}')`,
-        parseOptions
-      );
-      return [...cacheLoadCode, replayRecordedNotes];
-    };
-
-    const generateUpdateCode = ({
-      isNotCacheable,
-      code,
-      dependencies,
-      path,
-      id,
-    }) => {
-      if (isNotCacheable) {
-        return [code];
-      }
-
-      const body = [];
-      const seen = new Set();
-      const walk = (dependencies) => {
-        for (const dependency of dependencies) {
-          if (seen.has(dependency)) {
-            continue;
-          }
-          seen.add(dependency);
-          const entry = topLevel.get(dependency);
-          if (entry === undefined) {
-            continue;
-          }
-          if (!entry.isComputed) {
-            uncomputedInput = true;
-          }
-          walk(entry.dependencies);
-          body.push(...generateCacheLoadCode(entry));
-        }
-      };
-      walk(dependencies);
-      body.push(parse(`info('define ${id}');`, parseOptions));
-      body.push(
-        parse(
-          `beginRecordingNotes('${path}', '${id}', { line: ${declaration.loc.start.line}, column: ${declaration.loc.start.column} })`,
-          parseOptions
-        )
-      );
-      body.push(code);
-      // Only cache Shapes.
-      body.push(
-        parse(
-          `${id} instanceof Shape && await saveGeometry('data/def/${path}/${id}', ${id}) && await write('meta/def/${path}/${id}', { sha: '${sha}' });`,
-          parseOptions
-        )
-      );
-      body.push(
-        parse(`await saveRecordedNotes('${path}', '${id}')`, parseOptions)
-      );
-      const program = { type: 'Program', body };
-      return generate(program);
-    };
-
-    const isAllInputComputed = !uncomputedInput;
 
     const entry = {
       path,
@@ -6698,7 +6760,6 @@ const toEcmascript = async (
       definition,
       dependencies,
       sha,
-      isAllInputComputed,
       sourceLocation: declaration.loc,
     };
 
@@ -6708,6 +6769,7 @@ const toEcmascript = async (
       exportNames.push(id);
     }
 
+    // Bail out for special cases.
     if (declarator.init) {
       if (declarator.init.loc) {
         entry.initSourceLocation = declarator.init.loc;
@@ -6740,13 +6802,18 @@ const toEcmascript = async (
     if (!meta || meta.sha !== sha) {
       updates[`${path}/${id}`] = {
         dependencies,
-        program: generateUpdateCode(entry),
+        program: generateUpdateCode(entry, { declaration, sha, topLevel }),
       };
     }
   };
 
+  const statements = [];
+
   for (let nth = 0; nth < body.length; nth++) {
-    const entry = body[nth];
+    statements.push(...rewriteImportStatements(body[nth]));
+  }
+
+  for (const entry of statements) {
     if (entry.type === 'VariableDeclaration') {
       for (const declarator of entry.declarations) {
         await declareVariable(entry, declarator);
@@ -6759,51 +6826,6 @@ const toEcmascript = async (
           await declareVariable(entry.declaration, declarator, {
             doExport: true,
           });
-        }
-      }
-    } else if (entry.type === 'ImportDeclaration') {
-      const entry = body[nth];
-      // Rewrite
-      //   import { foo } from 'bar';
-      //   import Foo from 'bar';
-      // to
-      //   const { foo } = importModule('bar');
-      //   const Foo = importModule('bar');
-      //
-      // FIX: Handle other variations.
-      const { specifiers, source } = entry;
-
-      if (specifiers.length === 0) {
-        out.push(parse(`await importModule('${source.value}');`, parseOptions));
-      } else {
-        for (const { imported, local, type } of specifiers) {
-          switch (type) {
-            case 'ImportDefaultSpecifier':
-              out.push(
-                parse(
-                  `const ${local.name} = (await importModule('${source.value}')).default;`,
-                  parseOptions
-                )
-              );
-              break;
-            case 'ImportSpecifier':
-              if (local.name !== imported.name) {
-                out.push(
-                  parse(
-                    `const { ${imported.name}: ${local.name} } = await importModule('${source.value}');`,
-                    parseOptions
-                  )
-                );
-              } else {
-                out.push(
-                  parse(
-                    `const { ${imported.name} } = await importModule('${source.value}');`,
-                    parseOptions
-                  )
-                );
-              }
-              break;
-          }
         }
       }
     } else if (entry.type === 'ExpressionStatement') {
@@ -6822,8 +6844,11 @@ const toEcmascript = async (
   // Return the exports as an object.
   out.push(parse(`return { ${exportNames.join(', ')} };`, parseOptions));
 
-  const result =
-    '\n' + generate(parse(out.map(generate).join('\n'), parseOptions));
+  const result = `
+try {
+${generate(parse(out.map(generate).join('\n'), parseOptions))}
+} catch (error) { throw error; }
+`;
 
   return result;
 };

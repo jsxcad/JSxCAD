@@ -7,10 +7,13 @@ export const evaluate = async (ecmascript, { api, path }) => {
     `{ ${Object.keys(api).join(', ')} }`,
     `return async () => { ${ecmascript} };`
   );
-  const module = await builder(api);
   try {
+    const module = await builder(api);
     pushModule(path);
-    await module();
+    const result = await module();
+    return result;
+  } catch (error) {
+    throw error;
   } finally {
     popModule();
   }
@@ -42,14 +45,19 @@ export const execute = async (
         if (outstandingDependencies.length === 0) {
           console.log(`Scheduling: ${id}`);
           pending.delete(id);
-          evaluate(updates[id].program)
-            .then(() => {
+          const task = async () => {
+            try {
+              await evaluate(updates[id].program);
               console.log(`Completed ${id}`);
               delete updates[id];
               unprocessed.delete(id);
-            })
-            .catch((error) => somethingFailed(error)) // FIX: Deadlock?
-            .finally(() => somethingHappened());
+            } catch (error) {
+              somethingFailed(error); // FIX: Deadlock?
+            } finally {
+              somethingHappened();
+            }
+          };
+          task();
         }
       }
     };
@@ -64,7 +72,12 @@ export const execute = async (
         await somethingHappens;
       }
     }
-    return replay(ecmascript, { path });
+    try {
+      const result = await replay(ecmascript, { path });
+      return result;
+    } catch (error) {
+      throw error;
+    }
   } catch (error) {
     throw error;
   }

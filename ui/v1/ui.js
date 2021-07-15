@@ -797,14 +797,29 @@ class Ui extends React.PureComponent {
       await write(`control/${path}`, notebookControlData);
 
       let script = jsEditorData;
-      const evaluate = (script) =>
-        ask({ op: 'evaluate', script, workspace, path, sha });
-      const replay = (script) =>
-        ask({ op: 'evaluate', script, workspace, path, sha });
+      const evaluate = async (script) => {
+        try {
+          const result = await ask({
+            op: 'evaluate',
+            script,
+            workspace,
+            path,
+            sha,
+          });
+          if (result) {
+            return result;
+          } else {
+            // The error will have come back via a note.
+            throw Error('Evaluation failed');
+          }
+        } catch (error) {
+          throw error;
+        }
+      };
       jsEditorAdvice.definitions = topLevel;
       await execute(script, {
         evaluate,
-        replay,
+        replay: evaluate,
         path,
         topLevel,
       });

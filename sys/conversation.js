@@ -8,8 +8,16 @@ export const createConversation = ({ agent, say }) => {
     say,
   };
 
-  conversation.waitToFinish = () =>
-    new Promise((resolve, reject) => conversation.waiters.push(resolve));
+  conversation.waitToFinish = () => {
+    if (conversation.openQuestions.size === 0) {
+      return true;
+    } else {
+      const promise = new Promise((resolve, reject) =>
+        conversation.waiters.push(resolve)
+      );
+      return !promise;
+    }
+  };
 
   conversation.ask = (question, transfer) => {
     const { id, openQuestions, say } = conversation;
@@ -51,20 +59,21 @@ export const createConversation = ({ agent, say }) => {
         }
       }
     } else if (message.hasOwnProperty('question')) {
-      const answer = await agent({
-        ask,
-        message: question,
-        type: 'question',
-        tell,
-      });
       try {
+        const answer = await agent({
+          ask,
+          message: question,
+          type: 'question',
+          tell,
+        });
         say({ id, answer });
-      } catch (e) {
-        console.log(`QQ/say/error: ${e.stack}`);
-        throw e;
+      } catch (error) {
+        say({ id, answer: 'error', error });
       }
     } else if (message.hasOwnProperty('statement')) {
       await agent({ ask, message: statement, type: 'statement', tell });
+    } else if (message.hasOwnProperty('error')) {
+      throw error;
     } else {
       throw Error(
         `Expected { answer } or { question } but received ${JSON.stringify(
