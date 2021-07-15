@@ -108,13 +108,14 @@ const agent = async ({ ask, message, type, tell }) => {
           });
           await sys.log({ op: 'evaluate', status: 'failure' });
           await resolveNotebook();
-          return false;
+          throw error;
         }
       default:
         throw Error(`Unknown operation ${op}`);
     }
   } catch (error) {
     sys.info(error.stack);
+    throw error;
   }
 };
 

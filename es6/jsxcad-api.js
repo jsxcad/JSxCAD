@@ -75,10 +75,13 @@ const evaluate = async (ecmascript, { api, path }) => {
     `{ ${Object.keys(api).join(', ')} }`,
     `return async () => { ${ecmascript} };`
   );
-  const module = await builder(api);
   try {
+    const module = await builder(api);
     pushModule(path);
-    await module();
+    const result = await module();
+    return result;
+  } catch (error) {
+    throw error;
   } finally {
     popModule();
   }
@@ -110,14 +113,19 @@ const execute = async (
         if (outstandingDependencies.length === 0) {
           console.log(`Scheduling: ${id}`);
           pending.delete(id);
-          evaluate(updates[id].program)
-            .then(() => {
+          const task = async () => {
+            try {
+              await evaluate(updates[id].program);
               console.log(`Completed ${id}`);
               delete updates[id];
               unprocessed.delete(id);
-            })
-            .catch((error) => somethingFailed(error)) // FIX: Deadlock?
-            .finally(() => somethingHappened());
+            } catch (error) {
+              somethingFailed(error); // FIX: Deadlock?
+            } finally {
+              somethingHappened();
+            }
+          };
+          task();
         }
       }
     };
@@ -132,7 +140,12 @@ const execute = async (
         await somethingHappens;
       }
     }
-    return replay(ecmascript, { path });
+    try {
+      const result = await replay(ecmascript, { path });
+      return result;
+    } catch (error) {
+      throw error;
+    }
   } catch (error) {
     throw error;
   }
@@ -144,54 +157,49 @@ const registerDynamicModule = (bare, path) =>
   DYNAMIC_MODULES.set(bare, path);
 
 const buildImportModule = (baseApi) => async (name) => {
-  console.log(`QQ/importModule/0`);
-  const internalModule = DYNAMIC_MODULES.get(name);
-  if (internalModule !== undefined) {
-    const module = await import(internalModule);
-    return module;
-  }
-  console.log(`QQ/importModule/1`);
-  let script;
-  if (script === undefined) {
-    const path = `source/${name}`;
-    const sources = [];
-    sources.push(name);
-    script = await read(path, { sources });
-  }
-  console.log(`QQ/importModule/2`);
-  if (script === undefined) {
-    throw Error(`Cannot import module ${name}`);
-  }
-  console.log(`QQ/importModule/3`);
-  const scriptText =
-    typeof script === 'string'
-      ? script
-      : new TextDecoder('utf8').decode(script);
-  console.log(`QQ/importModule/4`);
-  const path = name;
-  const topLevel = new Map();
-  const onError = (error) => console.log(error.stack);
-  const api = { ...baseApi, sha: 'master' };
-  console.log(`QQ/importModule/5`);
-  const evaluate$1 = (script) => evaluate(script, { api, path });
-  console.log(`QQ/importModule/6`);
-
-  return execute(scriptText, { evaluate: evaluate$1, path, topLevel, onError });
-  /*
-  const ecmascript = await toEcmascript(scriptText, { path: name });
-  const builder = new Function(
-    `{ ${Object.keys(api).join(', ')} }`,
-    `return async () => { ${ecmascript} };`
-  );
-  const module = await builder(api);
   try {
-    pushModule(name);
-    const exports = await module();
-    return exports;
-  } finally {
-    popModule();
+    console.log(`QQ/importModule/0`);
+    const internalModule = DYNAMIC_MODULES.get(name);
+    if (internalModule !== undefined) {
+      const module = await import(internalModule);
+      return module;
+    }
+    console.log(`QQ/importModule/1`);
+    let script;
+    if (script === undefined) {
+      const path = `source/${name}`;
+      const sources = [];
+      sources.push(name);
+      script = await read(path, { sources });
+    }
+    console.log(`QQ/importModule/2`);
+    if (script === undefined) {
+      throw Error(`Cannot import module ${name}`);
+    }
+    console.log(`QQ/importModule/3`);
+    const scriptText =
+      typeof script === 'string'
+        ? script
+        : new TextDecoder('utf8').decode(script);
+    console.log(`QQ/importModule/4`);
+    const path = name;
+    const topLevel = new Map();
+    const api = { ...baseApi, sha: 'master' };
+    console.log(`QQ/importModule/5`);
+    const evaluate$1 = (script) => evaluate(script, { api, path });
+    const replay = (script) => evaluate(script, { api, path });
+    console.log(`QQ/importModule/6`);
+
+    const result = await execute(scriptText, {
+      evaluate: evaluate$1,
+      replay,
+      path,
+      topLevel,
+    });
+    return result;
+  } catch (error) {
+    throw error;
   }
-*/
 };
 
 /*

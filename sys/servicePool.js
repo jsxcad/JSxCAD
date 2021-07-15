@@ -78,22 +78,30 @@ export const askService = (spec, question, transfer) => {
     terminated = true;
   };
   const flow = async () => {
-    const service = await acquireService(spec);
-    if (service.released) {
-      return Promise.reject(Error('Terminated'));
+    let service;
+    try {
+      service = await acquireService(spec);
+      if (service.released) {
+        return Promise.reject(Error('Terminated'));
+      }
+      terminate = () => {
+        service.terminate();
+        return Promise.reject(Error('Terminated'));
+      };
+      if (terminated) {
+        terminate();
+      }
+      const answer = await service.ask(question, transfer);
+      return answer;
+    } catch (error) {
+      throw error;
+    } finally {
+      if (service) {
+        await service.waitToFinish();
+        service.finished = true;
+        service.release();
+      }
     }
-    terminate = () => {
-      service.terminate();
-      return Promise.reject(Error('Terminated'));
-    };
-    if (terminated) {
-      terminate();
-    }
-    const answer = service.ask(question, transfer);
-    await service.waitToFinish();
-    service.finished = true;
-    service.release();
-    return answer;
   };
   const promise = flow();
   // Avoid a race in which the service might be terminated before
