@@ -3,6 +3,9 @@
 
 name: Node.js CI
 
+variables:
+  NODE_OPTIONS: --max_old_space_size=4096
+
 on:
   push:
     branches: [master]
@@ -32,5 +35,3 @@ jobs:
       - run: npm run rollup
       - run: ./publish-es6.sh
       - run: ./publish-wasm.sh
-      - env:
-          NODE_OPTIONS: "--max_old_space_size=4096"
