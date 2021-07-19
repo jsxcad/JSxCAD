@@ -290,38 +290,13 @@ test('Import', async (t) => {
     ecmascript,
     `
 try {
-const foo = await loadGeometry('data/def//foo');
-Object.freeze(foo);
-await replayRecordedNotes('', 'foo');
+const foo = (await importModule('bar')).foo;
 return {};
 
 } catch (error) { throw error; }
 `
   );
-  t.deepEqual(updates, {
-    '/foo': {
-      dependencies: ['importModule'],
-      program: `
-try {
-info('define foo');
-
-beginRecordingNotes('', 'foo', {
-  line: 1,
-  column: 0
-});
-
-const foo = (await importModule('bar')).foo;
-foo instanceof Shape && (await saveGeometry('data/def//foo', foo)) && (await write('meta/def//foo', {
-  sha: '1b97e8d64b92cc729b7747efb08a9d57c5390ab6'
-}));
-
-await saveRecordedNotes('', 'foo');
-
-
-} catch (error) { throw error; }
-`,
-    },
-  });
+  t.deepEqual(updates, {});
 });
 
 test('Definition', async (t) => {
@@ -373,38 +348,13 @@ test('Default Import', async (t) => {
     ecmascript,
     `
 try {
-const Foo = await loadGeometry('data/def//Foo');
-Object.freeze(Foo);
-await replayRecordedNotes('', 'Foo');
+const Foo = (await importModule('bar')).default;
 return {};
 
 } catch (error) { throw error; }
 `
   );
-  t.deepEqual(updates, {
-    '/Foo': {
-      dependencies: ['importModule'],
-      program: `
-try {
-info('define Foo');
-
-beginRecordingNotes('', 'Foo', {
-  line: 1,
-  column: 0
-});
-
-const Foo = (await importModule('bar')).default;
-Foo instanceof Shape && (await saveGeometry('data/def//Foo', Foo)) && (await write('meta/def//Foo', {
-  sha: 'd83c9c742193c2ccc0487366f92ac46bd7520524'
-}));
-
-await saveRecordedNotes('', 'Foo');
-
-
-} catch (error) { throw error; }
-`,
-    },
-  });
+  t.deepEqual(updates, {});
 });
 
 test('Used Import', async (t) => {
@@ -417,9 +367,7 @@ test('Used Import', async (t) => {
     ecmascript,
     `
 try {
-const Foo = await loadGeometry('data/def//Foo');
-Object.freeze(Foo);
-await replayRecordedNotes('', 'Foo');
+const Foo = (await importModule('bar')).default;
 const foo = await loadGeometry('data/def//foo');
 Object.freeze(foo);
 await replayRecordedNotes('', 'foo');
@@ -430,36 +378,11 @@ return {};
   );
   // FIX: This should include the Foo import.
   t.deepEqual(updates, {
-    '/Foo': {
-      dependencies: ['importModule'],
-      program: `
-try {
-info('define Foo');
-
-beginRecordingNotes('', 'Foo', {
-  line: 1,
-  column: 0
-});
-
-const Foo = (await importModule('bar')).default;
-Foo instanceof Shape && (await saveGeometry('data/def//Foo', Foo)) && (await write('meta/def//Foo', {
-  sha: 'd83c9c742193c2ccc0487366f92ac46bd7520524'
-}));
-
-await saveRecordedNotes('', 'Foo');
-
-
-} catch (error) { throw error; }
-`,
-    },
     '/foo': {
       dependencies: ['Foo'],
       program: `
 try {
-const Foo = await loadGeometry('data/def//Foo');
-
-Object.freeze(Foo);
-
+const Foo = (await importModule('bar')).default;
 info('define foo');
 
 beginRecordingNotes('', 'foo', {
@@ -488,7 +411,7 @@ test('Unassigned Import', async (t) => {
     ecmascript,
     `
 try {
-await importModule('bar');
+const $1 = await importModule('bar');
 return {};
 
 } catch (error) { throw error; }

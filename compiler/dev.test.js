@@ -13,9 +13,7 @@ test('Used Import', async (t) => {
     ecmascript,
     `
 try {
-const Foo = await loadGeometry('data/def//Foo');
-Object.freeze(Foo);
-await replayRecordedNotes('', 'Foo');
+const Foo = (await importModule('bar')).default;
 const foo = await loadGeometry('data/def//foo');
 Object.freeze(foo);
 await replayRecordedNotes('', 'foo');
@@ -26,36 +24,11 @@ return {};
   );
   // FIX: This should include the Foo import.
   t.deepEqual(updates, {
-    '/Foo': {
-      dependencies: ['importModule'],
-      program: `
-try {
-info('define Foo');
-
-beginRecordingNotes('', 'Foo', {
-  line: 1,
-  column: 0
-});
-
-const Foo = (await importModule('bar')).default;
-Foo instanceof Shape && (await saveGeometry('data/def//Foo', Foo)) && (await write('meta/def//Foo', {
-  sha: 'd83c9c742193c2ccc0487366f92ac46bd7520524'
-}));
-
-await saveRecordedNotes('', 'Foo');
-
-
-} catch (error) { throw error; }
-`,
-    },
     '/foo': {
       dependencies: ['Foo'],
       program: `
 try {
-const Foo = await loadGeometry('data/def//Foo');
-
-Object.freeze(Foo);
-
+const Foo = (await importModule('bar')).default;
 info('define foo');
 
 beginRecordingNotes('', 'foo', {

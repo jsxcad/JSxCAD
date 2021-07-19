@@ -2,6 +2,8 @@
 
 import { installUi } from '@jsxcad/ui-v1';
 
+window.onError = (error) => window.alert(error.stack);
+
 document.onreadystatechange = () => {
   if (document.readyState === 'complete') {
     const bootstrap = async () => {
