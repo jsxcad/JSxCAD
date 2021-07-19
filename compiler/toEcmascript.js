@@ -39,6 +39,13 @@ const collectDependencies = (declarator) => {
   return dependencies;
 };
 
+const fromIdToSha = (id, { topLevel }) => {
+  const entry = topLevel.get(id);
+  if (entry !== undefined) {
+    return entry.sha;
+  }
+};
+
 const generateCacheLoadCode = ({ isNotCacheable, code, path, id }) => {
   if (isNotCacheable) {
     return [code];
@@ -74,7 +81,11 @@ const generateUpdateCode = (
   { declaration, sha, topLevel, state }
 ) => {
   if (isNotCacheable) {
-    return [code];
+    return `
+try {
+${generate(code)}
+} catch (error) { throw error; }
+`;
   }
 
   const body = [];
@@ -143,59 +154,277 @@ const fixControlCalls = (declarator, controls) => {
   }
 };
 
-const rewriteImportStatements = (entry) => {
-  const output = [];
+const declareVariable = async (
+  declaration,
+  declarator,
+  {
+    path,
+    updates,
+    controls,
+    exportNames,
+    out,
+    doExport = false,
+    isImport = false,
+    topLevel,
+    sourceLocation,
+  } = {}
+) => {
+  fixControlCalls(declarator, controls);
+
+  const id = declarator.id.name;
+
+  const code = {
+    type: 'VariableDeclaration',
+    kind: declaration.kind,
+    declarations: [strip(declarator)],
+  };
+
+  const dependencies = collectDependencies(declarator);
+  const dependencyShas = dependencies.map((dependency) =>
+    fromIdToSha(dependency, { topLevel })
+  );
+  const definition = { code, dependencies, dependencyShas };
+  const sha = hash(definition);
+
+  const entry = {
+    path,
+    id,
+    code,
+    definition,
+    dependencies,
+    sha,
+    sourceLocation: sourceLocation || declaration.loc,
+  };
+
+  topLevel.set(id, entry);
+
+  if (doExport) {
+    exportNames.push(id);
+  }
+
+  // Bail out for special cases.
+  if (declarator.init) {
+    if (declarator.init.loc) {
+      entry.initSourceLocation = sourceLocation || declarator.init.loc;
+    }
+    if (declarator.init.type === 'ArrowFunctionExpression') {
+      // We can't cache functions.
+      entry.isNotCacheable = true;
+    } else if (declarator.init.type === 'Literal') {
+      // Not much point in caching literals.
+      entry.isNotCacheable = true;
+    } else if (
+      declarator.init.type === 'CallExpression' &&
+      declarator.init.callee.type === 'Identifier' &&
+      declarator.init.callee.name === 'control'
+    ) {
+      // We've already patched this.
+      entry.isNotCacheable = true;
+    } else if (isImport) {
+      // We need to import from modules during replay.
+      entry.isNotCacheable = true;
+    }
+  }
+
+  out.push(...generateReplayCode(entry));
+
+  if (!entry.isNotCacheable) {
+    const meta = await read(`meta/def/${path}/${id}`);
+    if (!meta || meta.sha !== sha) {
+      updates[`${path}/${id}`] = {
+        dependencies,
+        program: generateUpdateCode(entry, { declaration, sha, topLevel }),
+      };
+    }
+  }
+};
+
+const processStatement = async (
+  entry,
+  {
+    out,
+    updates,
+    exportNames,
+    path,
+    controls,
+    topLevel,
+    nextTopLevelExpressionId,
+    isImport,
+    sourceLocation,
+  }
+) => {
   if (entry.type === 'ImportDeclaration') {
     // Rewrite
     //   import { foo } from 'bar';
     //   import Foo from 'bar';
     // to
-    //   const { foo } = importModule('bar');
-    //   const Foo = importModule('bar');
+    //   const { foo } = (await importModule('bar')).foo;
+    //   const Foo = (await importModule('bar')).default;
     //
     // FIX: Handle other variations.
     const { specifiers, source } = entry;
 
     if (specifiers.length === 0) {
-      output.push(
-        parse(`await importModule('${source.value}');`, parseOptions)
+      processProgram(
+        parse(`await importModule('${source.value}');`, parseOptions),
+        {
+          out,
+          updates,
+          exportNames,
+          path,
+          controls,
+          topLevel,
+          nextTopLevelExpressionId,
+          isImport: true,
+          sourceLocation: entry.loc,
+        }
       );
     } else {
       for (const { imported, local, type } of specifiers) {
         switch (type) {
           case 'ImportDefaultSpecifier':
-            output.push(
-              ...parse(
+            processProgram(
+              parse(
                 `const ${local.name} = (await importModule('${source.value}')).default;`,
                 parseOptions
-              ).body
+              ),
+              {
+                out,
+                updates,
+                exportNames,
+                path,
+                controls,
+                topLevel,
+                nextTopLevelExpressionId,
+                isImport: true,
+                sourceLocation: entry.loc,
+              }
             );
             break;
           case 'ImportSpecifier':
             if (local.name !== imported.name) {
-              output.push(
-                ...parse(
+              processProgram(
+                parse(
                   `const ${local.name} = (await importModule('${source.value}')).${imported.name};`,
                   parseOptions
-                ).body
+                ),
+                {
+                  out,
+                  updates,
+                  exportNames,
+                  path,
+                  controls,
+                  topLevel,
+                  nextTopLevelExpressionId,
+                  isImport: true,
+                  sourceLocation: entry.loc,
+                }
               );
             } else {
-              output.push(
-                ...parse(
+              processProgram(
+                parse(
                   `const ${imported.name} = (await importModule('${source.value}')).${imported.name};`,
                   parseOptions
-                ).body
+                ),
+                {
+                  out,
+                  updates,
+                  exportNames,
+                  path,
+                  controls,
+                  topLevel,
+                  nextTopLevelExpressionId,
+                  isImport: true,
+                  sourceLocation: entry.loc,
+                }
               );
             }
             break;
         }
       }
     }
+  } else if (entry.type === 'VariableDeclaration') {
+    for (const declarator of entry.declarations) {
+      await declareVariable(entry, declarator, {
+        out,
+        updates,
+        exportNames,
+        path,
+        controls,
+        topLevel,
+        nextTopLevelExpressionId,
+        isImport,
+        sourceLocation,
+      });
+    }
+  } else if (entry.type === 'ExportNamedDeclaration') {
+    // Note the names and replace the export with the declaration.
+    const declaration = entry.declaration;
+    if (declaration.type === 'VariableDeclaration') {
+      for (const declarator of declaration.declarations) {
+        await declareVariable(entry.declaration, declarator, {
+          updates,
+          doExport: true,
+          exportNames,
+          path,
+          controls,
+          out,
+          topLevel,
+          nextTopLevelExpressionId,
+          sourceLocation,
+        });
+      }
+    }
+  } else if (entry.type === 'ExpressionStatement') {
+    // This is an ugly way of turning top level expressions into declarations.
+    const declaration = parse(
+      `const $${nextTopLevelExpressionId()} = ${generate(entry)}`,
+      parseOptions
+    ).body[0];
+    const declarator = declaration.declarations[0];
+    await declareVariable(declaration, declarator, {
+      out,
+      updates,
+      exportNames,
+      path,
+      controls,
+      topLevel,
+      nextTopLevelExpressionId,
+      isImport,
+      sourceLocation: entry.loc,
+    });
   } else {
-    output.push(entry);
+    out.push(entry);
   }
+};
 
-  return output;
+const processProgram = async (
+  program,
+  {
+    out,
+    updates,
+    exportNames,
+    path,
+    controls,
+    isImport,
+    topLevel,
+    nextTopLevelExpressionId,
+    sourceLocation,
+  }
+) => {
+  for (const statement of program.body) {
+    await processStatement(statement, {
+      out,
+      updates,
+      exportNames,
+      path,
+      controls,
+      isImport,
+      topLevel,
+      nextTopLevelExpressionId,
+      sourceLocation,
+    });
+  }
 };
 
 /**
@@ -214,130 +443,25 @@ export const toEcmascript = async (
 ) => {
   let ast = parse(script, parseOptions);
 
-  let toplevelExpressionCount = 0;
+  let topLevelExpressionCount = 0;
+  const nextTopLevelExpressionId = () => ++topLevelExpressionCount;
 
   const exportNames = [];
 
-  const body = ast.body;
   const out = [];
 
   // Start by loading the controls
   const controls = (await read(`control/${path}`)) || {};
 
-  const fromIdToSha = (id) => {
-    const entry = topLevel.get(id);
-    if (entry !== undefined) {
-      return entry.sha;
-    }
-  };
-
-  const declareVariable = async (
-    declaration,
-    declarator,
-    { doExport = false } = {}
-  ) => {
-    fixControlCalls(declarator, controls);
-
-    const id = declarator.id.name;
-
-    const code = {
-      type: 'VariableDeclaration',
-      kind: declaration.kind,
-      declarations: [strip(declarator)],
-    };
-
-    const dependencies = collectDependencies(declarator);
-    const dependencyShas = dependencies.map(fromIdToSha);
-    const definition = { code, dependencies, dependencyShas };
-    const sha = hash(definition);
-
-    const entry = {
-      path,
-      id,
-      code,
-      definition,
-      dependencies,
-      sha,
-      sourceLocation: declaration.loc,
-    };
-
-    topLevel.set(id, entry);
-
-    if (doExport) {
-      exportNames.push(id);
-    }
-
-    // Bail out for special cases.
-    if (declarator.init) {
-      if (declarator.init.loc) {
-        entry.initSourceLocation = declarator.init.loc;
-      }
-      if (declarator.init.type === 'ArrowFunctionExpression') {
-        // We can't cache functions.
-        out.push(declaration);
-        entry.isNotCacheable = true;
-        return;
-      } else if (declarator.init.type === 'Literal') {
-        // Not much point in caching literals.
-        out.push(declaration);
-        entry.isNotCacheable = true;
-        return;
-      } else if (
-        declarator.init.type === 'CallExpression' &&
-        declarator.init.callee.type === 'Identifier' &&
-        declarator.init.callee.name === 'control'
-      ) {
-        // We've already patched this.
-        out.push(declaration);
-        entry.isNotCacheable = true;
-        return;
-      }
-    }
-
-    out.push(...generateReplayCode(entry));
-
-    const meta = await read(`meta/def/${path}/${id}`);
-    if (!meta || meta.sha !== sha) {
-      updates[`${path}/${id}`] = {
-        dependencies,
-        program: generateUpdateCode(entry, { declaration, sha, topLevel }),
-      };
-    }
-  };
-
-  const statements = [];
-
-  for (let nth = 0; nth < body.length; nth++) {
-    statements.push(...rewriteImportStatements(body[nth]));
-  }
-
-  for (const entry of statements) {
-    if (entry.type === 'VariableDeclaration') {
-      for (const declarator of entry.declarations) {
-        await declareVariable(entry, declarator);
-      }
-    } else if (entry.type === 'ExportNamedDeclaration') {
-      // Note the names and replace the export with the declaration.
-      const declaration = entry.declaration;
-      if (declaration.type === 'VariableDeclaration') {
-        for (const declarator of declaration.declarations) {
-          await declareVariable(entry.declaration, declarator, {
-            doExport: true,
-          });
-        }
-      }
-    } else if (entry.type === 'ExpressionStatement') {
-      // This is an ugly way of turning top level expressions into declarations.
-      const declaration = parse(
-        `const $${++toplevelExpressionCount} = ${generate(entry)}`,
-        parseOptions
-      ).body[0];
-      const declarator = declaration.declarations[0];
-      await declareVariable(declaration, declarator);
-    } else {
-      out.push(entry);
-    }
-  }
+  await processProgram(ast, {
+    out,
+    updates,
+    exportNames,
+    controls,
+    path,
+    topLevel,
+    nextTopLevelExpressionId,
+  });
 
   // Return the exports as an object.
   out.push(parse(`return { ${exportNames.join(', ')} };`, parseOptions));

@@ -73,7 +73,8 @@
     "rollup-plugin-loadz0r": "^0.7.1",
     "rollup-plugin-node-builtins": "^2.1.2",
     "rollup-plugin-node-globals": "^1.4.0",
-    "rollup-plugin-node-resolve": "^4.2.3"
+    "rollup-plugin-node-resolve": "^4.2.3",
+    "rollup-plugin-sizes": "^1.0.4"
   },
   "publishConfig": {
     "access": "public"

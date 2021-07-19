@@ -156,12 +156,19 @@ const DYNAMIC_MODULES = new Map();
 const registerDynamicModule = (bare, path) =>
   DYNAMIC_MODULES.set(bare, path);
 
+const CACHED_MODULES = new Map();
+
 const buildImportModule = (baseApi) => async (name) => {
   try {
+    const cachedModule = CACHED_MODULES.get(name);
+    if (cachedModule !== undefined) {
+      return cachedModule;
+    }
     console.log(`QQ/importModule/0`);
     const internalModule = DYNAMIC_MODULES.get(name);
     if (internalModule !== undefined) {
       const module = await import(internalModule);
+      CACHED_MODULES.set(name, module);
       return module;
     }
     console.log(`QQ/importModule/1`);
@@ -190,13 +197,14 @@ const buildImportModule = (baseApi) => async (name) => {
     const replay = (script) => evaluate(script, { api, path });
     console.log(`QQ/importModule/6`);
 
-    const result = await execute(scriptText, {
+    const builtModule = await execute(scriptText, {
       evaluate: evaluate$1,
       replay,
       path,
       topLevel,
     });
-    return result;
+    CACHED_MODULES.set(name, builtModule);
+    return builtModule;
   } catch (error) {
     throw error;
   }
