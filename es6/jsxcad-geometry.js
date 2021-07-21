@@ -107,31 +107,12 @@ const visit = (geometry, op, state) => {
 };
 
 const transform$4 = (matrix, geometry) => {
-  const op = (geometry, descend, walk) => {
-    switch (geometry.type) {
-      // Branch
-      case 'layout':
-      case 'group':
-      case 'item':
-      case 'sketch':
-        return descend();
-      // Leaf
-      case 'plan':
-      case 'triangles':
-      case 'paths':
-      case 'points':
-      case 'graph':
-        return descend({
-          matrix: geometry.matrix
-            ? composeTransforms(matrix, geometry.matrix)
-            : matrix,
-        });
-      default:
-        throw Error(
-          `Unexpected geometry ${geometry.type} see ${JSON.stringify(geometry)}`
-        );
-    }
-  };
+  const op = (geometry, descend, walk) =>
+    descend({
+      matrix: geometry.matrix
+        ? composeTransforms(matrix, geometry.matrix)
+        : matrix,
+    });
   return rewrite(geometry, op);
 };
 

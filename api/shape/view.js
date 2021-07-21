@@ -10,7 +10,7 @@ import { Shape } from './Shape.js';
 import { ensurePages } from './Page.js';
 
 // FIX: Avoid the extra read-write cycle.
-export const view =
+export const baseView =
   ({
     size,
     skin = true,
@@ -40,8 +40,6 @@ export const view =
     }
     return shape;
   };
-
-Shape.registerMethod('view', view);
 
 export const topView =
   ({
@@ -166,3 +164,22 @@ export const sideView =
     })(shape);
 
 Shape.registerMethod('sideView');
+
+export const view =
+  (options = {}) =>
+  (shape) => {
+    switch (options.style) {
+      case 'grid':
+        return shape.gridView(options);
+      case 'none':
+        return shape;
+      case 'side':
+        return shape.sideView(options);
+      case 'top':
+        return shape.topView(options);
+      default:
+        return baseView(options)(shape);
+    }
+  };
+
+Shape.registerMethod('view', view);

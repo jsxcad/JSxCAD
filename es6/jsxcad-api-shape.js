@@ -6,9 +6,9 @@ import { emit, log as log$1, getModule, generateUniqueId, addPending, write as w
 export { elapsed, emit, info, read, write } from './jsxcad-sys.js';
 import { toTagsFromName } from './jsxcad-algorithm-color.js';
 import { zag, seq } from './jsxcad-api-v1-math.js';
+import { invertTransform, fromRotateXToTransform, fromRotateYToTransform, fromRotateZToTransform } from './jsxcad-algorithm-cgal.js';
 import { toTagsFromName as toTagsFromName$1 } from './jsxcad-algorithm-material.js';
 import { pack as pack$1 } from './jsxcad-algorithm-pack.js';
-import { fromRotateXToTransform, fromRotateYToTransform, fromRotateZToTransform } from './jsxcad-algorithm-cgal.js';
 import { toTagsFromName as toTagsFromName$2 } from './jsxcad-algorithm-tool.js';
 import { fromPoints as fromPoints$3 } from './jsxcad-math-poly3.js';
 export { cm, foot, inch, m, mil, mm, thou, yard } from './jsxcad-api-v1-units.js';
@@ -2647,6 +2647,36 @@ const withInline = () => (shape) => shape.with(inline());
 
 Shape.registerMethod('withInline', withInline);
 
+const inFn = (path, op) => (shape) => {
+  const walk = (geometry, descend, walk, path) => {
+    if (geometry.type === 'item') {
+      if (path.length > 0) {
+        if (geometry.tags && geometry.tags.includes(`user/${path[0]}`)) {
+          if (path.length > 1) {
+            return descend({}, path.slice(1));
+          } else {
+            // This is a target.
+            const global = geometry.matrix;
+            const local = invertTransform(global);
+            const target = Shape.fromGeometry(geometry);
+            // Switch to the local coordinate space, perform the operation, and come back to the global coordinate space.
+            return target
+              .transform(local)
+              .op(op)
+              .transform(global)
+              .toGeometry();
+          }
+        }
+      }
+    }
+    return descend();
+  };
+
+  return Shape.fromGeometry(rewrite(shape.toGeometry(), walk, path.split('/')));
+};
+
+Shape.registerMethod('in', inFn);
+
 const inset =
   (initial = 1, step, limit) =>
   (shape) =>
@@ -2910,6 +2940,13 @@ const pack =
 
 Shape.registerMethod('pack', pack);
 
+const play =
+  (amount = 0.1) =>
+  (shape) =>
+    shape.grow(amount).void().and(shape);
+
+Shape.registerMethod('play', play);
+
 const projectToPlane =
   (plane = [0, 0, 1, 1], direction = [0, 0, 1, 0]) =>
   (shape) =>
@@ -3138,7 +3175,7 @@ const twist =
 Shape.registerMethod('twist', twist);
 
 // FIX: Avoid the extra read-write cycle.
-const view =
+const baseView =
   ({
     size,
     skin = true,
@@ -3168,8 +3205,6 @@ const view =
     }
     return shape;
   };
-
-Shape.registerMethod('view', view);
 
 const topView =
   ({
@@ -3265,6 +3300,25 @@ const frontView =
 Shape.registerMethod('frontView', frontView);
 
 Shape.registerMethod('sideView');
+
+const view =
+  (options = {}) =>
+  (shape) => {
+    switch (options.style) {
+      case 'grid':
+        return shape.gridView(options);
+      case 'none':
+        return shape;
+      case 'side':
+        return shape.sideView(options);
+      case 'top':
+        return shape.topView(options);
+      default:
+        return baseView(options)(shape);
+    }
+  };
+
+Shape.registerMethod('view', view);
 
 const voidFn = () => (shape) =>
   Shape.fromGeometry(
@@ -3776,4 +3830,4 @@ const yz = Peg('x', [0, 0, 0], [0, 0, 1], [0, -1, 0]);
 const xz = Peg('y', [0, 0, 0], [0, 0, 1], [1, 0, 0]);
 const xy = Peg('z', [0, 0, 0], [0, 1, 0], [-1, 0, 0]);
 
-export { Alpha, Arc, Assembly, Box, ChainedHull, Cone, Empty, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Item, Line, Octagon, Orb, Page, Path, Peg, Pentagon, Plan, Point, Points, Polygon, Polyhedron, Septagon, Shape, Spiral, Tetragon, Triangle, Wave, Weld, add, addTo, align, and, as, bend, clip, clipFrom, cloudSolid, color, colors, cut, cutFrom, defGrblConstantLaser, defGrblDynamicLaser, defGrblPlotter, defGrblSpindle, defRgbColor, defThreejsMaterial, defTool, define, drop, each, ensurePages, ex, extrude, extrudeToPlane, fill, fuse, grow, inline, inset, keep, loadGeometry, loft, log, loop, material, md, minkowskiDifference, minkowskiShell, minkowskiSum, move, noVoid, notAs, ofPlan, offset, op, orient, outline, pack, projectToPlane, push, remesh, rotate, rotateX, rotateY, rotateZ, rx, ry, rz, saveGeometry, scale, section, sectionProfile, separate, size, sketch, smooth, tags, test, tint, tool, twist, view, voidFn, weld, withFill, withFn, withInset, withOp, x, xy, xz, y, yz, z };
+export { Alpha, Arc, Assembly, Box, ChainedHull, Cone, Empty, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Item, Line, Octagon, Orb, Page, Path, Peg, Pentagon, Plan, Point, Points, Polygon, Polyhedron, Septagon, Shape, Spiral, Tetragon, Triangle, Wave, Weld, add, addTo, align, and, as, bend, clip, clipFrom, cloudSolid, color, colors, cut, cutFrom, defGrblConstantLaser, defGrblDynamicLaser, defGrblPlotter, defGrblSpindle, defRgbColor, defThreejsMaterial, defTool, define, drop, each, ensurePages, ex, extrude, extrudeToPlane, fill, fuse, grow, inFn, inline, inset, keep, loadGeometry, loft, log, loop, material, md, minkowskiDifference, minkowskiShell, minkowskiSum, move, noVoid, notAs, ofPlan, offset, op, orient, outline, pack, play, projectToPlane, push, remesh, rotate, rotateX, rotateY, rotateZ, rx, ry, rz, saveGeometry, scale, section, sectionProfile, separate, size, sketch, smooth, tags, test, tint, tool, twist, view, voidFn, weld, withFill, withFn, withInset, withOp, x, xy, xz, y, yz, z };

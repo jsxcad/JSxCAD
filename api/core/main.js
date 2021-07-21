@@ -7,11 +7,11 @@ import * as notesApi from './recordNotes.js';
 import * as shapeApi from '@jsxcad/api-shape';
 
 import { buildImportModule, registerDynamicModule } from './importModule.js';
+import { readStl, stl } from '@jsxcad/api-v1-stl';
 
 import { control } from './control.js';
 import { readObj } from '@jsxcad/api-v1-obj';
 import { readOff } from '@jsxcad/api-v1-off';
-import { readStl } from '@jsxcad/api-v1-stl';
 import { readSvg } from '@jsxcad/api-v1-svg';
 import { toSvg } from '@jsxcad/convert-svg';
 
@@ -24,6 +24,7 @@ const api = {
   readStl,
   readObj,
   readOff,
+  stl,
   toSvg,
 };
 
