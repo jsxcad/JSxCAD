@@ -99,14 +99,18 @@ export const toCgalTransformFromJsTransform = (
   }
 };
 
-export const composeTransforms = (a, b) => {
-  return toJsTransformFromCgalTransform(
+export const composeTransforms = (a, b) =>
+  toJsTransformFromCgalTransform(
     getCgal().Transformation__compose(
       toCgalTransformFromJsTransform(a),
       toCgalTransformFromJsTransform(b)
     )
   );
-};
+
+export const invertTransform = (a) =>
+  toJsTransformFromCgalTransform(
+    getCgal().Transformation__inverse(toCgalTransformFromJsTransform(a))
+  );
 
 export const fromExactToCgalTransform = (...exact) =>
   getCgal().Transformation__from_exact(() => exact.shift());

@@ -5,9 +5,9 @@ import * as mathApi from './jsxcad-api-v1-math.js';
 import { emit, hash, addOnEmitHandler, addPending, write, read, pushModule, popModule, getControlValue, getModule } from './jsxcad-sys.js';
 import * as shapeApi from './jsxcad-api-shape.js';
 import { toEcmascript } from './jsxcad-compiler.js';
+import { readStl, stl } from './jsxcad-api-v1-stl.js';
 import { readObj } from './jsxcad-api-v1-obj.js';
 import { readOff } from './jsxcad-api-v1-off.js';
-import { readStl } from './jsxcad-api-v1-stl.js';
 import { readSvg } from './jsxcad-api-v1-svg.js';
 import { toSvg } from './jsxcad-convert-svg.js';
 
@@ -237,6 +237,7 @@ const api = {
   readStl,
   readObj,
   readOff,
+  stl,
   toSvg,
 };
 

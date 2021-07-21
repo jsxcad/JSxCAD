@@ -2959,6 +2959,10 @@ Transformation* Transformation__compose(Transformation* a, Transformation* b) {
   return new Transformation(*a * *b);
 }
 
+Transformation* Transformation__inverse(Transformation* a) {
+  return new Transformation(a->inverse());
+}
+
 void Transformation__to_exact(Transformation* t, emscripten::val put) {
   for (int i = 0; i < 3; i++) {
     for (int j = 0; j < 4; j++) { 
@@ -3089,6 +3093,7 @@ EMSCRIPTEN_BINDINGS(module) {
   emscripten::class_<Transformation>("Transformation").constructor<>();
   emscripten::function("Transformation__compose", &Transformation__compose, emscripten::allow_raw_pointers());
   emscripten::function("Transformation__identity", &Transformation__identity, emscripten::allow_raw_pointers());
+  emscripten::function("Transformation__inverse", &Transformation__inverse, emscripten::allow_raw_pointers());
   emscripten::function("Transformation__from_approximate", &Transformation__from_approximate, emscripten::allow_raw_pointers());
   emscripten::function("Transformation__from_exact", &Transformation__from_exact, emscripten::allow_raw_pointers());
   emscripten::function("Transformation__to_approximate", &Transformation__to_approximate, emscripten::allow_raw_pointers());

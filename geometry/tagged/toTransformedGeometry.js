@@ -1,5 +1,4 @@
 import { rewrite } from './visit.js';
-// import { transform as transformGraph } from '../graph/transform.js';
 import { transform as transformPaths } from '../paths/transform.js';
 import { transform as transformPoints } from '../points/ops.js';
 import { transform as transformPolygons } from '../polygons/transform.js';

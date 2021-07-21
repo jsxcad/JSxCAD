@@ -8,6 +8,7 @@ export {
   fromRotateZToTransform,
   fromScaleToTransform,
   fromTranslateToTransform,
+  invertTransform,
   toCgalTransformFromJsTransform,
 } from './transform.js';
 
