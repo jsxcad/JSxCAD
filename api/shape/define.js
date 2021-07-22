@@ -7,12 +7,12 @@ export const define = (tag, data) => {
   return data;
 };
 
-export const defRgbColor = (name, rgb) => define(`color/${name}`, { rgb });
+export const defRgbColor = (name, rgb) => define(`color:${name}`, { rgb });
 
 export const defThreejsMaterial = (name, definition) =>
-  define(`material/${name}`, { threejsMaterial: definition });
+  define(`material:${name}`, { threejsMaterial: definition });
 
-export const defTool = (name, definition) => define(`tool/${name}`, definition);
+export const defTool = (name, definition) => define(`tool:${name}`, definition);
 
 export const defGrblSpindle = (
   name,

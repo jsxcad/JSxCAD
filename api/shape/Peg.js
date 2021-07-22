@@ -78,7 +78,7 @@ export const Peg = (
   const r = add(origin, right);
   const tags = ['peg'];
   if (name) {
-    tags.push(`peg/${name}`);
+    tags.push(`peg:${name}`);
   }
   return Shape.fromGeometry(
     taggedPoints({ tags }, [

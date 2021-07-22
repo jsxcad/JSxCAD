@@ -2,7 +2,7 @@ import { standardMaterialDefinitions } from './standardMaterialDefinitions.js';
 
 // FIX: Apply normalizations here.
 const toTagFromName = (name) => {
-  return `material/${name}`;
+  return `material:${name}`;
 };
 
 export const toTagsFromName = (name) => [toTagFromName(name)];
@@ -13,7 +13,7 @@ export const toThreejsMaterialFromTags = (
   otherwise
 ) => {
   for (const tag of tags) {
-    if (tag.startsWith('material/')) {
+    if (tag.startsWith('material:')) {
       for (const definitions of [
         standardMaterialDefinitions,
         customDefinitions,

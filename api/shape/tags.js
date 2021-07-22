@@ -7,7 +7,7 @@ export const tags =
   (shape) =>
     op(
       [...allTags(shape.toGeometry())]
-        .filter((tag) => tag.startsWith('user/'))
+        .filter((tag) => tag.startsWith('user:'))
         .map((tag) => tag.substring(5)),
       shape
     );

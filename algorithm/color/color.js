@@ -7,12 +7,12 @@ extend([mixPlugin]);
 
 // FIX: Apply normalizations here.
 const toTagFromName = (name) => {
-  return `color/${name}`;
+  return `color:${name}`;
 };
 
 export const toTagsFromName = (name) => [toTagFromName(name)];
 
-export const toTagFromRgbInt = (rgbInt, defaultTag = 'color/#000000') =>
+export const toTagFromRgbInt = (rgbInt, defaultTag = 'color:#000000') =>
   toTagFromName(`#${rgbInt.toString(16).padStart(6, '0')}`);
 
 export const toRgbColorFromTags = (
@@ -22,14 +22,14 @@ export const toRgbColorFromTags = (
 ) => {
   const collected = [];
   for (const tag of tags) {
-    if (tag.startsWith('color/')) {
+    if (tag.startsWith('color:')) {
       for (const definitions of [standardColorDefinitions, customDefinitions]) {
         const definition = definitions[tag];
         if (definition && definition.rgb) {
           collected.push(definition.rgb);
         }
       }
-      if (tag.startsWith('color/#')) {
+      if (tag.startsWith('color:#')) {
         // Assume tags that start with # are rgb colors.
         collected.push(tag.substring(6));
       }
