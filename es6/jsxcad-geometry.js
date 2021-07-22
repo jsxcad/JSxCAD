@@ -98,9 +98,14 @@ const visit = (geometry, op, state) => {
       if (geometry.content.some((x) => x === undefined)) {
         throw Error(`Bad geometry: ${JSON.stringify(geometry)}`);
       }
-      return op(geometry, (_) => geometry.content?.forEach(walk), state);
+      return op(
+        geometry,
+        (state) =>
+          geometry.content?.forEach((geometry) => walk(geometry, state)),
+        state
+      );
     } else {
-      return op(geometry, (_) => undefined, state);
+      return op(geometry, (state) => undefined, state);
     }
   };
   return walk(geometry, state);

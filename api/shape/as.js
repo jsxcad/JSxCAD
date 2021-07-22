@@ -1,15 +1,12 @@
 import Shape from './Shape.js';
-import { rewriteTags } from '@jsxcad/geometry';
+import { taggedItem } from '@jsxcad/geometry';
 
-export const as =
-  (...tags) =>
-  (shape) =>
-    Shape.fromGeometry(
-      rewriteTags(
-        tags.map((tag) => `user/${tag}`),
-        [],
-        shape.toGeometry()
-      )
-    );
+// Constructs an item from the designator.
+export const as = (name) => (shape) =>
+  Shape.fromGeometry(
+    taggedItem({ tags: [`item:${name}`] }, shape.toGeometry())
+  );
 
 Shape.registerMethod('as', as);
+
+export default as;

@@ -20,11 +20,11 @@ test('Triangle', async (t) => {
     {
       type: 'group',
       content: [
-        fromPolygonsToGraph({ tags: ['color/blue'] }, [{ points: triangle }]),
+        fromPolygonsToGraph({ tags: ['color:blue'] }, [{ points: triangle }]),
         {
           type: 'paths',
           paths: [triangle],
-          tags: ['color/red'],
+          tags: ['color:red'],
         },
       ],
     },
