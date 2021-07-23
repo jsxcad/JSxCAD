@@ -5,6 +5,9 @@ import { visit } from '@jsxcad/geometry';
 export const get =
   (path, ...ops) =>
   (shape) => {
+    if (ops.length === 0) {
+      ops = [(x) => x];
+    }
     const picks = [];
     const walk = (geometry, descend, path) => {
       if (geometry.type === 'item') {
@@ -17,8 +20,9 @@ export const get =
             }
           }
         }
+      } else {
+        return descend(path);
       }
-      return descend();
     };
     visit(
       shape.toGeometry(),
