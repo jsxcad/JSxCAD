@@ -34,6 +34,7 @@ export { and } from './and.js';
 export { addTo } from './addTo.js';
 export { align } from './align.js';
 export { as } from './as.js';
+export { at } from './at.js';
 export { bend } from './bend.js';
 export { clip } from './clip.js';
 export { clipFrom } from './clipFrom.js';

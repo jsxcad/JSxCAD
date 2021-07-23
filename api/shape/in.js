@@ -25,8 +25,9 @@ export const inFn =
             }
           }
         }
+      } else {
+        return descend(path);
       }
-      return descend();
     };
 
     return Shape.fromGeometry(

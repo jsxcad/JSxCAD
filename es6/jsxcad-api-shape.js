@@ -4,9 +4,9 @@ import { closePath, concatenatePath, assemble as assemble$1, eachPoint, flip, to
 import { identityMatrix, fromTranslation, fromRotation, fromScaling } from './jsxcad-math-mat4.js';
 import { emit, log as log$1, getModule, generateUniqueId, addPending, write as write$1 } from './jsxcad-sys.js';
 export { elapsed, emit, info, read, write } from './jsxcad-sys.js';
+import { invertTransform, fromRotateXToTransform, fromRotateYToTransform, fromRotateZToTransform } from './jsxcad-algorithm-cgal.js';
 import { toTagsFromName } from './jsxcad-algorithm-color.js';
 import { zag, seq } from './jsxcad-api-v1-math.js';
-import { invertTransform, fromRotateXToTransform, fromRotateYToTransform, fromRotateZToTransform } from './jsxcad-algorithm-cgal.js';
 import { toTagsFromName as toTagsFromName$1 } from './jsxcad-algorithm-material.js';
 import { pack as pack$1 } from './jsxcad-algorithm-pack.js';
 import { toTagsFromName as toTagsFromName$2 } from './jsxcad-algorithm-tool.js';
@@ -519,6 +519,29 @@ const as = (name) => (shape) =>
 
 Shape.registerMethod('as', as);
 
+const isDefined$1 = (value) => value;
+
+const Group = (...shapes) =>
+  Shape.fromGeometry(
+    taggedGroup(
+      {},
+      ...shapes.filter(isDefined$1).map((shape) => shape.toGeometry())
+    )
+  );
+
+Shape.prototype.Group = Shape.shapeMethod(Group);
+Shape.Group = Group;
+
+const at = (other, path) => (shape) => {
+  const reoriented = [];
+  for (const item of other.get(path).each()) {
+    reoriented.push(shape.transform(invertTransform(item.toGeometry().matrix)));
+  }
+  return Group(...reoriented);
+};
+
+Shape.registerMethod('at', at);
+
 const bend =
   (degreesPerMm = 1) =>
   (shape) =>
@@ -875,19 +898,6 @@ const Box = (x, y = x, z = 0) =>
   Shape.fromGeometry(taggedPlan({}, { type: 'Box' })).hasDiameter(x, y, z);
 
 Shape.prototype.Box = Shape.shapeMethod(Box);
-
-const isDefined$1 = (value) => value;
-
-const Group = (...shapes) =>
-  Shape.fromGeometry(
-    taggedGroup(
-      {},
-      ...shapes.filter(isDefined$1).map((shape) => shape.toGeometry())
-    )
-  );
-
-Shape.prototype.Group = Shape.shapeMethod(Group);
-Shape.Group = Group;
 
 // Hershey simplex one line font.
 // See: http://paulbourke.net/dataformats/hershey/
@@ -2616,6 +2626,9 @@ Shape.registerMethod('fuse', fuse);
 const get =
   (path, ...ops) =>
   (shape) => {
+    if (ops.length === 0) {
+      ops = [(x) => x];
+    }
     const picks = [];
     const walk = (geometry, descend, path) => {
       if (geometry.type === 'item') {
@@ -2628,8 +2641,9 @@ const get =
             }
           }
         }
+      } else {
+        return descend(path);
       }
-      return descend();
     };
     visit(
       shape.toGeometry(),
@@ -2693,8 +2707,9 @@ const inFn =
             }
           }
         }
+      } else {
+        return descend(path);
       }
-      return descend();
     };
 
     return Shape.fromGeometry(
@@ -3874,4 +3889,4 @@ const yz = Peg('x', [0, 0, 0], [0, 0, 1], [0, -1, 0]);
 const xz = Peg('y', [0, 0, 0], [0, 0, 1], [1, 0, 0]);
 const xy = Peg('z', [0, 0, 0], [0, 1, 0], [-1, 0, 0]);
 
-export { Alpha, Arc, Assembly, Box, ChainedHull, Cone, Empty, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Line, Octagon, Orb, Page, Path, Peg, Pentagon, Plan, Point, Points, Polygon, Polyhedron, Septagon, Shape, Spiral, Tetragon, Triangle, Wave, Weld, add, addTo, align, and, as, bend, clip, clipFrom, cloudSolid, color, colors, cut, cutFrom, defGrblConstantLaser, defGrblDynamicLaser, defGrblPlotter, defGrblSpindle, defRgbColor, defThreejsMaterial, defTool, define, drop, each, ensurePages, ex, extrude, extrudeToPlane, fill, fuse, get, grow, inFn, inline, inset, keep, loadGeometry, loft, log, loop, material, md, minkowskiDifference, minkowskiShell, minkowskiSum, move, noVoid, notAs, ofPlan, offset, op, orient, outline, pack, play, projectToPlane, push, remesh, rotate, rotateX, rotateY, rotateZ, rx, ry, rz, saveGeometry, scale, section, sectionProfile, separate, size, sketch, smooth, tag, tags, test, tint, tool, twist, view, voidFn, weld, withFill, withFn, withInset, withOp, x, xy, xz, y, yz, z };
+export { Alpha, Arc, Assembly, Box, ChainedHull, Cone, Empty, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Line, Octagon, Orb, Page, Path, Peg, Pentagon, Plan, Point, Points, Polygon, Polyhedron, Septagon, Shape, Spiral, Tetragon, Triangle, Wave, Weld, add, addTo, align, and, as, at, bend, clip, clipFrom, cloudSolid, color, colors, cut, cutFrom, defGrblConstantLaser, defGrblDynamicLaser, defGrblPlotter, defGrblSpindle, defRgbColor, defThreejsMaterial, defTool, define, drop, each, ensurePages, ex, extrude, extrudeToPlane, fill, fuse, get, grow, inFn, inline, inset, keep, loadGeometry, loft, log, loop, material, md, minkowskiDifference, minkowskiShell, minkowskiSum, move, noVoid, notAs, ofPlan, offset, op, orient, outline, pack, play, projectToPlane, push, remesh, rotate, rotateX, rotateY, rotateZ, rx, ry, rz, saveGeometry, scale, section, sectionProfile, separate, size, sketch, smooth, tag, tags, test, tint, tool, twist, view, voidFn, weld, withFill, withFn, withInset, withOp, x, xy, xz, y, yz, z };
