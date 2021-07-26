@@ -1,5 +1,6 @@
 import Shape from './Shape.js';
 import { invertTransform } from '@jsxcad/algorithm-cgal';
+import { qualifyTagPath } from './tag.js';
 import { rewrite } from '@jsxcad/geometry';
 
 export const inFn =
@@ -8,7 +9,10 @@ export const inFn =
     const walk = (geometry, descend, walk, path) => {
       if (geometry.type === 'item') {
         if (path.length > 0) {
-          if (geometry.tags && geometry.tags.includes(path[0])) {
+          if (
+            path[0] === 'tagpath:*' ||
+            (geometry.tags && geometry.tags.includes(path[0]))
+          ) {
             if (path.length > 1) {
               return descend({}, path.slice(1));
             } else {
@@ -31,11 +35,7 @@ export const inFn =
     };
 
     return Shape.fromGeometry(
-      rewrite(
-        shape.toGeometry(),
-        walk,
-        path.split('/').map((tag) => `item:${tag}`)
-      )
+      rewrite(shape.toGeometry(), walk, qualifyTagPath(path, 'item'))
     );
   };
 

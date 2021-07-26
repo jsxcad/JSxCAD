@@ -2376,12 +2376,12 @@ const scale$1 = ([x = 1, y = 1, z = 1], paths) =>
 const translate$1 = ([x = 0, y = 0, z = 0], paths) =>
   transform$2(fromTranslation([x, y, z]), paths);
 
-const sections = (geometry, planes, { profile = false } = {}) => {
+const sections = (geometry, matrices, { profile = false } = {}) => {
   const graphs = [];
   for (const planarMesh of sectionOfSurfaceMesh(
     toSurfaceMesh(geometry.graph),
     geometry.matrix,
-    planes,
+    matrices,
     /* profile= */ profile
   )) {
     graphs.push(
@@ -2391,11 +2391,11 @@ const sections = (geometry, planes, { profile = false } = {}) => {
   return graphs;
 };
 
-const sectionImpl = (geometry, planes, { profile = false }) => {
+const sectionImpl = (geometry, matrices, { profile = false }) => {
   const transformedGeometry = toTransformedGeometry(reify(geometry));
   const sections$1 = [];
   for (const geometry of getNonVoidGraphs(transformedGeometry)) {
-    for (const section of sections(geometry, planes, { profile })) {
+    for (const section of sections(geometry, matrices, { profile })) {
       sections$1.push(section);
     }
   }

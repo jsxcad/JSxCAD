@@ -13,3 +13,16 @@ export const tag =
     );
 
 Shape.registerMethod('tag', tag);
+
+export const qualifyTag = (tag, namespace = 'user') => {
+  if (tag.includes(':')) {
+    return tag;
+  }
+  if (tag === '*') {
+    return 'tagpath:*';
+  }
+  return `${namespace}:${tag}`;
+};
+
+export const qualifyTagPath = (path, namespace = 'user') =>
+  path.split('/').map((tag) => qualifyTag(tag, namespace));

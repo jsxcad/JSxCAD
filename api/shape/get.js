@@ -1,5 +1,6 @@
 import Group from './Group.js';
 import Shape from './Shape.js';
+import { qualifyTagPath } from './tag.js';
 import { visit } from '@jsxcad/geometry';
 
 export const get =
@@ -12,7 +13,10 @@ export const get =
     const walk = (geometry, descend, path) => {
       if (geometry.type === 'item') {
         if (path.length > 0) {
-          if (geometry.tags && geometry.tags.includes(path[0])) {
+          if (
+            path[0] === 'tagpath:*' ||
+            (geometry.tags && geometry.tags.includes(path[0]))
+          ) {
             if (path.length > 1) {
               return descend(path.slice(1));
             } else {
@@ -24,11 +28,7 @@ export const get =
         return descend(path);
       }
     };
-    visit(
-      shape.toGeometry(),
-      walk,
-      path.split('/').map((tag) => `item:${tag}`)
-    );
+    visit(shape.toGeometry(), walk, qualifyTagPath(path, 'item'));
     return Group(...picks);
   };
 
