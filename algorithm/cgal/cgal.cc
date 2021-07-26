@@ -1591,7 +1591,7 @@ bool didAdmitPlane(Plane& plane, emscripten::val fill_plane) {
 
 // FIX: The case where we take a section coplanar with a surface with a hole in it.
 // CHECK: Should this produce Polygons_with_holes?
-void SectionOfSurfaceMesh(Surface_mesh* input, Transformation* transform, std::size_t plane_count, emscripten::val fill_plane, emscripten::val emit_mesh, bool profile) {
+void SectionOfSurfaceMesh(Surface_mesh* input, Transformation* transform, std::size_t plane_count, emscripten::val get_transform, emscripten::val emit_mesh, bool profile) {
   // We could possibly be clever and transform the plane and output?
   Surface_mesh mesh(*input);
   CGAL::Polygon_mesh_processing::transform(*transform, mesh, CGAL::parameters::all_default());
@@ -1608,8 +1608,9 @@ void SectionOfSurfaceMesh(Surface_mesh* input, Transformation* transform, std::s
   for (std::size_t nth_plane = 0; nth_plane < plane_count; nth_plane++) {
     Quadruple q;
     Quadruple* qp =  &q;
-    fill_plane(nth_plane, qp);
-    Plane plane(q[0], q[1], q[2], q[3]);
+    Plane plane(0, 0, 1, 0);
+    Transformation* transform = get_transform().as<Transformation*>(emscripten::allow_raw_pointers());
+    plane.transform(*transform);
     if (profile) {
       // We need the 2d forms to be interoperable.
       plane = unitPlane(plane);

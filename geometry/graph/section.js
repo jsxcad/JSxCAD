@@ -3,11 +3,12 @@ import { sectionOfSurfaceMesh } from '@jsxcad/algorithm-cgal';
 import { taggedGraph } from '../tagged/taggedGraph.js';
 import { toSurfaceMesh } from './toSurfaceMesh.js';
 
-export const section = (geometry, plane) => {
+export const section = (geometry, matrix) => {
   for (const planarMesh of sectionOfSurfaceMesh(
     toSurfaceMesh(geometry.graph),
     geometry.matrix,
-    [plane, /* profile= */ false]
+    [matrix],
+    /* profile= */ false
   )) {
     return taggedGraph(
       { tags: geometry.tags },
@@ -16,12 +17,12 @@ export const section = (geometry, plane) => {
   }
 };
 
-export const sections = (geometry, planes, { profile = false } = {}) => {
+export const sections = (geometry, matrices, { profile = false } = {}) => {
   const graphs = [];
   for (const planarMesh of sectionOfSurfaceMesh(
     toSurfaceMesh(geometry.graph),
     geometry.matrix,
-    planes,
+    matrices,
     /* profile= */ profile
   )) {
     graphs.push(
