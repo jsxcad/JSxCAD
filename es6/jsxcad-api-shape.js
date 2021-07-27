@@ -2624,7 +2624,7 @@ const withOutline =
 
 Shape.registerMethod('withOutline', withOutline);
 
-const inline = () => (shape) => outline(shape.flip());
+const inline = () => (shape) => outline({}, shape.flip());
 
 Shape.registerMethod('inline', inline);
 
@@ -3399,20 +3399,18 @@ const z =
 
 Shape.registerMethod('z', z);
 
-const Alpha =
-  (componentLimit = 1) =>
-  (shape) => {
-    const points = [];
-    shape.eachPoint((point) => points.push(point));
-    return Shape.fromGeometry(
-      taggedGraph({}, alphaShape(points, componentLimit))
-    );
-  };
+const Alpha = (componentLimit = 1, shape) => {
+  const points = [];
+  shape.eachPoint((point) => points.push(point));
+  return Shape.fromGeometry(
+    alphaShape({ tags: shape.toGeometry().tags }, points, componentLimit)
+  );
+};
 
 const alpha =
   (componentLimit = 1) =>
   (shape) =>
-    Alpha(shape);
+    Alpha(componentLimit, shape);
 
 Shape.registerMethod('alpha', alpha);
 

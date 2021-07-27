@@ -1,13 +1,30 @@
 import { rewrite } from './visit.js';
+import { taggedSegments } from './taggedSegments.js';
 import { transform as transformPaths } from '../paths/transform.js';
 import { transform as transformPoints } from '../points/ops.js';
 import { transform as transformPolygons } from '../polygons/transform.js';
+import { transform as transformVec3 } from '@jsxcad/math-vec3';
 
 const transformedGeometry = Symbol('transformedGeometry');
 
 export const clearTransformedGeometry = (geometry) => {
   delete geometry[transformedGeometry];
   return geometry;
+};
+
+export const transformSegments = (geometry) => {
+  const { matrix, segments } = geometry;
+  if (!matrix) {
+    return geometry;
+  }
+  const transformed = [];
+  for (const [start, end] of segments) {
+    transformed.push([
+      transformVec3(matrix, start),
+      transformVec3(matrix, end),
+    ]);
+  }
+  return taggedSegments({ tags: geometry.tags }, transformed);
 };
 
 export const toTransformedGeometry = (geometry) => {
@@ -30,6 +47,8 @@ export const toTransformedGeometry = (geometry) => {
             triangles: transformPolygons(geometry.matrix, geometry.triangles),
             matrix: undefined,
           });
+        case 'segments':
+          return transformSegments(geometry);
         case 'paths':
           return descend({
             paths: transformPaths(geometry.matrix, geometry.paths),

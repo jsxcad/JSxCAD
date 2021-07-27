@@ -1554,7 +1554,7 @@ const sectionOfSurfaceMesh = (
     mesh,
     toCgalTransformFromJsTransform(transform),
     matrices.length,
-    (nth) => toCgalTransformFromJsTransform(matrices[nth]),
+    (nth) => toCgalTransformFromJsTransform(matrices[nth].matrix),
     (section) => sections.push(section),
     profile
   );
@@ -1627,6 +1627,20 @@ const twistSurfaceMesh = (mesh, transform, degreesPerMm) =>
     degreesPerMm
   );
 
+const wireframeSurfaceMesh = (mesh, transform) => {
+  const segments = [];
+  getCgal().WireframeSurfaceMesh(
+    mesh,
+    toCgalTransformFromJsTransform(transform),
+    (sx, sy, sz, tx, ty, tz) =>
+      segments.push([
+        [sx, sy, sz],
+        [tx, ty, tz],
+      ])
+  );
+  return segments;
+};
+
 const unionOfSurfaceMeshes = (a, aTransform, b, bTransform) =>
   getCgal().UnionOfSurfaceMeshes(
     a,
@@ -1635,4 +1649,4 @@ const unionOfSurfaceMeshes = (a, aTransform, b, bTransform) =>
     toCgalTransformFromJsTransform(bTransform)
   );
 
-export { BOOLEAN_ADD, BOOLEAN_CLIP, BOOLEAN_CUT, arrangePaths, arrangePathsIntoTriangles, arrangePolygonsWithHoles, bendSurfaceMesh, booleansOfPolygonsWithHoles, composeTransforms, deserializeSurfaceMesh, differenceOfSurfaceMeshes, doesSelfIntersectOfSurfaceMesh, extrudeSurfaceMesh, extrudeToPlaneOfSurfaceMesh, fitPlaneToPoints, fromApproximateToCgalTransform, fromExactToCgalTransform, fromFunctionToSurfaceMesh, fromGraphToSurfaceMesh, fromIdentityToCgalTransform, fromPointsToAlphaShape2AsPolygonSegments, fromPointsToAlphaShapeAsSurfaceMesh, fromPointsToConvexHullAsSurfaceMesh, fromPointsToSurfaceMesh, fromPolygonsToSurfaceMesh, fromRotateXToTransform, fromRotateYToTransform, fromRotateZToTransform, fromScaleToTransform, fromSurfaceMeshEmitBoundingBox, fromSurfaceMeshToGraph, fromSurfaceMeshToLazyGraph, fromSurfaceMeshToPolygons, fromSurfaceMeshToPolygonsWithHoles, fromSurfaceMeshToTriangles, fromTranslateToTransform, growSurfaceMesh, initCgal, insetOfPolygonWithHoles, intersectionOfSurfaceMeshes, invertTransform, loftBetweenCongruentSurfaceMeshes, minkowskiDifferenceOfSurfaceMeshes, minkowskiShellOfSurfaceMeshes, minkowskiSumOfSurfaceMeshes, offsetOfPolygonWithHoles, outlineSurfaceMesh, projectToPlaneOfSurfaceMesh, pushSurfaceMesh, remeshSurfaceMesh, reverseFaceOrientationsOfSurfaceMesh, sectionOfSurfaceMesh, separateSurfaceMesh, serializeSurfaceMesh, subdivideSurfaceMesh, toCgalTransformFromJsTransform, transformSurfaceMesh, twistSurfaceMesh, unionOfSurfaceMeshes };
+export { BOOLEAN_ADD, BOOLEAN_CLIP, BOOLEAN_CUT, arrangePaths, arrangePathsIntoTriangles, arrangePolygonsWithHoles, bendSurfaceMesh, booleansOfPolygonsWithHoles, composeTransforms, deserializeSurfaceMesh, differenceOfSurfaceMeshes, doesSelfIntersectOfSurfaceMesh, extrudeSurfaceMesh, extrudeToPlaneOfSurfaceMesh, fitPlaneToPoints, fromApproximateToCgalTransform, fromExactToCgalTransform, fromFunctionToSurfaceMesh, fromGraphToSurfaceMesh, fromIdentityToCgalTransform, fromPointsToAlphaShape2AsPolygonSegments, fromPointsToAlphaShapeAsSurfaceMesh, fromPointsToConvexHullAsSurfaceMesh, fromPointsToSurfaceMesh, fromPolygonsToSurfaceMesh, fromRotateXToTransform, fromRotateYToTransform, fromRotateZToTransform, fromScaleToTransform, fromSurfaceMeshEmitBoundingBox, fromSurfaceMeshToGraph, fromSurfaceMeshToLazyGraph, fromSurfaceMeshToPolygons, fromSurfaceMeshToPolygonsWithHoles, fromSurfaceMeshToTriangles, fromTranslateToTransform, growSurfaceMesh, initCgal, insetOfPolygonWithHoles, intersectionOfSurfaceMeshes, invertTransform, loftBetweenCongruentSurfaceMeshes, minkowskiDifferenceOfSurfaceMeshes, minkowskiShellOfSurfaceMeshes, minkowskiSumOfSurfaceMeshes, offsetOfPolygonWithHoles, outlineSurfaceMesh, projectToPlaneOfSurfaceMesh, pushSurfaceMesh, remeshSurfaceMesh, reverseFaceOrientationsOfSurfaceMesh, sectionOfSurfaceMesh, separateSurfaceMesh, serializeSurfaceMesh, subdivideSurfaceMesh, toCgalTransformFromJsTransform, transformSurfaceMesh, twistSurfaceMesh, unionOfSurfaceMeshes, wireframeSurfaceMesh };

@@ -66,7 +66,7 @@ export const buildMeshMaterial = async (definitions, tags) => {
       return new MeshPhysicalMaterial(parameters);
     } else if (color) {
       await merge(
-        toThreejsMaterialFromTags(['material/color'], definitions),
+        toThreejsMaterialFromTags(['material:color'], definitions),
         parameters
       );
       parameters.emissive = parameters.color;

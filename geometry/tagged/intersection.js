@@ -48,6 +48,7 @@ export const intersection = (geometry, ...geometries) => {
           )
         );
       }
+      case 'segments':
       case 'points': {
         // Not implemented yet.
         return geometry;

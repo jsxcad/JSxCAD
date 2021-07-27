@@ -14,7 +14,7 @@ export const sectionOfSurfaceMesh = (
     mesh,
     toCgalTransformFromJsTransform(transform),
     matrices.length,
-    (nth) => toCgalTransformFromJsTransform(matrices[nth]),
+    (nth) => toCgalTransformFromJsTransform(matrices[nth].matrix),
     (section) => sections.push(section),
     profile
   );

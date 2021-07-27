@@ -68,7 +68,7 @@ const engrave = (paths, depth = 0.5) => {
   const effectiveCutDepth = depth / cuts;
   const toolpaths = [];
   for (let cut = 1; cut <= cuts; cut++) {
-    for (const path of outline(paths.toGeometry())) {
+    for (const path of outline({}, paths.toGeometry())) {
       toolpaths.push(translate([0, 0, cut * -effectiveCutDepth], path));
     }
   }
