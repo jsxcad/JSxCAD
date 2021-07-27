@@ -1609,8 +1609,8 @@ void SectionOfSurfaceMesh(Surface_mesh* input, Transformation* transform, std::s
     Quadruple q;
     Quadruple* qp =  &q;
     Plane plane(0, 0, 1, 0);
-    Transformation* transform = get_transform().as<Transformation*>(emscripten::allow_raw_pointers());
-    plane.transform(*transform);
+    Transformation* section_transform = get_transform(nth_plane).as<Transformation*>(emscripten::allow_raw_pointers());
+    plane = plane.transform(*section_transform);
     if (profile) {
       // We need the 2d forms to be interoperable.
       plane = unitPlane(plane);
@@ -1643,6 +1643,7 @@ void SectionOfSurfaceMesh(Surface_mesh* input, Transformation* transform, std::s
     }
 
     Surface_mesh* c = PolygonsWithHolesToSurfaceMesh(plane, polygons);
+    // CGAL::Polygon_mesh_processing::transform(*section_transform, *c, CGAL::parameters::all_default());
     emit_mesh(c);
   }
 }
@@ -1669,8 +1670,9 @@ Plane ensureFacetPlane(Surface_mesh& mesh, std::unordered_map<Face_index, Plane>
   }
 }
 
-void OutlineSurfaceMesh(Surface_mesh* input, Transformation* transformation, emscripten::val emit_approximate_segment) {
+void OutlineSurfaceMesh(Surface_mesh* input, Transformation* transform, emscripten::val emit_approximate_segment) {
   Surface_mesh& mesh = *input;
+  CGAL::Polygon_mesh_processing::transform(*transform, mesh, CGAL::parameters::all_default());
 
   std::unordered_set<Plane> planes;
   std::unordered_map<Face_index, Plane> facet_to_plane;
@@ -1695,13 +1697,29 @@ void OutlineSurfaceMesh(Surface_mesh* input, Transformation* transformation, ems
         }
       }
       if (corner) {
-        Point s = mesh.point(mesh.source(edge)).transform(*transformation);
-        Point t = mesh.point(mesh.target(edge)).transform(*transformation);
+        Point s = mesh.point(mesh.source(edge));
+        Point t = mesh.point(mesh.target(edge));
         emit_approximate_segment(CGAL::to_double(s.x().exact()), CGAL::to_double(s.y().exact()), CGAL::to_double(s.z().exact()), CGAL::to_double(t.x().exact()), CGAL::to_double(t.y().exact()), CGAL::to_double(t.z().exact()));
       }
       const auto& next = mesh.next(edge);
       edge = next;
     } while (edge != start);
+  }
+}
+
+void WireframeSurfaceMesh(Surface_mesh* input, Transformation* transform, emscripten::val emit_approximate_segment) {
+  Surface_mesh& mesh = *input;
+  CGAL::Polygon_mesh_processing::transform(*transform, mesh, CGAL::parameters::all_default());
+
+  for (const auto& edge : mesh.edges()) {
+    if (mesh.is_removed(edge)) {
+      continue;
+    }
+    const auto& halfedge = mesh.halfedge(edge);
+    Point s = mesh.point(mesh.source(halfedge));
+    Point t = mesh.point(mesh.target(halfedge));
+    emit_approximate_segment(CGAL::to_double(s.x().exact()), CGAL::to_double(s.y().exact()), CGAL::to_double(s.z().exact()),
+                             CGAL::to_double(t.x().exact()), CGAL::to_double(t.y().exact()), CGAL::to_double(t.z().exact()));
   }
 }
 
@@ -3229,6 +3247,7 @@ EMSCRIPTEN_BINDINGS(module) {
   emscripten::function("BendSurfaceMesh", &BendSurfaceMesh, emscripten::allow_raw_pointers());
   emscripten::function("PushSurfaceMesh", &PushSurfaceMesh, emscripten::allow_raw_pointers());
   emscripten::function("OutlineSurfaceMesh", &OutlineSurfaceMesh, emscripten::allow_raw_pointers());
+  emscripten::function("WireframeSurfaceMesh", &WireframeSurfaceMesh, emscripten::allow_raw_pointers());
   emscripten::function("FromSurfaceMeshToPolygonsWithHoles", &FromSurfaceMeshToPolygonsWithHoles, emscripten::allow_raw_pointers());
 
   emscripten::function("BooleansOfPolygonsWithHolesApproximate", &BooleansOfPolygonsWithHolesApproximate);

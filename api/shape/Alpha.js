@@ -1,20 +1,18 @@
-import { alphaShape, taggedGraph } from '@jsxcad/geometry';
 import { Shape } from './Shape.js';
+import { alphaShape } from '@jsxcad/geometry';
 
-export const Alpha =
-  (componentLimit = 1) =>
-  (shape) => {
-    const points = [];
-    shape.eachPoint((point) => points.push(point));
-    return Shape.fromGeometry(
-      taggedGraph({}, alphaShape(points, componentLimit))
-    );
-  };
+export const Alpha = (componentLimit = 1, shape) => {
+  const points = [];
+  shape.eachPoint((point) => points.push(point));
+  return Shape.fromGeometry(
+    alphaShape({ tags: shape.toGeometry().tags }, points, componentLimit)
+  );
+};
 
 const alpha =
   (componentLimit = 1) =>
   (shape) =>
-    Alpha(shape, componentLimit);
+    Alpha(componentLimit, shape);
 
 Shape.registerMethod('alpha', alpha);
 

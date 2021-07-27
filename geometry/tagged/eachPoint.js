@@ -16,6 +16,12 @@ export const eachPoint = (emit, geometry) => {
         return descend();
       case 'points':
         return eachPointOfPoints(emit, geometry.points);
+      case 'segments':
+        for (const [start, end] of geometry.segments) {
+          emit(start);
+          emit(end);
+        }
+        return;
       case 'paths':
         return eachPointOfPaths(emit, geometry.paths);
       case 'graph':

@@ -43,6 +43,7 @@ const differenceImpl = (geometry, ...geometries) => {
           ),
           ...geometries
         );
+      case 'segments':
       case 'points': {
         // Not implemented yet.
         return geometry;

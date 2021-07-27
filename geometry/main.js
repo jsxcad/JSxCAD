@@ -115,6 +115,7 @@ export { taggedLayout } from './tagged/taggedLayout.js';
 export { taggedPaths } from './tagged/taggedPaths.js';
 export { taggedPlan } from './tagged/taggedPlan.js';
 export { taggedPoints } from './tagged/taggedPoints.js';
+export { taggedSegments } from './tagged/taggedSegments.js';
 export { taggedSketch } from './tagged/taggedSketch.js';
 export { taggedTriangles } from './tagged/taggedTriangles.js';
 export { test } from './tagged/test.js';

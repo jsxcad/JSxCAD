@@ -224,7 +224,9 @@ class Ui extends React.PureComponent {
                 )
                   .then((url) => {
                     // Is there a race condition here?
-                    entry.domElement.src = url;
+                    if (entry.domElement) {
+                      entry.domElement.src = url;
+                    }
                   })
                   .catch((error) => {
                     if (error.message === 'Terminated') {

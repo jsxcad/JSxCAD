@@ -11,6 +11,8 @@ export const canonicalize = (geometry) => {
     switch (geometry.type) {
       case 'points':
         return descend({ points: canonicalizePoints(geometry.points) });
+      case 'segments':
+        return geometry;
       case 'paths':
         return descend({ paths: canonicalizePaths(geometry.paths) });
       case 'triangles':

@@ -1,4 +1,3 @@
-import { cache } from '@jsxcad/cache';
 import { getNonVoidGraphs } from './getNonVoidGraphs.js';
 import { getNonVoidPaths } from './getNonVoidPaths.js';
 import { outline as outlineGraph } from '../graph/outline.js';
@@ -11,7 +10,7 @@ import { toDisjointGeometry } from './toDisjointGeometry.js';
 // Currently we need this so that things like withOutline() will work properly,
 // but ideally outline would be idempotent and rewrite shapes as their outlines,
 // unless already outlined, and handle the withOutline case within this.
-const outlineImpl = (geometry, tagsOverride) => {
+export const outline = (geometry, tagsOverride) => {
   const disjointGeometry = toDisjointGeometry(geometry);
   const outlines = [];
   for (let graphGeometry of getNonVoidGraphs(disjointGeometry)) {
@@ -19,12 +18,7 @@ const outlineImpl = (geometry, tagsOverride) => {
     if (tagsOverride) {
       tags = tagsOverride;
     }
-    outlines.push(
-      taggedPaths(
-        { tags: [...tags, 'path/Wire'] },
-        outlineGraph(graphGeometry).map((path) => [null, ...path])
-      )
-    );
+    outlines.push(outlineGraph({ tags }, graphGeometry));
   }
   // Turn paths into wires.
   for (let { tags = [], paths } of getNonVoidPaths(disjointGeometry)) {
@@ -35,5 +29,3 @@ const outlineImpl = (geometry, tagsOverride) => {
   }
   return outlines;
 };
-
-export const outline = cache(outlineImpl);

@@ -1,5 +1,11 @@
 import { fromPointsToAlphaShapeAsSurfaceMesh } from '@jsxcad/algorithm-cgal';
-import { fromSurfaceMesh } from './fromSurfaceMesh.js';
+import { fromSurfaceMeshLazy } from './fromSurfaceMeshLazy.js';
+import { taggedGraph } from '../tagged/taggedGraph.js';
 
-export const alphaShape = (points, componentLimit) =>
-  fromSurfaceMesh(fromPointsToAlphaShapeAsSurfaceMesh(points, componentLimit));
+export const alphaShape = ({ tags }, points, componentLimit) =>
+  taggedGraph(
+    { tags },
+    fromSurfaceMeshLazy(
+      fromPointsToAlphaShapeAsSurfaceMesh(points, componentLimit)
+    )
+  );
