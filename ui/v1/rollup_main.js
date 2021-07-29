@@ -10,6 +10,7 @@ import commonjs from 'rollup-plugin-commonjs';
 import hypothetical from 'rollup-plugin-hypothetical-windows-fix';
 import json from 'rollup-plugin-json';
 import nodeResolve from 'rollup-plugin-node-resolve';
+import sizes from 'rollup-plugin-sizes';
 
 export const watcher = {
   transform(code, id) {
@@ -110,5 +111,6 @@ export default {
         return code.replace(/process.env.NODE_ENV/g, "'development'");
       },
     },
+    sizes(),
   ],
 };

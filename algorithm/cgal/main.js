@@ -8,6 +8,7 @@ export {
   fromRotateZToTransform,
   fromScaleToTransform,
   fromTranslateToTransform,
+  invertTransform,
   toCgalTransformFromJsTransform,
 } from './transform.js';
 
@@ -59,4 +60,5 @@ export { serializeSurfaceMesh } from './serializeSurfaceMesh.js';
 export { subdivideSurfaceMesh } from './subdivideSurfaceMesh.js';
 export { transformSurfaceMesh } from './transformSurfaceMesh.js';
 export { twistSurfaceMesh } from './twistSurfaceMesh.js';
+export { wireframeSurfaceMesh } from './wireframeSurfaceMesh.js';
 export { unionOfSurfaceMeshes } from './unionOfSurfaceMeshes.js';

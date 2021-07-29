@@ -44,6 +44,7 @@ export const measureBoundingBox = (geometry) => {
         return update(geometry.marks);
       case 'points':
         return update(measureBoundingBoxOfPoints(geometry.points));
+      case 'segments':
       case 'paths':
         return update(measureBoundingBoxGeneric(geometry));
       case 'triangles':

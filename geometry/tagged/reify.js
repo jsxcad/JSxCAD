@@ -11,6 +11,7 @@ export const reify = (geometry) => {
       case 'graph':
       case 'triangles':
       case 'points':
+      case 'segments':
       case 'paths':
         // No plan to realize.
         return geometry;

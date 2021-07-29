@@ -6,7 +6,6 @@ import {
   getModule,
   getPendingErrorHandler,
   write,
-  writeFile,
 } from '@jsxcad/sys';
 
 import { hash as hashGeometry } from '@jsxcad/geometry';
@@ -14,10 +13,10 @@ import hashSum from 'hash-sum';
 import { toStl } from '@jsxcad/convert-stl';
 
 export const prepareStl = (shape, name, options = {}) => {
-  const { prepareStl = (s) => s } = options;
+  const { op = (s) => s } = options;
   let index = 0;
   const entries = [];
-  for (const entry of ensurePages(prepareStl(shape).toDisjointGeometry())) {
+  for (const entry of ensurePages(op(shape).toDisjointGeometry())) {
     const path = `stl/${getModule()}/${generateUniqueId()}`;
     const op = toStl(entry, options)
       .then((data) => write(path, data))
@@ -29,31 +28,19 @@ export const prepareStl = (shape, name, options = {}) => {
       filename: `${name}_${index++}.stl`,
       type: 'application/sla',
     });
+    // Produce a view of what will be downloaded.
+    Shape.fromGeometry(entry).view(options.view);
   }
   return entries;
 };
 
-const downloadStlMethod = function (name, options) {
-  const entries = prepareStl(this, name, options);
+export const stl = (name, options) => (shape) => {
+  const entries = prepareStl(shape, name, options);
   const download = { entries };
   // We should be saving the stl data in the filesystem.
-  const hash = hashSum({ name }) + hashGeometry(this.toGeometry());
+  const hash = hashSum({ name }) + hashGeometry(shape.toGeometry());
   emit({ download, hash });
-  return this;
-};
-Shape.prototype.downloadStl = downloadStlMethod;
-Shape.prototype.stl = downloadStlMethod;
-
-export const writeStl = (shape, name, options = {}) => {
-  for (const { data, filename } of prepareStl(shape, name, {})) {
-    addPending(writeFile({ doSerialize: false }, `output/${filename}`, data));
-  }
   return shape;
 };
 
-const method = function (...args) {
-  return writeStl(this, ...args);
-};
-Shape.prototype.writeStl = method;
-
-export default writeStl;
+Shape.registerMethod('stl', stl);

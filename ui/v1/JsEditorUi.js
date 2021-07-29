@@ -64,6 +64,7 @@ export class JsEditorUi extends React.PureComponent {
       data: PropTypes.string,
       advice: PropTypes.object,
       file: PropTypes.string,
+      path: PropTypes.string,
       id: PropTypes.string,
       onRun: PropTypes.func,
       onSave: PropTypes.func,

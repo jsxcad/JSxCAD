@@ -17,7 +17,7 @@ export const selectToDrop = (matchTags, geometryTags) =>
   !selectToKeep(matchTags, geometryTags);
 
 export const keepOrDrop = (shape, tags, select) => {
-  const matchTags = tags.map((tag) => `user/${tag}`);
+  const matchTags = tags.map((tag) => `user:${tag}`);
 
   const op = (geometry, descend) => {
     // FIX: Need a more reliable way to detect leaf structure.

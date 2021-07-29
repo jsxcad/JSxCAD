@@ -1,34 +1,33 @@
 import { Shape } from './Shape.js';
-import { getPegCoords } from './Peg.js';
 import { section as sectionGeometry } from '@jsxcad/geometry';
 
 const baseSection =
-  ({ profile = false } = {}, ...pegs) =>
+  ({ profile = false } = {}, ...orientations) =>
   (shape) => {
-    const planes = [];
-    if (pegs.length === 0) {
-      planes.push({ plane: [0, 0, 1, 0] });
+    const matrices = [];
+    if (orientations.length === 0) {
+      matrices.push({ plane: [0, 0, 1, 0] });
     } else {
-      for (const peg of pegs) {
-        const { plane } = getPegCoords(peg);
-        planes.push({ plane });
+      for (const item of orientations) {
+        const matrix = item.toGeometry().matrix;
+        matrices.push({ matrix });
       }
     }
     return Shape.fromGeometry(
-      sectionGeometry(shape.toGeometry(), planes, { profile })
+      sectionGeometry(shape.toGeometry(), matrices, { profile })
     );
   };
 
 export const section =
-  (...pegs) =>
+  (...orientations) =>
   (shape) =>
-    baseSection({ profile: false }, ...pegs)(shape);
+    baseSection({ profile: false }, ...orientations)(shape);
 
 Shape.registerMethod('section', section);
 
 export const sectionProfile =
-  (...pegs) =>
+  (...orientations) =>
   (shape) =>
-    baseSection({ profile: true }, ...pegs)(shape);
+    baseSection({ profile: true }, ...orientations)(shape);
 
 Shape.registerMethod('sectionProfile', sectionProfile);

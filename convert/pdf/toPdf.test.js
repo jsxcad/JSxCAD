@@ -15,7 +15,7 @@ const triangle = [
 test('Triangle', async (t) => {
   // A surface is a set of paths.
   const pdf = await toPdf({
-    tags: ['color/blue'],
+    tags: ['color:blue'],
     type: 'paths',
     paths: [triangle],
   });
@@ -106,10 +106,10 @@ test('Complex', async (t) => {
                 [1, 1.28847, 0],
               ],
             ],
-            tags: ['color/violet'],
+            tags: ['color:violet'],
           },
         ],
-        tags: ['color/violet'],
+        tags: ['color:violet'],
       },
       {
         type: 'group',
@@ -117,7 +117,7 @@ test('Complex', async (t) => {
         content: [
           {
             type: 'graph',
-            tags: ['color/yellow'],
+            tags: ['color:yellow'],
             graph: {
               isClosed: false,
               isLazy: false,
@@ -161,7 +161,7 @@ test('Complex', async (t) => {
             },
           },
         ],
-        tags: ['color/yellow'],
+        tags: ['color:yellow'],
       },
       {
         type: 'group',
@@ -178,10 +178,10 @@ test('Complex', async (t) => {
                 [400, 100.14496, 0],
               ],
             ],
-            tags: ['color/navy'],
+            tags: ['color:navy'],
           },
         ],
-        tags: ['color/navy'],
+        tags: ['color:navy'],
       },
     ],
   });

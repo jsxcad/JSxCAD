@@ -7,7 +7,7 @@
  * the api uses.
  */
 
-import { Peg } from './Peg.js';
+import Shape from './Shape.js';
 
 export {
   define,
@@ -20,9 +20,222 @@ export {
   defTool,
 } from './define.js';
 
-export const yz = Peg('x', [0, 0, 0], [0, 0, 1], [0, -1, 0]);
-export const xz = Peg('y', [0, 0, 0], [0, 0, 1], [1, 0, 0]);
-export const xy = Peg('z', [0, 0, 0], [0, 1, 0], [-1, 0, 0]);
+export const xy = Shape.fromGeometry({
+  type: 'item',
+  tags: ['item:xy'],
+  content: [
+    {
+      type: 'group',
+      content: [],
+      matrix: [
+        1,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        1,
+        '1',
+        '0',
+        '0',
+        '0',
+        '0',
+        '1',
+        '0',
+        '0',
+        '0',
+        '0',
+        '1',
+        '0',
+        '1',
+      ],
+    },
+  ],
+  matrix: [
+    1,
+    0,
+    0,
+    0,
+    0,
+    1,
+    0,
+    0,
+    0,
+    0,
+    1,
+    0,
+    0,
+    0,
+    0,
+    1,
+    '1',
+    '0',
+    '0',
+    '0',
+    '0',
+    '1',
+    '0',
+    '0',
+    '0',
+    '0',
+    '1',
+    '0',
+    '1',
+  ],
+});
+export const xz = Shape.fromGeometry({
+  type: 'item',
+  tags: ['item:xz'],
+  content: [
+    {
+      type: 'group',
+      content: [],
+      matrix: [
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        -1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        '1',
+        '0',
+        '0',
+        '0',
+        '0',
+        '0',
+        '-1',
+        '0',
+        '0',
+        '1',
+        '0',
+        '0',
+        '1',
+      ],
+    },
+  ],
+  matrix: [
+    1,
+    0,
+    0,
+    0,
+    0,
+    0,
+    1,
+    0,
+    0,
+    -1,
+    0,
+    0,
+    0,
+    0,
+    0,
+    1,
+    '1',
+    '0',
+    '0',
+    '0',
+    '0',
+    '0',
+    '-1',
+    '0',
+    '0',
+    '1',
+    '0',
+    '0',
+    '1',
+  ],
+});
+export const yz = Shape.fromGeometry({
+  type: 'item',
+  tags: ['item:yz'],
+  content: [
+    {
+      type: 'group',
+      content: [],
+      matrix: [
+        0,
+        0,
+        1,
+        0,
+        0,
+        1,
+        0,
+        0,
+        -1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        '0',
+        '0',
+        '-1',
+        '0',
+        '0',
+        '1',
+        '0',
+        '0',
+        '1',
+        '0',
+        '0',
+        '0',
+        '1',
+      ],
+    },
+  ],
+  matrix: [
+    0,
+    0,
+    1,
+    0,
+    0,
+    1,
+    0,
+    0,
+    -1,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    1,
+    '0',
+    '0',
+    '-1',
+    '0',
+    '0',
+    '1',
+    '0',
+    '0',
+    '1',
+    '0',
+    '0',
+    '0',
+    '1',
+  ],
+});
 
 export { md } from './md.js';
 
@@ -34,6 +247,7 @@ export { and } from './and.js';
 export { addTo } from './addTo.js';
 export { align } from './align.js';
 export { as } from './as.js';
+export { at } from './at.js';
 export { bend } from './bend.js';
 export { clip } from './clip.js';
 export { clipFrom } from './clipFrom.js';
@@ -49,8 +263,10 @@ export { ex, extrude } from './extrude.js';
 export { extrudeToPlane } from './extrudeToPlane.js';
 export { fill, withFill } from './fill.js';
 export { fuse } from './fuse.js';
+export { get } from './get.js';
 export { grow } from './grow.js';
 export { inline } from './inline.js';
+export { inFn } from './in.js';
 export { inset } from './inset.js';
 export { keep } from './keep.js';
 export { loadGeometry } from './loadGeometry.js';
@@ -69,6 +285,7 @@ export { op } from './op.js';
 export { outline } from './outline.js';
 export { orient } from './orient.js';
 export { pack } from './pack.js';
+export { play } from './play.js';
 export { projectToPlane } from './projectToPlane.js';
 export { push } from './push.js';
 export { remesh } from './remesh.js';
@@ -83,6 +300,7 @@ export { scale } from './scale.js';
 export { smooth } from './smooth.js';
 export { size } from './size.js';
 export { sketch } from './sketch.js';
+export { tag } from './tag.js';
 export { tags } from './tags.js';
 export { test } from './test.js';
 export { tint } from './tint.js';
@@ -110,14 +328,12 @@ export { Hershey } from './Hershey.js';
 export { Hexagon } from './Hexagon.js';
 export { Hull } from './Hull.js';
 export { Icosahedron } from './Icosahedron.js';
-export { Item } from './Item.js';
 export { Implicit } from './Implicit.js';
 export { Line } from './Line.js';
 export { Octagon } from './Octagon.js';
 export { Orb } from './Orb.js';
 export { Page } from './Page.js';
 export { Path } from './Path.js';
-export { Peg } from './Peg.js';
 export { Pentagon } from './Pentagon.js';
 export { Plan } from './Plan.js';
 export { Point } from './Point.js';

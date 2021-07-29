@@ -5,6 +5,7 @@ import { taggedPaths } from './taggedPaths.js';
 import { toPaths } from '../graph/toPaths.js';
 import { toTransformedGeometry } from './toTransformedGeometry.js';
 import { toTriangles } from '../graph/toTriangles.js';
+import { wireframe as wireframeOp } from './wireframe.js';
 
 export const soup = (
   geometry,
@@ -12,24 +13,23 @@ export const soup = (
 ) => {
   const outline = doOutline ? outlineOp : () => [];
   const wireframe = doWireframe
-    ? (geometry) => [taggedPaths({ tags: geometry.tags }, toPaths(geometry))]
+    ? (geometry) => wireframeOp(geometry)
     : () => [];
   const triangles = doTriangles
-    ? (geometry) => [toTriangles(geometry)]
+    ? ({ tags }, geometry) => [toTriangles({ tags }, geometry)]
     : () => [];
   const op = (geometry, descend) => {
-    const { tags } = geometry;
     switch (geometry.type) {
       case 'graph': {
-        const { graph } = geometry;
+        const { graph, tags } = geometry;
         if (graph.isWireframe) {
           return taggedPaths({ tags }, toPaths(graph));
         } else if (graph.isClosed) {
           return taggedGroup(
             {},
-            ...triangles(geometry),
+            ...triangles({ tags }, geometry),
             ...wireframe(geometry),
-            ...outline(geometry, ['color/black'])
+            ...outline(geometry, ['color:black'])
           );
         } else if (graph.isEmpty) {
           return taggedGroup({});
@@ -37,13 +37,14 @@ export const soup = (
           // FIX: Simplify this arrangement.
           return taggedGroup(
             {},
-            ...triangles(geometry),
+            ...triangles({ tags }, geometry),
             ...wireframe(geometry),
-            ...outline(geometry, ['color/black'])
+            ...outline(geometry, ['color:black'])
           );
         }
       }
       // Unreachable.
+      case 'segments':
       case 'triangles':
       case 'points':
       case 'paths':

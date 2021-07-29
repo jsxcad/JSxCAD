@@ -133,6 +133,7 @@ class Ui extends React.PureComponent {
   async componentDidMount() {
     const { jsEditorAdvice, workspace } = this.state;
     const { file, path, sha } = this.props;
+    const props = this.props;
 
     if (file && path) {
       await ensureFile(file, path, { workspace });
@@ -191,6 +192,11 @@ class Ui extends React.PureComponent {
               return;
             }
 
+            if (note.context?.recording?.path !== props.path) {
+              // This note is for a different module.
+              return;
+            }
+
             const { notebookData, notebookRef } = this.state;
             if (note.data === undefined && note.path) {
               note.data = await readOrWatch(note.path);
@@ -218,7 +224,9 @@ class Ui extends React.PureComponent {
                 )
                   .then((url) => {
                     // Is there a race condition here?
-                    entry.domElement.src = url;
+                    if (entry.domElement) {
+                      entry.domElement.src = url;
+                    }
                   })
                   .catch((error) => {
                     if (error.message === 'Terminated') {
@@ -797,10 +805,44 @@ class Ui extends React.PureComponent {
       await write(`control/${path}`, notebookControlData);
 
       let script = jsEditorData;
-      const evaluate = (script) =>
-        ask({ op: 'evaluate', script, workspace, path, sha });
-      const replay = (script) =>
-        ask({ op: 'evaluate', script, workspace, path, sha });
+      const evaluate = async (script) => {
+        try {
+          const result = await ask({
+            op: 'evaluate',
+            script,
+            workspace,
+            path,
+            sha,
+          });
+          if (result) {
+            return result;
+          } else {
+            // The error will have come back via a note.
+            throw Error('Evaluation failed');
+          }
+        } catch (error) {
+          throw error;
+        }
+      };
+      const replay = async (script) => {
+        try {
+          const result = await ask({
+            op: 'evaluate',
+            script,
+            workspace,
+            path,
+            sha,
+          });
+          if (result) {
+            return result;
+          } else {
+            // The error will have come back via a note.
+            throw Error('Evaluation failed');
+          }
+        } catch (error) {
+          throw error;
+        }
+      };
       jsEditorAdvice.definitions = topLevel;
       await execute(script, {
         evaluate,
@@ -1054,6 +1096,7 @@ class Ui extends React.PureComponent {
                       onClickLink={this.onClickEditorLink}
                       data={jsEditorData}
                       file={file}
+                      path={path}
                       ask={ask}
                       workspace={workspace}
                     />
@@ -1142,6 +1185,7 @@ class Ui extends React.PureComponent {
                       onClickLink={this.onClickEditorLink}
                       data={jsEditorData}
                       file={file}
+                      path={path}
                       ask={ask}
                       workspace={workspace}
                     />
@@ -1162,6 +1206,7 @@ class Ui extends React.PureComponent {
                       onClickLink={this.onClickEditorLink}
                       data={jsEditorData}
                       file={file}
+                      path={path}
                       ask={ask}
                       workspace={workspace}
                     />
@@ -1187,6 +1232,7 @@ class Ui extends React.PureComponent {
                       onClickLink={this.onClickEditorLink}
                       data={jsEditorData}
                       file={file}
+                      path={path}
                       ask={ask}
                       workspace={workspace}
                     />
@@ -1274,6 +1320,7 @@ class Ui extends React.PureComponent {
                                 data={jsEditorData}
                                 advice={jsEditorAdvice}
                                 file={file}
+                                path={path}
                                 ask={ask}
                                 workspace={workspace}
                                 notebookData={notebookData}

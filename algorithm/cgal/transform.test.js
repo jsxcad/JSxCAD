@@ -96,3 +96,27 @@ test('rotate z 90', (t) => {
     '1',
   ]);
 });
+
+test('Inverse transform cancels', (t) => {
+  const c = getCgal();
+  const rotation = c.Transformation__rotate_z(90);
+  const unrotation = c.Transformation__inverse(rotation);
+  const composed = c.Transformation__compose(unrotation, rotation);
+  const output = [];
+  c.Transformation__to_exact(composed, (value) => output.push(value));
+  t.deepEqual(output, [
+    '1',
+    '0',
+    '0',
+    '0',
+    '0',
+    '1',
+    '0',
+    '0',
+    '0',
+    '0',
+    '1',
+    '0',
+    '1',
+  ]);
+});
