@@ -2,7 +2,7 @@ import './jsxcad-api-v1-gcode.js';
 import './jsxcad-api-v1-pdf.js';
 import './jsxcad-api-v1-tools.js';
 import * as mathApi from './jsxcad-api-v1-math.js';
-import { emit, hash, addOnEmitHandler, addPending, write, read, pushModule, popModule, getControlValue, getModule } from './jsxcad-sys.js';
+import { addOnEmitHandler, emit, hash, addPending, write, read, pushModule, popModule, getControlValue, getModule } from './jsxcad-sys.js';
 import * as shapeApi from './jsxcad-api-shape.js';
 import { toEcmascript } from './jsxcad-compiler.js';
 import { readStl, stl } from './jsxcad-api-v1-stl.js';
@@ -23,17 +23,18 @@ const recordNote = (note) => {
 };
 
 const beginRecordingNotes = (path, id, sourceLocation) => {
-  const setContext = { recording: { path, id } };
-  emit({ hash: hash(setContext), setContext });
-
+  notes = [];
   if (handler === undefined) {
     handler = addOnEmitHandler(recordNote);
   }
   recording = true;
-  notes = [];
+  const setContext = { recording: { path, id } };
+  emit({ hash: hash(setContext), setContext });
+  emit({ beginNotes: { path, id } });
 };
 
 const saveRecordedNotes = (path, id) => {
+  emit({ endNotes: { path, id } });
   let notesToSave = notes;
   notes = undefined;
   recording = false;
@@ -41,8 +42,8 @@ const saveRecordedNotes = (path, id) => {
 };
 
 const replayRecordedNotes = async (path, id) => {
-  const setContext = { recording: { path, id } };
-  emit({ hash: hash(setContext), setContext });
+  // const setContext = { recording: { path, id } };
+  // emit({ hash: hash(setContext), setContext });
 
   const notes = await read(`data/note/${path}/${id}`);
 
@@ -267,5 +268,4 @@ registerDynamicModule(module('svg'), './jsxcad-api-v1-svg.js');
 registerDynamicModule(module('threejs'), './jsxcad-api-v1-threejs.js');
 registerDynamicModule(module('units'), './jsxcad-api-v1-units.js');
 
-export default api;
-export { evaluate, execute };
+export { api as default, evaluate, execute };

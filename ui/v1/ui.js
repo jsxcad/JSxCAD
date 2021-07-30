@@ -24,6 +24,7 @@ import {
   watchFileDeletion,
   write,
 } from '@jsxcad/sys';
+import { getNotebookControlData, toDomElement } from '@jsxcad/ui-notebook';
 
 import Button from 'react-bootstrap/Button';
 import ButtonGroup from 'react-bootstrap/ButtonGroup';
@@ -44,8 +45,8 @@ import ReactDOM from 'react-dom';
 import Spinner from 'react-bootstrap/Spinner';
 import { execute } from '@jsxcad/api';
 import { fromPointsToAlphaShape2AsPolygonSegments } from '@jsxcad/algorithm-cgal';
-import { getNotebookControlData } from '@jsxcad/ui-notebook';
 import marked from 'marked';
+
 import { writeGist } from './gist.js';
 import { writeToGithub } from './github.js';
 
@@ -113,8 +114,9 @@ class Ui extends React.PureComponent {
       workspace: this.props.workspace,
       files: [],
       selectedPaths: [],
-      notebookData: {},
-      jsEditorAdvice: {},
+      notebookNotes: {},
+      notebookDefinitions: {},
+      jsEditorAdvice: { domElementByHash: new Map() },
     };
 
     this.onChangeJsEditor = this.onChangeJsEditor.bind(this);
@@ -197,18 +199,75 @@ class Ui extends React.PureComponent {
               return;
             }
 
-            const { notebookData, notebookRef } = this.state;
+            const { notebookNotes, notebookDefinitions } = this.state;
+            const { domElementByHash } = jsEditorAdvice;
+            const id = note.context?.recording?.id;
+
+            if (note.beginNotes) {
+              // This starts the notes to update path/id.
+              return;
+            }
+
+            if (note.endNotes) {
+              const def = notebookDefinitions[id];
+              if (!def) {
+                return;
+              }
+              // This completes the notes to update path/id.
+              // Remove deleted entries and reset the rest.
+              for (const hash of Object.keys(notebookNotes)) {
+                const entry = notebookNotes[hash];
+                const entryId = entry.context?.recording?.id;
+                if (entryId === id) {
+                  if (entry.updated) {
+                    entry.updated = false;
+                  } else {
+                    const domElement = domElementByHash.get(entry.hash);
+                    if (domElement) {
+                      def.domElement.removeChild(domElement);
+                      domElementByHash.delete(entry.hash);
+                    }
+                    delete notebookNotes[hash];
+                    if (!domElement) {
+                      console.log(`Could not find element to remove`);
+                    }
+                  }
+                }
+              }
+              return;
+            }
+
+            if (!id) {
+              return;
+            }
+
+            if (!notebookDefinitions[id]) {
+              // TODO: Prune abandoned definitions.
+              notebookDefinitions[id] = {
+                domElement: document.createElement('div'),
+              };
+            }
+
+            const def = notebookDefinitions[id];
+
             if (note.data === undefined && note.path) {
               note.data = await readOrWatch(note.path);
             }
-            if (notebookData[note.hash]) {
-              // It's already in the notebook.
-              notebookData[note.hash].updated = true;
-              return;
-            } else {
-              notebookData[note.hash] = note;
+
+            if (!notebookNotes[note.hash]) {
+              notebookNotes[note.hash] = note;
             }
-            const entry = notebookData[note.hash];
+
+            const entry = notebookNotes[note.hash];
+            entry.updated = true;
+
+            if (domElementByHash.has(note.hash)) {
+              def.domElement.appendChild(domElementByHash.get(note.hash));
+              return;
+            }
+
+            // We need to build the element.
+
             if (entry.view && !entry.url) {
               const { workspace } = this.state;
               const { path, view } = note;
@@ -224,8 +283,9 @@ class Ui extends React.PureComponent {
                 )
                   .then((url) => {
                     // Is there a race condition here?
-                    if (entry.domElement) {
-                      entry.domElement.src = url;
+                    const element = domElementByHash.get(entry.hash);
+                    if (element && element.firstChild) {
+                      element.firstChild.src = url;
                     }
                   })
                   .catch((error) => {
@@ -238,10 +298,10 @@ class Ui extends React.PureComponent {
                   });
               render();
             }
+            const element = toDomElement([note]);
+            domElementByHash.set(note.hash, element);
+            def.domElement.appendChild(element);
             note.updated = true;
-            if (notebookRef) {
-              notebookRef.forceUpdate();
-            }
             if (jsEditorAdvice.onUpdate) {
               await jsEditorAdvice.onUpdate();
             }
@@ -403,7 +463,7 @@ class Ui extends React.PureComponent {
     );
   }
   async loadJsEditor(path, { shouldUpdateUrl = true } = {}) {
-    const { notebookData, workspace } = this.state;
+    const { workspace } = this.state;
     const file = `source/${path}`;
     await ensureFile(file, path, { workspace });
     if (shouldUpdateUrl) {
@@ -412,7 +472,6 @@ class Ui extends React.PureComponent {
     const data = await read(file);
     const jsEditorData =
       typeof data === 'string' ? data : new TextDecoder('utf8').decode(data);
-    notebookData.length = 0;
     this.setState({ file, path, jsEditorData });
 
     // Automatically run the notebook on load. The user can hit Stop.
@@ -765,10 +824,12 @@ class Ui extends React.PureComponent {
   }
 
   updateNotebook() {
+    /*
     const { notebookRef } = this.state;
     if (notebookRef) {
       notebookRef.forceUpdate();
     }
+*/
   }
 
   clearLog() {
@@ -853,30 +914,25 @@ class Ui extends React.PureComponent {
       await resolvePending();
       // Finalize the notebook
       {
-        const { notebookData, notebookRef } = this.state;
-        let deleted = false;
-        for (const hash of Object.keys(notebookData)) {
-          const note = notebookData[hash];
+        const { notebookNotes } = this.state;
+        // let deleted = false;
+        for (const hash of Object.keys(notebookNotes)) {
+          const note = notebookNotes[hash];
           if (!note) {
             continue;
           }
           if (!note.updated) {
-            delete notebookData[hash];
-            deleted = true;
+            delete notebookNotes[hash];
+            // deleted = true;
           } else {
-            delete note.updated;
+            note.updated = false;
           }
         }
-        if (deleted) {
-          if (notebookRef) {
-            notebookRef.forceUpdate();
-          }
-          if (jsEditorAdvice.onUpdate) {
-            await jsEditorAdvice.onUpdate();
-          }
-          if (jsEditorAdvice.onFinished) {
-            await jsEditorAdvice.onFinished();
-          }
+        if (jsEditorAdvice.onUpdate) {
+          await jsEditorAdvice.onUpdate();
+        }
+        if (jsEditorAdvice.onFinished) {
+          await jsEditorAdvice.onFinished();
         }
       }
     } catch (error) {
@@ -918,7 +974,8 @@ class Ui extends React.PureComponent {
       files,
       mode = 'Notebook',
       modal,
-      notebookData,
+      notebookDefinitions,
+      notebookNotes,
       running,
       selectedPaths,
       workspace,
@@ -1323,7 +1380,8 @@ class Ui extends React.PureComponent {
                                 path={path}
                                 ask={ask}
                                 workspace={workspace}
-                                notebookData={notebookData}
+                                notebookDefinitions={notebookDefinitions}
+                                notebookNotes={notebookNotes}
                               />
                             </Pane>
                           </SplitPane>
