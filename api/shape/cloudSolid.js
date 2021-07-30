@@ -1,10 +1,9 @@
-import { fromPointsToGraph, taggedGraph } from '@jsxcad/geometry';
-
 import { Shape } from './Shape.js';
+import { fromPointsToGraph } from '@jsxcad/geometry';
 
 export const cloudSolid = () => (shape) => {
   const points = shape.toPoints();
-  return Shape.fromGeometry(taggedGraph({}, fromPointsToGraph(points)));
+  return Shape.fromGeometry(fromPointsToGraph({}, points));
 };
 
 Shape.registerMethod('cloudSolid', cloudSolid);

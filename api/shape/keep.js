@@ -1,4 +1,5 @@
 import { Shape } from './Shape.js';
+import { qualifyTag } from './tag.js';
 import { rewrite } from '@jsxcad/geometry';
 
 export const selectToKeep = (matchTags, geometryTags) => {
@@ -17,7 +18,7 @@ export const selectToDrop = (matchTags, geometryTags) =>
   !selectToKeep(matchTags, geometryTags);
 
 export const keepOrDrop = (shape, tags, select) => {
-  const matchTags = tags.map((tag) => `user:${tag}`);
+  const matchTags = tags.map((tag) => qualifyTag(tag, 'user'));
 
   const op = (geometry, descend) => {
     // FIX: Need a more reliable way to detect leaf structure.

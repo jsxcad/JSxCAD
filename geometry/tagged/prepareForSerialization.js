@@ -10,6 +10,7 @@ export const prepareForSerialization = (geometry) => {
       case 'displayGeometry':
       case 'triangles':
       case 'points':
+      case 'segments':
       case 'paths':
         return;
       case 'item':

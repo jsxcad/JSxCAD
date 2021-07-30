@@ -616,11 +616,49 @@ function createCommonjsModule(fn, module) {
 	return module = { exports: {} }, fn(module, module.exports), module.exports;
 }
 
+/**
+ * https://bugs.webkit.org/show_bug.cgi?id=226547
+ * Safari has a horrible bug where IDB requests can hang while the browser is starting up.
+ * The only solution is to keep nudging it until it's awake.
+ * This probably creates garbage, but garbage is better than totally failing.
+ */
+
+function idbReady() {
+  var isSafari = !navigator.userAgentData && /Safari\//.test(navigator.userAgent) && !/Chrom(e|ium)\//.test(navigator.userAgent); // No point putting other browsers or older versions of Safari through this mess.
+
+  if (!isSafari || !indexedDB.databases) return Promise.resolve();
+  var intervalId;
+  return new Promise(function (resolve) {
+    var tryIdb = function tryIdb() {
+      return indexedDB.databases().finally(resolve);
+    };
+
+    intervalId = setInterval(tryIdb, 100);
+    tryIdb();
+  }).finally(function () {
+    return clearInterval(intervalId);
+  });
+}
+
+var cjsCompat$1 = idbReady;
+
 var cjsCompat = createCommonjsModule(function (module, exports) {
+
+function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
 Object.defineProperty(exports, '__esModule', {
   value: true
 });
+
+
+
+function _interopDefaultLegacy(e) {
+  return e && _typeof(e) === 'object' && 'default' in e ? e : {
+    'default': e
+  };
+}
+
+var safariFix__default = /*#__PURE__*/_interopDefaultLegacy(cjsCompat$1);
 
 function promisifyRequest(request) {
   return new Promise(function (resolve, reject) {
@@ -637,13 +675,15 @@ function promisifyRequest(request) {
 }
 
 function createStore(dbName, storeName) {
-  var request = indexedDB.open(dbName);
+  var dbp = safariFix__default['default']().then(function () {
+    var request = indexedDB.open(dbName);
 
-  request.onupgradeneeded = function () {
-    return request.result.createObjectStore(storeName);
-  };
+    request.onupgradeneeded = function () {
+      return request.result.createObjectStore(storeName);
+    };
 
-  var dbp = promisifyRequest(request);
+    return promisifyRequest(request);
+  });
   return function (txMode, callback) {
     return dbp.then(function (db) {
       return callback(db.transaction(storeName, txMode).objectStore(storeName));
@@ -4010,12 +4050,12 @@ const touch = async (
   }
 
   if (isWebWorker) {
-    console.log(`QQ/sys/touch/webworker: id ${self.id} path ${path}`);
+    // console.log(`QQ/sys/touch/webworker: id ${self.id} path ${path}`);
     if (broadcast) {
       addPending(await self.ask({ op: 'sys/touch', path, id: self.id }));
     }
   } else {
-    console.log(`QQ/sys/touch/browser: ${path}`);
+    // console.log(`QQ/sys/touch/browser: ${path}`);
     tellServices({ op: 'sys/touch', path, workspace });
   }
 

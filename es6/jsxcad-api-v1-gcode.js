@@ -115,5 +115,4 @@ Shape.prototype.writeGcode = writeGcodeMethod;
 
 const api = { writeGcode };
 
-export default api;
-export { writeGcode };
+export { api as default, writeGcode };

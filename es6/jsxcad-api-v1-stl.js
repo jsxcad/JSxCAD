@@ -117,5 +117,4 @@ const api = {
   stl,
 };
 
-export default api;
-export { readStl, stl };
+export { api as default, readStl, stl };
