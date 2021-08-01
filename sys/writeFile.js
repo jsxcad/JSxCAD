@@ -20,21 +20,8 @@ import { touch } from './touch.js';
 const { promises } = fs;
 const { serialize } = v8;
 
-const deepCopy = (original) => {
-  if (original && original.constructor === Object) {
-    const copy = {};
-    for (const key of Object.keys(original)) {
-      copy[key] = deepCopy(original[key]);
-    }
-    return copy;
-  }
-  return original;
-};
-
 export const writeFile = async (options, path, data) => {
   data = await data;
-
-  data = deepCopy(data);
 
   const {
     doSerialize = true,

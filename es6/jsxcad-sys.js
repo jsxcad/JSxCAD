@@ -4070,21 +4070,8 @@ const touch = async (
 const { promises: promises$3 } = fs;
 const { serialize } = v8$1;
 
-const deepCopy$1 = (original) => {
-  if (original && original.constructor === Object) {
-    const copy = {};
-    for (const key of Object.keys(original)) {
-      copy[key] = deepCopy$1(original[key]);
-    }
-    return copy;
-  }
-  return original;
-};
-
 const writeFile = async (options, path, data) => {
   data = await data;
-
-  data = deepCopy$1(data);
 
   const {
     doSerialize = true,
@@ -4250,17 +4237,6 @@ const fetchSources = async (sources) => {
   }
 };
 
-const deepCopy = (original) => {
-  if (original && original.constructor === Object) {
-    const copy = {};
-    for (const key of Object.keys(original)) {
-      copy[key] = deepCopy(original[key]);
-    }
-    return copy;
-  }
-  return original;
-};
-
 // Deprecated
 const readFile = async (options, path) => {
   const {
@@ -4322,7 +4298,7 @@ const readFile = async (options, path) => {
   }
   info(`Read complete: ${path} ${file.data ? 'present' : 'missing'}`);
 
-  return deepCopy(file.data);
+  return file.data;
 };
 
 const read = async (path, options = {}) => readFile(options, path);

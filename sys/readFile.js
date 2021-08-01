@@ -108,17 +108,6 @@ const fetchSources = async (sources) => {
   }
 };
 
-const deepCopy = (original) => {
-  if (original && original.constructor === Object) {
-    const copy = {};
-    for (const key of Object.keys(original)) {
-      copy[key] = deepCopy(original[key]);
-    }
-    return copy;
-  }
-  return original;
-};
-
 // Deprecated
 export const readFile = async (options, path) => {
   const {
@@ -180,7 +169,7 @@ export const readFile = async (options, path) => {
   }
   info(`Read complete: ${path} ${file.data ? 'present' : 'missing'}`);
 
-  return deepCopy(file.data);
+  return file.data;
 };
 
 export const read = async (path, options = {}) => readFile(options, path);
