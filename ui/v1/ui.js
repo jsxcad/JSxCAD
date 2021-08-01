@@ -203,49 +203,28 @@ class Ui extends React.PureComponent {
             const { domElementByHash } = jsEditorAdvice;
             const id = note.context?.recording?.id;
 
+            if (note.setContext) {
+              return;
+            }
+
             if (note.beginNotes) {
+              notebookDefinitions[id] = {
+                notes: [],
+                domElement: document.createElement('div'),
+              };
               // This starts the notes to update path/id.
               return;
             }
 
             if (note.endNotes) {
-              const def = notebookDefinitions[id];
-              if (!def) {
-                return;
-              }
-              // This completes the notes to update path/id.
-              // Remove deleted entries and reset the rest.
-              for (const hash of Object.keys(notebookNotes)) {
-                const entry = notebookNotes[hash];
-                const entryId = entry.context?.recording?.id;
-                if (entryId === id) {
-                  if (entry.updated) {
-                    entry.updated = false;
-                  } else {
-                    const domElement = domElementByHash.get(entry.hash);
-                    if (domElement) {
-                      def.domElement.removeChild(domElement);
-                      domElementByHash.delete(entry.hash);
-                    }
-                    delete notebookNotes[hash];
-                    if (!domElement) {
-                      console.log(`Could not find element to remove`);
-                    }
-                  }
-                }
+              if (jsEditorAdvice.onUpdate) {
+                await jsEditorAdvice.onUpdate();
               }
               return;
             }
 
             if (!id) {
               return;
-            }
-
-            if (!notebookDefinitions[id]) {
-              // TODO: Prune abandoned definitions.
-              notebookDefinitions[id] = {
-                domElement: document.createElement('div'),
-              };
             }
 
             const def = notebookDefinitions[id];
@@ -258,11 +237,18 @@ class Ui extends React.PureComponent {
               notebookNotes[note.hash] = note;
             }
 
-            const entry = notebookNotes[note.hash];
-            entry.updated = true;
+            if (!def) {
+              console.log('No def');
+            }
 
-            if (domElementByHash.has(note.hash)) {
-              def.domElement.appendChild(domElementByHash.get(note.hash));
+            def.notes.push(note.hash);
+
+            const entry = notebookNotes[note.hash];
+
+            if (domElementByHash.has(entry.hash)) {
+              console.log(`Re-appending ${entry.hash} to ${id}`);
+              def.domElement.appendChild(document.createTextNode(entry.hash));
+              def.domElement.appendChild(domElementByHash.get(entry.hash));
               return;
             }
 
@@ -270,7 +256,7 @@ class Ui extends React.PureComponent {
 
             if (entry.view && !entry.url) {
               const { workspace } = this.state;
-              const { path, view } = note;
+              const { path, view } = entry;
               const { width, height } = view;
               const canvas = document.createElement('canvas');
               canvas.width = width;
@@ -298,13 +284,12 @@ class Ui extends React.PureComponent {
                   });
               render();
             }
-            const element = toDomElement([note]);
-            domElementByHash.set(note.hash, element);
+            const element = toDomElement([entry]);
+            domElementByHash.set(entry.hash, element);
+            console.log(`Appending ${entry.hash} to ${id}`);
+            def.domElement.appendChild(document.createTextNode(entry.hash));
             def.domElement.appendChild(element);
-            note.updated = true;
-            if (jsEditorAdvice.onUpdate) {
-              await jsEditorAdvice.onUpdate();
-            }
+            console.log(`Marking ${entry.hash} in ${id}`);
           }
           return;
         default:
@@ -912,29 +897,6 @@ class Ui extends React.PureComponent {
         topLevel,
       });
       await resolvePending();
-      // Finalize the notebook
-      {
-        const { notebookNotes } = this.state;
-        // let deleted = false;
-        for (const hash of Object.keys(notebookNotes)) {
-          const note = notebookNotes[hash];
-          if (!note) {
-            continue;
-          }
-          if (!note.updated) {
-            delete notebookNotes[hash];
-            // deleted = true;
-          } else {
-            note.updated = false;
-          }
-        }
-        if (jsEditorAdvice.onUpdate) {
-          await jsEditorAdvice.onUpdate();
-        }
-        if (jsEditorAdvice.onFinished) {
-          await jsEditorAdvice.onFinished();
-        }
-      }
     } catch (error) {
       // Include any high level notebook errors in the output.
       window.alert(error.stack);
@@ -1510,6 +1472,9 @@ class Ui extends React.PureComponent {
 }
 
 const setupUi = async (sha) => {
+  document
+    .getElementById('loading')
+    .appendChild(document.createTextNode('Indexing Storage'));
   const filesystems = await listFilesystems();
   const decodeHash = () => {
     const hash = location.hash.substring(1);
@@ -1523,6 +1488,9 @@ const setupUi = async (sha) => {
   };
   const [path, file, workspace] = decodeHash();
   let ui;
+  document
+    .getElementById('loading')
+    .appendChild(document.createTextNode('Starting React'));
   ReactDOM.render(
     <Ui
       ref={(ref) => {
@@ -1555,8 +1523,14 @@ const setupUi = async (sha) => {
 
 export const installUi = async ({ document, workspace, sha }) => {
   await boot();
+  document
+    .getElementById('loading')
+    .appendChild(document.createTextNode('Booted'));
   if (workspace !== '') {
     await setupFilesystem({ fileBase: workspace });
   }
+  document
+    .getElementById('loading')
+    .appendChild(document.createTextNode('Setup UI'));
   await setupUi(sha);
 };

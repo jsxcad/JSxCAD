@@ -108,6 +108,17 @@ const fetchSources = async (sources) => {
   }
 };
 
+const deepCopy = (original) => {
+  if (original && original.constructor === Object) {
+    const copy = {};
+    for (const key of Object.keys(original)) {
+      copy[key] = deepCopy(original[key]);
+    }
+    return copy;
+  }
+  return original;
+};
+
 // Deprecated
 export const readFile = async (options, path) => {
   const {
@@ -116,6 +127,7 @@ export const readFile = async (options, path) => {
     sources = [],
     workspace = getFilesystem(),
     useCache = true,
+    forceNoCache = false,
     decode,
   } = options;
   let originalWorkspace = getFilesystem();
@@ -128,8 +140,20 @@ export const readFile = async (options, path) => {
     // info(`Read ${path}`);
   }
   const file = await getFile(options, path);
-  if (file.data === undefined || useCache === false) {
+  if (file.data === undefined || useCache === false || forceNoCache) {
+    if (isWebWorker) {
+      console.log(`QQ/read/persistent/webworker id ${self.id} path ${path}`);
+    } else {
+      console.log(`QQ/read/persistent/browser path ${path}`);
+    }
     file.data = await fetchPersistent(path, true);
+  } else {
+    console.log(`QQ/read/cache: ${path}`);
+    if (isWebWorker) {
+      console.log(`QQ/read/cache/webworker id ${self.id} path ${path}`);
+    } else {
+      console.log(`QQ/read/cache/browser path ${path}`);
+    }
   }
   if (workspace !== originalWorkspace) {
     // Switch back to the original filesystem, if necessary.
@@ -155,7 +179,8 @@ export const readFile = async (options, path) => {
     }
   }
   info(`Read complete: ${path} ${file.data ? 'present' : 'missing'}`);
-  return file.data;
+
+  return deepCopy(file.data);
 };
 
 export const read = async (path, options = {}) => readFile(options, path);

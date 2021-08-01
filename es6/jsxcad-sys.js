@@ -4050,12 +4050,12 @@ const touch = async (
   }
 
   if (isWebWorker) {
-    // console.log(`QQ/sys/touch/webworker: id ${self.id} path ${path}`);
+    console.log(`QQ/sys/touch/webworker: id ${self.id} path ${path}`);
     if (broadcast) {
       addPending(await self.ask({ op: 'sys/touch', path, id: self.id }));
     }
   } else {
-    // console.log(`QQ/sys/touch/browser: ${path}`);
+    console.log(`QQ/sys/touch/browser: ${path}`);
     tellServices({ op: 'sys/touch', path, workspace });
   }
 
@@ -4065,13 +4065,26 @@ const touch = async (
   }
 };
 
+/* global self */
+
 const { promises: promises$3 } = fs;
 const { serialize } = v8$1;
 
-// FIX Convert data by representation.
+const deepCopy$1 = (original) => {
+  if (original && original.constructor === Object) {
+    const copy = {};
+    for (const key of Object.keys(original)) {
+      copy[key] = deepCopy$1(original[key]);
+    }
+    return copy;
+  }
+  return original;
+};
 
 const writeFile = async (options, path, data) => {
   data = await data;
+
+  data = deepCopy$1(data);
 
   const {
     doSerialize = true,
@@ -4085,9 +4098,18 @@ const writeFile = async (options, path, data) => {
     setupFilesystem({ fileBase: workspace });
   }
 
+  if (path.startsWith('meta/def')) {
+    console.log(`QQ/write/META: ${path} ${JSON.stringify(data)}`);
+  }
   info(`Write ${path}`);
   const file = await getFile(options, path);
   file.data = data;
+
+  if (isWebWorker) {
+    console.log(`QQ/write/cache/webworker id ${self.id} path ${path}`);
+  } else {
+    console.log(`QQ/write/cache/browser path ${path}`);
+  }
 
   for (const watcher of file.watchers) {
     await watcher(options, file);
@@ -4113,6 +4135,13 @@ const writeFile = async (options, path, data) => {
     } else if (isBrowser || isWebWorker) {
       await db().setItem(persistentPath, data);
     }
+
+    if (isWebWorker) {
+      console.log(`QQ/write/persistent/webworker id ${self.id} path ${path}`);
+    } else {
+      console.log(`QQ/write/persistent/browser path ${path}`);
+    }
+
     // Let everyone know the file has changed.
     await touch(persistentPath, { workspace, clear: false });
   }
@@ -4221,6 +4250,17 @@ const fetchSources = async (sources) => {
   }
 };
 
+const deepCopy = (original) => {
+  if (original && original.constructor === Object) {
+    const copy = {};
+    for (const key of Object.keys(original)) {
+      copy[key] = deepCopy(original[key]);
+    }
+    return copy;
+  }
+  return original;
+};
+
 // Deprecated
 const readFile = async (options, path) => {
   const {
@@ -4229,6 +4269,7 @@ const readFile = async (options, path) => {
     sources = [],
     workspace = getFilesystem(),
     useCache = true,
+    forceNoCache = false,
     decode,
   } = options;
   let originalWorkspace = getFilesystem();
@@ -4241,8 +4282,20 @@ const readFile = async (options, path) => {
     // info(`Read ${path}`);
   }
   const file = await getFile(options, path);
-  if (file.data === undefined || useCache === false) {
+  if (file.data === undefined || useCache === false || forceNoCache) {
+    if (isWebWorker) {
+      console.log(`QQ/read/persistent/webworker id ${self.id} path ${path}`);
+    } else {
+      console.log(`QQ/read/persistent/browser path ${path}`);
+    }
     file.data = await fetchPersistent(path, true);
+  } else {
+    console.log(`QQ/read/cache: ${path}`);
+    if (isWebWorker) {
+      console.log(`QQ/read/cache/webworker id ${self.id} path ${path}`);
+    } else {
+      console.log(`QQ/read/cache/browser path ${path}`);
+    }
   }
   if (workspace !== originalWorkspace) {
     // Switch back to the original filesystem, if necessary.
@@ -4268,7 +4321,8 @@ const readFile = async (options, path) => {
     }
   }
   info(`Read complete: ${path} ${file.data ? 'present' : 'missing'}`);
-  return file.data;
+
+  return deepCopy(file.data);
 };
 
 const read = async (path, options = {}) => readFile(options, path);

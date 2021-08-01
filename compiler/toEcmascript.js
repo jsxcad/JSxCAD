@@ -210,7 +210,10 @@ const declareVariable = async (
     if (declarator.init.type === 'ArrowFunctionExpression') {
       // We can't cache functions.
       entry.isNotCacheable = true;
-    } else if (declarator.init.type === 'Literal') {
+    } else if (
+      declarator.init.type === 'Literal' ||
+      declarator.init.type === 'ObjectExpression'
+    ) {
       // Not much point in caching literals.
       entry.isNotCacheable = true;
     } else if (
