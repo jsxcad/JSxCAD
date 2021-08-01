@@ -2784,7 +2784,7 @@ const toDisplayGeometry = (
   if (skin === undefined) {
     skin = true;
   }
-  return soup(toVisiblyDisjointGeometry(geometry), {
+  return soup(toConcreteGeometry(geometry), {
     doTriangles: skin,
     doOutline: outline,
     doWireframe: wireframe,

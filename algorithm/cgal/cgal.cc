@@ -183,7 +183,7 @@ struct Triple_array_traits
   Less_xyz_3 less_xyz_3_object() const { return Less_xyz_3(); }
 };
 
-Surface_mesh* FromPolygonSoupToSurfaceMesh(emscripten::val fill) {
+const Surface_mesh* FromPolygonSoupToSurfaceMesh(emscripten::val fill) {
   Triples triples;
   Polygons polygons;
   // Workaround for emscripten::val() bindings.
@@ -198,10 +198,12 @@ Surface_mesh* FromPolygonSoupToSurfaceMesh(emscripten::val fill) {
   return mesh;
 }
 
-void FromSurfaceMeshToPolygonSoup(Surface_mesh* mesh, Transformation* transformation, bool triangulate, emscripten::val emit_polygon, emscripten::val emit_point) {
+void FromSurfaceMeshToPolygonSoup(const Surface_mesh* mesh, const Transformation* transformation, bool triangulate, emscripten::val emit_polygon, emscripten::val emit_point) {
   if (triangulate) {
     // Note: Destructive update.
-    CGAL::Polygon_mesh_processing::triangulate_faces(mesh->faces(), *mesh);
+    Surface_mesh working_copy(*mesh);
+    CGAL::Polygon_mesh_processing::triangulate_faces(working_copy.faces(), working_copy);
+    return FromSurfaceMeshToPolygonSoup(&working_copy, transformation, false, emit_polygon, emit_point);
   }
   Points points;
   Polygons polygons;
@@ -215,7 +217,7 @@ void FromSurfaceMeshToPolygonSoup(Surface_mesh* mesh, Transformation* transforma
   }
 }
 
-Surface_mesh* FromFunctionToSurfaceMesh(double radius, double angular_bound, double radius_bound, double distance_bound, double error_bound, emscripten::val function) {
+const Surface_mesh* FromFunctionToSurfaceMesh(double radius, double angular_bound, double radius_bound, double distance_bound, double error_bound, emscripten::val function) {
   typedef CGAL::Surface_mesh_default_triangulation_3 Tr;
   // c2t3
   typedef CGAL::Complex_2_in_triangulation_3<Tr> C2t3;
@@ -274,7 +276,7 @@ struct TriangularSurfaceMeshBuilder {
   TriangularSurfaceMeshBuilder operator++(int) { return *this; }
 };
 
-Surface_mesh* FromPointsToSurfaceMesh(emscripten::val fill_triples) {
+const Surface_mesh* FromPointsToSurfaceMesh(emscripten::val fill_triples) {
   Surface_mesh* mesh = new Surface_mesh();
   std::vector<Triple> triples;
   std::vector<Triple>* triples_ptr = &triples;
@@ -307,7 +309,7 @@ void FitPlaneToPoints(emscripten::val fill_triples, emscripten::val emit_plane) 
   }
 }
 
-Surface_mesh* SubdivideSurfaceMesh(Surface_mesh* input, int method, int iterations) {
+const Surface_mesh* SubdivideSurfaceMesh(const Surface_mesh* input, int method, int iterations) {
   typedef boost::graph_traits<Surface_mesh>::edge_descriptor edge_descriptor;
 
   Surface_mesh* mesh = new Surface_mesh(*input);
@@ -343,30 +345,27 @@ Surface_mesh* SubdivideSurfaceMesh(Surface_mesh* input, int method, int iteratio
   return mesh;
 }
 
-Surface_mesh* ReverseFaceOrientationsOfSurfaceMesh(Surface_mesh* input) {
+const Surface_mesh* ReverseFaceOrientationsOfSurfaceMesh(const Surface_mesh* input) {
   Surface_mesh* mesh = new Surface_mesh(*input);
   CGAL::Polygon_mesh_processing::reverse_face_orientations(mesh->faces(), *mesh);
   return mesh;
 }
 
-void TriangulateFacesOfSurfaceMesh(Surface_mesh* mesh) {
-  CGAL::Polygon_mesh_processing::triangulate_faces(*mesh);
-}
-
-bool IsBadSurfaceMesh(Surface_mesh* mesh) {
-  CGAL::Polygon_mesh_processing::triangulate_faces(*mesh);
-  if (CGAL::Polygon_mesh_processing::does_self_intersect(*mesh, CGAL::parameters::all_default())) {
+bool IsBadSurfaceMesh(const Surface_mesh* input) {
+  Surface_mesh mesh(*input);
+  CGAL::Polygon_mesh_processing::triangulate_faces(mesh);
+  if (CGAL::Polygon_mesh_processing::does_self_intersect(mesh, CGAL::parameters::all_default())) {
     std::vector<std::pair<Surface_mesh::Face_index, Surface_mesh::Face_index>> face_pairs;
-    CGAL::Polygon_mesh_processing::self_intersections(*mesh, std::back_inserter(face_pairs));
+    CGAL::Polygon_mesh_processing::self_intersections(mesh, std::back_inserter(face_pairs));
     for (const auto& pair : face_pairs) {
       std::cout << "Intersection between: " << pair.first << " and " << pair.second << std::endl;
     }
-    std::cout << std::setprecision(20) << *mesh << std::endl;
+    std::cout << std::setprecision(20) << mesh << std::endl;
     return true;
   }
 
-  for (const Vertex_index vertex : vertices(*mesh)) {
-    if (CGAL::Polygon_mesh_processing::is_non_manifold_vertex(vertex, *mesh)) {
+  for (const Vertex_index vertex : vertices(mesh)) {
+    if (CGAL::Polygon_mesh_processing::is_non_manifold_vertex(vertex, mesh)) {
       std::cout << "Non-manifold vertex " << vertex << std::endl;
       return true;
     }
@@ -375,7 +374,7 @@ bool IsBadSurfaceMesh(Surface_mesh* mesh) {
   return false;
 }
 
-Surface_mesh* RemeshSurfaceMesh(Surface_mesh* input, emscripten::val get_length) {
+const Surface_mesh* RemeshSurfaceMesh(const Surface_mesh* input, emscripten::val get_length) {
   typedef boost::graph_traits<Surface_mesh>::edge_descriptor edge_descriptor;
 
   Surface_mesh* mesh = new Surface_mesh(*input);
@@ -391,13 +390,13 @@ Surface_mesh* RemeshSurfaceMesh(Surface_mesh* input, emscripten::val get_length)
   return mesh;
 }
 
-Surface_mesh* TransformSurfaceMesh(Surface_mesh* input, double m00, double m01, double m02, double m03, double m10, double m11, double m12, double m13, double m20, double m21, double m22, double m23, double hw) {
+const Surface_mesh* TransformSurfaceMesh(const Surface_mesh* input, double m00, double m01, double m02, double m03, double m10, double m11, double m12, double m13, double m20, double m21, double m22, double m23, double hw) {
   Surface_mesh* output = new Surface_mesh(*input);
   CGAL::Polygon_mesh_processing::transform(Transformation(FT(m00), FT(m01), FT(m02), FT(m03), FT(m10), FT(m11), FT(m12), FT(m13), FT(m20), FT(m21), FT(m22), FT(m23), FT(hw)), *output, CGAL::parameters::all_default());
   return output;
 }
 
-Surface_mesh* TransformSurfaceMeshByTransform(Surface_mesh* input, Transformation* transform) {
+const Surface_mesh* TransformSurfaceMeshByTransform(const Surface_mesh* input, const Transformation* transform) {
   Surface_mesh* output = new Surface_mesh(*input);
   CGAL::Polygon_mesh_processing::transform(*transform, *output, CGAL::parameters::all_default());
   return output;
@@ -409,7 +408,7 @@ void compute_angle(double a, RT& sin_alpha, RT& cos_alpha, RT& w) {
   CGAL::rational_rotation_approximation(radians, sin_alpha, cos_alpha, w, RT(1), RT(1000));
 }
 
-Surface_mesh* BendSurfaceMesh(Surface_mesh* input, Transformation* transform, double degreesPerMm) {
+const Surface_mesh* BendSurfaceMesh(const Surface_mesh* input, const Transformation* transform, double degreesPerMm) {
   Surface_mesh* c = new Surface_mesh(*input);
   CGAL::Polygon_mesh_processing::transform(*transform, *c, CGAL::parameters::all_default());
   CGAL::Polygon_mesh_processing::triangulate_faces(*c);
@@ -443,7 +442,7 @@ std::cout << "Bend: Removing self intersections failed" << std::endl;
   return c;
 }
 
-Surface_mesh* TwistSurfaceMesh(Surface_mesh* input, Transformation* transform, double degreesPerMm) {
+const Surface_mesh* TwistSurfaceMesh(const Surface_mesh* input, const Transformation* transform, double degreesPerMm) {
   Surface_mesh* c = new Surface_mesh(*input);
   CGAL::Polygon_mesh_processing::transform(*transform, *c, CGAL::parameters::all_default());
   CGAL::Polygon_mesh_processing::triangulate_faces(*c);
@@ -468,7 +467,7 @@ Surface_mesh* TwistSurfaceMesh(Surface_mesh* input, Transformation* transform, d
   return c;
 }
 
-Surface_mesh* PushSurfaceMesh(Surface_mesh* input, Transformation* transform, double force, double minimum_distance, double scale) {
+const Surface_mesh* PushSurfaceMesh(const Surface_mesh* input, const Transformation* transform, double force, double minimum_distance, double scale) {
   Surface_mesh* c = new Surface_mesh(*input);
   CGAL::Polygon_mesh_processing::transform(*transform, *c, CGAL::parameters::all_default());
   Point origin(0, 0, 0);
@@ -493,7 +492,7 @@ Surface_mesh* PushSurfaceMesh(Surface_mesh* input, Transformation* transform, do
 Vector unitVector(const Vector& vector);
 Vector NormalOfSurfaceMeshFacet(const Surface_mesh& mesh, Face_index facet);
 
-Surface_mesh* GrowSurfaceMesh(Surface_mesh* input, Transformation* transformation, double amount) {
+const Surface_mesh* GrowSurfaceMesh(const Surface_mesh* input, const Transformation* transformation, double amount) {
   Surface_mesh mesh(*input);
   CGAL::Polygon_mesh_processing::transform(*transformation, mesh, CGAL::parameters::all_default());
 
@@ -520,7 +519,7 @@ Surface_mesh* GrowSurfaceMesh(Surface_mesh* input, Transformation* transformatio
   return result;
 }
 
-void Surface_mesh__EachFace(Surface_mesh* mesh, emscripten::val op) {
+void Surface_mesh__EachFace(const Surface_mesh* mesh, emscripten::val op) {
   for (const auto& face_index : mesh->faces()) {
     if (!mesh->is_removed(face_index)) {
       op(std::size_t(face_index));
@@ -562,35 +561,35 @@ void addPoint_2(Point_2s* points, double x, double y) {
   points->emplace_back(Point_2{ x, y });
 }
 
-std::size_t Surface_mesh__halfedge_to_target(Surface_mesh* mesh, std::size_t halfedge_index) {
+std::size_t Surface_mesh__halfedge_to_target(const Surface_mesh* mesh, std::size_t halfedge_index) {
   return std::size_t(mesh->target(Halfedge_index(halfedge_index)));
 }
 
-std::size_t Surface_mesh__halfedge_to_face(Surface_mesh* mesh, std::size_t halfedge_index) {
+std::size_t Surface_mesh__halfedge_to_face(const Surface_mesh* mesh, std::size_t halfedge_index) {
   return std::size_t(mesh->face(Halfedge_index(halfedge_index)));
 }
 
-std::size_t Surface_mesh__halfedge_to_next_halfedge(Surface_mesh* mesh, std::size_t halfedge_index) {
+std::size_t Surface_mesh__halfedge_to_next_halfedge(const Surface_mesh* mesh, std::size_t halfedge_index) {
   return std::size_t(mesh->next(Halfedge_index(halfedge_index)));
 }
 
-std::size_t Surface_mesh__halfedge_to_prev_halfedge(Surface_mesh* mesh, std::size_t halfedge_index) {
+std::size_t Surface_mesh__halfedge_to_prev_halfedge(const Surface_mesh* mesh, std::size_t halfedge_index) {
   return std::size_t(mesh->prev(Halfedge_index(halfedge_index)));
 }
 
-std::size_t Surface_mesh__halfedge_to_opposite_halfedge(Surface_mesh* mesh, std::size_t halfedge_index) {
+std::size_t Surface_mesh__halfedge_to_opposite_halfedge(const Surface_mesh* mesh, std::size_t halfedge_index) {
   return std::size_t(mesh->opposite(Halfedge_index(halfedge_index)));
 }
 
-std::size_t Surface_mesh__vertex_to_halfedge(Surface_mesh* mesh, std::size_t vertex_index) {
+std::size_t Surface_mesh__vertex_to_halfedge(const Surface_mesh* mesh, std::size_t vertex_index) {
   return std::size_t(mesh->halfedge(Vertex_index(vertex_index)));
 }
 
-std::size_t Surface_mesh__face_to_halfedge(Surface_mesh* mesh, std::size_t face_index) {
+std::size_t Surface_mesh__face_to_halfedge(const Surface_mesh* mesh, std::size_t face_index) {
   return std::size_t(mesh->halfedge(Face_index(face_index)));
 }
 
-const Point& Surface_mesh__vertex_to_point(Surface_mesh* mesh, std::size_t vertex_index) {
+const Point& Surface_mesh__vertex_to_point(const Surface_mesh* mesh, std::size_t vertex_index) {
   return mesh->point(Vertex_index(vertex_index));
 }
 
@@ -785,12 +784,12 @@ class SurfaceMeshAndTransform {
    SurfaceMeshAndTransform(emscripten::val* fill) : fill_(fill) {};
 
    emscripten::val* fill_;
-   Surface_mesh* mesh_;
-   Transformation* transform_;
+   const Surface_mesh* mesh_;
+   const Transformation* transform_;
 
-   void set_mesh(Surface_mesh* mesh) { mesh_ = mesh; }
-   void set_transform(Transformation* transform) { transform_ = transform; }
-   bool fill(Surface_mesh*& mesh, Transformation*& transform) {
+   void set_mesh(const Surface_mesh* mesh) { mesh_ = mesh; }
+   void set_transform(const Transformation* transform) { transform_ = transform; }
+   bool fill(const Surface_mesh*& mesh, const Transformation*& transform) {
      SurfaceMeshAndTransform* self = this;
      if ((*fill_)(self).as<bool>()) {
        mesh = mesh_;
@@ -802,20 +801,20 @@ class SurfaceMeshAndTransform {
    }
 };
 
-Surface_mesh* LoftBetweenCongruentSurfaceMeshes(bool closed, emscripten::val fill) {
+const Surface_mesh* LoftBetweenCongruentSurfaceMeshes(bool closed, emscripten::val fill) {
   SurfaceMeshAndTransform admit(&fill);
 
-  Surface_mesh* a;
-  Surface_mesh* b;
-  Transformation* a_transform;
-  Transformation* b_transform;
+  const Surface_mesh* a;
+  const Surface_mesh* b;
+  const Transformation* a_transform;
+  const Transformation* b_transform;
 
   if (!admit.fill(a, a_transform) || !admit.fill(b, b_transform)) {
     return nullptr;
   }
 
   Surface_mesh* loft = new Surface_mesh();
-  Surface_mesh* base = a;
+  const Surface_mesh* base = a;
 
   std::unordered_map<Vertex_index, Vertex_index> base_map;
   std::unordered_map<Vertex_index, Vertex_index> a_map;
@@ -888,7 +887,7 @@ Surface_mesh* LoftBetweenCongruentSurfaceMeshes(bool closed, emscripten::val fil
       }
     }
 
-    Surface_mesh* next;
+    const Surface_mesh* next;
     if (closing) {
       // We just finished closing off the final walls.
       break;
@@ -978,7 +977,7 @@ class SurfaceMeshQuery {
   std::unique_ptr<Tree> tree_;
 };
 
-void SeparateSurfaceMesh(Surface_mesh* input, bool keep_volumes, bool keep_cavities_in_volumes, bool keep_cavities_as_volumes, emscripten::val emit_mesh) {
+void SeparateSurfaceMesh(const Surface_mesh* input, bool keep_volumes, bool keep_cavities_in_volumes, bool keep_cavities_as_volumes, emscripten::val emit_mesh) {
   std::vector<Surface_mesh> meshes;
   std::vector<Surface_mesh> cavities;
   std::vector<Surface_mesh> volumes;
@@ -1024,7 +1023,7 @@ void SeparateSurfaceMesh(Surface_mesh* input, bool keep_volumes, bool keep_cavit
 }
 
 
-Surface_mesh* ExtrusionOfSurfaceMesh(Surface_mesh* input, Transformation* transformation, double height, double depth) {
+const Surface_mesh* ExtrusionOfSurfaceMesh(const Surface_mesh* input, const Transformation* transformation, double height, double depth) {
   Surface_mesh mesh(*input);
   CGAL::Polygon_mesh_processing::transform(*transformation, mesh, CGAL::parameters::all_default());
 
@@ -1102,9 +1101,9 @@ struct ProjectToPlane
   Plane plane;
 };
 
-Surface_mesh* ExtrusionToPlaneOfSurfaceMesh(
-    Surface_mesh* input,
-    Transformation* transformation,
+const Surface_mesh* ExtrusionToPlaneOfSurfaceMesh(
+    const Surface_mesh* input,
+    const Transformation* transformation,
     double high_x, double high_y, double high_z,
     double high_plane_x, double high_plane_y, double high_plane_z,
     double high_plane_w, double low_x, double low_y, double low_z,
@@ -1123,9 +1122,9 @@ Surface_mesh* ExtrusionToPlaneOfSurfaceMesh(
   return extruded_mesh;
 }
 
-Surface_mesh* ProjectionToPlaneOfSurfaceMesh(
-    Surface_mesh* input,
-    Transformation* transformation,
+const Surface_mesh* ProjectionToPlaneOfSurfaceMesh(
+    const Surface_mesh* input,
+    const Transformation* transformation,
     double direction_x, double direction_y, double direction_z,
     double plane_x, double plane_y, double plane_z, double plane_w) {
   Surface_mesh mesh(*input);
@@ -1151,7 +1150,7 @@ Surface_mesh* ProjectionToPlaneOfSurfaceMesh(
   return projected_mesh;
 }
 
-Surface_mesh::Vertex_index ensureVertex(Surface_mesh& mesh, std::map<Point, Vertex_index>& vertices, const Point& point) {
+const Surface_mesh::Vertex_index ensureVertex(Surface_mesh& mesh, std::map<Point, Vertex_index>& vertices, const Point& point) {
   auto it = vertices.find(point);
   if (it == vertices.end()) {
     Surface_mesh::Vertex_index new_vertex = mesh.add_vertex(point);
@@ -1304,7 +1303,7 @@ bool IsCoplanarSurfaceMesh(Plane& plane, const Surface_mesh& a) {
   return true;
 }
 
-Surface_mesh* PolygonsWithHolesToSurfaceMesh(const Plane& plane, std::vector<Polygon_with_holes_2>& polygons) {
+const Surface_mesh* PolygonsWithHolesToSurfaceMesh(const Plane& plane, std::vector<Polygon_with_holes_2>& polygons) {
   Surface_mesh* c = new Surface_mesh();
   CGAL::Polygon_triangulation_decomposition_2<Kernel> triangulate;
   std::map<Point, Vertex_index> vertices;
@@ -1320,34 +1319,32 @@ Surface_mesh* PolygonsWithHolesToSurfaceMesh(const Plane& plane, std::vector<Pol
   return c;
 }
 
-Surface_mesh* GeneralPolygonSetToSurfaceMesh(const Plane& plane, General_polygon_set_2& set) {
+const Surface_mesh* GeneralPolygonSetToSurfaceMesh(const Plane& plane, General_polygon_set_2& set) {
   Surface_mesh* c = new Surface_mesh();
   std::vector<Polygon_with_holes_2> polygons;
   set.polygons_with_holes(std::back_inserter(polygons));
   return PolygonsWithHolesToSurfaceMesh(plane, polygons);
 }
 
-Surface_mesh* DifferenceOfCoplanarSurfaceMeshes(const Plane& plane, Surface_mesh* a, Surface_mesh* b) {
+const Surface_mesh* DifferenceOfCoplanarSurfaceMeshes(const Plane& plane, const Surface_mesh* a, const Surface_mesh* b) {
   General_polygon_set_2 set;
   General_polygon_set_2 subtract;
   PlanarSurfaceMeshToPolygonSet(plane, *a, set);
   PlanarSurfaceMeshToPolygonSet(plane, *b, subtract);
   set.difference(subtract);
-  Surface_mesh* r = GeneralPolygonSetToSurfaceMesh(plane, set);
-  return r;
+  return GeneralPolygonSetToSurfaceMesh(plane, set);
 }
 
-Surface_mesh* UnionOfCoplanarSurfaceMeshes(const Plane& plane, Surface_mesh* a, Surface_mesh* b) {
+const Surface_mesh* UnionOfCoplanarSurfaceMeshes(const Plane& plane, const Surface_mesh* a, const Surface_mesh* b) {
   General_polygon_set_2 set;
   General_polygon_set_2 add;
   PlanarSurfaceMeshToPolygonSet(plane, *a, set);
   PlanarSurfaceMeshToPolygonSet(plane, *b, add);
   set.join(add);
-  Surface_mesh* r = GeneralPolygonSetToSurfaceMesh(plane, set);
-  return r;
+  return GeneralPolygonSetToSurfaceMesh(plane, set);
 }
 
-Surface_mesh* IntersectionOfCoplanarSurfaceMeshes(const Plane& plane, Surface_mesh* a, Surface_mesh* b) {
+const Surface_mesh* IntersectionOfCoplanarSurfaceMeshes(const Plane& plane, const Surface_mesh* a, const Surface_mesh* b) {
   General_polygon_set_2 set;
   General_polygon_set_2 clip;
   PlanarSurfaceMeshToPolygonSet(plane, *a, set);
@@ -1356,7 +1353,7 @@ Surface_mesh* IntersectionOfCoplanarSurfaceMeshes(const Plane& plane, Surface_me
   return GeneralPolygonSetToSurfaceMesh(plane, set);
 }
 
-void SurfaceMeshSectionToPolygonSet(const Plane& plane, Surface_mesh& a, General_polygon_set_2& set) {
+void SurfaceMeshSectionToPolygonSet(const Plane& plane, const Surface_mesh& a, General_polygon_set_2& set) {
   typedef std::vector<Point> Polyline_type;
   typedef std::list<Polyline_type> Polylines;
   CGAL::Polygon_mesh_slicer<Surface_mesh, Kernel> slicer(a);
@@ -1384,7 +1381,7 @@ const double kExtrusionMinimumSquared = kExtrusionMinimum * kExtrusionMinimum;
 
 const double kIota = 10e-5;
 
-Surface_mesh* DifferenceOfSurfaceMeshes(Surface_mesh* a, Transformation* a_transform, Surface_mesh* b, Transformation* b_transform) {
+const Surface_mesh* DifferenceOfSurfaceMeshes(const Surface_mesh* a, const Transformation* a_transform, const Surface_mesh* b, const Transformation* b_transform) {
   if (a_transform) {
     Surface_mesh transformed(*a);
     CGAL::Polygon_mesh_processing::transform(*a_transform, transformed, CGAL::parameters::all_default());
@@ -1446,7 +1443,7 @@ Surface_mesh* DifferenceOfSurfaceMeshes(Surface_mesh* a, Transformation* a_trans
   }
 }
 
-Surface_mesh* IntersectionOfSurfaceMeshes(Surface_mesh* a, Transformation* a_transform, Surface_mesh* b, Transformation* b_transform) {
+const Surface_mesh* IntersectionOfSurfaceMeshes(const Surface_mesh* a, const Transformation* a_transform, const Surface_mesh* b, const Transformation* b_transform) {
   if (a_transform) {
     Surface_mesh transformed(*a);
     CGAL::Polygon_mesh_processing::transform(*a_transform, transformed, CGAL::parameters::all_default());
@@ -1508,7 +1505,7 @@ Surface_mesh* IntersectionOfSurfaceMeshes(Surface_mesh* a, Transformation* a_tra
   }
 }
 
-Surface_mesh* UnionOfSurfaceMeshes(Surface_mesh* a, Transformation* a_transform, Surface_mesh* b, Transformation* b_transform) {
+const Surface_mesh* UnionOfSurfaceMeshes(const Surface_mesh* a, const Transformation* a_transform, const Surface_mesh* b, const Transformation* b_transform) {
   if (a_transform) {
     Surface_mesh transformed(*a);
     CGAL::Polygon_mesh_processing::transform(*a_transform, transformed, CGAL::parameters::all_default());
@@ -1591,7 +1588,7 @@ bool didAdmitPlane(Plane& plane, emscripten::val fill_plane) {
 
 // FIX: The case where we take a section coplanar with a surface with a hole in it.
 // CHECK: Should this produce Polygons_with_holes?
-void SectionOfSurfaceMesh(Surface_mesh* input, Transformation* transform, std::size_t plane_count, emscripten::val get_transform, emscripten::val emit_mesh, bool profile) {
+void SectionOfSurfaceMesh(const Surface_mesh* input, const Transformation* transform, std::size_t plane_count, emscripten::val get_transform, emscripten::val emit_mesh, bool profile) {
   // We could possibly be clever and transform the plane and output?
   Surface_mesh mesh(*input);
   CGAL::Polygon_mesh_processing::transform(*transform, mesh, CGAL::parameters::all_default());
@@ -1609,7 +1606,7 @@ void SectionOfSurfaceMesh(Surface_mesh* input, Transformation* transform, std::s
     Quadruple q;
     Quadruple* qp =  &q;
     Plane plane(0, 0, 1, 0);
-    Transformation* section_transform = get_transform(nth_plane).as<Transformation*>(emscripten::allow_raw_pointers());
+    const Transformation* section_transform = get_transform(nth_plane).as<const Transformation*>(emscripten::allow_raw_pointers());
     plane = plane.transform(*section_transform);
     if (profile) {
       // We need the 2d forms to be interoperable.
@@ -1642,9 +1639,8 @@ void SectionOfSurfaceMesh(Surface_mesh* input, Transformation* transform, std::s
       has_last_gps = true;
     }
 
-    Surface_mesh* c = PolygonsWithHolesToSurfaceMesh(plane, polygons);
-    // CGAL::Polygon_mesh_processing::transform(*section_transform, *c, CGAL::parameters::all_default());
-    emit_mesh(c);
+    const Surface_mesh* r = PolygonsWithHolesToSurfaceMesh(plane, polygons);
+    emit_mesh(r);
   }
 }
 
@@ -1670,8 +1666,8 @@ Plane ensureFacetPlane(Surface_mesh& mesh, std::unordered_map<Face_index, Plane>
   }
 }
 
-void OutlineSurfaceMesh(Surface_mesh* input, Transformation* transform, emscripten::val emit_approximate_segment) {
-  Surface_mesh& mesh = *input;
+void OutlineSurfaceMesh(const Surface_mesh* input, const Transformation* transform, emscripten::val emit_approximate_segment) {
+  Surface_mesh mesh(*input);
   CGAL::Polygon_mesh_processing::transform(*transform, mesh, CGAL::parameters::all_default());
 
   std::unordered_set<Plane> planes;
@@ -1707,8 +1703,8 @@ void OutlineSurfaceMesh(Surface_mesh* input, Transformation* transform, emscript
   }
 }
 
-void WireframeSurfaceMesh(Surface_mesh* input, Transformation* transform, emscripten::val emit_approximate_segment) {
-  Surface_mesh& mesh = *input;
+void WireframeSurfaceMesh(const Surface_mesh* input, const Transformation* transform, emscripten::val emit_approximate_segment) {
+  Surface_mesh mesh(*input);
   CGAL::Polygon_mesh_processing::transform(*transform, mesh, CGAL::parameters::all_default());
 
   for (const auto& edge : mesh.edges()) {
@@ -1857,8 +1853,8 @@ class Surface_mesh_explorer {
   emscripten::val& emit_face_;
 };
 
-void Surface_mesh__explore(Surface_mesh* mesh, emscripten::val emit_point, emscripten::val emit_edge, emscripten::val emit_face) {
-  CGAL::Polygon_mesh_processing::triangulate_faces(mesh->faces(), *mesh);
+void Surface_mesh__explore(const Surface_mesh* mesh, emscripten::val emit_point, emscripten::val emit_edge, emscripten::val emit_face) {
+  // CGAL::Polygon_mesh_processing::triangulate_faces(mesh->faces(), *mesh);
   Surface_mesh_explorer explorer(emit_point, emit_edge, emit_face);
   explorer.Explore(*mesh);
 }
@@ -1901,7 +1897,7 @@ std::string SerializeSurfaceMesh(const Surface_mesh* mesh) {
   return s.str();
 }
 
-Surface_mesh* DeserializeSurfaceMesh(std::string serialization) {
+const Surface_mesh* DeserializeSurfaceMesh(std::string serialization) {
   Surface_mesh* mesh = new Surface_mesh();
   std::istringstream s(serialization);
 
@@ -1946,7 +1942,7 @@ bool Surface_mesh__triangulate_faces(Surface_mesh *mesh) {
   return CGAL::Polygon_mesh_processing::triangulate_faces(mesh->faces(), *mesh);
 }
 
-Surface_mesh* ComputeConvexHullAsSurfaceMesh(emscripten::val fill) {
+const Surface_mesh* ComputeConvexHullAsSurfaceMesh(emscripten::val fill) {
   Points points;
   Points* points_ptr = &points;
   fill(points_ptr);
@@ -1956,7 +1952,7 @@ Surface_mesh* ComputeConvexHullAsSurfaceMesh(emscripten::val fill) {
   return mesh;
 }
 
-Surface_mesh* ComputeAlphaShapeAsSurfaceMesh(int component_limit, emscripten::val fill) {
+const Surface_mesh* ComputeAlphaShapeAsSurfaceMesh(int component_limit, emscripten::val fill) {
   typedef CGAL::Alpha_shape_vertex_base_3<Kernel>      Vb;
   typedef CGAL::Alpha_shape_cell_base_3<Kernel>        Fb;
   typedef CGAL::Triangulation_data_structure_3<Vb,Fb>  Tds;
@@ -2752,7 +2748,7 @@ void ArrangePathsExact(std::string x, std::string y, std::string z, std::string 
   ArrangePaths(Plane(to_FT(x), to_FT(y), to_FT(z), to_FT(w)), triangulate, fill, emit_polygon, emit_point);
 }
 
-void FromSurfaceMeshToPolygonsWithHoles(Surface_mesh* input, Transformation* transform, emscripten::val emit_plane, emscripten::val emit_polygon, emscripten::val emit_point) {
+void FromSurfaceMeshToPolygonsWithHoles(const Surface_mesh* input, const Transformation* transform, emscripten::val emit_plane, emscripten::val emit_polygon, emscripten::val emit_point) {
   Surface_mesh mesh(*input);
   CGAL::Polygon_mesh_processing::transform(*transform, mesh, CGAL::parameters::all_default());
    
@@ -2839,7 +2835,7 @@ bool computeFitPolygon(const Polygon_with_holes_2& space, const Polygon_with_hol
   return true;
 }
 
-Surface_mesh* MinkowskiDifferenceOfSurfaceMeshes(Surface_mesh* input_mesh, Transformation* input_transform, Surface_mesh* offset_mesh, Transformation* offset_transform) {
+const Surface_mesh* MinkowskiDifferenceOfSurfaceMeshes(const Surface_mesh* input_mesh, const Transformation* input_transform, const Surface_mesh* offset_mesh, const Transformation* offset_transform) {
   typedef CGAL::Nef_polyhedron_3<Kernel> Nef_polyhedron;
 
   Nef_polyhedron input_nef(*input_mesh);
@@ -2875,7 +2871,7 @@ Surface_mesh* MinkowskiDifferenceOfSurfaceMeshes(Surface_mesh* input_mesh, Trans
   return result_mesh;
 }
 
-Surface_mesh* MinkowskiSumOfSurfaceMeshes(Surface_mesh* input_mesh, Transformation* input_transform, Surface_mesh* offset_mesh, Transformation* offset_transform) {
+const Surface_mesh* MinkowskiSumOfSurfaceMeshes(const Surface_mesh* input_mesh, const Transformation* input_transform, const Surface_mesh* offset_mesh, const Transformation* offset_transform) {
   typedef CGAL::Nef_polyhedron_3<Kernel> Nef_polyhedron;
 
   Nef_polyhedron input_nef(*input_mesh);
@@ -2911,7 +2907,7 @@ Surface_mesh* MinkowskiSumOfSurfaceMeshes(Surface_mesh* input_mesh, Transformati
   return result_mesh;
 }
 
-Surface_mesh* MinkowskiShellOfSurfaceMeshes(Surface_mesh* input_mesh, Transformation* input_transform, Surface_mesh* offset_mesh, Transformation* offset_transform) {
+const Surface_mesh* MinkowskiShellOfSurfaceMeshes(const Surface_mesh* input_mesh, const Transformation* input_transform, const Surface_mesh* offset_mesh, const Transformation* offset_transform) {
   typedef CGAL::Nef_polyhedron_3<Kernel> Nef_polyhedron;
 
   Nef_polyhedron input_nef(*input_mesh);
@@ -2947,42 +2943,42 @@ Surface_mesh* MinkowskiShellOfSurfaceMeshes(Surface_mesh* input_mesh, Transforma
   return result_mesh;
 }
 
-bool Surface_mesh__is_closed(Surface_mesh* mesh) {
+bool Surface_mesh__is_closed(const Surface_mesh* mesh) {
   return CGAL::is_closed(*mesh);
 }
 
-bool Surface_mesh__is_valid_halfedge_graph(Surface_mesh* mesh) {
+bool Surface_mesh__is_valid_halfedge_graph(const Surface_mesh* mesh) {
   return CGAL::is_valid_halfedge_graph(*mesh);
 }
 
-bool Surface_mesh__is_valid_face_graph(Surface_mesh* mesh) {
+bool Surface_mesh__is_valid_face_graph(const Surface_mesh* mesh) {
   return CGAL::is_valid_face_graph(*mesh);
 }
 
-bool Surface_mesh__is_valid_polygon_mesh(Surface_mesh* mesh) {
+bool Surface_mesh__is_valid_polygon_mesh(const Surface_mesh* mesh) {
   return CGAL::is_valid_polygon_mesh(*mesh);
 }
 
-void Surface_mesh__bbox(Surface_mesh* input, Transformation* transform, emscripten::val emit) {
+void Surface_mesh__bbox(const Surface_mesh* input, const Transformation* transform, emscripten::val emit) {
   Surface_mesh mesh(*input);
   CGAL::Polygon_mesh_processing::transform(*transform, mesh, CGAL::parameters::all_default());
   CGAL::Bbox_3 box = CGAL::Polygon_mesh_processing::bbox(mesh);
   emit(box.xmin(), box.ymin(), box.zmin(), box.xmax(), box.ymax(), box.zmax());
 }
 
-Transformation* Transformation__identity() {
+const Transformation* Transformation__identity() {
   return new Transformation(CGAL::IDENTITY);
 }
 
-Transformation* Transformation__compose(Transformation* a, Transformation* b) {
+const Transformation* Transformation__compose(const Transformation* a, const Transformation* b) {
   return new Transformation(*a * *b);
 }
 
-Transformation* Transformation__inverse(Transformation* a) {
+const Transformation* Transformation__inverse(const Transformation* a) {
   return new Transformation(a->inverse());
 }
 
-void Transformation__to_exact(Transformation* t, emscripten::val put) {
+void Transformation__to_exact(const Transformation* t, emscripten::val put) {
   for (int i = 0; i < 3; i++) {
     for (int j = 0; j < 4; j++) { 
       auto value = t->cartesian(i, j).exact();
@@ -2998,7 +2994,7 @@ void Transformation__to_exact(Transformation* t, emscripten::val put) {
   put(serialization.str());
 }
 
-void Transformation__to_approximate(Transformation* t, emscripten::val put) {
+void Transformation__to_approximate(const Transformation* t, emscripten::val put) {
   for (int i = 0; i < 3; i++) {
     for (int j = 0; j < 4; j++) { 
       FT value = t->cartesian(i, j);
@@ -3018,7 +3014,7 @@ FT get_string(emscripten::val get) {
   return to_FT(get().as<std::string>());
 }
 
-Transformation* Transformation__from_exact(emscripten::val get) {
+const Transformation* Transformation__from_exact(emscripten::val get) {
   Transformation* t = new Transformation(
     get_string(get), get_string(get), get_string(get), get_string(get),
     get_string(get), get_string(get), get_string(get), get_string(get),
@@ -3027,7 +3023,7 @@ Transformation* Transformation__from_exact(emscripten::val get) {
   return t;
 }
 
-Transformation* Transformation__from_approximate(emscripten::val get) {
+const Transformation* Transformation__from_approximate(emscripten::val get) {
   Transformation* t = new Transformation(
     get_double(get), get_double(get), get_double(get), get_double(get),
     get_double(get), get_double(get), get_double(get), get_double(get),
@@ -3036,11 +3032,11 @@ Transformation* Transformation__from_approximate(emscripten::val get) {
   return t;
 }
 
-Transformation* Transformation__translate(double x, double y, double z) {
+const Transformation* Transformation__translate(double x, double y, double z) {
   return new Transformation(CGAL::TRANSLATION, Vector(x, y, z));
 }
 
-Transformation* Transformation__scale(double x, double y, double z) {
+const Transformation* Transformation__scale(double x, double y, double z) {
   return new Transformation(
     x, 0, 0, 0,
     0, y, 0, 0,
@@ -3048,7 +3044,7 @@ Transformation* Transformation__scale(double x, double y, double z) {
     1);
 }
 
-Transformation* Transformation__rotate_x(double a) {
+const Transformation* Transformation__rotate_x(double a) {
   RT sin_alpha, cos_alpha, w;
   compute_angle(a, sin_alpha, cos_alpha, w);
   double r = a * CGAL_PI / 180;
@@ -3059,7 +3055,7 @@ Transformation* Transformation__rotate_x(double a) {
       w);
 }
 
-Transformation* Transformation__rotate_y(double a) {
+const Transformation* Transformation__rotate_y(double a) {
   RT sin_alpha, cos_alpha, w;
   compute_angle(a, sin_alpha, cos_alpha, w);
   return new Transformation(
@@ -3069,7 +3065,7 @@ Transformation* Transformation__rotate_y(double a) {
       w);
 }
 
-Transformation* Transformation__rotate_z(double a) {
+const Transformation* Transformation__rotate_z(double a) {
   RT sin_alpha, cos_alpha, w;
   compute_angle(a, sin_alpha, cos_alpha, w);
   return new Transformation(
@@ -3254,7 +3250,6 @@ EMSCRIPTEN_BINDINGS(module) {
   emscripten::function("BooleansOfPolygonsWithHolesExact", &BooleansOfPolygonsWithHolesExact);
 
   emscripten::function("ReverseFaceOrientationsOfSurfaceMesh", &ReverseFaceOrientationsOfSurfaceMesh, emscripten::allow_raw_pointers());
-  emscripten::function("TriangulateFacesOfSurfaceMesh", &TriangulateFacesOfSurfaceMesh, emscripten::allow_raw_pointers());
 
   emscripten::function("IsBadSurfaceMesh", &IsBadSurfaceMesh, emscripten::allow_raw_pointers());
 

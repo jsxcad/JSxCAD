@@ -1,3 +1,5 @@
+/* global self */
+
 import * as fs from 'fs';
 import * as v8 from 'v8';
 
@@ -18,8 +20,6 @@ import { touch } from './touch.js';
 const { promises } = fs;
 const { serialize } = v8;
 
-// FIX Convert data by representation.
-
 export const writeFile = async (options, path, data) => {
   data = await data;
 
@@ -35,9 +35,18 @@ export const writeFile = async (options, path, data) => {
     setupFilesystem({ fileBase: workspace });
   }
 
+  if (path.startsWith('meta/def')) {
+    console.log(`QQ/write/META: ${path} ${JSON.stringify(data)}`);
+  }
   info(`Write ${path}`);
   const file = await getFile(options, path);
   file.data = data;
+
+  if (isWebWorker) {
+    console.log(`QQ/write/cache/webworker id ${self.id} path ${path}`);
+  } else {
+    console.log(`QQ/write/cache/browser path ${path}`);
+  }
 
   for (const watcher of file.watchers) {
     await watcher(options, file);
@@ -63,6 +72,13 @@ export const writeFile = async (options, path, data) => {
     } else if (isBrowser || isWebWorker) {
       await db().setItem(persistentPath, data);
     }
+
+    if (isWebWorker) {
+      console.log(`QQ/write/persistent/webworker id ${self.id} path ${path}`);
+    } else {
+      console.log(`QQ/write/persistent/browser path ${path}`);
+    }
+
     // Let everyone know the file has changed.
     await touch(persistentPath, { workspace, clear: false });
   }

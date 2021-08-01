@@ -159,31 +159,39 @@ export class JsEditorUi extends React.PureComponent {
       if (advice) {
         if (advice.definitions) {
           for (const definition of widgets.keys()) {
-            if (!advice.definitions.has(definition)) {
+            if (
+              !notebookDefinitions[definition] ||
+              !advice.definitions.get(definition)
+            ) {
               const widget = widgets.get(definition);
               widgetManager.removeLineWidget(widget);
               widgets.delete(definition);
               console.log(`QQ/delete widget for: ${definition}`);
             }
           }
-          for (const definition of advice.definitions.keys()) {
+          for (const definition of Object.keys(notebookDefinitions)) {
+            const notebookDefinition = notebookDefinitions[definition];
+            if (
+              widgets.has(definition) &&
+              widgets.el !== notebookDefinition.domElement
+            ) {
+              widgetManager.removeLineWidget(widgets.get(definition));
+              widgets.delete(definition);
+            }
             if (!widgets.has(definition)) {
               const entry = advice.definitions.get(definition);
-              const { initSourceLocation } = entry;
-              if (!notebookDefinitions[definition]) {
-                notebookDefinitions[definition] = {
-                  domElement: document.createElement('div'),
+              if (entry) {
+                const { initSourceLocation } = entry;
+                const { domElement } = notebookDefinition;
+                const widget = {
+                  row: initSourceLocation.end.line - 1,
+                  coverLine: false,
+                  fixedWidth: true,
+                  el: domElement,
                 };
+                widgetManager.addLineWidget(widget);
+                widgets.set(definition, widget);
               }
-              const { domElement } = notebookDefinitions[definition];
-              const widget = {
-                row: initSourceLocation.end.line - 1,
-                coverLine: false,
-                fixedWidth: true,
-                el: domElement,
-              };
-              widgetManager.addLineWidget(widget);
-              widgets.set(definition, widget);
             }
           }
         }
