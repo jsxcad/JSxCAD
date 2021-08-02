@@ -133,6 +133,7 @@ test('Control can be used with cached output.', async (t) => {
   await write('data/def//foo', 1);
   await write('meta/def//foo', {
     sha: '3b47f5704826b7544ce6724559603a63199f9b0e',
+    type: 'Shape'
   });
   const updates = {};
   const ecmascript = await toEcmascript(
@@ -437,9 +438,7 @@ test('Reuse and Redefine', async (t) => {
     reuse,
     `
 try {
-const A = await loadGeometry('data/def//A');
-Object.freeze(A);
-await replayRecordedNotes('', 'A');
+const A = Circle();
 const B = () => 2;
 function C() {}
 return {};
@@ -515,8 +514,7 @@ test('Indirect Redefinition', async (t) => {
     reuse,
     `
 try {
-const D = await loadGeometry('data/def//D');
-Object.freeze(D);
+const D = foo();␊
 await replayRecordedNotes('', 'D');
 const E = () => D;
 return {};
