@@ -4052,7 +4052,9 @@ const touch = async (
   if (isWebWorker) {
     console.log(`QQ/sys/touch/webworker: id ${self.id} path ${path}`);
     if (broadcast) {
-      addPending(await self.ask({ op: 'sys/touch', path, id: self.id }));
+      addPending(
+        await self.ask({ op: 'sys/touch', path, workspace, id: self.id })
+      );
     }
   } else {
     console.log(`QQ/sys/touch/browser: ${path}`);
@@ -4098,10 +4100,6 @@ const writeFile = async (options, path, data) => {
     console.log(`QQ/write/cache/browser path ${path}`);
   }
 
-  for (const watcher of file.watchers) {
-    await watcher(options, file);
-  }
-
   const base = getBase();
   if (!ephemeral && base !== undefined) {
     const persistentPath = qualifyPath(path);
@@ -4130,12 +4128,16 @@ const writeFile = async (options, path, data) => {
     }
 
     // Let everyone know the file has changed.
-    await touch(persistentPath, { workspace, clear: false });
+    await touch(path, { workspace, clear: false });
   }
 
   if (workspace !== originalWorkspace) {
     // Switch back to the original filesystem, if necessary.
     setupFilesystem({ fileBase: originalWorkspace });
+  }
+
+  for (const watcher of file.watchers) {
+    await watcher(options, file);
   }
 
   return true;

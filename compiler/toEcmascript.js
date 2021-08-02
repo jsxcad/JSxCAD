@@ -46,25 +46,35 @@ const fromIdToSha = (id, { topLevel }) => {
   }
 };
 
-const generateCacheLoadCode = async ({ isNotCacheable, code, path, id, doReplay = false }) => {
+const generateCacheLoadCode = async ({
+  isNotCacheable,
+  code,
+  path,
+  id,
+  doReplay = false,
+}) => {
   if (isNotCacheable) {
     return [code];
   }
-  const { type } = await read(`meta/def/${path}/${id}`);
-  if (type === 'Shape') {
+  const meta = await read(`meta/def/${path}/${id}`);
+  console.log(
+    `QQ/generateCacheLoadCode: meta/def/${path}/${id} = ${JSON.stringify(meta)}`
+  );
+  if (meta && meta.type === 'Shape') {
+    console.log(`QQ/generateCacheLoadCode/load`);
     const loadCode = [];
     loadCode.push(
       parse(
         `const ${id} = await loadGeometry('data/def/${path}/${id}')`,
         parseOptions
       ),
-      parse(`Object.freeze(${id});`, parseOptions));
+      parse(`Object.freeze(${id});`, parseOptions)
+    );
     if (doReplay) {
-      loadCode.push(parse(
-        `await replayRecordedNotes('${path}', '${id}')`,
-        parseOptions
-      ));
-    };
+      loadCode.push(
+        parse(`await replayRecordedNotes('${path}', '${id}')`, parseOptions)
+      );
+    }
     return loadCode;
   }
   // Otherwise recompute it.
@@ -96,7 +106,7 @@ ${generate(code)}
         continue;
       }
       await walk(entry.dependencies);
-      body.push(...await generateCacheLoadCode(entry));
+      body.push(...(await generateCacheLoadCode(entry)));
     }
   };
   await walk(dependencies);
@@ -112,7 +122,7 @@ ${generate(code)}
   body.push(
     parse(
       `await write('meta/def/${path}/${id}', { sha: '${sha}', type: ${id} instanceof Shape ? 'Shape' : 'Object' });
-       if (${id} instanceof Shape) { await saveGeometry('data/def/${path}/${id}; }`,
+       if (${id} instanceof Shape) { await saveGeometry('data/def/${path}/${id}', ${id}); }`,
       parseOptions
     )
   );
@@ -225,14 +235,18 @@ const declareVariable = async (
     }
   }
 
-  out.push(...await generateCacheLoadCode({ ...entry, doReplay: true }));
+  out.push(...(await generateCacheLoadCode({ ...entry, doReplay: true })));
 
   if (!entry.isNotCacheable) {
     const meta = await read(`meta/def/${path}/${id}`);
     if (!meta || meta.sha !== sha) {
-      updates[`${path}/${id}`] = {
+      updates[id] = {
         dependencies,
-        program: await generateUpdateCode(entry, { declaration, sha, topLevel }),
+        program: await generateUpdateCode(entry, {
+          declaration,
+          sha,
+          topLevel,
+        }),
       };
     }
   }

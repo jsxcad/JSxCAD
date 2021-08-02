@@ -133,7 +133,7 @@ test('Control can be used with cached output.', async (t) => {
   await write('data/def//foo', 1);
   await write('meta/def//foo', {
     sha: '3b47f5704826b7544ce6724559603a63199f9b0e',
-    type: 'Shape'
+    type: 'Shape',
   });
   const updates = {};
   const ecmascript = await toEcmascript(
@@ -515,7 +515,6 @@ test('Indirect Redefinition', async (t) => {
     `
 try {
 const D = foo();␊
-await replayRecordedNotes('', 'D');
 const E = () => D;
 return {};
 
@@ -529,6 +528,7 @@ test('Reuse', async (t) => {
   // Demonstrate defined case.
   await write('meta/def//mountainView', {
     sha: 'c3b0ad66f1281cd0078066eea1b208fef9ffc133',
+    type: 'Shape',
   });
   const updates = {};
   const define = await toEcmascript(
