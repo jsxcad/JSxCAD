@@ -452,7 +452,7 @@ const processProgram = async (
 
 export const toEcmascript = async (
   script,
-  { path = '', topLevel = new Map(), updates = [] } = {}
+  { path = '', topLevel = new Map(), updates = {} } = {}
 ) => {
   let ast = parse(script, parseOptions);
 

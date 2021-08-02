@@ -40,7 +40,7 @@ export const execute = async (
       for (const id of [...pending]) {
         const entry = updates[id];
         const outstandingDependencies = entry.dependencies.filter(
-          (dependency) => processed.has(dependency)
+          (dependency) => updates[dependency] && !processed.has(dependency)
         );
         if (outstandingDependencies.length === 0) {
           console.log(`Scheduling: ${id}`);
