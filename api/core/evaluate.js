@@ -26,13 +26,13 @@ export const execute = async (
   try {
     console.log(`QQ/execute/0`);
     const updates = {};
-    const ecmascript = await toEcmascript(script, {
+    await toEcmascript(script, {
       path,
-      topLevel,
       updates,
     });
     const pending = new Set(Object.keys(updates));
     const unprocessed = new Set(Object.keys(updates));
+    const processed = new Set();
     let somethingHappened;
     let somethingFailed;
     const schedule = () => {
@@ -40,7 +40,7 @@ export const execute = async (
       for (const id of [...pending]) {
         const entry = updates[id];
         const outstandingDependencies = entry.dependencies.filter(
-          (dependency) => updates[dependency]
+          (dependency) => processed.has(dependency)
         );
         if (outstandingDependencies.length === 0) {
           console.log(`Scheduling: ${id}`);
@@ -51,6 +51,7 @@ export const execute = async (
               console.log(`Completed ${id}`);
               delete updates[id];
               unprocessed.delete(id);
+              processed.add(id);
             } catch (error) {
               somethingFailed(error); // FIX: Deadlock?
             } finally {
@@ -71,6 +72,16 @@ export const execute = async (
         // Wait for something to happen.
         await somethingHappens;
       }
+    }
+    // Execute the script in the context of the resolved updates.
+    const ecmascript = await toEcmascript(script, {
+      path,
+      topLevel,
+      updates,
+    });
+    // These should all be resolved already.
+    if (Object.keys(updates).length !== 0) {
+      throw Error('Unresolved updates');
     }
     try {
       const result = await replay(ecmascript, { path });

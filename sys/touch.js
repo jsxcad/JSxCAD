@@ -30,7 +30,9 @@ export const touch = async (
   if (isWebWorker) {
     console.log(`QQ/sys/touch/webworker: id ${self.id} path ${path}`);
     if (broadcast) {
-      addPending(await self.ask({ op: 'sys/touch', path, id: self.id }));
+      addPending(
+        await self.ask({ op: 'sys/touch', path, workspace, id: self.id })
+      );
     }
   } else {
     console.log(`QQ/sys/touch/browser: ${path}`);

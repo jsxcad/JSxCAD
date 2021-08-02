@@ -152,8 +152,9 @@ class Ui extends React.PureComponent {
     clock();
 
     const fileUpdater = async () => {
+      const { workspace } = this.state;
       const workspaces = await listFilesystems();
-      const files = await listFiles();
+      const files = await listFiles({ workspace });
       this.setState({ workspaces, files });
     };
     const creationWatcher = await watchFileCreation(fileUpdater);
@@ -194,14 +195,21 @@ class Ui extends React.PureComponent {
               return;
             }
 
-            if (note.context?.recording?.path !== props.path) {
+            if (
+              note.context &&
+              note.context.recording &&
+              note.context.recording.path !== props.path
+            ) {
               // This note is for a different module.
               return;
             }
 
             const { notebookNotes, notebookDefinitions } = this.state;
             const { domElementByHash } = jsEditorAdvice;
-            const id = note.context?.recording?.id;
+            const id =
+              note.context &&
+              note.context.recording &&
+              note.context.recording.id;
 
             if (note.setContext) {
               return;
@@ -373,7 +381,7 @@ class Ui extends React.PureComponent {
       paneViews = defaultPaneViews;
     }
 
-    const files = [...(await listFiles())];
+    const files = await listFiles({ workspace });
     this.setState({
       paneLayout,
       paneViews,
@@ -694,15 +702,12 @@ class Ui extends React.PureComponent {
     const { files } = this.state;
     const uncached = [];
     for (const file of files) {
-      if (
-        file.startsWith('data/def') ||
-        file.startsWith('meta/def') ||
-        file.startsWith('cache')
-      ) {
+      if (file.startsWith('source/') || file.startsWith('control/')) {
+        // These are the only unregeneratable files.
+        console.log(`QQ/uncache/no: ${file}`);
+      } else {
         await deleteFile({}, file);
         uncached.push(file);
-      } else {
-        console.log(`QQ/uncache/no: ${file}`);
       }
     }
     const cancel = () => this.setState({ modal: undefined });

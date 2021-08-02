@@ -46,37 +46,42 @@ const fromIdToSha = (id, { topLevel }) => {
   }
 };
 
-const generateCacheLoadCode = ({ isNotCacheable, code, path, id }) => {
+const generateCacheLoadCode = async ({
+  isNotCacheable,
+  code,
+  path,
+  id,
+  doReplay = false,
+}) => {
   if (isNotCacheable) {
     return [code];
   }
-  return [
-    parse(
-      `const ${id} = await loadGeometry('data/def/${path}/${id}')`,
-      parseOptions
-    ),
-    parse(`Object.freeze(${id});`, parseOptions),
-  ];
-};
-
-const generateReplayCode = ({ isNotCacheable, code, path, id }) => {
-  if (isNotCacheable) {
-    return [code];
-  }
-  const cacheLoadCode = generateCacheLoadCode({
-    isNotCacheable,
-    code,
-    path,
-    id,
-  });
-  const replayRecordedNotes = parse(
-    `await replayRecordedNotes('${path}', '${id}')`,
-    parseOptions
+  const meta = await read(`meta/def/${path}/${id}`);
+  console.log(
+    `QQ/generateCacheLoadCode: meta/def/${path}/${id} = ${JSON.stringify(meta)}`
   );
-  return [...cacheLoadCode, replayRecordedNotes];
+  if (meta && meta.type === 'Shape') {
+    console.log(`QQ/generateCacheLoadCode/load`);
+    const loadCode = [];
+    loadCode.push(
+      parse(
+        `const ${id} = await loadGeometry('data/def/${path}/${id}')`,
+        parseOptions
+      ),
+      parse(`Object.freeze(${id});`, parseOptions)
+    );
+    if (doReplay) {
+      loadCode.push(
+        parse(`await replayRecordedNotes('${path}', '${id}')`, parseOptions)
+      );
+    }
+    return loadCode;
+  }
+  // Otherwise recompute it.
+  return [code];
 };
 
-const generateUpdateCode = (
+const generateUpdateCode = async (
   { isNotCacheable, code, dependencies, path, id },
   { declaration, sha, topLevel, state }
 ) => {
@@ -90,7 +95,7 @@ ${generate(code)}
 
   const body = [];
   const seen = new Set();
-  const walk = (dependencies) => {
+  const walk = async (dependencies) => {
     for (const dependency of dependencies) {
       if (seen.has(dependency)) {
         continue;
@@ -100,11 +105,11 @@ ${generate(code)}
       if (entry === undefined) {
         continue;
       }
-      walk(entry.dependencies);
-      body.push(...generateCacheLoadCode(entry));
+      await walk(entry.dependencies);
+      body.push(...(await generateCacheLoadCode(entry)));
     }
   };
-  walk(dependencies);
+  await walk(dependencies);
   body.push(parse(`info('define ${id}');`, parseOptions));
   body.push(
     parse(
@@ -116,7 +121,8 @@ ${generate(code)}
   // Only cache Shapes.
   body.push(
     parse(
-      `${id} instanceof Shape && await saveGeometry('data/def/${path}/${id}', ${id}) && await write('meta/def/${path}/${id}', { sha: '${sha}' });`,
+      `await write('meta/def/${path}/${id}', { sha: '${sha}', type: ${id} instanceof Shape ? 'Shape' : 'Object' });
+       if (${id} instanceof Shape) { await saveGeometry('data/def/${path}/${id}', ${id}); }`,
       parseOptions
     )
   );
@@ -229,14 +235,18 @@ const declareVariable = async (
     }
   }
 
-  out.push(...generateReplayCode(entry));
+  out.push(...(await generateCacheLoadCode({ ...entry, doReplay: true })));
 
   if (!entry.isNotCacheable) {
     const meta = await read(`meta/def/${path}/${id}`);
     if (!meta || meta.sha !== sha) {
-      updates[`${path}/${id}`] = {
+      updates[id] = {
         dependencies,
-        program: generateUpdateCode(entry, { declaration, sha, topLevel }),
+        program: await generateUpdateCode(entry, {
+          declaration,
+          sha,
+          topLevel,
+        }),
       };
     }
   }
