@@ -1,5 +1,3 @@
-import { popModule, pushModule } from '@jsxcad/sys';
-
 import { toEcmascript } from '@jsxcad/compiler';
 
 export const evaluate = async (ecmascript, { api, path }) => {
@@ -9,13 +7,10 @@ export const evaluate = async (ecmascript, { api, path }) => {
   );
   try {
     const module = await builder(api);
-    pushModule(path);
     const result = await module();
     return result;
   } catch (error) {
     throw error;
-  } finally {
-    popModule();
   }
 };
 

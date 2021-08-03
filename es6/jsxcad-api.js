@@ -2,7 +2,7 @@ import './jsxcad-api-v1-gcode.js';
 import './jsxcad-api-v1-pdf.js';
 import './jsxcad-api-v1-tools.js';
 import * as mathApi from './jsxcad-api-v1-math.js';
-import { addOnEmitHandler, emit, hash, addPending, write, read, pushModule, popModule, getControlValue, getModule } from './jsxcad-sys.js';
+import { addOnEmitHandler, addPending, write, read, emit, hash, getSourceLocation, getControlValue, popSourceLocation, pushSourceLocation } from './jsxcad-sys.js';
 import * as shapeApi from './jsxcad-api-shape.js';
 import { toEcmascript } from './jsxcad-compiler.js';
 import { readStl, stl } from './jsxcad-api-v1-stl.js';
@@ -28,13 +28,9 @@ const beginRecordingNotes = (path, id, sourceLocation) => {
     handler = addOnEmitHandler(recordNote);
   }
   recording = true;
-  const setContext = { recording: { path, id } };
-  emit({ hash: hash(setContext), setContext });
-  emit({ beginNotes: { path, id } });
 };
 
 const saveRecordedNotes = (path, id) => {
-  emit({ endNotes: { path, id } });
   let notesToSave = notes;
   notes = undefined;
   recording = false;
@@ -42,9 +38,6 @@ const saveRecordedNotes = (path, id) => {
 };
 
 const replayRecordedNotes = async (path, id) => {
-  // const setContext = { recording: { path, id } };
-  // emit({ hash: hash(setContext), setContext });
-
   const notes = await read(`data/note/${path}/${id}`);
 
   if (notes === undefined) {
@@ -58,8 +51,8 @@ const replayRecordedNotes = async (path, id) => {
   }
 };
 
-const emitSourceLocation = ({ line, column }) => {
-  const setContext = { sourceLocation: { line, column } };
+const emitSourceLocation = ({ path, id }) => {
+  const setContext = { sourceLocation: { path, id } };
   emit({ hash: hash(setContext), setContext });
 };
 
@@ -78,13 +71,10 @@ const evaluate = async (ecmascript, { api, path }) => {
   );
   try {
     const module = await builder(api);
-    pushModule(path);
     const result = await module();
     return result;
   } catch (error) {
     throw error;
-  } finally {
-    popModule();
   }
 };
 
@@ -229,12 +219,13 @@ const buildImportModule = (baseApi) => async (name) => {
 */
 
 const control = (label, value, type, options) => {
+  const { path } = getSourceLocation();
   const control = {
     type,
     label,
-    value: getControlValue(getModule(), label, value),
+    value: getControlValue(path, label, value),
     options,
-    path: getModule(),
+    path,
   };
   emit({ control, hash: hash(control) });
   return value;
@@ -245,6 +236,8 @@ const api = {
   ...shapeApi,
   ...notesApi,
   control,
+  popSourceLocation,
+  pushSourceLocation,
   readSvg,
   readStl,
   readObj,

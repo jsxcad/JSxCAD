@@ -80,6 +80,7 @@ export const toDomElement = (notebook = [], { onClickView } = {}) => {
     if (note.view) {
       const { url, openView } = note;
       const image = document.createElement('img');
+      image.style.display = 'block';
       image.style.height = `${21 * 13}px`;
       image.style.padding = '0px';
       image.style.border = '0px';

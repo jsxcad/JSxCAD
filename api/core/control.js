@@ -1,17 +1,18 @@
 import {
   emit,
   getControlValue,
-  getModule,
+  getSourceLocation,
   hash,
   read,
   setControlValue,
 } from '@jsxcad/sys';
 
 export const loadControlValues = async () => {
-  for (const { label, value } of (await read(`control/${getModule()}`, {
+  const { path } = getSourceLocation();
+  for (const { label, value } of (await read(`control/${path}`, {
     useCache: false,
   })) || []) {
-    setControlValue(getModule(), label, value);
+    setControlValue(path, label, value);
   }
 };
 
@@ -22,12 +23,13 @@ export const loadControlValues = async () => {
 */
 
 export const control = (label, value, type, options) => {
+  const { path } = getSourceLocation();
   const control = {
     type,
     label,
-    value: getControlValue(getModule(), label, value),
+    value: getControlValue(path, label, value),
     options,
-    path: getModule(),
+    path,
   };
   emit({ control, hash: hash(control) });
   return value;

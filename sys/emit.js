@@ -1,16 +1,21 @@
 import hashSum from 'hash-sum';
 
-const modules = [];
+const sourceLocations = [];
 
-export const getModule = () => modules[modules.length - 1];
+export const getSourceLocation = () =>
+  sourceLocations[sourceLocations.length - 1];
 
-export const popModule = () => modules.pop();
+export const popSourceLocation = () => {
+  emit({ endSourceLocation: getSourceLocation() });
+  sourceLocations.pop();
+};
 
-export const pushModule = (module) => modules.push(module);
+export const pushSourceLocation = (sourceLocation) => {
+  sourceLocations.push(sourceLocation);
+  emit({ beginSourceLocation: sourceLocation });
+};
 
 export const emitted = [];
-
-let context;
 
 let startTime = new Date();
 
@@ -19,25 +24,18 @@ export const elapsed = () => new Date() - startTime;
 export const clearEmitted = () => {
   startTime = new Date();
   emitted.length = 0;
-  context = undefined;
+  sourceLocations.length = 0;
 };
 
 const onEmitHandlers = new Set();
 
 export const emit = (value) => {
-  if (value.module === undefined) {
-    value.module = getModule();
+  if (value.sourceLocation === undefined) {
+    value.sourceLocation = getSourceLocation();
   }
-  if (value.setContext) {
-    context = value.setContext;
-  }
-  if (context) {
-    value.context = context;
-  }
-  const index = emitted.length;
   emitted.push(value);
   for (const onEmitHandler of onEmitHandlers) {
-    onEmitHandler(value, index);
+    onEmitHandler(value);
   }
 };
 

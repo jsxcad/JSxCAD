@@ -4,6 +4,8 @@ import { parse } from 'acorn/dist/acorn.mjs';
 import { read } from '@jsxcad/sys';
 import { recursive } from 'acorn-walk/dist/walk.mjs';
 
+// FIX: ArrowFunction parameters can be picked up as dependencies.
+
 const parseOptions = {
   allowAwaitOutsideFunction: true,
   allowReturnOutsideFunction: true,
@@ -54,7 +56,7 @@ const generateCacheLoadCode = async ({
   doReplay = false,
 }) => {
   if (isNotCacheable) {
-    return [code];
+    return code;
   }
   const meta = await read(`meta/def/${path}/${id}`);
   console.log(
@@ -72,13 +74,25 @@ const generateCacheLoadCode = async ({
     );
     if (doReplay) {
       loadCode.push(
+        parse(
+          `pushSourceLocation({ path: '${path}', id: '${id}' });`,
+          parseOptions
+        )
+      );
+      loadCode.push(
         parse(`await replayRecordedNotes('${path}', '${id}')`, parseOptions)
+      );
+      loadCode.push(
+        parse(
+          `popSourceLocation({ path: '${path}', id: '${id}' });`,
+          parseOptions
+        )
       );
     }
     return loadCode;
   }
   // Otherwise recompute it.
-  return [code];
+  return code;
 };
 
 const generateUpdateCode = async (
@@ -88,7 +102,7 @@ const generateUpdateCode = async (
   if (isNotCacheable) {
     return `
 try {
-${generate(code)}
+${code.map((statement) => generate(statement)).join('\n')}
 } catch (error) { throw error; }
 `;
   }
@@ -113,11 +127,11 @@ ${generate(code)}
   body.push(parse(`info('define ${id}');`, parseOptions));
   body.push(
     parse(
-      `beginRecordingNotes('${path}', '${id}', { line: ${declaration.loc.start.line}, column: ${declaration.loc.start.column} })`,
+      `pushSourceLocation({ path: '${path}', id: '${id}' }); beginRecordingNotes('${path}', '${id}', { line: ${declaration.loc.start.line}, column: ${declaration.loc.start.column} });`,
       parseOptions
     )
   );
-  body.push(code);
+  body.push(...code);
   // Only cache Shapes.
   body.push(
     parse(
@@ -126,7 +140,12 @@ ${generate(code)}
       parseOptions
     )
   );
-  body.push(parse(`await saveRecordedNotes('${path}', '${id}')`, parseOptions));
+  body.push(
+    parse(
+      `await saveRecordedNotes('${path}', '${id}'); popSourceLocation({ path: '${path}', id: '${id}' });`,
+      parseOptions
+    )
+  );
   const program = { type: 'Program', body };
   return `
 try {
@@ -179,11 +198,20 @@ const declareVariable = async (
 
   const id = declarator.id.name;
 
-  const code = {
-    type: 'VariableDeclaration',
-    kind: declaration.kind,
-    declarations: [strip(declarator)],
-  };
+  // pushSourceLocation({ path: '${path}', id: '${id}' });
+
+  const code = parse(
+    `
+      ${generate({
+        type: 'VariableDeclaration',
+        kind: declaration.kind,
+        declarations: [strip(declarator)],
+      })}
+    `,
+    parseOptions
+  ).body;
+
+  // popSourceLocation();
 
   const dependencies = collectDependencies(declarator);
   const dependencyShas = dependencies.map((dependency) =>
@@ -235,6 +263,7 @@ const declareVariable = async (
     }
   }
 
+  // parse(`emitSourceLocation( importModule('${source.value}');`, parseOptions),
   out.push(...(await generateCacheLoadCode({ ...entry, doReplay: true })));
 
   if (!entry.isNotCacheable) {

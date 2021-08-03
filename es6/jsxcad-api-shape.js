@@ -1,6 +1,6 @@
 import { closePath, concatenatePath, assemble as assemble$1, eachPoint, flip, toConcreteGeometry, toDisplayGeometry, toTransformedGeometry, toPoints, transform, rewriteTags, taggedPaths, taggedGraph, openPath, taggedPoints, fromPolygonsToGraph, registerReifier, union, taggedGroup, taggedItem, bend as bend$1, intersection, allTags, fromPointsToGraph, difference, rewrite, taggedPlan, translatePaths, getLeafs, taggedLayout, measureBoundingBox, getLayouts, visit, isNotVoid, extrude as extrude$1, extrudeToPlane as extrudeToPlane$1, fill as fill$1, empty, grow as grow$1, outline as outline$1, inset as inset$1, read, loft as loft$1, realize, minkowskiDifference as minkowskiDifference$1, minkowskiShell as minkowskiShell$1, minkowskiSum as minkowskiSum$1, isVoid, offset as offset$1, toDisjointGeometry, projectToPlane as projectToPlane$1, push as push$1, remesh as remesh$1, write, section as section$1, separate as separate$1, smooth as smooth$1, taggedSketch, test as test$1, twist as twist$1, toPolygonsWithHoles, arrangePolygonsWithHoles, fromPolygonsWithHolesToTriangles, fromTrianglesToGraph, alphaShape, rotateZPath, convexHullToGraph, fromFunctionToGraph, fromPathsToGraph, translatePath } from './jsxcad-geometry.js';
 import { identityMatrix, fromTranslation, fromRotation, fromScaling } from './jsxcad-math-mat4.js';
-import { emit, log as log$1, getModule, generateUniqueId, addPending, write as write$1 } from './jsxcad-sys.js';
+import { emit, log as log$1, getSourceLocation, generateUniqueId, addPending, write as write$1 } from './jsxcad-sys.js';
 export { elapsed, emit, info, read, write } from './jsxcad-sys.js';
 import { add as add$1, scale as scale$1, subtract, abs, negate, normalize, dot, cross, distance } from './jsxcad-math-vec3.js';
 import { invertTransform, fromRotateXToTransform, fromRotateYToTransform, fromRotateZToTransform } from './jsxcad-algorithm-cgal.js';
@@ -3194,13 +3194,14 @@ const baseView =
       height = size / 2;
     }
     const viewShape = prepareView(shape);
+    const { path } = getSourceLocation();
     for (const entry of ensurePages(
       viewShape.toDisplayGeometry({ skin, outline, wireframe })
     )) {
-      const path = `view/${getModule()}/${generateUniqueId()}`;
-      addPending(write$1(path, entry));
+      const viewPath = `view/${path}/${generateUniqueId()}`;
+      addPending(write$1(viewPath, entry));
       const view = { width, height, position, inline, withAxes, withGrid };
-      emit({ hash: generateUniqueId(), path, view });
+      emit({ hash: generateUniqueId(), path: viewPath, view });
     }
     return shape;
   };

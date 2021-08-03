@@ -15,10 +15,10 @@ export {
   elapsed,
   emit,
   getEmitted,
-  getModule,
+  getSourceLocation,
   info,
-  popModule,
-  pushModule,
+  popSourceLocation,
+  pushSourceLocation,
   removeOnEmitHandler,
 } from './emit.js';
 export { getDefinitions } from './getDefinitions.js';

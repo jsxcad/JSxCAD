@@ -113,6 +113,8 @@ class Ui extends React.PureComponent {
       workspaces: this.props.workspaces,
       workspace: this.props.workspace,
       files: [],
+      file: this.props.file,
+      path: this.props.path,
       selectedPaths: [],
       notebookNotes: {},
       notebookDefinitions: {},
@@ -133,9 +135,8 @@ class Ui extends React.PureComponent {
   }
 
   async componentDidMount() {
-    const { jsEditorAdvice, workspace } = this.state;
-    const { file, path, sha } = this.props;
-    const props = this.props;
+    const { jsEditorAdvice, file, path, workspace } = this.state;
+    const { sha } = this.props;
 
     if (file && path) {
       await ensureFile(file, path, { workspace });
@@ -195,10 +196,13 @@ class Ui extends React.PureComponent {
               return;
             }
 
+            if (note.view) {
+              console.log('view');
+            }
+
             if (
-              note.context &&
-              note.context.recording &&
-              note.context.recording.path !== props.path
+              !note.sourceLocation ||
+              note.sourceLocation.path !== this.state.path
             ) {
               // This note is for a different module.
               return;
@@ -206,25 +210,27 @@ class Ui extends React.PureComponent {
 
             const { notebookNotes, notebookDefinitions } = this.state;
             const { domElementByHash } = jsEditorAdvice;
-            const id =
-              note.context &&
-              note.context.recording &&
-              note.context.recording.id;
+            const id = note.sourceLocation.id;
 
             if (note.setContext) {
               return;
             }
 
-            if (note.beginNotes) {
+            if (note.beginSourceLocation) {
+              const domElement = document.createElement('div');
+              // Attach the domElement invisibly so that we can compute the size.
+              domElement.style.position = 'absolute';
+              domElement.style.visibility = 'hidden';
+              document.body.appendChild(domElement);
               notebookDefinitions[id] = {
                 notes: [],
-                domElement: document.createElement('div'),
+                domElement,
               };
               // This starts the notes to update path/id.
               return;
             }
 
-            if (note.endNotes) {
+            if (note.endSourceLocation) {
               if (jsEditorAdvice.onUpdate) {
                 await jsEditorAdvice.onUpdate();
               }

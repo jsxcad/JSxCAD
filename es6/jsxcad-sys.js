@@ -3797,17 +3797,22 @@ function sum (o) {
 
 var hashSum = sum;
 
-const modules = [];
+const sourceLocations = [];
 
-const getModule = () => modules[modules.length - 1];
+const getSourceLocation = () =>
+  sourceLocations[sourceLocations.length - 1];
 
-const popModule = () => modules.pop();
+const popSourceLocation = () => {
+  emit({ endSourceLocation: getSourceLocation() });
+  sourceLocations.pop();
+};
 
-const pushModule = (module) => modules.push(module);
+const pushSourceLocation = (sourceLocation) => {
+  sourceLocations.push(sourceLocation);
+  emit({ beginSourceLocation: sourceLocation });
+};
 
 const emitted = [];
-
-let context;
 
 let startTime = new Date();
 
@@ -3816,25 +3821,18 @@ const elapsed = () => new Date() - startTime;
 const clearEmitted = () => {
   startTime = new Date();
   emitted.length = 0;
-  context = undefined;
+  sourceLocations.length = 0;
 };
 
 const onEmitHandlers = new Set();
 
 const emit = (value) => {
-  if (value.module === undefined) {
-    value.module = getModule();
+  if (value.sourceLocation === undefined) {
+    value.sourceLocation = getSourceLocation();
   }
-  if (value.setContext) {
-    context = value.setContext;
-  }
-  if (context) {
-    value.context = context;
-  }
-  const index = emitted.length;
   emitted.push(value);
   for (const onEmitHandler of onEmitHandlers) {
-    onEmitHandler(value, index);
+    onEmitHandler(value);
   }
 };
 
@@ -4529,4 +4527,4 @@ let nanoid = (size = 21) => {
 
 const generateUniqueId = () => nanoid();
 
-export { addOnEmitHandler, addPending, ask, askService, askServices, boot, clearEmitted, createConversation, createService, deleteFile, elapsed, emit, generateUniqueId, getControlValue, getDefinitions, getEmitted, getFilesystem, getModule, getPendingErrorHandler, getServicePoolInfo, hash, info, isBrowser, isNode, isWebWorker, listFiles, listFilesystems, log, onBoot, popModule, pushModule, qualifyPath, read, readFile, readOrWatch, removeOnEmitHandler, resolvePending, setControlValue, setHandleAskUser, setPendingErrorHandler, setupFilesystem, sleep, tellServices, terminateActiveServices, touch, unwatchFile, unwatchFileCreation, unwatchFileDeletion, unwatchFiles, unwatchLog, unwatchServices, waitServices, watchFile, watchFileCreation, watchFileDeletion, watchLog, watchServices, write, writeFile };
+export { addOnEmitHandler, addPending, ask, askService, askServices, boot, clearEmitted, createConversation, createService, deleteFile, elapsed, emit, generateUniqueId, getControlValue, getDefinitions, getEmitted, getFilesystem, getPendingErrorHandler, getServicePoolInfo, getSourceLocation, hash, info, isBrowser, isNode, isWebWorker, listFiles, listFilesystems, log, onBoot, popSourceLocation, pushSourceLocation, qualifyPath, read, readFile, readOrWatch, removeOnEmitHandler, resolvePending, setControlValue, setHandleAskUser, setPendingErrorHandler, setupFilesystem, sleep, tellServices, terminateActiveServices, touch, unwatchFile, unwatchFileCreation, unwatchFileDeletion, unwatchFiles, unwatchLog, unwatchServices, waitServices, watchFile, watchFileCreation, watchFileDeletion, watchLog, watchServices, write, writeFile };

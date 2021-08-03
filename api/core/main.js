@@ -7,6 +7,7 @@ import * as notesApi from './recordNotes.js';
 import * as shapeApi from '@jsxcad/api-shape';
 
 import { buildImportModule, registerDynamicModule } from './importModule.js';
+import { popSourceLocation, pushSourceLocation } from '@jsxcad/sys';
 import { readStl, stl } from '@jsxcad/api-v1-stl';
 
 import { control } from './control.js';
@@ -20,6 +21,8 @@ const api = {
   ...shapeApi,
   ...notesApi,
   control,
+  popSourceLocation,
+  pushSourceLocation,
   readSvg,
   readStl,
   readObj,
