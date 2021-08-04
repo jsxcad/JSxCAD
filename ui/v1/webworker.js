@@ -8,20 +8,6 @@ import hashSum from 'hash-sum';
 // Compatibility with threejs.
 self.window = {};
 
-const resolveNotebook = async () => {
-  // Update the notebook.
-  const notebook = sys.getEmitted();
-  // Resolve any promises.
-  for (const note of notebook) {
-    if (note.download) {
-      for (const entry of note.download.entries) {
-        entry.data = await entry.data;
-      }
-    }
-  }
-  await sys.resolvePending();
-};
-
 const say = (message) => {
   // console.log(`QQ/webworker/say: ${JSON.stringify(message)}`);
   postMessage(message);
@@ -96,7 +82,6 @@ const agent = async ({ ask, message, type, tell }) => {
           });
           await sys.log({ op: 'evaluate', status: 'success' });
           // Wait for any pending operations.
-          await resolveNotebook();
           // Finally answer the top level question.
           return true;
         } catch (error) {
@@ -107,8 +92,9 @@ const agent = async ({ ask, message, type, tell }) => {
             level: 'serious',
           });
           await sys.log({ op: 'evaluate', status: 'failure' });
-          await resolveNotebook();
           throw error;
+        } finally {
+          await sys.resolvePending();
         }
       default:
         throw Error(`Unknown operation ${op}`);

@@ -72,7 +72,8 @@ export class JsEditorUi extends React.PureComponent {
       onClickLink: PropTypes.func,
       onSelectView: PropTypes.func,
       workspace: PropTypes.string,
-      notebookData: PropTypes.object,
+      notebookDefinitions: PropTypes.object,
+      notebookNotes: PropTypes.object,
     };
   }
 
@@ -114,17 +115,11 @@ export class JsEditorUi extends React.PureComponent {
     const { session } = editor;
     const { advice } = this.props;
 
-    if (!advice.domElementByHash) {
-      advice.domElementByHash = new Map();
-    }
-    if (!advice.domUsedElements) {
-      advice.domUsedElements = new Set();
-    }
     if (!advice.widgets) {
       advice.widgets = new Map();
     }
 
-    const { domElementByHash, domUsedElements, widgets } = advice;
+    const { domElementByHash, widgets } = advice;
 
     editor.on('linkClick', ({ token }) => {
       const { value = '' } = token;
@@ -148,7 +143,7 @@ export class JsEditorUi extends React.PureComponent {
     }
 
     const widgetManager = session.widgetManager;
-    const notebookData = this.props.notebookData;
+    const { notebookDefinitions, notebookNotes } = this.props;
 
     let openView = -1;
 
@@ -156,29 +151,63 @@ export class JsEditorUi extends React.PureComponent {
       openView = note.nthView;
     };
 
-    let lastUpdate;
+    // let lastUpdate;
     let marker;
 
     const doUpdate = async () => {
+      console.log(`QQ/doUpdate`);
       if (advice) {
         if (advice.definitions) {
-          for (const definition of advice.widgets.keys()) {
-            const widget = advice.widgets.get(definition);
-            widgetManager.removeLineWidget(widget);
-            advice.widgets.delete(definition);
+          for (const definition of widgets.keys()) {
+            if (
+              !notebookDefinitions[definition] ||
+              !advice.definitions.get(definition)
+            ) {
+              const widget = widgets.get(definition);
+              widgetManager.removeLineWidget(widget);
+              widgets.delete(definition);
+              console.log(`QQ/delete widget for: ${definition}`);
+            }
+          }
+          for (const definition of Object.keys(notebookDefinitions)) {
+            const notebookDefinition = notebookDefinitions[definition];
+            if (
+              widgets.has(definition) &&
+              widgets.el !== notebookDefinition.domElement
+            ) {
+              widgetManager.removeLineWidget(widgets.get(definition));
+              widgets.delete(definition);
+            }
+            if (!widgets.has(definition)) {
+              const entry = advice.definitions.get(definition);
+              if (entry) {
+                const { initSourceLocation } = entry;
+                const { domElement } = notebookDefinition;
+                const widget = {
+                  row: initSourceLocation.end.line - 1,
+                  coverLine: false,
+                  fixedWidth: true,
+                  el: domElement,
+                };
+                widgetManager.addLineWidget(widget);
+                widgets.set(definition, widget);
+              }
+            }
           }
         }
       }
 
-      lastUpdate = new Date();
+      // The widgets are created.
+
+      // lastUpdate = new Date();
 
       // let context = {};
       const notesByDefinition = new Map();
       const definitions = [];
       let nthView = 0;
 
-      for (let hash of Object.keys(notebookData)) {
-        const note = notebookData[hash];
+      for (let hash of Object.keys(notebookNotes)) {
+        const note = notebookNotes[hash];
         if (!note) {
           continue;
         }
@@ -203,8 +232,8 @@ export class JsEditorUi extends React.PureComponent {
           notesByDefinition.get(definition).push(note);
           if (note.hash) {
             if (!domElementByHash.has(note.hash)) {
-              // console.log(`QQ/dom/cache/miss: ${note.hash}`);
-              const element = await toDomElement([note, ...definitions], {
+              console.log(`QQ/build dom for: ${definition}`);
+              const element = toDomElement([note, ...definitions], {
                 onClickView,
               });
               domElementByHash.set(note.hash, element);
@@ -214,6 +243,7 @@ export class JsEditorUi extends React.PureComponent {
         }
       }
 
+      /*
       // Construct the LineWidgets
       for (const definition of notesByDefinition.keys()) {
         try {
@@ -225,10 +255,10 @@ export class JsEditorUi extends React.PureComponent {
           const { initSourceLocation } = entry;
           const notes = notesByDefinition.get(definition);
           const el = document.createElement('div');
+          el.appendChild(document.createTextNode(definition));
           for (const note of notes) {
             if (note.domElement) {
               el.appendChild(note.domElement);
-              domUsedElements.add(note.domElement);
             }
           }
           const widget = {
@@ -245,6 +275,7 @@ export class JsEditorUi extends React.PureComponent {
 
           // Add to the dom, so we can calculate the height.
           el.style.visibility = 'hidden';
+          el.style.filter = 'sepia(50%)';
           document.body.appendChild(el);
 
           // Adjust the widget height to be a multiple of line height, otherwise line selection is thrown off.
@@ -260,10 +291,12 @@ export class JsEditorUi extends React.PureComponent {
             // console.log( `QQ/Height not aligned: definition: ${definition} offsetHeight: ${el.offsetHeight} lineHeight: ${lineHeight}`);
           }
 
+          console.log(`QQ/add widget for: ${definition} height: ${el.style.height}`);
           widgets.set(definition, widget);
           widgetManager.addLineWidget(widget);
 
           // Make it visible now that it is in the right place.
+          el.style.filter = '';
           el.style.visibility = '';
 
           if (widget.pixelHeight !== lineHeight * widget.rowCount) {
@@ -274,6 +307,7 @@ export class JsEditorUi extends React.PureComponent {
           throw e;
         }
       }
+*/
 
       editor.resize();
 
@@ -282,9 +316,10 @@ export class JsEditorUi extends React.PureComponent {
       }
     };
 
-    let updateScheduled = false;
+    // let updateScheduled = false;
 
     const update = () => {
+      /*
       if (updateScheduled) {
         return;
       }
@@ -298,19 +333,12 @@ export class JsEditorUi extends React.PureComponent {
       } else {
         doUpdate();
       }
+*/
+      doUpdate();
     };
 
     const finished = () => {
-      for (const hash of domElementByHash.keys()) {
-        const element = domElementByHash.get(hash);
-        if (!domUsedElements.has(element)) {
-          domElementByHash.delete(hash);
-          if (element.parentNode) {
-            element.parentNode.removeChild(element);
-          }
-        }
-      }
-      domUsedElements.clear();
+      console.log(`QQ/finish`);
     };
 
     advice.onUpdate = update;
@@ -320,9 +348,9 @@ export class JsEditorUi extends React.PureComponent {
   async update() {}
 
   async componentWillUnmount() {
-    const notebookData = this.props.notebookData;
-    notebookData.onUpdate = undefined;
-    notebookData.onFinished = undefined;
+    const { notebookNotes } = this.props;
+    notebookNotes.onUpdate = undefined;
+    notebookNotes.onFinished = undefined;
   }
 
   onValueChange(data) {

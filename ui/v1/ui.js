@@ -24,6 +24,7 @@ import {
   watchFileDeletion,
   write,
 } from '@jsxcad/sys';
+import { getNotebookControlData, toDomElement } from '@jsxcad/ui-notebook';
 
 import Button from 'react-bootstrap/Button';
 import ButtonGroup from 'react-bootstrap/ButtonGroup';
@@ -44,8 +45,8 @@ import ReactDOM from 'react-dom';
 import Spinner from 'react-bootstrap/Spinner';
 import { execute } from '@jsxcad/api';
 import { fromPointsToAlphaShape2AsPolygonSegments } from '@jsxcad/algorithm-cgal';
-import { getNotebookControlData } from '@jsxcad/ui-notebook';
 import marked from 'marked';
+
 import { writeGist } from './gist.js';
 import { writeToGithub } from './github.js';
 
@@ -113,8 +114,9 @@ class Ui extends React.PureComponent {
       workspace: this.props.workspace,
       files: [],
       selectedPaths: [],
-      notebookData: {},
-      jsEditorAdvice: {},
+      notebookNotes: {},
+      notebookDefinitions: {},
+      jsEditorAdvice: { domElementByHash: new Map() },
     };
 
     this.onChangeJsEditor = this.onChangeJsEditor.bind(this);
@@ -150,8 +152,9 @@ class Ui extends React.PureComponent {
     clock();
 
     const fileUpdater = async () => {
+      const { workspace } = this.state;
       const workspaces = await listFilesystems();
-      const files = await listFiles();
+      const files = await listFiles({ workspace });
       this.setState({ workspaces, files });
     };
     const creationWatcher = await watchFileCreation(fileUpdater);
@@ -192,26 +195,76 @@ class Ui extends React.PureComponent {
               return;
             }
 
-            if (note.context?.recording?.path !== props.path) {
+            if (
+              note.context &&
+              note.context.recording &&
+              note.context.recording.path !== props.path
+            ) {
               // This note is for a different module.
               return;
             }
 
-            const { notebookData, notebookRef } = this.state;
+            const { notebookNotes, notebookDefinitions } = this.state;
+            const { domElementByHash } = jsEditorAdvice;
+            const id =
+              note.context &&
+              note.context.recording &&
+              note.context.recording.id;
+
+            if (note.setContext) {
+              return;
+            }
+
+            if (note.beginNotes) {
+              notebookDefinitions[id] = {
+                notes: [],
+                domElement: document.createElement('div'),
+              };
+              // This starts the notes to update path/id.
+              return;
+            }
+
+            if (note.endNotes) {
+              if (jsEditorAdvice.onUpdate) {
+                await jsEditorAdvice.onUpdate();
+              }
+              return;
+            }
+
+            if (!id) {
+              return;
+            }
+
+            const def = notebookDefinitions[id];
+
             if (note.data === undefined && note.path) {
               note.data = await readOrWatch(note.path);
             }
-            if (notebookData[note.hash]) {
-              // It's already in the notebook.
-              notebookData[note.hash].updated = true;
-              return;
-            } else {
-              notebookData[note.hash] = note;
+
+            if (!notebookNotes[note.hash]) {
+              notebookNotes[note.hash] = note;
             }
-            const entry = notebookData[note.hash];
+
+            if (!def) {
+              console.log('No def');
+            }
+
+            def.notes.push(note.hash);
+
+            const entry = notebookNotes[note.hash];
+
+            if (domElementByHash.has(entry.hash)) {
+              console.log(`Re-appending ${entry.hash} to ${id}`);
+              def.domElement.appendChild(document.createTextNode(entry.hash));
+              def.domElement.appendChild(domElementByHash.get(entry.hash));
+              return;
+            }
+
+            // We need to build the element.
+
             if (entry.view && !entry.url) {
               const { workspace } = this.state;
-              const { path, view } = note;
+              const { path, view } = entry;
               const { width, height } = view;
               const canvas = document.createElement('canvas');
               canvas.width = width;
@@ -224,8 +277,9 @@ class Ui extends React.PureComponent {
                 )
                   .then((url) => {
                     // Is there a race condition here?
-                    if (entry.domElement) {
-                      entry.domElement.src = url;
+                    const element = domElementByHash.get(entry.hash);
+                    if (element && element.firstChild) {
+                      element.firstChild.src = url;
                     }
                   })
                   .catch((error) => {
@@ -238,13 +292,12 @@ class Ui extends React.PureComponent {
                   });
               render();
             }
-            note.updated = true;
-            if (notebookRef) {
-              notebookRef.forceUpdate();
-            }
-            if (jsEditorAdvice.onUpdate) {
-              await jsEditorAdvice.onUpdate();
-            }
+            const element = toDomElement([entry]);
+            domElementByHash.set(entry.hash, element);
+            console.log(`Appending ${entry.hash} to ${id}`);
+            def.domElement.appendChild(document.createTextNode(entry.hash));
+            def.domElement.appendChild(element);
+            console.log(`Marking ${entry.hash} in ${id}`);
           }
           return;
         default:
@@ -328,7 +381,7 @@ class Ui extends React.PureComponent {
       paneViews = defaultPaneViews;
     }
 
-    const files = [...(await listFiles())];
+    const files = await listFiles({ workspace });
     this.setState({
       paneLayout,
       paneViews,
@@ -403,7 +456,7 @@ class Ui extends React.PureComponent {
     );
   }
   async loadJsEditor(path, { shouldUpdateUrl = true } = {}) {
-    const { notebookData, workspace } = this.state;
+    const { workspace } = this.state;
     const file = `source/${path}`;
     await ensureFile(file, path, { workspace });
     if (shouldUpdateUrl) {
@@ -412,7 +465,6 @@ class Ui extends React.PureComponent {
     const data = await read(file);
     const jsEditorData =
       typeof data === 'string' ? data : new TextDecoder('utf8').decode(data);
-    notebookData.length = 0;
     this.setState({ file, path, jsEditorData });
 
     // Automatically run the notebook on load. The user can hit Stop.
@@ -650,15 +702,12 @@ class Ui extends React.PureComponent {
     const { files } = this.state;
     const uncached = [];
     for (const file of files) {
-      if (
-        file.startsWith('data/def') ||
-        file.startsWith('meta/def') ||
-        file.startsWith('cache')
-      ) {
+      if (file.startsWith('source/') || file.startsWith('control/')) {
+        // These are the only unregeneratable files.
+        console.log(`QQ/uncache/no: ${file}`);
+      } else {
         await deleteFile({}, file);
         uncached.push(file);
-      } else {
-        console.log(`QQ/uncache/no: ${file}`);
       }
     }
     const cancel = () => this.setState({ modal: undefined });
@@ -765,10 +814,12 @@ class Ui extends React.PureComponent {
   }
 
   updateNotebook() {
+    /*
     const { notebookRef } = this.state;
     if (notebookRef) {
       notebookRef.forceUpdate();
     }
+*/
   }
 
   clearLog() {
@@ -851,34 +902,6 @@ class Ui extends React.PureComponent {
         topLevel,
       });
       await resolvePending();
-      // Finalize the notebook
-      {
-        const { notebookData, notebookRef } = this.state;
-        let deleted = false;
-        for (const hash of Object.keys(notebookData)) {
-          const note = notebookData[hash];
-          if (!note) {
-            continue;
-          }
-          if (!note.updated) {
-            delete notebookData[hash];
-            deleted = true;
-          } else {
-            delete note.updated;
-          }
-        }
-        if (deleted) {
-          if (notebookRef) {
-            notebookRef.forceUpdate();
-          }
-          if (jsEditorAdvice.onUpdate) {
-            await jsEditorAdvice.onUpdate();
-          }
-          if (jsEditorAdvice.onFinished) {
-            await jsEditorAdvice.onFinished();
-          }
-        }
-      }
     } catch (error) {
       // Include any high level notebook errors in the output.
       window.alert(error.stack);
@@ -918,7 +941,8 @@ class Ui extends React.PureComponent {
       files,
       mode = 'Notebook',
       modal,
-      notebookData,
+      notebookDefinitions,
+      notebookNotes,
       running,
       selectedPaths,
       workspace,
@@ -1323,7 +1347,8 @@ class Ui extends React.PureComponent {
                                 path={path}
                                 ask={ask}
                                 workspace={workspace}
-                                notebookData={notebookData}
+                                notebookDefinitions={notebookDefinitions}
+                                notebookNotes={notebookNotes}
                               />
                             </Pane>
                           </SplitPane>
@@ -1452,6 +1477,9 @@ class Ui extends React.PureComponent {
 }
 
 const setupUi = async (sha) => {
+  document
+    .getElementById('loading')
+    .appendChild(document.createTextNode('Indexing Storage'));
   const filesystems = await listFilesystems();
   const decodeHash = () => {
     const hash = location.hash.substring(1);
@@ -1465,6 +1493,9 @@ const setupUi = async (sha) => {
   };
   const [path, file, workspace] = decodeHash();
   let ui;
+  document
+    .getElementById('loading')
+    .appendChild(document.createTextNode('Starting React'));
   ReactDOM.render(
     <Ui
       ref={(ref) => {
@@ -1497,8 +1528,14 @@ const setupUi = async (sha) => {
 
 export const installUi = async ({ document, workspace, sha }) => {
   await boot();
+  document
+    .getElementById('loading')
+    .appendChild(document.createTextNode('Booted'));
   if (workspace !== '') {
     await setupFilesystem({ fileBase: workspace });
   }
+  document
+    .getElementById('loading')
+    .appendChild(document.createTextNode('Setup UI'));
   await setupUi(sha);
 };

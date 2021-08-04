@@ -616,11 +616,49 @@ function createCommonjsModule(fn, module) {
 	return module = { exports: {} }, fn(module, module.exports), module.exports;
 }
 
+/**
+ * https://bugs.webkit.org/show_bug.cgi?id=226547
+ * Safari has a horrible bug where IDB requests can hang while the browser is starting up.
+ * The only solution is to keep nudging it until it's awake.
+ * This probably creates garbage, but garbage is better than totally failing.
+ */
+
+function idbReady() {
+  var isSafari = !navigator.userAgentData && /Safari\//.test(navigator.userAgent) && !/Chrom(e|ium)\//.test(navigator.userAgent); // No point putting other browsers or older versions of Safari through this mess.
+
+  if (!isSafari || !indexedDB.databases) return Promise.resolve();
+  var intervalId;
+  return new Promise(function (resolve) {
+    var tryIdb = function tryIdb() {
+      return indexedDB.databases().finally(resolve);
+    };
+
+    intervalId = setInterval(tryIdb, 100);
+    tryIdb();
+  }).finally(function () {
+    return clearInterval(intervalId);
+  });
+}
+
+var cjsCompat$1 = idbReady;
+
 var cjsCompat = createCommonjsModule(function (module, exports) {
+
+function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
 Object.defineProperty(exports, '__esModule', {
   value: true
 });
+
+
+
+function _interopDefaultLegacy(e) {
+  return e && _typeof(e) === 'object' && 'default' in e ? e : {
+    'default': e
+  };
+}
+
+var safariFix__default = /*#__PURE__*/_interopDefaultLegacy(cjsCompat$1);
 
 function promisifyRequest(request) {
   return new Promise(function (resolve, reject) {
@@ -637,13 +675,15 @@ function promisifyRequest(request) {
 }
 
 function createStore(dbName, storeName) {
-  var request = indexedDB.open(dbName);
+  var dbp = safariFix__default['default']().then(function () {
+    var request = indexedDB.open(dbName);
 
-  request.onupgradeneeded = function () {
-    return request.result.createObjectStore(storeName);
-  };
+    request.onupgradeneeded = function () {
+      return request.result.createObjectStore(storeName);
+    };
 
-  var dbp = promisifyRequest(request);
+    return promisifyRequest(request);
+  });
   return function (txMode, callback) {
     return dbp.then(function (db) {
       return callback(db.transaction(storeName, txMode).objectStore(storeName));
@@ -4012,7 +4052,9 @@ const touch = async (
   if (isWebWorker) {
     console.log(`QQ/sys/touch/webworker: id ${self.id} path ${path}`);
     if (broadcast) {
-      addPending(await self.ask({ op: 'sys/touch', path, id: self.id }));
+      addPending(
+        await self.ask({ op: 'sys/touch', path, workspace, id: self.id })
+      );
     }
   } else {
     console.log(`QQ/sys/touch/browser: ${path}`);
@@ -4025,10 +4067,10 @@ const touch = async (
   }
 };
 
+/* global self */
+
 const { promises: promises$3 } = fs;
 const { serialize } = v8$1;
-
-// FIX Convert data by representation.
 
 const writeFile = async (options, path, data) => {
   data = await data;
@@ -4045,12 +4087,17 @@ const writeFile = async (options, path, data) => {
     setupFilesystem({ fileBase: workspace });
   }
 
+  if (path.startsWith('meta/def')) {
+    console.log(`QQ/write/META: ${path} ${JSON.stringify(data)}`);
+  }
   info(`Write ${path}`);
   const file = await getFile(options, path);
   file.data = data;
 
-  for (const watcher of file.watchers) {
-    await watcher(options, file);
+  if (isWebWorker) {
+    console.log(`QQ/write/cache/webworker id ${self.id} path ${path}`);
+  } else {
+    console.log(`QQ/write/cache/browser path ${path}`);
   }
 
   const base = getBase();
@@ -4073,13 +4120,24 @@ const writeFile = async (options, path, data) => {
     } else if (isBrowser || isWebWorker) {
       await db().setItem(persistentPath, data);
     }
+
+    if (isWebWorker) {
+      console.log(`QQ/write/persistent/webworker id ${self.id} path ${path}`);
+    } else {
+      console.log(`QQ/write/persistent/browser path ${path}`);
+    }
+
     // Let everyone know the file has changed.
-    await touch(persistentPath, { workspace, clear: false });
+    await touch(path, { workspace, clear: false });
   }
 
   if (workspace !== originalWorkspace) {
     // Switch back to the original filesystem, if necessary.
     setupFilesystem({ fileBase: originalWorkspace });
+  }
+
+  for (const watcher of file.watchers) {
+    await watcher(options, file);
   }
 
   return true;
@@ -4189,6 +4247,7 @@ const readFile = async (options, path) => {
     sources = [],
     workspace = getFilesystem(),
     useCache = true,
+    forceNoCache = false,
     decode,
   } = options;
   let originalWorkspace = getFilesystem();
@@ -4201,8 +4260,20 @@ const readFile = async (options, path) => {
     // info(`Read ${path}`);
   }
   const file = await getFile(options, path);
-  if (file.data === undefined || useCache === false) {
+  if (file.data === undefined || useCache === false || forceNoCache) {
+    if (isWebWorker) {
+      console.log(`QQ/read/persistent/webworker id ${self.id} path ${path}`);
+    } else {
+      console.log(`QQ/read/persistent/browser path ${path}`);
+    }
     file.data = await fetchPersistent(path, true);
+  } else {
+    console.log(`QQ/read/cache: ${path}`);
+    if (isWebWorker) {
+      console.log(`QQ/read/cache/webworker id ${self.id} path ${path}`);
+    } else {
+      console.log(`QQ/read/cache/browser path ${path}`);
+    }
   }
   if (workspace !== originalWorkspace) {
     // Switch back to the original filesystem, if necessary.
@@ -4228,6 +4299,7 @@ const readFile = async (options, path) => {
     }
   }
   info(`Read complete: ${path} ${file.data ? 'present' : 'missing'}`);
+
   return file.data;
 };
 
