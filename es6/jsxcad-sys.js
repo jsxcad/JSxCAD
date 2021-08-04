@@ -3802,8 +3802,22 @@ const sourceLocations = [];
 const getSourceLocation = () =>
   sourceLocations[sourceLocations.length - 1];
 
-const popSourceLocation = () => {
-  emit({ endSourceLocation: getSourceLocation() });
+const popSourceLocation = (sourceLocation) => {
+  if (sourceLocations.length === 0) {
+    throw Error(`Expected current sourceLocation but there was none.`);
+  }
+  const endSourceLocation = getSourceLocation();
+  if (
+    sourceLocation.path !== endSourceLocation.path ||
+    sourceLocation.id !== endSourceLocation.id
+  ) {
+    throw Error(
+      `Expected sourceLocation ${JSON.stringify(
+        sourceLocation
+      )} but found ${JSON.stringify(endSourceLocation)}`
+    );
+  }
+  emit({ endSourceLocation });
   sourceLocations.pop();
 };
 

@@ -3194,7 +3194,11 @@ const baseView =
       height = size / 2;
     }
     const viewShape = prepareView(shape);
-    const { path } = getSourceLocation();
+    const sourceLocation = getSourceLocation();
+    if (!sourceLocation) {
+      console.log('No sourceLocation');
+    }
+    const { path } = sourceLocation;
     for (const entry of ensurePages(
       viewShape.toDisplayGeometry({ skin, outline, wireframe })
     )) {

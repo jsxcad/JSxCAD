@@ -6557,44 +6557,52 @@ const generateCacheLoadCode = async ({
   id,
   doReplay = false,
 }) => {
-  if (isNotCacheable) {
-    return code;
-  }
-  const meta = await read(`meta/def/${path}/${id}`);
-  console.log(
-    `QQ/generateCacheLoadCode: meta/def/${path}/${id} = ${JSON.stringify(meta)}`
-  );
-  if (meta && meta.type === 'Shape') {
-    console.log(`QQ/generateCacheLoadCode/load`);
-    const loadCode = [];
-    loadCode.push(
-      parse(
-        `const ${id} = await loadGeometry('data/def/${path}/${id}')`,
-        parseOptions
-      ),
-      parse(`Object.freeze(${id});`, parseOptions)
+  const loadCode = [];
+  if (!isNotCacheable) {
+    const meta = await read(`meta/def/${path}/${id}`);
+    console.log(
+      `QQ/generateCacheLoadCode: meta/def/${path}/${id} = ${JSON.stringify(
+        meta
+      )}`
     );
-    if (doReplay) {
+    if (meta && meta.type === 'Shape') {
+      console.log(`QQ/generateCacheLoadCode/load`);
       loadCode.push(
         parse(
-          `pushSourceLocation({ path: '${path}', id: '${id}' });`,
+          `const ${id} = await loadGeometry('data/def/${path}/${id}')`,
           parseOptions
-        )
+        ),
+        parse(`Object.freeze(${id});`, parseOptions)
       );
-      loadCode.push(
-        parse(`await replayRecordedNotes('${path}', '${id}')`, parseOptions)
-      );
-      loadCode.push(
-        parse(
-          `popSourceLocation({ path: '${path}', id: '${id}' });`,
-          parseOptions
-        )
-      );
+      if (doReplay) {
+        loadCode.push(
+          parse(
+            `pushSourceLocation({ path: '${path}', id: '${id}' });`,
+            parseOptions
+          )
+        );
+        loadCode.push(
+          parse(`await replayRecordedNotes('${path}', '${id}')`, parseOptions)
+        );
+        loadCode.push(
+          parse(
+            `popSourceLocation({ path: '${path}', id: '${id}' });`,
+            parseOptions
+          )
+        );
+      }
+      return loadCode;
     }
-    return loadCode;
   }
   // Otherwise recompute it.
-  return code;
+  loadCode.push(
+    parse(`pushSourceLocation({ path: '${path}', id: '${id}' });`, parseOptions)
+  );
+  loadCode.push(...code);
+  loadCode.push(
+    parse(`popSourceLocation({ path: '${path}', id: '${id}' });`, parseOptions)
+  );
+  return loadCode;
 };
 
 const generateUpdateCode = async (
@@ -6604,7 +6612,9 @@ const generateUpdateCode = async (
   if (isNotCacheable) {
     return `
 try {
+pushSourceLocation({ path: '${path}', id: '${id}' });
 ${code.map((statement) => generate(statement)).join('\n')}
+popSourceLocation({ path: '${path}', id: '${id}' });
 } catch (error) { throw error; }
 `;
   }

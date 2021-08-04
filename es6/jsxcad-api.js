@@ -80,7 +80,7 @@ const evaluate = async (ecmascript, { api, path }) => {
 
 const execute = async (
   script,
-  { evaluate, replay, path, topLevel = {} }
+  { evaluate, replay, path, topLevel = {}, parallelUpdateLimit = Infinity }
 ) => {
   try {
     console.log(`QQ/execute/0`);
@@ -94,14 +94,19 @@ const execute = async (
     const processed = new Set();
     let somethingHappened;
     let somethingFailed;
+    let parallelUpdates = 0;
     const schedule = () => {
       console.log(`Updates remaining ${[...pending].join(', ')}`);
       for (const id of [...pending]) {
+        if (parallelUpdates >= parallelUpdateLimit) {
+          break;
+        }
         const entry = updates[id];
         const outstandingDependencies = entry.dependencies.filter(
           (dependency) => updates[dependency] && !processed.has(dependency)
         );
         if (outstandingDependencies.length === 0) {
+          parallelUpdates++;
           console.log(`Scheduling: ${id}`);
           pending.delete(id);
           const task = async () => {
@@ -111,13 +116,14 @@ const execute = async (
               delete updates[id];
               unprocessed.delete(id);
               processed.add(id);
+              parallelUpdates--;
             } catch (error) {
               somethingFailed(error); // FIX: Deadlock?
             } finally {
               somethingHappened();
             }
           };
-          task();
+          addPending(task());
         }
       }
     };
@@ -204,6 +210,7 @@ const buildImportModule = (baseApi) => async (name) => {
       replay,
       path,
       topLevel,
+      parallelUpdateLimit: 1,
     });
     CACHED_MODULES.set(name, builtModule);
     return builtModule;
