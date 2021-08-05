@@ -1,7 +1,9 @@
+/* global mermaid */
+import * as PropTypes from 'prop-types';
+
 import AceEditor from 'react-ace';
 import ExtractUrls from 'extract-urls';
 import PrismJS from 'prismjs/components/prism-core';
-import PropTypes from 'prop-types';
 import React from 'react';
 
 import { aceEditorAuxiliary } from './AceEditorAuxiliary';
@@ -155,6 +157,7 @@ export class JsEditorUi extends React.PureComponent {
     let marker;
 
     const update = async () => {
+      mermaid.init(undefined, '.mermaid');
       console.log(`QQ/doUpdate`);
       if (advice) {
         if (advice.definitions) {

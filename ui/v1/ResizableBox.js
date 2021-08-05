@@ -1,4 +1,4 @@
-import PropTypes from 'prop-types';
+import * as PropTypes from 'prop-types';
 import React from 'react';
 import Resizable from './Resizable.js';
 

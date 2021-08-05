@@ -2,6 +2,7 @@ module.exports = {
   extends: ['standard', 'plugin:react/recommended'],
   parser: 'babel-eslint',
   rules: {
+    'react/no-deprecated': 0,
     'max-len': [1, 120, 2],
     semi: [2, 'always'],
     'no-new-func': 0,

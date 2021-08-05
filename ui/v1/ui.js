@@ -1,5 +1,8 @@
-/* global FileReader, btoa, history, location */
+/* global FileReader, btoa, history, location, mermaid */
 
+import * as PropTypes from 'prop-types';
+
+import React, { PureComponent, render } from 'react';
 import SplitPane, { Pane } from 'react-split-pane';
 import {
   askService,
@@ -33,15 +36,11 @@ import Dropdown from 'react-bootstrap/Dropdown';
 import Form from 'react-bootstrap/Form';
 import FormControl from 'react-bootstrap/FormControl';
 import JsEditorUi from './JsEditorUi';
-import Mermaid from 'mermaid';
 import Modal from 'react-bootstrap/Modal';
 import Nav from 'react-bootstrap/Nav';
 import Navbar from 'react-bootstrap/Navbar';
-import Prettier from 'prettier';
-import PrettierParserBabel from 'prettier/parser-babel.js';
-import PropTypes from 'prop-types';
-import React from 'react';
-import ReactDOM from 'react-dom';
+import Prettier from 'https://unpkg.com/prettier@2.3.2/esm/standalone.mjs';
+import PrettierParserBabel from 'https://unpkg.com/prettier@2.3.2/esm/parser-babel.mjs';
 import Spinner from 'react-bootstrap/Spinner';
 import { execute } from '@jsxcad/api';
 import { fromPointsToAlphaShape2AsPolygonSegments } from '@jsxcad/algorithm-cgal';
@@ -95,7 +94,7 @@ const defaultPaneViews = [
   ['3', { view: 'log', title: 'Log' }],
 ];
 
-class Ui extends React.PureComponent {
+class Ui extends PureComponent {
   static get propTypes() {
     return {
       workspace: PropTypes.string,
@@ -221,7 +220,8 @@ class Ui extends React.PureComponent {
               // Attach the domElement invisibly so that we can compute the size.
               domElement.style.position = 'absolute';
               domElement.style.visibility = 'hidden';
-              document.body.appendChild(domElement);
+              // Add it at the top so that it doesn't extend the bottom of the page.
+              document.body.prepend(domElement);
               notebookDefinitions[id] = {
                 notes: [],
                 domElement,
@@ -1270,7 +1270,7 @@ class Ui extends React.PureComponent {
                 </SplitPane>
               </div>
             );
-            setTimeout(() => Mermaid.init(undefined, '.mermaid'), 0);
+            setTimeout(() => mermaid.init(undefined, '.mermaid'), 0);
           } else {
             const serviceInfo = [];
             for (const service of getServicePoolInfo().activeServices) {
@@ -1502,7 +1502,7 @@ const setupUi = async (sha) => {
   document
     .getElementById('loading')
     .appendChild(document.createTextNode('Starting React'));
-  ReactDOM.render(
+  render(
     <Ui
       ref={(ref) => {
         ui = ref;

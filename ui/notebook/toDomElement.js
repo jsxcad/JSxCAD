@@ -17,7 +17,7 @@ const downloadFile = async (event, filename, path, data, type) => {
 marked.use({
   renderer: {
     code(code, language) {
-      if (code.match(/^sequenceDiagram/) || code.match(/^graph/)) {
+      if (language === 'mermaid') {
         return '<div class="mermaid">' + code + '</div>';
       } else {
         return '<pre><code>' + code + '</code></pre>';
