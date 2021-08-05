@@ -1,5 +1,4 @@
-import { popModule, pushModule } from '@jsxcad/sys';
-
+import { addPending } from '@jsxcad/sys';
 import { toEcmascript } from '@jsxcad/compiler';
 
 export const evaluate = async (ecmascript, { api, path }) => {
@@ -9,19 +8,16 @@ export const evaluate = async (ecmascript, { api, path }) => {
   );
   try {
     const module = await builder(api);
-    pushModule(path);
     const result = await module();
     return result;
   } catch (error) {
     throw error;
-  } finally {
-    popModule();
   }
 };
 
 export const execute = async (
   script,
-  { evaluate, replay, path, topLevel = {} }
+  { evaluate, replay, path, topLevel = {}, parallelUpdateLimit = Infinity }
 ) => {
   try {
     console.log(`QQ/execute/0`);
@@ -35,14 +31,19 @@ export const execute = async (
     const processed = new Set();
     let somethingHappened;
     let somethingFailed;
+    let parallelUpdates = 0;
     const schedule = () => {
       console.log(`Updates remaining ${[...pending].join(', ')}`);
       for (const id of [...pending]) {
+        if (parallelUpdates >= parallelUpdateLimit) {
+          break;
+        }
         const entry = updates[id];
         const outstandingDependencies = entry.dependencies.filter(
           (dependency) => updates[dependency] && !processed.has(dependency)
         );
         if (outstandingDependencies.length === 0) {
+          parallelUpdates++;
           console.log(`Scheduling: ${id}`);
           pending.delete(id);
           const task = async () => {
@@ -52,13 +53,14 @@ export const execute = async (
               delete updates[id];
               unprocessed.delete(id);
               processed.add(id);
+              parallelUpdates--;
             } catch (error) {
               somethingFailed(error); // FIX: Deadlock?
             } finally {
               somethingHappened();
             }
           };
-          task();
+          addPending(task());
         }
       }
     };

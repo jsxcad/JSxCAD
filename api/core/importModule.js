@@ -53,6 +53,7 @@ export const buildImportModule = (baseApi) => async (name) => {
       replay,
       path,
       topLevel,
+      parallelUpdateLimit: 1,
     });
     CACHED_MODULES.set(name, builtModule);
     return builtModule;
