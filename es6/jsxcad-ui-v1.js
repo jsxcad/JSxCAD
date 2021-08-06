@@ -40416,6 +40416,10 @@ class JsEditorUi extends React$3.PureComponent {
     }; // let lastUpdate;
 
     const update = async () => {
+      // Make sure everything is rendered, first.
+      await new Promise((resolve, reject) => {
+        requestAnimationFrame(resolve);
+      });
       mermaid.init(undefined, '.mermaid');
       console.log(`QQ/doUpdate`);
 
@@ -46498,11 +46502,12 @@ class Ui extends E {
 
             if (note.beginSourceLocation) {
               const domElement = document.createElement('div'); // Attach the domElement invisibly so that we can compute the size.
-
-              domElement.style.position = 'absolute';
-              domElement.style.visibility = 'hidden'; // Add it at the top so that it doesn't extend the bottom of the page.
+              // Add it at the top so that it doesn't extend the bottom of the page.
 
               document.body.prepend(domElement);
+              domElement.style.display = 'block';
+              domElement.style.visibility = 'hidden';
+              domElement.style.position = 'absolute';
               notebookDefinitions[id] = {
                 notes: [],
                 domElement
@@ -46595,7 +46600,9 @@ class Ui extends E {
             console.log(`Appending ${entry.hash} to ${id}`);
             def.domElement.appendChild(document.createTextNode(entry.hash));
             def.domElement.appendChild(element);
-            console.log(`Marking ${entry.hash} in ${id}`);
+            console.log(`Marking ${entry.hash} in ${id}`); // Let the node attach.
+
+            await sleep$1(0);
           }
           return;
 
@@ -46781,7 +46788,11 @@ class Ui extends E {
       jsEditorData
     }); // Automatically run the notebook on load. The user can hit Stop.
 
-    await this.doRun();
+    await this.doRun({
+      file,
+      path,
+      jsEditorData
+    });
   }
 
   onChangeJsEditor(data) {
@@ -47147,14 +47158,14 @@ class Ui extends E {
     });
   }
 
-  async doRun() {
+  async doRun(options) {
     const {
       ask,
       jsEditorData,
       jsEditorAdvice,
       path,
       workspace
-    } = this.state;
+    } = Object.assign({}, this.state, options);
     const {
       sha
     } = this.props;

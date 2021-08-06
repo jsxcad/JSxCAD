@@ -1,4 +1,4 @@
-/* global mermaid */
+/* global mermaid, requestAnimationFrame */
 import * as PropTypes from 'prop-types';
 
 import AceEditor from 'react-ace';
@@ -157,6 +157,10 @@ export class JsEditorUi extends React.PureComponent {
     let marker;
 
     const update = async () => {
+      // Make sure everything is rendered, first.
+      await new Promise((resolve, reject) => {
+        requestAnimationFrame(resolve);
+      });
       mermaid.init(undefined, '.mermaid');
       console.log(`QQ/doUpdate`);
       if (advice) {
