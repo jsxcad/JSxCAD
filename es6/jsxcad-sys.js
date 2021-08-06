@@ -4079,8 +4079,6 @@ const touch = async (
   }
 };
 
-/* global self */
-
 const { promises: promises$3 } = fs;
 const { serialize } = v8$1;
 
@@ -4099,18 +4097,9 @@ const writeFile = async (options, path, data) => {
     setupFilesystem({ fileBase: workspace });
   }
 
-  if (path.startsWith('meta/def')) {
-    console.log(`QQ/write/META: ${path} ${JSON.stringify(data)}`);
-  }
   info(`Write ${path}`);
   const file = await getFile(options, path);
   file.data = data;
-
-  if (isWebWorker) {
-    console.log(`QQ/write/cache/webworker id ${self.id} path ${path}`);
-  } else {
-    console.log(`QQ/write/cache/browser path ${path}`);
-  }
 
   const base = getBase();
   if (!ephemeral && base !== undefined) {
@@ -4131,12 +4120,6 @@ const writeFile = async (options, path, data) => {
       }
     } else if (isBrowser || isWebWorker) {
       await db().setItem(persistentPath, data);
-    }
-
-    if (isWebWorker) {
-      console.log(`QQ/write/persistent/webworker id ${self.id} path ${path}`);
-    } else {
-      console.log(`QQ/write/persistent/browser path ${path}`);
     }
 
     // Let everyone know the file has changed.
@@ -4273,19 +4256,7 @@ const readFile = async (options, path) => {
   }
   const file = await getFile(options, path);
   if (file.data === undefined || useCache === false || forceNoCache) {
-    if (isWebWorker) {
-      console.log(`QQ/read/persistent/webworker id ${self.id} path ${path}`);
-    } else {
-      console.log(`QQ/read/persistent/browser path ${path}`);
-    }
     file.data = await fetchPersistent(path, true);
-  } else {
-    console.log(`QQ/read/cache: ${path}`);
-    if (isWebWorker) {
-      console.log(`QQ/read/cache/webworker id ${self.id} path ${path}`);
-    } else {
-      console.log(`QQ/read/cache/browser path ${path}`);
-    }
   }
   if (workspace !== originalWorkspace) {
     // Switch back to the original filesystem, if necessary.

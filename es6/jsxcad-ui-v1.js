@@ -46600,9 +46600,7 @@ class Ui extends E {
             console.log(`Appending ${entry.hash} to ${id}`);
             def.domElement.appendChild(document.createTextNode(entry.hash));
             def.domElement.appendChild(element);
-            console.log(`Marking ${entry.hash} in ${id}`); // Let the node attach.
-
-            await sleep$1(0);
+            console.log(`Marking ${entry.hash} in ${id}`);
           }
           return;
 
