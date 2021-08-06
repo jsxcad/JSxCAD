@@ -305,8 +305,6 @@ class Ui extends PureComponent {
             def.domElement.appendChild(document.createTextNode(entry.hash));
             def.domElement.appendChild(element);
             console.log(`Marking ${entry.hash} in ${id}`);
-            // Let the node attach.
-            await sleep(0);
           }
           return;
         default:
