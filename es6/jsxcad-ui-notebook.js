@@ -2767,10 +2767,12 @@ const toDomElement = (notebook = [], { onClickView } = {}) => {
       Object.assign(entry, note.define.data);
     }
     if (note.view) {
-      const { url, openView } = note;
+      const { url, openView, view } = note;
+      const { height, width } = view;
       const image = document.createElement('img');
       image.style.display = 'block';
-      image.style.height = `${21 * 13}px`;
+      image.style.height = `${height}px`;
+      image.style.width = `${width}px`;
       image.style.padding = '0px';
       image.style.border = '0px';
       image.style.margin = '0px';
