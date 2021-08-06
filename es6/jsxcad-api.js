@@ -87,6 +87,7 @@ const execute = async (
     const updates = {};
     await toEcmascript(script, {
       path,
+      topLevel,
       updates,
     });
     const pending = new Set(Object.keys(updates));

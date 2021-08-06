@@ -218,10 +218,11 @@ class Ui extends PureComponent {
             if (note.beginSourceLocation) {
               const domElement = document.createElement('div');
               // Attach the domElement invisibly so that we can compute the size.
-              domElement.style.position = 'absolute';
-              domElement.style.visibility = 'hidden';
               // Add it at the top so that it doesn't extend the bottom of the page.
               document.body.prepend(domElement);
+              domElement.style.display = 'block';
+              domElement.style.visibility = 'hidden';
+              domElement.style.position = 'absolute';
               notebookDefinitions[id] = {
                 notes: [],
                 domElement,
@@ -474,7 +475,7 @@ class Ui extends PureComponent {
     this.setState({ file, path, jsEditorData });
 
     // Automatically run the notebook on load. The user can hit Stop.
-    await this.doRun();
+    await this.doRun({ file, path, jsEditorData });
   }
 
   onChangeJsEditor(data) {
@@ -839,8 +840,9 @@ class Ui extends PureComponent {
     this.setState({ logStartDate });
   }
 
-  async doRun() {
-    const { ask, jsEditorData, jsEditorAdvice, path, workspace } = this.state;
+  async doRun(options) {
+    const { ask, jsEditorData, jsEditorAdvice, path, workspace } =
+      Object.assign({}, this.state, options);
     const { sha } = this.props;
     const topLevel = new Map();
     try {
