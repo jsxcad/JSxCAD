@@ -6560,13 +6560,7 @@ const generateCacheLoadCode = async ({
   const loadCode = [];
   if (!isNotCacheable) {
     const meta = await read(`meta/def/${path}/${id}`);
-    console.log(
-      `QQ/generateCacheLoadCode: meta/def/${path}/${id} = ${JSON.stringify(
-        meta
-      )}`
-    );
     if (meta && meta.type === 'Shape') {
-      console.log(`QQ/generateCacheLoadCode/load`);
       loadCode.push(
         parse(
           `const ${id} = await loadGeometry('data/def/${path}/${id}')`,

@@ -1,5 +1,3 @@
-/* global self */
-
 import * as fs from 'fs';
 import * as v8 from 'v8';
 
@@ -35,18 +33,9 @@ export const writeFile = async (options, path, data) => {
     setupFilesystem({ fileBase: workspace });
   }
 
-  if (path.startsWith('meta/def')) {
-    console.log(`QQ/write/META: ${path} ${JSON.stringify(data)}`);
-  }
   info(`Write ${path}`);
   const file = await getFile(options, path);
   file.data = data;
-
-  if (isWebWorker) {
-    console.log(`QQ/write/cache/webworker id ${self.id} path ${path}`);
-  } else {
-    console.log(`QQ/write/cache/browser path ${path}`);
-  }
 
   const base = getBase();
   if (!ephemeral && base !== undefined) {
@@ -67,12 +56,6 @@ export const writeFile = async (options, path, data) => {
       }
     } else if (isBrowser || isWebWorker) {
       await db().setItem(persistentPath, data);
-    }
-
-    if (isWebWorker) {
-      console.log(`QQ/write/persistent/webworker id ${self.id} path ${path}`);
-    } else {
-      console.log(`QQ/write/persistent/browser path ${path}`);
     }
 
     // Let everyone know the file has changed.
