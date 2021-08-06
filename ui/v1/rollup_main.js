@@ -3,13 +3,12 @@ import '@babel/plugin-transform-react-jsx';
 import '@babel/preset-env';
 import '@babel/preset-react';
 
-import babel from 'rollup-plugin-babel';
-import builtins from 'rollup-plugin-node-builtins';
-import commonjs from 'rollup-plugin-commonjs';
-// import globals from 'rollup-plugin-node-globals';
+import alias from '@rollup/plugin-alias';
+import babel from '@rollup/plugin-babel';
+import commonjs from '@rollup/plugin-commonjs';
 import hypothetical from 'rollup-plugin-hypothetical-windows-fix';
 import json from 'rollup-plugin-json';
-import nodeResolve from 'rollup-plugin-node-resolve';
+import resolve from '@rollup/plugin-node-resolve';
 import sizes from 'rollup-plugin-sizes';
 
 export const watcher = {
@@ -40,7 +39,15 @@ export default {
         ['@babel/env', { targets: { browsers: 'last 1 chrome versions' } }],
       ],
       plugins: [
-        '@babel/transform-react-jsx',
+        ['@babel/transform-react-jsx', { pragma: 'h' }],
+        [
+          'babel-plugin-jsx-pragmatic',
+          {
+            module: 'preact',
+            import: 'h',
+            export: 'h',
+          },
+        ],
         '@babel/plugin-proposal-class-properties',
       ],
     }),
@@ -98,8 +105,15 @@ export default {
             }`,
       },
     }),
-    builtins(),
-    nodeResolve({ preferBuiltins: true, browser: true }),
+    // builtins(),
+    // resolve({ preferBuiltins: true, browser: true }),
+    alias({
+      entries: [
+        { find: 'react', replacement: 'preact/compat' },
+        { find: 'react-dom', replacement: 'preact/compat' },
+      ],
+    }),
+    resolve({ browser: true }),
     json(),
     {
       transform(code, id) {

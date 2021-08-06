@@ -3,13 +3,11 @@ import '@babel/plugin-transform-react-jsx';
 import '@babel/preset-env';
 import '@babel/preset-react';
 
-import babel from 'rollup-plugin-babel';
-import builtins from 'rollup-plugin-node-builtins';
-import commonjs from 'rollup-plugin-commonjs';
-import globals from 'rollup-plugin-node-globals';
+import babel from '@rollup/plugin-babel';
+import commonjs from '@rollup/plugin-commonjs';
 import hypothetical from 'rollup-plugin-hypothetical-windows-fix';
 import json from 'rollup-plugin-json';
-import nodeResolve from 'rollup-plugin-node-resolve';
+import resolve from '@rollup/plugin-node-resolve';
 
 Error.stackTraceLimit = Infinity;
 
@@ -35,7 +33,6 @@ export default {
         tty: '',
       },
     }),
-    builtins(),
     babel({
       babelrc: false,
       exclude: [/node_modules/, /polybooljs/],
@@ -53,9 +50,8 @@ export default {
         '../../node_modules/binpackingjs/dist/BinPacking.min.js': ['BP2D'],
       },
     }),
-    globals(),
     json(),
-    nodeResolve({ jsnext: true, preferBuiltins: true }),
+    resolve({ jsnext: true, preferBuiltins: true }),
     {
       transform(code, id) {
         return code.replace(

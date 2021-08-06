@@ -1,9 +1,11 @@
+import * as PropTypes from 'prop-types';
+
+import React, { PureComponent } from 'react';
+
 import Mermaid from 'mermaid';
-import PropTypes from 'prop-types';
-import React from 'react';
 import { toDomElement } from '@jsxcad/ui-notebook';
 
-export class NoteUi extends React.PureComponent {
+export class NoteUi extends PureComponent {
   static get propTypes() {
     return {
       hash: PropTypes.string,
@@ -55,7 +57,7 @@ export class NoteUi extends React.PureComponent {
   }
 }
 
-export class NotebookUi extends React.PureComponent {
+export class NotebookUi extends PureComponent {
   static get propTypes() {
     return {
       id: PropTypes.string,

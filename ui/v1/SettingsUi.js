@@ -1,9 +1,10 @@
+import * as PropTypes from 'prop-types';
+
 import { read, write } from '@jsxcad/sys';
 
-import PropTypes from 'prop-types';
-import React from 'react';
+import { PureComponent } from 'react';
 
-export class SettingsUi extends React.PureComponent {
+export class SettingsUi extends PureComponent {
   static get propTypes() {
     return {
       onHide: PropTypes.func,
