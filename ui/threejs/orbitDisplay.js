@@ -3,7 +3,7 @@
 import { GEOMETRY_LAYER, SKETCH_LAYER } from './layers.js';
 import { buildScene, createResizer } from './scene.js';
 
-import { Layers } from 'three';
+import { Layers } from 'three/build/three.module.js';
 import { buildMeshes } from './mesh.js';
 import { buildTrackballControls } from './controls.js';
 import { moveToFit } from './moveToFit.js';

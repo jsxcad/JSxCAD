@@ -12,8 +12,8 @@ test.beforeEach(async (t) => {
 
 test('Test notebook', async (t) => {
   const notebook = [
-    { md: '# Test Notebook.' },
-    { md: '## A Sphere.' },
+    { md: '# Test Notebook.', hash: 'a' },
+    { md: '## A Sphere.', hash: 'b' },
     {
       data: {
         type: 'triangles',
@@ -21,6 +21,7 @@ test('Test notebook', async (t) => {
         tags: ['solid'],
       },
       view: { width: 512, height: 512, position: [50, 50, 50] },
+      hash: 'c',
     },
   ];
   const html = await toHtml(notebook);

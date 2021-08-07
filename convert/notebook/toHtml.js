@@ -1,18 +1,34 @@
 import Base64ArrayBuffer from 'base64-arraybuffer';
+import { read } from '@jsxcad/sys';
 
-const encodeNotebook = async (notebook) => {
+const encodeNotebook = async (notebook, { workspace } = {}) => {
   const encoded = [];
+  const seen = new Set();
   for (const note of notebook) {
+    if (seen.has(note.hash)) {
+      // Deduplicate the notes.
+      continue;
+    }
+    seen.add(note.hash);
+    if (note.view) {
+      // Make sure we have the view data loaded.
+      const { path, data } = note;
+      if (path && !data) {
+        note.data = await read(path, { workspace });
+      }
+    }
     if (note.download) {
       const encodedEntries = [];
       for (const entry of note.download.entries) {
         const data = await entry.data;
-        const encodedEntry = {
-          ...entry,
-          base64Data: Base64ArrayBuffer.encode(data.buffer),
-        };
-        delete encodedEntry.data;
-        encodedEntries.push(encodedEntry);
+        if (data) {
+          const encodedEntry = {
+            ...entry,
+            base64Data: Base64ArrayBuffer.encode(data.buffer),
+          };
+          delete encodedEntry.data;
+          encodedEntries.push(encodedEntry);
+        }
       }
       encoded.push({ download: { entries: encodedEntries } });
     } else {
@@ -27,7 +43,7 @@ export const toHtml = async (
   {
     view,
     title = 'JSxCAD Viewer',
-    modulePath = 'https://gitcdn.xyz/cdn/jsxcad/JSxCAD/master/es6',
+    modulePath = 'https://gitcdn.link/cdn/jsxcad/JSxCAD/master/es6',
   } = {}
 ) => {
   const html = `
@@ -100,14 +116,26 @@ export const toHtml = async (
  </head>
  <body>
   <script type='module'>
+    import { Shape } from '${modulePath}/jsxcad-api-shape.js';
+    import { dataUrl } from '${modulePath}/jsxcad-ui-threejs.js';
     import { toDomElement } from '${modulePath}/jsxcad-ui-notebook.js';
 
-    const notebook = ${JSON.stringify(await encodeNotebook(notebook))};
+    const notebook = ${JSON.stringify(await encodeNotebook(notebook), null, 2)};
+
+    const prepareViews = async (notebook) => {
+      // Prepare the view urls in the browser.
+      for (const note of notebook) {
+        if (note.view && !note.url) {
+          note.url = await dataUrl(Shape.fromGeometry(note.data), note.view);
+        }
+      }
+      return notebook;
+    }
 
     const run = async () => {
       const body = document.getElementsByTagName('body')[0];
       const bookElement = document.createElement('div');
-      const notebookElement = await toDomElement(notebook);
+      const notebookElement = await toDomElement(await prepareViews(notebook));
       bookElement.appendChild(notebookElement);
       body.appendChild(bookElement);
       bookElement.classList.add('book', 'notebook', 'loaded');
