@@ -6,7 +6,7 @@ import {
   PerspectiveCamera,
   Scene,
   WebGLRenderer,
-} from 'three/build/three.module.js';
+} from 'three';
 
 export const createResizer = ({
   camera,

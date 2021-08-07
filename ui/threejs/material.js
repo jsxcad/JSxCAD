@@ -5,8 +5,7 @@ import {
   MeshPhongMaterial,
   MeshPhysicalMaterial,
   RepeatWrapping,
-  // TextureLoader,
-} from 'three/build/three.module.js';
+} from 'three';
 
 import { setColor } from './color.js';
 import { toThreejsMaterialFromTags } from '@jsxcad/algorithm-material';

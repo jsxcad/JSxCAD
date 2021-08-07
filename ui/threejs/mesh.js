@@ -13,7 +13,7 @@ import {
   Vector2,
   Vector3,
   VertexColors,
-} from 'three/build/three.module.js';
+} from 'three';
 
 import { GEOMETRY_LAYER, SKETCH_LAYER } from './layers.js';
 

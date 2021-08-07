@@ -1,6 +1,6 @@
 import { GEOMETRY_LAYER, SKETCH_LAYER } from './layers.js';
 
-import { Layers } from 'three/build/three.module.js';
+import { Layers } from 'three';
 import { buildMeshes } from './mesh.js';
 import { buildScene } from './scene.js';
 import { moveToFit } from './moveToFit.js';
