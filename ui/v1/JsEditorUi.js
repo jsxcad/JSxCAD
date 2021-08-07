@@ -1,4 +1,4 @@
-/* global mermaid, requestAnimationFrame */
+/* global mermaid */
 import * as PropTypes from 'prop-types';
 
 import AceEditor from 'react-ace';
@@ -10,6 +10,7 @@ import { aceEditorAuxiliary } from './AceEditorAuxiliary';
 import { aceEditorCompleter } from './AceEditorCompleter';
 import { aceEditorLineWidgets } from './AceEditorLineWidgets';
 import { aceEditorSnippetManager } from './AceEditorSnippetManager';
+import { animationFrame } from './schedule.js';
 import { prismJsAuxiliary } from './PrismJSAuxiliary';
 import { toDomElement } from '@jsxcad/ui-notebook';
 
@@ -158,9 +159,7 @@ export class JsEditorUi extends React.PureComponent {
 
     const update = async () => {
       // Make sure everything is rendered, first.
-      await new Promise((resolve, reject) => {
-        requestAnimationFrame(resolve);
-      });
+      await animationFrame();
       mermaid.init(undefined, '.mermaid');
       console.log(`QQ/doUpdate`);
       if (advice) {

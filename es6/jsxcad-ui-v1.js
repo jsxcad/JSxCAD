@@ -40101,6 +40101,13 @@ const aceEditorLineWidgets = {
 
 const aceEditorSnippetManager = ace$3.require('ace/snippets').snippetManager;
 
+/* global requestAnimationFrame */
+const animationFrame = () => {
+  return new Promise((resolve, reject) => {
+    requestAnimationFrame(resolve);
+  });
+};
+
 Prism.languages.clike = {
 	'comment': [
 		{
@@ -40417,9 +40424,7 @@ class JsEditorUi extends React$3.PureComponent {
 
     const update = async () => {
       // Make sure everything is rendered, first.
-      await new Promise((resolve, reject) => {
-        requestAnimationFrame(resolve);
-      });
+      await animationFrame();
       mermaid.init(undefined, '.mermaid');
       console.log(`QQ/doUpdate`);
 
@@ -46306,28 +46311,6 @@ const ensureFile = async (file, url, {
   }
 };
 
-const defaultPaneLayout = {
-  direction: 'row',
-  first: '0',
-  second: {
-    direction: 'column',
-    first: '2',
-    second: '3',
-    splitPercentage: 75
-  }
-};
-const defaultPaneViews = [['0', {
-  view: 'editScript',
-  file: 'source/script.jsxcad',
-  title: 'Edit script.jsxcad'
-}], ['2', {
-  view: 'notebook',
-  title: 'Notebook'
-}], ['3', {
-  view: 'log',
-  title: 'Log'
-}]];
-
 class Ui extends E {
   static get propTypes() {
     return {
@@ -46670,38 +46653,10 @@ class Ui extends E {
     this.updateUrl({
       workspace
     });
-    const paneLayoutData = await read$1('ui/paneLayout');
-    let paneLayout;
-
-    if (paneLayoutData !== undefined && paneLayoutData !== 'null') {
-      if (paneLayoutData.buffer) {
-        paneLayout = JSON.parse(new TextDecoder('utf8').decode(paneLayoutData));
-      } else {
-        paneLayout = paneLayoutData;
-      }
-    } else {
-      paneLayout = defaultPaneLayout;
-    }
-
-    const paneViewsData = await read$1('ui/paneViews');
-    let paneViews;
-
-    if (paneViewsData !== undefined) {
-      if (paneViewsData.buffer) {
-        paneViews = JSON.parse(new TextDecoder('utf8').decode(paneViewsData));
-      } else {
-        paneViews = paneViewsData;
-      }
-    } else {
-      paneViews = defaultPaneViews;
-    }
-
     const files = await listFiles({
       workspace
     });
     this.setState({
-      paneLayout,
-      paneViews,
       workspace,
       files,
       selectedPaths: []
@@ -46784,13 +46739,11 @@ class Ui extends E {
       file,
       path,
       jsEditorData
-    }); // Automatically run the notebook on load. The user can hit Stop.
+    }); // Let state propagate.
 
-    await this.doRun({
-      file,
-      path,
-      jsEditorData
-    });
+    await animationFrame(); // Automatically run the notebook on load. The user can hit Stop.
+
+    await this.doRun();
   }
 
   onChangeJsEditor(data) {
@@ -47130,15 +47083,6 @@ class Ui extends E {
     }
   }
 
-  updateNotebook() {
-    /*
-    const { notebookRef } = this.state;
-    if (notebookRef) {
-      notebookRef.forceUpdate();
-    }
-    */
-  }
-
   clearLog() {
     const {
       logElement
@@ -47244,7 +47188,6 @@ class Ui extends E {
       // Include any high level notebook errors in the output.
       window.alert(error.stack);
     } finally {
-      this.updateNotebook();
       this.setState({
         running: false
       });
@@ -47259,7 +47202,7 @@ class Ui extends E {
 
     const getCleanData = data => {
       if (file.endsWith('.js') || file.endsWith('.nb')) {
-        // Just make a best attempt
+        // Just make a best attempt to reformat.
         data = Prettier.format(jsEditorData, {
           trailingComma: 'es5',
           singleQuote: true,
@@ -47650,12 +47593,6 @@ class Ui extends E {
                   overflowX: 'hidden',
                   overflowY: 'scroll'
                 }
-                /*
-                ref={(ref) => {
-                  this.setState({ logElement: ref });
-                }}
-                */
-
               }, serviceInfo))), v$1(Pane, {
                 key: "second",
                 className: "pane"
