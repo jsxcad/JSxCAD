@@ -42,6 +42,7 @@ import Navbar from 'react-bootstrap/Navbar';
 import Prettier from 'https://unpkg.com/prettier@2.3.2/esm/standalone.mjs';
 import PrettierParserBabel from 'https://unpkg.com/prettier@2.3.2/esm/parser-babel.mjs';
 import Spinner from 'react-bootstrap/Spinner';
+import { animationFrame } from './schedule.js';
 import { execute } from '@jsxcad/api';
 import { fromPointsToAlphaShape2AsPolygonSegments } from '@jsxcad/algorithm-cgal';
 import marked from 'marked';
@@ -74,25 +75,6 @@ const ensureFile = async (file, url, { workspace } = {}) => {
     await write(`${file}`, '', { workspace });
   }
 };
-
-const defaultPaneLayout = {
-  direction: 'row',
-  first: '0',
-  second: { direction: 'column', first: '2', second: '3', splitPercentage: 75 },
-};
-
-const defaultPaneViews = [
-  [
-    '0',
-    {
-      view: 'editScript',
-      file: 'source/script.jsxcad',
-      title: 'Edit script.jsxcad',
-    },
-  ],
-  ['2', { view: 'notebook', title: 'Notebook' }],
-  ['3', { view: 'log', title: 'Log' }],
-];
 
 class Ui extends PureComponent {
   static get propTypes() {
@@ -364,34 +346,8 @@ class Ui extends PureComponent {
   async selectWorkspace(workspace) {
     setupFilesystem({ fileBase: workspace });
     this.updateUrl({ workspace });
-    const paneLayoutData = await read('ui/paneLayout');
-    let paneLayout;
-    if (paneLayoutData !== undefined && paneLayoutData !== 'null') {
-      if (paneLayoutData.buffer) {
-        paneLayout = JSON.parse(new TextDecoder('utf8').decode(paneLayoutData));
-      } else {
-        paneLayout = paneLayoutData;
-      }
-    } else {
-      paneLayout = defaultPaneLayout;
-    }
-
-    const paneViewsData = await read('ui/paneViews');
-    let paneViews;
-    if (paneViewsData !== undefined) {
-      if (paneViewsData.buffer) {
-        paneViews = JSON.parse(new TextDecoder('utf8').decode(paneViewsData));
-      } else {
-        paneViews = paneViewsData;
-      }
-    } else {
-      paneViews = defaultPaneViews;
-    }
-
     const files = await listFiles({ workspace });
     this.setState({
-      paneLayout,
-      paneViews,
       workspace,
       files,
       selectedPaths: [],
@@ -474,8 +430,11 @@ class Ui extends PureComponent {
       typeof data === 'string' ? data : new TextDecoder('utf8').decode(data);
     this.setState({ file, path, jsEditorData });
 
+    // Let state propagate.
+    await animationFrame();
+
     // Automatically run the notebook on load. The user can hit Stop.
-    await this.doRun({ file, path, jsEditorData });
+    await this.doRun();
   }
 
   onChangeJsEditor(data) {
@@ -820,15 +779,6 @@ class Ui extends PureComponent {
     }
   }
 
-  updateNotebook() {
-    /*
-    const { notebookRef } = this.state;
-    if (notebookRef) {
-      notebookRef.forceUpdate();
-    }
-*/
-  }
-
   clearLog() {
     const { logElement } = this.state;
     if (logElement) {
@@ -914,7 +864,6 @@ class Ui extends PureComponent {
       // Include any high level notebook errors in the output.
       window.alert(error.stack);
     } finally {
-      this.updateNotebook();
       this.setState({ running: false });
     }
   }
@@ -923,7 +872,7 @@ class Ui extends PureComponent {
     const { file, jsEditorData } = this.state;
     const getCleanData = (data) => {
       if (file.endsWith('.js') || file.endsWith('.nb')) {
-        // Just make a best attempt
+        // Just make a best attempt to reformat.
         data = Prettier.format(jsEditorData, {
           trailingComma: 'es5',
           singleQuote: true,
@@ -1319,11 +1268,6 @@ class Ui extends PureComponent {
                             overflowX: 'hidden',
                             overflowY: 'scroll',
                           }}
-                          /*
-                          ref={(ref) => {
-                            this.setState({ logElement: ref });
-                          }}
-*/
                         >
                           {serviceInfo}
                         </Col>
