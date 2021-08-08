@@ -19,5 +19,4 @@ const example = Gear()
   .hasToothResolution(toothResolution)
   .ex(thickness)
   .material('wood')
-  .view(1024)
   .stl(`gear_${numberOfTeeth}`);

@@ -3,17 +3,17 @@ const wheelModel = await readStl(
 );
 
 const technicPlug = Group(
-  Arc(4.8).zag(0.01).ex(-0.8, -8),
-  Arc(5.8).zag(0.01).ex(0, -0.8)
+  Arc(4.8).hasZag(0.01).ex(-0.8, -8),
+  Arc(5.8).hasZag(0.01).ex(0, -0.8)
 )
   .view()
   .downloadStl('technic_plug');
 
 const halfAxle = Group(
-  Arc(6).zag(0.01).ex(3.5, 2.5),
-  Arc(5).zag(0.01).ex(2.5, 0),
-  Arc(4.8).zag(0.01).ex(0, -7),
-  Arc(4.7).zag(0.01).ex(-7, -8)
+  Arc(6).hasZag(0.01).ex(3.5, 2.5),
+  Arc(5).hasZag(0.01).ex(2.5, 0),
+  Arc(4.8).hasZag(0.01).ex(0, -7),
+  Arc(4.7).hasZag(0.01).ex(-7, -8)
 )
   .view()
   .downloadStl('axle');

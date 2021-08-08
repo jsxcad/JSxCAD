@@ -156,10 +156,13 @@ Shape.fromPoints = (points, context) =>
   fromGeometry(taggedPoints({}, points), context);
 Shape.fromPolygons = (polygons, context) =>
   fromGeometry(fromPolygonsToGraph({}, polygons), context);
-Shape.registerMethod = registerShapeMethod;
-// Let's consider 'method' instead of 'registerMethod'.
+// Deprecated.
 Shape.method = registerShapeMethod;
+// Deprecated
 Shape.reifier = (name, op) => registerReifier(name, op);
+// Let's make the registration functions more explicit.
+Shape.registerMethod = registerShapeMethod;
+Shape.registerReifier = (name, op) => registerReifier(name, op);
 
 const fromGeometry = Shape.fromGeometry;
 const toGeometry = (shape) => shape.toGeometry();
@@ -633,27 +636,25 @@ const drop =
 
 Shape.registerMethod('drop', drop);
 
-const updatePlan = (shape, ...updates) => {
-  const geometry = shape.toTransformedGeometry();
-  if (geometry.type !== 'plan') {
-    throw Error(`Shape is not a plan`);
-  }
-  return Shape.fromGeometry(
-    taggedPlan(
-      { tags: geometry.tags },
-      {
-        ...geometry.plan,
-        history: [...(geometry.plan.history || []), ...updates],
-      }
-    )
-  );
-};
+const updatePlan =
+  (...updates) =>
+  (shape) => {
+    const geometry = shape.toTransformedGeometry();
+    if (geometry.type !== 'plan') {
+      throw Error(`Shape is not a plan`);
+    }
+    return Shape.fromGeometry(
+      taggedPlan(
+        { tags: geometry.tags },
+        {
+          ...geometry.plan,
+          history: [...(geometry.plan.history || []), ...updates],
+        }
+      )
+    );
+  };
 
-const updatePlanMethod = function (...updates) {
-  return updatePlan(this, ...updates);
-};
-
-Shape.prototype.updatePlan = updatePlanMethod;
+Shape.registerMethod('updatePlan', updatePlan);
 
 const hasAngle =
   (start = 0, end = 0) =>

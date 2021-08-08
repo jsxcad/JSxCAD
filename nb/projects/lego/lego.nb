@@ -1,5 +1,3 @@
-card`todo`;
-
 md`Needs update`;
 
 export const SocketBoard = (length, width, height, { sockets = [] } = {}) => {

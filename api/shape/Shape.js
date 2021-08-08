@@ -164,10 +164,13 @@ Shape.fromPoints = (points, context) =>
   fromGeometry(taggedPoints({}, points), context);
 Shape.fromPolygons = (polygons, context) =>
   fromGeometry(fromPolygonsToGraph({}, polygons), context);
-Shape.registerMethod = registerShapeMethod;
-// Let's consider 'method' instead of 'registerMethod'.
+// Deprecated.
 Shape.method = registerShapeMethod;
+// Deprecated
 Shape.reifier = (name, op) => registerReifier(name, op);
+// Let's make the registration functions more explicit.
+Shape.registerMethod = registerShapeMethod;
+Shape.registerReifier = (name, op) => registerReifier(name, op);
 
 export const fromGeometry = Shape.fromGeometry;
 export const toGeometry = (shape) => shape.toGeometry();
