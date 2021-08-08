@@ -4,29 +4,42 @@ import path from 'path';
 import { updateNotebook } from './updateNotebook.js';
 
 const build = async (baseDirectory = '.') => {
-  const notebooks = [];
-  const walk = async (directory) => {
-    for (const entry of await fs.promises.readdir(directory, {
-      withFileTypes: true,
-    })) {
-      if (['node_modules'].includes(entry.name)) {
-        continue;
-      }
-      const filepath = path.join(directory, entry.name);
-      if (entry.isDirectory()) {
-        await walk(filepath);
-      } else if (entry.isFile()) {
-        if (filepath.endsWith('.nb')) {
-          notebooks.push(filepath.substring(0, filepath.length - 3));
+  try {
+    const notebooks = [];
+    const walk = async (directory) => {
+      for (const entry of await fs.promises.readdir(directory, {
+        withFileTypes: true,
+      })) {
+        if (['node_modules'].includes(entry.name)) {
+          continue;
+        }
+        const filepath = path.join(directory, entry.name);
+        if (entry.isDirectory()) {
+          await walk(filepath);
+        } else if (entry.isFile()) {
+          if (filepath.endsWith('.nb')) {
+            notebooks.push(filepath.substring(0, filepath.length - 3));
+          }
         }
       }
+    };
+    await walk(baseDirectory);
+    const failedExpectations = [];
+    for (const notebook of notebooks) {
+      console.log(`Processing notebook: ${process.cwd()}/${notebook}.nb`);
+      await updateNotebook(notebook, { failedExpectations });
     }
-  };
-  await walk(baseDirectory);
-  for (const notebook of notebooks) {
-    console.log(`QQ/notebook: ${process.cwd()}/${notebook}.nb`);
-    await updateNotebook(notebook);
+    if (failedExpectations.length > 0) {
+      console.log('Expectations failed:');
+      for (const failedExpectation of failedExpectations) {
+        console.log(failedExpectation);
+      }
+      process.exit(1);
+    }
+  } catch (error) {
+    console.log(error.toString());
+    process.exit(1);
   }
 };
 
-build(argv[2]).catch((error) => console.log(error.toString()));
+build(argv[2]);

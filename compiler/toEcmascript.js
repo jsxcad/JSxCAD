@@ -234,10 +234,6 @@ const declareVariable = async (
     sourceLocation: sourceLocation || declaration.loc,
   };
 
-  console.log(`QQ/id: ${id}`);
-  console.log(`QQ/def: ${JSON.stringify(definition)}`);
-  console.log(`QQ/sha: ${JSON.stringify(sha)}`);
-
   topLevel.set(id, entry);
 
   if (doExport) {

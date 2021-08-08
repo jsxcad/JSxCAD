@@ -80,10 +80,15 @@ const evaluate = async (ecmascript, { api, path }) => {
 
 const execute = async (
   script,
-  { evaluate, replay, path, topLevel = new Map(), parallelUpdateLimit = Infinity }
+  {
+    evaluate,
+    replay,
+    path,
+    topLevel = new Map(),
+    parallelUpdateLimit = Infinity,
+  }
 ) => {
   try {
-    console.log(`QQ/execute/0`);
     const updates = {};
     await toEcmascript(script, {
       path,
@@ -104,7 +109,10 @@ const execute = async (
         }
         const entry = updates[id];
         const outstandingDependencies = entry.dependencies.filter(
-          (dependency) => updates[dependency] && !processed.has(dependency) && dependency !== id
+          (dependency) =>
+            updates[dependency] &&
+            !processed.has(dependency) &&
+            dependency !== id
         );
         if (outstandingDependencies.length === 0) {
           parallelUpdates++;
@@ -173,14 +181,12 @@ const buildImportModule = (baseApi) => async (name) => {
     if (cachedModule !== undefined) {
       return cachedModule;
     }
-    console.log(`QQ/importModule/0`);
     const internalModule = DYNAMIC_MODULES.get(name);
     if (internalModule !== undefined) {
       const module = await import(internalModule);
       CACHED_MODULES.set(name, module);
       return module;
     }
-    console.log(`QQ/importModule/1`);
     let script;
     if (script === undefined) {
       const path = `source/${name}`;
@@ -188,23 +194,18 @@ const buildImportModule = (baseApi) => async (name) => {
       sources.push(name);
       script = await read(path, { sources });
     }
-    console.log(`QQ/importModule/2`);
     if (script === undefined) {
       throw Error(`Cannot import module ${name}`);
     }
-    console.log(`QQ/importModule/3`);
     const scriptText =
       typeof script === 'string'
         ? script
         : new TextDecoder('utf8').decode(script);
-    console.log(`QQ/importModule/4`);
     const path = name;
     const topLevel = new Map();
     const api = { ...baseApi, sha: 'master' };
-    console.log(`QQ/importModule/5`);
     const evaluate$1 = (script) => evaluate(script, { api, path });
     const replay = (script) => evaluate(script, { api, path });
-    console.log(`QQ/importModule/6`);
 
     const builtModule = await execute(scriptText, {
       evaluate: evaluate$1,

@@ -5,21 +5,23 @@ import { identityMatrix } from '@jsxcad/math-mat4';
 import { taggedPlan } from '@jsxcad/geometry';
 import { zag } from '@jsxcad/api-v1-math';
 
-const updatePlan = (...updates) => shape => {
-  const geometry = shape.toTransformedGeometry();
-  if (geometry.type !== 'plan') {
-    throw Error(`Shape is not a plan`);
-  }
-  return Shape.fromGeometry(
-    taggedPlan(
-      { tags: geometry.tags },
-      {
-        ...geometry.plan,
-        history: [...(geometry.plan.history || []), ...updates],
-      }
-    )
-  );
-};
+const updatePlan =
+  (...updates) =>
+  (shape) => {
+    const geometry = shape.toTransformedGeometry();
+    if (geometry.type !== 'plan') {
+      throw Error(`Shape is not a plan`);
+    }
+    return Shape.fromGeometry(
+      taggedPlan(
+        { tags: geometry.tags },
+        {
+          ...geometry.plan,
+          history: [...(geometry.plan.history || []), ...updates],
+        }
+      )
+    );
+  };
 
 Shape.registerMethod('updatePlan', updatePlan);
 

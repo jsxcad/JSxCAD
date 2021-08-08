@@ -636,21 +636,23 @@ const drop =
 
 Shape.registerMethod('drop', drop);
 
-const updatePlan = (...updates) => shape => {
-  const geometry = shape.toTransformedGeometry();
-  if (geometry.type !== 'plan') {
-    throw Error(`Shape is not a plan`);
-  }
-  return Shape.fromGeometry(
-    taggedPlan(
-      { tags: geometry.tags },
-      {
-        ...geometry.plan,
-        history: [...(geometry.plan.history || []), ...updates],
-      }
-    )
-  );
-};
+const updatePlan =
+  (...updates) =>
+  (shape) => {
+    const geometry = shape.toTransformedGeometry();
+    if (geometry.type !== 'plan') {
+      throw Error(`Shape is not a plan`);
+    }
+    return Shape.fromGeometry(
+      taggedPlan(
+        { tags: geometry.tags },
+        {
+          ...geometry.plan,
+          history: [...(geometry.plan.history || []), ...updates],
+        }
+      )
+    );
+  };
 
 Shape.registerMethod('updatePlan', updatePlan);
 
