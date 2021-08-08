@@ -1,6 +1,6 @@
 // import * as dat from 'dat.gui';
 
-import { TrackballControls } from 'three/examples/jsm/controls/TrackballControls';
+import { TrackballControls } from 'three/examples/jsm/controls/TrackballControls.js';
 
 export const buildTrackballControls = ({
   camera,
