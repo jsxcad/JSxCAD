@@ -2,7 +2,6 @@ import {
   boot,
   clearEmitted,
   getEmitted,
-  read,
   resolvePending,
 } from '@jsxcad/sys';
 import { readFileSync, writeFileSync } from 'fs';
@@ -34,6 +33,7 @@ const writeMarkdown = (path, notebook, imageUrls) => {
 };
 
 export const updateNotebook = async (target) => {
+  console.log(`QQ/updateNotebook ${target}`);
   clearEmitted();
   await boot();
   try {
@@ -43,56 +43,54 @@ export const updateNotebook = async (target) => {
   }
   await resolvePending();
   const notebook = getEmitted();
-  for (const note of notebook) {
-    if (note.log) {
-      console.log(note.log.text);
-    }
-    if (note.path) {
-      note.data = await read(note.path);
-    }
-  }
   const html = await toHtml(notebook);
+  console.log(`QQ/writeHtml ${target}.html`);
   writeFileSync(`${target}.html`, html);
-  const { pngData, imageUrls } = await screenshot(
+  const { pngDataList, imageUrlList } = await screenshot(
     new TextDecoder('utf8').decode(html),
     `${target}.png`
   );
-  await writeMarkdown(target, notebook, imageUrls);
-  writeFileSync(`${target}.observed.png`, pngData);
-  const observedPng = pngjs.PNG.sync.read(pngData);
-  let expectedPng;
-  try {
-    expectedPng = pngjs.PNG.sync.read(readFileSync(`${target}.png`));
-  } catch (error) {
-    if (error.code === 'ENOENT') {
-      // We have no expectation -- generate one.
-      const buffer = pngjs.PNG.sync.write(observedPng);
-      writeFileSync(`${target}.png`, buffer);
-      return;
+  console.log(`QQ/writeMarkdown`);
+  await writeMarkdown(target, notebook, imageUrlList);
+  console.log(`QQ/writePng`);
+  for (let nth = 0; nth < pngDataList.length; nth++) {
+    const pngData = pngDataList[nth];
+    writeFileSync(`${target}_${nth}.observed.png`, pngData);
+    const observedPng = pngjs.PNG.sync.read(pngData);
+    let expectedPng;
+    try {
+      expectedPng = pngjs.PNG.sync.read(readFileSync(`${target}_${nth}.png`));
+    } catch (error) {
+      if (error.code === 'ENOENT') {
+        // We have no expectation -- generate one.
+        const buffer = pngjs.PNG.sync.write(observedPng);
+        writeFileSync(`${target}_${nth}.png`, buffer);
+        return;
+      }
+      throw error;
     }
-    throw error;
-  }
-  const { width, height } = expectedPng;
-  const differencePng = new pngjs.PNG({ width, height });
-  const pixelThreshold = 1;
-  const numFailedPixels = pixelmatch(
-    expectedPng.data,
-    observedPng.data,
-    differencePng.data,
-    width,
-    height,
-    {
-      threshold: 0.01,
-      alpha: 0.2,
-      diffMask: process.env.FORCE_COLOR === '0',
-      diffColor:
-        process.env.FORCE_COLOR === '0' ? [255, 255, 255] : [255, 0, 0],
-    }
-  );
-  if (numFailedPixels >= pixelThreshold) {
-    writeFileSync(
-      `${target}.difference.png`,
-      pngjs.PNG.sync.write(differencePng)
+    const { width, height } = expectedPng;
+    const differencePng = new pngjs.PNG({ width, height });
+    const pixelThreshold = 1;
+    const numFailedPixels = pixelmatch(
+      expectedPng.data,
+      observedPng.data,
+      differencePng.data,
+      width,
+      height,
+      {
+        threshold: 0.01,
+        alpha: 0.2,
+        diffMask: process.env.FORCE_COLOR === '0',
+        diffColor:
+          process.env.FORCE_COLOR === '0' ? [255, 255, 255] : [255, 0, 0],
+      }
     );
+    if (numFailedPixels >= pixelThreshold) {
+      writeFileSync(
+        `${target}_${nth}.difference.png`,
+        pngjs.PNG.sync.write(differencePng)
+      );
+    }
   }
 };

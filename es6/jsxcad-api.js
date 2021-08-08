@@ -80,14 +80,14 @@ const evaluate = async (ecmascript, { api, path }) => {
 
 const execute = async (
   script,
-  { evaluate, replay, path, topLevel = {}, parallelUpdateLimit = Infinity }
+  { evaluate, replay, path, topLevel = new Map(), parallelUpdateLimit = Infinity }
 ) => {
   try {
     console.log(`QQ/execute/0`);
     const updates = {};
     await toEcmascript(script, {
       path,
-      topLevel,
+      topLevel: new Map(),
       updates,
     });
     const pending = new Set(Object.keys(updates));
@@ -104,7 +104,7 @@ const execute = async (
         }
         const entry = updates[id];
         const outstandingDependencies = entry.dependencies.filter(
-          (dependency) => updates[dependency] && !processed.has(dependency)
+          (dependency) => updates[dependency] && !processed.has(dependency) && dependency !== id
         );
         if (outstandingDependencies.length === 0) {
           parallelUpdates++;
