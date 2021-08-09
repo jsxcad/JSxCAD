@@ -40335,31 +40335,6 @@ class JsEditorUi extends React$3.PureComponent {
     this.onValueChange = this.onValueChange.bind(this);
   }
 
-  saveShortcut() {
-    return {
-      name: 'save',
-      bindKey: {
-        win: 'Ctrl-S',
-        mac: 'Command-S'
-      },
-      exec: () => this.save()
-    };
-  }
-
-  runShortcut() {
-    const {
-      onRun
-    } = this.props;
-    return {
-      name: 'run',
-      bindKey: {
-        win: 'Shift-Enter',
-        mac: 'Shift-Enter'
-      },
-      exec: () => onRun()
-    };
-  }
-
   async run() {
     this.props.onRun();
   }
@@ -40396,8 +40371,7 @@ class JsEditorUi extends React$3.PureComponent {
       const [url = ''] = extractUrls(value);
       this.props.onClickLink(url);
     });
-    editor.session.notebookElements = {}; // const { JavascriptMode, LineWidgets, Range } = aceEditorLineWidgets;
-
+    editor.session.notebookElements = {};
     const {
       JavascriptMode,
       LineWidgets
@@ -40622,7 +40596,6 @@ class JsEditorUi extends React$3.PureComponent {
       ref: ref => {
         this.aceEditor = ref;
       },
-      commands: [this.runShortcut(), this.saveShortcut()],
       editorProps: {
         $blockScrolling: true
       },
