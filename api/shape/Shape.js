@@ -18,6 +18,7 @@ import {
   transform,
 } from '@jsxcad/geometry';
 
+import { getSourceLocation } from '@jsxcad/sys';
 import { identityMatrix } from '@jsxcad/math-mat4';
 
 export class Shape {
@@ -121,12 +122,13 @@ const isSingleOpenPath = ({ paths }) =>
 Shape.method = {};
 
 export const registerShapeMethod = (name, op) => {
-  /*
-  // FIX: See if we can switch these to dispatching via define?
+  const path = getSourceLocation()?.path;
   if (Shape.prototype.hasOwnProperty(name)) {
-    throw Error(`Method ${name} is already in use.`);
+    const { origin } = Shape.prototype[name];
+    if (origin !== path) {
+      throw Error(`Method ${name} is already defined in ${origin}.`);
+    }
   }
-*/
   // Make the operation constructor available e.g., Shape.grow(1)(s)
   Shape[name] = op;
   // Make the operation application available e.g., s.grow(1)
@@ -135,6 +137,7 @@ export const registerShapeMethod = (name, op) => {
       return op(...args)(this);
     },
   };
+  method.origin = path;
   Shape.prototype[name] = method;
   return method;
 };

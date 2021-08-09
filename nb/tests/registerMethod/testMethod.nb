@@ -1,0 +1,1 @@
+Shape.registerMethod('testMethod', () => shape => 'testMethod');

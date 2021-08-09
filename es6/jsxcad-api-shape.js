@@ -1,7 +1,7 @@
 import { closePath, concatenatePath, assemble as assemble$1, eachPoint, flip, toConcreteGeometry, toDisplayGeometry, toTransformedGeometry, toPoints, transform, rewriteTags, taggedPaths, taggedGraph, openPath, taggedPoints, fromPolygonsToGraph, registerReifier, union, taggedGroup, taggedItem, bend as bend$1, intersection, allTags, fromPointsToGraph, difference, rewrite, taggedPlan, translatePaths, getLeafs, taggedLayout, measureBoundingBox, getLayouts, visit, isNotVoid, extrude as extrude$1, extrudeToPlane as extrudeToPlane$1, fill as fill$1, empty, grow as grow$1, outline as outline$1, inset as inset$1, read, loft as loft$1, realize, minkowskiDifference as minkowskiDifference$1, minkowskiShell as minkowskiShell$1, minkowskiSum as minkowskiSum$1, isVoid, offset as offset$1, toDisjointGeometry, projectToPlane as projectToPlane$1, push as push$1, remesh as remesh$1, write, section as section$1, separate as separate$1, smooth as smooth$1, taggedSketch, test as test$1, twist as twist$1, toPolygonsWithHoles, arrangePolygonsWithHoles, fromPolygonsWithHolesToTriangles, fromTrianglesToGraph, alphaShape, rotateZPath, convexHullToGraph, fromFunctionToGraph, fromPathsToGraph, translatePath } from './jsxcad-geometry.js';
-import { identityMatrix, fromTranslation, fromRotation, fromScaling } from './jsxcad-math-mat4.js';
-import { emit, log as log$1, getSourceLocation, generateUniqueId, addPending, write as write$1 } from './jsxcad-sys.js';
+import { getSourceLocation, emit, log as log$1, generateUniqueId, addPending, write as write$1 } from './jsxcad-sys.js';
 export { elapsed, emit, info, read, write } from './jsxcad-sys.js';
+import { identityMatrix, fromTranslation, fromRotation, fromScaling } from './jsxcad-math-mat4.js';
 import { add as add$1, scale as scale$1, subtract, abs, negate, normalize, dot, cross, distance } from './jsxcad-math-vec3.js';
 import { invertTransform, fromRotateXToTransform, fromRotateYToTransform, fromRotateZToTransform } from './jsxcad-algorithm-cgal.js';
 import { toTagsFromName } from './jsxcad-algorithm-color.js';
@@ -113,12 +113,13 @@ const isSingleOpenPath = ({ paths }) =>
 Shape.method = {};
 
 const registerShapeMethod = (name, op) => {
-  /*
-  // FIX: See if we can switch these to dispatching via define?
+  const { path } = getSourceLocation();
   if (Shape.prototype.hasOwnProperty(name)) {
-    throw Error(`Method ${name} is already in use.`);
+    const { origin } = Shape.prototype[name];
+    if (origin !== path) {
+      throw Error(`Method ${name} is already defined in ${origin}.`);
+    }
   }
-*/
   // Make the operation constructor available e.g., Shape.grow(1)(s)
   Shape[name] = op;
   // Make the operation application available e.g., s.grow(1)
@@ -127,6 +128,7 @@ const registerShapeMethod = (name, op) => {
       return op(...args)(this);
     },
   };
+  method.origin = path;
   Shape.prototype[name] = method;
   return method;
 };
