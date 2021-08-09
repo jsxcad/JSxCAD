@@ -1,4 +1,4 @@
-import { GearProfile } from 'https://gitcdn.link/cdn/jsxcad/JSxCAD/master/library/InvoluteGear.js';
+import { Gear } from 'https://gitcdn.link/cdn/jsxcad/JSxCAD/master/nb/projects/gear/gear.nb';
 
 import {
   Block,
@@ -52,7 +52,7 @@ const cap = Group(capProfile.ex(-2, -0.0), sheath)
   .md('Cap')
   .stl('cap');
 
-const gearProfile = GearProfile(20).md('Gear Profile').gridView();
+const gearProfile = Gear(20).md('Gear Profile').gridView();
 
 const gear = GearProfile(20)
   .cut(axleFlatProfile)
