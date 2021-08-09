@@ -1,0 +1,8 @@
+import 'testMethod.nb';
+
+md`Redefining a local method should work.`;
+Shape.registerMethod('myMethod', () => shape => 'one');
+Shape.registerMethod('myMethod', () => shape => 'two');
+
+md`Redefining a foreign method should fail.`;
+Shape.registerMethod('testMethod', () => shape => 'anotherTestMethod');
