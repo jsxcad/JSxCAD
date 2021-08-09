@@ -40092,7 +40092,8 @@ const aceEditorCompleter = {
 
 const JavascriptMode = ace$3.acequire('ace/mode/javascript').Mode;
 const LineWidgets = ace$3.acequire('ace/line_widgets').LineWidgets;
-const Range = ace$3.acequire('ace/range').Range;
+const Range = ace$3.acequire('ace/range').Range; // const Search = Ace.acequire('ace/ext/searchbox').Search;
+
 const aceEditorLineWidgets = {
   JavascriptMode,
   LineWidgets,
@@ -40335,14 +40336,14 @@ class JsEditorUi extends React$3.PureComponent {
     this.onValueChange = this.onValueChange.bind(this);
   }
 
-  saveShortcut() {
+  findShortcut() {
     return {
-      name: 'save',
+      name: 'find',
       bindKey: {
-        win: 'Ctrl-S',
-        mac: 'Command-S'
+        win: 'Ctrl-F',
+        mac: 'Command-F'
       },
-      exec: () => this.save()
+      exec: () => this.aceEditor.editor.execCommand('find')
     };
   }
 
@@ -40357,6 +40358,17 @@ class JsEditorUi extends React$3.PureComponent {
         mac: 'Shift-Enter'
       },
       exec: () => onRun()
+    };
+  }
+
+  saveShortcut() {
+    return {
+      name: 'save',
+      bindKey: {
+        win: 'Ctrl-S',
+        mac: 'Command-S'
+      },
+      exec: () => this.save()
     };
   }
 
@@ -40396,8 +40408,7 @@ class JsEditorUi extends React$3.PureComponent {
       const [url = ''] = extractUrls(value);
       this.props.onClickLink(url);
     });
-    editor.session.notebookElements = {}; // const { JavascriptMode, LineWidgets, Range } = aceEditorLineWidgets;
-
+    editor.session.notebookElements = {};
     const {
       JavascriptMode,
       LineWidgets
@@ -40621,8 +40632,8 @@ class JsEditorUi extends React$3.PureComponent {
     }, v$1(_default, {
       ref: ref => {
         this.aceEditor = ref;
-      },
-      commands: [this.runShortcut(), this.saveShortcut()],
+      } // commands={[/*this.findShortcut(), */ this.runShortcut(), this.saveShortcut()]}
+      ,
       editorProps: {
         $blockScrolling: true
       },

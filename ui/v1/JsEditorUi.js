@@ -88,11 +88,11 @@ export class JsEditorUi extends React.PureComponent {
     this.onValueChange = this.onValueChange.bind(this);
   }
 
-  saveShortcut() {
+  findShortcut() {
     return {
-      name: 'save',
-      bindKey: { win: 'Ctrl-S', mac: 'Command-S' },
-      exec: () => this.save(),
+      name: 'find',
+      bindKey: { win: 'Ctrl-F', mac: 'Command-F' },
+      exec: () => this.aceEditor.editor.execCommand('find'),
     };
   }
 
@@ -102,6 +102,14 @@ export class JsEditorUi extends React.PureComponent {
       name: 'run',
       bindKey: { win: 'Shift-Enter', mac: 'Shift-Enter' },
       exec: () => onRun(),
+    };
+  }
+
+  saveShortcut() {
+    return {
+      name: 'save',
+      bindKey: { win: 'Ctrl-S', mac: 'Command-S' },
+      exec: () => this.save(),
     };
   }
 
@@ -132,7 +140,6 @@ export class JsEditorUi extends React.PureComponent {
 
     editor.session.notebookElements = {};
 
-    // const { JavascriptMode, LineWidgets, Range } = aceEditorLineWidgets;
     const { JavascriptMode, LineWidgets } = aceEditorLineWidgets;
 
     const mode = new JavascriptMode();
@@ -338,7 +345,7 @@ export class JsEditorUi extends React.PureComponent {
           ref={(ref) => {
             this.aceEditor = ref;
           }}
-          commands={[this.runShortcut(), this.saveShortcut()]}
+          // commands={[/*this.findShortcut(), */ this.runShortcut(), this.saveShortcut()]}
           editorProps={{ $blockScrolling: true }}
           setOptions={{
             enableLinking: true,
