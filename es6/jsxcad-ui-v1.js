@@ -40336,17 +40336,6 @@ class JsEditorUi extends React$3.PureComponent {
     this.onValueChange = this.onValueChange.bind(this);
   }
 
-  findShortcut() {
-    return {
-      name: 'find',
-      bindKey: {
-        win: 'Ctrl-F',
-        mac: 'Command-F'
-      },
-      exec: () => this.aceEditor.editor.execCommand('find')
-    };
-  }
-
   runShortcut() {
     const {
       onRun
@@ -40632,8 +40621,7 @@ class JsEditorUi extends React$3.PureComponent {
     }, v$1(_default, {
       ref: ref => {
         this.aceEditor = ref;
-      } // commands={[/*this.findShortcut(), */ this.runShortcut(), this.saveShortcut()]}
-      ,
+      },
       editorProps: {
         $blockScrolling: true
       },
