@@ -88,23 +88,6 @@ export class JsEditorUi extends React.PureComponent {
     this.onValueChange = this.onValueChange.bind(this);
   }
 
-  runShortcut() {
-    const { onRun } = this.props;
-    return {
-      name: 'run',
-      bindKey: { win: 'Shift-Enter', mac: 'Shift-Enter' },
-      exec: () => onRun(),
-    };
-  }
-
-  saveShortcut() {
-    return {
-      name: 'save',
-      bindKey: { win: 'Ctrl-S', mac: 'Command-S' },
-      exec: () => this.save(),
-    };
-  }
-
   async run() {
     this.props.onRun();
   }

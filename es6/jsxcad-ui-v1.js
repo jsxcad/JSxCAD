@@ -40092,8 +40092,7 @@ const aceEditorCompleter = {
 
 const JavascriptMode = ace$3.acequire('ace/mode/javascript').Mode;
 const LineWidgets = ace$3.acequire('ace/line_widgets').LineWidgets;
-const Range = ace$3.acequire('ace/range').Range; // const Search = Ace.acequire('ace/ext/searchbox').Search;
-
+const Range = ace$3.acequire('ace/range').Range;
 const aceEditorLineWidgets = {
   JavascriptMode,
   LineWidgets,
@@ -40334,31 +40333,6 @@ class JsEditorUi extends React$3.PureComponent {
     this.state = {};
     this.onKeyDown = this.onKeyDown.bind(this);
     this.onValueChange = this.onValueChange.bind(this);
-  }
-
-  runShortcut() {
-    const {
-      onRun
-    } = this.props;
-    return {
-      name: 'run',
-      bindKey: {
-        win: 'Shift-Enter',
-        mac: 'Shift-Enter'
-      },
-      exec: () => onRun()
-    };
-  }
-
-  saveShortcut() {
-    return {
-      name: 'save',
-      bindKey: {
-        win: 'Ctrl-S',
-        mac: 'Command-S'
-      },
-      exec: () => this.save()
-    };
   }
 
   async run() {
