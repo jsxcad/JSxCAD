@@ -56,12 +56,12 @@ export const updateNotebook = async (
       expectedPng = pngjs.PNG.sync.read(readFileSync(`${target}_${nth}.png`));
     } catch (error) {
       if (error.code === 'ENOENT') {
-        // We have no expectation -- generate one.
-        const buffer = pngjs.PNG.sync.write(observedPng);
-        writeFileSync(`${target}_${nth}.png`, buffer);
-        return;
+        // We couldn't find a matching expectation.
+        failedExpectations.push(`${target}_${nth}.observed.png`);
+        continue;
+      } else {
+        throw error;
       }
-      throw error;
     }
     const { width, height } = expectedPng;
     const differencePng = new pngjs.PNG({ width, height });
