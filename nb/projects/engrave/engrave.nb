@@ -1,31 +1,15 @@
-import { readFont } from '@jsxcad/api-v1-font';
+import { Text, readFont } from '@jsxcad/api-v1-font';
 
 const unYetGul = await readFont('https://jsxcad.js.org/ttf/UnYetgul.ttf?a=1');
 
-const tool = { toolType: 'spindle', spindleRpm: 7000, feedRate: 650 };
+const tool = { grbl: { type: 'spindle', spindleRpm: 7000, feedRate: 650 } };
 
-const font = unYetGul(25);
+const text = await control('Engraving', '輝');
 
-// FIX: Caching means that this control doesn't update properly.
-// Edit the default value directly for now.
-const text = await stringBox('Engraving', '輝');
-
-const model = unYetGul(25)(text)
+const model = Text(unYetGul, text, 25)
   .align('xy')
-  .weld(Box(b(30, 26)))
-  .pull(-1)
+  .cutFrom(Box(30, 26))
   .view()
   .md('Model');
 
-const section = model
-  .section(...each((n) => z.z(0 - n), { upto: 0.4, from: 0.2, by: 0.2 }))
-  .gridView()
-  .md('Model Section');
-
-const inset = section.inset(0.5, 0.5).gridView().md('Section Inset');
-
-const toolpaths = Group(
-  ...each((n) => inset.z(0 - n), { upto: 2, from: 0, by: 0.1 })
-)
-  .view()
-  .downloadGcode('Engrave', { ...tool, minCutZ: -2.2 });
+const inset = model.inset(0.5, 0.5).gridView().md('Section Inset');
