@@ -8,7 +8,7 @@ export const screenshot = async (html) => {
   await page.setViewport({ width, height });
   page.on('error', (msg) => console.log(msg.text()));
   await page.setContent(html);
-  await page.waitForSelector('.notebook.loaded');
+  await page.waitForSelector('.notebook.loaded', { timeout: 60000 });
   const pageHeight = await page.evaluate(() => {
     let pageHeight = 0;
 
