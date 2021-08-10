@@ -1,49 +1,65 @@
 // Probably from https://www.pinterest.de/pin/200410252158492924/
-
-const sheath = Arc(10.1)
-  .op((s) => s.cutFrom(s.offset(2)))
-  .ex(10 + 12)
-  .cut(
-    Arc(1)
-      .ex(10 + 12, 10 + 6)
-      .x(7)
-      .op((s) => s.rz(180 + 45).and(s.rz(180 - 45)))
-  )
-  .and(
-    Box(2.5, 9.9)
-      .op((s) => s.cutFrom(s.offset(2)))
-      .ex(10)
-      .x(8)
-  )
-  .view()
-  .stl('sheath');
-const ring = Arc(10.1)
-  .offset(2)
-  .op((s) => s.cutFrom(s.offset(1)))
-  .ex(8)
-  .view()
-  .stl('ring');
-
 const dinosaur = await readSvg(
-  'https://gitcdn.xyz/cdn/jsxcad/JSxCAD/master/nb/projects/plotter/dinosaur.svg'
+  'https://gitcdn.link/cdn/jsxcad/JSxCAD/master/nb/projects/plotter/dinosaur.svg',
+  { fill: false }
 );
 
 const plotter = defGrblPlotter('plotter');
 
-const aligned = dinosaur
-  .scale(10)
-  .align('xy')
-  .view({ outline: false })
-  .downloadGcode('dinosaur', plotter);
+const aligned = dinosaur.scale(10).align('xy').gcode('dinosaur', plotter);
 
+const spiral = Spiral((a) => [[1 + (a * 360) / 100]], {
+  to: 10,
+  by: 3 / 360,
+}).gcode('spiral', plotter);
+const flowers = await readSvg(
+  'https://gitcdn.link/cdn/jsxcad/JSxCAD/master/nb/projects/plotter/flowers.svg',
+  { fill: false }
+);
+
+flowers
+  .scale(1 / 60)
+  .align()
+  .gcode('flowers', plotter);
 const mandala = await readSvg(
-  'https://gitcdn.xyz/cdn/jsxcad/JSxCAD/master/nb/projects/plotter/mandala.svg'
+  'https://gitcdn.xyz/cdn/jsxcad/JSxCAD/master/nb/projects/plotter/mandala.svg',
+  { fill: false }
 );
 
 const scaledMandala = mandala
   .align('xy')
-  .scale(11)
-  .view({ outline: false })
-  .downloadGcode('mandala', plotter, { doPlan: false });
+  .scale(20)
+  .gcode('mandala', plotter, { doPlan: false });
 
-const circle = Arc(101).gcode('circle', plotter);
+const visnezh = await readSvg(
+  'https://gitcdn.xyz/cdn/jsxcad/JSxCAD/master/nb/projects/plotter/visnezh.svg',
+  { fill: false }
+);
+
+const scaledVisnezh = visnezh
+  .align('xy')
+  .scale(1 / 100)
+  .gcode('visnezh', plotter, { doPlan: false });
+const calibration = Group(
+  ...seq(
+    (x) =>
+      Box(10)
+        .x(x)
+        .op((s) =>
+          Group(...seq((y) => s.y(y), { from: -100, upto: 100, by: 60 }))
+        ),
+    { from: -100, upto: 100, by: 60 }
+  )
+)
+  .align('xy')
+  .gcode('calibration', plotter);
+
+const star = Group(
+  ...seq((a) => Triangle(5).rz(a), { upto: 120 / 360, by: 30 / 360 })
+).view({ outline: false });
+
+const r = Random();
+
+const stars = Group(
+  ...seq((i) => star.x(r.in(-100, 100)).y(r.in(-100, 100)), { upto: 20 })
+).gcode('stars', plotter);
