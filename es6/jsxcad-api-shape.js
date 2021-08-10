@@ -113,7 +113,7 @@ const isSingleOpenPath = ({ paths }) =>
 Shape.method = {};
 
 const registerShapeMethod = (name, op) => {
-  const { path } = getSourceLocation();
+  const path = getSourceLocation()?.path;
   if (Shape.prototype.hasOwnProperty(name)) {
     const { origin } = Shape.prototype[name];
     if (origin !== path) {
