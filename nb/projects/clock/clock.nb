@@ -1,4 +1,6 @@
-import { readFont } from '@jsxcad/api-v1-font';
+import { Text, readFont } from '@jsxcad/api-v1-font';
+
+md`### (Needs redesign)`;
 
 md`
 # Clock
@@ -10,52 +12,50 @@ This is a simple project to produce a clock.
 We want to produce a display something like this.
 
 <img src="https://upload.wikimedia.org/wikipedia/commons/a/a4/Wecker_mit_Radium.jpg" width="256">
-
-## Parameters
 `;
 
-const face = {
-  faceRadius: await numberBox('face radius', 90),
-  axleRadius: await numberBox('axle radius', 5),
-  thickness: await numberBox('thickness', 3),
-  fontSize: await numberBox('font size', 20),
-};
+md`## Parameters
+`;
+
+const faceRadius = control('face radius', 90, 'input');
+const axleRadius = control('axle radius', 5, 'input');
+const faceThickness = control('face thickness', 3, 'input');
+const fontSize = control('font size', 20, 'input');
 
 md`## Parts`;
 
-const hourHand = { face, reach: 0.65, tipRadius: 1.75, thickness: 3 };
-const minuteHand = { face, reach: 0.9, tipRadius: 1.5, thickness: 3 };
-const clock = { face, hourHand, minuteHand };
+const hourHand = { reach: 0.65, tipRadius: 1.75, thickness: 3 };
+const minuteHand = { reach: 0.9, tipRadius: 1.5, thickness: 3 };
+const clock = { hourHand, minuteHand };
 
-const Hand = ({ reach, tipRadius, face, axleRadius, thickness }) =>
+const Hand = ({ reach, tipRadius, thickness }) =>
   Hull(
-    Arc().radius(face.axleRadius + 2.5),
+    Arc().hasRadius(axleRadius + 2.5),
     Arc()
-      .radius(tipRadius)
-      .move(reach * face.faceRadius)
-  ).cut(Arc().radius(face.axleRadius));
+      .hasRadius(tipRadius)
+      .move(reach * faceRadius)
+  ).cut(Arc().hasRadius(axleRadius));
 
 const aladinRegular = await readFont(
   'https://gitcdn.link/repo/google/fonts/master/ofl/aladin/Aladin-Regular.ttf'
 );
 
-const font = (c) => aladinRegular(face.fontSize)(c).outline().align();
-
-const Face = ({ axleRadius, faceRadius, thickness, fontSize }) =>
+const Face = ({ axleRadius, faceRadius, fontSize }) =>
   Arc()
-    .radius(faceRadius)
-    .cut(Arc().radius(axleRadius))
+    .hasRadius(faceRadius)
+    .cut(Arc().hasRadius(axleRadius))
     .and(
-      ...numbers(
+      ...seq(
         (n) =>
-          font(`${n}`)
+          Text(aladinRegular, `${n}`, 20)
+            .align('xy')
             .y(faceRadius - fontSize)
-            .rz((-n / 12) * 360),
+            .rz(-n / 12),
         { from: 1, to: 12 }
       )
     );
 
-Face(face).md('The clock face').topView();
+Face({ axleRadius, faceRadius, fontSize }).md('The clock face').gridView();
 
 Hand(hourHand).topView();
 md`The hour hand.`;
@@ -63,11 +63,13 @@ md`The hour hand.`;
 Hand(minuteHand).topView();
 md`The minute hand.`;
 
-const Clock = ({ face, hourHand, minuteHand }) =>
+const Clock = ({ hourHand, minuteHand }) =>
   Group(
-    Face(face),
-    Hand(hourHand).rz(45).z(face.thickness),
-    Hand(minuteHand).z(face.thickness + hourHand.thickness)
+    Face({ axleRadius, faceRadius, faceThickness, fontSize }),
+    Hand(hourHand)
+      .rz(45 / 360)
+      .z(faceThickness),
+    Hand(minuteHand).z(faceThickness + hourHand.thickness)
   );
 
 md`## Assembly`;
