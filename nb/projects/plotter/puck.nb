@@ -1,7 +1,7 @@
-const anchor = x
+const anchor = yz
   .Arc(2)
   .ex(7, -7)
-  .cut(y.Arc(1).ex(2, -2).z(0.75))
+  .cut(xz.Arc(1).ex(2, -2).z(0.75))
   .y(-1.5 / 2 - 1)
   .z(2 / 2 + 0.5)
   .view();
@@ -26,7 +26,9 @@ const Arm = (size) =>
     .ex(2);
 
 const arm3 = Arm(3.0).view().stl('arm_3');
+
 const arm5 = Arm(5).view().stl('arm_5');
+
 const arm7 = Arm(7).view().stl('arm_7');
 const arm8 = Arm(8).view().stl('arm_8');
 const arm9 = Arm(9).view().stl('arm_9');
@@ -53,11 +55,11 @@ const Sabot = (d) =>
     .stl('sabot');
 
 const foot = Orb(14)
-  .sides(20)
+  .hasSides(20)
   .with(Orb(12).void())
   .clip(Box(20).ex(100).z(-3))
   .cut(Box(20).ex(100).z(6))
-  .with(Orb(10.7).sides(10).material('steel').void())
+  .with(Orb(10.7).hasSides(10).material('steel').void())
   .align('z>')
   .z(2.8)
   .view({ outline: false })
@@ -69,35 +71,35 @@ const footWithGuide = foot
       .ex(11.8, 20)
       .op((s) => s.x(2).and(s.x(-2)))
   )
-  .cut(y.Arc(3).z(15).ex(5, -5))
+  .cut(xz.Arc(3).z(15).ex(5, -5))
   .cut(Arc(5).ex(100))
   .view({ outline: false });
 
 const bearing = Orb(10.8).view({ outline: false }).stl('bearing_108');
 
 const puckBase = Group(
-  x
+  yz
     .Arc(5)
-    .clip(x.Box(5).z(-5 / 2))
-    .add(x.Box(3, 2))
-    .cut(x.Box(1, 8).z(-2))
+    .clip(yz.Box(5).z(-5 / 2))
+    .add(yz.Box(3, 2))
+    .cut(yz.Box(1, 8).z(-2))
     .op((s) => s.ex(5, 50).and(s.ex(-5, -50)))
     .align('z>')
     .with(foot.align('z>').x(56, -56))
     .y(1),
-  y
+  xz
     .Arc(5)
-    .clip(y.Box(5).z(-5 / 2))
-    .add(y.Box(3, 2))
-    .cut(y.Box(1, 8).z(-2))
+    .clip(xz.Box(5).z(-5 / 2))
+    .add(xz.Box(3, 2))
+    .cut(xz.Box(1, 8).z(-2))
     .ex(-5, -50)
     .align('z>')
     .with(foot.y(56).align('z>')),
-  y
+  xz
     .Arc(5)
-    .clip(y.Box(5).z(-5 / 2))
-    .add(y.Box(3, 2))
-    .cut(y.Box(1, 8).z(-2))
+    .clip(xz.Box(5).z(-5 / 2))
+    .add(xz.Box(3, 2))
+    .cut(xz.Box(1, 8).z(-2))
     .ex(5, 50 + 30)
     .align('z>')
     .with(footWithGuide.y(-56 - 30).align('z>')),
@@ -138,7 +140,7 @@ const puck5 = puckBase
 
 const cam = Spiral((a) => [[a / 15 + 11]], { to: 200 }) // 15 -> 30
   .close()
-  .cut(Box().c1(5, 0).c2(60, 60))
+  .cut(Box().hasC1(5, 0).hasC2(60, 60))
   .cut(Arc(4.9))
   .ex(2)
   .view()
@@ -151,11 +153,11 @@ const servoMount = Assembly(
     .void()
 )
   .align('z>')
-  .clip(x.Arc(30, 40).ex(5, -5).z(13.5))
+  .clip(yz.Arc(30, 40).ex(5, -5).z(13.5))
   .with(
-    y
+    xz
       .Arc(5)
-      .clip(y.Box(5).z(-5 / 2))
+      .clip(xz.Box(5).z(-5 / 2))
       .align('z>')
       .ex(120)
       .grow(0.1)
@@ -188,7 +190,7 @@ const servoMount2 = Assembly(
       .x(2)
       .z(5 / 2 + 1)
   )
-  .cut(y.Box(4, 2).ex(20, -20))
+  .cut(xz.Box(4, 2).ex(20, -20))
   .view()
   .rx(1 / 2)
   .align('xyz>')
