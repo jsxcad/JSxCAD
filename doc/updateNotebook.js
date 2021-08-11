@@ -29,7 +29,7 @@ const writeMarkdown = (path, notebook, imageUrlList) => {
       }
     }
   }
-  const markdown = output.join('\n').replace(/#JSxCAD@https.*master/g, '../..');
+  const markdown = output.join('\n').replace(/#JSxCAD@https:\/\/gitcdn.link\/cdn\/jsxcad\/JSxCAD\/(.*).nb/g, (_, path) => `../../${path}.md`);
   writeFileSync(`${path}.md`, markdown);
 };
 
