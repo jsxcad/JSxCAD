@@ -1,13 +1,16 @@
+/* global mermaid */
+import * as PropTypes from 'prop-types';
+
 import AceEditor from 'react-ace';
 import ExtractUrls from 'extract-urls';
 import PrismJS from 'prismjs/components/prism-core';
-import PropTypes from 'prop-types';
 import React from 'react';
 
 import { aceEditorAuxiliary } from './AceEditorAuxiliary';
 import { aceEditorCompleter } from './AceEditorCompleter';
 import { aceEditorLineWidgets } from './AceEditorLineWidgets';
 import { aceEditorSnippetManager } from './AceEditorSnippetManager';
+import { animationFrame } from './schedule.js';
 import { prismJsAuxiliary } from './PrismJSAuxiliary';
 import { toDomElement } from '@jsxcad/ui-notebook';
 
@@ -85,23 +88,6 @@ export class JsEditorUi extends React.PureComponent {
     this.onValueChange = this.onValueChange.bind(this);
   }
 
-  saveShortcut() {
-    return {
-      name: 'save',
-      bindKey: { win: 'Ctrl-S', mac: 'Command-S' },
-      exec: () => this.save(),
-    };
-  }
-
-  runShortcut() {
-    const { onRun } = this.props;
-    return {
-      name: 'run',
-      bindKey: { win: 'Shift-Enter', mac: 'Shift-Enter' },
-      exec: () => onRun(),
-    };
-  }
-
   async run() {
     this.props.onRun();
   }
@@ -129,7 +115,6 @@ export class JsEditorUi extends React.PureComponent {
 
     editor.session.notebookElements = {};
 
-    // const { JavascriptMode, LineWidgets, Range } = aceEditorLineWidgets;
     const { JavascriptMode, LineWidgets } = aceEditorLineWidgets;
 
     const mode = new JavascriptMode();
@@ -154,7 +139,10 @@ export class JsEditorUi extends React.PureComponent {
     // let lastUpdate;
     let marker;
 
-    const doUpdate = async () => {
+    const update = async () => {
+      // Make sure everything is rendered, first.
+      await animationFrame();
+      mermaid.init(undefined, '.mermaid');
       console.log(`QQ/doUpdate`);
       if (advice) {
         if (advice.definitions) {
@@ -191,6 +179,8 @@ export class JsEditorUi extends React.PureComponent {
                 };
                 widgetManager.addLineWidget(widget);
                 widgets.set(definition, widget);
+                // Display the hidden element.
+                domElement.style.visibility = '';
               }
             }
           }
@@ -243,98 +233,11 @@ export class JsEditorUi extends React.PureComponent {
         }
       }
 
-      /*
-      // Construct the LineWidgets
-      for (const definition of notesByDefinition.keys()) {
-        try {
-          const entry = advice.definitions.get(definition);
-          if (!entry) {
-            console.log(`Missing definition: ${definition}`);
-            continue;
-          }
-          const { initSourceLocation } = entry;
-          const notes = notesByDefinition.get(definition);
-          const el = document.createElement('div');
-          el.appendChild(document.createTextNode(definition));
-          for (const note of notes) {
-            if (note.domElement) {
-              el.appendChild(note.domElement);
-            }
-          }
-          const widget = {
-            row: initSourceLocation.end.line - 1,
-            coverLine: false,
-            fixedWidth: true,
-            el,
-          };
-
-          el.style.overflow = 'hidden';
-          el.style.padding = 0;
-          el.style.border = 0;
-          el.style.margin = 0;
-
-          // Add to the dom, so we can calculate the height.
-          el.style.visibility = 'hidden';
-          el.style.filter = 'sepia(50%)';
-          document.body.appendChild(el);
-
-          // Adjust the widget height to be a multiple of line height, otherwise line selection is thrown off.
-          const lineHeight = editor.renderer.layerConfig.lineHeight;
-          let elHeight;
-          if (el.offsetHeight % lineHeight === 0) {
-            elHeight = Math.ceil(el.offsetHeight / lineHeight) * lineHeight;
-          } else {
-            elHeight = Math.ceil(el.offsetHeight / lineHeight) * lineHeight;
-          }
-          el.style.height = `${elHeight}px`;
-          if (el.offsetHeight % lineHeight !== 0) {
-            // console.log( `QQ/Height not aligned: definition: ${definition} offsetHeight: ${el.offsetHeight} lineHeight: ${lineHeight}`);
-          }
-
-          console.log(`QQ/add widget for: ${definition} height: ${el.style.height}`);
-          widgets.set(definition, widget);
-          widgetManager.addLineWidget(widget);
-
-          // Make it visible now that it is in the right place.
-          el.style.filter = '';
-          el.style.visibility = '';
-
-          if (widget.pixelHeight !== lineHeight * widget.rowCount) {
-            // console.log( `QQ/widget: definition ${definition} pixelHeight ${ widget.pixelHeight } vs ${lineHeight * widget.rowCount} rowCount ${ widget.rowCount } lineHeight ${lineHeight}`);
-          }
-        } catch (e) {
-          console.log(e.stack);
-          throw e;
-        }
-      }
-*/
-
       editor.resize();
 
       if (marker) {
         session.removeMarker(marker);
       }
-    };
-
-    // let updateScheduled = false;
-
-    const update = () => {
-      /*
-      if (updateScheduled) {
-        return;
-      }
-      const now = new Date();
-      if (lastUpdate && now < lastUpdate + 5000) {
-        updateScheduled = true;
-        setTimeout(() => {
-          doUpdate();
-          updateScheduled = false;
-        }, 1000);
-      } else {
-        doUpdate();
-      }
-*/
-      doUpdate();
     };
 
     const finished = () => {
@@ -417,7 +320,6 @@ export class JsEditorUi extends React.PureComponent {
           ref={(ref) => {
             this.aceEditor = ref;
           }}
-          commands={[this.runShortcut(), this.saveShortcut()]}
           editorProps={{ $blockScrolling: true }}
           setOptions={{
             enableLinking: true,

@@ -1,10 +1,4 @@
-import {
-  boot,
-  clearEmitted,
-  getEmitted,
-  read,
-  resolvePending,
-} from '@jsxcad/sys';
+import { boot, clearEmitted, getEmitted, resolvePending } from '@jsxcad/sys';
 import { readFileSync, writeFileSync } from 'fs';
 
 import api from '@jsxcad/api';
@@ -15,94 +9,98 @@ import pngjs from 'pngjs';
 import { screenshot } from './screenshot.js';
 import { toHtml } from '@jsxcad/convert-notebook';
 
-const writeMarkdown = (path, notebook, imageUrls) => {
-  const md = [];
+const writeMarkdown = (path, notebook, imageUrlList) => {
+  const output = [];
   let imageCount = 0;
+  let viewCount = 0;
   for (let nth = 0; nth < notebook.length; nth++) {
-    if (notebook[nth].md) {
-      md.push(notebook[nth].md);
+    const note = notebook[nth];
+    const { md, view } = note;
+    if (md) {
+      output.push(notebook[nth].md);
     }
-    if (imageUrls[nth]) {
-      imageCount += 1;
-      const { dataBuffer } = imageDataUri.decode(imageUrls[nth]);
-      const imagePath = `${path}.md.${imageCount}.png`;
-      writeFileSync(imagePath, dataBuffer);
-      md.push(`![Image](${pathModule.basename(imagePath)})`);
+    if (view) {
+      const imageUrl = imageUrlList[viewCount++];
+      if (typeof imageUrl === 'string' && imageUrl.startsWith('data:image/')) {
+        const { dataBuffer } = imageDataUri.decode(imageUrl);
+        const imagePath = `${path}.md.${imageCount++}.png`;
+        writeFileSync(imagePath, dataBuffer);
+        output.push(`![Image](${pathModule.basename(imagePath)})`);
+      }
     }
   }
-  writeFileSync(`${path}.md`, md.join('\n'));
+
+  // Produce a path back to the root.
+  const roots = path.split('/');
+  roots.pop();
+  const root = roots.map(_ => '..').join('/');
+
+  const markdown = output.join('\n\n').replace(/#JSxCAD@https:\/\/gitcdn.link\/cdn\/jsxcad\/JSxCAD\/master\/(.*).nb/g,
+    (_, path) => `${root}/${path}.md`);
+
+  writeFileSync(`${path}.md`, markdown);
 };
 
-export const updateNotebook = async (target) => {
-  console.log(`QQ/updateNotebook/0`);
+export const updateNotebook = async (
+  target,
+  { failedExpectations = [] } = {}
+) => {
   clearEmitted();
   await boot();
-  console.log(`QQ/updateNotebook/1`);
   try {
-    await api.importModule(`${target}.nb`);
+    await api.importModule(`${target}.nb`, { clearUpdateEmits: true });
   } catch (error) {
-    console.log(`QQ/updateNotebook/1/error`);
     api.log(error.stack);
   }
-  console.log(`QQ/updateNotebook/2`);
   await resolvePending();
   const notebook = getEmitted();
-  for (const note of notebook) {
-    if (note.log) {
-      console.log(note.log.text);
-    }
-    if (note.path) {
-      note.data = await read(note.path);
-    }
-  }
-  console.log(`QQ/updateNotebook/3`);
   const html = await toHtml(notebook);
-  console.log(`QQ/updateNotebook/4`);
   writeFileSync(`${target}.html`, html);
-  console.log(`QQ/updateNotebook/5`);
-  const { pngData, imageUrls } = await screenshot(
+  const { pngDataList, imageUrlList } = await screenshot(
     new TextDecoder('utf8').decode(html),
     `${target}.png`
   );
-  console.log(`QQ/updateNotebook/6`);
-  await writeMarkdown(target, notebook, imageUrls);
-  writeFileSync(`${target}.observed.png`, pngData);
-  const observedPng = pngjs.PNG.sync.read(pngData);
-  let expectedPng;
-  console.log(`QQ/updateNotebook/7`);
-  try {
-    expectedPng = pngjs.PNG.sync.read(readFileSync(`${target}.png`));
-  } catch (error) {
-    if (error.code === 'ENOENT') {
-      // We have no expectation -- generate one.
-      const buffer = pngjs.PNG.sync.write(observedPng);
-      writeFileSync(`${target}.png`, buffer);
-      return;
+  await writeMarkdown(target, notebook, imageUrlList);
+  for (let nth = 0; nth < pngDataList.length; nth++) {
+    const pngData = pngDataList[nth];
+    writeFileSync(`${target}_${nth}.observed.png`, pngData);
+    const observedPng = pngjs.PNG.sync.read(pngData);
+    let expectedPng;
+    try {
+      expectedPng = pngjs.PNG.sync.read(readFileSync(`${target}_${nth}.png`));
+    } catch (error) {
+      if (error.code === 'ENOENT') {
+        // We couldn't find a matching expectation.
+        failedExpectations.push(`${target}_${nth}.observed.png`);
+        continue;
+      } else {
+        throw error;
+      }
     }
-    throw error;
-  }
-  const { width, height } = expectedPng;
-  const differencePng = new pngjs.PNG({ width, height });
-  const pixelThreshold = 1;
-  const numFailedPixels = pixelmatch(
-    expectedPng.data,
-    observedPng.data,
-    differencePng.data,
-    width,
-    height,
-    {
-      threshold: 0.01,
-      alpha: 0.2,
-      diffMask: process.env.FORCE_COLOR === '0',
-      diffColor:
-        process.env.FORCE_COLOR === '0' ? [255, 255, 255] : [255, 0, 0],
-    }
-  );
-  if (numFailedPixels >= pixelThreshold) {
-    writeFileSync(
-      `${target}.difference.png`,
-      pngjs.PNG.sync.write(differencePng)
+    const { width, height } = expectedPng;
+    const differencePng = new pngjs.PNG({ width, height });
+    const pixelThreshold = 1;
+    const numFailedPixels = pixelmatch(
+      expectedPng.data,
+      observedPng.data,
+      differencePng.data,
+      width,
+      height,
+      {
+        threshold: 0.01,
+        alpha: 0.2,
+        diffMask: process.env.FORCE_COLOR === '0',
+        diffColor:
+          process.env.FORCE_COLOR === '0' ? [255, 255, 255] : [255, 0, 0],
+      }
     );
-    console.log(`${process.cwd()}/${target}.difference.png`);
+    if (numFailedPixels >= pixelThreshold) {
+      writeFileSync(
+        `${target}_${nth}.difference.png`,
+        pngjs.PNG.sync.write(differencePng)
+      );
+      // Note failures.
+      failedExpectations.push(`${target}_${nth}.observed.png`);
+    }
   }
 };

@@ -1,8 +1,9 @@
+import { getEdges } from '../path/getEdges.js';
 import { getNonVoidGraphs } from './getNonVoidGraphs.js';
 import { getNonVoidPaths } from './getNonVoidPaths.js';
 import { outline as outlineGraph } from '../graph/outline.js';
-import { taggedPaths } from './taggedPaths.js';
-import { toDisjointGeometry } from './toDisjointGeometry.js';
+import { taggedSegments } from './taggedSegments.js';
+import { toConcreteGeometry } from './toConcreteGeometry.js';
 
 // FIX: The semantics here are a bit off.
 // Let's consider the case of Assembly(Square(10), Square(10).outline()).outline().
@@ -11,9 +12,9 @@ import { toDisjointGeometry } from './toDisjointGeometry.js';
 // but ideally outline would be idempotent and rewrite shapes as their outlines,
 // unless already outlined, and handle the withOutline case within this.
 export const outline = (geometry, tagsOverride) => {
-  const disjointGeometry = toDisjointGeometry(geometry);
+  const concreteGeometry = toConcreteGeometry(geometry);
   const outlines = [];
-  for (let graphGeometry of getNonVoidGraphs(disjointGeometry)) {
+  for (let graphGeometry of getNonVoidGraphs(concreteGeometry)) {
     let tags = graphGeometry.tags;
     if (tagsOverride) {
       tags = tagsOverride;
@@ -21,11 +22,17 @@ export const outline = (geometry, tagsOverride) => {
     outlines.push(outlineGraph({ tags }, graphGeometry));
   }
   // Turn paths into wires.
-  for (let { tags = [], paths } of getNonVoidPaths(disjointGeometry)) {
+  for (let { tags = [], paths } of getNonVoidPaths(concreteGeometry)) {
     if (tagsOverride) {
       tags = tagsOverride;
     }
-    outlines.push(taggedPaths({ tags: [...tags, 'path/Wire'] }, paths));
+    const segments = [];
+    for (const path of paths) {
+      for (const edge of getEdges(path)) {
+        segments.push(edge);
+      }
+    }
+    outlines.push(taggedSegments({ tags }, segments));
   }
   return outlines;
 };

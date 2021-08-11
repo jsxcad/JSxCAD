@@ -3797,17 +3797,36 @@ function sum (o) {
 
 var hashSum = sum;
 
-const modules = [];
+const sourceLocations = [];
 
-const getModule = () => modules[modules.length - 1];
+const getSourceLocation = () =>
+  sourceLocations[sourceLocations.length - 1];
 
-const popModule = () => modules.pop();
+const popSourceLocation = (sourceLocation) => {
+  if (sourceLocations.length === 0) {
+    throw Error(`Expected current sourceLocation but there was none.`);
+  }
+  const endSourceLocation = getSourceLocation();
+  if (
+    sourceLocation.path !== endSourceLocation.path ||
+    sourceLocation.id !== endSourceLocation.id
+  ) {
+    throw Error(
+      `Expected sourceLocation ${JSON.stringify(
+        sourceLocation
+      )} but found ${JSON.stringify(endSourceLocation)}`
+    );
+  }
+  emit({ endSourceLocation });
+  sourceLocations.pop();
+};
 
-const pushModule = (module) => modules.push(module);
+const pushSourceLocation = (sourceLocation) => {
+  sourceLocations.push(sourceLocation);
+  emit({ beginSourceLocation: sourceLocation });
+};
 
 const emitted = [];
-
-let context;
 
 let startTime = new Date();
 
@@ -3816,25 +3835,18 @@ const elapsed = () => new Date() - startTime;
 const clearEmitted = () => {
   startTime = new Date();
   emitted.length = 0;
-  context = undefined;
+  sourceLocations.length = 0;
 };
 
 const onEmitHandlers = new Set();
 
 const emit = (value) => {
-  if (value.module === undefined) {
-    value.module = getModule();
+  if (value.sourceLocation === undefined) {
+    value.sourceLocation = getSourceLocation();
   }
-  if (value.setContext) {
-    context = value.setContext;
-  }
-  if (context) {
-    value.context = context;
-  }
-  const index = emitted.length;
   emitted.push(value);
   for (const onEmitHandler of onEmitHandlers) {
-    onEmitHandler(value, index);
+    onEmitHandler(value);
   }
 };
 
@@ -4067,8 +4079,6 @@ const touch = async (
   }
 };
 
-/* global self */
-
 const { promises: promises$3 } = fs;
 const { serialize } = v8$1;
 
@@ -4087,18 +4097,9 @@ const writeFile = async (options, path, data) => {
     setupFilesystem({ fileBase: workspace });
   }
 
-  if (path.startsWith('meta/def')) {
-    console.log(`QQ/write/META: ${path} ${JSON.stringify(data)}`);
-  }
   info(`Write ${path}`);
   const file = await getFile(options, path);
   file.data = data;
-
-  if (isWebWorker) {
-    console.log(`QQ/write/cache/webworker id ${self.id} path ${path}`);
-  } else {
-    console.log(`QQ/write/cache/browser path ${path}`);
-  }
 
   const base = getBase();
   if (!ephemeral && base !== undefined) {
@@ -4119,12 +4120,6 @@ const writeFile = async (options, path, data) => {
       }
     } else if (isBrowser || isWebWorker) {
       await db().setItem(persistentPath, data);
-    }
-
-    if (isWebWorker) {
-      console.log(`QQ/write/persistent/webworker id ${self.id} path ${path}`);
-    } else {
-      console.log(`QQ/write/persistent/browser path ${path}`);
     }
 
     // Let everyone know the file has changed.
@@ -4261,19 +4256,7 @@ const readFile = async (options, path) => {
   }
   const file = await getFile(options, path);
   if (file.data === undefined || useCache === false || forceNoCache) {
-    if (isWebWorker) {
-      console.log(`QQ/read/persistent/webworker id ${self.id} path ${path}`);
-    } else {
-      console.log(`QQ/read/persistent/browser path ${path}`);
-    }
     file.data = await fetchPersistent(path, true);
-  } else {
-    console.log(`QQ/read/cache: ${path}`);
-    if (isWebWorker) {
-      console.log(`QQ/read/cache/webworker id ${self.id} path ${path}`);
-    } else {
-      console.log(`QQ/read/cache/browser path ${path}`);
-    }
   }
   if (workspace !== originalWorkspace) {
     // Switch back to the original filesystem, if necessary.
@@ -4529,4 +4512,4 @@ let nanoid = (size = 21) => {
 
 const generateUniqueId = () => nanoid();
 
-export { addOnEmitHandler, addPending, ask, askService, askServices, boot, clearEmitted, createConversation, createService, deleteFile, elapsed, emit, generateUniqueId, getControlValue, getDefinitions, getEmitted, getFilesystem, getModule, getPendingErrorHandler, getServicePoolInfo, hash, info, isBrowser, isNode, isWebWorker, listFiles, listFilesystems, log, onBoot, popModule, pushModule, qualifyPath, read, readFile, readOrWatch, removeOnEmitHandler, resolvePending, setControlValue, setHandleAskUser, setPendingErrorHandler, setupFilesystem, sleep, tellServices, terminateActiveServices, touch, unwatchFile, unwatchFileCreation, unwatchFileDeletion, unwatchFiles, unwatchLog, unwatchServices, waitServices, watchFile, watchFileCreation, watchFileDeletion, watchLog, watchServices, write, writeFile };
+export { addOnEmitHandler, addPending, ask, askService, askServices, boot, clearEmitted, createConversation, createService, deleteFile, elapsed, emit, generateUniqueId, getControlValue, getDefinitions, getEmitted, getFilesystem, getPendingErrorHandler, getServicePoolInfo, getSourceLocation, hash, info, isBrowser, isNode, isWebWorker, listFiles, listFilesystems, log, onBoot, popSourceLocation, pushSourceLocation, qualifyPath, read, readFile, readOrWatch, removeOnEmitHandler, resolvePending, setControlValue, setHandleAskUser, setPendingErrorHandler, setupFilesystem, sleep, tellServices, terminateActiveServices, touch, unwatchFile, unwatchFileCreation, unwatchFileDeletion, unwatchFiles, unwatchLog, unwatchServices, waitServices, watchFile, watchFileCreation, watchFileDeletion, watchLog, watchServices, write, writeFile };

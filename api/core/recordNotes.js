@@ -24,13 +24,9 @@ export const beginRecordingNotes = (path, id, sourceLocation) => {
     handler = addOnEmitHandler(recordNote);
   }
   recording = true;
-  const setContext = { recording: { path, id } };
-  emit({ hash: hash(setContext), setContext });
-  emit({ beginNotes: { path, id } });
 };
 
 export const saveRecordedNotes = (path, id) => {
-  emit({ endNotes: { path, id } });
   let notesToSave = notes;
   notes = undefined;
   recording = false;
@@ -38,9 +34,6 @@ export const saveRecordedNotes = (path, id) => {
 };
 
 export const replayRecordedNotes = async (path, id) => {
-  // const setContext = { recording: { path, id } };
-  // emit({ hash: hash(setContext), setContext });
-
   const notes = await read(`data/note/${path}/${id}`);
 
   if (notes === undefined) {
@@ -54,7 +47,7 @@ export const replayRecordedNotes = async (path, id) => {
   }
 };
 
-export const emitSourceLocation = ({ line, column }) => {
-  const setContext = { sourceLocation: { line, column } };
+export const emitSourceLocation = ({ path, id }) => {
+  const setContext = { sourceLocation: { path, id } };
   emit({ hash: hash(setContext), setContext });
 };

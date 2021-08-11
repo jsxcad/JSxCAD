@@ -1,5 +1,8 @@
-/* global FileReader, btoa, history, location */
+/* global FileReader, btoa, history, location, mermaid */
 
+import * as PropTypes from 'prop-types';
+
+import React, { PureComponent, render } from 'react';
 import SplitPane, { Pane } from 'react-split-pane';
 import {
   askService,
@@ -33,16 +36,13 @@ import Dropdown from 'react-bootstrap/Dropdown';
 import Form from 'react-bootstrap/Form';
 import FormControl from 'react-bootstrap/FormControl';
 import JsEditorUi from './JsEditorUi';
-import Mermaid from 'mermaid';
 import Modal from 'react-bootstrap/Modal';
 import Nav from 'react-bootstrap/Nav';
 import Navbar from 'react-bootstrap/Navbar';
-import Prettier from 'prettier';
-import PrettierParserBabel from 'prettier/parser-babel.js';
-import PropTypes from 'prop-types';
-import React from 'react';
-import ReactDOM from 'react-dom';
+import Prettier from 'https://unpkg.com/prettier@2.3.2/esm/standalone.mjs';
+import PrettierParserBabel from 'https://unpkg.com/prettier@2.3.2/esm/parser-babel.mjs';
 import Spinner from 'react-bootstrap/Spinner';
+import { animationFrame } from './schedule.js';
 import { execute } from '@jsxcad/api';
 import { fromPointsToAlphaShape2AsPolygonSegments } from '@jsxcad/algorithm-cgal';
 import marked from 'marked';
@@ -76,26 +76,7 @@ const ensureFile = async (file, url, { workspace } = {}) => {
   }
 };
 
-const defaultPaneLayout = {
-  direction: 'row',
-  first: '0',
-  second: { direction: 'column', first: '2', second: '3', splitPercentage: 75 },
-};
-
-const defaultPaneViews = [
-  [
-    '0',
-    {
-      view: 'editScript',
-      file: 'source/script.jsxcad',
-      title: 'Edit script.jsxcad',
-    },
-  ],
-  ['2', { view: 'notebook', title: 'Notebook' }],
-  ['3', { view: 'log', title: 'Log' }],
-];
-
-class Ui extends React.PureComponent {
+class Ui extends PureComponent {
   static get propTypes() {
     return {
       workspace: PropTypes.string,
@@ -113,6 +94,8 @@ class Ui extends React.PureComponent {
       workspaces: this.props.workspaces,
       workspace: this.props.workspace,
       files: [],
+      file: this.props.file,
+      path: this.props.path,
       selectedPaths: [],
       notebookNotes: {},
       notebookDefinitions: {},
@@ -133,9 +116,8 @@ class Ui extends React.PureComponent {
   }
 
   async componentDidMount() {
-    const { jsEditorAdvice, workspace } = this.state;
-    const { file, path, sha } = this.props;
-    const props = this.props;
+    const { jsEditorAdvice, file, path, workspace } = this.state;
+    const { sha } = this.props;
 
     if (file && path) {
       await ensureFile(file, path, { workspace });
@@ -195,10 +177,13 @@ class Ui extends React.PureComponent {
               return;
             }
 
+            if (note.view) {
+              console.log('view');
+            }
+
             if (
-              note.context &&
-              note.context.recording &&
-              note.context.recording.path !== props.path
+              !note.sourceLocation ||
+              note.sourceLocation.path !== this.state.path
             ) {
               // This note is for a different module.
               return;
@@ -206,25 +191,29 @@ class Ui extends React.PureComponent {
 
             const { notebookNotes, notebookDefinitions } = this.state;
             const { domElementByHash } = jsEditorAdvice;
-            const id =
-              note.context &&
-              note.context.recording &&
-              note.context.recording.id;
+            const id = note.sourceLocation.id;
 
             if (note.setContext) {
               return;
             }
 
-            if (note.beginNotes) {
+            if (note.beginSourceLocation) {
+              const domElement = document.createElement('div');
+              // Attach the domElement invisibly so that we can compute the size.
+              // Add it at the top so that it doesn't extend the bottom of the page.
+              document.body.prepend(domElement);
+              domElement.style.display = 'block';
+              domElement.style.visibility = 'hidden';
+              domElement.style.position = 'absolute';
               notebookDefinitions[id] = {
                 notes: [],
-                domElement: document.createElement('div'),
+                domElement,
               };
               // This starts the notes to update path/id.
               return;
             }
 
-            if (note.endNotes) {
+            if (note.endSourceLocation) {
               if (jsEditorAdvice.onUpdate) {
                 await jsEditorAdvice.onUpdate();
               }
@@ -357,34 +346,8 @@ class Ui extends React.PureComponent {
   async selectWorkspace(workspace) {
     setupFilesystem({ fileBase: workspace });
     this.updateUrl({ workspace });
-    const paneLayoutData = await read('ui/paneLayout');
-    let paneLayout;
-    if (paneLayoutData !== undefined && paneLayoutData !== 'null') {
-      if (paneLayoutData.buffer) {
-        paneLayout = JSON.parse(new TextDecoder('utf8').decode(paneLayoutData));
-      } else {
-        paneLayout = paneLayoutData;
-      }
-    } else {
-      paneLayout = defaultPaneLayout;
-    }
-
-    const paneViewsData = await read('ui/paneViews');
-    let paneViews;
-    if (paneViewsData !== undefined) {
-      if (paneViewsData.buffer) {
-        paneViews = JSON.parse(new TextDecoder('utf8').decode(paneViewsData));
-      } else {
-        paneViews = paneViewsData;
-      }
-    } else {
-      paneViews = defaultPaneViews;
-    }
-
     const files = await listFiles({ workspace });
     this.setState({
-      paneLayout,
-      paneViews,
       workspace,
       files,
       selectedPaths: [],
@@ -466,6 +429,9 @@ class Ui extends React.PureComponent {
     const jsEditorData =
       typeof data === 'string' ? data : new TextDecoder('utf8').decode(data);
     this.setState({ file, path, jsEditorData });
+
+    // Let state propagate.
+    await animationFrame();
 
     // Automatically run the notebook on load. The user can hit Stop.
     await this.doRun();
@@ -813,15 +779,6 @@ class Ui extends React.PureComponent {
     }
   }
 
-  updateNotebook() {
-    /*
-    const { notebookRef } = this.state;
-    if (notebookRef) {
-      notebookRef.forceUpdate();
-    }
-*/
-  }
-
   clearLog() {
     const { logElement } = this.state;
     if (logElement) {
@@ -833,8 +790,9 @@ class Ui extends React.PureComponent {
     this.setState({ logStartDate });
   }
 
-  async doRun() {
-    const { ask, jsEditorData, jsEditorAdvice, path, workspace } = this.state;
+  async doRun(options) {
+    const { ask, jsEditorData, jsEditorAdvice, path, workspace } =
+      Object.assign({}, this.state, options);
     const { sha } = this.props;
     const topLevel = new Map();
     try {
@@ -906,7 +864,6 @@ class Ui extends React.PureComponent {
       // Include any high level notebook errors in the output.
       window.alert(error.stack);
     } finally {
-      this.updateNotebook();
       this.setState({ running: false });
     }
   }
@@ -915,7 +872,7 @@ class Ui extends React.PureComponent {
     const { file, jsEditorData } = this.state;
     const getCleanData = (data) => {
       if (file.endsWith('.js') || file.endsWith('.nb')) {
-        // Just make a best attempt
+        // Just make a best attempt to reformat.
         data = Prettier.format(jsEditorData, {
           trailingComma: 'es5',
           singleQuote: true,
@@ -1264,7 +1221,7 @@ class Ui extends React.PureComponent {
                 </SplitPane>
               </div>
             );
-            setTimeout(() => Mermaid.init(undefined, '.mermaid'), 0);
+            setTimeout(() => mermaid.init(undefined, '.mermaid'), 0);
           } else {
             const serviceInfo = [];
             for (const service of getServicePoolInfo().activeServices) {
@@ -1311,11 +1268,6 @@ class Ui extends React.PureComponent {
                             overflowX: 'hidden',
                             overflowY: 'scroll',
                           }}
-                          /*
-                          ref={(ref) => {
-                            this.setState({ logElement: ref });
-                          }}
-*/
                         >
                           {serviceInfo}
                         </Col>
@@ -1496,7 +1448,7 @@ const setupUi = async (sha) => {
   document
     .getElementById('loading')
     .appendChild(document.createTextNode('Starting React'));
-  ReactDOM.render(
+  render(
     <Ui
       ref={(ref) => {
         ui = ref;

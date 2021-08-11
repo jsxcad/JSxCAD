@@ -130,19 +130,7 @@ export const readFile = async (options, path) => {
   }
   const file = await getFile(options, path);
   if (file.data === undefined || useCache === false || forceNoCache) {
-    if (isWebWorker) {
-      console.log(`QQ/read/persistent/webworker id ${self.id} path ${path}`);
-    } else {
-      console.log(`QQ/read/persistent/browser path ${path}`);
-    }
     file.data = await fetchPersistent(path, true);
-  } else {
-    console.log(`QQ/read/cache: ${path}`);
-    if (isWebWorker) {
-      console.log(`QQ/read/cache/webworker id ${self.id} path ${path}`);
-    } else {
-      console.log(`QQ/read/cache/browser path ${path}`);
-    }
   }
   if (workspace !== originalWorkspace) {
     // Switch back to the original filesystem, if necessary.

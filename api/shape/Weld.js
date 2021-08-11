@@ -21,7 +21,6 @@ export const weld =
     }
     const welds = [];
     const arrangements = arrangePolygonsWithHoles(unwelded);
-    console.log(`QQ/arrangements: ${JSON.stringify(arrangements)}`);
     for (const { polygonsWithHoles } of arrangements) {
       // Keep the planar grouping.
       const triangles = fromPolygonsWithHolesToTriangles(polygonsWithHoles);

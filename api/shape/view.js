@@ -2,7 +2,7 @@ import {
   addPending,
   emit,
   generateUniqueId,
-  getModule,
+  getSourceLocation,
   write,
 } from '@jsxcad/sys';
 
@@ -18,8 +18,8 @@ export const baseView =
     wireframe = false,
     prepareView = (x) => x,
     inline,
-    width = 1024,
-    height = 512,
+    width = 512,
+    height = 256,
     position = [100, -100, 100],
     withAxes = false,
     withGrid = false,
@@ -30,13 +30,18 @@ export const baseView =
       height = size / 2;
     }
     const viewShape = prepareView(shape);
+    const sourceLocation = getSourceLocation();
+    if (!sourceLocation) {
+      console.log('No sourceLocation');
+    }
+    const { path } = sourceLocation;
     for (const entry of ensurePages(
       viewShape.toDisplayGeometry({ skin, outline, wireframe })
     )) {
-      const path = `view/${getModule()}/${generateUniqueId()}`;
-      addPending(write(path, entry));
+      const viewPath = `view/${path}/${generateUniqueId()}`;
+      addPending(write(viewPath, entry));
       const view = { width, height, position, inline, withAxes, withGrid };
-      emit({ hash: generateUniqueId(), path, view });
+      emit({ hash: generateUniqueId(), path: viewPath, view });
     }
     return shape;
   };

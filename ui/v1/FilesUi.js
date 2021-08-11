@@ -1,5 +1,7 @@
 /* global FileReader */
 
+import * as PropTypes from 'prop-types';
+
 import {
   deleteFile,
   listFiles,
@@ -16,7 +18,6 @@ import Container from 'react-bootstrap/Container';
 import FormControl from 'react-bootstrap/FormControl';
 import InputGroup from 'react-bootstrap/InputGroup';
 import Pane from './Pane';
-import PropTypes from 'prop-types';
 import React from 'react';
 import Row from 'react-bootstrap/Row';
 

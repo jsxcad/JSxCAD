@@ -17,7 +17,7 @@ const downloadFile = async (event, filename, path, data, type) => {
 marked.use({
   renderer: {
     code(code, language) {
-      if (code.match(/^sequenceDiagram/) || code.match(/^graph/)) {
+      if (language === 'mermaid') {
         return '<div class="mermaid">' + code + '</div>';
       } else {
         return '<pre><code>' + code + '</code></pre>';
@@ -78,9 +78,12 @@ export const toDomElement = (notebook = [], { onClickView } = {}) => {
       Object.assign(entry, note.define.data);
     }
     if (note.view) {
-      const { url, openView } = note;
+      const { url, openView, view } = note;
+      const { height, width } = view;
       const image = document.createElement('img');
-      image.style.height = `${21 * 13}px`;
+      image.style.display = 'block';
+      image.style.height = `${height}px`;
+      image.style.width = `${width}px`;
       image.style.padding = '0px';
       image.style.border = '0px';
       image.style.margin = '0px';

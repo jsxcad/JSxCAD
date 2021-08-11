@@ -1,18 +1,20 @@
+import * as PropTypes from 'prop-types';
+
 import {
   MosaicContext,
   MosaicWindow,
   MosaicWindowContext,
 } from 'react-mosaic-component';
 
+import React, { PureComponent } from 'react';
+
 import Nav from 'react-bootstrap/Nav';
 import NavDropdown from 'react-bootstrap/NavDropdown';
 import Navbar from 'react-bootstrap/Navbar';
-import PropTypes from 'prop-types';
-import React from 'react';
 
 import { getFilesystem } from '@jsxcad/sys';
 
-export class Pane extends React.PureComponent {
+export class Pane extends PureComponent {
   static get propTypes() {
     return {
       createNode: PropTypes.func,

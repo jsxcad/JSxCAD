@@ -5,7 +5,6 @@ import {
   MeshPhongMaterial,
   MeshPhysicalMaterial,
   RepeatWrapping,
-  // TextureLoader,
 } from 'three';
 
 import { setColor } from './color.js';

@@ -1,11 +1,9 @@
 // rollup.config.js
-import babel from 'rollup-plugin-babel';
-import builtins from 'rollup-plugin-node-builtins';
-import commonjs from 'rollup-plugin-commonjs';
-import globals from 'rollup-plugin-node-globals';
+import babel from '@rollup/plugin-babel';
+import commonjs from '@rollup/plugin-commonjs';
 import hypothetical from 'rollup-plugin-hypothetical-windows-fix';
 import loadz0r from 'rollup-plugin-loadz0r';
-import nodeResolve from 'rollup-plugin-node-resolve';
+import resolve from '@rollup/plugin-node-resolve';
 
 export const watcher = {
   transform(code, id) {
@@ -50,7 +48,6 @@ export default {
       },
     }),
     loadz0r(),
-    builtins(),
     babel({
       babelrc: false,
       exclude: [/node_modules/, /polybooljs/],
@@ -84,7 +81,6 @@ export default {
         '../../node_modules/react-recollect/index.js': ['collect'],
       },
     }),
-    globals(),
-    nodeResolve({ preferBuiltins: true }),
+    resolve({ preferBuiltins: true }),
   ],
 };

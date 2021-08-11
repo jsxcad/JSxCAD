@@ -5,27 +5,25 @@ import { identityMatrix } from '@jsxcad/math-mat4';
 import { taggedPlan } from '@jsxcad/geometry';
 import { zag } from '@jsxcad/api-v1-math';
 
-const updatePlan = (shape, ...updates) => {
-  const geometry = shape.toTransformedGeometry();
-  if (geometry.type !== 'plan') {
-    throw Error(`Shape is not a plan`);
-  }
-  return Shape.fromGeometry(
-    taggedPlan(
-      { tags: geometry.tags },
-      {
-        ...geometry.plan,
-        history: [...(geometry.plan.history || []), ...updates],
-      }
-    )
-  );
-};
+const updatePlan =
+  (...updates) =>
+  (shape) => {
+    const geometry = shape.toTransformedGeometry();
+    if (geometry.type !== 'plan') {
+      throw Error(`Shape is not a plan`);
+    }
+    return Shape.fromGeometry(
+      taggedPlan(
+        { tags: geometry.tags },
+        {
+          ...geometry.plan,
+          history: [...(geometry.plan.history || []), ...updates],
+        }
+      )
+    );
+  };
 
-const updatePlanMethod = function (...updates) {
-  return updatePlan(this, ...updates);
-};
-
-Shape.prototype.updatePlan = updatePlanMethod;
+Shape.registerMethod('updatePlan', updatePlan);
 
 export const hasAngle =
   (start = 0, end = 0) =>

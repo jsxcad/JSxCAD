@@ -26,6 +26,7 @@ export const prepareGcode = (shape, name, tool, options = {}) => {
       // CHECK: Is this a reasonable mime type?
       type: 'application/x-gcode',
     });
+    Shape.fromGeometry(entry).view(options.view);
   }
   return entries;
 };
@@ -38,7 +39,6 @@ const downloadGcodeMethod = function (name, tool, options = {}) {
   emit({ download, hash });
   return this;
 };
-Shape.prototype.downloadGcode = downloadGcodeMethod;
 Shape.prototype.gcode = downloadGcodeMethod;
 
 export const writeGcode = (shape, name, tool, options = {}) => {

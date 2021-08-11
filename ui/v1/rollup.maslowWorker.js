@@ -1,10 +1,8 @@
-import builtins from 'rollup-plugin-node-builtins';
-import commonjs from 'rollup-plugin-commonjs';
-import globals from 'rollup-plugin-node-globals';
+import commonjs from '@rollup/plugin-commonjs';
 import hypothetical from 'rollup-plugin-hypothetical-windows-fix';
 import loadz0r from 'rollup-plugin-loadz0r';
-import nodeResolve from 'rollup-plugin-node-resolve';
 import replace from '@rollup/plugin-replace';
+import resolve from '@rollup/plugin-node-resolve';
 
 export default {
   input: 'maslowWorker.js',
@@ -26,8 +24,6 @@ export default {
       },
     }),
     commonjs(),
-    globals(),
-    builtins(),
-    nodeResolve({ preferBuiltins: true, mainFields: ['main'] }),
+    resolve({ preferBuiltins: true, mainFields: ['main'] }),
   ],
 };

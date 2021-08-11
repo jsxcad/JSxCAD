@@ -1,5 +1,6 @@
+import * as PropTypes from 'prop-types';
+
 import { DraggableCore } from 'react-draggable';
-import PropTypes from 'prop-types';
 import React from 'react';
 
 // React.addons.cloneWithProps look-alike that merges style & className.
