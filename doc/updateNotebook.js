@@ -29,7 +29,16 @@ const writeMarkdown = (path, notebook, imageUrlList) => {
       }
     }
   }
-  const markdown = output.join('\n').replace(/#JSxCAD@https:\/\/gitcdn.link\/cdn\/jsxcad\/JSxCAD\/(.*).nb/g, (_, path) => `../../${path}.md`);
+  const markdown = output.join('\n\n').replace(/#JSxCAD@https:\/\/gitcdn.link\/cdn\/jsxcad\/JSxCAD\/master\/(.*).nb/g,
+    (_, path) => {
+      let result = '';
+      const level = path.split('/').length;
+      for (let nth = 2; nth < level; nth++) {
+        result += '../';
+      }
+      result += `${path}.md`;
+      return result;
+    });
   writeFileSync(`${path}.md`, markdown);
 };
 

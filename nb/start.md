@@ -5,14 +5,16 @@ Press Shift-Enter or click Run above to generate notebook.
 
 ## Links
 
-1. [Examples](../../master/nb/examples.md)
-1. [Regression](../../master/nb/regression.md)
-1. [Projects](../../master/nb/projects/index.md)
+1. [Examples](nb/examples.md)
+1. [Regression](nb/regression.md)
+1. [Projects](../nb/projects/index.md)
 
 ## Introduction
 
 JSxCAD allows CAD design as notebooks.
+
 ![Image](start.md.0.png)
+
 
 Clicking on a view maximizes and allows rotation and animation; use Escape to return.
 
@@ -24,7 +26,7 @@ You can Control-Click on a link in the editor to visit a page.
 import 'https://gitcdn.link/cdn/jsxcad/JSxCAD/master/nb/examples.nb';
 '''
 
-You can click on links in a notebook, like so: [examples.nb](../../master/nb/examples.md)
+You can click on links in a notebook, like so: [examples.nb](nb/examples.md)
 
 The back button should return as usual, and urls can be bookmarked normally.
 
