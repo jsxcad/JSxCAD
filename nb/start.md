@@ -5,7 +5,7 @@ Press Shift-Enter or click Run above to generate notebook.
 
 ## Links
 
-1. [Regression](../nb/regression.md)
+1. [Regression](../nb/regression/regression.md)
 1. [Projects](../nb/projects/index.md)
 
 ## Introduction

@@ -3,6 +3,11 @@ md`
 
 These example projects may be useful to see what can be done and to get started on your own.
 
+* [Bolt](#JSxCAD@https://gitcdn.link/cdn/jsxcad/JSxCAD/${sha}/nb/projects/bolt/bolt.nb)
+* [Clock](#JSxCAD@https://gitcdn.link/cdn/jsxcad/JSxCAD/${sha}/nb/projects/clock/clock.nb)
+* [Engrave](#JSxCAD@https://gitcdn.link/cdn/jsxcad/JSxCAD/${sha}/nb/projects/engrave/engrave.nb)
 * [Gear](#JSxCAD@https://gitcdn.link/cdn/jsxcad/JSxCAD/${sha}/nb/projects/gear/gear.nb)
 * [Lego](#JSxCAD@https://gitcdn.link/cdn/jsxcad/JSxCAD/${sha}/nb/projects/lego/lego.nb)
+* [Micro Gear Motor](#JSxCAD@https://gitcdn.link/cdn/jsxcad/JSxCAD/${sha}/nb/projects/micro_gear_motor/micro_gear_motor.nb)
+* [Plotter](#JSxCAD@https://gitcdn.link/cdn/jsxcad/JSxCAD/${sha}/nb/projects/plotter/plotter.nb)
 `;
