@@ -9,7 +9,7 @@ export const registerDynamicModule = (bare, path) =>
 
 const CACHED_MODULES = new Map();
 
-export const buildImportModule = (baseApi) => async (name) => {
+export const buildImportModule = (baseApi) => async (name, { clearUpdateEmits = false } = {}) => {
   try {
     const cachedModule = CACHED_MODULES.get(name);
     if (cachedModule !== undefined) {
@@ -47,6 +47,7 @@ export const buildImportModule = (baseApi) => async (name) => {
       path,
       topLevel,
       parallelUpdateLimit: 1,
+      clearUpdateEmits,
     });
     CACHED_MODULES.set(name, builtModule);
     return builtModule;

@@ -1,4 +1,5 @@
-import { addPending } from '@jsxcad/sys';
+import { addPending, clearEmitted } from '@jsxcad/sys';
+
 import { toEcmascript } from '@jsxcad/compiler';
 
 export const evaluate = async (ecmascript, { api, path }) => {
@@ -23,6 +24,7 @@ export const execute = async (
     path,
     topLevel = new Map(),
     parallelUpdateLimit = Infinity,
+    clearUpdateEmits = false,
   }
 ) => {
   try {
@@ -83,6 +85,9 @@ export const execute = async (
         // Wait for something to happen.
         await somethingHappens;
       }
+    }
+    if (clearUpdateEmits) {
+      clearEmitted();
     }
     // Execute the script in the context of the resolved updates.
     const ecmascript = await toEcmascript(script, {

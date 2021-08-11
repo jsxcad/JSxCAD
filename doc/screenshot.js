@@ -44,7 +44,7 @@ export const screenshot = async (html) => {
   }
   // TODO: Scroll down and take screenshots until we reach the end.
   const imageUrlList = [];
-  for (const element of await page.$$('.note')) {
+  for (const element of await page.$$('.note.view')) {
     const property = await element.getProperty('src');
     imageUrlList.push(await property.jsonValue());
   }
