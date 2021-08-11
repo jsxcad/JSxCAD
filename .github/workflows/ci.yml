@@ -29,6 +29,7 @@ jobs:
       - run: npm run depcheck
       - run: npm run lint
       - run: npm run test
+      - run: npm run doc
       - run: npm run rollup
       - run: ./publish-es6.sh
       - run: ./publish-wasm.sh

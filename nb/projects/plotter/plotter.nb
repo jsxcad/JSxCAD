@@ -22,7 +22,7 @@ flowers
   .align()
   .gcode('flowers', plotter);
 const mandala = await readSvg(
-  'https://gitcdn.xyz/cdn/jsxcad/JSxCAD/master/nb/projects/plotter/mandala.svg',
+  'https://gitcdn.link/cdn/jsxcad/JSxCAD/master/nb/projects/plotter/mandala.svg',
   { fill: false }
 );
 
@@ -32,7 +32,7 @@ const scaledMandala = mandala
   .gcode('mandala', plotter, { doPlan: false });
 
 const visnezh = await readSvg(
-  'https://gitcdn.xyz/cdn/jsxcad/JSxCAD/master/nb/projects/plotter/visnezh.svg',
+  'https://gitcdn.link/cdn/jsxcad/JSxCAD/master/nb/projects/plotter/visnezh.svg',
   { fill: false }
 );
 
