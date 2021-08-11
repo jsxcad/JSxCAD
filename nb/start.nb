@@ -5,7 +5,6 @@ Press Shift-Enter or click Run above to generate notebook.
 
 ## Links
 
-1. [Examples](#JSxCAD@https://gitcdn.link/cdn/jsxcad/JSxCAD/${sha}/nb/examples.nb)
 1. [Regression](#JSxCAD@https://gitcdn.link/cdn/jsxcad/JSxCAD/${sha}/nb/regression.nb)
 1. [Projects](#JSxCAD@https://gitcdn.link/cdn/jsxcad/JSxCAD/${sha}/nb/projects/index.nb)
 
