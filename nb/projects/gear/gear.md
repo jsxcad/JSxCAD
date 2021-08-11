@@ -1,1 +1,1 @@
-![Image](gear.md.1.png)
+![Image](gear.md.0.png)

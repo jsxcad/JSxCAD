@@ -9,22 +9,28 @@ import pngjs from 'pngjs';
 import { screenshot } from './screenshot.js';
 import { toHtml } from '@jsxcad/convert-notebook';
 
-const writeMarkdown = (path, notebook, imageUrls) => {
-  const md = [];
+const writeMarkdown = (path, notebook, imageUrlList) => {
+  const output = [];
   let imageCount = 0;
+  let viewCount = 0;
   for (let nth = 0; nth < notebook.length; nth++) {
-    if (notebook[nth].md) {
-      md.push(notebook[nth].md);
+    const note = notebook[nth];
+    const { md, view } = note;
+    if (md) {
+      output.push(notebook[nth].md);
     }
-    if (imageUrls[nth]) {
-      imageCount += 1;
-      const { dataBuffer } = imageDataUri.decode(imageUrls[nth]);
-      const imagePath = `${path}.md.${imageCount}.png`;
-      writeFileSync(imagePath, dataBuffer);
-      md.push(`![Image](${pathModule.basename(imagePath)})`);
+    if (view) {
+      const imageUrl = imageUrlList[viewCount++];
+      if (typeof imageUrl === 'string' && imageUrl.startsWith('data:image/')) {
+        const { dataBuffer } = imageDataUri.decode(imageUrl);
+        const imagePath = `${path}.md.${imageCount++}.png`;
+        writeFileSync(imagePath, dataBuffer);
+        output.push(`![Image](${pathModule.basename(imagePath)})`);
+      }
     }
   }
-  writeFileSync(`${path}.md`, md.join('\n'));
+  const markdown = output.join('\n').replace(/#JSxCAD@https.*master/g, '../..');
+  writeFileSync(`${path}.md`, markdown);
 };
 
 export const updateNotebook = async (
@@ -34,7 +40,7 @@ export const updateNotebook = async (
   clearEmitted();
   await boot();
   try {
-    await api.importModule(`${target}.nb`);
+    await api.importModule(`${target}.nb`, { clearUpdateEmits: true });
   } catch (error) {
     api.log(error.stack);
   }
