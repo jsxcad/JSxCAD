@@ -1,1 +1,1 @@
-npx rollup -c rollup_testmaster.js ; npx rollup -c rollup_testworker.js; npx asdf
+npx rollup -c rollup.testMaster.js; npx rollup -c rollup.testWorker.js; npx asdf
