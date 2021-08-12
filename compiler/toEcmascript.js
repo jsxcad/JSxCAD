@@ -29,11 +29,13 @@ export const strip = (ast) => {
   }
 };
 
-const collectDependencies = (declarator) => {
-  const dependencies = [];
+const collectDependencies = (declarator, sideEffectors) => {
+  const dependencies = [...sideEffectors];
 
   const Identifier = (node, state, c) => {
-    dependencies.push(node.name);
+    if (!dependencies.includes(node.name)) {
+      dependencies.push(node.name);
+    }
   };
 
   recursive(declarator, undefined, { Identifier });
@@ -194,6 +196,8 @@ const declareVariable = async (
     out,
     doExport = false,
     isImport = false,
+    sideEffectors,
+    hasSideEffects = false,
     topLevel,
     sourceLocation,
   } = {}
@@ -202,7 +206,9 @@ const declareVariable = async (
 
   const id = declarator.id.name;
 
-  // pushSourceLocation({ path: '${path}', id: '${id}' });
+  if (hasSideEffects && !sideEffectors.includes(id)) {
+    sideEffectors.push(id);
+  }
 
   const code = parse(
     `
@@ -215,9 +221,7 @@ const declareVariable = async (
     parseOptions
   ).body;
 
-  // popSourceLocation();
-
-  const dependencies = collectDependencies(declarator);
+  const dependencies = collectDependencies(declarator, sideEffectors);
   const dependencyShas = dependencies.map((dependency) =>
     fromIdToSha(dependency, { topLevel })
   );
@@ -231,6 +235,7 @@ const declareVariable = async (
     definition,
     dependencies,
     sha,
+    hasSideEffects,
     sourceLocation: sourceLocation || declaration.loc,
   };
 
@@ -267,7 +272,6 @@ const declareVariable = async (
     }
   }
 
-  // parse(`emitSourceLocation( importModule('${source.value}');`, parseOptions),
   out.push(...(await generateCacheLoadCode({ ...entry, doReplay: true })));
 
   if (!entry.isNotCacheable) {
@@ -285,19 +289,32 @@ const declareVariable = async (
   }
 };
 
-const processStatement = async (
-  entry,
-  {
-    out,
-    updates,
-    exportNames,
-    path,
-    controls,
-    topLevel,
-    nextTopLevelExpressionId,
-    isImport,
-    sourceLocation,
+// FIX: Replace path with directory?
+const resolveModulePath = (module, { path }) => {
+  const op = () => {
+  console.log(`QQ/resolveModulePath: ${module} ${path}`);
+  if (module.startsWith('./')) {
+    const subpath = path.split('/');
+    subpath.pop();
+    return `${[...subpath, module.substring(2)].join('/')}`;
+  } else if (module.startsWith('../')) {
+    const subpath = path.split('/');
+    const end = subpath.pop();
+    subpath.pop();
+    subpath.push(end);
+    return resolveModulePath(`./${module.substring(3)}`, { path: subpath.join('/') });
+  } else {
+    return module;
   }
+  }
+
+  const result = op();
+  console.log(`QQ/resolveModulePath/result: ${result}`);
+  return result;
+};
+
+const processStatement = async (
+  entry, options
 ) => {
   if (entry.type === 'ImportDeclaration') {
     // Rewrite
@@ -309,81 +326,38 @@ const processStatement = async (
     //
     // FIX: Handle other variations.
     const { specifiers, source } = entry;
+    const modulePath = resolveModulePath(source.value, options);
 
     if (specifiers.length === 0) {
       processProgram(
-        parse(`await importModule('${source.value}');`, parseOptions),
-        {
-          out,
-          updates,
-          exportNames,
-          path,
-          controls,
-          topLevel,
-          nextTopLevelExpressionId,
-          isImport: true,
-          sourceLocation: entry.loc,
-        }
-      );
+        parse(`await importModule('${modulePath}');`, parseOptions),
+        { ...options, isImport: true, hasSideEffects: true, sourceLocation: entry.loc });
     } else {
       for (const { imported, local, type } of specifiers) {
         switch (type) {
           case 'ImportDefaultSpecifier':
             processProgram(
               parse(
-                `const ${local.name} = (await importModule('${source.value}')).default;`,
+                `const ${local.name} = (await importModule('${modulePath}')).default;`,
                 parseOptions
               ),
-              {
-                out,
-                updates,
-                exportNames,
-                path,
-                controls,
-                topLevel,
-                nextTopLevelExpressionId,
-                isImport: true,
-                sourceLocation: entry.loc,
-              }
-            );
+              { ...options, isImport: true, sourceLocation: entry.loc });
             break;
           case 'ImportSpecifier':
             if (local.name !== imported.name) {
               processProgram(
                 parse(
-                  `const ${local.name} = (await importModule('${source.value}')).${imported.name};`,
+                  `const ${local.name} = (await importModule('${modulePath}')).${imported.name};`,
                   parseOptions
                 ),
-                {
-                  out,
-                  updates,
-                  exportNames,
-                  path,
-                  controls,
-                  topLevel,
-                  nextTopLevelExpressionId,
-                  isImport: true,
-                  sourceLocation: entry.loc,
-                }
-              );
+                { ...options, isImport: true, sourceLocation: entry.loc });
             } else {
               processProgram(
                 parse(
-                  `const ${imported.name} = (await importModule('${source.value}')).${imported.name};`,
+                  `const ${imported.name} = (await importModule('${modulePath}')).${imported.name};`,
                   parseOptions
                 ),
-                {
-                  out,
-                  updates,
-                  exportNames,
-                  path,
-                  controls,
-                  topLevel,
-                  nextTopLevelExpressionId,
-                  isImport: true,
-                  sourceLocation: entry.loc,
-                }
-              );
+                { ...options, isImport: true, sourceLocation: entry.loc });
             }
             break;
         }
@@ -391,85 +365,36 @@ const processStatement = async (
     }
   } else if (entry.type === 'VariableDeclaration') {
     for (const declarator of entry.declarations) {
-      await declareVariable(entry, declarator, {
-        out,
-        updates,
-        exportNames,
-        path,
-        controls,
-        topLevel,
-        nextTopLevelExpressionId,
-        isImport,
-        sourceLocation,
-      });
+      await declareVariable(entry, declarator, options);
     }
   } else if (entry.type === 'ExportNamedDeclaration') {
     // Note the names and replace the export with the declaration.
     const declaration = entry.declaration;
     if (declaration.type === 'VariableDeclaration') {
       for (const declarator of declaration.declarations) {
-        await declareVariable(entry.declaration, declarator, {
-          updates,
-          doExport: true,
-          exportNames,
-          path,
-          controls,
-          out,
-          topLevel,
-          nextTopLevelExpressionId,
-          sourceLocation,
-        });
+        await declareVariable(entry.declaration, declarator, { ...options, doExport: true });
       }
     }
   } else if (entry.type === 'ExpressionStatement') {
+    const { nextTopLevelExpressionId } = options;
     // This is an ugly way of turning top level expressions into declarations.
     const declaration = parse(
       `const $${nextTopLevelExpressionId()} = ${generate(entry)}`,
       parseOptions
     ).body[0];
     const declarator = declaration.declarations[0];
-    await declareVariable(declaration, declarator, {
-      out,
-      updates,
-      exportNames,
-      path,
-      controls,
-      topLevel,
-      nextTopLevelExpressionId,
-      isImport,
-      sourceLocation: entry.loc,
-    });
+    await declareVariable(declaration, declarator, { ...options, sourceLocation: entry.loc });
   } else {
+    const { out } = options;
     out.push(entry);
   }
 };
 
 const processProgram = async (
-  program,
-  {
-    out,
-    updates,
-    exportNames,
-    path,
-    controls,
-    isImport,
-    topLevel,
-    nextTopLevelExpressionId,
-    sourceLocation,
-  }
+  program, options
 ) => {
   for (const statement of program.body) {
-    await processStatement(statement, {
-      out,
-      updates,
-      exportNames,
-      path,
-      controls,
-      isImport,
-      topLevel,
-      nextTopLevelExpressionId,
-      sourceLocation,
-    });
+    await processStatement(statement, options);
   }
 };
 
@@ -495,6 +420,7 @@ export const toEcmascript = async (
   const exportNames = [];
 
   const out = [];
+  const sideEffectors = [];
 
   // Start by loading the controls
   const controls = (await read(`control/${path}`)) || {};
@@ -507,6 +433,7 @@ export const toEcmascript = async (
     path,
     topLevel,
     nextTopLevelExpressionId,
+    sideEffectors,
   });
 
   // Return the exports as an object.

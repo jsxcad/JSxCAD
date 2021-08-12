@@ -49,58 +49,58 @@ export const updateNotebook = async (
   await boot();
   try {
     await api.importModule(`${target}.nb`, { clearUpdateEmits: true });
-  } catch (error) {
-    api.log(error.stack);
-  }
-  await resolvePending();
-  const notebook = getEmitted();
-  const html = await toHtml(notebook);
-  writeFileSync(`${target}.html`, html);
-  const { pngDataList, imageUrlList } = await screenshot(
-    new TextDecoder('utf8').decode(html),
-    `${target}.png`
-  );
-  await writeMarkdown(target, notebook, imageUrlList);
-  for (let nth = 0; nth < pngDataList.length; nth++) {
-    const pngData = pngDataList[nth];
-    writeFileSync(`${target}_${nth}.observed.png`, pngData);
-    const observedPng = pngjs.PNG.sync.read(pngData);
-    let expectedPng;
-    try {
-      expectedPng = pngjs.PNG.sync.read(readFileSync(`${target}_${nth}.png`));
-    } catch (error) {
-      if (error.code === 'ENOENT') {
-        // We couldn't find a matching expectation.
-        failedExpectations.push(`${target}_${nth}.observed.png`);
-        continue;
-      } else {
-        throw error;
-      }
-    }
-    const { width, height } = expectedPng;
-    const differencePng = new pngjs.PNG({ width, height });
-    const pixelThreshold = 1;
-    const numFailedPixels = pixelmatch(
-      expectedPng.data,
-      observedPng.data,
-      differencePng.data,
-      width,
-      height,
-      {
-        threshold: 0.01,
-        alpha: 0.2,
-        diffMask: process.env.FORCE_COLOR === '0',
-        diffColor:
-          process.env.FORCE_COLOR === '0' ? [255, 255, 255] : [255, 0, 0],
-      }
+    await resolvePending();
+    const notebook = getEmitted();
+    const html = await toHtml(notebook);
+    writeFileSync(`${target}.html`, html);
+    const { pngDataList, imageUrlList } = await screenshot(
+      new TextDecoder('utf8').decode(html),
+      `${target}.png`
     );
-    if (numFailedPixels >= pixelThreshold) {
-      writeFileSync(
-        `${target}_${nth}.difference.png`,
-        pngjs.PNG.sync.write(differencePng)
+    await writeMarkdown(target, notebook, imageUrlList);
+    for (let nth = 0; nth < pngDataList.length; nth++) {
+      const pngData = pngDataList[nth];
+      writeFileSync(`${target}_${nth}.observed.png`, pngData);
+      const observedPng = pngjs.PNG.sync.read(pngData);
+      let expectedPng;
+      try {
+        expectedPng = pngjs.PNG.sync.read(readFileSync(`${target}_${nth}.png`));
+      } catch (error) {
+        if (error.code === 'ENOENT') {
+          // We couldn't find a matching expectation.
+          failedExpectations.push(`${target}_${nth}.observed.png`);
+          continue;
+        } else {
+          throw error;
+        }
+      }
+      const { width, height } = expectedPng;
+      const differencePng = new pngjs.PNG({ width, height });
+      const pixelThreshold = 1;
+      const numFailedPixels = pixelmatch(
+        expectedPng.data,
+        observedPng.data,
+        differencePng.data,
+        width,
+        height,
+        {
+          threshold: 0.01,
+          alpha: 0.2,
+          diffMask: process.env.FORCE_COLOR === '0',
+          diffColor:
+            process.env.FORCE_COLOR === '0' ? [255, 255, 255] : [255, 0, 0],
+        }
       );
-      // Note failures.
-      failedExpectations.push(`${target}_${nth}.observed.png`);
+      if (numFailedPixels >= pixelThreshold) {
+        writeFileSync(
+          `${target}_${nth}.difference.png`,
+          pngjs.PNG.sync.write(differencePng)
+        );
+        // Note failures.
+        failedExpectations.push(`${target}_${nth}.observed.png`);
+      }
     }
+  } catch (error) {
+    throw error;
   }
 };

@@ -140,4 +140,4 @@ export const rootRadius = (
   return p - (c - p) - clearance;
 };
 
-export const Gear = () => Plan('Gear');
+export const Gear = (teeth = 16) => Plan('Gear').hasTeeth(teeth);

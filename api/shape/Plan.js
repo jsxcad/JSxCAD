@@ -114,10 +114,12 @@ Shape.registerMethod('hasTop', hasTop);
 Shape.registerMethod('hasZag', hasZag);
 
 const eachEntry = (geometry, op, otherwise) => {
-  for (let nth = geometry.plan.history.length - 1; nth >= 0; nth--) {
-    const result = op(geometry.plan.history[nth]);
-    if (result !== undefined) {
-      return result;
+  if (geometry.plan.history) {
+    for (let nth = geometry.plan.history.length - 1; nth >= 0; nth--) {
+      const result = op(geometry.plan.history[nth]);
+      if (result !== undefined) {
+        return result;
+      }
     }
   }
   return otherwise;

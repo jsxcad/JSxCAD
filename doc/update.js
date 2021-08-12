@@ -37,9 +37,11 @@ const build = async (baseDirectory = '.') => {
       process.exit(1);
     }
   } catch (error) {
-    console.log(error.toString());
+    console.log(error.stack);
     process.exit(1);
   }
+  console.log('Completed successfully');
+  process.exit(0);
 };
 
 build(argv[2]);

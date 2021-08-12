@@ -1,4 +1,4 @@
-import 'testMethod.nb';
+import './testMethod.nb';
 
 md`Redefining a local method should work.`;
 Shape.registerMethod('myMethod', () => shape => 'one');
