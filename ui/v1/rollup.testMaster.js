@@ -14,7 +14,7 @@ export const watcher = {
 };
 
 export default {
-  input: 'maslowMaster.js',
+  input: 'testMaster.js',
   output: {
     dir: 'dist',
     format: 'amd',
