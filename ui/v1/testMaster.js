@@ -1,4 +1,4 @@
-import { askService, createService, sleep, touch } from '@jsxcad/sys';
+import { askService, sleep, touch } from '@jsxcad/sys';
 
 window.bootstrap = async () => {
   const agent = async ({ ask, message }) => {
@@ -8,7 +8,7 @@ window.bootstrap = async () => {
         await touch(path, { workspace, id, clear: true, broadcast: true });
         return;
       case 'log':
-        return
+        return;
       default:
         throw Error(`master/unhandled: ${JSON.stringify(message)}`);
     }
