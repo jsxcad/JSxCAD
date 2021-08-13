@@ -1,6 +1,13 @@
 /* global postMessage, onmessage:writable, self */
 
-import { boot, createConversation, read, setupFilesystem, touch, write } from '../../es6/jsxcad-sys.js';
+import {
+  boot,
+  createConversation,
+  read,
+  setupFilesystem,
+  touch,
+  write,
+} from '../../es6/jsxcad-sys.js';
 
 const say = (message) => postMessage(message);
 

@@ -33,10 +33,14 @@ const writeMarkdown = (path, notebook, imageUrlList) => {
   // Produce a path back to the root.
   const roots = path.split('/');
   roots.pop();
-  const root = roots.map(_ => '..').join('/');
+  const root = roots.map((_) => '..').join('/');
 
-  const markdown = output.join('\n\n').replace(/#JSxCAD@https:\/\/gitcdn.link\/cdn\/jsxcad\/JSxCAD\/master\/(.*).nb/g,
-    (_, path) => `${root}/${path}.md`);
+  const markdown = output
+    .join('\n\n')
+    .replace(
+      /#JSxCAD@https:\/\/gitcdn.link\/cdn\/jsxcad\/JSxCAD\/master\/(.*).nb/g,
+      (_, path) => `${root}/${path}.md`
+    );
 
   writeFileSync(`${path}.md`, markdown);
 };

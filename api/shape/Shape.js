@@ -126,7 +126,9 @@ export const registerShapeMethod = (name, op) => {
   if (Shape.prototype.hasOwnProperty(name)) {
     const { origin } = Shape.prototype[name];
     if (origin !== path) {
-      throw Error(`Method ${name} is already defined in ${origin} (this is ${path}).`);
+      throw Error(
+        `Method ${name} is already defined in ${origin} (this is ${path}).`
+      );
     }
   }
   // Make the operation constructor available e.g., Shape.grow(1)(s)

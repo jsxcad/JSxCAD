@@ -292,30 +292,30 @@ const declareVariable = async (
 // FIX: Replace path with directory?
 const resolveModulePath = (module, { path }) => {
   const op = () => {
-  console.log(`QQ/resolveModulePath: ${module} ${path}`);
-  if (module.startsWith('./')) {
-    const subpath = path.split('/');
-    subpath.pop();
-    return `${[...subpath, module.substring(2)].join('/')}`;
-  } else if (module.startsWith('../')) {
-    const subpath = path.split('/');
-    const end = subpath.pop();
-    subpath.pop();
-    subpath.push(end);
-    return resolveModulePath(`./${module.substring(3)}`, { path: subpath.join('/') });
-  } else {
-    return module;
-  }
-  }
+    console.log(`QQ/resolveModulePath: ${module} ${path}`);
+    if (module.startsWith('./')) {
+      const subpath = path.split('/');
+      subpath.pop();
+      return `${[...subpath, module.substring(2)].join('/')}`;
+    } else if (module.startsWith('../')) {
+      const subpath = path.split('/');
+      const end = subpath.pop();
+      subpath.pop();
+      subpath.push(end);
+      return resolveModulePath(`./${module.substring(3)}`, {
+        path: subpath.join('/'),
+      });
+    } else {
+      return module;
+    }
+  };
 
   const result = op();
   console.log(`QQ/resolveModulePath/result: ${result}`);
   return result;
 };
 
-const processStatement = async (
-  entry, options
-) => {
+const processStatement = async (entry, options) => {
   if (entry.type === 'ImportDeclaration') {
     // Rewrite
     //   import { foo } from 'bar';
@@ -331,7 +331,13 @@ const processStatement = async (
     if (specifiers.length === 0) {
       processProgram(
         parse(`await importModule('${modulePath}');`, parseOptions),
-        { ...options, isImport: true, hasSideEffects: true, sourceLocation: entry.loc });
+        {
+          ...options,
+          isImport: true,
+          hasSideEffects: true,
+          sourceLocation: entry.loc,
+        }
+      );
     } else {
       for (const { imported, local, type } of specifiers) {
         switch (type) {
@@ -341,7 +347,8 @@ const processStatement = async (
                 `const ${local.name} = (await importModule('${modulePath}')).default;`,
                 parseOptions
               ),
-              { ...options, isImport: true, sourceLocation: entry.loc });
+              { ...options, isImport: true, sourceLocation: entry.loc }
+            );
             break;
           case 'ImportSpecifier':
             if (local.name !== imported.name) {
@@ -350,14 +357,16 @@ const processStatement = async (
                   `const ${local.name} = (await importModule('${modulePath}')).${imported.name};`,
                   parseOptions
                 ),
-                { ...options, isImport: true, sourceLocation: entry.loc });
+                { ...options, isImport: true, sourceLocation: entry.loc }
+              );
             } else {
               processProgram(
                 parse(
                   `const ${imported.name} = (await importModule('${modulePath}')).${imported.name};`,
                   parseOptions
                 ),
-                { ...options, isImport: true, sourceLocation: entry.loc });
+                { ...options, isImport: true, sourceLocation: entry.loc }
+              );
             }
             break;
         }
@@ -372,7 +381,10 @@ const processStatement = async (
     const declaration = entry.declaration;
     if (declaration.type === 'VariableDeclaration') {
       for (const declarator of declaration.declarations) {
-        await declareVariable(entry.declaration, declarator, { ...options, doExport: true });
+        await declareVariable(entry.declaration, declarator, {
+          ...options,
+          doExport: true,
+        });
       }
     }
   } else if (entry.type === 'ExpressionStatement') {
@@ -383,16 +395,17 @@ const processStatement = async (
       parseOptions
     ).body[0];
     const declarator = declaration.declarations[0];
-    await declareVariable(declaration, declarator, { ...options, sourceLocation: entry.loc });
+    await declareVariable(declaration, declarator, {
+      ...options,
+      sourceLocation: entry.loc,
+    });
   } else {
     const { out } = options;
     out.push(entry);
   }
 };
 
-const processProgram = async (
-  program, options
-) => {
+const processProgram = async (program, options) => {
   for (const statement of program.body) {
     await processStatement(statement, options);
   }
