@@ -50,7 +50,10 @@ class Shape {
   }
 
   flip() {
-    return fromGeometry(flip(toConcreteGeometry(this)), this.context);
+    return fromGeometry(
+      flip(toConcreteGeometry(this.toGeometry())),
+      this.context
+    );
   }
 
   toDisplayGeometry(options) {
@@ -117,7 +120,9 @@ const registerShapeMethod = (name, op) => {
   if (Shape.prototype.hasOwnProperty(name)) {
     const { origin } = Shape.prototype[name];
     if (origin !== path) {
-      throw Error(`Method ${name} is already defined in ${origin}.`);
+      throw Error(
+        `Method ${name} is already defined in ${origin} (this is ${path}).`
+      );
     }
   }
   // Make the operation constructor available e.g., Shape.grow(1)(s)
@@ -745,10 +750,12 @@ Shape.registerMethod('hasTop', hasTop);
 Shape.registerMethod('hasZag', hasZag);
 
 const eachEntry = (geometry, op, otherwise) => {
-  for (let nth = geometry.plan.history.length - 1; nth >= 0; nth--) {
-    const result = op(geometry.plan.history[nth]);
-    if (result !== undefined) {
-      return result;
+  if (geometry.plan.history) {
+    for (let nth = geometry.plan.history.length - 1; nth >= 0; nth--) {
+      const result = op(geometry.plan.history[nth]);
+      if (result !== undefined) {
+        return result;
+      }
     }
   }
   return otherwise;

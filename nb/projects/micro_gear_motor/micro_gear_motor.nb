@@ -1,11 +1,6 @@
-import { Gear } from 'https://gitcdn.link/cdn/jsxcad/JSxCAD/master/nb/projects/gear/gear.nb';
+import { Gear } from '../gear/gear.js';
 
-import {
-  Block,
-  SocketBoard,
-  StudBoard,
-  block16x8x9_6,
-} from 'https://gitcdn.link/cdn/jsxcad/JSxCAD/master/nb/projects/lego/lego.nb';
+import { Block, SocketBoard, StudBoard, block16x8x9_6 } from '../lego/lego.nb';
 
 md`## Gear Motor and Sheath`;
 
@@ -48,82 +43,61 @@ const sheath = capProfile
   .md('Sheath')
   .stl('sheath1');
 
-const cap = Group(capProfile.ex(-2, -0.0), sheath)
-  .md('Cap')
-  .stl('cap');
+const cap = Group(capProfile.ex(-2, -0.0), sheath).md('Cap').stl('cap');
 
 const gearProfile = Gear(20).md('Gear Profile').gridView();
 
-const gear = GearProfile(20)
+const gear = Gear(20)
   .cut(axleFlatProfile)
   .ex(4)
   .md('Gear')
   .gridView()
   .stl('gear2');
 
-const gearCutout = GearProfile(20)
+const gearCutout = Gear(20)
   .op((s) => s.and(s.cutFrom(Arc(12)).inset(0.5)))
-  .item()
+  .as('gear cutout')
   .md('Gear Cutout')
   .gridView();
 
 md`## Motor Driver Bracket`;
 
 const motorDriverHolder = Block(4, 4, 3.2 * 5)
-  .cut(Box(20.7, 24.7).z(2))
-  .item('motor driver holder')
+  .cut(Box(20.7, 24.7).ex(2, 100))
+  .as('motor driver holder')
   .md('Motor Driver Holder')
   .stl('motor_driver_holder_3');
 
 md`## Wemos Bracket`;
 
 const wemosDriverHolder = Block(4, 5, 3.2 * 11)
-  .cut(Box(25.7 + 0.2, 34.5 + 0.2).z(2))
-  .cut(y.Box(3 * 8, 2.5 * 8).z(3.2 * (4 + 1.5)))
-  .cut(x.Box(3.2 * 8, 4 * 8).z(3.2 * (4 + 1.5)))
+  .cut(Box(25.7 + 0.2, 34.5 + 0.2).ex(2, 100))
+  .cut(xz.Box(3 * 8, 2.5 * 8).ex(3.2 * (4 + 1.5), 100))
+  .cut(yz.Box(3.2 * 8, 4 * 8).ex(3.2 * (4 + 1.5), 100))
   .cut(
-    y
+    xz
       .flip()
       .Box(3 * 8, 2.5 * 8)
-      .z(3.2 * (4 + 1.5))
+      .ex(3.2 * (4 + 1.5), 100)
   )
   .cut(
-    x
+    yz
       .flip()
       .Box(3.2 * 8, 4 * 8)
-      .z(3.2 * (4 + 1.5))
+      .ex(3.2 * (4 + 1.5), 100)
   )
-  .item('wemos holder')
+  .as('wemos holder')
   .md('Wemos Driver Holder')
-  .rz(180)
+  .rz(1 / 2)
   .stl('wemos_holder_2');
 
 md`## Gear Motor Bracket`;
 
 const motorHolderLegoBoard = Block(1, 4, 3.2).y(6);
 const motorHolderMotor = Group(motor, sheath.z(9.1 - 0.7), cap)
-  .rx(90)
-  .ry(-90)
+  .rx(1 / 4)
+  .ry(-1 / 4)
   .move(0, 14, 5.6 + 3.2 - 0.7)
-  .item('motor')
+  .as('motor')
   .md('Motor holder moter')
   .view();
-
-const motorHolderBoard = Box(17, 2 * 8)
-  .ex(8)
-  .move(0, 6, 2)
-  .md('Motor holder board')
-  .view();
-
-const motorHolder = Assembly(
-  motorHolderBoard,
-  motorHolderLegoBoard.x(12),
-  motorHolderLegoBoard.x(-12),
-  //block16x8x9_6.move(0, -16, 3.2),
-  motorHolderMotor.void()
-)
-  .item('motor holder')
-  .md('Motor holder')
-  .stl('motor_holder_c');
-
-// 14.3 vs 10.4 + 3.2 (13.6) - 0.7 mm off

@@ -106,28 +106,11 @@ const pack = Group(...seq((n) => Arc(n), { from: 1, to: 20 }))
   .gridView()
   .md(`Group(...each((n) => Arc(n), { from: 1, to: 20 })).pack()`);
 
-const peg = yz.peg(Box(5)).view().md(`x.peg(Box(5))`);
-
 const rotate = Box(5).rotate(45).gridView().md(`Box(5).rotate(45)`);
 
-const rotateX = Box(1, 2, 3)
-  .rotateX(45)
-  .gridView()
-  .md(`Box(1, 2, 3).rotateX(45)`);
-
-const rotateY = Box(1, 2, 3)
-  .rotateY(45)
-  .gridView()
-  .md(`Box(1, 2, 3).rotateY(45)`);
-
-const rotateZ = Box(1, 2, 3)
-  .rotateZ(45)
-  .gridView()
-  .md(`Box(1, 2, 3).rotateZ(45)`);
-
-const rx = Box(1, 2, 3).rx(45).gridView().md(`Box(1, 2, 3).rx(45)`);
-const ry = Box(1, 2, 3).ry(45).gridView().md(`Box(1, 2, 3).ry(45)`);
-const rz = Box(1, 2, 3).rz(45).gridView().md(`Box(1, 2, 3).rz(45)`);
+const rx = Box(1, 2, 3).rx(1/8).gridView().md(`Box(1, 2, 3).rx(1/8)`);
+const ry = Box(1, 2, 3).ry(1/8).gridView().md(`Box(1, 2, 3).ry(1/8)`);
+const rz = Box(1, 2, 3).rz(1/8).gridView().md(`Box(1, 2, 3).rz(1/8)`);
 
 const scale = Box(5).scale(1, 2).gridView().md(`Box(5).scale(1, 2)`);
 
@@ -146,7 +129,7 @@ const sketch = Box(2, 2, 2)
   .view()
   .md(`Box(2, 2, 2).and(Box(1, 1, 1).sketch())`);
 
-const tags = Box(1)
+const tagsEx = Box(1)
   .as('box')
   .tags((tags, shape) => {
     md`${tags}`;
@@ -160,7 +143,7 @@ const test = Box(5, 5, 5).test().gridView().md(`Box(1).test()`);
 
 const tool = Box(5).tool('laser').gridView().md(`Box(5).tool('laser')`);
 
-const voidFn = Assembly(Box(5), Arc(6).void())
+const voidEx = Assembly(Box(5), Arc(6).void())
   .gridView()
   .md(`Assembly(Box(5), Arc(6).void())`);
 

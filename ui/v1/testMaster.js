@@ -22,10 +22,30 @@ window.bootstrap = async () => {
 
   console.log(`master/ask/write`);
 
-  const wa = askService(serviceSpec, { op: 'write', path: 'test', value: 'a', 'workspace': 'test' });
-  const wb = askService(serviceSpec, { op: 'write', path: 'test', value: 'b', 'workspace': 'test' });
-  const wc = askService(serviceSpec, { op: 'write', path: 'test', value: 'c', 'workspace': 'test' });
-  const wd = askService(serviceSpec, { op: 'write', path: 'test', value: 'd', 'workspace': 'test' });
+  const wa = askService(serviceSpec, {
+    op: 'write',
+    path: 'test',
+    value: 'a',
+    workspace: 'test',
+  });
+  const wb = askService(serviceSpec, {
+    op: 'write',
+    path: 'test',
+    value: 'b',
+    workspace: 'test',
+  });
+  const wc = askService(serviceSpec, {
+    op: 'write',
+    path: 'test',
+    value: 'c',
+    workspace: 'test',
+  });
+  const wd = askService(serviceSpec, {
+    op: 'write',
+    path: 'test',
+    value: 'd',
+    workspace: 'test',
+  });
 
   console.log(`master/sleep`);
   await sleep(1000);
@@ -36,10 +56,26 @@ window.bootstrap = async () => {
   await wd;
 
   console.log(`master/ask/read`);
-  const ra = askService(serviceSpec, { op: 'read', path: 'test', 'workspace': 'test' });
-  const rb = askService(serviceSpec, { op: 'read', path: 'test', 'workspace': 'test' });
-  const rc = askService(serviceSpec, { op: 'read', path: 'test', 'workspace': 'test' });
-  const rd = askService(serviceSpec, { op: 'read', path: 'test', 'workspace': 'test' });
+  const ra = askService(serviceSpec, {
+    op: 'read',
+    path: 'test',
+    workspace: 'test',
+  });
+  const rb = askService(serviceSpec, {
+    op: 'read',
+    path: 'test',
+    workspace: 'test',
+  });
+  const rc = askService(serviceSpec, {
+    op: 'read',
+    path: 'test',
+    workspace: 'test',
+  });
+  const rd = askService(serviceSpec, {
+    op: 'read',
+    path: 'test',
+    workspace: 'test',
+  });
 
   console.log(`master/report`);
   console.log({ ra: await ra, rb: await rb, rc: await rc, rd: await rd });
