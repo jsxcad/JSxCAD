@@ -3,11 +3,11 @@ import { addPending, clearEmitted } from '@jsxcad/sys';
 import { toEcmascript } from '@jsxcad/compiler';
 
 export const evaluate = async (ecmascript, { api, path }) => {
-  const builder = new Function(
-    `{ ${Object.keys(api).join(', ')} }`,
-    `return async () => { ${ecmascript} };`
-  );
   try {
+    const builder = new Function(
+      `{ ${Object.keys(api).join(', ')} }`,
+      `return async () => { ${ecmascript} };`
+    );
     const module = await builder(api);
     const result = await module();
     return result;

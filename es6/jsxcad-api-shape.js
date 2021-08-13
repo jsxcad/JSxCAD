@@ -50,7 +50,7 @@ class Shape {
   }
 
   flip() {
-    return fromGeometry(flip(toConcreteGeometry(this)), this.context);
+    return fromGeometry(flip(toConcreteGeometry(this.toGeometry())), this.context);
   }
 
   toDisplayGeometry(options) {

@@ -28,7 +28,7 @@ Box(5).color('red').clipFrom(Arc(5.8).color('blue'))
 
 Box(5).color('orange')
 
-Colors are
+Colors are 
 
 Box(5).color('green').colors((s, colors) => { md`Colors are ${colors}`; return s; })
 
@@ -81,3 +81,63 @@ Line(10).orient({ at: [40, 50]})
 ![Image](shape.md.18.png)
 
 Group(...each((n) => Arc(n), { from: 1, to: 20 })).pack()
+
+![Image](shape.md.19.png)
+
+Box(5).rotate(45)
+
+![Image](shape.md.20.png)
+
+Box(1, 2, 3).rx(1/8)
+
+![Image](shape.md.21.png)
+
+Box(1, 2, 3).ry(1/8)
+
+![Image](shape.md.22.png)
+
+Box(1, 2, 3).rz(1/8)
+
+![Image](shape.md.23.png)
+
+Box(5).scale(1, 2)
+
+{"length":1.0000000000000016,"width":2.000000000000003,"height":3.000000000000002,"max":[0.5000000000000006,1.000000000000001,1.500000000000001],"min":[-0.500000000000001,-1.000000000000002,-1.500000000000001],"center":[-2.220446049250313e-16,-4.440892098500626e-16,0],"radius":1.8708286933869727}
+
+Box(1, 2, 3).size((size, shape) => { md`${JSON.stringify(size)}`; return shape; })
+
+![Image](shape.md.24.png)
+
+Box(2, 2, 2).and(Box(1, 1, 1).sketch())
+
+Box(1).as('box').tags((tags, shape) => { md`${tags}`; return shape; })
+
+![Image](shape.md.25.png)
+
+Box(1).test()
+
+![Image](shape.md.26.png)
+
+Box(5).tool('laser')
+
+![Image](shape.md.27.png)
+
+Assembly(Box(5), Arc(6).void())
+
+Weld(Arc(6).x(-1), Arc(6).x(1), Arc(6).y(1), Arc(6).y(-1)).fill()
+
+![Image](shape.md.28.png)
+
+Box(5).with(Arc(6))
+
+![Image](shape.md.29.png)
+
+Box(5).x(1)
+
+![Image](shape.md.30.png)
+
+Box(5).y(1)
+
+![Image](shape.md.31.png)
+
+Box(5).z(1)

@@ -37,6 +37,7 @@ const build = async (baseDirectory = '.') => {
       process.exit(1);
     }
   } catch (error) {
+    console.log('Failed with error');
     console.log(error.stack);
     process.exit(1);
   }

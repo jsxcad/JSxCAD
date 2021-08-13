@@ -73,11 +73,6 @@ const path = Path(Point(0), Point(5), Point(5, 5), Point(0))
   .gridView()
   .md(`Path(Point(0), Point(5), Point(5, 5), Point(0)).rz(45 / 2)`);
 
-const peg = Peg([1, 1, 0])
-  .peg(Box(5))
-  .gridView()
-  .md(`Peg([1, 1, 0]).peg(Box(5))`);
-
 const pentagon = Pentagon(5).gridView().md(`Pentagon(5)`);
 
 const point = Point(0.5, 0.5).gridView().md(`Point(0.5, 0.5)`);
