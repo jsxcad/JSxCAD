@@ -1,7 +1,8 @@
 import puppeteer from 'puppeteer';
 
 export const screenshot = async (html) => {
-  let timeoutNumber = 0;
+  let timeoutCount = 0;
+  const timeoutLimit = 3;
   const pngDataList = [];
   const imageUrlList = [];
   for (;;) {
@@ -20,16 +21,19 @@ export const screenshot = async (html) => {
       try {
         await page.waitForSelector('.notebook.loaded', { timeout: 30000 });
       } catch (error) {
-        if (e instanceof puppeteer.TimeoutError && timeouts++ < 3) {
-          console.log(`Retry ${timeoutNumber}`);
+        if (
+          error instanceof puppeteer.TimeoutError &&
+          timeoutCount++ < timeoutLimit
+        ) {
+          console.log(`Retry ${timeoutCount}`);
           continue;
         } else {
-          throw e;
+          throw error;
         }
       }
       const pageHeight = await page.evaluate(() => {
         let pageHeight = 0;
-  
+
         const findHighestNode = (nodesList) => {
           for (let i = nodesList.length - 1; i >= 0; i--) {
             if (nodesList[i].scrollHeight && nodesList[i].clientHeight) {
@@ -44,9 +48,9 @@ export const screenshot = async (html) => {
             }
           }
         };
-  
+
         findHighestNode(document.documentElement.childNodes);
-  
+
         return pageHeight;
       });
       await page.setViewport({ width, height: pageHeight });

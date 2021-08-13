@@ -59,7 +59,10 @@ export class Shape {
   }
 
   flip() {
-    return fromGeometry(flip(toConcreteTaggedGeometry(this.toGeometry())), this.context);
+    return fromGeometry(
+      flip(toConcreteTaggedGeometry(this.toGeometry())),
+      this.context
+    );
   }
 
   toDisplayGeometry(options) {

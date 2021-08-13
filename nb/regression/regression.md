@@ -1,4 +1,3 @@
-
 # JSxCAD
 
 These notebooks are used for regression tests.
