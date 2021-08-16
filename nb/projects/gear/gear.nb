@@ -1,4 +1,4 @@
-import { Gear } from 'https://gitcdn.link/cdn/jsxcad/JSxCAD/master/nb/projects/gear/gear.js';
+import { Gear } from './gear.js';
 
 const numberOfTeeth = control('number of teeth', 16, 'input');
 const mmPerTooth = control('mm per tooth', Math.PI, 'input');

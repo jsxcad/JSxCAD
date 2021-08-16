@@ -2,7 +2,7 @@ import './jsxcad-api-v1-gcode.js';
 import './jsxcad-api-v1-pdf.js';
 import './jsxcad-api-v1-tools.js';
 import * as mathApi from './jsxcad-api-v1-math.js';
-import { addOnEmitHandler, addPending, write, read, emit, hash, getSourceLocation, getControlValue, popSourceLocation, pushSourceLocation } from './jsxcad-sys.js';
+import { addOnEmitHandler, addPending, write, read, emit, hash, clearEmitted, getSourceLocation, getControlValue, popSourceLocation, pushSourceLocation } from './jsxcad-sys.js';
 import * as shapeApi from './jsxcad-api-shape.js';
 import { toEcmascript } from './jsxcad-compiler.js';
 import { readStl, stl } from './jsxcad-api-v1-stl.js';
@@ -65,11 +65,11 @@ var notesApi = /*#__PURE__*/Object.freeze({
 });
 
 const evaluate = async (ecmascript, { api, path }) => {
-  const builder = new Function(
-    `{ ${Object.keys(api).join(', ')} }`,
-    `return async () => { ${ecmascript} };`
-  );
   try {
+    const builder = new Function(
+      `{ ${Object.keys(api).join(', ')} }`,
+      `return async () => { ${ecmascript} };`
+    );
     const module = await builder(api);
     const result = await module();
     return result;
@@ -86,6 +86,7 @@ const execute = async (
     path,
     topLevel = new Map(),
     parallelUpdateLimit = Infinity,
+    clearUpdateEmits = false,
   }
 ) => {
   try {
@@ -147,6 +148,9 @@ const execute = async (
         await somethingHappens;
       }
     }
+    if (clearUpdateEmits) {
+      clearEmitted();
+    }
     // Execute the script in the context of the resolved updates.
     const ecmascript = await toEcmascript(script, {
       path,
@@ -175,51 +179,54 @@ const registerDynamicModule = (bare, path) =>
 
 const CACHED_MODULES = new Map();
 
-const buildImportModule = (baseApi) => async (name) => {
-  try {
-    const cachedModule = CACHED_MODULES.get(name);
-    if (cachedModule !== undefined) {
-      return cachedModule;
-    }
-    const internalModule = DYNAMIC_MODULES.get(name);
-    if (internalModule !== undefined) {
-      const module = await import(internalModule);
-      CACHED_MODULES.set(name, module);
-      return module;
-    }
-    let script;
-    if (script === undefined) {
-      const path = `source/${name}`;
-      const sources = [];
-      sources.push(name);
-      script = await read(path, { sources });
-    }
-    if (script === undefined) {
-      throw Error(`Cannot import module ${name}`);
-    }
-    const scriptText =
-      typeof script === 'string'
-        ? script
-        : new TextDecoder('utf8').decode(script);
-    const path = name;
-    const topLevel = new Map();
-    const api = { ...baseApi, sha: 'master' };
-    const evaluate$1 = (script) => evaluate(script, { api, path });
-    const replay = (script) => evaluate(script, { api, path });
+const buildImportModule =
+  (baseApi) =>
+  async (name, { clearUpdateEmits = false } = {}) => {
+    try {
+      const cachedModule = CACHED_MODULES.get(name);
+      if (cachedModule !== undefined) {
+        return cachedModule;
+      }
+      const internalModule = DYNAMIC_MODULES.get(name);
+      if (internalModule !== undefined) {
+        const module = await import(internalModule);
+        CACHED_MODULES.set(name, module);
+        return module;
+      }
+      let script;
+      if (script === undefined) {
+        const path = `source/${name}`;
+        const sources = [];
+        sources.push(name);
+        script = await read(path, { sources });
+      }
+      if (script === undefined) {
+        throw Error(`Cannot import module ${name}`);
+      }
+      const scriptText =
+        typeof script === 'string'
+          ? script
+          : new TextDecoder('utf8').decode(script);
+      const path = name;
+      const topLevel = new Map();
+      const api = { ...baseApi, sha: 'master' };
+      const evaluate$1 = (script) => evaluate(script, { api, path });
+      const replay = (script) => evaluate(script, { api, path });
 
-    const builtModule = await execute(scriptText, {
-      evaluate: evaluate$1,
-      replay,
-      path,
-      topLevel,
-      parallelUpdateLimit: 1,
-    });
-    CACHED_MODULES.set(name, builtModule);
-    return builtModule;
-  } catch (error) {
-    throw error;
-  }
-};
+      const builtModule = await execute(scriptText, {
+        evaluate: evaluate$1,
+        replay,
+        path,
+        topLevel,
+        parallelUpdateLimit: 1,
+        clearUpdateEmits,
+      });
+      CACHED_MODULES.set(name, builtModule);
+      return builtModule;
+    } catch (error) {
+      throw error;
+    }
+  };
 
 /*
   Options

@@ -5,7 +5,7 @@ import replace from '@rollup/plugin-replace';
 import resolve from '@rollup/plugin-node-resolve';
 
 export default {
-  input: 'maslowWorker.js',
+  input: 'testWorker.js',
   output: {
     dir: 'dist',
     format: 'amd',

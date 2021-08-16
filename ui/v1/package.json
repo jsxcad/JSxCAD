@@ -42,8 +42,7 @@
     "react-bootstrap": "^1.0.0-beta.14",
     "react-split-pane": "^0.1.92",
     "react-draggable": "4.2.0",
-    "react-mosaic-component": "^3.2.0",
-    "workerpool": "^6.0.0"
+    "react-mosaic-component": "^3.2.0"
   },
   "devDependencies": {
     "@babel/core": "^7.7.4",

@@ -55,3 +55,47 @@ Orb(5)
 ![Image](shapes.md.13.png)
 
 Path(Point(0), Point(5), Point(5, 5), Point(0)).rz(45 / 2)
+
+![Image](shapes.md.14.png)
+
+Pentagon(5)
+
+![Image](shapes.md.15.png)
+
+Point(0.5, 0.5)
+
+![Image](shapes.md.16.png)
+
+Points([0.5, 0.5], [-0.5, -0.5])
+
+![Image](shapes.md.17.png)
+
+Polygon(Point(0), Point(5), Point(5, 5)).rz(1 / 16)
+
+![Image](shapes.md.18.png)
+
+Polyhedron(  
+ [[10, 10, 0], [10, -10, 0], [-10, -10, 0], [-10, 10, 0], [0, 0, 10]],  
+ [[4, 1, 0], [4, 2, 1], [4, 3, 2], [4, 0, 3], [3, 0, 1], [3, 1, 2]])
+
+![Image](shapes.md.19.png)
+
+Septagon(5)
+
+![Image](shapes.md.20.png)
+
+Spiral()
+
+![Image](shapes.md.21.png)
+
+Tetragon(5)
+
+![Image](shapes.md.22.png)
+
+Triangle(5)
+
+![Image](shapes.md.23.png)
+
+Wave((a) => [[0, sin(a * 3) * 100]], { to: 360 })
+
+Weld(Arc(5).x(-1), Box(5).x(1)).fill()

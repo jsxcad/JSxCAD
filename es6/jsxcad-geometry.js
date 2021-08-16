@@ -601,7 +601,7 @@ const differenceImpl = (geometry, ...geometries) => {
               fill$1(
                 fromPaths(
                   { tags: pathsGeometry.tags },
-                  pathsGeometry.map((path) => ({ points: path }))
+                  pathsGeometry.paths.map((path) => ({ points: path }))
                 )
               )
             );

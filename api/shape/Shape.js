@@ -59,7 +59,10 @@ export class Shape {
   }
 
   flip() {
-    return fromGeometry(flip(toConcreteTaggedGeometry(this)), this.context);
+    return fromGeometry(
+      flip(toConcreteTaggedGeometry(this.toGeometry())),
+      this.context
+    );
   }
 
   toDisplayGeometry(options) {
@@ -126,7 +129,9 @@ export const registerShapeMethod = (name, op) => {
   if (Shape.prototype.hasOwnProperty(name)) {
     const { origin } = Shape.prototype[name];
     if (origin !== path) {
-      throw Error(`Method ${name} is already defined in ${origin}.`);
+      throw Error(
+        `Method ${name} is already defined in ${origin} (this is ${path}).`
+      );
     }
   }
   // Make the operation constructor available e.g., Shape.grow(1)(s)
