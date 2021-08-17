@@ -57,7 +57,7 @@ class Shape {
   }
 
   toDisplayGeometry(options) {
-    return toDisplayGeometry(toGeometry(this), options);
+    return toDisplayGeometry(toGeometry$1(this), options);
   }
 
   toKeptGeometry(options = {}) {
@@ -65,15 +65,15 @@ class Shape {
   }
 
   toConcreteGeometry(options = {}) {
-    return toConcreteGeometry(toGeometry(this));
+    return toConcreteGeometry(toGeometry$1(this));
   }
 
   toDisjointGeometry(options = {}) {
-    return toConcreteGeometry(toGeometry(this));
+    return toConcreteGeometry(toGeometry$1(this));
   }
 
   toTransformedGeometry(options = {}) {
-    return toTransformedGeometry(toGeometry(this));
+    return toTransformedGeometry(toGeometry$1(this));
   }
 
   getContext(symbol) {
@@ -172,7 +172,7 @@ Shape.registerMethod = registerShapeMethod;
 Shape.registerReifier = (name, op) => registerReifier(name, op);
 
 const fromGeometry = Shape.fromGeometry;
-const toGeometry = (shape) => shape.toGeometry();
+const toGeometry$1 = (shape) => shape.toGeometry();
 
 function pad (hash, len) {
   while (hash.length < len) {
@@ -353,14 +353,22 @@ const add =
 
 Shape.registerMethod('add', add);
 
+const toGeometry = (to, from) => {
+  if (to instanceof Function) {
+    return to(from).toGeometry();
+  } else {
+    return to.toGeometry();
+  }
+};
+
 const and =
-  (...shapes) =>
+  (...args) =>
   (shape) =>
     Shape.fromGeometry(
       taggedGroup(
         {},
         shape.toGeometry(),
-        ...shapes.map((shape) => shape.toGeometry())
+        ...args.map((arg) => toGeometry(arg, shape))
       )
     );
 
@@ -2287,11 +2295,9 @@ const toPaths = (letters) => {
     .outline();
 };
 
-const ofSize = (size) => (text) => toPaths(text).scale(size);
+const ofSize = (text, size) => toPaths(text).scale(size);
 
-const Hershey = (size) => ofSize(size);
-Hershey.ofSize = ofSize;
-Hershey.toPaths = toPaths;
+const Hershey = ofSize;
 
 const MIN = 0;
 const MAX = 1;
@@ -2330,11 +2336,10 @@ const buildLayoutGeometry = ({
   const size = [pageWidth, pageLength];
   const r = (v) => Math.floor(v * 100) / 100;
   const fontHeight = Math.max(pageWidth, pageLength) * labelScale;
-  const font = Hershey(fontHeight);
   const title = [];
-  title.push(font(`${r(pageWidth)} x ${r(pageLength)}`));
+  title.push(Hershey(`${r(pageWidth)} x ${r(pageLength)}`, fontHeight));
   for (let nth = 0; nth < itemNames.length; nth++) {
-    title.push(font(itemNames[nth]).y((nth + 1) * fontHeight));
+    title.push(Hershey(itemNames[nth], fontHeight).y((nth + 1) * fontHeight));
   }
   const visualization = Box(
     Math.max(pageWidth, margin),
@@ -2612,6 +2617,7 @@ const get =
   };
 
 Shape.registerMethod('get', get);
+Shape.registerMethod('g', get);
 
 const grow = (amount) => (shape) =>
   Shape.fromGeometry(grow$1(shape.toGeometry(), amount));
@@ -2855,6 +2861,11 @@ const notAs =
     );
 
 Shape.registerMethod('notAs', notAs);
+
+const nth = (n) => shape => each()(shape)[n];
+
+Shape.registerMethod('nth', nth);
+Shape.registerMethod('n', nth);
 
 const offset =
   (initial = 1, step, limit) =>
@@ -3380,7 +3391,7 @@ const assemble = (...shapes) => {
       return shapes[0];
     }
     default: {
-      return fromGeometry(assemble$1(...shapes.map(toGeometry)));
+      return fromGeometry(assemble$1(...shapes.map(toGeometry$1)));
     }
   }
 };
@@ -4048,4 +4059,4 @@ const yz = Shape.fromGeometry({
   ],
 });
 
-export { Alpha, Arc, Assembly, Box, ChainedHull, Cone, Empty, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Line, Octagon, Orb, Page, Path, Pentagon, Plan, Point, Points, Polygon, Polyhedron, Septagon, Shape, Spiral, Tetragon, Triangle, Wave, Weld, add, addTo, align, and, as, at, bend, clip, clipFrom, cloudSolid, color, colors, cut, cutFrom, defGrblConstantLaser, defGrblDynamicLaser, defGrblPlotter, defGrblSpindle, defRgbColor, defThreejsMaterial, defTool, define, drop, each, ensurePages, ex, extrude, extrudeToPlane, fill, fuse, get, grow, inFn, inline, inset, keep, loadGeometry, loft, log, loop, material, md, minkowskiDifference, minkowskiShell, minkowskiSum, move, noVoid, notAs, ofPlan, offset, op, orient, outline, pack, play, projectToPlane, push, remesh, rotate, rotateX, rotateY, rotateZ, rx, ry, rz, saveGeometry, scale, section, sectionProfile, separate, size, sketch, smooth, tag, tags, test, tint, tool, twist, view, voidFn, weld, withFill, withFn, withInset, withOp, x, xy, xz, y, yz, z };
+export { Alpha, Arc, Assembly, Box, ChainedHull, Cone, Empty, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Line, Octagon, Orb, Page, Path, Pentagon, Plan, Point, Points, Polygon, Polyhedron, Septagon, Shape, Spiral, Tetragon, Triangle, Wave, Weld, add, addTo, align, and, as, at, bend, clip, clipFrom, cloudSolid, color, colors, cut, cutFrom, defGrblConstantLaser, defGrblDynamicLaser, defGrblPlotter, defGrblSpindle, defRgbColor, defThreejsMaterial, defTool, define, drop, each, ensurePages, ex, extrude, extrudeToPlane, fill, fuse, get, grow, inFn, inline, inset, keep, loadGeometry, loft, log, loop, material, md, minkowskiDifference, minkowskiShell, minkowskiSum, move, noVoid, notAs, nth, ofPlan, offset, op, orient, outline, pack, play, projectToPlane, push, remesh, rotate, rotateX, rotateY, rotateZ, rx, ry, rz, saveGeometry, scale, section, sectionProfile, separate, size, sketch, smooth, tag, tags, test, tint, tool, twist, view, voidFn, weld, withFill, withFn, withInset, withOp, x, xy, xz, y, yz, z };
