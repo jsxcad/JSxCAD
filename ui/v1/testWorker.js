@@ -6,7 +6,6 @@ import {
   read,
   setupFilesystem,
   touch,
-  write,
 } from '../../es6/jsxcad-sys.js';
 
 import api from './local/jsxcad-api.js';
