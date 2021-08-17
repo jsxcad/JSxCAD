@@ -128,16 +128,16 @@ const bootstrap = async () => {
     self.tell({ op: 'note', note });
   });
 
+  // Handle any messages that came in while we were booting up.
+  if (messageBootQueue.length > 0) {
+    do {
+      hear(messageBootQueue.shift());
+    } while(messageBootQueue.length > 0);
+  }
+
+  // The boot queue must be empty at this point.
   onmessage = ({ data }) => hear(data);
-  // Now that we're ready, drain the buffer.
-  if (self.messageBootQueue !== undefined) {
-    while (self.messageBootQueue.length > 0) {
-      hear(self.messageBootQueue.shift());
-    }
-  }
-  while (messageBootQueue.length > 0) {
-    hear(messageBootQueue.shift());
-  }
+
   if (onmessage === undefined) throw Error('die');
 };
 

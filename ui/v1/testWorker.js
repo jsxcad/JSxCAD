@@ -6,8 +6,9 @@ import {
   read,
   setupFilesystem,
   touch,
-  write,
-} from '../../es6/jsxcad-sys.js';
+} from '@jsxcad/sys';
+
+import api from '@jsxcad/api';
 
 const say = (message) => postMessage(message);
 
@@ -31,7 +32,8 @@ const agent = async ({ ask, message }) => {
       case 'read':
         return await read(path);
       case 'write':
-        return await write(path, value);
+        const aBox = api.Box(value, value);
+        return await api.saveGeometry(path, aBox);
       default:
         throw Error(`worker/unhandled: ${JSON.stringify(message)}`);
     }
@@ -40,12 +42,25 @@ const agent = async ({ ask, message }) => {
   }
 };
 
+const messageBootQueue = [];
+onmessage = ({ data }) => messageBootQueue.push(data);
+
 const bootstrap = async () => {
   await boot();
   const { ask, hear, tell } = createConversation({ agent, say });
   self.ask = ask;
   self.tell = tell;
+
+  // Handle any messages that came in while we were booting up.
+  if (messageBootQueue.length > 0) {
+    do {
+      hear(messageBootQueue.shift());
+    } while(messageBootQueue.length > 0);
+  }
+
+  // The boot queue must be empty at this point.
   onmessage = ({ data }) => hear(data);
+
   if (onmessage === undefined) throw Error('die');
 };
 

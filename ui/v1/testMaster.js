@@ -15,7 +15,7 @@ window.bootstrap = async () => {
   };
 
   const serviceSpec = {
-    webWorker: `./dist/testWorker.js`,
+    webWorker: `./testWorker.js`,
     agent,
     workerType: 'module',
   };
@@ -25,25 +25,25 @@ window.bootstrap = async () => {
   const wa = askService(serviceSpec, {
     op: 'write',
     path: 'test',
-    value: 'a',
+    value: 1,
     workspace: 'test',
   });
   const wb = askService(serviceSpec, {
     op: 'write',
     path: 'test',
-    value: 'b',
+    value: 5,
     workspace: 'test',
   });
   const wc = askService(serviceSpec, {
     op: 'write',
     path: 'test',
-    value: 'c',
+    value: 12,
     workspace: 'test',
   });
   const wd = askService(serviceSpec, {
     op: 'write',
     path: 'test',
-    value: 'd',
+    value: 18,
     workspace: 'test',
   });
 
