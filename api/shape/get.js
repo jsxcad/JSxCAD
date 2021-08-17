@@ -33,3 +33,4 @@ export const get =
   };
 
 Shape.registerMethod('get', get);
+Shape.registerMethod('g', get);

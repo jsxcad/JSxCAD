@@ -280,6 +280,7 @@ export { minkowskiSum } from './minkowskiSum.js';
 export { move } from './move.js';
 export { noVoid } from './noVoid.js';
 export { notAs } from './notAs.js';
+export { nth } from './nth.js';
 export { offset } from './offset.js';
 export { op } from './op.js';
 export { outline } from './outline.js';
