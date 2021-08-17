@@ -15,7 +15,7 @@ window.bootstrap = async () => {
   };
 
   const serviceSpec = {
-    webWorker: `./dist/testWorker.js`,
+    webWorker: `./testWorker.js`,
     agent,
     workerType: 'module',
   };

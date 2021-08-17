@@ -6,9 +6,9 @@ import {
   read,
   setupFilesystem,
   touch,
-} from '../../es6/jsxcad-sys.js';
+} from '@jsxcad/sys';
 
-import api from './local/jsxcad-api.js';
+import api from '@jsxcad/api';
 
 const say = (message) => postMessage(message);
 
@@ -42,12 +42,25 @@ const agent = async ({ ask, message }) => {
   }
 };
 
+const messageBootQueue = [];
+onmessage = ({ data }) => messageBootQueue.push(data);
+
 const bootstrap = async () => {
   await boot();
   const { ask, hear, tell } = createConversation({ agent, say });
   self.ask = ask;
   self.tell = tell;
+
+  // Handle any messages that came in while we were booting up.
+  if (messageBootQueue.length > 0) {
+    do {
+      hear(messageBootQueue.shift());
+    } while(messageBootQueue.length > 0);
+  }
+
+  // The boot queue must be empty at this point.
   onmessage = ({ data }) => hear(data);
+
   if (onmessage === undefined) throw Error('die');
 };
 
