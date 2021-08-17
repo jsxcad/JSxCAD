@@ -9,6 +9,8 @@ import {
   write,
 } from '../../es6/jsxcad-sys.js';
 
+import api from './local/jsxcad-api.js';
+
 const say = (message) => postMessage(message);
 
 const agent = async ({ ask, message }) => {
@@ -31,7 +33,8 @@ const agent = async ({ ask, message }) => {
       case 'read':
         return await read(path);
       case 'write':
-        return await write(path, value);
+        const aBox = api.Box(value, value);
+        return await api.saveGeometry(path, aBox);
       default:
         throw Error(`worker/unhandled: ${JSON.stringify(message)}`);
     }
