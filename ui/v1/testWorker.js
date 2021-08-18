@@ -55,7 +55,7 @@ const bootstrap = async () => {
   if (messageBootQueue.length > 0) {
     do {
       hear(messageBootQueue.shift());
-    } while(messageBootQueue.length > 0);
+    } while (messageBootQueue.length > 0);
   }
 
   // The boot queue must be empty at this point.

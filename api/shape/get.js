@@ -12,17 +12,20 @@ export const get =
     const picks = [];
     const walk = (geometry, descend, path) => {
       if (geometry.type === 'item') {
-        if (path.length > 0) {
+        if (path.length >= 1) {
           if (
             path[0] === 'tagpath:*' ||
             (geometry.tags && geometry.tags.includes(path[0]))
           ) {
-            if (path.length > 1) {
+            if (path.length >= 2) {
               return descend(path.slice(1));
             } else {
               picks.push(Shape.fromGeometry(geometry).op(...ops));
             }
+          } else {
           }
+        } else {
+          throw Error('Path exhausted');
         }
       } else {
         return descend(path);

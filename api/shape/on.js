@@ -3,17 +3,17 @@ import { invertTransform } from '@jsxcad/algorithm-cgal';
 import { qualifyTagPath } from './tag.js';
 import { rewrite } from '@jsxcad/geometry';
 
-export const inFn =
+export const on =
   (path, ...ops) =>
   (shape) => {
     const walk = (geometry, descend, walk, path) => {
       if (geometry.type === 'item') {
-        if (path.length > 0) {
+        if (path.length >= 1) {
           if (
             path[0] === 'tagpath:*' ||
             (geometry.tags && geometry.tags.includes(path[0]))
           ) {
-            if (path.length > 1) {
+            if (path.length >= 2) {
               return descend({}, path.slice(1));
             } else {
               // This is a target.
@@ -27,11 +27,15 @@ export const inFn =
                 .transform(global)
                 .toGeometry();
             }
+          } else {
+            return geometry;
           }
+        } else {
+          // We ran out of path without finding anything, which should be impossible.
+          throw Error('Path exhausted');
         }
-      } else {
-        return descend(path);
       }
+      return descend({}, path);
     };
 
     return Shape.fromGeometry(
@@ -39,4 +43,4 @@ export const inFn =
     );
   };
 
-Shape.registerMethod('in', inFn);
+Shape.registerMethod('on', on);

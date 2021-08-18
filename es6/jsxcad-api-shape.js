@@ -545,13 +545,21 @@ const cut =
     Shape.fromGeometry(
       difference(
         shape.toGeometry(),
-        ...shapes.map((shape) => shape.toGeometry())
+        ...shapes.map((other) => toGeometry(other, shape))
       )
     );
 
 Shape.registerMethod('cut', cut);
 
-const cutFrom = (other) => (shape) => other.cut(shape);
+const toShape = (to, from) => {
+  if (to instanceof Function) {
+    return to(from);
+  } else {
+    return to;
+  }
+};
+
+const cutFrom = (other) => (shape) => toShape(other, shape).cut(shape);
 Shape.registerMethod('cutFrom', cutFrom);
 
 const tag =
@@ -2581,6 +2589,35 @@ Shape.registerMethod('fill', fill);
 const withFill = () => (shape) => shape.group(shape.fill());
 Shape.registerMethod('withFill', withFill);
 
+const assemble = (...shapes) => {
+  shapes = shapes.filter((shape) => shape !== undefined);
+  switch (shapes.length) {
+    case 0: {
+      return Shape.fromGeometry(assemble$1());
+    }
+    case 1: {
+      return shapes[0];
+    }
+    default: {
+      return fromGeometry(assemble$1(...shapes.map(toGeometry$1)));
+    }
+  }
+};
+
+const fit =
+  (...shapes) =>
+  (shape) =>
+    assemble(...shapes, shape);
+
+Shape.registerMethod('fit', fit);
+
+const fitTo =
+  (...shapes) =>
+  (shape) =>
+    assemble(shape, ...shapes);
+
+Shape.registerMethod('fitTo', fitTo);
+
 const fuse = () => (shape) => {
   const geometry = shape.toGeometry();
   return fromGeometry(union(empty({ tags: geometry.tags }), geometry));
@@ -2596,17 +2633,19 @@ const get =
     const picks = [];
     const walk = (geometry, descend, path) => {
       if (geometry.type === 'item') {
-        if (path.length > 0) {
+        if (path.length >= 1) {
           if (
             path[0] === 'tagpath:*' ||
             (geometry.tags && geometry.tags.includes(path[0]))
           ) {
-            if (path.length > 1) {
+            if (path.length >= 2) {
               return descend(path.slice(1));
             } else {
               picks.push(Shape.fromGeometry(geometry).op(...ops));
             }
           }
+        } else {
+          throw Error('Path exhausted');
         }
       } else {
         return descend(path);
@@ -2647,44 +2686,6 @@ Shape.registerMethod('inline', inline);
 const withInline = () => (shape) => shape.with(inline());
 
 Shape.registerMethod('withInline', withInline);
-
-const inFn =
-  (path, ...ops) =>
-  (shape) => {
-    const walk = (geometry, descend, walk, path) => {
-      if (geometry.type === 'item') {
-        if (path.length > 0) {
-          if (
-            path[0] === 'tagpath:*' ||
-            (geometry.tags && geometry.tags.includes(path[0]))
-          ) {
-            if (path.length > 1) {
-              return descend({}, path.slice(1));
-            } else {
-              // This is a target.
-              const global = geometry.matrix;
-              const local = invertTransform(global);
-              const target = Shape.fromGeometry(geometry);
-              // Switch to the local coordinate space, perform the operation, and come back to the global coordinate space.
-              return target
-                .transform(local)
-                .op(...ops)
-                .transform(global)
-                .toGeometry();
-            }
-          }
-        }
-      } else {
-        return descend(path);
-      }
-    };
-
-    return Shape.fromGeometry(
-      rewrite(shape.toGeometry(), walk, qualifyTagPath(path, 'item'))
-    );
-  };
-
-Shape.registerMethod('in', inFn);
 
 const inset =
   (initial = 1, step, limit) =>
@@ -2862,7 +2863,7 @@ const notAs =
 
 Shape.registerMethod('notAs', notAs);
 
-const nth = (n) => shape => each()(shape)[n];
+const nth = (n) => (shape) => each()(shape)[n];
 
 Shape.registerMethod('nth', nth);
 Shape.registerMethod('n', nth);
@@ -2875,6 +2876,48 @@ const offset =
     );
 
 Shape.registerMethod('offset', offset);
+
+const on =
+  (path, ...ops) =>
+  (shape) => {
+    const walk = (geometry, descend, walk, path) => {
+      if (geometry.type === 'item') {
+        if (path.length >= 1) {
+          if (
+            path[0] === 'tagpath:*' ||
+            (geometry.tags && geometry.tags.includes(path[0]))
+          ) {
+            if (path.length >= 2) {
+              return descend({}, path.slice(1));
+            } else {
+              // This is a target.
+              const global = geometry.matrix;
+              const local = invertTransform(global);
+              const target = Shape.fromGeometry(geometry);
+              // Switch to the local coordinate space, perform the operation, and come back to the global coordinate space.
+              return target
+                .transform(local)
+                .op(...ops)
+                .transform(global)
+                .toGeometry();
+            }
+          } else {
+            return geometry;
+          }
+        } else {
+          // We ran out of path without finding anything, which should be impossible.
+          throw Error('Path exhausted');
+        }
+      }
+      return descend({}, path);
+    };
+
+    return Shape.fromGeometry(
+      rewrite(shape.toGeometry(), walk, qualifyTagPath(path, 'item'))
+    );
+  };
+
+Shape.registerMethod('on', on);
 
 const op =
   (...fns) =>
@@ -3201,7 +3244,7 @@ const baseView =
     skin = true,
     outline = true,
     wireframe = false,
-    prepareView = (x) => x,
+    op = (x) => x,
     inline,
     width = 512,
     height = 256,
@@ -3214,7 +3257,7 @@ const baseView =
       width = size;
       height = size / 2;
     }
-    const viewShape = prepareView(shape);
+    const viewShape = op(shape);
     const sourceLocation = getSourceLocation();
     if (!sourceLocation) {
       console.log('No sourceLocation');
@@ -3237,7 +3280,7 @@ const topView =
     skin = true,
     outline = true,
     wireframe = false,
-    prepareView,
+    op,
     path,
     width = 1024,
     height = 512,
@@ -3251,7 +3294,7 @@ const topView =
       skin,
       outline,
       wireframe,
-      prepareView,
+      op,
       path,
       width,
       height,
@@ -3268,7 +3311,7 @@ const gridView =
     skin = true,
     outline = true,
     wireframe = false,
-    prepareView,
+    op,
     path,
     width = 1024,
     height = 512,
@@ -3282,7 +3325,7 @@ const gridView =
       skin,
       outline,
       wireframe,
-      prepareView,
+      op,
       path,
       width,
       height,
@@ -3299,7 +3342,7 @@ const frontView =
     skin = true,
     outline = true,
     wireframe = false,
-    prepareView,
+    op,
     path,
     width = 1024,
     height = 512,
@@ -3313,7 +3356,7 @@ const frontView =
       skin,
       outline,
       wireframe,
-      prepareView,
+      op,
       path,
       width,
       height,
@@ -3381,20 +3424,7 @@ const Weld = (first, ...rest) => first.weld(...rest);
 
 Shape.prototype.Weld = Shape.shapeMethod(Weld);
 
-const assemble = (...shapes) => {
-  shapes = shapes.filter((shape) => shape !== undefined);
-  switch (shapes.length) {
-    case 0: {
-      return Shape.fromGeometry(assemble$1());
-    }
-    case 1: {
-      return shapes[0];
-    }
-    default: {
-      return fromGeometry(assemble$1(...shapes.map(toGeometry$1)));
-    }
-  }
-};
+// DEPRECATE
 
 const withFn =
   (...shapes) =>
@@ -4059,4 +4089,4 @@ const yz = Shape.fromGeometry({
   ],
 });
 
-export { Alpha, Arc, Assembly, Box, ChainedHull, Cone, Empty, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Line, Octagon, Orb, Page, Path, Pentagon, Plan, Point, Points, Polygon, Polyhedron, Septagon, Shape, Spiral, Tetragon, Triangle, Wave, Weld, add, addTo, align, and, as, at, bend, clip, clipFrom, cloudSolid, color, colors, cut, cutFrom, defGrblConstantLaser, defGrblDynamicLaser, defGrblPlotter, defGrblSpindle, defRgbColor, defThreejsMaterial, defTool, define, drop, each, ensurePages, ex, extrude, extrudeToPlane, fill, fuse, get, grow, inFn, inline, inset, keep, loadGeometry, loft, log, loop, material, md, minkowskiDifference, minkowskiShell, minkowskiSum, move, noVoid, notAs, nth, ofPlan, offset, op, orient, outline, pack, play, projectToPlane, push, remesh, rotate, rotateX, rotateY, rotateZ, rx, ry, rz, saveGeometry, scale, section, sectionProfile, separate, size, sketch, smooth, tag, tags, test, tint, tool, twist, view, voidFn, weld, withFill, withFn, withInset, withOp, x, xy, xz, y, yz, z };
+export { Alpha, Arc, Assembly, Box, ChainedHull, Cone, Empty, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Line, Octagon, Orb, Page, Path, Pentagon, Plan, Point, Points, Polygon, Polyhedron, Septagon, Shape, Spiral, Tetragon, Triangle, Wave, Weld, add, addTo, align, and, as, at, bend, clip, clipFrom, cloudSolid, color, colors, cut, cutFrom, defGrblConstantLaser, defGrblDynamicLaser, defGrblPlotter, defGrblSpindle, defRgbColor, defThreejsMaterial, defTool, define, drop, each, ensurePages, ex, extrude, extrudeToPlane, fill, fit, fitTo, fuse, get, grow, inline, inset, keep, loadGeometry, loft, log, loop, material, md, minkowskiDifference, minkowskiShell, minkowskiSum, move, noVoid, notAs, nth, ofPlan, offset, on, op, orient, outline, pack, play, projectToPlane, push, remesh, rotate, rotateX, rotateY, rotateZ, rx, ry, rz, saveGeometry, scale, section, sectionProfile, separate, size, sketch, smooth, tag, tags, test, tint, tool, twist, view, voidFn, weld, withFill, withFn, withInset, withOp, x, xy, xz, y, yz, z };
