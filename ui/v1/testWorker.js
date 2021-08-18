@@ -1,12 +1,6 @@
 /* global postMessage, onmessage:writable, self */
 
-import {
-  boot,
-  createConversation,
-  read,
-  setupFilesystem,
-  touch,
-} from '@jsxcad/sys';
+import { boot, createConversation, setupFilesystem, touch } from '@jsxcad/sys';
 
 import api from '@jsxcad/api';
 
