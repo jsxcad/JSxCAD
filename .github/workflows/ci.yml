@@ -33,15 +33,12 @@ jobs:
       - run: npm run rollup
       - run: ./publish-es6.sh
       - run: ./publish-wasm.sh
-
-  artifacts:
-    when: on_failure
-    steps:
-      - name: Archive production artifacts
-        env:
-          NODE_OPTIONS: --max_old_space_size=4096
+      - name: Upload Artifacts
+        if: ${{ failure() }}
         uses: actions/upload-artifact@v2
         with:
           name: differences
           path: |
             **/*.difference.png
+        env:
+          NODE_OPTIONS: --max_old_space_size=4096
