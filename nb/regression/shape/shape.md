@@ -28,7 +28,7 @@ Box(5).color('red').clipFrom(Arc(5.8).color('blue'))
 
 Box(5).color('orange')
 
-Colors are
+Colors are 
 
 Box(5).color('green').colors((s, colors) => { md`Colors are ${colors}`; return s; })
 
