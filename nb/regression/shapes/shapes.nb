@@ -23,7 +23,7 @@ const group = Group(Box(10), Arc(8), Triangle(5))
   .gridView()
   .md(`Group(Box(10), Arc(8), Triangle(5))`);
 
-const hershey = Hershey(10)('Hershey')
+const hershey = Hershey('Hershey', 10)
   .align('xy')
   .gridView()
   .md(`Hershey(10)('Hershey').align('xy')`);
