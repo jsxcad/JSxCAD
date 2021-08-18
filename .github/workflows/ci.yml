@@ -38,5 +38,5 @@ jobs:
 
     artifacts:
       paths:
-        - *.observed.png
+        - '**/*.observed.png'
       expire_in: 1 day
