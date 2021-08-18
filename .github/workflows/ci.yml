@@ -10,13 +10,13 @@ on:
     branches: [master]
 
 jobs:
+  artifacts:
+    paths:
+      - '**/*.observed.png'
+    expire_in: 1 day
+
   build:
     runs-on: ubuntu-latest
-
-    artifacts:
-      paths:
-        - '**/*.observed.png'
-      expire_in: 1 day
 
     strategy:
       matrix:
