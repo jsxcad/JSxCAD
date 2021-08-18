@@ -1,5 +1,6 @@
 ### (Needs redesign)
 
+
 # Clock
 
 This is a simple project to produce a clock.
@@ -10,7 +11,9 @@ We want to produce a display something like this.
 
 <img src="https://upload.wikimedia.org/wikipedia/commons/a/a4/Wecker_mit_Radium.jpg" width="256">
 
+
 ## Parameters
+
 
 ## Parts
 

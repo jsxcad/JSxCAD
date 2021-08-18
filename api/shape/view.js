@@ -16,7 +16,7 @@ export const baseView =
     skin = true,
     outline = true,
     wireframe = false,
-    prepareView = (x) => x,
+    op = (x) => x,
     inline,
     width = 512,
     height = 256,
@@ -29,7 +29,7 @@ export const baseView =
       width = size;
       height = size / 2;
     }
-    const viewShape = prepareView(shape);
+    const viewShape = op(shape);
     const sourceLocation = getSourceLocation();
     if (!sourceLocation) {
       console.log('No sourceLocation');
@@ -52,7 +52,7 @@ export const topView =
     skin = true,
     outline = true,
     wireframe = false,
-    prepareView,
+    op,
     path,
     width = 1024,
     height = 512,
@@ -66,7 +66,7 @@ export const topView =
       skin,
       outline,
       wireframe,
-      prepareView,
+      op,
       path,
       width,
       height,
@@ -83,7 +83,7 @@ export const gridView =
     skin = true,
     outline = true,
     wireframe = false,
-    prepareView,
+    op,
     path,
     width = 1024,
     height = 512,
@@ -97,7 +97,7 @@ export const gridView =
       skin,
       outline,
       wireframe,
-      prepareView,
+      op,
       path,
       width,
       height,
@@ -114,7 +114,7 @@ export const frontView =
     skin = true,
     outline = true,
     wireframe = false,
-    prepareView,
+    op,
     path,
     width = 1024,
     height = 512,
@@ -128,7 +128,7 @@ export const frontView =
       skin,
       outline,
       wireframe,
-      prepareView,
+      op,
       path,
       width,
       height,
@@ -145,7 +145,7 @@ export const sideView =
     skin = true,
     outline = true,
     wireframe = false,
-    prepareView,
+    op,
     path,
     width = 1024,
     height = 512,
@@ -159,7 +159,7 @@ export const sideView =
       skin,
       outline,
       wireframe,
-      prepareView,
+      op,
       path,
       width,
       height,
