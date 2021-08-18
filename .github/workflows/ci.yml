@@ -37,5 +37,6 @@ jobs:
           NODE_OPTIONS: --max_old_space_size=4096
 
     artifacts:
-      paths: *.observed.png
+      paths:
+        - *.observed.png
       expire_in: 1 day
