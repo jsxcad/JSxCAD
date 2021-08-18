@@ -30,7 +30,8 @@ const agent = async ({ ask, message }) => {
         }
         return;
       case 'read':
-        return await read(path);
+        const readShape = await api.loadGeometry(path);
+        return readShape.size().length;
       case 'write':
         const aBox = api.Box(value, value);
         return await api.saveGeometry(path, aBox);
