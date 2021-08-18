@@ -1,12 +1,6 @@
 /* global postMessage, onmessage:writable, self */
 
-import {
-  boot,
-  createConversation,
-  read,
-  setupFilesystem,
-  touch,
-} from '@jsxcad/sys';
+import { boot, createConversation, setupFilesystem, touch } from '@jsxcad/sys';
 
 import api from '@jsxcad/api';
 
@@ -56,7 +50,7 @@ const bootstrap = async () => {
   if (messageBootQueue.length > 0) {
     do {
       hear(messageBootQueue.shift());
-    } while(messageBootQueue.length > 0);
+    } while (messageBootQueue.length > 0);
   }
 
   // The boot queue must be empty at this point.

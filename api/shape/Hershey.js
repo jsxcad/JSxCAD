@@ -1431,10 +1431,8 @@ export const toPaths = (letters) => {
     .outline();
 };
 
-export const ofSize = (size) => (text) => toPaths(text).scale(size);
+export const ofSize = (text, size) => toPaths(text).scale(size);
 
-export const Hershey = (size) => ofSize(size);
-Hershey.ofSize = ofSize;
-Hershey.toPaths = toPaths;
+export const Hershey = ofSize;
 
 export default Hershey;

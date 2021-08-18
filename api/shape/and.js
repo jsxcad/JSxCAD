@@ -1,14 +1,15 @@
 import Shape from './Shape.js';
 import { taggedGroup } from '@jsxcad/geometry';
+import { toGeometry } from './toGeometry.js';
 
 export const and =
-  (...shapes) =>
+  (...args) =>
   (shape) =>
     Shape.fromGeometry(
       taggedGroup(
         {},
         shape.toGeometry(),
-        ...shapes.map((shape) => shape.toGeometry())
+        ...args.map((arg) => toGeometry(arg, shape))
       )
     );
 

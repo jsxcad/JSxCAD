@@ -51,11 +51,10 @@ const buildLayoutGeometry = ({
   const size = [pageWidth, pageLength];
   const r = (v) => Math.floor(v * 100) / 100;
   const fontHeight = Math.max(pageWidth, pageLength) * labelScale;
-  const font = Hershey(fontHeight);
   const title = [];
-  title.push(font(`${r(pageWidth)} x ${r(pageLength)}`));
+  title.push(Hershey(`${r(pageWidth)} x ${r(pageLength)}`, fontHeight));
   for (let nth = 0; nth < itemNames.length; nth++) {
-    title.push(font(itemNames[nth]).y((nth + 1) * fontHeight));
+    title.push(Hershey(itemNames[nth], fontHeight).y((nth + 1) * fontHeight));
   }
   const visualization = Box(
     Math.max(pageWidth, margin),
