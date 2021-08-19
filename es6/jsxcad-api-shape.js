@@ -2561,9 +2561,7 @@ const each =
   (op = (leafs, shape) => leafs) =>
   (shape) =>
     op(
-      getLeafs(shape.toGeometry()).map((leaf) =>
-        Shape.fromGeometry(leaf)
-      ),
+      getLeafs(shape.toGeometry()).map((leaf) => Shape.fromGeometry(leaf)),
       shape
     );
 Shape.registerMethod('each', each);
@@ -2833,7 +2831,7 @@ Shape.registerMethod('loop', loop);
 const mask =
   (...args) =>
   (shape) =>
-  shape.and(...args.map(arg => toShape(arg, shape).void()));
+    shape.and(...args.map((arg) => toShape(arg, shape).void()));
 
 Shape.registerMethod('mask', mask);
 
@@ -2927,7 +2925,7 @@ Shape.registerMethod('offset', offset);
 const on =
   (path, ...ops) =>
   (shape) => {
-    ops = ops.map(op => op instanceof Function ? op : () => op);
+    ops = ops.map((op) => (op instanceof Function ? op : () => op));
     if (path instanceof Function) {
       // We've already selected the item to replace, e.g., s.on(g('plate'), ...);
       const selection = path(shape).toGeometry();

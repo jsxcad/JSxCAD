@@ -20,9 +20,7 @@ export const screenshot = async (html) => {
         await page.waitForSelector('.notebook.loaded', { timeout: 30000 });
       } catch (error) {
         console.log(error.stack);
-        if (
-          timeoutCount++ < timeoutLimit
-        ) {
+        if (timeoutCount++ < timeoutLimit) {
           console.log(`Retry ${timeoutCount}`);
           continue;
         } else {

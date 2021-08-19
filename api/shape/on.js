@@ -6,7 +6,7 @@ import { rewrite } from '@jsxcad/geometry';
 export const on =
   (path, ...ops) =>
   (shape) => {
-    ops = ops.map(op => op instanceof Function ? op : () => op);
+    ops = ops.map((op) => (op instanceof Function ? op : () => op));
     if (path instanceof Function) {
       // We've already selected the item to replace, e.g., s.on(g('plate'), ...);
       const selection = path(shape).toGeometry();
