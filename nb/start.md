@@ -45,5 +45,5 @@ This should change as JSxCAD becomes more mature.
 
 Edits are stored locally in the browser - they can be downloaded or published only explicitly.
 
-- Control-S will save local edits in the browser.
-- Shift-Enter will save, then run the notebook being edited.
+* Control-S will save local edits in the browser.
+* Shift-Enter will save, then run the notebook being edited.

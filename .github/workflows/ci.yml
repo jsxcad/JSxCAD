@@ -39,6 +39,7 @@ jobs:
         with:
           name: differences
           path: |
+            !**/node_modules/**
             **/*.difference.png
             **/*.observed.md
             **/*.md

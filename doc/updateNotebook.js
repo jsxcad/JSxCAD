@@ -9,6 +9,8 @@ import pngjs from 'pngjs';
 import { screenshot } from './screenshot.js';
 import { toHtml } from '@jsxcad/convert-notebook';
 
+const ensureNewline = (line) => (line.endsWith('\n') ? line : `${line}\n`);
+
 const writeMarkdown = (path, notebook, imageUrlList, failedExpectations) => {
   const output = [];
   let imageCount = 0;
@@ -17,13 +19,13 @@ const writeMarkdown = (path, notebook, imageUrlList, failedExpectations) => {
     const note = notebook[nth];
     const { md, view } = note;
     if (md) {
-      output.push(notebook[nth].md);
+      output.push(ensureNewline(notebook[nth].md.trim()));
     }
     if (view) {
       const imageUrl = imageUrlList[viewCount++];
       if (typeof imageUrl === 'string' && imageUrl.startsWith('data:image/')) {
         const imagePath = `${path}.md.${imageCount++}.png`;
-        output.push(`![Image](${pathModule.basename(imagePath)})`);
+        output.push(`![Image](${pathModule.basename(imagePath)})\n`);
       }
     }
   }
@@ -34,7 +36,7 @@ const writeMarkdown = (path, notebook, imageUrlList, failedExpectations) => {
   const root = roots.map((_) => '..').join('/');
 
   const markdown = output
-    .join('\n\n')
+    .join('\n')
     .replace(
       /#JSxCAD@https:\/\/gitcdn.link\/cdn\/jsxcad\/JSxCAD\/master\/(.*).nb/g,
       (_, path) => `${root}/${path}.md`
