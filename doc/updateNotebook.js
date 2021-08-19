@@ -9,7 +9,7 @@ import pngjs from 'pngjs';
 import { screenshot } from './screenshot.js';
 import { toHtml } from '@jsxcad/convert-notebook';
 
-const writeMarkdown = (path, notebook, imageUrlList) => {
+const writeMarkdown = (path, notebook, imageUrlList, failedExpectations) => {
   const output = [];
   let imageCount = 0;
   let viewCount = 0;
@@ -22,9 +22,7 @@ const writeMarkdown = (path, notebook, imageUrlList) => {
     if (view) {
       const imageUrl = imageUrlList[viewCount++];
       if (typeof imageUrl === 'string' && imageUrl.startsWith('data:image/')) {
-        const { dataBuffer } = imageDataUri.decode(imageUrl);
         const imagePath = `${path}.md.${imageCount++}.png`;
-        writeFileSync(imagePath, dataBuffer);
         output.push(`![Image](${pathModule.basename(imagePath)})`);
       }
     }
@@ -42,7 +40,20 @@ const writeMarkdown = (path, notebook, imageUrlList) => {
       (_, path) => `${root}/${path}.md`
     );
 
-  writeFileSync(`${path}.md`, markdown);
+  const observedPath = `${path}.observed.md`;
+  const expectedPath = `${path}.md`;
+  writeFileSync(observedPath, markdown);
+  try {
+    if (markdown !== readFileSync(expectedPath, 'utf8')) {
+      failedExpectations.push(`diff ${observedPath} ${expectedPath}`);
+    }
+  } catch (error) {
+    if (error.code === 'ENOENT') {
+      failedExpectations.push(`missing ${expectedPath}`);
+    } else {
+      throw error;
+    }
+  }
 };
 
 export const updateNotebook = async (
@@ -57,28 +68,35 @@ export const updateNotebook = async (
     const notebook = getEmitted();
     const html = await toHtml(notebook);
     writeFileSync(`${target}.html`, html);
-    const { pngDataList, imageUrlList } = await screenshot(
+    const { imageUrlList } = await screenshot(
       new TextDecoder('utf8').decode(html),
       `${target}.png`
     );
-    await writeMarkdown(target, notebook, imageUrlList);
-    for (let nth = 0; nth < pngDataList.length; nth++) {
-      const pngData = pngDataList[nth];
-      writeFileSync(`${target}_${nth}.observed.png`, pngData);
-      const observedPng = pngjs.PNG.sync.read(pngData);
+    await writeMarkdown(target, notebook, imageUrlList, failedExpectations);
+    for (let nth = 0; nth < imageUrlList.length; nth++) {
+      const observedPath = `${target}.md.${nth}.observed.png`;
+      const expectedPath = `${target}.md.${nth}.png`;
+      const { dataBuffer } = imageDataUri.decode(imageUrlList[nth]);
+      writeFileSync(observedPath, dataBuffer);
+      const observedPng = pngjs.PNG.sync.read(dataBuffer);
       let expectedPng;
       try {
-        expectedPng = pngjs.PNG.sync.read(readFileSync(`${target}_${nth}.png`));
+        expectedPng = pngjs.PNG.sync.read(readFileSync(expectedPath));
       } catch (error) {
         if (error.code === 'ENOENT') {
           // We couldn't find a matching expectation.
-          failedExpectations.push(`${target}_${nth}.observed.png`);
+          failedExpectations.push(`missing ${observedPath}`);
           continue;
         } else {
           throw error;
         }
       }
       const { width, height } = expectedPng;
+      if (width !== observedPng.width || height !== observedPng.height) {
+        // Can't diff when the dimensions don't match.
+        failedExpectations.push(observedPath);
+        continue;
+      }
       const differencePng = new pngjs.PNG({ width, height });
       const pixelThreshold = 1;
       const numFailedPixels = pixelmatch(
@@ -101,7 +119,7 @@ export const updateNotebook = async (
           pngjs.PNG.sync.write(differencePng)
         );
         // Note failures.
-        failedExpectations.push(`${target}_${nth}.observed.png`);
+        failedExpectations.push(`display ${target}_${nth}.difference.png`);
       }
     }
   } catch (error) {
