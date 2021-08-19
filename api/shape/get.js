@@ -32,8 +32,13 @@ export const get =
       }
     };
     visit(shape.toGeometry(), walk, qualifyTagPath(path, 'item'));
+    for (const pick of picks) {
+      pick.toGeometry().gotten = true;
+    }
     return Group(...picks);
   };
+
+export const g = get;
 
 Shape.registerMethod('get', get);
 Shape.registerMethod('g', get);

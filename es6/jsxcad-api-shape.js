@@ -2561,7 +2561,7 @@ const each =
   (op = (leafs, shape) => leafs) =>
   (shape) =>
     op(
-      getLeafs(shape.toDisjointGeometry()).map((leaf) =>
+      getLeafs(shape.toGeometry()).map((leaf) =>
         Shape.fromGeometry(leaf)
       ),
       shape
@@ -2685,8 +2685,13 @@ const get =
       }
     };
     visit(shape.toGeometry(), walk, qualifyTagPath(path, 'item'));
+    for (const pick of picks) {
+      pick.toGeometry().gotten = true;
+    }
     return Group(...picks);
   };
+
+const g = get;
 
 Shape.registerMethod('get', get);
 Shape.registerMethod('g', get);
@@ -2825,6 +2830,13 @@ const loop =
 
 Shape.registerMethod('loop', loop);
 
+const mask =
+  (...args) =>
+  (shape) =>
+  shape.and(...args.map(arg => toShape(arg, shape).void()));
+
+Shape.registerMethod('mask', mask);
+
 const material = (name) => (shape) =>
   Shape.fromGeometry(rewriteTags(toTagsFromName$1(name), [], shape.toGeometry()));
 
@@ -2898,6 +2910,8 @@ Shape.registerMethod('notAs', notAs);
 
 const nth = (n) => (shape) => each()(shape)[n];
 
+const n = nth;
+
 Shape.registerMethod('nth', nth);
 Shape.registerMethod('n', nth);
 
@@ -2913,6 +2927,32 @@ Shape.registerMethod('offset', offset);
 const on =
   (path, ...ops) =>
   (shape) => {
+    ops = ops.map(op => op instanceof Function ? op : () => op);
+    if (path instanceof Function) {
+      // We've already selected the item to replace, e.g., s.on(g('plate'), ...);
+      const selection = path(shape).toGeometry();
+      // FIX: Make this more robust?
+      const items = selection.type === 'item' ? [selection] : selection.content;
+      const walk = (geometry, descend) => {
+        if (geometry.type === 'item') {
+          if (items.includes(geometry)) {
+            // This is a target.
+            const global = geometry.matrix;
+            const local = invertTransform(global);
+            const target = Shape.fromGeometry(geometry);
+            // Switch to the local coordinate space, perform the operation, and come back to the global coordinate space.
+            return target
+              .transform(local)
+              .op(...ops)
+              .transform(global)
+              .toGeometry();
+          }
+        }
+        return descend();
+      };
+      return Shape.fromGeometry(rewrite(shape.toGeometry(), walk));
+    }
+
     const walk = (geometry, descend, walk, path) => {
       if (geometry.type === 'item') {
         if (path.length >= 1) {
@@ -4122,4 +4162,4 @@ const yz = Shape.fromGeometry({
   ],
 });
 
-export { Alpha, Arc, Assembly, Box, ChainedHull, Cone, Empty, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Line, Octagon, Orb, Page, Path, Pentagon, Plan, Point, Points, Polygon, Polyhedron, Septagon, Shape, Spiral, Tetragon, Triangle, Wave, Weld, add, addTo, align, and, as, asPart, at, bend, billOfMaterials, clip, clipFrom, cloudSolid, color, colors, cut, cutFrom, defGrblConstantLaser, defGrblDynamicLaser, defGrblPlotter, defGrblSpindle, defRgbColor, defThreejsMaterial, defTool, define, drop, each, ensurePages, ex, extrude, extrudeToPlane, fill, fit, fitTo, fuse, get, grow, inline, inset, keep, loadGeometry, loft, log, loop, material, md, minkowskiDifference, minkowskiShell, minkowskiSum, move, noVoid, notAs, nth, ofPlan, offset, on, op, orient, outline, pack, play, projectToPlane, push, remesh, rotate, rotateX, rotateY, rotateZ, rx, ry, rz, saveGeometry, scale, section, sectionProfile, separate, size, sketch, smooth, tag, tags, test, tint, tool, twist, view, voidFn, weld, withFill, withFn, withInset, withOp, x, xy, xz, y, yz, z };
+export { Alpha, Arc, Assembly, Box, ChainedHull, Cone, Empty, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Line, Octagon, Orb, Page, Path, Pentagon, Plan, Point, Points, Polygon, Polyhedron, Septagon, Shape, Spiral, Tetragon, Triangle, Wave, Weld, add, addTo, align, and, as, asPart, at, bend, billOfMaterials, clip, clipFrom, cloudSolid, color, colors, cut, cutFrom, defGrblConstantLaser, defGrblDynamicLaser, defGrblPlotter, defGrblSpindle, defRgbColor, defThreejsMaterial, defTool, define, drop, each, ensurePages, ex, extrude, extrudeToPlane, fill, fit, fitTo, fuse, g, get, grow, inline, inset, keep, loadGeometry, loft, log, loop, mask, material, md, minkowskiDifference, minkowskiShell, minkowskiSum, move, n, noVoid, notAs, nth, ofPlan, offset, on, op, orient, outline, pack, play, projectToPlane, push, remesh, rotate, rotateX, rotateY, rotateZ, rx, ry, rz, saveGeometry, scale, section, sectionProfile, separate, size, sketch, smooth, tag, tags, test, tint, tool, twist, view, voidFn, weld, withFill, withFn, withInset, withOp, x, xy, xz, y, yz, z };

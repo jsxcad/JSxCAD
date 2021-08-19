@@ -5,7 +5,7 @@ export const each =
   (op = (leafs, shape) => leafs) =>
   (shape) =>
     op(
-      getLeafs(shape.toDisjointGeometry()).map((leaf) =>
+      getLeafs(shape.toGeometry()).map((leaf) =>
         Shape.fromGeometry(leaf)
       ),
       shape

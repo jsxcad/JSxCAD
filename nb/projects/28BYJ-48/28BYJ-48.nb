@@ -1,0 +1,66 @@
+const bodyDiameter = 28;
+const bodyHeight = 19;
+const totalDiameter = 42;
+const tabDiameter = 7;
+const tabThickness = 1;
+const holeDiameter = 4;
+const shaftDiameter = 5;
+const shaftFlats = 3;
+const shaftOffset = 6;
+const shaftBaseDiameter = 8;
+const shaftBaseHeight = 1;
+const shaftLength = 10;
+const connectorWidth = 15;
+const connectorLength = 7;
+const connectorBaseWidth = 17;
+const connectorBaseHeight = 4;
+const connectorHeight = 5;
+
+export const stepperMotor28byj48 = Group(
+  Arc(bodyDiameter)
+    .add(Box(connectorLength, connectorWidth).x(bodyDiameter / -2))
+    .add(Box(connectorBaseHeight, connectorBaseWidth).x(bodyDiameter / -2 + 2))
+    .ex(-bodyHeight)
+    .as('body'),
+  Group(
+    Arc(shaftBaseDiameter).ex(0, -shaftBaseHeight),
+    Arc(shaftDiameter).clip(Box(shaftDiameter, shaftFlats)).ex(shaftLength)
+  )
+    .mask(grow(0.1))
+    .as('shaft')
+    .x(bodyDiameter / 2 - shaftOffset)
+    .z(shaftBaseHeight),
+  Arc(tabDiameter)
+    .y(totalDiameter / 2 - tabDiameter / 2)
+    .rz(0, 1 / 2)
+    .hull()
+    .ex(-tabThickness)
+    .fitTo(
+      Arc(holeDiameter)
+        .ex(-tabThickness)
+        .void()
+        .as('hole')
+        .y(totalDiameter / 2 - tabDiameter / 2)
+        .rz(0, 1 / 2)
+    )
+).view({ op: rz(1 / 4) });
+md`![28BYJ-48 Stepper Motor](https://cdn-reichelt.de/bilder/web/artikel_ws/A300/ME071_01.jpg)`;
+
+const reel = Group(Arc(32).ex(-2, -1), Arc(30).ex(-1, 1), Arc(32).ex(1, 2))
+  .as('reel')
+  .view();
+
+stepperMotor28byj48
+  .view()
+  .on('shaft', fit(reel.z(5)))
+  .on(
+    g('hole'),
+    Arc(6)
+      .ex(15)
+      .as('leg')
+      .fitTo(Arc(4).ex(5, -1).add(Arc(6).ex(-1, -5)).as('peg').mask(grow(0.1)))
+  )
+  .view()
+  .stl('reel', { op: g('reel') })
+  .stl('leg', { op: (s) => s.g('leg').rx(1 / 2) })
+  .stl('peg', { op: g('peg') });
