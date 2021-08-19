@@ -41,9 +41,9 @@ const writeMarkdown = (path, notebook, imageUrlList, failedExpectations) => {
     );
 
   const observedPath = `${path}.observed.md`;
+  const expectedPath = `${path}.md`;
   writeFileSync(observedPath, markdown);
   try {
-    const expectedPath = `${path}.md`;
     if (markdown !== readFileSync(expectedPath, 'utf8')) {
       failedExpectations.push(`diff ${observedPath} ${expectedPath}`);
     }
