@@ -11,7 +11,7 @@ export const screenshot = async (html) => {
       pngDataList.length = 0;
       imageUrlList.length = 0;
 
-      const browser = await puppeteer.launch();
+      const browser = await puppeteer.launch({ headless: true, args: ['--font-render-hinting=none'] });
       const page = await browser.newPage();
       const width = 1024;
       const height = 1024;
@@ -21,8 +21,8 @@ export const screenshot = async (html) => {
       try {
         await page.waitForSelector('.notebook.loaded', { timeout: 30000 });
       } catch (error) {
+        console.log(error.stack);
         if (
-          error instanceof puppeteer.TimeoutError &&
           timeoutCount++ < timeoutLimit
         ) {
           console.log(`Retry ${timeoutCount}`);

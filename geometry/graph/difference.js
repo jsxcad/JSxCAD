@@ -12,7 +12,6 @@ export const difference = (a, b) => {
   if (doesNotOverlap(a, b)) {
     return a;
   }
-  info('difference begin');
   const result = fromSurfaceMeshLazy(
     differenceOfSurfaceMeshes(
       toSurfaceMesh(a.graph),
@@ -21,6 +20,5 @@ export const difference = (a, b) => {
       b.matrix
     )
   );
-  info('difference end');
   return taggedGraph({ tags: a.tags }, result);
 };
