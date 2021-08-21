@@ -258,6 +258,7 @@ export { colors } from './colors.js';
 export { cloudSolid } from './cloudSolid.js';
 export { cut } from './cut.js';
 export { cutFrom } from './cutFrom.js';
+export { cutOut } from './cutOut.js';
 export { drop } from './drop.js';
 export { ensurePages } from './Page.js';
 export { each } from './each.js';

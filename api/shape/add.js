@@ -5,7 +5,10 @@ export const add =
   (...shapes) =>
   (shape) =>
     Shape.fromGeometry(
-      union(shape.toGeometry(), ...shapes.map((shape) => shape.toGeometry()))
+      union(
+        shape.toGeometry(),
+        ...shapes.map((other) => Shape.toShape(other, shape).toGeometry())
+      )
     );
 
 Shape.registerMethod('add', add);
