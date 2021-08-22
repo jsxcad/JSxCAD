@@ -116,12 +116,10 @@ export const updateNotebook = async (
         }
       );
       if (numFailedPixels >= pixelThreshold) {
-        writeFileSync(
-          `${target}_${nth}.difference.png`,
-          pngjs.PNG.sync.write(differencePng)
-        );
+        const differencePath = `${target}.md.${nth}.difference.png`;
+        writeFileSync(differencePath, pngjs.PNG.sync.write(differencePng));
         // Note failures.
-        failedExpectations.push(`display ${target}_${nth}.difference.png`);
+        failedExpectations.push(`display ${differencePath}`);
       }
     }
   } catch (error) {
