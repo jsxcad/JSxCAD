@@ -1,6 +1,5 @@
 import Shape from './Shape.js';
 import { difference } from '@jsxcad/geometry';
-import { toGeometry } from './toGeometry.js';
 
 export const cut =
   (...shapes) =>
@@ -8,7 +7,7 @@ export const cut =
     Shape.fromGeometry(
       difference(
         shape.toGeometry(),
-        ...shapes.map((other) => toGeometry(other, shape))
+        ...shapes.map((other) => Shape.toShape(other, shape).toGeometry())
       )
     );
 

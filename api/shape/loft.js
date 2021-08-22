@@ -12,15 +12,3 @@ export const loft =
     );
 
 Shape.registerMethod('loft', loft);
-
-export const loop =
-  (...ops) =>
-  (shape) =>
-    Shape.fromGeometry(
-      loftGeometry(
-        /* closed= */ true,
-        ...ops.map((op) => op(shape).toGeometry())
-      )
-    );
-
-Shape.registerMethod('loop', loop);

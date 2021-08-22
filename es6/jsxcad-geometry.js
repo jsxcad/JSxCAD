@@ -391,7 +391,6 @@ const difference$1 = (a, b) => {
   if (doesNotOverlap$1(a, b)) {
     return a;
   }
-  info('difference begin');
   const result = fromSurfaceMeshLazy(
     differenceOfSurfaceMeshes(
       toSurfaceMesh(a.graph),
@@ -400,7 +399,6 @@ const difference$1 = (a, b) => {
       b.matrix
     )
   );
-  info('difference end');
   return taggedGraph({ tags: a.tags }, result);
 };
 
@@ -1709,7 +1707,6 @@ const intersection$1 = (a, b) => {
   if (doesNotOverlap$1(a, b)) {
     return fromEmpty();
   }
-  info('intersection begin');
   const result = fromSurfaceMeshLazy(
     intersectionOfSurfaceMeshes(
       toSurfaceMesh(a.graph),
@@ -1718,7 +1715,6 @@ const intersection$1 = (a, b) => {
       b.matrix
     )
   );
-  info('intersection end');
   return taggedGraph({ tags: a.tags }, result);
 };
 
@@ -2152,14 +2148,10 @@ const open = (path) => (isClosed(path) ? [null, ...path] : path);
 const outline$1 = ({ tags }, geometry) => {
   geometry.cache = geometry.cache || {};
   if (geometry.cache.outline === undefined) {
-    info('outline begin');
     geometry.cache.outline = taggedSegments(
       { tags },
       outlineSurfaceMesh(toSurfaceMesh(geometry.graph), geometry.matrix)
     );
-    info('outline end');
-  } else {
-    info('outline cached');
   }
   return geometry.cache.outline;
 };
@@ -2943,7 +2935,6 @@ const union$2 = (a, b) => {
     return a;
   }
   // FIX: In an ideal world, if a and b do not overlap, we would generate a disjointAssembly of the two.
-  info('union begin');
   const result = fromSurfaceMeshLazy(
     unionOfSurfaceMeshes(
       toSurfaceMesh(a.graph),
@@ -2952,7 +2943,6 @@ const union$2 = (a, b) => {
       b.matrix
     )
   );
-  info('union end');
   return taggedGraph({ tags: a.tags }, result);
 };
 

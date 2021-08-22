@@ -7,7 +7,7 @@ export const clip =
     Shape.fromGeometry(
       intersection(
         shape.toGeometry(),
-        ...shapes.map((shape) => shape.toGeometry())
+        ...shapes.map((other) => Shape.toShape(other, shape).toGeometry())
       )
     );
 

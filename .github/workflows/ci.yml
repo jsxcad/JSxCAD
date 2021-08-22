@@ -39,6 +39,9 @@ jobs:
         with:
           name: differences
           path: |
+            !**/node_modules/**
             **/*.difference.png
+            **/*.observed.md
+            **/*.md
         env:
           NODE_OPTIONS: --max_old_space_size=4096

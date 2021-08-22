@@ -179,6 +179,16 @@ Shape.reifier = (name, op) => registerReifier(name, op);
 // Let's make the registration functions more explicit.
 Shape.registerMethod = registerShapeMethod;
 Shape.registerReifier = (name, op) => registerReifier(name, op);
+Shape.toShape = (to, from) => {
+  if (to instanceof Function) {
+    to = to(from);
+  }
+  if (to instanceof Shape) {
+    return to;
+  } else {
+    throw Error('Expected Function or Shape');
+  }
+};
 
 export const fromGeometry = Shape.fromGeometry;
 export const toGeometry = (shape) => shape.toGeometry();

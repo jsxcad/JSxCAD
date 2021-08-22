@@ -35,5 +35,7 @@ export const get =
     return Group(...picks);
   };
 
+export const g = get;
+
 Shape.registerMethod('get', get);
 Shape.registerMethod('g', get);

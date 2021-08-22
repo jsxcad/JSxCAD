@@ -17,3 +17,5 @@ cache
 local
 docs
 jsxcad
+**/*.md
+**/*.html
