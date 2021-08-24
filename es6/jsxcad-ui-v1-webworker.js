@@ -69,7 +69,7 @@ function sum (o) {
 
 var hashSum = sum;
 
-/* global FileReaderSync, postMessage, onmessage:writable, self */
+/* global FileReaderSync, postMessage, self */
 
 self.window = {};
 
@@ -106,14 +106,6 @@ const agent = async ({
   const {
     op
   } = message;
-  await sys.log({
-    op: 'evaluate',
-    status: 'run'
-  });
-  await sys.log({
-    op: 'text',
-    text: 'Evaluation Started'
-  });
   const {
     offscreenCanvas,
     id,
@@ -169,6 +161,10 @@ const agent = async ({
         return dataURL;
 
       case 'evaluate':
+        await sys.log({
+          op: 'text',
+          text: 'Evaluation Started'
+        });
         sys.clearEmitted();
 
         try {
@@ -219,11 +215,14 @@ const agent = async ({
 // Put them in a buffer.
 
 
-const messageBootQueue = [];
+if (!self.messageBootQueue) {
+  // The buffer wasn't set up in advance (e.g., we aren't being loaded via import())
+  self.messageBootQueue = [];
 
-onmessage = ({
-  data
-}) => messageBootQueue.push(data);
+  self.onmessage = ({
+    data
+  }) => self.messageBootQueue.push(data);
+}
 
 const bootstrap = async () => {
   const {
@@ -252,18 +251,18 @@ const bootstrap = async () => {
     });
   }); // Handle any messages that came in while we were booting up.
 
-  if (messageBootQueue.length > 0) {
+  if (self.messageBootQueue.length > 0) {
     do {
-      hear(messageBootQueue.shift());
-    } while (messageBootQueue.length > 0);
+      hear(self.messageBootQueue.shift());
+    } while (self.messageBootQueue.length > 0);
   } // The boot queue must be empty at this point.
 
 
-  onmessage = ({
+  self.onmessage = ({
     data
   }) => hear(data);
 
-  if (onmessage === undefined) throw Error('die');
+  if (self.onmessage === undefined) throw Error('die');
 };
 
 bootstrap();

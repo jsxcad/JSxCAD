@@ -1,4 +1,4 @@
-/* global FileReaderSync, postMessage, onmessage:writable, self */
+/* global FileReaderSync, postMessage, self */
 
 import * as sys from '@jsxcad/sys';
 
@@ -28,8 +28,6 @@ sys.setPendingErrorHandler(reportError);
 
 const agent = async ({ ask, message, type, tell }) => {
   const { op } = message;
-  await sys.log({ op: 'evaluate', status: 'run' });
-  await sys.log({ op: 'text', text: 'Evaluation Started' });
   const {
     offscreenCanvas,
     id,
@@ -70,6 +68,7 @@ const agent = async ({ ask, message, type, tell }) => {
         sys.info('Done');
         return dataURL;
       case 'evaluate':
+        await sys.log({ op: 'text', text: 'Evaluation Started' });
         sys.clearEmitted();
         try {
           // console.log({ op: 'text', text: `QQ/script: ${script}` });
@@ -107,8 +106,11 @@ const agent = async ({ ask, message, type, tell }) => {
 
 // We need to start receiving messages immediately, but we're not ready to process them yet.
 // Put them in a buffer.
-const messageBootQueue = [];
-onmessage = ({ data }) => messageBootQueue.push(data);
+if (!self.messageBootQueue) {
+  // The buffer wasn't set up in advance (e.g., we aren't being loaded via import())
+  self.messageBootQueue = [];
+  self.onmessage = ({ data }) => self.messageBootQueue.push(data);
+}
 
 const bootstrap = async () => {
   const { ask, hear, tell } = sys.createConversation({ agent, say });
@@ -129,16 +131,16 @@ const bootstrap = async () => {
   });
 
   // Handle any messages that came in while we were booting up.
-  if (messageBootQueue.length > 0) {
+  if (self.messageBootQueue.length > 0) {
     do {
-      hear(messageBootQueue.shift());
-    } while (messageBootQueue.length > 0);
+      hear(self.messageBootQueue.shift());
+    } while (self.messageBootQueue.length > 0);
   }
 
   // The boot queue must be empty at this point.
-  onmessage = ({ data }) => hear(data);
+  self.onmessage = ({ data }) => hear(data);
 
-  if (onmessage === undefined) throw Error('die');
+  if (self.onmessage === undefined) throw Error('die');
 };
 
 bootstrap();
