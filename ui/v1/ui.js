@@ -15,7 +15,6 @@ import {
   listFilesystems,
   log,
   read,
-  readOrWatch,
   resolvePending,
   setupFilesystem,
   sleep,
@@ -146,8 +145,17 @@ class Ui extends PureComponent {
       askService(serviceSpec, question, transfer);
 
     const agent = async ({ ask, message, type }) => {
-      const { op, entry, id, identifier, note, options, path, workspace } =
-        message;
+      const {
+        op,
+        entry,
+        id,
+        identifier,
+        notes,
+        options,
+        sourceLocation,
+        path,
+        workspace,
+      } = message;
       switch (op) {
         case 'sys/touch':
           await touch(path, { workspace, id, clear: true, broadcast: true });
@@ -158,136 +166,102 @@ class Ui extends PureComponent {
           return deleteFile(options, path);
         case 'log':
           return log(entry);
-        case 'note':
+        case 'notes':
           {
-            if (note.info) {
-              // Copy out info.
-              const now = new Date();
-              const { logElement, logStartDate, logLastDate } = this.state;
-              if (logElement) {
-                const div = document.createElement('div');
-                const total = (now - logStartDate) / 1000;
-                const elapsed = (now - logLastDate) / 1000;
-                div.textContent = `${total.toFixed(1)}s (${elapsed.toFixed(
-                  2
-                )}): ${note.info}`;
-                logElement.prepend(div);
-              }
-              this.setState({ logLastDate: now });
-              return;
-            }
-
-            if (note.view) {
-              console.log('view');
-            }
-
-            if (
-              !note.sourceLocation ||
-              note.sourceLocation.path !== this.state.path
-            ) {
+            const { notebookNotes, notebookDefinitions } = this.state;
+            const { domElementByHash } = jsEditorAdvice;
+            const { id, path } = sourceLocation;
+            if (path !== this.state.path) {
               // This note is for a different module.
               return;
             }
 
-            const { notebookNotes, notebookDefinitions } = this.state;
-            const { domElementByHash } = jsEditorAdvice;
-            const id = note.sourceLocation.id;
-
-            if (note.setContext) {
-              return;
-            }
-
-            if (note.beginSourceLocation) {
-              const domElement = document.createElement('div');
-              // Attach the domElement invisibly so that we can compute the size.
-              // Add it at the top so that it doesn't extend the bottom of the page.
-              document.body.prepend(domElement);
-              domElement.style.display = 'block';
-              domElement.style.visibility = 'hidden';
-              domElement.style.position = 'absolute';
-              notebookDefinitions[id] = {
-                notes: [],
-                domElement,
-              };
-              // This starts the notes to update path/id.
-              return;
-            }
-
-            if (note.endSourceLocation) {
-              if (jsEditorAdvice.onUpdate) {
-                await jsEditorAdvice.onUpdate();
+            const ensureNotebookNote = (note) => {
+              if (!notebookNotes[note.hash]) {
+                notebookNotes[note.hash] = note;
               }
-              return;
-            }
+              return notebookNotes[note.hash];
+            };
 
-            if (!id) {
-              return;
-            }
+            const domElement = document.createElement('div');
+            // Attach the domElement invisibly so that we can compute the size.
+            // Add it at the top so that it doesn't extend the bottom of the page.
+            document.body.prepend(domElement);
+            domElement.style.display = 'block';
+            domElement.style.visibility = 'hidden';
+            domElement.style.position = 'absolute';
 
-            const def = notebookDefinitions[id];
-
-            if (note.data === undefined && note.path) {
-              note.data = await readOrWatch(note.path);
-            }
-
-            if (!notebookNotes[note.hash]) {
-              notebookNotes[note.hash] = note;
-            }
-
-            if (!def) {
-              console.log('No def');
-            }
-
-            def.notes.push(note.hash);
-
-            const entry = notebookNotes[note.hash];
-
-            if (domElementByHash.has(entry.hash)) {
-              console.log(`Re-appending ${entry.hash} to ${id}`);
-              def.domElement.appendChild(document.createTextNode(entry.hash));
-              def.domElement.appendChild(domElementByHash.get(entry.hash));
-              return;
-            }
-
-            // We need to build the element.
-
-            if (entry.view && !entry.url) {
-              const { workspace } = this.state;
-              const { path, view } = entry;
-              const { width, height } = view;
-              const canvas = document.createElement('canvas');
-              canvas.width = width;
-              canvas.height = height;
-              const offscreenCanvas = canvas.transferControlToOffscreen();
-              const render = () =>
-                askToplevelQuestion(
-                  { op: 'staticView', path, workspace, view, offscreenCanvas },
-                  [offscreenCanvas]
-                )
-                  .then((url) => {
-                    // Is there a race condition here?
-                    const element = domElementByHash.get(entry.hash);
-                    if (element && element.firstChild) {
-                      element.firstChild.src = url;
+            for (const note of notes) {
+              if (note.hash === undefined) {
+                continue;
+              }
+              const entry = ensureNotebookNote(note);
+              if (domElementByHash.has(entry.hash)) {
+                // Reuse the element we built earlier
+                console.log(`Re-appending ${entry.hash} to ${id}`);
+                domElement.appendChild(document.createTextNode(entry.hash));
+                domElement.appendChild(domElementByHash.get(entry.hash));
+              } else {
+                // We need to build the element.
+                if (entry.view && !entry.url) {
+                  const { workspace } = this.state;
+                  const { path, view } = entry;
+                  const { width, height } = view;
+                  const canvas = document.createElement('canvas');
+                  canvas.width = width;
+                  canvas.height = height;
+                  const offscreenCanvas = canvas.transferControlToOffscreen();
+                  const render = async () => {
+                    try {
+                      const url = await askToplevelQuestion(
+                        {
+                          op: 'staticView',
+                          path,
+                          workspace,
+                          view,
+                          offscreenCanvas,
+                        },
+                        [offscreenCanvas]
+                      );
+                      const element = domElementByHash.get(entry.hash);
+                      if (element && element.firstChild) {
+                        element.firstChild.src = url;
+                      }
+                    } catch (error) {
+                      if (error.message === 'Terminated') {
+                        // Try again.
+                        return render();
+                      } else {
+                        window.alert(error.stack);
+                      }
                     }
-                  })
-                  .catch((error) => {
-                    if (error.message === 'Terminated') {
-                      // Try again.
-                      render();
-                    } else {
-                      window.alert(error.stack);
-                    }
-                  });
-              render();
+                  };
+                  // Render the image asynchronously -- it won't affect layout.
+                  render();
+                }
+
+                const element = toDomElement([entry]);
+                domElementByHash.set(entry.hash, element);
+                console.log(`Appending ${entry.hash} to ${id}`);
+                domElement.appendChild(document.createTextNode(entry.hash));
+                domElement.appendChild(element);
+                console.log(`Marking ${entry.hash} in ${id}`);
+              }
             }
-            const element = toDomElement([entry]);
-            domElementByHash.set(entry.hash, element);
-            console.log(`Appending ${entry.hash} to ${id}`);
-            def.domElement.appendChild(document.createTextNode(entry.hash));
-            def.domElement.appendChild(element);
-            console.log(`Marking ${entry.hash} in ${id}`);
+
+            await animationFrame();
+
+            notebookDefinitions[id] = {
+              notes,
+              domElement,
+            };
+
+            if (jsEditorAdvice.onUpdate) {
+              await jsEditorAdvice.onUpdate();
+            }
           }
+          return;
+        case 'info':
           return;
         default:
           throw Error(`Unknown operation ${op}`);
@@ -1429,6 +1403,7 @@ class Ui extends PureComponent {
 }
 
 const setupUi = async (sha) => {
+  const startPath = `https://gitcdn.link/cdn/jsxcad/JSxCAD/${sha}/nb/start.nb`;
   document
     .getElementById('loading')
     .appendChild(document.createTextNode('Indexing Storage'));
@@ -1437,9 +1412,7 @@ const setupUi = async (sha) => {
     const hash = location.hash.substring(1);
     const [encodedWorkspace, encodedFile] = hash.split('@');
     const workspace = decodeURIComponent(encodedWorkspace) || 'JSxCAD';
-    const path = encodedFile
-      ? decodeURIComponent(encodedFile)
-      : `https://gitcdn.xyz/cdn/jsxcad/JSxCAD/${sha}/nb/start.nb`;
+    const path = encodedFile ? decodeURIComponent(encodedFile) : startPath;
     const file = `source/${path}`;
     return [path, file, workspace];
   };
@@ -1468,7 +1441,7 @@ const setupUi = async (sha) => {
   );
 
   window.addEventListener('popstate', (e) => {
-    const { path = '' } = e.state;
+    const { path = startPath } = e.state || {};
     ui.loadJsEditor(path, { shouldUpdateUrl: false });
   });
 
