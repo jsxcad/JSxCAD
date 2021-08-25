@@ -125,6 +125,15 @@ export default {
         return code.replace(/process.env.NODE_ENV/g, "'development'");
       },
     },
+    {
+      transform(code, id) {
+        // FIX: Remove this nasty patch and fix ace properly.
+        return code.replace(
+          /var first = Math.min[(]this.firstRow, config.firstRow[)];/,
+          'var first = Math.min(this.firstRow, config.firstRow, 0);'
+        );
+      },
+    },
     sizes(),
   ],
 };

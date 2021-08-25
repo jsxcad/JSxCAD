@@ -12,7 +12,6 @@ import { aceEditorLineWidgets } from './AceEditorLineWidgets';
 import { aceEditorSnippetManager } from './AceEditorSnippetManager';
 import { animationFrame } from './schedule.js';
 import { prismJsAuxiliary } from './PrismJSAuxiliary';
-import { toDomElement } from '@jsxcad/ui-notebook';
 
 if (!aceEditorAuxiliary) throw Error('die');
 if (!prismJsAuxiliary) throw Error('die');
@@ -105,7 +104,7 @@ export class JsEditorUi extends React.PureComponent {
       advice.widgets = new Map();
     }
 
-    const { domElementByHash, widgets } = advice;
+    const { widgets } = advice;
 
     editor.on('linkClick', ({ token }) => {
       const { value = '' } = token;
@@ -128,115 +127,91 @@ export class JsEditorUi extends React.PureComponent {
     }
 
     const widgetManager = session.widgetManager;
-    const { notebookDefinitions, notebookNotes } = this.props;
+    const { notebookDefinitions } = this.props;
 
-    let openView = -1;
-
-    const onClickView = (event, note) => {
-      openView = note.nthView;
-    };
-
-    // let lastUpdate;
     let marker;
+    let updating = false;
 
     const update = async () => {
-      // Make sure everything is rendered, first.
-      await animationFrame();
-      mermaid.init(undefined, '.mermaid');
-      console.log(`QQ/doUpdate`);
-      if (advice) {
-        if (advice.definitions) {
-          for (const definition of widgets.keys()) {
-            if (
-              !notebookDefinitions[definition] ||
-              !advice.definitions.get(definition)
-            ) {
+      try {
+        if (updating) {
+          return;
+        }
+        updating = true;
+        // Make sure everything is rendered, first.
+        await animationFrame();
+        mermaid.init(undefined, '.mermaid');
+        console.log(`QQ/doUpdate`);
+        if (advice) {
+          if (advice.definitions) {
+            for (const definition of widgets.keys()) {
+              if (
+                !notebookDefinitions[definition] ||
+                !advice.definitions.get(definition)
+              ) {
+                const widget = widgets.get(definition);
+                widgetManager.removeLineWidget(widget);
+                widgets.delete(definition);
+                console.log(`QQ/delete widget for: ${definition}`);
+              }
+            }
+            for (const definition of Object.keys(notebookDefinitions)) {
+              const notebookDefinition = notebookDefinitions[definition];
               const widget = widgets.get(definition);
-              widgetManager.removeLineWidget(widget);
-              widgets.delete(definition);
-              console.log(`QQ/delete widget for: ${definition}`);
-            }
-          }
-          for (const definition of Object.keys(notebookDefinitions)) {
-            const notebookDefinition = notebookDefinitions[definition];
-            if (
-              widgets.has(definition) &&
-              widgets.el !== notebookDefinition.domElement
-            ) {
-              widgetManager.removeLineWidget(widgets.get(definition));
-              widgets.delete(definition);
-            }
-            if (!widgets.has(definition)) {
-              const entry = advice.definitions.get(definition);
-              if (entry) {
-                const { initSourceLocation } = entry;
-                const { domElement } = notebookDefinition;
-                const widget = {
-                  row: initSourceLocation.end.line - 1,
-                  coverLine: false,
-                  fixedWidth: true,
-                  el: domElement,
-                };
-                widgetManager.addLineWidget(widget);
-                widgets.set(definition, widget);
-                // Display the hidden element.
-                domElement.style.visibility = '';
+              if (widget && widget.el !== notebookDefinition.domElement) {
+                widgetManager.removeLineWidget(widget);
+                widgets.delete(definition);
+              }
+              if (!widgets.has(definition)) {
+                const entry = advice.definitions.get(definition);
+                if (entry) {
+                  const { initSourceLocation } = entry;
+                  const { domElement } = notebookDefinition;
+                  if (!domElement) {
+                    continue;
+                  }
+                  const pixelHeight = domElement.offsetHeight;
+                  if (!pixelHeight) {
+                    continue;
+                  }
+                  const widget = {
+                    row: initSourceLocation.end.line - 1,
+                    coverLine: false,
+                    fixedWidth: true,
+                    el: domElement,
+                  };
+                  const lineHeight = editor.renderer.layerConfig.lineHeight;
+                  const rowCount = Math.ceil(pixelHeight / lineHeight);
+                  domElement.style.height = `${rowCount * lineHeight}px`;
+                  domElement.style.zIndex = -1;
+
+                  widgetManager.addLineWidget(widget);
+
+                  if (widget.rowCount !== Math.floor(widget.rowCount)) {
+                    throw Error(`Widget height is not a whole number of rows`);
+                  }
+
+                  domElement.classList.add(
+                    `rowCount_${widget.rowCount}`,
+                    `lineHeight_${lineHeight}`,
+                    `pixelHeight_${pixelHeight}`
+                  );
+                  // Display the hidden element.
+                  domElement.style.visibility = '';
+                  widgets.set(definition, widget);
+                }
               }
             }
           }
         }
-      }
 
-      // The widgets are created.
+        editor.resize();
 
-      // lastUpdate = new Date();
-
-      // let context = {};
-      const notesByDefinition = new Map();
-      const definitions = [];
-      let nthView = 0;
-
-      for (let hash of Object.keys(notebookNotes)) {
-        const note = notebookNotes[hash];
-        if (!note) {
-          continue;
+        if (marker) {
+          session.removeMarker(marker);
         }
-        // console.log(JSON.stringify({ ...note, data: undefined }));
-        if (note.define) {
-          definitions.push(note);
-        }
-        if (note.info) {
-          // Filter out info.
-          continue;
-        }
-        if (note.view) {
-          note.nthView = nthView;
-          note.openView = nthView === openView;
-          nthView++;
-        }
-        if (note.context && note.context.recording) {
-          const definition = note.context.recording.id;
-          if (!notesByDefinition.has(definition)) {
-            notesByDefinition.set(definition, [...definitions]);
-          }
-          notesByDefinition.get(definition).push(note);
-          if (note.hash) {
-            if (!domElementByHash.has(note.hash)) {
-              console.log(`QQ/build dom for: ${definition}`);
-              const element = toDomElement([note, ...definitions], {
-                onClickView,
-              });
-              domElementByHash.set(note.hash, element);
-            }
-            note.domElement = domElementByHash.get(note.hash);
-          }
-        }
-      }
-
-      editor.resize();
-
-      if (marker) {
-        session.removeMarker(marker);
+      } finally {
+        updating = false;
       }
     };
 

@@ -120,14 +120,32 @@ const bootstrap = async () => {
   // sys/log depends on ask, so set that up before we boot.
   await sys.boot();
 
+  let notes;
+
   sys.addOnEmitHandler(async (note, index) => {
+    if (note.info) {
+      self.tell({ op: 'info', note });
+      return;
+    }
+    if (note.beginSourceLocation) {
+      if (notes) {
+        throw Error(`beginSource with pending notes`);
+      }
+      notes = { sourceLocation: note.beginSourceLocation, notes: [] };
+    }
     if (note.download) {
       for (const entry of note.download.entries) {
         entry.data = await entry.data;
       }
     }
-    // console.log(`QQ/webworker/emitHandler: ${JSON.stringify(note)}`);
-    self.tell({ op: 'note', note });
+    if (!notes) {
+      throw Error(`note without notes`);
+    }
+    notes.notes.push(note);
+    if (note.endSourceLocation) {
+      self.tell({ op: 'notes', ...notes });
+      notes = undefined;
+    }
   });
 
   // Handle any messages that came in while we were booting up.

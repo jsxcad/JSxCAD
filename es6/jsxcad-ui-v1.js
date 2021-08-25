@@ -1,5 +1,5 @@
-import { read as read$1, log, boot, setupFilesystem, listFilesystems, watchFileCreation, watchFileDeletion, unwatchFileCreation, unwatchFileDeletion, listFiles, deleteFile, terminateActiveServices, clearEmitted, write as write$1, resolvePending, getServicePoolInfo, sleep as sleep$1, askService, readOrWatch, ask, touch } from './jsxcad-sys.js';
-import { toDomElement, getNotebookControlData } from './jsxcad-ui-notebook.js';
+import { read as read$1, log, boot, setupFilesystem, listFilesystems, watchFileCreation, watchFileDeletion, unwatchFileCreation, unwatchFileDeletion, listFiles, deleteFile, terminateActiveServices, clearEmitted, write as write$1, resolvePending, getServicePoolInfo, sleep as sleep$1, askService, ask, touch } from './jsxcad-sys.js';
+import { getNotebookControlData, toDomElement } from './jsxcad-ui-notebook.js';
 import Prettier from 'https://unpkg.com/prettier@2.3.2/esm/standalone.mjs';
 import PrettierParserBabel from 'https://unpkg.com/prettier@2.3.2/esm/parser-babel.mjs';
 import { execute } from './jsxcad-api.js';
@@ -30893,7 +30893,7 @@ function LineWidgets(session) {
         var lineWidgets = this.session.lineWidgets;
         if (!lineWidgets)
             return;
-        var first = Math.min(this.firstRow, config.firstRow);
+        var first = Math.min(this.firstRow, config.firstRow, 0);
         var last = Math.max(this.lastRow, config.lastRow, lineWidgets.length);
         
         while (first > 0 && !lineWidgets[first])
@@ -40101,10 +40101,9 @@ const aceEditorLineWidgets = {
 
 const aceEditorSnippetManager = ace$3.require('ace/snippets').snippetManager;
 
-/* global requestAnimationFrame */
 const animationFrame = () => {
   return new Promise((resolve, reject) => {
-    requestAnimationFrame(resolve);
+    setTimeout(resolve, 1);
   });
 };
 
@@ -40359,7 +40358,6 @@ class JsEditorUi extends React$3.PureComponent {
     }
 
     const {
-      domElementByHash,
       widgets
     } = advice;
     editor.on('linkClick', ({
@@ -40387,120 +40385,96 @@ class JsEditorUi extends React$3.PureComponent {
 
     const widgetManager = session.widgetManager;
     const {
-      notebookDefinitions,
-      notebookNotes
+      notebookDefinitions
     } = this.props;
-    let openView = -1;
-
-    const onClickView = (event, note) => {
-      openView = note.nthView;
-    }; // let lastUpdate;
+    let marker;
+    let updating = false;
 
     const update = async () => {
-      // Make sure everything is rendered, first.
-      await animationFrame();
-      mermaid.init(undefined, '.mermaid');
-      console.log(`QQ/doUpdate`);
+      try {
+        if (updating) {
+          return;
+        }
 
-      if (advice) {
-        if (advice.definitions) {
-          for (const definition of widgets.keys()) {
-            if (!notebookDefinitions[definition] || !advice.definitions.get(definition)) {
+        updating = true; // Make sure everything is rendered, first.
+
+        await animationFrame();
+        mermaid.init(undefined, '.mermaid');
+        console.log(`QQ/doUpdate`);
+
+        if (advice) {
+          if (advice.definitions) {
+            for (const definition of widgets.keys()) {
+              if (!notebookDefinitions[definition] || !advice.definitions.get(definition)) {
+                const widget = widgets.get(definition);
+                widgetManager.removeLineWidget(widget);
+                widgets.delete(definition);
+                console.log(`QQ/delete widget for: ${definition}`);
+              }
+            }
+
+            for (const definition of Object.keys(notebookDefinitions)) {
+              const notebookDefinition = notebookDefinitions[definition];
               const widget = widgets.get(definition);
-              widgetManager.removeLineWidget(widget);
-              widgets.delete(definition);
-              console.log(`QQ/delete widget for: ${definition}`);
-            }
-          }
 
-          for (const definition of Object.keys(notebookDefinitions)) {
-            const notebookDefinition = notebookDefinitions[definition];
+              if (widget && widget.el !== notebookDefinition.domElement) {
+                widgetManager.removeLineWidget(widget);
+                widgets.delete(definition);
+              }
 
-            if (widgets.has(definition) && widgets.el !== notebookDefinition.domElement) {
-              widgetManager.removeLineWidget(widgets.get(definition));
-              widgets.delete(definition);
-            }
+              if (!widgets.has(definition)) {
+                const entry = advice.definitions.get(definition);
 
-            if (!widgets.has(definition)) {
-              const entry = advice.definitions.get(definition);
+                if (entry) {
+                  const {
+                    initSourceLocation
+                  } = entry;
+                  const {
+                    domElement
+                  } = notebookDefinition;
 
-              if (entry) {
-                const {
-                  initSourceLocation
-                } = entry;
-                const {
-                  domElement
-                } = notebookDefinition;
-                const widget = {
-                  row: initSourceLocation.end.line - 1,
-                  coverLine: false,
-                  fixedWidth: true,
-                  el: domElement
-                };
-                widgetManager.addLineWidget(widget);
-                widgets.set(definition, widget); // Display the hidden element.
+                  if (!domElement) {
+                    continue;
+                  }
 
-                domElement.style.visibility = '';
+                  const pixelHeight = domElement.offsetHeight;
+
+                  if (!pixelHeight) {
+                    continue;
+                  }
+
+                  const widget = {
+                    row: initSourceLocation.end.line - 1,
+                    coverLine: false,
+                    fixedWidth: true,
+                    el: domElement
+                  };
+                  const lineHeight = editor.renderer.layerConfig.lineHeight;
+                  const rowCount = Math.ceil(pixelHeight / lineHeight);
+                  domElement.style.height = `${rowCount * lineHeight}px`;
+                  domElement.style.zIndex = -1;
+                  widgetManager.addLineWidget(widget);
+
+                  if (widget.rowCount !== Math.floor(widget.rowCount)) {
+                    throw Error(`Widget height is not a whole number of rows`);
+                  }
+
+                  domElement.classList.add(`rowCount_${widget.rowCount}`, `lineHeight_${lineHeight}`, `pixelHeight_${pixelHeight}`); // Display the hidden element.
+
+                  domElement.style.visibility = '';
+                  widgets.set(definition, widget);
+                }
               }
             }
           }
         }
-      } // The widgets are created.
-      // lastUpdate = new Date();
-      // let context = {};
 
+        editor.resize();
 
-      const notesByDefinition = new Map();
-      const definitions = [];
-      let nthView = 0;
-
-      for (let hash of Object.keys(notebookNotes)) {
-        const note = notebookNotes[hash];
-
-        if (!note) {
-          continue;
-        } // console.log(JSON.stringify({ ...note, data: undefined }));
-
-
-        if (note.define) {
-          definitions.push(note);
-        }
-
-        if (note.info) {
-          // Filter out info.
-          continue;
-        }
-
-        if (note.view) {
-          note.nthView = nthView;
-          note.openView = nthView === openView;
-          nthView++;
-        }
-
-        if (note.context && note.context.recording) {
-          const definition = note.context.recording.id;
-
-          if (!notesByDefinition.has(definition)) {
-            notesByDefinition.set(definition, [...definitions]);
-          }
-
-          notesByDefinition.get(definition).push(note);
-
-          if (note.hash) {
-            if (!domElementByHash.has(note.hash)) {
-              console.log(`QQ/build dom for: ${definition}`);
-              const element = toDomElement([note, ...definitions], {
-                onClickView
-              });
-              domElementByHash.set(note.hash, element);
-            }
-
-            note.domElement = domElementByHash.get(note.hash);
-          }
-        }
+        if (marker) ;
+      } finally {
+        updating = false;
       }
-
-      editor.resize();
     };
 
     const finished = () => {
@@ -46384,8 +46358,9 @@ class Ui extends E {
         entry,
         id,
         identifier,
-        note,
+        notes,
         options,
+        sourceLocation,
         path,
         workspace
       } = message;
@@ -46409,40 +46384,8 @@ class Ui extends E {
         case 'log':
           return log(entry);
 
-        case 'note':
+        case 'notes':
           {
-            if (note.info) {
-              // Copy out info.
-              const now = new Date();
-              const {
-                logElement,
-                logStartDate,
-                logLastDate
-              } = this.state;
-
-              if (logElement) {
-                const div = document.createElement('div');
-                const total = (now - logStartDate) / 1000;
-                const elapsed = (now - logLastDate) / 1000;
-                div.textContent = `${total.toFixed(1)}s (${elapsed.toFixed(2)}): ${note.info}`;
-                logElement.prepend(div);
-              }
-
-              this.setState({
-                logLastDate: now
-              });
-              return;
-            }
-
-            if (note.view) {
-              console.log('view');
-            }
-
-            if (!note.sourceLocation || note.sourceLocation.path !== this.state.path) {
-              // This note is for a different module.
-              return;
-            }
-
             const {
               notebookNotes,
               notebookDefinitions
@@ -46450,114 +46393,113 @@ class Ui extends E {
             const {
               domElementByHash
             } = jsEditorAdvice;
-            const id = note.sourceLocation.id;
+            const {
+              id,
+              path
+            } = sourceLocation;
 
-            if (note.setContext) {
+            if (path !== this.state.path) {
+              // This note is for a different module.
               return;
             }
 
-            if (note.beginSourceLocation) {
-              const domElement = document.createElement('div'); // Attach the domElement invisibly so that we can compute the size.
-              // Add it at the top so that it doesn't extend the bottom of the page.
-
-              document.body.prepend(domElement);
-              domElement.style.display = 'block';
-              domElement.style.visibility = 'hidden';
-              domElement.style.position = 'absolute';
-              notebookDefinitions[id] = {
-                notes: [],
-                domElement
-              }; // This starts the notes to update path/id.
-
-              return;
-            }
-
-            if (note.endSourceLocation) {
-              if (jsEditorAdvice.onUpdate) {
-                await jsEditorAdvice.onUpdate();
+            const ensureNotebookNote = note => {
+              if (!notebookNotes[note.hash]) {
+                notebookNotes[note.hash] = note;
               }
 
-              return;
-            }
+              return notebookNotes[note.hash];
+            };
 
-            if (!id) {
-              return;
-            }
+            const domElement = document.createElement('div'); // Attach the domElement invisibly so that we can compute the size.
+            // Add it at the top so that it doesn't extend the bottom of the page.
 
-            const def = notebookDefinitions[id];
+            document.body.prepend(domElement);
+            domElement.style.display = 'block';
+            domElement.style.visibility = 'hidden';
+            domElement.style.position = 'absolute';
 
-            if (note.data === undefined && note.path) {
-              note.data = await readOrWatch(note.path);
-            }
+            for (const note of notes) {
+              if (note.hash === undefined) {
+                continue;
+              }
 
-            if (!notebookNotes[note.hash]) {
-              notebookNotes[note.hash] = note;
-            }
+              const entry = ensureNotebookNote(note);
 
-            if (!def) {
-              console.log('No def');
-            }
+              if (domElementByHash.has(entry.hash)) {
+                // Reuse the element we built earlier
+                console.log(`Re-appending ${entry.hash} to ${id}`);
+                domElement.appendChild(document.createTextNode(entry.hash));
+                domElement.appendChild(domElementByHash.get(entry.hash));
+              } else {
+                // We need to build the element.
+                if (entry.view && !entry.url) {
+                  const {
+                    workspace
+                  } = this.state;
+                  const {
+                    path,
+                    view
+                  } = entry;
+                  const {
+                    width,
+                    height
+                  } = view;
+                  const canvas = document.createElement('canvas');
+                  canvas.width = width;
+                  canvas.height = height;
+                  const offscreenCanvas = canvas.transferControlToOffscreen();
 
-            def.notes.push(note.hash);
-            const entry = notebookNotes[note.hash];
+                  const render = async () => {
+                    try {
+                      const url = await askToplevelQuestion({
+                        op: 'staticView',
+                        path,
+                        workspace,
+                        view,
+                        offscreenCanvas
+                      }, [offscreenCanvas]);
+                      const element = domElementByHash.get(entry.hash);
 
-            if (domElementByHash.has(entry.hash)) {
-              console.log(`Re-appending ${entry.hash} to ${id}`);
-              def.domElement.appendChild(document.createTextNode(entry.hash));
-              def.domElement.appendChild(domElementByHash.get(entry.hash));
-              return;
-            } // We need to build the element.
+                      if (element && element.firstChild) {
+                        element.firstChild.src = url;
+                      }
+                    } catch (error) {
+                      if (error.message === 'Terminated') {
+                        // Try again.
+                        return render();
+                      } else {
+                        window.alert(error.stack);
+                      }
+                    }
+                  }; // Render the image asynchronously -- it won't affect layout.
 
 
-            if (entry.view && !entry.url) {
-              const {
-                workspace
-              } = this.state;
-              const {
-                path,
-                view
-              } = entry;
-              const {
-                width,
-                height
-              } = view;
-              const canvas = document.createElement('canvas');
-              canvas.width = width;
-              canvas.height = height;
-              const offscreenCanvas = canvas.transferControlToOffscreen();
-
-              const render = () => askToplevelQuestion({
-                op: 'staticView',
-                path,
-                workspace,
-                view,
-                offscreenCanvas
-              }, [offscreenCanvas]).then(url => {
-                // Is there a race condition here?
-                const element = domElementByHash.get(entry.hash);
-
-                if (element && element.firstChild) {
-                  element.firstChild.src = url;
-                }
-              }).catch(error => {
-                if (error.message === 'Terminated') {
-                  // Try again.
                   render();
-                } else {
-                  window.alert(error.stack);
                 }
-              });
 
-              render();
+                const element = toDomElement([entry]);
+                domElementByHash.set(entry.hash, element);
+                console.log(`Appending ${entry.hash} to ${id}`);
+                domElement.appendChild(document.createTextNode(entry.hash));
+                domElement.appendChild(element);
+                console.log(`Marking ${entry.hash} in ${id}`);
+              }
             }
 
-            const element = toDomElement([entry]);
-            domElementByHash.set(entry.hash, element);
-            console.log(`Appending ${entry.hash} to ${id}`);
-            def.domElement.appendChild(document.createTextNode(entry.hash));
-            def.domElement.appendChild(element);
-            console.log(`Marking ${entry.hash} in ${id}`);
+            await animationFrame();
+            notebookDefinitions[id] = {
+              notes,
+              domElement
+            };
+
+            if (jsEditorAdvice.onUpdate) {
+              await jsEditorAdvice.onUpdate();
+            }
           }
+          return;
+
+        case 'info':
           return;
 
         default:
@@ -47708,6 +47650,7 @@ class Ui extends E {
 }
 
 const setupUi = async sha => {
+  const startPath = `https://gitcdn.link/cdn/jsxcad/JSxCAD/${sha}/nb/start.nb`;
   document.getElementById('loading').appendChild(document.createTextNode('Indexing Storage'));
   const filesystems = await listFilesystems();
 
@@ -47715,7 +47658,7 @@ const setupUi = async sha => {
     const hash = location.hash.substring(1);
     const [encodedWorkspace, encodedFile] = hash.split('@');
     const workspace = decodeURIComponent(encodedWorkspace) || 'JSxCAD';
-    const path = encodedFile ? decodeURIComponent(encodedFile) : `https://gitcdn.xyz/cdn/jsxcad/JSxCAD/${sha}/nb/start.nb`;
+    const path = encodedFile ? decodeURIComponent(encodedFile) : startPath;
     const file = `source/${path}`;
     return [path, file, workspace];
   };
@@ -47746,8 +47689,8 @@ const setupUi = async sha => {
   }), document.getElementById('top'));
   window.addEventListener('popstate', e => {
     const {
-      path = ''
-    } = e.state;
+      path = startPath
+    } = e.state || {};
     ui.loadJsEditor(path, {
       shouldUpdateUrl: false
     });
