@@ -1,4 +1,3 @@
-
 # JSxCAD
 
 Press Shift-Enter or click Run above to generate notebook.
@@ -13,7 +12,6 @@ Press Shift-Enter or click Run above to generate notebook.
 JSxCAD allows CAD design as notebooks.
 
 ![Image](start.md.0.png)
-
 
 Clicking on a view maximizes and allows rotation and animation; use Escape to return.
 

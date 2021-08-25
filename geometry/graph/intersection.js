@@ -13,7 +13,6 @@ export const intersection = (a, b) => {
   if (doesNotOverlap(a, b)) {
     return fromEmpty();
   }
-  info('intersection begin');
   const result = fromSurfaceMeshLazy(
     intersectionOfSurfaceMeshes(
       toSurfaceMesh(a.graph),
@@ -22,6 +21,5 @@ export const intersection = (a, b) => {
       b.matrix
     )
   );
-  info('intersection end');
   return taggedGraph({ tags: a.tags }, result);
 };

@@ -57,7 +57,7 @@ class Shape {
   }
 
   toDisplayGeometry(options) {
-    return toDisplayGeometry(toGeometry$1(this), options);
+    return toDisplayGeometry(toGeometry(this), options);
   }
 
   toKeptGeometry(options = {}) {
@@ -65,15 +65,15 @@ class Shape {
   }
 
   toConcreteGeometry(options = {}) {
-    return toConcreteGeometry(toGeometry$1(this));
+    return toConcreteGeometry(toGeometry(this));
   }
 
   toDisjointGeometry(options = {}) {
-    return toConcreteGeometry(toGeometry$1(this));
+    return toConcreteGeometry(toGeometry(this));
   }
 
   toTransformedGeometry(options = {}) {
-    return toTransformedGeometry(toGeometry$1(this));
+    return toTransformedGeometry(toGeometry(this));
   }
 
   getContext(symbol) {
@@ -170,9 +170,19 @@ Shape.reifier = (name, op) => registerReifier(name, op);
 // Let's make the registration functions more explicit.
 Shape.registerMethod = registerShapeMethod;
 Shape.registerReifier = (name, op) => registerReifier(name, op);
+Shape.toShape = (to, from) => {
+  if (to instanceof Function) {
+    to = to(from);
+  }
+  if (to instanceof Shape) {
+    return to;
+  } else {
+    throw Error('Expected Function or Shape');
+  }
+};
 
 const fromGeometry = Shape.fromGeometry;
-const toGeometry$1 = (shape) => shape.toGeometry();
+const toGeometry = (shape) => shape.toGeometry();
 
 function pad (hash, len) {
   while (hash.length < len) {
@@ -348,18 +358,13 @@ const add =
   (...shapes) =>
   (shape) =>
     Shape.fromGeometry(
-      union(shape.toGeometry(), ...shapes.map((shape) => shape.toGeometry()))
+      union(
+        shape.toGeometry(),
+        ...shapes.map((other) => Shape.toShape(other, shape).toGeometry())
+      )
     );
 
 Shape.registerMethod('add', add);
-
-const toGeometry = (to, from) => {
-  if (to instanceof Function) {
-    return to(from).toGeometry();
-  } else {
-    return to.toGeometry();
-  }
-};
 
 const and =
   (...args) =>
@@ -368,7 +373,7 @@ const and =
       taggedGroup(
         {},
         shape.toGeometry(),
-        ...args.map((arg) => toGeometry(arg, shape))
+        ...args.map((arg) => Shape.toShape(arg, shape).toGeometry())
       )
     );
 
@@ -480,6 +485,7 @@ Shape.Group = Group;
 const at =
   (other, path = 'tagpath:*') =>
   (shape) => {
+    other = Shape.toShape(other, shape);
     const reoriented = [];
     for (const item of other.get(path).each()) {
       reoriented.push(
@@ -529,7 +535,7 @@ const clip =
     Shape.fromGeometry(
       intersection(
         shape.toGeometry(),
-        ...shapes.map((shape) => shape.toGeometry())
+        ...shapes.map((other) => Shape.toShape(other, shape).toGeometry())
       )
     );
 
@@ -578,22 +584,23 @@ const cut =
     Shape.fromGeometry(
       difference(
         shape.toGeometry(),
-        ...shapes.map((other) => toGeometry(other, shape))
+        ...shapes.map((other) => Shape.toShape(other, shape).toGeometry())
       )
     );
 
 Shape.registerMethod('cut', cut);
 
-const toShape = (to, from) => {
-  if (to instanceof Function) {
-    return to(from);
-  } else {
-    return to;
-  }
-};
-
-const cutFrom = (other) => (shape) => toShape(other, shape).cut(shape);
+const cutFrom = (other) => (shape) =>
+  Shape.toShape(other, shape).cut(shape);
 Shape.registerMethod('cutFrom', cutFrom);
+
+const cutOut =
+  (other, op = (clipped) => clipped.void()) =>
+  (shape) => {
+    other = Shape.toShape(other, shape);
+    return shape.cut(other).and(op(shape.clip(other)));
+  };
+Shape.registerMethod('cutOut', cutOut);
 
 const tag =
   (...tags) =>
@@ -2561,9 +2568,7 @@ const each =
   (op = (leafs, shape) => leafs) =>
   (shape) =>
     op(
-      getLeafs(shape.toDisjointGeometry()).map((leaf) =>
-        Shape.fromGeometry(leaf)
-      ),
+      getLeafs(shape.toGeometry()).map((leaf) => Shape.fromGeometry(leaf)),
       shape
     );
 Shape.registerMethod('each', each);
@@ -2632,7 +2637,7 @@ const assemble = (...shapes) => {
       return shapes[0];
     }
     default: {
-      return fromGeometry(assemble$1(...shapes.map(toGeometry$1)));
+      return fromGeometry(assemble$1(...shapes.map(toGeometry)));
     }
   }
 };
@@ -2640,14 +2645,14 @@ const assemble = (...shapes) => {
 const fit =
   (...shapes) =>
   (shape) =>
-    assemble(...shapes, shape);
+    assemble(...shapes.map((other) => Shape.toShape(other, shape)), shape);
 
 Shape.registerMethod('fit', fit);
 
 const fitTo =
   (...shapes) =>
   (shape) =>
-    assemble(shape, ...shapes);
+    assemble(shape, ...shapes.map((other) => Shape.toShape(other, shape)));
 
 Shape.registerMethod('fitTo', fitTo);
 
@@ -2687,6 +2692,8 @@ const get =
     visit(shape.toGeometry(), walk, qualifyTagPath(path, 'item'));
     return Group(...picks);
   };
+
+const g = get;
 
 Shape.registerMethod('get', get);
 Shape.registerMethod('g', get);
@@ -2758,18 +2765,6 @@ const loft =
 
 Shape.registerMethod('loft', loft);
 
-const loop$1 =
-  (...ops) =>
-  (shape) =>
-    Shape.fromGeometry(
-      loft$1(
-        /* closed= */ true,
-        ...ops.map((op) => op(shape).toGeometry())
-      )
-    );
-
-Shape.registerMethod('loop', loop$1);
-
 /**
  *
  * # Log
@@ -2824,6 +2819,13 @@ const loop =
     );
 
 Shape.registerMethod('loop', loop);
+
+const mask =
+  (...args) =>
+  (shape) =>
+    shape.and(...args.map((arg) => Shape.toShape(arg, shape).void()));
+
+Shape.registerMethod('mask', mask);
 
 const material = (name) => (shape) =>
   Shape.fromGeometry(rewriteTags(toTagsFromName$1(name), [], shape.toGeometry()));
@@ -2898,6 +2900,8 @@ Shape.registerMethod('notAs', notAs);
 
 const nth = (n) => (shape) => each()(shape)[n];
 
+const n = nth;
+
 Shape.registerMethod('nth', nth);
 Shape.registerMethod('n', nth);
 
@@ -2913,6 +2917,32 @@ Shape.registerMethod('offset', offset);
 const on =
   (path, ...ops) =>
   (shape) => {
+    ops = ops.map((op) => (op instanceof Function ? op : () => op));
+    if (path instanceof Function) {
+      // We've already selected the item to replace, e.g., s.on(g('plate'), ...);
+      const selection = path(shape).toGeometry();
+      // FIX: Make this more robust?
+      const items = selection.type === 'item' ? [selection] : selection.content;
+      const walk = (geometry, descend) => {
+        if (geometry.type === 'item') {
+          if (items.includes(geometry)) {
+            // This is a target.
+            const global = geometry.matrix;
+            const local = invertTransform(global);
+            const target = Shape.fromGeometry(geometry);
+            // Switch to the local coordinate space, perform the operation, and come back to the global coordinate space.
+            return target
+              .transform(local)
+              .op(...ops)
+              .transform(global)
+              .toGeometry();
+          }
+        }
+        return descend();
+      };
+      return Shape.fromGeometry(rewrite(shape.toGeometry(), walk));
+    }
+
     const walk = (geometry, descend, walk, path) => {
       if (geometry.type === 'item') {
         if (path.length >= 1) {
@@ -4122,4 +4152,4 @@ const yz = Shape.fromGeometry({
   ],
 });
 
-export { Alpha, Arc, Assembly, Box, ChainedHull, Cone, Empty, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Line, Octagon, Orb, Page, Path, Pentagon, Plan, Point, Points, Polygon, Polyhedron, Septagon, Shape, Spiral, Tetragon, Triangle, Wave, Weld, add, addTo, align, and, as, asPart, at, bend, billOfMaterials, clip, clipFrom, cloudSolid, color, colors, cut, cutFrom, defGrblConstantLaser, defGrblDynamicLaser, defGrblPlotter, defGrblSpindle, defRgbColor, defThreejsMaterial, defTool, define, drop, each, ensurePages, ex, extrude, extrudeToPlane, fill, fit, fitTo, fuse, get, grow, inline, inset, keep, loadGeometry, loft, log, loop, material, md, minkowskiDifference, minkowskiShell, minkowskiSum, move, noVoid, notAs, nth, ofPlan, offset, on, op, orient, outline, pack, play, projectToPlane, push, remesh, rotate, rotateX, rotateY, rotateZ, rx, ry, rz, saveGeometry, scale, section, sectionProfile, separate, size, sketch, smooth, tag, tags, test, tint, tool, twist, view, voidFn, weld, withFill, withFn, withInset, withOp, x, xy, xz, y, yz, z };
+export { Alpha, Arc, Assembly, Box, ChainedHull, Cone, Empty, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Line, Octagon, Orb, Page, Path, Pentagon, Plan, Point, Points, Polygon, Polyhedron, Septagon, Shape, Spiral, Tetragon, Triangle, Wave, Weld, add, addTo, align, and, as, asPart, at, bend, billOfMaterials, clip, clipFrom, cloudSolid, color, colors, cut, cutFrom, cutOut, defGrblConstantLaser, defGrblDynamicLaser, defGrblPlotter, defGrblSpindle, defRgbColor, defThreejsMaterial, defTool, define, drop, each, ensurePages, ex, extrude, extrudeToPlane, fill, fit, fitTo, fuse, g, get, grow, inline, inset, keep, loadGeometry, loft, log, loop, mask, material, md, minkowskiDifference, minkowskiShell, minkowskiSum, move, n, noVoid, notAs, nth, ofPlan, offset, on, op, orient, outline, pack, play, projectToPlane, push, remesh, rotate, rotateX, rotateY, rotateZ, rx, ry, rz, saveGeometry, scale, section, sectionProfile, separate, size, sketch, smooth, tag, tags, test, tint, tool, twist, view, voidFn, weld, withFill, withFn, withInset, withOp, x, xy, xz, y, yz, z };

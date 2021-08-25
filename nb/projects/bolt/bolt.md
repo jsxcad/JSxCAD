@@ -4,6 +4,8 @@
 
 ![Image](bolt.md.2.png)
 
+Show the fit.
+
 ![Image](bolt.md.3.png)
 
 ![Image](bolt.md.4.png)

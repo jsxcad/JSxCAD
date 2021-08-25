@@ -5,6 +5,7 @@ import { invertTransform } from '@jsxcad/algorithm-cgal';
 export const at =
   (other, path = 'tagpath:*') =>
   (shape) => {
+    other = Shape.toShape(other, shape);
     const reoriented = [];
     for (const item of other.get(path).each()) {
       reoriented.push(
