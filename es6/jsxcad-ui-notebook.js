@@ -1,5 +1,5 @@
 import { orbitDisplay } from './jsxcad-ui-threejs.js';
-import { read } from './jsxcad-sys.js';
+import { readOrWatch } from './jsxcad-sys.js';
 
 var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
 
@@ -2696,8 +2696,8 @@ var FileSaver_min = createCommonjsModule(function (module, exports) {
 /* global Blob */
 
 const downloadFile = async (event, filename, path, data, type) => {
-  if (!data) {
-    data = await read(path);
+  if (path && !data) {
+    data = await readOrWatch(path);
   }
   const blob = new Blob([data], { type });
   FileSaver_min(blob, filename);
@@ -2719,6 +2719,9 @@ const toDomElement = (notebook = [], { onClickView } = {}) => {
   const definitions = {};
 
   const showOrbitView = async (event, note) => {
+    if (note.path && !note.data) {
+      note.data = await readOrWatch(note.path);
+    }
     const { data } = note;
     const { target, up, position, withAxes, withGrid } = note.view;
     const view = { target, up, position };
@@ -2786,7 +2789,9 @@ const toDomElement = (notebook = [], { onClickView } = {}) => {
 
       image.addEventListener('click', (event) => {
         showOrbitView(event, note);
-        onClickView(event, note);
+        if (onClickView) {
+          onClickView(event, note);
+        }
       });
       container.appendChild(image);
       if (openView) {
