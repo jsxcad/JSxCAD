@@ -3,12 +3,12 @@
 import Base64ArrayBuffer from 'base64-arraybuffer';
 import marked from 'marked';
 import { orbitDisplay } from '@jsxcad/ui-threejs';
-import { read } from '@jsxcad/sys';
+import { readOrWatch } from '@jsxcad/sys';
 import saveAs from 'file-saver';
 
 const downloadFile = async (event, filename, path, data, type) => {
-  if (!data) {
-    data = await read(path);
+  if (path && !data) {
+    data = await readOrWatch(path);
   }
   const blob = new Blob([data], { type });
   saveAs(blob, filename);
@@ -30,6 +30,9 @@ export const toDomElement = (notebook = [], { onClickView } = {}) => {
   const definitions = {};
 
   const showOrbitView = async (event, note) => {
+    if (note.path && !note.data) {
+      note.data = await readOrWatch(note.path);
+    }
     const { data } = note;
     const { target, up, position, withAxes, withGrid } = note.view;
     const view = { target, up, position };
@@ -97,7 +100,9 @@ export const toDomElement = (notebook = [], { onClickView } = {}) => {
 
       image.addEventListener('click', (event) => {
         showOrbitView(event, note);
-        onClickView(event, note);
+        if (onClickView) {
+          onClickView(event, note);
+        }
       });
       container.appendChild(image);
       if (openView) {

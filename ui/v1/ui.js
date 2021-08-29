@@ -199,7 +199,6 @@ class Ui extends PureComponent {
               if (domElementByHash.has(entry.hash)) {
                 // Reuse the element we built earlier
                 console.log(`Re-appending ${entry.hash} to ${id}`);
-                domElement.appendChild(document.createTextNode(entry.hash));
                 domElement.appendChild(domElementByHash.get(entry.hash));
               } else {
                 // We need to build the element.
@@ -243,7 +242,6 @@ class Ui extends PureComponent {
                 const element = toDomElement([entry]);
                 domElementByHash.set(entry.hash, element);
                 console.log(`Appending ${entry.hash} to ${id}`);
-                domElement.appendChild(document.createTextNode(entry.hash));
                 domElement.appendChild(element);
                 console.log(`Marking ${entry.hash} in ${id}`);
               }
@@ -1406,7 +1404,7 @@ const setupUi = async (sha) => {
   const startPath = `https://gitcdn.link/cdn/jsxcad/JSxCAD/${sha}/nb/start.nb`;
   document
     .getElementById('loading')
-    .appendChild(document.createTextNode('Indexing Storage'));
+    .appendChild(document.createTextNode('Indexing Storage. '));
   const filesystems = await listFilesystems();
   const decodeHash = () => {
     const hash = location.hash.substring(1);
@@ -1420,7 +1418,7 @@ const setupUi = async (sha) => {
   let ui;
   document
     .getElementById('loading')
-    .appendChild(document.createTextNode('Starting React'));
+    .appendChild(document.createTextNode('Starting React. '));
   render(
     <Ui
       ref={(ref) => {
@@ -1455,12 +1453,12 @@ export const installUi = async ({ document, workspace, sha }) => {
   await boot();
   document
     .getElementById('loading')
-    .appendChild(document.createTextNode('Booted'));
+    .appendChild(document.createTextNode('Booted. '));
   if (workspace !== '') {
     await setupFilesystem({ fileBase: workspace });
   }
   document
     .getElementById('loading')
-    .appendChild(document.createTextNode('Setup UI'));
+    .appendChild(document.createTextNode('Setup UI. '));
   await setupUi(sha);
 };
