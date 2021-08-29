@@ -11,29 +11,20 @@ test('Reuse', async (t) => {
     type: 'Shape',
   });
   const updates = {};
-  const define = await toEcmascript(
+  const replays = [];
+  await toEcmascript(
     `
 import 'blah';
 const Mountain = () => foo();
 const mountainView = Mountain().scale(0.5).Page();
 mountainView.frontView({ position: [0, -100, 50] });
 `,
-    { updates }
+    { updates, replays }
   );
 
-  t.is(
-    define,
+  t.deepEqual(replays, [
     `
 try {
-pushSourceLocation({
-  path: '',
-  id: '$1'
-});
-const $1 = await importModule('blah');
-popSourceLocation({
-  path: '',
-  id: '$1'
-});
 pushSourceLocation({
   path: '',
   id: 'Mountain'
@@ -43,34 +34,58 @@ popSourceLocation({
   path: '',
   id: 'Mountain'
 });
-const mountainView = await loadGeometry('data/def//mountainView');
-Object.freeze(mountainView);
-pushSourceLocation({
-  path: '',
-  id: 'mountainView'
-});
-await replayRecordedNotes('', 'mountainView');
-popSourceLocation({
-  path: '',
-  id: 'mountainView'
-});
-pushSourceLocation({
-  path: '',
-  id: '$2'
-});
-const $2 = mountainView.frontView({
-  position: [0, -100, 50]
-});
-popSourceLocation({
-  path: '',
-  id: '$2'
-});
-return {};
 
 } catch (error) { throw error; }
-`
-  );
+`,
+  ]);
   t.deepEqual(updates, {
+    $1: {
+      dependencies: ['$1', 'importModule'],
+      program: `
+try {
+pushSourceLocation({
+  path: '',
+  id: '$1'
+});
+
+const $1 = await importModule('blah');
+popSourceLocation({
+  path: '',
+  id: '$1'
+});
+
+info('define $1');
+
+pushSourceLocation({
+  path: '',
+  id: '$1'
+});
+
+beginRecordingNotes('', '$1', {
+  line: 1,
+  column: 0
+});
+
+const $1 = await importModule('blah');
+await write('meta/def//$1', {
+  sha: 'd3d743575d242dbbfc82a4d23ded4f43d538977c',
+  type: $1 instanceof Shape ? 'Shape' : 'Object'
+});
+if ($1 instanceof Shape) {
+  await saveGeometry('data/def//$1', $1);
+}
+
+await saveRecordedNotes('', '$1');
+
+popSourceLocation({
+  path: '',
+  id: '$1'
+});
+
+
+} catch (error) { throw error; }
+`,
+    },
     $2: {
       dependencies: ['$1', 'mountainView'],
       program: `
@@ -107,6 +122,7 @@ pushSourceLocation({
   path: '',
   id: '$2'
 });
+
 beginRecordingNotes('', '$2', {
   line: 1,
   column: 0
@@ -124,6 +140,7 @@ if ($2 instanceof Shape) {
 }
 
 await saveRecordedNotes('', '$2');
+
 popSourceLocation({
   path: '',
   id: '$2'
@@ -165,6 +182,7 @@ pushSourceLocation({
   path: '',
   id: 'mountainView'
 });
+
 beginRecordingNotes('', 'mountainView', {
   line: 4,
   column: 0
@@ -180,6 +198,7 @@ if (mountainView instanceof Shape) {
 }
 
 await saveRecordedNotes('', 'mountainView');
+
 popSourceLocation({
   path: '',
   id: 'mountainView'
@@ -192,17 +211,17 @@ popSourceLocation({
   });
 
   const reupdates = {};
-  const redefine = await toEcmascript(
+  const rereplays = [];
+  await toEcmascript(
     `
 const Mountain = () => bar();
 const mountainView = Mountain().scale(0.5).Page();
 mountainView.frontView({ position: [0, -100, 50] });
 `,
-    { updates: reupdates }
+    { updates: reupdates, replays: rereplays }
   );
 
-  t.is(
-    redefine,
+  t.deepEqual(rereplays, [
     `
 try {
 pushSourceLocation({
@@ -214,33 +233,10 @@ popSourceLocation({
   path: '',
   id: 'Mountain'
 });
-const mountainView = await loadGeometry('data/def//mountainView');
-Object.freeze(mountainView);
-pushSourceLocation({
-  path: '',
-  id: 'mountainView'
-});
-await replayRecordedNotes('', 'mountainView');
-popSourceLocation({
-  path: '',
-  id: 'mountainView'
-});
-pushSourceLocation({
-  path: '',
-  id: '$1'
-});
-const $1 = mountainView.frontView({
-  position: [0, -100, 50]
-});
-popSourceLocation({
-  path: '',
-  id: '$1'
-});
-return {};
 
 } catch (error) { throw error; }
-`
-  );
+`,
+  ]);
   t.deepEqual(reupdates, {
     $1: {
       dependencies: ['mountainView'],
@@ -267,6 +263,7 @@ pushSourceLocation({
   path: '',
   id: '$1'
 });
+
 beginRecordingNotes('', '$1', {
   line: 1,
   column: 0
@@ -284,6 +281,7 @@ if ($1 instanceof Shape) {
 }
 
 await saveRecordedNotes('', '$1');
+
 popSourceLocation({
   path: '',
   id: '$1'
@@ -314,6 +312,7 @@ pushSourceLocation({
   path: '',
   id: 'mountainView'
 });
+
 beginRecordingNotes('', 'mountainView', {
   line: 3,
   column: 0
@@ -329,6 +328,7 @@ if (mountainView instanceof Shape) {
 }
 
 await saveRecordedNotes('', 'mountainView');
+
 popSourceLocation({
   path: '',
   id: 'mountainView'

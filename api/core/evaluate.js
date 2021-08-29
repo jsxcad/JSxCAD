@@ -29,11 +29,16 @@ export const execute = async (
 ) => {
   try {
     const updates = {};
+    const replays = [];
+    const exports = [];
     await toEcmascript(script, {
       path,
-      topLevel: new Map(),
+      topLevel,
       updates,
+      replays,
+      exports,
     });
+    const replayPromises = replays.map((entry) => replay(entry, { path }));
     const pending = new Set(Object.keys(updates));
     const unprocessed = new Set(Object.keys(updates));
     const processed = new Set();
@@ -89,21 +94,17 @@ export const execute = async (
     if (clearUpdateEmits) {
       clearEmitted();
     }
-    // Execute the script in the context of the resolved updates.
-    const ecmascript = await toEcmascript(script, {
-      path,
-      topLevel,
-      updates,
-    });
-    // These should all be resolved already.
+    // Check these are all resolved.
     if (Object.keys(updates).length !== 0) {
       throw Error('Unresolved updates');
     }
-    try {
-      const result = await replay(ecmascript, { path });
-      return result;
-    } catch (error) {
-      throw error;
+    // Make sure the replay has finished.
+    for (const replayPromise of replayPromises) {
+      await replayPromise;
+    }
+    // Compute and return the export, if any.
+    for (const entry of exports) {
+      return evaluate(entry, { path });
     }
   } catch (error) {
     throw error;
