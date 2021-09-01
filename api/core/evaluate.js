@@ -61,11 +61,12 @@ export const execute = async (
         }
         const entry = updates[id];
         const outstandingDependencies = entry.dependencies.filter(
-          (dependency) =>
-            updates[dependency] &&
-            dependency !== id
+          (dependency) => updates[dependency] && dependency !== id
         );
-        if (updatePromises.length === 0 && outstandingDependencies.length === 0) {
+        if (
+          updatePromises.length === 0 &&
+          outstandingDependencies.length === 0
+        ) {
           // For now, only do one thing at a time, and block the remaining updates.
           const task = async () => {
             try {
@@ -80,7 +81,7 @@ export const execute = async (
         } else {
           blockedUpdates.push(id);
         }
-      };
+      }
       // FIX: We could instead use Promise.race() and then see what new updates could be queued.
       while (updatePromises.length > 0) {
         await updatePromises.pop();

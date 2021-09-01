@@ -92,13 +92,19 @@ const generateReplayCode = async ({
   // Otherwise recompute it.
   if (!isImport) {
     loadCode.push(
-      parse(`pushSourceLocation({ path: '${path}', id: '${id}' });`, parseOptions)
+      parse(
+        `pushSourceLocation({ path: '${path}', id: '${id}' });`,
+        parseOptions
+      )
     );
   }
   loadCode.push(...code);
   if (!isImport) {
     loadCode.push(
-      parse(`popSourceLocation({ path: '${path}', id: '${id}' });`, parseOptions)
+      parse(
+        `popSourceLocation({ path: '${path}', id: '${id}' });`,
+        parseOptions
+      )
     );
   }
   return loadCode;
@@ -128,7 +134,10 @@ const generateUpdateCode = async (
   if (!isImport) {
     body.push(parse(`info('define ${id}');`, parseOptions));
     body.push(
-      parse(`pushSourceLocation({ path: '${path}', id: '${id}' });`, parseOptions)
+      parse(
+        `pushSourceLocation({ path: '${path}', id: '${id}' });`,
+        parseOptions
+      )
     );
   }
   if (!isNotCacheable && !isImport) {
@@ -155,7 +164,10 @@ const generateUpdateCode = async (
   }
   if (!isImport) {
     body.push(
-      parse(`popSourceLocation({ path: '${path}', id: '${id}' });`, parseOptions)
+      parse(
+        `popSourceLocation({ path: '${path}', id: '${id}' });`,
+        parseOptions
+      )
     );
   }
   const program = { type: 'Program', body };

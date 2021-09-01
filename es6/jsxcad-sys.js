@@ -302,7 +302,10 @@ const createConversation = ({ agent, say }) => {
 
     const payload = answer || question || statement;
     if (payload instanceof Object && payload.sourceLocation) {
-      history.unshift({ op: payload.op, sourceLocation: payload.sourceLocation });
+      history.unshift({
+        op: payload.op,
+        sourceLocation: payload.sourceLocation,
+      });
       while (history.length > 3) {
         history.pop();
       }

@@ -40,12 +40,9 @@ popSourceLocation({
 `,
   ]);
   t.deepEqual(updates, {
-  $2: {
-    dependencies: [
-      '$1',
-      'mountainView',
-    ],
-    program: `
+    $2: {
+      dependencies: ['$1', 'mountainView'],
+      program: `
 try {
 const $1 = await importModule('blah');
 pushSourceLocation({
@@ -96,13 +93,10 @@ popSourceLocation({
 
 } catch (error) { throw error; }
 `,
-  },
-  mountainView: {
-    dependencies: [
-      '$1',
-      'Mountain',
-    ],
-    program: `
+    },
+    mountainView: {
+      dependencies: ['$1', 'Mountain'],
+      program: `
 try {
 const $1 = await importModule('blah');
 pushSourceLocation({
@@ -147,7 +141,7 @@ popSourceLocation({
 
 } catch (error) { throw error; }
 `,
-  },
+    },
   });
 
   const reupdates = {};

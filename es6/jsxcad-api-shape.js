@@ -2681,7 +2681,7 @@ const get =
       }
       return false;
     };
-    const qualifiedTags = tags.map(tag => qualifyTag(tag, 'item'));
+    const qualifiedTags = tags.map((tag) => qualifyTag(tag, 'item'));
     const picks = [];
     const walk = (geometry, descend) => {
       if (geometry.type === 'item') {

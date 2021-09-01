@@ -128,11 +128,19 @@ export default {
     {
       transform(code, id) {
         // FIX: Remove this nasty patch and fix ace properly.
-        return code.replace(
-          /var first = Math.min[(]this.firstRow, config.firstRow[)];/,
-          'var first = Math.min(this.firstRow, config.firstRow, 0);'
-        ).replace(/var rowCount = w.h [/] config.lineHeight;/, 'var rowCount = Math.ceil(w.h / config.lineHeight);')
-        .replace(/w.rowCount = w.pixelHeight [/] renderer.layerConfig.lineHeight/, 'w.rowCount = Math.ceil(w.pixelHeight / renderer.layerConfig.lineHeight)');
+        return code
+          .replace(
+            /var first = Math.min[(]this.firstRow, config.firstRow[)];/,
+            'var first = Math.min(this.firstRow, config.firstRow, 0);'
+          )
+          .replace(
+            /var rowCount = w.h [/] config.lineHeight;/,
+            'var rowCount = Math.ceil(w.h / config.lineHeight);'
+          )
+          .replace(
+            /w.rowCount = w.pixelHeight [/] renderer.layerConfig.lineHeight/,
+            'w.rowCount = Math.ceil(w.pixelHeight / renderer.layerConfig.lineHeight)'
+          );
       },
     },
     sizes(),
