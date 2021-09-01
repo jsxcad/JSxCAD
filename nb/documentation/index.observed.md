@@ -1,4 +1,3 @@
-md`
 # Documentation Index
 
 An interactive overview of the basic features of JSxCAD.
@@ -8,4 +7,3 @@ An interactive overview of the basic features of JSxCAD.
 * [Interactions With Geometry](../../nb/documentation/interactionswithgeometry.md)
 * [Interactions Between Geometry](../../nb/documentation/interactionsbetweengeometry.md)
 * [File Import and Export](../../nb/documentation/fileimportandexport.md)
-`;
