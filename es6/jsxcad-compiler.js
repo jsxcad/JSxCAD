@@ -6554,13 +6554,14 @@ const fromIdToSha = (id, { topLevel }) => {
 
 const generateReplayCode = async ({
   isNotCacheable,
+  isImport,
   code,
   path,
   id,
   doReplay = false,
 }) => {
   const loadCode = [];
-  if (!isNotCacheable) {
+  if (!isNotCacheable && !isImport) {
     const meta = await read(`meta/def/${path}/${id}`);
     if (meta && meta.type === 'Shape') {
       loadCode.push(
@@ -6591,18 +6592,22 @@ const generateReplayCode = async ({
     }
   }
   // Otherwise recompute it.
-  loadCode.push(
-    parse(`pushSourceLocation({ path: '${path}', id: '${id}' });`, parseOptions)
-  );
+  if (!isImport) {
+    loadCode.push(
+      parse(`pushSourceLocation({ path: '${path}', id: '${id}' });`, parseOptions)
+    );
+  }
   loadCode.push(...code);
-  loadCode.push(
-    parse(`popSourceLocation({ path: '${path}', id: '${id}' });`, parseOptions)
-  );
+  if (!isImport) {
+    loadCode.push(
+      parse(`popSourceLocation({ path: '${path}', id: '${id}' });`, parseOptions)
+    );
+  }
   return loadCode;
 };
 
 const generateUpdateCode = async (
-  { isNotCacheable, code, dependencies, path, id },
+  { isNotCacheable, code, dependencies, path, id, isImport },
   { declaration, sha, topLevel }
 ) => {
   const body = [];
@@ -6622,15 +6627,22 @@ const generateUpdateCode = async (
     }
   };
   await walk(dependencies);
-  body.push(parse(`info('define ${id}');`, parseOptions));
-  body.push(
-    parse(`pushSourceLocation({ path: '${path}', id: '${id}' });`, parseOptions)
-  );
-  if (!isNotCacheable) {
-    body.push(parse(`beginRecordingNotes('${path}', '${id}', { line: ${declaration.loc.start.line}, column: ${declaration.loc.start.column} });`, parseOptions));
+  if (!isImport) {
+    body.push(parse(`info('define ${id}');`, parseOptions));
+    body.push(
+      parse(`pushSourceLocation({ path: '${path}', id: '${id}' });`, parseOptions)
+    );
+  }
+  if (!isNotCacheable && !isImport) {
+    body.push(
+      parse(
+        `beginRecordingNotes('${path}', '${id}', { line: ${declaration.loc.start.line}, column: ${declaration.loc.start.column} });`,
+        parseOptions
+      )
+    );
   }
   body.push(...code);
-  if (!isNotCacheable) {
+  if (!isNotCacheable && !isImport) {
     // Only cache Shapes.
     body.push(
       parse(
@@ -6639,13 +6651,15 @@ const generateUpdateCode = async (
         parseOptions
       )
     );
-    body.push(parse(`await saveRecordedNotes('${path}', '${id}');`, parseOptions));
+    body.push(
+      parse(`await saveRecordedNotes('${path}', '${id}');`, parseOptions)
+    );
   }
-  body.push(
-      parse(
-        `popSourceLocation({ path: '${path}', id: '${id}' });`,
-        parseOptions
-      ));
+  if (!isImport) {
+    body.push(
+      parse(`popSourceLocation({ path: '${path}', id: '${id}' });`, parseOptions)
+    );
+  }
   const program = { type: 'Program', body };
   return `
 try {
@@ -6731,6 +6745,7 @@ const declareVariable = async (
     sha,
     hasSideEffects,
     sourceLocation: sourceLocation || declaration.loc,
+    isImport,
   };
 
   topLevel.set(id, entry);
@@ -6759,6 +6774,8 @@ const declareVariable = async (
       declarator.init.callee.name === 'control'
     ) {
       // We've already patched this.
+      entry.isNotCacheable = true;
+    } else if (isImport) {
       entry.isNotCacheable = true;
     }
   }
@@ -6904,19 +6921,15 @@ const processProgram = async (program, options) => {
   }
 };
 
-/**
- * Convert a module to executable ecmascript function.
- * The conversion includes caching constant variables for reuse, and tree pruning.
- *
- * @param {string} script
- * @param {object} options
- * @param {string} options.path - The path to the script for producing relative paths.
- * @param {function(path:string} options.import - A method for resolving imports.
- */
-
 const toEcmascript = async (
   script,
-  { path = '', topLevel = new Map(), updates = {}, replays = [], exports = [] } = {}
+  {
+    path = '',
+    topLevel = new Map(),
+    updates = {},
+    replays = [],
+    exports = [],
+  } = {}
 ) => {
   let ast = parse(script, parseOptions);
 
@@ -6945,7 +6958,19 @@ const toEcmascript = async (
   // Return the exports as an object.
   if (exportNames.length > 0) {
     const exportCode = `return { ${exportNames.join(', ')} };`;
-    exports.push(generateUpdateCode({ isNotCacheable: true, code: parse(exportCode, parseOptions).body, dependencies: exportNames, id: '$exports' }, { topLevel }));
+    exports.push(
+      await generateUpdateCode(
+        {
+          isNotCacheable: true,
+          code: parse(exportCode, parseOptions).body,
+          dependencies: exportNames,
+          id: '$exports',
+          path,
+          isImport: true, // FIX: Hack for source location.
+        },
+        { topLevel }
+      )
+    );
   }
 
   if (out.length > 0) {

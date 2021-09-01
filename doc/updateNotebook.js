@@ -65,10 +65,12 @@ export const updateNotebook = async (
   clearEmitted();
   await boot();
   try {
-    await api.importModule(`${target}.nb`, { clearUpdateEmits: true });
+    // FIX: This may produce a non-deterministic ordering for now.
+    const module = `${target}.nb`;
+    await api.importModule(module, { clearUpdateEmits: false });
     await resolvePending();
     const notebook = getEmitted();
-    const html = await toHtml(notebook);
+    const html = await toHtml(notebook, { module });
     writeFileSync(`${target}.html`, html);
     const { imageUrlList } = await screenshot(
       new TextDecoder('utf8').decode(html),

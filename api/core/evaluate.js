@@ -1,15 +1,14 @@
-import { addPending, clearEmitted } from '@jsxcad/sys';
-
 import { toEcmascript } from '@jsxcad/compiler';
 
 export const evaluate = async (ecmascript, { api, path }) => {
   try {
+    console.log(`QQ/evaluate: ${ecmascript.replace(/\n/g, '\n|   ')}`);
     const builder = new Function(
       `{ ${Object.keys(api).join(', ')} }`,
       `return async () => { ${ecmascript} };`
     );
-    const module = await builder(api);
-    const result = await module();
+    const op = await builder(api);
+    const result = await op();
     return result;
   } catch (error) {
     throw error;
@@ -28,83 +27,73 @@ export const execute = async (
   }
 ) => {
   try {
-    const updates = {};
-    const replays = [];
-    const exports = [];
-    await toEcmascript(script, {
-      path,
-      topLevel,
-      updates,
-      replays,
-      exports,
-    });
-    const replayPromises = replays.map((entry) => replay(entry, { path }));
-    const pending = new Set(Object.keys(updates));
-    const unprocessed = new Set(Object.keys(updates));
-    const processed = new Set();
-    let somethingHappened;
-    let somethingFailed;
-    let parallelUpdates = 0;
-    const schedule = () => {
-      console.log(`Updates remaining ${[...pending].join(', ')}`);
-      for (const id of [...pending]) {
-        if (parallelUpdates >= parallelUpdateLimit) {
-          break;
+    let replaysDone = false;
+    console.log(`QQ/Evaluate`);
+    const scheduled = new Set();
+    for (;;) {
+      console.log(`QQ/Compile`);
+      const updates = {};
+      const replays = [];
+      const exports = [];
+      await toEcmascript(script, {
+        path,
+        topLevel,
+        updates,
+        replays,
+        exports,
+      });
+      // Replay anything we can.
+      if (!replaysDone) {
+        console.log(`QQ/Replay`);
+        replaysDone = true;
+        for (const entry of replays) {
+          await replay(entry, { path });
+        }
+      }
+      // Update what we can.
+      console.log(`QQ/Update`);
+      const blockedUpdates = [];
+      const updatePromises = [];
+      // Determine the updates we can process.
+      for (const id of Object.keys(updates)) {
+        if (scheduled.has(id)) {
+          continue;
         }
         const entry = updates[id];
         const outstandingDependencies = entry.dependencies.filter(
           (dependency) =>
             updates[dependency] &&
-            !processed.has(dependency) &&
             dependency !== id
         );
-        if (outstandingDependencies.length === 0) {
-          parallelUpdates++;
-          console.log(`Scheduling: ${id}`);
-          pending.delete(id);
+        if (updatePromises.length === 0 && outstandingDependencies.length === 0) {
+          // For now, only do one thing at a time, and block the remaining updates.
           const task = async () => {
             try {
-              await evaluate(updates[id].program);
+              await evaluate(updates[id].program, { path });
               console.log(`Completed ${id}`);
-              delete updates[id];
-              unprocessed.delete(id);
-              processed.add(id);
-              parallelUpdates--;
             } catch (error) {
-              somethingFailed(error); // FIX: Deadlock?
-            } finally {
-              somethingHappened();
+              throw error;
             }
           };
-          addPending(task());
+          updatePromises.push(task());
+          scheduled.add(id);
+        } else {
+          blockedUpdates.push(id);
         }
+      };
+      // FIX: We could instead use Promise.race() and then see what new updates could be queued.
+      while (updatePromises.length > 0) {
+        await updatePromises.pop();
       }
-    };
-    while (unprocessed.size > 0) {
-      const somethingHappens = new Promise((resolve, reject) => {
-        somethingHappened = resolve;
-        somethingFailed = reject;
-      });
-      schedule();
-      if (unprocessed.size > 0) {
-        // Wait for something to happen.
-        await somethingHappens;
+      // Finally compute the exports.
+      if (blockedUpdates.length === 0) {
+        console.log(`QQ/Exports`);
+        for (const entry of exports) {
+          return await evaluate(entry, { path });
+        }
+        return;
       }
-    }
-    if (clearUpdateEmits) {
-      clearEmitted();
-    }
-    // Check these are all resolved.
-    if (Object.keys(updates).length !== 0) {
-      throw Error('Unresolved updates');
-    }
-    // Make sure the replay has finished.
-    for (const replayPromise of replayPromises) {
-      await replayPromise;
-    }
-    // Compute and return the export, if any.
-    for (const entry of exports) {
-      return evaluate(entry, { path });
+      // Otherwise recompute the updates and repeat.
     }
   } catch (error) {
     throw error;

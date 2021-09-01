@@ -25,6 +25,7 @@ mountainView.frontView({ position: [0, -100, 50] });
   t.deepEqual(replays, [
     `
 try {
+const $1 = await importModule('blah');
 pushSourceLocation({
   path: '',
   id: 'Mountain'
@@ -39,68 +40,14 @@ popSourceLocation({
 `,
   ]);
   t.deepEqual(updates, {
-    $1: {
-      dependencies: ['$1', 'importModule'],
-      program: `
+  $2: {
+    dependencies: [
+      '$1',
+      'mountainView',
+    ],
+    program: `
 try {
-pushSourceLocation({
-  path: '',
-  id: '$1'
-});
-
 const $1 = await importModule('blah');
-popSourceLocation({
-  path: '',
-  id: '$1'
-});
-
-info('define $1');
-
-pushSourceLocation({
-  path: '',
-  id: '$1'
-});
-
-beginRecordingNotes('', '$1', {
-  line: 1,
-  column: 0
-});
-
-const $1 = await importModule('blah');
-await write('meta/def//$1', {
-  sha: 'd3d743575d242dbbfc82a4d23ded4f43d538977c',
-  type: $1 instanceof Shape ? 'Shape' : 'Object'
-});
-if ($1 instanceof Shape) {
-  await saveGeometry('data/def//$1', $1);
-}
-
-await saveRecordedNotes('', '$1');
-
-popSourceLocation({
-  path: '',
-  id: '$1'
-});
-
-
-} catch (error) { throw error; }
-`,
-    },
-    $2: {
-      dependencies: ['$1', 'mountainView'],
-      program: `
-try {
-pushSourceLocation({
-  path: '',
-  id: '$1'
-});
-
-const $1 = await importModule('blah');
-popSourceLocation({
-  path: '',
-  id: '$1'
-});
-
 pushSourceLocation({
   path: '',
   id: 'Mountain'
@@ -149,22 +96,15 @@ popSourceLocation({
 
 } catch (error) { throw error; }
 `,
-    },
-    mountainView: {
-      dependencies: ['$1', 'Mountain'],
-      program: `
+  },
+  mountainView: {
+    dependencies: [
+      '$1',
+      'Mountain',
+    ],
+    program: `
 try {
-pushSourceLocation({
-  path: '',
-  id: '$1'
-});
-
 const $1 = await importModule('blah');
-popSourceLocation({
-  path: '',
-  id: '$1'
-});
-
 pushSourceLocation({
   path: '',
   id: 'Mountain'
@@ -207,7 +147,7 @@ popSourceLocation({
 
 } catch (error) { throw error; }
 `,
-    },
+  },
   });
 
   const reupdates = {};

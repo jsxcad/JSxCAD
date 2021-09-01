@@ -52,13 +52,14 @@ const fromIdToSha = (id, { topLevel }) => {
 
 const generateReplayCode = async ({
   isNotCacheable,
+  isImport,
   code,
   path,
   id,
   doReplay = false,
 }) => {
   const loadCode = [];
-  if (!isNotCacheable) {
+  if (!isNotCacheable && !isImport) {
     const meta = await read(`meta/def/${path}/${id}`);
     if (meta && meta.type === 'Shape') {
       loadCode.push(
@@ -89,18 +90,22 @@ const generateReplayCode = async ({
     }
   }
   // Otherwise recompute it.
-  loadCode.push(
-    parse(`pushSourceLocation({ path: '${path}', id: '${id}' });`, parseOptions)
-  );
+  if (!isImport) {
+    loadCode.push(
+      parse(`pushSourceLocation({ path: '${path}', id: '${id}' });`, parseOptions)
+    );
+  }
   loadCode.push(...code);
-  loadCode.push(
-    parse(`popSourceLocation({ path: '${path}', id: '${id}' });`, parseOptions)
-  );
+  if (!isImport) {
+    loadCode.push(
+      parse(`popSourceLocation({ path: '${path}', id: '${id}' });`, parseOptions)
+    );
+  }
   return loadCode;
 };
 
 const generateUpdateCode = async (
-  { isNotCacheable, code, dependencies, path, id },
+  { isNotCacheable, code, dependencies, path, id, isImport },
   { declaration, sha, topLevel }
 ) => {
   const body = [];
@@ -120,11 +125,13 @@ const generateUpdateCode = async (
     }
   };
   await walk(dependencies);
-  body.push(parse(`info('define ${id}');`, parseOptions));
-  body.push(
-    parse(`pushSourceLocation({ path: '${path}', id: '${id}' });`, parseOptions)
-  );
-  if (!isNotCacheable) {
+  if (!isImport) {
+    body.push(parse(`info('define ${id}');`, parseOptions));
+    body.push(
+      parse(`pushSourceLocation({ path: '${path}', id: '${id}' });`, parseOptions)
+    );
+  }
+  if (!isNotCacheable && !isImport) {
     body.push(
       parse(
         `beginRecordingNotes('${path}', '${id}', { line: ${declaration.loc.start.line}, column: ${declaration.loc.start.column} });`,
@@ -133,7 +140,7 @@ const generateUpdateCode = async (
     );
   }
   body.push(...code);
-  if (!isNotCacheable) {
+  if (!isNotCacheable && !isImport) {
     // Only cache Shapes.
     body.push(
       parse(
@@ -146,9 +153,11 @@ const generateUpdateCode = async (
       parse(`await saveRecordedNotes('${path}', '${id}');`, parseOptions)
     );
   }
-  body.push(
-    parse(`popSourceLocation({ path: '${path}', id: '${id}' });`, parseOptions)
-  );
+  if (!isImport) {
+    body.push(
+      parse(`popSourceLocation({ path: '${path}', id: '${id}' });`, parseOptions)
+    );
+  }
   const program = { type: 'Program', body };
   return `
 try {
@@ -234,6 +243,7 @@ const declareVariable = async (
     sha,
     hasSideEffects,
     sourceLocation: sourceLocation || declaration.loc,
+    isImport,
   };
 
   topLevel.set(id, entry);
@@ -262,6 +272,8 @@ const declareVariable = async (
       declarator.init.callee.name === 'control'
     ) {
       // We've already patched this.
+      entry.isNotCacheable = true;
+    } else if (isImport) {
       entry.isNotCacheable = true;
     }
   }
@@ -451,6 +463,8 @@ export const toEcmascript = async (
           code: parse(exportCode, parseOptions).body,
           dependencies: exportNames,
           id: '$exports',
+          path,
+          isImport: true, // FIX: Hack for source location.
         },
         { topLevel }
       )

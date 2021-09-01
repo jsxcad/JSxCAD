@@ -1,10 +1,17 @@
 import Base64ArrayBuffer from 'base64-arraybuffer';
 import { read } from '@jsxcad/sys';
 
-const encodeNotebook = async (notebook, { workspace } = {}) => {
+const encodeNotebook = async (notebook, { workspace, module } = {}) => {
   const encoded = [];
   const seen = new Set();
   for (const note of notebook) {
+console.log(`QQ/module: ${module}`)
+console.log(`QQ/sourceLocation: ${JSON.stringify(note.sourceLocation)}`)
+console.log(`QQ/note: ${JSON.stringify(note)}`)
+    if (module && note.sourceLocation && note.sourceLocation.path !== module) {
+      // Skip notes for other modules.
+      continue;
+    }
     if (seen.has(note.hash)) {
       // Deduplicate the notes.
       continue;
@@ -44,6 +51,7 @@ export const toHtml = async (
     view,
     title = 'JSxCAD Viewer',
     modulePath = 'https://gitcdn.link/cdn/jsxcad/JSxCAD/master/es6',
+    module,
   } = {}
 ) => {
   const html = `
@@ -120,7 +128,7 @@ export const toHtml = async (
     import { dataUrl } from '${modulePath}/jsxcad-ui-threejs.js';
     import { toDomElement } from '${modulePath}/jsxcad-ui-notebook.js';
 
-    const notebook = ${JSON.stringify(await encodeNotebook(notebook), null, 2)};
+    const notebook = ${JSON.stringify(await encodeNotebook(notebook, { module }), null, 2)};
 
     const prepareViews = async (notebook) => {
       // Prepare the view urls in the browser.
