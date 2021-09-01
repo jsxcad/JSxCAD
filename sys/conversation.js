@@ -33,13 +33,19 @@ export const createConversation = ({ agent, say }) => {
 
   conversation.hear = async (message) => {
     const { ask, history, openQuestions, tell, waiters } = conversation;
+    const { id, question, answer, error, statement } = message;
 
-    history.unshift(message);
-    while (history.length > 3) {
-      history.pop();
+    const payload = answer || question || statement;
+    if (payload instanceof Object && payload.sourceLocation) {
+      history.unshift({
+        op: payload.op,
+        sourceLocation: payload.sourceLocation,
+      });
+      while (history.length > 3) {
+        history.pop();
+      }
     }
 
-    const { id, question, answer, error, statement } = message;
     // Check hasOwnProperty to detect undefined values.
     if (message.hasOwnProperty('answer')) {
       const openQuestion = openQuestions.get(id);

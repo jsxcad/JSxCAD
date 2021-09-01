@@ -30780,7 +30780,7 @@ function LineWidgets(session) {
             }
         }
         if (w.rowCount == null) {
-            w.rowCount = w.pixelHeight / renderer.layerConfig.lineHeight;
+            w.rowCount = Math.ceil(w.pixelHeight / renderer.layerConfig.lineHeight);
         }
         
         var fold = this.session.getFoldAt(w.row, 0);
@@ -30869,7 +30869,7 @@ function LineWidgets(session) {
                 w.screenWidth = Math.ceil(w.w / config.characterWidth);
             }
             
-            var rowCount = w.h / config.lineHeight;
+            var rowCount = Math.ceil(w.h / config.lineHeight);
             if (w.coverLine) {
                 rowCount -= this.session.getRowLineCount(w.row);
                 if (rowCount < 0)
