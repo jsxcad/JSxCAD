@@ -3,9 +3,9 @@ md`
 
 An interactive overview of the basic features of JSxCAD.
 
-* [User Interface](../../nb/documentation/userinterface.md)
-* [Creating Geometry](../../nb/documentation/creatinggeometry.md)
-* [Interactions With Geometry](../../nb/documentation/interactionswithgeometry.md)
-* [Interactions Between Geometry](../../nb/documentation/interactionsbetweengeometry.md)
-* [File Import and Export](../../nb/documentation/fileimportandexport.md)
+* [User Interface](#JSxCAD@https://gitcdn.link/cdn/jsxcad/JSxCAD/${sha}/nb/documentation/user_interface.nb)
+* [Creating Geometry](#JSxCAD@https://gitcdn.link/cdn/jsxcad/JSxCAD/${sha}/nb/documentation/creating_geometry.nb)
+* [Interactions With Geometry](#JSxCAD@https://gitcdn.link/cdn/jsxcad/JSxCAD/${sha}/nb/documentation/interactions_with_geometry.nb)
+* [Interactions Between Geometry](#JSxCAD@https://gitcdn.link/cdn/jsxcad/JSxCAD/${sha}/nb/documentation/interactions_between_geometry.nb)
+* [File Import and Export](#JSxCAD@https://gitcdn.link/cdn/jsxcad/JSxCAD/${sha}/nb/documentation/file_import_and_export.nb)
 `;
