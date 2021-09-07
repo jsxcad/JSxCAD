@@ -5,550 +5,911 @@ import { write } from '@jsxcad/sys';
 Error.stackTraceLimit = Infinity;
 
 test('Wrap and return.', async (t) => {
-  const ecmascript = await toEcmascript(
+  const imports = [];
+  const exports = [];
+  const updates = {};
+  const replays = {};
+  await toEcmascript(
     `export const foo = (x) => x + 1;
        export const main = async () => {
          let a = 10;
          return circle(foo(a));
-       }`
+       }`,
+    { imports, exports, updates, replays }
   );
-  t.is(
-    ecmascript,
-    `
-try {
-pushSourceLocation({
-  path: '',
-  id: 'foo'
-});
-const foo = x => x + 1;
-popSourceLocation({
-  path: '',
-  id: 'foo'
-});
-pushSourceLocation({
-  path: '',
-  id: 'main'
-});
-const main = async () => {
-  let a = 10;
-  return circle(foo(a));
-};
-popSourceLocation({
-  path: '',
-  id: 'main'
-});
-return {
-  foo,
-  main
-};
-
-} catch (error) { throw error; }
-`
+  t.deepEqual(
+    { imports, exports, updates, replays },
+    {
+      imports: [],
+      exports: [
+        '\n' +
+          'try {\n' +
+          'pushSourceLocation({\n' +
+          "  path: '',\n" +
+          "  id: 'foo'\n" +
+          '});\n' +
+          '\n' +
+          "await replayRecordedNotes('', 'foo');\n" +
+          '\n' +
+          'const foo = x => x + 1;\n' +
+          'popSourceLocation({\n' +
+          "  path: '',\n" +
+          "  id: 'foo'\n" +
+          '});\n' +
+          '\n' +
+          'pushSourceLocation({\n' +
+          "  path: '',\n" +
+          "  id: 'main'\n" +
+          '});\n' +
+          '\n' +
+          "await replayRecordedNotes('', 'main');\n" +
+          '\n' +
+          'const main = async () => {\n' +
+          '  let a = 10;\n' +
+          '  return circle(foo(a));\n' +
+          '};\n' +
+          'popSourceLocation({\n' +
+          "  path: '',\n" +
+          "  id: 'main'\n" +
+          '});\n' +
+          '\n' +
+          'return {\n' +
+          '  foo,\n' +
+          '  main\n' +
+          '};\n' +
+          '\n' +
+          '} catch (error) { throw error; }\n',
+      ],
+      updates: {},
+      replays: {
+        foo: {
+          dependencies: ['x'],
+          imports: [],
+          program:
+            '\n' +
+            'try {\n' +
+            'pushSourceLocation({\n' +
+            "  path: '',\n" +
+            "  id: 'foo'\n" +
+            '});\n' +
+            '\n' +
+            "await replayRecordedNotes('', 'foo');\n" +
+            '\n' +
+            'popSourceLocation({\n' +
+            "  path: '',\n" +
+            "  id: 'foo'\n" +
+            '});\n' +
+            '\n' +
+            '\n' +
+            '} catch (error) { throw error; }\n',
+        },
+        main: {
+          dependencies: ['circle', 'foo', 'a'],
+          imports: [],
+          program:
+            '\n' +
+            'try {\n' +
+            'pushSourceLocation({\n' +
+            "  path: '',\n" +
+            "  id: 'main'\n" +
+            '});\n' +
+            '\n' +
+            "await replayRecordedNotes('', 'main');\n" +
+            '\n' +
+            'popSourceLocation({\n' +
+            "  path: '',\n" +
+            "  id: 'main'\n" +
+            '});\n' +
+            '\n' +
+            '\n' +
+            '} catch (error) { throw error; }\n',
+        },
+      },
+    }
   );
 });
 
 test('Top level expressions become variables.', async (t) => {
+  const imports = [];
+  const exports = [];
   const updates = {};
-  const ecmascript = await toEcmascript('1 + 2;', { updates });
-  t.is(
-    ecmascript,
-    `
-try {
-pushSourceLocation({
-  path: '',
-  id: '$1'
-});
-const $1 = 1 + 2;
-popSourceLocation({
-  path: '',
-  id: '$1'
-});
-return {};
-
-} catch (error) { throw error; }
-`
+  const replays = {};
+  await toEcmascript('1 + 2;', { imports, exports, updates, replays });
+  t.deepEqual(
+    { imports, exports, updates, replays },
+    {
+      imports: [],
+      exports: [],
+      updates: {
+        $1: {
+          dependencies: [],
+          imports: [],
+          program:
+            '\n' +
+            'try {\n' +
+            "info('define $1');\n" +
+            '\n' +
+            'pushSourceLocation({\n' +
+            "  path: '',\n" +
+            "  id: '$1'\n" +
+            '});\n' +
+            '\n' +
+            "beginRecordingNotes('', '$1', {\n" +
+            '  line: 1,\n' +
+            '  column: 0\n' +
+            '});\n' +
+            '\n' +
+            'const $1 = 1 + 2;\n' +
+            "await write('meta/def//$1', {\n" +
+            "  sha: 'fc6dd8b8d1285cd1edc8c1ffe54b5acb798c7387',\n" +
+            "  type: $1 instanceof Shape ? 'Shape' : 'Object'\n" +
+            '});\n' +
+            '\n' +
+            'if ($1 instanceof Shape) {\n' +
+            "  await saveGeometry('data/def//$1', $1);\n" +
+            '}\n' +
+            '\n' +
+            "await saveRecordedNotes('', '$1');\n" +
+            '\n' +
+            'popSourceLocation({\n' +
+            "  path: '',\n" +
+            "  id: '$1'\n" +
+            '});\n' +
+            '\n' +
+            '\n' +
+            '} catch (error) { throw error; }\n',
+        },
+      },
+      replays: {},
+    }
   );
 });
 
 test("Don't return declarations.", async (t) => {
+  const imports = [];
+  const exports = [];
   const updates = {};
-  const ecmascript = await toEcmascript(`let a = 10;`, { updates });
-  t.is(
-    ecmascript,
-    `
-try {
-pushSourceLocation({
-  path: '',
-  id: 'a'
-});
-let a = 10;
-popSourceLocation({
-  path: '',
-  id: 'a'
-});
-return {};
-
-} catch (error) { throw error; }
-`
+  const replays = {};
+  const ecmascript = await toEcmascript(`let a = 10;`, {
+    imports,
+    exports,
+    updates,
+    replays,
+  });
+  t.deepEqual(
+    { imports, exports, updates, replays },
+    {
+      imports: [],
+      exports: [],
+      updates: {},
+      replays: {
+        a: {
+          dependencies: [],
+          imports: [],
+          program:
+            '\n' +
+            'try {\n' +
+            'pushSourceLocation({\n' +
+            "  path: '',\n" +
+            "  id: 'a'\n" +
+            '});\n' +
+            '\n' +
+            "await replayRecordedNotes('', 'a');\n" +
+            '\n' +
+            'popSourceLocation({\n' +
+            "  path: '',\n" +
+            "  id: 'a'\n" +
+            '});\n' +
+            '\n' +
+            '\n' +
+            '} catch (error) { throw error; }\n',
+        },
+      },
+    }
   );
-  t.deepEqual(updates, {});
 });
 
 test('Replace control with constant default.', async (t) => {
+  const imports = [];
+  const exports = [];
   const updates = {};
-  const ecmascript = await toEcmascript(
-    `const length = control('length', 10, 'number');`,
-    { updates }
+  const replays = {};
+  await toEcmascript(`const length = control('length', 10, 'number');`, {
+    imports,
+    exports,
+    updates,
+    replays,
+  });
+  t.deepEqual(
+    { imports, exports, updates, replays },
+    {
+      imports: [],
+      exports: [],
+      updates: {},
+      replays: {
+        length: {
+          dependencies: ['control'],
+          imports: [],
+          program:
+            '\n' +
+            'try {\n' +
+            'pushSourceLocation({\n' +
+            "  path: '',\n" +
+            "  id: 'length'\n" +
+            '});\n' +
+            '\n' +
+            "await replayRecordedNotes('', 'length');\n" +
+            '\n' +
+            'popSourceLocation({\n' +
+            "  path: '',\n" +
+            "  id: 'length'\n" +
+            '});\n' +
+            '\n' +
+            '\n' +
+            '} catch (error) { throw error; }\n',
+        },
+      },
+    }
   );
-  t.is(
-    ecmascript,
-    `
-try {
-pushSourceLocation({
-  path: '',
-  id: 'length'
-});
-const length = control('length', 10, 'number');
-popSourceLocation({
-  path: '',
-  id: 'length'
-});
-return {};
-
-} catch (error) { throw error; }
-`
-  );
-  t.deepEqual(updates, {});
 });
 
 test('Replace control with constant setting.', async (t) => {
+  const imports = [];
+  const exports = [];
   const updates = {};
+  const replays = {};
   await write('control/', { length: 16 });
-  const ecmascript = await toEcmascript(
-    `const length = control('length', 10, 'number');`,
-    { updates }
+  await toEcmascript(`const length = control('length', 10, 'number');`, {
+    imports,
+    exports,
+    updates,
+    replays,
+  });
+  t.deepEqual(
+    { imports, exports, updates, replays },
+    {
+      imports: [],
+      exports: [],
+      updates: {},
+      replays: {
+        length: {
+          dependencies: ['control'],
+          imports: [],
+          program:
+            '\n' +
+            'try {\n' +
+            'pushSourceLocation({\n' +
+            "  path: '',\n" +
+            "  id: 'length'\n" +
+            '});\n' +
+            '\n' +
+            "await replayRecordedNotes('', 'length');\n" +
+            '\n' +
+            'popSourceLocation({\n' +
+            "  path: '',\n" +
+            "  id: 'length'\n" +
+            '});\n' +
+            '\n' +
+            '\n' +
+            '} catch (error) { throw error; }\n',
+        },
+      },
+    }
   );
-  // FIX: This should retrieve 16.
-  t.is(
-    ecmascript,
-    `
-try {
-pushSourceLocation({
-  path: '',
-  id: 'length'
-});
-const length = control('length', 10, 'number');
-popSourceLocation({
-  path: '',
-  id: 'length'
-});
-return {};
-
-} catch (error) { throw error; }
-`
-  );
-  t.deepEqual(updates, {});
 });
 
 test('Control can be used with cached output.', async (t) => {
   await write('control/', { length: 16 });
   await write('data/def//foo', 1);
   await write('meta/def//foo', {
-    sha: '3b47f5704826b7544ce6724559603a63199f9b0e',
+    sha: 'cab8606c3133e5d59965bae55412a5f03cb273e2',
     type: 'Shape',
   });
+  const imports = [];
+  const exports = [];
   const updates = {};
-  const replays = [];
+  const replays = {};
   await toEcmascript(
     `
 const length = control('length', 10, 'number');
 const foo = bar(length);`,
-    { updates, replays }
+    { imports, exports, updates, replays }
   );
-  // FIX: This should get back 16.
-  t.deepEqual(replays, [
-    `
-try {
-pushSourceLocation({
-  path: '',
-  id: 'length'
-});
-const length = control('length', 10, 'number');
-popSourceLocation({
-  path: '',
-  id: 'length'
-});
-const foo = await loadGeometry('data/def//foo');
-Object.freeze(foo);
-pushSourceLocation({
-  path: '',
-  id: 'foo'
-});
-await replayRecordedNotes('', 'foo');
-popSourceLocation({
-  path: '',
-  id: 'foo'
-});
-return {};
-
-} catch (error) { throw error; }
-`,
-  ]);
+  t.deepEqual(
+    { imports, exports, updates, replays },
+    {
+      imports: [],
+      exports: [],
+      updates: {
+        foo: {
+          dependencies: ['bar', 'length'],
+          imports: [],
+          program:
+            '\n' +
+            'try {\n' +
+            'pushSourceLocation({\n' +
+            "  path: '',\n" +
+            "  id: 'length'\n" +
+            '});\n' +
+            '\n' +
+            "await replayRecordedNotes('', 'length');\n" +
+            '\n' +
+            "const length = control('length', 10, 'number');\n" +
+            'popSourceLocation({\n' +
+            "  path: '',\n" +
+            "  id: 'length'\n" +
+            '});\n' +
+            '\n' +
+            "info('define foo');\n" +
+            '\n' +
+            'pushSourceLocation({\n' +
+            "  path: '',\n" +
+            "  id: 'foo'\n" +
+            '});\n' +
+            '\n' +
+            "beginRecordingNotes('', 'foo', {\n" +
+            '  line: 3,\n' +
+            '  column: 0\n' +
+            '});\n' +
+            '\n' +
+            'const foo = bar(length);\n' +
+            "await write('meta/def//foo', {\n" +
+            "  sha: '3e7b9e179e36b61b3a80476feb39ccaadd685c9a',\n" +
+            "  type: foo instanceof Shape ? 'Shape' : 'Object'\n" +
+            '});\n' +
+            '\n' +
+            'if (foo instanceof Shape) {\n' +
+            "  await saveGeometry('data/def//foo', foo);\n" +
+            '}\n' +
+            '\n' +
+            "await saveRecordedNotes('', 'foo');\n" +
+            '\n' +
+            'popSourceLocation({\n' +
+            "  path: '',\n" +
+            "  id: 'foo'\n" +
+            '});\n' +
+            '\n' +
+            '\n' +
+            '} catch (error) { throw error; }\n',
+        },
+      },
+      replays: {
+        length: {
+          dependencies: ['control'],
+          imports: [],
+          program:
+            '\n' +
+            'try {\n' +
+            'pushSourceLocation({\n' +
+            "  path: '',\n" +
+            "  id: 'length'\n" +
+            '});\n' +
+            '\n' +
+            "await replayRecordedNotes('', 'length');\n" +
+            '\n' +
+            'popSourceLocation({\n' +
+            "  path: '',\n" +
+            "  id: 'length'\n" +
+            '});\n' +
+            '\n' +
+            '\n' +
+            '} catch (error) { throw error; }\n',
+        },
+      },
+    }
+  );
 });
 
 test('Bind await to calls properly.', async (t) => {
+  const imports = [];
+  const exports = [];
   const updates = {};
-  const ecmascript = await toEcmascript(`foo().bar()`, { updates });
-  t.is(
-    ecmascript,
-    `
-try {
-pushSourceLocation({
-  path: '',
-  id: '$1'
-});
-const $1 = foo().bar();
-popSourceLocation({
-  path: '',
-  id: '$1'
-});
-return {};
-
-} catch (error) { throw error; }
-`
+  const replays = {};
+  await toEcmascript(`foo().bar()`, { updates });
+  t.deepEqual(
+    { imports, exports, updates, replays },
+    {
+      imports: [],
+      exports: [],
+      updates: {
+        $1: {
+          dependencies: ['foo'],
+          imports: [],
+          program:
+            '\n' +
+            'try {\n' +
+            "info('define $1');\n" +
+            '\n' +
+            'pushSourceLocation({\n' +
+            "  path: '',\n" +
+            "  id: '$1'\n" +
+            '});\n' +
+            '\n' +
+            "beginRecordingNotes('', '$1', {\n" +
+            '  line: 1,\n' +
+            '  column: 0\n' +
+            '});\n' +
+            '\n' +
+            'const $1 = foo().bar();\n' +
+            "await write('meta/def//$1', {\n" +
+            "  sha: '7bdff1a1fedd69427b31085d58c342a3b137ece2',\n" +
+            "  type: $1 instanceof Shape ? 'Shape' : 'Object'\n" +
+            '});\n' +
+            '\n' +
+            'if ($1 instanceof Shape) {\n' +
+            "  await saveGeometry('data/def//$1', $1);\n" +
+            '}\n' +
+            '\n' +
+            "await saveRecordedNotes('', '$1');\n" +
+            '\n' +
+            'popSourceLocation({\n' +
+            "  path: '',\n" +
+            "  id: '$1'\n" +
+            '});\n' +
+            '\n' +
+            '\n' +
+            '} catch (error) { throw error; }\n',
+        },
+      },
+      replays: {},
+    }
   );
 });
 
 test('Top level await.', async (t) => {
+  const imports = [];
+  const exports = [];
   const updates = {};
-  const ecmascript = await toEcmascript(`await foo()`, { updates });
-  t.is(
-    ecmascript,
-    `
-try {
-pushSourceLocation({
-  path: '',
-  id: '$1'
-});
-const $1 = await foo();
-popSourceLocation({
-  path: '',
-  id: '$1'
-});
-return {};
-
-} catch (error) { throw error; }
-`
+  const replays = {};
+  const ecmascript = await toEcmascript(`await foo()`, {
+    imports,
+    exports,
+    updates,
+    replays,
+  });
+  t.deepEqual(
+    { imports, exports, updates, replays },
+    {
+      imports: [],
+      exports: [],
+      updates: {
+        $1: {
+          dependencies: ['foo'],
+          imports: [],
+          program:
+            '\n' +
+            'try {\n' +
+            "info('define $1');\n" +
+            '\n' +
+            'pushSourceLocation({\n' +
+            "  path: '',\n" +
+            "  id: '$1'\n" +
+            '});\n' +
+            '\n' +
+            "beginRecordingNotes('', '$1', {\n" +
+            '  line: 1,\n' +
+            '  column: 0\n' +
+            '});\n' +
+            '\n' +
+            'const $1 = await foo();\n' +
+            "await write('meta/def//$1', {\n" +
+            "  sha: 'a199562e5ab8ffc2534453f164165d3a47fed088',\n" +
+            "  type: $1 instanceof Shape ? 'Shape' : 'Object'\n" +
+            '});\n' +
+            '\n' +
+            'if ($1 instanceof Shape) {\n' +
+            "  await saveGeometry('data/def//$1', $1);\n" +
+            '}\n' +
+            '\n' +
+            "await saveRecordedNotes('', '$1');\n" +
+            '\n' +
+            'popSourceLocation({\n' +
+            "  path: '',\n" +
+            "  id: '$1'\n" +
+            '});\n' +
+            '\n' +
+            '\n' +
+            '} catch (error) { throw error; }\n',
+        },
+      },
+      replays: {},
+    }
   );
 });
 
 test('Wrap on long implicit return expression is not malformed.', async (t) => {
+  const imports = [];
+  const exports = [];
   const updates = {};
-  const ecmascript = await toEcmascript(
+  const replays = {};
+  await toEcmascript(
     `
 foo();
 // Hello.
 await bar({ aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaagh: 1 }, 2);
 `,
-    { updates }
+    { imports, exports, updates, replays }
   );
-  t.is(
-    ecmascript,
-    `
-try {
-pushSourceLocation({
-  path: '',
-  id: '$1'
-});
-const $1 = foo();
-popSourceLocation({
-  path: '',
-  id: '$1'
-});
-pushSourceLocation({
-  path: '',
-  id: '$2'
-});
-const $2 = await bar({
-  aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaagh: 1
-}, 2);
-popSourceLocation({
-  path: '',
-  id: '$2'
-});
-return {};
-
-} catch (error) { throw error; }
-`
+  t.deepEqual(
+    { imports, exports, updates, replays },
+    {
+      imports: [],
+      exports: [],
+      updates: {
+        $1: {
+          dependencies: ['foo'],
+          imports: [],
+          program:
+            '\n' +
+            'try {\n' +
+            "info('define $1');\n" +
+            '\n' +
+            'pushSourceLocation({\n' +
+            "  path: '',\n" +
+            "  id: '$1'\n" +
+            '});\n' +
+            '\n' +
+            "beginRecordingNotes('', '$1', {\n" +
+            '  line: 1,\n' +
+            '  column: 0\n' +
+            '});\n' +
+            '\n' +
+            'const $1 = foo();\n' +
+            "await write('meta/def//$1', {\n" +
+            "  sha: '75dd6f574bd4f86fb5fce18b64fe446696ad857e',\n" +
+            "  type: $1 instanceof Shape ? 'Shape' : 'Object'\n" +
+            '});\n' +
+            '\n' +
+            'if ($1 instanceof Shape) {\n' +
+            "  await saveGeometry('data/def//$1', $1);\n" +
+            '}\n' +
+            '\n' +
+            "await saveRecordedNotes('', '$1');\n" +
+            '\n' +
+            'popSourceLocation({\n' +
+            "  path: '',\n" +
+            "  id: '$1'\n" +
+            '});\n' +
+            '\n' +
+            '\n' +
+            '} catch (error) { throw error; }\n',
+        },
+        $2: {
+          dependencies: ['bar'],
+          imports: [],
+          program:
+            '\n' +
+            'try {\n' +
+            "info('define $2');\n" +
+            '\n' +
+            'pushSourceLocation({\n' +
+            "  path: '',\n" +
+            "  id: '$2'\n" +
+            '});\n' +
+            '\n' +
+            "beginRecordingNotes('', '$2', {\n" +
+            '  line: 1,\n' +
+            '  column: 0\n' +
+            '});\n' +
+            '\n' +
+            'const $2 = await bar({\n' +
+            '  aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaagh: 1\n' +
+            '}, 2);\n' +
+            "await write('meta/def//$2', {\n" +
+            "  sha: '7141ae679533db16d1d6c99795f86d3666b901d2',\n" +
+            "  type: $2 instanceof Shape ? 'Shape' : 'Object'\n" +
+            '});\n' +
+            '\n' +
+            'if ($2 instanceof Shape) {\n' +
+            "  await saveGeometry('data/def//$2', $2);\n" +
+            '}\n' +
+            '\n' +
+            "await saveRecordedNotes('', '$2');\n" +
+            '\n' +
+            'popSourceLocation({\n' +
+            "  path: '',\n" +
+            "  id: '$2'\n" +
+            '});\n' +
+            '\n' +
+            '\n' +
+            '} catch (error) { throw error; }\n',
+        },
+      },
+      replays: {},
+    }
   );
 });
 
 test('Import', async (t) => {
+  const imports = [];
+  const exports = [];
   const updates = {};
-  const ecmascript = await toEcmascript('import { foo } from "bar";', {
+  const replays = {};
+  await toEcmascript('import { foo } from "bar";', {
+    imports,
+    exports,
     updates,
+    replays,
   });
-  t.is(
-    ecmascript,
-    `
-try {
-pushSourceLocation({
-  path: '',
-  id: 'foo'
-});
-const foo = (await importModule('bar')).foo;
-popSourceLocation({
-  path: '',
-  id: 'foo'
-});
-return {};
-
-} catch (error) { throw error; }
-`
+  t.deepEqual(
+    { imports, exports, updates, replays },
+    {
+      imports: [],
+      exports: [],
+      updates: {},
+      replays: {
+        foo: {
+          dependencies: ['importModule'],
+          imports: [],
+          program:
+            '\n' +
+            'try {\n' +
+            "await replayRecordedNotes('', 'foo');\n" +
+            '\n' +
+            '\n' +
+            '} catch (error) { throw error; }\n',
+        },
+      },
+    }
   );
-  t.deepEqual(updates, {});
 });
 
 test('Definition', async (t) => {
+  const imports = [];
+  const exports = [];
   const updates = {};
+  const replays = {};
   const ecmascript = await toEcmascript(
     'const a = 1; const b = () => 2; function c () {}',
-    { updates }
+    { imports, exports, updates, replays }
   );
-  t.is(
-    ecmascript,
-    `
-try {
-pushSourceLocation({
-  path: '',
-  id: 'a'
-});
-const a = 1;
-popSourceLocation({
-  path: '',
-  id: 'a'
-});
-pushSourceLocation({
-  path: '',
-  id: 'b'
-});
-const b = () => 2;
-popSourceLocation({
-  path: '',
-  id: 'b'
-});
-function c() {}
-return {};
-
-} catch (error) { throw error; }
-`
+  t.deepEqual(
+    { imports, exports, updates, replays },
+    {
+      imports: [],
+      exports: [],
+      updates: {},
+      replays: {
+        a: {
+          dependencies: [],
+          imports: [],
+          program:
+            '\n' +
+            'try {\n' +
+            'pushSourceLocation({\n' +
+            "  path: '',\n" +
+            "  id: 'a'\n" +
+            '});\n' +
+            '\n' +
+            "await replayRecordedNotes('', 'a');\n" +
+            '\n' +
+            'popSourceLocation({\n' +
+            "  path: '',\n" +
+            "  id: 'a'\n" +
+            '});\n' +
+            '\n' +
+            '\n' +
+            '} catch (error) { throw error; }\n',
+        },
+        b: {
+          dependencies: [],
+          imports: [],
+          program:
+            '\n' +
+            'try {\n' +
+            'pushSourceLocation({\n' +
+            "  path: '',\n" +
+            "  id: 'b'\n" +
+            '});\n' +
+            '\n' +
+            "await replayRecordedNotes('', 'b');\n" +
+            '\n' +
+            'popSourceLocation({\n' +
+            "  path: '',\n" +
+            "  id: 'b'\n" +
+            '});\n' +
+            '\n' +
+            '\n' +
+            '} catch (error) { throw error; }\n',
+        },
+      },
+    }
   );
-  t.deepEqual(updates, {});
 });
 
 test('Reference', async (t) => {
+  const imports = [];
+  const exports = [];
   const updates = {};
-  const ecmascript = await toEcmascript(
-    'const a = 1; const b = () => a; const c = () => b();',
-    { updates }
+  const replays = {};
+  await toEcmascript('const a = 1; const b = () => a; const c = () => b();', {
+    imports,
+    exports,
+    updates,
+    replays,
+  });
+  t.deepEqual(
+    { imports, exports, updates, replays },
+    {
+      imports: [],
+      exports: [],
+      updates: {},
+      replays: {
+        a: {
+          dependencies: [],
+          imports: [],
+          program:
+            '\n' +
+            'try {\n' +
+            'pushSourceLocation({\n' +
+            "  path: '',\n" +
+            "  id: 'a'\n" +
+            '});\n' +
+            '\n' +
+            "await replayRecordedNotes('', 'a');\n" +
+            '\n' +
+            'popSourceLocation({\n' +
+            "  path: '',\n" +
+            "  id: 'a'\n" +
+            '});\n' +
+            '\n' +
+            '\n' +
+            '} catch (error) { throw error; }\n',
+        },
+        b: {
+          dependencies: ['a'],
+          imports: [],
+          program:
+            '\n' +
+            'try {\n' +
+            'pushSourceLocation({\n' +
+            "  path: '',\n" +
+            "  id: 'b'\n" +
+            '});\n' +
+            '\n' +
+            "await replayRecordedNotes('', 'b');\n" +
+            '\n' +
+            'popSourceLocation({\n' +
+            "  path: '',\n" +
+            "  id: 'b'\n" +
+            '});\n' +
+            '\n' +
+            '\n' +
+            '} catch (error) { throw error; }\n',
+        },
+        c: {
+          dependencies: ['b'],
+          imports: [],
+          program:
+            '\n' +
+            'try {\n' +
+            'pushSourceLocation({\n' +
+            "  path: '',\n" +
+            "  id: 'c'\n" +
+            '});\n' +
+            '\n' +
+            "await replayRecordedNotes('', 'c');\n" +
+            '\n' +
+            'popSourceLocation({\n' +
+            "  path: '',\n" +
+            "  id: 'c'\n" +
+            '});\n' +
+            '\n' +
+            '\n' +
+            '} catch (error) { throw error; }\n',
+        },
+      },
+    }
   );
-  t.is(
-    ecmascript,
-    `
-try {
-pushSourceLocation({
-  path: '',
-  id: 'a'
-});
-const a = 1;
-popSourceLocation({
-  path: '',
-  id: 'a'
-});
-pushSourceLocation({
-  path: '',
-  id: 'b'
-});
-const b = () => a;
-popSourceLocation({
-  path: '',
-  id: 'b'
-});
-pushSourceLocation({
-  path: '',
-  id: 'c'
-});
-const c = () => b();
-popSourceLocation({
-  path: '',
-  id: 'c'
-});
-return {};
-
-} catch (error) { throw error; }
-`
-  );
-  t.deepEqual(updates, {});
 });
 
 test('Default Import', async (t) => {
+  const imports = [];
+  const exports = [];
   const updates = {};
-  const ecmascript = await toEcmascript('import Foo from "bar";', { updates });
-  t.is(
-    ecmascript,
-    `
-try {
-pushSourceLocation({
-  path: '',
-  id: 'Foo'
-});
-const Foo = (await importModule('bar')).default;
-popSourceLocation({
-  path: '',
-  id: 'Foo'
-});
-return {};
-
-} catch (error) { throw error; }
-`
+  const replays = {};
+  await toEcmascript('import Foo from "bar";', {
+    imports,
+    exports,
+    updates,
+    replays,
+  });
+  t.deepEqual(
+    { imports, exports, updates, replays },
+    {
+      imports: [],
+      exports: [],
+      updates: {},
+      replays: {
+        Foo: {
+          dependencies: ['importModule'],
+          imports: [],
+          program:
+            '\n' +
+            'try {\n' +
+            "await replayRecordedNotes('', 'Foo');\n" +
+            '\n' +
+            '\n' +
+            '} catch (error) { throw error; }\n',
+        },
+      },
+    }
   );
-  t.deepEqual(updates, {});
 });
 
 test('Used Import', async (t) => {
+  const imports = [];
+  const exports = [];
   const updates = {};
-  const ecmascript = await toEcmascript(
-    'import Foo from "bar"; const foo = Foo();',
-    { updates }
-  );
-  t.is(
-    ecmascript,
-    `
-try {
-pushSourceLocation({
-  path: '',
-  id: 'Foo'
-});
-const Foo = (await importModule('bar')).default;
-popSourceLocation({
-  path: '',
-  id: 'Foo'
-});
-pushSourceLocation({
-  path: '',
-  id: 'foo'
-});
-const foo = Foo();
-popSourceLocation({
-  path: '',
-  id: 'foo'
-});
-return {};
-
-} catch (error) { throw error; }
-`
-  );
-});
-
-test('Unassigned Import', async (t) => {
-  const updates = {};
-  const ecmascript = await toEcmascript('import "bar";', { updates });
-  t.is(
-    ecmascript,
-    `
-try {
-pushSourceLocation({
-  path: '',
-  id: '$1'
-});
-const $1 = await importModule('bar');
-popSourceLocation({
-  path: '',
-  id: '$1'
-});
-return {};
-
-} catch (error) { throw error; }
-`
-  );
-  t.deepEqual(updates, {});
-});
-
-test('Reuse and Redefine', async (t) => {
-  // Establish
-  await write('data/def//A', 1);
-  await write('meta/def//A', {
-    sha: 'd20ea9544ceb910f702b8ab8167cbe3e5fb7a2a2',
+  const replays = {};
+  await toEcmascript('import Foo from "bar"; const foo = Foo();', {
+    imports,
+    exports,
+    updates,
+    replays,
   });
-
-  // Reuse
-  const updates = {};
-  const reuse = await toEcmascript(
-    'const A = Circle(); const B = () => 2; function C () {}',
-    { updates }
-  );
-  t.is(
-    reuse,
-    `
-try {
-pushSourceLocation({
-  path: '',
-  id: 'A'
-});
-const A = Circle();
-popSourceLocation({
-  path: '',
-  id: 'A'
-});
-pushSourceLocation({
-  path: '',
-  id: 'B'
-});
-const B = () => 2;
-popSourceLocation({
-  path: '',
-  id: 'B'
-});
-function C() {}
-return {};
-
-} catch (error) { throw error; }
-`
-  );
-
-  const reupdates = {};
-  // Redefine
-  const redefine = await toEcmascript(
-    'const A = bar(); const B = () => 2; function C () {}',
-    { updates: reupdates }
-  );
-  t.is(
-    redefine,
-    `
-try {
-pushSourceLocation({
-  path: '',
-  id: 'A'
-});
-const A = bar();
-popSourceLocation({
-  path: '',
-  id: 'A'
-});
-pushSourceLocation({
-  path: '',
-  id: 'B'
-});
-const B = () => 2;
-popSourceLocation({
-  path: '',
-  id: 'B'
-});
-function C() {}
-return {};
-
-} catch (error) { throw error; }
-`
+  t.deepEqual(
+    { imports, exports, updates, replays },
+    {
+      imports: [],
+      exports: [],
+      updates: {
+        foo: {
+          dependencies: ['Foo'],
+          imports: ['bar'],
+          program:
+            '\n' +
+            'try {\n' +
+            "await replayRecordedNotes('', 'Foo');\n" +
+            '\n' +
+            "const Foo = (await importModule('bar')).default;\n" +
+            "info('define foo');\n" +
+            '\n' +
+            'pushSourceLocation({\n' +
+            "  path: '',\n" +
+            "  id: 'foo'\n" +
+            '});\n' +
+            '\n' +
+            "beginRecordingNotes('', 'foo', {\n" +
+            '  line: 1,\n' +
+            '  column: 23\n' +
+            '});\n' +
+            '\n' +
+            'const foo = Foo();\n' +
+            "await write('meta/def//foo', {\n" +
+            "  sha: '8dae1f3b3a9fdc66a5f13c7a0efdc9836d788f99',\n" +
+            "  type: foo instanceof Shape ? 'Shape' : 'Object'\n" +
+            '});\n' +
+            '\n' +
+            'if (foo instanceof Shape) {\n' +
+            "  await saveGeometry('data/def//foo', foo);\n" +
+            '}\n' +
+            '\n' +
+            "await saveRecordedNotes('', 'foo');\n" +
+            '\n' +
+            'popSourceLocation({\n' +
+            "  path: '',\n" +
+            "  id: 'foo'\n" +
+            '});\n' +
+            '\n' +
+            '\n' +
+            '} catch (error) { throw error; }\n',
+        },
+      },
+      replays: {
+        Foo: {
+          dependencies: ['importModule'],
+          imports: [],
+          program:
+            '\n' +
+            'try {\n' +
+            "await replayRecordedNotes('', 'Foo');\n" +
+            '\n' +
+            '\n' +
+            '} catch (error) { throw error; }\n',
+        },
+      },
+    }
   );
 });
 
@@ -564,36 +925,25 @@ test('Indirect Redefinition', async (t) => {
   });
 
   // Demonstrate reuse.
+  const imports = [];
+  const exports = [];
   const updates = {};
-  const reuse = await toEcmascript('const D = foo(); const E = () => D;', {
+  const replays = {};
+  toEcmascript('const D = foo(); const E = () => D;', {
+    imports,
+    exports,
     updates,
+    replays,
   });
-  t.is(
-    reuse,
-    `
-try {
-pushSourceLocation({
-  path: '',
-  id: 'D'
-});
-const D = foo();
-popSourceLocation({
-  path: '',
-  id: 'D'
-});
-pushSourceLocation({
-  path: '',
-  id: 'E'
-});
-const E = () => D;
-popSourceLocation({
-  path: '',
-  id: 'E'
-});
-return {};
-
-} catch (error) { throw error; }
-`
+  // FIX: What?
+  t.deepEqual(
+    { imports, exports, updates, replays },
+    {
+      imports: [],
+      exports: [],
+      updates: {},
+      replays: {},
+    }
   );
 });
 
@@ -603,142 +953,453 @@ test('Reuse', async (t) => {
     sha: 'c3b0ad66f1281cd0078066eea1b208fef9ffc133',
     type: 'Shape',
   });
+
+  const imports = [];
+  const exports = [];
   const updates = {};
-  const define = await toEcmascript(
+  const replays = {};
+  await toEcmascript(
     `
 const Mountain = () => foo();
 const mountainView = Mountain().scale(0.5).Page();
 mountainView.frontView({ position: [0, -100, 50] });
 `,
-    { updates }
+    { imports, exports, updates, replays }
+  );
+  t.deepEqual(
+    { imports, exports, updates, replays },
+    {
+      imports: [],
+      exports: [],
+      updates: {
+        mountainView: {
+          dependencies: ['Mountain'],
+          imports: [],
+          program:
+            '\n' +
+            'try {\n' +
+            'pushSourceLocation({\n' +
+            "  path: '',\n" +
+            "  id: 'Mountain'\n" +
+            '});\n' +
+            '\n' +
+            "await replayRecordedNotes('', 'Mountain');\n" +
+            '\n' +
+            'const Mountain = () => foo();\n' +
+            'popSourceLocation({\n' +
+            "  path: '',\n" +
+            "  id: 'Mountain'\n" +
+            '});\n' +
+            '\n' +
+            "info('define mountainView');\n" +
+            '\n' +
+            'pushSourceLocation({\n' +
+            "  path: '',\n" +
+            "  id: 'mountainView'\n" +
+            '});\n' +
+            '\n' +
+            "beginRecordingNotes('', 'mountainView', {\n" +
+            '  line: 3,\n' +
+            '  column: 0\n' +
+            '});\n' +
+            '\n' +
+            'const mountainView = Mountain().scale(0.5).Page();\n' +
+            "await write('meta/def//mountainView', {\n" +
+            "  sha: '6b59399386453161dac45fdfdd094e14b1db745c',\n" +
+            "  type: mountainView instanceof Shape ? 'Shape' : 'Object'\n" +
+            '});\n' +
+            '\n' +
+            'if (mountainView instanceof Shape) {\n' +
+            "  await saveGeometry('data/def//mountainView', mountainView);\n" +
+            '}\n' +
+            '\n' +
+            "await saveRecordedNotes('', 'mountainView');\n" +
+            '\n' +
+            'popSourceLocation({\n' +
+            "  path: '',\n" +
+            "  id: 'mountainView'\n" +
+            '});\n' +
+            '\n' +
+            '\n' +
+            '} catch (error) { throw error; }\n',
+        },
+        $1: {
+          dependencies: ['mountainView'],
+          imports: [],
+          program:
+            '\n' +
+            'try {\n' +
+            'pushSourceLocation({\n' +
+            "  path: '',\n" +
+            "  id: 'Mountain'\n" +
+            '});\n' +
+            '\n' +
+            "await replayRecordedNotes('', 'Mountain');\n" +
+            '\n' +
+            'const Mountain = () => foo();\n' +
+            'popSourceLocation({\n' +
+            "  path: '',\n" +
+            "  id: 'Mountain'\n" +
+            '});\n' +
+            '\n' +
+            "const mountainView = await loadGeometry('data/def//mountainView');\n" +
+            '\n' +
+            'Object.freeze(mountainView);\n' +
+            '\n' +
+            'pushSourceLocation({\n' +
+            "  path: '',\n" +
+            "  id: 'mountainView'\n" +
+            '});\n' +
+            '\n' +
+            "await replayRecordedNotes('', 'mountainView');\n" +
+            '\n' +
+            'popSourceLocation({\n' +
+            "  path: '',\n" +
+            "  id: 'mountainView'\n" +
+            '});\n' +
+            '\n' +
+            "info('define $1');\n" +
+            '\n' +
+            'pushSourceLocation({\n' +
+            "  path: '',\n" +
+            "  id: '$1'\n" +
+            '});\n' +
+            '\n' +
+            "beginRecordingNotes('', '$1', {\n" +
+            '  line: 1,\n' +
+            '  column: 0\n' +
+            '});\n' +
+            '\n' +
+            'const $1 = mountainView.frontView({\n' +
+            '  position: [0, -100, 50]\n' +
+            '});\n' +
+            "await write('meta/def//$1', {\n" +
+            "  sha: '90bc8ca30e592e30bdb5c65df7e0070a4b1b3cdc',\n" +
+            "  type: $1 instanceof Shape ? 'Shape' : 'Object'\n" +
+            '});\n' +
+            '\n' +
+            'if ($1 instanceof Shape) {\n' +
+            "  await saveGeometry('data/def//$1', $1);\n" +
+            '}\n' +
+            '\n' +
+            "await saveRecordedNotes('', '$1');\n" +
+            '\n' +
+            'popSourceLocation({\n' +
+            "  path: '',\n" +
+            "  id: '$1'\n" +
+            '});\n' +
+            '\n' +
+            '\n' +
+            '} catch (error) { throw error; }\n',
+        },
+      },
+      replays: {
+        Mountain: {
+          dependencies: ['foo'],
+          imports: [],
+          program:
+            '\n' +
+            'try {\n' +
+            'pushSourceLocation({\n' +
+            "  path: '',\n" +
+            "  id: 'Mountain'\n" +
+            '});\n' +
+            '\n' +
+            "await replayRecordedNotes('', 'Mountain');\n" +
+            '\n' +
+            'popSourceLocation({\n' +
+            "  path: '',\n" +
+            "  id: 'Mountain'\n" +
+            '});\n' +
+            '\n' +
+            '\n' +
+            '} catch (error) { throw error; }\n',
+        },
+      },
+    }
   );
 
-  t.is(
-    define,
-    `
-try {
-pushSourceLocation({
-  path: '',
-  id: 'Mountain'
-});
-const Mountain = () => foo();
-popSourceLocation({
-  path: '',
-  id: 'Mountain'
-});
-const mountainView = await loadGeometry('data/def//mountainView');
-Object.freeze(mountainView);
-pushSourceLocation({
-  path: '',
-  id: 'mountainView'
-});
-await replayRecordedNotes('', 'mountainView');
-popSourceLocation({
-  path: '',
-  id: 'mountainView'
-});
-pushSourceLocation({
-  path: '',
-  id: '$1'
-});
-const $1 = mountainView.frontView({
-  position: [0, -100, 50]
-});
-popSourceLocation({
-  path: '',
-  id: '$1'
-});
-return {};
-
-} catch (error) { throw error; }
-`
-  );
+  const reimports = [];
+  const reexports = [];
   const reupdates = {};
-  const redefine = await toEcmascript(
+  const rereplays = {};
+  await toEcmascript(
     `
 const Mountain = () => bar();
 const mountainView = Mountain().scale(0.5).Page();
 mountainView.frontView({ position: [0, -100, 50] });
 `,
-    { updates: reupdates }
+    {
+      imports: reimports,
+      exports: reexports,
+      updates: reupdates,
+      replays: rereplays,
+    }
   );
 
-  t.is(
-    redefine,
-    `
-try {
-pushSourceLocation({
-  path: '',
-  id: 'Mountain'
-});
-const Mountain = () => bar();
-popSourceLocation({
-  path: '',
-  id: 'Mountain'
-});
-const mountainView = await loadGeometry('data/def//mountainView');
-Object.freeze(mountainView);
-pushSourceLocation({
-  path: '',
-  id: 'mountainView'
-});
-await replayRecordedNotes('', 'mountainView');
-popSourceLocation({
-  path: '',
-  id: 'mountainView'
-});
-pushSourceLocation({
-  path: '',
-  id: '$1'
-});
-const $1 = mountainView.frontView({
-  position: [0, -100, 50]
-});
-popSourceLocation({
-  path: '',
-  id: '$1'
-});
-return {};
-
-} catch (error) { throw error; }
-`
+  t.deepEqual(
+    { reimports, reexports, reupdates, rereplays },
+    {
+      reimports: [],
+      reexports: [],
+      reupdates: {
+        mountainView: {
+          dependencies: ['Mountain'],
+          imports: [],
+          program:
+            '\n' +
+            'try {\n' +
+            'pushSourceLocation({\n' +
+            "  path: '',\n" +
+            "  id: 'Mountain'\n" +
+            '});\n' +
+            '\n' +
+            "await replayRecordedNotes('', 'Mountain');\n" +
+            '\n' +
+            'const Mountain = () => bar();\n' +
+            'popSourceLocation({\n' +
+            "  path: '',\n" +
+            "  id: 'Mountain'\n" +
+            '});\n' +
+            '\n' +
+            "info('define mountainView');\n" +
+            '\n' +
+            'pushSourceLocation({\n' +
+            "  path: '',\n" +
+            "  id: 'mountainView'\n" +
+            '});\n' +
+            '\n' +
+            "beginRecordingNotes('', 'mountainView', {\n" +
+            '  line: 3,\n' +
+            '  column: 0\n' +
+            '});\n' +
+            '\n' +
+            'const mountainView = Mountain().scale(0.5).Page();\n' +
+            "await write('meta/def//mountainView', {\n" +
+            "  sha: '1952b6311872fb454d675b9d14b8c53c41c23c57',\n" +
+            "  type: mountainView instanceof Shape ? 'Shape' : 'Object'\n" +
+            '});\n' +
+            '\n' +
+            'if (mountainView instanceof Shape) {\n' +
+            "  await saveGeometry('data/def//mountainView', mountainView);\n" +
+            '}\n' +
+            '\n' +
+            "await saveRecordedNotes('', 'mountainView');\n" +
+            '\n' +
+            'popSourceLocation({\n' +
+            "  path: '',\n" +
+            "  id: 'mountainView'\n" +
+            '});\n' +
+            '\n' +
+            '\n' +
+            '} catch (error) { throw error; }\n',
+        },
+        $1: {
+          dependencies: ['mountainView'],
+          imports: [],
+          program:
+            '\n' +
+            'try {\n' +
+            'pushSourceLocation({\n' +
+            "  path: '',\n" +
+            "  id: 'Mountain'\n" +
+            '});\n' +
+            '\n' +
+            "await replayRecordedNotes('', 'Mountain');\n" +
+            '\n' +
+            'const Mountain = () => bar();\n' +
+            'popSourceLocation({\n' +
+            "  path: '',\n" +
+            "  id: 'Mountain'\n" +
+            '});\n' +
+            '\n' +
+            "const mountainView = await loadGeometry('data/def//mountainView');\n" +
+            '\n' +
+            'Object.freeze(mountainView);\n' +
+            '\n' +
+            'pushSourceLocation({\n' +
+            "  path: '',\n" +
+            "  id: 'mountainView'\n" +
+            '});\n' +
+            '\n' +
+            "await replayRecordedNotes('', 'mountainView');\n" +
+            '\n' +
+            'popSourceLocation({\n' +
+            "  path: '',\n" +
+            "  id: 'mountainView'\n" +
+            '});\n' +
+            '\n' +
+            "info('define $1');\n" +
+            '\n' +
+            'pushSourceLocation({\n' +
+            "  path: '',\n" +
+            "  id: '$1'\n" +
+            '});\n' +
+            '\n' +
+            "beginRecordingNotes('', '$1', {\n" +
+            '  line: 1,\n' +
+            '  column: 0\n' +
+            '});\n' +
+            '\n' +
+            'const $1 = mountainView.frontView({\n' +
+            '  position: [0, -100, 50]\n' +
+            '});\n' +
+            "await write('meta/def//$1', {\n" +
+            "  sha: 'f6fbedf20aa75786f6cce70e27e67a1a5f50bc37',\n" +
+            "  type: $1 instanceof Shape ? 'Shape' : 'Object'\n" +
+            '});\n' +
+            '\n' +
+            'if ($1 instanceof Shape) {\n' +
+            "  await saveGeometry('data/def//$1', $1);\n" +
+            '}\n' +
+            '\n' +
+            "await saveRecordedNotes('', '$1');\n" +
+            '\n' +
+            'popSourceLocation({\n' +
+            "  path: '',\n" +
+            "  id: '$1'\n" +
+            '});\n' +
+            '\n' +
+            '\n' +
+            '} catch (error) { throw error; }\n',
+        },
+      },
+      rereplays: {
+        Mountain: {
+          dependencies: ['bar'],
+          imports: [],
+          program:
+            '\n' +
+            'try {\n' +
+            'pushSourceLocation({\n' +
+            "  path: '',\n" +
+            "  id: 'Mountain'\n" +
+            '});\n' +
+            '\n' +
+            "await replayRecordedNotes('', 'Mountain');\n" +
+            '\n' +
+            'popSourceLocation({\n' +
+            "  path: '',\n" +
+            "  id: 'Mountain'\n" +
+            '});\n' +
+            '\n' +
+            '\n' +
+            '} catch (error) { throw error; }\n',
+        },
+      },
+    }
   );
 });
 
 test('Top level definitions are frozen', async (t) => {
+  const imports = [];
+  const exports = [];
   const updates = {};
-  const script = await toEcmascript(
+  const replays = {};
+  await toEcmascript(
     `
 const a = [];
 log(a);
 `,
-    { updates }
+    { imports, exports, updates, replays }
   );
-  t.is(
-    script,
-    `
-try {
-pushSourceLocation({
-  path: '',
-  id: 'a'
-});
-const a = [];
-popSourceLocation({
-  path: '',
-  id: 'a'
-});
-pushSourceLocation({
-  path: '',
-  id: '$1'
-});
-const $1 = log(a);
-popSourceLocation({
-  path: '',
-  id: '$1'
-});
-return {};
-
-} catch (error) { throw error; }
-`
+  t.deepEqual(
+    { imports, exports, updates, replays },
+    {
+      imports: [],
+      exports: [],
+      updates: {
+        a: {
+          dependencies: [],
+          imports: [],
+          program:
+            '\n' +
+            'try {\n' +
+            "info('define a');\n" +
+            '\n' +
+            'pushSourceLocation({\n' +
+            "  path: '',\n" +
+            "  id: 'a'\n" +
+            '});\n' +
+            '\n' +
+            "beginRecordingNotes('', 'a', {\n" +
+            '  line: 2,\n' +
+            '  column: 0\n' +
+            '});\n' +
+            '\n' +
+            'const a = [];\n' +
+            "await write('meta/def//a', {\n" +
+            "  sha: '1e7e49f0bc9af1ba962b5532385c19a95f71f7bb',\n" +
+            "  type: a instanceof Shape ? 'Shape' : 'Object'\n" +
+            '});\n' +
+            '\n' +
+            'if (a instanceof Shape) {\n' +
+            "  await saveGeometry('data/def//a', a);\n" +
+            '}\n' +
+            '\n' +
+            "await saveRecordedNotes('', 'a');\n" +
+            '\n' +
+            'popSourceLocation({\n' +
+            "  path: '',\n" +
+            "  id: 'a'\n" +
+            '});\n' +
+            '\n' +
+            '\n' +
+            '} catch (error) { throw error; }\n',
+        },
+        $1: {
+          dependencies: ['log', 'a'],
+          imports: [],
+          program:
+            '\n' +
+            'try {\n' +
+            'pushSourceLocation({\n' +
+            "  path: '',\n" +
+            "  id: 'a'\n" +
+            '});\n' +
+            '\n' +
+            "await replayRecordedNotes('', 'a');\n" +
+            '\n' +
+            'const a = [];\n' +
+            'popSourceLocation({\n' +
+            "  path: '',\n" +
+            "  id: 'a'\n" +
+            '});\n' +
+            '\n' +
+            "info('define $1');\n" +
+            '\n' +
+            'pushSourceLocation({\n' +
+            "  path: '',\n" +
+            "  id: '$1'\n" +
+            '});\n' +
+            '\n' +
+            "beginRecordingNotes('', '$1', {\n" +
+            '  line: 1,\n' +
+            '  column: 0\n' +
+            '});\n' +
+            '\n' +
+            'const $1 = log(a);\n' +
+            "await write('meta/def//$1', {\n" +
+            "  sha: '64b17f788d49d14fcb63a9df334df40f3fc98aa3',\n" +
+            "  type: $1 instanceof Shape ? 'Shape' : 'Object'\n" +
+            '});\n' +
+            '\n' +
+            'if ($1 instanceof Shape) {\n' +
+            "  await saveGeometry('data/def//$1', $1);\n" +
+            '}\n' +
+            '\n' +
+            "await saveRecordedNotes('', '$1');\n" +
+            '\n' +
+            'popSourceLocation({\n' +
+            "  path: '',\n" +
+            "  id: '$1'\n" +
+            '});\n' +
+            '\n' +
+            '\n' +
+            '} catch (error) { throw error; }\n',
+        },
+      },
+      replays: {},
+    }
   );
 });

@@ -11,7 +11,7 @@ const CACHED_MODULES = new Map();
 
 export const buildImportModule =
   (baseApi) =>
-  async (name, { clearUpdateEmits = false } = {}) => {
+  async (name, { clearUpdateEmits = false, evaluate, replay } = {}) => {
     try {
       const cachedModule = CACHED_MODULES.get(name);
       if (cachedModule !== undefined) {
@@ -40,8 +40,12 @@ export const buildImportModule =
       const path = name;
       const topLevel = new Map();
       const api = { ...baseApi, sha: 'master' };
-      const evaluate = (script) => baseEvaluate(script, { api, path });
-      const replay = (script) => baseEvaluate(script, { api, path });
+      if (!evaluate) {
+        evaluate = (script) => baseEvaluate(script, { api, path });
+      }
+      if (!replay) {
+        replay = (script) => baseEvaluate(script, { api, path });
+      }
 
       const builtModule = await execute(scriptText, {
         evaluate,
