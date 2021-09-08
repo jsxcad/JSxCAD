@@ -1,8 +1,8 @@
 import { emit, isNode, log, onBoot } from '@jsxcad/sys';
-import { fileURLToPath } from 'url';
 
 import CgalBrowser from './cgal_browser.cjs';
 import CgalNode from './cgal_node.cjs';
+import { fileURLToPath } from 'url';
 import hashSum from 'hash-sum';
 
 let cgal;

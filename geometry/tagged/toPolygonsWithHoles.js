@@ -1,3 +1,4 @@
+import { isVoid } from './isNotVoid.js';
 import { toDisjointGeometry } from './toDisjointGeometry.js';
 import { toPolygonsWithHoles as toPolygonsWithHolesFromGraph } from '../graph/toPolygonsWithHoles.js';
 import { visit } from './visit.js';
@@ -6,6 +7,9 @@ export const toPolygonsWithHoles = (geometry) => {
   const output = [];
 
   const op = (geometry, descend) => {
+    if (isVoid(geometry)) {
+      return;
+    }
     switch (geometry.type) {
       case 'graph': {
         for (const {
@@ -27,11 +31,11 @@ export const toPolygonsWithHoles = (geometry) => {
       // FIX: Support 'triangles'?
       case 'points':
       case 'paths':
+      case 'sketch':
         break;
       case 'layout':
       case 'plan':
       case 'item':
-      case 'sketch':
       case 'group': {
         return descend();
       }

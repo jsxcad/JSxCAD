@@ -3,25 +3,31 @@ md`
 JSxCAD supports importing and exporting .svg and .stl file types`;
 
 md`
+One thing to note is that output may consist of multiple 'pages'.
+
+A filename like 'teapot' will have the page number and filetype appended, so it may produce 'teapot_0.stl', 'teapot_1.stl', etc.
+`;
+
+md`
 ---
 ### Exporting .stl
 Creates an option to download the shape as an stl file. A view is created to show what will be downloaded.`;
 
-Arc(10, 10, 10).stl('fileName.stl');
+Arc(10, 10, 10).stl('fileName');
 
 md`
 ---
 ### Exporting .svg
 Creates an option to download the shape as a svg file. A view is created to show what will be downloaded.`;
 
-Arc(10).svg('fileName.svg');
+Arc(10).svg('fileName');
 
 md`
 ---
 ### Importing .stl
 Imports a .stl file which can then be used as geometry. A best effort is made to handle bad geometry in the .stl file.`;
 
-const importedStl = await readStl('https://jsxcad.js.org/stl/teapot.stl');
+const importedStl = await readStl('https://jsxcad.js.org/stl/teapot.svg');
 importedStl.view();
 
 md`
@@ -30,6 +36,6 @@ md`
 Imports a .svg file which can then be used as geometry.`;
 
 const importedSvg = await readSvg('https://jsxcad.js.org/svg/rocket.svg');
-importedSvg.view();
+importedSvg.align('xy').view();
 
-importedSvg.extrude(5).view();
+importedSvg.align('xy').extrude(500).color('white').material('wood').view();
