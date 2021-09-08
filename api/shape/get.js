@@ -1,37 +1,39 @@
 import Group from './Group.js';
 import Shape from './Shape.js';
-import { qualifyTagPath } from './tag.js';
+import { qualifyTag } from './tag.js';
 import { visit } from '@jsxcad/geometry';
 
 export const get =
-  (path, ...ops) =>
+  (...tags) =>
   (shape) => {
-    if (ops.length === 0) {
-      ops = [(x) => x];
-    }
+    const isMatchingTag = (options, matches) => {
+      for (const match of matches) {
+        if (match === 'tagpath:*') {
+          return true;
+        }
+      }
+      if (options === undefined) {
+        return false;
+      }
+      for (const match of matches) {
+        if (options.includes(match)) {
+          return true;
+        }
+      }
+      return false;
+    };
+    const qualifiedTags = tags.map((tag) => qualifyTag(tag, 'item'));
     const picks = [];
-    const walk = (geometry, descend, path) => {
+    const walk = (geometry, descend) => {
       if (geometry.type === 'item') {
-        if (path.length >= 1) {
-          if (
-            path[0] === 'tagpath:*' ||
-            (geometry.tags && geometry.tags.includes(path[0]))
-          ) {
-            if (path.length >= 2) {
-              return descend(path.slice(1));
-            } else {
-              picks.push(Shape.fromGeometry(geometry).op(...ops));
-            }
-          } else {
-          }
-        } else {
-          throw Error('Path exhausted');
+        if (isMatchingTag(geometry.tags, qualifiedTags)) {
+          picks.push(Shape.fromGeometry(geometry));
         }
       } else {
-        return descend(path);
+        return descend();
       }
     };
-    visit(shape.toGeometry(), walk, qualifyTagPath(path, 'item'));
+    visit(shape.toGeometry(), walk);
     return Group(...picks);
   };
 

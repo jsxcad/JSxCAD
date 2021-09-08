@@ -158,15 +158,15 @@ test('Control can be used with cached output.', async (t) => {
     type: 'Shape',
   });
   const updates = {};
-  const ecmascript = await toEcmascript(
+  const replays = [];
+  await toEcmascript(
     `
 const length = control('length', 10, 'number');
 const foo = bar(length);`,
-    { updates }
+    { updates, replays }
   );
   // FIX: This should get back 16.
-  t.is(
-    ecmascript,
+  t.deepEqual(replays, [
     `
 try {
 pushSourceLocation({
@@ -192,8 +192,8 @@ popSourceLocation({
 return {};
 
 } catch (error) { throw error; }
-`
-  );
+`,
+  ]);
 });
 
 test('Bind await to calls properly.', async (t) => {

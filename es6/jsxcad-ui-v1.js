@@ -30780,7 +30780,7 @@ function LineWidgets(session) {
             }
         }
         if (w.rowCount == null) {
-            w.rowCount = w.pixelHeight / renderer.layerConfig.lineHeight;
+            w.rowCount = Math.ceil(w.pixelHeight / renderer.layerConfig.lineHeight);
         }
         
         var fold = this.session.getFoldAt(w.row, 0);
@@ -30869,7 +30869,7 @@ function LineWidgets(session) {
                 w.screenWidth = Math.ceil(w.w / config.characterWidth);
             }
             
-            var rowCount = w.h / config.lineHeight;
+            var rowCount = Math.ceil(w.h / config.lineHeight);
             if (w.coverLine) {
                 rowCount -= this.session.getRowLineCount(w.row);
                 if (rowCount < 0)
@@ -46429,7 +46429,6 @@ class Ui extends E {
               if (domElementByHash.has(entry.hash)) {
                 // Reuse the element we built earlier
                 console.log(`Re-appending ${entry.hash} to ${id}`);
-                domElement.appendChild(document.createTextNode(entry.hash));
                 domElement.appendChild(domElementByHash.get(entry.hash));
               } else {
                 // We need to build the element.
@@ -46481,7 +46480,6 @@ class Ui extends E {
                 const element = toDomElement([entry]);
                 domElementByHash.set(entry.hash, element);
                 console.log(`Appending ${entry.hash} to ${id}`);
-                domElement.appendChild(document.createTextNode(entry.hash));
                 domElement.appendChild(element);
                 console.log(`Marking ${entry.hash} in ${id}`);
               }
@@ -47651,7 +47649,7 @@ class Ui extends E {
 
 const setupUi = async sha => {
   const startPath = `https://gitcdn.link/cdn/jsxcad/JSxCAD/${sha}/nb/start.nb`;
-  document.getElementById('loading').appendChild(document.createTextNode('Indexing Storage'));
+  document.getElementById('loading').appendChild(document.createTextNode('Indexing Storage. '));
   const filesystems = await listFilesystems();
 
   const decodeHash = () => {
@@ -47665,7 +47663,7 @@ const setupUi = async sha => {
 
   const [path, file, workspace] = decodeHash();
   let ui;
-  document.getElementById('loading').appendChild(document.createTextNode('Starting React'));
+  document.getElementById('loading').appendChild(document.createTextNode('Starting React. '));
   z(v$1(Ui, {
     ref: ref => {
       ui = ref;
@@ -47709,7 +47707,7 @@ const installUi = async ({
   sha
 }) => {
   await boot();
-  document.getElementById('loading').appendChild(document.createTextNode('Booted'));
+  document.getElementById('loading').appendChild(document.createTextNode('Booted. '));
 
   if (workspace !== '') {
     await setupFilesystem({
@@ -47717,7 +47715,7 @@ const installUi = async ({
     });
   }
 
-  document.getElementById('loading').appendChild(document.createTextNode('Setup UI'));
+  document.getElementById('loading').appendChild(document.createTextNode('Setup UI. '));
   await setupUi(sha);
 };
 

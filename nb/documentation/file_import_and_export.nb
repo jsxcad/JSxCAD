@@ -1,0 +1,35 @@
+md`
+# File IO
+JSxCAD supports importing and exporting .svg and .stl file types`;
+
+md`
+---
+### Exporting .stl
+Creates an option to download the shape as an stl file. A view is created to show what will be downloaded.`;
+
+Arc(10, 10, 10).stl('fileName.stl');
+
+md`
+---
+### Exporting .svg
+Creates an option to download the shape as a svg file. A view is created to show what will be downloaded.`;
+
+Arc(10).svg('fileName.svg');
+
+md`
+---
+### Importing .stl
+Imports a .stl file which can then be used as geometry. A best effort is made to handle bad geometry in the .stl file.`;
+
+const importedStl = await readStl('https://jsxcad.js.org/stl/teapot.stl');
+importedStl.view();
+
+md`
+---
+### Importing .svg
+Imports a .svg file which can then be used as geometry.`;
+
+const importedSvg = await readSvg('https://jsxcad.js.org/svg/rocket.svg');
+importedSvg.view();
+
+importedSvg.extrude(5).view();
