@@ -24,7 +24,7 @@ test('Test notebook', async (t) => {
       hash: 'c',
     },
   ];
-  const html = await toHtml(notebook);
+  const { html } = await toHtml(notebook);
   t.is(
     new TextDecoder('utf8').decode(html),
     await readFile('toHtml.test.html', { encoding: 'utf8' })

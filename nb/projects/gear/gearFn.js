@@ -3,14 +3,24 @@
 // version 1.1 by Leemon Baird, 2011, Leemon@Leemon.com
 
 // convert polar to cartesian coordinates
-export const polar = (radius, theta) => [radius * sin(theta), radius * cos(theta)];
+export const polar = (radius, theta) => [
+  radius * sin(theta),
+  radius * cos(theta),
+];
 
 // point at radius d on the involute curve
 export const q6 = (baseCircle, side, angle, pitchRadius) =>
   polar(pitchRadius, side * (iang(baseCircle, pitchRadius) + angle));
 
 // radius a fraction f up the curved side of the tooth
-export const q7 = (fraction, rootRadius, baseRadius, outerRadius, angle, side) =>
+export const q7 = (
+  fraction,
+  rootRadius,
+  baseRadius,
+  outerRadius,
+  angle,
+  side
+) =>
   q6(
     baseRadius,
     side,

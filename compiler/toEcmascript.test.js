@@ -170,7 +170,7 @@ test("Don't return declarations.", async (t) => {
   const exports = [];
   const updates = {};
   const replays = {};
-  const ecmascript = await toEcmascript(`let a = 10;`, {
+  await toEcmascript(`let a = 10;`, {
     imports,
     exports,
     updates,
@@ -461,7 +461,7 @@ test('Top level await.', async (t) => {
   const exports = [];
   const updates = {};
   const replays = {};
-  const ecmascript = await toEcmascript(`await foo()`, {
+  await toEcmascript(`await foo()`, {
     imports,
     exports,
     updates,
@@ -659,10 +659,12 @@ test('Definition', async (t) => {
   const exports = [];
   const updates = {};
   const replays = {};
-  const ecmascript = await toEcmascript(
-    'const a = 1; const b = () => 2; function c () {}',
-    { imports, exports, updates, replays }
-  );
+  await toEcmascript('const a = 1; const b = () => 2; function c () {}', {
+    imports,
+    exports,
+    updates,
+    replays,
+  });
   t.deepEqual(
     { imports, exports, updates, replays },
     {

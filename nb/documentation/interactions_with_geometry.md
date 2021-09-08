@@ -23,11 +23,11 @@ Geometry can be defined to be an "item". Items are a way to identify individual 
 
 ![Image](interactions_with_geometry.md.4.png)
 
-![Image](interactions_with_geometry.md.5.png)
-
 ---
 ### Grow
 Expands the shape outwards by the input distance. May result in self intersections if not used cautiously.
+
+![Image](interactions_with_geometry.md.5.png)
 
 ![Image](interactions_with_geometry.md.6.png)
 

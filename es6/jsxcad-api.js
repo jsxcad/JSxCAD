@@ -242,7 +242,16 @@ const CACHED_MODULES = new Map();
 
 const buildImportModule =
   (baseApi) =>
-  async (name, { clearUpdateEmits = false, evaluate: evaluate$1, replay, doRelease = true } = {}) => {
+  async (
+    name,
+    {
+      clearUpdateEmits = false,
+      topLevel = new Map(),
+      evaluate: evaluate$1,
+      replay,
+      doRelease = true,
+    } = {}
+  ) => {
     try {
       if (doRelease) {
         await release();
@@ -272,7 +281,6 @@ const buildImportModule =
           ? script
           : new TextDecoder('utf8').decode(script);
       const path = name;
-      const topLevel = new Map();
       const api = { ...baseApi, sha: 'master' };
       if (!evaluate$1) {
         evaluate$1 = (script) => evaluate(script, { api, path });

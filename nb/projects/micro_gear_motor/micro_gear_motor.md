@@ -12,108 +12,62 @@ Axle Profile
 
 ![Image](micro_gear_motor.md.2.png)
 
-Axle Profile
+Flat Axle Profile
 
 ![Image](micro_gear_motor.md.3.png)
 
-Flat Axle Profile
+Rear Hub Profile
 
 ![Image](micro_gear_motor.md.4.png)
 
-Rear Hub Profile
+Motor
 
 ![Image](micro_gear_motor.md.5.png)
 
-Axle Profile
+Wire Channel Profile
 
 ![Image](micro_gear_motor.md.6.png)
 
-Flat Axle Profile
+Cap Profile
 
 ![Image](micro_gear_motor.md.7.png)
 
-Gearbox Profile
+Gear Profile
 
 ![Image](micro_gear_motor.md.8.png)
 
-Motor Profile
+Sheath
 
 ![Image](micro_gear_motor.md.9.png)
 
-Motor
+Gear
 
 ![Image](micro_gear_motor.md.10.png)
 
-Wire Channel Profile
-
 ![Image](micro_gear_motor.md.11.png)
-
-Cap Profile
-
-![Image](micro_gear_motor.md.12.png)
-
-Gear Profile
-
-![Image](micro_gear_motor.md.13.png)
-
-Cap Profile
-
-![Image](micro_gear_motor.md.14.png)
-
-Motor Profile
-
-![Image](micro_gear_motor.md.15.png)
-
-Wire Channel Profile
-
-![Image](micro_gear_motor.md.16.png)
-
-Sheath
-
-Axle Profile
-
-Flat Axle Profile
-
-Gear
-
-Cap Profile
-
-Motor Profile
-
-Wire Channel Profile
-
-Sheath
 
 Cap
 
+![Image](micro_gear_motor.md.12.png)
+
 Gear Cutout
+
+![Image](micro_gear_motor.md.13.png)
 
 ## Motor Driver Bracket
 
 Motor Driver Holder
 
+![Image](micro_gear_motor.md.14.png)
+
 ## Wemos Bracket
 
 Wemos Driver Holder
 
+![Image](micro_gear_motor.md.15.png)
+
 ## Gear Motor Bracket
 
-Axle Profile
-
-Flat Axle Profile
-
-Gearbox Profile
-
-Motor Profile
-
-Motor
-
-Cap Profile
-
-Wire Channel Profile
-
-Sheath
-
-Cap
-
 Motor holder moter
+
+![Image](micro_gear_motor.md.16.png)
