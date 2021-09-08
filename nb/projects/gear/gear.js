@@ -1,3 +1,3 @@
-import 'gearPlan.js';
+import './gearPlan.js';
 
 export const Gear = () => Plan('Gear');

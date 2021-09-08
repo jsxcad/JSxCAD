@@ -6515,6 +6515,13 @@ const parseOptions = {
   locations: true,
 };
 
+const add = (array, item) => {
+  if (array.indexOf(item) === -1) {
+    array.push(item);
+  }
+  return array;
+};
+
 const strip = (ast) => {
   if (ast instanceof Array) {
     return ast.map(strip);
@@ -6570,7 +6577,6 @@ const generateReplayCode = async (
       // This provides a definition.
       provideDefinition = false;
     }
-    console.log(`QQ/meta: ${JSON.stringify(meta)}`);
   }
   if (emitSourceLocation) {
     loadCode.push(
@@ -6609,13 +6615,13 @@ const generateUpdateCode = async (entry, { declaration, sha, topLevel }) => {
     path,
     id,
     importSource,
-    imports = new Set(),
+    imports = [],
     emitSourceLocation = !importSource,
   } = entry;
   const body = [];
   const seen = new Set();
   if (importSource) {
-    imports.add(importSource);
+    add(imports, importSource);
   }
   const walk = async (dependencies) => {
     for (const dependency of dependencies) {
@@ -6629,7 +6635,7 @@ const generateUpdateCode = async (entry, { declaration, sha, topLevel }) => {
       }
       await walk(entry.dependencies);
       if (entry.importSource) {
-        imports.add(entry.importSource);
+        add(imports, entry.importSource);
       }
       body.push(
         ...(await generateReplayCode(entry, { provideDefinition: true }))
@@ -6774,7 +6780,7 @@ const declareVariable = async (
     sourceLocation: sourceLocation || declaration.loc,
     emitSourceLocation,
     importSource,
-    imports: new Set(),
+    imports: [],
   };
 
   topLevel.set(id, entry);
@@ -6846,7 +6852,6 @@ ${generate({ type: 'Program', body: replayProgram })}
 // FIX: Replace path with directory?
 const resolveModulePath = (module, { path }) => {
   const op = () => {
-    console.log(`QQ/resolveModulePath: ${module} ${path}`);
     if (module.startsWith('./')) {
       const subpath = path.split('/');
       subpath.pop();
@@ -6865,7 +6870,6 @@ const resolveModulePath = (module, { path }) => {
   };
 
   const result = op();
-  console.log(`QQ/resolveModulePath/result: ${result}`);
   return result;
 };
 

@@ -1,3 +1,4 @@
+import { acquire, release } from './evaluateLock.js';
 import { evaluate as baseEvaluate, execute } from './evaluate.js';
 
 import { read } from '@jsxcad/sys';
@@ -11,8 +12,11 @@ const CACHED_MODULES = new Map();
 
 export const buildImportModule =
   (baseApi) =>
-  async (name, { clearUpdateEmits = false, evaluate, replay } = {}) => {
+  async (name, { clearUpdateEmits = false, evaluate, replay, doRelease = true } = {}) => {
     try {
+      if (doRelease) {
+        await release();
+      }
       const cachedModule = CACHED_MODULES.get(name);
       if (cachedModule !== undefined) {
         return cachedModule;
@@ -59,5 +63,9 @@ export const buildImportModule =
       return builtModule;
     } catch (error) {
       throw error;
+    } finally {
+      if (doRelease) {
+        await acquire();
+      }
     }
   };

@@ -25,7 +25,7 @@ export const iang = (baseRadius, pitchRadius) =>
     180 -
   acos(baseRadius / pitchRadius);
 
-export export const ToothProfile = (
+export const ToothProfile = (
   rootRadius = 7,
   baseRadius = 7.517540966287267,
   outerRadius = 9,

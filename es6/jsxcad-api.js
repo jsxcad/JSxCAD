@@ -64,15 +64,42 @@ var notesApi = /*#__PURE__*/Object.freeze({
   emitSourceLocation: emitSourceLocation
 });
 
+let locked = false;
+const pending = [];
+
+const acquire = async () => {
+  if (locked) {
+    console.log(`QQ/acquire/wait`);
+    return new Promise((resolve, reject) => pending.push(resolve));
+  } else {
+    console.log(`QQ/acquire`);
+    locked = true;
+  }
+};
+
+const release = async () => {
+  if (pending.length > 0) {
+    console.log(`QQ/release/schedule`);
+    const resolve = pending.pop();
+    resolve(true);
+  } else {
+    locked = false;
+    console.log(`QQ/release`);
+  }
+};
+
 let api$1;
 
-const setApi = (value) => { api$1 = value; };
+const setApi = (value) => {
+  api$1 = value;
+};
 
 const getApi = () => api$1;
 
 const evaluate = async (ecmascript, { api, path }) => {
   const where = isWebWorker ? 'worker' : 'browser';
   try {
+    await acquire();
     console.log(`QQ/evaluate ${where}: ${ecmascript.replace(/\n/g, '\n|   ')}`);
     const builder = new Function(
       `{ ${Object.keys(api).join(', ')} }`,
@@ -83,6 +110,8 @@ const evaluate = async (ecmascript, { api, path }) => {
     return result;
   } catch (error) {
     throw error;
+  } finally {
+    await release();
   }
 };
 
@@ -133,7 +162,7 @@ const execute = async (
         // We could run these in parallel, but let's keep it simple for now.
         for (const path of imports) {
           console.log(`QQ/Imports ${where}: ${path}`);
-          await importModule(path, { evaluate, replay });
+          await importModule(path, { evaluate, replay, doRelease: false });
         }
         // At this point the modules should build with a simple replay.
       }
@@ -157,15 +186,18 @@ const execute = async (
         }
         const entry = updates[id];
         const outstandingDependencies = entry.dependencies.filter(
-          (dependency) => !completed.has(dependency) && updates[dependency] && dependency !== id
+          (dependency) =>
+            !completed.has(dependency) &&
+            updates[dependency] &&
+            dependency !== id
         );
         if (
           updatePromises.length <= 1 &&
           outstandingDependencies.length === 0
         ) {
-          if (isWebWorker) {
-            throw Error('Updates should not happen in worker');
-          }
+          // if (isWebWorker) {
+          //   throw Error('Updates should not happen in worker');
+          // }
           // For now, only do one thing at a time, and block the remaining updates.
           const task = async () => {
             try {
@@ -210,8 +242,11 @@ const CACHED_MODULES = new Map();
 
 const buildImportModule =
   (baseApi) =>
-  async (name, { clearUpdateEmits = false, evaluate: evaluate$1, replay } = {}) => {
+  async (name, { clearUpdateEmits = false, evaluate: evaluate$1, replay, doRelease = true } = {}) => {
     try {
+      if (doRelease) {
+        await release();
+      }
       const cachedModule = CACHED_MODULES.get(name);
       if (cachedModule !== undefined) {
         return cachedModule;
@@ -258,6 +293,10 @@ const buildImportModule =
       return builtModule;
     } catch (error) {
       throw error;
+    } finally {
+      if (doRelease) {
+        await acquire();
+      }
     }
   };
 
