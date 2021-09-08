@@ -1,4 +1,5 @@
 import { emit, isNode, log, onBoot } from '@jsxcad/sys';
+import { fileURLToPath } from 'url';
 
 import CgalBrowser from './cgal_browser.cjs';
 import CgalNode from './cgal_node.cjs';
@@ -32,11 +33,9 @@ export const initCgal = async () => {
         if (path === 'cgal_node.wasm' || path === 'cgal_browser.wasm') {
           let url = import.meta.url;
           if (url.startsWith('file://')) {
-            url = url.substring(7);
-            const parts = url.split('/');
-            parts.pop();
-            parts.push('cgal_node.wasm');
-            return parts.join('/');
+            url = fileURLToPath(url);
+            url = url.substring(0, url.length - 10) + 'cgal_node.wasm';
+            return url;
           } else {
             const parts = url.split('/');
             parts.pop();
