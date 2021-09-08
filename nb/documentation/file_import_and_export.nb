@@ -27,7 +27,7 @@ md`
 ### Importing .stl
 Imports a .stl file which can then be used as geometry. A best effort is made to handle bad geometry in the .stl file.`;
 
-const importedStl = await readStl('https://jsxcad.js.org/stl/teapot.svg');
+const importedStl = await readStl('https://jsxcad.js.org/stl/teapot.stl');
 importedStl.view();
 
 md`

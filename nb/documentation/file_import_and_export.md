@@ -21,10 +21,12 @@ Creates an option to download the shape as a svg file. A view is created to show
 ### Importing .stl
 Imports a .stl file which can then be used as geometry. A best effort is made to handle bad geometry in the .stl file.
 
+![Image](file_import_and_export.md.2.png)
+
 ---
 ### Importing .svg
 Imports a .svg file which can then be used as geometry.
 
-![Image](file_import_and_export.md.2.png)
-
 ![Image](file_import_and_export.md.3.png)
+
+![Image](file_import_and_export.md.4.png)
