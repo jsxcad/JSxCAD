@@ -1,5 +1,4 @@
 import { fromSurfaceMeshLazy } from './fromSurfaceMeshLazy.js';
-import { info } from '@jsxcad/sys';
 import { taggedGraph } from '../tagged/taggedGraph.js';
 import { toSurfaceMesh } from './toSurfaceMesh.js';
 import { unionOfSurfaceMeshes } from '@jsxcad/algorithm-cgal';

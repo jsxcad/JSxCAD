@@ -13,6 +13,13 @@ const parseOptions = {
   locations: true,
 };
 
+const add = (array, item) => {
+  if (array.indexOf(item) === -1) {
+    array.push(item);
+  }
+  return array;
+};
+
 export const strip = (ast) => {
   if (ast instanceof Array) {
     return ast.map(strip);
@@ -50,16 +57,12 @@ const fromIdToSha = (id, { topLevel }) => {
   }
 };
 
-const generateReplayCode = async ({
-  isNotCacheable,
-  isImport,
-  code,
-  path,
-  id,
-  doReplay = false,
-}) => {
+const generateReplayCode = async (
+  { isNotCacheable, importSource, emitSourceLocation = true, code, path, id },
+  { doReplay = true, provideDefinition = false }
+) => {
   const loadCode = [];
-  if (!isNotCacheable && !isImport) {
+  if (!isNotCacheable && !importSource) {
     const meta = await read(`meta/def/${path}/${id}`);
     if (meta && meta.type === 'Shape') {
       loadCode.push(
@@ -69,28 +72,11 @@ const generateReplayCode = async ({
         ),
         parse(`Object.freeze(${id});`, parseOptions)
       );
-      if (doReplay) {
-        loadCode.push(
-          parse(
-            `pushSourceLocation({ path: '${path}', id: '${id}' });`,
-            parseOptions
-          )
-        );
-        loadCode.push(
-          parse(`await replayRecordedNotes('${path}', '${id}')`, parseOptions)
-        );
-        loadCode.push(
-          parse(
-            `popSourceLocation({ path: '${path}', id: '${id}' });`,
-            parseOptions
-          )
-        );
-      }
-      return loadCode;
+      // This provides a definition.
+      provideDefinition = false;
     }
   }
-  // Otherwise recompute it.
-  if (!isImport) {
+  if (emitSourceLocation) {
     loadCode.push(
       parse(
         `pushSourceLocation({ path: '${path}', id: '${id}' });`,
@@ -98,8 +84,16 @@ const generateReplayCode = async ({
       )
     );
   }
-  loadCode.push(...code);
-  if (!isImport) {
+  if (doReplay) {
+    loadCode.push(
+      parse(`await replayRecordedNotes('${path}', '${id}')`, parseOptions)
+    );
+  }
+  if (provideDefinition) {
+    loadCode.push(...code);
+  }
+  // Otherwise recompute it.
+  if (emitSourceLocation) {
     loadCode.push(
       parse(
         `popSourceLocation({ path: '${path}', id: '${id}' });`,
@@ -110,12 +104,23 @@ const generateReplayCode = async ({
   return loadCode;
 };
 
-const generateUpdateCode = async (
-  { isNotCacheable, code, dependencies, path, id, isImport },
-  { declaration, sha, topLevel }
-) => {
+const generateUpdateCode = async (entry, { declaration, sha, topLevel }) => {
+  const {
+    doNotUpdateMetadata = false,
+    isNotCacheable,
+    code,
+    dependencies,
+    path,
+    id,
+    importSource,
+    imports = [],
+    emitSourceLocation = !importSource,
+  } = entry;
   const body = [];
   const seen = new Set();
+  if (importSource) {
+    add(imports, importSource);
+  }
   const walk = async (dependencies) => {
     for (const dependency of dependencies) {
       if (seen.has(dependency)) {
@@ -127,11 +132,17 @@ const generateUpdateCode = async (
         continue;
       }
       await walk(entry.dependencies);
-      body.push(...(await generateReplayCode(entry)));
+      if (entry.importSource) {
+        add(imports, entry.importSource);
+      }
+      body.push(
+        ...(await generateReplayCode(entry, { provideDefinition: true }))
+      );
     }
   };
   await walk(dependencies);
-  if (!isImport) {
+  entry.imports = imports;
+  if (emitSourceLocation) {
     body.push(parse(`info('define ${id}');`, parseOptions));
     body.push(
       parse(
@@ -140,7 +151,7 @@ const generateUpdateCode = async (
       )
     );
   }
-  if (!isNotCacheable && !isImport) {
+  if (!isNotCacheable && !importSource) {
     body.push(
       parse(
         `beginRecordingNotes('${path}', '${id}', { line: ${declaration.loc.start.line}, column: ${declaration.loc.start.column} });`,
@@ -149,12 +160,19 @@ const generateUpdateCode = async (
     );
   }
   body.push(...code);
-  if (!isNotCacheable && !isImport) {
+  if (!doNotUpdateMetadata) {
+    body.push(
+      parse(
+        `await write('meta/def/${path}/${id}', { sha: '${sha}', type: ${id} instanceof Shape ? 'Shape' : 'Object' });`,
+        parseOptions
+      )
+    );
+  }
+  if (!isNotCacheable && !importSource) {
     // Only cache Shapes.
     body.push(
       parse(
-        `await write('meta/def/${path}/${id}', { sha: '${sha}', type: ${id} instanceof Shape ? 'Shape' : 'Object' });
-         if (${id} instanceof Shape) { await saveGeometry('data/def/${path}/${id}', ${id}); }`,
+        `if (${id} instanceof Shape) { await saveGeometry('data/def/${path}/${id}', ${id}); }`,
         parseOptions
       )
     );
@@ -162,7 +180,7 @@ const generateUpdateCode = async (
       parse(`await saveRecordedNotes('${path}', '${id}');`, parseOptions)
     );
   }
-  if (!isImport) {
+  if (emitSourceLocation) {
     body.push(
       parse(
         `popSourceLocation({ path: '${path}', id: '${id}' });`,
@@ -209,15 +227,18 @@ const declareVariable = async (
   {
     path,
     updates,
+    replays,
     controls,
     exportNames,
     out,
     doExport = false,
-    isImport = false,
     sideEffectors,
     hasSideEffects = false,
     topLevel,
     sourceLocation,
+    emitSourceLocation,
+    importSource,
+    imports,
   } = {}
 ) => {
   fixControlCalls(declarator, controls);
@@ -255,7 +276,9 @@ const declareVariable = async (
     sha,
     hasSideEffects,
     sourceLocation: sourceLocation || declaration.loc,
-    isImport,
+    emitSourceLocation,
+    importSource,
+    imports: [],
   };
 
   topLevel.set(id, entry);
@@ -285,7 +308,7 @@ const declareVariable = async (
     ) {
       // We've already patched this.
       entry.isNotCacheable = true;
-    } else if (isImport) {
+    } else if (importSource) {
       entry.isNotCacheable = true;
     }
   }
@@ -295,6 +318,7 @@ const declareVariable = async (
     if (!meta || meta.sha !== sha) {
       updates[id] = {
         dependencies,
+        imports: entry.imports,
         program: await generateUpdateCode(entry, {
           declaration,
           sha,
@@ -306,13 +330,26 @@ const declareVariable = async (
     }
   }
 
-  out.push(...(await generateReplayCode({ ...entry, doReplay: true })));
+  const replayProgram = await generateReplayCode(
+    { ...entry, isNotCacheable: true },
+    { provideDefinition: false }
+  );
+  if (replayProgram.length > 0) {
+    replays[id] = {
+      dependencies,
+      imports: entry.imports,
+      program: `
+try {
+${generate({ type: 'Program', body: replayProgram })}
+} catch (error) { throw error; }
+`,
+    };
+  }
 };
 
 // FIX: Replace path with directory?
 const resolveModulePath = (module, { path }) => {
   const op = () => {
-    console.log(`QQ/resolveModulePath: ${module} ${path}`);
     if (module.startsWith('./')) {
       const subpath = path.split('/');
       subpath.pop();
@@ -331,7 +368,6 @@ const resolveModulePath = (module, { path }) => {
   };
 
   const result = op();
-  console.log(`QQ/resolveModulePath/result: ${result}`);
   return result;
 };
 
@@ -353,9 +389,10 @@ const processStatement = async (entry, options) => {
         parse(`await importModule('${modulePath}');`, parseOptions),
         {
           ...options,
-          isImport: true,
+          importSource: modulePath,
           hasSideEffects: true,
           sourceLocation: entry.loc,
+          emitSourceLocation: false,
         }
       );
     } else {
@@ -367,7 +404,12 @@ const processStatement = async (entry, options) => {
                 `const ${local.name} = (await importModule('${modulePath}')).default;`,
                 parseOptions
               ),
-              { ...options, isImport: true, sourceLocation: entry.loc }
+              {
+                ...options,
+                importSource: modulePath,
+                sourceLocation: entry.loc,
+                emitSourceLocation: false,
+              }
             );
             break;
           case 'ImportSpecifier':
@@ -377,7 +419,12 @@ const processStatement = async (entry, options) => {
                   `const ${local.name} = (await importModule('${modulePath}')).${imported.name};`,
                   parseOptions
                 ),
-                { ...options, isImport: true, sourceLocation: entry.loc }
+                {
+                  ...options,
+                  importSource: modulePath,
+                  sourceLocation: entry.loc,
+                  emitSourceLocation: false,
+                }
               );
             } else {
               processProgram(
@@ -385,7 +432,12 @@ const processStatement = async (entry, options) => {
                   `const ${imported.name} = (await importModule('${modulePath}')).${imported.name};`,
                   parseOptions
                 ),
-                { ...options, isImport: true, sourceLocation: entry.loc }
+                {
+                  ...options,
+                  importSource: modulePath,
+                  sourceLocation: entry.loc,
+                  emitSourceLocation: false,
+                }
               );
             }
             break;
@@ -437,8 +489,10 @@ export const toEcmascript = async (
     path = '',
     topLevel = new Map(),
     updates = {},
-    replays = [],
+    replays = {},
     exports = [],
+    imports = new Map(),
+    indirectImports = new Map(),
   } = {}
 ) => {
   let ast = parse(script, parseOptions);
@@ -456,6 +510,7 @@ export const toEcmascript = async (
   await processProgram(ast, {
     out,
     updates,
+    replays,
     exportNames,
     controls,
     path,
@@ -463,6 +518,8 @@ export const toEcmascript = async (
     nextTopLevelExpressionId,
     sideEffectors,
     exports,
+    imports,
+    indirectImports,
   });
 
   // Return the exports as an object.
@@ -472,22 +529,15 @@ export const toEcmascript = async (
       await generateUpdateCode(
         {
           isNotCacheable: true,
+          doNotUpdateMetadata: true,
           code: parse(exportCode, parseOptions).body,
-          dependencies: exportNames,
+          dependencies: [...exportNames, ...sideEffectors],
           id: '$exports',
           path,
-          isImport: true, // FIX: Hack for source location.
+          emitSourceLocation: false, // FIX: Hack for source location.
         },
         { topLevel }
       )
     );
-  }
-
-  if (out.length > 0) {
-    replays.push(`
-try {
-${generate(parse(out.map(generate).join('\n'), parseOptions))}
-} catch (error) { throw error; }
-`);
   }
 };

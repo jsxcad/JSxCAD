@@ -32,21 +32,21 @@ Cap Profile
 
 ![Image](micro_gear_motor.md.7.png)
 
-Sheath
+Gear Profile
 
 ![Image](micro_gear_motor.md.8.png)
 
-Cap
+Sheath
 
 ![Image](micro_gear_motor.md.9.png)
 
-Gear Profile
+Gear
 
 ![Image](micro_gear_motor.md.10.png)
 
-Gear
-
 ![Image](micro_gear_motor.md.11.png)
+
+Cap
 
 ![Image](micro_gear_motor.md.12.png)
 

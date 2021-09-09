@@ -2,7 +2,7 @@ import './jsxcad-api-v1-gcode.js';
 import './jsxcad-api-v1-pdf.js';
 import './jsxcad-api-v1-tools.js';
 import * as mathApi from './jsxcad-api-v1-math.js';
-import { addOnEmitHandler, addPending, write, read, emit, hash, getSourceLocation, getControlValue, popSourceLocation, pushSourceLocation } from './jsxcad-sys.js';
+import { addOnEmitHandler, addPending, write, read, emit, hash, isWebWorker, getSourceLocation, getControlValue, popSourceLocation, pushSourceLocation } from './jsxcad-sys.js';
 import * as shapeApi from './jsxcad-api-shape.js';
 import { toEcmascript } from './jsxcad-compiler.js';
 import { readStl, stl } from './jsxcad-api-v1-stl.js';
@@ -64,9 +64,43 @@ var notesApi = /*#__PURE__*/Object.freeze({
   emitSourceLocation: emitSourceLocation
 });
 
+let locked = false;
+const pending = [];
+
+const acquire = async () => {
+  if (locked) {
+    console.log(`QQ/acquire/wait`);
+    return new Promise((resolve, reject) => pending.push(resolve));
+  } else {
+    console.log(`QQ/acquire`);
+    locked = true;
+  }
+};
+
+const release = async () => {
+  if (pending.length > 0) {
+    console.log(`QQ/release/schedule`);
+    const resolve = pending.pop();
+    resolve(true);
+  } else {
+    locked = false;
+    console.log(`QQ/release`);
+  }
+};
+
+let api$1;
+
+const setApi = (value) => {
+  api$1 = value;
+};
+
+const getApi = () => api$1;
+
 const evaluate = async (ecmascript, { api, path }) => {
+  const where = isWebWorker ? 'worker' : 'browser';
   try {
-    console.log(`QQ/evaluate: ${ecmascript.replace(/\n/g, '\n|   ')}`);
+    await acquire();
+    console.log(`QQ/evaluate ${where}: ${ecmascript.replace(/\n/g, '\n|   ')}`);
     const builder = new Function(
       `{ ${Object.keys(api).join(', ')} }`,
       `return async () => { ${ecmascript} };`
@@ -76,6 +110,8 @@ const evaluate = async (ecmascript, { api, path }) => {
     return result;
   } catch (error) {
     throw error;
+  } finally {
+    await release();
   }
 };
 
@@ -90,14 +126,17 @@ const execute = async (
     clearUpdateEmits = false,
   }
 ) => {
+  const where = isWebWorker ? 'worker' : 'browser';
   try {
     let replaysDone = false;
+    let importsDone = false;
     console.log(`QQ/Evaluate`);
     const scheduled = new Set();
+    const completed = new Set();
     for (;;) {
       console.log(`QQ/Compile`);
       const updates = {};
-      const replays = [];
+      const replays = {};
       const exports = [];
       await toEcmascript(script, {
         path,
@@ -106,16 +145,38 @@ const execute = async (
         replays,
         exports,
       });
+      // Make sure modules are prepared.
+      if (!importsDone) {
+        console.log(`QQ/Imports ${where}`);
+        const { importModule } = getApi();
+        // The imports we'll need to run these updates.
+        const imports = new Set();
+        for (const id of Object.keys(updates)) {
+          const update = updates[id];
+          if (update.imports) {
+            for (const entry of update.imports) {
+              imports.add(entry);
+            }
+          }
+        }
+        // We could run these in parallel, but let's keep it simple for now.
+        for (const path of imports) {
+          console.log(`QQ/Imports ${where}: ${path}`);
+          await importModule(path, { evaluate, replay, doRelease: false });
+        }
+        // At this point the modules should build with a simple replay.
+      }
       // Replay anything we can.
       if (!replaysDone) {
-        console.log(`QQ/Replay`);
+        console.log(`QQ/Replay ${where}`);
         replaysDone = true;
-        for (const entry of replays) {
-          await replay(entry, { path });
+        for (const id of Object.keys(replays)) {
+          await replay(replays[id].program, { path });
+          completed.add(id);
         }
       }
       // Update what we can.
-      console.log(`QQ/Update`);
+      console.log(`QQ/Update ${where}`);
       const blockedUpdates = [];
       const updatePromises = [];
       // Determine the updates we can process.
@@ -125,16 +186,23 @@ const execute = async (
         }
         const entry = updates[id];
         const outstandingDependencies = entry.dependencies.filter(
-          (dependency) => updates[dependency] && dependency !== id
+          (dependency) =>
+            !completed.has(dependency) &&
+            updates[dependency] &&
+            dependency !== id
         );
         if (
-          updatePromises.length === 0 &&
+          updatePromises.length <= 1 &&
           outstandingDependencies.length === 0
         ) {
+          // if (isWebWorker) {
+          //   throw Error('Updates should not happen in worker');
+          // }
           // For now, only do one thing at a time, and block the remaining updates.
           const task = async () => {
             try {
               await evaluate(updates[id].program, { path });
+              completed.add(id);
               console.log(`Completed ${id}`);
             } catch (error) {
               throw error;
@@ -152,7 +220,7 @@ const execute = async (
       }
       // Finally compute the exports.
       if (blockedUpdates.length === 0) {
-        console.log(`QQ/Exports`);
+        console.log(`QQ/Exports ${where}`);
         for (const entry of exports) {
           return await evaluate(entry, { path });
         }
@@ -174,8 +242,20 @@ const CACHED_MODULES = new Map();
 
 const buildImportModule =
   (baseApi) =>
-  async (name, { clearUpdateEmits = false } = {}) => {
+  async (
+    name,
+    {
+      clearUpdateEmits = false,
+      topLevel = new Map(),
+      evaluate: evaluate$1,
+      replay,
+      doRelease = true,
+    } = {}
+  ) => {
     try {
+      if (doRelease) {
+        await release();
+      }
       const cachedModule = CACHED_MODULES.get(name);
       if (cachedModule !== undefined) {
         return cachedModule;
@@ -201,10 +281,13 @@ const buildImportModule =
           ? script
           : new TextDecoder('utf8').decode(script);
       const path = name;
-      const topLevel = new Map();
       const api = { ...baseApi, sha: 'master' };
-      const evaluate$1 = (script) => evaluate(script, { api, path });
-      const replay = (script) => evaluate(script, { api, path });
+      if (!evaluate$1) {
+        evaluate$1 = (script) => evaluate(script, { api, path });
+      }
+      if (!replay) {
+        replay = (script) => evaluate(script, { api, path });
+      }
 
       const builtModule = await execute(scriptText, {
         evaluate: evaluate$1,
@@ -218,6 +301,10 @@ const buildImportModule =
       return builtModule;
     } catch (error) {
       throw error;
+    } finally {
+      if (doRelease) {
+        await acquire();
+      }
     }
   };
 
@@ -280,5 +367,7 @@ registerDynamicModule(module('stl'), './jsxcad-api-v1-stl.js');
 registerDynamicModule(module('svg'), './jsxcad-api-v1-svg.js');
 registerDynamicModule(module('threejs'), './jsxcad-api-v1-threejs.js');
 registerDynamicModule(module('units'), './jsxcad-api-v1-units.js');
+
+setApi(api);
 
 export { api as default, evaluate, execute };
