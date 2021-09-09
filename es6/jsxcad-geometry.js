@@ -2847,6 +2847,9 @@ const toPolygonsWithHoles = (geometry) => {
   const output = [];
 
   const op = (geometry, descend) => {
+    if (isVoid(geometry)) {
+      return;
+    }
     switch (geometry.type) {
       case 'graph': {
         for (const {
@@ -2868,11 +2871,11 @@ const toPolygonsWithHoles = (geometry) => {
       // FIX: Support 'triangles'?
       case 'points':
       case 'paths':
+      case 'sketch':
         break;
       case 'layout':
       case 'plan':
       case 'item':
-      case 'sketch':
       case 'group': {
         return descend();
       }
