@@ -391,11 +391,10 @@ const initCgal = async () => {
       locateFile(path) {
         if (path === 'cgal_node.wasm' || path === 'cgal_browser.wasm') {
           let pathname = toPathnameFromUrl(import.meta.url);
-          const base = pathname.substring(
-            0,
-            pathname.length - '/getCgal.js'.length
-          );
-          const wasmPathname = `${base}/cgal_node.wasm`;
+          const parts = pathname.split('/');
+          parts.pop();
+          const prefix = parts.join('/');
+          const wasmPathname = `${prefix}/${path}`;
           return wasmPathname;
         }
         return path;

@@ -1,6 +1,8 @@
 import {
   canonicalizePath,
+  flipPath,
   isClosedPath,
+  isCounterClockwisePath,
   transformPaths,
 } from '@jsxcad/geometry';
 
@@ -112,6 +114,11 @@ export const fromSvgPath = (svgPath, options = {}) => {
       absolutifySvgPath(parseSvgPath(new TextDecoder('utf8').decode(svgPath)))
     )
   );
-  const geometry = { type: 'paths', paths };
+  const geometry = {
+    type: 'paths',
+    paths: paths.map((path) =>
+      isCounterClockwisePath(path) ? path : flipPath(path)
+    ),
+  };
   return geometry;
 };

@@ -79,6 +79,7 @@ export { fill } from './tagged/fill.js';
 export { intersection } from './tagged/intersection.js';
 export { inset } from './tagged/inset.js';
 export { isClockwise as isClockwisePath } from './path/isClockwise.js';
+export { isCounterClockwise as isCounterClockwisePath } from './path/isCounterClockwise.js';
 export { isClosed as isClosedPath } from './path/isClosed.js';
 export { keep } from './tagged/keep.js';
 export { loft } from './tagged/loft.js';

@@ -1,4 +1,5 @@
 import Shape from './Shape.js';
+import { qualifyTag } from './tag.js';
 import { rewriteTags } from '@jsxcad/geometry';
 
 export const notAs =
@@ -7,7 +8,7 @@ export const notAs =
     Shape.fromGeometry(
       rewriteTags(
         [],
-        tags.map((tag) => `user/${tag}`),
+        tags.map((tag) => qualifyTag(tag)),
         shape.toGeometry()
       )
     );
