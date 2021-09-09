@@ -35,7 +35,7 @@ md`
 ### Importing .svg
 Imports a .svg file which can then be used as geometry.`;
 
-const importedSvg = await readSvg('https://jsxcad.js.org/svg/rocket.svg');
+const importedSvg = await readSvg('https://jsxcad.js.org/svg/rocket.svg', { stroke: false });
 importedSvg.align('xy').view();
 
-importedSvg.align('xy').extrude(500).color('white').material('wood').view();
+importedSvg.align('xy').scaleToFit(10).extrude(2).notColor('#090000').view();

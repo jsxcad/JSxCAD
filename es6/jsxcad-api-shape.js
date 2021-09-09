@@ -2894,12 +2894,19 @@ const notAs =
     Shape.fromGeometry(
       rewriteTags(
         [],
-        tags.map((tag) => `user/${tag}`),
+        tags.map((tag) => qualifyTag(tag)),
         shape.toGeometry()
       )
     );
 
 Shape.registerMethod('notAs', notAs);
+
+const notColor =
+  (...colors) =>
+  (shape) =>
+    shape.notAs(...colors.map((color) => qualifyTag(color, 'color')));
+
+Shape.registerMethod('notColor', notColor);
 
 const nth = (n) => (shape) => each()(shape)[n];
 
@@ -3215,6 +3222,20 @@ const scale =
     shape.transform(fromScaling([x, y, z]));
 
 Shape.registerMethod('scale', scale);
+
+const scaleToFit =
+  (x = 1, y = x, z = y) =>
+  (shape) => {
+    const { length, width, height } = shape.size();
+    const xFactor = x / length;
+    const yFactor = y / width;
+    const zFactor = z / height;
+    // Surfaces may get non-finite factors -- use the unit instead.
+    const finite = (factor) => (isFinite(factor) ? factor : 1);
+    return shape.scale(finite(xFactor), finite(yFactor), finite(zFactor));
+  };
+
+Shape.registerMethod('scaleToFit', scaleToFit);
 
 const smooth =
   (options = {}) =>
@@ -4155,4 +4176,4 @@ const yz = Shape.fromGeometry({
   ],
 });
 
-export { Alpha, Arc, Assembly, Box, ChainedHull, Cone, Empty, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Line, Octagon, Orb, Page, Path, Pentagon, Plan, Point, Points, Polygon, Polyhedron, Septagon, Shape, Spiral, Tetragon, Triangle, Wave, Weld, add, addTo, align, and, as, asPart, at, bend, billOfMaterials, clip, clipFrom, cloudSolid, color, colors, cut, cutFrom, cutOut, defGrblConstantLaser, defGrblDynamicLaser, defGrblPlotter, defGrblSpindle, defRgbColor, defThreejsMaterial, defTool, define, drop, each, ensurePages, ex, extrude, extrudeToPlane, fill, fit, fitTo, fuse, g, get, grow, inline, inset, keep, loadGeometry, loft, log, loop, mask, material, md, minkowskiDifference, minkowskiShell, minkowskiSum, move, n, noVoid, notAs, nth, ofPlan, offset, on, op, orient, outline, pack, play, projectToPlane, push, remesh, rotate, rotateX, rotateY, rotateZ, rx, ry, rz, saveGeometry, scale, section, sectionProfile, separate, size, sketch, smooth, tag, tags, test, tint, tool, twist, view, voidFn, weld, withFill, withFn, withInset, withOp, x, xy, xz, y, yz, z };
+export { Alpha, Arc, Assembly, Box, ChainedHull, Cone, Empty, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Line, Octagon, Orb, Page, Path, Pentagon, Plan, Point, Points, Polygon, Polyhedron, Septagon, Shape, Spiral, Tetragon, Triangle, Wave, Weld, add, addTo, align, and, as, asPart, at, bend, billOfMaterials, clip, clipFrom, cloudSolid, color, colors, cut, cutFrom, cutOut, defGrblConstantLaser, defGrblDynamicLaser, defGrblPlotter, defGrblSpindle, defRgbColor, defThreejsMaterial, defTool, define, drop, each, ensurePages, ex, extrude, extrudeToPlane, fill, fit, fitTo, fuse, g, get, grow, inline, inset, keep, loadGeometry, loft, log, loop, mask, material, md, minkowskiDifference, minkowskiShell, minkowskiSum, move, n, noVoid, notAs, notColor, nth, ofPlan, offset, on, op, orient, outline, pack, play, projectToPlane, push, remesh, rotate, rotateX, rotateY, rotateZ, rx, ry, rz, saveGeometry, scale, scaleToFit, section, sectionProfile, separate, size, sketch, smooth, tag, tags, test, tint, tool, twist, view, voidFn, weld, withFill, withFn, withInset, withOp, x, xy, xz, y, yz, z };

@@ -253,9 +253,8 @@ export const fromSvg = async (
             // Does fill, etc, inherit?
             const tags = toTagsFromName(fill, definitions);
             geometry.content.push(
-              transformGeometry(
-                scale(matrix),
-                fillGeometry(taggedPaths({ tags }, paths))
+              fillGeometry(
+                transformGeometry(scale(matrix), taggedPaths({ tags }, paths))
               )
             );
           }
