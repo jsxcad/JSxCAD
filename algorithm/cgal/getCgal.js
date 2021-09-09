@@ -2,8 +2,8 @@ import { emit, isNode, log, onBoot } from '@jsxcad/sys';
 
 import CgalBrowser from './cgal_browser.cjs';
 import CgalNode from './cgal_node.cjs';
-import { fileURLToPath } from 'url';
 import hashSum from 'hash-sum';
+import { toPathnameFromUrl } from './toPathnameFromUrl.js';
 
 let cgal;
 
@@ -31,17 +31,13 @@ export const initCgal = async () => {
       },
       locateFile(path) {
         if (path === 'cgal_node.wasm' || path === 'cgal_browser.wasm') {
-          let url = import.meta.url;
-          if (url.startsWith('file://')) {
-            url = fileURLToPath(url);
-            url = url.substring(0, url.length - 10) + 'cgal_node.wasm';
-            return url;
-          } else {
-            const parts = url.split('/');
-            parts.pop();
-            parts.push('cgal_browser.wasm');
-            return parts.join('/');
-          }
+          let pathname = toPathnameFromUrl(import.meta.url);
+          const base = pathname.substring(
+            0,
+            pathname.length - '/getCgal.js'.length
+          );
+          const wasmPathname = `${base}/cgal_node.wasm`;
+          return wasmPathname;
         }
         return path;
       },

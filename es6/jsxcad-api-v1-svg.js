@@ -134,6 +134,7 @@ const prepareSvg = (shape, name, options = {}) => {
       filename: `${name}_${index++}.svg`,
       type: 'image/svg+xml',
     });
+    Shape.fromGeometry(entry).view(options.view);
   }
   return entries;
 };

@@ -1,4 +1,3 @@
-import { info } from '@jsxcad/sys';
 import { outlineSurfaceMesh } from '@jsxcad/algorithm-cgal';
 import { taggedSegments } from '../tagged/taggedSegments.js';
 import { toSurfaceMesh } from './toSurfaceMesh.js';

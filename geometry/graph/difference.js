@@ -1,7 +1,6 @@
 import { differenceOfSurfaceMeshes } from '@jsxcad/algorithm-cgal';
 import { doesNotOverlap } from './doesNotOverlap.js';
 import { fromSurfaceMeshLazy } from './fromSurfaceMeshLazy.js';
-import { info } from '@jsxcad/sys';
 import { taggedGraph } from '../tagged/taggedGraph.js';
 import { toSurfaceMesh } from './toSurfaceMesh.js';
 

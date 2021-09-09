@@ -3,9 +3,9 @@ import { composeTransforms, fromSurfaceMeshToLazyGraph, fromPointsToAlphaShapeAs
 export { arrangePolygonsWithHoles } from './jsxcad-algorithm-cgal.js';
 import { cache, cacheRewriteTags, cacheSection } from './jsxcad-cache.js';
 import { equals, min, max, transform as transform$5, canonicalize as canonicalize$5, scale as scale$3, subtract } from './jsxcad-math-vec3.js';
-import { info, read as read$1, write as write$1 } from './jsxcad-sys.js';
 import { transform as transform$6, canonicalize as canonicalize$6 } from './jsxcad-math-poly3.js';
 import { canonicalize as canonicalize$7 } from './jsxcad-math-plane.js';
+import { info, read as read$1, write as write$1 } from './jsxcad-sys.js';
 
 const update = (geometry, updates, changes) => {
   if (updates === undefined) {
