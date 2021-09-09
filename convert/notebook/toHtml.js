@@ -54,6 +54,7 @@ export const toHtml = async (
     module,
   } = {}
 ) => {
+  const encodedNotebook = await encodeNotebook(notebook, { module });
   const html = `
 <html>
  <head>
@@ -128,11 +129,7 @@ export const toHtml = async (
     import { dataUrl } from '${modulePath}/jsxcad-ui-threejs.js';
     import { toDomElement } from '${modulePath}/jsxcad-ui-notebook.js';
 
-    const notebook = ${JSON.stringify(
-      await encodeNotebook(notebook, { module }),
-      null,
-      2
-    )};
+    const notebook = ${JSON.stringify(encodedNotebook, null, 2)};
 
     const prepareViews = async (notebook) => {
       // Prepare the view urls in the browser.
@@ -166,5 +163,5 @@ export const toHtml = async (
  </body>
 </html>
 `;
-  return new TextEncoder('utf8').encode(html);
+  return { html: new TextEncoder('utf8').encode(html), encodedNotebook };
 };

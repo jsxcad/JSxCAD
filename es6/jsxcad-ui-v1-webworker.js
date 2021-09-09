@@ -265,17 +265,19 @@ const bootstrap = async () => {
     }
 
     if (!notes) {
-      throw Error(`note without notes`);
-    }
+      // throw Error(`note without notes`);
+      // self.tell({ op: 'note', note });
+      console.log(`QQ/Note Without Note: ${JSON.stringify(note)}`);
+    } else {
+      notes.notes.push(note);
 
-    notes.notes.push(note);
-
-    if (note.endSourceLocation) {
-      self.tell({
-        op: 'notes',
-        ...notes
-      });
-      notes = undefined;
+      if (note.endSourceLocation) {
+        self.tell({
+          op: 'notes',
+          ...notes
+        });
+        notes = undefined;
+      }
     }
   }); // Handle any messages that came in while we were booting up.
 

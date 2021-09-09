@@ -10,8 +10,10 @@ test('Reuse', async (t) => {
     sha: 'c3b0ad66f1281cd0078066eea1b208fef9ffc133',
     type: 'Shape',
   });
+  const imports = [];
   const updates = {};
-  const replays = [];
+  const replays = {};
+  const exports = [];
   await toEcmascript(
     `
 import 'blah';
@@ -19,258 +21,364 @@ const Mountain = () => foo();
 const mountainView = Mountain().scale(0.5).Page();
 mountainView.frontView({ position: [0, -100, 50] });
 `,
-    { updates, replays }
+    { imports, updates, replays, exports }
   );
 
-  t.deepEqual(replays, [
-    `
-try {
-const $1 = await importModule('blah');
-pushSourceLocation({
-  path: '',
-  id: 'Mountain'
-});
-const Mountain = () => foo();
-popSourceLocation({
-  path: '',
-  id: 'Mountain'
-});
+  t.deepEqual(
+    { imports, exports, updates, replays },
+    {
+      imports: [],
+      exports: [],
+      updates: {
+        mountainView: {
+          dependencies: ['$1', 'Mountain'],
+          imports: ['blah'],
+          program:
+            '\n' +
+            'try {\n' +
+            "await replayRecordedNotes('', '$1');\n" +
+            '\n' +
+            "const $1 = await importModule('blah');\n" +
+            'pushSourceLocation({\n' +
+            "  path: '',\n" +
+            "  id: 'Mountain'\n" +
+            '});\n' +
+            '\n' +
+            "await replayRecordedNotes('', 'Mountain');\n" +
+            '\n' +
+            'const Mountain = () => foo();\n' +
+            'popSourceLocation({\n' +
+            "  path: '',\n" +
+            "  id: 'Mountain'\n" +
+            '});\n' +
+            '\n' +
+            "info('define mountainView');\n" +
+            '\n' +
+            'pushSourceLocation({\n' +
+            "  path: '',\n" +
+            "  id: 'mountainView'\n" +
+            '});\n' +
+            '\n' +
+            "beginRecordingNotes('', 'mountainView', {\n" +
+            '  line: 4,\n' +
+            '  column: 0\n' +
+            '});\n' +
+            '\n' +
+            'const mountainView = Mountain().scale(0.5).Page();\n' +
+            "await write('meta/def//mountainView', {\n" +
+            "  sha: 'dfc411bd02db82d7dc9410873aab460c274d2b01',\n" +
+            "  type: mountainView instanceof Shape ? 'Shape' : 'Object'\n" +
+            '});\n' +
+            '\n' +
+            'if (mountainView instanceof Shape) {\n' +
+            "  await saveGeometry('data/def//mountainView', mountainView);\n" +
+            '}\n' +
+            '\n' +
+            "await saveRecordedNotes('', 'mountainView');\n" +
+            '\n' +
+            'popSourceLocation({\n' +
+            "  path: '',\n" +
+            "  id: 'mountainView'\n" +
+            '});\n' +
+            '\n' +
+            '\n' +
+            '} catch (error) { throw error; }\n',
+        },
+        $2: {
+          dependencies: ['$1', 'mountainView'],
+          imports: ['blah'],
+          program:
+            '\n' +
+            'try {\n' +
+            "await replayRecordedNotes('', '$1');\n" +
+            '\n' +
+            "const $1 = await importModule('blah');\n" +
+            'pushSourceLocation({\n' +
+            "  path: '',\n" +
+            "  id: 'Mountain'\n" +
+            '});\n' +
+            '\n' +
+            "await replayRecordedNotes('', 'Mountain');\n" +
+            '\n' +
+            'const Mountain = () => foo();\n' +
+            'popSourceLocation({\n' +
+            "  path: '',\n" +
+            "  id: 'Mountain'\n" +
+            '});\n' +
+            '\n' +
+            "const mountainView = await loadGeometry('data/def//mountainView');\n" +
+            '\n' +
+            'Object.freeze(mountainView);\n' +
+            '\n' +
+            'pushSourceLocation({\n' +
+            "  path: '',\n" +
+            "  id: 'mountainView'\n" +
+            '});\n' +
+            '\n' +
+            "await replayRecordedNotes('', 'mountainView');\n" +
+            '\n' +
+            'popSourceLocation({\n' +
+            "  path: '',\n" +
+            "  id: 'mountainView'\n" +
+            '});\n' +
+            '\n' +
+            "info('define $2');\n" +
+            '\n' +
+            'pushSourceLocation({\n' +
+            "  path: '',\n" +
+            "  id: '$2'\n" +
+            '});\n' +
+            '\n' +
+            "beginRecordingNotes('', '$2', {\n" +
+            '  line: 1,\n' +
+            '  column: 0\n' +
+            '});\n' +
+            '\n' +
+            'const $2 = mountainView.frontView({\n' +
+            '  position: [0, -100, 50]\n' +
+            '});\n' +
+            "await write('meta/def//$2', {\n" +
+            "  sha: '46ba2bee79153c17eef85ba46ecea6f9168c571f',\n" +
+            "  type: $2 instanceof Shape ? 'Shape' : 'Object'\n" +
+            '});\n' +
+            '\n' +
+            'if ($2 instanceof Shape) {\n' +
+            "  await saveGeometry('data/def//$2', $2);\n" +
+            '}\n' +
+            '\n' +
+            "await saveRecordedNotes('', '$2');\n" +
+            '\n' +
+            'popSourceLocation({\n' +
+            "  path: '',\n" +
+            "  id: '$2'\n" +
+            '});\n' +
+            '\n' +
+            '\n' +
+            '} catch (error) { throw error; }\n',
+        },
+      },
+      replays: {
+        $1: {
+          dependencies: ['$1', 'importModule'],
+          imports: [],
+          program:
+            '\n' +
+            'try {\n' +
+            "await replayRecordedNotes('', '$1');\n" +
+            '\n' +
+            '\n' +
+            '} catch (error) { throw error; }\n',
+        },
+        Mountain: {
+          dependencies: ['$1', 'foo'],
+          imports: [],
+          program:
+            '\n' +
+            'try {\n' +
+            'pushSourceLocation({\n' +
+            "  path: '',\n" +
+            "  id: 'Mountain'\n" +
+            '});\n' +
+            '\n' +
+            "await replayRecordedNotes('', 'Mountain');\n" +
+            '\n' +
+            'popSourceLocation({\n' +
+            "  path: '',\n" +
+            "  id: 'Mountain'\n" +
+            '});\n' +
+            '\n' +
+            '\n' +
+            '} catch (error) { throw error; }\n',
+        },
+      },
+    }
+  );
 
-} catch (error) { throw error; }
-`,
-  ]);
-  t.deepEqual(updates, {
-    $2: {
-      dependencies: ['$1', 'mountainView'],
-      program: `
-try {
-const $1 = await importModule('blah');
-pushSourceLocation({
-  path: '',
-  id: 'Mountain'
-});
-
-const Mountain = () => foo();
-popSourceLocation({
-  path: '',
-  id: 'Mountain'
-});
-
-const mountainView = await loadGeometry('data/def//mountainView');
-
-Object.freeze(mountainView);
-
-info('define $2');
-
-pushSourceLocation({
-  path: '',
-  id: '$2'
-});
-
-beginRecordingNotes('', '$2', {
-  line: 1,
-  column: 0
-});
-
-const $2 = mountainView.frontView({
-  position: [0, -100, 50]
-});
-await write('meta/def//$2', {
-  sha: '46ba2bee79153c17eef85ba46ecea6f9168c571f',
-  type: $2 instanceof Shape ? 'Shape' : 'Object'
-});
-if ($2 instanceof Shape) {
-  await saveGeometry('data/def//$2', $2);
-}
-
-await saveRecordedNotes('', '$2');
-
-popSourceLocation({
-  path: '',
-  id: '$2'
-});
-
-
-} catch (error) { throw error; }
-`,
-    },
-    mountainView: {
-      dependencies: ['$1', 'Mountain'],
-      program: `
-try {
-const $1 = await importModule('blah');
-pushSourceLocation({
-  path: '',
-  id: 'Mountain'
-});
-
-const Mountain = () => foo();
-popSourceLocation({
-  path: '',
-  id: 'Mountain'
-});
-
-info('define mountainView');
-
-pushSourceLocation({
-  path: '',
-  id: 'mountainView'
-});
-
-beginRecordingNotes('', 'mountainView', {
-  line: 4,
-  column: 0
-});
-
-const mountainView = Mountain().scale(0.5).Page();
-await write('meta/def//mountainView', {
-  sha: 'dfc411bd02db82d7dc9410873aab460c274d2b01',
-  type: mountainView instanceof Shape ? 'Shape' : 'Object'
-});
-if (mountainView instanceof Shape) {
-  await saveGeometry('data/def//mountainView', mountainView);
-}
-
-await saveRecordedNotes('', 'mountainView');
-
-popSourceLocation({
-  path: '',
-  id: 'mountainView'
-});
-
-
-} catch (error) { throw error; }
-`,
-    },
-  });
-
+  const reimports = [];
   const reupdates = {};
-  const rereplays = [];
+  const rereplays = {};
+  const reexports = [];
   await toEcmascript(
     `
 const Mountain = () => bar();
 const mountainView = Mountain().scale(0.5).Page();
 mountainView.frontView({ position: [0, -100, 50] });
 `,
-    { updates: reupdates, replays: rereplays }
+    {
+      imports: reimports,
+      updates: reupdates,
+      replays: rereplays,
+      exports: reexports,
+    }
   );
 
-  t.deepEqual(rereplays, [
-    `
-try {
-pushSourceLocation({
-  path: '',
-  id: 'Mountain'
-});
-const Mountain = () => bar();
-popSourceLocation({
-  path: '',
-  id: 'Mountain'
-});
-
-} catch (error) { throw error; }
-`,
-  ]);
-  t.deepEqual(reupdates, {
-    $1: {
-      dependencies: ['mountainView'],
-      program: `
-try {
-pushSourceLocation({
-  path: '',
-  id: 'Mountain'
-});
-
-const Mountain = () => bar();
-popSourceLocation({
-  path: '',
-  id: 'Mountain'
-});
-
-const mountainView = await loadGeometry('data/def//mountainView');
-
-Object.freeze(mountainView);
-
-info('define $1');
-
-pushSourceLocation({
-  path: '',
-  id: '$1'
-});
-
-beginRecordingNotes('', '$1', {
-  line: 1,
-  column: 0
-});
-
-const $1 = mountainView.frontView({
-  position: [0, -100, 50]
-});
-await write('meta/def//$1', {
-  sha: 'f6fbedf20aa75786f6cce70e27e67a1a5f50bc37',
-  type: $1 instanceof Shape ? 'Shape' : 'Object'
-});
-if ($1 instanceof Shape) {
-  await saveGeometry('data/def//$1', $1);
-}
-
-await saveRecordedNotes('', '$1');
-
-popSourceLocation({
-  path: '',
-  id: '$1'
-});
-
-
-} catch (error) { throw error; }
-`,
-    },
-    mountainView: {
-      dependencies: ['Mountain'],
-      program: `
-try {
-pushSourceLocation({
-  path: '',
-  id: 'Mountain'
-});
-
-const Mountain = () => bar();
-popSourceLocation({
-  path: '',
-  id: 'Mountain'
-});
-
-info('define mountainView');
-
-pushSourceLocation({
-  path: '',
-  id: 'mountainView'
-});
-
-beginRecordingNotes('', 'mountainView', {
-  line: 3,
-  column: 0
-});
-
-const mountainView = Mountain().scale(0.5).Page();
-await write('meta/def//mountainView', {
-  sha: '1952b6311872fb454d675b9d14b8c53c41c23c57',
-  type: mountainView instanceof Shape ? 'Shape' : 'Object'
-});
-if (mountainView instanceof Shape) {
-  await saveGeometry('data/def//mountainView', mountainView);
-}
-
-await saveRecordedNotes('', 'mountainView');
-
-popSourceLocation({
-  path: '',
-  id: 'mountainView'
-});
-
-
-} catch (error) { throw error; }
-`,
-    },
-  });
+  t.deepEqual(
+    { imports, exports, updates, replays },
+    {
+      imports: [],
+      exports: [],
+      updates: {
+        mountainView: {
+          dependencies: ['$1', 'Mountain'],
+          imports: ['blah'],
+          program:
+            '\n' +
+            'try {\n' +
+            "await replayRecordedNotes('', '$1');\n" +
+            '\n' +
+            "const $1 = await importModule('blah');\n" +
+            'pushSourceLocation({\n' +
+            "  path: '',\n" +
+            "  id: 'Mountain'\n" +
+            '});\n' +
+            '\n' +
+            "await replayRecordedNotes('', 'Mountain');\n" +
+            '\n' +
+            'const Mountain = () => foo();\n' +
+            'popSourceLocation({\n' +
+            "  path: '',\n" +
+            "  id: 'Mountain'\n" +
+            '});\n' +
+            '\n' +
+            "info('define mountainView');\n" +
+            '\n' +
+            'pushSourceLocation({\n' +
+            "  path: '',\n" +
+            "  id: 'mountainView'\n" +
+            '});\n' +
+            '\n' +
+            "beginRecordingNotes('', 'mountainView', {\n" +
+            '  line: 4,\n' +
+            '  column: 0\n' +
+            '});\n' +
+            '\n' +
+            'const mountainView = Mountain().scale(0.5).Page();\n' +
+            "await write('meta/def//mountainView', {\n" +
+            "  sha: 'dfc411bd02db82d7dc9410873aab460c274d2b01',\n" +
+            "  type: mountainView instanceof Shape ? 'Shape' : 'Object'\n" +
+            '});\n' +
+            '\n' +
+            'if (mountainView instanceof Shape) {\n' +
+            "  await saveGeometry('data/def//mountainView', mountainView);\n" +
+            '}\n' +
+            '\n' +
+            "await saveRecordedNotes('', 'mountainView');\n" +
+            '\n' +
+            'popSourceLocation({\n' +
+            "  path: '',\n" +
+            "  id: 'mountainView'\n" +
+            '});\n' +
+            '\n' +
+            '\n' +
+            '} catch (error) { throw error; }\n',
+        },
+        $2: {
+          dependencies: ['$1', 'mountainView'],
+          imports: ['blah'],
+          program:
+            '\n' +
+            'try {\n' +
+            "await replayRecordedNotes('', '$1');\n" +
+            '\n' +
+            "const $1 = await importModule('blah');\n" +
+            'pushSourceLocation({\n' +
+            "  path: '',\n" +
+            "  id: 'Mountain'\n" +
+            '});\n' +
+            '\n' +
+            "await replayRecordedNotes('', 'Mountain');\n" +
+            '\n' +
+            'const Mountain = () => foo();\n' +
+            'popSourceLocation({\n' +
+            "  path: '',\n" +
+            "  id: 'Mountain'\n" +
+            '});\n' +
+            '\n' +
+            "const mountainView = await loadGeometry('data/def//mountainView');\n" +
+            '\n' +
+            'Object.freeze(mountainView);\n' +
+            '\n' +
+            'pushSourceLocation({\n' +
+            "  path: '',\n" +
+            "  id: 'mountainView'\n" +
+            '});\n' +
+            '\n' +
+            "await replayRecordedNotes('', 'mountainView');\n" +
+            '\n' +
+            'popSourceLocation({\n' +
+            "  path: '',\n" +
+            "  id: 'mountainView'\n" +
+            '});\n' +
+            '\n' +
+            "info('define $2');\n" +
+            '\n' +
+            'pushSourceLocation({\n' +
+            "  path: '',\n" +
+            "  id: '$2'\n" +
+            '});\n' +
+            '\n' +
+            "beginRecordingNotes('', '$2', {\n" +
+            '  line: 1,\n' +
+            '  column: 0\n' +
+            '});\n' +
+            '\n' +
+            'const $2 = mountainView.frontView({\n' +
+            '  position: [0, -100, 50]\n' +
+            '});\n' +
+            "await write('meta/def//$2', {\n" +
+            "  sha: '46ba2bee79153c17eef85ba46ecea6f9168c571f',\n" +
+            "  type: $2 instanceof Shape ? 'Shape' : 'Object'\n" +
+            '});\n' +
+            '\n' +
+            'if ($2 instanceof Shape) {\n' +
+            "  await saveGeometry('data/def//$2', $2);\n" +
+            '}\n' +
+            '\n' +
+            "await saveRecordedNotes('', '$2');\n" +
+            '\n' +
+            'popSourceLocation({\n' +
+            "  path: '',\n" +
+            "  id: '$2'\n" +
+            '});\n' +
+            '\n' +
+            '\n' +
+            '} catch (error) { throw error; }\n',
+        },
+      },
+      replays: {
+        $1: {
+          dependencies: ['$1', 'importModule'],
+          imports: [],
+          program:
+            '\n' +
+            'try {\n' +
+            "await replayRecordedNotes('', '$1');\n" +
+            '\n' +
+            '\n' +
+            '} catch (error) { throw error; }\n',
+        },
+        Mountain: {
+          dependencies: ['$1', 'foo'],
+          imports: [],
+          program:
+            '\n' +
+            'try {\n' +
+            'pushSourceLocation({\n' +
+            "  path: '',\n" +
+            "  id: 'Mountain'\n" +
+            '});\n' +
+            '\n' +
+            "await replayRecordedNotes('', 'Mountain');\n" +
+            '\n' +
+            'popSourceLocation({\n' +
+            "  path: '',\n" +
+            "  id: 'Mountain'\n" +
+            '});\n' +
+            '\n' +
+            '\n' +
+            '} catch (error) { throw error; }\n',
+        },
+      },
+    }
+  );
 });

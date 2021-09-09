@@ -14,6 +14,7 @@ import { control } from './control.js';
 import { readObj } from '@jsxcad/api-v1-obj';
 import { readOff } from '@jsxcad/api-v1-off';
 import { readSvg } from '@jsxcad/api-v1-svg';
+import { setApi } from './api.js';
 import { toSvg } from '@jsxcad/convert-svg';
 
 const api = {
@@ -58,5 +59,7 @@ registerDynamicModule(module('threejs'), '@jsxcad/api-v1-threejs');
 registerDynamicModule(module('units'), '@jsxcad/api-v1-units');
 
 export { evaluate, execute } from './evaluate.js';
+
+setApi(api);
 
 export default api;

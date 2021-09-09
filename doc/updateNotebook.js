@@ -67,16 +67,22 @@ export const updateNotebook = async (
   try {
     // FIX: This may produce a non-deterministic ordering for now.
     const module = `${target}.nb`;
-    await api.importModule(module, { clearUpdateEmits: false });
+    const topLevel = new Map();
+    await api.importModule(module, { clearUpdateEmits: false, topLevel });
     await resolvePending();
     const notebook = getEmitted();
-    const html = await toHtml(notebook, { module });
+    const { html, encodedNotebook } = await toHtml(notebook, { module });
     writeFileSync(`${target}.html`, html);
     const { imageUrlList } = await screenshot(
       new TextDecoder('utf8').decode(html),
       `${target}.png`
     );
-    await writeMarkdown(target, notebook, imageUrlList, failedExpectations);
+    await writeMarkdown(
+      target,
+      encodedNotebook,
+      imageUrlList,
+      failedExpectations
+    );
     for (let nth = 0; nth < imageUrlList.length; nth++) {
       const observedPath = `${target}.md.${nth}.observed.png`;
       const expectedPath = `${target}.md.${nth}.png`;

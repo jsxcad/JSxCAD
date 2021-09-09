@@ -4358,9 +4358,17 @@ function getBoundingClientRect(element, includeScale) {
   var scaleY = 1;
 
   if (isHTMLElement(element) && includeScale) {
+    var offsetHeight = element.offsetHeight;
+    var offsetWidth = element.offsetWidth; // Do not attempt to divide by 0, otherwise we get `Infinity` as scale
     // Fallback to 1 in case both values are `0`
-    scaleX = rect.width / element.offsetWidth || 1;
-    scaleY = rect.height / element.offsetHeight || 1;
+
+    if (offsetWidth > 0) {
+      scaleX = rect.width / offsetWidth || 1;
+    }
+
+    if (offsetHeight > 0) {
+      scaleY = rect.height / offsetHeight || 1;
+    }
   }
 
   return {
@@ -4639,6 +4647,10 @@ var arrow$1 = {
   requiresIfExists: ['preventOverflow']
 };
 
+function getVariation(placement) {
+  return placement.split('-')[1];
+}
+
 var unsetSides = {
   top: 'auto',
   right: 'auto',
@@ -4665,6 +4677,7 @@ function mapToStyles(_ref2) {
   var popper = _ref2.popper,
       popperRect = _ref2.popperRect,
       placement = _ref2.placement,
+      variation = _ref2.variation,
       offsets = _ref2.offsets,
       position = _ref2.position,
       gpuAcceleration = _ref2.gpuAcceleration,
@@ -4691,7 +4704,7 @@ function mapToStyles(_ref2) {
     if (offsetParent === getWindow(popper)) {
       offsetParent = getDocumentElement(popper);
 
-      if (getComputedStyle$1(offsetParent).position !== 'static') {
+      if (getComputedStyle$1(offsetParent).position !== 'static' && position === 'absolute') {
         heightProp = 'scrollHeight';
         widthProp = 'scrollWidth';
       }
@@ -4700,14 +4713,14 @@ function mapToStyles(_ref2) {
 
     offsetParent = offsetParent;
 
-    if (placement === top) {
+    if (placement === top || (placement === left || placement === right) && variation === end) {
       sideY = bottom; // $FlowFixMe[prop-missing]
 
       y -= offsetParent[heightProp] - popperRect.height;
       y *= gpuAcceleration ? 1 : -1;
     }
 
-    if (placement === left) {
+    if (placement === left || (placement === top || placement === bottom) && variation === end) {
       sideX = right; // $FlowFixMe[prop-missing]
 
       x -= offsetParent[widthProp] - popperRect.width;
@@ -4722,7 +4735,7 @@ function mapToStyles(_ref2) {
   if (gpuAcceleration) {
     var _Object$assign;
 
-    return Object.assign({}, commonStyles, (_Object$assign = {}, _Object$assign[sideY] = hasY ? '0' : '', _Object$assign[sideX] = hasX ? '0' : '', _Object$assign.transform = (win.devicePixelRatio || 1) < 2 ? "translate(" + x + "px, " + y + "px)" : "translate3d(" + x + "px, " + y + "px, 0)", _Object$assign));
+    return Object.assign({}, commonStyles, (_Object$assign = {}, _Object$assign[sideY] = hasY ? '0' : '', _Object$assign[sideX] = hasX ? '0' : '', _Object$assign.transform = (win.devicePixelRatio || 1) <= 1 ? "translate(" + x + "px, " + y + "px)" : "translate3d(" + x + "px, " + y + "px, 0)", _Object$assign));
   }
 
   return Object.assign({}, commonStyles, (_Object$assign2 = {}, _Object$assign2[sideY] = hasY ? y + "px" : '', _Object$assign2[sideX] = hasX ? x + "px" : '', _Object$assign2.transform = '', _Object$assign2));
@@ -4750,6 +4763,7 @@ function computeStyles(_ref4) {
 
   var commonStyles = {
     placement: getBasePlacement(state.placement),
+    variation: getVariation(state.placement),
     popper: state.elements.popper,
     popperRect: state.rects.popper,
     gpuAcceleration: gpuAcceleration
@@ -5052,10 +5066,6 @@ function getClippingRect(element, boundary, rootBoundary) {
   return clippingRect;
 }
 
-function getVariation(placement) {
-  return placement.split('-')[1];
-}
-
 function computeOffsets(_ref) {
   var reference = _ref.reference,
       element = _ref.element,
@@ -5141,11 +5151,10 @@ function detectOverflow(state, options) {
       padding = _options$padding === void 0 ? 0 : _options$padding;
   var paddingObject = mergePaddingObject(typeof padding !== 'number' ? padding : expandToHashMap(padding, basePlacements));
   var altContext = elementContext === popper ? reference : popper;
-  var referenceElement = state.elements.reference;
   var popperRect = state.rects.popper;
   var element = state.elements[altBoundary ? altContext : elementContext];
   var clippingClientRect = getClippingRect(isElement(element) ? element : element.contextElement || getDocumentElement(state.elements.popper), boundary, rootBoundary);
-  var referenceClientRect = getBoundingClientRect(referenceElement);
+  var referenceClientRect = getBoundingClientRect(state.elements.reference);
   var popperOffsets = computeOffsets({
     reference: referenceClientRect,
     element: popperRect,
@@ -5750,7 +5759,10 @@ var MISSING_DEPENDENCY_ERROR = 'Popper: modifier "%s" requires "%s", but "%s" mo
 var VALID_PROPERTIES = ['name', 'enabled', 'phase', 'fn', 'effect', 'requires', 'options'];
 function validateModifiers(modifiers) {
   modifiers.forEach(function (modifier) {
-    Object.keys(modifier).forEach(function (key) {
+    [].concat(Object.keys(modifier), VALID_PROPERTIES) // IE11-compatible replacement for `new Set(iterable)`
+    .filter(function (value, index, self) {
+      return self.indexOf(value) === index;
+    }).forEach(function (key) {
       switch (key) {
         case 'name':
           if (typeof modifier.name !== 'string') {
@@ -5763,6 +5775,8 @@ function validateModifiers(modifiers) {
           if (typeof modifier.enabled !== 'boolean') {
             console.error(format(INVALID_MODIFIER_ERROR, modifier.name, '"enabled"', '"boolean"', "\"" + String(modifier.enabled) + "\""));
           }
+
+          break;
 
         case 'phase':
           if (modifierPhases.indexOf(modifier.phase) < 0) {
@@ -5779,14 +5793,14 @@ function validateModifiers(modifiers) {
           break;
 
         case 'effect':
-          if (typeof modifier.effect !== 'function') {
+          if (modifier.effect != null && typeof modifier.effect !== 'function') {
             console.error(format(INVALID_MODIFIER_ERROR, modifier.name, '"effect"', '"function"', "\"" + String(modifier.fn) + "\""));
           }
 
           break;
 
         case 'requires':
-          if (!Array.isArray(modifier.requires)) {
+          if (modifier.requires != null && !Array.isArray(modifier.requires)) {
             console.error(format(INVALID_MODIFIER_ERROR, modifier.name, '"requires"', '"array"', "\"" + String(modifier.requires) + "\""));
           }
 
@@ -5896,7 +5910,8 @@ function popperGenerator(generatorOptions) {
     var isDestroyed = false;
     var instance = {
       state: state,
-      setOptions: function setOptions(options) {
+      setOptions: function setOptions(setOptionsAction) {
+        var options = typeof setOptionsAction === 'function' ? setOptionsAction(state.options) : setOptionsAction;
         cleanupModifierEffects();
         state.options = Object.assign({}, defaultOptions, state.options, options);
         state.scrollParents = {
@@ -7259,6 +7274,9 @@ function usePopperMarginModifiers() {
       name: 'popoverArrowMargins',
       enabled: true,
       phase: 'main',
+      fn: function fn() {
+        return undefined;
+      },
       requiresIfExists: ['arrow'],
       effect: function effect(_ref2) {
         var state = _ref2.state;
@@ -42539,7 +42557,7 @@ var Modal = /*#__PURE__*/React$3.forwardRef(function (_ref, ref) {
       return;
     }
 
-    onHide();
+    onHide == null ? void 0 : onHide();
   };
 
   var handleEscapeKeyDown = function handleEscapeKeyDown(e) {
@@ -42553,37 +42571,22 @@ var Modal = /*#__PURE__*/React$3.forwardRef(function (_ref, ref) {
     }
   };
 
-  var handleEnter = function handleEnter(node) {
+  var handleEnter = function handleEnter(node, isAppearing) {
     if (node) {
       node.style.display = 'block';
       updateDialogStyle(node);
     }
 
-    for (var _len = arguments.length, args = new Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
-      args[_key - 1] = arguments[_key];
-    }
-
-    if (onEnter) onEnter.apply(void 0, [node].concat(args));
+    onEnter == null ? void 0 : onEnter(node, isAppearing);
   };
 
   var handleExit = function handleExit(node) {
-    if (removeStaticModalAnimationRef.current) {
-      removeStaticModalAnimationRef.current();
-    }
-
-    for (var _len2 = arguments.length, args = new Array(_len2 > 1 ? _len2 - 1 : 0), _key2 = 1; _key2 < _len2; _key2++) {
-      args[_key2 - 1] = arguments[_key2];
-    }
-
-    if (onExit) onExit.apply(void 0, [node].concat(args));
+    removeStaticModalAnimationRef.current == null ? void 0 : removeStaticModalAnimationRef.current();
+    onExit == null ? void 0 : onExit(node);
   };
 
-  var handleEntering = function handleEntering(node) {
-    for (var _len3 = arguments.length, args = new Array(_len3 > 1 ? _len3 - 1 : 0), _key3 = 1; _key3 < _len3; _key3++) {
-      args[_key3 - 1] = arguments[_key3];
-    }
-
-    if (onEntering) onEntering.apply(void 0, [node].concat(args)); // FIXME: This should work even when animation is disabled.
+  var handleEntering = function handleEntering(node, isAppearing) {
+    onEntering == null ? void 0 : onEntering(node, isAppearing); // FIXME: This should work even when animation is disabled.
 
     addEventListener(window, 'resize', handleWindowResize);
   };
@@ -42591,11 +42594,7 @@ var Modal = /*#__PURE__*/React$3.forwardRef(function (_ref, ref) {
   var handleExited = function handleExited(node) {
     if (node) node.style.display = ''; // RHL removes it sometimes
 
-    for (var _len4 = arguments.length, args = new Array(_len4 > 1 ? _len4 - 1 : 0), _key4 = 1; _key4 < _len4; _key4++) {
-      args[_key4 - 1] = arguments[_key4];
-    }
-
-    if (onExited) onExited.apply(void 0, args); // FIXME: This should work even when animation is disabled.
+    onExited == null ? void 0 : onExited(node); // FIXME: This should work even when animation is disabled.
 
     removeEventListener(window, 'resize', handleWindowResize);
   };
