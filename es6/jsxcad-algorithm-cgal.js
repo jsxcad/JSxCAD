@@ -353,6 +353,17 @@ function sum (o) {
 
 var hashSum = sum;
 
+const toPathnameFromUrl = (url) => {
+  const { pathname } = new URL(url);
+  if (pathname.match(/^[/][A-Z]:[/]/)) {
+    // This looks like a windows file url.
+    // Unfortunately it has a leading slash that we need to get rid of.
+    return pathname.substring(1);
+  } else {
+    return pathname;
+  }
+};
+
 let cgal;
 
 const initCgal = async () => {
@@ -379,18 +390,13 @@ const initCgal = async () => {
       },
       locateFile(path) {
         if (path === 'cgal_node.wasm' || path === 'cgal_browser.wasm') {
-          let url = import.meta.url;
-          if (url.startsWith('file://')) {
-            const { pathname } = new URL(url);
-            const base = pathname.substring(0, pathname.length - 11);
-            const wasmPathname = `${base}/cgal_node.wasm`;
-            return wasmPathname;
-          } else {
-            const parts = url.split('/');
-            parts.pop();
-            parts.push('cgal_browser.wasm');
-            return parts.join('/');
-          }
+          let pathname = toPathnameFromUrl(import.meta.url);
+          const base = pathname.substring(
+            0,
+            pathname.length - '/getCgal.js'.length
+          );
+          const wasmPathname = `${base}/cgal_node.wasm`;
+          return wasmPathname;
         }
         return path;
       },
