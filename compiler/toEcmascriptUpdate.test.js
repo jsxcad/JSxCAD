@@ -21,7 +21,7 @@ const Mountain = () => foo();
 const mountainView = Mountain().scale(0.5).Page();
 mountainView.frontView({ position: [0, -100, 50] });
 `,
-    { imports, updates, replays, exports }
+    { imports, updates, replays, exports, noLines: true }
   );
 
   t.deepEqual(
@@ -209,6 +209,7 @@ mountainView.frontView({ position: [0, -100, 50] });
       updates: reupdates,
       replays: rereplays,
       exports: reexports,
+      noLines: true,
     }
   );
 

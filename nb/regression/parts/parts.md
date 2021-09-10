@@ -1,3 +1,6 @@
 Parts regression tests.
 
+const disk = Arc(4).ex(1).asPart('disk');
+const beam = Box(2, 2).ex(10).asPart('beam');
+const diskBeam = disk.and(beam).asPart('diskBeam');
 The bill of materials is disk,diskBeam

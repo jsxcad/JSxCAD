@@ -1,61 +1,42 @@
 import { Shape } from './Shape.js';
-import { qualifyTag } from './tag.js';
 import { rewrite } from '@jsxcad/geometry';
-
-export const selectToKeep = (matchTags, geometryTags) => {
-  if (geometryTags === undefined) {
-    return false;
-  }
-  for (const geometryTag of geometryTags) {
-    if (matchTags.includes(geometryTag)) {
-      return true;
-    }
-  }
-  return false;
-};
-
-export const selectToDrop = (matchTags, geometryTags) =>
-  !selectToKeep(matchTags, geometryTags);
-
-export const keepOrDrop = (shape, tags, select) => {
-  const matchTags = tags.map((tag) => qualifyTag(tag, 'user'));
-
-  const op = (geometry, descend) => {
-    // FIX: Need a more reliable way to detect leaf structure.
-    switch (geometry.type) {
-      case 'group':
-      case 'layout': {
-        return descend();
-      }
-      case 'item':
-      // falls through to deal with item as a leaf.
-      default: {
-        if (select(matchTags, geometry.tags)) {
-          return descend();
-        } else {
-          // Operate on the shape.
-          const shape = Shape.fromGeometry(geometry);
-          // Note that this transform does not violate geometry disjunction.
-          const dropped = shape.void().toGeometry();
-          return dropped;
-        }
-      }
-    }
-  };
-
-  const rewritten = rewrite(shape.toKeptGeometry(), op);
-  return Shape.fromGeometry(rewritten);
-};
+import { tagMatcher } from './tag.js';
 
 export const keep =
   (...tags) =>
   (shape) => {
-    if (tags.length === 0) {
-      // Dropping no tags is an unconditional keep.
-      return keepOrDrop(shape, [], selectToDrop);
-    } else {
-      return keepOrDrop(shape, tags, selectToKeep);
-    }
+    const matchers = tags.map((tag) => tagMatcher(tag, 'user'));
+    const isMatch = (tags, tag) => {
+      for (const matcher of matchers) {
+        for (const tag of tags) {
+          if (matcher(tag)) {
+            return true;
+          }
+        }
+      }
+      return false;
+    };
+    const op = (geometry, descend) => {
+      switch (geometry.type) {
+        case 'group':
+        case 'layout':
+          return descend();
+        default: {
+          // Should this pass through item boundaries?
+          const { tags = [] } = geometry;
+          if (isMatch(tags)) {
+            if (geometry.type === 'item') {
+              return geometry;
+            } else {
+              return descend();
+            }
+          } else {
+            return Shape.fromGeometry(geometry).void().toGeometry();
+          }
+        }
+      }
+    };
+    return Shape.fromGeometry(rewrite(shape.toGeometry(), op));
   };
 
 Shape.registerMethod('keep', keep);

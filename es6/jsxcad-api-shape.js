@@ -602,99 +602,84 @@ const cutOut =
   };
 Shape.registerMethod('cutOut', cutOut);
 
-const tag =
-  (...tags) =>
-  (shape) =>
-    Shape.fromGeometry(
-      rewriteTags(
-        tags.map((tag) => `user:${tag}`),
-        [],
-        shape.toGeometry()
-      )
-    );
-
-Shape.registerMethod('tag', tag);
-
 const qualifyTag = (tag, namespace = 'user') => {
   if (tag.includes(':')) {
     return tag;
   }
-  if (tag === '*') {
-    return 'tagpath:*';
-  }
   return `${namespace}:${tag}`;
+};
+
+const tagMatcher = (tag, namespace = 'user') => {
+  const qualifiedTag = qualifyTag(tag, namespace);
+  if (qualifiedTag.endsWith(':*')) {
+    const [namespace] = qualifiedTag.split(':');
+    const prefix = `${namespace}:`;
+    return (tag) => tag.startsWith(prefix);
+  } else {
+    return (tag) => tag === qualifiedTag;
+  }
 };
 
 const qualifyTagPath = (path, namespace = 'user') =>
   path.split('/').map((tag) => qualifyTag(tag, namespace));
 
-const selectToKeep = (matchTags, geometryTags) => {
-  if (geometryTags === undefined) {
-    return false;
-  }
-  for (const geometryTag of geometryTags) {
-    if (matchTags.includes(geometryTag)) {
-      return true;
-    }
-  }
-  return false;
-};
-
-const selectToDrop = (matchTags, geometryTags) =>
-  !selectToKeep(matchTags, geometryTags);
-
-const keepOrDrop = (shape, tags, select) => {
-  const matchTags = tags.map((tag) => qualifyTag(tag, 'user'));
-
-  const op = (geometry, descend) => {
-    // FIX: Need a more reliable way to detect leaf structure.
-    switch (geometry.type) {
-      case 'group':
-      case 'layout': {
-        return descend();
-      }
-      case 'item':
-      // falls through to deal with item as a leaf.
-      default: {
-        if (select(matchTags, geometry.tags)) {
-          return descend();
-        } else {
-          // Operate on the shape.
-          const shape = Shape.fromGeometry(geometry);
-          // Note that this transform does not violate geometry disjunction.
-          const dropped = shape.void().toGeometry();
-          return dropped;
-        }
-      }
-    }
-  };
-
-  const rewritten = rewrite(shape.toKeptGeometry(), op);
-  return Shape.fromGeometry(rewritten);
-};
-
-const keep =
+const tag =
   (...tags) =>
   (shape) => {
-    if (tags.length === 0) {
-      // Dropping no tags is an unconditional keep.
-      return keepOrDrop(shape, [], selectToDrop);
-    } else {
-      return keepOrDrop(shape, tags, selectToKeep);
-    }
+    const tagsToAdd = tags.map((tag) => qualifyTag(tag, 'user'));
+    const op = (geometry, descend) => {
+      switch (geometry.type) {
+        case 'group':
+        case 'layout': {
+          return descend();
+        }
+        default: {
+          const tags = [...(geometry.tags || [])];
+          for (const tagToAdd of tagsToAdd) {
+            if (!tags.includes(tagToAdd)) {
+              tags.push(tagToAdd);
+            }
+          }
+          return descend({ tags });
+        }
+      }
+    };
+    return Shape.fromGeometry(rewrite(shape.toGeometry(), op));
   };
 
-Shape.registerMethod('keep', keep);
+Shape.registerMethod('tag', tag);
 
 const drop =
   (...tags) =>
   (shape) => {
-    if (tags.length === 0) {
-      // Keeping no tags is an unconditional drop.
-      return keepOrDrop(shape, [], selectToKeep);
-    } else {
-      return keepOrDrop(shape, tags, selectToDrop);
-    }
+    const matchers = tags.map((tag) => tagMatcher(tag, 'user'));
+    const isMatch = (tags, tag) => {
+      for (const matcher of matchers) {
+        for (tag of tags) {
+          if (matcher(tag)) {
+            return true;
+          }
+        }
+      }
+      return false;
+    };
+    const op = (geometry, descend) => {
+      switch (geometry.type) {
+        case 'group':
+        case 'layout':
+          return descend();
+        default: {
+          // Should this pass through item boundaries?
+          const { tags = [] } = geometry;
+          if (isMatch(tags)) {
+            return Shape.fromGeometry(geometry).void().toGeometry();
+          } else if (geometry.type !== 'item') {
+            return descend();
+          }
+        }
+      }
+    };
+    return Shape.fromGeometry(rewrite(shape.toGeometry(), op));
   };
 
 Shape.registerMethod('drop', drop);
@@ -2742,6 +2727,45 @@ const withInset = (initial, step, limit) => (shape) =>
 Shape.registerMethod('inset', inset);
 Shape.registerMethod('withInset', withInset);
 
+const keep =
+  (...tags) =>
+  (shape) => {
+    const matchers = tags.map((tag) => tagMatcher(tag, 'user'));
+    const isMatch = (tags, tag) => {
+      for (const matcher of matchers) {
+        for (const tag of tags) {
+          if (matcher(tag)) {
+            return true;
+          }
+        }
+      }
+      return false;
+    };
+    const op = (geometry, descend) => {
+      switch (geometry.type) {
+        case 'group':
+        case 'layout':
+          return descend();
+        default: {
+          // Should this pass through item boundaries?
+          const { tags = [] } = geometry;
+          if (isMatch(tags)) {
+            if (geometry.type === 'item') {
+              return geometry;
+            } else {
+              return descend();
+            }
+          } else {
+            return Shape.fromGeometry(geometry).void().toGeometry();
+          }
+        }
+      }
+    };
+    return Shape.fromGeometry(rewrite(shape.toGeometry(), op));
+  };
+
+Shape.registerMethod('keep', keep);
+
 const fromUndefined = () => Shape.fromGeometry();
 
 const loadGeometry = async (
@@ -2888,23 +2912,10 @@ const noVoid = (tags, select) => (shape) => {
 
 Shape.registerMethod('noVoid', noVoid);
 
-const notAs =
-  (...tags) =>
-  (shape) =>
-    Shape.fromGeometry(
-      rewriteTags(
-        [],
-        tags.map((tag) => qualifyTag(tag)),
-        shape.toGeometry()
-      )
-    );
-
-Shape.registerMethod('notAs', notAs);
-
 const notColor =
   (...colors) =>
   (shape) =>
-    shape.notAs(...colors.map((color) => qualifyTag(color, 'color')));
+    shape.untag(...colors.map((color) => qualifyTag(color, 'color')));
 
 Shape.registerMethod('notColor', notColor);
 
@@ -3323,6 +3334,40 @@ const twist =
     Shape.fromGeometry(twist$1(shape.toGeometry(), degreesPerMm));
 
 Shape.registerMethod('twist', twist);
+
+const untag =
+  (...tags) =>
+  (shape) => {
+    const matchers = tags.map((tag) => tagMatcher(tag, 'user'));
+    const isMatch = (tag) => {
+      for (const matcher of matchers) {
+        if (matcher(tag)) {
+          return true;
+        }
+      }
+      return false;
+    };
+    const op = (geometry, descend) => {
+      switch (geometry.type) {
+        case 'group':
+        case 'layout':
+          return descend();
+        default: {
+          const { tags = [] } = geometry;
+          const remaining = [];
+          for (const tag of tags) {
+            if (!isMatch(tag)) {
+              remaining.push(tag);
+            }
+          }
+          return descend({ tags: remaining });
+        }
+      }
+    };
+    return Shape.fromGeometry(rewrite(shape.toGeometry(), op));
+  };
+
+Shape.registerMethod('untag', untag);
 
 // FIX: Avoid the extra read-write cycle.
 const baseView =
@@ -4176,4 +4221,4 @@ const yz = Shape.fromGeometry({
   ],
 });
 
-export { Alpha, Arc, Assembly, Box, ChainedHull, Cone, Empty, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Line, Octagon, Orb, Page, Path, Pentagon, Plan, Point, Points, Polygon, Polyhedron, Septagon, Shape, Spiral, Tetragon, Triangle, Wave, Weld, add, addTo, align, and, as, asPart, at, bend, billOfMaterials, clip, clipFrom, cloudSolid, color, colors, cut, cutFrom, cutOut, defGrblConstantLaser, defGrblDynamicLaser, defGrblPlotter, defGrblSpindle, defRgbColor, defThreejsMaterial, defTool, define, drop, each, ensurePages, ex, extrude, extrudeToPlane, fill, fit, fitTo, fuse, g, get, grow, inline, inset, keep, loadGeometry, loft, log, loop, mask, material, md, minkowskiDifference, minkowskiShell, minkowskiSum, move, n, noVoid, notAs, notColor, nth, ofPlan, offset, on, op, orient, outline, pack, play, projectToPlane, push, remesh, rotate, rotateX, rotateY, rotateZ, rx, ry, rz, saveGeometry, scale, scaleToFit, section, sectionProfile, separate, size, sketch, smooth, tag, tags, test, tint, tool, twist, view, voidFn, weld, withFill, withFn, withInset, withOp, x, xy, xz, y, yz, z };
+export { Alpha, Arc, Assembly, Box, ChainedHull, Cone, Empty, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Line, Octagon, Orb, Page, Path, Pentagon, Plan, Point, Points, Polygon, Polyhedron, Septagon, Shape, Spiral, Tetragon, Triangle, Wave, Weld, add, addTo, align, and, as, asPart, at, bend, billOfMaterials, clip, clipFrom, cloudSolid, color, colors, cut, cutFrom, cutOut, defGrblConstantLaser, defGrblDynamicLaser, defGrblPlotter, defGrblSpindle, defRgbColor, defThreejsMaterial, defTool, define, drop, each, ensurePages, ex, extrude, extrudeToPlane, fill, fit, fitTo, fuse, g, get, grow, inline, inset, keep, loadGeometry, loft, log, loop, mask, material, md, minkowskiDifference, minkowskiShell, minkowskiSum, move, n, noVoid, notColor, nth, ofPlan, offset, on, op, orient, outline, pack, play, projectToPlane, push, remesh, rotate, rotateX, rotateY, rotateZ, rx, ry, rz, saveGeometry, scale, scaleToFit, section, sectionProfile, separate, size, sketch, smooth, tag, tags, test, tint, tool, twist, untag, view, voidFn, weld, withFill, withFn, withInset, withOp, x, xy, xz, y, yz, z };

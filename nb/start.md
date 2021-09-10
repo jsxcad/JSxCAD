@@ -12,6 +12,7 @@ Press Shift-Enter or click Run above to generate notebook.
 
 JSxCAD allows CAD design as notebooks.
 
+Hershey('JSxCAD', 20).color('purple').align('xy').gridView(512);
 ![Image](start.md.0.png)
 
 Clicking on a view maximizes and allows rotation and animation; use Escape to return.

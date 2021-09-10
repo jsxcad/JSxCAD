@@ -1,55 +1,75 @@
 md`
 ---
 # Interactions between geometry
-JSxCAD offers a number of ways to interact two or more geometries to create new geometry. Most of these operations will work on both 2D and 3D geometry.`;
+JSxCAD offers a number of ways to interact two or more geometries to create new geometry. Most of these operations will work on both 2D and 3D geometry.
+`;
 
 
 md`
 ---
 ### ADD
-Returns the union of the input shapes.`;
+Returns the shape extended to include the space of the added shapes.
+`;
 
-Arc(10, 10, 5).add(Box(5, 5, 5).move(3, 0, 2)).view();
+Arc(10, 10, 5).color('blue').add(Box(5, 5, 5).move(3, 0, 2).color('red')).view().md(`The result is blue since the blue shape was added to`);
 
 md`
 ---
 ### Assembly
-Assembles together two or more 2D or 3D shapes to form a single one. Shapes interact subtractively with shapes later in the arguments list meaning that no overlap is allowed in the generated assembly. See Group as an alternative.`;
+Assembles together two or more 2D or 3D shapes to form a single one.
+
+Shapes interact subtractively with shapes later in the arguments list meaning that no overlap is allowed in the generated assembly.
+
+The assembled shapes can later be disassembled into their disjoint parts.
+
+See Group as an alternative.
+`;
 
 const twoCylindersAssembled = Assembly(
   Arc(10, 10, 3).color('red'),
   Arc(10, 10, 3).color('blue').x(4)
 ).view();
 
+md`This can also be achieved with a.fit(b) and a.fitTo(b).`;
+
+Arc(10).fit(Box(5)).pack().view();
+
+Arc(10).fitTo(Box(5)).pack().view();
+
 md`
 ---
 ### ChainedHull
-Performs the hull operation sequentially on the input shapes`;
+Performs the hull operation sequentially on the input shapes.
+`;
 
 ChainedHull(Arc(10), Box(5).move(12, 12, 0), Arc(20).x(40)).view();
 
 md`
 ---
 ### Clip
-Finds the overlapping volume of two shapes.`;
+Returns the shape limited to the space of the clipping shapes.`;
 
-Arc(10, 10, 5).clip(Box(5, 5, 5).move(3, 0, 2)).view();
+Arc(10, 10, 5).color('blue').clip(Box(5, 5, 5).move(3, 0, 2).color('red')).view().md(`The result is blue since the blue shape was clipped`);
 
-Arc(10, 10, 5).clipFrom(Box(5, 5, 5).move(3, 0, 2)).view();
+Arc(10, 10, 5).color('blue').clipFrom(Box(5, 5, 5).move(3, 0, 2).color('red')).view().md(`The result is red since the red shape was clipped from.`);
 
 md`
 ---
 ### Cut
-Subtracts one shape from another.`;
+Returns the shape with space of the cut shapes removed.
+`;
 
-Arc(10, 10, 5).cut(Box(5, 5, 5).move(3, 0, 2)).view();
+Arc(10, 10, 5).color('blue').cut(Box(5, 5, 5).move(3, 0, 2).color('red')).view().md(`The result is blue since the blue shape was cut.`);
 
-Arc(10, 10, 5).cutFrom(Box(5, 5, 5).move(3, 0, 2)).view();
+Arc(10, 10, 5).cutFrom(Box(5, 5, 5).move(3, 0, 2)).view().md(`The result is red since the red shape was cut from.`);
 
 md`
 ---
 ### Group
-Similar to Assembly, group joins together a number of shapes, however unlike Assembly, Group does not subtract the shapes which means they are allowed to overlap which makes Group much faster to compute than Assembly. Group can also be done using the .and() operator.`;
+Similar to Assembly, group joins together a number of shapes, however unlike Assembly, Group does not subtract the shapes which means they are allowed to overlap which makes Group much faster to compute than Assembly.
+
+Group can also be done using the .and() operator.
+`;
 
 Group(Arc(10, 10, 3), Arc(10, 10, 3).x(4)).view();
 
@@ -65,7 +85,8 @@ Hull(Arc(10), Box(5).move(12, 12, 0), Arc(20).x(40)).view();
 md`
 ---
 ### Pack
-Pack takes input geometry and lays it out on a sheet. Groups and Assemblies are split apart, but items are preserved.`;
+Pack takes input geometry and lays it out on a sheet. Groups and Assemblies are split apart, but items are preserved.
+`;
 
 Group(Arc(10), Box(3), Box(3.5)).pack().view();
 

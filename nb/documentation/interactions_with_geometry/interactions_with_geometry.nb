@@ -11,50 +11,78 @@ Box(10, 10, 10).color('pink').view();
 md`
 ---
 ### Extrude
-2D shapes can be 'extruded' to create 3D shapes. This can be abbreviated to .ex() for brevity.`;
+2D shapes can be 'extruded' to create 3D shapes. This can be abbreviated to .ex() for brevity.
+
+A series of extends can be provided, these will be sorted and paired. Zero will be added if the number of extents is odd.
+
+e.g., s.ex(1, 2, 3, 4) will produce two extrusions -- one from 1z to 2z, and one from 3z to 4z.
+`;
 
 Arc(10).view();
 Arc(10).extrude(5).view();
+Arc(10).ex(1, 2, -1, -2).view();
 
 md`
 ---
 ### Item
-Geometry can be defined to be an "item". Items are a way to identify individual elements within an assembly or group. Items are different from tags in that an item is a monolithic entity, while an object with a tag is a collection of individual geometry elements each of which has that tag. Items ideally correspond to real world physical items.`;
+Geometry can be formed into an 'item'.
 
-const aBolt = Group(Arc(8, 8, 2), Arc(4, 4, 14).z(-7))
+An item has an exterior (which looks like an individual piece of geometry), and an interior (which may contain many distinct pieces of geometry).
+
+The interior has its own frame of reference independent of any transformation of the exterior of the item.
+
+Since an item appears individual from the outside, tag and path selectors need to explicitly select item to access the interior.
+`;
+
+const aBolt = Arc(8, 8, 2)
+  .and(Arc(4, 4, 14).z(-7))
   .color('brown')
   .as('bolt')
   .view();
 
-const aGroup = Assembly(Box(10, 10, 10), aBolt.z(10)).view();
+const aBox = Box(10, 10, 10).as('box');
 
-aGroup.get('*').view();
+const aDesign = aBox.fit(aBolt.z(10)).as('design').view();
+
+aDesign.get('design').get('*').pack().view().md(`We need to get into the design in order to get at 'box' and 'bolt'`);
 
 md`
 ---
 ### Grow
-Expands the shape outwards by the input distance. May result in self intersections if not used cautiously.`;
+Expands the shape outwards by the input distance. May result in self intersections if not used cautiously.
+`;
 
 Arc(10, 10, 5).grow(1).view();
 
 md`
 ---
 ### Move
-A shape can be moved in XYZ space using the .move(x,y,z) command. These can also be shortened to .x(), .y(), or .z() if a movement in only one axis is needed.`;
+A shape can be moved in XYZ space using the .move(x,y,z) command.
+
+These can also be shortened to .x(), .y(), or .z() if a movement in only one axis is needed.
+
+Multiple offsets can be provided, which will produce one result per offset.
+`;
 
 Box(5, 5, 5).move(10, 2, 12).view();
+
+Box(5, 5, 5).x(10).y(2).z(12).view();
+
+Box(5).x(0, 10, 20).view();
 
 md`
 ---
 ### Remesh
-Remesh can be used to break up the segments of a shape allowing it to be distorted. .remesh(4, 2) first breaks segments longer than 4 and then breaks segments longer than 2. Then the shape is re-triangularized.`;
+Remesh can be used to break up the segments of a shape allowing it to be distorted.
+shape.remesh(4, 2) first breaks segments longer than 4 and then breaks segments longer than 2.
+At each step the shape is retriangulated to preserve manifold structure.
+`;
 
 const aRectangle = Box(5, 5, 15).view();
 
 aRectangle.remesh(4, 2).view({ wireframe: true });
 
-md`
-Once a shape is remeshed it can be twisted or bent about the origin.`;
+md`Once a shape is remeshed it can be twisted or bent about the origin.`;
 
 aRectangle.remesh(4, 1).twist(10).view({ wireframe: true });
 
@@ -68,7 +96,10 @@ aRectangle
 md`
 ---
 ### Rotate
-A shape can be rotated about the origin using the .rx(), .ry(), and .rz() commands. These take an argument of a fraction of a rotation, so .rz(1/8) would rotate the shape by 1/8th of a rotation. `;
+A shape can be rotated about the origin using the .rx(), .ry(), and .rz() commands.
+These take the number of turns as an argument .rz(1/8) would rotate the shape by 1/8th of a rotation.
+Multiple turns can be provided, which will produce one result per turn.
+`;
 
 aRectangle.rz(1 / 8).view();
 
@@ -76,6 +107,11 @@ aRectangle
   .rotateY(1 / 10)
   .x(4)
   .z(-2)
+  .view();
+
+Box(5)
+  .x(4)
+  .rz(0/8, 1/8, 2/8, 3/8, 4/8, 5/8, 6/8, 7/8)
   .view();
 
 md`
@@ -88,32 +124,49 @@ aRectangle.scale(2).view();
 md`
 ---
 ### Section
-Section takes a 2D slice of a 3D shape. By default the slice is taken where the shape intersects the XY plane.`;
+Section takes a 2D slice of a 3D shape.
 
-aRectangle.section().view();
+By default the slice is taken where the shape intersects the XY plane.
+
+Section takes shapes as arguments, and will use the plane of orientation of the shape.
+`;
+
+Orb(4).section().view();
+
+Orb(4).section(xy, xy.z(1), xy.z(2)).view();
 
 md`
 ---
 ### Size
-Size returns the size of the shape along with it's bounding box corners.`;
+Size returns the size of the shape along with it's bounding box corners.
+
+A function can be provided to receive the dimensions along with the shape.
+`;
 
 log(aRectangle.size());
+
+aRectangle.size((length, s) => s.x(length)).md(`Move the shape along by its length`);
 
 md`
 ---
 ### Tags
-Tags lists all of the tags associated with a shape.`;
+Tags lists all of the tags associated with a shape.
+
+A function can be supplied to receive the tags and shape.
+`;
 
 log(aRectangle.tag('tagString').tags());
+
+aRectangle.tag('tagString').tags((tags, s) => s.md(`Tags ${tags}`));
 
 md`
 Tags can be used to selectively keep or remove parts of geometry.`;
 
-const tagsAssembly = Assembly(
-  Arc(10, 10, 2).color('blue').tag('thing1'),
-  Box(6, 5, 2).move(2, 1, 1).color('red').tag('thing2')
+const taggedAssembly = Assembly(
+  Arc(10, 10, 2).color('blue').tag('A'),
+  Box(6, 5, 2).move(2, 1, 1).color('red').tag('B')
 ).view();
 
-tagsAssembly.keep('thing1').noVoid().view();
+taggedAssembly.keep('A').noVoid().view();
 
-tagsAssembly.drop('thing1').view();
+taggedAssembly.drop('B').view();

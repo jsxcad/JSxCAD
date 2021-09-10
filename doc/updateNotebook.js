@@ -17,9 +17,14 @@ const writeMarkdown = (path, notebook, imageUrlList, failedExpectations) => {
   let viewCount = 0;
   for (let nth = 0; nth < notebook.length; nth++) {
     const note = notebook[nth];
-    const { md, view } = note;
+    const { md, sourceText, view } = note;
     if (md) {
       output.push(ensureNewline(notebook[nth].md.trim()));
+    }
+    if (sourceText) {
+      if (!sourceText.startsWith('md`')) {
+        output.push(sourceText);
+      }
     }
     if (view) {
       const imageUrl = imageUrlList[viewCount++];
@@ -47,11 +52,11 @@ const writeMarkdown = (path, notebook, imageUrlList, failedExpectations) => {
   writeFileSync(observedPath, markdown);
   try {
     if (markdown !== readFileSync(expectedPath, 'utf8')) {
-      failedExpectations.push(`diff ${observedPath} ${expectedPath}`);
+      failedExpectations.push(`difference: cp ${observedPath} ${expectedPath}`);
     }
   } catch (error) {
     if (error.code === 'ENOENT') {
-      failedExpectations.push(`missing ${expectedPath}`);
+      failedExpectations.push(`missing: cp ${observedPath} ${expectedPath}`);
     } else {
       throw error;
     }
@@ -95,7 +100,9 @@ export const updateNotebook = async (
       } catch (error) {
         if (error.code === 'ENOENT') {
           // We couldn't find a matching expectation.
-          failedExpectations.push(`missing ${observedPath}`);
+          failedExpectations.push(
+            `missing: cp ${observedPath} ${expectedPath}`
+          );
           continue;
         } else {
           throw error;
@@ -104,7 +111,9 @@ export const updateNotebook = async (
       const { width, height } = expectedPng;
       if (width !== observedPng.width || height !== observedPng.height) {
         // Can't diff when the dimensions don't match.
-        failedExpectations.push(observedPath);
+        failedExpectations.push(
+          `size changed: cp ${observedPath} ${expectedPath}`
+        );
         continue;
       }
       const differencePng = new pngjs.PNG({ width, height });
@@ -127,7 +136,10 @@ export const updateNotebook = async (
         const differencePath = `${target}.md.${nth}.difference.png`;
         writeFileSync(differencePath, pngjs.PNG.sync.write(differencePng));
         // Note failures.
-        failedExpectations.push(`display ${differencePath}`);
+        failedExpectations.push(`difference: display ${differencePath}`);
+        failedExpectations.push(
+          `            cp ${observedPath} ${expectedPath}`
+        );
       }
     }
   } catch (error) {
