@@ -23,7 +23,9 @@ const writeMarkdown = (path, notebook, imageUrlList, failedExpectations) => {
     }
     if (sourceText) {
       if (!sourceText.startsWith('md`')) {
+        output.push('```JavaScript');
         output.push(sourceText);
+        output.push('```');
         output.push('');
       }
     }
