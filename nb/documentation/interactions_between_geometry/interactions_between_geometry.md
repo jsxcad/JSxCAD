@@ -7,6 +7,7 @@ JSxCAD offers a number of ways to interact two or more geometries to create new 
 Returns the shape extended to include the space of the added shapes.
 
 Arc(10, 10, 5).color('blue').add(Box(5, 5, 5).move(3, 0, 2).color('red')).view().md(`The result is blue since the blue shape was added to`);
+
 ![Image](interactions_between_geometry.md.0.png)
 
 The result is blue since the blue shape was added to
@@ -25,14 +26,17 @@ const twoCylindersAssembled = Assembly(
   Arc(10, 10, 3).color('red'),
   Arc(10, 10, 3).color('blue').x(4)
 ).view();
+
 ![Image](interactions_between_geometry.md.1.png)
 
 This can also be achieved with a.fit(b) and a.fitTo(b).
 
 Arc(10).fit(Box(5)).pack().view();
+
 ![Image](interactions_between_geometry.md.2.png)
 
 Arc(10).fitTo(Box(5)).pack().view();
+
 ![Image](interactions_between_geometry.md.3.png)
 
 ---
@@ -40,6 +44,7 @@ Arc(10).fitTo(Box(5)).pack().view();
 Performs the hull operation sequentially on the input shapes.
 
 ChainedHull(Arc(10), Box(5).move(12, 12, 0), Arc(20).x(40)).view();
+
 ![Image](interactions_between_geometry.md.4.png)
 
 ---
@@ -47,11 +52,13 @@ ChainedHull(Arc(10), Box(5).move(12, 12, 0), Arc(20).x(40)).view();
 Returns the shape limited to the space of the clipping shapes.
 
 Arc(10, 10, 5).color('blue').clip(Box(5, 5, 5).move(3, 0, 2).color('red')).view().md(`The result is blue since the blue shape was clipped`);
+
 ![Image](interactions_between_geometry.md.5.png)
 
 The result is blue since the blue shape was clipped
 
 Arc(10, 10, 5).color('blue').clipFrom(Box(5, 5, 5).move(3, 0, 2).color('red')).view().md(`The result is red since the red shape was clipped from.`);
+
 ![Image](interactions_between_geometry.md.6.png)
 
 The result is red since the red shape was clipped from.
@@ -61,11 +68,13 @@ The result is red since the red shape was clipped from.
 Returns the shape with space of the cut shapes removed.
 
 Arc(10, 10, 5).color('blue').cut(Box(5, 5, 5).move(3, 0, 2).color('red')).view().md(`The result is blue since the blue shape was cut.`);
+
 ![Image](interactions_between_geometry.md.7.png)
 
 The result is blue since the blue shape was cut.
 
 Arc(10, 10, 5).cutFrom(Box(5, 5, 5).move(3, 0, 2)).view().md(`The result is red since the red shape was cut from.`);
+
 ![Image](interactions_between_geometry.md.8.png)
 
 The result is red since the red shape was cut from.
@@ -77,9 +86,11 @@ Similar to Assembly, group joins together a number of shapes, however unlike Ass
 Group can also be done using the .and() operator.
 
 Group(Arc(10, 10, 3), Arc(10, 10, 3).x(4)).view();
+
 ![Image](interactions_between_geometry.md.9.png)
 
 Arc(10, 10, 3).and(Arc(10, 10, 3).x(4)).view(); //Does a group
+
 ![Image](interactions_between_geometry.md.10.png)
 
 ---
@@ -87,6 +98,7 @@ Arc(10, 10, 3).and(Arc(10, 10, 3).x(4)).view(); //Does a group
 Performs the hull operation on the input shapes.
 
 Hull(Arc(10), Box(5).move(12, 12, 0), Arc(20).x(40)).view();
+
 ![Image](interactions_between_geometry.md.11.png)
 
 ---
@@ -94,7 +106,9 @@ Hull(Arc(10), Box(5).move(12, 12, 0), Arc(20).x(40)).view();
 Pack takes input geometry and lays it out on a sheet. Groups and Assemblies are split apart, but items are preserved.
 
 Group(Arc(10), Box(3), Box(3.5)).pack().view();
+
 ![Image](interactions_between_geometry.md.12.png)
 
 Group(Arc(10), Box(3), Box(3.5)).as('anItem').pack().view();
+
 ![Image](interactions_between_geometry.md.13.png)

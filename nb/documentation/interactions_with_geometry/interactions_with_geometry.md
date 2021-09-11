@@ -6,6 +6,7 @@ JSxCAD provides a number of functions to modify existing geometry.
 Geometry can be given a color
 
 Box(10, 10, 10).color('pink').view();
+
 ![Image](interactions_with_geometry.md.0.png)
 
 ---
@@ -17,12 +18,15 @@ A series of extends can be provided, these will be sorted and paired. Zero will 
 e.g., s.ex(1, 2, 3, 4) will produce two extrusions -- one from 1z to 2z, and one from 3z to 4z.
 
 Arc(10).view();
+
 ![Image](interactions_with_geometry.md.1.png)
 
 Arc(10).extrude(5).view();
+
 ![Image](interactions_with_geometry.md.2.png)
 
 Arc(10).ex(1, 2, -1, -2).view();
+
 ![Image](interactions_with_geometry.md.3.png)
 
 ---
@@ -40,10 +44,13 @@ const aBolt = Arc(8, 8, 2)
   .color('brown')
   .as('bolt')
   .view();
+
 ![Image](interactions_with_geometry.md.4.png)
 
 const aBox = Box(10, 10, 10).as('box');
+
 const aDesign = aBox.fit(aBolt.z(10)).as('design').view();
+
 ![Image](interactions_with_geometry.md.5.png)
 
 ---
@@ -51,9 +58,11 @@ const aDesign = aBox.fit(aBolt.z(10)).as('design').view();
 Expands the shape outwards by the input distance. May result in self intersections if not used cautiously.
 
 aDesign.get('design').get('*').pack().view().md(`We need to get into the design in order to get at 'box' and 'bolt'`);
+
 We need to get into the design in order to get at 'box' and 'bolt'
 
 Arc(10, 10, 5).grow(1).view();
+
 ![Image](interactions_with_geometry.md.6.png)
 
 ---
@@ -65,12 +74,15 @@ These can also be shortened to .x(), .y(), or .z() if a movement in only one axi
 Multiple offsets can be provided, which will produce one result per offset.
 
 Box(5, 5, 5).move(10, 2, 12).view();
+
 ![Image](interactions_with_geometry.md.7.png)
 
 Box(5, 5, 5).x(10).y(2).z(12).view();
+
 ![Image](interactions_with_geometry.md.8.png)
 
 Box(5).x(0, 10, 20).view();
+
 ![Image](interactions_with_geometry.md.9.png)
 
 ---
@@ -80,14 +92,17 @@ shape.remesh(4, 2) first breaks segments longer than 4 and then breaks segments 
 At each step the shape is retriangulated to preserve manifold structure.
 
 const aRectangle = Box(5, 5, 15).view();
+
 ![Image](interactions_with_geometry.md.10.png)
 
 aRectangle.remesh(4, 2).view({ wireframe: true });
+
 ![Image](interactions_with_geometry.md.11.png)
 
 Once a shape is remeshed it can be twisted or bent about the origin.
 
 aRectangle.remesh(4, 1).twist(10).view({ wireframe: true });
+
 ![Image](interactions_with_geometry.md.12.png)
 
 aRectangle
@@ -96,6 +111,7 @@ aRectangle
   .y(10)
   .bend(4)
   .view({ wireframe: true });
+
 ![Image](interactions_with_geometry.md.13.png)
 
 ---
@@ -105,6 +121,7 @@ These take the number of turns as an argument .rz(1/8) would rotate the shape by
 Multiple turns can be provided, which will produce one result per turn.
 
 aRectangle.rz(1 / 8).view();
+
 ![Image](interactions_with_geometry.md.14.png)
 
 aRectangle
@@ -112,12 +129,14 @@ aRectangle
   .x(4)
   .z(-2)
   .view();
+
 ![Image](interactions_with_geometry.md.15.png)
 
 Box(5)
   .x(4)
   .rz(0/8, 1/8, 2/8, 3/8, 4/8, 5/8, 6/8, 7/8)
   .view();
+
 ![Image](interactions_with_geometry.md.16.png)
 
 ---
@@ -125,6 +144,7 @@ Box(5)
 Scale enlarges a shape by the entered multiple.
 
 aRectangle.scale(2).view();
+
 ![Image](interactions_with_geometry.md.17.png)
 
 ---
@@ -136,9 +156,11 @@ By default the slice is taken where the shape intersects the XY plane.
 Section takes shapes as arguments, and will use the plane of orientation of the shape.
 
 Orb(4).section().view();
+
 ![Image](interactions_with_geometry.md.18.png)
 
 Orb(4).section(xy, xy.z(1), xy.z(2)).view();
+
 ![Image](interactions_with_geometry.md.19.png)
 
 ---
@@ -148,7 +170,9 @@ Size returns the size of the shape along with it's bounding box corners.
 A function can be provided to receive the dimensions along with the shape.
 
 log(aRectangle.size());
+
 aRectangle.size((length, s) => s.x(length)).md(`Move the shape along by its length`);
+
 Move the shape along by its length
 
 ---
@@ -158,7 +182,9 @@ Tags lists all of the tags associated with a shape.
 A function can be supplied to receive the tags and shape.
 
 log(aRectangle.tag('tagString').tags());
+
 aRectangle.tag('tagString').tags((tags, s) => s.md(`Tags ${tags}`));
+
 Tags tagString
 
 Tags can be used to selectively keep or remove parts of geometry.
@@ -167,10 +193,13 @@ const taggedAssembly = Assembly(
   Arc(10, 10, 2).color('blue').tag('A'),
   Box(6, 5, 2).move(2, 1, 1).color('red').tag('B')
 ).view();
+
 ![Image](interactions_with_geometry.md.20.png)
 
 taggedAssembly.keep('A').noVoid().view();
+
 ![Image](interactions_with_geometry.md.21.png)
 
 taggedAssembly.drop('B').view();
+
 ![Image](interactions_with_geometry.md.22.png)

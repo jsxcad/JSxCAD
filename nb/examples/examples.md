@@ -7,6 +7,7 @@ Arc(10)
   .loop(...seq((a) => rz(a), { by: 1 / 32, upto: 1 }))
   .cutOut(Box(20, 20).ex(20))
   .view();
+
 ![Image](examples.md.0.png)
 
 Cube with red cut-out.
@@ -14,4 +15,5 @@ Cube with red cut-out.
 Box(10, 10, 10)
   .cutOut(Arc(5, 5, 10), color('red'))
   .view();
+
 ![Image](examples.md.1.png)

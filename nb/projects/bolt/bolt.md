@@ -5,6 +5,7 @@ const Profile = (pitch = 1, angle = 60 / 360) =>
     Point(pitch / 2, 1 / 2),
     Point(0, 1 / -2)
   ).fill();
+
 export const ScrewThread = (
   diameter,
   height,
@@ -24,6 +25,7 @@ export const ScrewThread = (
     .z(...seq((a) => a, { from: 0, to: height, by: pitch }))
     .clip(Box(diameter).ex(height))
     .and(Arc(diameter - 2).ex(height));
+
 export const NutThread = (
   diameter,
   height,
@@ -45,13 +47,16 @@ export const NutThread = (
     .clip(Box(diameter + 2).ex(height))
     .rz(1 / 2)
     .mask(Arc(diameter).ex(height));
+
 const profile = Profile().view();
+
 ![Image](bolt.md.0.png)
 
 const nutThread = NutThread(20, 10)
   //.and(Arc(30).cut(Arc(20)).ex(10))
   .material('steel')
   .stl('nut 20x10');
+
 ![Image](bolt.md.1.png)
 
 const screwThread = ScrewThread(20, 10)
@@ -62,6 +67,7 @@ const screwThread = ScrewThread(20, 10)
   )
   .material('steel')
   .stl('thread 20x10');
+
 ![Image](bolt.md.2.png)
 
 Show the fit.
@@ -70,6 +76,7 @@ ScrewThread(10, 5)
   .and(NutThread(10, 5).and(Arc(15).cut(Arc(10)).ex(5)))
   .view()
   .view({ op: section() });
+
 ![Image](bolt.md.3.png)
 
 ![Image](bolt.md.4.png)
