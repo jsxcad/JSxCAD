@@ -51,3 +51,6 @@ export const emitSourceLocation = ({ path, id }) => {
   const setContext = { sourceLocation: { path, id } };
   emit({ hash: hash(setContext), setContext });
 };
+
+export const emitSourceText = (sourceText) =>
+  emit({ hash: hash(sourceText), sourceText });

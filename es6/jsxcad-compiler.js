@@ -6522,6 +6522,8 @@ const add = (array, item) => {
   return array;
 };
 
+const escape = (text) => text.replace(/(['"`$])/g, '\\$1');
+
 const strip = (ast) => {
   if (ast instanceof Array) {
     return ast.map(strip);
@@ -6560,7 +6562,15 @@ const fromIdToSha = (id, { topLevel }) => {
 };
 
 const generateReplayCode = async (
-  { isNotCacheable, importSource, emitSourceLocation = true, code, path, id },
+  {
+    isNotCacheable,
+    importSource,
+    emitSourceLocation = true,
+    code,
+    path,
+    id,
+    text,
+  },
   { doReplay = true, provideDefinition = false }
 ) => {
   const loadCode = [];
@@ -6585,6 +6595,9 @@ const generateReplayCode = async (
         parseOptions
       )
     );
+  }
+  if (text) {
+    loadCode.push(parse(`emitSourceText(\`${escape(text)}\`);`, parseOptions));
   }
   if (doReplay) {
     loadCode.push(
@@ -6614,6 +6627,7 @@ const generateUpdateCode = async (entry, { declaration, sha, topLevel }) => {
     dependencies,
     path,
     id,
+    text,
     importSource,
     imports = [],
     emitSourceLocation = !importSource,
@@ -6652,6 +6666,9 @@ const generateUpdateCode = async (entry, { declaration, sha, topLevel }) => {
         parseOptions
       )
     );
+  }
+  if (text) {
+    body.push(parse(`emitSourceText(\`${escape(text)}\`);`, parseOptions));
   }
   if (!isNotCacheable && !importSource) {
     body.push(
@@ -6732,6 +6749,7 @@ const declareVariable = async (
     replays,
     controls,
     exportNames,
+    lines,
     out,
     doExport = false,
     sideEffectors,
@@ -6782,6 +6800,12 @@ const declareVariable = async (
     importSource,
     imports: [],
   };
+
+  if (lines) {
+    entry.text = lines
+      .slice(entry.sourceLocation.start.line - 1, entry.sourceLocation.end.line)
+      .join('\n');
+  }
 
   topLevel.set(id, entry);
 
@@ -6995,9 +7019,11 @@ const toEcmascript = async (
     exports = [],
     imports = new Map(),
     indirectImports = new Map(),
+    noLines = false,
   } = {}
 ) => {
-  let ast = parse(script, parseOptions);
+  const lines = noLines ? undefined : script.split('\n');
+  const ast = parse(script, parseOptions);
 
   let topLevelExpressionCount = 0;
   const nextTopLevelExpressionId = () => ++topLevelExpressionCount;
@@ -7010,6 +7036,7 @@ const toEcmascript = async (
   const controls = (await read(`control/${path}`)) || {};
 
   await processProgram(ast, {
+    lines,
     out,
     updates,
     replays,
