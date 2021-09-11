@@ -24,13 +24,15 @@ const writeMarkdown = (path, notebook, imageUrlList, failedExpectations) => {
     if (sourceText) {
       if (!sourceText.startsWith('md`')) {
         output.push(sourceText);
+        output.push('');
       }
     }
     if (view) {
       const imageUrl = imageUrlList[viewCount++];
       if (typeof imageUrl === 'string' && imageUrl.startsWith('data:image/')) {
         const imagePath = `${path}.md.${imageCount++}.png`;
-        output.push(`![Image](${pathModule.basename(imagePath)})\n`);
+        output.push(`![Image](${pathModule.basename(imagePath)})`);
+        output.push('');
       }
     }
   }

@@ -18,10 +18,12 @@ const torusFn = ([x, y, z]) => {
     4
   );
 };
+
 const arc = Arc(5)
   .hasAngle(45 / 360, 270 / 360)
   .gridView()
   .md(`Arc(5).angle(45/360, 270/360)`);
+
 ![Image](shapes.md.0.png)
 
 Arc(5).angle(45/360, 270/360)
@@ -30,11 +32,13 @@ const assembly = Assembly(Box(10), Arc(8), Triangle(5))
   .pack()
   .gridView({ size: 801, triangles: false, wireframe: false })
   .md(`Assembly(Box(10), Arc(8), Triangle(5))`);
+
 ![Image](shapes.md.1.png)
 
 Assembly(Box(10), Arc(8), Triangle(5))
 
 const box = Box(5, 7, 8).view().md(`Box(5, 7, 8)`);
+
 ![Image](shapes.md.2.png)
 
 Box(5, 7, 8)
@@ -42,22 +46,26 @@ Box(5, 7, 8)
 const chainedHull = ChainedHull(Point(), Box(5).z(5), Arc(3).z(8))
   .view()
   .md(`ChainedHull(Point(), Box(5).z(5), Arc(3).z(8))`);
+
 ![Image](shapes.md.3.png)
 
 ChainedHull(Point(), Box(5).z(5), Arc(3).z(8))
 
 const cone = Cone(6, 3).view().md(`Cone(6, 3)`);
+
 ![Image](shapes.md.4.png)
 
 Cone(6, 3)
 
 const empty = Empty().view().md(`Empty()`);
+
 Empty()
 
 const group = Group(Box(10), Arc(8), Triangle(5))
   .pack()
   .gridView()
   .md(`Group(Box(10), Arc(8), Triangle(5))`);
+
 ![Image](shapes.md.5.png)
 
 Group(Box(10), Arc(8), Triangle(5))
@@ -66,36 +74,43 @@ const hershey = Hershey('Hershey', 10)
   .align('xy')
   .gridView()
   .md(`Hershey(10)('Hershey').align('xy')`);
+
 ![Image](shapes.md.6.png)
 
 Hershey(10)('Hershey').align('xy')
 
 const hexagon = Hexagon(10).gridView().md(`Hexagon(10)`);
+
 ![Image](shapes.md.7.png)
 
 Hexagon(10)
 
 const hull = Hull(Arc(5), Box(5).z(5)).view().md(`Hull(Arc(5), Box(5).z(5))`);
+
 ![Image](shapes.md.8.png)
 
 Hull(Arc(5), Box(5).z(5))
 
 const icosahedron = Icosahedron(5).view().md(`Icosahedron(5)`);
+
 ![Image](shapes.md.9.png)
 
 Icosahedron(5)
 
 const line = Line(5, -1).rz(45).gridView().md(`Line(5, -1)`);
+
 ![Image](shapes.md.10.png)
 
 Line(5, -1)
 
 const octagon = Octagon(5).gridView().md(`Octagon(5)`);
+
 ![Image](shapes.md.11.png)
 
 Octagon(5)
 
 const orb = Orb(5).hasSides(20).view().md(`Orb(5)`);
+
 ![Image](shapes.md.12.png)
 
 Orb(5)
@@ -104,16 +119,19 @@ const path = Path(Point(0), Point(5), Point(5, 5), Point(0))
   .rz(45 / 2)
   .gridView()
   .md(`Path(Point(0), Point(5), Point(5, 5), Point(0)).rz(45 / 2)`);
+
 ![Image](shapes.md.13.png)
 
 Path(Point(0), Point(5), Point(5, 5), Point(0)).rz(45 / 2)
 
 const pentagon = Pentagon(5).gridView().md(`Pentagon(5)`);
+
 ![Image](shapes.md.14.png)
 
 Pentagon(5)
 
 const point = Point(0.5, 0.5).gridView().md(`Point(0.5, 0.5)`);
+
 ![Image](shapes.md.15.png)
 
 Point(0.5, 0.5)
@@ -121,6 +139,7 @@ Point(0.5, 0.5)
 const points = Points([0.5, 0.5], [-0.5, -0.5])
   .gridView()
   .md(`Points([0.5, 0.5], [-0.5, -0.5])`);
+
 ![Image](shapes.md.16.png)
 
 Points([0.5, 0.5], [-0.5, -0.5])
@@ -129,6 +148,7 @@ const polygon = Polygon(Point(0), Point(5), Point(5, 5))
   .rz(1 / 16)
   .gridView()
   .md(`Polygon(Point(0), Point(5), Point(5, 5)).rz(1 / 16)`);
+
 ![Image](shapes.md.17.png)
 
 Polygon(Point(0), Point(5), Point(5, 5)).rz(1 / 16)
@@ -156,6 +176,7 @@ const polyhedron = Polyhedron(
       [[10, 10, 0], [10, -10, 0], [-10, -10, 0], [-10, 10, 0], [0, 0, 10]],  
       [[4, 1, 0], [4, 2, 1], [4, 3, 2], [4, 0, 3], [3, 0, 1], [3, 1, 2]])`
   );
+
 ![Image](shapes.md.18.png)
 
 Polyhedron(  
@@ -163,21 +184,25 @@ Polyhedron(
       [[4, 1, 0], [4, 2, 1], [4, 3, 2], [4, 0, 3], [3, 0, 1], [3, 1, 2]])
 
 const septagon = Septagon(5).gridView().md(`Septagon(5)`);
+
 ![Image](shapes.md.19.png)
 
 Septagon(5)
 
 const spiral = Spiral().gridView().md(`Spiral()`);
+
 ![Image](shapes.md.20.png)
 
 Spiral()
 
 const tetragon = Tetragon(5).gridView().md(`Tetragon(5)`);
+
 ![Image](shapes.md.21.png)
 
 Tetragon(5)
 
 const triangle = Triangle(5).gridView().md(`Triangle(5)`);
+
 ![Image](shapes.md.22.png)
 
 Triangle(5)
@@ -186,6 +211,7 @@ const wave = Wave((a) => [[0, sin(a * 3) * 100]], { to: 360 })
   .align('xy')
   .gridView()
   .md(`Wave((a) => [[0, sin(a * 3) * 100]], { to: 360 })`);
+
 ![Image](shapes.md.23.png)
 
 Wave((a) => [[0, sin(a * 3) * 100]], { to: 360 })
@@ -194,4 +220,5 @@ const weld = Weld(Arc(4).x(-1), Box(5).x(1))
   .fill()
   .gridView()
   .md(`Weld(Arc(5).x(-1), Box(5).x(1)).fill()`);
+
 Weld(Arc(5).x(-1), Box(5).x(1)).fill()
