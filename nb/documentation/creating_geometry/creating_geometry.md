@@ -5,15 +5,21 @@ One of the core functions of JSxCAD is creating geometry and a number of primiti
 ### Arc
 Create a circle or a section of a an arc
 
+```JavaScript
 const aCircle = Arc(10).view();
+```
 
 ![Image](creating_geometry.md.0.png)
 
+```JavaScript
 const anElipseExtruded = Arc(10, 5, 2).view();
+```
 
 ![Image](creating_geometry.md.1.png)
 
+```JavaScript
 const aCircleWithSides = Arc(10).hasSides(8).view();
+```
 
 ![Image](creating_geometry.md.2.png)
 
@@ -21,11 +27,15 @@ const aCircleWithSides = Arc(10).hasSides(8).view();
 ### Box
 Creates a 2D or 3D box
 
+```JavaScript
 Box(10, 10).view();
+```
 
 ![Image](creating_geometry.md.3.png)
 
+```JavaScript
 Box(10, 10, 2).view();
+```
 
 ![Image](creating_geometry.md.4.png)
 
@@ -33,7 +43,9 @@ Box(10, 10, 2).view();
 ### Cone
 Creates a cone with arguments (diameter, top, bottom)
 
+```JavaScript
 Cone(10, 10, 0).view();
+```
 
 ![Image](creating_geometry.md.5.png)
 
@@ -41,17 +53,23 @@ Cone(10, 10, 0).view();
 ### Empty
 Creates a new empty geometry
 
+```JavaScript
 Empty().view();
+```
 
 ---
 ### Hexagon
 Creates a new hexagon
 
+```JavaScript
 Hexagon(4).view();
+```
 
 ![Image](creating_geometry.md.6.png)
 
+```JavaScript
 Hexagon(6, 3, 2).view();
+```
 
 ![Image](creating_geometry.md.7.png)
 
@@ -59,7 +77,9 @@ Hexagon(6, 3, 2).view();
 ### Hershy
 A built in single line font useful for adding text
 
+```JavaScript
 Hershey('Some Example Text', 20).align('xy').view();
+```
 
 ![Image](creating_geometry.md.8.png)
 
@@ -67,7 +87,9 @@ Hershey('Some Example Text', 20).align('xy').view();
 ### Icosahedron
 Creates a new Icosahedron
 
+```JavaScript
 Icosahedron(10).view();
+```
 
 ![Image](creating_geometry.md.9.png)
 
@@ -75,7 +97,9 @@ Icosahedron(10).view();
 ### Line
 Creates a new line
 
+```JavaScript
 Line(10).view();
+```
 
 ![Image](creating_geometry.md.10.png)
 
@@ -83,7 +107,9 @@ Line(10).view();
 ### Octagon
 Creates a new Octagon
 
+```JavaScript
 Octagon(20).view();
+```
 
 ![Image](creating_geometry.md.11.png)
 
@@ -91,11 +117,15 @@ Octagon(20).view();
 ### Orb
 Creates a new spheroid
 
+```JavaScript
 Orb(10).view();
+```
 
 ![Image](creating_geometry.md.12.png)
 
+```JavaScript
 Orb(10, 5, 2).view();
+```
 
 ![Image](creating_geometry.md.13.png)
 
@@ -103,7 +133,9 @@ Orb(10, 5, 2).view();
 ### Pentagon
 Generates a pentagon
 
+```JavaScript
 Pentagon(10).view();
+```
 
 ![Image](creating_geometry.md.14.png)
 
@@ -111,7 +143,9 @@ Pentagon(10).view();
 ### Point
 A point in 3D space
 
+```JavaScript
 Point(0, 0, 0).view();
+```
 
 ![Image](creating_geometry.md.15.png)
 
@@ -119,7 +153,9 @@ Point(0, 0, 0).view();
 ### Polygon
 Creates a new polygon from the input points
 
+```JavaScript
 Polygon(Point(0, 0, 0), Point(10, 0, 0), Point(10, 10, 0)).view();
+```
 
 ![Image](creating_geometry.md.16.png)
 
@@ -127,7 +163,9 @@ Polygon(Point(0, 0, 0), Point(10, 0, 0), Point(10, 10, 0)).view();
 ### Septagon
 Creates a Septagon.
 
+```JavaScript
 Septagon(10).view();
+```
 
 ![Image](creating_geometry.md.17.png)
 
@@ -135,6 +173,8 @@ Septagon(10).view();
 ### Triangle
 Triangle creates a new triangle.
 
+```JavaScript
 Triangle(4, 9).view();
+```
 
 ![Image](creating_geometry.md.18.png)

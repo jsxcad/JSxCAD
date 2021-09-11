@@ -1,5 +1,8 @@
+```JavaScript
 import './gearPlan.js';
+```
 
+```JavaScript
 import {
   ToothProfile,
   pitchRadius,
@@ -8,25 +11,45 @@ import {
   rootRadius,
   iang,
 } from './gearFn.js';
+```
 
+```JavaScript
 import { Gear } from './gear.js';
+```
 
+```JavaScript
 const numberOfTeeth = control('number of teeth', 16, 'input');
+```
 
+```JavaScript
 const mmPerTooth = control('mm per tooth', Math.PI, 'input');
+```
 
+```JavaScript
 const teethToHide = control('teeth to hide', 0, 'input');
+```
 
+```JavaScript
 const pressureAngle = control('pressure angle', 20, 'input');
+```
 
+```JavaScript
 const clearance = control('clearance', 0, 'input');
+```
 
+```JavaScript
 const backlash = control('backlash', 0, 'input');
+```
 
+```JavaScript
 const thickness = control('thickness', 2, 'input');
+```
 
+```JavaScript
 const toothResolution = control('toothResolution', 5, 'input');
+```
 
+```JavaScript
 const example = Gear()
   .hasTeeth(numberOfTeeth)
   .hasMmPerTooth(mmPerTooth)
@@ -38,5 +61,6 @@ const example = Gear()
   .ex(thickness)
   .material('wood')
   .stl(`gear_${numberOfTeeth}`);
+```
 
 ![Image](gear.md.0.png)
