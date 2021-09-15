@@ -1,4 +1,4 @@
-import { closePath, concatenatePath, assemble as assemble$1, eachPoint, flip, toConcreteGeometry, toDisplayGeometry, toTransformedGeometry, toPoints, transform, rewriteTags, taggedPaths, taggedGraph, openPath, taggedPoints, fromPolygonsToGraph, registerReifier, union, taggedGroup, taggedItem, bend as bend$1, visit, intersection, allTags, fromPointsToGraph, difference, rewrite, taggedPlan, translatePaths, getLeafs, taggedLayout, measureBoundingBox, getLayouts, isNotVoid, extrude as extrude$1, extrudeToPlane as extrudeToPlane$1, fill as fill$1, empty, grow as grow$1, outline as outline$1, inset as inset$1, read, loft as loft$1, realize, minkowskiDifference as minkowskiDifference$1, minkowskiShell as minkowskiShell$1, minkowskiSum as minkowskiSum$1, isVoid, offset as offset$1, toDisjointGeometry, projectToPlane as projectToPlane$1, push as push$1, remesh as remesh$1, write, section as section$1, separate as separate$1, smooth as smooth$1, taggedSketch, test as test$1, twist as twist$1, toPolygonsWithHoles, arrangePolygonsWithHoles, fromPolygonsWithHolesToTriangles, fromTrianglesToGraph, alphaShape, rotateZPath, convexHullToGraph, fromFunctionToGraph, fromPathsToGraph, translatePath } from './jsxcad-geometry.js';
+import { closePath, concatenatePath, assemble as assemble$1, eachPoint, flip, toConcreteGeometry, toDisplayGeometry, toTransformedGeometry, toPoints, transform, rewriteTags, taggedPaths, taggedGraph, openPath, taggedPoints, fromPolygonsToGraph, registerReifier, union, taggedGroup, taggedItem, getLeafs, visit, bend as bend$1, intersection, allTags, fromPointsToGraph, difference, rewrite, taggedPlan, translatePaths, taggedLayout, measureBoundingBox, getLayouts, isNotVoid, extrude as extrude$1, extrudeToPlane as extrudeToPlane$1, fill as fill$1, empty, grow as grow$1, outline as outline$1, inset as inset$1, read, loft as loft$1, realize, minkowskiDifference as minkowskiDifference$1, minkowskiShell as minkowskiShell$1, minkowskiSum as minkowskiSum$1, isVoid, offset as offset$1, toDisjointGeometry, projectToPlane as projectToPlane$1, push as push$1, remesh as remesh$1, write, section as section$1, separate as separate$1, smooth as smooth$1, taggedSketch, test as test$1, twist as twist$1, toPolygonsWithHoles, arrangePolygonsWithHoles, fromPolygonsWithHolesToTriangles, fromTrianglesToGraph, alphaShape, rotateZPath, convexHullToGraph, fromFunctionToGraph, fromPathsToGraph, translatePath } from './jsxcad-geometry.js';
 import { getSourceLocation, emit, log as log$1, generateUniqueId, addPending, write as write$1 } from './jsxcad-sys.js';
 export { elapsed, emit, info, read, write } from './jsxcad-sys.js';
 import { identityMatrix, fromTranslation, fromRotation, fromScaling } from './jsxcad-math-mat4.js';
@@ -140,7 +140,7 @@ const registerShapeMethod = (name, op) => {
 
 const shapeMethod = (build) => {
   return function (...args) {
-    return build(...args).at(this);
+    return this.at(this, build(...args));
   };
 };
 
@@ -483,16 +483,34 @@ Shape.prototype.Group = Shape.shapeMethod(Group);
 Shape.Group = Group;
 
 const at =
-  (other, path = 'tagpath:*') =>
+  (selection, ...ops) =>
   (shape) => {
-    other = Shape.toShape(other, shape);
-    const reoriented = [];
-    for (const item of other.get(path).each()) {
-      reoriented.push(
-        shape.transform(invertTransform(item.toGeometry().matrix))
-      );
+    ops = ops.map((op) => (op instanceof Function ? op : () => op));
+    // We've already selected the item to replace, e.g., s.on(g('plate'), ...);
+    if (selection instanceof Function) {
+      selection = selection(shape);
     }
-    return Group(...reoriented);
+    // FIX: This needs to walk through items.
+    const leafs = getLeafs(selection.toGeometry());
+    const placed = [];
+    const walk = (geometry, descend) => {
+      if (geometry.type === 'item' && leafs.includes(geometry)) {
+        // This is a target.
+        const global = geometry.matrix;
+        const local = invertTransform(global);
+        const target = Shape.fromGeometry(geometry);
+        // Switch to the local coordinate space, perform the operation, and come back to the global coordinate space.
+        placed.push(
+          target
+            .transform(local)
+            .op(...ops)
+            .transform(global)
+        );
+      }
+      return descend();
+    };
+    visit(shape.toGeometry(), walk);
+    return Group(...placed);
   };
 
 Shape.registerMethod('at', at);
@@ -620,8 +638,18 @@ const tagMatcher = (tag, namespace = 'user') => {
   }
 };
 
-const qualifyTagPath = (path, namespace = 'user') =>
-  path.split('/').map((tag) => qualifyTag(tag, namespace));
+const oneOfTagMatcher = (tags, namespace = 'user') => {
+  const matchers = tags.map((tag) => tagMatcher(tag, namespace));
+  const isMatch = (tag) => {
+    for (const matcher of matchers) {
+      if (matcher(tag)) {
+        return true;
+      }
+    }
+    return false;
+  };
+  return isMatch;
+};
 
 const tag =
   (...tags) =>
@@ -2650,30 +2678,17 @@ Shape.registerMethod('fuse', fuse);
 const get =
   (...tags) =>
   (shape) => {
-    const isMatchingTag = (options, matches) => {
-      for (const match of matches) {
-        if (match === 'tagpath:*') {
-          return true;
-        }
-      }
-      if (options === undefined) {
-        return false;
-      }
-      for (const match of matches) {
-        if (options.includes(match)) {
-          return true;
-        }
-      }
-      return false;
-    };
-    const qualifiedTags = tags.map((tag) => qualifyTag(tag, 'item'));
+    const isMatch = oneOfTagMatcher(tags, 'item');
     const picks = [];
     const walk = (geometry, descend) => {
-      if (geometry.type === 'item') {
-        if (isMatchingTag(geometry.tags, qualifiedTags)) {
+      const { tags = [] } = geometry;
+      for (const tag of tags) {
+        if (isMatch(tag)) {
           picks.push(Shape.fromGeometry(geometry));
+          break;
         }
-      } else {
+      }
+      if (geometry.type !== 'item') {
         return descend();
       }
     };
@@ -2936,69 +2951,31 @@ const offset =
 Shape.registerMethod('offset', offset);
 
 const on =
-  (path, ...ops) =>
+  (selection, ...ops) =>
   (shape) => {
     ops = ops.map((op) => (op instanceof Function ? op : () => op));
-    if (path instanceof Function) {
-      // We've already selected the item to replace, e.g., s.on(g('plate'), ...);
-      const selection = path(shape).toGeometry();
-      // FIX: Make this more robust?
-      const items = selection.type === 'item' ? [selection] : selection.content;
-      const walk = (geometry, descend) => {
-        if (geometry.type === 'item') {
-          if (items.includes(geometry)) {
-            // This is a target.
-            const global = geometry.matrix;
-            const local = invertTransform(global);
-            const target = Shape.fromGeometry(geometry);
-            // Switch to the local coordinate space, perform the operation, and come back to the global coordinate space.
-            return target
-              .transform(local)
-              .op(...ops)
-              .transform(global)
-              .toGeometry();
-          }
-        }
-        return descend();
-      };
-      return Shape.fromGeometry(rewrite(shape.toGeometry(), walk));
+    // We've already selected the item to replace, e.g., s.on(g('plate'), ...);
+    if (selection instanceof Function) {
+      selection = selection(shape);
     }
-
-    const walk = (geometry, descend, walk, path) => {
-      if (geometry.type === 'item') {
-        if (path.length >= 1) {
-          if (
-            path[0] === 'tagpath:*' ||
-            (geometry.tags && geometry.tags.includes(path[0]))
-          ) {
-            if (path.length >= 2) {
-              return descend({}, path.slice(1));
-            } else {
-              // This is a target.
-              const global = geometry.matrix;
-              const local = invertTransform(global);
-              const target = Shape.fromGeometry(geometry);
-              // Switch to the local coordinate space, perform the operation, and come back to the global coordinate space.
-              return target
-                .transform(local)
-                .op(...ops)
-                .transform(global)
-                .toGeometry();
-            }
-          } else {
-            return geometry;
-          }
-        } else {
-          // We ran out of path without finding anything, which should be impossible.
-          throw Error('Path exhausted');
-        }
+    // FIX: This needs to walk through items.
+    const leafs = getLeafs(selection.toGeometry());
+    const walk = (geometry, descend) => {
+      if (geometry.type === 'item' && leafs.includes(geometry)) {
+        // This is a target.
+        const global = geometry.matrix;
+        const local = invertTransform(global);
+        const target = Shape.fromGeometry(geometry);
+        // Switch to the local coordinate space, perform the operation, and come back to the global coordinate space.
+        return target
+          .transform(local)
+          .op(...ops)
+          .transform(global)
+          .toGeometry();
       }
-      return descend({}, path);
+      return descend();
     };
-
-    return Shape.fromGeometry(
-      rewrite(shape.toGeometry(), walk, qualifyTagPath(path, 'item'))
-    );
+    return Shape.fromGeometry(rewrite(shape.toGeometry(), walk));
   };
 
 Shape.registerMethod('on', on);
@@ -3338,15 +3315,7 @@ Shape.registerMethod('twist', twist);
 const untag =
   (...tags) =>
   (shape) => {
-    const matchers = tags.map((tag) => tagMatcher(tag, 'user'));
-    const isMatch = (tag) => {
-      for (const matcher of matchers) {
-        if (matcher(tag)) {
-          return true;
-        }
-      }
-      return false;
-    };
+    const isMatch = oneOfTagMatcher(tags, 'user');
     const op = (geometry, descend) => {
       switch (geometry.type) {
         case 'group':
