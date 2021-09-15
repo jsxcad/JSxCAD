@@ -19,6 +19,19 @@ export const tagMatcher = (tag, namespace = 'user') => {
   }
 };
 
+export const oneOfTagMatcher = (tags, namespace = 'user') => {
+  const matchers = tags.map((tag) => tagMatcher(tag, namespace));
+  const isMatch = (tag) => {
+    for (const matcher of matchers) {
+      if (matcher(tag)) {
+        return true;
+      }
+    }
+    return false;
+  };
+  return isMatch;
+};
+
 export const qualifyTagPath = (path, namespace = 'user') =>
   path.split('/').map((tag) => qualifyTag(tag, namespace));
 

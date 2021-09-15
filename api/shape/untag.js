@@ -1,19 +1,11 @@
 import Shape from './Shape.js';
+import { oneOfTagMatcher } from './tag.js';
 import { rewrite } from '@jsxcad/geometry';
-import { tagMatcher } from './tag.js';
 
 export const untag =
   (...tags) =>
   (shape) => {
-    const matchers = tags.map((tag) => tagMatcher(tag, 'user'));
-    const isMatch = (tag) => {
-      for (const matcher of matchers) {
-        if (matcher(tag)) {
-          return true;
-        }
-      }
-      return false;
-    };
+    const isMatch = oneOfTagMatcher(tags, 'user');
     const op = (geometry, descend) => {
       switch (geometry.type) {
         case 'group':

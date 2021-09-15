@@ -31,12 +31,20 @@ export const initCgal = async () => {
       },
       locateFile(path) {
         if (path === 'cgal_node.wasm' || path === 'cgal_browser.wasm') {
-          let pathname = toPathnameFromUrl(import.meta.url);
-          const parts = pathname.split('/');
-          parts.pop();
-          const prefix = parts.join('/');
-          const wasmPathname = `${prefix}/${path}`;
-          return wasmPathname;
+          const url = import.meta.url;
+          if (url.startsWith('file://')) {
+            let pathname = toPathnameFromUrl(import.meta.url);
+            const parts = pathname.split('/');
+            parts.pop();
+            const prefix = parts.join('/');
+            const wasmPathname = `${prefix}/${path}`;
+            return wasmPathname;
+          } else {
+            const parts = url.split('/');
+            parts.pop();
+            parts.push('cgal_browser.wasm');
+            return parts.join('/');
+          }
         }
         return path;
       },
