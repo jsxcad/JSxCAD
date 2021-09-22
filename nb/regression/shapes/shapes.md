@@ -1,27 +1,4 @@
 ```JavaScript
-const torusFn = ([x, y, z]) => {
-  const x2 = x * x,
-    y2 = y * y,
-    z2 = z * z;
-  const x4 = x2 * x2,
-    y4 = y2 * y2,
-    z4 = z2 * z2;
-  return (
-    x4 +
-    y4 +
-    z4 +
-    2 * x2 * y2 +
-    2 * x2 * z2 +
-    2 * y2 * z2 -
-    5 * x2 +
-    4 * y2 -
-    5 * z2 +
-    4
-  );
-};
-```
-
-```JavaScript
 const arc = Arc(5)
   .hasAngle(45 / 360, 270 / 360)
   .gridView()
@@ -120,6 +97,29 @@ const icosahedron = Icosahedron(5).view().md(`Icosahedron(5)`);
 ![Image](shapes.md.9.png)
 
 Icosahedron(5)
+
+```JavaScript
+const torusFn = ([x, y, z]) => {
+  const x2 = x * x,
+    y2 = y * y,
+    z2 = z * z;
+  const x4 = x2 * x2,
+    y4 = y2 * y2,
+    z4 = z2 * z2;
+  return (
+    x4 +
+    y4 +
+    z4 +
+    2 * x2 * y2 +
+    2 * x2 * z2 +
+    2 * y2 * z2 -
+    5 * x2 +
+    4 * y2 -
+    5 * z2 +
+    4
+  );
+};
+```
 
 ```JavaScript
 const line = Line(5, -1).rz(45).gridView().md(`Line(5, -1)`);

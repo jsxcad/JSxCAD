@@ -3750,80 +3750,69 @@ const localForageDb = () => {
 const db = localForageDb;
 // export const db = idbKeyvalDb;
 
-function pad (hash, len) {
-  while (hash.length < len) {
-    hash = '0' + hash;
-  }
-  return hash;
-}
-
-function fold (hash, text) {
-  var i;
-  var chr;
-  var len;
-  if (text.length === 0) {
-    return hash;
-  }
-  for (i = 0, len = text.length; i < len; i++) {
-    chr = text.charCodeAt(i);
-    hash = ((hash << 5) - hash) + chr;
-    hash |= 0;
-  }
-  return hash < 0 ? hash * -2 : hash;
-}
-
-function foldObject (hash, o, seen) {
-  return Object.keys(o).sort().reduce(foldKey, hash);
-  function foldKey (hash, key) {
-    return foldValue(hash, o[key], key, seen);
-  }
-}
-
-function foldValue (input, value, key, seen) {
-  var hash = fold(fold(fold(input, key), toString(value)), typeof value);
-  if (value === null) {
-    return fold(hash, 'null');
-  }
-  if (value === undefined) {
-    return fold(hash, 'undefined');
-  }
-  if (typeof value === 'object' || typeof value === 'function') {
-    if (seen.indexOf(value) !== -1) {
-      return fold(hash, '[Circular]' + key);
-    }
-    seen.push(value);
-
-    var objHash = foldObject(hash, value, seen);
-
-    if (!('valueOf' in value) || typeof value.valueOf !== 'function') {
-      return objHash;
-    }
-
-    try {
-      return fold(objHash, String(value.valueOf()))
-    } catch (err) {
-      return fold(objHash, '[valueOf exception]' + (err.stack || err.message))
-    }
-  }
-  return fold(hash, value.toString());
-}
-
-function toString (o) {
-  return Object.prototype.toString.call(o);
-}
-
-function sum (o) {
-  return pad(foldValue(0, o, '', []).toString(16), 8);
-}
-
-var hashSum = sum;
+// import hashSum from 'hash-sum';
 
 const sourceLocations = [];
 
 const getSourceLocation = () =>
   sourceLocations[sourceLocations.length - 1];
 
-const popSourceLocation = (sourceLocation) => {
+const emitGroup = [];
+
+let startTime = new Date();
+
+const elapsed = () => new Date() - startTime;
+
+const clearEmitted = () => {
+  startTime = new Date();
+  sourceLocations.splice(0);
+};
+
+const saveEmitGroup = () => {
+  const savedSourceLocations = [...sourceLocations];
+  sourceLocations.splice(0);
+
+  const savedEmitGroup = [...emitGroup];
+  emitGroup.splice(0);
+
+  return { savedSourceLocations, savedEmitGroup };
+};
+
+const restoreEmitGroup = ({ savedSourceLocations, savedEmitGroup }) => {
+  sourceLocations.splice(0, sourceLocations.length, ...savedSourceLocations);
+  emitGroup.splice(0, emitGroup.length, ...savedEmitGroup);
+};
+
+const onEmitHandlers = new Set();
+
+const emit = (value) => {
+  if (value.sourceLocation === undefined) {
+    value.sourceLocation = getSourceLocation();
+  }
+  emitGroup.push(value);
+};
+
+const addOnEmitHandler = (handler) => {
+  onEmitHandlers.add(handler);
+  return handler;
+};
+
+const beginEmitGroup = (sourceLocation) => {
+  if (emitGroup.length !== 0) {
+    throw Error('emitGroup not empty');
+  }
+  sourceLocations.push(sourceLocation);
+  emit({ beginSourceLocation: sourceLocation });
+};
+
+const flushEmitGroup = () => {
+  for (const onEmitHandler of onEmitHandlers) {
+    onEmitHandler([...emitGroup]);
+  }
+  emitGroup.splice(0);
+};
+
+const finishEmitGroup = (sourceLocation) => {
   if (sourceLocations.length === 0) {
     throw Error(`Expected current sourceLocation but there was none.`);
   }
@@ -3840,51 +3829,18 @@ const popSourceLocation = (sourceLocation) => {
   }
   emit({ endSourceLocation });
   sourceLocations.pop();
-};
-
-const pushSourceLocation = (sourceLocation) => {
-  sourceLocations.push(sourceLocation);
-  emit({ beginSourceLocation: sourceLocation });
-};
-
-const emitted = [];
-
-let startTime = new Date();
-
-const elapsed = () => new Date() - startTime;
-
-const clearEmitted = () => {
-  startTime = new Date();
-  emitted.length = 0;
-  sourceLocations.length = 0;
-};
-
-const onEmitHandlers = new Set();
-
-const emit = (value) => {
-  if (value.sourceLocation === undefined) {
-    value.sourceLocation = getSourceLocation();
-  }
-  emitted.push(value);
-  for (const onEmitHandler of onEmitHandlers) {
-    onEmitHandler(value);
-  }
-};
-
-const getEmitted = () => [...emitted];
-
-const addOnEmitHandler = (handler) => {
-  onEmitHandlers.add(handler);
-  return handler;
+  flushEmitGroup();
 };
 
 const removeOnEmitHandler = (handler) => onEmitHandlers.delete(handler);
 
 const info = (text) => {
+  /*
   console.log(text);
   const entry = { info: text };
   const hash = hashSum(entry);
   emit({ info: text, hash });
+*/
 };
 
 var nodeFetch = _ => _;
@@ -4114,12 +4070,9 @@ const writeFile = async (options, path, data) => {
   } = options;
   let originalWorkspace = getFilesystem();
   if (workspace !== originalWorkspace) {
-    info(`Write ${path} of ${workspace}`);
     // Switch to the source filesystem, if necessary.
     setupFilesystem({ fileBase: workspace });
   }
-
-  info(`Write ${path}`);
   const file = await getFile(options, path);
   file.data = data;
 
@@ -4390,15 +4343,73 @@ const boot = async () => {
   }
 };
 
-const getDefinitions = () => {
-  const definitions = {};
-  for (const note of getEmitted()) {
-    if (note.define) {
-      definitions[note.define.tag] = note.define.data;
+function pad (hash, len) {
+  while (hash.length < len) {
+    hash = '0' + hash;
+  }
+  return hash;
+}
+
+function fold (hash, text) {
+  var i;
+  var chr;
+  var len;
+  if (text.length === 0) {
+    return hash;
+  }
+  for (i = 0, len = text.length; i < len; i++) {
+    chr = text.charCodeAt(i);
+    hash = ((hash << 5) - hash) + chr;
+    hash |= 0;
+  }
+  return hash < 0 ? hash * -2 : hash;
+}
+
+function foldObject (hash, o, seen) {
+  return Object.keys(o).sort().reduce(foldKey, hash);
+  function foldKey (hash, key) {
+    return foldValue(hash, o[key], key, seen);
+  }
+}
+
+function foldValue (input, value, key, seen) {
+  var hash = fold(fold(fold(input, key), toString(value)), typeof value);
+  if (value === null) {
+    return fold(hash, 'null');
+  }
+  if (value === undefined) {
+    return fold(hash, 'undefined');
+  }
+  if (typeof value === 'object' || typeof value === 'function') {
+    if (seen.indexOf(value) !== -1) {
+      return fold(hash, '[Circular]' + key);
+    }
+    seen.push(value);
+
+    var objHash = foldObject(hash, value, seen);
+
+    if (!('valueOf' in value) || typeof value.valueOf !== 'function') {
+      return objHash;
+    }
+
+    try {
+      return fold(objHash, String(value.valueOf()))
+    } catch (err) {
+      return fold(objHash, '[valueOf exception]' + (err.stack || err.message))
     }
   }
-  return definitions;
-};
+  return fold(hash, value.toString());
+}
+
+function toString (o) {
+  return Object.prototype.toString.call(o);
+}
+
+function sum (o) {
+  return pad(foldValue(0, o, '', []).toString(16), 8);
+}
+
+var hashSum = sum;
 
 const hash = (item) => hashSum(item);
 
@@ -4534,4 +4545,4 @@ let nanoid = (size = 21) => {
 
 const generateUniqueId = () => nanoid();
 
-export { addOnEmitHandler, addPending, ask, askService, askServices, boot, clearEmitted, createConversation, createService, deleteFile, elapsed, emit, generateUniqueId, getControlValue, getDefinitions, getEmitted, getFilesystem, getPendingErrorHandler, getServicePoolInfo, getSourceLocation, hash, info, isBrowser, isNode, isWebWorker, listFiles, listFilesystems, log, onBoot, popSourceLocation, pushSourceLocation, qualifyPath, read, readFile, readOrWatch, removeOnEmitHandler, resolvePending, setControlValue, setHandleAskUser, setPendingErrorHandler, setupFilesystem, sleep, tellServices, terminateActiveServices, touch, unwatchFile, unwatchFileCreation, unwatchFileDeletion, unwatchFiles, unwatchLog, unwatchServices, waitServices, watchFile, watchFileCreation, watchFileDeletion, watchLog, watchServices, write, writeFile };
+export { addOnEmitHandler, addPending, ask, askService, askServices, beginEmitGroup, boot, clearEmitted, createConversation, createService, deleteFile, elapsed, emit, finishEmitGroup, flushEmitGroup, generateUniqueId, getControlValue, getFilesystem, getPendingErrorHandler, getServicePoolInfo, getSourceLocation, hash, info, isBrowser, isNode, isWebWorker, listFiles, listFilesystems, log, onBoot, qualifyPath, read, readFile, readOrWatch, removeOnEmitHandler, resolvePending, restoreEmitGroup, saveEmitGroup, setControlValue, setHandleAskUser, setPendingErrorHandler, setupFilesystem, sleep, tellServices, terminateActiveServices, touch, unwatchFile, unwatchFileCreation, unwatchFileDeletion, unwatchFiles, unwatchLog, unwatchServices, waitServices, watchFile, watchFileCreation, watchFileDeletion, watchLog, watchServices, write, writeFile };

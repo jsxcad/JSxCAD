@@ -152,8 +152,8 @@ class Ui extends PureComponent {
         identifier,
         notes,
         options,
-        sourceLocation,
         path,
+        sourceLocation,
         workspace,
       } = message;
       switch (op) {
@@ -170,9 +170,10 @@ class Ui extends PureComponent {
           {
             const { notebookNotes, notebookDefinitions } = this.state;
             const { domElementByHash } = jsEditorAdvice;
+
             const { id, path } = sourceLocation;
             if (path !== this.state.path) {
-              // This note is for a different module.
+              // These notes are for a different module.
               return;
             }
 

@@ -6522,7 +6522,8 @@ const add = (array, item) => {
   return array;
 };
 
-const escape = (text) => text.replace(/(['"`$])/g, '\\$1');
+const escape = (text) =>
+  text ? `\`${text.replace(/(['"`$])/g, '\\$1')}\`` : text;
 
 const strip = (ast) => {
   if (ast instanceof Array) {
@@ -6561,82 +6562,12 @@ const fromIdToSha = (id, { topLevel }) => {
   }
 };
 
-const generateReplayCode = async (
-  {
-    isNotCacheable,
-    importSource,
-    emitSourceLocation = true,
-    code,
-    path,
-    id,
-    text,
-  },
-  { doReplay = true, provideDefinition = false }
+const generateCode = async (
+  { path, id, dependencies, imports },
+  { topLevel, exportNames }
 ) => {
-  const loadCode = [];
-  if (!isNotCacheable && !importSource) {
-    const meta = await read(`meta/def/${path}/${id}`);
-    if (meta && meta.type === 'Shape') {
-      loadCode.push(
-        parse(
-          `const ${id} = await loadGeometry('data/def/${path}/${id}')`,
-          parseOptions
-        ),
-        parse(`Object.freeze(${id});`, parseOptions)
-      );
-      // This provides a definition.
-      provideDefinition = false;
-    }
-  }
-  if (emitSourceLocation) {
-    loadCode.push(
-      parse(
-        `pushSourceLocation({ path: '${path}', id: '${id}' });`,
-        parseOptions
-      )
-    );
-  }
-  if (text) {
-    loadCode.push(parse(`emitSourceText(\`${escape(text)}\`);`, parseOptions));
-  }
-  if (doReplay) {
-    loadCode.push(
-      parse(`await replayRecordedNotes('${path}', '${id}')`, parseOptions)
-    );
-  }
-  if (provideDefinition) {
-    loadCode.push(...code);
-  }
-  // Otherwise recompute it.
-  if (emitSourceLocation) {
-    loadCode.push(
-      parse(
-        `popSourceLocation({ path: '${path}', id: '${id}' });`,
-        parseOptions
-      )
-    );
-  }
-  return loadCode;
-};
-
-const generateUpdateCode = async (entry, { declaration, sha, topLevel }) => {
-  const {
-    doNotUpdateMetadata = false,
-    isNotCacheable,
-    code,
-    dependencies,
-    path,
-    id,
-    text,
-    importSource,
-    imports = [],
-    emitSourceLocation = !importSource,
-  } = entry;
   const body = [];
   const seen = new Set();
-  if (importSource) {
-    add(imports, importSource);
-  }
   const walk = async (dependencies) => {
     for (const dependency of dependencies) {
       if (seen.has(dependency)) {
@@ -6651,66 +6582,29 @@ const generateUpdateCode = async (entry, { declaration, sha, topLevel }) => {
       if (entry.importSource) {
         add(imports, entry.importSource);
       }
-      body.push(
-        ...(await generateReplayCode(entry, { provideDefinition: true }))
-      );
+      const { path, id, code, text, sha } = entry;
+      if (code) {
+        body.push(
+          parse(
+            `const ${id} = await $run(async () => { ${generate({
+              type: 'Program',
+              body: code,
+            })}; return ${id}; }, { path: '${path}', id: '${id}', text: ${escape(
+              text
+            )}, sha: '${sha}' });`,
+            parseOptions
+          )
+        );
+      }
     }
   };
-  await walk(dependencies);
-  entry.imports = imports;
-  if (emitSourceLocation) {
-    body.push(parse(`info('define ${id}');`, parseOptions));
-    body.push(
-      parse(
-        `pushSourceLocation({ path: '${path}', id: '${id}' });`,
-        parseOptions
-      )
-    );
+  await walk([id, ...dependencies]);
+  if (exportNames) {
+    body.push(parse(`return { ${exportNames.join(', ')} };`, parseOptions));
   }
-  if (text) {
-    body.push(parse(`emitSourceText(\`${escape(text)}\`);`, parseOptions));
-  }
-  if (!isNotCacheable && !importSource) {
-    body.push(
-      parse(
-        `beginRecordingNotes('${path}', '${id}', { line: ${declaration.loc.start.line}, column: ${declaration.loc.start.column} });`,
-        parseOptions
-      )
-    );
-  }
-  body.push(...code);
-  if (!doNotUpdateMetadata) {
-    body.push(
-      parse(
-        `await write('meta/def/${path}/${id}', { sha: '${sha}', type: ${id} instanceof Shape ? 'Shape' : 'Object' });`,
-        parseOptions
-      )
-    );
-  }
-  if (!isNotCacheable && !importSource) {
-    // Only cache Shapes.
-    body.push(
-      parse(
-        `if (${id} instanceof Shape) { await saveGeometry('data/def/${path}/${id}', ${id}); }`,
-        parseOptions
-      )
-    );
-    body.push(
-      parse(`await saveRecordedNotes('${path}', '${id}');`, parseOptions)
-    );
-  }
-  if (emitSourceLocation) {
-    body.push(
-      parse(
-        `popSourceLocation({ path: '${path}', id: '${id}' });`,
-        parseOptions
-      )
-    );
-  }
-  const program = { type: 'Program', body };
   return `
 try {
-${generate(program)}
+${generate({ type: 'Program', body })}
 } catch (error) { throw error; }
 `;
 };
@@ -6839,26 +6733,30 @@ const declareVariable = async (
     }
   }
 
-  if (!entry.isNotCacheable) {
-    const meta = await read(`meta/def/${path}/${id}`);
-    if (!meta || meta.sha !== sha) {
-      updates[id] = {
-        dependencies,
-        imports: entry.imports,
-        program: await generateUpdateCode(entry, {
-          declaration,
-          sha,
-          topLevel,
-        }),
-      };
-      // Don't replay it if it's being updated.
-      return;
-    }
+  updates[id] = {
+    dependencies,
+    imports: entry.imports,
+    program: await generateCode(entry, { topLevel }),
+  };
+
+  /*
+  const meta = await read(`meta/def/${path}/${id}`);
+  if (!meta || meta.sha !== sha || entry.isNotCacheable) {
+    updates[id] = {
+      dependencies,
+      imports: entry.imports,
+      program: await generateUpdateCode(entry, {
+        declaration,
+        sha,
+        topLevel,
+      }),
+    };
+    // Don't replay it if it's being updated.
+    return;
   }
 
   const replayProgram = await generateReplayCode(
-    { ...entry, isNotCacheable: true },
-    { provideDefinition: false }
+    entry,
   );
   if (replayProgram.length > 0) {
     replays[id] = {
@@ -6871,6 +6769,7 @@ ${generate({ type: 'Program', body: replayProgram })}
 `,
     };
   }
+*/
 };
 
 // FIX: Replace path with directory?
@@ -7053,19 +6952,17 @@ const toEcmascript = async (
 
   // Return the exports as an object.
   if (exportNames.length > 0) {
-    const exportCode = `return { ${exportNames.join(', ')} };`;
     exports.push(
-      await generateUpdateCode(
+      await generateCode(
         {
           isNotCacheable: true,
-          doNotUpdateMetadata: true,
-          code: parse(exportCode, parseOptions).body,
           dependencies: [...exportNames, ...sideEffectors],
           id: '$exports',
           path,
           emitSourceLocation: false, // FIX: Hack for source location.
+          imports: [],
         },
-        { topLevel }
+        { topLevel, exportNames }
       )
     );
   }

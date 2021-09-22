@@ -8,6 +8,8 @@ const Profile = (pitch = 1, angle = 60 / 360) =>
   ).fill();
 ```
 
+Show the fit.
+
 ```JavaScript
 export const ScrewThread = (
   diameter,
@@ -81,8 +83,6 @@ const screwThread = ScrewThread(20, 10)
 ```
 
 ![Image](bolt.md.2.png)
-
-Show the fit.
 
 ```JavaScript
 ScrewThread(10, 5)

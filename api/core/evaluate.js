@@ -1,13 +1,15 @@
 import { acquire, release } from './evaluateLock.js';
+import { isWebWorker, restoreEmitGroup, saveEmitGroup } from '@jsxcad/sys';
 
 import { getApi } from './api.js';
-import { isWebWorker } from '@jsxcad/sys';
 import { toEcmascript } from '@jsxcad/compiler';
 
 export const evaluate = async (ecmascript, { api, path }) => {
   const where = isWebWorker ? 'worker' : 'browser';
+  let emitGroup;
   try {
     await acquire();
+    emitGroup = saveEmitGroup();
     console.log(`QQ/evaluate ${where}: ${ecmascript.replace(/\n/g, '\n|   ')}`);
     const builder = new Function(
       `{ ${Object.keys(api).join(', ')} }`,
@@ -19,6 +21,9 @@ export const evaluate = async (ecmascript, { api, path }) => {
   } catch (error) {
     throw error;
   } finally {
+    if (emitGroup) {
+      restoreEmitGroup(emitGroup);
+    }
     await release();
   }
 };
@@ -85,56 +90,54 @@ export const execute = async (
       }
       // Update what we can.
       console.log(`QQ/Update ${where}`);
-      const blockedUpdates = [];
-      const updatePromises = [];
-      // Determine the updates we can process.
-      for (const id of Object.keys(updates)) {
-        if (scheduled.has(id)) {
-          continue;
+      const unprocessedUpdates = new Set(Object.keys(updates));
+      while (unprocessedUpdates.size > 0) {
+        const updatePromises = [];
+        // Determine the updates we can process.
+        for (const id of unprocessedUpdates) {
+          if (scheduled.has(id)) {
+            continue;
+          }
+          const entry = updates[id];
+          const outstandingDependencies = entry.dependencies.filter(
+            (dependency) =>
+              !completed.has(dependency) &&
+              updates[dependency] &&
+              dependency !== id
+          );
+          if (
+            updatePromises.length <= 1 &&
+            outstandingDependencies.length === 0
+          ) {
+            // if (isWebWorker) {
+            //   throw Error('Updates should not happen in worker');
+            // }
+            // For now, only do one thing at a time, and block the remaining updates.
+            const task = async () => {
+              try {
+                await evaluate(updates[id].program, { path });
+                completed.add(id);
+                console.log(`Completed ${id}`);
+              } catch (error) {
+                throw error;
+              }
+            };
+            updatePromises.push(task());
+            unprocessedUpdates.delete(id);
+            scheduled.add(id);
+          }
         }
-        const entry = updates[id];
-        const outstandingDependencies = entry.dependencies.filter(
-          (dependency) =>
-            !completed.has(dependency) &&
-            updates[dependency] &&
-            dependency !== id
-        );
-        if (
-          updatePromises.length <= 1 &&
-          outstandingDependencies.length === 0
-        ) {
-          // if (isWebWorker) {
-          //   throw Error('Updates should not happen in worker');
-          // }
-          // For now, only do one thing at a time, and block the remaining updates.
-          const task = async () => {
-            try {
-              await evaluate(updates[id].program, { path });
-              completed.add(id);
-              console.log(`Completed ${id}`);
-            } catch (error) {
-              throw error;
-            }
-          };
-          updatePromises.push(task());
-          scheduled.add(id);
-        } else {
-          blockedUpdates.push(id);
+        // FIX: We could instead use Promise.race() and then see what new updates could be queued.
+        while (updatePromises.length > 0) {
+          await updatePromises.pop();
         }
-      }
-      // FIX: We could instead use Promise.race() and then see what new updates could be queued.
-      while (updatePromises.length > 0) {
-        await updatePromises.pop();
       }
       // Finally compute the exports.
-      if (blockedUpdates.length === 0) {
-        console.log(`QQ/Exports ${where}`);
-        for (const entry of exports) {
-          return await evaluate(entry, { path });
-        }
-        return;
+      console.log(`QQ/Exports ${where}`);
+      for (const entry of exports) {
+        return await evaluate(entry, { path });
       }
-      // Otherwise recompute the updates and repeat.
+      return;
     }
   } catch (error) {
     throw error;

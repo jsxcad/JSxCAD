@@ -1,4 +1,10 @@
-import { boot, clearEmitted, getEmitted, resolvePending } from '@jsxcad/sys';
+import {
+  addOnEmitHandler,
+  boot,
+  clearEmitted,
+  removeOnEmitHandler,
+  resolvePending,
+} from '@jsxcad/sys';
 import { readFileSync, writeFileSync } from 'fs';
 
 import api from '@jsxcad/api';
@@ -73,13 +79,14 @@ export const updateNotebook = async (
 ) => {
   clearEmitted();
   await boot();
+  const notebook = [];
+  const onEmitHandler = addOnEmitHandler((notes) => notebook.push(...notes));
   try {
     // FIX: This may produce a non-deterministic ordering for now.
     const module = `${target}.nb`;
     const topLevel = new Map();
     await api.importModule(module, { clearUpdateEmits: false, topLevel });
     await resolvePending();
-    const notebook = getEmitted();
     const { html, encodedNotebook } = await toHtml(notebook, { module });
     writeFileSync(`${target}.html`, html);
     const { imageUrlList } = await screenshot(
@@ -148,5 +155,7 @@ export const updateNotebook = async (
     }
   } catch (error) {
     throw error;
+  } finally {
+    removeOnEmitHandler(onEmitHandler);
   }
 };

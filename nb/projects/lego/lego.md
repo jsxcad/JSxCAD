@@ -60,30 +60,6 @@ export const Block = (
 ```
 
 ```JavaScript
-export const AxleProfile = () => {
-  const length = 4.8 + 0.1;
-  const width = 1.8 + 0.1;
-  const diameter = 5 + 0.1;
-  const line = Line(length / 2, length / -2);
-  const bar = Weld(
-    line.y(width / 2),
-    line.y(width / -2),
-    Arc(diameter)
-      .hasAngle(1 / 4)
-      .rotate(50),
-    Arc(diameter)
-      .hasAngle(1 / 4)
-      .rotate(50 + 180)
-  ).fill();
-  return bar.add(bar.rotate(90));
-};
-```
-
-```JavaScript
-export const AxleJoiner = (length) => Arc(8).cut(axleProfile).ex(length);
-```
-
-```JavaScript
 export const socketBoard16x16x2 = SocketBoard(2, 2, 2)
   .as('SocketBoard 16x16x2')
   .md('SocketBoard 16x16x2')
@@ -199,24 +175,34 @@ export const block32x8x9_6 = Block(4, 1, 3.2 * 3)
 ![Image](lego.md.12.png)
 
 ```JavaScript
-export const axleProfile = AxleProfile().md('Axle Profile').topView();
+export const AxleProfile = () => {
+  const length = 4.8 + 0.1;
+  const width = 1.8 + 0.1;
+  const diameter = 5 + 0.1;
+  const line = Line(length / 2, length / -2);
+  const bar = Weld(
+    line.y(width / 2),
+    line.y(width / -2),
+    Arc(diameter)
+      .hasAngle(1 / 4)
+      .rotate(50),
+    Arc(diameter)
+      .hasAngle(1 / 4)
+      .rotate(50 + 180)
+  ).fill();
+  return bar.add(bar.rotate(90));
+};
 ```
-
-Axle Profile
-
-```JavaScript
-export const axleJoiner16 = AxleJoiner(16)
-  .md('Axle Joiner 16mm')
-  .stl('AxleJoiner16');
-```
-
-Axle Joiner 16mm
-
-![Image](lego.md.13.png)
 
 ```JavaScript
 const box = Box(8, 3.2 * 4).y(3.2 * 2);
 ```
+
+```JavaScript
+export const axleProfile = AxleProfile().md('Axle Profile').topView();
+```
+
+Axle Profile
 
 ```JavaScript
 const technic = Weld(box, Arc(4.8 + 0.2).y(5.6))
@@ -226,7 +212,29 @@ const technic = Weld(box, Arc(4.8 + 0.2).y(5.6))
   .stl('technic');
 ```
 
+![Image](lego.md.13.png)
+
+```JavaScript
+export const AxleJoiner = (length) => Arc(8).cut(axleProfile).ex(length);
+```
+
+```JavaScript
+const technic_1x6 = Group(...seq((n) => technic.x(n), { upto: 48, by: 8 }))
+  .align()
+  .view();
+```
+
 ![Image](lego.md.14.png)
+
+```JavaScript
+export const axleJoiner16 = AxleJoiner(16)
+  .md('Axle Joiner 16mm')
+  .stl('AxleJoiner16');
+```
+
+Axle Joiner 16mm
+
+![Image](lego.md.15.png)
 
 ```JavaScript
 const technicConnector = xz
@@ -250,14 +258,6 @@ const technicConnector = xz
   .clip(xz.Box(4.5, 6.2, 16))
   .material('plastic')
   .stl('technicConnector');
-```
-
-![Image](lego.md.15.png)
-
-```JavaScript
-const technic_1x6 = Group(...seq((n) => technic.x(n), { upto: 48, by: 8 }))
-  .align()
-  .view();
 ```
 
 ![Image](lego.md.16.png)

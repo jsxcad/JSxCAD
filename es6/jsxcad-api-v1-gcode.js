@@ -1,5 +1,5 @@
 import { Shape, ensurePages } from './jsxcad-api-shape.js';
-import { emit, addPending, writeFile, getDefinitions, getPendingErrorHandler } from './jsxcad-sys.js';
+import { emit, addPending, writeFile, getPendingErrorHandler } from './jsxcad-sys.js';
 import { hash } from './jsxcad-geometry.js';
 import { toGcode } from './jsxcad-convert-gcode.js';
 
@@ -75,10 +75,7 @@ const prepareGcode = (shape, name, tool, options = {}) => {
   let index = 0;
   const entries = [];
   for (const entry of ensurePages(shape.toKeptGeometry())) {
-    const op = toGcode(entry, tool, {
-      definitions: getDefinitions(),
-      ...options,
-    }).catch(getPendingErrorHandler());
+    const op = toGcode(entry, tool, options).catch(getPendingErrorHandler());
     addPending(op);
     entries.push({
       data: op,

@@ -35954,7 +35954,7 @@ var Prism = (function (_self) {
 					//    at _.util.currentScript (http://localhost/components/prism-core.js:119:5)
 					//    at Global code (http://localhost/components/prism-core.js:606:1)
 
-					var src = (/at [^(\r\n]*\((.*):.+:.+\)$/i.exec(err.stack) || [])[1];
+					var src = (/at [^(\r\n]*\((.*):[^:]+:[^:]+\)$/i.exec(err.stack) || [])[1];
 					if (src) {
 						var scripts = document.getElementsByTagName('script');
 						for (var i in scripts) {
@@ -46359,8 +46359,8 @@ class Ui extends E {
         identifier,
         notes,
         options,
-        sourceLocation,
         path,
+        sourceLocation,
         workspace
       } = message;
 
@@ -46398,7 +46398,7 @@ class Ui extends E {
             } = sourceLocation;
 
             if (path !== this.state.path) {
-              // This note is for a different module.
+              // These notes are for a different module.
               return;
             }
 
