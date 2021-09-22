@@ -7,38 +7,39 @@ import {
   flushEmitGroup,
   hash,
   read,
+  resolvePending,
   write,
 } from '@jsxcad/sys';
 
 import { loadGeometry, saveGeometry } from '@jsxcad/api-shape';
 
-let notes;
+let recordedNotes;
 
 let recording = false;
 let handler;
 
-const recordNote = (note) => {
+const recordNotes = (notes) => {
   if (recording) {
-    notes.push(note);
+    recordedNotes.push(...notes);
   }
 };
 
 export const beginRecordingNotes = (path, id) => {
-  notes = [];
+  recordedNotes = [];
   if (handler === undefined) {
-    handler = addOnEmitHandler(recordNote);
+    handler = addOnEmitHandler(recordNotes);
   }
   recording = true;
 };
 
 export const clearRecordedNotes = () => {
-  notes = undefined;
+  recordedNotes = undefined;
   recording = false;
 };
 
 export const saveRecordedNotes = (path, id) => {
-  let notesToSave = notes;
-  notes = undefined;
+  let notesToSave = recordedNotes;
+  recordedNotes = undefined;
   recording = false;
   addPending(write(`data/note/${path}/${id}`, notesToSave));
 };
@@ -73,6 +74,7 @@ export const $run = async (op, { path, id, text, sha }) => {
     beginEmitGroup({ path, id });
     emitSourceText(text);
     const result = await op();
+    await resolvePending();
     finishEmitGroup({ path, id });
     if (typeof result === 'object') {
       const type = result.constructor.name;

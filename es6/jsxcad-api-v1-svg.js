@@ -1,6 +1,6 @@
 import { Shape, ensurePages } from './jsxcad-api-shape.js';
 import { fromSvgPath, fromSvg, toSvg } from './jsxcad-convert-svg.js';
-import { read, emit, addPending, writeFile, getDefinitions, getPendingErrorHandler } from './jsxcad-sys.js';
+import { read, emit, addPending, writeFile, getPendingErrorHandler } from './jsxcad-sys.js';
 import { hash } from './jsxcad-geometry.js';
 
 /**
@@ -124,10 +124,7 @@ const prepareSvg = (shape, name, options = {}) => {
   let index = 0;
   const entries = [];
   for (const entry of ensurePages(shape.toDisjointGeometry())) {
-    const op = toSvg(entry, {
-      definitions: getDefinitions(),
-      ...options,
-    }).catch(getPendingErrorHandler());
+    const op = toSvg(entry, options).catch(getPendingErrorHandler());
     addPending(op);
     entries.push({
       data: op,

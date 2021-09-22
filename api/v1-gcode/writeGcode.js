@@ -2,7 +2,6 @@ import { Shape, ensurePages } from '@jsxcad/api-shape';
 import {
   addPending,
   emit,
-  getDefinitions,
   getPendingErrorHandler,
   writeFile,
 } from '@jsxcad/sys';
@@ -15,10 +14,7 @@ export const prepareGcode = (shape, name, tool, options = {}) => {
   let index = 0;
   const entries = [];
   for (const entry of ensurePages(shape.toKeptGeometry())) {
-    const op = toGcode(entry, tool, {
-      definitions: getDefinitions(),
-      ...options,
-    }).catch(getPendingErrorHandler());
+    const op = toGcode(entry, tool, options).catch(getPendingErrorHandler());
     addPending(op);
     entries.push({
       data: op,

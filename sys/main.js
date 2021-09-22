@@ -17,14 +17,12 @@ export {
   emit,
   finishEmitGroup,
   flushEmitGroup,
-  getEmitted,
   getSourceLocation,
   info,
   removeOnEmitHandler,
   restoreEmitGroup,
   saveEmitGroup,
 } from './emit.js';
-export { getDefinitions } from './getDefinitions.js';
 export { getFilesystem, qualifyPath, setupFilesystem } from './filesystem.js';
 export { hash } from './hash.js';
 export { isBrowser, isNode, isWebWorker } from './browserOrNode.js';

@@ -6,7 +6,6 @@ export const getSourceLocation = () =>
   sourceLocations[sourceLocations.length - 1];
 
 export const emitGroup = [];
-export const emitted = [];
 
 let startTime = new Date();
 
@@ -14,7 +13,6 @@ export const elapsed = () => new Date() - startTime;
 
 export const clearEmitted = () => {
   startTime = new Date();
-  emitted.splice(0);
   sourceLocations.splice(0);
 };
 
@@ -42,8 +40,6 @@ export const emit = (value) => {
   emitGroup.push(value);
 };
 
-export const getEmitted = () => [...emitted];
-
 export const addOnEmitHandler = (handler) => {
   onEmitHandlers.add(handler);
   return handler;
@@ -58,11 +54,8 @@ export const beginEmitGroup = (sourceLocation) => {
 };
 
 export const flushEmitGroup = () => {
-  for (const value of emitGroup) {
-    emitted.push(value);
-    for (const onEmitHandler of onEmitHandlers) {
-      onEmitHandler(value);
-    }
+  for (const onEmitHandler of onEmitHandlers) {
+    onEmitHandler([...emitGroup]);
   }
   emitGroup.splice(0);
 };

@@ -3758,7 +3758,6 @@ const getSourceLocation = () =>
   sourceLocations[sourceLocations.length - 1];
 
 const emitGroup = [];
-const emitted = [];
 
 let startTime = new Date();
 
@@ -3766,7 +3765,6 @@ const elapsed = () => new Date() - startTime;
 
 const clearEmitted = () => {
   startTime = new Date();
-  emitted.splice(0);
   sourceLocations.splice(0);
 };
 
@@ -3794,8 +3792,6 @@ const emit = (value) => {
   emitGroup.push(value);
 };
 
-const getEmitted = () => [...emitted];
-
 const addOnEmitHandler = (handler) => {
   onEmitHandlers.add(handler);
   return handler;
@@ -3810,11 +3806,8 @@ const beginEmitGroup = (sourceLocation) => {
 };
 
 const flushEmitGroup = () => {
-  for (const value of emitGroup) {
-    emitted.push(value);
-    for (const onEmitHandler of onEmitHandlers) {
-      onEmitHandler(value);
-    }
+  for (const onEmitHandler of onEmitHandlers) {
+    onEmitHandler([...emitGroup]);
   }
   emitGroup.splice(0);
 };
@@ -4350,16 +4343,6 @@ const boot = async () => {
   }
 };
 
-const getDefinitions = () => {
-  const definitions = {};
-  for (const note of getEmitted()) {
-    if (note.define) {
-      definitions[note.define.tag] = note.define.data;
-    }
-  }
-  return definitions;
-};
-
 function pad (hash, len) {
   while (hash.length < len) {
     hash = '0' + hash;
@@ -4562,4 +4545,4 @@ let nanoid = (size = 21) => {
 
 const generateUniqueId = () => nanoid();
 
-export { addOnEmitHandler, addPending, ask, askService, askServices, beginEmitGroup, boot, clearEmitted, createConversation, createService, deleteFile, elapsed, emit, finishEmitGroup, flushEmitGroup, generateUniqueId, getControlValue, getDefinitions, getEmitted, getFilesystem, getPendingErrorHandler, getServicePoolInfo, getSourceLocation, hash, info, isBrowser, isNode, isWebWorker, listFiles, listFilesystems, log, onBoot, qualifyPath, read, readFile, readOrWatch, removeOnEmitHandler, resolvePending, restoreEmitGroup, saveEmitGroup, setControlValue, setHandleAskUser, setPendingErrorHandler, setupFilesystem, sleep, tellServices, terminateActiveServices, touch, unwatchFile, unwatchFileCreation, unwatchFileDeletion, unwatchFiles, unwatchLog, unwatchServices, waitServices, watchFile, watchFileCreation, watchFileDeletion, watchLog, watchServices, write, writeFile };
+export { addOnEmitHandler, addPending, ask, askService, askServices, beginEmitGroup, boot, clearEmitted, createConversation, createService, deleteFile, elapsed, emit, finishEmitGroup, flushEmitGroup, generateUniqueId, getControlValue, getFilesystem, getPendingErrorHandler, getServicePoolInfo, getSourceLocation, hash, info, isBrowser, isNode, isWebWorker, listFiles, listFilesystems, log, onBoot, qualifyPath, read, readFile, readOrWatch, removeOnEmitHandler, resolvePending, restoreEmitGroup, saveEmitGroup, setControlValue, setHandleAskUser, setPendingErrorHandler, setupFilesystem, sleep, tellServices, terminateActiveServices, touch, unwatchFile, unwatchFileCreation, unwatchFileDeletion, unwatchFiles, unwatchLog, unwatchServices, waitServices, watchFile, watchFileCreation, watchFileDeletion, watchLog, watchServices, write, writeFile };

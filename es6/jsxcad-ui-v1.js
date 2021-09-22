@@ -46359,8 +46359,8 @@ class Ui extends E {
         identifier,
         notes,
         options,
-        sourceLocation,
         path,
+        sourceLocation,
         workspace
       } = message;
 
@@ -46398,7 +46398,7 @@ class Ui extends E {
             } = sourceLocation;
 
             if (path !== this.state.path) {
-              // This note is for a different module.
+              // These notes are for a different module.
               return;
             }
 

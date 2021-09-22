@@ -2,7 +2,7 @@ import './jsxcad-api-v1-gcode.js';
 import './jsxcad-api-v1-pdf.js';
 import './jsxcad-api-v1-tools.js';
 import * as mathApi from './jsxcad-api-v1-math.js';
-import { addOnEmitHandler, addPending, write, read, emit, flushEmitGroup, hash, beginEmitGroup, finishEmitGroup, saveEmitGroup, restoreEmitGroup, isWebWorker, getSourceLocation, getControlValue } from './jsxcad-sys.js';
+import { addOnEmitHandler, addPending, write, read, emit, flushEmitGroup, hash, beginEmitGroup, resolvePending, finishEmitGroup, saveEmitGroup, restoreEmitGroup, isWebWorker, getSourceLocation, getControlValue } from './jsxcad-sys.js';
 import * as shapeApi from './jsxcad-api-shape.js';
 import { saveGeometry, loadGeometry } from './jsxcad-api-shape.js';
 import { toEcmascript } from './jsxcad-compiler.js';
@@ -12,33 +12,33 @@ import { readOff } from './jsxcad-api-v1-off.js';
 import { readSvg } from './jsxcad-api-v1-svg.js';
 import { toSvg } from './jsxcad-convert-svg.js';
 
-let notes;
+let recordedNotes;
 
 let recording = false;
 let handler;
 
-const recordNote = (note) => {
+const recordNotes = (notes) => {
   if (recording) {
-    notes.push(note);
+    recordedNotes.push(...notes);
   }
 };
 
 const beginRecordingNotes = (path, id) => {
-  notes = [];
+  recordedNotes = [];
   if (handler === undefined) {
-    handler = addOnEmitHandler(recordNote);
+    handler = addOnEmitHandler(recordNotes);
   }
   recording = true;
 };
 
 const clearRecordedNotes = () => {
-  notes = undefined;
+  recordedNotes = undefined;
   recording = false;
 };
 
 const saveRecordedNotes = (path, id) => {
-  let notesToSave = notes;
-  notes = undefined;
+  let notesToSave = recordedNotes;
+  recordedNotes = undefined;
   recording = false;
   addPending(write(`data/note/${path}/${id}`, notesToSave));
 };
@@ -73,6 +73,7 @@ const $run = async (op, { path, id, text, sha }) => {
     beginEmitGroup({ path, id });
     emitSourceText(text);
     const result = await op();
+    await resolvePending();
     finishEmitGroup({ path, id });
     if (typeof result === 'object') {
       const type = result.constructor.name;
