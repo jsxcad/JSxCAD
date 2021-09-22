@@ -59,15 +59,12 @@ md`
 ### Loft
 2D shapes can be 'lofted' to create 3D shapes. Lofting a shape is done by taking an input shape, transforming it incrementally, then joining all of the incremental steps into a single shape.
 
-TODO: In the future (a) => move(a, a, a) can be replaced with move(a,a,a).
 `;
 
-
-Arc(6)
-  .x(10)
-  .loft(...seq((a) => move(a, a, a), { by: 1, upto: 10 }))
+Box(10)
+  .cut(Box(5))
+  .loft(...seq((a) => (s) => s.scale(Math.pow(a, 3)).z(a * 10), { by: 1 / 8 }))
   .view();
-  
 
 md`
 ---
