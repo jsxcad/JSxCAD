@@ -15,7 +15,7 @@ test('Wrap and return.', async (t) => {
          let a = 10;
          return circle(foo(a));
        }`,
-    { imports, exports, updates, replays }
+    { imports, exports, updates, replays, noLines: true }
   );
   t.deepEqual(
     { imports, exports, updates, replays },
@@ -114,7 +114,13 @@ test('Top level expressions become variables.', async (t) => {
   const exports = [];
   const updates = {};
   const replays = {};
-  await toEcmascript('1 + 2;', { imports, exports, updates, replays });
+  await toEcmascript('1 + 2;', {
+    imports,
+    exports,
+    updates,
+    replays,
+    noLines: true,
+  });
   t.deepEqual(
     { imports, exports, updates, replays },
     {
@@ -175,6 +181,7 @@ test("Don't return declarations.", async (t) => {
     exports,
     updates,
     replays,
+    noLines: true,
   });
   t.deepEqual(
     { imports, exports, updates, replays },
@@ -219,6 +226,7 @@ test('Replace control with constant default.', async (t) => {
     exports,
     updates,
     replays,
+    noLines: true,
   });
   t.deepEqual(
     { imports, exports, updates, replays },
@@ -260,6 +268,7 @@ test('Replace control with constant setting.', async (t) => {
   const replays = {};
   await write('control/', { length: 16 });
   await toEcmascript(`const length = control('length', 10, 'number');`, {
+    noLines: true,
     imports,
     exports,
     updates,
@@ -313,7 +322,7 @@ test('Control can be used with cached output.', async (t) => {
     `
 const length = control('length', 10, 'number');
 const foo = bar(length);`,
-    { imports, exports, updates, replays }
+    { imports, exports, updates, replays, noLines: true }
   );
   t.deepEqual(
     { imports, exports, updates, replays },
@@ -405,7 +414,7 @@ test('Bind await to calls properly.', async (t) => {
   const exports = [];
   const updates = {};
   const replays = {};
-  await toEcmascript(`foo().bar()`, { updates });
+  await toEcmascript(`foo().bar()`, { updates, noLines: true });
   t.deepEqual(
     { imports, exports, updates, replays },
     {
@@ -462,6 +471,7 @@ test('Top level await.', async (t) => {
   const updates = {};
   const replays = {};
   await toEcmascript(`await foo()`, {
+    noLines: true,
     imports,
     exports,
     updates,
@@ -528,7 +538,7 @@ foo();
 // Hello.
 await bar({ aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaagh: 1 }, 2);
 `,
-    { imports, exports, updates, replays }
+    { imports, exports, updates, replays, noLines: true }
   );
   t.deepEqual(
     { imports, exports, updates, replays },
@@ -630,6 +640,7 @@ test('Import', async (t) => {
     exports,
     updates,
     replays,
+    noLines: true,
   });
   t.deepEqual(
     { imports, exports, updates, replays },
@@ -664,6 +675,7 @@ test('Definition', async (t) => {
     exports,
     updates,
     replays,
+    noLines: true,
   });
   t.deepEqual(
     { imports, exports, updates, replays },
@@ -729,6 +741,7 @@ test('Reference', async (t) => {
     exports,
     updates,
     replays,
+    noLines: true,
   });
   t.deepEqual(
     { imports, exports, updates, replays },
@@ -815,6 +828,7 @@ test('Default Import', async (t) => {
     exports,
     updates,
     replays,
+    noLines: true,
   });
   t.deepEqual(
     { imports, exports, updates, replays },
@@ -849,6 +863,7 @@ test('Used Import', async (t) => {
     exports,
     updates,
     replays,
+    noLines: true,
   });
   t.deepEqual(
     { imports, exports, updates, replays },
@@ -936,6 +951,7 @@ test('Indirect Redefinition', async (t) => {
     exports,
     updates,
     replays,
+    noLines: true,
   });
   // FIX: What?
   t.deepEqual(
@@ -966,7 +982,7 @@ const Mountain = () => foo();
 const mountainView = Mountain().scale(0.5).Page();
 mountainView.frontView({ position: [0, -100, 50] });
 `,
-    { imports, exports, updates, replays }
+    { imports, exports, updates, replays, noLines: true }
   );
   t.deepEqual(
     { imports, exports, updates, replays },
@@ -1136,6 +1152,7 @@ mountainView.frontView({ position: [0, -100, 50] });
       exports: reexports,
       updates: reupdates,
       replays: rereplays,
+      noLines: true,
     }
   );
 
@@ -1303,7 +1320,7 @@ test('Top level definitions are frozen', async (t) => {
 const a = [];
 log(a);
 `,
-    { imports, exports, updates, replays }
+    { imports, exports, updates, replays, noLines: true }
   );
   t.deepEqual(
     { imports, exports, updates, replays },

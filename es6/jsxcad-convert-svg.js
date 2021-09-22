@@ -1,5 +1,5 @@
 import { reallyQuantizeForSpace } from './jsxcad-math-utils.js';
-import { transformPaths, isClosedPath, canonicalizePath, taggedGroup, transform, fill, taggedPaths, scale, measureBoundingBox, toPolygonsWithHoles, getNonVoidPaths } from './jsxcad-geometry.js';
+import { isCounterClockwisePath, flipPath, transformPaths, isClosedPath, canonicalizePath, taggedGroup, fill, transform, taggedPaths, scale, measureBoundingBox, toPolygonsWithHoles, getNonVoidPaths } from './jsxcad-geometry.js';
 import { fromScaling, identity, multiply, fromTranslation, fromZRotation } from './jsxcad-math-mat4.js';
 import { equals } from './jsxcad-math-vec2.js';
 import { toTagsFromName, toRgbColorFromTags } from './jsxcad-algorithm-color.js';
@@ -3910,7 +3910,12 @@ const fromSvgPath$1 = (svgPath, options = {}) => {
       absSvgPath(parseSvgPath(new TextDecoder('utf8').decode(svgPath)))
     )
   );
-  const geometry = { type: 'paths', paths };
+  const geometry = {
+    type: 'paths',
+    paths: paths.map((path) =>
+      isCounterClockwisePath(path) ? path : flipPath(path)
+    ),
+  };
   return geometry;
 };
 
@@ -4149,9 +4154,8 @@ const fromSvg = async (
             // Does fill, etc, inherit?
             const tags = toTagsFromName(fill$1, definitions);
             geometry.content.push(
-              transform(
-                scale(matrix),
-                fill(taggedPaths({ tags }, paths))
+              fill(
+                transform(scale(matrix), taggedPaths({ tags }, paths))
               )
             );
           }

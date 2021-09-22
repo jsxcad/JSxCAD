@@ -1,0 +1,11 @@
+---
+# Principles
+
+There are a number of principles informing design choices.
+
+1. Geometry Representation should be Context Free -- taking subgeometry out of a container should not affect how it operates.
+1. Short names are preferable -- aim for 4 letter operators.
+1. Code can be executed out-of-order -- dependencies are determined by variables.
+1. Side-effects are special -- side effects between statements need to be via "import './module.js';" without exports.
+1. The interior of items is not implicitly accessed from the exterior -- except where the effect is uniform.
+1. Notebooks should be usable as normal ecmascript -- but not all ecmascript will be usable as notebooks.

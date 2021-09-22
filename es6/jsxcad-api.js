@@ -56,12 +56,16 @@ const emitSourceLocation = ({ path, id }) => {
   emit({ hash: hash(setContext), setContext });
 };
 
+const emitSourceText = (sourceText) =>
+  emit({ hash: hash(sourceText), sourceText });
+
 var notesApi = /*#__PURE__*/Object.freeze({
   __proto__: null,
   beginRecordingNotes: beginRecordingNotes,
   saveRecordedNotes: saveRecordedNotes,
   replayRecordedNotes: replayRecordedNotes,
-  emitSourceLocation: emitSourceLocation
+  emitSourceLocation: emitSourceLocation,
+  emitSourceText: emitSourceText
 });
 
 let locked = false;

@@ -1,159 +1,131 @@
 const add = Triangle(10)
   .color('red')
   .add(Box(5).color('blue'))
-  .gridView(256)
-  .md(`Triangle(10).color('red').add(Box(5).color('blue'))`);
+  .gridView(256);
 
 const and = Box(5)
   .and(Arc(5))
-  .gridView({ size: 800, triangles: false, outline: true, wireframe: false })
-  .md(`Box(5).and(Arc(5))`);
+  .gridView({ size: 800, triangles: false, outline: true, wireframe: false });
 
 const addTo = Triangle(10)
   .color('red')
   .addTo(Box(5).color('blue'))
-  .gridView()
-  .md(`Triangle(10).color('red').addTo(Box(5).color('blue'))`);
+  .gridView();
 
-const align = Box(5).align('x>y>').gridView().md(`Box(5).align('x>y>')`);
+const align = Box(5).align('x>y>').gridView();
 
 const as = Box(5)
   .as('box')
   .with(Arc(4).as('arc'))
   .keep('box')
-  .gridView()
-  .md(`Box(5).as('box').with(Arc(4).as('arc')).keep('box')`);
+  .gridView();
 
 const clip = Box(5)
   .color('red')
   .clip(Arc(5.8).color('blue'))
-  .gridView()
-  .md(`Box(5).color('red').clip(Arc(5.8).color('blue'))`);
+  .gridView();
 
 const clipFrom = Box(5)
   .color('red')
   .clipFrom(Arc(5.8).color('blue'))
-  .gridView()
-  .md(`Box(5).color('red').clipFrom(Arc(5.8).color('blue'))`);
+  .gridView();
 
-const color = Box(5).color('green').gridView().md(`Box(5).color('orange')`);
+const color = Box(5).color('green').gridView();
 
 const colorsEx = Box(5)
   .color('green')
   .colors((colors, s) => {
     md`Colors are ${colors}`;
     return s;
-  })
-  .md(
-    `Box(5).color('green').colors((s, colors) => { md\`Colors are \${colors}\`; return s; })`
-  );
+  });
 
 const cut = Box(5)
   .color('red')
   .cut(Arc(6).color('blue'))
-  .gridView()
-  .md(`Box(5).color('red').cut(Arc(6).color('blue'))`);
+  .gridView();
 
 const cutFrom = Box(5)
   .color('red')
   .cutFrom(Arc(6).color('blue'))
-  .gridView()
-  .md(`Box(5).color('red').cutFrom(Arc(6).color('blue'))`);
+  .gridView();
 
 const eachMethod = Assembly(Box(5), Arc(6))
   .each((leafs) => leafs[0])
-  .gridView()
-  .md(`Assembly(Box(5), Arc(6)).each((leafs) => leafs[0])`);
+  .gridView();
 
 const fuse = Group(Box(5).color('red'), Arc(6).color('blue'))
   .fuse()
-  .gridView()
-  .md(`Group(Box(5).color('red'), Arc(6).color('blue')).fuse()`);
+  .gridView();
 
-const inset = Box(10).inset(0.5, 0.5).gridView().md(`Box(10).inset(0.5, 0.5)`);
+const inset = Box(10).inset(0.5, 0.5).gridView();
 
 const keep = Assembly(Box(10).as('a'), Arc(6).as('b'))
   .keep('a')
-  .gridView()
-  .md(`Assembly(Box(10).as('a'), Arc(6).as('b')).keep('a')`);
+  .gridView();
 
 const material = Box(10)
   .material('copper')
-  .gridView()
-  .md(`Box(10).material('copper')`);
+  .gridView();
 
-const move = Box(10).move(1, 2, 3).gridView().md(`Box(10).move(1, 2, 3)`);
+const move = Box(10).move(1, 2, 3).gridView();
 
 const noVoid = Assembly(Box(5), Arc(5.5).void())
   .noVoid()
-  .gridView()
-  .md(`Assembly(Box(5), Arc(4).void()).noVoid()`);
+  .gridView();
 
-const offset = Box(5).offset(1).gridView().md(`Box(5).offset(1)`);
+const offset = Box(5).offset(1).gridView();
 
 const op = Box(5)
   .op((s) => s.color('green'))
-  .gridView()
-  .md(`Box(5).op(s => s.color('green'))`);
+  .gridView();
 
 const orient = Line(10)
   .orient({ at: [40, 50, 0] })
-  .gridView()
-  .md(`Line(10).orient({ at: [40, 50]})`);
+  .gridView();
 
 const pack = Group(...seq((n) => Arc(n), { from: 1, to: 20 }))
   .pack()
-  .gridView()
-  .md(`Group(...each((n) => Arc(n), { from: 1, to: 20 })).pack()`);
+  .gridView();
 
-const rotate = Box(5).rotate(45).gridView().md(`Box(5).rotate(45)`);
+const rotate = Box(5).rotate(45).gridView();
 
-const rx = Box(1, 2, 3).rx(1/8).gridView().md(`Box(1, 2, 3).rx(1/8)`);
-const ry = Box(1, 2, 3).ry(1/8).gridView().md(`Box(1, 2, 3).ry(1/8)`);
-const rz = Box(1, 2, 3).rz(1/8).gridView().md(`Box(1, 2, 3).rz(1/8)`);
+const rx = Box(1, 2, 3).rx(1/8).gridView();
+const ry = Box(1, 2, 3).ry(1/8).gridView();
+const rz = Box(1, 2, 3).rz(1/8).gridView();
 
-const scale = Box(5).scale(1, 2).gridView().md(`Box(5).scale(1, 2)`);
+const scale = Box(5).scale(1, 2).gridView();
 
 const sizeEx = Box(1, 2, 3)
   .size((size, shape) => {
     md`${JSON.stringify(size)}`;
     return shape;
-  })
-  .md(
-    `Box(1, 2, 3).size((size, shape) => { md\`\${JSON.stringify(size)}\`; return shape; })`
-  );
+  });
 
 const sketch = Box(2, 2, 2)
   .color('red')
   .and(Box(1, 1, 1).sketch())
-  .view()
-  .md(`Box(2, 2, 2).and(Box(1, 1, 1).sketch())`);
+  .view();
 
 const tagsEx = Box(1)
   .as('box')
   .tags((tags, shape) => {
     md`${tags}`;
     return shape;
-  })
-  .md(
-    `Box(1).as('box').tags((tags, shape) => { md\`\${tags}\`; return shape; })`
-  );
+  });
 
-const test = Box(5, 5, 5).test().gridView().md(`Box(1).test()`);
+const test = Box(5, 5, 5).test().gridView();
 
-const tool = Box(5).tool('laser').gridView().md(`Box(5).tool('laser')`);
+const tool = Box(5).tool('laser').gridView();
 
 const voidEx = Assembly(Box(5), Arc(6).void())
-  .gridView()
-  .md(`Assembly(Box(5), Arc(6).void())`);
+  .gridView();
 
 const weld = Weld(Arc(6).x(-1), Arc(6).x(1), Arc(6).y(1), Arc(6).y(-1))
   .fill()
-  .gridView()
-  .md(`Weld(Arc(6).x(-1), Arc(6).x(1), Arc(6).y(1), Arc(6).y(-1)).fill()`);
+  .gridView();
 
-const withEx = Box(5).with(Arc(6)).gridView().md(`Box(5).with(Arc(6))`);
+const withEx = Box(5).with(Arc(6)).gridView();
 
-const xEx = Box(5).x(1).gridView().md(`Box(5).x(1)`);
-const yEx = Box(5).y(1).gridView().md(`Box(5).y(1)`);
-const zEx = Box(5).z(1).gridView().md(`Box(5).z(1)`);
+const xEx = Box(5).x(1).gridView();
+const yEx = Box(5).y(1).gridView();
+const zEx = Box(5).z(1).gridView();

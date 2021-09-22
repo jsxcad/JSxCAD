@@ -12,7 +12,7 @@ import './gearPlan.js';
 
 export const Gear = () => Plan('Gear');
 `,
-    { imports, exports, updates, replays }
+    { imports, exports, updates, replays, noLines: true }
   );
 
   t.deepEqual(

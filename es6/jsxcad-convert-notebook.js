@@ -79,9 +79,6 @@ const encodeNotebook = async (notebook, { workspace, module } = {}) => {
   const encoded = [];
   const seen = new Set();
   for (const note of notebook) {
-    console.log(`QQ/module: ${module}`);
-    console.log(`QQ/sourceLocation: ${JSON.stringify(note.sourceLocation)}`);
-    console.log(`QQ/note: ${JSON.stringify(note)}`);
     if (module && note.sourceLocation && note.sourceLocation.path !== module) {
       // Skip notes for other modules.
       continue;

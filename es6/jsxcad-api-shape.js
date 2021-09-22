@@ -1,4 +1,4 @@
-import { closePath, concatenatePath, assemble as assemble$1, eachPoint, flip, toConcreteGeometry, toDisplayGeometry, toTransformedGeometry, toPoints, transform, rewriteTags, taggedPaths, taggedGraph, openPath, taggedPoints, fromPolygonsToGraph, registerReifier, union, taggedGroup, taggedItem, bend as bend$1, visit, intersection, allTags, fromPointsToGraph, difference, rewrite, taggedPlan, translatePaths, getLeafs, taggedLayout, measureBoundingBox, getLayouts, isNotVoid, extrude as extrude$1, extrudeToPlane as extrudeToPlane$1, fill as fill$1, empty, grow as grow$1, outline as outline$1, inset as inset$1, read, loft as loft$1, realize, minkowskiDifference as minkowskiDifference$1, minkowskiShell as minkowskiShell$1, minkowskiSum as minkowskiSum$1, isVoid, offset as offset$1, toDisjointGeometry, projectToPlane as projectToPlane$1, push as push$1, remesh as remesh$1, write, section as section$1, separate as separate$1, smooth as smooth$1, taggedSketch, test as test$1, twist as twist$1, toPolygonsWithHoles, arrangePolygonsWithHoles, fromPolygonsWithHolesToTriangles, fromTrianglesToGraph, alphaShape, rotateZPath, convexHullToGraph, fromFunctionToGraph, fromPathsToGraph, translatePath } from './jsxcad-geometry.js';
+import { closePath, concatenatePath, assemble as assemble$1, eachPoint, flip, toConcreteGeometry, toDisplayGeometry, toTransformedGeometry, toPoints, transform, rewriteTags, taggedPaths, taggedGraph, openPath, taggedPoints, fromPolygonsToGraph, registerReifier, union, taggedGroup, taggedItem, getLeafs, visit, bend as bend$1, intersection, allTags, fromPointsToGraph, difference, rewrite, taggedPlan, translatePaths, taggedLayout, measureBoundingBox, getLayouts, isNotVoid, extrude as extrude$1, extrudeToPlane as extrudeToPlane$1, fill as fill$1, empty, grow as grow$1, outline as outline$1, inset as inset$1, read, loft as loft$1, realize, minkowskiDifference as minkowskiDifference$1, minkowskiShell as minkowskiShell$1, minkowskiSum as minkowskiSum$1, isVoid, offset as offset$1, toDisjointGeometry, projectToPlane as projectToPlane$1, push as push$1, remesh as remesh$1, write, section as section$1, separate as separate$1, smooth as smooth$1, taggedSketch, test as test$1, twist as twist$1, toPolygonsWithHoles, arrangePolygonsWithHoles, fromPolygonsWithHolesToTriangles, fromTrianglesToGraph, alphaShape, rotateZPath, convexHullToGraph, fromFunctionToGraph, fromPathsToGraph, translatePath } from './jsxcad-geometry.js';
 import { getSourceLocation, emit, log as log$1, generateUniqueId, addPending, write as write$1 } from './jsxcad-sys.js';
 export { elapsed, emit, info, read, write } from './jsxcad-sys.js';
 import { identityMatrix, fromTranslation, fromRotation, fromScaling } from './jsxcad-math-mat4.js';
@@ -140,7 +140,7 @@ const registerShapeMethod = (name, op) => {
 
 const shapeMethod = (build) => {
   return function (...args) {
-    return build(...args).at(this);
+    return this.at(this, build(...args));
   };
 };
 
@@ -483,16 +483,34 @@ Shape.prototype.Group = Shape.shapeMethod(Group);
 Shape.Group = Group;
 
 const at =
-  (other, path = 'tagpath:*') =>
+  (selection, ...ops) =>
   (shape) => {
-    other = Shape.toShape(other, shape);
-    const reoriented = [];
-    for (const item of other.get(path).each()) {
-      reoriented.push(
-        shape.transform(invertTransform(item.toGeometry().matrix))
-      );
+    ops = ops.map((op) => (op instanceof Function ? op : () => op));
+    // We've already selected the item to replace, e.g., s.on(g('plate'), ...);
+    if (selection instanceof Function) {
+      selection = selection(shape);
     }
-    return Group(...reoriented);
+    // FIX: This needs to walk through items.
+    const leafs = getLeafs(selection.toGeometry());
+    const placed = [];
+    const walk = (geometry, descend) => {
+      if (geometry.type === 'item' && leafs.includes(geometry)) {
+        // This is a target.
+        const global = geometry.matrix;
+        const local = invertTransform(global);
+        const target = Shape.fromGeometry(geometry);
+        // Switch to the local coordinate space, perform the operation, and come back to the global coordinate space.
+        placed.push(
+          target
+            .transform(local)
+            .op(...ops)
+            .transform(global)
+        );
+      }
+      return descend();
+    };
+    visit(shape.toGeometry(), walk);
+    return Group(...placed);
   };
 
 Shape.registerMethod('at', at);
@@ -602,99 +620,94 @@ const cutOut =
   };
 Shape.registerMethod('cutOut', cutOut);
 
-const tag =
-  (...tags) =>
-  (shape) =>
-    Shape.fromGeometry(
-      rewriteTags(
-        tags.map((tag) => `user:${tag}`),
-        [],
-        shape.toGeometry()
-      )
-    );
-
-Shape.registerMethod('tag', tag);
-
 const qualifyTag = (tag, namespace = 'user') => {
   if (tag.includes(':')) {
     return tag;
   }
-  if (tag === '*') {
-    return 'tagpath:*';
-  }
   return `${namespace}:${tag}`;
 };
 
-const qualifyTagPath = (path, namespace = 'user') =>
-  path.split('/').map((tag) => qualifyTag(tag, namespace));
+const tagMatcher = (tag, namespace = 'user') => {
+  const qualifiedTag = qualifyTag(tag, namespace);
+  if (qualifiedTag.endsWith(':*')) {
+    const [namespace] = qualifiedTag.split(':');
+    const prefix = `${namespace}:`;
+    return (tag) => tag.startsWith(prefix);
+  } else {
+    return (tag) => tag === qualifiedTag;
+  }
+};
 
-const selectToKeep = (matchTags, geometryTags) => {
-  if (geometryTags === undefined) {
+const oneOfTagMatcher = (tags, namespace = 'user') => {
+  const matchers = tags.map((tag) => tagMatcher(tag, namespace));
+  const isMatch = (tag) => {
+    for (const matcher of matchers) {
+      if (matcher(tag)) {
+        return true;
+      }
+    }
     return false;
-  }
-  for (const geometryTag of geometryTags) {
-    if (matchTags.includes(geometryTag)) {
-      return true;
-    }
-  }
-  return false;
-};
-
-const selectToDrop = (matchTags, geometryTags) =>
-  !selectToKeep(matchTags, geometryTags);
-
-const keepOrDrop = (shape, tags, select) => {
-  const matchTags = tags.map((tag) => qualifyTag(tag, 'user'));
-
-  const op = (geometry, descend) => {
-    // FIX: Need a more reliable way to detect leaf structure.
-    switch (geometry.type) {
-      case 'group':
-      case 'layout': {
-        return descend();
-      }
-      case 'item':
-      // falls through to deal with item as a leaf.
-      default: {
-        if (select(matchTags, geometry.tags)) {
-          return descend();
-        } else {
-          // Operate on the shape.
-          const shape = Shape.fromGeometry(geometry);
-          // Note that this transform does not violate geometry disjunction.
-          const dropped = shape.void().toGeometry();
-          return dropped;
-        }
-      }
-    }
   };
-
-  const rewritten = rewrite(shape.toKeptGeometry(), op);
-  return Shape.fromGeometry(rewritten);
+  return isMatch;
 };
 
-const keep =
+const tag =
   (...tags) =>
   (shape) => {
-    if (tags.length === 0) {
-      // Dropping no tags is an unconditional keep.
-      return keepOrDrop(shape, [], selectToDrop);
-    } else {
-      return keepOrDrop(shape, tags, selectToKeep);
-    }
+    const tagsToAdd = tags.map((tag) => qualifyTag(tag, 'user'));
+    const op = (geometry, descend) => {
+      switch (geometry.type) {
+        case 'group':
+        case 'layout': {
+          return descend();
+        }
+        default: {
+          const tags = [...(geometry.tags || [])];
+          for (const tagToAdd of tagsToAdd) {
+            if (!tags.includes(tagToAdd)) {
+              tags.push(tagToAdd);
+            }
+          }
+          return descend({ tags });
+        }
+      }
+    };
+    return Shape.fromGeometry(rewrite(shape.toGeometry(), op));
   };
 
-Shape.registerMethod('keep', keep);
+Shape.registerMethod('tag', tag);
 
 const drop =
   (...tags) =>
   (shape) => {
-    if (tags.length === 0) {
-      // Keeping no tags is an unconditional drop.
-      return keepOrDrop(shape, [], selectToKeep);
-    } else {
-      return keepOrDrop(shape, tags, selectToDrop);
-    }
+    const matchers = tags.map((tag) => tagMatcher(tag, 'user'));
+    const isMatch = (tags, tag) => {
+      for (const matcher of matchers) {
+        for (tag of tags) {
+          if (matcher(tag)) {
+            return true;
+          }
+        }
+      }
+      return false;
+    };
+    const op = (geometry, descend) => {
+      switch (geometry.type) {
+        case 'group':
+        case 'layout':
+          return descend();
+        default: {
+          // Should this pass through item boundaries?
+          const { tags = [] } = geometry;
+          if (isMatch(tags)) {
+            return Shape.fromGeometry(geometry).void().toGeometry();
+          } else if (geometry.type !== 'item') {
+            return descend();
+          }
+        }
+      }
+    };
+    return Shape.fromGeometry(rewrite(shape.toGeometry(), op));
   };
 
 Shape.registerMethod('drop', drop);
@@ -2665,30 +2678,17 @@ Shape.registerMethod('fuse', fuse);
 const get =
   (...tags) =>
   (shape) => {
-    const isMatchingTag = (options, matches) => {
-      for (const match of matches) {
-        if (match === 'tagpath:*') {
-          return true;
-        }
-      }
-      if (options === undefined) {
-        return false;
-      }
-      for (const match of matches) {
-        if (options.includes(match)) {
-          return true;
-        }
-      }
-      return false;
-    };
-    const qualifiedTags = tags.map((tag) => qualifyTag(tag, 'item'));
+    const isMatch = oneOfTagMatcher(tags, 'item');
     const picks = [];
     const walk = (geometry, descend) => {
-      if (geometry.type === 'item') {
-        if (isMatchingTag(geometry.tags, qualifiedTags)) {
+      const { tags = [] } = geometry;
+      for (const tag of tags) {
+        if (isMatch(tag)) {
           picks.push(Shape.fromGeometry(geometry));
+          break;
         }
-      } else {
+      }
+      if (geometry.type !== 'item') {
         return descend();
       }
     };
@@ -2741,6 +2741,45 @@ const withInset = (initial, step, limit) => (shape) =>
 
 Shape.registerMethod('inset', inset);
 Shape.registerMethod('withInset', withInset);
+
+const keep =
+  (...tags) =>
+  (shape) => {
+    const matchers = tags.map((tag) => tagMatcher(tag, 'user'));
+    const isMatch = (tags, tag) => {
+      for (const matcher of matchers) {
+        for (const tag of tags) {
+          if (matcher(tag)) {
+            return true;
+          }
+        }
+      }
+      return false;
+    };
+    const op = (geometry, descend) => {
+      switch (geometry.type) {
+        case 'group':
+        case 'layout':
+          return descend();
+        default: {
+          // Should this pass through item boundaries?
+          const { tags = [] } = geometry;
+          if (isMatch(tags)) {
+            if (geometry.type === 'item') {
+              return geometry;
+            } else {
+              return descend();
+            }
+          } else {
+            return Shape.fromGeometry(geometry).void().toGeometry();
+          }
+        }
+      }
+    };
+    return Shape.fromGeometry(rewrite(shape.toGeometry(), op));
+  };
+
+Shape.registerMethod('keep', keep);
 
 const fromUndefined = () => Shape.fromGeometry();
 
@@ -2888,18 +2927,12 @@ const noVoid = (tags, select) => (shape) => {
 
 Shape.registerMethod('noVoid', noVoid);
 
-const notAs =
-  (...tags) =>
+const notColor =
+  (...colors) =>
   (shape) =>
-    Shape.fromGeometry(
-      rewriteTags(
-        [],
-        tags.map((tag) => `user/${tag}`),
-        shape.toGeometry()
-      )
-    );
+    shape.untag(...colors.map((color) => qualifyTag(color, 'color')));
 
-Shape.registerMethod('notAs', notAs);
+Shape.registerMethod('notColor', notColor);
 
 const nth = (n) => (shape) => each()(shape)[n];
 
@@ -2918,69 +2951,31 @@ const offset =
 Shape.registerMethod('offset', offset);
 
 const on =
-  (path, ...ops) =>
+  (selection, ...ops) =>
   (shape) => {
     ops = ops.map((op) => (op instanceof Function ? op : () => op));
-    if (path instanceof Function) {
-      // We've already selected the item to replace, e.g., s.on(g('plate'), ...);
-      const selection = path(shape).toGeometry();
-      // FIX: Make this more robust?
-      const items = selection.type === 'item' ? [selection] : selection.content;
-      const walk = (geometry, descend) => {
-        if (geometry.type === 'item') {
-          if (items.includes(geometry)) {
-            // This is a target.
-            const global = geometry.matrix;
-            const local = invertTransform(global);
-            const target = Shape.fromGeometry(geometry);
-            // Switch to the local coordinate space, perform the operation, and come back to the global coordinate space.
-            return target
-              .transform(local)
-              .op(...ops)
-              .transform(global)
-              .toGeometry();
-          }
-        }
-        return descend();
-      };
-      return Shape.fromGeometry(rewrite(shape.toGeometry(), walk));
+    // We've already selected the item to replace, e.g., s.on(g('plate'), ...);
+    if (selection instanceof Function) {
+      selection = selection(shape);
     }
-
-    const walk = (geometry, descend, walk, path) => {
-      if (geometry.type === 'item') {
-        if (path.length >= 1) {
-          if (
-            path[0] === 'tagpath:*' ||
-            (geometry.tags && geometry.tags.includes(path[0]))
-          ) {
-            if (path.length >= 2) {
-              return descend({}, path.slice(1));
-            } else {
-              // This is a target.
-              const global = geometry.matrix;
-              const local = invertTransform(global);
-              const target = Shape.fromGeometry(geometry);
-              // Switch to the local coordinate space, perform the operation, and come back to the global coordinate space.
-              return target
-                .transform(local)
-                .op(...ops)
-                .transform(global)
-                .toGeometry();
-            }
-          } else {
-            return geometry;
-          }
-        } else {
-          // We ran out of path without finding anything, which should be impossible.
-          throw Error('Path exhausted');
-        }
+    // FIX: This needs to walk through items.
+    const leafs = getLeafs(selection.toGeometry());
+    const walk = (geometry, descend) => {
+      if (geometry.type === 'item' && leafs.includes(geometry)) {
+        // This is a target.
+        const global = geometry.matrix;
+        const local = invertTransform(global);
+        const target = Shape.fromGeometry(geometry);
+        // Switch to the local coordinate space, perform the operation, and come back to the global coordinate space.
+        return target
+          .transform(local)
+          .op(...ops)
+          .transform(global)
+          .toGeometry();
       }
-      return descend({}, path);
+      return descend();
     };
-
-    return Shape.fromGeometry(
-      rewrite(shape.toGeometry(), walk, qualifyTagPath(path, 'item'))
-    );
+    return Shape.fromGeometry(rewrite(shape.toGeometry(), walk));
   };
 
 Shape.registerMethod('on', on);
@@ -3216,6 +3211,20 @@ const scale =
 
 Shape.registerMethod('scale', scale);
 
+const scaleToFit =
+  (x = 1, y = x, z = y) =>
+  (shape) => {
+    const { length, width, height } = shape.size();
+    const xFactor = x / length;
+    const yFactor = y / width;
+    const zFactor = z / height;
+    // Surfaces may get non-finite factors -- use the unit instead.
+    const finite = (factor) => (isFinite(factor) ? factor : 1);
+    return shape.scale(finite(xFactor), finite(yFactor), finite(zFactor));
+  };
+
+Shape.registerMethod('scaleToFit', scaleToFit);
+
 const smooth =
   (options = {}) =>
   (shape) =>
@@ -3302,6 +3311,32 @@ const twist =
     Shape.fromGeometry(twist$1(shape.toGeometry(), degreesPerMm));
 
 Shape.registerMethod('twist', twist);
+
+const untag =
+  (...tags) =>
+  (shape) => {
+    const isMatch = oneOfTagMatcher(tags, 'user');
+    const op = (geometry, descend) => {
+      switch (geometry.type) {
+        case 'group':
+        case 'layout':
+          return descend();
+        default: {
+          const { tags = [] } = geometry;
+          const remaining = [];
+          for (const tag of tags) {
+            if (!isMatch(tag)) {
+              remaining.push(tag);
+            }
+          }
+          return descend({ tags: remaining });
+        }
+      }
+    };
+    return Shape.fromGeometry(rewrite(shape.toGeometry(), op));
+  };
+
+Shape.registerMethod('untag', untag);
 
 // FIX: Avoid the extra read-write cycle.
 const baseView =
@@ -4155,4 +4190,4 @@ const yz = Shape.fromGeometry({
   ],
 });
 
-export { Alpha, Arc, Assembly, Box, ChainedHull, Cone, Empty, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Line, Octagon, Orb, Page, Path, Pentagon, Plan, Point, Points, Polygon, Polyhedron, Septagon, Shape, Spiral, Tetragon, Triangle, Wave, Weld, add, addTo, align, and, as, asPart, at, bend, billOfMaterials, clip, clipFrom, cloudSolid, color, colors, cut, cutFrom, cutOut, defGrblConstantLaser, defGrblDynamicLaser, defGrblPlotter, defGrblSpindle, defRgbColor, defThreejsMaterial, defTool, define, drop, each, ensurePages, ex, extrude, extrudeToPlane, fill, fit, fitTo, fuse, g, get, grow, inline, inset, keep, loadGeometry, loft, log, loop, mask, material, md, minkowskiDifference, minkowskiShell, minkowskiSum, move, n, noVoid, notAs, nth, ofPlan, offset, on, op, orient, outline, pack, play, projectToPlane, push, remesh, rotate, rotateX, rotateY, rotateZ, rx, ry, rz, saveGeometry, scale, section, sectionProfile, separate, size, sketch, smooth, tag, tags, test, tint, tool, twist, view, voidFn, weld, withFill, withFn, withInset, withOp, x, xy, xz, y, yz, z };
+export { Alpha, Arc, Assembly, Box, ChainedHull, Cone, Empty, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Line, Octagon, Orb, Page, Path, Pentagon, Plan, Point, Points, Polygon, Polyhedron, Septagon, Shape, Spiral, Tetragon, Triangle, Wave, Weld, add, addTo, align, and, as, asPart, at, bend, billOfMaterials, clip, clipFrom, cloudSolid, color, colors, cut, cutFrom, cutOut, defGrblConstantLaser, defGrblDynamicLaser, defGrblPlotter, defGrblSpindle, defRgbColor, defThreejsMaterial, defTool, define, drop, each, ensurePages, ex, extrude, extrudeToPlane, fill, fit, fitTo, fuse, g, get, grow, inline, inset, keep, loadGeometry, loft, log, loop, mask, material, md, minkowskiDifference, minkowskiShell, minkowskiSum, move, n, noVoid, notColor, nth, ofPlan, offset, on, op, orient, outline, pack, play, projectToPlane, push, remesh, rotate, rotateX, rotateY, rotateZ, rx, ry, rz, saveGeometry, scale, scaleToFit, section, sectionProfile, separate, size, sketch, smooth, tag, tags, test, tint, tool, twist, untag, view, voidFn, weld, withFill, withFn, withInset, withOp, x, xy, xz, y, yz, z };
