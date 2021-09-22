@@ -6,10 +6,6 @@ import { Gear } from '../gear/gear.js';
 import { Block, SocketBoard, StudBoard, block16x8x9_6 } from '../lego/lego.nb';
 ```
 
-```JavaScript
-const wireThickness = 0.8;
-```
-
 ## Gear Motor and Sheath
 
 ```JavaScript
@@ -37,6 +33,14 @@ Axle Profile
 ![Image](micro_gear_motor.md.2.png)
 
 ```JavaScript
+const rearHubProfile = Arc(4.8).md('Rear Hub Profile').gridView();
+```
+
+Rear Hub Profile
+
+![Image](micro_gear_motor.md.3.png)
+
+```JavaScript
 const axleFlatProfile = axleProfile
   .clip(Box(3.2).x(0.5))
   .md('Flat Axle Profile')
@@ -45,15 +49,11 @@ const axleFlatProfile = axleProfile
 
 Flat Axle Profile
 
-![Image](micro_gear_motor.md.3.png)
+![Image](micro_gear_motor.md.4.png)
 
 ```JavaScript
-const rearHubProfile = Arc(4.8).md('Rear Hub Profile').gridView();
+const wireThickness = 0.8;
 ```
-
-Rear Hub Profile
-
-![Image](micro_gear_motor.md.4.png)
 
 ```JavaScript
 const motor = Group(

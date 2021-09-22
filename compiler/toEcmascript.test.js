@@ -20,89 +20,99 @@ test('Wrap and return.', async (t) => {
   t.deepEqual(
     { imports, exports, updates, replays },
     {
-      imports: [],
       exports: [
-        '\n' +
-          'try {\n' +
-          'pushSourceLocation({\n' +
-          "  path: '',\n" +
-          "  id: 'foo'\n" +
-          '});\n' +
-          '\n' +
-          "await replayRecordedNotes('', 'foo');\n" +
-          '\n' +
-          'const foo = x => x + 1;\n' +
-          'popSourceLocation({\n' +
-          "  path: '',\n" +
-          "  id: 'foo'\n" +
-          '});\n' +
-          '\n' +
-          'pushSourceLocation({\n' +
-          "  path: '',\n" +
-          "  id: 'main'\n" +
-          '});\n' +
-          '\n' +
-          "await replayRecordedNotes('', 'main');\n" +
-          '\n' +
-          'const main = async () => {\n' +
-          '  let a = 10;\n' +
-          '  return circle(foo(a));\n' +
-          '};\n' +
-          'popSourceLocation({\n' +
-          "  path: '',\n" +
-          "  id: 'main'\n" +
-          '});\n' +
-          '\n' +
-          'return {\n' +
-          '  foo,\n' +
-          '  main\n' +
-          '};\n' +
-          '\n' +
-          '} catch (error) { throw error; }\n',
+        `
+try {
+const foo = await $run(async () => {
+  const foo = x => x + 1;
+  ;
+  return foo;
+}, {
+  path: '',
+  id: 'foo',
+  text: undefined,
+  sha: '585b0571eb340b1f704b06a14b35919ab3582d35'
+});
+
+const main = await $run(async () => {
+  const main = async () => {
+    let a = 10;
+    return circle(foo(a));
+  };
+  ;
+  return main;
+}, {
+  path: '',
+  id: 'main',
+  text: undefined,
+  sha: '63b778e303946046c3422c45cd20ee355957e819'
+});
+
+return {
+  foo,
+  main
+};
+
+
+} catch (error) { throw error; }
+`,
       ],
-      updates: {},
-      replays: {
+      imports: [],
+      replays: {},
+      updates: {
         foo: {
           dependencies: ['x'],
           imports: [],
-          program:
-            '\n' +
-            'try {\n' +
-            'pushSourceLocation({\n' +
-            "  path: '',\n" +
-            "  id: 'foo'\n" +
-            '});\n' +
-            '\n' +
-            "await replayRecordedNotes('', 'foo');\n" +
-            '\n' +
-            'popSourceLocation({\n' +
-            "  path: '',\n" +
-            "  id: 'foo'\n" +
-            '});\n' +
-            '\n' +
-            '\n' +
-            '} catch (error) { throw error; }\n',
+          program: `
+try {
+const foo = await $run(async () => {
+  const foo = x => x + 1;
+  ;
+  return foo;
+}, {
+  path: '',
+  id: 'foo',
+  text: undefined,
+  sha: '585b0571eb340b1f704b06a14b35919ab3582d35'
+});
+
+
+} catch (error) { throw error; }
+`,
         },
         main: {
           dependencies: ['circle', 'foo', 'a'],
           imports: [],
-          program:
-            '\n' +
-            'try {\n' +
-            'pushSourceLocation({\n' +
-            "  path: '',\n" +
-            "  id: 'main'\n" +
-            '});\n' +
-            '\n' +
-            "await replayRecordedNotes('', 'main');\n" +
-            '\n' +
-            'popSourceLocation({\n' +
-            "  path: '',\n" +
-            "  id: 'main'\n" +
-            '});\n' +
-            '\n' +
-            '\n' +
-            '} catch (error) { throw error; }\n',
+          program: `
+try {
+const foo = await $run(async () => {
+  const foo = x => x + 1;
+  ;
+  return foo;
+}, {
+  path: '',
+  id: 'foo',
+  text: undefined,
+  sha: '585b0571eb340b1f704b06a14b35919ab3582d35'
+});
+
+const main = await $run(async () => {
+  const main = async () => {
+    let a = 10;
+    return circle(foo(a));
+  };
+  ;
+  return main;
+}, {
+  path: '',
+  id: 'main',
+  text: undefined,
+  sha: '63b778e303946046c3422c45cd20ee355957e819'
+});
+
+
+} catch (error) { throw error; }
+`,
         },
       },
     }
@@ -124,49 +134,31 @@ test('Top level expressions become variables.', async (t) => {
   t.deepEqual(
     { imports, exports, updates, replays },
     {
-      imports: [],
       exports: [],
+      imports: [],
+      replays: {},
       updates: {
         $1: {
           dependencies: [],
           imports: [],
-          program:
-            '\n' +
-            'try {\n' +
-            "info('define $1');\n" +
-            '\n' +
-            'pushSourceLocation({\n' +
-            "  path: '',\n" +
-            "  id: '$1'\n" +
-            '});\n' +
-            '\n' +
-            "beginRecordingNotes('', '$1', {\n" +
-            '  line: 1,\n' +
-            '  column: 0\n' +
-            '});\n' +
-            '\n' +
-            'const $1 = 1 + 2;\n' +
-            "await write('meta/def//$1', {\n" +
-            "  sha: 'fc6dd8b8d1285cd1edc8c1ffe54b5acb798c7387',\n" +
-            "  type: $1 instanceof Shape ? 'Shape' : 'Object'\n" +
-            '});\n' +
-            '\n' +
-            'if ($1 instanceof Shape) {\n' +
-            "  await saveGeometry('data/def//$1', $1);\n" +
-            '}\n' +
-            '\n' +
-            "await saveRecordedNotes('', '$1');\n" +
-            '\n' +
-            'popSourceLocation({\n' +
-            "  path: '',\n" +
-            "  id: '$1'\n" +
-            '});\n' +
-            '\n' +
-            '\n' +
-            '} catch (error) { throw error; }\n',
+          program: `
+try {
+const $1 = await $run(async () => {
+  const $1 = 1 + 2;
+  ;
+  return $1;
+}, {
+  path: '',
+  id: '$1',
+  text: undefined,
+  sha: 'fc6dd8b8d1285cd1edc8c1ffe54b5acb798c7387'
+});
+
+
+} catch (error) { throw error; }
+`,
         },
       },
-      replays: {},
     }
   );
 });
@@ -186,30 +178,29 @@ test("Don't return declarations.", async (t) => {
   t.deepEqual(
     { imports, exports, updates, replays },
     {
-      imports: [],
       exports: [],
-      updates: {},
-      replays: {
+      imports: [],
+      replays: {},
+      updates: {
         a: {
           dependencies: [],
           imports: [],
-          program:
-            '\n' +
-            'try {\n' +
-            'pushSourceLocation({\n' +
-            "  path: '',\n" +
-            "  id: 'a'\n" +
-            '});\n' +
-            '\n' +
-            "await replayRecordedNotes('', 'a');\n" +
-            '\n' +
-            'popSourceLocation({\n' +
-            "  path: '',\n" +
-            "  id: 'a'\n" +
-            '});\n' +
-            '\n' +
-            '\n' +
-            '} catch (error) { throw error; }\n',
+          program: `
+try {
+const a = await $run(async () => {
+  let a = 10;
+  ;
+  return a;
+}, {
+  path: '',
+  id: 'a',
+  text: undefined,
+  sha: '4715a3f1fa7d74b718eeefab7cf170375a69467c'
+});
+
+
+} catch (error) { throw error; }
+`,
         },
       },
     }
@@ -231,30 +222,29 @@ test('Replace control with constant default.', async (t) => {
   t.deepEqual(
     { imports, exports, updates, replays },
     {
-      imports: [],
       exports: [],
-      updates: {},
-      replays: {
+      imports: [],
+      replays: {},
+      updates: {
         length: {
           dependencies: ['control'],
           imports: [],
-          program:
-            '\n' +
-            'try {\n' +
-            'pushSourceLocation({\n' +
-            "  path: '',\n" +
-            "  id: 'length'\n" +
-            '});\n' +
-            '\n' +
-            "await replayRecordedNotes('', 'length');\n" +
-            '\n' +
-            'popSourceLocation({\n' +
-            "  path: '',\n" +
-            "  id: 'length'\n" +
-            '});\n' +
-            '\n' +
-            '\n' +
-            '} catch (error) { throw error; }\n',
+          program: `
+try {
+const length = await $run(async () => {
+  const length = control('length', 10, 'number');
+  ;
+  return length;
+}, {
+  path: '',
+  id: 'length',
+  text: undefined,
+  sha: '03210bbcfe5dc6151d192ebe8a6c0bd56f3e1b28'
+});
+
+
+} catch (error) { throw error; }
+`,
         },
       },
     }
@@ -277,30 +267,29 @@ test('Replace control with constant setting.', async (t) => {
   t.deepEqual(
     { imports, exports, updates, replays },
     {
-      imports: [],
       exports: [],
-      updates: {},
-      replays: {
+      imports: [],
+      replays: {},
+      updates: {
         length: {
           dependencies: ['control'],
           imports: [],
-          program:
-            '\n' +
-            'try {\n' +
-            'pushSourceLocation({\n' +
-            "  path: '',\n" +
-            "  id: 'length'\n" +
-            '});\n' +
-            '\n' +
-            "await replayRecordedNotes('', 'length');\n" +
-            '\n' +
-            'popSourceLocation({\n' +
-            "  path: '',\n" +
-            "  id: 'length'\n" +
-            '});\n' +
-            '\n' +
-            '\n' +
-            '} catch (error) { throw error; }\n',
+          program: `
+try {
+const length = await $run(async () => {
+  const length = control('length', 10, 'number');
+  ;
+  return length;
+}, {
+  path: '',
+  id: 'length',
+  text: undefined,
+  sha: '03210bbcfe5dc6151d192ebe8a6c0bd56f3e1b28'
+});
+
+
+} catch (error) { throw error; }
+`,
         },
       },
     }
@@ -327,82 +316,60 @@ const foo = bar(length);`,
   t.deepEqual(
     { imports, exports, updates, replays },
     {
-      imports: [],
       exports: [],
+      imports: [],
+      replays: {},
       updates: {
         foo: {
           dependencies: ['bar', 'length'],
           imports: [],
-          program:
-            '\n' +
-            'try {\n' +
-            'pushSourceLocation({\n' +
-            "  path: '',\n" +
-            "  id: 'length'\n" +
-            '});\n' +
-            '\n' +
-            "await replayRecordedNotes('', 'length');\n" +
-            '\n' +
-            "const length = control('length', 10, 'number');\n" +
-            'popSourceLocation({\n' +
-            "  path: '',\n" +
-            "  id: 'length'\n" +
-            '});\n' +
-            '\n' +
-            "info('define foo');\n" +
-            '\n' +
-            'pushSourceLocation({\n' +
-            "  path: '',\n" +
-            "  id: 'foo'\n" +
-            '});\n' +
-            '\n' +
-            "beginRecordingNotes('', 'foo', {\n" +
-            '  line: 3,\n' +
-            '  column: 0\n' +
-            '});\n' +
-            '\n' +
-            'const foo = bar(length);\n' +
-            "await write('meta/def//foo', {\n" +
-            "  sha: '3e7b9e179e36b61b3a80476feb39ccaadd685c9a',\n" +
-            "  type: foo instanceof Shape ? 'Shape' : 'Object'\n" +
-            '});\n' +
-            '\n' +
-            'if (foo instanceof Shape) {\n' +
-            "  await saveGeometry('data/def//foo', foo);\n" +
-            '}\n' +
-            '\n' +
-            "await saveRecordedNotes('', 'foo');\n" +
-            '\n' +
-            'popSourceLocation({\n' +
-            "  path: '',\n" +
-            "  id: 'foo'\n" +
-            '});\n' +
-            '\n' +
-            '\n' +
-            '} catch (error) { throw error; }\n',
+          program: `
+try {
+const length = await $run(async () => {
+  const length = control('length', 10, 'number');
+  ;
+  return length;
+}, {
+  path: '',
+  id: 'length',
+  text: undefined,
+  sha: '03210bbcfe5dc6151d192ebe8a6c0bd56f3e1b28'
+});
+
+const foo = await $run(async () => {
+  const foo = bar(length);
+  ;
+  return foo;
+}, {
+  path: '',
+  id: 'foo',
+  text: undefined,
+  sha: '3e7b9e179e36b61b3a80476feb39ccaadd685c9a'
+});
+
+
+} catch (error) { throw error; }
+`,
         },
-      },
-      replays: {
         length: {
           dependencies: ['control'],
           imports: [],
-          program:
-            '\n' +
-            'try {\n' +
-            'pushSourceLocation({\n' +
-            "  path: '',\n" +
-            "  id: 'length'\n" +
-            '});\n' +
-            '\n' +
-            "await replayRecordedNotes('', 'length');\n" +
-            '\n' +
-            'popSourceLocation({\n' +
-            "  path: '',\n" +
-            "  id: 'length'\n" +
-            '});\n' +
-            '\n' +
-            '\n' +
-            '} catch (error) { throw error; }\n',
+          program: `
+try {
+const length = await $run(async () => {
+  const length = control('length', 10, 'number');
+  ;
+  return length;
+}, {
+  path: '',
+  id: 'length',
+  text: undefined,
+  sha: '03210bbcfe5dc6151d192ebe8a6c0bd56f3e1b28'
+});
+
+
+} catch (error) { throw error; }
+`,
         },
       },
     }
@@ -418,49 +385,31 @@ test('Bind await to calls properly.', async (t) => {
   t.deepEqual(
     { imports, exports, updates, replays },
     {
-      imports: [],
       exports: [],
+      imports: [],
+      replays: {},
       updates: {
         $1: {
           dependencies: ['foo'],
           imports: [],
-          program:
-            '\n' +
-            'try {\n' +
-            "info('define $1');\n" +
-            '\n' +
-            'pushSourceLocation({\n' +
-            "  path: '',\n" +
-            "  id: '$1'\n" +
-            '});\n' +
-            '\n' +
-            "beginRecordingNotes('', '$1', {\n" +
-            '  line: 1,\n' +
-            '  column: 0\n' +
-            '});\n' +
-            '\n' +
-            'const $1 = foo().bar();\n' +
-            "await write('meta/def//$1', {\n" +
-            "  sha: '7bdff1a1fedd69427b31085d58c342a3b137ece2',\n" +
-            "  type: $1 instanceof Shape ? 'Shape' : 'Object'\n" +
-            '});\n' +
-            '\n' +
-            'if ($1 instanceof Shape) {\n' +
-            "  await saveGeometry('data/def//$1', $1);\n" +
-            '}\n' +
-            '\n' +
-            "await saveRecordedNotes('', '$1');\n" +
-            '\n' +
-            'popSourceLocation({\n' +
-            "  path: '',\n" +
-            "  id: '$1'\n" +
-            '});\n' +
-            '\n' +
-            '\n' +
-            '} catch (error) { throw error; }\n',
+          program: `
+try {
+const $1 = await $run(async () => {
+  const $1 = foo().bar();
+  ;
+  return $1;
+}, {
+  path: '',
+  id: '$1',
+  text: undefined,
+  sha: '7bdff1a1fedd69427b31085d58c342a3b137ece2'
+});
+
+
+} catch (error) { throw error; }
+`,
         },
       },
-      replays: {},
     }
   );
 });
@@ -480,49 +429,31 @@ test('Top level await.', async (t) => {
   t.deepEqual(
     { imports, exports, updates, replays },
     {
-      imports: [],
       exports: [],
+      imports: [],
+      replays: {},
       updates: {
         $1: {
           dependencies: ['foo'],
           imports: [],
-          program:
-            '\n' +
-            'try {\n' +
-            "info('define $1');\n" +
-            '\n' +
-            'pushSourceLocation({\n' +
-            "  path: '',\n" +
-            "  id: '$1'\n" +
-            '});\n' +
-            '\n' +
-            "beginRecordingNotes('', '$1', {\n" +
-            '  line: 1,\n' +
-            '  column: 0\n' +
-            '});\n' +
-            '\n' +
-            'const $1 = await foo();\n' +
-            "await write('meta/def//$1', {\n" +
-            "  sha: 'a199562e5ab8ffc2534453f164165d3a47fed088',\n" +
-            "  type: $1 instanceof Shape ? 'Shape' : 'Object'\n" +
-            '});\n' +
-            '\n' +
-            'if ($1 instanceof Shape) {\n' +
-            "  await saveGeometry('data/def//$1', $1);\n" +
-            '}\n' +
-            '\n' +
-            "await saveRecordedNotes('', '$1');\n" +
-            '\n' +
-            'popSourceLocation({\n' +
-            "  path: '',\n" +
-            "  id: '$1'\n" +
-            '});\n' +
-            '\n' +
-            '\n' +
-            '} catch (error) { throw error; }\n',
+          program: `
+try {
+const $1 = await $run(async () => {
+  const $1 = await foo();
+  ;
+  return $1;
+}, {
+  path: '',
+  id: '$1',
+  text: undefined,
+  sha: 'a199562e5ab8ffc2534453f164165d3a47fed088'
+});
+
+
+} catch (error) { throw error; }
+`,
         },
       },
-      replays: {},
     }
   );
 });
@@ -543,89 +474,53 @@ await bar({ aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
   t.deepEqual(
     { imports, exports, updates, replays },
     {
-      imports: [],
       exports: [],
+      imports: [],
+      replays: {},
       updates: {
         $1: {
           dependencies: ['foo'],
           imports: [],
-          program:
-            '\n' +
-            'try {\n' +
-            "info('define $1');\n" +
-            '\n' +
-            'pushSourceLocation({\n' +
-            "  path: '',\n" +
-            "  id: '$1'\n" +
-            '});\n' +
-            '\n' +
-            "beginRecordingNotes('', '$1', {\n" +
-            '  line: 1,\n' +
-            '  column: 0\n' +
-            '});\n' +
-            '\n' +
-            'const $1 = foo();\n' +
-            "await write('meta/def//$1', {\n" +
-            "  sha: '75dd6f574bd4f86fb5fce18b64fe446696ad857e',\n" +
-            "  type: $1 instanceof Shape ? 'Shape' : 'Object'\n" +
-            '});\n' +
-            '\n' +
-            'if ($1 instanceof Shape) {\n' +
-            "  await saveGeometry('data/def//$1', $1);\n" +
-            '}\n' +
-            '\n' +
-            "await saveRecordedNotes('', '$1');\n" +
-            '\n' +
-            'popSourceLocation({\n' +
-            "  path: '',\n" +
-            "  id: '$1'\n" +
-            '});\n' +
-            '\n' +
-            '\n' +
-            '} catch (error) { throw error; }\n',
+          program: `
+try {
+const $1 = await $run(async () => {
+  const $1 = foo();
+  ;
+  return $1;
+}, {
+  path: '',
+  id: '$1',
+  text: undefined,
+  sha: '75dd6f574bd4f86fb5fce18b64fe446696ad857e'
+});
+
+
+} catch (error) { throw error; }
+`,
         },
         $2: {
           dependencies: ['bar'],
           imports: [],
-          program:
-            '\n' +
-            'try {\n' +
-            "info('define $2');\n" +
-            '\n' +
-            'pushSourceLocation({\n' +
-            "  path: '',\n" +
-            "  id: '$2'\n" +
-            '});\n' +
-            '\n' +
-            "beginRecordingNotes('', '$2', {\n" +
-            '  line: 1,\n' +
-            '  column: 0\n' +
-            '});\n' +
-            '\n' +
-            'const $2 = await bar({\n' +
-            '  aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaagh: 1\n' +
-            '}, 2);\n' +
-            "await write('meta/def//$2', {\n" +
-            "  sha: '7141ae679533db16d1d6c99795f86d3666b901d2',\n" +
-            "  type: $2 instanceof Shape ? 'Shape' : 'Object'\n" +
-            '});\n' +
-            '\n' +
-            'if ($2 instanceof Shape) {\n' +
-            "  await saveGeometry('data/def//$2', $2);\n" +
-            '}\n' +
-            '\n' +
-            "await saveRecordedNotes('', '$2');\n" +
-            '\n' +
-            'popSourceLocation({\n' +
-            "  path: '',\n" +
-            "  id: '$2'\n" +
-            '});\n' +
-            '\n' +
-            '\n' +
-            '} catch (error) { throw error; }\n',
+          program: `
+try {
+const $2 = await $run(async () => {
+  const $2 = await bar({
+    aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaagh: 1
+  }, 2);
+  ;
+  return $2;
+}, {
+  path: '',
+  id: '$2',
+  text: undefined,
+  sha: '7141ae679533db16d1d6c99795f86d3666b901d2'
+});
+
+
+} catch (error) { throw error; }
+`,
         },
       },
-      replays: {},
     }
   );
 });
@@ -645,20 +540,29 @@ test('Import', async (t) => {
   t.deepEqual(
     { imports, exports, updates, replays },
     {
-      imports: [],
       exports: [],
-      updates: {},
-      replays: {
+      imports: [],
+      replays: {},
+      updates: {
         foo: {
           dependencies: ['importModule'],
-          imports: [],
-          program:
-            '\n' +
-            'try {\n' +
-            "await replayRecordedNotes('', 'foo');\n" +
-            '\n' +
-            '\n' +
-            '} catch (error) { throw error; }\n',
+          imports: ['bar'],
+          program: `
+try {
+const foo = await $run(async () => {
+  const foo = (await importModule('bar')).foo;
+  ;
+  return foo;
+}, {
+  path: '',
+  id: 'foo',
+  text: undefined,
+  sha: 'f2492431d568f0a8356182dad0a72b066bbb092e'
+});
+
+
+} catch (error) { throw error; }
+`,
         },
       },
     }
@@ -680,51 +584,49 @@ test('Definition', async (t) => {
   t.deepEqual(
     { imports, exports, updates, replays },
     {
-      imports: [],
       exports: [],
-      updates: {},
-      replays: {
+      imports: [],
+      replays: {},
+      updates: {
         a: {
           dependencies: [],
           imports: [],
-          program:
-            '\n' +
-            'try {\n' +
-            'pushSourceLocation({\n' +
-            "  path: '',\n" +
-            "  id: 'a'\n" +
-            '});\n' +
-            '\n' +
-            "await replayRecordedNotes('', 'a');\n" +
-            '\n' +
-            'popSourceLocation({\n' +
-            "  path: '',\n" +
-            "  id: 'a'\n" +
-            '});\n' +
-            '\n' +
-            '\n' +
-            '} catch (error) { throw error; }\n',
+          program: `
+try {
+const a = await $run(async () => {
+  const a = 1;
+  ;
+  return a;
+}, {
+  path: '',
+  id: 'a',
+  text: undefined,
+  sha: '3411aeae23875c8178ffdf2d7943c5fd51c808c1'
+});
+
+
+} catch (error) { throw error; }
+`,
         },
         b: {
           dependencies: [],
           imports: [],
-          program:
-            '\n' +
-            'try {\n' +
-            'pushSourceLocation({\n' +
-            "  path: '',\n" +
-            "  id: 'b'\n" +
-            '});\n' +
-            '\n' +
-            "await replayRecordedNotes('', 'b');\n" +
-            '\n' +
-            'popSourceLocation({\n' +
-            "  path: '',\n" +
-            "  id: 'b'\n" +
-            '});\n' +
-            '\n' +
-            '\n' +
-            '} catch (error) { throw error; }\n',
+          program: `
+try {
+const b = await $run(async () => {
+  const b = () => 2;
+  ;
+  return b;
+}, {
+  path: '',
+  id: 'b',
+  text: undefined,
+  sha: 'd235fc9470f400616254dc956574eae89959b16b'
+});
+
+
+} catch (error) { throw error; }
+`,
         },
       },
     }
@@ -746,72 +648,102 @@ test('Reference', async (t) => {
   t.deepEqual(
     { imports, exports, updates, replays },
     {
-      imports: [],
       exports: [],
-      updates: {},
-      replays: {
+      imports: [],
+      replays: {},
+      updates: {
         a: {
           dependencies: [],
           imports: [],
-          program:
-            '\n' +
-            'try {\n' +
-            'pushSourceLocation({\n' +
-            "  path: '',\n" +
-            "  id: 'a'\n" +
-            '});\n' +
-            '\n' +
-            "await replayRecordedNotes('', 'a');\n" +
-            '\n' +
-            'popSourceLocation({\n' +
-            "  path: '',\n" +
-            "  id: 'a'\n" +
-            '});\n' +
-            '\n' +
-            '\n' +
-            '} catch (error) { throw error; }\n',
+          program: `
+try {
+const a = await $run(async () => {
+  const a = 1;
+  ;
+  return a;
+}, {
+  path: '',
+  id: 'a',
+  text: undefined,
+  sha: '3411aeae23875c8178ffdf2d7943c5fd51c808c1'
+});
+
+
+} catch (error) { throw error; }
+`,
         },
         b: {
           dependencies: ['a'],
           imports: [],
-          program:
-            '\n' +
-            'try {\n' +
-            'pushSourceLocation({\n' +
-            "  path: '',\n" +
-            "  id: 'b'\n" +
-            '});\n' +
-            '\n' +
-            "await replayRecordedNotes('', 'b');\n" +
-            '\n' +
-            'popSourceLocation({\n' +
-            "  path: '',\n" +
-            "  id: 'b'\n" +
-            '});\n' +
-            '\n' +
-            '\n' +
-            '} catch (error) { throw error; }\n',
+          program: `
+try {
+const a = await $run(async () => {
+  const a = 1;
+  ;
+  return a;
+}, {
+  path: '',
+  id: 'a',
+  text: undefined,
+  sha: '3411aeae23875c8178ffdf2d7943c5fd51c808c1'
+});
+
+const b = await $run(async () => {
+  const b = () => a;
+  ;
+  return b;
+}, {
+  path: '',
+  id: 'b',
+  text: undefined,
+  sha: '947f9c02744c974b47e7471b9ffe6f3814e340cd'
+});
+
+
+} catch (error) { throw error; }
+`,
         },
         c: {
           dependencies: ['b'],
           imports: [],
-          program:
-            '\n' +
-            'try {\n' +
-            'pushSourceLocation({\n' +
-            "  path: '',\n" +
-            "  id: 'c'\n" +
-            '});\n' +
-            '\n' +
-            "await replayRecordedNotes('', 'c');\n" +
-            '\n' +
-            'popSourceLocation({\n' +
-            "  path: '',\n" +
-            "  id: 'c'\n" +
-            '});\n' +
-            '\n' +
-            '\n' +
-            '} catch (error) { throw error; }\n',
+          program: `
+try {
+const a = await $run(async () => {
+  const a = 1;
+  ;
+  return a;
+}, {
+  path: '',
+  id: 'a',
+  text: undefined,
+  sha: '3411aeae23875c8178ffdf2d7943c5fd51c808c1'
+});
+
+const b = await $run(async () => {
+  const b = () => a;
+  ;
+  return b;
+}, {
+  path: '',
+  id: 'b',
+  text: undefined,
+  sha: '947f9c02744c974b47e7471b9ffe6f3814e340cd'
+});
+
+const c = await $run(async () => {
+  const c = () => b();
+  ;
+  return c;
+}, {
+  path: '',
+  id: 'c',
+  text: undefined,
+  sha: 'f307fe6e47d1a4080c664ce78d9a016728f1c014'
+});
+
+
+} catch (error) { throw error; }
+`,
         },
       },
     }
@@ -833,20 +765,29 @@ test('Default Import', async (t) => {
   t.deepEqual(
     { imports, exports, updates, replays },
     {
-      imports: [],
       exports: [],
-      updates: {},
-      replays: {
+      imports: [],
+      replays: {},
+      updates: {
         Foo: {
           dependencies: ['importModule'],
-          imports: [],
-          program:
-            '\n' +
-            'try {\n' +
-            "await replayRecordedNotes('', 'Foo');\n" +
-            '\n' +
-            '\n' +
-            '} catch (error) { throw error; }\n',
+          imports: ['bar'],
+          program: `
+try {
+const Foo = await $run(async () => {
+  const Foo = (await importModule('bar')).default;
+  ;
+  return Foo;
+}, {
+  path: '',
+  id: 'Foo',
+  text: undefined,
+  sha: '20e703e4ac37e471285e38a54b1db998fb4a18dd'
+});
+
+
+} catch (error) { throw error; }
+`,
         },
       },
     }
@@ -868,62 +809,60 @@ test('Used Import', async (t) => {
   t.deepEqual(
     { imports, exports, updates, replays },
     {
-      imports: [],
       exports: [],
+      imports: [],
+      replays: {},
       updates: {
+        Foo: {
+          dependencies: ['importModule'],
+          imports: ['bar'],
+          program: `
+try {
+const Foo = await $run(async () => {
+  const Foo = (await importModule('bar')).default;
+  ;
+  return Foo;
+}, {
+  path: '',
+  id: 'Foo',
+  text: undefined,
+  sha: '20e703e4ac37e471285e38a54b1db998fb4a18dd'
+});
+
+
+} catch (error) { throw error; }
+`,
+        },
         foo: {
           dependencies: ['Foo'],
           imports: ['bar'],
-          program:
-            '\n' +
-            'try {\n' +
-            "await replayRecordedNotes('', 'Foo');\n" +
-            '\n' +
-            "const Foo = (await importModule('bar')).default;\n" +
-            "info('define foo');\n" +
-            '\n' +
-            'pushSourceLocation({\n' +
-            "  path: '',\n" +
-            "  id: 'foo'\n" +
-            '});\n' +
-            '\n' +
-            "beginRecordingNotes('', 'foo', {\n" +
-            '  line: 1,\n' +
-            '  column: 23\n' +
-            '});\n' +
-            '\n' +
-            'const foo = Foo();\n' +
-            "await write('meta/def//foo', {\n" +
-            "  sha: '8dae1f3b3a9fdc66a5f13c7a0efdc9836d788f99',\n" +
-            "  type: foo instanceof Shape ? 'Shape' : 'Object'\n" +
-            '});\n' +
-            '\n' +
-            'if (foo instanceof Shape) {\n' +
-            "  await saveGeometry('data/def//foo', foo);\n" +
-            '}\n' +
-            '\n' +
-            "await saveRecordedNotes('', 'foo');\n" +
-            '\n' +
-            'popSourceLocation({\n' +
-            "  path: '',\n" +
-            "  id: 'foo'\n" +
-            '});\n' +
-            '\n' +
-            '\n' +
-            '} catch (error) { throw error; }\n',
-        },
-      },
-      replays: {
-        Foo: {
-          dependencies: ['importModule'],
-          imports: [],
-          program:
-            '\n' +
-            'try {\n' +
-            "await replayRecordedNotes('', 'Foo');\n" +
-            '\n' +
-            '\n' +
-            '} catch (error) { throw error; }\n',
+          program: `
+try {
+const Foo = await $run(async () => {
+  const Foo = (await importModule('bar')).default;
+  ;
+  return Foo;
+}, {
+  path: '',
+  id: 'Foo',
+  text: undefined,
+  sha: '20e703e4ac37e471285e38a54b1db998fb4a18dd'
+});
+
+const foo = await $run(async () => {
+  const foo = Foo();
+  ;
+  return foo;
+}, {
+  path: '',
+  id: 'foo',
+  text: undefined,
+  sha: '8dae1f3b3a9fdc66a5f13c7a0efdc9836d788f99'
+});
+
+
+} catch (error) { throw error; }
+`,
         },
       },
     }
@@ -987,151 +926,104 @@ mountainView.frontView({ position: [0, -100, 50] });
   t.deepEqual(
     { imports, exports, updates, replays },
     {
-      imports: [],
       exports: [],
+      imports: [],
+      replays: {},
       updates: {
-        mountainView: {
-          dependencies: ['Mountain'],
-          imports: [],
-          program:
-            '\n' +
-            'try {\n' +
-            'pushSourceLocation({\n' +
-            "  path: '',\n" +
-            "  id: 'Mountain'\n" +
-            '});\n' +
-            '\n' +
-            "await replayRecordedNotes('', 'Mountain');\n" +
-            '\n' +
-            'const Mountain = () => foo();\n' +
-            'popSourceLocation({\n' +
-            "  path: '',\n" +
-            "  id: 'Mountain'\n" +
-            '});\n' +
-            '\n' +
-            "info('define mountainView');\n" +
-            '\n' +
-            'pushSourceLocation({\n' +
-            "  path: '',\n" +
-            "  id: 'mountainView'\n" +
-            '});\n' +
-            '\n' +
-            "beginRecordingNotes('', 'mountainView', {\n" +
-            '  line: 3,\n' +
-            '  column: 0\n' +
-            '});\n' +
-            '\n' +
-            'const mountainView = Mountain().scale(0.5).Page();\n' +
-            "await write('meta/def//mountainView', {\n" +
-            "  sha: '6b59399386453161dac45fdfdd094e14b1db745c',\n" +
-            "  type: mountainView instanceof Shape ? 'Shape' : 'Object'\n" +
-            '});\n' +
-            '\n' +
-            'if (mountainView instanceof Shape) {\n' +
-            "  await saveGeometry('data/def//mountainView', mountainView);\n" +
-            '}\n' +
-            '\n' +
-            "await saveRecordedNotes('', 'mountainView');\n" +
-            '\n' +
-            'popSourceLocation({\n' +
-            "  path: '',\n" +
-            "  id: 'mountainView'\n" +
-            '});\n' +
-            '\n' +
-            '\n' +
-            '} catch (error) { throw error; }\n',
-        },
         $1: {
           dependencies: ['mountainView'],
           imports: [],
-          program:
-            '\n' +
-            'try {\n' +
-            'pushSourceLocation({\n' +
-            "  path: '',\n" +
-            "  id: 'Mountain'\n" +
-            '});\n' +
-            '\n' +
-            "await replayRecordedNotes('', 'Mountain');\n" +
-            '\n' +
-            'const Mountain = () => foo();\n' +
-            'popSourceLocation({\n' +
-            "  path: '',\n" +
-            "  id: 'Mountain'\n" +
-            '});\n' +
-            '\n' +
-            "const mountainView = await loadGeometry('data/def//mountainView');\n" +
-            '\n' +
-            'Object.freeze(mountainView);\n' +
-            '\n' +
-            'pushSourceLocation({\n' +
-            "  path: '',\n" +
-            "  id: 'mountainView'\n" +
-            '});\n' +
-            '\n' +
-            "await replayRecordedNotes('', 'mountainView');\n" +
-            '\n' +
-            'popSourceLocation({\n' +
-            "  path: '',\n" +
-            "  id: 'mountainView'\n" +
-            '});\n' +
-            '\n' +
-            "info('define $1');\n" +
-            '\n' +
-            'pushSourceLocation({\n' +
-            "  path: '',\n" +
-            "  id: '$1'\n" +
-            '});\n' +
-            '\n' +
-            "beginRecordingNotes('', '$1', {\n" +
-            '  line: 1,\n' +
-            '  column: 0\n' +
-            '});\n' +
-            '\n' +
-            'const $1 = mountainView.frontView({\n' +
-            '  position: [0, -100, 50]\n' +
-            '});\n' +
-            "await write('meta/def//$1', {\n" +
-            "  sha: '90bc8ca30e592e30bdb5c65df7e0070a4b1b3cdc',\n" +
-            "  type: $1 instanceof Shape ? 'Shape' : 'Object'\n" +
-            '});\n' +
-            '\n' +
-            'if ($1 instanceof Shape) {\n' +
-            "  await saveGeometry('data/def//$1', $1);\n" +
-            '}\n' +
-            '\n' +
-            "await saveRecordedNotes('', '$1');\n" +
-            '\n' +
-            'popSourceLocation({\n' +
-            "  path: '',\n" +
-            "  id: '$1'\n" +
-            '});\n' +
-            '\n' +
-            '\n' +
-            '} catch (error) { throw error; }\n',
+          program: `
+try {
+const Mountain = await $run(async () => {
+  const Mountain = () => foo();
+  ;
+  return Mountain;
+}, {
+  path: '',
+  id: 'Mountain',
+  text: undefined,
+  sha: '951a037a3b8552181d9fc42c05f4c515160bada2'
+});
+
+const mountainView = await $run(async () => {
+  const mountainView = Mountain().scale(0.5).Page();
+  ;
+  return mountainView;
+}, {
+  path: '',
+  id: 'mountainView',
+  text: undefined,
+  sha: '6b59399386453161dac45fdfdd094e14b1db745c'
+});
+
+const $1 = await $run(async () => {
+  const $1 = mountainView.frontView({
+    position: [0, -100, 50]
+  });
+  ;
+  return $1;
+}, {
+  path: '',
+  id: '$1',
+  text: undefined,
+  sha: '90bc8ca30e592e30bdb5c65df7e0070a4b1b3cdc'
+});
+
+
+} catch (error) { throw error; }
+`,
         },
-      },
-      replays: {
         Mountain: {
           dependencies: ['foo'],
           imports: [],
-          program:
-            '\n' +
-            'try {\n' +
-            'pushSourceLocation({\n' +
-            "  path: '',\n" +
-            "  id: 'Mountain'\n" +
-            '});\n' +
-            '\n' +
-            "await replayRecordedNotes('', 'Mountain');\n" +
-            '\n' +
-            'popSourceLocation({\n' +
-            "  path: '',\n" +
-            "  id: 'Mountain'\n" +
-            '});\n' +
-            '\n' +
-            '\n' +
-            '} catch (error) { throw error; }\n',
+          program: `
+try {
+const Mountain = await $run(async () => {
+  const Mountain = () => foo();
+  ;
+  return Mountain;
+}, {
+  path: '',
+  id: 'Mountain',
+  text: undefined,
+  sha: '951a037a3b8552181d9fc42c05f4c515160bada2'
+});
+
+
+} catch (error) { throw error; }
+`,
+        },
+        mountainView: {
+          dependencies: ['Mountain'],
+          imports: [],
+          program: `
+try {
+const Mountain = await $run(async () => {
+  const Mountain = () => foo();
+  ;
+  return Mountain;
+}, {
+  path: '',
+  id: 'Mountain',
+  text: undefined,
+  sha: '951a037a3b8552181d9fc42c05f4c515160bada2'
+});
+
+const mountainView = await $run(async () => {
+  const mountainView = Mountain().scale(0.5).Page();
+  ;
+  return mountainView;
+}, {
+  path: '',
+  id: 'mountainView',
+  text: undefined,
+  sha: '6b59399386453161dac45fdfdd094e14b1db745c'
+});
+
+
+} catch (error) { throw error; }
+`,
         },
       },
     }
@@ -1159,151 +1051,104 @@ mountainView.frontView({ position: [0, -100, 50] });
   t.deepEqual(
     { reimports, reexports, reupdates, rereplays },
     {
-      reimports: [],
       reexports: [],
+      reimports: [],
+      rereplays: {},
       reupdates: {
-        mountainView: {
-          dependencies: ['Mountain'],
-          imports: [],
-          program:
-            '\n' +
-            'try {\n' +
-            'pushSourceLocation({\n' +
-            "  path: '',\n" +
-            "  id: 'Mountain'\n" +
-            '});\n' +
-            '\n' +
-            "await replayRecordedNotes('', 'Mountain');\n" +
-            '\n' +
-            'const Mountain = () => bar();\n' +
-            'popSourceLocation({\n' +
-            "  path: '',\n" +
-            "  id: 'Mountain'\n" +
-            '});\n' +
-            '\n' +
-            "info('define mountainView');\n" +
-            '\n' +
-            'pushSourceLocation({\n' +
-            "  path: '',\n" +
-            "  id: 'mountainView'\n" +
-            '});\n' +
-            '\n' +
-            "beginRecordingNotes('', 'mountainView', {\n" +
-            '  line: 3,\n' +
-            '  column: 0\n' +
-            '});\n' +
-            '\n' +
-            'const mountainView = Mountain().scale(0.5).Page();\n' +
-            "await write('meta/def//mountainView', {\n" +
-            "  sha: '1952b6311872fb454d675b9d14b8c53c41c23c57',\n" +
-            "  type: mountainView instanceof Shape ? 'Shape' : 'Object'\n" +
-            '});\n' +
-            '\n' +
-            'if (mountainView instanceof Shape) {\n' +
-            "  await saveGeometry('data/def//mountainView', mountainView);\n" +
-            '}\n' +
-            '\n' +
-            "await saveRecordedNotes('', 'mountainView');\n" +
-            '\n' +
-            'popSourceLocation({\n' +
-            "  path: '',\n" +
-            "  id: 'mountainView'\n" +
-            '});\n' +
-            '\n' +
-            '\n' +
-            '} catch (error) { throw error; }\n',
-        },
         $1: {
           dependencies: ['mountainView'],
           imports: [],
-          program:
-            '\n' +
-            'try {\n' +
-            'pushSourceLocation({\n' +
-            "  path: '',\n" +
-            "  id: 'Mountain'\n" +
-            '});\n' +
-            '\n' +
-            "await replayRecordedNotes('', 'Mountain');\n" +
-            '\n' +
-            'const Mountain = () => bar();\n' +
-            'popSourceLocation({\n' +
-            "  path: '',\n" +
-            "  id: 'Mountain'\n" +
-            '});\n' +
-            '\n' +
-            "const mountainView = await loadGeometry('data/def//mountainView');\n" +
-            '\n' +
-            'Object.freeze(mountainView);\n' +
-            '\n' +
-            'pushSourceLocation({\n' +
-            "  path: '',\n" +
-            "  id: 'mountainView'\n" +
-            '});\n' +
-            '\n' +
-            "await replayRecordedNotes('', 'mountainView');\n" +
-            '\n' +
-            'popSourceLocation({\n' +
-            "  path: '',\n" +
-            "  id: 'mountainView'\n" +
-            '});\n' +
-            '\n' +
-            "info('define $1');\n" +
-            '\n' +
-            'pushSourceLocation({\n' +
-            "  path: '',\n" +
-            "  id: '$1'\n" +
-            '});\n' +
-            '\n' +
-            "beginRecordingNotes('', '$1', {\n" +
-            '  line: 1,\n' +
-            '  column: 0\n' +
-            '});\n' +
-            '\n' +
-            'const $1 = mountainView.frontView({\n' +
-            '  position: [0, -100, 50]\n' +
-            '});\n' +
-            "await write('meta/def//$1', {\n" +
-            "  sha: 'f6fbedf20aa75786f6cce70e27e67a1a5f50bc37',\n" +
-            "  type: $1 instanceof Shape ? 'Shape' : 'Object'\n" +
-            '});\n' +
-            '\n' +
-            'if ($1 instanceof Shape) {\n' +
-            "  await saveGeometry('data/def//$1', $1);\n" +
-            '}\n' +
-            '\n' +
-            "await saveRecordedNotes('', '$1');\n" +
-            '\n' +
-            'popSourceLocation({\n' +
-            "  path: '',\n" +
-            "  id: '$1'\n" +
-            '});\n' +
-            '\n' +
-            '\n' +
-            '} catch (error) { throw error; }\n',
+          program: `
+try {
+const Mountain = await $run(async () => {
+  const Mountain = () => bar();
+  ;
+  return Mountain;
+}, {
+  path: '',
+  id: 'Mountain',
+  text: undefined,
+  sha: '451ad319754511b2bab3811821fd492dc1b3ae45'
+});
+
+const mountainView = await $run(async () => {
+  const mountainView = Mountain().scale(0.5).Page();
+  ;
+  return mountainView;
+}, {
+  path: '',
+  id: 'mountainView',
+  text: undefined,
+  sha: '1952b6311872fb454d675b9d14b8c53c41c23c57'
+});
+
+const $1 = await $run(async () => {
+  const $1 = mountainView.frontView({
+    position: [0, -100, 50]
+  });
+  ;
+  return $1;
+}, {
+  path: '',
+  id: '$1',
+  text: undefined,
+  sha: 'f6fbedf20aa75786f6cce70e27e67a1a5f50bc37'
+});
+
+
+} catch (error) { throw error; }
+`,
         },
-      },
-      rereplays: {
         Mountain: {
           dependencies: ['bar'],
           imports: [],
-          program:
-            '\n' +
-            'try {\n' +
-            'pushSourceLocation({\n' +
-            "  path: '',\n" +
-            "  id: 'Mountain'\n" +
-            '});\n' +
-            '\n' +
-            "await replayRecordedNotes('', 'Mountain');\n" +
-            '\n' +
-            'popSourceLocation({\n' +
-            "  path: '',\n" +
-            "  id: 'Mountain'\n" +
-            '});\n' +
-            '\n' +
-            '\n' +
-            '} catch (error) { throw error; }\n',
+          program: `
+try {
+const Mountain = await $run(async () => {
+  const Mountain = () => bar();
+  ;
+  return Mountain;
+}, {
+  path: '',
+  id: 'Mountain',
+  text: undefined,
+  sha: '451ad319754511b2bab3811821fd492dc1b3ae45'
+});
+
+
+} catch (error) { throw error; }
+`,
+        },
+        mountainView: {
+          dependencies: ['Mountain'],
+          imports: [],
+          program: `
+try {
+const Mountain = await $run(async () => {
+  const Mountain = () => bar();
+  ;
+  return Mountain;
+}, {
+  path: '',
+  id: 'Mountain',
+  text: undefined,
+  sha: '451ad319754511b2bab3811821fd492dc1b3ae45'
+});
+
+const mountainView = await $run(async () => {
+  const mountainView = Mountain().scale(0.5).Page();
+  ;
+  return mountainView;
+}, {
+  path: '',
+  id: 'mountainView',
+  text: undefined,
+  sha: '1952b6311872fb454d675b9d14b8c53c41c23c57'
+});
+
+
+} catch (error) { throw error; }
+`,
         },
       },
     }
@@ -1325,100 +1170,62 @@ log(a);
   t.deepEqual(
     { imports, exports, updates, replays },
     {
-      imports: [],
       exports: [],
+      imports: [],
+      replays: {},
       updates: {
-        a: {
-          dependencies: [],
-          imports: [],
-          program:
-            '\n' +
-            'try {\n' +
-            "info('define a');\n" +
-            '\n' +
-            'pushSourceLocation({\n' +
-            "  path: '',\n" +
-            "  id: 'a'\n" +
-            '});\n' +
-            '\n' +
-            "beginRecordingNotes('', 'a', {\n" +
-            '  line: 2,\n' +
-            '  column: 0\n' +
-            '});\n' +
-            '\n' +
-            'const a = [];\n' +
-            "await write('meta/def//a', {\n" +
-            "  sha: '1e7e49f0bc9af1ba962b5532385c19a95f71f7bb',\n" +
-            "  type: a instanceof Shape ? 'Shape' : 'Object'\n" +
-            '});\n' +
-            '\n' +
-            'if (a instanceof Shape) {\n' +
-            "  await saveGeometry('data/def//a', a);\n" +
-            '}\n' +
-            '\n' +
-            "await saveRecordedNotes('', 'a');\n" +
-            '\n' +
-            'popSourceLocation({\n' +
-            "  path: '',\n" +
-            "  id: 'a'\n" +
-            '});\n' +
-            '\n' +
-            '\n' +
-            '} catch (error) { throw error; }\n',
-        },
         $1: {
           dependencies: ['log', 'a'],
           imports: [],
-          program:
-            '\n' +
-            'try {\n' +
-            'pushSourceLocation({\n' +
-            "  path: '',\n" +
-            "  id: 'a'\n" +
-            '});\n' +
-            '\n' +
-            "await replayRecordedNotes('', 'a');\n" +
-            '\n' +
-            'const a = [];\n' +
-            'popSourceLocation({\n' +
-            "  path: '',\n" +
-            "  id: 'a'\n" +
-            '});\n' +
-            '\n' +
-            "info('define $1');\n" +
-            '\n' +
-            'pushSourceLocation({\n' +
-            "  path: '',\n" +
-            "  id: '$1'\n" +
-            '});\n' +
-            '\n' +
-            "beginRecordingNotes('', '$1', {\n" +
-            '  line: 1,\n' +
-            '  column: 0\n' +
-            '});\n' +
-            '\n' +
-            'const $1 = log(a);\n' +
-            "await write('meta/def//$1', {\n" +
-            "  sha: '64b17f788d49d14fcb63a9df334df40f3fc98aa3',\n" +
-            "  type: $1 instanceof Shape ? 'Shape' : 'Object'\n" +
-            '});\n' +
-            '\n' +
-            'if ($1 instanceof Shape) {\n' +
-            "  await saveGeometry('data/def//$1', $1);\n" +
-            '}\n' +
-            '\n' +
-            "await saveRecordedNotes('', '$1');\n" +
-            '\n' +
-            'popSourceLocation({\n' +
-            "  path: '',\n" +
-            "  id: '$1'\n" +
-            '});\n' +
-            '\n' +
-            '\n' +
-            '} catch (error) { throw error; }\n',
+          program: `
+try {
+const a = await $run(async () => {
+  const a = [];
+  ;
+  return a;
+}, {
+  path: '',
+  id: 'a',
+  text: undefined,
+  sha: '1e7e49f0bc9af1ba962b5532385c19a95f71f7bb'
+});
+
+const $1 = await $run(async () => {
+  const $1 = log(a);
+  ;
+  return $1;
+}, {
+  path: '',
+  id: '$1',
+  text: undefined,
+  sha: '64b17f788d49d14fcb63a9df334df40f3fc98aa3'
+});
+
+
+} catch (error) { throw error; }
+`,
+        },
+        a: {
+          dependencies: [],
+          imports: [],
+          program: `
+try {
+const a = await $run(async () => {
+  const a = [];
+  ;
+  return a;
+}, {
+  path: '',
+  id: 'a',
+  text: undefined,
+  sha: '1e7e49f0bc9af1ba962b5532385c19a95f71f7bb'
+});
+
+
+} catch (error) { throw error; }
+`,
         },
       },
-      replays: {},
     }
   );
 });

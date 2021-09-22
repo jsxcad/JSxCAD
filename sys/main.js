@@ -11,15 +11,18 @@ export { ask, setHandleAskUser } from './ask.js';
 export { boot, onBoot } from './boot.js';
 export {
   addOnEmitHandler,
+  beginEmitGroup,
   clearEmitted,
   elapsed,
   emit,
+  finishEmitGroup,
+  flushEmitGroup,
   getEmitted,
   getSourceLocation,
   info,
-  popSourceLocation,
-  pushSourceLocation,
   removeOnEmitHandler,
+  restoreEmitGroup,
+  saveEmitGroup,
 } from './emit.js';
 export { getDefinitions } from './getDefinitions.js';
 export { getFilesystem, qualifyPath, setupFilesystem } from './filesystem.js';

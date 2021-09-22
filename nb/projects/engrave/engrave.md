@@ -7,11 +7,11 @@ const tool = { grbl: { type: 'spindle', spindleRpm: 7000, feedRate: 650 } };
 ```
 
 ```JavaScript
-const text = await control('Engraving', '輝');
+const unYetGul = await readFont('https://jsxcad.js.org/ttf/UnYetgul.ttf?a=1');
 ```
 
 ```JavaScript
-const unYetGul = await readFont('https://jsxcad.js.org/ttf/UnYetgul.ttf?a=1');
+const text = await control('Engraving', '輝');
 ```
 
 ```JavaScript

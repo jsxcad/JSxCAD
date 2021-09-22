@@ -27,168 +27,157 @@ mountainView.frontView({ position: [0, -100, 50] });
   t.deepEqual(
     { imports, exports, updates, replays },
     {
-      imports: [],
       exports: [],
+      imports: [],
+      replays: {},
       updates: {
-        mountainView: {
-          dependencies: ['$1', 'Mountain'],
+        $1: {
+          dependencies: ['$1', 'importModule'],
           imports: ['blah'],
-          program:
-            '\n' +
-            'try {\n' +
-            "await replayRecordedNotes('', '$1');\n" +
-            '\n' +
-            "const $1 = await importModule('blah');\n" +
-            'pushSourceLocation({\n' +
-            "  path: '',\n" +
-            "  id: 'Mountain'\n" +
-            '});\n' +
-            '\n' +
-            "await replayRecordedNotes('', 'Mountain');\n" +
-            '\n' +
-            'const Mountain = () => foo();\n' +
-            'popSourceLocation({\n' +
-            "  path: '',\n" +
-            "  id: 'Mountain'\n" +
-            '});\n' +
-            '\n' +
-            "info('define mountainView');\n" +
-            '\n' +
-            'pushSourceLocation({\n' +
-            "  path: '',\n" +
-            "  id: 'mountainView'\n" +
-            '});\n' +
-            '\n' +
-            "beginRecordingNotes('', 'mountainView', {\n" +
-            '  line: 4,\n' +
-            '  column: 0\n' +
-            '});\n' +
-            '\n' +
-            'const mountainView = Mountain().scale(0.5).Page();\n' +
-            "await write('meta/def//mountainView', {\n" +
-            "  sha: 'dfc411bd02db82d7dc9410873aab460c274d2b01',\n" +
-            "  type: mountainView instanceof Shape ? 'Shape' : 'Object'\n" +
-            '});\n' +
-            '\n' +
-            'if (mountainView instanceof Shape) {\n' +
-            "  await saveGeometry('data/def//mountainView', mountainView);\n" +
-            '}\n' +
-            '\n' +
-            "await saveRecordedNotes('', 'mountainView');\n" +
-            '\n' +
-            'popSourceLocation({\n' +
-            "  path: '',\n" +
-            "  id: 'mountainView'\n" +
-            '});\n' +
-            '\n' +
-            '\n' +
-            '} catch (error) { throw error; }\n',
+          program: `
+try {
+const $1 = await $run(async () => {
+  const $1 = await importModule('blah');
+  ;
+  return $1;
+}, {
+  path: '',
+  id: '$1',
+  text: undefined,
+  sha: 'd3d743575d242dbbfc82a4d23ded4f43d538977c'
+});
+
+
+} catch (error) { throw error; }
+`,
         },
         $2: {
           dependencies: ['$1', 'mountainView'],
           imports: ['blah'],
-          program:
-            '\n' +
-            'try {\n' +
-            "await replayRecordedNotes('', '$1');\n" +
-            '\n' +
-            "const $1 = await importModule('blah');\n" +
-            'pushSourceLocation({\n' +
-            "  path: '',\n" +
-            "  id: 'Mountain'\n" +
-            '});\n' +
-            '\n' +
-            "await replayRecordedNotes('', 'Mountain');\n" +
-            '\n' +
-            'const Mountain = () => foo();\n' +
-            'popSourceLocation({\n' +
-            "  path: '',\n" +
-            "  id: 'Mountain'\n" +
-            '});\n' +
-            '\n' +
-            "const mountainView = await loadGeometry('data/def//mountainView');\n" +
-            '\n' +
-            'Object.freeze(mountainView);\n' +
-            '\n' +
-            'pushSourceLocation({\n' +
-            "  path: '',\n" +
-            "  id: 'mountainView'\n" +
-            '});\n' +
-            '\n' +
-            "await replayRecordedNotes('', 'mountainView');\n" +
-            '\n' +
-            'popSourceLocation({\n' +
-            "  path: '',\n" +
-            "  id: 'mountainView'\n" +
-            '});\n' +
-            '\n' +
-            "info('define $2');\n" +
-            '\n' +
-            'pushSourceLocation({\n' +
-            "  path: '',\n" +
-            "  id: '$2'\n" +
-            '});\n' +
-            '\n' +
-            "beginRecordingNotes('', '$2', {\n" +
-            '  line: 1,\n' +
-            '  column: 0\n' +
-            '});\n' +
-            '\n' +
-            'const $2 = mountainView.frontView({\n' +
-            '  position: [0, -100, 50]\n' +
-            '});\n' +
-            "await write('meta/def//$2', {\n" +
-            "  sha: '46ba2bee79153c17eef85ba46ecea6f9168c571f',\n" +
-            "  type: $2 instanceof Shape ? 'Shape' : 'Object'\n" +
-            '});\n' +
-            '\n' +
-            'if ($2 instanceof Shape) {\n' +
-            "  await saveGeometry('data/def//$2', $2);\n" +
-            '}\n' +
-            '\n' +
-            "await saveRecordedNotes('', '$2');\n" +
-            '\n' +
-            'popSourceLocation({\n' +
-            "  path: '',\n" +
-            "  id: '$2'\n" +
-            '});\n' +
-            '\n' +
-            '\n' +
-            '} catch (error) { throw error; }\n',
-        },
-      },
-      replays: {
-        $1: {
-          dependencies: ['$1', 'importModule'],
-          imports: [],
-          program:
-            '\n' +
-            'try {\n' +
-            "await replayRecordedNotes('', '$1');\n" +
-            '\n' +
-            '\n' +
-            '} catch (error) { throw error; }\n',
+          program: `
+try {
+const $1 = await $run(async () => {
+  const $1 = await importModule('blah');
+  ;
+  return $1;
+}, {
+  path: '',
+  id: '$1',
+  text: undefined,
+  sha: 'd3d743575d242dbbfc82a4d23ded4f43d538977c'
+});
+
+const Mountain = await $run(async () => {
+  const Mountain = () => foo();
+  ;
+  return Mountain;
+}, {
+  path: '',
+  id: 'Mountain',
+  text: undefined,
+  sha: '8004fc2084b4f6da7851dc47e8cb5612edbef602'
+});
+
+const mountainView = await $run(async () => {
+  const mountainView = Mountain().scale(0.5).Page();
+  ;
+  return mountainView;
+}, {
+  path: '',
+  id: 'mountainView',
+  text: undefined,
+  sha: 'dfc411bd02db82d7dc9410873aab460c274d2b01'
+});
+
+const $2 = await $run(async () => {
+  const $2 = mountainView.frontView({
+    position: [0, -100, 50]
+  });
+  ;
+  return $2;
+}, {
+  path: '',
+  id: '$2',
+  text: undefined,
+  sha: '46ba2bee79153c17eef85ba46ecea6f9168c571f'
+});
+
+
+} catch (error) { throw error; }
+`,
         },
         Mountain: {
           dependencies: ['$1', 'foo'],
-          imports: [],
-          program:
-            '\n' +
-            'try {\n' +
-            'pushSourceLocation({\n' +
-            "  path: '',\n" +
-            "  id: 'Mountain'\n" +
-            '});\n' +
-            '\n' +
-            "await replayRecordedNotes('', 'Mountain');\n" +
-            '\n' +
-            'popSourceLocation({\n' +
-            "  path: '',\n" +
-            "  id: 'Mountain'\n" +
-            '});\n' +
-            '\n' +
-            '\n' +
-            '} catch (error) { throw error; }\n',
+          imports: ['blah'],
+          program: `
+try {
+const $1 = await $run(async () => {
+  const $1 = await importModule('blah');
+  ;
+  return $1;
+}, {
+  path: '',
+  id: '$1',
+  text: undefined,
+  sha: 'd3d743575d242dbbfc82a4d23ded4f43d538977c'
+});
+
+const Mountain = await $run(async () => {
+  const Mountain = () => foo();
+  ;
+  return Mountain;
+}, {
+  path: '',
+  id: 'Mountain',
+  text: undefined,
+  sha: '8004fc2084b4f6da7851dc47e8cb5612edbef602'
+});
+
+
+} catch (error) { throw error; }
+`,
+        },
+        mountainView: {
+          dependencies: ['$1', 'Mountain'],
+          imports: ['blah'],
+          program: `
+try {
+const $1 = await $run(async () => {
+  const $1 = await importModule('blah');
+  ;
+  return $1;
+}, {
+  path: '',
+  id: '$1',
+  text: undefined,
+  sha: 'd3d743575d242dbbfc82a4d23ded4f43d538977c'
+});
+
+const Mountain = await $run(async () => {
+  const Mountain = () => foo();
+  ;
+  return Mountain;
+}, {
+  path: '',
+  id: 'Mountain',
+  text: undefined,
+  sha: '8004fc2084b4f6da7851dc47e8cb5612edbef602'
+});
+
+const mountainView = await $run(async () => {
+  const mountainView = Mountain().scale(0.5).Page();
+  ;
+  return mountainView;
+}, {
+  path: '',
+  id: 'mountainView',
+  text: undefined,
+  sha: 'dfc411bd02db82d7dc9410873aab460c274d2b01'
+});
+
+
+} catch (error) { throw error; }
+`,
         },
       },
     }
@@ -216,168 +205,157 @@ mountainView.frontView({ position: [0, -100, 50] });
   t.deepEqual(
     { imports, exports, updates, replays },
     {
-      imports: [],
       exports: [],
+      imports: [],
+      replays: {},
       updates: {
-        mountainView: {
-          dependencies: ['$1', 'Mountain'],
+        $1: {
+          dependencies: ['$1', 'importModule'],
           imports: ['blah'],
-          program:
-            '\n' +
-            'try {\n' +
-            "await replayRecordedNotes('', '$1');\n" +
-            '\n' +
-            "const $1 = await importModule('blah');\n" +
-            'pushSourceLocation({\n' +
-            "  path: '',\n" +
-            "  id: 'Mountain'\n" +
-            '});\n' +
-            '\n' +
-            "await replayRecordedNotes('', 'Mountain');\n" +
-            '\n' +
-            'const Mountain = () => foo();\n' +
-            'popSourceLocation({\n' +
-            "  path: '',\n" +
-            "  id: 'Mountain'\n" +
-            '});\n' +
-            '\n' +
-            "info('define mountainView');\n" +
-            '\n' +
-            'pushSourceLocation({\n' +
-            "  path: '',\n" +
-            "  id: 'mountainView'\n" +
-            '});\n' +
-            '\n' +
-            "beginRecordingNotes('', 'mountainView', {\n" +
-            '  line: 4,\n' +
-            '  column: 0\n' +
-            '});\n' +
-            '\n' +
-            'const mountainView = Mountain().scale(0.5).Page();\n' +
-            "await write('meta/def//mountainView', {\n" +
-            "  sha: 'dfc411bd02db82d7dc9410873aab460c274d2b01',\n" +
-            "  type: mountainView instanceof Shape ? 'Shape' : 'Object'\n" +
-            '});\n' +
-            '\n' +
-            'if (mountainView instanceof Shape) {\n' +
-            "  await saveGeometry('data/def//mountainView', mountainView);\n" +
-            '}\n' +
-            '\n' +
-            "await saveRecordedNotes('', 'mountainView');\n" +
-            '\n' +
-            'popSourceLocation({\n' +
-            "  path: '',\n" +
-            "  id: 'mountainView'\n" +
-            '});\n' +
-            '\n' +
-            '\n' +
-            '} catch (error) { throw error; }\n',
+          program: `
+try {
+const $1 = await $run(async () => {
+  const $1 = await importModule('blah');
+  ;
+  return $1;
+}, {
+  path: '',
+  id: '$1',
+  text: undefined,
+  sha: 'd3d743575d242dbbfc82a4d23ded4f43d538977c'
+});
+
+
+} catch (error) { throw error; }
+`,
         },
         $2: {
           dependencies: ['$1', 'mountainView'],
           imports: ['blah'],
-          program:
-            '\n' +
-            'try {\n' +
-            "await replayRecordedNotes('', '$1');\n" +
-            '\n' +
-            "const $1 = await importModule('blah');\n" +
-            'pushSourceLocation({\n' +
-            "  path: '',\n" +
-            "  id: 'Mountain'\n" +
-            '});\n' +
-            '\n' +
-            "await replayRecordedNotes('', 'Mountain');\n" +
-            '\n' +
-            'const Mountain = () => foo();\n' +
-            'popSourceLocation({\n' +
-            "  path: '',\n" +
-            "  id: 'Mountain'\n" +
-            '});\n' +
-            '\n' +
-            "const mountainView = await loadGeometry('data/def//mountainView');\n" +
-            '\n' +
-            'Object.freeze(mountainView);\n' +
-            '\n' +
-            'pushSourceLocation({\n' +
-            "  path: '',\n" +
-            "  id: 'mountainView'\n" +
-            '});\n' +
-            '\n' +
-            "await replayRecordedNotes('', 'mountainView');\n" +
-            '\n' +
-            'popSourceLocation({\n' +
-            "  path: '',\n" +
-            "  id: 'mountainView'\n" +
-            '});\n' +
-            '\n' +
-            "info('define $2');\n" +
-            '\n' +
-            'pushSourceLocation({\n' +
-            "  path: '',\n" +
-            "  id: '$2'\n" +
-            '});\n' +
-            '\n' +
-            "beginRecordingNotes('', '$2', {\n" +
-            '  line: 1,\n' +
-            '  column: 0\n' +
-            '});\n' +
-            '\n' +
-            'const $2 = mountainView.frontView({\n' +
-            '  position: [0, -100, 50]\n' +
-            '});\n' +
-            "await write('meta/def//$2', {\n" +
-            "  sha: '46ba2bee79153c17eef85ba46ecea6f9168c571f',\n" +
-            "  type: $2 instanceof Shape ? 'Shape' : 'Object'\n" +
-            '});\n' +
-            '\n' +
-            'if ($2 instanceof Shape) {\n' +
-            "  await saveGeometry('data/def//$2', $2);\n" +
-            '}\n' +
-            '\n' +
-            "await saveRecordedNotes('', '$2');\n" +
-            '\n' +
-            'popSourceLocation({\n' +
-            "  path: '',\n" +
-            "  id: '$2'\n" +
-            '});\n' +
-            '\n' +
-            '\n' +
-            '} catch (error) { throw error; }\n',
-        },
-      },
-      replays: {
-        $1: {
-          dependencies: ['$1', 'importModule'],
-          imports: [],
-          program:
-            '\n' +
-            'try {\n' +
-            "await replayRecordedNotes('', '$1');\n" +
-            '\n' +
-            '\n' +
-            '} catch (error) { throw error; }\n',
+          program: `
+try {
+const $1 = await $run(async () => {
+  const $1 = await importModule('blah');
+  ;
+  return $1;
+}, {
+  path: '',
+  id: '$1',
+  text: undefined,
+  sha: 'd3d743575d242dbbfc82a4d23ded4f43d538977c'
+});
+
+const Mountain = await $run(async () => {
+  const Mountain = () => foo();
+  ;
+  return Mountain;
+}, {
+  path: '',
+  id: 'Mountain',
+  text: undefined,
+  sha: '8004fc2084b4f6da7851dc47e8cb5612edbef602'
+});
+
+const mountainView = await $run(async () => {
+  const mountainView = Mountain().scale(0.5).Page();
+  ;
+  return mountainView;
+}, {
+  path: '',
+  id: 'mountainView',
+  text: undefined,
+  sha: 'dfc411bd02db82d7dc9410873aab460c274d2b01'
+});
+
+const $2 = await $run(async () => {
+  const $2 = mountainView.frontView({
+    position: [0, -100, 50]
+  });
+  ;
+  return $2;
+}, {
+  path: '',
+  id: '$2',
+  text: undefined,
+  sha: '46ba2bee79153c17eef85ba46ecea6f9168c571f'
+});
+
+
+} catch (error) { throw error; }
+`,
         },
         Mountain: {
           dependencies: ['$1', 'foo'],
-          imports: [],
-          program:
-            '\n' +
-            'try {\n' +
-            'pushSourceLocation({\n' +
-            "  path: '',\n" +
-            "  id: 'Mountain'\n" +
-            '});\n' +
-            '\n' +
-            "await replayRecordedNotes('', 'Mountain');\n" +
-            '\n' +
-            'popSourceLocation({\n' +
-            "  path: '',\n" +
-            "  id: 'Mountain'\n" +
-            '});\n' +
-            '\n' +
-            '\n' +
-            '} catch (error) { throw error; }\n',
+          imports: ['blah'],
+          program: `
+try {
+const $1 = await $run(async () => {
+  const $1 = await importModule('blah');
+  ;
+  return $1;
+}, {
+  path: '',
+  id: '$1',
+  text: undefined,
+  sha: 'd3d743575d242dbbfc82a4d23ded4f43d538977c'
+});
+
+const Mountain = await $run(async () => {
+  const Mountain = () => foo();
+  ;
+  return Mountain;
+}, {
+  path: '',
+  id: 'Mountain',
+  text: undefined,
+  sha: '8004fc2084b4f6da7851dc47e8cb5612edbef602'
+});
+
+
+} catch (error) { throw error; }
+`,
+        },
+        mountainView: {
+          dependencies: ['$1', 'Mountain'],
+          imports: ['blah'],
+          program: `
+try {
+const $1 = await $run(async () => {
+  const $1 = await importModule('blah');
+  ;
+  return $1;
+}, {
+  path: '',
+  id: '$1',
+  text: undefined,
+  sha: 'd3d743575d242dbbfc82a4d23ded4f43d538977c'
+});
+
+const Mountain = await $run(async () => {
+  const Mountain = () => foo();
+  ;
+  return Mountain;
+}, {
+  path: '',
+  id: 'Mountain',
+  text: undefined,
+  sha: '8004fc2084b4f6da7851dc47e8cb5612edbef602'
+});
+
+const mountainView = await $run(async () => {
+  const mountainView = Mountain().scale(0.5).Page();
+  ;
+  return mountainView;
+}, {
+  path: '',
+  id: 'mountainView',
+  text: undefined,
+  sha: 'dfc411bd02db82d7dc9410873aab460c274d2b01'
+});
+
+
+} catch (error) { throw error; }
+`,
         },
       },
     }

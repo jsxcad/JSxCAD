@@ -15,7 +15,7 @@ const EPSILON = 1e-5;
 
 export const seq = (
   op = (n) => n,
-  { from = 0, to = 1, upto, downto, by = 1 } = {}
+  { from = 0, to = 1, upto, downto, by = 1, index = false } = {}
 ) => {
   const numbers = [];
 
@@ -38,7 +38,7 @@ export const seq = (
   }
 
   for (let number = from, nth = 0; consider(number); number += by, nth++) {
-    numbers.push(op(number, nth));
+    numbers.push(index ? op(number, nth) : op(number));
   }
   return numbers;
 };

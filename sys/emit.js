@@ -1,11 +1,73 @@
-import hashSum from 'hash-sum';
+// import hashSum from 'hash-sum';
 
 const sourceLocations = [];
 
 export const getSourceLocation = () =>
   sourceLocations[sourceLocations.length - 1];
 
-export const popSourceLocation = (sourceLocation) => {
+export const emitGroup = [];
+export const emitted = [];
+
+let startTime = new Date();
+
+export const elapsed = () => new Date() - startTime;
+
+export const clearEmitted = () => {
+  startTime = new Date();
+  emitted.splice(0);
+  sourceLocations.splice(0);
+};
+
+export const saveEmitGroup = () => {
+  const savedSourceLocations = [...sourceLocations];
+  sourceLocations.splice(0);
+
+  const savedEmitGroup = [...emitGroup];
+  emitGroup.splice(0);
+
+  return { savedSourceLocations, savedEmitGroup };
+};
+
+export const restoreEmitGroup = ({ savedSourceLocations, savedEmitGroup }) => {
+  sourceLocations.splice(0, sourceLocations.length, ...savedSourceLocations);
+  emitGroup.splice(0, emitGroup.length, ...savedEmitGroup);
+};
+
+const onEmitHandlers = new Set();
+
+export const emit = (value) => {
+  if (value.sourceLocation === undefined) {
+    value.sourceLocation = getSourceLocation();
+  }
+  emitGroup.push(value);
+};
+
+export const getEmitted = () => [...emitted];
+
+export const addOnEmitHandler = (handler) => {
+  onEmitHandlers.add(handler);
+  return handler;
+};
+
+export const beginEmitGroup = (sourceLocation) => {
+  if (emitGroup.length !== 0) {
+    throw Error('emitGroup not empty');
+  }
+  sourceLocations.push(sourceLocation);
+  emit({ beginSourceLocation: sourceLocation });
+};
+
+export const flushEmitGroup = () => {
+  for (const value of emitGroup) {
+    emitted.push(value);
+    for (const onEmitHandler of onEmitHandlers) {
+      onEmitHandler(value);
+    }
+  }
+  emitGroup.splice(0);
+};
+
+export const finishEmitGroup = (sourceLocation) => {
   if (sourceLocations.length === 0) {
     throw Error(`Expected current sourceLocation but there was none.`);
   }
@@ -22,49 +84,16 @@ export const popSourceLocation = (sourceLocation) => {
   }
   emit({ endSourceLocation });
   sourceLocations.pop();
-};
-
-export const pushSourceLocation = (sourceLocation) => {
-  sourceLocations.push(sourceLocation);
-  emit({ beginSourceLocation: sourceLocation });
-};
-
-export const emitted = [];
-
-let startTime = new Date();
-
-export const elapsed = () => new Date() - startTime;
-
-export const clearEmitted = () => {
-  startTime = new Date();
-  emitted.length = 0;
-  sourceLocations.length = 0;
-};
-
-const onEmitHandlers = new Set();
-
-export const emit = (value) => {
-  if (value.sourceLocation === undefined) {
-    value.sourceLocation = getSourceLocation();
-  }
-  emitted.push(value);
-  for (const onEmitHandler of onEmitHandlers) {
-    onEmitHandler(value);
-  }
-};
-
-export const getEmitted = () => [...emitted];
-
-export const addOnEmitHandler = (handler) => {
-  onEmitHandlers.add(handler);
-  return handler;
+  flushEmitGroup();
 };
 
 export const removeOnEmitHandler = (handler) => onEmitHandlers.delete(handler);
 
 export const info = (text) => {
+  /*
   console.log(text);
   const entry = { info: text };
   const hash = hashSum(entry);
   emit({ info: text, hash });
+*/
 };

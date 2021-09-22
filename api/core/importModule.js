@@ -1,7 +1,6 @@
 import { acquire, release } from './evaluateLock.js';
 import { evaluate as baseEvaluate, execute } from './evaluate.js';
-
-import { read } from '@jsxcad/sys';
+import { read, restoreEmitGroup, saveEmitGroup } from '@jsxcad/sys';
 
 const DYNAMIC_MODULES = new Map();
 
@@ -22,13 +21,15 @@ export const buildImportModule =
       doRelease = true,
     } = {}
   ) => {
+    let emitGroup;
     try {
       if (doRelease) {
+        emitGroup = saveEmitGroup();
         await release();
       }
-      const cachedModule = CACHED_MODULES.get(name);
-      if (cachedModule !== undefined) {
-        return cachedModule;
+      if (CACHED_MODULES.has(name)) {
+        // It's ok for a module to evaluate to undefined so we need to check has explicitly.
+        return CACHED_MODULES.get(name);
       }
       const internalModule = DYNAMIC_MODULES.get(name);
       if (internalModule !== undefined) {
@@ -58,7 +59,6 @@ export const buildImportModule =
       if (!replay) {
         replay = (script) => baseEvaluate(script, { api, path });
       }
-
       const builtModule = await execute(scriptText, {
         evaluate,
         replay,
@@ -74,6 +74,7 @@ export const buildImportModule =
     } finally {
       if (doRelease) {
         await acquire();
+        restoreEmitGroup(emitGroup);
       }
     }
   };

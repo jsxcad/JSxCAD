@@ -166,10 +166,16 @@ Shape.fromPolygons = (polygons, context) =>
 // Deprecated.
 Shape.method = registerShapeMethod;
 // Deprecated
-Shape.reifier = (name, op) => registerReifier(name, op);
+Shape.reifier = (name, op) => {
+  registerReifier(name, op);
+  return op;
+};
 // Let's make the registration functions more explicit.
 Shape.registerMethod = registerShapeMethod;
-Shape.registerReifier = (name, op) => registerReifier(name, op);
+Shape.registerReifier = (name, op) => {
+  registerReifier(name, op);
+  return op;
+};
 Shape.toShape = (to, from) => {
   if (to instanceof Function) {
     to = to(from);

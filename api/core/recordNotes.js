@@ -1,11 +1,16 @@
 import {
   addOnEmitHandler,
   addPending,
+  beginEmitGroup,
   emit,
+  finishEmitGroup,
+  flushEmitGroup,
   hash,
   read,
   write,
 } from '@jsxcad/sys';
+
+import { loadGeometry, saveGeometry } from '@jsxcad/api-shape';
 
 let notes;
 
@@ -18,12 +23,17 @@ const recordNote = (note) => {
   }
 };
 
-export const beginRecordingNotes = (path, id, sourceLocation) => {
+export const beginRecordingNotes = (path, id) => {
   notes = [];
   if (handler === undefined) {
     handler = addOnEmitHandler(recordNote);
   }
   recording = true;
+};
+
+export const clearRecordedNotes = () => {
+  notes = undefined;
+  recording = false;
 };
 
 export const saveRecordedNotes = (path, id) => {
@@ -45,6 +55,7 @@ export const replayRecordedNotes = async (path, id) => {
   for (const note of notes) {
     emit(note);
   }
+  flushEmitGroup();
 };
 
 export const emitSourceLocation = ({ path, id }) => {
@@ -54,3 +65,31 @@ export const emitSourceLocation = ({ path, id }) => {
 
 export const emitSourceText = (sourceText) =>
   emit({ hash: hash(sourceText), sourceText });
+
+export const $run = async (op, { path, id, text, sha }) => {
+  const meta = await read(`meta/def/${path}/${id}`);
+  if (!meta || meta.sha !== sha) {
+    beginRecordingNotes(path, id);
+    beginEmitGroup({ path, id });
+    emitSourceText(text);
+    const result = await op();
+    finishEmitGroup({ path, id });
+    if (typeof result === 'object') {
+      const type = result.constructor.name;
+      switch (type) {
+        case 'Shape':
+          await saveGeometry(`data/def/${path}/${id}`, result);
+          await write(`meta/def/${path}/${id}`, { sha, type });
+          await saveRecordedNotes(path, id);
+          return result;
+      }
+    }
+    clearRecordedNotes();
+    return result;
+  } else if (meta.type === 'Shape') {
+    await replayRecordedNotes(path, id);
+    return loadGeometry(`data/def/${path}/${id}`);
+  } else {
+    throw Error('Unexpected cached result');
+  }
+};

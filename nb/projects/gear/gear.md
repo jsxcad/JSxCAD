@@ -1,24 +1,9 @@
 ```JavaScript
-import './gearPlan.js';
-```
-
-```JavaScript
-import {
-  ToothProfile,
-  pitchRadius,
-  outerRadius,
-  baseRadius,
-  rootRadius,
-  iang,
-} from './gearFn.js';
+const numberOfTeeth = control('number of teeth', 16, 'input');
 ```
 
 ```JavaScript
 import { Gear } from './gear.js';
-```
-
-```JavaScript
-const numberOfTeeth = control('number of teeth', 16, 'input');
 ```
 
 ```JavaScript

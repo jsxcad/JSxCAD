@@ -2,8 +2,9 @@ import './jsxcad-api-v1-gcode.js';
 import './jsxcad-api-v1-pdf.js';
 import './jsxcad-api-v1-tools.js';
 import * as mathApi from './jsxcad-api-v1-math.js';
-import { addOnEmitHandler, addPending, write, read, emit, hash, isWebWorker, getSourceLocation, getControlValue, popSourceLocation, pushSourceLocation } from './jsxcad-sys.js';
+import { addOnEmitHandler, addPending, write, read, emit, flushEmitGroup, hash, beginEmitGroup, finishEmitGroup, saveEmitGroup, restoreEmitGroup, isWebWorker, getSourceLocation, getControlValue } from './jsxcad-sys.js';
 import * as shapeApi from './jsxcad-api-shape.js';
+import { saveGeometry, loadGeometry } from './jsxcad-api-shape.js';
 import { toEcmascript } from './jsxcad-compiler.js';
 import { readStl, stl } from './jsxcad-api-v1-stl.js';
 import { readObj } from './jsxcad-api-v1-obj.js';
@@ -22,12 +23,17 @@ const recordNote = (note) => {
   }
 };
 
-const beginRecordingNotes = (path, id, sourceLocation) => {
+const beginRecordingNotes = (path, id) => {
   notes = [];
   if (handler === undefined) {
     handler = addOnEmitHandler(recordNote);
   }
   recording = true;
+};
+
+const clearRecordedNotes = () => {
+  notes = undefined;
+  recording = false;
 };
 
 const saveRecordedNotes = (path, id) => {
@@ -49,6 +55,7 @@ const replayRecordedNotes = async (path, id) => {
   for (const note of notes) {
     emit(note);
   }
+  flushEmitGroup();
 };
 
 const emitSourceLocation = ({ path, id }) => {
@@ -59,13 +66,43 @@ const emitSourceLocation = ({ path, id }) => {
 const emitSourceText = (sourceText) =>
   emit({ hash: hash(sourceText), sourceText });
 
+const $run = async (op, { path, id, text, sha }) => {
+  const meta = await read(`meta/def/${path}/${id}`);
+  if (!meta || meta.sha !== sha) {
+    beginRecordingNotes();
+    beginEmitGroup({ path, id });
+    emitSourceText(text);
+    const result = await op();
+    finishEmitGroup({ path, id });
+    if (typeof result === 'object') {
+      const type = result.constructor.name;
+      switch (type) {
+        case 'Shape':
+          await saveGeometry(`data/def/${path}/${id}`, result);
+          await write(`meta/def/${path}/${id}`, { sha, type });
+          await saveRecordedNotes(path, id);
+          return result;
+      }
+    }
+    clearRecordedNotes();
+    return result;
+  } else if (meta.type === 'Shape') {
+    await replayRecordedNotes(path, id);
+    return loadGeometry(`data/def/${path}/${id}`);
+  } else {
+    throw Error('Unexpected cached result');
+  }
+};
+
 var notesApi = /*#__PURE__*/Object.freeze({
   __proto__: null,
   beginRecordingNotes: beginRecordingNotes,
+  clearRecordedNotes: clearRecordedNotes,
   saveRecordedNotes: saveRecordedNotes,
   replayRecordedNotes: replayRecordedNotes,
   emitSourceLocation: emitSourceLocation,
-  emitSourceText: emitSourceText
+  emitSourceText: emitSourceText,
+  $run: $run
 });
 
 let locked = false;
@@ -102,8 +139,10 @@ const getApi = () => api$1;
 
 const evaluate = async (ecmascript, { api, path }) => {
   const where = isWebWorker ? 'worker' : 'browser';
+  let emitGroup;
   try {
     await acquire();
+    emitGroup = saveEmitGroup();
     console.log(`QQ/evaluate ${where}: ${ecmascript.replace(/\n/g, '\n|   ')}`);
     const builder = new Function(
       `{ ${Object.keys(api).join(', ')} }`,
@@ -115,6 +154,9 @@ const evaluate = async (ecmascript, { api, path }) => {
   } catch (error) {
     throw error;
   } finally {
+    if (emitGroup) {
+      restoreEmitGroup(emitGroup);
+    }
     await release();
   }
 };
@@ -181,56 +223,54 @@ const execute = async (
       }
       // Update what we can.
       console.log(`QQ/Update ${where}`);
-      const blockedUpdates = [];
-      const updatePromises = [];
-      // Determine the updates we can process.
-      for (const id of Object.keys(updates)) {
-        if (scheduled.has(id)) {
-          continue;
+      const unprocessedUpdates = new Set(Object.keys(updates));
+      while (unprocessedUpdates.size > 0) {
+        const updatePromises = [];
+        // Determine the updates we can process.
+        for (const id of unprocessedUpdates) {
+          if (scheduled.has(id)) {
+            continue;
+          }
+          const entry = updates[id];
+          const outstandingDependencies = entry.dependencies.filter(
+            (dependency) =>
+              !completed.has(dependency) &&
+              updates[dependency] &&
+              dependency !== id
+          );
+          if (
+            updatePromises.length <= 1 &&
+            outstandingDependencies.length === 0
+          ) {
+            // if (isWebWorker) {
+            //   throw Error('Updates should not happen in worker');
+            // }
+            // For now, only do one thing at a time, and block the remaining updates.
+            const task = async () => {
+              try {
+                await evaluate(updates[id].program, { path });
+                completed.add(id);
+                console.log(`Completed ${id}`);
+              } catch (error) {
+                throw error;
+              }
+            };
+            updatePromises.push(task());
+            unprocessedUpdates.delete(id);
+            scheduled.add(id);
+          }
         }
-        const entry = updates[id];
-        const outstandingDependencies = entry.dependencies.filter(
-          (dependency) =>
-            !completed.has(dependency) &&
-            updates[dependency] &&
-            dependency !== id
-        );
-        if (
-          updatePromises.length <= 1 &&
-          outstandingDependencies.length === 0
-        ) {
-          // if (isWebWorker) {
-          //   throw Error('Updates should not happen in worker');
-          // }
-          // For now, only do one thing at a time, and block the remaining updates.
-          const task = async () => {
-            try {
-              await evaluate(updates[id].program, { path });
-              completed.add(id);
-              console.log(`Completed ${id}`);
-            } catch (error) {
-              throw error;
-            }
-          };
-          updatePromises.push(task());
-          scheduled.add(id);
-        } else {
-          blockedUpdates.push(id);
+        // FIX: We could instead use Promise.race() and then see what new updates could be queued.
+        while (updatePromises.length > 0) {
+          await updatePromises.pop();
         }
-      }
-      // FIX: We could instead use Promise.race() and then see what new updates could be queued.
-      while (updatePromises.length > 0) {
-        await updatePromises.pop();
       }
       // Finally compute the exports.
-      if (blockedUpdates.length === 0) {
-        console.log(`QQ/Exports ${where}`);
-        for (const entry of exports) {
-          return await evaluate(entry, { path });
-        }
-        return;
+      console.log(`QQ/Exports ${where}`);
+      for (const entry of exports) {
+        return await evaluate(entry, { path });
       }
-      // Otherwise recompute the updates and repeat.
+      return;
     }
   } catch (error) {
     throw error;
@@ -256,13 +296,15 @@ const buildImportModule =
       doRelease = true,
     } = {}
   ) => {
+    let emitGroup;
     try {
       if (doRelease) {
+        emitGroup = saveEmitGroup();
         await release();
       }
-      const cachedModule = CACHED_MODULES.get(name);
-      if (cachedModule !== undefined) {
-        return cachedModule;
+      if (CACHED_MODULES.has(name)) {
+        // It's ok for a module to evaluate to undefined so we need to check has explicitly.
+        return CACHED_MODULES.get(name);
       }
       const internalModule = DYNAMIC_MODULES.get(name);
       if (internalModule !== undefined) {
@@ -292,7 +334,6 @@ const buildImportModule =
       if (!replay) {
         replay = (script) => evaluate(script, { api, path });
       }
-
       const builtModule = await execute(scriptText, {
         evaluate: evaluate$1,
         replay,
@@ -308,6 +349,7 @@ const buildImportModule =
     } finally {
       if (doRelease) {
         await acquire();
+        restoreEmitGroup(emitGroup);
       }
     }
   };
@@ -336,8 +378,6 @@ const api = {
   ...shapeApi,
   ...notesApi,
   control,
-  popSourceLocation,
-  pushSourceLocation,
   readSvg,
   readStl,
   readObj,
