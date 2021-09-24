@@ -20,7 +20,14 @@ export const get =
         return descend();
       }
     };
-    visit(shape.toGeometry(), walk);
+    const geometry = shape.toGeometry();
+    if (geometry.type === 'item') {
+      // FIX: Can we make this less magical?
+      // This allows constructions like s.get('a').get('b')
+      visit(geometry.content[0], walk);
+    } else {
+      visit(geometry, walk);
+    }
     return Group(...picks);
   };
 

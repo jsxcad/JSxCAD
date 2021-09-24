@@ -72,7 +72,7 @@ const aDesign = aBox.fit(aBolt.z(10)).as('design').view();
 Expands the shape outwards by the input distance. May result in self intersections if not used cautiously.
 
 ```JavaScript
-aDesign.get('design').get('*').pack().view().md(`We need to get into the design in order to get at 'box' and 'bolt'`);
+aDesign.get('*').pack().view().md(`We need to get into the design in order to get at 'box' and 'bolt'`);
 ```
 
 ![Image](interactions_with_geometry.md.6.png)
