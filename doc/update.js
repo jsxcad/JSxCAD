@@ -8,6 +8,8 @@ process.on('uncaughtException', (err) => {
   process.exit(1); // mandatory (as per the Node.js docs)
 });
 
+const makePosixPath = (string) => string.split(path.sep).join(path.posix.sep);
+
 const build = async (baseDirectory = '.') => {
   try {
     const notebooks = [];
@@ -18,7 +20,7 @@ const build = async (baseDirectory = '.') => {
         if (['node_modules'].includes(entry.name)) {
           continue;
         }
-        const filepath = path.join(directory, entry.name);
+        const filepath = makePosixPath(path.join(directory, entry.name));
         if (entry.isDirectory()) {
           await walk(filepath);
         } else if (entry.isFile()) {
