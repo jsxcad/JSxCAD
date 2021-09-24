@@ -2,7 +2,6 @@ import { Shape, ensurePages } from '@jsxcad/api-shape';
 import {
   addPending,
   emit,
-  getDefinitions,
   getPendingErrorHandler,
   writeFile,
 } from '@jsxcad/sys';
@@ -15,16 +14,14 @@ export const prepareSvg = (shape, name, options = {}) => {
   let index = 0;
   const entries = [];
   for (const entry of ensurePages(shape.toDisjointGeometry())) {
-    const op = toSvg(entry, {
-      definitions: getDefinitions(),
-      ...options,
-    }).catch(getPendingErrorHandler());
+    const op = toSvg(entry, options).catch(getPendingErrorHandler());
     addPending(op);
     entries.push({
       data: op,
       filename: `${name}_${index++}.svg`,
       type: 'image/svg+xml',
     });
+    Shape.fromGeometry(entry).view(options.view);
   }
   return entries;
 };

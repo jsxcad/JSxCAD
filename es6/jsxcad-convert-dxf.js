@@ -460,7 +460,7 @@ function parsePoint(scanner) {
  * @param {*} entity - the entity currently being parsed 
  * @param {*} curr - the current group being parsed
  */
-function checkCommonEntityProperties(entity, curr) {
+function checkCommonEntityProperties(entity, curr, scanner) {
     switch(curr.code) {
         case 0:
             entity.type = curr.value;
@@ -489,6 +489,13 @@ function checkCommonEntityProperties(entity, curr) {
             break;
         case 100:
             //ignore
+            break;
+        case 101: // Embedded Object in ACAD 2018.
+            // See https://ezdxf.readthedocs.io/en/master/dxfinternals/dxftags.html#embedded-objects
+            while(curr.code != 0) {
+                curr = scanner.next();
+            }
+            scanner.rewind();
             break;
         case 330:
             entity.ownerHandle = curr.value;
@@ -541,7 +548,7 @@ EntityParser$f.prototype.parseEntity = function(scanner, curr) {
                 curr = scanner.lastReadGroup;
                 break;
             default:
-                checkCommonEntityProperties(entity, curr);
+                checkCommonEntityProperties(entity, curr, scanner);
                 break;
         }
         curr = scanner.next();
@@ -627,7 +634,7 @@ EntityParser$e.prototype.parseEntity = function(scanner, curr) {
                 entity.angleLength = entity.endAngle - entity.startAngle; // angleLength is deprecated
                 break;
             default: // ignored attribute
-                checkCommonEntityProperties(entity, curr);
+                checkCommonEntityProperties(entity, curr, scanner);
                 break;
         }
         curr = scanner.next();
@@ -717,7 +724,7 @@ EntityParser$d.prototype.parseEntity = function(scanner, curr) {
                 entity.extrusionDirectionZ = curr.value;
                 break;
             default:
-                checkCommonEntityProperties(entity, curr);
+                checkCommonEntityProperties(entity, curr, scanner);
                 break;
         }
         curr = scanner.next();
@@ -756,7 +763,7 @@ EntityParser$c.prototype.parseEntity = function(scanner, curr) {
                 entity.endAngle = endAngle;
                 break;
             default: // ignored attribute
-                checkCommonEntityProperties(entity, curr);
+                checkCommonEntityProperties(entity, curr, scanner);
                 break;
         }
         curr = scanner.next();
@@ -816,7 +823,7 @@ EntityParser$b.prototype.parseEntity = function(scanner, curr) {
 					entity.angle = curr.value;
 					break;
 				default: // check common entity attributes
-					checkCommonEntityProperties(entity, curr);
+					checkCommonEntityProperties(entity, curr, scanner);
 					break;
 			}
 			curr = scanner.next();
@@ -856,7 +863,7 @@ EntityParser$a.prototype.parseEntity = function(scanner, curr) {
                 entity.name = curr.value;
                 break;
             default: // check common entity attributes
-                checkCommonEntityProperties(entity, curr);
+                checkCommonEntityProperties(entity, curr, scanner);
                 break;
         }
         
@@ -912,7 +919,7 @@ EntityParser$9.prototype.parseEntity = function(scanner, curr) {
                 entity.extrusionDirection = parsePoint(scanner);
                 break;
             default: // check common entity attributes
-                checkCommonEntityProperties(entity, curr);
+                checkCommonEntityProperties(entity, curr, scanner);
                 break;
         }
         curr = scanner.next();
@@ -944,7 +951,7 @@ EntityParser$8.prototype.parseEntity = function(scanner, curr) {
             case 100:
                 break;
             default:
-                checkCommonEntityProperties(entity, curr);
+                checkCommonEntityProperties(entity, curr, scanner);
                 break;
         }
         
@@ -994,7 +1001,7 @@ EntityParser$7.prototype.parseEntity = function(scanner, curr) {
                 entity.extrusionDirectionZ = curr.value;
                 break;
             default:
-                checkCommonEntityProperties(entity, curr);
+                checkCommonEntityProperties(entity, curr, scanner);
                 break;
         }
         curr = scanner.next();
@@ -1040,6 +1047,7 @@ function parseLWPolylineVertices(n, scanner) {
                     break;
                 default:
                     // if we do not hit known code return vertices.  Code might belong to entity
+                    scanner.rewind();
                     if (vertexIsStarted) {
                         vertices.push(vertex);
                     }
@@ -1094,7 +1102,7 @@ EntityParser$6.prototype.parseEntity = function(scanner, curr) {
                 entity.drawingDirection = curr.value;
                 break;
             default:
-                checkCommonEntityProperties(entity, curr);
+                checkCommonEntityProperties(entity, curr, scanner);
                 break;
         }
         curr = scanner.next();
@@ -1126,7 +1134,7 @@ EntityParser$5.prototype.parseEntity = function(scanner, curr) {
             case 100:
                 break;
             default: // check common entity attributes
-                checkCommonEntityProperties(entity, curr);
+                checkCommonEntityProperties(entity, curr, scanner);
                 break;
         }
         curr = scanner.next();
@@ -1186,7 +1194,7 @@ EntityParser$4.prototype.parseEntity = function(scanner, curr) {
                 entity.faceD = curr.value;
                 break;
             default:
-                checkCommonEntityProperties(entity, curr);
+                checkCommonEntityProperties(entity, curr, scanner);
                 break;
         }
         
@@ -1243,7 +1251,7 @@ EntityParser$3.prototype.parseEntity = function(scanner, curr) {
                     entity.extrusionDirection = parsePoint(scanner);
 					break;
 				default:
-					checkCommonEntityProperties(entity, curr);
+					checkCommonEntityProperties(entity, curr, scanner);
 					break;
 			}
 			curr = scanner.next();
@@ -1276,7 +1284,7 @@ function parseSeqEnd(scanner, curr) {
     curr = scanner.next();
     while(curr != 'EOF') {
         if (curr.code == 0) break;
-        checkCommonEntityProperties(entity, curr);
+        checkCommonEntityProperties(entity, curr, scanner);
         curr = scanner.next();
     }
 
@@ -1287,15 +1295,15 @@ function EntityParser$2() {}
 
 EntityParser$2.ForEntityName = 'SOLID';
 
-EntityParser$2.prototype.parseEntity = function(scanner, currentGroup) {
+EntityParser$2.prototype.parseEntity = function(scanner, curr) {
     var entity;
-    entity = { type: currentGroup.value };
+    entity = { type: curr.value };
     entity.points = [];
-    currentGroup = scanner.next();
-    while(currentGroup !== 'EOF') {
-        if(currentGroup.code === 0) break;
+    curr = scanner.next();
+    while(curr !== 'EOF') {
+        if(curr.code === 0) break;
 
-        switch(currentGroup.code) {
+        switch(curr.code) {
             case 10:
                 entity.points[0] = parsePoint(scanner);
                 break;
@@ -1312,10 +1320,10 @@ EntityParser$2.prototype.parseEntity = function(scanner, currentGroup) {
                 entity.extrusionDirection = parsePoint(scanner);
                 break;
             default: // check common entity attributes
-                checkCommonEntityProperties(entity, currentGroup);
+                checkCommonEntityProperties(entity, curr, scanner);
                 break;
         }
-        currentGroup = scanner.next();
+        curr = scanner.next();
     }
 
     return entity;
@@ -1380,7 +1388,7 @@ EntityParser$1.prototype.parseEntity = function(scanner, curr) {
                 entity.normalVector = parsePoint(scanner);
                 break;
             default:
-                checkCommonEntityProperties(entity, curr);
+                checkCommonEntityProperties(entity, curr, scanner);
                 break;
         }
         curr = scanner.next();
@@ -1426,7 +1434,7 @@ EntityParser.prototype.parseEntity = function(scanner, curr) {
                 entity.valign = curr.value;
                 break;
             default: // check common entity attributes
-                checkCommonEntityProperties(entity, curr);
+                checkCommonEntityProperties(entity, curr, scanner);
                 break;
         }
         curr = scanner.next();

@@ -1,35 +1,22 @@
 import Group from './Group.js';
 import Shape from './Shape.js';
-import { qualifyTag } from './tag.js';
+import { oneOfTagMatcher } from './tag.js';
 import { visit } from '@jsxcad/geometry';
 
 export const get =
   (...tags) =>
   (shape) => {
-    const isMatchingTag = (options, matches) => {
-      for (const match of matches) {
-        if (match === 'tagpath:*') {
-          return true;
-        }
-      }
-      if (options === undefined) {
-        return false;
-      }
-      for (const match of matches) {
-        if (options.includes(match)) {
-          return true;
-        }
-      }
-      return false;
-    };
-    const qualifiedTags = tags.map((tag) => qualifyTag(tag, 'item'));
+    const isMatch = oneOfTagMatcher(tags, 'item');
     const picks = [];
     const walk = (geometry, descend) => {
-      if (geometry.type === 'item') {
-        if (isMatchingTag(geometry.tags, qualifiedTags)) {
+      const { tags = [] } = geometry;
+      for (const tag of tags) {
+        if (isMatch(tag)) {
           picks.push(Shape.fromGeometry(geometry));
+          break;
         }
-      } else {
+      }
+      if (geometry.type !== 'item') {
         return descend();
       }
     };
