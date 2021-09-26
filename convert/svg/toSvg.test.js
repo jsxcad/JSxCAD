@@ -37,7 +37,7 @@ test('Triangle', async (t) => {
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1 Tiny//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11-tiny.dtd">
 <svg baseProfile="tiny" height="1.732050807568878mm" width="1.5000000000000018mm" viewBox="-0.5000000000000009 -0.8660254037844389 1.5000000000000018 1.732050807568878" version="1.1" stroke="black" stroke-width=".1" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path fill="#0000ff" stroke="#0000ff" d="M-0.4999999999999998 -0.8660254037844386 L-0.5000000000000004 0.8660254037844384 L1 0 z"/>
-<path fill="#ff0000" stroke="#ff0000" d="M1 0 L-0.4999999999999998 0.8660254037844387 L-0.5000000000000004 -0.8660254037844385 z"/>
+<path fill="#ff0000" stroke="#ff0000" d="M1 0 L-0.4999999999999998 -0.8660254037844387 L-0.5000000000000004 0.8660254037844385 z"/>
 </svg>`
   );
 });

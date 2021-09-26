@@ -1728,7 +1728,11 @@ const intersection$1 = (a, b) => {
   return taggedGraph({ tags: a.tags }, result);
 };
 
-const taggedPaths = ({ tags = [] }, paths) => ({ type: 'paths', tags, paths });
+const taggedPaths = ({ tags = [] }, paths) => ({
+  type: 'paths',
+  tags,
+  paths,
+});
 
 const toPolygonsWithHoles$1 = (geometry) => {
   if (geometry.graph === undefined) {
@@ -1882,8 +1886,14 @@ const inset = (geometry, initial = 1, step, limit) => {
 
 const isCounterClockwise = (path) => measureArea(path) > 0;
 
-const hasNotType = (geometry, type) => isNotType(geometry, type) ? geometry : { ...geometry, tags: geometry.tags.filter(tag => tag !== type) };
-const hasType = (geometry, type) => isType(geometry, type) ? geometry : { ...geometry, tags: [...geometry.tags, type] };
+const hasNotType = (geometry, type) =>
+  isNotType(geometry, type)
+    ? geometry
+    : { ...geometry, tags: geometry.tags.filter((tag) => tag !== type) };
+const hasType = (geometry, type) =>
+  isType(geometry, type)
+    ? geometry
+    : { ...geometry, tags: [...geometry.tags, type] };
 const isNotType = ({ tags }, type) => !tags.includes(type);
 const isType = ({ tags }, type) => tags.includes(type);
 
@@ -2864,8 +2874,17 @@ const toPoints = (geometry) => {
   return { type: 'points', points: [...points] };
 };
 
-const taggedPolygonsWithHoles = ({ tags = [], plane, exactPlane }, polygonsWithHoles) => {
-  return { type: 'polygonsWithHoles', tags, plane, exactPlane, polygonsWithHoles };
+const taggedPolygonsWithHoles = (
+  { tags = [], plane, exactPlane },
+  polygonsWithHoles
+) => {
+  return {
+    type: 'polygonsWithHoles',
+    tags,
+    plane,
+    exactPlane,
+    polygonsWithHoles,
+  };
 };
 
 const toPolygonsWithHoles = (geometry) => {
@@ -2883,7 +2902,12 @@ const toPolygonsWithHoles = (geometry) => {
           exactPlane,
           polygonsWithHoles,
         } of toPolygonsWithHoles$1(geometry)) {
-          output.push(taggedPolygonsWithHoles({ tags, plane, exactPlane }, polygonsWithHoles));
+          output.push(
+            taggedPolygonsWithHoles(
+              { tags, plane, exactPlane },
+              polygonsWithHoles
+            )
+          );
         }
         break;
       }

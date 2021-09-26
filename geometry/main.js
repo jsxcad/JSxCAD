@@ -82,7 +82,17 @@ export { inset } from './tagged/inset.js';
 export { isClockwise as isClockwisePath } from './path/isClockwise.js';
 export { isCounterClockwise as isCounterClockwisePath } from './path/isCounterClockwise.js';
 export { isClosed as isClosedPath } from './path/isClosed.js';
-export { isNotType, isType, hasNotType, hasType, isNotTypeWire, isTypeWire, hasNotTypeWire, hasTypeWire, typeWire } from './tagged/type.js';
+export {
+  isNotType,
+  isType,
+  hasNotType,
+  hasType,
+  isNotTypeWire,
+  isTypeWire,
+  hasNotTypeWire,
+  hasTypeWire,
+  typeWire,
+} from './tagged/type.js';
 export { keep } from './tagged/keep.js';
 export { loft } from './tagged/loft.js';
 export { measureBoundingBox } from './tagged/measureBoundingBox.js';

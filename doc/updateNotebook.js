@@ -18,9 +18,13 @@ import { toHtml } from '@jsxcad/convert-notebook';
 
 const ensureNewline = (line) => (line.endsWith('\n') ? line : `${line}\n`);
 
-const writeMarkdown = async (modulePath, notebook, imageUrlList, failedExpectations) => {
+const writeMarkdown = async (
+  modulePath,
+  notebook,
+  imageUrlList,
+  failedExpectations
+) => {
   const output = [];
-  const imageCounts = new Map();
   let imageCount = 0;
   let viewCount = 0;
   for (let nth = 0; nth < notebook.length; nth++) {
@@ -47,7 +51,7 @@ const writeMarkdown = async (modulePath, notebook, imageUrlList, failedExpectati
     }
     if (download) {
       const { entries } = download;
-      for (let { base64Data, filename, data, path } of entries) {
+      for (let { base64Data, filename, data } of entries) {
         if (!data && base64Data) {
           data = new Uint8Array(Base64ArrayBuffer.decode(base64Data));
         }

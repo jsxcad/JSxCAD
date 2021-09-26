@@ -1085,6 +1085,9 @@ EntityParser$6.prototype.parseEntity = function(scanner, curr) {
             case 10:
                 entity.position = parsePoint(scanner);
                 break;
+            case 11:
+                entity.directionVector = parsePoint(scanner);
+                break;
             case 40:
                 //Note: this is the text height
                 entity.height = curr.value;

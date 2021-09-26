@@ -19,7 +19,12 @@ export const toPolygonsWithHoles = (geometry) => {
           exactPlane,
           polygonsWithHoles,
         } of toPolygonsWithHolesFromGraph(geometry)) {
-          output.push(taggedPolygonsWithHoles({ tags, plane, exactPlane }, polygonsWithHoles));
+          output.push(
+            taggedPolygonsWithHoles(
+              { tags, plane, exactPlane },
+              polygonsWithHoles
+            )
+          );
         }
         break;
       }

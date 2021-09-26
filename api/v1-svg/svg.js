@@ -36,13 +36,15 @@ export const prepareSvg = (shape, name, options = {}) => {
   return entries;
 };
 
-export const svg = (name, options = {}) => (shape) => {
-  const entries = prepareSvg(shape, name, options);
-  const download = { entries };
-  const hash = hashSum({ name, options }) + hashGeometry(shape.toGeometry());
-  emit({ download, hash });
-  return shape;
-};
+export const svg =
+  (name, options = {}) =>
+  (shape) => {
+    const entries = prepareSvg(shape, name, options);
+    const download = { entries };
+    const hash = hashSum({ name, options }) + hashGeometry(shape.toGeometry());
+    emit({ download, hash });
+    return shape;
+  };
 
 Shape.registerMethod('svg', svg);
 

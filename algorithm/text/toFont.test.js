@@ -14,9 +14,11 @@ test('Render a letter', async (t) => {
   const letterA = font({}, 'ab');
   t.deepEqual(JSON.parse(JSON.stringify(realize(letterA))), {
     type: 'group',
+    tags: [],
     content: [
       {
         type: 'graph',
+        tags: [],
         graph: {
           isClosed: false,
           isLazy: false,
@@ -934,6 +936,7 @@ test('Render a letter', async (t) => {
       },
       {
         type: 'graph',
+        tags: [],
         graph: {
           isClosed: false,
           isLazy: false,

@@ -144,13 +144,15 @@ const prepareSvg = (shape, name, options = {}) => {
   return entries;
 };
 
-const svg = (name, options = {}) => (shape) => {
-  const entries = prepareSvg(shape, name, options);
-  const download = { entries };
-  const hash$1 = hashSum({ name, options }) + hash(shape.toGeometry());
-  emit({ download, hash: hash$1 });
-  return shape;
-};
+const svg =
+  (name, options = {}) =>
+  (shape) => {
+    const entries = prepareSvg(shape, name, options);
+    const download = { entries };
+    const hash$1 = hashSum({ name, options }) + hash(shape.toGeometry());
+    emit({ download, hash: hash$1 });
+    return shape;
+  };
 
 Shape.registerMethod('svg', svg);
 

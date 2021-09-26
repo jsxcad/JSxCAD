@@ -10,6 +10,7 @@ test('Read example', async (t) => {
   const geometry = await fromStl(stl);
   t.deepEqual(JSON.parse(JSON.stringify(geometry)), {
     type: 'graph',
+    tags: [],
     graph: {
       isClosed: true,
       isLazy: true,
@@ -17,6 +18,7 @@ test('Read example', async (t) => {
   });
   t.deepEqual(JSON.parse(JSON.stringify(realize(geometry))), {
     type: 'graph',
+    tags: [],
     graph: {
       isClosed: true,
       isLazy: false,

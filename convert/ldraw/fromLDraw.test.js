@@ -43,6 +43,7 @@ test('Load a file', async (t) => {
   const graph = await fromLDrawPart('3024', { allowFetch: false });
   t.deepEqual(JSON.parse(JSON.stringify(realize(graph))), {
     type: 'graph',
+    tags: [],
     graph: {
       isClosed: false,
       isLazy: false,
