@@ -1,7 +1,7 @@
 import { reallyQuantizeForSpace } from './jsxcad-math-utils.js';
-import { isCounterClockwisePath, flipPath, transformPaths, isClosedPath, canonicalizePath, taggedGroup, fill, transform, taggedPaths, scale, measureBoundingBox, toPolygonsWithHoles, getNonVoidPaths } from './jsxcad-geometry.js';
+import { isCounterClockwisePath, flipPath, transformPaths, isClosedPath, canonicalizePath, taggedGroup, fill, transform, taggedPaths, toTransformedGeometry, scale, measureBoundingBox, toPolygonsWithHoles, isTypeWire, getNonVoidPaths, getNonVoidSegments, isNotTypeWire } from './jsxcad-geometry.js';
 import { fromScaling, identity, multiply, fromTranslation, fromZRotation } from './jsxcad-math-mat4.js';
-import { equals } from './jsxcad-math-vec2.js';
+import { equals as equals$1 } from './jsxcad-math-vec2.js';
 import { toTagsFromName, toRgbColorFromTags } from './jsxcad-algorithm-color.js';
 
 const canonicalizeSegment = ([directive, ...args]) => [
@@ -3823,7 +3823,7 @@ const removeRepeatedPoints = (path) => {
   for (let nth = 1; nth < path.length; nth++) {
     const last = path[nth - 1];
     const current = path[nth];
-    if (last === null || !equals(last, current)) {
+    if (last === null || !equals$1(last, current)) {
       unrepeated.push(current);
     }
   }
@@ -3852,7 +3852,7 @@ const toPaths = (
   const maybeClosePath = () => {
     path = removeRepeatedPoints(canonicalizePath(path));
     if (path.length > 3) {
-      if (path[0] === null && equals(path[1], path[path.length - 1])) {
+      if (path[0] === null && equals$1(path[1], path[path.length - 1])) {
         // The path is closed, remove the leading null, and the duplicate point at the end.
         path = path.slice(1, path.length - 1);
         newPath();
@@ -4243,6 +4243,8 @@ const fromSvg = async (
   return geometry;
 };
 
+const equals = (a, b) => a && b && a[0] === b[0] && a[1] === b[1];
+
 const X = 0;
 const Y = 1;
 
@@ -4250,7 +4252,7 @@ const toSvg = async (
   baseGeometry,
   { padding = 0, definitions } = {}
 ) => {
-  const geometry = scale([1, -1, 1], await baseGeometry);
+  const geometry = toTransformedGeometry(scale([1, -1, 1], await baseGeometry));
   const [min, max] = measureBoundingBox(geometry);
   const width = max[X] - min[X];
   const height = max[Y] - min[Y];
@@ -4286,7 +4288,7 @@ const toSvg = async (
             .join(' ')
         );
       }
-      if (tags && tags.includes('path/Wire')) {
+      if (isTypeWire({ tags })) {
         svg.push(`<path fill="none" stroke="${color}" d="${d.join(' ')} z"/>`);
       } else {
         svg.push(
@@ -4303,7 +4305,7 @@ const toSvg = async (
         const d = path.map(
           (point, index) => `${index === 0 ? 'M' : 'L'}${point[0]} ${point[1]}`
         );
-        if (tags && tags.includes('path/Wire')) {
+        if (isTypeWire({ tags })) {
           svg.push(
             `<path fill="none" stroke="${color}" d="${d.join(' ')} z"/>`
           );
@@ -4322,6 +4324,30 @@ const toSvg = async (
         svg.push(`<path fill="none" stroke="${color}" d="${d.join(' ')}"/>`);
       }
     }
+  }
+
+  for (const { tags, segments } of getNonVoidSegments(geometry)) {
+    const color = toRgbColorFromTags(tags, definitions);
+    let d = [];
+    let first;
+    let last;
+    for (const [start, end] of segments) {
+      if (!equals(start, last)) {
+        d.push(`M ${start[0]} ${start[1]}`);
+      }
+      d.push(`L ${end[0]} ${end[1]}`);
+      if (!first) {
+        first = start;
+      }
+      last = end;
+    }
+    if (equals(first, last)) {
+      d.pop();
+      d.push('z');
+    }
+    const fill = isNotTypeWire({ tags }) ? color : 'none';
+    const stroke = isTypeWire({ tags }) ? color : 'none';
+    svg.push(`<path fill="${fill}" stroke="${stroke}" d="${d.join(' ')}"/>`);
   }
 
   svg.push('</svg>');

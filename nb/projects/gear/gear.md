@@ -49,3 +49,5 @@ const example = Gear()
 ```
 
 ![Image](gear.md.0.png)
+
+[gear_16_0.stl](gear.gear_16_0.stl)

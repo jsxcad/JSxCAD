@@ -1,4 +1,4 @@
-export const taggedGroup = ({ tags }, ...content) => {
+export const taggedGroup = ({ tags = [] }, ...content) => {
   if (content.some((value) => !value)) {
     throw Error(`Undefined Group content`);
   }

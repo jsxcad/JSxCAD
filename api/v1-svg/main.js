@@ -1,9 +1,9 @@
 import SvgPath from './SvgPath.js';
 import readSvg from './readSvg.js';
 import readSvgPath from './readSvgPath.js';
-import writeSvg from './writeSvg.js';
+import svg from './svg.js';
 
-const api = { SvgPath, readSvg, readSvgPath, writeSvg };
-export { SvgPath, readSvg, readSvgPath, writeSvg };
+const api = { SvgPath, readSvg, readSvgPath, svg };
+export { SvgPath, readSvg, readSvgPath, svg };
 
 export default api;

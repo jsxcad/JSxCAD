@@ -1,6 +1,7 @@
 import { getEdges } from '../path/getEdges.js';
 import { getNonVoidGraphs } from './getNonVoidGraphs.js';
 import { getNonVoidPaths } from './getNonVoidPaths.js';
+import { hasTypeWire } from './type.js';
 import { outline as outlineGraph } from '../graph/outline.js';
 import { taggedSegments } from './taggedSegments.js';
 import { toConcreteGeometry } from './toConcreteGeometry.js';
@@ -19,7 +20,7 @@ export const outline = (geometry, tagsOverride) => {
     if (tagsOverride) {
       tags = tagsOverride;
     }
-    outlines.push(outlineGraph({ tags }, graphGeometry));
+    outlines.push(hasTypeWire(outlineGraph({ tags }, graphGeometry)));
   }
   // Turn paths into wires.
   for (let { tags = [], paths } of getNonVoidPaths(concreteGeometry)) {
@@ -32,7 +33,7 @@ export const outline = (geometry, tagsOverride) => {
         segments.push(edge);
       }
     }
-    outlines.push(taggedSegments({ tags }, segments));
+    outlines.push(hasTypeWire(taggedSegments({ tags }, segments)));
   }
   return outlines;
 };

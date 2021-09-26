@@ -1,4 +1,4 @@
-import { taggedPaths, translatePaths } from '@jsxcad/geometry';
+import { hasTypeWire, taggedPaths, translatePaths } from '@jsxcad/geometry';
 
 import Shape from './Shape.js';
 
@@ -1426,7 +1426,7 @@ export const toPaths = (letters) => {
     mergedPaths.push(...translatePaths([xOffset, 0, 0], paths));
     xOffset += hersheyWidth[code] || 0;
   }
-  return Shape.fromGeometry(taggedPaths({}, mergedPaths))
+  return Shape.fromGeometry(hasTypeWire(taggedPaths({}, mergedPaths)))
     .scale(1 / 28)
     .outline();
 };

@@ -1,3 +1,3 @@
-export const taggedSurface = ({ tags }, surface) => {
+export const taggedSurface = ({ tags = [] }, surface) => {
   return { type: 'surface', tags, surface };
 };

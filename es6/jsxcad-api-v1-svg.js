@@ -1,6 +1,6 @@
 import { Shape, ensurePages } from './jsxcad-api-shape.js';
 import { fromSvgPath, fromSvg, toSvg } from './jsxcad-convert-svg.js';
-import { read, emit, addPending, writeFile, getPendingErrorHandler } from './jsxcad-sys.js';
+import { read, emit, getSourceLocation, generateUniqueId, addPending, write, getPendingErrorHandler } from './jsxcad-sys.js';
 import { hash } from './jsxcad-geometry.js';
 
 /**
@@ -121,13 +121,21 @@ function sum (o) {
 var hashSum = sum;
 
 const prepareSvg = (shape, name, options = {}) => {
+  const { path } = getSourceLocation();
   let index = 0;
   const entries = [];
   for (const entry of ensurePages(shape.toDisjointGeometry())) {
-    const op = toSvg(entry, options).catch(getPendingErrorHandler());
-    addPending(op);
+    const svgPath = `svg/${path}/${generateUniqueId()}`;
+    const op = async () => {
+      try {
+        await write(svgPath, await toSvg(entry, options));
+      } catch (error) {
+        getPendingErrorHandler()(error);
+      }
+    };
+    addPending(op());
     entries.push({
-      data: op,
+      path: svgPath,
       filename: `${name}_${index++}.svg`,
       type: 'image/svg+xml',
     });
@@ -136,28 +144,16 @@ const prepareSvg = (shape, name, options = {}) => {
   return entries;
 };
 
-const downloadSvgMethod = function (name, options = {}) {
-  const entries = prepareSvg(this, name, options);
+const svg = (name, options = {}) => (shape) => {
+  const entries = prepareSvg(shape, name, options);
   const download = { entries };
-  const hash$1 = hashSum({ name, options }) + hash(this.toGeometry());
+  const hash$1 = hashSum({ name, options }) + hash(shape.toGeometry());
   emit({ download, hash: hash$1 });
-  return this;
-};
-Shape.prototype.downloadSvg = downloadSvgMethod;
-Shape.prototype.svg = downloadSvgMethod;
-
-const writeSvg = (shape, name, options = {}) => {
-  for (const { data, filename } of prepareSvg(shape, name, {})) {
-    addPending(writeFile({ doSerialize: false }, `output/${filename}`, data));
-  }
   return shape;
 };
 
-const writeSvgMethod = function (...args) {
-  return writeSvg(this, ...args);
-};
-Shape.prototype.writeSvg = writeSvgMethod;
+Shape.registerMethod('svg', svg);
 
-const api = { SvgPath, readSvg, readSvgPath, writeSvg };
+const api = { SvgPath, readSvg, readSvgPath, svg };
 
-export { SvgPath, api as default, readSvg, readSvgPath, writeSvg };
+export { SvgPath, api as default, readSvg, readSvgPath, svg };
