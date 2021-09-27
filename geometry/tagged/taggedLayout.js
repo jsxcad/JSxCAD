@@ -1,5 +1,5 @@
 export const taggedLayout = (
-  { tags, size, margin, title, marks = [] },
+  { tags = [], size, margin, title, marks = [] },
   ...content
 ) => {
   if (content.some((value) => value === undefined)) {

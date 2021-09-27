@@ -24,7 +24,10 @@ const encodeNotebook = async (notebook, { workspace, module } = {}) => {
     if (note.download) {
       const encodedEntries = [];
       for (const entry of note.download.entries) {
-        const data = await entry.data;
+        let data = await entry.data;
+        if (entry.path && !data) {
+          data = await read(entry.path, { workspace });
+        }
         if (data) {
           const encodedEntry = {
             ...entry,

@@ -34,6 +34,7 @@ test('offset', (t) => {
     [
       {
         type: 'graph',
+        tags: [],
         graph: {
           isClosed: false,
           isLazy: false,

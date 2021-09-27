@@ -1,3 +1,3 @@
-export const taggedPolygons = ({ tags }, polygons) => {
+export const taggedPolygons = ({ tags = [] }, polygons) => {
   return { type: 'polygons', tags, polygons };
 };

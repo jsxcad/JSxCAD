@@ -1,4 +1,4 @@
-export const taggedItem = ({ tags }, ...content) => {
+export const taggedItem = ({ tags = [] }, ...content) => {
   if (tags !== undefined && tags.length === undefined) {
     throw Error(`Bad tags: ${tags}`);
   }

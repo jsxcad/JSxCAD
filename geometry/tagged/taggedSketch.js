@@ -1,4 +1,4 @@
-export const taggedSketch = ({ tags }, ...content) => {
+export const taggedSketch = ({ tags = [] }, ...content) => {
   if (content.some((value) => value === undefined)) {
     throw Error(`Undefined Sketch content`);
   }

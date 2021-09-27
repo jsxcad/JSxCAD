@@ -15,6 +15,8 @@ Arc(10, 10, 10).stl('fileName');
 
 ![Image](file_import_and_export.md.0.png)
 
+[fileName_0.stl](file_import_and_export.fileName_0.stl)
+
 ---
 ### Exporting .svg
 Creates an option to download the shape as a svg file. A view is created to show what will be downloaded.
@@ -24,6 +26,8 @@ Arc(10).svg('fileName');
 ```
 
 ![Image](file_import_and_export.md.1.png)
+
+[fileName_0.svg](file_import_and_export.fileName_0.svg)
 
 ---
 ### Importing .stl

@@ -1,12 +1,18 @@
 import {
   getNonVoidPaths,
+  getNonVoidSegments,
   isClosedPath,
+  isNotTypeWire,
+  isTypeWire,
   measureBoundingBox,
   scale,
   toPolygonsWithHoles,
+  toTransformedGeometry,
 } from '@jsxcad/geometry';
 
 import { toRgbColorFromTags } from '@jsxcad/algorithm-color';
+
+const equals = (a, b) => a && b && a[0] === b[0] && a[1] === b[1];
 
 const X = 0;
 const Y = 1;
@@ -15,7 +21,7 @@ export const toSvg = async (
   baseGeometry,
   { padding = 0, definitions } = {}
 ) => {
-  const geometry = scale([1, -1, 1], await baseGeometry);
+  const geometry = toTransformedGeometry(scale([1, -1, 1], await baseGeometry));
   const [min, max] = measureBoundingBox(geometry);
   const width = max[X] - min[X];
   const height = max[Y] - min[Y];
@@ -51,7 +57,7 @@ export const toSvg = async (
             .join(' ')
         );
       }
-      if (tags && tags.includes('path/Wire')) {
+      if (isTypeWire({ tags })) {
         svg.push(`<path fill="none" stroke="${color}" d="${d.join(' ')} z"/>`);
       } else {
         svg.push(
@@ -68,7 +74,7 @@ export const toSvg = async (
         const d = path.map(
           (point, index) => `${index === 0 ? 'M' : 'L'}${point[0]} ${point[1]}`
         );
-        if (tags && tags.includes('path/Wire')) {
+        if (isTypeWire({ tags })) {
           svg.push(
             `<path fill="none" stroke="${color}" d="${d.join(' ')} z"/>`
           );
@@ -87,6 +93,30 @@ export const toSvg = async (
         svg.push(`<path fill="none" stroke="${color}" d="${d.join(' ')}"/>`);
       }
     }
+  }
+
+  for (const { tags, segments } of getNonVoidSegments(geometry)) {
+    const color = toRgbColorFromTags(tags, definitions);
+    let d = [];
+    let first;
+    let last;
+    for (const [start, end] of segments) {
+      if (!equals(start, last)) {
+        d.push(`M ${start[0]} ${start[1]}`);
+      }
+      d.push(`L ${end[0]} ${end[1]}`);
+      if (!first) {
+        first = start;
+      }
+      last = end;
+    }
+    if (equals(first, last)) {
+      d.pop();
+      d.push('z');
+    }
+    const fill = isNotTypeWire({ tags }) ? color : 'none';
+    const stroke = isTypeWire({ tags }) ? color : 'none';
+    svg.push(`<path fill="${fill}" stroke="${stroke}" d="${d.join(' ')}"/>`);
   }
 
   svg.push('</svg>');

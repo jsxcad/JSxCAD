@@ -65,6 +65,7 @@ export { getNonVoidPaths } from './tagged/getNonVoidPaths.js';
 export { getNonVoidFaceablePaths } from './tagged/getNonVoidFaceablePaths.js';
 export { getNonVoidPlans } from './tagged/getNonVoidPlans.js';
 export { getNonVoidPoints } from './tagged/getNonVoidPoints.js';
+export { getNonVoidSegments } from './tagged/getNonVoidSegments.js';
 export { getFaceablePaths } from './tagged/getFaceablePaths.js';
 export { getGraphs } from './tagged/getGraphs.js';
 export { getPaths } from './tagged/getPaths.js';
@@ -81,6 +82,17 @@ export { inset } from './tagged/inset.js';
 export { isClockwise as isClockwisePath } from './path/isClockwise.js';
 export { isCounterClockwise as isCounterClockwisePath } from './path/isCounterClockwise.js';
 export { isClosed as isClosedPath } from './path/isClosed.js';
+export {
+  isNotType,
+  isType,
+  hasNotType,
+  hasType,
+  isNotTypeWire,
+  isTypeWire,
+  hasNotTypeWire,
+  hasTypeWire,
+  typeWire,
+} from './tagged/type.js';
 export { keep } from './tagged/keep.js';
 export { loft } from './tagged/loft.js';
 export { measureBoundingBox } from './tagged/measureBoundingBox.js';

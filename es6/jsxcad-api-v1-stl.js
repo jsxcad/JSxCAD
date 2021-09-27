@@ -95,7 +95,6 @@ const prepareStl = (shape, name, options = {}) => {
     };
     addPending(op());
     entries.push({
-      // data: op,
       path: stlPath,
       filename: `${name}_${index++}.stl`,
       type: 'application/sla',
@@ -109,7 +108,6 @@ const prepareStl = (shape, name, options = {}) => {
 const stl = (name, options) => (shape) => {
   const entries = prepareStl(shape, name, options);
   const download = { entries };
-  // We should be saving the stl data in the filesystem.
   const hash$1 = hashSum({ name }) + hash(shape.toGeometry());
   emit({ download, hash: hash$1 });
   return shape;

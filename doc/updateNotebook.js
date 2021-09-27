@@ -7,6 +7,7 @@ import {
 } from '@jsxcad/sys';
 import { readFileSync, writeFileSync } from 'fs';
 
+import Base64ArrayBuffer from 'base64-arraybuffer';
 import api from '@jsxcad/api';
 import imageDataUri from 'image-data-uri';
 import pathModule from 'path';
@@ -17,13 +18,18 @@ import { toHtml } from '@jsxcad/convert-notebook';
 
 const ensureNewline = (line) => (line.endsWith('\n') ? line : `${line}\n`);
 
-const writeMarkdown = (path, notebook, imageUrlList, failedExpectations) => {
+const writeMarkdown = async (
+  modulePath,
+  notebook,
+  imageUrlList,
+  failedExpectations
+) => {
   const output = [];
   let imageCount = 0;
   let viewCount = 0;
   for (let nth = 0; nth < notebook.length; nth++) {
     const note = notebook[nth];
-    const { md, sourceText, view } = note;
+    const { download, md, sourceText, view } = note;
     if (md) {
       output.push(ensureNewline(notebook[nth].md.trim()));
     }
@@ -38,15 +44,27 @@ const writeMarkdown = (path, notebook, imageUrlList, failedExpectations) => {
     if (view) {
       const imageUrl = imageUrlList[viewCount++];
       if (typeof imageUrl === 'string' && imageUrl.startsWith('data:image/')) {
-        const imagePath = `${path}.md.${imageCount++}.png`;
+        const imagePath = `${modulePath}.md.${imageCount++}.png`;
         output.push(`![Image](${pathModule.basename(imagePath)})`);
         output.push('');
+      }
+    }
+    if (download) {
+      const { entries } = download;
+      for (let { base64Data, filename, data } of entries) {
+        if (!data && base64Data) {
+          data = new Uint8Array(Base64ArrayBuffer.decode(base64Data));
+        }
+        const downloadPath = `${modulePath}.${filename}`;
+        output.push(`[${filename}](${pathModule.basename(downloadPath)})`);
+        output.push('');
+        writeFileSync(downloadPath, data);
       }
     }
   }
 
   // Produce a path back to the root.
-  const roots = path.split('/');
+  const roots = modulePath.split('/');
   roots.pop();
   const root = roots.map((_) => '..').join('/');
 
@@ -54,11 +72,11 @@ const writeMarkdown = (path, notebook, imageUrlList, failedExpectations) => {
     .join('\n')
     .replace(
       /#JSxCAD@https:\/\/gitcdn.link\/cdn\/jsxcad\/JSxCAD\/master\/(.*).nb/g,
-      (_, path) => `${root}/${path}.md`
+      (_, modulePath) => `${root}/${modulePath}.md`
     );
 
-  const observedPath = `${path}.observed.md`;
-  const expectedPath = `${path}.md`;
+  const observedPath = `${modulePath}.observed.md`;
+  const expectedPath = `${modulePath}.md`;
   writeFileSync(observedPath, markdown);
   try {
     if (markdown !== readFileSync(expectedPath, 'utf8')) {

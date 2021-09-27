@@ -157,7 +157,7 @@ const fromSurfaceMeshLazy = (surfaceMesh, forceNewGraph = false) => {
   return graph;
 };
 
-const taggedGraph = ({ tags, matrix }, graph) => {
+const taggedGraph = ({ tags = [], matrix }, graph) => {
   if (graph.length > 0) {
     throw Error('Graph should not be an array');
   }
@@ -452,7 +452,7 @@ const reify = (geometry) => {
 // We expect the type to be uniquely qualified.
 const registerReifier = (type, reifier) => registry.set(type, reifier);
 
-const taggedSegments = ({ tags }, segments) => {
+const taggedSegments = ({ tags = [] }, segments) => {
   return { type: 'segments', tags, segments };
 };
 
@@ -643,7 +643,7 @@ const differenceImpl = (geometry, ...geometries) => {
 
 const difference = cache(differenceImpl);
 
-const taggedGroup = ({ tags }, ...content) => {
+const taggedGroup = ({ tags = [] }, ...content) => {
   if (content.some((value) => !value)) {
     throw Error(`Undefined Group content`);
   }
@@ -1548,6 +1548,16 @@ const getNonVoidPoints = (geometry) => {
   return pointsets;
 };
 
+const getNonVoidSegments = (geometry) => {
+  const segmentsets = [];
+  eachNonVoidItem(geometry, (item) => {
+    if (item.type === 'segments') {
+      segmentsets.push(item);
+    }
+  });
+  return segmentsets;
+};
+
 const getPaths = (geometry) => {
   const pathsets = [];
   eachItem(geometry, (item) => {
@@ -1718,9 +1728,11 @@ const intersection$1 = (a, b) => {
   return taggedGraph({ tags: a.tags }, result);
 };
 
-const taggedPaths = ({ tags }, paths) => {
-  return { type: 'paths', tags, paths };
-};
+const taggedPaths = ({ tags = [] }, paths) => ({
+  type: 'paths',
+  tags,
+  paths,
+});
 
 const toPolygonsWithHoles$1 = (geometry) => {
   if (geometry.graph === undefined) {
@@ -1873,6 +1885,23 @@ const inset = (geometry, initial = 1, step, limit) => {
 };
 
 const isCounterClockwise = (path) => measureArea(path) > 0;
+
+const hasNotType = (geometry, type) =>
+  isNotType(geometry, type)
+    ? geometry
+    : { ...geometry, tags: geometry.tags.filter((tag) => tag !== type) };
+const hasType = (geometry, type) =>
+  isType(geometry, type)
+    ? geometry
+    : { ...geometry, tags: [...geometry.tags, type] };
+const isNotType = ({ tags }, type) => !tags.includes(type);
+const isType = ({ tags }, type) => tags.includes(type);
+
+const typeWire = 'type:wire';
+const hasNotTypeWire = (geometry) => hasNotType(geometry, typeWire);
+const hasTypeWire = (geometry) => hasType(geometry, typeWire);
+const isNotTypeWire = (geometry) => isNotType(geometry, typeWire);
+const isTypeWire = (geometry) => isType(geometry, typeWire);
 
 const keep = (tags, geometry) =>
   rewriteTags(['compose/non-positive'], [], geometry, tags, 'has not');
@@ -2172,7 +2201,7 @@ const outline = (geometry, tagsOverride) => {
     if (tagsOverride) {
       tags = tagsOverride;
     }
-    outlines.push(outline$1({ tags }, graphGeometry));
+    outlines.push(hasTypeWire(outline$1({ tags }, graphGeometry)));
   }
   // Turn paths into wires.
   for (let { tags = [], paths } of getNonVoidPaths(concreteGeometry)) {
@@ -2185,7 +2214,7 @@ const outline = (geometry, tagsOverride) => {
         segments.push(edge);
       }
     }
-    outlines.push(taggedSegments({ tags }, segments));
+    outlines.push(hasTypeWire(taggedSegments({ tags }, segments)));
   }
   return outlines;
 };
@@ -2552,7 +2581,7 @@ const separate = (
   return rewrite(geometry, op);
 };
 
-const taggedTriangles = ({ tags }, triangles) => {
+const taggedTriangles = ({ tags = [] }, triangles) => {
   return { type: 'triangles', tags, triangles };
 };
 
@@ -2668,7 +2697,7 @@ const soup = (
   return rewrite(toTransformedGeometry(geometry), op);
 };
 
-const taggedItem = ({ tags }, ...content) => {
+const taggedItem = ({ tags = [] }, ...content) => {
   if (tags !== undefined && tags.length === undefined) {
     throw Error(`Bad tags: ${tags}`);
   }
@@ -2681,7 +2710,7 @@ const taggedItem = ({ tags }, ...content) => {
   return { type: 'item', tags, content };
 };
 
-const taggedDisplayGeometry = ({ tags }, ...content) => {
+const taggedDisplayGeometry = ({ tags = [] }, ...content) => {
   if (content.some((value) => value === undefined)) {
     throw Error(`Undefined DisplayGeometry content`);
   }
@@ -2692,7 +2721,7 @@ const taggedDisplayGeometry = ({ tags }, ...content) => {
 };
 
 const taggedLayout = (
-  { tags, size, margin, title, marks = [] },
+  { tags = [], size, margin, title, marks = [] },
   ...content
 ) => {
   if (content.some((value) => value === undefined)) {
@@ -2713,22 +2742,22 @@ const taggedLayout = (
   };
 };
 
-const taggedPlan = ({ tags }, plan) => ({
+const taggedPlan = ({ tags = [] }, plan) => ({
   type: 'plan',
   tags,
   plan,
   content: [],
 });
 
-const taggedPoints = ({ tags }, points) => {
+const taggedPoints = ({ tags = [] }, points) => {
   return { type: 'points', tags, points };
 };
 
-const taggedPolygons = ({ tags }, polygons) => {
+const taggedPolygons = ({ tags = [] }, polygons) => {
   return { type: 'polygons', tags, polygons };
 };
 
-const taggedSketch = ({ tags }, ...content) => {
+const taggedSketch = ({ tags = [] }, ...content) => {
   if (content.some((value) => value === undefined)) {
     throw Error(`Undefined Sketch content`);
   }
@@ -2845,6 +2874,19 @@ const toPoints = (geometry) => {
   return { type: 'points', points: [...points] };
 };
 
+const taggedPolygonsWithHoles = (
+  { tags = [], plane, exactPlane },
+  polygonsWithHoles
+) => {
+  return {
+    type: 'polygonsWithHoles',
+    tags,
+    plane,
+    exactPlane,
+    polygonsWithHoles,
+  };
+};
+
 const toPolygonsWithHoles = (geometry) => {
   const output = [];
 
@@ -2852,6 +2894,7 @@ const toPolygonsWithHoles = (geometry) => {
     if (isVoid(geometry)) {
       return;
     }
+    const { tags } = geometry;
     switch (geometry.type) {
       case 'graph': {
         for (const {
@@ -2859,18 +2902,17 @@ const toPolygonsWithHoles = (geometry) => {
           exactPlane,
           polygonsWithHoles,
         } of toPolygonsWithHoles$1(geometry)) {
-          // FIX: Are we going to make polygonsWithHoles proper geometry?
-          output.push({
-            tags: geometry.tags,
-            type: 'polygonsWithHoles',
-            plane,
-            exactPlane,
-            polygonsWithHoles,
-          });
+          output.push(
+            taggedPolygonsWithHoles(
+              { tags, plane, exactPlane },
+              polygonsWithHoles
+            )
+          );
         }
         break;
       }
       // FIX: Support 'triangles'?
+      case 'segments':
       case 'points':
       case 'paths':
       case 'sketch':
@@ -3040,4 +3082,4 @@ const translate = (vector, geometry) =>
 const scale = (vector, geometry) =>
   transform$4(fromScaling(vector), geometry);
 
-export { allTags, alphaShape, assemble, bend, canonicalize, canonicalize$4 as canonicalizePath, canonicalize$3 as canonicalizePaths, close as closePath, concatenate as concatenatePath, convexHull as convexHullToGraph, deduplicate as deduplicatePath, difference, disjoint, doesNotOverlap, drop, eachItem, eachPoint, empty, extrude, extrudeToPlane, fill, flip, flip$3 as flipPath, fresh, fromFunction as fromFunctionToGraph, fromPaths as fromPathsToGraph, fromPoints as fromPointsToGraph, fromPolygons as fromPolygonsToGraph, fromPolygonsWithHolesToTriangles, fromSurfaceToPaths, fromTriangles as fromTrianglesToGraph, getAnyNonVoidSurfaces, getAnySurfaces, getFaceablePaths, getGraphs, getItems, getLayouts, getLeafs, getNonVoidFaceablePaths, getNonVoidGraphs, getNonVoidItems, getNonVoidPaths, getNonVoidPlans, getNonVoidPoints, getEdges as getPathEdges, getPaths, getPeg, getPlans, getPoints, getTags, grow, hash, inset, intersection, isClockwise as isClockwisePath, isClosed as isClosedPath, isCounterClockwise as isCounterClockwisePath, isNotVoid, isVoid, keep, loft, measureBoundingBox, minkowskiDifference, minkowskiShell, minkowskiSum, offset, open as openPath, outline, prepareForSerialization, projectToPlane, push, read, realize, realizeGraph, registerReifier, reify, remesh, rerealizeGraph, reverseFaceOrientations as reverseFaceOrientationsOfGraph, rewrite, rewriteTags, rotateX, rotateY, rotateZ, rotateZ$1 as rotateZPath, scale, scale$2 as scalePath, scale$1 as scalePaths, section, separate, smooth, soup, taggedDisplayGeometry, taggedGraph, taggedGroup, taggedItem, taggedLayout, taggedPaths, taggedPlan, taggedPoints, taggedPolygons, taggedSegments, taggedSketch, taggedTriangles, test, toConcreteGeometry, toDisjointGeometry, toDisplayGeometry, toKeptGeometry, toPoints, toPolygonsWithHoles, toTransformedGeometry, toTriangles as toTrianglesFromGraph, toVisiblyDisjointGeometry, transform$4 as transform, transform$2 as transformPaths, translate, translate$2 as translatePath, translate$1 as translatePaths, twist, union, update, visit, write };
+export { allTags, alphaShape, assemble, bend, canonicalize, canonicalize$4 as canonicalizePath, canonicalize$3 as canonicalizePaths, close as closePath, concatenate as concatenatePath, convexHull as convexHullToGraph, deduplicate as deduplicatePath, difference, disjoint, doesNotOverlap, drop, eachItem, eachPoint, empty, extrude, extrudeToPlane, fill, flip, flip$3 as flipPath, fresh, fromFunction as fromFunctionToGraph, fromPaths as fromPathsToGraph, fromPoints as fromPointsToGraph, fromPolygons as fromPolygonsToGraph, fromPolygonsWithHolesToTriangles, fromSurfaceToPaths, fromTriangles as fromTrianglesToGraph, getAnyNonVoidSurfaces, getAnySurfaces, getFaceablePaths, getGraphs, getItems, getLayouts, getLeafs, getNonVoidFaceablePaths, getNonVoidGraphs, getNonVoidItems, getNonVoidPaths, getNonVoidPlans, getNonVoidPoints, getNonVoidSegments, getEdges as getPathEdges, getPaths, getPeg, getPlans, getPoints, getTags, grow, hasNotType, hasNotTypeWire, hasType, hasTypeWire, hash, inset, intersection, isClockwise as isClockwisePath, isClosed as isClosedPath, isCounterClockwise as isCounterClockwisePath, isNotType, isNotTypeWire, isNotVoid, isType, isTypeWire, isVoid, keep, loft, measureBoundingBox, minkowskiDifference, minkowskiShell, minkowskiSum, offset, open as openPath, outline, prepareForSerialization, projectToPlane, push, read, realize, realizeGraph, registerReifier, reify, remesh, rerealizeGraph, reverseFaceOrientations as reverseFaceOrientationsOfGraph, rewrite, rewriteTags, rotateX, rotateY, rotateZ, rotateZ$1 as rotateZPath, scale, scale$2 as scalePath, scale$1 as scalePaths, section, separate, smooth, soup, taggedDisplayGeometry, taggedGraph, taggedGroup, taggedItem, taggedLayout, taggedPaths, taggedPlan, taggedPoints, taggedPolygons, taggedSegments, taggedSketch, taggedTriangles, test, toConcreteGeometry, toDisjointGeometry, toDisplayGeometry, toKeptGeometry, toPoints, toPolygonsWithHoles, toTransformedGeometry, toTriangles as toTrianglesFromGraph, toVisiblyDisjointGeometry, transform$4 as transform, transform$2 as transformPaths, translate, translate$2 as translatePath, translate$1 as translatePaths, twist, typeWire, union, update, visit, write };

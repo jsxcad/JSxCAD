@@ -35,6 +35,7 @@ test('Exact', async (t) => {
   const geometry = await fromOff(new TextEncoder('utf8').encode(exact));
   t.deepEqual(JSON.parse(JSON.stringify(realize(geometry))), {
     type: 'graph',
+    tags: [],
     graph: {
       isClosed: true,
       isLazy: false,
@@ -155,6 +156,7 @@ test('Approximate', async (t) => {
   const geometry = await fromOff(new TextEncoder('utf8').encode(approximate));
   t.deepEqual(JSON.parse(JSON.stringify(realize(geometry))), {
     type: 'graph',
+    tags: [],
     graph: {
       isClosed: true,
       isLazy: false,

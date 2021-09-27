@@ -1,4 +1,4 @@
-export const taggedPlan = ({ tags }, plan) => ({
+export const taggedPlan = ({ tags = [] }, plan) => ({
   type: 'plan',
   tags,
   plan,

@@ -1,3 +1,3 @@
-export const taggedSegments = ({ tags }, segments) => {
+export const taggedSegments = ({ tags = [] }, segments) => {
   return { type: 'segments', tags, segments };
 };
