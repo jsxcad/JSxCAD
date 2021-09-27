@@ -18,6 +18,8 @@ import { toHtml } from '@jsxcad/convert-notebook';
 
 const ensureNewline = (line) => (line.endsWith('\n') ? line : `${line}\n`);
 
+const escapeMarkdownLink = (string) => string.replace(/ /g, '%20');
+
 const writeMarkdown = async (
   modulePath,
   notebook,
@@ -56,7 +58,7 @@ const writeMarkdown = async (
           data = new Uint8Array(Base64ArrayBuffer.decode(base64Data));
         }
         const downloadPath = `${modulePath}.${filename}`;
-        output.push(`[${filename}](${pathModule.basename(downloadPath)})`);
+        output.push(`[${filename}](${escapeMarkdownLink(pathModule.basename(downloadPath))})`);
         output.push('');
         writeFileSync(downloadPath, data);
       }
