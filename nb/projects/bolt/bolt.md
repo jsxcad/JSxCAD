@@ -73,7 +73,7 @@ const nutThread = NutThread(20, 10)
 
 ![Image](bolt.md.1.png)
 
-[nut 20x10_0.stl](bolt.nut 20x10_0.stl)
+[nut 20x10_0.stl](bolt.nut%2020x10_0.stl)
 
 ```JavaScript
 const screwThread = ScrewThread(20, 10)
@@ -88,7 +88,7 @@ const screwThread = ScrewThread(20, 10)
 
 ![Image](bolt.md.2.png)
 
-[thread 20x10_0.stl](bolt.thread 20x10_0.stl)
+[thread 20x10_0.stl](bolt.thread%2020x10_0.stl)
 
 ```JavaScript
 ScrewThread(10, 5)
