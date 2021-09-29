@@ -3,7 +3,7 @@ import Shape from './Shape.js';
 import { oneOfTagMatcher } from './tag.js';
 import { visit } from '@jsxcad/geometry';
 
-export const get =
+export const getNot =
   (...tags) =>
   (shape) => {
     const isMatch = oneOfTagMatcher(tags, 'item');
@@ -13,11 +13,15 @@ export const get =
       if (type === 'group') {
         return descend();
       }
+      let discard = false;
       for (const tag of tags) {
         if (isMatch(tag)) {
-          picks.push(Shape.fromGeometry(geometry));
+          discard = true;
           break;
         }
+      }
+      if (!discard) {
+        picks.push(Shape.fromGeometry(geometry));
       }
       if (type !== 'item') {
         return descend();
@@ -34,7 +38,7 @@ export const get =
     return Group(...picks);
   };
 
-export const g = get;
+export const gn = getNot;
 
-Shape.registerMethod('get', get);
-Shape.registerMethod('g', get);
+Shape.registerMethod('getNot', getNot);
+Shape.registerMethod('gn', gn);

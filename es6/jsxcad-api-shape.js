@@ -360,6 +360,25 @@ const mdMethod = function (string, ...placeholders) {
 
 Shape.prototype.md = mdMethod;
 
+const abstract =
+  (op = abstract => abstract) =>
+  (shape) => {
+    const walk = ({ type, tags, plan, content }) => {
+      if (type === 'group') {
+        return content.flatMap(walk);
+      } else if (type === 'plan') {
+        return { type, plan };
+      } else if (content) {
+        return { type, tags, content: content.flatMap(walk) };
+      } else {
+        return { type, tags };
+      }
+    };
+    return op(walk(shape.toGeometry()), shape);
+  };
+
+Shape.registerMethod('abstract', abstract);
+
 const add =
   (...shapes) =>
   (shape) =>
@@ -2699,14 +2718,17 @@ const get =
     const isMatch = oneOfTagMatcher(tags, 'item');
     const picks = [];
     const walk = (geometry, descend) => {
-      const { tags = [] } = geometry;
+      const { tags, type } = geometry;
+      if (type === 'group') {
+        return descend();
+      }
       for (const tag of tags) {
         if (isMatch(tag)) {
           picks.push(Shape.fromGeometry(geometry));
           break;
         }
       }
-      if (geometry.type !== 'item') {
+      if (type !== 'item') {
         return descend();
       }
     };
@@ -2725,6 +2747,46 @@ const g = get;
 
 Shape.registerMethod('get', get);
 Shape.registerMethod('g', get);
+
+const getNot =
+  (...tags) =>
+  (shape) => {
+    const isMatch = oneOfTagMatcher(tags, 'item');
+    const picks = [];
+    const walk = (geometry, descend) => {
+      const { tags, type } = geometry;
+      if (type === 'group') {
+        return descend();
+      }
+      let discard = false;
+      for (const tag of tags) {
+        if (isMatch(tag)) {
+          discard = true;
+          break;
+        }
+      }
+      if (!discard) {
+        picks.push(Shape.fromGeometry(geometry));
+      }
+      if (type !== 'item') {
+        return descend();
+      }
+    };
+    const geometry = shape.toGeometry();
+    if (geometry.type === 'item') {
+      // FIX: Can we make this less magical?
+      // This allows constructions like s.get('a').get('b')
+      visit(geometry.content[0], walk);
+    } else {
+      visit(geometry, walk);
+    }
+    return Group(...picks);
+  };
+
+const gn = getNot;
+
+Shape.registerMethod('getNot', getNot);
+Shape.registerMethod('gn', gn);
 
 const grow = (amount) => (shape) =>
   Shape.fromGeometry(grow$1(shape.toGeometry(), amount));
@@ -3287,12 +3349,15 @@ const tags =
   (namespace = 'user', op = (tags, shape) => tags) =>
   (shape) => {
     const prefix = `${namespace}:`;
-    return op(
-      [...allTags(shape.toGeometry())]
-        .filter((tag) => tag.startsWith(prefix))
-        .map((tag) => tag.substring(prefix.length)),
-      shape
-    );
+    const collected = [];
+    for (const { tags } of getLeafs(shape.toGeometry())) {
+      for (const tag of tags) {
+        if (tag.startsWith(prefix)) {
+          collected.push(tag.substring(prefix.length));
+        }
+      }
+    }
+    return op(collected, shape);
   };
 
 Shape.registerMethod('tags', tags);
@@ -3515,7 +3580,7 @@ Shape.registerMethod('view', view);
 
 const voidFn = () => (shape) =>
   Shape.fromGeometry(
-    rewriteTags(['compose/non-positive'], [], shape.toGeometry())
+    rewriteTags(['type:void'], [], shape.toGeometry())
   );
 
 Shape.registerMethod('void', voidFn);
@@ -4214,4 +4279,4 @@ const yz = Shape.fromGeometry({
   ],
 });
 
-export { Alpha, Arc, Assembly, Box, ChainedHull, Cone, Empty, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Line, Octagon, Orb, Page, Path, Pentagon, Plan, Point, Points, Polygon, Polyhedron, Septagon, Shape, Spiral, Tetragon, Triangle, Wave, Weld, add, addTo, align, and, as, asPart, at, bend, billOfMaterials, cast, clip, clipFrom, cloudSolid, color, colors, cut, cutFrom, cutOut, defGrblConstantLaser, defGrblDynamicLaser, defGrblPlotter, defGrblSpindle, defRgbColor, defThreejsMaterial, defTool, define, drop, each, ensurePages, ex, extrude, extrudeToPlane, fill, fit, fitTo, fuse, g, get, grow, inline, inset, keep, loadGeometry, loft, log, loop, mask, material, md, minkowskiDifference, minkowskiShell, minkowskiSum, move, n, noVoid, notColor, nth, ofPlan, offset, on, op, orient, outline, pack, play, push, remesh, rotate, rotateX, rotateY, rotateZ, rx, ry, rz, saveGeometry, scale, scaleToFit, section, sectionProfile, separate, size, sketch, smooth, tag, tags, test, tint, tool, top, twist, untag, view, voidFn, weld, withFill, withFn, withInset, withOp, x, xy, xz, y, yz, z };
+export { Alpha, Arc, Assembly, Box, ChainedHull, Cone, Empty, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Line, Octagon, Orb, Page, Path, Pentagon, Plan, Point, Points, Polygon, Polyhedron, Septagon, Shape, Spiral, Tetragon, Triangle, Wave, Weld, abstract, add, addTo, align, and, as, asPart, at, bend, billOfMaterials, cast, clip, clipFrom, cloudSolid, color, colors, cut, cutFrom, cutOut, defGrblConstantLaser, defGrblDynamicLaser, defGrblPlotter, defGrblSpindle, defRgbColor, defThreejsMaterial, defTool, define, drop, each, ensurePages, ex, extrude, extrudeToPlane, fill, fit, fitTo, fuse, g, get, getNot, gn, grow, inline, inset, keep, loadGeometry, loft, log, loop, mask, material, md, minkowskiDifference, minkowskiShell, minkowskiSum, move, n, noVoid, notColor, nth, ofPlan, offset, on, op, orient, outline, pack, play, push, remesh, rotate, rotateX, rotateY, rotateZ, rx, ry, rz, saveGeometry, scale, scaleToFit, section, sectionProfile, separate, size, sketch, smooth, tag, tags, test, tint, tool, top, twist, untag, view, voidFn, weld, withFill, withFn, withInset, withOp, x, xy, xz, y, yz, z };

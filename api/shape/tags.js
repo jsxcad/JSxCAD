@@ -1,17 +1,19 @@
 import { Shape } from './Shape.js';
-
-import { allTags } from '@jsxcad/geometry';
+import { getLeafs } from '@jsxcad/geometry';
 
 export const tags =
   (namespace = 'user', op = (tags, shape) => tags) =>
   (shape) => {
     const prefix = `${namespace}:`;
-    return op(
-      [...allTags(shape.toGeometry())]
-        .filter((tag) => tag.startsWith(prefix))
-        .map((tag) => tag.substring(prefix.length)),
-      shape
-    );
+    const collected = [];
+    for (const { tags } of getLeafs(shape.toGeometry())) {
+      for (const tag of tags) {
+        if (tag.startsWith(prefix)) {
+          collected.push(tag.substring(prefix.length));
+        }
+      }
+    }
+    return op(collected, shape);
   };
 
 Shape.registerMethod('tags', tags);

@@ -3,7 +3,7 @@ import { rewriteTags } from '@jsxcad/geometry';
 
 export const voidFn = () => (shape) =>
   Shape.fromGeometry(
-    rewriteTags(['compose/non-positive'], [], shape.toGeometry())
+    rewriteTags(['type:void'], [], shape.toGeometry())
   );
 
 Shape.registerMethod('void', voidFn);

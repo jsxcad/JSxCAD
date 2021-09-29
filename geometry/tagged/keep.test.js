@@ -26,11 +26,11 @@ test('Deep keep', (t) => {
   t.deepEqual(kept, {
     type: 'group',
     content: [
-      { type: 'solid', solid: [], tags: ['compose/non-positive', 'plate'] },
+      { type: 'solid', solid: [], tags: ['type:void', 'plate'] },
       {
         type: 'group',
         content: [
-          { type: 'solid', solid: [], tags: ['compose/non-positive'] },
+          { type: 'solid', solid: [], tags: ['type:void'] },
           {
             type: 'group',
             content: [
