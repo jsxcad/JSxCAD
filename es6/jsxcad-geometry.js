@@ -2221,50 +2221,31 @@ const outline = (geometry, tagsOverride) => {
 
 const projectToPlane$1 = (geometry, plane, direction) => {
   let { graph } = geometry;
-  graph = realizeGraph(graph);
-  if (graph.faces.length > 0) {
-    // Arbitrarily pick the plane of the first graph to project along.
-    if (direction === undefined) {
-      for (const face of graph.faces) {
-        if (face && face.plane) {
-          direction = face.plane;
-          break;
-        }
-      }
-    }
-    return taggedGraph(
-      {},
-      fromSurfaceMeshLazy(
-        projectToPlaneOfSurfaceMesh(
-          toSurfaceMesh(graph),
-          geometry.matrix,
-          ...scale$3(1, direction),
-          ...plane
-        )
+  return taggedGraph(
+    {},
+    fromSurfaceMeshLazy(
+      projectToPlaneOfSurfaceMesh(
+        toSurfaceMesh(graph),
+        geometry.matrix,
+        ...scale$3(1, direction),
+        ...plane
       )
-    );
-  } else {
-    return geometry;
-  }
+    )
+  );
 };
 
 const projectToPlane = (geometry, plane, direction) => {
   const op = (geometry, descend) => {
-    const { tags } = geometry;
     switch (geometry.type) {
-      case 'graph': {
-        return taggedGraph(
-          { tags },
-          projectToPlane$1(geometry.graph, plane, direction)
-        );
-      }
+      case 'graph':
+        return projectToPlane$1(geometry, plane, direction);
       case 'triangles':
       case 'points':
         // Not implemented yet.
         return geometry;
       case 'paths':
         return projectToPlane(
-          taggedGraph({ tags }, fromPaths(geometry.paths)),
+          fromPaths(geometry.paths),
           plane,
           direction
         );

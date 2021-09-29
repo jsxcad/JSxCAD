@@ -38,6 +38,23 @@ Arc(10).ex(1, 2, -1, -2).view();
 ![Image](interactions_with_geometry.md.3.png)
 
 ---
+### Cast
+3D shapes can be 'cast' as shadows to create 2D shapes.
+
+A plane (default [0, 0, 1, 0]) to cast upon and a direction (default [0, 0, 1, 0]) can be provided.
+
+```JavaScript
+Arc(4)
+  .ex(10)
+  .rx(1 / 8)
+  .material('glass')
+  .and(cast())
+  .view();
+```
+
+![Image](interactions_with_geometry.md.4.png)
+
+---
 ### Item
 Geometry can be formed into an 'item'.
 
@@ -55,7 +72,7 @@ const aBolt = Arc(8, 8, 2)
   .view();
 ```
 
-![Image](interactions_with_geometry.md.4.png)
+![Image](interactions_with_geometry.md.5.png)
 
 ```JavaScript
 const aBox = Box(10, 10, 10).as('box');
@@ -65,7 +82,7 @@ const aBox = Box(10, 10, 10).as('box');
 const aDesign = aBox.fit(aBolt.z(10)).as('design').view();
 ```
 
-![Image](interactions_with_geometry.md.5.png)
+![Image](interactions_with_geometry.md.6.png)
 
 ---
 ### Grow
@@ -75,7 +92,7 @@ Expands the shape outwards by the input distance. May result in self intersectio
 aDesign.get('*').pack().view().md(`We need to get into the design in order to get at 'box' and 'bolt'`);
 ```
 
-![Image](interactions_with_geometry.md.6.png)
+![Image](interactions_with_geometry.md.7.png)
 
 We need to get into the design in order to get at 'box' and 'bolt'
 
@@ -83,7 +100,7 @@ We need to get into the design in order to get at 'box' and 'bolt'
 Arc(10, 10, 5).grow(1).view();
 ```
 
-![Image](interactions_with_geometry.md.7.png)
+![Image](interactions_with_geometry.md.8.png)
 
 ---
 ### Move
@@ -97,19 +114,19 @@ Multiple offsets can be provided, which will produce one result per offset.
 Box(5, 5, 5).move(10, 2, 12).view();
 ```
 
-![Image](interactions_with_geometry.md.8.png)
+![Image](interactions_with_geometry.md.9.png)
 
 ```JavaScript
 Box(5, 5, 5).x(10).y(2).z(12).view();
 ```
 
-![Image](interactions_with_geometry.md.9.png)
+![Image](interactions_with_geometry.md.10.png)
 
 ```JavaScript
 Box(5).x(0, 10, 20).view();
 ```
 
-![Image](interactions_with_geometry.md.10.png)
+![Image](interactions_with_geometry.md.11.png)
 
 ---
 ### Remesh
@@ -121,13 +138,13 @@ At each step the shape is retriangulated to preserve manifold structure.
 const aRectangle = Box(5, 5, 15).view();
 ```
 
-![Image](interactions_with_geometry.md.11.png)
+![Image](interactions_with_geometry.md.12.png)
 
 ```JavaScript
 aRectangle.remesh(4, 2).view({ wireframe: true });
 ```
 
-![Image](interactions_with_geometry.md.12.png)
+![Image](interactions_with_geometry.md.13.png)
 
 Once a shape is remeshed it can be twisted or bent about the origin.
 
@@ -135,7 +152,7 @@ Once a shape is remeshed it can be twisted or bent about the origin.
 aRectangle.remesh(4, 1).twist(10).view({ wireframe: true });
 ```
 
-![Image](interactions_with_geometry.md.13.png)
+![Image](interactions_with_geometry.md.14.png)
 
 ```JavaScript
 aRectangle
@@ -146,7 +163,7 @@ aRectangle
   .view({ wireframe: true });
 ```
 
-![Image](interactions_with_geometry.md.14.png)
+![Image](interactions_with_geometry.md.15.png)
 
 ---
 ### Rotate
@@ -158,7 +175,7 @@ Multiple turns can be provided, which will produce one result per turn.
 aRectangle.rz(1 / 8).view();
 ```
 
-![Image](interactions_with_geometry.md.15.png)
+![Image](interactions_with_geometry.md.16.png)
 
 ```JavaScript
 aRectangle
@@ -168,7 +185,7 @@ aRectangle
   .view();
 ```
 
-![Image](interactions_with_geometry.md.16.png)
+![Image](interactions_with_geometry.md.17.png)
 
 ```JavaScript
 Box(5)
@@ -177,7 +194,7 @@ Box(5)
   .view();
 ```
 
-![Image](interactions_with_geometry.md.17.png)
+![Image](interactions_with_geometry.md.18.png)
 
 ---
 ### Scale
@@ -187,7 +204,7 @@ Scale enlarges a shape by the entered multiple.
 aRectangle.scale(2).view();
 ```
 
-![Image](interactions_with_geometry.md.18.png)
+![Image](interactions_with_geometry.md.19.png)
 
 ---
 ### Section
@@ -201,13 +218,13 @@ Section takes shapes as arguments, and will use the plane of orientation of the 
 Orb(4).section().view();
 ```
 
-![Image](interactions_with_geometry.md.19.png)
+![Image](interactions_with_geometry.md.20.png)
 
 ```JavaScript
 Orb(4).section(xy, xy.z(1), xy.z(2)).view();
 ```
 
-![Image](interactions_with_geometry.md.20.png)
+![Image](interactions_with_geometry.md.21.png)
 
 ---
 ### Size
@@ -239,8 +256,6 @@ log(aRectangle.tag('tagString').tags());
 aRectangle.tag('tagString').tags((tags, s) => s.md(`Tags ${tags}`));
 ```
 
-Tags tagString
-
 Tags can be used to selectively keep or remove parts of geometry.
 
 ```JavaScript
@@ -250,16 +265,16 @@ const taggedAssembly = Assembly(
 ).view();
 ```
 
-![Image](interactions_with_geometry.md.21.png)
+![Image](interactions_with_geometry.md.22.png)
 
 ```JavaScript
 taggedAssembly.keep('A').noVoid().view();
 ```
 
-![Image](interactions_with_geometry.md.22.png)
+![Image](interactions_with_geometry.md.23.png)
 
 ```JavaScript
 taggedAssembly.drop('B').view();
 ```
 
-![Image](interactions_with_geometry.md.23.png)
+![Image](interactions_with_geometry.md.24.png)

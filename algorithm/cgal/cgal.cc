@@ -1122,34 +1122,6 @@ const Surface_mesh* ExtrusionToPlaneOfSurfaceMesh(
   return extruded_mesh;
 }
 
-const Surface_mesh* ProjectionToPlaneOfSurfaceMesh(
-    const Surface_mesh* input,
-    const Transformation* transformation,
-    double direction_x, double direction_y, double direction_z,
-    double plane_x, double plane_y, double plane_z, double plane_w) {
-  Surface_mesh mesh(*input);
-  CGAL::Polygon_mesh_processing::transform(*transformation, mesh, CGAL::parameters::all_default());
-
-  Surface_mesh* projected_mesh = new Surface_mesh(mesh);
-  auto& input_map = mesh.points();
-  auto& output_map = projected_mesh->points();
-
-  Plane plane(plane_x, plane_y, plane_z, plane_w);
-  Vector vector(direction_x, direction_y, direction_z);
-
-  // CHECK: Could this project a point multiple times?
-  // Are points shared between vertices?
-  for (auto& vertex : mesh.vertices()) {
-    auto result = CGAL::intersection(Line(get(input_map, vertex), get(input_map, vertex) + vector), plane);
-    if (result) {
-      if (Point* point = boost::get<Point>(&*result)) {
-        put(output_map, vertex, *point);
-      }
-    }
-  }
-  return projected_mesh;
-}
-
 const Surface_mesh::Vertex_index ensureVertex(Surface_mesh& mesh, std::map<Point, Vertex_index>& vertices, const Point& point) {
   auto it = vertices.find(point);
   if (it == vertices.end()) {
@@ -1281,6 +1253,42 @@ void PlanarSurfaceMeshToPolygonSet(const Plane& plane, const Surface_mesh& mesh,
   convertArrangementToPolygonsWithHoles(arrangement, polygons);
   for (const auto& polygon : polygons) {
     set.join(polygon);
+  }
+}
+
+// This handles potentially overlapping facets.
+void PlanarSurfaceMeshFacetsToPolygonSet(const Plane& plane, const Surface_mesh& mesh, General_polygon_set_2& set) {
+  typedef CGAL::Arr_segment_traits_2<Kernel>            Traits_2;
+  typedef Traits_2::Point_2                             Point_2;
+  typedef Traits_2::X_monotone_curve_2                  Segment_2;
+  typedef CGAL::Arrangement_2<Traits_2>                 Arrangement_2;
+  typedef Arrangement_2::Vertex_handle                  Vertex_handle;
+  typedef Arrangement_2::Halfedge_handle                Halfedge_handle;
+
+  std::set<std::vector<Kernel::FT>> segments;
+
+  for (const auto& facet : mesh.faces()) {
+    const auto& start = mesh.halfedge(facet);
+    if (mesh.is_removed(start)) {
+      continue;
+    }
+    // Do we really need an arrangement here?
+    Arrangement_2 arrangement;
+    Halfedge_index edge = start;
+    do {
+      Segment_2 segment {
+            plane.to_2d(mesh.point(mesh.source(edge))),
+            plane.to_2d(mesh.point(mesh.target(edge)))
+          };
+      insert(arrangement, segment);
+      edge = mesh.next(edge);
+    } while (edge != start);
+    // The arrangement shouldn't produce polygons with holes, so this might be simplified.
+    std::vector<Polygon_with_holes_2> polygons;
+    convertArrangementToPolygonsWithHoles(arrangement, polygons);
+    for (const auto& polygon : polygons) {
+      set.join(polygon);
+    }
   }
 }
 
@@ -1701,6 +1709,37 @@ void OutlineSurfaceMesh(const Surface_mesh* input, const Transformation* transfo
       edge = next;
     } while (edge != start);
   }
+}
+
+const Surface_mesh* ProjectionToPlaneOfSurfaceMesh(
+    const Surface_mesh* input,
+    const Transformation* transformation,
+    double direction_x, double direction_y, double direction_z,
+    double plane_x, double plane_y, double plane_z, double plane_w) {
+  Surface_mesh mesh(*input);
+  CGAL::Polygon_mesh_processing::transform(*transformation, mesh, CGAL::parameters::all_default());
+
+  Surface_mesh* projected_mesh = new Surface_mesh(mesh);
+  auto& input_map = mesh.points();
+  auto& output_map = projected_mesh->points();
+
+  Plane plane(plane_x, plane_y, plane_z, plane_w);
+  Vector vector(direction_x, direction_y, direction_z);
+
+  // Squash the mesh.
+  for (auto& vertex : mesh.vertices()) {
+    auto result = CGAL::intersection(Line(get(input_map, vertex), get(input_map, vertex) + vector), plane);
+    if (result) {
+      if (Point* point = boost::get<Point>(&*result)) {
+        put(output_map, vertex, *point);
+      }
+    }
+  }
+
+  // Simplify the projection.
+  General_polygon_set_2 set;
+  PlanarSurfaceMeshFacetsToPolygonSet(plane, *projected_mesh, set);
+  return GeneralPolygonSetToSurfaceMesh(plane, set);
 }
 
 void WireframeSurfaceMesh(const Surface_mesh* input, const Transformation* transform, emscripten::val emit_approximate_segment) {

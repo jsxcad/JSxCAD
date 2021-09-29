@@ -58,7 +58,11 @@ const writeMarkdown = async (
           data = new Uint8Array(Base64ArrayBuffer.decode(base64Data));
         }
         const downloadPath = `${modulePath}.${filename}`;
-        output.push(`[${filename}](${escapeMarkdownLink(pathModule.basename(downloadPath))})`);
+        output.push(
+          `[${filename}](${escapeMarkdownLink(
+            pathModule.basename(downloadPath)
+          )})`
+        );
         output.push('');
         writeFileSync(downloadPath, data);
       }
