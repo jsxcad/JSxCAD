@@ -24,6 +24,21 @@ Arc(10).ex(1, 2, -1, -2).view();
 
 md`
 ---
+### Cast
+3D shapes can be 'cast' as shadows to create 2D shapes.
+
+A plane (default [0, 0, 1, 0]) to cast upon and a direction (default [0, 0, 1, 0]) can be provided.
+`;
+
+Arc(4)
+  .ex(10)
+  .rx(1 / 8)
+  .material('glass')
+  .and(cast())
+  .view();
+
+md`
+---
 ### Item
 Geometry can be formed into an 'item'.
 

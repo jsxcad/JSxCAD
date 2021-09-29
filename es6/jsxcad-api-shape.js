@@ -1,4 +1,4 @@
-import { closePath, concatenatePath, assemble as assemble$1, eachPoint, flip, toConcreteGeometry, toDisplayGeometry, toTransformedGeometry, toPoints, transform, rewriteTags, taggedPaths, taggedGraph, openPath, taggedPoints, fromPolygonsToGraph, registerReifier, union, taggedGroup, taggedItem, getLeafs, visit, bend as bend$1, intersection, allTags, fromPointsToGraph, difference, rewrite, taggedPlan, hasTypeWire, translatePaths, taggedLayout, measureBoundingBox, getLayouts, isNotVoid, extrude as extrude$1, extrudeToPlane as extrudeToPlane$1, fill as fill$1, empty, grow as grow$1, outline as outline$1, inset as inset$1, read, loft as loft$1, realize, minkowskiDifference as minkowskiDifference$1, minkowskiShell as minkowskiShell$1, minkowskiSum as minkowskiSum$1, isVoid, offset as offset$1, toDisjointGeometry, projectToPlane as projectToPlane$1, push as push$1, remesh as remesh$1, write, section as section$1, separate as separate$1, smooth as smooth$1, taggedSketch, test as test$1, twist as twist$1, toPolygonsWithHoles, arrangePolygonsWithHoles, fromPolygonsWithHolesToTriangles, fromTrianglesToGraph, alphaShape, rotateZPath, convexHullToGraph, fromFunctionToGraph, fromPathsToGraph, translatePath } from './jsxcad-geometry.js';
+import { closePath, concatenatePath, assemble as assemble$1, eachPoint, flip, toConcreteGeometry, toDisplayGeometry, toTransformedGeometry, toPoints, transform, rewriteTags, taggedPaths, taggedGraph, openPath, taggedPoints, fromPolygonsToGraph, registerReifier, union, taggedGroup, taggedItem, getLeafs, visit, bend as bend$1, projectToPlane, intersection, allTags, fromPointsToGraph, difference, rewrite, taggedPlan, hasTypeWire, translatePaths, taggedLayout, measureBoundingBox, getLayouts, isNotVoid, extrude as extrude$1, extrudeToPlane as extrudeToPlane$1, fill as fill$1, empty, grow as grow$1, outline as outline$1, inset as inset$1, read, loft as loft$1, realize, minkowskiDifference as minkowskiDifference$1, minkowskiShell as minkowskiShell$1, minkowskiSum as minkowskiSum$1, isVoid, offset as offset$1, toDisjointGeometry, push as push$1, remesh as remesh$1, write, section as section$1, separate as separate$1, smooth as smooth$1, taggedSketch, test as test$1, twist as twist$1, toPolygonsWithHoles, arrangePolygonsWithHoles, fromPolygonsWithHolesToTriangles, fromTrianglesToGraph, alphaShape, rotateZPath, convexHullToGraph, fromFunctionToGraph, fromPathsToGraph, translatePath } from './jsxcad-geometry.js';
 import { getSourceLocation, emit, log as log$1, generateUniqueId, addPending, write as write$1 } from './jsxcad-sys.js';
 export { elapsed, emit, info, read, write } from './jsxcad-sys.js';
 import { identityMatrix, fromTranslation, fromRotation, fromScaling } from './jsxcad-math-mat4.js';
@@ -390,7 +390,7 @@ Shape.registerMethod('addTo', addTo);
 
 const X$3 = 0;
 const Y$3 = 1;
-const Z$4 = 2;
+const Z$5 = 2;
 
 const align =
   (spec = 'xyz', origin = [0, 0, 0]) =>
@@ -434,15 +434,15 @@ const align =
           case 'z': {
             switch (spec[index]) {
               case '>':
-                offset[Z$4] = -min[Z$4];
+                offset[Z$5] = -min[Z$5];
                 index += 1;
                 break;
               case '<':
-                offset[Z$4] = -max[Z$4];
+                offset[Z$5] = -max[Z$5];
                 index += 1;
                 break;
               default:
-                offset[Z$4] = -center[Z$4];
+                offset[Z$5] = -center[Z$5];
             }
             break;
           }
@@ -528,30 +528,42 @@ const bend =
 
 Shape.registerMethod('bend', bend);
 
-const billOfMaterials = () => (shape) => {
-  const billOfMaterials = [];
-  const walk = (geometry, descend, path) => {
-    if (geometry.type === 'item') {
-      let isPart = false;
-      for (const tag of geometry.tags) {
-        if (tag.startsWith('part:')) {
-          billOfMaterials.push(tag.substring(5));
-          isPart = true;
+// Is this better than s.get('part:*').tags('part')?
+const billOfMaterials =
+  (op = (list) => list) =>
+  (shape) => {
+    const billOfMaterials = [];
+    const walk = (geometry, descend, path) => {
+      if (geometry.type === 'item') {
+        let isPart = false;
+        for (const tag of geometry.tags) {
+          if (tag.startsWith('part:')) {
+            billOfMaterials.push(tag.substring(5));
+            isPart = true;
+          }
+        }
+        if (isPart) {
+          // Don't descend through parts to find sub-parts.
+          return;
         }
       }
-      if (isPart) {
-        // Don't descend through parts to find sub-parts.
-        return;
-      }
-    }
-    descend();
+      descend();
+    };
+    visit(shape.toGeometry(), walk);
+    return op(billOfMaterials, shape);
   };
-  visit(shape.toGeometry(), walk);
-  return billOfMaterials;
-};
 
 Shape.registerMethod('billOfMaterials', billOfMaterials);
 Shape.registerMethod('bom', billOfMaterials);
+
+const cast =
+  (plane = [0, 0, 1, 0], direction = [0, 0, 1, 0]) =>
+  (shape) =>
+    Shape.fromGeometry(
+      projectToPlane(shape.toGeometry(), plane, direction)
+    );
+
+Shape.registerMethod('cast', cast);
 
 const clip =
   (...shapes) =>
@@ -893,7 +905,7 @@ Shape.prototype.Empty = Shape.shapeMethod(Empty);
 
 const X$2 = 0;
 const Y$2 = 1;
-const Z$3 = 2;
+const Z$4 = 2;
 
 registerReifier('Box', (geometry) => {
   const corner1 = getCorner1(geometry);
@@ -902,8 +914,8 @@ registerReifier('Box', (geometry) => {
   const right = corner2[X$2];
   const front = corner1[Y$2];
   const back = corner2[Y$2];
-  const top = corner2[Z$3];
-  const bottom = corner1[Z$3];
+  const top = corner2[Z$4];
+  const bottom = corner1[Z$4];
 
   if (left <= right || front <= back) {
     return Empty().toGeometry();
@@ -3084,15 +3096,6 @@ const play =
 
 Shape.registerMethod('play', play);
 
-const projectToPlane =
-  (plane = [0, 0, 1, 1], direction = [0, 0, 1, 0]) =>
-  (shape) =>
-    Shape.fromGeometry(
-      projectToPlane$1(shape.toGeometry(), plane, direction)
-    );
-
-Shape.registerMethod('projectToPlane', projectToPlane);
-
 const push =
   (force = 0.1, minimumDistance = 1, maximumDistance = 10) =>
   (shape) =>
@@ -3247,7 +3250,7 @@ Shape.registerMethod('smooth', smooth);
 
 const X = 0;
 const Y = 1;
-const Z$2 = 2;
+const Z$3 = 2;
 
 const size =
   (op = (size, shape) => size) =>
@@ -3256,7 +3259,7 @@ const size =
     const [min, max] = measureBoundingBox(geometry);
     const length = max[X] - min[X];
     const width = max[Y] - min[Y];
-    const height = max[Z$2] - min[Z$2];
+    const height = max[Z$3] - min[Z$3];
     const center = scale$1(0.5, add$1(min, max));
     const radius = distance(center, max);
     return op(
@@ -3281,14 +3284,16 @@ const sketch = () => (shape) =>
 Shape.registerMethod('sketch', sketch);
 
 const tags =
-  (op = (tags, shape) => tags) =>
-  (shape) =>
-    op(
+  (namespace = 'user', op = (tags, shape) => tags) =>
+  (shape) => {
+    const prefix = `${namespace}:`;
+    return op(
       [...allTags(shape.toGeometry())]
-        .filter((tag) => tag.startsWith('user:'))
-        .map((tag) => tag.substring(5)),
+        .filter((tag) => tag.startsWith(prefix))
+        .map((tag) => tag.substring(prefix.length)),
       shape
     );
+  };
 
 Shape.registerMethod('tags', tags);
 
@@ -3317,6 +3322,12 @@ const tool = (name) => (shape) =>
   Shape.fromGeometry(rewriteTags(toTagsFromName$2(name), [], shape.toGeometry()));
 
 Shape.registerMethod('tool', tool);
+
+const Z$2 = 2;
+
+const top = () => (shape) => shape.size(({ max }) => max[Z$2]);
+
+Shape.registerMethod('top', top);
 
 const twist =
   (degreesPerMm = 1) =>
@@ -4203,4 +4214,4 @@ const yz = Shape.fromGeometry({
   ],
 });
 
-export { Alpha, Arc, Assembly, Box, ChainedHull, Cone, Empty, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Line, Octagon, Orb, Page, Path, Pentagon, Plan, Point, Points, Polygon, Polyhedron, Septagon, Shape, Spiral, Tetragon, Triangle, Wave, Weld, add, addTo, align, and, as, asPart, at, bend, billOfMaterials, clip, clipFrom, cloudSolid, color, colors, cut, cutFrom, cutOut, defGrblConstantLaser, defGrblDynamicLaser, defGrblPlotter, defGrblSpindle, defRgbColor, defThreejsMaterial, defTool, define, drop, each, ensurePages, ex, extrude, extrudeToPlane, fill, fit, fitTo, fuse, g, get, grow, inline, inset, keep, loadGeometry, loft, log, loop, mask, material, md, minkowskiDifference, minkowskiShell, minkowskiSum, move, n, noVoid, notColor, nth, ofPlan, offset, on, op, orient, outline, pack, play, projectToPlane, push, remesh, rotate, rotateX, rotateY, rotateZ, rx, ry, rz, saveGeometry, scale, scaleToFit, section, sectionProfile, separate, size, sketch, smooth, tag, tags, test, tint, tool, twist, untag, view, voidFn, weld, withFill, withFn, withInset, withOp, x, xy, xz, y, yz, z };
+export { Alpha, Arc, Assembly, Box, ChainedHull, Cone, Empty, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Line, Octagon, Orb, Page, Path, Pentagon, Plan, Point, Points, Polygon, Polyhedron, Septagon, Shape, Spiral, Tetragon, Triangle, Wave, Weld, add, addTo, align, and, as, asPart, at, bend, billOfMaterials, cast, clip, clipFrom, cloudSolid, color, colors, cut, cutFrom, cutOut, defGrblConstantLaser, defGrblDynamicLaser, defGrblPlotter, defGrblSpindle, defRgbColor, defThreejsMaterial, defTool, define, drop, each, ensurePages, ex, extrude, extrudeToPlane, fill, fit, fitTo, fuse, g, get, grow, inline, inset, keep, loadGeometry, loft, log, loop, mask, material, md, minkowskiDifference, minkowskiShell, minkowskiSum, move, n, noVoid, notColor, nth, ofPlan, offset, on, op, orient, outline, pack, play, push, remesh, rotate, rotateX, rotateY, rotateZ, rx, ry, rz, saveGeometry, scale, scaleToFit, section, sectionProfile, separate, size, sketch, smooth, tag, tags, test, tint, tool, top, twist, untag, view, voidFn, weld, withFill, withFn, withInset, withOp, x, xy, xz, y, yz, z };

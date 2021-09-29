@@ -3,13 +3,15 @@ import { Shape } from './Shape.js';
 import { allTags } from '@jsxcad/geometry';
 
 export const tags =
-  (op = (tags, shape) => tags) =>
-  (shape) =>
-    op(
+  (namespace = 'user', op = (tags, shape) => tags) =>
+  (shape) => {
+    const prefix = `${namespace}:`;
+    return op(
       [...allTags(shape.toGeometry())]
-        .filter((tag) => tag.startsWith('user:'))
-        .map((tag) => tag.substring(5)),
+        .filter((tag) => tag.startsWith(prefix))
+        .map((tag) => tag.substring(prefix.length)),
       shape
     );
+  };
 
 Shape.registerMethod('tags', tags);
