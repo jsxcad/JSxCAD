@@ -71,6 +71,35 @@ Arc(10, 10, 5).grow(1).view();
 
 md`
 ---
+### Loft
+2D shapes can be 'lofted' to create 3D shapes. Lofting a shape is done by taking an input shape, transforming it incrementally, then joining all of the incremental steps into a single shape.
+
+`;
+
+Box(10)
+  .cut(Box(5))
+  .loft(...seq((a) => (s) => s.scale(Math.pow(a, 3)).z(a * 10), { by: 1 / 8 }))
+  .view();
+
+md`
+---
+### Loop
+2D shapes can be 'looped' to create 3D shapes. In this example two circles are looped to create a hollow doughnut. See 'loft' for a similar behavior without the ends being joined.
+
+TODO: In the future (a) => rz(a) can be replaced with rz.
+`;
+
+
+Arc(6)
+  .cut(Arc(3))
+  .rx(0.25)
+  .x(10)
+  .loop(...seq((a) => rz(a), { by: 1 / 16, upto: 1 }))
+  .view();
+
+
+md`
+---
 ### Move
 A shape can be moved in XYZ space using the .move(x,y,z) command.
 
