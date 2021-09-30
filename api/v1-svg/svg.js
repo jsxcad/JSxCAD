@@ -12,20 +12,20 @@ import { hash as hashGeometry } from '@jsxcad/geometry';
 import hashSum from 'hash-sum';
 import { toSvg } from '@jsxcad/convert-svg';
 
-export const prepareSvg = (shape, name, options = {}) => {
+export const prepareSvg = (shape, name, op = (s) => s, options = {}) => {
   const { path } = getSourceLocation();
   let index = 0;
   const entries = [];
-  for (const entry of ensurePages(shape.toDisjointGeometry())) {
+  for (const entry of ensurePages(op(shape).toDisjointGeometry())) {
     const svgPath = `svg/${path}/${generateUniqueId()}`;
-    const op = async () => {
+    const render = async () => {
       try {
         await write(svgPath, await toSvg(entry, options));
       } catch (error) {
         getPendingErrorHandler()(error);
       }
     };
-    addPending(op());
+    addPending(render());
     entries.push({
       path: svgPath,
       filename: `${name}_${index++}.svg`,
@@ -37,9 +37,9 @@ export const prepareSvg = (shape, name, options = {}) => {
 };
 
 export const svg =
-  (name, options = {}) =>
+  (name, op, options = {}) =>
   (shape) => {
-    const entries = prepareSvg(shape, name, options);
+    const entries = prepareSvg(shape, name, op, options);
     const download = { entries };
     const hash = hashSum({ name, options }) + hashGeometry(shape.toGeometry());
     emit({ download, hash });

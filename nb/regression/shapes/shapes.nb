@@ -5,7 +5,7 @@ const arc = Arc(5)
 
 const assembly = Assembly(Box(10), Arc(8), Triangle(5))
   .pack()
-  .gridView({ size: 801, triangles: false, wireframe: false })
+  .gridView(undefined, { size: 801, triangles: false, wireframe: false })
   .md(`Assembly(Box(10), Arc(8), Triangle(5))`);
 
 const box = Box(5, 7, 8).view().md(`Box(5, 7, 8)`);

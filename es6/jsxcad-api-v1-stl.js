@@ -79,21 +79,20 @@ function sum (o) {
 
 var hashSum = sum;
 
-const prepareStl = (shape, name, options = {}) => {
+const prepareStl = (shape, name, op = (s) => s, options = {}) => {
   const { path } = getSourceLocation();
-  const { op = (s) => s } = options;
   let index = 0;
   const entries = [];
   for (const entry of ensurePages(op(shape).toDisjointGeometry())) {
     const stlPath = `stl/${path}/${generateUniqueId()}`;
-    const op = async () => {
+    const render = async () => {
       try {
         await write(stlPath, await toStl(entry, options));
       } catch (error) {
         getPendingErrorHandler()(error);
       }
     };
-    addPending(op());
+    addPending(render());
     entries.push({
       path: stlPath,
       filename: `${name}_${index++}.stl`,
@@ -105,8 +104,8 @@ const prepareStl = (shape, name, options = {}) => {
   return entries;
 };
 
-const stl = (name, options) => (shape) => {
-  const entries = prepareStl(shape, name, options);
+const stl = (name, op, options) => (shape) => {
+  const entries = prepareStl(shape, name, op, options);
   const download = { entries };
   const hash$1 = hashSum({ name }) + hash(shape.toGeometry());
   emit({ download, hash: hash$1 });

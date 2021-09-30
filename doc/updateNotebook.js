@@ -86,11 +86,12 @@ const writeMarkdown = async (
   writeFileSync(observedPath, markdown);
   try {
     if (markdown !== readFileSync(expectedPath, 'utf8')) {
-      failedExpectations.push(`difference: cp ${observedPath} ${expectedPath}`);
+      failedExpectations.push(`cp ${observedPath} ${expectedPath}`);
     }
   } catch (error) {
     if (error.code === 'ENOENT') {
-      failedExpectations.push(`missing: cp ${observedPath} ${expectedPath}`);
+      failedExpectations.push(`cp ${observedPath} ${expectedPath}`);
+      failedExpectations.push(`git add ${expectedPath}`);
     } else {
       throw error;
     }
@@ -135,9 +136,8 @@ export const updateNotebook = async (
       } catch (error) {
         if (error.code === 'ENOENT') {
           // We couldn't find a matching expectation.
-          failedExpectations.push(
-            `missing: cp ${observedPath} ${expectedPath}`
-          );
+          failedExpectations.push(`cp ${observedPath} ${expectedPath}`);
+          failedExpectations.push(`git add ${expectedPath}`);
           continue;
         } else {
           throw error;
@@ -146,9 +146,7 @@ export const updateNotebook = async (
       const { width, height } = expectedPng;
       if (width !== observedPng.width || height !== observedPng.height) {
         // Can't diff when the dimensions don't match.
-        failedExpectations.push(
-          `size changed: cp ${observedPath} ${expectedPath}`
-        );
+        failedExpectations.push(`cp ${observedPath} ${expectedPath}`);
         continue;
       }
       const differencePng = new pngjs.PNG({ width, height });
@@ -171,10 +169,8 @@ export const updateNotebook = async (
         const differencePath = `${target}.md.${nth}.difference.png`;
         writeFileSync(differencePath, pngjs.PNG.sync.write(differencePng));
         // Note failures.
-        failedExpectations.push(`difference: display ${differencePath}`);
-        failedExpectations.push(
-          `            cp ${observedPath} ${expectedPath}`
-        );
+        failedExpectations.push(`display ${differencePath}`);
+        failedExpectations.push(`cp ${observedPath} ${expectedPath}`);
       }
     }
   } catch (error) {

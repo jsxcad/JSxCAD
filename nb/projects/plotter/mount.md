@@ -26,7 +26,7 @@ const screw = ScrewThread(16, 5)
       .ex(5)
       .rz(0, 1 / 4)
   )
-  .stl('screw', { op: rx(1 / 2) });
+  .stl('screw', rx(1 / 2));
 ```
 
 ![Image](mount.md.0.png)
@@ -88,7 +88,7 @@ const toothedReel = Group(
     .z(reelThickness / 2)
 )
   .as('toothedReel')
-  .view({ op: rx(1 / 2) });
+  .view(rx(1 / 2));
 ```
 
 ![Image](mount.md.3.png)
@@ -134,11 +134,11 @@ const upsideDesign2 = upsideDesign
   )
   .on(get('shaft'), fit(toothedReel.z(6)))
   .view()
-  .stl('box-top', { op: get('box-top') })
-  .stl('box-pin', { op: (s) => s.get('box-pin').ry(1 / 4) })
-  .stl('box-base', { op: (s) => s.get('box-base').rx(1 / 2) })
-  .stl('reel', {
-    op: (s) =>
+  .stl('box-top', get('box-top'))
+  .stl('box-pin', (s) => s.get('box-pin').ry(1 / 4))
+  .stl('box-base', (s) => s.get('box-base').rx(1 / 2))
+  .stl('reel',
+    (s) =>
       s
         .get('toothedReel')
         .n(1) // This is due to the cutOut earlier?
@@ -147,11 +147,9 @@ const upsideDesign2 = upsideDesign
           (s) => s.color('green').void()
         )
         .material('glass'),
-  })
-  .stl('rim', { op: (s) => s.get('toothedReel').n(1).get('rim') })
-  .stl('clip', {
-    op: (s) => s.get('clip').rx(1 / 2),
-  });
+  )
+  .stl('rim', (s) => s.get('toothedReel').n(1).get('rim'))
+  .stl('clip', (s) => s.get('clip').rx(1 / 2));
 ```
 
 ![Image](mount.md.5.png)

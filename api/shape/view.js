@@ -11,19 +11,21 @@ import { ensurePages } from './Page.js';
 
 // FIX: Avoid the extra read-write cycle.
 export const baseView =
-  ({
-    size,
-    skin = true,
-    outline = true,
-    wireframe = false,
+  (
     op = (x) => x,
-    inline,
-    width = 512,
-    height = 256,
-    position = [100, -100, 100],
-    withAxes = false,
-    withGrid = false,
-  } = {}) =>
+    {
+      size,
+      skin = true,
+      outline = true,
+      wireframe = false,
+      inline,
+      width = 512,
+      height = 256,
+      position = [100, -100, 100],
+      withAxes = false,
+      withGrid = false,
+    } = {}
+  ) =>
   (shape) => {
     if (size !== undefined) {
       width = size;
@@ -47,26 +49,27 @@ export const baseView =
   };
 
 export const topView =
-  ({
-    size = 512,
-    skin = true,
-    outline = true,
-    wireframe = false,
+  (
     op,
-    path,
-    width = 1024,
-    height = 512,
-    position = [0, 0, 100],
-    withAxes,
-    withGrid,
-  } = {}) =>
+    {
+      size = 512,
+      skin = true,
+      outline = true,
+      wireframe = false,
+      path,
+      width = 1024,
+      height = 512,
+      position = [0, 0, 100],
+      withAxes,
+      withGrid,
+    } = {}
+  ) =>
   (shape) =>
-    view({
+    view(op, {
       size,
       skin,
       outline,
       wireframe,
-      op,
       path,
       width,
       height,
@@ -78,26 +81,27 @@ export const topView =
 Shape.registerMethod('topView', topView);
 
 export const gridView =
-  ({
-    size = 512,
-    skin = true,
-    outline = true,
-    wireframe = false,
+  (
     op,
-    path,
-    width = 1024,
-    height = 512,
-    position = [0, 0, 100],
-    withAxes,
-    withGrid = true,
-  } = {}) =>
+    {
+      size = 512,
+      skin = true,
+      outline = true,
+      wireframe = false,
+      path,
+      width = 1024,
+      height = 512,
+      position = [0, 0, 100],
+      withAxes,
+      withGrid = true,
+    } = {}
+  ) =>
   (shape) =>
-    view({
+    view(op, {
       size,
       skin,
       outline,
       wireframe,
-      op,
       path,
       width,
       height,
@@ -109,26 +113,27 @@ export const gridView =
 Shape.registerMethod('gridView', gridView);
 
 export const frontView =
-  ({
-    size = 512,
-    skin = true,
-    outline = true,
-    wireframe = false,
+  (
     op,
-    path,
-    width = 1024,
-    height = 512,
-    position = [0, -100, 0],
-    withAxes,
-    withGrid,
-  } = {}) =>
+    {
+      size = 512,
+      skin = true,
+      outline = true,
+      wireframe = false,
+      path,
+      width = 1024,
+      height = 512,
+      position = [0, -100, 0],
+      withAxes,
+      withGrid,
+    } = {}
+  ) =>
   (shape) =>
-    view({
+    view(op, {
       size,
       skin,
       outline,
       wireframe,
-      op,
       path,
       width,
       height,
@@ -154,12 +159,11 @@ export const sideView =
     withGrid,
   } = {}) =>
   (shape) =>
-    view({
+    view(op, {
       size,
       skin,
       outline,
       wireframe,
-      op,
       path,
       width,
       height,
@@ -171,19 +175,19 @@ export const sideView =
 Shape.registerMethod('sideView');
 
 export const view =
-  (options = {}) =>
+  (op, options = {}) =>
   (shape) => {
     switch (options.style) {
       case 'grid':
-        return shape.gridView(options);
+        return shape.gridView(op, options);
       case 'none':
         return shape;
       case 'side':
-        return shape.sideView(options);
+        return shape.sideView(op, options);
       case 'top':
-        return shape.topView(options);
+        return shape.topView(op, options);
       default:
-        return baseView(options)(shape);
+        return baseView(op, options)(shape);
     }
   };
 

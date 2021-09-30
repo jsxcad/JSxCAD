@@ -1,4 +1,4 @@
-import { closePath, concatenatePath, assemble as assemble$1, eachPoint, flip, toConcreteGeometry, toDisplayGeometry, toTransformedGeometry, toPoints, transform, rewriteTags, taggedPaths, taggedGraph, openPath, taggedPoints, fromPolygonsToGraph, registerReifier, union, taggedGroup, taggedItem, getLeafs, visit, bend as bend$1, projectToPlane, intersection, allTags, fromPointsToGraph, difference, rewrite, taggedPlan, hasTypeWire, translatePaths, taggedLayout, measureBoundingBox, getLayouts, isNotVoid, extrude as extrude$1, extrudeToPlane as extrudeToPlane$1, fill as fill$1, empty, grow as grow$1, outline as outline$1, inset as inset$1, read, loft as loft$1, realize, minkowskiDifference as minkowskiDifference$1, minkowskiShell as minkowskiShell$1, minkowskiSum as minkowskiSum$1, isVoid, offset as offset$1, toDisjointGeometry, push as push$1, remesh as remesh$1, write, section as section$1, separate as separate$1, smooth as smooth$1, taggedSketch, test as test$1, twist as twist$1, toPolygonsWithHoles, arrangePolygonsWithHoles, fromPolygonsWithHolesToTriangles, fromTrianglesToGraph, alphaShape, rotateZPath, convexHullToGraph, fromFunctionToGraph, fromPathsToGraph, translatePath } from './jsxcad-geometry.js';
+import { closePath, concatenatePath, assemble as assemble$1, eachPoint, flip, toConcreteGeometry, toDisplayGeometry, toTransformedGeometry, toPoints, transform, rewriteTags, taggedPaths, taggedGraph, openPath, taggedPoints, fromPolygonsToGraph, registerReifier, taggedGroup, union, taggedItem, getLeafs, visit, bend as bend$1, projectToPlane, intersection, allTags, fromPointsToGraph, difference, rewrite, taggedPlan, hasTypeWire, translatePaths, taggedLayout, measureBoundingBox, getLayouts, isNotVoid, extrude as extrude$1, extrudeToPlane as extrudeToPlane$1, fill as fill$1, empty, grow as grow$1, outline as outline$1, inset as inset$1, read, loft as loft$1, realize, minkowskiDifference as minkowskiDifference$1, minkowskiShell as minkowskiShell$1, minkowskiSum as minkowskiSum$1, isVoid, offset as offset$1, toDisjointGeometry, push as push$1, remesh as remesh$1, write, section as section$1, separate as separate$1, smooth as smooth$1, taggedSketch, test as test$1, twist as twist$1, toPolygonsWithHoles, arrangePolygonsWithHoles, fromPolygonsWithHolesToTriangles, fromTrianglesToGraph, alphaShape, rotateZPath, convexHullToGraph, fromFunctionToGraph, fromPathsToGraph, translatePath } from './jsxcad-geometry.js';
 import { getSourceLocation, emit, log as log$1, generateUniqueId, addPending, write as write$1 } from './jsxcad-sys.js';
 export { elapsed, emit, info, read, write } from './jsxcad-sys.js';
 import { identityMatrix, fromTranslation, fromRotation, fromScaling } from './jsxcad-math-mat4.js';
@@ -360,21 +360,52 @@ const mdMethod = function (string, ...placeholders) {
 
 Shape.prototype.md = mdMethod;
 
+const render = (abstract, shape) => {
+  const graph = [];
+  graph.push("'''mermaid");
+  graph.push('graph LR;');
+
+  let id = 0;
+  const nextId = () => id++;
+
+  const identify = ({ type, tags, content }) => {
+    if (content) {
+      return { type, tags, id: nextId(), content: content.map(identify) };
+    } else {
+      return { type, tags, id: nextId() };
+    }
+  };
+
+  const render = ({ id, type, tags = [], content = [] }) => {
+    graph.push(`  ${id}[${type}<br>${tags.join('<br>')}]`);
+    for (const child of content) {
+      graph.push(`  ${id} --> ${child.id};`);
+      render(child);
+    }
+  };
+
+  render(identify(abstract));
+
+  graph.push("'''");
+
+  return shape.md(graph.join('\n'));
+};
+
 const abstract =
-  (op = abstract => abstract) =>
+  (op = render) =>
   (shape) => {
     const walk = ({ type, tags, plan, content }) => {
       if (type === 'group') {
         return content.flatMap(walk);
       } else if (type === 'plan') {
-        return { type, plan };
+        return [{ type, plan }];
       } else if (content) {
-        return { type, tags, content: content.flatMap(walk) };
+        return [{ type, tags, content: content.flatMap(walk) }];
       } else {
-        return { type, tags };
+        return [{ type, tags }];
       }
     };
-    return op(walk(shape.toGeometry()), shape);
+    return op(taggedGroup({}, ...walk(shape.toGeometry())), shape);
   };
 
 Shape.registerMethod('abstract', abstract);
@@ -550,27 +581,8 @@ Shape.registerMethod('bend', bend);
 // Is this better than s.get('part:*').tags('part')?
 const billOfMaterials =
   (op = (list) => list) =>
-  (shape) => {
-    const billOfMaterials = [];
-    const walk = (geometry, descend, path) => {
-      if (geometry.type === 'item') {
-        let isPart = false;
-        for (const tag of geometry.tags) {
-          if (tag.startsWith('part:')) {
-            billOfMaterials.push(tag.substring(5));
-            isPart = true;
-          }
-        }
-        if (isPart) {
-          // Don't descend through parts to find sub-parts.
-          return;
-        }
-      }
-      descend();
-    };
-    visit(shape.toGeometry(), walk);
-    return op(billOfMaterials, shape);
-  };
+  (shape) =>
+    shape.get('part:*').tags('part', op);
 
 Shape.registerMethod('billOfMaterials', billOfMaterials);
 Shape.registerMethod('bom', billOfMaterials);
@@ -3429,19 +3441,21 @@ Shape.registerMethod('untag', untag);
 
 // FIX: Avoid the extra read-write cycle.
 const baseView =
-  ({
-    size,
-    skin = true,
-    outline = true,
-    wireframe = false,
+  (
     op = (x) => x,
-    inline,
-    width = 512,
-    height = 256,
-    position = [100, -100, 100],
-    withAxes = false,
-    withGrid = false,
-  } = {}) =>
+    {
+      size,
+      skin = true,
+      outline = true,
+      wireframe = false,
+      inline,
+      width = 512,
+      height = 256,
+      position = [100, -100, 100],
+      withAxes = false,
+      withGrid = false,
+    } = {}
+  ) =>
   (shape) => {
     if (size !== undefined) {
       width = size;
@@ -3465,26 +3479,27 @@ const baseView =
   };
 
 const topView =
-  ({
-    size = 512,
-    skin = true,
-    outline = true,
-    wireframe = false,
+  (
     op,
-    path,
-    width = 1024,
-    height = 512,
-    position = [0, 0, 100],
-    withAxes,
-    withGrid,
-  } = {}) =>
+    {
+      size = 512,
+      skin = true,
+      outline = true,
+      wireframe = false,
+      path,
+      width = 1024,
+      height = 512,
+      position = [0, 0, 100],
+      withAxes,
+      withGrid,
+    } = {}
+  ) =>
   (shape) =>
-    view({
+    view(op, {
       size,
       skin,
       outline,
       wireframe,
-      op,
       path,
       width,
       height,
@@ -3496,26 +3511,27 @@ const topView =
 Shape.registerMethod('topView', topView);
 
 const gridView =
-  ({
-    size = 512,
-    skin = true,
-    outline = true,
-    wireframe = false,
+  (
     op,
-    path,
-    width = 1024,
-    height = 512,
-    position = [0, 0, 100],
-    withAxes,
-    withGrid = true,
-  } = {}) =>
+    {
+      size = 512,
+      skin = true,
+      outline = true,
+      wireframe = false,
+      path,
+      width = 1024,
+      height = 512,
+      position = [0, 0, 100],
+      withAxes,
+      withGrid = true,
+    } = {}
+  ) =>
   (shape) =>
-    view({
+    view(op, {
       size,
       skin,
       outline,
       wireframe,
-      op,
       path,
       width,
       height,
@@ -3527,26 +3543,27 @@ const gridView =
 Shape.registerMethod('gridView', gridView);
 
 const frontView =
-  ({
-    size = 512,
-    skin = true,
-    outline = true,
-    wireframe = false,
+  (
     op,
-    path,
-    width = 1024,
-    height = 512,
-    position = [0, -100, 0],
-    withAxes,
-    withGrid,
-  } = {}) =>
+    {
+      size = 512,
+      skin = true,
+      outline = true,
+      wireframe = false,
+      path,
+      width = 1024,
+      height = 512,
+      position = [0, -100, 0],
+      withAxes,
+      withGrid,
+    } = {}
+  ) =>
   (shape) =>
-    view({
+    view(op, {
       size,
       skin,
       outline,
       wireframe,
-      op,
       path,
       width,
       height,
@@ -3560,28 +3577,26 @@ Shape.registerMethod('frontView', frontView);
 Shape.registerMethod('sideView');
 
 const view =
-  (options = {}) =>
+  (op, options = {}) =>
   (shape) => {
     switch (options.style) {
       case 'grid':
-        return shape.gridView(options);
+        return shape.gridView(op, options);
       case 'none':
         return shape;
       case 'side':
-        return shape.sideView(options);
+        return shape.sideView(op, options);
       case 'top':
-        return shape.topView(options);
+        return shape.topView(op, options);
       default:
-        return baseView(options)(shape);
+        return baseView(op, options)(shape);
     }
   };
 
 Shape.registerMethod('view', view);
 
 const voidFn = () => (shape) =>
-  Shape.fromGeometry(
-    rewriteTags(['type:void'], [], shape.toGeometry())
-  );
+  Shape.fromGeometry(rewriteTags(['type:void'], [], shape.toGeometry()));
 
 Shape.registerMethod('void', voidFn);
 

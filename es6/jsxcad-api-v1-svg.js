@@ -120,20 +120,20 @@ function sum (o) {
 
 var hashSum = sum;
 
-const prepareSvg = (shape, name, options = {}) => {
+const prepareSvg = (shape, name, op = (s) => s, options = {}) => {
   const { path } = getSourceLocation();
   let index = 0;
   const entries = [];
-  for (const entry of ensurePages(shape.toDisjointGeometry())) {
+  for (const entry of ensurePages(op(shape).toDisjointGeometry())) {
     const svgPath = `svg/${path}/${generateUniqueId()}`;
-    const op = async () => {
+    const render = async () => {
       try {
         await write(svgPath, await toSvg(entry, options));
       } catch (error) {
         getPendingErrorHandler()(error);
       }
     };
-    addPending(op());
+    addPending(render());
     entries.push({
       path: svgPath,
       filename: `${name}_${index++}.svg`,
@@ -145,9 +145,9 @@ const prepareSvg = (shape, name, options = {}) => {
 };
 
 const svg =
-  (name, options = {}) =>
+  (name, op, options = {}) =>
   (shape) => {
-    const entries = prepareSvg(shape, name, options);
+    const entries = prepareSvg(shape, name, op, options);
     const download = { entries };
     const hash$1 = hashSum({ name, options }) + hash(shape.toGeometry());
     emit({ download, hash: hash$1 });

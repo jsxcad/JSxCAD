@@ -12,7 +12,7 @@ Arc(5).angle(45/360, 270/360)
 ```JavaScript
 const assembly = Assembly(Box(10), Arc(8), Triangle(5))
   .pack()
-  .gridView({ size: 801, triangles: false, wireframe: false })
+  .gridView(undefined, { size: 801, triangles: false, wireframe: false })
   .md(`Assembly(Box(10), Arc(8), Triangle(5))`);
 ```
 

@@ -103,6 +103,36 @@ Arc(10, 10, 5).grow(1).view();
 ![Image](interactions_with_geometry.md.8.png)
 
 ---
+### Loft
+2D shapes can be 'lofted' to create 3D shapes. Lofting a shape is done by taking an input shape, transforming it incrementally, then joining all of the incremental steps into a single shape.
+
+```JavaScript
+Box(10)
+  .cut(Box(5))
+  .loft(...seq((a) => (s) => s.scale(Math.pow(a, 3)).z(a * 10), { by: 1 / 8 }))
+  .view();
+```
+
+![Image](interactions_with_geometry.md.9.png)
+
+---
+### Loop
+2D shapes can be 'looped' to create 3D shapes. In this example two circles are looped to create a hollow doughnut. See 'loft' for a similar behavior without the ends being joined.
+
+TODO: In the future (a) => rz(a) can be replaced with rz.
+
+```JavaScript
+Arc(6)
+  .cut(Arc(3))
+  .rx(0.25)
+  .x(10)
+  .loop(...seq((a) => rz(a), { by: 1 / 16, upto: 1 }))
+  .view();
+```
+
+![Image](interactions_with_geometry.md.10.png)
+
+---
 ### Move
 A shape can be moved in XYZ space using the .move(x,y,z) command.
 
@@ -114,19 +144,19 @@ Multiple offsets can be provided, which will produce one result per offset.
 Box(5, 5, 5).move(10, 2, 12).view();
 ```
 
-![Image](interactions_with_geometry.md.9.png)
+![Image](interactions_with_geometry.md.11.png)
 
 ```JavaScript
 Box(5, 5, 5).x(10).y(2).z(12).view();
 ```
 
-![Image](interactions_with_geometry.md.10.png)
+![Image](interactions_with_geometry.md.12.png)
 
 ```JavaScript
 Box(5).x(0, 10, 20).view();
 ```
 
-![Image](interactions_with_geometry.md.11.png)
+![Image](interactions_with_geometry.md.13.png)
 
 ---
 ### Remesh
@@ -138,21 +168,21 @@ At each step the shape is retriangulated to preserve manifold structure.
 const aRectangle = Box(5, 5, 15).view();
 ```
 
-![Image](interactions_with_geometry.md.12.png)
+![Image](interactions_with_geometry.md.14.png)
 
 ```JavaScript
-aRectangle.remesh(4, 2).view({ wireframe: true });
+aRectangle.remesh(4, 2).view(undefined, { wireframe: true });
 ```
 
-![Image](interactions_with_geometry.md.13.png)
+![Image](interactions_with_geometry.md.15.png)
 
 Once a shape is remeshed it can be twisted or bent about the origin.
 
 ```JavaScript
-aRectangle.remesh(4, 1).twist(10).view({ wireframe: true });
+aRectangle.remesh(4, 1).twist(10).view(undefined, { wireframe: true });
 ```
 
-![Image](interactions_with_geometry.md.14.png)
+![Image](interactions_with_geometry.md.16.png)
 
 ```JavaScript
 aRectangle
@@ -160,10 +190,10 @@ aRectangle
   .remesh(4, 1)
   .y(10)
   .bend(4)
-  .view({ wireframe: true });
+  .view(undefined, { wireframe: true });
 ```
 
-![Image](interactions_with_geometry.md.15.png)
+![Image](interactions_with_geometry.md.17.png)
 
 ---
 ### Rotate
@@ -175,7 +205,7 @@ Multiple turns can be provided, which will produce one result per turn.
 aRectangle.rz(1 / 8).view();
 ```
 
-![Image](interactions_with_geometry.md.16.png)
+![Image](interactions_with_geometry.md.18.png)
 
 ```JavaScript
 aRectangle
@@ -185,7 +215,7 @@ aRectangle
   .view();
 ```
 
-![Image](interactions_with_geometry.md.17.png)
+![Image](interactions_with_geometry.md.19.png)
 
 ```JavaScript
 Box(5)
@@ -194,7 +224,7 @@ Box(5)
   .view();
 ```
 
-![Image](interactions_with_geometry.md.18.png)
+![Image](interactions_with_geometry.md.20.png)
 
 ---
 ### Scale
@@ -204,7 +234,7 @@ Scale enlarges a shape by the entered multiple.
 aRectangle.scale(2).view();
 ```
 
-![Image](interactions_with_geometry.md.19.png)
+![Image](interactions_with_geometry.md.21.png)
 
 ---
 ### Section
@@ -218,13 +248,13 @@ Section takes shapes as arguments, and will use the plane of orientation of the 
 Orb(4).section().view();
 ```
 
-![Image](interactions_with_geometry.md.20.png)
+![Image](interactions_with_geometry.md.22.png)
 
 ```JavaScript
 Orb(4).section(xy, xy.z(1), xy.z(2)).view();
 ```
 
-![Image](interactions_with_geometry.md.21.png)
+![Image](interactions_with_geometry.md.23.png)
 
 ---
 ### Size
@@ -265,16 +295,45 @@ const taggedAssembly = Assembly(
 ).view();
 ```
 
-![Image](interactions_with_geometry.md.22.png)
+![Image](interactions_with_geometry.md.24.png)
+
+---
+#### Selection
+We can select parts of geometry based on tags using get(selector), getNot(selector), and nth(number).
+Aliases g, ng, and n are also available.
+
+Selector is in the form of 'namespace:value', with namespace defaulting to 'item'.
+
+value may also be the wildcard *.
+
+Selection does not traverse through item, except for the input shape.
+
+This means that s.get('a').get('b') will find b inside a, but otherwise b would not be found.
 
 ```JavaScript
 taggedAssembly.keep('A').noVoid().view();
 ```
 
-![Image](interactions_with_geometry.md.23.png)
+![Image](interactions_with_geometry.md.25.png)
 
 ```JavaScript
 taggedAssembly.drop('B').view();
 ```
 
-![Image](interactions_with_geometry.md.24.png)
+![Image](interactions_with_geometry.md.26.png)
+
+```JavaScript
+Group(Box().as('box').color('green').material('copper'), Arc().as('arc').color('blue').material('brick')).view(get('*')).md('All items.').view(get('color:green')).md('All green things.').view(getNot('material:copper')).md('All non-copper things.');
+```
+
+![Image](interactions_with_geometry.md.27.png)
+
+All items.
+
+![Image](interactions_with_geometry.md.28.png)
+
+All green things.
+
+![Image](interactions_with_geometry.md.29.png)
+
+All non-copper things.
