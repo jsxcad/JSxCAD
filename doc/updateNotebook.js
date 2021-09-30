@@ -16,7 +16,7 @@ import pngjs from 'pngjs';
 import { screenshot } from './screenshot.js';
 import { toHtml } from '@jsxcad/convert-notebook';
 
-const PIXEL_THRESHOLD = 1000;
+const PIXEL_THRESHOLD = 2000;
 
 const ensureNewline = (line) => (line.endsWith('\n') ? line : `${line}\n`);
 
