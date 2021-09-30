@@ -230,4 +230,21 @@ Selection does not traverse through item, except for the input shape.
 This means that s.get('a').get('b') will find b inside a, but otherwise b would not be found.
 `;
 
-Group(Box().as('box').color('green').material('copper'), Arc().as('arc').color('blue').material('brick')).view(get('*')).md('All items.').view(get('color:green')).md('All green things.').view(getNot('material:copper')).md('All non-copper things.');
+Group(
+  Box(10).as('box').color('yellow').material('copper'),
+  Arc(10).as('arc').color('cyan').material('brick')
+)
+  .view((s) => s.get('*').pack())
+  .md('All items.')
+  .view(get('color:green'))
+  .md('All green things.')
+  .view(getNot('material:copper'))
+  .md('All non-copper things.');
+
+md`
+---
+### Abstract View
+We can generate an abstract view of the geometry to be displayed as a graph.
+`;
+
+Box(4).as('box').and(Arc(5).ex(10).as('bar')).abstract();

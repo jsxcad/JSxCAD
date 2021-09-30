@@ -323,17 +323,45 @@ taggedAssembly.drop('B').view();
 ![Image](interactions_with_geometry.md.26.png)
 
 ```JavaScript
-Group(Box().as('box').color('green').material('copper'), Arc().as('arc').color('blue').material('brick')).view(get('*')).md('All items.').view(get('color:green')).md('All green things.').view(getNot('material:copper')).md('All non-copper things.');
+Group(
+  Box(10).as('box').color('yellow').material('copper'),
+  Arc(10).as('arc').color('cyan').material('brick')
+)
+  .view((s) => s.get('*').pack())
+  .md('All items.')
+  .view(get('color:green'))
+  .md('All green things.')
+  .view(getNot('material:copper'))
+  .md('All non-copper things.');
 ```
 
 ![Image](interactions_with_geometry.md.27.png)
 
 All items.
 
-![Image](interactions_with_geometry.md.28.png)
-
 All green things.
 
-![Image](interactions_with_geometry.md.29.png)
+![Image](interactions_with_geometry.md.28.png)
 
 All non-copper things.
+
+---
+### Abstract View
+We can generate an abstract view of the geometry to be displayed as a graph.
+
+```JavaScript
+Box(4).as('box').and(Arc(5).ex(10).as('bar')).abstract();
+```
+
+'''mermaid
+graph LR;
+  0[group<br>]
+  0 --> 1;
+  1[item<br>item:box]
+  1 --> 2;
+  2[plan<br>]
+  0 --> 3;
+  3[item<br>item:bar]
+  3 --> 4;
+  4[graph<br>]
+'''
