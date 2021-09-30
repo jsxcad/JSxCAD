@@ -169,6 +169,9 @@ export const updateNotebook = async (
         const differencePath = `${target}.md.${nth}.difference.png`;
         writeFileSync(differencePath, pngjs.PNG.sync.write(differencePng));
         // Note failures.
+        failedExpectations.push(
+          `# numFailedPixels ${numFailedPixels} > pixelThreshold ${pixelThreshold}`
+        );
         failedExpectations.push(`display ${differencePath}`);
         failedExpectations.push(`cp ${observedPath} ${expectedPath}`);
       }
