@@ -124,18 +124,18 @@ At each step the shape is retriangulated to preserve manifold structure.
 
 const aRectangle = Box(5, 5, 15).view();
 
-aRectangle.remesh(4, 2).view({ wireframe: true });
+aRectangle.remesh(4, 2).view(undefined, { wireframe: true });
 
 md`Once a shape is remeshed it can be twisted or bent about the origin.`;
 
-aRectangle.remesh(4, 1).twist(10).view({ wireframe: true });
+aRectangle.remesh(4, 1).twist(10).view(undefined, { wireframe: true });
 
 aRectangle
   .ry(1 / 4)
   .remesh(4, 1)
   .y(10)
   .bend(4)
-  .view({ wireframe: true });
+  .view(undefined, { wireframe: true });
 
 md`
 ---
@@ -214,3 +214,37 @@ const taggedAssembly = Assembly(
 taggedAssembly.keep('A').noVoid().view();
 
 taggedAssembly.drop('B').view();
+
+md`
+---
+#### Selection
+We can select parts of geometry based on tags using get(selector), getNot(selector), and nth(number).
+Aliases g, ng, and n are also available.
+
+Selector is in the form of 'namespace:value', with namespace defaulting to 'item'.
+
+value may also be the wildcard *.
+
+Selection does not traverse through item, except for the input shape.
+
+This means that s.get('a').get('b') will find b inside a, but otherwise b would not be found.
+`;
+
+Group(
+  Box(10).as('box').color('yellow').material('copper'),
+  Arc(10).as('arc').color('cyan').material('brick')
+)
+  .view((s) => s.get('*').pack())
+  .md('All items.')
+  .view(get('color:green'))
+  .md('All green things.')
+  .view(getNot('material:copper'))
+  .md('All non-copper things.');
+
+md`
+---
+### Abstract View
+We can generate an abstract view of the geometry to be displayed as a graph.
+`;
+
+Box(4).as('box').and(Arc(5).ex(10).as('bar')).abstract();

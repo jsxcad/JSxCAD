@@ -94,7 +94,7 @@ const screwThread = ScrewThread(20, 10)
 ScrewThread(10, 5)
   .and(NutThread(10, 5).and(Arc(15).cut(Arc(10)).ex(5)))
   .view()
-  .view({ op: section() });
+  .view(section());
 ```
 
 ![Image](bolt.md.3.png)

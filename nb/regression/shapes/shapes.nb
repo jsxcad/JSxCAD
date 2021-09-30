@@ -5,7 +5,7 @@ const arc = Arc(5)
 
 const assembly = Assembly(Box(10), Arc(8), Triangle(5))
   .pack()
-  .gridView({ size: 801, triangles: false, wireframe: false })
+  .gridView(undefined, { size: 801, triangles: false, wireframe: false })
   .md(`Assembly(Box(10), Arc(8), Triangle(5))`);
 
 const box = Box(5, 7, 8).view().md(`Box(5, 7, 8)`);
@@ -55,12 +55,10 @@ const torusFn = ([x, y, z]) => {
   );
 };
 
-/*
 // Determine why Implicit seems non-deterministic.
 const implicit = Implicit(torusFn, { radius: 2 })
   .view()
   .md('Implicit(torusFn, { radius: 2 }');
-*/
 
 const line = Line(5, -1).rz(45).gridView().md(`Line(5, -1)`);
 

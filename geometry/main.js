@@ -84,13 +84,18 @@ export { isCounterClockwise as isCounterClockwisePath } from './path/isCounterCl
 export { isClosed as isClosedPath } from './path/isClosed.js';
 export {
   isNotType,
-  isType,
-  hasNotType,
-  hasType,
+  isNotTypeVoid,
   isNotTypeWire,
+  isType,
+  isTypeVoid,
   isTypeWire,
+  hasNotType,
+  hasNotTypeVoid,
   hasNotTypeWire,
+  hasType,
+  hasTypeVoid,
   hasTypeWire,
+  typeVoid,
   typeWire,
 } from './tagged/type.js';
 export { keep } from './tagged/keep.js';

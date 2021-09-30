@@ -242,6 +242,7 @@ export { md } from './md.js';
 export { elapsed, emit, info, read, write } from '@jsxcad/sys';
 
 export { Shape } from './Shape.js';
+export { abstract } from './abstract.js';
 export { add } from './add.js';
 export { and } from './and.js';
 export { addTo } from './addTo.js';
@@ -270,6 +271,7 @@ export { fit } from './fit.js';
 export { fitTo } from './fitTo.js';
 export { fuse } from './fuse.js';
 export { g, get } from './get.js';
+export { gn, getNot } from './getNot.js';
 export { grow } from './grow.js';
 export { inline } from './inline.js';
 export { inset } from './inset.js';

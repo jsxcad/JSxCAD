@@ -105,7 +105,7 @@ const scaledVisnezh = visnezh
 ```JavaScript
 const star = Group(
   ...seq((a) => Triangle(5).rz(a), { upto: 120 / 360, by: 30 / 360 })
-).view({ outline: false });
+).view(undefined, { outline: false });
 ```
 
 ![Image](plotter.md.6.png)

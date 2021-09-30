@@ -31,14 +31,22 @@ const build = async (baseDirectory = '.') => {
       }
     };
     await walk(baseDirectory);
-    const failedExpectations = [];
+    const collectedFailedExpectations = [];
     for (const notebook of notebooks) {
+      const failedExpectations = [];
       console.log(`Processing notebook: ${process.cwd()}/${notebook}.nb`);
       await updateNotebook(notebook, { failedExpectations });
+      if (
+        failedExpectations.length > 0 &&
+        collectedFailedExpectations.length > 0
+      ) {
+        collectedFailedExpectations.push('');
+      }
+      collectedFailedExpectations.push(...failedExpectations);
     }
-    if (failedExpectations.length > 0) {
+    if (collectedFailedExpectations.length > 0) {
       console.log('Expectations failed:');
-      for (const failedExpectation of failedExpectations) {
+      for (const failedExpectation of collectedFailedExpectations) {
         console.log(failedExpectation);
       }
       process.exit(1);

@@ -56,7 +56,7 @@ const calibration = Group(
 
 const star = Group(
   ...seq((a) => Triangle(5).rz(a), { upto: 120 / 360, by: 30 / 360 })
-).view({ outline: false });
+).view(undefined, { outline: false });
 
 const r = Random();
 

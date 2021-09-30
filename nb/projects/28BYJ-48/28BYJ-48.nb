@@ -52,5 +52,5 @@ export const stepperMotor28byj48 = Group(
         .y(totalDiameter / 2 - tabDiameter / 2)
         .rz(0, 1 / 2)
     )
-).view({ op: rz(1 / 4) });
+).view(rz(1 / 4));
 md`![28BYJ-48 Stepper Motor](https://cdn-reichelt.de/bilder/web/artikel_ws/A300/ME071_01.jpg)`;

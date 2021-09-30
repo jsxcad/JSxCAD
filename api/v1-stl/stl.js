@@ -12,21 +12,20 @@ import { hash as hashGeometry } from '@jsxcad/geometry';
 import hashSum from 'hash-sum';
 import { toStl } from '@jsxcad/convert-stl';
 
-export const prepareStl = (shape, name, options = {}) => {
+export const prepareStl = (shape, name, op = (s) => s, options = {}) => {
   const { path } = getSourceLocation();
-  const { op = (s) => s } = options;
   let index = 0;
   const entries = [];
   for (const entry of ensurePages(op(shape).toDisjointGeometry())) {
     const stlPath = `stl/${path}/${generateUniqueId()}`;
-    const op = async () => {
+    const render = async () => {
       try {
         await write(stlPath, await toStl(entry, options));
       } catch (error) {
         getPendingErrorHandler()(error);
       }
     };
-    addPending(op());
+    addPending(render());
     entries.push({
       path: stlPath,
       filename: `${name}_${index++}.stl`,
@@ -38,8 +37,8 @@ export const prepareStl = (shape, name, options = {}) => {
   return entries;
 };
 
-export const stl = (name, options) => (shape) => {
-  const entries = prepareStl(shape, name, options);
+export const stl = (name, op, options) => (shape) => {
+  const entries = prepareStl(shape, name, op, options);
   const download = { entries };
   const hash = hashSum({ name }) + hashGeometry(shape.toGeometry());
   emit({ download, hash });

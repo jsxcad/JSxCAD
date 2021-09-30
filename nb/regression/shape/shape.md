@@ -2,7 +2,7 @@
 const add = Triangle(10)
   .color('red')
   .add(Box(5).color('blue'))
-  .gridView(256);
+  .gridView();
 ```
 
 ![Image](shape.md.0.png)
@@ -10,7 +10,7 @@ const add = Triangle(10)
 ```JavaScript
 const and = Box(5)
   .and(Arc(5))
-  .gridView({ size: 800, triangles: false, outline: true, wireframe: false });
+  .gridView(undefined, { size: 800, triangles: false, outline: true, wireframe: false });
 ```
 
 ![Image](shape.md.1.png)
