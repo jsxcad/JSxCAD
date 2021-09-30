@@ -16,6 +16,8 @@ import pngjs from 'pngjs';
 import { screenshot } from './screenshot.js';
 import { toHtml } from '@jsxcad/convert-notebook';
 
+const PIXEL_THRESHOLD = 1000;
+
 const ensureNewline = (line) => (line.endsWith('\n') ? line : `${line}\n`);
 
 const escapeMarkdownLink = (string) => string.replace(/ /g, '%20');
@@ -151,7 +153,6 @@ export const updateNotebook = async (
         continue;
       }
       const differencePng = new pngjs.PNG({ width, height });
-      const pixelThreshold = 1;
       const numFailedPixels = pixelmatch(
         expectedPng.data,
         observedPng.data,
@@ -166,12 +167,12 @@ export const updateNotebook = async (
             process.env.FORCE_COLOR === '0' ? [255, 255, 255] : [255, 0, 0],
         }
       );
-      if (numFailedPixels >= pixelThreshold) {
+      if (numFailedPixels >= PIXEL_THRESHOLD) {
         const differencePath = `${target}.md.${nth}.difference.png`;
         writeFileSync(differencePath, pngjs.PNG.sync.write(differencePng));
         // Note failures.
         failedExpectations.push(
-          `# numFailedPixels ${numFailedPixels} > pixelThreshold ${pixelThreshold}`
+          `# numFailedPixels ${numFailedPixels} > PIXEL_THRESHOLD ${PIXEL_THRESHOLD}`
         );
         failedExpectations.push(`display ${differencePath}`);
         failedExpectations.push(`cp ${observedPath} ${expectedPath}`);
