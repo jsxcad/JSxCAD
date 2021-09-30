@@ -146,6 +146,7 @@ export const updateNotebook = async (
       const { width, height } = expectedPng;
       if (width !== observedPng.width || height !== observedPng.height) {
         // Can't diff when the dimensions don't match.
+        failedExpectations.push('# dimensions differ');
         failedExpectations.push(`cp ${observedPath} ${expectedPath}`);
         continue;
       }
