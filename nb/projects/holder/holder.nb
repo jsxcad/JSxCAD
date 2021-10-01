@@ -20,4 +20,5 @@ const magneticPenHolder = Arc(magnetDiameter)
       .align('x<')
       .x(1)
   )
+  .view()
   .stl('holder', drop('material:steel'));
