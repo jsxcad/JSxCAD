@@ -185,6 +185,7 @@ Shape.registerReifier = (name, op) => {
   registerReifier(name, op);
   return op;
 };
+
 Shape.toShape = (to, from) => {
   if (to instanceof Function) {
     to = to(from);
@@ -194,6 +195,13 @@ Shape.toShape = (to, from) => {
   } else {
     throw Error('Expected Function or Shape');
   }
+};
+
+Shape.toValue = (to, from) => {
+  if (to instanceof Function) {
+    to = to(from);
+  }
+  return to;
 };
 
 export const fromGeometry = Shape.fromGeometry;

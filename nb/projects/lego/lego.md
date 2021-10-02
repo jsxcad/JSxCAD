@@ -243,20 +243,24 @@ Axle Joiner 16mm
 [AxleJoiner16_0.stl](lego.AxleJoiner16_0.stl)
 
 ```JavaScript
-const technicConnector = xz
-  .Arc(4.8)
+const technicConnector = Arc(4.8)
   .ex(8, -8)
-  .add(xz.Arc(6.2).ex(0.8 - 0.2))
+  .at(xz)
   .add(
-    xz
-      .Arc(5.5)
+    Arc(6.2)
+      .ex(0.8 - 0.2)
+      .at(xz)
+  )
+  .add(
+    Arc(5.5)
       .ex(0.4)
+      .at(xz)
       .y(-8 + 0.2)
   )
   .add(
-    xz
-      .Arc(5.5)
+    Arc(5.5)
       .ex(0.4)
+      .at(xz)
       .y(8 - 0.2)
   )
   .cut(yz.Box(10, 6, 0.5).y(-8 + 3))
@@ -271,14 +275,18 @@ const technicConnector = xz
 [technicConnector_0.stl](lego.technicConnector_0.stl)
 
 ```JavaScript
-const halfTechnicConnector = xz
-  .Arc(4.8)
+const halfTechnicConnector = Arc(4.8)
   .ex(8)
-  .add(xz.Arc(6.2).ex(0.8 - 0.2))
+  .at(xz)
   .add(
-    xz
-      .Arc(5.5)
+    Arc(6.2)
+      .ex(0.8 - 0.2)
+      .at(xz)
+  )
+  .add(
+    Arc(5.5)
       .ex(0.4)
+      .at(xz)
       .y(8 - 0.2)
   )
   .cut(yz.Box(10, 6, 0.5).y(-8 + 3))
@@ -294,7 +302,7 @@ const halfTechnicConnector = xz
 
 ```JavaScript
 const technicPlug5mm = halfTechnicConnector
-  .and(xz.Arc(5).clip(xz.Box(4.5, 5)).ex(-8))
+  .and(Arc(5).clip(Box(4.5, 5)).ex(-8).at(xz))
   .stl('technicPlug5mm');
 ```
 

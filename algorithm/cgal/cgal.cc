@@ -1060,6 +1060,17 @@ void computeNormalOfSurfaceMesh(Vector& normal, const Surface_mesh& mesh) {
   }
 }
 
+void ComputeNormalOfSurfaceMesh(const Surface_mesh* input, const Transformation* transformation, emscripten::val emit_normal) {
+  Surface_mesh mesh(*input);
+  CGAL::Polygon_mesh_processing::transform(*transformation, mesh, CGAL::parameters::all_default());
+  Vector normal;
+  computeNormalOfSurfaceMesh(normal, mesh);
+  std::ostringstream x; x << normal.x().exact(); std::string xs = x.str();
+  std::ostringstream y; y << normal.y().exact(); std::string ys = y.str();
+  std::ostringstream z; z << normal.z().exact(); std::string zs = z.str();
+  emit_normal(CGAL::to_double(normal.x().exact()), CGAL::to_double(normal.y().exact()), CGAL::to_double(normal.z().exact()), xs, ys, zs);
+}
+
 const Surface_mesh* ExtrusionOfSurfaceMesh(const Surface_mesh* input, const Transformation* transformation, double height, double depth, emscripten::val fill_normal) {
   Surface_mesh mesh(*input);
   CGAL::Polygon_mesh_processing::transform(*transformation, mesh, CGAL::parameters::all_default());
@@ -3321,6 +3332,7 @@ EMSCRIPTEN_BINDINGS(module) {
   emscripten::function("OutlineSurfaceMesh", &OutlineSurfaceMesh, emscripten::allow_raw_pointers());
   emscripten::function("WireframeSurfaceMesh", &WireframeSurfaceMesh, emscripten::allow_raw_pointers());
   emscripten::function("FromSurfaceMeshToPolygonsWithHoles", &FromSurfaceMeshToPolygonsWithHoles, emscripten::allow_raw_pointers());
+  emscripten::function("ComputeNormalOfSurfaceMesh", &ComputeNormalOfSurfaceMesh, emscripten::allow_raw_pointers());
 
   emscripten::function("BooleansOfPolygonsWithHolesApproximate", &BooleansOfPolygonsWithHolesApproximate);
   emscripten::function("BooleansOfPolygonsWithHolesExact", &BooleansOfPolygonsWithHolesExact);

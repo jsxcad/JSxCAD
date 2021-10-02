@@ -288,6 +288,7 @@ export { minkowskiDifference } from './minkowskiDifference.js';
 export { minkowskiShell } from './minkowskiShell.js';
 export { minkowskiSum } from './minkowskiSum.js';
 export { move } from './move.js';
+export { normal } from './normal.js';
 export { noVoid } from './noVoid.js';
 export { notColor } from './notColor.js';
 export { n, nth } from './nth.js';
