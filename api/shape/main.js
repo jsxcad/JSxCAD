@@ -267,6 +267,7 @@ export { drop } from './drop.js';
 export { ensurePages } from './Page.js';
 export { each } from './each.js';
 export { ex, extrude } from './extrude.js';
+export { extrudeAlong } from './extrudeAlong.js';
 export { extrudeToPlane } from './extrudeToPlane.js';
 export { fill, withFill } from './fill.js';
 export { fit } from './fit.js';

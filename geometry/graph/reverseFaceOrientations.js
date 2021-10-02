@@ -7,6 +7,9 @@ export const reverseFaceOrientations = (geometry) =>
   taggedGraph(
     { tags: geometry.tags },
     fromSurfaceMeshLazy(
-      reverseFaceOrientationsOfSurfaceMesh(toSurfaceMesh(geometry.graph))
+      reverseFaceOrientationsOfSurfaceMesh(
+        toSurfaceMesh(geometry.graph),
+        geometry.matrix
+      )
     )
   );

@@ -1,5 +1,5 @@
 import { identityMatrix, fromTranslation, fromZRotation, fromScaling, fromXRotation, fromYRotation } from './jsxcad-math-mat4.js';
-import { composeTransforms, fromSurfaceMeshToLazyGraph, fromPointsToAlphaShapeAsSurfaceMesh, arrangePathsIntoTriangles, fromPolygonsToSurfaceMesh, deserializeSurfaceMesh, fromGraphToSurfaceMesh, fromSurfaceMeshEmitBoundingBox, differenceOfSurfaceMeshes, bendSurfaceMesh, computeNormalOfSurfaceMesh, fromSurfaceMeshToGraph, fromPointsToConvexHullAsSurfaceMesh, extrudeSurfaceMesh, extrudeToPlaneOfSurfaceMesh, fromFunctionToSurfaceMesh, fromPointsToSurfaceMesh, arrangePaths, growSurfaceMesh, intersectionOfSurfaceMeshes, fromSurfaceMeshToPolygonsWithHoles, insetOfPolygonWithHoles, loftBetweenCongruentSurfaceMeshes, minkowskiDifferenceOfSurfaceMeshes, minkowskiShellOfSurfaceMeshes, minkowskiSumOfSurfaceMeshes, offsetOfPolygonWithHoles, outlineSurfaceMesh, projectToPlaneOfSurfaceMesh, serializeSurfaceMesh, pushSurfaceMesh, remeshSurfaceMesh, reverseFaceOrientationsOfSurfaceMesh, sectionOfSurfaceMesh, subdivideSurfaceMesh, separateSurfaceMesh, fromSurfaceMeshToTriangles, wireframeSurfaceMesh, doesSelfIntersectOfSurfaceMesh, twistSurfaceMesh, unionOfSurfaceMeshes } from './jsxcad-algorithm-cgal.js';
+import { composeTransforms, fromSurfaceMeshToLazyGraph, fromPointsToAlphaShapeAsSurfaceMesh, arrangePathsIntoTriangles, fromPolygonsToSurfaceMesh, deserializeSurfaceMesh, fromGraphToSurfaceMesh, fromSurfaceMeshEmitBoundingBox, differenceOfSurfaceMeshes, bendSurfaceMesh, computeNormalOfSurfaceMesh, fromSurfaceMeshToGraph, fromPointsToConvexHullAsSurfaceMesh, extrudeSurfaceMesh, extrudeToPlaneOfSurfaceMesh, reverseFaceOrientationsOfSurfaceMesh, fromFunctionToSurfaceMesh, fromPointsToSurfaceMesh, arrangePaths, growSurfaceMesh, intersectionOfSurfaceMeshes, fromSurfaceMeshToPolygonsWithHoles, insetOfPolygonWithHoles, loftBetweenCongruentSurfaceMeshes, minkowskiDifferenceOfSurfaceMeshes, minkowskiShellOfSurfaceMeshes, minkowskiSumOfSurfaceMeshes, offsetOfPolygonWithHoles, outlineSurfaceMesh, projectToPlaneOfSurfaceMesh, serializeSurfaceMesh, pushSurfaceMesh, remeshSurfaceMesh, sectionOfSurfaceMesh, subdivideSurfaceMesh, separateSurfaceMesh, fromSurfaceMeshToTriangles, wireframeSurfaceMesh, doesSelfIntersectOfSurfaceMesh, twistSurfaceMesh, unionOfSurfaceMeshes } from './jsxcad-algorithm-cgal.js';
 export { arrangePolygonsWithHoles } from './jsxcad-algorithm-cgal.js';
 import { cache, cacheRewriteTags, cacheSection } from './jsxcad-cache.js';
 import { equals, min, max, transform as transform$5, canonicalize as canonicalize$5, scale as scale$3, subtract } from './jsxcad-math-vec3.js';
@@ -1416,9 +1416,22 @@ const flip$1 = (points) =>
     return [x, y, z, xF, yF, zF, xFR, yFR, zFR];
   });
 
+const reverseFaceOrientations = (geometry) =>
+  taggedGraph(
+    { tags: geometry.tags },
+    fromSurfaceMeshLazy(
+      reverseFaceOrientationsOfSurfaceMesh(
+        toSurfaceMesh(geometry.graph),
+        geometry.matrix
+      )
+    )
+  );
+
 const flip = (geometry) => {
   const op = (geometry, descend) => {
     switch (geometry.type) {
+      case 'graph':
+        return reverseFaceOrientations(geometry);
       case 'points':
         return { ...geometry, points: flip$1(geometry.points) };
       case 'paths':
@@ -2464,14 +2477,6 @@ const remesh = (geometry, options) => {
 
 const rerealizeGraph = (graph) =>
   fromSurfaceMeshLazy(toSurfaceMesh(graph), /* forceNewGraph= */ true);
-
-const reverseFaceOrientations = (geometry) =>
-  taggedGraph(
-    { tags: geometry.tags },
-    fromSurfaceMeshLazy(
-      reverseFaceOrientationsOfSurfaceMesh(toSurfaceMesh(geometry.graph))
-    )
-  );
 
 const translate$2 = (vector, path) =>
   transform$3(fromTranslation(vector), path);

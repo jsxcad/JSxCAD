@@ -1590,8 +1590,11 @@ const pushSurfaceMesh = (
     scale
   );
 
-const reverseFaceOrientationsOfSurfaceMesh = (mesh) =>
-  getCgal().ReverseFaceOrientationsOfSurfaceMesh(mesh);
+const reverseFaceOrientationsOfSurfaceMesh = (mesh, transform) =>
+  getCgal().ReverseFaceOrientationsOfSurfaceMesh(
+    mesh,
+    toCgalTransformFromJsTransform(transform)
+  );
 
 // import { arrangePaths } from './arrangePaths.js';
 

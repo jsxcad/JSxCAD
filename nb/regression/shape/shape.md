@@ -196,10 +196,22 @@ const rz = Box(1, 2, 3).rz(1/8).gridView();
 ![Image](shape.md.22.png)
 
 ```JavaScript
-const scale = Box(5).scale(1, 2).gridView();
+const scale1 = Box(5).scale(1, 2).gridView();
 ```
 
 ![Image](shape.md.23.png)
+
+```JavaScript
+const scale2 = Box(5).cut(Arc(5).align('x>')).scale(1, 1).gridView();
+```
+
+![Image](shape.md.24.png)
+
+```JavaScript
+const scale3 = Box(5).cut(Arc(5).align('x>')).scale(-1, 1).gridView();
+```
+
+![Image](shape.md.25.png)
 
 ```JavaScript
 const sizeEx = Box(1, 2, 3)
@@ -218,7 +230,7 @@ const sketch = Box(2, 2, 2)
   .view();
 ```
 
-![Image](shape.md.24.png)
+![Image](shape.md.26.png)
 
 ```JavaScript
 const tagsEx = Box(1)
@@ -233,20 +245,20 @@ const tagsEx = Box(1)
 const test = Box(5, 5, 5).test().gridView();
 ```
 
-![Image](shape.md.25.png)
+![Image](shape.md.27.png)
 
 ```JavaScript
 const tool = Box(5).tool('laser').gridView();
 ```
 
-![Image](shape.md.26.png)
+![Image](shape.md.28.png)
 
 ```JavaScript
 const voidEx = Assembly(Box(5), Arc(6).void())
   .gridView();
 ```
 
-![Image](shape.md.27.png)
+![Image](shape.md.29.png)
 
 ```JavaScript
 const weld = Weld(Arc(6).x(-1), Arc(6).x(1), Arc(6).y(1), Arc(6).y(-1))
@@ -258,28 +270,28 @@ const weld = Weld(Arc(6).x(-1), Arc(6).x(1), Arc(6).y(1), Arc(6).y(-1))
 const withEx = Box(5).with(Arc(6)).gridView();
 ```
 
-![Image](shape.md.28.png)
+![Image](shape.md.30.png)
 
 ```JavaScript
 const xEx = Box(5).x(1).gridView();
 ```
 
-![Image](shape.md.29.png)
+![Image](shape.md.31.png)
 
 ```JavaScript
 const yEx = Box(5).y(1).gridView();
 ```
 
-![Image](shape.md.30.png)
+![Image](shape.md.32.png)
 
 ```JavaScript
 const zEx = Box(5).z(1).gridView();
 ```
 
-![Image](shape.md.31.png)
+![Image](shape.md.33.png)
 
 ```JavaScript
 const voidInEx = Arc(10).voidIn(offset(1)).ex(5).view();
 ```
 
-![Image](shape.md.32.png)
+![Image](shape.md.34.png)

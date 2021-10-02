@@ -346,8 +346,9 @@ const Surface_mesh* SubdivideSurfaceMesh(const Surface_mesh* input, int method, 
   return mesh;
 }
 
-const Surface_mesh* ReverseFaceOrientationsOfSurfaceMesh(const Surface_mesh* input) {
+const Surface_mesh* ReverseFaceOrientationsOfSurfaceMesh(const Surface_mesh* input, const Transformation* transformation) {
   Surface_mesh* mesh = new Surface_mesh(*input);
+  CGAL::Polygon_mesh_processing::transform(*transformation, *mesh, CGAL::parameters::all_default());
   CGAL::Polygon_mesh_processing::reverse_face_orientations(mesh->faces(), *mesh);
   return mesh;
 }

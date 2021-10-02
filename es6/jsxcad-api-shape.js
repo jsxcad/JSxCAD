@@ -2648,12 +2648,10 @@ Point.fromPoint = fromPoint;
 
 Shape.prototype.Point = Shape.shapeMethod(Point);
 
-const extrude =
-  (...args) =>
+const extrudeAlong =
+  (direction, ...extents) =>
   (shape) => {
-    const heights = args.map((arg) => Shape.toValue(arg, shape));
-    const direction =
-      heights[0] instanceof Shape ? heights.shift() : Point(0, 0, 1);
+    const heights = extents.map((extent) => Shape.toValue(extent, shape));
     if (heights.length % 2 === 1) {
       heights.push(0);
     }
@@ -2673,7 +2671,7 @@ const extrude =
             shape.toGeometry(),
             height,
             depth,
-            direction.toGeometry()
+            Shape.toShape(direction, shape).toGeometry()
           )
         )
       );
@@ -2681,10 +2679,14 @@ const extrude =
     return Shape.Group(...extrusions);
   };
 
+Shape.registerMethod('extrudeAlong', extrudeAlong);
+
+const extrude = (...extents) => extrudeAlong(Point(0, 0, 1), ...extents);
+
 const ex = extrude;
 
 Shape.registerMethod('extrude', extrude);
-Shape.registerMethod('ex', extrude);
+Shape.registerMethod('ex', ex);
 
 const extrudeToPlane =
   (
@@ -3324,8 +3326,15 @@ Shape.registerMethod('separate', separate);
 
 const scale =
   (x = 1, y = x, z = y) =>
-  (shape) =>
-    shape.transform(fromScaling([x, y, z]));
+  (shape) => {
+    const negatives = (x < 0) + (y < 0) + (z < 0);
+    if (negatives % 2) {
+      // Compensate for inversion.
+      return shape.transform(fromScaling([x, y, z])).flip();
+    } else {
+      return shape.transform(fromScaling([x, y, z]));
+    }
+  };
 
 Shape.registerMethod('scale', scale);
 
@@ -4323,4 +4332,4 @@ const yz = Shape.fromGeometry({
   ],
 });
 
-export { Alpha, Arc, Assembly, Box, ChainedHull, Cone, Empty, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Line, Octagon, Orb, Page, Path, Pentagon, Plan, Point, Points, Polygon, Polyhedron, Septagon, Shape, Spiral, Tetragon, Triangle, Wave, Weld, abstract, add, addTo, align, and, as, asPart, at, bend, billOfMaterials, cast, clip, clipFrom, cloudSolid, color, colors, cut, cutFrom, cutOut, defGrblConstantLaser, defGrblDynamicLaser, defGrblPlotter, defGrblSpindle, defRgbColor, defThreejsMaterial, defTool, define, drop, each, ensurePages, ex, extrude, extrudeToPlane, fill, fit, fitTo, fuse, g, get, getNot, gn, grow, inline, inset, keep, loadGeometry, loft, log, loop, mask, material, md, minkowskiDifference, minkowskiShell, minkowskiSum, move, n, noVoid, normal, notColor, nth, ofPlan, offset, on, op, orient, outline, pack, play, push, remesh, rotate, rotateX, rotateY, rotateZ, rx, ry, rz, saveGeometry, scale, scaleToFit, section, sectionProfile, separate, size, sketch, smooth, tag, tags, test, tint, tool, top, twist, untag, view, voidFn, voidIn, weld, withFill, withFn, withInset, withOp, x, xy, xz, y, yz, z };
+export { Alpha, Arc, Assembly, Box, ChainedHull, Cone, Empty, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Line, Octagon, Orb, Page, Path, Pentagon, Plan, Point, Points, Polygon, Polyhedron, Septagon, Shape, Spiral, Tetragon, Triangle, Wave, Weld, abstract, add, addTo, align, and, as, asPart, at, bend, billOfMaterials, cast, clip, clipFrom, cloudSolid, color, colors, cut, cutFrom, cutOut, defGrblConstantLaser, defGrblDynamicLaser, defGrblPlotter, defGrblSpindle, defRgbColor, defThreejsMaterial, defTool, define, drop, each, ensurePages, ex, extrude, extrudeAlong, extrudeToPlane, fill, fit, fitTo, fuse, g, get, getNot, gn, grow, inline, inset, keep, loadGeometry, loft, log, loop, mask, material, md, minkowskiDifference, minkowskiShell, minkowskiSum, move, n, noVoid, normal, notColor, nth, ofPlan, offset, on, op, orient, outline, pack, play, push, remesh, rotate, rotateX, rotateY, rotateZ, rx, ry, rz, saveGeometry, scale, scaleToFit, section, sectionProfile, separate, size, sketch, smooth, tag, tags, test, tint, tool, top, twist, untag, view, voidFn, voidIn, weld, withFill, withFn, withInset, withOp, x, xy, xz, y, yz, z };
