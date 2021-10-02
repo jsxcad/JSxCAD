@@ -1166,12 +1166,13 @@ const fromEmpty = ({ tags } = {}) =>
 
 const empty = ({ tags }) => fromEmpty({ tags });
 
-const extrude$1 = (geometry, height, depth) => {
+const extrude$1 = (geometry, height, depth, direction = {}) => {
   const extrudedMesh = extrudeSurfaceMesh(
     toSurfaceMesh(geometry.graph),
     geometry.matrix,
     height,
-    depth
+    depth,
+    direction
   );
   if (!extrudedMesh) {
     console.log(`Extrusion failed`);
@@ -1250,19 +1251,19 @@ const fill = (geometry, includeFaces = true, includeHoles = true) => {
   return taggedGroup({}, ...fills);
 };
 
-const extrude = (geometry, height, depth) => {
+const extrude = (geometry, height, depth, direction) => {
   const op = (geometry, descend) => {
     switch (geometry.type) {
       case 'graph':
-        return extrude$1(geometry, height, depth);
+        return extrude$1(geometry, height, depth, direction);
       case 'triangles':
       case 'points':
         // Not implemented yet.
         return geometry;
       case 'paths':
-        return extrude(fill(geometry), height, depth);
+        return extrude(fill(geometry), height, depth, direction);
       case 'plan':
-        return extrude(reify(geometry).content[0], height, depth);
+        return extrude(reify(geometry).content[0], height, depth, direction);
       case 'item':
       case 'group': {
         return descend();

@@ -92,6 +92,7 @@ typedef Kernel::Plane_3 Plane;
 typedef Kernel::Point_2 Point_2;
 typedef Kernel::Point_3 Point;
 typedef Kernel::Segment_3 Segment;
+typedef Kernel::Triangle_3 Triangle;
 typedef Kernel::Vector_2 Vector_2;
 typedef Kernel::Vector_3 Vector;
 typedef Kernel::Direction_3 Direction;
@@ -1022,18 +1023,54 @@ void SeparateSurfaceMesh(const Surface_mesh* input, bool keep_volumes, bool keep
   }
 }
 
+bool admitVector(Vector& vector, emscripten::val fill_vector) {
+  Quadruple q;
+  Quadruple* qp = &q;
+  if (fill_vector(qp).as<bool>()) {
+    vector = Vector(q[0], q[1], q[2]);
+    return true;
+  }
+  return false;
+}
 
-const Surface_mesh* ExtrusionOfSurfaceMesh(const Surface_mesh* input, const Transformation* transformation, double height, double depth) {
+Vector estimateTriangleNormals(const std::vector<Triangle>& triangles)
+{
+  Vector estimate(0, 0, 0);
+  for(const Triangle& triangle : triangles) {
+    estimate += unitVector(CGAL::Polygon_mesh_processing::internal::triangle_normal(
+          triangle[0], triangle[1], triangle[2], Kernel()));
+  }
+  return estimate;
+}
+
+void computeNormalOfSurfaceMesh(Vector& normal, const Surface_mesh& mesh) {
+  std::vector<Triangle> triangles;
+  for (const auto& facet : mesh.faces()) {
+    if (mesh.is_removed(facet)) {
+      continue;
+    }
+    const auto h = mesh.halfedge(facet);
+    triangles.push_back(Triangle(mesh.point(mesh.source(h)), mesh.point(mesh.source(mesh.next(h))), mesh.point(mesh.source(mesh.next(mesh.next(h))))));
+  }
+  Plane plane;
+  linear_least_squares_fitting_3(triangles.begin(), triangles.end(), plane, CGAL::Dimension_tag<2>());
+  normal = plane.orthogonal_vector();
+  if (CGAL::scalar_product(normal, estimateTriangleNormals(triangles)) < 0) {
+    normal = -normal;
+  }
+}
+
+const Surface_mesh* ExtrusionOfSurfaceMesh(const Surface_mesh* input, const Transformation* transformation, double height, double depth, emscripten::val fill_normal) {
   Surface_mesh mesh(*input);
   CGAL::Polygon_mesh_processing::transform(*transformation, mesh, CGAL::parameters::all_default());
 
-  Surface_mesh* extruded_mesh = new Surface_mesh();
+  // Default to a vertical extrusion.
+  Vector normal;
 
-  Vector normal = SomeNormalOfSurfaceMesh(mesh);
-
-  if (normal == CGAL::NULL_VECTOR) {
-    std::cout << "Extrusion couldn't find any faces: " << mesh << std::endl;
-    return nullptr;
+  // Infer a normal from the best-fit plane of the mesh.
+  if (!admitVector(normal, fill_normal)) {
+    CGAL::Polygon_mesh_processing::triangulate_faces(mesh);
+    computeNormalOfSurfaceMesh(normal, mesh);
   }
 
   Vector up;
@@ -1071,11 +1108,12 @@ const Surface_mesh* ExtrusionOfSurfaceMesh(const Surface_mesh* input, const Tran
     down = normal * (depth / length);
   }
 
+  Surface_mesh* extruded_mesh = new Surface_mesh();
+
   typedef typename boost::property_map<Surface_mesh, CGAL::vertex_point_t>::type VPMap;
   Project<VPMap> top(get(CGAL::vertex_point, *extruded_mesh), up);
   Project<VPMap> bottom(get(CGAL::vertex_point, *extruded_mesh), down);
   CGAL::Polygon_mesh_processing::extrude_mesh(mesh, *extruded_mesh, bottom, top);
-
   return extruded_mesh;
 }
 
@@ -1893,7 +1931,6 @@ class Surface_mesh_explorer {
 };
 
 void Surface_mesh__explore(const Surface_mesh* mesh, emscripten::val emit_point, emscripten::val emit_edge, emscripten::val emit_face) {
-  // CGAL::Polygon_mesh_processing::triangulate_faces(mesh->faces(), *mesh);
   Surface_mesh_explorer explorer(emit_point, emit_edge, emit_face);
   explorer.Explore(*mesh);
 }

@@ -142,7 +142,7 @@ const noVoid = Assembly(Box(5), Arc(5.5).void())
 ![Image](shape.md.14.png)
 
 ```JavaScript
-const offset = Box(5).offset(1).gridView();
+const offsetEx = Box(5).offset(1).gridView();
 ```
 
 ![Image](shape.md.15.png)
@@ -209,7 +209,7 @@ const sizeEx = Box(1, 2, 3)
   });
 ```
 
-{"length":1.0000000000000016,"width":2.000000000000003,"height":3.000000000000002,"max":[0.5000000000000006,1.000000000000001,1.500000000000001],"min":[-0.500000000000001,-1.000000000000002,-1.500000000000001],"center":[-2.220446049250313e-16,-4.440892098500626e-16,0],"radius":1.8708286933869727}
+{"length":1.000000000000001,"width":2.000000000000002,"height":3.000000000000002,"max":[0.5000000000000006,1.000000000000001,1.500000000000001],"min":[-0.5000000000000006,-1.000000000000001,-1.500000000000001],"center":[0,0,0],"radius":1.8708286933869724}
 
 ```JavaScript
 const sketch = Box(2, 2, 2)
@@ -277,3 +277,9 @@ const zEx = Box(5).z(1).gridView();
 ```
 
 ![Image](shape.md.31.png)
+
+```JavaScript
+const voidInEx = Arc(10).voidIn(offset(1)).ex(5).view();
+```
+
+![Image](shape.md.32.png)

@@ -73,7 +73,7 @@ const noVoid = Assembly(Box(5), Arc(5.5).void())
   .noVoid()
   .gridView();
 
-const offset = Box(5).offset(1).gridView();
+const offsetEx = Box(5).offset(1).gridView();
 
 const op = Box(5)
   .op((s) => s.color('green'))
@@ -129,3 +129,5 @@ const withEx = Box(5).with(Arc(6)).gridView();
 const xEx = Box(5).x(1).gridView();
 const yEx = Box(5).y(1).gridView();
 const zEx = Box(5).z(1).gridView();
+
+const voidInEx = Arc(10).voidIn(offset(1)).ex(5).view();
