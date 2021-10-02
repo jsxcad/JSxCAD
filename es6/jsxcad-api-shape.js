@@ -564,7 +564,8 @@ const at =
             .transform(global)
         );
       }
-    }    return Group(...placed);
+    }
+    return Group(...placed);
   };
 
 Shape.registerMethod('at', at);
@@ -3598,7 +3599,8 @@ const voidFn = () => (shape) =>
 
 Shape.registerMethod('void', voidFn);
 
-const voidIn = (other) => (shape) => Shape.toShape(other, shape).fitTo(shape.void());
+const voidIn = (other) => (shape) =>
+  Shape.toShape(other, shape).fitTo(shape.void());
 
 Shape.registerMethod('voidIn', voidIn);
 
@@ -4152,9 +4154,150 @@ const xy = Shape.fromGeometry({
   ],
 });
 const xz = Shape.fromGeometry({
-'type': 'item', 'tags': ['item:xz'], 'content': [{ 'type': 'group', 'tags': [], 'content': [], 'matrix': [1, 0, 0, 0, 0, 0, -1, 0, 0, 1, 0, 0, 0, 0, 0, 1, '1', '0', '0', '0', '0', '0', '1', '0', '0', '-1', '0', '0', '1'] }], 'matrix': [1, 0, 0, 0, 0, 0, -1, 0, 0, 1, 0, 0, 0, 0, 0, 1, '1', '0', '0', '0', '0', '0', '1', '0', '0', '-1', '0', '0', '1']
+  type: 'item',
+  tags: ['item:xz'],
+  content: [
+    {
+      type: 'group',
+      tags: [],
+      content: [],
+      matrix: [
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        -1,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        '1',
+        '0',
+        '0',
+        '0',
+        '0',
+        '0',
+        '1',
+        '0',
+        '0',
+        '-1',
+        '0',
+        '0',
+        '1',
+      ],
+    },
+  ],
+  matrix: [
+    1,
+    0,
+    0,
+    0,
+    0,
+    0,
+    -1,
+    0,
+    0,
+    1,
+    0,
+    0,
+    0,
+    0,
+    0,
+    1,
+    '1',
+    '0',
+    '0',
+    '0',
+    '0',
+    '0',
+    '1',
+    '0',
+    '0',
+    '-1',
+    '0',
+    '0',
+    '1',
+  ],
 });
-const yz = Shape.fromGeometry(
-{ 'type': 'item', 'tags': ['item:yz'], 'content': [{ 'type': 'group', 'tags': [], 'content': [], 'matrix': [0, 0, -1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, '0', '0', '1', '0', '0', '1', '0', '0', '-1', '0', '0', '0', '1'] }], 'matrix': [0, 0, -1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, '0', '0', '1', '0', '0', '1', '0', '0', '-1', '0', '0', '0', '1'] });
+const yz = Shape.fromGeometry({
+  type: 'item',
+  tags: ['item:yz'],
+  content: [
+    {
+      type: 'group',
+      tags: [],
+      content: [],
+      matrix: [
+        0,
+        0,
+        -1,
+        0,
+        0,
+        1,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        '0',
+        '0',
+        '1',
+        '0',
+        '0',
+        '1',
+        '0',
+        '0',
+        '-1',
+        '0',
+        '0',
+        '0',
+        '1',
+      ],
+    },
+  ],
+  matrix: [
+    0,
+    0,
+    -1,
+    0,
+    0,
+    1,
+    0,
+    0,
+    1,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    1,
+    '0',
+    '0',
+    '1',
+    '0',
+    '0',
+    '1',
+    '0',
+    '0',
+    '-1',
+    '0',
+    '0',
+    '0',
+    '1',
+  ],
+});
 
 export { Alpha, Arc, Assembly, Box, ChainedHull, Cone, Empty, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Line, Octagon, Orb, Page, Path, Pentagon, Plan, Point, Points, Polygon, Polyhedron, Septagon, Shape, Spiral, Tetragon, Triangle, Wave, Weld, abstract, add, addTo, align, and, as, asPart, at, bend, billOfMaterials, cast, clip, clipFrom, cloudSolid, color, colors, cut, cutFrom, cutOut, defGrblConstantLaser, defGrblDynamicLaser, defGrblPlotter, defGrblSpindle, defRgbColor, defThreejsMaterial, defTool, define, drop, each, ensurePages, ex, extrude, extrudeToPlane, fill, fit, fitTo, fuse, g, get, getNot, gn, grow, inline, inset, keep, loadGeometry, loft, log, loop, mask, material, md, minkowskiDifference, minkowskiShell, minkowskiSum, move, n, noVoid, notColor, nth, ofPlan, offset, on, op, orient, outline, pack, play, push, remesh, rotate, rotateX, rotateY, rotateZ, rx, ry, rz, saveGeometry, scale, scaleToFit, section, sectionProfile, separate, size, sketch, smooth, tag, tags, test, tint, tool, top, twist, untag, view, voidFn, voidIn, weld, withFill, withFn, withInset, withOp, x, xy, xz, y, yz, z };

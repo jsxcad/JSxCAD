@@ -899,7 +899,7 @@ const extrudeSurfaceMesh = (mesh, transform, height, depth, dir) => {
         }
       }
     )
-  )
+  );
 };
 
 const extrudeToPlaneOfSurfaceMesh = (
