@@ -21,6 +21,7 @@ export {
   BOOLEAN_CLIP,
   booleansOfPolygonsWithHoles,
 } from './booleansOfPolygonsWithHoles.js';
+export { computeNormalOfSurfaceMesh } from './computeNormalOfSurfaceMesh.js';
 export { deserializeSurfaceMesh } from './deserializeSurfaceMesh.js';
 export { differenceOfSurfaceMeshes } from './differenceOfSurfaceMeshes.js';
 export { doesSelfIntersectOfSurfaceMesh } from './doesSelfIntersectOfSurfaceMesh.js';

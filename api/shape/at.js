@@ -1,26 +1,26 @@
-import { getLeafs, visit } from '@jsxcad/geometry';
-
 import Group from './Group.js';
 import Shape from './Shape.js';
+import { getLeafs } from '@jsxcad/geometry';
 import { invertTransform } from '@jsxcad/algorithm-cgal';
 
 export const at =
   (selection, ...ops) =>
   (shape) => {
+    if (ops.length === 0) {
+      ops.push(() => shape);
+    }
     ops = ops.map((op) => (op instanceof Function ? op : () => op));
-    // We've already selected the item to replace, e.g., s.on(g('plate'), ...);
+    // We've already selected the item for reference, e.g., s.on(g('plate'), ...);
     if (selection instanceof Function) {
       selection = selection(shape);
     }
-    // FIX: This needs to walk through items.
-    const leafs = getLeafs(selection.toGeometry());
     const placed = [];
-    const walk = (geometry, descend) => {
-      if (geometry.type === 'item' && leafs.includes(geometry)) {
+    for (const leaf of getLeafs(selection.toGeometry())) {
+      if (leaf.type === 'item') {
         // This is a target.
-        const global = geometry.matrix;
+        const global = leaf.matrix;
         const local = invertTransform(global);
-        const target = Shape.fromGeometry(geometry);
+        const target = Shape.fromGeometry(leaf);
         // Switch to the local coordinate space, perform the operation, and come back to the global coordinate space.
         placed.push(
           target
@@ -29,9 +29,7 @@ export const at =
             .transform(global)
         );
       }
-      return descend();
-    };
-    visit(shape.toGeometry(), walk);
+    }
     return Group(...placed);
   };
 

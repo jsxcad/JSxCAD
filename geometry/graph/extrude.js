@@ -3,12 +3,20 @@ import { fromSurfaceMeshLazy } from './fromSurfaceMeshLazy.js';
 import { taggedGraph } from '../tagged/taggedGraph.js';
 import { toSurfaceMesh } from './toSurfaceMesh.js';
 
-export const extrude = (geometry, height, depth) => {
+export const extrude = (geometry, height, depth, normal) => {
+  const dir = {};
+  if (normal.points && normal.points.length >= 1) {
+    dir.direction = normal.points[0];
+  }
+  if (normal.exactPoints && normal.exactPoints.length >= 1) {
+    dir.exactDirection = normal.exactPoints[0];
+  }
   const extrudedMesh = extrudeSurfaceMesh(
     toSurfaceMesh(geometry.graph),
     geometry.matrix,
     height,
-    depth
+    depth,
+    dir
   );
   if (!extrudedMesh) {
     console.log(`Extrusion failed`);

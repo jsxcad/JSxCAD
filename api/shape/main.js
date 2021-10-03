@@ -98,6 +98,7 @@ export const xz = Shape.fromGeometry({
   content: [
     {
       type: 'group',
+      tags: [],
       content: [],
       matrix: [
         1,
@@ -106,12 +107,12 @@ export const xz = Shape.fromGeometry({
         0,
         0,
         0,
-        1,
-        0,
-        0,
         -1,
         0,
         0,
+        1,
+        0,
+        0,
         0,
         0,
         0,
@@ -122,10 +123,10 @@ export const xz = Shape.fromGeometry({
         '0',
         '0',
         '0',
-        '-1',
-        '0',
-        '0',
         '1',
+        '0',
+        '0',
+        '-1',
         '0',
         '0',
         '1',
@@ -139,12 +140,12 @@ export const xz = Shape.fromGeometry({
     0,
     0,
     0,
-    1,
-    0,
-    0,
     -1,
     0,
     0,
+    1,
+    0,
+    0,
     0,
     0,
     0,
@@ -155,10 +156,10 @@ export const xz = Shape.fromGeometry({
     '0',
     '0',
     '0',
-    '-1',
-    '0',
-    '0',
     '1',
+    '0',
+    '0',
+    '-1',
     '0',
     '0',
     '1',
@@ -170,19 +171,20 @@ export const yz = Shape.fromGeometry({
   content: [
     {
       type: 'group',
+      tags: [],
       content: [],
       matrix: [
-        0,
-        0,
-        1,
-        0,
-        0,
-        1,
         0,
         0,
         -1,
         0,
         0,
+        1,
+        0,
+        0,
+        1,
+        0,
+        0,
         0,
         0,
         0,
@@ -190,13 +192,13 @@ export const yz = Shape.fromGeometry({
         1,
         '0',
         '0',
+        '1',
+        '0',
+        '0',
+        '1',
+        '0',
+        '0',
         '-1',
-        '0',
-        '0',
-        '1',
-        '0',
-        '0',
-        '1',
         '0',
         '0',
         '0',
@@ -207,15 +209,15 @@ export const yz = Shape.fromGeometry({
   matrix: [
     0,
     0,
-    1,
-    0,
-    0,
-    1,
-    0,
-    0,
     -1,
     0,
     0,
+    1,
+    0,
+    0,
+    1,
+    0,
+    0,
     0,
     0,
     0,
@@ -223,13 +225,13 @@ export const yz = Shape.fromGeometry({
     1,
     '0',
     '0',
+    '1',
+    '0',
+    '0',
+    '1',
+    '0',
+    '0',
     '-1',
-    '0',
-    '0',
-    '1',
-    '0',
-    '0',
-    '1',
     '0',
     '0',
     '0',
@@ -265,6 +267,7 @@ export { drop } from './drop.js';
 export { ensurePages } from './Page.js';
 export { each } from './each.js';
 export { ex, extrude } from './extrude.js';
+export { extrudeAlong } from './extrudeAlong.js';
 export { extrudeToPlane } from './extrudeToPlane.js';
 export { fill, withFill } from './fill.js';
 export { fit } from './fit.js';
@@ -286,6 +289,7 @@ export { minkowskiDifference } from './minkowskiDifference.js';
 export { minkowskiShell } from './minkowskiShell.js';
 export { minkowskiSum } from './minkowskiSum.js';
 export { move } from './move.js';
+export { normal } from './normal.js';
 export { noVoid } from './noVoid.js';
 export { notColor } from './notColor.js';
 export { n, nth } from './nth.js';
@@ -320,6 +324,7 @@ export { twist } from './twist.js';
 export { untag } from './untag.js';
 export { view } from './view.js';
 export { voidFn } from './void.js';
+export { voidIn } from './voidIn.js';
 export { weld } from './Weld.js';
 export { withFn } from './with.js';
 export { withInset } from './inset.js';

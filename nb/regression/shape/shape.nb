@@ -73,7 +73,7 @@ const noVoid = Assembly(Box(5), Arc(5.5).void())
   .noVoid()
   .gridView();
 
-const offset = Box(5).offset(1).gridView();
+const offsetEx = Box(5).offset(1).gridView();
 
 const op = Box(5)
   .op((s) => s.color('green'))
@@ -93,7 +93,9 @@ const rx = Box(1, 2, 3).rx(1/8).gridView();
 const ry = Box(1, 2, 3).ry(1/8).gridView();
 const rz = Box(1, 2, 3).rz(1/8).gridView();
 
-const scale = Box(5).scale(1, 2).gridView();
+const scale1 = Box(5).scale(1, 2).gridView();
+const scale2 = Box(5).cut(Arc(5).align('x>')).scale(1, 1).gridView();
+const scale3 = Box(5).cut(Arc(5).align('x>')).scale(-1, 1).gridView();
 
 const sizeEx = Box(1, 2, 3)
   .size((size, shape) => {
@@ -129,3 +131,5 @@ const withEx = Box(5).with(Arc(6)).gridView();
 const xEx = Box(5).x(1).gridView();
 const yEx = Box(5).y(1).gridView();
 const zEx = Box(5).z(1).gridView();
+
+const voidInEx = Arc(10).voidIn(offset(1)).ex(5).view();

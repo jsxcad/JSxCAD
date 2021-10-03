@@ -29,6 +29,7 @@ export { arrangePolygonsWithHoles } from './graph/arrangePolygonsWithHoles.js';
 export { assemble } from './tagged/assemble.js';
 export { bend } from './tagged/bend.js';
 export { close as closePath } from './path/close.js';
+export { computeNormal } from './tagged/computeNormal.js';
 export { concatenate as concatenatePath } from './path/concatenate.js';
 export { canonicalize } from './tagged/canonicalize.js';
 export { canonicalize as canonicalizePath } from './path/canonicalize.js';
