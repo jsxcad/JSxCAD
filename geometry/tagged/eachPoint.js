@@ -40,6 +40,9 @@ export const eachPoint = (emit, geometry) => {
         return eachPointOfPaths(emit, geometry.paths);
       case 'graph':
         return eachPointOfGraph(geometry, emit);
+      case 'sketch':
+        // Sketches do not contribute points.
+        return;
       default:
         throw Error(
           `Unexpected geometry ${geometry.type} ${JSON.stringify(geometry)}`

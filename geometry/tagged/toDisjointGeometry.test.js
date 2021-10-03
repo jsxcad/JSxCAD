@@ -13,6 +13,7 @@ test('Empty', (t) => {
   t.deepEqual(canonicalize(disjoint), {
     type: 'group',
     tags: [],
+    matrix: undefined,
     content: [],
   });
 });

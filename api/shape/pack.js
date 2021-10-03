@@ -2,7 +2,7 @@ import {
   getLeafs,
   taggedGroup,
   taggedItem,
-  toDisjointGeometry,
+  toTransformedGeometry,
 } from '@jsxcad/geometry';
 
 import Shape from './Shape.js';
@@ -23,7 +23,7 @@ export const pack =
     }
 
     let todo = [];
-    for (const leaf of getLeafs(shape.toKeptGeometry())) {
+    for (const leaf of getLeafs(shape.toTransformedGeometry())) {
       todo.push(leaf);
     }
     const packedLayers = [];
@@ -42,7 +42,7 @@ export const pack =
         break;
       } else {
         packedLayers.push(
-          taggedItem({}, taggedGroup({}, ...packed.map(toDisjointGeometry)))
+          taggedItem({}, taggedGroup({}, ...packed.map(toTransformedGeometry)))
         );
       }
       todo.unshift(...unpacked);
