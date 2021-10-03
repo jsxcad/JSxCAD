@@ -295,3 +295,25 @@ const voidInEx = Arc(10).voidIn(offset(1)).ex(5).view();
 ```
 
 ![Image](shape.md.34.png)
+
+```JavaScript
+const facesEx = Box(10)
+  .ex(10)
+  .color('green')
+  .and((s) => s.faces().n(4).extrudeAlong(normal(), 1).tint('red'))
+  .view();
+```
+
+![Image](shape.md.35.png)
+
+```JavaScript
+const colorEx = Arc(10).color('blue').color('red').view();
+```
+
+![Image](shape.md.36.png)
+
+```JavaScript
+const tintEx = Arc(10).color('blue').tint('red').view();
+```
+
+![Image](shape.md.37.png)

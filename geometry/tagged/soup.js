@@ -1,4 +1,3 @@
-import { fromPolygonsWithHolesToTriangles } from '../graph/fromPolygonsWithHolesToTriangles.js';
 import { outline as outlineOp } from './outline.js';
 import { rewrite } from './visit.js';
 import { taggedGroup } from './taggedGroup.js';
@@ -6,7 +5,8 @@ import { taggedPaths } from './taggedPaths.js';
 import { taggedTriangles } from './taggedTriangles.js';
 import { toPaths } from '../graph/toPaths.js';
 import { toTransformedGeometry } from './toTransformedGeometry.js';
-import { toTriangles } from '../graph/toTriangles.js';
+import { toTriangles as toTrianglesFromGraph } from '../graph/toTriangles.js';
+import { toTriangles as toTrianglesFromPolygonsWithHoles } from '../polygonsWithHoles/toTriangles.js';
 import { wireframe as wireframeOp } from './wireframe.js';
 
 export const soup = (
@@ -18,7 +18,7 @@ export const soup = (
     ? (geometry) => wireframeOp(geometry)
     : () => [];
   const triangles = doTriangles
-    ? ({ tags }, geometry) => [toTriangles({ tags }, geometry)]
+    ? ({ tags }, geometry) => [toTrianglesFromGraph({ tags }, geometry)]
     : () => [];
   const op = (geometry, descend) => {
     switch (geometry.type) {
@@ -49,8 +49,10 @@ export const soup = (
       case 'polygons':
         return taggedTriangles(
           { tags: geometry.tags },
-          fromPolygonsWithHolesToTriangles(geometry.polygons)
+          toTrianglesFromPolygonsWithHoles(geometry)
         );
+      case 'polygonsWithHoles':
+        return toTrianglesFromPolygonsWithHoles(geometry);
       case 'segments':
       case 'triangles':
       case 'points':

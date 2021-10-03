@@ -45,6 +45,7 @@ export { eachPoint } from './tagged/eachPoint.js';
 export { empty } from './tagged/empty.js';
 export { extrude } from './tagged/extrude.js';
 export { extrudeToPlane } from './tagged/extrudeToPlane.js';
+export { faces } from './tagged/faces.js';
 export { flip } from './tagged/flip.js';
 export { flip as flipPath } from './path/flip.js';
 export { fresh } from './tagged/fresh.js';

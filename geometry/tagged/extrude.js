@@ -1,5 +1,6 @@
 import { extrude as extrudeGraph } from '../graph/extrude.js';
 import { fill } from './fill.js';
+import { fromPolygonsWithHoles as fromPolygonsWithHolesToGraph } from '../graph/fromPolygonsWithHoles.js';
 import { reify } from './reify.js';
 import { rewrite } from './visit.js';
 import { toTransformedGeometry } from './toTransformedGeometry.js';
@@ -13,6 +14,13 @@ export const extrude = (geometry, height, depth, direction) => {
       case 'points':
         // Not implemented yet.
         return geometry;
+      case 'polygonsWithHoles':
+        return extrude(
+          fromPolygonsWithHolesToGraph(geometry),
+          height,
+          depth,
+          reify(direction)
+        );
       case 'paths':
         return extrude(fill(geometry), height, depth, reify(direction));
       case 'plan':
