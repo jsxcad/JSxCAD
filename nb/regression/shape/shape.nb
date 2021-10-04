@@ -69,6 +69,8 @@ const material = Box(10)
 
 const move = Box(10).move(1, 2, 3).gridView();
 
+const moveToEx = Box(10).moveTo(1, 2, 3).gridView();
+
 const noVoid = Assembly(Box(5), Arc(5.5).void())
   .noVoid()
   .gridView();
@@ -133,3 +135,13 @@ const yEx = Box(5).y(1).gridView();
 const zEx = Box(5).z(1).gridView();
 
 const voidInEx = Arc(10).voidIn(offset(1)).ex(5).view();
+
+const facesEx = Box(10)
+  .ex(10)
+  .color('green')
+  .and((s) => s.faces().n(4).extrudeAlong(normal(), 1).tint('red'))
+  .view();
+
+const colorEx = Arc(10).color('blue').color('red').view();
+
+const tintEx = Arc(10).color('blue').tint('red').view();

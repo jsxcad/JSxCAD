@@ -10,6 +10,7 @@ export const realize = (geometry) => {
       case 'triangles':
       case 'points':
       case 'paths':
+      case 'polygonsWithHoles':
         // No lazy representation to realize.
         return geometry;
       case 'plan':

@@ -12,6 +12,7 @@ export const prepareForSerialization = (geometry) => {
       case 'points':
       case 'segments':
       case 'paths':
+      case 'polygonsWithHoles':
         return;
       case 'item':
       case 'group':

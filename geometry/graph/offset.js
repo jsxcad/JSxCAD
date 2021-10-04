@@ -1,11 +1,13 @@
 import { fromPolygonsWithHoles } from './fromPolygonsWithHoles.js';
 import { info } from '@jsxcad/sys';
 import { offsetOfPolygonWithHoles } from '@jsxcad/algorithm-cgal';
+import { taggedPolygonsWithHoles } from '../tagged/taggedPolygonsWithHoles.js';
 import { toPolygonsWithHoles } from './toPolygonsWithHoles.js';
 
 export const offset = (geometry, initial, step, limit) => {
   info('offset begin');
   const offsetGraphs = [];
+  const { tags, plane, exactPlane } = geometry;
   for (const { polygonsWithHoles } of toPolygonsWithHoles(geometry)) {
     for (const polygonWithHoles of polygonsWithHoles) {
       for (const offsetPolygon of offsetOfPolygonWithHoles(
@@ -15,7 +17,11 @@ export const offset = (geometry, initial, step, limit) => {
         polygonWithHoles
       )) {
         offsetGraphs.push(
-          fromPolygonsWithHoles({ tags: geometry.tags }, [offsetPolygon])
+          fromPolygonsWithHoles(
+            taggedPolygonsWithHoles({ tags, plane, exactPlane }, [
+              offsetPolygon,
+            ])
+          )
         );
       }
     }

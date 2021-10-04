@@ -1044,6 +1044,29 @@ Vector estimateTriangleNormals(const std::vector<Triangle>& triangles)
   return estimate;
 }
 
+void computeCentroidOfSurfaceMesh(Point& centroid, const Surface_mesh& mesh) {
+  std::vector<Triangle> triangles;
+  for (const auto& facet : mesh.faces()) {
+    if (mesh.is_removed(facet)) {
+      continue;
+    }
+    const auto h = mesh.halfedge(facet);
+    triangles.push_back(Triangle(mesh.point(mesh.source(h)), mesh.point(mesh.source(mesh.next(h))), mesh.point(mesh.source(mesh.next(mesh.next(h))))));
+  }
+  centroid = CGAL::centroid(triangles.begin(), triangles.end(), CGAL::Dimension_tag<2>());
+}
+
+void ComputeCentroidOfSurfaceMesh(const Surface_mesh* input, const Transformation* transformation, emscripten::val emit_normal) {
+  Surface_mesh mesh(*input);
+  CGAL::Polygon_mesh_processing::transform(*transformation, mesh, CGAL::parameters::all_default());
+  Point centroid;
+  computeCentroidOfSurfaceMesh(centroid, mesh);
+  std::ostringstream x; x << centroid.x().exact(); std::string xs = x.str();
+  std::ostringstream y; y << centroid.y().exact(); std::string ys = y.str();
+  std::ostringstream z; z << centroid.z().exact(); std::string zs = z.str();
+  emit_normal(CGAL::to_double(centroid.x().exact()), CGAL::to_double(centroid.y().exact()), CGAL::to_double(centroid.z().exact()), xs, ys, zs);
+}
+
 void computeNormalOfSurfaceMesh(Vector& normal, const Surface_mesh& mesh) {
   std::vector<Triangle> triangles;
   for (const auto& facet : mesh.faces()) {
@@ -3333,6 +3356,7 @@ EMSCRIPTEN_BINDINGS(module) {
   emscripten::function("OutlineSurfaceMesh", &OutlineSurfaceMesh, emscripten::allow_raw_pointers());
   emscripten::function("WireframeSurfaceMesh", &WireframeSurfaceMesh, emscripten::allow_raw_pointers());
   emscripten::function("FromSurfaceMeshToPolygonsWithHoles", &FromSurfaceMeshToPolygonsWithHoles, emscripten::allow_raw_pointers());
+  emscripten::function("ComputeCentroidOfSurfaceMesh", &ComputeCentroidOfSurfaceMesh, emscripten::allow_raw_pointers());
   emscripten::function("ComputeNormalOfSurfaceMesh", &ComputeNormalOfSurfaceMesh, emscripten::allow_raw_pointers());
 
   emscripten::function("BooleansOfPolygonsWithHolesApproximate", &BooleansOfPolygonsWithHolesApproximate);

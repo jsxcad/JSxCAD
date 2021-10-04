@@ -8,11 +8,13 @@ export const Hull = (...shapes) => {
   return Shape.fromGeometry(convexHullToGraph({}, points));
 };
 
-const hullMethod = function (...shapes) {
-  return Hull(this, ...shapes);
-};
-
 Shape.prototype.Hull = Shape.shapeMethod(Hull);
-Shape.prototype.hull = hullMethod;
+
+const hull =
+  (...shapes) =>
+  (shape) =>
+    Hull(shape, ...shapes.map((other) => Shape.toShape(other, shape)));
+
+Shape.registerMethod('hull', hull);
 
 export default Hull;

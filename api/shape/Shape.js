@@ -2,7 +2,6 @@ import {
   assemble,
   closePath,
   concatenatePath,
-  eachPoint,
   flip,
   fromPolygonsToGraph,
   openPath,
@@ -52,10 +51,6 @@ export class Shape {
     }
     this.geometry = geometry;
     this.context = context;
-  }
-
-  eachPoint(operation) {
-    eachPoint(operation, this.toConcreteGeometry());
   }
 
   flip() {

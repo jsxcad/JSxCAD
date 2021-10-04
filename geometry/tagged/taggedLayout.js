@@ -1,5 +1,5 @@
 export const taggedLayout = (
-  { tags = [], size, margin, title, marks = [] },
+  { tags = [], matrix, size, margin, title, marks = [] },
   ...content
 ) => {
   if (content.some((value) => value === undefined)) {
@@ -16,6 +16,7 @@ export const taggedLayout = (
     layout: { size, margin, title },
     marks,
     tags,
+    matrix,
     content,
   };
 };

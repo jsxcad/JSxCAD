@@ -1,5 +1,6 @@
 import { computeNormal as computeNormalOfGraph } from '../graph/computeNormal.js';
 import { fill } from './fill.js';
+import { fromPolygonsWithHoles as fromPolygonsWithHolesToGraph } from '../graph/fromPolygonsWithHoles.js';
 import { reify } from './reify.js';
 import { rewrite } from './visit.js';
 import { toTransformedGeometry } from './toTransformedGeometry.js';
@@ -9,6 +10,8 @@ export const computeNormal = (geometry) => {
     switch (geometry.type) {
       case 'graph':
         return computeNormalOfGraph(geometry);
+      case 'polygonsWithHoles':
+        return computeNormalOfGraph(fromPolygonsWithHolesToGraph(geometry));
       case 'triangles':
       case 'points':
         // Not implemented yet.

@@ -1,4 +1,5 @@
 import { fromPaths as fromPathsToGraph } from '../graph/fromPaths.js';
+import { fromPolygonsWithHoles as fromPolygonsWithHolesToGraph } from '../graph/fromPolygonsWithHoles.js';
 import { inset as insetGraph } from '../graph/inset.js';
 import { reify } from './reify.js';
 import { rewrite } from './visit.js';
@@ -18,6 +19,13 @@ export const inset = (geometry, initial = 1, step, limit) => {
       case 'points':
         // Not implemented yet.
         return geometry;
+      case 'polygonsWithHoles':
+        return inset(
+          fromPolygonsWithHolesToGraph(geometry),
+          initial,
+          step,
+          limit
+        );
       case 'paths':
         return inset(
           fromPathsToGraph(geometry.paths.map((path) => ({ points: path }))),
