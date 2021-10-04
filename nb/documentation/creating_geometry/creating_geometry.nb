@@ -25,14 +25,6 @@ Box(10, 10, 2).view();
 
 md`
 ---
-### Cone
-Creates a cone with arguments (diameter, top, bottom)
-`;
-
-Cone(10, 10, 0).view();
-
-md`
----
 ### Empty
 Creates a new empty geometry
 `;

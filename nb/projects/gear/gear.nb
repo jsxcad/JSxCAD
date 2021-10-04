@@ -9,7 +9,7 @@ const backlash = control('backlash', 0, 'input');
 const thickness = control('thickness', 2, 'input');
 const toothResolution = control('toothResolution', 5, 'input');
 
-const example = Gear()
+Gear()
   .hasTeeth(numberOfTeeth)
   .hasMmPerTooth(mmPerTooth)
   .hasHiddenTeeth(teethToHide)
@@ -20,3 +20,51 @@ const example = Gear()
   .ex(thickness)
   .material('wood')
   .stl(`gear_${numberOfTeeth}`);
+
+Gear()
+  .hasTeeth(8)
+  .and((s) => s.hasClearance(0.5).color('red'))
+  .gridView()
+  .md(`Clearance adds play to the gear tips`);
+
+Gear()
+  .hasTeeth(8)
+  .and((s) => s.hasBacklash(1).color('red'))
+  .gridView()
+  .md(`Backlash adds play to the gear sides`);
+
+Gear()
+  .hasTeeth(8)
+  .and(
+    (s) => s.hasPressureAngle(30).color('red'),
+    (s) => s.hasPressureAngle(10).color('blue')
+  )
+  .material('glass')
+  .gridView()
+  .md(`Pressure Angle makes the tip sharper or blunter`);
+
+// Set up standard play for reuse.
+const gear = Gear().hasClearance(0.1).hasBacklash(0.5);
+
+Arc(41)
+  .cut(gear.hasTeeth(32).hasBacklash(-0.5).hasClearance(-0.1))
+  .md(`Some care needs to be taken to invert play when cutting gears out.`)
+  .color('blue')
+  .as('ring')
+  .and(gear.hasTeeth(8).x(12).fill().color('red').as('planet'))
+  .and(
+    gear
+      .hasTeeth(16)
+      .rz(1 / 32)
+      .fill()
+      .color('green')
+      .as('sun')
+  )
+  .gridView()
+  .md(`The planetary assembly can be seen as a profile.`)
+  .ex(5)
+  .view()
+  .md(`Then extruded for printing.`)
+  .stl('ring', get('ring'))
+  .stl('planet', get('planet'))
+  .stl('sun', get('sun'));

@@ -9,6 +9,10 @@
 
 import Shape from './Shape.js';
 
+// We need Plan.js to add Shape.registerReifier before later imports call it.
+// eslint-disable-next-line sort-imports
+import './Plan.js';
+
 export {
   define,
   defGrblConstantLaser,
@@ -291,7 +295,7 @@ export { material } from './material.js';
 export { minkowskiDifference } from './minkowskiDifference.js';
 export { minkowskiShell } from './minkowskiShell.js';
 export { minkowskiSum } from './minkowskiSum.js';
-export { move } from './move.js';
+export { move, xyz } from './move.js';
 export { moveTo } from './moveTo.js';
 export { normal } from './normal.js';
 export { noVoid } from './noVoid.js';
@@ -342,7 +346,6 @@ export { Arc } from './Arc.js';
 export { Assembly } from './Assembly.js';
 export { Box } from './Box.js';
 export { ChainedHull } from './ChainedHull.js';
-export { Cone } from './Cone.js';
 export { Empty } from './Empty.js';
 export { Group } from './Group.js';
 export { Hershey } from './Hershey.js';

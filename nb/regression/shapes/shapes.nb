@@ -14,8 +14,6 @@ const chainedHull = ChainedHull(Point(), Box(5).z(5), Arc(3).z(8))
   .view()
   .md(`ChainedHull(Point(), Box(5).z(5), Arc(3).z(8))`);
 
-const cone = Cone(6, 3).view().md(`Cone(6, 3)`);
-
 const empty = Empty().view().md(`Empty()`);
 
 const group = Group(Box(10), Arc(8), Triangle(5))
