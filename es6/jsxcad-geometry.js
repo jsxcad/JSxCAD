@@ -2161,6 +2161,12 @@ const loft = (closed, geometry, ...geometries) => {
         }
         return loft$1(closed, ...lofts);
       }
+      case 'polygonsWithHoles':
+        return loft(
+          closed,
+          fromPolygonsWithHoles(geometry),
+          ...geometries
+        );
       case 'triangles':
       case 'paths':
       case 'points':

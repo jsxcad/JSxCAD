@@ -306,7 +306,9 @@ const pack = (
         [fit.x + xOffset + fit.w, fit.y + yOffset + fit.h, 0],
         maxPoint
       );
-      const transformed = toTransformedGeometry(translate([xo, yo, -minZ], geometry));
+      const transformed = toTransformedGeometry(
+        translate([xo, yo, -minZ], geometry)
+      );
       packedGeometries.push(transformed);
     } else {
       unpackedGeometries.push(geometry);

@@ -39,14 +39,6 @@ const chainedHull = ChainedHull(Point(), Box(5).z(5), Arc(3).z(8))
 ChainedHull(Point(), Box(5).z(5), Arc(3).z(8))
 
 ```JavaScript
-const cone = Cone(6, 3).view().md(`Cone(6, 3)`);
-```
-
-![Image](shapes.md.4.png)
-
-Cone(6, 3)
-
-```JavaScript
 const empty = Empty().view().md(`Empty()`);
 ```
 
@@ -59,7 +51,7 @@ const group = Group(Box(10), Arc(8), Triangle(5))
   .md(`Group(Box(10), Arc(8), Triangle(5))`);
 ```
 
-![Image](shapes.md.5.png)
+![Image](shapes.md.4.png)
 
 Group(Box(10), Arc(8), Triangle(5))
 
@@ -70,7 +62,7 @@ const hershey = Hershey('Hershey', 10)
   .md(`Hershey(10)('Hershey').align('xy')`);
 ```
 
-![Image](shapes.md.6.png)
+![Image](shapes.md.5.png)
 
 Hershey(10)('Hershey').align('xy')
 
@@ -78,7 +70,7 @@ Hershey(10)('Hershey').align('xy')
 const hexagon = Hexagon(10).gridView().md(`Hexagon(10)`);
 ```
 
-![Image](shapes.md.7.png)
+![Image](shapes.md.6.png)
 
 Hexagon(10)
 
@@ -86,7 +78,7 @@ Hexagon(10)
 const hull = Hull(Arc(5), Box(5).z(5)).view().md(`Hull(Arc(5), Box(5).z(5))`);
 ```
 
-![Image](shapes.md.8.png)
+![Image](shapes.md.7.png)
 
 Hull(Arc(5), Box(5).z(5))
 
@@ -94,7 +86,7 @@ Hull(Arc(5), Box(5).z(5))
 const icosahedron = Icosahedron(5).view().md(`Icosahedron(5)`);
 ```
 
-![Image](shapes.md.9.png)
+![Image](shapes.md.8.png)
 
 Icosahedron(5)
 
@@ -122,6 +114,14 @@ const torusFn = ([x, y, z]) => {
 ```
 
 ```JavaScript
+const line = Line(5, -1).rz(45).gridView().md(`Line(5, -1)`);
+```
+
+![Image](shapes.md.9.png)
+
+Line(5, -1)
+
+```JavaScript
 const implicit = Implicit(torusFn, { radius: 2 })
   .view()
   .md('Implicit(torusFn, { radius: 2 }');
@@ -132,18 +132,10 @@ const implicit = Implicit(torusFn, { radius: 2 })
 Implicit(torusFn, { radius: 2 }
 
 ```JavaScript
-const line = Line(5, -1).rz(45).gridView().md(`Line(5, -1)`);
-```
-
-![Image](shapes.md.11.png)
-
-Line(5, -1)
-
-```JavaScript
 const octagon = Octagon(5).gridView().md(`Octagon(5)`);
 ```
 
-![Image](shapes.md.12.png)
+![Image](shapes.md.11.png)
 
 Octagon(5)
 
@@ -151,7 +143,7 @@ Octagon(5)
 const orb = Orb(5).hasSides(20).view().md(`Orb(5)`);
 ```
 
-![Image](shapes.md.13.png)
+![Image](shapes.md.12.png)
 
 Orb(5)
 
@@ -162,7 +154,7 @@ const path = Path(Point(0), Point(5), Point(5, 5), Point(0))
   .md(`Path(Point(0), Point(5), Point(5, 5), Point(0)).rz(45 / 2)`);
 ```
 
-![Image](shapes.md.14.png)
+![Image](shapes.md.13.png)
 
 Path(Point(0), Point(5), Point(5, 5), Point(0)).rz(45 / 2)
 
@@ -170,7 +162,7 @@ Path(Point(0), Point(5), Point(5, 5), Point(0)).rz(45 / 2)
 const pentagon = Pentagon(5).gridView().md(`Pentagon(5)`);
 ```
 
-![Image](shapes.md.15.png)
+![Image](shapes.md.14.png)
 
 Pentagon(5)
 
@@ -178,7 +170,7 @@ Pentagon(5)
 const point = Point(0.5, 0.5).gridView().md(`Point(0.5, 0.5)`);
 ```
 
-![Image](shapes.md.16.png)
+![Image](shapes.md.15.png)
 
 Point(0.5, 0.5)
 
@@ -188,7 +180,7 @@ const points = Points([0.5, 0.5], [-0.5, -0.5])
   .md(`Points([0.5, 0.5], [-0.5, -0.5])`);
 ```
 
-![Image](shapes.md.17.png)
+![Image](shapes.md.16.png)
 
 Points([0.5, 0.5], [-0.5, -0.5])
 
@@ -199,7 +191,7 @@ const polygon = Polygon(Point(0), Point(5), Point(5, 5))
   .md(`Polygon(Point(0), Point(5), Point(5, 5)).rz(1 / 16)`);
 ```
 
-![Image](shapes.md.18.png)
+![Image](shapes.md.17.png)
 
 Polygon(Point(0), Point(5), Point(5, 5)).rz(1 / 16)
 
@@ -229,7 +221,7 @@ const polyhedron = Polyhedron(
   );
 ```
 
-![Image](shapes.md.19.png)
+![Image](shapes.md.18.png)
 
 Polyhedron(  
       [[10, 10, 0], [10, -10, 0], [-10, -10, 0], [-10, 10, 0], [0, 0, 10]],  
@@ -239,7 +231,7 @@ Polyhedron(
 const septagon = Septagon(5).gridView().md(`Septagon(5)`);
 ```
 
-![Image](shapes.md.20.png)
+![Image](shapes.md.19.png)
 
 Septagon(5)
 
@@ -247,7 +239,7 @@ Septagon(5)
 const spiral = Spiral().gridView().md(`Spiral()`);
 ```
 
-![Image](shapes.md.21.png)
+![Image](shapes.md.20.png)
 
 Spiral()
 
@@ -255,7 +247,7 @@ Spiral()
 const tetragon = Tetragon(5).gridView().md(`Tetragon(5)`);
 ```
 
-![Image](shapes.md.22.png)
+![Image](shapes.md.21.png)
 
 Tetragon(5)
 
@@ -263,7 +255,7 @@ Tetragon(5)
 const triangle = Triangle(5).gridView().md(`Triangle(5)`);
 ```
 
-![Image](shapes.md.23.png)
+![Image](shapes.md.22.png)
 
 Triangle(5)
 
@@ -274,7 +266,7 @@ const wave = Wave((a) => [[0, sin(a * 3) * 100]], { to: 360 })
   .md(`Wave((a) => [[0, sin(a * 3) * 100]], { to: 360 })`);
 ```
 
-![Image](shapes.md.24.png)
+![Image](shapes.md.23.png)
 
 Wave((a) => [[0, sin(a * 3) * 100]], { to: 360 })
 

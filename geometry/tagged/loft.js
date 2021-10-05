@@ -1,3 +1,4 @@
+import { fromPolygonsWithHoles as fromPolygonsWithHolesToGraph } from '../graph/fromPolygonsWithHoles.js';
 import { getNonVoidGraphs } from './getNonVoidGraphs.js';
 import { loft as loftGraph } from '../graph/loft.js';
 import { reify } from './reify.js';
@@ -17,6 +18,12 @@ export const loft = (closed, geometry, ...geometries) => {
         }
         return loftGraph(closed, ...lofts);
       }
+      case 'polygonsWithHoles':
+        return loft(
+          closed,
+          fromPolygonsWithHolesToGraph(geometry),
+          ...geometries
+        );
       case 'triangles':
       case 'paths':
       case 'points':

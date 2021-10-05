@@ -69,7 +69,8 @@ const material = Box(10)
 
 const move = Box(10).move(1, 2, 3).gridView();
 
-const moveToEx = Box(10).moveTo(1, 2, 3).gridView();
+const moveToEx1 = Box(10).moveTo(1, 2, 3).gridView();
+const moveToEx2 = Box(10).move(1, 2, 3).moveTo(center()).gridView();
 
 const noVoid = Assembly(Box(5), Arc(5.5).void())
   .noVoid()

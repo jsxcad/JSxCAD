@@ -4,20 +4,19 @@ import {
   getCorner1,
   getCorner2,
   getFrom,
-  getMatrix,
   getScale,
   getSides,
   getTo,
 } from './Plan.js';
-import { registerReifier, taggedPlan } from '@jsxcad/geometry';
 
 import Shape from './Shape.js';
 import Spiral from './Spiral.js';
 import { negate } from '@jsxcad/math-vec3';
+import { taggedPlan } from '@jsxcad/geometry';
 
 const Z = 2;
 
-registerReifier('Arc', (geometry) => {
+Shape.registerReifier('Arc', (geometry) => {
   let { start = 0, end = 1 } = getAngle(geometry);
 
   while (start > end) {
@@ -49,10 +48,7 @@ registerReifier('Arc', (geometry) => {
         center: negate(getAt(geometry)),
         from: getFrom(geometry),
         at: getTo(geometry),
-      })
-      .transform(getMatrix(geometry))
-      .setTags(geometry.tags)
-      .toGeometry();
+      });
   } else {
     return Spiral((a) => [[1]], {
       from: start - 1 / 4,
@@ -61,10 +57,7 @@ registerReifier('Arc', (geometry) => {
     })
       .scale(...scale)
       .move(...middle)
-      .move(...getAt(geometry))
-      .transform(getMatrix(geometry))
-      .setTags(geometry.tags)
-      .toGeometry();
+      .move(...getAt(geometry));
   }
 });
 

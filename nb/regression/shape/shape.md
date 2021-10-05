@@ -134,10 +134,16 @@ const move = Box(10).move(1, 2, 3).gridView();
 ![Image](shape.md.13.png)
 
 ```JavaScript
-const moveToEx = Box(10).moveTo(1, 2, 3).gridView();
+const moveToEx1 = Box(10).moveTo(1, 2, 3).gridView();
 ```
 
 ![Image](shape.md.14.png)
+
+```JavaScript
+const moveToEx2 = Box(10).move(1, 2, 3).moveTo(center()).gridView();
+```
+
+![Image](shape.md.15.png)
 
 ```JavaScript
 const noVoid = Assembly(Box(5), Arc(5.5).void())
@@ -145,13 +151,13 @@ const noVoid = Assembly(Box(5), Arc(5.5).void())
   .gridView();
 ```
 
-![Image](shape.md.15.png)
+![Image](shape.md.16.png)
 
 ```JavaScript
 const offsetEx = Box(5).offset(1).gridView();
 ```
 
-![Image](shape.md.16.png)
+![Image](shape.md.17.png)
 
 ```JavaScript
 const op = Box(5)
@@ -159,7 +165,7 @@ const op = Box(5)
   .gridView();
 ```
 
-![Image](shape.md.17.png)
+![Image](shape.md.18.png)
 
 ```JavaScript
 const orient = Line(10)
@@ -167,7 +173,7 @@ const orient = Line(10)
   .gridView();
 ```
 
-![Image](shape.md.18.png)
+![Image](shape.md.19.png)
 
 ```JavaScript
 const pack = Group(...seq((n) => Arc(n), { from: 1, to: 20 }))
@@ -175,49 +181,49 @@ const pack = Group(...seq((n) => Arc(n), { from: 1, to: 20 }))
   .gridView();
 ```
 
-![Image](shape.md.19.png)
+![Image](shape.md.20.png)
 
 ```JavaScript
 const rotate = Box(5).rotate(45).gridView();
 ```
 
-![Image](shape.md.20.png)
+![Image](shape.md.21.png)
 
 ```JavaScript
 const rx = Box(1, 2, 3).rx(1/8).gridView();
 ```
 
-![Image](shape.md.21.png)
+![Image](shape.md.22.png)
 
 ```JavaScript
 const ry = Box(1, 2, 3).ry(1/8).gridView();
 ```
 
-![Image](shape.md.22.png)
+![Image](shape.md.23.png)
 
 ```JavaScript
 const rz = Box(1, 2, 3).rz(1/8).gridView();
 ```
 
-![Image](shape.md.23.png)
+![Image](shape.md.24.png)
 
 ```JavaScript
 const scale1 = Box(5).scale(1, 2).gridView();
 ```
 
-![Image](shape.md.24.png)
+![Image](shape.md.25.png)
 
 ```JavaScript
 const scale2 = Box(5).cut(Arc(5).align('x>')).scale(1, 1).gridView();
 ```
 
-![Image](shape.md.25.png)
+![Image](shape.md.26.png)
 
 ```JavaScript
 const scale3 = Box(5).cut(Arc(5).align('x>')).scale(-1, 1).gridView();
 ```
 
-![Image](shape.md.26.png)
+![Image](shape.md.27.png)
 
 ```JavaScript
 const sizeEx = Box(1, 2, 3)
@@ -236,7 +242,7 @@ const sketch = Box(2, 2, 2)
   .view();
 ```
 
-![Image](shape.md.27.png)
+![Image](shape.md.28.png)
 
 ```JavaScript
 const tagsEx = Box(1)
@@ -251,20 +257,20 @@ const tagsEx = Box(1)
 const test = Box(5, 5, 5).test().gridView();
 ```
 
-![Image](shape.md.28.png)
+![Image](shape.md.29.png)
 
 ```JavaScript
 const tool = Box(5).tool('laser').gridView();
 ```
 
-![Image](shape.md.29.png)
+![Image](shape.md.30.png)
 
 ```JavaScript
 const voidEx = Assembly(Box(5), Arc(6).void())
   .gridView();
 ```
 
-![Image](shape.md.30.png)
+![Image](shape.md.31.png)
 
 ```JavaScript
 const weld = Weld(Arc(6).x(-1), Arc(6).x(1), Arc(6).y(1), Arc(6).y(-1))
@@ -276,31 +282,31 @@ const weld = Weld(Arc(6).x(-1), Arc(6).x(1), Arc(6).y(1), Arc(6).y(-1))
 const withEx = Box(5).with(Arc(6)).gridView();
 ```
 
-![Image](shape.md.31.png)
+![Image](shape.md.32.png)
 
 ```JavaScript
 const xEx = Box(5).x(1).gridView();
 ```
 
-![Image](shape.md.32.png)
+![Image](shape.md.33.png)
 
 ```JavaScript
 const yEx = Box(5).y(1).gridView();
 ```
 
-![Image](shape.md.33.png)
+![Image](shape.md.34.png)
 
 ```JavaScript
 const zEx = Box(5).z(1).gridView();
 ```
 
-![Image](shape.md.34.png)
+![Image](shape.md.35.png)
 
 ```JavaScript
 const voidInEx = Arc(10).voidIn(offset(1)).ex(5).view();
 ```
 
-![Image](shape.md.35.png)
+![Image](shape.md.36.png)
 
 ```JavaScript
 const facesEx = Box(10)
@@ -310,16 +316,16 @@ const facesEx = Box(10)
   .view();
 ```
 
-![Image](shape.md.36.png)
+![Image](shape.md.37.png)
 
 ```JavaScript
 const colorEx = Arc(10).color('blue').color('red').view();
 ```
 
-![Image](shape.md.37.png)
+![Image](shape.md.38.png)
 
 ```JavaScript
 const tintEx = Arc(10).color('blue').tint('red').view();
 ```
 
-![Image](shape.md.38.png)
+![Image](shape.md.39.png)

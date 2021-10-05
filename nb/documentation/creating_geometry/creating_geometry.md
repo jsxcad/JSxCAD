@@ -40,16 +40,6 @@ Box(10, 10, 2).view();
 ![Image](creating_geometry.md.4.png)
 
 ---
-### Cone
-Creates a cone with arguments (diameter, top, bottom)
-
-```JavaScript
-Cone(10, 10, 0).view();
-```
-
-![Image](creating_geometry.md.5.png)
-
----
 ### Empty
 Creates a new empty geometry
 
@@ -65,13 +55,13 @@ Creates a new hexagon
 Hexagon(4).view();
 ```
 
-![Image](creating_geometry.md.6.png)
+![Image](creating_geometry.md.5.png)
 
 ```JavaScript
 Hexagon(6, 3, 2).view();
 ```
 
-![Image](creating_geometry.md.7.png)
+![Image](creating_geometry.md.6.png)
 
 ---
 ### Hershy
@@ -81,7 +71,7 @@ A built in single line font useful for adding text
 Hershey('Some Example Text', 20).align('xy').view();
 ```
 
-![Image](creating_geometry.md.8.png)
+![Image](creating_geometry.md.7.png)
 
 ---
 ### Icosahedron
@@ -91,7 +81,7 @@ Creates a new Icosahedron
 Icosahedron(10).view();
 ```
 
-![Image](creating_geometry.md.9.png)
+![Image](creating_geometry.md.8.png)
 
 ---
 ### Line
@@ -101,7 +91,7 @@ Creates a new line
 Line(10).view();
 ```
 
-![Image](creating_geometry.md.10.png)
+![Image](creating_geometry.md.9.png)
 
 ---
 ### Octagon
@@ -111,7 +101,7 @@ Creates a new Octagon
 Octagon(20).view();
 ```
 
-![Image](creating_geometry.md.11.png)
+![Image](creating_geometry.md.10.png)
 
 ---
 ### Orb
@@ -121,13 +111,13 @@ Creates a new spheroid
 Orb(10).view();
 ```
 
-![Image](creating_geometry.md.12.png)
+![Image](creating_geometry.md.11.png)
 
 ```JavaScript
 Orb(10, 5, 2).view();
 ```
 
-![Image](creating_geometry.md.13.png)
+![Image](creating_geometry.md.12.png)
 
 ---
 ### Pentagon
@@ -137,7 +127,7 @@ Generates a pentagon
 Pentagon(10).view();
 ```
 
-![Image](creating_geometry.md.14.png)
+![Image](creating_geometry.md.13.png)
 
 ---
 ### Point
@@ -147,7 +137,7 @@ A point in 3D space
 Point(0, 0, 0).view();
 ```
 
-![Image](creating_geometry.md.15.png)
+![Image](creating_geometry.md.14.png)
 
 ---
 ### Polygon
@@ -157,7 +147,7 @@ Creates a new polygon from the input points
 Polygon(Point(0, 0, 0), Point(10, 0, 0), Point(10, 10, 0)).view();
 ```
 
-![Image](creating_geometry.md.16.png)
+![Image](creating_geometry.md.15.png)
 
 ---
 ### Septagon
@@ -167,7 +157,7 @@ Creates a Septagon.
 Septagon(10).view();
 ```
 
-![Image](creating_geometry.md.17.png)
+![Image](creating_geometry.md.16.png)
 
 ---
 ### Triangle
@@ -177,4 +167,4 @@ Triangle creates a new triangle.
 Triangle(4, 9).view();
 ```
 
-![Image](creating_geometry.md.18.png)
+![Image](creating_geometry.md.17.png)
