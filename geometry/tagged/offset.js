@@ -28,7 +28,10 @@ export const offset = (geometry, initial = 1, step, limit) => {
         );
       case 'paths':
         return offset(
-          fromPathsToGraph(geometry.paths.map((path) => ({ points: path }))),
+          fromPathsToGraph(
+            { tags },
+            geometry.paths.map((path) => ({ points: path }))
+          ),
           initial,
           step,
           limit

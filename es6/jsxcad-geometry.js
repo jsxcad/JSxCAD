@@ -1900,17 +1900,12 @@ const grow = (geometry, amount) => {
   return rewrite(toTransformedGeometry(geometry), op);
 };
 
-// This alphabet uses `A-Za-z0-9_-` symbols. The genetic algorithm helped
-// optimize the gzip compression for this alphabet.
 let urlAlphabet =
   'ModuleSymbhasOwnPr-0123456789ABCDEFGHNRVfgctiUvz_KqYTJkLxpZXIjQW';
-
 let nanoid = (size = 21) => {
   let id = '';
-  // A compact alternative for `for (var i = 0; i < step; i++)`.
   let i = size;
   while (i--) {
-    // `| 0` is more compact and faster than `Math.floor()`.
     id += urlAlphabet[(Math.random() * 64) | 0];
   }
   return id
@@ -2082,7 +2077,10 @@ const inset = (geometry, initial = 1, step, limit) => {
         );
       case 'paths':
         return inset(
-          fromPaths(geometry.paths.map((path) => ({ points: path }))),
+          fromPaths(
+            { tags },
+            geometry.paths.map((path) => ({ points: path }))
+          ),
           initial,
           step,
           limit
@@ -2396,7 +2394,10 @@ const offset = (geometry, initial = 1, step, limit) => {
         );
       case 'paths':
         return offset(
-          fromPaths(geometry.paths.map((path) => ({ points: path }))),
+          fromPaths(
+            { tags },
+            geometry.paths.map((path) => ({ points: path }))
+          ),
           initial,
           step,
           limit

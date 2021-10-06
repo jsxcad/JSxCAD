@@ -76,6 +76,8 @@ Gear()
 
 Backlash adds play to the gear sides
 
+### Planetary Gears
+
 ```JavaScript
 Gear()
   .hasTeeth(8)
@@ -93,52 +95,162 @@ Gear()
 Pressure Angle makes the tip sharper or blunter
 
 ```JavaScript
-const gear = Gear().hasClearance(0.1).hasBacklash(0.5);
+const planetary = Gear().hasTeeth(8).md(`Our base involute gear.`);
 ```
+
+Our base involute gear.
 
 ```JavaScript
-Arc(41)
-  .cut(gear.hasTeeth(32).hasBacklash(-0.5).hasClearance(-0.1))
-  .md(`Some care needs to be taken to invert play when cutting gears out.`)
-  .color('blue')
-  .as('ring')
-  .and(gear.hasTeeth(8).x(12).fill().color('red').as('planet'))
-  .and(
-    gear
-      .hasTeeth(16)
-      .rz(1 / 32)
-      .fill()
-      .color('green')
-      .as('sun')
-  )
-  .gridView()
-  .md(`The planetary assembly can be seen as a profile.`)
-  .ex(5)
+const planetaryFootprint = planetary
+  .offset(0.2)
   .view()
-  .md(`Then extruded for printing.`)
-  .stl('ring', get('ring'))
-  .stl('planet', get('planet'))
-  .stl('sun', get('sun'));
+  .md(`We'll use an offset template to cut the other gears`);
 ```
-
-Some care needs to be taken to invert play when cutting gears out.
 
 ![Image](gear.md.4.png)
 
-The planetary assembly can be seen as a profile.
+We'll use an offset template to cut the other gears
+
+```JavaScript
+const ring = Arc(50)
+  .hasAngle(-1 / 64, 1 / 64)
+  .hull(Point())
+  .cut(Arc(30))
+  .cut(
+    Group(
+      ...seq(
+        (a) =>
+          planetaryFootprint
+            .rz(a / -8)
+            .y(12)
+            .rz(a / 32)
+            .void(),
+        { from: -1, by: 1 / 16, to: 1 }
+      )
+    )
+  )
+  .rz(...seq((a) => a, { by: 1 / 32 }))
+  .gridView()
+  .md(
+    `We simulate the gear motion to cut a single tooth, then rotate it around.`
+  );
+```
 
 ![Image](gear.md.5.png)
 
-Then extruded for printing.
+We simulate the gear motion to cut a single tooth, then rotate it around.
+
+```JavaScript
+const solar = Arc(20)
+  .hasAngle(-1 / 32, 1 / 32)
+  .hull(Point())
+  .cut(
+    ...seq(
+      (a) =>
+        planetaryFootprint
+          .rz(a / 8)
+          .y(12)
+          .rz(a / 16),
+      { from: -1, by: 1 / 16, to: 1 }
+    )
+  )
+  .rz(...seq((a) => a, { by: 1 / 16 }))
+  .gridView()
+  .md(
+    `We simulate the gear motion to cut a single tooth, then rotate it around.`
+  );
+```
 
 ![Image](gear.md.6.png)
 
-[ring_0.stl](gear.ring_0.stl)
+```JavaScript
+const rack = Box(20, Math.PI)
+  .align('x<')
+  .cut(
+    ...seq((a) => planetaryFootprint.rz(-a / 8).y(Math.PI * a), {
+      from: -1,
+      by: 1 / 8,
+      to: 1,
+    })
+  )
+  .y(...seq((a) => a * Math.PI, { to: 10 }))
+  .gridView()
+  .md(`We can do the same thing to cut a rack.`);
+```
 
 ![Image](gear.md.7.png)
 
-[planet_0.stl](gear.planet_0.stl)
+We can do the same thing to cut a rack.
+
+```JavaScript
+const planetaryDesign = Arc(44)
+  .ex(-4)
+  .as('hoop')
+  .fitTo(Octagon(42).ex(-2, -4))
+  .cut(Octagon(42).ex(-2))
+  .and(ring.clip(Octagon(42)).ex(-2))
+  .cut(Arc(24).ex(-2, -4))
+  .color('blue')
+  .as('ring')
+  .and(
+    planetary
+      .ex(-2)
+      .cut(Arc(2).ex(-2))
+      .color('red')
+      .as('planetary')
+      .x(12)
+      .rz(1 / 4, 2 / 4, 3 / 4, 4 / 4)
+  )
+  .and(
+    solar
+      .ex(-2)
+      .and(Arc(23.5).ex(-2, -4))
+      .fitTo(Octagon(12).fitTo(Arc(8).void()).ex(-4).color('orange').as('axle'))
+      .color('green')
+      .as('solar')
+  )
+  .gridView()
+  .stl('hoop', (s) =>
+    s
+      .get('ring')
+      .get('hoop')
+      .rx(0 / 2, 1 / 2)
+  )
+  .stl('ring', (s) => s.get('ring').getNot('hoop'))
+  .stl('planetary', (s) =>
+    s
+      .get('planetary')
+      .n(0)
+      .y(12)
+      .rx(0 / 2, 1 / 2)
+  )
+  .stl('solar', (s) => s.get('solar').getNot('axle'))
+  .stl('axle', (s) =>
+    s
+      .get('solar')
+      .get('axle')
+      .rx(0 / 2, 1 / 2)
+  );
+```
 
 ![Image](gear.md.8.png)
 
-[sun_0.stl](gear.sun_0.stl)
+![Image](gear.md.9.png)
+
+[hoop_0.stl](gear.hoop_0.stl)
+
+![Image](gear.md.10.png)
+
+[ring_0.stl](gear.ring_0.stl)
+
+![Image](gear.md.11.png)
+
+[planetary_0.stl](gear.planetary_0.stl)
+
+![Image](gear.md.12.png)
+
+[solar_0.stl](gear.solar_0.stl)
+
+![Image](gear.md.13.png)
+
+[axle_0.stl](gear.axle_0.stl)
