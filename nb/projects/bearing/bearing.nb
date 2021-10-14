@@ -11,11 +11,13 @@ const Bearing = (diameter) =>
       Arc(4.5)
         .ex(3.5, 3.0, -3.0, -3.5)
         .and(Arc(5).ex(3, -3))
-        .mask(Arc(5).ex(3.5, -3.5))
+        .mask(Arc(5.2).ex(4, -4))
         .as('pin')
     );
 
 const bearing_10_7 = Bearing(10.7)
   .view(material('glass'))
+  .md(`You'll need to print two of these`)
   .stl('bearing_10_7_top', get('top'))
+  .md(`And one of these`)
   .stl('bearing_10_7_pin', get('pin'));
