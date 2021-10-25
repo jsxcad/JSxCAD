@@ -4528,7 +4528,7 @@ const sleep = (ms = 0) =>
   });
 
 let urlAlphabet =
-  'ModuleSymbhasOwnPr-0123456789ABCDEFGHNRVfgctiUvz_KqYTJkLxpZXIjQW';
+  'useandom-26T198340PX75pxJACKVERYMINDBUSHWOLF_GQZbfghjklqvwyzrict';
 let nanoid = (size = 21) => {
   let id = '';
   let i = size;

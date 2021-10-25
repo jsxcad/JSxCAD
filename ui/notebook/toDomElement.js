@@ -98,10 +98,11 @@ export const toDomElement = (notebook = [], { onClickView } = {}) => {
         image.src = url;
       }
 
+      const thisNote = note;
       image.addEventListener('click', (event) => {
-        showOrbitView(event, note);
+        showOrbitView(event, thisNote);
         if (onClickView) {
-          onClickView(event, note);
+          onClickView(event, thisNote);
         }
       });
       container.appendChild(image);

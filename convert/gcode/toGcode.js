@@ -2,6 +2,8 @@ import { outline, toDisjointGeometry } from '@jsxcad/geometry';
 
 import KdBush from 'kdbush';
 
+const TOOL_TYPES = ['dynamicLaser', 'constantLaser', 'plotter', 'spindle'];
+
 const X = 0;
 const Y = 1;
 const Z = 2;
@@ -12,6 +14,30 @@ export const toGcode = async (
   tool,
   { definitions, doPlan = true } = {}
 ) => {
+  if (!tool) {
+    throw Error('Tool not defined: Expected { grbl: {} }');
+  }
+  if (!tool.grbl) {
+    throw Error('Non GRBL tool not supported: Expected { grbl: {} }');
+  }
+  if (!TOOL_TYPES.includes(tool.grbl.type)) {
+    throw Error(
+      `Tool type ${
+        tool.grbl.type
+      } not supported: Expected { grbl: { type: [${TOOL_TYPES.join(', ')}] } }`
+    );
+  }
+  if (!tool.grbl.feedRate) {
+    throw Error(
+      `Tool feedRate not defined: Expected { grbl: { feedRate: <integer> } }`
+    );
+  }
+  if (!tool.grbl.cutSpeed) {
+    throw Error(
+      `Tool cutSpeed not defined: Expected { grbl: { cutSpeed: <integer> } }`
+    );
+  }
+
   // const topZ = 0;
   const codes = [];
   const _ = undefined;

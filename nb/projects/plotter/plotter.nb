@@ -29,7 +29,7 @@ const mandala = await readSvg(
 const scaledMandala = mandala
   .align('xy')
   .scale(20)
-  .gcode('mandala', plotter, { doPlan: false });
+  .gcode('mandala', plotter, s => s, { doPlan: false });
 
 const visnezh = await readSvg(
   'https://gitcdn.link/cdn/jsxcad/JSxCAD/master/nb/projects/plotter/visnezh.svg',
@@ -39,7 +39,7 @@ const visnezh = await readSvg(
 const scaledVisnezh = visnezh
   .align('xy')
   .scale(1 / 100)
-  .gcode('visnezh', plotter, { doPlan: false });
+  .gcode('visnezh', plotter, s => s, { doPlan: false });
 const calibration = Group(
   ...seq(
     (x) =>

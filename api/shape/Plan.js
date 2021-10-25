@@ -177,11 +177,16 @@ export const getScale = (geometry) => {
 export const Plan = (type) => Shape.fromGeometry(taggedPlan({}, { type }));
 
 Shape.registerReifier = (name, op) => {
-  const finishedOp = (geometry) =>
-    op(geometry)
+  const finishedOp = (geometry) => {
+    const shape = op(geometry);
+    if (!(shape instanceof Shape)) {
+      throw Error('Expected Shape');
+    }
+    return shape
       .transform(getMatrix(geometry))
       .setTags(geometry.tags)
       .toGeometry();
+  };
   registerReifier(name, finishedOp);
   return finishedOp;
 };

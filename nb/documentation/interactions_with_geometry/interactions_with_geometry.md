@@ -179,7 +179,7 @@ aRectangle.remesh(4, 2).view(undefined, { wireframe: true });
 Once a shape is remeshed it can be twisted or bent about the origin.
 
 ```JavaScript
-aRectangle.remesh(4, 1).twist(10).view(undefined, { wireframe: true });
+aRectangle.remesh(4, 1).twist(1/20).view(undefined, { wireframe: true });
 ```
 
 ![Image](interactions_with_geometry.md.16.png)
@@ -189,7 +189,7 @@ aRectangle
   .ry(1 / 4)
   .remesh(4, 1)
   .y(10)
-  .bend(4)
+  .bend(1/40)
   .view(undefined, { wireframe: true });
 ```
 

@@ -57,7 +57,7 @@ flowers
 const scaledMandala = mandala
   .align('xy')
   .scale(20)
-  .gcode('mandala', plotter, { doPlan: false });
+  .gcode('mandala', plotter, s => s, { doPlan: false });
 ```
 
 ![Image](plotter.md.3.png)
@@ -95,7 +95,7 @@ const calibration = Group(
 const scaledVisnezh = visnezh
   .align('xy')
   .scale(1 / 100)
-  .gcode('visnezh', plotter, { doPlan: false });
+  .gcode('visnezh', plotter, s => s, { doPlan: false });
 ```
 
 ![Image](plotter.md.5.png)

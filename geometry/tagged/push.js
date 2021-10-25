@@ -11,12 +11,8 @@ export const push = (
   const op = (geometry, descend) => {
     const { tags } = geometry;
     switch (geometry.type) {
-      case 'graph': {
-        return taggedGraph(
-          { tags },
-          pushGraph(geometry.graph, force, minimumDistance, maximumDistance)
-        );
-      }
+      case 'graph':
+        return pushGraph(geometry, force, minimumDistance, maximumDistance);
       case 'triangles':
       case 'paths':
       case 'points':
