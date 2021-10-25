@@ -1,6 +1,6 @@
-import writeGcode from './writeGcode.js';
+import gcode from './gcode.js';
 
-const api = { writeGcode };
-export { writeGcode };
+const api = { gcode };
+export { gcode };
 
 export default api;

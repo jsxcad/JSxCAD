@@ -20,7 +20,7 @@ Shape.registerReifier('Box', (geometry) => {
   const bottom = corner1[Z];
 
   if (left <= right || front <= back) {
-    return Empty().toGeometry();
+    return Empty();
   }
 
   const a = Shape.fromPath([

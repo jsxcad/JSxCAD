@@ -354,11 +354,16 @@ const getScale = (geometry) => {
 const Plan = (type) => Shape.fromGeometry(taggedPlan({}, { type }));
 
 Shape.registerReifier = (name, op) => {
-  const finishedOp = (geometry) =>
-    op(geometry)
+  const finishedOp = (geometry) => {
+    const shape = op(geometry);
+    if (!(shape instanceof Shape)) {
+      throw Error('Expected Shape');
+    }
+    return shape
       .transform(getMatrix(geometry))
       .setTags(geometry.tags)
       .toGeometry();
+  };
   registerReifier(name, finishedOp);
   return finishedOp;
 };
@@ -744,9 +749,9 @@ const at =
 Shape.registerMethod('at', at);
 
 const bend =
-  (degreesPerMm = 1) =>
+  (turnsPerMm = 1) =>
   (shape) =>
-    Shape.fromGeometry(bend$1(shape.toGeometry(), degreesPerMm));
+    Shape.fromGeometry(bend$1(shape.toGeometry(), turnsPerMm));
 
 Shape.registerMethod('bend', bend);
 
@@ -951,7 +956,7 @@ Shape.registerReifier('Box', (geometry) => {
   const bottom = corner1[Z$3];
 
   if (left <= right || front <= back) {
-    return Empty().toGeometry();
+    return Empty();
   }
 
   const a = Shape.fromPath([
@@ -3489,9 +3494,9 @@ const top = () => (shape) => shape.size(({ max }) => max[Z$1]);
 Shape.registerMethod('top', top);
 
 const twist =
-  (degreesPerMm = 1) =>
+  (turnsPerMm = 1) =>
   (shape) =>
-    Shape.fromGeometry(twist$1(shape.toGeometry(), degreesPerMm));
+    Shape.fromGeometry(twist$1(shape.toGeometry(), turnsPerMm));
 
 Shape.registerMethod('twist', twist);
 
@@ -3825,7 +3830,12 @@ Shape.registerReifier('Arc', (geometry) => {
     })
       .scale(...scale)
       .move(...middle)
-      .move(...getAt(geometry));
+      .op((s) => (top !== bottom ? s.close().fill().ex(top, bottom) : s))
+      .orient({
+        center: negate(getAt(geometry)),
+        from: getFrom(geometry),
+        at: getTo(geometry),
+      });
   }
 });
 

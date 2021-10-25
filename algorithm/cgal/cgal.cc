@@ -410,7 +410,7 @@ void compute_angle(double a, RT& sin_alpha, RT& cos_alpha, RT& w) {
   CGAL::rational_rotation_approximation(radians, sin_alpha, cos_alpha, w, RT(1), RT(1000));
 }
 
-const Surface_mesh* BendSurfaceMesh(const Surface_mesh* input, const Transformation* transform, double degreesPerMm) {
+const Surface_mesh* BendSurfaceMesh(const Surface_mesh* input, const Transformation* transform, double turnsPerMm) {
   Surface_mesh* c = new Surface_mesh(*input);
   CGAL::Polygon_mesh_processing::transform(*transform, *c, CGAL::parameters::all_default());
   CGAL::Polygon_mesh_processing::triangulate_faces(*c);
@@ -424,7 +424,7 @@ const Surface_mesh* BendSurfaceMesh(const Surface_mesh* input, const Transformat
     Point& point = c->point(vertex);
     FT lx = point.x();
     FT ly = point.y();
-    FT radians = ((90 - lx * degreesPerMm) * CGAL_PI) / 180.0;
+    FT radians = (0.50 - lx * turnsPerMm) * CGAL_PI;
     FT radius = ly;
     RT sin_alpha, cos_alpha, w;
     CGAL::rational_rotation_approximation(CGAL::to_double(radians.exact()), sin_alpha, cos_alpha, w, RT(1), RT(1000));
@@ -444,7 +444,7 @@ std::cout << "Bend: Removing self intersections failed" << std::endl;
   return c;
 }
 
-const Surface_mesh* TwistSurfaceMesh(const Surface_mesh* input, const Transformation* transform, double degreesPerMm) {
+const Surface_mesh* TwistSurfaceMesh(const Surface_mesh* input, const Transformation* transform, double turnsPerMm) {
   Surface_mesh* c = new Surface_mesh(*input);
   CGAL::Polygon_mesh_processing::transform(*transform, *c, CGAL::parameters::all_default());
   CGAL::Polygon_mesh_processing::triangulate_faces(*c);
@@ -456,9 +456,9 @@ const Surface_mesh* TwistSurfaceMesh(const Surface_mesh* input, const Transforma
       continue;
     }
     Point& point = c->point(vertex);
-    double a = CGAL::to_double(point.z()) * degreesPerMm;
+    FT radians = CGAL::to_double(point.z()) * turnsPerMm * CGAL_PI;
     RT sin_alpha, cos_alpha, w;
-    compute_angle(a, sin_alpha, cos_alpha, w);
+    CGAL::rational_rotation_approximation(CGAL::to_double(radians.exact()), sin_alpha, cos_alpha, w, RT(1), RT(1000));
     Transformation transformation(
         cos_alpha, sin_alpha, 0, 0,
         -sin_alpha, cos_alpha, 0, 0,
@@ -469,30 +469,24 @@ const Surface_mesh* TwistSurfaceMesh(const Surface_mesh* input, const Transforma
   return c;
 }
 
+Vector unitVector(const Vector& vector);
+Vector NormalOfSurfaceMeshFacet(const Surface_mesh& mesh, Face_index facet);
+
 const Surface_mesh* PushSurfaceMesh(const Surface_mesh* input, const Transformation* transform, double force, double minimum_distance, double scale) {
   Surface_mesh* c = new Surface_mesh(*input);
   CGAL::Polygon_mesh_processing::transform(*transform, *c, CGAL::parameters::all_default());
   Point origin(0, 0, 0);
-  for (const Surface_mesh::Vertex_index vertex : c->vertices()) {
+  for (Surface_mesh::Vertex_index vertex : c->vertices()) {
     if (c->is_removed(vertex)) {
       continue;
     }
     Point& point = c->point(vertex);
-    Vector vector = Vector(origin, point);
-    double distance = sqrt(CGAL::to_double(vector.squared_length())) * scale;
-    FT effect;
-    if ((distance - minimum_distance) <= 1.0) {
-      effect = 1.0;
-    } else {
-      effect = 1.0 - (1.0 / (distance - minimum_distance));
-    }
-    point += vector * (force * effect);
+    Vector vector = Vector(point, origin);
+    FT distance2 = vector.squared_length();
+    point += unitVector(vector) * force / distance2;
   }
   return c;
 }
-
-Vector unitVector(const Vector& vector);
-Vector NormalOfSurfaceMeshFacet(const Surface_mesh& mesh, Face_index facet);
 
 const Surface_mesh* GrowSurfaceMesh(const Surface_mesh* input, const Transformation* transformation, double amount) {
   Surface_mesh mesh(*input);

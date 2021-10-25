@@ -132,6 +132,14 @@ class Ui extends PureComponent {
     };
     clock();
 
+    const onClickView = (event, note) => {
+      if (jsEditorAdvice.orbitView) {
+        jsEditorAdvice.orbitView.openView = false;
+      }
+      jsEditorAdvice.orbitView = note;
+      jsEditorAdvice.orbitView.openView = true;
+    };
+
     const fileUpdater = async () => {
       const { workspace } = this.state;
       const workspaces = await listFilesystems();
@@ -192,11 +200,28 @@ class Ui extends PureComponent {
             domElement.style.visibility = 'hidden';
             domElement.style.position = 'absolute';
 
+            let nthView = 0;
             for (const note of notes) {
               if (note.hash === undefined) {
                 continue;
               }
               const entry = ensureNotebookNote(note);
+              if (entry.view) {
+                nthView += 1;
+                if (entry.sourceLocation) {
+                  entry.sourceLocation.nthView = nthView;
+                }
+                const { orbitView } = jsEditorAdvice;
+                entry.openView = false;
+                if (orbitView) {
+                  if (
+                    orbitView.sourceLocation.id === id &&
+                    orbitView.sourceLocation.nthView === nthView
+                  ) {
+                    entry.openView = true;
+                  }
+                }
+              }
               if (domElementByHash.has(entry.hash)) {
                 // Reuse the element we built earlier
                 console.log(`Re-appending ${entry.hash} to ${id}`);
@@ -240,7 +265,7 @@ class Ui extends PureComponent {
                   render();
                 }
 
-                const element = toDomElement([entry]);
+                const element = toDomElement([entry], { onClickView });
                 domElementByHash.set(entry.hash, element);
                 console.log(`Appending ${entry.hash} to ${id}`);
                 domElement.appendChild(element);

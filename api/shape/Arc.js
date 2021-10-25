@@ -57,7 +57,12 @@ Shape.registerReifier('Arc', (geometry) => {
     })
       .scale(...scale)
       .move(...middle)
-      .move(...getAt(geometry));
+      .op((s) => (top !== bottom ? s.close().fill().ex(top, bottom) : s))
+      .orient({
+        center: negate(getAt(geometry)),
+        from: getFrom(geometry),
+        at: getTo(geometry),
+      });
   }
 });
 
