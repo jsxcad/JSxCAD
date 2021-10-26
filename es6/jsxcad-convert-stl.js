@@ -136,6 +136,10 @@ const fromStl = async (
   }
 };
 
+const X = 0;
+const Y = 1;
+const Z = 2;
+
 const equals = ([aX, aY, aZ], [bX, bY, bZ]) =>
   aX === bX && aY === bY && aZ === bZ;
 const round = (value, tolerance) => Math.round(value / tolerance) * tolerance;
@@ -181,18 +185,61 @@ const convertToFacet = (polygon) => {
   }
 };
 
+// We sort the triangles to produce stable output.
+const orderVertices = (v, d = X) => {
+  if (v[0][d] <= v[1][d] && v[0][d] <= v[2][d]) {
+    // Cannot order by current dimension.
+    if (d === Z) {
+      // Exhausted dimensions.
+      // All vertices are identical, all orders are correct.
+      // This should be an impossible degenerate case.
+      throw Error('Degenerate triangle');
+    }
+    // Try ordering by the next dimension.
+    return orderVertices(v, d + 1);
+  }
+  for (;;) {
+    if (v[0][d] <= v[1][d] && v[0][d] <= v[2][d]) {
+      // Correctly ordered.
+      return v;
+    }
+    // Rotate the vertices and try again.
+    v.push(v.shift());
+  }
+  // Unreachable.
+};
+
+const compareTriangles = ([a], [b]) => {
+  // The triangle vertices have been ordered such that the top is the minimal vertex.
+  const dX = a[X] - b[X];
+  if (dX !== 0) {
+    return dX;
+  }
+  const dY = a[Y] - b[Y];
+  if (dY !== 0) {
+    return dY;
+  }
+  const dZ = a[Z] - b[Z];
+  if (dZ !== 0) {
+    return dZ;
+  }
+};
+
 const toStl = async (geometry, { tolerance = 0.001 } = {}) => {
   const keptGeometry = toDisjointGeometry(await geometry);
   const triangles = [];
   for (const graphGeometry of getNonVoidGraphs(keptGeometry)) {
     for (const [a, b, c] of toTrianglesFromGraph({}, graphGeometry).triangles) {
-      triangles.push([
-        roundVertex(a, tolerance),
-        roundVertex(b, tolerance),
-        roundVertex(c, tolerance),
-      ]);
+      triangles.push(
+        orderVertices([
+          roundVertex(a, tolerance),
+          roundVertex(b, tolerance),
+          roundVertex(c, tolerance),
+        ])
+      );
     }
   }
+  triangles.sort(compareTriangles);
   const output = `solid JSxCAD\n${convertToFacets(
     triangles
   )}\nendsolid JSxCAD\n`;

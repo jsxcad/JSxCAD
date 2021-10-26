@@ -59,14 +59,26 @@ const writeMarkdown = async (
         if (!data && base64Data) {
           data = new Uint8Array(Base64ArrayBuffer.decode(base64Data));
         }
-        const downloadPath = `${modulePath}.${filename}`;
+        const observedPath = `${modulePath}.observed.${filename}`;
+        const expectedPath = `${modulePath}.${filename}`;
+        try {
+          const text = new TextDecoder('utf8').decode(data);
+          if (text !== readFileSync(expectedPath, 'utf8')) {
+            failedExpectations.push(`cp "${observedPath}" "${expectedPath}"`);
+          }
+        } catch (error) {
+          if (error.code === 'ENOENT') {
+            failedExpectations.push(`cp "${observedPath}" "${expectedPath}"`);
+            failedExpectations.push(`git add "${expectedPath}"`);
+          }
+        }
         output.push(
           `[${filename}](${escapeMarkdownLink(
-            pathModule.basename(downloadPath)
+            pathModule.basename(expectedPath)
           )})`
         );
         output.push('');
-        writeFileSync(downloadPath, data);
+        writeFileSync(observedPath, data);
       }
     }
   }
@@ -88,12 +100,12 @@ const writeMarkdown = async (
   writeFileSync(observedPath, markdown);
   try {
     if (markdown !== readFileSync(expectedPath, 'utf8')) {
-      failedExpectations.push(`cp ${observedPath} ${expectedPath}`);
+      failedExpectations.push(`cp "${observedPath}" "${expectedPath}"`);
     }
   } catch (error) {
     if (error.code === 'ENOENT') {
-      failedExpectations.push(`cp ${observedPath} ${expectedPath}`);
-      failedExpectations.push(`git add ${expectedPath}`);
+      failedExpectations.push(`cp "${observedPath}" "${expectedPath}"`);
+      failedExpectations.push(`git add "${expectedPath}"`);
     } else {
       throw error;
     }
@@ -138,8 +150,8 @@ export const updateNotebook = async (
       } catch (error) {
         if (error.code === 'ENOENT') {
           // We couldn't find a matching expectation.
-          failedExpectations.push(`cp ${observedPath} ${expectedPath}`);
-          failedExpectations.push(`git add ${expectedPath}`);
+          failedExpectations.push(`cp "${observedPath}" "${expectedPath}"`);
+          failedExpectations.push(`git add "${expectedPath}"`);
           continue;
         } else {
           throw error;
@@ -149,7 +161,7 @@ export const updateNotebook = async (
       if (width !== observedPng.width || height !== observedPng.height) {
         // Can't diff when the dimensions don't match.
         failedExpectations.push('# dimensions differ');
-        failedExpectations.push(`cp ${observedPath} ${expectedPath}`);
+        failedExpectations.push(`cp "${observedPath}" "${expectedPath}"`);
         continue;
       }
       const differencePng = new pngjs.PNG({ width, height });
@@ -174,8 +186,8 @@ export const updateNotebook = async (
         failedExpectations.push(
           `# numFailedPixels ${numFailedPixels} > PIXEL_THRESHOLD ${PIXEL_THRESHOLD}`
         );
-        failedExpectations.push(`display ${differencePath}`);
-        failedExpectations.push(`cp ${observedPath} ${expectedPath}`);
+        failedExpectations.push(`display "${differencePath}"`);
+        failedExpectations.push(`cp "${observedPath}" "${expectedPath}"`);
       }
     }
   } catch (error) {

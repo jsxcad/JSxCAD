@@ -32,10 +32,6 @@ You'll need to print two of these
 
 ![Image](bearing.md.1.png)
 
-[bearing_10_7_top_0.stl](bearing.bearing_10_7_top_0.stl)
-
 And one of these
 
 ![Image](bearing.md.2.png)
-
-[bearing_10_7_pin_0.stl](bearing.bearing_10_7_pin_0.stl)

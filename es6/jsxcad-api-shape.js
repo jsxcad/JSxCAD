@@ -517,8 +517,8 @@ const defGrblConstantLaser = (
     },
   });
 
-const defGrblPlotter = (name, { feedRate = 1000 } = {}) =>
-  defTool(name, { grbl: { type: 'plotter', feedRate, cutSpeed: 1 } });
+const defGrblPlotter = (name, { feedRate = 1000, jumpZ = 1 } = {}) =>
+  defTool(name, { grbl: { type: 'plotter', feedRate, jumpZ } });
 
 const md = (strings, ...placeholders) => {
   const md = strings.reduce(
