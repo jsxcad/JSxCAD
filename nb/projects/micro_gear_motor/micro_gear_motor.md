@@ -111,8 +111,6 @@ Sheath
 
 ![Image](micro_gear_motor.md.9.png)
 
-[sheath1_0.stl](micro_gear_motor.sheath1_0.stl)
-
 ```JavaScript
 const gear = Gear(20)
   .cut(axleFlatProfile)
@@ -128,8 +126,6 @@ Gear
 
 ![Image](micro_gear_motor.md.11.png)
 
-[gear2_0.stl](micro_gear_motor.gear2_0.stl)
-
 ```JavaScript
 const cap = Group(capProfile.ex(-2, -0.0), sheath).md('Cap').stl('cap');
 ```
@@ -137,8 +133,6 @@ const cap = Group(capProfile.ex(-2, -0.0), sheath).md('Cap').stl('cap');
 Cap
 
 ![Image](micro_gear_motor.md.12.png)
-
-[cap_0.stl](micro_gear_motor.cap_0.stl)
 
 ```JavaScript
 const gearCutout = Gear(20)
@@ -165,8 +159,6 @@ const motorDriverHolder = Block(4, 4, 3.2 * 5)
 Motor Driver Holder
 
 ![Image](micro_gear_motor.md.14.png)
-
-[motor_driver_holder_3_0.stl](micro_gear_motor.motor_driver_holder_3_0.stl)
 
 ## Wemos Bracket
 
@@ -196,8 +188,6 @@ const wemosDriverHolder = Block(4, 5, 3.2 * 11)
 Wemos Driver Holder
 
 ![Image](micro_gear_motor.md.15.png)
-
-[wemos_holder_2_0.stl](micro_gear_motor.wemos_holder_2_0.stl)
 
 ## Gear Motor Bracket
 

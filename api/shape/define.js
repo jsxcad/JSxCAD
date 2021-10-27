@@ -82,5 +82,5 @@ export const defGrblConstantLaser = (
     },
   });
 
-export const defGrblPlotter = (name, { feedRate = 1000 } = {}) =>
-  defTool(name, { grbl: { type: 'plotter', feedRate, cutSpeed: 1 } });
+export const defGrblPlotter = (name, { feedRate = 1000, jumpZ = 1 } = {}) =>
+  defTool(name, { grbl: { type: 'plotter', feedRate, jumpZ } });
