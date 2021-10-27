@@ -365,3 +365,19 @@ graph LR;
   3 --> 4;
   4[graph<br>]
 '''
+
+---
+### Voxels
+We can convert a volume into voxels at a given resolution.
+
+```JavaScript
+Box(11)
+  .ex(10)
+  .rx(-1 / 8)
+  .op((s) => s.voxels(1).color('green').and(s.outline().sketch().color('red')))
+  .view().md('Produce a voxel representation with a 1mm resolution');
+```
+
+![Image](interactions_with_geometry.md.29.png)
+
+Produce a voxel representation with a 1mm resolution

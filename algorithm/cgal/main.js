@@ -1,3 +1,4 @@
+export { SurfaceMeshQuery } from './SurfaceMeshQuery.js';
 export {
   composeTransforms,
   fromApproximateToCgalTransform,

@@ -937,14 +937,18 @@ class SurfaceMeshQuery {
  typedef CGAL::AABB_tree<Traits> Tree;
  typedef boost::optional<Tree::Intersection_and_primitive_id<Point>::Type> Point_intersection;
  typedef boost::optional<Tree::Intersection_and_primitive_id<Segment>::Type> Segment_intersection;
+ typedef CGAL::Side_of_triangle_mesh<Surface_mesh, Kernel> Inside_tester;
 
  public:
-  SurfaceMeshQuery(Surface_mesh* mesh) {
-    tree_.reset(new Tree(faces(*mesh).first, faces(*mesh).second, *mesh));
+  SurfaceMeshQuery(const Surface_mesh* mesh, const Transformation* transformation) {
+    mesh_.reset(new Surface_mesh(*mesh));
+    CGAL::Polygon_mesh_processing::transform(*transformation, *mesh_, CGAL::parameters::all_default());
+    tree_.reset(new Tree(faces(*mesh_).first, faces(*mesh_).second, *mesh_));
+    inside_tester_.reset(new Inside_tester(*tree_));
   }
 
   bool isIntersectingPointApproximate(double x, double y, double z) {
-    return tree_->do_intersect(Point(x, y, z));
+    return (*inside_tester_)(Point(x, y, z)) == CGAL::ON_BOUNDED_SIDE;
   }
 
   void clipSegmentApproximate(double source_x, double source_y, double source_z, double target_x, double target_y, double target_z, emscripten::val emit_segment) {
@@ -970,7 +974,9 @@ class SurfaceMeshQuery {
   }
 
  private:
+  std::unique_ptr<Surface_mesh> mesh_;
   std::unique_ptr<Tree> tree_;
+  std::unique_ptr<Inside_tester> inside_tester_;
 };
 
 void SeparateSurfaceMesh(const Surface_mesh* input, bool keep_volumes, bool keep_cavities_in_volumes, bool keep_cavities_as_volumes, emscripten::val emit_mesh) {
@@ -3333,7 +3339,9 @@ EMSCRIPTEN_BINDINGS(module) {
     .function("z", &Point::z);
 
   emscripten::class_<SurfaceMeshQuery>("SurfaceMeshQuery")
-    .constructor<Surface_mesh*>();
+    .constructor<const Surface_mesh*, const Transformation*>()
+    .function("clipSegmentApproximate", &SurfaceMeshQuery::clipSegmentApproximate)
+    .function("isIntersectingPointApproximate", &SurfaceMeshQuery::isIntersectingPointApproximate);
 
   emscripten::function("SerializeSurfaceMesh", &SerializeSurfaceMesh, emscripten::allow_raw_pointers());
   emscripten::function("DeserializeSurfaceMesh", &DeserializeSurfaceMesh, emscripten::allow_raw_pointers());
