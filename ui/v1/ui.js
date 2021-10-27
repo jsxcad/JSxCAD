@@ -1,4 +1,4 @@
-/* global FileReader, btoa, history, location, mermaid */
+/* global FileReader, history, location, mermaid */
 
 import * as PropTypes from 'prop-types';
 

@@ -3122,7 +3122,7 @@ const toPolygonsWithHoles = (geometry) => {
     }
   };
 
-  visit(toTransformedGeometry(geometry), op);
+  visit(toConcreteGeometry(geometry), op);
 
   return output;
 };
