@@ -1,4 +1,4 @@
-import { closePath, concatenatePath, assemble as assemble$1, flip, toConcreteGeometry, toDisplayGeometry, toTransformedGeometry, toPoints, transform, rewriteTags, taggedPaths, taggedGraph, openPath, taggedPoints, fromPolygonsToGraph, registerReifier, taggedPlan, taggedGroup, union, taggedItem, getLeafs, bend as bend$1, projectToPlane, computeCentroid, intersection, allTags, fromPointsToGraph, difference, rewrite, hasTypeWire, translatePaths, taggedLayout, measureBoundingBox, getLayouts, visit, isNotVoid, eachPoint as eachPoint$1, extrude as extrude$1, extrudeToPlane as extrudeToPlane$1, faces as faces$1, fill as fill$1, empty, grow as grow$1, outline as outline$1, inset as inset$1, read, loft as loft$1, realize, minkowskiDifference as minkowskiDifference$1, minkowskiShell as minkowskiShell$1, minkowskiSum as minkowskiSum$1, computeNormal, isVoid, offset as offset$1, push as push$1, remesh as remesh$1, write, section as section$1, separate as separate$1, smooth as smooth$1, taggedSketch, test as test$1, twist as twist$1, withContainsPointTest, toPolygonsWithHoles, arrangePolygonsWithHoles, fromPolygonsWithHolesToTriangles, fromTrianglesToGraph, alphaShape, rotateZPath, convexHullToGraph, fromFunctionToGraph, fromPathsToGraph, translatePath } from './jsxcad-geometry.js';
+import { closePath, concatenatePath, assemble as assemble$1, flip, toConcreteGeometry, toDisplayGeometry, toTransformedGeometry, toPoints, transform, rewriteTags, taggedPaths, taggedGraph, openPath, taggedSegments, taggedPoints, fromPolygonsToGraph, registerReifier, taggedPlan, taggedGroup, union, taggedItem, getLeafs, bend as bend$1, projectToPlane, computeCentroid, intersection, allTags, fromPointsToGraph, difference, rewrite, hasTypeWire, translatePaths, taggedLayout, measureBoundingBox, getLayouts, visit, isNotVoid, eachPoint as eachPoint$1, extrude as extrude$1, extrudeToPlane as extrudeToPlane$1, faces as faces$1, fill as fill$1, empty, grow as grow$1, outline as outline$1, inset as inset$1, read, loft as loft$1, realize, minkowskiDifference as minkowskiDifference$1, minkowskiShell as minkowskiShell$1, minkowskiSum as minkowskiSum$1, computeNormal, isVoid, offset as offset$1, push as push$1, remesh as remesh$1, write, section as section$1, separate as separate$1, smooth as smooth$1, taggedSketch, test as test$1, twist as twist$1, withQuery, toPolygonsWithHoles, arrangePolygonsWithHoles, fromPolygonsWithHolesToTriangles, fromTrianglesToGraph, alphaShape, rotateZPath, convexHullToGraph, fromFunctionToGraph, fromPathsToGraph, translatePath } from './jsxcad-geometry.js';
 import { getSourceLocation, emit, log as log$1, generateUniqueId, addPending, write as write$1 } from './jsxcad-sys.js';
 export { elapsed, emit, info, read, write } from './jsxcad-sys.js';
 import { identityMatrix, fromTranslation, fromRotation, fromScaling } from './jsxcad-math-mat4.js';
@@ -149,6 +149,8 @@ Shape.fromGraph = (graph, context) =>
   new Shape(taggedGraph({}, graph), context);
 Shape.fromOpenPath = (path, context) =>
   fromGeometry(taggedPaths({}, [openPath(path)]), context);
+Shape.fromSegments = (...segments) =>
+  fromGeometry(taggedSegments({}, segments));
 Shape.fromPath = (path, context) =>
   fromGeometry(taggedPaths({}, [path]), context);
 Shape.fromPaths = (paths, context) =>
@@ -3026,6 +3028,18 @@ const minkowskiSum = (offset) => (shape) =>
 
 Shape.registerMethod('minkowskiSum', minkowskiSum);
 
+const toCoordinate = (x) => {
+  if (x instanceof Shape) {
+    const g = x.toTransformedGeometry();
+    if (g.type === 'points' && g.points.length === 1) {
+      // FIX: Consider how this might be more robust.
+      return g.points[0];
+    }
+  } else if (x instanceof Array) {
+    return x;
+  }
+};
+
 // FIX: Consider how exact values might be used.
 const move =
   (x = 0, y = 0, z = 0) =>
@@ -3035,11 +3049,7 @@ const move =
     z = Shape.toValue(z, shape);
     // Allow a Point to be provided.
     if (x instanceof Shape) {
-      const g = x.toTransformedGeometry();
-      if (g.type === 'points' && g.points.length === 1) {
-        // FIX: Consider how this might be more robust.
-        [x, y, z] = g.points[0];
-      }
+      [x, y, z] = toCoordinate(x);
     }
     if (!isFinite(x)) {
       x = 0;
@@ -3711,51 +3721,53 @@ const ceilPoint = ([x, y, z], resolution) => [
   ceil(z, resolution),
 ];
 
-const voxels = (resolution = 1) => shape => {
-  const offset = resolution / 2;
-  const geometry = shape.toGeometry();
-  const [boxMin, boxMax] = measureBoundingBox(geometry);
-  const min = floorPoint(boxMin, resolution);
-  const max = ceilPoint(boxMax, resolution);
-  const polygons = [];
-  withContainsPointTest(geometry, (test) => {
-    for (let x = min[X] - offset; x <= max[X] + offset; x += resolution) {
-      for (let y = min[Y] - offset; y <= max[Y] + offset; y += resolution) {
-        for (let z = min[Z$1] - offset; z <= max[Z$1] + offset; z += resolution) {
-          const state = test(x, y, z);
-          if (state !== test(x + resolution, y, z)) {
-            const face = [
-              [x + offset, y - offset, z - offset],
-              [x + offset, y + offset, z - offset],
-              [x + offset, y + offset, z + offset],
-              [x + offset, y - offset, z + offset],
-            ];
-            polygons.push({ points: state ? face : face.reverse() });
-          }
-          if (state !== test(x, y + resolution, z)) {
-            const face = [
-              [x - offset, y + offset, z - offset],
-              [x + offset, y + offset, z - offset],
-              [x + offset, y + offset, z + offset],
-              [x - offset, y + offset, z + offset],
-            ];
-            polygons.push({ points: state ? face.reverse() : face });
-          }
-          if (state !== test(x, y, z + resolution)) {
-            const face = [
-              [x - offset, y - offset, z + offset],
-              [x + offset, y - offset, z + offset],
-              [x + offset, y + offset, z + offset],
-              [x - offset, y + offset, z + offset],
-            ];
-            polygons.push({ points: state ? face : face.reverse() });
+const voxels =
+  (resolution = 1) =>
+  (shape) => {
+    const offset = resolution / 2;
+    const geometry = shape.toGeometry();
+    const [boxMin, boxMax] = measureBoundingBox(geometry);
+    const min = floorPoint(boxMin, resolution);
+    const max = ceilPoint(boxMax, resolution);
+    const polygons = [];
+    withQuery(geometry, ({ isInteriorPoint }) => {
+      for (let x = min[X] - offset; x <= max[X] + offset; x += resolution) {
+        for (let y = min[Y] - offset; y <= max[Y] + offset; y += resolution) {
+          for (let z = min[Z$1] - offset; z <= max[Z$1] + offset; z += resolution) {
+            const state = isInteriorPoint(x, y, z);
+            if (state !== isInteriorPoint(x + resolution, y, z)) {
+              const face = [
+                [x + offset, y - offset, z - offset],
+                [x + offset, y + offset, z - offset],
+                [x + offset, y + offset, z + offset],
+                [x + offset, y - offset, z + offset],
+              ];
+              polygons.push({ points: state ? face : face.reverse() });
+            }
+            if (state !== isInteriorPoint(x, y + resolution, z)) {
+              const face = [
+                [x - offset, y + offset, z - offset],
+                [x + offset, y + offset, z - offset],
+                [x + offset, y + offset, z + offset],
+                [x - offset, y + offset, z + offset],
+              ];
+              polygons.push({ points: state ? face.reverse() : face });
+            }
+            if (state !== isInteriorPoint(x, y, z + resolution)) {
+              const face = [
+                [x - offset, y - offset, z + offset],
+                [x + offset, y - offset, z + offset],
+                [x + offset, y + offset, z + offset],
+                [x - offset, y + offset, z + offset],
+              ];
+              polygons.push({ points: state ? face : face.reverse() });
+            }
           }
         }
       }
-    }
-  });
-  return Shape.fromPolygons(polygons);
-};
+    });
+    return Shape.fromPolygons(polygons);
+  };
 
 Shape.registerMethod('voxels', voxels);
 
@@ -4160,6 +4172,16 @@ Polyhedron.ofPointPaths = ofPointPaths;
 
 Shape.prototype.Polyhedron = Shape.shapeMethod(Polyhedron);
 
+const Segment = (source, target) =>
+  Shape.fromSegments([toCoordinate(source), toCoordinate(target)]);
+
+Shape.prototype.Segment = Shape.shapeMethod(Segment);
+
+const Segments = (...segments) =>
+  Shape.fromSegments(...segments.map(([source, target]) => [toCoordinate(source), toCoordinate(target)]));
+
+Shape.prototype.Segments = Shape.shapeMethod(Segments);
+
 const Septagon = (x, y, z) => Arc(x, y, z).hasSides(7);
 
 Shape.prototype.Septagon = Shape.shapeMethod(Septagon);
@@ -4420,4 +4442,4 @@ const yz = Shape.fromGeometry({
   ],
 });
 
-export { Alpha, Arc, Assembly, Box, ChainedHull, Empty, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Line, Octagon, Orb, Page, Path, Pentagon, Plan, Point, Points, Polygon, Polyhedron, Septagon, Shape, Spiral, Tetragon, Triangle, Wave, Weld, abstract, add, addTo, align, and, as, asPart, at, bend, billOfMaterials, cast, center, clip, clipFrom, cloudSolid, color, colors, cut, cutFrom, cutOut, defGrblConstantLaser, defGrblDynamicLaser, defGrblPlotter, defGrblSpindle, defRgbColor, defThreejsMaterial, defTool, define, drop, each, eachPoint, ensurePages, ex, extrude, extrudeAlong, extrudeToPlane, faces, fill, fit, fitTo, fuse, g, get, getNot, gn, grow, inline, inset, keep, loadGeometry, loft, log, loop, mask, material, md, minkowskiDifference, minkowskiShell, minkowskiSum, move, moveTo, n, noVoid, normal, notColor, nth, ofPlan, offset, on, op, orient, outline, pack, play, push, remesh, rotate, rotateX, rotateY, rotateZ, rx, ry, rz, saveGeometry, scale, scaleToFit, section, sectionProfile, separate, size, sketch, smooth, tag, tags, test, tint, tool, top, twist, untag, view, voidFn, voidIn, voxels, weld, withFill, withFn, withInset, withOp, x, xy, xyz, xz, y, yz, z };
+export { Alpha, Arc, Assembly, Box, ChainedHull, Empty, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Line, Octagon, Orb, Page, Path, Pentagon, Plan, Point, Points, Polygon, Polyhedron, Segment, Segments, Septagon, Shape, Spiral, Tetragon, Triangle, Wave, Weld, abstract, add, addTo, align, and, as, asPart, at, bend, billOfMaterials, cast, center, clip, clipFrom, cloudSolid, color, colors, cut, cutFrom, cutOut, defGrblConstantLaser, defGrblDynamicLaser, defGrblPlotter, defGrblSpindle, defRgbColor, defThreejsMaterial, defTool, define, drop, each, eachPoint, ensurePages, ex, extrude, extrudeAlong, extrudeToPlane, faces, fill, fit, fitTo, fuse, g, get, getNot, gn, grow, inline, inset, keep, loadGeometry, loft, log, loop, mask, material, md, minkowskiDifference, minkowskiShell, minkowskiSum, move, moveTo, n, noVoid, normal, notColor, nth, ofPlan, offset, on, op, orient, outline, pack, play, push, remesh, rotate, rotateX, rotateY, rotateZ, rx, ry, rz, saveGeometry, scale, scaleToFit, section, sectionProfile, separate, size, sketch, smooth, tag, tags, test, tint, tool, top, twist, untag, view, voidFn, voidIn, voxels, weld, withFill, withFn, withInset, withOp, x, xy, xyz, xz, y, yz, z };

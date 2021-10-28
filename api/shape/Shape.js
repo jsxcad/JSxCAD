@@ -9,6 +9,7 @@ import {
   taggedGraph,
   taggedPaths,
   taggedPoints,
+  taggedSegments,
   toConcreteGeometry as toConcreteTaggedGeometry,
   toDisplayGeometry,
   toPoints,
@@ -156,6 +157,8 @@ Shape.fromGraph = (graph, context) =>
   new Shape(taggedGraph({}, graph), context);
 Shape.fromOpenPath = (path, context) =>
   fromGeometry(taggedPaths({}, [openPath(path)]), context);
+Shape.fromSegments = (...segments) =>
+  fromGeometry(taggedSegments({}, segments));
 Shape.fromPath = (path, context) =>
   fromGeometry(taggedPaths({}, [path]), context);
 Shape.fromPaths = (paths, context) =>

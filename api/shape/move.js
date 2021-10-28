@@ -1,5 +1,6 @@
 import Shape from './Shape.js';
 import { fromTranslation } from '@jsxcad/math-mat4';
+import { toCoordinate } from './toCoordinate.js';
 
 // FIX: Consider how exact values might be used.
 export const move =
@@ -10,11 +11,7 @@ export const move =
     z = Shape.toValue(z, shape);
     // Allow a Point to be provided.
     if (x instanceof Shape) {
-      const g = x.toTransformedGeometry();
-      if (g.type === 'points' && g.points.length === 1) {
-        // FIX: Consider how this might be more robust.
-        [x, y, z] = g.points[0];
-      }
+      [x, y, z] = toCoordinate(x);
     }
     if (!isFinite(x)) {
       x = 0;

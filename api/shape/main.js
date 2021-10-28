@@ -365,6 +365,8 @@ export { Point } from './Point.js';
 export { Points } from './Points.js';
 export { Polygon } from './Polygon.js';
 export { Polyhedron } from './Polyhedron.js';
+export { Segment } from './Segment.js';
+export { Segments } from './Segments.js';
 export { Septagon } from './Septagon.js';
 export { Spiral } from './Spiral.js';
 export { Tetragon } from './Tetragon.js';

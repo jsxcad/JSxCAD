@@ -1,4 +1,4 @@
-import { measureBoundingBox, withContainsPointTest } from '@jsxcad/geometry';
+import { measureBoundingBox, withQuery } from '@jsxcad/geometry';
 
 import { Shape } from './Shape.js';
 
@@ -30,12 +30,12 @@ export const voxels =
     const min = floorPoint(boxMin, resolution);
     const max = ceilPoint(boxMax, resolution);
     const polygons = [];
-    withContainsPointTest(geometry, (test) => {
+    withQuery(geometry, ({ isInteriorPoint }) => {
       for (let x = min[X] - offset; x <= max[X] + offset; x += resolution) {
         for (let y = min[Y] - offset; y <= max[Y] + offset; y += resolution) {
           for (let z = min[Z] - offset; z <= max[Z] + offset; z += resolution) {
-            const state = test(x, y, z);
-            if (state !== test(x + resolution, y, z)) {
+            const state = isInteriorPoint(x, y, z);
+            if (state !== isInteriorPoint(x + resolution, y, z)) {
               const face = [
                 [x + offset, y - offset, z - offset],
                 [x + offset, y + offset, z - offset],
@@ -44,7 +44,7 @@ export const voxels =
               ];
               polygons.push({ points: state ? face : face.reverse() });
             }
-            if (state !== test(x, y + resolution, z)) {
+            if (state !== isInteriorPoint(x, y + resolution, z)) {
               const face = [
                 [x - offset, y + offset, z - offset],
                 [x + offset, y + offset, z - offset],
@@ -53,7 +53,7 @@ export const voxels =
               ];
               polygons.push({ points: state ? face.reverse() : face });
             }
-            if (state !== test(x, y, z + resolution)) {
+            if (state !== isInteriorPoint(x, y, z + resolution)) {
               const face = [
                 [x - offset, y - offset, z + offset],
                 [x + offset, y - offset, z + offset],

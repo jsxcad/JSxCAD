@@ -159,5 +159,5 @@ export { transform as transformPaths } from './paths/transform.js';
 export { twist } from './tagged/twist.js';
 export { union } from './tagged/union.js';
 export { update } from './tagged/update.js';
-export { withContainsPointTest } from './tagged/withContainsPointTest.js';
+export { withQuery } from './tagged/withQuery.js';
 export { write } from './tagged/write.js';

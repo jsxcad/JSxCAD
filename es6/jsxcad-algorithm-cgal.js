@@ -561,7 +561,10 @@ const fromScaleToTransform = (x = 0, y = 0, z = 0) =>
 
 const SurfaceMeshQuery = (mesh, transform) => {
   const c = getCgal();
-  return new c.SurfaceMeshQuery(mesh, toCgalTransformFromJsTransform(transform));
+  return new c.SurfaceMeshQuery(
+    mesh,
+    toCgalTransformFromJsTransform(transform)
+  );
 };
 
 const getPathEdges = (path) => {

@@ -7,6 +7,7 @@ export const realize = (geometry) => {
       case 'graph':
         return realizeGraph(geometry);
       case 'displayGeometry':
+      case 'segments':
       case 'triangles':
       case 'points':
       case 'paths':
