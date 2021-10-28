@@ -190,6 +190,19 @@ const X = 0;
 const Y = 1;
 const Z = 2;
 
+/*
+
+We support grbl tools at the moment, which have the following structure:
+
+{
+  jumpZ // a height that is safe for lateral rapid movement.
+  cutSpeed // the spindle speed to use when cutting
+  feedRate // the rate to advance the tool while cutting
+  type // 'dynamicLaser', 'constantLaser', 'plotter', 'spindle'
+}
+
+*/
+
 // FIX: This is actually GRBL.
 const toGcode = async (
   geometry,
@@ -325,6 +338,7 @@ const toGcode = async (
     cG1({ x, y, z });
   };
 
+  // Rapidly lift tool to a clear height and move to the x, y coordinate.
   const jump = ({ x, y }) => {
     if (x === state.x && y === state.y) {
       return;

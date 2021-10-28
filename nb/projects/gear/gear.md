@@ -62,6 +62,8 @@ Gear()
 
 ![Image](gear.md.1.png)
 
+[gear_16_0.stl](gear.gear_16_0.stl)
+
 ```JavaScript
 Gear()
   .hasTeeth(8)
@@ -242,3 +244,5 @@ const planetaryDesign = Arc(44)
 ![Image](gear.md.12.png)
 
 ![Image](gear.md.13.png)
+
+[axle_0.stl](gear.axle_0.stl)

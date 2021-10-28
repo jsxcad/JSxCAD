@@ -1,4 +1,4 @@
-import { closePath, concatenatePath, assemble as assemble$1, flip, toConcreteGeometry, toDisplayGeometry, toTransformedGeometry, toPoints, transform, rewriteTags, taggedPaths, taggedGraph, openPath, taggedPoints, fromPolygonsToGraph, registerReifier, taggedPlan, taggedGroup, union, taggedItem, getLeafs, bend as bend$1, projectToPlane, computeCentroid, intersection, allTags, fromPointsToGraph, difference, rewrite, hasTypeWire, translatePaths, taggedLayout, measureBoundingBox, getLayouts, visit, isNotVoid, eachPoint as eachPoint$1, extrude as extrude$1, extrudeToPlane as extrudeToPlane$1, faces as faces$1, fill as fill$1, empty, grow as grow$1, outline as outline$1, inset as inset$1, read, loft as loft$1, realize, minkowskiDifference as minkowskiDifference$1, minkowskiShell as minkowskiShell$1, minkowskiSum as minkowskiSum$1, computeNormal, isVoid, offset as offset$1, push as push$1, remesh as remesh$1, write, section as section$1, separate as separate$1, smooth as smooth$1, taggedSketch, test as test$1, twist as twist$1, toPolygonsWithHoles, arrangePolygonsWithHoles, fromPolygonsWithHolesToTriangles, fromTrianglesToGraph, alphaShape, rotateZPath, convexHullToGraph, fromFunctionToGraph, fromPathsToGraph, translatePath } from './jsxcad-geometry.js';
+import { closePath, concatenatePath, assemble as assemble$1, flip, toConcreteGeometry, toDisplayGeometry, toTransformedGeometry, toPoints, transform, rewriteTags, taggedPaths, taggedGraph, openPath, taggedSegments, taggedPoints, fromPolygonsToGraph, registerReifier, taggedPlan, taggedGroup, union, taggedItem, getLeafs, bend as bend$1, projectToPlane, computeCentroid, intersection, allTags, fromPointsToGraph, difference, rewrite, hasTypeWire, translatePaths, taggedLayout, measureBoundingBox, getLayouts, visit, isNotVoid, eachPoint as eachPoint$1, extrude as extrude$1, extrudeToPlane as extrudeToPlane$1, faces as faces$1, fill as fill$1, empty, grow as grow$1, outline as outline$1, inset as inset$1, read, loft as loft$1, realize, minkowskiDifference as minkowskiDifference$1, minkowskiShell as minkowskiShell$1, minkowskiSum as minkowskiSum$1, computeNormal, isVoid, offset as offset$1, push as push$1, remesh as remesh$1, write, section as section$1, separate as separate$1, smooth as smooth$1, taggedSketch, test as test$1, twist as twist$1, withQuery, toPolygonsWithHoles, arrangePolygonsWithHoles, fromPolygonsWithHolesToTriangles, fromTrianglesToGraph, alphaShape, rotateZPath, convexHullToGraph, fromFunctionToGraph, fromPathsToGraph, translatePath } from './jsxcad-geometry.js';
 import { getSourceLocation, emit, log as log$1, generateUniqueId, addPending, write as write$1 } from './jsxcad-sys.js';
 export { elapsed, emit, info, read, write } from './jsxcad-sys.js';
 import { identityMatrix, fromTranslation, fromRotation, fromScaling } from './jsxcad-math-mat4.js';
@@ -149,6 +149,8 @@ Shape.fromGraph = (graph, context) =>
   new Shape(taggedGraph({}, graph), context);
 Shape.fromOpenPath = (path, context) =>
   fromGeometry(taggedPaths({}, [openPath(path)]), context);
+Shape.fromSegments = (...segments) =>
+  fromGeometry(taggedSegments({}, segments));
 Shape.fromPath = (path, context) =>
   fromGeometry(taggedPaths({}, [path]), context);
 Shape.fromPaths = (paths, context) =>
@@ -616,9 +618,9 @@ Shape.registerMethod('and', and);
 const addTo = (other) => (shape) => other.add(shape);
 Shape.registerMethod('addTo', addTo);
 
-const X$3 = 0;
-const Y$3 = 1;
-const Z$4 = 2;
+const X$4 = 0;
+const Y$4 = 1;
+const Z$5 = 2;
 
 const align =
   (spec = 'xyz', origin = [0, 0, 0]) =>
@@ -632,45 +634,45 @@ const align =
           case 'x': {
             switch (spec[index]) {
               case '>':
-                offset[X$3] = -min[X$3];
+                offset[X$4] = -min[X$4];
                 index += 1;
                 break;
               case '<':
-                offset[X$3] = -max[X$3];
+                offset[X$4] = -max[X$4];
                 index += 1;
                 break;
               default:
-                offset[X$3] = -center[X$3];
+                offset[X$4] = -center[X$4];
             }
             break;
           }
           case 'y': {
             switch (spec[index]) {
               case '>':
-                offset[Y$3] = -min[Y$3];
+                offset[Y$4] = -min[Y$4];
                 index += 1;
                 break;
               case '<':
-                offset[Y$3] = -max[Y$3];
+                offset[Y$4] = -max[Y$4];
                 index += 1;
                 break;
               default:
-                offset[Y$3] = -center[Y$3];
+                offset[Y$4] = -center[Y$4];
             }
             break;
           }
           case 'z': {
             switch (spec[index]) {
               case '>':
-                offset[Z$4] = -min[Z$4];
+                offset[Z$5] = -min[Z$5];
                 index += 1;
                 break;
               case '<':
-                offset[Z$4] = -max[Z$4];
+                offset[Z$5] = -max[Z$5];
                 index += 1;
                 break;
               default:
-                offset[Z$4] = -center[Z$4];
+                offset[Z$5] = -center[Z$5];
             }
             break;
           }
@@ -941,19 +943,19 @@ const Empty = (...shapes) => Shape.fromGeometry(taggedGroup({}));
 
 Shape.prototype.Empty = Shape.shapeMethod(Empty);
 
-const X$2 = 0;
-const Y$2 = 1;
-const Z$3 = 2;
+const X$3 = 0;
+const Y$3 = 1;
+const Z$4 = 2;
 
 Shape.registerReifier('Box', (geometry) => {
   const corner1 = getCorner1(geometry);
   const corner2 = getCorner2(geometry);
-  const left = corner1[X$2];
-  const right = corner2[X$2];
-  const front = corner1[Y$2];
-  const back = corner2[Y$2];
-  const top = corner2[Z$3];
-  const bottom = corner1[Z$3];
+  const left = corner1[X$3];
+  const right = corner2[X$3];
+  const front = corner1[Y$3];
+  const back = corner2[Y$3];
+  const top = corner2[Z$4];
+  const bottom = corner1[Z$4];
 
   if (left <= right || front <= back) {
     return Empty();
@@ -2415,8 +2417,8 @@ const Hershey = ofSize;
 
 const MIN = 0;
 const MAX = 1;
-const X$1 = 0;
-const Y$1 = 1;
+const X$2 = 0;
+const Y$2 = 1;
 
 const getItemNames = (geometry) => {
   const names = new Set();
@@ -2500,15 +2502,15 @@ const Page = (
     const pageWidth =
       Math.max(
         1,
-        Math.abs(packSize[MAX][X$1] * 2),
-        Math.abs(packSize[MIN][X$1] * 2)
+        Math.abs(packSize[MAX][X$2] * 2),
+        Math.abs(packSize[MIN][X$2] * 2)
       ) +
       pageMargin * 2;
     const pageLength =
       Math.max(
         1,
-        Math.abs(packSize[MAX][Y$1] * 2),
-        Math.abs(packSize[MIN][Y$1] * 2)
+        Math.abs(packSize[MAX][Y$2] * 2),
+        Math.abs(packSize[MIN][Y$2] * 2)
       ) +
       pageMargin * 2;
     return Shape.fromGeometry(
@@ -2520,15 +2522,15 @@ const Page = (
     const pageWidth =
       Math.max(
         1,
-        Math.abs(packSize[MAX][X$1] * 2),
-        Math.abs(packSize[MIN][X$1] * 2)
+        Math.abs(packSize[MAX][X$2] * 2),
+        Math.abs(packSize[MIN][X$2] * 2)
       ) +
       pageMargin * 2;
     const pageLength =
       Math.max(
         1,
-        Math.abs(packSize[MAX][Y$1] * 2),
-        Math.abs(packSize[MIN][Y$1] * 2)
+        Math.abs(packSize[MAX][Y$2] * 2),
+        Math.abs(packSize[MIN][Y$2] * 2)
       ) +
       pageMargin * 2;
     if (isFinite(pageWidth) && isFinite(pageLength)) {
@@ -2551,8 +2553,8 @@ const Page = (
     if (packSize.length === 0) {
       throw Error('Packing failed');
     }
-    const pageWidth = Math.max(1, packSize[MAX][X$1] - packSize[MIN][X$1]);
-    const pageLength = Math.max(1, packSize[MAX][Y$1] - packSize[MIN][Y$1]);
+    const pageWidth = Math.max(1, packSize[MAX][X$2] - packSize[MIN][X$2]);
+    const pageLength = Math.max(1, packSize[MAX][Y$2] - packSize[MIN][Y$2]);
     if (isFinite(pageWidth) && isFinite(pageLength)) {
       const plans = [];
       for (const layer of content.toDisjointGeometry().content[0].content) {
@@ -2584,8 +2586,8 @@ const Page = (
     }
     // FIX: Using content.size() loses the margin, which is a problem for repacking.
     // Probably page plans should be generated by pack and count toward the size.
-    const pageWidth = packSize[MAX][X$1] - packSize[MIN][X$1];
-    const pageLength = packSize[MAX][Y$1] - packSize[MIN][Y$1];
+    const pageWidth = packSize[MAX][X$2] - packSize[MIN][X$2];
+    const pageLength = packSize[MAX][Y$2] - packSize[MIN][Y$2];
     if (isFinite(pageWidth) && isFinite(pageLength)) {
       const plans = [];
       for (const layer of content.toDisjointGeometry().content[0].content) {
@@ -3026,6 +3028,18 @@ const minkowskiSum = (offset) => (shape) =>
 
 Shape.registerMethod('minkowskiSum', minkowskiSum);
 
+const toCoordinate = (x) => {
+  if (x instanceof Shape) {
+    const g = x.toTransformedGeometry();
+    if (g.type === 'points' && g.points.length === 1) {
+      // FIX: Consider how this might be more robust.
+      return g.points[0];
+    }
+  } else if (x instanceof Array) {
+    return x;
+  }
+};
+
 // FIX: Consider how exact values might be used.
 const move =
   (x = 0, y = 0, z = 0) =>
@@ -3035,11 +3049,7 @@ const move =
     z = Shape.toValue(z, shape);
     // Allow a Point to be provided.
     if (x instanceof Shape) {
-      const g = x.toTransformedGeometry();
-      if (g.type === 'points' && g.points.length === 1) {
-        // FIX: Consider how this might be more robust.
-        [x, y, z] = g.points[0];
-      }
+      [x, y, z] = toCoordinate(x);
     }
     if (!isFinite(x)) {
       x = 0;
@@ -3415,18 +3425,18 @@ const smooth =
 
 Shape.registerMethod('smooth', smooth);
 
-const X = 0;
-const Y = 1;
-const Z$2 = 2;
+const X$1 = 0;
+const Y$1 = 1;
+const Z$3 = 2;
 
 const size =
   (op = (size, shape) => size) =>
   (shape) => {
     const geometry = shape.toConcreteGeometry();
     const [min, max] = measureBoundingBox(geometry);
-    const length = max[X] - min[X];
-    const width = max[Y] - min[Y];
-    const height = max[Z$2] - min[Z$2];
+    const length = max[X$1] - min[X$1];
+    const width = max[Y$1] - min[Y$1];
+    const height = max[Z$3] - min[Z$3];
     const center = scale$1(0.5, add$1(min, max));
     const radius = distance(center, max);
     return op(
@@ -3487,9 +3497,9 @@ const tool = (name) => (shape) =>
 
 Shape.registerMethod('tool', tool);
 
-const Z$1 = 2;
+const Z$2 = 2;
 
-const top = () => (shape) => shape.size(({ max }) => max[Z$1]);
+const top = () => (shape) => shape.size(({ max }) => max[Z$2]);
 
 Shape.registerMethod('top', top);
 
@@ -3691,6 +3701,75 @@ const voidIn = (other) => (shape) =>
   Shape.toShape(other, shape).fitTo(shape.void());
 
 Shape.registerMethod('voidIn', voidIn);
+
+const X = 0;
+const Y = 1;
+const Z$1 = 2;
+
+const floor = (value, resolution) =>
+  Math.floor(value / resolution) * resolution;
+const ceil = (value, resolution) => Math.ceil(value / resolution) * resolution;
+
+const floorPoint = ([x, y, z], resolution) => [
+  floor(x, resolution),
+  floor(y, resolution),
+  floor(z, resolution),
+];
+const ceilPoint = ([x, y, z], resolution) => [
+  ceil(x, resolution),
+  ceil(y, resolution),
+  ceil(z, resolution),
+];
+
+const voxels =
+  (resolution = 1) =>
+  (shape) => {
+    const offset = resolution / 2;
+    const geometry = shape.toGeometry();
+    const [boxMin, boxMax] = measureBoundingBox(geometry);
+    const min = floorPoint(boxMin, resolution);
+    const max = ceilPoint(boxMax, resolution);
+    const polygons = [];
+    withQuery(geometry, ({ isInteriorPoint }) => {
+      for (let x = min[X] - offset; x <= max[X] + offset; x += resolution) {
+        for (let y = min[Y] - offset; y <= max[Y] + offset; y += resolution) {
+          for (let z = min[Z$1] - offset; z <= max[Z$1] + offset; z += resolution) {
+            const state = isInteriorPoint(x, y, z);
+            if (state !== isInteriorPoint(x + resolution, y, z)) {
+              const face = [
+                [x + offset, y - offset, z - offset],
+                [x + offset, y + offset, z - offset],
+                [x + offset, y + offset, z + offset],
+                [x + offset, y - offset, z + offset],
+              ];
+              polygons.push({ points: state ? face : face.reverse() });
+            }
+            if (state !== isInteriorPoint(x, y + resolution, z)) {
+              const face = [
+                [x - offset, y + offset, z - offset],
+                [x + offset, y + offset, z - offset],
+                [x + offset, y + offset, z + offset],
+                [x - offset, y + offset, z + offset],
+              ];
+              polygons.push({ points: state ? face.reverse() : face });
+            }
+            if (state !== isInteriorPoint(x, y, z + resolution)) {
+              const face = [
+                [x - offset, y - offset, z + offset],
+                [x + offset, y - offset, z + offset],
+                [x + offset, y + offset, z + offset],
+                [x - offset, y + offset, z + offset],
+              ];
+              polygons.push({ points: state ? face : face.reverse() });
+            }
+          }
+        }
+      }
+    });
+    return Shape.fromPolygons(polygons);
+  };
+
+Shape.registerMethod('voxels', voxels);
 
 const weld =
   (...rest) =>
@@ -4093,6 +4172,21 @@ Polyhedron.ofPointPaths = ofPointPaths;
 
 Shape.prototype.Polyhedron = Shape.shapeMethod(Polyhedron);
 
+const Segment = (source, target) =>
+  Shape.fromSegments([toCoordinate(source), toCoordinate(target)]);
+
+Shape.prototype.Segment = Shape.shapeMethod(Segment);
+
+const Segments = (...segments) =>
+  Shape.fromSegments(
+    ...segments.map(([source, target]) => [
+      toCoordinate(source),
+      toCoordinate(target),
+    ])
+  );
+
+Shape.prototype.Segments = Shape.shapeMethod(Segments);
+
 const Septagon = (x, y, z) => Arc(x, y, z).hasSides(7);
 
 Shape.prototype.Septagon = Shape.shapeMethod(Septagon);
@@ -4353,4 +4447,4 @@ const yz = Shape.fromGeometry({
   ],
 });
 
-export { Alpha, Arc, Assembly, Box, ChainedHull, Empty, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Line, Octagon, Orb, Page, Path, Pentagon, Plan, Point, Points, Polygon, Polyhedron, Septagon, Shape, Spiral, Tetragon, Triangle, Wave, Weld, abstract, add, addTo, align, and, as, asPart, at, bend, billOfMaterials, cast, center, clip, clipFrom, cloudSolid, color, colors, cut, cutFrom, cutOut, defGrblConstantLaser, defGrblDynamicLaser, defGrblPlotter, defGrblSpindle, defRgbColor, defThreejsMaterial, defTool, define, drop, each, eachPoint, ensurePages, ex, extrude, extrudeAlong, extrudeToPlane, faces, fill, fit, fitTo, fuse, g, get, getNot, gn, grow, inline, inset, keep, loadGeometry, loft, log, loop, mask, material, md, minkowskiDifference, minkowskiShell, minkowskiSum, move, moveTo, n, noVoid, normal, notColor, nth, ofPlan, offset, on, op, orient, outline, pack, play, push, remesh, rotate, rotateX, rotateY, rotateZ, rx, ry, rz, saveGeometry, scale, scaleToFit, section, sectionProfile, separate, size, sketch, smooth, tag, tags, test, tint, tool, top, twist, untag, view, voidFn, voidIn, weld, withFill, withFn, withInset, withOp, x, xy, xyz, xz, y, yz, z };
+export { Alpha, Arc, Assembly, Box, ChainedHull, Empty, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Line, Octagon, Orb, Page, Path, Pentagon, Plan, Point, Points, Polygon, Polyhedron, Segment, Segments, Septagon, Shape, Spiral, Tetragon, Triangle, Wave, Weld, abstract, add, addTo, align, and, as, asPart, at, bend, billOfMaterials, cast, center, clip, clipFrom, cloudSolid, color, colors, cut, cutFrom, cutOut, defGrblConstantLaser, defGrblDynamicLaser, defGrblPlotter, defGrblSpindle, defRgbColor, defThreejsMaterial, defTool, define, drop, each, eachPoint, ensurePages, ex, extrude, extrudeAlong, extrudeToPlane, faces, fill, fit, fitTo, fuse, g, get, getNot, gn, grow, inline, inset, keep, loadGeometry, loft, log, loop, mask, material, md, minkowskiDifference, minkowskiShell, minkowskiSum, move, moveTo, n, noVoid, normal, notColor, nth, ofPlan, offset, on, op, orient, outline, pack, play, push, remesh, rotate, rotateX, rotateY, rotateZ, rx, ry, rz, saveGeometry, scale, scaleToFit, section, sectionProfile, separate, size, sketch, smooth, tag, tags, test, tint, tool, top, twist, untag, view, voidFn, voidIn, voxels, weld, withFill, withFn, withInset, withOp, x, xy, xyz, xz, y, yz, z };

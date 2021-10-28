@@ -1,6 +1,6 @@
 import { isVoid } from './isNotVoid.js';
 import { taggedPolygonsWithHoles } from './taggedPolygonsWithHoles.js';
-import { toDisjointGeometry } from './toDisjointGeometry.js';
+import { toConcreteGeometry } from './toConcreteGeometry.js';
 import { toPolygonsWithHoles as toPolygonsWithHolesFromGraph } from '../graph/toPolygonsWithHoles.js';
 import { visit } from './visit.js';
 
@@ -45,7 +45,7 @@ export const toPolygonsWithHoles = (geometry) => {
     }
   };
 
-  visit(toDisjointGeometry(geometry), op);
+  visit(toConcreteGeometry(geometry), op);
 
   return output;
 };

@@ -5,8 +5,10 @@ import { intersection as graphIntersection } from '../graph/intersection.js';
 import { rewrite } from './visit.js';
 import { taggedGroup } from './taggedGroup.js';
 import { taggedPaths } from './taggedPaths.js';
+import { taggedSegments } from './taggedSegments.js';
 import { toConcreteGeometry } from './toConcreteGeometry.js';
 import { toPaths as toPathsFromGraph } from '../graph/toPaths.js';
+import { withQuery } from './withQuery.js';
 
 export const intersection = (geometry, ...geometries) => {
   geometries = geometries.map(toConcreteGeometry);
@@ -48,7 +50,17 @@ export const intersection = (geometry, ...geometries) => {
           )
         );
       }
-      case 'segments':
+      case 'segments': {
+        const clippedSegments = [];
+        for (const otherGeometry of geometries) {
+          withQuery(otherGeometry, ({ clipSegments }) => {
+            if (clipSegments) {
+              clippedSegments.push(...clipSegments(geometry.segments));
+            }
+          });
+        }
+        return taggedSegments({ tags }, clippedSegments);
+      }
       case 'points': {
         // Not implemented yet.
         return geometry;

@@ -937,28 +937,68 @@ class SurfaceMeshQuery {
  typedef CGAL::AABB_tree<Traits> Tree;
  typedef boost::optional<Tree::Intersection_and_primitive_id<Point>::Type> Point_intersection;
  typedef boost::optional<Tree::Intersection_and_primitive_id<Segment>::Type> Segment_intersection;
+ typedef CGAL::Side_of_triangle_mesh<Surface_mesh, Kernel> Inside_tester;
 
  public:
-  SurfaceMeshQuery(Surface_mesh* mesh) {
-    tree_.reset(new Tree(faces(*mesh).first, faces(*mesh).second, *mesh));
+  SurfaceMeshQuery(const Surface_mesh* mesh, const Transformation* transformation) {
+    mesh_.reset(new Surface_mesh(*mesh));
+    CGAL::Polygon_mesh_processing::transform(*transformation, *mesh_, CGAL::parameters::all_default());
+    tree_.reset(new Tree(faces(*mesh_).first, faces(*mesh_).second, *mesh_));
+    inside_tester_.reset(new Inside_tester(*tree_));
   }
 
   bool isIntersectingPointApproximate(double x, double y, double z) {
-    return tree_->do_intersect(Point(x, y, z));
+    return (*inside_tester_)(Point(x, y, z)) == CGAL::ON_BOUNDED_SIDE;
   }
 
   void clipSegmentApproximate(double source_x, double source_y, double source_z, double target_x, double target_y, double target_z, emscripten::val emit_segment) {
-    Segment segment_query(Point(source_x, source_y, source_z), Point(target_x, target_y, target_z));
+    const Point source(source_x, source_y, source_z);
+    const Point target(target_x, target_y, target_z);
+    Segment segment_query(source, target);
     std::list<Segment_intersection> intersections;
     tree_->all_intersections(segment_query, std::back_inserter(intersections));
+    // Handle pointwise intersections -- through faces.
+    std::vector<Point> points;
+    if ((*inside_tester_)(source) == CGAL::ON_BOUNDED_SIDE) {
+      // The segment starts inside the volume.
+      points.push_back(source);
+      points.push_back(source);
+    }
+    if ((*inside_tester_)(target) == CGAL::ON_BOUNDED_SIDE) {
+      // The segment ends inside the volume.
+      points.push_back(target);
+      points.push_back(target);
+    }
     for (const auto& intersection : intersections) {
       if (!intersection) {
         continue;
       }
       // Note: intersection->second is the intersected face index.
-      if (const Segment* segment = boost::get<Segment>(&intersection->first)) {
-        const auto& source = segment->source();
-        const auto& target = segment->target();
+      // CHECK: We get doubles because we're intersecting with the interior of the faces.
+      if (const Point* point = boost::get<Point>(&intersection->first)) {
+        points.push_back(*point);
+      }
+    }
+    if (points.size() >= 4) {
+      if (source_x > target_x) {
+        std::sort(points.begin(), points.end(), [](const Point& a, const Point& b) { return a.x() > b.x(); });
+      } else if (source_x < target_x) {
+        std::sort(points.begin(), points.end(), [](const Point& a, const Point& b) { return a.x() < b.x(); });
+      } else if (source_y > target_y) {
+        std::sort(points.begin(), points.end(), [](const Point& a, const Point& b) { return a.y() > b.y(); });
+      } else if (source_y < target_y) {
+        std::sort(points.begin(), points.end(), [](const Point& a, const Point& b) { return a.y() < b.y(); });
+      } else if (source_z > target_z) {
+        std::sort(points.begin(), points.end(), [](const Point& a, const Point& b) { return a.z() > b.z(); });
+      } else if (source_z < target_z) {
+        std::sort(points.begin(), points.end(), [](const Point& a, const Point& b) { return a.z() < b.z(); });
+      } else {
+        std::cout << "QQ/clipSegmentApproximate: impossible" << std::endl;
+      }
+      // Now we should have pairs of doubled pointwise intersections.
+      for (size_t index = 0; index < points.size() - 2; index += 4) {
+        const Point& source = points[index];
+        const Point& target = points[index + 2];
         emit_segment(CGAL::to_double(source.x().exact()),
                      CGAL::to_double(source.y().exact()),
                      CGAL::to_double(source.z().exact()),
@@ -967,10 +1007,27 @@ class SurfaceMeshQuery {
                      CGAL::to_double(target.z().exact()));
       }
     }
+    // Handle segmentwise intersections -- along faces.
+    for (const auto& intersection : intersections) {
+      if (!intersection) {
+        continue;
+      }
+      // Note: intersection->second is the intersected face index.
+      if (const Segment* segment = boost::get<Segment>(&intersection->first)) {
+        emit_segment(CGAL::to_double(segment->source().x().exact()),
+                     CGAL::to_double(segment->source().y().exact()),
+                     CGAL::to_double(segment->source().z().exact()),
+                     CGAL::to_double(segment->target().x().exact()),
+                     CGAL::to_double(segment->target().y().exact()),
+                     CGAL::to_double(segment->target().z().exact()));
+      }
+    }
   }
 
  private:
+  std::unique_ptr<Surface_mesh> mesh_;
   std::unique_ptr<Tree> tree_;
+  std::unique_ptr<Inside_tester> inside_tester_;
 };
 
 void SeparateSurfaceMesh(const Surface_mesh* input, bool keep_volumes, bool keep_cavities_in_volumes, bool keep_cavities_as_volumes, emscripten::val emit_mesh) {
@@ -3333,7 +3390,9 @@ EMSCRIPTEN_BINDINGS(module) {
     .function("z", &Point::z);
 
   emscripten::class_<SurfaceMeshQuery>("SurfaceMeshQuery")
-    .constructor<Surface_mesh*>();
+    .constructor<const Surface_mesh*, const Transformation*>()
+    .function("clipSegmentApproximate", &SurfaceMeshQuery::clipSegmentApproximate)
+    .function("isIntersectingPointApproximate", &SurfaceMeshQuery::isIntersectingPointApproximate);
 
   emscripten::function("SerializeSurfaceMesh", &SerializeSurfaceMesh, emscripten::allow_raw_pointers());
   emscripten::function("DeserializeSurfaceMesh", &DeserializeSurfaceMesh, emscripten::allow_raw_pointers());
