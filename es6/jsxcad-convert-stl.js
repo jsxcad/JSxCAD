@@ -187,7 +187,7 @@ const convertToFacet = (polygon) => {
 
 // We sort the triangles to produce stable output.
 const orderVertices = (v, d = X) => {
-  if (v[0][d] <= v[1][d] && v[0][d] <= v[2][d]) {
+  if (v[0][d] === v[1][d] || v[0][d] === v[2][d]) {
     // Cannot order by current dimension.
     if (d === Z) {
       // Exhausted dimensions.

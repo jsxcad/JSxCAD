@@ -329,3 +329,18 @@ const tintEx = Arc(10).color('blue').tint('red').view();
 ```
 
 ![Image](shape.md.39.png)
+
+```JavaScript
+Segments(
+  ...seq((y) => [Point(-10, y, 0), Point(10, y, 0)], {
+    from: -6,
+    to: 6,
+    by: 1 / 4,
+  })
+)
+  .rz(1 / 8)
+  .clip(Arc(5).cut(Arc(2)))
+  .gridView();
+```
+
+![Image](shape.md.40.png)

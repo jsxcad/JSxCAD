@@ -214,6 +214,8 @@ const technic = Weld(box, Arc(4.8 + 0.2).y(5.6))
 
 ![Image](lego.md.13.png)
 
+[technic_0.stl](lego.technic_0.stl)
+
 ```JavaScript
 export const AxleJoiner = (length) => Arc(8).cut(axleProfile).ex(length);
 ```
@@ -235,6 +237,8 @@ export const axleJoiner16 = AxleJoiner(16)
 Axle Joiner 16mm
 
 ![Image](lego.md.15.png)
+
+[AxleJoiner16_0.stl](lego.AxleJoiner16_0.stl)
 
 ```JavaScript
 const technicConnector = Arc(4.8)

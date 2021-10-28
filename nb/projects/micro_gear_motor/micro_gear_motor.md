@@ -111,6 +111,8 @@ Sheath
 
 ![Image](micro_gear_motor.md.9.png)
 
+[sheath1_0.stl](micro_gear_motor.sheath1_0.stl)
+
 ```JavaScript
 const gear = Gear(20)
   .cut(axleFlatProfile)
@@ -125,6 +127,8 @@ Gear
 ![Image](micro_gear_motor.md.10.png)
 
 ![Image](micro_gear_motor.md.11.png)
+
+[gear2_0.stl](micro_gear_motor.gear2_0.stl)
 
 ```JavaScript
 const cap = Group(capProfile.ex(-2, -0.0), sheath).md('Cap').stl('cap');

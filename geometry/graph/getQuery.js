@@ -6,11 +6,26 @@ export const getQuery = (geometry) => {
     toSurfaceMesh(geometry.graph),
     geometry.matrix
   );
-  const isInteriorPoint = (x, y, z) => query.isIntersectingPointApproximate(x, y, z);
-  const clipSegment = ([sourceX = 0, sourceY = 0, sourceZ = 0], [targetX = 0, targetY = 0, targetZ = 0]) => {
+  const isInteriorPoint = (x, y, z) =>
+    query.isIntersectingPointApproximate(x, y, z);
+  const clipSegment = (
+    [sourceX = 0, sourceY = 0, sourceZ = 0],
+    [targetX = 0, targetY = 0, targetZ = 0]
+  ) => {
     const segments = [];
-    query.clipSegmentApproximate(sourceX, sourceY, sourceZ, targetX, targetY, targetZ,
-                                 (sourceX, sourceY, sourceZ, targetX, targetY, targetZ) => segments.push([[sourceX, sourceY, sourceZ], [targetX, targetY, targetZ]]));
+    query.clipSegmentApproximate(
+      sourceX,
+      sourceY,
+      sourceZ,
+      targetX,
+      targetY,
+      targetZ,
+      (sourceX, sourceY, sourceZ, targetX, targetY, targetZ) =>
+        segments.push([
+          [sourceX, sourceY, sourceZ],
+          [targetX, targetY, targetZ],
+        ])
+    );
     return segments;
   };
   const clipSegments = (segments) => {

@@ -4178,7 +4178,12 @@ const Segment = (source, target) =>
 Shape.prototype.Segment = Shape.shapeMethod(Segment);
 
 const Segments = (...segments) =>
-  Shape.fromSegments(...segments.map(([source, target]) => [toCoordinate(source), toCoordinate(target)]));
+  Shape.fromSegments(
+    ...segments.map(([source, target]) => [
+      toCoordinate(source),
+      toCoordinate(target),
+    ])
+  );
 
 Shape.prototype.Segments = Shape.shapeMethod(Segments);
 
