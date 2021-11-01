@@ -186,27 +186,22 @@ const convertToFacet = (polygon) => {
 };
 
 // We sort the triangles to produce stable output.
-const orderVertices = (v, d = X) => {
-  if (v[0][d] === v[1][d] || v[0][d] === v[2][d]) {
-    // Cannot order by current dimension.
-    if (d === Z) {
-      // Exhausted dimensions.
-      // All vertices are identical, all orders are correct.
-      // This should be an impossible degenerate case.
-      throw Error('Degenerate triangle');
+const orderVertices = (v) => {
+  let min = v[0];
+  for (let d = 1; d < 3; d++) {
+    const c = v[d];
+    if (c[X] < min[X]) {
+      min = c;
+    } else if (c[Y] < min[Y]) {
+      min = c;
+    } else if (c[Z] < min[Z]) {
+      min = c;
     }
-    // Try ordering by the next dimension.
-    return orderVertices(v, d + 1);
   }
-  for (;;) {
-    if (v[0][d] <= v[1][d] && v[0][d] <= v[2][d]) {
-      // Correctly ordered.
-      return v;
-    }
-    // Rotate the vertices and try again.
+  while (v[0] !== min) {
     v.push(v.shift());
   }
-  // Unreachable.
+  return v;
 };
 
 const compareTriangles = ([a], [b]) => {
@@ -230,13 +225,11 @@ const toStl = async (geometry, { tolerance = 0.001 } = {}) => {
   const triangles = [];
   for (const graphGeometry of getNonVoidGraphs(keptGeometry)) {
     for (const [a, b, c] of toTrianglesFromGraph({}, graphGeometry).triangles) {
-      triangles.push(
-        orderVertices([
+      triangles.push(orderVertices([
           roundVertex(a, tolerance),
           roundVertex(b, tolerance),
           roundVertex(c, tolerance),
-        ])
-      );
+        ]));
     }
   }
   triangles.sort(compareTriangles);

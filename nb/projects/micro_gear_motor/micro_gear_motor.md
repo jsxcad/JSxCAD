@@ -138,6 +138,8 @@ Cap
 
 ![Image](micro_gear_motor.md.12.png)
 
+[cap_0.stl](micro_gear_motor.cap_0.stl)
+
 ```JavaScript
 const gearCutout = Gear(20)
   .op((s) => s.and(s.cutFrom(Arc(12)).inset(0.5)))
@@ -163,6 +165,8 @@ const motorDriverHolder = Block(4, 4, 3.2 * 5)
 Motor Driver Holder
 
 ![Image](micro_gear_motor.md.14.png)
+
+[motor_driver_holder_3_0.stl](micro_gear_motor.motor_driver_holder_3_0.stl)
 
 ## Wemos Bracket
 
@@ -192,6 +196,8 @@ const wemosDriverHolder = Block(4, 5, 3.2 * 11)
 Wemos Driver Holder
 
 ![Image](micro_gear_motor.md.15.png)
+
+[wemos_holder_2_0.stl](micro_gear_motor.wemos_holder_2_0.stl)
 
 ## Gear Motor Bracket
 
