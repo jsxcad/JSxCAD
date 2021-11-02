@@ -66,8 +66,6 @@ const writeMarkdown = async (
           const expected = readFileSync(expectedPath, 'utf8');
           if (observed !== expected) {
             failedExpectations.push(`cp "${observedPath}" "${expectedPath}"`);
-            failedExpectations.push(`# observed: ${observed}`);
-            failedExpectations.push(`# expected: ${expected}`);
           }
         } catch (error) {
           if (error.code === 'ENOENT') {

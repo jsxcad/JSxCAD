@@ -40,7 +40,7 @@ jobs:
           name: differences
           path: |
             **/*.difference.png
-            **/*.observed.md
+            **/*.observed.*
             **/*.md
             !**/node_modules/**
         env:
