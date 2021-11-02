@@ -190,13 +190,21 @@ const orderVertices = (v) => {
   let min = v[0];
   for (let d = 1; d < 3; d++) {
     const c = v[d];
-    if (c[X] < min[X]) {
-      min = c;
-    } else if (c[Y] < min[Y]) {
-      min = c;
-    } else if (c[Z] < min[Z]) {
-      min = c;
+    const dX = min[X] - c[X];
+    if (dX < 0) {
+      continue;
+    } else if (dX === 0) {
+      const dY = min[Y] - c[Y];
+      if (dY < 0) {
+        continue;
+      } else if (dY === 0) {
+        const dZ = min[Z] - c[Z];
+        if (dZ < 0) {
+          continue;
+        }
+      }
     }
+    min = c;
   }
   while (v[0] !== min) {
     v.push(v.shift());
