@@ -64,7 +64,7 @@ const writeMarkdown = async (
         try {
           const observed = new TextDecoder('utf8').decode(data);
           const expected = readFileSync(expectedPath, 'utf8');
-          if (observed !== expected)
+          if (observed !== expected) {
             failedExpectations.push(`cp "${observedPath}" "${expectedPath}"`);
             failedExpectations.push(`# observed: ${observed}`);
             failedExpectations.push(`# expected: ${expected}`);
