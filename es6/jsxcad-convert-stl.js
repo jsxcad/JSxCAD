@@ -212,20 +212,30 @@ const orderVertices = (v) => {
   return v;
 };
 
-const compareTriangles = ([a], [b]) => {
+const compareTriangles = (t1, t2) => {
   // The triangle vertices have been ordered such that the top is the minimal vertex.
-  const dX = a[X] - b[X];
-  if (dX !== 0) {
-    return dX;
+  for (let d = 0; d < 3; d++) {
+    const a = t1[d];
+    const b = t2[d];
+    const dX = a[X] - b[X];
+    if (dX < 0) {
+      return -1;
+    } else if (dX === 0) {
+      const dY = a[Y] - b[Y];
+      if (dY < 0) {
+        return -1;
+      } else if (dY === 0) {
+        const dZ = a[Z] - b[Z];
+        if (dZ < 0) {
+          return -1;
+        } else if (dZ === 0) {
+          continue;
+        }
+      }
+    }
+    return 1;
   }
-  const dY = a[Y] - b[Y];
-  if (dY !== 0) {
-    return dY;
-  }
-  const dZ = a[Z] - b[Z];
-  if (dZ !== 0) {
-    return dZ;
-  }
+  return 0;
 };
 
 const toStl = async (geometry, { tolerance = 0.001 } = {}) => {
