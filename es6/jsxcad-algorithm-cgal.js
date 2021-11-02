@@ -1691,11 +1691,21 @@ const subdivideSurfaceMesh = (mesh, options) => {
   );
 };
 
-const taperSurfaceMesh = (mesh, transform, xPlusFactor, xMinusFactor, yPlusFactor, yMinusFactor) =>
+const taperSurfaceMesh = (
+  mesh,
+  transform,
+  xPlusFactor,
+  xMinusFactor,
+  yPlusFactor,
+  yMinusFactor
+) =>
   getCgal().TaperSurfaceMesh(
     mesh,
     toCgalTransformFromJsTransform(transform),
-    xPlusFactor, xMinusFactor, yPlusFactor, yMinusFactor
+    xPlusFactor,
+    xMinusFactor,
+    yPlusFactor,
+    yMinusFactor
   );
 
 const transformSurfaceMesh = (mesh, jsTransform) =>

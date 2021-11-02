@@ -225,11 +225,13 @@ const toStl = async (geometry, { tolerance = 0.001 } = {}) => {
   const triangles = [];
   for (const graphGeometry of getNonVoidGraphs(keptGeometry)) {
     for (const [a, b, c] of toTrianglesFromGraph({}, graphGeometry).triangles) {
-      triangles.push(orderVertices([
+      triangles.push(
+        orderVertices([
           roundVertex(a, tolerance),
           roundVertex(b, tolerance),
           roundVertex(c, tolerance),
-        ]));
+        ])
+      );
     }
   }
   triangles.sort(compareTriangles);

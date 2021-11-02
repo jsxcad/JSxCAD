@@ -689,11 +689,7 @@ const bend$1 = (geometry, radius) =>
   taggedGraph(
     { tags: geometry.tags },
     fromSurfaceMeshLazy(
-      bendSurfaceMesh(
-        toSurfaceMesh(geometry.graph),
-        geometry.matrix,
-        radius
-      )
+      bendSurfaceMesh(toSurfaceMesh(geometry.graph), geometry.matrix, radius)
     )
   );
 
@@ -2528,6 +2524,9 @@ const outline = (geometry, tagsOverride) => {
     }
     outlines.push(hasTypeWire(outline$1({ tags }, graphGeometry)));
   }
+  for (let segmentsGeometry of getNonVoidSegments(concreteGeometry)) {
+    outlines.push(hasTypeWire(segmentsGeometry));
+  }
   // Turn paths into wires.
   for (let { tags = [], paths } of getNonVoidPaths(concreteGeometry)) {
     if (tagsOverride) {
@@ -3067,23 +3066,52 @@ const taggedSketch = ({ tags = [], matrix }, ...content) => {
   return { type: 'sketch', tags, matrix, content };
 };
 
-const taper$1 = (geometry, xPlusFactor, xMinusFactor, yPlusFactor, yMinusFactor, zPlusFactor, zMinusFactor) =>
+const taper$1 = (
+  geometry,
+  xPlusFactor,
+  xMinusFactor,
+  yPlusFactor,
+  yMinusFactor,
+  zPlusFactor,
+  zMinusFactor
+) =>
   taggedGraph(
     { tags: geometry.tags },
     fromSurfaceMeshLazy(
       taperSurfaceMesh(
         toSurfaceMesh(geometry.graph),
         geometry.matrix,
-        xPlusFactor, xMinusFactor, yPlusFactor, yMinusFactor, zPlusFactor, zMinusFactor
+        xPlusFactor,
+        xMinusFactor,
+        yPlusFactor,
+        yMinusFactor,
+        zPlusFactor,
+        zMinusFactor
       )
     )
   );
 
-const taper = (geometry, xPlusFactor, xMinusFactor, yPlusFactor, yMinusFactor, zPlusFactor, zMinusFactor) => {
+const taper = (
+  geometry,
+  xPlusFactor,
+  xMinusFactor,
+  yPlusFactor,
+  yMinusFactor,
+  zPlusFactor,
+  zMinusFactor
+) => {
   const op = (geometry, descend) => {
     switch (geometry.type) {
       case 'graph': {
-        return taper$1(geometry, xPlusFactor, xMinusFactor, yPlusFactor, yMinusFactor, zPlusFactor, zMinusFactor);
+        return taper$1(
+          geometry,
+          xPlusFactor,
+          xMinusFactor,
+          yPlusFactor,
+          yMinusFactor,
+          zPlusFactor,
+          zMinusFactor
+        );
       }
       case 'triangles':
       case 'paths':
@@ -3091,7 +3119,15 @@ const taper = (geometry, xPlusFactor, xMinusFactor, yPlusFactor, yMinusFactor, z
         // Not implemented yet.
         return geometry;
       case 'plan':
-        return taper(reify(geometry).content[0], xPlusFactor, xMinusFactor, yPlusFactor, yMinusFactor, zPlusFactor, zMinusFactor);
+        return taper(
+          reify(geometry).content[0],
+          xPlusFactor,
+          xMinusFactor,
+          yPlusFactor,
+          yMinusFactor,
+          zPlusFactor,
+          zMinusFactor
+        );
       case 'item':
       case 'group': {
         return descend();

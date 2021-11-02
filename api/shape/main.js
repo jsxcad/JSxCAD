@@ -14,11 +14,11 @@ import Shape from './Shape.js';
 import './Plan.js';
 
 export {
+  GrblConstantLaser,
+  GrblDynamicLaser,
+  GrblPlotter,
+  GrblSpindle,
   define,
-  defGrblConstantLaser,
-  defGrblDynamicLaser,
-  defGrblPlotter,
-  defGrblSpindle,
   defRgbColor,
   defThreejsMaterial,
   defTool,
