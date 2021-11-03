@@ -123,3 +123,5 @@ const weld = Weld(Arc(4).x(-1), Box(5).x(1))
   .fill()
   .gridView()
   .md(`Weld(Arc(5).x(-1), Box(5).x(1)).fill()`);
+
+const toEx = Box(1).color('red').as('box').x(5).y(y).fit(Arc(10)).to(g('box')).gridView().md('Reposition to the local frame of reference of an item');
