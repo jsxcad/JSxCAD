@@ -410,11 +410,14 @@ void compute_angle(double a, RT& sin_alpha, RT& cos_alpha, RT& w) {
   CGAL::rational_rotation_approximation(radians, sin_alpha, cos_alpha, w, RT(1), RT(1000));
 }
 
-const Surface_mesh* BendSurfaceMesh(const Surface_mesh* input, const Transformation* transform, double turnsPerMm) {
+const Surface_mesh* BendSurfaceMesh(const Surface_mesh* input, const Transformation* transform, double referenceRadius) {
   Surface_mesh* c = new Surface_mesh(*input);
   CGAL::Polygon_mesh_processing::transform(*transform, *c, CGAL::parameters::all_default());
   CGAL::Polygon_mesh_processing::triangulate_faces(*c);
-  
+
+  const FT referencePerimeterMm = 2 * CGAL_PI * referenceRadius;
+  const FT referenceRadiansPerMm = 2 / referencePerimeterMm;
+
   // This does not look very efficient.
   // CHECK: Figure out deformations.
   for (const Surface_mesh::Vertex_index vertex : c->vertices()) {
@@ -422,14 +425,18 @@ const Surface_mesh* BendSurfaceMesh(const Surface_mesh* input, const Transformat
       continue;
     }
     Point& point = c->point(vertex);
-    FT lx = point.x();
-    FT ly = point.y();
-    FT radians = (0.50 - lx * turnsPerMm) * CGAL_PI;
-    FT radius = ly;
+    const FT lx = point.x();
+    const FT ly = point.y();
+    const FT radius = ly;
+    // At the radius, perimeter mm should be a full turn.
+    // const FT perimeterMm = 2 * CGAL_PI * radius;
+    // const FT radiansPerMm = 2 / perimeterMm;
+    const FT radiansPerMm = referenceRadiansPerMm;
+    const FT radians = (0.50 * CGAL_PI) - (lx * radiansPerMm * CGAL_PI);
     RT sin_alpha, cos_alpha, w;
     CGAL::rational_rotation_approximation(CGAL::to_double(radians.exact()), sin_alpha, cos_alpha, w, RT(1), RT(1000));
-    FT cx = (cos_alpha * radius) / w;
-    FT cy = (sin_alpha * radius) / w;
+    const FT cx = (cos_alpha * radius) / w;
+    const FT cy = (sin_alpha * radius) / w;
     point = Point(cx, cy, point.z());
   }
 
@@ -465,6 +472,32 @@ const Surface_mesh* TwistSurfaceMesh(const Surface_mesh* input, const Transforma
         0, 0, w,  0,
         w);
     point = point.transform(transformation);
+  }
+  return c;
+}
+
+const Surface_mesh* TaperSurfaceMesh(const Surface_mesh* input, const Transformation* transform, double xPlusFactor, double xMinusFactor, double yPlusFactor, double yMinusFactor) {
+  const double kMinimumTaper = 0.01;
+  Surface_mesh* c = new Surface_mesh(*input);
+  CGAL::Polygon_mesh_processing::transform(*transform, *c, CGAL::parameters::all_default());
+  CGAL::Polygon_mesh_processing::triangulate_faces(*c);
+  
+  // This does not look very efficient.
+  // CHECK: Figure out deformations.
+  for (const Surface_mesh::Vertex_index vertex : c->vertices()) {
+    if (c->is_removed(vertex)) {
+      continue;
+    }
+    Point& point = c->point(vertex);
+    FT xFactor = 1.0 + point.z() * (point.x() > 0 ? xPlusFactor : xMinusFactor);
+    if (xFactor < kMinimumTaper) {
+      xFactor = kMinimumTaper;
+    }
+    FT yFactor = 1.0 + point.z() * (point.y() > 0 ? yPlusFactor : yMinusFactor);
+    if (yFactor < kMinimumTaper) {
+      yFactor = kMinimumTaper;
+    }
+    point = Point(point.x() * xFactor, point.y() * yFactor, point.z());
   }
   return c;
 }
@@ -3405,6 +3438,7 @@ EMSCRIPTEN_BINDINGS(module) {
 
   emscripten::function("TwistSurfaceMesh", &TwistSurfaceMesh, emscripten::allow_raw_pointers());
   emscripten::function("BendSurfaceMesh", &BendSurfaceMesh, emscripten::allow_raw_pointers());
+  emscripten::function("TaperSurfaceMesh", &TaperSurfaceMesh, emscripten::allow_raw_pointers());
   emscripten::function("PushSurfaceMesh", &PushSurfaceMesh, emscripten::allow_raw_pointers());
   emscripten::function("OutlineSurfaceMesh", &OutlineSurfaceMesh, emscripten::allow_raw_pointers());
   emscripten::function("WireframeSurfaceMesh", &WireframeSurfaceMesh, emscripten::allow_raw_pointers());

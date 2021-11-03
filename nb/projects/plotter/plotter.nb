@@ -4,7 +4,7 @@ const dinosaur = await readSvg(
   { fill: false }
 );
 
-const plotter = defGrblPlotter('plotter');
+const plotter = GrblPlotter();
 
 const aligned = dinosaur.scale(10).align('xy').gcode('dinosaur', plotter);
 

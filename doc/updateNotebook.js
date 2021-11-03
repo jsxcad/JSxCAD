@@ -62,8 +62,9 @@ const writeMarkdown = async (
         const observedPath = `${modulePath}.observed.${filename}`;
         const expectedPath = `${modulePath}.${filename}`;
         try {
-          const text = new TextDecoder('utf8').decode(data);
-          if (text !== readFileSync(expectedPath, 'utf8')) {
+          const observed = new TextDecoder('utf8').decode(data);
+          const expected = readFileSync(expectedPath, 'utf8');
+          if (observed !== expected) {
             failedExpectations.push(`cp "${observedPath}" "${expectedPath}"`);
           }
         } catch (error) {

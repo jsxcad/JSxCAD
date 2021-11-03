@@ -14,11 +14,11 @@ import Shape from './Shape.js';
 import './Plan.js';
 
 export {
+  GrblConstantLaser,
+  GrblDynamicLaser,
+  GrblPlotter,
+  GrblSpindle,
   define,
-  defGrblConstantLaser,
-  defGrblDynamicLaser,
-  defGrblPlotter,
-  defGrblSpindle,
   defRgbColor,
   defThreejsMaterial,
   defTool,
@@ -324,6 +324,7 @@ export { size } from './size.js';
 export { sketch } from './sketch.js';
 export { tag } from './tag.js';
 export { tags } from './tags.js';
+export { taper } from './taper.js';
 export { test } from './test.js';
 export { tint } from './tint.js';
 export { tool } from './tool.js';

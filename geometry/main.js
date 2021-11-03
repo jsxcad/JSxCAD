@@ -140,6 +140,7 @@ export { taggedPolygons } from './tagged/taggedPolygons.js';
 export { taggedSegments } from './tagged/taggedSegments.js';
 export { taggedSketch } from './tagged/taggedSketch.js';
 export { taggedTriangles } from './tagged/taggedTriangles.js';
+export { taper } from './tagged/taper.js';
 export { test } from './tagged/test.js';
 export { translate as translatePath } from './path/ops.js';
 export { translate as translatePaths } from './paths/ops.js';

@@ -61,6 +61,7 @@ export { separateSurfaceMesh } from './separateSurfaceMesh.js';
 export { remeshSurfaceMesh } from './remeshSurfaceMesh.js';
 export { serializeSurfaceMesh } from './serializeSurfaceMesh.js';
 export { subdivideSurfaceMesh } from './subdivideSurfaceMesh.js';
+export { taperSurfaceMesh } from './taperSurfaceMesh.js';
 export { transformSurfaceMesh } from './transformSurfaceMesh.js';
 export { twistSurfaceMesh } from './twistSurfaceMesh.js';
 export { wireframeSurfaceMesh } from './wireframeSurfaceMesh.js';

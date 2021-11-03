@@ -1,4 +1,4 @@
-import { closePath, concatenatePath, assemble as assemble$1, flip, toConcreteGeometry, toDisplayGeometry, toTransformedGeometry, toPoints, transform, rewriteTags, taggedPaths, taggedGraph, openPath, taggedSegments, taggedPoints, fromPolygonsToGraph, registerReifier, taggedPlan, taggedGroup, union, taggedItem, getLeafs, bend as bend$1, projectToPlane, computeCentroid, intersection, allTags, fromPointsToGraph, difference, rewrite, hasTypeWire, translatePaths, taggedLayout, measureBoundingBox, getLayouts, visit, isNotVoid, eachPoint as eachPoint$1, extrude as extrude$1, extrudeToPlane as extrudeToPlane$1, faces as faces$1, fill as fill$1, empty, grow as grow$1, outline as outline$1, inset as inset$1, read, loft as loft$1, realize, minkowskiDifference as minkowskiDifference$1, minkowskiShell as minkowskiShell$1, minkowskiSum as minkowskiSum$1, computeNormal, isVoid, offset as offset$1, push as push$1, remesh as remesh$1, write, section as section$1, separate as separate$1, smooth as smooth$1, taggedSketch, test as test$1, twist as twist$1, withQuery, toPolygonsWithHoles, arrangePolygonsWithHoles, fromPolygonsWithHolesToTriangles, fromTrianglesToGraph, alphaShape, rotateZPath, convexHullToGraph, fromFunctionToGraph, fromPathsToGraph, translatePath } from './jsxcad-geometry.js';
+import { closePath, concatenatePath, assemble as assemble$1, flip, toConcreteGeometry, toDisplayGeometry, toTransformedGeometry, toPoints, transform, rewriteTags, taggedPaths, taggedGraph, openPath, taggedSegments, taggedPoints, fromPolygonsToGraph, registerReifier, taggedPlan, taggedGroup, union, taggedItem, getLeafs, bend as bend$1, projectToPlane, computeCentroid, intersection, allTags, fromPointsToGraph, difference, rewrite, hasTypeWire, translatePaths, taggedLayout, measureBoundingBox, getLayouts, visit, isNotVoid, eachPoint as eachPoint$1, extrude as extrude$1, extrudeToPlane as extrudeToPlane$1, faces as faces$1, fill as fill$1, empty, grow as grow$1, outline as outline$1, inset as inset$1, read, loft as loft$1, realize, minkowskiDifference as minkowskiDifference$1, minkowskiShell as minkowskiShell$1, minkowskiSum as minkowskiSum$1, computeNormal, isVoid, offset as offset$1, push as push$1, remesh as remesh$1, write, section as section$1, separate as separate$1, smooth as smooth$1, taggedSketch, taper as taper$1, test as test$1, twist as twist$1, withQuery, toPolygonsWithHoles, arrangePolygonsWithHoles, fromPolygonsWithHolesToTriangles, fromTrianglesToGraph, alphaShape, rotateZPath, convexHullToGraph, fromFunctionToGraph, fromPathsToGraph, translatePath } from './jsxcad-geometry.js';
 import { getSourceLocation, emit, log as log$1, generateUniqueId, addPending, write as write$1 } from './jsxcad-sys.js';
 export { elapsed, emit, info, read, write } from './jsxcad-sys.js';
 import { identityMatrix, fromTranslation, fromRotation, fromScaling } from './jsxcad-math-mat4.js';
@@ -451,76 +451,72 @@ const defThreejsMaterial = (name, definition) =>
 
 const defTool = (name, definition) => define(`tool:${name}`, definition);
 
-const defGrblSpindle = (
-  name,
-  { cutDepth = 0.2, rpm, feedRate, drillRate, diameter, jumpZ = 1 } = {}
-) =>
-  defTool(name, {
-    grbl: {
-      type: 'spindle',
-      cutDepth,
-      cutSpeed: rpm,
-      feedRate,
-      drillRate,
-      diameter,
-      jumpZ,
-    },
-  });
+const GrblSpindle = ({
+  cutDepth = 0.2,
+  rpm,
+  feedRate,
+  drillRate,
+  diameter,
+  jumpZ = 1,
+} = {}) => ({
+  grbl: {
+    type: 'spindle',
+    cutDepth,
+    cutSpeed: rpm,
+    feedRate,
+    drillRate,
+    diameter,
+    jumpZ,
+  },
+});
 
-const defGrblDynamicLaser = (
-  name,
-  {
-    cutDepth = 0.2,
-    diameter = 0.09,
-    jumpPower = 0,
-    power = 1000,
-    speed = 1000,
+const GrblDynamicLaser = ({
+  cutDepth = 0.2,
+  diameter = 0.09,
+  jumpPower = 0,
+  power = 1000,
+  speed = 1000,
+  warmupDuration,
+  warmupPower = 0,
+} = {}) => ({
+  grbl: {
+    type: 'dynamicLaser',
+    cutDepth,
+    cutSpeed: -power,
+    diameter,
+    jumpRate: speed,
+    jumpSpeed: -jumpPower,
+    feedRate: speed,
     warmupDuration,
-    warmupPower = 0,
-  } = {}
-) =>
-  defTool(name, {
-    grbl: {
-      type: 'dynamicLaser',
-      cutDepth,
-      cutSpeed: -power,
-      diameter,
-      jumpRate: speed,
-      jumpSpeed: -jumpPower,
-      feedRate: speed,
-      warmupDuration,
-      warmupSpeed: -warmupPower,
-    },
-  });
+    warmupSpeed: -warmupPower,
+  },
+});
 
-const defGrblConstantLaser = (
-  name,
-  {
-    cutDepth = 0.2,
-    diameter = 0.09,
-    jumpPower,
-    power = 1000,
-    speed = 1000,
+const GrblConstantLaser = ({
+  cutDepth = 0.2,
+  diameter = 0.09,
+  jumpPower,
+  power = 1000,
+  speed = 1000,
+  warmupDuration,
+  warmupPower = 0,
+} = {}) => ({
+  grbl: {
+    type: 'constantLaser',
+    cutDepth,
+    cutSpeed: power,
+    diameter,
+    jumpRate: speed,
+    jumpSpeed: jumpPower,
+    feedRate: speed,
     warmupDuration,
-    warmupPower = 0,
-  } = {}
-) =>
-  defTool(name, {
-    grbl: {
-      type: 'constantLaser',
-      cutDepth,
-      cutSpeed: power,
-      diameter,
-      jumpRate: speed,
-      jumpSpeed: jumpPower,
-      feedRate: speed,
-      warmupDuration,
-      warmupSpeed: warmupPower,
-    },
-  });
+    warmupSpeed: warmupPower,
+  },
+});
 
-const defGrblPlotter = (name, { feedRate = 1000, jumpZ = 1 } = {}) =>
-  defTool(name, { grbl: { type: 'plotter', feedRate, jumpZ } });
+const GrblPlotter = ({ feedRate = 1000, jumpZ = 1 } = {}) => ({
+  grbl: { type: 'plotter', feedRate, jumpZ },
+});
 
 const md = (strings, ...placeholders) => {
   const md = strings.reduce(
@@ -751,9 +747,9 @@ const at =
 Shape.registerMethod('at', at);
 
 const bend =
-  (turnsPerMm = 1) =>
+  (radius = 100) =>
   (shape) =>
-    Shape.fromGeometry(bend$1(shape.toGeometry(), turnsPerMm));
+    Shape.fromGeometry(bend$1(shape.toGeometry(), radius));
 
 Shape.registerMethod('bend', bend);
 
@@ -3477,6 +3473,30 @@ const tags =
 
 Shape.registerMethod('tags', tags);
 
+const taper =
+  (
+    xPlusFactor = 1,
+    xMinusFactor = 1,
+    yPlusFactor = 1,
+    yMinusFactor = 1,
+    zPlusFactor = 1,
+    zMinusFactor = 1
+  ) =>
+  (shape) =>
+    Shape.fromGeometry(
+      taper$1(
+        shape.toGeometry(),
+        xPlusFactor,
+        xMinusFactor,
+        yPlusFactor,
+        yMinusFactor,
+        zPlusFactor,
+        zMinusFactor
+      )
+    );
+
+Shape.registerMethod('taper', taper);
+
 const test = (md) => (shape) => {
   if (md) {
     shape.md(md);
@@ -4447,4 +4467,4 @@ const yz = Shape.fromGeometry({
   ],
 });
 
-export { Alpha, Arc, Assembly, Box, ChainedHull, Empty, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Line, Octagon, Orb, Page, Path, Pentagon, Plan, Point, Points, Polygon, Polyhedron, Segment, Segments, Septagon, Shape, Spiral, Tetragon, Triangle, Wave, Weld, abstract, add, addTo, align, and, as, asPart, at, bend, billOfMaterials, cast, center, clip, clipFrom, cloudSolid, color, colors, cut, cutFrom, cutOut, defGrblConstantLaser, defGrblDynamicLaser, defGrblPlotter, defGrblSpindle, defRgbColor, defThreejsMaterial, defTool, define, drop, each, eachPoint, ensurePages, ex, extrude, extrudeAlong, extrudeToPlane, faces, fill, fit, fitTo, fuse, g, get, getNot, gn, grow, inline, inset, keep, loadGeometry, loft, log, loop, mask, material, md, minkowskiDifference, minkowskiShell, minkowskiSum, move, moveTo, n, noVoid, normal, notColor, nth, ofPlan, offset, on, op, orient, outline, pack, play, push, remesh, rotate, rotateX, rotateY, rotateZ, rx, ry, rz, saveGeometry, scale, scaleToFit, section, sectionProfile, separate, size, sketch, smooth, tag, tags, test, tint, tool, top, twist, untag, view, voidFn, voidIn, voxels, weld, withFill, withFn, withInset, withOp, x, xy, xyz, xz, y, yz, z };
+export { Alpha, Arc, Assembly, Box, ChainedHull, Empty, GrblConstantLaser, GrblDynamicLaser, GrblPlotter, GrblSpindle, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Line, Octagon, Orb, Page, Path, Pentagon, Plan, Point, Points, Polygon, Polyhedron, Segment, Segments, Septagon, Shape, Spiral, Tetragon, Triangle, Wave, Weld, abstract, add, addTo, align, and, as, asPart, at, bend, billOfMaterials, cast, center, clip, clipFrom, cloudSolid, color, colors, cut, cutFrom, cutOut, defRgbColor, defThreejsMaterial, defTool, define, drop, each, eachPoint, ensurePages, ex, extrude, extrudeAlong, extrudeToPlane, faces, fill, fit, fitTo, fuse, g, get, getNot, gn, grow, inline, inset, keep, loadGeometry, loft, log, loop, mask, material, md, minkowskiDifference, minkowskiShell, minkowskiSum, move, moveTo, n, noVoid, normal, notColor, nth, ofPlan, offset, on, op, orient, outline, pack, play, push, remesh, rotate, rotateX, rotateY, rotateZ, rx, ry, rz, saveGeometry, scale, scaleToFit, section, sectionProfile, separate, size, sketch, smooth, tag, tags, taper, test, tint, tool, top, twist, untag, view, voidFn, voidIn, voxels, weld, withFill, withFn, withInset, withOp, x, xy, xyz, xz, y, yz, z };

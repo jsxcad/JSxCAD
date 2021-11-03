@@ -56,43 +56,56 @@ const convertToFacet = (polygon) => {
 };
 
 // We sort the triangles to produce stable output.
-const orderVertices = (v, d = X) => {
-  if (v[0][d] === v[1][d] || v[0][d] === v[2][d]) {
-    // Cannot order by current dimension.
-    if (d === Z) {
-      // Exhausted dimensions.
-      // All vertices are identical, all orders are correct.
-      // This should be an impossible degenerate case.
-      throw Error('Degenerate triangle');
+const orderVertices = (v) => {
+  let min = v[0];
+  for (let d = 1; d < 3; d++) {
+    const c = v[d];
+    const dX = min[X] - c[X];
+    if (dX < 0) {
+      continue;
+    } else if (dX === 0) {
+      const dY = min[Y] - c[Y];
+      if (dY < 0) {
+        continue;
+      } else if (dY === 0) {
+        const dZ = min[Z] - c[Z];
+        if (dZ < 0) {
+          continue;
+        }
+      }
     }
-    // Try ordering by the next dimension.
-    return orderVertices(v, d + 1);
+    min = c;
   }
-  for (;;) {
-    if (v[0][d] <= v[1][d] && v[0][d] <= v[2][d]) {
-      // Correctly ordered.
-      return v;
-    }
-    // Rotate the vertices and try again.
+  while (v[0] !== min) {
     v.push(v.shift());
   }
-  // Unreachable.
+  return v;
 };
 
-const compareTriangles = ([a], [b]) => {
+const compareTriangles = (t1, t2) => {
   // The triangle vertices have been ordered such that the top is the minimal vertex.
-  const dX = a[X] - b[X];
-  if (dX !== 0) {
-    return dX;
+  for (let d = 0; d < 3; d++) {
+    const a = t1[d];
+    const b = t2[d];
+    const dX = a[X] - b[X];
+    if (dX < 0) {
+      return -1;
+    } else if (dX === 0) {
+      const dY = a[Y] - b[Y];
+      if (dY < 0) {
+        return -1;
+      } else if (dY === 0) {
+        const dZ = a[Z] - b[Z];
+        if (dZ < 0) {
+          return -1;
+        } else if (dZ === 0) {
+          continue;
+        }
+      }
+    }
+    return 1;
   }
-  const dY = a[Y] - b[Y];
-  if (dY !== 0) {
-    return dY;
-  }
-  const dZ = a[Z] - b[Z];
-  if (dZ !== 0) {
-    return dZ;
-  }
+  return 0;
 };
 
 export const toStl = async (geometry, { tolerance = 0.001 } = {}) => {

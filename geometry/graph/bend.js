@@ -3,14 +3,10 @@ import { fromSurfaceMeshLazy } from './fromSurfaceMeshLazy.js';
 import { taggedGraph } from '../tagged/taggedGraph.js';
 import { toSurfaceMesh } from './toSurfaceMesh.js';
 
-export const bend = (geometry, turnsPerMm = 1) =>
+export const bend = (geometry, radius) =>
   taggedGraph(
     { tags: geometry.tags },
     fromSurfaceMeshLazy(
-      bendSurfaceMesh(
-        toSurfaceMesh(geometry.graph),
-        geometry.matrix,
-        turnsPerMm
-      )
+      bendSurfaceMesh(toSurfaceMesh(geometry.graph), geometry.matrix, radius)
     )
   );

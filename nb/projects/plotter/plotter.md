@@ -6,7 +6,7 @@ const dinosaur = await readSvg(
 ```
 
 ```JavaScript
-const plotter = defGrblPlotter('plotter');
+const plotter = GrblPlotter();
 ```
 
 ```JavaScript

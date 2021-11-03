@@ -31,6 +31,8 @@ const screw = ScrewThread(16, 5)
 
 ![Image](mount.md.0.png)
 
+[screw_0.stl](mount.screw_0.stl)
+
 ```JavaScript
 const upsideClip = Box(30 + 4)
   .align('x>y>')
@@ -154,12 +156,24 @@ const upsideDesign2 = upsideDesign
 
 ![Image](mount.md.6.png)
 
+[box-top_0.stl](mount.box-top_0.stl)
+
 ![Image](mount.md.7.png)
+
+[box-pin_0.stl](mount.box-pin_0.stl)
 
 ![Image](mount.md.8.png)
 
+[box-base_0.stl](mount.box-base_0.stl)
+
 ![Image](mount.md.9.png)
+
+[reel_0.stl](mount.reel_0.stl)
 
 ![Image](mount.md.10.png)
 
+[rim_0.stl](mount.rim_0.stl)
+
 ![Image](mount.md.11.png)
+
+[clip_0.stl](mount.clip_0.stl)

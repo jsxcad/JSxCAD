@@ -237,11 +237,19 @@ const planetaryDesign = Arc(44)
 
 ![Image](gear.md.9.png)
 
+[hoop_0.stl](gear.hoop_0.stl)
+
 ![Image](gear.md.10.png)
+
+[ring_0.stl](gear.ring_0.stl)
 
 ![Image](gear.md.11.png)
 
+[planetary_0.stl](gear.planetary_0.stl)
+
 ![Image](gear.md.12.png)
+
+[solar_0.stl](gear.solar_0.stl)
 
 ![Image](gear.md.13.png)
 
