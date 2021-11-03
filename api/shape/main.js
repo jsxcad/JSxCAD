@@ -327,6 +327,7 @@ export { tags } from './tags.js';
 export { taper } from './taper.js';
 export { test } from './test.js';
 export { tint } from './tint.js';
+export { to } from './to.js';
 export { tool } from './tool.js';
 export { top } from './top.js';
 export { twist } from './twist.js';

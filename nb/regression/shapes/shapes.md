@@ -278,3 +278,11 @@ const weld = Weld(Arc(4).x(-1), Box(5).x(1))
 ```
 
 Weld(Arc(5).x(-1), Box(5).x(1)).fill()
+
+```JavaScript
+const toEx = Box(1).color('red').as('box').x(5).y(y).fit(Arc(10)).to(g('box')).gridView().md('Reposition to the local frame of reference of an item');
+```
+
+![Image](shapes.md.24.png)
+
+Reposition to the local frame of reference of an item
