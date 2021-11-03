@@ -21,7 +21,7 @@ export const to =
         const global = leaf.matrix;
         const local = invertTransform(global);
         const target = Shape.fromGeometry(leaf);
-        // Switch to the local coordinate space, perform the operation, and come back to the global coordinate space.
+        // Perform the operation, then switch to the local coordinate space.
         placed.push(target.op(...ops).transform(local));
       }
     }
