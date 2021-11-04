@@ -1,42 +1,63 @@
-//Ported to JSxCAD from https://www.thingiverse.com/thing:16627/files by @BarbourSmith
-
-// Parametric Pulley with multiple belt profiles
-// by droftarts January 2012
-
-// Based on pulleys by:
-// http://www.thingiverse.com/thing:11256 by me!
-// https://github.com/prusajr/PrusaMendel by Josef Prusa
-// http://www.thingiverse.com/thing:3104 by GilesBathgate
-// http://www.thingiverse.com/thing:2079 by nophead
-
-// dxf tooth data from http://oem.cadregister.com/asp/PPOW_Entry.asp?company=915217&elementID=07807803/METRIC/URETH/WV0025/F
-// pulley diameter checked and modeled from data at http://www.sdp-si.com/D265/HTML/D265T016.html
-
-// tune-able constants
-
-//  ********************************
-//  ** Scaling tooth for good fit **
-//  ********************************
-/*  To improve fit of belt to pulley, set the following constant. Decrease or increase by 0.1mm at a time. We are modelling the *BELT* tooth here, not the tooth on the pulley. Increasing the number will *decrease* the pulley tooth size. Increasing the tooth width will also scale proportionately the tooth depth, to maintain the shape of the tooth, and increase how far into the pulley the tooth is indented. Can be negative */
-
+```JavaScript
 const additionalToothWidth = 0.2; //mm
+```
 
-//  If you need more tooth depth than this provides, adjust the following constant. However, this will cause the shape of the tooth to change.
-
+```JavaScript
 const additionalToothDepth = 0; //mm
+```
 
-// Functions
-
+```JavaScript
 const ToothSpaceingCurvefit = (teeth, b, c, d) => {
   return ((c * Math.pow(teeth, d)) / (b + Math.pow(teeth, d))) * teeth;
 };
+```
 
+```JavaScript
 const ToothSpacing = (teeth, tooth_pitch, pitch_line_offset) =>
   2 * ((teeth * tooth_pitch) / (3.14159265 * 2) - pitch_line_offset);
+```
 
+```JavaScript
 const ToothProfileToFace = (...points) =>
   Shape.fromOpenPath(points).close().fill();
+```
 
+```JavaScript
+const Pulley = (profile, teeth) => {
+  const pulley_OD = profile.diameter(teeth);
+  const tooth_depth = profile.toothDepth;
+  const tooth_width = profile.toothWidth;
+  const toothDistanceFromCentre = Math.sqrt(
+    Math.pow(pulley_OD / 2, 2) -
+      Math.pow((tooth_width + additionalToothWidth) / 2, 2)
+  );
+  const toothWidthScale = (tooth_width + additionalToothWidth) / tooth_width;
+  const toothDepthScale = (tooth_depth + additionalToothDepth) / tooth_depth;
+  var toothProfile = profile.profile;
+
+  console.log('pulley_OD: %f', pulley_OD);
+  console.log(profile);
+
+  const center = Arc(pulley_OD, pulley_OD);
+
+  //teeth - cut out of shaft
+
+  //Scale tooth up
+  toothProfile = toothProfile.scale(toothWidthScale, toothDepthScale);
+  //Translate it out to where it should be
+  toothProfile = toothProfile.move(0, -toothDistanceFromCentre, 0);
+
+  var teethArray = [];
+  for (let i = 0; i < teeth; i++) {
+    teethArray.push(toothProfile.rz(i / teeth));
+  }
+  const teethToCut = Group(...teethArray);
+
+  return center.cut(teethToCut);
+};
+```
+
+```JavaScript
 const MXL = {
   profile: ToothProfileToFace(
     ...[
@@ -68,7 +89,9 @@ const MXL = {
   toothDepth: 0.508,
   toothWidth: 1.321,
 };
+```
 
+```JavaScript
 const DP40 = {
   profile: ToothProfileToFace(
     ...[
@@ -96,7 +119,9 @@ const DP40 = {
   toothDepth: 0.457,
   toothWidth: 1.226,
 };
+```
 
+```JavaScript
 const XL = {
   profile: ToothProfileToFace(
     ...[
@@ -128,7 +153,9 @@ const XL = {
   toothDepth: 1.27,
   toothWidth: 3.051,
 };
+```
 
+```JavaScript
 const H = {
   profile: ToothProfileToFace(
     ...[
@@ -176,7 +203,9 @@ const H = {
   toothDepth: 1.905,
   toothWidth: 5.359,
 };
+```
 
+```JavaScript
 const T2_5 = {
   profile: ToothProfileToFace(
     ...[
@@ -200,7 +229,9 @@ const T2_5 = {
   toothDepth: 0.7,
   toothWidth: 1.678,
 };
+```
 
+```JavaScript
 const T5 = {
   profile: ToothProfileToFace(
     ...[
@@ -248,7 +279,9 @@ const T5 = {
   toothDepth: 1.19,
   toothWidth: 3.264,
 };
+```
 
+```JavaScript
 const T10 = {
   profile: ToothProfileToFace(
     ...[
@@ -296,7 +329,9 @@ const T10 = {
   toothDepth: 2.5,
   toothWidth: 6.13,
 };
+```
 
+```JavaScript
 const AT5 = {
   profile: ToothProfileToFace(
     ...[
@@ -336,7 +371,9 @@ const AT5 = {
   toothDepth: 1.19,
   toothWidth: 4.268,
 };
+```
 
+```JavaScript
 const HTD_3mm = {
   profile: ToothProfileToFace(
     ...[
@@ -391,7 +428,9 @@ const HTD_3mm = {
   toothDepth: 1.289,
   toothWidth: 2.27,
 };
+```
 
+```JavaScript
 const HTD_5mm = {
   profile: ToothProfileToFace(
     ...[
@@ -446,7 +485,9 @@ const HTD_5mm = {
   toothDepth: 2.199,
   toothWidth: 3.781,
 };
+```
 
+```JavaScript
 const HTD_8mm = {
   profile: ToothProfileToFace(
     ...[
@@ -509,7 +550,9 @@ const HTD_8mm = {
   toothDepth: 3.607,
   toothWidth: 6.603,
 };
+```
 
+```JavaScript
 const GT2_2mm = {
   profile: ToothProfileToFace(
     ...[
@@ -542,7 +585,9 @@ const GT2_2mm = {
   toothDepth: 0.764,
   toothWidth: 1.494,
 };
+```
 
+```JavaScript
 const GT2_3mm = {
   profile: ToothProfileToFace(
     ...[
@@ -579,7 +624,9 @@ const GT2_3mm = {
   toothDepth: 1.169,
   toothWidth: 2.31,
 };
+```
 
+```JavaScript
 const GT2_5mm = {
   profile: ToothProfileToFace(
     ...[
@@ -632,110 +679,122 @@ const GT2_5mm = {
   toothDepth: 1.969,
   toothWidth: 3.952,
 };
+```
 
-const Pulley = (profile, teeth) => {
-  const pulley_OD = profile.diameter(teeth);
-  const tooth_depth = profile.toothDepth;
-  const tooth_width = profile.toothWidth;
-  const toothDistanceFromCentre = Math.sqrt(
-    Math.pow(pulley_OD / 2, 2) -
-      Math.pow((tooth_width + additionalToothWidth) / 2, 2)
-  );
-  const toothWidthScale = (tooth_width + additionalToothWidth) / tooth_width;
-  const toothDepthScale = (tooth_depth + additionalToothDepth) / tooth_depth;
-  var toothProfile = profile.profile;
+# Supported belt profiles:
 
-  console.log('pulley_OD: %f', pulley_OD);
-  console.log(profile);
+MXL
 
-  const center = Arc(pulley_OD, pulley_OD);
-
-  //teeth - cut out of shaft
-
-  //Scale tooth up
-  toothProfile = toothProfile.scale(toothWidthScale, toothDepthScale);
-  //Translate it out to where it should be
-  toothProfile = toothProfile.move(0, -toothDistanceFromCentre, 0);
-
-  var teethArray = [];
-  for (let i = 0; i < teeth; i++) {
-    teethArray.push(toothProfile.rz(i / teeth));
-  }
-  const teethToCut = Group(...teethArray);
-
-  return center.cut(teethToCut);
-};
-
-md`
-# Supported belt profiles:`;
-
-
-
-
-
-
-md`
-MXL`;
+```JavaScript
 Pulley(MXL, 20).view();
+```
 
-md`
-DP40`;
+![Image](belt_sprockets.md.0.png)
+
+DP40
+
+```JavaScript
 Pulley(DP40, 20).view();
+```
 
-md`
-XL`;
+![Image](belt_sprockets.md.1.png)
+
+XL
+
+```JavaScript
 Pulley(XL, 20).view();
+```
 
-md`
-H`;
+![Image](belt_sprockets.md.2.png)
+
+H
+
+```JavaScript
 Pulley(H, 20).view();
+```
 
-md`
-T2 5mm`;
+![Image](belt_sprockets.md.3.png)
+
+T2 5mm
+
+```JavaScript
 Pulley(T2_5, 20).view();
+```
 
-md`
-T5`;
+![Image](belt_sprockets.md.4.png)
+
+T5
+
+```JavaScript
 Pulley(T5, 20).view();
+```
 
-md`
-T10`;
+![Image](belt_sprockets.md.5.png)
+
+T10
+
+```JavaScript
 Pulley(T10, 20).view();
+```
 
-md`
-AT 5mm`;
+![Image](belt_sprockets.md.6.png)
+
+AT 5mm
+
+```JavaScript
 Pulley(AT5, 20).view();
+```
 
-md`
-HTD 3mm`;
+![Image](belt_sprockets.md.7.png)
+
+HTD 3mm
+
+```JavaScript
 Pulley(HTD_3mm, 20).view();
+```
 
-md`
-HTD 5mm`;
+![Image](belt_sprockets.md.8.png)
+
+HTD 5mm
+
+```JavaScript
 Pulley(HTD_5mm, 20).view();
+```
 
-md`
-GT2 5mm`;
+![Image](belt_sprockets.md.9.png)
+
+GT2 5mm
+
+```JavaScript
 Pulley(GT2_5mm, 20).view();
+```
 
-md`
-GT2 5mm`;
-Pulley(GT2_5mm, 20).view();
+![Image](belt_sprockets.md.10.png)
 
-md`
-HTD 8mm`;
+![Image](belt_sprockets.md.11.png)
+
+HTD 8mm
+
+```JavaScript
 Pulley(HTD_8mm, 20).view();
+```
 
-md`
-GT2 2mm`;
+![Image](belt_sprockets.md.12.png)
+
+GT2 2mm
+
+```JavaScript
 Pulley(GT2_2mm, 20).view();
+```
 
-md`
-GT2 3mm`;
+![Image](belt_sprockets.md.13.png)
+
+GT2 3mm
+
+```JavaScript
 Pulley(GT2_3mm, 20).view();
+```
 
-md`
-GT2 5mm`;
-Pulley(GT2_5mm, 20).view();
+![Image](belt_sprockets.md.14.png)
 
-
+![Image](belt_sprockets.md.15.png)
