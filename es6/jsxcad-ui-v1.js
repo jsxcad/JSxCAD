@@ -1,4 +1,4 @@
-import { read as read$1, log, boot, setupFilesystem, listFilesystems, watchFileCreation, watchFileDeletion, unwatchFileCreation, unwatchFileDeletion, listFiles, deleteFile, terminateActiveServices, clearEmitted, write as write$1, resolvePending, getServicePoolInfo, sleep as sleep$1, askService, ask, touch } from './jsxcad-sys.js';
+import { read as read$1, log, boot, setupFilesystem, listFilesystems, watchFileCreation, watchFileDeletion, unwatchFileCreation, unwatchFileDeletion, listFiles, deleteFile, terminateActiveServices, clearEmitted, write as write$1, resolvePending, getServicePoolInfo, sleep as sleep$1, askService, ask, touch, readOrWatch } from './jsxcad-sys.js';
 import { getNotebookControlData, toDomElement } from './jsxcad-ui-notebook.js';
 import Prettier from 'https://unpkg.com/prettier@2.3.2/esm/standalone.mjs';
 import PrettierParserBabel from 'https://unpkg.com/prettier@2.3.2/esm/parser-babel.mjs';
@@ -46413,6 +46413,68 @@ class Ui extends E {
 
     clock();
 
+    const onClickPrint = (event, filename, path, data, type) => {
+      let url = 'http://192.168.31.235:88/';
+
+      const done = async () => {
+        if (path && !data) {
+          data = await readOrWatch(path);
+        }
+
+        let response, error;
+
+        try {
+          response = await fetch(url, {
+            mode: 'cors',
+            method: 'post',
+            body: data
+          });
+        } catch (e) {
+          error = e;
+        }
+
+        const done = () => this.setState({
+          modal: undefined
+        });
+
+        this.setState({
+          modal: v$1(Modal, {
+            show: true,
+            onHide: done
+          }, v$1(Modal.Header, {
+            closeButton: true
+          }, v$1(Modal.Title, null, "Print")), v$1(Modal.Body, null, error ? `Error: ${error}` : response.ok ? 'Printed successfully' : `Printed failed: ${response.status}`), v$1(Modal.Footer, null, v$1(Button, {
+            variant: "primary",
+            onClick: done
+          }, "Close")))
+        });
+      };
+
+      const cancel = () => {
+        this.setState({
+          modal: undefined
+        });
+      };
+
+      this.setState({
+        modal: v$1(Modal, {
+          show: true,
+          onHide: cancel
+        }, v$1(Modal.Header, {
+          closeButton: true
+        }, v$1(Modal.Title, null, "Print")), v$1(Modal.Body, null, v$1(FormImpl.Control, {
+          name: "url",
+          value: url,
+          onChange: event => {
+            url = event.target.value;
+          }
+        })), v$1(Modal.Footer, null, v$1(Button, {
+          variant: "primary",
+          onClick: done
+        }, "Print")))
+      });
+    };
+
     const onClickView = (event, note) => {
       if (jsEditorAdvice.orbitView) {
         jsEditorAdvice.orbitView.openView = false;
@@ -46591,7 +46653,8 @@ class Ui extends E {
                 }
 
                 const element = toDomElement([entry], {
-                  onClickView
+                  onClickView,
+                  onClickPrint
                 });
                 domElementByHash.set(entry.hash, element);
                 console.log(`Appending ${entry.hash} to ${id}`);

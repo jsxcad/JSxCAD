@@ -1,4 +1,4 @@
-/* global FileReader, history, location, mermaid */
+/* global FileReader, fetch, history, location, mermaid */
 
 import * as PropTypes from 'prop-types';
 
@@ -15,6 +15,7 @@ import {
   listFilesystems,
   log,
   read,
+  readOrWatch,
   resolvePending,
   setupFilesystem,
   sleep,
@@ -131,6 +132,73 @@ class Ui extends PureComponent {
       }
     };
     clock();
+
+    const onClickPrint = (event, filename, path, data, type) => {
+      let url = 'http://192.168.31.235:88/';
+      const done = async () => {
+        if (path && !data) {
+          data = await readOrWatch(path);
+        }
+        let response, error;
+        try {
+          response = await fetch(url, {
+            mode: 'cors',
+            method: 'post',
+            body: data,
+          });
+        } catch (e) {
+          error = e;
+        }
+        const done = () => this.setState({ modal: undefined });
+        this.setState({
+          modal: (
+            <Modal show={true} onHide={done}>
+              <Modal.Header closeButton>
+                <Modal.Title>Print</Modal.Title>
+              </Modal.Header>
+              <Modal.Body>
+                {error
+                  ? `Error: ${error}`
+                  : response.ok
+                  ? 'Printed successfully'
+                  : `Printed failed: ${response.status}`}
+              </Modal.Body>
+              <Modal.Footer>
+                <Button variant="primary" onClick={done}>
+                  Close
+                </Button>
+              </Modal.Footer>
+            </Modal>
+          ),
+        });
+      };
+      const cancel = () => {
+        this.setState({ modal: undefined });
+      };
+      this.setState({
+        modal: (
+          <Modal show={true} onHide={cancel}>
+            <Modal.Header closeButton>
+              <Modal.Title>Print</Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+              <Form.Control
+                name="url"
+                value={url}
+                onChange={(event) => {
+                  url = event.target.value;
+                }}
+              />
+            </Modal.Body>
+            <Modal.Footer>
+              <Button variant="primary" onClick={done}>
+                Print
+              </Button>
+            </Modal.Footer>
+          </Modal>
+        ),
+      });
+    };
 
     const onClickView = (event, note) => {
       if (jsEditorAdvice.orbitView) {
@@ -265,7 +333,10 @@ class Ui extends PureComponent {
                   render();
                 }
 
-                const element = toDomElement([entry], { onClickView });
+                const element = toDomElement([entry], {
+                  onClickView,
+                  onClickPrint,
+                });
                 domElementByHash.set(entry.hash, element);
                 console.log(`Appending ${entry.hash} to ${id}`);
                 domElement.appendChild(element);

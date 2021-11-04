@@ -2693,7 +2693,7 @@ var FileSaver_min = createCommonjsModule(function (module, exports) {
 
 });
 
-/* global Blob */
+/* global Blob, alert, fetch */
 
 const downloadFile = async (event, filename, path, data, type) => {
   if (path && !data) {
@@ -2701,6 +2701,27 @@ const downloadFile = async (event, filename, path, data, type) => {
   }
   const blob = new Blob([data], { type });
   FileSaver_min(blob, filename);
+};
+
+const printFile = async (event, filename, path, data, type) => {
+  if (path && !data) {
+    data = await readOrWatch(path);
+  }
+  const url = 'http://192.168.31.235:88/';
+  try {
+    const response = await fetch(url, {
+      mode: 'cors',
+      method: 'post',
+      body: data,
+    });
+    if (response.ok) {
+      alert('Print ok');
+    } else {
+      alert(`Print failed: ${response.status}`);
+    }
+  } catch (error) {
+    alert(error);
+  }
 };
 
 marked_1.use({
@@ -2715,7 +2736,10 @@ marked_1.use({
   },
 });
 
-const toDomElement = (notebook = [], { onClickView } = {}) => {
+const toDomElement = (
+  notebook = [],
+  { onClickView, onClickPrint = printFile } = {}
+) => {
   const definitions = {};
 
   const showOrbitView = async (event, note) => {
@@ -2755,9 +2779,6 @@ const toDomElement = (notebook = [], { onClickView } = {}) => {
 
   const container = document.createElement('div');
   container.classList.add('notebook');
-  container.style.padding = '0px';
-  container.style.border = '0px';
-  container.style.margin = '0px';
 
   for (const note of notebook) {
     if (note.define) {
@@ -2776,9 +2797,9 @@ const toDomElement = (notebook = [], { onClickView } = {}) => {
       image.style.display = 'block';
       image.style.height = `${height}px`;
       image.style.width = `${width}px`;
-      image.style.padding = '0px';
-      image.style.border = '0px';
-      image.style.margin = '0px';
+      // image.style.padding = '0px';
+      // image.style.border = '0px';
+      // image.style.margin = '0px';
       image.style.background =
         'url(https://upload.wikimedia.org/wikipedia/commons/b/b1/Loading_icon.gif) no-repeat center;';
       image.classList.add('note', 'view');
@@ -2828,18 +2849,34 @@ const toDomElement = (notebook = [], { onClickView } = {}) => {
         if (base64Data) {
           data = base64Arraybuffer.decode(base64Data);
         }
-        const button = document.createElement('button');
-        button.classList.add('note', 'download');
-        button.style.height = `${21 * 1}px`;
-        button.style.padding = '0px';
-        button.style.border = '0px';
-        button.style.margin = '0px';
-        const text = document.createTextNode(`Download "${filename}"`);
-        button.appendChild(text);
-        button.addEventListener('click', (event) =>
-          downloadFile(event, filename, path, data, type)
-        );
-        container.appendChild(button);
+        {
+          const button = document.createElement('button');
+          button.classList.add('note', 'download');
+          // button.style.height = `${21 * 1}px`;
+          // button.style.padding = '0px';
+          // button.style.border = '0px';
+          // button.style.margin = '0px';
+          const text = document.createTextNode(`Download "${filename}"`);
+          button.appendChild(text);
+          button.addEventListener('click', (event) =>
+            downloadFile(event, filename, path, data, type)
+          );
+          container.appendChild(button);
+        }
+        if (filename.endsWith('gcode')) {
+          const button = document.createElement('button');
+          button.classList.add('note', 'print');
+          // button.style.height = `${21 * 1}px`;
+          // button.style.padding = '0px';
+          // button.style.border = '0px';
+          // button.style.margin = '0px';
+          const text = document.createTextNode(`Print "${filename}"`);
+          button.appendChild(text);
+          button.addEventListener('click', (event) =>
+            onClickPrint(event, filename, path, data, type)
+          );
+          container.appendChild(button);
+        }
       }
     }
     if (note.control) {
