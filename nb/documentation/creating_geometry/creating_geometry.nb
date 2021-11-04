@@ -106,6 +106,8 @@ Creates a new polygon from the input points
 
 Polygon(Point(0, 0, 0), Point(10, 0, 0), Point(10, 10, 0)).view();
 
+Polygon([0, 0, 0], [10, 0, 0], [10, 10, 0]).view();
+
 md`
 ---
 ### Septagon

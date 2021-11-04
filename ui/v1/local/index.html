@@ -12,6 +12,12 @@
   <link rel="stylesheet" href="react-mosaic-component.css">
   <link rel="stylesheet" href="react-resizable.css">
   <style>
+    div.notebook {
+      // border: 1px dashed dodgerblue;
+      // margin: 4px 4px;
+      // padding: 4px 4px;
+    }
+
     .note.log {
       font-family: "Arial Black", Gadget, sans-serif;
       color: blue;
@@ -30,6 +36,9 @@
 
     img.note.view {
       // padding: 4px 4px;
+      border: 1px dashed dodgerblue;
+      margin: 4px 4px;
+      padding: 4px 4px;
     }
 
     .note.orbitView {
@@ -38,12 +47,12 @@
     }
 
     button.note.download {
-      // border: 2px solid black;
-      // border-radius: 5px;
-      background-color: white;
-      // margin: 4px 4px;
-      // padding: 10px 24px;
-      height: 21px;
+       border: 2px solid black;
+       border-radius: 5px;
+      // background-color: white;
+       margin: 4px 4px;
+       padding: 10px 24px;
+      // height: 21px;
       font-size: 16px;
       cursor: pointer;
       border-color: #2196F3;
@@ -51,6 +60,24 @@
     }
 
     button.note.download:hover {
+      background: #2196F3;
+      color: white;
+    }
+
+    button.note.print {
+       border: 2px solid black;
+       border-radius: 5px;
+      // background-color: white;
+       margin: 4px 4px;
+       padding: 10px 24px;
+      // height: 21px;
+      font-size: 16px;
+      cursor: pointer;
+      border-color: #2196F3;
+      color: dodgerblue
+    }
+
+    button.note.print:hover {
       background: #2196F3;
       color: white;
     }
