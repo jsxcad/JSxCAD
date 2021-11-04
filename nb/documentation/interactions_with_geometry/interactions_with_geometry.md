@@ -38,6 +38,23 @@ Arc(10).ex(1, 2, -1, -2).view();
 ![Image](interactions_with_geometry.md.3.png)
 
 ---
+### Cast
+3D shapes can be 'cast' as shadows to create 2D shapes.
+
+A plane (default [0, 0, 1, 0]) to cast upon and a direction (default [0, 0, 1, 0]) can be provided.
+
+```JavaScript
+Arc(4)
+  .ex(10)
+  .rx(1 / 8)
+  .material('glass')
+  .and(cast())
+  .view();
+```
+
+![Image](interactions_with_geometry.md.4.png)
+
+---
 ### Item
 Geometry can be formed into an 'item'.
 
@@ -55,7 +72,7 @@ const aBolt = Arc(8, 8, 2)
   .view();
 ```
 
-![Image](interactions_with_geometry.md.4.png)
+![Image](interactions_with_geometry.md.5.png)
 
 ```JavaScript
 const aBox = Box(10, 10, 10).as('box');
@@ -65,17 +82,17 @@ const aBox = Box(10, 10, 10).as('box');
 const aDesign = aBox.fit(aBolt.z(10)).as('design').view();
 ```
 
-![Image](interactions_with_geometry.md.5.png)
+![Image](interactions_with_geometry.md.6.png)
 
 ---
 ### Grow
 Expands the shape outwards by the input distance. May result in self intersections if not used cautiously.
 
 ```JavaScript
-aDesign.get('design').get('*').pack().view().md(`We need to get into the design in order to get at 'box' and 'bolt'`);
+aDesign.get('*').pack().view().md(`We need to get into the design in order to get at 'box' and 'bolt'`);
 ```
 
-![Image](interactions_with_geometry.md.6.png)
+![Image](interactions_with_geometry.md.7.png)
 
 We need to get into the design in order to get at 'box' and 'bolt'
 
@@ -83,7 +100,37 @@ We need to get into the design in order to get at 'box' and 'bolt'
 Arc(10, 10, 5).grow(1).view();
 ```
 
-![Image](interactions_with_geometry.md.7.png)
+![Image](interactions_with_geometry.md.8.png)
+
+---
+### Loft
+2D shapes can be 'lofted' to create 3D shapes. Lofting a shape is done by taking an input shape, transforming it incrementally, then joining all of the incremental steps into a single shape.
+
+```JavaScript
+Box(10)
+  .cut(Box(5))
+  .loft(...seq((a) => (s) => s.scale(Math.pow(a, 3)).z(a * 10), { by: 1 / 8 }))
+  .view();
+```
+
+![Image](interactions_with_geometry.md.9.png)
+
+---
+### Loop
+2D shapes can be 'looped' to create 3D shapes. In this example two circles are looped to create a hollow doughnut. See 'loft' for a similar behavior without the ends being joined.
+
+TODO: In the future (a) => rz(a) can be replaced with rz.
+
+```JavaScript
+Arc(6)
+  .cut(Arc(3))
+  .rx(0.25)
+  .x(10)
+  .loop(...seq((a) => rz(a), { by: 1 / 16, upto: 1 }))
+  .view();
+```
+
+![Image](interactions_with_geometry.md.10.png)
 
 ---
 ### Move
@@ -97,19 +144,19 @@ Multiple offsets can be provided, which will produce one result per offset.
 Box(5, 5, 5).move(10, 2, 12).view();
 ```
 
-![Image](interactions_with_geometry.md.8.png)
+![Image](interactions_with_geometry.md.11.png)
 
 ```JavaScript
 Box(5, 5, 5).x(10).y(2).z(12).view();
 ```
 
-![Image](interactions_with_geometry.md.9.png)
+![Image](interactions_with_geometry.md.12.png)
 
 ```JavaScript
 Box(5).x(0, 10, 20).view();
 ```
 
-![Image](interactions_with_geometry.md.10.png)
+![Image](interactions_with_geometry.md.13.png)
 
 ---
 ### Remesh
@@ -117,36 +164,19 @@ Remesh can be used to break up the segments of a shape allowing it to be distort
 shape.remesh(4, 2) first breaks segments longer than 4 and then breaks segments longer than 2.
 At each step the shape is retriangulated to preserve manifold structure.
 
-```JavaScript
-const aRectangle = Box(5, 5, 15).view();
-```
-
-![Image](interactions_with_geometry.md.11.png)
-
-```JavaScript
-aRectangle.remesh(4, 2).view({ wireframe: true });
-```
-
-![Image](interactions_with_geometry.md.12.png)
-
 Once a shape is remeshed it can be twisted or bent about the origin.
 
 ```JavaScript
-aRectangle.remesh(4, 1).twist(10).view({ wireframe: true });
-```
-
-![Image](interactions_with_geometry.md.13.png)
-
-```JavaScript
-aRectangle
-  .ry(1 / 4)
-  .remesh(4, 1)
-  .y(10)
-  .bend(4)
-  .view({ wireframe: true });
+Box(157, 20).ex(1).y(25)
+  .remesh(10, 8, 4)
+  .op(s => s.bend(25).and(s.outline()))
+  .gridView()
+  .md('A rectangle bent into a ring with a central radius of 25');
 ```
 
 ![Image](interactions_with_geometry.md.14.png)
+
+A rectangle bent into a ring with a central radius of 25
 
 ---
 ### Rotate
@@ -155,10 +185,31 @@ These take the number of turns as an argument .rz(1/8) would rotate the shape by
 Multiple turns can be provided, which will produce one result per turn.
 
 ```JavaScript
-aRectangle.rz(1 / 8).view();
+const aRectangle = Box(5, 5, 15).view();
 ```
 
 ![Image](interactions_with_geometry.md.15.png)
+
+```JavaScript
+Box(5)
+  .x(4)
+  .rz(0/8, 1/8, 2/8, 3/8, 4/8, 5/8, 6/8, 7/8)
+  .view();
+```
+
+![Image](interactions_with_geometry.md.16.png)
+
+```JavaScript
+aRectangle.remesh(4, 2).view(undefined, { wireframe: true });
+```
+
+![Image](interactions_with_geometry.md.17.png)
+
+```JavaScript
+aRectangle.rz(1 / 8).view();
+```
+
+![Image](interactions_with_geometry.md.18.png)
 
 ```JavaScript
 aRectangle
@@ -168,16 +219,7 @@ aRectangle
   .view();
 ```
 
-![Image](interactions_with_geometry.md.16.png)
-
-```JavaScript
-Box(5)
-  .x(4)
-  .rz(0/8, 1/8, 2/8, 3/8, 4/8, 5/8, 6/8, 7/8)
-  .view();
-```
-
-![Image](interactions_with_geometry.md.17.png)
+![Image](interactions_with_geometry.md.19.png)
 
 ---
 ### Scale
@@ -187,7 +229,7 @@ Scale enlarges a shape by the entered multiple.
 aRectangle.scale(2).view();
 ```
 
-![Image](interactions_with_geometry.md.18.png)
+![Image](interactions_with_geometry.md.20.png)
 
 ---
 ### Section
@@ -201,13 +243,13 @@ Section takes shapes as arguments, and will use the plane of orientation of the 
 Orb(4).section().view();
 ```
 
-![Image](interactions_with_geometry.md.19.png)
+![Image](interactions_with_geometry.md.21.png)
 
 ```JavaScript
 Orb(4).section(xy, xy.z(1), xy.z(2)).view();
 ```
 
-![Image](interactions_with_geometry.md.20.png)
+![Image](interactions_with_geometry.md.22.png)
 
 ---
 ### Size
@@ -239,8 +281,6 @@ log(aRectangle.tag('tagString').tags());
 aRectangle.tag('tagString').tags((tags, s) => s.md(`Tags ${tags}`));
 ```
 
-Tags tagString
-
 Tags can be used to selectively keep or remove parts of geometry.
 
 ```JavaScript
@@ -250,16 +290,89 @@ const taggedAssembly = Assembly(
 ).view();
 ```
 
-![Image](interactions_with_geometry.md.21.png)
+![Image](interactions_with_geometry.md.23.png)
 
 ```JavaScript
 taggedAssembly.keep('A').noVoid().view();
 ```
 
-![Image](interactions_with_geometry.md.22.png)
+![Image](interactions_with_geometry.md.24.png)
 
 ```JavaScript
 taggedAssembly.drop('B').view();
 ```
 
-![Image](interactions_with_geometry.md.23.png)
+![Image](interactions_with_geometry.md.25.png)
+
+---
+#### Selection
+We can select parts of geometry based on tags using get(selector), getNot(selector), and nth(number).
+Aliases g, ng, and n are also available.
+
+Selector is in the form of 'namespace:value', with namespace defaulting to 'item'.
+
+value may also be the wildcard *.
+
+Selection does not traverse through item, except for the input shape.
+
+This means that s.get('a').get('b') will find b inside a, but otherwise b would not be found.
+
+```JavaScript
+Group(
+  Box(10).as('box').color('yellow').material('copper'),
+  Arc(10).as('arc').color('cyan').material('brick')
+)
+  .view((s) => s.get('*').pack())
+  .md('All items.')
+  .view(get('color:green'))
+  .md('All green things.')
+  .view(getNot('material:copper'))
+  .md('All non-copper things.');
+```
+
+![Image](interactions_with_geometry.md.26.png)
+
+All items.
+
+All green things.
+
+![Image](interactions_with_geometry.md.27.png)
+
+All non-copper things.
+
+---
+### Abstract View
+We can generate an abstract view of the geometry to be displayed as a graph.
+
+```JavaScript
+Box(4).as('box').and(Arc(5).ex(10).as('bar')).abstract();
+```
+
+'''mermaid
+graph LR;
+  0[group<br>]
+  0 --> 1;
+  1[item<br>item:box]
+  1 --> 2;
+  2[plan<br>]
+  0 --> 3;
+  3[item<br>item:bar]
+  3 --> 4;
+  4[graph<br>]
+'''
+
+---
+### Voxels
+We can convert a volume into voxels at a given resolution.
+
+```JavaScript
+Box(11)
+  .ex(10)
+  .rx(-1 / 8)
+  .op((s) => s.voxels(1).color('green').and(s.outline().sketch().color('red')))
+  .view().md('Produce a voxel representation with a 1mm resolution');
+```
+
+![Image](interactions_with_geometry.md.28.png)
+
+Produce a voxel representation with a 1mm resolution

@@ -1,22 +1,15 @@
-import {
-  getAt,
-  getCorner1,
-  getCorner2,
-  getFrom,
-  getMatrix,
-  getTo,
-} from './Plan.js';
-import { registerReifier, taggedPlan } from '@jsxcad/geometry';
+import { getAt, getCorner1, getCorner2, getFrom, getTo } from './Plan.js';
 
 import { Empty } from './Empty.js';
 import Shape from './Shape.js';
 import { negate } from '@jsxcad/math-vec3';
+import { taggedPlan } from '@jsxcad/geometry';
 
 const X = 0;
 const Y = 1;
 const Z = 2;
 
-registerReifier('Box', (geometry) => {
+Shape.registerReifier('Box', (geometry) => {
   const corner1 = getCorner1(geometry);
   const corner2 = getCorner2(geometry);
   const left = corner1[X];
@@ -27,7 +20,7 @@ registerReifier('Box', (geometry) => {
   const bottom = corner1[Z];
 
   if (left <= right || front <= back) {
-    return Empty().toGeometry();
+    return Empty();
   }
 
   const a = Shape.fromPath([
@@ -43,10 +36,7 @@ registerReifier('Box', (geometry) => {
     from: getFrom(geometry),
     at: getTo(geometry),
   });
-  const e = d.transform(getMatrix(geometry));
-  const f = e.setTags(geometry.tags);
-  const g = f.toGeometry();
-  return g;
+  return d;
 });
 
 export const Box = (x, y = x, z = 0) =>

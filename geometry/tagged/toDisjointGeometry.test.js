@@ -12,7 +12,8 @@ test('Empty', (t) => {
   const disjoint = toDisjointGeometry(assemble());
   t.deepEqual(canonicalize(disjoint), {
     type: 'group',
-    tags: undefined,
+    tags: [],
+    matrix: undefined,
     content: [],
   });
 });

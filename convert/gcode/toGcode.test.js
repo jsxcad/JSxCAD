@@ -42,8 +42,8 @@ test('Dynamic Laser', async (t) => {
       grbl: {
         type: 'dynamicLaser',
         feedRate: 10000,
-        cutSpeed: -1000,
-        jumpSpeed: -1000,
+        cutSpeed: 1000,
+        jumpSpeed: 1000,
       },
     }
   );

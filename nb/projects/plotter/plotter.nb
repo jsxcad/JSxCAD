@@ -4,7 +4,7 @@ const dinosaur = await readSvg(
   { fill: false }
 );
 
-const plotter = defGrblPlotter('plotter');
+const plotter = GrblPlotter();
 
 const aligned = dinosaur.scale(10).align('xy').gcode('dinosaur', plotter);
 
@@ -29,7 +29,7 @@ const mandala = await readSvg(
 const scaledMandala = mandala
   .align('xy')
   .scale(20)
-  .gcode('mandala', plotter, { doPlan: false });
+  .gcode('mandala', plotter, s => s, { doPlan: false });
 
 const visnezh = await readSvg(
   'https://gitcdn.link/cdn/jsxcad/JSxCAD/master/nb/projects/plotter/visnezh.svg',
@@ -39,7 +39,7 @@ const visnezh = await readSvg(
 const scaledVisnezh = visnezh
   .align('xy')
   .scale(1 / 100)
-  .gcode('visnezh', plotter, { doPlan: false });
+  .gcode('visnezh', plotter, s => s, { doPlan: false });
 const calibration = Group(
   ...seq(
     (x) =>
@@ -56,7 +56,7 @@ const calibration = Group(
 
 const star = Group(
   ...seq((a) => Triangle(5).rz(a), { upto: 120 / 360, by: 30 / 360 })
-).view({ outline: false });
+).view(undefined, { outline: false });
 
 const r = Random();
 

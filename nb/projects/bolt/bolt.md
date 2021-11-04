@@ -8,11 +8,13 @@ const Profile = (pitch = 1, angle = 60 / 360) =>
   ).fill();
 ```
 
+Show the fit.
+
 ```JavaScript
 export const ScrewThread = (
   diameter,
   height,
-  { pitch = 1, angle, play = 0.1 } = {}
+  { pitch = 1, angle, play = 0.1, lefthanded = false } = {}
 ) =>
   Profile(pitch, angle)
     .y(diameter / -2 + 1 / 2 + play * 2)
@@ -24,6 +26,7 @@ export const ScrewThread = (
         to: 3 / 2,
       })
     )
+    .scale(lefthanded ? 1 : -1, lefthanded ? 1 : -1, 1)
     .clip(Box(diameter).ex(pitch))
     .z(...seq((a) => a, { from: 0, to: height, by: pitch }))
     .clip(Box(diameter).ex(height))
@@ -34,7 +37,7 @@ export const ScrewThread = (
 export const NutThread = (
   diameter,
   height,
-  { pitch = 1, angle, play = 0.1 } = {}
+  { pitch = 1, angle, play = 0.1, lefthanded = false } = {}
 ) =>
   Profile(pitch, angle)
     .rz(1 / 2)
@@ -47,6 +50,7 @@ export const NutThread = (
         to: 3 / 2,
       })
     )
+    .scale(lefthanded ? 1 : -1, lefthanded ? 1 : -1, 1)
     .clip(Box(diameter + 2).ex(pitch))
     .z(...seq((a) => a, { from: 0, to: height, by: pitch }))
     .clip(Box(diameter + 2).ex(height))
@@ -69,6 +73,8 @@ const nutThread = NutThread(20, 10)
 
 ![Image](bolt.md.1.png)
 
+[nut 20x10_0.stl](bolt.nut%2020x10_0.stl)
+
 ```JavaScript
 const screwThread = ScrewThread(20, 10)
   .cut(
@@ -82,13 +88,13 @@ const screwThread = ScrewThread(20, 10)
 
 ![Image](bolt.md.2.png)
 
-Show the fit.
+[thread 20x10_0.stl](bolt.thread%2020x10_0.stl)
 
 ```JavaScript
 ScrewThread(10, 5)
   .and(NutThread(10, 5).and(Arc(15).cut(Arc(10)).ex(5)))
   .view()
-  .view({ op: section() });
+  .view(section());
 ```
 
 ![Image](bolt.md.3.png)

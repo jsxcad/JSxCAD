@@ -1,6 +1,13 @@
-import { boot, clearEmitted, getEmitted, resolvePending } from '@jsxcad/sys';
+import {
+  addOnEmitHandler,
+  boot,
+  clearEmitted,
+  removeOnEmitHandler,
+  resolvePending,
+} from '@jsxcad/sys';
 import { readFileSync, writeFileSync } from 'fs';
 
+import Base64ArrayBuffer from 'base64-arraybuffer';
 import api from '@jsxcad/api';
 import imageDataUri from 'image-data-uri';
 import pathModule from 'path';
@@ -9,15 +16,24 @@ import pngjs from 'pngjs';
 import { screenshot } from './screenshot.js';
 import { toHtml } from '@jsxcad/convert-notebook';
 
+const PIXEL_THRESHOLD = 2000;
+
 const ensureNewline = (line) => (line.endsWith('\n') ? line : `${line}\n`);
 
-const writeMarkdown = (path, notebook, imageUrlList, failedExpectations) => {
+const escapeMarkdownLink = (string) => string.replace(/ /g, '%20');
+
+const writeMarkdown = async (
+  modulePath,
+  notebook,
+  imageUrlList,
+  failedExpectations
+) => {
   const output = [];
   let imageCount = 0;
   let viewCount = 0;
   for (let nth = 0; nth < notebook.length; nth++) {
     const note = notebook[nth];
-    const { md, sourceText, view } = note;
+    const { download, md, sourceText, view } = note;
     if (md) {
       output.push(ensureNewline(notebook[nth].md.trim()));
     }
@@ -32,15 +48,44 @@ const writeMarkdown = (path, notebook, imageUrlList, failedExpectations) => {
     if (view) {
       const imageUrl = imageUrlList[viewCount++];
       if (typeof imageUrl === 'string' && imageUrl.startsWith('data:image/')) {
-        const imagePath = `${path}.md.${imageCount++}.png`;
+        const imagePath = `${modulePath}.md.${imageCount++}.png`;
         output.push(`![Image](${pathModule.basename(imagePath)})`);
         output.push('');
+      }
+    }
+    if (download) {
+      const { entries } = download;
+      for (let { base64Data, filename, data } of entries) {
+        if (!data && base64Data) {
+          data = new Uint8Array(Base64ArrayBuffer.decode(base64Data));
+        }
+        const observedPath = `${modulePath}.observed.${filename}`;
+        const expectedPath = `${modulePath}.${filename}`;
+        try {
+          const observed = new TextDecoder('utf8').decode(data);
+          const expected = readFileSync(expectedPath, 'utf8');
+          if (observed !== expected) {
+            failedExpectations.push(`cp "${observedPath}" "${expectedPath}"`);
+          }
+        } catch (error) {
+          if (error.code === 'ENOENT') {
+            failedExpectations.push(`cp "${observedPath}" "${expectedPath}"`);
+            failedExpectations.push(`git add "${expectedPath}"`);
+          }
+        }
+        output.push(
+          `[${filename}](${escapeMarkdownLink(
+            pathModule.basename(expectedPath)
+          )})`
+        );
+        output.push('');
+        writeFileSync(observedPath, data);
       }
     }
   }
 
   // Produce a path back to the root.
-  const roots = path.split('/');
+  const roots = modulePath.split('/');
   roots.pop();
   const root = roots.map((_) => '..').join('/');
 
@@ -48,19 +93,20 @@ const writeMarkdown = (path, notebook, imageUrlList, failedExpectations) => {
     .join('\n')
     .replace(
       /#JSxCAD@https:\/\/gitcdn.link\/cdn\/jsxcad\/JSxCAD\/master\/(.*).nb/g,
-      (_, path) => `${root}/${path}.md`
+      (_, modulePath) => `${root}/${modulePath}.md`
     );
 
-  const observedPath = `${path}.observed.md`;
-  const expectedPath = `${path}.md`;
+  const observedPath = `${modulePath}.observed.md`;
+  const expectedPath = `${modulePath}.md`;
   writeFileSync(observedPath, markdown);
   try {
     if (markdown !== readFileSync(expectedPath, 'utf8')) {
-      failedExpectations.push(`difference: cp ${observedPath} ${expectedPath}`);
+      failedExpectations.push(`cp "${observedPath}" "${expectedPath}"`);
     }
   } catch (error) {
     if (error.code === 'ENOENT') {
-      failedExpectations.push(`missing: cp ${observedPath} ${expectedPath}`);
+      failedExpectations.push(`cp "${observedPath}" "${expectedPath}"`);
+      failedExpectations.push(`git add "${expectedPath}"`);
     } else {
       throw error;
     }
@@ -73,13 +119,14 @@ export const updateNotebook = async (
 ) => {
   clearEmitted();
   await boot();
+  const notebook = [];
+  const onEmitHandler = addOnEmitHandler((notes) => notebook.push(...notes));
   try {
     // FIX: This may produce a non-deterministic ordering for now.
     const module = `${target}.nb`;
     const topLevel = new Map();
     await api.importModule(module, { clearUpdateEmits: false, topLevel });
     await resolvePending();
-    const notebook = getEmitted();
     const { html, encodedNotebook } = await toHtml(notebook, { module });
     writeFileSync(`${target}.html`, html);
     const { imageUrlList } = await screenshot(
@@ -104,9 +151,8 @@ export const updateNotebook = async (
       } catch (error) {
         if (error.code === 'ENOENT') {
           // We couldn't find a matching expectation.
-          failedExpectations.push(
-            `missing: cp ${observedPath} ${expectedPath}`
-          );
+          failedExpectations.push(`cp "${observedPath}" "${expectedPath}"`);
+          failedExpectations.push(`git add "${expectedPath}"`);
           continue;
         } else {
           throw error;
@@ -115,13 +161,11 @@ export const updateNotebook = async (
       const { width, height } = expectedPng;
       if (width !== observedPng.width || height !== observedPng.height) {
         // Can't diff when the dimensions don't match.
-        failedExpectations.push(
-          `size changed: cp ${observedPath} ${expectedPath}`
-        );
+        failedExpectations.push('# dimensions differ');
+        failedExpectations.push(`cp "${observedPath}" "${expectedPath}"`);
         continue;
       }
       const differencePng = new pngjs.PNG({ width, height });
-      const pixelThreshold = 1;
       const numFailedPixels = pixelmatch(
         expectedPng.data,
         observedPng.data,
@@ -136,17 +180,20 @@ export const updateNotebook = async (
             process.env.FORCE_COLOR === '0' ? [255, 255, 255] : [255, 0, 0],
         }
       );
-      if (numFailedPixels >= pixelThreshold) {
+      if (numFailedPixels >= PIXEL_THRESHOLD) {
         const differencePath = `${target}.md.${nth}.difference.png`;
         writeFileSync(differencePath, pngjs.PNG.sync.write(differencePng));
         // Note failures.
-        failedExpectations.push(`difference: display ${differencePath}`);
         failedExpectations.push(
-          `            cp ${observedPath} ${expectedPath}`
+          `# numFailedPixels ${numFailedPixels} > PIXEL_THRESHOLD ${PIXEL_THRESHOLD}`
         );
+        failedExpectations.push(`display "${differencePath}"`);
+        failedExpectations.push(`cp "${observedPath}" "${expectedPath}"`);
       }
     }
   } catch (error) {
     throw error;
+  } finally {
+    removeOnEmitHandler(onEmitHandler);
   }
 };

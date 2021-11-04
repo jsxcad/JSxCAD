@@ -37,17 +37,17 @@ test('Deep drop', (t) => {
               {
                 type: 'solid',
                 solid: [],
-                tags: ['compose/non-positive', 'void'],
+                tags: ['type:void', 'void'],
               },
               {
                 type: 'solid',
                 solid: [],
-                tags: ['compose/non-positive', 'void'],
+                tags: ['type:void', 'void'],
               },
               {
                 type: 'solid',
                 solid: [],
-                tags: ['compose/non-positive', 'void'],
+                tags: ['type:void', 'void'],
               },
             ],
           },

@@ -29,6 +29,8 @@ export { arrangePolygonsWithHoles } from './graph/arrangePolygonsWithHoles.js';
 export { assemble } from './tagged/assemble.js';
 export { bend } from './tagged/bend.js';
 export { close as closePath } from './path/close.js';
+export { computeCentroid } from './tagged/computeCentroid.js';
+export { computeNormal } from './tagged/computeNormal.js';
 export { concatenate as concatenatePath } from './path/concatenate.js';
 export { canonicalize } from './tagged/canonicalize.js';
 export { canonicalize as canonicalizePath } from './path/canonicalize.js';
@@ -44,6 +46,7 @@ export { eachPoint } from './tagged/eachPoint.js';
 export { empty } from './tagged/empty.js';
 export { extrude } from './tagged/extrude.js';
 export { extrudeToPlane } from './tagged/extrudeToPlane.js';
+export { faces } from './tagged/faces.js';
 export { flip } from './tagged/flip.js';
 export { flip as flipPath } from './path/flip.js';
 export { fresh } from './tagged/fresh.js';
@@ -65,6 +68,7 @@ export { getNonVoidPaths } from './tagged/getNonVoidPaths.js';
 export { getNonVoidFaceablePaths } from './tagged/getNonVoidFaceablePaths.js';
 export { getNonVoidPlans } from './tagged/getNonVoidPlans.js';
 export { getNonVoidPoints } from './tagged/getNonVoidPoints.js';
+export { getNonVoidSegments } from './tagged/getNonVoidSegments.js';
 export { getFaceablePaths } from './tagged/getFaceablePaths.js';
 export { getGraphs } from './tagged/getGraphs.js';
 export { getPaths } from './tagged/getPaths.js';
@@ -81,6 +85,22 @@ export { inset } from './tagged/inset.js';
 export { isClockwise as isClockwisePath } from './path/isClockwise.js';
 export { isCounterClockwise as isCounterClockwisePath } from './path/isCounterClockwise.js';
 export { isClosed as isClosedPath } from './path/isClosed.js';
+export {
+  isNotType,
+  isNotTypeVoid,
+  isNotTypeWire,
+  isType,
+  isTypeVoid,
+  isTypeWire,
+  hasNotType,
+  hasNotTypeVoid,
+  hasNotTypeWire,
+  hasType,
+  hasTypeVoid,
+  hasTypeWire,
+  typeVoid,
+  typeWire,
+} from './tagged/type.js';
 export { keep } from './tagged/keep.js';
 export { loft } from './tagged/loft.js';
 export { measureBoundingBox } from './tagged/measureBoundingBox.js';
@@ -120,6 +140,7 @@ export { taggedPolygons } from './tagged/taggedPolygons.js';
 export { taggedSegments } from './tagged/taggedSegments.js';
 export { taggedSketch } from './tagged/taggedSketch.js';
 export { taggedTriangles } from './tagged/taggedTriangles.js';
+export { taper } from './tagged/taper.js';
 export { test } from './tagged/test.js';
 export { translate as translatePath } from './path/ops.js';
 export { translate as translatePaths } from './paths/ops.js';
@@ -139,4 +160,5 @@ export { transform as transformPaths } from './paths/transform.js';
 export { twist } from './tagged/twist.js';
 export { union } from './tagged/union.js';
 export { update } from './tagged/update.js';
+export { withQuery } from './tagged/withQuery.js';
 export { write } from './tagged/write.js';

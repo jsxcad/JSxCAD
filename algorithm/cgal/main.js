@@ -1,3 +1,4 @@
+export { SurfaceMeshQuery } from './SurfaceMeshQuery.js';
 export {
   composeTransforms,
   fromApproximateToCgalTransform,
@@ -21,6 +22,8 @@ export {
   BOOLEAN_CLIP,
   booleansOfPolygonsWithHoles,
 } from './booleansOfPolygonsWithHoles.js';
+export { computeCentroidOfSurfaceMesh } from './computeCentroidOfSurfaceMesh.js';
+export { computeNormalOfSurfaceMesh } from './computeNormalOfSurfaceMesh.js';
 export { deserializeSurfaceMesh } from './deserializeSurfaceMesh.js';
 export { differenceOfSurfaceMeshes } from './differenceOfSurfaceMeshes.js';
 export { doesSelfIntersectOfSurfaceMesh } from './doesSelfIntersectOfSurfaceMesh.js';
@@ -58,6 +61,7 @@ export { separateSurfaceMesh } from './separateSurfaceMesh.js';
 export { remeshSurfaceMesh } from './remeshSurfaceMesh.js';
 export { serializeSurfaceMesh } from './serializeSurfaceMesh.js';
 export { subdivideSurfaceMesh } from './subdivideSurfaceMesh.js';
+export { taperSurfaceMesh } from './taperSurfaceMesh.js';
 export { transformSurfaceMesh } from './transformSurfaceMesh.js';
 export { twistSurfaceMesh } from './twistSurfaceMesh.js';
 export { wireframeSurfaceMesh } from './wireframeSurfaceMesh.js';

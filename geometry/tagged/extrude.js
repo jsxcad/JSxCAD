@@ -1,22 +1,35 @@
 import { extrude as extrudeGraph } from '../graph/extrude.js';
 import { fill } from './fill.js';
+import { fromPolygonsWithHoles as fromPolygonsWithHolesToGraph } from '../graph/fromPolygonsWithHoles.js';
 import { reify } from './reify.js';
 import { rewrite } from './visit.js';
 import { toTransformedGeometry } from './toTransformedGeometry.js';
 
-export const extrude = (geometry, height, depth) => {
+export const extrude = (geometry, height, depth, direction) => {
   const op = (geometry, descend) => {
     switch (geometry.type) {
       case 'graph':
-        return extrudeGraph(geometry, height, depth);
+        return extrudeGraph(geometry, height, depth, reify(direction));
       case 'triangles':
       case 'points':
         // Not implemented yet.
         return geometry;
+      case 'polygonsWithHoles':
+        return extrude(
+          fromPolygonsWithHolesToGraph(geometry),
+          height,
+          depth,
+          reify(direction)
+        );
       case 'paths':
-        return extrude(fill(geometry), height, depth);
+        return extrude(fill(geometry), height, depth, reify(direction));
       case 'plan':
-        return extrude(reify(geometry).content[0], height, depth);
+        return extrude(
+          reify(geometry).content[0],
+          height,
+          depth,
+          reify(direction)
+        );
       case 'item':
       case 'group': {
         return descend();

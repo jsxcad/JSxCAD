@@ -6,10 +6,6 @@ import { Gear } from '../gear/gear.js';
 import { Block, SocketBoard, StudBoard, block16x8x9_6 } from '../lego/lego.nb';
 ```
 
-```JavaScript
-const wireThickness = 0.8;
-```
-
 ## Gear Motor and Sheath
 
 ```JavaScript
@@ -37,6 +33,14 @@ Axle Profile
 ![Image](micro_gear_motor.md.2.png)
 
 ```JavaScript
+const rearHubProfile = Arc(4.8).md('Rear Hub Profile').gridView();
+```
+
+Rear Hub Profile
+
+![Image](micro_gear_motor.md.3.png)
+
+```JavaScript
 const axleFlatProfile = axleProfile
   .clip(Box(3.2).x(0.5))
   .md('Flat Axle Profile')
@@ -45,15 +49,11 @@ const axleFlatProfile = axleProfile
 
 Flat Axle Profile
 
-![Image](micro_gear_motor.md.3.png)
+![Image](micro_gear_motor.md.4.png)
 
 ```JavaScript
-const rearHubProfile = Arc(4.8).md('Rear Hub Profile').gridView();
+const wireThickness = 0.8;
 ```
-
-Rear Hub Profile
-
-![Image](micro_gear_motor.md.4.png)
 
 ```JavaScript
 const motor = Group(
@@ -111,6 +111,8 @@ Sheath
 
 ![Image](micro_gear_motor.md.9.png)
 
+[sheath1_0.stl](micro_gear_motor.sheath1_0.stl)
+
 ```JavaScript
 const gear = Gear(20)
   .cut(axleFlatProfile)
@@ -126,6 +128,8 @@ Gear
 
 ![Image](micro_gear_motor.md.11.png)
 
+[gear2_0.stl](micro_gear_motor.gear2_0.stl)
+
 ```JavaScript
 const cap = Group(capProfile.ex(-2, -0.0), sheath).md('Cap').stl('cap');
 ```
@@ -133,6 +137,8 @@ const cap = Group(capProfile.ex(-2, -0.0), sheath).md('Cap').stl('cap');
 Cap
 
 ![Image](micro_gear_motor.md.12.png)
+
+[cap_0.stl](micro_gear_motor.cap_0.stl)
 
 ```JavaScript
 const gearCutout = Gear(20)
@@ -159,6 +165,8 @@ const motorDriverHolder = Block(4, 4, 3.2 * 5)
 Motor Driver Holder
 
 ![Image](micro_gear_motor.md.14.png)
+
+[motor_driver_holder_3_0.stl](micro_gear_motor.motor_driver_holder_3_0.stl)
 
 ## Wemos Bracket
 
@@ -188,6 +196,8 @@ const wemosDriverHolder = Block(4, 5, 3.2 * 11)
 Wemos Driver Holder
 
 ![Image](micro_gear_motor.md.15.png)
+
+[wemos_holder_2_0.stl](micro_gear_motor.wemos_holder_2_0.stl)
 
 ## Gear Motor Bracket
 

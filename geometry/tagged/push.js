@@ -1,7 +1,6 @@
 import { push as pushGraph } from '../graph/push.js';
 import { reify } from './reify.js';
 import { rewrite } from './visit.js';
-import { taggedGraph } from './taggedGraph.js';
 import { toTransformedGeometry } from './toTransformedGeometry.js';
 
 export const push = (
@@ -9,14 +8,9 @@ export const push = (
   { force, minimumDistance, maximumDistance } = {}
 ) => {
   const op = (geometry, descend) => {
-    const { tags } = geometry;
     switch (geometry.type) {
-      case 'graph': {
-        return taggedGraph(
-          { tags },
-          pushGraph(geometry.graph, force, minimumDistance, maximumDistance)
-        );
-      }
+      case 'graph':
+        return pushGraph(geometry, force, minimumDistance, maximumDistance);
       case 'triangles':
       case 'paths':
       case 'points':

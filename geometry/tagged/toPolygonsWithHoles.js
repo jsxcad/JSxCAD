@@ -1,5 +1,6 @@
 import { isVoid } from './isNotVoid.js';
-import { toDisjointGeometry } from './toDisjointGeometry.js';
+import { taggedPolygonsWithHoles } from './taggedPolygonsWithHoles.js';
+import { toConcreteGeometry } from './toConcreteGeometry.js';
 import { toPolygonsWithHoles as toPolygonsWithHolesFromGraph } from '../graph/toPolygonsWithHoles.js';
 import { visit } from './visit.js';
 
@@ -10,6 +11,7 @@ export const toPolygonsWithHoles = (geometry) => {
     if (isVoid(geometry)) {
       return;
     }
+    const { tags } = geometry;
     switch (geometry.type) {
       case 'graph': {
         for (const {
@@ -17,18 +19,17 @@ export const toPolygonsWithHoles = (geometry) => {
           exactPlane,
           polygonsWithHoles,
         } of toPolygonsWithHolesFromGraph(geometry)) {
-          // FIX: Are we going to make polygonsWithHoles proper geometry?
-          output.push({
-            tags: geometry.tags,
-            type: 'polygonsWithHoles',
-            plane,
-            exactPlane,
-            polygonsWithHoles,
-          });
+          output.push(
+            taggedPolygonsWithHoles(
+              { tags, plane, exactPlane },
+              polygonsWithHoles
+            )
+          );
         }
         break;
       }
       // FIX: Support 'triangles'?
+      case 'segments':
       case 'points':
       case 'paths':
       case 'sketch':
@@ -44,7 +45,7 @@ export const toPolygonsWithHoles = (geometry) => {
     }
   };
 
-  visit(toDisjointGeometry(geometry), op);
+  visit(toConcreteGeometry(geometry), op);
 
   return output;
 };

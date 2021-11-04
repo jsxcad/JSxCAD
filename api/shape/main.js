@@ -9,12 +9,16 @@
 
 import Shape from './Shape.js';
 
+// We need Plan.js to add Shape.registerReifier before later imports call it.
+// eslint-disable-next-line sort-imports
+import './Plan.js';
+
 export {
+  GrblConstantLaser,
+  GrblDynamicLaser,
+  GrblPlotter,
+  GrblSpindle,
   define,
-  defGrblConstantLaser,
-  defGrblDynamicLaser,
-  defGrblPlotter,
-  defGrblSpindle,
   defRgbColor,
   defThreejsMaterial,
   defTool,
@@ -98,6 +102,7 @@ export const xz = Shape.fromGeometry({
   content: [
     {
       type: 'group',
+      tags: [],
       content: [],
       matrix: [
         1,
@@ -106,12 +111,12 @@ export const xz = Shape.fromGeometry({
         0,
         0,
         0,
-        1,
-        0,
-        0,
         -1,
         0,
         0,
+        1,
+        0,
+        0,
         0,
         0,
         0,
@@ -122,10 +127,10 @@ export const xz = Shape.fromGeometry({
         '0',
         '0',
         '0',
-        '-1',
-        '0',
-        '0',
         '1',
+        '0',
+        '0',
+        '-1',
         '0',
         '0',
         '1',
@@ -139,12 +144,12 @@ export const xz = Shape.fromGeometry({
     0,
     0,
     0,
-    1,
-    0,
-    0,
     -1,
     0,
     0,
+    1,
+    0,
+    0,
     0,
     0,
     0,
@@ -155,10 +160,10 @@ export const xz = Shape.fromGeometry({
     '0',
     '0',
     '0',
-    '-1',
-    '0',
-    '0',
     '1',
+    '0',
+    '0',
+    '-1',
     '0',
     '0',
     '1',
@@ -170,19 +175,20 @@ export const yz = Shape.fromGeometry({
   content: [
     {
       type: 'group',
+      tags: [],
       content: [],
       matrix: [
-        0,
-        0,
-        1,
-        0,
-        0,
-        1,
         0,
         0,
         -1,
         0,
         0,
+        1,
+        0,
+        0,
+        1,
+        0,
+        0,
         0,
         0,
         0,
@@ -190,13 +196,13 @@ export const yz = Shape.fromGeometry({
         1,
         '0',
         '0',
+        '1',
+        '0',
+        '0',
+        '1',
+        '0',
+        '0',
         '-1',
-        '0',
-        '0',
-        '1',
-        '0',
-        '0',
-        '1',
         '0',
         '0',
         '0',
@@ -207,15 +213,15 @@ export const yz = Shape.fromGeometry({
   matrix: [
     0,
     0,
-    1,
-    0,
-    0,
-    1,
-    0,
-    0,
     -1,
     0,
     0,
+    1,
+    0,
+    0,
+    1,
+    0,
+    0,
     0,
     0,
     0,
@@ -223,13 +229,13 @@ export const yz = Shape.fromGeometry({
     1,
     '0',
     '0',
+    '1',
+    '0',
+    '0',
+    '1',
+    '0',
+    '0',
     '-1',
-    '0',
-    '0',
-    '1',
-    '0',
-    '0',
-    '1',
     '0',
     '0',
     '0',
@@ -242,6 +248,7 @@ export { md } from './md.js';
 export { elapsed, emit, info, read, write } from '@jsxcad/sys';
 
 export { Shape } from './Shape.js';
+export { abstract } from './abstract.js';
 export { add } from './add.js';
 export { and } from './and.js';
 export { addTo } from './addTo.js';
@@ -251,6 +258,8 @@ export { asPart } from './asPart.js';
 export { at } from './at.js';
 export { bend } from './bend.js';
 export { billOfMaterials } from './billOfMaterials.js';
+export { cast } from './cast.js';
+export { center } from './center.js';
 export { clip } from './clip.js';
 export { clipFrom } from './clipFrom.js';
 export { color } from './color.js';
@@ -262,13 +271,17 @@ export { cutOut } from './cutOut.js';
 export { drop } from './drop.js';
 export { ensurePages } from './Page.js';
 export { each } from './each.js';
+export { eachPoint } from './eachPoint.js';
 export { ex, extrude } from './extrude.js';
+export { extrudeAlong } from './extrudeAlong.js';
 export { extrudeToPlane } from './extrudeToPlane.js';
+export { faces } from './faces.js';
 export { fill, withFill } from './fill.js';
 export { fit } from './fit.js';
 export { fitTo } from './fitTo.js';
 export { fuse } from './fuse.js';
 export { g, get } from './get.js';
+export { gn, getNot } from './getNot.js';
 export { grow } from './grow.js';
 export { inline } from './inline.js';
 export { inset } from './inset.js';
@@ -282,7 +295,9 @@ export { material } from './material.js';
 export { minkowskiDifference } from './minkowskiDifference.js';
 export { minkowskiShell } from './minkowskiShell.js';
 export { minkowskiSum } from './minkowskiSum.js';
-export { move } from './move.js';
+export { move, xyz } from './move.js';
+export { moveTo } from './moveTo.js';
+export { normal } from './normal.js';
 export { noVoid } from './noVoid.js';
 export { notColor } from './notColor.js';
 export { n, nth } from './nth.js';
@@ -293,7 +308,6 @@ export { outline } from './outline.js';
 export { orient } from './orient.js';
 export { pack } from './pack.js';
 export { play } from './play.js';
-export { projectToPlane } from './projectToPlane.js';
 export { push } from './push.js';
 export { remesh } from './remesh.js';
 export { rotate } from './rotate.js';
@@ -310,13 +324,18 @@ export { size } from './size.js';
 export { sketch } from './sketch.js';
 export { tag } from './tag.js';
 export { tags } from './tags.js';
+export { taper } from './taper.js';
 export { test } from './test.js';
 export { tint } from './tint.js';
+export { to } from './to.js';
 export { tool } from './tool.js';
+export { top } from './top.js';
 export { twist } from './twist.js';
 export { untag } from './untag.js';
 export { view } from './view.js';
 export { voidFn } from './void.js';
+export { voidIn } from './voidIn.js';
+export { voxels } from './voxels.js';
 export { weld } from './Weld.js';
 export { withFn } from './with.js';
 export { withInset } from './inset.js';
@@ -330,7 +349,6 @@ export { Arc } from './Arc.js';
 export { Assembly } from './Assembly.js';
 export { Box } from './Box.js';
 export { ChainedHull } from './ChainedHull.js';
-export { Cone } from './Cone.js';
 export { Empty } from './Empty.js';
 export { Group } from './Group.js';
 export { Hershey } from './Hershey.js';
@@ -349,6 +367,8 @@ export { Point } from './Point.js';
 export { Points } from './Points.js';
 export { Polygon } from './Polygon.js';
 export { Polyhedron } from './Polyhedron.js';
+export { Segment } from './Segment.js';
+export { Segments } from './Segments.js';
 export { Septagon } from './Septagon.js';
 export { Spiral } from './Spiral.js';
 export { Tetragon } from './Tetragon.js';

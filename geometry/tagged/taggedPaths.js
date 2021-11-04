@@ -1,3 +1,6 @@
-export const taggedPaths = ({ tags }, paths) => {
-  return { type: 'paths', tags, paths };
-};
+export const taggedPaths = ({ tags = [], matrix }, paths) => ({
+  type: 'paths',
+  tags,
+  matrix,
+  paths,
+});

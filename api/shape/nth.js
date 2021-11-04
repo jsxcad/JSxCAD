@@ -1,7 +1,12 @@
+import Group from './Group.js';
 import Shape from './Shape.js';
-import { each } from './each.js';
 
-export const nth = (n) => (shape) => each()(shape)[n];
+export const nth =
+  (...ns) =>
+  (shape) => {
+    const candidates = shape.each();
+    return Group(...ns.map((n) => candidates[n]));
+  };
 
 export const n = nth;
 

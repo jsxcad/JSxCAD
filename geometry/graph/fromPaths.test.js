@@ -37,6 +37,7 @@ test('fromPaths', (t) => {
   const geometry = fromPaths({}, paths);
   t.deepEqual(JSON.parse(JSON.stringify(realizeGraph(geometry))), {
     type: 'graph',
+    tags: [],
     graph: {
       isClosed: false,
       isLazy: false,

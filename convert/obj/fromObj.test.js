@@ -47,6 +47,7 @@ test('Cube', async (t) => {
   const geometry = await fromObj(new TextEncoder('utf8').encode(cube));
   t.deepEqual(JSON.parse(JSON.stringify(realize(geometry))), {
     type: 'graph',
+    tags: [],
     graph: {
       isClosed: true,
       isLazy: false,
@@ -167,6 +168,7 @@ test('Diamond', async (t) => {
   const geometry = await fromObj(new TextEncoder('utf8').encode(diamond));
   t.deepEqual(JSON.parse(JSON.stringify(realize(geometry))), {
     type: 'graph',
+    tags: [],
     graph: {
       isClosed: false,
       isLazy: false,

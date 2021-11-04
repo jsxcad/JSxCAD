@@ -13,6 +13,7 @@ export const reify = (geometry) => {
       case 'points':
       case 'segments':
       case 'paths':
+      case 'polygonsWithHoles':
         // No plan to realize.
         return geometry;
       case 'plan': {

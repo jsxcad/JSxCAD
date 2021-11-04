@@ -24,6 +24,21 @@ Arc(10).ex(1, 2, -1, -2).view();
 
 md`
 ---
+### Cast
+3D shapes can be 'cast' as shadows to create 2D shapes.
+
+A plane (default [0, 0, 1, 0]) to cast upon and a direction (default [0, 0, 1, 0]) can be provided.
+`;
+
+Arc(4)
+  .ex(10)
+  .rx(1 / 8)
+  .material('glass')
+  .and(cast())
+  .view();
+
+md`
+---
 ### Item
 Geometry can be formed into an 'item'.
 
@@ -44,7 +59,7 @@ const aBox = Box(10, 10, 10).as('box');
 
 const aDesign = aBox.fit(aBolt.z(10)).as('design').view();
 
-aDesign.get('design').get('*').pack().view().md(`We need to get into the design in order to get at 'box' and 'bolt'`);
+aDesign.get('*').pack().view().md(`We need to get into the design in order to get at 'box' and 'bolt'`);
 
 md`
 ---
@@ -107,20 +122,13 @@ shape.remesh(4, 2) first breaks segments longer than 4 and then breaks segments 
 At each step the shape is retriangulated to preserve manifold structure.
 `;
 
-const aRectangle = Box(5, 5, 15).view();
-
-aRectangle.remesh(4, 2).view({ wireframe: true });
-
 md`Once a shape is remeshed it can be twisted or bent about the origin.`;
 
-aRectangle.remesh(4, 1).twist(10).view({ wireframe: true });
-
-aRectangle
-  .ry(1 / 4)
-  .remesh(4, 1)
-  .y(10)
-  .bend(4)
-  .view({ wireframe: true });
+Box(157, 20).ex(1).y(25)
+  .remesh(10, 8, 4)
+  .op(s => s.bend(25).and(s.outline()))
+  .gridView()
+  .md('A rectangle bent into a ring with a central radius of 25');
 
 md`
 ---
@@ -129,6 +137,10 @@ A shape can be rotated about the origin using the .rx(), .ry(), and .rz() comman
 These take the number of turns as an argument .rz(1/8) would rotate the shape by 1/8th of a rotation.
 Multiple turns can be provided, which will produce one result per turn.
 `;
+
+const aRectangle = Box(5, 5, 15).view();
+
+aRectangle.remesh(4, 2).view(undefined, { wireframe: true });
 
 aRectangle.rz(1 / 8).view();
 
@@ -199,3 +211,49 @@ const taggedAssembly = Assembly(
 taggedAssembly.keep('A').noVoid().view();
 
 taggedAssembly.drop('B').view();
+
+md`
+---
+#### Selection
+We can select parts of geometry based on tags using get(selector), getNot(selector), and nth(number).
+Aliases g, ng, and n are also available.
+
+Selector is in the form of 'namespace:value', with namespace defaulting to 'item'.
+
+value may also be the wildcard *.
+
+Selection does not traverse through item, except for the input shape.
+
+This means that s.get('a').get('b') will find b inside a, but otherwise b would not be found.
+`;
+
+Group(
+  Box(10).as('box').color('yellow').material('copper'),
+  Arc(10).as('arc').color('cyan').material('brick')
+)
+  .view((s) => s.get('*').pack())
+  .md('All items.')
+  .view(get('color:green'))
+  .md('All green things.')
+  .view(getNot('material:copper'))
+  .md('All non-copper things.');
+
+md`
+---
+### Abstract View
+We can generate an abstract view of the geometry to be displayed as a graph.
+`;
+
+Box(4).as('box').and(Arc(5).ex(10).as('bar')).abstract();
+
+md`
+---
+### Voxels
+We can convert a volume into voxels at a given resolution.
+`;
+
+Box(11)
+  .ex(10)
+  .rx(-1 / 8)
+  .op((s) => s.voxels(1).color('green').and(s.outline().sketch().color('red')))
+  .view().md('Produce a voxel representation with a 1mm resolution');

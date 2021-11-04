@@ -5,7 +5,7 @@ const arc = Arc(5)
 
 const assembly = Assembly(Box(10), Arc(8), Triangle(5))
   .pack()
-  .gridView({ size: 801, triangles: false, wireframe: false })
+  .gridView(undefined, { size: 801, triangles: false, wireframe: false })
   .md(`Assembly(Box(10), Arc(8), Triangle(5))`);
 
 const box = Box(5, 7, 8).view().md(`Box(5, 7, 8)`);
@@ -13,8 +13,6 @@ const box = Box(5, 7, 8).view().md(`Box(5, 7, 8)`);
 const chainedHull = ChainedHull(Point(), Box(5).z(5), Arc(3).z(8))
   .view()
   .md(`ChainedHull(Point(), Box(5).z(5), Arc(3).z(8))`);
-
-const cone = Cone(6, 3).view().md(`Cone(6, 3)`);
 
 const empty = Empty().view().md(`Empty()`);
 
@@ -55,12 +53,10 @@ const torusFn = ([x, y, z]) => {
   );
 };
 
-/*
 // Determine why Implicit seems non-deterministic.
 const implicit = Implicit(torusFn, { radius: 2 })
   .view()
   .md('Implicit(torusFn, { radius: 2 }');
-*/
 
 const line = Line(5, -1).rz(45).gridView().md(`Line(5, -1)`);
 
@@ -127,3 +123,5 @@ const weld = Weld(Arc(4).x(-1), Box(5).x(1))
   .fill()
   .gridView()
   .md(`Weld(Arc(5).x(-1), Box(5).x(1)).fill()`);
+
+const toEx = Box(1).color('red').as('box').x(5).y(y).fit(Arc(10)).to(g('box')).gridView().md('Reposition to the local frame of reference of an item');

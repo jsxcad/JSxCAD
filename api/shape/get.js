@@ -9,18 +9,28 @@ export const get =
     const isMatch = oneOfTagMatcher(tags, 'item');
     const picks = [];
     const walk = (geometry, descend) => {
-      const { tags = [] } = geometry;
+      const { tags, type } = geometry;
+      if (type === 'group') {
+        return descend();
+      }
       for (const tag of tags) {
         if (isMatch(tag)) {
           picks.push(Shape.fromGeometry(geometry));
           break;
         }
       }
-      if (geometry.type !== 'item') {
+      if (type !== 'item') {
         return descend();
       }
     };
-    visit(shape.toGeometry(), walk);
+    const geometry = shape.toGeometry();
+    if (geometry.type === 'item') {
+      // FIX: Can we make this less magical?
+      // This allows constructions like s.get('a').get('b')
+      visit(geometry.content[0], walk);
+    } else {
+      visit(geometry, walk);
+    }
     return Group(...picks);
   };
 

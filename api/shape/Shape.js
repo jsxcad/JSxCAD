@@ -2,15 +2,14 @@ import {
   assemble,
   closePath,
   concatenatePath,
-  eachPoint,
   flip,
   fromPolygonsToGraph,
   openPath,
-  registerReifier,
   rewriteTags,
   taggedGraph,
   taggedPaths,
   taggedPoints,
+  taggedSegments,
   toConcreteGeometry as toConcreteTaggedGeometry,
   toDisplayGeometry,
   toPoints,
@@ -52,10 +51,6 @@ export class Shape {
     }
     this.geometry = geometry;
     this.context = context;
-  }
-
-  eachPoint(operation) {
-    eachPoint(operation, this.toConcreteGeometry());
   }
 
   flip() {
@@ -149,7 +144,7 @@ export const registerShapeMethod = (name, op) => {
 
 export const shapeMethod = (build) => {
   return function (...args) {
-    return this.at(this, build(...args));
+    return build(...args).at(this);
   };
 };
 
@@ -162,6 +157,8 @@ Shape.fromGraph = (graph, context) =>
   new Shape(taggedGraph({}, graph), context);
 Shape.fromOpenPath = (path, context) =>
   fromGeometry(taggedPaths({}, [openPath(path)]), context);
+Shape.fromSegments = (...segments) =>
+  fromGeometry(taggedSegments({}, segments));
 Shape.fromPath = (path, context) =>
   fromGeometry(taggedPaths({}, [path]), context);
 Shape.fromPaths = (paths, context) =>
@@ -174,11 +171,8 @@ Shape.fromPolygons = (polygons, context) =>
   fromGeometry(fromPolygonsToGraph({}, polygons), context);
 // Deprecated.
 Shape.method = registerShapeMethod;
-// Deprecated
-Shape.reifier = (name, op) => registerReifier(name, op);
-// Let's make the registration functions more explicit.
 Shape.registerMethod = registerShapeMethod;
-Shape.registerReifier = (name, op) => registerReifier(name, op);
+
 Shape.toShape = (to, from) => {
   if (to instanceof Function) {
     to = to(from);
@@ -188,6 +182,13 @@ Shape.toShape = (to, from) => {
   } else {
     throw Error('Expected Function or Shape');
   }
+};
+
+Shape.toValue = (to, from) => {
+  if (to instanceof Function) {
+    to = to(from);
+  }
+  return to;
 };
 
 export const fromGeometry = Shape.fromGeometry;

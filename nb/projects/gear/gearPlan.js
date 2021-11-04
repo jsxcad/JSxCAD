@@ -69,5 +69,5 @@ Shape.registerReifier('Gear', (plan) => {
     profile = profile.concat(toothProfile.rotateZ(-i / numberOfTeeth));
   }
 
-  return profile.close().toGeometry();
+  return profile.close();
 });

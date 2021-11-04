@@ -1,27 +1,4 @@
 ```JavaScript
-const torusFn = ([x, y, z]) => {
-  const x2 = x * x,
-    y2 = y * y,
-    z2 = z * z;
-  const x4 = x2 * x2,
-    y4 = y2 * y2,
-    z4 = z2 * z2;
-  return (
-    x4 +
-    y4 +
-    z4 +
-    2 * x2 * y2 +
-    2 * x2 * z2 +
-    2 * y2 * z2 -
-    5 * x2 +
-    4 * y2 -
-    5 * z2 +
-    4
-  );
-};
-```
-
-```JavaScript
 const arc = Arc(5)
   .hasAngle(45 / 360, 270 / 360)
   .gridView()
@@ -35,7 +12,7 @@ Arc(5).angle(45/360, 270/360)
 ```JavaScript
 const assembly = Assembly(Box(10), Arc(8), Triangle(5))
   .pack()
-  .gridView({ size: 801, triangles: false, wireframe: false })
+  .gridView(undefined, { size: 801, triangles: false, wireframe: false })
   .md(`Assembly(Box(10), Arc(8), Triangle(5))`);
 ```
 
@@ -62,14 +39,6 @@ const chainedHull = ChainedHull(Point(), Box(5).z(5), Arc(3).z(8))
 ChainedHull(Point(), Box(5).z(5), Arc(3).z(8))
 
 ```JavaScript
-const cone = Cone(6, 3).view().md(`Cone(6, 3)`);
-```
-
-![Image](shapes.md.4.png)
-
-Cone(6, 3)
-
-```JavaScript
 const empty = Empty().view().md(`Empty()`);
 ```
 
@@ -82,7 +51,7 @@ const group = Group(Box(10), Arc(8), Triangle(5))
   .md(`Group(Box(10), Arc(8), Triangle(5))`);
 ```
 
-![Image](shapes.md.5.png)
+![Image](shapes.md.4.png)
 
 Group(Box(10), Arc(8), Triangle(5))
 
@@ -93,7 +62,7 @@ const hershey = Hershey('Hershey', 10)
   .md(`Hershey(10)('Hershey').align('xy')`);
 ```
 
-![Image](shapes.md.6.png)
+![Image](shapes.md.5.png)
 
 Hershey(10)('Hershey').align('xy')
 
@@ -101,7 +70,7 @@ Hershey(10)('Hershey').align('xy')
 const hexagon = Hexagon(10).gridView().md(`Hexagon(10)`);
 ```
 
-![Image](shapes.md.7.png)
+![Image](shapes.md.6.png)
 
 Hexagon(10)
 
@@ -109,7 +78,7 @@ Hexagon(10)
 const hull = Hull(Arc(5), Box(5).z(5)).view().md(`Hull(Arc(5), Box(5).z(5))`);
 ```
 
-![Image](shapes.md.8.png)
+![Image](shapes.md.7.png)
 
 Hull(Arc(5), Box(5).z(5))
 
@@ -117,17 +86,50 @@ Hull(Arc(5), Box(5).z(5))
 const icosahedron = Icosahedron(5).view().md(`Icosahedron(5)`);
 ```
 
-![Image](shapes.md.9.png)
+![Image](shapes.md.8.png)
 
 Icosahedron(5)
+
+```JavaScript
+const torusFn = ([x, y, z]) => {
+  const x2 = x * x,
+    y2 = y * y,
+    z2 = z * z;
+  const x4 = x2 * x2,
+    y4 = y2 * y2,
+    z4 = z2 * z2;
+  return (
+    x4 +
+    y4 +
+    z4 +
+    2 * x2 * y2 +
+    2 * x2 * z2 +
+    2 * y2 * z2 -
+    5 * x2 +
+    4 * y2 -
+    5 * z2 +
+    4
+  );
+};
+```
 
 ```JavaScript
 const line = Line(5, -1).rz(45).gridView().md(`Line(5, -1)`);
 ```
 
-![Image](shapes.md.10.png)
+![Image](shapes.md.9.png)
 
 Line(5, -1)
+
+```JavaScript
+const implicit = Implicit(torusFn, { radius: 2 })
+  .view()
+  .md('Implicit(torusFn, { radius: 2 }');
+```
+
+![Image](shapes.md.10.png)
+
+Implicit(torusFn, { radius: 2 }
 
 ```JavaScript
 const octagon = Octagon(5).gridView().md(`Octagon(5)`);
@@ -276,3 +278,11 @@ const weld = Weld(Arc(4).x(-1), Box(5).x(1))
 ```
 
 Weld(Arc(5).x(-1), Box(5).x(1)).fill()
+
+```JavaScript
+const toEx = Box(1).color('red').as('box').x(5).y(y).fit(Arc(10)).to(g('box')).gridView().md('Reposition to the local frame of reference of an item');
+```
+
+![Image](shapes.md.24.png)
+
+Reposition to the local frame of reference of an item

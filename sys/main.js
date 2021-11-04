@@ -11,17 +11,18 @@ export { ask, setHandleAskUser } from './ask.js';
 export { boot, onBoot } from './boot.js';
 export {
   addOnEmitHandler,
+  beginEmitGroup,
   clearEmitted,
   elapsed,
   emit,
-  getEmitted,
+  finishEmitGroup,
+  flushEmitGroup,
   getSourceLocation,
   info,
-  popSourceLocation,
-  pushSourceLocation,
   removeOnEmitHandler,
+  restoreEmitGroup,
+  saveEmitGroup,
 } from './emit.js';
-export { getDefinitions } from './getDefinitions.js';
 export { getFilesystem, qualifyPath, setupFilesystem } from './filesystem.js';
 export { hash } from './hash.js';
 export { isBrowser, isNode, isWebWorker } from './browserOrNode.js';

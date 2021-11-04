@@ -1,61 +1,52 @@
-import {
-  getAt,
-  getFrom,
-  getMatrix,
-  getScale,
-  getSides,
-  getTo,
-} from './Plan.js';
-
-import { registerReifier, taggedPlan } from '@jsxcad/geometry';
+import { getAt, getFrom, getScale, getSides, getTo } from './Plan.js';
 
 import Arc from './Arc.js';
 import Shape from './Shape.js';
 import { negate } from '@jsxcad/math-vec3';
+import { taggedPlan } from '@jsxcad/geometry';
 
 // Approximates a UV sphere.
-const extrudeSphere = (shape, height = 1, { sides = 20 } = {}) => {
-  const lofts = [];
+const extrudeSphere =
+  (height = 1, { sides = 20 } = {}) =>
+  (shape) => {
+    const lofts = [];
 
-  const getEffectiveSlice = (slice) => {
-    if (slice === 0) {
-      return 0.5;
-    } else if (slice === latitudinalResolution) {
-      return latitudinalResolution - 0.5;
-    } else {
-      return slice;
+    const getEffectiveSlice = (slice) => {
+      if (slice === 0) {
+        return 0.5;
+      } else if (slice === latitudinalResolution) {
+        return latitudinalResolution - 0.5;
+      } else {
+        return slice;
+      }
+    };
+
+    const latitudinalResolution = sides;
+
+    for (let slice = 0; slice <= latitudinalResolution; slice++) {
+      const angle =
+        (Math.PI * 1.0 * getEffectiveSlice(slice)) / latitudinalResolution;
+      const z = Math.cos(angle);
+      const radius = Math.sin(angle);
+      lofts.push((s) => s.scale(radius, radius, 1).z(z * height));
     }
+    return shape.loft(...lofts.reverse());
   };
-
-  const latitudinalResolution = sides;
-
-  for (let slice = 0; slice <= latitudinalResolution; slice++) {
-    const angle =
-      (Math.PI * 1.0 * getEffectiveSlice(slice)) / latitudinalResolution;
-    const z = Math.cos(angle);
-    const radius = Math.sin(angle);
-    lofts.push((s) => s.scale(radius, radius, 1).z(z * height));
-  }
-  return shape.loft(...lofts.reverse());
-};
 
 Shape.registerMethod('extrudeSphere', extrudeSphere);
 Shape.registerMethod('sx', extrudeSphere);
 
-registerReifier('Orb', (geometry) => {
+Shape.registerReifier('Orb', (geometry) => {
   const [scale, middle] = getScale(geometry);
   const sides = getSides(geometry, 16);
-  return extrudeSphere(Arc(2).hasSides(sides * 2), 1, { sides: 2 + sides })
+  return extrudeSphere(1, { sides: 2 + sides })(Arc(2).hasSides(sides * 2))
     .scale(...scale)
     .move(...middle)
     .orient({
       center: negate(getAt(geometry)),
       from: getFrom(geometry),
       at: getTo(geometry),
-    })
-    .transform(getMatrix(geometry))
-    .setTags(geometry.tags)
-    .toGeometry();
+    });
 });
 
 export const Orb = (x = 1, y = x, z = x) =>

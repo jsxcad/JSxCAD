@@ -60,30 +60,6 @@ export const Block = (
 ```
 
 ```JavaScript
-export const AxleProfile = () => {
-  const length = 4.8 + 0.1;
-  const width = 1.8 + 0.1;
-  const diameter = 5 + 0.1;
-  const line = Line(length / 2, length / -2);
-  const bar = Weld(
-    line.y(width / 2),
-    line.y(width / -2),
-    Arc(diameter)
-      .hasAngle(1 / 4)
-      .rotate(50),
-    Arc(diameter)
-      .hasAngle(1 / 4)
-      .rotate(50 + 180)
-  ).fill();
-  return bar.add(bar.rotate(90));
-};
-```
-
-```JavaScript
-export const AxleJoiner = (length) => Arc(8).cut(axleProfile).ex(length);
-```
-
-```JavaScript
 export const socketBoard16x16x2 = SocketBoard(2, 2, 2)
   .as('SocketBoard 16x16x2')
   .md('SocketBoard 16x16x2')
@@ -198,25 +174,37 @@ export const block32x8x9_6 = Block(4, 1, 3.2 * 3)
 
 ![Image](lego.md.12.png)
 
+[block32x8x9_6e_0.stl](lego.block32x8x9_6e_0.stl)
+
+```JavaScript
+export const AxleProfile = () => {
+  const length = 4.8 + 0.1;
+  const width = 1.8 + 0.1;
+  const diameter = 5 + 0.1;
+  const line = Line(length / 2, length / -2);
+  const bar = Weld(
+    line.y(width / 2),
+    line.y(width / -2),
+    Arc(diameter)
+      .hasAngle(1 / 4)
+      .rotate(50),
+    Arc(diameter)
+      .hasAngle(1 / 4)
+      .rotate(50 + 180)
+  ).fill();
+  return bar.add(bar.rotate(90));
+};
+```
+
+```JavaScript
+const box = Box(8, 3.2 * 4).y(3.2 * 2);
+```
+
 ```JavaScript
 export const axleProfile = AxleProfile().md('Axle Profile').topView();
 ```
 
 Axle Profile
-
-```JavaScript
-export const axleJoiner16 = AxleJoiner(16)
-  .md('Axle Joiner 16mm')
-  .stl('AxleJoiner16');
-```
-
-Axle Joiner 16mm
-
-![Image](lego.md.13.png)
-
-```JavaScript
-const box = Box(8, 3.2 * 4).y(3.2 * 2);
-```
 
 ```JavaScript
 const technic = Weld(box, Arc(4.8 + 0.2).y(5.6))
@@ -226,23 +214,53 @@ const technic = Weld(box, Arc(4.8 + 0.2).y(5.6))
   .stl('technic');
 ```
 
+![Image](lego.md.13.png)
+
+[technic_0.stl](lego.technic_0.stl)
+
+```JavaScript
+export const AxleJoiner = (length) => Arc(8).cut(axleProfile).ex(length);
+```
+
+```JavaScript
+const technic_1x6 = Group(...seq((n) => technic.x(n), { upto: 48, by: 8 }))
+  .align()
+  .view();
+```
+
 ![Image](lego.md.14.png)
 
 ```JavaScript
-const technicConnector = xz
-  .Arc(4.8)
+export const axleJoiner16 = AxleJoiner(16)
+  .md('Axle Joiner 16mm')
+  .stl('AxleJoiner16');
+```
+
+Axle Joiner 16mm
+
+![Image](lego.md.15.png)
+
+[AxleJoiner16_0.stl](lego.AxleJoiner16_0.stl)
+
+```JavaScript
+const technicConnector = Arc(4.8)
   .ex(8, -8)
-  .add(xz.Arc(6.2).ex(0.8 - 0.2))
+  .at(xz)
   .add(
-    xz
-      .Arc(5.5)
+    Arc(6.2)
+      .ex(0.8 - 0.2)
+      .at(xz)
+  )
+  .add(
+    Arc(5.5)
       .ex(0.4)
+      .at(xz)
       .y(-8 + 0.2)
   )
   .add(
-    xz
-      .Arc(5.5)
+    Arc(5.5)
       .ex(0.4)
+      .at(xz)
       .y(8 - 0.2)
   )
   .cut(yz.Box(10, 6, 0.5).y(-8 + 3))
@@ -252,25 +270,23 @@ const technicConnector = xz
   .stl('technicConnector');
 ```
 
-![Image](lego.md.15.png)
-
-```JavaScript
-const technic_1x6 = Group(...seq((n) => technic.x(n), { upto: 48, by: 8 }))
-  .align()
-  .view();
-```
-
 ![Image](lego.md.16.png)
 
+[technicConnector_0.stl](lego.technicConnector_0.stl)
+
 ```JavaScript
-const halfTechnicConnector = xz
-  .Arc(4.8)
+const halfTechnicConnector = Arc(4.8)
   .ex(8)
-  .add(xz.Arc(6.2).ex(0.8 - 0.2))
+  .at(xz)
   .add(
-    xz
-      .Arc(5.5)
+    Arc(6.2)
+      .ex(0.8 - 0.2)
+      .at(xz)
+  )
+  .add(
+    Arc(5.5)
       .ex(0.4)
+      .at(xz)
       .y(8 - 0.2)
   )
   .cut(yz.Box(10, 6, 0.5).y(-8 + 3))
@@ -282,10 +298,14 @@ const halfTechnicConnector = xz
 
 ![Image](lego.md.17.png)
 
+[halfTechnicConnector_0.stl](lego.halfTechnicConnector_0.stl)
+
 ```JavaScript
 const technicPlug5mm = halfTechnicConnector
-  .and(xz.Arc(5).clip(xz.Box(4.5, 5)).ex(-8))
+  .and(Arc(5).clip(Box(4.5, 5)).ex(-8).at(xz))
   .stl('technicPlug5mm');
 ```
 
 ![Image](lego.md.18.png)
+
+[technicPlug5mm_0.stl](lego.technicPlug5mm_0.stl)

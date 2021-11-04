@@ -8,6 +8,8 @@ process.on('uncaughtException', (err) => {
   process.exit(1); // mandatory (as per the Node.js docs)
 });
 
+const makePosixPath = (string) => string.split(path.sep).join(path.posix.sep);
+
 const build = async (baseDirectory = '.') => {
   try {
     const notebooks = [];
@@ -18,7 +20,7 @@ const build = async (baseDirectory = '.') => {
         if (['node_modules'].includes(entry.name)) {
           continue;
         }
-        const filepath = path.join(directory, entry.name);
+        const filepath = makePosixPath(path.join(directory, entry.name));
         if (entry.isDirectory()) {
           await walk(filepath);
         } else if (entry.isFile()) {
@@ -29,14 +31,22 @@ const build = async (baseDirectory = '.') => {
       }
     };
     await walk(baseDirectory);
-    const failedExpectations = [];
+    const collectedFailedExpectations = [];
     for (const notebook of notebooks) {
+      const failedExpectations = [];
       console.log(`Processing notebook: ${process.cwd()}/${notebook}.nb`);
       await updateNotebook(notebook, { failedExpectations });
+      if (
+        failedExpectations.length > 0 &&
+        collectedFailedExpectations.length > 0
+      ) {
+        collectedFailedExpectations.push('');
+      }
+      collectedFailedExpectations.push(...failedExpectations);
     }
-    if (failedExpectations.length > 0) {
+    if (collectedFailedExpectations.length > 0) {
       console.log('Expectations failed:');
-      for (const failedExpectation of failedExpectations) {
+      for (const failedExpectation of collectedFailedExpectations) {
         console.log(failedExpectation);
       }
       process.exit(1);

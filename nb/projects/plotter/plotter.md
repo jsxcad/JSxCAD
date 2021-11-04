@@ -6,7 +6,7 @@ const dinosaur = await readSvg(
 ```
 
 ```JavaScript
-const plotter = defGrblPlotter('plotter');
+const plotter = GrblPlotter();
 ```
 
 ```JavaScript
@@ -14,6 +14,8 @@ const aligned = dinosaur.scale(10).align('xy').gcode('dinosaur', plotter);
 ```
 
 ![Image](plotter.md.0.png)
+
+[dinosaur_0.gcode](plotter.dinosaur_0.gcode)
 
 ```JavaScript
 const spiral = Spiral((a) => [[1 + (a * 360) / 100]], {
@@ -23,6 +25,8 @@ const spiral = Spiral((a) => [[1 + (a * 360) / 100]], {
 ```
 
 ![Image](plotter.md.1.png)
+
+[spiral_0.gcode](plotter.spiral_0.gcode)
 
 ```JavaScript
 const flowers = await readSvg(
@@ -47,14 +51,18 @@ flowers
 
 ![Image](plotter.md.2.png)
 
+[flowers_0.gcode](plotter.flowers_0.gcode)
+
 ```JavaScript
 const scaledMandala = mandala
   .align('xy')
   .scale(20)
-  .gcode('mandala', plotter, { doPlan: false });
+  .gcode('mandala', plotter, s => s, { doPlan: false });
 ```
 
 ![Image](plotter.md.3.png)
+
+[mandala_0.gcode](plotter.mandala_0.gcode)
 
 ```JavaScript
 const visnezh = await readSvg(
@@ -81,19 +89,23 @@ const calibration = Group(
 
 ![Image](plotter.md.4.png)
 
+[calibration_0.gcode](plotter.calibration_0.gcode)
+
 ```JavaScript
 const scaledVisnezh = visnezh
   .align('xy')
   .scale(1 / 100)
-  .gcode('visnezh', plotter, { doPlan: false });
+  .gcode('visnezh', plotter, s => s, { doPlan: false });
 ```
 
 ![Image](plotter.md.5.png)
 
+[visnezh_0.gcode](plotter.visnezh_0.gcode)
+
 ```JavaScript
 const star = Group(
   ...seq((a) => Triangle(5).rz(a), { upto: 120 / 360, by: 30 / 360 })
-).view({ outline: false });
+).view(undefined, { outline: false });
 ```
 
 ![Image](plotter.md.6.png)
@@ -109,3 +121,5 @@ const stars = Group(
 ```
 
 ![Image](plotter.md.7.png)
+
+[stars_0.gcode](plotter.stars_0.gcode)

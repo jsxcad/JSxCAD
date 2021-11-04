@@ -1,11 +1,11 @@
 const add = Triangle(10)
   .color('red')
   .add(Box(5).color('blue'))
-  .gridView(256);
+  .gridView();
 
 const and = Box(5)
   .and(Arc(5))
-  .gridView({ size: 800, triangles: false, outline: true, wireframe: false });
+  .gridView(undefined, { size: 800, triangles: false, outline: true, wireframe: false });
 
 const addTo = Triangle(10)
   .color('red')
@@ -69,11 +69,14 @@ const material = Box(10)
 
 const move = Box(10).move(1, 2, 3).gridView();
 
+const moveToEx1 = Box(10).moveTo(1, 2, 3).gridView();
+const moveToEx2 = Box(10).move(1, 2, 3).moveTo(center()).gridView();
+
 const noVoid = Assembly(Box(5), Arc(5.5).void())
   .noVoid()
   .gridView();
 
-const offset = Box(5).offset(1).gridView();
+const offsetEx = Box(5).offset(1).gridView();
 
 const op = Box(5)
   .op((s) => s.color('green'))
@@ -93,7 +96,9 @@ const rx = Box(1, 2, 3).rx(1/8).gridView();
 const ry = Box(1, 2, 3).ry(1/8).gridView();
 const rz = Box(1, 2, 3).rz(1/8).gridView();
 
-const scale = Box(5).scale(1, 2).gridView();
+const scale1 = Box(5).scale(1, 2).gridView();
+const scale2 = Box(5).cut(Arc(5).align('x>')).scale(1, 1).gridView();
+const scale3 = Box(5).cut(Arc(5).align('x>')).scale(-1, 1).gridView();
 
 const sizeEx = Box(1, 2, 3)
   .size((size, shape) => {
@@ -129,3 +134,26 @@ const withEx = Box(5).with(Arc(6)).gridView();
 const xEx = Box(5).x(1).gridView();
 const yEx = Box(5).y(1).gridView();
 const zEx = Box(5).z(1).gridView();
+
+const voidInEx = Arc(10).voidIn(offset(1)).ex(5).view();
+
+const facesEx = Box(10)
+  .ex(10)
+  .color('green')
+  .and((s) => s.faces().n(4).extrudeAlong(normal(), 1).tint('red'))
+  .view();
+
+const colorEx = Arc(10).color('blue').color('red').view();
+
+const tintEx = Arc(10).color('blue').tint('red').view();
+
+Segments(
+  ...seq((y) => [Point(-10, y, 0), Point(10, y, 0)], {
+    from: -6,
+    to: 6,
+    by: 1 / 4,
+  })
+)
+  .rz(1 / 8)
+  .clip(Arc(5).cut(Arc(2)))
+  .gridView();

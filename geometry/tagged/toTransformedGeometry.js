@@ -1,3 +1,4 @@
+import { fromPolygonsWithHoles as fromPolygonsWithHolesToGraph } from '../graph/fromPolygonsWithHoles.js';
 import { rewrite } from './visit.js';
 import { taggedSegments } from './taggedSegments.js';
 import { transform as transformPaths } from '../paths/transform.js';
@@ -47,6 +48,8 @@ export const toTransformedGeometry = (geometry) => {
             triangles: transformPolygons(geometry.matrix, geometry.triangles),
             matrix: undefined,
           });
+        case 'polygonsWithHoles':
+          return fromPolygonsWithHolesToGraph(geometry);
         case 'segments':
           return transformSegments(geometry);
         case 'paths':
@@ -61,7 +64,7 @@ export const toTransformedGeometry = (geometry) => {
           });
         case 'graph':
           // Graphs don't need a transformed version.
-          return descend(geometry);
+          return geometry;
         default:
           throw Error(
             `Unexpected geometry ${geometry.type} see ${JSON.stringify(
