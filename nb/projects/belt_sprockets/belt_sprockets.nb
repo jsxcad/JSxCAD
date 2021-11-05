@@ -37,9 +37,8 @@ const ToothSpacing = (teeth, tooth_pitch, pitch_line_offset) =>
 const ToothProfileToFace = (...points) =>
   Shape.fromOpenPath(points).close().fill();
 
-const MXL = {
+export const MXL = {
   profile: ToothProfileToFace(
-    ...[
       [-0.660421, -0.5, 0],
       [-0.660421, 0, 0],
       [-0.621898, 0.006033, 0],
@@ -61,17 +60,15 @@ const MXL = {
       [0.587516, 0.023037, 0],
       [0.621841, 0.006033, 0],
       [0.660421, 0, 0],
-      [0.660421, -0.5, 0],
-    ]
-  ),
+      [0.660421, -0.5, 0]
+  ).md('MXL profile').gridView(),
   diameter: (teeth) => ToothSpacing(teeth, 2.032, 0.254),
   toothDepth: 0.508,
   toothWidth: 1.321,
 };
 
-const DP40 = {
+export const DP40 = {
   profile: ToothProfileToFace(
-    ...[
       [-0.612775, -0.5, 0],
       [-0.612775, 0, 0],
       [-0.574719, 0.010187, 0],
@@ -89,17 +86,15 @@ const DP40 = {
       [0.546806, 0.0381, 0],
       [0.574499, 0.010187, 0],
       [0.612775, 0, 0],
-      [0.612775, -0.5, 0],
-    ]
-  ),
+      [0.612775, -0.5, 0]
+  ).md('DP40 profile').gridView(),
   diameter: (teeth) => ToothSpacing(teeth, 2.07264, 0.1778),
   toothDepth: 0.457,
   toothWidth: 1.226,
 };
 
-const XL = {
+export const XL = {
   profile: ToothProfileToFace(
-    ...[
       [-1.525411, -1, 0],
       [-1.525411, 0, 0],
       [-1.41777, 0.015495, 0],
@@ -121,17 +116,15 @@ const XL = {
       [1.320844, 0.059664, 0],
       [1.417919, 0.015495, 0],
       [1.525411, 0, 0],
-      [1.525411, -1, 0],
-    ]
-  ),
+      [1.525411, -1, 0]
+  ).md('XL profile').gridView(),
   diameter: (teeth) => ToothSpacing(teeth, 5.08, 0.254),
   toothDepth: 1.27,
   toothWidth: 3.051,
 };
 
-const H = {
+export const H = {
   profile: ToothProfileToFace(
-    ...[
       [-2.6797, -1, 0],
       [-2.6797, 0, 0],
       [-2.600907, 0.006138, 0],
@@ -169,17 +162,15 @@ const H = {
       [2.525384, 0.024024, 0],
       [2.600904, 0.006138, 0],
       [2.6797, 0, 0],
-      [2.6797, -1, 0],
-    ]
-  ),
+      [2.6797, -1, 0]
+  ).md('H profile').gridView(),
   diameter: (teeth) => ToothSpacing(teeth, 9.525, 0.381),
   toothDepth: 1.905,
   toothWidth: 5.359,
 };
 
-const T2_5 = {
+export const T2_5 = {
   profile: ToothProfileToFace(
-    ...[
       [-0.839258, -0.5, 0],
       [-0.839258, 0, 0],
       [-0.770246, 0.021652, 0],
@@ -193,17 +184,15 @@ const T2_5 = {
       [0.726369, 0.079022, 0],
       [0.770114, 0.021652, 0],
       [0.839258, 0, 0],
-      [0.839258, -0.5, 0],
-    ]
-  ),
+      [0.839258, -0.5, 0]
+  ).md('T2_5 profile').gridView(),
   diameter: (teeth) => ToothSpaceingCurvefit(teeth, 0.7467, 0.796, 1.026),
   toothDepth: 0.7,
   toothWidth: 1.678,
 };
 
-const T5 = {
+export const T5 = {
   profile: ToothProfileToFace(
-    ...[
       [-1.632126, -0.5, 0],
       [-1.632126, 0, 0],
       [-1.568549, 0.004939, 0],
@@ -241,17 +230,15 @@ const T5 = {
       [1.507589, 0.019367, 0],
       [1.568563, 0.004939, 0],
       [1.632126, 0, 0],
-      [1.632126, -0.5, 0],
-    ]
-  ),
+      [1.632126, -0.5, 0]
+  ).md('T5 profile').gridView(),
   diameter: (teeth) => ToothSpaceingCurvefit(teeth, 0.6523, 1.591, 1.064),
   toothDepth: 1.19,
   toothWidth: 3.264,
 };
 
-const T10 = {
+export const T10 = {
   profile: ToothProfileToFace(
-    ...[
       [-3.06511, -1, 0],
       [-3.06511, 0, 0],
       [-2.971998, 0.007239, 0],
@@ -289,17 +276,15 @@ const T10 = {
       [2.882713, 0.028344, 0],
       [2.971997, 0.007239, 0],
       [3.06511, 0, 0],
-      [3.06511, -1, 0],
-    ]
-  ),
+      [3.06511, -1, 0]
+  ).md('T10 profile').gridView(),
   diameter: (teeth) => ToothSpacing(teeth, 10, 0.93),
   toothDepth: 2.5,
   toothWidth: 6.13,
 };
 
-const AT5 = {
+export const AT5 = {
   profile: ToothProfileToFace(
-    ...[
       [-2.134129, -0.75, 0],
       [-2.134129, 0, 0],
       [-2.058023, 0.005488, 0],
@@ -329,17 +314,15 @@ const AT5 = {
       [1.984392, 0.021547, 0],
       [2.057906, 0.005488, 0],
       [2.134129, 0, 0],
-      [2.134129, -0.75, 0],
-    ]
-  ),
+      [2.134129, -0.75, 0]
+  ).md('AT5 profile').gridView(),
   diameter: (teeth) => ToothSpaceingCurvefit(teeth, 0.6523, 1.591, 1.064),
   toothDepth: 1.19,
   toothWidth: 4.268,
 };
 
-const HTD_3mm = {
+export const HTD_3mm = {
   profile: ToothProfileToFace(
-    ...[
       [-1.135062, -0.5, 0],
       [-1.135062, 0, 0],
       [-1.048323, 0.015484, 0],
@@ -384,17 +367,15 @@ const HTD_3mm = {
       [0.974328, 0.058517, 0],
       [1.048362, 0.015484, 0],
       [1.135062, 0, 0],
-      [1.135062, -0.5, 0],
-    ]
-  ),
+      [1.135062, -0.5, 0]
+  ).md('HTD_3mm profile').gridView(),
   diameter: (teeth) => ToothSpacing(teeth, 3, 0.381),
   toothDepth: 1.289,
   toothWidth: 2.27,
 };
 
-const HTD_5mm = {
+export const HTD_5mm = {
   profile: ToothProfileToFace(
-    ...[
       [-1.89036, -0.75, 0],
       [-1.89036, 0, 0],
       [-1.741168, 0.02669, 0],
@@ -439,17 +420,15 @@ const HTD_5mm = {
       [1.61387, 0.100806, 0],
       [1.741168, 0.02669, 0],
       [1.89036, 0, 0],
-      [1.89036, -0.75, 0],
-    ]
-  ),
+      [1.89036, -0.75, 0]
+  ).md('HTD_5mm profile').gridView(),
   diameter: (teeth) => ToothSpacing(teeth, 5, 0.5715),
   toothDepth: 2.199,
   toothWidth: 3.781,
 };
 
-const HTD_8mm = {
+export const HTD_8mm = {
   profile: ToothProfileToFace(
-    ...[
       [-3.301471, -1, 0],
       [-3.301471, 0, 0],
       [-3.16611, 0.012093, 0],
@@ -502,17 +481,15 @@ const HTD_8mm = {
       [3.038012, 0.047068, 0],
       [3.166095, 0.012093, 0],
       [3.301471, 0, 0],
-      [3.301471, -1, 0],
-    ]
-  ),
+      [3.301471, -1, 0]
+  ).md('HTD_8mm profile').gridView(),
   diameter: (teeth) => ToothSpacing(teeth, 8, 0.6858),
   toothDepth: 3.607,
   toothWidth: 6.603,
 };
 
-const GT2_2mm = {
+export const GT2_2mm = {
   profile: ToothProfileToFace(
-    ...[
       [0.747183, -0.5, 0],
       [0.747183, 0, 0],
       [0.647876, 0.037218, 0],
@@ -535,17 +512,15 @@ const GT2_2mm = {
       [-0.598311, 0.130528, 0],
       [-0.648009, 0.037218, 0],
       [-0.747183, 0, 0],
-      [-0.747183, -0.5, 0],
-    ]
-  ),
+      [-0.747183, -0.5, 0]
+  ).md('GT2_2mm profile').gridView(),
   diameter: (teeth) => ToothSpacing(teeth, 2, 0.254),
   toothDepth: 0.764,
   toothWidth: 1.494,
 };
 
-const GT2_3mm = {
+export const GT2_3mm = {
   profile: ToothProfileToFace(
-    ...[
       [-1.155171, -0.5, 0],
       [-1.155171, 0, 0],
       [-1.065317, 0.016448, 0],
@@ -572,17 +547,15 @@ const GT2_3mm = {
       [0.988924, 0.062001, 0],
       [1.065168, 0.016448, 0],
       [1.155171, 0, 0],
-      [1.155171, -0.5, 0],
-    ]
-  ),
+      [1.155171, -0.5, 0]
+  ).md('GT2_3mm profile').gridView(),
   diameter: (teeth) => ToothSpacing(teeth, 3, 0.381),
   toothDepth: 1.169,
   toothWidth: 2.31,
 };
 
-const GT2_5mm = {
+export const GT2_5mm = {
   profile: ToothProfileToFace(
-    ...[
       [-1.975908, -0.75, 0],
       [-1.975908, 0, 0],
       [-1.797959, 0.03212, 0],
@@ -625,15 +598,14 @@ const GT2_5mm = {
       [1.646678, 0.121223, 0],
       [1.798064, 0.03212, 0],
       [1.975908, 0, 0],
-      [1.975908, -0.75, 0],
-    ]
-  ),
+      [1.975908, -0.75, 0]
+  ).md('GT2_5mm profile').gridView(),
   diameter: (teeth) => ToothSpacing(teeth, 5, 0.5715),
   toothDepth: 1.969,
   toothWidth: 3.952,
 };
 
-const Pulley = (profile, teeth) => {
+export const Pulley = (profile, teeth) => {
   const pulley_OD = profile.diameter(teeth);
   const tooth_depth = profile.toothDepth;
   const tooth_width = profile.toothWidth;
@@ -670,72 +642,36 @@ md`
 # Supported belt profiles:`;
 
 
+Pulley(MXL, 20).md('MXL').view();
 
+Pulley(DP40, 20).md('DP40').view();
 
+Pulley(XL, 20).md('XL').view();
 
+Pulley(H, 20).md('H').view();
 
-md`
-MXL`;
-Pulley(MXL, 20).view();
+Pulley(T2_5, 20).md('T2 5mm').view();
 
-md`
-DP40`;
-Pulley(DP40, 20).view();
+Pulley(T5, 20).md('T5').view();
 
-md`
-XL`;
-Pulley(XL, 20).view();
+Pulley(T10, 20).md('T10').view();
 
-md`
-H`;
-Pulley(H, 20).view();
+Pulley(AT5, 20).md('AT 5mm').view();
 
-md`
-T2 5mm`;
-Pulley(T2_5, 20).view();
+Pulley(HTD_3mm, 20).md('HTD 3mm').view();
 
-md`
-T5`;
-Pulley(T5, 20).view();
+Pulley(HTD_5mm, 20).md('HTD 5mm').view();
 
-md`
-T10`;
-Pulley(T10, 20).view();
+Pulley(GT2_5mm, 20).md('GT2 5mm').view();
 
-md`
-AT 5mm`;
-Pulley(AT5, 20).view();
+Pulley(GT2_5mm, 20).md('GT2 5mm').view();
 
-md`
-HTD 3mm`;
-Pulley(HTD_3mm, 20).view();
+Pulley(HTD_8mm, 20).md('HTD 8mm').view();
 
-md`
-HTD 5mm`;
-Pulley(HTD_5mm, 20).view();
+Pulley(GT2_2mm, 20).md('GT2 2mm').view();
 
-md`
-GT2 5mm`;
-Pulley(GT2_5mm, 20).view();
+Pulley(GT2_3mm, 20).md('GT2 3mm').view();
 
-md`
-GT2 5mm`;
-Pulley(GT2_5mm, 20).view();
-
-md`
-HTD 8mm`;
-Pulley(HTD_8mm, 20).view();
-
-md`
-GT2 2mm`;
-Pulley(GT2_2mm, 20).view();
-
-md`
-GT2 3mm`;
-Pulley(GT2_3mm, 20).view();
-
-md`
-GT2 5mm`;
-Pulley(GT2_5mm, 20).view();
+Pulley(GT2_5mm, 20).md('GT2 5mm').view();
 
 
