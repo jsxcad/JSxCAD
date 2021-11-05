@@ -23,7 +23,7 @@ const ToothProfileToFace = (...points) =>
 ```
 
 ```JavaScript
-const Pulley = (profile, teeth) => {
+export const Pulley = (profile, teeth) => {
   const pulley_OD = profile.diameter(teeth);
   const tooth_depth = profile.toothDepth;
   const tooth_width = profile.toothWidth;
@@ -58,9 +58,8 @@ const Pulley = (profile, teeth) => {
 ```
 
 ```JavaScript
-const MXL = {
+export const MXL = {
   profile: ToothProfileToFace(
-    ...[
       [-0.660421, -0.5, 0],
       [-0.660421, 0, 0],
       [-0.621898, 0.006033, 0],
@@ -82,19 +81,21 @@ const MXL = {
       [0.587516, 0.023037, 0],
       [0.621841, 0.006033, 0],
       [0.660421, 0, 0],
-      [0.660421, -0.5, 0],
-    ]
-  ),
+      [0.660421, -0.5, 0]
+  ).md('MXL profile').gridView(),
   diameter: (teeth) => ToothSpacing(teeth, 2.032, 0.254),
   toothDepth: 0.508,
   toothWidth: 1.321,
 };
 ```
 
+MXL profile
+
+![Image](belt_sprockets.md.0.png)
+
 ```JavaScript
-const DP40 = {
+export const DP40 = {
   profile: ToothProfileToFace(
-    ...[
       [-0.612775, -0.5, 0],
       [-0.612775, 0, 0],
       [-0.574719, 0.010187, 0],
@@ -112,19 +113,21 @@ const DP40 = {
       [0.546806, 0.0381, 0],
       [0.574499, 0.010187, 0],
       [0.612775, 0, 0],
-      [0.612775, -0.5, 0],
-    ]
-  ),
+      [0.612775, -0.5, 0]
+  ).md('DP40 profile').gridView(),
   diameter: (teeth) => ToothSpacing(teeth, 2.07264, 0.1778),
   toothDepth: 0.457,
   toothWidth: 1.226,
 };
 ```
 
+DP40 profile
+
+![Image](belt_sprockets.md.1.png)
+
 ```JavaScript
-const XL = {
+export const XL = {
   profile: ToothProfileToFace(
-    ...[
       [-1.525411, -1, 0],
       [-1.525411, 0, 0],
       [-1.41777, 0.015495, 0],
@@ -146,19 +149,21 @@ const XL = {
       [1.320844, 0.059664, 0],
       [1.417919, 0.015495, 0],
       [1.525411, 0, 0],
-      [1.525411, -1, 0],
-    ]
-  ),
+      [1.525411, -1, 0]
+  ).md('XL profile').gridView(),
   diameter: (teeth) => ToothSpacing(teeth, 5.08, 0.254),
   toothDepth: 1.27,
   toothWidth: 3.051,
 };
 ```
 
+XL profile
+
+![Image](belt_sprockets.md.2.png)
+
 ```JavaScript
-const H = {
+export const H = {
   profile: ToothProfileToFace(
-    ...[
       [-2.6797, -1, 0],
       [-2.6797, 0, 0],
       [-2.600907, 0.006138, 0],
@@ -196,19 +201,21 @@ const H = {
       [2.525384, 0.024024, 0],
       [2.600904, 0.006138, 0],
       [2.6797, 0, 0],
-      [2.6797, -1, 0],
-    ]
-  ),
+      [2.6797, -1, 0]
+  ).md('H profile').gridView(),
   diameter: (teeth) => ToothSpacing(teeth, 9.525, 0.381),
   toothDepth: 1.905,
   toothWidth: 5.359,
 };
 ```
 
+H profile
+
+![Image](belt_sprockets.md.3.png)
+
 ```JavaScript
-const T2_5 = {
+export const T2_5 = {
   profile: ToothProfileToFace(
-    ...[
       [-0.839258, -0.5, 0],
       [-0.839258, 0, 0],
       [-0.770246, 0.021652, 0],
@@ -222,19 +229,21 @@ const T2_5 = {
       [0.726369, 0.079022, 0],
       [0.770114, 0.021652, 0],
       [0.839258, 0, 0],
-      [0.839258, -0.5, 0],
-    ]
-  ),
+      [0.839258, -0.5, 0]
+  ).md('T2_5 profile').gridView(),
   diameter: (teeth) => ToothSpaceingCurvefit(teeth, 0.7467, 0.796, 1.026),
   toothDepth: 0.7,
   toothWidth: 1.678,
 };
 ```
 
+T2_5 profile
+
+![Image](belt_sprockets.md.4.png)
+
 ```JavaScript
-const T5 = {
+export const T5 = {
   profile: ToothProfileToFace(
-    ...[
       [-1.632126, -0.5, 0],
       [-1.632126, 0, 0],
       [-1.568549, 0.004939, 0],
@@ -272,19 +281,21 @@ const T5 = {
       [1.507589, 0.019367, 0],
       [1.568563, 0.004939, 0],
       [1.632126, 0, 0],
-      [1.632126, -0.5, 0],
-    ]
-  ),
+      [1.632126, -0.5, 0]
+  ).md('T5 profile').gridView(),
   diameter: (teeth) => ToothSpaceingCurvefit(teeth, 0.6523, 1.591, 1.064),
   toothDepth: 1.19,
   toothWidth: 3.264,
 };
 ```
 
+T5 profile
+
+![Image](belt_sprockets.md.5.png)
+
 ```JavaScript
-const T10 = {
+export const T10 = {
   profile: ToothProfileToFace(
-    ...[
       [-3.06511, -1, 0],
       [-3.06511, 0, 0],
       [-2.971998, 0.007239, 0],
@@ -322,19 +333,21 @@ const T10 = {
       [2.882713, 0.028344, 0],
       [2.971997, 0.007239, 0],
       [3.06511, 0, 0],
-      [3.06511, -1, 0],
-    ]
-  ),
+      [3.06511, -1, 0]
+  ).md('T10 profile').gridView(),
   diameter: (teeth) => ToothSpacing(teeth, 10, 0.93),
   toothDepth: 2.5,
   toothWidth: 6.13,
 };
 ```
 
+T10 profile
+
+![Image](belt_sprockets.md.6.png)
+
 ```JavaScript
-const AT5 = {
+export const AT5 = {
   profile: ToothProfileToFace(
-    ...[
       [-2.134129, -0.75, 0],
       [-2.134129, 0, 0],
       [-2.058023, 0.005488, 0],
@@ -364,19 +377,21 @@ const AT5 = {
       [1.984392, 0.021547, 0],
       [2.057906, 0.005488, 0],
       [2.134129, 0, 0],
-      [2.134129, -0.75, 0],
-    ]
-  ),
+      [2.134129, -0.75, 0]
+  ).md('AT5 profile').gridView(),
   diameter: (teeth) => ToothSpaceingCurvefit(teeth, 0.6523, 1.591, 1.064),
   toothDepth: 1.19,
   toothWidth: 4.268,
 };
 ```
 
+AT5 profile
+
+![Image](belt_sprockets.md.7.png)
+
 ```JavaScript
-const HTD_3mm = {
+export const HTD_3mm = {
   profile: ToothProfileToFace(
-    ...[
       [-1.135062, -0.5, 0],
       [-1.135062, 0, 0],
       [-1.048323, 0.015484, 0],
@@ -421,19 +436,21 @@ const HTD_3mm = {
       [0.974328, 0.058517, 0],
       [1.048362, 0.015484, 0],
       [1.135062, 0, 0],
-      [1.135062, -0.5, 0],
-    ]
-  ),
+      [1.135062, -0.5, 0]
+  ).md('HTD_3mm profile').gridView(),
   diameter: (teeth) => ToothSpacing(teeth, 3, 0.381),
   toothDepth: 1.289,
   toothWidth: 2.27,
 };
 ```
 
+HTD_3mm profile
+
+![Image](belt_sprockets.md.8.png)
+
 ```JavaScript
-const HTD_5mm = {
+export const HTD_5mm = {
   profile: ToothProfileToFace(
-    ...[
       [-1.89036, -0.75, 0],
       [-1.89036, 0, 0],
       [-1.741168, 0.02669, 0],
@@ -478,19 +495,21 @@ const HTD_5mm = {
       [1.61387, 0.100806, 0],
       [1.741168, 0.02669, 0],
       [1.89036, 0, 0],
-      [1.89036, -0.75, 0],
-    ]
-  ),
+      [1.89036, -0.75, 0]
+  ).md('HTD_5mm profile').gridView(),
   diameter: (teeth) => ToothSpacing(teeth, 5, 0.5715),
   toothDepth: 2.199,
   toothWidth: 3.781,
 };
 ```
 
+HTD_5mm profile
+
+![Image](belt_sprockets.md.9.png)
+
 ```JavaScript
-const HTD_8mm = {
+export const HTD_8mm = {
   profile: ToothProfileToFace(
-    ...[
       [-3.301471, -1, 0],
       [-3.301471, 0, 0],
       [-3.16611, 0.012093, 0],
@@ -543,19 +562,21 @@ const HTD_8mm = {
       [3.038012, 0.047068, 0],
       [3.166095, 0.012093, 0],
       [3.301471, 0, 0],
-      [3.301471, -1, 0],
-    ]
-  ),
+      [3.301471, -1, 0]
+  ).md('HTD_8mm profile').gridView(),
   diameter: (teeth) => ToothSpacing(teeth, 8, 0.6858),
   toothDepth: 3.607,
   toothWidth: 6.603,
 };
 ```
 
+HTD_8mm profile
+
+![Image](belt_sprockets.md.10.png)
+
 ```JavaScript
-const GT2_2mm = {
+export const GT2_2mm = {
   profile: ToothProfileToFace(
-    ...[
       [0.747183, -0.5, 0],
       [0.747183, 0, 0],
       [0.647876, 0.037218, 0],
@@ -578,19 +599,21 @@ const GT2_2mm = {
       [-0.598311, 0.130528, 0],
       [-0.648009, 0.037218, 0],
       [-0.747183, 0, 0],
-      [-0.747183, -0.5, 0],
-    ]
-  ),
+      [-0.747183, -0.5, 0]
+  ).md('GT2_2mm profile').gridView(),
   diameter: (teeth) => ToothSpacing(teeth, 2, 0.254),
   toothDepth: 0.764,
   toothWidth: 1.494,
 };
 ```
 
+GT2_2mm profile
+
+![Image](belt_sprockets.md.11.png)
+
 ```JavaScript
-const GT2_3mm = {
+export const GT2_3mm = {
   profile: ToothProfileToFace(
-    ...[
       [-1.155171, -0.5, 0],
       [-1.155171, 0, 0],
       [-1.065317, 0.016448, 0],
@@ -617,19 +640,21 @@ const GT2_3mm = {
       [0.988924, 0.062001, 0],
       [1.065168, 0.016448, 0],
       [1.155171, 0, 0],
-      [1.155171, -0.5, 0],
-    ]
-  ),
+      [1.155171, -0.5, 0]
+  ).md('GT2_3mm profile').gridView(),
   diameter: (teeth) => ToothSpacing(teeth, 3, 0.381),
   toothDepth: 1.169,
   toothWidth: 2.31,
 };
 ```
 
+GT2_3mm profile
+
+![Image](belt_sprockets.md.12.png)
+
 ```JavaScript
-const GT2_5mm = {
+export const GT2_5mm = {
   profile: ToothProfileToFace(
-    ...[
       [-1.975908, -0.75, 0],
       [-1.975908, 0, 0],
       [-1.797959, 0.03212, 0],
@@ -672,129 +697,192 @@ const GT2_5mm = {
       [1.646678, 0.121223, 0],
       [1.798064, 0.03212, 0],
       [1.975908, 0, 0],
-      [1.975908, -0.75, 0],
-    ]
-  ),
+      [1.975908, -0.75, 0]
+  ).md('GT2_5mm profile').gridView(),
   diameter: (teeth) => ToothSpacing(teeth, 5, 0.5715),
   toothDepth: 1.969,
   toothWidth: 3.952,
 };
 ```
 
-# Supported belt profiles:
-
-MXL
-
-```JavaScript
-Pulley(MXL, 20).view();
-```
-
-![Image](belt_sprockets.md.0.png)
-
-DP40
-
-```JavaScript
-Pulley(DP40, 20).view();
-```
-
-![Image](belt_sprockets.md.1.png)
-
-XL
-
-```JavaScript
-Pulley(XL, 20).view();
-```
-
-![Image](belt_sprockets.md.2.png)
-
-H
-
-```JavaScript
-Pulley(H, 20).view();
-```
-
-![Image](belt_sprockets.md.3.png)
-
-T2 5mm
-
-```JavaScript
-Pulley(T2_5, 20).view();
-```
-
-![Image](belt_sprockets.md.4.png)
-
-T5
-
-```JavaScript
-Pulley(T5, 20).view();
-```
-
-![Image](belt_sprockets.md.5.png)
-
-T10
-
-```JavaScript
-Pulley(T10, 20).view();
-```
-
-![Image](belt_sprockets.md.6.png)
-
-AT 5mm
-
-```JavaScript
-Pulley(AT5, 20).view();
-```
-
-![Image](belt_sprockets.md.7.png)
-
-HTD 3mm
-
-```JavaScript
-Pulley(HTD_3mm, 20).view();
-```
-
-![Image](belt_sprockets.md.8.png)
-
-HTD 5mm
-
-```JavaScript
-Pulley(HTD_5mm, 20).view();
-```
-
-![Image](belt_sprockets.md.9.png)
-
-GT2 5mm
-
-```JavaScript
-Pulley(GT2_5mm, 20).view();
-```
-
-![Image](belt_sprockets.md.10.png)
-
-![Image](belt_sprockets.md.11.png)
-
-HTD 8mm
-
-```JavaScript
-Pulley(HTD_8mm, 20).view();
-```
-
-![Image](belt_sprockets.md.12.png)
-
-GT2 2mm
-
-```JavaScript
-Pulley(GT2_2mm, 20).view();
-```
+GT2_5mm profile
 
 ![Image](belt_sprockets.md.13.png)
 
-GT2 3mm
-
-```JavaScript
-Pulley(GT2_3mm, 20).view();
-```
+# Supported belt profiles:
 
 ![Image](belt_sprockets.md.14.png)
 
+```JavaScript
+Pulley(MXL, 20).md('MXL').view();
+```
+
+MXL
+
 ![Image](belt_sprockets.md.15.png)
+
+![Image](belt_sprockets.md.16.png)
+
+```JavaScript
+Pulley(DP40, 20).md('DP40').view();
+```
+
+DP40
+
+![Image](belt_sprockets.md.17.png)
+
+![Image](belt_sprockets.md.18.png)
+
+```JavaScript
+Pulley(XL, 20).md('XL').view();
+```
+
+XL
+
+![Image](belt_sprockets.md.19.png)
+
+![Image](belt_sprockets.md.20.png)
+
+```JavaScript
+Pulley(H, 20).md('H').view();
+```
+
+H
+
+![Image](belt_sprockets.md.21.png)
+
+![Image](belt_sprockets.md.22.png)
+
+```JavaScript
+Pulley(T2_5, 20).md('T2 5mm').view();
+```
+
+T2 5mm
+
+![Image](belt_sprockets.md.23.png)
+
+![Image](belt_sprockets.md.24.png)
+
+```JavaScript
+Pulley(T5, 20).md('T5').view();
+```
+
+T5
+
+![Image](belt_sprockets.md.25.png)
+
+![Image](belt_sprockets.md.26.png)
+
+```JavaScript
+Pulley(T10, 20).md('T10').view();
+```
+
+T10
+
+![Image](belt_sprockets.md.27.png)
+
+![Image](belt_sprockets.md.28.png)
+
+```JavaScript
+Pulley(AT5, 20).md('AT 5mm').view();
+```
+
+AT 5mm
+
+![Image](belt_sprockets.md.29.png)
+
+![Image](belt_sprockets.md.30.png)
+
+```JavaScript
+Pulley(HTD_3mm, 20).md('HTD 3mm').view();
+```
+
+HTD 3mm
+
+![Image](belt_sprockets.md.31.png)
+
+![Image](belt_sprockets.md.32.png)
+
+```JavaScript
+Pulley(HTD_5mm, 20).md('HTD 5mm').view();
+```
+
+HTD 5mm
+
+![Image](belt_sprockets.md.33.png)
+
+![Image](belt_sprockets.md.34.png)
+
+```JavaScript
+Pulley(GT2_5mm, 20).md('GT2 5mm').view();
+```
+
+GT2 5mm
+
+![Image](belt_sprockets.md.35.png)
+
+![Image](belt_sprockets.md.36.png)
+
+![Image](belt_sprockets.md.37.png)
+
+![Image](belt_sprockets.md.38.png)
+
+```JavaScript
+Pulley(HTD_8mm, 20).md('HTD 8mm').view();
+```
+
+HTD 8mm
+
+![Image](belt_sprockets.md.39.png)
+
+![Image](belt_sprockets.md.40.png)
+
+```JavaScript
+Pulley(GT2_2mm, 20).md('GT2 2mm').view();
+```
+
+GT2 2mm
+
+![Image](belt_sprockets.md.41.png)
+
+![Image](belt_sprockets.md.42.png)
+
+```JavaScript
+Pulley(GT2_3mm, 20).md('GT2 3mm').view();
+```
+
+GT2 3mm
+
+![Image](belt_sprockets.md.43.png)
+
+![Image](belt_sprockets.md.44.png)
+
+![Image](belt_sprockets.md.45.png)
+
+![Image](belt_sprockets.md.46.png)
+
+![Image](belt_sprockets.md.47.png)
+
+![Image](belt_sprockets.md.48.png)
+
+![Image](belt_sprockets.md.49.png)
+
+![Image](belt_sprockets.md.50.png)
+
+![Image](belt_sprockets.md.51.png)
+
+![Image](belt_sprockets.md.52.png)
+
+![Image](belt_sprockets.md.53.png)
+
+![Image](belt_sprockets.md.54.png)
+
+![Image](belt_sprockets.md.55.png)
+
+![Image](belt_sprockets.md.56.png)
+
+![Image](belt_sprockets.md.57.png)
+
+![Image](belt_sprockets.md.58.png)
+
+![Image](belt_sprockets.md.59.png)
