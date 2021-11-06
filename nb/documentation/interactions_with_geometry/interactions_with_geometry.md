@@ -223,7 +223,7 @@ aRectangle
 
 ---
 ### Scale
-Scale enlarges a shape by the entered multiple.
+Scale enlarges a shape by the entered multiple. .scale(x,y,z) can be used to scale asymmetrically
 
 ```JavaScript
 aRectangle.scale(2).view();
