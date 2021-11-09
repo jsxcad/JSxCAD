@@ -1,7 +1,7 @@
+import { getInverseMatrices, getLeafs } from '@jsxcad/geometry';
+
 import Group from './Group.js';
 import Shape from './Shape.js';
-import { getLeafs } from '@jsxcad/geometry';
-import { invertTransform } from '@jsxcad/algorithm-cgal';
 
 export const at =
   (selection, ...ops) =>
@@ -14,23 +14,15 @@ export const at =
     if (selection instanceof Function) {
       selection = selection(shape);
     }
-    const placed = [];
     for (const leaf of getLeafs(selection.toGeometry())) {
-      if (leaf.type === 'item') {
-        // This is a target.
-        const global = leaf.matrix;
-        const local = invertTransform(global);
-        const target = Shape.fromGeometry(leaf);
-        // Switch to the local coordinate space, perform the operation, and come back to the global coordinate space.
-        placed.push(
-          target
-            .transform(local)
-            .op(...ops)
-            .transform(global)
-        );
-      }
+      const { global, local } = getInverseMatrices(leaf);
+      // Switch to the local coordinate space, perform the operation, and come back to the global coordinate space.
+      shape = shape
+        .transform(local)
+        .op(...ops)
+        .transform(global);
     }
-    return Group(...placed);
+    return shape;
   };
 
 Shape.registerMethod('at', at);

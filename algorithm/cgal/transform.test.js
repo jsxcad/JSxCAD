@@ -120,3 +120,48 @@ test('Inverse transform cancels', (t) => {
     '1',
   ]);
 });
+
+test('Inverse segment transform without rotation', (t) => {
+  const c = getCgal();
+  const transform = fromSegmentToInverseTransform(
+    [
+      [1, 1, 0],
+      [1, 2, 0],
+    ],
+    [0, 0, 1]
+  );
+  // We expect this to be equivalent to a [-1, -1, 0] transform.
+  t.deepEqual(clean(transform), [
+    1,
+    0,
+    0,
+    0,
+    0,
+    1,
+    0,
+    0,
+    0,
+    0,
+    1,
+    0,
+    -1,
+    -1,
+    0,
+    1,
+    '1',
+    '0',
+    '0',
+    '-1',
+    '0',
+    '1',
+    '0',
+    '-1',
+    '0',
+    '0',
+    '1',
+    '0',
+    '1',
+  ]);
+  const translated = transformVec3(transform, [1, 2, 0]);
+  t.deepEqual(translated, [0, 1, 0]);
+});

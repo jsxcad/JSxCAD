@@ -74,7 +74,7 @@ const colorsEx = Box(5)
 Colors are
 
 ```JavaScript
-const cut = Box(5)
+const cutEx = Box(5)
   .color('red')
   .cut(Arc(6).color('blue'))
   .gridView();
@@ -331,7 +331,7 @@ const tintEx = Arc(10).color('blue').tint('red').view();
 ![Image](shape.md.39.png)
 
 ```JavaScript
-Segments(
+Edges(
   ...seq((y) => [Point(-10, y, 0), Point(10, y, 0)], {
     from: -6,
     to: 6,
@@ -344,3 +344,43 @@ Segments(
 ```
 
 ![Image](shape.md.40.png)
+
+```JavaScript
+const topEdge = ([[, , startZ], [, , endZ]]) => Math.min(startZ, endZ);
+```
+
+```JavaScript
+const leftEdge = ([[startX], [endX]]) => Math.min(startX, endX);
+```
+
+```JavaScript
+const b = Box(5)
+  .ex(5)
+  .and(
+    Hershey('A', 3)
+      .color('green')
+      .z(5 / 2)
+  )
+  .material('glass')
+  .y(10);
+```
+
+```JavaScript
+b.at(
+  (s) => s.getEdge(topEdge).getEdge(leftEdge).nth(0),
+  cut(Box(11, 3, 3).rx(1 / 8))
+)
+  .view()
+```
+
+![Image](shape.md.41.png)
+
+```JavaScript
+b.to(
+  (s) => s.getEdge(topEdge).getEdge(leftEdge).nth(0),
+  cut(Box(11, 3, 3).rx(1 / 8))
+)
+  .view()
+```
+
+![Image](shape.md.42.png)

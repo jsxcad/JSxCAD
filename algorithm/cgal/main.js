@@ -8,6 +8,7 @@ export {
   fromRotateYToTransform,
   fromRotateZToTransform,
   fromScaleToTransform,
+  fromSegmentToInverseTransform,
   fromTranslateToTransform,
   invertTransform,
   toCgalTransformFromJsTransform,

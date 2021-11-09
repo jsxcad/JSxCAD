@@ -144,3 +144,24 @@ export const fromTranslateToTransform = (x = 0, y = 0, z = 0) =>
 
 export const fromScaleToTransform = (x = 0, y = 0, z = 0) =>
   toJsTransformFromCgalTransform(getCgal().Transformation__scale(x, y, z));
+
+export const fromSegmentToInverseTransform = (
+  [[startX = 0, startY = 0, startZ = 0], [endX = 0, endY = 0, endZ = 0]],
+  [
+    [originX = 0, originY = 0, originZ = 0],
+    [normalX = 0, normalY = 0, normalZ = 1],
+  ]
+) =>
+  toJsTransformFromCgalTransform(
+    getCgal().InverseSegmentTransform(
+      startX,
+      startY,
+      startZ,
+      endX,
+      endY,
+      endZ,
+      normalX - originX,
+      normalY - originY,
+      normalZ - originZ
+    )
+  );

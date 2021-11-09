@@ -2,19 +2,29 @@ import { reify } from './reify.js';
 import { rewrite } from './visit.js';
 import { toTransformedGeometry } from './toTransformedGeometry.js';
 
+const doNothing = (geometry) => geometry;
+
 export const op =
-  ({ graph }) =>
+  (
+    {
+      graph = doNothing,
+      segments = doNothing,
+      triangles = doNothing,
+      points = doNothing,
+    },
+    method = rewrite
+  ) =>
   (geometry, ...args) => {
     const walk = (geometry, descend) => {
       switch (geometry.type) {
-        case 'graph': {
+        case 'graph':
           return graph(geometry, ...args);
-        }
+        case 'segments':
+          return segments(geometry, ...args);
         case 'triangles':
-        case 'paths':
+          return triangles(geometry, ...args);
         case 'points':
-          // Not implemented yet.
-          return geometry;
+          return points(geometry, ...args);
         case 'plan':
           reify(geometry);
         // fall through
@@ -31,5 +41,5 @@ export const op =
       }
     };
 
-    return rewrite(toTransformedGeometry(geometry), walk);
+    return method(toTransformedGeometry(geometry), walk);
   };
