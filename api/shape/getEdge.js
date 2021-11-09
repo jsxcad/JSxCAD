@@ -11,7 +11,7 @@ export const getEdge =
   (shape) => {
     let best = [];
     let bestGoodness = 0;
-    const admitSegment = (segment, normal) => {
+    const admitSegment = (segment, orientation) => {
       const goodness = computeGoodness(segment);
       if (goodness < bestGoodness) {
         return;
@@ -20,12 +20,12 @@ export const getEdge =
         bestGoodness = goodness;
         best.length = 0;
       }
-      best.push({ segment, normal });
+      best.push({ segment, orientation });
     };
     eachSegment(shape.toGeometry(), admitSegment);
     return Group(
-      ...best.map(({ segment, normal }) =>
-        op(Shape.fromGeometry(taggedSegments({ normal }, [segment])))
+      ...best.map(({ segment, orientation }) =>
+        op(Shape.fromGeometry(taggedSegments({ orientation }, [segment])))
       )
     );
   };

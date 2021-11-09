@@ -11,6 +11,6 @@ export const outlineSurfaceMesh = (mesh, transform, emit) =>
           [sx, sy, sz],
           [tx, ty, tz],
         ],
-        [nx, ny, nz]
+        [[0, 0, 0], [nx, ny, nz]]
       )
   );

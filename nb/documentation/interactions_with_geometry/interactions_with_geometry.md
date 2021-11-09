@@ -109,7 +109,7 @@ Arc(10, 10, 5).grow(1).view();
 ```JavaScript
 Box(10)
   .cut(Box(5))
-  .loft(...seq((a) => (s) => s.scale(Math.pow(a, 3)).z(a * 10), { by: 1 / 8 }))
+  .loft(...seq((a) => (s) => s.scale(Math.pow(a, 3)).z(a * 10), { from: 1/128, by: 1 / 8 }))
   .view();
 ```
 
