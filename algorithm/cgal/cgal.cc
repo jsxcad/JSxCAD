@@ -3693,8 +3693,8 @@ const Transformation* Transformation__rotate_x(double a) {
 Transformation TransformationFromXTurn(double turn) {
   RT sin_alpha, cos_alpha, w;
   compute_turn(turn, sin_alpha, cos_alpha, w);
-  return Transformation(w, 0, 0, 0, 0, cos_alpha, -sin_alpha, 0, 0,
-                        sin_alpha, cos_alpha, 0, w);
+  return Transformation(w, 0, 0, 0, 0, cos_alpha, -sin_alpha, 0, 0, sin_alpha,
+                        cos_alpha, 0, w);
 }
 
 const Transformation* Transformation__rotate_y(double a) {
