@@ -43,6 +43,7 @@ export { doesNotOverlap } from './tagged/doesNotOverlap.js';
 export { drop } from './tagged/drop.js';
 export { eachItem } from './tagged/eachItem.js';
 export { eachPoint } from './tagged/eachPoint.js';
+export { eachSegment } from './tagged/eachSegment.js';
 export { empty } from './tagged/empty.js';
 export { extrude } from './tagged/extrude.js';
 export { extrudeToPlane } from './tagged/extrudeToPlane.js';
@@ -60,6 +61,7 @@ export { fromTriangles as fromTrianglesToGraph } from './graph/fromTriangles.js'
 export { getAnyNonVoidSurfaces } from './tagged/getAnyNonVoidSurfaces.js';
 export { getAnySurfaces } from './tagged/getAnySurfaces.js';
 export { getItems } from './tagged/getItems.js';
+export { getInverseMatrices } from './tagged/getInverseMatrices.js';
 export { getLayouts } from './tagged/getLayouts.js';
 export { getLeafs } from './tagged/getLeafs.js';
 export { getNonVoidGraphs } from './tagged/getNonVoidGraphs.js';

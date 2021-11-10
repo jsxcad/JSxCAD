@@ -13,8 +13,22 @@ export const clearTransformedGeometry = (geometry) => {
   return geometry;
 };
 
-export const transformSegments = (geometry) => {
-  const { matrix, segments } = geometry;
+const transformedOrientation = (matrix, [origin, normal, rotation]) => [
+  transformVec3(matrix, origin),
+  transformVec3(matrix, normal),
+  transformVec3(matrix, rotation),
+];
+
+const transformSegments = (geometry) => {
+  const {
+    matrix,
+    orientation = [
+      [0, 0, 0],
+      [0, 0, 1],
+      [1, 0, 0],
+    ],
+    segments,
+  } = geometry;
   if (!matrix) {
     return geometry;
   }
@@ -25,7 +39,13 @@ export const transformSegments = (geometry) => {
       transformVec3(matrix, end),
     ]);
   }
-  return taggedSegments({ tags: geometry.tags }, transformed);
+  return taggedSegments(
+    {
+      tags: geometry.tags,
+      orientation: transformedOrientation(matrix, orientation),
+    },
+    transformed
+  );
 };
 
 export const toTransformedGeometry = (geometry) => {

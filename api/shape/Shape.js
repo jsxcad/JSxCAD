@@ -169,8 +169,7 @@ Shape.fromPoints = (points, context) =>
   fromGeometry(taggedPoints({}, points), context);
 Shape.fromPolygons = (polygons, context) =>
   fromGeometry(fromPolygonsToGraph({}, polygons), context);
-// Deprecated.
-Shape.method = registerShapeMethod;
+
 Shape.registerMethod = registerShapeMethod;
 
 Shape.toShape = (to, from) => {

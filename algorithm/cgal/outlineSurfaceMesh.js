@@ -1,16 +1,19 @@
 import { getCgal } from './getCgal.js';
 import { toCgalTransformFromJsTransform } from './transform.js';
 
-export const outlineSurfaceMesh = (mesh, transform) => {
-  const segments = [];
+export const outlineSurfaceMesh = (mesh, transform, emit) =>
   getCgal().OutlineSurfaceMesh(
     mesh,
     toCgalTransformFromJsTransform(transform),
-    (sx, sy, sz, tx, ty, tz) =>
-      segments.push([
-        [sx, sy, sz],
-        [tx, ty, tz],
-      ])
+    (sx, sy, sz, tx, ty, tz, nx, ny, nz) =>
+      emit(
+        [
+          [sx, sy, sz],
+          [tx, ty, tz],
+        ],
+        [
+          [0, 0, 0],
+          [nx, ny, nz],
+        ]
+      )
   );
-  return segments;
-};
