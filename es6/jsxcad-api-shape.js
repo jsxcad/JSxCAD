@@ -700,19 +700,6 @@ const asPart = (partName) => (shape) =>
 
 Shape.registerMethod('asPart', asPart);
 
-const isDefined$1 = (value) => value;
-
-const Group = (...shapes) =>
-  Shape.fromGeometry(
-    taggedGroup(
-      {},
-      ...shapes.filter(isDefined$1).map((shape) => shape.toGeometry())
-    )
-  );
-
-Shape.prototype.Group = Shape.shapeMethod(Group);
-Shape.Group = Group;
-
 const at =
   (selection, ...ops) =>
   (shape) => {
@@ -727,7 +714,10 @@ const at =
     for (const leaf of getLeafs(selection.toGeometry())) {
       const { global, local } = getInverseMatrices(leaf);
       // Switch to the local coordinate space, perform the operation, and come back to the global coordinate space.
-      shape = shape.transform(local).op(...ops).transform(global);
+      shape = shape
+        .transform(local)
+        .op(...ops)
+        .transform(global);
     }
     return shape;
   };
@@ -965,6 +955,19 @@ const Box = (x, y = x, z = 0) =>
   Shape.fromGeometry(taggedPlan({}, { type: 'Box' })).hasDiameter(x, y, z);
 
 Shape.prototype.Box = Shape.shapeMethod(Box);
+
+const isDefined$1 = (value) => value;
+
+const Group = (...shapes) =>
+  Shape.fromGeometry(
+    taggedGroup(
+      {},
+      ...shapes.filter(isDefined$1).map((shape) => shape.toGeometry())
+    )
+  );
+
+Shape.prototype.Group = Shape.shapeMethod(Group);
+Shape.Group = Group;
 
 // Hershey simplex one line font.
 // See: http://paulbourke.net/dataformats/hershey/
@@ -2778,26 +2781,32 @@ const g = get;
 Shape.registerMethod('get', get);
 Shape.registerMethod('g', get);
 
-const noOp = shape => shape;
-const zero = segment => 0;
+const noOp = (shape) => shape;
+const zero = (segment) => 0;
 
-const getEdge = (computeGoodness = zero, op = noOp) => (shape) => {
-  let best = [];
-  let bestGoodness = 0;
-  const admitSegment = (segment, normal) => {
-    const goodness = computeGoodness(segment);
-    if (goodness < bestGoodness) {
-      return;
-    }
-    if (goodness > bestGoodness) {
-      bestGoodness = goodness;
-      best.length = 0;
-    }
-    best.push({ segment, normal });
+const getEdge =
+  (computeGoodness = zero, op = noOp) =>
+  (shape) => {
+    let best = [];
+    let bestGoodness = 0;
+    const admitSegment = (segment, orientation) => {
+      const goodness = computeGoodness(segment);
+      if (goodness < bestGoodness) {
+        return;
+      }
+      if (goodness > bestGoodness) {
+        bestGoodness = goodness;
+        best.length = 0;
+      }
+      best.push({ segment, orientation });
+    };
+    eachSegment(shape.toGeometry(), admitSegment);
+    return Group(
+      ...best.map(({ segment, orientation }) =>
+        op(Shape.fromGeometry(taggedSegments({ orientation }, [segment])))
+      )
+    );
   };
-  eachSegment(shape.toGeometry(), admitSegment);
-  return Group(...best.map(({ segment, normal }) => op(Shape.fromGeometry(taggedSegments({ normal }, [segment])))));
-};
 
 Shape.registerMethod('getEdge', getEdge);
 

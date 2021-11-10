@@ -2,18 +2,6 @@ import { translate, scale, toKeptGeometry, getNonVoidPaths, getPathEdges } from 
 import { fromAngleRadians } from './jsxcad-math-vec2.js';
 import { toTagFromRgbInt } from './jsxcad-algorithm-color.js';
 
-var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
-
-function unwrapExports (x) {
-	return x && x.__esModule && Object.prototype.hasOwnProperty.call(x, 'default') ? x['default'] : x;
-}
-
-function createCommonjsModule(fn, module) {
-	return module = { exports: {} }, fn(module, module.exports), module.exports;
-}
-
-var DxfArrayScanner_1 = createCommonjsModule(function (module, exports) {
-Object.defineProperty(exports, "__esModule", { value: true });
 /**
  * DxfArrayScanner
  *
@@ -93,7 +81,6 @@ class DxfArrayScanner {
         return this._eof;
     }
 }
-exports.default = DxfArrayScanner;
 /**
  * Parse a value to its proper type.
  * See pages 3 - 10 of the AutoCad DXF 2012 reference given at the top of this file
@@ -164,19 +151,14 @@ function parseBoolean(str) {
         return true;
     throw TypeError('String \'' + str + '\' cannot be cast to Boolean type');
 }
-});
 
-unwrapExports(DxfArrayScanner_1);
-
-var AutoCadColorIndex = createCommonjsModule(function (module, exports) {
 /**
  * AutoCad files sometimes use an indexed color value between 1 and 255 inclusive.
  * Each value corresponds to a color. index 1 is red, that is 16711680 or 0xFF0000.
  * index 0 and 256, while included in this array, are actually reserved for inheritance
  * values in AutoCad so they should not be used for index color lookups.
  */
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.default = [
+var AUTO_CAD_COLOR_INDEX = [
     0,
     16711680,
     16776960,
@@ -434,25 +416,14 @@ exports.default = [
     14079702,
     16777215
 ];
-});
 
-unwrapExports(AutoCadColorIndex);
-
-var ParseHelpers = createCommonjsModule(function (module, exports) {
-var __importDefault = (commonjsGlobal && commonjsGlobal.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.checkCommonEntityProperties = exports.parsePoint = exports.getAcadColor = void 0;
-const AutoCadColorIndex_1 = __importDefault(AutoCadColorIndex);
 /**
  * Returns the truecolor value of the given AutoCad color index value
  * @return {Number} truecolor value as a number
  */
-function getAcadColor(index) {
-    return AutoCadColorIndex_1.default[index];
+function getAcadColor$1(index) {
+    return AUTO_CAD_COLOR_INDEX[index];
 }
-exports.getAcadColor = getAcadColor;
 /**
  * Parses the 2D or 3D coordinate, vector, or point. When complete,
  * the scanner remains on the last group of the coordinate.
@@ -481,7 +452,6 @@ function parsePoint(scanner) {
     point.z = curr.value;
     return point;
 }
-exports.parsePoint = parsePoint;
 /**
  * Attempts to parse codes common to all entities. Returns true if the group
  * was handled by this function.
@@ -510,7 +480,7 @@ function checkCommonEntityProperties(entity, curr, scanner) {
             break;
         case 62: // Acad Index Color. 0 inherits ByBlock. 256 inherits ByLayer. Default is bylayer
             entity.colorIndex = curr.value;
-            entity.color = getAcadColor(Math.abs(curr.value));
+            entity.color = getAcadColor$1(Math.abs(curr.value));
             break;
         case 67:
             entity.inPaperSpace = curr.value !== 0;
@@ -555,36 +525,7 @@ function checkCommonEntityProperties(entity, curr, scanner) {
     }
     return true;
 }
-exports.checkCommonEntityProperties = checkCommonEntityProperties;
-});
 
-unwrapExports(ParseHelpers);
-ParseHelpers.checkCommonEntityProperties;
-ParseHelpers.parsePoint;
-ParseHelpers.getAcadColor;
-
-var _3dface = createCommonjsModule(function (module, exports) {
-var __createBinding = (commonjsGlobal && commonjsGlobal.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (commonjsGlobal && commonjsGlobal.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (commonjsGlobal && commonjsGlobal.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-const helpers = __importStar(ParseHelpers);
 class ThreeDface {
     constructor() {
         this.ForEntityName = '3DFACE';
@@ -605,7 +546,7 @@ class ThreeDface {
                     curr = scanner.lastReadGroup;
                     break;
                 default:
-                    helpers.checkCommonEntityProperties(entity, curr, scanner);
+                    checkCommonEntityProperties(entity, curr, scanner);
                     break;
             }
             curr = scanner.next();
@@ -613,7 +554,6 @@ class ThreeDface {
         return entity;
     }
 }
-exports.default = ThreeDface;
 function parse3dFaceVertices(scanner, curr) {
     var vertices = [];
     var vertexIsStarted = false;
@@ -663,33 +603,8 @@ function parse3dFaceVertices(scanner, curr) {
     scanner.rewind();
     return vertices;
 }
-});
 
-unwrapExports(_3dface);
-
-var arc = createCommonjsModule(function (module, exports) {
-var __createBinding = (commonjsGlobal && commonjsGlobal.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (commonjsGlobal && commonjsGlobal.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (commonjsGlobal && commonjsGlobal.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-const helpers = __importStar(ParseHelpers);
-class Arc {
+class Arc$1 {
     constructor() {
         this.ForEntityName = 'ARC';
     }
@@ -701,7 +616,7 @@ class Arc {
                 break;
             switch (curr.code) {
                 case 10: // X coordinate of point
-                    entity.center = helpers.parsePoint(scanner);
+                    entity.center = parsePoint(scanner);
                     break;
                 case 40: // radius
                     entity.radius = curr.value;
@@ -714,7 +629,7 @@ class Arc {
                     entity.angleLength = entity.endAngle - entity.startAngle; // angleLength is deprecated
                     break;
                 default: // ignored attribute
-                    helpers.checkCommonEntityProperties(entity, curr, scanner);
+                    checkCommonEntityProperties(entity, curr, scanner);
                     break;
             }
             curr = scanner.next();
@@ -722,33 +637,7 @@ class Arc {
         return entity;
     }
 }
-exports.default = Arc;
-});
 
-unwrapExports(arc);
-
-var attdef = createCommonjsModule(function (module, exports) {
-var __createBinding = (commonjsGlobal && commonjsGlobal.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (commonjsGlobal && commonjsGlobal.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (commonjsGlobal && commonjsGlobal.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-const helpers = __importStar(ParseHelpers);
 class Attdef {
     constructor() {
         this.ForEntityName = 'ATTDEF';
@@ -778,10 +667,10 @@ class Attdef {
                     entity.textStyle = curr.value;
                     break;
                 case 10: // X coordinate of 'first alignment point'
-                    entity.startPoint = helpers.parsePoint(scanner);
+                    entity.startPoint = parsePoint(scanner);
                     break;
                 case 11: // X coordinate of 'second alignment point'
-                    entity.endPoint = helpers.parsePoint(scanner);
+                    entity.endPoint = parsePoint(scanner);
                     break;
                 case 39:
                     entity.thickness = curr.value;
@@ -831,7 +720,7 @@ class Attdef {
                     entity.extrusionDirectionZ = curr.value;
                     break;
                 default:
-                    helpers.checkCommonEntityProperties(entity, curr, scanner);
+                    checkCommonEntityProperties(entity, curr, scanner);
                     break;
             }
             curr = scanner.next();
@@ -839,34 +728,8 @@ class Attdef {
         return entity;
     }
 }
-exports.default = Attdef;
-});
 
-unwrapExports(attdef);
-
-var circle = createCommonjsModule(function (module, exports) {
-var __createBinding = (commonjsGlobal && commonjsGlobal.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (commonjsGlobal && commonjsGlobal.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (commonjsGlobal && commonjsGlobal.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-const helpers = __importStar(ParseHelpers);
-class Circle {
+class Circle$1 {
     constructor() {
         this.ForEntityName = 'CIRCLE';
     }
@@ -878,7 +741,7 @@ class Circle {
                 break;
             switch (curr.code) {
                 case 10: // X coordinate of point
-                    entity.center = helpers.parsePoint(scanner);
+                    entity.center = parsePoint(scanner);
                     break;
                 case 40: // radius
                     entity.radius = curr.value;
@@ -895,7 +758,7 @@ class Circle {
                     entity.endAngle = endAngle;
                     break;
                 default: // ignored attribute
-                    helpers.checkCommonEntityProperties(entity, curr, scanner);
+                    checkCommonEntityProperties(entity, curr, scanner);
                     break;
             }
             curr = scanner.next();
@@ -903,33 +766,7 @@ class Circle {
         return entity;
     }
 }
-exports.default = Circle;
-});
 
-unwrapExports(circle);
-
-var dimension = createCommonjsModule(function (module, exports) {
-var __createBinding = (commonjsGlobal && commonjsGlobal.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (commonjsGlobal && commonjsGlobal.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (commonjsGlobal && commonjsGlobal.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-const helpers = __importStar(ParseHelpers);
 class Dimension {
     constructor() {
         this.ForEntityName = 'DIMENSION';
@@ -945,25 +782,25 @@ class Dimension {
                     entity.block = curr.value;
                     break;
                 case 10: // X coordinate of 'first alignment point'
-                    entity.anchorPoint = helpers.parsePoint(scanner);
+                    entity.anchorPoint = parsePoint(scanner);
                     break;
                 case 11:
-                    entity.middleOfText = helpers.parsePoint(scanner);
+                    entity.middleOfText = parsePoint(scanner);
                     break;
                 case 12: // Insertion point for clones of a dimension
-                    entity.insertionPoint = helpers.parsePoint(scanner);
+                    entity.insertionPoint = parsePoint(scanner);
                     break;
                 case 13: // Definition point for linear and angular dimensions 
-                    entity.linearOrAngularPoint1 = helpers.parsePoint(scanner);
+                    entity.linearOrAngularPoint1 = parsePoint(scanner);
                     break;
                 case 14: // Definition point for linear and angular dimensions 
-                    entity.linearOrAngularPoint2 = helpers.parsePoint(scanner);
+                    entity.linearOrAngularPoint2 = parsePoint(scanner);
                     break;
                 case 15: // Definition point for diameter, radius, and angular dimensions
-                    entity.diameterOrRadiusPoint = helpers.parsePoint(scanner);
+                    entity.diameterOrRadiusPoint = parsePoint(scanner);
                     break;
                 case 16: // Point defining dimension arc for angular dimensions
-                    entity.arcPoint = helpers.parsePoint(scanner);
+                    entity.arcPoint = parsePoint(scanner);
                     break;
                 case 70: // Dimension type
                     entity.dimensionType = curr.value;
@@ -981,7 +818,7 @@ class Dimension {
                     entity.angle = curr.value;
                     break;
                 default: // check common entity attributes
-                    helpers.checkCommonEntityProperties(entity, curr, scanner);
+                    checkCommonEntityProperties(entity, curr, scanner);
                     break;
             }
             curr = scanner.next();
@@ -989,34 +826,8 @@ class Dimension {
         return entity;
     }
 }
-exports.default = Dimension;
-});
 
-unwrapExports(dimension);
-
-var ellipse = createCommonjsModule(function (module, exports) {
-var __createBinding = (commonjsGlobal && commonjsGlobal.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (commonjsGlobal && commonjsGlobal.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (commonjsGlobal && commonjsGlobal.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-const helpers = __importStar(ParseHelpers);
-class Ellipse {
+class Ellipse$1 {
     constructor() {
         this.ForEntityName = 'ELLIPSE';
     }
@@ -1028,10 +839,10 @@ class Ellipse {
                 break;
             switch (curr.code) {
                 case 10:
-                    entity.center = helpers.parsePoint(scanner);
+                    entity.center = parsePoint(scanner);
                     break;
                 case 11:
-                    entity.majorAxisEndPoint = helpers.parsePoint(scanner);
+                    entity.majorAxisEndPoint = parsePoint(scanner);
                     break;
                 case 40:
                     entity.axisRatio = curr.value;
@@ -1046,7 +857,7 @@ class Ellipse {
                     entity.name = curr.value;
                     break;
                 default: // check common entity attributes
-                    helpers.checkCommonEntityProperties(entity, curr, scanner);
+                    checkCommonEntityProperties(entity, curr, scanner);
                     break;
             }
             curr = scanner.next();
@@ -1054,33 +865,7 @@ class Ellipse {
         return entity;
     }
 }
-exports.default = Ellipse;
-});
 
-unwrapExports(ellipse);
-
-var insert = createCommonjsModule(function (module, exports) {
-var __createBinding = (commonjsGlobal && commonjsGlobal.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (commonjsGlobal && commonjsGlobal.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (commonjsGlobal && commonjsGlobal.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-const helpers = __importStar(ParseHelpers);
 class Insert {
     constructor() {
         this.ForEntityName = 'INSERT';
@@ -1105,7 +890,7 @@ class Insert {
                     entity.zScale = curr.value;
                     break;
                 case 10:
-                    entity.position = helpers.parsePoint(scanner);
+                    entity.position = parsePoint(scanner);
                     break;
                 case 50:
                     entity.rotation = curr.value;
@@ -1123,10 +908,10 @@ class Insert {
                     entity.rowSpacing = curr.value;
                     break;
                 case 210:
-                    entity.extrusionDirection = helpers.parsePoint(scanner);
+                    entity.extrusionDirection = parsePoint(scanner);
                     break;
                 default: // check common entity attributes
-                    helpers.checkCommonEntityProperties(entity, curr, scanner);
+                    checkCommonEntityProperties(entity, curr, scanner);
                     break;
             }
             curr = scanner.next();
@@ -1134,34 +919,8 @@ class Insert {
         return entity;
     }
 }
-exports.default = Insert;
-});
 
-unwrapExports(insert);
-
-var line = createCommonjsModule(function (module, exports) {
-var __createBinding = (commonjsGlobal && commonjsGlobal.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (commonjsGlobal && commonjsGlobal.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (commonjsGlobal && commonjsGlobal.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-const helpers = __importStar(ParseHelpers);
-class Line {
+class Line$1 {
     constructor() {
         this.ForEntityName = 'LINE';
     }
@@ -1173,18 +932,18 @@ class Line {
                 break;
             switch (curr.code) {
                 case 10: // X coordinate of point
-                    entity.vertices.unshift(helpers.parsePoint(scanner));
+                    entity.vertices.unshift(parsePoint(scanner));
                     break;
                 case 11:
-                    entity.vertices.push(helpers.parsePoint(scanner));
+                    entity.vertices.push(parsePoint(scanner));
                     break;
                 case 210:
-                    entity.extrusionDirection = helpers.parsePoint(scanner);
+                    entity.extrusionDirection = parsePoint(scanner);
                     break;
                 case 100:
                     break;
                 default:
-                    helpers.checkCommonEntityProperties(entity, curr, scanner);
+                    checkCommonEntityProperties(entity, curr, scanner);
                     break;
             }
             curr = scanner.next();
@@ -1192,33 +951,7 @@ class Line {
         return entity;
     }
 }
-exports.default = Line;
-});
 
-unwrapExports(line);
-
-var lwpolyline = createCommonjsModule(function (module, exports) {
-var __createBinding = (commonjsGlobal && commonjsGlobal.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (commonjsGlobal && commonjsGlobal.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (commonjsGlobal && commonjsGlobal.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-const helpers = __importStar(ParseHelpers);
 class Lwpolyline {
     constructor() {
         this.ForEntityName = 'LWPOLYLINE';
@@ -1261,7 +994,7 @@ class Lwpolyline {
                     entity.extrusionDirectionZ = curr.value;
                     break;
                 default:
-                    helpers.checkCommonEntityProperties(entity, curr, scanner);
+                    checkCommonEntityProperties(entity, curr, scanner);
                     break;
             }
             curr = scanner.next();
@@ -1269,7 +1002,6 @@ class Lwpolyline {
         return entity;
     }
 }
-exports.default = Lwpolyline;
 function parseLWPolylineVertices(n, scanner) {
     if (!n || n <= 0)
         throw Error('n must be greater than 0 verticies');
@@ -1326,32 +1058,7 @@ function parseLWPolylineVertices(n, scanner) {
     scanner.rewind();
     return vertices;
 }
-});
 
-unwrapExports(lwpolyline);
-
-var mtext = createCommonjsModule(function (module, exports) {
-var __createBinding = (commonjsGlobal && commonjsGlobal.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (commonjsGlobal && commonjsGlobal.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (commonjsGlobal && commonjsGlobal.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-const helpers = __importStar(ParseHelpers);
 class Mtext {
     constructor() {
         this.ForEntityName = 'MTEXT';
@@ -1370,10 +1077,10 @@ class Mtext {
                     entity.text ? entity.text += curr.value : entity.text = curr.value;
                     break;
                 case 10:
-                    entity.position = helpers.parsePoint(scanner);
+                    entity.position = parsePoint(scanner);
                     break;
                 case 11:
-                    entity.directionVector = helpers.parsePoint(scanner);
+                    entity.directionVector = parsePoint(scanner);
                     break;
                 case 40:
                     //Note: this is the text height
@@ -1392,7 +1099,7 @@ class Mtext {
                     entity.drawingDirection = curr.value;
                     break;
                 default:
-                    helpers.checkCommonEntityProperties(entity, curr, scanner);
+                    checkCommonEntityProperties(entity, curr, scanner);
                     break;
             }
             curr = scanner.next();
@@ -1400,34 +1107,8 @@ class Mtext {
         return entity;
     }
 }
-exports.default = Mtext;
-});
 
-unwrapExports(mtext);
-
-var point = createCommonjsModule(function (module, exports) {
-var __createBinding = (commonjsGlobal && commonjsGlobal.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (commonjsGlobal && commonjsGlobal.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (commonjsGlobal && commonjsGlobal.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-const helpers = __importStar(ParseHelpers);
-class Point {
+class Point$1 {
     constructor() {
         this.ForEntityName = 'POINT';
     }
@@ -1440,18 +1121,18 @@ class Point {
                 break;
             switch (curr.code) {
                 case 10:
-                    entity.position = helpers.parsePoint(scanner);
+                    entity.position = parsePoint(scanner);
                     break;
                 case 39:
                     entity.thickness = curr.value;
                     break;
                 case 210:
-                    entity.extrusionDirection = helpers.parsePoint(scanner);
+                    entity.extrusionDirection = parsePoint(scanner);
                     break;
                 case 100:
                     break;
                 default: // check common entity attributes
-                    helpers.checkCommonEntityProperties(entity, curr, scanner);
+                    checkCommonEntityProperties(entity, curr, scanner);
                     break;
             }
             curr = scanner.next();
@@ -1459,33 +1140,7 @@ class Point {
         return entity;
     }
 }
-exports.default = Point;
-});
 
-unwrapExports(point);
-
-var vertex = createCommonjsModule(function (module, exports) {
-var __createBinding = (commonjsGlobal && commonjsGlobal.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (commonjsGlobal && commonjsGlobal.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (commonjsGlobal && commonjsGlobal.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-const helpers = __importStar(ParseHelpers);
 class Vertex {
     constructor() {
         this.ForEntityName = 'VERTEX';
@@ -1538,7 +1193,7 @@ class Vertex {
                     entity.faceD = curr.value;
                     break;
                 default:
-                    helpers.checkCommonEntityProperties(entity, curr, scanner);
+                    checkCommonEntityProperties(entity, curr, scanner);
                     break;
             }
             curr = scanner.next();
@@ -1546,38 +1201,8 @@ class Vertex {
         return entity;
     }
 }
-exports.default = Vertex;
-});
 
-unwrapExports(vertex);
-
-var polyline = createCommonjsModule(function (module, exports) {
-var __createBinding = (commonjsGlobal && commonjsGlobal.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (commonjsGlobal && commonjsGlobal.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (commonjsGlobal && commonjsGlobal.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-var __importDefault = (commonjsGlobal && commonjsGlobal.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-const helpers = __importStar(ParseHelpers);
-const vertex_1 = __importDefault(vertex);
-class Polyline {
+class Polyline$1 {
     constructor() {
         this.ForEntityName = 'POLYLINE';
     }
@@ -1622,10 +1247,10 @@ class Polyline {
                 case 75: // Curves and smooth surface type
                     break;
                 case 210:
-                    entity.extrusionDirection = helpers.parsePoint(scanner);
+                    entity.extrusionDirection = parsePoint(scanner);
                     break;
                 default:
-                    helpers.checkCommonEntityProperties(entity, curr, scanner);
+                    checkCommonEntityProperties(entity, curr, scanner);
                     break;
             }
             curr = scanner.next();
@@ -1634,9 +1259,8 @@ class Polyline {
         return entity;
     }
 }
-exports.default = Polyline;
 function parsePolylineVertices(scanner, curr) {
-    const vertexParser = new vertex_1.default();
+    const vertexParser = new Vertex();
     const vertices = [];
     while (!scanner.isEOF()) {
         if (curr.code === 0) {
@@ -1658,37 +1282,12 @@ function parseSeqEnd(scanner, curr) {
     while (!scanner.isEOF()) {
         if (curr.code == 0)
             break;
-        helpers.checkCommonEntityProperties(entity, curr, scanner);
+        checkCommonEntityProperties(entity, curr, scanner);
         curr = scanner.next();
     }
     return entity;
 }
-});
 
-unwrapExports(polyline);
-
-var solid = createCommonjsModule(function (module, exports) {
-var __createBinding = (commonjsGlobal && commonjsGlobal.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (commonjsGlobal && commonjsGlobal.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (commonjsGlobal && commonjsGlobal.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-const helpers = __importStar(ParseHelpers);
 class Solid {
     constructor() {
         this.ForEntityName = 'SOLID';
@@ -1701,22 +1300,22 @@ class Solid {
                 break;
             switch (curr.code) {
                 case 10:
-                    entity.points[0] = helpers.parsePoint(scanner);
+                    entity.points[0] = parsePoint(scanner);
                     break;
                 case 11:
-                    entity.points[1] = helpers.parsePoint(scanner);
+                    entity.points[1] = parsePoint(scanner);
                     break;
                 case 12:
-                    entity.points[2] = helpers.parsePoint(scanner);
+                    entity.points[2] = parsePoint(scanner);
                     break;
                 case 13:
-                    entity.points[3] = helpers.parsePoint(scanner);
+                    entity.points[3] = parsePoint(scanner);
                     break;
                 case 210:
-                    entity.extrusionDirection = helpers.parsePoint(scanner);
+                    entity.extrusionDirection = parsePoint(scanner);
                     break;
                 default: // check common entity attributes
-                    helpers.checkCommonEntityProperties(entity, curr, scanner);
+                    checkCommonEntityProperties(entity, curr, scanner);
                     break;
             }
             curr = scanner.next();
@@ -1724,34 +1323,8 @@ class Solid {
         return entity;
     }
 }
-exports.default = Solid;
-});
 
-unwrapExports(solid);
-
-var spline = createCommonjsModule(function (module, exports) {
-var __createBinding = (commonjsGlobal && commonjsGlobal.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (commonjsGlobal && commonjsGlobal.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (commonjsGlobal && commonjsGlobal.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-const helpers = __importStar(ParseHelpers);
-class Spline {
+class Spline$1 {
     constructor() {
         this.ForEntityName = 'SPLINE';
     }
@@ -1765,18 +1338,18 @@ class Spline {
                 case 10:
                     if (!entity.controlPoints)
                         entity.controlPoints = [];
-                    entity.controlPoints.push(helpers.parsePoint(scanner));
+                    entity.controlPoints.push(parsePoint(scanner));
                     break;
                 case 11:
                     if (!entity.fitPoints)
                         entity.fitPoints = [];
-                    entity.fitPoints.push(helpers.parsePoint(scanner));
+                    entity.fitPoints.push(parsePoint(scanner));
                     break;
                 case 12:
-                    entity.startTangent = helpers.parsePoint(scanner);
+                    entity.startTangent = parsePoint(scanner);
                     break;
                 case 13:
-                    entity.endTangent = helpers.parsePoint(scanner);
+                    entity.endTangent = parsePoint(scanner);
                     break;
                 case 40:
                     if (!entity.knotValues)
@@ -1810,10 +1383,10 @@ class Spline {
                     entity.numberOfFitPoints = curr.value;
                     break;
                 case 210:
-                    entity.normalVector = helpers.parsePoint(scanner);
+                    entity.normalVector = parsePoint(scanner);
                     break;
                 default:
-                    helpers.checkCommonEntityProperties(entity, curr, scanner);
+                    checkCommonEntityProperties(entity, curr, scanner);
                     break;
             }
             curr = scanner.next();
@@ -1821,34 +1394,8 @@ class Spline {
         return entity;
     }
 }
-exports.default = Spline;
-});
 
-unwrapExports(spline);
-
-var text = createCommonjsModule(function (module, exports) {
-var __createBinding = (commonjsGlobal && commonjsGlobal.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (commonjsGlobal && commonjsGlobal.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (commonjsGlobal && commonjsGlobal.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-const helpers = __importStar(ParseHelpers);
-class Text {
+class Text$1 {
     constructor() {
         this.ForEntityName = 'TEXT';
     }
@@ -1860,10 +1407,10 @@ class Text {
                 break;
             switch (curr.code) {
                 case 10: // X coordinate of 'first alignment point'
-                    entity.startPoint = helpers.parsePoint(scanner);
+                    entity.startPoint = parsePoint(scanner);
                     break;
                 case 11: // X coordinate of 'second alignment point'
-                    entity.endPoint = helpers.parsePoint(scanner);
+                    entity.endPoint = parsePoint(scanner);
                     break;
                 case 40: // Text height
                     entity.textHeight = curr.value;
@@ -1885,7 +1432,7 @@ class Text {
                     entity.valign = curr.value;
                     break;
                 default: // check common entity attributes
-                    helpers.checkCommonEntityProperties(entity, curr, scanner);
+                    checkCommonEntityProperties(entity, curr, scanner);
                     break;
             }
             curr = scanner.next();
@@ -1893,10 +1440,12 @@ class Text {
         return entity;
     }
 }
-exports.default = Text;
-});
 
-unwrapExports(text);
+var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
+
+function createCommonjsModule(fn, module) {
+	return module = { exports: {} }, fn(module, module.exports), module.exports;
+}
 
 var loglevel = createCommonjsModule(function (module) {
 /*
@@ -2171,52 +1720,28 @@ var loglevel = createCommonjsModule(function (module) {
 }));
 });
 
-var DxfParser_1 = createCommonjsModule(function (module, exports) {
-var __importDefault = (commonjsGlobal && commonjsGlobal.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-const DxfArrayScanner_1$1 = __importDefault(DxfArrayScanner_1);
-const AutoCadColorIndex_1 = __importDefault(AutoCadColorIndex);
-const _3dface_1 = __importDefault(_3dface);
-const arc_1 = __importDefault(arc);
-const attdef_1 = __importDefault(attdef);
-const circle_1 = __importDefault(circle);
-const dimension_1 = __importDefault(dimension);
-const ellipse_1 = __importDefault(ellipse);
-const insert_1 = __importDefault(insert);
-const line_1 = __importDefault(line);
-const lwpolyline_1 = __importDefault(lwpolyline);
-const mtext_1 = __importDefault(mtext);
-const point_1 = __importDefault(point);
-const polyline_1 = __importDefault(polyline);
-const solid_1 = __importDefault(solid);
-const spline_1 = __importDefault(spline);
-const text_1 = __importDefault(text);
-//import Vertex from './entities/';
-const loglevel_1 = __importDefault(loglevel);
 //log.setLevel('trace');
 //log.setLevel('debug');
 //log.setLevel('info');
 //log.setLevel('warn');
-loglevel_1.default.setLevel('error');
+loglevel.setLevel('error');
 function registerDefaultEntityHandlers(dxfParser) {
     // Supported entities here (some entity code is still being refactored into this flow)
-    dxfParser.registerEntityHandler(_3dface_1.default);
-    dxfParser.registerEntityHandler(arc_1.default);
-    dxfParser.registerEntityHandler(attdef_1.default);
-    dxfParser.registerEntityHandler(circle_1.default);
-    dxfParser.registerEntityHandler(dimension_1.default);
-    dxfParser.registerEntityHandler(ellipse_1.default);
-    dxfParser.registerEntityHandler(insert_1.default);
-    dxfParser.registerEntityHandler(line_1.default);
-    dxfParser.registerEntityHandler(lwpolyline_1.default);
-    dxfParser.registerEntityHandler(mtext_1.default);
-    dxfParser.registerEntityHandler(point_1.default);
-    dxfParser.registerEntityHandler(polyline_1.default);
-    dxfParser.registerEntityHandler(solid_1.default);
-    dxfParser.registerEntityHandler(spline_1.default);
-    dxfParser.registerEntityHandler(text_1.default);
+    dxfParser.registerEntityHandler(ThreeDface);
+    dxfParser.registerEntityHandler(Arc$1);
+    dxfParser.registerEntityHandler(Attdef);
+    dxfParser.registerEntityHandler(Circle$1);
+    dxfParser.registerEntityHandler(Dimension);
+    dxfParser.registerEntityHandler(Ellipse$1);
+    dxfParser.registerEntityHandler(Insert);
+    dxfParser.registerEntityHandler(Line$1);
+    dxfParser.registerEntityHandler(Lwpolyline);
+    dxfParser.registerEntityHandler(Mtext);
+    dxfParser.registerEntityHandler(Point$1);
+    dxfParser.registerEntityHandler(Polyline$1);
+    dxfParser.registerEntityHandler(Solid);
+    dxfParser.registerEntityHandler(Spline$1);
+    dxfParser.registerEntityHandler(Text$1);
     //dxfParser.registerEntityHandler(require('./entities/vertex'));
 }
 class DxfParser {
@@ -2264,7 +1789,7 @@ class DxfParser {
         const dxf = {};
         let lastHandle = 0;
         const dxfLinesArray = dxfString.split(/\r\n|\r|\n/g);
-        const scanner = new DxfArrayScanner_1$1.default(dxfLinesArray);
+        const scanner = new DxfArrayScanner(dxfLinesArray);
         if (!scanner.hasNext())
             throw Error('Empty file');
         const self = this;
@@ -2281,30 +1806,30 @@ class DxfParser {
                         continue;
                     }
                     if (curr.value === 'HEADER') {
-                        loglevel_1.default.debug('> HEADER');
+                        loglevel.debug('> HEADER');
                         dxf.header = parseHeader();
-                        loglevel_1.default.debug('<');
+                        loglevel.debug('<');
                     }
                     else if (curr.value === 'BLOCKS') {
-                        loglevel_1.default.debug('> BLOCKS');
+                        loglevel.debug('> BLOCKS');
                         dxf.blocks = parseBlocks();
-                        loglevel_1.default.debug('<');
+                        loglevel.debug('<');
                     }
                     else if (curr.value === 'ENTITIES') {
-                        loglevel_1.default.debug('> ENTITIES');
+                        loglevel.debug('> ENTITIES');
                         dxf.entities = parseEntities(false);
-                        loglevel_1.default.debug('<');
+                        loglevel.debug('<');
                     }
                     else if (curr.value === 'TABLES') {
-                        loglevel_1.default.debug('> TABLES');
+                        loglevel.debug('> TABLES');
                         dxf.tables = parseTables();
-                        loglevel_1.default.debug('<');
+                        loglevel.debug('<');
                     }
                     else if (curr.value === 'EOF') {
-                        loglevel_1.default.debug('EOF');
+                        loglevel.debug('EOF');
                     }
                     else {
-                        loglevel_1.default.warn('Skipping section \'%s\'', curr.value);
+                        loglevel.warn('Skipping section \'%s\'', curr.value);
                     }
                 }
                 else {
@@ -2370,12 +1895,12 @@ class DxfParser {
                     break;
                 }
                 if (groupIs(curr, 0, 'BLOCK')) {
-                    loglevel_1.default.debug('block {');
+                    loglevel.debug('block {');
                     const block = parseBlock();
-                    loglevel_1.default.debug('}');
+                    loglevel.debug('}');
                     ensureHandle(block);
                     if (!block.name)
-                        loglevel_1.default.error('block with handle "' + block.handle + '" is missing a name.');
+                        loglevel.error('block with handle "' + block.handle + '" is missing a name.');
                     else
                         blocks[block.name] = block;
                 }
@@ -2470,12 +1995,12 @@ class DxfParser {
                     curr = scanner.next();
                     const tableDefinition = tableDefinitions[curr.value];
                     if (tableDefinition) {
-                        loglevel_1.default.debug(curr.value + ' Table {');
+                        loglevel.debug(curr.value + ' Table {');
                         tables[tableDefinitions[curr.value].tableName] = parseTable(curr);
-                        loglevel_1.default.debug('}');
+                        loglevel.debug('}');
                     }
                     else {
-                        loglevel_1.default.debug('Unhandled Table ' + curr.value);
+                        loglevel.debug('Unhandled Table ' + curr.value);
                     }
                 }
                 else {
@@ -2542,7 +2067,7 @@ class DxfParser {
                     return undefined;
                 })();
                 if (expectedCount !== actualCount)
-                    loglevel_1.default.warn('Parsed ' + actualCount + ' ' + tableDefinition.dxfSymbolName + '\'s but expected ' + expectedCount);
+                    loglevel.warn('Parsed ' + actualCount + ' ' + tableDefinition.dxfSymbolName + '\'s but expected ' + expectedCount);
             }
             curr = scanner.next();
             return table;
@@ -2550,7 +2075,7 @@ class DxfParser {
         function parseViewPortRecords() {
             const viewPorts = []; // Multiple table entries may have the same name indicating a multiple viewport configuration
             let viewPort = {};
-            loglevel_1.default.debug('ViewPort {');
+            loglevel.debug('ViewPort {');
             curr = scanner.next();
             while (!groupIs(curr, 0, END_OF_TABLE_VALUE)) {
                 switch (curr.code) {
@@ -2660,9 +2185,9 @@ class DxfParser {
                     case 0:
                         // New ViewPort
                         if (curr.value === 'VPORT') {
-                            loglevel_1.default.debug('}');
+                            loglevel.debug('}');
                             viewPorts.push(viewPort);
-                            loglevel_1.default.debug('ViewPort {');
+                            loglevel.debug('ViewPort {');
                             viewPort = {};
                             curr = scanner.next();
                         }
@@ -2675,7 +2200,7 @@ class DxfParser {
             }
             // Note: do not call scanner.next() here,
             //  parseTable() needs the current group
-            loglevel_1.default.debug('}');
+            loglevel.debug('}');
             viewPorts.push(viewPort);
             return viewPorts;
         }
@@ -2684,7 +2209,7 @@ class DxfParser {
             let ltype = {};
             let length = 0;
             let ltypeName;
-            loglevel_1.default.debug('LType {');
+            loglevel.debug('LType {');
             curr = scanner.next();
             while (!groupIs(curr, 0, 'ENDTAB')) {
                 switch (curr.code) {
@@ -2712,19 +2237,19 @@ class DxfParser {
                         curr = scanner.next();
                         break;
                     case 0:
-                        loglevel_1.default.debug('}');
+                        loglevel.debug('}');
                         if (length > 0 && length !== ltype.pattern.length)
-                            loglevel_1.default.warn('lengths do not match on LTYPE pattern');
+                            loglevel.warn('lengths do not match on LTYPE pattern');
                         ltypes[ltypeName] = ltype;
                         ltype = {};
-                        loglevel_1.default.debug('LType {');
+                        loglevel.debug('LType {');
                         curr = scanner.next();
                         break;
                     default:
                         curr = scanner.next();
                 }
             }
-            loglevel_1.default.debug('}');
+            loglevel.debug('}');
             ltypes[ltypeName] = ltype;
             return ltypes;
         }
@@ -2732,7 +2257,7 @@ class DxfParser {
             const layers = {};
             let layer = {};
             let layerName;
-            loglevel_1.default.debug('Layer {');
+            loglevel.debug('Layer {');
             curr = scanner.next();
             while (!groupIs(curr, 0, 'ENDTAB')) {
                 switch (curr.code) {
@@ -2755,9 +2280,9 @@ class DxfParser {
                     case 0:
                         // New Layer
                         if (curr.value === 'LAYER') {
-                            loglevel_1.default.debug('}');
+                            loglevel.debug('}');
                             layers[layerName] = layer;
-                            loglevel_1.default.debug('Layer {');
+                            loglevel.debug('Layer {');
                             layer = {};
                             layerName = undefined;
                             curr = scanner.next();
@@ -2771,7 +2296,7 @@ class DxfParser {
             }
             // Note: do not call scanner.next() here,
             //  parseLayerTable() needs the current group
-            loglevel_1.default.debug('}');
+            loglevel.debug('}');
             layers[layerName] = layer;
             return layers;
         }
@@ -2813,15 +2338,15 @@ class DxfParser {
                     }
                     const handler = self._entityHandlers[curr.value];
                     if (handler != null) {
-                        loglevel_1.default.debug(curr.value + ' {');
+                        loglevel.debug(curr.value + ' {');
                         const entity = handler.parseEntity(scanner, curr);
                         curr = scanner.lastReadGroup;
-                        loglevel_1.default.debug('}');
+                        loglevel.debug('}');
                         ensureHandle(entity);
                         entities.push(entity);
                     }
                     else {
-                        loglevel_1.default.warn('Unhandled entity ' + curr.value);
+                        loglevel.warn('Unhandled entity ' + curr.value);
                         curr = scanner.next();
                         continue;
                     }
@@ -2871,12 +2396,11 @@ class DxfParser {
         return dxf;
     }
 }
-exports.default = DxfParser;
 function groupIs(group, code, value) {
     return group.code === code && group.value === value;
 }
 function logUnhandledGroup(curr) {
-    loglevel_1.default.debug('unhandled group ' + debugCode(curr));
+    loglevel.debug('unhandled group ' + debugCode(curr));
 }
 function debugCode(curr) {
     return curr.code + ':' + curr.value;
@@ -2886,7 +2410,7 @@ function debugCode(curr) {
  * @return {Number} truecolor value as a number
  */
 function getAcadColor(index) {
-    return AutoCadColorIndex_1.default[index];
+    return AUTO_CAD_COLOR_INDEX[index];
 }
 // const BLOCK_ANONYMOUS_FLAG = 1;
 // const BLOCK_NON_CONSTANT_FLAG = 2;
@@ -2899,11 +2423,6 @@ function getAcadColor(index) {
 // Code 6 of an entity indicates inheritance of properties (eg. color).
 //   BYBLOCK means inherits from block
 //   BYLAYER (default) mean inherits from layer
-});
-
-var dxfParserModule = unwrapExports(DxfParser_1);
-
-const DxfParser = dxfParserModule.default;
 
 const buildRegularPolygon = (sides = 32) => {
   let points = [];

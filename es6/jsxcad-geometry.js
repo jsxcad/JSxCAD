@@ -467,8 +467,11 @@ const fromPolygonsWithHoles = (geometry) =>
     fromPolygonsWithHolesToTriangles(geometry.polygonsWithHoles)
   );
 
-const taggedSegments = ({ tags = [], matrix }, segments) => {
-  return { type: 'segments', tags, matrix, segments };
+const taggedSegments = (
+  { tags = [], matrix, orientation },
+  segments
+) => {
+  return { type: 'segments', tags, matrix, segments, orientation };
 };
 
 const isClosed = (path) => path.length === 0 || path[0] !== null;
@@ -531,11 +534,22 @@ const transform = (matrix, polygons) =>
 
 const transformedGeometry = Symbol('transformedGeometry');
 
-const transformedOrientation = (matrix, [origin, normal, rotation]) =>
-    [transform$5(matrix, origin), transform$5(matrix, normal), transform$5(matrix, rotation)];
+const transformedOrientation = (matrix, [origin, normal, rotation]) => [
+  transform$5(matrix, origin),
+  transform$5(matrix, normal),
+  transform$5(matrix, rotation),
+];
 
 const transformSegments = (geometry) => {
-  const { matrix, orientation = [[0, 0, 0], [0, 0, 1], [1, 0, 0]], segments } = geometry;
+  const {
+    matrix,
+    orientation = [
+      [0, 0, 0],
+      [0, 0, 1],
+      [1, 0, 0],
+    ],
+    segments,
+  } = geometry;
   if (!matrix) {
     return geometry;
   }
@@ -546,7 +560,13 @@ const transformSegments = (geometry) => {
       transform$5(matrix, end),
     ]);
   }
-  return taggedSegments({ tags: geometry.tags, orientation: transformedOrientation(matrix, orientation) }, transformed);
+  return taggedSegments(
+    {
+      tags: geometry.tags,
+      orientation: transformedOrientation(matrix, orientation),
+    },
+    transformed
+  );
 };
 
 const toTransformedGeometry = (geometry) => {
@@ -699,14 +719,26 @@ const bend$1 = (geometry, radius) =>
 const doNothing = (geometry) => geometry;
 
 const op =
-  ({ graph = doNothing, segments = doNothing, triangles = doNothing, points = doNothing }, method = rewrite) =>
+  (
+    {
+      graph = doNothing,
+      segments = doNothing,
+      triangles = doNothing,
+      points = doNothing,
+    },
+    method = rewrite
+  ) =>
   (geometry, ...args) => {
     const walk = (geometry, descend) => {
       switch (geometry.type) {
-        case 'graph': return graph(geometry, ...args);
-        case 'segments': return segments(geometry, ...args);
-        case 'triangles': return triangles(geometry, ...args);
-        case 'points': return points(geometry, ...args);
+        case 'graph':
+          return graph(geometry, ...args);
+        case 'segments':
+          return segments(geometry, ...args);
+        case 'triangles':
+          return triangles(geometry, ...args);
+        case 'points':
+          return points(geometry, ...args);
         case 'plan':
           reify(geometry);
         // fall through
@@ -1355,9 +1387,20 @@ const drop = (tags, geometry) =>
 const eachEdge = (geometry, emit) =>
   outlineSurfaceMesh(toSurfaceMesh(geometry.graph), geometry.matrix, emit);
 
-const segments = ({ matrix, normal = [0, 0, 1], segments }, emit) => {
+const segments = (
+  {
+    matrix,
+    orientation = [
+      [0, 0, 0],
+      [0, 0, 1],
+      [1, 0, 0],
+    ],
+    segments,
+  },
+  emit
+) => {
   for (const segment of segments) {
-    emit(segment, normal, matrix);
+    emit(segment, orientation);
   }
 };
 
@@ -1694,7 +1737,14 @@ const getInverseMatrices = (geometry) => {
     case 'segments': {
       // This is a bit trickier.
       // We transform the matrices such that the first segment starts at [0, 0, 0], and extends to [length, 0, 0].
-      const { orientation = [[0, 0, 0], [0, 0, 1], [1, 0, 0]], segments } = geometry;
+      const {
+        orientation = [
+          [0, 0, 0],
+          [0, 0, 1],
+          [1, 0, 0],
+        ],
+        segments,
+      } = geometry;
       if (segments.length < 1) {
         // There's nothing to do.
         return { global: geometry.matrix, local: geometry.matrix };
@@ -2540,7 +2590,11 @@ const outline$1 = ({ tags }, geometry) => {
   geometry.cache = geometry.cache || {};
   if (geometry.cache.outline === undefined) {
     const segments = [];
-    outlineSurfaceMesh(toSurfaceMesh(geometry.graph), geometry.matrix, segment => segments.push(segment));
+    outlineSurfaceMesh(
+      toSurfaceMesh(geometry.graph),
+      geometry.matrix,
+      (segment) => segments.push(segment)
+    );
     geometry.cache.outline = taggedSegments({ tags }, segments);
   }
   return geometry.cache.outline;

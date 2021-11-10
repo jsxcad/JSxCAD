@@ -1,6 +1,5 @@
 import { getInverseMatrices, getLeafs } from '@jsxcad/geometry';
 
-import Group from './Group.js';
 import Shape from './Shape.js';
 
 export const at =

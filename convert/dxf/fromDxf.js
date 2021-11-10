@@ -1,10 +1,8 @@
 import { scale, translate } from '@jsxcad/geometry';
 
-import dxfParserModule from 'dxf-parser/dist/DxfParser.js';
+import DxfParser from 'dxf-parser';
 import { fromAngleRadians } from '@jsxcad/math-vec2';
 import { toTagFromRgbInt } from '@jsxcad/algorithm-color';
-
-const DxfParser = dxfParserModule.default;
 
 const buildRegularPolygon = (sides = 32) => {
   let points = [];

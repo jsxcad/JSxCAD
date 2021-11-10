@@ -27,7 +27,7 @@
     "@jsxcad/geometry": "^0.0.79",
     "@jsxcad/math-vec2": "^0.0.79",
     "dxf-writer": "^1.2.1",
-    "dxf-parser": "^1.0.0-alpha.2"
+    "dxf-parser": "^1.1.1"
   },
   "devDependencies": {
     "ava": "^3.9.0",
