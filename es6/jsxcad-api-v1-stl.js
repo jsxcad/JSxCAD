@@ -84,7 +84,7 @@ const prepareStl = (shape, name, op = (s) => s, options = {}) => {
   let index = 0;
   const entries = [];
   for (const entry of ensurePages(op(shape).toDisjointGeometry())) {
-    const stlPath = `stl/${path}/${generateUniqueId()}`;
+    const stlPath = `download/stl/${path}/${generateUniqueId()}`;
     const render = async () => {
       try {
         await write(stlPath, await toStl(entry, options));

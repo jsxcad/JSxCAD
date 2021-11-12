@@ -8,7 +8,7 @@ export const getFile = async (options, unqualifiedPath) => {
   if (typeof unqualifiedPath !== 'string') {
     throw Error(`die: ${JSON.stringify(unqualifiedPath)}`);
   }
-  const path = qualifyPath(unqualifiedPath);
+  const path = qualifyPath(unqualifiedPath, options.workspace);
   let file = files.get(path);
   if (file === undefined) {
     file = { path: unqualifiedPath, watchers: new Set(), storageKey: path };
@@ -27,7 +27,7 @@ export const listFiles = (set) => {
 };
 
 export const deleteFile = async (options, unqualifiedPath) => {
-  const path = qualifyPath(unqualifiedPath);
+  const path = qualifyPath(unqualifiedPath, options.workspace);
   let file = files.get(path);
   if (file !== undefined) {
     files.delete(path);

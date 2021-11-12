@@ -23,7 +23,13 @@ export {
   restoreEmitGroup,
   saveEmitGroup,
 } from './emit.js';
-export { getFilesystem, qualifyPath, setupFilesystem } from './filesystem.js';
+export {
+  getFilesystem,
+  getWorkspace,
+  qualifyPath,
+  setupFilesystem,
+  setupWorkspace,
+} from './filesystem.js';
 export { hash } from './hash.js';
 export { isBrowser, isNode, isWebWorker } from './browserOrNode.js';
 export { listFiles, listFilesystems } from './listFiles.js';

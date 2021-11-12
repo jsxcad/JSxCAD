@@ -4,12 +4,7 @@
 import * as fs from 'fs';
 import * as v8 from 'v8';
 
-import {
-  getBase,
-  getFilesystem,
-  qualifyPath,
-  setupFilesystem,
-} from './filesystem.js';
+import { getFilesystem, qualifyPath } from './filesystem.js';
 
 import { isBrowser, isNode, isWebWorker } from './browserOrNode.js';
 
@@ -61,11 +56,13 @@ const getFileFetcher = async (qualify = qualifyPath, doSerialize = true) => {
 };
 
 // Fetch from internal store.
-const fetchPersistent = async (path, doSerialize) => {
+const fetchPersistent = async (path, { workspace, doSerialize }) => {
   try {
-    const base = getBase();
-    if (base !== undefined) {
-      const fetchFile = await getFileFetcher(qualifyPath, doSerialize);
+    if (workspace) {
+      const fetchFile = await getFileFetcher(
+        (path) => qualifyPath(path, workspace),
+        doSerialize
+      );
       const data = await fetchFile(path);
       return data;
     }
@@ -119,23 +116,11 @@ export const readFile = async (options, path) => {
     forceNoCache = false,
     decode,
   } = options;
-  let originalWorkspace = getFilesystem();
-  if (workspace !== originalWorkspace) {
-    log({ op: 'text', text: `Read ${path} of ${workspace}` });
-    // Switch to the source filesystem, if necessary.
-    setupFilesystem({ fileBase: workspace });
-  } else {
-    log({ op: 'text', text: `Read ${path}` });
-    // info(`Read ${path}`);
-  }
   const file = await getFile(options, path);
   if (file.data === undefined || useCache === false || forceNoCache) {
-    file.data = await fetchPersistent(path, true);
+    file.data = await fetchPersistent(path, { workspace, doSerialize: true });
   }
-  if (workspace !== originalWorkspace) {
-    // Switch back to the original filesystem, if necessary.
-    setupFilesystem({ fileBase: originalWorkspace });
-  }
+
   if (file.data === undefined && allowFetch && sources.length > 0) {
     let data = await fetchSources(sources);
     if (decode) {
@@ -163,7 +148,7 @@ export const readFile = async (options, path) => {
 export const read = async (path, options = {}) => readFile(options, path);
 
 export const readOrWatch = async (path, options = {}) => {
-  const data = await read(path);
+  const data = await read(path, options);
   if (data !== undefined) {
     return data;
   }
@@ -174,5 +159,5 @@ export const readOrWatch = async (path, options = {}) => {
   const watcher = await watchFile(path, (file) => resolveWatch(path));
   await watch;
   await unwatchFile(path, watcher);
-  return read(path);
+  return read(path, options);
 };

@@ -1,20 +1,18 @@
 {
-  "name": "@jsxcad/ui-v1",
+  "name": "@jsxcad/ui-app",
   "version": "0.0.79",
-  "description": "v1 UI for JSxCAD",
+  "description": "Application UI for JSxCAD",
   "repository": "https://github.com/jsxcad/JSxCAD",
   "main": "master.js",
   "module": "dist/bundle.js",
   "type": "module",
   "scripts": {
-    "depcheck": "depcheck --ignores 'https:,debug,import-local,lodash,@jsxcad/ui-v1,@jsxcad/eslint*,eslint*,babel-eslint,preact,react,mermaid,babel-plugin-jsx-pragmatic' --ignore-dirs=dist,gitcdn,local",
+    "depcheck": "depcheck --ignores 'https:,debug,import-local,lodash,@jsxcad/ui-v1,@jsxcad/eslint*,eslint*,babel-eslint,preact,react,react-dom,mermaid,babel-plugin-jsx-pragmatic' --ignore-dirs=dist,gitcdn,local",
     "lint": "eslint *.js",
     "lintfix": "eslint --fix *.js",
     "test": "ava",
     "tests": "ava *.test.js",
-    "rollup": "node --max-old-space-size=4096 ../../node_modules/rollup/dist/bin/rollup -c rollup_main.js && rollup -c rollup_webworker.js && rollup -c rollup.auth.js && rollup -c rollup.auth.es6.js",
-    "didYouRunBootstrapMaslowRollup": "rollup -c rollup.maslowWorker.js",
-    "didYouRunBootstrapMaslowMasterRollup": "rollup -c rollup.maslowMaster.js"
+    "rollup": "node --max-old-space-size=4096 ../../node_modules/rollup/dist/bin/rollup -c rollup_main.js && rollup -c rollup_webworker.js"
   },
   "contributors": [
     {
@@ -25,24 +23,19 @@
   "keywords": [],
   "license": "MIT",
   "dependencies": {
-    "@jsxcad/algorithm-cgal": "^0.0.79",
     "@jsxcad/api": "^0.0.79",
     "@jsxcad/sys": "^0.0.79",
     "@jsxcad/ui-notebook": "^0.0.79",
     "@jsxcad/ui-threejs": "^0.0.79",
     "ace-builds": "^1.4.7",
-    "base64-js": "^1.3.0",
     "extract-urls": "^1.3.2",
     "hash-sum": "^2.0.0",
-    "marked": "^1.1.1",
     "preact": "10.5.14",
     "prismjs": "^1.17.1",
     "prop-types": "^15.7.2",
-    "react-ace": "^8.0.0",
+    "react-ace": "^9.5.0",
     "react-bootstrap": "^1.0.0-beta.14",
-    "react-split-pane": "^0.1.92",
-    "react-draggable": "4.2.0",
-    "react-mosaic-component": "^3.2.0"
+    "flexlayout-react": "^0.5.20"
   },
   "devDependencies": {
     "@babel/core": "^7.7.4",
@@ -68,7 +61,6 @@
     "rollup": "^2.56.0",
     "rollup-plugin-hypothetical-windows-fix": "^2.1.1",
     "rollup-plugin-json": "^4.0.0",
-    "rollup-plugin-loadz0r": "^0.7.1",
     "rollup-plugin-sizes": "^1.0.4"
   },
   "publishConfig": {

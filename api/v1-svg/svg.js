@@ -17,7 +17,7 @@ export const prepareSvg = (shape, name, op = (s) => s, options = {}) => {
   let index = 0;
   const entries = [];
   for (const entry of ensurePages(op(shape).toDisjointGeometry())) {
-    const svgPath = `svg/${path}/${generateUniqueId()}`;
+    const svgPath = `download/svg/${path}/${generateUniqueId()}`;
     const render = async () => {
       try {
         await write(svgPath, await toSvg(entry, options));
