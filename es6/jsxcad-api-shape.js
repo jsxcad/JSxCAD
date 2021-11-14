@@ -525,15 +525,23 @@ const md = (strings, ...placeholders) => {
   return md;
 };
 
-const mdMethod = function (string, ...placeholders) {
-  if (string instanceof Function) {
-    string = string(this);
-  }
-  md([string], ...placeholders);
-  return this;
-};
+const mdMethod =
+  (...chunks) =>
+  (shape) => {
+    const strings = [];
+    for (const chunk of chunks) {
+      if (chunk instanceof Function) {
+        strings.push(chunk(shape));
+      } else {
+        strings.push(chunk);
+      }
+    }
+    const md = strings.join('');
+    emit({ md, hash: hashSum(md) });
+    return shape;
+  };
 
-Shape.prototype.md = mdMethod;
+Shape.registerMethod('md', mdMethod);
 
 const render = (abstract, shape) => {
   const graph = [];
@@ -3113,6 +3121,8 @@ const moveTo =
 
 Shape.registerMethod('moveTo', moveTo);
 
+const noop = () => (shape) => shape;
+
 const normal = () => (shape) =>
   Shape.fromGeometry(computeNormal(shape.toGeometry()));
 
@@ -3476,6 +3486,27 @@ const sketch = () => (shape) =>
 
 Shape.registerMethod('sketch', sketch);
 
+const table =
+  (rows, columns, ...cells) =>
+  (shape) => {
+    const uniqueId = generateUniqueId;
+    const open = { open: { type: 'table', rows, columns, uniqueId } };
+    emit({ open, hash: hashSum(open) });
+    for (let cell of cells) {
+      if (cell instanceof Function) {
+        cell = cell(shape);
+      }
+      if (typeof cell === 'string') {
+        md(cell);
+      }
+    }
+    const close = { close: { type: 'table', rows, columns, uniqueId } };
+    emit({ close, hash: hashSum(close) });
+    return shape;
+  };
+
+Shape.registerMethod('table', table);
+
 const tags =
   (namespace = 'user', op = (tags, shape) => tags) =>
   (shape) => {
@@ -3598,11 +3629,29 @@ const untag =
 
 Shape.registerMethod('untag', untag);
 
+const byType = (args, defaultOptions) => {
+  let viewId;
+  let op = (x) => x;
+  let options = defaultOptions;
+
+  // An attempt to make view less annoying by assigning the arguments based on type.
+  for (const arg of args) {
+    if (arg instanceof Function) {
+      op = arg;
+    } else if (arg instanceof Object) {
+      options = Object.assign({}, defaultOptions, arg);
+    } else if (arg !== undefined) {
+      viewId = arg;
+    }
+  }
+  return { viewId, op, options };
+};
+
 // FIX: Avoid the extra read-write cycle.
 const baseView =
-  (
-    op = (x) => x,
-    {
+  (viewId, op = (x) => x, options = {}) =>
+  (shape) => {
+    let {
       size,
       skin = true,
       outline = true,
@@ -3613,9 +3662,8 @@ const baseView =
       position = [100, -100, 100],
       withAxes = false,
       withGrid = false,
-    } = {}
-  ) =>
-  (shape) => {
+    } = options;
+
     if (size !== undefined) {
       width = size;
       height = size / 2;
@@ -3625,11 +3673,11 @@ const baseView =
     if (!sourceLocation) {
       console.log('No sourceLocation');
     }
-    const { path } = sourceLocation;
+    const { id, path } = sourceLocation;
     for (const entry of ensurePages(
       viewShape.toDisplayGeometry({ skin, outline, wireframe })
     )) {
-      const viewPath = `view/${path}/${generateUniqueId()}`;
+      const viewPath = `view/${path}/${id}/${viewId}`;
       addPending(write$1(viewPath, entry));
       const view = { width, height, position, inline, withAxes, withGrid };
       emit({ hash: generateUniqueId(), path: viewPath, view });
@@ -3638,117 +3686,72 @@ const baseView =
   };
 
 const topView =
-  (
-    op,
-    {
-      size = 512,
-      skin = true,
-      outline = true,
-      wireframe = false,
-      path,
-      width = 1024,
-      height = 512,
-      position = [0, 0, 100],
-      withAxes,
-      withGrid,
-    } = {}
-  ) =>
-  (shape) =>
-    view(op, {
-      size,
-      skin,
-      outline,
-      wireframe,
-      path,
-      width,
-      height,
-      position,
-      withAxes,
-      withGrid,
-    })(shape);
+  (...args) =>
+  (shape) => {
+    const { viewId, op, options } = byType(args, {
+      size: 512,
+      skin: true,
+      outline: true,
+      wireframe: false,
+      width: 1024,
+      height: 512,
+      position: [0, 0, 100],
+    });
+    return view(viewId, op, options)(shape);
+  };
 
 Shape.registerMethod('topView', topView);
 
-const gridView =
-  (
-    op,
-    {
-      size = 512,
-      skin = true,
-      outline = true,
-      wireframe = false,
-      path,
-      width = 1024,
-      height = 512,
-      position = [0, 0, 100],
-      withAxes,
-      withGrid = true,
-    } = {}
-  ) =>
-  (shape) =>
-    view(op, {
-      size,
-      skin,
-      outline,
-      wireframe,
-      path,
-      width,
-      height,
-      position,
-      withAxes,
-      withGrid,
-    })(shape);
+const gridView = (...args) => {
+  const { viewId, op, options } = byType(args, {
+    size: 512,
+    skin: true,
+    outline: true,
+    wireframe: false,
+    width: 1024,
+    height: 512,
+    position: [0, 0, 100],
+    withGrid: true,
+  });
+  return (shape) => view(viewId, op, options)(shape);
+};
 
 Shape.registerMethod('gridView', gridView);
 
 const frontView =
-  (
-    op,
-    {
-      size = 512,
-      skin = true,
-      outline = true,
-      wireframe = false,
-      path,
-      width = 1024,
-      height = 512,
-      position = [0, -100, 0],
-      withAxes,
-      withGrid,
-    } = {}
-  ) =>
-  (shape) =>
-    view(op, {
-      size,
-      skin,
-      outline,
-      wireframe,
-      path,
-      width,
-      height,
-      position,
-      withAxes,
-      withGrid,
-    })(shape);
+  (...args) =>
+  (shape) => {
+    const { viewId, op, options } = byType(args, {
+      size: 512,
+      skin: true,
+      outline: true,
+      wireframe: false,
+      width: 1024,
+      height: 512,
+      position: [0, -100, 0],
+    });
+    return (shape) => view(viewId, op, options)(shape);
+  };
 
 Shape.registerMethod('frontView', frontView);
 
 Shape.registerMethod('sideView');
 
 const view =
-  (op, options = {}) =>
+  (...args) =>
   (shape) => {
+    const { viewId, op, options } = byType(args, {});
     switch (options.style) {
       case 'grid':
-        return shape.gridView(op, options);
+        return shape.gridView(viewId, op, options);
       case 'none':
         return shape;
       case 'side':
-        return shape.sideView(op, options);
+        return shape.sideView(viewId, op, options);
       case 'top':
-        return shape.topView(op, options);
+        return shape.topView(viewId, op, options);
       default:
-        return baseView(op, options)(shape);
+        return baseView(viewId, op, options)(shape);
     }
   };
 
@@ -4504,4 +4507,4 @@ const yz = Shape.fromGeometry({
   ],
 });
 
-export { Alpha, Arc, Assembly, Box, ChainedHull, Edge, Edges, Empty, GrblConstantLaser, GrblDynamicLaser, GrblPlotter, GrblSpindle, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Line, Octagon, Orb, Page, Path, Pentagon, Plan, Point, Points, Polygon, Polyhedron, Septagon, Shape, Spiral, Tetragon, Triangle, Wave, Weld, abstract, add, addTo, align, and, as, asPart, at, bend, billOfMaterials, cast, center, clip, clipFrom, cloudSolid, color, colors, cut, cutFrom, cutOut, defRgbColor, defThreejsMaterial, defTool, define, drop, each, eachPoint, ensurePages, ex, extrude, extrudeAlong, extrudeToPlane, faces, fill, fit, fitTo, fuse, g, get, getEdge, getNot, gn, grow, inline, inset, keep, loadGeometry, loft, log, loop, mask, material, md, minkowskiDifference, minkowskiShell, minkowskiSum, move, moveTo, n, noVoid, normal, notColor, nth, ofPlan, offset, on, op, orient, outline, pack, play, push, remesh, rotate, rotateX, rotateY, rotateZ, rx, ry, rz, saveGeometry, scale, scaleToFit, section, sectionProfile, separate, size, sketch, smooth, tag, tags, taper, test, tint, to, tool, top, twist, untag, view, voidFn, voidIn, voxels, weld, withFill, withFn, withInset, withOp, x, xy, xyz, xz, y, yz, z };
+export { Alpha, Arc, Assembly, Box, ChainedHull, Edge, Edges, Empty, GrblConstantLaser, GrblDynamicLaser, GrblPlotter, GrblSpindle, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Line, Octagon, Orb, Page, Path, Pentagon, Plan, Point, Points, Polygon, Polyhedron, Septagon, Shape, Spiral, Tetragon, Triangle, Wave, Weld, abstract, add, addTo, align, and, as, asPart, at, bend, billOfMaterials, cast, center, clip, clipFrom, cloudSolid, color, colors, cut, cutFrom, cutOut, defRgbColor, defThreejsMaterial, defTool, define, drop, each, eachPoint, ensurePages, ex, extrude, extrudeAlong, extrudeToPlane, faces, fill, fit, fitTo, fuse, g, get, getEdge, getNot, gn, grow, inline, inset, keep, loadGeometry, loft, log, loop, mask, material, md, minkowskiDifference, minkowskiShell, minkowskiSum, move, moveTo, n, noVoid, noop, normal, notColor, nth, ofPlan, offset, on, op, orient, outline, pack, play, push, remesh, rotate, rotateX, rotateY, rotateZ, rx, ry, rz, saveGeometry, scale, scaleToFit, section, sectionProfile, separate, size, sketch, smooth, table, tag, tags, taper, test, tint, to, tool, top, twist, untag, view, voidFn, voidIn, voxels, weld, withFill, withFn, withInset, withOp, x, xy, xyz, xz, y, yz, z };

@@ -1,6 +1,6 @@
 /* global location */
 
-import { installUi } from '@jsxcad/ui-v1';
+import { installUi } from '@jsxcad/ui-app';
 
 window.onError = (error) => window.alert(error.stack);
 

@@ -3,11 +3,10 @@
   "version": "0.0.79",
   "description": "Application UI for JSxCAD",
   "repository": "https://github.com/jsxcad/JSxCAD",
-  "main": "master.js",
   "module": "dist/bundle.js",
   "type": "module",
   "scripts": {
-    "depcheck": "depcheck --ignores 'https:,debug,import-local,lodash,@jsxcad/ui-v1,@jsxcad/eslint*,eslint*,babel-eslint,preact,react,react-dom,mermaid,babel-plugin-jsx-pragmatic' --ignore-dirs=dist,gitcdn,local",
+    "depcheck": "depcheck --ignores 'https:,debug,import-local,lodash,@jsxcad/ui-app,@jsxcad/eslint*,eslint*,babel-eslint,preact,react,react-dom,mermaid,babel-plugin-jsx-pragmatic' --ignore-dirs=dist,gitcdn,local",
     "lint": "eslint *.js",
     "lintfix": "eslint --fix *.js",
     "test": "ava",

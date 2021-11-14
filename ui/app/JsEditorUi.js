@@ -138,7 +138,6 @@ export class JsEditorUi extends React.PureComponent {
         // Make sure everything is rendered, first.
         await animationFrame();
         mermaid.init(undefined, '.mermaid');
-        console.log(`QQ/doUpdate`);
         if (advice) {
           if (advice.definitions) {
             for (const definition of widgets.keys()) {
@@ -149,7 +148,6 @@ export class JsEditorUi extends React.PureComponent {
                 const widget = widgets.get(definition);
                 widgetManager.removeLineWidget(widget);
                 widgets.delete(definition);
-                console.log(`QQ/delete widget for: ${definition}`);
               }
             }
             for (const definition of Object.keys(notebookDefinitions)) {
@@ -212,9 +210,7 @@ export class JsEditorUi extends React.PureComponent {
       }
     };
 
-    const finished = () => {
-      console.log(`QQ/finish`);
-    };
+    const finished = () => {};
 
     advice.onUpdate = update;
     advice.onFinished = finished;

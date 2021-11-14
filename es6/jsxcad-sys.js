@@ -3885,6 +3885,12 @@ const watchers = new Set();
 
 // TODO: Consider different specifications.
 
+const notifyWatchers = () => {
+  for (const watcher of watchers) {
+    watcher();
+  }
+};
+
 const acquireService = async (spec, context) => {
   if (idleServices.length > 0) {
     // Recycle an existing worker.
@@ -3896,6 +3902,7 @@ const acquireService = async (spec, context) => {
       throw Error('die');
     }
     service.context = context;
+    notifyWatchers();
     return service;
   } else if (activeServices.size < activeServiceLimit) {
     // Create a new service.
@@ -3905,10 +3912,13 @@ const acquireService = async (spec, context) => {
       throw Error('die');
     }
     service.context = context;
+    notifyWatchers();
     return service;
   } else {
     // Wait for a service to become available.
-    return new Promise((resolve, reject) => pending$1.push({ spec, resolve, context }));
+    return new Promise((resolve, reject) =>
+      pending$1.push({ spec, resolve, context })
+    );
   }
 };
 
@@ -3929,9 +3939,7 @@ const releaseService = (spec, service, terminate = false) => {
     const { spec, resolve, context } = pending$1.shift();
     resolve(acquireService(spec, context));
   }
-  for (const watcher of watchers) {
-    watcher();
-  }
+  notifyWatchers();
 };
 
 const getServicePoolInfo = () => ({
@@ -3943,6 +3951,17 @@ const getServicePoolInfo = () => ({
   idleServiceCount: idleServices.length,
   pendingCount: pending$1.length,
 });
+
+const getActiveServices = (contextFilter = (context) => true) => {
+  const filteredServices = [];
+  for (const service of activeServices) {
+    const { context } = service;
+    if (contextFilter(context)) {
+      filteredServices.push(service);
+    }
+  }
+  return filteredServices;
+};
 
 const terminateActiveServices = (contextFilter = (context) => true) => {
   for (const { terminate, context } of activeServices) {
@@ -4151,7 +4170,10 @@ const getFileFetcher = async (qualify = qualifyPath, doSerialize = true) => {
 const fetchPersistent = async (path, { workspace, doSerialize }) => {
   try {
     if (workspace) {
-      const fetchFile = await getFileFetcher(path => qualifyPath(path, workspace), doSerialize);
+      const fetchFile = await getFileFetcher(
+        (path) => qualifyPath(path, workspace),
+        doSerialize
+      );
       const data = await fetchFile(path);
       return data;
     }
@@ -4471,15 +4493,15 @@ const listFiles = async ({ workspace } = {}) => {
 
 const { promises } = fs;
 
-const getFileDeleter = async () => {
+const getFileDeleter = async ({ workspace } = {}) => {
   if (isNode) {
     // FIX: Put this through getFile, also.
     return async (path) => {
-      return promises.unlink(qualifyPath(path));
+      return promises.unlink(qualifyPath(path, workspace));
     };
   } else if (isBrowser) {
     return async (path) => {
-      await db().removeItem(qualifyPath(path));
+      await db().removeItem(qualifyPath(path, workspace));
     };
   } else {
     throw Error('die');
@@ -4490,7 +4512,7 @@ const deleteFile = async (options, path) => {
   if (isWebWorker) {
     return addPending(self.ask({ op: 'deleteFile', options, path }));
   }
-  const deleter = await getFileDeleter();
+  const deleter = await getFileDeleter(options);
   await deleter(path);
   await deleteFile$1(options, path);
 };
@@ -4513,4 +4535,4 @@ let nanoid = (size = 21) => {
 
 const generateUniqueId = () => nanoid();
 
-export { addOnEmitHandler, addPending, ask, askService, askServices, beginEmitGroup, boot, clearEmitted, createConversation, createService, deleteFile, elapsed, emit, finishEmitGroup, flushEmitGroup, generateUniqueId, getControlValue, getFilesystem, getPendingErrorHandler, getServicePoolInfo, getSourceLocation, getWorkspace, hash, info, isBrowser, isNode, isWebWorker, listFiles, listFilesystems, log, onBoot, qualifyPath, read, readFile, readOrWatch, removeOnEmitHandler, resolvePending, restoreEmitGroup, saveEmitGroup, setControlValue, setHandleAskUser, setPendingErrorHandler, setupFilesystem, setupWorkspace, sleep, tellServices, terminateActiveServices, touch, unwatchFile, unwatchFileCreation, unwatchFileDeletion, unwatchFiles, unwatchLog, unwatchServices, waitServices, watchFile, watchFileCreation, watchFileDeletion, watchLog, watchServices, write, writeFile };
+export { addOnEmitHandler, addPending, ask, askService, askServices, beginEmitGroup, boot, clearEmitted, createConversation, createService, deleteFile, elapsed, emit, finishEmitGroup, flushEmitGroup, generateUniqueId, getActiveServices, getControlValue, getFilesystem, getPendingErrorHandler, getServicePoolInfo, getSourceLocation, getWorkspace, hash, info, isBrowser, isNode, isWebWorker, listFiles, listFilesystems, log, onBoot, qualifyPath, read, readFile, readOrWatch, removeOnEmitHandler, resolvePending, restoreEmitGroup, saveEmitGroup, setControlValue, setHandleAskUser, setPendingErrorHandler, setupFilesystem, setupWorkspace, sleep, tellServices, terminateActiveServices, touch, unwatchFile, unwatchFileCreation, unwatchFileDeletion, unwatchFiles, unwatchLog, unwatchServices, waitServices, watchFile, watchFileCreation, watchFileDeletion, watchLog, watchServices, write, writeFile };

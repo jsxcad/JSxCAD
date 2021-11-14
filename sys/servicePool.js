@@ -9,6 +9,12 @@ const watchers = new Set();
 
 // TODO: Consider different specifications.
 
+const notifyWatchers = () => {
+  for (const watcher of watchers) {
+    watcher();
+  }
+};
+
 export const acquireService = async (spec, context) => {
   if (idleServices.length > 0) {
     // Recycle an existing worker.
@@ -20,6 +26,7 @@ export const acquireService = async (spec, context) => {
       throw Error('die');
     }
     service.context = context;
+    notifyWatchers();
     return service;
   } else if (activeServices.size < activeServiceLimit) {
     // Create a new service.
@@ -29,6 +36,7 @@ export const acquireService = async (spec, context) => {
       throw Error('die');
     }
     service.context = context;
+    notifyWatchers();
     return service;
   } else {
     // Wait for a service to become available.
@@ -55,9 +63,7 @@ export const releaseService = (spec, service, terminate = false) => {
     const { spec, resolve, context } = pending.shift();
     resolve(acquireService(spec, context));
   }
-  for (const watcher of watchers) {
-    watcher();
-  }
+  notifyWatchers();
 };
 
 export const getServicePoolInfo = () => ({
@@ -69,6 +75,17 @@ export const getServicePoolInfo = () => ({
   idleServiceCount: idleServices.length,
   pendingCount: pending.length,
 });
+
+export const getActiveServices = (contextFilter = (context) => true) => {
+  const filteredServices = [];
+  for (const service of activeServices) {
+    const { context } = service;
+    if (contextFilter(context)) {
+      filteredServices.push(service);
+    }
+  }
+  return filteredServices;
+};
 
 export const terminateActiveServices = (contextFilter = (context) => true) => {
   for (const { terminate, context } of activeServices) {

@@ -2695,7 +2695,7 @@ var FileSaver_min = createCommonjsModule(function (module, exports) {
 
 /* global Blob, alert, fetch */
 
-const downloadFile = async ({ event, filename, path, data, type, workspace }) => {
+const downloadFile = async ({ filename, path, data, type, workspace }) => {
   if (path && !data) {
     data = await readOrWatch(path, { workspace });
   }
@@ -2738,7 +2738,12 @@ marked_1.use({
 
 const toDomElement = (
   notebook = [],
-  { onClickView, onClickMake = sendFile, workspace } = {}
+  {
+    onClickView,
+    onClickMake = sendFile,
+    onClickDownload = downloadFile,
+    workspace,
+  } = {}
 ) => {
   const definitions = {};
 
@@ -2760,7 +2765,13 @@ const toDomElement = (
     }
     container.appendChild(div, container.firstChild);
     await orbitDisplay(
-      { view: { target, up, position }, geometry: data, withAxes, withGrid, definitions },
+      {
+        view: { target, up, position },
+        geometry: data,
+        withAxes,
+        withGrid,
+        definitions,
+      },
       div
     );
     const onKeyDown = async (event) => {
@@ -2790,7 +2801,7 @@ const toDomElement = (
       Object.assign(entry, note.define.data);
     }
     if (note.view) {
-      const { url, openView, view, sourceLocation } = note;
+      const { url, view, sourceLocation } = note;
       const { height, width } = view;
       const image = document.createElement('img');
       image.style.display = 'block';
@@ -2806,11 +2817,24 @@ const toDomElement = (
       if (url) {
         image.src = url;
       }
+
       image.addEventListener('click', (event) => {
         if (onClickView) {
-          onClickView({ event, path: note.path, view: note.view, workspace, sourceLocation });
+          onClickView({
+            event,
+            path: note.path,
+            view: note.view,
+            workspace,
+            sourceLocation,
+          });
         } else {
-          showOrbitView({ event, path: note.path, view: note.view, workspace, sourceLocation });
+          showOrbitView({
+            event,
+            path: note.path,
+            view: note.view,
+            workspace,
+            sourceLocation,
+          });
         }
       });
       container.appendChild(image);
@@ -2854,7 +2878,7 @@ const toDomElement = (
           const text = document.createTextNode(`Download "${filename}"`);
           button.appendChild(text);
           button.addEventListener('click', (event) =>
-            downloadFile(event)
+            onClickDownload({ event, filename, path, data, type, workspace })
           );
           container.appendChild(button);
         }

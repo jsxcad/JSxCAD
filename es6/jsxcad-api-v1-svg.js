@@ -139,7 +139,7 @@ const prepareSvg = (shape, name, op = (s) => s, options = {}) => {
       filename: `${name}_${index++}.svg`,
       type: 'image/svg+xml',
     });
-    Shape.fromGeometry(entry).gridView(options.view);
+    Shape.fromGeometry(entry).gridView(name, options.view);
   }
   return entries;
 };

@@ -189,7 +189,7 @@ export const toDomElement = (
           const text = document.createTextNode(`Download "${filename}"`);
           button.appendChild(text);
           button.addEventListener('click', (event) =>
-            onClickDownload({ event, filename, path, data, type })
+            onClickDownload({ event, filename, path, data, type, workspace })
           );
           container.appendChild(button);
         }

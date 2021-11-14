@@ -66,7 +66,6 @@ const profile = Profile().view();
 
 ```JavaScript
 const nutThread = NutThread(20, 10)
-  //.and(Arc(30).cut(Arc(20)).ex(10))
   .material('steel')
   .stl('nut 20x10');
 ```
@@ -93,8 +92,8 @@ const screwThread = ScrewThread(20, 10)
 ```JavaScript
 ScrewThread(10, 5)
   .and(NutThread(10, 5).and(Arc(15).cut(Arc(10)).ex(5)))
-  .view()
-  .view(section());
+  .view(1)
+  .view(2, section());
 ```
 
 ![Image](bolt.md.3.png)

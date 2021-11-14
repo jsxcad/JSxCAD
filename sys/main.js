@@ -48,6 +48,7 @@ export { deleteFile } from './deleteFile.js';
 export {
   askService,
   askServices,
+  getActiveServices,
   getServicePoolInfo,
   tellServices,
   terminateActiveServices,

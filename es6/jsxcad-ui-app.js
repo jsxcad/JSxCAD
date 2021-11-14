@@ -1,4 +1,4 @@
-import { readOrWatch, boot, log, deleteFile, ask, touch, askService, write, read, terminateActiveServices, clearEmitted, resolvePending, listFiles, watchFileCreation, watchFileDeletion } from './jsxcad-sys.js';
+import { readOrWatch, unwatchFile, read, watchFile, boot, log, deleteFile, ask, touch, askService, write, terminateActiveServices, clearEmitted, resolvePending, listFiles, getActiveServices, watchFileCreation, watchFileDeletion, watchServices } from './jsxcad-sys.js';
 import { toDomElement, getNotebookControlData } from './jsxcad-ui-notebook.js';
 import { orbitDisplay } from './jsxcad-ui-threejs.js';
 import Prettier from 'https://unpkg.com/prettier@2.3.2/esm/standalone.mjs';
@@ -40867,7 +40867,6 @@ class JsEditorUi extends ReactDOM$2.PureComponent {
 
         await animationFrame();
         mermaid.init(undefined, '.mermaid');
-        console.log(`QQ/doUpdate`);
 
         if (advice) {
           if (advice.definitions) {
@@ -40876,7 +40875,6 @@ class JsEditorUi extends ReactDOM$2.PureComponent {
                 const widget = widgets.get(definition);
                 widgetManager.removeLineWidget(widget);
                 widgets.delete(definition);
-                console.log(`QQ/delete widget for: ${definition}`);
               }
             }
 
@@ -40944,9 +40942,7 @@ class JsEditorUi extends ReactDOM$2.PureComponent {
       }
     };
 
-    const finished = () => {
-      console.log(`QQ/finish`);
-    };
+    const finished = () => {};
 
     advice.onUpdate = update;
     advice.onFinished = finished;
@@ -41491,20 +41487,30 @@ class OrbitView extends ReactDOM$2.PureComponent {
     return {
       path: propTypes$1.exports.string,
       view: propTypes$1.exports.object,
-      workspace: propTypes$1.exports.string
+      workspace: propTypes$1.exports.string,
+      onMove: propTypes$1.exports["function"],
+      trackballState: propTypes$1.exports.object
     };
   }
 
   constructor(props) {
     super(props);
-    this.state = {};
+    const {
+      path,
+      view
+    } = props;
+    this.state = {
+      path,
+      view
+    };
   }
 
   async buildElement(container) {
     const {
       path,
       view,
-      workspace
+      workspace,
+      trackballState
     } = this.props;
 
     if (!path) {
@@ -41525,10 +41531,11 @@ class OrbitView extends ReactDOM$2.PureComponent {
       position,
       withAxes,
       withGrid
-    } = view; // const element = document.createElement('div');
-    // element.classList.add('note', 'orbitView');
-
-    await orbitDisplay({
+    } = view;
+    const {
+      updateGeometry,
+      trackball
+    } = await orbitDisplay({
       view: {
         target,
         up,
@@ -41544,8 +41551,87 @@ class OrbitView extends ReactDOM$2.PureComponent {
       container.removeChild(container.firstChild);
     }
 
+    const state = await trackballState;
+    this.trackball = trackball;
+
+    if (state.target) {
+      this.trackball.target0.copy(state.target);
+    }
+
+    if (state.position) {
+      this.trackball.position0.copy(state.position);
+    }
+
+    if (state.up) {
+      this.trackball.up0.copy(state.up);
+    }
+
+    if (state.zoom) {
+      this.trackball.zoom0 = state.zoom;
+    }
+
+    this.trackball.reset();
     this.builtPath = path;
     this.builtContainer = container;
+
+    if (this.watcher) {
+      unwatchFile(this.builtPath, this.watcher, {
+        workspace
+      });
+    }
+
+    this.watcher = async () => {
+      // Backup the control state.
+      this.trackball.target0.copy(this.trackball.target);
+      this.trackball.position0.copy(this.trackball.object.position);
+      this.trackball.up0.copy(this.trackball.object.up);
+      this.trackball.zoom0 = this.trackball.object.zoom;
+      const geometry = await read(this.builtPath, {
+        workspace
+      });
+      await updateGeometry(geometry); // Restore the control state.
+
+      trackball.reset();
+    };
+
+    watchFile(path, this.watcher, {
+      workspace
+    });
+    trackball.addEventListener('change', () => {
+      const {
+        onMove
+      } = this.props;
+
+      if (onMove) {
+        const {
+          target
+        } = trackball;
+        const {
+          position,
+          up,
+          zoom
+        } = trackball.object;
+        onMove({
+          path,
+          position,
+          up,
+          target,
+          zoom
+        });
+      }
+    });
+  }
+
+  componentWillUnmount() {
+    const {
+      workspace
+    } = this.props;
+
+    if (this.watcher) {
+      unwatchFile(this.path, this.watcher, {
+        workspace
+      });
+    }
   }
 
   render() {
@@ -41624,6 +41710,8 @@ const ensureFile = async (file, url, {
     });
   }
 };
+
+const isRegenerable = file => file.startsWith('data/') || file.startsWith('meta/') || file.startsWith('view/') || file.startsWith('download/');
 
 const defaultModelConfig = {
   global: {},
@@ -41909,57 +41997,23 @@ class App extends ReactDOM$2.Component {
 
     this.ask = async (question, context, transfer) => askService(this.serviceSpec, question, transfer, context);
 
-    this.save = async () => {
-      if (this.saving) {
-        return;
-      }
-
-      try {
-        const {
-          workspace
-        } = this.props;
-        const {
-          View,
-          WorkspaceOpenPaths,
-          model
-        } = this.state;
-        this.Model.saving = true;
-        const uiConfig = {
-          persistentModelConfig: model.toJson(),
-          View,
-          WorkspaceOpenPaths
-        };
-        await write('ui/config', uiConfig, {
-          workspace
-        });
-      } finally {
-        this.saving = false;
-      }
-    };
-
-    this.load = async () => {
-      const {
-        persistentModelConfig = defaultModelConfig,
-        View,
-        WorkspaceOpenPaths = []
-      } = (await read('ui/config', {
-        workspace
-      })) || {};
-      const model = FlexLayout.Model.fromJson(persistentModelConfig);
-
-      for (const path of WorkspaceOpenPaths) {
-        await this.Notebook.load(path);
-      }
-
-      await this.updateState({
-        View,
-        WorkspaceFiles,
-        WorkspaceOpenPaths,
-        model
-      });
-    };
-
     this.layoutRef = /*#__PURE__*/ReactDOM$2.createRef();
+    this.GC = {};
+
+    this.GC.delete = async () => {
+      const {
+        WorkspaceFiles
+      } = this.state;
+      const regenerableFiles = WorkspaceFiles.filter(file => isRegenerable(file));
+
+      for (const file of regenerableFiles) {
+        console.log(`QQ/Deleting: ${file}`);
+        await deleteFile({
+          workspace
+        }, file);
+      }
+    };
+
     this.Layout = {};
 
     this.Layout.action = action => {
@@ -41967,31 +42021,142 @@ class App extends ReactDOM$2.Component {
       return action;
     };
 
+    this.Layout.buildSpinners = path => {
+      const pieces = ['<span>&nbsp;&nbsp;</span>'];
+      const count = this.servicesActiveCounts[path];
+
+      for (let nth = 0; nth < count; nth++) {
+        pieces.push('<span id="spinner" style={{display: "inline-block", width: "10px"}}/>');
+      }
+
+      return pieces.join('');
+    };
+
+    this.Layout.updateSpinners = path => {
+      const spinners = document.getElementById(`Spinners/Notebook/${path}`);
+
+      if (spinners) {
+        spinners.innerHTML = this.Layout.buildSpinners(path);
+      }
+    };
+
+    this.Layout.renderTab = (tabNode, {
+      buttons
+    }) => {
+      const id = tabNode.getId();
+
+      if (id.startsWith('Notebook/')) {
+        const path = id.substring(9);
+        buttons.push(v$1("span", {
+          id: `Spinners/${id}`,
+          dangerouslySetInnerHTML: this.Layout.buildSpinners(path)
+        }));
+      }
+    };
+
     this.Model = {};
 
-    this.Model.change = async () => this.save();
+    this.Model.change = async () => {
+      if (this.Model.changing) {
+        return;
+      }
+
+      try {
+        this.Model.changing = true;
+        await this.Model.store();
+      } finally {
+        this.Model.changing = false;
+      }
+    };
+
+    this.Model.store = async () => {
+      if (this.Model.saving) {
+        return;
+      }
+
+      try {
+        this.Model.saving = true;
+        const {
+          workspace
+        } = this.props;
+        const {
+          model
+        } = this.state;
+        await write('config/Model', {
+          persistentModelConfig: model.toJson()
+        }, {
+          workspace
+        });
+      } finally {
+        this.Model.saving = false;
+      }
+    };
+
+    this.Model.restore = async () => {
+      const {
+        persistentModelConfig = defaultModelConfig
+      } = (await read('config/Model', {
+        workspace
+      })) || {}; // Reconstruct WorkspaceOpenPaths from the layout, so they stay in sync.
+
+      const WorkspaceOpenPaths = [];
+
+      for (const tabset of persistentModelConfig.layout.children) {
+        if (tabset.id !== 'Notebooks') {
+          continue;
+        }
+
+        for (const {
+          id
+        } of tabset.children) {
+          WorkspaceOpenPaths.push(id.substring(9));
+        }
+      }
+
+      for (const path of WorkspaceOpenPaths) {
+        await this.Notebook.load(path);
+      }
+
+      const model = FlexLayout.Model.fromJson(persistentModelConfig);
+      await this.updateState({
+        model,
+        WorkspaceOpenPaths
+      }); // Now that layout is in place, run the notebooks we just loaded.
+
+      for (const path of WorkspaceOpenPaths) {
+        await this.Notebook.run(path);
+      }
+    };
 
     this.Notebook = {};
 
-    this.Notebook.clickView = ({
+    this.Notebook.clickView = async ({
       path,
       id,
       view
     }) => {
-      this.setState({
+      const {
+        model
+      } = this.state;
+      await this.updateState({
         View: {
           path,
           id,
           view
         }
-      });
+      }); // This is a bit of a hack, since selectTab toggles.
+
+      model.getNodeById('View').getParent()._setSelected(-1);
+
+      model.doAction(FlexLayout.Actions.selectTab('View'));
+      this.View.store();
     };
 
-    this.Notebook.clickMake = ({
+    this.Notebook.clickMake = async ({
       path,
       id
     }) => {
-      this.setState({
+      await this.updateState({
         Make: {
           path,
           id
@@ -42097,7 +42262,6 @@ class App extends ReactDOM$2.Component {
     };
 
     this.Notebook.load = async path => {
-      console.log(`QQ/Notebook.load: ${path}`);
       const {
         workspace
       } = this.props;
@@ -42116,8 +42280,7 @@ class App extends ReactDOM$2.Component {
       }); // Let state propagate.
 
       await animationFrame(); // Automatically run the notebook on load. The user can hit Stop.
-
-      await this.Notebook.run(path);
+      // await this.Notebook.run(path);
     };
 
     this.Notebook.save = async path => {
@@ -42164,15 +42327,16 @@ class App extends ReactDOM$2.Component {
 
     this.Notebook.clickLink = (path, link) => {};
 
-    this.Notebook.close = closedPath => {
+    this.Notebook.close = async closedPath => {
       const {
         WorkspaceOpenPaths = []
       } = this.state;
-      this.setState({
+      await this.updateState({
         [`NotebookText/${closedPath}`]: undefined,
         [`NotebookAdvice/${closedPath}`]: undefined,
         WorkspaceOpenPaths: WorkspaceOpenPaths.filter(path => path !== closedPath)
       });
+      this.Workspace.store();
     };
 
     this.Notebook.ensureAdvice = path => {
@@ -42194,6 +42358,106 @@ class App extends ReactDOM$2.Component {
       return createdAdvice;
     };
 
+    this.View = {};
+
+    this.View.move = async ({
+      path,
+      position,
+      up,
+      target,
+      zoom
+    }) => {
+      if (this.View.moving) {
+        return;
+      }
+
+      try {
+        this.View.moving = true;
+        await this.View.trackballState.store(path, {
+          position,
+          up,
+          target,
+          zoom
+        });
+      } finally {
+        this.View.moving = false;
+      }
+    };
+
+    this.View.store = async () => {
+      const {
+        workspace
+      } = this.props;
+      const {
+        View
+      } = this.state;
+      await write('config/View', View, {
+        workspace
+      });
+    };
+
+    this.View.restore = async () => {
+      const {
+        workspace
+      } = this.props;
+      const View = await read('config/View', {
+        workspace
+      });
+      await this.updateState({
+        View
+      });
+    };
+
+    this.View.trackballState = {};
+
+    this.View.trackballState.store = async (path, {
+      position,
+      up,
+      target,
+      zoom
+    }) => {
+      if (this.View.saving) {
+        return;
+      }
+
+      try {
+        this.View.saving = true;
+        const {
+          workspace
+        } = this.props;
+        await write(`config/View/trackballState/${path}`, {
+          position,
+          up,
+          target,
+          zoom
+        }, {
+          workspace
+        });
+      } finally {
+        this.View.saving = false;
+      }
+    };
+
+    this.View.trackballState.load = async path => {
+      const {
+        workspace
+      } = this.props;
+      const {
+        position,
+        up,
+        target,
+        zoom
+      } = (await read(`config/View/trackballState/${path}`, {
+        workspace
+      })) || {};
+      return {
+        position,
+        up,
+        target,
+        zoom
+      };
+    };
+
     this.Workspace = {};
 
     this.Workspace.loadWorkingPath = async () => {
@@ -42211,13 +42475,15 @@ class App extends ReactDOM$2.Component {
       await this.updateState({
         WorkspaceOpenPaths: [...WorkspaceOpenPaths, path]
       });
-      this.Notebook.load(path);
+      await this.Notebook.load(path);
       this.layoutRef.current.addTabToTabSet('Notebooks', {
         id: `Notebook/${path}`,
         type: 'tab',
         name: path,
         component: 'Notebook'
       });
+      await this.Workspace.store();
+      await this.Notebook.run(path);
     };
 
     this.Workspace.openWorkingFile = async file => {
@@ -42234,18 +42500,53 @@ class App extends ReactDOM$2.Component {
       await this.updateState({
         WorkspaceOpenPaths: [...WorkspaceOpenPaths, path]
       });
-      this.Notebook.load(path);
+      await this.Notebook.load(path);
       this.layoutRef.current.addTabToTabSet('Notebooks', {
         id: `Notebook/${path}`,
         type: 'tab',
         name: path,
         component: 'Notebook'
       });
+      await this.Workspace.store();
+      await this.Notebook.run(path);
+    };
+
+    this.Workspace.store = async () => {
+      if (this.Workspace.saving) {
+        return;
+      }
+
+      try {
+        this.Model.saving = true;
+        const {
+          workspace
+        } = this.props;
+        const {
+          WorkspaceOpenPaths
+        } = this.state;
+        const config = {
+          WorkspaceOpenPaths
+        };
+        await write('config/Workspace', config, {
+          workspace
+        });
+      } finally {
+        this.Workspace.saving = false;
+      }
+    };
+
+    this.Workspace.restore = async () => {// We restore these via Model.restore.
+
+      /*
+      const { WorkspaceOpenPaths = [] } = (await read('config/Workspace', { workspace })) || {};
+      for (const path of WorkspaceOpenPaths) {
+        await this.Notebook.load(path);
+      }
+      await this.updateState({ WorkspaceOpenPaths });
+      */
     };
 
     this.factory = node => {
-      console.log(`QQ/Factory: ${node.getName()}`);
-
       switch (node.getComponent()) {
         case 'Workspace':
           {
@@ -42306,10 +42607,13 @@ class App extends ReactDOM$2.Component {
             const {
               View = {}
             } = this.state;
+            const trackballState = this.View.trackballState.load(View.path);
             return v$1(OrbitView, {
               path: View.path,
               view: View.view,
-              workspace: workspace
+              workspace: workspace,
+              onMove: this.View.move,
+              trackballState: trackballState
             });
           }
 
@@ -42318,20 +42622,16 @@ class App extends ReactDOM$2.Component {
             const {
               WorkspaceFiles
             } = this.state;
-
-            const isRegenerable = file => file.startsWith('data/') || file.startsWith('meta/') || file.startsWith('view/') || file.startsWith('download/');
-
-            return v$1("div", null, v$1(Card, null, v$1(Card.Body, null, v$1(Card.Title, null, "Garbage Collection"), v$1(Card.Text, null, v$1(ListGroup, null, WorkspaceFiles.filter(file => isRegenerable(file)).map((file, index) => v$1(ListGroup.Item, {
+            return v$1("div", null, v$1(Card, null, v$1(Card.Body, null, v$1(Card.Title, null, "Garbage Collection"), v$1(Card.Text, null, v$1(Button, {
+              variant: "primary",
+              onClick: this.GC.delete
+            }, "Delete"), v$1(ListGroup, null, WorkspaceFiles.filter(file => isRegenerable(file)).map((file, index) => v$1(ListGroup.Item, {
               key: index,
               disabled: true
             }, file)))))));
           }
       }
     };
-
-    const WorkspaceFiles = await listFiles({
-      workspace
-    });
 
     this.fileUpdater = async () => {
       await this.updateState({
@@ -42341,9 +42641,37 @@ class App extends ReactDOM$2.Component {
       });
     };
 
+    this.servicesUpdater = () => {
+      const {
+        WorkspaceOpenPaths = []
+      } = this.state;
+      const servicesActiveCounts = {};
+
+      for (const path of WorkspaceOpenPaths) {
+        servicesActiveCounts[path] = 0;
+      }
+
+      for (const {
+        context
+      } of getActiveServices()) {
+        servicesActiveCounts[context.path] += 1;
+      }
+
+      this.servicesActiveCounts = servicesActiveCounts;
+      console.log(`QQ/SAC: ${JSON.stringify(this.servicesActiveCounts)}`);
+
+      for (const path of WorkspaceOpenPaths) {
+        this.Layout.updateSpinners(path);
+      }
+    };
+
     this.creationWatcher = await watchFileCreation(this.fileUpdater);
     this.deletionWatcher = await watchFileDeletion(this.fileUpdater);
-    await this.load();
+    this.servicesWatcher = watchServices(this.servicesUpdater);
+    this.servicesActiveCounts = {};
+    await this.Workspace.restore();
+    await this.View.restore();
+    await this.Model.restore();
   }
 
   async updateState(state) {
@@ -42366,6 +42694,7 @@ class App extends ReactDOM$2.Component {
       model: model,
       factory: this.factory,
       onAction: this.Layout.action,
+      onRenderTab: this.Layout.renderTab,
       onModelChange: this.Model.change
     });
   }

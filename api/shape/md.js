@@ -10,12 +10,20 @@ export const md = (strings, ...placeholders) => {
   return md;
 };
 
-const mdMethod = function (string, ...placeholders) {
-  if (string instanceof Function) {
-    string = string(this);
-  }
-  md([string], ...placeholders);
-  return this;
-};
+const mdMethod =
+  (...chunks) =>
+  (shape) => {
+    const strings = [];
+    for (const chunk of chunks) {
+      if (chunk instanceof Function) {
+        strings.push(chunk(shape));
+      } else {
+        strings.push(chunk);
+      }
+    }
+    const md = strings.join('');
+    emit({ md, hash: hashSum(md) });
+    return shape;
+  };
 
-Shape.prototype.md = mdMethod;
+Shape.registerMethod('md', mdMethod);
