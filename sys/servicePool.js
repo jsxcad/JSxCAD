@@ -9,7 +9,13 @@ const watchers = new Set();
 
 // TODO: Consider different specifications.
 
-export const acquireService = async (spec) => {
+const notifyWatchers = () => {
+  for (const watcher of watchers) {
+    watcher();
+  }
+};
+
+export const acquireService = async (spec, context) => {
   if (idleServices.length > 0) {
     // Recycle an existing worker.
     // FIX: We might have multiple paths to consider in the future.
@@ -19,6 +25,8 @@ export const acquireService = async (spec) => {
     if (service.released) {
       throw Error('die');
     }
+    service.context = context;
+    notifyWatchers();
     return service;
   } else if (activeServices.size < activeServiceLimit) {
     // Create a new service.
@@ -27,10 +35,14 @@ export const acquireService = async (spec) => {
     if (service.released) {
       throw Error('die');
     }
+    service.context = context;
+    notifyWatchers();
     return service;
   } else {
     // Wait for a service to become available.
-    return new Promise((resolve, reject) => pending.push({ spec, resolve }));
+    return new Promise((resolve, reject) =>
+      pending.push({ spec, resolve, context })
+    );
   }
 };
 
@@ -48,12 +60,10 @@ export const releaseService = (spec, service, terminate = false) => {
     }
   }
   if (pending.length > 0 && activeServices.size < activeServiceLimit) {
-    const request = pending.shift();
-    request.resolve(acquireService(request.spec));
+    const { spec, resolve, context } = pending.shift();
+    resolve(acquireService(spec, context));
   }
-  for (const watcher of watchers) {
-    watcher();
-  }
+  notifyWatchers();
 };
 
 export const getServicePoolInfo = () => ({
@@ -66,13 +76,26 @@ export const getServicePoolInfo = () => ({
   pendingCount: pending.length,
 });
 
-export const terminateActiveServices = () => {
-  for (const { terminate } of activeServices) {
-    terminate();
+export const getActiveServices = (contextFilter = (context) => true) => {
+  const filteredServices = [];
+  for (const service of activeServices) {
+    const { context } = service;
+    if (contextFilter(context)) {
+      filteredServices.push(service);
+    }
+  }
+  return filteredServices;
+};
+
+export const terminateActiveServices = (contextFilter = (context) => true) => {
+  for (const { terminate, context } of activeServices) {
+    if (contextFilter(context)) {
+      terminate();
+    }
   }
 };
 
-export const askService = (spec, question, transfer) => {
+export const askService = (spec, question, transfer, context) => {
   let terminated;
   let terminate = () => {
     terminated = true;
@@ -80,7 +103,7 @@ export const askService = (spec, question, transfer) => {
   const flow = async () => {
     let service;
     try {
-      service = await acquireService(spec);
+      service = await acquireService(spec, context);
       if (service.released) {
         return Promise.reject(Error('Terminated'));
       }

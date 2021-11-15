@@ -2695,17 +2695,17 @@ var FileSaver_min = createCommonjsModule(function (module, exports) {
 
 /* global Blob, alert, fetch */
 
-const downloadFile = async (event, filename, path, data, type) => {
+const downloadFile = async ({ filename, path, data, type, workspace }) => {
   if (path && !data) {
-    data = await readOrWatch(path);
+    data = await readOrWatch(path, { workspace });
   }
   const blob = new Blob([data], { type });
   FileSaver_min(blob, filename);
 };
 
-const printFile = async (event, filename, path, data, type) => {
+const sendFile = async ({ event, filename, path, data, type, workspace }) => {
   if (path && !data) {
-    data = await readOrWatch(path);
+    data = await readOrWatch(path, { workspace });
   }
   const url = 'http://192.168.31.235:88/';
   try {
@@ -2738,17 +2738,21 @@ marked_1.use({
 
 const toDomElement = (
   notebook = [],
-  { onClickView, onClickPrint = printFile } = {}
+  {
+    onClickView,
+    onClickMake = sendFile,
+    onClickDownload = downloadFile,
+    workspace,
+  } = {}
 ) => {
   const definitions = {};
 
-  const showOrbitView = async (event, note) => {
-    if (note.path && !note.data) {
-      note.data = await readOrWatch(note.path);
+  const showOrbitView = async ({ path, view, workspace }) => {
+    if (!path) {
+      return;
     }
-    const { data } = note;
-    const { target, up, position, withAxes, withGrid } = note.view;
-    const view = { target, up, position };
+    const data = await readOrWatch(path, { workspace });
+    const { target, up, position, withAxes, withGrid } = view;
     const div = document.createElement('div');
     div.classList.add('note', 'orbitView');
     const containers = window.document.getElementsByClassName(
@@ -2761,7 +2765,13 @@ const toDomElement = (
     }
     container.appendChild(div, container.firstChild);
     await orbitDisplay(
-      { view, geometry: data, withAxes, withGrid, definitions },
+      {
+        view: { target, up, position },
+        geometry: data,
+        withAxes,
+        withGrid,
+        definitions,
+      },
       div
     );
     const onKeyDown = async (event) => {
@@ -2791,7 +2801,7 @@ const toDomElement = (
       Object.assign(entry, note.define.data);
     }
     if (note.view) {
-      const { url, openView, view } = note;
+      const { url, view, sourceLocation } = note;
       const { height, width } = view;
       const image = document.createElement('img');
       image.style.display = 'block';
@@ -2808,17 +2818,26 @@ const toDomElement = (
         image.src = url;
       }
 
-      const thisNote = note;
       image.addEventListener('click', (event) => {
-        showOrbitView(event, thisNote);
         if (onClickView) {
-          onClickView(event, thisNote);
+          onClickView({
+            event,
+            path: note.path,
+            view: note.view,
+            workspace,
+            sourceLocation,
+          });
+        } else {
+          showOrbitView({
+            event,
+            path: note.path,
+            view: note.view,
+            workspace,
+            sourceLocation,
+          });
         }
       });
       container.appendChild(image);
-      if (openView) {
-        showOrbitView(undefined, note);
-      }
     }
     if (note.md) {
       const markup = document.createElement('div');
@@ -2859,7 +2878,7 @@ const toDomElement = (
           const text = document.createTextNode(`Download "${filename}"`);
           button.appendChild(text);
           button.addEventListener('click', (event) =>
-            downloadFile(event, filename, path, data, type)
+            onClickDownload({ event, filename, path, data, type, workspace })
           );
           container.appendChild(button);
         }
@@ -2870,10 +2889,10 @@ const toDomElement = (
           // button.style.padding = '0px';
           // button.style.border = '0px';
           // button.style.margin = '0px';
-          const text = document.createTextNode(`Print "${filename}"`);
+          const text = document.createTextNode(`Make "${filename}"`);
           button.appendChild(text);
           button.addEventListener('click', (event) =>
-            onClickPrint(event, filename, path, data, type)
+            onClickMake({ event, filename, path, data, type, workspace })
           );
           container.appendChild(button);
         }

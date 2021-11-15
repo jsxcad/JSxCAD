@@ -1,12 +1,7 @@
 import * as fs from 'fs';
 import * as v8 from 'v8';
 
-import {
-  getBase,
-  getFilesystem,
-  qualifyPath,
-  setupFilesystem,
-} from './filesystem.js';
+import { getFilesystem, qualifyPath } from './filesystem.js';
 import { isBrowser, isNode, isWebWorker } from './browserOrNode.js';
 
 import { db } from './db.js';
@@ -26,20 +21,20 @@ export const writeFile = async (options, path, data) => {
     ephemeral,
     workspace = getFilesystem(),
   } = options;
+  /*
   let originalWorkspace = getFilesystem();
   if (workspace !== originalWorkspace) {
     info(`Write ${path} of ${workspace}`);
     // Switch to the source filesystem, if necessary.
     setupFilesystem({ fileBase: workspace });
   }
-
+*/
   info(`Write ${path}`);
   const file = await getFile(options, path);
   file.data = data;
 
-  const base = getBase();
-  if (!ephemeral && base !== undefined) {
-    const persistentPath = qualifyPath(path);
+  if (!ephemeral && workspace !== undefined) {
+    const persistentPath = qualifyPath(path, workspace);
     if (isNode) {
       try {
         await promises.mkdir(dirname(persistentPath), { recursive: true });
@@ -60,11 +55,6 @@ export const writeFile = async (options, path, data) => {
 
     // Let everyone know the file has changed.
     await touch(path, { workspace, clear: false });
-  }
-
-  if (workspace !== originalWorkspace) {
-    // Switch back to the original filesystem, if necessary.
-    setupFilesystem({ fileBase: originalWorkspace });
   }
 
   for (const watcher of file.watchers) {

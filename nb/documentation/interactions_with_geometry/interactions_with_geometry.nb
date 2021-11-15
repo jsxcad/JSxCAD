@@ -228,14 +228,14 @@ This means that s.get('a').get('b') will find b inside a, but otherwise b would 
 `;
 
 Group(
-  Box(10).as('box').color('yellow').material('copper'),
-  Arc(10).as('arc').color('cyan').material('brick')
+  Box(10).as('box').color('green').material('copper'),
+  Arc(10).as('arc').color('red').material('brick')
 )
-  .view((s) => s.get('*').pack())
+  .view(1, (s) => s.get('*').pack())
   .md('All items.')
-  .view(get('color:green'))
+  .view(2, get('color:green'))
   .md('All green things.')
-  .view(getNot('material:copper'))
+  .view(3, getNot('material:copper'))
   .md('All non-copper things.');
 
 md`

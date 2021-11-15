@@ -319,14 +319,14 @@ This means that s.get('a').get('b') will find b inside a, but otherwise b would 
 
 ```JavaScript
 Group(
-  Box(10).as('box').color('yellow').material('copper'),
-  Arc(10).as('arc').color('cyan').material('brick')
+  Box(10).as('box').color('green').material('copper'),
+  Arc(10).as('arc').color('red').material('brick')
 )
-  .view((s) => s.get('*').pack())
+  .view(1, (s) => s.get('*').pack())
   .md('All items.')
-  .view(get('color:green'))
+  .view(2, get('color:green'))
   .md('All green things.')
-  .view(getNot('material:copper'))
+  .view(3, getNot('material:copper'))
   .md('All non-copper things.');
 ```
 
@@ -334,9 +334,11 @@ Group(
 
 All items.
 
+![Image](interactions_with_geometry.md.27.png)
+
 All green things.
 
-![Image](interactions_with_geometry.md.27.png)
+![Image](interactions_with_geometry.md.28.png)
 
 All non-copper things.
 
@@ -373,6 +375,6 @@ Box(11)
   .view().md('Produce a voxel representation with a 1mm resolution');
 ```
 
-![Image](interactions_with_geometry.md.28.png)
+![Image](interactions_with_geometry.md.29.png)
 
 Produce a voxel representation with a 1mm resolution

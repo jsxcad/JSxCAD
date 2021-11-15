@@ -628,6 +628,15 @@ class Arc$1 {
                     entity.endAngle = Math.PI / 180 * curr.value;
                     entity.angleLength = entity.endAngle - entity.startAngle; // angleLength is deprecated
                     break;
+                case 210:
+                    entity.extrusionDirectionX = curr.value;
+                    break;
+                case 220:
+                    entity.extrusionDirectionY = curr.value;
+                    break;
+                case 230:
+                    entity.extrusionDirectionZ = curr.value;
+                    break;
                 default: // ignored attribute
                     checkCommonEntityProperties(entity, curr, scanner);
                     break;

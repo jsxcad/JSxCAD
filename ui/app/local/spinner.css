@@ -1,0 +1,26 @@
+// https://speckyboy.com/css-loading-spinner-snippets/
+
+@import url(https://fonts.googleapis.com/css?family=Roboto:100);
+
+// body { margin-top: 100px; background-color: #137b85; color: #fff; text-align:center; }
+
+// h1 { font: 2em 'Roboto', sans-serif; margin-bottom: 40px; }
+
+#spinner {
+  display: inline-block;
+  color: black;
+  width: 10px;
+  height: 10px;
+  border: 3px solid rgba(255,255,255,.3);
+  border-radius: 50%;
+  border-top-color: #b8daff;
+  animation: spin 1s ease-in-out infinite;
+  -webkit-animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+  to { -webkit-transform: rotate(360deg); }
+}
+@-webkit-keyframes spin {
+  to { -webkit-transform: rotate(360deg); }
+}
