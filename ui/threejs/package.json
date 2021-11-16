@@ -25,7 +25,7 @@
     "@jsxcad/algorithm-color": "^0.0.79",
     "@jsxcad/algorithm-material": "^0.0.79",
     "@jsxcad/math-poly3": "^0.0.79",
-    "three": "^0.117.1"
+    "three": "^0.134.0"
   },
   "devDependencies": {
     "depcheck": "^1.4.1",

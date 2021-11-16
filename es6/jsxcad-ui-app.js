@@ -1,6 +1,6 @@
 import { readOrWatch, unwatchFile, read, watchFile, boot, log, deleteFile, ask, touch, askService, write, terminateActiveServices, clearEmitted, resolvePending, listFiles, getActiveServices, watchFileCreation, watchFileDeletion, watchServices } from './jsxcad-sys.js';
 import { toDomElement, getNotebookControlData } from './jsxcad-ui-notebook.js';
-import { orbitDisplay } from './jsxcad-ui-threejs.js';
+import { orbitDisplay, raycast } from './jsxcad-ui-threejs.js';
 import Prettier from 'https://unpkg.com/prettier@2.3.2/esm/standalone.mjs';
 import PrettierParserBabel from 'https://unpkg.com/prettier@2.3.2/esm/parser-babel.mjs';
 import { execute } from './jsxcad-api.js';
@@ -41489,6 +41489,7 @@ class OrbitView extends ReactDOM$2.PureComponent {
       view: propTypes$1.exports.object,
       workspace: propTypes$1.exports.string,
       onMove: propTypes$1.exports["function"],
+      onClick: propTypes$1.exports["function"],
       trackballState: propTypes$1.exports.object
     };
   }
@@ -41534,7 +41535,10 @@ class OrbitView extends ReactDOM$2.PureComponent {
     } = view;
     const {
       updateGeometry,
-      trackball
+      trackball,
+      canvas,
+      camera,
+      scene
     } = await orbitDisplay({
       view: {
         target,
@@ -41620,6 +41624,22 @@ class OrbitView extends ReactDOM$2.PureComponent {
         });
       }
     });
+    canvas.addEventListener('click', event => {
+      const {
+        onClick
+      } = this.props;
+      const rect = event.target.getBoundingClientRect();
+      const x = (event.clientX - rect.x) / rect.width * 2 - 1;
+      const y = -((event.clientY - rect.y) / rect.height) * 2 + 1;
+      const {
+        segment
+      } = raycast(x, y, camera, scene);
+
+      if (segment && onClick) {
+        console.log(`Ray: ${JSON.stringify(segment)}`);
+        onClick(segment);
+      }
+    });
   }
 
   componentWillUnmount() {
@@ -41635,7 +41655,6 @@ class OrbitView extends ReactDOM$2.PureComponent {
   }
 
   render() {
-    // return <div classList="note orbitView" onClick={e => e.stopPropagation()} ref={async (container) => {
     return v$1("div", {
       classList: "note orbitView",
       ref: async container => {

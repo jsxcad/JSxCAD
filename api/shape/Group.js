@@ -8,7 +8,9 @@ export const Group = (...shapes) =>
   Shape.fromGeometry(
     taggedGroup(
       {},
-      ...shapes.filter(isDefined).map((shape) => shape.toGeometry())
+      ...Shape.toShapes(shapes.filter(isDefined)).map((shape) =>
+        shape.toGeometry()
+      )
     )
   );
 

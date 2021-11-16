@@ -1,9 +1,9 @@
 import * as PropTypes from 'prop-types';
 
+import { orbitDisplay, raycast } from '@jsxcad/ui-threejs';
 import { read, readOrWatch, unwatchFile, watchFile } from '@jsxcad/sys';
 
 import React from 'react';
-import { orbitDisplay } from '@jsxcad/ui-threejs';
 
 export class OrbitView extends React.PureComponent {
   static get propTypes() {
@@ -12,6 +12,7 @@ export class OrbitView extends React.PureComponent {
       view: PropTypes.object,
       workspace: PropTypes.string,
       onMove: PropTypes.function,
+      onClick: PropTypes.function,
       trackballState: PropTypes.object,
     };
   }
@@ -33,16 +34,17 @@ export class OrbitView extends React.PureComponent {
     const data = await readOrWatch(path, { workspace });
     const definitions = {};
     const { target, up, position, withAxes, withGrid } = view;
-    const { updateGeometry, trackball } = await orbitDisplay(
-      {
-        view: { target, up, position },
-        geometry: data,
-        withAxes,
-        withGrid,
-        definitions,
-      },
-      container
-    );
+    const { updateGeometry, trackball, canvas, camera, scene } =
+      await orbitDisplay(
+        {
+          view: { target, up, position },
+          geometry: data,
+          withAxes,
+          withGrid,
+          definitions,
+        },
+        container
+      );
     while (container.firstChild !== container.lastChild) {
       container.removeChild(container.firstChild);
     }
@@ -87,6 +89,17 @@ export class OrbitView extends React.PureComponent {
         onMove({ path, position, up, target, zoom });
       }
     });
+    canvas.addEventListener('click', (event) => {
+      const { onClick } = this.props;
+      const rect = event.target.getBoundingClientRect();
+      const x = ((event.clientX - rect.x) / rect.width) * 2 - 1;
+      const y = -((event.clientY - rect.y) / rect.height) * 2 + 1;
+      const { segment } = raycast(x, y, camera, scene);
+      if (segment && onClick) {
+        console.log(`Ray: ${JSON.stringify(segment)}`);
+        onClick(segment);
+      }
+    });
   }
 
   componentWillUnmount() {
@@ -97,7 +110,6 @@ export class OrbitView extends React.PureComponent {
   }
 
   render() {
-    // return <div classList="note orbitView" onClick={e => e.stopPropagation()} ref={async (container) => {
     return (
       <div
         classList="note orbitView"

@@ -1,8 +1,7 @@
 import Shape from './Shape.js';
-import { toCoordinate } from './toCoordinate.js';
 
 export const Edge = (source, target) =>
-  Shape.fromSegments([toCoordinate(source), toCoordinate(target)]);
+  Shape.fromSegments([Shape.toCoordinate(source), Shape.toCoordinate(target)]);
 
 export default Edge;
 

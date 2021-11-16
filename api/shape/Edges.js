@@ -1,11 +1,10 @@
 import Shape from './Shape.js';
-import { toCoordinate } from './toCoordinate.js';
 
 export const Edges = (...segments) =>
   Shape.fromSegments(
     ...segments.map(([source, target]) => [
-      toCoordinate(source),
-      toCoordinate(target),
+      Shape.toCoordinate(source),
+      Shape.toCoordinate(target),
     ])
   );
 

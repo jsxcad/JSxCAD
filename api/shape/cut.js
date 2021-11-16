@@ -7,7 +7,7 @@ export const cut =
     Shape.fromGeometry(
       difference(
         shape.toGeometry(),
-        ...shapes.map((other) => Shape.toShape(other, shape).toGeometry())
+        ...shape.toShapes(shapes).map((other) => other.toGeometry())
       )
     );
 
