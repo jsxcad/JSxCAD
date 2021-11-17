@@ -384,3 +384,9 @@ b.to(
 ```
 
 ![Image](shape.md.42.png)
+
+```JavaScript
+Voxels([0, 0, 0], [0, 0, 1], [1, 0, 1], [2, 0, 1]).view();
+```
+
+![Image](shape.md.43.png)

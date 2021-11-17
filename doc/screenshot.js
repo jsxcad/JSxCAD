@@ -17,7 +17,7 @@ export const screenshot = async (html) => {
       page.on('error', (msg) => console.log(msg.text()));
       await page.setContent(html);
       try {
-        await page.waitForSelector('.notebook.loaded', { timeout: 30000 });
+        await page.waitForSelector('.notebook.loaded', { timeout: 60000 });
       } catch (error) {
         console.log(error.stack);
         if (timeoutCount++ < timeoutLimit) {
