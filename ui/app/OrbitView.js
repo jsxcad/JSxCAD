@@ -10,6 +10,7 @@ export class OrbitView extends React.PureComponent {
     return {
       path: PropTypes.string,
       view: PropTypes.object,
+      sourceLocation: PropTypes.object,
       workspace: PropTypes.string,
       onMove: PropTypes.function,
       onClick: PropTypes.function,
@@ -89,17 +90,19 @@ export class OrbitView extends React.PureComponent {
         onMove({ path, position, up, target, zoom });
       }
     });
-    canvas.addEventListener('click', (event) => {
-      const { onClick } = this.props;
+    const handleClick = (type) => (event) => {
+      const { onClick, view, sourceLocation } = this.props;
       const rect = event.target.getBoundingClientRect();
       const x = ((event.clientX - rect.x) / rect.width) * 2 - 1;
       const y = -((event.clientY - rect.y) / rect.height) * 2 + 1;
-      const { segment } = raycast(x, y, camera, scene);
-      if (segment && onClick) {
-        console.log(`Ray: ${JSON.stringify(segment)}`);
-        onClick(segment);
+      const { ray } = raycast(x, y, camera, scene);
+      if (ray && onClick) {
+        console.log(`Ray: ${JSON.stringify(ray)}`);
+        onClick({ type, event, path, view, sourceLocation, ray });
       }
-    });
+    };
+    canvas.addEventListener('contextmenu', handleClick('right'));
+    canvas.addEventListener('click', handleClick('left'));
   }
 
   componentWillUnmount() {

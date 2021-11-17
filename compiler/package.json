@@ -26,8 +26,10 @@
     "@jsxcad/sys": "^0.0.79",
     "acorn": "^7.1.0",
     "acorn-walk": "^7.1.1",
+    "ast-types": "0.14.2",
     "astring": "^1.4.3",
-    "object-hash": "^2.0.3"
+    "object-hash": "^2.0.3",
+    "recast": "^0.20.5"
   },
   "devDependencies": {
     "ava": "^3.9.0",
