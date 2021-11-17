@@ -176,7 +176,7 @@ const orient = Line(10)
 ![Image](shape.md.19.png)
 
 ```JavaScript
-const pack = Group(...seq((n) => Arc(n), { from: 1, to: 20 }))
+const pack = Group(seq((n) => Arc(n), { from: 1, to: 20 }))
   .pack()
   .gridView();
 ```
@@ -332,7 +332,7 @@ const tintEx = Arc(10).color('blue').tint('red').view();
 
 ```JavaScript
 Edges(
-  ...seq((y) => [Point(-10, y, 0), Point(10, y, 0)], {
+  seq((y) => [Point(-10, y, 0), Point(10, y, 0)], {
     from: -6,
     to: 6,
     by: 1 / 4,

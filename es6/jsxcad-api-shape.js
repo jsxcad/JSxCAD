@@ -121,8 +121,12 @@ class Shape {
     return Shape.toValue(value, this);
   }
 
-  toValues(values) {
-    return Shape.toValues(values, this);
+  toFlatValues(values) {
+    return Shape.toFlatValues(values, this);
+  }
+
+  toNestedValues(values) {
+    return Shape.toNestedValues(values, this);
   }
 }
 
@@ -215,7 +219,7 @@ Shape.toValue = (to, from) => {
   return to;
 };
 
-Shape.toValues = (to, from) => {
+Shape.toFlatValues = (to, from) => {
   if (to instanceof Function) {
     to = to(from);
   }
@@ -225,6 +229,27 @@ Shape.toValues = (to, from) => {
       .flatMap((value) => Shape.toValue(value, from));
   } else {
     return [Shape.toValue(to, from)];
+  }
+};
+
+Shape.toNestedValues = (to, from) => {
+  if (to instanceof Function) {
+    return to(from);
+  } else if (to instanceof Array) {
+    const expanded = [];
+    for (const value of to) {
+      if (value instanceof Function) {
+        const result = value(from);
+        if (result instanceof Array) {
+          expanded.push(...result);
+        } else {
+          expanded.push(result);
+        }
+      }
+    }
+    return expanded;
+  } else {
+    return to;
   }
 };
 
@@ -3018,7 +3043,7 @@ const loft =
     Shape.fromGeometry(
       loft$1(
         /* closed= */ false,
-        ...shape.toValues(ops).map((shape) => shape.toGeometry())
+        ...shape.toFlatValues(ops).map((shape) => shape.toGeometry())
       )
     );
 
@@ -3074,7 +3099,7 @@ const loop =
     return Shape.fromGeometry(
       loft$1(
         /* closed= */ true,
-        ...shape.toValues(ops).map((shape) => shape.toGeometry())
+        ...shape.toFlatValues(ops).map((shape) => shape.toGeometry())
       )
     );
   };
@@ -3375,7 +3400,7 @@ const rx =
   (shape) =>
     Shape.Group(
       ...shape
-        .toValues(angles)
+        .toFlatValues(angles)
         .map((angle) => shape.transform(fromRotateXToTransform(angle * 360)))
     );
 
@@ -3390,7 +3415,7 @@ const ry =
   (shape) =>
     Shape.Group(
       ...shape
-        .toValues(angles)
+        .toFlatValues(angles)
         .map((angle) => shape.transform(fromRotateYToTransform(angle * 360)))
     );
 
@@ -3405,7 +3430,7 @@ const rz =
   (shape) =>
     Shape.Group(
       ...shape
-        .toValues(angles)
+        .toFlatValues(angles)
         .map((angle) => shape.transform(fromRotateZToTransform(angle * 360)))
     );
 
@@ -4026,21 +4051,21 @@ Shape.registerMethod('with', withFn);
 const x =
   (...x) =>
   (shape) =>
-    Shape.Group(...shape.toValues(x).map((x) => move(x)(shape)));
+    Shape.Group(...shape.toFlatValues(x).map((x) => move(x)(shape)));
 
 Shape.registerMethod('x', x);
 
 const y =
   (...y) =>
   (shape) =>
-    Shape.Group(...shape.toValues(y).map((y) => move(0, y)(shape)));
+    Shape.Group(...shape.toFlatValues(y).map((y) => move(0, y)(shape)));
 
 Shape.registerMethod('y', y);
 
 const z =
   (...z) =>
   (shape) =>
-    Shape.Group(...shape.toValues(z).map((z) => move(0, 0, z)(shape)));
+    Shape.Group(...shape.toFlatValues(z).map((z) => move(0, 0, z)(shape)));
 
 Shape.registerMethod('z', z);
 
@@ -4193,7 +4218,7 @@ Shape.prototype.Edge = Shape.shapeMethod(Edge);
 
 const Edges = (...segments) =>
   Shape.fromSegments(
-    ...segments.map(([source, target]) => [
+    ...Shape.toNestedValues(segments).map(([source, target]) => [
       Shape.toCoordinate(source),
       Shape.toCoordinate(target),
     ])

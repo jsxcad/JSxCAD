@@ -74,7 +74,7 @@ const Face = ({ axleRadius, faceRadius, fontSize }) =>
     .hasRadius(faceRadius)
     .cut(Arc().hasRadius(axleRadius))
     .and(
-      ...seq(
+      seq(
         (n) =>
           Text(aladinRegular, `${n}`, 20)
             .align('xy')

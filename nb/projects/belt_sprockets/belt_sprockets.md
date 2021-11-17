@@ -711,178 +711,64 @@ GT2_5mm profile
 
 # Supported belt profiles:
 
-![Image](belt_sprockets.md.14.png)
-
-```JavaScript
+'''js
 Pulley(MXL, 20).md('MXL').view();
-```
 
-MXL
+Pulley(DP40, 20).md('DP40').view();
+
+Pulley(XL, 20).md('XL').view();
+
+Pulley(H, 20).md('H').view();
+
+Pulley(T2_5, 20).md('T2 5mm').view();
+
+Pulley(T5, 20).md('T5').view();
+
+Pulley(T10, 20).md('T10').view();
+
+Pulley(AT5, 20).md('AT 5mm').view();
+
+Pulley(HTD_3mm, 20).md('HTD 3mm').view();
+
+Pulley(HTD_5mm, 20).md('HTD 5mm').view();
+
+Pulley(GT2_5mm, 20).md('GT2 5mm').view();
+
+Pulley(GT2_5mm, 20).md('GT2 5mm').view();
+
+Pulley(HTD_8mm, 20).md('HTD 8mm').view();
+
+Pulley(GT2_2mm, 20).md('GT2 2mm').view();
+
+Pulley(GT2_3mm, 20).md('GT2 3mm').view();
+
+Pulley(GT2_5mm, 20).md('GT2 5mm').view();
+'''
+
+![Image](belt_sprockets.md.14.png)
 
 ![Image](belt_sprockets.md.15.png)
 
 ![Image](belt_sprockets.md.16.png)
 
-```JavaScript
-Pulley(DP40, 20).md('DP40').view();
-```
-
-DP40
-
 ![Image](belt_sprockets.md.17.png)
 
 ![Image](belt_sprockets.md.18.png)
-
-```JavaScript
-Pulley(XL, 20).md('XL').view();
-```
-
-XL
 
 ![Image](belt_sprockets.md.19.png)
 
 ![Image](belt_sprockets.md.20.png)
 
-```JavaScript
-Pulley(H, 20).md('H').view();
-```
-
-H
-
 ![Image](belt_sprockets.md.21.png)
 
 ![Image](belt_sprockets.md.22.png)
-
-```JavaScript
-Pulley(T2_5, 20).md('T2 5mm').view();
-```
-
-T2 5mm
 
 ![Image](belt_sprockets.md.23.png)
 
 ![Image](belt_sprockets.md.24.png)
 
-```JavaScript
-Pulley(T5, 20).md('T5').view();
-```
-
-T5
-
 ![Image](belt_sprockets.md.25.png)
 
 ![Image](belt_sprockets.md.26.png)
 
-```JavaScript
-Pulley(T10, 20).md('T10').view();
-```
-
-T10
-
 ![Image](belt_sprockets.md.27.png)
-
-![Image](belt_sprockets.md.28.png)
-
-```JavaScript
-Pulley(AT5, 20).md('AT 5mm').view();
-```
-
-AT 5mm
-
-![Image](belt_sprockets.md.29.png)
-
-![Image](belt_sprockets.md.30.png)
-
-```JavaScript
-Pulley(HTD_3mm, 20).md('HTD 3mm').view();
-```
-
-HTD 3mm
-
-![Image](belt_sprockets.md.31.png)
-
-![Image](belt_sprockets.md.32.png)
-
-```JavaScript
-Pulley(HTD_5mm, 20).md('HTD 5mm').view();
-```
-
-HTD 5mm
-
-![Image](belt_sprockets.md.33.png)
-
-![Image](belt_sprockets.md.34.png)
-
-```JavaScript
-Pulley(GT2_5mm, 20).md('GT2 5mm').view();
-```
-
-GT2 5mm
-
-![Image](belt_sprockets.md.35.png)
-
-![Image](belt_sprockets.md.36.png)
-
-![Image](belt_sprockets.md.37.png)
-
-![Image](belt_sprockets.md.38.png)
-
-```JavaScript
-Pulley(HTD_8mm, 20).md('HTD 8mm').view();
-```
-
-HTD 8mm
-
-![Image](belt_sprockets.md.39.png)
-
-![Image](belt_sprockets.md.40.png)
-
-```JavaScript
-Pulley(GT2_2mm, 20).md('GT2 2mm').view();
-```
-
-GT2 2mm
-
-![Image](belt_sprockets.md.41.png)
-
-![Image](belt_sprockets.md.42.png)
-
-```JavaScript
-Pulley(GT2_3mm, 20).md('GT2 3mm').view();
-```
-
-GT2 3mm
-
-![Image](belt_sprockets.md.43.png)
-
-![Image](belt_sprockets.md.44.png)
-
-![Image](belt_sprockets.md.45.png)
-
-![Image](belt_sprockets.md.46.png)
-
-![Image](belt_sprockets.md.47.png)
-
-![Image](belt_sprockets.md.48.png)
-
-![Image](belt_sprockets.md.49.png)
-
-![Image](belt_sprockets.md.50.png)
-
-![Image](belt_sprockets.md.51.png)
-
-![Image](belt_sprockets.md.52.png)
-
-![Image](belt_sprockets.md.53.png)
-
-![Image](belt_sprockets.md.54.png)
-
-![Image](belt_sprockets.md.55.png)
-
-![Image](belt_sprockets.md.56.png)
-
-![Image](belt_sprockets.md.57.png)
-
-![Image](belt_sprockets.md.58.png)
-
-![Image](belt_sprockets.md.59.png)

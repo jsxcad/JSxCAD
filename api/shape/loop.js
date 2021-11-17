@@ -8,7 +8,7 @@ export const loop =
     return Shape.fromGeometry(
       loftGeometry(
         /* closed= */ true,
-        ...shape.toValues(ops).map((shape) => shape.toGeometry())
+        ...shape.toFlatValues(ops).map((shape) => shape.toGeometry())
       )
     );
   };

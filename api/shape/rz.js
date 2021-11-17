@@ -7,7 +7,7 @@ export const rz =
   (shape) =>
     Shape.Group(
       ...shape
-        .toValues(angles)
+        .toFlatValues(angles)
         .map((angle) => shape.transform(fromRotateZToTransform(angle * 360)))
     );
 

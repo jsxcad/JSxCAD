@@ -129,8 +129,12 @@ export class Shape {
     return Shape.toValue(value, this);
   }
 
-  toValues(values) {
-    return Shape.toValues(values, this);
+  toFlatValues(values) {
+    return Shape.toFlatValues(values, this);
+  }
+
+  toNestedValues(values) {
+    return Shape.toNestedValues(values, this);
   }
 }
 
@@ -223,7 +227,7 @@ Shape.toValue = (to, from) => {
   return to;
 };
 
-Shape.toValues = (to, from) => {
+Shape.toFlatValues = (to, from) => {
   if (to instanceof Function) {
     to = to(from);
   }
@@ -233,6 +237,27 @@ Shape.toValues = (to, from) => {
       .flatMap((value) => Shape.toValue(value, from));
   } else {
     return [Shape.toValue(to, from)];
+  }
+};
+
+Shape.toNestedValues = (to, from) => {
+  if (to instanceof Function) {
+    return to(from);
+  } else if (to instanceof Array) {
+    const expanded = [];
+    for (const value of to) {
+      if (value instanceof Function) {
+        const result = value(from);
+        if (result instanceof Array) {
+          expanded.push(...result);
+        } else {
+          expanded.push(result);
+        }
+      }
+    }
+    return expanded;
+  } else {
+    return to;
   }
 };
 
