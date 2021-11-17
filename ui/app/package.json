@@ -23,6 +23,7 @@
   "license": "MIT",
   "dependencies": {
     "@jsxcad/api": "^0.0.79",
+    "@jsxcad/compiler": "^0.0.79",
     "@jsxcad/sys": "^0.0.79",
     "@jsxcad/ui-notebook": "^0.0.79",
     "@jsxcad/ui-threejs": "^0.0.79",

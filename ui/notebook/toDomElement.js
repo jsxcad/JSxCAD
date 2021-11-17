@@ -118,9 +118,6 @@ export const toDomElement = (
       image.style.display = 'block';
       image.style.height = `${height}px`;
       image.style.width = `${width}px`;
-      // image.style.padding = '0px';
-      // image.style.border = '0px';
-      // image.style.margin = '0px';
       image.style.background =
         'url(https://upload.wikimedia.org/wikipedia/commons/b/b1/Loading_icon.gif) no-repeat center;';
       image.classList.add('note', 'view');

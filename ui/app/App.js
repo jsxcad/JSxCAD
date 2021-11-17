@@ -20,6 +20,7 @@ import {
   watchServices,
   write,
 } from '@jsxcad/sys';
+
 import { getNotebookControlData, toDomElement } from '@jsxcad/ui-notebook';
 
 import Button from 'react-bootstrap/Button';
@@ -37,6 +38,7 @@ import ReactDOM from 'react-dom';
 import Row from 'react-bootstrap/Row';
 import { animationFrame } from './schedule.js';
 import { execute } from '@jsxcad/api';
+import { rewrite } from '@jsxcad/compiler';
 
 const ensureFile = async (file, url, { workspace } = {}) => {
   const sources = [];
@@ -423,17 +425,17 @@ class App extends React.Component {
 
     this.Notebook = {};
 
-    this.Notebook.clickView = async ({ path, id, view }) => {
+    this.Notebook.clickView = async ({ path, view, sourceLocation }) => {
       const { model } = this.state;
-      await this.updateState({ View: { path, id, view } });
+      await this.updateState({ View: { path, view, sourceLocation } });
       // This is a bit of a hack, since selectTab toggles.
       model.getNodeById('View').getParent()._setSelected(-1);
       model.doAction(FlexLayout.Actions.selectTab('View'));
       this.View.store();
     };
 
-    this.Notebook.clickMake = async ({ path, id }) => {
-      await this.updateState({ Make: { path, id } });
+    this.Notebook.clickMake = async ({ path, id, sourceLocation }) => {
+      await this.updateState({ Make: { path, id, sourceLocation } });
     };
 
     this.Notebook.run = async (path, options) => {
@@ -606,6 +608,41 @@ class App extends React.Component {
     };
 
     this.View = {};
+
+    this.View.click = async ({ type, view, ray, sourceLocation }) => {
+      if (this.View.clicking) {
+        return;
+      }
+      try {
+        this.View.clicking = true;
+        const { viewId } = view;
+        const { path } = sourceLocation;
+        const { [`NotebookText/${path}`]: NotebookText } = this.state;
+        const request = { viewId };
+        const [point, normal] = ray;
+        switch (type) {
+          case 'left':
+            request.pointToAppend = [
+              point[0] + normal[0] / 2,
+              point[1] + normal[1] / 2,
+              point[2] + normal[2] / 2,
+            ].map((v) => Math.round(v));
+            break;
+          case 'right':
+            request.pointToRemove = [
+              point[0] - normal[0] / 2,
+              point[1] - normal[1] / 2,
+              point[2] - normal[2] / 2,
+            ].map((v) => Math.round(v));
+            break;
+        }
+        const newNotebookText = rewrite(NotebookText, request);
+        await this.updateState({ [`NotebookText/${path}`]: newNotebookText });
+        await this.Notebook.run(path);
+      } finally {
+        this.View.clicking = false;
+      }
+    };
 
     this.View.move = async ({ path, position, up, target, zoom }) => {
       if (this.View.moving) {
@@ -825,7 +862,9 @@ class App extends React.Component {
             <OrbitView
               path={View.path}
               view={View.view}
+              sourceLocation={View.sourceLocation}
               workspace={workspace}
+              onClick={this.View.click}
               onMove={this.View.move}
               trackballState={trackballState}
             />

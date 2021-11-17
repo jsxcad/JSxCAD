@@ -59,7 +59,15 @@ export const baseView =
     )) {
       const viewPath = `view/${path}/${id}/${viewId}`;
       addPending(write(viewPath, entry));
-      const view = { width, height, position, inline, withAxes, withGrid };
+      const view = {
+        viewId,
+        width,
+        height,
+        position,
+        inline,
+        withAxes,
+        withGrid,
+      };
       emit({ hash: generateUniqueId(), path: viewPath, view });
     }
     return shape;

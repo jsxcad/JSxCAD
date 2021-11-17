@@ -14,11 +14,11 @@ export const raycast = (x, y, camera, scene) => {
 
   for (const { face, point } of intersects) {
     const { normal } = face;
-    const segment = [
+    const ray = [
       [point.x, point.y, point.z],
-      [point.x + normal.x, point.y + normal.y, point.z + normal.z],
+      [normal.x, normal.y, normal.z],
     ];
-    return { segment };
+    return { ray };
   }
 
   return {};
