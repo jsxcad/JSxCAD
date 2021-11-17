@@ -73,12 +73,12 @@ const visnezh = await readSvg(
 
 ```JavaScript
 const calibration = Group(
-  ...seq(
+  seq(
     (x) =>
       Box(10)
         .x(x)
         .op((s) =>
-          Group(...seq((y) => s.y(y), { from: -100, upto: 100, by: 60 }))
+          Group(seq((y) => s.y(y), { from: -100, upto: 100, by: 60 }))
         ),
     { from: -100, upto: 100, by: 60 }
   )
@@ -104,7 +104,7 @@ const scaledVisnezh = visnezh
 
 ```JavaScript
 const star = Group(
-  ...seq((a) => Triangle(5).rz(a), { upto: 120 / 360, by: 30 / 360 })
+  seq((a) => Triangle(5).rz(a), { upto: 120 / 360, by: 30 / 360 })
 ).view(undefined, { outline: false });
 ```
 
@@ -116,7 +116,7 @@ const r = Random();
 
 ```JavaScript
 const stars = Group(
-  ...seq((i) => star.x(r.in(-100, 100)).y(r.in(-100, 100)), { upto: 20 })
+  seq((i) => star.x(r.in(-100, 100)).y(r.in(-100, 100)), { upto: 20 })
 ).gcode('stars', plotter);
 ```
 

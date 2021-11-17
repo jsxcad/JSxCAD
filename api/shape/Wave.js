@@ -1,7 +1,7 @@
 import { concatenatePath, translatePath } from '@jsxcad/geometry';
 
 import Shape from './Shape.js';
-import { seq } from '@jsxcad/api-v1-math';
+import { seq } from './seq.js';
 
 export const Wave = (
   toPathFromXDistance = (xDistance) => [[0]],
@@ -14,7 +14,7 @@ export const Wave = (
     to,
     upto,
     downto,
-  })) {
+  })()) {
     const subpath = toPathFromXDistance(xDistance);
     path = concatenatePath(path, translatePath([xDistance, 0, 0], subpath));
   }

@@ -3,7 +3,7 @@ import { getSourceLocation, emit, log as log$1, generateUniqueId, addPending, wr
 export { elapsed, emit, info, read, write } from './jsxcad-sys.js';
 import { identityMatrix, fromTranslation, fromRotation, fromScaling } from './jsxcad-math-mat4.js';
 import { scale as scale$1, subtract, add as add$1, abs, negate, normalize, dot, cross, distance } from './jsxcad-math-vec3.js';
-import { zag, seq } from './jsxcad-api-v1-math.js';
+import { zag } from './jsxcad-api-v1-math.js';
 import { toTagsFromName } from './jsxcad-algorithm-color.js';
 import { toTagsFromName as toTagsFromName$1 } from './jsxcad-algorithm-material.js';
 import { invertTransform, fromRotateXToTransform, fromRotateYToTransform, fromRotateZToTransform } from './jsxcad-algorithm-cgal.js';
@@ -104,6 +104,30 @@ class Shape {
   setTags(tags = []) {
     return Shape.fromGeometry(rewriteTags(tags, [], this.toGeometry()));
   }
+
+  toCoordinate(value) {
+    return Shape.toCoordinate(value);
+  }
+
+  toShape(value) {
+    return Shape.toShape(value, this);
+  }
+
+  toShapes(values) {
+    return Shape.toShapes(values, this);
+  }
+
+  toValue(value) {
+    return Shape.toValue(value, this);
+  }
+
+  toFlatValues(values) {
+    return Shape.toFlatValues(values, this);
+  }
+
+  toNestedValues(values) {
+    return Shape.toNestedValues(values, this);
+  }
 }
 
 const isSingleOpenPath = ({ paths }) =>
@@ -171,7 +195,20 @@ Shape.toShape = (to, from) => {
   if (to instanceof Shape) {
     return to;
   } else {
-    throw Error('Expected Function or Shape');
+    throw Error(`Expected Function or Shape. Received: ${to.constructor.name}`);
+  }
+};
+
+Shape.toShapes = (to, from) => {
+  if (to instanceof Function) {
+    to = to(from);
+  }
+  if (to instanceof Array) {
+    return to
+      .flatMap((value) => Shape.toShapes(value, from))
+      .flatMap((value) => Shape.toShapes(value, from));
+  } else {
+    return [Shape.toShape(to, from)];
   }
 };
 
@@ -180,6 +217,52 @@ Shape.toValue = (to, from) => {
     to = to(from);
   }
   return to;
+};
+
+Shape.toFlatValues = (to, from) => {
+  if (to instanceof Function) {
+    to = to(from);
+  }
+  if (to instanceof Array) {
+    return to
+      .flatMap((value) => Shape.toValue(value, from))
+      .flatMap((value) => Shape.toValue(value, from));
+  } else {
+    return [Shape.toValue(to, from)];
+  }
+};
+
+Shape.toNestedValues = (to, from) => {
+  if (to instanceof Function) {
+    return to(from);
+  } else if (to instanceof Array) {
+    const expanded = [];
+    for (const value of to) {
+      if (value instanceof Function) {
+        const result = value(from);
+        if (result instanceof Array) {
+          expanded.push(...result);
+        } else {
+          expanded.push(result);
+        }
+      }
+    }
+    return expanded;
+  } else {
+    return to;
+  }
+};
+
+Shape.toCoordinate = (x) => {
+  if (x instanceof Shape) {
+    const g = x.toTransformedGeometry();
+    if (g.type === 'points' && g.points.length === 1) {
+      // FIX: Consider how this might be more robust.
+      return g.points[0];
+    }
+  } else if (x instanceof Array) {
+    return x;
+  }
 };
 
 const fromGeometry = Shape.fromGeometry;
@@ -612,7 +695,7 @@ const and =
       taggedGroup(
         {},
         shape.toGeometry(),
-        ...args.map((arg) => Shape.toShape(arg, shape).toGeometry())
+        ...shape.toShapes(args).map((shape) => shape.toGeometry())
       )
     );
 
@@ -811,7 +894,7 @@ const cut =
     Shape.fromGeometry(
       difference(
         shape.toGeometry(),
-        ...shapes.map((other) => Shape.toShape(other, shape).toGeometry())
+        ...shape.toShapes(shapes).map((other) => other.toGeometry())
       )
     );
 
@@ -970,7 +1053,9 @@ const Group = (...shapes) =>
   Shape.fromGeometry(
     taggedGroup(
       {},
-      ...shapes.filter(isDefined$1).map((shape) => shape.toGeometry())
+      ...Shape.toShapes(shapes.filter(isDefined$1)).map((shape) =>
+        shape.toGeometry()
+      )
     )
   );
 
@@ -2958,7 +3043,7 @@ const loft =
     Shape.fromGeometry(
       loft$1(
         /* closed= */ false,
-        ...ops.map((op) => op(shape).toGeometry())
+        ...shape.toFlatValues(ops).map((shape) => shape.toGeometry())
       )
     );
 
@@ -3009,13 +3094,15 @@ Shape.prototype.log = logMethod;
 
 const loop =
   (...ops) =>
-  (shape) =>
-    Shape.fromGeometry(
+  (shape) => {
+    // CHECK: Is two sufficient levels?
+    return Shape.fromGeometry(
       loft$1(
         /* closed= */ true,
-        ...ops.map((op) => op(shape).toGeometry())
+        ...shape.toFlatValues(ops).map((shape) => shape.toGeometry())
       )
     );
+  };
 
 Shape.registerMethod('loop', loop);
 
@@ -3052,18 +3139,6 @@ const minkowskiSum = (offset) => (shape) =>
 
 Shape.registerMethod('minkowskiSum', minkowskiSum);
 
-const toCoordinate = (x) => {
-  if (x instanceof Shape) {
-    const g = x.toTransformedGeometry();
-    if (g.type === 'points' && g.points.length === 1) {
-      // FIX: Consider how this might be more robust.
-      return g.points[0];
-    }
-  } else if (x instanceof Array) {
-    return x;
-  }
-};
-
 // FIX: Consider how exact values might be used.
 const move =
   (x = 0, y = 0, z = 0) =>
@@ -3073,7 +3148,7 @@ const move =
     z = Shape.toValue(z, shape);
     // Allow a Point to be provided.
     if (x instanceof Shape) {
-      [x, y, z] = toCoordinate(x);
+      [x, y, z] = Shape.toCoordinate(x);
     }
     if (!isFinite(x)) {
       x = 0;
@@ -3324,9 +3399,9 @@ const rx =
   (...angles) =>
   (shape) =>
     Shape.Group(
-      ...angles.map((angle) =>
-        shape.transform(fromRotateXToTransform(angle * 360))
-      )
+      ...shape
+        .toFlatValues(angles)
+        .map((angle) => shape.transform(fromRotateXToTransform(angle * 360)))
     );
 
 Shape.registerMethod('rx', rx);
@@ -3339,9 +3414,9 @@ const ry =
   (...angles) =>
   (shape) =>
     Shape.Group(
-      ...angles.map((angle) =>
-        shape.transform(fromRotateYToTransform(angle * 360))
-      )
+      ...shape
+        .toFlatValues(angles)
+        .map((angle) => shape.transform(fromRotateYToTransform(angle * 360)))
     );
 
 Shape.registerMethod('ry', ry);
@@ -3354,9 +3429,9 @@ const rz =
   (...angles) =>
   (shape) =>
     Shape.Group(
-      ...angles.map((angle) =>
-        shape.transform(fromRotateZToTransform(angle * 360))
-      )
+      ...shape
+        .toFlatValues(angles)
+        .map((angle) => shape.transform(fromRotateZToTransform(angle * 360)))
     );
 
 Shape.registerMethod('rz', rz);
@@ -3366,55 +3441,6 @@ Shape.registerMethod('rotateZ', rz);
 
 const saveGeometry = async (path, shape) =>
   Shape.fromGeometry(await write(shape.toGeometry(), path));
-
-const baseSection =
-  ({ profile = false } = {}, ...orientations) =>
-  (shape) => {
-    const matrices = [];
-    if (orientations.length === 0) {
-      matrices.push({ plane: [0, 0, 1, 0] });
-    } else {
-      for (const item of orientations) {
-        const matrix = item.toGeometry().matrix;
-        matrices.push({ matrix });
-      }
-    }
-    return Shape.fromGeometry(
-      section$1(shape.toGeometry(), matrices, { profile })
-    );
-  };
-
-const section =
-  (...orientations) =>
-  (shape) =>
-    baseSection({ profile: false }, ...orientations)(shape);
-
-Shape.registerMethod('section', section);
-
-const sectionProfile =
-  (...orientations) =>
-  (shape) =>
-    baseSection({ profile: true }, ...orientations)(shape);
-
-Shape.registerMethod('sectionProfile', sectionProfile);
-
-const separate =
-  ({
-    keepVolumes = true,
-    keepCavitiesInVolumes = true,
-    keepCavitiesAsVolumes = false,
-  } = {}) =>
-  (shape) =>
-    Shape.fromGeometry(
-      separate$1(
-        shape.toGeometry(),
-        keepVolumes,
-        keepCavitiesInVolumes,
-        keepCavitiesAsVolumes
-      )
-    );
-
-Shape.registerMethod('separate', separate);
 
 const scale =
   (x = 1, y = x, z = y) =>
@@ -3443,6 +3469,98 @@ const scaleToFit =
   };
 
 Shape.registerMethod('scaleToFit', scaleToFit);
+
+const baseSection =
+  ({ profile = false } = {}, orientations) =>
+  (shape) => {
+    orientations = orientations
+      .flatMap((orientation) => Shape.toValue(orientation, shape))
+      .flatMap((orientation) => Shape.toValue(orientation, shape));
+    const matrices = [];
+    if (orientations.length === 0) {
+      matrices.push({ plane: [0, 0, 1, 0] });
+    } else {
+      for (const item of orientations) {
+        const matrix = item.toGeometry().matrix;
+        matrices.push({ matrix });
+      }
+    }
+    return Shape.fromGeometry(
+      section$1(shape.toGeometry(), matrices, { profile })
+    );
+  };
+
+const section =
+  (...orientations) =>
+  (shape) =>
+    baseSection({ profile: false }, orientations)(shape);
+
+Shape.registerMethod('section', section);
+
+const sectionProfile =
+  (...orientations) =>
+  (shape) =>
+    baseSection({ profile: true }, orientations)(shape);
+
+Shape.registerMethod('sectionProfile', sectionProfile);
+
+const separate =
+  ({
+    keepVolumes = true,
+    keepCavitiesInVolumes = true,
+    keepCavitiesAsVolumes = false,
+  } = {}) =>
+  (shape) =>
+    Shape.fromGeometry(
+      separate$1(
+        shape.toGeometry(),
+        keepVolumes,
+        keepCavitiesInVolumes,
+        keepCavitiesAsVolumes
+      )
+    );
+
+Shape.registerMethod('separate', separate);
+
+const EPSILON = 1e-5;
+
+const seq =
+  (
+    op = (n) => n,
+    { from = 0, to = 1, upto, downto, by = 1, index = false } = {}
+  ) =>
+  (shape) => {
+    const numbers = [];
+
+    from = Shape.toValue(from, shape);
+    to = Shape.toValue(to, shape);
+    upto = Shape.toValue(upto, shape);
+    downto = Shape.toValue(downto, shape);
+    by = Shape.toValue(by, shape);
+
+    let consider;
+
+    if (by > 0) {
+      if (upto !== undefined) {
+        consider = (value) => value < upto - EPSILON;
+      } else {
+        consider = (value) => value <= to + EPSILON;
+      }
+    } else if (by < 0) {
+      if (downto !== undefined) {
+        consider = (value) => value > downto + EPSILON;
+      } else {
+        consider = (value) => value >= to - EPSILON;
+      }
+    } else {
+      throw Error('seq: Expects by != 0');
+    }
+
+    for (let number = from, nth = 0; consider(number); number += by, nth++) {
+      numbers.push(index ? op(number, nth) : op(number));
+    }
+    return numbers;
+  };
 
 const smooth =
   (options = {}) =>
@@ -3836,6 +3954,62 @@ const voxels =
 
 Shape.registerMethod('voxels', voxels);
 
+const Voxels = (...points) => {
+  const offset = 0.5;
+  const index = new Set();
+  const key = (x, y, z) => `${x},${y},${z}`;
+  let max = [-Infinity, -Infinity, -Infinity];
+  let min = [Infinity, Infinity, Infinity];
+  for (const [x, y, z] of points.map((point) => Shape.toCoordinate(point))) {
+    index.add(key(x, y, z));
+    max[X] = Math.max(x + 1, max[X]);
+    max[Y] = Math.max(y + 1, max[Y]);
+    max[Z$1] = Math.max(z + 1, max[Z$1]);
+    min[X] = Math.min(x - 1, min[X]);
+    min[Y] = Math.min(y - 1, min[Y]);
+    min[Z$1] = Math.min(z - 1, min[Z$1]);
+  }
+  const isInteriorPoint = (x, y, z) => index.has(key(x, y, z));
+  const polygons = [];
+  for (let x = min[X]; x <= max[X]; x++) {
+    for (let y = min[Y]; y <= max[Y]; y++) {
+      for (let z = min[Z$1]; z <= max[Z$1]; z++) {
+        const state = isInteriorPoint(x, y, z);
+        if (state !== isInteriorPoint(x + 1, y, z)) {
+          const face = [
+            [x + offset, y - offset, z - offset],
+            [x + offset, y + offset, z - offset],
+            [x + offset, y + offset, z + offset],
+            [x + offset, y - offset, z + offset],
+          ];
+          polygons.push({ points: state ? face : face.reverse() });
+        }
+        if (state !== isInteriorPoint(x, y + 1, z)) {
+          const face = [
+            [x - offset, y + offset, z - offset],
+            [x + offset, y + offset, z - offset],
+            [x + offset, y + offset, z + offset],
+            [x - offset, y + offset, z + offset],
+          ];
+          polygons.push({ points: state ? face.reverse() : face });
+        }
+        if (state !== isInteriorPoint(x, y, z + 1)) {
+          const face = [
+            [x - offset, y - offset, z + offset],
+            [x + offset, y - offset, z + offset],
+            [x + offset, y + offset, z + offset],
+            [x - offset, y + offset, z + offset],
+          ];
+          polygons.push({ points: state ? face : face.reverse() });
+        }
+      }
+    }
+  }
+  return Shape.fromPolygons(polygons);
+};
+
+Shape.prototype.Voxels = Shape.shapeMethod(Voxels);
+
 const weld =
   (...rest) =>
   (first) => {
@@ -3877,21 +4051,21 @@ Shape.registerMethod('with', withFn);
 const x =
   (...x) =>
   (shape) =>
-    Shape.Group(...x.map((x) => move(x)(shape)));
+    Shape.Group(...shape.toFlatValues(x).map((x) => move(x)(shape)));
 
 Shape.registerMethod('x', x);
 
 const y =
   (...y) =>
   (shape) =>
-    Shape.Group(...y.map((y) => move(0, y)(shape)));
+    Shape.Group(...shape.toFlatValues(y).map((y) => move(0, y)(shape)));
 
 Shape.registerMethod('y', y);
 
 const z =
   (...z) =>
   (shape) =>
-    Shape.Group(...z.map((z) => move(0, 0, z)(shape)));
+    Shape.Group(...shape.toFlatValues(z).map((z) => move(0, 0, z)(shape)));
 
 Shape.registerMethod('z', z);
 
@@ -3921,7 +4095,7 @@ const Spiral = (
     to,
     upto,
     downto,
-  })) {
+  })()) {
     const radians = -turn * Math.PI * 2;
     const subpath = toPathFromTurn(turn);
     path = concatenatePath(path, rotateZPath(radians, subpath));
@@ -4038,15 +4212,15 @@ Shape.prototype.chainHull = chainHullMethod;
 Shape.prototype.ChainedHull = Shape.shapeMethod(ChainedHull);
 
 const Edge = (source, target) =>
-  Shape.fromSegments([toCoordinate(source), toCoordinate(target)]);
+  Shape.fromSegments([Shape.toCoordinate(source), Shape.toCoordinate(target)]);
 
 Shape.prototype.Edge = Shape.shapeMethod(Edge);
 
 const Edges = (...segments) =>
   Shape.fromSegments(
-    ...segments.map(([source, target]) => [
-      toCoordinate(source),
-      toCoordinate(target),
+    ...Shape.toNestedValues(segments).map(([source, target]) => [
+      Shape.toCoordinate(source),
+      Shape.toCoordinate(target),
     ])
   );
 
@@ -4229,7 +4403,7 @@ const Pentagon = (x, y, z) => Arc(x, y, z).hasSides(5);
 Shape.prototype.Pentagon = Shape.shapeMethod(Pentagon);
 
 const Polygon = (...points) =>
-  Shape.fromClosedPath(points.map((point) => toCoordinate(point)));
+  Shape.fromClosedPath(points.map((point) => Shape.toCoordinate(point)));
 
 Shape.prototype.Polygon = Shape.shapeMethod(Polygon);
 
@@ -4270,7 +4444,7 @@ const Wave = (
     to,
     upto,
     downto,
-  })) {
+  })()) {
     const subpath = toPathFromXDistance(xDistance);
     path = concatenatePath(path, translatePath([xDistance, 0, 0], subpath));
   }
@@ -4507,4 +4681,4 @@ const yz = Shape.fromGeometry({
   ],
 });
 
-export { Alpha, Arc, Assembly, Box, ChainedHull, Edge, Edges, Empty, GrblConstantLaser, GrblDynamicLaser, GrblPlotter, GrblSpindle, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Line, Octagon, Orb, Page, Path, Pentagon, Plan, Point, Points, Polygon, Polyhedron, Septagon, Shape, Spiral, Tetragon, Triangle, Wave, Weld, abstract, add, addTo, align, and, as, asPart, at, bend, billOfMaterials, cast, center, clip, clipFrom, cloudSolid, color, colors, cut, cutFrom, cutOut, defRgbColor, defThreejsMaterial, defTool, define, drop, each, eachPoint, ensurePages, ex, extrude, extrudeAlong, extrudeToPlane, faces, fill, fit, fitTo, fuse, g, get, getEdge, getNot, gn, grow, inline, inset, keep, loadGeometry, loft, log, loop, mask, material, md, minkowskiDifference, minkowskiShell, minkowskiSum, move, moveTo, n, noVoid, noop, normal, notColor, nth, ofPlan, offset, on, op, orient, outline, pack, play, push, remesh, rotate, rotateX, rotateY, rotateZ, rx, ry, rz, saveGeometry, scale, scaleToFit, section, sectionProfile, separate, size, sketch, smooth, table, tag, tags, taper, test, tint, to, tool, top, twist, untag, view, voidFn, voidIn, voxels, weld, withFill, withFn, withInset, withOp, x, xy, xyz, xz, y, yz, z };
+export { Alpha, Arc, Assembly, Box, ChainedHull, Edge, Edges, Empty, GrblConstantLaser, GrblDynamicLaser, GrblPlotter, GrblSpindle, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Line, Octagon, Orb, Page, Path, Pentagon, Plan, Point, Points, Polygon, Polyhedron, Septagon, Shape, Spiral, Tetragon, Triangle, Voxels, Wave, Weld, abstract, add, addTo, align, and, as, asPart, at, bend, billOfMaterials, cast, center, clip, clipFrom, cloudSolid, color, colors, cut, cutFrom, cutOut, defRgbColor, defThreejsMaterial, defTool, define, drop, each, eachPoint, ensurePages, ex, extrude, extrudeAlong, extrudeToPlane, faces, fill, fit, fitTo, fuse, g, get, getEdge, getNot, gn, grow, inline, inset, keep, loadGeometry, loft, log, loop, mask, material, md, minkowskiDifference, minkowskiShell, minkowskiSum, move, moveTo, n, noVoid, noop, normal, notColor, nth, ofPlan, offset, on, op, orient, outline, pack, play, push, remesh, rotate, rotateX, rotateY, rotateZ, rx, ry, rz, saveGeometry, scale, scaleToFit, section, sectionProfile, separate, seq, size, sketch, smooth, table, tag, tags, taper, test, tint, to, tool, top, twist, untag, view, voidFn, voidIn, voxels, weld, withFill, withFn, withInset, withOp, x, xy, xyz, xz, y, yz, z };

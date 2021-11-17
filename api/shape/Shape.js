@@ -112,6 +112,30 @@ export class Shape {
   setTags(tags = []) {
     return Shape.fromGeometry(rewriteTags(tags, [], this.toGeometry()));
   }
+
+  toCoordinate(value) {
+    return Shape.toCoordinate(value);
+  }
+
+  toShape(value) {
+    return Shape.toShape(value, this);
+  }
+
+  toShapes(values) {
+    return Shape.toShapes(values, this);
+  }
+
+  toValue(value) {
+    return Shape.toValue(value, this);
+  }
+
+  toFlatValues(values) {
+    return Shape.toFlatValues(values, this);
+  }
+
+  toNestedValues(values) {
+    return Shape.toNestedValues(values, this);
+  }
 }
 
 const isSingleOpenPath = ({ paths }) =>
@@ -179,7 +203,20 @@ Shape.toShape = (to, from) => {
   if (to instanceof Shape) {
     return to;
   } else {
-    throw Error('Expected Function or Shape');
+    throw Error(`Expected Function or Shape. Received: ${to.constructor.name}`);
+  }
+};
+
+Shape.toShapes = (to, from) => {
+  if (to instanceof Function) {
+    to = to(from);
+  }
+  if (to instanceof Array) {
+    return to
+      .flatMap((value) => Shape.toShapes(value, from))
+      .flatMap((value) => Shape.toShapes(value, from));
+  } else {
+    return [Shape.toShape(to, from)];
   }
 };
 
@@ -188,6 +225,52 @@ Shape.toValue = (to, from) => {
     to = to(from);
   }
   return to;
+};
+
+Shape.toFlatValues = (to, from) => {
+  if (to instanceof Function) {
+    to = to(from);
+  }
+  if (to instanceof Array) {
+    return to
+      .flatMap((value) => Shape.toValue(value, from))
+      .flatMap((value) => Shape.toValue(value, from));
+  } else {
+    return [Shape.toValue(to, from)];
+  }
+};
+
+Shape.toNestedValues = (to, from) => {
+  if (to instanceof Function) {
+    return to(from);
+  } else if (to instanceof Array) {
+    const expanded = [];
+    for (const value of to) {
+      if (value instanceof Function) {
+        const result = value(from);
+        if (result instanceof Array) {
+          expanded.push(...result);
+        } else {
+          expanded.push(result);
+        }
+      }
+    }
+    return expanded;
+  } else {
+    return to;
+  }
+};
+
+Shape.toCoordinate = (x) => {
+  if (x instanceof Shape) {
+    const g = x.toTransformedGeometry();
+    if (g.type === 'points' && g.points.length === 1) {
+      // FIX: Consider how this might be more robust.
+      return g.points[0];
+    }
+  } else if (x instanceof Array) {
+    return x;
+  }
 };
 
 export const fromGeometry = Shape.fromGeometry;

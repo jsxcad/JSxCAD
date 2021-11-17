@@ -86,7 +86,7 @@ const orient = Line(10)
   .orient({ at: [40, 50, 0] })
   .gridView();
 
-const pack = Group(...seq((n) => Arc(n), { from: 1, to: 20 }))
+const pack = Group(seq((n) => Arc(n), { from: 1, to: 20 }))
   .pack()
   .gridView();
 
@@ -148,7 +148,7 @@ const colorEx = Arc(10).color('blue').color('red').view();
 const tintEx = Arc(10).color('blue').tint('red').view();
 
 Edges(
-  ...seq((y) => [Point(-10, y, 0), Point(10, y, 0)], {
+  seq((y) => [Point(-10, y, 0), Point(10, y, 0)], {
     from: -6,
     to: 6,
     by: 1 / 4,
@@ -182,3 +182,5 @@ b.to(
   cut(Box(11, 3, 3).rx(1 / 8))
 )
   .view()
+
+Voxels([0, 0, 0], [0, 0, 1], [1, 0, 1], [2, 0, 1]).view();

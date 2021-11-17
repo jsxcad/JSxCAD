@@ -223,7 +223,7 @@ export const AxleJoiner = (length) => Arc(8).cut(axleProfile).ex(length);
 ```
 
 ```JavaScript
-const technic_1x6 = Group(...seq((n) => technic.x(n), { upto: 48, by: 8 }))
+const technic_1x6 = Group(seq((n) => technic.x(n), { upto: 48, by: 8 }))
   .align()
   .view();
 ```

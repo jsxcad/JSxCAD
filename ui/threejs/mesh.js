@@ -3,7 +3,6 @@ import {
   BufferGeometry,
   Color,
   Float32BufferAttribute,
-  Geometry,
   LineBasicMaterial,
   LineSegments,
   Matrix4,
@@ -231,6 +230,7 @@ export const buildMeshes = async ({
       );
       dataset.mesh = new LineSegments(bufferGeometry, material);
       dataset.mesh.layers.set(layer);
+      dataset.mesh.userData.intangible = true;
       dataset.name = toName(geometry);
       scene.add(dataset.mesh);
       datasets.push(dataset);
@@ -304,6 +304,7 @@ export const buildMeshes = async ({
       );
       dataset.mesh = new LineSegments(bufferGeometry, material);
       dataset.mesh.layers.set(layer);
+      dataset.mesh.userData.intangible = true;
       dataset.name = toName(geometry);
       scene.add(dataset.mesh);
       datasets.push(dataset);
@@ -314,7 +315,6 @@ export const buildMeshes = async ({
           if (dataset.mesh) {
             const bufferGeometry = dataset.mesh.geometry;
             extent += index[current].length;
-            // geometry.setDrawRange(index[current].start, extent - index[current].start);
             bufferGeometry.setDrawRange(0, (extent += index[current].length));
             bufferGeometry.attributes.position.needsUpdate = true;
             render();
@@ -333,14 +333,19 @@ export const buildMeshes = async ({
     case 'points': {
       const { points } = geometry;
       const dataset = {};
-      const threeGeometry = new Geometry();
+      const threeGeometry = new BufferGeometry();
       const material = new PointsMaterial({
         color: setColor(definitions, tags, {}, [0, 0, 0]).color,
         size: 0.5,
       });
+      const positions = [];
       for (const [aX = 0, aY = 0, aZ = 0] of points) {
-        threeGeometry.vertices.push(new Vector3(aX, aY, aZ));
+        positions.push(aX, aY, aZ);
       }
+      threeGeometry.setAttribute(
+        'position',
+        new Float32BufferAttribute(positions, 3)
+      );
       dataset.mesh = new Points(threeGeometry, material);
       dataset.mesh.layers.set(layer);
       dataset.name = toName(geometry);

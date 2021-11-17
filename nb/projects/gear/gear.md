@@ -118,7 +118,7 @@ const ring = Arc(50)
   .cut(Arc(30))
   .cut(
     Group(
-      ...seq(
+      seq(
         (a) =>
           planetaryFootprint
             .rz(a / -8)
@@ -129,7 +129,7 @@ const ring = Arc(50)
       )
     )
   )
-  .rz(...seq((a) => a, { by: 1 / 32 }))
+  .rz(seq((a) => a, { by: 1 / 32 }))
   .gridView()
   .md(
     `We simulate the gear motion to cut a single tooth, then rotate it around.`
@@ -145,7 +145,7 @@ const solar = Arc(20)
   .hasAngle(-1 / 32, 1 / 32)
   .hull(Point())
   .cut(
-    ...seq(
+    seq(
       (a) =>
         planetaryFootprint
           .rz(a / 8)
@@ -154,7 +154,7 @@ const solar = Arc(20)
       { from: -1, by: 1 / 16, to: 1 }
     )
   )
-  .rz(...seq((a) => a, { by: 1 / 16 }))
+  .rz(seq((a) => a, { by: 1 / 16 }))
   .gridView()
   .md(
     `We simulate the gear motion to cut a single tooth, then rotate it around.`
@@ -167,13 +167,13 @@ const solar = Arc(20)
 const rack = Box(20, Math.PI)
   .align('x<')
   .cut(
-    ...seq((a) => planetaryFootprint.rz(-a / 8).y(Math.PI * a), {
+    seq((a) => planetaryFootprint.rz(-a / 8).y(Math.PI * a), {
       from: -1,
       by: 1 / 8,
       to: 1,
     })
   )
-  .y(...seq((a) => a * Math.PI, { to: 10 }))
+  .y(seq((a) => a * Math.PI, { to: 10 }))
   .gridView()
   .md(`We can do the same thing to cut a rack.`);
 ```

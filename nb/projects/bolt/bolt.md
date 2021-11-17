@@ -20,7 +20,7 @@ export const ScrewThread = (
     .y(diameter / -2 + 1 / 2 + play * 2)
     .ry(1 / 4)
     .loft(
-      ...seq((t) => (s) => s.rz(t).z(pitch * t * 1.001), {
+      seq((t) => (s) => s.rz(t).z(pitch * t * 1.001), {
         from: -1 / 2,
         by: 1 / 32,
         to: 3 / 2,
@@ -28,7 +28,7 @@ export const ScrewThread = (
     )
     .scale(lefthanded ? 1 : -1, lefthanded ? 1 : -1, 1)
     .clip(Box(diameter).ex(pitch))
-    .z(...seq((a) => a, { from: 0, to: height, by: pitch }))
+    .z(seq((a) => a, { from: 0, to: height, by: pitch }))
     .clip(Box(diameter).ex(height))
     .and(Arc(diameter - 2).ex(height));
 ```
@@ -44,7 +44,7 @@ export const NutThread = (
     .y(diameter / -2 + 1 / 2 - play * 2)
     .ry(1 / 4)
     .loft(
-      ...seq((t) => (s) => s.rz(t).z(pitch * t * 1.001), {
+      seq((t) => (s) => s.rz(t).z(pitch * t * 1.001), {
         from: -1 / 2,
         by: 1 / 32,
         to: 3 / 2,
@@ -52,7 +52,7 @@ export const NutThread = (
     )
     .scale(lefthanded ? 1 : -1, lefthanded ? 1 : -1, 1)
     .clip(Box(diameter + 2).ex(pitch))
-    .z(...seq((a) => a, { from: 0, to: height, by: pitch }))
+    .z(seq((a) => a, { from: 0, to: height, by: pitch }))
     .clip(Box(diameter + 2).ex(height))
     .rz(1 / 2)
     .mask(Arc(diameter).ex(height));

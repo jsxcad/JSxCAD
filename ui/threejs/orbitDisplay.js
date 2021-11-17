@@ -155,7 +155,14 @@ export const orbitDisplay = async (
     isUpdating = false;
   });
 
-  return { canvas: displayCanvas, render, updateGeometry, trackball };
+  return {
+    camera,
+    canvas: displayCanvas,
+    render,
+    scene,
+    trackball,
+    updateGeometry,
+  };
 };
 
 export default orbitDisplay;

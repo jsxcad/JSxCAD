@@ -8,7 +8,7 @@ export const and =
       taggedGroup(
         {},
         shape.toGeometry(),
-        ...args.map((arg) => Shape.toShape(arg, shape).toGeometry())
+        ...shape.toShapes(args).map((shape) => shape.toGeometry())
       )
     );
 
