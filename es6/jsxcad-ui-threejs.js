@@ -9243,7 +9243,7 @@ let _id = 0;
 
 const _m1 = /*@__PURE__*/ new Matrix4();
 const _obj = /*@__PURE__*/ new Object3D();
-const _offset = /*@__PURE__*/ new Vector3();
+const _offset$1 = /*@__PURE__*/ new Vector3();
 const _box$1 = /*@__PURE__*/ new Box3();
 const _boxMorphTargets = /*@__PURE__*/ new Box3();
 const _vector$8 = /*@__PURE__*/ new Vector3();
@@ -9489,9 +9489,9 @@ class BufferGeometry extends EventDispatcher {
 
 		this.computeBoundingBox();
 
-		this.boundingBox.getCenter( _offset ).negate();
+		this.boundingBox.getCenter( _offset$1 ).negate();
 
-		this.translate( _offset.x, _offset.y, _offset.z );
+		this.translate( _offset$1.x, _offset$1.y, _offset$1.z );
 
 		return this;
 
@@ -9671,8 +9671,8 @@ class BufferGeometry extends EventDispatcher {
 
 						if ( morphTargetsRelative ) {
 
-							_offset.fromBufferAttribute( position, j );
-							_vector$8.add( _offset );
+							_offset$1.fromBufferAttribute( position, j );
+							_vector$8.add( _offset$1 );
 
 						}
 
@@ -28493,7 +28493,7 @@ class PointsMaterial extends Material {
 
 PointsMaterial.prototype.isPointsMaterial = true;
 
-const _inverseMatrix = /*@__PURE__*/ new Matrix4();
+const _inverseMatrix$3 = /*@__PURE__*/ new Matrix4();
 const _ray = /*@__PURE__*/ new Ray();
 const _sphere = /*@__PURE__*/ new Sphere();
 const _position$2 = /*@__PURE__*/ new Vector3();
@@ -28543,8 +28543,8 @@ class Points extends Object3D {
 
 		//
 
-		_inverseMatrix.copy( matrixWorld ).invert();
-		_ray.copy( raycaster.ray ).applyMatrix4( _inverseMatrix );
+		_inverseMatrix$3.copy( matrixWorld ).invert();
+		_ray.copy( raycaster.ray ).applyMatrix4( _inverseMatrix$3 );
 
 		const localThreshold = threshold / ( ( this.scale.x + this.scale.y + this.scale.z ) / 3 );
 		const localThresholdSq = localThreshold * localThreshold;
@@ -42100,6 +42100,288 @@ if ( typeof window !== 'undefined' ) {
 
 }
 
+const createResizer = ({
+  camera,
+  controls,
+  renderer,
+  viewerElement,
+}) => {
+  const resize = () => {
+    const width = viewerElement.clientWidth;
+    const height = viewerElement.clientHeight;
+    camera.aspect = width / height;
+    camera.updateProjectionMatrix();
+    for (const control of controls) {
+      control.update();
+    }
+    renderer.setSize(width, height);
+    return { width, height };
+  };
+
+  return { resize };
+};
+
+const buildScene = ({
+  canvas,
+  width,
+  height,
+  view,
+  withAxes = true,
+  renderer,
+  preserveDrawingBuffer = false,
+}) => {
+  const { target = [0, 0, 0], position = [40, 40, 40], up = [0, 1, 1] } = view;
+  Object3D.DefaultUp.set(...up);
+
+  const camera = new PerspectiveCamera(27, width / height, 1, 1000000);
+  camera.layers.enable(1);
+  camera.position.set(...position);
+  camera.up.set(...up);
+  camera.lookAt(...target);
+
+  const scene = new Scene();
+  scene.add(camera);
+
+  if (withAxes) {
+    const axes = new AxesHelper(5);
+    axes.layers.set(1);
+    scene.add(axes);
+  }
+
+  var hemiLight = new HemisphereLight(0xffffff, 0x444444, 0.5);
+  hemiLight.position.set(0, 0, 300);
+  scene.add(hemiLight);
+
+  const light = new DirectionalLight(0xffffff, 0.5);
+  light.position.set(1, 1, 1);
+  light.layers.set(0);
+  camera.add(light);
+
+  if (renderer === undefined) {
+    renderer = new WebGLRenderer({
+      antialias: true,
+      canvas,
+      preserveDrawingBuffer,
+    });
+    renderer.autoClear = false;
+    renderer.setSize(width, height, /* updateStyle= */ false);
+    renderer.setClearColor(0xffffff);
+    renderer.antiAlias = false;
+    renderer.inputGamma = true;
+    renderer.outputGamma = true;
+    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.domElement.style =
+      'padding-left: 5px; padding-right: 5px; padding-bottom: 5px; position: absolute; z-index: 1';
+  }
+  return { camera, canvas: renderer.domElement, renderer, scene };
+};
+
+const GEOMETRY_LAYER = 0;
+const SKETCH_LAYER = 1;
+
+const _plane = new Plane();
+const _raycaster = new Raycaster();
+
+const _pointer = new Vector2();
+const _offset = new Vector3();
+const _intersection = new Vector3();
+const _worldPosition = new Vector3();
+const _inverseMatrix = new Matrix4();
+
+class DragControls extends EventDispatcher {
+
+	constructor( _objects, _camera, _domElement ) {
+
+		super();
+
+		_domElement.style.touchAction = 'none'; // disable touch scroll
+
+		let _selected = null, _hovered = null;
+
+		const _intersections = [];
+
+		//
+
+		const scope = this;
+
+		function activate() {
+
+			_domElement.addEventListener( 'pointermove', onPointerMove );
+			_domElement.addEventListener( 'pointerdown', onPointerDown );
+			_domElement.addEventListener( 'pointerup', onPointerCancel );
+			_domElement.addEventListener( 'pointerleave', onPointerCancel );
+
+		}
+
+		function deactivate() {
+
+			_domElement.removeEventListener( 'pointermove', onPointerMove );
+			_domElement.removeEventListener( 'pointerdown', onPointerDown );
+			_domElement.removeEventListener( 'pointerup', onPointerCancel );
+			_domElement.removeEventListener( 'pointerleave', onPointerCancel );
+
+			_domElement.style.cursor = '';
+
+		}
+
+		function dispose() {
+
+			deactivate();
+
+		}
+
+		function getObjects() {
+
+			return _objects;
+
+		}
+
+		function onPointerMove( event ) {
+
+			if ( scope.enabled === false ) return;
+
+			updatePointer( event );
+
+			_raycaster.setFromCamera( _pointer, _camera );
+
+			if ( _selected ) {
+
+				if ( _raycaster.ray.intersectPlane( _plane, _intersection ) ) {
+
+					_selected.position.copy( _intersection.sub( _offset ).applyMatrix4( _inverseMatrix ) );
+
+				}
+
+				scope.dispatchEvent( { type: 'drag', object: _selected } );
+
+				return;
+
+			}
+
+			// hover support
+
+			if ( event.pointerType === 'mouse' || event.pointerType === 'pen' ) {
+
+				_intersections.length = 0;
+
+				_raycaster.setFromCamera( _pointer, _camera );
+				_raycaster.intersectObjects( _objects, true, _intersections );
+
+				if ( _intersections.length > 0 ) {
+
+					const object = _intersections[ 0 ].object;
+
+					_plane.setFromNormalAndCoplanarPoint( _camera.getWorldDirection( _plane.normal ), _worldPosition.setFromMatrixPosition( object.matrixWorld ) );
+
+					if ( _hovered !== object && _hovered !== null ) {
+
+						scope.dispatchEvent( { type: 'hoveroff', object: _hovered } );
+
+						_domElement.style.cursor = 'auto';
+						_hovered = null;
+
+					}
+
+					if ( _hovered !== object ) {
+
+						scope.dispatchEvent( { type: 'hoveron', object: object } );
+
+						_domElement.style.cursor = 'pointer';
+						_hovered = object;
+
+					}
+
+				} else {
+
+					if ( _hovered !== null ) {
+
+						scope.dispatchEvent( { type: 'hoveroff', object: _hovered } );
+
+						_domElement.style.cursor = 'auto';
+						_hovered = null;
+
+					}
+
+				}
+
+			}
+
+		}
+
+		function onPointerDown( event ) {
+
+			if ( scope.enabled === false ) return;
+
+			updatePointer( event );
+
+			_intersections.length = 0;
+
+			_raycaster.setFromCamera( _pointer, _camera );
+			_raycaster.intersectObjects( _objects, true, _intersections );
+
+			if ( _intersections.length > 0 ) {
+
+				_selected = ( scope.transformGroup === true ) ? _objects[ 0 ] : _intersections[ 0 ].object;
+
+				_plane.setFromNormalAndCoplanarPoint( _camera.getWorldDirection( _plane.normal ), _worldPosition.setFromMatrixPosition( _selected.matrixWorld ) );
+
+				if ( _raycaster.ray.intersectPlane( _plane, _intersection ) ) {
+
+					_inverseMatrix.copy( _selected.parent.matrixWorld ).invert();
+					_offset.copy( _intersection ).sub( _worldPosition.setFromMatrixPosition( _selected.matrixWorld ) );
+
+				}
+
+				_domElement.style.cursor = 'move';
+
+				scope.dispatchEvent( { type: 'dragstart', object: _selected } );
+
+			}
+
+
+		}
+
+		function onPointerCancel() {
+
+			if ( scope.enabled === false ) return;
+
+			if ( _selected ) {
+
+				scope.dispatchEvent( { type: 'dragend', object: _selected } );
+
+				_selected = null;
+
+			}
+
+			_domElement.style.cursor = _hovered ? 'pointer' : 'auto';
+
+		}
+
+		function updatePointer( event ) {
+
+			const rect = _domElement.getBoundingClientRect();
+
+			_pointer.x = ( event.clientX - rect.left ) / rect.width * 2 - 1;
+			_pointer.y = - ( event.clientY - rect.top ) / rect.height * 2 + 1;
+
+		}
+
+		activate();
+
+		// API
+
+		this.enabled = true;
+		this.transformGroup = false;
+
+		this.activate = activate;
+		this.deactivate = deactivate;
+		this.dispose = dispose;
+		this.getObjects = getObjects;
+
+	}
+
+}
+
 const _changeEvent = { type: 'change' };
 const _startEvent = { type: 'start' };
 const _endEvent = { type: 'end' };
@@ -42899,140 +43181,6 @@ class TrackballControls extends EventDispatcher {
 
 }
 
-// import * as dat from 'dat.gui';
-
-const buildTrackballControls = ({
-  camera,
-  render,
-  viewerElement,
-  view = {},
-}) => {
-  const { target = [0, 0, 0] } = view;
-  const trackball = new TrackballControls(camera, viewerElement);
-  trackball.keys = [65, 83, 68];
-  // trackball.addEventListener('change', render);
-  trackball.target.set(...target);
-  trackball.update();
-  trackball.zoomSpeed = 2.5;
-  trackball.panSpeed = 1.25;
-  trackball.rotateSpeed = 2.5;
-  trackball.staticMoving = true;
-  return { trackball };
-};
-
-/*
-export const buildGui = ({ viewerElement }) => {
-  const gui = new dat.GUI({ autoPlace: false, closed: true });
-  gui.domElement.style = 'padding: 5px; z-index: 3';
-  viewerElement.appendChild(gui.domElement);
-
-  return { gui };
-};
-
-export const buildGuiControls = ({ datasets, gui }) => {
-  let count = 0;
-  const controllers = {};
-  for (const dataset of datasets) {
-    if (dataset.name === undefined) {
-      continue;
-    }
-    let controller = controllers[dataset.name];
-    if (controller === undefined) {
-      const ui = gui.add({ visible: true }, 'visible').name(`${dataset.name}`);
-      count += 1;
-      controller = { ui, datasets: [] };
-      controllers[dataset.name] = controller;
-      controller.ui.listen().onChange((value) =>
-        controller.datasets.forEach((dataset) => {
-          dataset.mesh.visible = value;
-        })
-      );
-    }
-    controller.datasets.push(dataset);
-    dataset.controller = controller;
-  }
-
-  return count;
-};
-*/
-
-const createResizer = ({
-  camera,
-  renderer,
-  trackball,
-  viewerElement,
-}) => {
-  const resize = () => {
-    const width = viewerElement.clientWidth;
-    const height = viewerElement.clientHeight;
-    camera.aspect = width / height;
-    camera.updateProjectionMatrix();
-    trackball.update();
-    renderer.setSize(width, height);
-    return { width, height };
-  };
-
-  return { resize };
-};
-
-const buildScene = ({
-  canvas,
-  width,
-  height,
-  view,
-  withAxes = true,
-  renderer,
-  preserveDrawingBuffer = false,
-}) => {
-  const { target = [0, 0, 0], position = [40, 40, 40], up = [0, 1, 1] } = view;
-  Object3D.DefaultUp.set(...up);
-
-  const camera = new PerspectiveCamera(27, width / height, 1, 1000000);
-  camera.layers.enable(1);
-  camera.position.set(...position);
-  camera.up.set(...up);
-  camera.lookAt(...target);
-
-  const scene = new Scene();
-  scene.add(camera);
-
-  if (withAxes) {
-    const axes = new AxesHelper(5);
-    axes.layers.set(1);
-    scene.add(axes);
-  }
-
-  var hemiLight = new HemisphereLight(0xffffff, 0x444444, 0.5);
-  hemiLight.position.set(0, 0, 300);
-  scene.add(hemiLight);
-
-  const light = new DirectionalLight(0xffffff, 0.5);
-  light.position.set(1, 1, 1);
-  light.layers.set(0);
-  camera.add(light);
-
-  if (renderer === undefined) {
-    renderer = new WebGLRenderer({
-      antialias: true,
-      canvas,
-      preserveDrawingBuffer,
-    });
-    renderer.autoClear = false;
-    renderer.setSize(width, height, /* updateStyle= */ false);
-    renderer.setClearColor(0xffffff);
-    renderer.antiAlias = false;
-    renderer.inputGamma = true;
-    renderer.outputGamma = true;
-    renderer.setPixelRatio(window.devicePixelRatio);
-    renderer.domElement.style =
-      'padding-left: 5px; padding-right: 5px; padding-bottom: 5px; position: absolute; z-index: 1';
-  }
-  return { camera, canvas: renderer.domElement, renderer, scene };
-};
-
-const GEOMETRY_LAYER = 0;
-const SKETCH_LAYER = 1;
-
 const setColor = (
   definitions,
   tags = [],
@@ -43518,7 +43666,7 @@ const moveToFit = ({
   datasets,
   view,
   camera,
-  controls,
+  controls = [],
   scene,
   fitOffset = 1.2,
   withGrid = false,
@@ -43583,12 +43731,11 @@ const moveToFit = ({
     return;
   }
 
-  if (controls) {
-    controls.reset();
+  for (const control of controls) {
+    control.reset();
   }
 
   const center = box.getCenter(new Vector3());
-  // const size = box.getSize(new Vector3());
 
   const size = {
     x: Math.max(Math.abs(box.min.x), Math.abs(box.max.x)),
@@ -43604,7 +43751,6 @@ const moveToFit = ({
   const distance =
     fitOffset * Math.max(fitHeightDistance, fitWidthDistance) * zoomOut;
 
-  // const target = controls ? controls.target.clone() : center.clone();
   const target = new Vector3(0, 0, 0);
 
   const direction = target
@@ -43619,12 +43765,50 @@ const moveToFit = ({
 
   camera.position.copy(center).sub(direction);
 
-  if (controls) {
-    controls.update();
+  for (const control of controls) {
+    control.update();
   }
 };
 
 /* global ResizeObserver, requestAnimationFrame */
+
+const buildTrackballControls = ({
+  camera,
+  render,
+  viewerElement,
+  view = {},
+}) => {
+  const { target = [0, 0, 0] } = view;
+  const trackballControls = new TrackballControls(camera, viewerElement);
+  trackballControls.keys = [65, 83, 68];
+  trackballControls.target.set(...target);
+  trackballControls.update();
+  trackballControls.zoomSpeed = 2.5;
+  trackballControls.panSpeed = 1.25;
+  trackballControls.rotateSpeed = 2.5;
+  trackballControls.staticMoving = true;
+  return { trackballControls };
+};
+
+const buildDragControls = ({
+  camera,
+  endUpdating,
+  startUpdating,
+  tangibleObjects,
+  trackballControls,
+  viewerElement,
+}) => {
+  const dragControls = new DragControls(tangibleObjects, camera, viewerElement);
+  dragControls.addEventListener('dragstart', () => {
+    trackballControls.enabled = false;
+    startUpdating();
+  });
+  dragControls.addEventListener('dragend', () => {
+    endUpdating();
+    trackballControls.enabled = true;
+  });
+  return { dragControls };
+};
 
 const orbitDisplay = async (
   {
@@ -43664,6 +43848,29 @@ const orbitDisplay = async (
     withAxes,
   });
 
+  let isUpdating = false;
+
+  let trackballControls;
+
+  const update = () => {
+    trackballControls.update();
+    render();
+    if (isUpdating) {
+      requestAnimationFrame(update);
+    }
+  };
+
+  const startUpdating = () => {
+    if (!isUpdating) {
+      isUpdating = true;
+      update();
+    }
+  };
+
+  const endUpdating = () => {
+    isUpdating = false;
+  };
+
   let isRendering = false;
 
   const doRender = () => {
@@ -43691,16 +43898,31 @@ const orbitDisplay = async (
     page.appendChild(displayCanvas);
   }
 
-  const { trackball } = buildTrackballControls({
+  ({ trackballControls } = buildTrackballControls({
     camera,
     render,
+    view,
+    viewerElement: displayCanvas,
+  }));
+
+  const tangibleObjects = scene.children.filter(
+    (item) => !item.userData.intangible
+  );
+
+  const { dragControls } = buildDragControls({
+    camera,
+    endUpdating,
+    render,
+    startUpdating,
+    tangibleObjects,
+    trackballControls,
     view,
     viewerElement: displayCanvas,
   });
 
   const { resize } = createResizer({
     camera,
-    trackball,
+    controls: [trackballControls],
     renderer,
     viewerElement: page,
   });
@@ -43736,11 +43958,18 @@ const orbitDisplay = async (
       datasets,
       view,
       camera,
-      controls: trackball,
+      controls: [trackballControls],
       scene,
       withGrid,
       gridLayer,
     });
+
+    // Update the tangible objects in place, so that dragControls notices.
+    tangibleObjects.splice(
+      0,
+      tangibleObjects.length,
+      ...scene.children.filter((item) => !item.userData.intangible)
+    );
 
     render();
   };
@@ -43749,36 +43978,16 @@ const orbitDisplay = async (
     await updateGeometry(geometry);
   }
 
-  trackball.addEventListener('change', () => {
-    render();
-  });
-
-  let isUpdating = false;
-
-  const update = () => {
-    trackball.update();
-    if (isUpdating) {
-      requestAnimationFrame(update);
-    }
-  };
-
-  trackball.addEventListener('start', () => {
-    if (!isUpdating) {
-      isUpdating = true;
-      requestAnimationFrame(update);
-    }
-  });
-
-  trackball.addEventListener('end', () => {
-    isUpdating = false;
-  });
+  trackballControls.addEventListener('start', startUpdating);
+  trackballControls.addEventListener('end', endUpdating);
 
   return {
     camera,
     canvas: displayCanvas,
+    dragControls,
     render,
     scene,
-    trackball,
+    trackballControls,
     updateGeometry,
   };
 };
@@ -43933,16 +44142,17 @@ const raycast = (x, y, camera, scene) => {
     scene.children.filter((item) => !item.userData.intangible)
   );
 
-  for (const { face, point } of intersects) {
+  for (const { face, object, point } of intersects) {
+    const { userData } = object;
     const { normal } = face;
     const ray = [
       [point.x, point.y, point.z],
       [normal.x, normal.y, normal.z],
     ];
-    return { ray };
+    return { ray, userData };
   }
 
   return {};
 };
 
-export { buildMeshes, buildScene, buildTrackballControls, createResizer, dataUrl, image, orbitDisplay, orbitView, raycast, staticDisplay, staticView };
+export { buildMeshes, buildScene, createResizer, dataUrl, image, orbitDisplay, orbitView, raycast, staticDisplay, staticView };

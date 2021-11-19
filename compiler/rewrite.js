@@ -1,7 +1,7 @@
 import { builders, namedTypes, visit } from 'ast-types';
 import { parse, print } from 'recast';
 
-export const rewrite = (script, { viewId, pointToAppend, pointToRemove }) => {
+export const rewrite = (script, { editId, pointToAppend, pointToRemove }) => {
   const ast = parse(script);
   // As we generate the ast locally it's safe for us to destructively modify it.
 
@@ -39,16 +39,16 @@ export const rewrite = (script, { viewId, pointToAppend, pointToRemove }) => {
           return;
         }
         // a.b()
-        if (property.get('name').value !== 'view') {
+        if (property.get('name').value !== 'edit') {
           return;
         }
-        // a.view()
+        // a.edit()
         if (!CallExpression.check(object.value)) {
           return;
         }
         let wasFound = false;
         for (const arg of args.value) {
-          if (Literal.check(arg) && arg.value === viewId) {
+          if (Literal.check(arg) && arg.value === editId) {
             wasFound = true;
             break;
           }
@@ -56,7 +56,7 @@ export const rewrite = (script, { viewId, pointToAppend, pointToRemove }) => {
         if (!wasFound) {
           return;
         }
-        // a().view('id')
+        // a().edit('id')
         if (!MemberExpression.check(callee.value)) {
           return;
         }
@@ -71,6 +71,7 @@ export const rewrite = (script, { viewId, pointToAppend, pointToRemove }) => {
         if (calleeObjectCallee.get('name').value !== 'Voxels') {
           return;
         }
+        // Voxels().edit('id')
         if (pointToAppend) {
           calleeObject
             .get('arguments')

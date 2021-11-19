@@ -3,10 +3,49 @@
 import { GEOMETRY_LAYER, SKETCH_LAYER } from './layers.js';
 import { buildScene, createResizer } from './scene.js';
 
+import { DragControls } from 'three/examples/jsm/controls/DragControls.js';
 import { Layers } from 'three';
+import { TrackballControls } from 'three/examples/jsm/controls/TrackballControls.js';
 import { buildMeshes } from './mesh.js';
-import { buildTrackballControls } from './controls.js';
 import { moveToFit } from './moveToFit.js';
+
+const buildTrackballControls = ({
+  camera,
+  render,
+  viewerElement,
+  view = {},
+}) => {
+  const { target = [0, 0, 0] } = view;
+  const trackballControls = new TrackballControls(camera, viewerElement);
+  trackballControls.keys = [65, 83, 68];
+  trackballControls.target.set(...target);
+  trackballControls.update();
+  trackballControls.zoomSpeed = 2.5;
+  trackballControls.panSpeed = 1.25;
+  trackballControls.rotateSpeed = 2.5;
+  trackballControls.staticMoving = true;
+  return { trackballControls };
+};
+
+const buildDragControls = ({
+  camera,
+  endUpdating,
+  startUpdating,
+  tangibleObjects,
+  trackballControls,
+  viewerElement,
+}) => {
+  const dragControls = new DragControls(tangibleObjects, camera, viewerElement);
+  dragControls.addEventListener('dragstart', () => {
+    trackballControls.enabled = false;
+    startUpdating();
+  });
+  dragControls.addEventListener('dragend', () => {
+    endUpdating();
+    trackballControls.enabled = true;
+  });
+  return { dragControls };
+};
 
 export const orbitDisplay = async (
   {
@@ -46,6 +85,29 @@ export const orbitDisplay = async (
     withAxes,
   });
 
+  let isUpdating = false;
+
+  let trackballControls;
+
+  const update = () => {
+    trackballControls.update();
+    render();
+    if (isUpdating) {
+      requestAnimationFrame(update);
+    }
+  };
+
+  const startUpdating = () => {
+    if (!isUpdating) {
+      isUpdating = true;
+      update();
+    }
+  };
+
+  const endUpdating = () => {
+    isUpdating = false;
+  };
+
   let isRendering = false;
 
   const doRender = () => {
@@ -73,16 +135,31 @@ export const orbitDisplay = async (
     page.appendChild(displayCanvas);
   }
 
-  const { trackball } = buildTrackballControls({
+  ({ trackballControls } = buildTrackballControls({
     camera,
     render,
+    view,
+    viewerElement: displayCanvas,
+  }));
+
+  const tangibleObjects = scene.children.filter(
+    (item) => !item.userData.intangible
+  );
+
+  const { dragControls } = buildDragControls({
+    camera,
+    endUpdating,
+    render,
+    startUpdating,
+    tangibleObjects,
+    trackballControls,
     view,
     viewerElement: displayCanvas,
   });
 
   const { resize } = createResizer({
     camera,
-    trackball,
+    controls: [trackballControls],
     renderer,
     viewerElement: page,
   });
@@ -118,11 +195,18 @@ export const orbitDisplay = async (
       datasets,
       view,
       camera,
-      controls: trackball,
+      controls: [trackballControls],
       scene,
       withGrid,
       gridLayer,
     });
+
+    // Update the tangible objects in place, so that dragControls notices.
+    tangibleObjects.splice(
+      0,
+      tangibleObjects.length,
+      ...scene.children.filter((item) => !item.userData.intangible)
+    );
 
     render();
   };
@@ -131,36 +215,16 @@ export const orbitDisplay = async (
     await updateGeometry(geometry);
   }
 
-  trackball.addEventListener('change', () => {
-    render();
-  });
-
-  let isUpdating = false;
-
-  const update = () => {
-    trackball.update();
-    if (isUpdating) {
-      requestAnimationFrame(update);
-    }
-  };
-
-  trackball.addEventListener('start', () => {
-    if (!isUpdating) {
-      isUpdating = true;
-      requestAnimationFrame(update);
-    }
-  });
-
-  trackball.addEventListener('end', () => {
-    isUpdating = false;
-  });
+  trackballControls.addEventListener('start', startUpdating);
+  trackballControls.addEventListener('end', endUpdating);
 
   return {
     camera,
     canvas: displayCanvas,
+    dragControls,
     render,
     scene,
-    trackball,
+    trackballControls,
     updateGeometry,
   };
 };
