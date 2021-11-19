@@ -10,8 +10,8 @@ import {
 
 export const createResizer = ({
   camera,
+  controls,
   renderer,
-  trackball,
   viewerElement,
 }) => {
   const resize = () => {
@@ -19,7 +19,9 @@ export const createResizer = ({
     const height = viewerElement.clientHeight;
     camera.aspect = width / height;
     camera.updateProjectionMatrix();
-    trackball.update();
+    for (const control of controls) {
+      control.update();
+    }
     renderer.setSize(width, height);
     return { width, height };
   };

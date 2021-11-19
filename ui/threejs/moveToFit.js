@@ -5,7 +5,7 @@ export const moveToFit = ({
   datasets,
   view,
   camera,
-  controls,
+  controls = [],
   scene,
   fitOffset = 1.2,
   withGrid = false,
@@ -70,12 +70,11 @@ export const moveToFit = ({
     return;
   }
 
-  if (controls) {
-    controls.reset();
+  for (const control of controls) {
+    control.reset();
   }
 
   const center = box.getCenter(new Vector3());
-  // const size = box.getSize(new Vector3());
 
   const size = {
     x: Math.max(Math.abs(box.min.x), Math.abs(box.max.x)),
@@ -91,7 +90,6 @@ export const moveToFit = ({
   const distance =
     fitOffset * Math.max(fitHeightDistance, fitWidthDistance) * zoomOut;
 
-  // const target = controls ? controls.target.clone() : center.clone();
   const target = new Vector3(0, 0, 0);
 
   const direction = target
@@ -106,7 +104,7 @@ export const moveToFit = ({
 
   camera.position.copy(center).sub(direction);
 
-  if (controls) {
-    controls.update();
+  for (const control of controls) {
+    control.update();
   }
 };

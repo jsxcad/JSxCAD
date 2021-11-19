@@ -35,7 +35,7 @@ export class OrbitView extends React.PureComponent {
     const data = await readOrWatch(path, { workspace });
     const definitions = {};
     const { target, up, position, withAxes, withGrid } = view;
-    const { updateGeometry, trackball, canvas, camera, scene } =
+    const { updateGeometry, trackballControls, canvas, camera, scene } =
       await orbitDisplay(
         {
           view: { target, up, position },
@@ -50,43 +50,46 @@ export class OrbitView extends React.PureComponent {
       container.removeChild(container.firstChild);
     }
     const state = await trackballState;
-    this.trackball = trackball;
+    this.trackballControls = trackballControls;
     if (state.target) {
-      this.trackball.target0.copy(state.target);
+      this.trackballControls.target0.copy(state.target);
     }
     if (state.position) {
-      this.trackball.position0.copy(state.position);
+      this.trackballControls.position0.copy(state.position);
     }
     if (state.up) {
-      this.trackball.up0.copy(state.up);
+      this.trackballControls.up0.copy(state.up);
     }
     if (state.zoom) {
-      this.trackball.zoom0 = state.zoom;
+      this.trackballControls.zoom0 = state.zoom;
     }
-    this.trackball.reset();
+    this.trackballControls.reset();
     this.builtPath = path;
     this.builtContainer = container;
     if (this.watcher) {
       unwatchFile(this.builtPath, this.watcher, { workspace });
     }
     this.watcher = async () => {
+      // FIX: Why isn't this done by updateGeometry?
       // Backup the control state.
-      this.trackball.target0.copy(this.trackball.target);
-      this.trackball.position0.copy(this.trackball.object.position);
-      this.trackball.up0.copy(this.trackball.object.up);
-      this.trackball.zoom0 = this.trackball.object.zoom;
+      this.trackballControls.target0.copy(this.trackballControls.target);
+      this.trackballControls.position0.copy(
+        this.trackballControls.object.position
+      );
+      this.trackballControls.up0.copy(this.trackballControls.object.up);
+      this.trackballControls.zoom0 = this.trackballControls.object.zoom;
       const geometry = await read(this.builtPath, { workspace });
       await updateGeometry(geometry);
       // Restore the control state.
-      trackball.reset();
+      trackballControls.reset();
     };
     watchFile(path, this.watcher, { workspace });
 
-    trackball.addEventListener('change', () => {
+    trackballControls.addEventListener('change', () => {
       const { onMove } = this.props;
       if (onMove) {
-        const { target } = trackball;
-        const { position, up, zoom } = trackball.object;
+        const { target } = trackballControls;
+        const { position, up, zoom } = trackballControls.object;
         onMove({ path, position, up, target, zoom });
       }
     });
@@ -95,10 +98,11 @@ export class OrbitView extends React.PureComponent {
       const rect = event.target.getBoundingClientRect();
       const x = ((event.clientX - rect.x) / rect.width) * 2 - 1;
       const y = -((event.clientY - rect.y) / rect.height) * 2 + 1;
-      const { ray } = raycast(x, y, camera, scene);
+      const { ray, userData } = raycast(x, y, camera, scene);
       if (ray && onClick) {
+        const { editId } = userData;
         console.log(`Ray: ${JSON.stringify(ray)}`);
-        onClick({ type, event, path, view, sourceLocation, ray });
+        onClick({ type, event, editId, path, view, sourceLocation, ray });
       }
     };
     canvas.addEventListener('contextmenu', handleClick('right'));

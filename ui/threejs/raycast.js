@@ -12,13 +12,14 @@ export const raycast = (x, y, camera, scene) => {
     scene.children.filter((item) => !item.userData.intangible)
   );
 
-  for (const { face, point } of intersects) {
+  for (const { face, object, point } of intersects) {
+    const { userData } = object;
     const { normal } = face;
     const ray = [
       [point.x, point.y, point.z],
       [normal.x, normal.y, normal.z],
     ];
-    return { ray };
+    return { ray, userData };
   }
 
   return {};

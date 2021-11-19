@@ -609,16 +609,15 @@ class App extends React.Component {
 
     this.View = {};
 
-    this.View.click = async ({ type, view, ray, sourceLocation }) => {
+    this.View.click = async ({ type, editId, ray, sourceLocation }) => {
       if (this.View.clicking) {
         return;
       }
       try {
         this.View.clicking = true;
-        const { viewId } = view;
         const { path } = sourceLocation;
         const { [`NotebookText/${path}`]: NotebookText } = this.state;
-        const request = { viewId };
+        const request = { editId };
         const [point, normal] = ray;
         switch (type) {
           case 'left':
