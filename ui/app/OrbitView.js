@@ -35,17 +35,23 @@ export class OrbitView extends React.PureComponent {
     const data = await readOrWatch(path, { workspace });
     const definitions = {};
     const { target, up, position, withAxes, withGrid } = view;
-    const { updateGeometry, trackballControls, canvas, camera, scene } =
-      await orbitDisplay(
-        {
-          view: { target, up, position },
-          geometry: data,
-          withAxes,
-          withGrid,
-          definitions,
-        },
-        container
-      );
+    const {
+      updateGeometry,
+      trackballControls,
+      canvas,
+      camera,
+      scene,
+      tangibleObjects,
+    } = await orbitDisplay(
+      {
+        view: { target, up, position },
+        geometry: data,
+        withAxes,
+        withGrid,
+        definitions,
+      },
+      container
+    );
     while (container.firstChild !== container.lastChild) {
       container.removeChild(container.firstChild);
     }
@@ -98,14 +104,28 @@ export class OrbitView extends React.PureComponent {
       const rect = event.target.getBoundingClientRect();
       const x = ((event.clientX - rect.x) / rect.width) * 2 - 1;
       const y = -((event.clientY - rect.y) / rect.height) * 2 + 1;
-      const { ray, userData } = raycast(x, y, camera, scene);
+      const { ray, object } = raycast(x, y, camera, tangibleObjects);
       if (ray && onClick) {
-        const { editId } = userData;
+        const { editId } = object.userData;
         console.log(`Ray: ${JSON.stringify(ray)}`);
-        onClick({ type, event, editId, path, view, sourceLocation, ray });
+        onClick({
+          type,
+          event,
+          editId,
+          path,
+          view,
+          scene,
+          sourceLocation,
+          ray,
+          tangibleObjects,
+          threejsMesh: object,
+        });
       }
     };
-    canvas.addEventListener('contextmenu', handleClick('right'));
+    canvas.addEventListener('contextmenu', (event) => {
+      event.preventDefault();
+      handleClick('right')(event);
+    });
     canvas.addEventListener('click', handleClick('left'));
   }
 

@@ -43435,6 +43435,16 @@ const applyBoxUV = (bufferGeometry, transformMatrix, boxSize) => {
   applyBoxUVImpl(bufferGeometry, transformMatrix, uvBbox, boxSize);
 };
 
+const updateUserData = (geometry, userData) => {
+  if (geometry.tags) {
+    for (const tag of geometry.tags) {
+      if (tag.startsWith('editId:')) {
+        userData.editId = tag.substring(7);
+      }
+    }
+  }
+};
+
 const buildMeshes = async ({
   datasets,
   geometry,
@@ -43477,6 +43487,7 @@ const buildMeshes = async ({
       );
       dataset.mesh = new LineSegments(bufferGeometry, material);
       dataset.mesh.layers.set(layer);
+      updateUserData(geometry, dataset.mesh.userData);
       dataset.mesh.userData.intangible = true;
       dataset.name = toName(geometry);
       scene.add(dataset.mesh);
@@ -43551,6 +43562,7 @@ const buildMeshes = async ({
       );
       dataset.mesh = new LineSegments(bufferGeometry, material);
       dataset.mesh.layers.set(layer);
+      updateUserData(geometry, dataset.mesh.userData);
       dataset.mesh.userData.intangible = true;
       dataset.name = toName(geometry);
       scene.add(dataset.mesh);
@@ -43595,6 +43607,7 @@ const buildMeshes = async ({
       );
       dataset.mesh = new Points(threeGeometry, material);
       dataset.mesh.layers.set(layer);
+      updateUserData(geometry, dataset.mesh.userData);
       dataset.name = toName(geometry);
       scene.add(dataset.mesh);
       datasets.push(dataset);
@@ -43639,6 +43652,7 @@ const buildMeshes = async ({
       }
       dataset.mesh = new Mesh(bufferGeometry, material);
       dataset.mesh.layers.set(layer);
+      updateUserData(geometry, dataset.mesh.userData);
       dataset.name = toName(geometry);
       scene.add(dataset.mesh);
       datasets.push(dataset);
@@ -43941,6 +43955,12 @@ const orbitDisplay = async (
       scene.remove(mesh);
     }
 
+    for (const object of [...scene.children]) {
+      if (object.userData.ephemeral) {
+        scene.remove(object);
+      }
+    }
+
     view = { ...view, fit };
 
     // Build new datasets from the written data, and display them.
@@ -43987,6 +44007,7 @@ const orbitDisplay = async (
     dragControls,
     render,
     scene,
+    tangibleObjects,
     trackballControls,
     updateGeometry,
   };
@@ -44132,24 +44153,21 @@ const orbitView = async (
 
 let raycaster = new Raycaster();
 
-const raycast = (x, y, camera, scene) => {
+const raycast = (x, y, camera, tangibleObjects) => {
   if (!raycaster) {
     raycaster = new Raycaster();
   }
   const position = new Vector2(x, y);
   raycaster.setFromCamera(position, camera);
-  const intersects = raycaster.intersectObjects(
-    scene.children.filter((item) => !item.userData.intangible)
-  );
+  const intersects = raycaster.intersectObjects(tangibleObjects);
 
   for (const { face, object, point } of intersects) {
-    const { userData } = object;
     const { normal } = face;
     const ray = [
       [point.x, point.y, point.z],
       [normal.x, normal.y, normal.z],
     ];
-    return { ray, userData };
+    return { ray, object };
   }
 
   return {};

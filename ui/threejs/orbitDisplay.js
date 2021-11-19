@@ -178,6 +178,12 @@ export const orbitDisplay = async (
       scene.remove(mesh);
     }
 
+    for (const object of [...scene.children]) {
+      if (object.userData.ephemeral) {
+        scene.remove(object);
+      }
+    }
+
     view = { ...view, fit };
 
     // Build new datasets from the written data, and display them.
@@ -224,6 +230,7 @@ export const orbitDisplay = async (
     dragControls,
     render,
     scene,
+    tangibleObjects,
     trackballControls,
     updateGeometry,
   };

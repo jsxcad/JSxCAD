@@ -2,6 +2,8 @@
 
 import * as PropTypes from 'prop-types';
 
+import { BoxGeometry, Mesh } from 'three';
+
 import {
   askService,
   ask as askSys,
@@ -609,7 +611,15 @@ class App extends React.Component {
 
     this.View = {};
 
-    this.View.click = async ({ type, editId, ray, sourceLocation }) => {
+    this.View.click = async ({
+      editId,
+      ray,
+      scene,
+      sourceLocation,
+      type,
+      tangibleObjects,
+      threejsMesh,
+    }) => {
       if (this.View.clicking) {
         return;
       }
@@ -637,6 +647,17 @@ class App extends React.Component {
         }
         const newNotebookText = rewrite(NotebookText, request);
         await this.updateState({ [`NotebookText/${path}`]: newNotebookText });
+        // Add an voxel to the display to temporarily reflect what we added to the source.
+        if (request.pointToAppend) {
+          // Additions can be done as previews.
+          const box = new BoxGeometry(1, 1, 1);
+          const mesh = new Mesh(box, threejsMesh.material);
+          mesh.userData.editId = editId;
+          mesh.userData.ephemeral = true;
+          mesh.position.set(...request.pointToAppend);
+          scene.add(mesh);
+          tangibleObjects.push(mesh);
+        }
         await this.Notebook.run(path);
       } finally {
         this.View.clicking = false;
