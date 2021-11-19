@@ -272,6 +272,7 @@ export { drop } from './drop.js';
 export { ensurePages } from './Page.js';
 export { each } from './each.js';
 export { eachPoint } from './eachPoint.js';
+export { edit } from './edit.js';
 export { ex, extrude } from './extrude.js';
 export { extrudeAlong } from './extrudeAlong.js';
 export { extrudeToPlane } from './extrudeToPlane.js';

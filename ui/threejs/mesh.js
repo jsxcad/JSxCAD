@@ -188,6 +188,16 @@ const applyBoxUV = (bufferGeometry, transformMatrix, boxSize) => {
   applyBoxUVImpl(bufferGeometry, transformMatrix, uvBbox, boxSize);
 };
 
+const updateUserData = (geometry, userData) => {
+  if (geometry.tags) {
+    for (const tag of geometry.tags) {
+      if (tag.startsWith('editId:')) {
+        userData.editId = tag.substring(7);
+      }
+    }
+  }
+};
+
 export const buildMeshes = async ({
   datasets,
   geometry,
@@ -230,6 +240,7 @@ export const buildMeshes = async ({
       );
       dataset.mesh = new LineSegments(bufferGeometry, material);
       dataset.mesh.layers.set(layer);
+      updateUserData(geometry, dataset.mesh.userData);
       dataset.mesh.userData.intangible = true;
       dataset.name = toName(geometry);
       scene.add(dataset.mesh);
@@ -304,6 +315,7 @@ export const buildMeshes = async ({
       );
       dataset.mesh = new LineSegments(bufferGeometry, material);
       dataset.mesh.layers.set(layer);
+      updateUserData(geometry, dataset.mesh.userData);
       dataset.mesh.userData.intangible = true;
       dataset.name = toName(geometry);
       scene.add(dataset.mesh);
@@ -348,6 +360,7 @@ export const buildMeshes = async ({
       );
       dataset.mesh = new Points(threeGeometry, material);
       dataset.mesh.layers.set(layer);
+      updateUserData(geometry, dataset.mesh.userData);
       dataset.name = toName(geometry);
       scene.add(dataset.mesh);
       datasets.push(dataset);
@@ -392,6 +405,7 @@ export const buildMeshes = async ({
       }
       dataset.mesh = new Mesh(bufferGeometry, material);
       dataset.mesh.layers.set(layer);
+      updateUserData(geometry, dataset.mesh.userData);
       dataset.name = toName(geometry);
       scene.add(dataset.mesh);
       datasets.push(dataset);
