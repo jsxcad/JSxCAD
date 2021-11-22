@@ -122,7 +122,7 @@ export const Voxels = (...points) => {
       }
     }
   }
-  return Shape.fromPolygons(polygons);
+  return Shape.fromPolygons(polygons).tag('editType:Voxels');
 };
 
 Shape.prototype.Voxels = Shape.shapeMethod(Voxels);

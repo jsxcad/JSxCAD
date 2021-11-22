@@ -14,6 +14,8 @@ export class OrbitView extends React.PureComponent {
       workspace: PropTypes.string,
       onMove: PropTypes.function,
       onClick: PropTypes.function,
+      onDrag: PropTypes.function,
+      onDragEnd: PropTypes.function,
       trackballState: PropTypes.object,
     };
   }
@@ -36,12 +38,13 @@ export class OrbitView extends React.PureComponent {
     const definitions = {};
     const { target, up, position, withAxes, withGrid } = view;
     const {
-      updateGeometry,
-      trackballControls,
-      canvas,
       camera,
+      canvas,
+      dragControls,
+      draggableObjects,
       scene,
-      tangibleObjects,
+      trackballControls,
+      updateGeometry,
     } = await orbitDisplay(
       {
         view: { target, up, position },
@@ -99,26 +102,42 @@ export class OrbitView extends React.PureComponent {
         onMove({ path, position, up, target, zoom });
       }
     });
+    const handleDrag = ({ object }) => {
+      const { onDrag } = this.props;
+      if (onDrag) {
+        onDrag({ object });
+      }
+    };
+    const handleDragEnd = ({ object }) => {
+      const { onDragEnd } = this.props;
+      if (onDragEnd) {
+        onDragEnd({ object });
+      }
+    };
     const handleClick = (type) => (event) => {
       const { onClick, view, sourceLocation } = this.props;
       const rect = event.target.getBoundingClientRect();
       const x = ((event.clientX - rect.x) / rect.width) * 2 - 1;
       const y = -((event.clientY - rect.y) / rect.height) * 2 + 1;
-      const { ray, object } = raycast(x, y, camera, tangibleObjects);
+      const { ray, object } = raycast(x, y, camera, [scene]);
       if (ray && onClick) {
-        const { editId } = object.userData;
+        const { editId, editType } = object.userData;
         console.log(`Ray: ${JSON.stringify(ray)}`);
         onClick({
-          type,
+          draggableObjects,
           event,
           editId,
+          editType,
           path,
+          position: camera.position,
+          object,
           view,
           scene,
           sourceLocation,
           ray,
-          tangibleObjects,
+          target: trackballControls.target,
           threejsMesh: object,
+          type,
         });
       }
     };
@@ -127,6 +146,8 @@ export class OrbitView extends React.PureComponent {
       handleClick('right')(event);
     });
     canvas.addEventListener('click', handleClick('left'));
+    dragControls.addEventListener('drag', handleDrag);
+    dragControls.addEventListener('dragend', handleDragEnd);
   }
 
   componentWillUnmount() {

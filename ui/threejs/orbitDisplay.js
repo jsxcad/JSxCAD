@@ -3,10 +3,11 @@
 import { GEOMETRY_LAYER, SKETCH_LAYER } from './layers.js';
 import { buildScene, createResizer } from './scene.js';
 
-import { DragControls } from 'three/examples/jsm/controls/DragControls.js';
+import { DragControls } from './DragControls.js';
 import { Layers } from 'three';
 import { TrackballControls } from 'three/examples/jsm/controls/TrackballControls.js';
 import { buildMeshes } from './mesh.js';
+import { getRaycaster } from './raycast.js';
 import { moveToFit } from './moveToFit.js';
 
 const buildTrackballControls = ({
@@ -29,13 +30,19 @@ const buildTrackballControls = ({
 
 const buildDragControls = ({
   camera,
+  draggableObjects,
   endUpdating,
   startUpdating,
-  tangibleObjects,
+  raycaster,
   trackballControls,
   viewerElement,
 }) => {
-  const dragControls = new DragControls(tangibleObjects, camera, viewerElement);
+  const dragControls = new DragControls(
+    draggableObjects,
+    camera,
+    viewerElement,
+    raycaster
+  );
   dragControls.addEventListener('dragstart', () => {
     trackballControls.enabled = false;
     startUpdating();
@@ -60,7 +67,6 @@ export const orbitDisplay = async (
   } = {},
   page
 ) => {
-  let datasets = [];
   const width = page.offsetWidth;
   const height = page.offsetHeight;
 
@@ -142,16 +148,18 @@ export const orbitDisplay = async (
     viewerElement: displayCanvas,
   }));
 
-  const tangibleObjects = scene.children.filter(
-    (item) => !item.userData.intangible
-  );
+  const draggableObjects = [];
+  const raycaster = getRaycaster();
+  raycaster.layers.enable(GEOMETRY_LAYER);
+  raycaster.layers.enable(SKETCH_LAYER);
 
   const { dragControls } = buildDragControls({
     camera,
+    draggableObjects,
     endUpdating,
+    raycaster,
     render,
     startUpdating,
-    tangibleObjects,
     trackballControls,
     view,
     viewerElement: displayCanvas,
@@ -173,24 +181,15 @@ export const orbitDisplay = async (
     geometry,
     { withGrid = true, fit = true } = {}
   ) => {
-    // Delete any previous dataset in the window.
-    for (const { mesh } of datasets) {
-      scene.remove(mesh);
-    }
-
     for (const object of [...scene.children]) {
-      if (object.userData.ephemeral) {
+      if (!object.userData.dressing) {
         scene.remove(object);
       }
     }
 
     view = { ...view, fit };
 
-    // Build new datasets from the written data, and display them.
-    datasets = [];
-
     await buildMeshes({
-      datasets,
       geometry,
       scene,
       render,
@@ -198,7 +197,6 @@ export const orbitDisplay = async (
     });
 
     moveToFit({
-      datasets,
       view,
       camera,
       controls: [trackballControls],
@@ -206,13 +204,6 @@ export const orbitDisplay = async (
       withGrid,
       gridLayer,
     });
-
-    // Update the tangible objects in place, so that dragControls notices.
-    tangibleObjects.splice(
-      0,
-      tangibleObjects.length,
-      ...scene.children.filter((item) => !item.userData.intangible)
-    );
 
     render();
   };
@@ -228,9 +219,9 @@ export const orbitDisplay = async (
     camera,
     canvas: displayCanvas,
     dragControls,
+    draggableObjects,
     render,
     scene,
-    tangibleObjects,
     trackballControls,
     updateGeometry,
   };

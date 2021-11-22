@@ -83446,6 +83446,8 @@ class OrbitView extends ReactDOM$2.PureComponent {
       workspace: propTypes$1.exports.string,
       onMove: propTypes$1.exports["function"],
       onClick: propTypes$1.exports["function"],
+      onDrag: propTypes$1.exports["function"],
+      onDragEnd: propTypes$1.exports["function"],
       trackballState: propTypes$1.exports.object
     };
   }
@@ -83490,12 +83492,13 @@ class OrbitView extends ReactDOM$2.PureComponent {
       withGrid
     } = view;
     const {
-      updateGeometry,
-      trackballControls,
-      canvas,
       camera,
+      canvas,
+      dragControls,
+      draggableObjects,
       scene,
-      tangibleObjects
+      trackballControls,
+      updateGeometry
     } = await orbitDisplay({
       view: {
         target,
@@ -83583,6 +83586,34 @@ class OrbitView extends ReactDOM$2.PureComponent {
       }
     });
 
+    const handleDrag = ({
+      object
+    }) => {
+      const {
+        onDrag
+      } = this.props;
+
+      if (onDrag) {
+        onDrag({
+          object
+        });
+      }
+    };
+
+    const handleDragEnd = ({
+      object
+    }) => {
+      const {
+        onDragEnd
+      } = this.props;
+
+      if (onDragEnd) {
+        onDragEnd({
+          object
+        });
+      }
+    };
+
     const handleClick = type => event => {
       const {
         onClick,
@@ -83595,24 +83626,29 @@ class OrbitView extends ReactDOM$2.PureComponent {
       const {
         ray,
         object
-      } = raycast(x, y, camera, tangibleObjects);
+      } = raycast(x, y, camera, [scene]);
 
       if (ray && onClick) {
         const {
-          editId
+          editId,
+          editType
         } = object.userData;
         console.log(`Ray: ${JSON.stringify(ray)}`);
         onClick({
-          type,
+          draggableObjects,
           event,
           editId,
+          editType,
           path,
+          position: camera.position,
+          object,
           view,
           scene,
           sourceLocation,
           ray,
-          tangibleObjects,
-          threejsMesh: object
+          target: trackballControls.target,
+          threejsMesh: object,
+          type
         });
       }
     };
@@ -83622,6 +83658,8 @@ class OrbitView extends ReactDOM$2.PureComponent {
       handleClick('right')(event);
     });
     canvas.addEventListener('click', handleClick('left'));
+    dragControls.addEventListener('drag', handleDrag);
+    dragControls.addEventListener('dragend', handleDragEnd);
   }
 
   componentWillUnmount() {
@@ -84363,61 +84401,220 @@ class App extends ReactDOM$2.Component {
 
     this.View = {};
 
-    this.View.click = async ({
-      editId,
-      ray,
-      scene,
-      sourceLocation,
-      type,
-      tangibleObjects,
-      threejsMesh
+    this.View.dragEnd = async ({
+      object
     }) => {
-      if (this.View.clicking) {
+      if (this.View.updating) {
         return;
       }
 
       try {
-        this.View.clicking = true;
         const {
-          path
-        } = sourceLocation;
+          parent,
+          userData
+        } = object;
         const {
-          [`NotebookText/${path}`]: NotebookText
-        } = this.state;
-        const request = {
-          editId
-        };
-        const [point, normal] = ray;
+          anchorType
+        } = userData;
 
-        switch (type) {
-          case 'left':
-            request.pointToAppend = [point[0] + normal[0] / 2, point[1] + normal[1] / 2, point[2] + normal[2] / 2].map(v => Math.round(v));
-            break;
+        switch (anchorType) {
+          case 'at':
+            {
+              // Get the anchor's position in the parent's frame of reference.
+              const anchor = new Vector3();
+              object.getWorldPosition(anchor);
+              parent.position.copy(anchor);
+              parent.userData.anchor.at = anchor;
+              object.position.set(0, 0, 0);
+              break;
+            }
 
-          case 'right':
-            request.pointToRemove = [point[0] - normal[0] / 2, point[1] - normal[1] / 2, point[2] - normal[2] / 2].map(v => Math.round(v));
-            break;
+          case 'to':
+            {
+              // Get the anchor's position in the parent's frame of reference.
+              const anchor = new Vector3();
+              anchor.copy(object.position);
+              object.localToWorld(anchor);
+              parent.lookAt(anchor); // And reset the offset.
+
+              parent.userData.anchor.to = anchor;
+              object.position.set(0, 0, 1);
+              break;
+            }
+          // Orthogonal to the [at, to] edge.
+
+          case 'up':
+            {
+              // Get the anchor's position in the parent's frame of reference.
+              const anchor = new Vector3();
+              anchor.copy(object.position);
+              object.localToWorld(anchor);
+              const position = new Vector3();
+              parent.getWorldPosition(position);
+              anchor.sub(position); // parent.worldToLocal(anchor);
+
+              parent.up.copy(anchor);
+              console.log(JSON.stringify(anchor));
+              parent.userData.anchor.up = anchor;
+              parent.lookAt(parent.userData.anchor.to); // And reset the offset.
+
+              object.position.set(0, 1, 0);
+              break;
+            }
         }
-
-        const newNotebookText = rewrite(NotebookText, request);
-        await this.updateState({
-          [`NotebookText/${path}`]: newNotebookText
-        }); // Add an voxel to the display to temporarily reflect what we added to the source.
-
-        if (request.pointToAppend) {
-          // Additions can be done as previews.
-          const box = new BoxGeometry(1, 1, 1);
-          const mesh = new Mesh(box, threejsMesh.material);
-          mesh.userData.editId = editId;
-          mesh.userData.ephemeral = true;
-          mesh.position.set(...request.pointToAppend);
-          scene.add(mesh);
-          tangibleObjects.push(mesh);
-        }
-
-        await this.Notebook.run(path);
       } finally {
-        this.View.clicking = false;
+        this.View.updating = false;
+      }
+    };
+
+    this.View.click = async ({
+      draggableObjects,
+      editId,
+      editType,
+      object,
+      position,
+      ray,
+      scene,
+      sourceLocation,
+      type,
+      target,
+      threejsMesh
+    }) => {
+      if (this.View.updating) {
+        return;
+      }
+
+      switch (editType) {
+        case 'Group':
+          {
+            const addAnchor = ({
+              color,
+              editId,
+              position = [0, 0, 0],
+              object,
+              anchorType
+            }) => {
+              const canvas = document.createElement('canvas');
+              canvas.width = 10;
+              canvas.height = 10;
+              const c = canvas.getContext('2d'); // c.strokeStyle = 'rgba(255, 255, 51)';
+              // c.fillStyle = 'rgba(0, 0, 0)';
+
+              c.strokeStyle = 'black';
+              c.fillStyle = color;
+              c.lineWidth = 1;
+              c.beginPath();
+              c.rect(0, 0, 10, 10);
+              c.closePath();
+              c.fill();
+              c.stroke();
+              const texture = new Texture(canvas);
+              texture.needsUpdate = true; // sizeAttenuation: false means that the sprite will have constant size regardless of distance.
+
+              const spriteMaterial = new SpriteMaterial({
+                map: texture,
+                sizeAttenuation: false
+              });
+              const sprite = new Sprite(spriteMaterial); // This determines the hitbox size, regardless of what is displayed.
+
+              sprite.scale.set(0.01, 0.01, 0.01);
+              sprite.userData.editId = editId;
+              sprite.userData.anchorType = anchorType;
+              sprite.userData.tangible = true; // Regenerate on recompute.
+
+              sprite.userData.ephemeral = true; // Display on the overlay.
+
+              sprite.layers.set(1);
+              object.add(sprite); // Anchors can be dragged.
+
+              draggableObjects.push(sprite); // These should be tangible, so that they block clicks.
+
+              sprite.position.set(...position);
+              return sprite;
+            };
+
+            const offset = 0.05;
+            const zoom = position.distanceTo(target);
+            const at = new Vector3(0, 0, 0);
+            const to = new Vector3(1, 0, 0);
+            const up = new Vector3(0, 0, 1);
+            object.localToWorld(at);
+            object.localToWorld(to);
+            object.up.copy(up);
+            object.userData.anchor = {
+              at,
+              to,
+              up
+            };
+            addAnchor({
+              anchorType: 'at',
+              color: 'yellow',
+              editId,
+              position: [0, 0, 0],
+              object
+            });
+            addAnchor({
+              anchorType: 'up',
+              color: 'green',
+              editId,
+              position: [0, offset * zoom, 0],
+              object
+            });
+            addAnchor({
+              anchorType: 'to',
+              color: 'red',
+              editId,
+              position: [0, 0, offset * zoom],
+              object
+            });
+            return;
+          }
+
+        case 'Voxels':
+          try {
+            this.View.updating = true;
+            const {
+              path
+            } = sourceLocation;
+            const {
+              [`NotebookText/${path}`]: NotebookText
+            } = this.state;
+            const request = {
+              editId
+            };
+            const [point, normal] = ray;
+
+            switch (type) {
+              case 'left':
+                request.pointToAppend = [point[0] + normal[0] / 2, point[1] + normal[1] / 2, point[2] + normal[2] / 2].map(v => Math.round(v));
+                break;
+
+              case 'right':
+                request.pointToRemove = [point[0] - normal[0] / 2, point[1] - normal[1] / 2, point[2] - normal[2] / 2].map(v => Math.round(v));
+                break;
+            }
+
+            const newNotebookText = rewrite(NotebookText, request);
+            await this.updateState({
+              [`NotebookText/${path}`]: newNotebookText
+            }); // Add an voxel to the display to temporarily reflect what we added to the source.
+
+            if (request.pointToAppend) {
+              // Additions can be done as previews.
+              const box = new BoxGeometry(1, 1, 1);
+              const mesh = new Mesh(box, threejsMesh.material);
+              mesh.userData.editId = editId;
+              mesh.userData.ephemeral = true;
+              mesh.userData.tangible = true;
+              mesh.position.set(...request.pointToAppend);
+              scene.add(mesh);
+            }
+
+            await this.Notebook.run(path);
+          } finally {
+            this.View.updating = false;
+          }
+
       }
     };
 
@@ -84675,6 +84872,7 @@ class App extends ReactDOM$2.Component {
               sourceLocation: View.sourceLocation,
               workspace: workspace,
               onClick: this.View.click,
+              onDragEnd: this.View.dragEnd,
               onMove: this.View.move,
               trackballState: trackballState
             });

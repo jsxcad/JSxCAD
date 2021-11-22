@@ -42180,7 +42180,6 @@ const GEOMETRY_LAYER = 0;
 const SKETCH_LAYER = 1;
 
 const _plane = new Plane();
-const _raycaster = new Raycaster();
 
 const _pointer = new Vector2();
 const _offset = new Vector3();
@@ -42189,197 +42188,168 @@ const _worldPosition = new Vector3();
 const _inverseMatrix = new Matrix4();
 
 class DragControls extends EventDispatcher {
+  constructor(_objects, _camera, _domElement, _raycaster = new Raycaster()) {
+    super();
 
-	constructor( _objects, _camera, _domElement ) {
+    _domElement.style.touchAction = 'none'; // disable touch scroll
 
-		super();
+    let _selected = null;
+    let _hovered = null;
 
-		_domElement.style.touchAction = 'none'; // disable touch scroll
+    const _intersections = [];
 
-		let _selected = null, _hovered = null;
+    //
 
-		const _intersections = [];
+    const scope = this;
 
-		//
+    function activate() {
+      _domElement.addEventListener('pointermove', onPointerMove);
+      _domElement.addEventListener('pointerdown', onPointerDown);
+      _domElement.addEventListener('pointerup', onPointerCancel);
+      _domElement.addEventListener('pointerleave', onPointerCancel);
+    }
 
-		const scope = this;
+    function deactivate() {
+      _domElement.removeEventListener('pointermove', onPointerMove);
+      _domElement.removeEventListener('pointerdown', onPointerDown);
+      _domElement.removeEventListener('pointerup', onPointerCancel);
+      _domElement.removeEventListener('pointerleave', onPointerCancel);
 
-		function activate() {
+      _domElement.style.cursor = '';
+    }
 
-			_domElement.addEventListener( 'pointermove', onPointerMove );
-			_domElement.addEventListener( 'pointerdown', onPointerDown );
-			_domElement.addEventListener( 'pointerup', onPointerCancel );
-			_domElement.addEventListener( 'pointerleave', onPointerCancel );
+    function dispose() {
+      deactivate();
+    }
 
-		}
+    function getObjects() {
+      return _objects;
+    }
 
-		function deactivate() {
+    function onPointerMove(event) {
+      if (scope.enabled === false) return;
 
-			_domElement.removeEventListener( 'pointermove', onPointerMove );
-			_domElement.removeEventListener( 'pointerdown', onPointerDown );
-			_domElement.removeEventListener( 'pointerup', onPointerCancel );
-			_domElement.removeEventListener( 'pointerleave', onPointerCancel );
+      updatePointer(event);
 
-			_domElement.style.cursor = '';
+      _raycaster.setFromCamera(_pointer, _camera);
 
-		}
+      if (_selected) {
+        if (_raycaster.ray.intersectPlane(_plane, _intersection)) {
+          _selected.position.copy(
+            _intersection.sub(_offset).applyMatrix4(_inverseMatrix)
+          );
+        }
 
-		function dispose() {
+        scope.dispatchEvent({ type: 'drag', object: _selected });
 
-			deactivate();
+        return;
+      }
 
-		}
+      // hover support
 
-		function getObjects() {
+      if (event.pointerType === 'mouse' || event.pointerType === 'pen') {
+        _intersections.length = 0;
 
-			return _objects;
+        _raycaster.setFromCamera(_pointer, _camera);
+        _raycaster.intersectObjects(_objects, true, _intersections);
 
-		}
+        if (_intersections.length > 0) {
+          const object = _intersections[0].object;
 
-		function onPointerMove( event ) {
+          _plane.setFromNormalAndCoplanarPoint(
+            _camera.getWorldDirection(_plane.normal),
+            _worldPosition.setFromMatrixPosition(object.matrixWorld)
+          );
 
-			if ( scope.enabled === false ) return;
+          if (_hovered !== object && _hovered !== null) {
+            scope.dispatchEvent({ type: 'hoveroff', object: _hovered });
 
-			updatePointer( event );
+            _domElement.style.cursor = 'auto';
+            _hovered = null;
+          }
 
-			_raycaster.setFromCamera( _pointer, _camera );
+          if (_hovered !== object) {
+            scope.dispatchEvent({ type: 'hoveron', object: object });
 
-			if ( _selected ) {
+            _domElement.style.cursor = 'pointer';
+            _hovered = object;
+          }
+        } else {
+          if (_hovered !== null) {
+            scope.dispatchEvent({ type: 'hoveroff', object: _hovered });
 
-				if ( _raycaster.ray.intersectPlane( _plane, _intersection ) ) {
+            _domElement.style.cursor = 'auto';
+            _hovered = null;
+          }
+        }
+      }
+    }
 
-					_selected.position.copy( _intersection.sub( _offset ).applyMatrix4( _inverseMatrix ) );
+    function onPointerDown(event) {
+      if (scope.enabled === false) return;
 
-				}
+      updatePointer(event);
 
-				scope.dispatchEvent( { type: 'drag', object: _selected } );
+      _intersections.length = 0;
 
-				return;
+      _raycaster.setFromCamera(_pointer, _camera);
+      _raycaster.intersectObjects(_objects, true, _intersections);
 
-			}
+      if (_intersections.length > 0) {
+        _selected =
+          scope.transformGroup === true
+            ? _objects[0]
+            : _intersections[0].object;
 
-			// hover support
+        _plane.setFromNormalAndCoplanarPoint(
+          _camera.getWorldDirection(_plane.normal),
+          _worldPosition.setFromMatrixPosition(_selected.matrixWorld)
+        );
 
-			if ( event.pointerType === 'mouse' || event.pointerType === 'pen' ) {
+        if (_raycaster.ray.intersectPlane(_plane, _intersection)) {
+          _inverseMatrix.copy(_selected.parent.matrixWorld).invert();
+          _offset
+            .copy(_intersection)
+            .sub(_worldPosition.setFromMatrixPosition(_selected.matrixWorld));
+        }
 
-				_intersections.length = 0;
+        _domElement.style.cursor = 'move';
 
-				_raycaster.setFromCamera( _pointer, _camera );
-				_raycaster.intersectObjects( _objects, true, _intersections );
+        scope.dispatchEvent({ type: 'dragstart', object: _selected });
+      }
+    }
 
-				if ( _intersections.length > 0 ) {
+    function onPointerCancel() {
+      if (scope.enabled === false) return;
 
-					const object = _intersections[ 0 ].object;
+      if (_selected) {
+        scope.dispatchEvent({ type: 'dragend', object: _selected });
 
-					_plane.setFromNormalAndCoplanarPoint( _camera.getWorldDirection( _plane.normal ), _worldPosition.setFromMatrixPosition( object.matrixWorld ) );
+        _selected = null;
+      }
 
-					if ( _hovered !== object && _hovered !== null ) {
+      _domElement.style.cursor = _hovered ? 'pointer' : 'auto';
+    }
 
-						scope.dispatchEvent( { type: 'hoveroff', object: _hovered } );
+    function updatePointer(event) {
+      const rect = _domElement.getBoundingClientRect();
 
-						_domElement.style.cursor = 'auto';
-						_hovered = null;
+      _pointer.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+      _pointer.y = (-(event.clientY - rect.top) / rect.height) * 2 + 1;
+    }
 
-					}
+    activate();
 
-					if ( _hovered !== object ) {
+    // API
 
-						scope.dispatchEvent( { type: 'hoveron', object: object } );
+    this.enabled = true;
+    this.transformGroup = false;
 
-						_domElement.style.cursor = 'pointer';
-						_hovered = object;
-
-					}
-
-				} else {
-
-					if ( _hovered !== null ) {
-
-						scope.dispatchEvent( { type: 'hoveroff', object: _hovered } );
-
-						_domElement.style.cursor = 'auto';
-						_hovered = null;
-
-					}
-
-				}
-
-			}
-
-		}
-
-		function onPointerDown( event ) {
-
-			if ( scope.enabled === false ) return;
-
-			updatePointer( event );
-
-			_intersections.length = 0;
-
-			_raycaster.setFromCamera( _pointer, _camera );
-			_raycaster.intersectObjects( _objects, true, _intersections );
-
-			if ( _intersections.length > 0 ) {
-
-				_selected = ( scope.transformGroup === true ) ? _objects[ 0 ] : _intersections[ 0 ].object;
-
-				_plane.setFromNormalAndCoplanarPoint( _camera.getWorldDirection( _plane.normal ), _worldPosition.setFromMatrixPosition( _selected.matrixWorld ) );
-
-				if ( _raycaster.ray.intersectPlane( _plane, _intersection ) ) {
-
-					_inverseMatrix.copy( _selected.parent.matrixWorld ).invert();
-					_offset.copy( _intersection ).sub( _worldPosition.setFromMatrixPosition( _selected.matrixWorld ) );
-
-				}
-
-				_domElement.style.cursor = 'move';
-
-				scope.dispatchEvent( { type: 'dragstart', object: _selected } );
-
-			}
-
-
-		}
-
-		function onPointerCancel() {
-
-			if ( scope.enabled === false ) return;
-
-			if ( _selected ) {
-
-				scope.dispatchEvent( { type: 'dragend', object: _selected } );
-
-				_selected = null;
-
-			}
-
-			_domElement.style.cursor = _hovered ? 'pointer' : 'auto';
-
-		}
-
-		function updatePointer( event ) {
-
-			const rect = _domElement.getBoundingClientRect();
-
-			_pointer.x = ( event.clientX - rect.left ) / rect.width * 2 - 1;
-			_pointer.y = - ( event.clientY - rect.top ) / rect.height * 2 + 1;
-
-		}
-
-		activate();
-
-		// API
-
-		this.enabled = true;
-		this.transformGroup = false;
-
-		this.activate = activate;
-		this.deactivate = deactivate;
-		this.dispose = dispose;
-		this.getObjects = getObjects;
-
-	}
-
+    this.activate = activate;
+    this.deactivate = deactivate;
+    this.dispose = dispose;
+    this.getObjects = getObjects;
+  }
 }
 
 const _changeEvent = { type: 'change' };
@@ -43267,16 +43237,6 @@ const buildMeshMaterial = async (definitions, tags) => {
   return new MeshNormalMaterial();
 };
 
-const toName = (geometry) => {
-  if (geometry.tags !== undefined && geometry.tags.length >= 1) {
-    for (const tag of geometry.tags) {
-      if (tag.startsWith('user/')) {
-        return tag.substring(5);
-      }
-    }
-  }
-};
-
 // FIX: Found it somewhere -- attribute.
 const applyBoxUVImpl = (geom, transformMatrix, bbox, bboxMaxSize) => {
   const coords = [];
@@ -43440,13 +43400,14 @@ const updateUserData = (geometry, userData) => {
     for (const tag of geometry.tags) {
       if (tag.startsWith('editId:')) {
         userData.editId = tag.substring(7);
+      } else if (tag.startsWith('editType:')) {
+        userData.editType = tag.substring(9);
       }
     }
   }
 };
 
 const buildMeshes = async ({
-  datasets,
   geometry,
   scene,
   layer = GEOMETRY_LAYER,
@@ -43457,6 +43418,7 @@ const buildMeshes = async ({
     return;
   }
   const { tags = [] } = geometry;
+  let mesh;
   switch (geometry.type) {
     case 'displayGeometry':
     case 'group':
@@ -43469,7 +43431,6 @@ const buildMeshes = async ({
       break;
     case 'segments': {
       const { segments } = geometry;
-      const dataset = {};
       const bufferGeometry = new BufferGeometry();
       const material = new LineBasicMaterial({
         color: new Color(setColor(definitions, tags, {}, [0, 0, 0]).color),
@@ -43485,13 +43446,10 @@ const buildMeshes = async ({
         'position',
         new Float32BufferAttribute(positions, 3)
       );
-      dataset.mesh = new LineSegments(bufferGeometry, material);
-      dataset.mesh.layers.set(layer);
-      updateUserData(geometry, dataset.mesh.userData);
-      dataset.mesh.userData.intangible = true;
-      dataset.name = toName(geometry);
-      scene.add(dataset.mesh);
-      datasets.push(dataset);
+      mesh = new LineSegments(bufferGeometry, material);
+      mesh.layers.set(layer);
+      updateUserData(geometry, mesh.userData);
+      scene.add(mesh);
       break;
     }
     case 'paths': {
@@ -43504,7 +43462,6 @@ const buildMeshes = async ({
         transparent = true;
       }
       const { paths } = geometry;
-      const dataset = {};
       const bufferGeometry = new BufferGeometry();
       const material = new LineBasicMaterial({
         color: 0xffffff,
@@ -43515,7 +43472,6 @@ const buildMeshes = async ({
       const color = new Color(setColor(definitions, tags, {}, [0, 0, 0]).color);
       const pathColors = [];
       const positions = [];
-      const index = [];
       for (const path of paths) {
         const entry = { start: Math.floor(positions.length / 3), length: 0 };
         let last = path.length - 1;
@@ -43548,9 +43504,7 @@ const buildMeshes = async ({
           positions.push(aX, aY, aZ, bX, bY, bZ);
           entry.length += 2;
         }
-        if (entry.length > 0) {
-          index.push(entry);
-        }
+        if (entry.length > 0) ;
       }
       bufferGeometry.setAttribute(
         'position',
@@ -43560,38 +43514,14 @@ const buildMeshes = async ({
         'color',
         new Float32BufferAttribute(pathColors, 4)
       );
-      dataset.mesh = new LineSegments(bufferGeometry, material);
-      dataset.mesh.layers.set(layer);
-      updateUserData(geometry, dataset.mesh.userData);
-      dataset.mesh.userData.intangible = true;
-      dataset.name = toName(geometry);
-      scene.add(dataset.mesh);
-      datasets.push(dataset);
-      if (render && tags.includes('display/trace')) {
-        let current = 0;
-        let extent = 0;
-        const animate = () => {
-          if (dataset.mesh) {
-            const bufferGeometry = dataset.mesh.geometry;
-            extent += index[current].length;
-            bufferGeometry.setDrawRange(0, (extent += index[current].length));
-            bufferGeometry.attributes.position.needsUpdate = true;
-            render();
-            current += 1;
-            if (current >= index.length) {
-              current = 0;
-              extent = 0;
-            }
-            setTimeout(animate, 100);
-          }
-        };
-        animate();
-      }
+      mesh = new LineSegments(bufferGeometry, material);
+      mesh.layers.set(layer);
+      updateUserData(geometry, mesh.userData);
+      scene.add(mesh);
       break;
     }
     case 'points': {
       const { points } = geometry;
-      const dataset = {};
       const threeGeometry = new BufferGeometry();
       const material = new PointsMaterial({
         color: setColor(definitions, tags, {}, [0, 0, 0]).color,
@@ -43605,12 +43535,10 @@ const buildMeshes = async ({
         'position',
         new Float32BufferAttribute(positions, 3)
       );
-      dataset.mesh = new Points(threeGeometry, material);
-      dataset.mesh.layers.set(layer);
-      updateUserData(geometry, dataset.mesh.userData);
-      dataset.name = toName(geometry);
-      scene.add(dataset.mesh);
-      datasets.push(dataset);
+      mesh = new Points(threeGeometry, material);
+      mesh.layers.set(layer);
+      updateUserData(geometry, mesh.userData);
+      scene.add(mesh);
       break;
     }
     case 'triangles': {
@@ -43633,7 +43561,6 @@ const buildMeshes = async ({
 
       const { triangles } = geometry;
       const { positions, normals } = prepareTriangles(triangles);
-      const dataset = {};
       const bufferGeometry = new BufferGeometry();
       bufferGeometry.setAttribute(
         'position',
@@ -43650,12 +43577,11 @@ const buildMeshes = async ({
         material.depthWrite = false;
         material.opacity *= 0.5;
       }
-      dataset.mesh = new Mesh(bufferGeometry, material);
-      dataset.mesh.layers.set(layer);
-      updateUserData(geometry, dataset.mesh.userData);
-      dataset.name = toName(geometry);
-      scene.add(dataset.mesh);
-      datasets.push(dataset);
+      mesh = new Mesh(bufferGeometry, material);
+      mesh.layers.set(layer);
+      updateUserData(geometry, mesh.userData);
+      mesh.userData.tangible = true;
+      scene.add(mesh);
       break;
     }
     default:
@@ -43663,11 +43589,14 @@ const buildMeshes = async ({
   }
 
   if (geometry.content) {
+    if (mesh === undefined) {
+      mesh = new Group();
+      scene.add(mesh);
+    }
     for (const content of geometry.content) {
       await buildMeshes({
-        datasets,
         geometry: content,
-        scene,
+        scene: mesh,
         layer,
         render,
         definitions,
@@ -43676,8 +43605,35 @@ const buildMeshes = async ({
   }
 };
 
+let raycaster = new Raycaster();
+
+const getRaycaster = () => raycaster;
+
+const raycast = (x, y, camera, objects) => {
+  const raycaster = getRaycaster();
+  const position = new Vector2(x, y);
+  raycaster.setFromCamera(position, camera);
+  const intersects = raycaster.intersectObjects(objects, true);
+
+  for (const { face, object, point } of intersects) {
+    if (!object.userData.tangible) {
+      continue;
+    }
+    if (!face) {
+      break;
+    }
+    const { normal } = face;
+    const ray = [
+      [point.x, point.y, point.z],
+      [normal.x, normal.y, normal.z],
+    ];
+    return { ray, object };
+  }
+
+  return {};
+};
+
 const moveToFit = ({
-  datasets,
   view,
   camera,
   controls = [],
@@ -43724,9 +43680,9 @@ const moveToFit = ({
       grid.rotation.x = -Math.PI / 2;
       grid.position.set(0, 0, -0.002);
       grid.layers.set(gridLayer);
-      grid.userData.intangible = true;
+      grid.userData.tangible = false;
+      grid.userData.dressing = true;
       scene.add(grid);
-      datasets.push({ mesh: grid });
     }
     {
       const grid = new GridHelper(size * 2, 4, 0x000040, 0x4040f0);
@@ -43735,9 +43691,9 @@ const moveToFit = ({
       grid.rotation.x = -Math.PI / 2;
       grid.position.set(0, 0, -0.001);
       grid.layers.set(gridLayer);
-      grid.userData.intangible = true;
+      grid.userData.tangible = false;
+      grid.userData.dressing = true;
       scene.add(grid);
-      datasets.push({ mesh: grid });
     }
   }
 
@@ -43806,13 +43762,19 @@ const buildTrackballControls = ({
 
 const buildDragControls = ({
   camera,
+  draggableObjects,
   endUpdating,
   startUpdating,
-  tangibleObjects,
+  raycaster,
   trackballControls,
   viewerElement,
 }) => {
-  const dragControls = new DragControls(tangibleObjects, camera, viewerElement);
+  const dragControls = new DragControls(
+    draggableObjects,
+    camera,
+    viewerElement,
+    raycaster
+  );
   dragControls.addEventListener('dragstart', () => {
     trackballControls.enabled = false;
     startUpdating();
@@ -43837,7 +43799,6 @@ const orbitDisplay = async (
   } = {},
   page
 ) => {
-  let datasets = [];
   const width = page.offsetWidth;
   const height = page.offsetHeight;
 
@@ -43919,16 +43880,18 @@ const orbitDisplay = async (
     viewerElement: displayCanvas,
   }));
 
-  const tangibleObjects = scene.children.filter(
-    (item) => !item.userData.intangible
-  );
+  const draggableObjects = [];
+  const raycaster = getRaycaster();
+  raycaster.layers.enable(GEOMETRY_LAYER);
+  raycaster.layers.enable(SKETCH_LAYER);
 
   const { dragControls } = buildDragControls({
     camera,
+    draggableObjects,
     endUpdating,
+    raycaster,
     render,
     startUpdating,
-    tangibleObjects,
     trackballControls,
     view,
     viewerElement: displayCanvas,
@@ -43950,24 +43913,15 @@ const orbitDisplay = async (
     geometry,
     { withGrid = true, fit = true } = {}
   ) => {
-    // Delete any previous dataset in the window.
-    for (const { mesh } of datasets) {
-      scene.remove(mesh);
-    }
-
     for (const object of [...scene.children]) {
-      if (object.userData.ephemeral) {
+      if (!object.userData.dressing) {
         scene.remove(object);
       }
     }
 
     view = { ...view, fit };
 
-    // Build new datasets from the written data, and display them.
-    datasets = [];
-
     await buildMeshes({
-      datasets,
       geometry,
       scene,
       render,
@@ -43975,7 +43929,6 @@ const orbitDisplay = async (
     });
 
     moveToFit({
-      datasets,
       view,
       camera,
       controls: [trackballControls],
@@ -43983,13 +43936,6 @@ const orbitDisplay = async (
       withGrid,
       gridLayer,
     });
-
-    // Update the tangible objects in place, so that dragControls notices.
-    tangibleObjects.splice(
-      0,
-      tangibleObjects.length,
-      ...scene.children.filter((item) => !item.userData.intangible)
-    );
 
     render();
   };
@@ -44005,9 +43951,9 @@ const orbitDisplay = async (
     camera,
     canvas: displayCanvas,
     dragControls,
+    draggableObjects,
     render,
     scene,
-    tangibleObjects,
     trackballControls,
     updateGeometry,
   };
@@ -44149,28 +44095,6 @@ const orbitView = async (
 
   await orbitDisplay({ geometry, view, definitions }, container);
   return container;
-};
-
-let raycaster = new Raycaster();
-
-const raycast = (x, y, camera, tangibleObjects) => {
-  if (!raycaster) {
-    raycaster = new Raycaster();
-  }
-  const position = new Vector2(x, y);
-  raycaster.setFromCamera(position, camera);
-  const intersects = raycaster.intersectObjects(tangibleObjects);
-
-  for (const { face, object, point } of intersects) {
-    const { normal } = face;
-    const ray = [
-      [point.x, point.y, point.z],
-      [normal.x, normal.y, normal.z],
-    ];
-    return { ray, object };
-  }
-
-  return {};
 };
 
 export { buildMeshes, buildScene, createResizer, dataUrl, image, orbitDisplay, orbitView, raycast, staticDisplay, staticView };
