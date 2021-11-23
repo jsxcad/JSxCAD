@@ -2,6 +2,7 @@ import {
   Box3,
   BufferGeometry,
   Color,
+  EdgesGeometry,
   Float32BufferAttribute,
   Group,
   LineBasicMaterial,
@@ -13,6 +14,7 @@ import {
   Vector2,
   Vector3,
   VertexColors,
+  WireframeGeometry,
 } from 'three';
 
 import { GEOMETRY_LAYER, SKETCH_LAYER } from './layers.js';
@@ -358,16 +360,42 @@ export const buildMeshes = async ({
         new Float32BufferAttribute(normals, 3)
       );
       applyBoxUV(bufferGeometry);
-      const material = await buildMeshMaterial(definitions, tags);
-      if (tags.includes('type:void')) {
-        material.transparent = true;
-        material.depthWrite = false;
-        material.opacity *= 0.5;
+
+      if (tags.includes('show:skin')) {
+        const material = await buildMeshMaterial(definitions, tags);
+        if (tags.includes('type:void')) {
+          material.transparent = true;
+          material.depthWrite = false;
+          material.opacity *= 0.5;
+        }
+        mesh = new Mesh(bufferGeometry, material);
+        mesh.castShadow = true;
+        mesh.receiveShadow = true;
+        mesh.layers.set(layer);
+        updateUserData(geometry, mesh.userData);
+        mesh.userData.tangible = true;
+      } else {
+        mesh = new Group();
       }
-      mesh = new Mesh(bufferGeometry, material);
-      mesh.layers.set(layer);
-      updateUserData(geometry, mesh.userData);
-      mesh.userData.tangible = true;
+
+      if (tags.includes('show:outline')) {
+        const edges = new EdgesGeometry(bufferGeometry);
+        const outline = new LineSegments(
+          edges,
+          new LineBasicMaterial({ color: 0x000000 })
+        );
+        mesh.add(outline);
+      }
+
+      if (tags.includes('show:wireframe')) {
+        const edges = new WireframeGeometry(bufferGeometry);
+        const outline = new LineSegments(
+          edges,
+          new LineBasicMaterial({ color: 0x000000 })
+        );
+        mesh.add(outline);
+      }
+
       scene.add(mesh);
       break;
     }

@@ -28796,10 +28796,139 @@ class DepthTexture extends Texture {
 
 DepthTexture.prototype.isDepthTexture = true;
 
-new Vector3();
-new Vector3();
-new Vector3();
-new Triangle();
+const _v0 = new Vector3();
+const _v1$1 = new Vector3();
+const _normal = new Vector3();
+const _triangle = new Triangle();
+
+class EdgesGeometry extends BufferGeometry {
+
+	constructor( geometry = null, thresholdAngle = 1 ) {
+
+		super();
+		this.type = 'EdgesGeometry';
+
+		this.parameters = {
+			geometry: geometry,
+			thresholdAngle: thresholdAngle
+		};
+
+		if ( geometry !== null ) {
+
+			const precisionPoints = 4;
+			const precision = Math.pow( 10, precisionPoints );
+			const thresholdDot = Math.cos( DEG2RAD * thresholdAngle );
+
+			const indexAttr = geometry.getIndex();
+			const positionAttr = geometry.getAttribute( 'position' );
+			const indexCount = indexAttr ? indexAttr.count : positionAttr.count;
+
+			const indexArr = [ 0, 0, 0 ];
+			const vertKeys = [ 'a', 'b', 'c' ];
+			const hashes = new Array( 3 );
+
+			const edgeData = {};
+			const vertices = [];
+			for ( let i = 0; i < indexCount; i += 3 ) {
+
+				if ( indexAttr ) {
+
+					indexArr[ 0 ] = indexAttr.getX( i );
+					indexArr[ 1 ] = indexAttr.getX( i + 1 );
+					indexArr[ 2 ] = indexAttr.getX( i + 2 );
+
+				} else {
+
+					indexArr[ 0 ] = i;
+					indexArr[ 1 ] = i + 1;
+					indexArr[ 2 ] = i + 2;
+
+				}
+
+				const { a, b, c } = _triangle;
+				a.fromBufferAttribute( positionAttr, indexArr[ 0 ] );
+				b.fromBufferAttribute( positionAttr, indexArr[ 1 ] );
+				c.fromBufferAttribute( positionAttr, indexArr[ 2 ] );
+				_triangle.getNormal( _normal );
+
+				// create hashes for the edge from the vertices
+				hashes[ 0 ] = `${ Math.round( a.x * precision ) },${ Math.round( a.y * precision ) },${ Math.round( a.z * precision ) }`;
+				hashes[ 1 ] = `${ Math.round( b.x * precision ) },${ Math.round( b.y * precision ) },${ Math.round( b.z * precision ) }`;
+				hashes[ 2 ] = `${ Math.round( c.x * precision ) },${ Math.round( c.y * precision ) },${ Math.round( c.z * precision ) }`;
+
+				// skip degenerate triangles
+				if ( hashes[ 0 ] === hashes[ 1 ] || hashes[ 1 ] === hashes[ 2 ] || hashes[ 2 ] === hashes[ 0 ] ) {
+
+					continue;
+
+				}
+
+				// iterate over every edge
+				for ( let j = 0; j < 3; j ++ ) {
+
+					// get the first and next vertex making up the edge
+					const jNext = ( j + 1 ) % 3;
+					const vecHash0 = hashes[ j ];
+					const vecHash1 = hashes[ jNext ];
+					const v0 = _triangle[ vertKeys[ j ] ];
+					const v1 = _triangle[ vertKeys[ jNext ] ];
+
+					const hash = `${ vecHash0 }_${ vecHash1 }`;
+					const reverseHash = `${ vecHash1 }_${ vecHash0 }`;
+
+					if ( reverseHash in edgeData && edgeData[ reverseHash ] ) {
+
+						// if we found a sibling edge add it into the vertex array if
+						// it meets the angle threshold and delete the edge from the map.
+						if ( _normal.dot( edgeData[ reverseHash ].normal ) <= thresholdDot ) {
+
+							vertices.push( v0.x, v0.y, v0.z );
+							vertices.push( v1.x, v1.y, v1.z );
+
+						}
+
+						edgeData[ reverseHash ] = null;
+
+					} else if ( ! ( hash in edgeData ) ) {
+
+						// if we've already got an edge here then skip adding a new one
+						edgeData[ hash ] = {
+
+							index0: indexArr[ j ],
+							index1: indexArr[ jNext ],
+							normal: _normal.clone(),
+
+						};
+
+					}
+
+				}
+
+			}
+
+			// iterate over all remaining, unmatched edges and add them to the vertex array
+			for ( const key in edgeData ) {
+
+				if ( edgeData[ key ] ) {
+
+					const { index0, index1 } = edgeData[ key ];
+					_v0.fromBufferAttribute( positionAttr, index0 );
+					_v1$1.fromBufferAttribute( positionAttr, index1 );
+
+					vertices.push( _v0.x, _v0.y, _v0.z );
+					vertices.push( _v1$1.x, _v1$1.y, _v1$1.z );
+
+				}
+
+			}
+
+			this.setAttribute( 'position', new Float32BufferAttribute( vertices, 3 ) );
+
+		}
+
+	}
+
+}
 
 /**
  * Extensible curve object.
@@ -32632,6 +32761,135 @@ function toJSON( shapes, data ) {
 	}
 
 	return data;
+
+}
+
+class WireframeGeometry extends BufferGeometry {
+
+	constructor( geometry = null ) {
+
+		super();
+		this.type = 'WireframeGeometry';
+
+		this.parameters = {
+			geometry: geometry
+		};
+
+		if ( geometry !== null ) {
+
+			// buffer
+
+			const vertices = [];
+			const edges = new Set();
+
+			// helper variables
+
+			const start = new Vector3();
+			const end = new Vector3();
+
+			if ( geometry.index !== null ) {
+
+				// indexed BufferGeometry
+
+				const position = geometry.attributes.position;
+				const indices = geometry.index;
+				let groups = geometry.groups;
+
+				if ( groups.length === 0 ) {
+
+					groups = [ { start: 0, count: indices.count, materialIndex: 0 } ];
+
+				}
+
+				// create a data structure that contains all eges without duplicates
+
+				for ( let o = 0, ol = groups.length; o < ol; ++ o ) {
+
+					const group = groups[ o ];
+
+					const groupStart = group.start;
+					const groupCount = group.count;
+
+					for ( let i = groupStart, l = ( groupStart + groupCount ); i < l; i += 3 ) {
+
+						for ( let j = 0; j < 3; j ++ ) {
+
+							const index1 = indices.getX( i + j );
+							const index2 = indices.getX( i + ( j + 1 ) % 3 );
+
+							start.fromBufferAttribute( position, index1 );
+							end.fromBufferAttribute( position, index2 );
+
+							if ( isUniqueEdge( start, end, edges ) === true ) {
+
+								vertices.push( start.x, start.y, start.z );
+								vertices.push( end.x, end.y, end.z );
+
+							}
+
+						}
+
+					}
+
+				}
+
+			} else {
+
+				// non-indexed BufferGeometry
+
+				const position = geometry.attributes.position;
+
+				for ( let i = 0, l = ( position.count / 3 ); i < l; i ++ ) {
+
+					for ( let j = 0; j < 3; j ++ ) {
+
+						// three edges per triangle, an edge is represented as (index1, index2)
+						// e.g. the first triangle has the following edges: (0,1),(1,2),(2,0)
+
+						const index1 = 3 * i + j;
+						const index2 = 3 * i + ( ( j + 1 ) % 3 );
+
+						start.fromBufferAttribute( position, index1 );
+						end.fromBufferAttribute( position, index2 );
+
+						if ( isUniqueEdge( start, end, edges ) === true ) {
+
+							vertices.push( start.x, start.y, start.z );
+							vertices.push( end.x, end.y, end.z );
+
+						}
+
+					}
+
+				}
+
+			}
+
+			// build geometry
+
+			this.setAttribute( 'position', new Float32BufferAttribute( vertices, 3 ) );
+
+		}
+
+	}
+
+}
+
+function isUniqueEdge( start, end, edges ) {
+
+	const hash1 = `${start.x},${start.y},${start.z}-${end.x},${end.y},${end.z}`;
+	const hash2 = `${end.x},${end.y},${end.z}-${start.x},${start.y},${start.z}`; // coincident edge
+
+	if ( edges.has( hash1 ) === true || edges.has( hash2 ) === true ) {
+
+		return false;
+
+	} else {
+
+		edges.add( hash1, hash2 );
+		return true;
+
+	}
 
 }
 
@@ -42138,6 +42396,7 @@ const buildScene = ({
   camera.position.set(...position);
   camera.up.set(...up);
   camera.lookAt(...target);
+  camera.userData.dressing = true;
 
   const scene = new Scene();
   scene.add(camera);
@@ -42150,12 +42409,29 @@ const buildScene = ({
 
   var hemiLight = new HemisphereLight(0xffffff, 0x444444, 0.5);
   hemiLight.position.set(0, 0, 300);
+  hemiLight.userData.dressing = true;
   scene.add(hemiLight);
 
   const light = new DirectionalLight(0xffffff, 0.5);
+  light.castShadow = true;
   light.position.set(1, 1, 1);
   light.layers.set(0);
+  light.userData.dressing = true;
   camera.add(light);
+
+  {
+    // Add spot light for shadows.
+    const spotLight = new SpotLight(0xdddddd, 0.7);
+    spotLight.position.set(20, 20, 20);
+    spotLight.castShadow = true;
+    spotLight.receiveShadow = true;
+    spotLight.shadowDarkness = 0.15;
+    spotLight.shadowCameraNear = 0.5;
+    spotLight.shadow.mapSize.width = 1024 * 2;
+    spotLight.shadow.mapSize.height = 1024 * 2;
+    spotLight.userData.dressing = true;
+    scene.add(spotLight);
+  }
 
   if (renderer === undefined) {
     renderer = new WebGLRenderer({
@@ -42172,6 +42448,9 @@ const buildScene = ({
     renderer.setPixelRatio(window.devicePixelRatio);
     renderer.domElement.style =
       'padding-left: 5px; padding-right: 5px; padding-bottom: 5px; position: absolute; z-index: 1';
+
+    renderer.shadowMap.enabled = true;
+    // renderer.shadowMapType = BasicShadowMap;
   }
   return { camera, canvas: renderer.domElement, renderer, scene };
 };
@@ -43571,16 +43850,42 @@ const buildMeshes = async ({
         new Float32BufferAttribute(normals, 3)
       );
       applyBoxUV(bufferGeometry);
-      const material = await buildMeshMaterial(definitions, tags);
-      if (tags.includes('type:void')) {
-        material.transparent = true;
-        material.depthWrite = false;
-        material.opacity *= 0.5;
+
+      if (tags.includes('show:skin')) {
+        const material = await buildMeshMaterial(definitions, tags);
+        if (tags.includes('type:void')) {
+          material.transparent = true;
+          material.depthWrite = false;
+          material.opacity *= 0.5;
+        }
+        mesh = new Mesh(bufferGeometry, material);
+        mesh.castShadow = true;
+        mesh.receiveShadow = true;
+        mesh.layers.set(layer);
+        updateUserData(geometry, mesh.userData);
+        mesh.userData.tangible = true;
+      } else {
+        mesh = new Group();
       }
-      mesh = new Mesh(bufferGeometry, material);
-      mesh.layers.set(layer);
-      updateUserData(geometry, mesh.userData);
-      mesh.userData.tangible = true;
+
+      if (tags.includes('show:outline')) {
+        const edges = new EdgesGeometry(bufferGeometry);
+        const outline = new LineSegments(
+          edges,
+          new LineBasicMaterial({ color: 0x000000 })
+        );
+        mesh.add(outline);
+      }
+
+      if (tags.includes('show:wireframe')) {
+        const edges = new WireframeGeometry(bufferGeometry);
+        const outline = new LineSegments(
+          edges,
+          new LineBasicMaterial({ color: 0x000000 })
+        );
+        mesh.add(outline);
+      }
+
       scene.add(mesh);
       break;
     }
@@ -43695,6 +44000,24 @@ const moveToFit = ({
       grid.userData.dressing = true;
       scene.add(grid);
     }
+    {
+      const plane = new Mesh(
+        new PlaneGeometry(50, 50),
+        new MeshStandardMaterial({
+          color: 0x00ff00,
+          depthWrite: false,
+          transparent: true,
+          opacity: 0.25,
+        })
+      );
+      plane.castShadow = false;
+      plane.receiveShadow = true;
+      plane.position.set(0, 0, 0);
+      plane.layers.set(gridLayer);
+      plane.userData.tangible = false;
+      plane.userData.dressing = true;
+      scene.add(plane);
+    }
   }
 
   if (!fit) {
@@ -43794,7 +44117,7 @@ const orbitDisplay = async (
     canvas,
     withAxes = false,
     withGrid = false,
-    gridLayer = SKETCH_LAYER,
+    gridLayer = GEOMETRY_LAYER,
     definitions,
   } = {},
   page
@@ -43909,10 +44232,9 @@ const orbitDisplay = async (
     render();
   }).observe(page);
 
-  const updateGeometry = async (
-    geometry,
-    { withGrid = true, fit = true } = {}
-  ) => {
+  let moveToFitDone = false;
+
+  const updateGeometry = async (geometry, { fit = true } = {}) => {
     for (const object of [...scene.children]) {
       if (!object.userData.dressing) {
         scene.remove(object);
@@ -43928,14 +44250,17 @@ const orbitDisplay = async (
       definitions,
     });
 
-    moveToFit({
-      view,
-      camera,
-      controls: [trackballControls],
-      scene,
-      withGrid,
-      gridLayer,
-    });
+    if (!moveToFitDone) {
+      moveToFitDone = true;
+      moveToFit({
+        view,
+        camera,
+        controls: [trackballControls],
+        scene,
+        withGrid,
+        gridLayer,
+      });
+    }
 
     render();
   };
@@ -44097,4 +44422,109 @@ const orbitView = async (
   return container;
 };
 
-export { buildMeshes, buildScene, createResizer, dataUrl, image, orbitDisplay, orbitView, raycast, staticDisplay, staticView };
+const addVoxel = ({ editId, point, scene, threejsMesh }) => {
+  const box = new BoxGeometry(1, 1, 1);
+  const mesh = new Mesh(box, threejsMesh.material);
+  mesh.userData.editId = editId;
+  mesh.userData.ephemeral = true;
+  mesh.userData.tangible = true;
+  mesh.position.set(...point);
+  scene.add(mesh);
+};
+
+const addAnchor = ({
+  draggableObjects,
+  color,
+  editId,
+  position = [0, 0, 0],
+  object,
+  anchorType,
+}) => {
+  const canvas = document.createElement('canvas');
+  canvas.width = 10;
+  canvas.height = 10;
+  const c = canvas.getContext('2d');
+  // c.strokeStyle = 'rgba(255, 255, 51)';
+  // c.fillStyle = 'rgba(0, 0, 0)';
+  c.strokeStyle = 'black';
+  c.fillStyle = color;
+  c.lineWidth = 1;
+  c.beginPath();
+  c.rect(0, 0, 10, 10);
+  c.closePath();
+  c.fill();
+  c.stroke();
+  const texture = new Texture(canvas);
+  texture.needsUpdate = true;
+  // sizeAttenuation: false means that the sprite will have constant size regardless of distance.
+  const spriteMaterial = new SpriteMaterial({
+    map: texture,
+    sizeAttenuation: false,
+  });
+  const sprite = new Sprite(spriteMaterial);
+  // This determines the hitbox size, regardless of what is displayed.
+  sprite.scale.set(0.01, 0.01, 0.01);
+  sprite.userData.editId = editId;
+  sprite.userData.anchorType = anchorType;
+  sprite.userData.tangible = true;
+  // Regenerate on recompute.
+  sprite.userData.ephemeral = true;
+  // Display on the overlay.
+  sprite.layers.set(1);
+  object.add(sprite);
+  // Anchors can be dragged.
+  draggableObjects.push(sprite);
+  // These should be tangible, so that they block clicks.
+  sprite.position.set(...position);
+  return sprite;
+};
+
+const addAnchors = ({
+  draggableObjects,
+  editId,
+  editType,
+  object,
+  position,
+  ray,
+  scene,
+  sourceLocation,
+  type,
+  target,
+  threejsMesh,
+}) => {
+  const offset = 0.05;
+  const zoom = position.distanceTo(target);
+  const at = new Vector3(0, 0, 0);
+  const to = new Vector3(1, 0, 0);
+  const up = new Vector3(0, 0, 1);
+  object.localToWorld(at);
+  object.localToWorld(to);
+  object.up.copy(up);
+  object.userData.anchor = { at, to, up };
+  addAnchor({
+    anchorType: 'at',
+    color: 'yellow',
+    draggableObjects,
+    editId,
+    position: [0, 0, 0],
+    object,
+  });
+  addAnchor({
+    anchorType: 'up',
+    color: 'green',
+    draggableObjects,
+    editId,
+    position: [0, offset * zoom, 0],
+    object,
+  });
+  addAnchor({
+    anchorType: 'to',
+    color: 'red',
+    draggableObjects,
+    editId,
+    position: [0, 0, offset * zoom],
+    object,
+  });
+};
+
+export { addAnchors, addVoxel, buildMeshes, buildScene, createResizer, dataUrl, image, orbitDisplay, orbitView, raycast, staticDisplay, staticView };

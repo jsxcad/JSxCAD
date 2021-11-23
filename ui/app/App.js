@@ -2,15 +2,7 @@
 
 import * as PropTypes from 'prop-types';
 
-// TODO: All of this three stuff should move to ../ui/threejs so we don't rollup threejs twice.
-import {
-  BoxGeometry,
-  Mesh,
-  Sprite,
-  SpriteMaterial,
-  Texture,
-  Vector3,
-} from 'three';
+import { addAnchors, addVoxel, dragAnchor } from '@jsxcad/ui-threejs';
 
 import {
   askService,
@@ -624,48 +616,8 @@ class App extends React.Component {
         return;
       }
       try {
-        const { parent, userData } = object;
-        const { anchorType } = userData;
-        switch (anchorType) {
-          case 'at': {
-            // Get the anchor's position in the parent's frame of reference.
-            const anchor = new Vector3();
-            object.getWorldPosition(anchor);
-            parent.position.copy(anchor);
-            parent.userData.anchor.at = anchor;
-            object.position.set(0, 0, 0);
-            break;
-          }
-          case 'to': {
-            // Get the anchor's position in the parent's frame of reference.
-            const anchor = new Vector3();
-            anchor.copy(object.position);
-            object.localToWorld(anchor);
-            parent.lookAt(anchor);
-            // And reset the offset.
-            parent.userData.anchor.to = anchor;
-            object.position.set(0, 0, 1);
-            break;
-          }
-          // Orthogonal to the [at, to] edge.
-          case 'up': {
-            // Get the anchor's position in the parent's frame of reference.
-            const anchor = new Vector3();
-            anchor.copy(object.position);
-            object.localToWorld(anchor);
-            const position = new Vector3();
-            parent.getWorldPosition(position);
-            anchor.sub(position);
-            // parent.worldToLocal(anchor);
-            parent.up.copy(anchor);
-            console.log(JSON.stringify(anchor));
-            parent.userData.anchor.up = anchor;
-            parent.lookAt(parent.userData.anchor.to);
-            // And reset the offset.
-            object.position.set(0, 1, 0);
-            break;
-          }
-        }
+        this.View.updating = true;
+        dragAnchor({ object });
       } finally {
         this.View.updating = false;
       }
@@ -687,89 +639,25 @@ class App extends React.Component {
       if (this.View.updating) {
         return;
       }
-      switch (editType) {
-        case 'Group': {
-          const addAnchor = ({
-            color,
-            editId,
-            position = [0, 0, 0],
-            object,
-            anchorType,
-          }) => {
-            const canvas = document.createElement('canvas');
-            canvas.width = 10;
-            canvas.height = 10;
-            const c = canvas.getContext('2d');
-            // c.strokeStyle = 'rgba(255, 255, 51)';
-            // c.fillStyle = 'rgba(0, 0, 0)';
-            c.strokeStyle = 'black';
-            c.fillStyle = color;
-            c.lineWidth = 1;
-            c.beginPath();
-            c.rect(0, 0, 10, 10);
-            c.closePath();
-            c.fill();
-            c.stroke();
-            const texture = new Texture(canvas);
-            texture.needsUpdate = true;
-            // sizeAttenuation: false means that the sprite will have constant size regardless of distance.
-            const spriteMaterial = new SpriteMaterial({
-              map: texture,
-              sizeAttenuation: false,
+      try {
+        this.View.updating = true;
+        switch (editType) {
+          case 'Group':
+            addAnchors({
+              draggableObjects,
+              editId,
+              editType,
+              object,
+              position,
+              ray,
+              scene,
+              sourceLocation,
+              type,
+              target,
+              threejsMesh,
             });
-            const sprite = new Sprite(spriteMaterial);
-            // This determines the hitbox size, regardless of what is displayed.
-            sprite.scale.set(0.01, 0.01, 0.01);
-            sprite.userData.editId = editId;
-            sprite.userData.anchorType = anchorType;
-            sprite.userData.tangible = true;
-            // Regenerate on recompute.
-            sprite.userData.ephemeral = true;
-            // Display on the overlay.
-            sprite.layers.set(1);
-            object.add(sprite);
-            // Anchors can be dragged.
-            draggableObjects.push(sprite);
-            // These should be tangible, so that they block clicks.
-            sprite.position.set(...position);
-            return sprite;
-          };
-
-          const offset = 0.05;
-          const zoom = position.distanceTo(target);
-          const at = new Vector3(0, 0, 0);
-          const to = new Vector3(1, 0, 0);
-          const up = new Vector3(0, 0, 1);
-          object.localToWorld(at);
-          object.localToWorld(to);
-          object.up.copy(up);
-          object.userData.anchor = { at, to, up };
-          addAnchor({
-            anchorType: 'at',
-            color: 'yellow',
-            editId,
-            position: [0, 0, 0],
-            object,
-          });
-          addAnchor({
-            anchorType: 'up',
-            color: 'green',
-            editId,
-            position: [0, offset * zoom, 0],
-            object,
-          });
-          addAnchor({
-            anchorType: 'to',
-            color: 'red',
-            editId,
-            position: [0, 0, offset * zoom],
-            object,
-          });
-          return;
-        }
-        case 'Voxels':
-          try {
-            this.View.updating = true;
+            return;
+          case 'Voxels': {
             const { path } = sourceLocation;
             const { [`NotebookText/${path}`]: NotebookText } = this.state;
             const request = { editId };
@@ -796,19 +684,18 @@ class App extends React.Component {
             });
             // Add an voxel to the display to temporarily reflect what we added to the source.
             if (request.pointToAppend) {
-              // Additions can be done as previews.
-              const box = new BoxGeometry(1, 1, 1);
-              const mesh = new Mesh(box, threejsMesh.material);
-              mesh.userData.editId = editId;
-              mesh.userData.ephemeral = true;
-              mesh.userData.tangible = true;
-              mesh.position.set(...request.pointToAppend);
-              scene.add(mesh);
+              addVoxel({
+                editId,
+                point: request.pointToAppend,
+                scene,
+                threejsMesh,
+              });
             }
             await this.Notebook.run(path);
-          } finally {
-            this.View.updating = false;
           }
+        }
+      } finally {
+        this.View.updating = false;
       }
     };
 

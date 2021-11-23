@@ -5,6 +5,7 @@ import {
   Object3D,
   PerspectiveCamera,
   Scene,
+  SpotLight,
   WebGLRenderer,
 } from 'three';
 
@@ -46,6 +47,7 @@ export const buildScene = ({
   camera.position.set(...position);
   camera.up.set(...up);
   camera.lookAt(...target);
+  camera.userData.dressing = true;
 
   const scene = new Scene();
   scene.add(camera);
@@ -58,12 +60,29 @@ export const buildScene = ({
 
   var hemiLight = new HemisphereLight(0xffffff, 0x444444, 0.5);
   hemiLight.position.set(0, 0, 300);
+  hemiLight.userData.dressing = true;
   scene.add(hemiLight);
 
   const light = new DirectionalLight(0xffffff, 0.5);
+  light.castShadow = true;
   light.position.set(1, 1, 1);
   light.layers.set(0);
+  light.userData.dressing = true;
   camera.add(light);
+
+  {
+    // Add spot light for shadows.
+    const spotLight = new SpotLight(0xdddddd, 0.7);
+    spotLight.position.set(20, 20, 20);
+    spotLight.castShadow = true;
+    spotLight.receiveShadow = true;
+    spotLight.shadowDarkness = 0.15;
+    spotLight.shadowCameraNear = 0.5;
+    spotLight.shadow.mapSize.width = 1024 * 2;
+    spotLight.shadow.mapSize.height = 1024 * 2;
+    spotLight.userData.dressing = true;
+    scene.add(spotLight);
+  }
 
   if (renderer === undefined) {
     renderer = new WebGLRenderer({
@@ -80,6 +99,9 @@ export const buildScene = ({
     renderer.setPixelRatio(window.devicePixelRatio);
     renderer.domElement.style =
       'padding-left: 5px; padding-right: 5px; padding-bottom: 5px; position: absolute; z-index: 1';
+
+    renderer.shadowMap.enabled = true;
+    // renderer.shadowMapType = BasicShadowMap;
   }
   return { camera, canvas: renderer.domElement, renderer, scene };
 };

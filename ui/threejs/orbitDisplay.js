@@ -62,7 +62,7 @@ export const orbitDisplay = async (
     canvas,
     withAxes = false,
     withGrid = false,
-    gridLayer = SKETCH_LAYER,
+    gridLayer = GEOMETRY_LAYER,
     definitions,
   } = {},
   page
@@ -177,10 +177,9 @@ export const orbitDisplay = async (
     render();
   }).observe(page);
 
-  const updateGeometry = async (
-    geometry,
-    { withGrid = true, fit = true } = {}
-  ) => {
+  let moveToFitDone = false;
+
+  const updateGeometry = async (geometry, { fit = true } = {}) => {
     for (const object of [...scene.children]) {
       if (!object.userData.dressing) {
         scene.remove(object);
@@ -196,14 +195,17 @@ export const orbitDisplay = async (
       definitions,
     });
 
-    moveToFit({
-      view,
-      camera,
-      controls: [trackballControls],
-      scene,
-      withGrid,
-      gridLayer,
-    });
+    if (!moveToFitDone) {
+      moveToFitDone = true;
+      moveToFit({
+        view,
+        camera,
+        controls: [trackballControls],
+        scene,
+        withGrid,
+        gridLayer,
+      });
+    }
 
     render();
   };

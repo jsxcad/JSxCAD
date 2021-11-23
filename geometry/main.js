@@ -88,6 +88,27 @@ export { isClockwise as isClockwisePath } from './path/isClockwise.js';
 export { isCounterClockwise as isCounterClockwisePath } from './path/isCounterClockwise.js';
 export { isClosed as isClosedPath } from './path/isClosed.js';
 export {
+  isNotShow,
+  isNotShowOutline,
+  isNotShowSkin,
+  isNotShowWireframe,
+  isShow,
+  isShowOutline,
+  isShowSkin,
+  isShowWireframe,
+  hasNotShow,
+  hasNotShowOutline,
+  hasNotShowSkin,
+  hasNotShowWireframe,
+  hasShow,
+  hasShowOutline,
+  hasShowSkin,
+  hasShowWireframe,
+  showOutline,
+  showSkin,
+  showWireframe,
+} from './tagged/show.js';
+export {
   isNotType,
   isNotTypeVoid,
   isNotTypeWire,

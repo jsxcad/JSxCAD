@@ -1,4 +1,12 @@
-import { Box3, GridHelper, LineSegments, Mesh, Vector3 } from 'three';
+import {
+  Box3,
+  GridHelper,
+  LineSegments,
+  Mesh,
+  MeshStandardMaterial,
+  PlaneGeometry,
+  Vector3,
+} from 'three';
 import { SKETCH_LAYER } from './layers.js';
 
 export const moveToFit = ({
@@ -62,6 +70,24 @@ export const moveToFit = ({
       grid.userData.tangible = false;
       grid.userData.dressing = true;
       scene.add(grid);
+    }
+    {
+      const plane = new Mesh(
+        new PlaneGeometry(50, 50),
+        new MeshStandardMaterial({
+          color: 0x00ff00,
+          depthWrite: false,
+          transparent: true,
+          opacity: 0.25,
+        })
+      );
+      plane.castShadow = false;
+      plane.receiveShadow = true;
+      plane.position.set(0, 0, 0);
+      plane.layers.set(gridLayer);
+      plane.userData.tangible = false;
+      plane.userData.dressing = true;
+      scene.add(plane);
     }
   }
 
