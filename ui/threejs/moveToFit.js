@@ -1,8 +1,15 @@
-import { Box3, GridHelper, LineSegments, Mesh, Vector3 } from 'three';
+import {
+  Box3,
+  GridHelper,
+  LineSegments,
+  Mesh,
+  MeshStandardMaterial,
+  PlaneGeometry,
+  Vector3,
+} from 'three';
 import { SKETCH_LAYER } from './layers.js';
 
 export const moveToFit = ({
-  datasets,
   view,
   camera,
   controls = [],
@@ -49,9 +56,9 @@ export const moveToFit = ({
       grid.rotation.x = -Math.PI / 2;
       grid.position.set(0, 0, -0.002);
       grid.layers.set(gridLayer);
-      grid.userData.intangible = true;
+      grid.userData.tangible = false;
+      grid.userData.dressing = true;
       scene.add(grid);
-      datasets.push({ mesh: grid });
     }
     {
       const grid = new GridHelper(size * 2, 4, 0x000040, 0x4040f0);
@@ -60,9 +67,27 @@ export const moveToFit = ({
       grid.rotation.x = -Math.PI / 2;
       grid.position.set(0, 0, -0.001);
       grid.layers.set(gridLayer);
-      grid.userData.intangible = true;
+      grid.userData.tangible = false;
+      grid.userData.dressing = true;
       scene.add(grid);
-      datasets.push({ mesh: grid });
+    }
+    {
+      const plane = new Mesh(
+        new PlaneGeometry(50, 50),
+        new MeshStandardMaterial({
+          color: 0x00ff00,
+          depthWrite: false,
+          transparent: true,
+          opacity: 0.25,
+        })
+      );
+      plane.castShadow = false;
+      plane.receiveShadow = true;
+      plane.position.set(0, 0, 0);
+      plane.layers.set(gridLayer);
+      plane.userData.tangible = false;
+      plane.userData.dressing = true;
+      scene.add(plane);
     }
   }
 

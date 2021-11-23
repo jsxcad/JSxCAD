@@ -1057,7 +1057,7 @@ const Group = (...shapes) =>
         shape.toGeometry()
       )
     )
-  );
+  ).tag('editType:Group');
 
 Shape.prototype.Group = Shape.shapeMethod(Group);
 Shape.Group = Group;
@@ -4018,7 +4018,7 @@ const Voxels = (...points) => {
       }
     }
   }
-  return Shape.fromPolygons(polygons);
+  return Shape.fromPolygons(polygons).tag('editType:Voxels');
 };
 
 Shape.prototype.Voxels = Shape.shapeMethod(Voxels);

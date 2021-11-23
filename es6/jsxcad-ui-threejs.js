@@ -28796,10 +28796,139 @@ class DepthTexture extends Texture {
 
 DepthTexture.prototype.isDepthTexture = true;
 
-new Vector3();
-new Vector3();
-new Vector3();
-new Triangle();
+const _v0 = new Vector3();
+const _v1$1 = new Vector3();
+const _normal = new Vector3();
+const _triangle = new Triangle();
+
+class EdgesGeometry extends BufferGeometry {
+
+	constructor( geometry = null, thresholdAngle = 1 ) {
+
+		super();
+		this.type = 'EdgesGeometry';
+
+		this.parameters = {
+			geometry: geometry,
+			thresholdAngle: thresholdAngle
+		};
+
+		if ( geometry !== null ) {
+
+			const precisionPoints = 4;
+			const precision = Math.pow( 10, precisionPoints );
+			const thresholdDot = Math.cos( DEG2RAD * thresholdAngle );
+
+			const indexAttr = geometry.getIndex();
+			const positionAttr = geometry.getAttribute( 'position' );
+			const indexCount = indexAttr ? indexAttr.count : positionAttr.count;
+
+			const indexArr = [ 0, 0, 0 ];
+			const vertKeys = [ 'a', 'b', 'c' ];
+			const hashes = new Array( 3 );
+
+			const edgeData = {};
+			const vertices = [];
+			for ( let i = 0; i < indexCount; i += 3 ) {
+
+				if ( indexAttr ) {
+
+					indexArr[ 0 ] = indexAttr.getX( i );
+					indexArr[ 1 ] = indexAttr.getX( i + 1 );
+					indexArr[ 2 ] = indexAttr.getX( i + 2 );
+
+				} else {
+
+					indexArr[ 0 ] = i;
+					indexArr[ 1 ] = i + 1;
+					indexArr[ 2 ] = i + 2;
+
+				}
+
+				const { a, b, c } = _triangle;
+				a.fromBufferAttribute( positionAttr, indexArr[ 0 ] );
+				b.fromBufferAttribute( positionAttr, indexArr[ 1 ] );
+				c.fromBufferAttribute( positionAttr, indexArr[ 2 ] );
+				_triangle.getNormal( _normal );
+
+				// create hashes for the edge from the vertices
+				hashes[ 0 ] = `${ Math.round( a.x * precision ) },${ Math.round( a.y * precision ) },${ Math.round( a.z * precision ) }`;
+				hashes[ 1 ] = `${ Math.round( b.x * precision ) },${ Math.round( b.y * precision ) },${ Math.round( b.z * precision ) }`;
+				hashes[ 2 ] = `${ Math.round( c.x * precision ) },${ Math.round( c.y * precision ) },${ Math.round( c.z * precision ) }`;
+
+				// skip degenerate triangles
+				if ( hashes[ 0 ] === hashes[ 1 ] || hashes[ 1 ] === hashes[ 2 ] || hashes[ 2 ] === hashes[ 0 ] ) {
+
+					continue;
+
+				}
+
+				// iterate over every edge
+				for ( let j = 0; j < 3; j ++ ) {
+
+					// get the first and next vertex making up the edge
+					const jNext = ( j + 1 ) % 3;
+					const vecHash0 = hashes[ j ];
+					const vecHash1 = hashes[ jNext ];
+					const v0 = _triangle[ vertKeys[ j ] ];
+					const v1 = _triangle[ vertKeys[ jNext ] ];
+
+					const hash = `${ vecHash0 }_${ vecHash1 }`;
+					const reverseHash = `${ vecHash1 }_${ vecHash0 }`;
+
+					if ( reverseHash in edgeData && edgeData[ reverseHash ] ) {
+
+						// if we found a sibling edge add it into the vertex array if
+						// it meets the angle threshold and delete the edge from the map.
+						if ( _normal.dot( edgeData[ reverseHash ].normal ) <= thresholdDot ) {
+
+							vertices.push( v0.x, v0.y, v0.z );
+							vertices.push( v1.x, v1.y, v1.z );
+
+						}
+
+						edgeData[ reverseHash ] = null;
+
+					} else if ( ! ( hash in edgeData ) ) {
+
+						// if we've already got an edge here then skip adding a new one
+						edgeData[ hash ] = {
+
+							index0: indexArr[ j ],
+							index1: indexArr[ jNext ],
+							normal: _normal.clone(),
+
+						};
+
+					}
+
+				}
+
+			}
+
+			// iterate over all remaining, unmatched edges and add them to the vertex array
+			for ( const key in edgeData ) {
+
+				if ( edgeData[ key ] ) {
+
+					const { index0, index1 } = edgeData[ key ];
+					_v0.fromBufferAttribute( positionAttr, index0 );
+					_v1$1.fromBufferAttribute( positionAttr, index1 );
+
+					vertices.push( _v0.x, _v0.y, _v0.z );
+					vertices.push( _v1$1.x, _v1$1.y, _v1$1.z );
+
+				}
+
+			}
+
+			this.setAttribute( 'position', new Float32BufferAttribute( vertices, 3 ) );
+
+		}
+
+	}
+
+}
 
 /**
  * Extensible curve object.
@@ -32632,6 +32761,135 @@ function toJSON( shapes, data ) {
 	}
 
 	return data;
+
+}
+
+class WireframeGeometry extends BufferGeometry {
+
+	constructor( geometry = null ) {
+
+		super();
+		this.type = 'WireframeGeometry';
+
+		this.parameters = {
+			geometry: geometry
+		};
+
+		if ( geometry !== null ) {
+
+			// buffer
+
+			const vertices = [];
+			const edges = new Set();
+
+			// helper variables
+
+			const start = new Vector3();
+			const end = new Vector3();
+
+			if ( geometry.index !== null ) {
+
+				// indexed BufferGeometry
+
+				const position = geometry.attributes.position;
+				const indices = geometry.index;
+				let groups = geometry.groups;
+
+				if ( groups.length === 0 ) {
+
+					groups = [ { start: 0, count: indices.count, materialIndex: 0 } ];
+
+				}
+
+				// create a data structure that contains all eges without duplicates
+
+				for ( let o = 0, ol = groups.length; o < ol; ++ o ) {
+
+					const group = groups[ o ];
+
+					const groupStart = group.start;
+					const groupCount = group.count;
+
+					for ( let i = groupStart, l = ( groupStart + groupCount ); i < l; i += 3 ) {
+
+						for ( let j = 0; j < 3; j ++ ) {
+
+							const index1 = indices.getX( i + j );
+							const index2 = indices.getX( i + ( j + 1 ) % 3 );
+
+							start.fromBufferAttribute( position, index1 );
+							end.fromBufferAttribute( position, index2 );
+
+							if ( isUniqueEdge( start, end, edges ) === true ) {
+
+								vertices.push( start.x, start.y, start.z );
+								vertices.push( end.x, end.y, end.z );
+
+							}
+
+						}
+
+					}
+
+				}
+
+			} else {
+
+				// non-indexed BufferGeometry
+
+				const position = geometry.attributes.position;
+
+				for ( let i = 0, l = ( position.count / 3 ); i < l; i ++ ) {
+
+					for ( let j = 0; j < 3; j ++ ) {
+
+						// three edges per triangle, an edge is represented as (index1, index2)
+						// e.g. the first triangle has the following edges: (0,1),(1,2),(2,0)
+
+						const index1 = 3 * i + j;
+						const index2 = 3 * i + ( ( j + 1 ) % 3 );
+
+						start.fromBufferAttribute( position, index1 );
+						end.fromBufferAttribute( position, index2 );
+
+						if ( isUniqueEdge( start, end, edges ) === true ) {
+
+							vertices.push( start.x, start.y, start.z );
+							vertices.push( end.x, end.y, end.z );
+
+						}
+
+					}
+
+				}
+
+			}
+
+			// build geometry
+
+			this.setAttribute( 'position', new Float32BufferAttribute( vertices, 3 ) );
+
+		}
+
+	}
+
+}
+
+function isUniqueEdge( start, end, edges ) {
+
+	const hash1 = `${start.x},${start.y},${start.z}-${end.x},${end.y},${end.z}`;
+	const hash2 = `${end.x},${end.y},${end.z}-${start.x},${start.y},${start.z}`; // coincident edge
+
+	if ( edges.has( hash1 ) === true || edges.has( hash2 ) === true ) {
+
+		return false;
+
+	} else {
+
+		edges.add( hash1, hash2 );
+		return true;
+
+	}
 
 }
 
@@ -42138,6 +42396,7 @@ const buildScene = ({
   camera.position.set(...position);
   camera.up.set(...up);
   camera.lookAt(...target);
+  camera.userData.dressing = true;
 
   const scene = new Scene();
   scene.add(camera);
@@ -42150,12 +42409,29 @@ const buildScene = ({
 
   var hemiLight = new HemisphereLight(0xffffff, 0x444444, 0.5);
   hemiLight.position.set(0, 0, 300);
+  hemiLight.userData.dressing = true;
   scene.add(hemiLight);
 
   const light = new DirectionalLight(0xffffff, 0.5);
+  light.castShadow = true;
   light.position.set(1, 1, 1);
   light.layers.set(0);
+  light.userData.dressing = true;
   camera.add(light);
+
+  {
+    // Add spot light for shadows.
+    const spotLight = new SpotLight(0xdddddd, 0.7);
+    spotLight.position.set(20, 20, 20);
+    spotLight.castShadow = true;
+    spotLight.receiveShadow = true;
+    spotLight.shadowDarkness = 0.15;
+    spotLight.shadowCameraNear = 0.5;
+    spotLight.shadow.mapSize.width = 1024 * 2;
+    spotLight.shadow.mapSize.height = 1024 * 2;
+    spotLight.userData.dressing = true;
+    scene.add(spotLight);
+  }
 
   if (renderer === undefined) {
     renderer = new WebGLRenderer({
@@ -42172,6 +42448,9 @@ const buildScene = ({
     renderer.setPixelRatio(window.devicePixelRatio);
     renderer.domElement.style =
       'padding-left: 5px; padding-right: 5px; padding-bottom: 5px; position: absolute; z-index: 1';
+
+    renderer.shadowMap.enabled = true;
+    // renderer.shadowMapType = BasicShadowMap;
   }
   return { camera, canvas: renderer.domElement, renderer, scene };
 };
@@ -42180,7 +42459,6 @@ const GEOMETRY_LAYER = 0;
 const SKETCH_LAYER = 1;
 
 const _plane = new Plane();
-const _raycaster = new Raycaster();
 
 const _pointer = new Vector2();
 const _offset = new Vector3();
@@ -42189,197 +42467,168 @@ const _worldPosition = new Vector3();
 const _inverseMatrix = new Matrix4();
 
 class DragControls extends EventDispatcher {
+  constructor(_objects, _camera, _domElement, _raycaster = new Raycaster()) {
+    super();
 
-	constructor( _objects, _camera, _domElement ) {
+    _domElement.style.touchAction = 'none'; // disable touch scroll
 
-		super();
+    let _selected = null;
+    let _hovered = null;
 
-		_domElement.style.touchAction = 'none'; // disable touch scroll
+    const _intersections = [];
 
-		let _selected = null, _hovered = null;
+    //
 
-		const _intersections = [];
+    const scope = this;
 
-		//
+    function activate() {
+      _domElement.addEventListener('pointermove', onPointerMove);
+      _domElement.addEventListener('pointerdown', onPointerDown);
+      _domElement.addEventListener('pointerup', onPointerCancel);
+      _domElement.addEventListener('pointerleave', onPointerCancel);
+    }
 
-		const scope = this;
+    function deactivate() {
+      _domElement.removeEventListener('pointermove', onPointerMove);
+      _domElement.removeEventListener('pointerdown', onPointerDown);
+      _domElement.removeEventListener('pointerup', onPointerCancel);
+      _domElement.removeEventListener('pointerleave', onPointerCancel);
 
-		function activate() {
+      _domElement.style.cursor = '';
+    }
 
-			_domElement.addEventListener( 'pointermove', onPointerMove );
-			_domElement.addEventListener( 'pointerdown', onPointerDown );
-			_domElement.addEventListener( 'pointerup', onPointerCancel );
-			_domElement.addEventListener( 'pointerleave', onPointerCancel );
+    function dispose() {
+      deactivate();
+    }
 
-		}
+    function getObjects() {
+      return _objects;
+    }
 
-		function deactivate() {
+    function onPointerMove(event) {
+      if (scope.enabled === false) return;
 
-			_domElement.removeEventListener( 'pointermove', onPointerMove );
-			_domElement.removeEventListener( 'pointerdown', onPointerDown );
-			_domElement.removeEventListener( 'pointerup', onPointerCancel );
-			_domElement.removeEventListener( 'pointerleave', onPointerCancel );
+      updatePointer(event);
 
-			_domElement.style.cursor = '';
+      _raycaster.setFromCamera(_pointer, _camera);
 
-		}
+      if (_selected) {
+        if (_raycaster.ray.intersectPlane(_plane, _intersection)) {
+          _selected.position.copy(
+            _intersection.sub(_offset).applyMatrix4(_inverseMatrix)
+          );
+        }
 
-		function dispose() {
+        scope.dispatchEvent({ type: 'drag', object: _selected });
 
-			deactivate();
+        return;
+      }
 
-		}
+      // hover support
 
-		function getObjects() {
+      if (event.pointerType === 'mouse' || event.pointerType === 'pen') {
+        _intersections.length = 0;
 
-			return _objects;
+        _raycaster.setFromCamera(_pointer, _camera);
+        _raycaster.intersectObjects(_objects, true, _intersections);
 
-		}
+        if (_intersections.length > 0) {
+          const object = _intersections[0].object;
 
-		function onPointerMove( event ) {
+          _plane.setFromNormalAndCoplanarPoint(
+            _camera.getWorldDirection(_plane.normal),
+            _worldPosition.setFromMatrixPosition(object.matrixWorld)
+          );
 
-			if ( scope.enabled === false ) return;
+          if (_hovered !== object && _hovered !== null) {
+            scope.dispatchEvent({ type: 'hoveroff', object: _hovered });
 
-			updatePointer( event );
+            _domElement.style.cursor = 'auto';
+            _hovered = null;
+          }
 
-			_raycaster.setFromCamera( _pointer, _camera );
+          if (_hovered !== object) {
+            scope.dispatchEvent({ type: 'hoveron', object: object });
 
-			if ( _selected ) {
+            _domElement.style.cursor = 'pointer';
+            _hovered = object;
+          }
+        } else {
+          if (_hovered !== null) {
+            scope.dispatchEvent({ type: 'hoveroff', object: _hovered });
 
-				if ( _raycaster.ray.intersectPlane( _plane, _intersection ) ) {
+            _domElement.style.cursor = 'auto';
+            _hovered = null;
+          }
+        }
+      }
+    }
 
-					_selected.position.copy( _intersection.sub( _offset ).applyMatrix4( _inverseMatrix ) );
+    function onPointerDown(event) {
+      if (scope.enabled === false) return;
 
-				}
+      updatePointer(event);
 
-				scope.dispatchEvent( { type: 'drag', object: _selected } );
+      _intersections.length = 0;
 
-				return;
+      _raycaster.setFromCamera(_pointer, _camera);
+      _raycaster.intersectObjects(_objects, true, _intersections);
 
-			}
+      if (_intersections.length > 0) {
+        _selected =
+          scope.transformGroup === true
+            ? _objects[0]
+            : _intersections[0].object;
 
-			// hover support
+        _plane.setFromNormalAndCoplanarPoint(
+          _camera.getWorldDirection(_plane.normal),
+          _worldPosition.setFromMatrixPosition(_selected.matrixWorld)
+        );
 
-			if ( event.pointerType === 'mouse' || event.pointerType === 'pen' ) {
+        if (_raycaster.ray.intersectPlane(_plane, _intersection)) {
+          _inverseMatrix.copy(_selected.parent.matrixWorld).invert();
+          _offset
+            .copy(_intersection)
+            .sub(_worldPosition.setFromMatrixPosition(_selected.matrixWorld));
+        }
 
-				_intersections.length = 0;
+        _domElement.style.cursor = 'move';
 
-				_raycaster.setFromCamera( _pointer, _camera );
-				_raycaster.intersectObjects( _objects, true, _intersections );
+        scope.dispatchEvent({ type: 'dragstart', object: _selected });
+      }
+    }
 
-				if ( _intersections.length > 0 ) {
+    function onPointerCancel() {
+      if (scope.enabled === false) return;
 
-					const object = _intersections[ 0 ].object;
+      if (_selected) {
+        scope.dispatchEvent({ type: 'dragend', object: _selected });
 
-					_plane.setFromNormalAndCoplanarPoint( _camera.getWorldDirection( _plane.normal ), _worldPosition.setFromMatrixPosition( object.matrixWorld ) );
+        _selected = null;
+      }
 
-					if ( _hovered !== object && _hovered !== null ) {
+      _domElement.style.cursor = _hovered ? 'pointer' : 'auto';
+    }
 
-						scope.dispatchEvent( { type: 'hoveroff', object: _hovered } );
+    function updatePointer(event) {
+      const rect = _domElement.getBoundingClientRect();
 
-						_domElement.style.cursor = 'auto';
-						_hovered = null;
+      _pointer.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+      _pointer.y = (-(event.clientY - rect.top) / rect.height) * 2 + 1;
+    }
 
-					}
+    activate();
 
-					if ( _hovered !== object ) {
+    // API
 
-						scope.dispatchEvent( { type: 'hoveron', object: object } );
+    this.enabled = true;
+    this.transformGroup = false;
 
-						_domElement.style.cursor = 'pointer';
-						_hovered = object;
-
-					}
-
-				} else {
-
-					if ( _hovered !== null ) {
-
-						scope.dispatchEvent( { type: 'hoveroff', object: _hovered } );
-
-						_domElement.style.cursor = 'auto';
-						_hovered = null;
-
-					}
-
-				}
-
-			}
-
-		}
-
-		function onPointerDown( event ) {
-
-			if ( scope.enabled === false ) return;
-
-			updatePointer( event );
-
-			_intersections.length = 0;
-
-			_raycaster.setFromCamera( _pointer, _camera );
-			_raycaster.intersectObjects( _objects, true, _intersections );
-
-			if ( _intersections.length > 0 ) {
-
-				_selected = ( scope.transformGroup === true ) ? _objects[ 0 ] : _intersections[ 0 ].object;
-
-				_plane.setFromNormalAndCoplanarPoint( _camera.getWorldDirection( _plane.normal ), _worldPosition.setFromMatrixPosition( _selected.matrixWorld ) );
-
-				if ( _raycaster.ray.intersectPlane( _plane, _intersection ) ) {
-
-					_inverseMatrix.copy( _selected.parent.matrixWorld ).invert();
-					_offset.copy( _intersection ).sub( _worldPosition.setFromMatrixPosition( _selected.matrixWorld ) );
-
-				}
-
-				_domElement.style.cursor = 'move';
-
-				scope.dispatchEvent( { type: 'dragstart', object: _selected } );
-
-			}
-
-
-		}
-
-		function onPointerCancel() {
-
-			if ( scope.enabled === false ) return;
-
-			if ( _selected ) {
-
-				scope.dispatchEvent( { type: 'dragend', object: _selected } );
-
-				_selected = null;
-
-			}
-
-			_domElement.style.cursor = _hovered ? 'pointer' : 'auto';
-
-		}
-
-		function updatePointer( event ) {
-
-			const rect = _domElement.getBoundingClientRect();
-
-			_pointer.x = ( event.clientX - rect.left ) / rect.width * 2 - 1;
-			_pointer.y = - ( event.clientY - rect.top ) / rect.height * 2 + 1;
-
-		}
-
-		activate();
-
-		// API
-
-		this.enabled = true;
-		this.transformGroup = false;
-
-		this.activate = activate;
-		this.deactivate = deactivate;
-		this.dispose = dispose;
-		this.getObjects = getObjects;
-
-	}
-
+    this.activate = activate;
+    this.deactivate = deactivate;
+    this.dispose = dispose;
+    this.getObjects = getObjects;
+  }
 }
 
 const _changeEvent = { type: 'change' };
@@ -43267,16 +43516,6 @@ const buildMeshMaterial = async (definitions, tags) => {
   return new MeshNormalMaterial();
 };
 
-const toName = (geometry) => {
-  if (geometry.tags !== undefined && geometry.tags.length >= 1) {
-    for (const tag of geometry.tags) {
-      if (tag.startsWith('user/')) {
-        return tag.substring(5);
-      }
-    }
-  }
-};
-
 // FIX: Found it somewhere -- attribute.
 const applyBoxUVImpl = (geom, transformMatrix, bbox, bboxMaxSize) => {
   const coords = [];
@@ -43440,13 +43679,14 @@ const updateUserData = (geometry, userData) => {
     for (const tag of geometry.tags) {
       if (tag.startsWith('editId:')) {
         userData.editId = tag.substring(7);
+      } else if (tag.startsWith('editType:')) {
+        userData.editType = tag.substring(9);
       }
     }
   }
 };
 
 const buildMeshes = async ({
-  datasets,
   geometry,
   scene,
   layer = GEOMETRY_LAYER,
@@ -43457,6 +43697,7 @@ const buildMeshes = async ({
     return;
   }
   const { tags = [] } = geometry;
+  let mesh;
   switch (geometry.type) {
     case 'displayGeometry':
     case 'group':
@@ -43469,7 +43710,6 @@ const buildMeshes = async ({
       break;
     case 'segments': {
       const { segments } = geometry;
-      const dataset = {};
       const bufferGeometry = new BufferGeometry();
       const material = new LineBasicMaterial({
         color: new Color(setColor(definitions, tags, {}, [0, 0, 0]).color),
@@ -43485,13 +43725,10 @@ const buildMeshes = async ({
         'position',
         new Float32BufferAttribute(positions, 3)
       );
-      dataset.mesh = new LineSegments(bufferGeometry, material);
-      dataset.mesh.layers.set(layer);
-      updateUserData(geometry, dataset.mesh.userData);
-      dataset.mesh.userData.intangible = true;
-      dataset.name = toName(geometry);
-      scene.add(dataset.mesh);
-      datasets.push(dataset);
+      mesh = new LineSegments(bufferGeometry, material);
+      mesh.layers.set(layer);
+      updateUserData(geometry, mesh.userData);
+      scene.add(mesh);
       break;
     }
     case 'paths': {
@@ -43504,7 +43741,6 @@ const buildMeshes = async ({
         transparent = true;
       }
       const { paths } = geometry;
-      const dataset = {};
       const bufferGeometry = new BufferGeometry();
       const material = new LineBasicMaterial({
         color: 0xffffff,
@@ -43515,7 +43751,6 @@ const buildMeshes = async ({
       const color = new Color(setColor(definitions, tags, {}, [0, 0, 0]).color);
       const pathColors = [];
       const positions = [];
-      const index = [];
       for (const path of paths) {
         const entry = { start: Math.floor(positions.length / 3), length: 0 };
         let last = path.length - 1;
@@ -43548,9 +43783,7 @@ const buildMeshes = async ({
           positions.push(aX, aY, aZ, bX, bY, bZ);
           entry.length += 2;
         }
-        if (entry.length > 0) {
-          index.push(entry);
-        }
+        if (entry.length > 0) ;
       }
       bufferGeometry.setAttribute(
         'position',
@@ -43560,38 +43793,14 @@ const buildMeshes = async ({
         'color',
         new Float32BufferAttribute(pathColors, 4)
       );
-      dataset.mesh = new LineSegments(bufferGeometry, material);
-      dataset.mesh.layers.set(layer);
-      updateUserData(geometry, dataset.mesh.userData);
-      dataset.mesh.userData.intangible = true;
-      dataset.name = toName(geometry);
-      scene.add(dataset.mesh);
-      datasets.push(dataset);
-      if (render && tags.includes('display/trace')) {
-        let current = 0;
-        let extent = 0;
-        const animate = () => {
-          if (dataset.mesh) {
-            const bufferGeometry = dataset.mesh.geometry;
-            extent += index[current].length;
-            bufferGeometry.setDrawRange(0, (extent += index[current].length));
-            bufferGeometry.attributes.position.needsUpdate = true;
-            render();
-            current += 1;
-            if (current >= index.length) {
-              current = 0;
-              extent = 0;
-            }
-            setTimeout(animate, 100);
-          }
-        };
-        animate();
-      }
+      mesh = new LineSegments(bufferGeometry, material);
+      mesh.layers.set(layer);
+      updateUserData(geometry, mesh.userData);
+      scene.add(mesh);
       break;
     }
     case 'points': {
       const { points } = geometry;
-      const dataset = {};
       const threeGeometry = new BufferGeometry();
       const material = new PointsMaterial({
         color: setColor(definitions, tags, {}, [0, 0, 0]).color,
@@ -43605,12 +43814,10 @@ const buildMeshes = async ({
         'position',
         new Float32BufferAttribute(positions, 3)
       );
-      dataset.mesh = new Points(threeGeometry, material);
-      dataset.mesh.layers.set(layer);
-      updateUserData(geometry, dataset.mesh.userData);
-      dataset.name = toName(geometry);
-      scene.add(dataset.mesh);
-      datasets.push(dataset);
+      mesh = new Points(threeGeometry, material);
+      mesh.layers.set(layer);
+      updateUserData(geometry, mesh.userData);
+      scene.add(mesh);
       break;
     }
     case 'triangles': {
@@ -43633,7 +43840,6 @@ const buildMeshes = async ({
 
       const { triangles } = geometry;
       const { positions, normals } = prepareTriangles(triangles);
-      const dataset = {};
       const bufferGeometry = new BufferGeometry();
       bufferGeometry.setAttribute(
         'position',
@@ -43644,18 +43850,43 @@ const buildMeshes = async ({
         new Float32BufferAttribute(normals, 3)
       );
       applyBoxUV(bufferGeometry);
-      const material = await buildMeshMaterial(definitions, tags);
-      if (tags.includes('type:void')) {
-        material.transparent = true;
-        material.depthWrite = false;
-        material.opacity *= 0.5;
+
+      if (tags.includes('show:skin')) {
+        const material = await buildMeshMaterial(definitions, tags);
+        if (tags.includes('type:void')) {
+          material.transparent = true;
+          material.depthWrite = false;
+          material.opacity *= 0.5;
+        }
+        mesh = new Mesh(bufferGeometry, material);
+        mesh.castShadow = true;
+        mesh.receiveShadow = true;
+        mesh.layers.set(layer);
+        updateUserData(geometry, mesh.userData);
+        mesh.userData.tangible = true;
+      } else {
+        mesh = new Group();
       }
-      dataset.mesh = new Mesh(bufferGeometry, material);
-      dataset.mesh.layers.set(layer);
-      updateUserData(geometry, dataset.mesh.userData);
-      dataset.name = toName(geometry);
-      scene.add(dataset.mesh);
-      datasets.push(dataset);
+
+      if (tags.includes('show:outline')) {
+        const edges = new EdgesGeometry(bufferGeometry);
+        const outline = new LineSegments(
+          edges,
+          new LineBasicMaterial({ color: 0x000000 })
+        );
+        mesh.add(outline);
+      }
+
+      if (tags.includes('show:wireframe')) {
+        const edges = new WireframeGeometry(bufferGeometry);
+        const outline = new LineSegments(
+          edges,
+          new LineBasicMaterial({ color: 0x000000 })
+        );
+        mesh.add(outline);
+      }
+
+      scene.add(mesh);
       break;
     }
     default:
@@ -43663,11 +43894,14 @@ const buildMeshes = async ({
   }
 
   if (geometry.content) {
+    if (mesh === undefined) {
+      mesh = new Group();
+      scene.add(mesh);
+    }
     for (const content of geometry.content) {
       await buildMeshes({
-        datasets,
         geometry: content,
-        scene,
+        scene: mesh,
         layer,
         render,
         definitions,
@@ -43676,8 +43910,35 @@ const buildMeshes = async ({
   }
 };
 
+let raycaster = new Raycaster();
+
+const getRaycaster = () => raycaster;
+
+const raycast = (x, y, camera, objects) => {
+  const raycaster = getRaycaster();
+  const position = new Vector2(x, y);
+  raycaster.setFromCamera(position, camera);
+  const intersects = raycaster.intersectObjects(objects, true);
+
+  for (const { face, object, point } of intersects) {
+    if (!object.userData.tangible) {
+      continue;
+    }
+    if (!face) {
+      break;
+    }
+    const { normal } = face;
+    const ray = [
+      [point.x, point.y, point.z],
+      [normal.x, normal.y, normal.z],
+    ];
+    return { ray, object };
+  }
+
+  return {};
+};
+
 const moveToFit = ({
-  datasets,
   view,
   camera,
   controls = [],
@@ -43724,9 +43985,9 @@ const moveToFit = ({
       grid.rotation.x = -Math.PI / 2;
       grid.position.set(0, 0, -0.002);
       grid.layers.set(gridLayer);
-      grid.userData.intangible = true;
+      grid.userData.tangible = false;
+      grid.userData.dressing = true;
       scene.add(grid);
-      datasets.push({ mesh: grid });
     }
     {
       const grid = new GridHelper(size * 2, 4, 0x000040, 0x4040f0);
@@ -43735,9 +43996,27 @@ const moveToFit = ({
       grid.rotation.x = -Math.PI / 2;
       grid.position.set(0, 0, -0.001);
       grid.layers.set(gridLayer);
-      grid.userData.intangible = true;
+      grid.userData.tangible = false;
+      grid.userData.dressing = true;
       scene.add(grid);
-      datasets.push({ mesh: grid });
+    }
+    {
+      const plane = new Mesh(
+        new PlaneGeometry(50, 50),
+        new MeshStandardMaterial({
+          color: 0x00ff00,
+          depthWrite: false,
+          transparent: true,
+          opacity: 0.25,
+        })
+      );
+      plane.castShadow = false;
+      plane.receiveShadow = true;
+      plane.position.set(0, 0, 0);
+      plane.layers.set(gridLayer);
+      plane.userData.tangible = false;
+      plane.userData.dressing = true;
+      scene.add(plane);
     }
   }
 
@@ -43806,13 +44085,19 @@ const buildTrackballControls = ({
 
 const buildDragControls = ({
   camera,
+  draggableObjects,
   endUpdating,
   startUpdating,
-  tangibleObjects,
+  raycaster,
   trackballControls,
   viewerElement,
 }) => {
-  const dragControls = new DragControls(tangibleObjects, camera, viewerElement);
+  const dragControls = new DragControls(
+    draggableObjects,
+    camera,
+    viewerElement,
+    raycaster
+  );
   dragControls.addEventListener('dragstart', () => {
     trackballControls.enabled = false;
     startUpdating();
@@ -43832,12 +44117,11 @@ const orbitDisplay = async (
     canvas,
     withAxes = false,
     withGrid = false,
-    gridLayer = SKETCH_LAYER,
+    gridLayer = GEOMETRY_LAYER,
     definitions,
   } = {},
   page
 ) => {
-  let datasets = [];
   const width = page.offsetWidth;
   const height = page.offsetHeight;
 
@@ -43919,16 +44203,18 @@ const orbitDisplay = async (
     viewerElement: displayCanvas,
   }));
 
-  const tangibleObjects = scene.children.filter(
-    (item) => !item.userData.intangible
-  );
+  const draggableObjects = [];
+  const raycaster = getRaycaster();
+  raycaster.layers.enable(GEOMETRY_LAYER);
+  raycaster.layers.enable(SKETCH_LAYER);
 
   const { dragControls } = buildDragControls({
     camera,
+    draggableObjects,
     endUpdating,
+    raycaster,
     render,
     startUpdating,
-    tangibleObjects,
     trackballControls,
     view,
     viewerElement: displayCanvas,
@@ -43946,50 +44232,35 @@ const orbitDisplay = async (
     render();
   }).observe(page);
 
-  const updateGeometry = async (
-    geometry,
-    { withGrid = true, fit = true } = {}
-  ) => {
-    // Delete any previous dataset in the window.
-    for (const { mesh } of datasets) {
-      scene.remove(mesh);
-    }
+  let moveToFitDone = false;
 
+  const updateGeometry = async (geometry, { fit = true } = {}) => {
     for (const object of [...scene.children]) {
-      if (object.userData.ephemeral) {
+      if (!object.userData.dressing) {
         scene.remove(object);
       }
     }
 
     view = { ...view, fit };
 
-    // Build new datasets from the written data, and display them.
-    datasets = [];
-
     await buildMeshes({
-      datasets,
       geometry,
       scene,
       render,
       definitions,
     });
 
-    moveToFit({
-      datasets,
-      view,
-      camera,
-      controls: [trackballControls],
-      scene,
-      withGrid,
-      gridLayer,
-    });
-
-    // Update the tangible objects in place, so that dragControls notices.
-    tangibleObjects.splice(
-      0,
-      tangibleObjects.length,
-      ...scene.children.filter((item) => !item.userData.intangible)
-    );
+    if (!moveToFitDone) {
+      moveToFitDone = true;
+      moveToFit({
+        view,
+        camera,
+        controls: [trackballControls],
+        scene,
+        withGrid,
+        gridLayer,
+      });
+    }
 
     render();
   };
@@ -44005,9 +44276,9 @@ const orbitDisplay = async (
     camera,
     canvas: displayCanvas,
     dragControls,
+    draggableObjects,
     render,
     scene,
-    tangibleObjects,
     trackballControls,
     updateGeometry,
   };
@@ -44151,26 +44422,109 @@ const orbitView = async (
   return container;
 };
 
-let raycaster = new Raycaster();
-
-const raycast = (x, y, camera, tangibleObjects) => {
-  if (!raycaster) {
-    raycaster = new Raycaster();
-  }
-  const position = new Vector2(x, y);
-  raycaster.setFromCamera(position, camera);
-  const intersects = raycaster.intersectObjects(tangibleObjects);
-
-  for (const { face, object, point } of intersects) {
-    const { normal } = face;
-    const ray = [
-      [point.x, point.y, point.z],
-      [normal.x, normal.y, normal.z],
-    ];
-    return { ray, object };
-  }
-
-  return {};
+const addVoxel = ({ editId, point, scene, threejsMesh }) => {
+  const box = new BoxGeometry(1, 1, 1);
+  const mesh = new Mesh(box, threejsMesh.material);
+  mesh.userData.editId = editId;
+  mesh.userData.ephemeral = true;
+  mesh.userData.tangible = true;
+  mesh.position.set(...point);
+  scene.add(mesh);
 };
 
-export { buildMeshes, buildScene, createResizer, dataUrl, image, orbitDisplay, orbitView, raycast, staticDisplay, staticView };
+const addAnchor = ({
+  draggableObjects,
+  color,
+  editId,
+  position = [0, 0, 0],
+  object,
+  anchorType,
+}) => {
+  const canvas = document.createElement('canvas');
+  canvas.width = 10;
+  canvas.height = 10;
+  const c = canvas.getContext('2d');
+  // c.strokeStyle = 'rgba(255, 255, 51)';
+  // c.fillStyle = 'rgba(0, 0, 0)';
+  c.strokeStyle = 'black';
+  c.fillStyle = color;
+  c.lineWidth = 1;
+  c.beginPath();
+  c.rect(0, 0, 10, 10);
+  c.closePath();
+  c.fill();
+  c.stroke();
+  const texture = new Texture(canvas);
+  texture.needsUpdate = true;
+  // sizeAttenuation: false means that the sprite will have constant size regardless of distance.
+  const spriteMaterial = new SpriteMaterial({
+    map: texture,
+    sizeAttenuation: false,
+  });
+  const sprite = new Sprite(spriteMaterial);
+  // This determines the hitbox size, regardless of what is displayed.
+  sprite.scale.set(0.01, 0.01, 0.01);
+  sprite.userData.editId = editId;
+  sprite.userData.anchorType = anchorType;
+  sprite.userData.tangible = true;
+  // Regenerate on recompute.
+  sprite.userData.ephemeral = true;
+  // Display on the overlay.
+  sprite.layers.set(1);
+  object.add(sprite);
+  // Anchors can be dragged.
+  draggableObjects.push(sprite);
+  // These should be tangible, so that they block clicks.
+  sprite.position.set(...position);
+  return sprite;
+};
+
+const addAnchors = ({
+  draggableObjects,
+  editId,
+  editType,
+  object,
+  position,
+  ray,
+  scene,
+  sourceLocation,
+  type,
+  target,
+  threejsMesh,
+}) => {
+  const offset = 0.05;
+  const zoom = position.distanceTo(target);
+  const at = new Vector3(0, 0, 0);
+  const to = new Vector3(1, 0, 0);
+  const up = new Vector3(0, 0, 1);
+  object.localToWorld(at);
+  object.localToWorld(to);
+  object.up.copy(up);
+  object.userData.anchor = { at, to, up };
+  addAnchor({
+    anchorType: 'at',
+    color: 'yellow',
+    draggableObjects,
+    editId,
+    position: [0, 0, 0],
+    object,
+  });
+  addAnchor({
+    anchorType: 'up',
+    color: 'green',
+    draggableObjects,
+    editId,
+    position: [0, offset * zoom, 0],
+    object,
+  });
+  addAnchor({
+    anchorType: 'to',
+    color: 'red',
+    draggableObjects,
+    editId,
+    position: [0, 0, offset * zoom],
+    object,
+  });
+};
+
+export { addAnchors, addVoxel, buildMeshes, buildScene, createResizer, dataUrl, image, orbitDisplay, orbitView, raycast, staticDisplay, staticView };

@@ -12,7 +12,7 @@ export const Group = (...shapes) =>
         shape.toGeometry()
       )
     )
-  );
+  ).tag('editType:Group');
 
 Shape.prototype.Group = Shape.shapeMethod(Group);
 Shape.Group = Group;

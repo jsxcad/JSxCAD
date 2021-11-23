@@ -2,7 +2,7 @@
 
 import * as PropTypes from 'prop-types';
 
-import { BoxGeometry, Mesh } from 'three';
+import { addAnchors, addVoxel, dragAnchor } from '@jsxcad/ui-threejs';
 
 import {
   askService,
@@ -611,56 +611,91 @@ class App extends React.Component {
 
     this.View = {};
 
+    this.View.dragEnd = async ({ object }) => {
+      if (this.View.updating) {
+        return;
+      }
+      try {
+        this.View.updating = true;
+        dragAnchor({ object });
+      } finally {
+        this.View.updating = false;
+      }
+    };
+
     this.View.click = async ({
+      draggableObjects,
       editId,
+      editType,
+      object,
+      position,
       ray,
       scene,
       sourceLocation,
       type,
-      tangibleObjects,
+      target,
       threejsMesh,
     }) => {
-      if (this.View.clicking) {
+      if (this.View.updating) {
         return;
       }
       try {
-        this.View.clicking = true;
-        const { path } = sourceLocation;
-        const { [`NotebookText/${path}`]: NotebookText } = this.state;
-        const request = { editId };
-        const [point, normal] = ray;
-        switch (type) {
-          case 'left':
-            request.pointToAppend = [
-              point[0] + normal[0] / 2,
-              point[1] + normal[1] / 2,
-              point[2] + normal[2] / 2,
-            ].map((v) => Math.round(v));
-            break;
-          case 'right':
-            request.pointToRemove = [
-              point[0] - normal[0] / 2,
-              point[1] - normal[1] / 2,
-              point[2] - normal[2] / 2,
-            ].map((v) => Math.round(v));
-            break;
+        this.View.updating = true;
+        switch (editType) {
+          case 'Group':
+            addAnchors({
+              draggableObjects,
+              editId,
+              editType,
+              object,
+              position,
+              ray,
+              scene,
+              sourceLocation,
+              type,
+              target,
+              threejsMesh,
+            });
+            return;
+          case 'Voxels': {
+            const { path } = sourceLocation;
+            const { [`NotebookText/${path}`]: NotebookText } = this.state;
+            const request = { editId };
+            const [point, normal] = ray;
+            switch (type) {
+              case 'left':
+                request.pointToAppend = [
+                  point[0] + normal[0] / 2,
+                  point[1] + normal[1] / 2,
+                  point[2] + normal[2] / 2,
+                ].map((v) => Math.round(v));
+                break;
+              case 'right':
+                request.pointToRemove = [
+                  point[0] - normal[0] / 2,
+                  point[1] - normal[1] / 2,
+                  point[2] - normal[2] / 2,
+                ].map((v) => Math.round(v));
+                break;
+            }
+            const newNotebookText = rewrite(NotebookText, request);
+            await this.updateState({
+              [`NotebookText/${path}`]: newNotebookText,
+            });
+            // Add an voxel to the display to temporarily reflect what we added to the source.
+            if (request.pointToAppend) {
+              addVoxel({
+                editId,
+                point: request.pointToAppend,
+                scene,
+                threejsMesh,
+              });
+            }
+            await this.Notebook.run(path);
+          }
         }
-        const newNotebookText = rewrite(NotebookText, request);
-        await this.updateState({ [`NotebookText/${path}`]: newNotebookText });
-        // Add an voxel to the display to temporarily reflect what we added to the source.
-        if (request.pointToAppend) {
-          // Additions can be done as previews.
-          const box = new BoxGeometry(1, 1, 1);
-          const mesh = new Mesh(box, threejsMesh.material);
-          mesh.userData.editId = editId;
-          mesh.userData.ephemeral = true;
-          mesh.position.set(...request.pointToAppend);
-          scene.add(mesh);
-          tangibleObjects.push(mesh);
-        }
-        await this.Notebook.run(path);
       } finally {
-        this.View.clicking = false;
+        this.View.updating = false;
       }
     };
 
@@ -885,6 +920,7 @@ class App extends React.Component {
               sourceLocation={View.sourceLocation}
               workspace={workspace}
               onClick={this.View.click}
+              onDragEnd={this.View.dragEnd}
               onMove={this.View.move}
               trackballState={trackballState}
             />
