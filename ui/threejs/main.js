@@ -6,4 +6,4 @@ export { orbitDisplay } from './orbitDisplay.js';
 export { raycast } from './raycast.js';
 export { staticDisplay } from './staticDisplay.js';
 export { addVoxel } from './voxel.js';
-export { addAnchors } from './anchor.js';
+export { addAnchors, dragAnchor } from './anchor.js';

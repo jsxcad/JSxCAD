@@ -44527,4 +44527,49 @@ const addAnchors = ({
   });
 };
 
-export { addAnchors, addVoxel, buildMeshes, buildScene, createResizer, dataUrl, image, orbitDisplay, orbitView, raycast, staticDisplay, staticView };
+const dragAnchor = ({ object }) => {
+  const { parent, userData } = object;
+  const { anchorType } = userData;
+  switch (anchorType) {
+    case 'at': {
+      // Get the anchor's position in the parent's frame of reference.
+      const anchor = new Vector3();
+      object.getWorldPosition(anchor);
+      parent.position.copy(anchor);
+      parent.userData.anchor.at = anchor;
+      object.position.set(0, 0, 0);
+      break;
+    }
+    case 'to': {
+      // Get the anchor's position in the parent's frame of reference.
+      const anchor = new Vector3();
+      anchor.copy(object.position);
+      object.localToWorld(anchor);
+      parent.lookAt(anchor);
+      // And reset the offset.
+      parent.userData.anchor.to = anchor;
+      object.position.set(0, 0, 1);
+      break;
+    }
+    // Orthogonal to the [at, to] edge.
+    case 'up': {
+      // Get the anchor's position in the parent's frame of reference.
+      const anchor = new Vector3();
+      anchor.copy(object.position);
+      object.localToWorld(anchor);
+      const position = new Vector3();
+      parent.getWorldPosition(position);
+      anchor.sub(position);
+      // parent.worldToLocal(anchor);
+      parent.up.copy(anchor);
+      console.log(JSON.stringify(anchor));
+      parent.userData.anchor.up = anchor;
+      parent.lookAt(parent.userData.anchor.to);
+      // And reset the offset.
+      object.position.set(0, 1, 0);
+      break;
+    }
+  }
+};
+
+export { addAnchors, addVoxel, buildMeshes, buildScene, createResizer, dataUrl, dragAnchor, image, orbitDisplay, orbitView, raycast, staticDisplay, staticView };
