@@ -35,8 +35,7 @@
     "prop-types": "^15.7.2",
     "react-ace": "^9.5.0",
     "react-bootstrap": "^1.0.0-beta.14",
-    "flexlayout-react": "^0.5.20",
-    "three": "^0.134.0"
+    "flexlayout-react": "^0.5.20"
   },
   "devDependencies": {
     "@babel/core": "^7.7.4",
