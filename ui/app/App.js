@@ -2,7 +2,12 @@
 
 import * as PropTypes from 'prop-types';
 
-import { addAnchors, addVoxel, dragAnchor } from '@jsxcad/ui-threejs';
+import {
+  addAnchors,
+  addVoxel,
+  dragAnchor,
+  getOrigin,
+} from '@jsxcad/ui-threejs';
 
 import {
   askService,
@@ -624,12 +629,15 @@ class App extends React.Component {
     };
 
     this.View.click = async ({
+      camera,
       draggableObjects,
       editId,
       editType,
       object,
+      trackballControls,
       position,
       ray,
+      renderer,
       scene,
       sourceLocation,
       type,
@@ -642,21 +650,48 @@ class App extends React.Component {
       try {
         this.View.updating = true;
         switch (editType) {
-          case 'Group':
-            addAnchors({
+          case 'Group': {
+            let changeScheduled = false;
+            let at, to, up;
+            const change = () => {
+              changeScheduled = false;
+              const request = {
+                viewId,
+                orient: {
+                  at: getOrigin(at),
+                  to: getOrigin(to),
+                  up: getOrigin(up),
+                },
+              };
+              console.log(JSON.stringify(request));
+              // const newNotebookText = rewrite(NotebookText, request);
+              // await this.updateState({ [`NotebookText/${path}`]: newNotebookText, });
+            };
+            ({ at, to, up } = addAnchors({
+              camera,
               draggableObjects,
               editId,
               editType,
               object,
+              onObjectChange: () => {
+                if (!changeScheduled) {
+                  changeScheduled = true;
+                  setTimeout(change, 500);
+                }
+              },
               position,
               ray,
+              renderer,
               scene,
               sourceLocation,
               type,
               target,
               threejsMesh,
-            });
+              trackballControls,
+              viewState: this.View.state,
+            }));
             return;
+          }
           case 'Voxels': {
             const { path } = sourceLocation;
             const { [`NotebookText/${path}`]: NotebookText } = this.state;
@@ -715,6 +750,8 @@ class App extends React.Component {
         this.View.moving = false;
       }
     };
+
+    this.View.state = { anchorObject: null, anchors: [] };
 
     this.View.store = async () => {
       const { workspace } = this.props;

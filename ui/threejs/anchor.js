@@ -1,19 +1,20 @@
 import { Sprite, SpriteMaterial, Texture, Vector3 } from 'three';
 
+import { TransformControls } from './TransformControls.js';
+
 export const addAnchor = ({
-  draggableObjects,
-  color,
-  editId,
-  position = [0, 0, 0],
-  object,
   anchorType,
+  color,
+  draggableObjects,
+  editId,
+  object,
+  onClick,
+  position = [0, 0, 0],
 }) => {
   const canvas = document.createElement('canvas');
   canvas.width = 10;
   canvas.height = 10;
   const c = canvas.getContext('2d');
-  // c.strokeStyle = 'rgba(255, 255, 51)';
-  // c.fillStyle = 'rgba(0, 0, 0)';
   c.strokeStyle = 'black';
   c.fillStyle = color;
   c.lineWidth = 1;
@@ -41,51 +42,127 @@ export const addAnchor = ({
   sprite.layers.set(1);
   object.add(sprite);
   // Anchors can be dragged.
-  draggableObjects.push(sprite);
+  // draggableObjects.push(sprite);
   // These should be tangible, so that they block clicks.
   sprite.position.set(...position);
+  if (onClick) {
+    sprite.userData.onClick = ({ event }) => onClick({ event, anchor: sprite });
+  }
+  sprite.userData.anchorType = anchorType;
   return sprite;
 };
 
+export const addTransformControls = ({
+  camera,
+  object,
+  renderer,
+  scene,
+  controlsToDisable = [],
+}) => {
+  const control = new TransformControls(camera, renderer.domElement);
+  scene.add(control);
+  return control;
+};
+
 export const addAnchors = ({
+  camera,
   draggableObjects,
   editId,
   editType,
   object,
+  onObjectChange,
   position,
   ray,
+  renderer,
   scene,
   sourceLocation,
-  type,
   target,
   threejsMesh,
+  trackballControls,
+  type,
+  viewState,
 }) => {
+  if (viewState.anchorObject === object) {
+    return viewState.anchors;
+  }
+  if (viewState.transformControls) {
+    viewState.transformControls.detach();
+  }
+  viewState.anchorObject = object;
+  for (const key of Object.keys(viewState.anchors)) {
+    const anchor = viewState.anchors[key];
+    delete viewState.anchors[key];
+    anchor.parent.remove(anchor);
+  }
   const offset = 0.05;
   const zoom = position.distanceTo(target);
-  const at = new Vector3(0, 0, 0);
-  const to = new Vector3(1, 0, 0);
-  const up = new Vector3(0, 0, 1);
-  object.localToWorld(at);
-  object.localToWorld(to);
-  object.up.copy(up);
-  object.userData.anchor = { at, to, up };
-  addAnchor({
+  const atVector = new Vector3(0, 0, 0);
+  const toVector = new Vector3(1, 0, 0);
+  const upVector = new Vector3(0, 0, 1);
+  object.localToWorld(atVector);
+  object.localToWorld(toVector);
+  object.up.copy(upVector);
+  object.userData.anchor = { at: atVector, to: toVector, up: upVector };
+  const at = addAnchor({
     anchorType: 'at',
     color: 'yellow',
-    draggableObjects,
     editId,
     position: [0, 0, 0],
     object,
+    onClick: ({ anchor }) => {
+      viewState.transformControls = addTransformControls({
+        camera,
+        object,
+        renderer,
+        scene,
+      });
+      viewState.transformControls.addEventListener('mouseDown', () => {
+        trackballControls.enabled = false;
+      });
+      viewState.transformControls.addEventListener('mouseUp', () => {
+        trackballControls.enabled = true;
+      });
+      if (onObjectChange) {
+        viewState.transformControls.addEventListener(
+          'objectChange',
+          onObjectChange
+        );
+      }
+      viewState.transformControls.setMode('translate');
+      viewState.transformControls.attach(anchor.parent);
+    },
   });
-  addAnchor({
+  const up = addAnchor({
     anchorType: 'up',
     color: 'green',
     draggableObjects,
     editId,
     position: [0, offset * zoom, 0],
     object,
+    onClick: ({ anchor }) => {
+      viewState.transformControls = addTransformControls({
+        camera,
+        object,
+        renderer,
+        scene,
+      });
+      viewState.transformControls.addEventListener('mouseDown', () => {
+        trackballControls.enabled = false;
+      });
+      viewState.transformControls.addEventListener('mouseUp', () => {
+        trackballControls.enabled = true;
+      });
+      if (onObjectChange) {
+        viewState.transformControls.addEventListener(
+          'objectChange',
+          onObjectChange
+        );
+      }
+      viewState.transformControls.setMode('rotate');
+      viewState.transformControls.attach(anchor.parent);
+    },
   });
-  addAnchor({
+  const to = addAnchor({
     anchorType: 'to',
     color: 'red',
     draggableObjects,
@@ -93,6 +170,8 @@ export const addAnchors = ({
     position: [0, 0, offset * zoom],
     object,
   });
+  viewState.anchors = { at, to, up };
+  return viewState.anchors;
 };
 
 export const dragAnchor = ({ object }) => {
@@ -138,4 +217,10 @@ export const dragAnchor = ({ object }) => {
       break;
     }
   }
+};
+
+export const getOrigin = (object) => {
+  const vector = new Vector3();
+  object.getWorldPosition(vector);
+  return [vector.x, vector.y, vector.z];
 };

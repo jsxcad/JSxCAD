@@ -1,12 +1,15 @@
+import { GEOMETRY_LAYER, SKETCH_LAYER } from './layers.js';
 import { Raycaster, Vector2 } from 'three';
 
-let raycaster = new Raycaster();
+let geometryRaycaster = new Raycaster();
+geometryRaycaster.layers.set(GEOMETRY_LAYER);
+export const getGeometryRaycaster = () => geometryRaycaster;
 
-export const getRaycaster = () => raycaster;
+let sketchRaycaster = new Raycaster();
+sketchRaycaster.layers.set(SKETCH_LAYER);
+export const getSketchRaycaster = () => sketchRaycaster;
 
-export const raycast = (x, y, camera, objects) => {
-  const raycaster = getRaycaster();
-  const position = new Vector2(x, y);
+const cast = (raycaster, position, camera, objects) => {
   raycaster.setFromCamera(position, camera);
   const intersects = raycaster.intersectObjects(objects, true);
 
@@ -14,16 +17,24 @@ export const raycast = (x, y, camera, objects) => {
     if (!object.userData.tangible) {
       continue;
     }
-    if (!face) {
-      break;
+    if (face) {
+      const { normal } = face;
+      const ray = [
+        [point.x, point.y, point.z],
+        [normal.x, normal.y, normal.z],
+      ];
+      return { ray, object };
+    } else {
+      return { point, object };
     }
-    const { normal } = face;
-    const ray = [
-      [point.x, point.y, point.z],
-      [normal.x, normal.y, normal.z],
-    ];
-    return { ray, object };
   }
+};
 
-  return {};
+export const raycast = (x, y, camera, objects) => {
+  const position = new Vector2(x, y);
+  return (
+    cast(sketchRaycaster, position, camera, objects) ||
+    cast(geometryRaycaster, position, camera, objects) ||
+    {}
+  );
 };

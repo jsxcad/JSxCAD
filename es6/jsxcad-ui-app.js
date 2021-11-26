@@ -1,4 +1,4 @@
-import { orbitDisplay, raycast, dragAnchor, addVoxel, addAnchors } from './jsxcad-ui-threejs.js';
+import { orbitDisplay, raycast, dragAnchor, addVoxel, getOrigin, addAnchors } from './jsxcad-ui-threejs.js';
 import { readOrWatch, unwatchFile, read, watchFile, boot, log, deleteFile, ask, touch, askService, write, terminateActiveServices, clearEmitted, resolvePending, listFiles, getActiveServices, watchFileCreation, watchFileDeletion, watchServices } from './jsxcad-sys.js';
 import { toDomElement, getNotebookControlData } from './jsxcad-ui-notebook.js';
 import Prettier from 'https://unpkg.com/prettier@2.3.2/esm/standalone.mjs';
@@ -41566,6 +41566,7 @@ class OrbitView extends ReactDOM$2.PureComponent {
       canvas,
       dragControls,
       draggableObjects,
+      renderer,
       scene,
       trackballControls,
       updateGeometry
@@ -41698,13 +41699,21 @@ class OrbitView extends ReactDOM$2.PureComponent {
         object
       } = raycast(x, y, camera, [scene]);
 
-      if (ray && onClick) {
+      if (!object) {
+        return;
+      }
+
+      if (object.userData.onClick) {
+        return object.userData.onClick({
+          event
+        });
+      } else if (onClick) {
         const {
           editId,
           editType
         } = object.userData;
-        console.log(`Ray: ${JSON.stringify(ray)}`);
-        onClick({
+        return onClick({
+          camera,
           draggableObjects,
           event,
           editId,
@@ -41715,7 +41724,9 @@ class OrbitView extends ReactDOM$2.PureComponent {
           view,
           scene,
           sourceLocation,
+          trackballControls,
           ray,
+          renderer,
           target: trackballControls.target,
           threejsMesh: object,
           type
@@ -42489,12 +42500,15 @@ class App extends ReactDOM$2.Component {
     };
 
     this.View.click = async ({
+      camera,
       draggableObjects,
       editId,
       editType,
       object,
+      trackballControls,
       position,
       ray,
+      renderer,
       scene,
       sourceLocation,
       type,
@@ -42510,20 +42524,53 @@ class App extends ReactDOM$2.Component {
 
         switch (editType) {
           case 'Group':
-            addAnchors({
-              draggableObjects,
-              editId,
-              editType,
-              object,
-              position,
-              ray,
-              scene,
-              sourceLocation,
-              type,
-              target,
-              threejsMesh
-            });
-            return;
+            {
+              let changeScheduled = false;
+              let at, to, up;
+
+              const change = () => {
+                changeScheduled = false;
+                const request = {
+                  editId,
+                  orient: {
+                    at: getOrigin(at),
+                    to: getOrigin(to),
+                    up: getOrigin(up)
+                  }
+                };
+                console.log(JSON.stringify(request)); // const newNotebookText = rewrite(NotebookText, request);
+                // await this.updateState({ [`NotebookText/${path}`]: newNotebookText, });
+              };
+
+              ({
+                at,
+                to,
+                up
+              } = addAnchors({
+                camera,
+                draggableObjects,
+                editId,
+                editType,
+                object,
+                onObjectChange: () => {
+                  if (!changeScheduled) {
+                    changeScheduled = true;
+                    setTimeout(change, 500);
+                  }
+                },
+                position,
+                ray,
+                renderer,
+                scene,
+                sourceLocation,
+                type,
+                target,
+                threejsMesh,
+                trackballControls,
+                viewState: this.View.state
+              }));
+              return;
+            }
 
           case 'Voxels':
             {
@@ -42592,6 +42639,11 @@ class App extends ReactDOM$2.Component {
       } finally {
         this.View.moving = false;
       }
+    };
+
+    this.View.state = {
+      anchorObject: null,
+      anchors: []
     };
 
     this.View.store = async () => {
