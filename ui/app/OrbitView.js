@@ -127,7 +127,7 @@ export class OrbitView extends React.PureComponent {
       if (object.userData.onClick) {
         return object.userData.onClick({ event });
       } else if (onClick) {
-        const { editId, editType } = object.userData;
+        const { editId, editType, viewId } = object.userData;
         return onClick({
           camera,
           draggableObjects,
@@ -137,7 +137,6 @@ export class OrbitView extends React.PureComponent {
           path,
           position: camera.position,
           object,
-          view,
           scene,
           sourceLocation,
           trackballControls,
@@ -146,6 +145,8 @@ export class OrbitView extends React.PureComponent {
           target: trackballControls.target,
           threejsMesh: object,
           type,
+          view,
+          viewId,
         });
       }
     };

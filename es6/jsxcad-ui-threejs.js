@@ -44504,13 +44504,19 @@ const applyBoxUV = (bufferGeometry, transformMatrix, boxSize) => {
   applyBoxUVImpl(bufferGeometry, transformMatrix, uvBbox, boxSize);
 };
 
-const updateUserData = (geometry, userData) => {
+const updateUserData = (geometry, scene, userData) => {
   if (geometry.tags) {
     for (const tag of geometry.tags) {
       if (tag.startsWith('editId:')) {
         userData.editId = tag.substring(7);
       } else if (tag.startsWith('editType:')) {
         userData.editType = tag.substring(9);
+      } else if (tag.startsWith('viewId:')) {
+        userData.viewId = tag.substring(7);
+      } else if (tag.startsWith('viewType:')) {
+        userData.viewType = tag.substring(9);
+      } else if (tag.startsWith('groupChildId:')) {
+        userData.groupChildId = tag.substring(13);
       }
     }
   }
@@ -44557,7 +44563,7 @@ const buildMeshes = async ({
       );
       mesh = new LineSegments(bufferGeometry, material);
       mesh.layers.set(layer);
-      updateUserData(geometry, mesh.userData);
+      updateUserData(geometry, scene, mesh.userData);
       scene.add(mesh);
       break;
     }
@@ -44625,7 +44631,7 @@ const buildMeshes = async ({
       );
       mesh = new LineSegments(bufferGeometry, material);
       mesh.layers.set(layer);
-      updateUserData(geometry, mesh.userData);
+      updateUserData(geometry, scene, mesh.userData);
       scene.add(mesh);
       break;
     }
@@ -44646,7 +44652,7 @@ const buildMeshes = async ({
       );
       mesh = new Points(threeGeometry, material);
       mesh.layers.set(layer);
-      updateUserData(geometry, mesh.userData);
+      updateUserData(geometry, scene, mesh.userData);
       scene.add(mesh);
       break;
     }
@@ -44692,7 +44698,7 @@ const buildMeshes = async ({
         mesh.castShadow = true;
         mesh.receiveShadow = true;
         mesh.layers.set(layer);
-        updateUserData(geometry, mesh.userData);
+        updateUserData(geometry, scene, mesh.userData);
         mesh.userData.tangible = true;
       } else {
         mesh = new Group();
@@ -44726,6 +44732,7 @@ const buildMeshes = async ({
   if (geometry.content) {
     if (mesh === undefined) {
       mesh = new Group();
+      updateUserData({}, scene, mesh.userData);
       scene.add(mesh);
     }
     for (const content of geometry.content) {
@@ -44896,7 +44903,7 @@ const buildDragControls = ({
   const dragControls = new DragControls(
     draggableObjects,
     camera,
-    viewerElement,
+    viewerElement
   );
   dragControls.addEventListener('dragstart', () => {
     trackballControls.enabled = false;
@@ -45469,7 +45476,9 @@ class TransformControls extends Object3D {
       this.object === undefined ||
       this.dragging === true ||
       pointer.button !== 0
-    ) { return; }
+    ) {
+      return;
+    }
 
     if (this.axis !== null) {
       _raycaster.setFromCamera(pointer, this.camera);
@@ -45520,7 +45529,9 @@ class TransformControls extends Object3D {
       axis === null ||
       this.dragging === false ||
       pointer.button !== -1
-    ) { return; }
+    ) {
+      return;
+    }
 
     _raycaster.setFromCamera(pointer, this.camera);
 
@@ -45713,10 +45724,10 @@ class TransformControls extends Object3D {
       // Apply rotation snap
 
       if (this.rotationSnap) {
- this.rotationAngle =
+        this.rotationAngle =
           Math.round(this.rotationAngle / this.rotationSnap) *
           this.rotationSnap;
-}
+      }
 
       // Apply rotate
       if (space === 'local' && axis !== 'E' && axis !== 'XYZE') {
@@ -47042,7 +47053,10 @@ const addAnchors = ({
         trackballControls.enabled = true;
       });
       if (onObjectChange) {
-        viewState.transformControls.addEventListener('objectChange', onObjectChange);
+        viewState.transformControls.addEventListener(
+          'objectChange',
+          onObjectChange
+        );
       }
       viewState.transformControls.setMode('translate');
       viewState.transformControls.attach(anchor.parent);
@@ -47069,7 +47083,10 @@ const addAnchors = ({
         trackballControls.enabled = true;
       });
       if (onObjectChange) {
-        viewState.transformControls.addEventListener('objectChange', onObjectChange);
+        viewState.transformControls.addEventListener(
+          'objectChange',
+          onObjectChange
+        );
       }
       viewState.transformControls.setMode('rotate');
       viewState.transformControls.attach(anchor.parent);
@@ -47132,10 +47149,17 @@ const dragAnchor = ({ object }) => {
   }
 };
 
-const getOrigin = (object) => {
+const round = (value, resolution) =>
+  Math.round(value / resolution) * resolution;
+
+const getWorldPosition = (object, resolution = 0.01) => {
   const vector = new Vector3();
   object.getWorldPosition(vector);
-  return [vector.x, vector.y, vector.z];
+  return [
+    round(vector.x, resolution),
+    round(vector.y, resolution),
+    round(vector.z, resolution),
+  ];
 };
 
-export { addAnchors, addTransformControls, addVoxel, buildMeshes, buildScene, createResizer, dataUrl, dragAnchor, getOrigin, image, orbitDisplay, orbitView, raycast, staticDisplay, staticView };
+export { addAnchors, addTransformControls, addVoxel, buildMeshes, buildScene, createResizer, dataUrl, dragAnchor, getWorldPosition, image, orbitDisplay, orbitView, raycast, staticDisplay, staticView };

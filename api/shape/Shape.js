@@ -261,7 +261,7 @@ Shape.toNestedValues = (to, from) => {
   }
 };
 
-Shape.toCoordinate = (x) => {
+Shape.toCoordinate = (x = 0, y = 0, z = 0) => {
   if (x instanceof Shape) {
     const g = x.toTransformedGeometry();
     if (g.type === 'points' && g.points.length === 1) {
@@ -270,7 +270,46 @@ Shape.toCoordinate = (x) => {
     }
   } else if (x instanceof Array) {
     return x;
+  } else {
+    return [x, y, z];
   }
+};
+
+Shape.toCoordinates = (...args) => {
+  const coordinates = [];
+  while (args.length > 0) {
+    const x = args.shift();
+    if (x instanceof Shape) {
+      const g = x.toTransformedGeometry();
+      if (g.type === 'points' && g.points.length === 1) {
+        // FIX: Consider how this might be more robust.
+        coordinates.push(g.points[0]);
+      } else {
+        throw Error(`Unexpected coordinate value: ${x}`);
+      }
+    } else if (x instanceof Array) {
+      coordinates.push(x);
+    } else if (typeof x === 'number') {
+      let y = args.shift();
+      let z = args.shift();
+      if (y === undefined) {
+        y = 0;
+      }
+      if (z === undefined) {
+        z = 0;
+      }
+      if (typeof y !== 'number') {
+        throw Error(`Unexpected coordinate value: ${y}`);
+      }
+      if (typeof z !== 'number') {
+        throw Error(`Unexpected coordinate value: ${z}`);
+      }
+      coordinates.push([x, y, z]);
+    } else {
+      throw Error(`Unexpected coordinate value: ${x}`);
+    }
+  }
+  return coordinates;
 };
 
 export const fromGeometry = Shape.fromGeometry;

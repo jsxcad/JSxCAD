@@ -31,7 +31,7 @@ Shape.registerReifier('Box', (geometry) => {
   ]);
   const b = a.fill();
   const c = b.ex(top, bottom);
-  const d = c.orient({
+  const d = c.orient2({
     center: negate(getAt(geometry)),
     from: getFrom(geometry),
     at: getTo(geometry),

@@ -20954,17 +20954,151 @@ var main_3 = main.print;
 main.types;
 var main_5 = main.parse;
 
-const rewrite = (script, { editId, pointToAppend, pointToRemove }) => {
+const {
+  arrayExpression,
+  callExpression,
+  identifier,
+  memberExpression,
+  objectExpression,
+  objectProperty,
+  literal: literal$1,
+} = main_17;
+
+const {
+  CallExpression,
+  Identifier,
+  Literal,
+  MemberExpression,
+  UnaryExpression,
+} = main_8;
+
+const extractViewMethodCall = (callExpression, calleeName, viewId) => {
+  const args = callExpression.get('arguments');
+  const callee = callExpression.get('callee');
+  const computed = callee.get('computed');
+  const object = callee.get('object');
+  const property = callee.get('property');
+  if (computed.value) {
+    // a[b]
+    return {};
+  }
+  // a.b
+  if (!Identifier.check(property.value)) {
+    return {};
+  }
+  // a.b()
+  if (property.get('name').value !== 'view') {
+    return {};
+  }
+  // a.view()
+  if (!CallExpression.check(object.value)) {
+    return {};
+  }
+  let wasFound = false;
+  for (const arg of args.value) {
+    if (Literal.check(arg) && arg.value === viewId) {
+      wasFound = true;
+      break;
+    }
+  }
+  if (!wasFound) {
+    return {};
+  }
+  // a().view('id')
+  if (!MemberExpression.check(callee.value)) {
+    return {};
+  }
+  const calleeObject = callee.get('object');
+  if (!CallExpression.check(calleeObject.value)) {
+    return {};
+  }
+  const calleeObjectCallee = calleeObject.get('callee');
+  if (!Identifier.check(calleeObjectCallee.value)) {
+    return {};
+  }
+  if (calleeObjectCallee.get('name').value !== calleeName) {
+    return {};
+  }
+  return { calleeObject, calleeObjectCallee };
+};
+
+const rewriteViewGroupOrient = (script, { viewId, nth, at, to, up }) => {
+  const ast = main_5(script);
+  main_1(ast, {
+    visitCallExpression(expression) {
+      try {
+        const { calleeObject } = extractViewMethodCall(
+          expression,
+          'Group',
+          viewId
+        );
+        if (!calleeObject) {
+          return;
+        }
+        const args = calleeObject.get('arguments');
+        const nthArg = args.value[nth];
+        if (!nthArg) {
+          return;
+        }
+        // Ok, we should have extracted an x of Group(x).view(viewId).
+        // The expression is organized like (a.b()).call(), which means that we're already at the final call.
+        const lastCall = nthArg;
+        const lastCallee = lastCall.callee;
+        const { property } = lastCallee;
+        const orientation = [];
+        if (at) {
+          orientation.push(
+            objectProperty(
+              literal$1('at'),
+              arrayExpression([literal$1(at[0]), literal$1(at[1]), literal$1(at[2])])
+            )
+          );
+        }
+        if (to) {
+          orientation.push(
+            objectProperty(
+              literal$1('to'),
+              arrayExpression([literal$1(to[0]), literal$1(to[1]), literal$1(to[2])])
+            )
+          );
+        }
+        if (up) {
+          orientation.push(
+            objectProperty(
+              literal$1('up'),
+              arrayExpression([literal$1(up[0]), literal$1(up[1]), literal$1(up[2])])
+            )
+          );
+        }
+        if (Identifier.check(property) && property.name === 'orient') {
+          // We need to rewrite the arguments of the orient call.
+          // e.g. s.Box().orient(Old) -> s.Box().orient(New)
+          lastCall.arguments = [objectExpression(orientation)];
+        } else {
+          // We need to rewrite lastCall to be a chained method call
+          // e.g. s.Box() -> s.Box().orient(New)
+          const chained = memberExpression(
+            lastCall,
+            callExpression(identifier('orient'), [
+              objectExpression(orientation),
+            ])
+          );
+          args.value[nth] = chained;
+        }
+      } finally {
+        this.traverse(expression);
+      }
+    },
+  });
+  return main_3(ast).code;
+};
+
+const rewriteVoxels = (
+  script,
+  { editId, pointToAppend, pointToRemove }
+) => {
   const ast = main_5(script);
   // As we generate the ast locally it's safe for us to destructively modify it.
-
-  const {
-    CallExpression,
-    Identifier,
-    Literal,
-    MemberExpression,
-    UnaryExpression,
-  } = main_8;
 
   const toValue = (expression) => {
     // const [x, y, z] = value.elements.map(element => element.value);
@@ -21029,9 +21163,7 @@ const rewrite = (script, { editId, pointToAppend, pointToRemove }) => {
           calleeObject
             .get('arguments')
             .push(
-              main_17.arrayExpression(
-                pointToAppend.map((value) => main_17.literal(value))
-              )
+              arrayExpression(pointToAppend.map((value) => literal$1(value)))
             );
         }
         if (pointToRemove) {
@@ -28022,4 +28154,4 @@ const toEcmascript = async (
   }
 };
 
-export { rewrite, toEcmascript };
+export { rewriteViewGroupOrient, rewriteVoxels, toEcmascript };

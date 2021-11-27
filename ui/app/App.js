@@ -6,7 +6,7 @@ import {
   addAnchors,
   addVoxel,
   dragAnchor,
-  getOrigin,
+  getWorldPosition,
 } from '@jsxcad/ui-threejs';
 
 import {
@@ -29,6 +29,7 @@ import {
 } from '@jsxcad/sys';
 
 import { getNotebookControlData, toDomElement } from '@jsxcad/ui-notebook';
+import { rewriteViewGroupOrient, rewriteVoxels } from '@jsxcad/compiler';
 
 import Button from 'react-bootstrap/Button';
 import Card from 'react-bootstrap/Card';
@@ -45,7 +46,6 @@ import ReactDOM from 'react-dom';
 import Row from 'react-bootstrap/Row';
 import { animationFrame } from './schedule.js';
 import { execute } from '@jsxcad/api';
-import { rewrite } from '@jsxcad/compiler';
 
 const ensureFile = async (file, url, { workspace } = {}) => {
   const sources = [];
@@ -573,7 +573,7 @@ class App extends React.Component {
       await write(NotebookFile, new TextEncoder('utf8').encode(cleanText), {
         workspace,
       });
-      await this.updateState({ NotebookText: cleanText });
+      await this.updateState({ [`NotebookText/${path}`]: cleanText });
 
       // Let state propagate.
       await animationFrame();
@@ -643,6 +643,7 @@ class App extends React.Component {
       type,
       target,
       threejsMesh,
+      viewId,
     }) => {
       if (this.View.updating) {
         return;
@@ -653,19 +654,28 @@ class App extends React.Component {
           case 'Group': {
             let changeScheduled = false;
             let at, to, up;
-            const change = () => {
+            const change = async () => {
               changeScheduled = false;
               const request = {
                 viewId,
-                orient: {
-                  at: getOrigin(at),
-                  to: getOrigin(to),
-                  up: getOrigin(up),
-                },
+                nth: object.userData.groupChildId,
+                at: getWorldPosition(at, 0.01),
+                to: getWorldPosition(to, 0.01),
+                up: getWorldPosition(up, 0.01),
               };
+              if (request.nth === undefined) {
+                return;
+              }
               console.log(JSON.stringify(request));
-              // const newNotebookText = rewrite(NotebookText, request);
-              // await this.updateState({ [`NotebookText/${path}`]: newNotebookText, });
+              const { path } = sourceLocation;
+              const { [`NotebookText/${path}`]: NotebookText } = this.state;
+              const newNotebookText = rewriteViewGroupOrient(
+                NotebookText,
+                request
+              );
+              await this.updateState({
+                [`NotebookText/${path}`]: newNotebookText,
+              });
             };
             ({ at, to, up } = addAnchors({
               camera,
@@ -713,7 +723,7 @@ class App extends React.Component {
                 ].map((v) => Math.round(v));
                 break;
             }
-            const newNotebookText = rewrite(NotebookText, request);
+            const newNotebookText = rewriteVoxels(NotebookText, request);
             await this.updateState({
               [`NotebookText/${path}`]: newNotebookText,
             });

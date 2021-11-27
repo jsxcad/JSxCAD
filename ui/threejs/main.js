@@ -10,5 +10,5 @@ export {
   addAnchors,
   addTransformControls,
   dragAnchor,
-  getOrigin,
+  getWorldPosition,
 } from './anchor.js';

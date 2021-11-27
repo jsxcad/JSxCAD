@@ -4267,7 +4267,7 @@ const readOrWatch = async (path, options = {}) => {
   const watch = new Promise((resolve) => {
     resolveWatch = resolve;
   });
-  const watcher = await watchFile(path, (file) => resolveWatch(path));
+  const watcher = await watchFile(path, (file) => resolveWatch(path), options);
   await watch;
   await unwatchFile(path, watcher);
   return read(path, options);

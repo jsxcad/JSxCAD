@@ -8,6 +8,8 @@ import {
 
 import { Shape } from './Shape.js';
 import { ensurePages } from './Page.js';
+import { tagGeometry } from './tag.js';
+import { untagGeometry } from './untag.js';
 
 const byType = (args, defaultOptions) => {
   let viewId;
@@ -25,6 +27,21 @@ const byType = (args, defaultOptions) => {
     }
   }
   return { viewId, op, options };
+};
+
+const markContent = (geometry) => {
+  if (geometry.type === 'group') {
+    return {
+      ...geometry,
+      content: geometry.content.map((child, nth) =>
+        tagGeometry(untagGeometry(child, ['groupChildId:*']), [
+          `groupChildId:${nth}`,
+        ])
+      ),
+    };
+  } else {
+    return geometry;
+  }
 };
 
 // FIX: Avoid the extra read-write cycle.
@@ -55,10 +72,13 @@ export const baseView =
     }
     const { id, path } = sourceLocation;
     for (const entry of ensurePages(
-      viewShape.toDisplayGeometry({ skin, outline, wireframe })
+      markContent(viewShape.toDisplayGeometry({ skin, outline, wireframe }))
     )) {
+      const geometry = tagGeometry(untagGeometry(entry, ['viewId:*']), [
+        `viewId:${viewId}`,
+      ]);
       const viewPath = `view/${path}/${id}/${viewId}`;
-      addPending(write(viewPath, entry));
+      addPending(write(viewPath, geometry));
       const view = {
         viewId,
         width,
