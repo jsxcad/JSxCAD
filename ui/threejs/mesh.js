@@ -181,13 +181,19 @@ const applyBoxUV = (bufferGeometry, transformMatrix, boxSize) => {
   applyBoxUVImpl(bufferGeometry, transformMatrix, uvBbox, boxSize);
 };
 
-const updateUserData = (geometry, userData) => {
+const updateUserData = (geometry, scene, userData) => {
   if (geometry.tags) {
     for (const tag of geometry.tags) {
       if (tag.startsWith('editId:')) {
         userData.editId = tag.substring(7);
       } else if (tag.startsWith('editType:')) {
         userData.editType = tag.substring(9);
+      } else if (tag.startsWith('viewId:')) {
+        userData.viewId = tag.substring(7);
+      } else if (tag.startsWith('viewType:')) {
+        userData.viewType = tag.substring(9);
+      } else if (tag.startsWith('groupChildId:')) {
+        userData.groupChildId = tag.substring(13);
       }
     }
   }
@@ -234,7 +240,7 @@ export const buildMeshes = async ({
       );
       mesh = new LineSegments(bufferGeometry, material);
       mesh.layers.set(layer);
-      updateUserData(geometry, mesh.userData);
+      updateUserData(geometry, scene, mesh.userData);
       scene.add(mesh);
       break;
     }
@@ -305,7 +311,7 @@ export const buildMeshes = async ({
       );
       mesh = new LineSegments(bufferGeometry, material);
       mesh.layers.set(layer);
-      updateUserData(geometry, mesh.userData);
+      updateUserData(geometry, scene, mesh.userData);
       scene.add(mesh);
       break;
     }
@@ -326,7 +332,7 @@ export const buildMeshes = async ({
       );
       mesh = new Points(threeGeometry, material);
       mesh.layers.set(layer);
-      updateUserData(geometry, mesh.userData);
+      updateUserData(geometry, scene, mesh.userData);
       scene.add(mesh);
       break;
     }
@@ -372,7 +378,7 @@ export const buildMeshes = async ({
         mesh.castShadow = true;
         mesh.receiveShadow = true;
         mesh.layers.set(layer);
-        updateUserData(geometry, mesh.userData);
+        updateUserData(geometry, scene, mesh.userData);
         mesh.userData.tangible = true;
       } else {
         mesh = new Group();
@@ -406,6 +412,7 @@ export const buildMeshes = async ({
   if (geometry.content) {
     if (mesh === undefined) {
       mesh = new Group();
+      updateUserData({}, scene, mesh.userData);
       scene.add(mesh);
     }
     for (const content of geometry.content) {

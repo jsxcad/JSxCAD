@@ -35,28 +35,31 @@ export const oneOfTagMatcher = (tags, namespace = 'user') => {
 export const qualifyTagPath = (path, namespace = 'user') =>
   path.split('/').map((tag) => qualifyTag(tag, namespace));
 
+export const tagGeometry = (geometry, tags) => {
+  const tagsToAdd = tags.map((tag) => qualifyTag(tag, 'user'));
+  const op = (geometry, descend) => {
+    switch (geometry.type) {
+      case 'group':
+      case 'layout': {
+        return descend();
+      }
+      default: {
+        const tags = [...(geometry.tags || [])];
+        for (const tagToAdd of tagsToAdd) {
+          if (!tags.includes(tagToAdd)) {
+            tags.push(tagToAdd);
+          }
+        }
+        return descend({ tags });
+      }
+    }
+  };
+  return rewrite(geometry, op);
+};
+
 export const tag =
   (...tags) =>
-  (shape) => {
-    const tagsToAdd = tags.map((tag) => qualifyTag(tag, 'user'));
-    const op = (geometry, descend) => {
-      switch (geometry.type) {
-        case 'group':
-        case 'layout': {
-          return descend();
-        }
-        default: {
-          const tags = [...(geometry.tags || [])];
-          for (const tagToAdd of tagsToAdd) {
-            if (!tags.includes(tagToAdd)) {
-              tags.push(tagToAdd);
-            }
-          }
-          return descend({ tags });
-        }
-      }
-    };
-    return Shape.fromGeometry(rewrite(shape.toGeometry(), op));
-  };
+  (shape) =>
+    Shape.fromGeometry(tagGeometry(shape.toGeometry(), tags));
 
 Shape.registerMethod('tag', tag);

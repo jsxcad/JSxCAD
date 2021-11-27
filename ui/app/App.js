@@ -2,7 +2,12 @@
 
 import * as PropTypes from 'prop-types';
 
-import { addAnchors, addVoxel, dragAnchor } from '@jsxcad/ui-threejs';
+import {
+  addAnchors,
+  addVoxel,
+  dragAnchor,
+  getWorldPosition,
+} from '@jsxcad/ui-threejs';
 
 import {
   askService,
@@ -24,6 +29,7 @@ import {
 } from '@jsxcad/sys';
 
 import { getNotebookControlData, toDomElement } from '@jsxcad/ui-notebook';
+import { rewriteViewGroupOrient, rewriteVoxels } from '@jsxcad/compiler';
 
 import Button from 'react-bootstrap/Button';
 import Card from 'react-bootstrap/Card';
@@ -40,7 +46,6 @@ import ReactDOM from 'react-dom';
 import Row from 'react-bootstrap/Row';
 import { animationFrame } from './schedule.js';
 import { execute } from '@jsxcad/api';
-import { rewrite } from '@jsxcad/compiler';
 
 const ensureFile = async (file, url, { workspace } = {}) => {
   const sources = [];
@@ -568,7 +573,7 @@ class App extends React.Component {
       await write(NotebookFile, new TextEncoder('utf8').encode(cleanText), {
         workspace,
       });
-      await this.updateState({ NotebookText: cleanText });
+      await this.updateState({ [`NotebookText/${path}`]: cleanText });
 
       // Let state propagate.
       await animationFrame();
@@ -624,17 +629,21 @@ class App extends React.Component {
     };
 
     this.View.click = async ({
+      camera,
       draggableObjects,
       editId,
       editType,
       object,
+      trackballControls,
       position,
       ray,
+      renderer,
       scene,
       sourceLocation,
       type,
       target,
       threejsMesh,
+      viewId,
     }) => {
       if (this.View.updating) {
         return;
@@ -642,21 +651,57 @@ class App extends React.Component {
       try {
         this.View.updating = true;
         switch (editType) {
-          case 'Group':
-            addAnchors({
+          case 'Group': {
+            let changeScheduled = false;
+            let at, to, up;
+            const change = async () => {
+              changeScheduled = false;
+              const request = {
+                viewId,
+                nth: object.userData.groupChildId,
+                at: getWorldPosition(at, 0.01),
+                to: getWorldPosition(to, 0.01),
+                up: getWorldPosition(up, 0.01),
+              };
+              if (request.nth === undefined) {
+                return;
+              }
+              console.log(JSON.stringify(request));
+              const { path } = sourceLocation;
+              const { [`NotebookText/${path}`]: NotebookText } = this.state;
+              const newNotebookText = rewriteViewGroupOrient(
+                NotebookText,
+                request
+              );
+              await this.updateState({
+                [`NotebookText/${path}`]: newNotebookText,
+              });
+            };
+            ({ at, to, up } = addAnchors({
+              camera,
               draggableObjects,
               editId,
               editType,
               object,
+              onObjectChange: () => {
+                if (!changeScheduled) {
+                  changeScheduled = true;
+                  setTimeout(change, 500);
+                }
+              },
               position,
               ray,
+              renderer,
               scene,
               sourceLocation,
               type,
               target,
               threejsMesh,
-            });
+              trackballControls,
+              viewState: this.View.state,
+            }));
             return;
+          }
           case 'Voxels': {
             const { path } = sourceLocation;
             const { [`NotebookText/${path}`]: NotebookText } = this.state;
@@ -678,7 +723,7 @@ class App extends React.Component {
                 ].map((v) => Math.round(v));
                 break;
             }
-            const newNotebookText = rewrite(NotebookText, request);
+            const newNotebookText = rewriteVoxels(NotebookText, request);
             await this.updateState({
               [`NotebookText/${path}`]: newNotebookText,
             });
@@ -715,6 +760,8 @@ class App extends React.Component {
         this.View.moving = false;
       }
     };
+
+    this.View.state = { anchorObject: null, anchors: [] };
 
     this.View.store = async () => {
       const { workspace } = this.props;

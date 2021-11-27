@@ -309,6 +309,7 @@ export { on } from './on.js';
 export { op } from './op.js';
 export { outline } from './outline.js';
 export { orient } from './orient.js';
+export { orient2 } from './orient2.js';
 export { pack } from './pack.js';
 export { play } from './play.js';
 export { push } from './push.js';

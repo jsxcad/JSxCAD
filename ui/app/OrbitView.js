@@ -42,6 +42,7 @@ export class OrbitView extends React.PureComponent {
       canvas,
       dragControls,
       draggableObjects,
+      renderer,
       scene,
       trackballControls,
       updateGeometry,
@@ -120,10 +121,15 @@ export class OrbitView extends React.PureComponent {
       const x = ((event.clientX - rect.x) / rect.width) * 2 - 1;
       const y = -((event.clientY - rect.y) / rect.height) * 2 + 1;
       const { ray, object } = raycast(x, y, camera, [scene]);
-      if (ray && onClick) {
-        const { editId, editType } = object.userData;
-        console.log(`Ray: ${JSON.stringify(ray)}`);
-        onClick({
+      if (!object) {
+        return;
+      }
+      if (object.userData.onClick) {
+        return object.userData.onClick({ event });
+      } else if (onClick) {
+        const { editId, editType, viewId } = object.userData;
+        return onClick({
+          camera,
           draggableObjects,
           event,
           editId,
@@ -131,13 +137,16 @@ export class OrbitView extends React.PureComponent {
           path,
           position: camera.position,
           object,
-          view,
           scene,
           sourceLocation,
+          trackballControls,
           ray,
+          renderer,
           target: trackballControls.target,
           threejsMesh: object,
           type,
+          view,
+          viewId,
         });
       }
     };

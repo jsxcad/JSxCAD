@@ -42,7 +42,7 @@ Shape.registerReifier('Orb', (geometry) => {
   return extrudeSphere(1, { sides: 2 + sides })(Arc(2).hasSides(sides * 2))
     .scale(...scale)
     .move(...middle)
-    .orient({
+    .orient2({
       center: negate(getAt(geometry)),
       from: getFrom(geometry),
       at: getTo(geometry),

@@ -7,7 +7,6 @@ import { DragControls } from './DragControls.js';
 import { Layers } from 'three';
 import { TrackballControls } from 'three/examples/jsm/controls/TrackballControls.js';
 import { buildMeshes } from './mesh.js';
-import { getRaycaster } from './raycast.js';
 import { moveToFit } from './moveToFit.js';
 
 const buildTrackballControls = ({
@@ -33,15 +32,13 @@ const buildDragControls = ({
   draggableObjects,
   endUpdating,
   startUpdating,
-  raycaster,
   trackballControls,
   viewerElement,
 }) => {
   const dragControls = new DragControls(
     draggableObjects,
     camera,
-    viewerElement,
-    raycaster
+    viewerElement
   );
   dragControls.addEventListener('dragstart', () => {
     trackballControls.enabled = false;
@@ -149,15 +146,11 @@ export const orbitDisplay = async (
   }));
 
   const draggableObjects = [];
-  const raycaster = getRaycaster();
-  raycaster.layers.enable(GEOMETRY_LAYER);
-  raycaster.layers.enable(SKETCH_LAYER);
 
   const { dragControls } = buildDragControls({
     camera,
     draggableObjects,
     endUpdating,
-    raycaster,
     render,
     startUpdating,
     trackballControls,
@@ -223,6 +216,7 @@ export const orbitDisplay = async (
     dragControls,
     draggableObjects,
     render,
+    renderer,
     scene,
     trackballControls,
     updateGeometry,
