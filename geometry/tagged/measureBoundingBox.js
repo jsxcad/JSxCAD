@@ -51,7 +51,9 @@ export const measureBoundingBox = (geometry) => {
       case 'paths':
         return update(measureBoundingBoxGeneric(geometry));
       case 'triangles':
-        return update(measureBoundingBoxOfPolygons(geometry.triangles));
+        return update(
+          measureBoundingBoxOfPolygons(geometry.triangles, geometry.matrix)
+        );
       default:
         throw Error(`Unknown geometry: ${geometry.type}`);
     }

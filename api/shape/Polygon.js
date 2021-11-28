@@ -1,7 +1,9 @@
 import Shape from './Shape.js';
 
 export const Polygon = (...points) =>
-  Shape.fromClosedPath(points.map((point) => Shape.toCoordinate(point)));
+  Shape.fromClosedPath(
+    points.map((point) => Shape.toCoordinate(undefined, point))
+  );
 
 export default Polygon;
 

@@ -3,8 +3,8 @@ import Shape from './Shape.js';
 export const Edges = (...segments) =>
   Shape.fromSegments(
     ...Shape.toNestedValues(segments).map(([source, target]) => [
-      Shape.toCoordinate(source),
-      Shape.toCoordinate(target),
+      Shape.toCoordinate(undefined, source),
+      Shape.toCoordinate(undefined, target),
     ])
   );
 

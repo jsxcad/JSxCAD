@@ -94,7 +94,7 @@ export const toCgalTransformFromJsTransform = (
     }
     return cgalTransform;
   } catch (e) {
-    console.log('Malformed transform');
+    console.log(`Malformed transform: ${JSON.stringify(jsTransform)}`);
     throw e;
   }
 };
@@ -120,8 +120,16 @@ export const invertTransform = (a) =>
 export const fromExactToCgalTransform = (...exact) =>
   getCgal().Transformation__from_exact(() => exact.shift());
 
-export const fromApproximateToCgalTransform = (...approximate) =>
-  getCgal().Transformation__from_approximate(() => approximate.shift());
+export const fromApproximateToCgalTransform = (...approximate) => {
+  try {
+    return getCgal().Transformation__from_approximate(() =>
+      approximate.shift()
+    );
+  } catch (error) {
+    console.log(JSON.stringify(approximate));
+    throw error;
+  }
+};
 
 export const fromIdentityToCgalTransform = () =>
   toJsTransformFromCgalTransform(getCgal().Transformation__identity());

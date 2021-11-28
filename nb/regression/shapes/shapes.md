@@ -1,5 +1,5 @@
 ```JavaScript
-const arc = Arc(5)
+Arc(5)
   .hasAngle(45 / 360, 270 / 360)
   .gridView()
   .md(`Arc(5).angle(45/360, 270/360)`);
@@ -10,7 +10,7 @@ const arc = Arc(5)
 Arc(5).angle(45/360, 270/360)
 
 ```JavaScript
-const assembly = Assembly(Box(10), Arc(8), Triangle(5))
+Assembly(Box(10), Arc(8), Triangle(5))
   .pack()
   .gridView(undefined, { size: 801, triangles: false, wireframe: false })
   .md(`Assembly(Box(10), Arc(8), Triangle(5))`);
@@ -21,7 +21,7 @@ const assembly = Assembly(Box(10), Arc(8), Triangle(5))
 Assembly(Box(10), Arc(8), Triangle(5))
 
 ```JavaScript
-const box = Box(5, 7, 8).view().md(`Box(5, 7, 8)`);
+Box(5, 7, 8).view().md(`Box(5, 7, 8)`);
 ```
 
 ![Image](shapes.md.2.png)
@@ -29,7 +29,7 @@ const box = Box(5, 7, 8).view().md(`Box(5, 7, 8)`);
 Box(5, 7, 8)
 
 ```JavaScript
-const chainedHull = ChainedHull(Point(), Box(5).z(5), Arc(3).z(8))
+ChainedHull(Point(), Box(5).z(5), Arc(3).z(8))
   .view()
   .md(`ChainedHull(Point(), Box(5).z(5), Arc(3).z(8))`);
 ```
@@ -39,13 +39,13 @@ const chainedHull = ChainedHull(Point(), Box(5).z(5), Arc(3).z(8))
 ChainedHull(Point(), Box(5).z(5), Arc(3).z(8))
 
 ```JavaScript
-const empty = Empty().view().md(`Empty()`);
+Empty().view().md(`Empty()`);
 ```
 
 Empty()
 
 ```JavaScript
-const group = Group(Box(10), Arc(8), Triangle(5))
+Group(Box(10), Arc(8), Triangle(5))
   .pack()
   .gridView()
   .md(`Group(Box(10), Arc(8), Triangle(5))`);
@@ -56,7 +56,7 @@ const group = Group(Box(10), Arc(8), Triangle(5))
 Group(Box(10), Arc(8), Triangle(5))
 
 ```JavaScript
-const hershey = Hershey('Hershey', 10)
+Hershey('Hershey', 10)
   .align('xy')
   .gridView()
   .md(`Hershey(10)('Hershey').align('xy')`);
@@ -67,7 +67,7 @@ const hershey = Hershey('Hershey', 10)
 Hershey(10)('Hershey').align('xy')
 
 ```JavaScript
-const hexagon = Hexagon(10).gridView().md(`Hexagon(10)`);
+Hexagon(10).gridView().md(`Hexagon(10)`);
 ```
 
 ![Image](shapes.md.6.png)
@@ -75,7 +75,7 @@ const hexagon = Hexagon(10).gridView().md(`Hexagon(10)`);
 Hexagon(10)
 
 ```JavaScript
-const hull = Hull(Arc(5), Box(5).z(5)).view().md(`Hull(Arc(5), Box(5).z(5))`);
+Hull(Arc(5), Box(5).z(5)).view().md(`Hull(Arc(5), Box(5).z(5))`);
 ```
 
 ![Image](shapes.md.7.png)
@@ -83,7 +83,7 @@ const hull = Hull(Arc(5), Box(5).z(5)).view().md(`Hull(Arc(5), Box(5).z(5))`);
 Hull(Arc(5), Box(5).z(5))
 
 ```JavaScript
-const icosahedron = Icosahedron(5).view().md(`Icosahedron(5)`);
+Icosahedron(5).view().md(`Icosahedron(5)`);
 ```
 
 ![Image](shapes.md.8.png)
@@ -114,7 +114,7 @@ const torusFn = ([x, y, z]) => {
 ```
 
 ```JavaScript
-const line = Line(5, -1).rz(45).gridView().md(`Line(5, -1)`);
+Line(5, -1).rz(45).gridView().md(`Line(5, -1)`);
 ```
 
 ![Image](shapes.md.9.png)
@@ -122,7 +122,7 @@ const line = Line(5, -1).rz(45).gridView().md(`Line(5, -1)`);
 Line(5, -1)
 
 ```JavaScript
-const implicit = Implicit(torusFn, { radius: 2 })
+Implicit(torusFn, { radius: 2 })
   .view()
   .md('Implicit(torusFn, { radius: 2 }');
 ```
@@ -132,7 +132,7 @@ const implicit = Implicit(torusFn, { radius: 2 })
 Implicit(torusFn, { radius: 2 }
 
 ```JavaScript
-const octagon = Octagon(5).gridView().md(`Octagon(5)`);
+Octagon(5).gridView().md(`Octagon(5)`);
 ```
 
 ![Image](shapes.md.11.png)
@@ -140,7 +140,7 @@ const octagon = Octagon(5).gridView().md(`Octagon(5)`);
 Octagon(5)
 
 ```JavaScript
-const orb = Orb(5).hasSides(20).view().md(`Orb(5)`);
+Orb(5).hasSides(20).view().md(`Orb(5)`);
 ```
 
 ![Image](shapes.md.12.png)
@@ -148,7 +148,7 @@ const orb = Orb(5).hasSides(20).view().md(`Orb(5)`);
 Orb(5)
 
 ```JavaScript
-const path = Path(Point(0), Point(5), Point(5, 5), Point(0))
+Path(Point(0), Point(5), Point(5, 5), Point(0))
   .rz(45 / 2)
   .gridView()
   .md(`Path(Point(0), Point(5), Point(5, 5), Point(0)).rz(45 / 2)`);
@@ -159,7 +159,7 @@ const path = Path(Point(0), Point(5), Point(5, 5), Point(0))
 Path(Point(0), Point(5), Point(5, 5), Point(0)).rz(45 / 2)
 
 ```JavaScript
-const pentagon = Pentagon(5).gridView().md(`Pentagon(5)`);
+Pentagon(5).gridView().md(`Pentagon(5)`);
 ```
 
 ![Image](shapes.md.14.png)
@@ -167,7 +167,7 @@ const pentagon = Pentagon(5).gridView().md(`Pentagon(5)`);
 Pentagon(5)
 
 ```JavaScript
-const point = Point(0.5, 0.5).gridView().md(`Point(0.5, 0.5)`);
+Point(0.5, 0.5).gridView().md(`Point(0.5, 0.5)`);
 ```
 
 ![Image](shapes.md.15.png)
@@ -175,7 +175,7 @@ const point = Point(0.5, 0.5).gridView().md(`Point(0.5, 0.5)`);
 Point(0.5, 0.5)
 
 ```JavaScript
-const points = Points([0.5, 0.5], [-0.5, -0.5])
+Points([0.5, 0.5], [-0.5, -0.5])
   .gridView()
   .md(`Points([0.5, 0.5], [-0.5, -0.5])`);
 ```
@@ -185,7 +185,7 @@ const points = Points([0.5, 0.5], [-0.5, -0.5])
 Points([0.5, 0.5], [-0.5, -0.5])
 
 ```JavaScript
-const polygon = Polygon(Point(0), Point(5), Point(5, 5))
+Polygon(Point(0), Point(5), Point(5, 5))
   .rz(1 / 16)
   .gridView()
   .md(`Polygon(Point(0), Point(5), Point(5, 5)).rz(1 / 16)`);
@@ -196,7 +196,7 @@ const polygon = Polygon(Point(0), Point(5), Point(5, 5))
 Polygon(Point(0), Point(5), Point(5, 5)).rz(1 / 16)
 
 ```JavaScript
-const polyhedron = Polyhedron(
+Polyhedron(
   [
     [10, 10, 0],
     [10, -10, 0],
@@ -228,7 +228,7 @@ Polyhedron(
       [[4, 1, 0], [4, 2, 1], [4, 3, 2], [4, 0, 3], [3, 0, 1], [3, 1, 2]])
 
 ```JavaScript
-const septagon = Septagon(5).gridView().md(`Septagon(5)`);
+Septagon(5).gridView().md(`Septagon(5)`);
 ```
 
 ![Image](shapes.md.19.png)
@@ -236,7 +236,7 @@ const septagon = Septagon(5).gridView().md(`Septagon(5)`);
 Septagon(5)
 
 ```JavaScript
-const spiral = Spiral().gridView().md(`Spiral()`);
+Spiral().gridView().md(`Spiral()`);
 ```
 
 ![Image](shapes.md.20.png)
@@ -244,7 +244,7 @@ const spiral = Spiral().gridView().md(`Spiral()`);
 Spiral()
 
 ```JavaScript
-const tetragon = Tetragon(5).gridView().md(`Tetragon(5)`);
+Tetragon(5).gridView().md(`Tetragon(5)`);
 ```
 
 ![Image](shapes.md.21.png)
@@ -252,7 +252,7 @@ const tetragon = Tetragon(5).gridView().md(`Tetragon(5)`);
 Tetragon(5)
 
 ```JavaScript
-const triangle = Triangle(5).gridView().md(`Triangle(5)`);
+Triangle(5).gridView().md(`Triangle(5)`);
 ```
 
 ![Image](shapes.md.22.png)
@@ -260,7 +260,7 @@ const triangle = Triangle(5).gridView().md(`Triangle(5)`);
 Triangle(5)
 
 ```JavaScript
-const wave = Wave((a) => [[0, sin(a * 3) * 100]], { to: 360 })
+Wave((a) => [[0, sin(a * 3) * 100]], { to: 360 })
   .align('xy')
   .gridView()
   .md(`Wave((a) => [[0, sin(a * 3) * 100]], { to: 360 })`);
@@ -271,7 +271,7 @@ const wave = Wave((a) => [[0, sin(a * 3) * 100]], { to: 360 })
 Wave((a) => [[0, sin(a * 3) * 100]], { to: 360 })
 
 ```JavaScript
-const weld = Weld(Arc(4).x(-1), Box(5).x(1))
+Weld(Arc(4).x(-1), Box(5).x(1))
   .fill()
   .gridView()
   .md(`Weld(Arc(5).x(-1), Box(5).x(1)).fill()`);
@@ -280,7 +280,7 @@ const weld = Weld(Arc(4).x(-1), Box(5).x(1))
 Weld(Arc(5).x(-1), Box(5).x(1)).fill()
 
 ```JavaScript
-const toEx = Box(1).color('red').as('box').x(5).y(y).fit(Arc(10)).to(g('box')).gridView().md('Reposition to the local frame of reference of an item');
+Box(1).color('red').as('box').x(5).y(5).fit(Arc(10)).to(g('box')).gridView().md('Reposition to the local frame of reference of an item');
 ```
 
 ![Image](shapes.md.24.png)

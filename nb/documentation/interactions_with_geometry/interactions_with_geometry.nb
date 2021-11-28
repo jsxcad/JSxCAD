@@ -186,7 +186,7 @@ A function can be provided to receive the dimensions along with the shape.
 
 log(aRectangle.size());
 
-aRectangle.size((length, s) => s.x(length)).md(`Move the shape along by its length`);
+aRectangle.size(({ length }, s) => s.x(length)).md(`Move the shape along by its length`);
 
 md`
 ---

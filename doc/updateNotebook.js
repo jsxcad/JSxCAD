@@ -127,7 +127,10 @@ export const updateNotebook = async (
     const topLevel = new Map();
     await api.importModule(module, { clearUpdateEmits: false, topLevel });
     await resolvePending();
-    const { html, encodedNotebook } = await toHtml(notebook, { module });
+    const { html, encodedNotebook } = await toHtml(notebook, {
+      module,
+      modulePath: 'https://jsxcad.js.org/alpha',
+    });
     writeFileSync(`${target}.html`, html);
     const { imageUrlList } = await screenshot(
       new TextDecoder('utf8').decode(html),

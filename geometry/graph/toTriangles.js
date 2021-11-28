@@ -9,8 +9,8 @@ export const toTriangles = ({ tags }, geometry) => {
   if (!geometry.cache.triangles) {
     const { matrix, graph } = geometry;
     const triangles = taggedTriangles(
-      { tags },
-      fromSurfaceMeshToTriangles(toSurfaceMesh(graph), matrix)
+      { tags, matrix },
+      fromSurfaceMeshToTriangles(toSurfaceMesh(graph))
     );
     geometry.cache.triangles = triangles;
   }

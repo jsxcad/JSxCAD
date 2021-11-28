@@ -5,7 +5,7 @@ export const move =
   (...args) =>
   (shape) =>
     Shape.Group(
-      ...Shape.toCoordinates(...args).map((coordinate) =>
+      ...Shape.toCoordinates(shape, ...args).map((coordinate) =>
         shape.transform(fromTranslation(coordinate))
       )
     );

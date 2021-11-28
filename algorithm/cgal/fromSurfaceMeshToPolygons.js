@@ -1,9 +1,10 @@
 import { getCgal } from './getCgal.js';
+import { identityMatrix } from '@jsxcad/math-mat4';
 import { toCgalTransformFromJsTransform } from './transform.js';
 
 export const fromSurfaceMeshToPolygons = (
   mesh,
-  transform,
+  transform = identityMatrix,
   triangulate = false
 ) => {
   const c = getCgal();

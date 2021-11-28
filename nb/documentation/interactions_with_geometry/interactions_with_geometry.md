@@ -262,7 +262,7 @@ log(aRectangle.size());
 ```
 
 ```JavaScript
-aRectangle.size((length, s) => s.x(length)).md(`Move the shape along by its length`);
+aRectangle.size(({ length }, s) => s.x(length)).md(`Move the shape along by its length`);
 ```
 
 Move the shape along by its length
@@ -360,7 +360,7 @@ graph LR;
   0 --> 3;
   3[item<br>item:bar]
   3 --> 4;
-  4[graph<br>]
+  4[graph<br>editType:Group]
 '''
 
 ---
