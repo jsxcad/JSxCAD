@@ -38,6 +38,8 @@ Box(5)
   .gridView();
 ```
 
+![Image](shape.md.4.png)
+
 ```JavaScript
 Box(5)
   .color('red')
@@ -45,7 +47,7 @@ Box(5)
   .gridView();
 ```
 
-![Image](shape.md.4.png)
+![Image](shape.md.5.png)
 
 ```JavaScript
 Box(5)
@@ -54,13 +56,13 @@ Box(5)
   .gridView();
 ```
 
-![Image](shape.md.5.png)
+![Image](shape.md.6.png)
 
 ```JavaScript
 Box(5).color('green').gridView();
 ```
 
-![Image](shape.md.6.png)
+![Image](shape.md.7.png)
 
 ```JavaScript
 Box(5)
@@ -80,7 +82,7 @@ Box(5)
   .gridView();
 ```
 
-![Image](shape.md.7.png)
+![Image](shape.md.8.png)
 
 ```JavaScript
 Box(5)
@@ -89,7 +91,7 @@ Box(5)
   .gridView();
 ```
 
-![Image](shape.md.8.png)
+![Image](shape.md.9.png)
 
 ```JavaScript
 Assembly(Box(5), Arc(6))
@@ -97,7 +99,7 @@ Assembly(Box(5), Arc(6))
   .gridView();
 ```
 
-![Image](shape.md.9.png)
+![Image](shape.md.10.png)
 
 ```JavaScript
 Group(Box(5).color('red'), Arc(6).color('blue'))
@@ -105,13 +107,13 @@ Group(Box(5).color('red'), Arc(6).color('blue'))
   .gridView();
 ```
 
-![Image](shape.md.10.png)
+![Image](shape.md.11.png)
 
 ```JavaScript
 Box(10).inset(0.5, 0.5).gridView();
 ```
 
-![Image](shape.md.11.png)
+![Image](shape.md.12.png)
 
 ```JavaScript
 Assembly(Box(10).as('a'), Arc(6).as('b'))
@@ -119,37 +121,39 @@ Assembly(Box(10).as('a'), Arc(6).as('b'))
   .gridView();
 ```
 
+![Image](shape.md.13.png)
+
 ```JavaScript
 Box(10)
   .material('copper')
   .gridView();
 ```
 
-![Image](shape.md.12.png)
+![Image](shape.md.14.png)
 
 ```JavaScript
 Box(10).move(1, 2, 3).gridView();
 ```
 
-![Image](shape.md.13.png)
+![Image](shape.md.15.png)
 
 ```JavaScript
 Box(10).moveTo(1, 2, 3).gridView();
 ```
 
-![Image](shape.md.14.png)
+![Image](shape.md.16.png)
 
 ```JavaScript
 Box(10).move(1, 2, 3).moveTo(center()).gridView();
 ```
 
-![Image](shape.md.15.png)
+![Image](shape.md.17.png)
 
 ```JavaScript
 Box(10).move(top()).gridView();
 ```
 
-![Image](shape.md.16.png)
+![Image](shape.md.18.png)
 
 ```JavaScript
 Assembly(Box(5), Arc(5.5).void())
@@ -157,13 +161,13 @@ Assembly(Box(5), Arc(5.5).void())
   .gridView();
 ```
 
-![Image](shape.md.17.png)
+![Image](shape.md.19.png)
 
 ```JavaScript
 Box(5).offset(1).gridView();
 ```
 
-![Image](shape.md.18.png)
+![Image](shape.md.20.png)
 
 ```JavaScript
 Box(5)
@@ -171,7 +175,7 @@ Box(5)
   .gridView();
 ```
 
-![Image](shape.md.19.png)
+![Image](shape.md.21.png)
 
 ```JavaScript
 Line(10)
@@ -179,7 +183,7 @@ Line(10)
   .gridView();
 ```
 
-![Image](shape.md.20.png)
+![Image](shape.md.22.png)
 
 ```JavaScript
 Group(seq((n) => Arc(n), { from: 1, to: 20 }))
@@ -187,49 +191,49 @@ Group(seq((n) => Arc(n), { from: 1, to: 20 }))
   .gridView();
 ```
 
-![Image](shape.md.21.png)
+![Image](shape.md.23.png)
 
 ```JavaScript
 Box(5).rotate(45).gridView();
 ```
 
-![Image](shape.md.22.png)
+![Image](shape.md.24.png)
 
 ```JavaScript
 Box(1, 2, 3).rx(1/8).gridView();
 ```
 
-![Image](shape.md.23.png)
+![Image](shape.md.25.png)
 
 ```JavaScript
 Box(1, 2, 3).ry(1/8).gridView();
 ```
 
-![Image](shape.md.24.png)
+![Image](shape.md.26.png)
 
 ```JavaScript
 Box(1, 2, 3).rz(1/8).gridView();
 ```
 
-![Image](shape.md.25.png)
+![Image](shape.md.27.png)
 
 ```JavaScript
 Box(5).scale(1, 2).gridView();
 ```
 
-![Image](shape.md.26.png)
+![Image](shape.md.28.png)
 
 ```JavaScript
 Box(5).cut(Arc(5).align('x>')).scale(1, 1).gridView();
 ```
 
-![Image](shape.md.27.png)
+![Image](shape.md.29.png)
 
 ```JavaScript
 Box(5).cut(Arc(5).align('x>')).scale(-1, 1).gridView();
 ```
 
-![Image](shape.md.28.png)
+![Image](shape.md.30.png)
 
 ```JavaScript
 Box(1, 2, 3)
@@ -248,7 +252,7 @@ Box(2, 2, 2)
   .view();
 ```
 
-![Image](shape.md.29.png)
+![Image](shape.md.31.png)
 
 ```JavaScript
 Box(1)
@@ -263,20 +267,20 @@ Box(1)
 Box(5, 5, 5).test().gridView();
 ```
 
-![Image](shape.md.30.png)
+![Image](shape.md.32.png)
 
 ```JavaScript
 Box(5).tool('laser').gridView();
 ```
 
-![Image](shape.md.31.png)
+![Image](shape.md.33.png)
 
 ```JavaScript
 Assembly(Box(5), Arc(6).void())
   .gridView();
 ```
 
-![Image](shape.md.32.png)
+![Image](shape.md.34.png)
 
 ```JavaScript
 Weld(Arc(6).x(-1), Arc(6).x(1), Arc(6).y(1), Arc(6).y(-1))
@@ -284,35 +288,37 @@ Weld(Arc(6).x(-1), Arc(6).x(1), Arc(6).y(1), Arc(6).y(-1))
   .gridView();
 ```
 
-```JavaScript
-Box(5).with(Arc(6)).gridView();
-```
-
-![Image](shape.md.33.png)
-
-```JavaScript
-Box(5).x(1).gridView();
-```
-
-![Image](shape.md.34.png)
-
-```JavaScript
-Box(5).y(1).gridView();
-```
-
 ![Image](shape.md.35.png)
 
 ```JavaScript
-Box(5).z(1).gridView();
+Box(5).with(Arc(6)).gridView();
 ```
 
 ![Image](shape.md.36.png)
 
 ```JavaScript
-Arc(10).voidIn(offset(1)).ex(5).view();
+Box(5).x(1).gridView();
 ```
 
 ![Image](shape.md.37.png)
+
+```JavaScript
+Box(5).y(1).gridView();
+```
+
+![Image](shape.md.38.png)
+
+```JavaScript
+Box(5).z(1).gridView();
+```
+
+![Image](shape.md.39.png)
+
+```JavaScript
+Arc(10).voidIn(offset(1)).ex(5).view();
+```
+
+![Image](shape.md.40.png)
 
 ```JavaScript
 Box(10)
@@ -322,19 +328,19 @@ Box(10)
   .view();
 ```
 
-![Image](shape.md.38.png)
+![Image](shape.md.41.png)
 
 ```JavaScript
 Arc(10).color('blue').color('red').view();
 ```
 
-![Image](shape.md.39.png)
+![Image](shape.md.42.png)
 
 ```JavaScript
 Arc(10).color('blue').tint('red').view();
 ```
 
-![Image](shape.md.40.png)
+![Image](shape.md.43.png)
 
 ```JavaScript
 Edges(
@@ -349,7 +355,7 @@ Edges(
   .gridView();
 ```
 
-![Image](shape.md.41.png)
+![Image](shape.md.44.png)
 
 ```JavaScript
 const topEdge = ([[, , startZ], [, , endZ]]) => Math.min(startZ, endZ);
@@ -375,7 +381,7 @@ const b = Box(5)
 Voxels([0, 0, 0], [0, 0, 1], [1, 0, 1], [2, 0, 1]).view();
 ```
 
-![Image](shape.md.42.png)
+![Image](shape.md.45.png)
 
 ```JavaScript
 b.at(
@@ -385,7 +391,7 @@ b.at(
   .view()
 ```
 
-![Image](shape.md.43.png)
+![Image](shape.md.46.png)
 
 ```JavaScript
 b.to(
@@ -395,4 +401,4 @@ b.to(
   .view()
 ```
 
-![Image](shape.md.44.png)
+![Image](shape.md.47.png)

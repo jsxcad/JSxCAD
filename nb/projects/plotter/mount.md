@@ -168,4 +168,12 @@ const upsideDesign2 = upsideDesign
 
 ![Image](mount.md.9.png)
 
+[reel_0.stl](mount.reel_0.stl)
+
+![Image](mount.md.10.png)
+
+[rim_0.stl](mount.rim_0.stl)
+
+![Image](mount.md.11.png)
+
 [clip_0.stl](mount.clip_0.stl)

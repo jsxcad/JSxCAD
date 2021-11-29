@@ -9,7 +9,6 @@ import {
 } from '@jsxcad/geometry';
 
 import Box from './Box.js';
-import Empty from './Empty.js';
 import Group from './Group.js';
 import Hershey from './Hershey.js';
 import Shape from './Shape.js';
@@ -39,13 +38,7 @@ const getItemNames = (geometry) => {
   return [...names].sort();
 };
 
-const buildLayoutGeometry = ({
-  layer,
-  packSize,
-  pageWidth,
-  pageLength,
-  margin,
-}) => {
+const buildLayoutGeometry = ({ layer, pageWidth, pageLength, margin }) => {
   const itemNames = getItemNames(layer).filter((name) => name !== '');
   const labelScale = 0.0125 * 10;
   const size = [pageWidth, pageLength];
@@ -67,11 +60,7 @@ const buildLayoutGeometry = ({
     .color('red')
     .sketch()
     .toGeometry();
-  return taggedLayout(
-    { size, margin, title, marks: packSize },
-    layer,
-    visualization
-  );
+  return taggedLayout({ size, margin, title }, layer, visualization);
 };
 
 export const Page = (
@@ -113,7 +102,7 @@ export const Page = (
       ) +
       pageMargin * 2;
     return Shape.fromGeometry(
-      buildLayoutGeometry({ layer, packSize, pageWidth, pageLength, margin })
+      buildLayoutGeometry({ layer, pageWidth, pageLength, margin })
     );
   } else if (!pack && !size) {
     const layer = taggedGroup({}, ...layers);
@@ -134,10 +123,12 @@ export const Page = (
       pageMargin * 2;
     if (isFinite(pageWidth) && isFinite(pageLength)) {
       return Shape.fromGeometry(
-        buildLayoutGeometry({ layer, packSize, pageWidth, pageLength, margin })
+        buildLayoutGeometry({ layer, pageWidth, pageLength, margin })
       );
     } else {
-      return Empty();
+      return Shape.fromGeometry(
+        buildLayoutGeometry({ layer, pageWidth: 0, pageLength: 0, margin })
+      );
     }
   } else if (pack && size) {
     // Content fits to page size.
@@ -160,7 +151,6 @@ export const Page = (
         plans.push(
           buildLayoutGeometry({
             layer,
-            packSize,
             pageWidth,
             pageLength,
             margin,
@@ -169,7 +159,13 @@ export const Page = (
       }
       return Shape.fromGeometry(taggedGroup({}, ...plans));
     } else {
-      return Empty();
+      const layer = taggedGroup({}, ...layers);
+      return buildLayoutGeometry({
+        layer,
+        pageWidth: 0,
+        pageLength: 0,
+        margin,
+      });
     }
   } else if (pack && !size) {
     const packSize = [];
@@ -202,7 +198,13 @@ export const Page = (
       }
       return Shape.fromGeometry(taggedGroup({}, ...plans));
     } else {
-      return Empty();
+      const layer = taggedGroup({}, ...layers);
+      return buildLayoutGeometry({
+        layer,
+        pageWidth: 0,
+        pageLength: 0,
+        margin,
+      });
     }
   }
 };

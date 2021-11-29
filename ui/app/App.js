@@ -585,7 +585,15 @@ class App extends React.Component {
       this.setState({ [`NotebookText/${path}`]: data });
     };
 
-    this.Notebook.clickLink = (path, link) => {};
+    this.Notebook.clickLink = async (path, link) => {
+      const { model } = this.state;
+      await this.Workspace.loadWorkingPath(link);
+      // This is a bit of a hack, since selectTab toggles.
+      const nodeId = `Notebook/${link}`;
+      model.getNodeById(nodeId).getParent()._setSelected(-1);
+      model.doAction(FlexLayout.Actions.selectTab(nodeId));
+      this.View.store();
+    };
 
     this.Notebook.close = async (closedPath) => {
       const { WorkspaceOpenPaths = [] } = this.state;
@@ -806,10 +814,8 @@ class App extends React.Component {
 
     this.Workspace = {};
 
-    this.Workspace.loadWorkingPath = async () => {
+    this.Workspace.loadWorkingPath = async (path) => {
       const { WorkspaceOpenPaths = [] } = this.state;
-      const pathControl = document.getElementById('WorkspaceLoadPathId');
-      const path = pathControl.value;
       if (WorkspaceOpenPaths.includes(path)) {
         // FIX: Add indication?
         return;
@@ -901,7 +907,13 @@ class App extends React.Component {
                         <Col xs="auto">
                           <Button
                             variant="primary"
-                            onClick={this.Workspace.loadWorkingPath}
+                            onClick={() => {
+                              const pathControl = document.getElementById(
+                                'WorkspaceLoadPathId'
+                              );
+                              const path = pathControl.value;
+                              this.Workspace.loadWorkingPath(path);
+                            }}
                           >
                             Add
                           </Button>
@@ -1027,6 +1039,13 @@ class App extends React.Component {
     this.creationWatcher = await watchFileCreation(this.fileUpdater);
     this.deletionWatcher = await watchFileDeletion(this.fileUpdater);
     this.servicesWatcher = watchServices(this.servicesUpdater);
+
+    window.onhashchange = ({ newURL }) => {
+      const hash = new URL(newURL).hash.substring(1);
+      const [workspace, path] = hash.split('@');
+      console.log({ workspace, path });
+      this.Notebook.clickLink(undefined, path);
+    };
 
     this.servicesActiveCounts = {};
 
