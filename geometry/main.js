@@ -177,6 +177,7 @@ export { toKeptGeometry } from './tagged/toKeptGeometry.js';
 export { toTransformedGeometry } from './tagged/toTransformedGeometry.js';
 export { toPoints } from './tagged/toPoints.js';
 export { toPolygonsWithHoles } from './tagged/toPolygonsWithHoles.js';
+export { toTriangleArray } from './tagged/toTriangleArray.js';
 export { toTriangles as toTrianglesFromGraph } from './graph/toTriangles.js';
 export { transform } from './tagged/transform.js';
 export { transform as transformPaths } from './paths/transform.js';

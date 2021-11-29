@@ -1,8 +1,5 @@
 ```JavaScript
-const dinosaur = await readSvg(
-  'https://gitcdn.link/cdn/jsxcad/JSxCAD/master/nb/projects/plotter/dinosaur.svg',
-  { fill: false }
-);
+const dinosaur = await readSvg('https://jsxcad.js.org/svg/dinosaur.svg', { fill: false });
 ```
 
 ```JavaScript
@@ -29,17 +26,11 @@ const spiral = Spiral((a) => [[1 + (a * 360) / 100]], {
 [spiral_0.gcode](plotter.spiral_0.gcode)
 
 ```JavaScript
-const flowers = await readSvg(
-  'https://gitcdn.link/cdn/jsxcad/JSxCAD/master/nb/projects/plotter/flowers.svg',
-  { fill: false }
-);
+const flowers = await readSvg('https://jsxcad.js.org/svg/flowers.svg', { fill: false });
 ```
 
 ```JavaScript
-const mandala = await readSvg(
-  'https://gitcdn.link/cdn/jsxcad/JSxCAD/master/nb/projects/plotter/mandala.svg',
-  { fill: false }
-);
+const mandala = await readSvg('https://jsxcad.js.org/svg/mandala.svg', { fill: false });
 ```
 
 ```JavaScript
@@ -65,10 +56,7 @@ const scaledMandala = mandala
 [mandala_0.gcode](plotter.mandala_0.gcode)
 
 ```JavaScript
-const visnezh = await readSvg(
-  'https://gitcdn.link/cdn/jsxcad/JSxCAD/master/nb/projects/plotter/visnezh.svg',
-  { fill: false }
-);
+const visnezh = await readSvg('https://jsxcad.js.org/svg/visnezh.svg', { fill: false });
 ```
 
 ```JavaScript
