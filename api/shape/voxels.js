@@ -77,7 +77,9 @@ export const Voxels = (...points) => {
   const key = (x, y, z) => `${x},${y},${z}`;
   let max = [-Infinity, -Infinity, -Infinity];
   let min = [Infinity, Infinity, Infinity];
-  for (const [x, y, z] of points.map((point) => Shape.toCoordinate(point))) {
+  for (const [x, y, z] of points.map((point) =>
+    Shape.toCoordinate(undefined, point)
+  )) {
     index.add(key(x, y, z));
     max[X] = Math.max(x + 1, max[X]);
     max[Y] = Math.max(y + 1, max[Y]);

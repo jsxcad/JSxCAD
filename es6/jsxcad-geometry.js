@@ -2,9 +2,9 @@ import { identityMatrix, fromTranslation, fromZRotation, fromScaling, fromXRotat
 import { composeTransforms, fromSurfaceMeshToLazyGraph, fromPointsToAlphaShapeAsSurfaceMesh, arrangePathsIntoTriangles, fromPolygonsToSurfaceMesh, deserializeSurfaceMesh, fromGraphToSurfaceMesh, fromSurfaceMeshEmitBoundingBox, differenceOfSurfaceMeshes, arrangePaths, bendSurfaceMesh, computeCentroidOfSurfaceMesh, computeNormalOfSurfaceMesh, fromSurfaceMeshToGraph, fromPointsToConvexHullAsSurfaceMesh, outlineSurfaceMesh, extrudeSurfaceMesh, extrudeToPlaneOfSurfaceMesh, fromSurfaceMeshToPolygonsWithHoles, reverseFaceOrientationsOfSurfaceMesh, fromFunctionToSurfaceMesh, fromPointsToSurfaceMesh, fromSegmentToInverseTransform, invertTransform, growSurfaceMesh, intersectionOfSurfaceMeshes, SurfaceMeshQuery, insetOfPolygonWithHoles, loftBetweenCongruentSurfaceMeshes, minkowskiDifferenceOfSurfaceMeshes, minkowskiShellOfSurfaceMeshes, minkowskiSumOfSurfaceMeshes, offsetOfPolygonWithHoles, projectToPlaneOfSurfaceMesh, serializeSurfaceMesh, pushSurfaceMesh, remeshSurfaceMesh, sectionOfSurfaceMesh, subdivideSurfaceMesh, separateSurfaceMesh, fromSurfaceMeshToTriangles, taperSurfaceMesh, doesSelfIntersectOfSurfaceMesh, twistSurfaceMesh, unionOfSurfaceMeshes } from './jsxcad-algorithm-cgal.js';
 export { arrangePolygonsWithHoles } from './jsxcad-algorithm-cgal.js';
 import { cache, cacheRewriteTags, cacheSection } from './jsxcad-cache.js';
-import { equals, transform as transform$5, canonicalize as canonicalize$5, max, min, scale as scale$3, subtract } from './jsxcad-math-vec3.js';
-import { transform as transform$6, canonicalize as canonicalize$6 } from './jsxcad-math-poly3.js';
+import { equals, transform as transform$4, canonicalize as canonicalize$5, max, min, scale as scale$3, subtract } from './jsxcad-math-vec3.js';
 import { canonicalize as canonicalize$7 } from './jsxcad-math-plane.js';
+import { canonicalize as canonicalize$6 } from './jsxcad-math-poly3.js';
 import { info, read as read$1, write as write$1 } from './jsxcad-sys.js';
 
 const update = (geometry, updates, changes) => {
@@ -111,7 +111,7 @@ const visit = (geometry, op, state) => {
   return walk(geometry, state);
 };
 
-const transform$4 = (matrix, geometry) => {
+const transform$3 = (matrix, geometry) => {
   const op = (geometry, descend, walk) =>
     descend({
       matrix: geometry.matrix
@@ -480,22 +480,22 @@ const isOpen = (path) => !isClosed(path);
 // A path point may be supplemented by a 'forward' and a 'right' vector
 // allowing it to define a plane with a rotation.
 
-const transform$3 = (matrix, path) => {
+const transform$2 = (matrix, path) => {
   const transformedPath = [];
   if (isOpen(path)) {
     transformedPath.push(null);
   }
   for (let nth = isOpen(path) ? 1 : 0; nth < path.length; nth++) {
     const point = path[nth];
-    const transformedPoint = transform$5(matrix, point);
+    const transformedPoint = transform$4(matrix, point);
     if (point.length > 3) {
       const forward = point.slice(3, 6);
-      const transformedForward = transform$5(matrix, forward);
+      const transformedForward = transform$4(matrix, forward);
       transformedPoint.push(...transformedForward);
     }
     if (point.length > 6) {
       const right = point.slice(6, 9);
-      const transformedRight = transform$5(matrix, right);
+      const transformedRight = transform$4(matrix, right);
       transformedPoint.push(...transformedRight);
     }
     transformedPath.push(transformedPoint);
@@ -503,25 +503,25 @@ const transform$3 = (matrix, path) => {
   return transformedPath;
 };
 
-const transform$2 = (matrix, paths) =>
-  paths.map((path) => transform$3(matrix, path));
+const transform$1 = (matrix, paths) =>
+  paths.map((path) => transform$2(matrix, path));
 
 // A point in a cloud may be supplemented by a 'forward' and a 'right' vector
 // allowing it to define a plane with a rotation.
 
-const transform$1 = (matrix, points) => {
+const transform = (matrix, points) => {
   const transformedPoints = [];
   for (let nth = 0; nth < points.length; nth++) {
     const point = points[nth];
-    const transformedPoint = transform$5(matrix, point);
+    const transformedPoint = transform$4(matrix, point);
     if (point.length > 3) {
       const forward = point.slice(3, 6);
-      const transformedForward = transform$5(matrix, forward);
+      const transformedForward = transform$4(matrix, forward);
       transformedPoint.push(...transformedForward);
     }
     if (point.length > 6) {
       const right = point.slice(6, 9);
-      const transformedRight = transform$5(matrix, right);
+      const transformedRight = transform$4(matrix, right);
       transformedPoint.push(...transformedRight);
     }
     transformedPoints.push(transformedPoint);
@@ -529,15 +529,12 @@ const transform$1 = (matrix, points) => {
   return transformedPoints;
 };
 
-const transform = (matrix, polygons) =>
-  polygons.map((polygon) => transform$6(matrix, polygon));
-
 const transformedGeometry = Symbol('transformedGeometry');
 
 const transformedOrientation = (matrix, [origin, normal, rotation]) => [
-  transform$5(matrix, origin),
-  transform$5(matrix, normal),
-  transform$5(matrix, rotation),
+  transform$4(matrix, origin),
+  transform$4(matrix, normal),
+  transform$4(matrix, rotation),
 ];
 
 const transformSegments = (geometry) => {
@@ -556,8 +553,8 @@ const transformSegments = (geometry) => {
   const transformed = [];
   for (const [start, end] of segments) {
     transformed.push([
-      transform$5(matrix, start),
-      transform$5(matrix, end),
+      transform$4(matrix, start),
+      transform$4(matrix, end),
     ]);
   }
   return taggedSegments(
@@ -584,27 +581,23 @@ const toTransformedGeometry = (geometry) => {
         case 'plan':
           return descend();
         // Leaf
-        case 'triangles':
-          return descend({
-            triangles: transform(geometry.matrix, geometry.triangles),
-            matrix: undefined,
-          });
         case 'polygonsWithHoles':
           return fromPolygonsWithHoles(geometry);
         case 'segments':
           return transformSegments(geometry);
         case 'paths':
           return descend({
-            paths: transform$2(geometry.matrix, geometry.paths),
+            paths: transform$1(geometry.matrix, geometry.paths),
             matrix: undefined,
           });
         case 'points':
           return descend({
-            points: transform$1(geometry.matrix, geometry.points),
+            points: transform(geometry.matrix, geometry.points),
             matrix: undefined,
           });
+        // These don't need a transformed version.
+        case 'triangles':
         case 'graph':
-          // Graphs don't need a transformed version.
           return geometry;
         default:
           throw Error(
@@ -1131,7 +1124,7 @@ const convexHull = ({ tags }, points) =>
 const eachPoint$3 = (geometry, emit) => {
   for (const point of realizeGraph(geometry).graph.points) {
     if (point !== undefined) {
-      emit(transform$5(geometry.matrix || identityMatrix, point));
+      emit(transform$4(geometry.matrix || identityMatrix, point));
     }
   }
 };
@@ -1210,12 +1203,13 @@ const measureBoundingBox$2 = (points) => {
   return [min$1, max$1];
 };
 
-const measureBoundingBox$1 = (polygons) => {
+const measureBoundingBox$1 = (polygons, matrix = identityMatrix) => {
   if (polygons.measureBoundingBox === undefined) {
     const min = [Infinity, Infinity, Infinity];
     const max = [-Infinity, -Infinity, -Infinity];
     for (const path of polygons) {
-      for (const point of path) {
+      for (const rawPoint of path) {
+        const point = transform$4(matrix, rawPoint);
         if (point[0] < min[0]) min[0] = point[0];
         if (point[1] < min[1]) min[1] = point[1];
         if (point[2] < min[2]) min[2] = point[2];
@@ -1272,7 +1266,9 @@ const measureBoundingBox = (geometry) => {
       case 'paths':
         return update(measureBoundingBoxGeneric(geometry));
       case 'triangles':
-        return update(measureBoundingBox$1(geometry.triangles));
+        return update(
+          measureBoundingBox$1(geometry.triangles, geometry.matrix)
+        );
       default:
         throw Error(`Unknown geometry: ${geometry.type}`);
     }
@@ -2846,15 +2842,15 @@ const rerealizeGraph = (graph) =>
   fromSurfaceMeshLazy(toSurfaceMesh(graph), /* forceNewGraph= */ true);
 
 const translate$2 = (vector, path) =>
-  transform$3(fromTranslation(vector), path);
+  transform$2(fromTranslation(vector), path);
 const rotateZ$1 = (radians, path) =>
-  transform$3(fromZRotation(radians), path);
-const scale$2 = (vector, path) => transform$3(fromScaling(vector), path);
+  transform$2(fromZRotation(radians), path);
+const scale$2 = (vector, path) => transform$2(fromScaling(vector), path);
 
 const scale$1 = ([x = 1, y = 1, z = 1], paths) =>
-  transform$2(fromScaling([x, y, z]), paths);
+  transform$1(fromScaling([x, y, z]), paths);
 const translate$1 = ([x = 0, y = 0, z = 0], paths) =>
-  transform$2(fromTranslation([x, y, z]), paths);
+  transform$1(fromTranslation([x, y, z]), paths);
 
 const sections = (geometry, matrices, { profile = false } = {}) => {
   const graphs = [];
@@ -3009,8 +3005,8 @@ const toTriangles$1 = ({ tags }, geometry) => {
   if (!geometry.cache.triangles) {
     const { matrix, graph } = geometry;
     const triangles = taggedTriangles(
-      { tags },
-      fromSurfaceMeshToTriangles(toSurfaceMesh(graph), matrix)
+      { tags, matrix },
+      fromSurfaceMeshToTriangles(toSurfaceMesh(graph))
     );
     geometry.cache.triangles = triangles;
   }
@@ -3382,6 +3378,52 @@ const toPolygonsWithHoles = (geometry) => {
   return output;
 };
 
+const toTriangleArray = (geometry) => {
+  const triangles = [];
+  const op = (geometry, descend) => {
+    const { matrix = identityMatrix, tags, type } = geometry;
+    const transformTriangles = (triangles) =>
+      triangles.map((triangle) =>
+        triangle.map((point) => transform$4(matrix, point))
+      );
+    switch (type) {
+      case 'graph': {
+        if (isNotVoid(geometry)) {
+          triangles.push(
+            ...transformTriangles(
+              toTriangles$1({ tags }, geometry).triangles
+            )
+          );
+        }
+        break;
+      }
+      case 'triangles': {
+        if (isNotVoid(geometry)) {
+          triangles.push(...transformTriangles(geometry.triangles));
+        }
+        break;
+      }
+      case 'points':
+      case 'paths':
+      case 'segments':
+        break;
+      case 'layout':
+      case 'plan':
+      case 'item':
+      case 'sketch':
+      case 'group': {
+        return descend();
+      }
+      default:
+        throw Error(`Unexpected geometry: ${JSON.stringify(geometry)}`);
+    }
+  };
+
+  visit(toConcreteGeometry(geometry), op);
+
+  return triangles;
+};
+
 const twist$1 = (geometry, turnsPerMm) =>
   taggedGraph(
     { tags: geometry.tags },
@@ -3521,14 +3563,14 @@ const write = async (geometry, path) => {
 };
 
 const rotateX = (angle, geometry) =>
-  transform$4(fromXRotation((angle * Math.PI) / 180), geometry);
+  transform$3(fromXRotation((angle * Math.PI) / 180), geometry);
 const rotateY = (angle, geometry) =>
-  transform$4(fromYRotation((angle * Math.PI) / 180), geometry);
+  transform$3(fromYRotation((angle * Math.PI) / 180), geometry);
 const rotateZ = (angle, geometry) =>
-  transform$4(fromZRotation((angle * Math.PI) / 180), geometry);
+  transform$3(fromZRotation((angle * Math.PI) / 180), geometry);
 const translate = (vector, geometry) =>
-  transform$4(fromTranslation(vector), geometry);
+  transform$3(fromTranslation(vector), geometry);
 const scale = (vector, geometry) =>
-  transform$4(fromScaling(vector), geometry);
+  transform$3(fromScaling(vector), geometry);
 
-export { allTags, alphaShape, assemble, bend, canonicalize, canonicalize$4 as canonicalizePath, canonicalize$3 as canonicalizePaths, close as closePath, computeCentroid, computeNormal, concatenate as concatenatePath, convexHull as convexHullToGraph, deduplicate as deduplicatePath, difference, disjoint, doesNotOverlap, drop, eachItem, eachPoint, eachSegment, empty, extrude, extrudeToPlane, faces, fill, flip, flip$3 as flipPath, fresh, fromFunction as fromFunctionToGraph, fromPaths as fromPathsToGraph, fromPoints as fromPointsToGraph, fromPolygons as fromPolygonsToGraph, fromPolygonsWithHolesToTriangles, fromSurfaceToPaths, fromTriangles as fromTrianglesToGraph, getAnyNonVoidSurfaces, getAnySurfaces, getFaceablePaths, getGraphs, getInverseMatrices, getItems, getLayouts, getLeafs, getNonVoidFaceablePaths, getNonVoidGraphs, getNonVoidItems, getNonVoidPaths, getNonVoidPlans, getNonVoidPoints, getNonVoidSegments, getEdges as getPathEdges, getPaths, getPeg, getPlans, getPoints, getTags, grow, hasNotShow, hasNotShowOutline, hasNotShowSkin, hasNotShowWireframe, hasNotType, hasNotTypeVoid, hasNotTypeWire, hasShow, hasShowOutline, hasShowSkin, hasShowWireframe, hasType, hasTypeVoid, hasTypeWire, hash, inset, intersection, isClockwise as isClockwisePath, isClosed as isClosedPath, isCounterClockwise as isCounterClockwisePath, isNotShow, isNotShowOutline, isNotShowSkin, isNotShowWireframe, isNotType, isNotTypeVoid, isNotTypeWire, isNotVoid, isShow, isShowOutline, isShowSkin, isShowWireframe, isType, isTypeVoid, isTypeWire, isVoid, keep, loft, measureBoundingBox, minkowskiDifference, minkowskiShell, minkowskiSum, offset, open as openPath, outline, prepareForSerialization, projectToPlane, push, read, realize, realizeGraph, registerReifier, reify, remesh, rerealizeGraph, reverseFaceOrientations as reverseFaceOrientationsOfGraph, rewrite, rewriteTags, rotateX, rotateY, rotateZ, rotateZ$1 as rotateZPath, scale, scale$2 as scalePath, scale$1 as scalePaths, section, separate, showOutline, showSkin, showWireframe, smooth, soup, taggedDisplayGeometry, taggedGraph, taggedGroup, taggedItem, taggedLayout, taggedPaths, taggedPlan, taggedPoints, taggedPolygons, taggedSegments, taggedSketch, taggedTriangles, taper, test, toConcreteGeometry, toDisjointGeometry, toDisplayGeometry, toKeptGeometry, toPoints, toPolygonsWithHoles, toTransformedGeometry, toTriangles$1 as toTrianglesFromGraph, toVisiblyDisjointGeometry, transform$4 as transform, transform$2 as transformPaths, translate, translate$2 as translatePath, translate$1 as translatePaths, twist, typeVoid, typeWire, union, update, visit, withQuery, write };
+export { allTags, alphaShape, assemble, bend, canonicalize, canonicalize$4 as canonicalizePath, canonicalize$3 as canonicalizePaths, close as closePath, computeCentroid, computeNormal, concatenate as concatenatePath, convexHull as convexHullToGraph, deduplicate as deduplicatePath, difference, disjoint, doesNotOverlap, drop, eachItem, eachPoint, eachSegment, empty, extrude, extrudeToPlane, faces, fill, flip, flip$3 as flipPath, fresh, fromFunction as fromFunctionToGraph, fromPaths as fromPathsToGraph, fromPoints as fromPointsToGraph, fromPolygons as fromPolygonsToGraph, fromPolygonsWithHolesToTriangles, fromSurfaceToPaths, fromTriangles as fromTrianglesToGraph, getAnyNonVoidSurfaces, getAnySurfaces, getFaceablePaths, getGraphs, getInverseMatrices, getItems, getLayouts, getLeafs, getNonVoidFaceablePaths, getNonVoidGraphs, getNonVoidItems, getNonVoidPaths, getNonVoidPlans, getNonVoidPoints, getNonVoidSegments, getEdges as getPathEdges, getPaths, getPeg, getPlans, getPoints, getTags, grow, hasNotShow, hasNotShowOutline, hasNotShowSkin, hasNotShowWireframe, hasNotType, hasNotTypeVoid, hasNotTypeWire, hasShow, hasShowOutline, hasShowSkin, hasShowWireframe, hasType, hasTypeVoid, hasTypeWire, hash, inset, intersection, isClockwise as isClockwisePath, isClosed as isClosedPath, isCounterClockwise as isCounterClockwisePath, isNotShow, isNotShowOutline, isNotShowSkin, isNotShowWireframe, isNotType, isNotTypeVoid, isNotTypeWire, isNotVoid, isShow, isShowOutline, isShowSkin, isShowWireframe, isType, isTypeVoid, isTypeWire, isVoid, keep, loft, measureBoundingBox, minkowskiDifference, minkowskiShell, minkowskiSum, offset, open as openPath, outline, prepareForSerialization, projectToPlane, push, read, realize, realizeGraph, registerReifier, reify, remesh, rerealizeGraph, reverseFaceOrientations as reverseFaceOrientationsOfGraph, rewrite, rewriteTags, rotateX, rotateY, rotateZ, rotateZ$1 as rotateZPath, scale, scale$2 as scalePath, scale$1 as scalePaths, section, separate, showOutline, showSkin, showWireframe, smooth, soup, taggedDisplayGeometry, taggedGraph, taggedGroup, taggedItem, taggedLayout, taggedPaths, taggedPlan, taggedPoints, taggedPolygons, taggedSegments, taggedSketch, taggedTriangles, taper, test, toConcreteGeometry, toDisjointGeometry, toDisplayGeometry, toKeptGeometry, toPoints, toPolygonsWithHoles, toTransformedGeometry, toTriangleArray, toTriangles$1 as toTrianglesFromGraph, toVisiblyDisjointGeometry, transform$3 as transform, transform$1 as transformPaths, translate, translate$2 as translatePath, translate$1 as translatePaths, twist, typeVoid, typeWire, union, update, visit, withQuery, write };

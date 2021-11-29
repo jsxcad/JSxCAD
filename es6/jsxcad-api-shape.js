@@ -253,24 +253,46 @@ Shape.toNestedValues = (to, from) => {
   }
 };
 
-Shape.toCoordinate = (x = 0, y = 0, z = 0) => {
+Shape.toCoordinate = (shape, x = 0, y = 0, z = 0) => {
+  if (x instanceof Function) {
+    x = x(shape);
+  }
+  if (typeof x === 'string') {
+    x = shape.get(x);
+  }
   if (x instanceof Shape) {
     const g = x.toTransformedGeometry();
     if (g.type === 'points' && g.points.length === 1) {
       // FIX: Consider how this might be more robust.
       return g.points[0];
+    } else {
+      throw Error(`Unexpected coordinate value: ${x}`);
     }
   } else if (x instanceof Array) {
     return x;
-  } else {
+  } else if (typeof x === 'number') {
+    if (typeof y !== 'number') {
+      throw Error(`Unexpected coordinate value: ${y}`);
+    }
+    if (typeof z !== 'number') {
+      throw Error(`Unexpected coordinate value: ${z}`);
+    }
     return [x, y, z];
+  } else {
+    throw Error(`Unexpected coordinate value: ${x}`);
   }
 };
 
-Shape.toCoordinates = (...args) => {
+Shape.toCoordinates = (shape, ...args) => {
   const coordinates = [];
   while (args.length > 0) {
-    const x = args.shift();
+    let x = args.shift();
+    if (x instanceof Function) {
+      x = x(shape);
+    }
+    if (typeof x === 'string') {
+      x = shape.get(x);
+    }
     if (x instanceof Shape) {
       const g = x.toTransformedGeometry();
       if (g.type === 'points' && g.points.length === 1) {
@@ -2773,7 +2795,8 @@ const edit = (editId) => (shape) =>
 
 Shape.registerMethod('edit', edit);
 
-const Point = (...args) => Shape.fromPoint(Shape.toCoordinate(...args));
+const Point = (...args) =>
+  Shape.fromPoint(Shape.toCoordinate(undefined, ...args));
 
 Shape.prototype.Point = Shape.shapeMethod(Point);
 
@@ -3188,7 +3211,7 @@ const move =
   (...args) =>
   (shape) =>
     Shape.Group(
-      ...Shape.toCoordinates(...args).map((coordinate) =>
+      ...Shape.toCoordinates(shape, ...args).map((coordinate) =>
         shape.transform(fromTranslation(coordinate))
       )
     );
@@ -4085,7 +4108,9 @@ const Voxels = (...points) => {
   const key = (x, y, z) => `${x},${y},${z}`;
   let max = [-Infinity, -Infinity, -Infinity];
   let min = [Infinity, Infinity, Infinity];
-  for (const [x, y, z] of points.map((point) => Shape.toCoordinate(point))) {
+  for (const [x, y, z] of points.map((point) =>
+    Shape.toCoordinate(undefined, point)
+  )) {
     index.add(key(x, y, z));
     max[X] = Math.max(x + 1, max[X]);
     max[Y] = Math.max(y + 1, max[Y]);
@@ -4311,7 +4336,7 @@ const hull =
 Shape.registerMethod('hull', hull);
 
 const Points = (...args) =>
-  Shape.fromPoints(args.map((arg) => Shape.toCoordinate(arg)));
+  Shape.fromPoints(args.map((arg) => Shape.toCoordinate(undefined, arg)));
 
 Shape.prototype.Points = Shape.shapeMethod(Points);
 
@@ -4333,15 +4358,18 @@ Shape.prototype.chainHull = chainHullMethod;
 Shape.prototype.ChainedHull = Shape.shapeMethod(ChainedHull);
 
 const Edge = (source, target) =>
-  Shape.fromSegments([Shape.toCoordinate(source), Shape.toCoordinate(target)]);
+  Shape.fromSegments([
+    Shape.toCoordinate(undefined, source),
+    Shape.toCoordinate(undefined, target),
+  ]);
 
 Shape.prototype.Edge = Shape.shapeMethod(Edge);
 
 const Edges = (...segments) =>
   Shape.fromSegments(
     ...Shape.toNestedValues(segments).map(([source, target]) => [
-      Shape.toCoordinate(source),
-      Shape.toCoordinate(target),
+      Shape.toCoordinate(undefined, source),
+      Shape.toCoordinate(undefined, target),
     ])
   );
 
@@ -4524,7 +4552,9 @@ const Pentagon = (x, y, z) => Arc(x, y, z).hasSides(5);
 Shape.prototype.Pentagon = Shape.shapeMethod(Pentagon);
 
 const Polygon = (...points) =>
-  Shape.fromClosedPath(points.map((point) => Shape.toCoordinate(point)));
+  Shape.fromClosedPath(
+    points.map((point) => Shape.toCoordinate(undefined, point))
+  );
 
 Shape.prototype.Polygon = Shape.shapeMethod(Polygon);
 

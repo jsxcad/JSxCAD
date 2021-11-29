@@ -409,6 +409,16 @@ export const buildMeshes = async ({
       throw Error(`Non-display geometry: ${geometry.type}`);
   }
 
+  if (mesh && geometry.matrix) {
+    const matrix = new Matrix4();
+    // Bypass matrix.set to use column-major ordering.
+    for (let nth = 0; nth < 16; nth++) {
+      matrix.elements[nth] = geometry.matrix[nth];
+    }
+    mesh.applyMatrix4(matrix);
+    mesh.updateMatrix();
+  }
+
   if (geometry.content) {
     if (mesh === undefined) {
       mesh = new Group();

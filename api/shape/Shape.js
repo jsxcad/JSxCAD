@@ -261,24 +261,46 @@ Shape.toNestedValues = (to, from) => {
   }
 };
 
-Shape.toCoordinate = (x = 0, y = 0, z = 0) => {
+Shape.toCoordinate = (shape, x = 0, y = 0, z = 0) => {
+  if (x instanceof Function) {
+    x = x(shape);
+  }
+  if (typeof x === 'string') {
+    x = shape.get(x);
+  }
   if (x instanceof Shape) {
     const g = x.toTransformedGeometry();
     if (g.type === 'points' && g.points.length === 1) {
       // FIX: Consider how this might be more robust.
       return g.points[0];
+    } else {
+      throw Error(`Unexpected coordinate value: ${x}`);
     }
   } else if (x instanceof Array) {
     return x;
-  } else {
+  } else if (typeof x === 'number') {
+    if (typeof y !== 'number') {
+      throw Error(`Unexpected coordinate value: ${y}`);
+    }
+    if (typeof z !== 'number') {
+      throw Error(`Unexpected coordinate value: ${z}`);
+    }
     return [x, y, z];
+  } else {
+    throw Error(`Unexpected coordinate value: ${x}`);
   }
 };
 
-Shape.toCoordinates = (...args) => {
+Shape.toCoordinates = (shape, ...args) => {
   const coordinates = [];
   while (args.length > 0) {
-    const x = args.shift();
+    let x = args.shift();
+    if (x instanceof Function) {
+      x = x(shape);
+    }
+    if (typeof x === 'string') {
+      x = shape.get(x);
+    }
     if (x instanceof Shape) {
       const g = x.toTransformedGeometry();
       if (g.type === 'points' && g.points.length === 1) {

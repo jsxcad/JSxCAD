@@ -1,7 +1,10 @@
 import Shape from './Shape.js';
 
 export const Edge = (source, target) =>
-  Shape.fromSegments([Shape.toCoordinate(source), Shape.toCoordinate(target)]);
+  Shape.fromSegments([
+    Shape.toCoordinate(undefined, source),
+    Shape.toCoordinate(undefined, target),
+  ]);
 
 export default Edge;
 
