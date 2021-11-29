@@ -42,6 +42,8 @@ ChainedHull(Point(), Box(5).z(5), Arc(3).z(8))
 Empty().view().md(`Empty()`);
 ```
 
+![Image](shapes.md.4.png)
+
 Empty()
 
 ```JavaScript
@@ -51,7 +53,7 @@ Group(Box(10), Arc(8), Triangle(5))
   .md(`Group(Box(10), Arc(8), Triangle(5))`);
 ```
 
-![Image](shapes.md.4.png)
+![Image](shapes.md.5.png)
 
 Group(Box(10), Arc(8), Triangle(5))
 
@@ -62,7 +64,7 @@ Hershey('Hershey', 10)
   .md(`Hershey(10)('Hershey').align('xy')`);
 ```
 
-![Image](shapes.md.5.png)
+![Image](shapes.md.6.png)
 
 Hershey(10)('Hershey').align('xy')
 
@@ -70,7 +72,7 @@ Hershey(10)('Hershey').align('xy')
 Hexagon(10).gridView().md(`Hexagon(10)`);
 ```
 
-![Image](shapes.md.6.png)
+![Image](shapes.md.7.png)
 
 Hexagon(10)
 
@@ -78,7 +80,7 @@ Hexagon(10)
 Hull(Arc(5), Box(5).z(5)).view().md(`Hull(Arc(5), Box(5).z(5))`);
 ```
 
-![Image](shapes.md.7.png)
+![Image](shapes.md.8.png)
 
 Hull(Arc(5), Box(5).z(5))
 
@@ -86,7 +88,7 @@ Hull(Arc(5), Box(5).z(5))
 Icosahedron(5).view().md(`Icosahedron(5)`);
 ```
 
-![Image](shapes.md.8.png)
+![Image](shapes.md.9.png)
 
 Icosahedron(5)
 
@@ -117,7 +119,7 @@ const torusFn = ([x, y, z]) => {
 Line(5, -1).rz(45).gridView().md(`Line(5, -1)`);
 ```
 
-![Image](shapes.md.9.png)
+![Image](shapes.md.10.png)
 
 Line(5, -1)
 
@@ -127,7 +129,7 @@ Implicit(torusFn, { radius: 2 })
   .md('Implicit(torusFn, { radius: 2 }');
 ```
 
-![Image](shapes.md.10.png)
+![Image](shapes.md.11.png)
 
 Implicit(torusFn, { radius: 2 }
 
@@ -135,7 +137,7 @@ Implicit(torusFn, { radius: 2 }
 Octagon(5).gridView().md(`Octagon(5)`);
 ```
 
-![Image](shapes.md.11.png)
+![Image](shapes.md.12.png)
 
 Octagon(5)
 
@@ -143,7 +145,7 @@ Octagon(5)
 Orb(5).hasSides(20).view().md(`Orb(5)`);
 ```
 
-![Image](shapes.md.12.png)
+![Image](shapes.md.13.png)
 
 Orb(5)
 
@@ -154,7 +156,7 @@ Path(Point(0), Point(5), Point(5, 5), Point(0))
   .md(`Path(Point(0), Point(5), Point(5, 5), Point(0)).rz(45 / 2)`);
 ```
 
-![Image](shapes.md.13.png)
+![Image](shapes.md.14.png)
 
 Path(Point(0), Point(5), Point(5, 5), Point(0)).rz(45 / 2)
 
@@ -162,7 +164,7 @@ Path(Point(0), Point(5), Point(5, 5), Point(0)).rz(45 / 2)
 Pentagon(5).gridView().md(`Pentagon(5)`);
 ```
 
-![Image](shapes.md.14.png)
+![Image](shapes.md.15.png)
 
 Pentagon(5)
 
@@ -170,7 +172,7 @@ Pentagon(5)
 Point(0.5, 0.5).gridView().md(`Point(0.5, 0.5)`);
 ```
 
-![Image](shapes.md.15.png)
+![Image](shapes.md.16.png)
 
 Point(0.5, 0.5)
 
@@ -180,7 +182,7 @@ Points([0.5, 0.5], [-0.5, -0.5])
   .md(`Points([0.5, 0.5], [-0.5, -0.5])`);
 ```
 
-![Image](shapes.md.16.png)
+![Image](shapes.md.17.png)
 
 Points([0.5, 0.5], [-0.5, -0.5])
 
@@ -191,7 +193,7 @@ Polygon(Point(0), Point(5), Point(5, 5))
   .md(`Polygon(Point(0), Point(5), Point(5, 5)).rz(1 / 16)`);
 ```
 
-![Image](shapes.md.17.png)
+![Image](shapes.md.18.png)
 
 Polygon(Point(0), Point(5), Point(5, 5)).rz(1 / 16)
 
@@ -221,7 +223,7 @@ Polyhedron(
   );
 ```
 
-![Image](shapes.md.18.png)
+![Image](shapes.md.19.png)
 
 Polyhedron(  
       [[10, 10, 0], [10, -10, 0], [-10, -10, 0], [-10, 10, 0], [0, 0, 10]],  
@@ -231,7 +233,7 @@ Polyhedron(
 Septagon(5).gridView().md(`Septagon(5)`);
 ```
 
-![Image](shapes.md.19.png)
+![Image](shapes.md.20.png)
 
 Septagon(5)
 
@@ -239,7 +241,7 @@ Septagon(5)
 Spiral().gridView().md(`Spiral()`);
 ```
 
-![Image](shapes.md.20.png)
+![Image](shapes.md.21.png)
 
 Spiral()
 
@@ -247,7 +249,7 @@ Spiral()
 Tetragon(5).gridView().md(`Tetragon(5)`);
 ```
 
-![Image](shapes.md.21.png)
+![Image](shapes.md.22.png)
 
 Tetragon(5)
 
@@ -255,7 +257,7 @@ Tetragon(5)
 Triangle(5).gridView().md(`Triangle(5)`);
 ```
 
-![Image](shapes.md.22.png)
+![Image](shapes.md.23.png)
 
 Triangle(5)
 
@@ -266,7 +268,7 @@ Wave((a) => [[0, sin(a * 3) * 100]], { to: 360 })
   .md(`Wave((a) => [[0, sin(a * 3) * 100]], { to: 360 })`);
 ```
 
-![Image](shapes.md.23.png)
+![Image](shapes.md.24.png)
 
 Wave((a) => [[0, sin(a * 3) * 100]], { to: 360 })
 
@@ -277,12 +279,14 @@ Weld(Arc(4).x(-1), Box(5).x(1))
   .md(`Weld(Arc(5).x(-1), Box(5).x(1)).fill()`);
 ```
 
+![Image](shapes.md.25.png)
+
 Weld(Arc(5).x(-1), Box(5).x(1)).fill()
 
 ```JavaScript
 Box(1).color('red').as('box').x(5).y(5).fit(Arc(10)).to(g('box')).gridView().md('Reposition to the local frame of reference of an item');
 ```
 
-![Image](shapes.md.24.png)
+![Image](shapes.md.26.png)
 
 Reposition to the local frame of reference of an item

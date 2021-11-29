@@ -2584,13 +2584,7 @@ const getItemNames = (geometry) => {
   return [...names].sort();
 };
 
-const buildLayoutGeometry = ({
-  layer,
-  packSize,
-  pageWidth,
-  pageLength,
-  margin,
-}) => {
+const buildLayoutGeometry = ({ layer, pageWidth, pageLength, margin }) => {
   const itemNames = getItemNames(layer).filter((name) => name !== '');
   const labelScale = 0.0125 * 10;
   const size = [pageWidth, pageLength];
@@ -2612,11 +2606,7 @@ const buildLayoutGeometry = ({
     .color('red')
     .sketch()
     .toGeometry();
-  return taggedLayout(
-    { size, margin, title, marks: packSize },
-    layer,
-    visualization
-  );
+  return taggedLayout({ size, margin, title }, layer, visualization);
 };
 
 const Page = (
@@ -2658,7 +2648,7 @@ const Page = (
       ) +
       pageMargin * 2;
     return Shape.fromGeometry(
-      buildLayoutGeometry({ layer, packSize, pageWidth, pageLength, margin })
+      buildLayoutGeometry({ layer, pageWidth, pageLength, margin })
     );
   } else if (!pack && !size) {
     const layer = taggedGroup({}, ...layers);
@@ -2679,10 +2669,12 @@ const Page = (
       pageMargin * 2;
     if (isFinite(pageWidth) && isFinite(pageLength)) {
       return Shape.fromGeometry(
-        buildLayoutGeometry({ layer, packSize, pageWidth, pageLength, margin })
+        buildLayoutGeometry({ layer, pageWidth, pageLength, margin })
       );
     } else {
-      return Empty();
+      return Shape.fromGeometry(
+        buildLayoutGeometry({ layer, pageWidth: 0, pageLength: 0, margin })
+      );
     }
   } else if (pack && size) {
     // Content fits to page size.
@@ -2705,7 +2697,6 @@ const Page = (
         plans.push(
           buildLayoutGeometry({
             layer,
-            packSize,
             pageWidth,
             pageLength,
             margin,
@@ -2714,7 +2705,13 @@ const Page = (
       }
       return Shape.fromGeometry(taggedGroup({}, ...plans));
     } else {
-      return Empty();
+      const layer = taggedGroup({}, ...layers);
+      return buildLayoutGeometry({
+        layer,
+        pageWidth: 0,
+        pageLength: 0,
+        margin,
+      });
     }
   } else if (pack && !size) {
     const packSize = [];
@@ -2747,7 +2744,13 @@ const Page = (
       }
       return Shape.fromGeometry(taggedGroup({}, ...plans));
     } else {
-      return Empty();
+      const layer = taggedGroup({}, ...layers);
+      return buildLayoutGeometry({
+        layer,
+        pageWidth: 0,
+        pageLength: 0,
+        margin,
+      });
     }
   }
 };
