@@ -42634,7 +42634,7 @@ class App extends ReactDOM$2.Component {
       workerType: 'module'
     };
 
-    this.ask = async (question, context, transfer) => askService(this.serviceSpec, question, transfer, context);
+    this.ask = async (question, context, transfer) => askService(this.serviceSpec, question, transfer, context).answer;
 
     this.layoutRef = /*#__PURE__*/ReactDOM$2.createRef();
     this.GC = {};
