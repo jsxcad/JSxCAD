@@ -45,7 +45,7 @@ test('Echo service', async (t) => {
     const agent = async ({ message }) => `Secret ${message}`;
     const spec = { nodeWorker: './service.test.nodeWorker.js', agent };
 
-    t.is(await askService(spec, 'A'), 'Worker Secret A');
+    t.is(await askService(spec, 'A').answer, 'Worker Secret A');
     t.deepEqual(
       { ...(await getServicePoolInfo()), activeServices: [], idleServices: [] },
       {
@@ -58,7 +58,7 @@ test('Echo service', async (t) => {
         activeServiceLimit: 5,
       }
     );
-    t.is(await askService(spec, 'B'), 'Worker Secret B');
+    t.is(await askService(spec, 'B').answer, 'Worker Secret B');
     t.deepEqual(
       { ...(await getServicePoolInfo()), idleServices: [] },
       {

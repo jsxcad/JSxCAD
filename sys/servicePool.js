@@ -97,9 +97,10 @@ export const terminateActiveServices = (contextFilter = (context) => true) => {
 
 export const askService = (spec, question, transfer, context) => {
   let terminated;
-  let terminate = () => {
+  let doTerminate = () => {
     terminated = true;
   };
+  const terminate = () => doTerminate();
   const flow = async () => {
     let service;
     try {
@@ -107,7 +108,7 @@ export const askService = (spec, question, transfer, context) => {
       if (service.released) {
         return Promise.reject(Error('Terminated'));
       }
-      terminate = () => {
+      doTerminate = () => {
         service.terminate();
         return Promise.reject(Error('Terminated'));
       };
@@ -126,11 +127,10 @@ export const askService = (spec, question, transfer, context) => {
       }
     }
   };
-  const promise = flow();
+  const answer = flow();
   // Avoid a race in which the service might be terminated before
   // acquireService returns.
-  promise.terminate = () => terminate();
-  return promise;
+  return { answer, terminate };
 };
 
 export const askServices = async (question) => {

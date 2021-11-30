@@ -319,7 +319,7 @@ class App extends React.Component {
     };
 
     this.ask = async (question, context, transfer) =>
-      askService(this.serviceSpec, question, transfer, context);
+      askService(this.serviceSpec, question, transfer, context).answer;
 
     this.layoutRef = React.createRef();
 
