@@ -2,12 +2,7 @@
 
 import * as PropTypes from 'prop-types';
 
-import {
-  addAnchors,
-  addVoxel,
-  dragAnchor,
-  getWorldPosition,
-} from '@jsxcad/ui-threejs';
+import { addVoxel, getWorldPosition } from '@jsxcad/ui-threejs';
 
 import {
   askService,
@@ -624,18 +619,6 @@ class App extends React.Component {
 
     this.View = {};
 
-    this.View.dragEnd = async ({ object }) => {
-      if (this.View.updating) {
-        return;
-      }
-      try {
-        this.View.updating = true;
-        dragAnchor({ object });
-      } finally {
-        this.View.updating = false;
-      }
-    };
-
     this.View.click = async ({
       camera,
       draggableObjects,
@@ -660,6 +643,7 @@ class App extends React.Component {
         this.View.updating = true;
         switch (editType) {
           case 'Group': {
+            /*
             let changeScheduled = false;
             let at, to, up;
             const change = async () => {
@@ -708,6 +692,7 @@ class App extends React.Component {
               trackballControls,
               viewState: this.View.state,
             }));
+*/
             return;
           }
           case 'Voxels': {
@@ -750,6 +735,44 @@ class App extends React.Component {
       } finally {
         this.View.updating = false;
       }
+    };
+
+    this.View.jogPendingUpdate = null;
+
+    this.View.jog = async (update) => {
+      const execute = async () => {
+        const { sourceLocation, at, to, up, object } =
+          this.View.jogPendingUpdate;
+        const { viewId, groupChildId } = object.userData;
+        try {
+          this.View.jogPendingUpdate = null;
+          const request = {
+            viewId,
+            nth: groupChildId,
+            at: getWorldPosition(at, 0.01),
+            to: getWorldPosition(to, 0.01),
+            up: getWorldPosition(up, 0.01),
+          };
+          if (request.nth === undefined) {
+            return;
+          }
+          console.log(JSON.stringify(request));
+          const { path } = sourceLocation;
+          const { [`NotebookText/${path}`]: NotebookText } = this.state;
+          const newNotebookText = rewriteViewGroupOrient(NotebookText, request);
+          await this.updateState({
+            [`NotebookText/${path}`]: newNotebookText,
+          });
+        } finally {
+          if (this.View.jogPendingUpdate) {
+            setTimeout(execute, 500);
+          }
+        }
+      };
+      if (!this.View.jogPendingUpdate) {
+        setTimeout(execute, 500);
+      }
+      this.View.jogPendingUpdate = update;
     };
 
     this.View.move = async ({ path, position, up, target, zoom }) => {
@@ -979,7 +1002,7 @@ class App extends React.Component {
               sourceLocation={View.sourceLocation}
               workspace={workspace}
               onClick={this.View.click}
-              onDragEnd={this.View.dragEnd}
+              onJog={this.View.jog}
               onMove={this.View.move}
               trackballState={trackballState}
             />

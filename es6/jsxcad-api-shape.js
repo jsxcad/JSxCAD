@@ -3919,7 +3919,7 @@ const baseView =
       height = 256,
       position = [100, -100, 100],
       withAxes = false,
-      withGrid = false,
+      withGrid = true,
     } = options;
 
     if (size !== undefined) {

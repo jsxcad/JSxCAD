@@ -3,7 +3,7 @@
 import { GEOMETRY_LAYER, SKETCH_LAYER } from './layers.js';
 import { buildScene, createResizer } from './scene.js';
 
-import { DragControls } from './DragControls.js';
+import { AnchorControls } from './AnchorControls.js';
 import { Layers } from 'three';
 import { TrackballControls } from 'three/examples/jsm/controls/TrackballControls.js';
 import { buildMeshes } from './mesh.js';
@@ -27,28 +27,18 @@ const buildTrackballControls = ({
   return { trackballControls };
 };
 
-const buildDragControls = ({
+const buildAnchorControls = ({
   camera,
   draggableObjects,
   endUpdating,
+  scene,
   startUpdating,
   trackballControls,
   viewerElement,
 }) => {
-  const dragControls = new DragControls(
-    draggableObjects,
-    camera,
-    viewerElement
-  );
-  dragControls.addEventListener('dragstart', () => {
-    trackballControls.enabled = false;
-    startUpdating();
-  });
-  dragControls.addEventListener('dragend', () => {
-    endUpdating();
-    trackballControls.enabled = true;
-  });
-  return { dragControls };
+  const anchorControls = new AnchorControls(camera, viewerElement, scene);
+  anchorControls.enable();
+  return { anchorControls };
 };
 
 export const orbitDisplay = async (
@@ -58,7 +48,7 @@ export const orbitDisplay = async (
     path,
     canvas,
     withAxes = false,
-    withGrid = false,
+    withGrid = true,
     gridLayer = GEOMETRY_LAYER,
     definitions,
   } = {},
@@ -145,18 +135,18 @@ export const orbitDisplay = async (
     viewerElement: displayCanvas,
   }));
 
-  const draggableObjects = [];
-
-  const { dragControls } = buildDragControls({
+  const { anchorControls } = buildAnchorControls({
     camera,
-    draggableObjects,
     endUpdating,
     render,
+    scene,
     startUpdating,
     trackballControls,
     view,
     viewerElement: displayCanvas,
   });
+
+  anchorControls.addEventListener('change', update);
 
   const { resize } = createResizer({
     camera,
@@ -213,8 +203,7 @@ export const orbitDisplay = async (
   return {
     camera,
     canvas: displayCanvas,
-    dragControls,
-    draggableObjects,
+    anchorControls,
     render,
     renderer,
     scene,

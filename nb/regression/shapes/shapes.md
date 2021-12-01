@@ -125,7 +125,7 @@ Line(5, -1)
 
 ```JavaScript
 Implicit(torusFn, { radius: 2 })
-  .view()
+  .view({ withGrid: false })
   .md('Implicit(torusFn, { radius: 2 }');
 ```
 

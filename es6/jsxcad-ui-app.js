@@ -1,4 +1,4 @@
-import { orbitDisplay, raycast, dragAnchor, addVoxel, getWorldPosition, addAnchors } from './jsxcad-ui-threejs.js';
+import { orbitDisplay, raycast, addVoxel, getWorldPosition } from './jsxcad-ui-threejs.js';
 import { readOrWatch, unwatchFile, read, watchFile, boot, log, deleteFile, ask, touch, askService, write, terminateActiveServices, clearEmitted, resolvePending, listFiles, getActiveServices, watchFileCreation, watchFileDeletion, watchServices } from './jsxcad-sys.js';
 import { toDomElement, getNotebookControlData } from './jsxcad-ui-notebook.js';
 import { rewriteVoxels, rewriteViewGroupOrient } from './jsxcad-compiler.js';
@@ -42035,6 +42035,7 @@ class OrbitView extends ReactDOM$2.PureComponent {
       onClick: propTypes$1.exports["function"],
       onDrag: propTypes$1.exports["function"],
       onDragEnd: propTypes$1.exports["function"],
+      onJog: propTypes$1.exports["function"],
       trackballState: propTypes$1.exports.object
     };
   }
@@ -42079,10 +42080,9 @@ class OrbitView extends ReactDOM$2.PureComponent {
       withGrid
     } = view;
     const {
+      anchorControls,
       camera,
       canvas,
-      dragControls,
-      draggableObjects,
       renderer,
       scene,
       trackballControls,
@@ -42174,33 +42174,33 @@ class OrbitView extends ReactDOM$2.PureComponent {
       }
     });
 
-    const handleDrag = ({
-      object
+    const handleJog = ({
+      object,
+      at,
+      to,
+      up
     }) => {
       const {
-        onDrag
+        onJog,
+        sourceLocation
       } = this.props;
 
-      if (onDrag) {
-        onDrag({
-          object
+      if (!object) {
+        return;
+      }
+
+      if (onJog) {
+        onJog({
+          sourceLocation,
+          object,
+          at,
+          to,
+          up
         });
       }
     };
 
-    const handleDragEnd = ({
-      object
-    }) => {
-      const {
-        onDragEnd
-      } = this.props;
-
-      if (onDragEnd) {
-        onDragEnd({
-          object
-        });
-      }
-    };
+    anchorControls.addEventListener('change', handleJog);
 
     const handleClick = type => event => {
       const {
@@ -42232,7 +42232,6 @@ class OrbitView extends ReactDOM$2.PureComponent {
         } = object.userData;
         return onClick({
           camera,
-          draggableObjects,
           event,
           editId,
           editType,
@@ -42258,8 +42257,6 @@ class OrbitView extends ReactDOM$2.PureComponent {
       handleClick('right')(event);
     });
     canvas.addEventListener('click', handleClick('left'));
-    dragControls.addEventListener('drag', handleDrag);
-    dragControls.addEventListener('dragend', handleDragEnd);
   }
 
   componentWillUnmount() {
@@ -43013,23 +43010,6 @@ class App extends ReactDOM$2.Component {
 
     this.View = {};
 
-    this.View.dragEnd = async ({
-      object
-    }) => {
-      if (this.View.updating) {
-        return;
-      }
-
-      try {
-        this.View.updating = true;
-        dragAnchor({
-          object
-        });
-      } finally {
-        this.View.updating = false;
-      }
-    };
-
     this.View.click = async ({
       camera,
       draggableObjects,
@@ -43057,9 +43037,9 @@ class App extends ReactDOM$2.Component {
         switch (editType) {
           case 'Group':
             {
+              /*
               let changeScheduled = false;
               let at, to, up;
-
               const change = async () => {
                 changeScheduled = false;
                 const request = {
@@ -43067,31 +43047,23 @@ class App extends ReactDOM$2.Component {
                   nth: object.userData.groupChildId,
                   at: getWorldPosition(at, 0.01),
                   to: getWorldPosition(to, 0.01),
-                  up: getWorldPosition(up, 0.01)
+                  up: getWorldPosition(up, 0.01),
                 };
-
                 if (request.nth === undefined) {
                   return;
                 }
-
                 console.log(JSON.stringify(request));
-                const {
-                  path
-                } = sourceLocation;
-                const {
-                  [`NotebookText/${path}`]: NotebookText
-                } = this.state;
-                const newNotebookText = rewriteViewGroupOrient(NotebookText, request);
+                const { path } = sourceLocation;
+                const { [`NotebookText/${path}`]: NotebookText } = this.state;
+                const newNotebookText = rewriteViewGroupOrient(
+                  NotebookText,
+                  request
+                );
                 await this.updateState({
-                  [`NotebookText/${path}`]: newNotebookText
+                  [`NotebookText/${path}`]: newNotebookText,
                 });
               };
-
-              ({
-                at,
-                to,
-                up
-              } = addAnchors({
+              ({ at, to, up } = addAnchors({
                 camera,
                 draggableObjects,
                 editId,
@@ -43112,8 +43084,9 @@ class App extends ReactDOM$2.Component {
                 target,
                 threejsMesh,
                 trackballControls,
-                viewState: this.View.state
+                viewState: this.View.state,
               }));
+              */
               return;
             }
 
@@ -43160,6 +43133,61 @@ class App extends ReactDOM$2.Component {
       } finally {
         this.View.updating = false;
       }
+    };
+
+    this.View.jogPendingUpdate = null;
+
+    this.View.jog = async update => {
+      const execute = async () => {
+        const {
+          sourceLocation,
+          at,
+          to,
+          up,
+          object
+        } = this.View.jogPendingUpdate;
+        const {
+          viewId,
+          groupChildId
+        } = object.userData;
+
+        try {
+          this.View.jogPendingUpdate = null;
+          const request = {
+            viewId,
+            nth: groupChildId,
+            at: getWorldPosition(at, 0.01),
+            to: getWorldPosition(to, 0.01),
+            up: getWorldPosition(up, 0.01)
+          };
+
+          if (request.nth === undefined) {
+            return;
+          }
+
+          console.log(JSON.stringify(request));
+          const {
+            path
+          } = sourceLocation;
+          const {
+            [`NotebookText/${path}`]: NotebookText
+          } = this.state;
+          const newNotebookText = rewriteViewGroupOrient(NotebookText, request);
+          await this.updateState({
+            [`NotebookText/${path}`]: newNotebookText
+          });
+        } finally {
+          if (this.View.jogPendingUpdate) {
+            setTimeout(execute, 500);
+          }
+        }
+      };
+
+      if (!this.View.jogPendingUpdate) {
+        setTimeout(execute, 500);
+      }
+
+      this.View.jogPendingUpdate = update;
     };
 
     this.View.move = async ({
@@ -43423,7 +43451,7 @@ class App extends ReactDOM$2.Component {
               sourceLocation: View.sourceLocation,
               workspace: workspace,
               onClick: this.View.click,
-              onDragEnd: this.View.dragEnd,
+              onJog: this.View.jog,
               onMove: this.View.move,
               trackballState: trackballState
             });
