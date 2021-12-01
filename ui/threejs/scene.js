@@ -1,13 +1,13 @@
 import {
   AxesHelper,
-  DirectionalLight,
-  HemisphereLight,
   Object3D,
   PerspectiveCamera,
   Scene,
   SpotLight,
   WebGLRenderer,
 } from 'three';
+
+import { SKETCH_LAYER } from './layers.js';
 
 export const createResizer = ({
   camera,
@@ -43,7 +43,6 @@ export const buildScene = ({
   Object3D.DefaultUp.set(...up);
 
   const camera = new PerspectiveCamera(27, width / height, 1, 1000000);
-  camera.layers.enable(1);
   camera.position.set(...position);
   camera.up.set(...up);
   camera.lookAt(...target);
@@ -54,29 +53,25 @@ export const buildScene = ({
 
   if (withAxes) {
     const axes = new AxesHelper(5);
-    axes.layers.set(1);
+    axes.layers.set(SKETCH_LAYER);
     scene.add(axes);
   }
 
-  var hemiLight = new HemisphereLight(0xffffff, 0x444444, 0.5);
-  hemiLight.position.set(0, 0, 300);
-  hemiLight.userData.dressing = true;
-  scene.add(hemiLight);
-
-  const light = new DirectionalLight(0xffffff, 0.5);
-  light.castShadow = true;
-  light.position.set(1, 1, 1);
-  light.layers.set(0);
-  light.userData.dressing = true;
-  camera.add(light);
+  {
+    // const light = new DirectionalLight(0xffffff, 0.25);
+    const light = new SpotLight(0xffffff, 0.7);
+    light.target = camera;
+    light.position.set(0.1, 0.1, 1);
+    light.userData.dressing = true;
+    camera.add(light);
+  }
 
   {
     // Add spot light for shadows.
-    const spotLight = new SpotLight(0xdddddd, 0.7);
+    const spotLight = new SpotLight(0xffffff, 0.75);
     spotLight.position.set(20, 20, 20);
     spotLight.castShadow = true;
     spotLight.receiveShadow = true;
-    spotLight.shadowDarkness = 0.15;
     spotLight.shadowCameraNear = 0.5;
     spotLight.shadow.mapSize.width = 1024 * 2;
     spotLight.shadow.mapSize.height = 1024 * 2;

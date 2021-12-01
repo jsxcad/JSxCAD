@@ -16,6 +16,7 @@ export class OrbitView extends React.PureComponent {
       onClick: PropTypes.function,
       onDrag: PropTypes.function,
       onDragEnd: PropTypes.function,
+      onJog: PropTypes.function,
       trackballState: PropTypes.object,
     };
   }
@@ -38,10 +39,9 @@ export class OrbitView extends React.PureComponent {
     const definitions = {};
     const { target, up, position, withAxes, withGrid } = view;
     const {
+      anchorControls,
       camera,
       canvas,
-      dragControls,
-      draggableObjects,
       renderer,
       scene,
       trackballControls,
@@ -103,18 +103,16 @@ export class OrbitView extends React.PureComponent {
         onMove({ path, position, up, target, zoom });
       }
     });
-    const handleDrag = ({ object }) => {
-      const { onDrag } = this.props;
-      if (onDrag) {
-        onDrag({ object });
+    const handleJog = ({ object, at, to, up }) => {
+      const { onJog, sourceLocation } = this.props;
+      if (!object) {
+        return;
+      }
+      if (onJog) {
+        onJog({ sourceLocation, object, at, to, up });
       }
     };
-    const handleDragEnd = ({ object }) => {
-      const { onDragEnd } = this.props;
-      if (onDragEnd) {
-        onDragEnd({ object });
-      }
-    };
+    anchorControls.addEventListener('change', handleJog);
     const handleClick = (type) => (event) => {
       const { onClick, view, sourceLocation } = this.props;
       const rect = event.target.getBoundingClientRect();
@@ -130,7 +128,6 @@ export class OrbitView extends React.PureComponent {
         const { editId, editType, viewId } = object.userData;
         return onClick({
           camera,
-          draggableObjects,
           event,
           editId,
           editType,
@@ -155,8 +152,6 @@ export class OrbitView extends React.PureComponent {
       handleClick('right')(event);
     });
     canvas.addEventListener('click', handleClick('left'));
-    dragControls.addEventListener('drag', handleDrag);
-    dragControls.addEventListener('dragend', handleDragEnd);
   }
 
   componentWillUnmount() {

@@ -7,7 +7,7 @@ import {
   PlaneGeometry,
   Vector3,
 } from 'three';
-import { SKETCH_LAYER } from './layers.js';
+import { GEOMETRY_LAYER } from './layers.js';
 
 export const moveToFit = ({
   view,
@@ -16,7 +16,7 @@ export const moveToFit = ({
   scene,
   fitOffset = 1.2,
   withGrid = false,
-  gridLayer = SKETCH_LAYER,
+  gridLayer = GEOMETRY_LAYER,
 } = {}) => {
   const { fit = true } = view;
 
@@ -50,7 +50,7 @@ export const moveToFit = ({
     const scale = Math.pow(10, Math.ceil(Math.log10(length)));
     const size = scale;
     {
-      const grid = new GridHelper(size * 2, 20, 0x000040, 0x40f040);
+      const grid = new GridHelper(size / 2, 50, 0x000040, 0x20a020);
       grid.material.transparent = true;
       grid.material.opacity = 0.5;
       grid.rotation.x = -Math.PI / 2;
@@ -61,7 +61,7 @@ export const moveToFit = ({
       scene.add(grid);
     }
     {
-      const grid = new GridHelper(size * 2, 4, 0x000040, 0x4040f0);
+      const grid = new GridHelper(size * 2, 20, 0x000040, 0xf04040);
       grid.material.transparent = true;
       grid.material.opacity = 0.5;
       grid.rotation.x = -Math.PI / 2;
@@ -76,7 +76,7 @@ export const moveToFit = ({
         new PlaneGeometry(50, 50),
         new MeshStandardMaterial({
           color: 0x00ff00,
-          depthWrite: false,
+          // depthWrite: false,
           transparent: true,
           opacity: 0.25,
         })
