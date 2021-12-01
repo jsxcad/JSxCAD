@@ -183,7 +183,7 @@ export const updateNotebook = async (
             process.env.FORCE_COLOR === '0' ? [255, 255, 255] : [255, 0, 0],
         }
       );
-      if (numFailedPixels >= PIXEL_THRESHOLD) {
+      if (numFailedPixels > PIXEL_THRESHOLD) {
         const differencePath = `${target}.md.${nth}.difference.png`;
         writeFileSync(differencePath, pngjs.PNG.sync.write(differencePng));
         // Note failures.
