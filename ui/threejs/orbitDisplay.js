@@ -84,6 +84,7 @@ export const orbitDisplay = async (
 
   const update = () => {
     trackballControls.update();
+    anchorControls.change();
     render();
     if (isUpdating) {
       requestAnimationFrame(update);

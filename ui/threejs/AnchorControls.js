@@ -77,6 +77,10 @@ class AnchorControls extends EventDispatcher {
     const blue = _material.clone();
     blue.color.setHex(0x0000ff);
 
+    const _xAxis = new Vector3();
+    const _yAxis = new Vector3();
+    const _zAxis = new Vector3();
+
     let _step = 1;
     let _object = null;
 
@@ -112,6 +116,66 @@ class AnchorControls extends EventDispatcher {
       _domElement.removeEventListener('pointerdown', onPointerDown);
     };
 
+    // Something in the outside environment changed.
+    const change = () => {
+      if (!_object) {
+        return;
+      }
+
+      // Find a best fit between camera and world axes.
+      const x = new Vector3();
+      x.set(1, 0, 0);
+      // The y axis is backward.
+      const y = new Vector3();
+      y.set(0, -1, 0);
+      const z = new Vector3();
+      z.set(0, 0, 1);
+
+      // Invalidate the axes so errors become obvious.
+      _xAxis.set(NaN, NaN, NaN);
+      _yAxis.set(NaN, NaN, NaN);
+      _zAxis.set(NaN, NaN, NaN);
+
+      // This could be more efficient, since we don't need to consider axes already asigned.
+      const fit = (v, cameraAxis) => {
+        const xDot = x.dot(v);
+        const xFit = Math.abs(xDot);
+
+        const yDot = y.dot(v);
+        const yFit = Math.abs(yDot);
+
+        const zDot = z.dot(v);
+        const zFit = Math.abs(zDot);
+
+        if (xFit >= yFit && xFit >= zFit) {
+          cameraAxis.copy(x);
+          if (xDot < 0) {
+            cameraAxis.negate();
+          }
+        } else if (yFit >= xFit && yFit >= zFit) {
+          cameraAxis.copy(y);
+          if (yDot < 0) {
+            cameraAxis.negate();
+          }
+        } else {
+          cameraAxis.copy(z);
+          if (zDot < 0) {
+            cameraAxis.negate();
+          }
+        }
+      };
+
+      const cx = new Vector3();
+      const cy = new Vector3();
+      const cz = new Vector3();
+      _camera.matrixWorld.extractBasis(cx, cy, cz);
+
+      fit(cx, _xAxis);
+      fit(cy, _yAxis);
+      fit(cz, _zAxis);
+    };
+
+    // We're changing our state.
     const update = () => {
       _object.position.copy(_at.position);
       const up = new Vector3();
@@ -145,6 +209,7 @@ class AnchorControls extends EventDispatcher {
       _up.position.set(0, 1, 0);
       _object.localToWorld(_up.position);
 
+      change();
       update();
 
       _domElement.addEventListener('keydown', onKeyDown);
@@ -203,98 +268,98 @@ class AnchorControls extends EventDispatcher {
 
         // at
         case 'd':
-          _at.position.x += _step;
+          _at.position.addScaledVector(_xAxis, _step);
           if (_lockUp) {
-            _up.position.x += _step;
+            _up.position.addScaledVector(_xAxis, _step);
           }
           if (_lockTo) {
-            _to.position.x += _step;
+            _to.position.addScaledVector(_xAxis, _step);
           }
           break;
         case 'a':
-          _at.position.x -= _step;
+          _at.position.addScaledVector(_xAxis, -_step);
           if (_lockUp) {
-            _up.position.x -= _step;
+            _up.position.addScaledVector(_xAxis, -_step);
           }
           if (_lockTo) {
-            _to.position.x -= _step;
+            _to.position.addScaledVector(_xAxis, -_step);
           }
           break;
         case 'w':
-          _at.position.y += _step;
+          _at.position.addScaledVector(_yAxis, _step);
           if (_lockUp) {
-            _up.position.y += _step;
+            _up.position.addScaledVector(_yAxis, _step);
           }
           if (_lockTo) {
-            _to.position.y += _step;
+            _to.position.addScaledVector(_yAxis, _step);
           }
           break;
         case 's':
-          _at.position.y -= _step;
+          _at.position.addScaledVector(_yAxis, -_step);
           if (_lockUp) {
-            _up.position.y -= _step;
+            _up.position.addScaledVector(_yAxis, -_step);
           }
           if (_lockTo) {
-            _to.position.y -= _step;
+            _to.position.addScaledVector(_yAxis, -_step);
           }
           break;
         case 'e':
-          _at.position.z += _step;
+          _at.position.addScaledVector(_zAxis, _step);
           if (_lockUp) {
-            _up.position.z += _step;
+            _up.position.addScaledVector(_zAxis, _step);
           }
           if (_lockTo) {
-            _to.position.z += _step;
+            _to.position.addScaledVector(_zAxis, _step);
           }
           break;
         case 'q':
-          _at.position.z -= _step;
+          _at.position.addScaledVector(_zAxis, -_step);
           if (_lockUp) {
-            _up.position.z -= _step;
+            _up.position.addScaledVector(_zAxis, -_step);
           }
           if (_lockTo) {
-            _to.position.z -= _step;
+            _to.position.addScaledVector(_zAxis, -_step);
           }
           break;
 
         // to
         case 'h':
-          _to.position.x += _step;
+          _to.position.addScaledVector(_xAxis, _step);
           break;
         case 'f':
-          _to.position.x -= _step;
+          _to.position.addScaledVector(_xAxis, -_step);
           break;
         case 't':
-          _to.position.y += _step;
+          _to.position.addScaledVector(_yAxis, _step);
           break;
         case 'g':
-          _to.position.y -= _step;
+          _to.position.addScaledVector(_yAxis, -_step);
           break;
         case 'y':
-          _to.position.z += _step;
+          _to.position.addScaledVector(_zAxis, _step);
           break;
         case 'r':
-          _to.position.z -= _step;
+          _to.position.addScaledVector(_zAxis, -_step);
           break;
 
         // up
         case 'l':
-          _up.position.x += _step;
+          _to.position.addScaledVector(_xAxis, _step);
           break;
         case 'j':
-          _up.position.x -= _step;
+          _to.position.addScaledVector(_xAxis, -_step);
           break;
         case 'i':
-          _up.position.y += _step;
+          _to.position.addScaledVector(_yAxis, _step);
           break;
         case 'k':
-          _up.position.y -= _step;
+          _to.position.addScaledVector(_yAxis, -_step);
           break;
         case 'o':
-          _up.position.z += _step;
+          _to.position.addScaledVector(_zAxis, _step);
           break;
         case 'u':
-          _up.position.z -= _step;
+          _to.position.addScaledVector(_zAxis, -_step);
           break;
       }
 
@@ -315,10 +380,11 @@ class AnchorControls extends EventDispatcher {
     // API
 
     this.attach = attach;
+    this.change = change;
     this.detach = detach;
+    this.dispose = dispose;
     this.disable = disable;
     this.enable = enable;
-    this.dispose = dispose;
   }
 }
 
