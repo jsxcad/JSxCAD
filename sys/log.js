@@ -15,6 +15,10 @@ export const log = async (entry) => {
   }
 };
 
+export const logInfo = (source, text) => log({ type: 'info', source, text });
+
+export const logError = (source, text) => log({ type: 'error', source, text });
+
 export const watchLog = (thunk) => {
   watchers.add(thunk);
   return thunk;

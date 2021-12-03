@@ -1,7 +1,7 @@
 import { orbitDisplay, raycast, addVoxel, getWorldPosition } from './jsxcad-ui-threejs.js';
-import { readOrWatch, unwatchFile, read, watchFile, boot, log, deleteFile, ask, touch, askService, write, terminateActiveServices, clearEmitted, resolvePending, listFiles, getActiveServices, watchFileCreation, watchFileDeletion, watchServices } from './jsxcad-sys.js';
+import { rewriteVoxels, appendViewGroupCode, extractViewGroupCode, deleteViewGroupCode, rewriteViewGroupOrient } from './jsxcad-compiler.js';
+import { readOrWatch, unwatchFile, read, watchFile, boot, log, deleteFile, ask, touch, askService, write, terminateActiveServices, clearEmitted, resolvePending, listFiles, getActiveServices, watchFileCreation, watchFileDeletion, watchLog, watchServices } from './jsxcad-sys.js';
 import { toDomElement, getNotebookControlData } from './jsxcad-ui-notebook.js';
-import { rewriteVoxels, rewriteViewGroupOrient } from './jsxcad-compiler.js';
 import Prettier from 'https://unpkg.com/prettier@2.3.2/esm/standalone.mjs';
 import PrettierParserBabel from 'https://unpkg.com/prettier@2.3.2/esm/parser-babel.mjs';
 import { execute } from './jsxcad-api.js';
@@ -42035,6 +42035,7 @@ class OrbitView extends ReactDOM$2.PureComponent {
       onClick: propTypes$1.exports["function"],
       onDrag: propTypes$1.exports["function"],
       onDragEnd: propTypes$1.exports["function"],
+      onKeydown: propTypes$1.exports["function"],
       onJog: propTypes$1.exports["function"],
       trackballState: propTypes$1.exports.object
     };
@@ -42200,7 +42201,30 @@ class OrbitView extends ReactDOM$2.PureComponent {
       }
     };
 
+    const handleKeydown = ({
+      object,
+      event
+    }) => {
+      const {
+        onKeydown,
+        sourceLocation
+      } = this.props;
+
+      if (!object) {
+        return;
+      }
+
+      if (onKeydown) {
+        onKeydown({
+          sourceLocation,
+          object,
+          event
+        });
+      }
+    };
+
     anchorControls.addEventListener('change', handleJog);
+    anchorControls.addEventListener('keydown', handleKeydown);
 
     const handleClick = type => event => {
       const {
@@ -42350,7 +42374,9 @@ const ensureFile = async (file, url, {
 const isRegenerable = file => file.startsWith('data/') || file.startsWith('meta/') || file.startsWith('view/') || file.startsWith('download/');
 
 const defaultModelConfig = {
-  global: {},
+  global: {
+    tabEnableFloat: true
+  },
   borders: [{
     type: 'border',
     location: 'left',
@@ -42393,6 +42419,13 @@ const defaultModelConfig = {
       component: 'GC',
       enableClose: false,
       borderWidth: 1024
+    }, {
+      id: 'Log',
+      type: 'tab',
+      name: 'Log',
+      component: 'Log',
+      enableClose: false,
+      borderWidth: 1024
     }]
   }],
   layout: {
@@ -42400,6 +42433,12 @@ const defaultModelConfig = {
     weight: 100,
     children: [{
       id: 'Notebooks',
+      type: 'tabset',
+      weight: 100,
+      enableDeleteWhenEmpty: false,
+      children: []
+    }, {
+      id: 'Objects',
       type: 'tabset',
       weight: 100,
       enableDeleteWhenEmpty: false,
@@ -42690,6 +42729,16 @@ class App extends ReactDOM$2.Component {
       }
     };
 
+    this.Log = {};
+
+    this.Log.clear = async () => {
+      this.updateState({
+        LogMessages: []
+      });
+    };
+
+    this.Log.pendingMessages = [];
+    this.Log.updating = false;
     this.Model = {};
 
     this.Model.change = async () => {
@@ -42705,7 +42754,7 @@ class App extends ReactDOM$2.Component {
       }
     };
 
-    this.Model.store = async () => {
+    this.Model.store = async json => {
       if (this.Model.saving) {
         return;
       }
@@ -42719,13 +42768,18 @@ class App extends ReactDOM$2.Component {
           model
         } = this.state;
         await write('config/Model', {
-          persistentModelConfig: model.toJson()
+          persistentModelConfig: json || model.toJson()
         }, {
           workspace
         });
       } finally {
         this.Model.saving = false;
       }
+    };
+
+    this.Model.reset = async () => {
+      await this.Model.store(defaultModelConfig);
+      await this.Model.restore();
     };
 
     this.Model.restore = async () => {
@@ -43190,6 +43244,154 @@ class App extends ReactDOM$2.Component {
       this.View.jogPendingUpdate = update;
     };
 
+    this.View.keydown = async ({
+      event,
+      object,
+      sourceLocation
+    }) => {
+      switch (event.key) {
+        // Edit shape
+        case ' ':
+          window.alert('Edit');
+          break;
+
+        case 'Backspace':
+        case 'Delete':
+          {
+            const {
+              path
+            } = sourceLocation;
+            const {
+              [`NotebookText/${path}`]: NotebookText
+            } = this.state;
+            const {
+              viewId,
+              groupChildId: nth
+            } = object.userData;
+            const newNotebookText = deleteViewGroupCode(NotebookText, {
+              viewId,
+              nth
+            });
+            await this.updateState({
+              [`NotebookText/${path}`]: newNotebookText
+            });
+            await this.Notebook.run(path);
+            break;
+          }
+
+        case 'c':
+          if (!event.getModifierState('Control')) {
+            break;
+          }
+
+        // fall through to Copy
+
+        case 'Copy':
+          {
+            const {
+              path
+            } = sourceLocation;
+            const {
+              [`NotebookText/${path}`]: NotebookText
+            } = this.state;
+            const {
+              viewId,
+              groupChildId: nth
+            } = object.userData;
+            const {
+              code
+            } = extractViewGroupCode(NotebookText, {
+              viewId,
+              nth
+            });
+            await this.updateState({
+              Clipboard: {
+                code,
+                viewId,
+                nth
+              }
+            });
+            break;
+          }
+
+        case 'x':
+          if (!event.getModifierState('Control')) {
+            break;
+          }
+
+        // fall through to Cut
+
+        case 'Cut':
+          {
+            const {
+              path
+            } = sourceLocation;
+            const {
+              [`NotebookText/${path}`]: NotebookText
+            } = this.state;
+            const {
+              viewId,
+              groupChildId: nth
+            } = object.userData;
+            const {
+              code
+            } = extractViewGroupCode(NotebookText, {
+              viewId,
+              nth
+            });
+            const newNotebookText = deleteViewGroupCode(NotebookText, {
+              viewId,
+              nth
+            });
+            await this.updateState({
+              [`NotebookText/${path}`]: newNotebookText,
+              Clipboard: {
+                code,
+                viewId
+              }
+            });
+            await this.Notebook.run(path);
+            break;
+          }
+
+        case 'v':
+          if (!event.getModifierState('Control')) {
+            break;
+          }
+
+        // fall through to Paste
+
+        case 'Paste':
+          {
+            const {
+              path
+            } = sourceLocation;
+            const {
+              Clipboard = {},
+              [`NotebookText/${path}`]: NotebookText
+            } = this.state;
+            const {
+              code,
+              viewId
+            } = Clipboard;
+
+            if (!code) {
+              return;
+            }
+
+            const newNotebookText = appendViewGroupCode(NotebookText, {
+              viewId,
+              code
+            });
+            await this.updateState({
+              [`NotebookText/${path}`]: newNotebookText
+            });
+            await this.Notebook.run(path);
+            break;
+          }
+      }
+    };
+
     this.View.move = async ({
       path,
       position,
@@ -43452,6 +43654,7 @@ class App extends ReactDOM$2.Component {
               workspace: workspace,
               onClick: this.View.click,
               onJog: this.View.jog,
+              onKeydown: this.View.keydown,
               onMove: this.View.move,
               trackballState: trackballState
             });
@@ -43468,7 +43671,28 @@ class App extends ReactDOM$2.Component {
             }, "Delete"), v$1(ListGroup, null, WorkspaceFiles.filter(file => isRegenerable(file)).map((file, index) => v$1(ListGroup.Item, {
               key: index,
               disabled: true
-            }, file)))))));
+            }, file))))), v$1(Card.Body, null, v$1(Card.Title, null, "Reset Layout"), v$1(Card.Text, null, v$1(Button, {
+              variant: "primary",
+              onClick: this.Model.reset
+            }, "Reset")))));
+          }
+
+        case 'Log':
+          {
+            const {
+              LogMessages = []
+            } = this.state;
+            return v$1("div", null, v$1(Card, null, v$1(Card.Body, null, v$1(Card.Title, null, "Log Messages"), v$1(Card.Text, null, v$1(Button, {
+              variant: "primary",
+              onClick: this.Log.clear
+            }, "Clear"), v$1(ListGroup, null, LogMessages.map(({
+              type,
+              source,
+              text
+            }, index) => v$1(ListGroup.Item, {
+              key: index,
+              disabled: true
+            }, text)))))));
           }
       }
     };
@@ -43479,6 +43703,42 @@ class App extends ReactDOM$2.Component {
           workspace
         })
       });
+    };
+
+    this.logUpdater = ({
+      type,
+      source,
+      text
+    }) => {
+      this.Log.pendingMessages.unshift({
+        type,
+        source,
+        text
+      });
+
+      if (this.Log.updating) {
+        return;
+      }
+
+      const spool = async () => {
+        try {
+          while (this.Log.pendingMessages.length > 0) {
+            const commit = this.Log.pendingMessages;
+            this.Log.pendingMessages = [];
+            const {
+              LogMessages = []
+            } = this.state;
+            await this.updateState({
+              LogMessages: [...commit, ...LogMessages]
+            });
+          }
+        } finally {
+          this.Log.updating = false;
+        }
+      };
+
+      this.Log.updating = true;
+      spool();
     };
 
     this.servicesUpdater = () => {
@@ -43507,6 +43767,7 @@ class App extends ReactDOM$2.Component {
 
     this.creationWatcher = await watchFileCreation(this.fileUpdater);
     this.deletionWatcher = await watchFileDeletion(this.fileUpdater);
+    this.logWatcher = watchLog(this.logUpdater);
     this.servicesWatcher = watchServices(this.servicesUpdater);
 
     window.onhashchange = ({
