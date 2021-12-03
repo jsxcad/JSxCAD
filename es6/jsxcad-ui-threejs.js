@@ -44058,17 +44058,19 @@ const buildMeshes = async ({
 
       if (tags.includes('show:skin')) {
         const material = await buildMeshMaterial(definitions, tags);
-        if (tags.includes('type:void')) {
-          material.transparent = true;
-          material.depthWrite = false;
-          material.opacity *= 0.5;
-        }
         mesh = new Mesh(bufferGeometry, material);
         mesh.castShadow = true;
         mesh.receiveShadow = true;
         mesh.layers.set(layer);
         updateUserData(geometry, scene, mesh.userData);
         mesh.userData.tangible = true;
+        if (tags.includes('type:void')) {
+          material.transparent = true;
+          material.depthWrite = false;
+          material.opacity *= 0.1;
+          mesh.castShadow = false;
+          mesh.receiveShadow = false;
+        }
       } else {
         mesh = new Group();
       }

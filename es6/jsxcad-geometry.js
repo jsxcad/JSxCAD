@@ -3027,10 +3027,10 @@ const soup = (
     if (doTriangles) {
       geometry = hasShowSkin(geometry);
     }
-    if (doOutline) {
+    if (doOutline && isNotTypeVoid(geometry)) {
       geometry = hasShowOutline(geometry);
     }
-    if (doWireframe) {
+    if (doWireframe && isNotTypeVoid(geometry)) {
       geometry = hasShowWireframe(geometry);
     }
     return geometry;

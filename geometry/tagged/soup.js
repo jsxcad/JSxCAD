@@ -1,5 +1,6 @@
 import { hasShowOutline, hasShowSkin, hasShowWireframe } from './show.js';
 
+import { isNotTypeVoid } from './type.js';
 import { rewrite } from './visit.js';
 import { taggedGroup } from './taggedGroup.js';
 import { taggedTriangles } from './taggedTriangles.js';
@@ -15,10 +16,10 @@ export const soup = (
     if (doTriangles) {
       geometry = hasShowSkin(geometry);
     }
-    if (doOutline) {
+    if (doOutline && isNotTypeVoid(geometry)) {
       geometry = hasShowOutline(geometry);
     }
-    if (doWireframe) {
+    if (doWireframe && isNotTypeVoid(geometry)) {
       geometry = hasShowWireframe(geometry);
     }
     return geometry;
