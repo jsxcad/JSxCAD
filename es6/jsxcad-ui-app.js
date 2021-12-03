@@ -42375,7 +42375,7 @@ const isRegenerable = file => file.startsWith('data/') || file.startsWith('meta/
 
 const defaultModelConfig = {
   global: {
-    tabEnableFloat: true
+    rootOrientationVertical: true
   },
   borders: [{
     type: 'border',
@@ -42438,11 +42438,18 @@ const defaultModelConfig = {
       enableDeleteWhenEmpty: false,
       children: []
     }, {
-      id: 'Objects',
+      id: 'Clipboards',
       type: 'tabset',
       weight: 100,
       enableDeleteWhenEmpty: false,
-      children: []
+      children: [{
+        id: 'Clipboard',
+        type: 'tab',
+        name: 'Clipboard',
+        component: 'Clipboard',
+        enableClose: false,
+        borderWidth: 1024
+      }]
     }]
   }
 };
@@ -42673,6 +42680,23 @@ class App extends ReactDOM$2.Component {
     this.ask = async (question, context, transfer) => askService(this.serviceSpec, question, transfer, context).answer;
 
     this.layoutRef = /*#__PURE__*/ReactDOM$2.createRef();
+    this.Clipboard = {};
+
+    this.Clipboard.change = data => {
+      const {
+        Clipboard
+      } = this.state;
+      this.setState({
+        Clipboard: { ...Clipboard,
+          code: data
+        }
+      });
+    };
+
+    this.Clipboard.run = () => {};
+
+    this.Clipboard.save = () => {};
+
     this.GC = {};
 
     this.GC.delete = async () => {
@@ -43306,6 +43330,7 @@ class App extends ReactDOM$2.Component {
             });
             await this.updateState({
               Clipboard: {
+                path,
                 code,
                 viewId,
                 nth
@@ -43571,14 +43596,6 @@ class App extends ReactDOM$2.Component {
     };
 
     this.Workspace.restore = async () => {// We restore these via Model.restore.
-
-      /*
-      const { WorkspaceOpenPaths = [] } = (await read('config/Workspace', { workspace })) || {};
-      for (const path of WorkspaceOpenPaths) {
-        await this.Notebook.load(path);
-      }
-      await this.updateState({ WorkspaceOpenPaths });
-      */
     };
 
     this.factory = node => {
@@ -43635,6 +43652,22 @@ class App extends ReactDOM$2.Component {
               onClose: () => this.Notebook.close(path),
               data: NotebookText,
               advice: NotebookAdvice
+            });
+          }
+
+        case 'Clipboard':
+          {
+            const {
+              Clipboard = {}
+            } = this.state;
+            const {
+              code
+            } = Clipboard;
+            return v$1(JsEditorUi, {
+              onRun: () => this.Clipboard.run(),
+              onSave: () => this.Clipboard.save(),
+              onChange: data => this.Clipboard.change(data),
+              data: code
             });
           }
 
