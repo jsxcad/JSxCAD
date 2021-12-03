@@ -1,5 +1,6 @@
 import { builders, namedTypes, visit } from 'ast-types';
 import { parse, print } from 'recast';
+import { logInfo as baseLogInfo } from '@jsxcad/sys';
 
 const {
   arrayExpression,
@@ -19,7 +20,9 @@ const {
   UnaryExpression,
 } = namedTypes;
 
-const extractViewMethodCall = (callExpression, calleeName, viewId) => {
+const logInfo = (text) => baseLogInfo('compiler/rewrite', text);
+
+const extractViewMethodCall = (callExpression, allowedCalleeNames, viewId) => {
   const args = callExpression.get('arguments');
   const callee = callExpression.get('callee');
   const computed = callee.get('computed');
@@ -37,6 +40,7 @@ const extractViewMethodCall = (callExpression, calleeName, viewId) => {
   if (property.get('name').value !== 'view') {
     return {};
   }
+  logInfo('Found View call');
   // a.view()
   if (!CallExpression.check(object.value)) {
     return {};
@@ -51,6 +55,7 @@ const extractViewMethodCall = (callExpression, calleeName, viewId) => {
   if (!wasFound) {
     return {};
   }
+  logInfo('Found ViewId');
   // a().view('id')
   if (!MemberExpression.check(callee.value)) {
     return {};
@@ -63,20 +68,23 @@ const extractViewMethodCall = (callExpression, calleeName, viewId) => {
   if (!Identifier.check(calleeObjectCallee.value)) {
     return {};
   }
-  if (calleeObjectCallee.get('name').value !== calleeName) {
+  const calleeName = calleeObjectCallee.get('name').value;
+  if (!allowedCalleeNames.includes(calleeName)) {
     return {};
   }
+  logInfo(`Found ObjectCallee ${calleeName}`);
   return { calleeObject, calleeObjectCallee };
 };
 
-export const rewriteViewGroupOrient = (script, { viewId, nth, at, to, up }) => {
+export const extractViewGroupCode = (script, { viewId, nth }) => {
   const ast = parse(script);
+  let code;
   visit(ast, {
     visitCallExpression(expression) {
       try {
         const { calleeObject } = extractViewMethodCall(
           expression,
-          'Group',
+          ['Group', 'Assembly'],
           viewId
         );
         if (!calleeObject) {
@@ -87,6 +95,81 @@ export const rewriteViewGroupOrient = (script, { viewId, nth, at, to, up }) => {
         if (!nthArg) {
           return;
         }
+        ({ code } = print(nthArg));
+      } finally {
+        this.traverse(expression);
+      }
+    },
+  });
+  return { code };
+};
+
+export const appendViewGroupCode = (script, { code, viewId, nth }) => {
+  const ast = parse(script);
+  const astToAppend = parse(code);
+  visit(ast, {
+    visitCallExpression(expression) {
+      try {
+        const { calleeObject } = extractViewMethodCall(
+          expression,
+          ['Group', 'Assembly'],
+          viewId
+        );
+        if (!calleeObject) {
+          return;
+        }
+        const args = calleeObject.get('arguments');
+        args.value.push(astToAppend);
+      } finally {
+        this.traverse(expression);
+      }
+    },
+  });
+  return print(ast).code;
+};
+
+export const deleteViewGroupCode = (script, { viewId, nth }) => {
+  const ast = parse(script);
+  visit(ast, {
+    visitCallExpression(expression) {
+      try {
+        const { calleeObject } = extractViewMethodCall(
+          expression,
+          ['Group', 'Assembly'],
+          viewId
+        );
+        if (!calleeObject) {
+          return;
+        }
+        const args = calleeObject.get('arguments');
+        args.value.splice(nth, 1);
+      } finally {
+        this.traverse(expression);
+      }
+    },
+  });
+  return print(ast).code;
+};
+
+export const rewriteViewGroupOrient = (script, { viewId, nth, at, to, up }) => {
+  const ast = parse(script);
+  visit(ast, {
+    visitCallExpression(expression) {
+      try {
+        const { calleeObject } = extractViewMethodCall(
+          expression,
+          ['Group', 'Assembly'],
+          viewId
+        );
+        if (!calleeObject) {
+          return;
+        }
+        const args = calleeObject.get('arguments');
+        const nthArg = args.value[nth];
+        if (!nthArg) {
+          return;
+        }
+        logInfo(`Found nthArg ${nthArg}`);
         // Ok, we should have extracted an x of Group(x).view(viewId).
         // The expression is organized like (a.b()).call(), which means that we're already at the final call.
         const lastCall = nthArg;
@@ -118,10 +201,12 @@ export const rewriteViewGroupOrient = (script, { viewId, nth, at, to, up }) => {
           );
         }
         if (Identifier.check(property) && property.name === 'orient') {
+          logInfo(`Rewriting orient`);
           // We need to rewrite the arguments of the orient call.
           // e.g. s.Box().orient(Old) -> s.Box().orient(New)
           lastCall.arguments = [objectExpression(orientation)];
         } else {
+          logInfo(`Appending orient`);
           // We need to rewrite lastCall to be a chained method call
           // e.g. s.Box() -> s.Box().orient(New)
           const chained = memberExpression(

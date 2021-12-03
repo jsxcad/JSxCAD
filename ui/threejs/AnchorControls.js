@@ -10,53 +10,6 @@ import {
 import { SKETCH_LAYER } from './layers.js';
 import { raycast } from './raycast.js';
 
-/*
-export const dragAnchor = ({ object }) => {
-  const { parent, userData } = object;
-  const { anchorType } = userData;
-  switch (anchorType) {
-    case 'at': {
-      // Get the anchor's position in the parent's frame of reference.
-      const anchor = new Vector3();
-      object.getWorldPosition(anchor);
-      parent.position.copy(anchor);
-      parent.userData.anchor.at = anchor;
-      object.position.set(0, 0, 0);
-      break;
-    }
-    case 'to': {
-      // Get the anchor's position in the parent's frame of reference.
-      const anchor = new Vector3();
-      anchor.copy(object.position);
-      object.localToWorld(anchor);
-      parent.lookAt(anchor);
-      // And reset the offset.
-      parent.userData.anchor.to = anchor;
-      object.position.set(0, 0, 1);
-      break;
-    }
-    // Orthogonal to the [at, to] edge.
-    case 'up': {
-      // Get the anchor's position in the parent's frame of reference.
-      const anchor = new Vector3();
-      anchor.copy(object.position);
-      object.localToWorld(anchor);
-      const position = new Vector3();
-      parent.getWorldPosition(position);
-      anchor.sub(position);
-      // parent.worldToLocal(anchor);
-      parent.up.copy(anchor);
-      console.log(JSON.stringify(anchor));
-      parent.userData.anchor.up = anchor;
-      parent.lookAt(parent.userData.anchor.to);
-      // And reset the offset.
-      object.position.set(0, 1, 0);
-      break;
-    }
-  }
-};
-*/
-
 class AnchorControls extends EventDispatcher {
   constructor(_camera, _domElement, _scene) {
     super();
@@ -233,134 +186,144 @@ class AnchorControls extends EventDispatcher {
     const onKeyDown = (event) => {
       if (!_object) return;
 
-      switch (event.key) {
-        // step
-        case '1':
-          _step = 100.0;
-          break;
-        case '2':
-          _step = 50.0;
-          break;
-        case '3':
-          _step = 25.0;
-          break;
-        case '4':
-          _step = 10.0;
-          break;
-        case '5':
-          _step = 5.0;
-          break;
-        case '6':
-          _step = 2.5;
-          break;
-        case '7':
-          _step = 1.0;
-          break;
-        case '8':
-          _step = 0.5;
-          break;
-        case '9':
-          _step = 0.25;
-          break;
-        case '0':
-          _step = 0.1;
-          break;
+      if (event.getModifierState('Control')) {
+        this.dispatchEvent({ type: 'keydown', object: _object, event });
+      } else {
+        // These exclude control keys.
+        switch (event.key) {
+          // step
+          case '1':
+            _step = 100.0;
+            break;
+          case '2':
+            _step = 50.0;
+            break;
+          case '3':
+            _step = 25.0;
+            break;
+          case '4':
+            _step = 10.0;
+            break;
+          case '5':
+            _step = 5.0;
+            break;
+          case '6':
+            _step = 2.5;
+            break;
+          case '7':
+            _step = 1.0;
+            break;
+          case '8':
+            _step = 0.5;
+            break;
+          case '9':
+            _step = 0.25;
+            break;
+          case '0':
+            _step = 0.1;
+            break;
 
-        // at
-        case 'd':
-          _at.position.addScaledVector(_xAxis, _step);
-          if (_lockUp) {
-            _up.position.addScaledVector(_xAxis, _step);
-          }
-          if (_lockTo) {
+          // at
+          case 'd':
+            _at.position.addScaledVector(_xAxis, _step);
+            if (_lockUp) {
+              _up.position.addScaledVector(_xAxis, _step);
+            }
+            if (_lockTo) {
+              _to.position.addScaledVector(_xAxis, _step);
+            }
+            break;
+          case 'a':
+            _at.position.addScaledVector(_xAxis, -_step);
+            if (_lockUp) {
+              _up.position.addScaledVector(_xAxis, -_step);
+            }
+            if (_lockTo) {
+              _to.position.addScaledVector(_xAxis, -_step);
+            }
+            break;
+          case 'w':
+            _at.position.addScaledVector(_yAxis, _step);
+            if (_lockUp) {
+              _up.position.addScaledVector(_yAxis, _step);
+            }
+            if (_lockTo) {
+              _to.position.addScaledVector(_yAxis, _step);
+            }
+            break;
+          case 's':
+            _at.position.addScaledVector(_yAxis, -_step);
+            if (_lockUp) {
+              _up.position.addScaledVector(_yAxis, -_step);
+            }
+            if (_lockTo) {
+              _to.position.addScaledVector(_yAxis, -_step);
+            }
+            break;
+          case 'e':
+            _at.position.addScaledVector(_zAxis, _step);
+            if (_lockUp) {
+              _up.position.addScaledVector(_zAxis, _step);
+            }
+            if (_lockTo) {
+              _to.position.addScaledVector(_zAxis, _step);
+            }
+            break;
+          case 'q':
+            _at.position.addScaledVector(_zAxis, -_step);
+            if (_lockUp) {
+              _up.position.addScaledVector(_zAxis, -_step);
+            }
+            if (_lockTo) {
+              _to.position.addScaledVector(_zAxis, -_step);
+            }
+            break;
+
+          // to
+          case 'h':
             _to.position.addScaledVector(_xAxis, _step);
-          }
-          break;
-        case 'a':
-          _at.position.addScaledVector(_xAxis, -_step);
-          if (_lockUp) {
-            _up.position.addScaledVector(_xAxis, -_step);
-          }
-          if (_lockTo) {
+            break;
+          case 'f':
             _to.position.addScaledVector(_xAxis, -_step);
-          }
-          break;
-        case 'w':
-          _at.position.addScaledVector(_yAxis, _step);
-          if (_lockUp) {
-            _up.position.addScaledVector(_yAxis, _step);
-          }
-          if (_lockTo) {
+            break;
+          case 't':
             _to.position.addScaledVector(_yAxis, _step);
-          }
-          break;
-        case 's':
-          _at.position.addScaledVector(_yAxis, -_step);
-          if (_lockUp) {
-            _up.position.addScaledVector(_yAxis, -_step);
-          }
-          if (_lockTo) {
+            break;
+          case 'g':
             _to.position.addScaledVector(_yAxis, -_step);
-          }
-          break;
-        case 'e':
-          _at.position.addScaledVector(_zAxis, _step);
-          if (_lockUp) {
-            _up.position.addScaledVector(_zAxis, _step);
-          }
-          if (_lockTo) {
+            break;
+          case 'y':
             _to.position.addScaledVector(_zAxis, _step);
-          }
-          break;
-        case 'q':
-          _at.position.addScaledVector(_zAxis, -_step);
-          if (_lockUp) {
-            _up.position.addScaledVector(_zAxis, -_step);
-          }
-          if (_lockTo) {
+            break;
+          case 'r':
             _to.position.addScaledVector(_zAxis, -_step);
-          }
-          break;
+            break;
 
-        // to
-        case 'h':
-          _to.position.addScaledVector(_xAxis, _step);
-          break;
-        case 'f':
-          _to.position.addScaledVector(_xAxis, -_step);
-          break;
-        case 't':
-          _to.position.addScaledVector(_yAxis, _step);
-          break;
-        case 'g':
-          _to.position.addScaledVector(_yAxis, -_step);
-          break;
-        case 'y':
-          _to.position.addScaledVector(_zAxis, _step);
-          break;
-        case 'r':
-          _to.position.addScaledVector(_zAxis, -_step);
-          break;
+          // up
+          case 'l':
+            _to.position.addScaledVector(_xAxis, _step);
+            break;
+          case 'j':
+            _to.position.addScaledVector(_xAxis, -_step);
+            break;
+          case 'i':
+            _to.position.addScaledVector(_yAxis, _step);
+            break;
+          case 'k':
+            _to.position.addScaledVector(_yAxis, -_step);
+            break;
+          case 'o':
+            _to.position.addScaledVector(_zAxis, _step);
+            break;
+          case 'u':
+            _to.position.addScaledVector(_zAxis, -_step);
+            break;
 
-        // up
-        case 'l':
-          _to.position.addScaledVector(_xAxis, _step);
-          break;
-        case 'j':
-          _to.position.addScaledVector(_xAxis, -_step);
-          break;
-        case 'i':
-          _to.position.addScaledVector(_yAxis, _step);
-          break;
-        case 'k':
-          _to.position.addScaledVector(_yAxis, -_step);
-          break;
-        case 'o':
-          _to.position.addScaledVector(_zAxis, _step);
-          break;
-        case 'u':
-          _to.position.addScaledVector(_zAxis, -_step);
-          break;
+          // Pass on other keystrokes
+          default:
+            this.dispatchEvent({ type: 'keydown', object: _object, event });
+            break;
+        }
       }
 
       update();
