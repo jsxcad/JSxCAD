@@ -42143,6 +42143,7 @@ class OrbitView extends ReactDOM$2.PureComponent {
       const geometry = await read(this.builtPath, {
         workspace
       });
+      console.log(`QQ/update geometry`);
       await updateGeometry(geometry); // Restore the control state.
 
       trackballControls.reset();
@@ -42203,22 +42204,28 @@ class OrbitView extends ReactDOM$2.PureComponent {
 
     const handleKeydown = ({
       object,
-      event
+      event,
+      at,
+      to,
+      up,
+      hideObject,
+      placeObject
     }) => {
       const {
         onKeydown,
         sourceLocation
       } = this.props;
 
-      if (!object) {
-        return;
-      }
-
       if (onKeydown) {
         onKeydown({
           sourceLocation,
           object,
-          event
+          event,
+          at,
+          to,
+          up,
+          hideObject,
+          placeObject
         });
       }
     };
@@ -43211,7 +43218,8 @@ class App extends ReactDOM$2.Component {
       } finally {
         this.View.updating = false;
       }
-    };
+    }; // We need a view op queue.
+
 
     this.View.jogPendingUpdate = null;
 
@@ -43271,7 +43279,12 @@ class App extends ReactDOM$2.Component {
     this.View.keydown = async ({
       event,
       object,
-      sourceLocation
+      sourceLocation,
+      at,
+      to,
+      up,
+      hideObject,
+      placeObject
     }) => {
       switch (event.key) {
         // Edit shape
@@ -43282,6 +43295,10 @@ class App extends ReactDOM$2.Component {
         case 'Backspace':
         case 'Delete':
           {
+            if (hideObject && object) {
+              hideObject(object);
+            }
+
             const {
               path
             } = sourceLocation;
@@ -43333,7 +43350,8 @@ class App extends ReactDOM$2.Component {
                 path,
                 code,
                 viewId,
-                nth
+                nth,
+                object
               }
             });
             break;
@@ -43348,6 +43366,10 @@ class App extends ReactDOM$2.Component {
 
         case 'Cut':
           {
+            if (hideObject && object) {
+              hideObject(object);
+            }
+
             const {
               path
             } = sourceLocation;
@@ -43372,7 +43394,8 @@ class App extends ReactDOM$2.Component {
               [`NotebookText/${path}`]: newNotebookText,
               Clipboard: {
                 code,
-                viewId
+                viewId,
+                object
               }
             });
             await this.Notebook.run(path);
@@ -43397,16 +43420,26 @@ class App extends ReactDOM$2.Component {
             } = this.state;
             const {
               code,
-              viewId
+              viewId,
+              object
             } = Clipboard;
 
             if (!code) {
               return;
             }
 
+            if (placeObject && object) {
+              placeObject(object, {
+                at
+              });
+            }
+
             const newNotebookText = appendViewGroupCode(NotebookText, {
               viewId,
-              code
+              code,
+              at: getWorldPosition(at, 0.01),
+              to: getWorldPosition(to, 0.01),
+              up: getWorldPosition(up, 0.01)
             });
             await this.updateState({
               [`NotebookText/${path}`]: newNotebookText

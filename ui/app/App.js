@@ -797,6 +797,8 @@ class App extends React.Component {
       }
     };
 
+    // We need a view op queue.
+
     this.View.jogPendingUpdate = null;
 
     this.View.jog = async (update) => {
@@ -835,7 +837,16 @@ class App extends React.Component {
       this.View.jogPendingUpdate = update;
     };
 
-    this.View.keydown = async ({ event, object, sourceLocation }) => {
+    this.View.keydown = async ({
+      event,
+      object,
+      sourceLocation,
+      at,
+      to,
+      up,
+      hideObject,
+      placeObject,
+    }) => {
       switch (event.key) {
         // Edit shape
         case ' ':
@@ -844,6 +855,9 @@ class App extends React.Component {
 
         case 'Backspace':
         case 'Delete': {
+          if (hideObject && object) {
+            hideObject(object);
+          }
           const { path } = sourceLocation;
           const { [`NotebookText/${path}`]: NotebookText } = this.state;
           const { viewId, groupChildId: nth } = object.userData;
@@ -868,7 +882,9 @@ class App extends React.Component {
           const { [`NotebookText/${path}`]: NotebookText } = this.state;
           const { viewId, groupChildId: nth } = object.userData;
           const { code } = extractViewGroupCode(NotebookText, { viewId, nth });
-          await this.updateState({ Clipboard: { path, code, viewId, nth } });
+          await this.updateState({
+            Clipboard: { path, code, viewId, nth, object },
+          });
           break;
         }
 
@@ -878,6 +894,9 @@ class App extends React.Component {
           }
         // fall through to Cut
         case 'Cut': {
+          if (hideObject && object) {
+            hideObject(object);
+          }
           const { path } = sourceLocation;
           const { [`NotebookText/${path}`]: NotebookText } = this.state;
           const { viewId, groupChildId: nth } = object.userData;
@@ -888,7 +907,7 @@ class App extends React.Component {
           });
           await this.updateState({
             [`NotebookText/${path}`]: newNotebookText,
-            Clipboard: { code, viewId },
+            Clipboard: { code, viewId, object },
           });
           await this.Notebook.run(path);
           break;
@@ -903,13 +922,19 @@ class App extends React.Component {
           const { path } = sourceLocation;
           const { Clipboard = {}, [`NotebookText/${path}`]: NotebookText } =
             this.state;
-          const { code, viewId } = Clipboard;
+          const { code, viewId, object } = Clipboard;
           if (!code) {
             return;
+          }
+          if (placeObject && object) {
+            placeObject(object, { at });
           }
           const newNotebookText = appendViewGroupCode(NotebookText, {
             viewId,
             code,
+            at: getWorldPosition(at, 0.01),
+            to: getWorldPosition(to, 0.01),
+            up: getWorldPosition(up, 0.01),
           });
           await this.updateState({
             [`NotebookText/${path}`]: newNotebookText,

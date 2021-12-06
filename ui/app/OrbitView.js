@@ -90,6 +90,7 @@ export class OrbitView extends React.PureComponent {
       this.trackballControls.up0.copy(this.trackballControls.object.up);
       this.trackballControls.zoom0 = this.trackballControls.object.zoom;
       const geometry = await read(this.builtPath, { workspace });
+      console.log(`QQ/update geometry`);
       await updateGeometry(geometry);
       // Restore the control state.
       trackballControls.reset();
@@ -113,13 +114,27 @@ export class OrbitView extends React.PureComponent {
         onJog({ sourceLocation, object, at, to, up });
       }
     };
-    const handleKeydown = ({ object, event }) => {
+    const handleKeydown = ({
+      object,
+      event,
+      at,
+      to,
+      up,
+      hideObject,
+      placeObject,
+    }) => {
       const { onKeydown, sourceLocation } = this.props;
-      if (!object) {
-        return;
-      }
       if (onKeydown) {
-        onKeydown({ sourceLocation, object, event });
+        onKeydown({
+          sourceLocation,
+          object,
+          event,
+          at,
+          to,
+          up,
+          hideObject,
+          placeObject,
+        });
       }
     };
     anchorControls.addEventListener('change', handleJog);
