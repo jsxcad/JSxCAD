@@ -375,6 +375,7 @@ const control = (label, value, type, options) => {
 };
 
 const api = {
+  _: undefined,
   ...mathApi,
   ...shapeApi,
   ...notesApi,

@@ -42917,7 +42917,7 @@ class AnchorControls extends EventDispatcher {
     _upArrow.userData.dressing = true;
     _at.add(_upArrow);
 
-    const hideObject = () => {
+    const deleteObject = () => {
       if (!_object) {
         return;
       }
@@ -42932,7 +42932,10 @@ class AnchorControls extends EventDispatcher {
       if (at) {
         copy.position.copy(at.position);
       }
-      _scene.add(copy);
+      // Record the time this was produced.
+      copy.userData.created = new Date();
+      // This is not quite right -- we might be pasting elsewhere.
+      original.parent.add(copy);
     };
 
     const enable = () => {
@@ -43043,6 +43046,7 @@ class AnchorControls extends EventDispatcher {
           child.visible = true;
         }
       }
+      _at.material.color.setHex(0xff4500); // orange red
       _at.visible = true;
       _to.visible = true;
       _up.visible = true;
@@ -43075,10 +43079,7 @@ class AnchorControls extends EventDispatcher {
         }
       }
       _object = null;
-      // _at.visible = false;
-      // _to.visible = false;
-      // _up.visible = false;
-      // _domElement.removeEventListener('keydown', onKeyDown);
+      _at.material.color.setHex(0xffff00); // yellow
       this.dispatchEvent({ type: 'change', object: null });
     };
 
@@ -43089,14 +43090,14 @@ class AnchorControls extends EventDispatcher {
 
       if (event.getModifierState('Control')) {
         this.dispatchEvent({
-          type: 'keydown',
-          object: _object,
-          event,
           at: _at,
+          deleteObject,
+          object: _object,
+          placeObject,
+          type: 'keydown',
+          event,
           to: _to,
           up: _up,
-          hideObject,
-          placeObject,
         });
       } else {
         // These exclude control keys.
@@ -43134,6 +43135,7 @@ class AnchorControls extends EventDispatcher {
             break;
 
           // at
+          case 'ArrowRight':
           case 'd':
             _at.position.addScaledVector(_xAxis, _step);
             {
@@ -43143,6 +43145,7 @@ class AnchorControls extends EventDispatcher {
               _to.position.addScaledVector(_xAxis, _step);
             }
             break;
+          case 'ArrowLeft':
           case 'a':
             _at.position.addScaledVector(_xAxis, -_step);
             {
@@ -43152,6 +43155,7 @@ class AnchorControls extends EventDispatcher {
               _to.position.addScaledVector(_xAxis, -_step);
             }
             break;
+          case 'ArrowUp':
           case 'w':
             _at.position.addScaledVector(_yAxis, _step);
             {
@@ -43161,6 +43165,7 @@ class AnchorControls extends EventDispatcher {
               _to.position.addScaledVector(_yAxis, _step);
             }
             break;
+          case 'ArrowDown':
           case 's':
             _at.position.addScaledVector(_yAxis, -_step);
             {
@@ -43170,6 +43175,7 @@ class AnchorControls extends EventDispatcher {
               _to.position.addScaledVector(_yAxis, -_step);
             }
             break;
+          case 'PageDown':
           case 'e':
             _at.position.addScaledVector(_zAxis, _step);
             {
@@ -43179,6 +43185,7 @@ class AnchorControls extends EventDispatcher {
               _to.position.addScaledVector(_zAxis, _step);
             }
             break;
+          case 'PageUp':
           case 'q':
             _at.position.addScaledVector(_zAxis, -_step);
             {
@@ -43232,14 +43239,14 @@ class AnchorControls extends EventDispatcher {
           // Pass on other keystrokes
           default:
             this.dispatchEvent({
-              type: 'keydown',
-              object: _object,
-              event,
               at: _at,
-              to: _to,
-              up: _up,
-              hideObject,
+              deleteObject,
+              event,
+              object: _object,
               placeObject,
+              to: _to,
+              type: 'keydown',
+              up: _up,
             });
             break;
         }
@@ -44326,7 +44333,8 @@ const updateUserData = (geometry, scene, userData) => {
       } else if (tag.startsWith('viewType:')) {
         userData.viewType = tag.substring(9);
       } else if (tag.startsWith('groupChildId:')) {
-        userData.groupChildId = tag.substring(13);
+        // Deprecate these.
+        userData.groupChildId = parseInt(tag.substring(13));
       }
     }
   }
@@ -44853,9 +44861,15 @@ const orbitDisplay = async (
 
   let moveToFitDone = false;
 
-  const updateGeometry = async (geometry, { fit = true } = {}) => {
+  const updateGeometry = async (geometry, { fit = true, timestamp } = {}) => {
     for (const object of [...scene.children]) {
-      if (!object.userData.dressing) {
+      if (
+        !object.userData.dressing &&
+        (!timestamp ||
+          !object.userData.created ||
+          object.userData.created < timestamp)
+      ) {
+        // If the object isn't dressing and was created before the update time, then it should be obsolete.
         scene.remove(object);
       }
     }

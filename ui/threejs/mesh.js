@@ -193,7 +193,8 @@ const updateUserData = (geometry, scene, userData) => {
       } else if (tag.startsWith('viewType:')) {
         userData.viewType = tag.substring(9);
       } else if (tag.startsWith('groupChildId:')) {
-        userData.groupChildId = tag.substring(13);
+        // Deprecate these.
+        userData.groupChildId = parseInt(tag.substring(13));
       }
     }
   }

@@ -1,5 +1,7 @@
 import puppeteer from 'puppeteer';
 
+const timeout = 120000;
+
 export const screenshot = async (html) => {
   let timeoutCount = 0;
   const timeoutLimit = 3;
@@ -15,9 +17,20 @@ export const screenshot = async (html) => {
       const height = 1024;
       await page.setViewport({ width, height });
       page.on('error', (msg) => console.log(msg.text()));
-      await page.setContent(html);
       try {
-        await page.waitForSelector('.notebook.loaded', { timeout: 60000 });
+        await page.setContent(html, { timeout });
+      } catch (error) {
+        console.log(error.stack);
+        if (timeoutCount++ < timeoutLimit) {
+          console.log(`Retry ${timeoutCount}`);
+          continue;
+        } else {
+          throw error;
+        }
+      }
+      timeoutCount = 0;
+      try {
+        await page.waitForSelector('.notebook.loaded', { timeout });
       } catch (error) {
         console.log(error.stack);
         if (timeoutCount++ < timeoutLimit) {
