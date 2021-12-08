@@ -1,7 +1,7 @@
 import * as PropTypes from 'prop-types';
 
 import { orbitDisplay, raycast } from '@jsxcad/ui-threejs';
-import { read, readOrWatch, unwatchFile, watchFile } from '@jsxcad/sys';
+import { readOrWatch, unwatchFile, watchFile } from '@jsxcad/sys';
 
 import React from 'react';
 
@@ -18,6 +18,7 @@ export class OrbitView extends React.PureComponent {
       onDragEnd: PropTypes.function,
       onKeydown: PropTypes.function,
       onJog: PropTypes.function,
+      onUpdateGeometry: PropTypes.function,
       trackballState: PropTypes.object,
     };
   }
@@ -81,6 +82,8 @@ export class OrbitView extends React.PureComponent {
       unwatchFile(this.builtPath, this.watcher, { workspace });
     }
     this.watcher = async () => {
+      const { onUpdateGeometry } = this.props;
+
       // FIX: Why isn't this done by updateGeometry?
       // Backup the control state.
       this.trackballControls.target0.copy(this.trackballControls.target);
@@ -89,8 +92,14 @@ export class OrbitView extends React.PureComponent {
       );
       this.trackballControls.up0.copy(this.trackballControls.object.up);
       this.trackballControls.zoom0 = this.trackballControls.object.zoom;
-      const geometry = await read(this.builtPath, { workspace });
-      await updateGeometry(geometry);
+      if (onUpdateGeometry) {
+        await onUpdateGeometry({
+          geometryPath: this.builtPath,
+          path,
+          updateGeometry,
+          workspace,
+        });
+      }
       // Restore the control state.
       trackballControls.reset();
     };
@@ -113,13 +122,27 @@ export class OrbitView extends React.PureComponent {
         onJog({ sourceLocation, object, at, to, up });
       }
     };
-    const handleKeydown = ({ object, event }) => {
+    const handleKeydown = ({
+      at,
+      deleteObject,
+      event,
+      object,
+      placeObject,
+      to,
+      up,
+    }) => {
       const { onKeydown, sourceLocation } = this.props;
-      if (!object) {
-        return;
-      }
       if (onKeydown) {
-        onKeydown({ sourceLocation, object, event });
+        onKeydown({
+          at,
+          deleteObject,
+          event,
+          placeObject,
+          sourceLocation,
+          object,
+          to,
+          up,
+        });
       }
     };
     anchorControls.addEventListener('change', handleJog);

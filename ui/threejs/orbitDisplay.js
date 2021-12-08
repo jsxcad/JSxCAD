@@ -163,9 +163,15 @@ export const orbitDisplay = async (
 
   let moveToFitDone = false;
 
-  const updateGeometry = async (geometry, { fit = true } = {}) => {
+  const updateGeometry = async (geometry, { fit = true, timestamp } = {}) => {
     for (const object of [...scene.children]) {
-      if (!object.userData.dressing) {
+      if (
+        !object.userData.dressing &&
+        (!timestamp ||
+          !object.userData.created ||
+          object.userData.created < timestamp)
+      ) {
+        // If the object isn't dressing and was created before the update time, then it should be obsolete.
         scene.remove(object);
       }
     }

@@ -20972,7 +20972,60 @@ const {
   UnaryExpression,
 } = main_8;
 
+const editableCalls = ['Assembly', 'Group', 'Polygon'];
+
 const logInfo = (text) => logInfo$1('compiler/rewrite', text);
+
+const rewriteOrient = (lastCall, { at, to, up }) => {
+  // Ok, we should have extracted an x of Group(x).view(viewId).
+  // The expression is organized like (a.b()).call(), which means that we're already at the final call.
+  const lastCallee = lastCall.callee;
+  if (!lastCallee) {
+    return;
+  }
+  const { property } = lastCallee;
+  const orientation = [];
+  if (at) {
+    orientation.push(
+      objectProperty(
+        literal$1('at'),
+        arrayExpression([literal$1(at[0]), literal$1(at[1]), literal$1(at[2])])
+      )
+    );
+  }
+  if (to) {
+    orientation.push(
+      objectProperty(
+        literal$1('to'),
+        arrayExpression([literal$1(to[0]), literal$1(to[1]), literal$1(to[2])])
+      )
+    );
+  }
+  if (up) {
+    orientation.push(
+      objectProperty(
+        literal$1('up'),
+        arrayExpression([literal$1(up[0]), literal$1(up[1]), literal$1(up[2])])
+      )
+    );
+  }
+  if (Identifier.check(property) && property.name === 'orient') {
+    logInfo(`Rewriting orient`);
+    // We need to rewrite the arguments of the orient call.
+    // e.g. s.Box().orient(Old) -> s.Box().orient(New)
+    lastCall.arguments = [objectExpression(orientation)];
+    return lastCall;
+  } else {
+    logInfo(`Appending orient`);
+    // We need to rewrite lastCall to be a chained method call
+    // e.g. s.Box() -> s.Box().orient(New)
+    const chained = memberExpression(
+      lastCall,
+      callExpression(identifier('orient'), [objectExpression(orientation)])
+    );
+    return chained;
+  }
+};
 
 const extractViewMethodCall = (callExpression, allowedCalleeNames, viewId) => {
   const args = callExpression.get('arguments');
@@ -21036,7 +21089,7 @@ const extractViewGroupCode = (script, { viewId, nth }) => {
       try {
         const { calleeObject } = extractViewMethodCall(
           expression,
-          ['Group', 'Assembly'],
+          editableCalls,
           viewId
         );
         if (!calleeObject) {
@@ -21056,15 +21109,28 @@ const extractViewGroupCode = (script, { viewId, nth }) => {
   return { code };
 };
 
-const appendViewGroupCode = (script, { code, viewId, nth }) => {
+const appendViewGroupCode = (
+  script,
+  { code, viewId, nth, at, to, up }
+) => {
   const ast = main_5(script);
-  const astToAppend = main_5(code);
+  const astToAppend = rewriteOrient(main_5(code).program.body[0].expression, {
+    at,
+    to,
+    up,
+  });
+  if (!astToAppend) {
+    return;
+  }
+  console.log(
+    `QQ/appendViewGroupCode/rewriteOrient: ${main_3(astToAppend).code}`
+  );
   main_1(ast, {
     visitCallExpression(expression) {
       try {
         const { calleeObject } = extractViewMethodCall(
           expression,
-          ['Group', 'Assembly'],
+          editableCalls,
           viewId
         );
         if (!calleeObject) {
@@ -21087,7 +21153,7 @@ const deleteViewGroupCode = (script, { viewId, nth }) => {
       try {
         const { calleeObject } = extractViewMethodCall(
           expression,
-          ['Group', 'Assembly'],
+          editableCalls,
           viewId
         );
         if (!calleeObject) {
@@ -21100,6 +21166,7 @@ const deleteViewGroupCode = (script, { viewId, nth }) => {
       }
     },
   });
+  console.log(main_3(ast).code);
   return main_3(ast).code;
 };
 
@@ -21110,7 +21177,7 @@ const rewriteViewGroupOrient = (script, { viewId, nth, at, to, up }) => {
       try {
         const { calleeObject } = extractViewMethodCall(
           expression,
-          ['Group', 'Assembly'],
+          editableCalls,
           viewId
         );
         if (!calleeObject) {
@@ -21124,50 +21191,9 @@ const rewriteViewGroupOrient = (script, { viewId, nth, at, to, up }) => {
         logInfo(`Found nthArg ${nthArg}`);
         // Ok, we should have extracted an x of Group(x).view(viewId).
         // The expression is organized like (a.b()).call(), which means that we're already at the final call.
-        const lastCall = nthArg;
-        const lastCallee = lastCall.callee;
-        const { property } = lastCallee;
-        const orientation = [];
-        if (at) {
-          orientation.push(
-            objectProperty(
-              literal$1('at'),
-              arrayExpression([literal$1(at[0]), literal$1(at[1]), literal$1(at[2])])
-            )
-          );
-        }
-        if (to) {
-          orientation.push(
-            objectProperty(
-              literal$1('to'),
-              arrayExpression([literal$1(to[0]), literal$1(to[1]), literal$1(to[2])])
-            )
-          );
-        }
-        if (up) {
-          orientation.push(
-            objectProperty(
-              literal$1('up'),
-              arrayExpression([literal$1(up[0]), literal$1(up[1]), literal$1(up[2])])
-            )
-          );
-        }
-        if (Identifier.check(property) && property.name === 'orient') {
-          logInfo(`Rewriting orient`);
-          // We need to rewrite the arguments of the orient call.
-          // e.g. s.Box().orient(Old) -> s.Box().orient(New)
-          lastCall.arguments = [objectExpression(orientation)];
-        } else {
-          logInfo(`Appending orient`);
-          // We need to rewrite lastCall to be a chained method call
-          // e.g. s.Box() -> s.Box().orient(New)
-          const chained = memberExpression(
-            lastCall,
-            callExpression(identifier('orient'), [
-              objectExpression(orientation),
-            ])
-          );
-          args.value[nth] = chained;
+        const rewritten = rewriteOrient(nthArg, { at, to, up });
+        if (rewritten) {
+          args.value[nth] = rewritten;
         }
       } finally {
         this.traverse(expression);

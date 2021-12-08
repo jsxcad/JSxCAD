@@ -193,7 +193,8 @@ const updateUserData = (geometry, scene, userData) => {
       } else if (tag.startsWith('viewType:')) {
         userData.viewType = tag.substring(9);
       } else if (tag.startsWith('groupChildId:')) {
-        userData.groupChildId = tag.substring(13);
+        // Deprecate these.
+        userData.groupChildId = parseInt(tag.substring(13));
       }
     }
   }
@@ -386,12 +387,15 @@ export const buildMeshes = async ({
         mesh = new Group();
       }
 
-      if (tags.includes('show:outline')) {
+      {
         const edges = new EdgesGeometry(bufferGeometry);
         const outline = new LineSegments(
           edges,
           new LineBasicMaterial({ color: 0x000000 })
         );
+        outline.userData.isOutline = true;
+        outline.userData.hasShowOutline = tags.includes('show:outline');
+        outline.visible = outline.userData.hasShowOutline;
         mesh.add(outline);
       }
 

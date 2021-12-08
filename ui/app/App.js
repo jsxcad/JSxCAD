@@ -2,14 +2,11 @@
 
 import * as PropTypes from 'prop-types';
 
-import { addVoxel, getWorldPosition } from '@jsxcad/ui-threejs';
-
 import {
   appendViewGroupCode,
   deleteViewGroupCode,
   extractViewGroupCode,
   rewriteViewGroupOrient,
-  rewriteVoxels,
 } from '@jsxcad/compiler';
 
 import {
@@ -49,6 +46,7 @@ import ReactDOM from 'react-dom';
 import Row from 'react-bootstrap/Row';
 import { animationFrame } from './schedule.js';
 import { execute } from '@jsxcad/api';
+import { getWorldPosition } from '@jsxcad/ui-threejs';
 
 const ensureFile = async (file, url, { workspace } = {}) => {
   const sources = [];
@@ -500,7 +498,13 @@ class App extends React.Component {
       await this.updateState({ Make: { path, id, sourceLocation } });
     };
 
+    this.Notebook.runStart = {};
+
     this.Notebook.run = async (path, options) => {
+      // Note the time that this run started.
+      // This can be used to note which assets are obsoleted by the completion of the run.
+      this.Notebook.runStart[path] = new Date();
+
       const { sha, workspace } = this.props;
       const NotebookAdvice = this.Notebook.ensureAdvice(path);
       const NotebookPath = path;
@@ -598,6 +602,7 @@ class App extends React.Component {
         typeof data === 'string' ? data : new TextDecoder('utf8').decode(data);
 
       this.Notebook.ensureAdvice(path);
+      console.log(`QQ/Notebook.load/path: ${path}`);
       await this.updateState({ [`NotebookText/${path}`]: notebookText });
 
       // Let state propagate.
@@ -628,6 +633,7 @@ class App extends React.Component {
       await write(NotebookFile, new TextEncoder('utf8').encode(cleanText), {
         workspace,
       });
+      console.log(`QQ/Notebook.save/path: ${path} ${cleanText}`);
       await this.updateState({ [`NotebookText/${path}`]: cleanText });
 
       // Let state propagate.
@@ -637,6 +643,7 @@ class App extends React.Component {
     };
 
     this.Notebook.change = (path, data) => {
+      console.log(`QQ/Notebook.change/path: ${path} ${data}`);
       this.setState({ [`NotebookText/${path}`]: data });
     };
 
@@ -652,6 +659,7 @@ class App extends React.Component {
 
     this.Notebook.close = async (closedPath) => {
       const { WorkspaceOpenPaths = [] } = this.state;
+      console.log(`QQ/Notebook.close/path: ${closedPath}`);
       await this.updateState({
         [`NotebookText/${closedPath}`]: undefined,
         [`NotebookAdvice/${closedPath}`]: undefined,
@@ -679,163 +687,97 @@ class App extends React.Component {
 
     this.View = {};
 
-    this.View.click = async ({
-      camera,
-      draggableObjects,
-      editId,
-      editType,
-      object,
-      trackballControls,
-      position,
-      ray,
-      renderer,
-      scene,
-      sourceLocation,
-      type,
-      target,
-      threejsMesh,
-      viewId,
-    }) => {
-      if (this.View.updating) {
-        return;
-      }
+    this.View.pendingOperations = [];
+    this.View.operationsScheduled = false;
+
+    this.View.executeOperations = async () => {
       try {
-        this.View.updating = true;
-        switch (editType) {
-          case 'Group': {
-            /*
-            let changeScheduled = false;
-            let at, to, up;
-            const change = async () => {
-              changeScheduled = false;
-              const request = {
-                viewId,
-                nth: object.userData.groupChildId,
-                at: getWorldPosition(at, 0.01),
-                to: getWorldPosition(to, 0.01),
-                up: getWorldPosition(up, 0.01),
-              };
-              if (request.nth === undefined) {
-                return;
+        while (this.View.pendingOperations.length > 0) {
+          const paths = new Set();
+          // Run a complete update cycle.
+          while (this.View.pendingOperations.length > 0) {
+            const operations = this.View.pendingOperations;
+            this.View.pendingOperations = [];
+            for (const { path, operation } of operations) {
+              await operation();
+              if (path) {
+                paths.add(path);
               }
-              console.log(JSON.stringify(request));
-              const { path } = sourceLocation;
-              const { [`NotebookText/${path}`]: NotebookText } = this.state;
-              const newNotebookText = rewriteViewGroupOrient(
-                NotebookText,
-                request
-              );
-              await this.updateState({
-                [`NotebookText/${path}`]: newNotebookText,
-              });
-            };
-            ({ at, to, up } = addAnchors({
-              camera,
-              draggableObjects,
-              editId,
-              editType,
-              object,
-              onObjectChange: () => {
-                if (!changeScheduled) {
-                  changeScheduled = true;
-                  setTimeout(change, 500);
-                }
-              },
-              position,
-              ray,
-              renderer,
-              scene,
-              sourceLocation,
-              type,
-              target,
-              threejsMesh,
-              trackballControls,
-              viewState: this.View.state,
-            }));
-*/
-            return;
-          }
-          case 'Voxels': {
-            const { path } = sourceLocation;
-            const { [`NotebookText/${path}`]: NotebookText } = this.state;
-            const request = { editId };
-            const [point, normal] = ray;
-            switch (type) {
-              case 'left':
-                request.pointToAppend = [
-                  point[0] + normal[0] / 2,
-                  point[1] + normal[1] / 2,
-                  point[2] + normal[2] / 2,
-                ].map((v) => Math.round(v));
-                break;
-              case 'right':
-                request.pointToRemove = [
-                  point[0] - normal[0] / 2,
-                  point[1] - normal[1] / 2,
-                  point[2] - normal[2] / 2,
-                ].map((v) => Math.round(v));
-                break;
             }
-            const newNotebookText = rewriteVoxels(NotebookText, request);
-            await this.updateState({
-              [`NotebookText/${path}`]: newNotebookText,
-            });
-            // Add an voxel to the display to temporarily reflect what we added to the source.
-            if (request.pointToAppend) {
-              addVoxel({
-                editId,
-                point: request.pointToAppend,
-                scene,
-                threejsMesh,
-              });
-            }
-            await this.Notebook.run(path);
           }
+          // We defer the rerun of the notebook to the user, but we save at this point.
+          for (const path of paths) {
+            await this.Notebook.save(path);
+          }
+          // See if we got more ops while while we were working.
         }
       } finally {
-        this.View.updating = false;
+        this.View.operationsScheduled = false;
       }
     };
 
-    this.View.jogPendingUpdate = null;
+    this.View.scheduleOperation = ({ path, operation }) => {
+      this.View.pendingOperations.push({ path, operation });
+      if (this.View.operationsScheduled) {
+        // We're already processing these.
+        return;
+      }
+      // Start processing.
+      this.View.operationsScheduled = true;
+      this.View.executeOperations();
+    };
+
+    this.View.jogPendingUpdate = new Map();
 
     this.View.jog = async (update) => {
-      const execute = async () => {
-        const { sourceLocation, at, to, up, object } =
-          this.View.jogPendingUpdate;
-        const { viewId, groupChildId } = object.userData;
-        try {
-          this.View.jogPendingUpdate = null;
-          const request = {
-            viewId,
-            nth: groupChildId,
-            at: getWorldPosition(at, 0.01),
-            to: getWorldPosition(to, 0.01),
-            up: getWorldPosition(up, 0.01),
-          };
-          if (request.nth === undefined) {
-            return;
-          }
-          console.log(JSON.stringify(request));
-          const { path } = sourceLocation;
-          const { [`NotebookText/${path}`]: NotebookText } = this.state;
-          const newNotebookText = rewriteViewGroupOrient(NotebookText, request);
-          await this.updateState({
-            [`NotebookText/${path}`]: newNotebookText,
-          });
-        } finally {
-          if (this.View.jogPendingUpdate) {
-            setTimeout(execute, 500);
-          }
-        }
-      };
-      if (!this.View.jogPendingUpdate) {
-        setTimeout(execute, 500);
+      const { object, path } = update;
+
+      if (object) {
+        this.View.jogPendingUpdate.set(object, update);
       }
-      this.View.jogPendingUpdate = update;
+
+      const operation = async () => {
+        if (!this.View.jogPendingUpdate.has(object)) {
+          // We already handled this jog.
+          return;
+        }
+        const { sourceLocation, at, to, up } =
+          this.View.jogPendingUpdate.get(object);
+        const { viewId } = object.userData;
+        this.View.jogPendingUpdate.delete(object);
+        const request = {
+          viewId,
+          nth: object.parent.children.findIndex((value) => value === object),
+          at: getWorldPosition(at, 0.01),
+          to: getWorldPosition(to, 0.01),
+          up: getWorldPosition(up, 0.01),
+        };
+        if (request.nth === undefined) {
+          return;
+        }
+        console.log(JSON.stringify(request));
+        const { path } = sourceLocation;
+        const { [`NotebookText/${path}`]: NotebookText } = this.state;
+        const newNotebookText = rewriteViewGroupOrient(NotebookText, request);
+        console.log(`QQ/Notebook.jog/path: ${path} ${newNotebookText}`);
+        await this.updateState({
+          [`NotebookText/${path}`]: newNotebookText,
+        });
+      };
+
+      this.View.scheduleOperation({ path, operation });
     };
 
-    this.View.keydown = async ({ event, object, sourceLocation }) => {
+    this.View.keydown = async ({
+      deleteObject,
+      event,
+      object,
+      sourceLocation,
+      at,
+      to,
+      up,
+      placeObject,
+    }) => {
       switch (event.key) {
         // Edit shape
         case ' ':
@@ -844,17 +786,25 @@ class App extends React.Component {
 
         case 'Backspace':
         case 'Delete': {
+          if (deleteObject && object) {
+            deleteObject(object);
+          }
           const { path } = sourceLocation;
-          const { [`NotebookText/${path}`]: NotebookText } = this.state;
-          const { viewId, groupChildId: nth } = object.userData;
-          const newNotebookText = deleteViewGroupCode(NotebookText, {
-            viewId,
-            nth,
-          });
-          await this.updateState({
-            [`NotebookText/${path}`]: newNotebookText,
-          });
-          await this.Notebook.run(path);
+          const { viewId } = object.userData;
+          const operation = async () => {
+            const { [`NotebookText/${path}`]: NotebookText } = this.state;
+            const newNotebookText = deleteViewGroupCode(NotebookText, {
+              viewId,
+              nth: object.parent.children.findIndex(
+                (value) => value === object
+              ),
+            });
+            console.log(`QQ/postDelete: ${newNotebookText}`);
+            await this.updateState({
+              [`NotebookText/${path}`]: newNotebookText,
+            });
+          };
+          this.View.scheduleOperation({ path, operation });
           break;
         }
 
@@ -865,10 +815,23 @@ class App extends React.Component {
         // fall through to Copy
         case 'Copy': {
           const { path } = sourceLocation;
-          const { [`NotebookText/${path}`]: NotebookText } = this.state;
-          const { viewId, groupChildId: nth } = object.userData;
-          const { code } = extractViewGroupCode(NotebookText, { viewId, nth });
-          await this.updateState({ Clipboard: { path, code, viewId, nth } });
+          const operation = async () => {
+            // We should have already extracted the source into userData.
+            // Other operations may have made this introspection out of date.
+            const { [`NotebookText/${path}`]: NotebookText } = this.state;
+            const { viewId } = object.userData;
+            const nth = object.parent.children.findIndex(
+              (value) => value === object
+            );
+            const { code } = extractViewGroupCode(NotebookText, {
+              viewId,
+              nth,
+            });
+            await this.updateState({
+              Clipboard: { path, code, viewId, nth, object },
+            });
+          };
+          this.View.scheduleOperation({ path, operation });
           break;
         }
 
@@ -878,19 +841,31 @@ class App extends React.Component {
           }
         // fall through to Cut
         case 'Cut': {
+          if (deleteObject && object) {
+            deleteObject(object);
+          }
           const { path } = sourceLocation;
-          const { [`NotebookText/${path}`]: NotebookText } = this.state;
-          const { viewId, groupChildId: nth } = object.userData;
-          const { code } = extractViewGroupCode(NotebookText, { viewId, nth });
-          const newNotebookText = deleteViewGroupCode(NotebookText, {
-            viewId,
-            nth,
-          });
-          await this.updateState({
-            [`NotebookText/${path}`]: newNotebookText,
-            Clipboard: { code, viewId },
-          });
-          await this.Notebook.run(path);
+          const { viewId } = object.userData;
+          const operation = async () => {
+            const { [`NotebookText/${path}`]: NotebookText } = this.state;
+            const nth = object.parent.children.findIndex(
+              (value) => value === object
+            );
+            const { code } = extractViewGroupCode(NotebookText, {
+              viewId,
+              nth,
+            });
+            const newNotebookText = deleteViewGroupCode(NotebookText, {
+              viewId,
+              nth,
+            });
+            console.log(`QQ/Notebook.cut/path: ${path} ${newNotebookText}`);
+            await this.updateState({
+              [`NotebookText/${path}`]: newNotebookText,
+              Clipboard: { code, viewId, object },
+            });
+          };
+          this.View.scheduleOperation({ path, operation });
           break;
         }
 
@@ -899,22 +874,32 @@ class App extends React.Component {
             break;
           }
         // fall through to Paste
+        case 'Insert':
         case 'Paste': {
           const { path } = sourceLocation;
-          const { Clipboard = {}, [`NotebookText/${path}`]: NotebookText } =
-            this.state;
-          const { code, viewId } = Clipboard;
+          const { Clipboard = {} } = this.state;
+          const { code, viewId, object } = Clipboard;
           if (!code) {
             return;
           }
-          const newNotebookText = appendViewGroupCode(NotebookText, {
+          if (placeObject && object) {
+            placeObject(object, { at });
+          }
+          const request = {
             viewId,
             code,
-          });
-          await this.updateState({
-            [`NotebookText/${path}`]: newNotebookText,
-          });
-          await this.Notebook.run(path);
+            at: getWorldPosition(at, 0.01),
+            to: getWorldPosition(to, 0.01),
+            up: getWorldPosition(up, 0.01),
+          };
+          const operation = async () => {
+            const { [`NotebookText/${path}`]: NotebookText } = this.state;
+            const newNotebookText = appendViewGroupCode(NotebookText, request);
+            await this.updateState({
+              [`NotebookText/${path}`]: newNotebookText,
+            });
+          };
+          this.View.scheduleOperation({ path, operation });
           break;
         }
       }
@@ -949,6 +934,19 @@ class App extends React.Component {
       const { workspace } = this.props;
       const View = await read('config/View', { workspace });
       await this.updateState({ View });
+    };
+
+    this.View.updateGeometry = async ({
+      geometryPath,
+      path,
+      updateGeometry,
+      workspace,
+    }) => {
+      const geometry = await read(geometryPath, { workspace });
+      console.log(`QQ/update geometry`);
+      await updateGeometry(geometry, {
+        timestamp: this.Notebook.runStart[path],
+      });
     };
 
     this.View.trackballState = {};
@@ -1151,10 +1149,10 @@ class App extends React.Component {
               view={View.view}
               sourceLocation={View.sourceLocation}
               workspace={workspace}
-              onClick={this.View.click}
               onJog={this.View.jog}
               onKeydown={this.View.keydown}
               onMove={this.View.move}
+              onUpdateGeometry={this.View.updateGeometry}
               trackballState={trackballState}
             />
           );
