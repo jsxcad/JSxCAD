@@ -779,11 +779,6 @@ class App extends React.Component {
       placeObject,
     }) => {
       switch (event.key) {
-        // Edit shape
-        case ' ':
-          window.alert('Edit');
-          break;
-
         case 'Backspace':
         case 'Delete': {
           if (deleteObject && object) {
@@ -805,7 +800,7 @@ class App extends React.Component {
             });
           };
           this.View.scheduleOperation({ path, operation });
-          break;
+          return false;
         }
 
         case 'c':
@@ -832,7 +827,7 @@ class App extends React.Component {
             });
           };
           this.View.scheduleOperation({ path, operation });
-          break;
+          return false;
         }
 
         case 'x':
@@ -866,7 +861,7 @@ class App extends React.Component {
             });
           };
           this.View.scheduleOperation({ path, operation });
-          break;
+          return false;
         }
 
         case 'v':
@@ -900,7 +895,7 @@ class App extends React.Component {
             });
           };
           this.View.scheduleOperation({ path, operation });
-          break;
+          return false;
         }
       }
     };
