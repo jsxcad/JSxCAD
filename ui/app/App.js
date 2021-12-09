@@ -189,9 +189,32 @@ class App extends React.Component {
         notes,
         options,
         path,
+        paths,
         sourceLocation,
       } = message;
       switch (op) {
+        case 'geometry/disjoint': {
+          // Build up a set of parallel operations.
+          const ops = [];
+          if (paths.length < 2) {
+            return paths;
+          }
+          for (let nth = 0; nth < paths.length - 1; nth++) {
+            ops.push(
+              this.ask({
+                op: 'geometry/difference',
+                paths: paths.slice(nth),
+                workspace,
+              })
+            );
+          }
+          const disjointPaths = [paths[paths.length - 1]];
+          for (const op of ops) {
+            disjointPaths.push(await op);
+          }
+          return disjointPaths;
+        }
+
         case 'sys/touch':
           await touch(path, { workspace, id, clear: true, broadcast: true });
           return;
@@ -269,7 +292,7 @@ class App extends React.Component {
                       console.log(`Ask render for ${path}/${id}`);
                       const url = await this.ask(
                         {
-                          op: 'staticView',
+                          op: 'app/staticView',
                           path,
                           workspace,
                           view,
@@ -536,7 +559,7 @@ class App extends React.Component {
           try {
             const result = await this.ask(
               {
-                op: 'evaluate',
+                op: 'app/evaluate',
                 script,
                 workspace,
                 path: NotebookPath,
@@ -558,7 +581,7 @@ class App extends React.Component {
           try {
             const result = await this.ask(
               {
-                op: 'evaluate',
+                op: 'app/evaluate',
                 script,
                 workspace,
                 path: NotebookPath,
@@ -1249,7 +1272,9 @@ class App extends React.Component {
         servicesActiveCounts[path] = 0;
       }
       for (const { context } of getActiveServices()) {
-        servicesActiveCounts[context.path] += 1;
+        if (context && context.path) {
+          servicesActiveCounts[context.path] += 1;
+        }
       }
       this.servicesActiveCounts = servicesActiveCounts;
       console.log(`QQ/SAC: ${JSON.stringify(this.servicesActiveCounts)}`);

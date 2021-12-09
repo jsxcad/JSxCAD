@@ -4271,7 +4271,7 @@ const readOrWatch = async (path, options = {}) => {
   });
   const watcher = await watchFile(path, (file) => resolveWatch(path), options);
   await watch;
-  await unwatchFile(path, watcher);
+  await unwatchFile(path, watcher, options);
   return read(path, options);
 };
 

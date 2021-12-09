@@ -3,6 +3,8 @@
 import * as sys from '@jsxcad/sys';
 
 import baseApi, { evaluate as evaluateScript } from '@jsxcad/api';
+import { difference, write } from '@jsxcad/geometry';
+
 import hashSum from 'hash-sum';
 
 // Compatibility with threejs.
@@ -32,6 +34,7 @@ const agent = async ({ ask, message, type, tell }) => {
     offscreenCanvas,
     id,
     path,
+    paths,
     workspace,
     script,
     sha = 'master',
@@ -44,6 +47,19 @@ const agent = async ({ ask, message, type, tell }) => {
 
   try {
     switch (op) {
+      case 'geometry/difference': {
+        const geometries = [];
+        if (!workspace) {
+          console.log(`No Workspace`);
+        }
+        for (const path of paths) {
+          geometries.push(await sys.readOrWatch(path, { workspace }));
+        }
+        const geometry = difference(...geometries);
+        const path = `geometry/${sys.generateUniqueId()}`;
+        await write(geometry, path);
+        return path;
+      }
       case 'sys/attach':
         self.id = id;
         return;
@@ -53,7 +69,7 @@ const agent = async ({ ask, message, type, tell }) => {
           await sys.touch(path, { workspace, clear: true, broadcast: false });
         }
         return;
-      case 'staticView':
+      case 'app/staticView':
         sys.info('Load Geometry');
         const geometry = await sys.readOrWatch(path, { workspace });
         const { staticView } = await import('@jsxcad/ui-threejs');
@@ -67,7 +83,7 @@ const agent = async ({ ask, message, type, tell }) => {
         const dataURL = new FileReaderSync().readAsDataURL(blob);
         sys.info('Done');
         return dataURL;
-      case 'evaluate':
+      case 'app/evaluate':
         await sys.log({ op: 'text', text: 'Evaluation Started' });
         sys.clearEmitted();
         try {

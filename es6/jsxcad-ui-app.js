@@ -42502,10 +42502,37 @@ class App extends ReactDOM$2.Component {
         notes,
         options,
         path,
+        paths,
         sourceLocation
       } = message;
 
       switch (op) {
+        case 'geometry/disjoint':
+          {
+            // Build up a set of parallel operations.
+            const ops = [];
+
+            if (paths.length < 2) {
+              return paths;
+            }
+
+            for (let nth = 0; nth < paths.length - 1; nth++) {
+              ops.push(this.ask({
+                op: 'geometry/difference',
+                paths: paths.slice(nth),
+                workspace
+              }));
+            }
+
+            const disjointPaths = [paths[paths.length - 1]];
+
+            for (const op of ops) {
+              disjointPaths.push(await op);
+            }
+
+            return disjointPaths;
+          }
+
         case 'sys/touch':
           await touch(path, {
             workspace,
@@ -42608,7 +42635,7 @@ class App extends ReactDOM$2.Component {
                     try {
                       console.log(`Ask render for ${path}/${id}`);
                       const url = await this.ask({
-                        op: 'staticView',
+                        op: 'app/staticView',
                         path,
                         workspace,
                         view,
@@ -42937,7 +42964,7 @@ class App extends ReactDOM$2.Component {
         const evaluate = async script => {
           try {
             const result = await this.ask({
-              op: 'evaluate',
+              op: 'app/evaluate',
               script,
               workspace,
               path: NotebookPath,
@@ -42960,7 +42987,7 @@ class App extends ReactDOM$2.Component {
         const replay = async script => {
           try {
             const result = await this.ask({
-              op: 'evaluate',
+              op: 'app/evaluate',
               script,
               workspace,
               path: NotebookPath,
@@ -43237,11 +43264,6 @@ class App extends ReactDOM$2.Component {
       placeObject
     }) => {
       switch (event.key) {
-        // Edit shape
-        case ' ':
-          window.alert('Edit');
-          break;
-
         case 'Backspace':
         case 'Delete':
           {
@@ -43274,7 +43296,7 @@ class App extends ReactDOM$2.Component {
               path,
               operation
             });
-            break;
+            return false;
           }
 
         case 'c':
@@ -43321,7 +43343,7 @@ class App extends ReactDOM$2.Component {
               path,
               operation
             });
-            break;
+            return false;
           }
 
         case 'x':
@@ -43374,7 +43396,7 @@ class App extends ReactDOM$2.Component {
               path,
               operation
             });
-            break;
+            return false;
           }
 
         case 'v':
@@ -43431,7 +43453,7 @@ class App extends ReactDOM$2.Component {
               path,
               operation
             });
-            break;
+            return false;
           }
       }
     };
@@ -43821,7 +43843,9 @@ class App extends ReactDOM$2.Component {
       for (const {
         context
       } of getActiveServices()) {
-        servicesActiveCounts[context.path] += 1;
+        if (context && context.path) {
+          servicesActiveCounts[context.path] += 1;
+        }
       }
 
       this.servicesActiveCounts = servicesActiveCounts;

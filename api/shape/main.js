@@ -355,6 +355,7 @@ export { Arc } from './Arc.js';
 export { Assembly } from './Assembly.js';
 export { Box } from './Box.js';
 export { ChainedHull } from './ChainedHull.js';
+export { DistributedAssembly } from './DistributedAssembly.js';
 export { Edge } from './Edge.js';
 export { Edges } from './Edges.js';
 export { Empty } from './Empty.js';
