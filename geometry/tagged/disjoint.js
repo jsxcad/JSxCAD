@@ -1,6 +1,6 @@
 /* global self */
 
-import { generateUniqueId, getWorkspace } from '@jsxcad/sys';
+import { deleteFile, generateUniqueId, getWorkspace } from '@jsxcad/sys';
 
 import { difference } from './difference.js';
 import { read } from './read.js';

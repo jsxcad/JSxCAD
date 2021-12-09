@@ -1,4 +1,3 @@
-import { cache } from '@jsxcad/cache';
 import { fill as fillOutlineGraph } from '../graph/fill.js';
 import { fromPaths as fromPathsToGraph } from '../graph/fromPaths.js';
 import { getFaceablePaths } from './getFaceablePaths.js';
