@@ -1,4 +1,3 @@
-import { cache } from '@jsxcad/cache';
 import { fill as fillOutlineGraph } from '../graph/fill.js';
 import { fromPaths as fromPathsToGraph } from '../graph/fromPaths.js';
 import { getFaceablePaths } from './getFaceablePaths.js';
@@ -7,7 +6,7 @@ import { difference as graphDifference } from '../graph/difference.js';
 import { rewrite } from './visit.js';
 import { toConcreteGeometry } from './toConcreteGeometry.js';
 
-const differenceImpl = (geometry, ...geometries) => {
+export const difference = (geometry, ...geometries) => {
   geometries = geometries.map(toConcreteGeometry);
   const op = (geometry, descend) => {
     const { tags } = geometry;
@@ -65,5 +64,3 @@ const differenceImpl = (geometry, ...geometries) => {
 
   return rewrite(toConcreteGeometry(geometry), op);
 };
-
-export const difference = cache(differenceImpl);
