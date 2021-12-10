@@ -951,13 +951,20 @@ Shape.registerMethod('withCloudSolid', withCloudSolid);
 
 const cut =
   (...shapes) =>
-  (shape) =>
-    Shape.fromGeometry(
+  (shape) => {
+    let options;
+    if (shapes.length >= 1 && shapes[0].constructor === Object) {
+      const { mode, check } = shapes.shift();
+      options = { mode, check };
+    }
+    return Shape.fromGeometry(
       difference(
         shape.toGeometry(),
+        options,
         ...shape.toShapes(shapes).map((other) => other.toGeometry())
       )
     );
+  };
 
 Shape.registerMethod('cut', cut);
 
@@ -1067,6 +1074,34 @@ const drop =
   };
 
 Shape.registerMethod('drop', drop);
+
+const starts = new Map();
+
+const startTimer = (name) => (shape) => {
+  starts.set(name, new Date());
+  return shape;
+};
+
+Shape.registerMethod('startTimer', startTimer);
+
+const totals = new Map();
+
+const endTimer = (name) => (shape) => {
+  const start = starts.get(name);
+  const ms = start !== undefined ? new Date() - start : -1;
+  const total = totals.get(name) || { sum: 0, count: 0, history: [] };
+  total.sum += ms;
+  total.count += 1;
+  total.history.push(ms);
+  totals.set(name, total);
+  return shape.md(
+    `${name}: ${total.history
+      .map((ms) => (ms / 1000).toFixed(2))
+      .join(', ')} [${(total.sum / (1000 * total.count)).toFixed(2)}]`
+  );
+};
+
+Shape.registerMethod('endTimer', endTimer);
 
 const Empty = (...shapes) => Shape.fromGeometry(taggedGroup({}));
 
@@ -4846,4 +4881,4 @@ const yz = Shape.fromGeometry({
   ],
 });
 
-export { Alpha, Arc, Assembly, Box, ChainedHull, DistributedAssembly, Edge, Edges, Empty, GrblConstantLaser, GrblDynamicLaser, GrblPlotter, GrblSpindle, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Line, Octagon, Orb, Page, Path, Pentagon, Plan, Point, Points, Polygon, Polyhedron, Septagon, Shape, Spiral, Tetragon, Triangle, Voxels, Wave, Weld, abstract, add, addTo, align, and, as, asPart, at, bend, billOfMaterials, cast, center, clip, clipFrom, cloudSolid, color, colors, cut, cutFrom, cutOut, defRgbColor, defThreejsMaterial, defTool, define, drop, each, eachPoint, edit, ensurePages, ex, extrude, extrudeAlong, extrudeToPlane, faces, fill, fit, fitTo, fuse, g, get, getEdge, getNot, gn, grow, inline, inset, keep, loadGeometry, loft, log, loop, mask, material, md, minkowskiDifference, minkowskiShell, minkowskiSum, move, moveTo, n, noVoid, noop, normal, notColor, nth, ofPlan, offset, on, op, orient, orient2, outline, pack, play, push, remesh, rotate, rotateX, rotateY, rotateZ, rx, ry, rz, saveGeometry, scale, scaleToFit, section, sectionProfile, separate, seq, size, sketch, smooth, table, tag, tags, taper, test, tint, to, tool, top, twist, untag, view, voidFn, voidIn, voxels, weld, withFill, withFn, withInset, withOp, x, xy, xyz, xz, y, yz, z };
+export { Alpha, Arc, Assembly, Box, ChainedHull, DistributedAssembly, Edge, Edges, Empty, GrblConstantLaser, GrblDynamicLaser, GrblPlotter, GrblSpindle, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Line, Octagon, Orb, Page, Path, Pentagon, Plan, Point, Points, Polygon, Polyhedron, Septagon, Shape, Spiral, Tetragon, Triangle, Voxels, Wave, Weld, abstract, add, addTo, align, and, as, asPart, at, bend, billOfMaterials, cast, center, clip, clipFrom, cloudSolid, color, colors, cut, cutFrom, cutOut, defRgbColor, defThreejsMaterial, defTool, define, drop, each, eachPoint, edit, endTimer, ensurePages, ex, extrude, extrudeAlong, extrudeToPlane, faces, fill, fit, fitTo, fuse, g, get, getEdge, getNot, gn, grow, inline, inset, keep, loadGeometry, loft, log, loop, mask, material, md, minkowskiDifference, minkowskiShell, minkowskiSum, move, moveTo, n, noVoid, noop, normal, notColor, nth, ofPlan, offset, on, op, orient, orient2, outline, pack, play, push, remesh, rotate, rotateX, rotateY, rotateZ, rx, ry, rz, saveGeometry, scale, scaleToFit, section, sectionProfile, separate, seq, size, sketch, smooth, startTimer, table, tag, tags, taper, test, tint, to, tool, top, twist, untag, view, voidFn, voidIn, voxels, weld, withFill, withFn, withInset, withOp, x, xy, xyz, xz, y, yz, z };
