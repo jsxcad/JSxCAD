@@ -1,5 +1,5 @@
 import { identityMatrix, fromTranslation, fromZRotation, fromScaling, fromXRotation, fromYRotation } from './jsxcad-math-mat4.js';
-import { composeTransforms, fromSurfaceMeshToLazyGraph, fromPointsToAlphaShapeAsSurfaceMesh, arrangePathsIntoTriangles, fromPolygonsToSurfaceMesh, deserializeSurfaceMesh, fromGraphToSurfaceMesh, fromSurfaceMeshEmitBoundingBox, differenceOfSurfaceMeshes, arrangePaths, serializeSurfaceMesh, bendSurfaceMesh, computeCentroidOfSurfaceMesh, computeNormalOfSurfaceMesh, fromSurfaceMeshToGraph, fromPointsToConvexHullAsSurfaceMesh, outlineSurfaceMesh, extrudeSurfaceMesh, extrudeToPlaneOfSurfaceMesh, fromSurfaceMeshToPolygonsWithHoles, reverseFaceOrientationsOfSurfaceMesh, fromFunctionToSurfaceMesh, fromPointsToSurfaceMesh, fromSegmentToInverseTransform, invertTransform, growSurfaceMesh, intersectionOfSurfaceMeshes, SurfaceMeshQuery, insetOfPolygonWithHoles, loftBetweenCongruentSurfaceMeshes, minkowskiDifferenceOfSurfaceMeshes, minkowskiShellOfSurfaceMeshes, minkowskiSumOfSurfaceMeshes, offsetOfPolygonWithHoles, projectToPlaneOfSurfaceMesh, pushSurfaceMesh, remeshSurfaceMesh, sectionOfSurfaceMesh, subdivideSurfaceMesh, separateSurfaceMesh, fromSurfaceMeshToTriangles, taperSurfaceMesh, doesSelfIntersectOfSurfaceMesh, twistSurfaceMesh, unionOfSurfaceMeshes } from './jsxcad-algorithm-cgal.js';
+import { composeTransforms, fromSurfaceMeshToLazyGraph, fromPointsToAlphaShapeAsSurfaceMesh, deserializeSurfaceMesh, fromGraphToSurfaceMesh, cutClosedSurfaceMeshIncrementally, cutClosedSurfaceMeshSingly, cutClosedSurfaceMeshSinglyRecursive, arrangePathsIntoTriangles, fromPolygonsToSurfaceMesh, fromSurfaceMeshEmitBoundingBox, differenceOfSurfaceMeshes, arrangePaths, serializeSurfaceMesh, bendSurfaceMesh, computeCentroidOfSurfaceMesh, computeNormalOfSurfaceMesh, fromSurfaceMeshToGraph, fromPointsToConvexHullAsSurfaceMesh, outlineSurfaceMesh, extrudeSurfaceMesh, extrudeToPlaneOfSurfaceMesh, fromSurfaceMeshToPolygonsWithHoles, reverseFaceOrientationsOfSurfaceMesh, fromFunctionToSurfaceMesh, fromPointsToSurfaceMesh, fromSegmentToInverseTransform, invertTransform, growSurfaceMesh, intersectionOfSurfaceMeshes, SurfaceMeshQuery, insetOfPolygonWithHoles, loftBetweenCongruentSurfaceMeshes, minkowskiDifferenceOfSurfaceMeshes, minkowskiShellOfSurfaceMeshes, minkowskiSumOfSurfaceMeshes, offsetOfPolygonWithHoles, projectToPlaneOfSurfaceMesh, pushSurfaceMesh, remeshSurfaceMesh, sectionOfSurfaceMesh, subdivideSurfaceMesh, separateSurfaceMesh, fromSurfaceMeshToTriangles, taperSurfaceMesh, doesSelfIntersectOfSurfaceMesh, twistSurfaceMesh, unionOfSurfaceMeshes } from './jsxcad-algorithm-cgal.js';
 export { arrangePolygonsWithHoles } from './jsxcad-algorithm-cgal.js';
 import { read as read$1, write as write$1, generateUniqueId, getWorkspace, deleteFile, info } from './jsxcad-sys.js';
 import { equals, transform as transform$4, canonicalize as canonicalize$5, max, min, scale as scale$3, subtract } from './jsxcad-math-vec3.js';
@@ -180,6 +180,102 @@ const alphaShape = ({ tags }, points, componentLimit) =>
     )
   );
 
+const eachItem = (geometry, op) => {
+  const walk = (geometry, descend) => {
+    switch (geometry.type) {
+      case 'sketch': {
+        // Sketches aren't real.
+        return;
+      }
+      default: {
+        op(geometry);
+        return descend();
+      }
+    }
+  };
+  visit(geometry, walk);
+};
+
+const getClosedGraphs = (geometry) => {
+  const graphs = [];
+  eachItem(geometry, (item) => {
+    if (item.type === 'graph' && item.graph.isClosed) {
+      graphs.push(item);
+    }
+  });
+  return graphs;
+};
+
+const getGraphs = (geometry) => {
+  const graphs = [];
+  eachItem(geometry, (item) => {
+    if (item.type === 'graph') {
+      graphs.push(item);
+    }
+  });
+  return graphs;
+};
+
+const toSurfaceMesh = (graph) => {
+  let surfaceMesh = graph[surfaceMeshSymbol];
+  if (surfaceMesh !== undefined) {
+    return surfaceMesh;
+  }
+  if (graph.serializedSurfaceMesh) {
+    surfaceMesh = deserializeSurfaceMesh(graph.serializedSurfaceMesh);
+  } else {
+    surfaceMesh = fromGraphToSurfaceMesh(graph);
+  }
+  graph[surfaceMeshSymbol] = surfaceMesh;
+  surfaceMesh[graphSymbol] = graph;
+  return surfaceMesh;
+};
+
+const cutVolumeIncrementally = (a, check, cuts) => {
+  if (a.graph.isEmpty) {
+    return a;
+  }
+  const result = fromSurfaceMeshLazy(
+    cutClosedSurfaceMeshIncrementally(
+      toSurfaceMesh(a.graph),
+      a.matrix,
+      check,
+      cuts.map(({ graph, matrix }) => ({ mesh: toSurfaceMesh(graph), matrix }))
+    )
+  );
+  return taggedGraph({ tags: a.tags, matrix: a.matrix }, result);
+};
+
+const cutVolumeSingly = (a, check, cuts) => {
+  if (a.graph.isEmpty) {
+    return a;
+  }
+  const result = fromSurfaceMeshLazy(
+    cutClosedSurfaceMeshSingly(
+      toSurfaceMesh(a.graph),
+      a.matrix,
+      check,
+      cuts.map(({ graph, matrix }) => ({ mesh: toSurfaceMesh(graph), matrix }))
+    )
+  );
+  return taggedGraph({ tags: a.tags, matrix: a.matrix }, result);
+};
+
+const cutVolumeSinglyRecursive = (a, check, cuts) => {
+  if (a.graph.isEmpty) {
+    return a;
+  }
+  const result = fromSurfaceMeshLazy(
+    cutClosedSurfaceMeshSinglyRecursive(
+      toSurfaceMesh(a.graph),
+      a.matrix,
+      check,
+      cuts.map(({ graph, matrix }) => ({ mesh: toSurfaceMesh(graph), matrix }))
+    )
+  );
+  return taggedGraph({ tags: a.tags, matrix: a.matrix }, result);
+};
+
 // import { fromPolygons } from './fromPolygons.js';
 // import { toTriangles } from './toTriangles.js';
 
@@ -259,22 +355,6 @@ const fromPaths = ({ tags }, paths, plane = [0, 0, 1, 0]) => {
   );
 };
 
-const eachItem = (geometry, op) => {
-  const walk = (geometry, descend) => {
-    switch (geometry.type) {
-      case 'sketch': {
-        // Sketches aren't real.
-        return;
-      }
-      default: {
-        op(geometry);
-        return descend();
-      }
-    }
-  };
-  visit(geometry, walk);
-};
-
 const getFaceablePaths = (geometry) => {
   const pathsets = [];
   eachItem(geometry, (item) => {
@@ -287,31 +367,6 @@ const getFaceablePaths = (geometry) => {
     pathsets.push(item);
   });
   return pathsets;
-};
-
-const getGraphs = (geometry) => {
-  const graphs = [];
-  eachItem(geometry, (item) => {
-    if (item.type === 'graph') {
-      graphs.push(item);
-    }
-  });
-  return graphs;
-};
-
-const toSurfaceMesh = (graph) => {
-  let surfaceMesh = graph[surfaceMeshSymbol];
-  if (surfaceMesh !== undefined) {
-    return surfaceMesh;
-  }
-  if (graph.serializedSurfaceMesh) {
-    surfaceMesh = deserializeSurfaceMesh(graph.serializedSurfaceMesh);
-  } else {
-    surfaceMesh = fromGraphToSurfaceMesh(graph);
-  }
-  graph[surfaceMeshSymbol] = surfaceMesh;
-  surfaceMesh[graphSymbol] = graph;
-  return surfaceMesh;
 };
 
 const measureBoundingBox$3 = (geometry) => {
@@ -618,12 +673,46 @@ const toTransformedGeometry = (geometry) => {
 const toConcreteGeometry = (geometry) =>
   toTransformedGeometry(reify(geometry));
 
-const difference = (geometry, ...geometries) => {
-  geometries = geometries.map(toConcreteGeometry);
+const difference = (geometry, options = {}, ...geometries) => {
+  if (
+    !['incremental', 'single', 'single_recursive', 'basic', undefined].includes(
+      options.mode
+    )
+  ) {
+    throw Error(`Unknown mode: ${options.mode}`);
+  }
+  const { check = false, mode = 'basic' } = options;
+  geometries = geometries.map((geometry) => toConcreteGeometry(geometry));
   const op = (geometry, descend) => {
     const { tags } = geometry;
     switch (geometry.type) {
       case 'graph': {
+        if (geometry.graph.isClosed) {
+          switch (mode) {
+            case 'incremental':
+              return cutVolumeIncrementally(
+                geometry,
+                check,
+                geometries.flatMap((geometry) => getClosedGraphs(geometry))
+              );
+            case 'single':
+              return cutVolumeSingly(
+                geometry,
+                check,
+                geometries.flatMap((geometry) => getClosedGraphs(geometry))
+              );
+            case 'single_recursive':
+              return cutVolumeSinglyRecursive(
+                geometry,
+                check,
+                geometries.flatMap((geometry) => getClosedGraphs(geometry))
+              );
+            // fall through
+          }
+        }
+
+        // general solution.
+
         let differenced = geometry;
         for (const geometry of geometries) {
           for (const graph of getGraphs(geometry)) {
@@ -652,6 +741,7 @@ const difference = (geometry, ...geometries) => {
               geometry.paths.map((path) => ({ points: path }))
             )
           ),
+          options,
           ...geometries
         );
       case 'segments':
@@ -770,7 +860,7 @@ const disjoint = (geometries) => {
   geometries = [...geometries];
   for (let sup = geometries.length - 1; sup >= 0; sup--) {
     for (let sub = geometries.length - 1; sub > sup; sub--) {
-      geometries[sup] = difference(geometries[sup], geometries[sub]);
+      geometries[sup] = difference(geometries[sup], {}, geometries[sub]);
     }
   }
   return taggedGroup({}, ...geometries);

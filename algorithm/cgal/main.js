@@ -25,6 +25,10 @@ export {
 } from './booleansOfPolygonsWithHoles.js';
 export { computeCentroidOfSurfaceMesh } from './computeCentroidOfSurfaceMesh.js';
 export { computeNormalOfSurfaceMesh } from './computeNormalOfSurfaceMesh.js';
+export { cutOutOfSurfaceMeshes } from './cutOutOfSurfaceMeshes.js';
+export { cutClosedSurfaceMeshIncrementally } from './cutClosedSurfaceMeshIncrementally.js';
+export { cutClosedSurfaceMeshSingly } from './cutClosedSurfaceMeshSingly.js';
+export { cutClosedSurfaceMeshSinglyRecursive } from './cutClosedSurfaceMeshSinglyRecursive.js';
 export { deserializeSurfaceMesh } from './deserializeSurfaceMesh.js';
 export { differenceOfSurfaceMeshes } from './differenceOfSurfaceMeshes.js';
 export { doesSelfIntersectOfSurfaceMesh } from './doesSelfIntersectOfSurfaceMesh.js';
