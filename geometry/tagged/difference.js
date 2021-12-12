@@ -18,7 +18,7 @@ export const difference = (geometry, options = {}, ...geometries) => {
   ) {
     throw Error(`Unknown mode: ${options.mode}`);
   }
-  const { check = true, mode = 'basic' } = options;
+  const { check = false, mode = 'basic' } = options;
   geometries = geometries.map((geometry) => toConcreteGeometry(geometry));
   const op = (geometry, descend) => {
     const { tags } = geometry;

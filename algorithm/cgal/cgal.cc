@@ -4502,6 +4502,7 @@ EMSCRIPTEN_BINDINGS(module) {
                        emscripten::allow_raw_pointers());
   emscripten::function("DifferenceOfSurfaceMeshes", &DifferenceOfSurfaceMeshes,
                        emscripten::allow_raw_pointers());
+#if 0
   emscripten::function("CutClosedSurfaceMeshIncrementally",
                        &CutClosedSurfaceMeshIncrementally,
                        emscripten::allow_raw_pointers());
@@ -4511,6 +4512,7 @@ EMSCRIPTEN_BINDINGS(module) {
   emscripten::function("CutClosedSurfaceMeshSinglyRecursive",
                        &CutClosedSurfaceMeshSinglyRecursive,
                        emscripten::allow_raw_pointers());
+#endif
   emscripten::function("IntersectionOfSurfaceMeshes",
                        &IntersectionOfSurfaceMeshes,
                        emscripten::allow_raw_pointers());
