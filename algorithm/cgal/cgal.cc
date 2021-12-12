@@ -1820,15 +1820,18 @@ const Surface_mesh* CutClosedSurfaceMeshIncrementally(
         std::cout << "Note: Shifting difference by x=" << x << " y=" << y
                   << " z=" << z << std::endl;
         Transformation translation(CGAL::TRANSLATION, Vector(x, y, z));
+std::cout << "CCSMI/1" << std::endl;
         CGAL::Polygon_mesh_processing::transform(
             *cutTransform * translation * toA, workingCutMesh,
             CGAL::parameters::all_default());
       } else {
+std::cout << "CCSMI/2" << std::endl;
         CGAL::Polygon_mesh_processing::transform(
             *cutTransform * toA, workingCutMesh,
             CGAL::parameters::all_default());
       }
       if (check) {
+std::cout << "CCSMI/3" << std::endl;
         if (CGAL::Polygon_mesh_processing::corefine_and_compute_difference(
                 *result, workingCutMesh, *result,
                 CGAL::Polygon_mesh_processing::parameters::
@@ -1840,6 +1843,7 @@ const Surface_mesh* CutClosedSurfaceMeshIncrementally(
           break;
         }
       } else {
+std::cout << "CCSMI/4" << std::endl;
         if (CGAL::Polygon_mesh_processing::corefine_and_compute_difference(
                 *result, workingCutMesh, *result,
                 CGAL::parameters::all_default(),
@@ -1867,6 +1871,8 @@ const Surface_mesh* CutClosedSurfaceMeshIncrementally(
     }
   }
 
+std::cout << "CCSMI/5" << std::endl;
+  CGAL::Polygon_mesh_processing::remove_degenerate_faces(*result);
   return result;
 }
 
@@ -1922,8 +1928,8 @@ void RecursiveUnionOfSurfaceMeshes(std::queue<Surface_mesh*>& meshes,
         z = 0;
       }
     }
-    meshes.push(a);
     delete b;
+    meshes.push(a);
   }
 }
 
@@ -1931,48 +1937,59 @@ const Surface_mesh* CutClosedSurfaceMeshSingly(
     const Surface_mesh* a, const Transformation* a_transform, int cutCount,
     bool check, emscripten::val nthMesh, emscripten::val nthTransform) {
   Transformation toA = a_transform->inverse();
-  Surface_mesh accumulator;
+  Surface_mesh* workingA = new Surface_mesh(*a);
+  Surface_mesh* accumulator;
   for (int nth = 0; nth < cutCount; nth++) {
     const Surface_mesh* cutMesh =
         nthMesh(nth).as<const Surface_mesh*>(emscripten::allow_raw_pointers());
-    Surface_mesh workingCutMesh(*cutMesh);
+    Surface_mesh* workingCutMesh = new Surface_mesh(*cutMesh);
     const Transformation* cutTransform =
         nthTransform(nth).as<const Transformation*>(
             emscripten::allow_raw_pointers());
     double x = 0, y = 0, z = 0;
+    if (nth == 0) {
+      CGAL::Polygon_mesh_processing::transform(*cutTransform * toA,
+                                               *workingCutMesh,
+                                               CGAL::parameters::all_default());
+      accumulator = workingCutMesh;
+      continue;
+    }
     for (int shift = 0x11;; shift++) {
       if (x != 0 || y != 0 || z != 0) {
         std::cout << "Note: Shifting difference by x=" << x << " y=" << y
                   << " z=" << z << std::endl;
         Transformation translation(CGAL::TRANSLATION, Vector(x, y, z));
         CGAL::Polygon_mesh_processing::transform(
-            *cutTransform * translation * toA, workingCutMesh,
+            *cutTransform * translation * toA, *workingCutMesh,
             CGAL::parameters::all_default());
       } else {
         CGAL::Polygon_mesh_processing::transform(
-            *cutTransform * toA, workingCutMesh,
+            *cutTransform * toA, *workingCutMesh,
             CGAL::parameters::all_default());
       }
       if (check) {
         if (CGAL::Polygon_mesh_processing::corefine_and_compute_union(
-                accumulator, workingCutMesh, accumulator,
+                *accumulator, *workingCutMesh, *accumulator,
                 CGAL::Polygon_mesh_processing::parameters::
                     throw_on_self_intersection(true),
                 CGAL::Polygon_mesh_processing::parameters::
                     throw_on_self_intersection(true),
                 CGAL::Polygon_mesh_processing::parameters::
                     throw_on_self_intersection(true))) {
+          delete workingCutMesh;
           break;
         }
       } else {
         if (CGAL::Polygon_mesh_processing::corefine_and_compute_union(
-                accumulator, workingCutMesh, accumulator,
+                *accumulator, *workingCutMesh, *accumulator,
                 CGAL::parameters::all_default(),
                 CGAL::parameters::all_default(),
                 CGAL::parameters::all_default())) {
+          delete workingCutMesh;
           break;
         }
       }
+      delete workingCutMesh;
       const double direction = ((shift & (1 << 3)) ? -1 : 1) * (shift >> 4);
       if (shift & (1 << 0)) {
         x = kIota * direction;
@@ -1993,7 +2010,6 @@ const Surface_mesh* CutClosedSurfaceMeshSingly(
   }
 
   {
-    Surface_mesh* result = new Surface_mesh(*a);
     double x = 0, y = 0, z = 0;
     for (int shift = 0x11;; shift++) {
       if (x != 0 || y != 0 || z != 0) {
@@ -2001,11 +2017,11 @@ const Surface_mesh* CutClosedSurfaceMeshSingly(
                   << " z=" << z << std::endl;
         Transformation translation(CGAL::TRANSLATION, Vector(x, y, z));
         CGAL::Polygon_mesh_processing::transform(
-            translation, accumulator, CGAL::parameters::all_default());
+            translation, *accumulator, CGAL::parameters::all_default());
       }
       if (check) {
         if (CGAL::Polygon_mesh_processing::corefine_and_compute_difference(
-                *result, accumulator, *result,
+                *workingA, *accumulator, *workingA,
                 CGAL::Polygon_mesh_processing::parameters::
                     throw_on_self_intersection(true),
                 CGAL::Polygon_mesh_processing::parameters::
@@ -2016,7 +2032,8 @@ const Surface_mesh* CutClosedSurfaceMeshSingly(
         }
       } else {
         if (CGAL::Polygon_mesh_processing::corefine_and_compute_difference(
-                *result, accumulator, *result, CGAL::parameters::all_default(),
+                *workingA, *accumulator, *workingA,
+                CGAL::parameters::all_default(),
                 CGAL::parameters::all_default(),
                 CGAL::parameters::all_default())) {
           break;
@@ -2039,7 +2056,7 @@ const Surface_mesh* CutClosedSurfaceMeshSingly(
         z = 0;
       }
     }
-    return result;
+    return workingA;
   }
 }
 
@@ -4246,6 +4263,13 @@ void test() {
 using emscripten::select_const;
 using emscripten::select_overload;
 
+#if 0
+unsigned int getTotalMemory()
+{
+  return EM_ASM_INT(return HEAP8.length);
+}
+#endif
+
 EMSCRIPTEN_BINDINGS(module) {
 #ifdef TEST_ONLY
   emscripten::function("test", &test, emscripten::allow_raw_pointers());
@@ -4603,5 +4627,7 @@ EMSCRIPTEN_BINDINGS(module) {
                        emscripten::allow_raw_pointers());
   emscripten::function("SectionOfSurfaceMesh", &SectionOfSurfaceMesh,
                        emscripten::allow_raw_pointers());
+
+  // emscripten::function("getTotalMemory", &getTotalMemory);
 #endif
 }

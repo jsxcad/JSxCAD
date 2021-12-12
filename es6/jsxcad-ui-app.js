@@ -42374,9 +42374,9 @@ const ensureFile = async (file, url, {
   // TODO: Handle a transform from file to source so that things github can be used sensibly.
 
 
-  const content = await read(`${file}`, {
-    workspace,
-    sources
+  const content = await read(file, {
+    sources,
+    workspace
   });
 
   if (content === undefined) {
@@ -43035,6 +43035,7 @@ class App extends ReactDOM$2.Component {
         workspace
       });
       const data = await read(notebookFile, {
+        sources: [notebookPath],
         workspace
       });
       const notebookText = typeof data === 'string' ? data : new TextDecoder('utf8').decode(data);

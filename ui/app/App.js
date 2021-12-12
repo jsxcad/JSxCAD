@@ -55,7 +55,7 @@ const ensureFile = async (file, url, { workspace } = {}) => {
   }
   // Ensure the file exists.
   // TODO: Handle a transform from file to source so that things github can be used sensibly.
-  const content = await read(`${file}`, { workspace, sources });
+  const content = await read(file, { sources, workspace });
   if (content === undefined) {
     // If we couldn't find it, create it as an empty file.
     await write(`${file}`, '', { workspace });
@@ -620,7 +620,10 @@ class App extends React.Component {
       const notebookPath = path;
       const notebookFile = `source/${notebookPath}`;
       await ensureFile(notebookFile, notebookPath, { workspace });
-      const data = await read(notebookFile, { workspace });
+      const data = await read(notebookFile, {
+        sources: [notebookPath],
+        workspace,
+      });
       const notebookText =
         typeof data === 'string' ? data : new TextDecoder('utf8').decode(data);
 

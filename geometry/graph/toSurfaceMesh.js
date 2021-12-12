@@ -18,3 +18,5 @@ export const toSurfaceMesh = (graph) => {
   surfaceMesh[graphSymbol] = graph;
   return surfaceMesh;
 };
+
+export const deletePendingSurfaceMeshes = () => {};
