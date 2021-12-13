@@ -42375,8 +42375,8 @@ const ensureFile = async (file, url, {
 
 
   const content = await read(`${file}`, {
-    workspace,
-    sources
+    sources,
+    workspace
   });
 
   if (content === undefined) {
@@ -42440,6 +42440,13 @@ const defaultModelConfig = {
       type: 'tab',
       name: 'Log',
       component: 'Log',
+      enableClose: false,
+      borderWidth: 1024
+    }, {
+      id: 'Files',
+      type: 'tab',
+      name: 'Files',
+      component: 'Files',
       enableClose: false,
       borderWidth: 1024
     }]
@@ -42739,6 +42746,37 @@ class App extends ReactDOM$2.Component {
     this.Clipboard.run = () => {};
 
     this.Clipboard.save = () => {};
+
+    this.Files = {};
+
+    this.Files.deleteCachedFiles = async () => {
+      const {
+        WorkspaceFiles
+      } = this.state;
+      const regenerableFiles = WorkspaceFiles.filter(file => isRegenerable(file));
+
+      for (const file of regenerableFiles) {
+        console.log(`QQ/Deleting: ${file}`);
+        await deleteFile({
+          workspace
+        }, file);
+      }
+    };
+
+    this.Files.deleteSourceFiles = async () => {
+      const {
+        WorkspaceFiles
+      } = this.state;
+      const nonRegenerableFiles = WorkspaceFiles.filter(file => !isRegenerable(file));
+
+      for (const file of nonRegenerableFiles) {
+        console.log(`QQ/Deleting: ${file}`);
+        await deleteFile({
+          workspace
+        }, file);
+      }
+    }; // Deprecate
+
 
     this.GC = {};
 
@@ -43747,6 +43785,29 @@ class App extends ReactDOM$2.Component {
               onUpdateGeometry: this.View.updateGeometry,
               trackballState: trackballState
             });
+          }
+
+        case 'Files':
+          {
+            const {
+              WorkspaceFiles
+            } = this.state;
+            return v$1("div", null, v$1(Card, null, v$1(Card.Body, null, v$1(Card.Title, null, "Clear Cached Files"), v$1(Card.Text, null, v$1(Button, {
+              variant: "primary",
+              onClick: this.Files.deleteCachedFiles
+            }, "Delete Regeneable Files"), v$1(ListGroup, null, WorkspaceFiles.filter(file => isRegenerable(file)).map((file, index) => v$1(ListGroup.Item, {
+              key: index,
+              disabled: true
+            }, file))))), v$1(Card.Body, null, v$1(Card.Title, null, "Delete Source Files"), v$1(Card.Text, null, v$1(Button, {
+              variant: "primary",
+              onClick: this.Files.deleteSourceFiles
+            }, "Delete Source Files Forever"), v$1(ListGroup, null, WorkspaceFiles.filter(file => !isRegenerable(file)).map((file, index) => v$1(ListGroup.Item, {
+              key: index,
+              disabled: true
+            }, file))))), v$1(Card.Body, null, v$1(Card.Title, null, "Reset Layout"), v$1(Card.Text, null, v$1(Button, {
+              variant: "primary",
+              onClick: this.Model.reset
+            }, "Reset")))));
           }
 
         case 'GC':

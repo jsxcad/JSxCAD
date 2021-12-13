@@ -1,7 +1,8 @@
+import { deletePendingSurfaceMeshes, toSurfaceMesh } from './toSurfaceMesh.js';
+
 import { cutClosedSurfaceMeshSingly } from '@jsxcad/algorithm-cgal';
 import { fromSurfaceMeshLazy } from './fromSurfaceMeshLazy.js';
 import { taggedGraph } from '../tagged/taggedGraph.js';
-import { toSurfaceMesh } from './toSurfaceMesh.js';
 
 export const cutVolumeSingly = (a, check, cuts) => {
   if (a.graph.isEmpty) {
@@ -15,5 +16,6 @@ export const cutVolumeSingly = (a, check, cuts) => {
       cuts.map(({ graph, matrix }) => ({ mesh: toSurfaceMesh(graph), matrix }))
     )
   );
+  deletePendingSurfaceMeshes();
   return taggedGraph({ tags: a.tags, matrix: a.matrix }, result);
 };

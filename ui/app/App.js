@@ -55,7 +55,7 @@ const ensureFile = async (file, url, { workspace } = {}) => {
   }
   // Ensure the file exists.
   // TODO: Handle a transform from file to source so that things github can be used sensibly.
-  const content = await read(`${file}`, { workspace, sources });
+  const content = await read(`${file}`, { sources, workspace });
   if (content === undefined) {
     // If we couldn't find it, create it as an empty file.
     await write(`${file}`, '', { workspace });
@@ -127,6 +127,14 @@ const defaultModelConfig = {
           type: 'tab',
           name: 'Log',
           component: 'Log',
+          enableClose: false,
+          borderWidth: 1024,
+        },
+        {
+          id: 'Files',
+          type: 'tab',
+          name: 'Files',
+          component: 'Files',
           enableClose: false,
           borderWidth: 1024,
         },
@@ -384,6 +392,31 @@ class App extends React.Component {
 
     this.Clipboard.save = () => {};
 
+    this.Files = {};
+
+    this.Files.deleteCachedFiles = async () => {
+      const { WorkspaceFiles } = this.state;
+      const regenerableFiles = WorkspaceFiles.filter((file) =>
+        isRegenerable(file)
+      );
+      for (const file of regenerableFiles) {
+        console.log(`QQ/Deleting: ${file}`);
+        await deleteFile({ workspace }, file);
+      }
+    };
+
+    this.Files.deleteSourceFiles = async () => {
+      const { WorkspaceFiles } = this.state;
+      const nonRegenerableFiles = WorkspaceFiles.filter(
+        (file) => !isRegenerable(file)
+      );
+      for (const file of nonRegenerableFiles) {
+        console.log(`QQ/Deleting: ${file}`);
+        await deleteFile({ workspace }, file);
+      }
+    };
+
+    // Deprecate
     this.GC = {};
 
     this.GC.delete = async () => {
@@ -1173,6 +1206,63 @@ class App extends React.Component {
               onUpdateGeometry={this.View.updateGeometry}
               trackballState={trackballState}
             />
+          );
+        }
+        case 'Files': {
+          const { WorkspaceFiles } = this.state;
+          return (
+            <div>
+              <Card>
+                <Card.Body>
+                  <Card.Title>Clear Cached Files</Card.Title>
+                  <Card.Text>
+                    <Button
+                      variant="primary"
+                      onClick={this.Files.deleteCachedFiles}
+                    >
+                      Delete Regeneable Files
+                    </Button>
+                    <ListGroup>
+                      {WorkspaceFiles.filter((file) => isRegenerable(file)).map(
+                        (file, index) => (
+                          <ListGroup.Item key={index} disabled>
+                            {file}
+                          </ListGroup.Item>
+                        )
+                      )}
+                    </ListGroup>
+                  </Card.Text>
+                </Card.Body>
+                <Card.Body>
+                  <Card.Title>Delete Source Files</Card.Title>
+                  <Card.Text>
+                    <Button
+                      variant="primary"
+                      onClick={this.Files.deleteSourceFiles}
+                    >
+                      Delete Source Files Forever
+                    </Button>
+                    <ListGroup>
+                      {WorkspaceFiles.filter(
+                        (file) => !isRegenerable(file)
+                      ).map((file, index) => (
+                        <ListGroup.Item key={index} disabled>
+                          {file}
+                        </ListGroup.Item>
+                      ))}
+                    </ListGroup>
+                  </Card.Text>
+                </Card.Body>
+                <Card.Body>
+                  <Card.Title>Reset Layout</Card.Title>
+                  <Card.Text>
+                    <Button variant="primary" onClick={this.Model.reset}>
+                      Reset
+                    </Button>
+                  </Card.Text>
+                </Card.Body>
+              </Card>
+            </div>
           );
         }
         case 'GC': {
