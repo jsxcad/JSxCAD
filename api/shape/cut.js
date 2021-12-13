@@ -3,12 +3,19 @@ import { difference } from '@jsxcad/geometry';
 
 export const cut =
   (...shapes) =>
-  (shape) =>
-    Shape.fromGeometry(
+  (shape) => {
+    let options;
+    if (shapes.length >= 1 && shapes[0].constructor === Object) {
+      const { mode, check } = shapes.shift();
+      options = { mode, check };
+    }
+    return Shape.fromGeometry(
       difference(
         shape.toGeometry(),
-        ...shapes.map((other) => Shape.toShape(other, shape).toGeometry())
+        options,
+        ...shape.toShapes(shapes).map((other) => other.toGeometry())
       )
     );
+  };
 
 Shape.registerMethod('cut', cut);

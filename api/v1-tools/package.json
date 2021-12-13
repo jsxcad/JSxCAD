@@ -26,7 +26,6 @@
   "dependencies": {
     "@jsxcad/algorithm-tool": "^0.0.79",
     "@jsxcad/api-shape": "^0.0.79",
-    "@jsxcad/api-v1-math": "^0.0.79",
     "@jsxcad/geometry": "^0.0.79"
   },
   "devDependencies": {

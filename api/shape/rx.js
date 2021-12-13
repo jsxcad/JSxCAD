@@ -6,9 +6,9 @@ export const rx =
   (...angles) =>
   (shape) =>
     Shape.Group(
-      ...angles.map((angle) =>
-        shape.transform(fromRotateXToTransform(angle * 360))
-      )
+      ...shape
+        .toFlatValues(angles)
+        .map((angle) => shape.transform(fromRotateXToTransform(angle * 360)))
     );
 
 Shape.registerMethod('rx', rx);

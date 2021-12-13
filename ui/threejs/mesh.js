@@ -2,8 +2,9 @@ import {
   Box3,
   BufferGeometry,
   Color,
+  EdgesGeometry,
   Float32BufferAttribute,
-  Geometry,
+  Group,
   LineBasicMaterial,
   LineSegments,
   Matrix4,
@@ -13,6 +14,7 @@ import {
   Vector2,
   Vector3,
   VertexColors,
+  WireframeGeometry,
 } from 'three';
 
 import { GEOMETRY_LAYER, SKETCH_LAYER } from './layers.js';
@@ -20,16 +22,6 @@ import { GEOMETRY_LAYER, SKETCH_LAYER } from './layers.js';
 import { buildMeshMaterial } from './material.js';
 import { setColor } from './color.js';
 import { toPlane } from '@jsxcad/math-poly3';
-
-const toName = (geometry) => {
-  if (geometry.tags !== undefined && geometry.tags.length >= 1) {
-    for (const tag of geometry.tags) {
-      if (tag.startsWith('user/')) {
-        return tag.substring(5);
-      }
-    }
-  }
-};
 
 // FIX: Found it somewhere -- attribute.
 const applyBoxUVImpl = (geom, transformMatrix, bbox, bboxMaxSize) => {
@@ -189,8 +181,26 @@ const applyBoxUV = (bufferGeometry, transformMatrix, boxSize) => {
   applyBoxUVImpl(bufferGeometry, transformMatrix, uvBbox, boxSize);
 };
 
+const updateUserData = (geometry, scene, userData) => {
+  if (geometry.tags) {
+    for (const tag of geometry.tags) {
+      if (tag.startsWith('editId:')) {
+        userData.editId = tag.substring(7);
+      } else if (tag.startsWith('editType:')) {
+        userData.editType = tag.substring(9);
+      } else if (tag.startsWith('viewId:')) {
+        userData.viewId = tag.substring(7);
+      } else if (tag.startsWith('viewType:')) {
+        userData.viewType = tag.substring(9);
+      } else if (tag.startsWith('groupChildId:')) {
+        // Deprecate these.
+        userData.groupChildId = parseInt(tag.substring(13));
+      }
+    }
+  }
+};
+
 export const buildMeshes = async ({
-  datasets,
   geometry,
   scene,
   layer = GEOMETRY_LAYER,
@@ -201,6 +211,7 @@ export const buildMeshes = async ({
     return;
   }
   const { tags = [] } = geometry;
+  let mesh;
   switch (geometry.type) {
     case 'displayGeometry':
     case 'group':
@@ -213,7 +224,6 @@ export const buildMeshes = async ({
       break;
     case 'segments': {
       const { segments } = geometry;
-      const dataset = {};
       const bufferGeometry = new BufferGeometry();
       const material = new LineBasicMaterial({
         color: new Color(setColor(definitions, tags, {}, [0, 0, 0]).color),
@@ -229,11 +239,10 @@ export const buildMeshes = async ({
         'position',
         new Float32BufferAttribute(positions, 3)
       );
-      dataset.mesh = new LineSegments(bufferGeometry, material);
-      dataset.mesh.layers.set(layer);
-      dataset.name = toName(geometry);
-      scene.add(dataset.mesh);
-      datasets.push(dataset);
+      mesh = new LineSegments(bufferGeometry, material);
+      mesh.layers.set(layer);
+      updateUserData(geometry, scene, mesh.userData);
+      scene.add(mesh);
       break;
     }
     case 'paths': {
@@ -246,7 +255,6 @@ export const buildMeshes = async ({
         transparent = true;
       }
       const { paths } = geometry;
-      const dataset = {};
       const bufferGeometry = new BufferGeometry();
       const material = new LineBasicMaterial({
         color: 0xffffff,
@@ -302,50 +310,31 @@ export const buildMeshes = async ({
         'color',
         new Float32BufferAttribute(pathColors, 4)
       );
-      dataset.mesh = new LineSegments(bufferGeometry, material);
-      dataset.mesh.layers.set(layer);
-      dataset.name = toName(geometry);
-      scene.add(dataset.mesh);
-      datasets.push(dataset);
-      if (render && tags.includes('display/trace')) {
-        let current = 0;
-        let extent = 0;
-        const animate = () => {
-          if (dataset.mesh) {
-            const bufferGeometry = dataset.mesh.geometry;
-            extent += index[current].length;
-            // geometry.setDrawRange(index[current].start, extent - index[current].start);
-            bufferGeometry.setDrawRange(0, (extent += index[current].length));
-            bufferGeometry.attributes.position.needsUpdate = true;
-            render();
-            current += 1;
-            if (current >= index.length) {
-              current = 0;
-              extent = 0;
-            }
-            setTimeout(animate, 100);
-          }
-        };
-        animate();
-      }
+      mesh = new LineSegments(bufferGeometry, material);
+      mesh.layers.set(layer);
+      updateUserData(geometry, scene, mesh.userData);
+      scene.add(mesh);
       break;
     }
     case 'points': {
       const { points } = geometry;
-      const dataset = {};
-      const threeGeometry = new Geometry();
+      const threeGeometry = new BufferGeometry();
       const material = new PointsMaterial({
         color: setColor(definitions, tags, {}, [0, 0, 0]).color,
         size: 0.5,
       });
+      const positions = [];
       for (const [aX = 0, aY = 0, aZ = 0] of points) {
-        threeGeometry.vertices.push(new Vector3(aX, aY, aZ));
+        positions.push(aX, aY, aZ);
       }
-      dataset.mesh = new Points(threeGeometry, material);
-      dataset.mesh.layers.set(layer);
-      dataset.name = toName(geometry);
-      scene.add(dataset.mesh);
-      datasets.push(dataset);
+      threeGeometry.setAttribute(
+        'position',
+        new Float32BufferAttribute(positions, 3)
+      );
+      mesh = new Points(threeGeometry, material);
+      mesh.layers.set(layer);
+      updateUserData(geometry, scene, mesh.userData);
+      scene.add(mesh);
       break;
     }
     case 'triangles': {
@@ -368,7 +357,6 @@ export const buildMeshes = async ({
 
       const { triangles } = geometry;
       const { positions, normals } = prepareTriangles(triangles);
-      const dataset = {};
       const bufferGeometry = new BufferGeometry();
       bufferGeometry.setAttribute(
         'position',
@@ -379,29 +367,74 @@ export const buildMeshes = async ({
         new Float32BufferAttribute(normals, 3)
       );
       applyBoxUV(bufferGeometry);
-      const material = await buildMeshMaterial(definitions, tags);
-      if (tags.includes('type:void')) {
-        material.transparent = true;
-        material.depthWrite = false;
-        material.opacity *= 0.5;
+
+      if (tags.includes('show:skin')) {
+        const material = await buildMeshMaterial(definitions, tags);
+        mesh = new Mesh(bufferGeometry, material);
+        mesh.castShadow = true;
+        mesh.receiveShadow = true;
+        mesh.layers.set(layer);
+        updateUserData(geometry, scene, mesh.userData);
+        mesh.userData.tangible = true;
+        if (tags.includes('type:void')) {
+          material.transparent = true;
+          material.depthWrite = false;
+          material.opacity *= 0.1;
+          mesh.castShadow = false;
+          mesh.receiveShadow = false;
+        }
+      } else {
+        mesh = new Group();
       }
-      dataset.mesh = new Mesh(bufferGeometry, material);
-      dataset.mesh.layers.set(layer);
-      dataset.name = toName(geometry);
-      scene.add(dataset.mesh);
-      datasets.push(dataset);
+
+      {
+        const edges = new EdgesGeometry(bufferGeometry);
+        const outline = new LineSegments(
+          edges,
+          new LineBasicMaterial({ color: 0x000000 })
+        );
+        outline.userData.isOutline = true;
+        outline.userData.hasShowOutline = tags.includes('show:outline');
+        outline.visible = outline.userData.hasShowOutline;
+        mesh.add(outline);
+      }
+
+      if (tags.includes('show:wireframe')) {
+        const edges = new WireframeGeometry(bufferGeometry);
+        const outline = new LineSegments(
+          edges,
+          new LineBasicMaterial({ color: 0x000000 })
+        );
+        mesh.add(outline);
+      }
+
+      scene.add(mesh);
       break;
     }
     default:
       throw Error(`Non-display geometry: ${geometry.type}`);
   }
 
+  if (mesh && geometry.matrix) {
+    const matrix = new Matrix4();
+    // Bypass matrix.set to use column-major ordering.
+    for (let nth = 0; nth < 16; nth++) {
+      matrix.elements[nth] = geometry.matrix[nth];
+    }
+    mesh.applyMatrix4(matrix);
+    mesh.updateMatrix();
+  }
+
   if (geometry.content) {
+    if (mesh === undefined) {
+      mesh = new Group();
+      updateUserData({}, scene, mesh.userData);
+      scene.add(mesh);
+    }
     for (const content of geometry.content) {
       await buildMeshes({
-        datasets,
         geometry: content,
-        scene,
+        scene: mesh,
         layer,
         render,
         definitions,

@@ -125,7 +125,7 @@ const prepareSvg = (shape, name, op = (s) => s, options = {}) => {
   let index = 0;
   const entries = [];
   for (const entry of ensurePages(op(shape).toDisjointGeometry())) {
-    const svgPath = `svg/${path}/${generateUniqueId()}`;
+    const svgPath = `download/svg/${path}/${generateUniqueId()}`;
     const render = async () => {
       try {
         await write(svgPath, await toSvg(entry, options));
@@ -139,7 +139,7 @@ const prepareSvg = (shape, name, op = (s) => s, options = {}) => {
       filename: `${name}_${index++}.svg`,
       type: 'image/svg+xml',
     });
-    Shape.fromGeometry(entry).gridView(options.view);
+    Shape.fromGeometry(entry).gridView(name, options.view);
   }
   return entries;
 };

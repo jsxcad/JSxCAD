@@ -1,154 +1,154 @@
-const add = Triangle(10)
+Triangle(10)
   .color('red')
   .add(Box(5).color('blue'))
   .gridView();
 
-const and = Box(5)
+Box(5)
   .and(Arc(5))
   .gridView(undefined, { size: 800, triangles: false, outline: true, wireframe: false });
 
-const addTo = Triangle(10)
+Triangle(10)
   .color('red')
   .addTo(Box(5).color('blue'))
   .gridView();
 
-const align = Box(5).align('x>y>').gridView();
+Box(5).align('x>y>').gridView();
 
-const as = Box(5)
+Box(5)
   .as('box')
   .with(Arc(4).as('arc'))
   .keep('box')
   .gridView();
 
-const clip = Box(5)
+Box(5)
   .color('red')
   .clip(Arc(5.8).color('blue'))
   .gridView();
 
-const clipFrom = Box(5)
+Box(5)
   .color('red')
   .clipFrom(Arc(5.8).color('blue'))
   .gridView();
 
-const color = Box(5).color('green').gridView();
+Box(5).color('green').gridView();
 
-const colorsEx = Box(5)
+Box(5)
   .color('green')
   .colors((colors, s) => {
     md`Colors are ${colors}`;
     return s;
   });
 
-const cutEx = Box(5)
+Box(5)
   .color('red')
   .cut(Arc(6).color('blue'))
   .gridView();
 
-const cutFrom = Box(5)
+Box(5)
   .color('red')
   .cutFrom(Arc(6).color('blue'))
   .gridView();
 
-const eachMethod = Assembly(Box(5), Arc(6))
+Assembly(Box(5), Arc(6))
   .each((leafs) => leafs[0])
   .gridView();
 
-const fuse = Group(Box(5).color('red'), Arc(6).color('blue'))
+Group(Box(5).color('red'), Arc(6).color('blue'))
   .fuse()
   .gridView();
 
-const inset = Box(10).inset(0.5, 0.5).gridView();
+Box(10).inset(0.5, 0.5).gridView();
 
-const keep = Assembly(Box(10).as('a'), Arc(6).as('b'))
+Assembly(Box(10).as('a'), Arc(6).as('b'))
   .keep('a')
   .gridView();
 
-const material = Box(10)
+Box(10)
   .material('copper')
   .gridView();
 
-const move = Box(10).move(1, 2, 3).gridView();
+Box(10).move(1, 2, 3).gridView();
+Box(10).moveTo(1, 2, 3).gridView();
+Box(10).move(1, 2, 3).moveTo(center()).gridView();
+Box(10).move(top()).gridView();
 
-const moveToEx1 = Box(10).moveTo(1, 2, 3).gridView();
-const moveToEx2 = Box(10).move(1, 2, 3).moveTo(center()).gridView();
-
-const noVoid = Assembly(Box(5), Arc(5.5).void())
+Assembly(Box(5), Arc(5.5).void())
   .noVoid()
   .gridView();
 
-const offsetEx = Box(5).offset(1).gridView();
+Box(5).offset(1).gridView();
 
-const op = Box(5)
+Box(5)
   .op((s) => s.color('green'))
   .gridView();
 
-const orient = Line(10)
+Line(10)
   .orient({ at: [40, 50, 0] })
   .gridView();
 
-const pack = Group(...seq((n) => Arc(n), { from: 1, to: 20 }))
+Group(seq((n) => Arc(n), { from: 1, to: 20 }))
   .pack()
   .gridView();
 
-const rotate = Box(5).rotate(45).gridView();
+Box(5).rotate(45).gridView();
 
-const rx = Box(1, 2, 3).rx(1/8).gridView();
-const ry = Box(1, 2, 3).ry(1/8).gridView();
-const rz = Box(1, 2, 3).rz(1/8).gridView();
+Box(1, 2, 3).rx(1/8).gridView();
+Box(1, 2, 3).ry(1/8).gridView();
+Box(1, 2, 3).rz(1/8).gridView();
 
-const scale1 = Box(5).scale(1, 2).gridView();
-const scale2 = Box(5).cut(Arc(5).align('x>')).scale(1, 1).gridView();
-const scale3 = Box(5).cut(Arc(5).align('x>')).scale(-1, 1).gridView();
+Box(5).scale(1, 2).gridView();
+Box(5).cut(Arc(5).align('x>')).scale(1, 1).gridView();
+Box(5).cut(Arc(5).align('x>')).scale(-1, 1).gridView();
 
-const sizeEx = Box(1, 2, 3)
+Box(1, 2, 3)
   .size((size, shape) => {
     md`${JSON.stringify(size)}`;
     return shape;
   });
 
-const sketch = Box(2, 2, 2)
+Box(2, 2, 2)
   .color('red')
   .and(Box(1, 1, 1).sketch())
   .view();
 
-const tagsEx = Box(1)
+Box(1)
   .as('box')
   .tags((tags, shape) => {
     md`${tags}`;
     return shape;
   });
 
-const test = Box(5, 5, 5).test().gridView();
+Box(5, 5, 5).test().gridView();
 
-const tool = Box(5).tool('laser').gridView();
+Box(5).tool('laser').gridView();
 
-const voidEx = Assembly(Box(5), Arc(6).void())
+Assembly(Box(5), Arc(6).void())
   .gridView();
 
-const weld = Weld(Arc(6).x(-1), Arc(6).x(1), Arc(6).y(1), Arc(6).y(-1))
+Weld(Arc(6).x(-1), Arc(6).x(1), Arc(6).y(1), Arc(6).y(-1))
   .fill()
   .gridView();
 
-const withEx = Box(5).with(Arc(6)).gridView();
+Box(5).with(Arc(6)).gridView();
 
-const xEx = Box(5).x(1).gridView();
-const yEx = Box(5).y(1).gridView();
-const zEx = Box(5).z(1).gridView();
+Box(5).x(1).gridView();
+Box(5).y(1).gridView();
+Box(5).z(1).gridView();
 
-const voidInEx = Arc(10).voidIn(offset(1)).ex(5).view();
+Arc(10).voidIn(offset(1)).ex(5).view();
 
-const facesEx = Box(10)
+Box(10)
   .ex(10)
   .color('green')
   .and((s) => s.faces().n(4).extrudeAlong(normal(), 1).tint('red'))
   .view();
 
-const colorEx = Arc(10).color('blue').color('red').view();
+Arc(10).color('blue').color('red').view();
 
-const tintEx = Arc(10).color('blue').tint('red').view();
+Arc(10).color('blue').tint('red').view();
 
 Edges(
-  ...seq((y) => [Point(-10, y, 0), Point(10, y, 0)], {
+  seq((y) => [Point(-10, y, 0), Point(10, y, 0)], {
     from: -6,
     to: 6,
     by: 1 / 4,
@@ -182,3 +182,5 @@ b.to(
   cut(Box(11, 3, 3).rx(1 / 8))
 )
   .view()
+
+Voxels([0, 0, 0], [0, 0, 1], [1, 0, 1], [2, 0, 1]).view();

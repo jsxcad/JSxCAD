@@ -1,58 +1,49 @@
-import { outline as outlineOp } from './outline.js';
+import { hasShowOutline, hasShowSkin, hasShowWireframe } from './show.js';
+
+import { isNotTypeVoid } from './type.js';
 import { rewrite } from './visit.js';
 import { taggedGroup } from './taggedGroup.js';
-import { taggedPaths } from './taggedPaths.js';
 import { taggedTriangles } from './taggedTriangles.js';
-import { toPaths } from '../graph/toPaths.js';
 import { toTransformedGeometry } from './toTransformedGeometry.js';
 import { toTriangles as toTrianglesFromGraph } from '../graph/toTriangles.js';
 import { toTriangles as toTrianglesFromPolygonsWithHoles } from '../polygonsWithHoles/toTriangles.js';
-import { wireframe as wireframeOp } from './wireframe.js';
 
 export const soup = (
   geometry,
   { doTriangles = true, doOutline = true, doWireframe = true } = {}
 ) => {
-  const outline = doOutline ? outlineOp : () => [];
-  const wireframe = doWireframe
-    ? (geometry) => wireframeOp(geometry)
-    : () => [];
-  const triangles = doTriangles
-    ? ({ tags }, geometry) => [toTrianglesFromGraph({ tags }, geometry)]
-    : () => [];
+  const show = (geometry) => {
+    if (doTriangles) {
+      geometry = hasShowSkin(geometry);
+    }
+    if (doOutline && isNotTypeVoid(geometry)) {
+      geometry = hasShowOutline(geometry);
+    }
+    if (doWireframe && isNotTypeVoid(geometry)) {
+      geometry = hasShowWireframe(geometry);
+    }
+    return geometry;
+  };
   const op = (geometry, descend) => {
+    const { tags } = geometry;
     switch (geometry.type) {
       case 'graph': {
-        const { graph, tags } = geometry;
-        if (graph.isWireframe) {
-          return taggedPaths({ tags }, toPaths(graph));
-        } else if (graph.isClosed) {
-          return taggedGroup(
-            {},
-            ...triangles({ tags }, geometry),
-            ...wireframe(geometry),
-            ...outline(geometry, ['color:black'])
-          );
-        } else if (graph.isEmpty) {
+        const { graph } = geometry;
+        if (graph.isEmpty) {
           return taggedGroup({});
         } else {
-          // FIX: Simplify this arrangement.
-          return taggedGroup(
-            {},
-            ...triangles({ tags }, geometry),
-            ...wireframe(geometry),
-            ...outline(geometry, ['color:black'])
-          );
+          return show(toTrianglesFromGraph({ tags }, geometry));
         }
       }
       // Unreachable.
       case 'polygons':
-        return taggedTriangles(
-          { tags: geometry.tags },
-          toTrianglesFromPolygonsWithHoles(geometry)
+        return show(
+          taggedTriangles({ tags }, toTrianglesFromPolygonsWithHoles(geometry))
         );
       case 'polygonsWithHoles':
-        return toTrianglesFromPolygonsWithHoles(geometry);
+        return show(
+          taggedTriangles({ tags }, toTrianglesFromPolygonsWithHoles(geometry))
+        );
       case 'segments':
       case 'triangles':
       case 'points':

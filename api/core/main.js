@@ -17,6 +17,7 @@ import { setApi } from './api.js';
 import { toSvg } from '@jsxcad/convert-svg';
 
 const api = {
+  _: undefined,
   ...mathApi,
   ...shapeApi,
   ...notesApi,

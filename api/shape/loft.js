@@ -7,7 +7,7 @@ export const loft =
     Shape.fromGeometry(
       loftGeometry(
         /* closed= */ false,
-        ...ops.map((op) => op(shape).toGeometry())
+        ...shape.toFlatValues(ops).map((shape) => shape.toGeometry())
       )
     );
 

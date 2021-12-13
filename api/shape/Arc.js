@@ -44,10 +44,9 @@ Shape.registerReifier('Arc', (geometry) => {
       .close()
       .fill()
       .ex(top, bottom)
-      .orient({
-        center: negate(getAt(geometry)),
-        from: getFrom(geometry),
-        at: getTo(geometry),
+      .orient2({
+        at: getAt(geometry),
+        to: getTo(geometry),
       });
   } else {
     return Spiral((a) => [[1]], {
@@ -58,7 +57,7 @@ Shape.registerReifier('Arc', (geometry) => {
       .scale(...scale)
       .move(...middle)
       .op((s) => (top !== bottom ? s.close().fill().ex(top, bottom) : s))
-      .orient({
+      .orient2({
         center: negate(getAt(geometry)),
         from: getFrom(geometry),
         at: getTo(geometry),

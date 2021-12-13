@@ -23,11 +23,17 @@ export {
   restoreEmitGroup,
   saveEmitGroup,
 } from './emit.js';
-export { getFilesystem, qualifyPath, setupFilesystem } from './filesystem.js';
+export {
+  getFilesystem,
+  getWorkspace,
+  qualifyPath,
+  setupFilesystem,
+  setupWorkspace,
+} from './filesystem.js';
 export { hash } from './hash.js';
 export { isBrowser, isNode, isWebWorker } from './browserOrNode.js';
 export { listFiles, listFilesystems } from './listFiles.js';
-export { log, unwatchLog, watchLog } from './log.js';
+export { log, logError, logInfo, unwatchLog, watchLog } from './log.js';
 export { unwatchFile, watchFile } from './watchFile.js';
 export {
   unwatchFileCreation,
@@ -42,6 +48,7 @@ export { deleteFile } from './deleteFile.js';
 export {
   askService,
   askServices,
+  getActiveServices,
   getServicePoolInfo,
   tellServices,
   terminateActiveServices,

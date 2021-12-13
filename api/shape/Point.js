@@ -1,9 +1,8 @@
 import Shape from './Shape.js';
 
-export const fromPoint = ([x = 0, y = 0, z = 0]) => Shape.fromPoint([x, y, z]);
-export const Point = (...args) => fromPoint([...args]);
-Point.fromPoint = fromPoint;
-
-export default Point;
+export const Point = (...args) =>
+  Shape.fromPoint(Shape.toCoordinate(undefined, ...args));
 
 Shape.prototype.Point = Shape.shapeMethod(Point);
+
+export default Point;

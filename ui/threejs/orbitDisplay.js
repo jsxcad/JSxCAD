@@ -3,10 +3,43 @@
 import { GEOMETRY_LAYER, SKETCH_LAYER } from './layers.js';
 import { buildScene, createResizer } from './scene.js';
 
+import { AnchorControls } from './AnchorControls.js';
 import { Layers } from 'three';
+import { TrackballControls } from 'three/examples/jsm/controls/TrackballControls.js';
 import { buildMeshes } from './mesh.js';
-import { buildTrackballControls } from './controls.js';
 import { moveToFit } from './moveToFit.js';
+
+const buildTrackballControls = ({
+  camera,
+  render,
+  viewerElement,
+  view = {},
+}) => {
+  const { target = [0, 0, 0] } = view;
+  const trackballControls = new TrackballControls(camera, viewerElement);
+  trackballControls.keys = [65, 83, 68];
+  trackballControls.target.set(...target);
+  trackballControls.update();
+  trackballControls.zoomSpeed = 2.5;
+  trackballControls.panSpeed = 1.25;
+  trackballControls.rotateSpeed = 2.5;
+  trackballControls.staticMoving = true;
+  return { trackballControls };
+};
+
+const buildAnchorControls = ({
+  camera,
+  draggableObjects,
+  endUpdating,
+  scene,
+  startUpdating,
+  trackballControls,
+  viewerElement,
+}) => {
+  const anchorControls = new AnchorControls(camera, viewerElement, scene);
+  anchorControls.enable();
+  return { anchorControls };
+};
 
 export const orbitDisplay = async (
   {
@@ -15,13 +48,12 @@ export const orbitDisplay = async (
     path,
     canvas,
     withAxes = false,
-    withGrid = false,
-    gridLayer = SKETCH_LAYER,
+    withGrid = true,
+    gridLayer = GEOMETRY_LAYER,
     definitions,
   } = {},
   page
 ) => {
-  let datasets = [];
   const width = page.offsetWidth;
   const height = page.offsetHeight;
 
@@ -45,6 +77,30 @@ export const orbitDisplay = async (
     planLayers,
     withAxes,
   });
+
+  let isUpdating = false;
+
+  let trackballControls;
+
+  const update = () => {
+    trackballControls.update();
+    anchorControls.change();
+    render();
+    if (isUpdating) {
+      requestAnimationFrame(update);
+    }
+  };
+
+  const startUpdating = () => {
+    if (!isUpdating) {
+      isUpdating = true;
+      update();
+    }
+  };
+
+  const endUpdating = () => {
+    isUpdating = false;
+  };
 
   let isRendering = false;
 
@@ -73,16 +129,29 @@ export const orbitDisplay = async (
     page.appendChild(displayCanvas);
   }
 
-  const { trackball } = buildTrackballControls({
+  ({ trackballControls } = buildTrackballControls({
     camera,
     render,
     view,
     viewerElement: displayCanvas,
+  }));
+
+  const { anchorControls } = buildAnchorControls({
+    camera,
+    endUpdating,
+    render,
+    scene,
+    startUpdating,
+    trackballControls,
+    view,
+    viewerElement: displayCanvas,
   });
+
+  anchorControls.addEventListener('change', update);
 
   const { resize } = createResizer({
     camera,
-    trackball,
+    controls: [trackballControls],
     renderer,
     viewerElement: page,
   });
@@ -92,37 +161,41 @@ export const orbitDisplay = async (
     render();
   }).observe(page);
 
-  const updateGeometry = async (
-    geometry,
-    { withGrid = true, fit = true } = {}
-  ) => {
-    // Delete any previous dataset in the window.
-    for (const { mesh } of datasets) {
-      scene.remove(mesh);
+  let moveToFitDone = false;
+
+  const updateGeometry = async (geometry, { fit = true, timestamp } = {}) => {
+    for (const object of [...scene.children]) {
+      if (
+        !object.userData.dressing &&
+        (!timestamp ||
+          !object.userData.created ||
+          object.userData.created < timestamp)
+      ) {
+        // If the object isn't dressing and was created before the update time, then it should be obsolete.
+        scene.remove(object);
+      }
     }
 
     view = { ...view, fit };
 
-    // Build new datasets from the written data, and display them.
-    datasets = [];
-
     await buildMeshes({
-      datasets,
       geometry,
       scene,
       render,
       definitions,
     });
 
-    moveToFit({
-      datasets,
-      view,
-      camera,
-      controls: trackball,
-      scene,
-      withGrid,
-      gridLayer,
-    });
+    if (!moveToFitDone) {
+      moveToFitDone = true;
+      moveToFit({
+        view,
+        camera,
+        controls: [trackballControls],
+        scene,
+        withGrid,
+        gridLayer,
+      });
+    }
 
     render();
   };
@@ -131,31 +204,19 @@ export const orbitDisplay = async (
     await updateGeometry(geometry);
   }
 
-  trackball.addEventListener('change', () => {
-    render();
-  });
+  trackballControls.addEventListener('start', startUpdating);
+  trackballControls.addEventListener('end', endUpdating);
 
-  let isUpdating = false;
-
-  const update = () => {
-    trackball.update();
-    if (isUpdating) {
-      requestAnimationFrame(update);
-    }
+  return {
+    camera,
+    canvas: displayCanvas,
+    anchorControls,
+    render,
+    renderer,
+    scene,
+    trackballControls,
+    updateGeometry,
   };
-
-  trackball.addEventListener('start', () => {
-    if (!isUpdating) {
-      isUpdating = true;
-      requestAnimationFrame(update);
-    }
-  });
-
-  trackball.addEventListener('end', () => {
-    isUpdating = false;
-  });
-
-  return { canvas: displayCanvas, render, updateGeometry, trackball };
 };
 
 export default orbitDisplay;

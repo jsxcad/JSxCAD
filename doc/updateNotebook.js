@@ -127,7 +127,10 @@ export const updateNotebook = async (
     const topLevel = new Map();
     await api.importModule(module, { clearUpdateEmits: false, topLevel });
     await resolvePending();
-    const { html, encodedNotebook } = await toHtml(notebook, { module });
+    const { html, encodedNotebook } = await toHtml(notebook, {
+      module,
+      modulePath: 'https://jsxcad.js.org/alpha',
+    });
     writeFileSync(`${target}.html`, html);
     const { imageUrlList } = await screenshot(
       new TextDecoder('utf8').decode(html),
@@ -180,7 +183,7 @@ export const updateNotebook = async (
             process.env.FORCE_COLOR === '0' ? [255, 255, 255] : [255, 0, 0],
         }
       );
-      if (numFailedPixels >= PIXEL_THRESHOLD) {
+      if (numFailedPixels > PIXEL_THRESHOLD) {
         const differencePath = `${target}.md.${nth}.difference.png`;
         writeFileSync(differencePath, pngjs.PNG.sync.write(differencePng));
         // Note failures.

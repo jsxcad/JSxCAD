@@ -3,6 +3,9 @@ import { rewrite } from './visit.js';
 const registry = new Map();
 
 export const reify = (geometry) => {
+  if (!geometry) {
+    console.log(`Reifying undefined geometry`);
+  }
   if (geometry.type === 'plan' && geometry.content.length > 0) {
     return geometry;
   }

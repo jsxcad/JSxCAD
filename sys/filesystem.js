@@ -26,9 +26,14 @@ export const setupFilesystem = ({ fileBase } = {}) => {
   }
 };
 
+export const setupWorkspace = (workspace) =>
+  setupFilesystem({ filebase: workspace });
+
 export const getFilesystem = () => {
   if (base !== undefined) {
     const [filesystem] = base.split('/');
     return filesystem;
   }
 };
+
+export const getWorkspace = () => getFilesystem();

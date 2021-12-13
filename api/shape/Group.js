@@ -8,9 +8,11 @@ export const Group = (...shapes) =>
   Shape.fromGeometry(
     taggedGroup(
       {},
-      ...shapes.filter(isDefined).map((shape) => shape.toGeometry())
+      ...Shape.toShapes(shapes.filter(isDefined)).map((shape) =>
+        shape.toGeometry()
+      )
     )
-  );
+  ).tag('editType:Group');
 
 Shape.prototype.Group = Shape.shapeMethod(Group);
 Shape.Group = Group;

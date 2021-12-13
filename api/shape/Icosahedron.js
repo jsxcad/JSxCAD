@@ -72,7 +72,7 @@ Shape.registerReifier('Icosahedron', (geometry) => {
   const a = Shape.fromPolygons(buildRegularIcosahedron({}));
   const b = a.scale(...scale);
   const c = b.move(...middle);
-  const d = c.orient({
+  const d = c.orient2({
     center: negate(getAt(geometry)),
     from: getFrom(geometry),
     at: getTo(geometry),

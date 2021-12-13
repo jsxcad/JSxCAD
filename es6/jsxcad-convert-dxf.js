@@ -628,6 +628,15 @@ class Arc$1 {
                     entity.endAngle = Math.PI / 180 * curr.value;
                     entity.angleLength = entity.endAngle - entity.startAngle; // angleLength is deprecated
                     break;
+                case 210:
+                    entity.extrusionDirectionX = curr.value;
+                    break;
+                case 220:
+                    entity.extrusionDirectionY = curr.value;
+                    break;
+                case 230:
+                    entity.extrusionDirectionZ = curr.value;
+                    break;
                 default: // ignored attribute
                     checkCommonEntityProperties(entity, curr, scanner);
                     break;
@@ -1564,6 +1573,7 @@ var loglevel = createCommonjsModule(function (module) {
     function Logger(name, defaultLevel, factory) {
       var self = this;
       var currentLevel;
+      defaultLevel = defaultLevel == null ? "WARN" : defaultLevel;
 
       var storageKey = "loglevel";
       if (typeof name === "string") {
@@ -1619,6 +1629,22 @@ var loglevel = createCommonjsModule(function (module) {
           return storedLevel;
       }
 
+      function clearPersistedLevel() {
+          if (typeof window === undefinedType || !storageKey) return;
+
+          // Use localStorage if available
+          try {
+              window.localStorage.removeItem(storageKey);
+              return;
+          } catch (ignore) {}
+
+          // Use session cookie as fallback
+          try {
+              window.document.cookie =
+                encodeURIComponent(storageKey) + "=; expires=Thu, 01 Jan 1970 00:00:00 UTC";
+          } catch (ignore) {}
+      }
+
       /*
        *
        * Public logger API - see https://github.com/pimterry/loglevel for details
@@ -1655,9 +1681,15 @@ var loglevel = createCommonjsModule(function (module) {
       };
 
       self.setDefaultLevel = function (level) {
+          defaultLevel = level;
           if (!getPersistedLevel()) {
               self.setLevel(level, false);
           }
+      };
+
+      self.resetLevel = function () {
+          self.setLevel(defaultLevel, false);
+          clearPersistedLevel();
       };
 
       self.enableAll = function(persist) {
@@ -1671,7 +1703,7 @@ var loglevel = createCommonjsModule(function (module) {
       // Initialize with the right level
       var initialLevel = getPersistedLevel();
       if (initialLevel == null) {
-          initialLevel = defaultLevel == null ? "WARN" : defaultLevel;
+          initialLevel = defaultLevel;
       }
       self.setLevel(initialLevel, false);
     }
@@ -3062,8 +3094,8 @@ class Polyline extends DatabaseObject_1
         s += "6\nByLayer\n";
         s += "62\n256\n";
         s += "370\n-1\n";
-        s += `70\n${this.closed ? 1 : 0}\n`;
         s += `90\n${this.points.length}\n`;
+        s += `70\n${this.closed ? 1 : 0}\n`;
 
         for (const p of this.points) {
             s += `10\n${p[0]}\n20\n${p[1]}\n`;
@@ -3163,7 +3195,7 @@ class Point extends DatabaseObject_1
 {
     constructor(x, y)
     {
-        super(["AcDbEntity", "AcDbEntity"]);
+        super(["AcDbEntity", "AcDbPoint"]);
         this.x = x;
         this.y = y;
     }

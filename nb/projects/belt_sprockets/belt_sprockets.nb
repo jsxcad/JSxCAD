@@ -639,9 +639,9 @@ export const Pulley = (profile, teeth) => {
 };
 
 md`
-# Supported belt profiles:`;
+# Supported belt profiles:
 
-
+'''js
 Pulley(MXL, 20).md('MXL').view();
 
 Pulley(DP40, 20).md('DP40').view();
@@ -673,5 +673,5 @@ Pulley(GT2_2mm, 20).md('GT2 2mm').view();
 Pulley(GT2_3mm, 20).md('GT2 3mm').view();
 
 Pulley(GT2_5mm, 20).md('GT2 5mm').view();
-
-
+'''
+`;

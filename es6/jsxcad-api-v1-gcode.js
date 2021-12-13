@@ -97,7 +97,7 @@ const prepareGcode = (
       type: 'application/x-gcode',
     });
     // Produce a view of what will be downloaded.
-    Shape.fromGeometry(entry).gridView(options.view);
+    Shape.fromGeometry(entry).gridView(name, options.view);
   }
   return entries;
 };

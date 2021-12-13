@@ -3,7 +3,6 @@ import { rewrite } from './visit.js';
 import { taggedSegments } from './taggedSegments.js';
 import { transform as transformPaths } from '../paths/transform.js';
 import { transform as transformPoints } from '../points/ops.js';
-import { transform as transformPolygons } from '../polygons/transform.js';
 import { transform as transformVec3 } from '@jsxcad/math-vec3';
 
 const transformedGeometry = Symbol('transformedGeometry');
@@ -63,11 +62,6 @@ export const toTransformedGeometry = (geometry) => {
         case 'plan':
           return descend();
         // Leaf
-        case 'triangles':
-          return descend({
-            triangles: transformPolygons(geometry.matrix, geometry.triangles),
-            matrix: undefined,
-          });
         case 'polygonsWithHoles':
           return fromPolygonsWithHolesToGraph(geometry);
         case 'segments':
@@ -82,8 +76,9 @@ export const toTransformedGeometry = (geometry) => {
             points: transformPoints(geometry.matrix, geometry.points),
             matrix: undefined,
           });
+        // These don't need a transformed version.
+        case 'triangles':
         case 'graph':
-          // Graphs don't need a transformed version.
           return geometry;
         default:
           throw Error(

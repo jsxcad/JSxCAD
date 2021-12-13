@@ -109,7 +109,7 @@ Arc(10, 10, 5).grow(1).view();
 ```JavaScript
 Box(10)
   .cut(Box(5))
-  .loft(...seq((a) => (s) => s.scale(Math.pow(a, 3)).z(a * 10), { from: 1/128, by: 1 / 8 }))
+  .loft(seq((a) => (s) => s.scale(Math.pow(a, 3)).z(a * 10), { from: 1/128, by: 1 / 8 }))
   .view();
 ```
 
@@ -126,7 +126,7 @@ Arc(6)
   .cut(Arc(3))
   .rx(0.25)
   .x(10)
-  .loop(...seq((a) => rz(a), { by: 1 / 16, upto: 1 }))
+  .loop(seq((a) => rz(a), { by: 1 / 16, upto: 1 }))
   .view();
 ```
 
@@ -262,7 +262,7 @@ log(aRectangle.size());
 ```
 
 ```JavaScript
-aRectangle.size((length, s) => s.x(length)).md(`Move the shape along by its length`);
+aRectangle.size(({ length }, s) => s.x(length)).md(`Move the shape along by its length`);
 ```
 
 Move the shape along by its length
@@ -319,14 +319,14 @@ This means that s.get('a').get('b') will find b inside a, but otherwise b would 
 
 ```JavaScript
 Group(
-  Box(10).as('box').color('yellow').material('copper'),
-  Arc(10).as('arc').color('cyan').material('brick')
+  Box(10).as('box').color('green').material('copper'),
+  Arc(10).as('arc').color('red').material('brick')
 )
-  .view((s) => s.get('*').pack())
+  .view(1, (s) => s.get('*').pack())
   .md('All items.')
-  .view(get('color:green'))
+  .view(2, get('color:green'))
   .md('All green things.')
-  .view(getNot('material:copper'))
+  .view(3, getNot('material:copper'))
   .md('All non-copper things.');
 ```
 
@@ -334,9 +334,11 @@ Group(
 
 All items.
 
+![Image](interactions_with_geometry.md.27.png)
+
 All green things.
 
-![Image](interactions_with_geometry.md.27.png)
+![Image](interactions_with_geometry.md.28.png)
 
 All non-copper things.
 
@@ -358,7 +360,7 @@ graph LR;
   0 --> 3;
   3[item<br>item:bar]
   3 --> 4;
-  4[graph<br>]
+  4[graph<br>editType:Group]
 '''
 
 ---
@@ -373,6 +375,6 @@ Box(11)
   .view().md('Produce a voxel representation with a 1mm resolution');
 ```
 
-![Image](interactions_with_geometry.md.28.png)
+![Image](interactions_with_geometry.md.29.png)
 
 Produce a voxel representation with a 1mm resolution

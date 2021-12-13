@@ -206,6 +206,8 @@ export const axleProfile = AxleProfile().md('Axle Profile').topView();
 
 Axle Profile
 
+![Image](lego.md.13.png)
+
 ```JavaScript
 const technic = Weld(box, Arc(4.8 + 0.2).y(5.6))
   .ex(8 - 0.8, 0.8)
@@ -214,7 +216,7 @@ const technic = Weld(box, Arc(4.8 + 0.2).y(5.6))
   .stl('technic');
 ```
 
-![Image](lego.md.13.png)
+![Image](lego.md.14.png)
 
 [technic_0.stl](lego.technic_0.stl)
 
@@ -223,12 +225,12 @@ export const AxleJoiner = (length) => Arc(8).cut(axleProfile).ex(length);
 ```
 
 ```JavaScript
-const technic_1x6 = Group(...seq((n) => technic.x(n), { upto: 48, by: 8 }))
+const technic_1x6 = Group(seq((n) => technic.x(n), { upto: 48, by: 8 }))
   .align()
   .view();
 ```
 
-![Image](lego.md.14.png)
+![Image](lego.md.15.png)
 
 ```JavaScript
 export const axleJoiner16 = AxleJoiner(16)
@@ -238,7 +240,7 @@ export const axleJoiner16 = AxleJoiner(16)
 
 Axle Joiner 16mm
 
-![Image](lego.md.15.png)
+![Image](lego.md.16.png)
 
 [AxleJoiner16_0.stl](lego.AxleJoiner16_0.stl)
 
@@ -270,7 +272,7 @@ const technicConnector = Arc(4.8)
   .stl('technicConnector');
 ```
 
-![Image](lego.md.16.png)
+![Image](lego.md.17.png)
 
 [technicConnector_0.stl](lego.technicConnector_0.stl)
 
@@ -296,7 +298,7 @@ const halfTechnicConnector = Arc(4.8)
   .stl('halfTechnicConnector');
 ```
 
-![Image](lego.md.17.png)
+![Image](lego.md.18.png)
 
 [halfTechnicConnector_0.stl](lego.halfTechnicConnector_0.stl)
 
@@ -306,6 +308,6 @@ const technicPlug5mm = halfTechnicConnector
   .stl('technicPlug5mm');
 ```
 
-![Image](lego.md.18.png)
+![Image](lego.md.19.png)
 
 [technicPlug5mm_0.stl](lego.technicPlug5mm_0.stl)

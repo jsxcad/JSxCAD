@@ -26,7 +26,7 @@ export { rewrite, visit } from './tagged/visit.js';
 export { allTags } from './tagged/allTags.js';
 export { alphaShape } from './graph/alphaShape.js';
 export { arrangePolygonsWithHoles } from './graph/arrangePolygonsWithHoles.js';
-export { assemble } from './tagged/assemble.js';
+export { assemble, distributedAssemble } from './tagged/assemble.js';
 export { bend } from './tagged/bend.js';
 export { close as closePath } from './path/close.js';
 export { computeCentroid } from './tagged/computeCentroid.js';
@@ -87,6 +87,27 @@ export { inset } from './tagged/inset.js';
 export { isClockwise as isClockwisePath } from './path/isClockwise.js';
 export { isCounterClockwise as isCounterClockwisePath } from './path/isCounterClockwise.js';
 export { isClosed as isClosedPath } from './path/isClosed.js';
+export {
+  isNotShow,
+  isNotShowOutline,
+  isNotShowSkin,
+  isNotShowWireframe,
+  isShow,
+  isShowOutline,
+  isShowSkin,
+  isShowWireframe,
+  hasNotShow,
+  hasNotShowOutline,
+  hasNotShowSkin,
+  hasNotShowWireframe,
+  hasShow,
+  hasShowOutline,
+  hasShowSkin,
+  hasShowWireframe,
+  showOutline,
+  showSkin,
+  showWireframe,
+} from './tagged/show.js';
 export {
   isNotType,
   isNotTypeVoid,
@@ -156,6 +177,7 @@ export { toKeptGeometry } from './tagged/toKeptGeometry.js';
 export { toTransformedGeometry } from './tagged/toTransformedGeometry.js';
 export { toPoints } from './tagged/toPoints.js';
 export { toPolygonsWithHoles } from './tagged/toPolygonsWithHoles.js';
+export { toTriangleArray } from './tagged/toTriangleArray.js';
 export { toTriangles as toTrianglesFromGraph } from './graph/toTriangles.js';
 export { transform } from './tagged/transform.js';
 export { transform as transformPaths } from './paths/transform.js';
