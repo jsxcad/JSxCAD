@@ -21,23 +21,15 @@ export const writeFile = async (options, path, data) => {
     ephemeral,
     workspace = getFilesystem(),
   } = options;
-  /*
-  let originalWorkspace = getFilesystem();
-  if (workspace !== originalWorkspace) {
-    info(`Write ${path} of ${workspace}`);
-    // Switch to the source filesystem, if necessary.
-    setupFilesystem({ fileBase: workspace });
-  }
-*/
   info(`Write ${path}`);
   const file = await getFile(options, path);
   file.data = data;
 
   if (!ephemeral && workspace !== undefined) {
-    const persistentPath = qualifyPath(path, workspace);
+    const qualifiedPath = qualifyPath(path, workspace);
     if (isNode) {
       try {
-        await promises.mkdir(dirname(persistentPath), { recursive: true });
+        await promises.mkdir(dirname(qualifiedPath), { recursive: true });
       } catch (error) {
         throw error;
       }
@@ -45,12 +37,12 @@ export const writeFile = async (options, path, data) => {
         if (doSerialize) {
           data = serialize(data);
         }
-        await promises.writeFile(persistentPath, data);
+        await promises.writeFile(qualifiedPath, data);
       } catch (error) {
         throw error;
       }
     } else if (isBrowser || isWebWorker) {
-      await db().setItem(persistentPath, data);
+      await db(qualifiedPath).setItem(qualifiedPath, data);
     }
 
     // Let everyone know the file has changed.

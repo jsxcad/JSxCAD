@@ -1,5 +1,5 @@
 import { rewriteViewGroupOrient, appendViewGroupCode, extractViewGroupCode, deleteViewGroupCode } from './jsxcad-compiler.js';
-import { readOrWatch, unwatchFile, watchFile, boot, log, deleteFile, ask, touch, askService, write, read, terminateActiveServices, clearEmitted, resolvePending, listFiles, getActiveServices, watchFileCreation, watchFileDeletion, watchLog, watchServices } from './jsxcad-sys.js';
+import { readOrWatch, unwatchFile, watchFile, boot, log, deleteFile, ask, touch, askService, clearCacheDb, write, read, logInfo, terminateActiveServices, clearEmitted, resolvePending, listFiles, getActiveServices, watchFileCreation, watchFileDeletion, watchLog, watchServices } from './jsxcad-sys.js';
 import { toDomElement, getNotebookControlData } from './jsxcad-ui-notebook.js';
 import { orbitDisplay, raycast, getWorldPosition } from './jsxcad-ui-threejs.js';
 import Prettier from 'https://unpkg.com/prettier@2.3.2/esm/standalone.mjs';
@@ -42429,13 +42429,6 @@ const defaultModelConfig = {
       component: 'Help',
       enableClose: false
     }, {
-      id: 'GC',
-      type: 'tab',
-      name: 'GC',
-      component: 'GC',
-      enableClose: false,
-      borderWidth: 1024
-    }, {
       id: 'Log',
       type: 'tab',
       name: 'Log',
@@ -42751,42 +42744,24 @@ class App extends ReactDOM$2.Component {
 
     this.Files.deleteCachedFiles = async () => {
       const {
-        WorkspaceFiles
-      } = this.state;
-      const regenerableFiles = WorkspaceFiles.filter(file => isRegenerable(file));
-
-      for (const file of regenerableFiles) {
-        console.log(`QQ/Deleting: ${file}`);
-        await deleteFile({
-          workspace
-        }, file);
-      }
+        workspace
+      } = this.props;
+      await clearCacheDb({
+        workspace
+      });
+      window.alert("Cached files deleted");
     };
 
     this.Files.deleteSourceFiles = async () => {
+      const {
+        workspace
+      } = this.props;
       const {
         WorkspaceFiles
       } = this.state;
       const nonRegenerableFiles = WorkspaceFiles.filter(file => !isRegenerable(file));
 
       for (const file of nonRegenerableFiles) {
-        console.log(`QQ/Deleting: ${file}`);
-        await deleteFile({
-          workspace
-        }, file);
-      }
-    }; // Deprecate
-
-
-    this.GC = {};
-
-    this.GC.delete = async () => {
-      const {
-        WorkspaceFiles
-      } = this.state;
-      const regenerableFiles = WorkspaceFiles.filter(file => isRegenerable(file));
-
-      for (const file of regenerableFiles) {
         console.log(`QQ/Deleting: ${file}`);
         await deleteFile({
           workspace
@@ -42964,8 +42939,9 @@ class App extends ReactDOM$2.Component {
     this.Notebook.runStart = {};
 
     this.Notebook.run = async (path, options) => {
-      // Note the time that this run started.
+      logInfo('app/App', `Request notebook run ${path}`); // Note the time that this run started.
       // This can be used to note which assets are obsoleted by the completion of the run.
+
       this.Notebook.runStart[path] = new Date();
       const {
         sha,
@@ -42976,31 +42952,38 @@ class App extends ReactDOM$2.Component {
       const topLevel = new Map();
 
       try {
+        logInfo('app/App', `Run/1 ${path}`);
         await this.updateState({
           NotebookState: 'running'
         }); // Terminate any services running for this path, since we're going to restart evaluating it.
 
-        await terminateActiveServices(context => context.path === path); // CHECK: Can we get rid of this?
+        await terminateActiveServices(context => context.path === path);
+        logInfo('app/App', `Run/2 ${path}`); // CHECK: Can we get rid of this?
 
         clearEmitted();
+        logInfo('app/App', `Run/3 ${path}`);
         const NotebookText = await this.Notebook.save(path);
+        logInfo('app/App', `Run/4 ${path}`);
 
         if (!NotebookPath.endsWith('.js') && !NotebookPath.endsWith('.nb')) {
           // We don't know how to run anything else.
           return;
-        } // FIX: This is a bit awkward.
+        }
+
+        logInfo('app/App', `Run/5 ${path}`); // FIX: This is a bit awkward.
         // The responsibility for updating the control values ought to be with what
         // renders the notebook.
-
 
         const notebookControlData = await getNotebookControlData();
         await write(`control/${NotebookPath}`, notebookControlData, {
           workspace
         });
+        logInfo('app/App', `Run/6 ${path}`);
         let script = NotebookText;
 
         const evaluate = async script => {
           try {
+            logInfo('app/App', `Distribute eval for ${path}`);
             const result = await this.ask({
               op: 'app/evaluate',
               script,
@@ -43024,6 +43007,7 @@ class App extends ReactDOM$2.Component {
 
         const replay = async script => {
           try {
+            logInfo('app/App', `Distribute eval for ${path}`);
             const result = await this.ask({
               op: 'app/evaluate',
               script,
@@ -43046,6 +43030,7 @@ class App extends ReactDOM$2.Component {
         };
 
         NotebookAdvice.definitions = topLevel;
+        logInfo('app/App', `Execute notebook run ${path}`);
         await execute(script, {
           evaluate,
           replay,
@@ -43060,6 +43045,7 @@ class App extends ReactDOM$2.Component {
         await this.updateState({
           NotebookState: 'idle'
         });
+        logInfo('app/App', `Completed notebook run ${path}`);
       }
     };
 
@@ -43087,6 +43073,7 @@ class App extends ReactDOM$2.Component {
     };
 
     this.Notebook.save = async path => {
+      logInfo('app/App/Notebook/save', `Saving Notebook ${path}`);
       const {
         workspace
       } = this.props;
@@ -43110,16 +43097,20 @@ class App extends ReactDOM$2.Component {
         return data;
       };
 
+      logInfo('app/App/Notebook/save', `Cleaning Notebook ${path}`);
       const cleanText = getCleanText(NotebookText);
+      logInfo('app/App/Notebook/save', `Writing Notebook ${path}`);
       await write(NotebookFile, new TextEncoder('utf8').encode(cleanText), {
         workspace
       });
       console.log(`QQ/Notebook.save/path: ${path} ${cleanText}`);
+      logInfo('app/App/Notebook/save', `Updating state for Notebook ${path}`);
       await this.updateState({
         [`NotebookText/${path}`]: cleanText
       }); // Let state propagate.
 
       await animationFrame();
+      logInfo('app/App/Notebook/save', `Saving complete for ${path}`);
       return cleanText;
     };
 
@@ -43795,30 +43786,10 @@ class App extends ReactDOM$2.Component {
             return v$1("div", null, v$1(Card, null, v$1(Card.Body, null, v$1(Card.Title, null, "Clear Cached Files"), v$1(Card.Text, null, v$1(Button, {
               variant: "primary",
               onClick: this.Files.deleteCachedFiles
-            }, "Delete Regeneable Files"), v$1(ListGroup, null, WorkspaceFiles.filter(file => isRegenerable(file)).map((file, index) => v$1(ListGroup.Item, {
-              key: index,
-              disabled: true
-            }, file))))), v$1(Card.Body, null, v$1(Card.Title, null, "Delete Source Files"), v$1(Card.Text, null, v$1(Button, {
+            }, "Delete Regeneable Files"))), v$1(Card.Body, null, v$1(Card.Title, null, "Delete Source Files"), v$1(Card.Text, null, v$1(Button, {
               variant: "primary",
               onClick: this.Files.deleteSourceFiles
             }, "Delete Source Files Forever"), v$1(ListGroup, null, WorkspaceFiles.filter(file => !isRegenerable(file)).map((file, index) => v$1(ListGroup.Item, {
-              key: index,
-              disabled: true
-            }, file))))), v$1(Card.Body, null, v$1(Card.Title, null, "Reset Layout"), v$1(Card.Text, null, v$1(Button, {
-              variant: "primary",
-              onClick: this.Model.reset
-            }, "Reset")))));
-          }
-
-        case 'GC':
-          {
-            const {
-              WorkspaceFiles
-            } = this.state;
-            return v$1("div", null, v$1(Card, null, v$1(Card.Body, null, v$1(Card.Title, null, "Garbage Collection"), v$1(Card.Text, null, v$1(Button, {
-              variant: "primary",
-              onClick: this.GC.delete
-            }, "Delete"), v$1(ListGroup, null, WorkspaceFiles.filter(file => isRegenerable(file)).map((file, index) => v$1(ListGroup.Item, {
               key: index,
               disabled: true
             }, file))))), v$1(Card.Body, null, v$1(Card.Title, null, "Reset Layout"), v$1(Card.Text, null, v$1(Button, {

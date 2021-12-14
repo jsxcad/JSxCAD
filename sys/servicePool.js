@@ -1,4 +1,5 @@
 import { createService } from './service.js';
+import { logInfo } from './log.js';
 
 let activeServiceLimit = 5;
 let idleServiceLimit = 5;
@@ -17,6 +18,11 @@ const notifyWatchers = () => {
 
 export const acquireService = async (spec, context) => {
   if (idleServices.length > 0) {
+    logInfo('sys/servicePool', 'Recycle worker');
+    logInfo(
+      'sys/servicePool/counts',
+      `Active service count: ${activeServices.size}`
+    );
     // Recycle an existing worker.
     // FIX: We might have multiple paths to consider in the future.
     // For now, just assume that the path is correct.
@@ -29,6 +35,11 @@ export const acquireService = async (spec, context) => {
     notifyWatchers();
     return service;
   } else if (activeServices.size < activeServiceLimit) {
+    logInfo('sys/servicePool', 'Allocate worker');
+    logInfo(
+      'sys/servicePool/counts',
+      `Active service count: ${activeServices.size}`
+    );
     // Create a new service.
     const service = createService({ ...spec, release: releaseService });
     activeServices.add(service);
@@ -39,6 +50,11 @@ export const acquireService = async (spec, context) => {
     notifyWatchers();
     return service;
   } else {
+    logInfo('sys/servicePool', 'Wait for worker');
+    logInfo(
+      'sys/servicePool/counts',
+      `Active service count: ${activeServices.size}`
+    );
     // Wait for a service to become available.
     return new Promise((resolve, reject) =>
       pending.push({ spec, resolve, context })
@@ -47,6 +63,11 @@ export const acquireService = async (spec, context) => {
 };
 
 export const releaseService = (spec, service, terminate = false) => {
+  logInfo('sys/servicePool', 'Release worker');
+  logInfo(
+    'sys/servicePool/counts',
+    `Active service count: ${activeServices.size}`
+  );
   service.poolReleased = true;
   activeServices.delete(service);
   const worker = service.releaseWorker();

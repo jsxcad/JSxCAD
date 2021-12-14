@@ -13,11 +13,13 @@ import {
   askService,
   ask as askSys,
   boot,
+  clearCacheDb,
   clearEmitted,
   deleteFile,
   getActiveServices,
   listFiles,
   log,
+  logInfo,
   read,
   resolvePending,
   terminateActiveServices,
@@ -113,14 +115,6 @@ const defaultModelConfig = {
           name: 'Help',
           component: 'Help',
           enableClose: false,
-        },
-        {
-          id: 'GC',
-          type: 'tab',
-          name: 'GC',
-          component: 'GC',
-          enableClose: false,
-          borderWidth: 1024,
         },
         {
           id: 'Log',
@@ -395,36 +389,18 @@ class App extends React.Component {
     this.Files = {};
 
     this.Files.deleteCachedFiles = async () => {
-      const { WorkspaceFiles } = this.state;
-      const regenerableFiles = WorkspaceFiles.filter((file) =>
-        isRegenerable(file)
-      );
-      for (const file of regenerableFiles) {
-        console.log(`QQ/Deleting: ${file}`);
-        await deleteFile({ workspace }, file);
-      }
+      const { workspace } = this.props;
+      await clearCacheDb({ workspace });
+      window.alert('Cached files deleted');
     };
 
     this.Files.deleteSourceFiles = async () => {
+      const { workspace } = this.props;
       const { WorkspaceFiles } = this.state;
       const nonRegenerableFiles = WorkspaceFiles.filter(
         (file) => !isRegenerable(file)
       );
       for (const file of nonRegenerableFiles) {
-        console.log(`QQ/Deleting: ${file}`);
-        await deleteFile({ workspace }, file);
-      }
-    };
-
-    // Deprecate
-    this.GC = {};
-
-    this.GC.delete = async () => {
-      const { WorkspaceFiles } = this.state;
-      const regenerableFiles = WorkspaceFiles.filter((file) =>
-        isRegenerable(file)
-      );
-      for (const file of regenerableFiles) {
         console.log(`QQ/Deleting: ${file}`);
         await deleteFile({ workspace }, file);
       }
@@ -557,6 +533,7 @@ class App extends React.Component {
     this.Notebook.runStart = {};
 
     this.Notebook.run = async (path, options) => {
+      logInfo('app/App', `Request notebook run ${path}`);
       // Note the time that this run started.
       // This can be used to note which assets are obsoleted by the completion of the run.
       this.Notebook.runStart[path] = new Date();
@@ -566,18 +543,23 @@ class App extends React.Component {
       const NotebookPath = path;
       const topLevel = new Map();
       try {
+        logInfo('app/App', `Run/1 ${path}`);
         await this.updateState({ NotebookState: 'running' });
         // Terminate any services running for this path, since we're going to restart evaluating it.
         await terminateActiveServices((context) => context.path === path);
+        logInfo('app/App', `Run/2 ${path}`);
         // CHECK: Can we get rid of this?
         clearEmitted();
+        logInfo('app/App', `Run/3 ${path}`);
 
         const NotebookText = await this.Notebook.save(path);
+        logInfo('app/App', `Run/4 ${path}`);
 
         if (!NotebookPath.endsWith('.js') && !NotebookPath.endsWith('.nb')) {
           // We don't know how to run anything else.
           return;
         }
+        logInfo('app/App', `Run/5 ${path}`);
 
         // FIX: This is a bit awkward.
         // The responsibility for updating the control values ought to be with what
@@ -586,10 +568,12 @@ class App extends React.Component {
         await write(`control/${NotebookPath}`, notebookControlData, {
           workspace,
         });
+        logInfo('app/App', `Run/6 ${path}`);
 
         let script = NotebookText;
         const evaluate = async (script) => {
           try {
+            logInfo('app/App', `Distribute eval for ${path}`);
             const result = await this.ask(
               {
                 op: 'app/evaluate',
@@ -612,6 +596,7 @@ class App extends React.Component {
         };
         const replay = async (script) => {
           try {
+            logInfo('app/App', `Distribute eval for ${path}`);
             const result = await this.ask(
               {
                 op: 'app/evaluate',
@@ -633,6 +618,7 @@ class App extends React.Component {
           }
         };
         NotebookAdvice.definitions = topLevel;
+        logInfo('app/App', `Execute notebook run ${path}`);
         await execute(script, {
           evaluate,
           replay,
@@ -645,6 +631,7 @@ class App extends React.Component {
         window.alert(error.stack);
       } finally {
         await this.updateState({ NotebookState: 'idle' });
+        logInfo('app/App', `Completed notebook run ${path}`);
       }
     };
 
@@ -669,6 +656,7 @@ class App extends React.Component {
     };
 
     this.Notebook.save = async (path) => {
+      logInfo('app/App/Notebook/save', `Saving Notebook ${path}`);
       const { workspace } = this.props;
       const { [`NotebookText/${path}`]: NotebookText } = this.state;
       const NotebookPath = path;
@@ -685,16 +673,20 @@ class App extends React.Component {
         }
         return data;
       };
+      logInfo('app/App/Notebook/save', `Cleaning Notebook ${path}`);
       const cleanText = getCleanText(NotebookText);
+      logInfo('app/App/Notebook/save', `Writing Notebook ${path}`);
       await write(NotebookFile, new TextEncoder('utf8').encode(cleanText), {
         workspace,
       });
       console.log(`QQ/Notebook.save/path: ${path} ${cleanText}`);
+      logInfo('app/App/Notebook/save', `Updating state for Notebook ${path}`);
       await this.updateState({ [`NotebookText/${path}`]: cleanText });
 
       // Let state propagate.
       await animationFrame();
 
+      logInfo('app/App/Notebook/save', `Saving complete for ${path}`);
       return cleanText;
     };
 
@@ -1222,15 +1214,6 @@ class App extends React.Component {
                     >
                       Delete Regeneable Files
                     </Button>
-                    <ListGroup>
-                      {WorkspaceFiles.filter((file) => isRegenerable(file)).map(
-                        (file, index) => (
-                          <ListGroup.Item key={index} disabled>
-                            {file}
-                          </ListGroup.Item>
-                        )
-                      )}
-                    </ListGroup>
                   </Card.Text>
                 </Card.Body>
                 <Card.Body>
@@ -1250,40 +1233,6 @@ class App extends React.Component {
                           {file}
                         </ListGroup.Item>
                       ))}
-                    </ListGroup>
-                  </Card.Text>
-                </Card.Body>
-                <Card.Body>
-                  <Card.Title>Reset Layout</Card.Title>
-                  <Card.Text>
-                    <Button variant="primary" onClick={this.Model.reset}>
-                      Reset
-                    </Button>
-                  </Card.Text>
-                </Card.Body>
-              </Card>
-            </div>
-          );
-        }
-        case 'GC': {
-          const { WorkspaceFiles } = this.state;
-          return (
-            <div>
-              <Card>
-                <Card.Body>
-                  <Card.Title>Garbage Collection</Card.Title>
-                  <Card.Text>
-                    <Button variant="primary" onClick={this.GC.delete}>
-                      Delete
-                    </Button>
-                    <ListGroup>
-                      {WorkspaceFiles.filter((file) => isRegenerable(file)).map(
-                        (file, index) => (
-                          <ListGroup.Item key={index} disabled>
-                            {file}
-                          </ListGroup.Item>
-                        )
-                      )}
                     </ListGroup>
                   </Card.Text>
                 </Card.Body>

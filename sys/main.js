@@ -4,6 +4,7 @@ export {
   resolvePending,
   setPendingErrorHandler,
 } from './pending.js';
+export { clearCacheDb } from './db.js';
 export { createService } from './service.js';
 export { getControlValue, setControlValue } from './control.js';
 export { read, readFile, readOrWatch } from './readFile.js';
@@ -32,7 +33,7 @@ export {
 } from './filesystem.js';
 export { hash } from './hash.js';
 export { isBrowser, isNode, isWebWorker } from './browserOrNode.js';
-export { listFiles, listFilesystems } from './listFiles.js';
+export { listFiles } from './listFiles.js';
 export { log, logError, logInfo, unwatchLog, watchLog } from './log.js';
 export { unwatchFile, watchFile } from './watchFile.js';
 export {

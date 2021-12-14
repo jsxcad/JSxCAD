@@ -33,7 +33,30 @@ const getUrlFetcher = async () => {
   throw Error('die');
 };
 
-const getFileFetcher = async (qualify = qualifyPath, doSerialize = true) => {
+const getExternalFileFetcher = async (
+  qualify = qualifyPath,
+  doSerialize = true
+) => {
+  if (isNode) {
+    // FIX: Put this through getFile, also.
+    return async (path) => {
+      let data = await promises.readFile(qualify(path));
+      if (doSerialize) {
+        data = deserialize(data);
+      }
+      return data;
+    };
+  } else if (isBrowser || isWebWorker) {
+    return async (path) => {};
+  } else {
+    throw Error('die');
+  }
+};
+
+const getInternalFileFetcher = async (
+  qualify = qualifyPath,
+  doSerialize = true
+) => {
   if (isNode) {
     // FIX: Put this through getFile, also.
     return async (path) => {
@@ -45,7 +68,8 @@ const getFileFetcher = async (qualify = qualifyPath, doSerialize = true) => {
     };
   } else if (isBrowser || isWebWorker) {
     return async (path) => {
-      const data = await db().getItem(qualify(path));
+      const qualifiedPath = qualify(path);
+      const data = await db(qualifiedPath).getItem(qualifiedPath);
       if (data !== null) {
         return data;
       }
@@ -59,7 +83,7 @@ const getFileFetcher = async (qualify = qualifyPath, doSerialize = true) => {
 const fetchPersistent = async (path, { workspace, doSerialize }) => {
   try {
     if (workspace) {
-      const fetchFile = await getFileFetcher(
+      const fetchFile = await getInternalFileFetcher(
         (path) => qualifyPath(path, workspace),
         doSerialize
       );
@@ -75,9 +99,9 @@ const fetchPersistent = async (path, { workspace, doSerialize }) => {
 };
 
 // Fetch from external sources.
-const fetchSources = async (sources) => {
+const fetchSources = async (sources, { workspace }) => {
   const fetchUrl = await getUrlFetcher();
-  const fetchFile = await getFileFetcher((path) => path, false);
+  const fetchFile = await getExternalFileFetcher((path) => path, false);
   // Try to load the data from a source.
   for (const source of sources) {
     if (typeof source === 'string') {
@@ -122,7 +146,7 @@ export const readFile = async (options, path) => {
   }
 
   if (file.data === undefined && allowFetch && sources.length > 0) {
-    let data = await fetchSources(sources);
+    let data = await fetchSources(sources, { workspace });
     if (decode) {
       data = new TextDecoder(decode).decode(data);
     }

@@ -14,7 +14,7 @@ import { db } from './db.js';
 
 const { promises } = fs;
 
-const getFileLister = async () => {
+const getFileLister = async ({ workspace }) => {
   if (isNode) {
     // FIX: Put this through getFile, also.
     return async () => {
@@ -40,7 +40,11 @@ const getFileLister = async () => {
   } else if (isBrowser || isWebWorker) {
     // FIX: Make localstorage optional.
     return async () => {
-      const qualifiedPaths = new Set(await db().keys());
+      const qualifiedPaths = new Set(
+        await db(`jsxcad/${workspace}/source`).keys(),
+        await db(`jsxcad/${workspace}/config`).keys(),
+        await db(`jsxcad/${workspace}/control`).keys()
+      );
       listEphemeralFiles(qualifiedPaths);
       return qualifiedPaths;
     };
@@ -56,9 +60,9 @@ const updateCachedKeys = (options = {}, file) =>
 const deleteCachedKeys = (options = {}, file) =>
   cachedKeys.delete(file.storageKey);
 
-const getKeys = async () => {
+const getKeys = async ({ workspace }) => {
   if (cachedKeys === undefined) {
-    const listFiles = await getFileLister();
+    const listFiles = await getFileLister({ workspace });
     cachedKeys = await listFiles();
     watchFileCreation(updateCachedKeys);
     watchFileDeletion(deleteCachedKeys);
@@ -66,24 +70,12 @@ const getKeys = async () => {
   return cachedKeys;
 };
 
-export const listFilesystems = async () => {
-  const keys = await getKeys();
-  const filesystems = new Set();
-  for (const key of keys) {
-    if (key.startsWith('jsxcad/')) {
-      const [, filesystem] = key.split('/');
-      filesystems.add(filesystem);
-    }
-  }
-  return [...filesystems];
-};
-
 export const listFiles = async ({ workspace } = {}) => {
   if (workspace === undefined) {
     workspace = getFilesystem();
   }
   const prefix = qualifyPath('', workspace);
-  const keys = await getKeys();
+  const keys = await getKeys({ workspace });
   const files = [];
   for (const key of keys) {
     if (key.startsWith(prefix)) {
