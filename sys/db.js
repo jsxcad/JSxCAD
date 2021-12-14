@@ -1,58 +1,61 @@
 import * as keyval from 'idb-keyval';
 import { fromStringToIntegerHash } from './hash.js';
-import localForage from 'localforage';
 
-let localForageDbInstance;
+const cacheStoreCount = 10;
+const idbKeyvalDbInstance = {};
 
-export const localForageDb = () => {
-  if (localForageDbInstance === undefined) {
-    localForageDbInstance = localForage.createInstance({
-      name: 'jsxcad',
-      driver: localForage.INDEXEDDB,
-      storeName: 'jsxcad',
-      description: 'jsxcad local filesystem',
-    });
+const ensureDb = (index) => {
+  let instance = idbKeyvalDbInstance[index];
+  if (instance) {
+    return instance;
   }
-  return localForageDbInstance;
+  const store = keyval.createStore(index, `jsxcad`);
+  instance = {
+    clear() {
+      return keyval.clear(store);
+    },
+    removeItem(path) {
+      return keyval.del(path, store);
+    },
+    getItem(path) {
+      return keyval.get(path, store);
+    },
+    keys() {
+      return keyval.keys(store);
+    },
+    setItem(path, value) {
+      return keyval.set(path, value, store);
+    },
+  };
+  idbKeyvalDbInstance[index] = instance;
+  return instance;
 };
 
-let idbKeyvalDbInstance = {};
-
-export const idbKeyvalDb = (key) => {
+export const db = (key) => {
   const [jsxcad, workspace, partition] = key.split('/');
   let index;
+
+  if (jsxcad !== 'jsxcad') {
+    throw Error('Malformed key');
+  }
 
   switch (partition) {
     case 'config':
     case 'control':
     case 'source':
-      index = `${jsxcad}_${workspace}_${partition}`;
+      index = `jsxcad_${workspace}_${partition}`;
       break;
-    default:
-      index = `${jsxcad}_${workspace}_cache_${
-        fromStringToIntegerHash(key) % 10
-      }`;
+    default: {
+      const nth = fromStringToIntegerHash(key) % cacheStoreCount;
+      index = `jsxcad_${workspace}_cache_${nth}`;
       break;
+    }
   }
-  if (idbKeyvalDbInstance[index] === undefined) {
-    const store = keyval.createStore(index, `jsxcad`);
-    idbKeyvalDbInstance[index] = {
-      removeItem(path) {
-        return keyval.del(path, store);
-      },
-      getItem(path) {
-        return keyval.get(path, store);
-      },
-      keys() {
-        return keyval.keys(store);
-      },
-      setItem(path, value) {
-        return keyval.set(path, value, store);
-      },
-    };
-  }
-  return idbKeyvalDbInstance[index];
+  return ensureDb(index);
 };
 
-// export const db = localForageDb;
-export const db = idbKeyvalDb;
+export const clearCacheDb = async ({ workspace }) => {
+  for (let nth = 0; nth < cacheStoreCount; nth++) {
+    await ensureDb(`jsxcad_${workspace}_cache_${nth}`).clear();
+  }
+};

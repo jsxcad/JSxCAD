@@ -1,5 +1,5 @@
 import { rewriteViewGroupOrient, appendViewGroupCode, extractViewGroupCode, deleteViewGroupCode } from './jsxcad-compiler.js';
-import { readOrWatch, unwatchFile, watchFile, boot, log, deleteFile, ask, touch, askService, write, read, logInfo, terminateActiveServices, clearEmitted, resolvePending, listFiles, getActiveServices, watchFileCreation, watchFileDeletion, watchLog, watchServices } from './jsxcad-sys.js';
+import { readOrWatch, unwatchFile, watchFile, boot, log, deleteFile, ask, touch, askService, clearCacheDb, write, read, logInfo, terminateActiveServices, clearEmitted, resolvePending, listFiles, getActiveServices, watchFileCreation, watchFileDeletion, watchLog, watchServices } from './jsxcad-sys.js';
 import { toDomElement, getNotebookControlData } from './jsxcad-ui-notebook.js';
 import { orbitDisplay, raycast, getWorldPosition } from './jsxcad-ui-threejs.js';
 import Prettier from 'https://unpkg.com/prettier@2.3.2/esm/standalone.mjs';
@@ -42429,13 +42429,6 @@ const defaultModelConfig = {
       component: 'Help',
       enableClose: false
     }, {
-      id: 'GC',
-      type: 'tab',
-      name: 'GC',
-      component: 'GC',
-      enableClose: false,
-      borderWidth: 1024
-    }, {
       id: 'Log',
       type: 'tab',
       name: 'Log',
@@ -42751,42 +42744,24 @@ class App extends ReactDOM$2.Component {
 
     this.Files.deleteCachedFiles = async () => {
       const {
-        WorkspaceFiles
-      } = this.state;
-      const regenerableFiles = WorkspaceFiles.filter(file => isRegenerable(file));
-
-      for (const file of regenerableFiles) {
-        console.log(`QQ/Deleting: ${file}`);
-        await deleteFile({
-          workspace
-        }, file);
-      }
+        workspace
+      } = this.props;
+      await clearCacheDb({
+        workspace
+      });
+      window.alert("Cached files deleted");
     };
 
     this.Files.deleteSourceFiles = async () => {
+      const {
+        workspace
+      } = this.props;
       const {
         WorkspaceFiles
       } = this.state;
       const nonRegenerableFiles = WorkspaceFiles.filter(file => !isRegenerable(file));
 
       for (const file of nonRegenerableFiles) {
-        console.log(`QQ/Deleting: ${file}`);
-        await deleteFile({
-          workspace
-        }, file);
-      }
-    }; // Deprecate
-
-
-    this.GC = {};
-
-    this.GC.delete = async () => {
-      const {
-        WorkspaceFiles
-      } = this.state;
-      const regenerableFiles = WorkspaceFiles.filter(file => isRegenerable(file));
-
-      for (const file of regenerableFiles) {
         console.log(`QQ/Deleting: ${file}`);
         await deleteFile({
           workspace
@@ -43811,30 +43786,10 @@ class App extends ReactDOM$2.Component {
             return v$1("div", null, v$1(Card, null, v$1(Card.Body, null, v$1(Card.Title, null, "Clear Cached Files"), v$1(Card.Text, null, v$1(Button, {
               variant: "primary",
               onClick: this.Files.deleteCachedFiles
-            }, "Delete Regeneable Files"), v$1(ListGroup, null, WorkspaceFiles.filter(file => isRegenerable(file)).map((file, index) => v$1(ListGroup.Item, {
-              key: index,
-              disabled: true
-            }, file))))), v$1(Card.Body, null, v$1(Card.Title, null, "Delete Source Files"), v$1(Card.Text, null, v$1(Button, {
+            }, "Delete Regeneable Files"))), v$1(Card.Body, null, v$1(Card.Title, null, "Delete Source Files"), v$1(Card.Text, null, v$1(Button, {
               variant: "primary",
               onClick: this.Files.deleteSourceFiles
             }, "Delete Source Files Forever"), v$1(ListGroup, null, WorkspaceFiles.filter(file => !isRegenerable(file)).map((file, index) => v$1(ListGroup.Item, {
-              key: index,
-              disabled: true
-            }, file))))), v$1(Card.Body, null, v$1(Card.Title, null, "Reset Layout"), v$1(Card.Text, null, v$1(Button, {
-              variant: "primary",
-              onClick: this.Model.reset
-            }, "Reset")))));
-          }
-
-        case 'GC':
-          {
-            const {
-              WorkspaceFiles
-            } = this.state;
-            return v$1("div", null, v$1(Card, null, v$1(Card.Body, null, v$1(Card.Title, null, "Garbage Collection"), v$1(Card.Text, null, v$1(Button, {
-              variant: "primary",
-              onClick: this.GC.delete
-            }, "Delete"), v$1(ListGroup, null, WorkspaceFiles.filter(file => isRegenerable(file)).map((file, index) => v$1(ListGroup.Item, {
               key: index,
               disabled: true
             }, file))))), v$1(Card.Body, null, v$1(Card.Title, null, "Reset Layout"), v$1(Card.Text, null, v$1(Button, {

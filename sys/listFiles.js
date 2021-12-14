@@ -41,7 +41,9 @@ const getFileLister = async ({ workspace }) => {
     // FIX: Make localstorage optional.
     return async () => {
       const qualifiedPaths = new Set(
-        await db(`jsxcad/${workspace}/source`).keys()
+        await db(`jsxcad/${workspace}/source`).keys(),
+        await db(`jsxcad/${workspace}/config`).keys(),
+        await db(`jsxcad/${workspace}/control`).keys()
       );
       listEphemeralFiles(qualifiedPaths);
       return qualifiedPaths;

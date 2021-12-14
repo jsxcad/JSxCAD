@@ -13,6 +13,7 @@ import {
   askService,
   ask as askSys,
   boot,
+  clearCacheDb,
   clearEmitted,
   deleteFile,
   getActiveServices,
@@ -114,14 +115,6 @@ const defaultModelConfig = {
           name: 'Help',
           component: 'Help',
           enableClose: false,
-        },
-        {
-          id: 'GC',
-          type: 'tab',
-          name: 'GC',
-          component: 'GC',
-          enableClose: false,
-          borderWidth: 1024,
         },
         {
           id: 'Log',
@@ -396,36 +389,18 @@ class App extends React.Component {
     this.Files = {};
 
     this.Files.deleteCachedFiles = async () => {
-      const { WorkspaceFiles } = this.state;
-      const regenerableFiles = WorkspaceFiles.filter((file) =>
-        isRegenerable(file)
-      );
-      for (const file of regenerableFiles) {
-        console.log(`QQ/Deleting: ${file}`);
-        await deleteFile({ workspace }, file);
-      }
+      const { workspace } = this.props;
+      await clearCacheDb({ workspace });
+      window.alert('Cached files deleted');
     };
 
     this.Files.deleteSourceFiles = async () => {
+      const { workspace } = this.props;
       const { WorkspaceFiles } = this.state;
       const nonRegenerableFiles = WorkspaceFiles.filter(
         (file) => !isRegenerable(file)
       );
       for (const file of nonRegenerableFiles) {
-        console.log(`QQ/Deleting: ${file}`);
-        await deleteFile({ workspace }, file);
-      }
-    };
-
-    // Deprecate
-    this.GC = {};
-
-    this.GC.delete = async () => {
-      const { WorkspaceFiles } = this.state;
-      const regenerableFiles = WorkspaceFiles.filter((file) =>
-        isRegenerable(file)
-      );
-      for (const file of regenerableFiles) {
         console.log(`QQ/Deleting: ${file}`);
         await deleteFile({ workspace }, file);
       }
@@ -1239,15 +1214,6 @@ class App extends React.Component {
                     >
                       Delete Regeneable Files
                     </Button>
-                    <ListGroup>
-                      {WorkspaceFiles.filter((file) => isRegenerable(file)).map(
-                        (file, index) => (
-                          <ListGroup.Item key={index} disabled>
-                            {file}
-                          </ListGroup.Item>
-                        )
-                      )}
-                    </ListGroup>
                   </Card.Text>
                 </Card.Body>
                 <Card.Body>
@@ -1267,40 +1233,6 @@ class App extends React.Component {
                           {file}
                         </ListGroup.Item>
                       ))}
-                    </ListGroup>
-                  </Card.Text>
-                </Card.Body>
-                <Card.Body>
-                  <Card.Title>Reset Layout</Card.Title>
-                  <Card.Text>
-                    <Button variant="primary" onClick={this.Model.reset}>
-                      Reset
-                    </Button>
-                  </Card.Text>
-                </Card.Body>
-              </Card>
-            </div>
-          );
-        }
-        case 'GC': {
-          const { WorkspaceFiles } = this.state;
-          return (
-            <div>
-              <Card>
-                <Card.Body>
-                  <Card.Title>Garbage Collection</Card.Title>
-                  <Card.Text>
-                    <Button variant="primary" onClick={this.GC.delete}>
-                      Delete
-                    </Button>
-                    <ListGroup>
-                      {WorkspaceFiles.filter((file) => isRegenerable(file)).map(
-                        (file, index) => (
-                          <ListGroup.Item key={index} disabled>
-                            {file}
-                          </ListGroup.Item>
-                        )
-                      )}
                     </ListGroup>
                   </Card.Text>
                 </Card.Body>
