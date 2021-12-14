@@ -1,5 +1,3 @@
-// import hashSum from 'hash-sum';
-
 const sourceLocations = [];
 
 export const getSourceLocation = () =>
@@ -82,11 +80,4 @@ export const finishEmitGroup = (sourceLocation) => {
 
 export const removeOnEmitHandler = (handler) => onEmitHandlers.delete(handler);
 
-export const info = (text) => {
-  /*
-  console.log(text);
-  const entry = { info: text };
-  const hash = hashSum(entry);
-  emit({ info: text, hash });
-*/
-};
+export const info = (text) => {};

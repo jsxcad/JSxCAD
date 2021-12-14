@@ -615,80 +615,45 @@ const unwatchFile = async (path, thunk, options) => {
   }
 };
 
-var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
-
-function commonjsRequire () {
-	throw new Error('Dynamic requires are not currently supported by rollup-plugin-commonjs');
-}
-
-function unwrapExports (x) {
-	return x && x.__esModule && Object.prototype.hasOwnProperty.call(x, 'default') ? x['default'] : x;
-}
-
-function createCommonjsModule(fn, module) {
-	return module = { exports: {} }, fn(module, module.exports), module.exports;
-}
-
 /**
- * https://bugs.webkit.org/show_bug.cgi?id=226547
- * Safari has a horrible bug where IDB requests can hang while the browser is starting up.
+ * Work around Safari 14 IndexedDB open bug.
+ *
+ * Safari has a horrible bug where IDB requests can hang while the browser is starting up. https://bugs.webkit.org/show_bug.cgi?id=226547
  * The only solution is to keep nudging it until it's awake.
- * This probably creates garbage, but garbage is better than totally failing.
  */
-
 function idbReady() {
-  var isSafari = !navigator.userAgentData && /Safari\//.test(navigator.userAgent) && !/Chrom(e|ium)\//.test(navigator.userAgent); // No point putting other browsers or older versions of Safari through this mess.
-
-  if (!isSafari || !indexedDB.databases) return Promise.resolve();
-  var intervalId;
-  return new Promise(function (resolve) {
-    var tryIdb = function tryIdb() {
-      return indexedDB.databases().finally(resolve);
-    };
-
-    intervalId = setInterval(tryIdb, 100);
-    tryIdb();
-  }).finally(function () {
-    return clearInterval(intervalId);
-  });
+    var isSafari = !navigator.userAgentData &&
+        /Safari\//.test(navigator.userAgent) &&
+        !/Chrom(e|ium)\//.test(navigator.userAgent);
+    // No point putting other browsers or older versions of Safari through this mess.
+    if (!isSafari || !indexedDB.databases)
+        return Promise.resolve();
+    var intervalId;
+    return new Promise(function (resolve) {
+        var tryIdb = function () { return indexedDB.databases().finally(resolve); };
+        intervalId = setInterval(tryIdb, 100);
+        tryIdb();
+    }).finally(function () { return clearInterval(intervalId); });
 }
-
-var cjsCompat$1 = idbReady;
-
-var cjsCompat = createCommonjsModule(function (module, exports) {
-
-function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
-
-Object.defineProperty(exports, '__esModule', {
-  value: true
-});
-
-
-
-function _interopDefaultLegacy(e) {
-  return e && _typeof(e) === 'object' && 'default' in e ? e : {
-    'default': e
-  };
-}
-
-var safariFix__default = /*#__PURE__*/_interopDefaultLegacy(cjsCompat$1);
 
 function promisifyRequest(request) {
   return new Promise(function (resolve, reject) {
     // @ts-ignore - file size hacks
     request.oncomplete = request.onsuccess = function () {
+console.log('request complete');
       return resolve(request.result);
     }; // @ts-ignore - file size hacks
 
 
     request.onabort = request.onerror = function () {
+console.log('request abort');
       return reject(request.error);
     };
   });
 }
 
 function createStore(dbName, storeName) {
-  var dbp = safariFix__default['default']().then(function () {
+  var dbp = idbReady().then(function () {
     var request = indexedDB.open(dbName);
 
     request.onupgradeneeded = function () {
@@ -699,7 +664,7 @@ function createStore(dbName, storeName) {
   });
   return function (txMode, callback) {
     return dbp.then(function (db) {
-      return callback(db.transaction(storeName, txMode).objectStore(storeName));
+      return callback(db.transaction(storeName, txMode, { durability: 'relaxed' }).objectStore(storeName));
     });
   };
 }
@@ -739,70 +704,10 @@ function get(key) {
 function set(key, value) {
   var customStore = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : defaultGetStore();
   return customStore('readwrite', function (store) {
+    console.log(`before put ${store.transaction.durability}`);
     store.put(value, key);
+    console.log(`after put ${store.transaction.durability}`);
     return promisifyRequest(store.transaction);
-  });
-}
-/**
- * Set multiple values at once. This is faster than calling set() multiple times.
- * It's also atomic – if one of the pairs can't be added, none will be added.
- *
- * @param entries Array of entries, where each entry is an array of `[key, value]`.
- * @param customStore Method to get a custom store. Use with caution (see the docs).
- */
-
-
-function setMany(entries) {
-  var customStore = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : defaultGetStore();
-  return customStore('readwrite', function (store) {
-    entries.forEach(function (entry) {
-      return store.put(entry[1], entry[0]);
-    });
-    return promisifyRequest(store.transaction);
-  });
-}
-/**
- * Get multiple values by their keys
- *
- * @param keys
- * @param customStore Method to get a custom store. Use with caution (see the docs).
- */
-
-
-function getMany(keys) {
-  var customStore = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : defaultGetStore();
-  return customStore('readonly', function (store) {
-    return Promise.all(keys.map(function (key) {
-      return promisifyRequest(store.get(key));
-    }));
-  });
-}
-/**
- * Update a value. This lets you see the old value and update it as an atomic operation.
- *
- * @param key
- * @param updater A callback that takes the old value and returns a new value.
- * @param customStore Method to get a custom store. Use with caution (see the docs).
- */
-
-
-function update(key, updater) {
-  var customStore = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : defaultGetStore();
-  return customStore('readwrite', function (store) {
-    return (// Need to create the promise manually.
-      // If I try to chain promises, the transaction closes in browsers
-      // that use a promise polyfill (IE10/11).
-      new Promise(function (resolve, reject) {
-        store.get(key).onsuccess = function () {
-          try {
-            store.put(updater(this.result), key);
-            resolve(promisifyRequest(store.transaction));
-          } catch (err) {
-            reject(err);
-          }
-        };
-      })
-    );
   });
 }
 /**
@@ -817,20 +722,6 @@ function del(key) {
   var customStore = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : defaultGetStore();
   return customStore('readwrite', function (store) {
     store.delete(key);
-    return promisifyRequest(store.transaction);
-  });
-}
-/**
- * Clear all values in the store.
- *
- * @param customStore Method to get a custom store. Use with caution (see the docs).
- */
-
-
-function clear() {
-  var customStore = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : defaultGetStore();
-  return customStore('readwrite', function (store) {
-    store.clear();
     return promisifyRequest(store.transaction);
   });
 }
@@ -864,68 +755,90 @@ function keys() {
     return items;
   });
 }
-/**
- * Get all values in the store.
- *
- * @param customStore Method to get a custom store. Use with caution (see the docs).
- */
 
-
-function values() {
-  var customStore = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : defaultGetStore();
-  var items = [];
-  return eachCursor(customStore, function (cursor) {
-    return items.push(cursor.value);
-  }).then(function () {
-    return items;
-  });
-}
-/**
- * Get all entries in the store. Each entry is an array of `[key, value]`.
- *
- * @param customStore Method to get a custom store. Use with caution (see the docs).
- */
-
-
-function entries() {
-  var customStore = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : defaultGetStore();
-  var items = [];
-  return eachCursor(customStore, function (cursor) {
-    return items.push([cursor.key, cursor.value]);
-  }).then(function () {
-    return items;
-  });
+function pad (hash, len) {
+  while (hash.length < len) {
+    hash = '0' + hash;
+  }
+  return hash;
 }
 
-exports.clear = clear;
-exports.createStore = createStore;
-exports.del = del;
-exports.entries = entries;
-exports.get = get;
-exports.getMany = getMany;
-exports.keys = keys;
-exports.promisifyRequest = promisifyRequest;
-exports.set = set;
-exports.setMany = setMany;
-exports.update = update;
-exports.values = values;
-});
+function fold (hash, text) {
+  var i;
+  var chr;
+  var len;
+  if (text.length === 0) {
+    return hash;
+  }
+  for (i = 0, len = text.length; i < len; i++) {
+    chr = text.charCodeAt(i);
+    hash = ((hash << 5) - hash) + chr;
+    hash |= 0;
+  }
+  return hash < 0 ? hash * -2 : hash;
+}
 
-unwrapExports(cjsCompat);
-cjsCompat.clear;
-cjsCompat.createStore;
-cjsCompat.del;
-cjsCompat.entries;
-cjsCompat.get;
-cjsCompat.getMany;
-cjsCompat.keys;
-cjsCompat.promisifyRequest;
-cjsCompat.set;
-cjsCompat.setMany;
-cjsCompat.update;
-cjsCompat.values;
+function foldObject (hash, o, seen) {
+  return Object.keys(o).sort().reduce(foldKey, hash);
+  function foldKey (hash, key) {
+    return foldValue(hash, o[key], key, seen);
+  }
+}
 
-var localforage = createCommonjsModule(function (module, exports) {
+function foldValue (input, value, key, seen) {
+  var hash = fold(fold(fold(input, key), toString(value)), typeof value);
+  if (value === null) {
+    return fold(hash, 'null');
+  }
+  if (value === undefined) {
+    return fold(hash, 'undefined');
+  }
+  if (typeof value === 'object' || typeof value === 'function') {
+    if (seen.indexOf(value) !== -1) {
+      return fold(hash, '[Circular]' + key);
+    }
+    seen.push(value);
+
+    var objHash = foldObject(hash, value, seen);
+
+    if (!('valueOf' in value) || typeof value.valueOf !== 'function') {
+      return objHash;
+    }
+
+    try {
+      return fold(objHash, String(value.valueOf()))
+    } catch (err) {
+      return fold(objHash, '[valueOf exception]' + (err.stack || err.message))
+    }
+  }
+  return fold(hash, value.toString());
+}
+
+function toString (o) {
+  return Object.prototype.toString.call(o);
+}
+
+function sum (o) {
+  return pad(foldValue(0, o, '', []).toString(16), 8);
+}
+
+var hashSum = sum;
+
+const hash = (item) => hashSum(item);
+
+const fromStringToIntegerHash = s => Math.abs(s.split('').reduce((a, b) => (((a << 5) - a) + b.charCodeAt(0)) | 0, 0));
+
+var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
+
+function commonjsRequire () {
+	throw new Error('Dynamic requires are not currently supported by rollup-plugin-commonjs');
+}
+
+function createCommonjsModule(fn, module) {
+	return module = { exports: {} }, fn(module, module.exports), module.exports;
+}
+
+createCommonjsModule(function (module, exports) {
 /*!
     localForage -- Offline Storage, Improved
     Version 1.10.0
@@ -3740,24 +3653,44 @@ module.exports = localforage_js;
 });
 });
 
-let localForageDbInstance;
+let idbKeyvalDbInstance = {};
 
-const localForageDb = () => {
-  if (localForageDbInstance === undefined) {
-    localForageDbInstance = localforage.createInstance({
-      name: 'jsxcad',
-      driver: localforage.INDEXEDDB,
-      storeName: 'jsxcad',
-      description: 'jsxcad local filesystem',
-    });
+const idbKeyvalDb = (key) => {
+  const [jsxcad, workspace, partition] = key.split('/');
+  let index;
+
+  switch (partition) {
+    case 'config':
+    case 'control':
+    case 'source':
+      index = `${jsxcad}_${workspace}_${partition}`;
+      break;
+    default:
+      index = `${jsxcad}_${workspace}_cache_${fromStringToIntegerHash(key) % 10}`;
+      break;
   }
-  return localForageDbInstance;
+  if (idbKeyvalDbInstance[index] === undefined) {
+    const store = createStore(index, `jsxcad`);
+    idbKeyvalDbInstance[index] = {
+      removeItem(path) {
+        return del(path, store);
+      },
+      getItem(path) {
+        return get(path, store);
+      },
+      keys() {
+        return keys(store);
+      },
+      setItem(path, value) {
+        return set(path, value, store);
+      },
+    };
+  }
+  return idbKeyvalDbInstance[index];
 };
 
-const db = localForageDb;
-// export const db = idbKeyvalDb;
-
-// import hashSum from 'hash-sum';
+// export const db = localForageDb;
+const db = idbKeyvalDb;
 
 const sourceLocations = [];
 
@@ -3842,12 +3775,6 @@ const finishEmitGroup = (sourceLocation) => {
 const removeOnEmitHandler = (handler) => onEmitHandlers.delete(handler);
 
 const info = (text) => {
-  /*
-  console.log(text);
-  const entry = { info: text };
-  const hash = hashSum(entry);
-  emit({ info: text, hash });
-*/
 };
 
 var nodeFetch = _ => _;
@@ -3897,6 +3824,8 @@ const notifyWatchers = () => {
 
 const acquireService = async (spec, context) => {
   if (idleServices.length > 0) {
+    logInfo('sys/servicePool', 'Recycle worker');
+    logInfo('sys/servicePool/counts', `Active service count: ${activeServices.size}`);
     // Recycle an existing worker.
     // FIX: We might have multiple paths to consider in the future.
     // For now, just assume that the path is correct.
@@ -3909,6 +3838,8 @@ const acquireService = async (spec, context) => {
     notifyWatchers();
     return service;
   } else if (activeServices.size < activeServiceLimit) {
+    logInfo('sys/servicePool', 'Allocate worker');
+    logInfo('sys/servicePool/counts', `Active service count: ${activeServices.size}`);
     // Create a new service.
     const service = createService({ ...spec, release: releaseService });
     activeServices.add(service);
@@ -3919,6 +3850,8 @@ const acquireService = async (spec, context) => {
     notifyWatchers();
     return service;
   } else {
+    logInfo('sys/servicePool', 'Wait for worker');
+    logInfo('sys/servicePool/counts', `Active service count: ${activeServices.size}`);
     // Wait for a service to become available.
     return new Promise((resolve, reject) =>
       pending$1.push({ spec, resolve, context })
@@ -3927,6 +3860,8 @@ const acquireService = async (spec, context) => {
 };
 
 const releaseService = (spec, service, terminate = false) => {
+  logInfo('sys/servicePool', 'Release worker');
+  logInfo('sys/servicePool/counts', `Active service count: ${activeServices.size}`);
   service.poolReleased = true;
   activeServices.delete(service);
   const worker = service.releaseWorker();
@@ -4090,10 +4025,10 @@ const writeFile = async (options, path, data) => {
   file.data = data;
 
   if (!ephemeral && workspace !== undefined) {
-    const persistentPath = qualifyPath(path, workspace);
+    const qualifiedPath = qualifyPath(path, workspace);
     if (isNode) {
       try {
-        await promises$3.mkdir(dirname(persistentPath), { recursive: true });
+        await promises$3.mkdir(dirname(qualifiedPath), { recursive: true });
       } catch (error) {
         throw error;
       }
@@ -4101,12 +4036,12 @@ const writeFile = async (options, path, data) => {
         if (doSerialize) {
           data = serialize(data);
         }
-        await promises$3.writeFile(persistentPath, data);
+        await promises$3.writeFile(qualifiedPath, data);
       } catch (error) {
         throw error;
       }
     } else if (isBrowser || isWebWorker) {
-      await db().setItem(persistentPath, data);
+      await db(qualifiedPath).setItem(qualifiedPath, data);
     }
 
     // Let everyone know the file has changed.
@@ -4146,7 +4081,24 @@ const getUrlFetcher = async () => {
   throw Error('die');
 };
 
-const getFileFetcher = async (qualify = qualifyPath, doSerialize = true) => {
+const getExternalFileFetcher = async (qualify = qualifyPath, doSerialize = true) => {
+  if (isNode) {
+    // FIX: Put this through getFile, also.
+    return async (path) => {
+      let data = await promises$2.readFile(qualify(path));
+      if (doSerialize) {
+        data = deserialize(data);
+      }
+      return data;
+    };
+  } else if (isBrowser || isWebWorker) {
+    return async (path) => {};
+  } else {
+    throw Error('die');
+  }
+};
+
+const getInternalFileFetcher = async (qualify = qualifyPath, doSerialize = true) => {
   if (isNode) {
     // FIX: Put this through getFile, also.
     return async (path) => {
@@ -4158,7 +4110,8 @@ const getFileFetcher = async (qualify = qualifyPath, doSerialize = true) => {
     };
   } else if (isBrowser || isWebWorker) {
     return async (path) => {
-      const data = await db().getItem(qualify(path));
+      const qualifiedPath = qualify(path);
+      const data = await db(qualifiedPath).getItem(qualifiedPath);
       if (data !== null) {
         return data;
       }
@@ -4172,7 +4125,7 @@ const getFileFetcher = async (qualify = qualifyPath, doSerialize = true) => {
 const fetchPersistent = async (path, { workspace, doSerialize }) => {
   try {
     if (workspace) {
-      const fetchFile = await getFileFetcher(
+      const fetchFile = await getInternalFileFetcher(
         (path) => qualifyPath(path, workspace),
         doSerialize
       );
@@ -4188,9 +4141,9 @@ const fetchPersistent = async (path, { workspace, doSerialize }) => {
 };
 
 // Fetch from external sources.
-const fetchSources = async (sources) => {
+const fetchSources = async (sources, { workspace }) => {
   const fetchUrl = await getUrlFetcher();
-  const fetchFile = await getFileFetcher((path) => path, false);
+  const fetchFile = await getExternalFileFetcher((path) => path, false);
   // Try to load the data from a source.
   for (const source of sources) {
     if (typeof source === 'string') {
@@ -4235,7 +4188,7 @@ const readFile = async (options, path) => {
   }
 
   if (file.data === undefined && allowFetch && sources.length > 0) {
-    let data = await fetchSources(sources);
+    let data = await fetchSources(sources, { workspace });
     if (decode) {
       data = new TextDecoder(decode).decode(data);
     }
@@ -4340,79 +4293,9 @@ const boot = async () => {
   }
 };
 
-function pad (hash, len) {
-  while (hash.length < len) {
-    hash = '0' + hash;
-  }
-  return hash;
-}
-
-function fold (hash, text) {
-  var i;
-  var chr;
-  var len;
-  if (text.length === 0) {
-    return hash;
-  }
-  for (i = 0, len = text.length; i < len; i++) {
-    chr = text.charCodeAt(i);
-    hash = ((hash << 5) - hash) + chr;
-    hash |= 0;
-  }
-  return hash < 0 ? hash * -2 : hash;
-}
-
-function foldObject (hash, o, seen) {
-  return Object.keys(o).sort().reduce(foldKey, hash);
-  function foldKey (hash, key) {
-    return foldValue(hash, o[key], key, seen);
-  }
-}
-
-function foldValue (input, value, key, seen) {
-  var hash = fold(fold(fold(input, key), toString(value)), typeof value);
-  if (value === null) {
-    return fold(hash, 'null');
-  }
-  if (value === undefined) {
-    return fold(hash, 'undefined');
-  }
-  if (typeof value === 'object' || typeof value === 'function') {
-    if (seen.indexOf(value) !== -1) {
-      return fold(hash, '[Circular]' + key);
-    }
-    seen.push(value);
-
-    var objHash = foldObject(hash, value, seen);
-
-    if (!('valueOf' in value) || typeof value.valueOf !== 'function') {
-      return objHash;
-    }
-
-    try {
-      return fold(objHash, String(value.valueOf()))
-    } catch (err) {
-      return fold(objHash, '[valueOf exception]' + (err.stack || err.message))
-    }
-  }
-  return fold(hash, value.toString());
-}
-
-function toString (o) {
-  return Object.prototype.toString.call(o);
-}
-
-function sum (o) {
-  return pad(foldValue(0, o, '', []).toString(16), 8);
-}
-
-var hashSum = sum;
-
-const hash = (item) => hashSum(item);
-
 const { promises: promises$1 } = fs;
 
-const getFileLister = async () => {
+const getFileLister = async ({ workspace }) => {
   if (isNode) {
     // FIX: Put this through getFile, also.
     return async () => {
@@ -4438,7 +4321,7 @@ const getFileLister = async () => {
   } else if (isBrowser || isWebWorker) {
     // FIX: Make localstorage optional.
     return async () => {
-      const qualifiedPaths = new Set(await db().keys());
+      const qualifiedPaths = new Set(await db(`jsxcad/${workspace}/source`).keys());
       listFiles$1(qualifiedPaths);
       return qualifiedPaths;
     };
@@ -4454,9 +4337,9 @@ const updateCachedKeys = (options = {}, file) =>
 const deleteCachedKeys = (options = {}, file) =>
   cachedKeys.delete(file.storageKey);
 
-const getKeys = async () => {
+const getKeys = async ({ workspace }) => {
   if (cachedKeys === undefined) {
-    const listFiles = await getFileLister();
+    const listFiles = await getFileLister({ workspace });
     cachedKeys = await listFiles();
     watchFileCreation(updateCachedKeys);
     watchFileDeletion(deleteCachedKeys);
@@ -4464,24 +4347,12 @@ const getKeys = async () => {
   return cachedKeys;
 };
 
-const listFilesystems = async () => {
-  const keys = await getKeys();
-  const filesystems = new Set();
-  for (const key of keys) {
-    if (key.startsWith('jsxcad/')) {
-      const [, filesystem] = key.split('/');
-      filesystems.add(filesystem);
-    }
-  }
-  return [...filesystems];
-};
-
 const listFiles = async ({ workspace } = {}) => {
   if (workspace === undefined) {
     workspace = getFilesystem();
   }
   const prefix = qualifyPath('', workspace);
-  const keys = await getKeys();
+  const keys = await getKeys({ workspace });
   const files = [];
   for (const key of keys) {
     if (key.startsWith(prefix)) {
@@ -4503,7 +4374,8 @@ const getFileDeleter = async ({ workspace } = {}) => {
     };
   } else if (isBrowser) {
     return async (path) => {
-      await db().removeItem(qualifyPath(path, workspace));
+      const qualifiedPath = qualifyPath(path, workspace);
+      await db(qualifiedPath).removeItem(qualifiedPath);
     };
   } else {
     throw Error('die');
@@ -4537,4 +4409,4 @@ let nanoid = (size = 21) => {
 
 const generateUniqueId = () => nanoid();
 
-export { addOnEmitHandler, addPending, ask, askService, askServices, beginEmitGroup, boot, clearEmitted, createConversation, createService, deleteFile, elapsed, emit, finishEmitGroup, flushEmitGroup, generateUniqueId, getActiveServices, getControlValue, getFilesystem, getPendingErrorHandler, getServicePoolInfo, getSourceLocation, getWorkspace, hash, info, isBrowser, isNode, isWebWorker, listFiles, listFilesystems, log, logError, logInfo, onBoot, qualifyPath, read, readFile, readOrWatch, removeOnEmitHandler, resolvePending, restoreEmitGroup, saveEmitGroup, setControlValue, setHandleAskUser, setPendingErrorHandler, setupFilesystem, setupWorkspace, sleep, tellServices, terminateActiveServices, touch, unwatchFile, unwatchFileCreation, unwatchFileDeletion, unwatchFiles, unwatchLog, unwatchServices, waitServices, watchFile, watchFileCreation, watchFileDeletion, watchLog, watchServices, write, writeFile };
+export { addOnEmitHandler, addPending, ask, askService, askServices, beginEmitGroup, boot, clearEmitted, createConversation, createService, deleteFile, elapsed, emit, finishEmitGroup, flushEmitGroup, generateUniqueId, getActiveServices, getControlValue, getFilesystem, getPendingErrorHandler, getServicePoolInfo, getSourceLocation, getWorkspace, hash, info, isBrowser, isNode, isWebWorker, listFiles, log, logError, logInfo, onBoot, qualifyPath, read, readFile, readOrWatch, removeOnEmitHandler, resolvePending, restoreEmitGroup, saveEmitGroup, setControlValue, setHandleAskUser, setPendingErrorHandler, setupFilesystem, setupWorkspace, sleep, tellServices, terminateActiveServices, touch, unwatchFile, unwatchFileCreation, unwatchFileDeletion, unwatchFiles, unwatchLog, unwatchServices, waitServices, watchFile, watchFileCreation, watchFileDeletion, watchLog, watchServices, write, writeFile };

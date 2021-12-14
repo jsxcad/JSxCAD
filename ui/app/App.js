@@ -18,6 +18,7 @@ import {
   getActiveServices,
   listFiles,
   log,
+  logInfo,
   read,
   resolvePending,
   terminateActiveServices,
@@ -557,6 +558,7 @@ class App extends React.Component {
     this.Notebook.runStart = {};
 
     this.Notebook.run = async (path, options) => {
+      logInfo('app/App', `Request notebook run ${path}`);
       // Note the time that this run started.
       // This can be used to note which assets are obsoleted by the completion of the run.
       this.Notebook.runStart[path] = new Date();
@@ -566,18 +568,23 @@ class App extends React.Component {
       const NotebookPath = path;
       const topLevel = new Map();
       try {
+        logInfo('app/App', `Run/1 ${path}`);
         await this.updateState({ NotebookState: 'running' });
         // Terminate any services running for this path, since we're going to restart evaluating it.
         await terminateActiveServices((context) => context.path === path);
+        logInfo('app/App', `Run/2 ${path}`);
         // CHECK: Can we get rid of this?
         clearEmitted();
+        logInfo('app/App', `Run/3 ${path}`);
 
         const NotebookText = await this.Notebook.save(path);
+        logInfo('app/App', `Run/4 ${path}`);
 
         if (!NotebookPath.endsWith('.js') && !NotebookPath.endsWith('.nb')) {
           // We don't know how to run anything else.
           return;
         }
+        logInfo('app/App', `Run/5 ${path}`);
 
         // FIX: This is a bit awkward.
         // The responsibility for updating the control values ought to be with what
@@ -586,10 +593,12 @@ class App extends React.Component {
         await write(`control/${NotebookPath}`, notebookControlData, {
           workspace,
         });
+        logInfo('app/App', `Run/6 ${path}`);
 
         let script = NotebookText;
         const evaluate = async (script) => {
           try {
+            logInfo('app/App', `Distribute eval for ${path}`);
             const result = await this.ask(
               {
                 op: 'app/evaluate',
@@ -612,6 +621,7 @@ class App extends React.Component {
         };
         const replay = async (script) => {
           try {
+            logInfo('app/App', `Distribute eval for ${path}`);
             const result = await this.ask(
               {
                 op: 'app/evaluate',
@@ -633,6 +643,7 @@ class App extends React.Component {
           }
         };
         NotebookAdvice.definitions = topLevel;
+        logInfo('app/App', `Execute notebook run ${path}`);
         await execute(script, {
           evaluate,
           replay,
@@ -645,6 +656,7 @@ class App extends React.Component {
         window.alert(error.stack);
       } finally {
         await this.updateState({ NotebookState: 'idle' });
+        logInfo('app/App', `Completed notebook run ${path}`);
       }
     };
 
@@ -669,6 +681,7 @@ class App extends React.Component {
     };
 
     this.Notebook.save = async (path) => {
+      logInfo('app/App/Notebook/save', `Saving Notebook ${path}`);
       const { workspace } = this.props;
       const { [`NotebookText/${path}`]: NotebookText } = this.state;
       const NotebookPath = path;
@@ -685,16 +698,20 @@ class App extends React.Component {
         }
         return data;
       };
+      logInfo('app/App/Notebook/save', `Cleaning Notebook ${path}`);
       const cleanText = getCleanText(NotebookText);
+      logInfo('app/App/Notebook/save', `Writing Notebook ${path}`);
       await write(NotebookFile, new TextEncoder('utf8').encode(cleanText), {
         workspace,
       });
       console.log(`QQ/Notebook.save/path: ${path} ${cleanText}`);
+      logInfo('app/App/Notebook/save', `Updating state for Notebook ${path}`);
       await this.updateState({ [`NotebookText/${path}`]: cleanText });
 
       // Let state propagate.
       await animationFrame();
 
+      logInfo('app/App/Notebook/save', `Saving complete for ${path}`);
       return cleanText;
     };
 

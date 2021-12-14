@@ -19,7 +19,8 @@ const getFileDeleter = async ({ workspace } = {}) => {
     };
   } else if (isBrowser) {
     return async (path) => {
-      await db().removeItem(qualifyPath(path, workspace));
+      const qualifiedPath = qualifyPath(path, workspace);
+      await db(qualifiedPath).removeItem(qualifiedPath);
     };
   } else {
     throw Error('die');

@@ -1,4 +1,5 @@
-import * as keyval from 'idb-keyval/dist/cjs-compat';
+import * as keyval from 'idb-keyval';
+import { fromStringToIntegerHash } from './hash.js';
 import localForage from 'localforage';
 
 let localForageDbInstance;
@@ -15,12 +16,27 @@ export const localForageDb = () => {
   return localForageDbInstance;
 };
 
-let idbKeyvalDbInstance;
+let idbKeyvalDbInstance = {};
 
-export const idbKeyvalDb = () => {
-  if (idbKeyvalDbInstance === undefined) {
-    const store = keyval.createStore('jsxcad', 'jsxcad');
-    idbKeyvalDbInstance = {
+export const idbKeyvalDb = (key) => {
+  const [jsxcad, workspace, partition] = key.split('/');
+  let index;
+
+  switch (partition) {
+    case 'config':
+    case 'control':
+    case 'source':
+      index = `${jsxcad}_${workspace}_${partition}`;
+      break;
+    default:
+      index = `${jsxcad}_${workspace}_cache_${
+        fromStringToIntegerHash(key) % 10
+      }`;
+      break;
+  }
+  if (idbKeyvalDbInstance[index] === undefined) {
+    const store = keyval.createStore(index, `jsxcad`);
+    idbKeyvalDbInstance[index] = {
       removeItem(path) {
         return keyval.del(path, store);
       },
@@ -35,8 +51,8 @@ export const idbKeyvalDb = () => {
       },
     };
   }
-  return idbKeyvalDbInstance;
+  return idbKeyvalDbInstance[index];
 };
 
-export const db = localForageDb;
-// export const db = idbKeyvalDb;
+// export const db = localForageDb;
+export const db = idbKeyvalDb;

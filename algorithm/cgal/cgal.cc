@@ -1875,6 +1875,132 @@ const Surface_mesh* CutClosedSurfaceMeshIncrementally(
   return result;
 }
 
+void DestructiveDifferenceOfSurfaceMeshes(Surface_mesh& a, Surface_mesh& b,
+                                          bool check) {
+  double x = 0, y = 0, z = 0;
+  for (int shift = 0x11;; shift++) {
+    if (x != 0 || y != 0 || z != 0) {
+      std::cout << "Note: Shifting difference by x=" << x << " y=" << y
+                << " z=" << z << std::endl;
+      Transformation translation(CGAL::TRANSLATION, Vector(x, y, z));
+      CGAL::Polygon_mesh_processing::transform(translation, a,
+                                               CGAL::parameters::all_default());
+    }
+    if (check) {
+      if (CGAL::Polygon_mesh_processing::corefine_and_compute_difference(
+              a, b, a,
+              CGAL::Polygon_mesh_processing::parameters::
+                  throw_on_self_intersection(true),
+              CGAL::Polygon_mesh_processing::parameters::
+                  throw_on_self_intersection(true),
+              CGAL::Polygon_mesh_processing::parameters::
+                  throw_on_self_intersection(true))) {
+        break;
+      }
+    } else {
+      if (CGAL::Polygon_mesh_processing::corefine_and_compute_difference(
+              a, b, a, CGAL::parameters::all_default(),
+              CGAL::parameters::all_default(),
+              CGAL::parameters::all_default())) {
+        break;
+      }
+    }
+    const double direction = ((shift & (1 << 3)) ? -1 : 1) * (shift >> 4);
+    if (shift & (1 << 0)) {
+      x = kIota * direction;
+    } else {
+      x = 0;
+    }
+    if (shift & (1 << 1)) {
+      y = kIota * direction;
+    } else {
+      y = 0;
+    }
+    if (shift & (1 << 2)) {
+      z = kIota * direction;
+    } else {
+      z = 0;
+    }
+  }
+}
+
+void DestructiveUnionOfSurfaceMeshes(Surface_mesh& a, Surface_mesh& b,
+                                     bool check) {
+  double x = 0, y = 0, z = 0;
+  for (int shift = 0x11;; shift++) {
+    if (x != 0 || y != 0 || z != 0) {
+      std::cout << "Note: Shifting difference by x=" << x << " y=" << y
+                << " z=" << z << std::endl;
+      Transformation translation(CGAL::TRANSLATION, Vector(x, y, z));
+      CGAL::Polygon_mesh_processing::transform(translation, a,
+                                               CGAL::parameters::all_default());
+    }
+    if (check) {
+      if (CGAL::Polygon_mesh_processing::corefine_and_compute_union(
+              a, b, a,
+              CGAL::Polygon_mesh_processing::parameters::
+                  throw_on_self_intersection(true),
+              CGAL::Polygon_mesh_processing::parameters::
+                  throw_on_self_intersection(true),
+              CGAL::Polygon_mesh_processing::parameters::
+                  throw_on_self_intersection(true))) {
+        break;
+      }
+    } else {
+      if (CGAL::Polygon_mesh_processing::corefine_and_compute_union(
+              a, b, a, CGAL::parameters::all_default(),
+              CGAL::parameters::all_default(),
+              CGAL::parameters::all_default())) {
+        break;
+      }
+    }
+    const double direction = ((shift & (1 << 3)) ? -1 : 1) * (shift >> 4);
+    if (shift & (1 << 0)) {
+      x = kIota * direction;
+    } else {
+      x = 0;
+    }
+    if (shift & (1 << 1)) {
+      y = kIota * direction;
+    } else {
+      y = 0;
+    }
+    if (shift & (1 << 2)) {
+      z = kIota * direction;
+    } else {
+      z = 0;
+    }
+  }
+}
+
+void DisjointClosedSurfaceMeshesSingly(int meshCount, bool check,
+                                       emscripten::val nthMesh,
+                                       emscripten::val nthTransform,
+                                       emscripten::val emitMesh) {
+  Surface_mesh mask;
+  for (int nth = 0; nth < meshCount; nth++) {
+    const Surface_mesh* mesh =
+        nthMesh(nth).as<const Surface_mesh*>(emscripten::allow_raw_pointers());
+    const Transformation* transform =
+        nthTransform(nth).as<const Transformation*>(
+            emscripten::allow_raw_pointers());
+    if (nth > 0) {
+      Surface_mesh* result = new Surface_mesh(*mesh);
+      Surface_mesh orientedMask(mask);
+      // Subtract the mask in the orientation of the result.
+      CGAL::Polygon_mesh_processing::transform(
+          transform->inverse(), orientedMask, CGAL::parameters::all_default());
+      DestructiveDifferenceOfSurfaceMeshes(*result, orientedMask, check);
+      emitMesh(nth, result);
+    }
+    // Add the mesh in the orientation of the mask.
+    Surface_mesh orientedMesh(*mesh);
+    CGAL::Polygon_mesh_processing::transform(*transform, orientedMesh,
+                                             CGAL::parameters::all_default());
+    DestructiveUnionOfSurfaceMeshes(mask, orientedMesh, check);
+  }
+}
+
 void RecursiveUnionOfSurfaceMeshes(std::queue<Surface_mesh*>& meshes,
                                    bool check) {
   while (meshes.size() >= 2) {
@@ -4509,6 +4635,9 @@ EMSCRIPTEN_BINDINGS(module) {
                        emscripten::allow_raw_pointers());
   emscripten::function("CutClosedSurfaceMeshSinglyRecursive",
                        &CutClosedSurfaceMeshSinglyRecursive,
+                       emscripten::allow_raw_pointers());
+  emscripten::function("DisjointClosedSurfaceMeshesSingly",
+                       &DisjointClosedSurfaceMeshesSingly,
                        emscripten::allow_raw_pointers());
   emscripten::function("IntersectionOfSurfaceMeshes",
                        &IntersectionOfSurfaceMeshes,

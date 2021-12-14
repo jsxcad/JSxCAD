@@ -23,7 +23,7 @@
   "keywords": [],
   "license": "MIT",
   "dependencies": {
-    "idb-keyval": "^5.0.6",
+    "idb-keyval": "^6.0.3",
     "localforage": "^1.10.0",
     "node-fetch": "^2.6.1",
     "hash-sum": "^2.0.0",
