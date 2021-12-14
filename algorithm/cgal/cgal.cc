@@ -1813,39 +1813,63 @@ const Surface_mesh* CutClosedSurfaceMeshIncrementally(
     bool check, emscripten::val nthMesh, emscripten::val nthTransform) {
   Transformation toA = a_transform->inverse();
   Surface_mesh* result = new Surface_mesh(*a);
-  if (IsBadSurfaceMesh(result)) {
-    std::cout << "QQ/CCSMI/0/bad" << std::endl;
-  }
   for (int nth = 0; nth < cutCount; nth++) {
     const Surface_mesh* cutMesh =
         nthMesh(nth).as<const Surface_mesh*>(emscripten::allow_raw_pointers());
-    Surface_mesh workingCutMesh(*cutMesh);
     const Transformation* cutTransform =
         nthTransform(nth).as<const Transformation*>(
             emscripten::allow_raw_pointers());
-    CGAL::Polygon_mesh_processing::transform(
-        *cutTransform * toA, workingCutMesh, CGAL::parameters::all_default());
-    if (check) {
-      if (!CGAL::Polygon_mesh_processing::corefine_and_compute_difference(
-              *result, workingCutMesh, *result,
-              CGAL::Polygon_mesh_processing::parameters::
-                  throw_on_self_intersection(true),
-              CGAL::Polygon_mesh_processing::parameters::
-                  throw_on_self_intersection(true),
-              CGAL::Polygon_mesh_processing::parameters::
-                  throw_on_self_intersection(true))) {
-        std::cout << "QQ/CCSMI/1" << std::endl;
+    double x = 0, y = 0, z = 0;
+    for (int shift = 0x11;; shift++) {
+      Surface_mesh workingCutMesh(*cutMesh);
+      if (x != 0 || y != 0 || z != 0) {
+        std::cout << "Note: Shifting difference by x=" << x << " y=" << y
+                  << " z=" << z << std::endl;
+        Transformation translation(CGAL::TRANSLATION, Vector(x, y, z));
+        CGAL::Polygon_mesh_processing::transform(
+            translation * *cutTransform * toA, workingCutMesh,
+            CGAL::parameters::all_default());
+      } else {
+        CGAL::Polygon_mesh_processing::transform(
+            *cutTransform * toA, workingCutMesh,
+            CGAL::parameters::all_default());
       }
-    } else {
-      if (CGAL::Polygon_mesh_processing::corefine_and_compute_difference(
-              *result, workingCutMesh, *result, CGAL::parameters::all_default(),
-              CGAL::parameters::all_default(),
-              CGAL::parameters::all_default())) {
-        std::cout << "QQ/CCSMI/2" << std::endl;
+      if (check) {
+        if (CGAL::Polygon_mesh_processing::corefine_and_compute_difference(
+                *result, workingCutMesh, *result,
+                CGAL::Polygon_mesh_processing::parameters::
+                    throw_on_self_intersection(true),
+                CGAL::Polygon_mesh_processing::parameters::
+                    throw_on_self_intersection(true),
+                CGAL::Polygon_mesh_processing::parameters::
+                    throw_on_self_intersection(true))) {
+          break;
+        }
+      } else {
+        if (CGAL::Polygon_mesh_processing::corefine_and_compute_difference(
+                *result, workingCutMesh, *result,
+                CGAL::parameters::all_default(),
+                CGAL::parameters::all_default(),
+                CGAL::parameters::all_default())) {
+          break;
+        }
       }
-    }
-    if (IsBadSurfaceMesh(result)) {
-      std::cout << "QQ/CCSMI/3/bad" << std::endl;
+      const double direction = ((shift & (1 << 3)) ? -1 : 1) * (shift >> 4);
+      if (shift & (1 << 0)) {
+        x = kIota * direction;
+      } else {
+        x = 0;
+      }
+      if (shift & (1 << 1)) {
+        y = kIota * direction;
+      } else {
+        y = 0;
+      }
+      if (shift & (1 << 2)) {
+        z = kIota * direction;
+      } else {
+        z = 0;
+      }
     }
   }
   return result;
