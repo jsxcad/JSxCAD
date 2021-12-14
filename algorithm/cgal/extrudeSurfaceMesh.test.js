@@ -23,7 +23,7 @@ test('Extrude/Triangle', (t) => {
   const surfaceMesh = fromPolygonsToSurfaceMesh(triangle);
   t.true(surfaceMesh.is_valid(false));
   t.true(!surfaceMesh.is_empty());
-  const extrusion = extrudeSurfaceMesh(surfaceMesh, identityMatrix, 1, 0, {
+  const extrusion = extrudeSurfaceMesh(surfaceMesh, [...identityMatrix], 1, 0, {
     direction: [0, 0, 1, 0],
     exactDirection: ['0', '0', '1', '0'],
   });
@@ -98,4 +98,26 @@ test('Extrude/Triangle', (t) => {
     ],
     isClosed: true,
   });
+});
+
+test('Zero volume extrusion fails', (t) => {
+  const triangle = [
+    {
+      points: [
+        [-1, 0, 1],
+        [1, 0, 1],
+        [0, 0, 0],
+      ],
+    },
+  ];
+  const surfaceMesh = fromPolygonsToSurfaceMesh(triangle);
+  t.true(surfaceMesh.is_valid(false));
+  t.true(!surfaceMesh.is_empty());
+  t.is(
+    undefined,
+    extrudeSurfaceMesh(surfaceMesh, [...identityMatrix], 1, 0, {
+      direction: [0, 0, 1, 0],
+      exactDirection: ['0', '0', '1', '0'],
+    })
+  );
 });

@@ -1333,10 +1333,10 @@ void ComputeNormalOfSurfaceMesh(const Surface_mesh* input,
               CGAL::to_double(normal.z().exact()), xs, ys, zs);
 }
 
-const Surface_mesh* ExtrusionOfSurfaceMesh(const Surface_mesh* input,
-                                           const Transformation* transformation,
-                                           double height, double depth,
-                                           emscripten::val fill_normal) {
+void ExtrusionOfSurfaceMesh(const Surface_mesh* input,
+                            const Transformation* transformation, double height,
+                            double depth, emscripten::val fill_normal,
+                            emscripten::val emit_mesh) {
   Surface_mesh mesh(*input);
   CGAL::Polygon_mesh_processing::transform(*transformation, mesh,
                                            CGAL::parameters::all_default());
@@ -1394,7 +1394,13 @@ const Surface_mesh* ExtrusionOfSurfaceMesh(const Surface_mesh* input,
   Project<VPMap> bottom(get(CGAL::vertex_point, *extruded_mesh), down);
   CGAL::Polygon_mesh_processing::extrude_mesh(mesh, *extruded_mesh, bottom,
                                               top);
-  return extruded_mesh;
+
+  if (CGAL::Polygon_mesh_processing::volume(
+          *extruded_mesh, CGAL::parameters::all_default()) == 0) {
+    delete extruded_mesh;
+  } else {
+    emit_mesh(extruded_mesh);
+  }
 }
 
 template <typename MAP>
@@ -1810,18 +1816,18 @@ const Surface_mesh* CutClosedSurfaceMeshIncrementally(
   for (int nth = 0; nth < cutCount; nth++) {
     const Surface_mesh* cutMesh =
         nthMesh(nth).as<const Surface_mesh*>(emscripten::allow_raw_pointers());
-    Surface_mesh workingCutMesh(*cutMesh);
     const Transformation* cutTransform =
         nthTransform(nth).as<const Transformation*>(
             emscripten::allow_raw_pointers());
     double x = 0, y = 0, z = 0;
     for (int shift = 0x11;; shift++) {
+      Surface_mesh workingCutMesh(*cutMesh);
       if (x != 0 || y != 0 || z != 0) {
         std::cout << "Note: Shifting difference by x=" << x << " y=" << y
                   << " z=" << z << std::endl;
         Transformation translation(CGAL::TRANSLATION, Vector(x, y, z));
         CGAL::Polygon_mesh_processing::transform(
-            *cutTransform * translation * toA, workingCutMesh,
+            translation * *cutTransform * toA, workingCutMesh,
             CGAL::parameters::all_default());
       } else {
         CGAL::Polygon_mesh_processing::transform(
@@ -1866,8 +1872,6 @@ const Surface_mesh* CutClosedSurfaceMeshIncrementally(
       }
     }
   }
-
-  CGAL::Polygon_mesh_processing::remove_degenerate_faces(*result);
   return result;
 }
 

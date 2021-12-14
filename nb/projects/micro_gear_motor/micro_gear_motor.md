@@ -172,20 +172,20 @@ Motor Driver Holder
 
 ```JavaScript
 const wemosDriverHolder = Block(4, 5, 3.2 * 11)
-  .cut(Box(25.7 + 0.2, 34.5 + 0.2).ex(2, 100))
-  .cut(xz.Box(3 * 8, 2.5 * 8).ex(3.2 * (4 + 1.5), 100))
-  .cut(yz.Box(3.2 * 8, 4 * 8).ex(3.2 * (4 + 1.5), 100))
+  .cut({ mode: 'basic' }, Box(25.7 + 0.2, 34.5 + 0.2).ex(2, 100))
+  .cut({ mode: 'basic' }, xz.Box(3 * 8, 2.5 * 8).extrudeAlong(normal(), 3.2 * (4 + 1.5), 100))
+  .cut({ mode: 'incremental' }, yz.Box(3.2 * 8, 4 * 8).extrudeAlong(normal(), 3.2 * (4 + 1.5), 100))
   .cut(
     xz
       .flip()
       .Box(3 * 8, 2.5 * 8)
-      .ex(3.2 * (4 + 1.5), 100)
+      .extrudeAlong(normal(), 3.2 * (4 + 1.5), 100)
   )
   .cut(
     yz
       .flip()
       .Box(3.2 * 8, 4 * 8)
-      .ex(3.2 * (4 + 1.5), 100)
+      .extrudeAlong(normal(), 3.2 * (4 + 1.5), 100)
   )
   .as('wemos holder')
   .md('Wemos Driver Holder')
