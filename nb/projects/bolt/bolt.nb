@@ -1,9 +1,9 @@
 const Profile = (pitch = 1, angle = 60 / 360) =>
   Path(
-    Point(0, 1 / -2),
-    Point(pitch / -2, 1 / 2),
-    Point(pitch / 2, 1 / 2),
-    Point(0, 1 / -2)
+    Point(0, 0),
+    Point(pitch / -2, 1.33 * pitch),
+    Point(pitch / 2, 1.33 * pitch),
+    Point(0, 0)
   ).fill();
 
 export const ScrewThread = (
@@ -12,7 +12,7 @@ export const ScrewThread = (
   { pitch = 1, angle, play = 0.1, lefthanded = false } = {}
 ) =>
   Profile(pitch, angle)
-    .y(diameter / -2 + 1 / 2 + play * 2)
+    .y(diameter / -2 + play * 2 - 0.5 * pitch)
     .ry(1 / 4)
     .loft(
       seq((t) => (s) => s.rz(t).z(pitch * t * 1.001), {
@@ -24,8 +24,8 @@ export const ScrewThread = (
     .scale(lefthanded ? 1 : -1, lefthanded ? 1 : -1, 1)
     .clip(Box(diameter).ex(pitch))
     .z(seq((a) => a, { from: 0, to: height, by: pitch }))
-    .clip(Box(diameter).ex(height))
-    .and(Arc(diameter - 2).ex(height));
+    .clip(Arc(diameter).ex(height))
+    .and(Arc(diameter - 1.33 * pitch).ex(height));
 
 export const NutThread = (
   diameter,
