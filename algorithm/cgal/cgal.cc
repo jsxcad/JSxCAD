@@ -1744,26 +1744,18 @@ const double kIotaZ = 12e-5;
 
 void DestructiveDifferenceOfSurfaceMeshes(Surface_mesh& a, Surface_mesh& b,
                                           bool check) {
-  // Ideally these operations would perform in-place, but we have a couple of
-  // issues. Firstly Surface_mesh has restrictions on zero volume gaps, which
-  // require backing off (we can look into an alternative to Surface_mesh), and
-  // secondly backing off multiple times seems to produce an infinite loop in
-  // some cases, presumably due to incremental corefinement.
-  //
-  // So for now we make a working copy.
-  Surface_mesh& workingA = a;
   double x = 0, y = 0, z = 0;
   for (int shift = 0x17;; shift++) {
     if (x != 0 || y != 0 || z != 0) {
       std::cout << "Note: Shifting difference by x=" << x << " y=" << y
                 << " z=" << z << std::endl;
       Transformation translation(CGAL::TRANSLATION, Vector(x, y, z));
-      CGAL::Polygon_mesh_processing::transform(translation, workingA,
+      CGAL::Polygon_mesh_processing::transform(translation, a,
                                                CGAL::parameters::all_default());
     }
     if (check) {
       if (CGAL::Polygon_mesh_processing::corefine_and_compute_difference(
-              workingA, b, a,
+              a, b, a,
               CGAL::Polygon_mesh_processing::parameters::
                   throw_on_self_intersection(true),
               CGAL::Polygon_mesh_processing::parameters::
@@ -1774,7 +1766,7 @@ void DestructiveDifferenceOfSurfaceMeshes(Surface_mesh& a, Surface_mesh& b,
       }
     } else {
       if (CGAL::Polygon_mesh_processing::corefine_and_compute_difference(
-              workingA, b, a, CGAL::parameters::all_default(),
+              a, b, a, CGAL::parameters::all_default(),
               CGAL::parameters::all_default(),
               CGAL::parameters::all_default())) {
         break;
