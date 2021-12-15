@@ -1,10 +1,13 @@
 /* global self */
 
 import { deleteFile, generateUniqueId, getWorkspace } from '@jsxcad/sys';
+import { rewrite, visit } from './visit.js';
 
 import { difference } from './difference.js';
+import { disjointVolumes } from '../graph/disjointVolumes.js';
 import { read } from './read.js';
 import { taggedGroup } from './taggedGroup.js';
+import { toConcreteGeometry } from './toConcreteGeometry.js';
 import { write } from './write.js';
 
 export const disjoint = (geometries) => {
@@ -15,6 +18,44 @@ export const disjoint = (geometries) => {
     }
   }
   return taggedGroup({}, ...geometries);
+};
+
+// An alternate disjunction that can be more efficient.
+export const disjoint2 = (geometries) => {
+  // We need to determine the linearization of geometry by type, then rewrite
+  // with the corresponding disjunction.
+  const concreteGeometries = [];
+  for (const geometry of geometries) {
+    concreteGeometries.push(toConcreteGeometry(geometry));
+  }
+  // For now we restrict ourselves to graph volumes.
+  const originalVolumes = [];
+  const collect = (geometry, descend) => {
+    if (geometry.type === 'graph' && geometry.graph.isClosed) {
+      originalVolumes.push(geometry);
+    }
+  };
+  for (const geometry of concreteGeometries) {
+    visit(geometry, collect);
+  }
+  const disjointedVolumes = disjointVolumes(originalVolumes);
+  const map = new Map();
+  for (let nth = 0; nth < disjointedVolumes.length; nth++) {
+    map.set(originalVolumes[nth], disjointedVolumes[nth]);
+  }
+  const update = (geometry, descend) => {
+    const disjointed = map.get(geometry);
+    if (disjointed) {
+      return disjointed;
+    } else {
+      return descend();
+    }
+  };
+  const rewrittenGeometries = [];
+  for (const geometry of concreteGeometries) {
+    rewrittenGeometries.push(rewrite(geometry, update));
+  }
+  return taggedGroup({}, ...rewrittenGeometries);
 };
 
 export const distributedDisjoint = async (geometries) => {

@@ -1737,6 +1737,109 @@ const double kExtrusionMinimumSquared = kExtrusionMinimum * kExtrusionMinimum;
 
 const double kIota = 10e-5;
 
+// Use different iota to avoid 45 degree slides.
+const double kIotaX = 10e-5;
+const double kIotaY = 11e-5;
+const double kIotaZ = 12e-5;
+
+void DestructiveDifferenceOfSurfaceMeshes(Surface_mesh& a, Surface_mesh& b,
+                                          bool check) {
+  double x = 0, y = 0, z = 0;
+  for (int shift = 0x17;; shift++) {
+    if (x != 0 || y != 0 || z != 0) {
+      std::cout << "Note: Shifting difference by x=" << x << " y=" << y
+                << " z=" << z << std::endl;
+      Transformation translation(CGAL::TRANSLATION, Vector(x, y, z));
+      CGAL::Polygon_mesh_processing::transform(translation, a,
+                                               CGAL::parameters::all_default());
+    }
+    if (check) {
+      if (CGAL::Polygon_mesh_processing::corefine_and_compute_difference(
+              a, b, a,
+              CGAL::Polygon_mesh_processing::parameters::
+                  throw_on_self_intersection(true),
+              CGAL::Polygon_mesh_processing::parameters::
+                  throw_on_self_intersection(true),
+              CGAL::Polygon_mesh_processing::parameters::
+                  throw_on_self_intersection(true))) {
+        break;
+      }
+    } else {
+      if (CGAL::Polygon_mesh_processing::corefine_and_compute_difference(
+              a, b, a, CGAL::parameters::all_default(),
+              CGAL::parameters::all_default(),
+              CGAL::parameters::all_default())) {
+        break;
+      }
+    }
+    const double direction = ((shift & (1 << 3)) ? -1 : 1) * (shift >> 4);
+    if (shift & (1 << 0)) {
+      x = kIotaX * direction;
+    } else {
+      x = 0;
+    }
+    if (shift & (1 << 1)) {
+      y = kIotaY * direction;
+    } else {
+      y = 0;
+    }
+    if (shift & (1 << 2)) {
+      z = kIotaZ * direction;
+    } else {
+      z = 0;
+    }
+  }
+}
+
+void DestructiveUnionOfSurfaceMeshes(Surface_mesh& a, Surface_mesh& b,
+                                     bool check) {
+  double x = 0, y = 0, z = 0;
+  for (int shift = 0x11;; shift++) {
+    if (x != 0 || y != 0 || z != 0) {
+      std::cout << "Note: Shifting difference by x=" << x << " y=" << y
+                << " z=" << z << std::endl;
+      Transformation translation(CGAL::TRANSLATION, Vector(x, y, z));
+      CGAL::Polygon_mesh_processing::transform(translation, a,
+                                               CGAL::parameters::all_default());
+    }
+    if (check) {
+      if (CGAL::Polygon_mesh_processing::corefine_and_compute_union(
+              a, b, a,
+              CGAL::Polygon_mesh_processing::parameters::
+                  throw_on_self_intersection(true),
+              CGAL::Polygon_mesh_processing::parameters::
+                  throw_on_self_intersection(true),
+              CGAL::Polygon_mesh_processing::parameters::
+                  throw_on_self_intersection(true))) {
+        break;
+      }
+    } else {
+      if (CGAL::Polygon_mesh_processing::corefine_and_compute_union(
+              a, b, a, CGAL::parameters::all_default(),
+              CGAL::parameters::all_default(),
+              CGAL::parameters::all_default())) {
+        break;
+      }
+    }
+    const double direction = ((shift & (1 << 3)) ? -1 : 1) * (shift >> 4);
+    if (shift & (1 << 0)) {
+      x = kIota * direction;
+    } else {
+      x = 0;
+    }
+    if (shift & (1 << 1)) {
+      y = kIota * direction;
+    } else {
+      y = 0;
+    }
+    if (shift & (1 << 2)) {
+      z = kIota * direction;
+    } else {
+      z = 0;
+    }
+  }
+}
+
 const Surface_mesh* DifferenceOfSurfaceMeshes(
     const Surface_mesh* a, const Transformation* a_transform,
     const Surface_mesh* b, const Transformation* b_transform) {
@@ -1819,158 +1922,12 @@ const Surface_mesh* CutClosedSurfaceMeshIncrementally(
     const Transformation* cutTransform =
         nthTransform(nth).as<const Transformation*>(
             emscripten::allow_raw_pointers());
-    double x = 0, y = 0, z = 0;
-    for (int shift = 0x11;; shift++) {
-      Surface_mesh workingCutMesh(*cutMesh);
-      if (x != 0 || y != 0 || z != 0) {
-        std::cout << "Note: Shifting difference by x=" << x << " y=" << y
-                  << " z=" << z << std::endl;
-        Transformation translation(CGAL::TRANSLATION, Vector(x, y, z));
-        CGAL::Polygon_mesh_processing::transform(
-            translation * *cutTransform * toA, workingCutMesh,
-            CGAL::parameters::all_default());
-      } else {
-        CGAL::Polygon_mesh_processing::transform(
-            *cutTransform * toA, workingCutMesh,
-            CGAL::parameters::all_default());
-      }
-      if (check) {
-        if (CGAL::Polygon_mesh_processing::corefine_and_compute_difference(
-                *result, workingCutMesh, *result,
-                CGAL::Polygon_mesh_processing::parameters::
-                    throw_on_self_intersection(true),
-                CGAL::Polygon_mesh_processing::parameters::
-                    throw_on_self_intersection(true),
-                CGAL::Polygon_mesh_processing::parameters::
-                    throw_on_self_intersection(true))) {
-          break;
-        }
-      } else {
-        if (CGAL::Polygon_mesh_processing::corefine_and_compute_difference(
-                *result, workingCutMesh, *result,
-                CGAL::parameters::all_default(),
-                CGAL::parameters::all_default(),
-                CGAL::parameters::all_default())) {
-          break;
-        }
-      }
-      const double direction = ((shift & (1 << 3)) ? -1 : 1) * (shift >> 4);
-      if (shift & (1 << 0)) {
-        x = kIota * direction;
-      } else {
-        x = 0;
-      }
-      if (shift & (1 << 1)) {
-        y = kIota * direction;
-      } else {
-        y = 0;
-      }
-      if (shift & (1 << 2)) {
-        z = kIota * direction;
-      } else {
-        z = 0;
-      }
-    }
+    Surface_mesh workingCutMesh(*cutMesh);
+    CGAL::Polygon_mesh_processing::transform(
+        toA * *cutTransform, workingCutMesh, CGAL::parameters::all_default());
+    DestructiveDifferenceOfSurfaceMeshes(*result, workingCutMesh, check);
   }
   return result;
-}
-
-void DestructiveDifferenceOfSurfaceMeshes(Surface_mesh& a, Surface_mesh& b,
-                                          bool check) {
-  double x = 0, y = 0, z = 0;
-  for (int shift = 0x11;; shift++) {
-    if (x != 0 || y != 0 || z != 0) {
-      std::cout << "Note: Shifting difference by x=" << x << " y=" << y
-                << " z=" << z << std::endl;
-      Transformation translation(CGAL::TRANSLATION, Vector(x, y, z));
-      CGAL::Polygon_mesh_processing::transform(translation, a,
-                                               CGAL::parameters::all_default());
-    }
-    if (check) {
-      if (CGAL::Polygon_mesh_processing::corefine_and_compute_difference(
-              a, b, a,
-              CGAL::Polygon_mesh_processing::parameters::
-                  throw_on_self_intersection(true),
-              CGAL::Polygon_mesh_processing::parameters::
-                  throw_on_self_intersection(true),
-              CGAL::Polygon_mesh_processing::parameters::
-                  throw_on_self_intersection(true))) {
-        break;
-      }
-    } else {
-      if (CGAL::Polygon_mesh_processing::corefine_and_compute_difference(
-              a, b, a, CGAL::parameters::all_default(),
-              CGAL::parameters::all_default(),
-              CGAL::parameters::all_default())) {
-        break;
-      }
-    }
-    const double direction = ((shift & (1 << 3)) ? -1 : 1) * (shift >> 4);
-    if (shift & (1 << 0)) {
-      x = kIota * direction;
-    } else {
-      x = 0;
-    }
-    if (shift & (1 << 1)) {
-      y = kIota * direction;
-    } else {
-      y = 0;
-    }
-    if (shift & (1 << 2)) {
-      z = kIota * direction;
-    } else {
-      z = 0;
-    }
-  }
-}
-
-void DestructiveUnionOfSurfaceMeshes(Surface_mesh& a, Surface_mesh& b,
-                                     bool check) {
-  double x = 0, y = 0, z = 0;
-  for (int shift = 0x11;; shift++) {
-    if (x != 0 || y != 0 || z != 0) {
-      std::cout << "Note: Shifting difference by x=" << x << " y=" << y
-                << " z=" << z << std::endl;
-      Transformation translation(CGAL::TRANSLATION, Vector(x, y, z));
-      CGAL::Polygon_mesh_processing::transform(translation, a,
-                                               CGAL::parameters::all_default());
-    }
-    if (check) {
-      if (CGAL::Polygon_mesh_processing::corefine_and_compute_union(
-              a, b, a,
-              CGAL::Polygon_mesh_processing::parameters::
-                  throw_on_self_intersection(true),
-              CGAL::Polygon_mesh_processing::parameters::
-                  throw_on_self_intersection(true),
-              CGAL::Polygon_mesh_processing::parameters::
-                  throw_on_self_intersection(true))) {
-        break;
-      }
-    } else {
-      if (CGAL::Polygon_mesh_processing::corefine_and_compute_union(
-              a, b, a, CGAL::parameters::all_default(),
-              CGAL::parameters::all_default(),
-              CGAL::parameters::all_default())) {
-        break;
-      }
-    }
-    const double direction = ((shift & (1 << 3)) ? -1 : 1) * (shift >> 4);
-    if (shift & (1 << 0)) {
-      x = kIota * direction;
-    } else {
-      x = 0;
-    }
-    if (shift & (1 << 1)) {
-      y = kIota * direction;
-    } else {
-      y = 0;
-    }
-    if (shift & (1 << 2)) {
-      z = kIota * direction;
-    } else {
-      z = 0;
-    }
-  }
 }
 
 void DisjointClosedSurfaceMeshesSingly(int meshCount, bool check,
