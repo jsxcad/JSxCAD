@@ -31,6 +31,7 @@ export { cutClosedSurfaceMeshSingly } from './cutClosedSurfaceMeshSingly.js';
 export { cutClosedSurfaceMeshSinglyRecursive } from './cutClosedSurfaceMeshSinglyRecursive.js';
 export { deserializeSurfaceMesh } from './deserializeSurfaceMesh.js';
 export { differenceOfSurfaceMeshes } from './differenceOfSurfaceMeshes.js';
+export { disjointClosedSurfaceMeshes } from './disjointClosedSurfaceMeshes.js';
 export { doesSelfIntersectOfSurfaceMesh } from './doesSelfIntersectOfSurfaceMesh.js';
 export { extrudeSurfaceMesh } from './extrudeSurfaceMesh.js';
 export { extrudeToPlaneOfSurfaceMesh } from './extrudeToPlaneOfSurfaceMesh.js';

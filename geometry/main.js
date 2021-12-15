@@ -26,7 +26,7 @@ export { rewrite, visit } from './tagged/visit.js';
 export { allTags } from './tagged/allTags.js';
 export { alphaShape } from './graph/alphaShape.js';
 export { arrangePolygonsWithHoles } from './graph/arrangePolygonsWithHoles.js';
-export { assemble, distributedAssemble } from './tagged/assemble.js';
+export { assemble, assemble2, distributedAssemble } from './tagged/assemble.js';
 export { bend } from './tagged/bend.js';
 export { close as closePath } from './path/close.js';
 export { computeCentroid } from './tagged/computeCentroid.js';

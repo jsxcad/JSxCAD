@@ -355,6 +355,7 @@ export { z } from './z.js';
 export { Alpha } from './Alpha.js';
 export { Arc } from './Arc.js';
 export { Assembly } from './Assembly.js';
+export { Assembly2 } from './Assembly2.js';
 export { Box } from './Box.js';
 export { ChainedHull } from './ChainedHull.js';
 export { DistributedAssembly } from './DistributedAssembly.js';

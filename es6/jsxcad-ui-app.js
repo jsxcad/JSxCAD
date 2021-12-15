@@ -42749,7 +42749,7 @@ class App extends ReactDOM$2.Component {
       await clearCacheDb({
         workspace
       });
-      window.alert("Cached files deleted");
+      window.alert('Cached files deleted');
     };
 
     this.Files.deleteSourceFiles = async () => {

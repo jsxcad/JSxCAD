@@ -1549,7 +1549,7 @@ const getFileLister = async ({ workspace }) => {
       const qualifiedPaths = new Set(
         await db(`jsxcad/${workspace}/source`).keys(),
         await db(`jsxcad/${workspace}/config`).keys(),
-        await db(`jsxcad/${workspace}/control`).keys(),
+        await db(`jsxcad/${workspace}/control`).keys()
       );
       listFiles$1(qualifiedPaths);
       return qualifiedPaths;
