@@ -12,7 +12,7 @@ export const ScrewThread = (
   { pitch = 1, angle = 60 / 360, play = 0.01, lefthanded = false } = {}
 ) => {
   const depth = pitch / 2 / Math.tan(angle * Math.PI);
-  return Profile(pitch, depth)
+  const thread = Profile(pitch, depth)
     .y(diameter / -2 - depth / 4)
     .ry(1 / 4)
     .loft(
@@ -22,11 +22,15 @@ export const ScrewThread = (
         to: 3 / 2,
       })
     )
-    .scale(lefthanded ? 1 : -1, lefthanded ? 1 : -1, 1)
     .clip(Box(diameter).ex(pitch))
     .z(seq((a) => a, { from: 0, to: height, by: pitch }))
     .clip(Arc(diameter).ex(height))
     .and(Arc(diameter - depth).ex(height));
+  if (lefthanded) {
+    return thread.scale(1, 1, -1).z(height);
+  } else {
+    return thread;
+  }
 };
 
 export const NutThread = (
@@ -57,6 +61,13 @@ const screwThread = ScrewThread(20, 10, { pitch: 2 })
   )
   .material('steel')
   .stl('thread 20x10');
+
+md`Left hand vs right hand.`;
+
+Group(
+  ScrewThread(5, 5, { pitch: 0.5, lefthanded: true }).x(-3),
+  ScrewThread(5, 5, { pitch: 0.5, lefthanded: false }).x(3)
+).view();
 
 md`Show the fit.`;
 ScrewThread(20, 10, { pitch: 2, play: 0 }).material('steel').view();
