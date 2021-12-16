@@ -20977,13 +20977,6 @@ const editableCalls = ['Assembly', 'Group', 'Polygon'];
 const logInfo = (text) => logInfo$1('compiler/rewrite', text);
 
 const rewriteOrient = (lastCall, { at, to, up }) => {
-  // Ok, we should have extracted an x of Group(x).view(viewId).
-  // The expression is organized like (a.b()).call(), which means that we're already at the final call.
-  const lastCallee = lastCall.callee;
-  if (!lastCallee) {
-    return;
-  }
-  const { property } = lastCallee;
   const orientation = [];
   if (at) {
     orientation.push(
@@ -21009,25 +21002,33 @@ const rewriteOrient = (lastCall, { at, to, up }) => {
       )
     );
   }
-  if (Identifier.check(property) && property.name === 'orient') {
-    logInfo(`Rewriting orient`);
-    // We need to rewrite the arguments of the orient call.
-    // e.g. s.Box().orient(Old) -> s.Box().orient(New)
-    lastCall.arguments = [objectExpression(orientation)];
-    return lastCall;
-  } else {
-    logInfo(`Appending orient`);
-    // We need to rewrite lastCall to be a chained method call
-    // e.g. s.Box() -> s.Box().orient(New)
-    const chained = memberExpression(
-      lastCall,
-      callExpression(identifier('orient'), [objectExpression(orientation)])
-    );
-    return chained;
+  logInfo(`rewriteOrient`);
+  // Ok, we should have extracted an x of Group(x).view(viewId).
+  // The expression is organized like (a.b()).call(), which means that we're already at the final call.
+  const lastCallee = lastCall.callee;
+  if (lastCallee) {
+    const { property } = lastCallee;
+    if (Identifier.check(property) && property.name === 'orient') {
+      // We need to rewrite the arguments of the orient call.
+      // e.g. s.Box().orient(Old) -> s.Box().orient(New)
+      lastCall.arguments = [objectExpression(orientation)];
+      logInfo(`Rewriting orient: lastCall is ${main_3(lastCall).code}`);
+      return lastCall;
+    }
   }
+  logInfo(`Appending orient`);
+  // We need to rewrite lastCall to be a chained method call
+  // e.g. s.Box() -> s.Box().orient(New)
+  const chained = memberExpression(
+    lastCall,
+    callExpression(identifier('orient'), [objectExpression(orientation)])
+  );
+  logInfo(`Chained ${main_3(chained).code}`);
+  return chained;
 };
 
 const extractViewMethodCall = (callExpression, allowedCalleeNames, viewId) => {
+  logInfo(`Inspecting ${main_3(callExpression).code}`);
   const args = callExpression.get('arguments');
   const callee = callExpression.get('callee');
   const computed = callee.get('computed');
@@ -21045,19 +21046,22 @@ const extractViewMethodCall = (callExpression, allowedCalleeNames, viewId) => {
   if (property.get('name').value !== 'view') {
     return {};
   }
-  logInfo('Found View call');
+  logInfo(`Found View call: Arg: ${main_3(object).code}`);
   // a.view()
   if (!CallExpression.check(object.value)) {
+    logInfo('Not an expression');
     return {};
   }
   let wasFound = false;
   for (const arg of args.value) {
+    logInfo(`Found Arg: ${main_3(arg).code}`);
     if (Literal.check(arg) && arg.value === viewId) {
       wasFound = true;
       break;
     }
   }
   if (!wasFound) {
+    logInfo(`Did not find viewId ${viewId}`);
     return {};
   }
   logInfo('Found ViewId');
@@ -21174,6 +21178,7 @@ const rewriteViewGroupOrient = (script, { viewId, nth, at, to, up }) => {
   const ast = main_5(script);
   main_1(ast, {
     visitCallExpression(expression) {
+      logInfo(`rewriteViewGroupOrient: ${viewId} ${nth}`);
       try {
         const { calleeObject } = extractViewMethodCall(
           expression,
@@ -21188,13 +21193,14 @@ const rewriteViewGroupOrient = (script, { viewId, nth, at, to, up }) => {
         if (!nthArg) {
           return;
         }
-        logInfo(`Found nthArg ${nthArg}`);
+        logInfo(`Found nthArg ${main_3(nthArg).code}`);
         // Ok, we should have extracted an x of Group(x).view(viewId).
         // The expression is organized like (a.b()).call(), which means that we're already at the final call.
         const rewritten = rewriteOrient(nthArg, { at, to, up });
         if (rewritten) {
           args.value[nth] = rewritten;
         }
+        logInfo(`Found nthArg ${main_3(nthArg).code}`);
       } finally {
         this.traverse(expression);
       }

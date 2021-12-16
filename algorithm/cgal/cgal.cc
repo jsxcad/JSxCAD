@@ -514,6 +514,62 @@ const Surface_mesh* BendSurfaceMesh(const Surface_mesh* input,
     }
   }
 
+  // Ensure that it is still a positive volume.
+  if (CGAL::Polygon_mesh_processing::volume(
+          *c, CGAL::parameters::all_default()) < 0) {
+    CGAL::Polygon_mesh_processing::reverse_face_orientations(*c);
+  }
+
+  return c;
+}
+
+const Surface_mesh* BendSurfaceMeshToward(const Surface_mesh* input,
+                                          const Transformation* transform,
+                                          double referenceRadius, double x,
+                                          double y, double z) {
+  Surface_mesh* c = new Surface_mesh(*input);
+  CGAL::Polygon_mesh_processing::transform(*transform, *c,
+                                           CGAL::parameters::all_default());
+  CGAL::Polygon_mesh_processing::triangulate_faces(*c);
+
+  const FT referencePerimeterMm = 2 * CGAL_PI * referenceRadius;
+  const FT referenceRadiansPerMm = 2 / referencePerimeterMm;
+
+  // This does not look very efficient.
+  // CHECK: Figure out deformations.
+  for (const Surface_mesh::Vertex_index vertex : c->vertices()) {
+    if (c->is_removed(vertex)) {
+      continue;
+    }
+    Point& point = c->point(vertex);
+    const FT lx = point.x();
+    const FT ly = point.y();
+    const FT radius = ly;
+    // At the radius, perimeter mm should be a full turn.
+    // const FT perimeterMm = 2 * CGAL_PI * radius;
+    // const FT radiansPerMm = 2 / perimeterMm;
+    const FT radiansPerMm = referenceRadiansPerMm;
+    const FT radians = (0.50 * CGAL_PI) - (lx * radiansPerMm * CGAL_PI);
+    RT sin_alpha, cos_alpha, w;
+    CGAL::rational_rotation_approximation(CGAL::to_double(radians.exact()),
+                                          sin_alpha, cos_alpha, w, RT(1),
+                                          RT(1000));
+    const FT cx = (cos_alpha * radius) / w;
+    const FT cy = (sin_alpha * radius) / w;
+    point = Point(cx, cy, point.z());
+  }
+
+  if (CGAL::Polygon_mesh_processing::does_self_intersect(
+          *c, CGAL::parameters::all_default())) {
+    std::cout << "Bend: Removing self intersections" << std::endl;
+    CGAL::Polygon_mesh_processing::experimental::remove_self_intersections(
+        *c, CGAL::parameters::preserve_genus(false));
+    if (CGAL::Polygon_mesh_processing::does_self_intersect(
+            *c, CGAL::parameters::all_default())) {
+      std::cout << "Bend: Removing self intersections failed" << std::endl;
+    }
+  }
+
   return c;
 }
 

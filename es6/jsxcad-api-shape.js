@@ -1141,8 +1141,49 @@ Shape.registerReifier('Box', (geometry) => {
   return d;
 });
 
-const Box = (x, y = x, z = 0) =>
-  Shape.fromGeometry(taggedPlan({}, { type: 'Box' })).hasDiameter(x, y, z);
+const Box = (x, y = x, z = 0) => {
+  const c1 = [0, 0, 0];
+  const c2 = [0, 0, 0];
+  if (x instanceof Array) {
+    if (x[0] < x[1]) {
+      c1[X$4] = x[1];
+      c2[X$4] = x[0];
+    } else {
+      c1[X$4] = x[0];
+      c2[X$4] = x[1];
+    }
+  } else {
+    c1[X$4] = x / 2;
+    c2[X$4] = x / -2;
+  }
+  if (y instanceof Array) {
+    if (y[0] < y[1]) {
+      c1[Y$4] = y[1];
+      c2[Y$4] = y[0];
+    } else {
+      c1[Y$4] = y[0];
+      c2[Y$4] = y[1];
+    }
+  } else {
+    c1[Y$4] = y / 2;
+    c2[Y$4] = y / -2;
+  }
+  if (z instanceof Array) {
+    if (z[0] < z[1]) {
+      c1[Z$5] = z[1];
+      c2[Z$5] = z[0];
+    } else {
+      c1[Z$5] = z[0];
+      c2[Z$5] = z[1];
+    }
+  } else {
+    c1[Z$5] = z / 2;
+    c2[Z$5] = z / -2;
+  }
+  return Shape.fromGeometry(taggedPlan({}, { type: 'Box' }))
+    .hasC1(...c1)
+    .hasC2(...c2);
+};
 
 Shape.prototype.Box = Shape.shapeMethod(Box);
 
