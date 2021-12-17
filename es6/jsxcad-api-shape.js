@@ -1,4 +1,4 @@
-import { closePath, concatenatePath, assemble as assemble$1, flip, toConcreteGeometry, toDisplayGeometry, toTransformedGeometry, toPoints, transform, rewriteTags, taggedPaths, taggedGraph, openPath, taggedSegments, taggedPoints, fromPolygonsToGraph, registerReifier, taggedPlan, taggedGroup, union, taggedItem, getLeafs, getInverseMatrices, bend as bend$1, projectToPlane, computeCentroid, intersection, allTags, fromPointsToGraph, difference, rewrite, hasTypeWire, translatePaths, taggedLayout, measureBoundingBox, getLayouts, visit, isNotVoid, eachPoint as eachPoint$1, extrude as extrude$1, extrudeToPlane as extrudeToPlane$1, faces as faces$1, fill as fill$1, empty, eachSegment, grow as grow$1, outline as outline$1, inset as inset$1, read, loft as loft$1, realize, hasShowOverlay, minkowskiDifference as minkowskiDifference$1, minkowskiShell as minkowskiShell$1, minkowskiSum as minkowskiSum$1, computeNormal, isVoid, offset as offset$1, push as push$1, remesh as remesh$1, removeSelfIntersections as removeSelfIntersections$1, write, section as section$1, separate as separate$1, smooth as smooth$1, taggedSketch, taper as taper$1, test as test$1, twist as twist$1, hasTypeVoid, withQuery, toPolygonsWithHoles, arrangePolygonsWithHoles, fromPolygonsWithHolesToTriangles, fromTrianglesToGraph, alphaShape, rotateZPath, assemble2, convexHullToGraph, distributedAssemble, fromFunctionToGraph, translatePath } from './jsxcad-geometry.js';
+import { closePath, concatenatePath, assemble as assemble$1, flip, toConcreteGeometry, toDisplayGeometry, toTransformedGeometry, toPoints, transform, rewriteTags, taggedPaths, taggedGraph, openPath, taggedSegments, taggedPoints, fromPolygonsToGraph, registerReifier, taggedPlan, taggedGroup, union, taggedItem, getLeafs, getInverseMatrices, bend as bend$1, projectToPlane, computeCentroid, intersection, allTags, fromPointsToGraph, difference, rewrite, hasTypeWire, translatePaths, taggedLayout, measureBoundingBox, getLayouts, visit, isNotVoid, eachPoint as eachPoint$1, computeNormal, extrude, extrudeToPlane as extrudeToPlane$1, faces as faces$1, fill as fill$1, empty, eachSegment, grow as grow$1, outline as outline$1, inset as inset$1, read, loft as loft$1, realize, hasShowOverlay, minkowskiDifference as minkowskiDifference$1, minkowskiShell as minkowskiShell$1, minkowskiSum as minkowskiSum$1, isVoid, offset as offset$1, push as push$1, remesh as remesh$1, removeSelfIntersections as removeSelfIntersections$1, write, section as section$1, separate as separate$1, smooth as smooth$1, taggedSketch, taper as taper$1, test as test$1, twist as twist$1, hasTypeVoid, withQuery, toPolygonsWithHoles, arrangePolygonsWithHoles, fromPolygonsWithHolesToTriangles, fromTrianglesToGraph, alphaShape, rotateZPath, assemble2, convexHullToGraph, distributedAssemble, fromFunctionToGraph, translatePath } from './jsxcad-geometry.js';
 import { getSourceLocation, emit, logInfo, config, log as log$1, generateUniqueId, addPending, write as write$1 } from './jsxcad-sys.js';
 export { elapsed, emit, info, read, write } from './jsxcad-sys.js';
 import { identityMatrix, fromTranslation, fromRotation, fromScaling } from './jsxcad-math-mat4.js';
@@ -1162,7 +1162,7 @@ Shape.registerReifier('Box', (geometry) => {
     [left, front, bottom],
   ]);
   const b = a.fill();
-  const c = b.ex(top, bottom);
+  const c = b.e(top, bottom);
   return c;
 });
 
@@ -2904,6 +2904,11 @@ const Point = (...args) =>
 
 Shape.prototype.Point = Shape.shapeMethod(Point);
 
+const normal = () => (shape) =>
+  Shape.fromGeometry(computeNormal(shape.toGeometry()));
+
+Shape.registerMethod('normal', normal);
+
 const extrudeAlong =
   (direction, ...extents) =>
   (shape) => {
@@ -2923,7 +2928,7 @@ const extrudeAlong =
       }
       extrusions.push(
         Shape.fromGeometry(
-          extrude$1(
+          extrude(
             shape.toGeometry(),
             height,
             depth,
@@ -2935,14 +2940,22 @@ const extrudeAlong =
     return Shape.Group(...extrusions);
   };
 
+const e = (...extents) => extrudeAlong(normal(), ...extents);
+
 Shape.registerMethod('extrudeAlong', extrudeAlong);
+Shape.registerMethod('e', e);
 
-const extrude = (...extents) => extrudeAlong(Point(0, 0, 1), ...extents);
+const extrudeX = (...extents) => extrudeAlong(Point(1, 0, 0), ...extents);
+const extrudeY = (...extents) => extrudeAlong(Point(0, 1, 0), ...extents);
+const extrudeZ = (...extents) => extrudeAlong(Point(0, 0, 1), ...extents);
 
-const ex = extrude;
+const ex = extrudeX;
+const ey = extrudeY;
+const ez = extrudeZ;
 
-Shape.registerMethod('extrude', extrude);
 Shape.registerMethod('ex', ex);
+Shape.registerMethod('ey', ey);
+Shape.registerMethod('ez', ez);
 
 const extrudeToPlane =
   (
@@ -3361,11 +3374,6 @@ const moveTo =
 Shape.registerMethod('moveTo', moveTo);
 
 const noop = () => (shape) => shape;
-
-const normal = () => (shape) =>
-  Shape.fromGeometry(computeNormal(shape.toGeometry()));
-
-Shape.registerMethod('normal', normal);
 
 const noVoid = (tags, select) => (shape) => {
   const op = (geometry, descend) => {
@@ -4349,7 +4357,7 @@ const X = 0;
 const Y = 1;
 const Z = 2;
 
-const reifyArc = (op = s => s) => (geometry) => {
+const reifyArc = (axis = Z) => (geometry) => {
   let { start = 0, end = 1 } = getAngle(geometry);
 
   while (start > end) {
@@ -4359,11 +4367,19 @@ const reifyArc = (op = s => s) => (geometry) => {
   const [scale, middle] = getScale(geometry);
   const corner1 = getCorner1(geometry);
   const corner2 = getCorner2(geometry);
-  const top = corner2[Z];
-  const bottom = corner1[Z];
+  const top = corner2[axis];
+  const bottom = corner1[axis];
   const step = 1 / getSides(geometry, 32);
   const steps = Math.ceil((end - start) / step);
   const effectiveStep = (end - start) / steps;
+
+  let op;
+
+  switch (axis) {
+    case X: op = s => s.ry(-1 / 4); break;
+    case Y: op = s => s.rx(-1 / 4); break;
+    case Z: op = s => s; break;
+  }
 
   // FIX: corner1 is not really right.
   if (end - start === 1) {
@@ -4374,26 +4390,27 @@ const reifyArc = (op = s => s) => (geometry) => {
     })
       .close()
       .fill()
-      .ex(top, bottom)
       .op(op)
       .scale(...scale)
-      .move(...middle);
+      .move(...middle)
+      .e(top - middle[axis], bottom - middle[axis]);
   } else {
     return Spiral((a) => [[1]], {
       from: start - 1 / 4,
       to: end - 1 / 4,
       by: effectiveStep,
     })
+      .op((s) => (top !== bottom ? s.close().fill() : s))
       .op(op)
       .scale(...scale)
       .move(...middle)
-      .op((s) => (top !== bottom ? s.close().fill().ex(top, bottom) : s));
+      .op((s) => (top !== bottom ? s.e(top - middle[axis], bottom - middle[axis]) : s));
   }
 };
 
 Shape.registerReifier('Arc', reifyArc());
-Shape.registerReifier('ArcX', reifyArc(s => s.rx(1 / 4)));
-Shape.registerReifier('ArcY', reifyArc(s => s.ry(1 / 4)));
+Shape.registerReifier('ArcX', reifyArc(X));
+Shape.registerReifier('ArcY', reifyArc(Y));
 Shape.registerReifier('ArcZ', reifyArc());
 
 const ArcOp = (type) => (x = 1, y = x, z = 0) => {
@@ -4979,4 +4996,4 @@ const yz = Shape.fromGeometry({
   ],
 });
 
-export { Alpha, Arc, ArcX, ArcY, ArcZ, Assembly, Assembly2, Box, ChainedHull, DistributedAssembly, Edge, Edges, Empty, GrblConstantLaser, GrblDynamicLaser, GrblPlotter, GrblSpindle, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Line, Octagon, Orb, Page, Path, Pentagon, Plan, Point, Points, Polygon, Polyhedron, Septagon, Shape, Spiral, Tetragon, Triangle, Voxels, Wave, Weld, abstract, add, addTo, align, and, as, asPart, at, bend, billOfMaterials, cast, center, clip, clipFrom, cloudSolid, color, colors, cut, cutFrom, cutOut, defRgbColor, defThreejsMaterial, defTool, define, drop, each, eachPoint, edit, endTimer, ensurePages, ex, extrude, extrudeAlong, extrudeToPlane, faces, fill, fit, fitTo, fuse, g, get, getEdge, getNot, gn, grow, inline, inset, keep, loadGeometry, loft, log, loop, mask, material, md, minkowskiDifference, minkowskiShell, minkowskiSum, move, moveTo, n, noVoid, noop, normal, notColor, nth, ofPlan, offset, on, op, orient, outline, overlay, pack, play, push, remesh, removeSelfIntersections, rotate, rotateX, rotateY, rotateZ, rx, ry, rz, saveGeometry, scale, scaleToFit, section, sectionProfile, separate, seq, size, sketch, smooth, startTimer, table, tag, tags, taper, test, tint, to, tool, top, twist, untag, view, voidFn, voidIn, voxels, weld, withFill, withFn, withInset, withOp, x, xy, xyz, xz, y, yz, z };
+export { Alpha, Arc, ArcX, ArcY, ArcZ, Assembly, Assembly2, Box, ChainedHull, DistributedAssembly, Edge, Edges, Empty, GrblConstantLaser, GrblDynamicLaser, GrblPlotter, GrblSpindle, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Line, Octagon, Orb, Page, Path, Pentagon, Plan, Point, Points, Polygon, Polyhedron, Septagon, Shape, Spiral, Tetragon, Triangle, Voxels, Wave, Weld, abstract, add, addTo, align, and, as, asPart, at, bend, billOfMaterials, cast, center, clip, clipFrom, cloudSolid, color, colors, cut, cutFrom, cutOut, defRgbColor, defThreejsMaterial, defTool, define, drop, e, each, eachPoint, edit, endTimer, ensurePages, ex, extrudeAlong, extrudeToPlane, extrudeX, extrudeY, extrudeZ, ey, ez, faces, fill, fit, fitTo, fuse, g, get, getEdge, getNot, gn, grow, inline, inset, keep, loadGeometry, loft, log, loop, mask, material, md, minkowskiDifference, minkowskiShell, minkowskiSum, move, moveTo, n, noVoid, noop, normal, notColor, nth, ofPlan, offset, on, op, orient, outline, overlay, pack, play, push, remesh, removeSelfIntersections, rotate, rotateX, rotateY, rotateZ, rx, ry, rz, saveGeometry, scale, scaleToFit, section, sectionProfile, separate, seq, size, sketch, smooth, startTimer, table, tag, tags, taper, test, tint, to, tool, top, twist, untag, view, voidFn, voidIn, voxels, weld, withFill, withFn, withInset, withOp, x, xy, xyz, xz, y, yz, z };

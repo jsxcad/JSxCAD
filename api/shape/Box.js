@@ -29,7 +29,7 @@ Shape.registerReifier('Box', (geometry) => {
     [left, front, bottom],
   ]);
   const b = a.fill();
-  const c = b.ex(top, bottom);
+  const c = b.e(top, bottom);
   return c;
 });
 

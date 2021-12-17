@@ -1,6 +1,6 @@
-import Point from './Point.js';
 import Shape from './Shape.js';
 import { extrude as extrudeGeometry } from '@jsxcad/geometry';
+import { normal } from './normal.js';
 
 export const extrudeAlong =
   (direction, ...extents) =>
@@ -33,8 +33,9 @@ export const extrudeAlong =
     return Shape.Group(...extrusions);
   };
 
-export const ex = (...extents) => extrudeAlong(Point(0, 0, 1), ...extents);
+export const e = (...extents) => extrudeAlong(normal(), ...extents);
 
 Shape.registerMethod('extrudeAlong', extrudeAlong);
+Shape.registerMethod('e', e);
 
 export default extrudeAlong;

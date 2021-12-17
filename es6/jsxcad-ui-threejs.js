@@ -44337,6 +44337,7 @@ const updateUserData = (geometry, scene, userData) => {
         userData.groupChildId = parseInt(tag.substring(13));
       }
     }
+    userData.tags = geometry.tags;
   }
 };
 
