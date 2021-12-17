@@ -1,8 +1,7 @@
-import { getAt, getCorner1, getCorner2, getFrom, getTo } from './Plan.js';
+import { getCorner1, getCorner2 } from './Plan.js';
 
 import { Empty } from './Empty.js';
 import Shape from './Shape.js';
-import { negate } from '@jsxcad/math-vec3';
 import { taggedPlan } from '@jsxcad/geometry';
 
 const X = 0;
@@ -31,12 +30,7 @@ Shape.registerReifier('Box', (geometry) => {
   ]);
   const b = a.fill();
   const c = b.ex(top, bottom);
-  const d = c.orient2({
-    center: negate(getAt(geometry)),
-    from: getFrom(geometry),
-    at: getTo(geometry),
-  });
-  return d;
+  return c;
 });
 
 export const Box = (x, y = x, z = 0) => {

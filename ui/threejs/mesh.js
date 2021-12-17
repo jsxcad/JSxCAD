@@ -203,24 +203,28 @@ const updateUserData = (geometry, scene, userData) => {
 export const buildMeshes = async ({
   geometry,
   scene,
-  layer = GEOMETRY_LAYER,
   render,
   definitions,
+  pageSize = [],
 }) => {
   if (geometry === undefined) {
     return;
   }
   const { tags = [] } = geometry;
+  const layer = tags.includes('show:overlay') ? SKETCH_LAYER : GEOMETRY_LAYER;
   let mesh;
   switch (geometry.type) {
+    case 'layout': {
+      const [ width, length ] = geometry.layout.size;
+      pageSize[0] = width;
+      pageSize[1] = length;
+      break;
+    }
+    case 'sketch':
     case 'displayGeometry':
     case 'group':
-    case 'layout':
     case 'item':
     case 'plan':
-      break;
-    case 'sketch':
-      layer = SKETCH_LAYER;
       break;
     case 'segments': {
       const { segments } = geometry;
@@ -248,12 +252,6 @@ export const buildMeshes = async ({
     case 'paths': {
       let transparent = false;
       let opacity = 1;
-      if (tags && tags.includes('path/Toolpath')) {
-        // Put toolpaths in the sketch layer.
-        layer = SKETCH_LAYER;
-        opacity = 0.5;
-        transparent = true;
-      }
       const { paths } = geometry;
       const bufferGeometry = new BufferGeometry();
       const material = new LineBasicMaterial({

@@ -93,6 +93,10 @@ export const hasTo =
   (shape) =>
     shape.updatePlan({ to: [x, y, z], top: undefined });
 export const hasTop = (top) => (shape) => shape.updatePlan({ top });
+export const hasUp =
+  (x = 0, y = 0, z = 0) =>
+  (shape) =>
+    shape.updatePlan({ up: [x, y, z], top: undefined });
 export const hasZag = (zag) => (shape) => shape.updatePlan({ zag });
 
 // Let's consider migrating to a 'has' prefix for planning.
@@ -111,6 +115,7 @@ Shape.registerMethod('hasRadius', hasRadius);
 Shape.registerMethod('hasSides', hasSides);
 Shape.registerMethod('hasTo', hasTo);
 Shape.registerMethod('hasTop', hasTop);
+Shape.registerMethod('hasUp', hasUp);
 Shape.registerMethod('hasZag', hasZag);
 
 const eachEntry = (geometry, op, otherwise) => {
@@ -142,7 +147,8 @@ export const getCorner1 = (geometry) => find(geometry, 'corner1', [0, 0, 0]);
 export const getCorner2 = (geometry) => find(geometry, 'corner2', [0, 0, 0]);
 export const getFrom = (geometry) => find(geometry, 'from', [0, 0, 0]);
 export const getMatrix = (geometry) => geometry.matrix || identityMatrix;
-export const getTo = (geometry) => find(geometry, 'to', [0, 0, 0]);
+export const getTo = (geometry) => find(geometry, 'to', [0, 0, 1]);
+export const getUp = (geometry) => find(geometry, 'up', [0, -1, 0]);
 
 const defaultZag = 0.01;
 

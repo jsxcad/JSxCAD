@@ -76,9 +76,11 @@ export const staticDisplay = async (
     renderer.render(scene, camera);
   };
 
-  await buildMeshes({ datasets, geometry, scene, definitions });
+  const pageSize = [];
 
-  moveToFit({ datasets, view, camera, scene, withGrid });
+  await buildMeshes({ datasets, geometry, scene, definitions, pageSize });
+
+  moveToFit({ datasets, view, camera, scene, withGrid, pageSize });
 
   render();
 

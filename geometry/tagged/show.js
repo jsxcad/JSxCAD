@@ -16,6 +16,13 @@ export const hasShowOutline = (geometry) => hasShow(geometry, showOutline);
 export const isNotShowOutline = (geometry) => isNotShow(geometry, showOutline);
 export const isShowOutline = (geometry) => isShow(geometry, showOutline);
 
+export const showOverlay = 'show:overlay';
+export const hasNotShowOverlay = (geometry) =>
+  hasNotShow(geometry, showOutline);
+export const hasShowOverlay = (geometry) => hasShow(geometry, showOverlay);
+export const isNotShowOverlay = (geometry) => isNotShow(geometry, showOverlay);
+export const isShowOverlay = (geometry) => isShow(geometry, showOverlay);
+
 export const showSkin = 'show:skin';
 export const hasNotShowSkin = (geometry) => hasNotShow(geometry, showSkin);
 export const hasShowSkin = (geometry) => hasShow(geometry, showSkin);
