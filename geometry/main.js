@@ -141,6 +141,7 @@ export { realize } from './tagged/realize.js';
 export { realizeGraph } from './graph/realizeGraph.js';
 export { registerReifier, reify } from './tagged/reify.js';
 export { remesh } from './tagged/remesh.js';
+export { removeSelfIntersections } from './tagged/removeSelfIntersections.js';
 export { rewriteTags } from './tagged/rewriteTags.js';
 export { rerealizeGraph } from './graph/rerealizeGraph.js';
 export { reverseFaceOrientations as reverseFaceOrientationsOfGraph } from './graph/reverseFaceOrientations.js';

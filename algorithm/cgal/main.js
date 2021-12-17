@@ -61,6 +61,7 @@ export { minkowskiShellOfSurfaceMeshes } from './minkowskiShellOfSurfaceMeshes.j
 export { minkowskiSumOfSurfaceMeshes } from './minkowskiSumOfSurfaceMeshes.js';
 export { projectToPlaneOfSurfaceMesh } from './projectToPlaneOfSurfaceMesh.js';
 export { pushSurfaceMesh } from './pushSurfaceMesh.js';
+export { removeSelfIntersectionsOfSurfaceMesh } from './removeSelfIntersectionsOfSurfaceMesh.js';
 export { reverseFaceOrientationsOfSurfaceMesh } from './reverseFaceOrientationsOfSurfaceMesh.js';
 export { sectionOfSurfaceMesh } from './sectionOfSurfaceMesh.js';
 export { separateSurfaceMesh } from './separateSurfaceMesh.js';

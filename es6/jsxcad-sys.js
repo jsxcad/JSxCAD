@@ -300,6 +300,8 @@ const clearCacheDb = async ({ workspace }) => {
   }
 };
 
+const config$1 = {};
+
 var global$1 = (typeof global !== "undefined" ? global :
             typeof self !== "undefined" ? self :
             typeof window !== "undefined" ? window : {});
@@ -1638,4 +1640,4 @@ let nanoid = (size = 21) => {
 
 const generateUniqueId = () => nanoid();
 
-export { addOnEmitHandler, addPending, ask, askService, askServices, beginEmitGroup, boot, clearCacheDb, clearEmitted, createConversation, createService, deleteFile, elapsed, emit, finishEmitGroup, flushEmitGroup, generateUniqueId, getActiveServices, getControlValue, getFilesystem, getPendingErrorHandler, getServicePoolInfo, getSourceLocation, getWorkspace, hash, info, isBrowser, isNode, isWebWorker, listFiles, log, logError, logInfo, onBoot, qualifyPath, read, readFile, readOrWatch, removeOnEmitHandler, resolvePending, restoreEmitGroup, saveEmitGroup, setControlValue, setHandleAskUser, setPendingErrorHandler, setupFilesystem, setupWorkspace, sleep, tellServices, terminateActiveServices, touch, unwatchFile, unwatchFileCreation, unwatchFileDeletion, unwatchFiles, unwatchLog, unwatchServices, waitServices, watchFile, watchFileCreation, watchFileDeletion, watchLog, watchServices, write, writeFile };
+export { addOnEmitHandler, addPending, ask, askService, askServices, beginEmitGroup, boot, clearCacheDb, clearEmitted, config$1 as config, createConversation, createService, deleteFile, elapsed, emit, finishEmitGroup, flushEmitGroup, generateUniqueId, getActiveServices, getControlValue, getFilesystem, getPendingErrorHandler, getServicePoolInfo, getSourceLocation, getWorkspace, hash, info, isBrowser, isNode, isWebWorker, listFiles, log, logError, logInfo, onBoot, qualifyPath, read, readFile, readOrWatch, removeOnEmitHandler, resolvePending, restoreEmitGroup, saveEmitGroup, setControlValue, setHandleAskUser, setPendingErrorHandler, setupFilesystem, setupWorkspace, sleep, tellServices, terminateActiveServices, touch, unwatchFile, unwatchFileCreation, unwatchFileDeletion, unwatchFiles, unwatchLog, unwatchServices, waitServices, watchFile, watchFileCreation, watchFileDeletion, watchLog, watchServices, write, writeFile };

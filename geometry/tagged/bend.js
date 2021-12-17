@@ -1,4 +1,4 @@
-import { bend as bendGraph } from '../graph/bend.js';
+import { bend as graph } from '../graph/bend.js';
 import { op } from './op.js';
 
-export const bend = op({ graph: bendGraph });
+export const bend = op({ graph });

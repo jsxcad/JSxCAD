@@ -315,6 +315,7 @@ export { pack } from './pack.js';
 export { play } from './play.js';
 export { push } from './push.js';
 export { remesh } from './remesh.js';
+export { removeSelfIntersections } from './removeSelfIntersections.js';
 export { rotate } from './rotate.js';
 export { rotateX, rx } from './rx.js';
 export { rotateY, ry } from './ry.js';

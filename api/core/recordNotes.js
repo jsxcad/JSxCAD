@@ -6,6 +6,7 @@ import {
   finishEmitGroup,
   flushEmitGroup,
   hash,
+  logInfo,
   read,
   resolvePending,
   write,
@@ -70,6 +71,7 @@ export const emitSourceText = (sourceText) =>
 export const $run = async (op, { path, id, text, sha }) => {
   const meta = await read(`meta/def/${path}/${id}`);
   if (!meta || meta.sha !== sha) {
+    logInfo('api/core/$run', text);
     beginRecordingNotes(path, id);
     beginEmitGroup({ path, id });
     emitSourceText(text);

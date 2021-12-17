@@ -5,6 +5,7 @@ export {
   setPendingErrorHandler,
 } from './pending.js';
 export { clearCacheDb } from './db.js';
+export { config } from './config.js';
 export { createService } from './service.js';
 export { getControlValue, setControlValue } from './control.js';
 export { read, readFile, readOrWatch } from './readFile.js';
