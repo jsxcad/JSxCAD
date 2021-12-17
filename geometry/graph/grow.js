@@ -5,8 +5,6 @@ import { toSurfaceMesh } from './toSurfaceMesh.js';
 
 export const grow = (geometry, amount) =>
   taggedGraph(
-    { tags: geometry.tags },
-    fromSurfaceMeshLazy(
-      growSurfaceMesh(toSurfaceMesh(geometry.graph), geometry.matrix, amount)
-    )
+    { tags: geometry.tags, matrix: geometry.matrix },
+    fromSurfaceMeshLazy(growSurfaceMesh(toSurfaceMesh(geometry.graph), amount))
   );

@@ -156,14 +156,28 @@ export const registerShapeMethod = (name, op) => {
   // Make the operation constructor available e.g., Shape.grow(1)(s)
   Shape[name] = op;
   // Make the operation application available e.g., s.grow(1)
-  const { [name]: method } = {
-    [name]: function (...args) {
-      return op(...args)(this);
-    },
-  };
-  method.origin = path;
-  Shape.prototype[name] = method;
-  return method;
+  if (name === 'startTimer' || name === 'endTimer' || name === 'md') {
+    const { [name]: method } = {
+      [name]: function (...args) {
+        return op(...args)(this);
+      },
+    };
+    method.origin = path;
+    Shape.prototype[name] = method;
+    return method;
+  } else {
+    const { [name]: method } = {
+      [name]: function (...args) {
+        this.startTimer(name);
+        const result = op(...args)(this);
+        this.endTimer(name);
+        return result;
+      },
+    };
+    method.origin = path;
+    Shape.prototype[name] = method;
+    return method;
+  }
 };
 
 export const shapeMethod = (build) => {

@@ -58,7 +58,12 @@ export const toSurfaceMesh = (graph) => {
     return surfaceMesh;
   }
   if (graph.serializedSurfaceMesh) {
-    surfaceMesh = deserializeSurfaceMesh(graph.serializedSurfaceMesh);
+    try {
+      surfaceMesh = deserializeSurfaceMesh(graph.serializedSurfaceMesh);
+    } catch (error) {
+      console.log('Mesh deserialization failure');
+      throw error;
+    }
   } else {
     surfaceMesh = fromGraphToSurfaceMesh(graph);
   }

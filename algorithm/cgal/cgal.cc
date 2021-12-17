@@ -523,56 +523,6 @@ const Surface_mesh* BendSurfaceMesh(const Surface_mesh* input,
   return c;
 }
 
-const Surface_mesh* BendSurfaceMeshToward(const Surface_mesh* input,
-                                          const Transformation* transform,
-                                          double referenceRadius, double x,
-                                          double y, double z) {
-  Surface_mesh* c = new Surface_mesh(*input);
-  CGAL::Polygon_mesh_processing::transform(*transform, *c,
-                                           CGAL::parameters::all_default());
-  CGAL::Polygon_mesh_processing::triangulate_faces(*c);
-
-  const FT referencePerimeterMm = 2 * CGAL_PI * referenceRadius;
-  const FT referenceRadiansPerMm = 2 / referencePerimeterMm;
-
-  // This does not look very efficient.
-  // CHECK: Figure out deformations.
-  for (const Surface_mesh::Vertex_index vertex : c->vertices()) {
-    if (c->is_removed(vertex)) {
-      continue;
-    }
-    Point& point = c->point(vertex);
-    const FT lx = point.x();
-    const FT ly = point.y();
-    const FT radius = ly;
-    // At the radius, perimeter mm should be a full turn.
-    // const FT perimeterMm = 2 * CGAL_PI * radius;
-    // const FT radiansPerMm = 2 / perimeterMm;
-    const FT radiansPerMm = referenceRadiansPerMm;
-    const FT radians = (0.50 * CGAL_PI) - (lx * radiansPerMm * CGAL_PI);
-    RT sin_alpha, cos_alpha, w;
-    CGAL::rational_rotation_approximation(CGAL::to_double(radians.exact()),
-                                          sin_alpha, cos_alpha, w, RT(1),
-                                          RT(1000));
-    const FT cx = (cos_alpha * radius) / w;
-    const FT cy = (sin_alpha * radius) / w;
-    point = Point(cx, cy, point.z());
-  }
-
-  if (CGAL::Polygon_mesh_processing::does_self_intersect(
-          *c, CGAL::parameters::all_default())) {
-    std::cout << "Bend: Removing self intersections" << std::endl;
-    CGAL::Polygon_mesh_processing::experimental::remove_self_intersections(
-        *c, CGAL::parameters::preserve_genus(false));
-    if (CGAL::Polygon_mesh_processing::does_self_intersect(
-            *c, CGAL::parameters::all_default())) {
-      std::cout << "Bend: Removing self intersections failed" << std::endl;
-    }
-  }
-
-  return c;
-}
-
 const Surface_mesh* TwistSurfaceMesh(const Surface_mesh* input,
                                      const Transformation* transform,
                                      double turnsPerMm) {
@@ -653,34 +603,133 @@ const Surface_mesh* PushSurfaceMesh(const Surface_mesh* input,
   return c;
 }
 
-const Surface_mesh* GrowSurfaceMesh(const Surface_mesh* input,
-                                    const Transformation* transformation,
-                                    double amount) {
-  Surface_mesh mesh(*input);
-  CGAL::Polygon_mesh_processing::transform(*transformation, mesh,
-                                           CGAL::parameters::all_default());
+// Use different iota to avoid 45 degree slides.
+const double kIotaX = 10e-5;
+const double kIotaY = 11e-5;
+const double kIotaZ = 12e-5;
 
-  Surface_mesh* result = new Surface_mesh(mesh);
-  for (const Surface_mesh::Vertex_index vertex : mesh.vertices()) {
-    const Surface_mesh::Halfedge_index start = mesh.halfedge(vertex);
-    Surface_mesh::Halfedge_index edge = start;
-    std::vector<Vector> normals;
-    Vector average = CGAL::NULL_VECTOR;
-    do {
-      Surface_mesh::Face_index facet = mesh.face(edge);
-      Vector unit = unitVector(NormalOfSurfaceMeshFacet(mesh, facet));
-      if (std::find(normals.begin(), normals.end(), unit) == normals.end()) {
-        normals.push_back(unit);
-        average += unit;
+void DestructiveDifferenceOfSurfaceMeshes(Surface_mesh& a, Surface_mesh& b,
+                                          bool check) {
+  double x = 0, y = 0, z = 0;
+  for (int shift = 0x17;; shift++) {
+    if (x != 0 || y != 0 || z != 0) {
+      std::cout << "Note: Shifting difference by x=" << x << " y=" << y
+                << " z=" << z << std::endl;
+      Transformation translation(CGAL::TRANSLATION, Vector(x, y, z));
+      CGAL::Polygon_mesh_processing::transform(translation, a,
+                                               CGAL::parameters::all_default());
+    }
+    if (check) {
+      if (CGAL::Polygon_mesh_processing::corefine_and_compute_difference(
+              a, b, a,
+              CGAL::Polygon_mesh_processing::parameters::
+                  throw_on_self_intersection(true),
+              CGAL::Polygon_mesh_processing::parameters::
+                  throw_on_self_intersection(true),
+              CGAL::Polygon_mesh_processing::parameters::
+                  throw_on_self_intersection(true))) {
+        break;
       }
-      edge = mesh.next_around_target(edge);
-    } while (edge != start);
-
-    Point& point = result->point(vertex);
-    Vector offset = average * (amount / normals.size());
-    point += offset;
+    } else {
+      if (CGAL::Polygon_mesh_processing::corefine_and_compute_difference(
+              a, b, a, CGAL::parameters::all_default(),
+              CGAL::parameters::all_default(),
+              CGAL::parameters::all_default())) {
+        break;
+      }
+    }
+    const double direction = ((shift & (1 << 3)) ? -1 : 1) * (shift >> 4);
+    if (shift & (1 << 0)) {
+      x = kIotaX * direction;
+    } else {
+      x = 0;
+    }
+    if (shift & (1 << 1)) {
+      y = kIotaY * direction;
+    } else {
+      y = 0;
+    }
+    if (shift & (1 << 2)) {
+      z = kIotaZ * direction;
+    } else {
+      z = 0;
+    }
   }
-  return result;
+}
+
+void DestructiveUnionOfSurfaceMeshes(Surface_mesh& a, Surface_mesh& b,
+                                     bool check) {
+  double x = 0, y = 0, z = 0;
+  for (int shift = 0x11;; shift++) {
+    if (x != 0 || y != 0 || z != 0) {
+      std::cout << "Note: Shifting difference by x=" << x << " y=" << y
+                << " z=" << z << std::endl;
+      Transformation translation(CGAL::TRANSLATION, Vector(x, y, z));
+      CGAL::Polygon_mesh_processing::transform(translation, a,
+                                               CGAL::parameters::all_default());
+    }
+    if (check) {
+      if (CGAL::Polygon_mesh_processing::corefine_and_compute_union(
+              a, b, a,
+              CGAL::Polygon_mesh_processing::parameters::
+                  throw_on_self_intersection(true),
+              CGAL::Polygon_mesh_processing::parameters::
+                  throw_on_self_intersection(true),
+              CGAL::Polygon_mesh_processing::parameters::
+                  throw_on_self_intersection(true))) {
+        break;
+      }
+    } else {
+      if (CGAL::Polygon_mesh_processing::corefine_and_compute_union(
+              a, b, a, CGAL::parameters::all_default(),
+              CGAL::parameters::all_default(),
+              CGAL::parameters::all_default())) {
+        break;
+      }
+    }
+    const double direction = ((shift & (1 << 3)) ? -1 : 1) * (shift >> 4);
+    if (shift & (1 << 0)) {
+      x = kIotaX * direction;
+    } else {
+      x = 0;
+    }
+    if (shift & (1 << 1)) {
+      y = kIotaY * direction;
+    } else {
+      y = 0;
+    }
+    if (shift & (1 << 2)) {
+      z = kIotaZ * direction;
+    } else {
+      z = 0;
+    }
+  }
+}
+
+const Surface_mesh* GrowSurfaceMesh(const Surface_mesh* input, double amount) {
+  Surface_mesh* mesh = new Surface_mesh(*input);
+  std::unordered_map<Surface_mesh::Vertex_index, Point> grown_points;
+
+  for (const Surface_mesh::Vertex_index vertex : mesh->vertices()) {
+    Vector unit_vertex_normal =
+        CGAL::Polygon_mesh_processing::compute_vertex_normal(
+            vertex, *mesh, CGAL::parameters::all_default());
+    grown_points[vertex] = mesh->point(vertex) + unit_vertex_normal * amount;
+  }
+
+  for (const Surface_mesh::Vertex_index vertex : mesh->vertices()) {
+    mesh->point(vertex) = grown_points[vertex];
+  }
+
+  return mesh;
+}
+
+const Surface_mesh* RemoveSelfIntersectionsOfSurfaceMesh(
+    const Surface_mesh* input) {
+  Surface_mesh* mesh = new Surface_mesh(*input);
+  CGAL::Polygon_mesh_processing::experimental::
+      autorefine_and_remove_self_intersections(*mesh);
+  return mesh;
 }
 
 void Surface_mesh__EachFace(const Surface_mesh* mesh, emscripten::val op) {
@@ -1793,109 +1842,6 @@ const double kExtrusionMinimumSquared = kExtrusionMinimum * kExtrusionMinimum;
 
 const double kIota = 10e-5;
 
-// Use different iota to avoid 45 degree slides.
-const double kIotaX = 10e-5;
-const double kIotaY = 11e-5;
-const double kIotaZ = 12e-5;
-
-void DestructiveDifferenceOfSurfaceMeshes(Surface_mesh& a, Surface_mesh& b,
-                                          bool check) {
-  double x = 0, y = 0, z = 0;
-  for (int shift = 0x17;; shift++) {
-    if (x != 0 || y != 0 || z != 0) {
-      std::cout << "Note: Shifting difference by x=" << x << " y=" << y
-                << " z=" << z << std::endl;
-      Transformation translation(CGAL::TRANSLATION, Vector(x, y, z));
-      CGAL::Polygon_mesh_processing::transform(translation, a,
-                                               CGAL::parameters::all_default());
-    }
-    if (check) {
-      if (CGAL::Polygon_mesh_processing::corefine_and_compute_difference(
-              a, b, a,
-              CGAL::Polygon_mesh_processing::parameters::
-                  throw_on_self_intersection(true),
-              CGAL::Polygon_mesh_processing::parameters::
-                  throw_on_self_intersection(true),
-              CGAL::Polygon_mesh_processing::parameters::
-                  throw_on_self_intersection(true))) {
-        break;
-      }
-    } else {
-      if (CGAL::Polygon_mesh_processing::corefine_and_compute_difference(
-              a, b, a, CGAL::parameters::all_default(),
-              CGAL::parameters::all_default(),
-              CGAL::parameters::all_default())) {
-        break;
-      }
-    }
-    const double direction = ((shift & (1 << 3)) ? -1 : 1) * (shift >> 4);
-    if (shift & (1 << 0)) {
-      x = kIotaX * direction;
-    } else {
-      x = 0;
-    }
-    if (shift & (1 << 1)) {
-      y = kIotaY * direction;
-    } else {
-      y = 0;
-    }
-    if (shift & (1 << 2)) {
-      z = kIotaZ * direction;
-    } else {
-      z = 0;
-    }
-  }
-}
-
-void DestructiveUnionOfSurfaceMeshes(Surface_mesh& a, Surface_mesh& b,
-                                     bool check) {
-  double x = 0, y = 0, z = 0;
-  for (int shift = 0x11;; shift++) {
-    if (x != 0 || y != 0 || z != 0) {
-      std::cout << "Note: Shifting difference by x=" << x << " y=" << y
-                << " z=" << z << std::endl;
-      Transformation translation(CGAL::TRANSLATION, Vector(x, y, z));
-      CGAL::Polygon_mesh_processing::transform(translation, a,
-                                               CGAL::parameters::all_default());
-    }
-    if (check) {
-      if (CGAL::Polygon_mesh_processing::corefine_and_compute_union(
-              a, b, a,
-              CGAL::Polygon_mesh_processing::parameters::
-                  throw_on_self_intersection(true),
-              CGAL::Polygon_mesh_processing::parameters::
-                  throw_on_self_intersection(true),
-              CGAL::Polygon_mesh_processing::parameters::
-                  throw_on_self_intersection(true))) {
-        break;
-      }
-    } else {
-      if (CGAL::Polygon_mesh_processing::corefine_and_compute_union(
-              a, b, a, CGAL::parameters::all_default(),
-              CGAL::parameters::all_default(),
-              CGAL::parameters::all_default())) {
-        break;
-      }
-    }
-    const double direction = ((shift & (1 << 3)) ? -1 : 1) * (shift >> 4);
-    if (shift & (1 << 0)) {
-      x = kIota * direction;
-    } else {
-      x = 0;
-    }
-    if (shift & (1 << 1)) {
-      y = kIota * direction;
-    } else {
-      y = 0;
-    }
-    if (shift & (1 << 2)) {
-      z = kIota * direction;
-    } else {
-      z = 0;
-    }
-  }
-}
-
 const Surface_mesh* DifferenceOfSurfaceMeshes(
     const Surface_mesh* a, const Transformation* a_transform,
     const Surface_mesh* b, const Transformation* b_transform) {
@@ -2850,16 +2796,21 @@ void Surface_mesh__explore(const Surface_mesh* mesh, emscripten::val emit_point,
   explorer.Explore(*mesh);
 }
 
-std::string SerializeSurfaceMesh(const Surface_mesh* mesh) {
+std::string SerializeSurfaceMesh(const Surface_mesh* mesh,
+                                 emscripten::val emit_error) {
   // CHECK: We assume the mesh is compact.
 
   std::ostringstream s;
-  // stream << *mesh;
 
-  s << mesh->number_of_vertices() << "\n";
+  size_t number_of_vertices = mesh->number_of_vertices();
+
+  s << number_of_vertices << "\n";
+  std::unordered_map<Vertex_index, size_t> vertex_map;
+  size_t vertex_count = 0;
   for (const Vertex_index vertex : mesh->vertices()) {
     const Point& p = mesh->point(vertex);
     s << p.x().exact() << " " << p.y().exact() << " " << p.z().exact() << "\n";
+    vertex_map[vertex] = vertex_count++;
   }
   s << "\n";
 
@@ -2878,7 +2829,13 @@ std::string SerializeSurfaceMesh(const Surface_mesh* mesh) {
     {
       Halfedge_index edge = start;
       do {
-        s << " " << std::size_t(mesh->source(edge));
+        std::size_t vertex(vertex_map[mesh->source(edge)]);
+        if (vertex >= number_of_vertices) {
+          std::cout << "Vertex " << vertex << " out of range "
+                    << number_of_vertices << std::endl;
+          emit_error(vertex, number_of_vertices);
+        }
+        s << " " << vertex;
         edge = mesh->next(edge);
       } while (edge != start);
     }
@@ -2914,12 +2871,17 @@ const Surface_mesh* DeserializeSurfaceMesh(std::string serialization) {
   s >> number_of_facets;
 
   for (std::size_t facet = 0; facet < number_of_facets; facet++) {
-    std::size_t number_of_vertices;
-    s >> number_of_vertices;
+    std::size_t number_of_vertices_in_facet;
+    s >> number_of_vertices_in_facet;
     std::vector<Vertex_index> vertices;
-    for (std::size_t nth = 0; nth < number_of_vertices; nth++) {
+    for (std::size_t nth = 0; nth < number_of_vertices_in_facet; nth++) {
       std::size_t vertex;
       s >> vertex;
+
+      if (vertex > number_of_vertices) {
+        std::cout << "Vertex " << vertex << " out of range "
+                  << number_of_vertices << std::endl;
+      }
 
       vertices.push_back(Vertex_index(vertex));
     }
@@ -4746,6 +4708,9 @@ EMSCRIPTEN_BINDINGS(module) {
                        &MinkowskiSumOfSurfaceMeshes,
                        emscripten::allow_raw_pointers());
   emscripten::function("GrowSurfaceMesh", &GrowSurfaceMesh,
+                       emscripten::allow_raw_pointers());
+  emscripten::function("RemoveSelfIntersectionsOfSurfaceMesh",
+                       &RemoveSelfIntersectionsOfSurfaceMesh,
                        emscripten::allow_raw_pointers());
   emscripten::function("Surface_mesh__is_closed", &Surface_mesh__is_closed,
                        emscripten::allow_raw_pointers());
