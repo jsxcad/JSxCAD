@@ -135,10 +135,10 @@ Box(5).x(1).gridView();
 Box(5).y(1).gridView();
 Box(5).z(1).gridView();
 
-Arc(10).voidIn(offset(1)).ex(5).view();
+Arc(10).voidIn(offset(1)).ez(5).view();
 
 Box(10)
-  .ex(10)
+  .ez(10)
   .color('green')
   .and((s) => s.faces().n(4).extrudeAlong(normal(), 1).tint('red'))
   .view();
@@ -162,7 +162,7 @@ const topEdge = ([[, , startZ], [, , endZ]]) => Math.min(startZ, endZ);
 const leftEdge = ([[startX], [endX]]) => Math.min(startX, endX);
 
 const b = Box(5)
-  .ex(5)
+  .ez(5)
   .and(
     Hershey('A', 3)
       .color('green')

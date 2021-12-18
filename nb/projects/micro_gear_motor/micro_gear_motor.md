@@ -57,9 +57,9 @@ const wireThickness = 0.8;
 
 ```JavaScript
 const motor = Group(
-  axleFlatProfile.ex(13.5 + 9.1, 13.5 + 9.1 + 10.8),
-  gearboxProfile.ex(13.5, 13.5 + 9.1),
-  motorProfile.ex(13.5, 0)
+  axleFlatProfile.ez(13.5 + 9.1, 13.5 + 9.1 + 10.8),
+  gearboxProfile.ez(13.5, 13.5 + 9.1),
+  motorProfile.ez(13.5, 0)
 )
   .md('Motor')
   .view();
@@ -102,7 +102,7 @@ Gear Profile
 ```JavaScript
 const sheath = capProfile
   .cut(motorProfile, wireChannelProfile)
-  .ex(0, 5)
+  .ez(0, 5)
   .md('Sheath')
   .stl('sheath1');
 ```
@@ -116,7 +116,7 @@ Sheath
 ```JavaScript
 const gear = Gear(20)
   .cut(axleFlatProfile)
-  .ex(4)
+  .ez(4)
   .md('Gear')
   .gridView()
   .stl('gear2');
@@ -131,7 +131,7 @@ Gear
 [gear2_0.stl](micro_gear_motor.gear2_0.stl)
 
 ```JavaScript
-const cap = Group(capProfile.ex(-2, -0.0), sheath).md('Cap').stl('cap');
+const cap = Group(capProfile.ez(-2, -0.0), sheath).md('Cap').stl('cap');
 ```
 
 Cap
@@ -156,7 +156,7 @@ Gear Cutout
 
 ```JavaScript
 const motorDriverHolder = Block(4, 4, 3.2 * 5)
-  .cut(Box(20.7, 24.7).ex(2, 100))
+  .cut(Box(20.7, 24.7).ez(2, 100))
   .as('motor driver holder')
   .md('Motor Driver Holder')
   .stl('motor_driver_holder_3');
@@ -172,7 +172,7 @@ Motor Driver Holder
 
 ```JavaScript
 const wemosDriverHolder = Block(4, 5, 3.2 * 11)
-  .cut({ mode: 'basic' }, Box(25.7 + 0.2, 34.5 + 0.2).ex(2, 100))
+  .cut({ mode: 'basic' }, Box(25.7 + 0.2, 34.5 + 0.2).ez(2, 100))
   .cut({ mode: 'basic' }, xz.Box(3 * 8, 2.5 * 8).extrudeAlong(normal(), 3.2 * (4 + 1.5), 100))
   .cut({ mode: 'incremental' }, yz.Box(3.2 * 8, 4 * 8).extrudeAlong(normal(), 3.2 * (4 + 1.5), 100))
   .cut(

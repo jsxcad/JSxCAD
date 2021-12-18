@@ -38,4 +38,4 @@ Imports a .svg file which can then be used as geometry.`;
 const importedSvg = await readSvg('https://jsxcad.js.org/svg/rocket.svg', { fill: false });
 importedSvg.align('xy').view();
 
-importedSvg.align('xy').scaleToFit(10).extrude(2).notColor('#090000').view();
+importedSvg.align('xy').scaleToFit(10).ez(2).notColor('#090000').view();

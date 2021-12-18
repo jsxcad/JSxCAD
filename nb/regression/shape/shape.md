@@ -315,14 +315,14 @@ Box(5).z(1).gridView();
 ![Image](shape.md.39.png)
 
 ```JavaScript
-Arc(10).voidIn(offset(1)).ex(5).view();
+Arc(10).voidIn(offset(1)).ez(5).view();
 ```
 
 ![Image](shape.md.40.png)
 
 ```JavaScript
 Box(10)
-  .ex(10)
+  .ez(10)
   .color('green')
   .and((s) => s.faces().n(4).extrudeAlong(normal(), 1).tint('red'))
   .view();
@@ -367,7 +367,7 @@ const leftEdge = ([[startX], [endX]]) => Math.min(startX, endX);
 
 ```JavaScript
 const b = Box(5)
-  .ex(5)
+  .ez(5)
   .and(
     Hershey('A', 3)
       .color('green')

@@ -8,7 +8,19 @@ export const ofPointPaths = (points = [], paths = []) => {
   return Shape.fromPolygons(polygons);
 };
 
-export const Polyhedron = (...args) => ofPointPaths(...args);
+export const ofPolygons = (...polygons) => {
+  const out = [];
+  for (const polygon of polygons) {
+    if (polygon instanceof Array) {
+      out.push({ points: polygon });
+    } else if (polygon instanceof Shape) {
+      out.push({ points: polygon.toPoints() });
+    }
+  }
+  return Shape.fromPolygons(out);
+};
+
+export const Polyhedron = (...args) => ofPolygons(...args);
 
 Polyhedron.ofPointPaths = ofPointPaths;
 

@@ -290,3 +290,39 @@ Box(1).color('red').as('box').x(5).y(5).fit(Arc(10)).to(g('box')).gridView().md(
 ![Image](shapes.md.26.png)
 
 Reposition to the local frame of reference of an item
+
+```JavaScript
+const extentsA = [
+  [2, 5],
+  [2, 3],
+  [2, 4],
+];
+```
+
+```JavaScript
+const extentsB = [
+  [0, 1],
+  [0, 5],
+  [0, 5],
+];
+```
+
+```JavaScript
+const extentsC = [
+  [-2, 2],
+  [-2, 2],
+  [-2, -1],
+];
+```
+
+```JavaScript
+const q = Group(
+  ArcY(...extentsA).and(Box(...extentsA).material('glass')),
+  ArcX(...extentsB).and(Box(...extentsB).material('glass')),
+  ArcZ(...extentsC).and(Box(...extentsC).material('glass'))
+).view().md`Boxes and Arcs from extents`;
+```
+
+![Image](shapes.md.27.png)
+
+Boxes and Arcs from extents

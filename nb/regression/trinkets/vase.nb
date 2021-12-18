@@ -1,10 +1,10 @@
 Box(10)
-  .ex(10)
+  .ez(10)
   .color('green')
   .cut(
     Arc(10)
       .x(5)
-      .ex(15, -10)
+      .ez(15, -10)
       .ry(1 / 8)
   )
   .and((s) => s.center().color('yellow').sketch())

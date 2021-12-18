@@ -23,7 +23,7 @@ const boardThickness = 8.4;
 const screw = ScrewThread(16, 5)
   .cut(
     Box(2, 6)
-      .ex(5)
+      .ez(5)
       .rz(0, 1 / 4)
   )
   .stl('screw', rx(1 / 2));
@@ -36,12 +36,12 @@ const screw = ScrewThread(16, 5)
 ```JavaScript
 const upsideClip = Box(30 + 4)
   .align('x>y>')
-  .ex(boardThickness + 2, -5)
-  .cut(Box(30).align('x>y>').ex(boardThickness))
+  .ez(boardThickness + 2, -5)
+  .cut(Box(30).align('x>y>').ez(boardThickness))
   .rz(1 / 8)
   .x(2)
-  .cut(Box(22).ex(20, -5))
-  .cut(Arc(16).ex(-5).x(33))
+  .cut(Box(22).ez(20, -5))
+  .cut(Arc(16).ez(-5).x(33))
   .op((s) =>
     Line(21, -21)
       .rz(1 / 4)
@@ -74,17 +74,17 @@ const upsideProfile = Box(30, 27)
 ```JavaScript
 const toothedReel = Group(
   Arc(reelDiameter + 8)
-    .ex(1)
+    .ez(1)
     .z(reelThickness / -2)
     .as('rim')
     .fitTo(Arc(reelDiameter, reelDiameter, reelThickness)),
   Arc(reelDiameter + 4)
-    .ex(1)
+    .ez(1)
     .z(reelThickness / 2),
   Gear()
     .hasMmPerTooth(5)
     .hasTeeth(17)
-    .ex(2, 1)
+    .ez(2, 1)
     .z(reelThickness / 2)
 )
   .as('toothedReel')
@@ -95,16 +95,16 @@ const toothedReel = Group(
 
 ```JavaScript
 const upsideBox = upsideProfile
-  .ex(20, 9 - 3 + 4)
+  .ez(20, 9 - 3 + 4)
   .as('box-top')
   .material('glass')
   .and(
     upsideProfile
-      .ex(9 - 3 + 4, 2)
+      .ez(9 - 3 + 4, 2)
       .mask(grow(0.1))
       .as('box-base')
   )
-  .fitTo(Box(5, 10).x(-11.5).ex(-3, 20).color('green').as('box-pin'))
+  .fitTo(Box(5, 10).x(-11.5).ez(-3, 20).color('green').as('box-pin'))
   .view();
 ```
 
@@ -116,7 +116,7 @@ const upsideDesign = stepperMotor28byj48
   .align('z>')
   .z(2)
   .fit(upsideBox)
-  .cutOut(at(get('shaft'), Arc(reelDiameter + 12).ex(2, 11)));
+  .cutOut(at(get('shaft'), Arc(reelDiameter + 12).ez(2, 11)));
 ```
 
 ```JavaScript

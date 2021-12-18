@@ -13,11 +13,11 @@ Box(10, 10, 10).color('pink').view();
 
 ---
 ### Extrude
-2D shapes can be 'extruded' to create 3D shapes. This can be abbreviated to .ex() for brevity.
+2D shapes can be 'extruded' to create 3D shapes. This can be abbreviated to .e() for brevity.
 
 A series of extends can be provided, these will be sorted and paired. Zero will be added if the number of extents is odd.
 
-e.g., s.ex(1, 2, 3, 4) will produce two extrusions -- one from 1z to 2z, and one from 3z to 4z.
+e.g., s.ez(1, 2, 3, 4) will produce two extrusions -- one from 1z to 2z, and one from 3z to 4z.
 
 ```JavaScript
 Arc(10).view();
@@ -26,13 +26,13 @@ Arc(10).view();
 ![Image](interactions_with_geometry.md.1.png)
 
 ```JavaScript
-Arc(10).extrude(5).view();
+Arc(10).ez(5).view();
 ```
 
 ![Image](interactions_with_geometry.md.2.png)
 
 ```JavaScript
-Arc(10).ex(1, 2, -1, -2).view();
+Arc(10).ez(1, 2, -1, -2).view();
 ```
 
 ![Image](interactions_with_geometry.md.3.png)
@@ -45,7 +45,7 @@ A plane (default [0, 0, 1, 0]) to cast upon and a direction (default [0, 0, 1, 0
 
 ```JavaScript
 Arc(4)
-  .ex(10)
+  .ez(10)
   .rx(1 / 8)
   .material('glass')
   .and(cast())
@@ -167,7 +167,7 @@ At each step the shape is retriangulated to preserve manifold structure.
 Once a shape is remeshed it can be twisted or bent about the origin.
 
 ```JavaScript
-Box(157, 20).ex(1).y(25)
+Box(157, 20).ez(1).y(25)
   .remesh(10, 8, 4)
   .op(s => s.bend(25).and(s.outline()))
   .gridView()
@@ -347,7 +347,7 @@ All non-copper things.
 We can generate an abstract view of the geometry to be displayed as a graph.
 
 ```JavaScript
-Box(4).as('box').and(Arc(5).ex(10).as('bar')).abstract();
+Box(4).as('box').and(Arc(5).ez(10).as('bar')).abstract();
 ```
 
 '''mermaid
@@ -369,7 +369,7 @@ We can convert a volume into voxels at a given resolution.
 
 ```JavaScript
 Box(11)
-  .ex(10)
+  .ez(10)
   .rx(-1 / 8)
   .op((s) => s.voxels(1).color('green').and(s.outline().sketch().color('red')))
   .view().md('Produce a voxel representation with a 1mm resolution');

@@ -1,11 +1,11 @@
 ```JavaScript
 const Profile = (pitch = 1, angle = 60 / 360) =>
-  Path(
+  Polygon(
     Point(0, 1 / -2),
     Point(pitch / -2, 1 / 2),
     Point(pitch / 2, 1 / 2),
     Point(0, 1 / -2)
-  ).fill();
+  );
 ```
 
 Show the fit.
@@ -27,10 +27,10 @@ export const ScrewThread = (
       })
     )
     .scale(lefthanded ? 1 : -1, lefthanded ? 1 : -1, 1)
-    .clip(Box(diameter).ex(pitch))
+    .clip(Box(diameter).ez(pitch))
     .z(seq((a) => a, { from: 0, to: height, by: pitch }))
-    .clip(Box(diameter).ex(height))
-    .and(Arc(diameter - 2).ex(height));
+    .clip(Box(diameter).ez(height))
+    .and(Arc(diameter - 2).ez(height));
 ```
 
 ```JavaScript
@@ -51,11 +51,11 @@ export const NutThread = (
       })
     )
     .scale(lefthanded ? 1 : -1, lefthanded ? 1 : -1, 1)
-    .clip(Box(diameter + 2).ex(pitch))
+    .clip(Box(diameter + 2).ez(pitch))
     .z(seq((a) => a, { from: 0, to: height, by: pitch }))
-    .clip(Box(diameter + 2).ex(height))
+    .clip(Box(diameter + 2).ez(height))
     .rz(1 / 2)
-    .mask(Arc(diameter).ex(height));
+    .mask(Arc(diameter).ez(height));
 ```
 
 ```JavaScript
@@ -78,7 +78,7 @@ const nutThread = NutThread(20, 10)
 const screwThread = ScrewThread(20, 10)
   .cut(
     Box(2, 10)
-      .ex(10, 5)
+      .ez(10, 5)
       .rz(0, 1 / 4)
   )
   .material('steel')
@@ -91,7 +91,7 @@ const screwThread = ScrewThread(20, 10)
 
 ```JavaScript
 ScrewThread(10, 5)
-  .and(NutThread(10, 5).and(Arc(15).cut(Arc(10)).ex(5)))
+  .and(NutThread(10, 5).and(Arc(15).cut(Arc(10)).ez(5)))
   .view(1)
   .view(2, section());
 ```

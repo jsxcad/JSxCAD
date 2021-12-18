@@ -15,7 +15,7 @@ export const SocketBoard = (length, width, height, { sockets = [] } = {}) => {
     }
   }
   return Weld(Box(length * 8, width * 8).align('x>y>'), ...pieces)
-    .ex(height)
+    .ez(height)
     .align('xy')
     .as(`SocketBoard ${length} x ${width} x ${height}`);
 };
@@ -29,11 +29,11 @@ export const StudBoard = (length, width, height, { studs = [] } = {}) => {
     return studs[y][x] === '_';
   };
   const board = [];
-  const flat = Box(8).ex(height);
+  const flat = Box(8).ez(height);
   const stud = Box(8)
-    .ex(height)
-    .add(Arc(5).ex(height, height + 1.6))
-    .add(Arc(4.8).ex(height + 1.6, height + 1.8));
+    .ez(height)
+    .add(Arc(5).ez(height, height + 1.6))
+    .add(Arc(4.8).ez(height + 1.6, height + 1.8));
   for (let x = 0; x < length; x++) {
     for (let y = 0; y < width; y++) {
       const part = isFlat(x, y) ? flat : stud;
@@ -89,7 +89,7 @@ export const axleHole = Arc()
       .hasApothem(4 / 2)
       .y(1.5 / 2)
   )
-  .ex(4.00001, -4.00001)
+  .ez(4.00001, -4.00001)
   .rx(90)
   .z(5.6)
   .view();
@@ -210,9 +210,9 @@ Axle Profile
 
 ```JavaScript
 const technic = Weld(box, Arc(4.8 + 0.2).y(5.6))
-  .ex(8 - 0.8, 0.8)
-  .and(Weld(box, Arc(6.2 + 0.2).y(5.6)).ex(0.8))
-  .and(Weld(box, Arc(6.2 + 0.2).y(5.6)).ex(8, 8 - 0.8))
+  .ez(8 - 0.8, 0.8)
+  .and(Weld(box, Arc(6.2 + 0.2).y(5.6)).ez(0.8))
+  .and(Weld(box, Arc(6.2 + 0.2).y(5.6)).ez(8, 8 - 0.8))
   .stl('technic');
 ```
 
@@ -221,7 +221,7 @@ const technic = Weld(box, Arc(4.8 + 0.2).y(5.6))
 [technic_0.stl](lego.technic_0.stl)
 
 ```JavaScript
-export const AxleJoiner = (length) => Arc(8).cut(axleProfile).ex(length);
+export const AxleJoiner = (length) => Arc(8).cut(axleProfile).ez(length);
 ```
 
 ```JavaScript
@@ -246,22 +246,22 @@ Axle Joiner 16mm
 
 ```JavaScript
 const technicConnector = Arc(4.8)
-  .ex(8, -8)
+  .ez(8, -8)
   .at(xz)
   .add(
     Arc(6.2)
-      .ex(0.8 - 0.2)
+      .ez(0.8 - 0.2)
       .at(xz)
   )
   .add(
     Arc(5.5)
-      .ex(0.4)
+      .ez(0.4)
       .at(xz)
       .y(-8 + 0.2)
   )
   .add(
     Arc(5.5)
-      .ex(0.4)
+      .ez(0.4)
       .at(xz)
       .y(8 - 0.2)
   )
@@ -278,16 +278,16 @@ const technicConnector = Arc(4.8)
 
 ```JavaScript
 const halfTechnicConnector = Arc(4.8)
-  .ex(8)
+  .ez(8)
   .at(xz)
   .add(
     Arc(6.2)
-      .ex(0.8 - 0.2)
+      .ez(0.8 - 0.2)
       .at(xz)
   )
   .add(
     Arc(5.5)
-      .ex(0.4)
+      .ez(0.4)
       .at(xz)
       .y(8 - 0.2)
   )
@@ -304,7 +304,7 @@ const halfTechnicConnector = Arc(4.8)
 
 ```JavaScript
 const technicPlug5mm = halfTechnicConnector
-  .and(Arc(5).clip(Box(4.5, 5)).ex(-8).at(xz))
+  .and(Arc(5).clip(Box(4.5, 5)).ez(-8).at(xz))
   .stl('technicPlug5mm');
 ```
 

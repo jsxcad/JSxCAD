@@ -216,7 +216,7 @@ export const buildMeshes = async ({
   let mesh;
   switch (geometry.type) {
     case 'layout': {
-      const [ width, length ] = geometry.layout.size;
+      const [width, length] = geometry.layout.size;
       pageSize[0] = width;
       pageSize[1] = length;
       break;

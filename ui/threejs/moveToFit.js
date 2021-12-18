@@ -31,6 +31,16 @@ export const moveToFit = ({
     if (object instanceof LineSegments || object instanceof Mesh) {
       const objectBox = new Box3();
       objectBox.setFromObject(object);
+      if (
+        !isFinite(objectBox.max.x) ||
+        !isFinite(objectBox.max.y) ||
+        !isFinite(objectBox.max.z) ||
+        !isFinite(objectBox.min.x) ||
+        !isFinite(objectBox.min.y) ||
+        !isFinite(objectBox.min.z)
+      ) {
+        return;
+      }
       if (box) {
         box = box.union(objectBox);
       } else {
@@ -55,7 +65,7 @@ export const moveToFit = ({
       grid.material.transparent = true;
       grid.material.opacity = 0.5;
       grid.rotation.x = -Math.PI / 2;
-      grid.position.set(0, 0, -0.10);
+      grid.position.set(0, 0, -0.1);
       grid.layers.set(gridLayer);
       grid.userData.tangible = false;
       grid.userData.dressing = true;
@@ -74,22 +84,22 @@ export const moveToFit = ({
     }
   }
   if (withGrid) {
-      const plane = new Mesh(
-        new PlaneGeometry(length, width),
-        new MeshStandardMaterial({
-          color: 0x00ff00,
-          // depthWrite: false,
-          transparent: true,
-          opacity: 0.25,
-        })
-      );
-      plane.castShadow = false;
-      plane.receiveShadow = true;
-      plane.position.set(0, 0, -0.05);
-      plane.layers.set(gridLayer);
-      plane.userData.tangible = false;
-      plane.userData.dressing = true;
-      scene.add(plane);
+    const plane = new Mesh(
+      new PlaneGeometry(length, width),
+      new MeshStandardMaterial({
+        color: 0x00ff00,
+        // depthWrite: false,
+        transparent: true,
+        opacity: 0.25,
+      })
+    );
+    plane.castShadow = false;
+    plane.receiveShadow = true;
+    plane.position.set(0, 0, -0.05);
+    plane.layers.set(gridLayer);
+    plane.userData.tangible = false;
+    plane.userData.dressing = true;
+    scene.add(plane);
   }
 
   if (!fit) {

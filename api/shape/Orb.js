@@ -39,8 +39,8 @@ Shape.registerReifier('Orb', (geometry) => {
   const [scale, middle] = getScale(geometry);
   const sides = getSides(geometry, 16);
   return extrudeSphere(1, { sides: 2 + sides })(Arc(2).hasSides(sides * 2))
-    .scale(...scale)
-    .move(...middle);
+    .scale(scale)
+    .move(middle);
 });
 
 export const Orb = (x = 1, y = x, z = x) =>
