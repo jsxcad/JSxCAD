@@ -37,6 +37,17 @@ Arc(4)
   .and(cast())
   .view();
 
+
+md`
+---
+### Inset
+2D shapes can be inset creating a new shape smaller than the original by the specified amount. Hard inside corners are rounded.
+
+`;
+
+const a = Arc(20).cut(Box(10));
+Group(a.inset(1).z(0.1).color('pink'), a.color('orange')).view();
+
 md`
 ---
 ### Item
@@ -113,6 +124,18 @@ Box(5, 5, 5).move(10, 2, 12).view();
 Box(5, 5, 5).x(10).y(2).z(12).view();
 
 Box(5).x(0, 10, 20).view();
+
+
+md`
+---
+### Offset 
+2D shapes can be offset creating a new shape larger than the original by the specified amount. Hard exterior corners are rounded.
+
+`;
+
+const b = Arc(20).cut(Box(10)).with(Box(5).x(10));
+Group(b.offset(1).z(-0.1).color('pink'), b.color('orange')).view();
+
 
 md`
 ---
