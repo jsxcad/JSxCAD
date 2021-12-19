@@ -62,7 +62,7 @@ export const difference = (geometry, options = {}, ...geometries) => {
               fillOutlineGraph(
                 fromPathsToGraph(
                   { tags: pathsGeometry.tags },
-                  pathsGeometry.paths.map((path) => ({ points: path }))
+                  pathsGeometry.paths
                 )
               )
             );
@@ -73,12 +73,7 @@ export const difference = (geometry, options = {}, ...geometries) => {
       case 'paths':
         // This will have problems with open paths, but we want to phase this out anyhow.
         return difference(
-          fillOutlineGraph(
-            fromPathsToGraph(
-              { tags },
-              geometry.paths.map((path) => ({ points: path }))
-            )
-          ),
+          fillOutlineGraph(fromPathsToGraph({ tags }, geometry.paths)),
           options,
           ...geometries
         );

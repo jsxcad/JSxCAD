@@ -1,6 +1,6 @@
 import { reify } from './reify.js';
 import { rewrite } from './visit.js';
-import { toTransformedGeometry } from './toTransformedGeometry.js';
+import { toConcreteGeometry } from './toConcreteGeometry.js';
 
 const doNothing = (geometry) => geometry;
 
@@ -11,6 +11,7 @@ export const op =
       segments = doNothing,
       triangles = doNothing,
       points = doNothing,
+      paths = doNothing,
     },
     method = rewrite
   ) =>
@@ -25,6 +26,8 @@ export const op =
           return triangles(geometry, ...args);
         case 'points':
           return points(geometry, ...args);
+        case 'paths':
+          return paths(geometry, ...args);
         case 'plan':
           reify(geometry);
         // fall through
@@ -41,5 +44,5 @@ export const op =
       }
     };
 
-    return method(toTransformedGeometry(geometry), walk);
+    return method(toConcreteGeometry(geometry), walk);
   };

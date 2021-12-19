@@ -191,6 +191,12 @@ const Surface_mesh* FromPolygonSoupToSurfaceMesh(emscripten::val fill) {
   CGAL::Polygon_mesh_processing::polygon_soup_to_polygon_mesh(triples, polygons,
                                                               *mesh);
   assert(CGAL::Polygon_mesh_processing::triangulate_faces(*mesh) == true);
+  // If a volume, ensure it is positive.
+  if (CGAL::is_closed(*mesh) &&
+      CGAL::Polygon_mesh_processing::volume(
+          *mesh, CGAL::parameters::all_default()) < 0) {
+    CGAL::Polygon_mesh_processing::reverse_face_orientations(*mesh);
+  }
   return mesh;
 }
 
@@ -308,8 +314,8 @@ const Surface_mesh* FromPointsToSurfaceMesh(emscripten::val fill_triples) {
 
 void FitPlaneToPoints(emscripten::val fill_triples,
                       emscripten::val emit_plane) {
-  typedef CGAL::Epick::Plane_3 Plane;
-  typedef CGAL::Epick::Point_3 Point;
+  typedef CGAL::Epeck::Plane_3 Plane;
+  typedef CGAL::Epeck::Point_3 Point;
   DoubleTriples triples;
   std::vector<DoubleTriple>* triples_ptr = &triples;
   fill_triples(triples_ptr);
@@ -317,10 +323,26 @@ void FitPlaneToPoints(emscripten::val fill_triples,
   for (const auto& triple : triples) {
     points.emplace_back(Point{triple[0], triple[1], triple[2]});
   }
-  Plane plane;
   if (points.size() > 0) {
+    Plane plane;
     linear_least_squares_fitting_3(points.begin(), points.end(), plane,
                                    CGAL::Dimension_tag<0>());
+    // Prefer positive planes.
+    FT zly = CGAL::scalar_product(plane.orthogonal_vector(), Vector(0, 0, 1));
+    if (zly < 0) {
+      plane = plane.opposite();
+    } else {
+      FT xly = CGAL::scalar_product(plane.orthogonal_vector(), Vector(0, 1, 0));
+      if (xly < 0) {
+        plane = plane.opposite();
+      } else {
+        FT ylx =
+            CGAL::scalar_product(plane.orthogonal_vector(), Vector(1, 0, 0));
+        if (ylx < 0) {
+          plane = plane.opposite();
+        }
+      }
+    }
     emit_plane(CGAL::to_double(plane.a()), CGAL::to_double(plane.b()),
                CGAL::to_double(plane.c()), CGAL::to_double(plane.d()));
   }
@@ -4251,7 +4273,6 @@ Transformation Righten(Vector current) {
   }
 }
 
-#if 1
 const Transformation* InverseSegmentTransform(double startX, double startY,
                                               double startZ, double endX,
                                               double endY, double endZ,
@@ -4276,69 +4297,6 @@ const Transformation* InverseSegmentTransform(double startX, double startY,
 
   return new Transformation(align * orient);
 }
-#else
-const Transformation* InverseSegmentTransform(
-    double startX, double startY, double startZ, double endX, double endY,
-    double endZ, double directionX, double directionY, double directionZ) {
-  FT dX = 0 - directionX;
-  FT dY = 0 - directionY;
-  FT dZ = 1 - directionZ;
-
-  // Translate so that start is at zero.
-  Transformation t(CGAL::TRANSLATION, Vector(-startX, -startY, -startZ));
-
-  // X rotation.
-  Transformation rx(CGAL::IDENTITY);
-  if (dY != 0 || dZ != 0) {
-    RT sin_alpha, cos_alpha, w;
-    CGAL::rational_rotation_approximation(dY, dZ, sin_alpha, cos_alpha, w,
-                                          RT(1), RT(1000));
-    Transformation rotation(w, 0, 0, 0, 0, cos_alpha, -sin_alpha, 0, 0,
-                            sin_alpha, cos_alpha, 0, w);
-    rx = rotation;  // .inverse();
-  }
-
-  // Y rotation.
-  Transformation ry(CGAL::IDENTITY);
-  if (dX != 0 || dZ != 0) {
-    RT sin_alpha, cos_alpha, w;
-    CGAL::rational_rotation_approximation(dX, dZ, sin_alpha, cos_alpha, w,
-                                          RT(1), RT(1000));
-    Transformation rotation(cos_alpha, 0, -sin_alpha, 0, 0, w, 0, 0, sin_alpha,
-                            0, cos_alpha, 0, w);
-    ry = rotation;  // .inverse();
-  }
-
-  // Z rotation.
-  Transformation rz(CGAL::IDENTITY);
-  if (dX != 0 || dY != 0) {
-    RT sin_alpha, cos_alpha, w;
-    CGAL::rational_rotation_approximation(dX, dY, sin_alpha, cos_alpha, w,
-                                          RT(1), RT(1000));
-    Transformation rotation(cos_alpha, sin_alpha, 0, 0, -sin_alpha, cos_alpha,
-                            0, 0, 0, 0, w, 0, w);
-    rz = rotation;  // .inverse();
-  }
-
-  // Transformation righted(t * rx * ry * rz);
-  Transformation righted(rz * rx * ry * t);
-
-  Point righted_end = Point(endX, endY, endZ).transform(righted);
-
-  Transformation aligned(CGAL::IDENTITY);
-  if (righted_end.y() != 0) {
-    RT sin_alpha, cos_alpha, w;
-    CGAL::rational_rotation_approximation(righted_end.x(), righted_end.y(),
-                                          sin_alpha, cos_alpha, w, RT(1),
-                                          RT(1000));
-    Transformation rotation(cos_alpha, sin_alpha, 0, 0, -sin_alpha, cos_alpha,
-                            0, 0, 0, 0, w, 0, w);
-    aligned = rotation;  // .inverse();
-  }
-
-  return new Transformation(aligned * righted);
-}
-#endif
 
 #else  // TEST_ONLY
 

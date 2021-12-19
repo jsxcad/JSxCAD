@@ -55,7 +55,7 @@ Gear()
   .hasClearance(clearance)
   .hasBacklash(backlash)
   .hasToothResolution(toothResolution)
-  .ex(thickness)
+  .ez(thickness)
   .material('wood')
   .stl(`gear_${numberOfTeeth}`);
 ```
@@ -184,18 +184,18 @@ We can do the same thing to cut a rack.
 
 ```JavaScript
 const planetaryDesign = Arc(44)
-  .ex(-4)
+  .ez(-4)
   .as('hoop')
-  .fitTo(Octagon(42).ex(-2, -4))
-  .cut(Octagon(42).ex(-2))
-  .and(ring.clip(Octagon(42)).ex(-2))
-  .cut(Arc(24).ex(-2, -4))
+  .fitTo(Octagon(42).ez(-2, -4))
+  .cut(Octagon(42).ez(-2))
+  .and(ring.clip(Octagon(42)).ez(-2))
+  .cut(Arc(24).ez(-2, -4))
   .color('blue')
   .as('ring')
   .and(
     planetary
-      .ex(-2)
-      .cut(Arc(2).ex(-2))
+      .ez(-2)
+      .cut(Arc(2).ez(-2))
       .color('red')
       .as('planetary')
       .x(12)
@@ -203,9 +203,9 @@ const planetaryDesign = Arc(44)
   )
   .and(
     solar
-      .ex(-2)
-      .and(Arc(23.5).ex(-2, -4))
-      .fitTo(Octagon(12).fitTo(Arc(8).void()).ex(-4).color('orange').as('axle'))
+      .ez(-2)
+      .and(Arc(23.5).ez(-2, -4))
+      .fitTo(Octagon(12).fitTo(Arc(8).void()).ez(-4).color('orange').as('axle'))
       .color('green')
       .as('solar')
   )

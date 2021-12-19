@@ -1,8 +1,7 @@
-import { getAt, getFrom, getScale, getSides, getTo } from './Plan.js';
+import { getScale, getSides } from './Plan.js';
 
 import Arc from './Arc.js';
 import Shape from './Shape.js';
-import { negate } from '@jsxcad/math-vec3';
 import { taggedPlan } from '@jsxcad/geometry';
 
 // Approximates a UV sphere.
@@ -40,13 +39,8 @@ Shape.registerReifier('Orb', (geometry) => {
   const [scale, middle] = getScale(geometry);
   const sides = getSides(geometry, 16);
   return extrudeSphere(1, { sides: 2 + sides })(Arc(2).hasSides(sides * 2))
-    .scale(...scale)
-    .move(...middle)
-    .orient2({
-      center: negate(getAt(geometry)),
-      from: getFrom(geometry),
-      at: getTo(geometry),
-    });
+    .scale(scale)
+    .move(middle);
 });
 
 export const Orb = (x = 1, y = x, z = x) =>

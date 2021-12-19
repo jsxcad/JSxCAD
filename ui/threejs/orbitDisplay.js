@@ -178,11 +178,14 @@ export const orbitDisplay = async (
 
     view = { ...view, fit };
 
+    const pageSize = [];
+
     await buildMeshes({
       geometry,
       scene,
       render,
       definitions,
+      pageSize,
     });
 
     if (!moveToFitDone) {
@@ -194,6 +197,7 @@ export const orbitDisplay = async (
         scene,
         withGrid,
         gridLayer,
+        pageSize,
       });
     }
 

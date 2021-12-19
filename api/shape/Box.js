@@ -1,43 +1,121 @@
-import { getAt, getCorner1, getCorner2, getFrom, getTo } from './Plan.js';
+import { getCorner1, getCorner2 } from './Plan.js';
 
-import { Empty } from './Empty.js';
+import Edge from './Edge.js';
+import Face from './Face.js';
+import Point from './Point.js';
+import Polyhedron from './Polyhedron.js';
 import Shape from './Shape.js';
-import { negate } from '@jsxcad/math-vec3';
 import { taggedPlan } from '@jsxcad/geometry';
 
 const X = 0;
 const Y = 1;
 const Z = 2;
 
-Shape.registerReifier('Box', (geometry) => {
-  const corner1 = getCorner1(geometry);
-  const corner2 = getCorner2(geometry);
-  const left = corner1[X];
-  const right = corner2[X];
-  const front = corner1[Y];
-  const back = corner2[Y];
-  const top = corner2[Z];
-  const bottom = corner1[Z];
+const reifyBox = (geometry) => {
+  const build = () => {
+    const corner1 = getCorner1(geometry);
+    const corner2 = getCorner2(geometry);
 
-  if (left <= right || front <= back) {
-    return Empty();
-  }
+    const left = corner1[X];
+    const right = corner2[X];
 
-  const a = Shape.fromPath([
-    [left, back, bottom],
-    [right, back, bottom],
-    [right, front, bottom],
-    [left, front, bottom],
-  ]);
-  const b = a.fill();
-  const c = b.ex(top, bottom);
-  const d = c.orient2({
-    center: negate(getAt(geometry)),
-    from: getFrom(geometry),
-    at: getTo(geometry),
-  });
-  return d;
-});
+    const front = corner1[Y];
+    const back = corner2[Y];
+
+    const bottom = corner1[Z];
+    const top = corner2[Z];
+
+    if (top === bottom) {
+      if (left === right) {
+        if (front === back) {
+          return Point(bottom, left, front);
+        } else {
+          return Edge(Point(left, front, bottom), Point(right, back, top));
+        }
+      } else {
+        if (front === back) {
+          return Edge(Point(left, front, bottom), Point(right, back, top));
+        } else {
+          // left !== right && front !== back
+          return Face(
+            Point(left, back, bottom),
+            Point(left, front, bottom),
+            Point(right, front, top),
+            Point(right, back, top)
+          );
+        }
+      }
+    } else {
+      if (left === right) {
+        if (front === back) {
+          return Edge(Point(left, front, bottom), Point(right, back, top));
+        } else {
+          // top !== bottom && front !== back
+          return Face(
+            Point(right, back, top),
+            Point(right, front, top),
+            Point(right, front, bottom),
+            Point(left, back, bottom)
+          );
+        }
+      } else {
+        if (front === back) {
+          // top !== bottom && left !== right
+          return Face(
+            Point(left, back, top),
+            Point(right, front, top),
+            Point(right, front, bottom),
+            Point(left, back, bottom)
+          );
+        } else {
+          // top !== bottom && front !== back && left !== right
+          return Polyhedron(
+            Face(
+              Point(left, back, top),
+              Point(left, front, top),
+              Point(right, front, top),
+              Point(right, back, top)
+            ),
+            Face(
+              Point(left, back, bottom),
+              Point(left, front, bottom),
+              Point(right, front, bottom),
+              Point(right, back, bottom)
+            ),
+            Face(
+              Point(left, back, bottom),
+              Point(left, front, bottom),
+              Point(left, front, top),
+              Point(left, back, top)
+            ),
+            Face(
+              Point(right, back, bottom),
+              Point(right, front, bottom),
+              Point(right, front, top),
+              Point(right, back, top)
+            ),
+            Face(
+              Point(left, back, bottom),
+              Point(right, back, bottom),
+              Point(right, back, top),
+              Point(left, back, top)
+            ),
+            Face(
+              Point(left, front, bottom),
+              Point(right, front, bottom),
+              Point(right, front, top),
+              Point(left, front, top)
+            )
+          );
+        }
+      }
+    }
+  };
+
+  return build().tag(...geometry.tags);
+};
+
+Shape.registerReifier('Box', reifyBox);
 
 export const Box = (x, y = x, z = 0) => {
   const c1 = [0, 0, 0];

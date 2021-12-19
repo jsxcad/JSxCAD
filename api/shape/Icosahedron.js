@@ -1,8 +1,6 @@
-import { getAt, getFrom, getScale, getTo } from './Plan.js';
-
 import Shape from './Shape.js';
 import { fromPoints } from '@jsxcad/math-poly3';
-import { negate } from '@jsxcad/math-vec3';
+import { getScale } from './Plan.js';
 import { taggedPlan } from '@jsxcad/geometry';
 
 /** @type {function(Point[], Path[]):Triangle[]} */
@@ -72,12 +70,7 @@ Shape.registerReifier('Icosahedron', (geometry) => {
   const a = Shape.fromPolygons(buildRegularIcosahedron({}));
   const b = a.scale(...scale);
   const c = b.move(...middle);
-  const d = c.orient2({
-    center: negate(getAt(geometry)),
-    from: getFrom(geometry),
-    at: getTo(geometry),
-  });
-  return d;
+  return c;
 });
 
 export const Icosahedron = (x = 1, y = x, z = x) =>

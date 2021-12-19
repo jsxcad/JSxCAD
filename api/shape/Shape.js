@@ -113,8 +113,8 @@ export class Shape {
     return Shape.fromGeometry(rewriteTags(tags, [], this.toGeometry()));
   }
 
-  toCoordinate(value) {
-    return Shape.toCoordinate(value);
+  toCoordinate(x, y, z) {
+    return Shape.toCoordinate(this, x, y, z);
   }
 
   toShape(value) {

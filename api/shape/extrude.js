@@ -2,11 +2,17 @@ import Point from './Point.js';
 import Shape from './Shape.js';
 import extrudeAlong from './extrudeAlong.js';
 
-export const extrude = (...extents) => extrudeAlong(Point(0, 0, 1), ...extents);
+export const extrudeX = (...extents) =>
+  extrudeAlong(Point(1, 0, 0), ...extents);
+export const extrudeY = (...extents) =>
+  extrudeAlong(Point(0, 1, 0), ...extents);
+export const extrudeZ = (...extents) =>
+  extrudeAlong(Point(0, 0, 1), ...extents);
 
-export const ex = extrude;
+export const ex = extrudeX;
+export const ey = extrudeY;
+export const ez = extrudeZ;
 
-Shape.registerMethod('extrude', extrude);
 Shape.registerMethod('ex', ex);
-
-export default extrudeAlong;
+Shape.registerMethod('ey', ey);
+Shape.registerMethod('ez', ez);

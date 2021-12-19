@@ -4,6 +4,7 @@ import { fromScaling } from '@jsxcad/math-mat4';
 export const scale =
   (x = 1, y = x, z = y) =>
   (shape) => {
+    [x = 1, y = x, z] = shape.toCoordinate(x, y, z);
     const negatives = (x < 0) + (y < 0) + (z < 0);
     if (negatives % 2) {
       // Compensate for inversion.

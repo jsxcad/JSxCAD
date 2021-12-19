@@ -17,8 +17,10 @@ export const moveToFit = ({
   fitOffset = 1.2,
   withGrid = false,
   gridLayer = GEOMETRY_LAYER,
+  pageSize = [],
 } = {}) => {
   const { fit = true } = view;
+  const [length = 100, width = 100] = pageSize;
 
   let box;
 
@@ -29,6 +31,16 @@ export const moveToFit = ({
     if (object instanceof LineSegments || object instanceof Mesh) {
       const objectBox = new Box3();
       objectBox.setFromObject(object);
+      if (
+        !isFinite(objectBox.max.x) ||
+        !isFinite(objectBox.max.y) ||
+        !isFinite(objectBox.max.z) ||
+        !isFinite(objectBox.min.x) ||
+        !isFinite(objectBox.min.y) ||
+        !isFinite(objectBox.min.z)
+      ) {
+        return;
+      }
       if (box) {
         box = box.union(objectBox);
       } else {
@@ -46,7 +58,6 @@ export const moveToFit = ({
     const x = Math.max(Math.abs(box.min.x), Math.abs(box.max.x));
     const y = Math.max(Math.abs(box.min.y), Math.abs(box.max.y));
     const length = Math.max(x, y);
-    // This is how large we want the smallest grid to be.
     const scale = Math.pow(10, Math.ceil(Math.log10(length)));
     const size = scale;
     {
@@ -54,7 +65,7 @@ export const moveToFit = ({
       grid.material.transparent = true;
       grid.material.opacity = 0.5;
       grid.rotation.x = -Math.PI / 2;
-      grid.position.set(0, 0, -0.05);
+      grid.position.set(0, 0, -0.1);
       grid.layers.set(gridLayer);
       grid.userData.tangible = false;
       grid.userData.dressing = true;
@@ -65,30 +76,30 @@ export const moveToFit = ({
       grid.material.transparent = true;
       grid.material.opacity = 0.5;
       grid.rotation.x = -Math.PI / 2;
-      grid.position.set(0, 0, -0.04);
+      grid.position.set(0, 0, -0.05);
       grid.layers.set(gridLayer);
       grid.userData.tangible = false;
       grid.userData.dressing = true;
       scene.add(grid);
     }
-    {
-      const plane = new Mesh(
-        new PlaneGeometry(50, 50),
-        new MeshStandardMaterial({
-          color: 0x00ff00,
-          // depthWrite: false,
-          transparent: true,
-          opacity: 0.25,
-        })
-      );
-      plane.castShadow = false;
-      plane.receiveShadow = true;
-      plane.position.set(0, 0, 0);
-      plane.layers.set(gridLayer);
-      plane.userData.tangible = false;
-      plane.userData.dressing = true;
-      scene.add(plane);
-    }
+  }
+  if (withGrid) {
+    const plane = new Mesh(
+      new PlaneGeometry(length, width),
+      new MeshStandardMaterial({
+        color: 0x00ff00,
+        // depthWrite: false,
+        transparent: true,
+        opacity: 0.25,
+      })
+    );
+    plane.castShadow = false;
+    plane.receiveShadow = true;
+    plane.position.set(0, 0, -0.05);
+    plane.layers.set(gridLayer);
+    plane.userData.tangible = false;
+    plane.userData.dressing = true;
+    scene.add(plane);
   }
 
   if (!fit) {

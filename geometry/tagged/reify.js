@@ -29,8 +29,8 @@ export const reify = (geometry) => {
             );
           }
           const reified = reifier(geometry);
-          geometry.content.push(reified);
-          return descend();
+          // We can't share the reification since things like tags applied to the plan need to propagate separately.
+          return descend({ content: [reified] });
         }
         return geometry;
       }
