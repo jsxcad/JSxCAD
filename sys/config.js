@@ -1,1 +1,7 @@
-export const config = {};
+let config = {};
+
+export const getConfig = () => config;
+
+export const setConfig = (value = {}) => {
+  config = value;
+};

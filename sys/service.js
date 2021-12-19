@@ -1,6 +1,7 @@
 import { isBrowser, isNode } from './browserOrNode.js';
 
 import { createConversation } from './conversation.js';
+import { getConfig } from './config.js';
 import { log } from './log.js';
 import { nodeWorker } from './nodeWorker.js';
 import { webWorker } from './webWorker.js';
@@ -75,7 +76,7 @@ export const createService = (spec, worker) => {
       }
     };
     service.terminate = () => service.release(true);
-    service.tell({ op: 'sys/attach', id: service.id });
+    service.tell({ op: 'sys/attach', config: getConfig(), id: service.id });
     return service;
   } catch (e) {
     log({ op: 'text', text: '' + e, level: 'serious', duration: 6000000 });

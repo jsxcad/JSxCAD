@@ -108,6 +108,7 @@ const agent = async ({
     op
   } = message;
   const {
+    config,
     offscreenCanvas,
     id,
     path,
@@ -148,6 +149,7 @@ const agent = async ({
 
       case 'sys/attach':
         self.id = id;
+        sys.setConfig(config);
         return;
 
       case 'sys/touch':

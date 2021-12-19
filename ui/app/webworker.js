@@ -31,6 +31,7 @@ sys.setPendingErrorHandler(reportError);
 const agent = async ({ ask, message, type, tell }) => {
   const { op } = message;
   const {
+    config,
     offscreenCanvas,
     id,
     path,
@@ -62,6 +63,7 @@ const agent = async ({ ask, message, type, tell }) => {
       }
       case 'sys/attach':
         self.id = id;
+        sys.setConfig(config);
         return;
       case 'sys/touch':
         if (id === undefined || id !== self.id) {
