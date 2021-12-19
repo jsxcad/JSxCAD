@@ -1,5 +1,5 @@
 import { rewriteViewGroupOrient, appendViewGroupCode, extractViewGroupCode, deleteViewGroupCode } from './jsxcad-compiler.js';
-import { readOrWatch, unwatchFile, watchFile, boot, log, deleteFile, ask, touch, askService, clearCacheDb, write, read, logInfo, terminateActiveServices, clearEmitted, resolvePending, listFiles, getActiveServices, watchFileCreation, watchFileDeletion, watchLog, watchServices } from './jsxcad-sys.js';
+import { readOrWatch, unwatchFile, watchFile, boot, log, deleteFile, ask, touch, askService, setConfig, write, read, clearCacheDb, logInfo, terminateActiveServices, clearEmitted, resolvePending, listFiles, getActiveServices, watchFileCreation, watchFileDeletion, watchLog, watchServices } from './jsxcad-sys.js';
 import { toDomElement, getNotebookControlData } from './jsxcad-ui-notebook.js';
 import { orbitDisplay, raycast, getWorldPosition } from './jsxcad-ui-threejs.js';
 import Prettier from 'https://unpkg.com/prettier@2.3.2/esm/standalone.mjs';
@@ -42442,6 +42442,13 @@ const defaultModelConfig = {
       component: 'Files',
       enableClose: false,
       borderWidth: 1024
+    }, {
+      id: 'Config',
+      type: 'tab',
+      name: 'Config',
+      component: 'Config',
+      enableClose: false,
+      borderWidth: 1024
     }]
   }],
   layout: {
@@ -42739,6 +42746,69 @@ class App extends ReactDOM$2.Component {
     this.Clipboard.run = () => {};
 
     this.Clipboard.save = () => {};
+
+    this.Config = {};
+
+    this.Config.path = path => {
+      const {
+        Config = {}
+      } = this.state;
+      let object = {
+        Config
+      };
+      const steps = path.split('/');
+
+      while (steps.length > 0) {
+        const step = steps.shift();
+
+        if (object[step] === undefined) {
+          object[step] = {};
+        }
+
+        object = object[step];
+      }
+
+      return object;
+    };
+
+    this.Config.update = async () => {
+      const {
+        Config = {}
+      } = this.state;
+      const form = document.getElementById('form/Config');
+      this.Config.path('Config/api/shape/endTimer').md = form['Config/api/shape/endTimer/md'].checked;
+      await this.updateState({
+        Config
+      });
+      await this.Config.store();
+      setConfig(Config);
+      window.alert('Configuration updated');
+    };
+
+    this.Config.store = async () => {
+      const {
+        workspace
+      } = this.props;
+      const {
+        Config
+      } = this.state;
+      await write('config/Config', Config, {
+        workspace
+      });
+    };
+
+    this.Config.restore = async () => {
+      const {
+        workspace
+      } = this.props;
+      const Config = await read('config/Config', {
+        workspace
+      });
+      setConfig(Config);
+      await this.updateState({
+        Config
+      });
+    };
 
     this.Files = {};
 
@@ -43815,6 +43885,22 @@ class App extends ReactDOM$2.Component {
               disabled: true
             }, text)))))));
           }
+
+        case 'Config':
+          {
+            return v$1("div", null, v$1(Card, null, v$1(Card.Body, null, v$1(Card.Title, null, "Configuration"), v$1(Card.Text, null, v$1(FormImpl, {
+              id: "form/Config"
+            }, v$1(Button, {
+              variant: "primary",
+              onClick: this.Config.update
+            }, "Update"), v$1(FormImpl.Group, {
+              controlId: "Config/api/shape/endTimer/md"
+            }, v$1(FormImpl.Check, {
+              type: "checkbox",
+              label: "Emit md from endTimer",
+              checked: this.Config.path('Config/api/shape/endTimer').md
+            })))))));
+          }
       }
     };
 
@@ -43906,6 +43992,7 @@ class App extends ReactDOM$2.Component {
     };
 
     this.servicesActiveCounts = {};
+    await this.Config.restore();
     await this.Workspace.restore();
     await this.View.restore();
     await this.Model.restore();

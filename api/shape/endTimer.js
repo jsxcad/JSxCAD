@@ -1,4 +1,4 @@
-import { config, logInfo } from '@jsxcad/sys';
+import { getConfig, logInfo } from '@jsxcad/sys';
 import { starts, totals } from './startTimer.js';
 
 import Shape from './Shape.js';
@@ -17,7 +17,7 @@ export const endTimer = (name) => (shape) => {
       (1000 * total.count)
     ).toFixed(2)}]`;
     logInfo('api/shape/endTimer', message);
-    if (config?.api?.shape?.endTimer?.md) {
+    if (getConfig().api?.shape?.endTimer?.md) {
       shape = shape.md(message);
     }
   }
