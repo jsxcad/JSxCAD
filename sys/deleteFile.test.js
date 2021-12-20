@@ -9,13 +9,13 @@ test('Utf8 read', async (t) => {
   setupFilesystem({ fileBase: 'tmp' });
 
   const deleted = new Set();
-  watchFileDeletion((options, file) => deleted.add(file.path));
+  watchFileDeletion((path) => deleted.add(path));
 
   await writeFile({}, 'hello', 'hello');
   const data1 = await readFile({}, 'hello');
   await deleteFile({}, 'hello');
   const data2 = await readFile({}, 'hello');
   t.is(data1, 'hello');
-  t.true(deleted.has('hello'));
+  t.true(deleted.has('jsxcad/tmp/hello'));
   t.is(data2, undefined);
 });

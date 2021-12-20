@@ -78,7 +78,7 @@ export const listFiles = async ({ workspace } = {}) => {
   const keys = await getKeys({ workspace });
   const files = [];
   for (const key of keys) {
-    if (key.startsWith(prefix)) {
+    if (key && key.startsWith(prefix)) {
       files.push(key.substring(prefix.length));
     }
   }

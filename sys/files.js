@@ -4,6 +4,18 @@ const files = new Map();
 const fileCreationWatchers = new Set();
 const fileDeletionWatchers = new Set();
 
+export const runFileCreationWatchers = async (path, options) => {
+  for (const watcher of fileCreationWatchers) {
+    await watcher(path, options);
+  }
+};
+
+export const runFileDeletionWatchers = async (path, options) => {
+  for (const watcher of fileDeletionWatchers) {
+    await watcher(path, options);
+  }
+};
+
 export const getFile = async (options, unqualifiedPath) => {
   if (typeof unqualifiedPath !== 'string') {
     throw Error(`die: ${JSON.stringify(unqualifiedPath)}`);
@@ -13,9 +25,7 @@ export const getFile = async (options, unqualifiedPath) => {
   if (file === undefined) {
     file = { path: unqualifiedPath, watchers: new Set(), storageKey: path };
     files.set(path, file);
-    for (const watcher of fileCreationWatchers) {
-      await watcher(options, file);
-    }
+    await runFileCreationWatchers(path, options);
   }
   return file;
 };
@@ -35,9 +45,7 @@ export const deleteFile = async (options, unqualifiedPath) => {
     // It might not have been in the cache, but we still need to inform watchers.
     file = { path: unqualifiedPath, storageKey: path };
   }
-  for (const watcher of fileDeletionWatchers) {
-    await watcher(options, file);
-  }
+  await runFileDeletionWatchers(path, options);
 };
 
 export const unwatchFiles = async (thunk) => {

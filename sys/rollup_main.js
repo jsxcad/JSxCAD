@@ -20,6 +20,7 @@ export default {
       allowFallthrough: true,
       allowRealFiles: true,
       files: {
+        './dexie-observable-shim.js': "import './dexie-observable.es.js';",
         'node-fetch': 'export default _ => _;',
         './nodeWorker.js': 'export const nodeWorker = () => {};',
         v8: 'export default {};',
