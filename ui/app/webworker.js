@@ -72,18 +72,14 @@ const agent = async ({ ask, message, type, tell }) => {
         }
         return;
       case 'app/staticView':
-        sys.info('Load Geometry');
         const geometry = await sys.readOrWatch(path, { workspace });
         const { staticView } = await import('@jsxcad/ui-threejs');
-        sys.info('Render');
         await staticView(baseApi.Shape.fromGeometry(geometry), {
           ...view,
           canvas: offscreenCanvas,
         });
-        sys.info('Convert to PNG');
         const blob = await offscreenCanvas.convertToBlob({ type: 'image/png' });
         const dataURL = new FileReaderSync().readAsDataURL(blob);
-        sys.info('Done');
         return dataURL;
       case 'app/evaluate':
         await sys.log({ op: 'text', text: 'Evaluation Started' });
@@ -117,7 +113,7 @@ const agent = async ({ ask, message, type, tell }) => {
         throw Error(`Unknown operation ${op}`);
     }
   } catch (error) {
-    sys.info(error.stack);
+    console.log(error.stack);
     throw error;
   }
 };

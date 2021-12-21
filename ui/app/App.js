@@ -15,16 +15,15 @@ import {
   boot,
   clearCacheDb,
   clearEmitted,
-  deleteFile,
   getActiveServices,
   listFiles,
   log,
   logInfo,
   read,
+  remove,
   resolvePending,
   setConfig,
   terminateActiveServices,
-  touch,
   watchFileCreation,
   watchFileDeletion,
   watchLog,
@@ -195,7 +194,6 @@ class App extends React.Component {
       const {
         op,
         entry,
-        id,
         identifier,
         notes,
         options,
@@ -225,14 +223,10 @@ class App extends React.Component {
           }
           return disjointPaths;
         }
-
-        case 'sys/touch':
-          await touch(path, { workspace, id, clear: true, broadcast: true });
-          return;
         case 'ask':
           return askSys(identifier, options);
         case 'deleteFile':
-          return deleteFile(options, path);
+          return remove(options, path);
         case 'log':
           return log(entry);
         case 'notes':
@@ -300,7 +294,7 @@ class App extends React.Component {
                   const offscreenCanvas = canvas.transferControlToOffscreen();
                   const render = async () => {
                     try {
-                      console.log(`Ask render for ${path}/${id}`);
+                      logInfo('app/App', `Ask render for ${path}/${id}`);
                       const url = await this.ask(
                         {
                           op: 'app/staticView',
@@ -365,8 +359,6 @@ class App extends React.Component {
               await NotebookAdvice.onUpdate();
             }
           }
-          return;
-        case 'info':
           return;
         default:
           throw Error(`Unknown operation ${op}`);
@@ -451,7 +443,7 @@ class App extends React.Component {
       );
       for (const file of nonRegenerableFiles) {
         console.log(`QQ/Deleting: ${file}`);
-        await deleteFile({ workspace }, file);
+        await remove({ workspace }, file);
       }
     };
 
@@ -1309,9 +1301,9 @@ class App extends React.Component {
                       Clear
                     </Button>
                     <ListGroup>
-                      {LogMessages.map(({ type, source, text }, index) => (
+                      {LogMessages.map(({ type, source, text, id }, index) => (
                         <ListGroup.Item key={index} disabled>
-                          {text}
+                          {id}: {text}
                         </ListGroup.Item>
                       ))}
                     </ListGroup>

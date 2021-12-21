@@ -245,7 +245,7 @@ export const yz = Shape.fromGeometry({
 
 export { md } from './md.js';
 
-export { elapsed, emit, info, read, write } from '@jsxcad/sys';
+export { elapsed, emit, read, write } from '@jsxcad/sys';
 
 export { Shape } from './Shape.js';
 export { abstract } from './abstract.js';

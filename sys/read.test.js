@@ -1,13 +1,13 @@
-import { readFile } from './readFile.js';
+import { read } from './read.js';
 import { setupFilesystem } from './filesystem.js';
 import test from 'ava';
-import { writeFile } from './writeFile.js';
+import { write } from './write.js';
 
 test('Unserialized utf8 read', async (t) => {
   setupFilesystem({ fileBase: 'tmp' });
-  const data = await readFile(
+  const data = await read(
+    'utf8',
     { doSerialize: false, sources: ['testdata/hello.txt'] },
-    'utf8'
   );
   const text = new TextDecoder('utf8').decode(data);
   t.is(text, 'Hello\n');
@@ -15,9 +15,9 @@ test('Unserialized utf8 read', async (t) => {
 
 test('Unserialized bytes read', async (t) => {
   setupFilesystem({ fileBase: 'tmp' });
-  const data = await readFile(
+  const data = await read(
+    'bytes',
     { doSerialize: false, sources: ['testdata/hello.txt'] },
-    'bytes'
   );
   t.deepEqual(
     [0, 1, 2, 3, 4, 5].map((nth) => data[nth]),
@@ -27,24 +27,23 @@ test('Unserialized bytes read', async (t) => {
 
 test('Serialized utf8 read', async (t) => {
   setupFilesystem({ fileBase: 'tmp' });
-  await writeFile({}, 'serialized_utf8', 'Hello\n');
-  const data = await readFile(
+  await write('serialized_utf8', 'Hello\n');
+  const data = await read(
+    'serialized_utf8',
     { sources: ['testdata/hello.txt'] },
-    'serialized_utf8'
   );
   t.is(data, 'Hello\n');
 });
 
 test('Serialized bytes read', async (t) => {
   setupFilesystem({ fileBase: 'tmp' });
-  await writeFile(
-    {},
+  await write(
     'serialized_bytes',
     new TextEncoder('utf8').encode('Hello\n')
   );
-  const data = await readFile(
+  const data = await read(
+    'serialized_bytes',
     { sources: ['testdata/hello.txt'] },
-    'serialized_bytes'
   );
   t.deepEqual(
     [0, 1, 2, 3, 4, 5].map((nth) => data[nth]),

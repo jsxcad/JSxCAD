@@ -1,5 +1,5 @@
 import { rewriteViewGroupOrient, appendViewGroupCode, extractViewGroupCode, deleteViewGroupCode } from './jsxcad-compiler.js';
-import { readOrWatch, unwatchFile, watchFile, boot, log, deleteFile, ask, touch, askService, setConfig, write, read, clearCacheDb, logInfo, terminateActiveServices, clearEmitted, resolvePending, listFiles, getActiveServices, watchFileCreation, watchFileDeletion, watchLog, watchServices } from './jsxcad-sys.js';
+import { readOrWatch, unwatchFile, watchFile, boot, log, remove, ask, askService, setConfig, write, read, clearCacheDb, logInfo, terminateActiveServices, clearEmitted, resolvePending, listFiles, getActiveServices, watchFileCreation, watchFileDeletion, watchLog, watchServices } from './jsxcad-sys.js';
 import { toDomElement, getNotebookControlData } from './jsxcad-ui-notebook.js';
 import { orbitDisplay, raycast, getWorldPosition } from './jsxcad-ui-threejs.js';
 import Prettier from 'https://unpkg.com/prettier@2.3.2/esm/standalone.mjs';
@@ -42504,7 +42504,6 @@ class App extends ReactDOM$2.Component {
       const {
         op,
         entry,
-        id,
         identifier,
         notes,
         options,
@@ -42540,20 +42539,11 @@ class App extends ReactDOM$2.Component {
             return disjointPaths;
           }
 
-        case 'sys/touch':
-          await touch(path, {
-            workspace,
-            id,
-            clear: true,
-            broadcast: true
-          });
-          return;
-
         case 'ask':
           return ask(identifier, options);
 
         case 'deleteFile':
-          return deleteFile(options, path);
+          return remove(options, path);
 
         case 'log':
           return log(entry);
@@ -42640,7 +42630,7 @@ class App extends ReactDOM$2.Component {
 
                   const render = async () => {
                     try {
-                      console.log(`Ask render for ${path}/${id}`);
+                      logInfo('app/App', `Ask render for ${path}/${id}`);
                       const url = await this.ask({
                         op: 'app/staticView',
                         path,
@@ -42711,9 +42701,6 @@ class App extends ReactDOM$2.Component {
               await NotebookAdvice.onUpdate();
             }
           }
-          return;
-
-        case 'info':
           return;
 
         default:
@@ -42833,7 +42820,7 @@ class App extends ReactDOM$2.Component {
 
       for (const file of nonRegenerableFiles) {
         console.log(`QQ/Deleting: ${file}`);
-        await deleteFile({
+        await remove({
           workspace
         }, file);
       }
@@ -43879,11 +43866,12 @@ class App extends ReactDOM$2.Component {
             }, "Clear"), v$1(ListGroup, null, LogMessages.map(({
               type,
               source,
-              text
+              text,
+              id
             }, index) => v$1(ListGroup.Item, {
               key: index,
               disabled: true
-            }, text)))))));
+            }, id, ": ", text)))))));
           }
 
         case 'Config':

@@ -1,7 +1,7 @@
 import { identityMatrix, fromTranslation, fromZRotation, fromScaling, fromXRotation, fromYRotation } from './jsxcad-math-mat4.js';
 import { composeTransforms, fromSurfaceMeshToLazyGraph, fromPointsToAlphaShapeAsSurfaceMesh, deserializeSurfaceMesh, fromGraphToSurfaceMesh, cutClosedSurfaceMeshIncrementally, cutClosedSurfaceMeshSingly, cutClosedSurfaceMeshSinglyRecursive, fitPlaneToPoints, arrangePathsIntoTriangles, fromPolygonsToSurfaceMesh, fromSurfaceMeshEmitBoundingBox, differenceOfSurfaceMeshes, arrangePaths, disjointClosedSurfaceMeshes, serializeSurfaceMesh, bendSurfaceMesh, computeCentroidOfSurfaceMesh, computeNormalOfSurfaceMesh, fromSurfaceMeshToGraph, fromPointsToConvexHullAsSurfaceMesh, outlineSurfaceMesh, extrudeSurfaceMesh, extrudeToPlaneOfSurfaceMesh, fromSurfaceMeshToPolygonsWithHoles, reverseFaceOrientationsOfSurfaceMesh, fromFunctionToSurfaceMesh, fromPointsToSurfaceMesh, fromSegmentToInverseTransform, invertTransform, growSurfaceMesh, intersectionOfSurfaceMeshes, SurfaceMeshQuery, insetOfPolygonWithHoles, loftBetweenCongruentSurfaceMeshes, minkowskiDifferenceOfSurfaceMeshes, minkowskiShellOfSurfaceMeshes, minkowskiSumOfSurfaceMeshes, offsetOfPolygonWithHoles, projectToPlaneOfSurfaceMesh, pushSurfaceMesh, remeshSurfaceMesh, removeSelfIntersectionsOfSurfaceMesh, sectionOfSurfaceMesh, subdivideSurfaceMesh, separateSurfaceMesh, fromSurfaceMeshToTriangles, taperSurfaceMesh, doesSelfIntersectOfSurfaceMesh, twistSurfaceMesh, unionOfSurfaceMeshes } from './jsxcad-algorithm-cgal.js';
 export { arrangePolygonsWithHoles } from './jsxcad-algorithm-cgal.js';
-import { read as read$1, write as write$1, generateUniqueId, getWorkspace, deleteFile, info } from './jsxcad-sys.js';
+import { read as read$1, write as write$1, generateUniqueId, getWorkspace, remove } from './jsxcad-sys.js';
 import { equals, transform as transform$4, canonicalize as canonicalize$5, max, min, scale as scale$3, subtract } from './jsxcad-math-vec3.js';
 import { canonicalize as canonicalize$7 } from './jsxcad-math-plane.js';
 import { canonicalize as canonicalize$6 } from './jsxcad-math-poly3.js';
@@ -1002,10 +1002,10 @@ const distributedDisjoint = async (geometries) => {
   }
   // Schedule cleanup for the temporary paths.
   for (const path of paths) {
-    deleteFile({}, path);
+    remove(path, {});
   }
   for (const path of disjointPaths) {
-    deleteFile({}, path);
+    remove(path, {});
   }
   return taggedGroup({}, ...disjointGeometries);
 };
@@ -2466,7 +2466,6 @@ const intersection = (geometry, ...geometries) => {
 };
 
 const inset$1 = (geometry, initial, step, limit) => {
-  info('inset begin');
   const insetGraphs = [];
   const { tags, plane, exactPlane } = geometry;
   for (const { polygonsWithHoles } of toPolygonsWithHoles$1(geometry)) {
@@ -2485,7 +2484,6 @@ const inset$1 = (geometry, initial, step, limit) => {
       }
     }
   }
-  info('inset end');
   return insetGraphs;
 };
 
@@ -2820,7 +2818,6 @@ const minkowskiSum = (geometry, offset) => {
 };
 
 const offset$1 = (geometry, initial, step, limit) => {
-  info('offset begin');
   const offsetGraphs = [];
   const { tags, plane, exactPlane } = geometry;
   for (const { polygonsWithHoles } of toPolygonsWithHoles$1(geometry)) {
@@ -2841,7 +2838,6 @@ const offset$1 = (geometry, initial, step, limit) => {
       }
     }
   }
-  info('offset end');
   return offsetGraphs;
 };
 

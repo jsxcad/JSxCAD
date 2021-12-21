@@ -8,7 +8,7 @@ export { clearCacheDb } from './db.js';
 export { getConfig, setConfig } from './config.js';
 export { createService } from './service.js';
 export { getControlValue, setControlValue } from './control.js';
-export { read, readFile, readOrWatch } from './readFile.js';
+export { read, readOrWatch } from './read.js';
 export { ask, setHandleAskUser } from './ask.js';
 export { boot, onBoot } from './boot.js';
 export {
@@ -20,7 +20,6 @@ export {
   finishEmitGroup,
   flushEmitGroup,
   getSourceLocation,
-  info,
   removeOnEmitHandler,
   restoreEmitGroup,
   saveEmitGroup,
@@ -36,17 +35,16 @@ export { hash } from './hash.js';
 export { isBrowser, isNode, isWebWorker } from './browserOrNode.js';
 export { listFiles } from './listFiles.js';
 export { log, logError, logInfo, unwatchLog, watchLog } from './log.js';
-export { unwatchFile, watchFile } from './watchFile.js';
 export {
+  unwatchFile,
   unwatchFileCreation,
   unwatchFileDeletion,
-  unwatchFiles,
+  watchFile,
   watchFileCreation,
   watchFileDeletion,
-} from './files.js';
+} from './watchers.js';
 
 export { createConversation } from './conversation.js';
-export { deleteFile } from './deleteFile.js';
 export {
   askService,
   askServices,
@@ -58,7 +56,7 @@ export {
   waitServices,
   watchServices,
 } from './servicePool.js';
+export { remove } from './remove.js';
 export { sleep } from './sleep.js';
-export { touch } from './touch.js';
-export { write, writeFile } from './writeFile.js';
+export { write } from './write.js';
 export { generateUniqueId } from './generateUniqueId.js';

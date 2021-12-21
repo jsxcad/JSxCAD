@@ -1,6 +1,6 @@
 /* global self */
 
-import { deleteFile, generateUniqueId, getWorkspace } from '@jsxcad/sys';
+import { generateUniqueId, getWorkspace, remove } from '@jsxcad/sys';
 import { rewrite, visit } from './visit.js';
 
 import { difference } from './difference.js';
@@ -83,10 +83,10 @@ export const distributedDisjoint = async (geometries) => {
   }
   // Schedule cleanup for the temporary paths.
   for (const path of paths) {
-    deleteFile({}, path);
+    remove(path, {});
   }
   for (const path of disjointPaths) {
-    deleteFile({}, path);
+    remove(path, {});
   }
   return taggedGroup({}, ...disjointGeometries);
 };

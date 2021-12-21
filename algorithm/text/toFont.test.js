@@ -1,4 +1,4 @@
-import { boot, readFile } from '@jsxcad/sys';
+import { boot, read } from '@jsxcad/sys';
 
 import { realize } from '@jsxcad/geometry';
 import test from 'ava';
@@ -6,9 +6,9 @@ import { toFont } from './toFont.js';
 
 test('Render a letter', async (t) => {
   await boot();
-  const bytes = await readFile(
+  const bytes = await read(
+    'GreatVibes-Regular.ttf',
     { doSerialize: false, sources: ['GreatVibes-Regular.ttf'] },
-    'GreatVibes-Regular.ttf'
   );
   const font = toFont({}, bytes);
   const letterA = font({}, 'ab');

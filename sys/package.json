@@ -7,7 +7,7 @@
   "module": "dist/main.js",
   "type": "module",
   "scripts": {
-    "depcheck": "depcheck --ignores '@jsxcad/eslint*,eslint*,babel-eslint'",
+    "depcheck": "depcheck --ignores '@jsxcad/eslint*,eslint*,babel-eslint,broadcast-channel'",
     "lint": "eslint *.js",
     "lintfix": "eslint --fix *.js",
     "rollup": "rollup -c rollup_main.js",
@@ -23,8 +23,8 @@
   "keywords": [],
   "license": "MIT",
   "dependencies": {
-    "dexie": "^3.2.0",
-    "dexie-observable": "^3.0.0-beta.11",
+    "broadcast-channel": "^4.8.0",
+    "idb": "^7.0.0",
     "idb-keyval": "^6.0.3",
     "node-fetch": "^2.6.1",
     "hash-sum": "^2.0.0",
