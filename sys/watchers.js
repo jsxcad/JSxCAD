@@ -1,52 +1,63 @@
+import { qualifyPath } from './filesystem.js';
+
 const fileChangeWatchers = new Set();
 const fileChangeWatchersByPath = new Map();
 const fileCreationWatchers = new Set();
 const fileDeletionWatchers = new Set();
 
-export const runFileCreationWatchers = async (path, options) => {
+export const runFileCreationWatchers = async (path, workspace) => {
   for (const watcher of fileCreationWatchers) {
-    await watcher(path, options);
+    await watcher(path, workspace);
   }
 };
 
-export const runFileDeletionWatchers = async (path, options) => {
+export const runFileDeletionWatchers = async (path, workspace) => {
   for (const watcher of fileDeletionWatchers) {
-    await watcher(path, options);
+    await watcher(path, workspace);
   }
 };
 
-export const runFileChangeWatchers = async (path, options) => {
+export const runFileChangeWatchers = async (path, workspace) => {
   for (const watcher of fileChangeWatchers) {
-    await watcher(path, options);
+    await watcher(path, workspace);
   }
-  const watchers = fileChangeWatchersByPath.get(path);
+  const entry = fileChangeWatchersByPath.get(qualifyPath(path, workspace));
+  if (entry === undefined) {
+    return;
+  }
+  const { watchers } = entry;
   if (watchers === undefined) {
     return;
   }
   for (const watcher of watchers) {
-    await watcher(path, options);
+    await watcher(path, workspace);
   }
 };
 
-export const watchFile = async (path, thunk, options) => {
+export const watchFile = async (path, workspace, thunk) => {
   if (thunk) {
-    let watchers = fileChangeWatchersByPath.get(path);
-    if (watchers === undefined) {
-      watchers = new Set();
-      fileChangeWatchersByPath.set(path, watchers);
+    const qualifiedPath = qualifyPath(path, workspace);
+    let entry = fileChangeWatchersByPath.get(qualifiedPath);
+    if (entry === undefined) {
+      entry = { path, workspace, watchers: new Set() };
+      fileChangeWatchersByPath.set(qualifiedPath, entry);
     }
-    watchers.add(thunk);
+    entry.watchers.add(thunk);
     return thunk;
   }
 };
 
-export const unwatchFile = async (path, thunk, options) => {
+export const unwatchFile = async (path, workspace, thunk) => {
   if (thunk) {
-    const watchers = fileChangeWatchersByPath.get(path);
-    if (watchers === undefined) {
+    const qualifiedPath = qualifyPath(path, workspace);
+    const entry = fileChangeWatchersByPath.get(qualifiedPath);
+    if (entry === undefined) {
       return;
     }
-    watchers.delete(thunk);
+    entry.watchers.delete(thunk);
+    if (entry.watchers.size === 0) {
+      fileChangeWatchersByPath.delete(qualifiedPath);
+    }
   }
 };
 

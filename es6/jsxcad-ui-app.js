@@ -42129,9 +42129,7 @@ class OrbitView extends ReactDOM$2.PureComponent {
     this.builtContainer = container;
 
     if (this.watcher) {
-      unwatchFile(this.builtPath, this.watcher, {
-        workspace
-      });
+      unwatchFile(this.builtPath, workspace, this.watcher);
     }
 
     this.watcher = async () => {
@@ -42158,9 +42156,7 @@ class OrbitView extends ReactDOM$2.PureComponent {
       trackballControls.reset();
     };
 
-    watchFile(path, this.watcher, {
-      workspace
-    });
+    watchFile(path, workspace, this.watcher);
     trackballControls.addEventListener('change', () => {
       const {
         onMove
@@ -42305,9 +42301,7 @@ class OrbitView extends ReactDOM$2.PureComponent {
     } = this.props;
 
     if (this.watcher) {
-      unwatchFile(this.path, this.watcher, {
-        workspace
-      });
+      unwatchFile(this.path, workspace, this.watcher);
     }
   }
 

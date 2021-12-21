@@ -15,157 +15,6 @@ const setPendingErrorHandler = (handler) => {
   pendingErrorHandler = handler;
 };
 
-/**
- * Work around Safari 14 IndexedDB open bug.
- *
- * Safari has a horrible bug where IDB requests can hang while the browser is starting up. https://bugs.webkit.org/show_bug.cgi?id=226547
- * The only solution is to keep nudging it until it's awake.
- */
-function idbReady() {
-    var isSafari = !navigator.userAgentData &&
-        /Safari\//.test(navigator.userAgent) &&
-        !/Chrom(e|ium)\//.test(navigator.userAgent);
-    // No point putting other browsers or older versions of Safari through this mess.
-    if (!isSafari || !indexedDB.databases)
-        return Promise.resolve();
-    var intervalId;
-    return new Promise(function (resolve) {
-        var tryIdb = function () { return indexedDB.databases().finally(resolve); };
-        intervalId = setInterval(tryIdb, 100);
-        tryIdb();
-    }).finally(function () { return clearInterval(intervalId); });
-}
-
-function promisifyRequest(request) {
-  return new Promise(function (resolve, reject) {
-    // @ts-ignore - file size hacks
-    request.oncomplete = request.onsuccess = function () {
-      return resolve(request.result);
-    }; // @ts-ignore - file size hacks
-
-
-    request.onabort = request.onerror = function () {
-      return reject(request.error);
-    };
-  });
-}
-
-function createStore(dbName, storeName) {
-  var dbp = idbReady().then(function () {
-    var request = indexedDB.open(dbName);
-
-    request.onupgradeneeded = function () {
-      return request.result.createObjectStore(storeName);
-    };
-
-    return promisifyRequest(request);
-  });
-  return function (txMode, callback) {
-    return dbp.then(function (db) {
-      return callback(db.transaction(storeName, txMode).objectStore(storeName));
-    });
-  };
-}
-
-var defaultGetStoreFunc;
-
-function defaultGetStore() {
-  if (!defaultGetStoreFunc) {
-    defaultGetStoreFunc = createStore('keyval-store', 'keyval');
-  }
-
-  return defaultGetStoreFunc;
-}
-/**
- * Get a value by its key.
- *
- * @param key
- * @param customStore Method to get a custom store. Use with caution (see the docs).
- */
-
-
-function get(key) {
-  var customStore = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : defaultGetStore();
-  return customStore('readonly', function (store) {
-    return promisifyRequest(store.get(key));
-  });
-}
-/**
- * Set a value with a key.
- *
- * @param key
- * @param value
- * @param customStore Method to get a custom store. Use with caution (see the docs).
- */
-
-
-function set(key, value) {
-  var customStore = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : defaultGetStore();
-  return customStore('readwrite', function (store) {
-    store.put(value, key);
-    return promisifyRequest(store.transaction);
-  });
-}
-/**
- * Delete a particular key from the store.
- *
- * @param key
- * @param customStore Method to get a custom store. Use with caution (see the docs).
- */
-
-
-function del(key) {
-  var customStore = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : defaultGetStore();
-  return customStore('readwrite', function (store) {
-    store.delete(key);
-    return promisifyRequest(store.transaction);
-  });
-}
-/**
- * Clear all values in the store.
- *
- * @param customStore Method to get a custom store. Use with caution (see the docs).
- */
-
-
-function clear() {
-  var customStore = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : defaultGetStore();
-  return customStore('readwrite', function (store) {
-    store.clear();
-    return promisifyRequest(store.transaction);
-  });
-}
-
-function eachCursor(customStore, callback) {
-  return customStore('readonly', function (store) {
-    // This would be store.getAllKeys(), but it isn't supported by Edge or Safari.
-    // And openKeyCursor isn't supported by Safari.
-    store.openCursor().onsuccess = function () {
-      if (!this.result) return;
-      callback(this.result);
-      this.result.continue();
-    };
-
-    return promisifyRequest(store.transaction);
-  });
-}
-/**
- * Get all keys in the store.
- *
- * @param customStore Method to get a custom store. Use with caution (see the docs).
- */
-
-
-function keys() {
-  var customStore = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : defaultGetStore();
-  var items = [];
-  return eachCursor(customStore, function (cursor) {
-    return items.push(cursor.key);
-  }).then(function () {
-    return items;
-  });
-}
-
 function pad (hash, len) {
   while (hash.length < len) {
     hash = '0' + hash;
@@ -241,39 +90,328 @@ const fromStringToIntegerHash = (s) =>
     s.split('').reduce((a, b) => ((a << 5) - a + b.charCodeAt(0)) | 0, 0)
   );
 
-const cacheStoreCount = 10;
-const idbKeyvalDbInstance = {};
+const instanceOfAny = (object, constructors) => constructors.some((c) => object instanceof c);
 
-const ensureDb = (index) => {
-  let instance = idbKeyvalDbInstance[index];
-  if (instance) {
-    return instance;
+let idbProxyableTypes;
+let cursorAdvanceMethods;
+// This is a function to prevent it throwing up in node environments.
+function getIdbProxyableTypes() {
+    return (idbProxyableTypes ||
+        (idbProxyableTypes = [
+            IDBDatabase,
+            IDBObjectStore,
+            IDBIndex,
+            IDBCursor,
+            IDBTransaction,
+        ]));
+}
+// This is a function to prevent it throwing up in node environments.
+function getCursorAdvanceMethods() {
+    return (cursorAdvanceMethods ||
+        (cursorAdvanceMethods = [
+            IDBCursor.prototype.advance,
+            IDBCursor.prototype.continue,
+            IDBCursor.prototype.continuePrimaryKey,
+        ]));
+}
+const cursorRequestMap = new WeakMap();
+const transactionDoneMap = new WeakMap();
+const transactionStoreNamesMap = new WeakMap();
+const transformCache = new WeakMap();
+const reverseTransformCache = new WeakMap();
+function promisifyRequest(request) {
+    const promise = new Promise((resolve, reject) => {
+        const unlisten = () => {
+            request.removeEventListener('success', success);
+            request.removeEventListener('error', error);
+        };
+        const success = () => {
+            resolve(wrap(request.result));
+            unlisten();
+        };
+        const error = () => {
+            reject(request.error);
+            unlisten();
+        };
+        request.addEventListener('success', success);
+        request.addEventListener('error', error);
+    });
+    promise
+        .then((value) => {
+        // Since cursoring reuses the IDBRequest (*sigh*), we cache it for later retrieval
+        // (see wrapFunction).
+        if (value instanceof IDBCursor) {
+            cursorRequestMap.set(value, request);
+        }
+        // Catching to avoid "Uncaught Promise exceptions"
+    })
+        .catch(() => { });
+    // This mapping exists in reverseTransformCache but doesn't doesn't exist in transformCache. This
+    // is because we create many promises from a single IDBRequest.
+    reverseTransformCache.set(promise, request);
+    return promise;
+}
+function cacheDonePromiseForTransaction(tx) {
+    // Early bail if we've already created a done promise for this transaction.
+    if (transactionDoneMap.has(tx))
+        return;
+    const done = new Promise((resolve, reject) => {
+        const unlisten = () => {
+            tx.removeEventListener('complete', complete);
+            tx.removeEventListener('error', error);
+            tx.removeEventListener('abort', error);
+        };
+        const complete = () => {
+            resolve();
+            unlisten();
+        };
+        const error = () => {
+            reject(tx.error || new DOMException('AbortError', 'AbortError'));
+            unlisten();
+        };
+        tx.addEventListener('complete', complete);
+        tx.addEventListener('error', error);
+        tx.addEventListener('abort', error);
+    });
+    // Cache it for later retrieval.
+    transactionDoneMap.set(tx, done);
+}
+let idbProxyTraps = {
+    get(target, prop, receiver) {
+        if (target instanceof IDBTransaction) {
+            // Special handling for transaction.done.
+            if (prop === 'done')
+                return transactionDoneMap.get(target);
+            // Polyfill for objectStoreNames because of Edge.
+            if (prop === 'objectStoreNames') {
+                return target.objectStoreNames || transactionStoreNamesMap.get(target);
+            }
+            // Make tx.store return the only store in the transaction, or undefined if there are many.
+            if (prop === 'store') {
+                return receiver.objectStoreNames[1]
+                    ? undefined
+                    : receiver.objectStore(receiver.objectStoreNames[0]);
+            }
+        }
+        // Else transform whatever we get back.
+        return wrap(target[prop]);
+    },
+    set(target, prop, value) {
+        target[prop] = value;
+        return true;
+    },
+    has(target, prop) {
+        if (target instanceof IDBTransaction &&
+            (prop === 'done' || prop === 'store')) {
+            return true;
+        }
+        return prop in target;
+    },
+};
+function replaceTraps(callback) {
+    idbProxyTraps = callback(idbProxyTraps);
+}
+function wrapFunction(func) {
+    // Due to expected object equality (which is enforced by the caching in `wrap`), we
+    // only create one new func per func.
+    // Edge doesn't support objectStoreNames (booo), so we polyfill it here.
+    if (func === IDBDatabase.prototype.transaction &&
+        !('objectStoreNames' in IDBTransaction.prototype)) {
+        return function (storeNames, ...args) {
+            const tx = func.call(unwrap(this), storeNames, ...args);
+            transactionStoreNamesMap.set(tx, storeNames.sort ? storeNames.sort() : [storeNames]);
+            return wrap(tx);
+        };
+    }
+    // Cursor methods are special, as the behaviour is a little more different to standard IDB. In
+    // IDB, you advance the cursor and wait for a new 'success' on the IDBRequest that gave you the
+    // cursor. It's kinda like a promise that can resolve with many values. That doesn't make sense
+    // with real promises, so each advance methods returns a new promise for the cursor object, or
+    // undefined if the end of the cursor has been reached.
+    if (getCursorAdvanceMethods().includes(func)) {
+        return function (...args) {
+            // Calling the original function with the proxy as 'this' causes ILLEGAL INVOCATION, so we use
+            // the original object.
+            func.apply(unwrap(this), args);
+            return wrap(cursorRequestMap.get(this));
+        };
+    }
+    return function (...args) {
+        // Calling the original function with the proxy as 'this' causes ILLEGAL INVOCATION, so we use
+        // the original object.
+        return wrap(func.apply(unwrap(this), args));
+    };
+}
+function transformCachableValue(value) {
+    if (typeof value === 'function')
+        return wrapFunction(value);
+    // This doesn't return, it just creates a 'done' promise for the transaction,
+    // which is later returned for transaction.done (see idbObjectHandler).
+    if (value instanceof IDBTransaction)
+        cacheDonePromiseForTransaction(value);
+    if (instanceOfAny(value, getIdbProxyableTypes()))
+        return new Proxy(value, idbProxyTraps);
+    // Return the same value back if we're not going to transform it.
+    return value;
+}
+function wrap(value) {
+    // We sometimes generate multiple promises from a single IDBRequest (eg when cursoring), because
+    // IDB is weird and a single IDBRequest can yield many responses, so these can't be cached.
+    if (value instanceof IDBRequest)
+        return promisifyRequest(value);
+    // If we've already transformed this value before, reuse the transformed value.
+    // This is faster, but it also provides object equality.
+    if (transformCache.has(value))
+        return transformCache.get(value);
+    const newValue = transformCachableValue(value);
+    // Not all types are transformed.
+    // These may be primitive types, so they can't be WeakMap keys.
+    if (newValue !== value) {
+        transformCache.set(value, newValue);
+        reverseTransformCache.set(newValue, value);
+    }
+    return newValue;
+}
+const unwrap = (value) => reverseTransformCache.get(value);
+
+/**
+ * Open a database.
+ *
+ * @param name Name of the database.
+ * @param version Schema version.
+ * @param callbacks Additional callbacks.
+ */
+function openDB(name, version, { blocked, upgrade, blocking, terminated } = {}) {
+    const request = indexedDB.open(name, version);
+    const openPromise = wrap(request);
+    if (upgrade) {
+        request.addEventListener('upgradeneeded', (event) => {
+            upgrade(wrap(request.result), event.oldVersion, event.newVersion, wrap(request.transaction));
+        });
+    }
+    if (blocked)
+        request.addEventListener('blocked', () => blocked());
+    openPromise
+        .then((db) => {
+        if (terminated)
+            db.addEventListener('close', () => terminated());
+        if (blocking)
+            db.addEventListener('versionchange', () => blocking());
+    })
+        .catch(() => { });
+    return openPromise;
+}
+
+const readMethods = ['get', 'getKey', 'getAll', 'getAllKeys', 'count'];
+const writeMethods = ['put', 'add', 'delete', 'clear'];
+const cachedMethods = new Map();
+function getMethod(target, prop) {
+    if (!(target instanceof IDBDatabase &&
+        !(prop in target) &&
+        typeof prop === 'string')) {
+        return;
+    }
+    if (cachedMethods.get(prop))
+        return cachedMethods.get(prop);
+    const targetFuncName = prop.replace(/FromIndex$/, '');
+    const useIndex = prop !== targetFuncName;
+    const isWrite = writeMethods.includes(targetFuncName);
+    if (
+    // Bail if the target doesn't exist on the target. Eg, getAll isn't in Edge.
+    !(targetFuncName in (useIndex ? IDBIndex : IDBObjectStore).prototype) ||
+        !(isWrite || readMethods.includes(targetFuncName))) {
+        return;
+    }
+    const method = async function (storeName, ...args) {
+        // isWrite ? 'readwrite' : undefined gzipps better, but fails in Edge :(
+        const tx = this.transaction(storeName, isWrite ? 'readwrite' : 'readonly');
+        let target = tx.store;
+        if (useIndex)
+            target = target.index(args.shift());
+        // Must reject if op rejects.
+        // If it's a write operation, must reject if tx.done rejects.
+        // Must reject with op rejection first.
+        // Must resolve with op value.
+        // Must handle both promises (no unhandled rejections)
+        return (await Promise.all([
+            target[targetFuncName](...args),
+            isWrite && tx.done,
+        ]))[0];
+    };
+    cachedMethods.set(prop, method);
+    return method;
+}
+replaceTraps((oldTraps) => ({
+    ...oldTraps,
+    get: (target, prop, receiver) => getMethod(target, prop) || oldTraps.get(target, prop, receiver),
+    has: (target, prop) => !!getMethod(target, prop) || oldTraps.has(target, prop),
+}));
+
+const cacheStoreCount = 10;
+const workspaces = {};
+
+const ensureDb = (workspace) => {
+  let entry = workspaces[workspace];
+  if (!entry) {
+    const db = openDB('jsxcad/idb', 1, {
+      upgrade(db) {
+        db.createObjectStore('config/value');
+        db.createObjectStore('config/version');
+        db.createObjectStore('control/value');
+        db.createObjectStore('control/version');
+        db.createObjectStore('source/value');
+        db.createObjectStore('source/version');
+        for (let nth = 0; nth < cacheStoreCount; nth++) {
+          db.createObjectStore(`cache_${nth}/value`);
+          db.createObjectStore(`cache_${nth}/version`);
+        }
+      },
+    });
+    entry = { db, instances: [] };
+    workspaces[workspace] = entry;
   }
-  const store = createStore(index, `jsxcad`);
-  instance = {
-    clear() {
-      return clear(store);
-    },
-    removeItem(path) {
-      return del(path, store);
-    },
-    getItem(path) {
-      return get(path, store);
-    },
-    keys() {
-      return keys(store);
-    },
-    setItem(path, value) {
-      return set(path, value, store);
-    },
-  };
-  idbKeyvalDbInstance[index] = instance;
+  return entry;
+};
+
+const ensureStore = (store, db, instances) => {
+  let instance = instances[store];
+  const valueStore = `${store}/value`;
+  const versionStore = `${store}/version`;
+  if (!instance) {
+    instance = {
+      clear: async () => (await db).clear(valueStore),
+      getItem: async (key) => (await db).get(valueStore, key),
+      getItemAndVersion: async (key) => {
+        const tx = (await db).transaction([valueStore, versionStore]);
+        const value = await tx.objectStore(valueStore).get(key);
+        const version = await tx.objectStore(versionStore).get(key);
+        await tx.done;
+        return { value, version };
+      },
+      getItemVersion: async (key) => (await db).get(versionStore, key),
+      keys: async () => (await db).getAllKeys(valueStore),
+      removeItem: async (key) => (await db).delete(valueStore, key),
+      setItem: async (key, value) => (await db).put(valueStore, value, key),
+      setItemAndIncrementVersion: async (key, value) => {
+        const tx = (await db).transaction(
+          [valueStore, versionStore],
+          'readwrite'
+        );
+        const version = (await tx.objectStore(versionStore).get(key)) || 0;
+        await tx.objectStore(versionStore).put(version + 1, key);
+        await tx.objectStore(valueStore).put(value, key);
+        await tx.done;
+        return version;
+      },
+    };
+    instances[store] = instance;
+  }
   return instance;
 };
 
 const db = (key) => {
   const [jsxcad, workspace, partition] = key.split('/');
-  let index;
+  let store;
 
   if (jsxcad !== 'jsxcad') {
     throw Error('Malformed key');
@@ -283,20 +421,22 @@ const db = (key) => {
     case 'config':
     case 'control':
     case 'source':
-      index = `jsxcad_${workspace}_${partition}`;
+      store = partition;
       break;
     default: {
       const nth = fromStringToIntegerHash(key) % cacheStoreCount;
-      index = `jsxcad_${workspace}_cache_${nth}`;
+      store = `cache_${nth}`;
       break;
     }
   }
-  return ensureDb(index);
+  const { db, instances } = ensureDb(workspace);
+  return ensureStore(store, db, instances);
 };
 
 const clearCacheDb = async ({ workspace }) => {
+  const { instances } = ensureDb(workspace);
   for (let nth = 0; nth < cacheStoreCount; nth++) {
-    await ensureDb(`jsxcad_${workspace}_cache_${nth}`).clear();
+    await ensureStore(`index_${nth}`, instances).clear();
   }
 };
 
@@ -837,50 +977,59 @@ const fileChangeWatchersByPath = new Map();
 const fileCreationWatchers = new Set();
 const fileDeletionWatchers = new Set();
 
-const runFileCreationWatchers = async (path, options) => {
+const runFileCreationWatchers = async (path, workspace) => {
   for (const watcher of fileCreationWatchers) {
-    await watcher(path, options);
+    await watcher(path, workspace);
   }
 };
 
-const runFileDeletionWatchers = async (path, options) => {
+const runFileDeletionWatchers = async (path, workspace) => {
   for (const watcher of fileDeletionWatchers) {
-    await watcher(path, options);
+    await watcher(path, workspace);
   }
 };
 
-const runFileChangeWatchers = async (path, options) => {
+const runFileChangeWatchers = async (path, workspace) => {
   for (const watcher of fileChangeWatchers) {
-    await watcher(path, options);
+    await watcher(path, workspace);
   }
-  const watchers = fileChangeWatchersByPath.get(path);
+  const entry = fileChangeWatchersByPath.get(qualifyPath(path, workspace));
+  if (entry === undefined) {
+    return;
+  }
+  const { watchers } = entry;
   if (watchers === undefined) {
     return;
   }
   for (const watcher of watchers) {
-    await watcher(path, options);
+    await watcher(path, workspace);
   }
 };
 
-const watchFile = async (path, thunk, options) => {
+const watchFile = async (path, workspace, thunk) => {
   if (thunk) {
-    let watchers = fileChangeWatchersByPath.get(path);
-    if (watchers === undefined) {
-      watchers = new Set();
-      fileChangeWatchersByPath.set(path, watchers);
+    const qualifiedPath = qualifyPath(path, workspace);
+    let entry = fileChangeWatchersByPath.get(qualifiedPath);
+    if (entry === undefined) {
+      entry = { path, workspace, watchers: new Set() };
+      fileChangeWatchersByPath.set(qualifiedPath, entry);
     }
-    watchers.add(thunk);
+    entry.watchers.add(thunk);
     return thunk;
   }
 };
 
-const unwatchFile = async (path, thunk, options) => {
+const unwatchFile = async (path, workspace, thunk) => {
   if (thunk) {
-    const watchers = fileChangeWatchersByPath.get(path);
-    if (watchers === undefined) {
+    const qualifiedPath = qualifyPath(path, workspace);
+    const entry = fileChangeWatchersByPath.get(qualifiedPath);
+    if (entry === undefined) {
       return;
     }
-    watchers.delete(thunk);
+    entry.watchers.delete(thunk);
+    if (entry.watchers.size === 0) {
+      fileChangeWatchersByPath.delete(qualifiedPath);
+    }
   }
 };
 
@@ -2836,13 +2985,13 @@ const receiveNotification = async ({ id, op, path, workspace }) => {
   );
   switch (op) {
     case 'changePath':
-      await runFileChangeWatchers(path, { workspace });
+      await runFileChangeWatchers(path, workspace);
       break;
     case 'createPath':
-      await runFileCreationWatchers(path, { workspace });
+      await runFileCreationWatchers(path, workspace);
       break;
     case 'deletePath':
-      await runFileDeletionWatchers(path, { workspace });
+      await runFileDeletionWatchers(path, workspace);
       break;
     default:
       throw Error(
@@ -2870,13 +3019,13 @@ const initBroadcastChannel = async () => {
   broadcastChannel.onmessage = receiveBroadcast;
 };
 
-const notifyFileChange = async (path, { workspace }) =>
+const notifyFileChange = async (path, workspace) =>
   sendBroadcast({ id: self$1 && self$1.id, op: 'changePath', path, workspace });
 
-const notifyFileCreation = async (path, { workspace }) =>
+const notifyFileCreation = async (path, workspace) =>
   sendBroadcast({ id: self$1 && self$1.id, op: 'createPath', path, workspace });
 
-const notifyFileDeletion = async (path, { workspace }) =>
+const notifyFileDeletion = async (path, workspace) =>
   sendBroadcast({ id: self$1 && self$1.id, op: 'deletePath', path, workspace });
 
 initBroadcastChannel();
@@ -2893,7 +3042,7 @@ const getQualifiedFile = async (
   if (file === undefined) {
     file = { path: unqualifiedPath, storageKey: qualifiedPath };
     files.set(qualifiedPath, file);
-    await notifyFileCreation(qualifiedPath, options);
+    await notifyFileCreation(unqualifiedPath, options.workspace);
   }
   return file;
 };
@@ -2904,7 +3053,12 @@ const listFiles$1 = (set) => {
   }
 };
 
-watchFileDeletion((qualifiedPath, options) => {
+watchFileDeletion((path, workspace) => {
+  const qualifiedPath = qualifyPath(path, workspace);
+  const file = files.get(qualifiedPath);
+  if (file) {
+    file.data = undefined;
+  }
   files.delete(qualifiedPath);
 });
 
@@ -2954,6 +3108,9 @@ const getFileWriter = () => {
           data = serialize(data);
         }
         await promises$3.writeFile(qualifiedPath, data);
+        // FIX: Do proper versioning.
+        const version = 0;
+        return version;
       } catch (error) {
         throw error;
       }
@@ -2991,7 +3148,7 @@ const write = async (path, data, options = {}) => {
   }
 
   // Let everyone else know the file has changed.
-  await notifyFileChange(qualifiedPath, { workspace });
+  await notifyFileChange(path, workspace);
 
   return true;
 };
@@ -3019,12 +3176,9 @@ const urlFetcher = getUrlFetcher();
 const getExternalFileFetcher = () => {
   if (isNode) {
     // FIX: Put this through getFile, also.
-    return async (qualifiedPath, doSerialize = true) => {
+    return async (qualifiedPath) => {
       try {
         let data = await promises$2.readFile(qualifiedPath);
-        if (doSerialize) {
-          data = deserialize(data);
-        }
         return data;
       } catch (e) {
         if (e.code && e.code === 'ENOENT') {
@@ -3061,9 +3215,8 @@ const getInternalFileFetcher = () => {
       }
     };
   } else if (isBrowser || isWebWorker) {
-    return async (qualifiedPath) => {
-      return db(qualifiedPath).getItemAndVersion(qualifiedPath);
-    };
+    return (qualifiedPath) =>
+      db(qualifiedPath).getItemAndVersion(qualifiedPath);
   } else {
     throw Error('Expected node or browser or web worker');
   }
@@ -3074,14 +3227,12 @@ const internalFileFetcher = getInternalFileFetcher();
 const getInternalFileVersionFetcher = (qualify = qualifyPath) => {
   if (isNode) {
     // FIX: Put this through getFile, also.
-    return async (qualifiedPath) => {
+    return (qualifiedPath) => {
       // FIX: Use a proper version.
       return 0;
     };
   } else if (isBrowser || isWebWorker) {
-    return async (qualifiedPath) => {
-      return db(qualifiedPath).getItemVersion(qualifiedPath);
-    };
+    return (qualifiedPath) => db(qualifiedPath).getItemVersion(qualifiedPath);
   } else {
     throw Error('Expected node or browser or web worker');
   }
@@ -3090,7 +3241,7 @@ const getInternalFileVersionFetcher = (qualify = qualifyPath) => {
 const internalFileVersionFetcher = getInternalFileVersionFetcher();
 
 // Fetch from internal store.
-const fetchPersistent = async (qualifiedPath, { workspace, doSerialize }) => {
+const fetchPersistent = (qualifiedPath, { workspace, doSerialize }) => {
   try {
     if (workspace) {
       return internalFileFetcher(qualifiedPath, doSerialize);
@@ -3105,7 +3256,7 @@ const fetchPersistent = async (qualifiedPath, { workspace, doSerialize }) => {
   }
 };
 
-const fetchPersistentVersion = async (qualifiedPath, { workspace }) => {
+const fetchPersistentVersion = (qualifiedPath, { workspace }) => {
   try {
     if (workspace) {
       return internalFileVersionFetcher(qualifiedPath);
@@ -3133,7 +3284,7 @@ const fetchSources = async (sources, { workspace }) => {
         } else {
           logInfo('sys/fetchSources/file', source);
           // Assume a file path.
-          const data = await externalFileFetcher(source, false);
+          const data = await externalFileFetcher(source);
           if (data !== undefined) {
             return data;
           }
@@ -3169,11 +3320,11 @@ const read = async (path, options = {}) => {
   }
 
   if (file.data === undefined || useCache === false || forceNoCache) {
-    const { data, version } = await fetchPersistent(qualifiedPath, {
+    const { value, version } = await fetchPersistent(qualifiedPath, {
       workspace,
       doSerialize: true,
     });
-    file.data = data;
+    file.data = value;
     file.version = version;
   }
 
@@ -3206,9 +3357,11 @@ const readOrWatch = async (path, options = {}) => {
   const watch = new Promise((resolve) => {
     resolveWatch = resolve;
   });
-  const watcher = await watchFile(path, (file) => resolveWatch(path));
+  const watcher = await watchFile(path, options.workspace, (file) =>
+    resolveWatch(path)
+  );
   await watch;
-  await unwatchFile(path, watcher);
+  await unwatchFile(path, options.workspace, watcher);
   return read(path, options);
 };
 
@@ -3607,7 +3760,6 @@ const { promises } = fs;
 
 const getPersistentFileDeleter = () => {
   if (isNode) {
-    // FIX: Put this through getFile, also.
     return async (qualifiedPath) => {
       return promises.unlink(qualifiedPath);
     };
@@ -3623,9 +3775,8 @@ const getPersistentFileDeleter = () => {
 const persistentFileDeleter = getPersistentFileDeleter();
 
 const remove = async (path, { workspace } = {}) => {
-  const qualifiedPath = qualifyPath(path, workspace);
-  await persistentFileDeleter(qualifiedPath);
-  await notifyFileDeletion(qualifiedPath, { workspace });
+  await persistentFileDeleter(qualifyPath(path, workspace));
+  await notifyFileDeletion(path, workspace);
 };
 
 const sleep = (ms = 0) =>

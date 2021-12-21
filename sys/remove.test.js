@@ -18,6 +18,6 @@ test('Utf8 read', async (t) => {
   await remove('hello');
   const data2 = await read('hello');
   t.is(data1, 'hello');
-  t.true(deleted.has('jsxcad/tmp/hello'));
+  t.true(deleted.has('hello'));
   t.is(data2, undefined);
 });

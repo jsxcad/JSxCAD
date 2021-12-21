@@ -14,7 +14,7 @@ export const getQualifiedFile = async (
   if (file === undefined) {
     file = { path: unqualifiedPath, storageKey: qualifiedPath };
     files.set(qualifiedPath, file);
-    await notifyFileCreation(qualifiedPath, options);
+    await notifyFileCreation(unqualifiedPath, options.workspace);
   }
   return file;
 };
@@ -33,6 +33,11 @@ export const listFiles = (set) => {
   }
 };
 
-watchFileDeletion((qualifiedPath, options) => {
+watchFileDeletion((path, workspace) => {
+  const qualifiedPath = qualifyPath(path, workspace);
+  const file = files.get(qualifiedPath);
+  if (file) {
+    file.data = undefined;
+  }
   files.delete(qualifiedPath);
 });

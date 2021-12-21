@@ -10,7 +10,6 @@ const { promises } = fs;
 
 const getPersistentFileDeleter = () => {
   if (isNode) {
-    // FIX: Put this through getFile, also.
     return async (qualifiedPath) => {
       return promises.unlink(qualifiedPath);
     };
@@ -26,7 +25,6 @@ const getPersistentFileDeleter = () => {
 const persistentFileDeleter = getPersistentFileDeleter();
 
 export const remove = async (path, { workspace } = {}) => {
-  const qualifiedPath = qualifyPath(path, workspace);
-  await persistentFileDeleter(qualifiedPath);
-  await notifyFileDeletion(qualifiedPath, { workspace });
+  await persistentFileDeleter(qualifyPath(path, workspace));
+  await notifyFileDeletion(path, workspace);
 };

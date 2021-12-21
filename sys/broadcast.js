@@ -17,13 +17,13 @@ const receiveNotification = async ({ id, op, path, workspace }) => {
   );
   switch (op) {
     case 'changePath':
-      await runFileChangeWatchers(path, { workspace });
+      await runFileChangeWatchers(path, workspace);
       break;
     case 'createPath':
-      await runFileCreationWatchers(path, { workspace });
+      await runFileCreationWatchers(path, workspace);
       break;
     case 'deletePath':
-      await runFileDeletionWatchers(path, { workspace });
+      await runFileDeletionWatchers(path, workspace);
       break;
     default:
       throw Error(
@@ -51,13 +51,13 @@ const initBroadcastChannel = async () => {
   broadcastChannel.onmessage = receiveBroadcast;
 };
 
-export const notifyFileChange = async (path, { workspace }) =>
+export const notifyFileChange = async (path, workspace) =>
   sendBroadcast({ id: self && self.id, op: 'changePath', path, workspace });
 
-export const notifyFileCreation = async (path, { workspace }) =>
+export const notifyFileCreation = async (path, workspace) =>
   sendBroadcast({ id: self && self.id, op: 'createPath', path, workspace });
 
-export const notifyFileDeletion = async (path, { workspace }) =>
+export const notifyFileDeletion = async (path, workspace) =>
   sendBroadcast({ id: self && self.id, op: 'deletePath', path, workspace });
 
 initBroadcastChannel();

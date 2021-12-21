@@ -25,6 +25,9 @@ const getFileWriter = () => {
           data = serialize(data);
         }
         await promises.writeFile(qualifiedPath, data);
+        // FIX: Do proper versioning.
+        const version = 0;
+        return version;
       } catch (error) {
         throw error;
       }
@@ -62,7 +65,7 @@ export const write = async (path, data, options = {}) => {
   }
 
   // Let everyone else know the file has changed.
-  await notifyFileChange(qualifiedPath, { workspace });
+  await notifyFileChange(path, workspace);
 
   return true;
 };

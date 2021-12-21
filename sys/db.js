@@ -1,1 +1,1 @@
-export { clearCacheDb, db } from './db-idb-keyval.js';
+export { clearCacheDb, db } from './db-idb.js';

@@ -35,12 +35,9 @@ const urlFetcher = getUrlFetcher();
 const getExternalFileFetcher = () => {
   if (isNode) {
     // FIX: Put this through getFile, also.
-    return async (qualifiedPath, doSerialize = true) => {
+    return async (qualifiedPath) => {
       try {
         let data = await promises.readFile(qualifiedPath);
-        if (doSerialize) {
-          data = deserialize(data);
-        }
         return data;
       } catch (e) {
         if (e.code && e.code === 'ENOENT') {
@@ -77,9 +74,8 @@ const getInternalFileFetcher = () => {
       }
     };
   } else if (isBrowser || isWebWorker) {
-    return async (qualifiedPath) => {
-      return db(qualifiedPath).getItemAndVersion(qualifiedPath);
-    };
+    return (qualifiedPath) =>
+      db(qualifiedPath).getItemAndVersion(qualifiedPath);
   } else {
     throw Error('Expected node or browser or web worker');
   }
@@ -90,14 +86,12 @@ const internalFileFetcher = getInternalFileFetcher();
 const getInternalFileVersionFetcher = (qualify = qualifyPath) => {
   if (isNode) {
     // FIX: Put this through getFile, also.
-    return async (qualifiedPath) => {
+    return (qualifiedPath) => {
       // FIX: Use a proper version.
       return 0;
     };
   } else if (isBrowser || isWebWorker) {
-    return async (qualifiedPath) => {
-      return db(qualifiedPath).getItemVersion(qualifiedPath);
-    };
+    return (qualifiedPath) => db(qualifiedPath).getItemVersion(qualifiedPath);
   } else {
     throw Error('Expected node or browser or web worker');
   }
@@ -106,7 +100,7 @@ const getInternalFileVersionFetcher = (qualify = qualifyPath) => {
 const internalFileVersionFetcher = getInternalFileVersionFetcher();
 
 // Fetch from internal store.
-const fetchPersistent = async (qualifiedPath, { workspace, doSerialize }) => {
+const fetchPersistent = (qualifiedPath, { workspace, doSerialize }) => {
   try {
     if (workspace) {
       return internalFileFetcher(qualifiedPath, doSerialize);
@@ -121,7 +115,7 @@ const fetchPersistent = async (qualifiedPath, { workspace, doSerialize }) => {
   }
 };
 
-const fetchPersistentVersion = async (qualifiedPath, { workspace }) => {
+const fetchPersistentVersion = (qualifiedPath, { workspace }) => {
   try {
     if (workspace) {
       return internalFileVersionFetcher(qualifiedPath);
@@ -149,7 +143,7 @@ const fetchSources = async (sources, { workspace }) => {
         } else {
           logInfo('sys/fetchSources/file', source);
           // Assume a file path.
-          const data = await externalFileFetcher(source, false);
+          const data = await externalFileFetcher(source);
           if (data !== undefined) {
             return data;
           }
@@ -185,11 +179,11 @@ export const read = async (path, options = {}) => {
   }
 
   if (file.data === undefined || useCache === false || forceNoCache) {
-    const { data, version } = await fetchPersistent(qualifiedPath, {
+    const { value, version } = await fetchPersistent(qualifiedPath, {
       workspace,
       doSerialize: true,
     });
-    file.data = data;
+    file.data = value;
     file.version = version;
   }
 
@@ -222,8 +216,10 @@ export const readOrWatch = async (path, options = {}) => {
   const watch = new Promise((resolve) => {
     resolveWatch = resolve;
   });
-  const watcher = await watchFile(path, (file) => resolveWatch(path), options);
+  const watcher = await watchFile(path, options.workspace, (file) =>
+    resolveWatch(path)
+  );
   await watch;
-  await unwatchFile(path, watcher, options);
+  await unwatchFile(path, options.workspace, watcher);
   return read(path, options);
 };
