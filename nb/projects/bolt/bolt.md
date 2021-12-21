@@ -1,101 +1,80 @@
 ```JavaScript
-const Profile = (pitch = 1, angle = 60 / 360) =>
+const Profile = (pitch = 1, depth = 4 / 3) =>
   Polygon(
-    Point(0, 1 / -2),
-    Point(pitch / -2, 1 / 2),
-    Point(pitch / 2, 1 / 2),
-    Point(0, 1 / -2)
+    Point(0, 0),
+    Point(pitch / -2, depth),
+    Point(pitch / 2, depth),
+    Point(0, 0)
   );
 ```
 
-Show the fit.
+```JavaScript
+export const ScrewThreadSegment = (
+  diameter,
+  { pitch = 1, angle = 60 / 360, play = 0.1, turn = 'right' } = {}
+) => {
+  const depth = pitch / 2 / Math.tan(angle * Math.PI);
+  return Profile(pitch, (pitch * 0.5) / Math.tan(angle * Math.PI))
+    .y(diameter / -2 - depth / 4)
+    .ry(1 / 4)
+    .loft(
+      seq((t) => (s) => s.rz(t).z(pitch * t * 1.001), {
+        from: -1,
+        by: 1 / 32,
+        to: 1,
+      })
+    )
+    .scale(1, 1, turn === 'right' ? 1 : -1)
+    .grow(-play)
+    .removeSelfIntersections()
+    .clip(Box(diameter * 2).ez(pitch / 2, pitch / -2))
+    .align('z>');
+};
+```
 
 ```JavaScript
 export const ScrewThread = (
   diameter,
   height,
-  { pitch = 1, angle, play = 0.1, lefthanded = false } = {}
+  { pitch = 1, angle = 60 / 360, play = 0.1, turn = 'right' } = {}
 ) =>
-  Profile(pitch, angle)
-    .y(diameter / -2 + 1 / 2 + play * 2)
-    .ry(1 / 4)
-    .loft(
-      seq((t) => (s) => s.rz(t).z(pitch * t * 1.001), {
-        from: -1 / 2,
-        by: 1 / 32,
-        to: 3 / 2,
-      })
-    )
-    .scale(lefthanded ? 1 : -1, lefthanded ? 1 : -1, 1)
-    .clip(Box(diameter).ez(pitch))
+  ScrewThreadSegment(diameter, { pitch, angle, play, turn })
     .z(seq((a) => a, { from: 0, to: height, by: pitch }))
-    .clip(Box(diameter).ez(height))
-    .and(Arc(diameter - 2).ez(height));
+    .clip(Box(diameter * 2).ez(height / 2, height / -2))
+    .align('z>');
+```
+
+```JavaScript
+export const NutThreadSegment = (
+  diameter,
+  {
+    pitch = 1,
+    thickness = pitch * 2,
+    angle = 60 / 360,
+    play = 0.1,
+    lefthanded = false,
+  } = {}
+) => {
+  const depth = pitch / 2 / Math.tan(angle * Math.PI);
+  return ScrewThreadSegment(diameter, {
+    pitch,
+    angle,
+    play: -play,
+  }).cutFrom(
+    Arc(diameter + thickness)
+      .cut(Arc(diameter - depth))
+      .ez(pitch)
+  );
+};
 ```
 
 ```JavaScript
 export const NutThread = (
   diameter,
   height,
-  { pitch = 1, angle, play = 0.1, lefthanded = false } = {}
+  { pitch = 1, angle = 60 / 360, play = 0.1, turn = 'right' } = {}
 ) =>
-  Profile(pitch, angle)
-    .rz(1 / 2)
-    .y(diameter / -2 + 1 / 2 - play * 2)
-    .ry(1 / 4)
-    .loft(
-      seq((t) => (s) => s.rz(t).z(pitch * t * 1.001), {
-        from: -1 / 2,
-        by: 1 / 32,
-        to: 3 / 2,
-      })
-    )
-    .scale(lefthanded ? 1 : -1, lefthanded ? 1 : -1, 1)
-    .clip(Box(diameter + 2).ez(pitch))
+  NutThreadSegment(diameter, { pitch, angle, play, turn })
     .z(seq((a) => a, { from: 0, to: height, by: pitch }))
-    .clip(Box(diameter + 2).ez(height))
-    .rz(1 / 2)
-    .mask(Arc(diameter).ez(height));
+    .clip(Box(diameter * 2).ez(height));
 ```
-
-```JavaScript
-const profile = Profile().view();
-```
-
-![Image](bolt.md.0.png)
-
-```JavaScript
-const nutThread = NutThread(20, 10)
-  .material('steel')
-  .stl('nut 20x10');
-```
-
-![Image](bolt.md.1.png)
-
-[nut 20x10_0.stl](bolt.nut%2020x10_0.stl)
-
-```JavaScript
-const screwThread = ScrewThread(20, 10)
-  .cut(
-    Box(2, 10)
-      .ez(10, 5)
-      .rz(0, 1 / 4)
-  )
-  .material('steel')
-  .stl('thread 20x10');
-```
-
-![Image](bolt.md.2.png)
-
-[thread 20x10_0.stl](bolt.thread%2020x10_0.stl)
-
-```JavaScript
-ScrewThread(10, 5)
-  .and(NutThread(10, 5).and(Arc(15).cut(Arc(10)).ez(5)))
-  .view(1)
-  .view(2, section());
-```
-
-![Image](bolt.md.3.png)
-
-![Image](bolt.md.4.png)

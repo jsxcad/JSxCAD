@@ -2,6 +2,7 @@ import { argv } from 'process';
 import fs from 'fs';
 import path from 'path';
 import { updateNotebook } from './updateNotebook.js';
+import { watchLog } from '@jsxcad/sys';
 
 process.on('uncaughtException', (err) => {
   console.error('There was an uncaught error', err);
@@ -11,6 +12,9 @@ process.on('uncaughtException', (err) => {
 const makePosixPath = (string) => string.split(path.sep).join(path.posix.sep);
 
 const build = async (baseDirectory = '.') => {
+  const logWatcher = ({ type, source, text }) =>
+    console.log(`[${type}] ${source} ${text}`);
+  watchLog(logWatcher);
   try {
     const notebooks = [];
     const walk = async (directory) => {

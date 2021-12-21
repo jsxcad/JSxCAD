@@ -4,17 +4,16 @@ import { logInfo } from '@jsxcad/sys';
 export const starts = new Map();
 export const totals = new Map();
 
-let timeoutId;
-
 export const startTimer = (name) => (shape) => {
-  starts.set(name, new Date());
-  if (timeoutId) {
-    clearTimeout(timeoutId);
+  const start = new Date();
+  starts.set(name, start);
+  const total = totals.get(name);
+  if (total) {
+    const average = total.sum / total.count / 1000;
+    if (average > 1.0) {
+      logInfo('api/shape/startTimer', `${name} [${average.toFixed(2)}]`);
+    }
   }
-  timeoutId = setTimeout(() => {
-    timeoutId = null;
-    logInfo('api/shape/startTimer', name);
-  }, 1000);
   return shape;
 };
 

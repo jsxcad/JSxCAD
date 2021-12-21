@@ -1,7 +1,6 @@
-import { emit, log as sysLog } from '@jsxcad/sys';
+import { hash as computeHash, emit, log as sysLog } from '@jsxcad/sys';
 
 import Shape from './Shape.js';
-import hashSum from 'hash-sum';
 import { realize } from '@jsxcad/geometry';
 
 /**
@@ -27,7 +26,7 @@ const toText = (value) => {
 export const log = (value, level) => {
   const text = toText(value);
   const log = { text, level };
-  const hash = hashSum(log);
+  const hash = computeHash(log);
   emit({ log, hash });
   return sysLog({ op: 'text', text, level });
 };
@@ -36,7 +35,7 @@ export const logOp = (shape, op) => {
   const text = String(op(shape));
   const level = 'serious';
   const log = { text, level };
-  const hash = hashSum(log);
+  const hash = computeHash(log);
   emit({ log, hash });
   return sysLog({ op: 'text', text });
 };

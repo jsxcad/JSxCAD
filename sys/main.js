@@ -31,7 +31,7 @@ export {
   setupFilesystem,
   setupWorkspace,
 } from './filesystem.js';
-export { hash } from './hash.js';
+export { computeHash, hash } from './hash.js';
 export { isBrowser, isNode, isWebWorker } from './browserOrNode.js';
 export { listFiles } from './listFiles.js';
 export { log, logError, logInfo, unwatchLog, watchLog } from './log.js';
