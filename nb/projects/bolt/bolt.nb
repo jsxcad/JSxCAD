@@ -1,10 +1,13 @@
 const Profile = (pitch = 1, depth = 4 / 3) =>
   Polygon(
-    Point(0, 0),
+    Point(0, depth / -2),
+    Point(pitch / -2, depth / 2),
     Point(pitch / -2, depth),
     Point(pitch / 2, depth),
-    Point(0, 0)
+    Point(pitch / 2, depth / 2)
   );
+
+Profile().view();
 
 export const ScrewThreadSegment = (
   diameter,
@@ -12,7 +15,7 @@ export const ScrewThreadSegment = (
 ) => {
   const depth = pitch / 2 / Math.tan(angle * Math.PI);
   return Profile(pitch, (pitch * 0.5) / Math.tan(angle * Math.PI))
-    .y(diameter / -2 - depth / 4)
+    .y(diameter / -2)
     .ry(1 / 4)
     .loft(
       seq((t) => (s) => s.rz(t).z(pitch * t * 1.001), {
@@ -24,6 +27,7 @@ export const ScrewThreadSegment = (
     .scale(1, 1, turn === 'right' ? 1 : -1)
     .grow(-play)
     .removeSelfIntersections()
+    .add(Arc(diameter - depth).ez(pitch, -pitch))
     .clip(Box(diameter * 2).ez(pitch / 2, pitch / -2))
     .align('z>');
 };

@@ -4,12 +4,14 @@
 import * as fs from 'fs';
 import * as v8 from 'v8';
 
+import { ensureQualifiedFile, getFile } from './files.js';
 import { getFilesystem, qualifyPath } from './filesystem.js';
 import { isBrowser, isNode, isWebWorker } from './browserOrNode.js';
 import { unwatchFile, watchFile } from './watchers.js';
 
+import { ErrorWouldBlock } from './error.js';
+import { addPending } from './pending.js';
 import { db } from './db.js';
-import { getQualifiedFile } from './files.js';
 import { logInfo } from './log.js';
 import nodeFetch from 'node-fetch';
 import { write } from './write.js';
@@ -155,6 +157,16 @@ const fetchSources = async (sources, { workspace }) => {
   }
 };
 
+export const readNonblocking = (path, options = {}) => {
+  const { workspace = getFilesystem() } = options;
+  const file = getFile(path, workspace);
+  if (file) {
+    return file.data;
+  }
+  addPending(read(path, options));
+  throw new ErrorWouldBlock(`Would have blocked on read ${path}`);
+};
+
 export const read = async (path, options = {}) => {
   const {
     allowFetch = true,
@@ -166,7 +178,7 @@ export const read = async (path, options = {}) => {
     decode,
   } = options;
   const qualifiedPath = qualifyPath(path, workspace);
-  const file = await getQualifiedFile(options, path, qualifiedPath);
+  const file = ensureQualifiedFile(path, qualifiedPath);
 
   if (file.data && workspace) {
     // Check that the version is still up to date.

@@ -1,3 +1,10 @@
+class ErrorWouldBlock extends Error {
+  constructor(message) {
+    super(message);
+    this.name = 'ErrorWouldBlock';
+  }
+}
+
 const pending$2 = [];
 
 let pendingErrorHandler = (error) => console.log(error);
@@ -381,7 +388,16 @@ const ensureStore = (store, db, instances) => {
   const versionStore = `${store}/version`;
   if (!instance) {
     instance = {
-      clear: async () => (await db).clear(valueStore),
+      clear: async () => {
+        const tx = (await db).transaction(
+          [valueStore, versionStore],
+          'readwrite'
+        );
+        await tx.objectStore(valueStore).clear();
+        await tx.objectStore(versionStore).clear();
+        await tx.done;
+        return true;
+      },
       getItem: async (key) => (await db).get(valueStore, key),
       getItemAndVersion: async (key) => {
         const tx = (await db).transaction([valueStore, versionStore]);
@@ -436,9 +452,9 @@ const db = (key) => {
 };
 
 const clearCacheDb = async ({ workspace }) => {
-  const { instances } = ensureDb(workspace);
+  const { db, instances } = ensureDb(workspace);
   for (let nth = 0; nth < cacheStoreCount; nth++) {
-    await ensureStore(`index_${nth}`, instances).clear();
+    await ensureStore(`cache_${nth}`, db, instances).clear();
   }
 };
 
@@ -1054,6 +1070,49 @@ const watchFileDeletion = async (thunk) => {
   fileDeletionWatchers.add(thunk);
   return thunk;
 };
+
+const files = new Map();
+
+// Do we need the ensureFile functions?
+const ensureQualifiedFile = (path, qualifiedPath) => {
+  let file = files.get(qualifiedPath);
+  // Accessing a file counts as creation.
+  if (file === undefined) {
+    file = { path, storageKey: qualifiedPath };
+    files.set(qualifiedPath, file);
+  }
+  return file;
+};
+
+const ensureFile = (path, workspace) => {
+  if (typeof path !== 'string') {
+    throw Error(`die: ${JSON.stringify(path)}`);
+  }
+  const qualifiedPath = qualifyPath(path, workspace);
+  return ensureQualifiedFile(path, qualifiedPath);
+};
+
+const getQualifiedFile = (qualifiedPath) => files.get(qualifiedPath);
+
+const getFile = (path, workspace) =>
+  getQualifiedFile(qualifyPath(path, workspace));
+
+const listFiles$1 = (set) => {
+  for (const file of files.keys()) {
+    set.add(file);
+  }
+};
+
+watchFileDeletion((path, workspace) => {
+  const qualifiedPath = qualifyPath(path, workspace);
+  const file = files.get(qualifiedPath);
+  if (file) {
+    file.data = undefined;
+  }
+  files.delete(qualifiedPath);
+});
+
+var nodeFetch = _ => _;
 
 function unwrapExports (x) {
 	return x && x.__esModule && Object.prototype.hasOwnProperty.call(x, 'default') ? x['default'] : x;
@@ -3032,40 +3091,6 @@ const notifyFileDeletion = async (path, workspace) =>
 
 initBroadcastChannel();
 
-const files = new Map();
-
-const getQualifiedFile = async (
-  options,
-  unqualifiedPath,
-  qualifiedPath
-) => {
-  let file = files.get(qualifiedPath);
-  // Accessing a file counts as creation.
-  if (file === undefined) {
-    file = { path: unqualifiedPath, storageKey: qualifiedPath };
-    files.set(qualifiedPath, file);
-    await notifyFileCreation(unqualifiedPath, options.workspace);
-  }
-  return file;
-};
-
-const listFiles$1 = (set) => {
-  for (const file of files.keys()) {
-    set.add(file);
-  }
-};
-
-watchFileDeletion((path, workspace) => {
-  const qualifiedPath = qualifyPath(path, workspace);
-  const file = files.get(qualifiedPath);
-  if (file) {
-    file.data = undefined;
-  }
-  files.delete(qualifiedPath);
-});
-
-var nodeFetch = _ => _;
-
 // Copyright Joyent, Inc. and other Node contributors.
 
 // Split a filename into [root, dir, basename, ext], unix version
@@ -3126,6 +3151,15 @@ const getFileWriter = () => {
 
 const fileWriter = getFileWriter();
 
+const writeNonblocking = (path, data, options = {}) => {
+  const { workspace = getFilesystem() } = options;
+  // Update in-memory cache immediately.
+  ensureFile(path, workspace).data = data;
+  // Schedule a deferred write to update persistent storage.
+  addPending(write(path, data, options));
+  return true;
+};
+
 const write = async (path, data, options = {}) => {
   data = await data;
 
@@ -3141,7 +3175,11 @@ const write = async (path, data, options = {}) => {
   } = options;
 
   const qualifiedPath = qualifyPath(path, workspace);
-  const file = await getQualifiedFile(options, path, qualifiedPath);
+  const file = ensureQualifiedFile(path, qualifiedPath);
+
+  if (!file.data) {
+    await notifyFileCreation(path, workspace);
+  }
 
   file.data = data;
 
@@ -3298,6 +3336,16 @@ const fetchSources = async (sources, { workspace }) => {
   }
 };
 
+const readNonblocking = (path, options = {}) => {
+  const { workspace = getFilesystem() } = options;
+  const file = getFile(path, workspace);
+  if (file) {
+    return file.data;
+  }
+  addPending(read(path, options));
+  throw new ErrorWouldBlock(`Would have blocked on read ${path}`);
+};
+
 const read = async (path, options = {}) => {
   const {
     allowFetch = true,
@@ -3309,7 +3357,7 @@ const read = async (path, options = {}) => {
     decode,
   } = options;
   const qualifiedPath = qualifyPath(path, workspace);
-  const file = await getQualifiedFile(options, path, qualifiedPath);
+  const file = ensureQualifiedFile(path, qualifiedPath);
 
   if (file.data && workspace) {
     // Check that the version is still up to date.
@@ -3799,4 +3847,4 @@ let nanoid = (size = 21) => {
 
 const generateUniqueId = () => nanoid();
 
-export { addOnEmitHandler, addPending, ask, askService, askServices, beginEmitGroup, boot, clearCacheDb, clearEmitted, computeHash, createConversation, createService, elapsed, emit, finishEmitGroup, flushEmitGroup, generateUniqueId, getActiveServices, getConfig, getControlValue, getFilesystem, getPendingErrorHandler, getServicePoolInfo, getSourceLocation, getWorkspace, hash, isBrowser, isNode, isWebWorker, listFiles, log, logError, logInfo, onBoot, qualifyPath, read, readOrWatch, remove, removeOnEmitHandler, resolvePending, restoreEmitGroup, saveEmitGroup, setConfig, setControlValue, setHandleAskUser, setPendingErrorHandler, setupFilesystem, setupWorkspace, sleep, tellServices, terminateActiveServices, unwatchFile, unwatchFileCreation, unwatchFileDeletion, unwatchLog, unwatchServices, waitServices, watchFile, watchFileCreation, watchFileDeletion, watchLog, watchServices, write };
+export { ErrorWouldBlock, addOnEmitHandler, addPending, ask, askService, askServices, beginEmitGroup, boot, clearCacheDb, clearEmitted, computeHash, createConversation, createService, elapsed, emit, finishEmitGroup, flushEmitGroup, generateUniqueId, getActiveServices, getConfig, getControlValue, getFilesystem, getPendingErrorHandler, getServicePoolInfo, getSourceLocation, getWorkspace, hash, isBrowser, isNode, isWebWorker, listFiles, log, logError, logInfo, onBoot, qualifyPath, read, readNonblocking, readOrWatch, remove, removeOnEmitHandler, resolvePending, restoreEmitGroup, saveEmitGroup, setConfig, setControlValue, setHandleAskUser, setPendingErrorHandler, setupFilesystem, setupWorkspace, sleep, tellServices, terminateActiveServices, unwatchFile, unwatchFileCreation, unwatchFileDeletion, unwatchLog, unwatchServices, waitServices, watchFile, watchFileCreation, watchFileDeletion, watchLog, watchServices, write, writeNonblocking };

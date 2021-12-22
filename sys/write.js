@@ -1,13 +1,14 @@
 import * as fs from 'fs';
 import * as v8 from 'v8';
 
+import { ensureFile, ensureQualifiedFile } from './files.js';
 import { getFilesystem, qualifyPath } from './filesystem.js';
 import { isBrowser, isNode, isWebWorker } from './browserOrNode.js';
+import { notifyFileChange, notifyFileCreation } from './broadcast.js';
 
+import { addPending } from './pending.js';
 import { db } from './db.js';
 import { dirname } from 'path';
-import { getQualifiedFile } from './files.js';
-import { notifyFileChange } from './broadcast.js';
 
 const { promises } = fs;
 const { serialize } = v8;
@@ -41,6 +42,15 @@ const getFileWriter = () => {
 
 const fileWriter = getFileWriter();
 
+export const writeNonblocking = (path, data, options = {}) => {
+  const { workspace = getFilesystem() } = options;
+  // Update in-memory cache immediately.
+  ensureFile(path, workspace).data = data;
+  // Schedule a deferred write to update persistent storage.
+  addPending(write(path, data, options));
+  return true;
+};
+
 export const write = async (path, data, options = {}) => {
   data = await data;
 
@@ -56,7 +66,11 @@ export const write = async (path, data, options = {}) => {
   } = options;
 
   const qualifiedPath = qualifyPath(path, workspace);
-  const file = await getQualifiedFile(options, path, qualifiedPath);
+  const file = ensureQualifiedFile(path, qualifiedPath);
+
+  if (!file.data) {
+    await notifyFileCreation(path, workspace);
+  }
 
   file.data = data;
 

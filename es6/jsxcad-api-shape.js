@@ -1,5 +1,5 @@
 import { closePath, concatenatePath, assemble as assemble$1, flip, toConcreteGeometry, toDisplayGeometry, toTransformedGeometry, toPoints, transform, rewriteTags, taggedPaths, taggedGraph, openPath, taggedSegments, taggedPoints, fromPolygonsToGraph, registerReifier, taggedPlan, taggedGroup, union, taggedItem, getLeafs, getInverseMatrices, bend as bend$1, projectToPlane, computeCentroid, intersection, allTags, fromPointsToGraph, difference, rewrite, hasTypeWire, translatePaths, taggedLayout, measureBoundingBox, getLayouts, visit, isNotVoid, eachPoint as eachPoint$1, computeNormal, extrude, extrudeToPlane as extrudeToPlane$1, faces as faces$1, fill as fill$1, empty, eachSegment, grow as grow$1, outline as outline$1, inset as inset$1, read, loft as loft$1, realize, hasShowOverlay, minkowskiDifference as minkowskiDifference$1, minkowskiShell as minkowskiShell$1, minkowskiSum as minkowskiSum$1, isVoid, offset as offset$1, push as push$1, remesh as remesh$1, removeSelfIntersections as removeSelfIntersections$1, write, section as section$1, separate as separate$1, smooth as smooth$1, taggedSketch, taper as taper$1, test as test$1, twist as twist$1, hasTypeVoid, withQuery, toPolygonsWithHoles, arrangePolygonsWithHoles, fromPolygonsWithHolesToTriangles, fromTrianglesToGraph, alphaShape, rotateZPath, assemble2, convexHullToGraph, distributedAssemble, fromFunctionToGraph, translatePath } from './jsxcad-geometry.js';
-import { getSourceLocation, emit, computeHash, logInfo, getConfig, hash, log as log$1, generateUniqueId, addPending, write as write$1 } from './jsxcad-sys.js';
+import { getSourceLocation, emit, computeHash, logInfo, getConfig, hash, log as log$1, generateUniqueId, addPending, write as write$1, readNonblocking, writeNonblocking } from './jsxcad-sys.js';
 export { elapsed, emit, read, write } from './jsxcad-sys.js';
 import { identityMatrix, fromTranslation, fromRotation, fromScaling } from './jsxcad-math-mat4.js';
 import { scale as scale$1, subtract, add as add$1, abs, squaredLength, normalize, cross, distance } from './jsxcad-math-vec3.js';
@@ -4567,6 +4567,36 @@ const Assembly2 = (...shapes) =>
 
 Shape.prototype.Assembly2 = Shape.shapeMethod(Assembly2);
 
+const readShapeCache = (name, args) => {
+  const key = `${name}/${JSON.stringify(args)}`;
+  const value = readNonblocking(key);
+  if (value) {
+    logInfo('api/shape/readShapeCache', `read ${key}`);
+    return Shape.fromGeometry(value);
+  }
+  logInfo('api/shape/readShapeCache', `missing ${key}`);
+};
+
+const writeShapeCache = (name, args, shape) => {
+  const key = `${name}/${JSON.stringify(args)}`;
+  writeNonblocking(key, shape.toGeometry());
+  logInfo('api/shape/writeShapeCache', key);
+  return shape;
+};
+
+const Cached = (name, thunk) => {
+  const op = (...args) => {
+    const cached = readShapeCache(name, args);
+    if (cached) {
+      return cached;
+    }
+    const value = thunk(...args);
+    writeShapeCache(name, args, value);
+    return value;
+  };
+  return op;
+};
+
 const Hull = (...shapes) => {
   const points = [];
   shapes.forEach((shape) => shape.eachPoint((point) => points.push(point)));
@@ -5062,4 +5092,4 @@ const yz = Shape.fromGeometry({
   ],
 });
 
-export { Alpha, Arc, ArcX, ArcY, ArcZ, Assembly, Assembly2, Box, ChainedHull, DistributedAssembly, Edge, Edges, Empty, Face, GrblConstantLaser, GrblDynamicLaser, GrblPlotter, GrblSpindle, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Line, Octagon, Orb, Page, Path, Pentagon, Plan, Point, Points, Polygon, Polyhedron, Septagon, Shape, Spiral, Tetragon, Triangle, Voxels, Wave, Weld, abstract, add, addTo, align, and, as, asPart, at, bend, billOfMaterials, cast, center, clip, clipFrom, cloudSolid, color, colors, cut, cutFrom, cutOut, defRgbColor, defThreejsMaterial, defTool, define, drop, e, each, eachPoint, edit, endTimer, ensurePages, ex, extrudeAlong, extrudeToPlane, extrudeX, extrudeY, extrudeZ, ey, ez, faces, fill, fit, fitTo, fuse, g, get, getEdge, getNot, gn, grow, inline, inset, keep, loadGeometry, loft, log, loop, mask, material, md, minkowskiDifference, minkowskiShell, minkowskiSum, move, moveTo, n, noVoid, noop, normal, notColor, nth, ofPlan, offset, on, op, orient, outline, overlay, pack, play, push, remesh, removeSelfIntersections, rotate, rotateX, rotateY, rotateZ, rx, ry, rz, saveGeometry, scale, scaleToFit, section, sectionProfile, separate, seq, size, sketch, smooth, startTimer, table, tag, tags, taper, test, tint, to, tool, top, twist, untag, view, voidFn, voidIn, voxels, weld, withFill, withFn, withInset, withOp, x, xy, xyz, xz, y, yz, z };
+export { Alpha, Arc, ArcX, ArcY, ArcZ, Assembly, Assembly2, Box, Cached, ChainedHull, DistributedAssembly, Edge, Edges, Empty, Face, GrblConstantLaser, GrblDynamicLaser, GrblPlotter, GrblSpindle, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Line, Octagon, Orb, Page, Path, Pentagon, Plan, Point, Points, Polygon, Polyhedron, Septagon, Shape, Spiral, Tetragon, Triangle, Voxels, Wave, Weld, abstract, add, addTo, align, and, as, asPart, at, bend, billOfMaterials, cast, center, clip, clipFrom, cloudSolid, color, colors, cut, cutFrom, cutOut, defRgbColor, defThreejsMaterial, defTool, define, drop, e, each, eachPoint, edit, endTimer, ensurePages, ex, extrudeAlong, extrudeToPlane, extrudeX, extrudeY, extrudeZ, ey, ez, faces, fill, fit, fitTo, fuse, g, get, getEdge, getNot, gn, grow, inline, inset, keep, loadGeometry, loft, log, loop, mask, material, md, minkowskiDifference, minkowskiShell, minkowskiSum, move, moveTo, n, noVoid, noop, normal, notColor, nth, ofPlan, offset, on, op, orient, outline, overlay, pack, play, push, remesh, removeSelfIntersections, rotate, rotateX, rotateY, rotateZ, rx, ry, rz, saveGeometry, scale, scaleToFit, section, sectionProfile, separate, seq, size, sketch, smooth, startTimer, table, tag, tags, taper, test, tint, to, tool, top, twist, untag, view, voidFn, voidIn, voxels, weld, withFill, withFn, withInset, withOp, x, xy, xyz, xz, y, yz, z };

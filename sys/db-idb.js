@@ -33,7 +33,16 @@ const ensureStore = (store, db, instances) => {
   const versionStore = `${store}/version`;
   if (!instance) {
     instance = {
-      clear: async () => (await db).clear(valueStore),
+      clear: async () => {
+        const tx = (await db).transaction(
+          [valueStore, versionStore],
+          'readwrite'
+        );
+        await tx.objectStore(valueStore).clear();
+        await tx.objectStore(versionStore).clear();
+        await tx.done;
+        return true;
+      },
       getItem: async (key) => (await db).get(valueStore, key),
       getItemAndVersion: async (key) => {
         const tx = (await db).transaction([valueStore, versionStore]);
@@ -88,8 +97,8 @@ export const db = (key) => {
 };
 
 export const clearCacheDb = async ({ workspace }) => {
-  const { instances } = ensureDb(workspace);
+  const { db, instances } = ensureDb(workspace);
   for (let nth = 0; nth < cacheStoreCount; nth++) {
-    await ensureStore(`index_${nth}`, instances).clear();
+    await ensureStore(`cache_${nth}`, db, instances).clear();
   }
 };

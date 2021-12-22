@@ -1,31 +1,31 @@
-import { notifyFileCreation } from './broadcast.js';
 import { qualifyPath } from './filesystem.js';
 import { watchFileDeletion } from './watchers.js';
 
 const files = new Map();
 
-export const getQualifiedFile = async (
-  options,
-  unqualifiedPath,
-  qualifiedPath
-) => {
+// Do we need the ensureFile functions?
+export const ensureQualifiedFile = (path, qualifiedPath) => {
   let file = files.get(qualifiedPath);
   // Accessing a file counts as creation.
   if (file === undefined) {
-    file = { path: unqualifiedPath, storageKey: qualifiedPath };
+    file = { path, storageKey: qualifiedPath };
     files.set(qualifiedPath, file);
-    await notifyFileCreation(unqualifiedPath, options.workspace);
   }
   return file;
 };
 
-export const getFile = (options, unqualifiedPath) => {
-  if (typeof unqualifiedPath !== 'string') {
-    throw Error(`die: ${JSON.stringify(unqualifiedPath)}`);
+export const ensureFile = (path, workspace) => {
+  if (typeof path !== 'string') {
+    throw Error(`die: ${JSON.stringify(path)}`);
   }
-  const qualifiedPath = qualifyPath(unqualifiedPath, options.workspace);
-  return getQualifiedFile(options, unqualifiedPath, qualifiedPath);
+  const qualifiedPath = qualifyPath(path, workspace);
+  return ensureQualifiedFile(path, qualifiedPath);
 };
+
+export const getQualifiedFile = (qualifiedPath) => files.get(qualifiedPath);
+
+export const getFile = (path, workspace) =>
+  getQualifiedFile(qualifyPath(path, workspace));
 
 export const listFiles = (set) => {
   for (const file of files.keys()) {

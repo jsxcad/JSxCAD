@@ -2,7 +2,7 @@ import './jsxcad-api-v1-gcode.js';
 import './jsxcad-api-v1-pdf.js';
 import './jsxcad-api-v1-tools.js';
 import * as mathApi from './jsxcad-api-v1-math.js';
-import { addOnEmitHandler, addPending, write, read, emit, flushEmitGroup, hash, logInfo, beginEmitGroup, resolvePending, finishEmitGroup, saveEmitGroup, restoreEmitGroup, isWebWorker, getSourceLocation, getControlValue } from './jsxcad-sys.js';
+import { addOnEmitHandler, addPending, write, read, emit, flushEmitGroup, hash, logInfo, beginEmitGroup, resolvePending, finishEmitGroup, saveEmitGroup, ErrorWouldBlock, restoreEmitGroup, isWebWorker, getSourceLocation, getControlValue } from './jsxcad-sys.js';
 import * as shapeApi from './jsxcad-api-shape.js';
 import { saveGeometry, loadGeometry } from './jsxcad-api-shape.js';
 import { toEcmascript } from './jsxcad-compiler.js';
@@ -150,9 +150,26 @@ const evaluate = async (ecmascript, { api, path }) => {
       `{ ${Object.keys(api).join(', ')} }`,
       `return async () => { ${ecmascript} };`
     );
-    const op = await builder(api);
-    const result = await op();
-    return result;
+    // Add import to make import.meta.url available.
+    const op = await builder({ ...api, import: { meta: { url: path } } });
+    // Retry until none of the operations block.
+    for (;;) {
+      try {
+        const result = await op();
+        return result;
+      } catch (error) {
+        if (error instanceof ErrorWouldBlock) {
+          logInfo(
+            'api/core/evaluate',
+            'Resolve pending and retry due to blocking operation'
+          );
+          await resolvePending();
+          restoreEmitGroup(emitGroup);
+          continue;
+        }
+        throw error;
+      }
+    }
   } catch (error) {
     throw error;
   } finally {

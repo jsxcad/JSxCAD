@@ -46,6 +46,7 @@ import PrettierParserBabel from 'https://unpkg.com/prettier@2.3.2/esm/parser-bab
 import React from 'react';
 import ReactDOM from 'react-dom';
 import Row from 'react-bootstrap/Row';
+import Table from 'react-bootstrap/Table';
 import { animationFrame } from './schedule.js';
 import { execute } from '@jsxcad/api';
 import { getWorldPosition } from '@jsxcad/ui-threejs';
@@ -437,12 +438,11 @@ class App extends React.Component {
 
     this.Files.deleteSourceFiles = async () => {
       const { workspace } = this.props;
-      const { WorkspaceFiles } = this.state;
+      const { WorkspaceFiles = [] } = this.state;
       const nonRegenerableFiles = WorkspaceFiles.filter(
         (file) => !isRegenerable(file)
       );
       for (const file of nonRegenerableFiles) {
-        console.log(`QQ/Deleting: ${file}`);
         await remove({ workspace }, file);
       }
     };
@@ -488,7 +488,11 @@ class App extends React.Component {
     this.Log = {};
 
     this.Log.clear = async () => {
-      this.updateState({ LogMessages: [] });
+      this.updateState({ LogMessages: [], LogFilter: '' });
+    };
+
+    this.Log.updateFilter = async (LogFilter) => {
+      this.updateState({ LogFilter });
     };
 
     this.Log.pendingMessages = [];
@@ -686,7 +690,6 @@ class App extends React.Component {
         typeof data === 'string' ? data : new TextDecoder('utf8').decode(data);
 
       this.Notebook.ensureAdvice(path);
-      console.log(`QQ/Notebook.load/path: ${path}`);
       await this.updateState({ [`NotebookText/${path}`]: notebookText });
 
       // Let state propagate.
@@ -720,7 +723,6 @@ class App extends React.Component {
       await write(NotebookFile, new TextEncoder('utf8').encode(cleanText), {
         workspace,
       });
-      console.log(`QQ/Notebook.save/path: ${path} ${cleanText}`);
       logInfo('app/App/Notebook/save', `Updating state for Notebook ${path}`);
       await this.updateState({ [`NotebookText/${path}`]: cleanText });
 
@@ -732,7 +734,6 @@ class App extends React.Component {
     };
 
     this.Notebook.change = (path, data) => {
-      console.log(`QQ/Notebook.change/path: ${path} ${data}`);
       this.setState({ [`NotebookText/${path}`]: data });
     };
 
@@ -748,7 +749,6 @@ class App extends React.Component {
 
     this.Notebook.close = async (closedPath) => {
       const { WorkspaceOpenPaths = [] } = this.state;
-      console.log(`QQ/Notebook.close/path: ${closedPath}`);
       await this.updateState({
         [`NotebookText/${closedPath}`]: undefined,
         [`NotebookAdvice/${closedPath}`]: undefined,
@@ -848,7 +848,6 @@ class App extends React.Component {
         const { path } = sourceLocation;
         const { [`NotebookText/${path}`]: NotebookText } = this.state;
         const newNotebookText = rewriteViewGroupOrient(NotebookText, request);
-        console.log(`QQ/Notebook.jog/path: ${path} ${newNotebookText}`);
         await this.updateState({
           [`NotebookText/${path}`]: newNotebookText,
         });
@@ -883,7 +882,6 @@ class App extends React.Component {
                 (value) => value === object
               ),
             });
-            console.log(`QQ/postDelete: ${newNotebookText}`);
             await this.updateState({
               [`NotebookText/${path}`]: newNotebookText,
             });
@@ -943,7 +941,6 @@ class App extends React.Component {
               viewId,
               nth,
             });
-            console.log(`QQ/Notebook.cut/path: ${path} ${newNotebookText}`);
             await this.updateState({
               [`NotebookText/${path}`]: newNotebookText,
               Clipboard: { code, viewId, object },
@@ -1027,7 +1024,6 @@ class App extends React.Component {
       workspace,
     }) => {
       const geometry = await read(geometryPath, { workspace });
-      console.log(`QQ/update geometry`);
       await updateGeometry(geometry, {
         timestamp: this.Notebook.runStart[path],
       });
@@ -1129,7 +1125,7 @@ class App extends React.Component {
     this.factory = (node) => {
       switch (node.getComponent()) {
         case 'Workspace': {
-          const { WorkspaceFiles, WorkspaceOpenPaths = [] } = this.state;
+          const { WorkspaceFiles = [], WorkspaceOpenPaths = [] } = this.state;
           const isDisabled = (file) =>
             WorkspaceOpenPaths.includes(file.substring(7));
           const computeListItemVariant = (file) =>
@@ -1151,11 +1147,10 @@ class App extends React.Component {
                           <Button
                             variant="primary"
                             onClick={() => {
-                              const pathControl = document.getElementById(
+                              const { value } = document.getElementById(
                                 'WorkspaceLoadPathId'
                               );
-                              const path = pathControl.value;
-                              this.Workspace.loadWorkingPath(path);
+                              this.Workspace.loadWorkingPath(value);
                             }}
                           >
                             Add
@@ -1242,7 +1237,7 @@ class App extends React.Component {
           );
         }
         case 'Files': {
-          const { WorkspaceFiles } = this.state;
+          const { WorkspaceFiles = [] } = this.state;
           return (
             <div>
               <Card>
@@ -1290,23 +1285,63 @@ class App extends React.Component {
           );
         }
         case 'Log': {
-          const { LogMessages = [] } = this.state;
+          const { LogMessages = [], LogFilter = [] } = this.state;
           return (
             <div>
               <Card>
                 <Card.Body>
                   <Card.Title>Log Messages</Card.Title>
                   <Card.Text>
+                    <Form>
+                      <Row>
+                        <Col>
+                          <Form.Group controlId="LogFilterId">
+                            <Form.Control
+                              placeholder="Filter source by regex"
+                              value={LogFilter}
+                            />
+                          </Form.Group>
+                        </Col>
+                        <Col>
+                          <Button
+                            variant="primary"
+                            onClick={() => {
+                              const { value } =
+                                document.getElementById('LogFilterId');
+                              this.Log.updateFilter(value);
+                            }}
+                          >
+                            Update Filter
+                          </Button>
+                        </Col>
+                      </Row>
+                    </Form>
                     <Button variant="primary" onClick={this.Log.clear}>
                       Clear
                     </Button>
-                    <ListGroup>
-                      {LogMessages.map(({ type, source, text, id }, index) => (
-                        <ListGroup.Item key={index} disabled>
-                          {id}: {text}
-                        </ListGroup.Item>
-                      ))}
-                    </ListGroup>
+                    <Table striped border hover>
+                      <thead>
+                        <tr>
+                          <td>ID</td>
+                          <td>Type</td>
+                          <td>Source</td>
+                          <td>Message</td>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {LogMessages.filter(
+                          ({ source }) =>
+                            !source || !LogFilter || !source.match(LogFilter)
+                        ).map(({ type, source, text, id }, index) => (
+                          <tr key={index}>
+                            <td>{id}</td>
+                            <td>{type}</td>
+                            <td>{source}</td>
+                            <td>{text}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </Table>
                   </Card.Text>
                 </Card.Body>
               </Card>
@@ -1349,8 +1384,8 @@ class App extends React.Component {
       });
     };
 
-    this.logUpdater = ({ type, source, text }) => {
-      this.Log.pendingMessages.unshift({ type, source, text });
+    this.logUpdater = ({ id, type, source, text }) => {
+      this.Log.pendingMessages.unshift({ id, type, source, text });
       if (this.Log.updating) {
         return;
       }
@@ -1384,7 +1419,6 @@ class App extends React.Component {
         }
       }
       this.servicesActiveCounts = servicesActiveCounts;
-      console.log(`QQ/SAC: ${JSON.stringify(this.servicesActiveCounts)}`);
       for (const path of WorkspaceOpenPaths) {
         this.Layout.updateSpinners(path);
       }
@@ -1404,6 +1438,7 @@ class App extends React.Component {
 
     this.servicesActiveCounts = {};
 
+    await this.fileUpdater();
     await this.Config.restore();
     await this.Workspace.restore();
     await this.View.restore();

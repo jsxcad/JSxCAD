@@ -1,3 +1,4 @@
+export { ErrorWouldBlock } from './error.js';
 export {
   addPending,
   getPendingErrorHandler,
@@ -8,7 +9,7 @@ export { clearCacheDb } from './db.js';
 export { getConfig, setConfig } from './config.js';
 export { createService } from './service.js';
 export { getControlValue, setControlValue } from './control.js';
-export { read, readOrWatch } from './read.js';
+export { read, readNonblocking, readOrWatch } from './read.js';
 export { ask, setHandleAskUser } from './ask.js';
 export { boot, onBoot } from './boot.js';
 export {
@@ -58,5 +59,5 @@ export {
 } from './servicePool.js';
 export { remove } from './remove.js';
 export { sleep } from './sleep.js';
-export { write } from './write.js';
+export { write, writeNonblocking } from './write.js';
 export { generateUniqueId } from './generateUniqueId.js';
