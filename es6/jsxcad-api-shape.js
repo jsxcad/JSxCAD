@@ -1,5 +1,5 @@
-import { closePath, concatenatePath, assemble as assemble$1, flip, toConcreteGeometry, toDisplayGeometry, toTransformedGeometry, toPoints, transform, rewriteTags, taggedPaths, taggedGraph, openPath, taggedSegments, taggedPoints, fromPolygonsToGraph, registerReifier, taggedPlan, taggedGroup, union, taggedItem, getLeafs, getInverseMatrices, bend as bend$1, projectToPlane, computeCentroid, intersection, allTags, fromPointsToGraph, difference, rewrite, hasTypeWire, translatePaths, taggedLayout, measureBoundingBox, getLayouts, visit, isNotVoid, eachPoint as eachPoint$1, computeNormal, extrude, extrudeToPlane as extrudeToPlane$1, faces as faces$1, fill as fill$1, empty, eachSegment, grow as grow$1, outline as outline$1, inset as inset$1, read, loft as loft$1, realize, hasShowOverlay, minkowskiDifference as minkowskiDifference$1, minkowskiShell as minkowskiShell$1, minkowskiSum as minkowskiSum$1, isVoid, offset as offset$1, push as push$1, remesh as remesh$1, removeSelfIntersections as removeSelfIntersections$1, write, section as section$1, separate as separate$1, smooth as smooth$1, taggedSketch, taper as taper$1, test as test$1, twist as twist$1, hasTypeVoid, withQuery, toPolygonsWithHoles, arrangePolygonsWithHoles, fromPolygonsWithHolesToTriangles, fromTrianglesToGraph, alphaShape, rotateZPath, assemble2, convexHullToGraph, distributedAssemble, fromFunctionToGraph, translatePath } from './jsxcad-geometry.js';
-import { getSourceLocation, emit, computeHash, logInfo, getConfig, hash, log as log$1, generateUniqueId, addPending, write as write$1, readNonblocking, writeNonblocking } from './jsxcad-sys.js';
+import { closePath, concatenatePath, assemble as assemble$1, flip, toConcreteGeometry, toDisplayGeometry, toTransformedGeometry, toPoints, transform, rewriteTags, taggedPaths, taggedGraph, openPath, taggedSegments, taggedPoints, fromPolygonsToGraph, registerReifier, taggedPlan, taggedGroup, union, taggedItem, getLeafs, getInverseMatrices, bend as bend$1, projectToPlane, computeCentroid, intersection, allTags, fromPointsToGraph, difference, rewrite, hasTypeWire, translatePaths, taggedLayout, measureBoundingBox, getLayouts, visit, isNotVoid, eachPoint as eachPoint$1, computeNormal, extrude, extrudeToPlane as extrudeToPlane$1, faces as faces$1, fill as fill$1, empty, eachSegment, grow as grow$1, outline as outline$1, inset as inset$1, read, readNonblocking, loft as loft$1, realize, hasShowOverlay, minkowskiDifference as minkowskiDifference$1, minkowskiShell as minkowskiShell$1, minkowskiSum as minkowskiSum$1, isVoid, offset as offset$1, push as push$1, remesh as remesh$1, removeSelfIntersections as removeSelfIntersections$1, write, writeNonblocking, section as section$1, separate as separate$1, smooth as smooth$1, taggedSketch, taper as taper$1, test as test$1, twist as twist$1, hasTypeVoid, withQuery, toPolygonsWithHoles, arrangePolygonsWithHoles, fromPolygonsWithHolesToTriangles, fromTrianglesToGraph, alphaShape, rotateZPath, assemble2, convexHullToGraph, distributedAssemble, fromFunctionToGraph, translatePath } from './jsxcad-geometry.js';
+import { getSourceLocation, emit, computeHash, logInfo, getConfig, hash, log as log$1, generateUniqueId, addPending, write as write$1 } from './jsxcad-sys.js';
 export { elapsed, emit, read, write } from './jsxcad-sys.js';
 import { identityMatrix, fromTranslation, fromRotation, fromScaling } from './jsxcad-math-mat4.js';
 import { scale as scale$1, subtract, add as add$1, abs, squaredLength, normalize, cross, distance } from './jsxcad-math-vec3.js';
@@ -3264,11 +3264,20 @@ const loadGeometry = async (
   path,
   { otherwise = fromUndefined } = {}
 ) => {
+  logInfo('api/shape/loadGeometry', path);
   const data = await read(path);
   if (data === undefined) {
     return otherwise();
   } else {
     return Shape.fromGeometry(data);
+  }
+};
+
+const loadGeometryNonblocking = (path) => {
+  logInfo('api/shape/loadGeometryNonblocking', path);
+  const geometry = readNonblocking(path);
+  if (geometry) {
+    return Shape.fromGeometry(geometry);
   }
 };
 
@@ -3706,8 +3715,15 @@ Shape.registerMethod('rz', rz);
 const rotateZ = rz;
 Shape.registerMethod('rotateZ', rz);
 
-const saveGeometry = async (path, shape) =>
-  Shape.fromGeometry(await write(shape.toGeometry(), path));
+const saveGeometry = async (path, shape) => {
+  logInfo('api/shape/saveGeometry', path);
+  return Shape.fromGeometry(await write(path, shape.toGeometry()));
+};
+
+const saveGeometryNonblocking = (path, shape) => {
+  logInfo('api/shape/saveGeometryNonblocking', path);
+  return Shape.fromGeometry(writeNonblocking(path, shape.toGeometry()));
+};
 
 const scale =
   (x = 1, y = x, z = y) =>
@@ -4567,32 +4583,19 @@ const Assembly2 = (...shapes) =>
 
 Shape.prototype.Assembly2 = Shape.shapeMethod(Assembly2);
 
-const readShapeCache = (name, args) => {
-  const key = `${name}/${JSON.stringify(args)}`;
-  const value = readNonblocking(key);
-  if (value) {
-    logInfo('api/shape/readShapeCache', `read ${key}`);
-    return Shape.fromGeometry(value);
-  }
-  logInfo('api/shape/readShapeCache', `missing ${key}`);
-};
-
-const writeShapeCache = (name, args, shape) => {
-  const key = `${name}/${JSON.stringify(args)}`;
-  writeNonblocking(key, shape.toGeometry());
-  logInfo('api/shape/writeShapeCache', key);
-  return shape;
-};
-
 const Cached = (name, thunk) => {
   const op = (...args) => {
-    const cached = readShapeCache(name, args);
+    const path = `cached/${name}/${JSON.stringify(args)}`;
+    // The first time we hit this, we'll schedule a read and throw, then wait for the read to complete, and retry.
+    const cached = loadGeometryNonblocking(path);
     if (cached) {
       return cached;
     }
-    const value = thunk(...args);
-    writeShapeCache(name, args, value);
-    return value;
+    // The read we scheduled last time produced undefined, so we fall through to here.
+    const shape = thunk(...args);
+    // This will schedule a write and throw, then wait for the write to complete, and retry.
+    saveGeometryNonblocking(path, shape);
+    return shape;
   };
   return op;
 };

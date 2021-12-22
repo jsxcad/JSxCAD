@@ -1285,7 +1285,7 @@ class App extends React.Component {
           );
         }
         case 'Log': {
-          const { LogMessages = [], LogFilter = [] } = this.state;
+          const { LogMessages = [], LogFilter = '/sys' } = this.state;
           return (
             <div>
               <Card>

@@ -35,15 +35,6 @@ NutThread(20, 10).material('steel').view().md(`NutThread(20, 10)`);
 NutThread(20, 10)
 
 ```JavaScript
-ScrewThreadSegment(20, { turn: 'right' })
-  .color('purple')
-  .and(ScrewThreadSegment(20, { turn: 'left' }).color('green'))
-  .view();
-```
-
-![Image](examples.md.4.png)
-
-```JavaScript
 NutThreadSegment(20, { play: 0.1 })
   .color('orange')
   .and(ScrewThreadSegment(20, { play: 0.1 }).color('blue'))
@@ -52,6 +43,15 @@ NutThreadSegment(20, { play: 0.1 })
   .md(`NutThread(20, 10).and(ScrewThread(20, 10))`);
 ```
 
-![Image](examples.md.5.png)
+![Image](examples.md.4.png)
 
 NutThread(20, 10).and(ScrewThread(20, 10))
+
+```JavaScript
+ScrewThreadSegment(20, { turn: 'right' })
+  .color('purple')
+  .and(ScrewThreadSegment(20, { turn: 'left' }).color('green'))
+  .view();
+```
+
+![Image](examples.md.5.png)

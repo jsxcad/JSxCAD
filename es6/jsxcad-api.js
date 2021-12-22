@@ -159,10 +159,7 @@ const evaluate = async (ecmascript, { api, path }) => {
         return result;
       } catch (error) {
         if (error instanceof ErrorWouldBlock) {
-          logInfo(
-            'api/core/evaluate',
-            'Resolve pending and retry due to blocking operation'
-          );
+          logInfo('api/core/evaluate', error.message);
           await resolvePending();
           restoreEmitGroup(emitGroup);
           continue;

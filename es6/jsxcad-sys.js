@@ -1084,14 +1084,6 @@ const ensureQualifiedFile = (path, qualifiedPath) => {
   return file;
 };
 
-const ensureFile = (path, workspace) => {
-  if (typeof path !== 'string') {
-    throw Error(`die: ${JSON.stringify(path)}`);
-  }
-  const qualifiedPath = qualifyPath(path, workspace);
-  return ensureQualifiedFile(path, qualifiedPath);
-};
-
 const getQualifiedFile = (qualifiedPath) => files.get(qualifiedPath);
 
 const getFile = (path, workspace) =>
@@ -3152,12 +3144,9 @@ const getFileWriter = () => {
 const fileWriter = getFileWriter();
 
 const writeNonblocking = (path, data, options = {}) => {
-  const { workspace = getFilesystem() } = options;
-  // Update in-memory cache immediately.
-  ensureFile(path, workspace).data = data;
   // Schedule a deferred write to update persistent storage.
   addPending(write(path, data, options));
-  return true;
+  throw new ErrorWouldBlock(`Would have blocked on write ${path}`);
 };
 
 const write = async (path, data, options = {}) => {
