@@ -1,6 +1,6 @@
-import { closePath, concatenatePath, assemble as assemble$1, flip, toConcreteGeometry, toDisplayGeometry, toTransformedGeometry, toPoints, transform, rewriteTags, taggedPaths, taggedGraph, openPath, taggedSegments, taggedPoints, fromPolygonsToGraph, registerReifier, taggedPlan, taggedGroup, union, taggedItem, getLeafs, getInverseMatrices, bend as bend$1, projectToPlane, computeCentroid, intersection, allTags, fromPointsToGraph, difference, rewrite, hasTypeWire, translatePaths, taggedLayout, measureBoundingBox, getLayouts, visit, isNotVoid, eachPoint as eachPoint$1, computeNormal, extrude, extrudeToPlane as extrudeToPlane$1, faces as faces$1, fill as fill$1, empty, eachSegment, grow as grow$1, outline as outline$1, inset as inset$1, read, loft as loft$1, realize, hasShowOverlay, minkowskiDifference as minkowskiDifference$1, minkowskiShell as minkowskiShell$1, minkowskiSum as minkowskiSum$1, isVoid, offset as offset$1, push as push$1, remesh as remesh$1, removeSelfIntersections as removeSelfIntersections$1, write, section as section$1, separate as separate$1, smooth as smooth$1, taggedSketch, taper as taper$1, test as test$1, twist as twist$1, hasTypeVoid, withQuery, toPolygonsWithHoles, arrangePolygonsWithHoles, fromPolygonsWithHolesToTriangles, fromTrianglesToGraph, alphaShape, rotateZPath, assemble2, convexHullToGraph, distributedAssemble, fromFunctionToGraph, translatePath } from './jsxcad-geometry.js';
-import { getSourceLocation, emit, logInfo, getConfig, log as log$1, generateUniqueId, addPending, write as write$1 } from './jsxcad-sys.js';
-export { elapsed, emit, info, read, write } from './jsxcad-sys.js';
+import { closePath, concatenatePath, assemble as assemble$1, flip, toConcreteGeometry, toDisplayGeometry, toTransformedGeometry, toPoints, transform, rewriteTags, taggedPaths, taggedGraph, openPath, taggedSegments, taggedPoints, fromPolygonsToGraph, registerReifier, taggedPlan, taggedGroup, union, taggedItem, getLeafs, getInverseMatrices, bend as bend$1, projectToPlane, computeCentroid, intersection, allTags, fromPointsToGraph, difference, rewrite, hasTypeWire, translatePaths, taggedLayout, measureBoundingBox, getLayouts, visit, isNotVoid, eachPoint as eachPoint$1, computeNormal, extrude, extrudeToPlane as extrudeToPlane$1, faces as faces$1, fill as fill$1, empty, eachSegment, grow as grow$1, outline as outline$1, inset as inset$1, read, readNonblocking, loft as loft$1, realize, hasShowOverlay, minkowskiDifference as minkowskiDifference$1, minkowskiShell as minkowskiShell$1, minkowskiSum as minkowskiSum$1, isVoid, offset as offset$1, push as push$1, remesh as remesh$1, removeSelfIntersections as removeSelfIntersections$1, write, writeNonblocking, section as section$1, separate as separate$1, smooth as smooth$1, taggedSketch, taper as taper$1, test as test$1, twist as twist$1, hasTypeVoid, withQuery, toPolygonsWithHoles, arrangePolygonsWithHoles, fromPolygonsWithHolesToTriangles, fromTrianglesToGraph, alphaShape, rotateZPath, assemble2, convexHullToGraph, distributedAssemble, fromFunctionToGraph, translatePath } from './jsxcad-geometry.js';
+import { getSourceLocation, emit, computeHash, logInfo, getConfig, hash, log as log$1, generateUniqueId, addPending, write as write$1 } from './jsxcad-sys.js';
+export { elapsed, emit, read, write } from './jsxcad-sys.js';
 import { identityMatrix, fromTranslation, fromRotation, fromScaling } from './jsxcad-math-mat4.js';
 import { scale as scale$1, subtract, add as add$1, abs, squaredLength, normalize, cross, distance } from './jsxcad-math-vec3.js';
 import { zag } from './jsxcad-api-v1-math.js';
@@ -529,77 +529,9 @@ Shape.registerReifier = (name, op) => {
   return finishedOp;
 };
 
-function pad (hash, len) {
-  while (hash.length < len) {
-    hash = '0' + hash;
-  }
-  return hash;
-}
-
-function fold (hash, text) {
-  var i;
-  var chr;
-  var len;
-  if (text.length === 0) {
-    return hash;
-  }
-  for (i = 0, len = text.length; i < len; i++) {
-    chr = text.charCodeAt(i);
-    hash = ((hash << 5) - hash) + chr;
-    hash |= 0;
-  }
-  return hash < 0 ? hash * -2 : hash;
-}
-
-function foldObject (hash, o, seen) {
-  return Object.keys(o).sort().reduce(foldKey, hash);
-  function foldKey (hash, key) {
-    return foldValue(hash, o[key], key, seen);
-  }
-}
-
-function foldValue (input, value, key, seen) {
-  var hash = fold(fold(fold(input, key), toString(value)), typeof value);
-  if (value === null) {
-    return fold(hash, 'null');
-  }
-  if (value === undefined) {
-    return fold(hash, 'undefined');
-  }
-  if (typeof value === 'object' || typeof value === 'function') {
-    if (seen.indexOf(value) !== -1) {
-      return fold(hash, '[Circular]' + key);
-    }
-    seen.push(value);
-
-    var objHash = foldObject(hash, value, seen);
-
-    if (!('valueOf' in value) || typeof value.valueOf !== 'function') {
-      return objHash;
-    }
-
-    try {
-      return fold(objHash, String(value.valueOf()))
-    } catch (err) {
-      return fold(objHash, '[valueOf exception]' + (err.stack || err.message))
-    }
-  }
-  return fold(hash, value.toString());
-}
-
-function toString (o) {
-  return Object.prototype.toString.call(o);
-}
-
-function sum (o) {
-  return pad(foldValue(0, o, '', []).toString(16), 8);
-}
-
-var hashSum = sum;
-
 const define = (tag, data) => {
   const define = { tag, data };
-  emit({ define, hash: hashSum(define) });
+  emit({ define, hash: computeHash(define) });
   return data;
 };
 
@@ -681,7 +613,7 @@ const md = (strings, ...placeholders) => {
   const md = strings.reduce(
     (result, string, i) => result + placeholders[i - 1] + string
   );
-  emit({ md, hash: hashSum(md) });
+  emit({ md, hash: computeHash(md) });
   return md;
 };
 
@@ -697,7 +629,7 @@ const mdMethod =
       }
     }
     const md = strings.join('');
-    emit({ md, hash: hashSum(md) });
+    emit({ md, hash: computeHash(md) });
     return shape;
   };
 
@@ -1094,17 +1026,16 @@ Shape.registerMethod('drop', drop);
 const starts = new Map();
 const totals = new Map();
 
-let timeoutId;
-
 const startTimer = (name) => (shape) => {
-  starts.set(name, new Date());
-  if (timeoutId) {
-    clearTimeout(timeoutId);
+  const start = new Date();
+  starts.set(name, start);
+  const total = totals.get(name);
+  if (total) {
+    const average = total.sum / total.count / 1000;
+    if (average > 1.0) {
+      logInfo('api/shape/startTimer', `${name} [${average.toFixed(2)}]`);
+    }
   }
-  timeoutId = setTimeout(() => {
-    timeoutId = null;
-    logInfo('api/shape/startTimer', name);
-  }, 1000);
   return shape;
 };
 
@@ -1113,16 +1044,14 @@ Shape.registerMethod('startTimer', startTimer);
 const endTimer = (name) => (shape) => {
   const start = starts.get(name);
   const ms = start !== undefined ? new Date() - start : -1;
-  const total = totals.get(name) || { sum: 0, count: 0, history: [] };
+  const total = totals.get(name) || { sum: 0, count: 0 };
   total.sum += ms;
   total.count += 1;
-  // total.history.push(ms);
   totals.set(name, total);
-  if (total.sum >= 1000) {
-    const message = `${name}: ${(total.sum / 1000).toFixed(2)} [${(
-      total.sum /
-      (1000 * total.count)
-    ).toFixed(2)}]`;
+  const sum = total.sum / 1000;
+  if (sum >= 1.0) {
+    const average = total.sum / total.count / 1000;
+    const message = `${name}: ${sum.toFixed(2)} [${average.toFixed(2)}]`;
     logInfo('api/shape/endTimer', message);
     if (getConfig().api?.shape?.endTimer?.md) {
       shape = shape.md(message);
@@ -3335,11 +3264,20 @@ const loadGeometry = async (
   path,
   { otherwise = fromUndefined } = {}
 ) => {
+  logInfo('api/shape/loadGeometry', path);
   const data = await read(path);
   if (data === undefined) {
     return otherwise();
   } else {
     return Shape.fromGeometry(data);
+  }
+};
+
+const loadGeometryNonblocking = (path) => {
+  logInfo('api/shape/loadGeometryNonblocking', path);
+  const geometry = readNonblocking(path);
+  if (geometry) {
+    return Shape.fromGeometry(geometry);
   }
 };
 
@@ -3378,8 +3316,8 @@ const toText = (value) => {
 const log = (value, level) => {
   const text = toText(value);
   const log = { text, level };
-  const hash = hashSum(log);
-  emit({ log, hash });
+  const hash$1 = hash(log);
+  emit({ log, hash: hash$1 });
   return log$1({ op: 'text', text, level });
 };
 
@@ -3387,8 +3325,8 @@ const logOp = (shape, op) => {
   const text = String(op(shape));
   const level = 'serious';
   const log = { text, level };
-  const hash = hashSum(log);
-  emit({ log, hash });
+  const hash$1 = hash(log);
+  emit({ log, hash: hash$1 });
   return log$1({ op: 'text', text });
 };
 
@@ -3777,8 +3715,15 @@ Shape.registerMethod('rz', rz);
 const rotateZ = rz;
 Shape.registerMethod('rotateZ', rz);
 
-const saveGeometry = async (path, shape) =>
-  Shape.fromGeometry(await write(shape.toGeometry(), path));
+const saveGeometry = async (path, shape) => {
+  logInfo('api/shape/saveGeometry', path);
+  return Shape.fromGeometry(await write(path, shape.toGeometry()));
+};
+
+const saveGeometryNonblocking = (path, shape) => {
+  logInfo('api/shape/saveGeometryNonblocking', path);
+  return Shape.fromGeometry(writeNonblocking(path, shape.toGeometry()));
+};
 
 const scale =
   (x = 1, y = x, z = y) =>
@@ -3948,7 +3893,7 @@ const table =
   (shape) => {
     const uniqueId = generateUniqueId;
     const open = { open: { type: 'table', rows, columns, uniqueId } };
-    emit({ open, hash: hashSum(open) });
+    emit({ open, hash: computeHash(open) });
     for (let cell of cells) {
       if (cell instanceof Function) {
         cell = cell(shape);
@@ -3958,7 +3903,7 @@ const table =
       }
     }
     const close = { close: { type: 'table', rows, columns, uniqueId } };
-    emit({ close, hash: hashSum(close) });
+    emit({ close, hash: computeHash(close) });
     return shape;
   };
 
@@ -4638,6 +4583,23 @@ const Assembly2 = (...shapes) =>
 
 Shape.prototype.Assembly2 = Shape.shapeMethod(Assembly2);
 
+const Cached = (name, thunk) => {
+  const op = (...args) => {
+    const path = `cached/${name}/${JSON.stringify(args)}`;
+    // The first time we hit this, we'll schedule a read and throw, then wait for the read to complete, and retry.
+    const cached = loadGeometryNonblocking(path);
+    if (cached) {
+      return cached;
+    }
+    // The read we scheduled last time produced undefined, so we fall through to here.
+    const shape = thunk(...args);
+    // This will schedule a write and throw, then wait for the write to complete, and retry.
+    saveGeometryNonblocking(path, shape);
+    return shape;
+  };
+  return op;
+};
+
 const Hull = (...shapes) => {
   const points = [];
   shapes.forEach((shape) => shape.eachPoint((point) => points.push(point)));
@@ -5133,4 +5095,4 @@ const yz = Shape.fromGeometry({
   ],
 });
 
-export { Alpha, Arc, ArcX, ArcY, ArcZ, Assembly, Assembly2, Box, ChainedHull, DistributedAssembly, Edge, Edges, Empty, Face, GrblConstantLaser, GrblDynamicLaser, GrblPlotter, GrblSpindle, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Line, Octagon, Orb, Page, Path, Pentagon, Plan, Point, Points, Polygon, Polyhedron, Septagon, Shape, Spiral, Tetragon, Triangle, Voxels, Wave, Weld, abstract, add, addTo, align, and, as, asPart, at, bend, billOfMaterials, cast, center, clip, clipFrom, cloudSolid, color, colors, cut, cutFrom, cutOut, defRgbColor, defThreejsMaterial, defTool, define, drop, e, each, eachPoint, edit, endTimer, ensurePages, ex, extrudeAlong, extrudeToPlane, extrudeX, extrudeY, extrudeZ, ey, ez, faces, fill, fit, fitTo, fuse, g, get, getEdge, getNot, gn, grow, inline, inset, keep, loadGeometry, loft, log, loop, mask, material, md, minkowskiDifference, minkowskiShell, minkowskiSum, move, moveTo, n, noVoid, noop, normal, notColor, nth, ofPlan, offset, on, op, orient, outline, overlay, pack, play, push, remesh, removeSelfIntersections, rotate, rotateX, rotateY, rotateZ, rx, ry, rz, saveGeometry, scale, scaleToFit, section, sectionProfile, separate, seq, size, sketch, smooth, startTimer, table, tag, tags, taper, test, tint, to, tool, top, twist, untag, view, voidFn, voidIn, voxels, weld, withFill, withFn, withInset, withOp, x, xy, xyz, xz, y, yz, z };
+export { Alpha, Arc, ArcX, ArcY, ArcZ, Assembly, Assembly2, Box, Cached, ChainedHull, DistributedAssembly, Edge, Edges, Empty, Face, GrblConstantLaser, GrblDynamicLaser, GrblPlotter, GrblSpindle, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Line, Octagon, Orb, Page, Path, Pentagon, Plan, Point, Points, Polygon, Polyhedron, Septagon, Shape, Spiral, Tetragon, Triangle, Voxels, Wave, Weld, abstract, add, addTo, align, and, as, asPart, at, bend, billOfMaterials, cast, center, clip, clipFrom, cloudSolid, color, colors, cut, cutFrom, cutOut, defRgbColor, defThreejsMaterial, defTool, define, drop, e, each, eachPoint, edit, endTimer, ensurePages, ex, extrudeAlong, extrudeToPlane, extrudeX, extrudeY, extrudeZ, ey, ez, faces, fill, fit, fitTo, fuse, g, get, getEdge, getNot, gn, grow, inline, inset, keep, loadGeometry, loft, log, loop, mask, material, md, minkowskiDifference, minkowskiShell, minkowskiSum, move, moveTo, n, noVoid, noop, normal, notColor, nth, ofPlan, offset, on, op, orient, outline, overlay, pack, play, push, remesh, removeSelfIntersections, rotate, rotateX, rotateY, rotateZ, rx, ry, rz, saveGeometry, scale, scaleToFit, section, sectionProfile, separate, seq, size, sketch, smooth, startTimer, table, tag, tags, taper, test, tint, to, tool, top, twist, untag, view, voidFn, voidIn, voxels, weld, withFill, withFn, withInset, withOp, x, xy, xyz, xz, y, yz, z };

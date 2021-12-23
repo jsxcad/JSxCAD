@@ -277,14 +277,14 @@ test('Replace control with constant setting.', async (t) => {
           program: `
 try {
 const length = await $run(async () => {
-  const length = control('length', 10, 'number');
+  const length = control('length', 16, 'number');
   ;
   return length;
 }, {
   path: '',
   id: 'length',
   text: undefined,
-  sha: '03210bbcfe5dc6151d192ebe8a6c0bd56f3e1b28'
+  sha: '597a1f0c3f64df4cbe92954d7892cafadc4b099d'
 });
 
 
@@ -309,69 +309,30 @@ test('Control can be used with cached output.', async (t) => {
   const replays = {};
   await toEcmascript(
     `
-const length = control('length', 10, 'number');
+const length = control('length', 16, 'number');
 const foo = bar(length);`,
     { imports, exports, updates, replays, noLines: true }
   );
   t.deepEqual(
     { imports, exports, updates, replays },
     {
-      exports: [],
       imports: [],
-      replays: {},
+      exports: [],
       updates: {
-        foo: {
-          dependencies: ['bar', 'length'],
-          imports: [],
-          program: `
-try {
-const length = await $run(async () => {
-  const length = control('length', 10, 'number');
-  ;
-  return length;
-}, {
-  path: '',
-  id: 'length',
-  text: undefined,
-  sha: '03210bbcfe5dc6151d192ebe8a6c0bd56f3e1b28'
-});
-
-const foo = await $run(async () => {
-  const foo = bar(length);
-  ;
-  return foo;
-}, {
-  path: '',
-  id: 'foo',
-  text: undefined,
-  sha: '3e7b9e179e36b61b3a80476feb39ccaadd685c9a'
-});
-
-
-} catch (error) { throw error; }
-`,
-        },
         length: {
           dependencies: ['control'],
           imports: [],
-          program: `
-try {
-const length = await $run(async () => {
-  const length = control('length', 10, 'number');
-  ;
-  return length;
-}, {
-  path: '',
-  id: 'length',
-  text: undefined,
-  sha: '03210bbcfe5dc6151d192ebe8a6c0bd56f3e1b28'
-});
-
-
-} catch (error) { throw error; }
-`,
+          program:
+            "\ntry {\nconst length = await $run(async () => {\n  const length = control('length', 16, 'number');\n  ;\n  return length;\n}, {\n  path: '',\n  id: 'length',\n  text: undefined,\n  sha: '597a1f0c3f64df4cbe92954d7892cafadc4b099d'\n});\n\n\n} catch (error) { throw error; }\n",
+        },
+        foo: {
+          dependencies: ['bar', 'length'],
+          imports: [],
+          program:
+            "\ntry {\nconst length = await $run(async () => {\n  const length = control('length', 16, 'number');\n  ;\n  return length;\n}, {\n  path: '',\n  id: 'length',\n  text: undefined,\n  sha: '597a1f0c3f64df4cbe92954d7892cafadc4b099d'\n});\n\nconst foo = await $run(async () => {\n  const foo = bar(length);\n  ;\n  return foo;\n}, {\n  path: '',\n  id: 'foo',\n  text: undefined,\n  sha: 'cab8606c3133e5d59965bae55412a5f03cb273e2'\n});\n\n\n} catch (error) { throw error; }\n",
         },
       },
+      replays: {},
     }
   );
 });

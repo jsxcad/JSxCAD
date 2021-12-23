@@ -1,7 +1,6 @@
-import { emit, generateUniqueId } from '@jsxcad/sys';
+import { computeHash, emit, generateUniqueId } from '@jsxcad/sys';
 
 import Shape from './Shape.js';
-import hashSum from 'hash-sum';
 import { md } from './md.js';
 
 export const table =
@@ -9,7 +8,7 @@ export const table =
   (shape) => {
     const uniqueId = generateUniqueId;
     const open = { open: { type: 'table', rows, columns, uniqueId } };
-    emit({ open, hash: hashSum(open) });
+    emit({ open, hash: computeHash(open) });
     for (let cell of cells) {
       if (cell instanceof Function) {
         cell = cell(shape);
@@ -19,7 +18,7 @@ export const table =
       }
     }
     const close = { close: { type: 'table', rows, columns, uniqueId } };
-    emit({ close, hash: hashSum(close) });
+    emit({ close, hash: computeHash(close) });
     return shape;
   };
 

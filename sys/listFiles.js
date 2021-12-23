@@ -1,16 +1,10 @@
 import * as fs from 'fs';
 
 import { getFilesystem, qualifyPath } from './filesystem.js';
-
 import { isBrowser, isNode, isWebWorker } from './browserOrNode.js';
 
-import {
-  listFiles as listEphemeralFiles,
-  watchFileCreation,
-  watchFileDeletion,
-} from './files.js';
-
 import { db } from './db.js';
+import { listFiles as listEphemeralFiles } from './files.js';
 
 const { promises } = fs;
 
@@ -53,22 +47,7 @@ const getFileLister = async ({ workspace }) => {
   }
 };
 
-let cachedKeys;
-
-const updateCachedKeys = (options = {}, file) =>
-  cachedKeys.add(file.storageKey);
-const deleteCachedKeys = (options = {}, file) =>
-  cachedKeys.delete(file.storageKey);
-
-const getKeys = async ({ workspace }) => {
-  if (cachedKeys === undefined) {
-    const listFiles = await getFileLister({ workspace });
-    cachedKeys = await listFiles();
-    watchFileCreation(updateCachedKeys);
-    watchFileDeletion(deleteCachedKeys);
-  }
-  return cachedKeys;
-};
+const getKeys = async ({ workspace }) => (await getFileLister({ workspace }))();
 
 export const listFiles = async ({ workspace } = {}) => {
   if (workspace === undefined) {
@@ -78,7 +57,7 @@ export const listFiles = async ({ workspace } = {}) => {
   const keys = await getKeys({ workspace });
   const files = [];
   for (const key of keys) {
-    if (key.startsWith(prefix)) {
+    if (key && key.startsWith(prefix)) {
       files.push(key.substring(prefix.length));
     }
   }

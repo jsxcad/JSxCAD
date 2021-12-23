@@ -79,7 +79,7 @@ export class OrbitView extends React.PureComponent {
     this.builtPath = path;
     this.builtContainer = container;
     if (this.watcher) {
-      unwatchFile(this.builtPath, this.watcher, { workspace });
+      unwatchFile(this.builtPath, workspace, this.watcher);
     }
     this.watcher = async () => {
       const { onUpdateGeometry } = this.props;
@@ -103,7 +103,7 @@ export class OrbitView extends React.PureComponent {
       // Restore the control state.
       trackballControls.reset();
     };
-    watchFile(path, this.watcher, { workspace });
+    watchFile(path, workspace, this.watcher);
 
     trackballControls.addEventListener('change', () => {
       const { onMove } = this.props;
@@ -191,7 +191,7 @@ export class OrbitView extends React.PureComponent {
   componentWillUnmount() {
     const { workspace } = this.props;
     if (this.watcher) {
-      unwatchFile(this.path, this.watcher, { workspace });
+      unwatchFile(this.path, workspace, this.watcher);
     }
   }
 

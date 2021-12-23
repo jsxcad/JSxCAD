@@ -1,5 +1,5 @@
-import { fromPaths as fromPathsToGraph } from '../graph/fromPaths.js';
 import { close } from '../paths/close.js';
+import { fromPaths as fromPathsToGraph } from '../graph/fromPaths.js';
 import { fill as graph } from '../graph/fill.js';
 import { op } from './op.js';
 

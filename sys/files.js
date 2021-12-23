@@ -1,24 +1,31 @@
 import { qualifyPath } from './filesystem.js';
+import { watchFileDeletion } from './watchers.js';
 
 const files = new Map();
-const fileCreationWatchers = new Set();
-const fileDeletionWatchers = new Set();
 
-export const getFile = async (options, unqualifiedPath) => {
-  if (typeof unqualifiedPath !== 'string') {
-    throw Error(`die: ${JSON.stringify(unqualifiedPath)}`);
-  }
-  const path = qualifyPath(unqualifiedPath, options.workspace);
-  let file = files.get(path);
+// Do we need the ensureFile functions?
+export const ensureQualifiedFile = (path, qualifiedPath) => {
+  let file = files.get(qualifiedPath);
+  // Accessing a file counts as creation.
   if (file === undefined) {
-    file = { path: unqualifiedPath, watchers: new Set(), storageKey: path };
-    files.set(path, file);
-    for (const watcher of fileCreationWatchers) {
-      await watcher(options, file);
-    }
+    file = { path, storageKey: qualifiedPath };
+    files.set(qualifiedPath, file);
   }
   return file;
 };
+
+export const ensureFile = (path, workspace) => {
+  if (typeof path !== 'string') {
+    throw Error(`die: ${JSON.stringify(path)}`);
+  }
+  const qualifiedPath = qualifyPath(path, workspace);
+  return ensureQualifiedFile(path, qualifiedPath);
+};
+
+export const getQualifiedFile = (qualifiedPath) => files.get(qualifiedPath);
+
+export const getFile = (path, workspace) =>
+  getQualifiedFile(qualifyPath(path, workspace));
 
 export const listFiles = (set) => {
   for (const file of files.keys()) {
@@ -26,42 +33,11 @@ export const listFiles = (set) => {
   }
 };
 
-export const deleteFile = async (options, unqualifiedPath) => {
-  const path = qualifyPath(unqualifiedPath, options.workspace);
-  let file = files.get(path);
-  if (file !== undefined) {
-    files.delete(path);
-  } else {
-    // It might not have been in the cache, but we still need to inform watchers.
-    file = { path: unqualifiedPath, storageKey: path };
+watchFileDeletion((path, workspace) => {
+  const qualifiedPath = qualifyPath(path, workspace);
+  const file = files.get(qualifiedPath);
+  if (file) {
+    file.data = undefined;
   }
-  for (const watcher of fileDeletionWatchers) {
-    await watcher(options, file);
-  }
-};
-
-export const unwatchFiles = async (thunk) => {
-  for (const file of files.values()) {
-    file.watchers.delete(thunk);
-  }
-};
-
-export const watchFileCreation = async (thunk) => {
-  fileCreationWatchers.add(thunk);
-  return thunk;
-};
-
-export const unwatchFileCreation = async (thunk) => {
-  fileCreationWatchers.delete(thunk);
-  return thunk;
-};
-
-export const watchFileDeletion = async (thunk) => {
-  fileDeletionWatchers.add(thunk);
-  return thunk;
-};
-
-export const unwatchFileDeletion = async (thunk) => {
-  fileCreationWatchers.delete(thunk);
-  return thunk;
-};
+  files.delete(qualifiedPath);
+});

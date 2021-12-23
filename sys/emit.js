@@ -79,5 +79,3 @@ export const finishEmitGroup = (sourceLocation) => {
 };
 
 export const removeOnEmitHandler = (handler) => onEmitHandlers.delete(handler);
-
-export const info = (text) => {};

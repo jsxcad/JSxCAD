@@ -1,72 +1,65 @@
-const Profile = (pitch = 1, angle = 60 / 360) =>
+const Profile = (pitch = 1, depth = 4 / 3) =>
   Polygon(
-    Point(0, 1 / -2),
-    Point(pitch / -2, 1 / 2),
-    Point(pitch / 2, 1 / 2),
-    Point(0, 1 / -2)
+    Point(0, depth / -2),
+    Point(pitch / -2, depth / 2),
+    Point(pitch / -2, depth),
+    Point(pitch / 2, depth),
+    Point(pitch / 2, depth / 2)
   );
 
-export const ScrewThread = (
-  diameter,
-  height,
-  { pitch = 1, angle, play = 0.1, lefthanded = false } = {}
-) =>
-  Profile(pitch, angle)
-    .y(diameter / -2 + 1 / 2 + play * 2)
+Profile().view();
+
+export const ScrewThreadSegmentBuilder = Cached('nb/projects/bolt/bolt.nb/ScrewThreadSegmentBuilder',
+  (diameter, pitch, angle, play, turn) => {
+  const depth = pitch / 2 / Math.tan(angle * Math.PI);
+  return Profile(pitch, (pitch * 0.5) / Math.tan(angle * Math.PI))
+    .y(diameter / -2)
     .ry(1 / 4)
     .loft(
       seq((t) => (s) => s.rz(t).z(pitch * t * 1.001), {
-        from: -1 / 2,
+        from: -1,
         by: 1 / 32,
-        to: 3 / 2,
+        to: 1,
       })
     )
-    .scale(lefthanded ? 1 : -1, lefthanded ? 1 : -1, 1)
-    .clip(Box(diameter).ez(pitch))
+    .scale(1, 1, turn === 'right' ? 1 : -1)
+    .grow(-play)
+    .removeSelfIntersections()
+    .add(Arc(diameter - depth).ez(pitch, -pitch))
+    .clip(Box(diameter * 2).ez(pitch / 2, pitch / -2))
+    .align('z>');
+});
+
+export const ScrewThreadSegment = (diameter, { pitch = 1, angle = 60 / 360, play = 0.1, turn = 'right' } = {}) => ScrewThreadSegmentBuilder(diameter, pitch, angle, play, turn);
+
+export const ScrewThreadBuilder = Cached('nb/projects/bolt/bolt.nb/ScrewThread', (diameter, height, pitch, angle, play, turn) =>
+  ScrewThreadSegment(diameter, { pitch, angle, play, turn })
     .z(seq((a) => a, { from: 0, to: height, by: pitch }))
-    .clip(Box(diameter).ez(height))
-    .and(Arc(diameter - 2).ez(height));
+    .cut(Box(diameter * 2).ez(height, height + pitch * 2)));
 
-export const NutThread = (
-  diameter,
-  height,
-  { pitch = 1, angle, play = 0.1, lefthanded = false } = {}
-) =>
-  Profile(pitch, angle)
-    .rz(1 / 2)
-    .y(diameter / -2 + 1 / 2 - play * 2)
-    .ry(1 / 4)
-    .loft(
-      seq((t) => (s) => s.rz(t).z(pitch * t * 1.001), {
-        from: -1 / 2,
-        by: 1 / 32,
-        to: 3 / 2,
-      })
-    )
-    .scale(lefthanded ? 1 : -1, lefthanded ? 1 : -1, 1)
-    .clip(Box(diameter + 2).ez(pitch))
+export const ScrewThread = (diameter, height, { pitch = 1, angle = 60 / 360, play = 0.1, turn = 'right' } = {}) => ScrewThreadBuilder(diameter, height, pitch, angle, play, turn);
+
+export const NutThreadSegmentBuilder = Cached('nb/projects/bolt/bolt.nb/NutThreadSegment', (
+  diameter, pitch, thickness, angle, play, turn) => {
+  const depth = pitch / 2 / Math.tan(angle * Math.PI);
+  return ScrewThreadSegment(diameter, {
+    pitch,
+    angle,
+    play: -play,
+    turn
+  }).cutFrom(
+    Arc(diameter + thickness)
+      .cut(Arc(diameter - depth))
+      .ez(pitch)
+  );
+});
+
+export const NutThreadSegment = (diameter, { pitch = 1, thickness = pitch * 2, angle = 60 / 360, play = 0.1, turn = 'right' } = {}) =>
+  NutThreadSegmentBuilder(diameter, pitch, thickness, angle, play, turn);
+
+export const NutThreadBuilder = Cached('nb/projects/bolt/bolt.nb/NutThread', (diameter, height, pitch, angle, play, turn) =>
+  NutThreadSegment(diameter, { pitch, angle, play, turn })
     .z(seq((a) => a, { from: 0, to: height, by: pitch }))
-    .clip(Box(diameter + 2).ez(height))
-    .rz(1 / 2)
-    .mask(Arc(diameter).ez(height));
+    .cut(Box(diameter * 2).ez(height, height + pitch * 2)));
 
-const profile = Profile().view();
-
-const nutThread = NutThread(20, 10)
-  .material('steel')
-  .stl('nut 20x10');
-
-const screwThread = ScrewThread(20, 10)
-  .cut(
-    Box(2, 10)
-      .ez(10, 5)
-      .rz(0, 1 / 4)
-  )
-  .material('steel')
-  .stl('thread 20x10');
-
-md`Show the fit.`;
-ScrewThread(10, 5)
-  .and(NutThread(10, 5).and(Arc(15).cut(Arc(10)).ez(5)))
-  .view(1)
-  .view(2, section());
+export const NutThread = (diameter, height, { pitch = 1, angle = 60 / 360, play = 0.1, turn = 'right' } = {}) => NutThreadBuilder(diameter, height, pitch, angle, play, turn);

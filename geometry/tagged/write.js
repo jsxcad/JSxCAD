@@ -1,13 +1,25 @@
 import { hash } from './hash.js';
 import { prepareForSerialization } from './prepareForSerialization.js';
 import { toDisjointGeometry } from './toDisjointGeometry.js';
-import { write as writePath } from '@jsxcad/sys';
+import {
+  write as writePath,
+  writeNonblocking as writePathNonblocking,
+} from '@jsxcad/sys';
 
-export const write = async (geometry, path) => {
+export const write = async (path, geometry) => {
   const disjointGeometry = toDisjointGeometry(geometry);
   // Ensure that the geometry carries a hash before saving.
   hash(disjointGeometry);
   const preparedGeometry = prepareForSerialization(disjointGeometry);
   await writePath(path, preparedGeometry);
+  return preparedGeometry;
+};
+
+export const writeNonblocking = (path, geometry) => {
+  const disjointGeometry = toDisjointGeometry(geometry);
+  // Ensure that the geometry carries a hash before saving.
+  hash(disjointGeometry);
+  const preparedGeometry = prepareForSerialization(disjointGeometry);
+  writePathNonblocking(path, preparedGeometry);
   return preparedGeometry;
 };
