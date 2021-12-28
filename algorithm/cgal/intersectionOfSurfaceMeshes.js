@@ -6,5 +6,6 @@ export const intersectionOfSurfaceMeshes = (a, aTransform, b, bTransform) =>
     a,
     toCgalTransformFromJsTransform(aTransform),
     b,
-    toCgalTransformFromJsTransform(bTransform)
+    toCgalTransformFromJsTransform(bTransform),
+    false, false
   );

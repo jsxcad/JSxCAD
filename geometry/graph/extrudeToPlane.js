@@ -7,6 +7,9 @@ import { toSurfaceMesh } from './toSurfaceMesh.js';
 
 // FIX: The face needs to be selected with the transform in mind.
 export const extrudeToPlane = (geometry, highPlane, lowPlane, direction) => {
+  if (geometry.graph.isEmpty) {
+    return geometry;
+  }
   let graph = realizeGraph(geometry.graph);
   if (graph.faces.length > 0) {
     // Arbitrarily pick the plane of the first graph to extrude along.

@@ -66,7 +66,7 @@ const reifyArc =
           .scale(scale)
           .move(middle);
         if (left !== right) {
-          spiral = spiral.fill().ex(left, right);
+          spiral = spiral.fill().ex(left - middle[X], right - middle[X]);
         }
         break;
       }
@@ -77,7 +77,7 @@ const reifyArc =
           .scale(scale)
           .move(middle);
         if (front !== back) {
-          spiral = spiral.fill().ey(front, back);
+          spiral = spiral.fill().ey(front - middle[Y], back - middle[Y]);
         }
         break;
       }
@@ -85,7 +85,7 @@ const reifyArc =
         scale[Z] = 1;
         spiral = spiral.scale(scale).move(middle);
         if (top !== bottom) {
-          spiral = spiral.fill().ez(top, bottom);
+          spiral = spiral.fill().ez(top - middle[Z], bottom - middle[Z]);
         }
         break;
       }

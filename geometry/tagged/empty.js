@@ -1,3 +1,3 @@
 import { fromEmpty } from '../graph/fromEmpty.js';
 
-export const empty = ({ tags }) => fromEmpty({ tags });
+export const empty = ({ tags, isPlanar }) => fromEmpty({ tags, isPlanar });

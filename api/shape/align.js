@@ -5,12 +5,22 @@ const X = 0;
 const Y = 1;
 const Z = 2;
 
+// Round to the nearest 0.001 mm
+
+const round = (v) => Math.round(v * 1000) / 1000;
+
+const roundCoordinate = ([x, y, z]) => [round(x), round(y), round(z)];
+
 export const align =
   (spec = 'xyz', origin = [0, 0, 0]) =>
   (shape) =>
     shape.size(({ max, min, center }, shape) => {
+      // This is producing very small deviations.
+      // FIX: Try a more principled approach.
+      max = roundCoordinate(max);
+      min = roundCoordinate(min);
+      center = roundCoordinate(center);
       const offset = [0, 0, 0];
-
       let index = 0;
       while (index < spec.length) {
         switch (spec[index++]) {

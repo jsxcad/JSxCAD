@@ -36,6 +36,7 @@ export { canonicalize } from './tagged/canonicalize.js';
 export { canonicalize as canonicalizePath } from './path/canonicalize.js';
 export { canonicalize as canonicalizePaths } from './paths/canonicalize.js';
 export { convexHull as convexHullToGraph } from './graph/convexHull.js';
+export { cut } from './tagged/cut.js';
 export { deduplicate as deduplicatePath } from './path/deduplicate.js';
 export { difference } from './tagged/difference.js';
 export { disjoint } from './tagged/disjoint.js';
@@ -115,20 +116,26 @@ export {
 } from './tagged/show.js';
 export {
   isNotType,
+  isNotTypeMasked,
   isNotTypeVoid,
   isNotTypeWire,
   isType,
+  isTypeMasked,
   isTypeVoid,
   isTypeWire,
   hasNotType,
+  hasNotTypeMasked,
   hasNotTypeVoid,
   hasNotTypeWire,
   hasType,
+  hasTypeMasked,
   hasTypeVoid,
   hasTypeWire,
+  typeMasked,
   typeVoid,
   typeWire,
 } from './tagged/type.js';
+export { join } from './tagged/join.js';
 export { keep } from './tagged/keep.js';
 export { loft } from './tagged/loft.js';
 export { measureBoundingBox } from './tagged/measureBoundingBox.js';
@@ -154,6 +161,7 @@ export { rotateZ as rotateZPath } from './path/ops.js';
 export { scale as scalePath } from './path/ops.js';
 export { scale as scalePaths } from './paths/ops.js';
 export { section } from './tagged/section.js';
+export { simplify } from './tagged/simplify.js';
 export { smooth } from './tagged/smooth.js';
 export { separate } from './tagged/separate.js';
 export { soup } from './tagged/soup.js';

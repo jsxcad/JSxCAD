@@ -231,9 +231,9 @@ const taggedAssembly = Assembly(
   Box(6, 5, 2).move(2, 1, 1).color('red').tag('B')
 ).view();
 
-taggedAssembly.keep('A').noVoid().view();
+taggedAssembly.keep('user:A').noVoid().view();
 
-taggedAssembly.drop('B').view();
+taggedAssembly.drop('user:B').view();
 
 md`
 ---

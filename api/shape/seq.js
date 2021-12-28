@@ -4,10 +4,20 @@ const EPSILON = 1e-5;
 
 export const seq =
   (
-    op = (n) => n,
-    { from = 0, to = 1, upto, downto, by = 1, index = false } = {}
+    ...args
   ) =>
   (shape) => {
+    let op = (n) => n;
+    let spec = {};
+    for (const arg of args) {
+      if (arg instanceof Function) {
+        op = arg;
+      } else if (arg instanceof Object) {
+        Object.assign(spec, arg);
+      }
+    }
+    let { from = 0, to = 1, upto, downto, by = 1, index = false } = spec;
+
     const numbers = [];
 
     from = Shape.toValue(from, shape);

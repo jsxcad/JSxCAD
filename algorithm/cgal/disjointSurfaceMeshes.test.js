@@ -1,4 +1,4 @@
-import { disjointClosedSurfaceMeshes } from './disjointClosedSurfaceMeshes.js';
+import { disjointSurfaceMeshes } from './disjointSurfaceMeshes.js';
 import { fromPolygonsToSurfaceMesh } from './fromPolygonsToSurfaceMesh.js';
 import { fromSurfaceMeshToGraph } from './fromSurfaceMeshToGraph.js';
 import { identityMatrix } from '@jsxcad/math-mat4';
@@ -188,7 +188,7 @@ test('Disjoint', (t) => {
   const a = fromPolygonsToSurfaceMesh(largeBox);
   const b = fromPolygonsToSurfaceMesh(box);
   // The first entry is the pivot of the disjunction.
-  const r = disjointClosedSurfaceMeshes(true, [
+  const r = disjointSurfaceMeshes(true, [
     { mesh: b, matrix: [...identityMatrix] },
     { mesh: a, matrix: [...identityMatrix] },
   ]);

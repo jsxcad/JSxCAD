@@ -43887,7 +43887,7 @@ class App extends ReactDOM$2.Component {
           {
             const {
               LogMessages = [],
-              LogFilter = '/sys'
+              LogFilter = '^sys/'
             } = this.state;
             return v$1("div", null, v$1(Card, null, v$1(Card.Body, null, v$1(Card.Title, null, "Log Messages"), v$1(Card.Text, null, v$1(FormImpl, null, v$1(Row, null, v$1(Col, null, v$1(FormImpl.Group, {
               controlId: "LogFilterId"
@@ -43973,7 +43973,7 @@ class App extends ReactDOM$2.Component {
               LogMessages = []
             } = this.state;
             await this.updateState({
-              LogMessages: [...commit, ...LogMessages]
+              LogMessages: [...commit, ...LogMessages.slice(0, 99)]
             });
           }
         } finally {

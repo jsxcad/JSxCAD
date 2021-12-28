@@ -1,42 +1,7 @@
-import { Shape } from './Shape.js';
-import { rewrite } from '@jsxcad/geometry';
-import { tagMatcher } from './tag.js';
+import Shape from './Shape.js';
+import { getNot } from './getNot.js';
+import { voidFn } from './void.js';
 
-export const keep =
-  (...tags) =>
-  (shape) => {
-    const matchers = tags.map((tag) => tagMatcher(tag, 'user'));
-    const isMatch = (tags, tag) => {
-      for (const matcher of matchers) {
-        for (const tag of tags) {
-          if (matcher(tag)) {
-            return true;
-          }
-        }
-      }
-      return false;
-    };
-    const op = (geometry, descend) => {
-      switch (geometry.type) {
-        case 'group':
-        case 'layout':
-          return descend();
-        default: {
-          // Should this pass through item boundaries?
-          const { tags = [] } = geometry;
-          if (isMatch(tags)) {
-            if (geometry.type === 'item') {
-              return geometry;
-            } else {
-              return descend();
-            }
-          } else {
-            return Shape.fromGeometry(geometry).void().toGeometry();
-          }
-        }
-      }
-    };
-    return Shape.fromGeometry(rewrite(shape.toGeometry(), op));
-  };
+export const keep = (tag) => (shape) => shape.on(getNot(tag), voidFn());
 
 Shape.registerMethod('keep', keep);

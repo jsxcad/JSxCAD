@@ -54,7 +54,7 @@ Assembly(Box(5), Arc(6))
   .gridView();
 
 Group(Box(5).color('red'), Arc(6).color('blue'))
-  .fuse()
+  .fuse({ isPlanar: true })
   .gridView();
 
 Box(10).inset(0.5, 0.5).gridView();
@@ -97,8 +97,8 @@ Box(1, 2, 3).ry(1/8).gridView();
 Box(1, 2, 3).rz(1/8).gridView();
 
 Box(5).scale(1, 2).gridView();
-Box(5).cut(Arc(5).align('x>')).scale(1, 1).gridView();
-Box(5).cut(Arc(5).align('x>')).scale(-1, 1).gridView();
+Box(5).cut(Arc(4.9).align('x>')).scale(1, 1).gridView();
+Box(5).cut(Arc(4.9).align('x>')).scale(-1, 1).gridView();
 
 Box(1, 2, 3)
   .size((size, shape) => {

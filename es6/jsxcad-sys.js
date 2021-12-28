@@ -458,14 +458,6 @@ const clearCacheDb = async ({ workspace }) => {
   }
 };
 
-let config$1 = {};
-
-const getConfig = () => config$1;
-
-const setConfig = (value = {}) => {
-  config$1 = value;
-};
-
 var global$1 = (typeof global !== "undefined" ? global :
             typeof self !== "undefined" ? self :
             typeof window !== "undefined" ? window : {});
@@ -611,7 +603,7 @@ var argv = [];
 var version = ''; // empty string to avoid regexp issues
 var versions = {};
 var release = {};
-var config = {};
+var config$1 = {};
 
 function noop() {}
 
@@ -659,10 +651,10 @@ function hrtime(previousTimestamp){
   return [seconds,nanoseconds]
 }
 
-var startTime$1 = new Date();
+var startTime$2 = new Date();
 function uptime() {
   var currentTime = new Date();
-  var dif = currentTime - startTime$1;
+  var dif = currentTime - startTime$2;
   return dif / 1000;
 }
 
@@ -688,7 +680,7 @@ var process = {
   hrtime: hrtime,
   platform: platform,
   release: release,
-  config: config,
+  config: config$1,
   uptime: uptime
 };
 
@@ -713,6 +705,76 @@ const isNode =
   typeof process !== 'undefined' &&
   process.versions != null &&
   process.versions.node != null;
+
+/* global self */
+var self$1 = self;
+
+const watchers$1 = new Set();
+
+const log = async (entry) => {
+  if (isWebWorker) {
+    return addPending(self$1.tell({ op: 'log', entry }));
+  }
+
+  for (const watcher of watchers$1) {
+    watcher(entry);
+  }
+};
+
+const logInfo = (source, text) =>
+  log({ type: 'info', source, text, id: self$1 && self$1.id });
+
+const logError = (source, text) =>
+  log({ type: 'error', source, text, id: self$1 && self$1.id });
+
+const watchLog = (thunk) => {
+  watchers$1.add(thunk);
+  return thunk;
+};
+
+const unwatchLog = (thunk) => {
+  watchers$1.delete(thunk);
+};
+
+const aggregates = new Map();
+
+const startTime$1 = name => {
+  if (!aggregates.has(name)) {
+    aggregates.set(name, { name, count: 0, total: 0, average: 0 });
+  }
+  const start = new Date();
+  const aggregate = aggregates.get(name);
+  const timer = { start, name, aggregate };
+  logInfo('sys/profile/startTime', name);
+  return timer;
+};
+
+const endTime = ({ start, name, aggregate }) => {
+  const end = new Date();
+  const seconds = (end - start) / 1000;
+  aggregate.last = seconds;
+  aggregate.total += seconds;
+  aggregate.count += 1;
+  aggregate.average = aggregate.total / aggregate.count;
+  const { average, count, last, total } = aggregate;
+  logInfo('sys/profile/endTime', `${name} average: ${average.toFixed(2)} count: ${count} last: ${last.toFixed(2)} total: ${total.toFixed(2)}`);
+  return aggregate;
+};
+
+const reportTimes = () => {
+  const entries = [...aggregates.values()].sort((a, b) => a.total - b.total);
+  for (const { average, count, last, name, total } of entries) {
+    logInfo('sys/profile', `${name} average: ${average.toFixed(2)} count: ${count} last: ${last.toFixed(2)} total: ${total.toFixed(2)}`);
+  }
+};
+
+let config = {};
+
+const getConfig = () => config;
+
+const setConfig = (value = {}) => {
+  config = value;
+};
 
 const createConversation = ({ agent, say }) => {
   const conversation = {
@@ -806,36 +868,6 @@ const createConversation = ({ agent, say }) => {
   };
 
   return conversation;
-};
-
-/* global self */
-var self$1 = self;
-
-const watchers$1 = new Set();
-
-const log = async (entry) => {
-  if (isWebWorker) {
-    return addPending(self$1.tell({ op: 'log', entry }));
-  }
-
-  for (const watcher of watchers$1) {
-    watcher(entry);
-  }
-};
-
-const logInfo = (source, text) =>
-  log({ type: 'info', source, text, id: self$1 && self$1.id });
-
-const logError = (source, text) =>
-  log({ type: 'error', source, text, id: self$1 && self$1.id });
-
-const watchLog = (thunk) => {
-  watchers$1.add(thunk);
-  return thunk;
-};
-
-const unwatchLog = (thunk) => {
-  watchers$1.delete(thunk);
 };
 
 const nodeWorker = () => {};
@@ -3506,6 +3538,7 @@ const emit = (value) => {
   if (value.sourceLocation === undefined) {
     value.sourceLocation = getSourceLocation();
   }
+  console.log(JSON.stringify(value));
   emitGroup.push(value);
 };
 
@@ -3836,4 +3869,4 @@ let nanoid = (size = 21) => {
 
 const generateUniqueId = () => nanoid();
 
-export { ErrorWouldBlock, addOnEmitHandler, addPending, ask, askService, askServices, beginEmitGroup, boot, clearCacheDb, clearEmitted, computeHash, createConversation, createService, elapsed, emit, finishEmitGroup, flushEmitGroup, generateUniqueId, getActiveServices, getConfig, getControlValue, getFilesystem, getPendingErrorHandler, getServicePoolInfo, getSourceLocation, getWorkspace, hash, isBrowser, isNode, isWebWorker, listFiles, log, logError, logInfo, onBoot, qualifyPath, read, readNonblocking, readOrWatch, remove, removeOnEmitHandler, resolvePending, restoreEmitGroup, saveEmitGroup, setConfig, setControlValue, setHandleAskUser, setPendingErrorHandler, setupFilesystem, setupWorkspace, sleep, tellServices, terminateActiveServices, unwatchFile, unwatchFileCreation, unwatchFileDeletion, unwatchLog, unwatchServices, waitServices, watchFile, watchFileCreation, watchFileDeletion, watchLog, watchServices, write, writeNonblocking };
+export { ErrorWouldBlock, addOnEmitHandler, addPending, ask, askService, askServices, beginEmitGroup, boot, clearCacheDb, clearEmitted, computeHash, createConversation, createService, elapsed, emit, endTime, finishEmitGroup, flushEmitGroup, generateUniqueId, getActiveServices, getConfig, getControlValue, getFilesystem, getPendingErrorHandler, getServicePoolInfo, getSourceLocation, getWorkspace, hash, isBrowser, isNode, isWebWorker, listFiles, log, logError, logInfo, onBoot, qualifyPath, read, readNonblocking, readOrWatch, remove, removeOnEmitHandler, reportTimes, resolvePending, restoreEmitGroup, saveEmitGroup, setConfig, setControlValue, setHandleAskUser, setPendingErrorHandler, setupFilesystem, setupWorkspace, sleep, startTime$1 as startTime, tellServices, terminateActiveServices, unwatchFile, unwatchFileCreation, unwatchFileDeletion, unwatchLog, unwatchServices, waitServices, watchFile, watchFileCreation, watchFileDeletion, watchLog, watchServices, write, writeNonblocking };

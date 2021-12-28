@@ -17,13 +17,14 @@ export const evaluate = async (ecmascript, { api, path }) => {
   try {
     await acquire();
     emitGroup = saveEmitGroup();
-    console.log(`QQ/evaluate ${where}: ${ecmascript.replace(/\n/g, '\n|   ')}`);
+    logInfo('api/core/evaluate/script', `${where}: ${ecmascript.replace(/\n/g, '\n|   ')}`);
     const builder = new Function(
       `{ ${Object.keys(api).join(', ')} }`,
       `return async () => { ${ecmascript} };`
     );
     // Add import to make import.meta.url available.
     const op = await builder({ ...api, import: { meta: { url: path } } });
+    console.log('QQ/evaluate/done');
     // Retry until none of the operations block.
     for (;;) {
       try {
@@ -31,7 +32,7 @@ export const evaluate = async (ecmascript, { api, path }) => {
         return result;
       } catch (error) {
         if (error instanceof ErrorWouldBlock) {
-          logInfo('api/core/evaluate', error.message);
+          logInfo('api/core/evaluate/error', error.message);
           await resolvePending();
           restoreEmitGroup(emitGroup);
           continue;
