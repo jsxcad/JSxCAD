@@ -87,9 +87,11 @@ export const $run = async (op, { path, id, text, sha }) => {
         const md = `Evaluation time ${durationMinutes.toFixed(2)} minutes.`;
         emit({ md, hash: computeHash(md) });
       }
-    } catch (error) {
-    }
-    logInfo('api/core/evaluate/duration', `Evaluation time ${durationMinutes.toFixed(2)}: ${text}`);
+    } catch (error) {}
+    logInfo(
+      'api/core/evaluate/duration',
+      `Evaluation time ${durationMinutes.toFixed(2)}: ${text}`
+    );
     finishEmitGroup({ path, id });
     if (typeof result === 'object') {
       const type = result.constructor.name;

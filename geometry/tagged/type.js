@@ -1,6 +1,7 @@
 import { rewrite } from './visit.js';
 
-const rewriteType = (op) => geometry => rewrite(geometry, (geometry, descend) => descend(op(geometry)));
+const rewriteType = (op) => (geometry) =>
+  rewrite(geometry, (geometry, descend) => descend(op(geometry)));
 
 const addType = (type) => (geometry) => {
   if (geometry.tags.includes(type)) {
@@ -18,10 +19,16 @@ const removeType = (type) => (geometry) => {
   }
 };
 
-export const hasNotType = type => rewriteType(removeType(type));
-export const hasType = type => rewriteType(addType(type));
-export const isNotType = type => ({ tags }) => !tags.includes(type);
-export const isType = type => ({ tags }) => tags.includes(type);
+export const hasNotType = (type) => rewriteType(removeType(type));
+export const hasType = (type) => rewriteType(addType(type));
+export const isNotType =
+  (type) =>
+  ({ tags }) =>
+    !tags.includes(type);
+export const isType =
+  (type) =>
+  ({ tags }) =>
+    tags.includes(type);
 
 export const typeMasked = 'type:masked';
 export const hasNotTypeMasked = hasNotType(typeMasked);

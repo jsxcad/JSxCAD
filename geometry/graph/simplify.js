@@ -6,5 +6,7 @@ import { toSurfaceMesh } from './toSurfaceMesh.js';
 export const simplify = (geometry, resolution) =>
   taggedGraph(
     { tags: geometry.tags, matrix: geometry.matrix },
-    fromSurfaceMeshLazy(simplifySurfaceMesh(toSurfaceMesh(geometry.graph), resolution))
+    fromSurfaceMeshLazy(
+      simplifySurfaceMesh(toSurfaceMesh(geometry.graph), resolution)
+    )
   );

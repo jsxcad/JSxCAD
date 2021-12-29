@@ -3,9 +3,7 @@ import Shape from './Shape.js';
 const EPSILON = 1e-5;
 
 export const seq =
-  (
-    ...args
-  ) =>
+  (...args) =>
   (shape) => {
     let op = (n) => n;
     let spec = {};

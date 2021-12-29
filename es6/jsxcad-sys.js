@@ -738,7 +738,7 @@ const unwatchLog = (thunk) => {
 
 const aggregates = new Map();
 
-const startTime$1 = name => {
+const startTime$1 = (name) => {
   if (!aggregates.has(name)) {
     aggregates.set(name, { name, count: 0, total: 0, average: 0 });
   }
@@ -757,14 +757,24 @@ const endTime = ({ start, name, aggregate }) => {
   aggregate.count += 1;
   aggregate.average = aggregate.total / aggregate.count;
   const { average, count, last, total } = aggregate;
-  logInfo('sys/profile/endTime', `${name} average: ${average.toFixed(2)} count: ${count} last: ${last.toFixed(2)} total: ${total.toFixed(2)}`);
+  logInfo(
+    'sys/profile/endTime',
+    `${name} average: ${average.toFixed(
+      2
+    )} count: ${count} last: ${last.toFixed(2)} total: ${total.toFixed(2)}`
+  );
   return aggregate;
 };
 
 const reportTimes = () => {
   const entries = [...aggregates.values()].sort((a, b) => a.total - b.total);
   for (const { average, count, last, name, total } of entries) {
-    logInfo('sys/profile', `${name} average: ${average.toFixed(2)} count: ${count} last: ${last.toFixed(2)} total: ${total.toFixed(2)}`);
+    logInfo(
+      'sys/profile',
+      `${name} average: ${average.toFixed(
+        2
+      )} count: ${count} last: ${last.toFixed(2)} total: ${total.toFixed(2)}`
+    );
   }
 };
 

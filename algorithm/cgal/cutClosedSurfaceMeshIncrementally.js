@@ -18,11 +18,19 @@ export const cutClosedSurfaceMeshIncrementally = (
   cuts
 ) => {
   console.log(`memory size: ${(getCgal().HEAP8.length / 1000000).toFixed(2)}M`);
-  console.log(`Mesh: ${JSON.stringify(describeSurfaceMesh(mesh))} matrix ${JSON.stringify(transform)}`);
+  console.log(
+    `Mesh: ${JSON.stringify(describeSurfaceMesh(mesh))} matrix ${JSON.stringify(
+      transform
+    )}`
+  );
   cuts.forEach(({ mesh, matrix }, index) => {
-    console.log(`Cut ${index}: ${JSON.stringify(describeSurfaceMesh(mesh))} matrix ${JSON.stringify(matrix)}`);
+    console.log(
+      `Cut ${index}: ${JSON.stringify(
+        describeSurfaceMesh(mesh)
+      )} matrix ${JSON.stringify(matrix)}`
+    );
   });
-/*
+  /*
   if (JSON.stringify(describeSurfaceMesh(mesh)), '{"vertices":636,"faces":1272}') {
     console.log(`Dumping cut`);
     fs.writeFileSync('/tmp/mesh.txt', serializeSurfaceMesh(mesh));
@@ -38,7 +46,9 @@ export const cutClosedSurfaceMeshIncrementally = (
     check,
     (nth) => cuts[nth].mesh,
     (nth) => toCgalTransformFromJsTransform(cuts[nth].matrix),
-    (output) => { result = output; }
+    (output) => {
+      result = output;
+    }
   );
   if (status === STATUS_ZERO_THICKNESS) {
     throw new ErrorZeroThickness('Zero thickness produced by cut');
@@ -47,7 +57,10 @@ export const cutClosedSurfaceMeshIncrementally = (
     throw new Error(`Unexpected status ${status}`);
   }
   const { average, last, sum } = endTime(timer);
-  logInfo('algorithm/cgal/cutClosedSurfaceMeshIncrementally', `${cuts.length} cuts, ${last} (${sum}) [${average}]`);
+  logInfo(
+    'algorithm/cgal/cutClosedSurfaceMeshIncrementally',
+    `${cuts.length} cuts, ${last} (${sum}) [${average}]`
+  );
   if (last > 100) {
     console.log(`mesh ${cycle} transform ${JSON.stringify(transform)}`);
     cuts.forEach(({ mesh, matrix }, index) => {

@@ -8,10 +8,24 @@ export const join = (targets, sources) => {
   if (sources.length === 0) {
     return targets;
   }
-  targets = targets.map(({ graph, matrix, tags }) => ({ mesh: toSurfaceMesh(graph), matrix, tags, isPlanar: graph.isPlanar, isEmpty: graph.isEmpty }));
-  sources = sources.map(({ graph, matrix, tags }) => ({ mesh: toSurfaceMesh(graph), matrix, tags, isPlanar: graph.isPlanar, isEmpty: graph.isEmpty }));
+  targets = targets.map(({ graph, matrix, tags }) => ({
+    mesh: toSurfaceMesh(graph),
+    matrix,
+    tags,
+    isPlanar: graph.isPlanar,
+    isEmpty: graph.isEmpty,
+  }));
+  sources = sources.map(({ graph, matrix, tags }) => ({
+    mesh: toSurfaceMesh(graph),
+    matrix,
+    tags,
+    isPlanar: graph.isPlanar,
+    isEmpty: graph.isEmpty,
+  }));
   const results = joinSurfaceMeshes(targets, sources);
-  const joinedGeometries = results.map(({ matrix, mesh, tags }) => taggedGraph({ tags, matrix }, fromSurfaceMeshLazy(mesh)));
+  const joinedGeometries = results.map(({ matrix, mesh, tags }) =>
+    taggedGraph({ tags, matrix }, fromSurfaceMeshLazy(mesh))
+  );
   deletePendingSurfaceMeshes();
   return joinedGeometries;
 };

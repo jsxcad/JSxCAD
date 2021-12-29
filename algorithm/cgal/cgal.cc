@@ -2247,8 +2247,7 @@ int JoinSurfaceMeshesIncrementally(
   return STATUS_OK;
 }
 
-int DisjointSurfaceMeshesIncrementally(int meshCount, bool check,
-                                       emscripten::val nthMesh,
+int DisjointSurfaceMeshesIncrementally(int meshCount, emscripten::val nthMesh,
                                        emscripten::val nthTransform,
                                        emscripten::val nthMasked,
                                        emscripten::val emitMesh) {

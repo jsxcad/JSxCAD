@@ -1,8 +1,9 @@
+import { reportTimes, watchLog } from '@jsxcad/sys';
+
 import { argv } from 'process';
 import fs from 'fs';
 import path from 'path';
 import { updateNotebook } from './updateNotebook.js';
-import { reportTimes, watchLog } from '@jsxcad/sys';
 
 process.on('uncaughtException', (err) => {
   console.error('There was an uncaught error', err);
@@ -54,7 +55,9 @@ const build = async (baseDirectory = '.') => {
       const finishTime = new Date();
       const minutesDuration = (finishTime - startTime) / 60000.0;
       notebookDurations.push({ notebook, minutesDuration });
-      console.log(`Notebook ${notebook} completed in ${minutesDuration.toFixed(2)}.`);
+      console.log(
+        `Notebook ${notebook} completed in ${minutesDuration.toFixed(2)}.`
+      );
     }
     reportTimes();
     notebookDurations.sort((a, b) => a.minutesDuration - b.minutesDuration);
@@ -79,7 +82,9 @@ const build = async (baseDirectory = '.') => {
     console.log(error.stack);
     exitCode = 1;
   }
-  process.stderr.write('', () => process.stdout.write('', () => process.exit(exitCode)));
+  process.stderr.write('', () =>
+    process.stdout.write('', () => process.exit(exitCode))
+  );
 };
 
 build(argv[2]);

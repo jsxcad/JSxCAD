@@ -17,7 +17,10 @@ export const evaluate = async (ecmascript, { api, path }) => {
   try {
     await acquire();
     emitGroup = saveEmitGroup();
-    logInfo('api/core/evaluate/script', `${where}: ${ecmascript.replace(/\n/g, '\n|   ')}`);
+    logInfo(
+      'api/core/evaluate/script',
+      `${where}: ${ecmascript.replace(/\n/g, '\n|   ')}`
+    );
     const builder = new Function(
       `{ ${Object.keys(api).join(', ')} }`,
       `return async () => { ${ecmascript} };`

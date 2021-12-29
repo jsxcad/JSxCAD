@@ -4,10 +4,7 @@ import { ErrorZeroThickness } from './error.js';
 import { getCgal } from './getCgal.js';
 import { toCgalTransformFromJsTransform } from './transform.js';
 
-export const joinSurfaceMeshes = (
-  targets,
-  sources,
-) => {
+export const joinSurfaceMeshes = (targets, sources) => {
   const results = [];
   const status = getCgal().JoinSurfaceMeshesIncrementally(
     targets.length,

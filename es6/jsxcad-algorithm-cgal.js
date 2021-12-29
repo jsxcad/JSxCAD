@@ -933,92 +933,7 @@ const STATUS_ZERO_THICKNESS = 2;
 
 class ErrorZeroThickness extends Error {}
 
-const describeSurfaceMesh = (mesh) => {
-  let description;
-  getCgal().DescribeSurfaceMesh(mesh, (vertices, faces) => { description = { vertices, faces }; });
-  return description;
-};
-
-// import * as fs from 'fs';
-
-let cycle = 0;
-
-const cutClosedSurfaceMeshIncrementally = (
-  mesh,
-  transform,
-  check,
-  cuts
-) => {
-  console.log(`memory size: ${(getCgal().HEAP8.length / 1000000).toFixed(2)}M`);
-  console.log(`Mesh: ${JSON.stringify(describeSurfaceMesh(mesh))} matrix ${JSON.stringify(transform)}`);
-  cuts.forEach(({ mesh, matrix }, index) => {
-    console.log(`Cut ${index}: ${JSON.stringify(describeSurfaceMesh(mesh))} matrix ${JSON.stringify(matrix)}`);
-  });
-/*
-  if (JSON.stringify(describeSurfaceMesh(mesh)), '{"vertices":636,"faces":1272}') {
-    console.log(`Dumping cut`);
-    fs.writeFileSync('/tmp/mesh.txt', serializeSurfaceMesh(mesh));
-    fs.writeFileSync('/tmp/cut1.txt', serializeSurfaceMesh(cuts[0].mesh));
-  }
-*/
-  const timer = startTime('algorithm/cgal/cutClosedSurfaceMeshIncrementally');
-  let result;
-  const status = getCgal().CutClosedSurfaceMeshIncrementally(
-    mesh,
-    toCgalTransformFromJsTransform(transform),
-    cuts.length,
-    check,
-    (nth) => cuts[nth].mesh,
-    (nth) => toCgalTransformFromJsTransform(cuts[nth].matrix),
-    (output) => { result = output; }
-  );
-  if (status === STATUS_ZERO_THICKNESS) {
-    throw new ErrorZeroThickness('Zero thickness produced by cut');
-  }
-  if (status !== STATUS_OK) {
-    throw new Error(`Unexpected status ${status}`);
-  }
-  const { average, last, sum } = endTime(timer);
-  logInfo('algorithm/cgal/cutClosedSurfaceMeshIncrementally', `${cuts.length} cuts, ${last} (${sum}) [${average}]`);
-  if (last > 100) {
-    console.log(`mesh ${cycle} transform ${JSON.stringify(transform)}`);
-    cuts.forEach(({ mesh, matrix }, index) => {
-      console.log(`cut ${cycle} ${index} matrix ${JSON.stringify(matrix)}`);
-    });
-    cycle += 1;
-  }
-  return result;
-};
-
-const cutClosedSurfaceMeshSingly = (mesh, transform, check, cuts) =>
-  getCgal().CutClosedSurfaceMeshSingly(
-    mesh,
-    toCgalTransformFromJsTransform(transform),
-    cuts.length,
-    check,
-    (nth) => cuts[nth].mesh,
-    (nth) => toCgalTransformFromJsTransform(cuts[nth].matrix)
-  );
-
-const cutClosedSurfaceMeshSinglyRecursive = (
-  mesh,
-  transform,
-  check,
-  cuts
-) =>
-  getCgal().CutClosedSurfaceMeshSinglyRecursive(
-    mesh,
-    toCgalTransformFromJsTransform(transform),
-    cuts.length,
-    check,
-    (nth) => cuts[nth].mesh,
-    (nth) => toCgalTransformFromJsTransform(cuts[nth].matrix)
-  );
-
-const cutSurfaceMeshes = (
-  targets,
-  sources,
-) => {
+const cutSurfaceMeshes = (targets, sources) => {
   const results = [];
   const status = getCgal().CutSurfaceMeshesIncrementally(
     targets.length,
@@ -1046,7 +961,10 @@ const deserializeSurfaceMesh = (text) => {
   const timer = startTime('algorithm/cgal/deserializeSurfaceMesh');
   const result = getCgal().DeserializeSurfaceMesh(text);
   const { average, last, sum } = endTime(timer);
-  logInfo('algorithm/cgal/deserializeSurfaceMesh', `${last} (${sum}) [${average}]`);
+  logInfo(
+    'algorithm/cgal/deserializeSurfaceMesh',
+    `${last} (${sum}) [${average}]`
+  );
   return result;
 };
 
@@ -1057,27 +975,28 @@ const differenceOfSurfaceMeshes = (a, aTransform, b, bTransform) => {
     toCgalTransformFromJsTransform(aTransform),
     b,
     toCgalTransformFromJsTransform(bTransform),
-    false, false
+    false,
+    false
   );
   const { average, last, sum } = endTime(timer);
-  logInfo('algorithm/cgal/differenceOfSurfaceMeshes', `${last} (${sum}) [${average}]`);
+  logInfo(
+    'algorithm/cgal/differenceOfSurfaceMeshes',
+    `${last} (${sum}) [${average}]`
+  );
   return result;
 };
 
-const disjointSurfaceMeshes = (meshes, check) => {
+const disjointSurfaceMeshes = (meshes) => {
   const results = [meshes[0]];
-  console.log(`QQ/results/1: ${JSON.stringify(results)}`);
   const status = getCgal().DisjointSurfaceMeshesIncrementally(
     meshes.length,
-    meshes,
-    (nth) => { console.log(`QQ/mesh: ${nth} matrix ${JSON.stringify(meshes[nth].matrix)} ${JSON.stringify(describeSurfaceMesh(meshes[nth].mesh))}`); return meshes[nth].mesh; },
+    (nth) => meshes[nth].mesh,
     (nth) => toCgalTransformFromJsTransform(meshes[nth].matrix),
-    (nth) => meshes[nth].tags.includes('type:masked'),
+    (nth) => meshes[nth].tags && meshes[nth].tags.includes('type:masked'),
     (nth, mesh) => {
       const { matrix, tags } = meshes[nth];
       // Note: The 0th mesh is not emitted as it does not get cut.
       results.push({ mesh, matrix, tags });
-      console.log(`QQ/results/2: ${JSON.stringify(results)} matrix: ${JSON.stringify(matrix)}`);
     }
   );
   if (status === STATUS_ZERO_THICKNESS) {
@@ -1086,7 +1005,6 @@ const disjointSurfaceMeshes = (meshes, check) => {
   if (status !== STATUS_OK) {
     throw new Error(`Unexpected status ${status}`);
   }
-  console.log(`QQ/results/3: ${JSON.stringify(results)}`);
   return results;
 };
 
@@ -1623,13 +1541,11 @@ const intersectionOfSurfaceMeshes = (a, aTransform, b, bTransform) =>
     toCgalTransformFromJsTransform(aTransform),
     b,
     toCgalTransformFromJsTransform(bTransform),
-    false, false
+    false,
+    false
   );
 
-const joinSurfaceMeshes = (
-  targets,
-  sources,
-) => {
+const joinSurfaceMeshes = (targets, sources) => {
   const results = [];
   const status = getCgal().JoinSurfaceMeshesIncrementally(
     targets.length,
@@ -1899,11 +1815,17 @@ const simplifySurfaceMesh = (mesh, resolution) =>
 
 const serializeSurfaceMesh = (mesh) => {
   const timer = startTime('algorithm/cgal/serializeSurfaceMesh');
-  const result = getCgal().SerializeSurfaceMesh(mesh, (vertex, numberOfVertices) => {
-    throw Error(`Vertex ${vertex} out of range ${numberOfVertices}`);
-  });
+  const result = getCgal().SerializeSurfaceMesh(
+    mesh,
+    (vertex, numberOfVertices) => {
+      throw Error(`Vertex ${vertex} out of range ${numberOfVertices}`);
+    }
+  );
   const { average, last, sum } = endTime(timer);
-  logInfo('algorithm/cgal/serializeSurfaceMesh', `${last} (${sum}) [${average}]`);
+  logInfo(
+    'algorithm/cgal/serializeSurfaceMesh',
+    `${last} (${sum}) [${average}]`
+  );
   return result;
 };
 
@@ -1981,7 +1903,8 @@ const unionOfSurfaceMeshes = (a, aTransform, b, bTransform) =>
     toCgalTransformFromJsTransform(aTransform),
     b,
     toCgalTransformFromJsTransform(bTransform),
-    false, false
+    false,
+    false
   );
 
-export { BOOLEAN_ADD, BOOLEAN_CLIP, BOOLEAN_CUT, SurfaceMeshQuery, arrangePaths, arrangePathsIntoTriangles, arrangePolygonsWithHoles, bendSurfaceMesh, booleansOfPolygonsWithHoles, composeTransforms, computeCentroidOfSurfaceMesh, computeNormalOfSurfaceMesh, cutClosedSurfaceMeshIncrementally, cutClosedSurfaceMeshSingly, cutClosedSurfaceMeshSinglyRecursive, cutOutOfSurfaceMeshes, cutSurfaceMeshes, deserializeSurfaceMesh, differenceOfSurfaceMeshes, disjointSurfaceMeshes, doesSelfIntersectOfSurfaceMesh, extrudeSurfaceMesh, extrudeToPlaneOfSurfaceMesh, fitPlaneToPoints, fromApproximateToCgalTransform, fromExactToCgalTransform, fromFunctionToSurfaceMesh, fromGraphToSurfaceMesh, fromIdentityToCgalTransform, fromPointsToAlphaShape2AsPolygonSegments, fromPointsToAlphaShapeAsSurfaceMesh, fromPointsToConvexHullAsSurfaceMesh, fromPointsToSurfaceMesh, fromPolygonsToSurfaceMesh, fromRotateXToTransform, fromRotateYToTransform, fromRotateZToTransform, fromScaleToTransform, fromSegmentToInverseTransform, fromSurfaceMeshEmitBoundingBox, fromSurfaceMeshToGraph, fromSurfaceMeshToLazyGraph, fromSurfaceMeshToPolygons, fromSurfaceMeshToPolygonsWithHoles, fromSurfaceMeshToTriangles, fromTranslateToTransform, growSurfaceMesh, initCgal, insetOfPolygonWithHoles, intersectionOfSurfaceMeshes, invertTransform, joinSurfaceMeshes, loftBetweenCongruentSurfaceMeshes, minkowskiDifferenceOfSurfaceMeshes, minkowskiShellOfSurfaceMeshes, minkowskiSumOfSurfaceMeshes, offsetOfPolygonWithHoles, outlineSurfaceMesh, projectToPlaneOfSurfaceMesh, pushSurfaceMesh, remeshSurfaceMesh, removeSelfIntersectionsOfSurfaceMesh, reverseFaceOrientationsOfSurfaceMesh, sectionOfSurfaceMesh, separateSurfaceMesh, serializeSurfaceMesh, simplifySurfaceMesh, subdivideSurfaceMesh, taperSurfaceMesh, toCgalTransformFromJsTransform, transformSurfaceMesh, twistSurfaceMesh, unionOfSurfaceMeshes, wireframeSurfaceMesh };
+export { BOOLEAN_ADD, BOOLEAN_CLIP, BOOLEAN_CUT, SurfaceMeshQuery, arrangePaths, arrangePathsIntoTriangles, arrangePolygonsWithHoles, bendSurfaceMesh, booleansOfPolygonsWithHoles, composeTransforms, computeCentroidOfSurfaceMesh, computeNormalOfSurfaceMesh, cutOutOfSurfaceMeshes, cutSurfaceMeshes, deserializeSurfaceMesh, differenceOfSurfaceMeshes, disjointSurfaceMeshes, doesSelfIntersectOfSurfaceMesh, extrudeSurfaceMesh, extrudeToPlaneOfSurfaceMesh, fitPlaneToPoints, fromApproximateToCgalTransform, fromExactToCgalTransform, fromFunctionToSurfaceMesh, fromGraphToSurfaceMesh, fromIdentityToCgalTransform, fromPointsToAlphaShape2AsPolygonSegments, fromPointsToAlphaShapeAsSurfaceMesh, fromPointsToConvexHullAsSurfaceMesh, fromPointsToSurfaceMesh, fromPolygonsToSurfaceMesh, fromRotateXToTransform, fromRotateYToTransform, fromRotateZToTransform, fromScaleToTransform, fromSegmentToInverseTransform, fromSurfaceMeshEmitBoundingBox, fromSurfaceMeshToGraph, fromSurfaceMeshToLazyGraph, fromSurfaceMeshToPolygons, fromSurfaceMeshToPolygonsWithHoles, fromSurfaceMeshToTriangles, fromTranslateToTransform, growSurfaceMesh, initCgal, insetOfPolygonWithHoles, intersectionOfSurfaceMeshes, invertTransform, joinSurfaceMeshes, loftBetweenCongruentSurfaceMeshes, minkowskiDifferenceOfSurfaceMeshes, minkowskiShellOfSurfaceMeshes, minkowskiSumOfSurfaceMeshes, offsetOfPolygonWithHoles, outlineSurfaceMesh, projectToPlaneOfSurfaceMesh, pushSurfaceMesh, remeshSurfaceMesh, removeSelfIntersectionsOfSurfaceMesh, reverseFaceOrientationsOfSurfaceMesh, sectionOfSurfaceMesh, separateSurfaceMesh, serializeSurfaceMesh, simplifySurfaceMesh, subdivideSurfaceMesh, taperSurfaceMesh, toCgalTransformFromJsTransform, transformSurfaceMesh, twistSurfaceMesh, unionOfSurfaceMeshes, wireframeSurfaceMesh };

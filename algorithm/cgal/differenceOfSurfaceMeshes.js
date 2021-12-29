@@ -10,9 +10,13 @@ export const differenceOfSurfaceMeshes = (a, aTransform, b, bTransform) => {
     toCgalTransformFromJsTransform(aTransform),
     b,
     toCgalTransformFromJsTransform(bTransform),
-    false, false
+    false,
+    false
   );
   const { average, last, sum } = endTime(timer);
-  logInfo('algorithm/cgal/differenceOfSurfaceMeshes', `${last} (${sum}) [${average}]`);
+  logInfo(
+    'algorithm/cgal/differenceOfSurfaceMeshes',
+    `${last} (${sum}) [${average}]`
+  );
   return result;
 };

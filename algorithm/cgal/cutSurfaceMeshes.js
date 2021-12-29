@@ -4,10 +4,7 @@ import { ErrorZeroThickness } from './error.js';
 import { getCgal } from './getCgal.js';
 import { toCgalTransformFromJsTransform } from './transform.js';
 
-export const cutSurfaceMeshes = (
-  targets,
-  sources,
-) => {
+export const cutSurfaceMeshes = (targets, sources) => {
   const results = [];
   const status = getCgal().CutSurfaceMeshesIncrementally(
     targets.length,

@@ -13,6 +13,7 @@ test('Read example', async (t) => {
     tags: [],
     graph: {
       isClosed: true,
+      isEmpty: false,
       isLazy: true,
     },
   });
@@ -21,6 +22,7 @@ test('Read example', async (t) => {
     tags: [],
     graph: {
       isClosed: true,
+      isEmpty: false,
       isLazy: false,
       edges: [
         { point: 0, next: 2, twin: 1, facet: 0, face: 0 },

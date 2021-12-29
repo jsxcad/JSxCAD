@@ -1038,7 +1038,7 @@ const voidFn = () => (shape) =>
 
 Shape.registerMethod('void', voidFn);
 
-const drop = (tag) => (shape) => shape.on(get(qualifyTag(tag, 'user')), voidFn());
+const drop = (tag) => (shape) => shape.on(get(tag), voidFn());
 
 Shape.registerMethod('drop', drop);
 
@@ -2898,9 +2898,14 @@ const fix =
 Shape.registerMethod('fix', fix);
 
 const each =
-  (leafOp = (leaf) => leaf, groupOp = (leafs, shape) => Shape.Group(...leafs)) =>
+  (
+    leafOp = (leaf) => leaf,
+    groupOp = (leafs, shape) => Shape.Group(...leafs)
+  ) =>
   (shape) => {
-    const leafShapes = getLeafs(shape.toGeometry()).map((leaf) => leafOp(Shape.fromGeometry(leaf)));
+    const leafShapes = getLeafs(shape.toGeometry()).map((leaf) =>
+      leafOp(Shape.fromGeometry(leaf))
+    );
     return groupOp(leafShapes, shape);
   };
 Shape.registerMethod('each', each);
@@ -3034,10 +3039,14 @@ const fitTo =
 
 Shape.registerMethod('fitTo', fitTo);
 
-const fuse = ({ isPlanar } = {}) => (shape) => {
-  const geometry = shape.toGeometry();
-  return fromGeometry(union(empty({ tags: geometry.tags, isPlanar }), geometry));
-};
+const fuse =
+  ({ isPlanar } = {}) =>
+  (shape) => {
+    const geometry = shape.toGeometry();
+    return fromGeometry(
+      union(empty({ tags: geometry.tags, isPlanar }), geometry)
+    );
+  };
 Shape.registerMethod('fuse', fuse);
 
 const noOp = (shape) => shape;
@@ -3150,7 +3159,7 @@ const withInset = (initial, step, limit) => (shape) =>
 Shape.registerMethod('inset', inset);
 Shape.registerMethod('withInset', withInset);
 
-const keep = (tag) => (shape) => shape.on(getNot(qualifyTag(tag, 'user')), voidFn());
+const keep = (tag) => (shape) => shape.on(getNot(tag), voidFn());
 
 Shape.registerMethod('keep', keep);
 
@@ -3254,7 +3263,10 @@ Shape.registerMethod('overlay', overlay);
 const mask =
   (...args) =>
   (shape) =>
-    Group(...args.map((arg) => Shape.toShape(arg, shape).void()), Shape.fromGeometry(hasTypeMasked(shape.toGeometry())));
+    Group(
+      ...args.map((arg) => Shape.toShape(arg, shape).void()),
+      Shape.fromGeometry(hasTypeMasked(shape.toGeometry()))
+    );
 
 Shape.registerMethod('mask', mask);
 
@@ -3374,7 +3386,10 @@ Shape.registerMethod('notColor', notColor);
 const nth =
   (...ns) =>
   (shape) => {
-    const candidates = shape.each(leaf => leaf, leafs => leafs);
+    const candidates = shape.each(
+      (leaf) => leaf,
+      (leafs) => leafs
+    );
     return Group(...ns.map((n) => candidates[n]));
   };
 
@@ -3699,8 +3714,10 @@ const scaleToFit =
 
 Shape.registerMethod('scaleToFit', scaleToFit);
 
-const simplify = (resolution = 100) => (shape) =>
-  Shape.fromGeometry(simplify$1(shape.toGeometry(), resolution));
+const simplify =
+  (resolution = 100) =>
+  (shape) =>
+    Shape.fromGeometry(simplify$1(shape.toGeometry(), resolution));
 
 Shape.registerMethod('simplify', simplify);
 
@@ -3759,9 +3776,7 @@ Shape.registerMethod('separate', separate);
 const EPSILON = 1e-5;
 
 const seq =
-  (
-    ...args
-  ) =>
+  (...args) =>
   (shape) => {
     let op = (n) => n;
     let spec = {};
@@ -4794,8 +4809,13 @@ const Septagon = (x, y, z) => Arc(x, y, z).hasSides(7);
 
 Shape.prototype.Septagon = Shape.shapeMethod(Septagon);
 
-const SurfaceMesh = (serializedSurfaceMesh, { isClosed = true, matrix } = {}) =>
-  Shape.fromGeometry(taggedGraph({ tags: [], matrix }, { serializedSurfaceMesh, isClosed }));
+const SurfaceMesh = (
+  serializedSurfaceMesh,
+  { isClosed = true, matrix } = {}
+) =>
+  Shape.fromGeometry(
+    taggedGraph({ tags: [], matrix }, { serializedSurfaceMesh, isClosed })
+  );
 
 const Tetragon = (x, y, z) => Arc(x, y, z).hasSides(4);
 

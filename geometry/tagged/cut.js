@@ -5,7 +5,7 @@ import { isNotTypeMasked } from './type.js';
 import { toConcreteGeometry } from './toConcreteGeometry.js';
 
 // Masked geometry is cut.
-const collectTargets = out => (geometry, descend) => {
+const collectTargets = (out) => (geometry, descend) => {
   if (geometry.type === 'graph' && !geometry.graph.isEmpty) {
     out.push(geometry);
   }
@@ -13,8 +13,12 @@ const collectTargets = out => (geometry, descend) => {
 };
 
 // Masked geometry doesn't cut.
-const collectRemoves = out => (geometry, descend) => {
-  if (geometry.type === 'graph' && isNotTypeMasked(geometry) && !geometry.graph.isEmpty) {
+const collectRemoves = (out) => (geometry, descend) => {
+  if (
+    geometry.type === 'graph' &&
+    isNotTypeMasked(geometry) &&
+    !geometry.graph.isEmpty
+  ) {
     out.push(geometry);
   }
   descend();

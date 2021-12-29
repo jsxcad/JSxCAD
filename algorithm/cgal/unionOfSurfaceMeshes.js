@@ -7,5 +7,6 @@ export const unionOfSurfaceMeshes = (a, aTransform, b, bTransform) =>
     toCgalTransformFromJsTransform(aTransform),
     b,
     toCgalTransformFromJsTransform(bTransform),
-    false, false
+    false,
+    false
   );
