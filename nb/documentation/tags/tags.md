@@ -28,13 +28,13 @@ Shape.color() and shape.material() are provided as convenience operations.
 Shape.keep() and Shape.drop() select which sub-geometries to turn void.
 
 ```JavaScript
-Arc(5).tag('a').fit(Box(4).tag('b')).keep('a').view();
+Arc(5).tag('a').fit(Box(4).tag('b')).keep('user:a').view();
 ```
 
 ![Image](tags.md.2.png)
 
 ```JavaScript
-Arc(5).tag('a').fit(Box(4).tag('b')).drop('a').view();
+Arc(5).tag('a').fit(Box(4).tag('b')).drop('user:a').view();
 ```
 
 ![Image](tags.md.3.png)
