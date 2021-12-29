@@ -321,13 +321,13 @@ const taggedAssembly = Assembly(
 ![Image](interactions_with_geometry.md.25.png)
 
 ```JavaScript
-taggedAssembly.keep('A').noVoid().view();
+taggedAssembly.keep('user:A').noVoid().view();
 ```
 
 ![Image](interactions_with_geometry.md.26.png)
 
 ```JavaScript
-taggedAssembly.drop('B').view();
+taggedAssembly.drop('user:B').view();
 ```
 
 ![Image](interactions_with_geometry.md.27.png)
@@ -388,7 +388,7 @@ graph LR;
   0 --> 3;
   3[item<br>item:bar]
   3 --> 4;
-  4[graph<br>editType:Group]
+  4[graph<br>]
 '''
 
 ---

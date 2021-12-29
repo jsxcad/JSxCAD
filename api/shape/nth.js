@@ -4,7 +4,10 @@ import Shape from './Shape.js';
 export const nth =
   (...ns) =>
   (shape) => {
-    const candidates = shape.each();
+    const candidates = shape.each(
+      (leaf) => leaf,
+      (leafs) => leafs
+    );
     return Group(...ns.map((n) => candidates[n]));
   };
 

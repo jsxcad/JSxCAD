@@ -141,8 +141,8 @@ Cap
 [cap_0.stl](micro_gear_motor.cap_0.stl)
 
 ```JavaScript
-const gearCutout = Gear(20)
-  .op((s) => s.and(s.cutFrom(Arc(12)).inset(0.5)))
+const gearCutout = Gear(20).fill()
+  .op((s) => s.and(s.cutFrom(Arc(24)).inset(0.5)))
   .as('gear cutout')
   .md('Gear Cutout')
   .gridView();
@@ -172,9 +172,9 @@ Motor Driver Holder
 
 ```JavaScript
 const wemosDriverHolder = Block(4, 5, 3.2 * 11)
-  .cut({ mode: 'basic' }, Box(25.7 + 0.2, 34.5 + 0.2).ez(2, 100))
-  .cut({ mode: 'basic' }, xz.Box(3 * 8, 2.5 * 8).extrudeAlong(normal(), 3.2 * (4 + 1.5), 100))
-  .cut({ mode: 'incremental' }, yz.Box(3.2 * 8, 4 * 8).extrudeAlong(normal(), 3.2 * (4 + 1.5), 100))
+  .cut(Box(25.7 + 0.2, 34.5 + 0.2).ez(2, 100))
+  .cut(xz.Box(3 * 8, 2.5 * 8).extrudeAlong(normal(), 3.2 * (4 + 1.5), 100))
+  .cut(yz.Box(3.2 * 8, 4 * 8).extrudeAlong(normal(), 3.2 * (4 + 1.5), 100))
   .cut(
     xz
       .flip()

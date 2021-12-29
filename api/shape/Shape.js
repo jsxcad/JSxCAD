@@ -17,7 +17,7 @@ import {
   transform,
 } from '@jsxcad/geometry';
 
-import { getSourceLocation } from '@jsxcad/sys';
+import { endTime, getSourceLocation, startTime } from '@jsxcad/sys';
 import { identityMatrix } from '@jsxcad/math-mat4';
 
 export class Shape {
@@ -155,29 +155,19 @@ export const registerShapeMethod = (name, op) => {
   }
   // Make the operation constructor available e.g., Shape.grow(1)(s)
   Shape[name] = op;
+
   // Make the operation application available e.g., s.grow(1)
-  if (name === 'startTimer' || name === 'endTimer' || name === 'md') {
-    const { [name]: method } = {
-      [name]: function (...args) {
-        return op(...args)(this);
-      },
-    };
-    method.origin = path;
-    Shape.prototype[name] = method;
-    return method;
-  } else {
-    const { [name]: method } = {
-      [name]: function (...args) {
-        this.startTimer(name);
-        const result = op(...args)(this);
-        this.endTimer(name);
-        return result;
-      },
-    };
-    method.origin = path;
-    Shape.prototype[name] = method;
-    return method;
-  }
+  const { [name]: method } = {
+    [name]: function (...args) {
+      const timer = startTime(name);
+      const result = op(...args)(this);
+      endTime(timer);
+      return result;
+    },
+  };
+  method.origin = path;
+  Shape.prototype[name] = method;
+  return method;
 };
 
 export const shapeMethod = (build) => {
@@ -301,7 +291,7 @@ Shape.toCoordinate = (shape, x = 0, y = 0, z = 0) => {
     }
     return [x, y, z];
   } else {
-    throw Error(`Unexpected coordinate value: ${x}`);
+    throw Error(`Unexpected coordinate value: ${JSON.stringify(x)}`);
   }
 };
 
@@ -342,7 +332,7 @@ Shape.toCoordinates = (shape, ...args) => {
       }
       coordinates.push([x, y, z]);
     } else {
-      throw Error(`Unexpected coordinate value: ${x}`);
+      throw Error(`Unexpected coordinate value: ${JSON.stringify(x)}`);
     }
   }
   return coordinates;

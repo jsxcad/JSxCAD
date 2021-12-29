@@ -7,7 +7,7 @@ const tool = { grbl: { type: 'spindle', spindleRpm: 7000, feedRate: 650 } };
 ```
 
 ```JavaScript
-const unYetGul = await readFont('https://jsxcad.js.org/ttf/UnYetgul.ttf?a=1');
+const unYetGul = await readFont('https://jsxcad.js.org/ttf/UnYetgul.ttf');
 ```
 
 ```JavaScript

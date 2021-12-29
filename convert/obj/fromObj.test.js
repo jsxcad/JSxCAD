@@ -50,6 +50,7 @@ test('Cube', async (t) => {
     tags: [],
     graph: {
       isClosed: true,
+      isEmpty: false,
       isLazy: false,
       edges: [
         { point: 0, next: 2, twin: 1, facet: 0, face: 0 },
@@ -171,6 +172,7 @@ test('Diamond', async (t) => {
     tags: [],
     graph: {
       isClosed: false,
+      isEmpty: false,
       isLazy: false,
       edges: [
         { point: 0, next: 2, twin: 1, facet: 0, face: 0 },

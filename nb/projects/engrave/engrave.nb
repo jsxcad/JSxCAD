@@ -1,6 +1,6 @@
 import { Text, readFont } from '@jsxcad/api-v1-font';
 
-const unYetGul = await readFont('https://jsxcad.js.org/ttf/UnYetgul.ttf?a=1');
+const unYetGul = await readFont('https://jsxcad.js.org/ttf/UnYetgul.ttf');
 
 const tool = { grbl: { type: 'spindle', spindleRpm: 7000, feedRate: 650 } };
 

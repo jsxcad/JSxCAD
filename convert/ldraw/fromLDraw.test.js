@@ -46,6 +46,7 @@ test('Load a file', async (t) => {
     tags: [],
     graph: {
       isClosed: false,
+      isEmpty: false,
       isLazy: false,
       edges: [
         { point: 0, next: 520, twin: 1, facet: 0, face: 0 },

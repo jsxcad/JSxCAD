@@ -16,7 +16,7 @@ test('Basic', async (t) => {
         paths: [
           [null, [1, 0, 0], [-0.4999999999999998, 0.8660254037844387, 0]],
         ],
-        tags: ['user:dxf:handle:1b', 'user:dxf:layer:0', 'color:#ffffff'],
+        tags: ['user:dxf:handle:16', 'user:dxf:layer:0', 'color:#ffffff'],
       },
       {
         type: 'paths',
@@ -27,14 +27,14 @@ test('Basic', async (t) => {
             [-0.5000000000000004, -0.8660254037844385, 0],
           ],
         ],
-        tags: ['user:dxf:handle:1c', 'user:dxf:layer:0', 'color:#ffffff'],
+        tags: ['user:dxf:handle:17', 'user:dxf:layer:0', 'color:#ffffff'],
       },
       {
         type: 'paths',
         paths: [
           [null, [-0.5000000000000004, -0.8660254037844385, 0], [1, 0, 0]],
         ],
-        tags: ['user:dxf:handle:1d', 'user:dxf:layer:0', 'color:#ffffff'],
+        tags: ['user:dxf:handle:18', 'user:dxf:layer:0', 'color:#ffffff'],
       },
     ],
   });

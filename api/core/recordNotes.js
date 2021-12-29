@@ -2,9 +2,11 @@ import {
   addOnEmitHandler,
   addPending,
   beginEmitGroup,
+  computeHash,
   emit,
   finishEmitGroup,
   flushEmitGroup,
+  getConfig,
   hash,
   logInfo,
   read,
@@ -72,11 +74,24 @@ export const $run = async (op, { path, id, text, sha }) => {
   const meta = await read(`meta/def/${path}/${id}`);
   if (!meta || meta.sha !== sha) {
     logInfo('api/core/$run', text);
+    const startTime = new Date();
     beginRecordingNotes(path, id);
     beginEmitGroup({ path, id });
     emitSourceText(text);
     const result = await op();
     await resolvePending();
+    const endTime = new Date();
+    const durationMinutes = (endTime - startTime) / 60000;
+    try {
+      if (getConfig().api.evaluate.showTimeViaMd) {
+        const md = `Evaluation time ${durationMinutes.toFixed(2)} minutes.`;
+        emit({ md, hash: computeHash(md) });
+      }
+    } catch (error) {}
+    logInfo(
+      'api/core/evaluate/duration',
+      `Evaluation time ${durationMinutes.toFixed(2)}: ${text}`
+    );
     finishEmitGroup({ path, id });
     if (typeof result === 'object') {
       const type = result.constructor.name;

@@ -4,6 +4,9 @@ import { taggedGraph } from '../tagged/taggedGraph.js';
 import { toSurfaceMesh } from './toSurfaceMesh.js';
 
 export const extrude = (geometry, height, depth, normal) => {
+  if (geometry.graph.isEmpty) {
+    return geometry;
+  }
   const dir = {};
   if (normal.points && normal.points.length >= 1) {
     dir.direction = normal.points[0];

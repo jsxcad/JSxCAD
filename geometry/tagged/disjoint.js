@@ -4,13 +4,13 @@ import { generateUniqueId, getWorkspace, remove } from '@jsxcad/sys';
 import { rewrite, visit } from './visit.js';
 
 import { difference } from './difference.js';
-import { disjointVolumes } from '../graph/disjointVolumes.js';
+import { disjoint as disjointGraphs } from '../graph/disjoint.js';
 import { read } from './read.js';
 import { taggedGroup } from './taggedGroup.js';
 import { toConcreteGeometry } from './toConcreteGeometry.js';
 import { write } from './write.js';
 
-export const disjoint = (geometries) => {
+export const disjoint2 = (geometries) => {
   geometries = [...geometries];
   for (let sup = geometries.length - 1; sup >= 0; sup--) {
     for (let sub = geometries.length - 1; sub > sup; sub--) {
@@ -21,27 +21,28 @@ export const disjoint = (geometries) => {
 };
 
 // An alternate disjunction that can be more efficient.
-export const disjoint2 = (geometries) => {
+export const disjoint = (geometries) => {
   // We need to determine the linearization of geometry by type, then rewrite
   // with the corresponding disjunction.
   const concreteGeometries = [];
   for (const geometry of geometries) {
     concreteGeometries.push(toConcreteGeometry(geometry));
   }
-  // For now we restrict ourselves to graph volumes.
-  const originalVolumes = [];
+  // For now we restrict ourselves to graphs.
+  const originalGraphs = [];
   const collect = (geometry, descend) => {
-    if (geometry.type === 'graph' && geometry.graph.isClosed) {
-      originalVolumes.push(geometry);
+    if (geometry.type === 'graph') {
+      originalGraphs.push(geometry);
     }
+    descend();
   };
   for (const geometry of concreteGeometries) {
     visit(geometry, collect);
   }
-  const disjointedVolumes = disjointVolumes(originalVolumes);
+  const disjointedGraphs = disjointGraphs(originalGraphs);
   const map = new Map();
-  for (let nth = 0; nth < disjointedVolumes.length; nth++) {
-    map.set(originalVolumes[nth], disjointedVolumes[nth]);
+  for (let nth = 0; nth < disjointedGraphs.length; nth++) {
+    map.set(originalGraphs[nth], disjointedGraphs[nth]);
   }
   const update = (geometry, descend) => {
     const disjointed = map.get(geometry);

@@ -101,6 +101,7 @@ test('FromSurfaceMeshToLazyGraph', (t) => {
   const graph = fromSurfaceMeshToLazyGraph(surfaceMesh);
   t.deepEqual(graph, {
     isClosed: true,
+    isEmpty: false,
     isLazy: true,
   });
 });

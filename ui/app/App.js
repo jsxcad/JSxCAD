@@ -1285,7 +1285,7 @@ class App extends React.Component {
           );
         }
         case 'Log': {
-          const { LogMessages = [], LogFilter = '/sys' } = this.state;
+          const { LogMessages = [], LogFilter = '^sys/' } = this.state;
           return (
             <div>
               <Card>
@@ -1396,7 +1396,7 @@ class App extends React.Component {
             this.Log.pendingMessages = [];
             const { LogMessages = [] } = this.state;
             await this.updateState({
-              LogMessages: [...commit, ...LogMessages],
+              LogMessages: [...commit, ...LogMessages.slice(0, 99)],
             });
           }
         } finally {

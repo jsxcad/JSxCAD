@@ -12,3 +12,4 @@ export const add =
     );
 
 Shape.registerMethod('add', add);
+Shape.registerMethod('join', add);

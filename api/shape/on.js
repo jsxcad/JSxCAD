@@ -14,7 +14,7 @@ export const on =
     // FIX: This needs to walk through items.
     const leafs = getLeafs(selection.toGeometry());
     const walk = (geometry, descend) => {
-      if (geometry.type === 'item' && leafs.includes(geometry)) {
+      if (leafs.includes(geometry)) {
         // This is a target.
         const global = geometry.matrix;
         const local = invertTransform(global);

@@ -32,9 +32,10 @@ export const ScrewThreadSegmentBuilder = Cached('nb/projects/bolt/bolt.nb/ScrewT
     .scale(1, 1, turn === 'right' ? 1 : -1)
     .grow(-play)
     .removeSelfIntersections()
+    .simplify(0.8)
     .add(Arc(diameter - depth).ez(pitch, -pitch))
     .clip(Box(diameter * 2).ez(pitch / 2, pitch / -2))
-    .align('z>');
+    .z(pitch / 2);
 });
 ```
 
@@ -46,7 +47,8 @@ export const ScrewThreadSegment = (diameter, { pitch = 1, angle = 60 / 360, play
 export const ScrewThreadBuilder = Cached('nb/projects/bolt/bolt.nb/ScrewThread', (diameter, height, pitch, angle, play, turn) =>
   ScrewThreadSegment(diameter, { pitch, angle, play, turn })
     .z(seq((a) => a, { from: 0, to: height, by: pitch }))
-    .cut(Box(diameter * 2).ez(height, height + pitch * 2)));
+    .cut(Box(diameter * 2).ez(height, height + pitch * 2))
+    .op(s => { console.log(`ScrewThreadSegmentBuilder/matrix: ${s.toGeometry().matrix}`); return s; }));
 ```
 
 ```JavaScript

@@ -1150,7 +1150,7 @@ class Point$1 {
     }
 }
 
-class Vertex {
+class Vertex$1 {
     constructor() {
         this.ForEntityName = 'VERTEX';
     }
@@ -1269,7 +1269,7 @@ class Polyline$1 {
     }
 }
 function parsePolylineVertices(scanner, curr) {
-    const vertexParser = new Vertex();
+    const vertexParser = new Vertex$1();
     const vertices = [];
     while (!scanner.isEOF()) {
         if (curr.code === 0) {
@@ -2538,6 +2538,42 @@ class Tag {
 
 var Tag_1 = Tag;
 
+class Handle {
+    static seed = 0;
+
+    static handle() {
+        return (++Handle.seed).toString(16).toUpperCase();
+    }
+
+    constructor(handleToOwner = null) {
+        this._handle = Handle.handle();
+        this._handleToOwner = handleToOwner;
+    }
+
+    handleTag(groupCode = 5) {
+        return [new Tag_1(groupCode, this._handle)];
+    }
+
+    handleToOwnerTag(groupCode = 330) {
+        if (!this._handleToOwner) return [new Tag_1(groupCode, 0)];
+        return [new Tag_1(groupCode, this._handleToOwner)];
+    }
+
+    set handleToOwner(handleToOwner) {
+        this._handleToOwner = handleToOwner;
+    }
+
+    get handleToOwner() {
+        return this._handleToOwner;
+    }
+
+    get handle() {
+        return this._handle;
+    }
+}
+
+var Handle_1 = Handle;
+
 class TagsManager {
     constructor() {
         this._tags = [];
@@ -2619,17 +2655,13 @@ class TagsManager {
 
 var TagsManager_1 = TagsManager;
 
-class DatabaseObject {
+class DatabaseObject extends Handle_1 {
     constructor(subclass = null) {
-        /* Handle should be assigned externally by document instance */
-        this.handle = null;
-        this.ownerHandle = null;
+        super();
         this.subclassMarkers = [];
         if (subclass) {
             if (Array.isArray(subclass)) {
-                for (const sc of subclass) {
-                    this.subclassMarkers.push(sc);
-                }
+                this.subclassMarkers.push(...subclass);
             } else {
                 this.subclassMarkers.push(subclass);
             }
@@ -2643,17 +2675,11 @@ class DatabaseObject {
     tags() {
         const manager = new TagsManager_1();
 
-        if (this.handle) {
-            manager.addTag(5, this.handle.toString(16));
-        } else {
-            console.warn("No handle assigned to entity", this);
-        }
-        if (this.ownerHandle) {
-            manager.addTag(330, this.ownerHandle.toString(16));
-        }
-        for (const marker of this.subclassMarkers) {
-            manager.addTag(100, marker);
-        }
+        manager.addTags(this.handleTag());
+        manager.addTags(this.handleToOwnerTag());
+        this.subclassMarkers.forEach((subclassMarker) => {
+            manager.addTag(100, subclassMarker);
+        });
 
         return manager.tags();
     }
@@ -2758,8 +2784,9 @@ class Layer extends DatabaseObject_1 {
         return this.shapes;
     }
 
-    shapesTags() {
+    shapesTags(space) {
         return this.shapes.reduce((tags, shape) => {
+            shape.handleToOwner = space.handle;
             return [...tags, ...shape.tags()];
         }, []);
     }
@@ -2781,6 +2808,7 @@ class Table extends DatabaseObject_1 {
     }
 
     add(element) {
+        element.handleToOwner = this.handle;
         this.elements.push(element);
     }
 
@@ -2819,9 +2847,9 @@ class DimStyleTable extends Table_1 {
         /* DIMTOL */
         manager.addTag(71, 1);
 
-        for (const element of this.elements) {
+        this.elements.forEach((element) => {
             manager.addTags(element.tags());
-        }
+        });
 
         manager.addTag(0, "ENDTAB");
         return manager.tags();
@@ -2908,18 +2936,6 @@ class Block extends DatabaseObject_1 {
         this.recordHandle = null;
     }
 
-    /* Internal method to set handle value for block end separator entity. */
-    setEndHandle(handle) {
-        this.end.handle = handle;
-    }
-
-    /* Internal method to set handle value for block record in block records table. */
-    setRecordHandle(handle) {
-        this.recordHandle = handle;
-    }
-
-    //XXX need some API to add content
-
     tags() {
         const manager = new TagsManager_1();
 
@@ -2974,11 +2990,16 @@ class Dictionary extends DatabaseObject_1 {
         this.children = {};
     }
 
+    /**
+     *
+     * @param {*} name
+     * @param {DatabaseObject} dictionary
+     */
     addChildDictionary(name, dictionary) {
         if (!this.handle) {
             throw new Error("Handle must be set before adding children");
         }
-        dictionary.ownerHandle = this.handle;
+        dictionary.handleToOwner = this.handle;
         this.children[name] = dictionary;
     }
 
@@ -2989,14 +3010,15 @@ class Dictionary extends DatabaseObject_1 {
         /* Duplicate record cloning flag - keep existing */
         manager.addTag(281, 1);
 
-        for (const [name, item] of Object.entries(this.children)) {
+        Object.entries(this.children).forEach((child) => {
+            const [name, item] = child;
             manager.addTag(3, name);
-            manager.addTag(350, item.handle.toString(16));
-        }
+            manager.addTags(item.handleTag(350));
+        });
 
-        for (const item of Object.values(this.children)) {
-            manager.addTags(item.tags());
-        }
+        Object.values(this.children).forEach((child) => {
+            manager.addTags(child.tags());
+        });
 
         return manager.tags();
     }
@@ -3224,17 +3246,18 @@ class Polyline extends DatabaseObject_1 {
         manager.addTag(90, this.points.length);
         manager.addTag(70, this.closed ? 1 : 0);
 
-        for (const point of this.points) {
-            manager.addTag(10, point[0]);
-            manager.addTag(20, point[1]);
+        this.points.forEach((point) => {
+            const [x, y, z] = point;
+            manager.addTag(10, x);
+            manager.addTag(20, y);
             if (this.startWidth !== 0 || this.endWidth !== 0) {
                 manager.addTag(40, this.startWidth);
                 manager.addTag(41, this.endWidth);
             }
-            if (point[2] !== undefined) {
-                manager.addTag(42, point[2]);
+            if (z !== undefined) {
+                manager.addTag(42, z);
             }
-        }
+        });
 
         return manager.tags();
     }
@@ -3242,18 +3265,47 @@ class Polyline extends DatabaseObject_1 {
 
 var Polyline_1 = Polyline;
 
-class Polyline3d extends DatabaseObject_1 {
+class Vertex extends DatabaseObject_1 {
     /**
-     * @param {array} points - Array of points like [ [x1, y1, z1], [x2, y2, z2]... ]
+     *
+     * @param {number} x The X coordinate
+     * @param {number} y The Y coordinate
+     * @param {number} z The Z coordinate
      */
-    constructor(points) {
-        super(["AcDbEntity", "AcDbPolyline3D"]);
-        this.points = points;
-        this.pointHandles = null;
+    constructor(x, y, z) {
+        super(["AcDbEntity", "AcDbVertex", "AcDb3dPolylineVertex"]);
+        this.x = x;
+        this.y = y;
+        this.z = z;
     }
 
-    assignVertexHandles(handleProvider) {
-        this.pointHandles = this.points.map(() => handleProvider());
+    tags() {
+        const manager = new TagsManager_1();
+
+        manager.addTag(0, "VERTEX");
+        manager.addTags(super.tags());
+        manager.addTag(8, this.layer.name);
+        manager.addPointTags(this.x, this.y, this.z);
+        manager.addTag(70, 32);
+        return manager.tags();
+    }
+}
+
+var Vertex_1 = Vertex;
+
+class Polyline3d extends DatabaseObject_1 {
+    /**
+     * @param {[number, number, number][]} points - Array of points like [ [x1, y1, z1], [x2, y2, z2]... ]
+     */
+    constructor(points) {
+        super(["AcDbEntity", "AcDb3dPolyline"]);
+        this.verticies = points.map((point) => {
+            const [x, y, z] = point;
+            const vertex = new Vertex_1(x, y, z);
+            vertex.handleToOwner = this.handle;
+            return vertex;
+        });
+        this.seqendHandle = Handle_1.handle();
     }
 
     tags() {
@@ -3263,25 +3315,18 @@ class Polyline3d extends DatabaseObject_1 {
         manager.addTags(super.tags());
         manager.addTag(8, this.layer.name);
         manager.addTag(66, 1);
-        manager.addTag(70, 8);
+        manager.addTag(70, 0);
+        manager.addPointTags(0, 0);
 
-        for (let i = 0; i < this.points.length; ++i) {
-            manager.addTag(0, "VERTEX");
-            manager.addTagsByElements([
-                [100, "AcDbEntity"],
-                [100, "AcDbVertex"],
-            ]);
-            manager.addTag(5, this.pointHandles[i].toString(16));
-            manager.addTag(8, this.layer.name);
-            manager.addTag(70, 0);
-            manager.addPointTags(
-                this.points[i][0],
-                this.points[i][1],
-                this.points[i][2]
-            );
-        }
+        this.verticies.forEach((vertex) => {
+            vertex.layer = this.layer;
+            manager.addTags(vertex.tags());
+        });
 
         manager.addTag(0, "SEQEND");
+        manager.addTag(5, this.seqendHandle);
+        manager.addTag(100, "AcDbEntity");
+        manager.addTag(8, this.layer.name);
 
         return manager.tags();
     }
@@ -3532,28 +3577,22 @@ class Drawing {
         this.headers = {};
         this.tables = {};
         this.blocks = {};
-        this.handleCount = 0;
-
-        this.ltypeTableHandle = this._generateHandle();
-        this.layerTableHandle = this._generateHandle();
-        this.blockRecordTableHandle = this._generateHandle();
 
         this.dictionary = new Dictionary_1();
-        this._assignHandle(this.dictionary);
 
         this.setUnits("Unitless");
 
-        for (const lineType of Drawing.LINE_TYPES) {
+        Drawing.LINE_TYPES.forEach((lineType) => {
             this.addLineType(
                 lineType.name,
                 lineType.description,
                 lineType.elements
             );
-        }
+        });
 
-        for (const layer of Drawing.LAYERS) {
+        Drawing.LAYERS.forEach((layer) => {
             this.addLayer(layer.name, layer.colorNumber, layer.lineTypeName);
-        }
+        });
 
         this.setActiveLayer("0");
 
@@ -3567,16 +3606,12 @@ class Drawing {
      * @param {array} elements - if elem > 0 it is a line, if elem < 0 it is gap, if elem == 0.0 it is a
      */
     addLineType(name, description, elements) {
-        this.lineTypes[name] = this._assignHandle(
-            new LineType_1(name, description, elements)
-        );
+        this.lineTypes[name] = new LineType_1(name, description, elements);
         return this;
     }
 
     addLayer(name, colorNumber, lineTypeName) {
-        this.layers[name] = this._assignHandle(
-            new Layer_1(name, colorNumber, lineTypeName)
-        );
+        this.layers[name] = new Layer_1(name, colorNumber, lineTypeName);
         return this;
     }
 
@@ -3587,34 +3622,33 @@ class Drawing {
 
     addTable(name) {
         const table = new Table_1(name);
-        this._assignHandle(table);
         this.tables[name] = table;
         return table;
     }
 
+    /**
+     *
+     * @param {string} name The name of the block.
+     * @returns {Block}
+     */
     addBlock(name) {
         const block = new Block_1(name);
-        this._assignHandle(block);
-        block.setEndHandle(this._generateHandle());
-        block.setRecordHandle(this._generateHandle());
         this.blocks[name] = block;
         return block;
     }
 
     drawLine(x1, y1, x2, y2) {
-        this.activeLayer.addShape(this._assignHandle(new Line_1(x1, y1, x2, y2)));
+        this.activeLayer.addShape(new Line_1(x1, y1, x2, y2));
         return this;
     }
 
     drawLine3d(x1, y1, z1, x2, y2, z2) {
-        this.activeLayer.addShape(
-            this._assignHandle(new Line3d_1(x1, y1, z1, x2, y2, z2))
-        );
+        this.activeLayer.addShape(new Line3d_1(x1, y1, z1, x2, y2, z2));
         return this;
     }
 
     drawPoint(x, y) {
-        this.activeLayer.addShape(this._assignHandle(new Point_1(x, y)));
+        this.activeLayer.addShape(new Point_1(x, y));
         return this;
     }
 
@@ -3648,8 +3682,6 @@ class Drawing {
                 true
             );
         }
-
-        this._assignHandle(p);
         this.activeLayer.addShape(p);
         return this;
     }
@@ -3662,9 +3694,7 @@ class Drawing {
      * @param {number} endAngle - degree
      */
     drawArc(x1, y1, r, startAngle, endAngle) {
-        this.activeLayer.addShape(
-            this._assignHandle(new Arc_1(x1, y1, r, startAngle, endAngle))
-        );
+        this.activeLayer.addShape(new Arc_1(x1, y1, r, startAngle, endAngle));
         return this;
     }
 
@@ -3674,7 +3704,7 @@ class Drawing {
      * @param {number} r - radius
      */
     drawCircle(x1, y1, r) {
-        this.activeLayer.addShape(this._assignHandle(new Circle_1(x1, y1, r)));
+        this.activeLayer.addShape(new Circle_1(x1, y1, r));
         return this;
     }
 
@@ -3697,47 +3727,42 @@ class Drawing {
         verticalAlignment = "baseline"
     ) {
         this.activeLayer.addShape(
-            this._assignHandle(
-                new Text_1(
-                    x1,
-                    y1,
-                    height,
-                    rotation,
-                    value,
-                    horizontalAlignment,
-                    verticalAlignment
-                )
+            new Text_1(
+                x1,
+                y1,
+                height,
+                rotation,
+                value,
+                horizontalAlignment,
+                verticalAlignment
             )
         );
         return this;
     }
 
     /**
-     * @param {array} points - Array of points like [ [x1, y1], [x2, y2]... ]
+     * @param {[number, number][]} points - Array of points like [ [x1, y1], [x2, y2]... ]
      * @param {boolean} closed - Closed polyline flag
      * @param {number} startWidth - Default start width
      * @param {number} endWidth - Default end width
      */
     drawPolyline(points, closed = false, startWidth = 0, endWidth = 0) {
-        const p = new Polyline_1(points, closed, startWidth, endWidth);
-        this._assignHandle(p);
-        this.activeLayer.addShape(p);
+        this.activeLayer.addShape(
+            new Polyline_1(points, closed, startWidth, endWidth)
+        );
         return this;
     }
 
     /**
-     * @param {array} points - Array of points like [ [x1, y1, z1], [x2, y2, z1]... ]
+     * @param {[number, number, number][]} points - Array of points like [ [x1, y1, z1], [x2, y2, z1]... ]
      */
     drawPolyline3d(points) {
         points.forEach((point) => {
             if (point.length !== 3) {
-                throw "Require 3D coordinate";
+                throw "Require 3D coordinates";
             }
         });
-        const p = new Polyline3d_1(points);
-        this._assignHandle(p);
-        p.assignVertexHandles(this._generateHandle.bind(this));
-        this.activeLayer.addShape(p);
+        this.activeLayer.addShape(new Polyline3d_1(points));
         return this;
     }
 
@@ -3766,9 +3791,7 @@ class Drawing {
         fitPoints = []
     ) {
         this.activeLayer.addShape(
-            this._assignHandle(
-                new Spline_1(controlPoints, degree, knots, weights, fitPoints)
-            )
+            new Spline_1(controlPoints, degree, knots, weights, fitPoints)
         );
         return this;
     }
@@ -3793,16 +3816,14 @@ class Drawing {
         endAngle = 2 * Math.PI
     ) {
         this.activeLayer.addShape(
-            this._assignHandle(
-                new Ellipse_1(
-                    x1,
-                    y1,
-                    majorAxisX,
-                    majorAxisY,
-                    axisRatio,
-                    startAngle,
-                    endAngle
-                )
+            new Ellipse_1(
+                x1,
+                y1,
+                majorAxisX,
+                majorAxisY,
+                axisRatio,
+                startAngle,
+                endAngle
             )
         );
         return this;
@@ -3824,32 +3845,19 @@ class Drawing {
      */
     drawFace(x1, y1, z1, x2, y2, z2, x3, y3, z3, x4, y4, z4) {
         this.activeLayer.addShape(
-            this._assignHandle(
-                new Face_1(x1, y1, z1, x2, y2, z2, x3, y3, z3, x4, y4, z4)
-            )
+            new Face_1(x1, y1, z1, x2, y2, z2, x3, y3, z3, x4, y4, z4)
         );
         return this;
     }
 
-    _generateHandle() {
-        return ++this.handleCount;
-    }
-
-    _assignHandle(entity) {
-        entity.handle = this._generateHandle();
-        return entity;
-    }
-
     _getLtypeTableTags() {
         const t = new Table_1("LTYPE");
-        t.handle = this.ltypeTableHandle;
         Object.values(this.lineTypes).forEach((v) => t.add(v));
         return t.tags();
     }
 
     _getLayerTableTags() {
         const t = new Table_1("LAYER");
-        t.handle = this.layerTableHandle;
         Object.values(this.layers).forEach((v) => t.add(v));
         return t.tags();
     }
@@ -3915,33 +3923,38 @@ class Drawing {
         }
         if (!this.tables["DIMSTYLE"]) {
             const t = new DimStyleTable_1("DIMSTYLE");
-            this._assignHandle(t);
             this.tables["DIMSTYLE"] = t;
         }
 
-        vpTable.add(this._assignHandle(new Viewport_1("*ACTIVE", 1000)));
+        vpTable.add(new Viewport_1("*ACTIVE", 1000));
 
         /* Non-default text alignment is not applied without this entry. */
-        styleTable.add(this._assignHandle(new TextStyle_1("standard")));
+        styleTable.add(new TextStyle_1("standard"));
 
-        appIdTable.add(this._assignHandle(new AppId_1("ACAD")));
+        appIdTable.add(new AppId_1("ACAD"));
 
-        this.addBlock("*Model_Space");
+        this.modelSpace = this.addBlock("*Model_Space");
         this.addBlock("*Paper_Space");
 
         const d = new Dictionary_1();
-        this._assignHandle(d);
         this.dictionary.addChildDictionary("ACAD_GROUP", d);
     }
 
     tags() {
         const manager = new TagsManager_1();
 
+        // Setup
+        const blockRecordTable = new Table_1("BLOCK_RECORD");
+        Object.values(this.blocks).forEach((b) => {
+            const rec = new BlockRecord_1(b.name);
+            blockRecordTable.add(rec);
+        });
+        const ltypeTableTags = this._getLtypeTableTags();
+        const layerTableTags = this._getLayerTableTags();
+
         // Header section start.
         manager.addSectionBegin("HEADER");
-        manager.addHeaderVariable("HANDSEED", [
-            [5, (this.handleCount + 1).toString(16)],
-        ]);
+        manager.addHeaderVariable("HANDSEED", [[5, Handle_1.handle()]]);
         Object.entries(this.headers).forEach((variable) => {
             const [name, values] = variable;
             manager.addHeaderVariable(name, values);
@@ -3957,18 +3970,12 @@ class Drawing {
 
         // Tables section start.
         manager.addSectionBegin("TABLES");
-        manager.addTags(this._getLtypeTableTags());
-        manager.addTags(this._getLayerTableTags());
+        manager.addTags(ltypeTableTags);
+        manager.addTags(layerTableTags);
         Object.values(this.tables).forEach((table) => {
             manager.addTags(table.tags());
         });
-        const blockRecordTable = new Table_1("BLOCK_RECORD");
-        blockRecordTable.handle = this.blockRecordTableHandle;
-        Object.values(this.blocks).forEach((b) => {
-            const rec = new BlockRecord_1(b.name);
-            rec.handle = b.recordHandle;
-            blockRecordTable.add(rec);
-        });
+
         manager.addTags(blockRecordTable.tags());
         manager.addSectionEnd();
         // Tables section end.
@@ -3984,7 +3991,7 @@ class Drawing {
         // Entities section start.
         manager.addSectionBegin("ENTITIES");
         Object.values(this.layers).forEach((layer) => {
-            manager.addTags(layer.shapesTags());
+            manager.addTags(layer.shapesTags(this.modelSpace));
         });
         manager.addSectionEnd();
         // Entities section end.

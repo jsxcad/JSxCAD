@@ -95,10 +95,21 @@ Gear()
 Pressure Angle makes the tip sharper or blunter
 
 ```JavaScript
+const planetaryDesign1 = Arc(44)
+  .ez(-4)
+  .as('hoop')
+  .fitTo(Octagon(42).ez(-2, -4));
+```
+
+```JavaScript
 const planetary = Gear().hasTeeth(8).md(`Our base involute gear.`);
 ```
 
 Our base involute gear.
+
+```JavaScript
+const planetaryDesignAxle = Octagon(12).fitTo(Arc(8).void()).ez(-4).color('orange').as('axle');
+```
 
 ```JavaScript
 const planetaryFootprint = planetary
@@ -142,7 +153,7 @@ We simulate the gear motion to cut a single tooth, then rotate it around.
 
 ```JavaScript
 const solar = Arc(20)
-  .hasAngle(-1 / 32, 1 / 32)
+  .hasAngle(-1 / 30, 1 / 30)
   .hull(Point())
   .cut(
     seq(
@@ -155,6 +166,7 @@ const solar = Arc(20)
     )
   )
   .rz(seq((a) => a, { by: 1 / 16 }))
+  .fuse({ isPlanar: true })
   .gridView()
   .md(
     `We simulate the gear motion to cut a single tooth, then rotate it around.`
@@ -183,15 +195,16 @@ const rack = Box(20, Math.PI)
 We can do the same thing to cut a rack.
 
 ```JavaScript
-const planetaryDesign = Arc(44)
-  .ez(-4)
-  .as('hoop')
-  .fitTo(Octagon(42).ez(-2, -4))
+const planetaryDesign2 = planetaryDesign1
   .cut(Octagon(42).ez(-2))
   .and(ring.clip(Octagon(42)).ez(-2))
   .cut(Arc(24).ez(-2, -4))
   .color('blue')
-  .as('ring')
+  .as('ring');
+```
+
+```JavaScript
+const planetaryDesign3 = planetaryDesign2
   .and(
     planetary
       .ez(-2)
@@ -201,14 +214,33 @@ const planetaryDesign = Arc(44)
       .x(12)
       .rz(1 / 4, 2 / 4, 3 / 4, 4 / 4)
   )
-  .and(
+```
+
+```JavaScript
+const planetaryDesign4a =
     solar
-      .ez(-2)
+      .ez(-2);
+```
+
+```JavaScript
+const planetaryDesign4b = planetaryDesign4a
       .and(Arc(23.5).ez(-2, -4))
-      .fitTo(Octagon(12).fitTo(Arc(8).void()).ez(-4).color('orange').as('axle'))
+```
+
+```JavaScript
+const planetaryDesign4c = planetaryDesign4b
+      .fitTo(planetaryDesignAxle);
+```
+
+```JavaScript
+const planetaryDesign4 = planetaryDesign4c
       .color('green')
-      .as('solar')
-  )
+      .as('solar');
+```
+
+```JavaScript
+const planetaryDesign = planetaryDesign3
+  .and(planetaryDesign4)
   .gridView()
   .stl('hoop', (s) =>
     s

@@ -111,17 +111,17 @@ facet normal 0 0 -1
     vertex -12 -18.5 0
   endloop
 endfacet
-facet normal 0 -0.9999999999999999 0
+facet normal 0 -1 0
   outer loop
     vertex -16 -20 0
     vertex -12 -20 0
-    vertex -12 -20 1.838
+    vertex -12 -20 1.837
   endloop
 endfacet
-facet normal 0 -0.9999999999999999 0
+facet normal 0 -1 0
   outer loop
     vertex -16 -20 0
-    vertex -12 -20 1.838
+    vertex -12 -20 1.837
     vertex -16 -20 2.1
   endloop
 endfacet
@@ -289,7 +289,7 @@ endfacet
 facet normal 0 -1 0
   outer loop
     vertex -16 -20 2.1
-    vertex -12 -20 1.838
+    vertex -12 -20 1.837
     vertex -12 -20 2.1
   endloop
 endfacet
@@ -10863,37 +10863,37 @@ facet normal 0.09480909262802327 0.9954954725939495 0
     vertex -12 13.5 0
   endloop
 endfacet
-facet normal 1 0 0
+facet normal 0.9999999999999999 0 0
   outer loop
     vertex -12 -20 0
     vertex -12 -19.5 0
-    vertex -12 -20 1.838
+    vertex -12 -20 1.837
   endloop
 endfacet
-facet normal 1 0 0
+facet normal 0.9999999999999999 0 0
   outer loop
-    vertex -12 -20 1.838
+    vertex -12 -20 1.837
     vertex -12 -19.5 0
     vertex -12 -19.468 0
   endloop
 endfacet
 facet normal 1 0 0
   outer loop
-    vertex -12 -20 1.838
+    vertex -12 -20 1.837
     vertex -12 -19.5 2.1
     vertex -12 -20 2.1
   endloop
 endfacet
 facet normal 1 0 0
   outer loop
-    vertex -12 -20 1.838
+    vertex -12 -20 1.837
     vertex -12 -19.468 0
     vertex -12 -19.468 2.1
   endloop
 endfacet
 facet normal 1 0 0
   outer loop
-    vertex -12 -20 1.838
+    vertex -12 -20 1.837
     vertex -12 -19.468 2.1
     vertex -12 -19.5 2.1
   endloop
@@ -10937,14 +10937,14 @@ facet normal 1 0 0
   outer loop
     vertex -12 -18.613 0
     vertex -12 -18.5 0
-    vertex -12 -18.5 2.1
+    vertex -12 -18.613 2.1
   endloop
 endfacet
 facet normal 1 0 0
   outer loop
-    vertex -12 -18.613 0
-    vertex -12 -18.5 2.1
     vertex -12 -18.613 2.1
+    vertex -12 -18.5 0
+    vertex -12 -18.5 2.1
   endloop
 endfacet
 facet normal 0.0872238982729301 -0.9961887329066083 0

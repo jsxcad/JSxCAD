@@ -18,7 +18,9 @@ const screw = ScrewThread(16, 5)
   )
   .stl('screw', rx(1 / 2));
 
-const upsideClip = Box(30 + 4)
+const nut = NutThread(16, 5);
+
+const upsideClip1 = Box(30 + 4)
   .align('x>y>')
   .ez(boardThickness + 2, -5)
   .cut(Box(30).align('x>y>').ez(boardThickness))
@@ -33,8 +35,10 @@ const upsideClip = Box(30 + 4)
       .x(23)
       .hull()
       .op((f) => s.cut(f.extrudeAlong(normal(), -15)).and(f.extrudeAlong(normal(), 0.4)))
-  )
-  .and(NutThread(16, 5).z(-5).x(33))
+  );
+
+const upsideClip = upsideClip1
+  .and(nut.z(-5).x(33))
   .as('clip')
   .view();
 
@@ -79,6 +83,8 @@ const toothedReel = Group(
   .as('toothedReel')
   .view(rx(1 / 2));
 
+/*
+// FIX: These are too slow.
 const upsideDesign = stepperMotor28byj48
   .rx(1 / 2)
   .align('z>')
@@ -116,3 +122,4 @@ const upsideDesign2 = upsideDesign
   )
   .stl('rim', (s) => s.get('toothedReel').n(1).get('rim'))
   .stl('clip', (s) => s.get('clip').rx(1 / 2));
+*/

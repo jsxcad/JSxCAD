@@ -195,6 +195,7 @@ export const updateNotebook = async (
       }
     }
   } catch (error) {
+    console.log(error.stack);
     throw error;
   } finally {
     removeOnEmitHandler(onEmitHandler);

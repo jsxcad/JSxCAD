@@ -6,6 +6,7 @@ export {
   setPendingErrorHandler,
 } from './pending.js';
 export { clearCacheDb } from './db.js';
+export { endTime, reportTimes, startTime } from './profile.js';
 export { getConfig, setConfig } from './config.js';
 export { createService } from './service.js';
 export { getControlValue, setControlValue } from './control.js';

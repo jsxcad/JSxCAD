@@ -1,8 +1,6 @@
 import { getClosedGraphs, getGraphs } from './getGraphs.js';
 
-import { cutVolumeIncrementally } from '../graph/cutVolumeIncrementally.js';
-import { cutVolumeSingly } from '../graph/cutVolumeSingly.js';
-import { cutVolumeSinglyRecursive } from '../graph/cutVolumeSinglyRecursive.js';
+import { cut } from './cut.js';
 import { fill as fillOutlineGraph } from '../graph/fill.js';
 import { fromPaths as fromPathsToGraph } from '../graph/fromPaths.js';
 import { getFaceablePaths } from './getFaceablePaths.js';
@@ -10,6 +8,10 @@ import { difference as graphDifference } from '../graph/difference.js';
 import { rewrite } from './visit.js';
 import { toConcreteGeometry } from './toConcreteGeometry.js';
 
+export const difference = (geometry, options = {}, ...geometries) =>
+  cut(geometry, geometries);
+
+/*
 export const difference = (geometry, options = {}, ...geometries) => {
   if (
     !['incremental', 'single', 'single_recursive', 'basic', undefined].includes(
@@ -99,3 +101,4 @@ export const difference = (geometry, options = {}, ...geometries) => {
 
   return rewrite(toConcreteGeometry(geometry), op);
 };
+*/
