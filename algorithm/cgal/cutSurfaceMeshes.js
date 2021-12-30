@@ -10,7 +10,6 @@ export const cutSurfaceMeshes = (targets, sources) => {
     targets.length,
     (nth) => targets[nth].mesh,
     (nth) => toCgalTransformFromJsTransform(targets[nth].matrix),
-    (nth) => targets[nth].isPlanar && targets[nth].isEmpty,
     sources.length,
     (nth) => sources[nth].mesh,
     (nth) => toCgalTransformFromJsTransform(sources[nth].matrix),

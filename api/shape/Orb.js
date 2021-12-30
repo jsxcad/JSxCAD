@@ -33,7 +33,6 @@ const extrudeSphere =
   };
 
 Shape.registerMethod('extrudeSphere', extrudeSphere);
-Shape.registerMethod('sx', extrudeSphere);
 
 Shape.registerReifier('Orb', (geometry) => {
   const [scale, middle] = getScale(geometry);

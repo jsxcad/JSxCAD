@@ -2,21 +2,39 @@ import Shape from './Shape.js';
 
 const EPSILON = 1e-5;
 
+const maybeApply = (value, shape) => {
+  if (value instanceof Function) {
+    return value(shape);
+  } else {
+    return value;
+  }
+};
+
+// This is getting a bit excessively magical.
 export const seq =
   (...args) =>
   (shape) => {
-    let op = (n) => n;
+    let op;
+    let groupOp;
     let spec = {};
     for (const arg of args) {
       if (arg instanceof Function) {
-        op = arg;
+        if (!op) {
+          op = arg;
+        } else if (!groupOp) {
+          groupOp = arg;
+        }
       } else if (arg instanceof Object) {
         Object.assign(spec, arg);
       }
     }
+    if (!op) {
+      op = (n) => n;
+    }
+    if (!groupOp) {
+      groupOp = (...results) => results;
+    }
     let { from = 0, to = 1, upto, downto, by = 1, index = false } = spec;
-
-    const numbers = [];
 
     from = Shape.toValue(from, shape);
     to = Shape.toValue(to, shape);
@@ -42,8 +60,15 @@ export const seq =
       throw Error('seq: Expects by != 0');
     }
 
+    const results = [];
     for (let number = from, nth = 0; consider(number); number += by, nth++) {
-      numbers.push(index ? op(number, nth) : op(number));
+      results.push(
+        index
+          ? maybeApply(op(number, nth), shape)
+          : maybeApply(op(number), shape)
+      );
     }
-    return numbers;
+    return groupOp(...results);
   };
+
+Shape.registerMethod('seq', seq);

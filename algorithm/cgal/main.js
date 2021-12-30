@@ -23,6 +23,7 @@ export {
   BOOLEAN_CLIP,
   booleansOfPolygonsWithHoles,
 } from './booleansOfPolygonsWithHoles.js';
+export { clipSurfaceMeshes } from './clipSurfaceMeshes.js';
 export { computeCentroidOfSurfaceMesh } from './computeCentroidOfSurfaceMesh.js';
 export { computeNormalOfSurfaceMesh } from './computeNormalOfSurfaceMesh.js';
 export { cutOutOfSurfaceMeshes } from './cutOutOfSurfaceMeshes.js';

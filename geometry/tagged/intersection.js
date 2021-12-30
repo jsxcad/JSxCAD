@@ -1,3 +1,9 @@
+import { clip } from './clip.js';
+
+export const intersection = (geometry, ...geometries) =>
+  clip(geometry, geometries);
+
+/*
 import { fromPaths as fromPathsToGraph } from '../graph/fromPaths.js';
 import { getNonVoidFaceablePaths } from './getNonVoidFaceablePaths.js';
 import { getNonVoidGraphs } from './getNonVoidGraphs.js';
@@ -82,3 +88,4 @@ export const intersection = (geometry, ...geometries) => {
 
   return rewrite(toConcreteGeometry(geometry), op);
 };
+*/
