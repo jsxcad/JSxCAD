@@ -6,7 +6,7 @@ Arc(10)
   .rx(1 / 4)
   .x(10)
   .loop(seq((a) => rz(a), { by: 1 / 32, upto: 1 }))
-  .cutOut(Box(20, 20).ez(20))
+  .cutout(Box(20, 20).ez(20))
   .view();
 ```
 
@@ -16,7 +16,7 @@ Cube with red cut-out.
 
 ```JavaScript
 Box(10, 10, 10)
-  .cutOut(Arc(5, 5, 10), color('red'))
+  .cutout(Arc(5, 5, 10), color('red'))
   .view();
 ```
 

@@ -76,6 +76,7 @@
 #include <CGAL/minkowski_sum_3.h>
 #include <CGAL/offset_polygon_2.h>
 #include <CGAL/perturb_mesh_3.h>
+#include <CGAL/simplest_rational_in_interval.h>
 #include <emscripten/bind.h>
 
 #include <array>
@@ -747,27 +748,52 @@ const Surface_mesh* GrowSurfaceMesh(const Surface_mesh* input, double amount) {
   return mesh;
 }
 
-Surface_mesh* SimplifySurfaceMesh(const Surface_mesh* input, double ratio) {
+Surface_mesh* SimplifySurfaceMesh(const Surface_mesh* input, double ratio,
+                                  bool simplify_points, double eps) {
   typedef CGAL::Simple_cartesian<double> Cartesian_kernel;
   typedef Cartesian_kernel::Point_3 Cartesian_point;
   typedef CGAL::Surface_mesh<Cartesian_point> Cartesian_surface_mesh;
 
+  boost::unordered_map<Surface_mesh::Vertex_index,
+                       Cartesian_surface_mesh::Vertex_index>
+      vertex_map;
+
+  Surface_mesh working_copy(*input);
+
+  if (simplify_points) {
+    //
+    for (const Surface_mesh::Vertex_index vertex : working_copy.vertices()) {
+      Point& point = working_copy.point(vertex);
+      double x = CGAL::to_double(point.x());
+      double y = CGAL::to_double(point.y());
+      double z = CGAL::to_double(point.z());
+      point = Point(CGAL::simplest_rational_in_interval<FT>(x - eps, x + eps),
+                    CGAL::simplest_rational_in_interval<FT>(y - eps, y + eps),
+                    CGAL::simplest_rational_in_interval<FT>(z - eps, z + eps));
+    }
+  }
+
   Cartesian_surface_mesh cartesian_surface_mesh;
-  copy_face_graph(*input, cartesian_surface_mesh);
+  copy_face_graph(working_copy, cartesian_surface_mesh,
+                  CGAL::parameters::vertex_to_vertex_output_iterator(
+                      std::inserter(vertex_map, vertex_map.end())));
+
   CGAL::Surface_mesh_simplification::Count_ratio_stop_predicate<
       Cartesian_surface_mesh>
       stop(ratio);
+
   int removed_edge_count = CGAL::Surface_mesh_simplification::edge_collapse(
       cartesian_surface_mesh, stop);
 
   Surface_mesh* output = new Surface_mesh();
-  copy_face_graph(cartesian_surface_mesh, *output);
+  copy_face_graph(cartesian_surface_mesh, *output,
+                  CGAL::parameters::vertex_to_vertex_map(
+                      boost::make_assoc_property_map(vertex_map)));
 
   return output;
 }
 
-const Surface_mesh* RemoveSelfIntersectionsOfSurfaceMesh(
-    const Surface_mesh* input) {
+Surface_mesh* RemoveSelfIntersectionsOfSurfaceMesh(const Surface_mesh* input) {
   Surface_mesh* mesh = new Surface_mesh(*input);
   CGAL::Polygon_mesh_processing::experimental::
       autorefine_and_remove_self_intersections(*mesh);
@@ -1834,7 +1860,6 @@ bool PolygonsWithHolesToSurfaceMesh(const Plane& plane,
 bool GeneralPolygonSetToSurfaceMesh(const Plane& plane,
                                     General_polygon_set_2& set,
                                     Surface_mesh& result) {
-  Surface_mesh* c = new Surface_mesh();
   std::vector<Polygon_with_holes_2> polygons;
   set.polygons_with_holes(std::back_inserter(polygons));
   return PolygonsWithHolesToSurfaceMesh(plane, polygons, result);
@@ -2040,16 +2065,200 @@ int CutClosedSurfaceMeshIncrementally(const Surface_mesh* a,
   return STATUS_OK;
 }
 
-int CutSurfaceMeshesIncrementally(
-    size_t target_count, emscripten::val getTargetMesh,
-    emscripten::val getTargetTransform, emscripten::val getTargetIsEmptyPlanar,
-    size_t source_count, emscripten::val getSourceMesh,
-    emscripten::val getSourceTransform, emscripten::val emit) {
+class ClipSurfaceMeshesSegmentProcessor {
+ public:
+  ClipSurfaceMeshesSegmentProcessor(std::vector<SurfaceMeshQuery>& queries,
+                                    emscripten::val& emit_segment)
+      : queries_(queries), emit_segment_(emit_segment){};
+
+  void clip(double sourceX, double sourceY, double sourceZ, double targetX,
+            double targetY, double targetZ) {
+    // This might produce duplicate segments where a volume and a plane
+    // overlap -- consider cutting the volumes from the planes.
+    // Alternatively, consider using an arrangement to deduplicate the
+    // segments.
+    for (SurfaceMeshQuery& query : queries_) {
+      query.clipSegmentApproximate(sourceX, sourceY, sourceZ, targetX, targetY,
+                                   targetZ, emit_segment_);
+    }
+  };
+
+ private:
+  std::vector<SurfaceMeshQuery>& queries_;
+  emscripten::val& emit_segment_;
+};
+
+int ClipSurfaceMeshes(size_t target_count, emscripten::val getTargetMesh,
+                      emscripten::val getTargetTransform, size_t segments_count,
+                      emscripten::val fillSegments, size_t source_count,
+                      emscripten::val getSourceMesh,
+                      emscripten::val getSourceTransform,
+                      emscripten::val emit_mesh, emscripten::val emit_segment) {
+  std::vector<Surface_mesh> working_target_meshes(target_count);
+  std::vector<std::unique_ptr<Surface_mesh>> clipped_target_meshes(
+      target_count);
+  std::vector<General_polygon_set_2> working_target_polygon_sets(target_count);
+  std::vector<General_polygon_set_2> clipped_target_polygon_sets(target_count);
+  std::vector<Transformation> to_target_transforms(target_count);
+  std::vector<bool> is_planar(target_count, false);
+  std::vector<Plane> target_planes(target_count);
+
+  for (size_t nth_target = 0; nth_target < target_count; nth_target++) {
+    const Surface_mesh* target_mesh =
+        getTargetMesh(nth_target)
+            .as<const Surface_mesh*>(emscripten::allow_raw_pointers());
+    working_target_meshes[nth_target] = Surface_mesh(*target_mesh);
+    clipped_target_meshes[nth_target].reset(new Surface_mesh());
+    const Transformation* target_transform =
+        getTargetTransform(nth_target)
+            .as<const Transformation*>(emscripten::allow_raw_pointers());
+    to_target_transforms[nth_target] = target_transform->inverse();
+    is_planar[nth_target] = IsPlanarSurfaceMesh(
+        target_planes[nth_target], working_target_meshes[nth_target]);
+    if (is_planar[nth_target]) {
+      PlanarSurfaceMeshToPolygonSet(target_planes[nth_target],
+                                    working_target_meshes[nth_target],
+                                    working_target_polygon_sets[nth_target]);
+    }
+  }
+
+  for (size_t nth_source = 0; nth_source < source_count; nth_source++) {
+    const Surface_mesh* source_mesh =
+        getSourceMesh(nth_source)
+            .as<const Surface_mesh*>(emscripten::allow_raw_pointers());
+    if (CGAL::is_empty(*source_mesh)) {
+      continue;
+    }
+    const Transformation* source_transform =
+        getSourceTransform(nth_source)
+            .as<const Transformation*>(emscripten::allow_raw_pointers());
+    for (size_t nth_target = 0; nth_target < target_count; nth_target++) {
+      Surface_mesh& working_target_mesh = working_target_meshes[nth_target];
+      Surface_mesh& clipped_target_mesh = *clipped_target_meshes[nth_target];
+      General_polygon_set_2& working_target_polygon_set =
+          working_target_polygon_sets[nth_target];
+      General_polygon_set_2& clipped_target_polygon_set =
+          clipped_target_polygon_sets[nth_target];
+      // Work with the source mesh in the frame of the target.
+      Surface_mesh working_source_mesh(*source_mesh);
+      CGAL::Polygon_mesh_processing::transform(
+          to_target_transforms[nth_target] * *source_transform,
+          working_source_mesh, CGAL::parameters::all_default());
+      Plane plane;
+      if (IsPlanarSurfaceMesh(plane, working_source_mesh)) {
+        // Planar clipped by planar.
+        if (IsCoplanarSurfaceMesh(plane, working_target_mesh)) {
+          General_polygon_set_2 clip_set;
+          // We need to use the target plane so that the polygon sets agree on
+          // scale.
+          PlanarSurfaceMeshToPolygonSet(target_planes[nth_target],
+                                        working_source_mesh, clip_set);
+          clip_set.intersection(working_target_polygon_set);
+          clipped_target_polygon_set.join(clip_set);
+        }
+      } else if (is_planar[nth_target]) {
+        // Planar clipped by planar.
+        General_polygon_set_2 clip_set;
+        SurfaceMeshSectionToPolygonSet(target_planes[nth_target],
+                                       working_source_mesh, clip_set);
+        clip_set.intersection(working_target_polygon_set);
+        clipped_target_polygon_set.join(clip_set);
+      } else {
+        // Volume clipped by volume.
+        if (!CGAL::is_closed(working_source_mesh) ||
+            CGAL::is_empty(working_source_mesh)) {
+          continue;
+        }
+        // Construct a shared clipping volume.
+        if (CGAL::Polygon_mesh_processing::do_intersect(
+                working_target_mesh, working_source_mesh,
+                CGAL::Polygon_mesh_processing::parameters::
+                    do_overlap_test_of_bounded_sides(true),
+                CGAL::Polygon_mesh_processing::parameters::
+                    do_overlap_test_of_bounded_sides(true))) {
+          Surface_mesh clip_mesh;
+          if (!CGAL::Polygon_mesh_processing::corefine_and_compute_intersection(
+                  working_target_mesh, working_source_mesh, clip_mesh,
+                  CGAL::parameters::all_default(),
+                  CGAL::parameters::all_default(),
+                  CGAL::parameters::all_default())) {
+            return STATUS_ZERO_THICKNESS;
+          }
+          if (!CGAL::Polygon_mesh_processing::corefine_and_compute_union(
+                  clipped_target_mesh, clip_mesh, clipped_target_mesh,
+                  CGAL::parameters::all_default(),
+                  CGAL::parameters::all_default(),
+                  CGAL::parameters::all_default())) {
+            return STATUS_ZERO_THICKNESS;
+          }
+        } else {
+          clipped_target_mesh.join(working_source_mesh);
+        }
+      }
+    }
+  }
+
+  // Fold in the planar results.
+  for (size_t nth_target = 0; nth_target < target_count; nth_target++) {
+    Surface_mesh& clipped_target_mesh = *clipped_target_meshes[nth_target];
+    if (is_planar[nth_target]) {
+      General_polygon_set_2& clipped_target_polygon_set =
+          clipped_target_polygon_sets[nth_target];
+      if (!GeneralPolygonSetToSurfaceMesh(target_planes[nth_target],
+                                          clipped_target_polygon_set,
+                                          clipped_target_mesh)) {
+        return STATUS_ZERO_THICKNESS;
+      }
+    }
+  }
+
+  // From this point we are committed.
+
+  // Handle segments.
+  {
+    Transformation identity_transform(CGAL::IDENTITY);
+    std::vector<SurfaceMeshQuery> queries;
+    for (size_t nth_source = 0; nth_source < source_count; nth_source++) {
+      const Surface_mesh* source_mesh =
+          getSourceMesh(nth_source)
+              .as<const Surface_mesh*>(emscripten::allow_raw_pointers());
+      if (CGAL::is_empty(*source_mesh) || !CGAL::is_closed(*source_mesh)) {
+        continue;
+      }
+      const Transformation* source_transform =
+          getSourceTransform(nth_source)
+              .as<const Transformation*>(emscripten::allow_raw_pointers());
+      queries.emplace_back(source_mesh, &identity_transform);
+    }
+    ClipSurfaceMeshesSegmentProcessor processor(queries, emit_segment);
+    ClipSurfaceMeshesSegmentProcessor* processor_ptr = &processor;
+    for (size_t nth_segments = 0; nth_segments < segments_count;
+         nth_segments++) {
+      fillSegments(nth_segments, processor_ptr);
+    }
+  }
+
+  for (size_t nth_target = 0; nth_target < target_count; nth_target++) {
+    Surface_mesh* clipped_target_mesh =
+        clipped_target_meshes[nth_target].release();
+    emit_mesh(nth_target, clipped_target_mesh);
+  }
+
+  return STATUS_OK;
+}
+
+int CutSurfaceMeshesIncrementally(size_t target_count,
+                                  emscripten::val getTargetMesh,
+                                  emscripten::val getTargetTransform,
+                                  size_t source_count,
+                                  emscripten::val getSourceMesh,
+                                  emscripten::val getSourceTransform,
+                                  emscripten::val emit) {
   std::vector<std::unique_ptr<Surface_mesh>> target_meshes(target_count);
   std::vector<Transformation> to_target_transforms(target_count);
   std::vector<bool> planar(target_count, false);
   std::vector<Plane> target_planes(target_count);
-  std::vector<General_polygon_set_2> planar_sets(target_count);
+  std::vector<General_polygon_set_2> planar_target_sets(target_count);
 
   for (size_t nth_target = 0; nth_target < target_count; nth_target++) {
     const Surface_mesh* target_mesh =
@@ -2060,20 +2269,12 @@ int CutSurfaceMeshesIncrementally(
         getTargetTransform(nth_target)
             .as<const Transformation*>(emscripten::allow_raw_pointers());
     to_target_transforms[nth_target] = target_transform->inverse();
-    if (CGAL::is_empty(*target_meshes[nth_target]) &&
-        getTargetIsEmptyPlanar(nth_target).as<bool>()) {
-      // By default an empty mesh will be considered a volumetric target.
-      // So for planar fusion we append a planar target in the xy plane.
-      target_planes[nth_target] = Plane(0, 0, 1, 0);
-      planar[nth_target] = true;
-    } else {
-      planar[nth_target] = IsPlanarSurfaceMesh(target_planes[nth_target],
-                                               *target_meshes[nth_target]);
-      if (planar[nth_target]) {
-        PlanarSurfaceMeshToPolygonSet(target_planes[nth_target],
-                                      *target_meshes[nth_target],
-                                      planar_sets[nth_target]);
-      }
+    planar[nth_target] = IsPlanarSurfaceMesh(target_planes[nth_target],
+                                             *target_meshes[nth_target]);
+    if (planar[nth_target]) {
+      PlanarSurfaceMeshToPolygonSet(target_planes[nth_target],
+                                    *target_meshes[nth_target],
+                                    planar_target_sets[nth_target]);
     }
   }
 
@@ -2100,7 +2301,7 @@ int CutSurfaceMeshesIncrementally(
         } else if (CGAL::is_closed(working_source_mesh)) {
           SurfaceMeshSectionToPolygonSet(plane, working_source_mesh, cut);
         }
-        planar_sets[nth_target].difference(cut);
+        planar_target_sets[nth_target].difference(cut);
       } else {
         if (!CGAL::is_closed(working_source_mesh) ||
             CGAL::is_empty(working_source_mesh)) {
@@ -2126,7 +2327,7 @@ int CutSurfaceMeshesIncrementally(
   for (size_t nth_target = 0; nth_target < target_count; nth_target++) {
     if (planar[nth_target]) {
       if (!GeneralPolygonSetToSurfaceMesh(target_planes[nth_target],
-                                          planar_sets[nth_target],
+                                          planar_target_sets[nth_target],
                                           *target_meshes[nth_target])) {
         return STATUS_ZERO_THICKNESS;
       }
@@ -2151,7 +2352,7 @@ int JoinSurfaceMeshesIncrementally(
   std::vector<Transformation> to_target_transforms(target_count);
   std::vector<bool> planar(target_count, false);
   std::vector<Plane> target_planes(target_count);
-  std::vector<General_polygon_set_2> planar_sets(target_count);
+  std::vector<General_polygon_set_2> planar_target_sets(target_count);
 
   for (size_t nth_target = 0; nth_target < target_count; nth_target++) {
     const Surface_mesh* target_mesh =
@@ -2174,7 +2375,7 @@ int JoinSurfaceMeshesIncrementally(
       if (planar[nth_target]) {
         PlanarSurfaceMeshToPolygonSet(target_planes[nth_target],
                                       *target_meshes[nth_target],
-                                      planar_sets[nth_target]);
+                                      planar_target_sets[nth_target]);
       }
     }
   }
@@ -2198,10 +2399,10 @@ int JoinSurfaceMeshesIncrementally(
         Plane& plane = target_planes[nth_target];
         if (IsCoplanarSurfaceMesh(plane, working_source_mesh)) {
           PlanarSurfaceMeshToPolygonSet(plane, working_source_mesh,
-                                        planar_sets[nth_target]);
+                                        planar_target_sets[nth_target]);
         } else if (CGAL::is_closed(working_source_mesh)) {
           SurfaceMeshSectionToPolygonSet(plane, working_source_mesh,
-                                         planar_sets[nth_target]);
+                                         planar_target_sets[nth_target]);
         }
       } else {
         if (!CGAL::is_closed(working_source_mesh) ||
@@ -2233,7 +2434,7 @@ int JoinSurfaceMeshesIncrementally(
   for (size_t nth_target = 0; nth_target < target_count; nth_target++) {
     if (planar[nth_target]) {
       if (!GeneralPolygonSetToSurfaceMesh(target_planes[nth_target],
-                                          planar_sets[nth_target],
+                                          planar_target_sets[nth_target],
                                           *target_meshes[nth_target])) {
         return STATUS_ZERO_THICKNESS;
       }
@@ -2556,76 +2757,6 @@ const Surface_mesh* UnionOfSurfaceMeshes(const Surface_mesh* a,
     if (!fix) {
       delete c;
       return nullptr;
-    }
-    const double direction = ((shift & (1 << 3)) ? -1 : 1) * (shift >> 4);
-    if (shift & (1 << 0)) {
-      x = kIota * direction;
-    } else {
-      x = 0;
-    }
-    if (shift & (1 << 1)) {
-      y = kIota * direction;
-    } else {
-      y = 0;
-    }
-    if (shift & (1 << 2)) {
-      z = kIota * direction;
-    } else {
-      z = 0;
-    }
-  }
-}
-
-void CutOutOfSurfaceMeshes(const Surface_mesh* a,
-                           const Transformation* a_transform,
-                           const Surface_mesh* b,
-                           const Transformation* b_transform,
-                           emscripten::val emit_mesh) {
-  // Transform b to a's coordinate system.
-  if (b_transform) {
-    Surface_mesh transformed(*b);
-    CGAL::Polygon_mesh_processing::transform(*b_transform, transformed,
-                                             CGAL::parameters::all_default());
-    if (a_transform) {
-      CGAL::Polygon_mesh_processing::transform(
-          a_transform->inverse(), transformed, CGAL::parameters::all_default());
-    }
-    return CutOutOfSurfaceMeshes(a, nullptr, &transformed, nullptr, emit_mesh);
-  }
-  Surface_mesh* a_not_b = new Surface_mesh();
-  Surface_mesh* a_and_b = new Surface_mesh();
-  double x = 0, y = 0, z = 0;
-  for (int shift = 0x11;; shift++) {
-    Surface_mesh working_a(*a);
-    Surface_mesh working_b(*b);
-    if (x != 0 || y != 0 || z != 0) {
-      std::cout << "Note: Shifting union by x=" << x << " y=" << y << " z=" << z
-                << std::endl;
-      Transformation translation(CGAL::TRANSLATION, Vector(x, y, z));
-      CGAL::Polygon_mesh_processing::transform(translation, working_b,
-                                               CGAL::parameters::all_default());
-    }
-    std::array<boost::optional<Surface_mesh*>, 4> output;
-    output[CGAL::Polygon_mesh_processing::Corefinement::TM1_MINUS_TM2] =
-        a_not_b;
-    output[CGAL::Polygon_mesh_processing::Corefinement::INTERSECTION] = a_and_b;
-    std::array<bool, 4> result =
-        CGAL::Polygon_mesh_processing::corefine_and_compute_boolean_operations(
-            working_a, working_b, output,
-            CGAL::Polygon_mesh_processing::parameters::
-                throw_on_self_intersection(true),
-            CGAL::Polygon_mesh_processing::parameters::
-                throw_on_self_intersection(true),
-            std::make_tuple(CGAL::parameters::all_default(),
-                            CGAL::parameters::all_default(),
-                            CGAL::Polygon_mesh_processing::parameters::
-                                throw_on_self_intersection(true),
-                            CGAL::Polygon_mesh_processing::parameters::
-                                throw_on_self_intersection(true)));
-    if (result[CGAL::Polygon_mesh_processing::Corefinement::TM1_MINUS_TM2] &&
-        result[CGAL::Polygon_mesh_processing::Corefinement::INTERSECTION]) {
-      emit_mesh(a_not_b, a_and_b);
-      return;
     }
     const double direction = ((shift & (1 << 3)) ? -1 : 1) * (shift >> 4);
     if (shift & (1 << 0)) {
@@ -4769,6 +4900,11 @@ EMSCRIPTEN_BINDINGS(module) {
                        emscripten::allow_raw_pointers());
   emscripten::function("DifferenceOfSurfaceMeshes", &DifferenceOfSurfaceMeshes,
                        emscripten::allow_raw_pointers());
+  emscripten::class_<ClipSurfaceMeshesSegmentProcessor>(
+      "ClipSurfaceMeshesSegmentProcessor")
+      .function("clip", &ClipSurfaceMeshesSegmentProcessor::clip);
+  emscripten::function("ClipSurfaceMeshes", &ClipSurfaceMeshes,
+                       emscripten::allow_raw_pointers());
   emscripten::function("CutClosedSurfaceMeshIncrementally",
                        &CutClosedSurfaceMeshIncrementally,
                        emscripten::allow_raw_pointers());
@@ -4785,8 +4921,6 @@ EMSCRIPTEN_BINDINGS(module) {
                        &IntersectionOfSurfaceMeshes,
                        emscripten::allow_raw_pointers());
   emscripten::function("UnionOfSurfaceMeshes", &UnionOfSurfaceMeshes,
-                       emscripten::allow_raw_pointers());
-  emscripten::function("CutOutOfSurfaceMeshes", &CutOutOfSurfaceMeshes,
                        emscripten::allow_raw_pointers());
   emscripten::function("SeparateSurfaceMesh", &SeparateSurfaceMesh,
                        emscripten::allow_raw_pointers());

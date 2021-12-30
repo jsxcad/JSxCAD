@@ -155,7 +155,7 @@ Edges(
   })
 )
   .rz(1 / 8)
-  .clip(Arc(5).cut(Arc(2)))
+  .clip(Arc(5).cut(Arc(2)).ez(1, -1))
   .gridView();
 
 const topEdge = ([[, , startZ], [, , endZ]]) => Math.min(startZ, endZ);
@@ -184,3 +184,9 @@ b.to(
   .view()
 
 Voxels([0, 0, 0], [0, 0, 1], [1, 0, 1], [2, 0, 1]).view();
+
+Arc(2)
+  .ez(5)
+  .cut(Box(5).ry(1 / 16).ez(5).z(3))
+  .simplify({ ratio: 0.1, eps: 0.01 })
+  .view();

@@ -351,7 +351,7 @@ Edges(
   })
 )
   .rz(1 / 8)
-  .clip(Arc(5).cut(Arc(2)))
+  .clip(Arc(5).cut(Arc(2)).ez(1, -1))
   .gridView();
 ```
 
@@ -402,3 +402,13 @@ b.to(
 ```
 
 ![Image](shape.md.47.png)
+
+```JavaScript
+Arc(2)
+  .ez(5)
+  .cut(Box(5).ry(1 / 16).ez(5).z(3))
+  .simplify({ ratio: 0.1, eps: 0.01 })
+  .view();
+```
+
+![Image](shape.md.48.png)

@@ -90,7 +90,7 @@ const upsideDesign = stepperMotor28byj48
   .align('z>')
   .z(2)
   .fit(upsideBox)
-  .cutOut(at(get('shaft'), Arc(reelDiameter + 12).ez(2, 11)));
+  .cutout(at(get('shaft'), Arc(reelDiameter + 12).ez(2, 11)));
 
 const upsideDesign2 = upsideDesign
   .material('glass')
@@ -113,7 +113,7 @@ const upsideDesign2 = upsideDesign
     (s) =>
       s
         .get('toothedReel')
-        .n(1) // This is due to the cutOut earlier?
+        .n(1) // This is due to the cutout earlier?
         .on(
           (s) => s.get('rim'),
           (s) => s.color('green').void()
