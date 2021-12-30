@@ -330,6 +330,7 @@ export { simplify } from './simplify.js';
 export { section, sectionProfile } from './section.js';
 export { separate } from './separate.js';
 export { seq } from './seq.js';
+export { serialize } from './serialize.js';
 export { smooth } from './smooth.js';
 export { size } from './size.js';
 export { sketch } from './sketch.js';

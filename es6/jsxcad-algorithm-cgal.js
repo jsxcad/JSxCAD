@@ -1857,8 +1857,8 @@ const separateSurfaceMesh = (
   return meshes;
 };
 
-const simplifySurfaceMesh = (mesh, resolution) =>
-  getCgal().SimplifySurfaceMesh(mesh, resolution);
+const simplifySurfaceMesh = (mesh, { stopRatio = 0.5, eps }) =>
+  getCgal().SimplifySurfaceMesh(mesh, stopRatio, eps !== undefined, eps || 0);
 
 const serializeSurfaceMesh = (mesh) => {
   const timer = startTime('algorithm/cgal/serializeSurfaceMesh');

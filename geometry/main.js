@@ -162,6 +162,7 @@ export { rotateZ as rotateZPath } from './path/ops.js';
 export { scale as scalePath } from './path/ops.js';
 export { scale as scalePaths } from './paths/ops.js';
 export { section } from './tagged/section.js';
+export { serialize } from './tagged/serialize.js';
 export { simplify } from './tagged/simplify.js';
 export { smooth } from './tagged/smooth.js';
 export { separate } from './tagged/separate.js';

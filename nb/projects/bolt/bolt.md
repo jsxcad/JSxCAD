@@ -32,7 +32,8 @@ export const ScrewThreadSegmentBuilder = Cached('nb/projects/bolt/bolt.nb/ScrewT
     .scale(1, 1, turn === 'right' ? 1 : -1)
     .grow(-play)
     .removeSelfIntersections()
-    .simplify(0.8)
+    // .simplify({ ratio: 0.8 })
+    .simplify({ eps: 0.01 })
     .add(Arc(diameter - depth).ez(pitch, -pitch))
     .clip(Box(diameter * 2).ez(pitch / 2, pitch / -2))
     .z(pitch / 2);

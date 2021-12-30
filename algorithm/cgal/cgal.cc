@@ -76,6 +76,7 @@
 #include <CGAL/minkowski_sum_3.h>
 #include <CGAL/offset_polygon_2.h>
 #include <CGAL/perturb_mesh_3.h>
+#include <CGAL/simplest_rational_in_interval.h>
 #include <emscripten/bind.h>
 
 #include <array>
@@ -747,27 +748,52 @@ const Surface_mesh* GrowSurfaceMesh(const Surface_mesh* input, double amount) {
   return mesh;
 }
 
-Surface_mesh* SimplifySurfaceMesh(const Surface_mesh* input, double ratio) {
+Surface_mesh* SimplifySurfaceMesh(const Surface_mesh* input, double ratio,
+                                  bool simplify_points, double eps) {
   typedef CGAL::Simple_cartesian<double> Cartesian_kernel;
   typedef Cartesian_kernel::Point_3 Cartesian_point;
   typedef CGAL::Surface_mesh<Cartesian_point> Cartesian_surface_mesh;
 
+  boost::unordered_map<Surface_mesh::Vertex_index,
+                       Cartesian_surface_mesh::Vertex_index>
+      vertex_map;
+
+  Surface_mesh working_copy(*input);
+
+  if (simplify_points) {
+    //
+    for (const Surface_mesh::Vertex_index vertex : working_copy.vertices()) {
+      Point& point = working_copy.point(vertex);
+      double x = CGAL::to_double(point.x());
+      double y = CGAL::to_double(point.y());
+      double z = CGAL::to_double(point.z());
+      point = Point(CGAL::simplest_rational_in_interval<FT>(x - eps, x + eps),
+                    CGAL::simplest_rational_in_interval<FT>(y - eps, y + eps),
+                    CGAL::simplest_rational_in_interval<FT>(z - eps, z + eps));
+    }
+  }
+
   Cartesian_surface_mesh cartesian_surface_mesh;
-  copy_face_graph(*input, cartesian_surface_mesh);
+  copy_face_graph(working_copy, cartesian_surface_mesh,
+                  CGAL::parameters::vertex_to_vertex_output_iterator(
+                      std::inserter(vertex_map, vertex_map.end())));
+
   CGAL::Surface_mesh_simplification::Count_ratio_stop_predicate<
       Cartesian_surface_mesh>
       stop(ratio);
+
   int removed_edge_count = CGAL::Surface_mesh_simplification::edge_collapse(
       cartesian_surface_mesh, stop);
 
   Surface_mesh* output = new Surface_mesh();
-  copy_face_graph(cartesian_surface_mesh, *output);
+  copy_face_graph(cartesian_surface_mesh, *output,
+                  CGAL::parameters::vertex_to_vertex_map(
+                      boost::make_assoc_property_map(vertex_map)));
 
   return output;
 }
 
-const Surface_mesh* RemoveSelfIntersectionsOfSurfaceMesh(
-    const Surface_mesh* input) {
+Surface_mesh* RemoveSelfIntersectionsOfSurfaceMesh(const Surface_mesh* input) {
   Surface_mesh* mesh = new Surface_mesh(*input);
   CGAL::Polygon_mesh_processing::experimental::
       autorefine_and_remove_self_intersections(*mesh);
