@@ -45,7 +45,10 @@ export const measureBoundingBox = (geometry) => {
       case 'layout': {
         const { size = [] } = geometry.layout;
         const [width, height] = size;
-        return update([[width / -2, height / -2, 0], [width / 2, height / 2, 0]]);
+        return update([
+          [width / -2, height / -2, 0],
+          [width / 2, height / 2, 0],
+        ]);
       }
       case 'points':
         return update(measureBoundingBoxOfPoints(geometry.points));
