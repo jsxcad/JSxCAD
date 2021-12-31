@@ -1705,12 +1705,27 @@ void convertArrangementToPolygonsWithHoles(
     Arrangement_2::Ccb_halfedge_const_circulator start = face->outer_ccb();
     Arrangement_2::Ccb_halfedge_const_circulator edge = start;
     do {
-      if (edge->source()->point() == edge->target()->point()) {
+      const Point_2& point = edge->source()->point();
+      if (point == edge->target()->point()) {
         // Skip zero length edges.
         continue;
       }
-      polygon_boundary.push_back(edge->source()->point());
+      if (polygon_boundary.size() >= 2 &&
+          CGAL::collinear(polygon_boundary.end()[-2],
+                          polygon_boundary.end()[-1], point)) {
+        // Skip colinear points.
+        polygon_boundary.end()[-1] = point;
+      } else {
+        polygon_boundary.push_back(point);
+      }
     } while (++edge != start);
+
+    if (polygon_boundary.size() > 3 &&
+        CGAL::collinear(polygon_boundary.end()[-2], polygon_boundary.end()[-1],
+                        polygon_boundary[0])) {
+      // Skip colinear points.
+      polygon_boundary.resize(polygon_boundary.size() - 1);
+    }
 
     std::vector<Polygon_2> polygon_holes;
     for (Arrangement_2::Hole_const_iterator hole = face->holes_begin();
@@ -1719,12 +1734,27 @@ void convertArrangementToPolygonsWithHoles(
       Arrangement_2::Ccb_halfedge_const_circulator start = *hole;
       Arrangement_2::Ccb_halfedge_const_circulator edge = start;
       do {
-        if (edge->source()->point() == edge->target()->point()) {
+        const Point_2& point = edge->source()->point();
+        if (point == edge->target()->point()) {
           // Skip zero length edges.
           continue;
         }
-        polygon_hole.push_back(edge->source()->point());
+        if (polygon_hole.size() >= 2 &&
+            CGAL::collinear(polygon_hole.end()[-2], polygon_hole.end()[-1],
+                            point)) {
+          // Skip colinear points.
+          polygon_hole.end()[-1] = point;
+        } else {
+          polygon_hole.push_back(point);
+        }
       } while (++edge != start);
+
+      if (polygon_hole.size() > 3 &&
+          CGAL::collinear(polygon_hole.end()[-2], polygon_hole.end()[-1],
+                          polygon_hole[0])) {
+        // Skip colinear points.
+        polygon_hole.resize(polygon_hole.size() - 1);
+      }
 
       if (polygon_hole.orientation() == CGAL::Sign::POSITIVE) {
         polygon_hole.reverse_orientation();
@@ -3253,7 +3283,7 @@ const Surface_mesh* ComputeConvexHullAsSurfaceMesh(emscripten::val fill) {
   Points* points_ptr = &points;
   fill(points_ptr);
   Surface_mesh* mesh = new Surface_mesh();
-  // compute convex hull of non-collinear points
+  // compute convex hull of non-colinear points
   CGAL::convex_hull_3(points.begin(), points.end(), *mesh);
   return mesh;
 }
