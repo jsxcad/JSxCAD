@@ -42,8 +42,14 @@ export const measureBoundingBox = (geometry) => {
         return descend();
       case 'graph':
         return update(measureBoundingBoxOfGraph(geometry));
-      case 'layout':
-        return update(geometry.marks);
+      case 'layout': {
+        const { size = [] } = geometry.layout;
+        const [width, height] = size;
+        return update([
+          [width / -2, height / -2, 0],
+          [width / 2, height / 2, 0],
+        ]);
+      }
       case 'points':
         return update(measureBoundingBoxOfPoints(geometry.points));
       case 'polygonsWithHoles':
