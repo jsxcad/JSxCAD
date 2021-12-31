@@ -1,4 +1,5 @@
 import Shape from './Shape.js';
+import { eachPoint } from '@jsxcad/geometry';
 
 export const fromVec3 = (...points) =>
   Shape.fromOpenPath(points.map(([x = 0, y = 0, z = 0]) => [x, y, z]));
@@ -6,7 +7,7 @@ export const fromVec3 = (...points) =>
 export const fromPoints = (...shapes) => {
   const vec3List = [];
   for (const shape of shapes) {
-    shape.eachPoint((vec3) => vec3List.push(vec3));
+    eachPoint((vec3) => vec3List.push(vec3), shape.toGeometry());
   }
   return fromVec3(...vec3List);
 };

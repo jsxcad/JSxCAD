@@ -2192,7 +2192,7 @@ int ClipSurfaceMeshes(size_t target_count, emscripten::val getTargetMesh,
             return STATUS_ZERO_THICKNESS;
           }
         } else {
-          clipped_target_mesh.join(working_source_mesh);
+          clipped_target_mesh.clear();
         }
       }
     }

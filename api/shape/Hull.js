@@ -1,10 +1,15 @@
-import Shape from './Shape.js';
+import { convexHullToGraph, eachPoint } from '@jsxcad/geometry';
 
-import { convexHullToGraph } from '@jsxcad/geometry';
+import Shape from './Shape.js';
 
 export const Hull = (...shapes) => {
   const points = [];
-  shapes.forEach((shape) => shape.eachPoint((point) => points.push(point)));
+  for (const shape of shapes) {
+    if (!shape) {
+      continue;
+    }
+    eachPoint((point) => points.push(point), shape.toGeometry());
+  }
   return Shape.fromGeometry(convexHullToGraph({}, points));
 };
 

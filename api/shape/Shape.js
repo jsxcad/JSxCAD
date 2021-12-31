@@ -92,10 +92,6 @@ export class Shape {
     return toPoints(this.toConcreteGeometry()).points;
   }
 
-  points() {
-    return Shape.fromGeometry(toPoints(this.toTransformedGeometry()));
-  }
-
   transform(matrix) {
     if (matrix === identityMatrix) {
       return this;

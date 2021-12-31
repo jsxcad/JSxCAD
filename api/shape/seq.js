@@ -16,7 +16,7 @@ export const seq =
   (shape) => {
     let op;
     let groupOp;
-    let spec = {};
+    let specs = [];
     for (const arg of args) {
       if (arg instanceof Function) {
         if (!op) {
@@ -25,7 +25,7 @@ export const seq =
           groupOp = arg;
         }
       } else if (arg instanceof Object) {
-        Object.assign(spec, arg);
+        specs.push(arg);
       }
     }
     if (!op) {
@@ -34,39 +34,56 @@ export const seq =
     if (!groupOp) {
       groupOp = (...results) => results;
     }
-    let { from = 0, to = 1, upto, downto, by = 1, index = false } = spec;
 
-    from = Shape.toValue(from, shape);
-    to = Shape.toValue(to, shape);
-    upto = Shape.toValue(upto, shape);
-    downto = Shape.toValue(downto, shape);
-    by = Shape.toValue(by, shape);
+    const indexes = [];
+    for (const spec of specs) {
+      let { from = 0, to = 1, upto, downto, by = 1 } = spec;
 
-    let consider;
+      from = Shape.toValue(from, shape);
+      to = Shape.toValue(to, shape);
+      upto = Shape.toValue(upto, shape);
+      downto = Shape.toValue(downto, shape);
+      by = Shape.toValue(by, shape);
 
-    if (by > 0) {
-      if (upto !== undefined) {
-        consider = (value) => value < upto - EPSILON;
+      let consider;
+
+      if (by > 0) {
+        if (upto !== undefined) {
+          consider = (value) => value < upto - EPSILON;
+        } else {
+          consider = (value) => value <= to + EPSILON;
+        }
+      } else if (by < 0) {
+        if (downto !== undefined) {
+          consider = (value) => value > downto + EPSILON;
+        } else {
+          consider = (value) => value >= to - EPSILON;
+        }
       } else {
-        consider = (value) => value <= to + EPSILON;
+        throw Error('seq: Expects by != 0');
       }
-    } else if (by < 0) {
-      if (downto !== undefined) {
-        consider = (value) => value > downto + EPSILON;
-      } else {
-        consider = (value) => value >= to - EPSILON;
+      const numbers = [];
+      for (let number = from, nth = 0; consider(number); number += by, nth++) {
+        numbers.push(number);
       }
-    } else {
-      throw Error('seq: Expects by != 0');
+      indexes.push(numbers);
     }
-
     const results = [];
-    for (let number = from, nth = 0; consider(number); number += by, nth++) {
+    const index = indexes.map(() => 0);
+    for (;;) {
       results.push(
-        index
-          ? maybeApply(op(number, nth), shape)
-          : maybeApply(op(number), shape)
+        maybeApply(op(...index.map((nth, index) => indexes[index][nth])), shape)
       );
+      let nth;
+      for (nth = 0; nth < index.length; nth++) {
+        if (++index[nth] < indexes[nth].length) {
+          break;
+        }
+        index[nth] = 0;
+      }
+      if (nth === index.length) {
+        break;
+      }
     }
     return groupOp(...results);
   };
