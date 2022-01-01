@@ -16,6 +16,10 @@ export {
 
 export { arrangePaths, arrangePathsIntoTriangles } from './arrangePaths.js';
 export { arrangePolygonsWithHoles } from './arrangePolygonsWithHoles.js';
+export {
+  arrangeSegments,
+  arrangeSegmentsIntoTriangles,
+} from './arrangeSegments.js';
 export { bendSurfaceMesh } from './bendSurfaceMesh.js';
 export {
   BOOLEAN_ADD,

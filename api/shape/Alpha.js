@@ -1,9 +1,10 @@
+import { alphaShape, eachPoint } from '@jsxcad/geometry';
+
 import { Shape } from './Shape.js';
-import { alphaShape } from '@jsxcad/geometry';
 
 export const Alpha = (componentLimit = 1, shape) => {
   const points = [];
-  shape.eachPoint((point) => points.push(point));
+  eachPoint((point) => points.push(point), shape.toGeometry());
   return Shape.fromGeometry(
     alphaShape({ tags: shape.toGeometry().tags }, points, componentLimit)
   );
