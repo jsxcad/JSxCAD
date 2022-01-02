@@ -6,7 +6,7 @@ import { toCgalTransformFromJsTransform } from './transform.js';
 
 export const joinSurfaceMeshes = (targets, sources) => {
   const results = [];
-  const status = getCgal().JoinSurfaceMeshesIncrementally(
+  const status = getCgal().JoinSurfaceMeshes(
     targets.length,
     (nth) => targets[nth].mesh,
     (nth) => toCgalTransformFromJsTransform(targets[nth].matrix),

@@ -203,10 +203,8 @@ const Surface_mesh* FromPolygonSoupToSurfaceMesh(emscripten::val fill) {
                                                               *mesh);
   assert(CGAL::Polygon_mesh_processing::triangulate_faces(*mesh) == true);
   // If a volume, ensure it is positive.
-  if (CGAL::is_closed(*mesh) &&
-      CGAL::Polygon_mesh_processing::volume(
-          *mesh, CGAL::parameters::all_default()) < 0) {
-    CGAL::Polygon_mesh_processing::reverse_face_orientations(*mesh);
+  if (CGAL::is_closed(*mesh)) {
+    CGAL::Polygon_mesh_processing::orient_to_bound_a_volume(*mesh);
   }
   return mesh;
 }
@@ -1259,7 +1257,8 @@ class SurfaceMeshQuery {
 
  public:
   SurfaceMeshQuery(const Surface_mesh* mesh,
-                   const Transformation* transformation) {
+                   const Transformation* transformation)
+      : is_volume_(CGAL::is_closed(*mesh)) {
     mesh_.reset(new Surface_mesh(*mesh));
     CGAL::Polygon_mesh_processing::transform(*transformation, *mesh_,
                                              CGAL::parameters::all_default());
@@ -1271,84 +1270,114 @@ class SurfaceMeshQuery {
     return (*inside_tester_)(Point(x, y, z)) == CGAL::ON_BOUNDED_SIDE;
   }
 
-  void clipSegmentApproximate(double source_x, double source_y, double source_z,
-                              double target_x, double target_y, double target_z,
-                              emscripten::val emit_segment) {
+  void intersectSegmentApproximate(bool do_clip, double source_x,
+                                   double source_y, double source_z,
+                                   double target_x, double target_y,
+                                   double target_z,
+                                   emscripten::val emit_segment) {
+    const bool do_cut = !do_clip;
     const Point source(source_x, source_y, source_z);
     const Point target(target_x, target_y, target_z);
     Segment segment_query(source, target);
     std::list<Segment_intersection> intersections;
     tree_->all_intersections(segment_query, std::back_inserter(intersections));
     // Handle pointwise intersections -- through faces.
-    std::vector<Point> points;
-    if ((*inside_tester_)(source) == CGAL::ON_BOUNDED_SIDE) {
-      // The segment starts inside the volume.
-      points.push_back(source);
-      points.push_back(source);
-    }
-    if ((*inside_tester_)(target) == CGAL::ON_BOUNDED_SIDE) {
-      // The segment ends inside the volume.
-      points.push_back(target);
-      points.push_back(target);
-    }
-    for (const auto& intersection : intersections) {
-      if (!intersection) {
-        continue;
+    if (is_volume_) {
+      // We could just see if the closest point to the source is the source.
+      bool is_source_inside =
+          (*inside_tester_)(source) == CGAL::ON_BOUNDED_SIDE;
+      // We could just see if the further point to the source is the target.
+      bool is_target_inside =
+          (*inside_tester_)(target) == CGAL::ON_BOUNDED_SIDE;
+      std::vector<Point> points;
+      if ((do_clip && is_source_inside) || (do_cut && !is_source_inside)) {
+        points.push_back(source);
       }
-      // Note: intersection->second is the intersected face index.
-      // CHECK: We get doubles because we're intersecting with the interior of
-      // the faces.
-      if (const Point* point = boost::get<Point>(&intersection->first)) {
-        points.push_back(*point);
+      for (const auto& intersection : intersections) {
+        if (!intersection) {
+          continue;
+        }
+        // Note: intersection->second is the intersected face index.
+        // CHECK: We get doubles because we're intersecting with the interior of
+        // the faces.
+        if (const Point* point = boost::get<Point>(&intersection->first)) {
+          points.push_back(*point);
+        }
       }
-    }
-    if (points.size() >= 4) {
-      if (source_x > target_x) {
-        std::sort(points.begin(), points.end(),
-                  [](const Point& a, const Point& b) { return a.x() > b.x(); });
-      } else if (source_x < target_x) {
-        std::sort(points.begin(), points.end(),
-                  [](const Point& a, const Point& b) { return a.x() < b.x(); });
-      } else if (source_y > target_y) {
-        std::sort(points.begin(), points.end(),
-                  [](const Point& a, const Point& b) { return a.y() > b.y(); });
-      } else if (source_y < target_y) {
-        std::sort(points.begin(), points.end(),
-                  [](const Point& a, const Point& b) { return a.y() < b.y(); });
-      } else if (source_z > target_z) {
-        std::sort(points.begin(), points.end(),
-                  [](const Point& a, const Point& b) { return a.z() > b.z(); });
-      } else if (source_z < target_z) {
-        std::sort(points.begin(), points.end(),
-                  [](const Point& a, const Point& b) { return a.z() < b.z(); });
-      } else {
-        std::cout << "QQ/clipSegmentApproximate: impossible" << std::endl;
+      if ((do_clip && is_target_inside) || (do_cut && !is_target_inside)) {
+        points.push_back(target);
       }
-      // Now we should have pairs of doubled pointwise intersections.
-      for (size_t index = 0; index < points.size() - 2; index += 4) {
-        const Point& source = points[index];
-        const Point& target = points[index + 2];
-        emit_segment(CGAL::to_double(source.x().exact()),
-                     CGAL::to_double(source.y().exact()),
-                     CGAL::to_double(source.z().exact()),
-                     CGAL::to_double(target.x().exact()),
-                     CGAL::to_double(target.y().exact()),
-                     CGAL::to_double(target.z().exact()));
+      if (points.size() >= 2) {
+        std::sort(points.begin(), points.end(),
+                  [&](const Point& a, const Point& b) {
+                    return CGAL::squared_distance(a, source) <
+                           CGAL::squared_distance(b, source);
+                  });
+        points.erase(std::unique(points.begin(), points.end()), points.end());
+        // Now we should have pairs of doubled pointwise intersections.
+        for (size_t index = 0; index < points.size(); index += 2) {
+          const Point& source = points[index + 0];
+          const Point& target = points[index + 1];
+          emit_segment(CGAL::to_double(source.x().exact()),
+                       CGAL::to_double(source.y().exact()),
+                       CGAL::to_double(source.z().exact()),
+                       CGAL::to_double(target.x().exact()),
+                       CGAL::to_double(target.y().exact()),
+                       CGAL::to_double(target.z().exact()));
+        }
       }
-    }
-    // Handle segmentwise intersections -- along faces.
-    for (const auto& intersection : intersections) {
-      if (!intersection) {
-        continue;
+    } else {
+      // Surface
+      // Handle segmentwise intersections -- along faces.
+      std::vector<Point> points;
+      for (const auto& intersection : intersections) {
+        if (!intersection) {
+          continue;
+        }
+        // Note: intersection->second is the intersected face index.
+        if (const Segment* segment =
+                boost::get<Segment>(&intersection->first)) {
+          points.push_back(segment->source());
+          points.push_back(segment->target());
+        }
       }
-      // Note: intersection->second is the intersected face index.
-      if (const Segment* segment = boost::get<Segment>(&intersection->first)) {
-        emit_segment(CGAL::to_double(segment->source().x().exact()),
-                     CGAL::to_double(segment->source().y().exact()),
-                     CGAL::to_double(segment->source().z().exact()),
-                     CGAL::to_double(segment->target().x().exact()),
-                     CGAL::to_double(segment->target().y().exact()),
-                     CGAL::to_double(segment->target().z().exact()));
+      std::sort(points.begin(), points.end(),
+                [&](const Point& a, const Point& b) {
+                  return CGAL::squared_distance(a, source) <
+                         CGAL::squared_distance(b, source);
+                });
+      points.erase(std::unique(points.begin(), points.end()), points.end());
+      size_t start = 0;
+      if (do_cut) {
+        if (points.size() >= 1 && points[0] == source) {
+          // The segment starts inside the surface.
+          // Skip the segment, and switch to the complementary segments.
+          start += 1;
+        } else {
+          // The segment starts outside the surface.
+          // Effectively prepend the source, switching to the complementary
+          // segments.
+          points.insert(points.begin(), source);
+        }
+        if (points.size() >= 1 && points.back() == target) {
+          // The segment ends inside the surface.
+          // Skip the segment.
+          points.pop_back();
+        } else {
+          points.push_back(target);
+        }
+      }
+      if (points.size() >= 2) {
+        for (size_t index = start; index < points.size() - 1; index += 2) {
+          const Point& source = points[index + 0];
+          const Point& target = points[index + 1];
+          emit_segment(CGAL::to_double(source.x().exact()),
+                       CGAL::to_double(source.y().exact()),
+                       CGAL::to_double(source.z().exact()),
+                       CGAL::to_double(target.x().exact()),
+                       CGAL::to_double(target.y().exact()),
+                       CGAL::to_double(target.z().exact()));
+        }
       }
     }
   }
@@ -1357,6 +1386,7 @@ class SurfaceMeshQuery {
   std::unique_ptr<Surface_mesh> mesh_;
   std::unique_ptr<Tree> tree_;
   std::unique_ptr<Inside_tester> inside_tester_;
+  bool is_volume_;
 };
 
 void SeparateSurfaceMesh(const Surface_mesh* input, bool keep_volumes,
@@ -2095,10 +2125,10 @@ int CutClosedSurfaceMeshIncrementally(const Surface_mesh* a,
   return STATUS_OK;
 }
 
-class ClipSurfaceMeshesSegmentProcessor {
+class SurfaceMeshSegmentProcessor {
  public:
-  ClipSurfaceMeshesSegmentProcessor(std::vector<SurfaceMeshQuery>& queries,
-                                    emscripten::val& emit_segment)
+  SurfaceMeshSegmentProcessor(std::vector<SurfaceMeshQuery>& queries,
+                              emscripten::val& emit_segment)
       : queries_(queries), emit_segment_(emit_segment){};
 
   void clip(double sourceX, double sourceY, double sourceZ, double targetX,
@@ -2108,8 +2138,22 @@ class ClipSurfaceMeshesSegmentProcessor {
     // Alternatively, consider using an arrangement to deduplicate the
     // segments.
     for (SurfaceMeshQuery& query : queries_) {
-      query.clipSegmentApproximate(sourceX, sourceY, sourceZ, targetX, targetY,
-                                   targetZ, emit_segment_);
+      query.intersectSegmentApproximate(true, sourceX, sourceY, sourceZ,
+                                        targetX, targetY, targetZ,
+                                        emit_segment_);
+    }
+  };
+
+  void cut(double sourceX, double sourceY, double sourceZ, double targetX,
+           double targetY, double targetZ) {
+    // This might produce duplicate segments where a volume and a plane
+    // overlap -- consider cutting the volumes from the planes.
+    // Alternatively, consider using an arrangement to deduplicate the
+    // segments.
+    for (SurfaceMeshQuery& query : queries_) {
+      query.intersectSegmentApproximate(false, sourceX, sourceY, sourceZ,
+                                        targetX, targetY, targetZ,
+                                        emit_segment_);
     }
   };
 
@@ -2196,6 +2240,7 @@ int ClipSurfaceMeshes(size_t target_count, emscripten::val getTargetMesh,
       } else {
         // Volume clipped by volume.
         if (!CGAL::is_closed(working_source_mesh) ||
+            CGAL::is_empty(working_target_mesh) ||
             CGAL::is_empty(working_source_mesh)) {
           continue;
         }
@@ -2246,22 +2291,21 @@ int ClipSurfaceMeshes(size_t target_count, emscripten::val getTargetMesh,
 
   // Handle segments.
   {
-    Transformation identity_transform(CGAL::IDENTITY);
     std::vector<SurfaceMeshQuery> queries;
     for (size_t nth_source = 0; nth_source < source_count; nth_source++) {
       const Surface_mesh* source_mesh =
           getSourceMesh(nth_source)
               .as<const Surface_mesh*>(emscripten::allow_raw_pointers());
-      if (CGAL::is_empty(*source_mesh) || !CGAL::is_closed(*source_mesh)) {
+      if (CGAL::is_empty(*source_mesh)) {
         continue;
       }
       const Transformation* source_transform =
           getSourceTransform(nth_source)
               .as<const Transformation*>(emscripten::allow_raw_pointers());
-      queries.emplace_back(source_mesh, &identity_transform);
+      queries.emplace_back(source_mesh, source_transform);
     }
-    ClipSurfaceMeshesSegmentProcessor processor(queries, emit_segment);
-    ClipSurfaceMeshesSegmentProcessor* processor_ptr = &processor;
+    SurfaceMeshSegmentProcessor processor(queries, emit_segment);
+    SurfaceMeshSegmentProcessor* processor_ptr = &processor;
     for (size_t nth_segments = 0; nth_segments < segments_count;
          nth_segments++) {
       fillSegments(nth_segments, processor_ptr);
@@ -2277,13 +2321,12 @@ int ClipSurfaceMeshes(size_t target_count, emscripten::val getTargetMesh,
   return STATUS_OK;
 }
 
-int CutSurfaceMeshesIncrementally(size_t target_count,
-                                  emscripten::val getTargetMesh,
-                                  emscripten::val getTargetTransform,
-                                  size_t source_count,
-                                  emscripten::val getSourceMesh,
-                                  emscripten::val getSourceTransform,
-                                  emscripten::val emit) {
+int CutSurfaceMeshes(size_t target_count, emscripten::val getTargetMesh,
+                     emscripten::val getTargetTransform, size_t segments_count,
+                     emscripten::val fillSegments, size_t source_count,
+                     emscripten::val getSourceMesh,
+                     emscripten::val getSourceTransform,
+                     emscripten::val emit_mesh, emscripten::val emit_segment) {
   std::vector<std::unique_ptr<Surface_mesh>> target_meshes(target_count);
   std::vector<Transformation> to_target_transforms(target_count);
   std::vector<bool> planar(target_count, false);
@@ -2334,6 +2377,7 @@ int CutSurfaceMeshesIncrementally(size_t target_count,
         planar_target_sets[nth_target].difference(cut);
       } else {
         if (!CGAL::is_closed(working_source_mesh) ||
+            CGAL::is_empty(*target_meshes[nth_target]) ||
             CGAL::is_empty(working_source_mesh)) {
           continue;
         }
@@ -2365,19 +2409,44 @@ int CutSurfaceMeshesIncrementally(size_t target_count,
   }
 
   // At this point we are committed to producing a result.
+
+  // Handle segments.
+  {
+    std::vector<SurfaceMeshQuery> queries;
+    for (size_t nth_source = 0; nth_source < source_count; nth_source++) {
+      const Surface_mesh* source_mesh =
+          getSourceMesh(nth_source)
+              .as<const Surface_mesh*>(emscripten::allow_raw_pointers());
+      if (CGAL::is_empty(*source_mesh)) {
+        continue;
+      }
+      const Transformation* source_transform =
+          getSourceTransform(nth_source)
+              .as<const Transformation*>(emscripten::allow_raw_pointers());
+      queries.emplace_back(source_mesh, source_transform);
+    }
+    SurfaceMeshSegmentProcessor processor(queries, emit_segment);
+    SurfaceMeshSegmentProcessor* processor_ptr = &processor;
+    for (size_t nth_segments = 0; nth_segments < segments_count;
+         nth_segments++) {
+      fillSegments(nth_segments, processor_ptr);
+    }
+  }
+
   for (size_t nth_target = 0; nth_target < target_count; nth_target++) {
     Surface_mesh* target_mesh = target_meshes[nth_target].release();
-    emit(nth_target, target_mesh);
+    emit_mesh(nth_target, target_mesh);
   }
 
   return STATUS_OK;
 }
 
-int JoinSurfaceMeshesIncrementally(
-    size_t target_count, emscripten::val getTargetMesh,
-    emscripten::val getTargetTransform, emscripten::val getTargetIsEmptyPlanar,
-    size_t source_count, emscripten::val getSourceMesh,
-    emscripten::val getSourceTransform, emscripten::val emit) {
+int JoinSurfaceMeshes(size_t target_count, emscripten::val getTargetMesh,
+                      emscripten::val getTargetTransform,
+                      emscripten::val getTargetIsEmptyPlanar,
+                      size_t source_count, emscripten::val getSourceMesh,
+                      emscripten::val getSourceTransform,
+                      emscripten::val emit) {
   std::vector<std::unique_ptr<Surface_mesh>> target_meshes(target_count);
   std::vector<Transformation> to_target_transforms(target_count);
   std::vector<bool> planar(target_count, false);
@@ -2436,7 +2505,8 @@ int JoinSurfaceMeshesIncrementally(
         }
       } else {
         if (!CGAL::is_closed(working_source_mesh) ||
-            CGAL::is_empty(working_source_mesh)) {
+            CGAL::is_empty(working_source_mesh) ||
+            CGAL::is_empty(*target_meshes[nth_target])) {
           continue;
         }
         if (CGAL::Polygon_mesh_processing::do_intersect(
@@ -4913,8 +4983,8 @@ EMSCRIPTEN_BINDINGS(module) {
 
   emscripten::class_<SurfaceMeshQuery>("SurfaceMeshQuery")
       .constructor<const Surface_mesh*, const Transformation*>()
-      .function("clipSegmentApproximate",
-                &SurfaceMeshQuery::clipSegmentApproximate)
+      .function("intersectSegmentApproximate",
+                &SurfaceMeshQuery::intersectSegmentApproximate)
       .function("isIntersectingPointApproximate",
                 &SurfaceMeshQuery::isIntersectingPointApproximate);
 
@@ -4930,19 +5000,17 @@ EMSCRIPTEN_BINDINGS(module) {
                        emscripten::allow_raw_pointers());
   emscripten::function("DifferenceOfSurfaceMeshes", &DifferenceOfSurfaceMeshes,
                        emscripten::allow_raw_pointers());
-  emscripten::class_<ClipSurfaceMeshesSegmentProcessor>(
-      "ClipSurfaceMeshesSegmentProcessor")
-      .function("clip", &ClipSurfaceMeshesSegmentProcessor::clip);
+  emscripten::class_<SurfaceMeshSegmentProcessor>("SurfaceMeshSegmentProcessor")
+      .function("clip", &SurfaceMeshSegmentProcessor::clip)
+      .function("cut", &SurfaceMeshSegmentProcessor::cut);
   emscripten::function("ClipSurfaceMeshes", &ClipSurfaceMeshes,
                        emscripten::allow_raw_pointers());
   emscripten::function("CutClosedSurfaceMeshIncrementally",
                        &CutClosedSurfaceMeshIncrementally,
                        emscripten::allow_raw_pointers());
-  emscripten::function("CutSurfaceMeshesIncrementally",
-                       &CutSurfaceMeshesIncrementally,
+  emscripten::function("CutSurfaceMeshes", &CutSurfaceMeshes,
                        emscripten::allow_raw_pointers());
-  emscripten::function("JoinSurfaceMeshesIncrementally",
-                       &JoinSurfaceMeshesIncrementally,
+  emscripten::function("JoinSurfaceMeshes", &JoinSurfaceMeshes,
                        emscripten::allow_raw_pointers());
   emscripten::function("DisjointSurfaceMeshesIncrementally",
                        &DisjointSurfaceMeshesIncrementally,

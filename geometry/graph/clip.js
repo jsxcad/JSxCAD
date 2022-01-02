@@ -7,7 +7,10 @@ import { taggedSegments } from '../tagged/taggedSegments.js';
 
 export const clip = (targetGraphs, targetSegments, sourceGraphs) => {
   if (sourceGraphs.length === 0) {
-    return { clippedGraphs: targetGraphs, clippedSegments: targetSegments };
+    return {
+      clippedGraphGeometries: targetGraphs,
+      clippedSegmentGeometries: targetSegments,
+    };
   }
   targetGraphs = targetGraphs.map(({ graph, matrix, tags }) => ({
     mesh: toSurfaceMesh(graph),

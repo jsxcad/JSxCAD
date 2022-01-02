@@ -148,3 +148,23 @@ const q = Group(
   ArcX(...extentsB).and(Box(...extentsB).material('glass')),
   ArcZ(...extentsC).and(Box(...extentsC).material('glass'))
 ).view().md`Boxes and Arcs from extents`;
+
+Line(15, -15)
+  .seq({ from: -10, to: 11 }, y, Group)
+  .clip(Arc(20).cut(Arc(10)))
+  .view();
+
+Line(15, -15)
+  .seq({ from: -10, to: 11 }, y, Group)
+  .clip(Arc(20).cut(Arc(10)).ez(1))
+  .view();
+
+Line(-15, 15)
+  .seq({ from: -15, to: 15 }, y, Group)
+  .cut(Arc(20).cut(Arc(10)))
+  .view();
+
+Line(-15, 15)
+  .seq({ from: -15, to: 15 }, y, Group)
+  .cut(Arc(20).cut(Arc(10)).ez(1))
+  .view();
