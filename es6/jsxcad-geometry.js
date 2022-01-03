@@ -614,7 +614,10 @@ const bend = op({ graph: bend$1 });
 
 const clip$1 = (targetGraphs, targetSegments, sourceGraphs) => {
   if (sourceGraphs.length === 0) {
-    return { clippedGraphs: targetGraphs, clippedSegments: targetSegments };
+    return {
+      clippedGraphGeometries: targetGraphs,
+      clippedSegmentGeometries: targetSegments,
+    };
   }
   targetGraphs = targetGraphs.map(({ graph, matrix, tags }) => ({
     mesh: toSurfaceMesh(graph),
@@ -1037,7 +1040,8 @@ const convexHull = ({ tags }, points) =>
     fromSurfaceMeshLazy(fromPointsToConvexHullAsSurfaceMesh(points))
   );
 
-const cut$1 = (targets, sources) => {
+/*
+export const cut = (targets, sources) => {
   if (sources.length === 0) {
     return targets;
   }
@@ -1062,6 +1066,43 @@ const cut$1 = (targets, sources) => {
   );
   deletePendingSurfaceMeshes();
   return cutGeometries;
+};
+*/
+
+const cut$1 = (targetGraphs, targetSegments, sourceGraphs) => {
+  if (sourceGraphs.length === 0) {
+    return {
+      cutGraphGeometries: targetGraphs,
+      cutSegmentsGeometries: targetSegments,
+    };
+  }
+  targetGraphs = targetGraphs.map(({ graph, matrix, tags }) => ({
+    mesh: toSurfaceMesh(graph),
+    matrix,
+    tags,
+    isPlanar: graph.isPlanar,
+    isEmpty: graph.isEmpty,
+  }));
+  sourceGraphs = sourceGraphs.map(({ graph, matrix, tags }) => ({
+    mesh: toSurfaceMesh(graph),
+    matrix,
+    tags,
+    isPlanar: graph.isPlanar,
+    isEmpty: graph.isEmpty,
+  }));
+  const { cutMeshes, cutSegments } = cutSurfaceMeshes(
+    targetGraphs,
+    targetSegments,
+    sourceGraphs
+  );
+  const cutGraphGeometries = cutMeshes.map(({ matrix, mesh, tags }) =>
+    taggedGraph({ tags, matrix }, fromSurfaceMeshLazy(mesh))
+  );
+  const cutSegmentsGeometries = cutSegments.map(({ matrix, segments, tags }) =>
+    taggedSegments({ tags, matrix }, segments)
+  );
+  deletePendingSurfaceMeshes();
+  return { cutGraphGeometries, cutSegmentsGeometries };
 };
 
 const rewriteType = (op) => (geometry) =>
@@ -1113,42 +1154,58 @@ const isNotTypeWire = isNotType(typeWire);
 const isTypeWire = isType(typeWire);
 
 // Masked geometry is cut.
-const collectTargets$1 = (out) => (geometry, descend) => {
-  if (geometry.type === 'graph' && !geometry.graph.isEmpty) {
-    out.push(geometry);
-  }
-  descend();
+const collectTargets$1 = (geometry, graphOut, segmentsOut) => {
+  const op = (geometry, descend) => {
+    switch (geometry.type) {
+      case 'graph':
+        graphOut.push(geometry);
+        break;
+      case 'segments':
+        segmentsOut.push(geometry);
+        break;
+    }
+    descend();
+  };
+  visit(geometry, op);
 };
 
 // Masked geometry doesn't cut.
-const collectRemoves = (out) => (geometry, descend) => {
-  if (
-    geometry.type === 'graph' &&
-    isNotTypeMasked(geometry) &&
-    !geometry.graph.isEmpty
-  ) {
-    out.push(geometry);
-  }
-  descend();
+const collectRemoves = (geometry, out) => {
+  const op = (geometry, descend) => {
+    if (
+      geometry.type === 'graph' &&
+      isNotTypeMasked(geometry) &&
+      !geometry.graph.isEmpty
+    ) {
+      out.push(geometry);
+    }
+    descend();
+  };
+  visit(geometry, op);
 };
 
-// An alternate disjunction that can be more efficient.
 const cut = (geometry, geometries) => {
   const concreteGeometry = toConcreteGeometry(geometry);
-  const targetGraphs = [];
-  visit(concreteGeometry, collectTargets$1(targetGraphs));
-  if (targetGraphs.length === 0) {
-    return geometry;
-  }
-  const removeGraphs = [];
+  const rewriteGraphs = [];
+  const rewriteSegments = [];
+  collectTargets$1(concreteGeometry, rewriteGraphs, rewriteSegments);
+  const readGraphs = [];
   for (const geometry of geometries) {
-    visit(toConcreteGeometry(geometry), collectRemoves(removeGraphs));
+    collectRemoves(toConcreteGeometry(geometry), readGraphs);
   }
-  const resultingGraphs = cut$1(targetGraphs, removeGraphs);
+  const { cutGraphGeometries, cutSegmentsGeometries } = cut$1(
+    rewriteGraphs,
+    rewriteSegments,
+    readGraphs
+  );
   const map = new Map();
-  for (let nth = 0; nth < resultingGraphs.length; nth++) {
-    map.set(targetGraphs[nth], resultingGraphs[nth]);
+  for (let nth = 0; nth < cutGraphGeometries.length; nth++) {
+    map.set(rewriteGraphs[nth], cutGraphGeometries[nth]);
   }
+  for (let nth = 0; nth < cutSegmentsGeometries.length; nth++) {
+    map.set(rewriteSegments[nth], cutSegmentsGeometries[nth]);
+  }
+
   const update = (geometry, descend) => {
     const cut = map.get(geometry);
     if (cut) {

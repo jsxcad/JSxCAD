@@ -8,13 +8,17 @@ export const Wave = (
   { from, by, to, upto, downto } = {}
 ) => {
   let path = [null];
-  for (const xDistance of seq((distance) => distance, {
-    from,
-    by,
-    to,
-    upto,
-    downto,
-  })()) {
+  for (const xDistance of seq(
+    {
+      from,
+      by,
+      to,
+      upto,
+      downto,
+    },
+    (distance) => distance,
+    (...numbers) => numbers
+  )()) {
     const subpath = toPathFromXDistance(xDistance);
     path = concatenatePath(path, translatePath([xDistance, 0, 0], subpath));
   }

@@ -188,11 +188,12 @@ test('Cut', (t) => {
   const a = fromPolygonsToSurfaceMesh(largeBox);
   const b = fromPolygonsToSurfaceMesh(box);
   // The first entry is the pivot of the disjunction.
-  const r = cutSurfaceMeshes(
+  const { cutMeshes } = cutSurfaceMeshes(
     [{ mesh: a, matrix: [...identityMatrix], tags: ['a'] }],
+    [],
     [{ mesh: b, matrix: [...identityMatrix], tags: ['b'] }]
   );
-  const graphs = r.map(({ mesh, matrix, tags }) => ({
+  const graphs = cutMeshes.map(({ mesh, matrix, tags }) => ({
     graph: fromSurfaceMeshToGraph(mesh),
     matrix,
     tags,

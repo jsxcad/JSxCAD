@@ -50,7 +50,8 @@ test('Clip Segment by Volume', (t) => {
   {
     // Segment passes all the way through.
     const segments = [];
-    query.clipSegmentApproximate(
+    query.intersectSegmentApproximate(
+      true,
       0,
       0,
       10,
@@ -73,7 +74,8 @@ test('Clip Segment by Volume', (t) => {
   {
     // Segment starts inside.
     const segments = [];
-    query.clipSegmentApproximate(
+    query.intersectSegmentApproximate(
+      true,
       0,
       0,
       0,
@@ -96,7 +98,8 @@ test('Clip Segment by Volume', (t) => {
   {
     // Segment ends inside.
     const segments = [];
-    query.clipSegmentApproximate(
+    query.intersectSegmentApproximate(
+      true,
       0,
       0,
       10,
@@ -135,7 +138,8 @@ test('Clip Segment by Surface', (t) => {
   {
     // Segment passes all the way through -- point intersection isn't sufficient.
     const segments = [];
-    query.clipSegmentApproximate(
+    query.intersectSegmentApproximate(
+      true,
       0,
       0,
       10,
@@ -153,7 +157,8 @@ test('Clip Segment by Surface', (t) => {
   {
     // Segment along face
     const segments = [];
-    query.clipSegmentApproximate(
+    query.intersectSegmentApproximate(
+      true,
       -10,
       0,
       0,
@@ -176,7 +181,8 @@ test('Clip Segment by Surface', (t) => {
   {
     // Segment starts inside and goes along.
     const segments = [];
-    query.clipSegmentApproximate(
+    query.intersectSegmentApproximate(
+      true,
       -0.25,
       0,
       0,
@@ -199,7 +205,8 @@ test('Clip Segment by Surface', (t) => {
   {
     // Segment goes along and ends inside.
     const segments = [];
-    query.clipSegmentApproximate(
+    query.intersectSegmentApproximate(
+      true,
       -10,
       0,
       0,

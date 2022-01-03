@@ -32,7 +32,7 @@ export const seq =
       op = (n) => n;
     }
     if (!groupOp) {
-      groupOp = (...results) => results;
+      groupOp = (...values) => values;
     }
 
     const indexes = [];

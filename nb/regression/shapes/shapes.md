@@ -316,6 +316,15 @@ const extentsC = [
 ```
 
 ```JavaScript
+Line(15, -15)
+  .seq({ from: -10, to: 11 }, y, Group)
+  .clip(Arc(20).cut(Arc(10)))
+  .view();
+```
+
+![Image](shapes.md.27.png)
+
+```JavaScript
 const q = Group(
   ArcY(...extentsA).and(Box(...extentsA).material('glass')),
   ArcX(...extentsB).and(Box(...extentsB).material('glass')),
@@ -323,6 +332,33 @@ const q = Group(
 ).view().md`Boxes and Arcs from extents`;
 ```
 
-![Image](shapes.md.27.png)
+![Image](shapes.md.28.png)
 
 Boxes and Arcs from extents
+
+```JavaScript
+Line(15, -15)
+  .seq({ from: -10, to: 11 }, y, Group)
+  .clip(Arc(20).cut(Arc(10)).ez(1))
+  .view();
+```
+
+![Image](shapes.md.29.png)
+
+```JavaScript
+Line(-15, 15)
+  .seq({ from: -15, to: 15 }, y, Group)
+  .cut(Arc(20).cut(Arc(10)))
+  .view();
+```
+
+![Image](shapes.md.30.png)
+
+```JavaScript
+Line(-15, 15)
+  .seq({ from: -15, to: 15 }, y, Group)
+  .cut(Arc(20).cut(Arc(10)).ez(1))
+  .view();
+```
+
+![Image](shapes.md.31.png)
