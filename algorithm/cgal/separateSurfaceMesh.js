@@ -6,13 +6,17 @@ export const separateSurfaceMesh = (
   keepCavitiesInVolumes = true,
   keepCavitiesAsVolumes = false
 ) => {
-  const meshes = [];
-  getCgal().SeparateSurfaceMesh(
-    mesh,
-    keepVolumes,
-    keepCavitiesInVolumes,
-    keepCavitiesAsVolumes,
-    (mesh) => meshes.push(mesh)
-  );
-  return meshes;
+  try {
+    const meshes = [];
+    getCgal().SeparateSurfaceMesh(
+      mesh,
+      keepVolumes,
+      keepCavitiesInVolumes,
+      keepCavitiesAsVolumes,
+      (mesh) => meshes.push(mesh)
+    );
+    return meshes;
+  } catch (error) {
+    throw Error(error);
+  }
 };

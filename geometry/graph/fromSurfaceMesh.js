@@ -7,6 +7,9 @@ export const fromSurfaceMesh = (surfaceMesh) => {
   if (surfaceMesh === undefined) {
     throw Error('No surface mesh provided');
   }
+  if (surfaceMesh.provenance === undefined) {
+    throw Error('Surface mesh has no provenance');
+  }
   let graph = surfaceMesh[graphSymbol];
   if (graph === undefined || graph.isLazy) {
     const converted = fromSurfaceMeshToGraph(surfaceMesh);

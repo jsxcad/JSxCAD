@@ -407,15 +407,13 @@ class App extends React.Component {
       window.alert('Cached files deleted');
     };
 
-    this.Files.deleteSourceFiles = async () => {
+    this.Files.deleteSourceFile = async (file) => {
       const { workspace } = this.props;
       const { WorkspaceFiles = [] } = this.state;
-      const nonRegenerableFiles = WorkspaceFiles.filter(
-        (file) => !isRegenerable(file)
-      );
-      for (const file of nonRegenerableFiles) {
-        await remove({ workspace }, file);
-      }
+      await remove(file, { workspace });
+      await this.updateState({
+        WorkspaceFiles: WorkspaceFiles.filter((entry) => entry !== file),
+      });
     };
 
     this.Layout = {};
@@ -1224,23 +1222,28 @@ class App extends React.Component {
                   </Card.Text>
                 </Card.Body>
                 <Card.Body>
-                  <Card.Title>Delete Source Files</Card.Title>
+                  <Card.Title>Source Files</Card.Title>
                   <Card.Text>
-                    <Button
-                      variant="primary"
-                      onClick={this.Files.deleteSourceFiles}
-                    >
-                      Delete Source Files Forever
-                    </Button>
-                    <ListGroup>
-                      {WorkspaceFiles.filter(
-                        (file) => !isRegenerable(file)
-                      ).map((file, index) => (
-                        <ListGroup.Item key={index} disabled>
-                          {file}
-                        </ListGroup.Item>
-                      ))}
-                    </ListGroup>
+                    <Table striped border hover>
+                      <tbody>
+                        {WorkspaceFiles.filter(
+                          (file) => !isRegenerable(file)
+                        ).map((file, index) => (
+                          <tr key={index}>
+                            <td>
+                              <Button
+                                onClick={() =>
+                                  this.Files.deleteSourceFile(file)
+                                }
+                              >
+                                Delete
+                              </Button>
+                            </td>
+                            <td>{file}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </Table>
                   </Card.Text>
                 </Card.Body>
                 <Card.Body>

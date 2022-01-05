@@ -7,18 +7,22 @@ export const fromSurfaceMeshToPolygons = (
   transform = identityMatrix,
   triangulate = false
 ) => {
-  const c = getCgal();
-  const polygons = [];
-  let polygon;
-  c.FromSurfaceMeshToPolygonSoup(
-    mesh,
-    toCgalTransformFromJsTransform(transform),
-    triangulate,
-    () => {
-      polygon = [];
-      polygons.push(polygon);
-    },
-    (x, y, z) => polygon.push([x, y, z])
-  );
-  return polygons;
+  try {
+    const c = getCgal();
+    const polygons = [];
+    let polygon;
+    c.FromSurfaceMeshToPolygonSoup(
+      mesh,
+      toCgalTransformFromJsTransform(transform),
+      triangulate,
+      () => {
+        polygon = [];
+        polygons.push(polygon);
+      },
+      (x, y, z) => polygon.push([x, y, z])
+    );
+    return polygons;
+  } catch (error) {
+    throw Error(error);
+  }
 };

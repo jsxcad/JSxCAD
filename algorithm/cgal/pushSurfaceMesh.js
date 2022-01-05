@@ -7,11 +7,16 @@ export const pushSurfaceMesh = (
   force,
   minimumDistance,
   scale = 1
-) =>
-  getCgal().PushSurfaceMesh(
-    mesh,
-    toCgalTransformFromJsTransform(transform),
-    force,
-    minimumDistance,
-    scale
-  );
+) => {
+  try {
+    getCgal().PushSurfaceMesh(
+      mesh,
+      toCgalTransformFromJsTransform(transform),
+      force,
+      minimumDistance,
+      scale
+    );
+  } catch (error) {
+    throw Error(error);
+  }
+};

@@ -22,8 +22,8 @@ export const join = (targets, sources) => {
     isPlanar: graph.isPlanar,
     isEmpty: graph.isEmpty,
   }));
-  const results = joinSurfaceMeshes(targets, sources);
-  const joinedGeometries = results.map(({ matrix, mesh, tags }) =>
+  const { joinedMeshes } = joinSurfaceMeshes(targets, sources);
+  const joinedGeometries = joinedMeshes.map(({ matrix, mesh, tags }) =>
     taggedGraph({ tags, matrix }, fromSurfaceMeshLazy(mesh))
   );
   deletePendingSurfaceMeshes();

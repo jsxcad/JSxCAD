@@ -6,10 +6,15 @@ export const minkowskiSumOfSurfaceMeshes = (
   meshTransform,
   offset,
   offsetTransform
-) =>
-  getCgal().MinkowskiSumOfSurfaceMeshes(
-    mesh,
-    toCgalTransformFromJsTransform(meshTransform),
-    offset,
-    toCgalTransformFromJsTransform(offsetTransform)
-  );
+) => {
+  try {
+    getCgal().MinkowskiSumOfSurfaceMeshes(
+      mesh,
+      toCgalTransformFromJsTransform(meshTransform),
+      offset,
+      toCgalTransformFromJsTransform(offsetTransform)
+    );
+  } catch (error) {
+    throw Error(error);
+  }
+};

@@ -9,12 +9,19 @@ export const fromFunctionToSurfaceMesh = (
     distanceBound = 0.1, // maximum facet divergence
     errorBound = 0.001,
   } = {}
-) =>
-  getCgal().FromFunctionToSurfaceMesh(
-    radius,
-    angularBound,
-    radiusBound,
-    distanceBound,
-    errorBound,
-    op
-  );
+) => {
+  try {
+    const mesh = getCgal().FromFunctionToSurfaceMesh(
+      radius,
+      angularBound,
+      radiusBound,
+      distanceBound,
+      errorBound,
+      op
+    );
+    mesh.provenance = 'fromFunction';
+    return mesh;
+  } catch (error) {
+    throw Error(error);
+  }
+};

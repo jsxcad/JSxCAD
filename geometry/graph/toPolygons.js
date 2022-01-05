@@ -1,3 +1,8 @@
+export const toPolygons = (geometry) => {
+  throw Error('deprecated');
+};
+
+/*
 import { eachEdgeLoop, eachFacet, getPointNode } from './graph.js';
 
 import { realizeGraph } from './realizeGraph.js';
@@ -14,3 +19,4 @@ export const toPolygons = (geometry) => {
   });
   return surface;
 };
+*/

@@ -7,32 +7,36 @@ export const fromPointsToAlphaShape2AsPolygonSegments = (
   alpha = 10000,
   regularized = true
 ) => {
-  if (jsPoints.length < 3) {
-    return [];
-  }
-  const c = getCgal();
-  const segments = [];
-  c.ComputeAlphaShape2AsPolygonSegments(
-    componentLimit,
-    alpha,
-    regularized,
-    (points) => {
-      let addedPoints = [];
-      for (const jsPoint of jsPoints) {
-        if (addedPoints.some((addedPoint) => equals(addedPoint, jsPoint))) {
-          continue;
-        }
-        addedPoints.push(jsPoint);
-        const [x, y] = jsPoint;
-        c.addPoint_2(points, x, y);
-      }
-    },
-    (startX, startY, endX, endY) => {
-      segments.push([
-        [startX, startY],
-        [endX, endY],
-      ]);
+  try {
+    if (jsPoints.length < 3) {
+      return [];
     }
-  );
-  return segments;
+    const c = getCgal();
+    const segments = [];
+    c.ComputeAlphaShape2AsPolygonSegments(
+      componentLimit,
+      alpha,
+      regularized,
+      (points) => {
+        let addedPoints = [];
+        for (const jsPoint of jsPoints) {
+          if (addedPoints.some((addedPoint) => equals(addedPoint, jsPoint))) {
+            continue;
+          }
+          addedPoints.push(jsPoint);
+          const [x, y] = jsPoint;
+          c.addPoint_2(points, x, y);
+        }
+      },
+      (startX, startY, endX, endY) => {
+        segments.push([
+          [startX, startY],
+          [endX, endY],
+        ]);
+      }
+    );
+    return segments;
+  } catch (error) {
+    throw Error(error);
+  }
 };

@@ -16,10 +16,14 @@ const toIndexFromMethod = (method) => {
 };
 
 export const subdivideSurfaceMesh = (mesh, options) => {
-  const { method, iterations = 1 } = options;
-  return getCgal().SubdivideSurfaceMesh(
-    mesh,
-    toIndexFromMethod(method),
-    iterations
-  );
+  try {
+    const { method, iterations = 1 } = options;
+    return getCgal().SubdivideSurfaceMesh(
+      mesh,
+      toIndexFromMethod(method),
+      iterations
+    );
+  } catch (error) {
+    throw Error(error);
+  }
 };

@@ -1,3 +1,8 @@
+export const principlePlane = (graph) => {
+  throw Error('deprecated');
+};
+
+/*
 import { realizeGraph } from './realizeGraph.js';
 
 // FIX: Actually determine the principle plane.
@@ -8,3 +13,4 @@ export const principlePlane = (graph) => {
     }
   }
 };
+*/

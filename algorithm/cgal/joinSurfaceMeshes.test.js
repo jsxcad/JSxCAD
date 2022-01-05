@@ -188,11 +188,11 @@ test('Join', (t) => {
   const a = fromPolygonsToSurfaceMesh(largeBox);
   const b = fromPolygonsToSurfaceMesh(box);
   // The first entry is the pivot of the disjunction.
-  const r = joinSurfaceMeshes(
+  const { joinedMeshes } = joinSurfaceMeshes(
     [{ mesh: b, matrix: [...identityMatrix], tags: ['a'] }],
     [{ mesh: a, matrix: [...identityMatrix], tags: ['b'] }]
   );
-  const graphs = r.map(({ mesh, matrix, tags }) => ({
+  const graphs = joinedMeshes.map(({ mesh, matrix, tags }) => ({
     graph: fromSurfaceMeshToGraph(mesh),
     matrix,
     tags,

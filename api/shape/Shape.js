@@ -213,6 +213,7 @@ Shape.toShapes = (to, from) => {
   }
   if (to instanceof Array) {
     return to
+      .filter((value) => value !== undefined)
       .flatMap((value) => Shape.toShapes(value, from))
       .flatMap((value) => Shape.toShapes(value, from));
   } else {
@@ -233,6 +234,7 @@ Shape.toFlatValues = (to, from) => {
   }
   if (to instanceof Array) {
     return to
+      .filter((value) => value !== undefined)
       .flatMap((value) => Shape.toValue(value, from))
       .flatMap((value) => Shape.toValue(value, from));
   } else {

@@ -9,6 +9,6 @@ export const fromSurfaceMeshEmitBoundingBox = (mesh, transform, emit) => {
       emit
     );
   } catch (error) {
-    throw error;
+    throw Error(error);
   }
 };

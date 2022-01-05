@@ -60,6 +60,7 @@ export { fromPolygons as fromPolygonsToGraph } from './graph/fromPolygons.js';
 export { fromPolygonsWithHolesToTriangles } from './graph/fromPolygonsWithHolesToTriangles.js';
 export { fromSurfaceToPaths } from './tagged/fromSurfaceToPaths.js';
 export { fromTriangles as fromTrianglesToGraph } from './graph/fromTriangles.js';
+export { fuse } from './tagged/fuse.js';
 export { getAnyNonVoidSurfaces } from './tagged/getAnyNonVoidSurfaces.js';
 export { getAnySurfaces } from './tagged/getAnySurfaces.js';
 export { getItems } from './tagged/getItems.js';

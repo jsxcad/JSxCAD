@@ -8,12 +8,17 @@ export const taperSurfaceMesh = (
   xMinusFactor,
   yPlusFactor,
   yMinusFactor
-) =>
-  getCgal().TaperSurfaceMesh(
-    mesh,
-    toCgalTransformFromJsTransform(transform),
-    xPlusFactor,
-    xMinusFactor,
-    yPlusFactor,
-    yMinusFactor
-  );
+) => {
+  try {
+    getCgal().TaperSurfaceMesh(
+      mesh,
+      toCgalTransformFromJsTransform(transform),
+      xPlusFactor,
+      xMinusFactor,
+      yPlusFactor,
+      yMinusFactor
+    );
+  } catch (error) {
+    throw Error(error);
+  }
+};
