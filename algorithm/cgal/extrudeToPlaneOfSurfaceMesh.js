@@ -18,22 +18,27 @@ export const extrudeToPlaneOfSurfaceMesh = (
   lowPlaneY,
   lowPlaneZ,
   lowPlaneW
-) =>
-  getCgal().ExtrusionToPlaneOfSurfaceMesh(
-    mesh,
-    toCgalTransformFromJsTransform(transform),
-    highX,
-    highY,
-    highZ,
-    highPlaneX,
-    highPlaneY,
-    highPlaneZ,
-    highPlaneW,
-    lowX,
-    lowY,
-    lowZ,
-    lowPlaneX,
-    lowPlaneY,
-    lowPlaneZ,
-    lowPlaneW
-  );
+) => {
+  try {
+    return getCgal().ExtrusionToPlaneOfSurfaceMesh(
+      mesh,
+      toCgalTransformFromJsTransform(transform),
+      highX,
+      highY,
+      highZ,
+      highPlaneX,
+      highPlaneY,
+      highPlaneZ,
+      highPlaneW,
+      lowX,
+      lowY,
+      lowZ,
+      lowPlaneX,
+      lowPlaneY,
+      lowPlaneZ,
+      lowPlaneW
+    );
+  } catch (error) {
+    throw Error(error);
+  }
+};

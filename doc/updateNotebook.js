@@ -68,9 +68,12 @@ const writeMarkdown = async (
             failedExpectations.push(`cp "${observedPath}" "${expectedPath}"`);
           }
         } catch (error) {
+          console.log(`EE/3: ${JSON.stringify(error)}`);
           if (error.code === 'ENOENT') {
             failedExpectations.push(`cp "${observedPath}" "${expectedPath}"`);
             failedExpectations.push(`git add "${expectedPath}"`);
+          } else {
+            throw error;
           }
         }
         output.push(
@@ -104,6 +107,7 @@ const writeMarkdown = async (
       failedExpectations.push(`cp "${observedPath}" "${expectedPath}"`);
     }
   } catch (error) {
+    console.log(`EE/0: ${JSON.stringify(error)}`);
     if (error.code === 'ENOENT') {
       failedExpectations.push(`cp "${observedPath}" "${expectedPath}"`);
       failedExpectations.push(`git add "${expectedPath}"`);
@@ -152,6 +156,7 @@ export const updateNotebook = async (
       try {
         expectedPng = pngjs.PNG.sync.read(readFileSync(expectedPath));
       } catch (error) {
+        console.log(`EE/1: ${JSON.stringify(error)}`);
         if (error.code === 'ENOENT') {
           // We couldn't find a matching expectation.
           failedExpectations.push(`cp "${observedPath}" "${expectedPath}"`);
@@ -195,6 +200,7 @@ export const updateNotebook = async (
       }
     }
   } catch (error) {
+    console.log(`EE/2: ${JSON.stringify(error)}`);
     console.log(error.stack);
     throw error;
   } finally {

@@ -373,6 +373,7 @@ export { Hexagon } from './Hexagon.js';
 export { Hull } from './Hull.js';
 export { Icosahedron } from './Icosahedron.js';
 export { Implicit } from './Implicit.js';
+export { Join } from './Join.js';
 export { Line } from './Line.js';
 export { Octagon } from './Octagon.js';
 export { Orb } from './Orb.js';

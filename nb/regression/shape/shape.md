@@ -103,7 +103,7 @@ Assembly(Box(5), Arc(6))
 
 ```JavaScript
 Group(Box(5).color('red'), Arc(6).color('blue'))
-  .fuse({ isPlanar: true })
+  .fuse()
   .gridView();
 ```
 

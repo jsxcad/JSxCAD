@@ -1,10 +1,13 @@
 import {
+  deleteSurfaceMesh,
   deserializeSurfaceMesh,
   fromGraphToSurfaceMesh,
+  serializeSurfaceMesh,
 } from '@jsxcad/algorithm-cgal';
 import { graphSymbol, surfaceMeshSymbol } from './symbols.js';
 
 const cacheSize = 100;
+// const cacheSize = 1;
 const clock = [];
 let pointer = 0;
 const pending = new Set();
@@ -46,14 +49,49 @@ const remember = (surfaceMesh) => {
 export const deletePendingSurfaceMeshes = () => {
   console.log(`QQ/deleting ${pending.size} surface meshes`);
   for (const surfaceMesh of pending) {
-    surfaceMesh.delete();
+    if (surfaceMesh.isScheduledForDeletion) {
+      console.log(
+        `QQ/trying to delete isScheduledForDeletion ${surfaceMesh} ${surfaceMesh.provenance}`
+      );
+    } else if (surfaceMesh.isDeleted()) {
+      console.log(
+        `QQ/trying to delete isDeleted() ${surfaceMesh} ${surfaceMesh.provenance}`
+      );
+    } else {
+      console.log(`QQ/delete ${surfaceMesh} ${surfaceMesh.provenance}`);
+      surfaceMesh.isScheduledForDeletion = true;
+      // surfaceMesh.delete();
+      try {
+        // Make sure it's serialized and then unlink from the corresponding graph.
+        const graph = surfaceMesh[graphSymbol];
+        if (graph) {
+          if (!graph.serializedSurfaceMesh) {
+            graph.serializedSurfaceMesh = serializeSurfaceMesh(surfaceMesh);
+          }
+          if (graph[surfaceMeshSymbol] === surfaceMesh) {
+            delete graph[surfaceMeshSymbol];
+          }
+        }
+        delete surfaceMesh[graphSymbol];
+        deleteSurfaceMesh(surfaceMesh);
+      } catch (error) {
+        console.log(JSON.stringify(surfaceMesh));
+        throw error;
+      }
+    }
   }
   pending.clear();
 };
 
 export const toSurfaceMesh = (graph) => {
   let surfaceMesh = graph[surfaceMeshSymbol];
-  if (surfaceMesh !== undefined && !surfaceMesh.isDeleted()) {
+  if (surfaceMesh) {
+    if (surfaceMesh.provenance === undefined) {
+      throw Error('Unknown surface mesh provenance');
+    }
+    if (surfaceMesh.isScheduledForDeletion) {
+      throw Error('Deleted surface mesh');
+    }
     remember(surfaceMesh);
     return surfaceMesh;
   }

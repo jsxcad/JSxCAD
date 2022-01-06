@@ -152,7 +152,12 @@ test('Clip Segment by Surface', (t) => {
           [targetX, targetY, targetZ],
         ])
     );
-    t.deepEqual(segments, []);
+    t.deepEqual(segments, [
+      [
+        [0, 0, 10],
+        [0, 0, -10],
+      ],
+    ]);
   }
   {
     // Segment along face

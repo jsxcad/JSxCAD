@@ -6,10 +6,15 @@ export const minkowskiShellOfSurfaceMeshes = (
   meshTransform,
   offset,
   offsetTransform
-) =>
-  getCgal().MinkowskiShellOfSurfaceMeshes(
-    mesh,
-    toCgalTransformFromJsTransform(meshTransform),
-    offset,
-    toCgalTransformFromJsTransform(offsetTransform)
-  );
+) => {
+  try {
+    getCgal().MinkowskiShellOfSurfaceMeshes(
+      mesh,
+      toCgalTransformFromJsTransform(meshTransform),
+      offset,
+      toCgalTransformFromJsTransform(offsetTransform)
+    );
+  } catch (error) {
+    throw Error(error);
+  }
+};

@@ -6,12 +6,17 @@ export const computeNormalOfSurfaceMesh = (
   transform,
   approximate,
   exact
-) =>
-  getCgal().ComputeNormalOfSurfaceMesh(
-    mesh,
-    toCgalTransformFromJsTransform(transform),
-    (ax, ay, az, ex, ey, ez) => {
-      approximate.push(ax, ay, az);
-      exact.push(ex, ey, ez);
-    }
-  );
+) => {
+  try {
+    return getCgal().ComputeNormalOfSurfaceMesh(
+      mesh,
+      toCgalTransformFromJsTransform(transform),
+      (ax, ay, az, ex, ey, ez) => {
+        approximate.push(ax, ay, az);
+        exact.push(ex, ey, ez);
+      }
+    );
+  } catch (error) {
+    throw Error(error);
+  }
+};

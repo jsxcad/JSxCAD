@@ -6,12 +6,17 @@ export const computeCentroidOfSurfaceMesh = (
   transform,
   approximate,
   exact
-) =>
-  getCgal().ComputeCentroidOfSurfaceMesh(
-    mesh,
-    toCgalTransformFromJsTransform(transform),
-    (ax, ay, az, ex, ey, ez) => {
-      approximate.push(ax, ay, az);
-      exact.push(ex, ey, ez);
-    }
-  );
+) => {
+  try {
+    return getCgal().ComputeCentroidOfSurfaceMesh(
+      mesh,
+      toCgalTransformFromJsTransform(transform),
+      (ax, ay, az, ex, ey, ez) => {
+        approximate.push(ax, ay, az);
+        exact.push(ex, ey, ez);
+      }
+    );
+  } catch (error) {
+    throw Error(error);
+  }
+};

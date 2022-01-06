@@ -359,8 +359,6 @@ void FitPlaneToPoints(emscripten::val fill_triples,
 
 const Surface_mesh* SubdivideSurfaceMesh(const Surface_mesh* input, int method,
                                          int iterations) {
-  typedef boost::graph_traits<Surface_mesh>::edge_descriptor edge_descriptor;
-
   Surface_mesh* mesh = new Surface_mesh(*input);
 
   CGAL::Polygon_mesh_processing::triangulate_faces(*mesh);
@@ -447,8 +445,6 @@ bool IsBadSurfaceMesh(const Surface_mesh* input) {
 
 const Surface_mesh* RemeshSurfaceMesh(const Surface_mesh* input,
                                       emscripten::val get_length) {
-  typedef boost::graph_traits<Surface_mesh>::edge_descriptor edge_descriptor;
-
   Surface_mesh* mesh = new Surface_mesh(*input);
 
   CGAL::Polygon_mesh_processing::triangulate_faces(*mesh);
@@ -625,109 +621,6 @@ const Surface_mesh* PushSurfaceMesh(const Surface_mesh* input,
   return c;
 }
 
-// Use different iota to avoid 45 degree slides.
-const double kIotaX = 10e-5;
-const double kIotaY = 11e-5;
-const double kIotaZ = 12e-5;
-
-void DestructiveDifferenceOfSurfaceMeshes(Surface_mesh& a, Surface_mesh& b,
-                                          bool check) {
-  double x = 0, y = 0, z = 0;
-  for (int shift = 0x17;; shift++) {
-    if (x != 0 || y != 0 || z != 0) {
-      std::cout << "Note: Shifting difference by x=" << x << " y=" << y
-                << " z=" << z << std::endl;
-      Transformation translation(CGAL::TRANSLATION, Vector(x, y, z));
-      CGAL::Polygon_mesh_processing::transform(translation, a,
-                                               CGAL::parameters::all_default());
-    }
-    if (check) {
-      if (CGAL::Polygon_mesh_processing::corefine_and_compute_difference(
-              a, b, a,
-              CGAL::Polygon_mesh_processing::parameters::
-                  throw_on_self_intersection(true),
-              CGAL::Polygon_mesh_processing::parameters::
-                  throw_on_self_intersection(true),
-              CGAL::Polygon_mesh_processing::parameters::
-                  throw_on_self_intersection(true))) {
-        break;
-      }
-    } else {
-      if (CGAL::Polygon_mesh_processing::corefine_and_compute_difference(
-              a, b, a, CGAL::parameters::all_default(),
-              CGAL::parameters::all_default(),
-              CGAL::parameters::all_default())) {
-        break;
-      }
-    }
-    const double direction = ((shift & (1 << 3)) ? -1 : 1) * (shift >> 4);
-    if (shift & (1 << 0)) {
-      x = kIotaX * direction;
-    } else {
-      x = 0;
-    }
-    if (shift & (1 << 1)) {
-      y = kIotaY * direction;
-    } else {
-      y = 0;
-    }
-    if (shift & (1 << 2)) {
-      z = kIotaZ * direction;
-    } else {
-      z = 0;
-    }
-  }
-}
-
-void DestructiveUnionOfSurfaceMeshes(Surface_mesh& a, Surface_mesh& b,
-                                     bool check) {
-  double x = 0, y = 0, z = 0;
-  for (int shift = 0x11;; shift++) {
-    if (x != 0 || y != 0 || z != 0) {
-      std::cout << "Note: Shifting difference by x=" << x << " y=" << y
-                << " z=" << z << std::endl;
-      Transformation translation(CGAL::TRANSLATION, Vector(x, y, z));
-      CGAL::Polygon_mesh_processing::transform(translation, a,
-                                               CGAL::parameters::all_default());
-    }
-    if (check) {
-      if (CGAL::Polygon_mesh_processing::corefine_and_compute_union(
-              a, b, a,
-              CGAL::Polygon_mesh_processing::parameters::
-                  throw_on_self_intersection(true),
-              CGAL::Polygon_mesh_processing::parameters::
-                  throw_on_self_intersection(true),
-              CGAL::Polygon_mesh_processing::parameters::
-                  throw_on_self_intersection(true))) {
-        break;
-      }
-    } else {
-      if (CGAL::Polygon_mesh_processing::corefine_and_compute_union(
-              a, b, a, CGAL::parameters::all_default(),
-              CGAL::parameters::all_default(),
-              CGAL::parameters::all_default())) {
-        break;
-      }
-    }
-    const double direction = ((shift & (1 << 3)) ? -1 : 1) * (shift >> 4);
-    if (shift & (1 << 0)) {
-      x = kIotaX * direction;
-    } else {
-      x = 0;
-    }
-    if (shift & (1 << 1)) {
-      y = kIotaY * direction;
-    } else {
-      y = 0;
-    }
-    if (shift & (1 << 2)) {
-      z = kIotaZ * direction;
-    } else {
-      z = 0;
-    }
-  }
-}
-
 const Surface_mesh* GrowSurfaceMesh(const Surface_mesh* input, double amount) {
   Surface_mesh* mesh = new Surface_mesh(*input);
   std::unordered_map<Surface_mesh::Vertex_index, Point> grown_points;
@@ -746,8 +639,8 @@ const Surface_mesh* GrowSurfaceMesh(const Surface_mesh* input, double amount) {
   return mesh;
 }
 
-Surface_mesh* SimplifySurfaceMesh(const Surface_mesh* input, double ratio,
-                                  bool simplify_points, double eps) {
+const Surface_mesh* SimplifySurfaceMesh(const Surface_mesh* input, double ratio,
+                                        bool simplify_points, double eps) {
   typedef CGAL::Simple_cartesian<double> Cartesian_kernel;
   typedef Cartesian_kernel::Point_3 Cartesian_point;
   typedef CGAL::Surface_mesh<Cartesian_point> Cartesian_surface_mesh;
@@ -780,8 +673,8 @@ Surface_mesh* SimplifySurfaceMesh(const Surface_mesh* input, double ratio,
       Cartesian_surface_mesh>
       stop(ratio);
 
-  int removed_edge_count = CGAL::Surface_mesh_simplification::edge_collapse(
-      cartesian_surface_mesh, stop);
+  CGAL::Surface_mesh_simplification::edge_collapse(cartesian_surface_mesh,
+                                                   stop);
 
   Surface_mesh* output = new Surface_mesh();
   copy_face_graph(cartesian_surface_mesh, *output,
@@ -791,7 +684,8 @@ Surface_mesh* SimplifySurfaceMesh(const Surface_mesh* input, double ratio,
   return output;
 }
 
-Surface_mesh* RemoveSelfIntersectionsOfSurfaceMesh(const Surface_mesh* input) {
+const Surface_mesh* RemoveSelfIntersectionsOfSurfaceMesh(
+    const Surface_mesh* input) {
   Surface_mesh* mesh = new Surface_mesh(*input);
   CGAL::Polygon_mesh_processing::experimental::
       autorefine_and_remove_self_intersections(*mesh);
@@ -803,6 +697,26 @@ void Surface_mesh__EachFace(const Surface_mesh* mesh, emscripten::val op) {
     if (!mesh->is_removed(face_index)) {
       op(std::size_t(face_index));
     }
+  }
+}
+
+void EachPointOfSurfaceMesh(const Surface_mesh* input,
+                            const Transformation* transformation,
+                            emscripten::val emit_point) {
+  Surface_mesh mesh(*input);
+  for (const Surface_mesh::Vertex_index vertex : mesh.vertices()) {
+    const Point p = mesh.point(vertex).transform(*transformation);
+    std::ostringstream x;
+    x << p.x().exact();
+    std::string xs = x.str();
+    std::ostringstream y;
+    y << p.y().exact();
+    std::string ys = y.str();
+    std::ostringstream z;
+    z << p.z().exact();
+    std::string zs = z.str();
+    emit_point(CGAL::to_double(p.x().exact()), CGAL::to_double(p.y().exact()),
+               CGAL::to_double(p.z().exact()), xs, ys, zs);
   }
 }
 
@@ -1191,8 +1105,7 @@ const Surface_mesh* LoftBetweenCongruentSurfaceMeshes(bool closed,
         } else {
           b_target = b_target_it->second;
         }
-        auto face = loft->add_face(b_target, a_map[a_target], a_map[a_source],
-                                   b_source);
+        loft->add_face(b_target, a_map[a_target], a_map[a_source], b_source);
       }
     }
 
@@ -1341,6 +1254,8 @@ class SurfaceMeshQuery {
           points.push_back(segment->target());
         }
       }
+      points.push_back(source);
+      points.push_back(target);
       std::sort(points.begin(), points.end(),
                 [&](const Point& a, const Point& b) {
                   return CGAL::squared_distance(a, source) <
@@ -1348,29 +1263,15 @@ class SurfaceMeshQuery {
                 });
       points.erase(std::unique(points.begin(), points.end()), points.end());
       size_t start = 0;
-      if (do_cut) {
-        if (points.size() >= 1 && points[0] == source) {
-          // The segment starts inside the surface.
-          // Skip the segment, and switch to the complementary segments.
-          start += 1;
-        } else {
-          // The segment starts outside the surface.
-          // Effectively prepend the source, switching to the complementary
-          // segments.
-          points.insert(points.begin(), source);
-        }
-        if (points.size() >= 1 && points.back() == target) {
-          // The segment ends inside the surface.
-          // Skip the segment.
-          points.pop_back();
-        } else {
-          points.push_back(target);
-        }
-      }
       if (points.size() >= 2) {
-        for (size_t index = start; index < points.size() - 1; index += 2) {
+        for (size_t index = start; index < points.size() - 1; index++) {
           const Point& source = points[index + 0];
           const Point& target = points[index + 1];
+          const bool on_boundary = (*inside_tester_)(CGAL::midpoint(
+                                       source, target)) == CGAL::ON_BOUNDARY;
+          if ((on_boundary && do_cut) || (!on_boundary && do_clip)) {
+            continue;
+          }
           emit_segment(CGAL::to_double(source.x().exact()),
                        CGAL::to_double(source.y().exact()),
                        CGAL::to_double(source.z().exact()),
@@ -1799,11 +1700,8 @@ void convertArrangementToPolygonsWithHoles(
 void PlanarSurfaceMeshToPolygonSet(const Plane& plane, const Surface_mesh& mesh,
                                    General_polygon_set_2& set) {
   typedef CGAL::Arr_segment_traits_2<Kernel> Traits_2;
-  typedef Traits_2::Point_2 Point_2;
   typedef Traits_2::X_monotone_curve_2 Segment_2;
   typedef CGAL::Arrangement_2<Traits_2> Arrangement_2;
-  typedef Arrangement_2::Vertex_handle Vertex_handle;
-  typedef Arrangement_2::Halfedge_handle Halfedge_handle;
 
   Arrangement_2 arrangement;
 
@@ -1832,11 +1730,8 @@ void PlanarSurfaceMeshFacetsToPolygonSet(const Plane& plane,
                                          const Surface_mesh& mesh,
                                          General_polygon_set_2& set) {
   typedef CGAL::Arr_segment_traits_2<Kernel> Traits_2;
-  typedef Traits_2::Point_2 Point_2;
   typedef Traits_2::X_monotone_curve_2 Segment_2;
   typedef CGAL::Arrangement_2<Traits_2> Arrangement_2;
-  typedef Arrangement_2::Vertex_handle Vertex_handle;
-  typedef Arrangement_2::Halfedge_handle Halfedge_handle;
 
   std::set<std::vector<Kernel::FT>> segments;
 
@@ -1980,103 +1875,6 @@ void SurfaceMeshSectionToPolygonSet(const Plane& plane, const Surface_mesh& a,
       polygon.reverse_orientation();
     }
     set.join(polygon);
-  }
-}
-
-const double kExtrusionMinimum = 10000.0;
-const double kExtrusionMinimumSquared = kExtrusionMinimum * kExtrusionMinimum;
-
-const double kIota = 10e-5;
-
-const Surface_mesh* DifferenceOfSurfaceMeshes(const Surface_mesh* a,
-                                              const Transformation* a_transform,
-                                              const Surface_mesh* b,
-                                              const Transformation* b_transform,
-                                              bool check, bool fix) {
-  if (a_transform) {
-    Surface_mesh transformed(*a);
-    CGAL::Polygon_mesh_processing::transform(*a_transform, transformed,
-                                             CGAL::parameters::all_default());
-    return DifferenceOfSurfaceMeshes(&transformed, nullptr, b, b_transform,
-                                     check, fix);
-  } else if (b_transform) {
-    Surface_mesh transformed(*b);
-    CGAL::Polygon_mesh_processing::transform(*b_transform, transformed,
-                                             CGAL::parameters::all_default());
-    return DifferenceOfSurfaceMeshes(a, a_transform, &transformed, nullptr,
-                                     check, fix);
-  }
-  Plane plane;
-  if (IsPlanarSurfaceMesh(plane, *a)) {
-    if (IsCoplanarSurfaceMesh(plane, *b)) {
-      Surface_mesh* result = new Surface_mesh();
-      DifferenceOfCoplanarSurfaceMeshes(plane, *a, *b, *result);
-      return result;
-    } else {
-      // Difference with the section of the other.
-      General_polygon_set_2 set;
-      General_polygon_set_2 other;
-      PlanarSurfaceMeshToPolygonSet(plane, *a, set);
-      SurfaceMeshSectionToPolygonSet(plane, *b, other);
-      set.difference(other);
-      Surface_mesh* result = new Surface_mesh();
-      GeneralPolygonSetToSurfaceMesh(plane, set, *result);
-      return result;
-    }
-  } else if (IsPlanarSurfaceMesh(plane, *b)) {
-    return a;
-  }
-  double x = 0, y = 0, z = 0;
-  Surface_mesh* c = new Surface_mesh();
-  for (int shift = 0x11;; shift++) {
-    Surface_mesh working_a(*a);
-    Surface_mesh working_b(*b);
-    if (x != 0 || y != 0 || z != 0) {
-      std::cout << "Note: Shifting difference by x=" << x << " y=" << y
-                << " z=" << z << std::endl;
-      Transformation translation(CGAL::TRANSLATION, Vector(x, y, z));
-      CGAL::Polygon_mesh_processing::transform(translation, working_b,
-                                               CGAL::parameters::all_default());
-    }
-    if (check) {
-      if (CGAL::Polygon_mesh_processing::corefine_and_compute_difference(
-              working_a, working_b, *c,
-              CGAL::Polygon_mesh_processing::parameters::
-                  throw_on_self_intersection(true),
-              CGAL::Polygon_mesh_processing::parameters::
-                  throw_on_self_intersection(true),
-              CGAL::Polygon_mesh_processing::parameters::
-                  throw_on_self_intersection(true))) {
-        return c;
-      }
-    } else {
-      if (CGAL::Polygon_mesh_processing::corefine_and_compute_difference(
-              working_a, working_b, *c, CGAL::parameters::all_default(),
-              CGAL::parameters::all_default(),
-              CGAL::parameters::all_default())) {
-        return c;
-      }
-    }
-    if (!fix) {
-      delete c;
-      return nullptr;
-    }
-    const double direction = ((shift & (1 << 3)) ? -1 : 1) * (shift >> 4);
-    if (shift & (1 << 0)) {
-      x = kIota * direction;
-    } else {
-      x = 0;
-    }
-    if (shift & (1 << 1)) {
-      y = kIota * direction;
-    } else {
-      y = 0;
-    }
-    if (shift & (1 << 2)) {
-      z = kIota * direction;
-    } else {
-      z = 0;
-    }
   }
 }
 
@@ -2313,7 +2111,7 @@ int ClipSurfaceMeshes(size_t target_count, emscripten::val getTargetMesh,
   }
 
   for (size_t nth_target = 0; nth_target < target_count; nth_target++) {
-    Surface_mesh* clipped_target_mesh =
+    const Surface_mesh* clipped_target_mesh =
         clipped_target_meshes[nth_target].release();
     emit_mesh(nth_target, clipped_target_mesh);
   }
@@ -2434,7 +2232,7 @@ int CutSurfaceMeshes(size_t target_count, emscripten::val getTargetMesh,
   }
 
   for (size_t nth_target = 0; nth_target < target_count; nth_target++) {
-    Surface_mesh* target_mesh = target_meshes[nth_target].release();
+    const Surface_mesh* target_mesh = target_meshes[nth_target].release();
     emit_mesh(nth_target, target_mesh);
   }
 
@@ -2542,45 +2340,131 @@ int JoinSurfaceMeshes(size_t target_count, emscripten::val getTargetMesh,
   }
 
   for (size_t nth_target = 0; nth_target < target_count; nth_target++) {
-    Surface_mesh* target_mesh = target_meshes[nth_target].release();
+    const Surface_mesh* target_mesh = target_meshes[nth_target].release();
     emit(nth_target, target_mesh);
   }
+  return STATUS_OK;
+}
+
+// Fuse combines all inputs together that it can, rather than enlarging
+// specified inputs. Join has a set of existing targets to join to. All volumes
+// are combinable, all coplanar surfaces are combinable, and all segments are
+// combinable. So fuse should output at most one volume, n surfaces, and one set
+// of segments. Each individual output should have no overlapping pieces, but
+// different kinds of output can overlap. e.g., a planar surface may overlap
+// with a volume, or segments may intersect planar surfaces. The fused outputs
+// will be in the absolute frame of reference.
+int FuseSurfaceMeshes(size_t mesh_count, emscripten::val getMesh,
+                      emscripten::val getMeshTransform,
+                      emscripten::val emit_mesh) {
+  std::unique_ptr<Surface_mesh> volume(new Surface_mesh());
+  std::unordered_map<Plane, General_polygon_set_2> surface_sets;
+
+  for (size_t nth_mesh = 0; nth_mesh < mesh_count; nth_mesh++) {
+    const Surface_mesh* mesh = getMesh(nth_mesh).as<const Surface_mesh*>(
+        emscripten::allow_raw_pointers());
+    if (CGAL::is_empty(*mesh)) {
+      continue;
+    }
+    const Transformation* transform =
+        getMeshTransform(nth_mesh).as<const Transformation*>(
+            emscripten::allow_raw_pointers());
+    Surface_mesh working_mesh(*mesh);
+    CGAL::Polygon_mesh_processing::transform(*transform, working_mesh,
+                                             CGAL::parameters::all_default());
+    Plane plane;
+    if (IsPlanarSurfaceMesh(plane, working_mesh)) {
+      auto it = surface_sets.find(plane);
+      if (it == surface_sets.end()) {
+        PlanarSurfaceMeshToPolygonSet(plane, working_mesh, surface_sets[plane]);
+      } else {
+        PlanarSurfaceMeshToPolygonSet(it->first, working_mesh, it->second);
+      }
+    } else if (CGAL::is_closed(working_mesh)) {
+      if (volume->is_empty() ||
+          !CGAL::Polygon_mesh_processing::do_intersect(
+              *volume, working_mesh,
+              CGAL::Polygon_mesh_processing::parameters::
+                  do_overlap_test_of_bounded_sides(true),
+              CGAL::Polygon_mesh_processing::parameters::
+                  do_overlap_test_of_bounded_sides(true))) {
+        // There is no overlap, so we can perform a simple join.
+        if (!volume->join(working_mesh)) {
+          return STATUS_ZERO_THICKNESS;
+        }
+      } else {
+        // There are potential overlaps, so we need to corefine.
+        if (!CGAL::Polygon_mesh_processing::corefine_and_compute_union(
+                *volume, working_mesh, *volume, CGAL::parameters::all_default(),
+                CGAL::parameters::all_default(),
+                CGAL::parameters::all_default())) {
+          return STATUS_ZERO_THICKNESS;
+        }
+      }
+    }
+  }
+
+  std::vector<std::unique_ptr<Surface_mesh>> surface_meshes;
+
+  for (auto& entry : surface_sets) {
+    const Plane& plane = entry.first;
+    General_polygon_set_2& set = entry.second;
+    surface_meshes.emplace_back(new Surface_mesh());
+    if (!GeneralPolygonSetToSurfaceMesh(plane, set, *surface_meshes.back())) {
+      return STATUS_ZERO_THICKNESS;
+    }
+  }
+
+  // At this point we are committed.
+  {
+    const Surface_mesh* mesh = volume.release();
+    emit_mesh(mesh);
+  }
+
+  for (std::unique_ptr<Surface_mesh>& surface_mesh : surface_meshes) {
+    const Surface_mesh* mesh = surface_mesh.release();
+    emit_mesh(mesh);
+  }
+
+  // TODO: handle segment deduplication.
+
   return STATUS_OK;
 }
 
 int DisjointSurfaceMeshesIncrementally(int meshCount, emscripten::val nthMesh,
                                        emscripten::val nthTransform,
                                        emscripten::val nthMasked,
-                                       emscripten::val emitMesh) {
-  Surface_mesh mask;
-  std::vector<Surface_mesh> planar_masks;
-  std::vector<Surface_mesh> volume_masks;
+                                       emscripten::val emit_mesh) {
+  // Surface_mesh mask;
+  std::vector<std::unique_ptr<Surface_mesh>> planar_masks;
+  std::vector<std::unique_ptr<Surface_mesh>> volume_masks;
   for (int nth = 0; nth < meshCount; nth++) {
     bool is_masked = nthMasked(nth).as<bool>();
     const Surface_mesh* mesh =
         nthMesh(nth).as<const Surface_mesh*>(emscripten::allow_raw_pointers());
     if (CGAL::is_empty(*mesh)) {
-      emitMesh(nth, mesh);
+      Surface_mesh* empty = new Surface_mesh();
+      emit_mesh(nth, empty);
       continue;
     }
     const Transformation* transform =
         nthTransform(nth).as<const Transformation*>(
             emscripten::allow_raw_pointers());
-    Surface_mesh oriented_mesh(*mesh);
+    std::unique_ptr<Surface_mesh> oriented_mesh(new Surface_mesh(*mesh));
     // Orient the mesh in the absolute frame of the masks.
-    CGAL::Polygon_mesh_processing::transform(*transform, oriented_mesh,
+    CGAL::Polygon_mesh_processing::transform(*transform, *oriented_mesh,
                                              CGAL::parameters::all_default());
     Plane plane;
-    bool planar = IsPlanarSurfaceMesh(plane, oriented_mesh);
+    bool planar = IsPlanarSurfaceMesh(plane, *oriented_mesh);
     if (nth > 0) {
-      Surface_mesh* result = new Surface_mesh(oriented_mesh);
+      std::unique_ptr<Surface_mesh> result(new Surface_mesh(*oriented_mesh));
       if (planar) {
         for (auto& planar_mask : planar_masks) {
           if (CGAL::is_empty(*result)) {
             break;
           }
-          if (IsCoplanarSurfaceMesh(plane, planar_mask)) {
-            DifferenceOfCoplanarSurfaceMeshes(plane, *result, planar_mask,
+          if (IsCoplanarSurfaceMesh(plane, *planar_mask)) {
+            DifferenceOfCoplanarSurfaceMeshes(plane, *result, *planar_mask,
                                               *result);
           }
         }
@@ -2591,7 +2475,7 @@ int DisjointSurfaceMeshesIncrementally(int meshCount, emscripten::val nthMesh,
           // Now clip to the inverted volume mask to make planar surfaces
           // disjoint with volumes. (Note that volumes are not made disjoint to
           // planar surfaces)
-          Surface_mesh inverse_mask(volume_mask);
+          Surface_mesh inverse_mask(*volume_mask);
           CGAL::Polygon_mesh_processing::reverse_face_orientations(
               inverse_mask.faces(), inverse_mask);
           CGAL::Polygon_mesh_processing::clip(*result, inverse_mask,
@@ -2604,7 +2488,7 @@ int DisjointSurfaceMeshesIncrementally(int meshCount, emscripten::val nthMesh,
             break;
           }
           if (!CGAL::Polygon_mesh_processing::do_intersect(
-                  *result, volume_mask,
+                  *result, *volume_mask,
                   CGAL::Polygon_mesh_processing::parameters::
                       do_overlap_test_of_bounded_sides(true),
                   CGAL::Polygon_mesh_processing::parameters::
@@ -2612,11 +2496,10 @@ int DisjointSurfaceMeshesIncrementally(int meshCount, emscripten::val nthMesh,
             continue;
           }
           if (!CGAL::Polygon_mesh_processing::corefine_and_compute_difference(
-                  *result, volume_mask, *result,
+                  *result, *volume_mask, *result,
                   CGAL::parameters::all_default(),
                   CGAL::parameters::all_default(),
                   CGAL::parameters::all_default())) {
-            delete result;
             return STATUS_ZERO_THICKNESS;
           }
         }
@@ -2624,9 +2507,10 @@ int DisjointSurfaceMeshesIncrementally(int meshCount, emscripten::val nthMesh,
       // Now emit the result in the original orientation.
       CGAL::Polygon_mesh_processing::transform(transform->inverse(), *result,
                                                CGAL::parameters::all_default());
-      emitMesh(nth, result);
+      Surface_mesh* released_result = result.release();
+      emit_mesh(nth, released_result);
     }
-    if (!is_masked && !CGAL::is_empty(oriented_mesh)) {
+    if (!is_masked && !CGAL::is_empty(*oriented_mesh)) {
       if (planar) {
         planar_masks.push_back(std::move(oriented_mesh));
       } else {
@@ -2635,246 +2519,6 @@ int DisjointSurfaceMeshesIncrementally(int meshCount, emscripten::val nthMesh,
     }
   }
   return STATUS_OK;
-}
-
-void RecursiveUnionOfSurfaceMeshes(std::queue<Surface_mesh*>& meshes,
-                                   bool check) {
-  while (meshes.size() >= 2) {
-    Surface_mesh* a = meshes.front();
-    meshes.pop();
-    Surface_mesh* b = meshes.front();
-    meshes.pop();
-    double x = 0, y = 0, z = 0;
-    for (int shift = 0x11;; shift++) {
-      if (x != 0 || y != 0 || z != 0) {
-        std::cout << "Note: Shifting difference by x=" << x << " y=" << y
-                  << " z=" << z << std::endl;
-        Transformation translation(CGAL::TRANSLATION, Vector(x, y, z));
-        CGAL::Polygon_mesh_processing::transform(
-            translation, *a, CGAL::parameters::all_default());
-      }
-      if (check) {
-        if (CGAL::Polygon_mesh_processing::corefine_and_compute_union(
-                *a, *b, *a,
-                CGAL::Polygon_mesh_processing::parameters::
-                    throw_on_self_intersection(true),
-                CGAL::Polygon_mesh_processing::parameters::
-                    throw_on_self_intersection(true),
-                CGAL::Polygon_mesh_processing::parameters::
-                    throw_on_self_intersection(true))) {
-          break;
-        }
-      } else {
-        if (CGAL::Polygon_mesh_processing::corefine_and_compute_union(
-                *a, *b, *a, CGAL::parameters::all_default(),
-                CGAL::parameters::all_default(),
-                CGAL::parameters::all_default())) {
-          break;
-        }
-      }
-      const double direction = ((shift & (1 << 3)) ? -1 : 1) * (shift >> 4);
-      if (shift & (1 << 0)) {
-        x = kIota * direction;
-      } else {
-        x = 0;
-      }
-      if (shift & (1 << 1)) {
-        y = kIota * direction;
-      } else {
-        y = 0;
-      }
-      if (shift & (1 << 2)) {
-        z = kIota * direction;
-      } else {
-        z = 0;
-      }
-    }
-    delete b;
-    meshes.push(a);
-  }
-}
-
-const Surface_mesh* IntersectionOfSurfaceMeshes(
-    const Surface_mesh* a, const Transformation* a_transform,
-    const Surface_mesh* b, const Transformation* b_transform, bool check,
-    bool fix) {
-  if (a_transform) {
-    Surface_mesh transformed(*a);
-    CGAL::Polygon_mesh_processing::transform(*a_transform, transformed,
-                                             CGAL::parameters::all_default());
-    return IntersectionOfSurfaceMeshes(&transformed, nullptr, b, b_transform,
-                                       check, fix);
-  } else if (b_transform) {
-    Surface_mesh transformed(*b);
-    CGAL::Polygon_mesh_processing::transform(*b_transform, transformed,
-                                             CGAL::parameters::all_default());
-    return IntersectionOfSurfaceMeshes(a, a_transform, &transformed, nullptr,
-                                       check, fix);
-  }
-  Plane plane;
-  if (IsPlanarSurfaceMesh(plane, *a)) {
-    if (IsCoplanarSurfaceMesh(plane, *b)) {
-      Surface_mesh* result = new Surface_mesh();
-      IntersectionOfCoplanarSurfaceMeshes(plane, a, b, *result);
-      return result;
-    } else {
-      // Difference with the section of the other.
-      General_polygon_set_2 set;
-      General_polygon_set_2 other;
-      PlanarSurfaceMeshToPolygonSet(plane, *a, set);
-      SurfaceMeshSectionToPolygonSet(plane, *b, other);
-      set.intersection(other);
-      Surface_mesh* result = new Surface_mesh();
-      GeneralPolygonSetToSurfaceMesh(plane, set, *result);
-      return result;
-    }
-  } else if (IsPlanarSurfaceMesh(plane, *b)) {
-    return new Surface_mesh();
-  }
-  double x = 0, y = 0, z = 0;
-  Surface_mesh* c = new Surface_mesh();
-  for (int shift = 0x11;; shift++) {
-    Surface_mesh working_a(*a);
-    Surface_mesh working_b(*b);
-    if (x != 0 || y != 0 || z != 0) {
-      std::cout << "Note: Shifting intersection x=" << x << " y=" << y
-                << " z=" << z << std::endl;
-      Transformation translation(CGAL::TRANSLATION, Vector(x, y, z));
-      CGAL::Polygon_mesh_processing::transform(translation, working_b,
-                                               CGAL::parameters::all_default());
-    }
-    if (check) {
-      if (CGAL::Polygon_mesh_processing::corefine_and_compute_intersection(
-              working_a, working_b, *c,
-              CGAL::Polygon_mesh_processing::parameters::
-                  throw_on_self_intersection(true),
-              CGAL::Polygon_mesh_processing::parameters::
-                  throw_on_self_intersection(true),
-              CGAL::Polygon_mesh_processing::parameters::
-                  throw_on_self_intersection(true))) {
-        return c;
-      }
-    } else {
-      if (CGAL::Polygon_mesh_processing::corefine_and_compute_intersection(
-              working_a, working_b, *c, CGAL::parameters::all_default(),
-              CGAL::parameters::all_default(),
-              CGAL::parameters::all_default())) {
-        return c;
-      }
-    }
-    if (!fix) {
-      delete c;
-      return nullptr;
-    }
-    const double direction = ((shift & (1 << 3)) ? -1 : 1) * (shift >> 4);
-    if (shift & (1 << 0)) {
-      x = kIota * direction;
-    } else {
-      x = 0;
-    }
-    if (shift & (1 << 1)) {
-      y = kIota * direction;
-    } else {
-      y = 0;
-    }
-    if (shift & (1 << 2)) {
-      z = kIota * direction;
-    } else {
-      z = 0;
-    }
-  }
-}
-
-const Surface_mesh* UnionOfSurfaceMeshes(const Surface_mesh* a,
-                                         const Transformation* a_transform,
-                                         const Surface_mesh* b,
-                                         const Transformation* b_transform,
-                                         bool check, bool fix) {
-  if (a_transform) {
-    Surface_mesh transformed(*a);
-    CGAL::Polygon_mesh_processing::transform(*a_transform, transformed,
-                                             CGAL::parameters::all_default());
-    return UnionOfSurfaceMeshes(&transformed, nullptr, b, b_transform, check,
-                                fix);
-  } else if (b_transform) {
-    Surface_mesh transformed(*b);
-    CGAL::Polygon_mesh_processing::transform(*b_transform, transformed,
-                                             CGAL::parameters::all_default());
-    return UnionOfSurfaceMeshes(a, a_transform, &transformed, nullptr, check,
-                                fix);
-  }
-  Plane plane;
-  if (IsPlanarSurfaceMesh(plane, *a)) {
-    if (IsCoplanarSurfaceMesh(plane, *b)) {
-      Surface_mesh* result = new Surface_mesh();
-      UnionOfCoplanarSurfaceMeshes(plane, a, b, *result);
-      return result;
-    } else {
-      // Difference with the section of the other.
-      General_polygon_set_2 set;
-      General_polygon_set_2 other;
-      PlanarSurfaceMeshToPolygonSet(plane, *a, set);
-      SurfaceMeshSectionToPolygonSet(plane, *b, other);
-      set.join(other);
-      Surface_mesh* result = new Surface_mesh();
-      GeneralPolygonSetToSurfaceMesh(plane, set, *result);
-      return result;
-    }
-  } else if (IsPlanarSurfaceMesh(plane, *b)) {
-    return a;
-  }
-  double x = 0, y = 0, z = 0;
-  Surface_mesh* c = new Surface_mesh();
-  for (int shift = 0x11;; shift++) {
-    Surface_mesh working_a(*a);
-    Surface_mesh working_b(*b);
-    if (x != 0 || y != 0 || z != 0) {
-      std::cout << "Note: Shifting union by x=" << x << " y=" << y << " z=" << z
-                << std::endl;
-      Transformation translation(CGAL::TRANSLATION, Vector(x, y, z));
-      CGAL::Polygon_mesh_processing::transform(translation, working_b,
-                                               CGAL::parameters::all_default());
-    }
-    if (check) {
-      if (CGAL::Polygon_mesh_processing::corefine_and_compute_union(
-              working_a, working_b, *c,
-              CGAL::Polygon_mesh_processing::parameters::
-                  throw_on_self_intersection(true),
-              CGAL::Polygon_mesh_processing::parameters::
-                  throw_on_self_intersection(true),
-              CGAL::Polygon_mesh_processing::parameters::
-                  throw_on_self_intersection(true))) {
-        return c;
-      }
-    } else {
-      if (CGAL::Polygon_mesh_processing::corefine_and_compute_union(
-              working_a, working_b, *c, CGAL::parameters::all_default(),
-              CGAL::parameters::all_default(),
-              CGAL::parameters::all_default())) {
-        return c;
-      }
-    }
-    if (!fix) {
-      delete c;
-      return nullptr;
-    }
-    const double direction = ((shift & (1 << 3)) ? -1 : 1) * (shift >> 4);
-    if (shift & (1 << 0)) {
-      x = kIota * direction;
-    } else {
-      x = 0;
-    }
-    if (shift & (1 << 1)) {
-      y = kIota * direction;
-    } else {
-      y = 0;
-    }
-    if (shift & (1 << 2)) {
-      z = kIota * direction;
-    } else {
-      z = 0;
-    }
-  }
 }
 
 void admitPlane(Plane& plane, emscripten::val fill_plane) {
@@ -2919,7 +2563,6 @@ void SectionOfSurfaceMesh(const Surface_mesh* input,
 
   for (std::size_t nth_plane = 0; nth_plane < plane_count; nth_plane++) {
     Quadruple q;
-    Quadruple* qp = &q;
     Plane plane(0, 0, 1, 0);
     const Transformation* section_transform =
         get_transform(nth_plane).as<const Transformation*>(
@@ -3238,11 +2881,15 @@ class Surface_mesh_explorer {
   emscripten::val& emit_face_;
 };
 
-void Surface_mesh__explore(const Surface_mesh* mesh, emscripten::val emit_point,
+void Surface_mesh__explore(const Surface_mesh* input, emscripten::val emit_point,
                            emscripten::val emit_edge,
                            emscripten::val emit_face) {
   Surface_mesh_explorer explorer(emit_point, emit_edge, emit_face);
-  explorer.Explore(*mesh);
+  Surface_mesh mesh(*input);
+  if (mesh.has_garbage()) {
+    mesh.collect_garbage();
+  }
+  explorer.Explore(mesh);
 }
 
 std::string SerializeSurfaceMesh(const Surface_mesh* mesh,
@@ -3365,7 +3012,6 @@ const Surface_mesh* ComputeAlphaShapeAsSurfaceMesh(int component_limit,
   typedef CGAL::Triangulation_data_structure_3<Vb, Fb> Tds;
   typedef CGAL::Delaunay_triangulation_3<Kernel, Tds> Triangulation_3;
   typedef CGAL::Alpha_shape_3<Triangulation_3> Alpha_shape_3;
-  typedef Kernel::Point_3 Point;
   typedef Alpha_shape_3::Alpha_iterator Alpha_iterator;
 
   Points points;
@@ -4113,11 +3759,8 @@ void ArrangePolygonsWithHoles(std::size_t count, emscripten::val fill_plane,
 void ArrangePaths(Plane plane, bool do_triangulate, emscripten::val fill,
                   emscripten::val emit_polygon, emscripten::val emit_point) {
   typedef CGAL::Arr_segment_traits_2<Kernel> Traits_2;
-  typedef Traits_2::Point_2 Point_2;
   typedef Traits_2::X_monotone_curve_2 Segment_2;
   typedef CGAL::Arrangement_2<Traits_2> Arrangement_2;
-  typedef Arrangement_2::Vertex_handle Vertex_handle;
-  typedef Arrangement_2::Halfedge_handle Halfedge_handle;
 
   Arrangement_2 arrangement;
 
@@ -4573,6 +4216,8 @@ void Surface_mesh__bbox(const Surface_mesh* input,
   emit(box.xmin(), box.ymin(), box.zmin(), box.xmax(), box.ymax(), box.zmax());
 }
 
+void DeleteSurfaceMesh(const Surface_mesh* input) { delete input; }
+
 const Transformation* Transformation__identity() {
   return new Transformation(CGAL::IDENTITY);
 }
@@ -4998,8 +4643,6 @@ EMSCRIPTEN_BINDINGS(module) {
   emscripten::function("FromPolygonSoupToSurfaceMesh",
                        &FromPolygonSoupToSurfaceMesh,
                        emscripten::allow_raw_pointers());
-  emscripten::function("DifferenceOfSurfaceMeshes", &DifferenceOfSurfaceMeshes,
-                       emscripten::allow_raw_pointers());
   emscripten::class_<SurfaceMeshSegmentProcessor>("SurfaceMeshSegmentProcessor")
       .function("clip", &SurfaceMeshSegmentProcessor::clip)
       .function("cut", &SurfaceMeshSegmentProcessor::cut);
@@ -5012,17 +4655,13 @@ EMSCRIPTEN_BINDINGS(module) {
                        emscripten::allow_raw_pointers());
   emscripten::function("JoinSurfaceMeshes", &JoinSurfaceMeshes,
                        emscripten::allow_raw_pointers());
+  emscripten::function("FuseSurfaceMeshes", &FuseSurfaceMeshes,
+                       emscripten::allow_raw_pointers());
   emscripten::function("DisjointSurfaceMeshesIncrementally",
                        &DisjointSurfaceMeshesIncrementally,
                        emscripten::allow_raw_pointers());
-  emscripten::function("IntersectionOfSurfaceMeshes",
-                       &IntersectionOfSurfaceMeshes,
-                       emscripten::allow_raw_pointers());
-  emscripten::function("UnionOfSurfaceMeshes", &UnionOfSurfaceMeshes,
-                       emscripten::allow_raw_pointers());
   emscripten::function("SeparateSurfaceMesh", &SeparateSurfaceMesh,
                        emscripten::allow_raw_pointers());
-
   emscripten::function("TwistSurfaceMesh", &TwistSurfaceMesh,
                        emscripten::allow_raw_pointers());
   emscripten::function("BendSurfaceMesh", &BendSurfaceMesh,
@@ -5113,6 +4752,8 @@ EMSCRIPTEN_BINDINGS(module) {
   emscripten::function("RemoveSelfIntersectionsOfSurfaceMesh",
                        &RemoveSelfIntersectionsOfSurfaceMesh,
                        emscripten::allow_raw_pointers());
+  emscripten::function("EachPointOfSurfaceMesh", &EachPointOfSurfaceMesh,
+                       emscripten::allow_raw_pointers());
   emscripten::function("Surface_mesh__is_closed", &Surface_mesh__is_closed,
                        emscripten::allow_raw_pointers());
   emscripten::function("Surface_mesh__is_empty", &Surface_mesh__is_empty,
@@ -5128,6 +4769,8 @@ EMSCRIPTEN_BINDINGS(module) {
                        emscripten::allow_raw_pointers());
   emscripten::function("Surface_mesh__bbox", &Surface_mesh__bbox,
                        emscripten::allow_raw_pointers());
+  emscripten::function("DeleteSurfaceMesh", &DeleteSurfaceMesh,
+                       emscripten::allow_raw_pointers());
   emscripten::function("ArrangePathsApproximate", &ArrangePathsApproximate,
                        emscripten::allow_raw_pointers());
   emscripten::function("ArrangePathsExact", &ArrangePathsExact,
@@ -5137,6 +4780,7 @@ EMSCRIPTEN_BINDINGS(module) {
   emscripten::function("SectionOfSurfaceMesh", &SectionOfSurfaceMesh,
                        emscripten::allow_raw_pointers());
 
-  // emscripten::function("getTotalMemory", &getTotalMemory);
+  // emscripten::function("getTotalMemory",
+  // &getTotalMemory);
 #endif
 }

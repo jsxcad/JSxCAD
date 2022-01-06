@@ -78,6 +78,7 @@ const build = async (baseDirectory = '.') => {
       exitCode = 0;
     }
   } catch (error) {
+    console.log(`ER/1: ${JSON.stringify(error)}`);
     console.log(`Failed with error: ${error.message}`);
     console.log(error.stack);
     exitCode = 1;

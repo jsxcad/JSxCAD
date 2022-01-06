@@ -18,6 +18,7 @@ export const disjoint = (geometries) => {
   const disjointGeometries = [];
   const results = disjointSurfaceMeshes(request.reverse(), check);
   for (const { matrix, mesh, tags } of results) {
+    mesh.provenance = 'disjoint';
     disjointGeometries.push(
       taggedGraph({ tags, matrix }, fromSurfaceMeshLazy(mesh))
     );
