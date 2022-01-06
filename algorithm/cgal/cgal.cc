@@ -2881,7 +2881,8 @@ class Surface_mesh_explorer {
   emscripten::val& emit_face_;
 };
 
-void Surface_mesh__explore(const Surface_mesh* input, emscripten::val emit_point,
+void Surface_mesh__explore(const Surface_mesh* input,
+                           emscripten::val emit_point,
                            emscripten::val emit_edge,
                            emscripten::val emit_face) {
   Surface_mesh_explorer explorer(emit_point, emit_edge, emit_face);
