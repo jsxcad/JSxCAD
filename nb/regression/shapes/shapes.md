@@ -362,3 +362,35 @@ Line(-15, 15)
 ```
 
 ![Image](shapes.md.31.png)
+
+```JavaScript
+Box(12)
+  .cut(
+    Arc(3)
+      .y(3)
+      .rz(1 / 4, 3 / 4)
+  )
+  .color('black')
+  .fit((s) =>
+    s.separate({ keepHolesInShapes: true }).offset(1).fuse().color('yellow')
+  )
+  .view();
+```
+
+![Image](shapes.md.32.png)
+
+```JavaScript
+Box(12)
+  .cut(
+    Arc(3)
+      .y(3)
+      .rz(1 / 4, 3 / 4)
+  )
+  .color('black')
+  .fit((s) =>
+    s.separate({ keepHolesInShapes: false }).offset(1).fuse().color('yellow')
+  )
+  .view();
+```
+
+![Image](shapes.md.33.png)

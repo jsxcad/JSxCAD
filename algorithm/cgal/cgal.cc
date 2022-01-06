@@ -1290,9 +1290,9 @@ class SurfaceMeshQuery {
   bool is_volume_;
 };
 
-void SeparateSurfaceMesh(const Surface_mesh* input, bool keep_volumes,
-                         bool keep_cavities_in_volumes,
-                         bool keep_cavities_as_volumes,
+void SeparateSurfaceMesh(const Surface_mesh* input, bool keep_shapes,
+                         bool keep_holes_in_shapes,
+                         bool keep_holes_as_shapes,
                          emscripten::val emit_mesh) {
   std::vector<Surface_mesh> meshes;
   std::vector<Surface_mesh> cavities;

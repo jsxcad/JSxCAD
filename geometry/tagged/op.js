@@ -11,6 +11,7 @@ export const op =
       layout = doNothing,
       paths = doNothing,
       points = doNothing,
+      polygonsWithHoles = doNothing,
       segments = doNothing,
       triangles = doNothing,
     },
@@ -27,6 +28,8 @@ export const op =
           return paths(geometry, ...args);
         case 'points':
           return points(geometry, ...args);
+        case 'polygonsWithHoles':
+          return polygonsWithHoles(geometry, ...args);
         case 'segments':
           return segments(geometry, ...args);
         case 'triangles':
