@@ -3104,10 +3104,7 @@ const sectionImpl = (geometry, matrices, { profile = false }) => {
 
 const section = cacheSection(sectionImpl);
 
-const serialize$1 = (geometry, options) =>
-  serializeSurfaceMesh(toSurfaceMesh(geometry.graph));
-
-const serialize = op({ graph: serialize$1 });
+const serialize = op({ graph: prepareForSerialization$1 });
 
 const simplify$1 = (geometry, options) =>
   taggedGraph(

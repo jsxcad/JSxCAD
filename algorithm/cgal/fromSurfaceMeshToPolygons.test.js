@@ -95,7 +95,7 @@ const box = [
   },
 ];
 
-test('FromPolygonsToSurfaceMesh', (t) => {
+test('FromSurfaceMeshToPolygon', (t) => {
   const surfaceMesh = fromPolygonsToSurfaceMesh(box);
   t.true(surfaceMesh.is_valid(false));
   const polygons = fromSurfaceMeshToPolygons(surfaceMesh);

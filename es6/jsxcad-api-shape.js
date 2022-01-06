@@ -3865,7 +3865,10 @@ const seq =
 
 Shape.registerMethod('seq', seq);
 
-const serialize = () => (shape) => serialize$1(shape.toGeometry());
+const serialize =
+  (op = (v) => v, groupOp = (v, s) => s) =>
+  (shape) =>
+    groupOp(op(serialize$1(shape.toGeometry())), shape);
 
 Shape.registerMethod('serialize', serialize);
 

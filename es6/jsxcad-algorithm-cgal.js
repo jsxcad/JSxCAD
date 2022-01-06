@@ -1722,6 +1722,7 @@ const fromSurfaceMeshToPolygonsWithHoles = (mesh, transform) => {
     let outputExactPlane;
     let outputPolygons;
     let outputPolygon;
+    let output;
 
     const emitPlane = (x, y, z, w, a, b, c, d) => {
       outputPlane = [x, y, z, w];
@@ -1747,13 +1748,14 @@ const fromSurfaceMeshToPolygonsWithHoles = (mesh, transform) => {
         outputPolygon.holes.push(polygon);
       } else {
         outputPolygons.push(polygon);
+        outputPolygon = polygon;
       }
-      outputPolygon = polygon;
+      output = polygon;
     };
 
     const emitPoint = (x, y, z, exactX, exactY, exactZ) => {
-      outputPolygon.points.push([x, y, z]);
-      outputPolygon.exactPoints.push([exactX, exactY, exactZ]);
+      output.points.push([x, y, z]);
+      output.exactPoints.push([exactX, exactY, exactZ]);
     };
 
     g.FromSurfaceMeshToPolygonsWithHoles(
