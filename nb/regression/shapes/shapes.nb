@@ -168,3 +168,27 @@ Line(-15, 15)
   .seq({ from: -15, to: 15 }, y, Group)
   .cut(Arc(20).cut(Arc(10)).ez(1))
   .view();
+
+Box(12)
+  .cut(
+    Arc(3)
+      .y(3)
+      .rz(1 / 4, 3 / 4)
+  )
+  .color('black')
+  .fit((s) =>
+    s.separate({ keepHolesInShapes: true }).offset(1).fuse().color('yellow')
+  )
+  .view();
+
+Box(12)
+  .cut(
+    Arc(3)
+      .y(3)
+      .rz(1 / 4, 3 / 4)
+  )
+  .color('black')
+  .fit((s) =>
+    s.separate({ keepHolesInShapes: false }).offset(1).fuse().color('yellow')
+  )
+  .view();

@@ -3,17 +3,17 @@ import { separate as separateGeometry } from '@jsxcad/geometry';
 
 export const separate =
   ({
-    keepVolumes = true,
-    keepCavitiesInVolumes = true,
-    keepCavitiesAsVolumes = false,
+    keepShapes = true,
+    keepHolesInShapes = true,
+    keepHolesAsShapes = false,
   } = {}) =>
   (shape) =>
     Shape.fromGeometry(
       separateGeometry(
         shape.toGeometry(),
-        keepVolumes,
-        keepCavitiesInVolumes,
-        keepCavitiesAsVolumes
+        keepShapes,
+        keepHolesInShapes,
+        keepHolesAsShapes
       )
     );
 

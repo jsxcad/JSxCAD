@@ -611,6 +611,7 @@ const op =
       layout = doNothing,
       paths = doNothing,
       points = doNothing,
+      polygonsWithHoles = doNothing,
       segments = doNothing,
       triangles = doNothing,
     },
@@ -627,6 +628,8 @@ const op =
           return paths(geometry, ...args);
         case 'points':
           return points(geometry, ...args);
+        case 'polygonsWithHoles':
+          return polygonsWithHoles(geometry, ...args);
         case 'segments':
           return segments(geometry, ...args);
         case 'triangles':
@@ -2814,6 +2817,7 @@ const graph = (geometry, initial = 1, step, limit) =>
   );
 const polygonsWithHoles = (geometry, initial = 1, step, limit) =>
   offset(fromPolygonsWithHoles(geometry), initial, step, limit);
+
 const paths = (geometry, initial = 1, step, limit) =>
   offset(
     fromPaths({ tags: geometry.tags }, geometry.paths),
@@ -3168,67 +3172,61 @@ const smooth = (geometry, options) => {
 
 const separate$1 = (
   geometry,
-  keepVolumes = true,
-  keepCavitiesInVolumes = true,
-  keepCavitiesAsVolumes = false
-) =>
-  taggedGroup(
-    {},
-    ...separateSurfaceMesh(
-      toSurfaceMesh(geometry.graph),
-      keepVolumes,
-      keepCavitiesInVolumes,
-      keepCavitiesAsVolumes
-    ).map((mesh) =>
-      taggedGraph(
-        { tags: geometry.tags, matrix: geometry.matrix },
-        fromSurfaceMeshLazy(mesh)
-      )
-    )
-  );
-
-const separate = (
-  geometry,
-  keepVolumes = true,
-  keepCavitiesInVolumes = true,
-  keepCavitiesAsVolumes = false
+  keepShapes = true,
+  keepHolesInShapes = true,
+  keepHolesAsShapes = false
 ) => {
-  const op = (geometry, descend) => {
-    switch (geometry.type) {
-      case 'graph':
-        return separate$1(
-          geometry,
-          keepVolumes,
-          keepCavitiesInVolumes,
-          keepCavitiesAsVolumes
-        );
-      case 'triangles':
-      case 'paths':
-      case 'points':
-        // Not implemented yet.
-        return geometry;
-      case 'plan':
-        return separate(
-          reify(geometry).content[0],
-          keepVolumes,
-          keepCavitiesInVolumes,
-          keepCavitiesAsVolumes
-        );
-      case 'item':
-      case 'group': {
-        return descend();
+  if (geometry.graph.is_closed) {
+    return taggedGroup(
+      {},
+      ...separateSurfaceMesh(
+        toSurfaceMesh(geometry.graph),
+        keepShapes,
+        keepHolesInShapes,
+        keepHolesAsShapes
+      ).map((mesh) =>
+        taggedGraph(
+          { tags: geometry.tags, matrix: geometry.matrix },
+          fromSurfaceMeshLazy(mesh)
+        )
+      )
+    );
+  } else {
+    // This is a surface.
+    const results = [];
+    const arrangements = fromSurfaceMeshToPolygonsWithHoles(
+      toSurfaceMesh(geometry.graph)
+    );
+    for (const { exactPlane, plane, polygonsWithHoles } of arrangements) {
+      const shapes = [];
+      for (const polygonWithHoles of polygonsWithHoles) {
+        if (keepShapes) {
+          if (keepHolesInShapes) {
+            shapes.push(polygonWithHoles);
+          } else {
+            shapes.push({ ...polygonWithHoles, holes: [] });
+          }
+        }
+        if (keepHolesAsShapes) {
+          for (const hole of polygonWithHoles.holes) {
+            shapes.push(hole);
+          }
+        }
       }
-      case 'sketch': {
-        // Sketches aren't real.
-        return geometry;
+      if (shapes.length > 0) {
+        results.push(
+          taggedPolygonsWithHoles(
+            { tags: geometry.tags, matrix: geometry.matrix, plane, exactPlane },
+            shapes
+          )
+        );
       }
-      default:
-        throw Error(`Unexpected geometry: ${JSON.stringify(geometry)}`);
     }
-  };
-
-  return rewrite(geometry, op);
+    return taggedGroup({}, ...results);
+  }
 };
+
+const separate = op({ graph: separate$1 });
 
 const taggedTriangles = ({ tags = [], matrix }, triangles) => {
   return { type: 'triangles', tags, matrix, triangles };

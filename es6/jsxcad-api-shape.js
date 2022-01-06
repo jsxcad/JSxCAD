@@ -3759,17 +3759,17 @@ Shape.registerMethod('sectionProfile', sectionProfile);
 
 const separate =
   ({
-    keepVolumes = true,
-    keepCavitiesInVolumes = true,
-    keepCavitiesAsVolumes = false,
+    keepShapes = true,
+    keepHolesInShapes = true,
+    keepHolesAsShapes = false,
   } = {}) =>
   (shape) =>
     Shape.fromGeometry(
       separate$1(
         shape.toGeometry(),
-        keepVolumes,
-        keepCavitiesInVolumes,
-        keepCavitiesAsVolumes
+        keepShapes,
+        keepHolesInShapes,
+        keepHolesAsShapes
       )
     );
 

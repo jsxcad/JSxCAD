@@ -11,6 +11,7 @@ const graph = (geometry, initial = 1, step, limit) =>
   );
 const polygonsWithHoles = (geometry, initial = 1, step, limit) =>
   offset(fromPolygonsWithHolesToGraph(geometry), initial, step, limit);
+
 const paths = (geometry, initial = 1, step, limit) =>
   offset(
     fromPathsToGraph({ tags: geometry.tags }, geometry.paths),

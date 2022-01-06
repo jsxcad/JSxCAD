@@ -2,18 +2,21 @@ import { getCgal } from './getCgal.js';
 
 export const separateSurfaceMesh = (
   mesh,
-  keepVolumes = true,
-  keepCavitiesInVolumes = true,
-  keepCavitiesAsVolumes = false
+  keepShapes = true,
+  keepHolesInShapes = true,
+  keepHolesAsShapes = false
 ) => {
   try {
     const meshes = [];
     getCgal().SeparateSurfaceMesh(
       mesh,
-      keepVolumes,
-      keepCavitiesInVolumes,
-      keepCavitiesAsVolumes,
-      (mesh) => meshes.push(mesh)
+      keepShapes,
+      keepHolesInShapes,
+      keepHolesAsShapes,
+      (mesh) => {
+        mesh.provenance = 'separate';
+        meshes.push(mesh);
+      }
     );
     return meshes;
   } catch (error) {
