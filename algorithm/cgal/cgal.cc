@@ -1,3 +1,5 @@
+// #define BOOST_DISABLE_THREADS
+
 #include <CGAL/Advancing_front_surface_reconstruction.h>
 #include <CGAL/Aff_transformation_3.h>
 #include <CGAL/Alpha_shape_2.h>
@@ -84,6 +86,10 @@
 #include <boost/algorithm/string/split.hpp>
 #include <boost/range/adaptor/reversed.hpp>
 #include <queue>
+
+#ifdef CUSTOM_HAS_THREADS
+#include <thread>
+#endif
 
 typedef CGAL::Exact_predicates_exact_constructions_kernel Kernel;
 
@@ -369,32 +375,32 @@ const Surface_mesh* SubdivideSurfaceMesh(const Surface_mesh* input, int method,
           CGAL::Polygon_mesh_processing::parameters::number_of_iterations(
               iterations));
       break;
-    // case 1:
-    //   CGAL::Subdivision_method_3::DooSabin_subdivision(*mesh,
-    //   CGAL::Polygon_mesh_processing::parameters::number_of_iterations(iterations));
-    //   break;
-    // case 2:
-    //  CGAL::Subdivision_method_3::DQQ(*mesh,
-    //  CGAL::Polygon_mesh_processing::parameters::number_of_iterations(iterations));
-    //  break;
+    case 1:
+      CGAL::Subdivision_method_3::DooSabin_subdivision(*mesh,
+      CGAL::Polygon_mesh_processing::parameters::number_of_iterations(iterations));
+      break;
+    case 2:
+      CGAL::Subdivision_method_3::DQQ(*mesh,
+      CGAL::Polygon_mesh_processing::parameters::number_of_iterations(iterations));
+      break;
     case 3:
       CGAL::Subdivision_method_3::Loop_subdivision(
           *mesh,
           CGAL::Polygon_mesh_processing::parameters::number_of_iterations(
               iterations));
       break;
-    // case 4:
-    //   CGAL::Subdivision_method_3::PQQ(*mesh,
-    //   CGAL::Polygon_mesh_processing::parameters::number_of_iterations(iterations));
-    //   break;
-    // case 5:
-    //   CGAL::Subdivision_method_3::PTQ(*mesh,
-    //   CGAL::Polygon_mesh_processing::parameters::number_of_iterations(iterations));
-    //   break;
-    // case 6:
-    //   CGAL::Subdivision_method_3::Sqrt3(*mesh,
-    //   CGAL::Polygon_mesh_processing::parameters::number_of_iterations(iterations));
-    //   break;
+    case 4:
+      CGAL::Subdivision_method_3::PQQ(*mesh,
+      CGAL::Polygon_mesh_processing::parameters::number_of_iterations(iterations));
+      break;
+    case 5:
+      CGAL::Subdivision_method_3::PTQ(*mesh,
+      CGAL::Polygon_mesh_processing::parameters::number_of_iterations(iterations));
+      break;
+    case 6:
+      CGAL::Subdivision_method_3::Sqrt3(*mesh,
+      CGAL::Polygon_mesh_processing::parameters::number_of_iterations(iterations));
+      break;
     case 7:
       CGAL::Subdivision_method_3::Sqrt3_subdivision(
           *mesh,
@@ -1291,8 +1297,7 @@ class SurfaceMeshQuery {
 };
 
 void SeparateSurfaceMesh(const Surface_mesh* input, bool keep_shapes,
-                         bool keep_holes_in_shapes,
-                         bool keep_holes_as_shapes,
+                         bool keep_holes_in_shapes, bool keep_holes_as_shapes,
                          emscripten::val emit_mesh) {
   std::vector<Surface_mesh> meshes;
   std::vector<Surface_mesh> cavities;
@@ -1309,9 +1314,9 @@ void SeparateSurfaceMesh(const Surface_mesh* input, bool keep_shapes,
     }
   }
 
-  if (keep_volumes) {
+  if (keep_shapes) {
     for (auto& mesh : volumes) {
-      if (keep_cavities_in_volumes) {
+      if (keep_holes_in_shapes) {
         CGAL::Side_of_triangle_mesh<Surface_mesh, Kernel> inside(mesh);
         for (auto& cavity : cavities) {
           for (const auto vertex : cavity.vertices()) {
@@ -1329,7 +1334,7 @@ void SeparateSurfaceMesh(const Surface_mesh* input, bool keep_shapes,
     }
   }
 
-  if (keep_cavities_as_volumes) {
+  if (keep_holes_as_shapes) {
     for (auto& mesh : cavities) {
       CGAL::Polygon_mesh_processing::reverse_face_orientations(mesh);
       Surface_mesh* output = new Surface_mesh(mesh);
@@ -1878,51 +1883,6 @@ void SurfaceMeshSectionToPolygonSet(const Plane& plane, const Surface_mesh& a,
   }
 }
 
-int CutClosedSurfaceMeshIncrementally(const Surface_mesh* a,
-                                      const Transformation* a_transform,
-                                      int cutCount, bool check,
-                                      emscripten::val nthMesh,
-                                      emscripten::val nthTransform,
-                                      emscripten::val emit) {
-  Transformation toA = a_transform->inverse();
-  Surface_mesh* result = new Surface_mesh(*a);
-  for (int nth = 0; nth < cutCount; nth++) {
-    if (CGAL::is_empty(*result)) {
-      emit(result);
-      return STATUS_EMPTY;
-    }
-    const Surface_mesh* cutMesh =
-        nthMesh(nth).as<const Surface_mesh*>(emscripten::allow_raw_pointers());
-    if (CGAL::is_empty(*cutMesh)) {
-      continue;
-    }
-    const Transformation* cutTransform =
-        nthTransform(nth).as<const Transformation*>(
-            emscripten::allow_raw_pointers());
-    Surface_mesh workingCutMesh(*cutMesh);
-    CGAL::Polygon_mesh_processing::transform(
-        toA * *cutTransform, workingCutMesh, CGAL::parameters::all_default());
-    if (!CGAL::Polygon_mesh_processing::do_intersect(
-            *result, workingCutMesh,
-            CGAL::Polygon_mesh_processing::parameters::
-                do_overlap_test_of_bounded_sides(true),
-            CGAL::Polygon_mesh_processing::parameters::
-                do_overlap_test_of_bounded_sides(true))) {
-      continue;
-    }
-    if (!CGAL::Polygon_mesh_processing::corefine_and_compute_difference(
-            *result, workingCutMesh, *result, CGAL::parameters::all_default(),
-            CGAL::parameters::all_default(), CGAL::parameters::all_default())) {
-      delete result;
-      std::cout << "CutClosedSurfaceMeshIncrementally/zero_thickness"
-                << std::endl;
-      return STATUS_ZERO_THICKNESS;
-    }
-  }
-  emit(result);
-  return STATUS_OK;
-}
-
 class SurfaceMeshSegmentProcessor {
  public:
   SurfaceMeshSegmentProcessor(std::vector<SurfaceMeshQuery>& queries,
@@ -2114,6 +2074,198 @@ int ClipSurfaceMeshes(size_t target_count, emscripten::val getTargetMesh,
     const Surface_mesh* clipped_target_mesh =
         clipped_target_meshes[nth_target].release();
     emit_mesh(nth_target, clipped_target_mesh);
+  }
+
+  return STATUS_OK;
+}
+
+int ParallelCutSurfaceMeshes(size_t target_count, emscripten::val getTargetMesh,
+                             emscripten::val getTargetTransform,
+                             size_t segments_count,
+                             emscripten::val fillSegments, size_t source_count,
+                             emscripten::val getSourceMesh,
+                             emscripten::val getSourceTransform,
+                             emscripten::val emit_mesh,
+                             emscripten::val emit_segment) {
+  std::vector<std::unique_ptr<Surface_mesh>> target_meshes(target_count);
+  std::vector<Transformation> to_target_transforms(target_count);
+  std::vector<bool> planar(target_count, false);
+  std::vector<Plane> target_planes(target_count);
+  std::vector<General_polygon_set_2> planar_target_sets(target_count);
+
+  for (size_t nth_target = 0; nth_target < target_count; nth_target++) {
+    const Surface_mesh* target_mesh =
+        getTargetMesh(nth_target)
+            .as<const Surface_mesh*>(emscripten::allow_raw_pointers());
+    target_meshes[nth_target].reset(new Surface_mesh(*target_mesh));
+    const Transformation* target_transform =
+        getTargetTransform(nth_target)
+            .as<const Transformation*>(emscripten::allow_raw_pointers());
+    to_target_transforms[nth_target] = target_transform->inverse();
+    planar[nth_target] = IsPlanarSurfaceMesh(target_planes[nth_target],
+                                             *target_meshes[nth_target]);
+    if (planar[nth_target]) {
+      PlanarSurfaceMeshToPolygonSet(target_planes[nth_target],
+                                    *target_meshes[nth_target],
+                                    planar_target_sets[nth_target]);
+    }
+  }
+
+  std::vector<const Surface_mesh*> source_meshes(source_count);
+  std::vector<const Transformation*> source_transforms(source_count);
+
+  for (size_t nth_source = 0; nth_source < source_count; nth_source++) {
+    source_meshes[nth_source] =
+        getSourceMesh(nth_source)
+            .as<const Surface_mesh*>(emscripten::allow_raw_pointers());
+    source_transforms[nth_source] =
+        getSourceTransform(nth_source)
+            .as<const Transformation*>(emscripten::allow_raw_pointers());
+  }
+#ifdef CUSTOM_HAS_THREADS
+  typedef std::atomic<bool> atomic_bool;
+#else
+  typedef bool atomic_bool;
+#endif
+
+  atomic_bool zero_thickness_signal(false);
+
+  auto planar_cut_fn =
+      [](Surface_mesh* target_mesh, const Transformation* to_target_transform,
+         Plane* plane, General_polygon_set_2* planar_target_set,
+         atomic_bool* zero_thickness_signal, size_t source_count,
+         const std::vector<const Surface_mesh*>* source_meshes,
+         const std::vector<const Transformation*>* source_transforms) {
+        for (size_t nth_source = 0; nth_source < source_count; nth_source++) {
+          if (*zero_thickness_signal) {
+            return;
+          }
+          Surface_mesh working_source_mesh(*(*source_meshes)[nth_source]);
+          CGAL::Polygon_mesh_processing::transform(
+              *to_target_transform * *(*source_transforms)[nth_source],
+              working_source_mesh, CGAL::parameters::all_default());
+          General_polygon_set_2 cut;
+          if (IsCoplanarSurfaceMesh(*plane, working_source_mesh)) {
+            PlanarSurfaceMeshToPolygonSet(*plane, working_source_mesh, cut);
+          } else if (CGAL::is_closed(working_source_mesh)) {
+            SurfaceMeshSectionToPolygonSet(*plane, working_source_mesh, cut);
+          }
+          planar_target_set->difference(cut);
+        }
+        if (!GeneralPolygonSetToSurfaceMesh(*plane, *planar_target_set,
+                                            *target_mesh)) {
+          *zero_thickness_signal = true;
+        }
+      };
+
+  auto volume_cut_fn =
+      [](Surface_mesh* target_mesh, const Transformation* to_target_transform,
+         atomic_bool* zero_thickness_signal, size_t source_count,
+         const std::vector<const Surface_mesh*>* source_meshes,
+         const std::vector<const Transformation*>* source_transforms) {
+        for (size_t nth_source = 0; nth_source < source_count; nth_source++) {
+          if (*zero_thickness_signal) {
+            return;
+          }
+          if (CGAL::is_empty(*target_mesh)) {
+            break;
+          }
+          const Surface_mesh& source_mesh = *(*source_meshes)[nth_source];
+          if (!CGAL::is_closed(source_mesh) || CGAL::is_empty(source_mesh)) {
+            continue;
+          }
+          Surface_mesh working_source_mesh(source_mesh);
+          CGAL::Polygon_mesh_processing::transform(
+              *to_target_transform * *(*source_transforms)[nth_source],
+              working_source_mesh, CGAL::parameters::all_default());
+          if (CGAL::Polygon_mesh_processing::do_intersect(
+                  *target_mesh, working_source_mesh,
+                  CGAL::Polygon_mesh_processing::parameters::
+                      do_overlap_test_of_bounded_sides(true),
+                  CGAL::Polygon_mesh_processing::parameters::
+                      do_overlap_test_of_bounded_sides(true))) {
+            if (!CGAL::Polygon_mesh_processing::corefine_and_compute_difference(
+                    *target_mesh, working_source_mesh, *target_mesh,
+                    CGAL::parameters::all_default(),
+                    CGAL::parameters::all_default(),
+                    CGAL::parameters::all_default())) {
+              *zero_thickness_signal = true;
+            }
+          }
+        }
+      };
+
+#ifdef CUSTOM_HAS_THREADS
+  std::vector<std::thread> threads;
+  threads.reserve(target_count);
+
+  for (size_t nth_target = 0; nth_target < target_count; nth_target++) {
+    if (planar[nth_target]) {
+      threads.emplace_back(
+          planar_cut_fn, target_meshes[nth_target].get(),
+          &to_target_transforms[nth_target], &target_planes[nth_target],
+          &planar_target_sets[nth_target], &zero_thickness_signal, source_count,
+          &source_meshes, &source_transforms);
+    } else {
+      threads.emplace_back(volume_cut_fn, target_meshes[nth_target].get(),
+                           &to_target_transforms[nth_target],
+                           &zero_thickness_signal, source_count, &source_meshes,
+                           &source_transforms);
+    }
+  }
+  for (std::thread& thread : threads) {
+    thread.join();
+  }
+  // end parallel processing.
+#else
+  // Without threads
+  for (size_t nth_target = 0; nth_target < target_count; nth_target++) {
+    if (planar[nth_target]) {
+      planar_cut_fn(target_meshes[nth_target].get(),
+                    &to_target_transforms[nth_target],
+                    &target_planes[nth_target], &planar_target_sets[nth_target],
+                    &zero_thickness_signal, source_count, &source_meshes,
+                    &source_transforms);
+    } else {
+      volume_cut_fn(target_meshes[nth_target].get(),
+                    &to_target_transforms[nth_target], &zero_thickness_signal,
+                    source_count, &source_meshes, &source_transforms);
+    }
+  }
+#endif
+
+  if (zero_thickness_signal) {
+    return STATUS_ZERO_THICKNESS;
+  }
+
+  // At this point we are committed to producing a result.
+
+  // Handle segments.
+  {
+    std::vector<SurfaceMeshQuery> queries;
+    for (size_t nth_source = 0; nth_source < source_count; nth_source++) {
+      const Surface_mesh* source_mesh =
+          getSourceMesh(nth_source)
+              .as<const Surface_mesh*>(emscripten::allow_raw_pointers());
+      if (CGAL::is_empty(*source_mesh)) {
+        continue;
+      }
+      const Transformation* source_transform =
+          getSourceTransform(nth_source)
+              .as<const Transformation*>(emscripten::allow_raw_pointers());
+      queries.emplace_back(source_mesh, source_transform);
+    }
+    SurfaceMeshSegmentProcessor processor(queries, emit_segment);
+    SurfaceMeshSegmentProcessor* processor_ptr = &processor;
+    for (size_t nth_segments = 0; nth_segments < segments_count;
+         nth_segments++) {
+      fillSegments(nth_segments, processor_ptr);
+    }
+  }
+
+  for (size_t nth_target = 0; nth_target < target_count; nth_target++) {
+    const Surface_mesh* target_mesh = target_meshes[nth_target].release();
+    emit_mesh(nth_target, target_mesh);
   }
 
   return STATUS_OK;
@@ -4649,10 +4801,9 @@ EMSCRIPTEN_BINDINGS(module) {
       .function("cut", &SurfaceMeshSegmentProcessor::cut);
   emscripten::function("ClipSurfaceMeshes", &ClipSurfaceMeshes,
                        emscripten::allow_raw_pointers());
-  emscripten::function("CutClosedSurfaceMeshIncrementally",
-                       &CutClosedSurfaceMeshIncrementally,
-                       emscripten::allow_raw_pointers());
   emscripten::function("CutSurfaceMeshes", &CutSurfaceMeshes,
+                       emscripten::allow_raw_pointers());
+  emscripten::function("ParallelCutSurfaceMeshes", &ParallelCutSurfaceMeshes,
                        emscripten::allow_raw_pointers());
   emscripten::function("JoinSurfaceMeshes", &JoinSurfaceMeshes,
                        emscripten::allow_raw_pointers());

@@ -9,7 +9,7 @@ export const cutSurfaceMeshes = (targetMeshes, targetSegments, sources) => {
     const cutMeshes = [];
     const cutSegments = [];
     let nthSegments;
-    const status = getCgal().CutSurfaceMeshes(
+    const status = getCgal().ParallelCutSurfaceMeshes(
       targetMeshes.length,
       (nth) => targetMeshes[nth].mesh,
       (nth) => toCgalTransformFromJsTransform(targetMeshes[nth].matrix),

@@ -3140,35 +3140,7 @@ const smooth$1 = (geometry, options = {}) => {
   }
 };
 
-const smooth = (geometry, options) => {
-  const op = (geometry, descend) => {
-    const { tags } = geometry;
-    switch (geometry.type) {
-      case 'graph': {
-        return taggedGraph({ tags }, smooth$1(geometry.graph, options));
-      }
-      case 'triangles':
-      case 'paths':
-      case 'points':
-        // Not implemented yet.
-        return geometry;
-      case 'plan':
-        return smooth(reify(geometry).content[0], options);
-      case 'item':
-      case 'group': {
-        return descend();
-      }
-      case 'sketch': {
-        // Sketches aren't real for smooth.
-        return geometry;
-      }
-      default:
-        throw Error(`Unexpected geometry: ${JSON.stringify(geometry)}`);
-    }
-  };
-
-  return rewrite(toTransformedGeometry(geometry), op);
-};
+const smooth = op({ graph: smooth$1 });
 
 const separate$1 = (
   geometry,

@@ -30,7 +30,17 @@ export const initCgal = async () => {
         console.log(texts);
       },
       locateFile(path) {
-        if (path === 'cgal_node.wasm' || path === 'cgal_browser.wasm') {
+        if (path === 'cgal_node.worker.js') {
+          const url = import.meta.url;
+          if (url.startsWith('file://')) {
+            let pathname = toPathnameFromUrl(import.meta.url);
+            const parts = pathname.split('/');
+            parts.pop();
+            const prefix = parts.join('/');
+            const workerPathname = `${prefix}/cgal_node.worker.cjs`;
+            return workerPathname;
+          }
+        } else if (path === 'cgal_node.wasm' || path === 'cgal_browser.wasm') {
           const url = import.meta.url;
           if (url.startsWith('file://')) {
             let pathname = toPathnameFromUrl(import.meta.url);
