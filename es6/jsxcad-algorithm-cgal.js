@@ -2307,11 +2307,13 @@ const toIndexFromMethod = (method) => {
 const subdivideSurfaceMesh = (mesh, options) => {
   try {
     const { method, iterations = 1 } = options;
-    return getCgal().SubdivideSurfaceMesh(
+    const subdividedMesh = getCgal().SubdivideSurfaceMesh(
       mesh,
       toIndexFromMethod(method),
       iterations
     );
+    subdividedMesh.provenance = 'subdivide';
+    return subdividedMesh;
   } catch (error) {
     throw Error(error);
   }

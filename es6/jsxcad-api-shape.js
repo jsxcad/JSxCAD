@@ -3873,9 +3873,9 @@ const serialize =
 Shape.registerMethod('serialize', serialize);
 
 const smooth =
-  (options = {}) =>
+  (iterations = 1, { method = 'Loop' } = {}) =>
   (shape) =>
-    Shape.fromGeometry(smooth$1(shape.toGeometry(), options));
+    Shape.fromGeometry(smooth$1(shape.toGeometry(), { iterations, method }));
 
 Shape.registerMethod('smooth', smooth);
 

@@ -375,32 +375,32 @@ const Surface_mesh* SubdivideSurfaceMesh(const Surface_mesh* input, int method,
           CGAL::Polygon_mesh_processing::parameters::number_of_iterations(
               iterations));
       break;
-    // case 1:
-    //   CGAL::Subdivision_method_3::DooSabin_subdivision(*mesh,
-    //   CGAL::Polygon_mesh_processing::parameters::number_of_iterations(iterations));
-    //   break;
-    // case 2:
-    //  CGAL::Subdivision_method_3::DQQ(*mesh,
-    //  CGAL::Polygon_mesh_processing::parameters::number_of_iterations(iterations));
-    //  break;
+    case 1:
+      CGAL::Subdivision_method_3::DooSabin_subdivision(*mesh,
+      CGAL::Polygon_mesh_processing::parameters::number_of_iterations(iterations));
+      break;
+    case 2:
+      CGAL::Subdivision_method_3::DQQ(*mesh,
+      CGAL::Polygon_mesh_processing::parameters::number_of_iterations(iterations));
+      break;
     case 3:
       CGAL::Subdivision_method_3::Loop_subdivision(
           *mesh,
           CGAL::Polygon_mesh_processing::parameters::number_of_iterations(
               iterations));
       break;
-    // case 4:
-    //   CGAL::Subdivision_method_3::PQQ(*mesh,
-    //   CGAL::Polygon_mesh_processing::parameters::number_of_iterations(iterations));
-    //   break;
-    // case 5:
-    //   CGAL::Subdivision_method_3::PTQ(*mesh,
-    //   CGAL::Polygon_mesh_processing::parameters::number_of_iterations(iterations));
-    //   break;
-    // case 6:
-    //   CGAL::Subdivision_method_3::Sqrt3(*mesh,
-    //   CGAL::Polygon_mesh_processing::parameters::number_of_iterations(iterations));
-    //   break;
+    case 4:
+      CGAL::Subdivision_method_3::PQQ(*mesh,
+      CGAL::Polygon_mesh_processing::parameters::number_of_iterations(iterations));
+      break;
+    case 5:
+      CGAL::Subdivision_method_3::PTQ(*mesh,
+      CGAL::Polygon_mesh_processing::parameters::number_of_iterations(iterations));
+      break;
+    case 6:
+      CGAL::Subdivision_method_3::Sqrt3(*mesh,
+      CGAL::Polygon_mesh_processing::parameters::number_of_iterations(iterations));
+      break;
     case 7:
       CGAL::Subdivision_method_3::Sqrt3_subdivision(
           *mesh,
