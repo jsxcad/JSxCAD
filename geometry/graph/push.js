@@ -5,7 +5,7 @@ import { toSurfaceMesh } from './toSurfaceMesh.js';
 
 export const push = (geometry, force, minimumDistance, maximumDistance) =>
   taggedGraph(
-    { tags: geometry.tags },
+    { tags: geometry.tags, matrix: geometry.matrix },
     fromSurfaceMeshLazy(
       pushSurfaceMesh(
         toSurfaceMesh(geometry.graph),

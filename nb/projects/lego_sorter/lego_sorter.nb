@@ -1,0 +1,31 @@
+const grid = Hexagon(16)
+  .seq(
+    { from: -4, to: 4 },
+    { from: -4, to: 4 },
+    (i, j) => move(i * 15 + ((j % 2) * 15) / 2, j * 13),
+    Join
+  )
+  .gridView();
+
+const base = grid.cutFrom(Arc(100)).ez(1).gridView();
+
+const ring = Arc(99).cutFrom(Arc(102)).ez(2.5).gridView();
+
+const sorter = ring.and(base).stl('sorter');
+
+const wall = grid
+  .cutFrom(Box(80, 110))
+  .rz(1 / 4)
+  .ez(2)
+  .rx(1 / 4)
+  .x(-210, -105, 0, 105, 210)
+  .view();
+
+const bentWall = wall
+  .scale(1 / 1.5)
+  .align('z>')
+  .y(51)
+  .bend(50)
+  .view();
+
+bentWall.and(ring, base, ring.z(52)).scale(1.5).view().stl('tall_sorter');

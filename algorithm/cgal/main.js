@@ -57,6 +57,7 @@ export { fuseSurfaceMeshes } from './fuseSurfaceMeshes.js';
 export { growSurfaceMesh } from './growSurfaceMesh.js';
 export { initCgal } from './getCgal.js';
 export { insetOfPolygonWithHoles } from './insetOfPolygonWithHoles.js';
+export { isotropicRemeshingOfSurfaceMesh } from './isotropicRemeshingOfSurfaceMesh.js';
 export { joinSurfaceMeshes } from './joinSurfaceMeshes.js';
 export { loftBetweenCongruentSurfaceMeshes } from './loftBetweenCongruentSurfaceMeshes.js';
 export { offsetOfPolygonWithHoles } from './offsetOfPolygonWithHoles.js';
@@ -72,6 +73,8 @@ export { reverseFaceOrientationsOfSurfaceMesh } from './reverseFaceOrientationsO
 export { sectionOfSurfaceMesh } from './sectionOfSurfaceMesh.js';
 export { separateSurfaceMesh } from './separateSurfaceMesh.js';
 export { simplifySurfaceMesh } from './simplifySurfaceMesh.js';
+export { smoothShapeOfSurfaceMesh } from './smoothShapeOfSurfaceMesh.js';
+export { smoothSurfaceMesh } from './smoothSurfaceMesh.js';
 export { serializeSurfaceMesh } from './serializeSurfaceMesh.js';
 export { subdivideSurfaceMesh } from './subdivideSurfaceMesh.js';
 export { taperSurfaceMesh } from './taperSurfaceMesh.js';

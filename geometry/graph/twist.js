@@ -5,7 +5,7 @@ import { twistSurfaceMesh } from '@jsxcad/algorithm-cgal';
 
 export const twist = (geometry, turnsPerMm) =>
   taggedGraph(
-    { tags: geometry.tags },
+    { tags: geometry.tags, matrix: geometry.matrix },
     fromSurfaceMeshLazy(
       twistSurfaceMesh(
         toSurfaceMesh(geometry.graph),
