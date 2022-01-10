@@ -420,3 +420,17 @@ Triangle(14).svg('triangle');
 ![Image](shape.md.49.png)
 
 [triangle_0.svg](shape.triangle_0.svg)
+
+```JavaScript
+Box(10)
+  .ez(50, -50)
+  .rx(0, 1 / 4)
+  .fuse().view(0)
+  .smooth({ method: 'IsotropicRemeshing', iterations: 20, relaxationSteps: 10, targetEdgeLength: 0.5, }, Box(20, 20, 20))
+  .smooth({ method: 'SmoothShape', iterations: 10, time: 1 }, Box(9, 20, 20))
+  .view();
+```
+
+![Image](shape.md.50.png)
+
+![Image](shape.md.51.png)

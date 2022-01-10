@@ -5,7 +5,7 @@ import { toSurfaceMesh } from './toSurfaceMesh.js';
 
 export const bend = (geometry, radius) =>
   taggedGraph(
-    { tags: geometry.tags },
+    { tags: geometry.tags, matrix: geometry.matrix },
     fromSurfaceMeshLazy(
       bendSurfaceMesh(toSurfaceMesh(geometry.graph), geometry.matrix, radius)
     )

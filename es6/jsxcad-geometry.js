@@ -1,5 +1,5 @@
 import { identityMatrix, fromTranslation, fromZRotation, fromScaling, fromXRotation, fromYRotation } from './jsxcad-math-mat4.js';
-import { composeTransforms, fromSurfaceMeshToLazyGraph, fromPointsToAlphaShapeAsSurfaceMesh, serializeSurfaceMesh, deleteSurfaceMesh, deserializeSurfaceMesh, fromGraphToSurfaceMesh, disjointSurfaceMeshes, arrangePaths, fromPolygonsToSurfaceMesh, bendSurfaceMesh, clipSurfaceMeshes, computeCentroidOfSurfaceMesh, fitPlaneToPoints, arrangePathsIntoTriangles, computeNormalOfSurfaceMesh, fromSurfaceMeshToGraph, fromPointsToConvexHullAsSurfaceMesh, cutSurfaceMeshes, eachPointOfSurfaceMesh, fromSurfaceMeshEmitBoundingBox, outlineSurfaceMesh, extrudeSurfaceMesh, extrudeToPlaneOfSurfaceMesh, fromSurfaceMeshToPolygonsWithHoles, reverseFaceOrientationsOfSurfaceMesh, fromFunctionToSurfaceMesh, fromPointsToSurfaceMesh, fuseSurfaceMeshes, fromSegmentToInverseTransform, invertTransform, growSurfaceMesh, insetOfPolygonWithHoles, joinSurfaceMeshes, loftBetweenCongruentSurfaceMeshes, minkowskiDifferenceOfSurfaceMeshes, minkowskiShellOfSurfaceMeshes, minkowskiSumOfSurfaceMeshes, offsetOfPolygonWithHoles, projectToPlaneOfSurfaceMesh, pushSurfaceMesh, remeshSurfaceMesh, removeSelfIntersectionsOfSurfaceMesh, sectionOfSurfaceMesh, simplifySurfaceMesh, subdivideSurfaceMesh, separateSurfaceMesh, fromSurfaceMeshToTriangles, taperSurfaceMesh, doesSelfIntersectOfSurfaceMesh, twistSurfaceMesh, SurfaceMeshQuery } from './jsxcad-algorithm-cgal.js';
+import { composeTransforms, fromSurfaceMeshToLazyGraph, fromPointsToAlphaShapeAsSurfaceMesh, serializeSurfaceMesh, deleteSurfaceMesh, deserializeSurfaceMesh, fromGraphToSurfaceMesh, disjointSurfaceMeshes, arrangePaths, fromPolygonsToSurfaceMesh, bendSurfaceMesh, clipSurfaceMeshes, computeCentroidOfSurfaceMesh, fitPlaneToPoints, arrangePathsIntoTriangles, computeNormalOfSurfaceMesh, fromSurfaceMeshToGraph, fromPointsToConvexHullAsSurfaceMesh, cutSurfaceMeshes, eachPointOfSurfaceMesh, fromSurfaceMeshEmitBoundingBox, outlineSurfaceMesh, extrudeSurfaceMesh, extrudeToPlaneOfSurfaceMesh, fromSurfaceMeshToPolygonsWithHoles, reverseFaceOrientationsOfSurfaceMesh, fromFunctionToSurfaceMesh, fromPointsToSurfaceMesh, fuseSurfaceMeshes, fromSegmentToInverseTransform, invertTransform, growSurfaceMesh, insetOfPolygonWithHoles, joinSurfaceMeshes, loftBetweenCongruentSurfaceMeshes, minkowskiDifferenceOfSurfaceMeshes, minkowskiShellOfSurfaceMeshes, minkowskiSumOfSurfaceMeshes, offsetOfPolygonWithHoles, projectToPlaneOfSurfaceMesh, pushSurfaceMesh, remeshSurfaceMesh, removeSelfIntersectionsOfSurfaceMesh, sectionOfSurfaceMesh, simplifySurfaceMesh, subdivideSurfaceMesh, smoothShapeOfSurfaceMesh, smoothSurfaceMesh, isotropicRemeshingOfSurfaceMesh, separateSurfaceMesh, fromSurfaceMeshToTriangles, taperSurfaceMesh, doesSelfIntersectOfSurfaceMesh, twistSurfaceMesh, SurfaceMeshQuery } from './jsxcad-algorithm-cgal.js';
 export { arrangePolygonsWithHoles } from './jsxcad-algorithm-cgal.js';
 import { transform as transform$4, equals, canonicalize as canonicalize$5, max, min, scale as scale$3, subtract } from './jsxcad-math-vec3.js';
 import { canonicalize as canonicalize$7 } from './jsxcad-math-plane.js';
@@ -596,7 +596,7 @@ const assemble = (...geometries) => disjoint(geometries);
 
 const bend$1 = (geometry, radius) =>
   taggedGraph(
-    { tags: geometry.tags },
+    { tags: geometry.tags, matrix: geometry.matrix },
     fromSurfaceMeshLazy(
       bendSurfaceMesh(toSurfaceMesh(geometry.graph), geometry.matrix, radius)
     )
@@ -2967,7 +2967,7 @@ const prepareForSerialization = (geometry) => {
 
 const push$1 = (geometry, force, minimumDistance, maximumDistance) =>
   taggedGraph(
-    { tags: geometry.tags },
+    { tags: geometry.tags, matrix: geometry.matrix },
     fromSurfaceMeshLazy(
       pushSurfaceMesh(
         toSurfaceMesh(geometry.graph),
@@ -3023,7 +3023,11 @@ const remesh$1 = (geometry, { lengths = [1] } = {}) =>
   taggedGraph(
     { tags: geometry.tags, matrix: geometry.matrix },
     fromSurfaceMeshLazy(
-      remeshSurfaceMesh(toSurfaceMesh(geometry.graph), ...lengths)
+      remeshSurfaceMesh(
+        toSurfaceMesh(geometry.graph),
+        geometry.matrix,
+        ...lengths
+      )
     )
   );
 
@@ -3120,23 +3124,87 @@ const simplify$1 = (geometry, options) =>
 
 const simplify = op({ graph: simplify$1 });
 
-const smooth$1 = (geometry, options = {}) => {
+const smooth$1 = (geometry, options = {}, selections = []) => {
   const { method = 'Remesh' } = options;
+  const selectionGraphs = selections.flatMap((selection) =>
+    getNonVoidGraphs(toConcreteGeometry(selection))
+  );
   switch (method) {
     case 'Remesh':
       return taggedGraph(
-        { tags: geometry.tags },
+        { tags: geometry.tags, matrix: geometry.matrix },
         fromSurfaceMeshLazy(
-          remeshSurfaceMesh(toSurfaceMesh(geometry.graph), options)
+          remeshSurfaceMesh(
+            toSurfaceMesh(geometry.graph),
+            geometry.matrix,
+            options
+          )
         )
       );
-    default:
+    case 'IsotropicRemeshing': {
+      return taggedGraph(
+        { tags: geometry.tags, matrix: geometry.matrix },
+        fromSurfaceMeshLazy(
+          isotropicRemeshingOfSurfaceMesh(
+            toSurfaceMesh(geometry.graph),
+            geometry.matrix,
+            options,
+            selectionGraphs.map(({ graph, matrix }) => ({
+              mesh: toSurfaceMesh(graph),
+              matrix,
+            }))
+          )
+        )
+      );
+    }
+    case 'SmoothMesh': {
+      if (selectionGraphs.length === 0) {
+        throw Error('No selections provided for SmoothMesh');
+      }
+      return taggedGraph(
+        { tags: geometry.tags, matrix: geometry.matrix },
+        fromSurfaceMeshLazy(
+          smoothSurfaceMesh(
+            toSurfaceMesh(geometry.graph),
+            geometry.matrix,
+            options,
+            selectionGraphs.map(({ graph, matrix }) => ({
+              mesh: toSurfaceMesh(graph),
+              matrix,
+            }))
+          )
+        )
+      );
+    }
+    case 'SmoothShape': {
+      if (selectionGraphs.length === 0) {
+        throw Error('No selections provided for SmoothShape');
+      }
+      return taggedGraph(
+        { tags: geometry.tags, matrix: geometry.matrix },
+        fromSurfaceMeshLazy(
+          smoothShapeOfSurfaceMesh(
+            toSurfaceMesh(geometry.graph),
+            geometry.matrix,
+            options,
+            selectionGraphs.map(({ graph, matrix }) => ({
+              mesh: toSurfaceMesh(graph),
+              matrix,
+            }))
+          )
+        )
+      );
+    }
+    case 'Subdivide': {
       return taggedGraph(
         { tags: geometry.tags },
         fromSurfaceMeshLazy(
           subdivideSurfaceMesh(toSurfaceMesh(geometry.graph), options)
         )
       );
+    }
+    default:
+      throw Error(`Unknown method ${method}`);
   }
 };
 
@@ -3365,7 +3433,7 @@ const taper$1 = (
   zMinusFactor
 ) =>
   taggedGraph(
-    { tags: geometry.tags },
+    { tags: geometry.tags, matrix: geometry.matrix },
     fromSurfaceMeshLazy(
       taperSurfaceMesh(
         toSurfaceMesh(geometry.graph),
@@ -3643,7 +3711,7 @@ const toTriangleArray = (geometry) => {
 
 const twist$1 = (geometry, turnsPerMm) =>
   taggedGraph(
-    { tags: geometry.tags },
+    { tags: geometry.tags, matrix: geometry.matrix },
     fromSurfaceMeshLazy(
       twistSurfaceMesh(
         toSurfaceMesh(geometry.graph),

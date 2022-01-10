@@ -13,7 +13,7 @@ export const taper = (
   zMinusFactor
 ) =>
   taggedGraph(
-    { tags: geometry.tags },
+    { tags: geometry.tags, matrix: geometry.matrix },
     fromSurfaceMeshLazy(
       taperSurfaceMesh(
         toSurfaceMesh(geometry.graph),
