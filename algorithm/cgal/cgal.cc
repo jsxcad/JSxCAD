@@ -1154,6 +1154,10 @@ const Surface_mesh* ApproximateSurfaceMesh(
     size_t proxies, double minimum_error_drop, double subdivision_ratio,
     bool relative_to_chord, bool with_dihedral_angle,
     bool optimize_anchor_location, bool pca_plane) {
+  // This depends on the standard prng.
+  // Lock it down to be deterministic.
+  std::srand(0);
+
   typedef CGAL::Exact_predicates_inexact_constructions_kernel Epick;
   std::vector<Epick::Point_3> epick_anchors;
   std::vector<std::array<std::size_t, 3>> triangles;
