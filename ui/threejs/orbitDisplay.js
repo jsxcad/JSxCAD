@@ -163,16 +163,34 @@ export const orbitDisplay = async (
 
   const pageSize = [];
 
+  const gridState = {
+    objects: [],
+    visible: withGrid,
+  };
+
   const updateFit = () =>
     moveToFit({
       view,
       camera,
       controls: [trackballControls],
       scene,
-      withGrid,
+      withGrid: true,
       gridLayer,
       pageSize,
+      gridState,
     });
+
+  const showGrid = (visible) => {
+    if (gridState.visible !== visible) {
+      gridState.visible = visible;
+      for (const object of gridState.objects) {
+        object.visible = visible;
+      }
+      render();
+    }
+  };
+
+  showGrid(withGrid);
 
   let moveToFitDone = false;
 
@@ -221,6 +239,7 @@ export const orbitDisplay = async (
     render,
     renderer,
     scene,
+    showGrid,
     trackballControls,
     updateFit,
     updateGeometry,

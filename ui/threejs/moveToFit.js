@@ -18,18 +18,14 @@ export const moveToFit = ({
   withGrid = false,
   gridLayer = GEOMETRY_LAYER,
   pageSize = [],
+  gridState = { objects: [], visible: withGrid },
 } = {}) => {
   const { fit = true } = view;
   const [length = 100, width = 100] = pageSize;
 
   let box;
 
-  const toDelete = [];
-
   scene.traverse((object) => {
-    if (object.userData.grid) {
-      toDelete.push(object);
-    }
     if (object instanceof GridHelper) {
       return;
     }
@@ -54,7 +50,8 @@ export const moveToFit = ({
     }
   });
 
-  for (const object of toDelete) {
+  while (gridState.objects.length > 0) {
+    const object = gridState.objects.pop();
     if (object.parent) {
       object.parent.remove(object);
     }
@@ -82,6 +79,7 @@ export const moveToFit = ({
       grid.userData.dressing = true;
       grid.userData.grid = true;
       scene.add(grid);
+      gridState.objects.push(grid);
     }
     {
       const grid = new GridHelper(size * 2, 20, 0x000040, 0xf04040);
@@ -94,6 +92,7 @@ export const moveToFit = ({
       grid.userData.dressing = true;
       grid.userData.grid = true;
       scene.add(grid);
+      gridState.objects.push(grid);
     }
   }
   if (withGrid) {
@@ -114,6 +113,7 @@ export const moveToFit = ({
     plane.userData.dressing = true;
     plane.userData.grid = true;
     scene.add(plane);
+    gridState.objects.push(plane);
   }
 
   if (!fit) {
