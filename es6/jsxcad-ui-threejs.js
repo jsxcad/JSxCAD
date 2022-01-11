@@ -44594,7 +44594,12 @@ const moveToFit = ({
 
   let box;
 
+  const toDelete = [];
+
   scene.traverse((object) => {
+    if (object.userData.grid) {
+      toDelete.push(object);
+    }
     if (object instanceof GridHelper) {
       return;
     }
@@ -44619,6 +44624,12 @@ const moveToFit = ({
     }
   });
 
+  for (const object of toDelete) {
+    if (object.parent) {
+      object.parent.remove(object);
+    }
+  }
+
   if (!box) {
     box = new Box3();
     box.setFromObject(scene);
@@ -44639,6 +44650,7 @@ const moveToFit = ({
       grid.layers.set(gridLayer);
       grid.userData.tangible = false;
       grid.userData.dressing = true;
+      grid.userData.grid = true;
       scene.add(grid);
     }
     {
@@ -44650,6 +44662,7 @@ const moveToFit = ({
       grid.layers.set(gridLayer);
       grid.userData.tangible = false;
       grid.userData.dressing = true;
+      grid.userData.grid = true;
       scene.add(grid);
     }
   }
@@ -44669,6 +44682,7 @@ const moveToFit = ({
     plane.layers.set(gridLayer);
     plane.userData.tangible = false;
     plane.userData.dressing = true;
+    plane.userData.grid = true;
     scene.add(plane);
   }
 
