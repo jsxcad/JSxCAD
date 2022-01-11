@@ -426,8 +426,8 @@ Box(10)
   .ez(50, -50)
   .rx(0, 1 / 4)
   .fuse().view(0)
-  .smooth({ method: 'IsotropicRemeshing', iterations: 20, relaxationSteps: 10, targetEdgeLength: 0.5, }, Box(20, 20, 20))
-  .smooth({ method: 'SmoothShape', iterations: 10, time: 1 }, Box(9, 20, 20))
+  .remesh({ method: 'isotropic', iterations: 20, relaxationSteps: 10, targetEdgeLength: 0.5, }, Box(20, 20, 20))
+  .smooth({ method: 'shape', iterations: 10, time: 1 }, Box(9, 20, 20))
   .view();
 ```
 

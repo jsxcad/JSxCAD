@@ -14,6 +14,7 @@ export {
   toCgalTransformFromJsTransform,
 } from './transform.js';
 
+export { approximateSurfaceMesh } from './approximateSurfaceMesh.js';
 export { arrangePaths, arrangePathsIntoTriangles } from './arrangePaths.js';
 export { arrangePolygonsWithHoles } from './arrangePolygonsWithHoles.js';
 export {

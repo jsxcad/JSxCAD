@@ -1,6 +1,4 @@
 import {
-  isotropicRemeshingOfSurfaceMesh,
-  remeshSurfaceMesh,
   smoothShapeOfSurfaceMesh,
   smoothSurfaceMesh,
   subdivideSurfaceMesh,
@@ -13,39 +11,12 @@ import { toConcreteGeometry } from './../tagged/toConcreteGeometry.js';
 import { toSurfaceMesh } from './toSurfaceMesh.js';
 
 export const smooth = (geometry, options = {}, selections = []) => {
-  const { method = 'Remesh' } = options;
+  const { method = 'SmoothShape' } = options;
   const selectionGraphs = selections.flatMap((selection) =>
     getNonVoidGraphs(toConcreteGeometry(selection))
   );
   switch (method) {
-    case 'Remesh':
-      return taggedGraph(
-        { tags: geometry.tags, matrix: geometry.matrix },
-        fromSurfaceMeshLazy(
-          remeshSurfaceMesh(
-            toSurfaceMesh(geometry.graph),
-            geometry.matrix,
-            options
-          )
-        )
-      );
-    case 'IsotropicRemeshing': {
-      return taggedGraph(
-        { tags: geometry.tags, matrix: geometry.matrix },
-        fromSurfaceMeshLazy(
-          isotropicRemeshingOfSurfaceMesh(
-            toSurfaceMesh(geometry.graph),
-            geometry.matrix,
-            options,
-            selectionGraphs.map(({ graph, matrix }) => ({
-              mesh: toSurfaceMesh(graph),
-              matrix,
-            }))
-          )
-        )
-      );
-    }
-    case 'SmoothMesh': {
+    case 'mesh': {
       if (selectionGraphs.length === 0) {
         throw Error('No selections provided for SmoothMesh');
       }
@@ -64,10 +35,7 @@ export const smooth = (geometry, options = {}, selections = []) => {
         )
       );
     }
-    case 'SmoothShape': {
-      if (selectionGraphs.length === 0) {
-        throw Error('No selections provided for SmoothShape');
-      }
+    case 'shape': {
       return taggedGraph(
         { tags: geometry.tags, matrix: geometry.matrix },
         fromSurfaceMeshLazy(
@@ -83,7 +51,7 @@ export const smooth = (geometry, options = {}, selections = []) => {
         )
       );
     }
-    case 'Subdivide': {
+    case 'subdivide': {
       return taggedGraph(
         { tags: geometry.tags },
         fromSurfaceMeshLazy(
