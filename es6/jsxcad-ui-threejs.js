@@ -44869,6 +44869,8 @@ const orbitDisplay = async (
     render();
   }).observe(page);
 
+  const pageSize = [];
+
   const updateFit = () =>
     moveToFit({
       view,
@@ -44896,8 +44898,6 @@ const orbitDisplay = async (
     }
 
     view = { ...view, fit };
-
-    const pageSize = [];
 
     await buildMeshes({
       geometry,
