@@ -1,12 +1,30 @@
+import {
+  approximateSurfaceMesh,
+  simplifySurfaceMesh,
+} from '@jsxcad/algorithm-cgal';
+
 import { fromSurfaceMeshLazy } from './fromSurfaceMeshLazy.js';
-import { simplifySurfaceMesh } from '@jsxcad/algorithm-cgal';
 import { taggedGraph } from '../tagged/taggedGraph.js';
 import { toSurfaceMesh } from './toSurfaceMesh.js';
 
-export const simplify = (geometry, options) =>
-  taggedGraph(
-    { tags: geometry.tags, matrix: geometry.matrix },
-    fromSurfaceMeshLazy(
-      simplifySurfaceMesh(toSurfaceMesh(geometry.graph), options)
-    )
-  );
+export const simplify = (geometry, options) => {
+  const { method = 'simplify' } = options;
+  switch (method) {
+    case 'simplify':
+      return taggedGraph(
+        { tags: geometry.tags, matrix: geometry.matrix },
+        fromSurfaceMeshLazy(
+          simplifySurfaceMesh(toSurfaceMesh(geometry.graph), options)
+        )
+      );
+    case 'approximate':
+      return taggedGraph(
+        { tags: geometry.tags, matrix: geometry.matrix },
+        fromSurfaceMeshLazy(
+          approximateSurfaceMesh(toSurfaceMesh(geometry.graph), options)
+        )
+      );
+    default:
+      throw Error(`Unknown simplify method ${method}`);
+  }
+};

@@ -56,6 +56,7 @@
 #include <CGAL/Simple_cartesian.h>
 #include <CGAL/Subdivision_method_3/subdivision_methods_3.h>
 #include <CGAL/Surface_mesh.h>
+#include <CGAL/Surface_mesh_approximation/approximate_triangle_mesh.h>
 #include <CGAL/Surface_mesh_default_triangulation_3.h>
 #include <CGAL/Surface_mesh_simplification/Policies/Edge_collapse/Count_ratio_stop_predicate.h>
 #include <CGAL/Surface_mesh_simplification/edge_collapse.h>
@@ -850,35 +851,37 @@ const Surface_mesh* SmoothShapeOfSurfaceMesh(
   size_t constrained_count = 0;
   size_t unconstrained_count = 0;
 
-  for (size_t nth = 0; nth < selection_count; nth++) {
-    const Surface_mesh* mesh =
-        getMesh(nth).as<const Surface_mesh*>(emscripten::allow_raw_pointers());
-    const Transformation* transform =
-        getTransform(nth).as<const Transformation*>(
-            emscripten::allow_raw_pointers());
-    transforms.push_back(to_input_transform * *transform);
-    queries.emplace_back(mesh, &transforms.back());
-  }
-
   std::set<Vertex_index> constrained_vertices;
 
-  for (const Vertex_index vertex : vertices(cartesian_mesh)) {
-    const Cartesian_point& p = cartesian_mesh.point(vertex);
-    double x = p.x();
-    double y = p.y();
-    double z = p.z();
-    bool contained = false;
-    for (SurfaceMeshQuery& query : queries) {
-      if (query.isInsidePointApproximate(x, y, z)) {
-        contained = true;
-        break;
-      }
+  if (selection_count > 0) {
+    for (size_t nth = 0; nth < selection_count; nth++) {
+      const Surface_mesh* mesh = getMesh(nth).as<const Surface_mesh*>(
+          emscripten::allow_raw_pointers());
+      const Transformation* transform =
+          getTransform(nth).as<const Transformation*>(
+              emscripten::allow_raw_pointers());
+      transforms.push_back(to_input_transform * *transform);
+      queries.emplace_back(mesh, &transforms.back());
     }
-    if (!contained) {
-      constrained_vertices.insert(vertex);
-      constrained_count++;
-    } else {
-      unconstrained_count++;
+
+    for (const Vertex_index vertex : vertices(cartesian_mesh)) {
+      const Cartesian_point& p = cartesian_mesh.point(vertex);
+      double x = p.x();
+      double y = p.y();
+      double z = p.z();
+      bool contained = false;
+      for (SurfaceMeshQuery& query : queries) {
+        if (query.isInsidePointApproximate(x, y, z)) {
+          contained = true;
+          break;
+        }
+      }
+      if (!contained) {
+        constrained_vertices.insert(vertex);
+        constrained_count++;
+      } else {
+        unconstrained_count++;
+      }
     }
   }
 
@@ -1144,6 +1147,57 @@ const Surface_mesh* GrowSurfaceMesh(const Surface_mesh* input, double amount) {
   }
 
   return mesh;
+}
+
+const Surface_mesh* ApproximateSurfaceMesh(
+    const Surface_mesh* input, size_t iterations, size_t relaxation_steps,
+    size_t proxies, double minimum_error_drop, double subdivision_ratio,
+    bool relative_to_chord, bool with_dihedral_angle,
+    bool optimize_anchor_location, bool pca_plane) {
+  typedef CGAL::Exact_predicates_inexact_constructions_kernel Epick;
+  std::vector<Epick::Point_3> epick_anchors;
+  std::vector<std::array<std::size_t, 3>> triangles;
+  CGAL::Surface_mesh<Epick::Point_3> epick_mesh;
+  copy_face_graph(*input, epick_mesh);
+
+  if (proxies > 0) {
+    CGAL::Surface_mesh_approximation::approximate_triangle_mesh(
+        epick_mesh, CGAL::parameters::verbose_level(
+                        CGAL::Surface_mesh_approximation::MAIN_STEPS)
+                        .number_of_iterations(iterations)
+                        .number_of_relaxations(relaxation_steps)
+                        .max_number_of_proxies(proxies)
+                        .min_error_drop(minimum_error_drop)
+                        .subdivision_ratio(subdivision_ratio)
+                        .relative_to_chord(relative_to_chord)
+                        .with_dihedral_angle(with_dihedral_angle)
+                        .optimize_anchor_location(optimize_anchor_location)
+                        .pca_plane(pca_plane)
+                        .anchors(std::back_inserter(epick_anchors))
+                        .triangles(std::back_inserter(triangles)));
+  } else {
+    CGAL::Surface_mesh_approximation::approximate_triangle_mesh(
+        epick_mesh, CGAL::parameters::verbose_level(
+                        CGAL::Surface_mesh_approximation::MAIN_STEPS)
+                        .number_of_iterations(iterations)
+                        .number_of_relaxations(relaxation_steps)
+                        .min_error_drop(minimum_error_drop)
+                        .subdivision_ratio(subdivision_ratio)
+                        .relative_to_chord(relative_to_chord)
+                        .with_dihedral_angle(with_dihedral_angle)
+                        .optimize_anchor_location(optimize_anchor_location)
+                        .pca_plane(pca_plane)
+                        .anchors(std::back_inserter(epick_anchors))
+                        .triangles(std::back_inserter(triangles)));
+  }
+  std::vector<Point> anchors;
+  for (const auto& epick_anchor : epick_anchors) {
+    anchors.emplace_back(epick_anchor.x(), epick_anchor.y(), epick_anchor.z());
+  }
+  std::unique_ptr<Surface_mesh> output(new Surface_mesh());
+  CGAL::Polygon_mesh_processing::polygon_soup_to_polygon_mesh(
+      anchors, triangles, *output);
+  return output.release();
 }
 
 const Surface_mesh* SimplifySurfaceMesh(const Surface_mesh* input, double ratio,
@@ -5274,6 +5328,8 @@ EMSCRIPTEN_BINDINGS(module) {
                        &MinkowskiSumOfSurfaceMeshes,
                        emscripten::allow_raw_pointers());
   emscripten::function("GrowSurfaceMesh", &GrowSurfaceMesh,
+                       emscripten::allow_raw_pointers());
+  emscripten::function("ApproximateSurfaceMesh", &ApproximateSurfaceMesh,
                        emscripten::allow_raw_pointers());
   emscripten::function("SimplifySurfaceMesh", &SimplifySurfaceMesh,
                        emscripten::allow_raw_pointers());

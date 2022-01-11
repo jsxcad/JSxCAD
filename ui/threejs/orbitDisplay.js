@@ -161,6 +161,19 @@ export const orbitDisplay = async (
     render();
   }).observe(page);
 
+  const pageSize = [];
+
+  const updateFit = () =>
+    moveToFit({
+      view,
+      camera,
+      controls: [trackballControls],
+      scene,
+      withGrid,
+      gridLayer,
+      pageSize,
+    });
+
   let moveToFitDone = false;
 
   const updateGeometry = async (geometry, { fit = true, timestamp } = {}) => {
@@ -178,8 +191,6 @@ export const orbitDisplay = async (
 
     view = { ...view, fit };
 
-    const pageSize = [];
-
     await buildMeshes({
       geometry,
       scene,
@@ -190,15 +201,7 @@ export const orbitDisplay = async (
 
     if (!moveToFitDone) {
       moveToFitDone = true;
-      moveToFit({
-        view,
-        camera,
-        controls: [trackballControls],
-        scene,
-        withGrid,
-        gridLayer,
-        pageSize,
-      });
+      updateFit();
     }
 
     render();
@@ -219,6 +222,7 @@ export const orbitDisplay = async (
     renderer,
     scene,
     trackballControls,
+    updateFit,
     updateGeometry,
   };
 };

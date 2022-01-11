@@ -2,13 +2,13 @@ import Shape from './Shape.js';
 import { smooth as smoothGeometry } from '@jsxcad/geometry';
 
 export const smooth =
-  (options = { iterations: 1, method: 'Subdivide' }, ...shapes) =>
+  (options = { iterations: 1, method: 'subdivide' }, ...selections) =>
   (shape) =>
     Shape.fromGeometry(
       smoothGeometry(
         shape.toGeometry(),
         options,
-        shape.toShapes(shapes).map((shape) => shape.toGeometry())
+        shape.toShapes(selections).map((selection) => selection.toGeometry())
       )
     );
 
