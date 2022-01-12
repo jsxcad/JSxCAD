@@ -5,7 +5,7 @@ import { transform as transform$4, equals, canonicalize as canonicalize$5, max, 
 import { canonicalize as canonicalize$7 } from './jsxcad-math-plane.js';
 import { canonicalize as canonicalize$6 } from './jsxcad-math-poly3.js';
 import { cacheRewriteTags, cache, cacheSection } from './jsxcad-cache.js';
-import { read as read$1, readNonblocking as readNonblocking$1, write as write$1, writeNonblocking as writeNonblocking$1 } from './jsxcad-sys.js';
+import { hash as hash$1, read as read$1, readNonblocking as readNonblocking$1, write as write$1, writeNonblocking as writeNonblocking$1 } from './jsxcad-sys.js';
 
 const update = (geometry, updates, changes) => {
   if (updates === undefined) {
@@ -2216,20 +2216,9 @@ const grow = (geometry, amount) => {
   return rewrite(toTransformedGeometry(geometry), op);
 };
 
-let urlAlphabet =
-  'useandom-26T198340PX75pxJACKVERYMINDBUSHWOLF_GQZbfghjklqvwyzrict';
-let nanoid = (size = 21) => {
-  let id = '';
-  let i = size;
-  while (i--) {
-    id += urlAlphabet[(Math.random() * 64) | 0];
-  }
-  return id
-};
-
 const hash = (geometry) => {
   if (geometry.hash === undefined) {
-    geometry.hash = nanoid();
+    geometry.hash = hash$1(geometry);
   }
   return geometry.hash;
 };

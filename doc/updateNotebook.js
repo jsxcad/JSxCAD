@@ -16,7 +16,10 @@ import pngjs from 'pngjs';
 import { screenshot } from './screenshot.js';
 import { toHtml } from '@jsxcad/convert-notebook';
 
-const IGNORED_PIXEL_THRESHOLD_OBSERVED_PATHS = new Set(['nb/regression/shape/shape.md.51.observed.png', 'nb/regression/smooth/smooth.md.3.observed.png']);
+const IGNORED_PIXEL_THRESHOLD_OBSERVED_PATHS = new Set([
+  'nb/regression/shape/shape.md.51.observed.png',
+  'nb/regression/smooth/smooth.md.3.observed.png',
+]);
 const PIXEL_THRESHOLD = 2000;
 
 const ensureNewline = (line) => (line.endsWith('\n') ? line : `${line}\n`);
@@ -189,7 +192,10 @@ export const updateNotebook = async (
             process.env.FORCE_COLOR === '0' ? [255, 255, 255] : [255, 0, 0],
         }
       );
-      if (numFailedPixels > PIXEL_THRESHOLD && !IGNORED_PIXEL_THRESHOLD_OBSERVED_PATHS.has(observedPath)) {
+      if (
+        numFailedPixels > PIXEL_THRESHOLD &&
+        !IGNORED_PIXEL_THRESHOLD_OBSERVED_PATHS.has(observedPath)
+      ) {
         const differencePath = `${target}.md.${nth}.difference.png`;
         writeFileSync(differencePath, pngjs.PNG.sync.write(differencePng));
         // Note failures.

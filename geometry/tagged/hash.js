@@ -1,8 +1,8 @@
-import { nanoid } from 'nanoid/non-secure';
+import { hash as hashObject } from '@jsxcad/sys';
 
 export const hash = (geometry) => {
   if (geometry.hash === undefined) {
-    geometry.hash = nanoid();
+    geometry.hash = hashObject(geometry);
   }
   return geometry.hash;
 };
