@@ -5,7 +5,7 @@ import { transform as transform$4, equals, canonicalize as canonicalize$5, max, 
 import { canonicalize as canonicalize$7 } from './jsxcad-math-plane.js';
 import { canonicalize as canonicalize$6 } from './jsxcad-math-poly3.js';
 import { cacheRewriteTags, cache, cacheSection } from './jsxcad-cache.js';
-import { hash as hash$1, read as read$1, readNonblocking as readNonblocking$1, write as write$1, writeNonblocking as writeNonblocking$1 } from './jsxcad-sys.js';
+import { hash as hash$1, write as write$1, writeNonblocking as writeNonblocking$1, read as read$1, readNonblocking as readNonblocking$1 } from './jsxcad-sys.js';
 
 const update = (geometry, updates, changes) => {
   if (updates === undefined) {
@@ -3004,9 +3004,136 @@ const push = (
   return rewrite(toTransformedGeometry(geometry), op);
 };
 
-const read = async (path) => read$1(path);
+const is_stored = Symbol('is_stored');
 
-const readNonblocking = (path) => readNonblocking$1(path);
+const store = async (geometry) => {
+  if (geometry === undefined) {
+    throw Error('Attempted to store undefined geometry');
+  }
+  const uuid = hash(geometry);
+  if (geometry[is_stored]) {
+    return { type: 'link', hash: uuid };
+  }
+  prepareForSerialization(geometry);
+  const stored = { ...geometry };
+  geometry[is_stored] = true;
+  // Share graphs across geometries.
+  const graph = geometry.graph;
+  if (graph && !graph[is_stored]) {
+    if (!graph.hash) {
+      graph.hash = hash(graph);
+    }
+    await write$1(`graph/${graph.hash}`, graph);
+    stored.graph = { hash: graph.hash };
+  }
+  if (geometry.content) {
+    for (let nth = 0; nth < geometry.content.length; nth++) {
+      stored.content[nth] = await store(geometry.content[nth]);
+    }
+  }
+  await write$1(`hash/${uuid}`, stored);
+  return { type: 'link', hash: uuid };
+};
+
+const storeNonblocking = (geometry) => {
+  if (geometry[is_stored]) {
+    return { type: 'link', hash: geometry.hash };
+  }
+  prepareForSerialization(geometry);
+  const uuid = hash(geometry);
+  const stored = { ...geometry };
+  geometry[is_stored] = true;
+  // Share graphs across geometries.
+  const graph = geometry.graph;
+  if (graph && !graph[is_stored]) {
+    if (!graph.hash) {
+      graph.hash = hash(graph);
+    }
+    writeNonblocking$1(`graph/${graph.hash}`, graph);
+    stored.graph = { hash: graph.hash };
+  }
+  if (geometry.content) {
+    for (let nth = 0; nth < geometry.content.length; nth++) {
+      stored.content[nth] = storeNonblocking(geometry.content[nth]);
+    }
+  }
+  writeNonblocking$1(`hash/${uuid}`, stored);
+  return { type: 'link', hash: uuid };
+};
+
+const is_loaded = Symbol('is_loaded');
+
+const load = async (geometry) => {
+  if (geometry === undefined || geometry[is_loaded]) {
+    return geometry;
+  }
+  if (!geometry.hash) {
+    throw Error(`No hash`);
+  }
+  geometry = await read$1(`hash/${geometry.hash}`);
+  if (!geometry) {
+    return;
+  }
+  if (geometry[is_loaded]) {
+    return geometry;
+  }
+  geometry[is_loaded] = true;
+  geometry[is_stored] = true;
+  // Link to any associated graph structure.
+  if (geometry.graph && geometry.graph.hash) {
+    geometry.graph = await read$1(`graph/${geometry.graph.hash}`);
+  }
+  if (geometry.content) {
+    for (let nth = 0; nth < geometry.content.length; nth++) {
+      geometry.content[nth] = await load(geometry.content[nth]);
+    }
+  }
+  return geometry;
+};
+
+const loadNonblocking = (geometry) => {
+  if (geometry === undefined || geometry[is_loaded]) {
+    return geometry;
+  }
+  if (!geometry.hash) {
+    return;
+  }
+  geometry = readNonblocking$1(`hash/${geometry.hash}`);
+  if (!geometry) {
+    return;
+  }
+  if (geometry[is_loaded]) {
+    return geometry;
+  }
+  geometry[is_loaded] = true;
+  geometry[is_stored] = true;
+  // Link to any associated graph structure.
+  if (geometry.graph && geometry.graph.hash) {
+    geometry.graph = readNonblocking$1(`graph/${geometry.graph.hash}`);
+  }
+  if (geometry.content) {
+    for (let nth = 0; nth < geometry.content.length; nth++) {
+      geometry.content[nth] = loadNonblocking(geometry.content[nth]);
+    }
+  }
+  return geometry;
+};
+
+const read = async (path) => {
+  const readData = await read$1(path);
+  if (!readData) {
+    return;
+  }
+  return load(readData);
+};
+
+const readNonblocking = (path) => {
+  const readData = readNonblocking$1(path);
+  if (!readData) {
+    return;
+  }
+  return loadNonblocking(readNonblocking$1(path));
+};
 
 const remesh$1 = (geometry, options = {}, selections = []) => {
   const { method = 'edgeLength', lengths = [1] } = options;
@@ -3811,7 +3938,8 @@ const write = async (path, geometry) => {
   // Ensure that the geometry carries a hash before saving.
   hash(disjointGeometry);
   const preparedGeometry = prepareForSerialization(disjointGeometry);
-  await write$1(path, preparedGeometry);
+  const stored = await store(preparedGeometry);
+  await write$1(path, stored);
   return preparedGeometry;
 };
 
@@ -3820,7 +3948,7 @@ const writeNonblocking = (path, geometry) => {
   // Ensure that the geometry carries a hash before saving.
   hash(disjointGeometry);
   const preparedGeometry = prepareForSerialization(disjointGeometry);
-  writeNonblocking$1(path, preparedGeometry);
+  writeNonblocking$1(path, storeNonblocking(preparedGeometry));
   return preparedGeometry;
 };
 

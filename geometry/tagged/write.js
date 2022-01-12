@@ -1,3 +1,5 @@
+import { store, storeNonblocking } from './store.js';
+
 import {
   write as writePath,
   writeNonblocking as writePathNonblocking,
@@ -12,7 +14,8 @@ export const write = async (path, geometry) => {
   // Ensure that the geometry carries a hash before saving.
   hash(disjointGeometry);
   const preparedGeometry = prepareForSerialization(disjointGeometry);
-  await writePath(path, preparedGeometry);
+  const stored = await store(preparedGeometry);
+  await writePath(path, stored);
   return preparedGeometry;
 };
 
@@ -21,6 +24,6 @@ export const writeNonblocking = (path, geometry) => {
   // Ensure that the geometry carries a hash before saving.
   hash(disjointGeometry);
   const preparedGeometry = prepareForSerialization(disjointGeometry);
-  writePathNonblocking(path, preparedGeometry);
+  writePathNonblocking(path, storeNonblocking(preparedGeometry));
   return preparedGeometry;
 };
