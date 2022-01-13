@@ -23,8 +23,9 @@
   "keywords": [],
   "license": "MIT",
   "dependencies": {
+    "base64-arraybuffer": "^1.0.1",
     "broadcast-channel": "^4.8.0",
-    "create-hash": "^1.2.0",
+    "digest-js": "^0.3.0",
     "idb": "^7.0.0",
     "idb-keyval": "^6.0.3",
     "node-fetch": "^2.6.1",
@@ -41,12 +42,12 @@
     "eslint-plugin-promise": "^4.0.1",
     "eslint-plugin-react": "^7.17.0",
     "eslint-plugin-standard": "^4.0.0",
-    "rollup": "^2.51.2",
-    "rollup-plugin-commonjs": "^9.3.4",
+    "rollup": "^2.56.0",
+    "@rollup/plugin-commonjs": "^21.0.1",
     "rollup-plugin-node-builtins": "^2.1.2",
-    "rollup-plugin-hypothetical-windows-fix": "^2.1.1",
+    "rollup-plugin-hypothetical": "^2.1.1",
     "rollup-plugin-node-globals": "^1.4.0",
-    "rollup-plugin-node-resolve": "^4.2.3"
+    "@rollup/plugin-node-resolve": "^13.0.4"
   },
   "publishConfig": {
     "access": "public"

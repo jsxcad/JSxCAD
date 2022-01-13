@@ -1,6 +1,5 @@
-import * as createHashModule from './create-hash.cjs';
-
-const { createHash } = createHashModule;
+import Digest from 'digest-js';
+import { encode } from 'base64-arraybuffer';
 
 export const hashObject = (object, hash) => {
   const keys = Object.keys(object);
@@ -46,9 +45,10 @@ export const hashValue = (value, hash) => {
 };
 
 export const computeHash = (value) => {
-  const hash = createHash('sha256');
+  // const hash = createHash('sha256');
+  const hash = new Digest.SHA256('sha256');
   hashValue(value, hash);
-  return hash.digest('base64');
+  return encode(hash.finalize());
 };
 
 export const fromStringToIntegerHash = (s) =>
