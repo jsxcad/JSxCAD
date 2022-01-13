@@ -7,7 +7,6 @@ import {
   finishEmitGroup,
   flushEmitGroup,
   getConfig,
-  hash,
   logInfo,
   read,
   resolvePending,
@@ -64,11 +63,11 @@ export const replayRecordedNotes = async (path, id) => {
 
 export const emitSourceLocation = ({ path, id }) => {
   const setContext = { sourceLocation: { path, id } };
-  emit({ hash: hash(setContext), setContext });
+  emit({ hash: computeHash(setContext), setContext });
 };
 
 export const emitSourceText = (sourceText) =>
-  emit({ hash: hash(sourceText), sourceText });
+  emit({ hash: computeHash(sourceText), sourceText });
 
 export const $run = async (op, { path, id, text, sha }) => {
   const meta = await read(`meta/def/${path}/${id}`);
