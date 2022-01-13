@@ -3,6 +3,7 @@ import { reportTimes, watchLog } from '@jsxcad/sys';
 import { argv } from 'process';
 import fs from 'fs';
 import path from 'path';
+import puppeteer from 'puppeteer';
 import { updateNotebook } from './updateNotebook.js';
 
 process.on('uncaughtException', (err) => {
@@ -13,10 +14,12 @@ process.on('uncaughtException', (err) => {
 const makePosixPath = (string) => string.split(path.sep).join(path.posix.sep);
 
 const build = async (baseDirectory = '.') => {
+  const browser = await puppeteer.launch({ headless: true });
   const notebookDurations = [];
   const startTime = new Date();
-  const logWatcher = ({ type, source, text }) =>
+  const logWatcher = ({ type, source, text }) => {
     console.log(`[${type}] ${source} ${text}`);
+  };
   let exitCode;
   watchLog(logWatcher);
   try {
@@ -44,7 +47,7 @@ const build = async (baseDirectory = '.') => {
       const startTime = new Date();
       const failedExpectations = [];
       console.log(`Processing notebook: ${process.cwd()}/${notebook}.nb`);
-      await updateNotebook(notebook, { failedExpectations });
+      await updateNotebook(notebook, { failedExpectations, browser });
       if (
         failedExpectations.length > 0 &&
         collectedFailedExpectations.length > 0
@@ -83,6 +86,7 @@ const build = async (baseDirectory = '.') => {
     console.log(error.stack);
     exitCode = 1;
   }
+  await browser.close();
   process.stderr.write('', () =>
     process.stdout.write('', () => process.exit(exitCode))
   );

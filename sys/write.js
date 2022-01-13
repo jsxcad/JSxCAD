@@ -16,17 +16,14 @@ const { serialize } = v8;
 
 const getFileWriter = () => {
   if (isNode) {
-    return async (qualifiedPath, data, doSerialize) => {
+    return async (qualifiedPath, data) => {
       try {
         await promises.mkdir(dirname(qualifiedPath), { recursive: true });
       } catch (error) {
         throw error;
       }
       try {
-        if (doSerialize) {
-          data = serialize(data);
-        }
-        await promises.writeFile(qualifiedPath, data);
+        await promises.writeFile(qualifiedPath, serialize(data));
         // FIX: Do proper versioning.
         const version = 0;
         return version;
@@ -44,6 +41,13 @@ const getFileWriter = () => {
 const fileWriter = getFileWriter();
 
 export const writeNonblocking = (path, data, options = {}) => {
+  const { workspace = getFilesystem() } = options;
+  const qualifiedPath = qualifyPath(path, workspace);
+  const file = ensureQualifiedFile(path, qualifiedPath);
+  if (file.data === data) {
+    // This has already been written.
+    return true;
+  }
   // Schedule a deferred write to update persistent storage.
   addPending(write(path, data, options));
   throw new ErrorWouldBlock(`Would have blocked on write ${path}`);
@@ -57,11 +61,7 @@ export const write = async (path, data, options = {}) => {
     return undefined;
   }
 
-  const {
-    doSerialize = true,
-    ephemeral,
-    workspace = getFilesystem(),
-  } = options;
+  const { ephemeral, workspace = getFilesystem() } = options;
 
   const qualifiedPath = qualifyPath(path, workspace);
   const file = ensureQualifiedFile(path, qualifiedPath);
@@ -73,7 +73,7 @@ export const write = async (path, data, options = {}) => {
   file.data = data;
 
   if (!ephemeral && workspace !== undefined) {
-    file.version = await fileWriter(qualifiedPath, data, doSerialize);
+    file.version = await fileWriter(qualifiedPath, data);
   }
 
   // Let everyone else know the file has changed.

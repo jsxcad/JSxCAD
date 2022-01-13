@@ -1,8 +1,8 @@
 import {
+  computeHash,
   emit,
   getControlValue,
   getSourceLocation,
-  hash,
   read,
   setControlValue,
 } from '@jsxcad/sys';
@@ -31,6 +31,6 @@ export const control = (label, value, type, options) => {
     options,
     path,
   };
-  emit({ control, hash: hash(control) });
+  emit({ control, hash: computeHash(control) });
   return value;
 };

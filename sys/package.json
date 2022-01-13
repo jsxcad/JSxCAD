@@ -24,10 +24,10 @@
   "license": "MIT",
   "dependencies": {
     "broadcast-channel": "^4.8.0",
+    "create-hash": "^1.2.0",
     "idb": "^7.0.0",
     "idb-keyval": "^6.0.3",
     "node-fetch": "^2.6.1",
-    "hash-sum": "^2.0.0",
     "nanoid": "^3.1.16"
   },
   "devDependencies": {

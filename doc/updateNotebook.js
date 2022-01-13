@@ -123,7 +123,7 @@ const writeMarkdown = async (
 
 export const updateNotebook = async (
   target,
-  { failedExpectations = [] } = {}
+  { failedExpectations = [], browser } = {}
 ) => {
   clearEmitted();
   await boot();
@@ -142,7 +142,7 @@ export const updateNotebook = async (
     writeFileSync(`${target}.html`, html);
     const { imageUrlList } = await screenshot(
       new TextDecoder('utf8').decode(html),
-      `${target}.png`
+      { browser }
     );
     await writeMarkdown(
       target,

@@ -18,5 +18,5 @@ export const readNonblocking = (path) => {
   if (!readData) {
     return;
   }
-  return loadNonblocking(readPathNonblocking(path));
+  return loadNonblocking(readData);
 };

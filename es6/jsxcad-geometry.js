@@ -5,7 +5,7 @@ import { transform as transform$4, equals, canonicalize as canonicalize$5, max, 
 import { canonicalize as canonicalize$7 } from './jsxcad-math-plane.js';
 import { canonicalize as canonicalize$6 } from './jsxcad-math-poly3.js';
 import { cacheRewriteTags, cache, cacheSection } from './jsxcad-cache.js';
-import { hash as hash$1, write as write$1, writeNonblocking as writeNonblocking$1, read as read$1, readNonblocking as readNonblocking$1 } from './jsxcad-sys.js';
+import { computeHash, write as write$1, writeNonblocking as writeNonblocking$1, ErrorWouldBlock, read as read$1, readNonblocking as readNonblocking$1 } from './jsxcad-sys.js';
 
 const update = (geometry, updates, changes) => {
   if (updates === undefined) {
@@ -2218,7 +2218,7 @@ const grow = (geometry, amount) => {
 
 const hash = (geometry) => {
   if (geometry.hash === undefined) {
-    geometry.hash = hash$1(geometry);
+    geometry.hash = computeHash(geometry);
   }
   return geometry.hash;
 };
@@ -3042,23 +3042,41 @@ const storeNonblocking = (geometry) => {
   prepareForSerialization(geometry);
   const uuid = hash(geometry);
   const stored = { ...geometry };
-  geometry[is_stored] = true;
   // Share graphs across geometries.
   const graph = geometry.graph;
+  let wouldBlock;
   if (graph && !graph[is_stored]) {
     if (!graph.hash) {
       graph.hash = hash(graph);
     }
-    writeNonblocking$1(`graph/${graph.hash}`, graph);
+    try {
+      writeNonblocking$1(`graph/${graph.hash}`, graph);
+    } catch (error) {
+      if (error instanceof ErrorWouldBlock) {
+        wouldBlock = error;
+      }
+    }
     stored.graph = { hash: graph.hash };
   }
   if (geometry.content) {
     for (let nth = 0; nth < geometry.content.length; nth++) {
-      stored.content[nth] = storeNonblocking(geometry.content[nth]);
+      const { stored: contentStored, wouldBlock: contentWouldBlock } =
+        storeNonblocking(geometry.content[nth]);
+      if (contentWouldBlock) {
+        wouldBlock = contentWouldBlock;
+      }
+      stored.content[nth] = contentStored;
     }
   }
-  writeNonblocking$1(`hash/${uuid}`, stored);
-  return { type: 'link', hash: uuid };
+  try {
+    writeNonblocking$1(`hash/${uuid}`, stored);
+  } catch (error) {
+    if (error instanceof ErrorWouldBlock) {
+      wouldBlock = error;
+    }
+  }
+  geometry[is_stored] = true;
+  return { stored: { type: 'link', hash: uuid }, wouldBlock };
 };
 
 const is_loaded = Symbol('is_loaded');
@@ -3132,7 +3150,7 @@ const readNonblocking = (path) => {
   if (!readData) {
     return;
   }
-  return loadNonblocking(readNonblocking$1(path));
+  return loadNonblocking(readData);
 };
 
 const remesh$1 = (geometry, options = {}, selections = []) => {
@@ -3948,7 +3966,11 @@ const writeNonblocking = (path, geometry) => {
   // Ensure that the geometry carries a hash before saving.
   hash(disjointGeometry);
   const preparedGeometry = prepareForSerialization(disjointGeometry);
-  writeNonblocking$1(path, storeNonblocking(preparedGeometry));
+  const { stored, wouldBlock } = storeNonblocking(preparedGeometry);
+  writeNonblocking$1(path, stored);
+  if (wouldBlock) {
+    throw wouldBlock;
+  }
   return preparedGeometry;
 };
 

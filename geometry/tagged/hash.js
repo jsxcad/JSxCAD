@@ -1,8 +1,8 @@
-import { hash as hashObject } from '@jsxcad/sys';
+import { computeHash } from '@jsxcad/sys';
 
 export const hash = (geometry) => {
   if (geometry.hash === undefined) {
-    geometry.hash = hashObject(geometry);
+    geometry.hash = computeHash(geometry);
   }
   return geometry.hash;
 };

@@ -1,4 +1,4 @@
-import { write, writeNonblocking } from '@jsxcad/sys';
+import { ErrorWouldBlock, write, writeNonblocking } from '@jsxcad/sys';
 
 import { hash } from './hash.js';
 import { prepareForSerialization } from './prepareForSerialization.js';
@@ -41,21 +41,39 @@ export const storeNonblocking = (geometry) => {
   prepareForSerialization(geometry);
   const uuid = hash(geometry);
   const stored = { ...geometry };
-  geometry[is_stored] = true;
   // Share graphs across geometries.
   const graph = geometry.graph;
+  let wouldBlock;
   if (graph && !graph[is_stored]) {
     if (!graph.hash) {
       graph.hash = hash(graph);
     }
-    writeNonblocking(`graph/${graph.hash}`, graph);
+    try {
+      writeNonblocking(`graph/${graph.hash}`, graph);
+    } catch (error) {
+      if (error instanceof ErrorWouldBlock) {
+        wouldBlock = error;
+      }
+    }
     stored.graph = { hash: graph.hash };
   }
   if (geometry.content) {
     for (let nth = 0; nth < geometry.content.length; nth++) {
-      stored.content[nth] = storeNonblocking(geometry.content[nth]);
+      const { stored: contentStored, wouldBlock: contentWouldBlock } =
+        storeNonblocking(geometry.content[nth]);
+      if (contentWouldBlock) {
+        wouldBlock = contentWouldBlock;
+      }
+      stored.content[nth] = contentStored;
     }
   }
-  writeNonblocking(`hash/${uuid}`, stored);
-  return { type: 'link', hash: uuid };
+  try {
+    writeNonblocking(`hash/${uuid}`, stored);
+  } catch (error) {
+    if (error instanceof ErrorWouldBlock) {
+      wouldBlock = error;
+    }
+  }
+  geometry[is_stored] = true;
+  return { stored: { type: 'link', hash: uuid }, wouldBlock };
 };

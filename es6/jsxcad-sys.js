@@ -22,77 +22,62 @@ const setPendingErrorHandler = (handler) => {
   pendingErrorHandler = handler;
 };
 
-function pad (hash, len) {
-  while (hash.length < len) {
-    hash = '0' + hash;
-  }
-  return hash;
-}
+exports.createHash = require('create-hash');
 
-function fold (hash, text) {
-  var i;
-  var chr;
-  var len;
-  if (text.length === 0) {
-    return hash;
-  }
-  for (i = 0, len = text.length; i < len; i++) {
-    chr = text.charCodeAt(i);
-    hash = ((hash << 5) - hash) + chr;
-    hash |= 0;
-  }
-  return hash < 0 ? hash * -2 : hash;
-}
+var createHashModule = /*#__PURE__*/Object.freeze({
+  __proto__: null
+});
 
-function foldObject (hash, o, seen) {
-  return Object.keys(o).sort().reduce(foldKey, hash);
-  function foldKey (hash, key) {
-    return foldValue(hash, o[key], key, seen);
-  }
-}
+const { createHash } = createHashModule;
 
-function foldValue (input, value, key, seen) {
-  var hash = fold(fold(fold(input, key), toString(value)), typeof value);
-  if (value === null) {
-    return fold(hash, 'null');
+const hashObject = (object, hash) => {
+  const keys = Object.keys(object);
+  keys.sort();
+  for (const key of keys) {
+    if (typeof key === 'symbol') {
+      continue;
+    }
+    hash.update(key);
+    hashValue(object[key], hash);
   }
+};
+
+const hashArray = (array, hash) => {
+  for (const value of array) {
+    hashValue(value, hash);
+  }
+};
+
+const hashValue = (value, hash) => {
   if (value === undefined) {
-    return fold(hash, 'undefined');
+    hash.update('undefined');
+  } else if (value === null) {
+    hash.update('null');
+  } else if (value instanceof Array) {
+    hash.update('array');
+    hashArray(value, hash);
+  } else if (value instanceof Object) {
+    hash.update('object');
+    hashObject(value, hash);
+  } else if (typeof value === 'number') {
+    hash.update('number');
+    hash.update(value.toString());
+  } else if (typeof value === 'string') {
+    hash.update('string');
+    hash.update(value);
+  } else if (typeof value === 'boolean') {
+    hash.update('bool');
+    hash.update(value ? 'true' : 'false');
+  } else {
+    throw Error(`Unexpected hashValue value ${value}`);
   }
-  if (typeof value === 'object' || typeof value === 'function') {
-    if (seen.indexOf(value) !== -1) {
-      return fold(hash, '[Circular]' + key);
-    }
-    seen.push(value);
+};
 
-    var objHash = foldObject(hash, value, seen);
-
-    if (!('valueOf' in value) || typeof value.valueOf !== 'function') {
-      return objHash;
-    }
-
-    try {
-      return fold(objHash, String(value.valueOf()))
-    } catch (err) {
-      return fold(objHash, '[valueOf exception]' + (err.stack || err.message))
-    }
-  }
-  return fold(hash, value.toString());
-}
-
-function toString (o) {
-  return Object.prototype.toString.call(o);
-}
-
-function sum (o) {
-  return pad(foldValue(0, o, '', []).toString(16), 8);
-}
-
-var hashSum = sum;
-
-const hash = (item) => hashSum(item);
-
-const computeHash = hash;
+const computeHash = (value) => {
+  const hash = createHash('sha256');
+  hashValue(value, hash);
+  return hash.digest('base64');
+};
 
 const fromStringToIntegerHash = (s) =>
   Math.abs(
@@ -3170,17 +3155,14 @@ const { serialize } = v8$1;
 
 const getFileWriter = () => {
   if (isNode) {
-    return async (qualifiedPath, data, doSerialize) => {
+    return async (qualifiedPath, data) => {
       try {
         await promises$3.mkdir(dirname(qualifiedPath), { recursive: true });
       } catch (error) {
         throw error;
       }
       try {
-        if (doSerialize) {
-          data = serialize(data);
-        }
-        await promises$3.writeFile(qualifiedPath, data);
+        await promises$3.writeFile(qualifiedPath, serialize(data));
         // FIX: Do proper versioning.
         const version = 0;
         return version;
@@ -3198,6 +3180,13 @@ const getFileWriter = () => {
 const fileWriter = getFileWriter();
 
 const writeNonblocking = (path, data, options = {}) => {
+  const { workspace = getFilesystem() } = options;
+  const qualifiedPath = qualifyPath(path, workspace);
+  const file = ensureQualifiedFile(path, qualifiedPath);
+  if (file.data === data) {
+    // This has already been written.
+    return true;
+  }
   // Schedule a deferred write to update persistent storage.
   addPending(write(path, data, options));
   throw new ErrorWouldBlock(`Would have blocked on write ${path}`);
@@ -3211,11 +3200,7 @@ const write = async (path, data, options = {}) => {
     return undefined;
   }
 
-  const {
-    doSerialize = true,
-    ephemeral,
-    workspace = getFilesystem(),
-  } = options;
+  const { ephemeral, workspace = getFilesystem() } = options;
 
   const qualifiedPath = qualifyPath(path, workspace);
   const file = ensureQualifiedFile(path, qualifiedPath);
@@ -3227,7 +3212,7 @@ const write = async (path, data, options = {}) => {
   file.data = data;
 
   if (!ephemeral && workspace !== undefined) {
-    file.version = await fileWriter(qualifiedPath, data, doSerialize);
+    file.version = await fileWriter(qualifiedPath, data);
   }
 
   // Let everyone else know the file has changed.
@@ -3891,4 +3876,4 @@ let nanoid = (size = 21) => {
 
 const generateUniqueId = () => nanoid();
 
-export { ErrorWouldBlock, addOnEmitHandler, addPending, ask, askService, askServices, beginEmitGroup, boot, clearCacheDb, clearEmitted, computeHash, createConversation, createService, elapsed, emit, endTime, finishEmitGroup, flushEmitGroup, generateUniqueId, getActiveServices, getConfig, getControlValue, getFilesystem, getPendingErrorHandler, getServicePoolInfo, getSourceLocation, getWorkspace, hash, isBrowser, isNode, isWebWorker, listFiles, log, logError, logInfo, onBoot, qualifyPath, read, readNonblocking, readOrWatch, remove, removeOnEmitHandler, reportTimes, resolvePending, restoreEmitGroup, saveEmitGroup, setConfig, setControlValue, setHandleAskUser, setPendingErrorHandler, setupFilesystem, setupWorkspace, sleep, startTime$1 as startTime, tellServices, terminateActiveServices, unwatchFile, unwatchFileCreation, unwatchFileDeletion, unwatchLog, unwatchServices, waitServices, watchFile, watchFileCreation, watchFileDeletion, watchLog, watchServices, write, writeNonblocking };
+export { ErrorWouldBlock, addOnEmitHandler, addPending, ask, askService, askServices, beginEmitGroup, boot, clearCacheDb, clearEmitted, computeHash, createConversation, createService, elapsed, emit, endTime, finishEmitGroup, flushEmitGroup, generateUniqueId, getActiveServices, getConfig, getControlValue, getFilesystem, getPendingErrorHandler, getServicePoolInfo, getSourceLocation, getWorkspace, isBrowser, isNode, isWebWorker, listFiles, log, logError, logInfo, onBoot, qualifyPath, read, readNonblocking, readOrWatch, remove, removeOnEmitHandler, reportTimes, resolvePending, restoreEmitGroup, saveEmitGroup, setConfig, setControlValue, setHandleAskUser, setPendingErrorHandler, setupFilesystem, setupWorkspace, sleep, startTime$1 as startTime, tellServices, terminateActiveServices, unwatchFile, unwatchFileCreation, unwatchFileDeletion, unwatchLog, unwatchServices, waitServices, watchFile, watchFileCreation, watchFileDeletion, watchLog, watchServices, write, writeNonblocking };

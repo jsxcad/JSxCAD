@@ -1,4 +1,4 @@
-import { hash as computeHash, emit, log as sysLog } from '@jsxcad/sys';
+import { computeHash, emit, log as sysLog } from '@jsxcad/sys';
 
 import Shape from './Shape.js';
 import { realize } from '@jsxcad/geometry';

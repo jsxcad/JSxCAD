@@ -24,6 +24,10 @@ export const writeNonblocking = (path, geometry) => {
   // Ensure that the geometry carries a hash before saving.
   hash(disjointGeometry);
   const preparedGeometry = prepareForSerialization(disjointGeometry);
-  writePathNonblocking(path, storeNonblocking(preparedGeometry));
+  const { stored, wouldBlock } = storeNonblocking(preparedGeometry);
+  writePathNonblocking(path, stored);
+  if (wouldBlock) {
+    throw wouldBlock;
+  }
   return preparedGeometry;
 };

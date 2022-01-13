@@ -10,14 +10,14 @@ test('Load and store', async (t) => {
     content: [{ type: 'group', tags: 'bar' }],
   };
   const stored = await store(original);
-  t.deepEqual(stored, { type: 'link', hash: '0ea7c97c' });
+  t.deepEqual(stored, { type: 'link', hash: '1GMMO3OWtQxbyS7MthYH7fELAX/Vj2r2YKdCoGMQgQE=' });
 
   // Check what we actually stored for root geometry.
   t.deepEqual(await read(`hash/${original.hash}`), {
     type: 'group',
     tags: 'foo',
-    content: [{ type: 'link', hash: '3e191b56' }],
-    hash: '0ea7c97c',
+    content: [{ type: 'link', hash: 'ogfvjTzmTXpJZfrmMQYJEmw60A343JPNoo0pXLUc0Dw=' }],
+    hash: '1GMMO3OWtQxbyS7MthYH7fELAX/Vj2r2YKdCoGMQgQE=',
   });
 
   // Ensure that the round trip is completed.
@@ -29,10 +29,10 @@ test('Load and store', async (t) => {
       {
         type: 'group',
         tags: 'bar',
-        hash: '3e191b56',
+        hash: 'ogfvjTzmTXpJZfrmMQYJEmw60A343JPNoo0pXLUc0Dw=',
       },
     ],
-    hash: '0ea7c97c',
+    hash: '1GMMO3OWtQxbyS7MthYH7fELAX/Vj2r2YKdCoGMQgQE=',
   });
 
   // Ensure that the sub-structural identities are maintained.
