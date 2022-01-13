@@ -4627,7 +4627,6 @@ const Cached = (name, thunk) => {
     const shape = thunk(...args);
     // This will schedule a write and throw, then wait for the write to complete, and retry.
     saveGeometryNonblocking(path, shape);
-    console.log(`QQ/Cached/shape: ${JSON.stringify(shape)}`);
     return shape;
   };
   return op;

@@ -10,13 +10,18 @@ test('Load and store', async (t) => {
     content: [{ type: 'group', tags: 'bar' }],
   };
   const stored = await store(original);
-  t.deepEqual(stored, { type: 'link', hash: '1GMMO3OWtQxbyS7MthYH7fELAX/Vj2r2YKdCoGMQgQE=' });
+  t.deepEqual(stored, {
+    type: 'link',
+    hash: '1GMMO3OWtQxbyS7MthYH7fELAX/Vj2r2YKdCoGMQgQE=',
+  });
 
   // Check what we actually stored for root geometry.
   t.deepEqual(await read(`hash/${original.hash}`), {
     type: 'group',
     tags: 'foo',
-    content: [{ type: 'link', hash: 'ogfvjTzmTXpJZfrmMQYJEmw60A343JPNoo0pXLUc0Dw=' }],
+    content: [
+      { type: 'link', hash: 'ogfvjTzmTXpJZfrmMQYJEmw60A343JPNoo0pXLUc0Dw=' },
+    ],
     hash: '1GMMO3OWtQxbyS7MthYH7fELAX/Vj2r2YKdCoGMQgQE=',
   });
 
