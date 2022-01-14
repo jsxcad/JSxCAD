@@ -1,5 +1,5 @@
 import { rewriteViewGroupOrient, appendViewGroupCode, extractViewGroupCode, deleteViewGroupCode } from './jsxcad-compiler.js';
-import { readOrWatch, unwatchFile, watchFile, boot, log, remove, ask, askService, setConfig, write, read, clearCacheDb, logInfo, terminateActiveServices, clearEmitted, resolvePending, listFiles, getActiveServices, watchFileCreation, watchFileDeletion, watchLog, watchServices } from './jsxcad-sys.js';
+import { readOrWatch, unwatchFile, watchFile, boot, read, log, remove, ask, askService, setConfig, write, clearCacheDb, logInfo, terminateActiveServices, clearEmitted, resolvePending, listFiles, getActiveServices, watchFileCreation, watchFileDeletion, watchLog, watchServices } from './jsxcad-sys.js';
 import { toDomElement, getNotebookControlData } from './jsxcad-ui-notebook.js';
 import { orbitDisplay, raycast, getWorldPosition } from './jsxcad-ui-threejs.js';
 import Prettier from 'https://unpkg.com/prettier@2.3.2/esm/standalone.mjs';
@@ -42717,54 +42717,6 @@ class App extends ReactDOM$2.Component {
                 console.log(`Re-appending ${entry.hash} to ${path}/${id}`);
                 domElement.appendChild(domElementByHash.get(entry.hash));
               } else {
-                // We need to build the element.
-                if (entry.view && !entry.url) {
-                  const {
-                    path,
-                    view
-                  } = entry;
-                  const {
-                    width,
-                    height
-                  } = view;
-                  const canvas = document.createElement('canvas');
-                  canvas.width = width;
-                  canvas.height = height;
-                  const offscreenCanvas = canvas.transferControlToOffscreen();
-
-                  const render = async () => {
-                    try {
-                      logInfo('app/App', `Ask render for ${path}/${id}`);
-                      const url = await this.ask({
-                        op: 'app/staticView',
-                        path,
-                        workspace,
-                        view,
-                        offscreenCanvas
-                      }, {
-                        path
-                      }, [offscreenCanvas]);
-                      console.log(`Finished render for ${path}/${id}`);
-                      const element = domElementByHash.get(entry.hash);
-
-                      if (element && element.firstChild) {
-                        element.firstChild.src = url;
-                      }
-                    } catch (error) {
-                      if (error.message === 'Terminated') {
-                        // Try again.
-                        return render();
-                      } else {
-                        window.alert(error.stack);
-                      }
-                    }
-                  }; // Render the image asynchronously -- it won't affect layout.
-
-
-                  console.log(`Schedule render for ${path}/${id}`);
-                  render();
-                }
-
                 const element = toDomElement([entry], {
                   onClickView: ({
                     path,
@@ -42792,6 +42744,71 @@ class App extends ReactDOM$2.Component {
                 console.log(`Appending ${entry.hash} to ${path}/${id}`);
                 domElement.appendChild(element);
                 console.log(`Marking ${entry.hash} in ${path}/${id}`);
+                await animationFrame(); // We need to build the element.
+
+                const cachedUrl = await read(`thumbnail/${entry.hash}`, {
+                  workspace
+                });
+
+                if (cachedUrl) {
+                  const render = async () => {
+                    console.log(`Retrieved thumbnail for ${path}/${id}`);
+
+                    if (element && element.firstChild) {
+                      element.firstChild.src = cachedUrl;
+                    }
+                  };
+
+                  render();
+                } else if (entry.view && !entry.url) {
+                  const {
+                    path,
+                    view
+                  } = entry;
+                  const {
+                    width,
+                    height
+                  } = view;
+                  const canvas = document.createElement('canvas');
+                  canvas.width = width;
+                  canvas.height = height;
+                  const offscreenCanvas = canvas.transferControlToOffscreen();
+
+                  const render = async () => {
+                    try {
+                      logInfo('app/App', `Ask render for ${path}/${id}`);
+                      const url = await this.ask({
+                        op: 'app/staticView',
+                        path,
+                        workspace,
+                        view,
+                        offscreenCanvas
+                      }, {
+                        path
+                      }, [offscreenCanvas]);
+                      console.log(`Finished render for ${path}/${id}`); // Cache the thumbnail for next time.
+
+                      await write(`thumbnail/${entry.hash}`, url, {
+                        workspace
+                      });
+
+                      if (element && element.firstChild) {
+                        element.firstChild.src = url;
+                      }
+                    } catch (error) {
+                      if (error.message === 'Terminated') {
+                        // Try again.
+                        return render();
+                      } else {
+                        window.alert(error.stack);
+                      }
+                    }
+                  }; // Render the image asynchronously -- it won't affect layout.
+
+
+                  console.log(`Schedule render for ${path}/${id}`);
+                  render();
+                }
               }
             }
 
