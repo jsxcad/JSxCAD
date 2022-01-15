@@ -38,7 +38,12 @@ const collectRemoves = (geometry, out) => {
 };
 
 export const cut = cached(
-  (geometry, geometries) => ['cut', hash(geometry), ...geometries.map(hash)],
+  (geometry, geometries) => {
+    if (geometries.some((value) => value === undefined)) {
+      throw Error('undef');
+    }
+    return ['cut', hash(geometry), ...geometries.map(hash)];
+  },
   (geometry, geometries) => {
     const concreteGeometry = toConcreteGeometry(geometry);
     const rewriteGraphs = [];

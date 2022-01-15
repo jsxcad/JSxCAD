@@ -1,22 +1,27 @@
-import { computeHash, readNonblocking, writeNonblocking } from '@jsxcad/sys';
+import { addPending, computeHash } from '@jsxcad/sys';
+
+import { readNonblocking } from './read.js';
+import { write } from './write.js';
 
 export const cached =
   (computeKey, op) =>
   (...args) => {
-    const key = computeKey(...args);
+    let key;
+    try {
+      key = computeKey(...args);
+    } catch (error) {
+      console.log(JSON.stringify([...args]));
+      throw error;
+    }
     const hash = computeHash(key);
     const path = `op/${hash}`;
-    console.log(
-      `QQ/Reading cached result for op ${JSON.stringify(key)} from ${path}`
-    );
-    const data = readNonblocking(path);
+    const data = readNonblocking(path, { errorOnMissing: false });
     if (data !== undefined) {
       console.log(`QQ/Using cached result for op ${JSON.stringify(key)}`);
       return data;
     }
     console.log(`QQ/Computing cached result for op ${JSON.stringify(key)}`);
     const result = op(...args);
-    console.log(`QQ/Writing cached result for op ${JSON.stringify(key)}`);
-    writeNonblocking(path, result);
+    addPending(write(path, result));
     return result;
   };

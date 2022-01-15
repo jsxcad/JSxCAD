@@ -1,33 +1,44 @@
-import { store, storeNonblocking } from './store.js';
-
 import {
+  addPending,
   write as writePath,
   writeNonblocking as writePathNonblocking,
 } from '@jsxcad/sys';
 
 import { hash } from './hash.js';
-import { prepareForSerialization } from './prepareForSerialization.js';
+import { store } from './store.js';
 import { toDisjointGeometry } from './toDisjointGeometry.js';
 
-export const write = async (path, geometry) => {
+export const write = async (path, geometry, options) => {
   const disjointGeometry = toDisjointGeometry(geometry);
   // Ensure that the geometry carries a hash before saving.
   hash(disjointGeometry);
-  const preparedGeometry = prepareForSerialization(disjointGeometry);
-  const stored = await store(preparedGeometry);
-  await writePath(path, stored);
-  return preparedGeometry;
+  const stored = await store(disjointGeometry);
+  await writePath(path, stored, options);
+  return disjointGeometry;
 };
 
-export const writeNonblocking = (path, geometry) => {
+// Generally addPending(write(...)) seems a better option.
+export const writeNonblocking = (path, geometry, options) => {
+  addPending(write(path, geometry, options));
+  return geometry;
+  /*
   const disjointGeometry = toDisjointGeometry(geometry);
   // Ensure that the geometry carries a hash before saving.
   hash(disjointGeometry);
-  const preparedGeometry = prepareForSerialization(disjointGeometry);
-  const { stored, wouldBlock } = storeNonblocking(preparedGeometry);
-  writePathNonblocking(path, stored);
+  const { stored, wouldBlock } = storeNonblocking(disjointGeometry);
   if (wouldBlock) {
+    if (options && options.errorOnMissing === false) {
+      return;
+    }
     throw wouldBlock;
   }
-  return preparedGeometry;
+  try {
+    writePathNonblocking(path, stored, options);
+  } catch (error) {
+    if (!options || options.errorOnMissing === true) {
+      throw error;
+    }
+  }
+  return disjointGeometry;
+*/
 };

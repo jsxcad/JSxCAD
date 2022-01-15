@@ -1,7 +1,6 @@
 import { ErrorWouldBlock, write, writeNonblocking } from '@jsxcad/sys';
 
 import { hash } from './hash.js';
-import { prepareForSerialization } from './prepareForSerialization.js';
 
 export const isStored = Symbol('isStored');
 
@@ -13,21 +12,23 @@ export const store = async (geometry) => {
   if (geometry[isStored]) {
     return { type: 'link', hash: uuid };
   }
-  prepareForSerialization(geometry);
   const stored = { ...geometry };
   geometry[isStored] = true;
   // Share graphs across geometries.
   const graph = geometry.graph;
   if (graph && !graph[isStored]) {
-    if (!graph.hash) {
-      graph.hash = hash(graph);
-    }
     await write(`graph/${graph.hash}`, graph);
     stored.graph = { hash: graph.hash };
   }
   if (geometry.content) {
     for (let nth = 0; nth < geometry.content.length; nth++) {
+      if (!geometry.content[nth]) {
+        throw Error('Store has empty content/1');
+      }
       stored.content[nth] = await store(geometry.content[nth]);
+      if (!stored.content[nth]) {
+        throw Error('Store has empty content/2');
+      }
     }
   }
   await write(`hash/${uuid}`, stored);
@@ -36,9 +37,8 @@ export const store = async (geometry) => {
 
 export const storeNonblocking = (geometry) => {
   if (geometry[isStored]) {
-    return { type: 'link', hash: geometry.hash };
+    return { stored: { type: 'link', hash: geometry.hash }, wouldBlock: false };
   }
-  prepareForSerialization(geometry);
   const uuid = hash(geometry);
   const stored = { ...geometry };
   // Share graphs across geometries.
@@ -59,12 +59,22 @@ export const storeNonblocking = (geometry) => {
   }
   if (geometry.content) {
     for (let nth = 0; nth < geometry.content.length; nth++) {
+      if (!geometry.content[nth]) {
+        throw Error('Store has empty content/3');
+      }
       const { stored: contentStored, wouldBlock: contentWouldBlock } =
         storeNonblocking(geometry.content[nth]);
       if (contentWouldBlock) {
         wouldBlock = contentWouldBlock;
       }
       stored.content[nth] = contentStored;
+      if (!stored.content[nth]) {
+        throw Error(
+          `Store has empty content/4: contentWouldBlock ${contentWouldBlock} from ${JSON.stringify(
+            geometry
+          )}`
+        );
+      }
     }
   }
   try {

@@ -179,10 +179,6 @@ export const toDomElement = (
         {
           const button = document.createElement('button');
           button.classList.add('note', 'download');
-          // button.style.height = `${21 * 1}px`;
-          // button.style.padding = '0px';
-          // button.style.border = '0px';
-          // button.style.margin = '0px';
           const text = document.createTextNode(`Download "${filename}"`);
           button.appendChild(text);
           button.addEventListener('click', (event) =>
@@ -193,10 +189,6 @@ export const toDomElement = (
         if (filename.endsWith('gcode')) {
           const button = document.createElement('button');
           button.classList.add('note', 'print');
-          // button.style.height = `${21 * 1}px`;
-          // button.style.padding = '0px';
-          // button.style.border = '0px';
-          // button.style.margin = '0px';
           const text = document.createTextNode(`Make "${filename}"`);
           button.appendChild(text);
           button.addEventListener('click', (event) =>

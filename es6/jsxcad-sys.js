@@ -81,6 +81,11 @@ var encode = function (arraybuffer) {
 };
 
 const hashObject = (object, hash) => {
+  if (object.hash) {
+    hash.update('hash');
+    hash.update(object.hash);
+    return;
+  }
   const keys = Object.keys(object);
   keys.sort();
   for (const key of keys) {
@@ -2318,7 +2323,7 @@ const getFileWriter = () => {
 const fileWriter = getFileWriter();
 
 const writeNonblocking = (path, data, options = {}) => {
-  const { workspace = getFilesystem() } = options;
+  const { workspace = getFilesystem(), errorOnBlocking = true } = options;
   const qualifiedPath = qualifyPath(path, workspace);
   const file = ensureQualifiedFile(path, qualifiedPath);
   if (file.data === data) {
@@ -2327,7 +2332,9 @@ const writeNonblocking = (path, data, options = {}) => {
   }
   // Schedule a deferred write to update persistent storage.
   addPending(write(path, data, options));
-  throw new ErrorWouldBlock(`Would have blocked on write ${path}`);
+  if (errorOnBlocking) {
+    throw new ErrorWouldBlock(`Would have blocked on write ${path}`);
+  }
 };
 
 const write = async (path, data, options = {}) => {
@@ -2503,13 +2510,15 @@ const fetchSources = async (sources, { workspace }) => {
 };
 
 const readNonblocking = (path, options = {}) => {
-  const { workspace = getFilesystem() } = options;
+  const { workspace = getFilesystem(), errorOnMissing = true } = options;
   const file = getFile(path, workspace);
   if (file) {
     return file.data;
   }
   addPending(read(path, options));
-  throw new ErrorWouldBlock(`Would have blocked on read ${path}`);
+  if (errorOnMissing) {
+    throw new ErrorWouldBlock(`Would have blocked on read ${path}`);
+  }
 };
 
 const read = async (path, options = {}) => {

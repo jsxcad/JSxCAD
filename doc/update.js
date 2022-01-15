@@ -18,9 +18,6 @@ const build = async (baseDirectory = '.') => {
   const notebookDurations = [];
   const startTime = new Date();
   const logWatcher = ({ type, source, text }) => {
-    if (source && source.startsWith('sys/')) {
-      return;
-    }
     console.log(`[${type}] ${source} ${text}`);
   };
   let exitCode;

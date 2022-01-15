@@ -132,28 +132,20 @@ const agent = async ({
 
       case 'app/staticView':
         for (;;) {
-          try {
-            const geometry = await sys.readOrWatch(path, {
-              workspace
-            });
-            const {
-              staticView
-            } = await import('./jsxcad-ui-threejs.js');
-            await staticView(baseApi.Shape.fromGeometry(geometry), { ...view,
-              canvas: offscreenCanvas
-            });
-            const blob = await offscreenCanvas.convertToBlob({
-              type: 'image/png'
-            });
-            const dataURL = new FileReaderSync().readAsDataURL(blob);
-            return dataURL;
-          } catch (error) {
-            if (error instanceof sys.ErrorWouldBlock) {
-              continue;
-            }
-
-            throw error;
-          }
+          const geometry = await sys.readOrWatch(path, {
+            workspace
+          });
+          const {
+            staticView
+          } = await import('./jsxcad-ui-threejs.js');
+          await staticView(baseApi.Shape.fromGeometry(geometry), { ...view,
+            canvas: offscreenCanvas
+          });
+          const blob = await offscreenCanvas.convertToBlob({
+            type: 'image/png'
+          });
+          const dataURL = new FileReaderSync().readAsDataURL(blob);
+          return dataURL;
         }
 
       case 'app/evaluate':

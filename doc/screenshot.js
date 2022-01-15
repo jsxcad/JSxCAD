@@ -7,38 +7,43 @@ export const screenshot = async (html, { browser }) => {
   for (;;) {
     imageUrlList.length = 0;
 
-    const page = await browser.newPage();
-    const width = 1024;
-    const height = 1024;
-    await page.setViewport({ width, height });
-    page.on('error', (msg) => console.log(msg.text()));
+    let page;
     try {
-      await page.setContent(html, { timeout });
-    } catch (error) {
-      console.log(error.stack);
-      if (timeoutCount++ < timeoutLimit) {
-        console.log(`Retry ${timeoutCount}`);
-        continue;
-      } else {
-        throw error;
+      page = await browser.newPage();
+      const width = 1024;
+      const height = 1024;
+      await page.setViewport({ width, height });
+      page.on('error', (msg) => console.log(msg.text()));
+      try {
+        await page.setContent(html, { timeout });
+      } catch (error) {
+        console.log(error.stack);
+        if (timeoutCount++ < timeoutLimit) {
+          console.log(`Retry ${timeoutCount}`);
+          continue;
+        } else {
+          throw error;
+        }
       }
-    }
-    timeoutCount = 0;
-    try {
-      await page.waitForSelector('.notebook.loaded', { timeout });
-    } catch (error) {
-      console.log(error.stack);
-      if (timeoutCount++ < timeoutLimit) {
-        console.log(`Retry ${timeoutCount}`);
-        continue;
-      } else {
-        throw error;
+      timeoutCount = 0;
+      try {
+        await page.waitForSelector('.notebook.loaded', { timeout });
+      } catch (error) {
+        console.log(error.stack);
+        if (timeoutCount++ < timeoutLimit) {
+          console.log(`Retry ${timeoutCount}`);
+          continue;
+        } else {
+          throw error;
+        }
       }
+      for (const element of await page.$$('.note.view')) {
+        const property = await element.getProperty('src');
+        imageUrlList.push(await property.jsonValue());
+      }
+      return { imageUrlList };
+    } finally {
+      await page.close();
     }
-    for (const element of await page.$$('.note.view')) {
-      const property = await element.getProperty('src');
-      imageUrlList.push(await property.jsonValue());
-    }
-    return { imageUrlList };
   }
 };

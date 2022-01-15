@@ -1,10 +1,10 @@
 import { identityMatrix, fromTranslation, fromZRotation, fromScaling, fromXRotation, fromYRotation } from './jsxcad-math-mat4.js';
-import { composeTransforms, fromSurfaceMeshToLazyGraph, fromPointsToAlphaShapeAsSurfaceMesh, serializeSurfaceMesh, deleteSurfaceMesh, deserializeSurfaceMesh, fromGraphToSurfaceMesh, disjointSurfaceMeshes, arrangePaths, fromPolygonsToSurfaceMesh, bendSurfaceMesh, clipSurfaceMeshes, computeCentroidOfSurfaceMesh, fitPlaneToPoints, arrangePathsIntoTriangles, computeNormalOfSurfaceMesh, fromSurfaceMeshToGraph, fromPointsToConvexHullAsSurfaceMesh, cutSurfaceMeshes, STATUS_OK, STATUS_UNCHANGED, STATUS_EMPTY, eachPointOfSurfaceMesh, fromSurfaceMeshEmitBoundingBox, outlineSurfaceMesh, extrudeSurfaceMesh, extrudeToPlaneOfSurfaceMesh, fromSurfaceMeshToPolygonsWithHoles, reverseFaceOrientationsOfSurfaceMesh, fromFunctionToSurfaceMesh, fromPointsToSurfaceMesh, fuseSurfaceMeshes, fromSegmentToInverseTransform, invertTransform, growSurfaceMesh, insetOfPolygonWithHoles, joinSurfaceMeshes, loftBetweenCongruentSurfaceMeshes, minkowskiDifferenceOfSurfaceMeshes, minkowskiShellOfSurfaceMeshes, minkowskiSumOfSurfaceMeshes, offsetOfPolygonWithHoles, projectToPlaneOfSurfaceMesh, pushSurfaceMesh, remeshSurfaceMesh, isotropicRemeshingOfSurfaceMesh, removeSelfIntersectionsOfSurfaceMesh, sectionOfSurfaceMesh, approximateSurfaceMesh, simplifySurfaceMesh, subdivideSurfaceMesh, smoothShapeOfSurfaceMesh, smoothSurfaceMesh, separateSurfaceMesh, fromSurfaceMeshToTriangles, taperSurfaceMesh, doesSelfIntersectOfSurfaceMesh, twistSurfaceMesh, SurfaceMeshQuery } from './jsxcad-algorithm-cgal.js';
+import { composeTransforms, fromSurfaceMeshToLazyGraph, fromPointsToAlphaShapeAsSurfaceMesh, serializeSurfaceMesh, deleteSurfaceMesh, deserializeSurfaceMesh, fromGraphToSurfaceMesh, disjointSurfaceMeshes, arrangePaths, fromPolygonsToSurfaceMesh, bendSurfaceMesh, clipSurfaceMeshes, computeCentroidOfSurfaceMesh, fitPlaneToPoints, arrangePathsIntoTriangles, computeNormalOfSurfaceMesh, fromSurfaceMeshToGraph, fromPointsToConvexHullAsSurfaceMesh, fromSurfaceMeshEmitBoundingBox, cutSurfaceMeshes, STATUS_OK, STATUS_UNCHANGED, STATUS_EMPTY, eachPointOfSurfaceMesh, outlineSurfaceMesh, extrudeSurfaceMesh, extrudeToPlaneOfSurfaceMesh, fromSurfaceMeshToPolygonsWithHoles, reverseFaceOrientationsOfSurfaceMesh, fromFunctionToSurfaceMesh, fromPointsToSurfaceMesh, fuseSurfaceMeshes, fromSegmentToInverseTransform, invertTransform, growSurfaceMesh, insetOfPolygonWithHoles, joinSurfaceMeshes, loftBetweenCongruentSurfaceMeshes, minkowskiDifferenceOfSurfaceMeshes, minkowskiShellOfSurfaceMeshes, minkowskiSumOfSurfaceMeshes, offsetOfPolygonWithHoles, projectToPlaneOfSurfaceMesh, pushSurfaceMesh, remeshSurfaceMesh, isotropicRemeshingOfSurfaceMesh, removeSelfIntersectionsOfSurfaceMesh, sectionOfSurfaceMesh, approximateSurfaceMesh, simplifySurfaceMesh, subdivideSurfaceMesh, smoothShapeOfSurfaceMesh, smoothSurfaceMesh, separateSurfaceMesh, fromSurfaceMeshToTriangles, taperSurfaceMesh, doesSelfIntersectOfSurfaceMesh, twistSurfaceMesh, SurfaceMeshQuery } from './jsxcad-algorithm-cgal.js';
 export { arrangePolygonsWithHoles } from './jsxcad-algorithm-cgal.js';
 import { transform as transform$4, equals, canonicalize as canonicalize$5, max, min, scale as scale$3, subtract } from './jsxcad-math-vec3.js';
 import { canonicalize as canonicalize$7 } from './jsxcad-math-plane.js';
 import { canonicalize as canonicalize$6 } from './jsxcad-math-poly3.js';
-import { computeHash, readNonblocking as readNonblocking$1, writeNonblocking as writeNonblocking$1, write as write$1, ErrorWouldBlock, read as read$1 } from './jsxcad-sys.js';
+import { computeHash, write as write$1, read as read$1, readNonblocking as readNonblocking$1, ErrorWouldBlock, addPending } from './jsxcad-sys.js';
 import { cacheRewriteTags, cache, cacheSection } from './jsxcad-cache.js';
 
 const update = (geometry, updates, changes) => {
@@ -1086,24 +1086,243 @@ const convexHull = ({ tags }, points) =>
     fromSurfaceMeshLazy(fromPointsToConvexHullAsSurfaceMesh(points))
   );
 
+const measureBoundingBox$3 = (geometry) => {
+  if (
+    geometry.cache === undefined ||
+    geometry.cache.boundingBox === undefined
+  ) {
+    if (geometry.cache === undefined) {
+      geometry.cache = {};
+    }
+    const { graph } = geometry;
+    fromSurfaceMeshEmitBoundingBox(
+      toSurfaceMesh(graph),
+      geometry.matrix,
+      (xMin, yMin, zMin, xMax, yMax, zMax) => {
+        geometry.cache.boundingBox = [
+          [xMin, yMin, zMin],
+          [xMax, yMax, zMax],
+        ];
+      }
+    );
+  }
+  return geometry.cache.boundingBox;
+};
+
+const prepareForSerialization$1 = (geometry) => {
+  const { graph } = geometry;
+  if (!graph.serializedSurfaceMesh) {
+    measureBoundingBox$3(geometry);
+    graph.serializedSurfaceMesh = serializeSurfaceMesh(toSurfaceMesh(graph));
+    graph.hash = computeHash(graph);
+  }
+  return graph;
+};
+
+const prepareForSerialization = op({ graph: prepareForSerialization$1 }, visit);
+
+const hash = (geometry) => {
+  if (geometry.hash === undefined) {
+    if (geometry.content) {
+      for (const content of geometry.content) {
+        hash(content);
+      }
+    }
+    prepareForSerialization(geometry);
+    geometry.hash = computeHash(geometry);
+  }
+  return geometry.hash;
+};
+
+const isStored = Symbol('isStored');
+
+const store = async (geometry) => {
+  if (geometry === undefined) {
+    throw Error('Attempted to store undefined geometry');
+  }
+  const uuid = hash(geometry);
+  if (geometry[isStored]) {
+    return { type: 'link', hash: uuid };
+  }
+  const stored = { ...geometry };
+  geometry[isStored] = true;
+  // Share graphs across geometries.
+  const graph = geometry.graph;
+  if (graph && !graph[isStored]) {
+    await write$1(`graph/${graph.hash}`, graph);
+    stored.graph = { hash: graph.hash };
+  }
+  if (geometry.content) {
+    for (let nth = 0; nth < geometry.content.length; nth++) {
+      if (!geometry.content[nth]) {
+        throw Error('Store has empty content/1');
+      }
+      stored.content[nth] = await store(geometry.content[nth]);
+      if (!stored.content[nth]) {
+        throw Error('Store has empty content/2');
+      }
+    }
+  }
+  await write$1(`hash/${uuid}`, stored);
+  return { type: 'link', hash: uuid };
+};
+
+const isLoaded = Symbol('isLoaded');
+
+const load = async (geometry) => {
+  if (geometry === undefined || geometry[isLoaded]) {
+    return geometry;
+  }
+  if (!geometry.hash) {
+    throw Error(`No hash`);
+  }
+  geometry = await read$1(`hash/${geometry.hash}`);
+  if (!geometry) {
+    return;
+  }
+  if (geometry[isLoaded]) {
+    return geometry;
+  }
+  geometry[isLoaded] = true;
+  geometry[isStored] = true;
+  // Link to any associated graph structure.
+  if (geometry.graph && geometry.graph.hash) {
+    geometry.graph = await read$1(`graph/${geometry.graph.hash}`);
+  }
+  if (geometry.content) {
+    for (let nth = 0; nth < geometry.content.length; nth++) {
+      if (!geometry.content[nth]) {
+        throw Error('Load has empty content/1');
+      }
+      geometry.content[nth] = await load(geometry.content[nth]);
+      if (!geometry.content[nth]) {
+        throw Error('Load has empty content/2');
+      }
+    }
+  }
+  return geometry;
+};
+
+const loadNonblocking = (geometry) => {
+  if (geometry === undefined || geometry[isLoaded]) {
+    return geometry;
+  }
+  if (!geometry.hash) {
+    return;
+  }
+  geometry = readNonblocking$1(`hash/${geometry.hash}`);
+  if (!geometry) {
+    return;
+  }
+  if (geometry[isLoaded]) {
+    return geometry;
+  }
+  geometry[isLoaded] = true;
+  geometry[isStored] = true;
+  // Link to any associated graph structure.
+  if (geometry.graph && geometry.graph.hash) {
+    geometry.graph = readNonblocking$1(`graph/${geometry.graph.hash}`);
+  }
+  if (geometry.content) {
+    for (let nth = 0; nth < geometry.content.length; nth++) {
+      if (!geometry.content[nth]) {
+        throw Error('Load has empty content/3');
+      }
+      geometry.content[nth] = loadNonblocking(geometry.content[nth]);
+      if (!geometry.content[nth]) {
+        throw Error('Load has empty content/4');
+      }
+    }
+  }
+  return geometry;
+};
+
+const read = async (path, options) => {
+  const readData = await read$1(path, options);
+  if (!readData) {
+    return;
+  }
+  return load(readData);
+};
+
+const readNonblocking = (path, options) => {
+  const readData = readNonblocking$1(path, options);
+  if (!readData) {
+    return;
+  }
+  try {
+    return loadNonblocking(readData);
+  } catch (error) {
+    if (error instanceof ErrorWouldBlock) {
+      if (options && options.errorOnMissing === false) {
+        return;
+      }
+    }
+    throw error;
+  }
+};
+
+// FIX: Remove toDisjointGeometry and replace with a more meaningful operation.
+const toDisjointGeometry = (geometry) => toConcreteGeometry(geometry);
+
+const toVisiblyDisjointGeometry = (geometry) =>
+  toDisjointGeometry(geometry);
+
+const write = async (path, geometry, options) => {
+  const disjointGeometry = toDisjointGeometry(geometry);
+  // Ensure that the geometry carries a hash before saving.
+  hash(disjointGeometry);
+  const stored = await store(disjointGeometry);
+  await write$1(path, stored, options);
+  return disjointGeometry;
+};
+
+// Generally addPending(write(...)) seems a better option.
+const writeNonblocking = (path, geometry, options) => {
+  addPending(write(path, geometry, options));
+  return geometry;
+  /*
+  const disjointGeometry = toDisjointGeometry(geometry);
+  // Ensure that the geometry carries a hash before saving.
+  hash(disjointGeometry);
+  const { stored, wouldBlock } = storeNonblocking(disjointGeometry);
+  if (wouldBlock) {
+    if (options && options.errorOnMissing === false) {
+      return;
+    }
+    throw wouldBlock;
+  }
+  try {
+    writePathNonblocking(path, stored, options);
+  } catch (error) {
+    if (!options || options.errorOnMissing === true) {
+      throw error;
+    }
+  }
+  return disjointGeometry;
+*/
+};
+
 const cached =
   (computeKey, op) =>
   (...args) => {
-    const key = computeKey(...args);
+    let key;
+    try {
+      key = computeKey(...args);
+    } catch (error) {
+      console.log(JSON.stringify([...args]));
+      throw error;
+    }
     const hash = computeHash(key);
     const path = `op/${hash}`;
-    console.log(
-      `QQ/Reading cached result for op ${JSON.stringify(key)} from ${path}`
-    );
-    const data = readNonblocking$1(path);
+    const data = readNonblocking(path, { errorOnMissing: false });
     if (data !== undefined) {
       console.log(`QQ/Using cached result for op ${JSON.stringify(key)}`);
       return data;
     }
     console.log(`QQ/Computing cached result for op ${JSON.stringify(key)}`);
     const result = op(...args);
-    console.log(`QQ/Writing cached result for op ${JSON.stringify(key)}`);
-    writeNonblocking$1(path, result);
+    addPending(write(path, result));
     return result;
   };
 
@@ -1155,13 +1374,6 @@ const cut$1 = (targetGraphs, targetSegments, sourceGraphs) => {
   );
   deletePendingSurfaceMeshes();
   return { cutGraphGeometries, cutSegmentsGeometries };
-};
-
-const hash = (geometry) => {
-  if (geometry.hash === undefined) {
-    geometry.hash = computeHash(geometry);
-  }
-  return geometry.hash;
 };
 
 const rewriteType = (op) => (geometry) =>
@@ -1244,7 +1456,12 @@ const collectRemoves = (geometry, out) => {
 };
 
 const cut = cached(
-  (geometry, geometries) => ['cut', hash(geometry), ...geometries.map(hash)],
+  (geometry, geometries) => {
+    if (geometries.some((value) => value === undefined)) {
+      throw Error('undef');
+    }
+    return ['cut', hash(geometry), ...geometries.map(hash)];
+  },
   (geometry, geometries) => {
     const concreteGeometry = toConcreteGeometry(geometry);
     const rewriteGraphs = [];
@@ -1346,29 +1563,6 @@ const eachPoint = (emit, geometry) => {
     }
   };
   visit(toTransformedGeometry(geometry), op);
-};
-
-const measureBoundingBox$3 = (geometry) => {
-  if (
-    geometry.cache === undefined ||
-    geometry.cache.boundingBox === undefined
-  ) {
-    if (geometry.cache === undefined) {
-      geometry.cache = {};
-    }
-    const { graph } = geometry;
-    fromSurfaceMeshEmitBoundingBox(
-      toSurfaceMesh(graph),
-      geometry.matrix,
-      (xMin, yMin, zMin, xMax, yMax, zMax) => {
-        geometry.cache.boundingBox = [
-          [xMin, yMin, zMin],
-          [xMax, yMax, zMax],
-        ];
-      }
-    );
-  }
-  return geometry.cache.boundingBox;
 };
 
 // returns an array of two Vector3Ds (minimum coordinates and maximum coordinates)
@@ -2950,45 +3144,6 @@ const projectToPlane = (geometry, plane, direction) => {
   return rewrite(toTransformedGeometry(geometry), op);
 };
 
-const prepareForSerialization$1 = (geometry) => {
-  const { graph } = geometry;
-  if (!graph.serializedSurfaceMesh) {
-    measureBoundingBox$3(geometry);
-    graph.serializedSurfaceMesh = serializeSurfaceMesh(toSurfaceMesh(graph));
-  }
-  return graph;
-};
-
-const prepareForSerialization = (geometry) => {
-  const op = (geometry, descend) => {
-    switch (geometry.type) {
-      case 'graph':
-        prepareForSerialization$1(geometry);
-        return;
-      case 'displayGeometry':
-      case 'triangles':
-      case 'points':
-      case 'segments':
-      case 'paths':
-      case 'polygonsWithHoles':
-        return;
-      case 'item':
-      case 'group':
-      case 'layout':
-      case 'sketch':
-      case 'transform':
-      case 'plan':
-        return descend();
-      default:
-        throw Error(`Unexpected geometry: ${JSON.stringify(geometry)}`);
-    }
-  };
-
-  visit(geometry, op);
-
-  return geometry;
-};
-
 const push$1 = (geometry, force, minimumDistance, maximumDistance) =>
   taggedGraph(
     { tags: geometry.tags, matrix: geometry.matrix },
@@ -3037,155 +3192,6 @@ const push = (
   };
 
   return rewrite(toTransformedGeometry(geometry), op);
-};
-
-const isStored = Symbol('isStored');
-
-const store = async (geometry) => {
-  if (geometry === undefined) {
-    throw Error('Attempted to store undefined geometry');
-  }
-  const uuid = hash(geometry);
-  if (geometry[isStored]) {
-    return { type: 'link', hash: uuid };
-  }
-  prepareForSerialization(geometry);
-  const stored = { ...geometry };
-  geometry[isStored] = true;
-  // Share graphs across geometries.
-  const graph = geometry.graph;
-  if (graph && !graph[isStored]) {
-    if (!graph.hash) {
-      graph.hash = hash(graph);
-    }
-    await write$1(`graph/${graph.hash}`, graph);
-    stored.graph = { hash: graph.hash };
-  }
-  if (geometry.content) {
-    for (let nth = 0; nth < geometry.content.length; nth++) {
-      stored.content[nth] = await store(geometry.content[nth]);
-    }
-  }
-  await write$1(`hash/${uuid}`, stored);
-  return { type: 'link', hash: uuid };
-};
-
-const storeNonblocking = (geometry) => {
-  if (geometry[isStored]) {
-    return { type: 'link', hash: geometry.hash };
-  }
-  prepareForSerialization(geometry);
-  const uuid = hash(geometry);
-  const stored = { ...geometry };
-  // Share graphs across geometries.
-  const graph = geometry.graph;
-  let wouldBlock;
-  if (graph && !graph[isStored]) {
-    if (!graph.hash) {
-      graph.hash = hash(graph);
-    }
-    try {
-      writeNonblocking$1(`graph/${graph.hash}`, graph);
-    } catch (error) {
-      if (error instanceof ErrorWouldBlock) {
-        wouldBlock = error;
-      }
-    }
-    stored.graph = { hash: graph.hash };
-  }
-  if (geometry.content) {
-    for (let nth = 0; nth < geometry.content.length; nth++) {
-      const { stored: contentStored, wouldBlock: contentWouldBlock } =
-        storeNonblocking(geometry.content[nth]);
-      if (contentWouldBlock) {
-        wouldBlock = contentWouldBlock;
-      }
-      stored.content[nth] = contentStored;
-    }
-  }
-  try {
-    writeNonblocking$1(`hash/${uuid}`, stored);
-  } catch (error) {
-    if (error instanceof ErrorWouldBlock) {
-      wouldBlock = error;
-    }
-  }
-  geometry[isStored] = true;
-  return { stored: { type: 'link', hash: uuid }, wouldBlock };
-};
-
-const isLoaded = Symbol('isLoaded');
-
-const load = async (geometry) => {
-  if (geometry === undefined || geometry[isLoaded]) {
-    return geometry;
-  }
-  if (!geometry.hash) {
-    throw Error(`No hash`);
-  }
-  geometry = await read$1(`hash/${geometry.hash}`);
-  if (!geometry) {
-    return;
-  }
-  if (geometry[isLoaded]) {
-    return geometry;
-  }
-  geometry[isLoaded] = true;
-  geometry[isStored] = true;
-  // Link to any associated graph structure.
-  if (geometry.graph && geometry.graph.hash) {
-    geometry.graph = await read$1(`graph/${geometry.graph.hash}`);
-  }
-  if (geometry.content) {
-    for (let nth = 0; nth < geometry.content.length; nth++) {
-      geometry.content[nth] = await load(geometry.content[nth]);
-    }
-  }
-  return geometry;
-};
-
-const loadNonblocking = (geometry) => {
-  if (geometry === undefined || geometry[isLoaded]) {
-    return geometry;
-  }
-  if (!geometry.hash) {
-    return;
-  }
-  geometry = readNonblocking$1(`hash/${geometry.hash}`);
-  if (!geometry) {
-    return;
-  }
-  if (geometry[isLoaded]) {
-    return geometry;
-  }
-  geometry[isLoaded] = true;
-  geometry[isStored] = true;
-  // Link to any associated graph structure.
-  if (geometry.graph && geometry.graph.hash) {
-    geometry.graph = readNonblocking$1(`graph/${geometry.graph.hash}`);
-  }
-  if (geometry.content) {
-    for (let nth = 0; nth < geometry.content.length; nth++) {
-      geometry.content[nth] = loadNonblocking(geometry.content[nth]);
-    }
-  }
-  return geometry;
-};
-
-const read = async (path) => {
-  const readData = await read$1(path);
-  if (!readData) {
-    return;
-  }
-  return load(readData);
-};
-
-const readNonblocking = (path) => {
-  const readData = readNonblocking$1(path);
-  if (!readData) {
-    return;
-  }
-  return loadNonblocking(readData);
 };
 
 const remesh$1 = (geometry, options = {}, selections = []) => {
@@ -3688,12 +3694,6 @@ const test = (geometry) => {
   return geometry;
 };
 
-// FIX: Remove toDisjointGeometry and replace with a more meaningful operation.
-const toDisjointGeometry = (geometry) => toConcreteGeometry(geometry);
-
-const toVisiblyDisjointGeometry = (geometry) =>
-  toDisjointGeometry(geometry);
-
 const toDisplayGeometry = (
   geometry,
   { triangles, outline = true, skin, wireframe = false } = {}
@@ -3984,29 +3984,6 @@ const withQuery = (geometry, thunk) => {
   for (const query of queries) {
     query.release();
   }
-};
-
-const write = async (path, geometry) => {
-  const disjointGeometry = toDisjointGeometry(geometry);
-  // Ensure that the geometry carries a hash before saving.
-  hash(disjointGeometry);
-  const preparedGeometry = prepareForSerialization(disjointGeometry);
-  const stored = await store(preparedGeometry);
-  await write$1(path, stored);
-  return preparedGeometry;
-};
-
-const writeNonblocking = (path, geometry) => {
-  const disjointGeometry = toDisjointGeometry(geometry);
-  // Ensure that the geometry carries a hash before saving.
-  hash(disjointGeometry);
-  const preparedGeometry = prepareForSerialization(disjointGeometry);
-  const { stored, wouldBlock } = storeNonblocking(preparedGeometry);
-  writeNonblocking$1(path, stored);
-  if (wouldBlock) {
-    throw wouldBlock;
-  }
-  return preparedGeometry;
 };
 
 const rotateX = (angle, geometry) =>

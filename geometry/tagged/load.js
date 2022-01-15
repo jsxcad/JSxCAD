@@ -26,7 +26,13 @@ export const load = async (geometry) => {
   }
   if (geometry.content) {
     for (let nth = 0; nth < geometry.content.length; nth++) {
+      if (!geometry.content[nth]) {
+        throw Error('Load has empty content/1');
+      }
       geometry.content[nth] = await load(geometry.content[nth]);
+      if (!geometry.content[nth]) {
+        throw Error('Load has empty content/2');
+      }
     }
   }
   return geometry;
@@ -54,7 +60,13 @@ export const loadNonblocking = (geometry) => {
   }
   if (geometry.content) {
     for (let nth = 0; nth < geometry.content.length; nth++) {
+      if (!geometry.content[nth]) {
+        throw Error('Load has empty content/3');
+      }
       geometry.content[nth] = loadNonblocking(geometry.content[nth]);
+      if (!geometry.content[nth]) {
+        throw Error('Load has empty content/4');
+      }
     }
   }
   return geometry;

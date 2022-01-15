@@ -158,13 +158,15 @@ const fetchSources = async (sources, { workspace }) => {
 };
 
 export const readNonblocking = (path, options = {}) => {
-  const { workspace = getFilesystem() } = options;
+  const { workspace = getFilesystem(), errorOnMissing = true } = options;
   const file = getFile(path, workspace);
   if (file) {
     return file.data;
   }
   addPending(read(path, options));
-  throw new ErrorWouldBlock(`Would have blocked on read ${path}`);
+  if (errorOnMissing) {
+    throw new ErrorWouldBlock(`Would have blocked on read ${path}`);
+  }
 };
 
 export const read = async (path, options = {}) => {

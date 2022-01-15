@@ -41,7 +41,7 @@ const getFileWriter = () => {
 const fileWriter = getFileWriter();
 
 export const writeNonblocking = (path, data, options = {}) => {
-  const { workspace = getFilesystem() } = options;
+  const { workspace = getFilesystem(), errorOnBlocking = true } = options;
   const qualifiedPath = qualifyPath(path, workspace);
   const file = ensureQualifiedFile(path, qualifiedPath);
   if (file.data === data) {
@@ -50,7 +50,9 @@ export const writeNonblocking = (path, data, options = {}) => {
   }
   // Schedule a deferred write to update persistent storage.
   addPending(write(path, data, options));
-  throw new ErrorWouldBlock(`Would have blocked on write ${path}`);
+  if (errorOnBlocking) {
+    throw new ErrorWouldBlock(`Would have blocked on write ${path}`);
+  }
 };
 
 export const write = async (path, data, options = {}) => {
