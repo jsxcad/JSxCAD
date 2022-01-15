@@ -28,6 +28,12 @@ export {
   BOOLEAN_CLIP,
   booleansOfPolygonsWithHoles,
 } from './booleansOfPolygonsWithHoles.js';
+export {
+  STATUS_OK,
+  STATUS_EMPTY,
+  STATUS_ZERO_THICKNESS,
+  STATUS_UNCHANGED,
+} from './status.js';
 export { clipSurfaceMeshes } from './clipSurfaceMeshes.js';
 export { computeCentroidOfSurfaceMesh } from './computeCentroidOfSurfaceMesh.js';
 export { computeNormalOfSurfaceMesh } from './computeNormalOfSurfaceMesh.js';

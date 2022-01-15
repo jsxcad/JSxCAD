@@ -34,10 +34,9 @@ export const cutSurfaceMeshes = (targetMeshes, targetSegments, sources) => {
       sources.length,
       (nth) => sources[nth].mesh,
       (nth) => toCgalTransformFromJsTransform(sources[nth].matrix),
-      (nth, mesh) => {
-        mesh.provenance = 'cut';
+      (nth, mesh, status) => {
         const { matrix, tags } = targetMeshes[nth];
-        cutMeshes[nth] = { matrix, mesh, tags };
+        cutMeshes[nth] = { matrix, mesh, tags, status };
       },
       (sourceX, sourceY, sourceZ, targetX, targetY, targetZ) => {
         const source = [sourceX, sourceY, sourceZ];

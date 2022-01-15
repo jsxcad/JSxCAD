@@ -1,11 +1,11 @@
 import { identityMatrix, fromTranslation, fromZRotation, fromScaling, fromXRotation, fromYRotation } from './jsxcad-math-mat4.js';
-import { composeTransforms, fromSurfaceMeshToLazyGraph, fromPointsToAlphaShapeAsSurfaceMesh, serializeSurfaceMesh, deleteSurfaceMesh, deserializeSurfaceMesh, fromGraphToSurfaceMesh, disjointSurfaceMeshes, arrangePaths, fromPolygonsToSurfaceMesh, bendSurfaceMesh, clipSurfaceMeshes, computeCentroidOfSurfaceMesh, fitPlaneToPoints, arrangePathsIntoTriangles, computeNormalOfSurfaceMesh, fromSurfaceMeshToGraph, fromPointsToConvexHullAsSurfaceMesh, cutSurfaceMeshes, eachPointOfSurfaceMesh, fromSurfaceMeshEmitBoundingBox, outlineSurfaceMesh, extrudeSurfaceMesh, extrudeToPlaneOfSurfaceMesh, fromSurfaceMeshToPolygonsWithHoles, reverseFaceOrientationsOfSurfaceMesh, fromFunctionToSurfaceMesh, fromPointsToSurfaceMesh, fuseSurfaceMeshes, fromSegmentToInverseTransform, invertTransform, growSurfaceMesh, insetOfPolygonWithHoles, joinSurfaceMeshes, loftBetweenCongruentSurfaceMeshes, minkowskiDifferenceOfSurfaceMeshes, minkowskiShellOfSurfaceMeshes, minkowskiSumOfSurfaceMeshes, offsetOfPolygonWithHoles, projectToPlaneOfSurfaceMesh, pushSurfaceMesh, remeshSurfaceMesh, isotropicRemeshingOfSurfaceMesh, removeSelfIntersectionsOfSurfaceMesh, sectionOfSurfaceMesh, approximateSurfaceMesh, simplifySurfaceMesh, subdivideSurfaceMesh, smoothShapeOfSurfaceMesh, smoothSurfaceMesh, separateSurfaceMesh, fromSurfaceMeshToTriangles, taperSurfaceMesh, doesSelfIntersectOfSurfaceMesh, twistSurfaceMesh, SurfaceMeshQuery } from './jsxcad-algorithm-cgal.js';
+import { composeTransforms, fromSurfaceMeshToLazyGraph, fromPointsToAlphaShapeAsSurfaceMesh, serializeSurfaceMesh, deleteSurfaceMesh, deserializeSurfaceMesh, fromGraphToSurfaceMesh, disjointSurfaceMeshes, arrangePaths, fromPolygonsToSurfaceMesh, bendSurfaceMesh, clipSurfaceMeshes, computeCentroidOfSurfaceMesh, fitPlaneToPoints, arrangePathsIntoTriangles, computeNormalOfSurfaceMesh, fromSurfaceMeshToGraph, fromPointsToConvexHullAsSurfaceMesh, cutSurfaceMeshes, STATUS_OK, STATUS_UNCHANGED, STATUS_EMPTY, eachPointOfSurfaceMesh, fromSurfaceMeshEmitBoundingBox, outlineSurfaceMesh, extrudeSurfaceMesh, extrudeToPlaneOfSurfaceMesh, fromSurfaceMeshToPolygonsWithHoles, reverseFaceOrientationsOfSurfaceMesh, fromFunctionToSurfaceMesh, fromPointsToSurfaceMesh, fuseSurfaceMeshes, fromSegmentToInverseTransform, invertTransform, growSurfaceMesh, insetOfPolygonWithHoles, joinSurfaceMeshes, loftBetweenCongruentSurfaceMeshes, minkowskiDifferenceOfSurfaceMeshes, minkowskiShellOfSurfaceMeshes, minkowskiSumOfSurfaceMeshes, offsetOfPolygonWithHoles, projectToPlaneOfSurfaceMesh, pushSurfaceMesh, remeshSurfaceMesh, isotropicRemeshingOfSurfaceMesh, removeSelfIntersectionsOfSurfaceMesh, sectionOfSurfaceMesh, approximateSurfaceMesh, simplifySurfaceMesh, subdivideSurfaceMesh, smoothShapeOfSurfaceMesh, smoothSurfaceMesh, separateSurfaceMesh, fromSurfaceMeshToTriangles, taperSurfaceMesh, doesSelfIntersectOfSurfaceMesh, twistSurfaceMesh, SurfaceMeshQuery } from './jsxcad-algorithm-cgal.js';
 export { arrangePolygonsWithHoles } from './jsxcad-algorithm-cgal.js';
 import { transform as transform$4, equals, canonicalize as canonicalize$5, max, min, scale as scale$3, subtract } from './jsxcad-math-vec3.js';
 import { canonicalize as canonicalize$7 } from './jsxcad-math-plane.js';
 import { canonicalize as canonicalize$6 } from './jsxcad-math-poly3.js';
+import { computeHash, readNonblocking as readNonblocking$1, writeNonblocking as writeNonblocking$1, write as write$1, ErrorWouldBlock, read as read$1 } from './jsxcad-sys.js';
 import { cacheRewriteTags, cache, cacheSection } from './jsxcad-cache.js';
-import { computeHash, write as write$1, writeNonblocking as writeNonblocking$1, ErrorWouldBlock, read as read$1, readNonblocking as readNonblocking$1 } from './jsxcad-sys.js';
 
 const update = (geometry, updates, changes) => {
   if (updates === undefined) {
@@ -1086,6 +1086,30 @@ const convexHull = ({ tags }, points) =>
     fromSurfaceMeshLazy(fromPointsToConvexHullAsSurfaceMesh(points))
   );
 
+const cached =
+  (computeKey, op) =>
+  (...args) => {
+    const key = computeKey(...args);
+    const hash = computeHash(key);
+    const path = `op/${hash}`;
+    console.log(
+      `QQ/Reading cached result for op ${JSON.stringify(key)} from ${path}`
+    );
+    const data = readNonblocking$1(path);
+    if (data !== undefined) {
+      console.log(`QQ/Using cached result for op ${JSON.stringify(key)}`);
+      return data;
+    }
+    console.log(`QQ/Computing cached result for op ${JSON.stringify(key)}`);
+    const result = op(...args);
+    console.log(`QQ/Writing cached result for op ${JSON.stringify(key)}`);
+    writeNonblocking$1(path, result);
+    return result;
+  };
+
+const fromEmpty = ({ tags, isPlanar } = {}) =>
+  taggedGraph({ tags }, { isEmpty: true, isPlanar });
+
 const cut$1 = (targetGraphs, targetSegments, sourceGraphs) => {
   if (sourceGraphs.length === 0) {
     return {
@@ -1093,14 +1117,14 @@ const cut$1 = (targetGraphs, targetSegments, sourceGraphs) => {
       cutSegmentsGeometries: targetSegments,
     };
   }
-  targetGraphs = targetGraphs.map(({ graph, matrix, tags }) => ({
+  const targetGraphRequests = targetGraphs.map(({ graph, matrix, tags }) => ({
     mesh: toSurfaceMesh(graph),
     matrix,
     tags,
     isPlanar: graph.isPlanar,
     isEmpty: graph.isEmpty,
   }));
-  sourceGraphs = sourceGraphs.map(({ graph, matrix, tags }) => ({
+  const sourceGraphRequests = sourceGraphs.map(({ graph, matrix, tags }) => ({
     mesh: toSurfaceMesh(graph),
     matrix,
     tags,
@@ -1108,18 +1132,36 @@ const cut$1 = (targetGraphs, targetSegments, sourceGraphs) => {
     isEmpty: graph.isEmpty,
   }));
   const { cutMeshes, cutSegments } = cutSurfaceMeshes(
-    targetGraphs,
+    targetGraphRequests,
     targetSegments,
-    sourceGraphs
+    sourceGraphRequests
   );
-  const cutGraphGeometries = cutMeshes.map(({ matrix, mesh, tags }) =>
-    taggedGraph({ tags, matrix }, fromSurfaceMeshLazy(mesh))
+  const cutGraphGeometries = cutMeshes.map(
+    ({ matrix, mesh, tags, status }, index) => {
+      switch (status) {
+        case STATUS_EMPTY:
+          return fromEmpty({ tags });
+        case STATUS_UNCHANGED:
+          // Preserve identity.
+          return targetGraphs[index];
+        case STATUS_OK:
+          mesh.provenance = 'cut';
+          return taggedGraph({ tags, matrix }, fromSurfaceMeshLazy(mesh));
+      }
+    }
   );
   const cutSegmentsGeometries = cutSegments.map(({ matrix, segments, tags }) =>
     taggedSegments({ tags, matrix }, segments)
   );
   deletePendingSurfaceMeshes();
   return { cutGraphGeometries, cutSegmentsGeometries };
+};
+
+const hash = (geometry) => {
+  if (geometry.hash === undefined) {
+    geometry.hash = computeHash(geometry);
+  }
+  return geometry.hash;
 };
 
 const rewriteType = (op) => (geometry) =>
@@ -1201,38 +1243,41 @@ const collectRemoves = (geometry, out) => {
   visit(geometry, op);
 };
 
-const cut = (geometry, geometries) => {
-  const concreteGeometry = toConcreteGeometry(geometry);
-  const rewriteGraphs = [];
-  const rewriteSegments = [];
-  collectTargets$1(concreteGeometry, rewriteGraphs, rewriteSegments);
-  const readGraphs = [];
-  for (const geometry of geometries) {
-    collectRemoves(toConcreteGeometry(geometry), readGraphs);
-  }
-  const { cutGraphGeometries, cutSegmentsGeometries } = cut$1(
-    rewriteGraphs,
-    rewriteSegments,
-    readGraphs
-  );
-  const map = new Map();
-  for (let nth = 0; nth < cutGraphGeometries.length; nth++) {
-    map.set(rewriteGraphs[nth], cutGraphGeometries[nth]);
-  }
-  for (let nth = 0; nth < cutSegmentsGeometries.length; nth++) {
-    map.set(rewriteSegments[nth], cutSegmentsGeometries[nth]);
-  }
-
-  const update = (geometry, descend) => {
-    const cut = map.get(geometry);
-    if (cut) {
-      return cut;
-    } else {
-      return descend();
+const cut = cached(
+  (geometry, geometries) => ['cut', hash(geometry), ...geometries.map(hash)],
+  (geometry, geometries) => {
+    const concreteGeometry = toConcreteGeometry(geometry);
+    const rewriteGraphs = [];
+    const rewriteSegments = [];
+    collectTargets$1(concreteGeometry, rewriteGraphs, rewriteSegments);
+    const readGraphs = [];
+    for (const geometry of geometries) {
+      collectRemoves(toConcreteGeometry(geometry), readGraphs);
     }
-  };
-  return rewrite(concreteGeometry, update);
-};
+    const { cutGraphGeometries, cutSegmentsGeometries } = cut$1(
+      rewriteGraphs,
+      rewriteSegments,
+      readGraphs
+    );
+    const map = new Map();
+    for (let nth = 0; nth < cutGraphGeometries.length; nth++) {
+      map.set(rewriteGraphs[nth], cutGraphGeometries[nth]);
+    }
+    for (let nth = 0; nth < cutSegmentsGeometries.length; nth++) {
+      map.set(rewriteSegments[nth], cutSegmentsGeometries[nth]);
+    }
+
+    const update = (geometry, descend) => {
+      const cut = map.get(geometry);
+      if (cut) {
+        return cut;
+      } else {
+        return descend();
+      }
+    };
+    return rewrite(concreteGeometry, update);
+  }
+);
 
 const difference = (geometry, options = {}, ...geometries) =>
   cut(geometry, geometries);
@@ -1557,9 +1602,6 @@ const segments = (
 };
 
 const eachSegment = op({ graph: eachEdge, segments }, visit);
-
-const fromEmpty = ({ tags, isPlanar } = {}) =>
-  taggedGraph({ tags }, { isEmpty: true, isPlanar });
 
 const empty = ({ tags, isPlanar }) => fromEmpty({ tags, isPlanar });
 
@@ -2214,13 +2256,6 @@ const grow = (geometry, amount) => {
   };
 
   return rewrite(toTransformedGeometry(geometry), op);
-};
-
-const hash = (geometry) => {
-  if (geometry.hash === undefined) {
-    geometry.hash = computeHash(geometry);
-  }
-  return geometry.hash;
 };
 
 const collectTargets = (geometry, graphOut, segmentsOut) => {
@@ -3004,22 +3039,22 @@ const push = (
   return rewrite(toTransformedGeometry(geometry), op);
 };
 
-const is_stored = Symbol('is_stored');
+const isStored = Symbol('isStored');
 
 const store = async (geometry) => {
   if (geometry === undefined) {
     throw Error('Attempted to store undefined geometry');
   }
   const uuid = hash(geometry);
-  if (geometry[is_stored]) {
+  if (geometry[isStored]) {
     return { type: 'link', hash: uuid };
   }
   prepareForSerialization(geometry);
   const stored = { ...geometry };
-  geometry[is_stored] = true;
+  geometry[isStored] = true;
   // Share graphs across geometries.
   const graph = geometry.graph;
-  if (graph && !graph[is_stored]) {
+  if (graph && !graph[isStored]) {
     if (!graph.hash) {
       graph.hash = hash(graph);
     }
@@ -3036,7 +3071,7 @@ const store = async (geometry) => {
 };
 
 const storeNonblocking = (geometry) => {
-  if (geometry[is_stored]) {
+  if (geometry[isStored]) {
     return { type: 'link', hash: geometry.hash };
   }
   prepareForSerialization(geometry);
@@ -3045,7 +3080,7 @@ const storeNonblocking = (geometry) => {
   // Share graphs across geometries.
   const graph = geometry.graph;
   let wouldBlock;
-  if (graph && !graph[is_stored]) {
+  if (graph && !graph[isStored]) {
     if (!graph.hash) {
       graph.hash = hash(graph);
     }
@@ -3075,14 +3110,14 @@ const storeNonblocking = (geometry) => {
       wouldBlock = error;
     }
   }
-  geometry[is_stored] = true;
+  geometry[isStored] = true;
   return { stored: { type: 'link', hash: uuid }, wouldBlock };
 };
 
-const is_loaded = Symbol('is_loaded');
+const isLoaded = Symbol('isLoaded');
 
 const load = async (geometry) => {
-  if (geometry === undefined || geometry[is_loaded]) {
+  if (geometry === undefined || geometry[isLoaded]) {
     return geometry;
   }
   if (!geometry.hash) {
@@ -3092,11 +3127,11 @@ const load = async (geometry) => {
   if (!geometry) {
     return;
   }
-  if (geometry[is_loaded]) {
+  if (geometry[isLoaded]) {
     return geometry;
   }
-  geometry[is_loaded] = true;
-  geometry[is_stored] = true;
+  geometry[isLoaded] = true;
+  geometry[isStored] = true;
   // Link to any associated graph structure.
   if (geometry.graph && geometry.graph.hash) {
     geometry.graph = await read$1(`graph/${geometry.graph.hash}`);
@@ -3110,7 +3145,7 @@ const load = async (geometry) => {
 };
 
 const loadNonblocking = (geometry) => {
-  if (geometry === undefined || geometry[is_loaded]) {
+  if (geometry === undefined || geometry[isLoaded]) {
     return geometry;
   }
   if (!geometry.hash) {
@@ -3120,11 +3155,11 @@ const loadNonblocking = (geometry) => {
   if (!geometry) {
     return;
   }
-  if (geometry[is_loaded]) {
+  if (geometry[isLoaded]) {
     return geometry;
   }
-  geometry[is_loaded] = true;
-  geometry[is_stored] = true;
+  geometry[isLoaded] = true;
+  geometry[isStored] = true;
   // Link to any associated graph structure.
   if (geometry.graph && geometry.graph.hash) {
     geometry.graph = readNonblocking$1(`graph/${geometry.graph.hash}`);

@@ -3,22 +3,22 @@ import { ErrorWouldBlock, write, writeNonblocking } from '@jsxcad/sys';
 import { hash } from './hash.js';
 import { prepareForSerialization } from './prepareForSerialization.js';
 
-export const is_stored = Symbol('is_stored');
+export const isStored = Symbol('isStored');
 
 export const store = async (geometry) => {
   if (geometry === undefined) {
     throw Error('Attempted to store undefined geometry');
   }
   const uuid = hash(geometry);
-  if (geometry[is_stored]) {
+  if (geometry[isStored]) {
     return { type: 'link', hash: uuid };
   }
   prepareForSerialization(geometry);
   const stored = { ...geometry };
-  geometry[is_stored] = true;
+  geometry[isStored] = true;
   // Share graphs across geometries.
   const graph = geometry.graph;
-  if (graph && !graph[is_stored]) {
+  if (graph && !graph[isStored]) {
     if (!graph.hash) {
       graph.hash = hash(graph);
     }
@@ -35,7 +35,7 @@ export const store = async (geometry) => {
 };
 
 export const storeNonblocking = (geometry) => {
-  if (geometry[is_stored]) {
+  if (geometry[isStored]) {
     return { type: 'link', hash: geometry.hash };
   }
   prepareForSerialization(geometry);
@@ -44,7 +44,7 @@ export const storeNonblocking = (geometry) => {
   // Share graphs across geometries.
   const graph = geometry.graph;
   let wouldBlock;
-  if (graph && !graph[is_stored]) {
+  if (graph && !graph[isStored]) {
     if (!graph.hash) {
       graph.hash = hash(graph);
     }
@@ -74,6 +74,6 @@ export const storeNonblocking = (geometry) => {
       wouldBlock = error;
     }
   }
-  geometry[is_stored] = true;
+  geometry[isStored] = true;
   return { stored: { type: 'link', hash: uuid }, wouldBlock };
 };
