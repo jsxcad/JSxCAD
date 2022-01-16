@@ -1,40 +1,45 @@
 import { read, readNonblocking } from '@jsxcad/sys';
 
-import { is_stored } from './store.js';
+import { isStored } from './store.js';
 
-const is_loaded = Symbol('is_loaded');
+const isLoaded = Symbol('isLoaded');
 
 export const load = async (geometry) => {
-  if (geometry === undefined || geometry[is_loaded]) {
+  if (geometry === undefined || geometry[isLoaded]) {
     return geometry;
   }
   if (!geometry.hash) {
     throw Error(`No hash`);
-    return;
   }
   geometry = await read(`hash/${geometry.hash}`);
   if (!geometry) {
     return;
   }
-  if (geometry[is_loaded]) {
+  if (geometry[isLoaded]) {
     return geometry;
   }
-  geometry[is_loaded] = true;
-  geometry[is_stored] = true;
+  geometry[isLoaded] = true;
+  geometry[isStored] = true;
   // Link to any associated graph structure.
   if (geometry.graph && geometry.graph.hash) {
     geometry.graph = await read(`graph/${geometry.graph.hash}`);
   }
   if (geometry.content) {
     for (let nth = 0; nth < geometry.content.length; nth++) {
+      if (!geometry.content[nth]) {
+        throw Error('Load has empty content/1');
+      }
       geometry.content[nth] = await load(geometry.content[nth]);
+      if (!geometry.content[nth]) {
+        throw Error('Load has empty content/2');
+      }
     }
   }
   return geometry;
 };
 
 export const loadNonblocking = (geometry) => {
-  if (geometry === undefined || geometry[is_loaded]) {
+  if (geometry === undefined || geometry[isLoaded]) {
     return geometry;
   }
   if (!geometry.hash) {
@@ -44,18 +49,24 @@ export const loadNonblocking = (geometry) => {
   if (!geometry) {
     return;
   }
-  if (geometry[is_loaded]) {
+  if (geometry[isLoaded]) {
     return geometry;
   }
-  geometry[is_loaded] = true;
-  geometry[is_stored] = true;
+  geometry[isLoaded] = true;
+  geometry[isStored] = true;
   // Link to any associated graph structure.
   if (geometry.graph && geometry.graph.hash) {
     geometry.graph = readNonblocking(`graph/${geometry.graph.hash}`);
   }
   if (geometry.content) {
     for (let nth = 0; nth < geometry.content.length; nth++) {
+      if (!geometry.content[nth]) {
+        throw Error('Load has empty content/3');
+      }
       geometry.content[nth] = loadNonblocking(geometry.content[nth]);
+      if (!geometry.content[nth]) {
+        throw Error('Load has empty content/4');
+      }
     }
   }
   return geometry;

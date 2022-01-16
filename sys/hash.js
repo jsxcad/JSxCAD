@@ -2,6 +2,11 @@ import Digest from 'digest-js';
 import { encode } from 'base64-arraybuffer';
 
 export const hashObject = (object, hash) => {
+  if (object.hash) {
+    hash.update('hash');
+    hash.update(object.hash);
+    return;
+  }
   const keys = Object.keys(object);
   keys.sort();
   for (const key of keys) {

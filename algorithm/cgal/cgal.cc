@@ -139,6 +139,7 @@ enum Status {
   STATUS_OK = 0,
   STATUS_EMPTY = 1,
   STATUS_ZERO_THICKNESS = 2,
+  STATUS_UNCHANGED = 3,
 };
 
 namespace std {
@@ -2516,6 +2517,7 @@ int ParallelCutSurfaceMeshes(size_t target_count, emscripten::val getTargetMesh,
                              emscripten::val emit_segment) {
   std::vector<std::unique_ptr<Surface_mesh>> target_meshes(target_count);
   std::vector<Transformation> to_target_transforms(target_count);
+  std::vector<int> subtracted(target_count, false);
   std::vector<bool> planar(target_count, false);
   std::vector<Plane> target_planes(target_count);
   std::vector<General_polygon_set_2> planar_target_sets(target_count);
@@ -2560,7 +2562,8 @@ int ParallelCutSurfaceMeshes(size_t target_count, emscripten::val getTargetMesh,
   auto planar_cut_fn =
       [](Surface_mesh* target_mesh, const Transformation* to_target_transform,
          Plane* plane, General_polygon_set_2* planar_target_set,
-         atomic_bool* zero_thickness_signal, size_t source_count,
+         atomic_bool* zero_thickness_signal, int* subtracted,
+         size_t source_count,
          const std::vector<const Surface_mesh*>* source_meshes,
          const std::vector<const Transformation*>* source_transforms) {
         for (size_t nth_source = 0; nth_source < source_count; nth_source++) {
@@ -2578,6 +2581,7 @@ int ParallelCutSurfaceMeshes(size_t target_count, emscripten::val getTargetMesh,
             SurfaceMeshSectionToPolygonSet(*plane, working_source_mesh, cut);
           }
           planar_target_set->difference(cut);
+          *subtracted = true;
         }
         if (!GeneralPolygonSetToSurfaceMesh(*plane, *planar_target_set,
                                             *target_mesh)) {
@@ -2587,7 +2591,8 @@ int ParallelCutSurfaceMeshes(size_t target_count, emscripten::val getTargetMesh,
 
   auto volume_cut_fn =
       [](Surface_mesh* target_mesh, const Transformation* to_target_transform,
-         atomic_bool* zero_thickness_signal, size_t source_count,
+         atomic_bool* zero_thickness_signal, int* subtracted,
+         size_t source_count,
          const std::vector<const Surface_mesh*>* source_meshes,
          const std::vector<const Transformation*>* source_transforms) {
         for (size_t nth_source = 0; nth_source < source_count; nth_source++) {
@@ -2618,6 +2623,7 @@ int ParallelCutSurfaceMeshes(size_t target_count, emscripten::val getTargetMesh,
                     CGAL::parameters::all_default())) {
               *zero_thickness_signal = true;
             }
+            *subtracted = true;
           }
         }
       };
@@ -2628,16 +2634,17 @@ int ParallelCutSurfaceMeshes(size_t target_count, emscripten::val getTargetMesh,
 
   for (size_t nth_target = 0; nth_target < target_count; nth_target++) {
     if (planar[nth_target]) {
-      threads.emplace_back(
-          planar_cut_fn, target_meshes[nth_target].get(),
-          &to_target_transforms[nth_target], &target_planes[nth_target],
-          &planar_target_sets[nth_target], &zero_thickness_signal, source_count,
-          &source_meshes, &source_transforms);
+      threads.emplace_back(planar_cut_fn, target_meshes[nth_target].get(),
+                           &to_target_transforms[nth_target],
+                           &target_planes[nth_target],
+                           &planar_target_sets[nth_target],
+                           &zero_thickness_signal, &subtracted[nth_target],
+                           source_count, &source_meshes, &source_transforms);
     } else {
       threads.emplace_back(volume_cut_fn, target_meshes[nth_target].get(),
                            &to_target_transforms[nth_target],
-                           &zero_thickness_signal, source_count, &source_meshes,
-                           &source_transforms);
+                           &zero_thickness_signal, &subtracted[nth_target],
+                           source_count, &source_meshes, &source_transforms);
     }
   }
   for (std::thread& thread : threads) {
@@ -2651,12 +2658,13 @@ int ParallelCutSurfaceMeshes(size_t target_count, emscripten::val getTargetMesh,
       planar_cut_fn(target_meshes[nth_target].get(),
                     &to_target_transforms[nth_target],
                     &target_planes[nth_target], &planar_target_sets[nth_target],
-                    &zero_thickness_signal, source_count, &source_meshes,
-                    &source_transforms);
+                    &zero_thickness_signal, &subtracted[nth_target],
+                    source_count, &source_meshes, &source_transforms);
     } else {
       volume_cut_fn(target_meshes[nth_target].get(),
                     &to_target_transforms[nth_target], &zero_thickness_signal,
-                    source_count, &source_meshes, &source_transforms);
+                    &subtracted[nth_target], source_count, &source_meshes,
+                    &source_transforms);
     }
   }
 #endif
@@ -2690,9 +2698,47 @@ int ParallelCutSurfaceMeshes(size_t target_count, emscripten::val getTargetMesh,
     }
   }
 
+  Surface_mesh* null_mesh = nullptr;
+
   for (size_t nth_target = 0; nth_target < target_count; nth_target++) {
-    const Surface_mesh* target_mesh = target_meshes[nth_target].release();
-    emit_mesh(nth_target, target_mesh);
+    if (!subtracted[nth_target]) {
+      emit_mesh(nth_target, null_mesh, int(STATUS_UNCHANGED));
+      continue;
+    }
+    Surface_mesh* target_mesh = target_meshes[nth_target].get();
+    if (CGAL::is_empty(*target_mesh)) {
+      emit_mesh(nth_target, null_mesh, int(STATUS_EMPTY));
+      continue;
+    }
+    if (CGAL::is_closed(*target_mesh)) {
+      // volume
+      const Surface_mesh* original_mesh =
+          getTargetMesh(nth_target)
+              .as<const Surface_mesh*>(emscripten::allow_raw_pointers());
+      FT original_volume = CGAL::Polygon_mesh_processing::volume(
+          *original_mesh, CGAL::parameters::all_default());
+      FT cut_volume = CGAL::Polygon_mesh_processing::volume(
+          *target_mesh, CGAL::parameters::all_default());
+      if (original_volume == cut_volume) {
+        emit_mesh(nth_target, null_mesh, int(STATUS_UNCHANGED));
+        continue;
+      }
+    } else {
+      // surface
+      const Surface_mesh* original_mesh =
+          getTargetMesh(nth_target)
+              .as<const Surface_mesh*>(emscripten::allow_raw_pointers());
+      FT original_area = CGAL::Polygon_mesh_processing::area(
+          *original_mesh, CGAL::parameters::all_default());
+      FT cut_area = CGAL::Polygon_mesh_processing::area(
+          *target_mesh, CGAL::parameters::all_default());
+      if (original_area == cut_area) {
+        emit_mesh(nth_target, null_mesh, int(STATUS_UNCHANGED));
+        continue;
+      }
+    }
+    target_meshes[nth_target].release();
+    emit_mesh(nth_target, target_mesh, int(STATUS_OK));
   }
 
   return STATUS_OK;

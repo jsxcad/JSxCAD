@@ -1,6 +1,8 @@
 import { rewrite, visit } from './visit.js';
 
+import { cached } from './cached.js';
 import { cut as cutGraphs } from '../graph/cut.js';
+import { hash } from './hash.js';
 import { isNotTypeMasked } from './type.js';
 import { toConcreteGeometry } from './toConcreteGeometry.js';
 
@@ -35,35 +37,43 @@ const collectRemoves = (geometry, out) => {
   visit(geometry, op);
 };
 
-export const cut = (geometry, geometries) => {
-  const concreteGeometry = toConcreteGeometry(geometry);
-  const rewriteGraphs = [];
-  const rewriteSegments = [];
-  collectTargets(concreteGeometry, rewriteGraphs, rewriteSegments);
-  const readGraphs = [];
-  for (const geometry of geometries) {
-    collectRemoves(toConcreteGeometry(geometry), readGraphs);
-  }
-  const { cutGraphGeometries, cutSegmentsGeometries } = cutGraphs(
-    rewriteGraphs,
-    rewriteSegments,
-    readGraphs
-  );
-  const map = new Map();
-  for (let nth = 0; nth < cutGraphGeometries.length; nth++) {
-    map.set(rewriteGraphs[nth], cutGraphGeometries[nth]);
-  }
-  for (let nth = 0; nth < cutSegmentsGeometries.length; nth++) {
-    map.set(rewriteSegments[nth], cutSegmentsGeometries[nth]);
-  }
-
-  const update = (geometry, descend) => {
-    const cut = map.get(geometry);
-    if (cut) {
-      return cut;
-    } else {
-      return descend();
+export const cut = cached(
+  (geometry, geometries) => {
+    if (geometries.some((value) => value === undefined)) {
+      throw Error('undef');
     }
-  };
-  return rewrite(concreteGeometry, update);
-};
+    return ['cut', hash(geometry), ...geometries.map(hash)];
+  },
+  (geometry, geometries) => {
+    const concreteGeometry = toConcreteGeometry(geometry);
+    const rewriteGraphs = [];
+    const rewriteSegments = [];
+    collectTargets(concreteGeometry, rewriteGraphs, rewriteSegments);
+    const readGraphs = [];
+    for (const geometry of geometries) {
+      collectRemoves(toConcreteGeometry(geometry), readGraphs);
+    }
+    const { cutGraphGeometries, cutSegmentsGeometries } = cutGraphs(
+      rewriteGraphs,
+      rewriteSegments,
+      readGraphs
+    );
+    const map = new Map();
+    for (let nth = 0; nth < cutGraphGeometries.length; nth++) {
+      map.set(rewriteGraphs[nth], cutGraphGeometries[nth]);
+    }
+    for (let nth = 0; nth < cutSegmentsGeometries.length; nth++) {
+      map.set(rewriteSegments[nth], cutSegmentsGeometries[nth]);
+    }
+
+    const update = (geometry, descend) => {
+      const cut = map.get(geometry);
+      if (cut) {
+        return cut;
+      } else {
+        return descend();
+      }
+    };
+    return rewrite(concreteGeometry, update);
+  }
+);

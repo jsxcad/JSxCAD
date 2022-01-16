@@ -51,15 +51,19 @@ const agent = async ({ ask, message, type, tell }) => {
         sys.setConfig(config);
         return;
       case 'app/staticView':
-        const geometry = await sys.readOrWatch(path, { workspace });
-        const { staticView } = await import('@jsxcad/ui-threejs');
-        await staticView(baseApi.Shape.fromGeometry(geometry), {
-          ...view,
-          canvas: offscreenCanvas,
-        });
-        const blob = await offscreenCanvas.convertToBlob({ type: 'image/png' });
-        const dataURL = new FileReaderSync().readAsDataURL(blob);
-        return dataURL;
+        for (;;) {
+          const geometry = await sys.readOrWatch(path, { workspace });
+          const { staticView } = await import('@jsxcad/ui-threejs');
+          await staticView(baseApi.Shape.fromGeometry(geometry), {
+            ...view,
+            canvas: offscreenCanvas,
+          });
+          const blob = await offscreenCanvas.convertToBlob({
+            type: 'image/png',
+          });
+          const dataURL = new FileReaderSync().readAsDataURL(blob);
+          return dataURL;
+        }
       case 'app/evaluate':
         await sys.log({ op: 'text', text: 'Evaluation Started' });
         sys.clearEmitted();

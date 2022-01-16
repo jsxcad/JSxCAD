@@ -256,8 +256,42 @@ class App extends React.Component {
                 console.log(`Re-appending ${entry.hash} to ${path}/${id}`);
                 domElement.appendChild(domElementByHash.get(entry.hash));
               } else {
+                const element = toDomElement([entry], {
+                  onClickView: ({ path, view, workspace, sourceLocation }) =>
+                    this.Notebook.clickView({
+                      path,
+                      view,
+                      workspace,
+                      sourceLocation,
+                    }),
+                  onClickMake: ({ path, workspace, sourceLocation }) =>
+                    this.Notebook.clickMake({
+                      path,
+                      workspace,
+                      sourceLocation,
+                    }),
+                  workspace,
+                });
+                domElementByHash.set(entry.hash, element);
+                console.log(`Appending ${entry.hash} to ${path}/${id}`);
+                domElement.appendChild(element);
+                console.log(`Marking ${entry.hash} in ${path}/${id}`);
+
+                await animationFrame();
+
                 // We need to build the element.
-                if (entry.view && !entry.url) {
+                const cachedUrl = await read(`thumbnail/${entry.hash}`, {
+                  workspace,
+                });
+                if (cachedUrl) {
+                  const render = async () => {
+                    console.log(`Retrieved thumbnail for ${path}/${id}`);
+                    if (element && element.firstChild) {
+                      element.firstChild.src = cachedUrl;
+                    }
+                  };
+                  render();
+                } else if (entry.view && !entry.url) {
                   const { path, view } = entry;
                   const { width, height } = view;
                   const canvas = document.createElement('canvas');
@@ -279,7 +313,10 @@ class App extends React.Component {
                         [offscreenCanvas]
                       );
                       console.log(`Finished render for ${path}/${id}`);
-                      const element = domElementByHash.get(entry.hash);
+                      // Cache the thumbnail for next time.
+                      await write(`thumbnail/${entry.hash}`, url, {
+                        workspace,
+                      });
                       if (element && element.firstChild) {
                         element.firstChild.src = url;
                       }
@@ -296,27 +333,6 @@ class App extends React.Component {
                   console.log(`Schedule render for ${path}/${id}`);
                   render();
                 }
-
-                const element = toDomElement([entry], {
-                  onClickView: ({ path, view, workspace, sourceLocation }) =>
-                    this.Notebook.clickView({
-                      path,
-                      view,
-                      workspace,
-                      sourceLocation,
-                    }),
-                  onClickMake: ({ path, workspace, sourceLocation }) =>
-                    this.Notebook.clickMake({
-                      path,
-                      workspace,
-                      sourceLocation,
-                    }),
-                  workspace,
-                });
-                domElementByHash.set(entry.hash, element);
-                console.log(`Appending ${entry.hash} to ${path}/${id}`);
-                domElement.appendChild(element);
-                console.log(`Marking ${entry.hash} in ${path}/${id}`);
               }
             }
 
