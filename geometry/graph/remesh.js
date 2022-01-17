@@ -10,7 +10,7 @@ import { toConcreteGeometry } from './../tagged/toConcreteGeometry.js';
 import { toSurfaceMesh } from './toSurfaceMesh.js';
 
 export const remesh = (geometry, options = {}, selections = []) => {
-  const { method = 'edgeLength', lengths = [1] } = options;
+  const { method = 'isotropic', lengths = [1] } = options;
   const selectionGraphs = selections.flatMap((selection) =>
     getNonVoidGraphs(toConcreteGeometry(selection))
   );

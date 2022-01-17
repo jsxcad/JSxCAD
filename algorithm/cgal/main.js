@@ -34,6 +34,7 @@ export {
   STATUS_ZERO_THICKNESS,
   STATUS_UNCHANGED,
 } from './status.js';
+export { cleanSurfaceMesh } from './cleanSurfaceMesh.js';
 export { clipSurfaceMeshes } from './clipSurfaceMeshes.js';
 export { computeCentroidOfSurfaceMesh } from './computeCentroidOfSurfaceMesh.js';
 export { computeNormalOfSurfaceMesh } from './computeNormalOfSurfaceMesh.js';

@@ -2,7 +2,7 @@ import Shape from './Shape.js';
 import { smooth as smoothGeometry } from '@jsxcad/geometry';
 
 export const smooth =
-  (options = { iterations: 1, method: 'subdivide' }, ...selections) =>
+  (options = { iterations: 1, method: 'mesh' }, ...selections) =>
   (shape) =>
     Shape.fromGeometry(
       smoothGeometry(

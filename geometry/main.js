@@ -28,6 +28,7 @@ export { alphaShape } from './graph/alphaShape.js';
 export { arrangePolygonsWithHoles } from './graph/arrangePolygonsWithHoles.js';
 export { assemble } from './tagged/assemble.js';
 export { bend } from './tagged/bend.js';
+export { clean } from './tagged/clean.js';
 export { clip } from './graph/clip.js';
 export { close as closePath } from './path/close.js';
 export { computeCentroid } from './tagged/computeCentroid.js';

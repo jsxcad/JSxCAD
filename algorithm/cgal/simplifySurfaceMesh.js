@@ -1,6 +1,9 @@
 import { getCgal } from './getCgal.js';
 
-export const simplifySurfaceMesh = (mesh, { stopRatio = 0.5, eps }) => {
+export const simplifySurfaceMesh = (
+  mesh,
+  { stopRatio = 0.5, stopCount = 0, eps }
+) => {
   try {
     const result = getCgal().SimplifySurfaceMesh(
       mesh,

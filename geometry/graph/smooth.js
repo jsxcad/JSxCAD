@@ -11,7 +11,7 @@ import { toConcreteGeometry } from './../tagged/toConcreteGeometry.js';
 import { toSurfaceMesh } from './toSurfaceMesh.js';
 
 export const smooth = (geometry, options = {}, selections = []) => {
-  const { method = 'SmoothShape' } = options;
+  const { method = 'shape' } = options;
   const selectionGraphs = selections.flatMap((selection) =>
     getNonVoidGraphs(toConcreteGeometry(selection))
   );
