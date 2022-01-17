@@ -442,9 +442,12 @@ Box(20, 20, 20)
   .remesh()
   .view(2, { wireframe: true })
   .md('Isotropic remeshing')
+  .cut(Box([0, 10], [0, -10], [0, 10]))
+  .view(3, { wireframe: true })
+  .md('Cut')
   .demesh()
-  .md('Cleaned mesh')
-  .view(3, { wireframe: true });
+  .view(3, { wireframe: true })
+  .md('Cleaned mesh');
 ```
 
 ![Image](shape.md.52.png)
@@ -455,6 +458,10 @@ Original mesh
 
 Isotropic remeshing
 
-Cleaned mesh
-
 ![Image](shape.md.54.png)
+
+Cut
+
+![Image](shape.md.55.png)
+
+Cleaned mesh

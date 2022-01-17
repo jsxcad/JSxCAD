@@ -207,6 +207,9 @@ Box(20, 20, 20)
   .remesh()
   .view(2, { wireframe: true })
   .md('Isotropic remeshing')
+  .cut(Box([0, 10], [0, -10], [0, 10]))
+  .view(3, { wireframe: true })
+  .md('Cut')
   .demesh()
-  .md('Cleaned mesh')
-  .view(3, { wireframe: true });
+  .view(3, { wireframe: true })
+  .md('Cleaned mesh');

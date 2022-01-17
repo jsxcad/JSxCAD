@@ -17,9 +17,6 @@ export const smooth = (geometry, options = {}, selections = []) => {
   );
   switch (method) {
     case 'mesh': {
-      if (selectionGraphs.length === 0) {
-        throw Error('No selections provided for SmoothMesh');
-      }
       return taggedGraph(
         { tags: geometry.tags, matrix: geometry.matrix },
         fromSurfaceMeshLazy(
