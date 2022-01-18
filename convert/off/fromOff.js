@@ -1,8 +1,4 @@
-import {
-  rerealizeGraph,
-  reverseFaceOrientationsOfGraph,
-  taggedGraph,
-} from '@jsxcad/geometry';
+import { reverseFaceOrientationsOfGraph, taggedGraph } from '@jsxcad/geometry';
 
 // First line (optional): the letters OFF to mark the file type.
 // Second line: the number of vertices, number of faces, and number of edges, in order (the latter can be ignored by writing 0 instead).
@@ -52,7 +48,7 @@ export const fromOffSync = (data, { invert = false } = {}) => {
   if (invert) {
     graph = reverseFaceOrientationsOfGraph(graph);
   }
-  return taggedGraph({}, rerealizeGraph(graph));
+  return taggedGraph({}, graph);
 };
 
 export const fromOff = async (data, options = {}) => fromOffSync(data, options);

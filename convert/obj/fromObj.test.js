@@ -1,6 +1,6 @@
 import { boot } from '@jsxcad/sys';
 import { fromObj } from './fromObj.js';
-import { realize } from '@jsxcad/geometry';
+import { prepareForSerialization } from '@jsxcad/geometry';
 import test from 'ava';
 
 test.beforeEach(async (t) => {
@@ -45,51 +45,10 @@ f  2/  8/  4/
 
 test('Cube', async (t) => {
   const geometry = await fromObj(new TextEncoder('utf8').encode(cube));
-  t.deepEqual(JSON.parse(JSON.stringify(realize(geometry))), {
+  t.deepEqual(JSON.parse(JSON.stringify(prepareForSerialization(geometry))), {
     type: 'graph',
     tags: [],
     graph: {
-      isClosed: true,
-      isEmpty: false,
-      isLazy: false,
-      edges: [
-        { point: 0, next: 2, twin: 1, facet: 0, face: 0 },
-        { point: 6, next: 6, twin: 0, facet: 1, face: 0 },
-        { point: 6, next: 4, twin: 3, facet: 0, face: 0 },
-        { point: 4, next: 21, twin: 2, facet: 6, face: 6 },
-        { point: 4, next: 0, twin: 5, facet: 0, face: 0 },
-        { point: 0, next: 29, twin: 4, facet: 8, face: 8 },
-        { point: 0, next: 8, twin: 7, facet: 1, face: 0 },
-        { point: 2, next: 10, twin: 6, facet: 2, face: 2 },
-        { point: 2, next: 1, twin: 9, facet: 1, face: 0 },
-        { point: 6, next: 18, twin: 8, facet: 4, face: 4 },
-        { point: 0, next: 12, twin: 11, facet: 2, face: 2 },
-        { point: 3, next: 14, twin: 10, facet: 3, face: 2 },
-        { point: 3, next: 7, twin: 13, facet: 2, face: 2 },
-        { point: 2, next: 22, twin: 12, facet: 5, face: 4 },
-        { point: 0, next: 16, twin: 15, facet: 3, face: 2 },
-        { point: 1, next: 31, twin: 14, facet: 9, face: 8 },
-        { point: 1, next: 11, twin: 17, facet: 3, face: 2 },
-        { point: 3, next: 35, twin: 16, facet: 11, face: 10 },
-        { point: 2, next: 20, twin: 19, facet: 4, face: 4 },
-        { point: 7, next: 13, twin: 18, facet: 5, face: 4 },
-        { point: 7, next: 9, twin: 21, facet: 4, face: 4 },
-        { point: 6, next: 24, twin: 20, facet: 6, face: 6 },
-        { point: 3, next: 19, twin: 23, facet: 5, face: 4 },
-        { point: 7, next: 17, twin: 22, facet: 11, face: 10 },
-        { point: 7, next: 3, twin: 25, facet: 6, face: 6 },
-        { point: 4, next: 26, twin: 24, facet: 7, face: 6 },
-        { point: 7, next: 28, twin: 27, facet: 7, face: 6 },
-        { point: 5, next: 34, twin: 26, facet: 10, face: 10 },
-        { point: 5, next: 25, twin: 29, facet: 7, face: 6 },
-        { point: 4, next: 30, twin: 28, facet: 8, face: 8 },
-        { point: 5, next: 5, twin: 31, facet: 8, face: 8 },
-        { point: 0, next: 32, twin: 30, facet: 9, face: 8 },
-        { point: 5, next: 15, twin: 33, facet: 9, face: 8 },
-        { point: 1, next: 27, twin: 32, facet: 10, face: 10 },
-        { point: 7, next: 33, twin: 35, facet: 10, face: 10 },
-        { point: 1, next: 23, twin: 34, facet: 11, face: 10 },
-      ],
       points: [
         [0, 0, 0],
         [0, 0, 1],
@@ -100,42 +59,90 @@ test('Cube', async (t) => {
         [1, 1, 0],
         [1, 1, 1],
       ],
-      exactPoints: [
-        ['0', '0', '0'],
-        ['0', '0', '1'],
-        ['0', '1', '0'],
-        ['0', '1', '1'],
-        ['1', '0', '0'],
-        ['1', '0', '1'],
-        ['1', '1', '0'],
-        ['1', '1', '1'],
-      ],
-      faces: [
-        { plane: [0, 0, -1, 0], exactPlane: ['0', '0', '-1', '0'] },
-        null,
-        { plane: [-1, 0, 0, 0], exactPlane: ['-1', '0', '0', '0'] },
-        null,
-        { plane: [0, 1, 0, -1], exactPlane: ['0', '1', '0', '-1'] },
-        null,
-        { plane: [1, 0, 0, -1], exactPlane: ['1', '0', '0', '-1'] },
-        null,
-        { plane: [0, -1, 0, 0], exactPlane: ['0', '-1', '0', '0'] },
-        null,
-        { plane: [0, 0, 1, -1], exactPlane: ['0', '0', '1', '-1'] },
+      exactPoints: [],
+      edges: [
+        { point: 0, next: 1, facet: 0 },
+        { point: 6, next: 2, facet: 0 },
+        { point: 4, next: 0, facet: 0 },
+        { point: 0, next: 4, facet: 1 },
+        { point: 2, next: 5, facet: 1 },
+        { point: 6, next: 3, facet: 1 },
+        { point: 0, next: 7, facet: 2 },
+        { point: 3, next: 8, facet: 2 },
+        { point: 2, next: 6, facet: 2 },
+        { point: 0, next: 10, facet: 3 },
+        { point: 1, next: 11, facet: 3 },
+        { point: 3, next: 9, facet: 3 },
+        { point: 2, next: 13, facet: 4 },
+        { point: 7, next: 14, facet: 4 },
+        { point: 6, next: 12, facet: 4 },
+        { point: 2, next: 16, facet: 5 },
+        { point: 3, next: 17, facet: 5 },
+        { point: 7, next: 15, facet: 5 },
+        { point: 4, next: 19, facet: 6 },
+        { point: 6, next: 20, facet: 6 },
+        { point: 7, next: 18, facet: 6 },
+        { point: 4, next: 22, facet: 7 },
+        { point: 7, next: 23, facet: 7 },
+        { point: 5, next: 21, facet: 7 },
+        { point: 0, next: 25, facet: 8 },
+        { point: 4, next: 26, facet: 8 },
+        { point: 5, next: 24, facet: 8 },
+        { point: 0, next: 28, facet: 9 },
+        { point: 5, next: 29, facet: 9 },
+        { point: 1, next: 27, facet: 9 },
+        { point: 1, next: 31, facet: 10 },
+        { point: 5, next: 32, facet: 10 },
+        { point: 7, next: 30, facet: 10 },
+        { point: 1, next: 34, facet: 11 },
+        { point: 7, next: 35, facet: 11 },
+        { point: 3, next: 33, facet: 11 },
       ],
       facets: [
-        { edge: 4 },
-        { edge: 8 },
+        { edge: 0 },
+        { edge: 3 },
+        { edge: 6 },
+        { edge: 9 },
         { edge: 12 },
-        { edge: 16 },
-        { edge: 20 },
-        { edge: 22 },
+        { edge: 15 },
+        { edge: 18 },
+        { edge: 21 },
         { edge: 24 },
-        { edge: 28 },
+        { edge: 27 },
         { edge: 30 },
-        { edge: 32 },
-        { edge: 34 },
-        { edge: 35 },
+        { edge: 33 },
+      ],
+      serializedSurfaceMesh:
+        '8\n' +
+        '0 0 0\n' +
+        '0 0 1\n' +
+        '0 1 0\n' +
+        '0 1 1\n' +
+        '1 0 0\n' +
+        '1 0 1\n' +
+        '1 1 0\n' +
+        '1 1 1\n' +
+        '\n' +
+        '12\n' +
+        '3 4 0 6\n' +
+        '3 6 0 2\n' +
+        '3 2 0 3\n' +
+        '3 3 0 1\n' +
+        '3 6 2 7\n' +
+        '3 7 2 3\n' +
+        '3 7 4 6\n' +
+        '3 5 4 7\n' +
+        '3 5 0 4\n' +
+        '3 1 0 5\n' +
+        '3 7 1 5\n' +
+        '3 3 1 7\n' +
+        '',
+      hash: '5r9m0Twa3Gvh9D+SiPG7thdIv1A59ekuZ/rnTZ/bM7E=',
+    },
+    cache: {
+      boundingBox: [
+        [-2e-323, -2e-323, -2e-323],
+        [1.0000000000000009, 1.0000000000000009, 1.0000000000000007],
       ],
     },
   });
@@ -167,39 +174,10 @@ f     6 3 2
 
 test('Diamond', async (t) => {
   const geometry = await fromObj(new TextEncoder('utf8').encode(diamond));
-  t.deepEqual(JSON.parse(JSON.stringify(realize(geometry))), {
+  t.deepEqual(JSON.parse(JSON.stringify(prepareForSerialization(geometry))), {
     type: 'graph',
     tags: [],
     graph: {
-      isClosed: false,
-      isEmpty: false,
-      isLazy: false,
-      edges: [
-        { point: 0, next: 2, twin: 1, facet: 0, face: 0 },
-        { point: 1, next: 13, twin: 0, facet: 3, face: 3 },
-        { point: 1, next: 4, twin: 3, facet: 0, face: 0 },
-        { point: 2, next: 22, twin: 2, facet: 6, face: 6 },
-        { point: 2, next: 0, twin: 5, facet: 0, face: 0 },
-        { point: 0, next: 6, twin: 4, facet: 1, face: 1 },
-        { point: 2, next: 8, twin: 7, facet: 1, face: 1 },
-        { point: 3, next: 20, twin: 6, facet: 5, face: 5 },
-        { point: 3, next: 5, twin: 9, facet: 1, face: 1 },
-        { point: 0, next: 10, twin: 8, facet: 2, face: 2 },
-        { point: 3, next: 12, twin: 11, facet: 2, face: 2 },
-        { point: 4, next: 18, twin: 10, facet: 4, face: 4 },
-        { point: 4, next: 9, twin: 13, facet: 2, face: 2 },
-        { point: 0, next: 14, twin: 12, facet: 3, face: 3 },
-        { point: 4, next: 1, twin: 15, facet: 3, face: 3 },
-        { point: 1, next: 17, twin: 14, facet: -1, face: -1 },
-        { point: 5, next: 11, twin: 17, facet: 4, face: 4 },
-        { point: 4, next: 23, twin: 16, facet: -1, face: -1 },
-        { point: 3, next: 16, twin: 19, facet: 4, face: 4 },
-        { point: 5, next: 7, twin: 18, facet: 5, face: 5 },
-        { point: 2, next: 19, twin: 21, facet: 5, face: 5 },
-        { point: 5, next: 3, twin: 20, facet: 6, face: 6 },
-        { point: 1, next: 21, twin: 23, facet: 6, face: 6 },
-        { point: 5, next: 15, twin: 22, facet: -1, face: -1 },
-      ],
       points: [
         [0, 0, 78],
         [45, 45, 0],
@@ -208,52 +186,63 @@ test('Diamond', async (t) => {
         [-45, 45, 0],
         [0, 0, -78],
       ],
-      exactPoints: [
-        ['0', '0', '78'],
-        ['45', '45', '0'],
-        ['45', '-45', '0'],
-        ['-45', '-45', '0'],
-        ['-45', '45', '0'],
-        ['0', '0', '-78'],
-      ],
-      faces: [
-        {
-          plane: [-0.8661855860486004, 0, -0.49972245348957717, 315900],
-          exactPlane: ['-7020', '0', '-4050', '315900'],
-        },
-        {
-          plane: [0, 0.8661855860486004, -0.49972245348957717, 315900],
-          exactPlane: ['0', '7020', '-4050', '315900'],
-        },
-        {
-          plane: [0.8661855860486004, 0, -0.49972245348957717, 315900],
-          exactPlane: ['7020', '0', '-4050', '315900'],
-        },
-        {
-          plane: [0, -0.8661855860486004, -0.49972245348957717, 315900],
-          exactPlane: ['0', '-7020', '-4050', '315900'],
-        },
-        {
-          plane: [0.8661855860486004, 0, 0.49972245348957717, 315900],
-          exactPlane: ['7020', '0', '4050', '315900'],
-        },
-        {
-          plane: [0, 0.8661855860486004, 0.49972245348957717, 315900],
-          exactPlane: ['0', '7020', '4050', '315900'],
-        },
-        {
-          plane: [-0.8661855860486004, 0, 0.49972245348957717, 315900],
-          exactPlane: ['-7020', '0', '4050', '315900'],
-        },
+      exactPoints: [],
+      edges: [
+        { point: 0, next: 1, facet: 0 },
+        { point: 1, next: 2, facet: 0 },
+        { point: 2, next: 0, facet: 0 },
+        { point: 0, next: 4, facet: 1 },
+        { point: 2, next: 5, facet: 1 },
+        { point: 3, next: 3, facet: 1 },
+        { point: 0, next: 7, facet: 2 },
+        { point: 3, next: 8, facet: 2 },
+        { point: 4, next: 6, facet: 2 },
+        { point: 0, next: 10, facet: 3 },
+        { point: 4, next: 11, facet: 3 },
+        { point: 1, next: 9, facet: 3 },
+        { point: 5, next: 13, facet: 4 },
+        { point: 4, next: 14, facet: 4 },
+        { point: 3, next: 12, facet: 4 },
+        { point: 5, next: 16, facet: 5 },
+        { point: 3, next: 17, facet: 5 },
+        { point: 2, next: 15, facet: 5 },
+        { point: 5, next: 19, facet: 6 },
+        { point: 2, next: 20, facet: 6 },
+        { point: 1, next: 18, facet: 6 },
       ],
       facets: [
-        { edge: 4 },
-        { edge: 8 },
+        { edge: 0 },
+        { edge: 3 },
+        { edge: 6 },
+        { edge: 9 },
         { edge: 12 },
-        { edge: 14 },
+        { edge: 15 },
         { edge: 18 },
-        { edge: 20 },
-        { edge: 22 },
+      ],
+      serializedSurfaceMesh:
+        '6\n' +
+        '0 0 78\n' +
+        '45 45 0\n' +
+        '45 -45 0\n' +
+        '-45 -45 0\n' +
+        '-45 45 0\n' +
+        '0 0 -78\n' +
+        '\n' +
+        '7\n' +
+        '3 2 0 1\n' +
+        '3 3 0 2\n' +
+        '3 4 0 3\n' +
+        '3 1 0 4\n' +
+        '3 3 5 4\n' +
+        '3 2 5 3\n' +
+        '3 1 5 2\n' +
+        '',
+      hash: 'fYxsplH4usQuBaRS0uvDQYMwF3ljqx3dfOoddkbtHBU=',
+    },
+    cache: {
+      boundingBox: [
+        [-45.00000000000003, -45.00000000000003, -78.00000000000004],
+        [45.00000000000003, 45.00000000000003, 78.00000000000004],
       ],
     },
   });

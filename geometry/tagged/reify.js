@@ -1,6 +1,6 @@
 import { rewrite } from './visit.js';
 
-const registry = new Map();
+export const registry = new Map();
 
 export const reify = (geometry) => {
   if (!geometry) {
@@ -50,6 +50,3 @@ export const reify = (geometry) => {
 
   return rewrite(geometry, op);
 };
-
-// We expect the type to be uniquely qualified.
-export const registerReifier = (type, reifier) => registry.set(type, reifier);

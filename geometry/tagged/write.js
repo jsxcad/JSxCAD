@@ -1,8 +1,4 @@
-import {
-  addPending,
-  write as writePath,
-  writeNonblocking as writePathNonblocking,
-} from '@jsxcad/sys';
+import { addPending, write as writePath } from '@jsxcad/sys';
 
 import { hash } from './hash.js';
 import { store } from './store.js';
@@ -21,24 +17,4 @@ export const write = async (path, geometry, options) => {
 export const writeNonblocking = (path, geometry, options) => {
   addPending(write(path, geometry, options));
   return geometry;
-  /*
-  const disjointGeometry = toDisjointGeometry(geometry);
-  // Ensure that the geometry carries a hash before saving.
-  hash(disjointGeometry);
-  const { stored, wouldBlock } = storeNonblocking(disjointGeometry);
-  if (wouldBlock) {
-    if (options && options.errorOnMissing === false) {
-      return;
-    }
-    throw wouldBlock;
-  }
-  try {
-    writePathNonblocking(path, stored, options);
-  } catch (error) {
-    if (!options || options.errorOnMissing === true) {
-      throw error;
-    }
-  }
-  return disjointGeometry;
-*/
 };

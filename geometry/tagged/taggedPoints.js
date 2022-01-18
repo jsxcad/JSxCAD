@@ -1,3 +1,7 @@
-export const taggedPoints = ({ tags = [], matrix }, points, exactPoints) => {
-  return { type: 'points', tags, matrix, points, exactPoints };
+export const taggedPoints = (
+  { tags = [], matrix, provenance },
+  points,
+  exactPoints
+) => {
+  return { type: 'points', tags, matrix, provenance, points, exactPoints };
 };

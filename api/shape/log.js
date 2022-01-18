@@ -1,7 +1,7 @@
 import { computeHash, emit, log as sysLog } from '@jsxcad/sys';
 
 import Shape from './Shape.js';
-import { realize } from '@jsxcad/geometry';
+import { prepareForSerialization } from '@jsxcad/geometry';
 
 /**
  *
@@ -41,7 +41,7 @@ export const logOp = (shape, op) => {
 };
 
 const logMethod = function (op = (shape) => JSON.stringify(shape)) {
-  logOp(Shape.fromGeometry(realize(this.toGeometry())), op);
+  logOp(Shape.fromGeometry(prepareForSerialization(this.toGeometry())), op);
   return this;
 };
 Shape.prototype.log = logMethod;

@@ -1,7 +1,7 @@
 import { boot, write } from '@jsxcad/sys';
 
 import { fromLDrawPart } from './fromLDraw.js';
-import { realize } from '@jsxcad/geometry';
+import { prepareForSerialization } from '@jsxcad/geometry';
 import test from 'ava';
 
 test('Load a file', async (t) => {
@@ -41,1848 +41,305 @@ test('Load a file', async (t) => {
     '0 Stud\r\n0 Name: stud.dat\r\n0 Author: James Jessiman\r\n0 !LDRAW_ORG Primitive UPDATE 2012-01\r\n0 !LICENSE Redistributable under CCAL version 2.0 : see CAreadme.txt\r\n\r\n0 BFC CERTIFY CCW\r\n\r\n0 !HISTORY 2002-04-04 [sbliss] Modified for BFC compliance\r\n0 !HISTORY 2002-04-25 [PTadmin] Official Update 2002-02\r\n0 !HISTORY 2007-06-24 [PTadmin] Header formatted for Contributor Agreement\r\n0 !HISTORY 2008-07-01 [PTadmin] Official Update 2008-01\r\n0 !HISTORY 2012-02-16 [Philo] Changed to CCW\r\n0 !HISTORY 2012-03-30 [PTadmin] Official Update 2012-01\r\n\r\n1 16 0 0 0 6 0 0 0 1 0 0 0 6 4-4edge.dat\r\n1 16 0 -4 0 6 0 0 0 1 0 0 0 6 4-4edge.dat\r\n1 16 0 0 0 6 0 0 0 -4 0 0 0 6 4-4cyli.dat\r\n1 16 0 -4 0 6 0 0 0 1 0 0 0 6 4-4disc.dat\r\n'
   );
   const graph = await fromLDrawPart('3024', { allowFetch: false });
-  t.deepEqual(JSON.parse(JSON.stringify(realize(graph))), {
+  t.deepEqual(JSON.parse(JSON.stringify(prepareForSerialization(graph))), {
     type: 'graph',
     tags: [],
     graph: {
       isClosed: false,
       isEmpty: false,
-      isLazy: false,
-      edges: [
-        { point: 0, next: 520, twin: 1, facet: 0, face: 0 },
-        { point: 1, next: 8, twin: 0, facet: 1, face: 1 },
-        { point: 1, next: 4, twin: 3, facet: 150, face: 0 },
-        { point: 2, next: 13, twin: 2, facet: 4, face: 4 },
-        { point: 2, next: 521, twin: 5, facet: 150, face: 0 },
-        { point: 3, next: 18, twin: 4, facet: 3, face: 3 },
-        { point: 3, next: 0, twin: 7, facet: 0, face: 0 },
-        { point: 0, next: 14, twin: 6, facet: 2, face: 2 },
-        { point: 0, next: 522, twin: 9, facet: 1, face: 1 },
-        { point: 4, next: 525, twin: 8, facet: 152, face: 2 },
-        { point: 4, next: 12, twin: 11, facet: 151, face: 1 },
-        { point: 5, next: 26, twin: 10, facet: 155, face: 5 },
-        { point: 5, next: 523, twin: 13, facet: 151, face: 1 },
-        { point: 1, next: 528, twin: 12, facet: 4, face: 4 },
-        { point: 3, next: 524, twin: 15, facet: 2, face: 2 },
-        { point: 6, next: 527, twin: 14, facet: 153, face: 3 },
-        { point: 6, next: 9, twin: 17, facet: 152, face: 2 },
-        { point: 4, next: 30, twin: 16, facet: 156, face: 5 },
-        { point: 2, next: 526, twin: 19, facet: 3, face: 3 },
-        { point: 7, next: 529, twin: 18, facet: 154, face: 4 },
-        { point: 7, next: 15, twin: 21, facet: 153, face: 3 },
-        { point: 6, next: 34, twin: 20, facet: 157, face: 5 },
-        { point: 5, next: 19, twin: 23, facet: 154, face: 4 },
-        { point: 7, next: 25, twin: 22, facet: 158, face: 5 },
-        { point: 8, next: 530, twin: 25, facet: 5, face: 5 },
-        { point: 5, next: 537, twin: 24, facet: 158, face: 5 },
-        { point: 4, next: 531, twin: 27, facet: 155, face: 5 },
-        { point: 9, next: 532, twin: 26, facet: 6, face: 5 },
-        { point: 9, next: 24, twin: 29, facet: 5, face: 5 },
-        { point: 8, next: 50, twin: 28, facet: 160, face: 10 },
-        { point: 6, next: 533, twin: 31, facet: 156, face: 5 },
-        { point: 10, next: 534, twin: 30, facet: 7, face: 5 },
-        { point: 10, next: 27, twin: 33, facet: 6, face: 5 },
-        { point: 9, next: 52, twin: 32, facet: 161, face: 11 },
-        { point: 7, next: 535, twin: 35, facet: 157, face: 5 },
-        { point: 11, next: 536, twin: 34, facet: 8, face: 5 },
-        { point: 11, next: 31, twin: 37, facet: 7, face: 5 },
-        { point: 10, next: 54, twin: 36, facet: 162, face: 12 },
-        { point: 8, next: 35, twin: 39, facet: 8, face: 5 },
-        { point: 11, next: 49, twin: 38, facet: 163, face: 13 },
-        { point: 12, next: 538, twin: 41, facet: 9, face: 9 },
-        { point: 13, next: 53, twin: 40, facet: 12, face: 12 },
-        { point: 13, next: 44, twin: 43, facet: 159, face: 9 },
-        { point: 14, next: 55, twin: 42, facet: 13, face: 13 },
-        { point: 14, next: 539, twin: 45, facet: 159, face: 9 },
-        { point: 15, next: 48, twin: 44, facet: 10, face: 10 },
-        { point: 15, next: 40, twin: 47, facet: 9, face: 9 },
-        { point: 12, next: 51, twin: 46, facet: 11, face: 11 },
-        { point: 14, next: 540, twin: 49, facet: 10, face: 10 },
-        { point: 8, next: 547, twin: 48, facet: 163, face: 13 },
-        { point: 9, next: 541, twin: 51, facet: 160, face: 10 },
-        { point: 15, next: 542, twin: 50, facet: 11, face: 11 },
-        { point: 10, next: 543, twin: 53, facet: 161, face: 11 },
-        { point: 12, next: 544, twin: 52, facet: 12, face: 12 },
-        { point: 11, next: 545, twin: 55, facet: 162, face: 12 },
-        { point: 13, next: 546, twin: 54, facet: 13, face: 13 },
-        { point: 16, next: 58, twin: 57, facet: 14, face: 14 },
-        { point: 17, next: 62, twin: 56, facet: 15, face: 14 },
-        { point: 17, next: 60, twin: 59, facet: 14, face: 14 },
-        { point: 18, next: 421, twin: 58, facet: -1, face: -1 },
-        { point: 18, next: 56, twin: 61, facet: 14, face: 14 },
-        { point: 16, next: 67, twin: 60, facet: 17, face: 16 },
-        { point: 16, next: 64, twin: 63, facet: 15, face: 14 },
-        { point: 19, next: 424, twin: 62, facet: 102, face: 102 },
-        { point: 19, next: 57, twin: 65, facet: 15, face: 14 },
-        { point: 17, next: 418, twin: 64, facet: 100, face: 100 },
-        { point: 20, next: 68, twin: 67, facet: 16, face: 16 },
-        { point: 18, next: 72, twin: 66, facet: 17, face: 16 },
-        { point: 18, next: 70, twin: 69, facet: 16, face: 16 },
-        { point: 21, next: 59, twin: 68, facet: -1, face: -1 },
-        { point: 21, next: 66, twin: 71, facet: 16, face: 16 },
-        { point: 20, next: 75, twin: 70, facet: 19, face: 18 },
-        { point: 20, next: 61, twin: 73, facet: 17, face: 16 },
-        { point: 16, next: 428, twin: 72, facet: 103, face: 102 },
-        { point: 22, next: 76, twin: 75, facet: 18, face: 18 },
-        { point: 21, next: 80, twin: 74, facet: 19, face: 18 },
-        { point: 21, next: 78, twin: 77, facet: 18, face: 18 },
-        { point: 23, next: 69, twin: 76, facet: -1, face: -1 },
-        { point: 23, next: 74, twin: 79, facet: 18, face: 18 },
-        { point: 22, next: 83, twin: 78, facet: 21, face: 20 },
-        { point: 22, next: 71, twin: 81, facet: 19, face: 18 },
-        { point: 20, next: 430, twin: 80, facet: 104, face: 102 },
-        { point: 24, next: 84, twin: 83, facet: 20, face: 20 },
-        { point: 23, next: 88, twin: 82, facet: 21, face: 20 },
-        { point: 23, next: 86, twin: 85, facet: 20, face: 20 },
-        { point: 25, next: 77, twin: 84, facet: -1, face: -1 },
-        { point: 25, next: 82, twin: 87, facet: 20, face: 20 },
-        { point: 24, next: 92, twin: 86, facet: 164, face: 22 },
-        { point: 24, next: 79, twin: 89, facet: 21, face: 20 },
-        { point: 22, next: 432, twin: 88, facet: 105, face: 102 },
-        { point: 26, next: 548, twin: 91, facet: 22, face: 22 },
-        { point: 24, next: 434, twin: 90, facet: 106, face: 102 },
-        { point: 25, next: 549, twin: 93, facet: 164, face: 22 },
-        { point: 27, next: 85, twin: 92, facet: -1, face: -1 },
-        { point: 27, next: 90, twin: 95, facet: 22, face: 22 },
-        { point: 26, next: 97, twin: 94, facet: 24, face: 23 },
-        { point: 28, next: 98, twin: 97, facet: 23, face: 23 },
-        { point: 27, next: 102, twin: 96, facet: 24, face: 23 },
-        { point: 27, next: 100, twin: 99, facet: 23, face: 23 },
-        { point: 29, next: 93, twin: 98, facet: -1, face: -1 },
-        { point: 29, next: 96, twin: 101, facet: 23, face: 23 },
-        { point: 28, next: 105, twin: 100, facet: 26, face: 25 },
-        { point: 28, next: 95, twin: 103, facet: 24, face: 23 },
-        { point: 26, next: 436, twin: 102, facet: 107, face: 102 },
-        { point: 30, next: 106, twin: 105, facet: 25, face: 25 },
-        { point: 29, next: 110, twin: 104, facet: 26, face: 25 },
-        { point: 29, next: 108, twin: 107, facet: 25, face: 25 },
-        { point: 31, next: 99, twin: 106, facet: -1, face: -1 },
-        { point: 31, next: 104, twin: 109, facet: 25, face: 25 },
-        { point: 30, next: 114, twin: 108, facet: 165, face: 27 },
-        { point: 30, next: 101, twin: 111, facet: 26, face: 25 },
-        { point: 28, next: 438, twin: 110, facet: 108, face: 102 },
-        { point: 32, next: 550, twin: 113, facet: 27, face: 27 },
-        { point: 30, next: 440, twin: 112, facet: 109, face: 102 },
-        { point: 31, next: 551, twin: 115, facet: 165, face: 27 },
-        { point: 33, next: 107, twin: 114, facet: -1, face: -1 },
-        { point: 33, next: 112, twin: 117, facet: 27, face: 27 },
-        { point: 32, next: 119, twin: 116, facet: 29, face: 28 },
-        { point: 34, next: 120, twin: 119, facet: 28, face: 28 },
-        { point: 33, next: 124, twin: 118, facet: 29, face: 28 },
-        { point: 33, next: 122, twin: 121, facet: 28, face: 28 },
-        { point: 35, next: 115, twin: 120, facet: -1, face: -1 },
-        { point: 35, next: 118, twin: 123, facet: 28, face: 28 },
-        { point: 34, next: 127, twin: 122, facet: 31, face: 30 },
-        { point: 34, next: 117, twin: 125, facet: 29, face: 28 },
-        { point: 32, next: 442, twin: 124, facet: 110, face: 102 },
-        { point: 36, next: 128, twin: 127, facet: 30, face: 30 },
-        { point: 35, next: 132, twin: 126, facet: 31, face: 30 },
-        { point: 35, next: 130, twin: 129, facet: 30, face: 30 },
-        { point: 37, next: 121, twin: 128, facet: -1, face: -1 },
-        { point: 37, next: 126, twin: 131, facet: 30, face: 30 },
-        { point: 36, next: 135, twin: 130, facet: 33, face: 32 },
-        { point: 36, next: 123, twin: 133, facet: 31, face: 30 },
-        { point: 34, next: 444, twin: 132, facet: 111, face: 102 },
-        { point: 38, next: 136, twin: 135, facet: 32, face: 32 },
-        { point: 37, next: 140, twin: 134, facet: 33, face: 32 },
-        { point: 37, next: 138, twin: 137, facet: 32, face: 32 },
-        { point: 39, next: 129, twin: 136, facet: -1, face: -1 },
-        { point: 39, next: 134, twin: 139, facet: 32, face: 32 },
-        { point: 38, next: 143, twin: 138, facet: 35, face: 34 },
-        { point: 38, next: 131, twin: 141, facet: 33, face: 32 },
-        { point: 36, next: 446, twin: 140, facet: 112, face: 102 },
-        { point: 40, next: 144, twin: 143, facet: 34, face: 34 },
-        { point: 39, next: 148, twin: 142, facet: 35, face: 34 },
-        { point: 39, next: 146, twin: 145, facet: 34, face: 34 },
-        { point: 41, next: 137, twin: 144, facet: -1, face: -1 },
-        { point: 41, next: 142, twin: 147, facet: 34, face: 34 },
-        { point: 40, next: 151, twin: 146, facet: 37, face: 36 },
-        { point: 40, next: 139, twin: 149, facet: 35, face: 34 },
-        { point: 38, next: 448, twin: 148, facet: 113, face: 102 },
-        { point: 42, next: 152, twin: 151, facet: 36, face: 36 },
-        { point: 41, next: 156, twin: 150, facet: 37, face: 36 },
-        { point: 41, next: 154, twin: 153, facet: 36, face: 36 },
-        { point: 43, next: 145, twin: 152, facet: -1, face: -1 },
-        { point: 43, next: 150, twin: 155, facet: 36, face: 36 },
-        { point: 42, next: 159, twin: 154, facet: 39, face: 38 },
-        { point: 42, next: 147, twin: 157, facet: 37, face: 36 },
-        { point: 40, next: 450, twin: 156, facet: 114, face: 102 },
-        { point: 44, next: 160, twin: 159, facet: 38, face: 38 },
-        { point: 43, next: 164, twin: 158, facet: 39, face: 38 },
-        { point: 43, next: 162, twin: 161, facet: 38, face: 38 },
-        { point: 45, next: 153, twin: 160, facet: -1, face: -1 },
-        { point: 45, next: 158, twin: 163, facet: 38, face: 38 },
-        { point: 44, next: 167, twin: 162, facet: 41, face: 40 },
-        { point: 44, next: 155, twin: 165, facet: 39, face: 38 },
-        { point: 42, next: 452, twin: 164, facet: 115, face: 102 },
-        { point: 46, next: 168, twin: 167, facet: 40, face: 40 },
-        { point: 45, next: 172, twin: 166, facet: 41, face: 40 },
-        { point: 45, next: 170, twin: 169, facet: 40, face: 40 },
-        { point: 47, next: 161, twin: 168, facet: -1, face: -1 },
-        { point: 47, next: 166, twin: 171, facet: 40, face: 40 },
-        { point: 46, next: 175, twin: 170, facet: 43, face: 42 },
-        { point: 46, next: 163, twin: 173, facet: 41, face: 40 },
-        { point: 44, next: 454, twin: 172, facet: 116, face: 102 },
-        { point: 48, next: 176, twin: 175, facet: 42, face: 42 },
-        { point: 47, next: 180, twin: 174, facet: 43, face: 42 },
-        { point: 47, next: 178, twin: 177, facet: 42, face: 42 },
-        { point: 49, next: 169, twin: 176, facet: -1, face: -1 },
-        { point: 49, next: 174, twin: 179, facet: 42, face: 42 },
-        { point: 48, next: 184, twin: 178, facet: 166, face: 44 },
-        { point: 48, next: 171, twin: 181, facet: 43, face: 42 },
-        { point: 46, next: 456, twin: 180, facet: 117, face: 102 },
-        { point: 50, next: 552, twin: 183, facet: 44, face: 44 },
-        { point: 48, next: 458, twin: 182, facet: 118, face: 102 },
-        { point: 49, next: 553, twin: 185, facet: 166, face: 44 },
-        { point: 51, next: 177, twin: 184, facet: -1, face: -1 },
-        { point: 51, next: 182, twin: 187, facet: 44, face: 44 },
-        { point: 50, next: 189, twin: 186, facet: 46, face: 45 },
-        { point: 52, next: 190, twin: 189, facet: 45, face: 45 },
-        { point: 51, next: 194, twin: 188, facet: 46, face: 45 },
-        { point: 51, next: 192, twin: 191, facet: 45, face: 45 },
-        { point: 53, next: 185, twin: 190, facet: -1, face: -1 },
-        { point: 53, next: 188, twin: 193, facet: 45, face: 45 },
-        { point: 52, next: 197, twin: 192, facet: 48, face: 47 },
-        { point: 52, next: 187, twin: 195, facet: 46, face: 45 },
-        { point: 50, next: 460, twin: 194, facet: 119, face: 102 },
-        { point: 54, next: 198, twin: 197, facet: 47, face: 47 },
-        { point: 53, next: 202, twin: 196, facet: 48, face: 47 },
-        { point: 53, next: 200, twin: 199, facet: 47, face: 47 },
-        { point: 55, next: 191, twin: 198, facet: -1, face: -1 },
-        { point: 55, next: 196, twin: 201, facet: 47, face: 47 },
-        { point: 54, next: 206, twin: 200, facet: 167, face: 49 },
-        { point: 54, next: 193, twin: 203, facet: 48, face: 47 },
-        { point: 52, next: 462, twin: 202, facet: 120, face: 102 },
-        { point: 56, next: 554, twin: 205, facet: 49, face: 49 },
-        { point: 54, next: 464, twin: 204, facet: 121, face: 102 },
-        { point: 55, next: 555, twin: 207, facet: 167, face: 49 },
-        { point: 57, next: 199, twin: 206, facet: -1, face: -1 },
-        { point: 57, next: 204, twin: 209, facet: 49, face: 49 },
-        { point: 56, next: 211, twin: 208, facet: 51, face: 50 },
-        { point: 58, next: 212, twin: 211, facet: 50, face: 50 },
-        { point: 57, next: 216, twin: 210, facet: 51, face: 50 },
-        { point: 57, next: 214, twin: 213, facet: 50, face: 50 },
-        { point: 59, next: 207, twin: 212, facet: -1, face: -1 },
-        { point: 59, next: 210, twin: 215, facet: 50, face: 50 },
-        { point: 58, next: 219, twin: 214, facet: 53, face: 52 },
-        { point: 58, next: 209, twin: 217, facet: 51, face: 50 },
-        { point: 56, next: 466, twin: 216, facet: 122, face: 102 },
-        { point: 60, next: 220, twin: 219, facet: 52, face: 52 },
-        { point: 59, next: 224, twin: 218, facet: 53, face: 52 },
-        { point: 59, next: 222, twin: 221, facet: 52, face: 52 },
-        { point: 61, next: 213, twin: 220, facet: -1, face: -1 },
-        { point: 61, next: 218, twin: 223, facet: 52, face: 52 },
-        { point: 60, next: 227, twin: 222, facet: 55, face: 54 },
-        { point: 60, next: 215, twin: 225, facet: 53, face: 52 },
-        { point: 58, next: 468, twin: 224, facet: 123, face: 102 },
-        { point: 62, next: 228, twin: 227, facet: 54, face: 54 },
-        { point: 61, next: 232, twin: 226, facet: 55, face: 54 },
-        { point: 61, next: 230, twin: 229, facet: 54, face: 54 },
-        { point: 63, next: 221, twin: 228, facet: -1, face: -1 },
-        { point: 63, next: 226, twin: 231, facet: 54, face: 54 },
-        { point: 62, next: 235, twin: 230, facet: 57, face: 56 },
-        { point: 62, next: 223, twin: 233, facet: 55, face: 54 },
-        { point: 60, next: 470, twin: 232, facet: 124, face: 102 },
-        { point: 64, next: 236, twin: 235, facet: 56, face: 56 },
-        { point: 63, next: 240, twin: 234, facet: 57, face: 56 },
-        { point: 63, next: 238, twin: 237, facet: 56, face: 56 },
-        { point: 65, next: 229, twin: 236, facet: -1, face: -1 },
-        { point: 65, next: 234, twin: 239, facet: 56, face: 56 },
-        { point: 64, next: 243, twin: 238, facet: 59, face: 58 },
-        { point: 64, next: 231, twin: 241, facet: 57, face: 56 },
-        { point: 62, next: 472, twin: 240, facet: 125, face: 102 },
-        { point: 66, next: 244, twin: 243, facet: 58, face: 58 },
-        { point: 65, next: 248, twin: 242, facet: 59, face: 58 },
-        { point: 65, next: 246, twin: 245, facet: 58, face: 58 },
-        { point: 67, next: 237, twin: 244, facet: -1, face: -1 },
-        { point: 67, next: 242, twin: 247, facet: 58, face: 58 },
-        { point: 66, next: 251, twin: 246, facet: 61, face: 60 },
-        { point: 66, next: 239, twin: 249, facet: 59, face: 58 },
-        { point: 64, next: 474, twin: 248, facet: 126, face: 102 },
-        { point: 68, next: 252, twin: 251, facet: 60, face: 60 },
-        { point: 67, next: 256, twin: 250, facet: 61, face: 60 },
-        { point: 67, next: 254, twin: 253, facet: 60, face: 60 },
-        { point: 69, next: 245, twin: 252, facet: -1, face: -1 },
-        { point: 69, next: 250, twin: 255, facet: 60, face: 60 },
-        { point: 68, next: 259, twin: 254, facet: 63, face: 62 },
-        { point: 68, next: 247, twin: 257, facet: 61, face: 60 },
-        { point: 66, next: 476, twin: 256, facet: 127, face: 102 },
-        { point: 70, next: 260, twin: 259, facet: 62, face: 62 },
-        { point: 69, next: 264, twin: 258, facet: 63, face: 62 },
-        { point: 69, next: 262, twin: 261, facet: 62, face: 62 },
-        { point: 71, next: 253, twin: 260, facet: -1, face: -1 },
-        { point: 71, next: 258, twin: 263, facet: 62, face: 62 },
-        { point: 70, next: 267, twin: 262, facet: 65, face: 64 },
-        { point: 70, next: 255, twin: 265, facet: 63, face: 62 },
-        { point: 68, next: 478, twin: 264, facet: 128, face: 102 },
-        { point: 72, next: 268, twin: 267, facet: 64, face: 64 },
-        { point: 71, next: 272, twin: 266, facet: 65, face: 64 },
-        { point: 71, next: 270, twin: 269, facet: 64, face: 64 },
-        { point: 73, next: 261, twin: 268, facet: -1, face: -1 },
-        { point: 73, next: 266, twin: 271, facet: 64, face: 64 },
-        { point: 72, next: 276, twin: 270, facet: 168, face: 66 },
-        { point: 72, next: 263, twin: 273, facet: 65, face: 64 },
-        { point: 70, next: 480, twin: 272, facet: 129, face: 102 },
-        { point: 74, next: 556, twin: 275, facet: 66, face: 66 },
-        { point: 72, next: 482, twin: 274, facet: 130, face: 102 },
-        { point: 73, next: 557, twin: 277, facet: 168, face: 66 },
-        { point: 75, next: 269, twin: 276, facet: -1, face: -1 },
-        { point: 75, next: 274, twin: 279, facet: 66, face: 66 },
-        { point: 74, next: 281, twin: 278, facet: 68, face: 67 },
-        { point: 76, next: 282, twin: 281, facet: 67, face: 67 },
-        { point: 75, next: 286, twin: 280, facet: 68, face: 67 },
-        { point: 75, next: 284, twin: 283, facet: 67, face: 67 },
-        { point: 77, next: 277, twin: 282, facet: -1, face: -1 },
-        { point: 77, next: 280, twin: 285, facet: 67, face: 67 },
-        { point: 76, next: 289, twin: 284, facet: 70, face: 69 },
-        { point: 76, next: 279, twin: 287, facet: 68, face: 67 },
-        { point: 74, next: 484, twin: 286, facet: 131, face: 102 },
-        { point: 78, next: 290, twin: 289, facet: 69, face: 69 },
-        { point: 77, next: 294, twin: 288, facet: 70, face: 69 },
-        { point: 77, next: 292, twin: 291, facet: 69, face: 69 },
-        { point: 79, next: 283, twin: 290, facet: -1, face: -1 },
-        { point: 79, next: 288, twin: 293, facet: 69, face: 69 },
-        { point: 78, next: 298, twin: 292, facet: 169, face: 71 },
-        { point: 78, next: 285, twin: 295, facet: 70, face: 69 },
-        { point: 76, next: 486, twin: 294, facet: 132, face: 102 },
-        { point: 80, next: 558, twin: 297, facet: 71, face: 71 },
-        { point: 78, next: 488, twin: 296, facet: 133, face: 102 },
-        { point: 79, next: 559, twin: 299, facet: 169, face: 71 },
-        { point: 81, next: 291, twin: 298, facet: -1, face: -1 },
-        { point: 81, next: 296, twin: 301, facet: 71, face: 71 },
-        { point: 80, next: 303, twin: 300, facet: 73, face: 72 },
-        { point: 82, next: 304, twin: 303, facet: 72, face: 72 },
-        { point: 81, next: 308, twin: 302, facet: 73, face: 72 },
-        { point: 81, next: 306, twin: 305, facet: 72, face: 72 },
-        { point: 83, next: 299, twin: 304, facet: -1, face: -1 },
-        { point: 83, next: 302, twin: 307, facet: 72, face: 72 },
-        { point: 82, next: 311, twin: 306, facet: 75, face: 74 },
-        { point: 82, next: 301, twin: 309, facet: 73, face: 72 },
-        { point: 80, next: 490, twin: 308, facet: 134, face: 102 },
-        { point: 84, next: 312, twin: 311, facet: 74, face: 74 },
-        { point: 83, next: 316, twin: 310, facet: 75, face: 74 },
-        { point: 83, next: 314, twin: 313, facet: 74, face: 74 },
-        { point: 85, next: 305, twin: 312, facet: -1, face: -1 },
-        { point: 85, next: 310, twin: 315, facet: 74, face: 74 },
-        { point: 84, next: 319, twin: 314, facet: 77, face: 76 },
-        { point: 84, next: 307, twin: 317, facet: 75, face: 74 },
-        { point: 82, next: 492, twin: 316, facet: 135, face: 102 },
-        { point: 86, next: 320, twin: 319, facet: 76, face: 76 },
-        { point: 85, next: 324, twin: 318, facet: 77, face: 76 },
-        { point: 85, next: 322, twin: 321, facet: 76, face: 76 },
-        { point: 87, next: 313, twin: 320, facet: -1, face: -1 },
-        { point: 87, next: 318, twin: 323, facet: 76, face: 76 },
-        { point: 86, next: 327, twin: 322, facet: 79, face: 78 },
-        { point: 86, next: 315, twin: 325, facet: 77, face: 76 },
-        { point: 84, next: 494, twin: 324, facet: 136, face: 102 },
-        { point: 88, next: 328, twin: 327, facet: 78, face: 78 },
-        { point: 87, next: 332, twin: 326, facet: 79, face: 78 },
-        { point: 87, next: 330, twin: 329, facet: 78, face: 78 },
-        { point: 89, next: 321, twin: 328, facet: -1, face: -1 },
-        { point: 89, next: 326, twin: 331, facet: 78, face: 78 },
-        { point: 88, next: 335, twin: 330, facet: 81, face: 80 },
-        { point: 88, next: 323, twin: 333, facet: 79, face: 78 },
-        { point: 86, next: 496, twin: 332, facet: 137, face: 102 },
-        { point: 90, next: 336, twin: 335, facet: 80, face: 80 },
-        { point: 89, next: 340, twin: 334, facet: 81, face: 80 },
-        { point: 89, next: 338, twin: 337, facet: 80, face: 80 },
-        { point: 91, next: 329, twin: 336, facet: -1, face: -1 },
-        { point: 91, next: 334, twin: 339, facet: 80, face: 80 },
-        { point: 90, next: 343, twin: 338, facet: 83, face: 82 },
-        { point: 90, next: 331, twin: 341, facet: 81, face: 80 },
-        { point: 88, next: 498, twin: 340, facet: 138, face: 102 },
-        { point: 92, next: 344, twin: 343, facet: 82, face: 82 },
-        { point: 91, next: 348, twin: 342, facet: 83, face: 82 },
-        { point: 91, next: 346, twin: 345, facet: 82, face: 82 },
-        { point: 93, next: 337, twin: 344, facet: -1, face: -1 },
-        { point: 93, next: 342, twin: 347, facet: 82, face: 82 },
-        { point: 92, next: 351, twin: 346, facet: 85, face: 84 },
-        { point: 92, next: 339, twin: 349, facet: 83, face: 82 },
-        { point: 90, next: 500, twin: 348, facet: 139, face: 102 },
-        { point: 94, next: 352, twin: 351, facet: 84, face: 84 },
-        { point: 93, next: 356, twin: 350, facet: 85, face: 84 },
-        { point: 93, next: 354, twin: 353, facet: 84, face: 84 },
-        { point: 95, next: 345, twin: 352, facet: -1, face: -1 },
-        { point: 95, next: 350, twin: 355, facet: 84, face: 84 },
-        { point: 94, next: 359, twin: 354, facet: 87, face: 86 },
-        { point: 94, next: 347, twin: 357, facet: 85, face: 84 },
-        { point: 92, next: 502, twin: 356, facet: 140, face: 102 },
-        { point: 96, next: 360, twin: 359, facet: 86, face: 86 },
-        { point: 95, next: 364, twin: 358, facet: 87, face: 86 },
-        { point: 95, next: 362, twin: 361, facet: 86, face: 86 },
-        { point: 97, next: 353, twin: 360, facet: -1, face: -1 },
-        { point: 97, next: 358, twin: 363, facet: 86, face: 86 },
-        { point: 96, next: 368, twin: 362, facet: 170, face: 88 },
-        { point: 96, next: 355, twin: 365, facet: 87, face: 86 },
-        { point: 94, next: 504, twin: 364, facet: 141, face: 102 },
-        { point: 98, next: 560, twin: 367, facet: 88, face: 88 },
-        { point: 96, next: 506, twin: 366, facet: 142, face: 102 },
-        { point: 97, next: 561, twin: 369, facet: 170, face: 88 },
-        { point: 99, next: 361, twin: 368, facet: -1, face: -1 },
-        { point: 99, next: 366, twin: 371, facet: 88, face: 88 },
-        { point: 98, next: 373, twin: 370, facet: 90, face: 89 },
-        { point: 100, next: 374, twin: 373, facet: 89, face: 89 },
-        { point: 99, next: 378, twin: 372, facet: 90, face: 89 },
-        { point: 99, next: 376, twin: 375, facet: 89, face: 89 },
-        { point: 101, next: 369, twin: 374, facet: -1, face: -1 },
-        { point: 101, next: 372, twin: 377, facet: 89, face: 89 },
-        { point: 100, next: 381, twin: 376, facet: 92, face: 91 },
-        { point: 100, next: 371, twin: 379, facet: 90, face: 89 },
-        { point: 98, next: 508, twin: 378, facet: 143, face: 102 },
-        { point: 102, next: 382, twin: 381, facet: 91, face: 91 },
-        { point: 101, next: 386, twin: 380, facet: 92, face: 91 },
-        { point: 101, next: 384, twin: 383, facet: 91, face: 91 },
-        { point: 103, next: 375, twin: 382, facet: -1, face: -1 },
-        { point: 103, next: 380, twin: 385, facet: 91, face: 91 },
-        { point: 102, next: 390, twin: 384, facet: 171, face: 93 },
-        { point: 102, next: 377, twin: 387, facet: 92, face: 91 },
-        { point: 100, next: 510, twin: 386, facet: 144, face: 102 },
-        { point: 104, next: 562, twin: 389, facet: 93, face: 93 },
-        { point: 102, next: 512, twin: 388, facet: 145, face: 102 },
-        { point: 103, next: 563, twin: 391, facet: 171, face: 93 },
-        { point: 105, next: 383, twin: 390, facet: -1, face: -1 },
-        { point: 105, next: 388, twin: 393, facet: 93, face: 93 },
-        { point: 104, next: 395, twin: 392, facet: 95, face: 94 },
-        { point: 106, next: 396, twin: 395, facet: 94, face: 94 },
-        { point: 105, next: 400, twin: 394, facet: 95, face: 94 },
-        { point: 105, next: 398, twin: 397, facet: 94, face: 94 },
-        { point: 107, next: 391, twin: 396, facet: -1, face: -1 },
-        { point: 107, next: 394, twin: 399, facet: 94, face: 94 },
-        { point: 106, next: 403, twin: 398, facet: 97, face: 96 },
-        { point: 106, next: 393, twin: 401, facet: 95, face: 94 },
-        { point: 104, next: 514, twin: 400, facet: 146, face: 102 },
-        { point: 108, next: 404, twin: 403, facet: 96, face: 96 },
-        { point: 107, next: 408, twin: 402, facet: 97, face: 96 },
-        { point: 107, next: 406, twin: 405, facet: 96, face: 96 },
-        { point: 109, next: 397, twin: 404, facet: -1, face: -1 },
-        { point: 109, next: 402, twin: 407, facet: 96, face: 96 },
-        { point: 108, next: 411, twin: 406, facet: 99, face: 98 },
-        { point: 108, next: 399, twin: 409, facet: 97, face: 96 },
-        { point: 106, next: 516, twin: 408, facet: 147, face: 102 },
-        { point: 110, next: 412, twin: 411, facet: 98, face: 98 },
-        { point: 109, next: 416, twin: 410, facet: 99, face: 98 },
-        { point: 109, next: 414, twin: 413, facet: 98, face: 98 },
-        { point: 111, next: 405, twin: 412, facet: -1, face: -1 },
-        { point: 111, next: 410, twin: 415, facet: 98, face: 98 },
-        { point: 110, next: 419, twin: 414, facet: 101, face: 100 },
-        { point: 110, next: 407, twin: 417, facet: 99, face: 98 },
-        { point: 108, next: 518, twin: 416, facet: 148, face: 102 },
-        { point: 19, next: 420, twin: 419, facet: 100, face: 100 },
-        { point: 111, next: 422, twin: 418, facet: 101, face: 100 },
-        { point: 111, next: 65, twin: 421, facet: 100, face: 100 },
-        { point: 17, next: 413, twin: 420, facet: -1, face: -1 },
-        { point: 19, next: 415, twin: 423, facet: 101, face: 100 },
-        { point: 110, next: 427, twin: 422, facet: 149, face: 102 },
-        { point: 16, next: 426, twin: 425, facet: 102, face: 102 },
-        { point: 112, next: 73, twin: 424, facet: 103, face: 102 },
-        { point: 112, next: 63, twin: 427, facet: 102, face: 102 },
-        { point: 19, next: 519, twin: 426, facet: 149, face: 102 },
-        { point: 20, next: 425, twin: 429, facet: 103, face: 102 },
-        { point: 112, next: 81, twin: 428, facet: 104, face: 102 },
-        { point: 22, next: 429, twin: 431, facet: 104, face: 102 },
-        { point: 112, next: 89, twin: 430, facet: 105, face: 102 },
-        { point: 24, next: 431, twin: 433, facet: 105, face: 102 },
-        { point: 112, next: 91, twin: 432, facet: 106, face: 102 },
-        { point: 26, next: 433, twin: 435, facet: 106, face: 102 },
-        { point: 112, next: 103, twin: 434, facet: 107, face: 102 },
-        { point: 28, next: 435, twin: 437, facet: 107, face: 102 },
-        { point: 112, next: 111, twin: 436, facet: 108, face: 102 },
-        { point: 30, next: 437, twin: 439, facet: 108, face: 102 },
-        { point: 112, next: 113, twin: 438, facet: 109, face: 102 },
-        { point: 32, next: 439, twin: 441, facet: 109, face: 102 },
-        { point: 112, next: 125, twin: 440, facet: 110, face: 102 },
-        { point: 34, next: 441, twin: 443, facet: 110, face: 102 },
-        { point: 112, next: 133, twin: 442, facet: 111, face: 102 },
-        { point: 36, next: 443, twin: 445, facet: 111, face: 102 },
-        { point: 112, next: 141, twin: 444, facet: 112, face: 102 },
-        { point: 38, next: 445, twin: 447, facet: 112, face: 102 },
-        { point: 112, next: 149, twin: 446, facet: 113, face: 102 },
-        { point: 40, next: 447, twin: 449, facet: 113, face: 102 },
-        { point: 112, next: 157, twin: 448, facet: 114, face: 102 },
-        { point: 42, next: 449, twin: 451, facet: 114, face: 102 },
-        { point: 112, next: 165, twin: 450, facet: 115, face: 102 },
-        { point: 44, next: 451, twin: 453, facet: 115, face: 102 },
-        { point: 112, next: 173, twin: 452, facet: 116, face: 102 },
-        { point: 46, next: 453, twin: 455, facet: 116, face: 102 },
-        { point: 112, next: 181, twin: 454, facet: 117, face: 102 },
-        { point: 48, next: 455, twin: 457, facet: 117, face: 102 },
-        { point: 112, next: 183, twin: 456, facet: 118, face: 102 },
-        { point: 50, next: 457, twin: 459, facet: 118, face: 102 },
-        { point: 112, next: 195, twin: 458, facet: 119, face: 102 },
-        { point: 52, next: 459, twin: 461, facet: 119, face: 102 },
-        { point: 112, next: 203, twin: 460, facet: 120, face: 102 },
-        { point: 54, next: 461, twin: 463, facet: 120, face: 102 },
-        { point: 112, next: 205, twin: 462, facet: 121, face: 102 },
-        { point: 56, next: 463, twin: 465, facet: 121, face: 102 },
-        { point: 112, next: 217, twin: 464, facet: 122, face: 102 },
-        { point: 58, next: 465, twin: 467, facet: 122, face: 102 },
-        { point: 112, next: 225, twin: 466, facet: 123, face: 102 },
-        { point: 60, next: 467, twin: 469, facet: 123, face: 102 },
-        { point: 112, next: 233, twin: 468, facet: 124, face: 102 },
-        { point: 62, next: 469, twin: 471, facet: 124, face: 102 },
-        { point: 112, next: 241, twin: 470, facet: 125, face: 102 },
-        { point: 64, next: 471, twin: 473, facet: 125, face: 102 },
-        { point: 112, next: 249, twin: 472, facet: 126, face: 102 },
-        { point: 66, next: 473, twin: 475, facet: 126, face: 102 },
-        { point: 112, next: 257, twin: 474, facet: 127, face: 102 },
-        { point: 68, next: 475, twin: 477, facet: 127, face: 102 },
-        { point: 112, next: 265, twin: 476, facet: 128, face: 102 },
-        { point: 70, next: 477, twin: 479, facet: 128, face: 102 },
-        { point: 112, next: 273, twin: 478, facet: 129, face: 102 },
-        { point: 72, next: 479, twin: 481, facet: 129, face: 102 },
-        { point: 112, next: 275, twin: 480, facet: 130, face: 102 },
-        { point: 74, next: 481, twin: 483, facet: 130, face: 102 },
-        { point: 112, next: 287, twin: 482, facet: 131, face: 102 },
-        { point: 76, next: 483, twin: 485, facet: 131, face: 102 },
-        { point: 112, next: 295, twin: 484, facet: 132, face: 102 },
-        { point: 78, next: 485, twin: 487, facet: 132, face: 102 },
-        { point: 112, next: 297, twin: 486, facet: 133, face: 102 },
-        { point: 80, next: 487, twin: 489, facet: 133, face: 102 },
-        { point: 112, next: 309, twin: 488, facet: 134, face: 102 },
-        { point: 82, next: 489, twin: 491, facet: 134, face: 102 },
-        { point: 112, next: 317, twin: 490, facet: 135, face: 102 },
-        { point: 84, next: 491, twin: 493, facet: 135, face: 102 },
-        { point: 112, next: 325, twin: 492, facet: 136, face: 102 },
-        { point: 86, next: 493, twin: 495, facet: 136, face: 102 },
-        { point: 112, next: 333, twin: 494, facet: 137, face: 102 },
-        { point: 88, next: 495, twin: 497, facet: 137, face: 102 },
-        { point: 112, next: 341, twin: 496, facet: 138, face: 102 },
-        { point: 90, next: 497, twin: 499, facet: 138, face: 102 },
-        { point: 112, next: 349, twin: 498, facet: 139, face: 102 },
-        { point: 92, next: 499, twin: 501, facet: 139, face: 102 },
-        { point: 112, next: 357, twin: 500, facet: 140, face: 102 },
-        { point: 94, next: 501, twin: 503, facet: 140, face: 102 },
-        { point: 112, next: 365, twin: 502, facet: 141, face: 102 },
-        { point: 96, next: 503, twin: 505, facet: 141, face: 102 },
-        { point: 112, next: 367, twin: 504, facet: 142, face: 102 },
-        { point: 98, next: 505, twin: 507, facet: 142, face: 102 },
-        { point: 112, next: 379, twin: 506, facet: 143, face: 102 },
-        { point: 100, next: 507, twin: 509, facet: 143, face: 102 },
-        { point: 112, next: 387, twin: 508, facet: 144, face: 102 },
-        { point: 102, next: 509, twin: 511, facet: 144, face: 102 },
-        { point: 112, next: 389, twin: 510, facet: 145, face: 102 },
-        { point: 104, next: 511, twin: 513, facet: 145, face: 102 },
-        { point: 112, next: 401, twin: 512, facet: 146, face: 102 },
-        { point: 106, next: 513, twin: 515, facet: 146, face: 102 },
-        { point: 112, next: 409, twin: 514, facet: 147, face: 102 },
-        { point: 108, next: 515, twin: 517, facet: 147, face: 102 },
-        { point: 112, next: 417, twin: 516, facet: 148, face: 102 },
-        { point: 110, next: 517, twin: 519, facet: 148, face: 102 },
-        { point: 112, next: 423, twin: 518, facet: 149, face: 102 },
-        { point: 1, next: 6, twin: 521, facet: 0, face: 0 },
-        { point: 3, next: 2, twin: 520, facet: 150, face: 0 },
-        { point: 4, next: 1, twin: 523, facet: 1, face: 1 },
-        { point: 1, next: 10, twin: 522, facet: 151, face: 1 },
-        { point: 6, next: 7, twin: 525, facet: 2, face: 2 },
-        { point: 0, next: 16, twin: 524, facet: 152, face: 2 },
-        { point: 7, next: 5, twin: 527, facet: 3, face: 3 },
-        { point: 3, next: 20, twin: 526, facet: 153, face: 3 },
-        { point: 5, next: 3, twin: 529, facet: 4, face: 4 },
-        { point: 2, next: 22, twin: 528, facet: 154, face: 4 },
-        { point: 5, next: 28, twin: 531, facet: 5, face: 5 },
-        { point: 9, next: 11, twin: 530, facet: 155, face: 5 },
-        { point: 4, next: 32, twin: 533, facet: 6, face: 5 },
-        { point: 10, next: 17, twin: 532, facet: 156, face: 5 },
-        { point: 6, next: 36, twin: 535, facet: 7, face: 5 },
-        { point: 11, next: 21, twin: 534, facet: 157, face: 5 },
-        { point: 7, next: 38, twin: 537, facet: 8, face: 5 },
-        { point: 8, next: 23, twin: 536, facet: 158, face: 5 },
-        { point: 13, next: 46, twin: 539, facet: 9, face: 9 },
-        { point: 15, next: 42, twin: 538, facet: 159, face: 9 },
-        { point: 8, next: 45, twin: 541, facet: 10, face: 10 },
-        { point: 15, next: 29, twin: 540, facet: 160, face: 10 },
-        { point: 9, next: 47, twin: 543, facet: 11, face: 11 },
-        { point: 12, next: 33, twin: 542, facet: 161, face: 11 },
-        { point: 10, next: 41, twin: 545, facet: 12, face: 12 },
-        { point: 13, next: 37, twin: 544, facet: 162, face: 12 },
-        { point: 11, next: 43, twin: 547, facet: 13, face: 13 },
-        { point: 14, next: 39, twin: 546, facet: 163, face: 13 },
-        { point: 24, next: 94, twin: 549, facet: 22, face: 22 },
-        { point: 27, next: 87, twin: 548, facet: 164, face: 22 },
-        { point: 30, next: 116, twin: 551, facet: 27, face: 27 },
-        { point: 33, next: 109, twin: 550, facet: 165, face: 27 },
-        { point: 48, next: 186, twin: 553, facet: 44, face: 44 },
-        { point: 51, next: 179, twin: 552, facet: 166, face: 44 },
-        { point: 54, next: 208, twin: 555, facet: 49, face: 49 },
-        { point: 57, next: 201, twin: 554, facet: 167, face: 49 },
-        { point: 72, next: 278, twin: 557, facet: 66, face: 66 },
-        { point: 75, next: 271, twin: 556, facet: 168, face: 66 },
-        { point: 78, next: 300, twin: 559, facet: 71, face: 71 },
-        { point: 81, next: 293, twin: 558, facet: 169, face: 71 },
-        { point: 96, next: 370, twin: 561, facet: 88, face: 88 },
-        { point: 99, next: 363, twin: 560, facet: 170, face: 88 },
-        { point: 102, next: 392, twin: 563, facet: 93, face: 93 },
-        { point: 105, next: 385, twin: 562, facet: 171, face: 93 },
-      ],
-      points: [
-        [-6, 4, 6],
-        [6, 4, 6],
-        [6, 4, -6],
-        [-6, 4, -6],
-        [-6, 8, 6],
-        [6, 8, 6],
-        [-6, 8, -6],
-        [6, 8, -6],
-        [10, 8, 10],
-        [-10, 8, 10],
-        [-10, 8, -10],
-        [10, 8, -10],
-        [-10, 0, -10],
-        [10, 0, -10],
-        [10, 0, 10],
-        [-10, 0, 10],
-        [5.9483999999999995, -4, 0.783],
-        [6, 0, 0],
-        [5.9483999999999995, 0, 0.783],
-        [6, -4, 0],
-        [5.7954, -4, 1.5528],
-        [5.7954, 0, 1.5528],
-        [5.5434, -4, 2.2962],
-        [5.5434, 0, 2.2962],
-        [5.196, -4, 3],
-        [5.196, 0, 3],
-        [4.7604, -4, 3.6528],
-        [4.7604, 0, 3.6528],
-        [4.2425999999999995, -4, 4.2425999999999995],
-        [4.2425999999999995, 0, 4.2425999999999995],
-        [3.6528, -4, 4.7604],
-        [3.6528, 0, 4.7604],
-        [3, -4, 5.196],
-        [3, 0, 5.196],
-        [2.2962, -4, 5.5434],
-        [2.2962, 0, 5.5434],
-        [1.5528, -4, 5.7954],
-        [1.5528, 0, 5.7954],
-        [0.783, -4, 5.9483999999999995],
-        [0.783, 0, 5.9483999999999995],
-        [0, -4, 6],
-        [0, 0, 6],
-        [-0.783, -4, 5.9483999999999995],
-        [-0.783, 0, 5.9483999999999995],
-        [-1.5528, -4, 5.7954],
-        [-1.5528, 0, 5.7954],
-        [-2.2962, -4, 5.5434],
-        [-2.2962, 0, 5.5434],
-        [-3, -4, 5.196],
-        [-3, 0, 5.196],
-        [-3.6528, -4, 4.7604],
-        [-3.6528, 0, 4.7604],
-        [-4.2425999999999995, -4, 4.2425999999999995],
-        [-4.2425999999999995, 0, 4.2425999999999995],
-        [-4.7604, -4, 3.6528],
-        [-4.7604, 0, 3.6528],
-        [-5.196, -4, 3],
-        [-5.196, 0, 3],
-        [-5.5434, -4, 2.2962],
-        [-5.5434, 0, 2.2962],
-        [-5.7954, -4, 1.5528],
-        [-5.7954, 0, 1.5528],
-        [-5.9483999999999995, -4, 0.783],
-        [-5.9483999999999995, 0, 0.783],
-        [-6, -4, 0],
-        [-6, 0, 0],
-        [-5.9483999999999995, -4, -0.783],
-        [-5.9483999999999995, 0, -0.783],
-        [-5.7954, -4, -1.5528],
-        [-5.7954, 0, -1.5528],
-        [-5.5434, -4, -2.2962],
-        [-5.5434, 0, -2.2962],
-        [-5.196, -4, -3],
-        [-5.196, 0, -3],
-        [-4.7604, -4, -3.6528],
-        [-4.7604, 0, -3.6528],
-        [-4.2425999999999995, -4, -4.2425999999999995],
-        [-4.2425999999999995, 0, -4.2425999999999995],
-        [-3.6528, -4, -4.7604],
-        [-3.6528, 0, -4.7604],
-        [-3, -4, -5.196],
-        [-3, 0, -5.196],
-        [-2.2962, -4, -5.5434],
-        [-2.2962, 0, -5.5434],
-        [-1.5528, -4, -5.7954],
-        [-1.5528, 0, -5.7954],
-        [-0.783, -4, -5.9483999999999995],
-        [-0.783, 0, -5.9483999999999995],
-        [0, -4, -6],
-        [0, 0, -6],
-        [0.783, -4, -5.9483999999999995],
-        [0.783, 0, -5.9483999999999995],
-        [1.5528, -4, -5.7954],
-        [1.5528, 0, -5.7954],
-        [2.2962, -4, -5.5434],
-        [2.2962, 0, -5.5434],
-        [3, -4, -5.196],
-        [3, 0, -5.196],
-        [3.6528, -4, -4.7604],
-        [3.6528, 0, -4.7604],
-        [4.2425999999999995, -4, -4.2425999999999995],
-        [4.2425999999999995, 0, -4.2425999999999995],
-        [4.7604, -4, -3.6528],
-        [4.7604, 0, -3.6528],
-        [5.196, -4, -3],
-        [5.196, 0, -3],
-        [5.5434, -4, -2.2962],
-        [5.5434, 0, -2.2962],
-        [5.7954, -4, -1.5528],
-        [5.7954, 0, -1.5528],
-        [5.9483999999999995, -4, -0.783],
-        [5.9483999999999995, 0, -0.783],
-        [0, -4, 0],
-      ],
-      exactPoints: [
-        ['-6', '4', '6'],
-        ['6', '4', '6'],
-        ['6', '4', '-6'],
-        ['-6', '4', '-6'],
-        ['-6', '8', '6'],
-        ['6', '8', '6'],
-        ['-6', '8', '-6'],
-        ['6', '8', '-6'],
-        ['10', '8', '10'],
-        ['-10', '8', '10'],
-        ['-10', '8', '-10'],
-        ['10', '8', '-10'],
-        ['-10', '0', '-10'],
-        ['10', '0', '-10'],
-        ['10', '0', '10'],
-        ['-10', '0', '10'],
-        [
-          '837162875732833/140737488355328',
-          '-4',
-          '7052637016462197/9007199254740992',
-        ],
-        ['6', '0', '0'],
-        [
-          '837162875732833/140737488355328',
-          '0',
-          '7052637016462197/9007199254740992',
-        ],
-        ['6', '-4', '0'],
-        [
-          '6525040320115743/1125899906842624',
-          '-4',
-          '3496594750690453/2251799813685248',
-        ],
-        [
-          '6525040320115743/1125899906842624',
-          '0',
-          '3496594750690453/2251799813685248',
-        ],
-        [
-          '3120656771795701/562949953421312',
-          '-4',
-          '2585291366092033/1125899906842624',
-        ],
-        [
-          '3120656771795701/562949953421312',
-          '0',
-          '2585291366092033/1125899906842624',
-        ],
-        ['2925087957977137/562949953421312', '-4', '3'],
-        ['2925087957977137/562949953421312', '0', '3'],
-        [
-          '5359733916533627/1125899906842624',
-          '-4',
-          '4112687179714737/1125899906842624',
-        ],
-        [
-          '5359733916533627/1125899906842624',
-          '0',
-          '4112687179714737/1125899906842624',
-        ],
-        [
-          '1194185736192629/281474976710656',
-          '-4',
-          '1194185736192629/281474976710656',
-        ],
-        [
-          '1194185736192629/281474976710656',
-          '0',
-          '1194185736192629/281474976710656',
-        ],
-        [
-          '4112687179714737/1125899906842624',
-          '-4',
-          '5359733916533627/1125899906842624',
-        ],
-        [
-          '4112687179714737/1125899906842624',
-          '0',
-          '5359733916533627/1125899906842624',
-        ],
-        ['3', '-4', '2925087957977137/562949953421312'],
-        ['3', '0', '2925087957977137/562949953421312'],
-        [
-          '2585291366092033/1125899906842624',
-          '-4',
-          '3120656771795701/562949953421312',
-        ],
-        [
-          '2585291366092033/1125899906842624',
-          '0',
-          '3120656771795701/562949953421312',
-        ],
-        [
-          '3496594750690453/2251799813685248',
-          '-4',
-          '6525040320115743/1125899906842624',
-        ],
-        [
-          '3496594750690453/2251799813685248',
-          '0',
-          '6525040320115743/1125899906842624',
-        ],
-        [
-          '7052637016462197/9007199254740992',
-          '-4',
-          '837162875732833/140737488355328',
-        ],
-        [
-          '7052637016462197/9007199254740992',
-          '0',
-          '837162875732833/140737488355328',
-        ],
-        ['0', '-4', '6'],
-        ['0', '0', '6'],
-        [
-          '-7052637016462197/9007199254740992',
-          '-4',
-          '837162875732833/140737488355328',
-        ],
-        [
-          '-7052637016462197/9007199254740992',
-          '0',
-          '837162875732833/140737488355328',
-        ],
-        [
-          '-3496594750690453/2251799813685248',
-          '-4',
-          '6525040320115743/1125899906842624',
-        ],
-        [
-          '-3496594750690453/2251799813685248',
-          '0',
-          '6525040320115743/1125899906842624',
-        ],
-        [
-          '-2585291366092033/1125899906842624',
-          '-4',
-          '3120656771795701/562949953421312',
-        ],
-        [
-          '-2585291366092033/1125899906842624',
-          '0',
-          '3120656771795701/562949953421312',
-        ],
-        ['-3', '-4', '2925087957977137/562949953421312'],
-        ['-3', '0', '2925087957977137/562949953421312'],
-        [
-          '-4112687179714737/1125899906842624',
-          '-4',
-          '5359733916533627/1125899906842624',
-        ],
-        [
-          '-4112687179714737/1125899906842624',
-          '0',
-          '5359733916533627/1125899906842624',
-        ],
-        [
-          '-1194185736192629/281474976710656',
-          '-4',
-          '1194185736192629/281474976710656',
-        ],
-        [
-          '-1194185736192629/281474976710656',
-          '0',
-          '1194185736192629/281474976710656',
-        ],
-        [
-          '-5359733916533627/1125899906842624',
-          '-4',
-          '4112687179714737/1125899906842624',
-        ],
-        [
-          '-5359733916533627/1125899906842624',
-          '0',
-          '4112687179714737/1125899906842624',
-        ],
-        ['-2925087957977137/562949953421312', '-4', '3'],
-        ['-2925087957977137/562949953421312', '0', '3'],
-        [
-          '-3120656771795701/562949953421312',
-          '-4',
-          '2585291366092033/1125899906842624',
-        ],
-        [
-          '-3120656771795701/562949953421312',
-          '0',
-          '2585291366092033/1125899906842624',
-        ],
-        [
-          '-6525040320115743/1125899906842624',
-          '-4',
-          '3496594750690453/2251799813685248',
-        ],
-        [
-          '-6525040320115743/1125899906842624',
-          '0',
-          '3496594750690453/2251799813685248',
-        ],
-        [
-          '-837162875732833/140737488355328',
-          '-4',
-          '7052637016462197/9007199254740992',
-        ],
-        [
-          '-837162875732833/140737488355328',
-          '0',
-          '7052637016462197/9007199254740992',
-        ],
-        ['-6', '-4', '0'],
-        ['-6', '0', '0'],
-        [
-          '-837162875732833/140737488355328',
-          '-4',
-          '-7052637016462197/9007199254740992',
-        ],
-        [
-          '-837162875732833/140737488355328',
-          '0',
-          '-7052637016462197/9007199254740992',
-        ],
-        [
-          '-6525040320115743/1125899906842624',
-          '-4',
-          '-3496594750690453/2251799813685248',
-        ],
-        [
-          '-6525040320115743/1125899906842624',
-          '0',
-          '-3496594750690453/2251799813685248',
-        ],
-        [
-          '-3120656771795701/562949953421312',
-          '-4',
-          '-2585291366092033/1125899906842624',
-        ],
-        [
-          '-3120656771795701/562949953421312',
-          '0',
-          '-2585291366092033/1125899906842624',
-        ],
-        ['-2925087957977137/562949953421312', '-4', '-3'],
-        ['-2925087957977137/562949953421312', '0', '-3'],
-        [
-          '-5359733916533627/1125899906842624',
-          '-4',
-          '-4112687179714737/1125899906842624',
-        ],
-        [
-          '-5359733916533627/1125899906842624',
-          '0',
-          '-4112687179714737/1125899906842624',
-        ],
-        [
-          '-1194185736192629/281474976710656',
-          '-4',
-          '-1194185736192629/281474976710656',
-        ],
-        [
-          '-1194185736192629/281474976710656',
-          '0',
-          '-1194185736192629/281474976710656',
-        ],
-        [
-          '-4112687179714737/1125899906842624',
-          '-4',
-          '-5359733916533627/1125899906842624',
-        ],
-        [
-          '-4112687179714737/1125899906842624',
-          '0',
-          '-5359733916533627/1125899906842624',
-        ],
-        ['-3', '-4', '-2925087957977137/562949953421312'],
-        ['-3', '0', '-2925087957977137/562949953421312'],
-        [
-          '-2585291366092033/1125899906842624',
-          '-4',
-          '-3120656771795701/562949953421312',
-        ],
-        [
-          '-2585291366092033/1125899906842624',
-          '0',
-          '-3120656771795701/562949953421312',
-        ],
-        [
-          '-3496594750690453/2251799813685248',
-          '-4',
-          '-6525040320115743/1125899906842624',
-        ],
-        [
-          '-3496594750690453/2251799813685248',
-          '0',
-          '-6525040320115743/1125899906842624',
-        ],
-        [
-          '-7052637016462197/9007199254740992',
-          '-4',
-          '-837162875732833/140737488355328',
-        ],
-        [
-          '-7052637016462197/9007199254740992',
-          '0',
-          '-837162875732833/140737488355328',
-        ],
-        ['0', '-4', '-6'],
-        ['0', '0', '-6'],
-        [
-          '7052637016462197/9007199254740992',
-          '-4',
-          '-837162875732833/140737488355328',
-        ],
-        [
-          '7052637016462197/9007199254740992',
-          '0',
-          '-837162875732833/140737488355328',
-        ],
-        [
-          '3496594750690453/2251799813685248',
-          '-4',
-          '-6525040320115743/1125899906842624',
-        ],
-        [
-          '3496594750690453/2251799813685248',
-          '0',
-          '-6525040320115743/1125899906842624',
-        ],
-        [
-          '2585291366092033/1125899906842624',
-          '-4',
-          '-3120656771795701/562949953421312',
-        ],
-        [
-          '2585291366092033/1125899906842624',
-          '0',
-          '-3120656771795701/562949953421312',
-        ],
-        ['3', '-4', '-2925087957977137/562949953421312'],
-        ['3', '0', '-2925087957977137/562949953421312'],
-        [
-          '4112687179714737/1125899906842624',
-          '-4',
-          '-5359733916533627/1125899906842624',
-        ],
-        [
-          '4112687179714737/1125899906842624',
-          '0',
-          '-5359733916533627/1125899906842624',
-        ],
-        [
-          '1194185736192629/281474976710656',
-          '-4',
-          '-1194185736192629/281474976710656',
-        ],
-        [
-          '1194185736192629/281474976710656',
-          '0',
-          '-1194185736192629/281474976710656',
-        ],
-        [
-          '5359733916533627/1125899906842624',
-          '-4',
-          '-4112687179714737/1125899906842624',
-        ],
-        [
-          '5359733916533627/1125899906842624',
-          '0',
-          '-4112687179714737/1125899906842624',
-        ],
-        ['2925087957977137/562949953421312', '-4', '-3'],
-        ['2925087957977137/562949953421312', '0', '-3'],
-        [
-          '3120656771795701/562949953421312',
-          '-4',
-          '-2585291366092033/1125899906842624',
-        ],
-        [
-          '3120656771795701/562949953421312',
-          '0',
-          '-2585291366092033/1125899906842624',
-        ],
-        [
-          '6525040320115743/1125899906842624',
-          '-4',
-          '-3496594750690453/2251799813685248',
-        ],
-        [
-          '6525040320115743/1125899906842624',
-          '0',
-          '-3496594750690453/2251799813685248',
-        ],
-        [
-          '837162875732833/140737488355328',
-          '-4',
-          '-7052637016462197/9007199254740992',
-        ],
-        [
-          '837162875732833/140737488355328',
-          '0',
-          '-7052637016462197/9007199254740992',
-        ],
-        ['0', '-4', '0'],
-      ],
-      faces: [
-        { plane: [0, 1, 0, -576], exactPlane: ['0', '144', '0', '-576'] },
-        { plane: [0, 0, -1, 288], exactPlane: ['0', '0', '-48', '288'] },
-        { plane: [1, 0, 0, 288], exactPlane: ['48', '0', '0', '288'] },
-        { plane: [0, 0, 1, 288], exactPlane: ['0', '0', '48', '288'] },
-        { plane: [-1, 0, 0, 288], exactPlane: ['-48', '0', '0', '288'] },
-        { plane: [0, 1, 0, -640], exactPlane: ['0', '80', '0', '-640'] },
-        null,
-        null,
-        null,
-        { plane: [0, -1, 0, 0], exactPlane: ['0', '-400', '0', '0'] },
-        { plane: [0, 0, 1, -1600], exactPlane: ['0', '0', '160', '-1600'] },
-        { plane: [-1, 0, 0, -1600], exactPlane: ['-160', '0', '0', '-1600'] },
-        { plane: [0, 0, -1, -1600], exactPlane: ['0', '0', '-160', '-1600'] },
-        { plane: [1, 0, 0, -1600], exactPlane: ['160', '0', '0', '-1600'] },
-        {
-          plane: [
-            0.9978356169154344, 0, 0.06575774946722471, -18.791999999999998,
-          ],
-          exactPlane: [
-            '7052637016462197/2251799813685248',
-            '0',
-            '7262054399135/35184372088832',
-            '-21157911049386591/1125899906842624',
-          ],
-        },
-        null,
-        {
-          plane: [
-            0.9808151919611836, 0, 0.19493988616531657, -18.795509279999994,
-          ],
-          exactPlane: [
-            '6933741986299615/2251799813685248',
-            '0',
-            '172262685746921/281474976710656',
-            '-47652277240774499915904151719797/2535301200456458802993406410752',
-          ],
-        },
-        null,
-        {
-          plane: [
-            0.9470658794157987, 0, 0.32103928115789765, -18.79842383999999,
-          ],
-          exactPlane: [
-            '1673987981493613/562949953421312',
-            '0',
-            '283726776524341/281474976710656',
-            '-2978729158015081257564871516483/158456325028528675187087900672',
-          ],
-        },
-        null,
-        {
-          plane: [
-            0.8967088030885066, 0, 0.4426209692994423, -18.796579200000007,
-          ],
-          exactPlane: [
-            '792408354435839/281474976710656',
-            '0',
-            '48892203454641/35184372088832',
-            '-2978436863139682764809408428751/158456325028528675187087900672',
-          ],
-        },
-        null,
-        {
-          plane: [0.8318149777230516, 0, 0.5550530090321097, -18.7949952],
-          exactPlane: [
-            '734987459186865/281474976710656',
-            '0',
-            '490441999420647/281474976710656',
-            '-2978185868320836331610788592097/158456325028528675187087900672',
-          ],
-        },
-        {
-          plane: [
-            0.7514864465445471, 0, 0.6597485283498933, -18.796415039999992,
-          ],
-          exactPlane: [
-            '664055765055779/281474976710656',
-            '0',
-            '582990971763111/281474976710656',
-            '-744602712737340909609862980905/39614081257132168796771975168',
-          ],
-        },
-        null,
-        {
-          plane: [
-            0.6597485283498933, 0, 0.7514864465445471, -18.796415039999992,
-          ],
-          exactPlane: [
-            '582990971763111/281474976710656',
-            '0',
-            '664055765055779/281474976710656',
-            '-744602712737340909609862980905/39614081257132168796771975168',
-          ],
-        },
-        null,
-        {
-          plane: [0.5550530090321097, 0, 0.8318149777230516, -18.7949952],
-          exactPlane: [
-            '490441999420647/281474976710656',
-            '0',
-            '734987459186865/281474976710656',
-            '-2978185868320836331610788592097/158456325028528675187087900672',
-          ],
-        },
-        {
-          plane: [
-            0.4426209692994423, 0, 0.8967088030885066, -18.796579200000007,
-          ],
-          exactPlane: [
-            '48892203454641/35184372088832',
-            '0',
-            '792408354435839/281474976710656',
-            '-2978436863139682764809408428751/158456325028528675187087900672',
-          ],
-        },
-        null,
-        {
-          plane: [
-            0.32103928115789765, 0, 0.9470658794157987, -18.79842383999999,
-          ],
-          exactPlane: [
-            '283726776524341/281474976710656',
-            '0',
-            '1673987981493613/562949953421312',
-            '-2978729158015081257564871516483/158456325028528675187087900672',
-          ],
-        },
-        null,
-        {
-          plane: [
-            0.19493988616531657, 0, 0.9808151919611836, -18.795509279999994,
-          ],
-          exactPlane: [
-            '172262685746921/281474976710656',
-            '0',
-            '6933741986299615/2251799813685248',
-            '-47652277240774499915904151719797/2535301200456458802993406410752',
-          ],
-        },
-        null,
-        {
-          plane: [
-            0.06575774946722471, 0, 0.9978356169154344, -18.791999999999998,
-          ],
-          exactPlane: [
-            '7262054399135/35184372088832',
-            '0',
-            '7052637016462197/2251799813685248',
-            '-21157911049386591/1125899906842624',
-          ],
-        },
-        null,
-        {
-          plane: [
-            -0.06575774946722471, 0, 0.9978356169154344, -18.791999999999998,
-          ],
-          exactPlane: [
-            '-7262054399135/35184372088832',
-            '0',
-            '7052637016462197/2251799813685248',
-            '-21157911049386591/1125899906842624',
-          ],
-        },
-        null,
-        {
-          plane: [
-            -0.19493988616531657, 0, 0.9808151919611836, -18.795509279999994,
-          ],
-          exactPlane: [
-            '-172262685746921/281474976710656',
-            '0',
-            '6933741986299615/2251799813685248',
-            '-47652277240774499915904151719797/2535301200456458802993406410752',
-          ],
-        },
-        null,
-        {
-          plane: [
-            -0.32103928115789765, 0, 0.9470658794157987, -18.79842383999999,
-          ],
-          exactPlane: [
-            '-283726776524341/281474976710656',
-            '0',
-            '1673987981493613/562949953421312',
-            '-2978729158015081257564871516483/158456325028528675187087900672',
-          ],
-        },
-        null,
-        {
-          plane: [
-            -0.4426209692994423, 0, 0.8967088030885066, -18.796579200000007,
-          ],
-          exactPlane: [
-            '-48892203454641/35184372088832',
-            '0',
-            '792408354435839/281474976710656',
-            '-2978436863139682764809408428751/158456325028528675187087900672',
-          ],
-        },
-        null,
-        {
-          plane: [-0.5550530090321097, 0, 0.8318149777230516, -18.7949952],
-          exactPlane: [
-            '-490441999420647/281474976710656',
-            '0',
-            '734987459186865/281474976710656',
-            '-2978185868320836331610788592097/158456325028528675187087900672',
-          ],
-        },
-        {
-          plane: [
-            -0.6597485283498933, 0, 0.7514864465445471, -18.796415039999992,
-          ],
-          exactPlane: [
-            '-582990971763111/281474976710656',
-            '0',
-            '664055765055779/281474976710656',
-            '-744602712737340909609862980905/39614081257132168796771975168',
-          ],
-        },
-        null,
-        {
-          plane: [
-            -0.7514864465445471, 0, 0.6597485283498933, -18.796415039999992,
-          ],
-          exactPlane: [
-            '-664055765055779/281474976710656',
-            '0',
-            '582990971763111/281474976710656',
-            '-744602712737340909609862980905/39614081257132168796771975168',
-          ],
-        },
-        null,
-        {
-          plane: [-0.8318149777230516, 0, 0.5550530090321097, -18.7949952],
-          exactPlane: [
-            '-734987459186865/281474976710656',
-            '0',
-            '490441999420647/281474976710656',
-            '-2978185868320836331610788592097/158456325028528675187087900672',
-          ],
-        },
-        {
-          plane: [
-            -0.8967088030885066, 0, 0.4426209692994423, -18.796579200000007,
-          ],
-          exactPlane: [
-            '-792408354435839/281474976710656',
-            '0',
-            '48892203454641/35184372088832',
-            '-2978436863139682764809408428751/158456325028528675187087900672',
-          ],
-        },
-        null,
-        {
-          plane: [
-            -0.9470658794157987, 0, 0.32103928115789765, -18.79842383999999,
-          ],
-          exactPlane: [
-            '-1673987981493613/562949953421312',
-            '0',
-            '283726776524341/281474976710656',
-            '-2978729158015081257564871516483/158456325028528675187087900672',
-          ],
-        },
-        null,
-        {
-          plane: [
-            -0.9808151919611836, 0, 0.19493988616531657, -18.795509279999994,
-          ],
-          exactPlane: [
-            '-6933741986299615/2251799813685248',
-            '0',
-            '172262685746921/281474976710656',
-            '-47652277240774499915904151719797/2535301200456458802993406410752',
-          ],
-        },
-        null,
-        {
-          plane: [
-            -0.9978356169154344, 0, 0.06575774946722471, -18.791999999999998,
-          ],
-          exactPlane: [
-            '-7052637016462197/2251799813685248',
-            '0',
-            '7262054399135/35184372088832',
-            '-21157911049386591/1125899906842624',
-          ],
-        },
-        null,
-        {
-          plane: [
-            -0.9978356169154344, 0, -0.06575774946722471, -18.791999999999998,
-          ],
-          exactPlane: [
-            '-7052637016462197/2251799813685248',
-            '0',
-            '-7262054399135/35184372088832',
-            '-21157911049386591/1125899906842624',
-          ],
-        },
-        null,
-        {
-          plane: [
-            -0.9808151919611836, 0, -0.19493988616531657, -18.795509279999994,
-          ],
-          exactPlane: [
-            '-6933741986299615/2251799813685248',
-            '0',
-            '-172262685746921/281474976710656',
-            '-47652277240774499915904151719797/2535301200456458802993406410752',
-          ],
-        },
-        null,
-        {
-          plane: [
-            -0.9470658794157987, 0, -0.32103928115789765, -18.79842383999999,
-          ],
-          exactPlane: [
-            '-1673987981493613/562949953421312',
-            '0',
-            '-283726776524341/281474976710656',
-            '-2978729158015081257564871516483/158456325028528675187087900672',
-          ],
-        },
-        null,
-        {
-          plane: [
-            -0.8967088030885066, 0, -0.4426209692994423, -18.796579200000007,
-          ],
-          exactPlane: [
-            '-792408354435839/281474976710656',
-            '0',
-            '-48892203454641/35184372088832',
-            '-2978436863139682764809408428751/158456325028528675187087900672',
-          ],
-        },
-        null,
-        {
-          plane: [-0.8318149777230516, 0, -0.5550530090321097, -18.7949952],
-          exactPlane: [
-            '-734987459186865/281474976710656',
-            '0',
-            '-490441999420647/281474976710656',
-            '-2978185868320836331610788592097/158456325028528675187087900672',
-          ],
-        },
-        {
-          plane: [
-            -0.7514864465445471, 0, -0.6597485283498933, -18.796415039999992,
-          ],
-          exactPlane: [
-            '-664055765055779/281474976710656',
-            '0',
-            '-582990971763111/281474976710656',
-            '-744602712737340909609862980905/39614081257132168796771975168',
-          ],
-        },
-        null,
-        {
-          plane: [
-            -0.6597485283498933, 0, -0.7514864465445471, -18.796415039999992,
-          ],
-          exactPlane: [
-            '-582990971763111/281474976710656',
-            '0',
-            '-664055765055779/281474976710656',
-            '-744602712737340909609862980905/39614081257132168796771975168',
-          ],
-        },
-        null,
-        {
-          plane: [-0.5550530090321097, 0, -0.8318149777230516, -18.7949952],
-          exactPlane: [
-            '-490441999420647/281474976710656',
-            '0',
-            '-734987459186865/281474976710656',
-            '-2978185868320836331610788592097/158456325028528675187087900672',
-          ],
-        },
-        {
-          plane: [
-            -0.4426209692994423, 0, -0.8967088030885066, -18.796579200000007,
-          ],
-          exactPlane: [
-            '-48892203454641/35184372088832',
-            '0',
-            '-792408354435839/281474976710656',
-            '-2978436863139682764809408428751/158456325028528675187087900672',
-          ],
-        },
-        null,
-        {
-          plane: [
-            -0.32103928115789765, 0, -0.9470658794157987, -18.79842383999999,
-          ],
-          exactPlane: [
-            '-283726776524341/281474976710656',
-            '0',
-            '-1673987981493613/562949953421312',
-            '-2978729158015081257564871516483/158456325028528675187087900672',
-          ],
-        },
-        null,
-        {
-          plane: [
-            -0.19493988616531657, 0, -0.9808151919611836, -18.795509279999994,
-          ],
-          exactPlane: [
-            '-172262685746921/281474976710656',
-            '0',
-            '-6933741986299615/2251799813685248',
-            '-47652277240774499915904151719797/2535301200456458802993406410752',
-          ],
-        },
-        null,
-        {
-          plane: [
-            -0.06575774946722471, 0, -0.9978356169154344, -18.791999999999998,
-          ],
-          exactPlane: [
-            '-7262054399135/35184372088832',
-            '0',
-            '-7052637016462197/2251799813685248',
-            '-21157911049386591/1125899906842624',
-          ],
-        },
-        null,
-        {
-          plane: [
-            0.06575774946722471, 0, -0.9978356169154344, -18.791999999999998,
-          ],
-          exactPlane: [
-            '7262054399135/35184372088832',
-            '0',
-            '-7052637016462197/2251799813685248',
-            '-21157911049386591/1125899906842624',
-          ],
-        },
-        null,
-        {
-          plane: [
-            0.19493988616531657, 0, -0.9808151919611836, -18.795509279999994,
-          ],
-          exactPlane: [
-            '172262685746921/281474976710656',
-            '0',
-            '-6933741986299615/2251799813685248',
-            '-47652277240774499915904151719797/2535301200456458802993406410752',
-          ],
-        },
-        null,
-        {
-          plane: [
-            0.32103928115789765, 0, -0.9470658794157987, -18.79842383999999,
-          ],
-          exactPlane: [
-            '283726776524341/281474976710656',
-            '0',
-            '-1673987981493613/562949953421312',
-            '-2978729158015081257564871516483/158456325028528675187087900672',
-          ],
-        },
-        null,
-        {
-          plane: [
-            0.4426209692994423, 0, -0.8967088030885066, -18.796579200000007,
-          ],
-          exactPlane: [
-            '48892203454641/35184372088832',
-            '0',
-            '-792408354435839/281474976710656',
-            '-2978436863139682764809408428751/158456325028528675187087900672',
-          ],
-        },
-        null,
-        {
-          plane: [0.5550530090321097, 0, -0.8318149777230516, -18.7949952],
-          exactPlane: [
-            '490441999420647/281474976710656',
-            '0',
-            '-734987459186865/281474976710656',
-            '-2978185868320836331610788592097/158456325028528675187087900672',
-          ],
-        },
-        {
-          plane: [
-            0.6597485283498933, 0, -0.7514864465445471, -18.796415039999992,
-          ],
-          exactPlane: [
-            '582990971763111/281474976710656',
-            '0',
-            '-664055765055779/281474976710656',
-            '-744602712737340909609862980905/39614081257132168796771975168',
-          ],
-        },
-        null,
-        {
-          plane: [
-            0.7514864465445471, 0, -0.6597485283498933, -18.796415039999992,
-          ],
-          exactPlane: [
-            '664055765055779/281474976710656',
-            '0',
-            '-582990971763111/281474976710656',
-            '-744602712737340909609862980905/39614081257132168796771975168',
-          ],
-        },
-        null,
-        {
-          plane: [0.8318149777230516, 0, -0.5550530090321097, -18.7949952],
-          exactPlane: [
-            '734987459186865/281474976710656',
-            '0',
-            '-490441999420647/281474976710656',
-            '-2978185868320836331610788592097/158456325028528675187087900672',
-          ],
-        },
-        {
-          plane: [
-            0.8967088030885066, 0, -0.4426209692994423, -18.796579200000007,
-          ],
-          exactPlane: [
-            '792408354435839/281474976710656',
-            '0',
-            '-48892203454641/35184372088832',
-            '-2978436863139682764809408428751/158456325028528675187087900672',
-          ],
-        },
-        null,
-        {
-          plane: [
-            0.9470658794157987, 0, -0.32103928115789765, -18.79842383999999,
-          ],
-          exactPlane: [
-            '1673987981493613/562949953421312',
-            '0',
-            '-283726776524341/281474976710656',
-            '-2978729158015081257564871516483/158456325028528675187087900672',
-          ],
-        },
-        null,
-        {
-          plane: [
-            0.9808151919611836, 0, -0.19493988616531657, -18.795509279999994,
-          ],
-          exactPlane: [
-            '6933741986299615/2251799813685248',
-            '0',
-            '-172262685746921/281474976710656',
-            '-47652277240774499915904151719797/2535301200456458802993406410752',
-          ],
-        },
-        null,
-        {
-          plane: [
-            0.9978356169154344, 0, -0.06575774946722471, -18.791999999999998,
-          ],
-          exactPlane: [
-            '7052637016462197/2251799813685248',
-            '0',
-            '-7262054399135/35184372088832',
-            '-21157911049386591/1125899906842624',
-          ],
-        },
-        null,
-        {
-          plane: [0, -1, 0, -18.791999999999998],
-          exactPlane: [
-            '0',
-            '-21157911049386591/4503599627370496',
-            '0',
-            '-21157911049386591/1125899906842624',
-          ],
-        },
-      ],
-      facets: [
-        { edge: 520 },
-        { edge: 522 },
-        { edge: 524 },
-        { edge: 526 },
-        { edge: 528 },
-        { edge: 530 },
-        { edge: 532 },
-        { edge: 534 },
-        { edge: 536 },
-        { edge: 538 },
-        { edge: 540 },
-        { edge: 542 },
-        { edge: 544 },
-        { edge: 546 },
-        { edge: 60 },
-        { edge: 64 },
-        { edge: 70 },
-        { edge: 72 },
-        { edge: 78 },
-        { edge: 80 },
-        { edge: 86 },
-        { edge: 88 },
-        { edge: 548 },
-        { edge: 100 },
-        { edge: 102 },
-        { edge: 108 },
-        { edge: 110 },
-        { edge: 550 },
-        { edge: 122 },
-        { edge: 124 },
-        { edge: 130 },
-        { edge: 132 },
-        { edge: 138 },
-        { edge: 140 },
-        { edge: 146 },
-        { edge: 148 },
-        { edge: 154 },
-        { edge: 156 },
-        { edge: 162 },
-        { edge: 164 },
-        { edge: 170 },
-        { edge: 172 },
-        { edge: 178 },
-        { edge: 180 },
-        { edge: 552 },
-        { edge: 192 },
-        { edge: 194 },
-        { edge: 200 },
-        { edge: 202 },
-        { edge: 554 },
-        { edge: 214 },
-        { edge: 216 },
-        { edge: 222 },
-        { edge: 224 },
-        { edge: 230 },
-        { edge: 232 },
-        { edge: 238 },
-        { edge: 240 },
-        { edge: 246 },
-        { edge: 248 },
-        { edge: 254 },
-        { edge: 256 },
-        { edge: 262 },
-        { edge: 264 },
-        { edge: 270 },
-        { edge: 272 },
-        { edge: 556 },
-        { edge: 284 },
-        { edge: 286 },
-        { edge: 292 },
-        { edge: 294 },
-        { edge: 558 },
-        { edge: 306 },
-        { edge: 308 },
-        { edge: 314 },
-        { edge: 316 },
-        { edge: 322 },
-        { edge: 324 },
-        { edge: 330 },
-        { edge: 332 },
-        { edge: 338 },
-        { edge: 340 },
-        { edge: 346 },
-        { edge: 348 },
-        { edge: 354 },
-        { edge: 356 },
-        { edge: 362 },
-        { edge: 364 },
-        { edge: 560 },
-        { edge: 376 },
-        { edge: 378 },
-        { edge: 384 },
-        { edge: 386 },
-        { edge: 562 },
-        { edge: 398 },
-        { edge: 400 },
-        { edge: 406 },
-        { edge: 408 },
-        { edge: 414 },
-        { edge: 416 },
-        { edge: 420 },
-        { edge: 422 },
-        { edge: 426 },
-        { edge: 428 },
-        { edge: 430 },
-        { edge: 432 },
-        { edge: 434 },
-        { edge: 436 },
-        { edge: 438 },
-        { edge: 440 },
-        { edge: 442 },
-        { edge: 444 },
-        { edge: 446 },
-        { edge: 448 },
-        { edge: 450 },
-        { edge: 452 },
-        { edge: 454 },
-        { edge: 456 },
-        { edge: 458 },
-        { edge: 460 },
-        { edge: 462 },
-        { edge: 464 },
-        { edge: 466 },
-        { edge: 468 },
-        { edge: 470 },
-        { edge: 472 },
-        { edge: 474 },
-        { edge: 476 },
-        { edge: 478 },
-        { edge: 480 },
-        { edge: 482 },
-        { edge: 484 },
-        { edge: 486 },
-        { edge: 488 },
-        { edge: 490 },
-        { edge: 492 },
-        { edge: 494 },
-        { edge: 496 },
-        { edge: 498 },
-        { edge: 500 },
-        { edge: 502 },
-        { edge: 504 },
-        { edge: 506 },
-        { edge: 508 },
-        { edge: 510 },
-        { edge: 512 },
-        { edge: 514 },
-        { edge: 516 },
-        { edge: 518 },
-        { edge: 519 },
-        { edge: 521 },
-        { edge: 523 },
-        { edge: 525 },
-        { edge: 527 },
-        { edge: 529 },
-        { edge: 531 },
-        { edge: 533 },
-        { edge: 535 },
-        { edge: 537 },
-        { edge: 539 },
-        { edge: 541 },
-        { edge: 543 },
-        { edge: 545 },
-        { edge: 547 },
-        { edge: 549 },
-        { edge: 551 },
-        { edge: 553 },
-        { edge: 555 },
-        { edge: 557 },
-        { edge: 559 },
-        { edge: 561 },
-        { edge: 563 },
-      ],
+      isLazy: true,
+      provenance: 'algorithm/cgal/fromSurfaceMeshToLazyGraph',
+      serializedSurfaceMesh:
+        '113\n' +
+        '-6 4 6\n' +
+        '6 4 6\n' +
+        '6 4 -6\n' +
+        '-6 4 -6\n' +
+        '-6 8 6\n' +
+        '6 8 6\n' +
+        '-6 8 -6\n' +
+        '6 8 -6\n' +
+        '10 8 10\n' +
+        '-10 8 10\n' +
+        '-10 8 -10\n' +
+        '10 8 -10\n' +
+        '-10 0 -10\n' +
+        '10 0 -10\n' +
+        '10 0 10\n' +
+        '-10 0 10\n' +
+        '837162875732833/140737488355328 -4 7052637016462197/9007199254740992\n' +
+        '6 0 0\n' +
+        '837162875732833/140737488355328 0 7052637016462197/9007199254740992\n' +
+        '6 -4 0\n' +
+        '6525040320115743/1125899906842624 -4 3496594750690453/2251799813685248\n' +
+        '6525040320115743/1125899906842624 0 3496594750690453/2251799813685248\n' +
+        '3120656771795701/562949953421312 -4 2585291366092033/1125899906842624\n' +
+        '3120656771795701/562949953421312 0 2585291366092033/1125899906842624\n' +
+        '2925087957977137/562949953421312 -4 3\n' +
+        '2925087957977137/562949953421312 0 3\n' +
+        '5359733916533627/1125899906842624 -4 4112687179714737/1125899906842624\n' +
+        '5359733916533627/1125899906842624 0 4112687179714737/1125899906842624\n' +
+        '1194185736192629/281474976710656 -4 1194185736192629/281474976710656\n' +
+        '1194185736192629/281474976710656 0 1194185736192629/281474976710656\n' +
+        '4112687179714737/1125899906842624 -4 5359733916533627/1125899906842624\n' +
+        '4112687179714737/1125899906842624 0 5359733916533627/1125899906842624\n' +
+        '3 -4 2925087957977137/562949953421312\n' +
+        '3 0 2925087957977137/562949953421312\n' +
+        '2585291366092033/1125899906842624 -4 3120656771795701/562949953421312\n' +
+        '2585291366092033/1125899906842624 0 3120656771795701/562949953421312\n' +
+        '3496594750690453/2251799813685248 -4 6525040320115743/1125899906842624\n' +
+        '3496594750690453/2251799813685248 0 6525040320115743/1125899906842624\n' +
+        '7052637016462197/9007199254740992 -4 837162875732833/140737488355328\n' +
+        '7052637016462197/9007199254740992 0 837162875732833/140737488355328\n' +
+        '0 -4 6\n' +
+        '0 0 6\n' +
+        '-7052637016462197/9007199254740992 -4 837162875732833/140737488355328\n' +
+        '-7052637016462197/9007199254740992 0 837162875732833/140737488355328\n' +
+        '-3496594750690453/2251799813685248 -4 6525040320115743/1125899906842624\n' +
+        '-3496594750690453/2251799813685248 0 6525040320115743/1125899906842624\n' +
+        '-2585291366092033/1125899906842624 -4 3120656771795701/562949953421312\n' +
+        '-2585291366092033/1125899906842624 0 3120656771795701/562949953421312\n' +
+        '-3 -4 2925087957977137/562949953421312\n' +
+        '-3 0 2925087957977137/562949953421312\n' +
+        '-4112687179714737/1125899906842624 -4 5359733916533627/1125899906842624\n' +
+        '-4112687179714737/1125899906842624 0 5359733916533627/1125899906842624\n' +
+        '-1194185736192629/281474976710656 -4 1194185736192629/281474976710656\n' +
+        '-1194185736192629/281474976710656 0 1194185736192629/281474976710656\n' +
+        '-5359733916533627/1125899906842624 -4 4112687179714737/1125899906842624\n' +
+        '-5359733916533627/1125899906842624 0 4112687179714737/1125899906842624\n' +
+        '-2925087957977137/562949953421312 -4 3\n' +
+        '-2925087957977137/562949953421312 0 3\n' +
+        '-3120656771795701/562949953421312 -4 2585291366092033/1125899906842624\n' +
+        '-3120656771795701/562949953421312 0 2585291366092033/1125899906842624\n' +
+        '-6525040320115743/1125899906842624 -4 3496594750690453/2251799813685248\n' +
+        '-6525040320115743/1125899906842624 0 3496594750690453/2251799813685248\n' +
+        '-837162875732833/140737488355328 -4 7052637016462197/9007199254740992\n' +
+        '-837162875732833/140737488355328 0 7052637016462197/9007199254740992\n' +
+        '-6 -4 0\n' +
+        '-6 0 0\n' +
+        '-837162875732833/140737488355328 -4 -7052637016462197/9007199254740992\n' +
+        '-837162875732833/140737488355328 0 -7052637016462197/9007199254740992\n' +
+        '-6525040320115743/1125899906842624 -4 -3496594750690453/2251799813685248\n' +
+        '-6525040320115743/1125899906842624 0 -3496594750690453/2251799813685248\n' +
+        '-3120656771795701/562949953421312 -4 -2585291366092033/1125899906842624\n' +
+        '-3120656771795701/562949953421312 0 -2585291366092033/1125899906842624\n' +
+        '-2925087957977137/562949953421312 -4 -3\n' +
+        '-2925087957977137/562949953421312 0 -3\n' +
+        '-5359733916533627/1125899906842624 -4 -4112687179714737/1125899906842624\n' +
+        '-5359733916533627/1125899906842624 0 -4112687179714737/1125899906842624\n' +
+        '-1194185736192629/281474976710656 -4 -1194185736192629/281474976710656\n' +
+        '-1194185736192629/281474976710656 0 -1194185736192629/281474976710656\n' +
+        '-4112687179714737/1125899906842624 -4 -5359733916533627/1125899906842624\n' +
+        '-4112687179714737/1125899906842624 0 -5359733916533627/1125899906842624\n' +
+        '-3 -4 -2925087957977137/562949953421312\n' +
+        '-3 0 -2925087957977137/562949953421312\n' +
+        '-2585291366092033/1125899906842624 -4 -3120656771795701/562949953421312\n' +
+        '-2585291366092033/1125899906842624 0 -3120656771795701/562949953421312\n' +
+        '-3496594750690453/2251799813685248 -4 -6525040320115743/1125899906842624\n' +
+        '-3496594750690453/2251799813685248 0 -6525040320115743/1125899906842624\n' +
+        '-7052637016462197/9007199254740992 -4 -837162875732833/140737488355328\n' +
+        '-7052637016462197/9007199254740992 0 -837162875732833/140737488355328\n' +
+        '0 -4 -6\n' +
+        '0 0 -6\n' +
+        '7052637016462197/9007199254740992 -4 -837162875732833/140737488355328\n' +
+        '7052637016462197/9007199254740992 0 -837162875732833/140737488355328\n' +
+        '3496594750690453/2251799813685248 -4 -6525040320115743/1125899906842624\n' +
+        '3496594750690453/2251799813685248 0 -6525040320115743/1125899906842624\n' +
+        '2585291366092033/1125899906842624 -4 -3120656771795701/562949953421312\n' +
+        '2585291366092033/1125899906842624 0 -3120656771795701/562949953421312\n' +
+        '3 -4 -2925087957977137/562949953421312\n' +
+        '3 0 -2925087957977137/562949953421312\n' +
+        '4112687179714737/1125899906842624 -4 -5359733916533627/1125899906842624\n' +
+        '4112687179714737/1125899906842624 0 -5359733916533627/1125899906842624\n' +
+        '1194185736192629/281474976710656 -4 -1194185736192629/281474976710656\n' +
+        '1194185736192629/281474976710656 0 -1194185736192629/281474976710656\n' +
+        '5359733916533627/1125899906842624 -4 -4112687179714737/1125899906842624\n' +
+        '5359733916533627/1125899906842624 0 -4112687179714737/1125899906842624\n' +
+        '2925087957977137/562949953421312 -4 -3\n' +
+        '2925087957977137/562949953421312 0 -3\n' +
+        '3120656771795701/562949953421312 -4 -2585291366092033/1125899906842624\n' +
+        '3120656771795701/562949953421312 0 -2585291366092033/1125899906842624\n' +
+        '6525040320115743/1125899906842624 -4 -3496594750690453/2251799813685248\n' +
+        '6525040320115743/1125899906842624 0 -3496594750690453/2251799813685248\n' +
+        '837162875732833/140737488355328 -4 -7052637016462197/9007199254740992\n' +
+        '837162875732833/140737488355328 0 -7052637016462197/9007199254740992\n' +
+        '0 -4 0\n' +
+        '\n' +
+        '172\n' +
+        '3 1 3 0\n' +
+        '3 4 1 0\n' +
+        '3 6 0 3\n' +
+        '3 7 3 2\n' +
+        '3 5 2 1\n' +
+        '3 5 9 8\n' +
+        '3 4 10 9\n' +
+        '3 6 11 10\n' +
+        '3 7 8 11\n' +
+        '3 13 15 12\n' +
+        '3 8 15 14\n' +
+        '3 9 12 15\n' +
+        '3 10 13 12\n' +
+        '3 11 14 13\n' +
+        '3 18 16 17\n' +
+        '3 19 17 16\n' +
+        '3 21 20 18\n' +
+        '3 16 18 20\n' +
+        '3 23 22 21\n' +
+        '3 20 21 22\n' +
+        '3 25 24 23\n' +
+        '3 22 23 24\n' +
+        '3 24 27 26\n' +
+        '3 29 28 27\n' +
+        '3 26 27 28\n' +
+        '3 31 30 29\n' +
+        '3 28 29 30\n' +
+        '3 30 33 32\n' +
+        '3 35 34 33\n' +
+        '3 32 33 34\n' +
+        '3 37 36 35\n' +
+        '3 34 35 36\n' +
+        '3 39 38 37\n' +
+        '3 36 37 38\n' +
+        '3 41 40 39\n' +
+        '3 38 39 40\n' +
+        '3 43 42 41\n' +
+        '3 40 41 42\n' +
+        '3 45 44 43\n' +
+        '3 42 43 44\n' +
+        '3 47 46 45\n' +
+        '3 44 45 46\n' +
+        '3 49 48 47\n' +
+        '3 46 47 48\n' +
+        '3 48 51 50\n' +
+        '3 53 52 51\n' +
+        '3 50 51 52\n' +
+        '3 55 54 53\n' +
+        '3 52 53 54\n' +
+        '3 54 57 56\n' +
+        '3 59 58 57\n' +
+        '3 56 57 58\n' +
+        '3 61 60 59\n' +
+        '3 58 59 60\n' +
+        '3 63 62 61\n' +
+        '3 60 61 62\n' +
+        '3 65 64 63\n' +
+        '3 62 63 64\n' +
+        '3 67 66 65\n' +
+        '3 64 65 66\n' +
+        '3 69 68 67\n' +
+        '3 66 67 68\n' +
+        '3 71 70 69\n' +
+        '3 68 69 70\n' +
+        '3 73 72 71\n' +
+        '3 70 71 72\n' +
+        '3 72 75 74\n' +
+        '3 77 76 75\n' +
+        '3 74 75 76\n' +
+        '3 79 78 77\n' +
+        '3 76 77 78\n' +
+        '3 78 81 80\n' +
+        '3 83 82 81\n' +
+        '3 80 81 82\n' +
+        '3 85 84 83\n' +
+        '3 82 83 84\n' +
+        '3 87 86 85\n' +
+        '3 84 85 86\n' +
+        '3 89 88 87\n' +
+        '3 86 87 88\n' +
+        '3 91 90 89\n' +
+        '3 88 89 90\n' +
+        '3 93 92 91\n' +
+        '3 90 91 92\n' +
+        '3 95 94 93\n' +
+        '3 92 93 94\n' +
+        '3 97 96 95\n' +
+        '3 94 95 96\n' +
+        '3 96 99 98\n' +
+        '3 101 100 99\n' +
+        '3 98 99 100\n' +
+        '3 103 102 101\n' +
+        '3 100 101 102\n' +
+        '3 102 105 104\n' +
+        '3 107 106 105\n' +
+        '3 104 105 106\n' +
+        '3 109 108 107\n' +
+        '3 106 107 108\n' +
+        '3 111 110 109\n' +
+        '3 108 109 110\n' +
+        '3 17 19 111\n' +
+        '3 110 111 19\n' +
+        '3 112 19 16\n' +
+        '3 112 16 20\n' +
+        '3 112 20 22\n' +
+        '3 112 22 24\n' +
+        '3 112 24 26\n' +
+        '3 112 26 28\n' +
+        '3 112 28 30\n' +
+        '3 112 30 32\n' +
+        '3 112 32 34\n' +
+        '3 112 34 36\n' +
+        '3 112 36 38\n' +
+        '3 112 38 40\n' +
+        '3 112 40 42\n' +
+        '3 112 42 44\n' +
+        '3 112 44 46\n' +
+        '3 112 46 48\n' +
+        '3 112 48 50\n' +
+        '3 112 50 52\n' +
+        '3 112 52 54\n' +
+        '3 112 54 56\n' +
+        '3 112 56 58\n' +
+        '3 112 58 60\n' +
+        '3 112 60 62\n' +
+        '3 112 62 64\n' +
+        '3 112 64 66\n' +
+        '3 112 66 68\n' +
+        '3 112 68 70\n' +
+        '3 112 70 72\n' +
+        '3 112 72 74\n' +
+        '3 112 74 76\n' +
+        '3 112 76 78\n' +
+        '3 112 78 80\n' +
+        '3 112 80 82\n' +
+        '3 112 82 84\n' +
+        '3 112 84 86\n' +
+        '3 112 86 88\n' +
+        '3 112 88 90\n' +
+        '3 112 90 92\n' +
+        '3 112 92 94\n' +
+        '3 112 94 96\n' +
+        '3 112 96 98\n' +
+        '3 112 98 100\n' +
+        '3 112 100 102\n' +
+        '3 112 102 104\n' +
+        '3 112 104 106\n' +
+        '3 112 106 108\n' +
+        '3 112 108 110\n' +
+        '3 112 110 19\n' +
+        '3 3 1 2\n' +
+        '3 1 4 5\n' +
+        '3 0 6 4\n' +
+        '3 3 7 6\n' +
+        '3 2 5 7\n' +
+        '3 9 5 4\n' +
+        '3 10 4 6\n' +
+        '3 11 6 7\n' +
+        '3 8 7 5\n' +
+        '3 15 13 14\n' +
+        '3 15 8 9\n' +
+        '3 12 9 10\n' +
+        '3 13 10 11\n' +
+        '3 14 11 8\n' +
+        '3 27 24 25\n' +
+        '3 33 30 31\n' +
+        '3 51 48 49\n' +
+        '3 57 54 55\n' +
+        '3 75 72 73\n' +
+        '3 81 78 79\n' +
+        '3 99 96 97\n' +
+        '3 105 102 103\n' +
+        '',
+      hash: 'BUWkVIwehYYeiAi2MK/RcNNj4jDsp83YNJVbyJghTVE=',
     },
     matrix: [
       0.4,
@@ -1915,5 +372,11 @@ test('Load a file', async (t) => {
       '0',
       '1',
     ],
+    cache: {
+      boundingBox: [
+        [-4.0000000000000036, -4.000000000000003, -3.2000000000000024],
+        [4.0000000000000036, 4.000000000000003, 1.6000000000000012],
+      ],
+    },
   });
 });

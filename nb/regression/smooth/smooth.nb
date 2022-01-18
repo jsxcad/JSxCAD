@@ -6,16 +6,16 @@ const fused = Box(20, 20, 20)
   .md('fused');
 
 const remeshed = fused
-  .remesh({ method: 'isotropic', lengths: [10, 5, 2, 1] })
+  .remesh()
   .view(1, { wireframe: true })
   .md('remeshed');
 
 const smoothed = remeshed
-  .smooth({ method: 'shape', iterations: 3 })
+  .smooth()
   .view(1)
   .md('smoothed');
 
 const simplified = smoothed
-  .simplify({ method: 'approximate' })
+  .simplify()
   .view(1)
   .md('simplified');

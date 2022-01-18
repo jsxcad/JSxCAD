@@ -2,7 +2,7 @@ import Shape from './Shape.js';
 import { demesh as demeshGeometry } from '@jsxcad/geometry';
 
 // TODO: Rename clean at the lower levels.
-export const demesh = () => (shape) =>
-  Shape.fromGeometry(demeshGeometry(shape.toGeometry()));
+export const demesh = (options) => (shape) =>
+  Shape.fromGeometry(demeshGeometry(shape.toGeometry(), options));
 
 Shape.registerMethod('demesh', demesh);

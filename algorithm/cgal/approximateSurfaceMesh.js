@@ -1,7 +1,9 @@
 import { getCgal } from './getCgal.js';
+import { toCgalTransformFromJsTransform } from './transform.js';
 
 export const approximateSurfaceMesh = (
   mesh,
+  matrix,
   {
     iterations = 1,
     relaxationSteps = 5,
@@ -17,6 +19,7 @@ export const approximateSurfaceMesh = (
   try {
     const result = getCgal().ApproximateSurfaceMesh(
       mesh,
+      toCgalTransformFromJsTransform(matrix),
       iterations,
       relaxationSteps,
       proxies,

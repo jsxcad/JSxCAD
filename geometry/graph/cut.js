@@ -47,7 +47,10 @@ export const cut = (targetGraphs, targetSegments, sourceGraphs) => {
           return targetGraphs[index];
         case STATUS_OK:
           mesh.provenance = 'cut';
-          return taggedGraph({ tags, matrix }, fromSurfaceMeshLazy(mesh));
+          return taggedGraph(
+            { tags, matrix, provenance: 'geometry/graph/cut' },
+            fromSurfaceMeshLazy(mesh)
+          );
       }
     }
   );

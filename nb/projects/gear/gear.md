@@ -166,7 +166,7 @@ const solar = Arc(20)
     )
   )
   .rz(seq((a) => a, { by: 1 / 16 }))
-  .fuse({ isPlanar: true })
+  .fuse()
   .gridView()
   .md(
     `We simulate the gear motion to cut a single tooth, then rotate it around.`
@@ -219,6 +219,7 @@ const planetaryDesign3 = planetaryDesign2
 ```JavaScript
 const planetaryDesign4a =
     solar
+      .log()
       .ez(-2);
 ```
 

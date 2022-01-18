@@ -16,7 +16,10 @@ export const fuse = (sources) => {
   }));
   const { fusedMeshes } = fuseSurfaceMeshes(sources);
   const fusedGeometries = fusedMeshes.map(({ mesh }) =>
-    taggedGraph({}, fromSurfaceMeshLazy(mesh))
+    taggedGraph(
+      { provenance: 'geometry/graph/fuse' },
+      fromSurfaceMeshLazy(mesh)
+    )
   );
   deletePendingSurfaceMeshes();
   return fusedGeometries;

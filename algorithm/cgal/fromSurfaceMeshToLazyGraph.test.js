@@ -103,5 +103,6 @@ test('FromSurfaceMeshToLazyGraph', (t) => {
     isClosed: true,
     isEmpty: false,
     isLazy: true,
+    provenance: 'algorithm/cgal/fromSurfaceMeshToLazyGraph',
   });
 });

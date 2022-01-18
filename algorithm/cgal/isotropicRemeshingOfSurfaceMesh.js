@@ -4,7 +4,7 @@ import { toCgalTransformFromJsTransform } from './transform.js';
 export const isotropicRemeshingOfSurfaceMesh = (
   mesh,
   matrix,
-  { iterations = 1, relaxationSteps = 1, targetEdgeLength = 1.0 },
+  { iterations = 1, relaxationSteps = 1, targetEdgeLength = 1.0, exact = true },
   selections
 ) => {
   try {
@@ -14,6 +14,7 @@ export const isotropicRemeshingOfSurfaceMesh = (
       iterations,
       relaxationSteps,
       targetEdgeLength,
+      exact,
       selections.length,
       (nth) => selections[nth].mesh,
       (nth) => toCgalTransformFromJsTransform(selections[nth].matrix)
