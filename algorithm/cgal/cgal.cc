@@ -58,7 +58,9 @@
 #include <CGAL/Surface_mesh.h>
 #include <CGAL/Surface_mesh_approximation/approximate_triangle_mesh.h>
 #include <CGAL/Surface_mesh_default_triangulation_3.h>
+#include <CGAL/Surface_mesh_simplification/Policies/Edge_collapse/Constrained_placement.h>
 #include <CGAL/Surface_mesh_simplification/Policies/Edge_collapse/Count_ratio_stop_predicate.h>
+#include <CGAL/Surface_mesh_simplification/Policies/Edge_collapse/Count_stop_predicate.h>
 #include <CGAL/Surface_mesh_simplification/edge_collapse.h>
 #include <CGAL/Unique_hash_map.h>
 #include <CGAL/approximated_offset_2.h>
@@ -176,6 +178,81 @@ FT to_FT(const std::string& v) {
 }
 
 FT to_FT(const double v) { return FT(v); }
+
+Plane unitPlane(const Plane& p) {
+  Vector normal = p.orthogonal_vector();
+  // We can handle the axis aligned planes exactly.
+  if (normal.direction() == Vector(0, 0, 1).direction()) {
+    return Plane(p.point(), Vector(0, 0, 1));
+  } else if (normal.direction() == Vector(0, 0, -1).direction()) {
+    return Plane(p.point(), Vector(0, 0, -1));
+  } else if (normal.direction() == Vector(0, 1, 0).direction()) {
+    return Plane(p.point(), Vector(0, 1, 0));
+  } else if (normal.direction() == Vector(0, -1, 0).direction()) {
+    return Plane(p.point(), Vector(0, -1, 0));
+  } else if (normal.direction() == Vector(1, 0, 0).direction()) {
+    return Plane(p.point(), Vector(1, 0, 0));
+  } else if (normal.direction() == Vector(-1, 0, 0).direction()) {
+    return Plane(p.point(), Vector(-1, 0, 0));
+  } else {
+    // But the general case requires an approximation.
+    Vector unit_normal =
+        normal / CGAL_NTS approximate_sqrt(normal.squared_length());
+    return Plane(p.point(), unit_normal);
+  }
+}
+
+Vector unitVector(const Vector& vector) {
+  // We can handle the axis aligned planes exactly.
+  if (vector.direction() == Vector(0, 0, 1).direction()) {
+    return Vector(0, 0, 1);
+  } else if (vector.direction() == Vector(0, 0, -1).direction()) {
+    return Vector(0, 0, -1);
+  } else if (vector.direction() == Vector(0, 1, 0).direction()) {
+    return Vector(0, 1, 0);
+  } else if (vector.direction() == Vector(0, -1, 0).direction()) {
+    return Vector(0, -1, 0);
+  } else if (vector.direction() == Vector(1, 0, 0).direction()) {
+    return Vector(1, 0, 0);
+  } else if (vector.direction() == Vector(-1, 0, 0).direction()) {
+    return Vector(-1, 0, 0);
+  } else {
+    // But the general case requires an approximation.
+    Vector unit_vector =
+        vector / CGAL_NTS approximate_sqrt(vector.squared_length());
+    return unit_vector;
+  }
+}
+
+Plane PlaneOfSurfaceMeshFacet(const Surface_mesh& mesh, Face_index facet) {
+  const auto h = mesh.halfedge(facet);
+  const Plane plane(mesh.point(mesh.source(h)),
+                    mesh.point(mesh.source(mesh.next(h))),
+                    mesh.point(mesh.source(mesh.next(mesh.next(h)))));
+  return plane;
+}
+
+bool SomePlaneOfSurfaceMesh(Plane& plane, const Surface_mesh& mesh) {
+  for (const auto& facet : mesh.faces()) {
+    plane = PlaneOfSurfaceMeshFacet(mesh, facet);
+    return true;
+  }
+  return false;
+}
+
+Vector NormalOfSurfaceMeshFacet(const Surface_mesh& mesh, Face_index facet) {
+  const auto h = mesh.halfedge(facet);
+  return CGAL::normal(mesh.point(mesh.source(h)),
+                      mesh.point(mesh.source(mesh.next(h))),
+                      mesh.point(mesh.source(mesh.next(mesh.next(h)))));
+}
+
+Vector SomeNormalOfSurfaceMesh(const Surface_mesh& mesh) {
+  for (const auto& facet : mesh.faces()) {
+    return NormalOfSurfaceMeshFacet(mesh, facet);
+  }
+  return CGAL::NULL_VECTOR;
+}
 
 class SurfaceMeshQuery {
   typedef CGAL::AABB_face_graph_triangle_primitive<Surface_mesh> Primitive;
@@ -715,10 +792,6 @@ const Surface_mesh* SmoothSurfaceMesh(const Surface_mesh* input,
                                       size_t selection_count,
                                       emscripten::val getMesh,
                                       emscripten::val getTransform) {
-  std::cout << "SmoothSurfaceMesh iterations: " << iterations
-            << " safe: " << safe << " selection_count: " << selection_count
-            << std::endl;
-
   typedef CGAL::Simple_cartesian<double> Cartesian_kernel;
   typedef Cartesian_kernel::Point_3 Cartesian_point;
   typedef CGAL::Surface_mesh<Cartesian_point> Cartesian_surface_mesh;
@@ -752,30 +825,27 @@ const Surface_mesh* SmoothSurfaceMesh(const Surface_mesh* input,
   size_t unconstrained_edge_count = 0;
   std::set<Edge_index> constrained_edges;
 
-  for (const Vertex_index vertex : vertices(cartesian_mesh)) {
-    const Cartesian_point& p = cartesian_mesh.point(vertex);
-    double x = p.x();
-    double y = p.y();
-    double z = p.z();
-    bool contained = false;
-    for (SurfaceMeshQuery& query : queries) {
-      if (query.isInsidePointApproximate(x, y, z)) {
-        contained = true;
-        break;
+  if (selection_count > 0) {
+    for (const Vertex_index vertex : vertices(cartesian_mesh)) {
+      const Cartesian_point& p = cartesian_mesh.point(vertex);
+      double x = p.x();
+      double y = p.y();
+      double z = p.z();
+      bool contained = false;
+      for (SurfaceMeshQuery& query : queries) {
+        if (query.isInsidePointApproximate(x, y, z)) {
+          contained = true;
+          break;
+        }
+      }
+      if (!contained) {
+        constrained_vertices.insert(vertex);
+        constrained_vertex_count++;
+      } else {
+        unconstrained_vertex_count++;
       }
     }
-    if (!contained) {
-      constrained_vertices.insert(vertex);
-      constrained_vertex_count++;
-    } else {
-      unconstrained_vertex_count++;
-    }
   }
-
-  std::cout << "Unconstrained Vertices: " << unconstrained_vertex_count
-            << std::endl;
-  std::cout << "Constrained Vertices: " << constrained_vertex_count
-            << std::endl;
 
   for (const Edge_index edge : edges(cartesian_mesh)) {
     const Halfedge_index halfedge = cartesian_mesh.halfedge(edge);
@@ -804,9 +874,6 @@ const Surface_mesh* SmoothSurfaceMesh(const Surface_mesh* input,
       unconstrained_edge_count++;
     }
   }
-
-  std::cout << "Unconstrained Edges: " << unconstrained_edge_count << std::endl;
-  std::cout << "Constrained Edges: " << constrained_edge_count << std::endl;
 
   CGAL::Boolean_property_map<std::set<Vertex_index>> constrained_vertex_map(
       constrained_vertices);
@@ -1205,6 +1272,112 @@ const Surface_mesh* ApproximateSurfaceMesh(
   return output.release();
 }
 
+template <typename Vertex_point_map>
+bool is_coplanar_edge(const Surface_mesh& m, const Vertex_point_map& p,
+                      const Halfedge_index e) {
+  auto a = p[m.source(e)];
+  auto b = p[m.target(e)];
+  auto c = p[m.target(m.next(e))];
+  typename Kernel::Plane_3 plane(a, b, c);
+  return plane.has_on(p[m.target(m.next(m.opposite(e)))]);
+}
+
+template <typename Vertex_point_map>
+bool is_collinear_edge(const Surface_mesh& m, const Vertex_point_map& p,
+                       const Halfedge_index e0, const Halfedge_index e1) {
+  // Assume that e0 and e1 share the same source vertex.
+  const auto& a = p[m.source(e0)];
+  const auto& b = p[m.target(e0)];
+  const auto& c = p[m.target(e1)];
+  return CGAL::collinear(a, b, c);
+}
+
+template <typename Vertex_point_map>
+bool is_safe_to_move(const Surface_mesh& m, const Vertex_point_map& p,
+                     const Halfedge_index start) {
+  for (Halfedge_index e = m.next_around_source(start); e != start;
+       e = m.next_around_source(e)) {
+    if (!is_coplanar_edge(m, p, e) && !is_collinear_edge(m, p, start, e)) {
+      return false;
+    }
+  }
+  return true;
+}
+
+template <typename Kernel>
+class Demesh_cost {
+ public:
+  Demesh_cost() {}
+  template <typename Profile>
+  boost::optional<typename Profile::FT> operator()(
+      const Profile& profile,
+      const boost::optional<typename Profile::Point>& placement) const {
+    /*
+        auto& m = profile.surface_mesh();
+        auto& p = profile.vertex_point_map();
+
+        // Collapsing an edge to its midpoint moves its same-face adjacent
+       edges.
+        // This is ok if (a) those adjacent edges are between coplanar facets,
+        // and (b) the edge is between two collinear extra-face adjacent edges.
+        // Collapsing an edge is ok if this edge is collinear, and all other
+       edges
+        // are coplanar with their neighbors.
+
+        // This won't clean up the mesh perfectly, since it requires both ends
+       of
+        // the edge to be mobile. But I think we should be able to collapse if
+       only
+        // one end of the edge is mobile, by collapsing to the immobile point,
+        // rather than the midpoint.
+
+        if (is_safe_to_move(m, p, profile.v0_v1())) {
+          return FT(0);
+        } else {
+          return boost::none;
+        }
+    */
+    // All options are equal priority -- delegate the decision to placement.
+    return FT(0);
+  }
+};
+
+template <class TM_>
+class Demesh_placement {
+ public:
+  typedef TM_ TM;
+
+  Demesh_placement() {}
+
+  template <typename Profile>
+  boost::optional<typename Profile::Point> operator()(
+      const Profile& profile) const {
+    auto& m = profile.surface_mesh();
+    auto& p = profile.vertex_point_map();
+    if (is_safe_to_move(m, p, profile.v0_v1())) {
+      return profile.p1();
+    } else if (is_safe_to_move(m, p, profile.v1_v0())) {
+      return profile.p0();
+    } else {
+      return boost::none;
+    }
+  }
+};
+
+const Surface_mesh* DemeshSurfaceMesh(const Surface_mesh* input) {
+  std::unique_ptr<Surface_mesh> mesh(new Surface_mesh(*input));
+
+  CGAL::Surface_mesh_simplification::Count_stop_predicate<Surface_mesh> stop(0);
+  Demesh_cost<Kernel> cost;
+  Demesh_placement<Surface_mesh> placement;
+
+  CGAL::Surface_mesh_simplification::edge_collapse(
+      *mesh, stop, CGAL::parameters::get_cost(cost).get_placement(placement));
+
+  Surface_mesh* result = mesh.release();
+  return result;
+}
+
 const Surface_mesh* SimplifySurfaceMesh(const Surface_mesh* input, double ratio,
                                         bool simplify_points, double eps) {
   typedef CGAL::Simple_cartesian<double> Cartesian_kernel;
@@ -1483,81 +1656,6 @@ struct Project {
   MAP map;
   Vector vector;
 };
-
-Plane unitPlane(const Plane& p) {
-  Vector normal = p.orthogonal_vector();
-  // We can handle the axis aligned planes exactly.
-  if (normal.direction() == Vector(0, 0, 1).direction()) {
-    return Plane(p.point(), Vector(0, 0, 1));
-  } else if (normal.direction() == Vector(0, 0, -1).direction()) {
-    return Plane(p.point(), Vector(0, 0, -1));
-  } else if (normal.direction() == Vector(0, 1, 0).direction()) {
-    return Plane(p.point(), Vector(0, 1, 0));
-  } else if (normal.direction() == Vector(0, -1, 0).direction()) {
-    return Plane(p.point(), Vector(0, -1, 0));
-  } else if (normal.direction() == Vector(1, 0, 0).direction()) {
-    return Plane(p.point(), Vector(1, 0, 0));
-  } else if (normal.direction() == Vector(-1, 0, 0).direction()) {
-    return Plane(p.point(), Vector(-1, 0, 0));
-  } else {
-    // But the general case requires an approximation.
-    Vector unit_normal =
-        normal / CGAL_NTS approximate_sqrt(normal.squared_length());
-    return Plane(p.point(), unit_normal);
-  }
-}
-
-Vector unitVector(const Vector& vector) {
-  // We can handle the axis aligned planes exactly.
-  if (vector.direction() == Vector(0, 0, 1).direction()) {
-    return Vector(0, 0, 1);
-  } else if (vector.direction() == Vector(0, 0, -1).direction()) {
-    return Vector(0, 0, -1);
-  } else if (vector.direction() == Vector(0, 1, 0).direction()) {
-    return Vector(0, 1, 0);
-  } else if (vector.direction() == Vector(0, -1, 0).direction()) {
-    return Vector(0, -1, 0);
-  } else if (vector.direction() == Vector(1, 0, 0).direction()) {
-    return Vector(1, 0, 0);
-  } else if (vector.direction() == Vector(-1, 0, 0).direction()) {
-    return Vector(-1, 0, 0);
-  } else {
-    // But the general case requires an approximation.
-    Vector unit_vector =
-        vector / CGAL_NTS approximate_sqrt(vector.squared_length());
-    return unit_vector;
-  }
-}
-
-Plane PlaneOfSurfaceMeshFacet(const Surface_mesh& mesh, Face_index facet) {
-  const auto h = mesh.halfedge(facet);
-  const Plane plane(mesh.point(mesh.source(h)),
-                    mesh.point(mesh.source(mesh.next(h))),
-                    mesh.point(mesh.source(mesh.next(mesh.next(h)))));
-  return plane;
-}
-
-bool SomePlaneOfSurfaceMesh(Plane& plane, const Surface_mesh& mesh) {
-  for (const auto& facet : mesh.faces()) {
-    plane = PlaneOfSurfaceMeshFacet(mesh, facet);
-    return true;
-  }
-  return false;
-}
-
-Vector NormalOfSurfaceMeshFacet(const Surface_mesh& mesh, Face_index facet) {
-  const auto h = mesh.halfedge(facet);
-  return CGAL::normal(mesh.point(mesh.source(h)),
-                      mesh.point(mesh.source(mesh.next(h))),
-                      mesh.point(mesh.source(mesh.next(mesh.next(h)))));
-}
-
-Vector SomeNormalOfSurfaceMesh(const Surface_mesh& mesh) {
-  for (const auto& facet : mesh.faces()) {
-    return NormalOfSurfaceMeshFacet(mesh, facet);
-  }
-  return CGAL::NULL_VECTOR;
-}
 
 class SurfaceMeshAndTransform {
  public:
@@ -5380,6 +5478,8 @@ EMSCRIPTEN_BINDINGS(module) {
   emscripten::function("GrowSurfaceMesh", &GrowSurfaceMesh,
                        emscripten::allow_raw_pointers());
   emscripten::function("ApproximateSurfaceMesh", &ApproximateSurfaceMesh,
+                       emscripten::allow_raw_pointers());
+  emscripten::function("DemeshSurfaceMesh", &DemeshSurfaceMesh,
                        emscripten::allow_raw_pointers());
   emscripten::function("SimplifySurfaceMesh", &SimplifySurfaceMesh,
                        emscripten::allow_raw_pointers());

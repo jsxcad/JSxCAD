@@ -11,15 +11,12 @@ import { toConcreteGeometry } from './../tagged/toConcreteGeometry.js';
 import { toSurfaceMesh } from './toSurfaceMesh.js';
 
 export const smooth = (geometry, options = {}, selections = []) => {
-  const { method = 'SmoothShape' } = options;
+  const { method = 'shape' } = options;
   const selectionGraphs = selections.flatMap((selection) =>
     getNonVoidGraphs(toConcreteGeometry(selection))
   );
   switch (method) {
     case 'mesh': {
-      if (selectionGraphs.length === 0) {
-        throw Error('No selections provided for SmoothMesh');
-      }
       return taggedGraph(
         { tags: geometry.tags, matrix: geometry.matrix },
         fromSurfaceMeshLazy(

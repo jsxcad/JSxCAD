@@ -200,3 +200,16 @@ Box(10)
   .remesh({ method: 'isotropic', iterations: 20, relaxationSteps: 10, targetEdgeLength: 0.5, }, Box(20, 20, 20))
   .smooth({ method: 'shape', iterations: 10, time: 1 }, Box(9, 20, 20))
   .view();
+
+Box(20, 20, 20)
+  .view(1, { wireframe: true })
+  .md('Original mesh')
+  .remesh()
+  .view(2, { wireframe: true })
+  .md('Isotropic remeshing')
+  .cut(Box([0, 10], [0, -10], [0, 10]))
+  .view(3, { wireframe: true })
+  .md('Cut')
+  .demesh()
+  .view(3, { wireframe: true })
+  .md('Cleaned mesh');

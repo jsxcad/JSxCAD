@@ -434,3 +434,34 @@ Box(10)
 ![Image](shape.md.50.png)
 
 ![Image](shape.md.51.png)
+
+```JavaScript
+Box(20, 20, 20)
+  .view(1, { wireframe: true })
+  .md('Original mesh')
+  .remesh()
+  .view(2, { wireframe: true })
+  .md('Isotropic remeshing')
+  .cut(Box([0, 10], [0, -10], [0, 10]))
+  .view(3, { wireframe: true })
+  .md('Cut')
+  .demesh()
+  .view(3, { wireframe: true })
+  .md('Cleaned mesh');
+```
+
+![Image](shape.md.52.png)
+
+Original mesh
+
+![Image](shape.md.53.png)
+
+Isotropic remeshing
+
+![Image](shape.md.54.png)
+
+Cut
+
+![Image](shape.md.55.png)
+
+Cleaned mesh

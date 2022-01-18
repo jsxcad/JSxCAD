@@ -40,6 +40,7 @@ export { computeNormalOfSurfaceMesh } from './computeNormalOfSurfaceMesh.js';
 export { cutOutOfSurfaceMeshes } from './cutOutOfSurfaceMeshes.js';
 export { cutSurfaceMeshes } from './cutSurfaceMeshes.js';
 export { deleteSurfaceMesh } from './deleteSurfaceMesh.js';
+export { demeshSurfaceMesh } from './demeshSurfaceMesh.js';
 export { deserializeSurfaceMesh } from './deserializeSurfaceMesh.js';
 export { disjointSurfaceMeshes } from './disjointSurfaceMeshes.js';
 export { doesSelfIntersectOfSurfaceMesh } from './doesSelfIntersectOfSurfaceMesh.js';
