@@ -5,7 +5,7 @@ import { toSurfaceMesh } from './toSurfaceMesh.js';
 
 export const prepareForSerialization = (geometry) => {
   const { graph } = geometry;
-  if (!graph.serializedSurfaceMesh) {
+  if (!graph.isEmpty && !graph.serializedSurfaceMesh) {
     measureBoundingBox(geometry);
     graph.serializedSurfaceMesh = serializeSurfaceMesh(toSurfaceMesh(graph));
     graph.hash = computeHash(graph);

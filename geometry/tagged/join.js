@@ -1,5 +1,7 @@
 import { rewrite, visit } from './visit.js';
 
+import { cached } from './cached.js';
+import { hash } from './hash.js';
 import { isNotTypeVoid } from './type.js';
 import { join as joinGraphs } from '../graph/join.js';
 import { toConcreteGeometry } from './toConcreteGeometry.js';
@@ -14,7 +16,14 @@ const collect = (geometry, out) => {
   visit(geometry, op);
 };
 
-export const join = (geometry, geometries) => {
+export const join = cached(
+  (geometry, geometries) => {
+    if (geometries.some((value) => value === undefined)) {
+      throw Error('undef');
+    }
+    return ['join', hash(geometry), ...geometries.map(hash)];
+  },
+  (geometry, geometries) => {
   const concreteGeometry = toConcreteGeometry(geometry);
   // Collect graphs for rewriting.
   const rewriteGraphs = [];
@@ -38,4 +47,4 @@ export const join = (geometry, geometries) => {
     }
   };
   return rewrite(concreteGeometry, update);
-};
+});

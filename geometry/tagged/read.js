@@ -1,11 +1,10 @@
-import { load, loadNonblocking } from './load.js';
-
-import { ErrorWouldBlock } from '@jsxcad/sys';
-
 import {
+  ErrorWouldBlock,
   read as readPath,
   readNonblocking as readPathNonblocking,
 } from '@jsxcad/sys';
+
+import { load, loadNonblocking } from './load.js';
 
 export const read = async (path, options) => {
   const readData = await readPath(path, options);

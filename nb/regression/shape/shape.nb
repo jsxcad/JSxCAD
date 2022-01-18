@@ -211,5 +211,5 @@ Box(20, 20, 20)
   .view(3, { wireframe: true })
   .md('Cut')
   .demesh()
-  .view(3, { wireframe: true })
+  .view(4, { wireframe: true })
   .md('Cleaned mesh');

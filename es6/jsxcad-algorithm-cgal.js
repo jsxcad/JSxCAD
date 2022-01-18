@@ -667,6 +667,7 @@ const SurfaceMeshQuery = (mesh, transform) => {
 
 const approximateSurfaceMesh = (
   mesh,
+  matrix,
   {
     iterations = 1,
     relaxationSteps = 5,
@@ -682,6 +683,7 @@ const approximateSurfaceMesh = (
   try {
     const result = getCgal().ApproximateSurfaceMesh(
       mesh,
+      toCgalTransformFromJsTransform(matrix),
       iterations,
       relaxationSteps,
       proxies,
@@ -1262,9 +1264,9 @@ const deleteSurfaceMesh = (mesh) => {
   }
 };
 
-const demeshSurfaceMesh = (mesh) => {
+const demeshSurfaceMesh = (mesh, matrix) => {
   try {
-    const result = getCgal().DemeshSurfaceMesh(mesh);
+    const result = getCgal().DemeshSurfaceMesh(mesh, toCgalTransformFromJsTransform(matrix));
     result.provenance = 'demesh';
     return result;
   } catch (error) {
@@ -1736,6 +1738,7 @@ const fromSurfaceMeshToLazyGraph = (mesh) => {
       isClosed: c.Surface_mesh__is_closed(mesh),
       isEmpty: c.Surface_mesh__is_empty(mesh),
       isLazy: true,
+      provenance: 'algorithm/cgal/fromSurfaceMeshToLazyGraph'
     };
     return graph;
   } catch (error) {
@@ -2329,11 +2332,13 @@ const separateSurfaceMesh = (
 
 const simplifySurfaceMesh = (
   mesh,
+  matrix,
   { stopRatio = 0.5, stopCount = 0, eps }
 ) => {
   try {
     const result = getCgal().SimplifySurfaceMesh(
       mesh,
+      toCgalTransformFromJsTransform(matrix),
       stopRatio,
       eps !== undefined,
       eps || 0

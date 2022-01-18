@@ -1,6 +1,6 @@
 export const taggedSegments = (
-  { tags = [], matrix, orientation },
+  { tags = [], matrix, provenance, orientation },
   segments
 ) => {
-  return { type: 'segments', tags, matrix, segments, orientation };
+  return { type: 'segments', tags, matrix, provenance, segments, orientation };
 };

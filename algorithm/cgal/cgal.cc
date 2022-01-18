@@ -651,8 +651,6 @@ const Surface_mesh* IsotropicRemeshingOfSurfaceMesh(
   typedef Cartesian_kernel::Point_3 Cartesian_point;
   typedef CGAL::Surface_mesh<Cartesian_point> Cartesian_surface_mesh;
 
-  const Transformation to_input_transform = input_transform->inverse();
-
   std::vector<SurfaceMeshQuery> queries;
   queries.reserve(selection_count);
 
@@ -661,13 +659,16 @@ const Surface_mesh* IsotropicRemeshingOfSurfaceMesh(
 
   Surface_mesh working_input(*input);
 
+  CGAL::Polygon_mesh_processing::transform(*input_transform, working_input,
+                                           CGAL::parameters::all_default());
+
   for (size_t nth = 0; nth < selection_count; nth++) {
     const Surface_mesh* mesh =
         getMesh(nth).as<const Surface_mesh*>(emscripten::allow_raw_pointers());
     const Transformation* transform =
         getTransform(nth).as<const Transformation*>(
             emscripten::allow_raw_pointers());
-    transforms.push_back(to_input_transform * *transform);
+    transforms.push_back(*transform);
     queries.emplace_back(mesh, &transforms.back());
     Surface_mesh working_selection(*mesh);
     std::cout << "Corefining" << std::endl;
@@ -782,6 +783,8 @@ const Surface_mesh* IsotropicRemeshingOfSurfaceMesh(
 
   Surface_mesh* output = new Surface_mesh();
   copy_face_graph(cartesian_mesh, *output);
+  CGAL::Polygon_mesh_processing::transform(input_transform->inverse(), *output,
+                                           CGAL::parameters::all_default());
   // This may require self intersection removal.
   return output;
 }
@@ -796,10 +799,13 @@ const Surface_mesh* SmoothSurfaceMesh(const Surface_mesh* input,
   typedef Cartesian_kernel::Point_3 Cartesian_point;
   typedef CGAL::Surface_mesh<Cartesian_point> Cartesian_surface_mesh;
 
-  Cartesian_surface_mesh cartesian_mesh;
-  copy_face_graph(*input, cartesian_mesh);
+  Surface_mesh working_input(*input);
 
-  const Transformation to_input_transform = input_transform->inverse();
+  CGAL::Polygon_mesh_processing::transform(*input_transform, working_input,
+                                           CGAL::parameters::all_default());
+
+  Cartesian_surface_mesh cartesian_mesh;
+  copy_face_graph(working_input, cartesian_mesh);
 
   std::vector<SurfaceMeshQuery> queries;
   queries.reserve(selection_count);
@@ -813,7 +819,7 @@ const Surface_mesh* SmoothSurfaceMesh(const Surface_mesh* input,
     const Transformation* transform =
         getTransform(nth).as<const Transformation*>(
             emscripten::allow_raw_pointers());
-    transforms.push_back(to_input_transform * *transform);
+    transforms.push_back(*transform);
     queries.emplace_back(mesh, &transforms.back());
   }
 
@@ -893,6 +899,8 @@ const Surface_mesh* SmoothSurfaceMesh(const Surface_mesh* input,
 
   Surface_mesh* output = new Surface_mesh();
   copy_face_graph(cartesian_mesh, *output);
+  CGAL::Polygon_mesh_processing::transform(input_transform->inverse(), *output,
+                                           CGAL::parameters::all_default());
   // This may require self intersection removal.
   return output;
 }
@@ -905,10 +913,12 @@ const Surface_mesh* SmoothShapeOfSurfaceMesh(
   typedef Cartesian_kernel::Point_3 Cartesian_point;
   typedef CGAL::Surface_mesh<Cartesian_point> Cartesian_surface_mesh;
 
-  Cartesian_surface_mesh cartesian_mesh;
-  copy_face_graph(*input, cartesian_mesh);
+  Surface_mesh working_input(*input);
+  CGAL::Polygon_mesh_processing::transform(*input_transform, working_input,
+                                           CGAL::parameters::all_default());
 
-  const Transformation to_input_transform = input_transform->inverse();
+  Cartesian_surface_mesh cartesian_mesh;
+  copy_face_graph(working_input, cartesian_mesh);
 
   std::vector<SurfaceMeshQuery> queries;
   queries.reserve(selection_count);
@@ -928,7 +938,7 @@ const Surface_mesh* SmoothShapeOfSurfaceMesh(
       const Transformation* transform =
           getTransform(nth).as<const Transformation*>(
               emscripten::allow_raw_pointers());
-      transforms.push_back(to_input_transform * *transform);
+      transforms.push_back(*transform);
       queries.emplace_back(mesh, &transforms.back());
     }
 
@@ -963,6 +973,8 @@ const Surface_mesh* SmoothShapeOfSurfaceMesh(
           .vertex_is_constrained_map(constrained_vertex_map));
   Surface_mesh* output = new Surface_mesh();
   copy_face_graph(cartesian_mesh, *output);
+  CGAL::Polygon_mesh_processing::transform(input_transform->inverse(), *output,
+                                           CGAL::parameters::all_default());
   // This may require self intersection removal.
   return output;
 }
@@ -1218,19 +1230,23 @@ const Surface_mesh* GrowSurfaceMesh(const Surface_mesh* input, double amount) {
 }
 
 const Surface_mesh* ApproximateSurfaceMesh(
-    const Surface_mesh* input, size_t iterations, size_t relaxation_steps,
-    size_t proxies, double minimum_error_drop, double subdivision_ratio,
-    bool relative_to_chord, bool with_dihedral_angle,
-    bool optimize_anchor_location, bool pca_plane) {
+    const Surface_mesh* input, const Transformation* transform,
+    size_t iterations, size_t relaxation_steps, size_t proxies,
+    double minimum_error_drop, double subdivision_ratio, bool relative_to_chord,
+    bool with_dihedral_angle, bool optimize_anchor_location, bool pca_plane) {
   // This depends on the standard prng.
   // Lock it down to be deterministic.
   std::srand(0);
+
+  Surface_mesh working_input(*input);
+  CGAL::Polygon_mesh_processing::transform(*transform, working_input,
+                                           CGAL::parameters::all_default());
 
   typedef CGAL::Exact_predicates_inexact_constructions_kernel Epick;
   std::vector<Epick::Point_3> epick_anchors;
   std::vector<std::array<std::size_t, 3>> triangles;
   CGAL::Surface_mesh<Epick::Point_3> epick_mesh;
-  copy_face_graph(*input, epick_mesh);
+  copy_face_graph(working_input, epick_mesh);
 
   if (proxies > 0) {
     CGAL::Surface_mesh_approximation::approximate_triangle_mesh(
@@ -1269,6 +1285,9 @@ const Surface_mesh* ApproximateSurfaceMesh(
   std::unique_ptr<Surface_mesh> output(new Surface_mesh());
   CGAL::Polygon_mesh_processing::polygon_soup_to_polygon_mesh(
       anchors, triangles, *output);
+
+  CGAL::Polygon_mesh_processing::transform(transform->inverse(), *output,
+                                           CGAL::parameters::all_default());
   return output.release();
 }
 
@@ -1312,31 +1331,6 @@ class Demesh_cost {
   boost::optional<typename Profile::FT> operator()(
       const Profile& profile,
       const boost::optional<typename Profile::Point>& placement) const {
-    /*
-        auto& m = profile.surface_mesh();
-        auto& p = profile.vertex_point_map();
-
-        // Collapsing an edge to its midpoint moves its same-face adjacent
-       edges.
-        // This is ok if (a) those adjacent edges are between coplanar facets,
-        // and (b) the edge is between two collinear extra-face adjacent edges.
-        // Collapsing an edge is ok if this edge is collinear, and all other
-       edges
-        // are coplanar with their neighbors.
-
-        // This won't clean up the mesh perfectly, since it requires both ends
-       of
-        // the edge to be mobile. But I think we should be able to collapse if
-       only
-        // one end of the edge is mobile, by collapsing to the immobile point,
-        // rather than the midpoint.
-
-        if (is_safe_to_move(m, p, profile.v0_v1())) {
-          return FT(0);
-        } else {
-          return boost::none;
-        }
-    */
     // All options are equal priority -- delegate the decision to placement.
     return FT(0);
   }
@@ -1364,8 +1358,12 @@ class Demesh_placement {
   }
 };
 
-const Surface_mesh* DemeshSurfaceMesh(const Surface_mesh* input) {
+const Surface_mesh* DemeshSurfaceMesh(const Surface_mesh* input,
+                                      const Transformation* transform) {
   std::unique_ptr<Surface_mesh> mesh(new Surface_mesh(*input));
+
+  CGAL::Polygon_mesh_processing::transform(*transform, *mesh,
+                                           CGAL::parameters::all_default());
 
   CGAL::Surface_mesh_simplification::Count_stop_predicate<Surface_mesh> stop(0);
   Demesh_cost<Kernel> cost;
@@ -1374,12 +1372,17 @@ const Surface_mesh* DemeshSurfaceMesh(const Surface_mesh* input) {
   CGAL::Surface_mesh_simplification::edge_collapse(
       *mesh, stop, CGAL::parameters::get_cost(cost).get_placement(placement));
 
+  CGAL::Polygon_mesh_processing::transform(transform->inverse(), *mesh,
+                                           CGAL::parameters::all_default());
+
   Surface_mesh* result = mesh.release();
   return result;
 }
 
-const Surface_mesh* SimplifySurfaceMesh(const Surface_mesh* input, double ratio,
-                                        bool simplify_points, double eps) {
+const Surface_mesh* SimplifySurfaceMesh(const Surface_mesh* input,
+                                        const Transformation* transform,
+                                        double ratio, bool simplify_points,
+                                        double eps) {
   typedef CGAL::Simple_cartesian<double> Cartesian_kernel;
   typedef Cartesian_kernel::Point_3 Cartesian_point;
   typedef CGAL::Surface_mesh<Cartesian_point> Cartesian_surface_mesh;
@@ -1389,6 +1392,8 @@ const Surface_mesh* SimplifySurfaceMesh(const Surface_mesh* input, double ratio,
       vertex_map;
 
   Surface_mesh working_copy(*input);
+  CGAL::Polygon_mesh_processing::transform(*transform, working_copy,
+                                           CGAL::parameters::all_default());
 
   if (simplify_points) {
     //
@@ -1419,6 +1424,8 @@ const Surface_mesh* SimplifySurfaceMesh(const Surface_mesh* input, double ratio,
   copy_face_graph(cartesian_surface_mesh, *output,
                   CGAL::parameters::vertex_to_vertex_map(
                       boost::make_assoc_property_map(vertex_map)));
+  CGAL::Polygon_mesh_processing::transform(transform->inverse(), *output,
+                                           CGAL::parameters::all_default());
 
   return output;
 }

@@ -1,6 +1,8 @@
 import { rewrite, visit } from './visit.js';
 
+import { cached } from './cached.js';
 import { clip as clipGraphs } from '../graph/clip.js';
+import { hash } from './hash.js';
 import { isNotTypeVoid } from './type.js';
 import { toConcreteGeometry } from './toConcreteGeometry.js';
 
@@ -29,7 +31,14 @@ const collectClips = (geometry, out) => {
   visit(geometry, op);
 };
 
-export const clip = (geometry, geometries) => {
+export const clip = cached(
+  (geometry, geometries) => {
+    if (geometries.some((value) => value === undefined)) {
+      throw Error('undef');
+    }
+    return ['clip', hash(geometry), ...geometries.map(hash)];
+  },
+  (geometry, geometries) => {
   const concreteGeometry = toConcreteGeometry(geometry);
   // Collect graphs for rewriting.
   const rewriteGraphs = [];
@@ -61,4 +70,4 @@ export const clip = (geometry, geometries) => {
     }
   };
   return rewrite(concreteGeometry, update);
-};
+});

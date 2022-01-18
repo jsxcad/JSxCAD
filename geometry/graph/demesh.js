@@ -7,5 +7,5 @@ import { toSurfaceMesh } from './toSurfaceMesh.js';
 export const demesh = (geometry) =>
   taggedGraph(
     { tags: geometry.tags, matrix: geometry.matrix },
-    fromSurfaceMeshLazy(demeshSurfaceMesh(toSurfaceMesh(geometry.graph)))
+    fromSurfaceMeshLazy(demeshSurfaceMesh(toSurfaceMesh(geometry.graph), geometry.matrix))
   );
