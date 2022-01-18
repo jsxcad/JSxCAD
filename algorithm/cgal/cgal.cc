@@ -637,19 +637,110 @@ const Surface_mesh* SubdivideSurfaceMesh(const Surface_mesh* input, int method,
   return mesh;
 }
 
+template <typename Target_kernel>
+void SelectVerticesAndFaces(
+    Surface_mesh& working_input,
+    CGAL::Surface_mesh<typename Target_kernel::Point_3>& target_mesh,
+    const Transformation* input_transform,
+    std::set<Vertex_index>& constrained_vertices,
+    std::set<Edge_index>& constrained_edges,
+    std::set<Face_index>& selected_faces, size_t selection_count,
+    emscripten::val getMesh, emscripten::val getTransform) {
+  std::vector<SurfaceMeshQuery> queries;
+  queries.reserve(selection_count);
+
+  std::vector<Transformation> transforms;
+  transforms.reserve(selection_count);
+
+  for (size_t nth = 0; nth < selection_count; nth++) {
+    const Surface_mesh* mesh =
+        getMesh(nth).as<const Surface_mesh*>(emscripten::allow_raw_pointers());
+    const Transformation* transform =
+        getTransform(nth).as<const Transformation*>(
+            emscripten::allow_raw_pointers());
+    transforms.push_back(*transform);
+    queries.emplace_back(mesh, &transforms.back());
+    Surface_mesh working_selection(*mesh);
+    CGAL::Polygon_mesh_processing::corefine(working_input, working_selection,
+                                            CGAL::parameters::all_default(),
+                                            CGAL::parameters::all_default());
+  }
+
+  typedef typename Target_kernel::Point_3 Target_point;
+
+  if ((void*)&working_input != (void*)&target_mesh) {
+    copy_face_graph(working_input, target_mesh);
+  }
+
+  if (selection_count > 0) {
+    for (const Vertex_index vertex : vertices(target_mesh)) {
+      const Target_point& p = target_mesh.point(vertex);
+      double x = CGAL::to_double(p.x());
+      double y = CGAL::to_double(p.y());
+      double z = CGAL::to_double(p.z());
+      bool contained = false;
+      for (SurfaceMeshQuery& query : queries) {
+        if (!query.isOutsidePointApproximate(x, y, z)) {
+          contained = true;
+          break;
+        }
+      }
+      if (!contained) {
+        constrained_vertices.insert(vertex);
+      } else {
+      }
+    }
+
+    for (const Face_index face : faces(target_mesh)) {
+      bool contained = true;
+      for (const Vertex_index vertex :
+           vertices_around_face(halfedge(face, target_mesh), target_mesh)) {
+        if (constrained_vertices.find(vertex) != constrained_vertices.end()) {
+          contained = false;
+          break;
+        }
+      }
+      if (contained) {
+        selected_faces.insert(face);
+      }
+    }
+  } else {
+    selected_faces.insert(faces(target_mesh).begin(), faces(target_mesh).end());
+  }
+
+  for (const Edge_index edge : edges(target_mesh)) {
+    const Halfedge_index halfedge = target_mesh.halfedge(edge);
+    const Target_point& s = target_mesh.point(target_mesh.source(halfedge));
+    const Target_point& t = target_mesh.point(target_mesh.target(halfedge));
+    double sx = CGAL::to_double(s.x());
+    double sy = CGAL::to_double(s.y());
+    double sz = CGAL::to_double(s.z());
+    double tx = CGAL::to_double(t.x());
+    double ty = CGAL::to_double(t.y());
+    double tz = CGAL::to_double(t.z());
+    bool contained = false;
+    for (SurfaceMeshQuery& query : queries) {
+      if (!query.isOutsidePointApproximate(sx, sy, sz) &&
+          !query.isOutsidePointApproximate(tx, ty, tz)) {
+        contained = true;
+        break;
+      }
+    }
+    if (!contained) {
+      constrained_edges.insert(edge);
+    }
+  }
+}
+
 const Surface_mesh* IsotropicRemeshingOfSurfaceMesh(
     const Surface_mesh* input, const Transformation* input_transform,
     size_t iterations, size_t relaxation_steps, double target_edge_length,
-    size_t selection_count, emscripten::val getMesh,
+    bool exact, size_t selection_count, emscripten::val getMesh,
     emscripten::val getTransform) {
   std::cout << "Isometric Remeshing 2 iterations: " << iterations
             << " relaxation_steps: " << relaxation_steps
             << " target_edge_length: " << target_edge_length
             << " selection_count: " << selection_count << std::endl;
-
-  typedef CGAL::Simple_cartesian<double> Cartesian_kernel;
-  typedef Cartesian_kernel::Point_3 Cartesian_point;
-  typedef CGAL::Surface_mesh<Cartesian_point> Cartesian_surface_mesh;
 
   std::vector<SurfaceMeshQuery> queries;
   queries.reserve(selection_count);
@@ -662,131 +753,68 @@ const Surface_mesh* IsotropicRemeshingOfSurfaceMesh(
   CGAL::Polygon_mesh_processing::transform(*input_transform, working_input,
                                            CGAL::parameters::all_default());
 
-  for (size_t nth = 0; nth < selection_count; nth++) {
-    const Surface_mesh* mesh =
-        getMesh(nth).as<const Surface_mesh*>(emscripten::allow_raw_pointers());
-    const Transformation* transform =
-        getTransform(nth).as<const Transformation*>(
-            emscripten::allow_raw_pointers());
-    transforms.push_back(*transform);
-    queries.emplace_back(mesh, &transforms.back());
-    Surface_mesh working_selection(*mesh);
-    std::cout << "Corefining" << std::endl;
-    CGAL::Polygon_mesh_processing::corefine(working_input, working_selection,
-                                            CGAL::parameters::all_default(),
-                                            CGAL::parameters::all_default());
-  }
-
-  Cartesian_surface_mesh cartesian_mesh;
-  copy_face_graph(working_input, cartesian_mesh);
-
-  size_t constrained_vertex_count = 0;
-  size_t unconstrained_vertex_count = 0;
   std::set<Vertex_index> constrained_vertices;
-
-  size_t constrained_edge_count = 0;
-  size_t unconstrained_edge_count = 0;
   std::set<Edge_index> constrained_edges;
+  std::set<Face_index> selected_faces;
 
-  std::set<Face_index> faces_to_remesh;
+  if (exact) {
+    SelectVerticesAndFaces<Kernel>(working_input, working_input,
+                                   input_transform, constrained_vertices,
+                                   constrained_edges, selected_faces,
+                                   selection_count, getMesh, getTransform);
 
-  if (selection_count > 0) {
-    for (const Vertex_index vertex : vertices(cartesian_mesh)) {
-      const Cartesian_point& p = cartesian_mesh.point(vertex);
-      double x = p.x();
-      double y = p.y();
-      double z = p.z();
-      bool contained = false;
-      for (SurfaceMeshQuery& query : queries) {
-        if (!query.isOutsidePointApproximate(x, y, z)) {
-          contained = true;
-          break;
-        }
-      }
-      if (!contained) {
-        constrained_vertices.insert(vertex);
-        constrained_vertex_count++;
-      } else {
-        unconstrained_vertex_count++;
-      }
-    }
+    CGAL::Boolean_property_map<std::set<Vertex_index>> constrained_vertex_map(
+        constrained_vertices);
+    CGAL::Boolean_property_map<std::set<Edge_index>> constrained_edge_map(
+        constrained_edges);
 
-    for (const Face_index face : faces(cartesian_mesh)) {
-      bool contained = true;
-      for (const Vertex_index vertex : vertices_around_face(
-               halfedge(face, cartesian_mesh), cartesian_mesh)) {
-        if (constrained_vertices.find(vertex) != constrained_vertices.end()) {
-          contained = false;
-          break;
-        }
-      }
-      if (contained) {
-        faces_to_remesh.insert(face);
-        std::cout << "Adding face: " << face << std::endl;
-      }
-    }
+    CGAL::Polygon_mesh_processing::isotropic_remeshing(
+        selected_faces, target_edge_length, working_input,
+        CGAL::Polygon_mesh_processing::parameters::number_of_iterations(
+            iterations)
+            .vertex_point_map(working_input.points())
+            .vertex_is_constrained_map(constrained_vertex_map)
+            .edge_is_constrained_map(constrained_edge_map)
+            .number_of_relaxation_steps(relaxation_steps));
+
+    Surface_mesh* output = new Surface_mesh(working_input);
+    CGAL::Polygon_mesh_processing::transform(
+        input_transform->inverse(), *output, CGAL::parameters::all_default());
+    // This may require self intersection removal.
+    return output;
   } else {
-    std::cout << "Adding all faces" << std::endl;
-    faces_to_remesh.insert(faces(cartesian_mesh).begin(),
-                           faces(cartesian_mesh).end());
+    typedef CGAL::Simple_cartesian<double> Cartesian_kernel;
+    typedef Cartesian_kernel::Point_3 Cartesian_point;
+    typedef CGAL::Surface_mesh<Cartesian_point> Cartesian_surface_mesh;
+
+    Cartesian_surface_mesh cartesian_mesh;
+
+    SelectVerticesAndFaces<Cartesian_kernel>(
+        working_input, cartesian_mesh, input_transform, constrained_vertices,
+        constrained_edges, selected_faces, selection_count, getMesh,
+        getTransform);
+
+    CGAL::Boolean_property_map<std::set<Vertex_index>> constrained_vertex_map(
+        constrained_vertices);
+    CGAL::Boolean_property_map<std::set<Edge_index>> constrained_edge_map(
+        constrained_edges);
+
+    CGAL::Polygon_mesh_processing::isotropic_remeshing(
+        selected_faces, target_edge_length, cartesian_mesh,
+        CGAL::Polygon_mesh_processing::parameters::number_of_iterations(
+            iterations)
+            .vertex_point_map(cartesian_mesh.points())
+            .vertex_is_constrained_map(constrained_vertex_map)
+            .edge_is_constrained_map(constrained_edge_map)
+            .number_of_relaxation_steps(relaxation_steps));
+
+    Surface_mesh* output = new Surface_mesh();
+    copy_face_graph(cartesian_mesh, *output);
+    CGAL::Polygon_mesh_processing::transform(
+        input_transform->inverse(), *output, CGAL::parameters::all_default());
+    // This may require self intersection removal.
+    return output;
   }
-
-  std::cout << "Unconstrained Vertices: " << unconstrained_vertex_count
-            << std::endl;
-  std::cout << "Constrained Vertices: " << constrained_vertex_count
-            << std::endl;
-
-  for (const Edge_index edge : edges(cartesian_mesh)) {
-    const Halfedge_index halfedge = cartesian_mesh.halfedge(edge);
-    const Cartesian_point& s =
-        cartesian_mesh.point(cartesian_mesh.source(halfedge));
-    const Cartesian_point& t =
-        cartesian_mesh.point(cartesian_mesh.target(halfedge));
-    double sx = s.x();
-    double sy = s.y();
-    double sz = s.z();
-    double tx = t.x();
-    double ty = t.y();
-    double tz = t.z();
-    bool contained = false;
-    for (SurfaceMeshQuery& query : queries) {
-      if (!query.isOutsidePointApproximate(sx, sy, sz) &&
-          !query.isOutsidePointApproximate(tx, ty, tz)) {
-        contained = true;
-        break;
-      }
-    }
-    if (!contained) {
-      constrained_edges.insert(edge);
-      constrained_edge_count++;
-    } else {
-      unconstrained_edge_count++;
-    }
-  }
-
-  std::cout << "Unconstrained Edges: " << unconstrained_edge_count << std::endl;
-  std::cout << "Constrained Edges: " << constrained_edge_count << std::endl;
-
-  CGAL::Boolean_property_map<std::set<Vertex_index>> constrained_vertex_map(
-      constrained_vertices);
-  CGAL::Boolean_property_map<std::set<Edge_index>> constrained_edge_map(
-      constrained_edges);
-
-  CGAL::Polygon_mesh_processing::isotropic_remeshing(
-      faces_to_remesh, target_edge_length, cartesian_mesh,
-      CGAL::Polygon_mesh_processing::parameters::number_of_iterations(
-          iterations)
-          .vertex_point_map(cartesian_mesh.points())
-          .vertex_is_constrained_map(constrained_vertex_map)
-          .edge_is_constrained_map(constrained_edge_map)
-          .number_of_relaxation_steps(relaxation_steps));
-
-  Surface_mesh* output = new Surface_mesh();
-  copy_face_graph(cartesian_mesh, *output);
-  CGAL::Polygon_mesh_processing::transform(input_transform->inverse(), *output,
-                                           CGAL::parameters::all_default());
-  // This may require self intersection removal.
-  return output;
 }
 
 const Surface_mesh* SmoothSurfaceMesh(const Surface_mesh* input,
@@ -1302,6 +1330,17 @@ bool is_coplanar_edge(const Surface_mesh& m, const Vertex_point_map& p,
 }
 
 template <typename Vertex_point_map>
+bool is_sufficiently_coplanar_edge(const Surface_mesh& m,
+                                   const Vertex_point_map& p,
+                                   const Halfedge_index e, FT threshold) {
+  FT angle = CGAL::approximate_dihedral_angle(
+      p[CGAL::target(opposite(e, m), m)], p[CGAL::target(e, m)],
+      p[CGAL::target(CGAL::next(e, m), m)],
+      p[CGAL::target(CGAL::next(CGAL::opposite(e, m), m), m)]);
+  return angle < threshold;
+}
+
+template <typename Vertex_point_map>
 bool is_collinear_edge(const Surface_mesh& m, const Vertex_point_map& p,
                        const Halfedge_index e0, const Halfedge_index e1) {
   // Assume that e0 and e1 share the same source vertex.
@@ -1336,12 +1375,9 @@ class Demesh_cost {
   }
 };
 
-template <class TM_>
-class Demesh_placement {
+class Demesh_safe_placement {
  public:
-  typedef TM_ TM;
-
-  Demesh_placement() {}
+  Demesh_safe_placement() {}
 
   template <typename Profile>
   boost::optional<typename Profile::Point> operator()(
@@ -1367,8 +1403,8 @@ const Surface_mesh* DemeshSurfaceMesh(const Surface_mesh* input,
 
   CGAL::Surface_mesh_simplification::Count_stop_predicate<Surface_mesh> stop(0);
   Demesh_cost<Kernel> cost;
-  Demesh_placement<Surface_mesh> placement;
 
+  Demesh_safe_placement placement;
   CGAL::Surface_mesh_simplification::edge_collapse(
       *mesh, stop, CGAL::parameters::get_cost(cost).get_placement(placement));
 
@@ -3077,13 +3113,13 @@ int JoinSurfaceMeshes(size_t target_count, emscripten::val getTargetMesh,
 }
 
 // Fuse combines all inputs together that it can, rather than enlarging
-// specified inputs. Join has a set of existing targets to join to. All volumes
-// are combinable, all coplanar surfaces are combinable, and all segments are
-// combinable. So fuse should output at most one volume, n surfaces, and one set
-// of segments. Each individual output should have no overlapping pieces, but
-// different kinds of output can overlap. e.g., a planar surface may overlap
-// with a volume, or segments may intersect planar surfaces. The fused outputs
-// will be in the absolute frame of reference.
+// specified inputs. Join has a set of existing targets to join to. All
+// volumes are combinable, all coplanar surfaces are combinable, and all
+// segments are combinable. So fuse should output at most one volume, n
+// surfaces, and one set of segments. Each individual output should have no
+// overlapping pieces, but different kinds of output can overlap. e.g., a
+// planar surface may overlap with a volume, or segments may intersect planar
+// surfaces. The fused outputs will be in the absolute frame of reference.
 int FuseSurfaceMeshes(size_t mesh_count, emscripten::val getMesh,
                       emscripten::val getMeshTransform,
                       emscripten::val emit_mesh) {
@@ -3203,8 +3239,8 @@ int DisjointSurfaceMeshesIncrementally(int meshCount, emscripten::val nthMesh,
             break;
           }
           // Now clip to the inverted volume mask to make planar surfaces
-          // disjoint with volumes. (Note that volumes are not made disjoint to
-          // planar surfaces)
+          // disjoint with volumes. (Note that volumes are not made disjoint
+          // to planar surfaces)
           Surface_mesh inverse_mask(*volume_mask);
           CGAL::Polygon_mesh_processing::reverse_face_orientations(
               inverse_mask.faces(), inverse_mask);
@@ -3270,8 +3306,8 @@ bool didAdmitPlane(Plane& plane, emscripten::val fill_plane) {
   }
 }
 
-// FIX: The case where we take a section coplanar with a surface with a hole in
-// it. CHECK: Should this produce Polygons_with_holes?
+// FIX: The case where we take a section coplanar with a surface with a hole
+// in it. CHECK: Should this produce Polygons_with_holes?
 void SectionOfSurfaceMesh(const Surface_mesh* input,
                           const Transformation* transform,
                           std::size_t plane_count,
@@ -4812,8 +4848,8 @@ const Surface_mesh* MinkowskiDifferenceOfSurfaceMeshes(
   CGAL::Polygon_mesh_processing::split_connected_components(*input_mesh,
                                                             input_meshes);
 
-  // Unfortunately minkowski sum doesn't do cavities, so let's do them here and
-  // cut them out.
+  // Unfortunately minkowski sum doesn't do cavities, so let's do them here
+  // and cut them out.
 
   for (const Surface_mesh& hole : input_meshes) {
     if (!CGAL::Polygon_mesh_processing::does_bound_a_volume(hole)) {
@@ -4854,8 +4890,8 @@ const Surface_mesh* MinkowskiSumOfSurfaceMeshes(
   CGAL::Polygon_mesh_processing::split_connected_components(*input_mesh,
                                                             input_meshes);
 
-  // Unfortunately minkowski sum doesn't do cavities, so let's do them here and
-  // cut them out.
+  // Unfortunately minkowski sum doesn't do cavities, so let's do them here
+  // and cut them out.
 
   for (const Surface_mesh& hole : input_meshes) {
     if (!CGAL::Polygon_mesh_processing::does_bound_a_volume(hole)) {
@@ -4895,8 +4931,8 @@ const Surface_mesh* MinkowskiShellOfSurfaceMeshes(
   CGAL::Polygon_mesh_processing::split_connected_components(*input_mesh,
                                                             input_meshes);
 
-  // Unfortunately minkowski sum doesn't do cavities, so let's do them here and
-  // cut them out.
+  // Unfortunately minkowski sum doesn't do cavities, so let's do them here
+  // and cut them out.
 
   for (const Surface_mesh& hole : input_meshes) {
     if (!CGAL::Polygon_mesh_processing::does_bound_a_volume(hole)) {

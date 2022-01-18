@@ -921,8 +921,8 @@ const cutout =
 Shape.registerMethod('cutout', cutout);
 
 // TODO: Rename clean at the lower levels.
-const demesh = () => (shape) =>
-  Shape.fromGeometry(demesh$1(shape.toGeometry()));
+const demesh = (options) => (shape) =>
+  Shape.fromGeometry(demesh$1(shape.toGeometry(), options));
 
 Shape.registerMethod('demesh', demesh);
 
@@ -1100,19 +1100,36 @@ const fs = () => {
       tlfBox: Point(),
       tlBox: Edge(Point(0, 1, 0), Point(0, 0, 0)),
       tfBox: Edge(Point(0, 0, 0), Point(1, 0, 0)),
-      tBox: Face(Point(1, 0, 0), Point(1, 1, 0), Point(0, 1, 0), Point(0, 0, 0)),
+      tBox: Face(
+        Point(1, 0, 0),
+        Point(1, 1, 0),
+        Point(0, 1, 0),
+        Point(0, 0, 0)
+      ),
 
       lfBox: Edge(Point(0, 0, 0), Point(0, 0, 1)),
-      lBox: Face(Point(0, 0, 0), Point(0, 1, 0), Point(0, 1, 1), Point(0, 0, 1)),
+      lBox: Face(
+        Point(0, 0, 0),
+        Point(0, 1, 0),
+        Point(0, 1, 1),
+        Point(0, 0, 1)
+      ),
 
-      fBox: Face(Point(0, 0, 1), Point(1, 0, 1), Point(1, 0, 0), Point(0, 0, 0)),
+      fBox: Face(
+        Point(0, 0, 1),
+        Point(1, 0, 1),
+        Point(1, 0, 0),
+        Point(0, 0, 0)
+      ),
 
-      box: Polyhedron(Face(Point(0, 0, 1), Point(0, 1, 1), Point(1, 1, 1), Point(1, 0, 1)),
-                  Face(Point(0, 0, 0), Point(0, 1, 0), Point(1, 1, 0), Point(1, 0, 0)),
-                  Face( Point(0, 0, 0), Point(0, 1, 0), Point(0, 1, 1), Point(0, 0, 1)),
-                  Face( Point(1, 0, 0), Point(1, 1, 0), Point(1, 1, 1), Point(1, 0, 1)),
-                  Face( Point(0, 0, 0), Point(1, 0, 0), Point(1, 0, 1), Point(0, 0, 1)),
-                  Face( Point(0, 1, 0), Point(1, 1, 0), Point(1, 1, 1), Point(0, 1, 1))),
+      box: Polyhedron(
+        Face(Point(0, 0, 1), Point(0, 1, 1), Point(1, 1, 1), Point(1, 0, 1)),
+        Face(Point(0, 0, 0), Point(0, 1, 0), Point(1, 1, 0), Point(1, 0, 0)),
+        Face(Point(0, 0, 0), Point(0, 1, 0), Point(0, 1, 1), Point(0, 0, 1)),
+        Face(Point(1, 0, 0), Point(1, 1, 0), Point(1, 1, 1), Point(1, 0, 1)),
+        Face(Point(0, 0, 0), Point(1, 0, 0), Point(1, 0, 1), Point(0, 0, 1)),
+        Face(Point(0, 1, 0), Point(1, 1, 0), Point(1, 1, 1), Point(0, 1, 1))
+      ),
     };
   }
   return fundamentalShapes;
@@ -1139,33 +1156,48 @@ const reifyBox = (geometry) => {
           return fs().tlfBox.move(left, back, bottom);
         } else {
           // return Edge(Point(left, front, bottom), Point(right, back, top));
-          return fs().tlBox.sy(front - back).move(left, back, bottom);
+          return fs()
+            .tlBox.sy(front - back)
+            .move(left, back, bottom);
         }
       } else {
         if (front === back) {
           // return Edge(Point(left, front, bottom), Point(right, back, top));
-          return fs().tfBox.sx(right - left).move(left, back, bottom);
+          return fs()
+            .tfBox.sx(right - left)
+            .move(left, back, bottom);
         } else {
           // left !== right && front !== back
           // return Face(Point(left, back, bottom), Point(left, front, bottom), Point(right, front, top), Point(right, back, top));
-          return fs().tBox.sx(right - left).sy(front - back).move(left, back, bottom);
+          return fs()
+            .tBox.sx(right - left)
+            .sy(front - back)
+            .move(left, back, bottom);
         }
       }
     } else {
       if (left === right) {
         if (front === back) {
           // return Edge(Point(left, front, bottom), Point(right, back, top));
-          return fs().lfBox.sz(top - bottom).move(left, back, bottom);
+          return fs()
+            .lfBox.sz(top - bottom)
+            .move(left, back, bottom);
         } else {
           // top !== bottom && front !== back
           // return Face(Point(right, back, top), Point(right, front, top), Point(right, front, bottom), Point(left, back, bottom));
-          return fs().lBox.sz(top - bottom).sy(front - back).move(left, back, bottom);
+          return fs()
+            .lBox.sz(top - bottom)
+            .sy(front - back)
+            .move(left, back, bottom);
         }
       } else {
         if (front === back) {
           // top !== bottom && left !== right
           // return Face(Point(left, back, top), Point(right, front, top), Point(right, front, bottom), Point(left, back, bottom));
-          return fs().fBox.sz(top - bottom).sx(right - left).move(left, back, bottom);
+          return fs()
+            .fBox.sz(top - bottom)
+            .sx(right - left)
+            .move(left, back, bottom);
         } else {
           // top !== bottom && front !== back && left !== right
           /*
@@ -1177,7 +1209,11 @@ const reifyBox = (geometry) => {
             Face( Point(left, back, bottom), Point(right, back, bottom), Point(right, back, top), Point(left, back, top)),
             Face( Point(left, front, bottom), Point(right, front, bottom), Point(right, front, top), Point(left, front, top)));
           */
-          return fs().box.sz(top - bottom).sx(right - left).sy(front - back).move(left, back, bottom);
+          return fs()
+            .box.sz(top - bottom)
+            .sx(right - left)
+            .sy(front - back)
+            .move(left, back, bottom);
         }
       }
     }
@@ -3881,7 +3917,7 @@ const serialize =
 Shape.registerMethod('serialize', serialize);
 
 const smooth =
-  (options = { iterations: 1, method: 'mesh' }, ...selections) =>
+  (options = {}, ...selections) =>
   (shape) =>
     Shape.fromGeometry(
       smooth$1(

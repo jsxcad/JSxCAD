@@ -39,35 +39,36 @@ export const clip = cached(
     return ['clip', hash(geometry), ...geometries.map(hash)];
   },
   (geometry, geometries) => {
-  const concreteGeometry = toConcreteGeometry(geometry);
-  // Collect graphs for rewriting.
-  const rewriteGraphs = [];
-  const rewriteSegments = [];
-  collectTargets(concreteGeometry, rewriteGraphs, rewriteSegments);
-  // The other graphs are just read from.
-  const readGraphs = [];
-  for (const geometry of geometries) {
-    collectClips(toConcreteGeometry(geometry), readGraphs);
-  }
-  const { clippedGraphGeometries, clippedSegmentsGeometries } = clipGraphs(
-    rewriteGraphs,
-    rewriteSegments,
-    readGraphs
-  );
-  const map = new Map();
-  for (let nth = 0; nth < clippedGraphGeometries.length; nth++) {
-    map.set(rewriteGraphs[nth], clippedGraphGeometries[nth]);
-  }
-  for (let nth = 0; nth < clippedSegmentsGeometries.length; nth++) {
-    map.set(rewriteSegments[nth], clippedSegmentsGeometries[nth]);
-  }
-  const update = (geometry, descend) => {
-    const clipped = map.get(geometry);
-    if (clipped) {
-      return clipped;
-    } else {
-      return descend();
+    const concreteGeometry = toConcreteGeometry(geometry);
+    // Collect graphs for rewriting.
+    const rewriteGraphs = [];
+    const rewriteSegments = [];
+    collectTargets(concreteGeometry, rewriteGraphs, rewriteSegments);
+    // The other graphs are just read from.
+    const readGraphs = [];
+    for (const geometry of geometries) {
+      collectClips(toConcreteGeometry(geometry), readGraphs);
     }
-  };
-  return rewrite(concreteGeometry, update);
-});
+    const { clippedGraphGeometries, clippedSegmentsGeometries } = clipGraphs(
+      rewriteGraphs,
+      rewriteSegments,
+      readGraphs
+    );
+    const map = new Map();
+    for (let nth = 0; nth < clippedGraphGeometries.length; nth++) {
+      map.set(rewriteGraphs[nth], clippedGraphGeometries[nth]);
+    }
+    for (let nth = 0; nth < clippedSegmentsGeometries.length; nth++) {
+      map.set(rewriteSegments[nth], clippedSegmentsGeometries[nth]);
+    }
+    const update = (geometry, descend) => {
+      const clipped = map.get(geometry);
+      if (clipped) {
+        return clipped;
+      } else {
+        return descend();
+      }
+    };
+    return rewrite(concreteGeometry, update);
+  }
+);

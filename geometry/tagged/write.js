@@ -1,7 +1,4 @@
-import {
-  addPending,
-  write as writePath,
-} from '@jsxcad/sys';
+import { addPending, write as writePath } from '@jsxcad/sys';
 
 import { hash } from './hash.js';
 import { store } from './store.js';

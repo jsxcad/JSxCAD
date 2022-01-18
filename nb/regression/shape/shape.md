@@ -426,8 +426,8 @@ Box(10)
   .ez(50, -50)
   .rx(0, 1 / 4)
   .fuse().view(0)
-  .remesh({ method: 'isotropic', iterations: 20, relaxationSteps: 10, targetEdgeLength: 0.5, }, Box(20, 20, 20))
-  .smooth({ method: 'shape', iterations: 10, time: 1 }, Box(9, 20, 20))
+  .remesh({ method: 'isotropic', iterations: 1, relaxationSteps: 1, targetEdgeLength: 0.5, }, Box(20, 20, 20))
+  .smooth({ method: 'shape', iterations: 1, time: 1 }, Box(9, 20, 20))
   .view();
 ```
 
@@ -446,7 +446,7 @@ Box(20, 20, 20)
   .view(3, { wireframe: true })
   .md('Cut')
   .demesh()
-  .view(3, { wireframe: true })
+  .view(4, { wireframe: true })
   .md('Cleaned mesh');
 ```
 

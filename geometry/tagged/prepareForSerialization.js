@@ -2,4 +2,7 @@ import { prepareForSerialization as graph } from '../graph/prepareForSerializati
 import { op } from './op.js';
 import { visit } from './visit.js';
 
-export const prepareForSerialization = op({ graph }, visit);
+export const prepareForSerialization = (geometry) => {
+  op({ graph }, visit)(geometry);
+  return geometry;
+};

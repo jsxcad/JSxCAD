@@ -14,14 +14,22 @@ export const simplify = (geometry, options) => {
       return taggedGraph(
         { tags: geometry.tags, matrix: geometry.matrix },
         fromSurfaceMeshLazy(
-          simplifySurfaceMesh(toSurfaceMesh(geometry.graph), geometry.matrix, options)
+          simplifySurfaceMesh(
+            toSurfaceMesh(geometry.graph),
+            geometry.matrix,
+            options
+          )
         )
       );
     case 'approximate':
       return taggedGraph(
         { tags: geometry.tags, matrix: geometry.matrix },
         fromSurfaceMeshLazy(
-          approximateSurfaceMesh(toSurfaceMesh(geometry.graph), geometry.matrix, options)
+          approximateSurfaceMesh(
+            toSurfaceMesh(geometry.graph),
+            geometry.matrix,
+            options
+          )
         )
       );
     default:

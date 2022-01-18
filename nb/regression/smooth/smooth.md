@@ -13,7 +13,7 @@ fused
 
 ```JavaScript
 const remeshed = fused
-  .remesh({ method: 'isotropic', lengths: [10, 5, 2, 1] })
+  .remesh()
   .view(1, { wireframe: true })
   .md('remeshed');
 ```
@@ -24,7 +24,7 @@ remeshed
 
 ```JavaScript
 const smoothed = remeshed
-  .smooth({ method: 'shape', iterations: 3 })
+  .smooth()
   .view(1)
   .md('smoothed');
 ```
@@ -35,7 +35,7 @@ smoothed
 
 ```JavaScript
 const simplified = smoothed
-  .simplify({ method: 'approximate' })
+  .simplify()
   .view(1)
   .md('simplified');
 ```

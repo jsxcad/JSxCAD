@@ -4,8 +4,17 @@ import { reverseFaceOrientations as graph } from '../graph/reverseFaceOrientatio
 
 import { op } from './op.js';
 
-const points = (geometry) => ({ ...geometry, points: flipPoints(geometry.points) });
-const paths = (geometry) => ({ ...geometry, paths: flipPaths(geometry.points) });
-const segments = (geometry) => ({ ...geometry, segments: geometry.segments.map(([source, target]) => [target, source]) });
+const points = (geometry) => ({
+  ...geometry,
+  points: flipPoints(geometry.points),
+});
+const paths = (geometry) => ({
+  ...geometry,
+  paths: flipPaths(geometry.points),
+});
+const segments = (geometry) => ({
+  ...geometry,
+  segments: geometry.segments.map(([source, target]) => [target, source]),
+});
 
 export const flip = op({ graph, points, paths, segments });

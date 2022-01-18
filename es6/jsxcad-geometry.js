@@ -600,7 +600,10 @@ const op =
     return method(toConcreteGeometry(geometry), walk);
   };
 
-const prepareForSerialization = op({ graph: prepareForSerialization$1 }, visit);
+const prepareForSerialization = (geometry) => {
+  op({ graph: prepareForSerialization$1 }, visit)(geometry);
+  return geometry;
+};
 
 const hash = (geometry) => {
   if (geometry.hash === undefined) {
@@ -631,7 +634,12 @@ const store = async (geometry) => {
   const graph = geometry.graph;
   if (graph && !graph[isStored]) {
     await write$1(`graph/${graph.hash}`, graph);
-    stored.graph = { hash: graph.hash, isClosed: graph.isClosed, isEmpty: graph.isEmpty, provenance: graph.provenance };
+    stored.graph = {
+      hash: graph.hash,
+      isClosed: graph.isClosed,
+      isEmpty: graph.isEmpty,
+      provenance: graph.provenance,
+    };
   }
   if (geometry.content) {
     for (let nth = 0; nth < geometry.content.length; nth++) {
@@ -788,7 +796,10 @@ const cached =
   };
 
 const fromEmpty = ({ tags, isPlanar } = {}) =>
-  taggedGraph({ tags, provenance: 'geometry/graph/fromEmpty' }, { isEmpty: true, isPlanar });
+  taggedGraph(
+    { tags, provenance: 'geometry/graph/fromEmpty' },
+    { isEmpty: true, isPlanar }
+  );
 
 const cut$1 = (targetGraphs, targetSegments, sourceGraphs) => {
   if (sourceGraphs.length === 0) {
@@ -826,7 +837,10 @@ const cut$1 = (targetGraphs, targetSegments, sourceGraphs) => {
           return targetGraphs[index];
         case STATUS_OK:
           mesh.provenance = 'cut';
-          return taggedGraph({ tags, matrix, provenance: 'geometry/graph/cut' }, fromSurfaceMeshLazy(mesh));
+          return taggedGraph(
+            { tags, matrix, provenance: 'geometry/graph/cut' },
+            fromSurfaceMeshLazy(mesh)
+          );
       }
     }
   );
@@ -1105,7 +1119,11 @@ const clip$1 = (targetGraphs, targetSegments, sourceGraphs) => {
 
 const close$1 = (path) => (isClosed(path) ? path : path.slice(1));
 
-const taggedPoints = ({ tags = [], matrix, provenance }, points, exactPoints) => {
+const taggedPoints = (
+  { tags = [], matrix, provenance },
+  points,
+  exactPoints
+) => {
   return { type: 'points', tags, matrix, provenance, points, exactPoints };
 };
 
@@ -1335,50 +1353,6 @@ const canonicalize$1 = (polygons) => {
   return canonicalized;
 };
 
-const fromSurfaceMesh = (surfaceMesh) => {
-  throw Error('die');
-  let graph = surfaceMesh[graphSymbol];
-};
-
-const realizeGraph = (geometry) => {
-  if (geometry.graph.isLazy) {
-    return {
-      ...geometry,
-      graph: fromSurfaceMesh(toSurfaceMesh(geometry.graph)),
-    };
-  } else {
-    return geometry;
-  }
-};
-
-const realize = (geometry) => {
-  const op = (geometry, descend) => {
-    switch (geometry.type) {
-      case 'graph':
-        return realizeGraph(geometry);
-      case 'displayGeometry':
-      case 'segments':
-      case 'triangles':
-      case 'points':
-      case 'paths':
-      case 'polygonsWithHoles':
-        // No lazy representation to realize.
-        return geometry;
-      case 'plan':
-      case 'item':
-      case 'group':
-      case 'layout':
-      case 'sketch':
-      case 'transform':
-        return descend();
-      default:
-        throw Error(`Unexpected geometry: ${JSON.stringify(geometry)}`);
-    }
-  };
-
-  return rewrite(geometry, op);
-};
-
 const canonicalize = (geometry) => {
   const op = (geometry, descend) => {
     switch (geometry.type) {
@@ -1395,15 +1369,8 @@ const canonicalize = (geometry) => {
           marks: canonicalize$2(geometry.marks),
           planes: geometry.planes.map(canonicalize$7),
         });
-      case 'graph': {
-        const realizedGeometry = realize(geometry);
-        return descend({
-          graph: {
-            ...realizedGeometry.graph,
-            points: canonicalize$2(realizedGeometry.graph.points),
-          },
-        });
-      }
+      case 'graph':
+        return prepareForSerialization(graph);
       case 'item':
       case 'group':
       case 'layout':
@@ -1422,10 +1389,12 @@ const convexHull = ({ tags }, points) =>
     fromSurfaceMeshLazy(fromPointsToConvexHullAsSurfaceMesh(points))
   );
 
-const demesh$1 = (geometry) =>
+const demesh$1 = (geometry, options) =>
   taggedGraph(
     { tags: geometry.tags, matrix: geometry.matrix },
-    fromSurfaceMeshLazy(demeshSurfaceMesh(toSurfaceMesh(geometry.graph)))
+    fromSurfaceMeshLazy(
+      demeshSurfaceMesh(toSurfaceMesh(geometry.graph), geometry.matrix, options)
+    )
   );
 
 const demesh = op({ graph: demesh$1 });
@@ -1861,7 +1830,8 @@ const taggedPolygonsWithHoles = (
   return {
     type: 'polygonsWithHoles',
     tags,
-    matrix, provenance,
+    matrix,
+    provenance,
     plane,
     exactPlane,
     polygonsWithHoles,
@@ -1943,9 +1913,18 @@ const reverseFaceOrientations = (geometry) =>
     )
   );
 
-const points = (geometry) => ({ ...geometry, points: flip$1(geometry.points) });
-const paths$1 = (geometry) => ({ ...geometry, paths: flip$2(geometry.points) });
-const segments = (geometry) => ({ ...geometry, segments: geometry.segments.map(([source, target]) => [target, source]) });
+const points = (geometry) => ({
+  ...geometry,
+  points: flip$1(geometry.points),
+});
+const paths$1 = (geometry) => ({
+  ...geometry,
+  paths: flip$2(geometry.points),
+});
+const segments = (geometry) => ({
+  ...geometry,
+  segments: geometry.segments.map(([source, target]) => [target, source]),
+});
 
 const flip = op({ graph: reverseFaceOrientations, points, paths: paths$1, segments });
 
@@ -1995,7 +1974,10 @@ const fuse$1 = (sources) => {
   }));
   const { fusedMeshes } = fuseSurfaceMeshes(sources);
   const fusedGeometries = fusedMeshes.map(({ mesh }) =>
-    taggedGraph({ provenance: 'geometry/graph/fuse' }, fromSurfaceMeshLazy(mesh))
+    taggedGraph(
+      { provenance: 'geometry/graph/fuse' },
+      fromSurfaceMeshLazy(mesh)
+    )
   );
   deletePendingSurfaceMeshes();
   return fusedGeometries;
@@ -2024,7 +2006,11 @@ const fuse = (geometries) => {
   const fusedGraphs = fuse$1(graphs);
   const fusedSegments = segments.flatMap(({ segments }) => segments);
   if (fusedSegments.length > 0) {
-    return taggedGroup({ provenance: 'geometry/tagged/fuse' }, ...fusedGraphs, taggedSegments({ provenance: 'geometry/tagged/fuse' }, fusedSegments));
+    return taggedGroup(
+      { provenance: 'geometry/tagged/fuse' },
+      ...fusedGraphs,
+      taggedSegments({ provenance: 'geometry/tagged/fuse' }, fusedSegments)
+    );
   } else {
     return taggedGroup({ provenance: 'geometry/tagged/fuse' }, ...fusedGraphs);
   }
@@ -2404,38 +2390,39 @@ const clip = cached(
     return ['clip', hash(geometry), ...geometries.map(hash)];
   },
   (geometry, geometries) => {
-  const concreteGeometry = toConcreteGeometry(geometry);
-  // Collect graphs for rewriting.
-  const rewriteGraphs = [];
-  const rewriteSegments = [];
-  collectTargets(concreteGeometry, rewriteGraphs, rewriteSegments);
-  // The other graphs are just read from.
-  const readGraphs = [];
-  for (const geometry of geometries) {
-    collectClips(toConcreteGeometry(geometry), readGraphs);
-  }
-  const { clippedGraphGeometries, clippedSegmentsGeometries } = clip$1(
-    rewriteGraphs,
-    rewriteSegments,
-    readGraphs
-  );
-  const map = new Map();
-  for (let nth = 0; nth < clippedGraphGeometries.length; nth++) {
-    map.set(rewriteGraphs[nth], clippedGraphGeometries[nth]);
-  }
-  for (let nth = 0; nth < clippedSegmentsGeometries.length; nth++) {
-    map.set(rewriteSegments[nth], clippedSegmentsGeometries[nth]);
-  }
-  const update = (geometry, descend) => {
-    const clipped = map.get(geometry);
-    if (clipped) {
-      return clipped;
-    } else {
-      return descend();
+    const concreteGeometry = toConcreteGeometry(geometry);
+    // Collect graphs for rewriting.
+    const rewriteGraphs = [];
+    const rewriteSegments = [];
+    collectTargets(concreteGeometry, rewriteGraphs, rewriteSegments);
+    // The other graphs are just read from.
+    const readGraphs = [];
+    for (const geometry of geometries) {
+      collectClips(toConcreteGeometry(geometry), readGraphs);
     }
-  };
-  return rewrite(concreteGeometry, update);
-});
+    const { clippedGraphGeometries, clippedSegmentsGeometries } = clip$1(
+      rewriteGraphs,
+      rewriteSegments,
+      readGraphs
+    );
+    const map = new Map();
+    for (let nth = 0; nth < clippedGraphGeometries.length; nth++) {
+      map.set(rewriteGraphs[nth], clippedGraphGeometries[nth]);
+    }
+    for (let nth = 0; nth < clippedSegmentsGeometries.length; nth++) {
+      map.set(rewriteSegments[nth], clippedSegmentsGeometries[nth]);
+    }
+    const update = (geometry, descend) => {
+      const clipped = map.get(geometry);
+      if (clipped) {
+        return clipped;
+      } else {
+        return descend();
+      }
+    };
+    return rewrite(concreteGeometry, update);
+  }
+);
 
 const intersection = (geometry, ...geometries) =>
   clip(geometry, geometries);
@@ -2694,30 +2681,31 @@ const join = cached(
     return ['join', hash(geometry), ...geometries.map(hash)];
   },
   (geometry, geometries) => {
-  const concreteGeometry = toConcreteGeometry(geometry);
-  // Collect graphs for rewriting.
-  const rewriteGraphs = [];
-  collect(concreteGeometry, rewriteGraphs);
-  // The other graphs are just read from.
-  const readGraphs = [];
-  for (const geometry of geometries) {
-    collect(toConcreteGeometry(geometry), readGraphs);
-  }
-  const joinedGraphs = join$1(rewriteGraphs, readGraphs);
-  const map = new Map();
-  for (let nth = 0; nth < joinedGraphs.length; nth++) {
-    map.set(rewriteGraphs[nth], joinedGraphs[nth]);
-  }
-  const update = (geometry, descend) => {
-    const joined = map.get(geometry);
-    if (joined) {
-      return joined;
-    } else {
-      return descend();
+    const concreteGeometry = toConcreteGeometry(geometry);
+    // Collect graphs for rewriting.
+    const rewriteGraphs = [];
+    collect(concreteGeometry, rewriteGraphs);
+    // The other graphs are just read from.
+    const readGraphs = [];
+    for (const geometry of geometries) {
+      collect(toConcreteGeometry(geometry), readGraphs);
     }
-  };
-  return rewrite(concreteGeometry, update);
-});
+    const joinedGraphs = join$1(rewriteGraphs, readGraphs);
+    const map = new Map();
+    for (let nth = 0; nth < joinedGraphs.length; nth++) {
+      map.set(rewriteGraphs[nth], joinedGraphs[nth]);
+    }
+    const update = (geometry, descend) => {
+      const joined = map.get(geometry);
+      if (joined) {
+        return joined;
+      } else {
+        return descend();
+      }
+    };
+    return rewrite(concreteGeometry, update);
+  }
+);
 
 const keep = (tags, geometry) =>
   rewriteTags(['type:void'], [], geometry, tags, 'has not');
@@ -2961,7 +2949,7 @@ const offset$1 = (geometry, initial, step, limit) => {
   return offsetGraphs;
 };
 
-const graph = (geometry, initial = 1, step, limit) =>
+const graph$1 = (geometry, initial = 1, step, limit) =>
   taggedGroup(
     { tags: geometry.tags },
     ...offset$1(geometry, initial, step, limit)
@@ -2977,7 +2965,7 @@ const paths = (geometry, initial = 1, step, limit) =>
     limit
   );
 
-const offset = op({ graph, polygonsWithHoles, paths });
+const offset = op({ graph: graph$1, polygonsWithHoles, paths });
 
 const open = (path) => (isClosed(path) ? [null, ...path] : path);
 
@@ -3180,9 +3168,6 @@ const removeSelfIntersections$1 = (geometry) =>
 
 const removeSelfIntersections = op({ graph: removeSelfIntersections$1 });
 
-const rerealizeGraph = (graph) =>
-  fromSurfaceMeshLazy(toSurfaceMesh(graph), /* forceNewGraph= */ true);
-
 const translate$2 = (vector, path) =>
   transform$2(fromTranslation(vector), path);
 const rotateZ$1 = (radians, path) =>
@@ -3231,14 +3216,22 @@ const simplify$1 = (geometry, options) => {
       return taggedGraph(
         { tags: geometry.tags, matrix: geometry.matrix },
         fromSurfaceMeshLazy(
-          simplifySurfaceMesh(toSurfaceMesh(geometry.graph), options)
+          simplifySurfaceMesh(
+            toSurfaceMesh(geometry.graph),
+            geometry.matrix,
+            options
+          )
         )
       );
     case 'approximate':
       return taggedGraph(
         { tags: geometry.tags, matrix: geometry.matrix },
         fromSurfaceMeshLazy(
-          approximateSurfaceMesh(toSurfaceMesh(geometry.graph), options)
+          approximateSurfaceMesh(
+            toSurfaceMesh(geometry.graph),
+            geometry.matrix,
+            options
+          )
         )
       );
     default:
@@ -3359,7 +3352,10 @@ const separate$1 = (
 
 const separate = op({ graph: separate$1 });
 
-const taggedTriangles = ({ tags = [], matrix, provenance }, triangles) => {
+const taggedTriangles = (
+  { tags = [], matrix, provenance },
+  triangles
+) => {
   return { type: 'triangles', tags, matrix, provenance, triangles };
 };
 
@@ -3453,7 +3449,10 @@ const taggedItem = ({ tags = [], matrix, provenance }, ...content) => {
   return { type: 'item', tags, matrix, provenance, content };
 };
 
-const taggedDisplayGeometry = ({ tags = [], matrix, provenance }, ...content) => {
+const taggedDisplayGeometry = (
+  { tags = [], matrix, provenance },
+  ...content
+) => {
   if (content.some((value) => value === undefined)) {
     throw Error(`Undefined DisplayGeometry content`);
   }
@@ -3480,7 +3479,8 @@ const taggedLayout = (
     type: 'layout',
     layout: { size, margin, title },
     tags,
-    matrix, provenance,
+    matrix,
+    provenance,
     content,
   };
 };
@@ -3488,14 +3488,16 @@ const taggedLayout = (
 const taggedPaths = ({ tags = [], matrix, provenance }, paths) => ({
   type: 'paths',
   tags,
-  matrix, provenance,
+  matrix,
+  provenance,
   paths,
 });
 
 const taggedPlan = ({ tags = [], matrix, provenance }, plan) => ({
   type: 'plan',
   tags,
-  matrix, provenance,
+  matrix,
+  provenance,
   plan,
   content: [],
 });
@@ -3930,4 +3932,4 @@ const translate = (vector, geometry) =>
 const scale = (vector, geometry) =>
   transform$3(fromScaling(vector), geometry);
 
-export { allTags, alphaShape, assemble, bend, cached, canonicalize, canonicalize$4 as canonicalizePath, canonicalize$3 as canonicalizePaths, clip$1 as clip, close$1 as closePath, computeCentroid, computeNormal, concatenate as concatenatePath, convexHull as convexHullToGraph, cut, deduplicate as deduplicatePath, demesh, difference, disjoint, doesNotOverlap, drop, eachItem, eachPoint, eachSegment, empty, extrude, extrudeToPlane, faces, fill, flip, flip$3 as flipPath, fresh, fromFunction as fromFunctionToGraph, fromPaths as fromPathsToGraph, fromPoints as fromPointsToGraph, fromPolygons as fromPolygonsToGraph, fromPolygonsWithHolesToTriangles, fromSurfaceToPaths, fromTriangles as fromTrianglesToGraph, fuse, getAnyNonVoidSurfaces, getAnySurfaces, getFaceablePaths, getGraphs, getInverseMatrices, getItems, getLayouts, getLeafs, getNonVoidFaceablePaths, getNonVoidGraphs, getNonVoidItems, getNonVoidPaths, getNonVoidPlans, getNonVoidPoints, getNonVoidSegments, getEdges as getPathEdges, getPaths, getPeg, getPlans, getPoints, getTags, grow, hasNotShow, hasNotShowOutline, hasNotShowOverlay, hasNotShowSkin, hasNotShowWireframe, hasNotType, hasNotTypeMasked, hasNotTypeVoid, hasNotTypeWire, hasShow, hasShowOutline, hasShowOverlay, hasShowSkin, hasShowWireframe, hasType, hasTypeMasked, hasTypeVoid, hasTypeWire, hash, inset, intersection, isClockwise as isClockwisePath, isClosed as isClosedPath, isCounterClockwise as isCounterClockwisePath, isNotShow, isNotShowOutline, isNotShowOverlay, isNotShowSkin, isNotShowWireframe, isNotType, isNotTypeMasked, isNotTypeVoid, isNotTypeWire, isNotVoid, isShow, isShowOutline, isShowOverlay, isShowSkin, isShowWireframe, isType, isTypeMasked, isTypeVoid, isTypeWire, isVoid, join, keep, loft, measureBoundingBox, minkowskiDifference, minkowskiShell, minkowskiSum, offset, open as openPath, outline, prepareForSerialization, projectToPlane, push, read, readNonblocking, realize, realizeGraph, registerReifier, reify, remesh, removeSelfIntersections, rerealizeGraph, reverseFaceOrientations as reverseFaceOrientationsOfGraph, rewrite, rewriteTags, rotateX, rotateY, rotateZ, rotateZ$1 as rotateZPath, scale, scale$2 as scalePath, scale$1 as scalePaths, section, separate, serialize, showOutline, showOverlay, showSkin, showWireframe, simplify, smooth, soup, taggedDisplayGeometry, taggedGraph, taggedGroup, taggedItem, taggedLayout, taggedPaths, taggedPlan, taggedPoints, taggedPolygons, taggedSegments, taggedSketch, taggedTriangles, taper, test, toConcreteGeometry, toDisjointGeometry, toDisplayGeometry, toKeptGeometry, toPoints, toPolygonsWithHoles, toTransformedGeometry, toTriangleArray, toTriangles$1 as toTrianglesFromGraph, toVisiblyDisjointGeometry, transform$3 as transform, transform$1 as transformPaths, translate, translate$2 as translatePath, translate$1 as translatePaths, twist, typeMasked, typeVoid, typeWire, union, update, visit, withQuery, write, writeNonblocking };
+export { allTags, alphaShape, assemble, bend, cached, canonicalize, canonicalize$4 as canonicalizePath, canonicalize$3 as canonicalizePaths, clip$1 as clip, close$1 as closePath, computeCentroid, computeNormal, concatenate as concatenatePath, convexHull as convexHullToGraph, cut, deduplicate as deduplicatePath, demesh, difference, disjoint, doesNotOverlap, drop, eachItem, eachPoint, eachSegment, empty, extrude, extrudeToPlane, faces, fill, flip, flip$3 as flipPath, fresh, fromFunction as fromFunctionToGraph, fromPaths as fromPathsToGraph, fromPoints as fromPointsToGraph, fromPolygons as fromPolygonsToGraph, fromPolygonsWithHolesToTriangles, fromSurfaceToPaths, fromTriangles as fromTrianglesToGraph, fuse, getAnyNonVoidSurfaces, getAnySurfaces, getFaceablePaths, getGraphs, getInverseMatrices, getItems, getLayouts, getLeafs, getNonVoidFaceablePaths, getNonVoidGraphs, getNonVoidItems, getNonVoidPaths, getNonVoidPlans, getNonVoidPoints, getNonVoidSegments, getEdges as getPathEdges, getPaths, getPeg, getPlans, getPoints, getTags, grow, hasNotShow, hasNotShowOutline, hasNotShowOverlay, hasNotShowSkin, hasNotShowWireframe, hasNotType, hasNotTypeMasked, hasNotTypeVoid, hasNotTypeWire, hasShow, hasShowOutline, hasShowOverlay, hasShowSkin, hasShowWireframe, hasType, hasTypeMasked, hasTypeVoid, hasTypeWire, hash, inset, intersection, isClockwise as isClockwisePath, isClosed as isClosedPath, isCounterClockwise as isCounterClockwisePath, isNotShow, isNotShowOutline, isNotShowOverlay, isNotShowSkin, isNotShowWireframe, isNotType, isNotTypeMasked, isNotTypeVoid, isNotTypeWire, isNotVoid, isShow, isShowOutline, isShowOverlay, isShowSkin, isShowWireframe, isType, isTypeMasked, isTypeVoid, isTypeWire, isVoid, join, keep, loft, measureBoundingBox, minkowskiDifference, minkowskiShell, minkowskiSum, offset, open as openPath, outline, prepareForSerialization, projectToPlane, push, read, readNonblocking, registerReifier, reify, remesh, removeSelfIntersections, reverseFaceOrientations as reverseFaceOrientationsOfGraph, rewrite, rewriteTags, rotateX, rotateY, rotateZ, rotateZ$1 as rotateZPath, scale, scale$2 as scalePath, scale$1 as scalePaths, section, separate, serialize, showOutline, showOverlay, showSkin, showWireframe, simplify, smooth, soup, taggedDisplayGeometry, taggedGraph, taggedGroup, taggedItem, taggedLayout, taggedPaths, taggedPlan, taggedPoints, taggedPolygons, taggedSegments, taggedSketch, taggedTriangles, taper, test, toConcreteGeometry, toDisjointGeometry, toDisplayGeometry, toKeptGeometry, toPoints, toPolygonsWithHoles, toTransformedGeometry, toTriangleArray, toTriangles$1 as toTrianglesFromGraph, toVisiblyDisjointGeometry, transform$3 as transform, transform$1 as transformPaths, translate, translate$2 as translatePath, translate$1 as translatePaths, twist, typeMasked, typeVoid, typeWire, union, update, visit, withQuery, write, writeNonblocking };

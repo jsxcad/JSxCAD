@@ -18,7 +18,12 @@ export const store = async (geometry) => {
   const graph = geometry.graph;
   if (graph && !graph[isStored]) {
     await write(`graph/${graph.hash}`, graph);
-    stored.graph = { hash: graph.hash, isClosed: graph.isClosed, isEmpty: graph.isEmpty, provenance: graph.provenance };
+    stored.graph = {
+      hash: graph.hash,
+      isClosed: graph.isClosed,
+      isEmpty: graph.isEmpty,
+      provenance: graph.provenance,
+    };
   }
   if (geometry.content) {
     for (let nth = 0; nth < geometry.content.length; nth++) {

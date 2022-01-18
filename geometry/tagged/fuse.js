@@ -28,7 +28,11 @@ export const fuse = (geometries) => {
   const fusedGraphs = fuseGraphs(graphs);
   const fusedSegments = segments.flatMap(({ segments }) => segments);
   if (fusedSegments.length > 0) {
-    return taggedGroup({ provenance: 'geometry/tagged/fuse' }, ...fusedGraphs, taggedSegments({ provenance: 'geometry/tagged/fuse' }, fusedSegments));
+    return taggedGroup(
+      { provenance: 'geometry/tagged/fuse' },
+      ...fusedGraphs,
+      taggedSegments({ provenance: 'geometry/tagged/fuse' }, fusedSegments)
+    );
   } else {
     return taggedGroup({ provenance: 'geometry/tagged/fuse' }, ...fusedGraphs);
   }

@@ -1,5 +1,4 @@
 import {
-  rerealizeGraph,
   reverseFaceOrientationsOfGraph,
   taggedGraph,
   taggedGroup,
@@ -35,7 +34,7 @@ export const fromObjSync = (data, { invert = false } = {}) => {
     if (invert) {
       graph = reverseFaceOrientationsOfGraph(graph);
     }
-    group.push(taggedGraph({}, rerealizeGraph(graph)));
+    group.push(taggedGraph({}, graph));
   }
 
   return taggedGroup({}, ...group);

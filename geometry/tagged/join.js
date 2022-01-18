@@ -24,27 +24,28 @@ export const join = cached(
     return ['join', hash(geometry), ...geometries.map(hash)];
   },
   (geometry, geometries) => {
-  const concreteGeometry = toConcreteGeometry(geometry);
-  // Collect graphs for rewriting.
-  const rewriteGraphs = [];
-  collect(concreteGeometry, rewriteGraphs);
-  // The other graphs are just read from.
-  const readGraphs = [];
-  for (const geometry of geometries) {
-    collect(toConcreteGeometry(geometry), readGraphs);
-  }
-  const joinedGraphs = joinGraphs(rewriteGraphs, readGraphs);
-  const map = new Map();
-  for (let nth = 0; nth < joinedGraphs.length; nth++) {
-    map.set(rewriteGraphs[nth], joinedGraphs[nth]);
-  }
-  const update = (geometry, descend) => {
-    const joined = map.get(geometry);
-    if (joined) {
-      return joined;
-    } else {
-      return descend();
+    const concreteGeometry = toConcreteGeometry(geometry);
+    // Collect graphs for rewriting.
+    const rewriteGraphs = [];
+    collect(concreteGeometry, rewriteGraphs);
+    // The other graphs are just read from.
+    const readGraphs = [];
+    for (const geometry of geometries) {
+      collect(toConcreteGeometry(geometry), readGraphs);
     }
-  };
-  return rewrite(concreteGeometry, update);
-});
+    const joinedGraphs = joinGraphs(rewriteGraphs, readGraphs);
+    const map = new Map();
+    for (let nth = 0; nth < joinedGraphs.length; nth++) {
+      map.set(rewriteGraphs[nth], joinedGraphs[nth]);
+    }
+    const update = (geometry, descend) => {
+      const joined = map.get(geometry);
+      if (joined) {
+        return joined;
+      } else {
+        return descend();
+      }
+    };
+    return rewrite(concreteGeometry, update);
+  }
+);

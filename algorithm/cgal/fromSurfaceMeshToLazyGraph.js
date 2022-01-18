@@ -7,7 +7,7 @@ export const fromSurfaceMeshToLazyGraph = (mesh) => {
       isClosed: c.Surface_mesh__is_closed(mesh),
       isEmpty: c.Surface_mesh__is_empty(mesh),
       isLazy: true,
-      provenance: 'algorithm/cgal/fromSurfaceMeshToLazyGraph'
+      provenance: 'algorithm/cgal/fromSurfaceMeshToLazyGraph',
     };
     return graph;
   } catch (error) {

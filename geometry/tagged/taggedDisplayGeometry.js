@@ -1,4 +1,7 @@
-export const taggedDisplayGeometry = ({ tags = [], matrix, provenance }, ...content) => {
+export const taggedDisplayGeometry = (
+  { tags = [], matrix, provenance },
+  ...content
+) => {
   if (content.some((value) => value === undefined)) {
     throw Error(`Undefined DisplayGeometry content`);
   }

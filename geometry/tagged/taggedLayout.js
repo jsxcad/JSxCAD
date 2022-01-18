@@ -15,7 +15,8 @@ export const taggedLayout = (
     type: 'layout',
     layout: { size, margin, title },
     tags,
-    matrix, provenance,
+    matrix,
+    provenance,
     content,
   };
 };

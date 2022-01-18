@@ -1,7 +1,8 @@
 export const taggedPlan = ({ tags = [], matrix, provenance }, plan) => ({
   type: 'plan',
   tags,
-  matrix, provenance,
+  matrix,
+  provenance,
   plan,
   content: [],
 });

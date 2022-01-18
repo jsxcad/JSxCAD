@@ -5,7 +5,8 @@ export const taggedPolygonsWithHoles = (
   return {
     type: 'polygonsWithHoles',
     tags,
-    matrix, provenance,
+    matrix,
+    provenance,
     plane,
     exactPlane,
     polygonsWithHoles,
