@@ -559,6 +559,7 @@ const fromExactToCgalTransform = (...exact) => {
 };
 
 const fromApproximateToCgalTransform = (...approximate) => {
+  console.log(`QQ/fromApproximateToCgalTransform: ${approximate}`);
   try {
     return getCgal().Transformation__from_approximate(() =>
       approximate.shift()
@@ -576,10 +577,10 @@ const fromIdentityToCgalTransform = () => {
   }
 };
 
-const fromRotateXToTransform = (angle) => {
+const fromRotateXToTransform = (turn) => {
   try {
     const t = toJsTransformFromCgalTransform(
-      getCgal().Transformation__rotate_x(angle)
+      getCgal().Transformation__rotate_x(turn)
     );
     return t;
   } catch (error) {
@@ -587,20 +588,20 @@ const fromRotateXToTransform = (angle) => {
   }
 };
 
-const fromRotateYToTransform = (angle) => {
+const fromRotateYToTransform = (turn) => {
   try {
     return toJsTransformFromCgalTransform(
-      getCgal().Transformation__rotate_y(angle)
+      getCgal().Transformation__rotate_y(turn)
     );
   } catch (error) {
     throw Error(error);
   }
 };
 
-const fromRotateZToTransform = (angle) => {
+const fromRotateZToTransform = (turn) => {
   try {
     return toJsTransformFromCgalTransform(
-      getCgal().Transformation__rotate_z(angle)
+      getCgal().Transformation__rotate_z(turn)
     );
   } catch (error) {
     throw Error(error);

@@ -1,12 +1,12 @@
 import { closePath, concatenatePath, assemble as assemble$1, flip, toConcreteGeometry, toDisplayGeometry, toTransformedGeometry, toPoints, transform, rewriteTags, taggedPaths, taggedGraph, openPath, taggedSegments, taggedPoints, fromPolygonsToGraph, registerReifier, taggedPlan, taggedGroup, union, taggedItem, getLeafs, getInverseMatrices, bend as bend$1, projectToPlane, computeCentroid, intersection, allTags, fromPointsToGraph, cut as cut$1, demesh as demesh$1, rewrite, visit, hasTypeVoid, hasTypeWire, translatePaths, taggedLayout, measureBoundingBox, getLayouts, isNotVoid, computeNormal, extrude, extrudeToPlane as extrudeToPlane$1, faces as faces$1, fill as fill$1, fuse as fuse$1, eachSegment, removeSelfIntersections as removeSelfIntersections$1, grow as grow$1, outline as outline$1, inset as inset$1, read, readNonblocking, loft as loft$1, prepareForSerialization, hasShowOverlay, hasTypeMasked, minkowskiDifference as minkowskiDifference$1, minkowskiShell as minkowskiShell$1, minkowskiSum as minkowskiSum$1, isVoid, offset as offset$1, eachPoint, push as push$1, remesh as remesh$1, write, writeNonblocking, simplify as simplify$1, section as section$1, separate as separate$1, serialize as serialize$1, smooth as smooth$1, taggedSketch, taper as taper$1, test as test$1, twist as twist$1, withQuery, toPolygonsWithHoles, arrangePolygonsWithHoles, fromPolygonsWithHolesToTriangles, fromTrianglesToGraph, alphaShape, rotateZPath, convexHullToGraph, fromFunctionToGraph, translatePath } from './jsxcad-geometry.js';
 import { getSourceLocation, startTime, endTime, emit, computeHash, logInfo, log as log$1, generateUniqueId, addPending, write as write$1 } from './jsxcad-sys.js';
 export { elapsed, emit, read, write } from './jsxcad-sys.js';
-import { identityMatrix, fromTranslation, fromRotation, fromScaling } from './jsxcad-math-mat4.js';
+import { identityMatrix, fromTranslation, fromRotation } from './jsxcad-math-mat4.js';
 import { scale as scale$1, subtract, add as add$1, abs, squaredLength, normalize, cross, distance } from './jsxcad-math-vec3.js';
 import { zag } from './jsxcad-api-v1-math.js';
 import { toTagsFromName } from './jsxcad-algorithm-color.js';
 import { toTagsFromName as toTagsFromName$1 } from './jsxcad-algorithm-material.js';
-import { invertTransform, fromRotateXToTransform, fromRotateYToTransform, fromRotateZToTransform } from './jsxcad-algorithm-cgal.js';
+import { fromTranslateToTransform, invertTransform, fromRotateXToTransform, fromRotateYToTransform, fromRotateZToTransform, fromScaleToTransform } from './jsxcad-algorithm-cgal.js';
 import { pack as pack$1 } from './jsxcad-algorithm-pack.js';
 import { toTagsFromName as toTagsFromName$2 } from './jsxcad-algorithm-tool.js';
 import { fromPoints as fromPoints$1 } from './jsxcad-math-poly3.js';
@@ -3330,7 +3330,7 @@ const move =
   (shape) =>
     Shape.Group(
       ...Shape.toCoordinates(shape, ...args).map((coordinate) =>
-        shape.transform(fromTranslation(coordinate))
+        shape.transform(fromTranslateToTransform(...coordinate))
       )
     );
 
@@ -3633,6 +3633,7 @@ const remesh =
 
 Shape.registerMethod('remesh', remesh);
 
+// FIX: Move this to cgal.
 const rotate =
   (turn = 0, axis = [0, 0, 1]) =>
   (shape) =>
@@ -3642,12 +3643,12 @@ Shape.registerMethod('rotate', rotate);
 
 // rx is in terms of turns -- 1/2 is a half turn.
 const rx =
-  (...angles) =>
+  (...turns) =>
   (shape) =>
     Shape.Group(
       ...shape
-        .toFlatValues(angles)
-        .map((angle) => shape.transform(fromRotateXToTransform(angle * 360)))
+        .toFlatValues(turns)
+        .map((turn) => shape.transform(fromRotateXToTransform(turn)))
     );
 
 Shape.registerMethod('rx', rx);
@@ -3657,12 +3658,12 @@ Shape.registerMethod('rotateX', rotateX);
 
 // ry is in terms of turns -- 1/2 is a half turn.
 const ry =
-  (...angles) =>
+  (...turns) =>
   (shape) =>
     Shape.Group(
       ...shape
-        .toFlatValues(angles)
-        .map((angle) => shape.transform(fromRotateYToTransform(angle * 360)))
+        .toFlatValues(turns)
+        .map((turn) => shape.transform(fromRotateYToTransform(turn)))
     );
 
 Shape.registerMethod('ry', ry);
@@ -3672,12 +3673,12 @@ Shape.registerMethod('rotateY', ry);
 
 // rz is in terms of turns -- 1/2 is a half turn.
 const rz =
-  (...angles) =>
+  (...turns) =>
   (shape) =>
     Shape.Group(
       ...shape
-        .toFlatValues(angles)
-        .map((angle) => shape.transform(fromRotateZToTransform(angle * 360)))
+        .toFlatValues(turns)
+        .map((turn) => shape.transform(fromRotateZToTransform(turn)))
     );
 
 Shape.registerMethod('rz', rz);
@@ -3702,9 +3703,9 @@ const scale =
     const negatives = (x < 0) + (y < 0) + (z < 0);
     if (negatives % 2) {
       // Compensate for inversion.
-      return shape.transform(fromScaling([x, y, z])).flip();
+      return shape.transform(fromScaleToTransform(x, y, z)).flip();
     } else {
-      return shape.transform(fromScaling([x, y, z]));
+      return shape.transform(fromScaleToTransform(x, y, z));
     }
   };
 

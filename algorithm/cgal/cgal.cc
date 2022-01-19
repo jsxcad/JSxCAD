@@ -1090,11 +1090,13 @@ const Surface_mesh* TransformSurfaceMeshByTransform(
   return output;
 }
 
-void compute_degrees(double a, RT& sin_alpha, RT& cos_alpha, RT& w) {
-  // Convert angle to radians.
-  double radians = a * M_PI / 180.0;
-  CGAL::rational_rotation_approximation(radians, sin_alpha, cos_alpha, w, RT(1),
-                                        RT(1000));
+// These may need adjustment.
+FT compute_scaling_factor(double value) {
+  return CGAL::simplest_rational_in_interval<FT>(value * 0.999, value * 1.001);
+}
+
+FT compute_translation_offset(double value) {
+  return CGAL::simplest_rational_in_interval<FT>(value - 0.001, value + 0.001);
 }
 
 void compute_turn(double turn, RT& sin_alpha, RT& cos_alpha, RT& w) {
@@ -5050,16 +5052,21 @@ const Transformation* Transformation__from_approximate(emscripten::val get) {
 }
 
 const Transformation* Transformation__translate(double x, double y, double z) {
-  return new Transformation(CGAL::TRANSLATION, Vector(x, y, z));
+  return new Transformation(
+      CGAL::TRANSLATION,
+      Vector(compute_translation_offset(x), compute_translation_offset(y),
+             compute_translation_offset(z)));
 }
 
 const Transformation* Transformation__scale(double x, double y, double z) {
-  return new Transformation(x, 0, 0, 0, 0, y, 0, 0, 0, 0, z, 0, 1);
+  return new Transformation(compute_scaling_factor(x), 0, 0, 0, 0,
+                            compute_scaling_factor(y), 0, 0, 0, 0,
+                            compute_scaling_factor(z), 0, 1);
 }
 
 const Transformation* Transformation__rotate_x(double a) {
   RT sin_alpha, cos_alpha, w;
-  compute_degrees(a, sin_alpha, cos_alpha, w);
+  compute_turn(a, sin_alpha, cos_alpha, w);
   return new Transformation(w, 0, 0, 0, 0, cos_alpha, -sin_alpha, 0, 0,
                             sin_alpha, cos_alpha, 0, w);
 }
@@ -5073,14 +5080,14 @@ Transformation TransformationFromXTurn(double turn) {
 
 const Transformation* Transformation__rotate_y(double a) {
   RT sin_alpha, cos_alpha, w;
-  compute_degrees(a, sin_alpha, cos_alpha, w);
+  compute_turn(a, sin_alpha, cos_alpha, w);
   return new Transformation(cos_alpha, 0, -sin_alpha, 0, 0, w, 0, 0, sin_alpha,
                             0, cos_alpha, 0, w);
 }
 
 const Transformation* Transformation__rotate_z(double a) {
   RT sin_alpha, cos_alpha, w;
-  compute_degrees(a, sin_alpha, cos_alpha, w);
+  compute_turn(a, sin_alpha, cos_alpha, w);
   return new Transformation(cos_alpha, sin_alpha, 0, 0, -sin_alpha, cos_alpha,
                             0, 0, 0, 0, w, 0, w);
 }
