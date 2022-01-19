@@ -57,6 +57,8 @@ export const orient =
       0,
       1,
     ];
+    // FIX: Move this to CGAL.
+    lookAt.blessed = true;
     return shape
       .transform(local)
       .transform(lookAt)

@@ -6,4 +6,7 @@
 
 export const identityMatrix = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
 
+// FIX: Move to cgal.
+identityMatrix.blessed = true;
+
 export const identity = () => identityMatrix;

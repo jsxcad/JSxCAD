@@ -1,5 +1,5 @@
 import Shape from './Shape.js';
-import { fromTranslation } from '@jsxcad/math-mat4';
+import { fromTranslateToTransform } from '@jsxcad/algorithm-cgal';
 
 // FIX: This is probably the wrong approach to moving to a particular location.
 export const moveTo =
@@ -25,7 +25,7 @@ export const moveTo =
     if (!isFinite(z)) {
       z = 0;
     }
-    return shape.transform(fromTranslation([-x, -y, -z]));
+    return shape.transform(fromTranslateToTransform(-x, -y, -z));
   };
 
 Shape.registerMethod('moveTo', moveTo);

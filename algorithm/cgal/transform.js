@@ -1,6 +1,11 @@
 import { getCgal } from './getCgal.js';
 import { identityMatrix } from '@jsxcad/math-mat4';
 
+export const blessed = (matrix) => {
+  matrix.blessed = true;
+  return matrix;
+};
+
 const M00 = 0;
 const M01 = 1;
 const M02 = 2;
@@ -58,7 +63,7 @@ export const toCgalTransformFromJsTransform = (
     let cgalTransform = jsTransform[transformSymbol];
     if (cgalTransform === undefined) {
       if (jsTransform.length > 16) {
-        cgalTransform = fromExactToCgalTransform(...jsTransform.slice(16));
+        cgalTransform = fromExactToCgalTransform(jsTransform.slice(16));
       } else {
         const [
           m00,
@@ -78,7 +83,14 @@ export const toCgalTransformFromJsTransform = (
           m23,
           hw,
         ] = jsTransform;
-        cgalTransform = fromApproximateToCgalTransform(
+        if (!jsTransform.blessed) {
+          throw Error(
+            `Received unblessed non-identity approximate matrix: ${JSON.stringify(
+              jsTransform
+            )}`
+          );
+        }
+        cgalTransform = fromApproximateToCgalTransform([
           m00,
           m01,
           m02,
@@ -91,14 +103,16 @@ export const toCgalTransformFromJsTransform = (
           m21,
           m22,
           m23,
-          hw
-        );
+          hw,
+        ]);
       }
       jsTransform[transformSymbol] = cgalTransform;
     }
     return cgalTransform;
   } catch (e) {
-    console.log(`Malformed transform: ${JSON.stringify(jsTransform)}`);
+    console.log(
+      `Malformed transform: ${JSON.stringify(jsTransform)}: ${e.stack}`
+    );
     throw e;
   }
 };
@@ -126,20 +140,17 @@ export const invertTransform = (a) => {
   }
 };
 
-export const fromExactToCgalTransform = (...exact) => {
+export const fromExactToCgalTransform = (exact) => {
   try {
-    return getCgal().Transformation__from_exact(() => exact.shift());
+    return getCgal().Transformation__from_exact(...exact);
   } catch (error) {
     throw Error(error);
   }
 };
 
-export const fromApproximateToCgalTransform = (...approximate) => {
-  console.log(`QQ/fromApproximateToCgalTransform: ${approximate}`);
+export const fromApproximateToCgalTransform = (approximate) => {
   try {
-    return getCgal().Transformation__from_approximate(() =>
-      approximate.shift()
-    );
+    return getCgal().Transformation__from_approximate(...approximate);
   } catch (error) {
     throw Error(error);
   }
@@ -229,3 +240,8 @@ export const fromSegmentToInverseTransform = (
     throw Error(error);
   }
 };
+
+export const identity = () => blessed(identityMatrix);
+
+export const matrix6 = (a, b, c, d, tx, ty) =>
+  blessed([a, b, 0, 0, c, d, 0, 0, 0, 0, 1, 0, tx, ty, 0, 1]);

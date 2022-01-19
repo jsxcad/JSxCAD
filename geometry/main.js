@@ -1,23 +1,23 @@
 import {
-  fromScaling,
-  fromTranslation,
-  fromXRotation,
-  fromYRotation,
-  fromZRotation,
-} from '@jsxcad/math-mat4';
+  fromRotateXToTransform,
+  fromRotateYToTransform,
+  fromRotateZToTransform,
+  fromScaleToTransform,
+  fromTranslateToTransform,
+} from '@jsxcad/algorithm-cgal';
 
 import { transform } from './tagged/transform.js';
 
-export const rotateX = (angle, geometry) =>
-  transform(fromXRotation((angle * Math.PI) / 180), geometry);
-export const rotateY = (angle, geometry) =>
-  transform(fromYRotation((angle * Math.PI) / 180), geometry);
-export const rotateZ = (angle, geometry) =>
-  transform(fromZRotation((angle * Math.PI) / 180), geometry);
+export const rotateX = (turn, geometry) =>
+  transform(fromRotateXToTransform(turn), geometry);
+export const rotateY = (turn, geometry) =>
+  transform(fromRotateYToTransform(turn), geometry);
+export const rotateZ = (turn, geometry) =>
+  transform(fromRotateZToTransform(turn), geometry);
 export const translate = (vector, geometry) =>
-  transform(fromTranslation(vector), geometry);
+  transform(fromTranslateToTransform(...vector), geometry);
 export const scale = (vector, geometry) =>
-  transform(fromScaling(vector), geometry);
+  transform(fromScaleToTransform(...vector), geometry);
 
 export { isNotVoid, isVoid } from './tagged/isNotVoid.js';
 

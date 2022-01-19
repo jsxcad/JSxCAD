@@ -1,3 +1,4 @@
+import { blessed } from './transform.js';
 import { disjointSurfaceMeshes } from './disjointSurfaceMeshes.js';
 import { fromPolygonsToSurfaceMesh } from './fromPolygonsToSurfaceMesh.js';
 import { fromSurfaceMeshToGraph } from './fromSurfaceMeshToGraph.js';
@@ -189,8 +190,8 @@ test('Disjoint', (t) => {
   const b = fromPolygonsToSurfaceMesh(box);
   // The first entry is the pivot of the disjunction.
   const r = disjointSurfaceMeshes([
-    { mesh: b, matrix: [...identityMatrix] },
-    { mesh: a, matrix: [...identityMatrix] },
+    { mesh: b, matrix: blessed([...identityMatrix]) },
+    { mesh: a, matrix: blessed([...identityMatrix]) },
   ]);
   const graphs = r.map(({ mesh, matrix }) => ({
     graph: fromSurfaceMeshToGraph(mesh),

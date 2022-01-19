@@ -61,7 +61,7 @@ test('deserialize', (t) => {
     '0',
     '1',
   ];
-  const transform = c.Transformation__from_exact(() => input.shift());
+  const transform = c.Transformation__from_exact(...input);
 
   const output = [];
   c.Transformation__to_exact(transform, (value) => output.push(value));

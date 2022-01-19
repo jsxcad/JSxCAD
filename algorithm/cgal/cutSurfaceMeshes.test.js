@@ -1,3 +1,4 @@
+import { blessed } from './transform.js';
 import { cutSurfaceMeshes } from './cutSurfaceMeshes.js';
 import { fromPolygonsToSurfaceMesh } from './fromPolygonsToSurfaceMesh.js';
 import { fromSurfaceMeshToGraph } from './fromSurfaceMeshToGraph.js';
@@ -189,9 +190,9 @@ test('Cut', (t) => {
   const b = fromPolygonsToSurfaceMesh(box);
   // The first entry is the pivot of the disjunction.
   const { cutMeshes } = cutSurfaceMeshes(
-    [{ mesh: a, matrix: [...identityMatrix], tags: ['a'] }],
+    [{ mesh: a, matrix: blessed([...identityMatrix]), tags: ['a'] }],
     [],
-    [{ mesh: b, matrix: [...identityMatrix], tags: ['b'] }]
+    [{ mesh: b, matrix: blessed([...identityMatrix]), tags: ['b'] }]
   );
   const graphs = cutMeshes.map(({ mesh, matrix, tags }) => ({
     graph: fromSurfaceMeshToGraph(mesh),

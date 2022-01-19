@@ -1,4 +1,5 @@
 import { SurfaceMeshQuery } from './SurfaceMeshQuery.js';
+import { blessed } from './transform.js';
 import { fromPolygonsToSurfaceMesh } from './fromPolygonsToSurfaceMesh.js';
 import { identityMatrix } from '@jsxcad/math-mat4';
 import { initCgal } from './getCgal.js';
@@ -44,7 +45,7 @@ test('Clip Segment by Volume', (t) => {
   const surfaceMesh = fromPolygonsToSurfaceMesh(unitRegularTetrahedronPolygons);
   t.true(surfaceMesh.is_valid(false));
   t.true(!surfaceMesh.is_empty());
-  const query = SurfaceMeshQuery(surfaceMesh, [...identityMatrix]);
+  const query = SurfaceMeshQuery(surfaceMesh, blessed([...identityMatrix]));
   t.is(query.isIntersectingPointApproximate(0, 0, 0), true);
   t.is(query.isIntersectingPointApproximate(0, 0, 10), false);
   {
@@ -134,7 +135,7 @@ const triangle = [
 
 test('Clip Segment by Surface', (t) => {
   const surfaceMesh = fromPolygonsToSurfaceMesh(triangle);
-  const query = SurfaceMeshQuery(surfaceMesh, [...identityMatrix]);
+  const query = SurfaceMeshQuery(surfaceMesh, blessed([...identityMatrix]));
   {
     // Segment passes all the way through -- point intersection isn't sufficient.
     const segments = [];

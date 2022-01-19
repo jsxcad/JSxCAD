@@ -1,3 +1,4 @@
+import { blessed } from './transform.js';
 import { fromPolygonsToSurfaceMesh } from './fromPolygonsToSurfaceMesh.js';
 import { fromSurfaceMeshToGraph } from './fromSurfaceMeshToGraph.js';
 import { fuseSurfaceMeshes } from './fuseSurfaceMeshes.js';
@@ -189,8 +190,8 @@ test('Fuse', (t) => {
   const b = fromPolygonsToSurfaceMesh(box);
   // The first entry is the pivot of the disjunction.
   const { fusedMeshes } = fuseSurfaceMeshes([
-    { mesh: b, matrix: [...identityMatrix], tags: ['a'] },
-    { mesh: a, matrix: [...identityMatrix], tags: ['b'] },
+    { mesh: b, matrix: blessed([...identityMatrix]), tags: ['a'] },
+    { mesh: a, matrix: blessed([...identityMatrix]), tags: ['b'] },
   ]);
   const graphs = fusedMeshes.map(({ mesh, matrix, tags }) => ({
     graph: fromSurfaceMeshToGraph(mesh),
