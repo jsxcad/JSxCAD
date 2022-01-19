@@ -1,5 +1,5 @@
 import Shape from './Shape.js';
-import { fromScaling } from '@jsxcad/math-mat4';
+import { fromScaleToTransform } from '@jsxcad/algorithm-cgal';
 
 export const scale =
   (x = 1, y = x, z = y) =>
@@ -8,9 +8,9 @@ export const scale =
     const negatives = (x < 0) + (y < 0) + (z < 0);
     if (negatives % 2) {
       // Compensate for inversion.
-      return shape.transform(fromScaling([x, y, z])).flip();
+      return shape.transform(fromScaleToTransform(x, y, z)).flip();
     } else {
-      return shape.transform(fromScaling([x, y, z]));
+      return shape.transform(fromScaleToTransform(x, y, z));
     }
   };
 

@@ -3,12 +3,12 @@ import { fromRotateZToTransform } from '@jsxcad/algorithm-cgal';
 
 // rz is in terms of turns -- 1/2 is a half turn.
 export const rz =
-  (...angles) =>
+  (...turns) =>
   (shape) =>
     Shape.Group(
       ...shape
-        .toFlatValues(angles)
-        .map((angle) => shape.transform(fromRotateZToTransform(angle * 360)))
+        .toFlatValues(turns)
+        .map((turn) => shape.transform(fromRotateZToTransform(turn)))
     );
 
 Shape.registerMethod('rz', rz);

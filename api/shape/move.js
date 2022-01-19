@@ -1,12 +1,12 @@
 import Shape from './Shape.js';
-import { fromTranslation } from '@jsxcad/math-mat4';
+import { fromTranslateToTransform } from '@jsxcad/algorithm-cgal';
 
 export const move =
   (...args) =>
   (shape) =>
     Shape.Group(
       ...Shape.toCoordinates(shape, ...args).map((coordinate) =>
-        shape.transform(fromTranslation(coordinate))
+        shape.transform(fromTranslateToTransform(...coordinate))
       )
     );
 
