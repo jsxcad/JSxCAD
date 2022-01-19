@@ -1,3 +1,4 @@
+import { blessed } from './transform.js';
 import { extrudeSurfaceMesh } from './extrudeSurfaceMesh.js';
 import { fromPolygonsToSurfaceMesh } from './fromPolygonsToSurfaceMesh.js';
 import { fromSurfaceMeshToGraph } from './fromSurfaceMeshToGraph.js';
@@ -23,10 +24,16 @@ test('Extrude/Triangle', (t) => {
   const surfaceMesh = fromPolygonsToSurfaceMesh(triangle);
   t.true(surfaceMesh.is_valid(false));
   t.true(!surfaceMesh.is_empty());
-  const extrusion = extrudeSurfaceMesh(surfaceMesh, [...identityMatrix], 1, 0, {
-    direction: [0, 0, 1, 0],
-    exactDirection: ['0', '0', '1', '0'],
-  });
+  const extrusion = extrudeSurfaceMesh(
+    surfaceMesh,
+    blessed([...identityMatrix]),
+    1,
+    0,
+    {
+      direction: [0, 0, 1, 0],
+      exactDirection: ['0', '0', '1', '0'],
+    }
+  );
   const graph = fromSurfaceMeshToGraph(extrusion);
   t.deepEqual(JSON.parse(JSON.stringify(graph)), {
     edges: [
@@ -115,7 +122,7 @@ test('Zero volume extrusion fails', (t) => {
   t.true(!surfaceMesh.is_empty());
   t.is(
     undefined,
-    extrudeSurfaceMesh(surfaceMesh, [...identityMatrix], 1, 0, {
+    extrudeSurfaceMesh(surfaceMesh, blessed([...identityMatrix]), 1, 0, {
       direction: [0, 0, 1, 0],
       exactDirection: ['0', '0', '1', '0'],
     })

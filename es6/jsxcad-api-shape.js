@@ -1,7 +1,7 @@
 import { closePath, concatenatePath, assemble as assemble$1, flip, toConcreteGeometry, toDisplayGeometry, toTransformedGeometry, toPoints, transform, rewriteTags, taggedPaths, taggedGraph, openPath, taggedSegments, taggedPoints, fromPolygonsToGraph, registerReifier, taggedPlan, taggedGroup, union, taggedItem, getLeafs, getInverseMatrices, bend as bend$1, projectToPlane, computeCentroid, intersection, allTags, fromPointsToGraph, cut as cut$1, demesh as demesh$1, rewrite, visit, hasTypeVoid, hasTypeWire, translatePaths, taggedLayout, measureBoundingBox, getLayouts, isNotVoid, computeNormal, extrude, extrudeToPlane as extrudeToPlane$1, faces as faces$1, fill as fill$1, fuse as fuse$1, eachSegment, removeSelfIntersections as removeSelfIntersections$1, grow as grow$1, outline as outline$1, inset as inset$1, read, readNonblocking, loft as loft$1, prepareForSerialization, hasShowOverlay, hasTypeMasked, minkowskiDifference as minkowskiDifference$1, minkowskiShell as minkowskiShell$1, minkowskiSum as minkowskiSum$1, isVoid, offset as offset$1, eachPoint, push as push$1, remesh as remesh$1, write, writeNonblocking, simplify as simplify$1, section as section$1, separate as separate$1, serialize as serialize$1, smooth as smooth$1, taggedSketch, taper as taper$1, test as test$1, twist as twist$1, withQuery, toPolygonsWithHoles, arrangePolygonsWithHoles, fromPolygonsWithHolesToTriangles, fromTrianglesToGraph, alphaShape, rotateZPath, convexHullToGraph, fromFunctionToGraph, translatePath } from './jsxcad-geometry.js';
 import { getSourceLocation, startTime, endTime, emit, computeHash, logInfo, log as log$1, generateUniqueId, addPending, write as write$1 } from './jsxcad-sys.js';
 export { elapsed, emit, read, write } from './jsxcad-sys.js';
-import { identityMatrix, fromTranslation, fromRotation } from './jsxcad-math-mat4.js';
+import { identityMatrix, fromRotation } from './jsxcad-math-mat4.js';
 import { scale as scale$1, subtract, add as add$1, abs, squaredLength, normalize, cross, distance } from './jsxcad-math-vec3.js';
 import { zag } from './jsxcad-api-v1-math.js';
 import { toTagsFromName } from './jsxcad-algorithm-color.js';
@@ -3383,7 +3383,7 @@ const moveTo =
     if (!isFinite(z)) {
       z = 0;
     }
-    return shape.transform(fromTranslation([-x, -y, -z]));
+    return shape.transform(fromTranslateToTransform(-x, -y, -z));
   };
 
 Shape.registerMethod('moveTo', moveTo);
@@ -3534,6 +3534,8 @@ const orient =
       0,
       1,
     ];
+    // FIX: Move this to CGAL.
+    lookAt.blessed = true;
     return shape
       .transform(local)
       .transform(lookAt)
@@ -3636,8 +3638,12 @@ Shape.registerMethod('remesh', remesh);
 // FIX: Move this to cgal.
 const rotate =
   (turn = 0, axis = [0, 0, 1]) =>
-  (shape) =>
-    shape.transform(fromRotation(turn * Math.PI * 2, axis));
+  (shape) => {
+    const matrix = fromRotation(turn * Math.PI * 2, axis);
+    // FIX: Move to cgal.
+    matrix.blessed = true;
+    return shape.transform(matrix);
+  };
 
 Shape.registerMethod('rotate', rotate);
 

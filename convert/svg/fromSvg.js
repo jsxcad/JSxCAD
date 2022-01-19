@@ -1,17 +1,18 @@
 import {
+  composeTransforms,
+  fromRotateZToTransform,
+  fromScaleToTransform,
+  fromTranslateToTransform,
+  identity,
+  matrix6,
+} from '@jsxcad/algorithm-cgal';
+
+import {
   fill as fillGeometry,
   taggedGroup,
   taggedPaths,
   transform as transformGeometry,
 } from '@jsxcad/geometry';
-
-import {
-  fromScaling,
-  fromTranslation,
-  fromZRotation,
-  identity,
-  multiply,
-} from '@jsxcad/math-mat4';
 
 import SvgPoints from 'svg-points/cjs/index.js';
 import XmlDom from 'xmldom';
@@ -53,41 +54,30 @@ const applyTransforms = ({ matrix }, transformText) => {
       case 'matrix': {
         // a b c
         const [a, b, c, d, tx, ty] = operands;
-        matrix = multiply(matrix, [
-          a,
-          b,
-          0,
-          0,
-          c,
-          d,
-          0,
-          0,
-          0,
-          0,
-          1,
-          0,
-          tx,
-          ty,
-          0,
-          1,
-        ]);
+        matrix = composeTransforms(matrix, matrix6(a, b, c, d, tx, ty));
         break;
       }
       case 'translate': {
         const [x = 0, y = 0, z = 0] = operands;
-        matrix = multiply(matrix, fromTranslation([x, y, z]));
+        matrix = composeTransforms(matrix, fromTranslateToTransform(x, y, z));
         break;
       }
       case 'scale': {
         const [x = 1, y = x, z = 1] = operands;
-        matrix = multiply(matrix, fromScaling([x, y, z]));
+        matrix = composeTransforms(matrix, fromScaleToTransform(x, y, z));
         break;
       }
       case 'rotate': {
         const [degrees = 0, x = 0, y = 0, z = 0] = operands;
-        matrix = multiply(matrix, fromTranslation([x, y, z]));
-        matrix = multiply(matrix, fromZRotation((degrees * Math.PI) / 180));
-        matrix = multiply(matrix, fromTranslation([-x, -y, -z]));
+        matrix = composeTransforms(matrix, fromTranslateToTransform(x, y, z));
+        matrix = composeTransforms(
+          matrix,
+          fromRotateZToTransform(degrees / 360)
+        );
+        matrix = composeTransforms(
+          matrix,
+          fromTranslateToTransform(-x, -y, -z)
+        );
         break;
       }
       case 'skewX': {
@@ -101,24 +91,7 @@ const applyTransforms = ({ matrix }, transformText) => {
           0,
           0,
         ];
-        matrix = multiply(matrix, [
-          a,
-          b,
-          0,
-          0,
-          c,
-          d,
-          0,
-          0,
-          0,
-          0,
-          1,
-          0,
-          tx,
-          ty,
-          0,
-          1,
-        ]);
+        matrix = composeTransforms(matrix, matrix6(a, b, c, d, tx, ty));
         break;
       }
       case 'skewY': {
@@ -132,24 +105,7 @@ const applyTransforms = ({ matrix }, transformText) => {
           0,
           0,
         ];
-        matrix = multiply(matrix, [
-          a,
-          b,
-          0,
-          0,
-          c,
-          d,
-          0,
-          0,
-          0,
-          0,
-          1,
-          0,
-          tx,
-          ty,
-          0,
-          1,
-        ]);
+        matrix = composeTransforms(matrix, matrix6(a, b, c, d, tx, ty));
         break;
       }
       default: {
@@ -199,12 +155,10 @@ export const fromSvg = async (
   };
 
   const scaling = measureScale(svg.documentElement);
-  const scale = (matrix) => multiply(fromScaling(scaling), matrix);
+  const scale = (matrix) =>
+    composeTransforms(fromScaleToTransform(...scaling), matrix);
 
   const walk = ({ matrix }, node) => {
-    if (matrix.some((element) => isNaN(element))) {
-      throw Error(`die: Bad element in matrix ${matrix}.`);
-    }
     const buildShape = (...attrs) => {
       const result = { type: node.tagName };
       for (const attr of attrs) {
@@ -231,10 +185,6 @@ export const fromSvg = async (
           { matrix },
           node.getAttribute('transform')
         ));
-
-        if (matrix.some((element) => isNaN(element))) {
-          throw Error(`die: Bad element in matrix ${matrix}.`);
-        }
 
         const output = (svgPath) => {
           const paths = fromSvgPath(svgPath).paths;
@@ -267,13 +217,7 @@ export const fromSvg = async (
             strokeWidth !== 'none' &&
             strokeWidth !== '';
           if (doStroke && (hasStroke || hasStrokeWidth)) {
-            if (matrix.some((element) => isNaN(element))) {
-              throw Error(`die: Bad element in matrix ${matrix}.`);
-            }
             const scaledMatrix = scale(matrix);
-            if (scaledMatrix.some((element) => isNaN(element))) {
-              throw Error(`die: Bad element in matrix ${matrix}.`);
-            }
             const tags = toTagsFromName(stroke, definitions);
             geometry.content.push(
               transformGeometry(scaledMatrix, {

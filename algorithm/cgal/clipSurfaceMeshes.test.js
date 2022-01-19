@@ -1,3 +1,4 @@
+import { blessed } from './transform.js';
 import { clipSurfaceMeshes } from './clipSurfaceMeshes.js';
 import { fromPolygonsToSurfaceMesh } from './fromPolygonsToSurfaceMesh.js';
 import { fromSurfaceMeshToGraph } from './fromSurfaceMeshToGraph.js';
@@ -189,9 +190,9 @@ test('Clip Meshes', (t) => {
   const b = fromPolygonsToSurfaceMesh(box);
   // The first entry is the pivot of the disjunction.
   const { clippedMeshes } = clipSurfaceMeshes(
-    [{ mesh: b, matrix: [...identityMatrix], tags: ['a'] }],
+    [{ mesh: b, matrix: blessed([...identityMatrix]), tags: ['a'] }],
     [],
-    [{ mesh: a, matrix: [...identityMatrix], tags: ['b'] }]
+    [{ mesh: a, matrix: blessed([...identityMatrix]), tags: ['b'] }]
   );
   const graphs = clippedMeshes.map(({ mesh, matrix, tags }) => ({
     graph: fromSurfaceMeshToGraph(mesh),

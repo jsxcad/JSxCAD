@@ -425,6 +425,11 @@ const getCgal = () => cgal;
 
 onBoot(initCgal);
 
+const blessed = (matrix) => {
+  matrix.blessed = true;
+  return matrix;
+};
+
 const M00 = 0;
 const M01 = 1;
 const M02 = 2;
@@ -482,7 +487,7 @@ const toCgalTransformFromJsTransform = (
     let cgalTransform = jsTransform[transformSymbol];
     if (cgalTransform === undefined) {
       if (jsTransform.length > 16) {
-        cgalTransform = fromExactToCgalTransform(...jsTransform.slice(16));
+        cgalTransform = fromExactToCgalTransform(jsTransform.slice(16));
       } else {
         const [
           m00,
@@ -502,7 +507,14 @@ const toCgalTransformFromJsTransform = (
           m23,
           hw,
         ] = jsTransform;
-        cgalTransform = fromApproximateToCgalTransform(
+        if (!jsTransform.blessed) {
+          throw Error(
+            `Received unblessed non-identity approximate matrix: ${JSON.stringify(
+              jsTransform
+            )}`
+          );
+        }
+        cgalTransform = fromApproximateToCgalTransform([
           m00,
           m01,
           m02,
@@ -515,14 +527,16 @@ const toCgalTransformFromJsTransform = (
           m21,
           m22,
           m23,
-          hw
-        );
+          hw,
+        ]);
       }
       jsTransform[transformSymbol] = cgalTransform;
     }
     return cgalTransform;
   } catch (e) {
-    console.log(`Malformed transform: ${JSON.stringify(jsTransform)}`);
+    console.log(
+      `Malformed transform: ${JSON.stringify(jsTransform)}: ${e.stack}`
+    );
     throw e;
   }
 };
@@ -550,20 +564,17 @@ const invertTransform = (a) => {
   }
 };
 
-const fromExactToCgalTransform = (...exact) => {
+const fromExactToCgalTransform = (exact) => {
   try {
-    return getCgal().Transformation__from_exact(() => exact.shift());
+    return getCgal().Transformation__from_exact(...exact);
   } catch (error) {
     throw Error(error);
   }
 };
 
-const fromApproximateToCgalTransform = (...approximate) => {
-  console.log(`QQ/fromApproximateToCgalTransform: ${approximate}`);
+const fromApproximateToCgalTransform = (approximate) => {
   try {
-    return getCgal().Transformation__from_approximate(() =>
-      approximate.shift()
-    );
+    return getCgal().Transformation__from_approximate(...approximate);
   } catch (error) {
     throw Error(error);
   }
@@ -653,6 +664,11 @@ const fromSegmentToInverseTransform = (
     throw Error(error);
   }
 };
+
+const identity = () => blessed(identityMatrix);
+
+const matrix6 = (a, b, c, d, tx, ty) =>
+  blessed([a, b, 0, 0, c, d, 0, 0, 0, 0, 1, 0, tx, ty, 0, 1]);
 
 const SurfaceMeshQuery = (mesh, transform) => {
   try {
@@ -2514,4 +2530,4 @@ const wireframeSurfaceMesh = (mesh, transform) => {
   }
 };
 
-export { BOOLEAN_ADD, BOOLEAN_CLIP, BOOLEAN_CUT, STATUS_EMPTY, STATUS_OK, STATUS_UNCHANGED, STATUS_ZERO_THICKNESS, SurfaceMeshQuery, approximateSurfaceMesh, arrangePaths, arrangePathsIntoTriangles, arrangePolygonsWithHoles, arrangeSegments, arrangeSegmentsIntoTriangles, bendSurfaceMesh, booleansOfPolygonsWithHoles, clipSurfaceMeshes, composeTransforms, computeCentroidOfSurfaceMesh, computeNormalOfSurfaceMesh, cutOutOfSurfaceMeshes, cutSurfaceMeshes, deleteSurfaceMesh, demeshSurfaceMesh, deserializeSurfaceMesh, disjointSurfaceMeshes, doesSelfIntersectOfSurfaceMesh, eachPointOfSurfaceMesh, extrudeSurfaceMesh, extrudeToPlaneOfSurfaceMesh, fitPlaneToPoints, fromApproximateToCgalTransform, fromExactToCgalTransform, fromFunctionToSurfaceMesh, fromGraphToSurfaceMesh, fromIdentityToCgalTransform, fromPointsToAlphaShape2AsPolygonSegments, fromPointsToAlphaShapeAsSurfaceMesh, fromPointsToConvexHullAsSurfaceMesh, fromPointsToSurfaceMesh, fromPolygonsToSurfaceMesh, fromRotateXToTransform, fromRotateYToTransform, fromRotateZToTransform, fromScaleToTransform, fromSegmentToInverseTransform, fromSurfaceMeshEmitBoundingBox, fromSurfaceMeshToGraph, fromSurfaceMeshToLazyGraph, fromSurfaceMeshToPolygons, fromSurfaceMeshToPolygonsWithHoles, fromSurfaceMeshToTriangles, fromTranslateToTransform, fuseSurfaceMeshes, growSurfaceMesh, initCgal, insetOfPolygonWithHoles, invertTransform, isotropicRemeshingOfSurfaceMesh, joinSurfaceMeshes, loftBetweenCongruentSurfaceMeshes, minkowskiDifferenceOfSurfaceMeshes, minkowskiShellOfSurfaceMeshes, minkowskiSumOfSurfaceMeshes, offsetOfPolygonWithHoles, outlineSurfaceMesh, projectToPlaneOfSurfaceMesh, pushSurfaceMesh, remeshSurfaceMesh, removeSelfIntersectionsOfSurfaceMesh, reverseFaceOrientationsOfSurfaceMesh, sectionOfSurfaceMesh, separateSurfaceMesh, serializeSurfaceMesh, simplifySurfaceMesh, smoothShapeOfSurfaceMesh, smoothSurfaceMesh, subdivideSurfaceMesh, taperSurfaceMesh, toCgalTransformFromJsTransform, transformSurfaceMesh, twistSurfaceMesh, wireframeSurfaceMesh };
+export { BOOLEAN_ADD, BOOLEAN_CLIP, BOOLEAN_CUT, STATUS_EMPTY, STATUS_OK, STATUS_UNCHANGED, STATUS_ZERO_THICKNESS, SurfaceMeshQuery, approximateSurfaceMesh, arrangePaths, arrangePathsIntoTriangles, arrangePolygonsWithHoles, arrangeSegments, arrangeSegmentsIntoTriangles, bendSurfaceMesh, blessed, booleansOfPolygonsWithHoles, clipSurfaceMeshes, composeTransforms, computeCentroidOfSurfaceMesh, computeNormalOfSurfaceMesh, cutOutOfSurfaceMeshes, cutSurfaceMeshes, deleteSurfaceMesh, demeshSurfaceMesh, deserializeSurfaceMesh, disjointSurfaceMeshes, doesSelfIntersectOfSurfaceMesh, eachPointOfSurfaceMesh, extrudeSurfaceMesh, extrudeToPlaneOfSurfaceMesh, fitPlaneToPoints, fromExactToCgalTransform, fromFunctionToSurfaceMesh, fromGraphToSurfaceMesh, fromIdentityToCgalTransform, fromPointsToAlphaShape2AsPolygonSegments, fromPointsToAlphaShapeAsSurfaceMesh, fromPointsToConvexHullAsSurfaceMesh, fromPointsToSurfaceMesh, fromPolygonsToSurfaceMesh, fromRotateXToTransform, fromRotateYToTransform, fromRotateZToTransform, fromScaleToTransform, fromSegmentToInverseTransform, fromSurfaceMeshEmitBoundingBox, fromSurfaceMeshToGraph, fromSurfaceMeshToLazyGraph, fromSurfaceMeshToPolygons, fromSurfaceMeshToPolygonsWithHoles, fromSurfaceMeshToTriangles, fromTranslateToTransform, fuseSurfaceMeshes, growSurfaceMesh, identity, initCgal, insetOfPolygonWithHoles, invertTransform, isotropicRemeshingOfSurfaceMesh, joinSurfaceMeshes, loftBetweenCongruentSurfaceMeshes, matrix6, minkowskiDifferenceOfSurfaceMeshes, minkowskiShellOfSurfaceMeshes, minkowskiSumOfSurfaceMeshes, offsetOfPolygonWithHoles, outlineSurfaceMesh, projectToPlaneOfSurfaceMesh, pushSurfaceMesh, remeshSurfaceMesh, removeSelfIntersectionsOfSurfaceMesh, reverseFaceOrientationsOfSurfaceMesh, sectionOfSurfaceMesh, separateSurfaceMesh, serializeSurfaceMesh, simplifySurfaceMesh, smoothShapeOfSurfaceMesh, smoothSurfaceMesh, subdivideSurfaceMesh, taperSurfaceMesh, toCgalTransformFromJsTransform, transformSurfaceMesh, twistSurfaceMesh, wireframeSurfaceMesh };

@@ -1,7 +1,7 @@
 export { SurfaceMeshQuery } from './SurfaceMeshQuery.js';
 export {
+  blessed,
   composeTransforms,
-  fromApproximateToCgalTransform,
   fromExactToCgalTransform,
   fromIdentityToCgalTransform,
   fromRotateXToTransform,
@@ -10,7 +10,9 @@ export {
   fromScaleToTransform,
   fromSegmentToInverseTransform,
   fromTranslateToTransform,
+  identity,
   invertTransform,
+  matrix6,
   toCgalTransformFromJsTransform,
 } from './transform.js';
 

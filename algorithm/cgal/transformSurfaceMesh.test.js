@@ -1,3 +1,4 @@
+import { blessed } from './transform.js';
 import { fromGraphToSurfaceMesh } from './fromGraphToSurfaceMesh.js';
 import { fromSurfaceMeshToGraph } from './fromSurfaceMeshToGraph.js';
 import { initCgal } from './getCgal.js';
@@ -104,7 +105,7 @@ test('transformSurfaceMesh', (t) => {
   t.false(mesh.is_empty());
   const transformedMesh = transformSurfaceMesh(
     mesh,
-    [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 2, 4, 6, 1]
+    blessed([1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 2, 4, 6, 1])
   );
   const transformedGraph = fromSurfaceMeshToGraph(transformedMesh);
   t.deepEqual(transformedGraph, {

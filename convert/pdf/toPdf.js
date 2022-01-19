@@ -1,10 +1,10 @@
-import { fromScaling, fromTranslation, multiply } from '@jsxcad/math-mat4';
 import {
   getNonVoidPaths,
   measureBoundingBox,
+  scale as scaleGeometry,
   toDisjointGeometry,
   toPolygonsWithHoles,
-  transform,
+  translate as translateGeometry,
 } from '@jsxcad/geometry';
 
 import { toRgbFromTags } from '@jsxcad/algorithm-color';
@@ -84,12 +84,11 @@ export const toPdf = async (
   const width = max[X] - min[X];
   const height = max[Y] - min[Y];
   const lines = [];
-  const matrix = multiply(
-    fromTranslation([1, 1, 0]),
-    fromScaling([scale, scale, scale])
-  );
   const disjointGeometry = toDisjointGeometry(
-    transform(matrix, await geometry)
+    translateGeometry(
+      [1, 1, 0],
+      scaleGeometry([scale, scale, scale], await geometry)
+    )
   );
   for (const { tags, polygonsWithHoles } of toPolygonsWithHoles(
     disjointGeometry

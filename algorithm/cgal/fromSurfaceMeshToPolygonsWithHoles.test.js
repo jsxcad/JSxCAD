@@ -1,3 +1,4 @@
+import { blessed } from './transform.js';
 import { deserializeSurfaceMesh } from './deserializeSurfaceMesh.js';
 import { fromGraphToSurfaceMesh } from './fromGraphToSurfaceMesh.js';
 import { fromSurfaceMeshToPolygonsWithHoles } from './fromSurfaceMeshToPolygonsWithHoles.js';
@@ -301,9 +302,10 @@ test('Box with two holes', (t) => {
       3 16 14 15
       `);
 
-  const polygons = fromSurfaceMeshToPolygonsWithHoles(mesh, [
-    ...identityMatrix,
-  ]);
+  const polygons = fromSurfaceMeshToPolygonsWithHoles(
+    mesh,
+    blessed([...identityMatrix])
+  );
 
   t.deepEqual(polygons, [
     {

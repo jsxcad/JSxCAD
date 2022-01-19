@@ -1,3 +1,4 @@
+import { blessed } from './transform.js';
 import { fromPolygonsToSurfaceMesh } from './fromPolygonsToSurfaceMesh.js';
 import { fromSurfaceMeshToGraph } from './fromSurfaceMeshToGraph.js';
 import { identityMatrix } from '@jsxcad/math-mat4';
@@ -189,8 +190,8 @@ test('Join', (t) => {
   const b = fromPolygonsToSurfaceMesh(box);
   // The first entry is the pivot of the disjunction.
   const { joinedMeshes } = joinSurfaceMeshes(
-    [{ mesh: b, matrix: [...identityMatrix], tags: ['a'] }],
-    [{ mesh: a, matrix: [...identityMatrix], tags: ['b'] }]
+    [{ mesh: b, matrix: blessed([...identityMatrix]), tags: ['a'] }],
+    [{ mesh: a, matrix: blessed([...identityMatrix]), tags: ['b'] }]
   );
   const graphs = joinedMeshes.map(({ mesh, matrix, tags }) => ({
     graph: fromSurfaceMeshToGraph(mesh),

@@ -5033,21 +5033,26 @@ FT get_double(emscripten::val get) { return to_FT(get().as<double>()); }
 
 FT get_string(emscripten::val get) { return to_FT(get().as<std::string>()); }
 
-const Transformation* Transformation__from_exact(emscripten::val get) {
-  Transformation* t = new Transformation(
-      get_string(get), get_string(get), get_string(get), get_string(get),
-      get_string(get), get_string(get), get_string(get), get_string(get),
-      get_string(get), get_string(get), get_string(get), get_string(get),
-      get_string(get));
+const Transformation* Transformation__from_exact(
+    const std::string& v1, const std::string& v2, const std::string& v3,
+    const std::string& v4, const std::string& v5, const std::string& v6,
+    const std::string& v7, const std::string& v8, const std::string& v9,
+    const std::string& v10, const std::string& v11, const std::string& v12,
+    const std::string& v13) {
+  Transformation* t =
+      new Transformation(to_FT(v1), to_FT(v2), to_FT(v3), to_FT(v4), to_FT(v5),
+                         to_FT(v6), to_FT(v7), to_FT(v8), to_FT(v9), to_FT(v10),
+                         to_FT(v11), to_FT(v12), to_FT(v13));
   return t;
 }
 
-const Transformation* Transformation__from_approximate(emscripten::val get) {
-  Transformation* t = new Transformation(
-      get_double(get), get_double(get), get_double(get), get_double(get),
-      get_double(get), get_double(get), get_double(get), get_double(get),
-      get_double(get), get_double(get), get_double(get), get_double(get),
-      get_double(get));
+const Transformation* Transformation__from_approximate(
+    double v1, double v2, double v3, double v4, double v5, double v6, double v7,
+    double v8, double v9, double v10, double v11, double v12, double v13) {
+  Transformation* t =
+      new Transformation(to_FT(v1), to_FT(v2), to_FT(v3), to_FT(v4), to_FT(v5),
+                         to_FT(v6), to_FT(v7), to_FT(v8), to_FT(v9), to_FT(v10),
+                         to_FT(v11), to_FT(v12), to_FT(v13));
   return t;
 }
 

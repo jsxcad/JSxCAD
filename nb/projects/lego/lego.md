@@ -187,12 +187,12 @@ export const AxleProfile = () => {
     line.y(width / -2),
     Arc(diameter)
       .hasAngle(1 / 4)
-      .rotate(50),
+      .rz(50/360),
     Arc(diameter)
       .hasAngle(1 / 4)
-      .rotate(50 + 180)
+      .rz((50 + 180)/360)
   ).fill();
-  return bar.add(bar.rotate(90));
+  return bar.add(bar.rz(90/360));
 };
 ```
 
