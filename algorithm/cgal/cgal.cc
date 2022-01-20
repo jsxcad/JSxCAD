@@ -179,6 +179,26 @@ FT to_FT(const std::string& v) {
 
 FT to_FT(const double v) { return FT(v); }
 
+// These may need adjustment.
+FT compute_scaling_factor(double value) {
+  return CGAL::simplest_rational_in_interval<FT>(value * 0.999, value * 1.001);
+}
+
+FT compute_translation_offset(double value) {
+  return CGAL::simplest_rational_in_interval<FT>(value - 0.001, value + 0.001);
+}
+
+FT compute_approximate_point_value(double value) {
+  return CGAL::simplest_rational_in_interval<FT>(value - 0.001, value + 0.001);
+}
+
+void compute_turn(double turn, RT& sin_alpha, RT& cos_alpha, RT& w) {
+  // Convert angle to radians.
+  double radians = turn * 2 * CGAL_PI;
+  CGAL::rational_rotation_approximation(radians, sin_alpha, cos_alpha, w, RT(1),
+                                        RT(1000));
+}
+
 Plane unitPlane(const Plane& p) {
   Vector normal = p.orthogonal_vector();
   // We can handle the axis aligned planes exactly.
@@ -421,6 +441,12 @@ const Surface_mesh* FromPolygonSoupToSurfaceMesh(emscripten::val fill) {
   Triples* triples_ptr = &triples;
   Polygons* polygons_ptr = &polygons;
   fill(triples_ptr, polygons_ptr);
+  for (Triple& triple : triples) {
+    // Find a nice representation for the double.
+    triple[0] = compute_approximate_point_value(CGAL::to_double(triple[0]));
+    triple[1] = compute_approximate_point_value(CGAL::to_double(triple[1]));
+    triple[2] = compute_approximate_point_value(CGAL::to_double(triple[2]));
+  }
   CGAL::Polygon_mesh_processing::repair_polygon_soup(
       triples, polygons, CGAL::parameters::geom_traits(Triple_array_traits()));
   CGAL::Polygon_mesh_processing::orient_polygon_soup(triples, polygons);
@@ -556,7 +582,9 @@ void FitPlaneToPoints(emscripten::val fill_triples,
   fill_triples(triples_ptr);
   std::vector<Point> points;
   for (const auto& triple : triples) {
-    points.emplace_back(Point{triple[0], triple[1], triple[2]});
+    points.emplace_back(Point{compute_approximate_point_value(triple[0]),
+                              compute_approximate_point_value(triple[1]),
+                              compute_approximate_point_value(triple[2])});
   }
   if (points.size() > 0) {
     Plane plane;
@@ -1090,22 +1118,6 @@ const Surface_mesh* TransformSurfaceMeshByTransform(
   return output;
 }
 
-// These may need adjustment.
-FT compute_scaling_factor(double value) {
-  return CGAL::simplest_rational_in_interval<FT>(value * 0.999, value * 1.001);
-}
-
-FT compute_translation_offset(double value) {
-  return CGAL::simplest_rational_in_interval<FT>(value - 0.001, value + 0.001);
-}
-
-void compute_turn(double turn, RT& sin_alpha, RT& cos_alpha, RT& w) {
-  // Convert angle to radians.
-  double radians = turn * 2 * CGAL_PI;
-  CGAL::rational_rotation_approximation(radians, sin_alpha, cos_alpha, w, RT(1),
-                                        RT(1000));
-}
-
 const Surface_mesh* BendSurfaceMesh(const Surface_mesh* input,
                                     const Transformation* transform,
                                     double referenceRadius) {
@@ -1588,9 +1600,11 @@ const std::size_t Surface_mesh__add_exact(Surface_mesh* mesh, std::string x,
   return index;
 }
 
-const std::size_t Surface_mesh__add_vertex(Surface_mesh* mesh, float x, float y,
-                                           float z) {
-  std::size_t index(mesh->add_vertex(Point{x, y, z}));
+const std::size_t Surface_mesh__add_vertex(Surface_mesh* mesh, double x,
+                                           double y, double z) {
+  std::size_t index(mesh->add_vertex(Point{
+      compute_approximate_point_value(x), compute_approximate_point_value(y),
+      compute_approximate_point_value(z)}));
   assert(index == std::size_t(Vertex_index(index)));
   return index;
 }
@@ -2119,11 +2133,23 @@ const Surface_mesh* ExtrusionToPlaneOfSurfaceMesh(
   typedef typename boost::property_map<Surface_mesh, CGAL::vertex_point_t>::type
       VPMap;
   ProjectToPlane<VPMap> top(
-      get(CGAL::vertex_point, *extruded_mesh), Vector(high_x, high_y, high_z),
-      Plane(high_plane_x, high_plane_y, high_plane_z, high_plane_w));
+      get(CGAL::vertex_point, *extruded_mesh),
+      Vector(compute_approximate_point_value(high_x),
+             compute_approximate_point_value(high_y),
+             compute_approximate_point_value(high_z)),
+      Plane(compute_approximate_point_value(high_plane_x),
+            compute_approximate_point_value(high_plane_y),
+            compute_approximate_point_value(high_plane_z),
+            compute_approximate_point_value(high_plane_w)));
   ProjectToPlane<VPMap> bottom(
-      get(CGAL::vertex_point, *extruded_mesh), Vector(low_x, low_y, low_z),
-      Plane(low_plane_x, low_plane_y, low_plane_z, low_plane_w));
+      get(CGAL::vertex_point, *extruded_mesh),
+      Vector(compute_approximate_point_value(low_x),
+             compute_approximate_point_value(low_y),
+             compute_approximate_point_value(low_z)),
+      Plane(compute_approximate_point_value(low_plane_x),
+            compute_approximate_point_value(low_plane_y),
+            compute_approximate_point_value(low_plane_z),
+            compute_approximate_point_value(low_plane_w)));
 
   CGAL::Polygon_mesh_processing::extrude_mesh(mesh, *extruded_mesh, bottom,
                                               top);
@@ -3460,8 +3486,13 @@ const Surface_mesh* ProjectionToPlaneOfSurfaceMesh(
   auto& input_map = mesh.points();
   auto& output_map = projected_mesh->points();
 
-  Plane plane(plane_x, plane_y, plane_z, plane_w);
-  Vector vector(direction_x, direction_y, direction_z);
+  Plane plane(compute_approximate_point_value(plane_x),
+              compute_approximate_point_value(plane_y),
+              compute_approximate_point_value(plane_z),
+              compute_approximate_point_value(plane_w));
+  Vector vector(compute_approximate_point_value(direction_x),
+                compute_approximate_point_value(direction_y),
+                compute_approximate_point_value(direction_z));
 
   // Squash the mesh.
   for (auto& vertex : mesh.vertices()) {
@@ -4416,7 +4447,10 @@ void BooleansOfPolygonsWithHolesApproximate(
     double x, double y, double z, double w, emscripten::val get_operation,
     emscripten::val fill_boundary, emscripten::val fill_hole,
     emscripten::val emit_polygon, emscripten::val emit_point) {
-  BooleansOfPolygonsWithHoles(Plane(to_FT(x), to_FT(y), to_FT(z), to_FT(w)),
+  BooleansOfPolygonsWithHoles(Plane(compute_approximate_point_value(x),
+                                    compute_approximate_point_value(y),
+                                    compute_approximate_point_value(z),
+                                    compute_approximate_point_value(w)),
                               get_operation, fill_boundary, fill_hole,
                               emit_polygon, emit_point);
 }
@@ -4722,7 +4756,11 @@ void ArrangePathsApproximate(double x, double y, double z, double w,
                              bool triangulate, emscripten::val fill,
                              emscripten::val emit_polygon,
                              emscripten::val emit_point) {
-  ArrangePaths(Plane(x, y, z, w), triangulate, fill, emit_polygon, emit_point);
+  ArrangePaths(Plane(compute_approximate_point_value(x),
+                     compute_approximate_point_value(y),
+                     compute_approximate_point_value(z),
+                     compute_approximate_point_value(w)),
+               triangulate, fill, emit_polygon, emit_point);
 }
 
 void ArrangePathsExact(std::string x, std::string y, std::string z,
