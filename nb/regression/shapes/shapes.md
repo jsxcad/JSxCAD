@@ -394,3 +394,11 @@ Box(12)
 ```
 
 ![Image](shapes.md.33.png)
+
+```JavaScript
+Group(Box(1), Box(1).rx(1 / 4))
+  .e(2)
+  .view();
+```
+
+![Image](shapes.md.34.png)

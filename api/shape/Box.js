@@ -143,7 +143,7 @@ const reifyBox = (geometry) => {
 
 Shape.registerReifier('Box', reifyBox);
 
-export const Box = (x, y = x, z = 0) => {
+export const Box = (x = 1, y = x, z = 0) => {
   const c1 = [0, 0, 0];
   const c2 = [0, 0, 0];
   if (x instanceof Array) {

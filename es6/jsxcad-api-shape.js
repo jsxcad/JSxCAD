@@ -1224,7 +1224,7 @@ const reifyBox = (geometry) => {
 
 Shape.registerReifier('Box', reifyBox);
 
-const Box = (x, y = x, z = 0) => {
+const Box = (x = 1, y = x, z = 0) => {
   const c1 = [0, 0, 0];
   const c2 = [0, 0, 0];
   if (x instanceof Array) {
