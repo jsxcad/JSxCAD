@@ -23,7 +23,7 @@ export const canonicalize = (geometry) => {
           planes: geometry.planes.map(canonicalizePlane),
         });
       case 'graph':
-        return prepareForSerialization(graph);
+        return prepareForSerialization(geometry);
       case 'item':
       case 'group':
       case 'layout':

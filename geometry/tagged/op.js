@@ -15,25 +15,26 @@ export const op =
       segments = doNothing,
       triangles = doNothing,
     },
-    method = rewrite
+    method = rewrite,
+    accumulate = (x) => x
   ) =>
   (geometry, ...args) => {
     const walk = (geometry, descend) => {
       switch (geometry.type) {
         case 'graph':
-          return graph(geometry, ...args);
+          return accumulate(graph(geometry, ...args));
         case 'layout':
-          return layout(geometry, ...args);
+          return accumulate(layout(geometry, ...args));
         case 'paths':
-          return paths(geometry, ...args);
+          return accumulate(paths(geometry, ...args));
         case 'points':
-          return points(geometry, ...args);
+          return accumulate(points(geometry, ...args));
         case 'polygonsWithHoles':
-          return polygonsWithHoles(geometry, ...args);
+          return accumulate(polygonsWithHoles(geometry, ...args));
         case 'segments':
-          return segments(geometry, ...args);
+          return accumulate(segments(geometry, ...args));
         case 'triangles':
-          return triangles(geometry, ...args);
+          return accumulate(triangles(geometry, ...args));
         case 'plan':
           reify(geometry);
         // fall through
