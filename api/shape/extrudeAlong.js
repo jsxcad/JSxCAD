@@ -16,16 +16,14 @@ export const extrudeAlong =
       const depth = heights.pop();
       if (height === depth) {
         // Return unextruded geometry at this height, instead.
+        // FIX: Should be along direction, not z.
         extrusions.push(shape.z(height));
         continue;
       }
       extrusions.push(
         Shape.fromGeometry(
-          extrudeGeometry(
-            shape.toGeometry(),
-            height,
-            depth,
-            Shape.toShape(direction, shape).toGeometry()
+          extrudeGeometry(shape.toGeometry(), height, depth, (geometry) =>
+            Shape.fromGeometry(geometry).toShape(direction, shape).toGeometry()
           )
         )
       );
@@ -33,6 +31,7 @@ export const extrudeAlong =
     return Shape.Group(...extrusions);
   };
 
+// Note that the operator is applied to each leaf geometry by default.
 export const e = (...extents) => extrudeAlong(normal(), ...extents);
 
 Shape.registerMethod('extrudeAlong', extrudeAlong);

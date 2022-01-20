@@ -9,7 +9,12 @@ export const extrude = (geometry, height, depth, direction) => {
   const op = (geometry, descend) => {
     switch (geometry.type) {
       case 'graph':
-        return extrudeGraph(geometry, height, depth, reify(direction));
+        return extrudeGraph(
+          geometry,
+          height,
+          depth,
+          reify(direction(geometry))
+        );
       case 'triangles':
       case 'points':
         // Not implemented yet.
@@ -19,17 +24,12 @@ export const extrude = (geometry, height, depth, direction) => {
           fromPolygonsWithHolesToGraph(geometry),
           height,
           depth,
-          reify(direction)
+          direction
         );
       case 'paths':
-        return extrude(fill(geometry), height, depth, reify(direction));
+        return extrude(fill(geometry), height, depth, direction);
       case 'plan':
-        return extrude(
-          reify(geometry).content[0],
-          height,
-          depth,
-          reify(direction)
-        );
+        return extrude(reify(geometry).content[0], height, depth, direction);
       case 'item':
       case 'group': {
         return descend();
