@@ -13,6 +13,7 @@ export const op =
       points = doNothing,
       polygonsWithHoles = doNothing,
       segments = doNothing,
+      toolpath = doNothing,
       triangles = doNothing,
     },
     method = rewrite,
@@ -33,6 +34,8 @@ export const op =
           return accumulate(polygonsWithHoles(geometry, ...args));
         case 'segments':
           return accumulate(segments(geometry, ...args));
+        case 'toolpath':
+          return accumulate(toolpath(geometry, ...args));
         case 'triangles':
           return accumulate(triangles(geometry, ...args));
         case 'plan':

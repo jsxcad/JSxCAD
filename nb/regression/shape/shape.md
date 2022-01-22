@@ -465,3 +465,9 @@ Cut
 ![Image](shape.md.55.png)
 
 Cleaned mesh
+
+```JavaScript
+Arc(10).and(Hexagon(2), Box(4)).toolpath(5).view(4);
+```
+
+![Image](shape.md.56.png)

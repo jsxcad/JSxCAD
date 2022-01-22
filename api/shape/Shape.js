@@ -244,17 +244,15 @@ Shape.toFlatValues = (to, from) => {
 
 Shape.toNestedValues = (to, from) => {
   if (to instanceof Function) {
-    return to(from);
-  } else if (to instanceof Array) {
+    to = to(from);
+  }
+  if (to instanceof Array) {
     const expanded = [];
     for (const value of to) {
       if (value instanceof Function) {
-        const result = value(from);
-        if (result instanceof Array) {
-          expanded.push(...result);
-        } else {
-          expanded.push(result);
-        }
+        expanded.push(...value(from));
+      } else {
+        expanded.push(value);
       }
     }
     return expanded;

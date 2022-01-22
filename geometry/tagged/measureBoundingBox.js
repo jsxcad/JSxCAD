@@ -33,7 +33,8 @@ export const measureBoundingBox = (geometry) => {
     }
     switch (geometry.type) {
       case 'sketch':
-        // Don't consider sketches as part of the geometry size.
+      case 'toolpath':
+        // Don't consider these as part of the geometry size.
         return;
       case 'plan':
       case 'group':

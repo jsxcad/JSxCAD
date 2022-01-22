@@ -213,3 +213,5 @@ Box(20, 20, 20)
   .demesh()
   .view(4, { wireframe: true })
   .md('Cleaned mesh');
+
+Arc(10).and(Hexagon(2), Box(4)).toolpath(5).view(4);

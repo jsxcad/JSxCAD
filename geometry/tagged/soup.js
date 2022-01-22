@@ -40,6 +40,8 @@ export const soup = (
       case 'polygonsWithHoles':
         return show(toTrianglesFromPolygonsWithHoles(geometry));
       case 'segments':
+      case 'toolpath':
+        return taggedGroup({});
       case 'triangles':
       case 'points':
       case 'paths':

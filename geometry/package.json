@@ -23,7 +23,6 @@
   "keywords": [],
   "license": "MIT",
   "dependencies": {
-    "@jsxcad/cache": "^0.0.79",
     "@jsxcad/algorithm-cgal": "^0.0.79",
     "@jsxcad/data-shape": "^0.0.79",
     "@jsxcad/math-mat4": "^0.0.79",
@@ -31,6 +30,7 @@
     "@jsxcad/math-poly3": "^0.0.79",
     "@jsxcad/math-vec3": "^0.0.79",
     "@jsxcad/sys": "^0.0.79",
+    "kdbush": "^3.0.0",
     "rollup": "^2.51.2",
     "rollup-plugin-commonjs": "^9.3.4",
     "rollup-plugin-node-builtins": "^2.1.2",

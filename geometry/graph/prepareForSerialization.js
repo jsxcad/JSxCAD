@@ -10,5 +10,5 @@ export const prepareForSerialization = (geometry) => {
     graph.serializedSurfaceMesh = serializeSurfaceMesh(toSurfaceMesh(graph));
     graph.hash = computeHash(graph);
   }
-  return graph;
+  return geometry;
 };

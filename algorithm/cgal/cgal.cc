@@ -296,7 +296,24 @@ class SurfaceMeshQuery {
   }
 
   bool isIntersectingPointApproximate(double x, double y, double z) {
-    return (*inside_tester_)(Point(x, y, z)) == CGAL::ON_BOUNDED_SIDE;
+    if (is_volume_) {
+      return (*inside_tester_)(Point(x, y, z)) != CGAL::ON_UNBOUNDED_SIDE;
+    } else {
+#if 0
+      switch ((*inside_tester_)(Point(x, y, z))) {
+        case CGAL::ON_UNBOUNDED_SIDE:
+          std::cout << "QQ/SurfaceMeshQuery/unbounded: x " << x << " y " << y << " z " << z << std::endl;
+          break;
+        case CGAL::ON_BOUNDED_SIDE:
+          std::cout << "QQ/SurfaceMeshQuery/bounded: x " << x << " y " << y << " z " << z << std::endl;
+          break;
+        case CGAL::ON_BOUNDARY:
+          std::cout << "QQ/SurfaceMeshQuery/boundary: x " << x << " y " << y << " z " << z << std::endl;
+          break;
+      }
+#endif
+      return (*inside_tester_)(Point(x, y, z)) == CGAL::ON_BOUNDARY;
+    }
   }
 
   bool isInsidePointApproximate(double x, double y, double z) {
