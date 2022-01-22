@@ -3,6 +3,7 @@ import {
   flipPath,
   isClosedPath,
   isCounterClockwisePath,
+  taggedSegments,
   transformPaths,
 } from '@jsxcad/geometry';
 
@@ -13,6 +14,9 @@ import { equals } from '@jsxcad/math-vec2';
 import { fromScaling } from '@jsxcad/math-mat4';
 import parseSvgPath from 'parse-svg-path';
 import simplifyPath from 'simplify-path';
+
+const X = 0;
+const Y = 1;
 
 const simplify = (path, tolerance) => {
   if (isClosedPath(path)) {
@@ -34,58 +38,53 @@ const removeRepeatedPoints = (path) => {
   return unrepeated;
 };
 
-const toPaths = (
+const toSegments = (
   { curveSegments, normalizeCoordinateSystem = true, tolerance = 0.01 },
   svgPath
 ) => {
-  const paths = [];
-  let path = [null];
+  const segments = [];
+  let position;
 
   const newPath = () => {
-    if (path[0] === null) {
-      maybeClosePath();
-    }
-    if (path.length < 2) {
-      // An empty path.
-      return;
-    }
-    paths.push(path);
-    path = [null];
+    position = undefined;
   };
 
-  const maybeClosePath = () => {
-    path = removeRepeatedPoints(canonicalizePath(path));
-    if (path.length > 3) {
-      if (path[0] === null && equals(path[1], path[path.length - 1])) {
-        // The path is closed, remove the leading null, and the duplicate point at the end.
-        path = path.slice(1, path.length - 1);
-        newPath();
-      }
+  const appendPoint = (nextPosition) => {
+    if (normalizeCoordinateSystem) {
+      nextPosition = [nextPosition[X], -nextPosition[Y]];
     }
+    if (!position) {
+      position = nextPosition
+      return;
+    }
+    if (position[X] === nextPosition[X] && position[Y] === nextPosition[Y]) {
+      return;
+    }
+    segments.push([position, nextPosition]);
+    position = nextPosition;
   };
 
   for (const segment of svgPath) {
     const [directive, ...args] = segment;
     switch (directive) {
       case 'M': {
-        maybeClosePath();
         newPath();
         const [x, y] = args;
-        path.push([x, y]);
+        appendPoint([x, y]);
         break;
       }
       case 'C': {
         const [x1, y1, x2, y2, x, y] = args;
-        const start = path[path.length - 1];
-        const [xStart, yStart] = start === null ? [0, 0] : start;
-        path = path.concat(
-          buildAdaptiveCubicBezierCurve({ segments: curveSegments }, [
+        const [start, end] = (segments.length > 0) ? segments[segments.length - 1] : [[0, 0], [0, 0]];
+        const [xStart, yStart] = end;
+        for (const [xPoint, yPoint] of buildAdaptiveCubicBezierCurve({ segments: curveSegments }, [
             [xStart, yStart],
             [x1, y1],
             [x2, y2],
             [x, y],
-          ])
-        );
+          ])) {
+          appendPoint([xPoint, yPoint]);
+        }
         break;
       }
       default: {
@@ -94,31 +93,17 @@ const toPaths = (
     }
   }
 
-  maybeClosePath();
   newPath();
 
-  const simplifiedPaths = paths.map((path) => simplify(path, tolerance));
-
-  if (normalizeCoordinateSystem) {
-    // Turn it upside down.
-    return transformPaths(fromScaling([1, -1, 0]), simplifiedPaths);
-  } else {
-    return simplifiedPaths;
-  }
+  return segments;
 };
 
 export const fromSvgPath = (svgPath, options = {}) => {
-  const paths = toPaths(
+  const segments = toSegments(
     options,
     curvifySvgPath(
       absolutifySvgPath(parseSvgPath(new TextDecoder('utf8').decode(svgPath)))
     )
   );
-  const geometry = {
-    type: 'paths',
-    paths: paths.map((path) =>
-      isCounterClockwisePath(path) ? path : flipPath(path)
-    ),
-  };
-  return geometry;
+  return taggedSegments({}, segments);
 };

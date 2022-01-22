@@ -17,6 +17,8 @@ test('Parse an open triangle.', async (t) => {
   const paths = canonicalize(
     fromSvgPath(new TextEncoder('utf8').encode(svgPath))
   );
+console.dir(JSON.parse(JSON.stringify(paths)), { depth: null });
+console.log(new TextDecoder('utf8').decode(await toPdf(paths)));
   t.is(
     new TextDecoder('utf8').decode(await toPdf(paths)),
     `%PDF-1.5

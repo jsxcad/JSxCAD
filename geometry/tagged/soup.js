@@ -40,13 +40,14 @@ export const soup = (
       case 'polygonsWithHoles':
         return show(toTrianglesFromPolygonsWithHoles(geometry));
       case 'segments':
-      case 'toolpath':
-        return taggedGroup({});
       case 'triangles':
       case 'points':
       case 'paths':
         // Already soupy enough.
         return geometry;
+      case 'toolpath':
+        // Drop toolpaths for now.
+        return taggedGroup({});
       case 'displayGeometry':
         // soup can handle displayGeometry.
         return descend();

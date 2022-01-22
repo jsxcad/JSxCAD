@@ -222,7 +222,7 @@ export const fromSvg = async (
             geometry.content.push(
               transformGeometry(scaledMatrix, {
                 type: 'paths',
-                paths: paths,
+                paths,
                 tags,
               })
             );

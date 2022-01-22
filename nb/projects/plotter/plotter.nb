@@ -1,34 +1,35 @@
 // Probably from https://www.pinterest.de/pin/200410252158492924/
-const dinosaur = await readSvg('https://jsxcad.js.org/svg/dinosaur.svg', { fill: false });
+(await readSvg('https://jsxcad.js.org/svg/dinosaur.svg', { fill: false }))
+  .scale(10)
+  .align('xy')
+  .and(toolpath())
+  .gcode('dinosaur');
 
-const plotter = GrblPlotter();
-
-const aligned = dinosaur.scale(10).align('xy').gcode('dinosaur', plotter);
-
-const spiral = Spiral((a) => [[1 + (a * 360) / 100]], {
+Spiral((a) => [[1 + (a * 360) / 100]], {
   to: 10,
   by: 3 / 360,
-}).gcode('spiral', plotter);
-const flowers = await readSvg('https://jsxcad.js.org/svg/flowers.svg', { fill: false });
+}).and(toolpath())
+  .gcode('spiral');
 
-flowers
+(await readSvg('https://jsxcad.js.org/svg/flowers.svg', { fill: false }))
   .scale(1 / 60)
   .align()
-  .gcode('flowers', plotter);
-const mandala = await readSvg('https://jsxcad.js.org/svg/mandala.svg', { fill: false });
+  .and(toolpath())
+  .gcode('flowers');
 
-const scaledMandala = mandala
+(await readSvg('https://jsxcad.js.org/svg/mandala.svg', { fill: false }))
   .align('xy')
   .scale(20)
-  .gcode('mandala', plotter, s => s, { doPlan: false });
+  .and(toolpath())
+  .gcode('mandala');
 
-const visnezh = await readSvg('https://jsxcad.js.org/svg/visnezh.svg', { fill: false });
-
-const scaledVisnezh = visnezh
+(await readSvg('https://jsxcad.js.org/svg/visnezh.svg', { fill: false }))
   .align('xy')
   .scale(1 / 100)
-  .gcode('visnezh', plotter, s => s, { doPlan: false });
-const calibration = Group(
+  .and(toolpath())
+  .gcode('visnezh');
+
+Group(
   seq(
     (x) =>
       Box(10)
@@ -40,14 +41,20 @@ const calibration = Group(
   )
 )
   .align('xy')
-  .gcode('calibration', plotter);
+  .toolpath()
+  .gcode('calibration');
 
-const star = Group(
-  seq((a) => Triangle(5).rz(a), { upto: 120 / 360, by: 30 / 360 })
-).view(undefined, { outline: false });
+const star = Triangle(5)
+  .seq({ upto: 120 / 360, by: 30 / 360 }, rz, Join)
+  .view();
 
 const r = Random();
 
-const stars = Group(
-  seq((i) => star.x(r.in(-100, 100)).y(r.in(-100, 100)), { upto: 20 })
-).gcode('stars', plotter);
+const stars = star
+  .seq(
+    { upto: 20 },
+    () => (s) => s.x(r.in(-100, 100)).y(r.in(-100, 100)),
+    Group
+  )
+  .and(toolpath())
+  .gcode('stars');
