@@ -4001,17 +4001,17 @@ void OffsetOfPolygonWithHoles(double initial, double step, double limit,
 
   double offset = initial;
 
+  Polygon_2 tool;
+  for (double a = 0; a < CGAL_PI * 2; a += CGAL_PI / 16) {
+    tool.push_back(Point_2(sin(-a) * offset, cos(-a) * offset));
+  }
+  if (tool.orientation() == CGAL::Sign::NEGATIVE) {
+    std::cout << "Reverse tool" << std::endl;
+    tool.reverse_orientation();
+  }
+
   for (;;) {
     CGAL::General_polygon_set_2<Traits> boundaries;
-
-    Polygon_2 tool;
-    for (double a = 0; a < CGAL_PI * 2; a += CGAL_PI / 16) {
-      tool.push_back(Point_2(sin(-a) * offset, cos(-a) * offset));
-    }
-    if (tool.orientation() == CGAL::Sign::NEGATIVE) {
-      std::cout << "Reverse tool" << std::endl;
-      tool.reverse_orientation();
-    }
 
     // This computes the offsetting of the holes.
     Polygon_with_holes_2 inset_boundary =
@@ -4163,17 +4163,17 @@ void InsetOfPolygonWithHoles(double initial, double step, double limit,
 
   double offset = initial;
 
+  Polygon_2 tool;
+  for (double a = 0; a < CGAL_PI * 2; a += CGAL_PI / 16) {
+    tool.push_back(Point_2(sin(-a) * offset, cos(-a) * offset));
+  }
+  if (tool.orientation() == CGAL::Sign::NEGATIVE) {
+    std::cout << "Reverse tool" << std::endl;
+    tool.reverse_orientation();
+  }
+
   for (;;) {
     CGAL::General_polygon_set_2<Traits> boundaries;
-
-    Polygon_2 tool;
-    for (double a = 0; a < CGAL_PI * 2; a += CGAL_PI / 16) {
-      tool.push_back(Point_2(sin(-a) * offset, cos(-a) * offset));
-    }
-    if (tool.orientation() == CGAL::Sign::NEGATIVE) {
-      std::cout << "Reverse tool" << std::endl;
-      tool.reverse_orientation();
-    }
 
     Polygon_with_holes_2 inset_boundary =
         CGAL::minkowski_sum_2(insetting_boundary, tool);
