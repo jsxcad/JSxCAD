@@ -45,6 +45,9 @@ export const soup = (
       case 'paths':
         // Already soupy enough.
         return geometry;
+      case 'toolpath':
+        // Drop toolpaths for now.
+        return taggedGroup({});
       case 'displayGeometry':
         // soup can handle displayGeometry.
         return descend();

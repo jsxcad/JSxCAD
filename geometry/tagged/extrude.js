@@ -1,48 +1,16 @@
 import { extrude as extrudeGraph } from '../graph/extrude.js';
 import { fill } from './fill.js';
 import { fromPolygonsWithHoles as fromPolygonsWithHolesToGraph } from '../graph/fromPolygonsWithHoles.js';
+import { op } from './op.js';
 import { reify } from './reify.js';
-import { rewrite } from './visit.js';
-import { toTransformedGeometry } from './toTransformedGeometry.js';
 
-export const extrude = (geometry, height, depth, direction) => {
-  const op = (geometry, descend) => {
-    switch (geometry.type) {
-      case 'graph':
-        return extrudeGraph(
-          geometry,
-          height,
-          depth,
-          reify(direction(geometry))
-        );
-      case 'triangles':
-      case 'points':
-        // Not implemented yet.
-        return geometry;
-      case 'polygonsWithHoles':
-        return extrude(
-          fromPolygonsWithHolesToGraph(geometry),
-          height,
-          depth,
-          direction
-        );
-      case 'paths':
-        return extrude(fill(geometry), height, depth, direction);
-      case 'plan':
-        return extrude(reify(geometry).content[0], height, depth, direction);
-      case 'item':
-      case 'group': {
-        return descend();
-      }
-      case 'sketch': {
-        // Sketches aren't real for extrude.
-        return geometry;
-      }
-      default:
-        throw Error(`Unexpected geometry: ${JSON.stringify(geometry)}`);
-    }
-  };
+const graph = (geometry, height, depth, direction) =>
+  extrudeGraph(geometry, height, depth, reify(direction(geometry)));
+const paths = (geometry, height, depth, direction) =>
+  extrude(fill(geometry), height, depth, direction);
+const polygonsWithHoles = (geometry, height, depth, direction) =>
+  extrude(fromPolygonsWithHolesToGraph(geometry), height, depth, direction);
+const segments = (geometry, height, depth, direction) =>
+  extrude(fill(geometry), height, depth, direction);
 
-  // CHECK: Why does this need transformed geometry?
-  return rewrite(toTransformedGeometry(geometry), op);
-};
+export const extrude = op({ graph, polygonsWithHoles, paths, segments });

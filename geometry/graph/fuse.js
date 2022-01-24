@@ -5,7 +5,7 @@ import { fuseSurfaceMeshes } from '@jsxcad/algorithm-cgal';
 import { taggedGraph } from '../tagged/taggedGraph.js';
 
 export const fuse = (sources) => {
-  if (sources.length === 0) {
+  if (sources.length < 2) {
     return sources;
   }
   sources = sources.map(({ graph, matrix, tags }) => ({

@@ -296,7 +296,11 @@ class SurfaceMeshQuery {
   }
 
   bool isIntersectingPointApproximate(double x, double y, double z) {
-    return (*inside_tester_)(Point(x, y, z)) == CGAL::ON_BOUNDED_SIDE;
+    if (is_volume_) {
+      return (*inside_tester_)(Point(x, y, z)) != CGAL::ON_UNBOUNDED_SIDE;
+    } else {
+      return (*inside_tester_)(Point(x, y, z)) == CGAL::ON_BOUNDARY;
+    }
   }
 
   bool isInsidePointApproximate(double x, double y, double z) {
@@ -577,18 +581,20 @@ void FitPlaneToPoints(emscripten::val fill_triples,
                       emscripten::val emit_plane) {
   typedef CGAL::Epeck::Plane_3 Plane;
   typedef CGAL::Epeck::Point_3 Point;
-  DoubleTriples triples;
-  std::vector<DoubleTriple>* triples_ptr = &triples;
-  fill_triples(triples_ptr);
-  std::vector<Point> points;
-  for (const auto& triple : triples) {
-    points.emplace_back(Point{compute_approximate_point_value(triple[0]),
-                              compute_approximate_point_value(triple[1]),
-                              compute_approximate_point_value(triple[2])});
+  std::unique_ptr<std::vector<Point>> points(new std::vector<Point>);
+  {
+    std::unique_ptr<DoubleTriples> triples(new DoubleTriples);
+    std::vector<DoubleTriple>* triples_ptr = triples.get();
+    fill_triples(triples_ptr);
+    for (const auto& triple : *triples) {
+      points->emplace_back(Point{compute_approximate_point_value(triple[0]),
+                                 compute_approximate_point_value(triple[1]),
+                                 compute_approximate_point_value(triple[2])});
+    }
   }
-  if (points.size() > 0) {
+  if (points->size() > 0) {
     Plane plane;
-    linear_least_squares_fitting_3(points.begin(), points.end(), plane,
+    linear_least_squares_fitting_3(points->begin(), points->end(), plane,
                                    CGAL::Dimension_tag<0>());
     // Prefer positive planes.
     FT zly = CGAL::scalar_product(plane.orthogonal_vector(), Vector(0, 0, 1));
@@ -1541,7 +1547,9 @@ void fillExactQuadruple(Quadruple* q, const std::string& a,
 }
 
 void addPoint(Points* points, double x, double y, double z) {
-  points->emplace_back(Point{x, y, z});
+  points->emplace_back(Point{compute_approximate_point_value(x),
+                             compute_approximate_point_value(y),
+                             compute_approximate_point_value(z)});
 }
 
 void addExactPoint(Points* points, const std::string& x, const std::string& y,
@@ -3993,17 +4001,17 @@ void OffsetOfPolygonWithHoles(double initial, double step, double limit,
 
   double offset = initial;
 
+  Polygon_2 tool;
+  for (double a = 0; a < CGAL_PI * 2; a += CGAL_PI / 16) {
+    tool.push_back(Point_2(sin(-a) * offset, cos(-a) * offset));
+  }
+  if (tool.orientation() == CGAL::Sign::NEGATIVE) {
+    std::cout << "Reverse tool" << std::endl;
+    tool.reverse_orientation();
+  }
+
   for (;;) {
     CGAL::General_polygon_set_2<Traits> boundaries;
-
-    Polygon_2 tool;
-    for (double a = 0; a < CGAL_PI * 2; a += CGAL_PI / 16) {
-      tool.push_back(Point_2(sin(-a) * offset, cos(-a) * offset));
-    }
-    if (tool.orientation() == CGAL::Sign::NEGATIVE) {
-      std::cout << "Reverse tool" << std::endl;
-      tool.reverse_orientation();
-    }
 
     // This computes the offsetting of the holes.
     Polygon_with_holes_2 inset_boundary =
@@ -4155,17 +4163,17 @@ void InsetOfPolygonWithHoles(double initial, double step, double limit,
 
   double offset = initial;
 
+  Polygon_2 tool;
+  for (double a = 0; a < CGAL_PI * 2; a += CGAL_PI / 16) {
+    tool.push_back(Point_2(sin(-a) * offset, cos(-a) * offset));
+  }
+  if (tool.orientation() == CGAL::Sign::NEGATIVE) {
+    std::cout << "Reverse tool" << std::endl;
+    tool.reverse_orientation();
+  }
+
   for (;;) {
     CGAL::General_polygon_set_2<Traits> boundaries;
-
-    Polygon_2 tool;
-    for (double a = 0; a < CGAL_PI * 2; a += CGAL_PI / 16) {
-      tool.push_back(Point_2(sin(-a) * offset, cos(-a) * offset));
-    }
-    if (tool.orientation() == CGAL::Sign::NEGATIVE) {
-      std::cout << "Reverse tool" << std::endl;
-      tool.reverse_orientation();
-    }
 
     Polygon_with_holes_2 inset_boundary =
         CGAL::minkowski_sum_2(insetting_boundary, tool);
@@ -4582,12 +4590,13 @@ void ArrangePaths(Plane plane, bool do_triangulate, emscripten::val fill,
       point_2s.push_back(point_2);
     }
     for (std::size_t i = 0; i + 1 < point_2s.size(); i += 2) {
-      if (segments.find({point_2s[i].x(), point_2s[i].y(), point_2s[i + 1].x(),
-                         point_2s[i + 1].y()}) != segments.end()) {
-        continue;
-      }
       if (point_2s[i] == point_2s[i + 1]) {
         // Skip zero length segments.
+        continue;
+      }
+      if (segments.find({point_2s[i].x(), point_2s[i].y(), point_2s[i + 1].x(),
+                         point_2s[i + 1].y()}) != segments.end()) {
+        // CHECK: Do we need to avoid duplicates here?
         continue;
       }
       // Add the segment

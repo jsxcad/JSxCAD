@@ -181,8 +181,7 @@ Shape.fromGraph = (graph, context) =>
   new Shape(taggedGraph({}, graph), context);
 Shape.fromOpenPath = (path, context) =>
   fromGeometry(taggedPaths({}, [openPath(path)]), context);
-Shape.fromSegments = (...segments) =>
-  fromGeometry(taggedSegments({}, segments));
+Shape.fromSegments = (segments) => fromGeometry(taggedSegments({}, segments));
 Shape.fromPath = (path, context) =>
   fromGeometry(taggedPaths({}, [path]), context);
 Shape.fromPaths = (paths, context) =>
@@ -214,7 +213,6 @@ Shape.toShapes = (to, from) => {
   if (to instanceof Array) {
     return to
       .filter((value) => value !== undefined)
-      .flatMap((value) => Shape.toShapes(value, from))
       .flatMap((value) => Shape.toShapes(value, from));
   } else {
     return [Shape.toShape(to, from)];
@@ -244,17 +242,15 @@ Shape.toFlatValues = (to, from) => {
 
 Shape.toNestedValues = (to, from) => {
   if (to instanceof Function) {
-    return to(from);
-  } else if (to instanceof Array) {
+    to = to(from);
+  }
+  if (to instanceof Array) {
     const expanded = [];
     for (const value of to) {
       if (value instanceof Function) {
-        const result = value(from);
-        if (result instanceof Array) {
-          expanded.push(...result);
-        } else {
-          expanded.push(result);
-        }
+        expanded.push(...value(from));
+      } else {
+        expanded.push(value);
       }
     }
     return expanded;

@@ -12,6 +12,7 @@ export const reify = (geometry) => {
   const op = (geometry, descend) => {
     switch (geometry.type) {
       case 'graph':
+      case 'toolpath':
       case 'triangles':
       case 'points':
       case 'segments':

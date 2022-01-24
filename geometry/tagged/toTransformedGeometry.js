@@ -78,6 +78,7 @@ export const toTransformedGeometry = (geometry) => {
           });
         // These don't need a transformed version.
         case 'triangles':
+        case 'toolpath':
         case 'graph':
           return geometry;
         default:

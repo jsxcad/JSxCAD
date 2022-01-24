@@ -213,3 +213,11 @@ Box(20, 20, 20)
   .demesh()
   .view(4, { wireframe: true })
   .md('Cleaned mesh');
+
+Arc(4)
+  .x(5)
+  .seq({ by: 1 / 8 }, rz, Join)
+  .material('glass')
+  .color('orange')
+  .and(toolpath(1))
+  .view();

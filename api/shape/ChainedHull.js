@@ -8,7 +8,7 @@ export const ChainedHull = (...shapes) => {
   const chain = [];
   for (let nth = 1; nth < pointsets.length; nth++) {
     const points = [...pointsets[nth - 1], ...pointsets[nth]];
-    chain.push(Hull(Points(...points)));
+    chain.push(Hull(Points(points)));
   }
   return Group(...chain);
 };

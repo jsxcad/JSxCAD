@@ -17,10 +17,8 @@ export const cached =
     const path = `op/${hash}`;
     const data = readNonblocking(path, { errorOnMissing: false });
     if (data !== undefined) {
-      console.log(`QQ/Using cached result for op ${JSON.stringify(key)}`);
       return data;
     }
-    console.log(`QQ/Computing cached result for op ${JSON.stringify(key)}`);
     const result = op(...args);
     addPending(write(path, result));
     return result;

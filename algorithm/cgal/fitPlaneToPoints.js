@@ -11,8 +11,13 @@ export const fitPlaneToPoints = (points) => {
     const plane = [0, 0, 1, 0];
     c.FitPlaneToPoints(
       (triples) => {
+        let count = 0;
         for (const [x, y, z] of points) {
           c.addDoubleTriple(triples, x, y, z);
+          if (count++ > 1000) {
+            // We're blowing the stack when this is too high.
+            break;
+          }
         }
       },
       (x, y, z, w) => {

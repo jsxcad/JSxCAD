@@ -1,4 +1,3 @@
-import { cacheRewriteTags } from '@jsxcad/cache';
 import { hasMatchingTag } from './hasMatchingTag.js';
 import { rewrite } from './visit.js';
 
@@ -13,7 +12,7 @@ const buildCondition = (conditionTags, conditionSpec) => {
   }
 };
 
-const rewriteTagsImpl = (
+export const rewriteTags = (
   add,
   remove,
   geometry,
@@ -52,5 +51,3 @@ const rewriteTagsImpl = (
   };
   return rewrite(geometry, op);
 };
-
-export const rewriteTags = cacheRewriteTags(rewriteTagsImpl);

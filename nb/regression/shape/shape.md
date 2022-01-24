@@ -465,3 +465,15 @@ Cut
 ![Image](shape.md.55.png)
 
 Cleaned mesh
+
+```JavaScript
+Arc(4)
+  .x(5)
+  .seq({ by: 1 / 8 }, rz, Join)
+  .material('glass')
+  .color('orange')
+  .and(toolpath(1))
+  .view();
+```
+
+![Image](shape.md.56.png)

@@ -13,6 +13,7 @@ export const op =
       points = doNothing,
       polygonsWithHoles = doNothing,
       segments = doNothing,
+      toolpath = doNothing,
       triangles = doNothing,
     },
     method = rewrite,
@@ -23,8 +24,6 @@ export const op =
       switch (geometry.type) {
         case 'graph':
           return accumulate(graph(geometry, ...args));
-        case 'layout':
-          return accumulate(layout(geometry, ...args));
         case 'paths':
           return accumulate(paths(geometry, ...args));
         case 'points':
@@ -33,11 +32,15 @@ export const op =
           return accumulate(polygonsWithHoles(geometry, ...args));
         case 'segments':
           return accumulate(segments(geometry, ...args));
+        case 'toolpath':
+          return accumulate(toolpath(geometry, ...args));
         case 'triangles':
           return accumulate(triangles(geometry, ...args));
         case 'plan':
           reify(geometry);
         // fall through
+        case 'layout':
+        // return accumulate(layout(geometry, ...args));
         case 'item':
         case 'group': {
           return descend();

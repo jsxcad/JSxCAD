@@ -1,91 +1,58 @@
-import {
-  canonicalizePath,
-  flipPath,
-  isClosedPath,
-  isCounterClockwisePath,
-  transformPaths,
-} from '@jsxcad/geometry';
+import { scale, taggedSegments } from '@jsxcad/geometry';
 
 import absolutifySvgPath from 'abs-svg-path';
 import { buildAdaptiveCubicBezierCurve } from './buildAdaptiveCubicBezierCurve.js';
 import { curvify as curvifySvgPath } from './curvify-svg-path/index.js';
-import { equals } from '@jsxcad/math-vec2';
-import { fromScaling } from '@jsxcad/math-mat4';
 import parseSvgPath from 'parse-svg-path';
 import simplifyPath from 'simplify-path';
 
-const simplify = (path, tolerance) => {
-  if (isClosedPath(path)) {
-    return simplifyPath(path, tolerance);
-  } else {
-    return [null, ...simplifyPath(path.slice(1), tolerance)];
-  }
-};
+const X = 0;
+const Y = 1;
 
-const removeRepeatedPoints = (path) => {
-  const unrepeated = [path[0]];
-  for (let nth = 1; nth < path.length; nth++) {
-    const last = path[nth - 1];
-    const current = path[nth];
-    if (last === null || !equals(last, current)) {
-      unrepeated.push(current);
-    }
-  }
-  return unrepeated;
-};
-
-const toPaths = (
-  { curveSegments, normalizeCoordinateSystem = true, tolerance = 0.01 },
-  svgPath
-) => {
-  const paths = [];
-  let path = [null];
+const toSegments = ({ curveSegments, tolerance = 0.01 }, svgPath) => {
+  const segments = [];
+  let position;
 
   const newPath = () => {
-    if (path[0] === null) {
-      maybeClosePath();
-    }
-    if (path.length < 2) {
-      // An empty path.
-      return;
-    }
-    paths.push(path);
-    path = [null];
+    position = undefined;
   };
 
-  const maybeClosePath = () => {
-    path = removeRepeatedPoints(canonicalizePath(path));
-    if (path.length > 3) {
-      if (path[0] === null && equals(path[1], path[path.length - 1])) {
-        // The path is closed, remove the leading null, and the duplicate point at the end.
-        path = path.slice(1, path.length - 1);
-        newPath();
-      }
+  const appendPoint = (nextPosition) => {
+    if (!position) {
+      position = nextPosition;
+      return;
     }
+    if (position[X] === nextPosition[X] && position[Y] === nextPosition[Y]) {
+      return;
+    }
+    segments.push([position, nextPosition]);
+    position = nextPosition;
   };
 
   for (const segment of svgPath) {
     const [directive, ...args] = segment;
     switch (directive) {
       case 'M': {
-        maybeClosePath();
         newPath();
         const [x, y] = args;
-        path.push([x, y]);
+        appendPoint([x, y]);
         break;
       }
       case 'C': {
         const [x1, y1, x2, y2, x, y] = args;
-        const start = path[path.length - 1];
-        const [xStart, yStart] = start === null ? [0, 0] : start;
-        path = path.concat(
-          buildAdaptiveCubicBezierCurve({ segments: curveSegments }, [
+        const [xStart, yStart] = position || [0, 0];
+        const path = buildAdaptiveCubicBezierCurve(
+          { segments: curveSegments },
+          [
             [xStart, yStart],
             [x1, y1],
             [x2, y2],
             [x, y],
-          ])
+          ]
         );
+        for (const [x, y] of simplifyPath(path, tolerance)) {
+          appendPoint([x, y]);
+        }
         break;
       }
       default: {
@@ -94,31 +61,21 @@ const toPaths = (
     }
   }
 
-  maybeClosePath();
   newPath();
 
-  const simplifiedPaths = paths.map((path) => simplify(path, tolerance));
-
-  if (normalizeCoordinateSystem) {
-    // Turn it upside down.
-    return transformPaths(fromScaling([1, -1, 0]), simplifiedPaths);
-  } else {
-    return simplifiedPaths;
-  }
+  return segments;
 };
 
 export const fromSvgPath = (svgPath, options = {}) => {
-  const paths = toPaths(
+  const segments = toSegments(
     options,
     curvifySvgPath(
       absolutifySvgPath(parseSvgPath(new TextDecoder('utf8').decode(svgPath)))
     )
   );
-  const geometry = {
-    type: 'paths',
-    paths: paths.map((path) =>
-      isCounterClockwisePath(path) ? path : flipPath(path)
-    ),
-  };
-  return geometry;
+  if (options.normalizeCoordinateSystem) {
+    return scale([1, -1, 0], taggedSegments({}, segments));
+  } else {
+    return taggedSegments({}, segments);
+  }
 };
