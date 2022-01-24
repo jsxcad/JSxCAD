@@ -572,8 +572,6 @@ const op =
       switch (geometry.type) {
         case 'graph':
           return accumulate(graph(geometry, ...args));
-        case 'layout':
-          return accumulate(layout(geometry, ...args));
         case 'paths':
           return accumulate(paths(geometry, ...args));
         case 'points':
@@ -589,6 +587,8 @@ const op =
         case 'plan':
           reify(geometry);
         // fall through
+        case 'layout':
+        // return accumulate(layout(geometry, ...args));
         case 'item':
         case 'group': {
           return descend();
