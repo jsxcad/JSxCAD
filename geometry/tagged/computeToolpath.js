@@ -1,5 +1,6 @@
 import KdBush from 'kdbush';
 import { fuse } from './fuse.js';
+import { getNonVoidSegments } from './getNonVoidSegments.js';
 import { getQuery } from '../graph/getQuery.js';
 import { identityMatrix } from '@jsxcad/math-mat4';
 import { inset } from './inset.js';
@@ -7,6 +8,7 @@ import { measureBoundingBox } from './measureBoundingBox.js';
 import { outline } from './outline.js';
 import { section } from './section.js';
 import { taggedToolpath } from './taggedToolpath.js';
+import { toConcreteGeometry } from './toConcreteGeometry.js';
 
 const X = 0;
 const Y = 1;
@@ -30,10 +32,12 @@ export const computeToolpath = (geometry, toolDiameter = 1, jumpHeight = 1) => {
     let pendingEdges = 0;
     const points = [];
 
-    const sections = section(geometry, identityMatrix);
+    const concreteGeometry = toConcreteGeometry(geometry);
+    const sections = section(concreteGeometry, [identityMatrix]);
     const fusedArea = fuse([sections]);
     const insetArea = inset(fusedArea, toolRadius);
 
+    // Surfaces
     {
       const { isInteriorPoint, release } = getQuery(insetArea);
       const [minPoint, maxPoint] = measureBoundingBox(sections);
@@ -63,6 +67,7 @@ export const computeToolpath = (geometry, toolDiameter = 1, jumpHeight = 1) => {
       release();
     }
 
+    // Profiles
     for (const { segments } of outline(insetArea)) {
       for (const edge of segments) {
         // CHECK: Do outline segments have duplicates still?
@@ -85,6 +90,36 @@ export const computeToolpath = (geometry, toolDiameter = 1, jumpHeight = 1) => {
         start.type = 'edge';
         const end = [...edge[1]];
         end.type = 'edge';
+        const path = [start, end];
+        points.push([start, path], [end, path]);
+        pendingEdges += 1;
+      }
+    }
+
+    // Grooves
+    // FIX: These should be sectioned segments.
+    for (const { segments } of getNonVoidSegments(concreteGeometry)) {
+      for (const edge of segments) {
+        // CHECK: Do outline segments have duplicates still?
+        // Deduplicate edges.
+        {
+          const forward = JSON.stringify(edge);
+          if (seen.has(forward)) {
+            continue;
+          } else {
+            seen.add(forward);
+          }
+          const backward = JSON.stringify([...edge].reverse());
+          if (seen.has(backward)) {
+            continue;
+          } else {
+            seen.add(backward);
+          }
+        }
+        const start = [...edge[0]];
+        start.type = 'profile';
+        const end = [...edge[1]];
+        end.type = 'profile';
         const path = [start, end];
         points.push([start, path], [end, path]);
         pendingEdges += 1;
@@ -118,47 +153,45 @@ export const computeToolpath = (geometry, toolDiameter = 1, jumpHeight = 1) => {
       at = to;
     };
 
-    try {
-      while (pendingEdges > 0) {
-        const [x, y] = at;
-        for (let range = 1; range < Infinity; range *= 2) {
-          let bestStart;
-          let bestEdge;
-          let bestDistance = Infinity;
-          for (const index of kd.within(x, y, range)) {
-            const [start, edge] = points[index];
-            if (edge.planned) {
-              continue;
-            }
-            const distance = computeDistance(start);
-            if (distance < bestDistance) {
-              bestDistance = distance;
-              bestEdge = edge;
-              bestStart = start;
-            }
-          }
-          if (bestDistance === Infinity) {
-            // No target within range, so expand the range.
+    while (pendingEdges > 0) {
+      const [x, y] = at;
+      for (let range = 1; range < Infinity; range *= 2) {
+        let bestStart;
+        let bestEdge;
+        let bestDistance = Infinity;
+        for (const index of kd.within(x, y, range)) {
+          const [start, edge] = points[index];
+          if (edge.planned) {
             continue;
           }
-          pendingEdges -= 1;
-          bestEdge.planned = true;
-          const bestEnd = bestEdge[0] === bestStart ? bestEdge[1] : bestEdge[0];
-          if (
-            (bestEnd.type === 'fill' || at.type === 'fill') &&
-            bestDistance <= toolDiameter
-          ) {
-            cut(bestEnd); // cut across
-          } else {
-            jump(bestStart); // jump to the start x, y
-            cut(bestStart); // may need to drill down to the start z
-            cut(bestEnd); // cut across
+          const distance = computeDistance(start);
+          if (distance < bestDistance) {
+            bestDistance = distance;
+            bestEdge = edge;
+            bestStart = start;
           }
-          break;
         }
+        if (bestDistance === Infinity) {
+          // No target within range, so expand the range.
+          continue;
+        }
+        pendingEdges -= 1;
+        bestEdge.planned = true;
+        const bestEnd = bestEdge[0] === bestStart ? bestEdge[1] : bestEdge[0];
+        if (
+          bestEnd.type !== 'profile' &&
+          at.type !== 'profile' &&
+          (bestEnd.type === 'fill' || at.type === 'fill') &&
+          bestDistance <= toolDiameter
+        ) {
+          cut(bestEnd); // cut across
+        } else {
+          jump(bestStart); // jump to the start x, y
+          cut(bestStart); // may need to drill down to the start z
+          cut(bestEnd); // cut across
+        }
+        break;
       }
-    } catch (error) {
-      throw error;
     }
 
     jump([0, 0, 0]);

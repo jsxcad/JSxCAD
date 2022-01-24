@@ -173,8 +173,7 @@ Shape.fromGraph = (graph, context) =>
   new Shape(taggedGraph({}, graph), context);
 Shape.fromOpenPath = (path, context) =>
   fromGeometry(taggedPaths({}, [openPath(path)]), context);
-Shape.fromSegments = (...segments) =>
-  fromGeometry(taggedSegments({}, segments));
+Shape.fromSegments = (segments) => fromGeometry(taggedSegments({}, segments));
 Shape.fromPath = (path, context) =>
   fromGeometry(taggedPaths({}, [path]), context);
 Shape.fromPaths = (paths, context) =>
@@ -206,7 +205,6 @@ Shape.toShapes = (to, from) => {
   if (to instanceof Array) {
     return to
       .filter((value) => value !== undefined)
-      .flatMap((value) => Shape.toShapes(value, from))
       .flatMap((value) => Shape.toShapes(value, from));
   } else {
     return [Shape.toShape(to, from)];
@@ -1042,8 +1040,10 @@ Shape.registerMethod('drop', drop);
 
 const Edge = (source = 1, target = 0) =>
   Shape.fromSegments([
-    Shape.toCoordinate(undefined, source),
-    Shape.toCoordinate(undefined, target),
+    [
+      Shape.toCoordinate(undefined, source),
+      Shape.toCoordinate(undefined, target),
+    ],
   ]);
 
 Shape.prototype.Edge = Shape.shapeMethod(Edge);
@@ -4072,9 +4072,9 @@ const tool = (name) => (shape) =>
 
 Shape.registerMethod('tool', tool);
 
-const Edges = (...segments) =>
+const Edges = (segments) =>
   Shape.fromSegments(
-    ...Shape.toNestedValues(segments).map(([source, target]) => [
+    Shape.toNestedValues(segments).map(([source, target]) => [
       Shape.toCoordinate(undefined, source),
       Shape.toCoordinate(undefined, target),
     ])
@@ -4082,8 +4082,8 @@ const Edges = (...segments) =>
 
 Shape.prototype.Edges = Shape.shapeMethod(Edges);
 
-const Points = (...args) =>
-  Shape.fromPoints(args.map((arg) => Shape.toCoordinate(undefined, arg)));
+const Points = (points) =>
+  Shape.fromPoints(points.map((arg) => Shape.toCoordinate(undefined, arg)));
 
 Shape.prototype.Points = Shape.shapeMethod(Points);
 
@@ -4108,11 +4108,11 @@ const toolpath =
       }
     }
     return Group(
-      Points(...cutEnds).color('red'),
-      Edges(...cuts).color('red'),
-      Points(...jumpEnds).color('blue'),
-      Edges(...jumps).color('blue'),
-      Shape.fromGeometry(toolpath),
+      Points(cutEnds).color('red'),
+      Edges(cuts).color('red'),
+      Points(jumpEnds).color('blue'),
+      Edges(jumps).color('blue'),
+      Shape.fromGeometry(toolpath)
     );
   };
 
@@ -4739,7 +4739,7 @@ const ChainedHull = (...shapes) => {
   const chain = [];
   for (let nth = 1; nth < pointsets.length; nth++) {
     const points = [...pointsets[nth - 1], ...pointsets[nth]];
-    chain.push(Hull(Points(...points)));
+    chain.push(Hull(Points(points)));
   }
   return Group(...chain);
 };

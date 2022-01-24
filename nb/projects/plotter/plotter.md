@@ -1,13 +1,9 @@
 ```JavaScript
-const dinosaur = await readSvg('https://jsxcad.js.org/svg/dinosaur.svg', { fill: false });
-```
-
-```JavaScript
-const plotter = GrblPlotter();
-```
-
-```JavaScript
-const aligned = dinosaur.scale(10).align('xy').gcode('dinosaur', plotter);
+(await readSvg('https://jsxcad.js.org/svg/dinosaur.svg', { fill: false }))
+  .scale(10)
+  .align('xy')
+  .and(toolpath())
+  .gcode('dinosaur');
 ```
 
 ![Image](plotter.md.0.png)
@@ -15,10 +11,11 @@ const aligned = dinosaur.scale(10).align('xy').gcode('dinosaur', plotter);
 [dinosaur_0.gcode](plotter.dinosaur_0.gcode)
 
 ```JavaScript
-const spiral = Spiral((a) => [[1 + (a * 360) / 100]], {
+Spiral((a) => [[1 + (a * 360) / 100]], {
   to: 10,
   by: 3 / 360,
-}).gcode('spiral', plotter);
+}).and(toolpath())
+  .gcode('spiral');
 ```
 
 ![Image](plotter.md.1.png)
@@ -26,18 +23,11 @@ const spiral = Spiral((a) => [[1 + (a * 360) / 100]], {
 [spiral_0.gcode](plotter.spiral_0.gcode)
 
 ```JavaScript
-const flowers = await readSvg('https://jsxcad.js.org/svg/flowers.svg', { fill: false });
-```
-
-```JavaScript
-const mandala = await readSvg('https://jsxcad.js.org/svg/mandala.svg', { fill: false });
-```
-
-```JavaScript
-flowers
+(await readSvg('https://jsxcad.js.org/svg/flowers.svg', { fill: false }))
   .scale(1 / 60)
   .align()
-  .gcode('flowers', plotter);
+  .and(toolpath())
+  .gcode('flowers');
 ```
 
 ![Image](plotter.md.2.png)
@@ -45,22 +35,7 @@ flowers
 [flowers_0.gcode](plotter.flowers_0.gcode)
 
 ```JavaScript
-const scaledMandala = mandala
-  .align('xy')
-  .scale(20)
-  .gcode('mandala', plotter, s => s, { doPlan: false });
-```
-
-![Image](plotter.md.3.png)
-
-[mandala_0.gcode](plotter.mandala_0.gcode)
-
-```JavaScript
-const visnezh = await readSvg('https://jsxcad.js.org/svg/visnezh.svg', { fill: false });
-```
-
-```JavaScript
-const calibration = Group(
+Group(
   seq(
     (x) =>
       Box(10)
@@ -72,42 +47,37 @@ const calibration = Group(
   )
 )
   .align('xy')
-  .gcode('calibration', plotter);
+  .toolpath()
+  .gcode('calibration');
 ```
 
-![Image](plotter.md.4.png)
+![Image](plotter.md.3.png)
 
 [calibration_0.gcode](plotter.calibration_0.gcode)
 
 ```JavaScript
-const scaledVisnezh = visnezh
-  .align('xy')
-  .scale(1 / 100)
-  .gcode('visnezh', plotter, s => s, { doPlan: false });
+const star = Triangle(5)
+  .seq({ upto: 120 / 360, by: 30 / 360 }, rz, Join)
+  .view();
 ```
 
-![Image](plotter.md.5.png)
-
-[visnezh_0.gcode](plotter.visnezh_0.gcode)
-
-```JavaScript
-const star = Group(
-  seq((a) => Triangle(5).rz(a), { upto: 120 / 360, by: 30 / 360 })
-).view(undefined, { outline: false });
-```
-
-![Image](plotter.md.6.png)
+![Image](plotter.md.4.png)
 
 ```JavaScript
 const r = Random();
 ```
 
 ```JavaScript
-const stars = Group(
-  seq((i) => star.x(r.in(-100, 100)).y(r.in(-100, 100)), { upto: 20 })
-).gcode('stars', plotter);
+const stars = star
+  .seq(
+    { upto: 20 },
+    () => (s) => s.x(r.in(-100, 100)).y(r.in(-100, 100)),
+    Group
+  )
+  .and(toolpath())
+  .gcode('stars');
 ```
 
-![Image](plotter.md.7.png)
+![Image](plotter.md.5.png)
 
 [stars_0.gcode](plotter.stars_0.gcode)

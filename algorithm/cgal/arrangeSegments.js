@@ -15,10 +15,15 @@ export const arrangeSegments = (
     let target;
     let polygon;
     let polygons = [];
+    let filled = false;
     const fill = (out) => {
-      for (const [start, end] of segments) {
-        c.addPoint(out, start[X], start[Y], start[Z]);
-        c.addPoint(out, end[X], end[Y], end[Z]);
+      // This interface is a bit silly.
+      if (!filled) {
+        for (const [start, end] of segments) {
+          c.addPoint(out, start[X], start[Y], start[Z]);
+          c.addPoint(out, end[X], end[Y], end[Z]);
+        }
+        filled = true;
       }
     };
     const emitPolygon = (isHole) => {

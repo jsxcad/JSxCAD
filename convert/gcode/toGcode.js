@@ -1,15 +1,11 @@
-import { op, outline, toDisjointGeometry, visit } from '@jsxcad/geometry';
-
-import KdBush from 'kdbush';
+import { op, visit } from '@jsxcad/geometry';
 
 const X = 0;
 const Y = 1;
 const Z = 2;
 
 // FIX: This is actually GRBL.
-export const toGcode = async (
-  geometry,
-) => {
+export const toGcode = async (geometry) => {
   const codes = [];
 
   // CHECK: Perhaps this should be a more direct modeling of the GRBL state?
@@ -124,13 +120,6 @@ export const toGcode = async (
 
   const useMetric = () => emit('G21');
 
-  const computeDistance = ([x, y, z]) => {
-    const dX = x - state.x;
-    const dY = y - state.y;
-    const cost = Math.sqrt(dX * dX + dY * dY) - z * 1000000;
-    return cost;
-  };
-
   codes.push('');
 
   useMetric();
@@ -138,21 +127,21 @@ export const toGcode = async (
   cM3();
 
   const processToolpath = ({ toolpath }) => {
-     for (const entry of toolpath) {
-       switch (entry.op) {
-         case 'jump':
-           cF({ f: entry.speed });
-           cS({ s: entry.power });
-           cG0({ x: entry.to[X], y: entry.to[Y], z: entry.to[Z] });
-           break;
-         case 'cut':
-           cF({ f: entry.speed });
-           cS({ s: entry.power });
-           cG1({ x: entry.to[X], y: entry.to[Y], z: entry.to[Z] });
-           break;
-       }
-     }
-  }
+    for (const entry of toolpath) {
+      switch (entry.op) {
+        case 'jump':
+          cF({ f: entry.speed });
+          cS({ s: entry.power });
+          cG0({ x: entry.to[X], y: entry.to[Y], z: entry.to[Z] });
+          break;
+        case 'cut':
+          cF({ f: entry.speed });
+          cS({ s: entry.power });
+          cG1({ x: entry.to[X], y: entry.to[Y], z: entry.to[Z] });
+          break;
+      }
+    }
+  };
 
   op({ toolpath: processToolpath }, visit)(geometry);
 

@@ -1,4 +1,4 @@
-import { composeTransforms, fromSurfaceMeshToLazyGraph, fromPointsToAlphaShapeAsSurfaceMesh, serializeSurfaceMesh, deleteSurfaceMesh, deserializeSurfaceMesh, fromGraphToSurfaceMesh, fromSurfaceMeshEmitBoundingBox, arrangePaths, fromPolygonsToSurfaceMesh, cutSurfaceMeshes, STATUS_OK, STATUS_UNCHANGED, STATUS_EMPTY, bendSurfaceMesh, clipSurfaceMeshes, computeCentroidOfSurfaceMesh, fitPlaneToPoints, arrangePathsIntoTriangles, fuseSurfaceMeshes, SurfaceMeshQuery, fromSurfaceMeshToPolygonsWithHoles, insetOfPolygonWithHoles, eachPointOfSurfaceMesh, outlineSurfaceMesh, sectionOfSurfaceMesh, fromPointsToConvexHullAsSurfaceMesh, demeshSurfaceMesh, extrudeSurfaceMesh, extrudeToPlaneOfSurfaceMesh, reverseFaceOrientationsOfSurfaceMesh, fromFunctionToSurfaceMesh, fromPointsToSurfaceMesh, fromSegmentToInverseTransform, invertTransform, growSurfaceMesh, joinSurfaceMeshes, loftBetweenCongruentSurfaceMeshes, minkowskiDifferenceOfSurfaceMeshes, minkowskiShellOfSurfaceMeshes, minkowskiSumOfSurfaceMeshes, offsetOfPolygonWithHoles, projectToPlaneOfSurfaceMesh, pushSurfaceMesh, remeshSurfaceMesh, isotropicRemeshingOfSurfaceMesh, removeSelfIntersectionsOfSurfaceMesh, approximateSurfaceMesh, simplifySurfaceMesh, subdivideSurfaceMesh, smoothShapeOfSurfaceMesh, smoothSurfaceMesh, separateSurfaceMesh, fromSurfaceMeshToTriangles, taperSurfaceMesh, doesSelfIntersectOfSurfaceMesh, twistSurfaceMesh, fromRotateXToTransform, fromRotateYToTransform, fromRotateZToTransform, fromTranslateToTransform, fromScaleToTransform } from './jsxcad-algorithm-cgal.js';
+import { composeTransforms, fromSurfaceMeshToLazyGraph, fromPointsToAlphaShapeAsSurfaceMesh, serializeSurfaceMesh, deleteSurfaceMesh, deserializeSurfaceMesh, fromGraphToSurfaceMesh, fromSurfaceMeshEmitBoundingBox, arrangePaths, fromPolygonsToSurfaceMesh, cutSurfaceMeshes, STATUS_OK, STATUS_UNCHANGED, STATUS_EMPTY, bendSurfaceMesh, clipSurfaceMeshes, computeCentroidOfSurfaceMesh, fitPlaneToPoints, arrangePathsIntoTriangles, arrangeSegmentsIntoTriangles, fuseSurfaceMeshes, SurfaceMeshQuery, fromSurfaceMeshToPolygonsWithHoles, insetOfPolygonWithHoles, eachPointOfSurfaceMesh, outlineSurfaceMesh, sectionOfSurfaceMesh, fromPointsToConvexHullAsSurfaceMesh, demeshSurfaceMesh, extrudeSurfaceMesh, extrudeToPlaneOfSurfaceMesh, reverseFaceOrientationsOfSurfaceMesh, fromFunctionToSurfaceMesh, fromPointsToSurfaceMesh, fromSegmentToInverseTransform, invertTransform, growSurfaceMesh, joinSurfaceMeshes, loftBetweenCongruentSurfaceMeshes, minkowskiDifferenceOfSurfaceMeshes, minkowskiShellOfSurfaceMeshes, minkowskiSumOfSurfaceMeshes, offsetOfPolygonWithHoles, projectToPlaneOfSurfaceMesh, pushSurfaceMesh, remeshSurfaceMesh, isotropicRemeshingOfSurfaceMesh, removeSelfIntersectionsOfSurfaceMesh, approximateSurfaceMesh, simplifySurfaceMesh, subdivideSurfaceMesh, smoothShapeOfSurfaceMesh, smoothSurfaceMesh, separateSurfaceMesh, fromSurfaceMeshToTriangles, taperSurfaceMesh, doesSelfIntersectOfSurfaceMesh, twistSurfaceMesh, fromRotateXToTransform, fromRotateYToTransform, fromRotateZToTransform, fromTranslateToTransform, fromScaleToTransform } from './jsxcad-algorithm-cgal.js';
 export { arrangePolygonsWithHoles } from './jsxcad-algorithm-cgal.js';
 import { computeHash, write as write$1, read as read$1, readNonblocking as readNonblocking$1, ErrorWouldBlock, addPending } from './jsxcad-sys.js';
 import { transform as transform$4, equals, max, min, canonicalize as canonicalize$5, scale as scale$3, subtract } from './jsxcad-math-vec3.js';
@@ -1186,9 +1186,9 @@ const measureArea = (path) => {
 
 const isClockwise = (path) => measureArea(path) < 0;
 
-const clean = (path) => deduplicate(path);
+const clean$1 = (path) => deduplicate(path);
 
-const orientCounterClockwise = (path) =>
+const orientCounterClockwise$1 = (path) =>
   isClockwise(path) ? flip$3(path) : path;
 
 // This imposes a planar arrangement.
@@ -1205,6 +1205,39 @@ const fromPaths = ({ tags }, paths, plane) => {
     plane,
     undefined,
     polygons
+  )) {
+    const exterior = orientCounterClockwise$1(points);
+    const cleaned = clean$1(exterior);
+    if (cleaned.length < 3) {
+      continue;
+    }
+    const orientedPolygon = { points: cleaned, plane };
+    orientedPolygons.push(orientedPolygon);
+  }
+  return taggedGraph(
+    { tags },
+    fromSurfaceMeshLazy(fromPolygonsToSurfaceMesh(orientedPolygons))
+  );
+};
+
+const clean = (path) => deduplicate(path);
+
+const orientCounterClockwise = (path) =>
+  isClockwise(path) ? flip$3(path) : path;
+
+// This imposes a planar arrangement.
+const fromSegments = ({ tags }, segments, plane) => {
+  if (!plane) {
+    plane = fitPlaneToPoints(segments.flatMap((points) => points));
+  }
+  if (plane[0] === 0 && plane[1] === 0 && plane[2] === 0 && plane[3] === 0) {
+    throw Error(`Zero plane`);
+  }
+  const orientedPolygons = [];
+  for (const { points } of arrangeSegmentsIntoTriangles(
+    plane,
+    undefined,
+    segments
   )) {
     const exterior = orientCounterClockwise(points);
     const cleaned = clean(exterior);
@@ -1225,7 +1258,7 @@ const fill$1 = (geometry) => ({
   graph: { ...geometry.graph, isOutline: false },
 });
 
-const paths$2 = (geometry) =>
+const paths$3 = (geometry) =>
   fill$1(
     fromPaths(
       { tags: geometry.tags, matrix: geometry.matrix },
@@ -1233,7 +1266,15 @@ const paths$2 = (geometry) =>
     )
   );
 
-const fill = op({ graph: fill$1, paths: paths$2 });
+const segments$3 = (geometry) =>
+  fill$1(
+    fromSegments(
+      { tags: geometry.tags, matrix: geometry.matrix },
+      geometry.segments
+    )
+  );
+
+const fill = op({ graph: fill$1, paths: paths$3, segments: segments$3 });
 
 const computeCentroid = (geometry) => {
   const op = (geometry, descend) => {
@@ -1455,7 +1496,7 @@ class KDBush {
 }
 
 const fuse$1 = (sources) => {
-  if (sources.length === 0) {
+  if (sources.length < 2) {
     return sources;
   }
   sources = sources.map(({ graph, matrix, tags }) => ({
@@ -1506,6 +1547,27 @@ const fuse = (geometries) => {
   } else {
     return taggedGroup({ provenance: 'geometry/tagged/fuse' }, ...fusedGraphs);
   }
+};
+
+const eachNonVoidItem = (geometry, op) => {
+  const walk = (geometry, descend) => {
+    // FIX: Sketches aren't real either -- but this is a bit unclear.
+    if (geometry.type !== 'sketch' && isNotVoid(geometry)) {
+      op(geometry);
+      descend();
+    }
+  };
+  visit(geometry, walk);
+};
+
+const getNonVoidSegments = (geometry) => {
+  const segmentsets = [];
+  eachNonVoidItem(geometry, (item) => {
+    if (item.type === 'segments') {
+      segmentsets.push(item);
+    }
+  });
+  return segmentsets;
 };
 
 const collect$1 = (geometry, out) => {
@@ -1848,17 +1910,6 @@ const getEdges = (path) => {
   return edges;
 };
 
-const eachNonVoidItem = (geometry, op) => {
-  const walk = (geometry, descend) => {
-    // FIX: Sketches aren't real either -- but this is a bit unclear.
-    if (geometry.type !== 'sketch' && isNotVoid(geometry)) {
-      op(geometry);
-      descend();
-    }
-  };
-  visit(geometry, walk);
-};
-
 const getNonVoidGraphs = (geometry) => {
   const graphs = [];
   eachNonVoidItem(geometry, (item) => {
@@ -1877,16 +1928,6 @@ const getNonVoidPaths = (geometry) => {
     }
   });
   return pathsets;
-};
-
-const getNonVoidSegments = (geometry) => {
-  const segmentsets = [];
-  eachNonVoidItem(geometry, (item) => {
-    if (item.type === 'segments') {
-      segmentsets.push(item);
-    }
-  });
-  return segmentsets;
 };
 
 const outline$1 = ({ tags }, geometry) => {
@@ -1964,10 +2005,7 @@ const section = (geometry, matrices, { profile = false } = {}) => {
   return taggedGroup({}, ...sections$1);
 };
 
-const taggedToolpath = (
-  { tags = [], provenance },
-  toolpath
-) => {
+const taggedToolpath = ({ tags = [], provenance }, toolpath) => {
   return { type: 'toolpath', tags, toolpath };
 };
 
@@ -1993,10 +2031,12 @@ const computeToolpath = (geometry, toolDiameter = 1, jumpHeight = 1) => {
     let pendingEdges = 0;
     const points = [];
 
-    const sections = section(geometry, identityMatrix);
+    const concreteGeometry = toConcreteGeometry(geometry);
+    const sections = section(concreteGeometry, [identityMatrix]);
     const fusedArea = fuse([sections]);
     const insetArea = inset(fusedArea, toolRadius);
 
+    // Surfaces
     {
       const { isInteriorPoint, release } = getQuery(insetArea);
       const [minPoint, maxPoint] = measureBoundingBox(sections);
@@ -2026,6 +2066,7 @@ const computeToolpath = (geometry, toolDiameter = 1, jumpHeight = 1) => {
       release();
     }
 
+    // Profiles
     for (const { segments } of outline(insetArea)) {
       for (const edge of segments) {
         // CHECK: Do outline segments have duplicates still?
@@ -2048,6 +2089,36 @@ const computeToolpath = (geometry, toolDiameter = 1, jumpHeight = 1) => {
         start.type = 'edge';
         const end = [...edge[1]];
         end.type = 'edge';
+        const path = [start, end];
+        points.push([start, path], [end, path]);
+        pendingEdges += 1;
+      }
+    }
+
+    // Grooves
+    // FIX: These should be sectioned segments.
+    for (const { segments } of getNonVoidSegments(concreteGeometry)) {
+      for (const edge of segments) {
+        // CHECK: Do outline segments have duplicates still?
+        // Deduplicate edges.
+        {
+          const forward = JSON.stringify(edge);
+          if (seen.has(forward)) {
+            continue;
+          } else {
+            seen.add(forward);
+          }
+          const backward = JSON.stringify([...edge].reverse());
+          if (seen.has(backward)) {
+            continue;
+          } else {
+            seen.add(backward);
+          }
+        }
+        const start = [...edge[0]];
+        start.type = 'profile';
+        const end = [...edge[1]];
+        end.type = 'profile';
         const path = [start, end];
         points.push([start, path], [end, path]);
         pendingEdges += 1;
@@ -2081,47 +2152,45 @@ const computeToolpath = (geometry, toolDiameter = 1, jumpHeight = 1) => {
       at = to;
     };
 
-    try {
-      while (pendingEdges > 0) {
-        const [x, y] = at;
-        for (let range = 1; range < Infinity; range *= 2) {
-          let bestStart;
-          let bestEdge;
-          let bestDistance = Infinity;
-          for (const index of kd.within(x, y, range)) {
-            const [start, edge] = points[index];
-            if (edge.planned) {
-              continue;
-            }
-            const distance = computeDistance(start);
-            if (distance < bestDistance) {
-              bestDistance = distance;
-              bestEdge = edge;
-              bestStart = start;
-            }
-          }
-          if (bestDistance === Infinity) {
-            // No target within range, so expand the range.
+    while (pendingEdges > 0) {
+      const [x, y] = at;
+      for (let range = 1; range < Infinity; range *= 2) {
+        let bestStart;
+        let bestEdge;
+        let bestDistance = Infinity;
+        for (const index of kd.within(x, y, range)) {
+          const [start, edge] = points[index];
+          if (edge.planned) {
             continue;
           }
-          pendingEdges -= 1;
-          bestEdge.planned = true;
-          const bestEnd = bestEdge[0] === bestStart ? bestEdge[1] : bestEdge[0];
-          if (
-            (bestEnd.type === 'fill' || at.type === 'fill') &&
-            bestDistance <= toolDiameter
-          ) {
-            cut(bestEnd); // cut across
-          } else {
-            jump(bestStart); // jump to the start x, y
-            cut(bestStart); // may need to drill down to the start z
-            cut(bestEnd); // cut across
+          const distance = computeDistance(start);
+          if (distance < bestDistance) {
+            bestDistance = distance;
+            bestEdge = edge;
+            bestStart = start;
           }
-          break;
         }
+        if (bestDistance === Infinity) {
+          // No target within range, so expand the range.
+          continue;
+        }
+        pendingEdges -= 1;
+        bestEdge.planned = true;
+        const bestEnd = bestEdge[0] === bestStart ? bestEdge[1] : bestEdge[0];
+        if (
+          bestEnd.type !== 'profile' &&
+          at.type !== 'profile' &&
+          (bestEnd.type === 'fill' || at.type === 'fill') &&
+          bestDistance <= toolDiameter
+        ) {
+          cut(bestEnd); // cut across
+        } else {
+          jump(bestStart); // jump to the start x, y
+          cut(bestStart); // may need to drill down to the start z
+          cut(bestEnd); // cut across
+        }
+        break;
       }
-    } catch (error) {
-      throw error;
     }
 
     jump([0, 0, 0]);
@@ -2344,7 +2413,7 @@ const eachItem = (geometry, op) => {
 const eachEdge = (geometry, emit) =>
   outlineSurfaceMesh(toSurfaceMesh(geometry.graph), geometry.matrix, emit);
 
-const segments$1 = (
+const segments$2 = (
   {
     matrix,
     orientation = [
@@ -2361,7 +2430,7 @@ const segments$1 = (
   }
 };
 
-const eachSegment = op({ graph: eachEdge, segments: segments$1 }, visit);
+const eachSegment = op({ graph: eachEdge, segments: segments$2 }, visit);
 
 const empty = ({ tags, isPlanar }) => fromEmpty({ tags, isPlanar });
 
@@ -2392,47 +2461,16 @@ const extrude$1 = (geometry, height, depth, normal) => {
   );
 };
 
-const extrude = (geometry, height, depth, direction) => {
-  const op = (geometry, descend) => {
-    switch (geometry.type) {
-      case 'graph':
-        return extrude$1(
-          geometry,
-          height,
-          depth,
-          reify(direction(geometry))
-        );
-      case 'triangles':
-      case 'points':
-        // Not implemented yet.
-        return geometry;
-      case 'polygonsWithHoles':
-        return extrude(
-          fromPolygonsWithHoles(geometry),
-          height,
-          depth,
-          direction
-        );
-      case 'paths':
-        return extrude(fill(geometry), height, depth, direction);
-      case 'plan':
-        return extrude(reify(geometry).content[0], height, depth, direction);
-      case 'item':
-      case 'group': {
-        return descend();
-      }
-      case 'sketch': {
-        // Sketches aren't real for extrude.
-        return geometry;
-      }
-      default:
-        throw Error(`Unexpected geometry: ${JSON.stringify(geometry)}`);
-    }
-  };
+const graph$1 = (geometry, height, depth, direction) =>
+  extrude$1(geometry, height, depth, reify(direction(geometry)));
+const paths$2 = (geometry, height, depth, direction) =>
+  extrude(fill(geometry), height, depth, direction);
+const polygonsWithHoles$1 = (geometry, height, depth, direction) =>
+  extrude(fromPolygonsWithHoles(geometry), height, depth, direction);
+const segments$1 = (geometry, height, depth, direction) =>
+  extrude(fill(geometry), height, depth, direction);
 
-  // CHECK: Why does this need transformed geometry?
-  return rewrite(toTransformedGeometry(geometry), op);
-};
+const extrude = op({ graph: graph$1, polygonsWithHoles: polygonsWithHoles$1, paths: paths$2, segments: segments$1 });
 
 // FIX: The face needs to be selected with the transform in mind.
 const extrudeToPlane$1 = (geometry, highPlane, lowPlane, direction) => {
@@ -3789,13 +3827,14 @@ const soup = (
       case 'polygonsWithHoles':
         return show(toTriangles(geometry));
       case 'segments':
-      case 'toolpath':
-        return taggedGroup({});
       case 'triangles':
       case 'points':
       case 'paths':
         // Already soupy enough.
         return geometry;
+      case 'toolpath':
+        // Drop toolpaths for now.
+        return taggedGroup({});
       case 'displayGeometry':
         // soup can handle displayGeometry.
         return descend();

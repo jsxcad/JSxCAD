@@ -10,7 +10,6 @@ import {
 import {
   fill as fillGeometry,
   taggedGroup,
-  taggedPaths,
   transform as transformGeometry,
 } from '@jsxcad/geometry';
 
@@ -187,7 +186,7 @@ export const fromSvg = async (
         ));
 
         const output = (svgPath) => {
-          const paths = fromSvgPath(svgPath).paths;
+          const segments = fromSvgPath(svgPath);
           const attributes = {
             fill: node.getAttribute('fill') || 'black',
             stroke: node.getAttribute('stroke') || 'none',
@@ -204,7 +203,7 @@ export const fromSvg = async (
             const tags = toTagsFromName(fill, definitions);
             geometry.content.push(
               fillGeometry(
-                transformGeometry(scale(matrix), taggedPaths({ tags }, paths))
+                transformGeometry(scale(matrix), { ...segments, tags })
               )
             );
           }
@@ -220,11 +219,7 @@ export const fromSvg = async (
             const scaledMatrix = scale(matrix);
             const tags = toTagsFromName(stroke, definitions);
             geometry.content.push(
-              transformGeometry(scaledMatrix, {
-                type: 'paths',
-                paths,
-                tags,
-              })
+              transformGeometry(scaledMatrix, { ...segments, tags })
             );
           }
         };

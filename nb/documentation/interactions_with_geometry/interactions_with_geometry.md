@@ -388,7 +388,7 @@ graph LR;
   0 --> 3;
   3[item<br>item:bar]
   3 --> 4;
-  4[graph<br>]
+  4[plan<br>]
 '''
 
 ---

@@ -181,8 +181,7 @@ Shape.fromGraph = (graph, context) =>
   new Shape(taggedGraph({}, graph), context);
 Shape.fromOpenPath = (path, context) =>
   fromGeometry(taggedPaths({}, [openPath(path)]), context);
-Shape.fromSegments = (...segments) =>
-  fromGeometry(taggedSegments({}, segments));
+Shape.fromSegments = (segments) => fromGeometry(taggedSegments({}, segments));
 Shape.fromPath = (path, context) =>
   fromGeometry(taggedPaths({}, [path]), context);
 Shape.fromPaths = (paths, context) =>
@@ -214,7 +213,6 @@ Shape.toShapes = (to, from) => {
   if (to instanceof Array) {
     return to
       .filter((value) => value !== undefined)
-      .flatMap((value) => Shape.toShapes(value, from))
       .flatMap((value) => Shape.toShapes(value, from));
   } else {
     return [Shape.toShape(to, from)];

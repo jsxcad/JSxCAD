@@ -3,15 +3,11 @@ import { Text, readFont } from '@jsxcad/api-v1-font';
 ```
 
 ```JavaScript
-const tool = { grbl: { type: 'spindle', spindleRpm: 7000, feedRate: 650 } };
+const text = await control('Engraving', '輝');
 ```
 
 ```JavaScript
 const unYetGul = await readFont('https://jsxcad.js.org/ttf/UnYetgul.ttf');
-```
-
-```JavaScript
-const text = await control('Engraving', '輝');
 ```
 
 ```JavaScript

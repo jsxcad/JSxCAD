@@ -467,7 +467,13 @@ Cut
 Cleaned mesh
 
 ```JavaScript
-Arc(10).and(Hexagon(2), Box(4)).toolpath(5).view(4);
+Arc(4)
+  .x(5)
+  .seq({ by: 1 / 8 }, rz, Join)
+  .material('glass')
+  .color('orange')
+  .and(toolpath(1))
+  .view();
 ```
 
 ![Image](shape.md.56.png)

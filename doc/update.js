@@ -6,6 +6,8 @@ import path from 'path';
 import puppeteer from 'puppeteer';
 import { updateNotebook } from './updateNotebook.js';
 
+Error.stackTraceLimit = Infinity;
+
 process.on('uncaughtException', (err) => {
   console.error('There was an uncaught error', err);
   process.exit(1); // mandatory (as per the Node.js docs)

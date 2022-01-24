@@ -5,9 +5,7 @@ const Y = 1;
 const Z = 2;
 
 // FIX: This is actually GRBL.
-const toGcode = async (
-  geometry,
-) => {
+const toGcode = async (geometry) => {
   const codes = [];
 
   // CHECK: Perhaps this should be a more direct modeling of the GRBL state?
@@ -129,20 +127,20 @@ const toGcode = async (
   cM3();
 
   const processToolpath = ({ toolpath }) => {
-     for (const entry of toolpath) {
-       switch (entry.op) {
-         case 'jump':
-           cF({ f: entry.speed });
-           cS({ s: entry.power });
-           cG0({ x: entry.to[X], y: entry.to[Y], z: entry.to[Z] });
-           break;
-         case 'cut':
-           cF({ f: entry.speed });
-           cS({ s: entry.power });
-           cG1({ x: entry.to[X], y: entry.to[Y], z: entry.to[Z] });
-           break;
-       }
-     }
+    for (const entry of toolpath) {
+      switch (entry.op) {
+        case 'jump':
+          cF({ f: entry.speed });
+          cS({ s: entry.power });
+          cG0({ x: entry.to[X], y: entry.to[Y], z: entry.to[Z] });
+          break;
+        case 'cut':
+          cF({ f: entry.speed });
+          cS({ s: entry.power });
+          cG1({ x: entry.to[X], y: entry.to[Y], z: entry.to[Z] });
+          break;
+      }
+    }
   };
 
   op({ toolpath: processToolpath }, visit)(geometry);

@@ -142,7 +142,10 @@ export const toPdf = async (
     let last;
     for (const [start, end] of segments) {
       if (!last || start[X] !== last[X] || start[Y] !== last[Y]) {
-        lines.push(`${start[X].toFixed(9)} ${start[X].toFixed(9)} m`); // move-to.
+        if (last) {
+          lines.push(`S`); // stroke.
+        }
+        lines.push(`${start[X].toFixed(9)} ${start[Y].toFixed(9)} m`); // move-to.
       }
       lines.push(`${end[X].toFixed(9)} ${end[Y].toFixed(9)} l`); // line-to.
       last = end;
