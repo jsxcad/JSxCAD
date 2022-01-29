@@ -23,7 +23,7 @@ const model = Text(unYetGul, text, 25)
 Model
 
 ```JavaScript
-const inset = model.inset(0.5, 0.5).gridView().md('Section Inset');
+const inset = model.inset(0.5).gridView().md('Section Inset');
 ```
 
 ![Image](engrave.md.1.png)
