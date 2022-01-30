@@ -46,7 +46,7 @@ export const cutSurfaceMeshes = (targetMeshes, targetSegments, sources) => {
     );
 
     if (status === STATUS_ZERO_THICKNESS) {
-      throw new ErrorZeroThickness('Zero thickness produced by join');
+      throw new ErrorZeroThickness('Zero thickness produced by cut');
     }
     if (status !== STATUS_OK) {
       throw new Error(`Unexpected status ${status}`);

@@ -119,6 +119,10 @@ typedef CGAL::Arr_segment_traits_2<Kernel> Traits_2;
 typedef CGAL::Arrangement_2<Traits_2> Arrangement_2;
 typedef Traits_2::X_monotone_curve_2 Segment_2;
 
+typedef CGAL::Simple_cartesian<double> Cartesian_kernel;
+typedef Cartesian_kernel::Point_3 Cartesian_point;
+typedef CGAL::Surface_mesh<Cartesian_point> Cartesian_surface_mesh;
+
 typedef std::array<FT, 3> Triple;
 typedef std::vector<Triple> Triples;
 
@@ -129,10 +133,9 @@ typedef std::array<FT, 4> Quadruple;
 
 typedef std::vector<std::size_t> Polygon;
 
-typedef CGAL::Exact_predicates_exact_constructions_kernel Kernel_2;
-typedef CGAL::Polygon_2<Kernel_2> Polygon_2;
-typedef CGAL::Polygon_with_holes_2<Kernel_2> Polygon_with_holes_2;
-typedef CGAL::Straight_skeleton_2<Kernel_2> Straight_skeleton_2;
+typedef CGAL::Polygon_2<Kernel> Polygon_2;
+typedef CGAL::Polygon_with_holes_2<Kernel> Polygon_with_holes_2;
+typedef CGAL::Straight_skeleton_2<Kernel> Straight_skeleton_2;
 
 typedef CGAL::General_polygon_set_2<CGAL::Gps_segment_traits_2<Kernel>>
     General_polygon_set_2;
@@ -189,6 +192,11 @@ FT compute_translation_offset(double value) {
 }
 
 FT compute_approximate_point_value(double value) {
+  return CGAL::simplest_rational_in_interval<FT>(value - 0.001, value + 0.001);
+}
+
+FT compute_approximate_point_value(FT ft) {
+  const double value = CGAL::to_double(ft.exact());
   return CGAL::simplest_rational_in_interval<FT>(value - 0.001, value + 0.001);
 }
 
@@ -445,12 +453,6 @@ const Surface_mesh* FromPolygonSoupToSurfaceMesh(emscripten::val fill) {
   Triples* triples_ptr = &triples;
   Polygons* polygons_ptr = &polygons;
   fill(triples_ptr, polygons_ptr);
-  for (Triple& triple : triples) {
-    // Find a nice representation for the double.
-    triple[0] = compute_approximate_point_value(CGAL::to_double(triple[0]));
-    triple[1] = compute_approximate_point_value(CGAL::to_double(triple[1]));
-    triple[2] = compute_approximate_point_value(CGAL::to_double(triple[2]));
-  }
   CGAL::Polygon_mesh_processing::repair_polygon_soup(
       triples, polygons, CGAL::parameters::geom_traits(Triple_array_traits()));
   CGAL::Polygon_mesh_processing::orient_polygon_soup(triples, polygons);
@@ -463,6 +465,35 @@ const Surface_mesh* FromPolygonSoupToSurfaceMesh(emscripten::val fill) {
     CGAL::Polygon_mesh_processing::orient_to_bound_a_volume(*mesh);
   }
   return mesh;
+}
+
+void emitPoint(Point p, emscripten::val emit_point) {
+  std::ostringstream x;
+  x << p.x().exact();
+  std::string xs = x.str();
+  std::ostringstream y;
+  y << p.y().exact();
+  std::string ys = y.str();
+  std::ostringstream z;
+  z << p.z().exact();
+  std::string zs = z.str();
+  emit_point(CGAL::to_double(p.x().exact()), CGAL::to_double(p.y().exact()),
+             CGAL::to_double(p.z().exact()), xs, ys, zs);
+}
+
+void emitNthPoint(int nth, Point p, emscripten::val emit_point) {
+  std::ostringstream x;
+  x << p.x().exact();
+  std::string xs = x.str();
+  std::ostringstream y;
+  y << p.y().exact();
+  std::string ys = y.str();
+  std::ostringstream z;
+  z << p.z().exact();
+  std::string zs = z.str();
+  emit_point(nth, CGAL::to_double(p.x().exact()),
+             CGAL::to_double(p.y().exact()), CGAL::to_double(p.z().exact()), xs,
+             ys, zs);
 }
 
 void FromSurfaceMeshToPolygonSoup(const Surface_mesh* mesh,
@@ -486,8 +517,7 @@ void FromSurfaceMeshToPolygonSoup(const Surface_mesh* mesh,
     emit_polygon();
     for (const auto& index : polygon) {
       const auto p = points[index].transform(*transformation);
-      emit_point(CGAL::to_double(p.x().exact()), CGAL::to_double(p.y().exact()),
-                 CGAL::to_double(p.z().exact()));
+      emitPoint(p, emit_point);
     }
   }
 }
@@ -817,10 +847,6 @@ const Surface_mesh* IsotropicRemeshingOfSurfaceMesh(
     // This may require self intersection removal.
     return output;
   } else {
-    typedef CGAL::Simple_cartesian<double> Cartesian_kernel;
-    typedef Cartesian_kernel::Point_3 Cartesian_point;
-    typedef CGAL::Surface_mesh<Cartesian_point> Cartesian_surface_mesh;
-
     Cartesian_surface_mesh cartesian_mesh;
 
     SelectVerticesAndFaces<Cartesian_kernel>(
@@ -1508,17 +1534,7 @@ void EachPointOfSurfaceMesh(const Surface_mesh* input,
   Surface_mesh mesh(*input);
   for (const Surface_mesh::Vertex_index vertex : mesh.vertices()) {
     const Point p = mesh.point(vertex).transform(*transformation);
-    std::ostringstream x;
-    x << p.x().exact();
-    std::string xs = x.str();
-    std::ostringstream y;
-    y << p.y().exact();
-    std::string ys = y.str();
-    std::ostringstream z;
-    z << p.z().exact();
-    std::string zs = z.str();
-    emit_point(CGAL::to_double(p.x().exact()), CGAL::to_double(p.y().exact()),
-               CGAL::to_double(p.z().exact()), xs, ys, zs);
+    emitPoint(p, emit_point);
   }
 }
 
@@ -2180,13 +2196,12 @@ const Surface_mesh::Vertex_index ensureVertex(
 void convertArrangementToPolygonsWithHoles(
     const Arrangement_2& arrangement, std::vector<Polygon_with_holes_2>& out) {
   std::queue<Arrangement_2::Face_const_handle> undecided;
-  CGAL::Unique_hash_map<Arrangement_2::Face_const_handle, bool> positive_faces;
-  CGAL::Unique_hash_map<Arrangement_2::Face_const_handle, bool> negative_faces;
+  CGAL::Unique_hash_map<Arrangement_2::Face_const_handle, CGAL::Sign> face_sign;
 
   for (Arrangement_2::Face_const_iterator face = arrangement.faces_begin();
        face != arrangement.faces_end(); ++face) {
     if (!face->has_outer_ccb()) {
-      negative_faces[face] = true;
+      face_sign[face] = CGAL::Sign::NEGATIVE;
     } else {
       undecided.push(face);
     }
@@ -2195,19 +2210,17 @@ void convertArrangementToPolygonsWithHoles(
   while (!undecided.empty()) {
     Arrangement_2::Face_const_handle face = undecided.front();
     undecided.pop();
-    if (positive_faces[face]) {
+    CGAL::Sign sign = face_sign[face];
+    if (sign == CGAL::Sign::POSITIVE) {
       for (Arrangement_2::Hole_const_iterator hole = face->holes_begin();
            hole != face->holes_end(); ++hole) {
-        positive_faces[(*hole)->twin()->face()] = false;
-        negative_faces[(*hole)->twin()->face()] = true;
+        face_sign[(*hole)->twin()->face()] = CGAL::Sign::NEGATIVE;
       }
       continue;
-    }
-    if (negative_faces[face]) {
+    } else if (sign == CGAL::Sign::NEGATIVE) {
       for (Arrangement_2::Hole_const_iterator hole = face->holes_begin();
            hole != face->holes_end(); ++hole) {
-        positive_faces[(*hole)->twin()->face()] = true;
-        negative_faces[(*hole)->twin()->face()] = false;
+        face_sign[(*hole)->twin()->face()] = CGAL::Sign::POSITIVE;
       }
       continue;
     }
@@ -2215,9 +2228,8 @@ void convertArrangementToPolygonsWithHoles(
     Arrangement_2::Ccb_halfedge_const_circulator start = face->outer_ccb();
     Arrangement_2::Ccb_halfedge_const_circulator edge = start;
     do {
-      if (negative_faces[edge->twin()->face()]) {
-        positive_faces[face] = true;
-        negative_faces[face] = false;
+      if (face_sign[edge->twin()->face()] == CGAL::Sign::NEGATIVE) {
+        face_sign[face] = CGAL::Sign::POSITIVE;
         decided = true;
         break;
       }
@@ -2225,9 +2237,8 @@ void convertArrangementToPolygonsWithHoles(
     if (!decided) {
       edge = start;
       do {
-        if (positive_faces[edge->twin()->face()]) {
-          positive_faces[face] = false;
-          negative_faces[face] = true;
+        if (face_sign[edge->twin()->face()] == CGAL::Sign::POSITIVE) {
+          face_sign[face] = CGAL::Sign::NEGATIVE;
           decided = true;
           break;
         }
@@ -2238,7 +2249,7 @@ void convertArrangementToPolygonsWithHoles(
 
   for (Arrangement_2::Face_const_iterator face = arrangement.faces_begin();
        face != arrangement.faces_end(); ++face) {
-    if (!positive_faces[face]) {
+    if (face_sign[face] == CGAL::Sign::NEGATIVE) {
       continue;
     }
     Polygon_2 polygon_boundary;
@@ -3577,19 +3588,7 @@ class Surface_mesh_explorer {
       if (mesh.is_removed(vertex)) {
         continue;
       }
-      const auto& p = mesh.point(vertex);
-      std::ostringstream x;
-      x << p.x().exact();
-      std::string xs = x.str();
-      std::ostringstream y;
-      y << p.y().exact();
-      std::string ys = y.str();
-      std::ostringstream z;
-      z << p.z().exact();
-      std::string zs = z.str();
-      emit_point_((std::int32_t)vertex, CGAL::to_double(p.x().exact()),
-                  CGAL::to_double(p.y().exact()),
-                  CGAL::to_double(p.z().exact()), xs, ys, zs);
+      emitNthPoint((std::int32_t)vertex, mesh.point(vertex), emit_point_);
     }
 
     facet_to_face[mesh.null_face()] = -1;
@@ -3930,6 +3929,169 @@ void print_polygon_with_holes(
   std::cout << " }" << std::endl;
 }
 
+template <typename P>
+bool emitPolygonsWithHoles(const Plane& plane, const std::vector<P>& polygons,
+                           emscripten::val& emit_polygon,
+                           emscripten::val& emit_point) {
+  bool emitted = false;
+  for (const P& polygon : polygons) {
+    const auto& outer = polygon.outer_boundary();
+    emit_polygon(false);
+    emitted = true;
+    for (auto edge = outer.edges_begin(); edge != outer.edges_end(); ++edge) {
+      if (edge->source() == edge->target()) {
+        // Skip zero length edges.
+        std::cout << "QQ/skip zero length edge" << std::endl;
+        continue;
+      }
+      auto p = plane.to_3d(Point_2(edge->source().x(), edge->source().y()));
+      auto p2 = plane.to_3d(Point_2(edge->target().x(), edge->target().y()));
+      if (p == p2) {
+        continue;
+      }
+      emitPoint(p, emit_point);
+    }
+    for (auto hole = polygon.holes_begin(); hole != polygon.holes_end();
+         ++hole) {
+      emit_polygon(true);
+      emitted = true;
+      for (auto edge = hole->edges_begin(); edge != hole->edges_end(); ++edge) {
+        if (edge->source() == edge->target()) {
+          // Skip zero length edges.
+          std::cout << "QQ/skip zero length edge" << std::endl;
+          continue;
+        }
+        auto p = plane.to_3d(Point_2(edge->source().x(), edge->source().y()));
+        emitPoint(p, emit_point);
+      }
+    }
+  }
+  return emitted;
+}
+
+template <class Curve, class Curve_point>
+void emitCircularCurve(Curve& curve, Curve_point& position,
+                       Polygon_2& linear_polygon) {
+  // General loss of precision.
+  const auto& source = curve->source();
+  const auto& target = curve->target();
+  const auto& circle = curve->supporting_circle();
+  double cx = CGAL::to_double(circle.center().x());
+  double cy = CGAL::to_double(circle.center().y());
+  double sx = CGAL::to_double(source.x());
+  double sy = CGAL::to_double(source.y());
+  double tx = CGAL::to_double(target.x());
+  double ty = CGAL::to_double(target.y());
+  double source_angle = atan2(sy - cy, sx - cx);
+  double target_angle = atan2(ty - cy, tx - cx);
+  std::vector<Point_2> plan;
+  if (circle.orientation() == CGAL::CLOCKWISE) {
+    plan.push_back(Point_2(sx, sy));
+    if (target_angle > source_angle) {
+      target_angle -= M_PI * 2;
+    }
+    const double step = M_PI / 32.0;
+    double ox = sx - cx;
+    double oy = sy - cy;
+    double angle_limit = source_angle - target_angle;
+    for (double angle = step; angle < angle_limit; angle += step) {
+      plan.push_back(Point_2(cos(-angle) * ox - sin(-angle) * oy + cx,
+                             sin(-angle) * ox + cos(-angle) * oy + cy));
+    }
+    plan.push_back(Point_2(tx, ty));
+  } else {
+    // COUNTER-CLOCKWISE
+    plan.push_back(Point_2(sx, sy));
+    if (target_angle < source_angle) {
+      target_angle += M_PI * 2;
+    }
+    const double step = M_PI / 32.0;
+    double ox = sx - cx;
+    double oy = sy - cy;
+    double angle_limit = target_angle - source_angle;
+    for (double angle = step; angle < angle_limit; angle += step) {
+      plan.push_back(Point_2(cos(angle) * ox - sin(angle) * oy + cx,
+                             sin(angle) * ox + cos(angle) * oy + cy));
+    }
+    plan.push_back(Point_2(tx, ty));
+  }
+  if (position == curve->target()) {
+    std::reverse(plan.begin(), plan.end());
+    position = curve->source();
+  } else {
+    position = curve->target();
+  }
+  // Skip the initial point which should be the end of another curve.
+  auto it = plan.begin() + 1;
+  while (it != plan.end()) {
+    linear_polygon.push_back(*it);
+    ++it;
+  }
+}
+
+template <class Curve, class Curve_point>
+void emitLinearCurve(Curve& curve, Curve_point position,
+                     Polygon_2& linear_polygon) {
+  if (position == curve->target()) {
+    linear_polygon.push_back(Point_2(CGAL::to_double(curve->source().x()),
+                                     CGAL::to_double(curve->source().y())));
+    position = curve->source();
+  } else {
+    linear_polygon.push_back(Point_2(CGAL::to_double(curve->target().x()),
+                                     CGAL::to_double(curve->target().y())));
+    position = curve->target();
+  }
+}
+
+void emitLinearPolygon(const Plane& plane, const Polygon_2& linear_polygon,
+                       emscripten::val& emit_point) {
+  for (Point_2 p2 : linear_polygon) {
+    emitPoint(plane.to_3d(p2), emit_point);
+  }
+}
+
+template <typename Polygon>
+bool emitCircularPolygonsWithHoles(const Plane& plane,
+                                   const std::vector<Polygon>& polygons,
+                                   emscripten::val& emit_polygon,
+                                   emscripten::val& emit_point) {
+  bool emitted = false;
+  for (const Polygon& polygon : polygons) {
+    const auto& outer = polygon.outer_boundary();
+    emit_polygon(false);
+    emitted = true;
+    Polygon_2 linear_polygon;
+    auto position = outer.curves_begin()->source();
+    for (auto curve = outer.curves_begin(); curve != outer.curves_end();
+         ++curve) {
+      if (curve->is_linear()) {
+        emitLinearCurve(curve, position, linear_polygon);
+      } else if (curve->is_circular()) {
+        emitCircularCurve(curve, position, linear_polygon);
+      }
+      emitted = true;
+    }
+    emitLinearPolygon(plane, linear_polygon, emit_point);
+    for (auto hole = polygon.holes_begin(); hole != polygon.holes_end();
+         ++hole) {
+      emit_polygon(true);
+      Polygon_2 linear_polygon;
+      auto position = hole->curves_begin()->source();
+      for (auto curve = hole->curves_begin(); curve != hole->curves_end();
+           ++curve) {
+        if (curve->is_linear()) {
+          emitLinearCurve(curve, position, linear_polygon);
+        } else if (curve->is_circular()) {
+          emitCircularCurve(curve, position, linear_polygon);
+        }
+        emitted = true;
+      }
+      emitLinearPolygon(plane, linear_polygon, emit_point);
+    }
+  }
+  return emitted;
+}
+
 void OffsetOfPolygonWithHoles(double initial, double step, double limit,
                               std::size_t hole_count,
                               emscripten::val fill_plane,
@@ -3953,12 +4115,12 @@ void OffsetOfPolygonWithHoles(double initial, double step, double limit,
     for (const auto& point : points) {
       hole.push_back(plane.to_2d(point));
     }
-    if (hole.orientation() == CGAL::Sign::POSITIVE) {
-      hole.reverse_orientation();
-    }
     if (!hole.is_simple()) {
       std::cout << "Hole is not simple" << std::endl;
       return;
+    }
+    if (hole.orientation() == CGAL::Sign::POSITIVE) {
+      hole.reverse_orientation();
     }
     holes.push_back(hole);
   }
@@ -3972,14 +4134,13 @@ void OffsetOfPolygonWithHoles(double initial, double step, double limit,
     for (const auto& point : points) {
       boundary.push_back(plane.to_2d(point));
     }
-    if (boundary.orientation() == CGAL::Sign::NEGATIVE) {
-      boundary.reverse_orientation();
-    }
     if (!boundary.is_simple()) {
       std::cout << "Boundary is not simple" << std::endl;
       return;
     }
-
+    if (boundary.orientation() == CGAL::Sign::NEGATIVE) {
+      boundary.reverse_orientation();
+    }
     // Stick a box around the boundary (which will now form a hole).
     CGAL::Bbox_2 bb = boundary.bbox();
     bb.dilate(10);
@@ -4001,16 +4162,14 @@ void OffsetOfPolygonWithHoles(double initial, double step, double limit,
 
   double offset = initial;
 
-  Polygon_2 tool;
-  for (double a = 0; a < CGAL_PI * 2; a += CGAL_PI / 16) {
-    tool.push_back(Point_2(sin(-a) * offset, cos(-a) * offset));
-  }
-  if (tool.orientation() == CGAL::Sign::NEGATIVE) {
-    std::cout << "Reverse tool" << std::endl;
-    tool.reverse_orientation();
-  }
-
   for (;;) {
+    Polygon_2 tool;
+    for (double a = 0; a < CGAL_PI * 2; a += CGAL_PI / 8) {
+      tool.push_back(
+          Point_2(compute_approximate_point_value(sin(-a) * offset),
+                  compute_approximate_point_value(cos(-a) * offset)));
+    }
+
     CGAL::General_polygon_set_2<Traits> boundaries;
 
     // This computes the offsetting of the holes.
@@ -4025,6 +4184,10 @@ void OffsetOfPolygonWithHoles(double initial, double step, double limit,
     // We just extract the holes, which are the offset holes.
     for (auto hole = inset_boundary.holes_begin();
          hole != inset_boundary.holes_end(); ++hole) {
+      if (!hole->is_simple()) {
+        std::cout << "OffsetOfPolygonWithHoles: hole is not simple"
+                  << std::endl;
+      }
       if (hole->orientation() == CGAL::Sign::NEGATIVE) {
         Polygon_2 boundary = *hole;
         boundary.reverse_orientation();
@@ -4034,51 +4197,11 @@ void OffsetOfPolygonWithHoles(double initial, double step, double limit,
       }
     }
 
-    bool emitted = false;
-
     std::vector<Traits::Polygon_with_holes_2> polygons;
     boundaries.polygons_with_holes(std::back_inserter(polygons));
 
-    for (const Traits::Polygon_with_holes_2& polygon : polygons) {
-      const auto& outer = polygon.outer_boundary();
-      emit_polygon(false);
-      for (auto vertex = outer.vertices_begin(); vertex != outer.vertices_end();
-           ++vertex) {
-        auto p = plane.to_3d(Point_2(CGAL::to_double(vertex->x().exact()),
-                                     CGAL::to_double(vertex->y().exact())));
-        std::ostringstream x;
-        x << p.x().exact();
-        std::ostringstream y;
-        y << p.y().exact();
-        std::ostringstream z;
-        z << p.z().exact();
-        emit_point(CGAL::to_double(p.x().exact()),
-                   CGAL::to_double(p.y().exact()),
-                   CGAL::to_double(p.z().exact()), x.str(), y.str(), z.str());
-        emitted = true;
-      }
-      for (auto hole = polygon.holes_begin(); hole != polygon.holes_end();
-           ++hole) {
-        emit_polygon(true);
-        for (auto vertex = hole->vertices_begin();
-             vertex != hole->vertices_end(); ++vertex) {
-          auto p = plane.to_3d(Point_2(CGAL::to_double(vertex->x().exact()),
-                                       CGAL::to_double(vertex->y().exact())));
-          std::ostringstream x;
-          x << p.x().exact();
-          std::ostringstream y;
-          y << p.y().exact();
-          std::ostringstream z;
-          z << p.z().exact();
-          emit_point(CGAL::to_double(p.x().exact()),
-                     CGAL::to_double(p.y().exact()),
-                     CGAL::to_double(p.z().exact()), x.str(), y.str(), z.str());
-          emitted = true;
-        }
-      }
-    }
-
-    if (!emitted) {
+    if (!emitPolygonsWithHoles(plane, polygons, emit_polygon, emit_point)) {
+      // Nothing emitted.
       break;
     }
     if (step <= 0) {
@@ -4094,12 +4217,113 @@ void OffsetOfPolygonWithHoles(double initial, double step, double limit,
   }
 }
 
+#if 0
+/*
+This approach has an issue in that we need to approximate the circles after performing the booleans, which may lead to self intersection.
+
+const a = Box(21)
+  .cut(
+    Arc(3)
+      .x(4.6)
+      .seq({ by: 1 / 6 }, rz, Group)
+  )
+  .view();
+
+a.inset(1.5).view({ wireframe: true });
+*/
 void InsetOfPolygonWithHoles(double initial, double step, double limit,
                              std::size_t hole_count, emscripten::val fill_plane,
                              emscripten::val fill_boundary,
                              emscripten::val fill_hole,
                              emscripten::val emit_polygon,
                              emscripten::val emit_point) {
+  typedef CGAL::Gps_circle_segment_traits_2<Kernel> Traits;
+  typedef Kernel::Point_2 Gps_point;
+  typedef CGAL::Polygon_2<Kernel> Gps_polygon_2;
+  typedef Traits::Polygon_2 General_polygon_2;
+  typedef Traits::Polygon_with_holes_2 Polygon_with_holes_2;
+  typedef Traits::X_monotone_curve_2 X_monotone_curve_2;
+  typedef CGAL::General_polygon_set_2<Traits> General_polygon_set_2;
+  std::cout << "InsetOfPolygonWithHoles/0" << std::endl;
+  Plane plane;
+  admitPlane(plane, fill_plane);
+  plane = unitPlane(plane);
+
+  General_polygon_set_2 gps;
+
+  // Inset the boundary.
+  {
+    Points points;
+    Points* points_ptr = &points;
+    fill_boundary(points_ptr);
+    Gps_polygon_2 boundary;
+    for (const auto& point : points) {
+      Point_2 p = plane.to_2d(point);
+      Gps_point cp(CGAL::to_double(p.x()), CGAL::to_double(p.y()));
+      boundary.push_back(cp);
+    }
+    if (boundary.orientation() != CGAL::Sign::POSITIVE) {
+      boundary.reverse_orientation();
+    }
+    std::list<General_polygon_2> inset_polygons;
+    std::cout << "InsetOfPolygonWithHoles/1" << std::endl;
+    CGAL::approximated_inset_2(boundary, initial, 0.001,
+                               std::back_inserter(inset_polygons));
+    std::cout << "InsetOfPolygonWithHoles/2" << std::endl;
+    for (General_polygon_2& inset_polygon : inset_polygons) {
+      if (inset_polygon.orientation() != CGAL::Sign::POSITIVE) {
+        // What does it mean that some have negative orientations?
+        // Should they be ignored?
+        std::cout << "InsetOfPolygonWithHoles/2a" << std::endl;
+        inset_polygon.reverse_orientation();
+      }
+      gps.join(inset_polygon);
+    }
+    std::cout << "InsetOfPolygonWithHoles/3" << std::endl;
+  }
+  std::cout << "InsetOfPolygonWithHoles/4" << std::endl;
+
+  // Offset the holes.
+  for (std::size_t nth = 0; nth < hole_count; nth++) {
+    Points points;
+    Points* points_ptr = &points;
+    fill_hole(points_ptr, nth);
+    Gps_polygon_2 hole;
+    for (const auto& point : points) {
+      Point_2 p = plane.to_2d(point);
+      Gps_point cp(CGAL::to_double(p.x()), CGAL::to_double(p.y()));
+      hole.push_back(cp);
+    }
+    if (hole.orientation() != CGAL::Sign::POSITIVE) {
+      hole.reverse_orientation();
+    }
+    std::cout << "InsetOfPolygonWithHoles/5" << std::endl;
+    Polygon_with_holes_2 offset_holes =
+        CGAL::approximated_offset_2(hole, initial, 0.001);
+    std::cout << "InsetOfPolygonWithHoles/6" << std::endl;
+    gps.difference(offset_holes);
+    std::cout << "InsetOfPolygonWithHoles/7" << std::endl;
+  }
+
+  std::vector<Traits::Polygon_with_holes_2> polygons;
+  std::cout << "InsetOfPolygonWithHoles/8" << std::endl;
+  gps.polygons_with_holes(std::back_inserter(polygons));
+
+  std::cout << "InsetOfPolygonWithHoles/9" << std::endl;
+  gps.polygons_with_holes(std::back_inserter(polygons));
+  std::cout << "InsetOfPolygonWithHoles/10" << std::endl;
+
+  emitCircularPolygonsWithHoles(plane, polygons, emit_polygon, emit_point);
+  std::cout << "InsetOfPolygonWithHoles/11" << std::endl;
+}
+#else
+void InsetOfPolygonWithHoles(double initial, double step, double limit,
+                             std::size_t hole_count, emscripten::val fill_plane,
+                             emscripten::val fill_boundary,
+                             emscripten::val fill_hole,
+                             emscripten::val emit_polygon,
+                             emscripten::val emit_point) {
+  std::cout << "InsetOfPolygonWithHoles/start" << std::endl;
   typedef CGAL::Gps_segment_traits_2<Kernel> Traits;
   Plane plane;
   admitPlane(plane, fill_plane);
@@ -4115,12 +4339,12 @@ void InsetOfPolygonWithHoles(double initial, double step, double limit,
     for (const auto& point : points) {
       boundary.push_back(plane.to_2d(point));
     }
-    if (boundary.orientation() == CGAL::Sign::POSITIVE) {
-      boundary.reverse_orientation();
-    }
     if (!boundary.is_simple()) {
       std::cout << "Boundary is not simple" << std::endl;
       return;
+    }
+    if (boundary.orientation() == CGAL::Sign::POSITIVE) {
+      boundary.reverse_orientation();
     }
 
     // Stick a box around the boundary (which will now form a hole).
@@ -4141,9 +4365,9 @@ void InsetOfPolygonWithHoles(double initial, double step, double limit,
     insetting_boundary =
         Polygon_with_holes_2(frame, boundaries.begin(), boundaries.end());
   }
-
   std::vector<Polygon_2> holes;
   for (std::size_t nth = 0; nth < hole_count; nth++) {
+    std::cout << "InsetOfPolygonWithHoles/prep/hole" << std::endl;
     Points points;
     Points* points_ptr = &points;
     fill_hole(points_ptr, nth);
@@ -4151,11 +4375,13 @@ void InsetOfPolygonWithHoles(double initial, double step, double limit,
     for (const auto& point : points) {
       hole.push_back(plane.to_2d(point));
     }
+    if (!hole.is_simple()) {
+      std::cout << "InsetOfPolygonWithHoles: hole is not simple" << std::endl;
+    }
     if (hole.orientation() == CGAL::Sign::NEGATIVE) {
       hole.reverse_orientation();
     }
     if (!hole.is_simple()) {
-      std::cout << "Hole is not simple" << std::endl;
       return;
     }
     holes.push_back(hole);
@@ -4163,24 +4389,31 @@ void InsetOfPolygonWithHoles(double initial, double step, double limit,
 
   double offset = initial;
 
-  Polygon_2 tool;
-  for (double a = 0; a < CGAL_PI * 2; a += CGAL_PI / 16) {
-    tool.push_back(Point_2(sin(-a) * offset, cos(-a) * offset));
-  }
-  if (tool.orientation() == CGAL::Sign::NEGATIVE) {
-    std::cout << "Reverse tool" << std::endl;
-    tool.reverse_orientation();
-  }
-
   for (;;) {
+    std::cout << "InsetOfPolygonWithHoles/tool: offset " << offset << std::endl;
+    Polygon_2 tool;
+    for (double a = 0; a < CGAL_PI * 2; a += CGAL_PI / 8) {
+      tool.push_back(
+          Point_2(compute_approximate_point_value(sin(-a) * offset),
+                  compute_approximate_point_value(cos(-a) * offset)));
+    }
+    if (tool.orientation() == CGAL::Sign::NEGATIVE) {
+      tool.reverse_orientation();
+    }
+
     CGAL::General_polygon_set_2<Traits> boundaries;
 
+    std::cout << "InsetOfPolygonWithHoles/sum" << std::endl;
     Polygon_with_holes_2 inset_boundary =
         CGAL::minkowski_sum_2(insetting_boundary, tool);
 
     // We just extract the holes, which are the inset boundary.
     for (auto hole = inset_boundary.holes_begin();
          hole != inset_boundary.holes_end(); ++hole) {
+      if (!hole->is_simple()) {
+        std::cout << "InsetOfPolygonWithHoles: hole is not simple" << std::endl;
+      }
+      std::cout << "InsetOfPolygonWithHoles/join" << std::endl;
       if (hole->orientation() == CGAL::Sign::NEGATIVE) {
         Polygon_2 boundary = *hole;
         boundary.reverse_orientation();
@@ -4192,63 +4425,16 @@ void InsetOfPolygonWithHoles(double initial, double step, double limit,
 
     for (const auto& hole : holes) {
       Polygon_with_holes_2 offset_hole = CGAL::minkowski_sum_2(hole, tool);
+      std::cout << "InsetOfPolygonWithHoles/diff" << std::endl;
       boundaries.difference(CGAL::General_polygon_set_2<Traits>(offset_hole));
     }
-
-    bool emitted = false;
 
     std::vector<Traits::Polygon_with_holes_2> polygons;
     boundaries.polygons_with_holes(std::back_inserter(polygons));
 
-    for (const Traits::Polygon_with_holes_2& polygon : polygons) {
-      const auto& outer = polygon.outer_boundary();
-      emit_polygon(false);
-      for (auto edge = outer.edges_begin(); edge != outer.edges_end(); ++edge) {
-        if (edge->source() == edge->target()) {
-          std::cout << "QQ/skip zero length edge" << std::endl;
-          continue;
-        }
-        auto p =
-            plane.to_3d(Point_2(CGAL::to_double(edge->source().x().exact()),
-                                CGAL::to_double(edge->source().y().exact())));
-        std::ostringstream x;
-        x << p.x().exact();
-        std::ostringstream y;
-        y << p.y().exact();
-        std::ostringstream z;
-        z << p.z().exact();
-        emit_point(CGAL::to_double(p.x().exact()),
-                   CGAL::to_double(p.y().exact()),
-                   CGAL::to_double(p.z().exact()), x.str(), y.str(), z.str());
-        emitted = true;
-      }
-      for (auto hole = polygon.holes_begin(); hole != polygon.holes_end();
-           ++hole) {
-        emit_polygon(true);
-        for (auto edge = hole->edges_begin(); edge != hole->edges_end();
-             ++edge) {
-          if (edge->source() == edge->target()) {
-            std::cout << "QQ/skip zero length edge" << std::endl;
-            continue;
-          }
-          auto p =
-              plane.to_3d(Point_2(CGAL::to_double(edge->source().x().exact()),
-                                  CGAL::to_double(edge->source().y().exact())));
-          std::ostringstream x;
-          x << p.x().exact();
-          std::ostringstream y;
-          y << p.y().exact();
-          std::ostringstream z;
-          z << p.z().exact();
-          emit_point(CGAL::to_double(p.x().exact()),
-                     CGAL::to_double(p.y().exact()),
-                     CGAL::to_double(p.z().exact()), x.str(), y.str(), z.str());
-          emitted = true;
-        }
-      }
-    }
-
-    if (!emitted) {
+    std::cout << "InsetOfPolygonWithHoles/emit" << std::endl;
+    if (!emitPolygonsWithHoles(plane, polygons, emit_polygon, emit_point)) {
+      // Nothing emitted.
       break;
     }
     if (step <= 0) {
@@ -4262,7 +4448,9 @@ void InsetOfPolygonWithHoles(double initial, double step, double limit,
       break;
     }
   }
+  std::cout << "InsetOfPolygonWithHoles/end" << std::endl;
 }
+#endif
 
 template <typename P>
 bool admitPolygonWithHoles(std::size_t nth_polygon, const Plane& plane,
@@ -4278,12 +4466,12 @@ bool admitPolygonWithHoles(std::size_t nth_polygon, const Plane& plane,
   for (const auto& point : points) {
     boundary.push_back(plane.to_2d(point));
   }
-  if (boundary.orientation() == CGAL::Sign::NEGATIVE) {
-    boundary.reverse_orientation();
-  }
   if (!boundary.is_simple()) {
     std::cout << "Boundary is not simple" << std::endl;
     return false;
+  }
+  if (boundary.orientation() == CGAL::Sign::NEGATIVE) {
+    boundary.reverse_orientation();
   }
 
   std::vector<Polygon_2> holes;
@@ -4298,12 +4486,12 @@ bool admitPolygonWithHoles(std::size_t nth_polygon, const Plane& plane,
     for (const auto& point : points) {
       hole.push_back(plane.to_2d(point));
     }
-    if (hole.orientation() == CGAL::Sign::POSITIVE) {
-      hole.reverse_orientation();
-    }
     if (!hole.is_simple()) {
       std::cout << "Hole is not simple" << std::endl;
       return false;
+    }
+    if (hole.orientation() == CGAL::Sign::POSITIVE) {
+      hole.reverse_orientation();
     }
     holes.push_back(hole);
   }
@@ -4350,68 +4538,6 @@ void emitPlane(const Plane& plane, emscripten::val& emit_plane) {
   const double wd = CGAL::to_double(d);
   // Normalize the approximate plane normal.
   emit_plane(xd / ld, yd / ld, zd / ld, wd, xs, ys, zs, ws);
-}
-
-template <typename P>
-void emitPolygonsWithHoles(const Plane& plane, const std::vector<P>& polygons,
-                           emscripten::val& emit_polygon,
-                           emscripten::val& emit_point) {
-  for (const P& polygon : polygons) {
-    // std::cout << "QQ/emitPolygonsWithHoles: " << std::endl;
-    // print_polygon_with_holes(polygon);
-    const auto& outer = polygon.outer_boundary();
-    emit_polygon(false);
-    for (auto edge = outer.edges_begin(); edge != outer.edges_end(); ++edge) {
-      if (edge->source() == edge->target()) {
-        // Skip zero length edges.
-        std::cout << "QQ/skip zero length edge" << std::endl;
-        continue;
-      }
-      auto p =
-          plane.to_3d(Point_2(CGAL::to_double(edge->source().x().exact()),
-                              CGAL::to_double(edge->source().y().exact())));
-      auto p2 =
-          plane.to_3d(Point_2(CGAL::to_double(edge->target().x().exact()),
-                              CGAL::to_double(edge->target().y().exact())));
-      if (p == p2) {
-        // This produced a zero length edge in 3 space.
-        // CHECK: For some mysterious reason this might not be a zero length
-        // edge in 2 space. std::cout << "QQ/dup" << std::endl;
-        continue;
-      }
-      std::ostringstream x;
-      x << p.x().exact();
-      std::ostringstream y;
-      y << p.y().exact();
-      std::ostringstream z;
-      z << p.z().exact();
-      emit_point(CGAL::to_double(p.x().exact()), CGAL::to_double(p.y().exact()),
-                 CGAL::to_double(p.z().exact()), x.str(), y.str(), z.str());
-    }
-    for (auto hole = polygon.holes_begin(); hole != polygon.holes_end();
-         ++hole) {
-      emit_polygon(true);
-      for (auto edge = hole->edges_begin(); edge != hole->edges_end(); ++edge) {
-        if (edge->source() == edge->target()) {
-          // Skip zero length edges.
-          std::cout << "QQ/skip zero length edge" << std::endl;
-          continue;
-        }
-        auto p =
-            plane.to_3d(Point_2(CGAL::to_double(edge->source().x().exact()),
-                                CGAL::to_double(edge->source().y().exact())));
-        std::ostringstream x;
-        x << p.x().exact();
-        std::ostringstream y;
-        y << p.y().exact();
-        std::ostringstream z;
-        z << p.z().exact();
-        emit_point(CGAL::to_double(p.x().exact()),
-                   CGAL::to_double(p.y().exact()),
-                   CGAL::to_double(p.z().exact()), x.str(), y.str(), z.str());
-      }
-    }
-  }
 }
 
 const int kAdd = 1;
@@ -4510,9 +4636,10 @@ void convertSurfaceMeshFacesToArrangements(
       if (corner) {
         Point_2 s = facet_plane.to_2d(mesh.point(mesh.source(edge)));
         Point_2 t = facet_plane.to_2d(mesh.point(mesh.target(edge)));
-
-        Segment_2 segment{s, t};
-        insert(arrangement, segment);
+        if (s != t) {
+          Segment_2 segment{s, t};
+          insert(arrangement, segment);
+        }
       }
       const auto& next = mesh.next(edge);
       edge = next;
@@ -4531,6 +4658,19 @@ void emitArrangementsAsPolygonsWithHoles(
     convertArrangementToPolygonsWithHoles(arrangement, polygons);
     emitPlane(plane, emit_plane);
     emitPolygonsWithHoles(plane, polygons, emit_polygon, emit_point);
+  }
+}
+
+void triangulatePolygonsWithHoles(
+    std::vector<Polygon_with_holes_2>& polygons_with_holes) {
+  CGAL::Polygon_triangulation_decomposition_2<Kernel> triangulate;
+  std::vector<Polygon_2> triangles;
+  for (const Polygon_with_holes_2& polygon_with_holes : polygons_with_holes) {
+    triangulate(polygon_with_holes, std::back_inserter(triangles));
+  }
+  polygons_with_holes.clear();
+  for (const Polygon_2& triangle : triangles) {
+    polygons_with_holes.emplace_back(triangle);
   }
 }
 
@@ -4566,7 +4706,6 @@ void ArrangePolygonsWithHoles(std::size_t count, emscripten::val fill_plane,
                                       emit_point);
 }
 
-// FIX: Accept exact plane.
 void ArrangePaths(Plane plane, bool do_triangulate, emscripten::val fill,
                   emscripten::val emit_polygon, emscripten::val emit_point) {
   typedef CGAL::Arr_segment_traits_2<Kernel> Traits_2;
@@ -4574,8 +4713,6 @@ void ArrangePaths(Plane plane, bool do_triangulate, emscripten::val fill,
   typedef CGAL::Arrangement_2<Traits_2> Arrangement_2;
 
   Arrangement_2 arrangement;
-
-  std::set<std::vector<Kernel::FT>> segments;
 
   for (;;) {
     Points points;
@@ -4594,171 +4731,18 @@ void ArrangePaths(Plane plane, bool do_triangulate, emscripten::val fill,
         // Skip zero length segments.
         continue;
       }
-      if (segments.find({point_2s[i].x(), point_2s[i].y(), point_2s[i + 1].x(),
-                         point_2s[i + 1].y()}) != segments.end()) {
-        // CHECK: Do we need to avoid duplicates here?
-        continue;
-      }
       // Add the segment
       Segment_2 segment{point_2s[i], point_2s[i + 1]};
       insert(arrangement, segment);
-
-      // Remember the edges we've inserted.
-      segments.insert({point_2s[i].x(), point_2s[i].y(), point_2s[i + 1].x(),
-                       point_2s[i + 1].y()});
-      // In both directions.
-      segments.insert({point_2s[i + 1].x(), point_2s[i + 1].y(),
-                       point_2s[i].x(), point_2s[i].y()});
     }
   }
 
-  std::queue<Arrangement_2::Face_const_handle> undecided;
-  CGAL::Unique_hash_map<Arrangement_2::Face_const_handle, bool> positive_faces;
-  CGAL::Unique_hash_map<Arrangement_2::Face_const_handle, bool> negative_faces;
-
-  for (Arrangement_2::Face_iterator face = arrangement.faces_begin();
-       face != arrangement.faces_end(); ++face) {
-    if (!face->has_outer_ccb()) {
-      negative_faces[face] = true;
-    } else {
-      undecided.push(face);
-    }
-  }
-
-  while (!undecided.empty()) {
-    Arrangement_2::Face_const_handle face = undecided.front();
-    undecided.pop();
-    if (positive_faces[face]) {
-      for (Arrangement_2::Hole_const_iterator hole = face->holes_begin();
-           hole != face->holes_end(); ++hole) {
-        negative_faces[(*hole)->twin()->face()] = true;
-        positive_faces[(*hole)->twin()->face()] = false;
-      }
-      continue;
-    }
-    if (negative_faces[face]) {
-      for (Arrangement_2::Hole_const_iterator hole = face->holes_begin();
-           hole != face->holes_end(); ++hole) {
-        positive_faces[(*hole)->twin()->face()] = true;
-        negative_faces[(*hole)->twin()->face()] = false;
-      }
-      continue;
-    }
-    bool decided = false;
-    Arrangement_2::Ccb_halfedge_const_circulator start = face->outer_ccb();
-    Arrangement_2::Ccb_halfedge_const_circulator edge = start;
-    do {
-      if (negative_faces[edge->twin()->face()]) {
-        positive_faces[face] = true;
-        decided = true;
-        break;
-      }
-    } while (++edge != start);
-    if (!decided) {
-      edge = start;
-      do {
-        if (positive_faces[edge->twin()->face()]) {
-          negative_faces[face] = true;
-          decided = true;
-          break;
-        }
-      } while (++edge != start);
-    }
-    undecided.push(face);
-  }
-
+  std::vector<Polygon_with_holes_2> output;
+  convertArrangementToPolygonsWithHoles(arrangement, output);
   if (do_triangulate) {
-    CGAL::Polygon_triangulation_decomposition_2<Kernel> triangulate;
-    for (Arrangement_2::Face_iterator face = arrangement.faces_begin();
-         face != arrangement.faces_end(); ++face) {
-      if (!positive_faces[face] || !face->has_outer_ccb()) {
-        continue;
-      }
-      Arrangement_2::Ccb_halfedge_const_circulator start = face->outer_ccb();
-      Arrangement_2::Ccb_halfedge_const_circulator edge = start;
-      Polygon_2 polygon;
-      do {
-        polygon.push_back(edge->source()->point());
-      } while (++edge != start);
-
-      std::vector<Polygon_2> holes;
-      for (Arrangement_2::Hole_iterator hole = face->holes_begin();
-           hole != face->holes_end(); ++hole) {
-        Polygon_2 polygon;
-        Arrangement_2::Ccb_halfedge_const_circulator start = *hole;
-        Arrangement_2::Ccb_halfedge_const_circulator edge = start;
-        do {
-          polygon.push_back(edge->source()->point());
-        } while (++edge != start);
-        holes.push_back(polygon);
-      }
-      Polygon_with_holes_2 polygon_with_holes(polygon, holes.begin(),
-                                              holes.end());
-      std::vector<Polygon_2> triangles;
-      triangulate(polygon_with_holes, std::back_inserter(triangles));
-      for (const auto& triangle : triangles) {
-        emit_polygon(false);
-        for (const auto& p2 : triangle) {
-          Point p3 = plane.to_3d(p2);
-          auto e3 = p3;
-          std::ostringstream x;
-          x << e3.x().exact();
-          std::ostringstream y;
-          y << e3.y().exact();
-          std::ostringstream z;
-          z << e3.z().exact();
-          emit_point(
-              CGAL::to_double(p3.x().exact()), CGAL::to_double(p3.y().exact()),
-              CGAL::to_double(p3.z().exact()), x.str(), y.str(), z.str());
-        }
-      }
-    }
-  } else {
-    for (Arrangement_2::Face_iterator face = arrangement.faces_begin();
-         face != arrangement.faces_end(); ++face) {
-      if (!positive_faces[face] || !face->has_outer_ccb()) {
-        continue;
-      }
-      Arrangement_2::Ccb_halfedge_const_circulator start = face->outer_ccb();
-      Arrangement_2::Ccb_halfedge_const_circulator edge = start;
-      // Can we build Polygon_with_holes_2 here?
-      emit_polygon(false);
-      do {
-        Point p3 = plane.to_3d(edge->source()->point());
-        auto e3 = p3;
-        std::ostringstream x;
-        x << e3.x().exact();
-        std::ostringstream y;
-        y << e3.y().exact();
-        std::ostringstream z;
-        z << e3.z().exact();
-        emit_point(CGAL::to_double(p3.x().exact()),
-                   CGAL::to_double(p3.y().exact()),
-                   CGAL::to_double(p3.z().exact()), x.str(), y.str(), z.str());
-      } while (++edge != start);
-
-      // Emit holes
-      for (Arrangement_2::Hole_iterator hole = face->holes_begin();
-           hole != face->holes_end(); ++hole) {
-        emit_polygon(true);
-        Arrangement_2::Ccb_halfedge_const_circulator start = *hole;
-        Arrangement_2::Ccb_halfedge_const_circulator edge = start;
-        do {
-          Point p3 = plane.to_3d(edge->source()->point());
-          auto e3 = p3;
-          std::ostringstream x;
-          x << e3.x().exact();
-          std::ostringstream y;
-          y << e3.y().exact();
-          std::ostringstream z;
-          z << e3.z().exact();
-          emit_point(
-              CGAL::to_double(p3.x().exact()), CGAL::to_double(p3.y().exact()),
-              CGAL::to_double(p3.z().exact()), x.str(), y.str(), z.str());
-        } while (++edge != start);
-      }
-    }
+    triangulatePolygonsWithHoles(output);
   }
+  emitPolygonsWithHoles(plane, output, emit_polygon, emit_point);
 }
 
 void ArrangePathsApproximate(double x, double y, double z, double w,
@@ -4823,12 +4807,12 @@ bool computeFitPolygon(const Polygon_with_holes_2& space,
   std::vector<Polygon_2> holes;
   for (auto it = space.holes_begin(); it != space.holes_end(); ++it) {
     Polygon_2 hole = *it;
-    if (hole.orientation() == CGAL::Sign::NEGATIVE) {
-      hole.reverse_orientation();
-    }
     if (!hole.is_simple()) {
       std::cout << "Hole is not simple" << std::endl;
-      return false;
+      continue;
+    }
+    if (hole.orientation() == CGAL::Sign::NEGATIVE) {
+      hole.reverse_orientation();
     }
     holes.push_back(hole);
   }
@@ -4841,6 +4825,10 @@ bool computeFitPolygon(const Polygon_with_holes_2& space,
   // We just extract the holes, which are the inset boundary.
   for (auto hole = inset_boundary.holes_begin();
        hole != inset_boundary.holes_end(); ++hole) {
+    if (!hole->is_simple()) {
+      std::cout << "fitPolygon: hole is not simple" << std::endl;
+      continue;
+    }
     if (hole->orientation() == CGAL::Sign::NEGATIVE) {
       Polygon_2 boundary = *hole;
       boundary.reverse_orientation();

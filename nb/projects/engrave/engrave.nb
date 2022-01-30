@@ -10,4 +10,4 @@ const model = Text(unYetGul, text, 25)
   .view()
   .md('Model');
 
-const inset = model.inset(0.5, 0.5).gridView().md('Section Inset');
+const inset = model.inset(0.5).gridView().md('Section Inset');

@@ -15,11 +15,11 @@ export const fromSurfaceMeshToGraph = (mesh) => {
       mesh,
       (point, x, y, z, exactX, exactY, exactZ) => {
         if (!isFinite(x) || !isFinite(y) || !isFinite(z)) {
-          throw Error('die');
+          throw Error(`Expected ${[x, y, z]} is finite`);
         }
         if (graph.points[point]) {
           if (!equals(graph.points[point], [x, y, z])) {
-            throw Error('die');
+            throw Error(`Expected ${graph.points[point]} equals ${[x, y, z]}`);
           }
         }
         graph.points[point] = [x, y, z];
