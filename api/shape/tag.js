@@ -8,6 +8,14 @@ export const qualifyTag = (tag, namespace = 'user') => {
   return `${namespace}:${tag}`;
 };
 
+export const getTagNamespace = (tag, namespace = 'user') => {
+  const index = tag.indexOf(':');
+  if (index === -1) {
+    return namespace;
+  }
+  return tag.substring(0, index);
+};
+
 export const tagMatcher = (tag, namespace = 'user') => {
   const qualifiedTag = qualifyTag(tag, namespace);
   if (qualifiedTag.endsWith(':*')) {

@@ -41,6 +41,7 @@ export const op =
         // fall through
         case 'layout':
         // return accumulate(layout(geometry, ...args));
+        // fall through
         case 'item':
         case 'group': {
           return descend();

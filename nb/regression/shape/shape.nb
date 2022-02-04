@@ -219,5 +219,10 @@ Arc(4)
   .seq({ by: 1 / 8 }, rz, Join)
   .material('glass')
   .color('orange')
-  .and(toolpath(1))
+  .and(toolpath())
+  .view();
+
+Box(10)
+  .cut(Arc(6).x(6, -6), Box(1, 10))
+  .and(toolpath())
   .view();

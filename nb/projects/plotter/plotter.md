@@ -23,18 +23,6 @@ Spiral((a) => [[1 + (a * 360) / 100]], {
 [spiral_0.gcode](plotter.spiral_0.gcode)
 
 ```JavaScript
-(await readSvg('https://jsxcad.js.org/svg/flowers.svg', { fill: false }))
-  .scale(1 / 60)
-  .align()
-  .and(toolpath())
-  .gcode('flowers');
-```
-
-![Image](plotter.md.2.png)
-
-[flowers_0.gcode](plotter.flowers_0.gcode)
-
-```JavaScript
 Group(
   seq(
     (x) =>
@@ -51,7 +39,7 @@ Group(
   .gcode('calibration');
 ```
 
-![Image](plotter.md.3.png)
+![Image](plotter.md.2.png)
 
 [calibration_0.gcode](plotter.calibration_0.gcode)
 
@@ -61,7 +49,7 @@ const star = Triangle(5)
   .view();
 ```
 
-![Image](plotter.md.4.png)
+![Image](plotter.md.3.png)
 
 ```JavaScript
 const r = Random();
@@ -78,6 +66,6 @@ const stars = star
   .gcode('stars');
 ```
 
-![Image](plotter.md.5.png)
+![Image](plotter.md.4.png)
 
 [stars_0.gcode](plotter.stars_0.gcode)

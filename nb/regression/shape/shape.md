@@ -472,8 +472,17 @@ Arc(4)
   .seq({ by: 1 / 8 }, rz, Join)
   .material('glass')
   .color('orange')
-  .and(toolpath(1))
+  .and(toolpath())
   .view();
 ```
 
 ![Image](shape.md.56.png)
+
+```JavaScript
+Box(10)
+  .cut(Arc(6).x(6, -6), Box(1, 10))
+  .and(toolpath())
+  .view();
+```
+
+![Image](shape.md.57.png)

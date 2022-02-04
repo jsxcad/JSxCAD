@@ -3,8 +3,9 @@ const grid = Hexagon(16)
   .seq(
     { from: -4, to: 4 },
     { from: -4, to: 4 },
-    (i, j) => move(i * 15 + ((j % 2) * 15) / 2, j * 13),
-    Join
+    (i, j) =>
+      move((i + (j % 2) * 0.5) * 16 * Math.sqrt(3) * 0.5, j * 16 * 0.75),
+    Group
   )
   .gridView();
 ```

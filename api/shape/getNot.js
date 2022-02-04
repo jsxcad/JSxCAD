@@ -14,10 +14,14 @@ export const getNot =
         return descend();
       }
       let discard = false;
-      for (const tag of tags) {
-        if (isMatch(tag)) {
-          discard = true;
-          break;
+      if (isMatch(`type:${geometry.type}`)) {
+        discard = true;
+      } else {
+        for (const tag of tags) {
+          if (isMatch(tag)) {
+            discard = true;
+            break;
+          }
         }
       }
       if (!discard) {
