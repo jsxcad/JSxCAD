@@ -3,7 +3,7 @@ const grid = Hexagon(16)
     { from: -4, to: 4 },
     { from: -4, to: 4 },
     (i, j) =>
-      move((i + (j % 2) * 0.5) * 16 * Math.sqrt(3) * 0.5, j * 16 * 0.75),
+      move((i + (j % 2) * 0.5) * 18 * Math.sqrt(3) * 0.5, j * 18 * 0.75),
     Group
   )
   .gridView();
@@ -13,16 +13,23 @@ const base = grid.cutFrom(Arc(100)).ez(1).gridView();
 const ring = Arc(99).cutFrom(Arc(102)).ez(2.5).gridView();
 
 const sorter = ring.and(base).stl('sorter');
-
-const wall = grid
+const wall1 = grid
   .cutFrom(Box(80, 110))
   .rz(1 / 4)
   .ez(2)
-  .rx(1 / 4)
-  .x(-210, -105, 0, 105, 210)
+  .rx(1 / 4);
+
+const wall = wall1
+  .align('x<')
+  .and(align('x>'))
+  .align('x<')
+  .and(align('x>'))
+  .align('x<')
+  .and(align('x>'))
   .view();
 
 const bentWall = wall
+  .clip(Box(475, 50, 500))
   .scale(1 / 1.5)
   .align('z>')
   .y(51)
