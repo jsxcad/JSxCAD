@@ -11,11 +11,13 @@ Spiral((a) => [[1 + (a * 360) / 100]], {
 }).and(toolpath())
   .gcode('spiral');
 
+/*
 (await readSvg('https://jsxcad.js.org/svg/flowers.svg', { fill: false }))
   .scale(1 / 60)
   .align()
   .and(toolpath())
   .gcode('flowers');
+*/
 
 /*
 (await readSvg('https://jsxcad.js.org/svg/mandala.svg', { fill: false }))

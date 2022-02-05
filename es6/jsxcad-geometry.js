@@ -1,7 +1,7 @@
 import { composeTransforms, fromSurfaceMeshToLazyGraph, fromPointsToAlphaShapeAsSurfaceMesh, serializeSurfaceMesh, deleteSurfaceMesh, deserializeSurfaceMesh, fromGraphToSurfaceMesh, fromSurfaceMeshEmitBoundingBox, arrangePaths, fromPolygonsToSurfaceMesh, cutSurfaceMeshes, STATUS_OK, STATUS_UNCHANGED, STATUS_EMPTY, bendSurfaceMesh, clipSurfaceMeshes, computeCentroidOfSurfaceMesh, fitPlaneToPoints, arrangePathsIntoTriangles, arrangeSegmentsIntoTriangles, fuseSurfaceMeshes, SurfaceMeshQuery, fromSurfaceMeshToPolygonsWithHoles, insetOfPolygonWithHoles, eachPointOfSurfaceMesh, outlineSurfaceMesh, sectionOfSurfaceMesh, fromPointsToConvexHullAsSurfaceMesh, demeshSurfaceMesh, extrudeSurfaceMesh, extrudeToPlaneOfSurfaceMesh, reverseFaceOrientationsOfSurfaceMesh, fromFunctionToSurfaceMesh, fromPointsToSurfaceMesh, fromSegmentToInverseTransform, invertTransform, growSurfaceMesh, joinSurfaceMeshes, loftBetweenCongruentSurfaceMeshes, minkowskiDifferenceOfSurfaceMeshes, minkowskiShellOfSurfaceMeshes, minkowskiSumOfSurfaceMeshes, offsetOfPolygonWithHoles, projectToPlaneOfSurfaceMesh, pushSurfaceMesh, remeshSurfaceMesh, isotropicRemeshingOfSurfaceMesh, removeSelfIntersectionsOfSurfaceMesh, approximateSurfaceMesh, simplifySurfaceMesh, subdivideSurfaceMesh, smoothShapeOfSurfaceMesh, smoothSurfaceMesh, separateSurfaceMesh, fromSurfaceMeshToTriangles, taperSurfaceMesh, doesSelfIntersectOfSurfaceMesh, twistSurfaceMesh, fromRotateXToTransform, fromRotateYToTransform, fromRotateZToTransform, fromTranslateToTransform, fromScaleToTransform } from './jsxcad-algorithm-cgal.js';
 export { arrangePolygonsWithHoles } from './jsxcad-algorithm-cgal.js';
 import { computeHash, write as write$1, read as read$1, readNonblocking as readNonblocking$1, ErrorWouldBlock, addPending } from './jsxcad-sys.js';
-import { transform as transform$4, equals, max, min, canonicalize as canonicalize$5, scale as scale$3, subtract } from './jsxcad-math-vec3.js';
+import { transform as transform$4, equals, max, min, subtract, dot, distance, canonicalize as canonicalize$5, scale as scale$3 } from './jsxcad-math-vec3.js';
 import { identityMatrix, fromTranslation, fromZRotation, fromScaling } from './jsxcad-math-mat4.js';
 import { canonicalize as canonicalize$7 } from './jsxcad-math-plane.js';
 import { canonicalize as canonicalize$6 } from './jsxcad-math-poly3.js';
@@ -589,6 +589,7 @@ const op =
         // fall through
         case 'layout':
         // return accumulate(layout(geometry, ...args));
+        // fall through
         case 'item':
         case 'group': {
           return descend();
@@ -2011,25 +2012,24 @@ const taggedToolpath = ({ tags = [], provenance }, toolpath) => {
 
 const X$2 = 0;
 const Y$2 = 1;
-const Z$2 = 2;
 
-const computeToolpath = (geometry, toolDiameter = 1, jumpHeight = 1) => {
+const computeToolpath = (
+  geometry,
+  {
+    toolDiameter = 1,
+    jumpHeight = 1,
+    stepCost = toolDiameter * -2,
+    turnCost = -2,
+    neighborCost = -2,
+    stopCost = 30,
+    candidateLimit = 1,
+    subCandidateLimit = 1,
+  }
+) => {
   const toolRadius = toolDiameter / 2;
-  const toolpath = [];
-
-  let at = [0, 0, 0];
-
-  const computeDistance = ([x, y, z]) => {
-    const dX = x - at[X$2];
-    const dY = y - at[Y$2];
-    const cost = Math.sqrt(dX * dX + dY * dY) - z * 1000000;
-    return cost;
-  };
 
   {
-    const seen = new Set();
-    let pendingEdges = 0;
-    const points = [];
+    let points = [];
 
     const concreteGeometry = toConcreteGeometry(geometry);
     const sections = section(concreteGeometry, [identityMatrix]);
@@ -2038,6 +2038,7 @@ const computeToolpath = (geometry, toolDiameter = 1, jumpHeight = 1) => {
 
     // Surfaces
     {
+      // The hexagon diameter is the tool radius.
       const { isInteriorPoint, release } = getQuery(insetArea);
       const [minPoint, maxPoint] = measureBoundingBox(sections);
       const z = 0;
@@ -2046,20 +2047,44 @@ const computeToolpath = (geometry, toolDiameter = 1, jumpHeight = 1) => {
       const offsetX = (maxPoint[X$2] + minPoint[X$2]) / 2 - width / 2;
       const height = maxPoint[Y$2] - minPoint[Y$2];
       const offsetY = (maxPoint[Y$2] + minPoint[Y$2]) / 2 - height / 2;
-      const columns = width / ((sqrt3 / 2) * toolRadius) + 1;
+      const columns = width / (sqrt3 * 0.5 * toolRadius) + 1;
       const rows = height / (toolRadius * 0.75);
+      const index = [];
+      for (let i = 0; i < columns; i++) {
+        index[i] = [];
+      }
+      const link = (point, neighbor) => {
+        if (neighbor) {
+          point.fillNeighbors.push(neighbor);
+          neighbor.fillNeighbors.push(point);
+        }
+      };
       for (let i = 0; i < columns; i++) {
         for (let j = 0; j < rows; j++) {
-          const x = offsetX + (i + (j % 2 ? 0.5 : 0)) * sqrt3 * toolRadius;
+          // const x = offsetX + (i + (j % 2 ? 0.5 : 0)) * sqrt3 * toolRadius;
+          // const y = offsetY + j * toolRadius * 0.75;
+          const x = offsetX + (i + (j % 2) * 0.5) * toolRadius * sqrt3 * 0.5;
           const y = offsetY + j * toolRadius * 0.75;
           // FIX: We need to produce an affinity with each distinct contiguous area.
           if (isInteriorPoint(x, y, z)) {
-            const point = [x, y, z];
-            point.type = 'fill';
-            const edge = [point, point];
-            // FIX: This should form an edge to any point within a tool-radius in the same contiguous area.
-            points.push([edge[0], edge]);
-            pendingEdges += 1;
+            const point = { start: [x, y, z], isFill: true, fillNeighbors: [] };
+            index[i][j] = point;
+            points.push(point);
+          }
+        }
+      }
+      for (let i = 0; i < columns; i++) {
+        for (let j = 0; j < rows; j++) {
+          const point = index[i][j];
+          if (!point) {
+            continue;
+          }
+          link(point, index[i - 1][j]);
+          link(point, index[i][j - 1]);
+          if (j % 2) {
+            link(point, index[i + 1][j - 1]);
+          } else {
+            link(point, index[i - 1][j - 1]);
           }
         }
       }
@@ -2068,135 +2093,307 @@ const computeToolpath = (geometry, toolDiameter = 1, jumpHeight = 1) => {
 
     // Profiles
     for (const { segments } of outline(insetArea)) {
-      for (const edge of segments) {
-        // CHECK: Do outline segments have duplicates still?
-        // Deduplicate edges.
-        {
-          const forward = JSON.stringify(edge);
-          if (seen.has(forward)) {
-            continue;
-          } else {
-            seen.add(forward);
-          }
-          const backward = JSON.stringify([...edge].reverse());
-          if (seen.has(backward)) {
-            continue;
-          } else {
-            seen.add(backward);
-          }
-        }
-        const start = [...edge[0]];
-        start.type = 'edge';
-        const end = [...edge[1]];
-        end.type = 'edge';
-        const path = [start, end];
-        points.push([start, path], [end, path]);
-        pendingEdges += 1;
+      for (const [start, end] of segments) {
+        points.push({ start: start, end: { end: end, type: 'required' } });
+        points.push({ start: end });
       }
     }
 
     // Grooves
     // FIX: These should be sectioned segments.
     for (const { segments } of getNonVoidSegments(concreteGeometry)) {
-      for (const edge of segments) {
-        // CHECK: Do outline segments have duplicates still?
-        // Deduplicate edges.
-        {
-          const forward = JSON.stringify(edge);
-          if (seen.has(forward)) {
-            continue;
-          } else {
-            seen.add(forward);
-          }
-          const backward = JSON.stringify([...edge].reverse());
-          if (seen.has(backward)) {
-            continue;
-          } else {
-            seen.add(backward);
-          }
-        }
-        const start = [...edge[0]];
-        start.type = 'profile';
-        const end = [...edge[1]];
-        end.type = 'profile';
-        const path = [start, end];
-        points.push([start, path], [end, path]);
-        pendingEdges += 1;
+      for (const [start, end] of segments) {
+        points.push({ start, end: { end, type: 'required' } });
+        points.push({ start: end });
       }
     }
+
+    const compareCoord = (a, b) => {
+      const dX = a[X$2] - b[X$2];
+      if (dX !== 0) {
+        return dX;
+      }
+      return a[Y$2] - b[Y$2];
+    };
+
+    const compareStart = (a, b) => compareCoord(a.start, b.start);
+
+    // Fold the individual points and edges together.
+    {
+      points.sort(compareStart);
+      const consolidated = [];
+      let last;
+      for (const point of points) {
+        if (last === undefined || !equals(last.start, point.start)) {
+          last = point;
+          last.ends = [];
+          consolidated.push(point);
+        } else {
+          if (point.isFill) {
+            last.isFill = true;
+          }
+        }
+        if (point.end) {
+          last.ends.push(point.end);
+          delete point.end;
+        }
+      }
+      points = consolidated;
+    }
+
+    const pointByHash = new Map();
+
+    // Set up an index from start to point, and have the ends share identity with the starts.
+    for (const point of points) {
+      pointByHash.set(computeHash(point.start), point);
+    }
+
+    // Now that we have, e.g.
+    // [{ start: [x, y, z], isFill: true, ends: [{ end: [x, y, z], type }] }]
+    // we can use a spatial structure to query nearby points.
 
     const kd = new KDBush(
       points,
-      (p) => p[0][0],
-      (p) => p[0][1]
+      (p) => p.start[X$2],
+      (p) => p.start[Y$2]
     );
 
-    const jump = (to) => {
-      if (to[X$2] === at[X$2] && to[Y$2] === at[Y$2]) {
+    const jump = (toolpath, from, to) =>
+      toolpath.push({ op: 'jump', from: from, to: to });
+
+    const cut = (toolpath, from, to) => toolpath.push({ op: 'cut', from, to });
+
+    // While the cost gradient is negative, we will follow the best candidate.
+    // A positive cost gradient will induce backtracking up to that far back in history.
+    // New candidates will displace the oldest candidates once the limit is reached.
+
+    const considerTargetPoint = (candidates, fulfilled, candidate, target) => {
+      if (fulfilled.has(computeHash(target.start))) {
+        // This target is already fulfilled.
         return;
       }
-      const up = [at[X$2], at[Y$2], jumpHeight];
-      toolpath.push({ op: 'jump', from: [...at], to: [...up] });
 
-      const across = [to[X$2], to[Y$2], jumpHeight];
-      toolpath.push({ op: 'jump', from: [...up], to: [...across] });
+      let cost = candidate.cost;
+      if (target.fillNeighbors) {
+        for (const neighbor of target.fillNeighbors) {
+          if (fulfilled.has(computeHash(neighbor.start))) {
+            cost += neighborCost;
+          }
+        }
+      }
 
-      at = across;
-    };
+      if (candidate.last) {
+        const lastDirection = subtract(
+          candidate.at.start,
+          candidate.last.at.start
+        );
+        const nextDirection = subtract(target.start, candidate.at.start);
+        const dot$1 = dot(lastDirection, nextDirection);
+        cost += dot$1 * turnCost;
+      }
 
-    const cut = (to) => {
-      if (to[X$2] === at[X$2] && to[X$2] === at[Y$2] && to[Z$2] === at[Z$2]) {
+      const distance$1 = distance(candidate.at.start, target.start);
+      if ((candidate.at.isFill || target.isFill) && distance$1 < toolDiameter) {
+        // Reaching a fill point fulfills it, but reaching a profile or groove point won't.
+        const fulfills = [];
+        if (target.isFill) {
+          fulfills.push(computeHash(target.start));
+        }
+        if (candidate.isFill) {
+          fulfills.push(computeHash(candidate.at.start));
+        }
+        cost += stepCost / distance$1;
+        const length = candidate.length + 1;
+        // Cutting from a fill point also fulfills it.
+        const last = candidate;
+        const next = { last, toolpath: [], at: target, cost, length, fulfills };
+        cut(next.toolpath, candidate.at.start, target.start); // safe cut across fill.
+        candidates.push(next);
         return;
       }
-      toolpath.push({ op: 'cut', from: [...at], to: [...to] });
-      at = to;
+
+      // This is an unsafe cut -- jump.
+      // FIX: This is not a very sensible penalty.
+      // cost += distance + stepCost + stopCost * 3;
+      cost = stepCost / (distance$1 * 2);
+      const length = candidate.length + 1;
+      const last = candidate;
+      const fulfills = [];
+      if (target.isFill) {
+        fulfills.push(computeHash(target.start));
+      }
+      const next = { last, toolpath: [], at: target, cost, length, fulfills };
+      jump(next.toolpath, candidate.at.start, [
+        candidate.at.start[X$2],
+        candidate.at.start[Y$2],
+        jumpHeight,
+      ]);
+      jump(
+        next.toolpath,
+        [candidate.at.start[X$2], candidate.at.start[Y$2], jumpHeight],
+        [target.start[X$2], target.start[Y$2], jumpHeight]
+      );
+      cut(
+        next.toolpath,
+        [target.start[X$2], target.start[Y$2], jumpHeight],
+        target.start
+      );
+      candidates.push(next);
     };
 
-    while (pendingEdges > 0) {
-      const [x, y] = at;
-      for (let range = 1; range < Infinity; range *= 2) {
-        let bestStart;
-        let bestEdge;
-        let bestDistance = Infinity;
-        for (const index of kd.within(x, y, range)) {
-          const [start, edge] = points[index];
-          if (edge.planned) {
-            continue;
-          }
-          const distance = computeDistance(start);
-          if (distance < bestDistance) {
-            bestDistance = distance;
-            bestEdge = edge;
-            bestStart = start;
+    const considerTargetEdge = (
+      candidates,
+      fulfilled,
+      candidate,
+      target,
+      edge
+    ) => {
+      if (
+        fulfilled.has(
+          computeHash({ start: candidate.at.start, end: target.start })
+        )
+      ) {
+        // This edge is already fulfilled.
+        return;
+      }
+
+      let cost = candidate.cost;
+      if (target.fillNeighbors) {
+        for (const neighbor of target.fillNeighbors) {
+          if (fulfilled.has(computeHash(neighbor.start))) {
+            cost += neighborCost;
           }
         }
-        if (bestDistance === Infinity) {
-          // No target within range, so expand the range.
-          continue;
-        }
-        pendingEdges -= 1;
-        bestEdge.planned = true;
-        const bestEnd = bestEdge[0] === bestStart ? bestEdge[1] : bestEdge[0];
-        if (
-          bestEnd.type !== 'profile' &&
-          at.type !== 'profile' &&
-          (bestEnd.type === 'fill' || at.type === 'fill') &&
-          bestDistance <= toolDiameter
-        ) {
-          cut(bestEnd); // cut across
+      }
+
+      if (candidate.last) {
+        const lastDirection = subtract(
+          candidate.at.start,
+          candidate.last.at.start
+        );
+        const nextDirection = subtract(target.start, candidate.at.start);
+        const dot$1 = dot(lastDirection, nextDirection);
+        cost += dot$1 * turnCost;
+      }
+
+      const distance$1 = distance(candidate.at.start, target.start);
+      const fulfills = [];
+      let isFulfilled = true;
+      for (const end of candidate.at.ends) {
+        const fulfilledEdge = computeHash({
+          start: candidate.at.start,
+          end: end.end,
+        });
+        if (equals(target.start, end.end)) {
+          cost += stepCost / distance$1;
+          const length = candidate.length + 1;
+          fulfills.push(fulfilledEdge);
+          const last = candidate;
+          const next = {
+            last,
+            toolpath: [],
+            at: target,
+            cost,
+            length,
+            fulfills,
+          };
+          cut(next.toolpath, candidate.at.start, target.start); // safe cut across known edge.
+          candidates.push(next);
         } else {
-          jump(bestStart); // jump to the start x, y
-          cut(bestStart); // may need to drill down to the start z
-          cut(bestEnd); // cut across
+          if (!fulfilled.has(fulfilledEdge)) {
+            isFulfilled = false;
+          }
         }
-        break;
       }
+      if (isFulfilled) {
+        // All of the candidate edges are now fulfilled, so mark the point as fulfilled.
+        fulfills.push(computeHash(candidate.at.start));
+      }
+    };
+
+    const candidates = [
+      { at: { start: [0, 0, 0], ends: [] }, toolpath: [], cost: 0, length: 0 },
+    ];
+    const fulfilled = new Set();
+    for (;;) {
+      candidates.sort((a, b) => b.cost - a.cost);
+      const candidate = candidates.pop();
+      while (candidates.length > candidateLimit) {
+        candidates.shift();
+      }
+      fulfilled.clear();
+      for (let node = candidate; node; node = node.last) {
+        if (node.fulfills) {
+          for (const hash of node.fulfills) {
+            fulfilled.add(hash);
+          }
+        }
+      }
+      const nextCandidates = [];
+      try {
+        for (const end of candidate.at.ends) {
+          const foundPoint = pointByHash.get(computeHash(end.end));
+          if (!foundPoint) {
+            throw Error(`Cannot find end point ${JSON.stringify(end.end)}`);
+          }
+          // This is a bit silly -- why aren't we communicating the edge more directly?
+          considerTargetEdge(
+            nextCandidates,
+            fulfilled,
+            candidate,
+            foundPoint,
+            end
+          );
+        }
+        const [x, y] = candidate.at.start;
+        for (let range = 2; range < Infinity; range *= 2) {
+          const destinations = kd.within(x, y, range);
+          for (const destination of destinations) {
+            const point = points[destination];
+            if (point === candidate.at) {
+              continue;
+            }
+            considerTargetPoint(nextCandidates, fulfilled, candidate, point);
+          }
+          if (
+            nextCandidates.length >= subCandidateLimit ||
+            destinations.length >= points.length
+          ) {
+            break;
+          }
+          if (range > 2) {
+            console.log(`QQ/range: ${range}`);
+          }
+        }
+      } catch (error) {
+        console.log(error.stack);
+        throw error;
+      }
+      if (candidates.length === 0 && nextCandidates.length === 0) {
+        console.log(`QQ/completed`);
+        // We have computed a total toolpath.
+        // Note that we include the imaginary seed point.
+        const history = [];
+        for (let node = candidate; node; node = node.last) {
+          history.push(node.toolpath);
+        }
+        const toolpath = [];
+        while (history.length > 0) {
+          toolpath.push(...history.pop());
+        }
+        return taggedToolpath({}, toolpath);
+      }
+      if (candidate.length % 100 === 0) {
+        console.log(`QQ/candidate.length: ${candidate.length}`);
+      }
+      nextCandidates.sort((a, b) => b.cost - a.cost);
+      candidates.push(
+        ...nextCandidates.slice(
+          Math.max(0, nextCandidates.length - subCandidateLimit)
+        )
+      );
     }
-
-    jump([0, 0, 0]);
   }
-
-  return taggedToolpath({}, toolpath);
 };
 
 const concatenate = (...paths) => {

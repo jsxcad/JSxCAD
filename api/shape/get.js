@@ -13,10 +13,14 @@ export const get =
       if (type === 'group') {
         return descend();
       }
-      for (const tag of tags) {
-        if (isMatch(tag)) {
-          picks.push(Shape.fromGeometry(geometry));
-          break;
+      if (isMatch(`type:${geometry.type}`)) {
+        picks.push(Shape.fromGeometry(geometry));
+      } else {
+        for (const tag of tags) {
+          if (isMatch(tag)) {
+            picks.push(Shape.fromGeometry(geometry));
+            break;
+          }
         }
       }
       if (type !== 'item') {

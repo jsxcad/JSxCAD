@@ -1003,10 +1003,14 @@ const get =
       if (type === 'group') {
         return descend();
       }
-      for (const tag of tags) {
-        if (isMatch(tag)) {
-          picks.push(Shape.fromGeometry(geometry));
-          break;
+      if (isMatch(`type:${geometry.type}`)) {
+        picks.push(Shape.fromGeometry(geometry));
+      } else {
+        for (const tag of tags) {
+          if (isMatch(tag)) {
+            picks.push(Shape.fromGeometry(geometry));
+            break;
+          }
         }
       }
       if (type !== 'item') {
@@ -3106,10 +3110,14 @@ const getNot =
         return descend();
       }
       let discard = false;
-      for (const tag of tags) {
-        if (isMatch(tag)) {
-          discard = true;
-          break;
+      if (isMatch(`type:${geometry.type}`)) {
+        discard = true;
+      } else {
+        for (const tag of tags) {
+          if (isMatch(tag)) {
+            discard = true;
+            break;
+          }
         }
       }
       if (!discard) {
@@ -4088,9 +4096,27 @@ const Points = (points) =>
 Shape.prototype.Points = Shape.shapeMethod(Points);
 
 const toolpath =
-  ({ diameter = 1, jumpHeight = 1 } = {}) =>
+  ({
+    diameter = 1,
+    jumpHeight = 1,
+    stepCost = diameter * -2,
+    turnCost = -2,
+    neighborCost = -2,
+    stopCost = 30,
+    candidateLimit = 1,
+    subCandidateLimit = 1,
+  } = {}) =>
   (shape) => {
-    const toolpath = computeToolpath(shape.toGeometry(), diameter, jumpHeight);
+    const toolpath = computeToolpath(shape.toGeometry(), {
+      diameter,
+      jumpHeight,
+      stepCost,
+      turnCost,
+      neighborCost,
+      stopCost,
+      candidateLimit,
+      subCandidateLimit,
+    });
     const cuts = [];
     const jumpEnds = [];
     const cutEnds = [];
@@ -4098,11 +4124,11 @@ const toolpath =
     for (const { op, from, to } of toolpath.toolpath) {
       switch (op) {
         case 'cut':
-          cuts.push([from, lerp(0.8, from, to)]);
+          cuts.push([lerp(0.2, from, to), to]);
           cutEnds.push(to);
           break;
         case 'jump':
-          jumps.push([from, lerp(0.8, from, to)]);
+          jumps.push([lerp(0.2, from, to), to]);
           jumpEnds.push(to);
           break;
       }
