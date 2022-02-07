@@ -4,6 +4,7 @@ export const offsetOfPolygonWithHoles = (
   initial = 1,
   step = -1,
   limit = -1,
+  segments = 16,
   polygon
 ) => {
   try {
@@ -16,6 +17,7 @@ export const offsetOfPolygonWithHoles = (
       initial,
       step,
       limit,
+      segments / 2,
       polygon.holes.length,
       (out) => {
         if (polygon.exactPlane) {

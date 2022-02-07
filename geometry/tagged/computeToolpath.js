@@ -17,6 +17,7 @@ import { outline } from './outline.js';
 import { section } from './section.js';
 import { taggedToolpath } from './taggedToolpath.js';
 import { toConcreteGeometry } from './toConcreteGeometry.js';
+import { toSegments } from './toSegments.js';
 
 const X = 0;
 const Y = 1;
@@ -100,11 +101,9 @@ export const computeToolpath = (
     }
 
     // Profiles
-    for (const { segments } of outline(insetArea)) {
-      for (const [start, end] of segments) {
-        points.push({ start: start, end: { end: end, type: 'required' } });
-        points.push({ start: end });
-      }
+    for (const [start, end] of toSegments(outline(insetArea)).segments) {
+      points.push({ start: start, end: { end: end, type: 'required' } });
+      points.push({ start: end });
     }
 
     // Grooves

@@ -11,10 +11,10 @@ import { visit } from './visit.js';
 const measureBoundingBoxGeneric = (geometry) => {
   let minPoint = [Infinity, Infinity, Infinity];
   let maxPoint = [-Infinity, -Infinity, -Infinity];
-  eachPoint((point) => {
+  eachPoint(geometry, (point) => {
     minPoint = min(minPoint, point);
     maxPoint = max(maxPoint, point);
-  }, geometry);
+  });
   return [minPoint, maxPoint];
 };
 

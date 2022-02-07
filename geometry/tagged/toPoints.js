@@ -1,9 +1,8 @@
-import { createPointNormalizer } from './pointNormalizer.js';
 import { eachPoint } from './eachPoint.js';
+import { taggedPoints } from './taggedPoints.js';
 
 export const toPoints = (geometry) => {
-  const normalize = createPointNormalizer();
-  const points = new Set();
-  eachPoint((point) => points.add(normalize(point)), geometry);
-  return { type: 'points', points: [...points] };
+  const points = [];
+  eachPoint(geometry, (point) => points.push(point));
+  return taggedPoints({}, points);
 };

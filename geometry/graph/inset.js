@@ -3,7 +3,11 @@ import { insetOfPolygonWithHoles } from '@jsxcad/algorithm-cgal';
 import { taggedPolygonsWithHoles } from '../tagged/taggedPolygonsWithHoles.js';
 import { toPolygonsWithHoles } from './toPolygonsWithHoles.js';
 
-export const inset = (geometry, initial, step, limit) => {
+export const inset = (
+  geometry,
+  initial,
+  { segments = 8, step, limit } = {}
+) => {
   const insetGraphs = [];
   const { tags, plane, exactPlane } = geometry;
   for (const { polygonsWithHoles } of toPolygonsWithHoles(geometry)) {
@@ -12,6 +16,7 @@ export const inset = (geometry, initial, step, limit) => {
         initial,
         step,
         limit,
+        segments,
         polygonWithHoles
       )) {
         insetGraphs.push(

@@ -2,10 +2,10 @@ import Shape from './Shape.js';
 import { offset as offsetGeometry } from '@jsxcad/geometry';
 
 export const offset =
-  (initial = 1, step, limit) =>
+  (initial = 1, { segments = 16, step, limit } = {}) =>
   (shape) =>
     Shape.fromGeometry(
-      offsetGeometry(shape.toGeometry(), initial, step, limit)
+      offsetGeometry(shape.toGeometry(), initial, { segments, step, limit })
     );
 
 Shape.registerMethod('offset', offset);

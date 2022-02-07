@@ -64,6 +64,7 @@ export { fromSurfaceMeshToPolygons } from './fromSurfaceMeshToPolygons.js';
 export { fromSurfaceMeshToPolygonsWithHoles } from './fromSurfaceMeshToPolygonsWithHoles.js';
 export { fromSurfaceMeshToTriangles } from './fromSurfaceMeshToTriangles.js';
 export { fuseSurfaceMeshes } from './fuseSurfaceMeshes.js';
+export { generatePackingEnvelopeForSurfaceMesh } from './generatePackingEnvelopeForSurfaceMesh.js';
 export { growSurfaceMesh } from './growSurfaceMesh.js';
 export { initCgal } from './getCgal.js';
 export { insetOfPolygonWithHoles } from './insetOfPolygonWithHoles.js';
