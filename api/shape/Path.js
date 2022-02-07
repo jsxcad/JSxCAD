@@ -7,7 +7,7 @@ export const fromVec3 = (...points) =>
 export const fromPoints = (...shapes) => {
   const vec3List = [];
   for (const shape of shapes) {
-    eachPoint((vec3) => vec3List.push(vec3), shape.toGeometry());
+    eachPoint(shape.toGeometry(), (vec3) => vec3List.push(vec3));
   }
   return fromVec3(...vec3List);
 };

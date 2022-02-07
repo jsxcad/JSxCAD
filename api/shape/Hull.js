@@ -8,7 +8,7 @@ export const Hull = (...shapes) => {
     if (!shape) {
       continue;
     }
-    eachPoint((point) => points.push(point), shape.toGeometry());
+    eachPoint(shape.toGeometry(), (point) => points.push(point));
   }
   return Shape.fromGeometry(convexHullToGraph({}, points));
 };

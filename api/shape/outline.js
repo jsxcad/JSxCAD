@@ -1,13 +1,8 @@
-import { Group } from './Group.js';
 import { Shape } from './Shape.js';
 import { outline as outlineGeometry } from '@jsxcad/geometry';
 
 export const outline = () => (shape) =>
-  Group(
-    ...outlineGeometry(shape.toGeometry()).map((outline) =>
-      Shape.fromGeometry(outline)
-    )
-  );
+  Shape.fromGeometry(outlineGeometry(shape.toGeometry()));
 
 Shape.registerMethod('outline', outline);
 

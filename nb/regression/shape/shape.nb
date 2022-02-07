@@ -226,3 +226,11 @@ Box(10)
   .cut(Arc(6).x(6, -6), Box(1, 10))
   .and(toolpath())
   .view();
+
+Arc(5)
+  .x(4)
+  .seq({ by: 1 / 8 }, rz, Join)
+  .cut(Box(10, 20).y(6))
+  .and((s) => s.envelope().outline().color('red'),
+       (s) => s.envelope({ offset: 1, threshold: 20 }).outline().color('green'))
+  .view();

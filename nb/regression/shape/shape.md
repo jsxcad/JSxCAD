@@ -486,3 +486,15 @@ Box(10)
 ```
 
 ![Image](shape.md.57.png)
+
+```JavaScript
+Arc(5)
+  .x(4)
+  .seq({ by: 1 / 8 }, rz, Join)
+  .cut(Box(10, 20).y(6))
+  .and((s) => s.envelope().outline().color('red'),
+       (s) => s.envelope({ offset: 1, threshold: 20 }).outline().color('green'))
+  .view();
+```
+
+![Image](shape.md.58.png)

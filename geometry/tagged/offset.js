@@ -4,20 +4,20 @@ import { offset as offsetGraph } from '../graph/offset.js';
 import { op } from './op.js';
 import { taggedGroup } from './taggedGroup.js';
 
-const graph = (geometry, initial = 1, step, limit) =>
+const graph = (geometry, initial = 1, options) =>
   taggedGroup(
     { tags: geometry.tags },
-    ...offsetGraph(geometry, initial, step, limit)
+    ...offsetGraph(geometry, initial, options)
   );
-const polygonsWithHoles = (geometry, initial = 1, step, limit) =>
-  offset(fromPolygonsWithHolesToGraph(geometry), initial, step, limit);
 
-const paths = (geometry, initial = 1, step, limit) =>
-  offset(
+const polygonsWithHoles = (geometry, initial = 1, options) =>
+  graph(fromPolygonsWithHolesToGraph(geometry), initial, options);
+
+const paths = (geometry, initial = 1, options) =>
+  graph(
     fromPathsToGraph({ tags: geometry.tags }, geometry.paths),
     initial,
-    step,
-    limit
+    options
   );
 
 export const offset = op({ graph, polygonsWithHoles, paths });
