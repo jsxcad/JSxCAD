@@ -4779,6 +4779,21 @@ void GeneratePackingEnvelopeForSurfaceMesh(const Surface_mesh* input,
   }
 }
 
+#include <CGAL/envelope_3.h>
+
+void GenerateUpperEnvelopeForSurfaceMesh(const Surface_mesh* input,
+                                         const Transformation* transform, emscripten::val emit_surface) {
+  typedef Kernel::Plane_3                                  Plane_3;
+  typedef CGAL::Env_plane_traits_3<Kernel>                 Traits_3;
+  typedef Traits_3::Surface_3                              Surface_3;
+  typedef CGAL::Envelope_diagram_2<Traits_3>               Envelope_diagram_2;
+
+  // Compute and print the maximization diagram.
+  Envelope_diagram_2 max_diag;
+  CGAL::upper_envelope_3(triangles.begin(), triangles.end(),
+                         max_diag);
+}
+
 bool computeFitPolygon(const Polygon_with_holes_2& space,
                        const Polygon_with_holes_2& shape, Point_2& picked) {
   Polygon_with_holes_2 insetting_boundary;
