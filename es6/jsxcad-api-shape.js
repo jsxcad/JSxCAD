@@ -3018,19 +3018,10 @@ Shape.registerMethod('ey', ey);
 Shape.registerMethod('ez', ez);
 
 const extrudeToPlane =
-  (
-    highPlane = [0, 0, 1, 1],
-    lowPlane = [0, 0, 1, -1],
-    direction = [0, 0, 1, 0]
-  ) =>
+  ({ high, low, direction = [0, 0, 1, 0] }) =>
   (shape) =>
     Shape.fromGeometry(
-      extrudeToPlane$1(
-        shape.toGeometry(),
-        highPlane,
-        lowPlane,
-        direction
-      )
+      extrudeToPlane$1(shape.toGeometry(), { high, low, direction })
     );
 
 Shape.registerMethod('extrudeToPlane', extrudeToPlane);

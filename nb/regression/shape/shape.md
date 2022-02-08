@@ -509,3 +509,16 @@ Box(20, 20, 20)
 ```
 
 ![Image](shape.md.59.png)
+
+```JavaScript
+const q = Box(20, 20, 20)
+  .join(Box(10, 10, 40))
+  .join(Orb(4).hasSides(4).z(24))
+  .rx(1 / 16)
+  .align('z>')
+  .upperEnvelope()
+  .extrudeToPlane({ low: [0, 0, 1, 0], direction: [0, 0, -1, 0] })
+  .view(5);
+```
+
+![Image](shape.md.60.png)

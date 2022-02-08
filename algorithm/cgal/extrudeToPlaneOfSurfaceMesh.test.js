@@ -26,6 +26,7 @@ test('Extrude/Triangle', (t) => {
   const extrusion = extrudeToPlaneOfSurfaceMesh(
     surfaceMesh,
     identityMatrix,
+    true,
     0,
     0,
     1,
@@ -33,6 +34,7 @@ test('Extrude/Triangle', (t) => {
     0.5,
     0.5,
     1,
+    true,
     0,
     0,
     -1,

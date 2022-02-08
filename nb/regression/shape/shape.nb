@@ -241,3 +241,12 @@ Box(20, 20, 20)
   .material('glass')
   .and((s) => s.upperEnvelope().color('red'))
   .view();
+
+const q = Box(20, 20, 20)
+  .join(Box(10, 10, 40))
+  .join(Orb(4).hasSides(4).z(24))
+  .rx(1 / 16)
+  .align('z>')
+  .upperEnvelope()
+  .extrudeToPlane({ low: [0, 0, 1, 0], direction: [0, 0, -1, 0] })
+  .view(5);

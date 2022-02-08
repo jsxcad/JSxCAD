@@ -4,6 +4,7 @@ import { toCgalTransformFromJsTransform } from './transform.js';
 export const extrudeToPlaneOfSurfaceMesh = (
   mesh,
   transform,
+  enableHigh,
   highX,
   highY,
   highZ,
@@ -11,6 +12,7 @@ export const extrudeToPlaneOfSurfaceMesh = (
   highPlaneY,
   highPlaneZ,
   highPlaneW,
+  enableLow,
   lowX,
   lowY,
   lowZ,
@@ -20,9 +22,11 @@ export const extrudeToPlaneOfSurfaceMesh = (
   lowPlaneW
 ) => {
   try {
-    return getCgal().ExtrusionToPlaneOfSurfaceMesh(
+    let extrudedMesh;
+    getCgal().ExtrusionToPlaneOfSurfaceMesh(
       mesh,
       toCgalTransformFromJsTransform(transform),
+      enableHigh,
       highX,
       highY,
       highZ,
@@ -30,14 +34,20 @@ export const extrudeToPlaneOfSurfaceMesh = (
       highPlaneY,
       highPlaneZ,
       highPlaneW,
+      enableLow,
       lowX,
       lowY,
       lowZ,
       lowPlaneX,
       lowPlaneY,
       lowPlaneZ,
-      lowPlaneW
+      lowPlaneW,
+      (result) => {
+        extrudedMesh = result;
+      }
     );
+    extrudedMesh.provenance = 'extrudeToPlaneOfSurfaceMesh';
+    return extrudedMesh;
   } catch (error) {
     throw Error(error);
   }
