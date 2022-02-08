@@ -18,6 +18,8 @@
 #include <CGAL/Complex_2_in_triangulation_3.h>
 #include <CGAL/Delaunay_triangulation_2.h>
 #include <CGAL/Delaunay_triangulation_3.h>
+#include <CGAL/Env_surface_data_traits_3.h>
+#include <CGAL/Env_triangle_traits_3.h>
 #include <CGAL/Exact_predicates_exact_constructions_kernel.h>
 #include <CGAL/Gps_traits_2.h>
 #include <CGAL/IO/facets_in_complex_2_to_triangle_mesh.h>
@@ -74,6 +76,7 @@
 #include <CGAL/create_offset_polygons_from_polygon_with_holes_2.h>
 #include <CGAL/create_straight_skeleton_2.h>
 #include <CGAL/create_straight_skeleton_from_polygon_with_holes_2.h>
+#include <CGAL/envelope_3.h>
 #include <CGAL/exude_mesh_3.h>
 #include <CGAL/intersections.h>
 #include <CGAL/linear_least_squares_fitting_3.h>
@@ -4779,20 +4782,171 @@ void GeneratePackingEnvelopeForSurfaceMesh(const Surface_mesh* input,
   }
 }
 
-#include <CGAL/envelope_3.h>
+Surface_mesh* GenerateUpperEnvelopeForSurfaceMesh(
+    const Surface_mesh* input, const Transformation* transform) {
+  Surface_mesh mesh(*input);
+  CGAL::Polygon_mesh_processing::transform(*transform, mesh,
+                                           CGAL::parameters::all_default());
+  assert(CGAL::Polygon_mesh_processing::triangulate_faces(mesh) == true);
 
-void GenerateUpperEnvelopeForSurfaceMesh(const Surface_mesh* input,
-                                         const Transformation* transform, emscripten::val emit_surface) {
-  typedef Kernel::Plane_3                                  Plane_3;
-  typedef CGAL::Env_plane_traits_3<Kernel>                 Traits_3;
-  typedef Traits_3::Surface_3                              Surface_3;
-  typedef CGAL::Envelope_diagram_2<Traits_3>               Envelope_diagram_2;
+  typedef CGAL::Env_triangle_traits_3<Kernel> Traits_3;
+  typedef Kernel::Point_3 Point_3;
+  typedef Traits_3::Surface_3 Triangle_3;
+  typedef CGAL::Envelope_diagram_2<Traits_3> Envelope_diagram_2;
+  std::list<Triangle_3> triangles;
 
+  {
+    auto& points = mesh.points();
+    for (const Face_index face : faces(mesh)) {
+      Halfedge_index a = halfedge(face, mesh);
+      Halfedge_index b = mesh.next(a);
+      triangles.emplace_back(points[mesh.source(a)], points[mesh.source(b)],
+                             points[mesh.target(b)]);
+    }
+  }
+
+  // Compute and print the minimization diagram.
+  Envelope_diagram_2 upper_diagram;
+  CGAL::upper_envelope_3(triangles.begin(), triangles.end(), upper_diagram);
+
+  std::vector<Point_3> points;
+  std::vector<std::vector<size_t>> polygons;
+
+  Envelope_diagram_2::Face_const_iterator face;
+  for (face = upper_diagram.faces_begin(); face != upper_diagram.faces_end();
+       ++face) {
+    if (face->is_unbounded()) {
+      continue;
+    }
+    for (auto surface = face->surfaces_begin(); surface != face->surfaces_end();
+         ++surface) {
+      std::vector<size_t> polygon;
+      const Triangle_3& triangle = *surface;
+      for (int nth = 0; nth < 3; nth++) {
+        const Point_3& point = triangle.vertex(nth);
+        size_t vertex = points.size();
+        points.push_back(point);
+        polygon.push_back(vertex);
+      }
+      polygons.push_back(std::move(polygon));
+    }
+  }
+  CGAL::Polygon_mesh_processing::repair_polygon_soup(points, polygons);
+  CGAL::Polygon_mesh_processing::orient_polygon_soup(points, polygons);
+  Surface_mesh* upper_surface = new Surface_mesh();
+  CGAL::Polygon_mesh_processing::polygon_soup_to_polygon_mesh(points, polygons,
+                                                              *upper_surface);
+  return upper_surface;
+}
+
+#if 0
+#include <CGAL/Env_surface_data_traits_3.h>
+#include <CGAL/Env_triangle_traits_3.h>
+
+/* Auxiliary function - print the features of the given envelope diagram. */
+void print_diagram(
+    const CGAL::Envelope_diagram_2<CGAL::Env_surface_data_traits_3<
+        CGAL::Env_triangle_traits_3<Kernel>, char>>& diag) {
+  typedef CGAL::Env_triangle_traits_3<Kernel> Traits_3;
+  typedef Kernel::Point_3 Point_3;
+  typedef Traits_3::Surface_3 Triangle_3;
+  typedef CGAL::Env_surface_data_traits_3<Traits_3, char> Data_traits_3;
+  typedef Data_traits_3::Surface_3 Data_triangle_3;
+  typedef CGAL::Envelope_diagram_2<Data_traits_3> Envelope_diagram_2;
+  // Go over all arrangement faces.
+  Envelope_diagram_2::Face_const_iterator fit;
+  Envelope_diagram_2::Ccb_halfedge_const_circulator ccb;
+  Envelope_diagram_2::Surface_const_iterator sit;
+  for (fit = diag.faces_begin(); fit != diag.faces_end(); ++fit) {
+    // Print the face boundary.
+    if (fit->is_unbounded()) {
+      std::cout << "[Unbounded face]";
+    } else {
+      // Print the vertices along the outer boundary of the face.
+      ccb = fit->outer_ccb();
+      std::cout << "[Face]  ";
+      do {
+        std::cout << '(' << ccb->target()->point() << ")  ";
+        ++ccb;
+      } while (ccb != fit->outer_ccb());
+    }
+    // Print the labels of the triangles that induce the envelope on this
+    // face.
+    std::cout << "-->  " << fit->number_of_surfaces() << " triangles:";
+    for (sit = fit->surfaces_begin(); sit != fit->surfaces_end(); ++sit)
+      std::cout << ' ' << sit->data();
+    std::cout << std::endl;
+  }
+  // Go over all arrangement edges.
+  Envelope_diagram_2::Edge_const_iterator eit;
+  for (eit = diag.edges_begin(); eit != diag.edges_end(); ++eit) {
+    // Print the labels of the triangles that induce the envelope on this
+    // edge.
+    std::cout << "[Edge]  (" << eit->source()->point() << ")  ("
+              << eit->target()->point() << ")  -->  "
+              << eit->number_of_surfaces() << " triangles:";
+    for (sit = eit->surfaces_begin(); sit != eit->surfaces_end(); ++sit)
+      std::cout << ' ' << sit->data();
+    std::cout << std::endl;
+  }
+  return;
+}
+
+int foo() {
+  typedef CGAL::Env_triangle_traits_3<Kernel> Traits_3;
+  typedef Kernel::Point_3 Point_3;
+  typedef Traits_3::Surface_3 Triangle_3;
+  typedef CGAL::Env_surface_data_traits_3<Traits_3, char> Data_traits_3;
+  typedef Data_traits_3::Surface_3 Data_triangle_3;
+  typedef CGAL::Envelope_diagram_2<Data_traits_3> Envelope_diagram_2;
+  // Construct the input triangles, makred A and B.
+  std::list<Data_triangle_3> triangles;
+  triangles.push_back(Data_triangle_3(
+      Triangle_3(Point_3(0, 0, 0), Point_3(0, 6, 0), Point_3(5, 3, 4)), 'A'));
+  triangles.push_back(Data_triangle_3(
+      Triangle_3(Point_3(6, 0, 0), Point_3(6, 6, 0), Point_3(1, 3, 4)), 'B'));
+  // Compute and print the minimization diagram.
+  Envelope_diagram_2 min_diag;
+  CGAL::lower_envelope_3(triangles.begin(), triangles.end(), min_diag);
+  std::cout << std::endl << "The minimization diagram:" << std::endl;
+  print_diagram(min_diag);
   // Compute and print the maximization diagram.
   Envelope_diagram_2 max_diag;
-  CGAL::upper_envelope_3(triangles.begin(), triangles.end(),
-                         max_diag);
+  CGAL::upper_envelope_3(triangles.begin(), triangles.end(), max_diag);
+  std::cout << std::endl << "The maximization diagram:" << std::endl;
+  print_diagram(max_diag);
+  return (0);
 }
+#endif
+
+#if 0
+#include <CGAL/Env_surface_data_traits_3.h>
+#include <CGAL/Env_triangle_traits_3.h>
+
+int foo() {
+  typedef CGAL::Env_triangle_traits_3<Kernel> Traits_3;
+  typedef Kernel::Point_3 Point_3;
+  typedef Traits_3::Surface_3 Triangle_3;
+  typedef CGAL::Envelope_diagram_2<Traits_3> Envelope_diagram_2;
+  // Construct the input triangles, makred A and B.
+  std::list<Triangle_3> triangles;
+  triangles.push_back(
+      Triangle_3(Point_3(0, 0, 0), Point_3(0, 6, 0), Point_3(5, 3, 4)));
+  triangles.push_back(
+      Triangle_3(Point_3(6, 0, 0), Point_3(6, 6, 0), Point_3(1, 3, 4)));
+  // Compute and print the minimization diagram.
+  Envelope_diagram_2 min_diag;
+  CGAL::lower_envelope_3(triangles.begin(), triangles.end(), min_diag);
+  std::cout << std::endl << "The minimization diagram:" << std::endl;
+  // print_diagram(min_diag);
+  // Compute and print the maximization diagram.
+  Envelope_diagram_2 max_diag;
+  CGAL::upper_envelope_3(triangles.begin(), triangles.end(), max_diag);
+  std::cout << std::endl << "The maximization diagram:" << std::endl;
+  // print_diagram(max_diag);
+  return (0);
+}
+#endif
 
 bool computeFitPolygon(const Polygon_with_holes_2& space,
                        const Polygon_with_holes_2& shape, Point_2& picked) {
@@ -5511,9 +5665,14 @@ EMSCRIPTEN_BINDINGS(module) {
   emscripten::function("ComputeNormalOfSurfaceMesh",
                        &ComputeNormalOfSurfaceMesh,
                        emscripten::allow_raw_pointers());
+
   emscripten::function("GeneratePackingEnvelopeForSurfaceMesh",
                        &GeneratePackingEnvelopeForSurfaceMesh,
                        emscripten::allow_raw_pointers());
+  emscripten::function("GenerateUpperEnvelopeForSurfaceMesh",
+                       &GenerateUpperEnvelopeForSurfaceMesh,
+                       emscripten::allow_raw_pointers());
+
   emscripten::function("BooleansOfPolygonsWithHolesApproximate",
                        &BooleansOfPolygonsWithHolesApproximate);
   emscripten::function("BooleansOfPolygonsWithHolesExact",

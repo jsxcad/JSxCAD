@@ -65,6 +65,7 @@ export { fromSurfaceToPaths } from './tagged/fromSurfaceToPaths.js';
 export { fromTriangles as fromTrianglesToGraph } from './graph/fromTriangles.js';
 export { fuse } from './tagged/fuse.js';
 export { generatePackingEnvelope } from './tagged/generatePackingEnvelope.js';
+export { generateUpperEnvelope } from './tagged/generateUpperEnvelope.js';
 export { getAnyNonVoidSurfaces } from './tagged/getAnyNonVoidSurfaces.js';
 export { getAnySurfaces } from './tagged/getAnySurfaces.js';
 export { getItems } from './tagged/getItems.js';

@@ -1,8 +1,8 @@
 import { fromPaths as fromPathsToGraph } from '../graph/fromPaths.js';
 import { fromPolygonsWithHoles as fromPolygonsWithHolesToGraph } from '../graph/fromPolygonsWithHoles.js';
 import { inset as insetGraph } from '../graph/inset.js';
-import { taggedGroup } from './taggedGroup.js';
 import { op } from './op.js';
+import { taggedGroup } from './taggedGroup.js';
 
 const graph = (geometry, initial, options) =>
   taggedGroup(

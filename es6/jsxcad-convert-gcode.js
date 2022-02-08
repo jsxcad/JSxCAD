@@ -118,11 +118,13 @@ const toGcode = async (geometry) => {
     }
   };
 
+  const useAbsoluteCoordinates = () => emit('G90');
   const useMetric = () => emit('G21');
 
   codes.push('');
 
   useMetric();
+  useAbsoluteCoordinates();
 
   cM3();
 
