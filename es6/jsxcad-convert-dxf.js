@@ -2648,7 +2648,7 @@ class TagsManager {
      */
     toDxfString() {
         return this._tags.reduce((dxfString, tag) => {
-            return `${dxfString}${tag.dxfString()}`;
+            return `${dxfString}${tag.toDxfString()}`;
         }, "");
     }
 }

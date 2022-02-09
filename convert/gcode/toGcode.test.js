@@ -13,6 +13,7 @@ test('Simple', async (t) => {
     new TextDecoder('utf8').decode(code),
     `
 G21
+G90
 M3
 F100
 S50

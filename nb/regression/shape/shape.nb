@@ -231,6 +231,22 @@ Arc(5)
   .x(4)
   .seq({ by: 1 / 8 }, rz, Join)
   .cut(Box(10, 20).y(6))
-  .and((s) => s.envelope().outline().color('red'),
-       (s) => s.envelope({ offset: 1, threshold: 20 }).outline().color('green'))
+  .and((s) => s.packingEnvelope().outline().color('red'),
+       (s) => s.packingEnvelope({ offset: 1, threshold: 20 }).outline().color('green'))
   .view();
+
+Box(20, 20, 20)
+  .join(Box(10, 10, 40))
+  .rx(1 / 16)
+  .material('glass')
+  .and((s) => s.upperEnvelope().color('red'))
+  .view();
+
+const q = Box(20, 20, 20)
+  .join(Box(10, 10, 40))
+  .join(Orb(4).hasSides(4).z(24))
+  .rx(1 / 16)
+  .align('z>')
+  .upperEnvelope()
+  .extrudeToPlane({ low: [0, 0, 1, 0], direction: [0, 0, -1, 0] })
+  .view(5);

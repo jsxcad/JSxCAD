@@ -1,6 +1,6 @@
-import { eachPoint as graph } from '../graph/eachPoint.js';
 import { eachPoint as eachPointOfPaths } from '../paths/eachPoint.js';
 import { eachPoint as eachPointOfPoints } from '../points/eachPoint.js';
+import { eachPoint as graph } from '../graph/eachPoint.js';
 import { op } from './op.js';
 import { visit } from './visit.js';
 

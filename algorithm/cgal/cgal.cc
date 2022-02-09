@@ -18,6 +18,8 @@
 #include <CGAL/Complex_2_in_triangulation_3.h>
 #include <CGAL/Delaunay_triangulation_2.h>
 #include <CGAL/Delaunay_triangulation_3.h>
+#include <CGAL/Env_surface_data_traits_3.h>
+#include <CGAL/Env_triangle_traits_3.h>
 #include <CGAL/Exact_predicates_exact_constructions_kernel.h>
 #include <CGAL/Gps_traits_2.h>
 #include <CGAL/IO/facets_in_complex_2_to_triangle_mesh.h>
@@ -74,6 +76,7 @@
 #include <CGAL/create_offset_polygons_from_polygon_with_holes_2.h>
 #include <CGAL/create_straight_skeleton_2.h>
 #include <CGAL/create_straight_skeleton_from_polygon_with_holes_2.h>
+#include <CGAL/envelope_3.h>
 #include <CGAL/exude_mesh_3.h>
 #include <CGAL/intersections.h>
 #include <CGAL/linear_least_squares_fitting_3.h>
@@ -104,6 +107,7 @@ typedef Kernel::Line_3 Line;
 typedef Kernel::Plane_3 Plane;
 typedef Kernel::Point_2 Point_2;
 typedef Kernel::Point_3 Point;
+typedef Kernel::Ray_3 Ray;
 typedef Kernel::Segment_3 Segment;
 typedef Kernel::Triangle_3 Triangle;
 typedef Kernel::Vector_2 Vector_2;
@@ -2106,7 +2110,7 @@ void ExtrusionOfSurfaceMesh(const Surface_mesh* input,
     down = normal * (depth / length);
   }
 
-  Surface_mesh* extruded_mesh = new Surface_mesh();
+  std::unique_ptr<Surface_mesh> extruded_mesh(new Surface_mesh());
 
   typedef typename boost::property_map<Surface_mesh, CGAL::vertex_point_t>::type
       VPMap;
@@ -2116,20 +2120,22 @@ void ExtrusionOfSurfaceMesh(const Surface_mesh* input,
                                               top);
   CGAL::Polygon_mesh_processing::triangulate_faces(*extruded_mesh);
   if (CGAL::Polygon_mesh_processing::volume(
-          *extruded_mesh, CGAL::parameters::all_default()) == 0) {
-    delete extruded_mesh;
-  } else {
-    emit_mesh(extruded_mesh);
+          *extruded_mesh, CGAL::parameters::all_default()) != 0) {
+    Surface_mesh* result = extruded_mesh.release();
+    emit_mesh(result);
   }
 }
 
 template <typename MAP>
 struct ProjectToPlane {
-  ProjectToPlane(MAP map, Vector vector, Plane plane)
-      : map(map), vector(vector), plane(plane) {}
+  ProjectToPlane(MAP map, bool enable, Vector vector, Plane plane)
+      : map(map), enable_(enable), vector(vector), plane(plane) {}
 
   template <typename VD, typename T>
   void operator()(const T&, VD vd) const {
+    if (!enable_) {
+      return;
+    }
     Line line(get(map, vd), vector);
     auto result = CGAL::intersection(Line(get(map, vd), vector), plane);
     if (result) {
@@ -2140,26 +2146,28 @@ struct ProjectToPlane {
   }
 
   MAP map;
+  bool enable_;
   Vector vector;
   Plane plane;
 };
 
-const Surface_mesh* ExtrusionToPlaneOfSurfaceMesh(
+void ExtrusionToPlaneOfSurfaceMesh(
     const Surface_mesh* input, const Transformation* transformation,
-    double high_x, double high_y, double high_z, double high_plane_x,
-    double high_plane_y, double high_plane_z, double high_plane_w, double low_x,
-    double low_y, double low_z, double low_plane_x, double low_plane_y,
-    double low_plane_z, double low_plane_w) {
+    bool use_high, double high_x, double high_y, double high_z,
+    double high_plane_x, double high_plane_y, double high_plane_z,
+    double high_plane_w, bool use_low, double low_x, double low_y, double low_z,
+    double low_plane_x, double low_plane_y, double low_plane_z,
+    double low_plane_w, emscripten::val emit_mesh) {
   Surface_mesh mesh(*input);
   CGAL::Polygon_mesh_processing::transform(*transformation, mesh,
                                            CGAL::parameters::all_default());
 
-  Surface_mesh* extruded_mesh = new Surface_mesh();
+  std::unique_ptr<Surface_mesh> extruded_mesh(new Surface_mesh());
 
   typedef typename boost::property_map<Surface_mesh, CGAL::vertex_point_t>::type
       VPMap;
   ProjectToPlane<VPMap> top(
-      get(CGAL::vertex_point, *extruded_mesh),
+      get(CGAL::vertex_point, *extruded_mesh), use_high,
       Vector(compute_approximate_point_value(high_x),
              compute_approximate_point_value(high_y),
              compute_approximate_point_value(high_z)),
@@ -2168,7 +2176,7 @@ const Surface_mesh* ExtrusionToPlaneOfSurfaceMesh(
             compute_approximate_point_value(high_plane_z),
             compute_approximate_point_value(high_plane_w)));
   ProjectToPlane<VPMap> bottom(
-      get(CGAL::vertex_point, *extruded_mesh),
+      get(CGAL::vertex_point, *extruded_mesh), use_low,
       Vector(compute_approximate_point_value(low_x),
              compute_approximate_point_value(low_y),
              compute_approximate_point_value(low_z)),
@@ -2179,8 +2187,12 @@ const Surface_mesh* ExtrusionToPlaneOfSurfaceMesh(
 
   CGAL::Polygon_mesh_processing::extrude_mesh(mesh, *extruded_mesh, bottom,
                                               top);
-
-  return extruded_mesh;
+  CGAL::Polygon_mesh_processing::triangulate_faces(*extruded_mesh);
+  if (CGAL::Polygon_mesh_processing::volume(
+          *extruded_mesh, CGAL::parameters::all_default()) != 0) {
+    Surface_mesh* result = extruded_mesh.release();
+    emit_mesh(result);
+  }
 }
 
 const Surface_mesh::Vertex_index ensureVertex(
@@ -4779,19 +4791,160 @@ void GeneratePackingEnvelopeForSurfaceMesh(const Surface_mesh* input,
   }
 }
 
-#include <CGAL/envelope_3.h>
+template <typename Edge, typename Face, typename Point>
+bool projectPointToUpperEnvelope(const Edge& edge, const Face& face,
+                                 Point& projected) {
+  // Project the corner up to the surface.
+  auto p2 = edge->source()->point();
+  Line line(Point(p2.x(), p2.y(), 0), Vector(0, 0, 1).direction());
+  for (auto surface = face->surfaces_begin(); surface != face->surfaces_end();
+       ++surface) {
+    const auto& triangle = *surface;
+    const Plane plane(triangle.vertex(0), triangle.vertex(1),
+                      triangle.vertex(2));
+    const auto result = CGAL::intersection(line, plane);
+    if (result) {
+      if (const Point* p3 = boost::get<Point>(&*result)) {
+        projected = *p3;
+        return true;
+      }
+    }
+  }
+  return false;
+}
 
-void GenerateUpperEnvelopeForSurfaceMesh(const Surface_mesh* input,
-                                         const Transformation* transform, emscripten::val emit_surface) {
-  typedef Kernel::Plane_3                                  Plane_3;
-  typedef CGAL::Env_plane_traits_3<Kernel>                 Traits_3;
-  typedef Traits_3::Surface_3                              Surface_3;
-  typedef CGAL::Envelope_diagram_2<Traits_3>               Envelope_diagram_2;
+Surface_mesh* GenerateUpperEnvelopeForSurfaceMesh(
+    const Surface_mesh* input, const Transformation* transform) {
+  Surface_mesh mesh(*input);
+  CGAL::Polygon_mesh_processing::transform(*transform, mesh,
+                                           CGAL::parameters::all_default());
+  assert(CGAL::Polygon_mesh_processing::triangulate_faces(mesh) == true);
 
-  // Compute and print the maximization diagram.
-  Envelope_diagram_2 max_diag;
-  CGAL::upper_envelope_3(triangles.begin(), triangles.end(),
-                         max_diag);
+  typedef CGAL::Env_triangle_traits_3<Kernel> Traits_3;
+  typedef Kernel::Point_3 Point_3;
+  typedef Traits_3::Surface_3 Triangle_3;
+  // typedef Traits_3::Intersect_3 intersect;
+  typedef CGAL::Envelope_diagram_2<Traits_3> Envelope_diagram_2;
+  std::list<Triangle_3> triangles;
+
+  {
+    auto& points = mesh.points();
+    for (const Face_index face : faces(mesh)) {
+      Halfedge_index a = halfedge(face, mesh);
+      Halfedge_index b = mesh.next(a);
+      triangles.emplace_back(points[mesh.source(a)], points[mesh.source(b)],
+                             points[mesh.target(b)]);
+    }
+  }
+
+  // Compute and print the minimization diagram.
+  Envelope_diagram_2 upper_diagram;
+  CGAL::upper_envelope_3(triangles.begin(), triangles.end(), upper_diagram);
+
+  std::vector<Point_3> points;
+  std::vector<std::vector<size_t>> polygons;
+
+  Envelope_diagram_2::Face_const_iterator face;
+  for (face = upper_diagram.faces_begin(); face != upper_diagram.faces_end();
+       ++face) {
+    if (face->is_unbounded()) {
+      continue;
+    }
+    std::vector<size_t> polygon;
+    Envelope_diagram_2::Ccb_halfedge_const_circulator start = face->outer_ccb();
+    Envelope_diagram_2::Ccb_halfedge_const_circulator edge = start;
+    // TODO: Project the edges and generate polygons where the areas are
+    // non-zero.
+    do {
+      Point_3 point;
+      if (projectPointToUpperEnvelope(edge, face, point)) {
+        size_t vertex = points.size();
+        points.push_back(point);
+        polygon.push_back(vertex);
+      }
+    } while (++edge != start);
+
+    polygons.push_back(std::move(polygon));
+  }
+
+  Envelope_diagram_2::Edge_const_iterator edge;
+  for (edge = upper_diagram.edges_begin(); edge != upper_diagram.edges_end();
+       ++edge) {
+    const auto& front = edge;
+    const auto& front_next = front->next();
+    const auto& back = front->twin();
+    const auto& back_next = back->next();
+
+    Point_3 front_point;
+    Point_3 front_next_point;
+    Point_3 back_point;
+    Point_3 back_next_point;
+    if (projectPointToUpperEnvelope(front, front->face(), front_point) &&
+        projectPointToUpperEnvelope(front_next, front_next->face(),
+                                    front_next_point) &&
+        projectPointToUpperEnvelope(back, back->face(), back_point) &&
+        projectPointToUpperEnvelope(back_next, back_next->face(),
+                                    back_next_point)) {
+      if (front_point == back_next_point &&
+          front_next_point == back_next_point) {
+        // This has zero area and can be ignored.
+      } else if (front_point == back_next_point) {
+        // This is a triangle.
+        std::vector<size_t> polygon;
+
+        polygon.push_back(points.size());
+        points.push_back(front_point);
+
+        polygon.push_back(points.size());
+        points.push_back(front_next_point);
+
+        polygon.push_back(points.size());
+        points.push_back(back_point);
+
+        polygons.push_back(std::move(polygon));
+      } else if (back_point == front_next_point) {
+        // This is a triangle.
+        std::vector<size_t> polygon;
+
+        polygon.push_back(points.size());
+        points.push_back(front_point);
+
+        polygon.push_back(points.size());
+        points.push_back(front_next_point);
+
+        polygon.push_back(points.size());
+        points.push_back(back_next_point);
+
+        polygons.push_back(std::move(polygon));
+      } else {
+        // This is a quadrilateral.
+        std::vector<size_t> polygon;
+
+        polygon.push_back(points.size());
+        points.push_back(front_point);
+
+        polygon.push_back(points.size());
+        points.push_back(front_next_point);
+
+        polygon.push_back(points.size());
+        points.push_back(back_point);
+
+        polygon.push_back(points.size());
+        points.push_back(back_next_point);
+
+        polygons.push_back(std::move(polygon));
+      }
+    }
+  }
+
+  CGAL::Polygon_mesh_processing::repair_polygon_soup(points, polygons);
+  CGAL::Polygon_mesh_processing::orient_polygon_soup(points, polygons);
+  Surface_mesh* upper_surface = new Surface_mesh();
+  CGAL::Polygon_mesh_processing::polygon_soup_to_polygon_mesh(points, polygons,
+                                                              *upper_surface);
+  assert(CGAL::Polygon_mesh_processing::triangulate_faces(*upper_surface) ==
+         true);
+  return upper_surface;
 }
 
 bool computeFitPolygon(const Polygon_with_holes_2& space,
@@ -5511,9 +5664,14 @@ EMSCRIPTEN_BINDINGS(module) {
   emscripten::function("ComputeNormalOfSurfaceMesh",
                        &ComputeNormalOfSurfaceMesh,
                        emscripten::allow_raw_pointers());
+
   emscripten::function("GeneratePackingEnvelopeForSurfaceMesh",
                        &GeneratePackingEnvelopeForSurfaceMesh,
                        emscripten::allow_raw_pointers());
+  emscripten::function("GenerateUpperEnvelopeForSurfaceMesh",
+                       &GenerateUpperEnvelopeForSurfaceMesh,
+                       emscripten::allow_raw_pointers());
+
   emscripten::function("BooleansOfPolygonsWithHolesApproximate",
                        &BooleansOfPolygonsWithHolesApproximate);
   emscripten::function("BooleansOfPolygonsWithHolesExact",
