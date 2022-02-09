@@ -1,3 +1,5 @@
+import { Group, Shape, loadGeometry, saveGeometry } from '@jsxcad/api-shape';
+
 import {
   addOnEmitHandler,
   addPending,
@@ -12,8 +14,6 @@ import {
   resolvePending,
   write,
 } from '@jsxcad/sys';
-
-import { loadGeometry, saveGeometry } from '@jsxcad/api-shape';
 
 let recordedNotes;
 
@@ -77,7 +77,22 @@ export const $run = async (op, { path, id, text, sha }) => {
     beginRecordingNotes(path, id);
     beginEmitGroup({ path, id });
     emitSourceText(text);
-    const result = await op();
+    let result;
+    try {
+      result = await op();
+    } catch (error) {
+      if (error.debugGeometry) {
+        Group(
+          ...error.debugGeometry.map((geometry) => Shape.fromGeometry(geometry))
+        )
+          .md(error.message)
+          .md('Debug Geometry: ')
+          .view();
+        await resolvePending();
+        finishEmitGroup({ path, id });
+      }
+      throw error;
+    }
     await resolvePending();
     const endTime = new Date();
     const durationMinutes = (endTime - startTime) / 60000;

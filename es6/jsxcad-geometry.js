@@ -942,36 +942,41 @@ const cut = cached(
     return ['cut', hash(geometry), ...geometries.map(hash)];
   },
   (geometry, geometries) => {
-    const concreteGeometry = toConcreteGeometry(geometry);
-    const rewriteGraphs = [];
-    const rewriteSegments = [];
-    collectTargets$1(concreteGeometry, rewriteGraphs, rewriteSegments);
-    const readGraphs = [];
-    for (const geometry of geometries) {
-      collectRemoves(toConcreteGeometry(geometry), readGraphs);
-    }
-    const { cutGraphGeometries, cutSegmentsGeometries } = cut$1(
-      rewriteGraphs,
-      rewriteSegments,
-      readGraphs
-    );
-    const map = new Map();
-    for (let nth = 0; nth < cutGraphGeometries.length; nth++) {
-      map.set(rewriteGraphs[nth], cutGraphGeometries[nth]);
-    }
-    for (let nth = 0; nth < cutSegmentsGeometries.length; nth++) {
-      map.set(rewriteSegments[nth], cutSegmentsGeometries[nth]);
-    }
-
-    const update = (geometry, descend) => {
-      const cut = map.get(geometry);
-      if (cut) {
-        return cut;
-      } else {
-        return descend();
+    try {
+      const concreteGeometry = toConcreteGeometry(geometry);
+      const rewriteGraphs = [];
+      const rewriteSegments = [];
+      collectTargets$1(concreteGeometry, rewriteGraphs, rewriteSegments);
+      const readGraphs = [];
+      for (const geometry of geometries) {
+        collectRemoves(toConcreteGeometry(geometry), readGraphs);
       }
-    };
-    return rewrite(concreteGeometry, update);
+      const { cutGraphGeometries, cutSegmentsGeometries } = cut$1(
+        rewriteGraphs,
+        rewriteSegments,
+        readGraphs
+      );
+      const map = new Map();
+      for (let nth = 0; nth < cutGraphGeometries.length; nth++) {
+        map.set(rewriteGraphs[nth], cutGraphGeometries[nth]);
+      }
+      for (let nth = 0; nth < cutSegmentsGeometries.length; nth++) {
+        map.set(rewriteSegments[nth], cutSegmentsGeometries[nth]);
+      }
+      const update = (geometry, descend) => {
+        const cut = map.get(geometry);
+        if (cut) {
+          return cut;
+        } else {
+          return descend();
+        }
+      };
+      return rewrite(concreteGeometry, update);
+    } catch (error) {
+      // CHECK: Does this depend on error being user defined or is it safe on the builtin Error?
+      error.debugGeometry = [geometry, ...geometries];
+      throw error;
+    }
   }
 );
 
@@ -1032,46 +1037,6 @@ const disjoint = (geometries) => {
   }
   return taggedGroup({}, ...rewrittenGeometries);
 };
-
-/*
-export const disjoint = (geometries) => {
-  // We need to determine the linearization of geometry by type, then rewrite
-  // with the corresponding disjunction.
-  const concreteGeometries = [];
-  for (const geometry of geometries) {
-    concreteGeometries.push(toConcreteGeometry(geometry));
-  }
-  // For now we restrict ourselves to graphs.
-  const originalGraphs = [];
-  const collect = (geometry, descend) => {
-    if (geometry.type === 'graph') {
-      originalGraphs.push(geometry);
-    }
-    descend();
-  };
-  for (const geometry of concreteGeometries) {
-    visit(geometry, collect);
-  }
-  const disjointedGraphs = disjointGraphs(originalGraphs);
-  const map = new Map();
-  for (let nth = 0; nth < disjointedGraphs.length; nth++) {
-    map.set(originalGraphs[nth], disjointedGraphs[nth]);
-  }
-  const update = (geometry, descend) => {
-    const disjointed = map.get(geometry);
-    if (disjointed) {
-      return disjointed;
-    } else {
-      return descend();
-    }
-  };
-  const rewrittenGeometries = [];
-  for (const geometry of concreteGeometries) {
-    rewrittenGeometries.push(rewrite(geometry, update));
-  }
-  return taggedGroup({}, ...rewrittenGeometries);
-};
-*/
 
 const assemble = (...geometries) => disjoint(geometries);
 
