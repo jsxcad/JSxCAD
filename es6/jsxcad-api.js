@@ -2,9 +2,9 @@ import './jsxcad-api-v1-gcode.js';
 import './jsxcad-api-v1-pdf.js';
 import './jsxcad-api-v1-tools.js';
 import * as mathApi from './jsxcad-api-v1-math.js';
-import { addOnEmitHandler, addPending, write, read, emit, flushEmitGroup, computeHash, logInfo, beginEmitGroup, resolvePending, getConfig, finishEmitGroup, saveEmitGroup, ErrorWouldBlock, restoreEmitGroup, isWebWorker, getSourceLocation, getControlValue } from './jsxcad-sys.js';
 import * as shapeApi from './jsxcad-api-shape.js';
-import { saveGeometry, loadGeometry } from './jsxcad-api-shape.js';
+import { Group, Shape, saveGeometry, loadGeometry } from './jsxcad-api-shape.js';
+import { addOnEmitHandler, addPending, write, read, emit, flushEmitGroup, computeHash, logInfo, beginEmitGroup, resolvePending, finishEmitGroup, getConfig, saveEmitGroup, ErrorWouldBlock, restoreEmitGroup, isWebWorker, getSourceLocation, getControlValue } from './jsxcad-sys.js';
 import { toEcmascript } from './jsxcad-compiler.js';
 import { readStl, stl } from './jsxcad-api-v1-stl.js';
 import { readObj } from './jsxcad-api-v1-obj.js';
@@ -74,7 +74,22 @@ const $run = async (op, { path, id, text, sha }) => {
     beginRecordingNotes();
     beginEmitGroup({ path, id });
     emitSourceText(text);
-    const result = await op();
+    let result;
+    try {
+      result = await op();
+    } catch (error) {
+      if (error.debugGeometry) {
+        Group(
+          ...error.debugGeometry.map((geometry) => Shape.fromGeometry(geometry))
+        )
+          .md(error.message)
+          .md('Debug Geometry: ')
+          .view();
+        await resolvePending();
+        finishEmitGroup({ path, id });
+      }
+      throw error;
+    }
     await resolvePending();
     const endTime = new Date();
     const durationMinutes = (endTime - startTime) / 60000;

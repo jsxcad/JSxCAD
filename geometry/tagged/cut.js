@@ -45,35 +45,40 @@ export const cut = cached(
     return ['cut', hash(geometry), ...geometries.map(hash)];
   },
   (geometry, geometries) => {
-    const concreteGeometry = toConcreteGeometry(geometry);
-    const rewriteGraphs = [];
-    const rewriteSegments = [];
-    collectTargets(concreteGeometry, rewriteGraphs, rewriteSegments);
-    const readGraphs = [];
-    for (const geometry of geometries) {
-      collectRemoves(toConcreteGeometry(geometry), readGraphs);
-    }
-    const { cutGraphGeometries, cutSegmentsGeometries } = cutGraphs(
-      rewriteGraphs,
-      rewriteSegments,
-      readGraphs
-    );
-    const map = new Map();
-    for (let nth = 0; nth < cutGraphGeometries.length; nth++) {
-      map.set(rewriteGraphs[nth], cutGraphGeometries[nth]);
-    }
-    for (let nth = 0; nth < cutSegmentsGeometries.length; nth++) {
-      map.set(rewriteSegments[nth], cutSegmentsGeometries[nth]);
-    }
-
-    const update = (geometry, descend) => {
-      const cut = map.get(geometry);
-      if (cut) {
-        return cut;
-      } else {
-        return descend();
+    try {
+      const concreteGeometry = toConcreteGeometry(geometry);
+      const rewriteGraphs = [];
+      const rewriteSegments = [];
+      collectTargets(concreteGeometry, rewriteGraphs, rewriteSegments);
+      const readGraphs = [];
+      for (const geometry of geometries) {
+        collectRemoves(toConcreteGeometry(geometry), readGraphs);
       }
-    };
-    return rewrite(concreteGeometry, update);
+      const { cutGraphGeometries, cutSegmentsGeometries } = cutGraphs(
+        rewriteGraphs,
+        rewriteSegments,
+        readGraphs
+      );
+      const map = new Map();
+      for (let nth = 0; nth < cutGraphGeometries.length; nth++) {
+        map.set(rewriteGraphs[nth], cutGraphGeometries[nth]);
+      }
+      for (let nth = 0; nth < cutSegmentsGeometries.length; nth++) {
+        map.set(rewriteSegments[nth], cutSegmentsGeometries[nth]);
+      }
+      const update = (geometry, descend) => {
+        const cut = map.get(geometry);
+        if (cut) {
+          return cut;
+        } else {
+          return descend();
+        }
+      };
+      return rewrite(concreteGeometry, update);
+    } catch (error) {
+      // CHECK: Does this depend on error being user defined or is it safe on the builtin Error?
+      error.debugGeometry = [geometry, ...geometries];
+      throw error;
+    }
   }
 );
