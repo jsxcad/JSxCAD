@@ -92,7 +92,6 @@
 #include <array>
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/split.hpp>
-#include <boost/exception/diagnostic_information.hpp>
 #include <boost/range/adaptor/reversed.hpp>
 #include <queue>
 
@@ -2559,7 +2558,6 @@ int ClipSurfaceMeshes(size_t target_count, emscripten::val getTargetMesh,
                       emscripten::val getSourceMesh,
                       emscripten::val getSourceTransform,
                       emscripten::val emit_mesh, emscripten::val emit_segment) {
-  try {
     std::vector<Surface_mesh> working_target_meshes(target_count);
     std::vector<std::unique_ptr<Surface_mesh>> clipped_target_meshes(
         target_count);
@@ -2571,7 +2569,6 @@ int ClipSurfaceMeshes(size_t target_count, emscripten::val getTargetMesh,
     std::vector<bool> is_planar(target_count, false);
     std::vector<Plane> target_planes(target_count);
 
-    std::cout << "QQ/ClipSurfaceMeshes/1" << std::endl;
     for (size_t nth_target = 0; nth_target < target_count; nth_target++) {
       const Surface_mesh* target_mesh =
           getTargetMesh(nth_target)
@@ -2591,22 +2588,17 @@ int ClipSurfaceMeshes(size_t target_count, emscripten::val getTargetMesh,
       }
     }
 
-    std::cout << "QQ/ClipSurfaceMeshes/2" << std::endl;
     for (size_t nth_source = 0; nth_source < source_count; nth_source++) {
       const Surface_mesh* source_mesh =
           getSourceMesh(nth_source)
               .as<const Surface_mesh*>(emscripten::allow_raw_pointers());
-      std::cout << "QQ/ClipSurfaceMeshes/2/1" << std::endl;
       if (CGAL::is_empty(*source_mesh)) {
         continue;
       }
-      std::cout << "QQ/ClipSurfaceMeshes/2/2" << std::endl;
       const Transformation* source_transform =
           getSourceTransform(nth_source)
               .as<const Transformation*>(emscripten::allow_raw_pointers());
-      std::cout << "QQ/ClipSurfaceMeshes/2/3" << std::endl;
       for (size_t nth_target = 0; nth_target < target_count; nth_target++) {
-        std::cout << "QQ/ClipSurfaceMeshes/2/4" << std::endl;
         Surface_mesh& working_target_mesh = working_target_meshes[nth_target];
         Surface_mesh& clipped_target_mesh = *clipped_target_meshes[nth_target];
         General_polygon_set_2& working_target_polygon_set =
@@ -2614,18 +2606,14 @@ int ClipSurfaceMeshes(size_t target_count, emscripten::val getTargetMesh,
         General_polygon_set_2& clipped_target_polygon_set =
             clipped_target_polygon_sets[nth_target];
         // Work with the source mesh in the frame of the target.
-        std::cout << "QQ/ClipSurfaceMeshes/2/5" << std::endl;
         Surface_mesh working_source_mesh(*source_mesh);
         CGAL::Polygon_mesh_processing::transform(
             to_target_transforms[nth_target] * *source_transform,
             working_source_mesh, CGAL::parameters::all_default());
         Plane plane;
-        std::cout << "QQ/ClipSurfaceMeshes/2/6" << std::endl;
         if (IsPlanarSurfaceMesh(plane, working_source_mesh)) {
-          std::cout << "QQ/ClipSurfaceMeshes/2/7" << std::endl;
           // Planar clipped by planar.
           if (IsCoplanarSurfaceMesh(plane, working_target_mesh)) {
-            std::cout << "QQ/ClipSurfaceMeshes/2/8" << std::endl;
             General_polygon_set_2 clip_set;
             // We need to use the target plane so that the polygon sets agree on
             // scale.
@@ -2635,7 +2623,6 @@ int ClipSurfaceMeshes(size_t target_count, emscripten::val getTargetMesh,
             clipped_target_polygon_set.join(clip_set);
           }
         } else if (is_planar[nth_target]) {
-          std::cout << "QQ/ClipSurfaceMeshes/2/9" << std::endl;
           // Planar clipped by planar.
           General_polygon_set_2 clip_set;
           SurfaceMeshSectionToPolygonSet(target_planes[nth_target],
@@ -2643,14 +2630,12 @@ int ClipSurfaceMeshes(size_t target_count, emscripten::val getTargetMesh,
           clip_set.intersection(working_target_polygon_set);
           clipped_target_polygon_set.join(clip_set);
         } else {
-          std::cout << "QQ/ClipSurfaceMeshes/2/10" << std::endl;
           // Volume clipped by volume.
           if (!CGAL::is_closed(working_source_mesh) ||
               CGAL::is_empty(working_target_mesh) ||
               CGAL::is_empty(working_source_mesh)) {
             continue;
           }
-          std::cout << "QQ/ClipSurfaceMeshes/2/11" << std::endl;
           // Construct a shared clipping volume.
           if (CGAL::Polygon_mesh_processing::do_intersect(
                   working_target_mesh, working_source_mesh,
@@ -2658,49 +2643,29 @@ int ClipSurfaceMeshes(size_t target_count, emscripten::val getTargetMesh,
                       do_overlap_test_of_bounded_sides(true),
                   CGAL::Polygon_mesh_processing::parameters::
                       do_overlap_test_of_bounded_sides(true))) {
-            std::cout << "QQ/ClipSurfaceMeshes/2/12" << std::endl;
             Surface_mesh clip_mesh;
-            if (CGAL::Polygon_mesh_processing::does_self_intersect(
-                    working_target_mesh)) {
-              std::cout
-                  << "QQ/ClipSurfaceMeshes/2/12/self-intersect/working_target"
-                  << std::endl;
-            }
-            if (CGAL::Polygon_mesh_processing::does_self_intersect(
-                    working_source_mesh)) {
-              std::cout << "QQ/ClipSurfaceMeshes/2/12/self-intersect/"
-                           "working_source_mesh"
-                        << std::endl;
-            }
             if (!CGAL::Polygon_mesh_processing::
                     corefine_and_compute_intersection(
                         working_target_mesh, working_source_mesh, clip_mesh,
                         CGAL::parameters::all_default(),
                         CGAL::parameters::all_default(),
                         CGAL::parameters::all_default())) {
-              std::cout << "QQ/ClipSurfaceMeshes/2/13" << std::endl;
               return STATUS_ZERO_THICKNESS;
             }
-            std::cout << "QQ/ClipSurfaceMeshes/2/14" << std::endl;
             if (!CGAL::Polygon_mesh_processing::corefine_and_compute_union(
                     clipped_target_mesh, clip_mesh, clipped_target_mesh,
                     CGAL::parameters::all_default(),
                     CGAL::parameters::all_default(),
                     CGAL::parameters::all_default())) {
-              std::cout << "QQ/ClipSurfaceMeshes/2/15" << std::endl;
               return STATUS_ZERO_THICKNESS;
             }
           } else {
-            std::cout << "QQ/ClipSurfaceMeshes/2/16" << std::endl;
             clipped_target_mesh.clear();
           }
         }
-        std::cout << "QQ/ClipSurfaceMeshes/2/17" << std::endl;
       }
-      std::cout << "QQ/ClipSurfaceMeshes/2/18" << std::endl;
     }
 
-    std::cout << "QQ/ClipSurfaceMeshes/3" << std::endl;
     // Fold in the planar results.
     for (size_t nth_target = 0; nth_target < target_count; nth_target++) {
       Surface_mesh& clipped_target_mesh = *clipped_target_meshes[nth_target];
@@ -2717,7 +2682,6 @@ int ClipSurfaceMeshes(size_t target_count, emscripten::val getTargetMesh,
 
     // From this point we are committed.
 
-    std::cout << "QQ/ClipSurfaceMeshes/4" << std::endl;
     // Handle segments.
     {
       std::vector<SurfaceMeshQuery> queries;
@@ -2741,19 +2705,13 @@ int ClipSurfaceMeshes(size_t target_count, emscripten::val getTargetMesh,
       }
     }
 
-    std::cout << "QQ/ClipSurfaceMeshes/5" << std::endl;
     for (size_t nth_target = 0; nth_target < target_count; nth_target++) {
       const Surface_mesh* clipped_target_mesh =
           clipped_target_meshes[nth_target].release();
       emit_mesh(nth_target, clipped_target_mesh);
     }
 
-    std::cout << "QQ/ClipSurfaceMeshes/6" << std::endl;
     return STATUS_OK;
-  } catch (const std::exception& e) {
-    std::cout << "Exception: " << e.what() << std::endl;
-    throw;
-  }
 }
 
 int ParallelCutSurfaceMeshes(size_t target_count, emscripten::val getTargetMesh,
