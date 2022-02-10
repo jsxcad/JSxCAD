@@ -4,6 +4,7 @@ import {
   concatenatePath,
   flip,
   fromPolygonsToGraph,
+  getPathEdges,
   openPath,
   rewriteTags,
   taggedGraph,
@@ -183,9 +184,15 @@ Shape.fromOpenPath = (path, context) =>
   fromGeometry(taggedPaths({}, [openPath(path)]), context);
 Shape.fromSegments = (segments) => fromGeometry(taggedSegments({}, segments));
 Shape.fromPath = (path, context) =>
-  fromGeometry(taggedPaths({}, [path]), context);
+  fromGeometry(taggedSegments({}, getPathEdges(path)), context);
 Shape.fromPaths = (paths, context) =>
-  fromGeometry(taggedPaths({}, paths), context);
+  fromGeometry(
+    taggedPaths(
+      {},
+      paths.flatMap((path) => getPathEdges(path))
+    ),
+    context
+  );
 Shape.fromPoint = (point, context) =>
   fromGeometry(taggedPoints({}, [point]), context);
 Shape.fromPoints = (points, context) =>

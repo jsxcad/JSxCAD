@@ -1935,6 +1935,13 @@ const computeToolpath = (
     subCandidateLimit = 1,
   }
 ) => {
+  const startTime = new Date();
+  let lastTime = startTime;
+  const time = (msg) => {
+    const now = new Date();
+    console.log(`${msg}: ${((now - startTime) / 1000).toFixed(2)} ${((now - lastTime) / 1000).toFixed(2)}`);
+    lastTime = now;
+  };
   const toolRadius = toolDiameter / 2;
 
   {
@@ -1999,12 +2006,14 @@ const computeToolpath = (
       }
       release();
     }
+    time('QQ/computeToolpath/Surfaces');
 
     // Profiles
     for (const [start, end] of toSegments(outline(insetArea)).segments) {
       points.push({ start: start, end: { end: end, type: 'required' } });
       points.push({ start: end });
     }
+    time('QQ/computeToolpath/Profiles');
 
     // Grooves
     // FIX: These should be sectioned segments.
@@ -2014,6 +2023,7 @@ const computeToolpath = (
         points.push({ start: end });
       }
     }
+    time('QQ/computeToolpath/Grooves');
 
     const compareCoord = (a, b) => {
       const dX = a[X$1] - b[X$1];
@@ -2047,6 +2057,7 @@ const computeToolpath = (
       }
       points = consolidated;
     }
+    time('QQ/computeToolpath/Fold');
 
     const pointByHash = new Map();
 
@@ -2064,15 +2075,12 @@ const computeToolpath = (
       (p) => p.start[X$1],
       (p) => p.start[Y$1]
     );
+    time('QQ/computeToolpath/Index');
 
     const jump = (toolpath, from, to) =>
       toolpath.push({ op: 'jump', from: from, to: to });
 
     const cut = (toolpath, from, to) => toolpath.push({ op: 'cut', from, to });
-
-    // While the cost gradient is negative, we will follow the best candidate.
-    // A positive cost gradient will induce backtracking up to that far back in history.
-    // New candidates will displace the oldest candidates once the limit is reached.
 
     const considerTargetPoint = (candidates, fulfilled, candidate, target) => {
       if (fulfilled.has(computeHash(target.start))) {
@@ -2218,23 +2226,11 @@ const computeToolpath = (
       }
     };
 
-    const candidates = [
-      { at: { start: [0, 0, 0], ends: [] }, toolpath: [], cost: 0, length: 0 },
-    ];
+    let candidate = { at: { start: [0, 0, 0], ends: [] }, toolpath: [], cost: 0, length: 0 };
     const fulfilled = new Set();
     for (;;) {
-      candidates.sort((a, b) => b.cost - a.cost);
-      const candidate = candidates.pop();
-      while (candidates.length > candidateLimit) {
-        candidates.shift();
-      }
-      fulfilled.clear();
-      for (let node = candidate; node; node = node.last) {
-        if (node.fulfills) {
-          for (const hash of node.fulfills) {
-            fulfilled.add(hash);
-          }
-        }
+      if (candidate.length % 10000 === 0) {
+        time(`QQ/computeToolpath/Candidate/${candidate.length}`);
       }
       const nextCandidates = [];
       try {
@@ -2276,8 +2272,8 @@ const computeToolpath = (
         console.log(error.stack);
         throw error;
       }
-      if (candidates.length === 0 && nextCandidates.length === 0) {
-        console.log(`QQ/completed`);
+      if (nextCandidates.length === 0) {
+        time('QQ/computeToolpath/Candidate/completed');
         // We have computed a total toolpath.
         // Note that we include the imaginary seed point.
         const history = [];
@@ -2288,17 +2284,16 @@ const computeToolpath = (
         while (history.length > 0) {
           toolpath.push(...history.pop());
         }
+        time('QQ/computeToolpath/Candidate/toolpath');
         return taggedToolpath({}, toolpath);
       }
-      if (candidate.length % 100 === 0) {
-        console.log(`QQ/candidate.length: ${candidate.length}`);
-      }
       nextCandidates.sort((a, b) => b.cost - a.cost);
-      candidates.push(
-        ...nextCandidates.slice(
-          Math.max(0, nextCandidates.length - subCandidateLimit)
-        )
-      );
+      candidate = nextCandidates[0];
+      if (candidate.fulfills) {
+        for (const hash of candidate.fulfills) {
+          fulfilled.add(hash);
+        }
+      }
     }
   }
 };

@@ -31,6 +31,8 @@ export const toolpath =
     const jumpEnds = [];
     const cutEnds = [];
     const jumps = [];
+    // console.log(JSON.stringify(shape));
+    // console.log(JSON.stringify(toolpath));
     for (const { op, from, to } of toolpath.toolpath) {
       switch (op) {
         case 'cut':
