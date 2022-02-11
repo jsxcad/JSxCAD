@@ -8,6 +8,8 @@ import {
 import KdBush from 'kdbush';
 import { computeHash } from '@jsxcad/sys';
 import { fuse } from './fuse.js';
+import { getEdges } from '../path/getEdges.js';
+import { getNonVoidPaths } from './getNonVoidPaths.js';
 import { getNonVoidSegments } from './getNonVoidSegments.js';
 import { getQuery } from '../graph/getQuery.js';
 import { identityMatrix } from '@jsxcad/math-mat4';
@@ -126,6 +128,14 @@ export const computeToolpath = (
       for (const [start, end] of segments) {
         points.push({ start, end: { end, type: 'required' } });
         points.push({ start: end, note: 'groove end' });
+      }
+    }
+    for (const { paths } of getNonVoidPaths(concreteGeometry)) {
+      for (const path of paths) {
+        for (const [start, end] of getEdges(path)) {
+          points.push({ start, end: { end, type: 'required' } });
+          points.push({ start: end, note: 'groove end' });
+        }
       }
     }
     time('QQ/computeToolpath/Grooves');

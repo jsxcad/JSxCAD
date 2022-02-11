@@ -511,7 +511,7 @@ Box(20, 20, 20)
 ![Image](shape.md.59.png)
 
 ```JavaScript
-const q = Box(20, 20, 20)
+Box(20, 20, 20)
   .join(Box(10, 10, 40))
   .join(Orb(4).hasSides(4).z(24))
   .rx(1 / 16)
