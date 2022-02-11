@@ -1515,6 +1515,24 @@ const fuse = (geometries) => {
   }
 };
 
+const getEdges = (path) => {
+  const edges = [];
+  let last = null;
+  for (const point of path) {
+    if (point === null) {
+      continue;
+    }
+    if (last !== null) {
+      edges.push([last, point]);
+    }
+    last = point;
+  }
+  if (path[0] !== null) {
+    edges.push([last, path[0]]);
+  }
+  return edges;
+};
+
 const eachNonVoidItem = (geometry, op) => {
   const walk = (geometry, descend) => {
     // FIX: Sketches aren't real either -- but this is a bit unclear.
@@ -1524,6 +1542,16 @@ const eachNonVoidItem = (geometry, op) => {
     }
   };
   visit(geometry, walk);
+};
+
+const getNonVoidPaths = (geometry) => {
+  const pathsets = [];
+  eachNonVoidItem(geometry, (item) => {
+    if (item.type === 'paths') {
+      pathsets.push(item);
+    }
+  });
+  return pathsets;
 };
 
 const getNonVoidSegments = (geometry) => {
@@ -1935,6 +1963,18 @@ const computeToolpath = (
     subCandidateLimit = 1,
   }
 ) => {
+  const startTime = new Date();
+  let lastTime = startTime;
+  const time = (msg) => {
+    const now = new Date();
+    console.log(
+      `${msg}: ${((now - startTime) / 1000).toFixed(2)} ${(
+        (now - lastTime) /
+        1000
+      ).toFixed(2)}`
+    );
+    lastTime = now;
+  };
   const toolRadius = toolDiameter / 2;
 
   {
@@ -1999,21 +2039,32 @@ const computeToolpath = (
       }
       release();
     }
+    time('QQ/computeToolpath/Surfaces');
 
     // Profiles
     for (const [start, end] of toSegments(outline(insetArea)).segments) {
       points.push({ start: start, end: { end: end, type: 'required' } });
-      points.push({ start: end });
+      points.push({ start: end, note: 'segment end' });
     }
+    time('QQ/computeToolpath/Profiles');
 
     // Grooves
     // FIX: These should be sectioned segments.
     for (const { segments } of getNonVoidSegments(concreteGeometry)) {
       for (const [start, end] of segments) {
         points.push({ start, end: { end, type: 'required' } });
-        points.push({ start: end });
+        points.push({ start: end, note: 'groove end' });
       }
     }
+    for (const { paths } of getNonVoidPaths(concreteGeometry)) {
+      for (const path of paths) {
+        for (const [start, end] of getEdges(path)) {
+          points.push({ start, end: { end, type: 'required' } });
+          points.push({ start: end, note: 'groove end' });
+        }
+      }
+    }
+    time('QQ/computeToolpath/Grooves');
 
     const compareCoord = (a, b) => {
       const dX = a[X$1] - b[X$1];
@@ -2033,20 +2084,43 @@ const computeToolpath = (
       for (const point of points) {
         if (last === undefined || !equals(last.start, point.start)) {
           last = point;
-          last.ends = [];
+          if (last.end) {
+            last.ends = [last.end];
+            delete last.end;
+          }
           consolidated.push(point);
+          continue;
         } else {
           if (point.isFill) {
             last.isFill = true;
           }
         }
         if (point.end) {
+          if (!last.ends) {
+            last.ends = [];
+          }
           last.ends.push(point.end);
           delete point.end;
         }
+        if (point.fillNeighbors) {
+          if (!last.fillNeighbors) {
+            last.fillNeighbors = [];
+          }
+          last.fillNeighbors.push(...point.fillNeighbors);
+        }
       }
       points = consolidated;
+      for (const point of points) {
+        if (
+          !point.ends &&
+          !point.fillNeighbors &&
+          point.note !== 'groove end'
+        ) {
+          throw Error(`Lonely consolidated point: ${JSON.stringify(point)}`);
+        }
+      }
     }
+    time('QQ/computeToolpath/Fold');
 
     const pointByHash = new Map();
 
@@ -2064,19 +2138,22 @@ const computeToolpath = (
       (p) => p.start[X$1],
       (p) => p.start[Y$1]
     );
+    time('QQ/computeToolpath/Index');
 
     const jump = (toolpath, from, to) =>
       toolpath.push({ op: 'jump', from: from, to: to });
 
     const cut = (toolpath, from, to) => toolpath.push({ op: 'cut', from, to });
 
-    // While the cost gradient is negative, we will follow the best candidate.
-    // A positive cost gradient will induce backtracking up to that far back in history.
-    // New candidates will displace the oldest candidates once the limit is reached.
-
     const considerTargetPoint = (candidates, fulfilled, candidate, target) => {
       if (fulfilled.has(computeHash(target.start))) {
         // This target is already fulfilled.
+        return;
+      }
+
+      if (!target.ends && !target.fillNeighbors) {
+        // This target was already fulfilled, make a note of it.
+        fulfilled.add(computeHash(target.start));
         return;
       }
 
@@ -2218,66 +2295,74 @@ const computeToolpath = (
       }
     };
 
-    const candidates = [
-      { at: { start: [0, 0, 0], ends: [] }, toolpath: [], cost: 0, length: 0 },
-    ];
+    let candidate = {
+      at: { start: [0, 0, 0], ends: [] },
+      toolpath: [],
+      cost: 0,
+      length: 0,
+    };
     const fulfilled = new Set();
     for (;;) {
-      candidates.sort((a, b) => b.cost - a.cost);
-      const candidate = candidates.pop();
-      while (candidates.length > candidateLimit) {
-        candidates.shift();
-      }
-      fulfilled.clear();
-      for (let node = candidate; node; node = node.last) {
-        if (node.fulfills) {
-          for (const hash of node.fulfills) {
-            fulfilled.add(hash);
-          }
-        }
+      if (candidate.length % 1000 === 0) {
+        time(`QQ/computeToolpath/Candidate/${candidate.length}`);
       }
       const nextCandidates = [];
+      let nextCandidatesConsidered = 0;
       try {
-        for (const end of candidate.at.ends) {
-          const foundPoint = pointByHash.get(computeHash(end.end));
-          if (!foundPoint) {
-            throw Error(`Cannot find end point ${JSON.stringify(end.end)}`);
-          }
-          // This is a bit silly -- why aren't we communicating the edge more directly?
-          considerTargetEdge(
-            nextCandidates,
-            fulfilled,
-            candidate,
-            foundPoint,
-            end
-          );
-        }
-        const [x, y] = candidate.at.start;
-        for (let range = 2; range < Infinity; range *= 2) {
-          const destinations = kd.within(x, y, range);
-          for (const destination of destinations) {
-            const point = points[destination];
-            if (point === candidate.at) {
-              continue;
+        if (nextCandidates.length < subCandidateLimit && candidate.at.ends) {
+          for (const end of candidate.at.ends) {
+            const foundPoint = pointByHash.get(computeHash(end.end));
+            if (!foundPoint) {
+              throw Error(`Cannot find end point ${JSON.stringify(end.end)}`);
             }
+            // This is a bit silly -- why aren't we communicating the edge more directly?
+            considerTargetEdge(
+              nextCandidates,
+              fulfilled,
+              candidate,
+              foundPoint,
+              end
+            );
+          }
+        }
+        if (
+          nextCandidates.length < subCandidateLimit &&
+          candidate.at.fillNeighbors
+        ) {
+          for (const point of candidate.at.fillNeighbors) {
             considerTargetPoint(nextCandidates, fulfilled, candidate, point);
           }
-          if (
-            nextCandidates.length >= subCandidateLimit ||
-            destinations.length >= points.length
-          ) {
-            break;
-          }
-          if (range > 2) {
-            console.log(`QQ/range: ${range}`);
+        }
+        if (nextCandidates.length < subCandidateLimit) {
+          // From this point they're really jumps.
+          const [x, y] = candidate.at.start;
+          for (let range = 2; range < Infinity; range *= 2) {
+            const destinations = kd.within(x, y, range);
+            for (const destination of destinations) {
+              nextCandidatesConsidered += 1;
+              const point = points[destination];
+              if (point === candidate.at) {
+                continue;
+              }
+              considerTargetPoint(nextCandidates, fulfilled, candidate, point);
+            }
+            if (
+              nextCandidates.length >= subCandidateLimit ||
+              destinations.length >= points.length
+            ) {
+              break;
+            }
+            if (range > 4) {
+              console.log(`QQ/range: ${range}`);
+            }
           }
         }
       } catch (error) {
         console.log(error.stack);
         throw error;
       }
-      if (candidates.length === 0 && nextCandidates.length === 0) {
-        console.log(`QQ/completed`);
+      if (nextCandidates.length === 0) {
+        time('QQ/computeToolpath/Candidate/completed');
         // We have computed a total toolpath.
         // Note that we include the imaginary seed point.
         const history = [];
@@ -2290,15 +2375,13 @@ const computeToolpath = (
         }
         return taggedToolpath({}, toolpath);
       }
-      if (candidate.length % 100 === 0) {
-        console.log(`QQ/candidate.length: ${candidate.length}`);
+      nextCandidates.sort((a, b) => a.cost - b.cost);
+      candidate = nextCandidates[0];
+      if (candidate.fulfills) {
+        for (const hash of candidate.fulfills) {
+          fulfilled.add(hash);
+        }
       }
-      nextCandidates.sort((a, b) => b.cost - a.cost);
-      candidates.push(
-        ...nextCandidates.slice(
-          Math.max(0, nextCandidates.length - subCandidateLimit)
-        )
-      );
     }
   }
 };
@@ -2866,16 +2949,6 @@ const getNonVoidItems = (geometry) => {
   return items;
 };
 
-const getNonVoidPaths = (geometry) => {
-  const pathsets = [];
-  eachNonVoidItem(geometry, (item) => {
-    if (item.type === 'paths') {
-      pathsets.push(item);
-    }
-  });
-  return pathsets;
-};
-
 const getNonVoidFaceablePaths = (geometry) => {
   const pathsets = [];
   eachNonVoidItem(geometry, (item) => {
@@ -2942,24 +3015,6 @@ const getPaths = (geometry) => {
     }
   });
   return pathsets;
-};
-
-const getEdges = (path) => {
-  const edges = [];
-  let last = null;
-  for (const point of path) {
-    if (point === null) {
-      continue;
-    }
-    if (last !== null) {
-      edges.push([last, point]);
-    }
-    last = point;
-  }
-  if (path[0] !== null) {
-    edges.push([last, path[0]]);
-  }
-  return edges;
 };
 
 /**
