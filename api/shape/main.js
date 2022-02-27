@@ -292,6 +292,7 @@ export { inset } from './inset.js';
 export { keep } from './keep.js';
 export { loadGeometry } from './loadGeometry.js';
 export { loft } from './loft.js';
+export { loft2 } from './loft2.js';
 export { log } from './log.js';
 export { loop } from './loop.js';
 export { overlay } from './overlay.js';

@@ -402,3 +402,9 @@ Group(Box(1), Box(1).rx(1 / 4))
 ```
 
 ![Image](shapes.md.34.png)
+
+```JavaScript
+Triangle(6).loft2(Octagon(4).rz(1 / 32).z(3)).view();
+```
+
+![Image](shapes.md.35.png)

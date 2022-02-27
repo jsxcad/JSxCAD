@@ -72,6 +72,7 @@ export { insetOfPolygonWithHoles } from './insetOfPolygonWithHoles.js';
 export { isotropicRemeshingOfSurfaceMesh } from './isotropicRemeshingOfSurfaceMesh.js';
 export { joinSurfaceMeshes } from './joinSurfaceMeshes.js';
 export { loftBetweenCongruentSurfaceMeshes } from './loftBetweenCongruentSurfaceMeshes.js';
+export { loftBetweenSurfaceMeshes } from './loftBetweenSurfaceMeshes.js';
 export { offsetOfPolygonWithHoles } from './offsetOfPolygonWithHoles.js';
 export { outlineSurfaceMesh } from './outlineSurfaceMesh.js';
 export { minkowskiDifferenceOfSurfaceMeshes } from './minkowskiDifferenceOfSurfaceMeshes.js';
