@@ -1078,8 +1078,7 @@ const Surface_mesh* ReverseFaceOrientationsOfSurfaceMesh(
   Surface_mesh* mesh = new Surface_mesh(*input);
   CGAL::Polygon_mesh_processing::transform(*transformation, *mesh,
                                            CGAL::parameters::all_default());
-  CGAL::Polygon_mesh_processing::reverse_face_orientations(mesh->faces(),
-                                                           *mesh);
+  CGAL::Polygon_mesh_processing::reverse_face_orientations(*mesh);
   return mesh;
 }
 
@@ -1911,6 +1910,40 @@ const Surface_mesh* LoftBetweenCongruentSurfaceMeshes(bool closed,
   return loft;
 }
 
+bool findClosestPointOnSegment(const Point& point, const Segment& segment,
+                               Point& result) {
+  Vector heading = segment.target() - segment.source();
+  FT length2 = heading.squared_length();
+  // This is imprecise, but will be precisely on the segment.
+  // Vector unit_heading = heading / length;
+  // Do projection from the point but clamp it
+  Vector lhs = point - segment.source();
+  FT t = (lhs * heading) / length2;
+  if (t < 0) {
+    result = segment.source();
+    return false;
+  }
+  if (t > 1) {
+    result = segment.target();
+    return false;
+  }
+  result = segment.source() + (heading * t);
+  return true;
+};
+
+Segment& findLargestSegment(std::vector<Segment>& segments) {
+  Segment* largest_segment = nullptr;
+  FT largest_length2 = 0;
+  for (Segment& segment : segments) {
+    FT length2 = (segment.source() - segment.target()).squared_length();
+    if (largest_segment == nullptr || length2 > largest_length2) {
+      largest_segment = &segment;
+      largest_length2 = length2;
+    }
+  }
+  return *largest_segment;
+}
+
 void SeparateSurfaceMesh(const Surface_mesh* input, bool keep_shapes,
                          bool keep_holes_in_shapes, bool keep_holes_as_shapes,
                          emscripten::val emit_mesh) {
@@ -2334,8 +2367,9 @@ void convertArrangementToPolygonsWithHoles(
   }
 }
 
-void PlanarSurfaceMeshToPolygonSet(const Plane& plane, const Surface_mesh& mesh,
-                                   General_polygon_set_2& set) {
+void PlanarSurfaceMeshToPolygonsWithHoles(
+    const Plane& plane, const Surface_mesh& mesh,
+    std::vector<Polygon_with_holes_2>& polygons) {
   typedef CGAL::Arr_segment_traits_2<Kernel> Traits_2;
   typedef Traits_2::X_monotone_curve_2 Segment_2;
   typedef CGAL::Arrangement_2<Traits_2> Arrangement_2;
@@ -2354,9 +2388,13 @@ void PlanarSurfaceMeshToPolygonSet(const Plane& plane, const Surface_mesh& mesh,
         plane.to_2d(mesh.point(mesh.target(mesh.halfedge(edge))))};
     insert(arrangement, segment);
   }
-
-  std::vector<Polygon_with_holes_2> polygons;
   convertArrangementToPolygonsWithHoles(arrangement, polygons);
+}
+
+void PlanarSurfaceMeshToPolygonSet(const Plane& plane, const Surface_mesh& mesh,
+                                   General_polygon_set_2& set) {
+  std::vector<Polygon_with_holes_2> polygons;
+  PlanarSurfaceMeshToPolygonsWithHoles(plane, mesh, polygons);
   for (const auto& polygon : polygons) {
     set.join(polygon);
   }
@@ -2477,6 +2515,235 @@ void UnionOfCoplanarSurfaceMeshes(const Plane& plane, const Surface_mesh* a,
   PlanarSurfaceMeshToPolygonSet(plane, *b, add);
   set.join(add);
   GeneralPolygonSetToSurfaceMesh(plane, set, result);
+}
+
+void findClosestIndicesBetweenPolygon2s(const Polygon_2 as,
+                                        size_t& shortest_a_index,
+                                        const Polygon_2 bs,
+                                        size_t& shortest_b_index) {
+  FT shortest_length2 = 1000000;
+  for (size_t a_index = 0; a_index < as.size(); a_index++) {
+    for (size_t b_index = 0; b_index < bs.size(); b_index++) {
+      FT length2 = (as[a_index] - bs[b_index]).squared_length();
+      if (length2 < shortest_length2) {
+        shortest_a_index = a_index;
+        shortest_b_index = b_index;
+        shortest_length2 = length2;
+      }
+    }
+  }
+}
+
+void findClosestIndicesBetweenSamples(
+    const std::vector<std::vector<Point_2>>& as, size_t& shortest_a_index,
+    const std::vector<std::vector<Point_2>>& bs, size_t& shortest_b_index) {
+  FT shortest_length2 = 1000000;
+  for (size_t a_index = 0; a_index < as.size(); a_index++) {
+    for (size_t b_index = 0; b_index < bs.size(); b_index++) {
+      FT length2 = (as[a_index][0] - bs[b_index][0]).squared_length();
+      if (length2 < shortest_length2) {
+        shortest_a_index = a_index;
+        shortest_b_index = b_index;
+        shortest_length2 = length2;
+      }
+    }
+  }
+}
+
+double measurePerimeterOfPolygon2(
+    const Polygon_2& polygon,
+    std::map<double, Point_2>& position_on_perimeter) {
+  double traveled = 0;
+  for (auto position = polygon.begin(); position != polygon.end(); ++position) {
+    position_on_perimeter[traveled] = *position;
+    auto next = position + 1;
+    if (next == polygon.end()) {
+      next = polygon.begin();
+    }
+    FT length2 = (*next - *position).squared_length();
+    double length = CGAL::sqrt(CGAL::to_double(length2));
+    traveled += length;
+  }
+  return traveled;
+}
+
+bool pointOnPerimeterPosition(const Polygon_2& polygon, double perimeter_length,
+                              double fraction, Point_2& point) {
+  const double eps = 0.001;
+  double traveled = 0;
+  double target = fraction * perimeter_length;
+  for (;;) {
+    for (auto position = polygon.begin(); position != polygon.end();
+         ++position) {
+      auto next = position + 1;
+      if (next == polygon.end()) {
+        next = polygon.begin();
+      }
+      Vector_2 heading = (*next - *position);
+      FT length2 = heading.squared_length();
+      double length = CGAL::sqrt(CGAL::to_double(length2));
+      if (target < traveled + length + eps) {
+        Vector_2 unit_heading = heading / length;
+        // Interpolate the point into this segment.
+        point = *position + unit_heading * (target - traveled);
+        return true;
+      }
+      traveled += length;
+    }
+  }
+  return false;
+}
+
+// Unfortunately fmod computes remainder, not modulus.
+double modulus(double x, double y) { return x - y * floor(x / y); }
+
+void LoftBetweenSurfaceMeshes(const Surface_mesh* input_a,
+                              const Transformation* transform_a,
+                              const Surface_mesh* input_b,
+                              const Transformation* transform_b,
+                              emscripten::val emit_mesh) {
+  Surface_mesh mesh_a(*input_a);
+  CGAL::Polygon_mesh_processing::transform(*transform_a, mesh_a,
+                                           CGAL::parameters::all_default());
+  Plane plane_a;
+  if (!IsPlanarSurfaceMesh(plane_a, mesh_a)) {
+    return;
+  }
+  plane_a = unitPlane(plane_a);
+  std::vector<Polygon_with_holes_2> polygons_a;
+  PlanarSurfaceMeshToPolygonsWithHoles(plane_a, mesh_a, polygons_a);
+  Polygon_2& polygon_a = polygons_a[0].outer_boundary();
+
+  Surface_mesh mesh_b(*input_b);
+  CGAL::Polygon_mesh_processing::transform(*transform_b, mesh_b,
+                                           CGAL::parameters::all_default());
+  Plane plane_b;
+  if (!IsPlanarSurfaceMesh(plane_b, mesh_b)) {
+    return;
+  }
+  plane_b = unitPlane(plane_b);
+  std::vector<Polygon_with_holes_2> polygons_b;
+  PlanarSurfaceMeshToPolygonsWithHoles(plane_b, mesh_b, polygons_b);
+  Polygon_2& polygon_b = polygons_b[0].outer_boundary();
+
+  std::map<double, Point_2> perimeter_a;
+  double perimeter_length_a =
+      measurePerimeterOfPolygon2(polygon_a, perimeter_a);
+
+  std::map<double, Point_2> perimeter_b;
+  double perimeter_length_b =
+      measurePerimeterOfPolygon2(polygon_b, perimeter_b);
+
+  double start_a_fraction = 0;
+  double start_b_fraction = 0;
+
+  if (true) {
+    // Pick a well aligned starting point.
+    FT best_distance2 = 100000000;
+    for (double t = 0; t < 1; t += 0.01) {
+      Point_2 projected;
+      if (pointOnPerimeterPosition(polygon_b, perimeter_length_b, t,
+                                   projected)) {
+        FT distance2 = (projected - polygon_a[0]).squared_length();
+        if (distance2 < best_distance2) {
+          start_b_fraction = t;
+          best_distance2 = distance2;
+        }
+      }
+    }
+  }
+
+  std::vector<double> joints;
+
+  for (auto& entry : perimeter_a) {
+    double fraction =
+        modulus(entry.first / perimeter_length_a - start_a_fraction, 1);
+    joints.push_back(fraction);
+  }
+
+  for (auto& entry : perimeter_b) {
+    double fraction =
+        modulus(entry.first / perimeter_length_b - start_b_fraction, 1);
+    joints.push_back(fraction);
+  }
+
+  std::sort(joints.begin(), joints.end());
+  joints.erase(std::unique(joints.begin(), joints.end()), joints.end());
+
+  std::vector<std::pair<Point, Point>> segments;
+
+  for (double joint : joints) {
+    Point_2 point_a;
+    Point_2 point_b;
+    if (pointOnPerimeterPosition(polygon_a, perimeter_length_a,
+                                 modulus(joint + start_a_fraction, 1),
+                                 point_a) &&
+        pointOnPerimeterPosition(polygon_b, perimeter_length_b,
+                                 modulus(joint + start_b_fraction, 1),
+                                 point_b)) {
+      segments.emplace_back(plane_a.to_3d(point_a), plane_b.to_3d(point_b));
+    }
+  }
+
+  std::vector<Point> points;
+  std::vector<std::vector<size_t>> polygons;
+
+  std::vector<std::size_t> bottom_a;
+  std::vector<std::size_t> top_b;
+
+  for (auto last_segment = segments.end() - 1, segment = segments.begin();
+       segment != segments.end(); last_segment = segment++) {
+    const Point a = segment->first;
+    const Point b = segment->second;
+    const Point c = last_segment->second;
+    const Point d = last_segment->first;
+
+    FT x = a.x() + b.x() + c.x() + d.x();
+    FT y = a.y() + b.y() + c.y() + d.y();
+    FT z = a.z() + b.z() + c.z() + d.z();
+
+    const Point m(x / 4, y / 4, z / 4);
+
+    std::size_t av = points.size();
+    points.push_back(a);
+
+    std::size_t bv = points.size();
+    points.push_back(b);
+
+    std::size_t cv = points.size();
+    points.push_back(c);
+
+    std::size_t dv = points.size();
+    points.push_back(d);
+
+    std::size_t mv = points.size();
+    points.push_back(m);
+
+    // Emit the quad as four triangles meeting in the center.
+    polygons.emplace_back(std::vector<size_t>{av, bv, mv});
+    polygons.emplace_back(std::vector<size_t>{bv, cv, mv});
+    polygons.emplace_back(std::vector<size_t>{cv, dv, mv});
+    polygons.emplace_back(std::vector<size_t>{dv, av, mv});
+
+    bottom_a.push_back(av);
+    top_b.push_back(bv);
+  }
+
+  std::reverse(bottom_a.begin(), bottom_a.end());
+  polygons.push_back(std::move(bottom_a));
+  polygons.push_back(std::move(top_b));
+
+  CGAL::Polygon_mesh_processing::repair_polygon_soup(points, polygons);
+  CGAL::Polygon_mesh_processing::orient_polygon_soup(points, polygons);
+  Surface_mesh* lofted_mesh = new Surface_mesh();
+  CGAL::Polygon_mesh_processing::polygon_soup_to_polygon_mesh(points, polygons,
+                                                              *lofted_mesh);
+  assert(CGAL::Polygon_mesh_processing::triangulate_faces(*lofted_mesh) ==
+         true);
+  if (!CGAL::is_closed(*lofted_mesh)) {
+    std::cout << "Loft is not closed" << std::endl;
+  }
+  emit_mesh(lofted_mesh);
 }
 
 void IntersectionOfCoplanarSurfaceMeshes(const Plane& plane,
@@ -3306,7 +3573,7 @@ int DisjointSurfaceMeshesIncrementally(int meshCount, emscripten::val nthMesh,
           // to planar surfaces)
           Surface_mesh inverse_mask(*volume_mask);
           CGAL::Polygon_mesh_processing::reverse_face_orientations(
-              inverse_mask.faces(), inverse_mask);
+              inverse_mask);
           CGAL::Polygon_mesh_processing::clip(*result, inverse_mask,
                                               CGAL::parameters::all_default(),
                                               CGAL::parameters::all_default());
@@ -5530,6 +5797,8 @@ EMSCRIPTEN_BINDINGS(module) {
                        emscripten::allow_raw_pointers());
   emscripten::function("LoftBetweenCongruentSurfaceMeshes",
                        &LoftBetweenCongruentSurfaceMeshes,
+                       emscripten::allow_raw_pointers());
+  emscripten::function("LoftBetweenSurfaceMeshes", &LoftBetweenSurfaceMeshes,
                        emscripten::allow_raw_pointers());
   emscripten::function("ExtrusionOfSurfaceMesh", &ExtrusionOfSurfaceMesh,
                        emscripten::allow_raw_pointers());

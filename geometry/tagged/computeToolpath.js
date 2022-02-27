@@ -381,7 +381,6 @@ export const computeToolpath = (
         time(`QQ/computeToolpath/Candidate/${candidate.length}`);
       }
       const nextCandidates = [];
-      let nextCandidatesConsidered = 0;
       try {
         if (nextCandidates.length < subCandidateLimit && candidate.at.ends) {
           for (const end of candidate.at.ends) {
@@ -413,7 +412,6 @@ export const computeToolpath = (
           for (let range = 2; range < Infinity; range *= 2) {
             const destinations = kd.within(x, y, range);
             for (const destination of destinations) {
-              nextCandidatesConsidered += 1;
               const point = points[destination];
               if (point === candidate.at) {
                 continue;
