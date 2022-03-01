@@ -1,6 +1,6 @@
 import {
   arrangeSegmentsIntoTriangles,
-  fitPlaneToPoints,
+  // fitPlaneToPoints,
   fromPolygonsToSurfaceMesh,
 } from '@jsxcad/algorithm-cgal';
 
@@ -18,7 +18,8 @@ const orientCounterClockwise = (path) =>
 // This imposes a planar arrangement.
 export const fromSegments = ({ tags }, segments, plane) => {
   if (!plane) {
-    plane = fitPlaneToPoints(segments.flatMap((points) => points));
+    // plane = fitPlaneToPoints(segments.flatMap((points) => points));
+    plane = [0, 0, 1, 0];
   }
   if (plane[0] === 0 && plane[1] === 0 && plane[2] === 0 && plane[3] === 0) {
     throw Error(`Zero plane`);

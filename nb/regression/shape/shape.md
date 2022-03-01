@@ -522,3 +522,32 @@ Box(20, 20, 20)
 ```
 
 ![Image](shape.md.60.png)
+
+```JavaScript
+Box(10, 3, 3)
+  .remesh({ targetEdgeLength: 0.25 })
+  .deform(
+    [
+      {
+        selection: Box([4.8, 5], 3, 3),
+        deformation: Point().rx(1 / 4),
+      },
+      {
+        selection: Box([-5, -4.8], 3, 3),
+        deformation: Point().rx(-1 / 4),
+      },
+      {
+        selection: Box([-0.1, 0.1], 3, 3),
+        deformation: Point().z(3),
+      },
+    ],
+    {
+      iterations: 1000,
+      tolerance: 0.001,
+      alpha: 0.05,
+    }
+  )
+  .view();
+```
+
+![Image](shape.md.61.png)
