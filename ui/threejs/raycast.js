@@ -1,5 +1,5 @@
 import { GEOMETRY_LAYER, SKETCH_LAYER } from './layers.js';
-import { Raycaster, Vector2 } from 'three';
+import { Raycaster, Vector2 } from '@jsxcad/algorithm-threejs';
 
 let geometryRaycaster = new Raycaster();
 geometryRaycaster.layers.set(GEOMETRY_LAYER);

@@ -1,4 +1,4 @@
-import { Vector3 } from 'three';
+import { Vector3 } from '@jsxcad/algorithm-threejs';
 
 const round = (value, resolution) =>
   Math.round(value / resolution) * resolution;

@@ -6,6 +6,7 @@ cp algorithm/contour/dist/main.js es6/jsxcad-algorithm-contour.js
 cp algorithm/material/dist/main.js es6/jsxcad-algorithm-material.js
 cp algorithm/pack/dist/main.js es6/jsxcad-algorithm-pack.js
 cp algorithm/text/dist/main.js es6/jsxcad-algorithm-text.js
+cp algorithm/threejs/dist/main.js es6/jsxcad-algorithm-threejs.js
 cp algorithm/tool/dist/main.js es6/jsxcad-algorithm-tool.js
 cp algorithm/verlet/dist/main.js es6/jsxcad-algorithm-verlet.js
 cp api/core/dist/main.js es6/jsxcad-api.js

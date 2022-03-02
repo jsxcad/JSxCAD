@@ -15,7 +15,7 @@ import {
   Vector3,
   VertexColors,
   WireframeGeometry,
-} from 'three';
+} from '@jsxcad/algorithm-threejs';
 
 import { GEOMETRY_LAYER, SKETCH_LAYER } from './layers.js';
 

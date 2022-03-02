@@ -6,7 +6,7 @@ import {
   MeshStandardMaterial,
   PlaneGeometry,
   Vector3,
-} from 'three';
+} from '@jsxcad/algorithm-threejs';
 import { GEOMETRY_LAYER } from './layers.js';
 
 export const moveToFit = ({

@@ -1,6 +1,6 @@
 import { GEOMETRY_LAYER, SKETCH_LAYER } from './layers.js';
 
-import { Layers } from 'three';
+import { Layers } from '@jsxcad/algorithm-threejs';
 import { buildMeshes } from './mesh.js';
 import { buildScene } from './scene.js';
 import { moveToFit } from './moveToFit.js';

@@ -7,7 +7,7 @@ import {
   Mesh,
   MeshBasicMaterial,
   Vector3,
-} from 'three';
+} from '@jsxcad/algorithm-threejs';
 import { SKETCH_LAYER } from './layers.js';
 import { raycast } from './raycast.js';
 
