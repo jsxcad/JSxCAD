@@ -1,13 +1,13 @@
 {
-  "name": "@jsxcad/ui-threejs",
+  "name": "@jsxcad/algorithm-threejs",
   "version": "0.0.79",
-  "description": "ThreeJs ui for JSxCAD",
+  "description": "ThreeJS algorithm integration for JSxCAD",
   "repository": "https://github.com/jsxcad/JSxCAD",
   "main": "main.js",
   "module": "dist/main.js",
   "type": "module",
   "scripts": {
-    "depcheck": "depcheck --ignores '@jsxcad/eslint*,eslint*,babel-eslint'",
+    "depcheck": "depcheck --ignores '@jsxcad/eslint*,eslint*,babel-eslint' --ignore-patterns 'emsdk/**'",
     "lint": "eslint *.js",
     "lintfix": "eslint --fix *.js",
     "rollup": "rollup -c rollup_main.js",
@@ -20,17 +20,14 @@
     }
   ],
   "keywords": [],
-  "license": "MIT",
+  "license": "LGPL",
   "dependencies": {
-    "@jsxcad/algorithm-color": "^0.0.79",
-    "@jsxcad/algorithm-material": "^0.0.79",
-    "@jsxcad/algorithm-threejs": "^0.0.79",
-    "@jsxcad/math-poly3": "^0.0.79"
+    "three": "^0.134.0"
   },
   "devDependencies": {
+    "babel-eslint": "^10.0.1",
     "depcheck": "^1.4.1",
     "eslint": "^7.0.0",
-    "babel-eslint": "^10.0.1",
     "eslint-config-standard": "^12.0.0",
     "eslint-plugin-import": "^2.16.0",
     "eslint-plugin-node": "^8.0.1",
@@ -39,7 +36,6 @@
     "eslint-plugin-standard": "^4.0.0",
     "rollup": "^2.51.2",
     "rollup-plugin-commonjs": "^9.3.4",
-    "rollup-plugin-hypothetical-windows-fix": "^2.1.1",
     "rollup-plugin-node-builtins": "^2.1.2",
     "rollup-plugin-node-globals": "^1.4.0",
     "rollup-plugin-node-resolve": "^4.2.3"

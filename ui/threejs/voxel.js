@@ -1,4 +1,4 @@
-import { BoxGeometry, Mesh } from 'three';
+import { BoxGeometry, Mesh } from '@jsxcad/algorithm-threejs';
 
 export const addVoxel = ({ editId, point, scene, threejsMesh }) => {
   const box = new BoxGeometry(1, 1, 1);

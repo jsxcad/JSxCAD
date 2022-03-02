@@ -5,7 +5,7 @@ import {
   Raycaster,
   Vector2,
   Vector3,
-} from 'three';
+} from '@jsxcad/algorithm-threejs';
 
 const _plane = new Plane();
 
