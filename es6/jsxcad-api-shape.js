@@ -12,6 +12,61 @@ import { toTagsFromName as toTagsFromName$2 } from './jsxcad-algorithm-tool.js';
 import { fromPoints as fromPoints$1 } from './jsxcad-math-poly3.js';
 export { cm, foot, inch, m, mil, mm, thou, yard } from './jsxcad-api-v1-units.js';
 
+const destructure = (
+  args,
+  {
+    shapes = [],
+    shapesAndFunctions = [],
+    functions = [],
+    arrays = [],
+    objects = [],
+    values = [],
+    object = {},
+    func,
+    number,
+    value,
+  } = {}
+) => {
+  for (const arg of args) {
+    if (arg instanceof Shape) {
+      shapes.push(arg);
+      shapesAndFunctions.push(arg);
+    } else if (arg instanceof Function) {
+      functions.push(arg);
+      shapesAndFunctions.push(arg);
+      func = arg;
+    } else if (arg instanceof Array) {
+      arrays.push(arg);
+    } else if (arg instanceof Object) {
+      objects.push(arg);
+      object = Object.assign(object, arg);
+    }
+    if (typeof arg !== 'object' && typeof arg !== 'function') {
+      values.push(arg);
+      if (value === undefined) {
+        value = arg;
+      }
+    }
+    if (typeof arg === 'number') {
+      if (number === undefined) {
+        number = arg;
+      }
+    }
+  }
+  return {
+    shapes,
+    shapesAndFunctions,
+    functions,
+    func,
+    arrays,
+    objects,
+    values,
+    object,
+    number,
+    value,
+  };
+};
+
 class Shape {
   close() {
     const geometry = this.toConcreteGeometry();
@@ -163,6 +218,8 @@ const shapeMethod = (build) => {
     return build(...args).at(this);
   };
 };
+
+Shape.destructure = destructure;
 
 Shape.shapeMethod = shapeMethod;
 
@@ -3668,15 +3725,22 @@ const push =
 Shape.registerMethod('push', push);
 
 const remesh =
-  (options, ...selections) =>
-  (shape) =>
-    Shape.fromGeometry(
+  (...args) =>
+  (shape) => {
+    const {
+      number: resolution = 1,
+      shapesAndFunctions: selections,
+      object: options,
+    } = Shape.destructure(args);
+    return Shape.fromGeometry(
       remesh$1(
         shape.toGeometry(),
+        resolution,
         options,
         shape.toShapes(selections).map((selection) => selection.toGeometry())
       )
     );
+  };
 
 Shape.registerMethod('remesh', remesh);
 
@@ -4228,24 +4292,6 @@ const untag =
 
 Shape.registerMethod('untag', untag);
 
-const byType = (args, defaultOptions) => {
-  let viewId;
-  let op = (x) => x;
-  let options = defaultOptions;
-
-  // An attempt to make view less annoying by assigning the arguments based on type.
-  for (const arg of args) {
-    if (arg instanceof Function) {
-      op = arg;
-    } else if (arg instanceof Object) {
-      options = Object.assign({}, defaultOptions, arg);
-    } else if (arg !== undefined) {
-      viewId = arg;
-    }
-  }
-  return { viewId, op, options };
-};
-
 const markContent = (geometry) => {
   if (geometry.type === 'group') {
     return {
@@ -4313,14 +4359,20 @@ const baseView =
 const topView =
   (...args) =>
   (shape) => {
-    const { viewId, op, options } = byType(args, {
-      size: 512,
-      skin: true,
-      outline: true,
-      wireframe: false,
-      width: 1024,
-      height: 512,
-      position: [0, 0, 100],
+    const {
+      value: viewId,
+      func: op = (x) => x,
+      object: options,
+    } = Shape.destructure(args, {
+      object: {
+        size: 512,
+        skin: true,
+        outline: true,
+        wireframe: false,
+        width: 1024,
+        height: 512,
+        position: [0, 0, 100],
+      },
     });
     return view(viewId, op, options)(shape);
   };
@@ -4328,15 +4380,21 @@ const topView =
 Shape.registerMethod('topView', topView);
 
 const gridView = (...args) => {
-  const { viewId, op, options } = byType(args, {
-    size: 512,
-    skin: true,
-    outline: true,
-    wireframe: false,
-    width: 1024,
-    height: 512,
-    position: [0, 0, 100],
-    withGrid: true,
+  const {
+    value: viewId,
+    func: op = (x) => x,
+    object: options,
+  } = Shape.destructure(args, {
+    object: {
+      size: 512,
+      skin: true,
+      outline: true,
+      wireframe: false,
+      width: 1024,
+      height: 512,
+      position: [0, 0, 100],
+      withGrid: true,
+    },
   });
   return (shape) => view(viewId, op, options)(shape);
 };
@@ -4346,14 +4404,20 @@ Shape.registerMethod('gridView', gridView);
 const frontView =
   (...args) =>
   (shape) => {
-    const { viewId, op, options } = byType(args, {
-      size: 512,
-      skin: true,
-      outline: true,
-      wireframe: false,
-      width: 1024,
-      height: 512,
-      position: [0, -100, 0],
+    const {
+      value: viewId,
+      func: op = (x) => x,
+      object: options,
+    } = Shape.destructure(args, {
+      object: {
+        size: 512,
+        skin: true,
+        outline: true,
+        wireframe: false,
+        width: 1024,
+        height: 512,
+        position: [0, -100, 0],
+      },
     });
     return (shape) => view(viewId, op, options)(shape);
   };
@@ -4365,7 +4429,11 @@ Shape.registerMethod('sideView');
 const view =
   (...args) =>
   (shape) => {
-    const { viewId, op, options } = byType(args, {});
+    const {
+      value: viewId,
+      func: op = (x) => x,
+      object: options,
+    } = Shape.destructure(args);
     switch (options.style) {
       case 'grid':
         return shape.gridView(viewId, op, options);

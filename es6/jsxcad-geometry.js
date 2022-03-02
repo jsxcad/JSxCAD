@@ -3766,8 +3766,13 @@ const push = (
 // We expect the type to be uniquely qualified.
 const registerReifier = (type, reifier) => registry.set(type, reifier);
 
-const remesh$1 = (geometry, options = {}, selections = []) => {
-  const { method = 'isotropic', lengths = [1] } = options;
+const remesh$1 = (
+  geometry,
+  resolution = 1,
+  options = {},
+  selections = []
+) => {
+  const { method = 'isotropic', lengths = [resolution] } = options;
   const selectionGraphs = selections.flatMap((selection) =>
     getNonVoidGraphs(toConcreteGeometry(selection))
   );
@@ -3779,7 +3784,7 @@ const remesh$1 = (geometry, options = {}, selections = []) => {
           isotropicRemeshingOfSurfaceMesh(
             toSurfaceMesh(geometry.graph),
             geometry.matrix,
-            options,
+            { targetEdgeLength: resolution, ...options },
             selectionGraphs.map(({ graph, matrix }) => ({
               mesh: toSurfaceMesh(graph),
               matrix,
