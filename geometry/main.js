@@ -41,6 +41,7 @@ export { canonicalize as canonicalizePaths } from './paths/canonicalize.js';
 export { convexHull as convexHullToGraph } from './graph/convexHull.js';
 export { cut } from './tagged/cut.js';
 export { deduplicate as deduplicatePath } from './path/deduplicate.js';
+export { deform } from './tagged/deform.js';
 export { demesh } from './tagged/demesh.js';
 export { difference } from './tagged/difference.js';
 export { disjoint } from './tagged/disjoint.js';

@@ -41,6 +41,7 @@ export { computeCentroidOfSurfaceMesh } from './computeCentroidOfSurfaceMesh.js'
 export { computeNormalOfSurfaceMesh } from './computeNormalOfSurfaceMesh.js';
 export { cutOutOfSurfaceMeshes } from './cutOutOfSurfaceMeshes.js';
 export { cutSurfaceMeshes } from './cutSurfaceMeshes.js';
+export { deformSurfaceMesh } from './deformSurfaceMesh.js';
 export { deleteSurfaceMesh } from './deleteSurfaceMesh.js';
 export { demeshSurfaceMesh } from './demeshSurfaceMesh.js';
 export { deserializeSurfaceMesh } from './deserializeSurfaceMesh.js';

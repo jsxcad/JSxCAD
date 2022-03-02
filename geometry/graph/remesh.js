@@ -9,8 +9,13 @@ import { taggedGraph } from '../tagged/taggedGraph.js';
 import { toConcreteGeometry } from './../tagged/toConcreteGeometry.js';
 import { toSurfaceMesh } from './toSurfaceMesh.js';
 
-export const remesh = (geometry, options = {}, selections = []) => {
-  const { method = 'isotropic', lengths = [1] } = options;
+export const remesh = (
+  geometry,
+  resolution = 1,
+  options = {},
+  selections = []
+) => {
+  const { method = 'isotropic', lengths = [resolution] } = options;
   const selectionGraphs = selections.flatMap((selection) =>
     getNonVoidGraphs(toConcreteGeometry(selection))
   );
@@ -22,7 +27,7 @@ export const remesh = (geometry, options = {}, selections = []) => {
           isotropicRemeshingOfSurfaceMesh(
             toSurfaceMesh(geometry.graph),
             geometry.matrix,
-            options,
+            { targetEdgeLength: resolution, ...options },
             selectionGraphs.map(({ graph, matrix }) => ({
               mesh: toSurfaceMesh(graph),
               matrix,

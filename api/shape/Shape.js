@@ -18,6 +18,7 @@ import {
 } from '@jsxcad/geometry';
 
 import { endTime, getSourceLocation, startTime } from '@jsxcad/sys';
+import { destructure } from './destructure.js';
 import { identityMatrix } from '@jsxcad/math-mat4';
 
 export class Shape {
@@ -171,6 +172,8 @@ export const shapeMethod = (build) => {
     return build(...args).at(this);
   };
 };
+
+Shape.destructure = destructure;
 
 Shape.shapeMethod = shapeMethod;
 

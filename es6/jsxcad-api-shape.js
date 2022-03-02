@@ -1,4 +1,4 @@
-import { closePath, concatenatePath, assemble as assemble$1, flip, toConcreteGeometry, toDisplayGeometry, toTransformedGeometry, toPoints, transform, rewriteTags, taggedPaths, taggedGraph, openPath, taggedSegments, taggedPoints, fromPolygonsToGraph, registerReifier, taggedPlan, taggedGroup, union, taggedItem, getLeafs, getInverseMatrices, bend as bend$1, projectToPlane, computeCentroid, intersection, allTags, fromPointsToGraph, cut as cut$1, demesh as demesh$1, rewrite, visit, hasTypeVoid, hasTypeWire, translatePaths, taggedLayout, measureBoundingBox, getLayouts, isNotVoid, generatePackingEnvelope, generateUpperEnvelope, computeNormal, extrude, extrudeToPlane as extrudeToPlane$1, faces as faces$1, fill as fill$1, fuse as fuse$1, eachSegment, removeSelfIntersections as removeSelfIntersections$1, grow as grow$1, outline as outline$1, inset as inset$1, read, readNonblocking, loft as loft$1, loft2 as loft2$1, prepareForSerialization, hasShowOverlay, hasTypeMasked, minkowskiDifference as minkowskiDifference$1, minkowskiShell as minkowskiShell$1, minkowskiSum as minkowskiSum$1, isVoid, offset as offset$1, eachPoint, push as push$1, remesh as remesh$1, write, writeNonblocking, simplify as simplify$1, section as section$1, separate as separate$1, serialize as serialize$1, smooth as smooth$1, taggedSketch, taper as taper$1, test as test$1, computeToolpath, twist as twist$1, withQuery, toPolygonsWithHoles, arrangePolygonsWithHoles, fromPolygonsWithHolesToTriangles, fromTrianglesToGraph, alphaShape, rotateZPath, convexHullToGraph, fromFunctionToGraph, translatePath } from './jsxcad-geometry.js';
+import { closePath, concatenatePath, assemble as assemble$1, flip, toConcreteGeometry, toDisplayGeometry, toTransformedGeometry, toPoints, transform, rewriteTags, taggedPaths, taggedGraph, openPath, taggedSegments, taggedPoints, fromPolygonsToGraph, registerReifier, taggedPlan, taggedGroup, union, taggedItem, getLeafs, getInverseMatrices, bend as bend$1, projectToPlane, computeCentroid, intersection, allTags, fromPointsToGraph, cut as cut$1, deform as deform$1, demesh as demesh$1, rewrite, visit, hasTypeVoid, hasTypeWire, translatePaths, taggedLayout, measureBoundingBox, getLayouts, isNotVoid, generatePackingEnvelope, generateUpperEnvelope, computeNormal, extrude, extrudeToPlane as extrudeToPlane$1, faces as faces$1, fill as fill$1, fuse as fuse$1, eachSegment, removeSelfIntersections as removeSelfIntersections$1, grow as grow$1, outline as outline$1, inset as inset$1, read, readNonblocking, loft as loft$1, loft2 as loft2$1, prepareForSerialization, hasShowOverlay, hasTypeMasked, minkowskiDifference as minkowskiDifference$1, minkowskiShell as minkowskiShell$1, minkowskiSum as minkowskiSum$1, isVoid, offset as offset$1, eachPoint, push as push$1, remesh as remesh$1, write, writeNonblocking, simplify as simplify$1, section as section$1, separate as separate$1, serialize as serialize$1, smooth as smooth$1, taggedSketch, taper as taper$1, test as test$1, computeToolpath, twist as twist$1, withQuery, toPolygonsWithHoles, arrangePolygonsWithHoles, fromPolygonsWithHolesToTriangles, fromTrianglesToGraph, alphaShape, rotateZPath, convexHullToGraph, fromFunctionToGraph, translatePath } from './jsxcad-geometry.js';
 import { getSourceLocation, startTime, endTime, emit, computeHash, logInfo, log as log$1, generateUniqueId, addPending, write as write$1 } from './jsxcad-sys.js';
 export { elapsed, emit, read, write } from './jsxcad-sys.js';
 import { identityMatrix, fromRotation } from './jsxcad-math-mat4.js';
@@ -11,6 +11,61 @@ import { pack as pack$1 } from './jsxcad-algorithm-pack.js';
 import { toTagsFromName as toTagsFromName$2 } from './jsxcad-algorithm-tool.js';
 import { fromPoints as fromPoints$1 } from './jsxcad-math-poly3.js';
 export { cm, foot, inch, m, mil, mm, thou, yard } from './jsxcad-api-v1-units.js';
+
+const destructure = (
+  args,
+  {
+    shapes = [],
+    shapesAndFunctions = [],
+    functions = [],
+    arrays = [],
+    objects = [],
+    values = [],
+    object = {},
+    func,
+    number,
+    value,
+  } = {}
+) => {
+  for (const arg of args) {
+    if (arg instanceof Shape) {
+      shapes.push(arg);
+      shapesAndFunctions.push(arg);
+    } else if (arg instanceof Function) {
+      functions.push(arg);
+      shapesAndFunctions.push(arg);
+      func = arg;
+    } else if (arg instanceof Array) {
+      arrays.push(arg);
+    } else if (arg instanceof Object) {
+      objects.push(arg);
+      object = Object.assign(object, arg);
+    }
+    if (typeof arg !== 'object' && typeof arg !== 'function') {
+      values.push(arg);
+      if (value === undefined) {
+        value = arg;
+      }
+    }
+    if (typeof arg === 'number') {
+      if (number === undefined) {
+        number = arg;
+      }
+    }
+  }
+  return {
+    shapes,
+    shapesAndFunctions,
+    functions,
+    func,
+    arrays,
+    objects,
+    values,
+    object,
+    number,
+    value,
+  };
+};
 
 class Shape {
   close() {
@@ -163,6 +218,8 @@ const shapeMethod = (build) => {
     return build(...args).at(this);
   };
 };
+
+Shape.destructure = destructure;
 
 Shape.shapeMethod = shapeMethod;
 
@@ -915,6 +972,26 @@ const cutout =
     return shape.cut(other).and(op(shape.clip(other)));
   };
 Shape.registerMethod('cutout', cutout);
+
+const deform =
+  (entries, { iterations, tolerance, alpha } = {}) =>
+  (shape) =>
+    Shape.fromGeometry(
+      deform$1(
+        shape.toGeometry(),
+        entries.map(({ selection, deformation }) => ({
+          selection: selection.toGeometry(),
+          deformation: deformation
+            ? deformation.toGeometry().matrix
+            : identityMatrix,
+        })),
+        iterations,
+        tolerance,
+        alpha
+      )
+    );
+
+Shape.registerMethod('deform', deform);
 
 // TODO: Rename clean at the lower levels.
 const demesh = (options) => (shape) =>
@@ -3648,15 +3725,22 @@ const push =
 Shape.registerMethod('push', push);
 
 const remesh =
-  (options, ...selections) =>
-  (shape) =>
-    Shape.fromGeometry(
+  (...args) =>
+  (shape) => {
+    const {
+      number: resolution = 1,
+      shapesAndFunctions: selections,
+      object: options,
+    } = Shape.destructure(args);
+    return Shape.fromGeometry(
       remesh$1(
         shape.toGeometry(),
+        resolution,
         options,
         shape.toShapes(selections).map((selection) => selection.toGeometry())
       )
     );
+  };
 
 Shape.registerMethod('remesh', remesh);
 
@@ -4208,24 +4292,6 @@ const untag =
 
 Shape.registerMethod('untag', untag);
 
-const byType = (args, defaultOptions) => {
-  let viewId;
-  let op = (x) => x;
-  let options = defaultOptions;
-
-  // An attempt to make view less annoying by assigning the arguments based on type.
-  for (const arg of args) {
-    if (arg instanceof Function) {
-      op = arg;
-    } else if (arg instanceof Object) {
-      options = Object.assign({}, defaultOptions, arg);
-    } else if (arg !== undefined) {
-      viewId = arg;
-    }
-  }
-  return { viewId, op, options };
-};
-
 const markContent = (geometry) => {
   if (geometry.type === 'group') {
     return {
@@ -4293,14 +4359,20 @@ const baseView =
 const topView =
   (...args) =>
   (shape) => {
-    const { viewId, op, options } = byType(args, {
-      size: 512,
-      skin: true,
-      outline: true,
-      wireframe: false,
-      width: 1024,
-      height: 512,
-      position: [0, 0, 100],
+    const {
+      value: viewId,
+      func: op = (x) => x,
+      object: options,
+    } = Shape.destructure(args, {
+      object: {
+        size: 512,
+        skin: true,
+        outline: true,
+        wireframe: false,
+        width: 1024,
+        height: 512,
+        position: [0, 0, 100],
+      },
     });
     return view(viewId, op, options)(shape);
   };
@@ -4308,15 +4380,21 @@ const topView =
 Shape.registerMethod('topView', topView);
 
 const gridView = (...args) => {
-  const { viewId, op, options } = byType(args, {
-    size: 512,
-    skin: true,
-    outline: true,
-    wireframe: false,
-    width: 1024,
-    height: 512,
-    position: [0, 0, 100],
-    withGrid: true,
+  const {
+    value: viewId,
+    func: op = (x) => x,
+    object: options,
+  } = Shape.destructure(args, {
+    object: {
+      size: 512,
+      skin: true,
+      outline: true,
+      wireframe: false,
+      width: 1024,
+      height: 512,
+      position: [0, 0, 100],
+      withGrid: true,
+    },
   });
   return (shape) => view(viewId, op, options)(shape);
 };
@@ -4326,14 +4404,20 @@ Shape.registerMethod('gridView', gridView);
 const frontView =
   (...args) =>
   (shape) => {
-    const { viewId, op, options } = byType(args, {
-      size: 512,
-      skin: true,
-      outline: true,
-      wireframe: false,
-      width: 1024,
-      height: 512,
-      position: [0, -100, 0],
+    const {
+      value: viewId,
+      func: op = (x) => x,
+      object: options,
+    } = Shape.destructure(args, {
+      object: {
+        size: 512,
+        skin: true,
+        outline: true,
+        wireframe: false,
+        width: 1024,
+        height: 512,
+        position: [0, -100, 0],
+      },
     });
     return (shape) => view(viewId, op, options)(shape);
   };
@@ -4345,7 +4429,11 @@ Shape.registerMethod('sideView');
 const view =
   (...args) =>
   (shape) => {
-    const { viewId, op, options } = byType(args, {});
+    const {
+      value: viewId,
+      func: op = (x) => x,
+      object: options,
+    } = Shape.destructure(args);
     switch (options.style) {
       case 'grid':
         return shape.gridView(viewId, op, options);
@@ -5257,4 +5345,4 @@ const yz = Shape.fromGeometry({
   ],
 });
 
-export { Alpha, Arc, ArcX, ArcY, ArcZ, Assembly, Box, Cached, ChainedHull, Edge, Edges, Empty, Face, GrblConstantLaser, GrblDynamicLaser, GrblPlotter, GrblSpindle, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Join, Line, Octagon, Orb, Page, Path, Pentagon, Plan, Point, Points, Polygon, Polyhedron, Segments, Septagon, Shape, Spiral, SurfaceMesh, Tetragon, Triangle, Voxels, Wave, Weld, abstract, add, addTo, align, and, as, asPart, at, bend, billOfMaterials, cast, center, clip, clipFrom, cloudSolid, color, colors, cut, cutFrom, cutout, defRgbColor, defThreejsMaterial, defTool, define, demesh, drop, e, each, edit, ensurePages, ex, extrudeAlong, extrudeToPlane, extrudeX, extrudeY, extrudeZ, ey, ez, faces, fill, fit, fitTo, fuse, g, get, getEdge, getNot, gn, grow, inline, inset, keep, loadGeometry, loft, loft2, log, loop, mask, material, md, minkowskiDifference, minkowskiShell, minkowskiSum, move, moveAlong, moveTo, n, noVoid, noop, normal, notColor, nth, ofPlan, offset, on, op, orient, outline, overlay, pack, packingEnvelope, play, points$1 as points, push, remesh, removeSelfIntersections, rotate, rotateX, rotateY, rotateZ, rx, ry, rz, saveGeometry, scale, scaleToFit, scaleX, scaleY, scaleZ, section, sectionProfile, separate, seq, serialize, simplify, size, sketch, smooth, sx, sy, sz, table, tag, tags, taper, test, tint, to, tool, toolpath, top, twist, untag, upperEnvelope, view, voidFn, voidIn, voxels, weld, withFill, withFn, withInset, withOp, x, xy, xyz, xz, y, yz, z };
+export { Alpha, Arc, ArcX, ArcY, ArcZ, Assembly, Box, Cached, ChainedHull, Edge, Edges, Empty, Face, GrblConstantLaser, GrblDynamicLaser, GrblPlotter, GrblSpindle, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Join, Line, Octagon, Orb, Page, Path, Pentagon, Plan, Point, Points, Polygon, Polyhedron, Segments, Septagon, Shape, Spiral, SurfaceMesh, Tetragon, Triangle, Voxels, Wave, Weld, abstract, add, addTo, align, and, as, asPart, at, bend, billOfMaterials, cast, center, clip, clipFrom, cloudSolid, color, colors, cut, cutFrom, cutout, defRgbColor, defThreejsMaterial, defTool, define, deform, demesh, drop, e, each, edit, ensurePages, ex, extrudeAlong, extrudeToPlane, extrudeX, extrudeY, extrudeZ, ey, ez, faces, fill, fit, fitTo, fuse, g, get, getEdge, getNot, gn, grow, inline, inset, keep, loadGeometry, loft, loft2, log, loop, mask, material, md, minkowskiDifference, minkowskiShell, minkowskiSum, move, moveAlong, moveTo, n, noVoid, noop, normal, notColor, nth, ofPlan, offset, on, op, orient, outline, overlay, pack, packingEnvelope, play, points$1 as points, push, remesh, removeSelfIntersections, rotate, rotateX, rotateY, rotateZ, rx, ry, rz, saveGeometry, scale, scaleToFit, scaleX, scaleY, scaleZ, section, sectionProfile, separate, seq, serialize, simplify, size, sketch, smooth, sx, sy, sz, table, tag, tags, taper, test, tint, to, tool, toolpath, top, twist, untag, upperEnvelope, view, voidFn, voidIn, voxels, weld, withFill, withFn, withInset, withOp, x, xy, xyz, xz, y, yz, z };
