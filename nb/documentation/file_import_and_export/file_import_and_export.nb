@@ -40,6 +40,8 @@ importedSvg.align('xy').view();
 
 importedSvg.align('xy').scaleToFit(10).ez(2).notColor('#090000').view();
 
-import { readSvg as readSvgWithThreejs } from '@jsxcad/api-threejs';
+import { readCollada, readSvg as readSvgWithThreejs } from '@jsxcad/api-threejs';
 
 (await readSvgWithThreejs('https://jsxcad.js.org/svg/rocket.svg')).align('xy').view();
+
+(await readCollada('https://jsxcad.js.org/collada/duck_triangles.dae')).rx(1/4).view();

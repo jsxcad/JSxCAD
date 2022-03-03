@@ -7,7 +7,10 @@ export const fromThreejsToGeometry = async (threejs) => {
   if (threejs instanceof Group) {
     const children = [];
     for (const child of threejs.children) {
-      children.push(await fromThreejsToGeometry(child));
+      const childGeometry = await fromThreejsToGeometry(child);
+      if (childGeometry) {
+        children.push(childGeometry);
+      }
     }
     return taggedGroup({}, ...children);
   } else if (threejs instanceof Mesh) {
@@ -30,9 +33,9 @@ export const fromThreejsToGeometry = async (threejs) => {
       const p = geometry.attributes.position.array;
       for (let i = 0; i < p.length; i += 9) {
         const points = [
-          [p[0], p[1], p[2]],
-          [p[3], p[4], p[5]],
-          [p[6], p[7], p[8]],
+          [p[i + 0], p[i + 1], p[i + 2]],
+          [p[i + 3], p[i + 4], p[i + 5]],
+          [p[i + 6], p[i + 7], p[i + 8]],
         ];
         triangles.push({ points });
       }

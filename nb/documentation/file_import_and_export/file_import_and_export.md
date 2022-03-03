@@ -52,7 +52,7 @@ const importedSvg = await readSvg('https://jsxcad.js.org/svg/rocket.svg', { fill
 ```
 
 ```JavaScript
-import { readSvg as readSvgWithThreejs } from '@jsxcad/api-threejs';
+import { readCollada, readSvg as readSvgWithThreejs } from '@jsxcad/api-threejs';
 ```
 
 ```JavaScript
@@ -68,7 +68,13 @@ importedSvg.align('xy').scaleToFit(10).ez(2).notColor('#090000').view();
 ![Image](file_import_and_export.md.4.png)
 
 ```JavaScript
-(await readSvgWithThreejs('https://jsxcad.js.org/svg/rocket.svg')).align('xy').view();
+(await readCollada('https://jsxcad.js.org/collada/duck_triangles.dae')).rx(1/4).view();
 ```
 
 ![Image](file_import_and_export.md.5.png)
+
+```JavaScript
+(await readSvgWithThreejs('https://jsxcad.js.org/svg/rocket.svg')).align('xy').view();
+```
+
+![Image](file_import_and_export.md.6.png)

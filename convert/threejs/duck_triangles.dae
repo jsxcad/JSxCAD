@@ -53,69 +53,6 @@ limitations under the License.
             </technique_common>
         </light>
     </library_lights>
-    <library_images>
-        <image id="file2" name="file2" depth="1">
-            <init_from>./duckCM.tga</init_from>
-        </image>
-    </library_images>
-    <library_materials>
-        <material id="blinn3" name="blinn3">
-            <instance_effect url="#blinn3-fx"/>
-        </material>
-    </library_materials>
-    <library_effects>
-        <effect id="blinn3-fx">
-            <profile_COMMON>
-                <newparam sid="file2-surface">
-                    <surface type="2D">
-                        <init_from>file2</init_from>
-                        <format>A8R8G8B8</format>
-                    </surface>
-                </newparam>
-                <newparam sid="file2-sampler">
-                    <sampler2D>
-                        <source>file2-surface</source>
-                        <minfilter>LINEAR_MIPMAP_LINEAR</minfilter>
-                        <magfilter>LINEAR</magfilter>
-                    </sampler2D>
-                </newparam>
-                <technique sid="common">
-                    <blinn>
-                        <emission>
-                            <color>0 0 0 1</color>
-                        </emission>
-                        <ambient>
-                            <color>0 0 0 1</color>
-                        </ambient>
-                        <diffuse>
-                            <texture texture="file2-sampler" texcoord="TEX0"/>
-                        </diffuse>
-                        <specular>
-                            <color>0 0 0 1</color>
-                        </specular>
-                        <shininess>
-                            <float>0.3</float>
-                        </shininess>
-                        <reflective>
-                            <color>0 0 0 1</color>
-                        </reflective>
-                        <reflectivity>
-                            <float>0.5</float>
-                        </reflectivity>
-                        <transparent>
-                            <color>0 0 0 1</color>
-                        </transparent>
-                        <transparency>
-                            <float>1</float>
-                        </transparency>
-                        <index_of_refraction>
-                            <float>1</float>
-                        </index_of_refraction>
-                    </blinn>
-                </technique>
-            </profile_COMMON>
-        </effect>
-    </library_effects>
     <library_geometries>
         <geometry id="LOD3spShape-lib" name="LOD3spShape">
             <mesh>
@@ -151,7 +88,7 @@ limitations under the License.
                 <vertices id="LOD3spShape-lib-vertices">
                     <input semantic="POSITION" source="#LOD3spShape-lib-positions"/>
                 </vertices>
-                <triangles count="4212" material="blinn3SG">
+                <triangles count="4212">
                     <input offset="0" semantic="VERTEX" source="#LOD3spShape-lib-vertices"/>
                     <input offset="1" semantic="NORMAL" source="#LOD3spShape-lib-normals"/>
                     <input offset="2" semantic="TEXCOORD" source="#LOD3spShape-lib-map1" set="0"/>
@@ -167,13 +104,6 @@ limitations under the License.
                 <rotate sid="rotateY">0 1 0 0</rotate>
                 <rotate sid="rotateX">1 0 0 0</rotate>
                 <instance_geometry url="#LOD3spShape-lib">
-                    <bind_material>
-                        <technique_common>
-                            <instance_material symbol="blinn3SG" target="#blinn3">
-                                <bind_vertex_input semantic="TEX0" input_semantic="TEXCOORD" input_set="0"/>
-                            </instance_material>
-                        </technique_common>
-                    </bind_material>
                 </instance_geometry>
             </node>
             <node id="camera1" name="camera1">

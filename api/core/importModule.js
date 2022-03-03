@@ -4,8 +4,8 @@ import { isNode, read, restoreEmitGroup, saveEmitGroup } from '@jsxcad/sys';
 
 const DYNAMIC_MODULES = new Map();
 
-export const registerDynamicModule = (bare, path, nodePath) => {
-  DYNAMIC_MODULES.set(bare, isNode ? nodePath : path);
+export const registerDynamicModule = (path, nodePath) => {
+  DYNAMIC_MODULES.set(path, isNode ? nodePath : path);
 };
 
 const CACHED_MODULES = new Map();
@@ -34,7 +34,6 @@ export const buildImportModule =
       }
       const internalModule = DYNAMIC_MODULES.get(name);
       if (internalModule !== undefined) {
-        console.log(`QQ/internalModule: ${name} ${internalModule}`);
         const module = await import(internalModule);
         CACHED_MODULES.set(name, module);
         return module;
