@@ -270,6 +270,7 @@ export { cutFrom } from './cutFrom.js';
 export { cutout } from './cutout.js';
 export { deform } from './deform.js';
 export { demesh } from './demesh.js';
+export { disjoint } from './disjoint.js';
 export { drop } from './drop.js';
 export { ensurePages } from './Page.js';
 export { each } from './each.js';

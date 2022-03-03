@@ -37,6 +37,7 @@ export {
   Raycaster,
   RepeatWrapping,
   Scene,
+  ShapeGeometry,
   SphereGeometry,
   SpotLight,
   TorusGeometry,
@@ -47,4 +48,6 @@ export {
   WireframeGeometry,
 } from 'three';
 
+export { ColladaLoader } from './ColladaLoader.js';
+export { SVGLoader } from './SVGLoader.js';
 export { TrackballControls } from 'three/examples/jsm/controls/TrackballControls.js';

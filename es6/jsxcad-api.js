@@ -4,7 +4,7 @@ import './jsxcad-api-v1-tools.js';
 import * as mathApi from './jsxcad-api-v1-math.js';
 import * as shapeApi from './jsxcad-api-shape.js';
 import { Group, Shape, saveGeometry, loadGeometry } from './jsxcad-api-shape.js';
-import { addOnEmitHandler, addPending, write, read, emit, flushEmitGroup, computeHash, logInfo, beginEmitGroup, resolvePending, finishEmitGroup, getConfig, saveEmitGroup, ErrorWouldBlock, restoreEmitGroup, isWebWorker, getSourceLocation, getControlValue } from './jsxcad-sys.js';
+import { addOnEmitHandler, addPending, write, read, emit, flushEmitGroup, computeHash, logInfo, beginEmitGroup, resolvePending, finishEmitGroup, getConfig, saveEmitGroup, ErrorWouldBlock, restoreEmitGroup, isWebWorker, isNode, getSourceLocation, getControlValue } from './jsxcad-sys.js';
 import { toEcmascript } from './jsxcad-compiler.js';
 import { readStl, stl } from './jsxcad-api-v1-stl.js';
 import { readObj } from './jsxcad-api-v1-obj.js';
@@ -327,8 +327,9 @@ const execute = async (
 
 const DYNAMIC_MODULES = new Map();
 
-const registerDynamicModule = (bare, path) =>
-  DYNAMIC_MODULES.set(bare, path);
+const registerDynamicModule = (bare, path, nodePath) => {
+  DYNAMIC_MODULES.set(bare, isNode ? nodePath : path);
+};
 
 const CACHED_MODULES = new Map();
 
@@ -356,6 +357,7 @@ const buildImportModule =
       }
       const internalModule = DYNAMIC_MODULES.get(name);
       if (internalModule !== undefined) {
+        console.log(`QQ/internalModule: ${name} ${internalModule}`);
         const module = await import(internalModule);
         CACHED_MODULES.set(name, module);
         return module;
@@ -439,27 +441,32 @@ const importModule = buildImportModule(api);
 
 api.importModule = importModule;
 
-// Register Dynamic libraries.
+// Register Dynamically loadable modules.
 
-const module = (name) => `@jsxcad/api-v1-${name}`;
+const module = (name) => `@jsxcad/api-${name}`;
 
-registerDynamicModule(module('armature'), './jsxcad-api-v1-armature.js');
-registerDynamicModule(module('cursor'), './jsxcad-api-v1-cursor.js');
-registerDynamicModule(module('deform'), './jsxcad-api-v1-deform.js');
-registerDynamicModule(module('dst'), './jsxcad-api-v1-dst.js');
-registerDynamicModule(module('dxf'), './jsxcad-api-v1-dxf.js');
-registerDynamicModule(module('font'), './jsxcad-api-v1-font.js');
-registerDynamicModule(module('gcode'), './jsxcad-api-v1-gcode.js');
-registerDynamicModule(module('ldraw'), './jsxcad-api-v1-ldraw.js');
-registerDynamicModule(module('math'), './jsxcad-api-v1-math.js');
-registerDynamicModule(module('pdf'), './jsxcad-api-v1-pdf.js');
-registerDynamicModule(module('png'), './jsxcad-api-v1-png.js');
-registerDynamicModule(module('shape'), './jsxcad-api-v1-shape.js');
-registerDynamicModule(module('shapefile'), './jsxcad-api-v1-shapefile.js');
-registerDynamicModule(module('stl'), './jsxcad-api-v1-stl.js');
-registerDynamicModule(module('svg'), './jsxcad-api-v1-svg.js');
-registerDynamicModule(module('threejs'), './jsxcad-api-v1-threejs.js');
-registerDynamicModule(module('units'), './jsxcad-api-v1-units.js');
+registerDynamicModule(
+  module('threejs'),
+  './jsxcad-api-threejs.js',
+  '../threejs/main.js'
+);
+registerDynamicModule(module('v1-armature'), './jsxcad-api-v1-armature.js');
+registerDynamicModule(module('v1-cursor'), './jsxcad-api-v1-cursor.js');
+registerDynamicModule(module('v1-deform'), './jsxcad-api-v1-deform.js');
+registerDynamicModule(module('v1-dst'), './jsxcad-api-v1-dst.js');
+registerDynamicModule(module('v1-dxf'), './jsxcad-api-v1-dxf.js');
+registerDynamicModule(module('v1-font'), './jsxcad-api-v1-font.js');
+registerDynamicModule(module('v1-gcode'), './jsxcad-api-v1-gcode.js');
+registerDynamicModule(module('v1-ldraw'), './jsxcad-api-v1-ldraw.js');
+registerDynamicModule(module('v1-math'), './jsxcad-api-v1-math.js');
+registerDynamicModule(module('v1-pdf'), './jsxcad-api-v1-pdf.js');
+registerDynamicModule(module('v1-png'), './jsxcad-api-v1-png.js');
+registerDynamicModule(module('v1-threejs'), './jsxcad-api-v1-threejs.js');
+registerDynamicModule(module('v1-shape'), './jsxcad-api-v1-shape.js');
+registerDynamicModule(module('v1-shapefile'), './jsxcad-api-v1-shapefile.js');
+registerDynamicModule(module('v1-stl'), './jsxcad-api-v1-stl.js');
+registerDynamicModule(module('v1-svg'), './jsxcad-api-v1-svg.js');
+registerDynamicModule(module('v1-units'), './jsxcad-api-v1-units.js');
 
 setApi(api);
 
