@@ -19,6 +19,8 @@ test('Simple import', async (t) => {
       prepareForSerialization(await fromThreejsToGeometry(threejs))
     )
   );
-  const expectedGeometry = JSON.parse(readFileSync('duck_triangles.json', 'utf8'));
+  const expectedGeometry = JSON.parse(
+    readFileSync('duck_triangles.json', 'utf8')
+  );
   t.deepEqual(geometry, expectedGeometry);
 });

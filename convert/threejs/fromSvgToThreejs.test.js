@@ -39,13 +39,14 @@ test('Simple import', async (t) => {
           isEmpty: false,
           isLazy: true,
           provenance: 'algorithm/cgal/fromSurfaceMeshToLazyGraph',
-          serializedSurfaceMesh: '3\n2 2 0\n0 0 0\n1200 0 0\n\n1\n3 2 0 1\n',
-          hash: 'vY//dE5bX17UeT20R9zHAPLhqv0mQ0ABIAmZ3UMSl+k=',
+          serializedSurfaceMesh:
+            '8\n2 2 0\n0 0 0\n1200 0 0\n1198 2 0\n1200 400 0\n1198 398 0\n0 400 0\n2 398 0\n\n8\n3 2 0 1\n3 3 0 2\n3 4 3 2\n3 5 3 4\n3 6 5 4\n3 7 5 6\n3 1 7 6\n3 0 7 1\n',
+          hash: 'r9H+HVi+0HPs0VLeLezF4obH6+WwmFfYe5Y7RRxiIMs=',
         },
         cache: {
           boundingBox: [
             [-2e-323, -2e-323, -2e-323],
-            [1200.000000000001, 2.0000000000000018, 1.5e-323],
+            [1200.000000000001, 400.0000000000002, 1.5e-323],
           ],
         },
       },
@@ -77,13 +78,13 @@ test('Simple import', async (t) => {
           isLazy: true,
           provenance: 'algorithm/cgal/fromSurfaceMeshToLazyGraph',
           serializedSurfaceMesh:
-            '3\n405 105 0\n395 95 0\n805 95 0\n\n1\n3 2 0 1\n',
-          hash: 'mmnKWOAh5g5WwfX5O2O/3h7n/ZxK3XmaQVL7QwUeewk=',
+            '8\n405 105 0\n395 95 0\n805 95 0\n795 105 0\n805 305 0\n795 295 0\n395 305 0\n405 295 0\n\n8\n3 2 0 1\n3 3 0 2\n3 4 3 2\n3 5 3 4\n3 6 5 4\n3 7 5 6\n3 1 7 6\n3 0 7 1\n',
+          hash: 'aHtLQ0ODwARNHk8xyqPpTku3qlPgiehGkWTzQ3lYpTY=',
         },
         cache: {
           boundingBox: [
             [394.9999999999998, 94.99999999999994, -2e-323],
-            [805.0000000000005, 105.00000000000006, 1.5e-323],
+            [805.0000000000005, 305.0000000000002, 1.5e-323],
           ],
         },
       },
