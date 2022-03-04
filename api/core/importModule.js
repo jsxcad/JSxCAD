@@ -1,11 +1,12 @@
 import { acquire, release } from './evaluateLock.js';
 import { evaluate as baseEvaluate, execute } from './evaluate.js';
-import { read, restoreEmitGroup, saveEmitGroup } from '@jsxcad/sys';
+import { isNode, read, restoreEmitGroup, saveEmitGroup } from '@jsxcad/sys';
 
 const DYNAMIC_MODULES = new Map();
 
-export const registerDynamicModule = (bare, path) =>
-  DYNAMIC_MODULES.set(bare, path);
+export const registerDynamicModule = (path, nodePath) => {
+  DYNAMIC_MODULES.set(path, isNode ? nodePath : path);
+};
 
 const CACHED_MODULES = new Map();
 

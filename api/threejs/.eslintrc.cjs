@@ -2,13 +2,7 @@ module.exports = {
   extends: ['standard', 'plugin:react/recommended'],
   parser: 'babel-eslint',
   rules: {
-    camelcase: 0,
-    'no-useless-constructor': 0,
-    'no-undef': 0,
-    eqeqeq: 0,
-    'no-useless-escape': 0,
-    'max-len': 0,
-    'no-fallthrough': 0,
+    'max-len': [1, 120, 2],
     semi: [2, 'always'],
     'no-new-func': 0,
     indent: [

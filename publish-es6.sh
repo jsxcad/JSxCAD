@@ -11,6 +11,7 @@ cp algorithm/tool/dist/main.js es6/jsxcad-algorithm-tool.js
 cp algorithm/verlet/dist/main.js es6/jsxcad-algorithm-verlet.js
 cp api/core/dist/main.js es6/jsxcad-api.js
 cp api/shape/dist/main.js es6/jsxcad-api-shape.js
+cp api/threejs/dist/main.js es6/jsxcad-api-threejs.js
 cp api/v1-armature/dist/main.js es6/jsxcad-api-v1-armature.js
 cp api/v1-cursor/dist/main.js es6/jsxcad-api-v1-cursor.js
 cp api/v1-dst/dist/main.js es6/jsxcad-api-v1-dst.js

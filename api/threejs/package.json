@@ -1,7 +1,7 @@
 {
-  "name": "@jsxcad/convert-threejs",
+  "name": "@jsxcad/api-threejs",
   "version": "0.0.79",
-  "description": "ThreeJs integration algorithms for JSxCAD",
+  "description": "Threejs conversion api for JSxCAD",
   "repository": "https://github.com/jsxcad/JSxCAD",
   "main": "main.js",
   "module": "dist/main.js",
@@ -11,8 +11,8 @@
     "lint": "eslint *.js",
     "lintfix": "eslint --fix *.js",
     "rollup": "rollup -c rollup_main.js",
-    "test": "ava --timeout=600s",
-    "tests": "ava --timeout=600s *.test.js"
+    "test": "ava",
+    "tests": "echo ok"
   },
   "contributors": [
     {
@@ -23,10 +23,8 @@
   "keywords": [],
   "license": "MIT",
   "dependencies": {
-    "@jsxcad/algorithm-cgal": "^0.0.79",
-    "@jsxcad/algorithm-color": "^0.0.79",
-    "@jsxcad/algorithm-threejs": "^0.0.79",
-    "@jsxcad/geometry": "^0.0.79",
+    "@jsxcad/api-shape": "^0.0.79",
+    "@jsxcad/convert-threejs": "^0.0.79",
     "@jsxcad/sys": "^0.0.79"
   },
   "devDependencies": {
@@ -42,7 +40,6 @@
     "eslint-plugin-standard": "^4.0.0",
     "rollup": "^2.51.2",
     "rollup-plugin-commonjs": "^9.3.4",
-    "rollup-plugin-hypothetical-windows-fix": "^2.1.1",
     "rollup-plugin-node-builtins": "^2.1.2",
     "rollup-plugin-node-globals": "^1.4.0",
     "rollup-plugin-node-resolve": "^4.2.3"

@@ -85,7 +85,6 @@ export const execute = async (
       });
       // Make sure modules are prepared.
       if (!importsDone) {
-        console.log(`QQ/Imports ${where}`);
         const { importModule } = getApi();
         // The imports we'll need to run these updates.
         const imports = new Set();
@@ -99,14 +98,12 @@ export const execute = async (
         }
         // We could run these in parallel, but let's keep it simple for now.
         for (const path of imports) {
-          console.log(`QQ/Imports ${where}: ${path}`);
           await importModule(path, { evaluate, replay, doRelease: false });
         }
         // At this point the modules should build with a simple replay.
       }
       // Replay anything we can.
       if (!replaysDone) {
-        console.log(`QQ/Replay ${where}`);
         replaysDone = true;
         for (const id of Object.keys(replays)) {
           await replay(replays[id].program, { path });
@@ -114,7 +111,6 @@ export const execute = async (
         }
       }
       // Update what we can.
-      console.log(`QQ/Update ${where}`);
       const unprocessedUpdates = new Set(Object.keys(updates));
       while (unprocessedUpdates.size > 0) {
         const updatePromises = [];
