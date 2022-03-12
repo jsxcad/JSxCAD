@@ -42,6 +42,7 @@ jobs:
             **/*.difference.png
             **/*.observed.*
             **/*.md
+            **/*.stl
             !**/node_modules/**
         env:
           NODE_OPTIONS: --max_old_space_size=4096
