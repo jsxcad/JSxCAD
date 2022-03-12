@@ -64,10 +64,12 @@ test('fromPolygonsWithHolesToTriangles', (t) => {
     },
   ];
 
-  const triangles = fromPolygonsWithHolesToTriangles({ type: 'polygonsWithHoles',
-polygonsWithHoles,
-      plane: [0, 0, 0.9999999999999998, 0],
-      exactPlane: ['0', '0', '24605612895193225/24605612895193228', '0'] });
+  const triangles = fromPolygonsWithHolesToTriangles({
+    type: 'polygonsWithHoles',
+    polygonsWithHoles,
+    plane: [0, 0, 0.9999999999999998, 0],
+    exactPlane: ['0', '0', '24605612895193225/24605612895193228', '0'],
+  });
   t.deepEqual(triangles, [
     {
       points: [

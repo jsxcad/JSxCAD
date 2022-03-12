@@ -814,7 +814,6 @@ const arrangePaths = (
     }
     return polygons;
   } catch (error) {
-    console.log(JSON.stringify({ plane }));
     throw Error(error);
   }
 };
