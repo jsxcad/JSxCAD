@@ -1,6 +1,8 @@
-import { differenceOfSurfaceMeshes } from '@jsxcad/algorithm-cgal';
+import {
+  differenceOfSurfaceMeshes,
+  fromSurfaceMesh,
+} from '@jsxcad/algorithm-cgal';
 import { doesNotOverlap } from './doesNotOverlap.js';
-import { fromSurfaceMeshLazy } from './fromSurfaceMeshLazy.js';
 import { taggedGraph } from '../tagged/taggedGraph.js';
 import { toSurfaceMesh } from './toSurfaceMesh.js';
 
@@ -11,7 +13,7 @@ export const difference = (a, b) => {
   if (doesNotOverlap(a, b)) {
     return a;
   }
-  const result = fromSurfaceMeshLazy(
+  const result = fromSurfaceMesh(
     differenceOfSurfaceMeshes(
       toSurfaceMesh(a.graph),
       a.matrix,

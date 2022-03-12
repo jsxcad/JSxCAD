@@ -1,9 +1,9 @@
 import {
   approximateSurfaceMesh,
+  fromSurfaceMesh,
   simplifySurfaceMesh,
 } from '@jsxcad/algorithm-cgal';
 
-import { fromSurfaceMeshLazy } from './fromSurfaceMeshLazy.js';
 import { taggedGraph } from '../tagged/taggedGraph.js';
 import { toSurfaceMesh } from './toSurfaceMesh.js';
 
@@ -13,7 +13,7 @@ export const simplify = (geometry, options) => {
     case 'simplify':
       return taggedGraph(
         { tags: geometry.tags, matrix: geometry.matrix },
-        fromSurfaceMeshLazy(
+        fromSurfaceMesh(
           simplifySurfaceMesh(
             toSurfaceMesh(geometry.graph),
             geometry.matrix,
@@ -24,7 +24,7 @@ export const simplify = (geometry, options) => {
     case 'approximate':
       return taggedGraph(
         { tags: geometry.tags, matrix: geometry.matrix },
-        fromSurfaceMeshLazy(
+        fromSurfaceMesh(
           approximateSurfaceMesh(
             toSurfaceMesh(geometry.graph),
             geometry.matrix,

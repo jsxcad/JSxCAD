@@ -3,11 +3,12 @@ import {
   STATUS_OK,
   STATUS_UNCHANGED,
   cutSurfaceMeshes,
+  deletePendingSurfaceMeshes,
+  fromSurfaceMesh,
+  toSurfaceMesh,
 } from '@jsxcad/algorithm-cgal';
-import { deletePendingSurfaceMeshes, toSurfaceMesh } from './toSurfaceMesh.js';
 
 import { fromEmpty } from './fromEmpty.js';
-import { fromSurfaceMeshLazy } from './fromSurfaceMeshLazy.js';
 import { taggedGraph } from '../tagged/taggedGraph.js';
 import { taggedSegments } from '../tagged/taggedSegments.js';
 
@@ -49,7 +50,7 @@ export const cut = (targetGraphs, targetSegments, sourceGraphs) => {
           mesh.provenance = 'cut';
           return taggedGraph(
             { tags, matrix, provenance: 'geometry/graph/cut' },
-            fromSurfaceMeshLazy(mesh)
+            fromSurfaceMesh(mesh)
           );
       }
     }

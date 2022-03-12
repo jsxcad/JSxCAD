@@ -1,9 +1,9 @@
 import {
+  fromSurfaceMesh,
   isotropicRemeshingOfSurfaceMesh,
   remeshSurfaceMesh,
 } from '@jsxcad/algorithm-cgal';
 
-import { fromSurfaceMeshLazy } from './fromSurfaceMeshLazy.js';
 import { getNonVoidGraphs } from '../tagged/getNonVoidGraphs.js';
 import { taggedGraph } from '../tagged/taggedGraph.js';
 import { toConcreteGeometry } from './../tagged/toConcreteGeometry.js';
@@ -23,7 +23,7 @@ export const remesh = (
     case 'isotropic': {
       return taggedGraph(
         { tags: geometry.tags, matrix: geometry.matrix },
-        fromSurfaceMeshLazy(
+        fromSurfaceMesh(
           isotropicRemeshingOfSurfaceMesh(
             toSurfaceMesh(geometry.graph),
             geometry.matrix,
@@ -39,7 +39,7 @@ export const remesh = (
     case 'edgeLength':
       return taggedGraph(
         { tags: geometry.tags, matrix: geometry.matrix },
-        fromSurfaceMeshLazy(
+        fromSurfaceMesh(
           remeshSurfaceMesh(
             toSurfaceMesh(geometry.graph),
             geometry.matrix,

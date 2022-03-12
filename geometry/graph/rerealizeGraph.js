@@ -1,5 +1,4 @@
-import { fromSurfaceMeshLazy } from './fromSurfaceMeshLazy.js';
-import { toSurfaceMesh } from './toSurfaceMesh.js';
+import { fromSurfaceMesh, toSurfaceMesh } from '@jsxcad/algorithm-cgal';
 
 export const rerealizeGraph = (graph) =>
-  fromSurfaceMeshLazy(toSurfaceMesh(graph), /* forceNewGraph= */ true);
+  fromSurfaceMesh(toSurfaceMesh(graph), /* forceNewGraph= */ true);

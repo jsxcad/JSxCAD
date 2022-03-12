@@ -1,6 +1,5 @@
-import { fromSurfaceMeshLazy } from './fromSurfaceMeshLazy.js';
+import { fromSurfaceMesh, taperSurfaceMesh } from '@jsxcad/algorithm-cgal';
 import { taggedGraph } from '../tagged/taggedGraph.js';
-import { taperSurfaceMesh } from '@jsxcad/algorithm-cgal';
 import { toSurfaceMesh } from './toSurfaceMesh.js';
 
 export const taper = (
@@ -14,7 +13,7 @@ export const taper = (
 ) =>
   taggedGraph(
     { tags: geometry.tags, matrix: geometry.matrix },
-    fromSurfaceMeshLazy(
+    fromSurfaceMesh(
       taperSurfaceMesh(
         toSurfaceMesh(geometry.graph),
         geometry.matrix,

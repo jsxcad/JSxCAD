@@ -1,5 +1,4 @@
-import { extrudeSurfaceMesh } from '@jsxcad/algorithm-cgal';
-import { fromSurfaceMeshLazy } from './fromSurfaceMeshLazy.js';
+import { extrudeSurfaceMesh, fromSurfaceMesh } from '@jsxcad/algorithm-cgal';
 import { taggedGraph } from '../tagged/taggedGraph.js';
 import { toSurfaceMesh } from './toSurfaceMesh.js';
 
@@ -24,8 +23,5 @@ export const extrude = (geometry, height, depth, normal) => {
   if (!extrudedMesh) {
     console.log(`Extrusion failed`);
   }
-  return taggedGraph(
-    { tags: geometry.tags },
-    fromSurfaceMeshLazy(extrudedMesh)
-  );
+  return taggedGraph({ tags: geometry.tags }, fromSurfaceMesh(extrudedMesh));
 };

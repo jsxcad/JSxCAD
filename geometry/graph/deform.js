@@ -1,6 +1,5 @@
-import { deformSurfaceMesh } from '@jsxcad/algorithm-cgal';
+import { deformSurfaceMesh, fromSurfaceMesh } from '@jsxcad/algorithm-cgal';
 
-import { fromSurfaceMeshLazy } from './fromSurfaceMeshLazy.js';
 import { getNonVoidGraphs } from '../tagged/getNonVoidGraphs.js';
 import { taggedGraph } from '../tagged/taggedGraph.js';
 import { toConcreteGeometry } from './../tagged/toConcreteGeometry.js';
@@ -19,7 +18,7 @@ export const deform = (geometry, entries, iterations, tolerance, alpha) => {
   }
   return taggedGraph(
     { tags: geometry.tags, matrix: geometry.matrix },
-    fromSurfaceMeshLazy(
+    fromSurfaceMesh(
       deformSurfaceMesh(
         toSurfaceMesh(geometry.graph),
         geometry.matrix,

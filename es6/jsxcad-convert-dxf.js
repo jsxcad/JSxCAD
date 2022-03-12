@@ -3151,6 +3151,57 @@ class Circle extends DatabaseObject_1 {
 
 var Circle_1 = Circle;
 
+class Cylinder extends DatabaseObject_1 {
+    /**
+     * @param {number} x - Center x
+     * @param {number} y - Center y
+     * @param {number} z - Center z
+     * @param {number} r - radius
+     * @param {number} thickness - thickness
+     * @param {number} extrusionDirectionX - Extrusion Direction x
+     * @param {number} extrusionDirectionY - Extrusion Direction y
+     * @param {number} extrusionDirectionZ - Extrusion Direction z
+     */
+    constructor(
+        x,
+        y,
+        z,
+        r,
+        thickness,
+        extrusionDirectionX,
+        extrusionDirectionY,
+        extrusionDirectionZ
+    ) {
+        super(["AcDbEntity", "AcDbCircle"]);
+        this.x = x;
+        this.y = y;
+        this.z = z;
+        this.r = r;
+        this.thickness = thickness;
+        this.extrusionDirectionX = extrusionDirectionX,
+        this.extrusionDirectionY = extrusionDirectionY,
+        this.extrusionDirectionZ = extrusionDirectionZ;
+    }
+
+    tags() {
+        const manager = new TagsManager_1();
+
+        manager.addTag(0, "CIRCLE");
+        manager.addTags(super.tags());
+        manager.addTag(8, this.layer.name);
+        manager.addPointTags(this.x, this.y, this.z);
+        manager.addTag(40, this.r);
+        manager.addTag(39, this.thickness);
+        manager.addTag(210, this.extrusionDirectionX);
+        manager.addTag(220, this.extrusionDirectionY);
+        manager.addTag(230, this.extrusionDirectionZ);
+
+        return manager.tags();
+    }
+}
+
+var Cylinder_1 = Cylinder;
+
 const H_ALIGN_CODES = ["left", "center", "right"];
 const V_ALIGN_CODES = ["baseline", "bottom", "middle", "top"];
 
@@ -3743,6 +3794,41 @@ class Drawing {
      */
     drawCircle(x1, y1, r) {
         this.activeLayer.addShape(new Circle_1(x1, y1, r));
+        return this;
+    }
+
+    /**
+     * @param {number} x1 - Center x
+     * @param {number} y1 - Center y
+     * @param {number} z1 - Center z
+     * @param {number} r - radius
+     * @param {number} thickness - thickness
+     * @param {number} extrusionDirectionX - Extrusion Direction x
+     * @param {number} extrusionDirectionY - Extrusion Direction y
+     * @param {number} extrusionDirectionZ - Extrusion Direction z
+     */
+    drawCylinder(
+        x1,
+        y1,
+        z1,
+        r,
+        thickness,
+        extrusionDirectionX,
+        extrusionDirectionY,
+        extrusionDirectionZ
+    ){
+        this.activeLayer.addShape(
+            new Cylinder_1(
+                x1,
+                y1,
+                z1,
+                r,
+                thickness,
+                extrusionDirectionX,
+                extrusionDirectionY,
+                extrusionDirectionZ
+            )
+        );
         return this;
     }
 

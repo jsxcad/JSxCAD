@@ -1,7 +1,9 @@
-import { deletePendingSurfaceMeshes, toSurfaceMesh } from './toSurfaceMesh.js';
-
-import { fromSurfaceMeshLazy } from './fromSurfaceMeshLazy.js';
-import { joinSurfaceMeshes } from '@jsxcad/algorithm-cgal';
+import {
+  deletePendingSurfaceMeshes,
+  fromSurfaceMesh,
+  joinSurfaceMeshes,
+  toSurfaceMesh,
+} from '@jsxcad/algorithm-cgal';
 import { taggedGraph } from '../tagged/taggedGraph.js';
 
 export const join = (targets, sources) => {
@@ -24,7 +26,7 @@ export const join = (targets, sources) => {
   }));
   const { joinedMeshes } = joinSurfaceMeshes(targets, sources);
   const joinedGeometries = joinedMeshes.map(({ matrix, mesh, tags }) =>
-    taggedGraph({ tags, matrix }, fromSurfaceMeshLazy(mesh))
+    taggedGraph({ tags, matrix }, fromSurfaceMesh(mesh))
   );
   deletePendingSurfaceMeshes();
   return joinedGeometries;

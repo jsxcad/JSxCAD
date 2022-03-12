@@ -1,9 +1,9 @@
 import {
+  fromSurfaceMesh,
   fromSurfaceMeshToPolygonsWithHoles,
   separateSurfaceMesh,
 } from '@jsxcad/algorithm-cgal';
 
-import { fromSurfaceMeshLazy } from './fromSurfaceMeshLazy.js';
 import { taggedGraph } from '../tagged/taggedGraph.js';
 import { taggedGroup } from '../tagged/taggedGroup.js';
 import { taggedPolygonsWithHoles } from '../tagged/taggedPolygonsWithHoles.js';
@@ -26,7 +26,7 @@ export const separate = (
       ).map((mesh) =>
         taggedGraph(
           { tags: geometry.tags, matrix: geometry.matrix },
-          fromSurfaceMeshLazy(mesh)
+          fromSurfaceMesh(mesh)
         )
       )
     );

@@ -1,10 +1,10 @@
 import {
+  fromSurfaceMesh,
   smoothShapeOfSurfaceMesh,
   smoothSurfaceMesh,
   subdivideSurfaceMesh,
 } from '@jsxcad/algorithm-cgal';
 
-import { fromSurfaceMeshLazy } from './fromSurfaceMeshLazy.js';
 import { getNonVoidGraphs } from '../tagged/getNonVoidGraphs.js';
 import { taggedGraph } from '../tagged/taggedGraph.js';
 import { toConcreteGeometry } from './../tagged/toConcreteGeometry.js';
@@ -19,7 +19,7 @@ export const smooth = (geometry, options = {}, selections = []) => {
     case 'mesh': {
       return taggedGraph(
         { tags: geometry.tags, matrix: geometry.matrix },
-        fromSurfaceMeshLazy(
+        fromSurfaceMesh(
           smoothSurfaceMesh(
             toSurfaceMesh(geometry.graph),
             geometry.matrix,
@@ -35,7 +35,7 @@ export const smooth = (geometry, options = {}, selections = []) => {
     case 'shape': {
       return taggedGraph(
         { tags: geometry.tags, matrix: geometry.matrix },
-        fromSurfaceMeshLazy(
+        fromSurfaceMesh(
           smoothShapeOfSurfaceMesh(
             toSurfaceMesh(geometry.graph),
             geometry.matrix,
@@ -51,7 +51,7 @@ export const smooth = (geometry, options = {}, selections = []) => {
     case 'subdivide': {
       return taggedGraph(
         { tags: geometry.tags },
-        fromSurfaceMeshLazy(
+        fromSurfaceMesh(
           subdivideSurfaceMesh(toSurfaceMesh(geometry.graph), options)
         )
       );

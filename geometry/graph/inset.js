@@ -9,8 +9,10 @@ export const inset = (
   { segments = 8, step, limit } = {}
 ) => {
   const insetGraphs = [];
-  const { tags, plane, exactPlane } = geometry;
-  for (const { polygonsWithHoles } of toPolygonsWithHoles(geometry)) {
+  const { tags } = geometry;
+  for (const { polygonsWithHoles, plane, exactPlane } of toPolygonsWithHoles(
+    geometry
+  )) {
     for (const polygonWithHoles of polygonsWithHoles) {
       for (const insetPolygon of insetOfPolygonWithHoles(
         initial,

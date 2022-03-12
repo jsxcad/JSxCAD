@@ -36,6 +36,8 @@ export {
   STATUS_ZERO_THICKNESS,
   STATUS_UNCHANGED,
 } from './status.js';
+export { deletePendingSurfaceMeshes, toSurfaceMesh } from './toSurfaceMesh.js';
+export { graphSymbol, surfaceMeshSymbol } from './symbols.js';
 export { clipSurfaceMeshes } from './clipSurfaceMeshes.js';
 export { computeCentroidOfSurfaceMesh } from './computeCentroidOfSurfaceMesh.js';
 export { computeNormalOfSurfaceMesh } from './computeNormalOfSurfaceMesh.js';
@@ -45,7 +47,7 @@ export { deformSurfaceMesh } from './deformSurfaceMesh.js';
 export { deleteSurfaceMesh } from './deleteSurfaceMesh.js';
 export { demeshSurfaceMesh } from './demeshSurfaceMesh.js';
 export { deserializeSurfaceMesh } from './deserializeSurfaceMesh.js';
-export { disjointSurfaceMeshes } from './disjointSurfaceMeshes.js';
+export { disjoint } from './disjoint.js';
 export { doesSelfIntersectOfSurfaceMesh } from './doesSelfIntersectOfSurfaceMesh.js';
 export { eachPointOfSurfaceMesh } from './eachPointOfSurfaceMesh.js';
 export { extrudeSurfaceMesh } from './extrudeSurfaceMesh.js';
@@ -58,6 +60,7 @@ export { fromPointsToAlphaShape2AsPolygonSegments } from './fromPointsToAlphaSha
 export { fromPointsToConvexHullAsSurfaceMesh } from './fromPointsToConvexHullAsSurfaceMesh.js';
 export { fromPointsToSurfaceMesh } from './fromPointsToSurfaceMesh.js';
 export { fromPolygonsToSurfaceMesh } from './fromPolygonsToSurfaceMesh.js';
+export { fromSurfaceMesh } from './fromSurfaceMesh.js';
 export { fromSurfaceMeshEmitBoundingBox } from './fromSurfaceMeshEmitBoundingBox.js';
 export { fromSurfaceMeshToGraph } from './fromSurfaceMeshToGraph.js';
 export { fromSurfaceMeshToLazyGraph } from './fromSurfaceMeshToLazyGraph.js';

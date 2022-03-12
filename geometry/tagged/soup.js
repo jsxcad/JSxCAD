@@ -28,6 +28,9 @@ export const soup = (
     switch (geometry.type) {
       case 'graph': {
         const { graph } = geometry;
+        if (!graph) {
+          console.log(JSON.stringify(geometry));
+        }
         if (graph.isEmpty) {
           return taggedGroup({});
         } else {

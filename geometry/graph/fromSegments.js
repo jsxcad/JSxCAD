@@ -1,12 +1,11 @@
 import {
   arrangeSegmentsIntoTriangles,
-  // fitPlaneToPoints,
   fromPolygonsToSurfaceMesh,
+  fromSurfaceMesh,
 } from '@jsxcad/algorithm-cgal';
 
 import { deduplicate } from '../path/deduplicate.js';
 import { flip } from '../path/flip.js';
-import { fromSurfaceMeshLazy } from './fromSurfaceMeshLazy.js';
 import { isClockwise } from '../path/isClockwise.js';
 import { taggedGraph } from '../tagged/taggedGraph.js';
 
@@ -40,6 +39,6 @@ export const fromSegments = ({ tags }, segments, plane) => {
   }
   return taggedGraph(
     { tags },
-    fromSurfaceMeshLazy(fromPolygonsToSurfaceMesh(orientedPolygons))
+    fromSurfaceMesh(fromPolygonsToSurfaceMesh(orientedPolygons))
   );
 };

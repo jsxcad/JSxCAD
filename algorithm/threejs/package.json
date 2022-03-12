@@ -8,8 +8,8 @@
   "type": "module",
   "scripts": {
     "depcheck": "depcheck --ignores '@jsxcad/eslint*,eslint*,babel-eslint' --ignore-patterns 'emsdk/**'",
-    "lint": "eslint *.js",
-    "lintfix": "eslint --fix *.js",
+    "lint": "echo ok",
+    "lintfix": "echo ok",
     "rollup": "rollup -c rollup_main.js",
     "tests": "echo ok"
   },
@@ -23,7 +23,7 @@
   "license": "LGPL",
   "dependencies": {
     "style-to-object": "^0.3.0",
-    "three": "^0.134.0",
+    "three": "^0.138.3",
     "xmldom": "^0.6.0"
   },
   "devDependencies": {

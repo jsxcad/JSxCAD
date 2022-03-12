@@ -7,6 +7,7 @@ algorithm/cgal/emsdk*
 algorithm/cgal/gmp*
 algorithm/cgal/mpfr*
 algorithm/cgal/eigen*
+algorithm/threejs/*
 dist
 js-angusj-clipperjs-web
 molecule-full-expected.js

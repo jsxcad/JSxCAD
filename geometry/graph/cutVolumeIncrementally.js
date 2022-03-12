@@ -1,5 +1,7 @@
-import { cutClosedSurfaceMeshIncrementally } from '@jsxcad/algorithm-cgal';
-import { fromSurfaceMeshLazy } from './fromSurfaceMeshLazy.js';
+import {
+  cutClosedSurfaceMeshIncrementally,
+  fromSurfaceMesh,
+} from '@jsxcad/algorithm-cgal';
 import { taggedGraph } from '../tagged/taggedGraph.js';
 import { toSurfaceMesh } from './toSurfaceMesh.js';
 
@@ -7,7 +9,7 @@ export const cutVolumeIncrementally = (a, check, cuts) => {
   if (a.graph.isEmpty) {
     return a;
   }
-  const result = fromSurfaceMeshLazy(
+  const result = fromSurfaceMesh(
     cutClosedSurfaceMeshIncrementally(
       toSurfaceMesh(a.graph),
       a.matrix,

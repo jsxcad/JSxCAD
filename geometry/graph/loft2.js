@@ -1,12 +1,14 @@
-import { fromSurfaceMeshLazy } from './fromSurfaceMeshLazy.js';
-import { loftBetweenSurfaceMeshes } from '@jsxcad/algorithm-cgal';
+import {
+  fromSurfaceMesh,
+  loftBetweenSurfaceMeshes,
+} from '@jsxcad/algorithm-cgal';
 import { taggedGraph } from '../tagged/taggedGraph.js';
 import { toSurfaceMesh } from './toSurfaceMesh.js';
 
 export const loft2 = (a, b) =>
   taggedGraph(
     { tags: a.tags },
-    fromSurfaceMeshLazy(
+    fromSurfaceMesh(
       loftBetweenSurfaceMeshes(
         toSurfaceMesh(a.graph),
         a.matrix,

@@ -1,5 +1,7 @@
-import { fromSurfaceMeshLazy } from './fromSurfaceMeshLazy.js';
-import { minkowskiShellOfSurfaceMeshes } from '@jsxcad/algorithm-cgal';
+import {
+  fromSurfaceMesh,
+  minkowskiShellOfSurfaceMeshes,
+} from '@jsxcad/algorithm-cgal';
 import { taggedGraph } from '../tagged/taggedGraph.js';
 import { toSurfaceMesh } from './toSurfaceMesh.js';
 
@@ -9,7 +11,7 @@ export const minkowskiShell = ({ tags }, a, b) => {
   }
   return taggedGraph(
     { tags },
-    fromSurfaceMeshLazy(
+    fromSurfaceMesh(
       minkowskiShellOfSurfaceMeshes(
         toSurfaceMesh(a.graph),
         a.matrix,
