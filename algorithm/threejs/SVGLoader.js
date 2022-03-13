@@ -62,7 +62,7 @@ class SVGLoader extends Loader {
 
       const transform = getNodeTransform(node);
 
-      let traverseChildNodes = true;
+      let isDefsNode = false;
 
       let path = null;
 
@@ -114,12 +114,15 @@ class SVGLoader extends Loader {
           break;
 
         case 'defs':
-          traverseChildNodes = false;
+          isDefsNode = true;
           break;
 
         case 'use':
           style = parseStyle(node, style);
-          const usedNodeId = node.href.baseVal.substring(1);
+
+          const href =
+            node.getAttributeNS('http://www.w3.org/1999/xlink', 'href') || '';
+          const usedNodeId = href.substring(1);
           const usedNode = node.viewportElement.getElementById(usedNodeId);
           if (usedNode) {
             parseNode(usedNode, style);
@@ -148,12 +151,23 @@ class SVGLoader extends Loader {
         path.userData = { node: node, style: style };
       }
 
-      if (traverseChildNodes) {
-        const nodes = node.childNodes;
+      const childNodes = node.childNodes;
 
-        for (let i = 0; i < nodes.length; i++) {
-          parseNode(nodes[i], style);
+      for (let i = 0; i < childNodes.length; i++) {
+        const node = childNodes[i];
+
+        if (
+          isDefsNode &&
+          node.nodeName !== 'style' &&
+          node.nodeName !== 'defs'
+        ) {
+          // Ignore everything in defs except CSS style definitions
+          // and nested defs, because it is OK by the standard to have
+          // <style/> there.
+          continue;
         }
+
+        parseNode(node, style);
       }
 
       if (transform) {
@@ -183,399 +197,398 @@ class SVGLoader extends Loader {
 
       const commands = d.match(/[a-df-z][^a-df-z]*/gi);
 
-      for (let i = 0, l = commands.length; i < l; i++) {
-        const command = commands[i];
+      if (commands)
+        for (let i = 0, l = commands.length; i < l; i++) {
+          const command = commands[i];
 
-        const type = command.charAt(0);
-        const data = command.substr(1).trim();
+          const type = command.charAt(0);
+          const data = command.slice(1).trim();
 
-        if (isFirstPoint === true) {
-          doSetFirstPoint = true;
-          isFirstPoint = false;
-        }
+          if (isFirstPoint === true) {
+            doSetFirstPoint = true;
+            isFirstPoint = false;
+          }
 
-        let numbers;
+          let numbers;
 
-        switch (type) {
-          case 'M':
-            numbers = parseFloats(data);
-            for (let j = 0, jl = numbers.length; j < jl; j += 2) {
-              point.x = numbers[j + 0];
-              point.y = numbers[j + 1];
-              control.x = point.x;
-              control.y = point.y;
+          switch (type) {
+            case 'M':
+              numbers = parseFloats(data);
+              for (let j = 0, jl = numbers.length; j < jl; j += 2) {
+                point.x = numbers[j + 0];
+                point.y = numbers[j + 1];
+                control.x = point.x;
+                control.y = point.y;
 
-              if (j === 0) {
-                path.moveTo(point.x, point.y);
-              } else {
+                if (j === 0) {
+                  path.moveTo(point.x, point.y);
+                } else {
+                  path.lineTo(point.x, point.y);
+                }
+
+                if (j === 0) firstPoint.copy(point);
+              }
+
+              break;
+
+            case 'H':
+              numbers = parseFloats(data);
+
+              for (let j = 0, jl = numbers.length; j < jl; j++) {
+                point.x = numbers[j];
+                control.x = point.x;
+                control.y = point.y;
                 path.lineTo(point.x, point.y);
+
+                if (j === 0 && doSetFirstPoint === true) firstPoint.copy(point);
               }
 
-              if (j === 0 && doSetFirstPoint === true) firstPoint.copy(point);
-            }
+              break;
 
-            break;
+            case 'V':
+              numbers = parseFloats(data);
 
-          case 'H':
-            numbers = parseFloats(data);
-
-            for (let j = 0, jl = numbers.length; j < jl; j++) {
-              point.x = numbers[j];
-              control.x = point.x;
-              control.y = point.y;
-              path.lineTo(point.x, point.y);
-
-              if (j === 0 && doSetFirstPoint === true) firstPoint.copy(point);
-            }
-
-            break;
-
-          case 'V':
-            numbers = parseFloats(data);
-
-            for (let j = 0, jl = numbers.length; j < jl; j++) {
-              point.y = numbers[j];
-              control.x = point.x;
-              control.y = point.y;
-              path.lineTo(point.x, point.y);
-
-              if (j === 0 && doSetFirstPoint === true) firstPoint.copy(point);
-            }
-
-            break;
-
-          case 'L':
-            numbers = parseFloats(data);
-
-            for (let j = 0, jl = numbers.length; j < jl; j += 2) {
-              point.x = numbers[j + 0];
-              point.y = numbers[j + 1];
-              control.x = point.x;
-              control.y = point.y;
-              path.lineTo(point.x, point.y);
-
-              if (j === 0 && doSetFirstPoint === true) firstPoint.copy(point);
-            }
-
-            break;
-
-          case 'C':
-            numbers = parseFloats(data);
-
-            for (let j = 0, jl = numbers.length; j < jl; j += 6) {
-              path.bezierCurveTo(
-                numbers[j + 0],
-                numbers[j + 1],
-                numbers[j + 2],
-                numbers[j + 3],
-                numbers[j + 4],
-                numbers[j + 5]
-              );
-              control.x = numbers[j + 2];
-              control.y = numbers[j + 3];
-              point.x = numbers[j + 4];
-              point.y = numbers[j + 5];
-
-              if (j === 0 && doSetFirstPoint === true) firstPoint.copy(point);
-            }
-
-            break;
-
-          case 'S':
-            numbers = parseFloats(data);
-
-            for (let j = 0, jl = numbers.length; j < jl; j += 4) {
-              path.bezierCurveTo(
-                getReflection(point.x, control.x),
-                getReflection(point.y, control.y),
-                numbers[j + 0],
-                numbers[j + 1],
-                numbers[j + 2],
-                numbers[j + 3]
-              );
-              control.x = numbers[j + 0];
-              control.y = numbers[j + 1];
-              point.x = numbers[j + 2];
-              point.y = numbers[j + 3];
-
-              if (j === 0 && doSetFirstPoint === true) firstPoint.copy(point);
-            }
-
-            break;
-
-          case 'Q':
-            numbers = parseFloats(data);
-
-            for (let j = 0, jl = numbers.length; j < jl; j += 4) {
-              path.quadraticCurveTo(
-                numbers[j + 0],
-                numbers[j + 1],
-                numbers[j + 2],
-                numbers[j + 3]
-              );
-              control.x = numbers[j + 0];
-              control.y = numbers[j + 1];
-              point.x = numbers[j + 2];
-              point.y = numbers[j + 3];
-
-              if (j === 0 && doSetFirstPoint === true) firstPoint.copy(point);
-            }
-
-            break;
-
-          case 'T':
-            numbers = parseFloats(data);
-
-            for (let j = 0, jl = numbers.length; j < jl; j += 2) {
-              const rx = getReflection(point.x, control.x);
-              const ry = getReflection(point.y, control.y);
-              path.quadraticCurveTo(rx, ry, numbers[j + 0], numbers[j + 1]);
-              control.x = rx;
-              control.y = ry;
-              point.x = numbers[j + 0];
-              point.y = numbers[j + 1];
-
-              if (j === 0 && doSetFirstPoint === true) firstPoint.copy(point);
-            }
-
-            break;
-
-          case 'A':
-            numbers = parseFloats(data, [3, 4], 7);
-
-            for (let j = 0, jl = numbers.length; j < jl; j += 7) {
-              // skip command if start point == end point
-              if (numbers[j + 5] == point.x && numbers[j + 6] == point.y) {
-                continue;
-              }
-
-              const start = point.clone();
-              point.x = numbers[j + 5];
-              point.y = numbers[j + 6];
-              control.x = point.x;
-              control.y = point.y;
-              parseArcCommand(
-                path,
-                numbers[j],
-                numbers[j + 1],
-                numbers[j + 2],
-                numbers[j + 3],
-                numbers[j + 4],
-                start,
-                point
-              );
-
-              if (j === 0 && doSetFirstPoint === true) firstPoint.copy(point);
-            }
-
-            break;
-
-          case 'm':
-            numbers = parseFloats(data);
-
-            for (let j = 0, jl = numbers.length; j < jl; j += 2) {
-              point.x += numbers[j + 0];
-              point.y += numbers[j + 1];
-              control.x = point.x;
-              control.y = point.y;
-
-              if (j === 0) {
-                path.moveTo(point.x, point.y);
-              } else {
+              for (let j = 0, jl = numbers.length; j < jl; j++) {
+                point.y = numbers[j];
+                control.x = point.x;
+                control.y = point.y;
                 path.lineTo(point.x, point.y);
+
+                if (j === 0 && doSetFirstPoint === true) firstPoint.copy(point);
               }
 
-              if (j === 0 && doSetFirstPoint === true) firstPoint.copy(point);
-            }
+              break;
 
-            break;
+            case 'L':
+              numbers = parseFloats(data);
 
-          case 'h':
-            numbers = parseFloats(data);
+              for (let j = 0, jl = numbers.length; j < jl; j += 2) {
+                point.x = numbers[j + 0];
+                point.y = numbers[j + 1];
+                control.x = point.x;
+                control.y = point.y;
+                path.lineTo(point.x, point.y);
 
-            for (let j = 0, jl = numbers.length; j < jl; j++) {
-              point.x += numbers[j];
-              control.x = point.x;
-              control.y = point.y;
-              path.lineTo(point.x, point.y);
+                if (j === 0 && doSetFirstPoint === true) firstPoint.copy(point);
+              }
 
-              if (j === 0 && doSetFirstPoint === true) firstPoint.copy(point);
-            }
+              break;
 
-            break;
+            case 'C':
+              numbers = parseFloats(data);
 
-          case 'v':
-            numbers = parseFloats(data);
+              for (let j = 0, jl = numbers.length; j < jl; j += 6) {
+                path.bezierCurveTo(
+                  numbers[j + 0],
+                  numbers[j + 1],
+                  numbers[j + 2],
+                  numbers[j + 3],
+                  numbers[j + 4],
+                  numbers[j + 5]
+                );
+                control.x = numbers[j + 2];
+                control.y = numbers[j + 3];
+                point.x = numbers[j + 4];
+                point.y = numbers[j + 5];
 
-            for (let j = 0, jl = numbers.length; j < jl; j++) {
-              point.y += numbers[j];
-              control.x = point.x;
-              control.y = point.y;
-              path.lineTo(point.x, point.y);
+                if (j === 0 && doSetFirstPoint === true) firstPoint.copy(point);
+              }
 
-              if (j === 0 && doSetFirstPoint === true) firstPoint.copy(point);
-            }
+              break;
 
-            break;
+            case 'S':
+              numbers = parseFloats(data);
 
-          case 'l':
-            numbers = parseFloats(data);
+              for (let j = 0, jl = numbers.length; j < jl; j += 4) {
+                path.bezierCurveTo(
+                  getReflection(point.x, control.x),
+                  getReflection(point.y, control.y),
+                  numbers[j + 0],
+                  numbers[j + 1],
+                  numbers[j + 2],
+                  numbers[j + 3]
+                );
+                control.x = numbers[j + 0];
+                control.y = numbers[j + 1];
+                point.x = numbers[j + 2];
+                point.y = numbers[j + 3];
 
-            for (let j = 0, jl = numbers.length; j < jl; j += 2) {
-              point.x += numbers[j + 0];
-              point.y += numbers[j + 1];
-              control.x = point.x;
-              control.y = point.y;
-              path.lineTo(point.x, point.y);
+                if (j === 0 && doSetFirstPoint === true) firstPoint.copy(point);
+              }
 
-              if (j === 0 && doSetFirstPoint === true) firstPoint.copy(point);
-            }
+              break;
 
-            break;
+            case 'Q':
+              numbers = parseFloats(data);
 
-          case 'c':
-            numbers = parseFloats(data);
+              for (let j = 0, jl = numbers.length; j < jl; j += 4) {
+                path.quadraticCurveTo(
+                  numbers[j + 0],
+                  numbers[j + 1],
+                  numbers[j + 2],
+                  numbers[j + 3]
+                );
+                control.x = numbers[j + 0];
+                control.y = numbers[j + 1];
+                point.x = numbers[j + 2];
+                point.y = numbers[j + 3];
 
-            for (let j = 0, jl = numbers.length; j < jl; j += 6) {
-              path.bezierCurveTo(
-                point.x + numbers[j + 0],
-                point.y + numbers[j + 1],
-                point.x + numbers[j + 2],
-                point.y + numbers[j + 3],
-                point.x + numbers[j + 4],
-                point.y + numbers[j + 5]
-              );
-              control.x = point.x + numbers[j + 2];
-              control.y = point.y + numbers[j + 3];
-              point.x += numbers[j + 4];
-              point.y += numbers[j + 5];
+                if (j === 0 && doSetFirstPoint === true) firstPoint.copy(point);
+              }
 
-              if (j === 0 && doSetFirstPoint === true) firstPoint.copy(point);
-            }
+              break;
 
-            break;
+            case 'T':
+              numbers = parseFloats(data);
 
-          case 's':
-            numbers = parseFloats(data);
+              for (let j = 0, jl = numbers.length; j < jl; j += 2) {
+                const rx = getReflection(point.x, control.x);
+                const ry = getReflection(point.y, control.y);
+                path.quadraticCurveTo(rx, ry, numbers[j + 0], numbers[j + 1]);
+                control.x = rx;
+                control.y = ry;
+                point.x = numbers[j + 0];
+                point.y = numbers[j + 1];
 
-            for (let j = 0, jl = numbers.length; j < jl; j += 4) {
-              path.bezierCurveTo(
-                getReflection(point.x, control.x),
-                getReflection(point.y, control.y),
-                point.x + numbers[j + 0],
-                point.y + numbers[j + 1],
-                point.x + numbers[j + 2],
-                point.y + numbers[j + 3]
-              );
-              control.x = point.x + numbers[j + 0];
-              control.y = point.y + numbers[j + 1];
-              point.x += numbers[j + 2];
-              point.y += numbers[j + 3];
+                if (j === 0 && doSetFirstPoint === true) firstPoint.copy(point);
+              }
 
-              if (j === 0 && doSetFirstPoint === true) firstPoint.copy(point);
-            }
+              break;
 
-            break;
+            case 'A':
+              numbers = parseFloats(data, [3, 4], 7);
 
-          case 'q':
-            numbers = parseFloats(data);
+              for (let j = 0, jl = numbers.length; j < jl; j += 7) {
+                // skip command if start point == end point
+                if (numbers[j + 5] == point.x && numbers[j + 6] == point.y)
+                  continue;
 
-            for (let j = 0, jl = numbers.length; j < jl; j += 4) {
-              path.quadraticCurveTo(
-                point.x + numbers[j + 0],
-                point.y + numbers[j + 1],
-                point.x + numbers[j + 2],
-                point.y + numbers[j + 3]
-              );
-              control.x = point.x + numbers[j + 0];
-              control.y = point.y + numbers[j + 1];
-              point.x += numbers[j + 2];
-              point.y += numbers[j + 3];
+                const start = point.clone();
+                point.x = numbers[j + 5];
+                point.y = numbers[j + 6];
+                control.x = point.x;
+                control.y = point.y;
+                parseArcCommand(
+                  path,
+                  numbers[j],
+                  numbers[j + 1],
+                  numbers[j + 2],
+                  numbers[j + 3],
+                  numbers[j + 4],
+                  start,
+                  point
+                );
 
-              if (j === 0 && doSetFirstPoint === true) firstPoint.copy(point);
-            }
+                if (j === 0 && doSetFirstPoint === true) firstPoint.copy(point);
+              }
 
-            break;
+              break;
 
-          case 't':
-            numbers = parseFloats(data);
+            case 'm':
+              numbers = parseFloats(data);
 
-            for (let j = 0, jl = numbers.length; j < jl; j += 2) {
-              const rx = getReflection(point.x, control.x);
-              const ry = getReflection(point.y, control.y);
-              path.quadraticCurveTo(
-                rx,
-                ry,
-                point.x + numbers[j + 0],
-                point.y + numbers[j + 1]
-              );
-              control.x = rx;
-              control.y = ry;
-              point.x = point.x + numbers[j + 0];
-              point.y = point.y + numbers[j + 1];
+              for (let j = 0, jl = numbers.length; j < jl; j += 2) {
+                point.x += numbers[j + 0];
+                point.y += numbers[j + 1];
+                control.x = point.x;
+                control.y = point.y;
 
-              if (j === 0 && doSetFirstPoint === true) firstPoint.copy(point);
-            }
+                if (j === 0) {
+                  path.moveTo(point.x, point.y);
+                } else {
+                  path.lineTo(point.x, point.y);
+                }
 
-            break;
+                if (j === 0) firstPoint.copy(point);
+              }
 
-          case 'a':
-            numbers = parseFloats(data, [3, 4], 7);
+              break;
 
-            for (let j = 0, jl = numbers.length; j < jl; j += 7) {
-              // skip command if no displacement
-              if (numbers[j + 5] == 0 && numbers[j + 6] == 0) continue;
+            case 'h':
+              numbers = parseFloats(data);
 
-              const start = point.clone();
-              point.x += numbers[j + 5];
-              point.y += numbers[j + 6];
-              control.x = point.x;
-              control.y = point.y;
-              parseArcCommand(
-                path,
-                numbers[j],
-                numbers[j + 1],
-                numbers[j + 2],
-                numbers[j + 3],
-                numbers[j + 4],
-                start,
-                point
-              );
+              for (let j = 0, jl = numbers.length; j < jl; j++) {
+                point.x += numbers[j];
+                control.x = point.x;
+                control.y = point.y;
+                path.lineTo(point.x, point.y);
 
-              if (j === 0 && doSetFirstPoint === true) firstPoint.copy(point);
-            }
+                if (j === 0 && doSetFirstPoint === true) firstPoint.copy(point);
+              }
 
-            break;
+              break;
 
-          case 'Z':
-          case 'z':
-            path.currentPath.autoClose = true;
+            case 'v':
+              numbers = parseFloats(data);
 
-            if (path.currentPath.curves.length > 0) {
-              // Reset point to beginning of Path
-              point.copy(firstPoint);
-              path.currentPath.currentPoint.copy(point);
-              isFirstPoint = true;
-            }
+              for (let j = 0, jl = numbers.length; j < jl; j++) {
+                point.y += numbers[j];
+                control.x = point.x;
+                control.y = point.y;
+                path.lineTo(point.x, point.y);
 
-            break;
+                if (j === 0 && doSetFirstPoint === true) firstPoint.copy(point);
+              }
 
-          default:
-            console.warn(command);
+              break;
+
+            case 'l':
+              numbers = parseFloats(data);
+
+              for (let j = 0, jl = numbers.length; j < jl; j += 2) {
+                point.x += numbers[j + 0];
+                point.y += numbers[j + 1];
+                control.x = point.x;
+                control.y = point.y;
+                path.lineTo(point.x, point.y);
+
+                if (j === 0 && doSetFirstPoint === true) firstPoint.copy(point);
+              }
+
+              break;
+
+            case 'c':
+              numbers = parseFloats(data);
+
+              for (let j = 0, jl = numbers.length; j < jl; j += 6) {
+                path.bezierCurveTo(
+                  point.x + numbers[j + 0],
+                  point.y + numbers[j + 1],
+                  point.x + numbers[j + 2],
+                  point.y + numbers[j + 3],
+                  point.x + numbers[j + 4],
+                  point.y + numbers[j + 5]
+                );
+                control.x = point.x + numbers[j + 2];
+                control.y = point.y + numbers[j + 3];
+                point.x += numbers[j + 4];
+                point.y += numbers[j + 5];
+
+                if (j === 0 && doSetFirstPoint === true) firstPoint.copy(point);
+              }
+
+              break;
+
+            case 's':
+              numbers = parseFloats(data);
+
+              for (let j = 0, jl = numbers.length; j < jl; j += 4) {
+                path.bezierCurveTo(
+                  getReflection(point.x, control.x),
+                  getReflection(point.y, control.y),
+                  point.x + numbers[j + 0],
+                  point.y + numbers[j + 1],
+                  point.x + numbers[j + 2],
+                  point.y + numbers[j + 3]
+                );
+                control.x = point.x + numbers[j + 0];
+                control.y = point.y + numbers[j + 1];
+                point.x += numbers[j + 2];
+                point.y += numbers[j + 3];
+
+                if (j === 0 && doSetFirstPoint === true) firstPoint.copy(point);
+              }
+
+              break;
+
+            case 'q':
+              numbers = parseFloats(data);
+
+              for (let j = 0, jl = numbers.length; j < jl; j += 4) {
+                path.quadraticCurveTo(
+                  point.x + numbers[j + 0],
+                  point.y + numbers[j + 1],
+                  point.x + numbers[j + 2],
+                  point.y + numbers[j + 3]
+                );
+                control.x = point.x + numbers[j + 0];
+                control.y = point.y + numbers[j + 1];
+                point.x += numbers[j + 2];
+                point.y += numbers[j + 3];
+
+                if (j === 0 && doSetFirstPoint === true) firstPoint.copy(point);
+              }
+
+              break;
+
+            case 't':
+              numbers = parseFloats(data);
+
+              for (let j = 0, jl = numbers.length; j < jl; j += 2) {
+                const rx = getReflection(point.x, control.x);
+                const ry = getReflection(point.y, control.y);
+                path.quadraticCurveTo(
+                  rx,
+                  ry,
+                  point.x + numbers[j + 0],
+                  point.y + numbers[j + 1]
+                );
+                control.x = rx;
+                control.y = ry;
+                point.x = point.x + numbers[j + 0];
+                point.y = point.y + numbers[j + 1];
+
+                if (j === 0 && doSetFirstPoint === true) firstPoint.copy(point);
+              }
+
+              break;
+
+            case 'a':
+              numbers = parseFloats(data, [3, 4], 7);
+
+              for (let j = 0, jl = numbers.length; j < jl; j += 7) {
+                // skip command if no displacement
+                if (numbers[j + 5] == 0 && numbers[j + 6] == 0) continue;
+
+                const start = point.clone();
+                point.x += numbers[j + 5];
+                point.y += numbers[j + 6];
+                control.x = point.x;
+                control.y = point.y;
+                parseArcCommand(
+                  path,
+                  numbers[j],
+                  numbers[j + 1],
+                  numbers[j + 2],
+                  numbers[j + 3],
+                  numbers[j + 4],
+                  start,
+                  point
+                );
+
+                if (j === 0 && doSetFirstPoint === true) firstPoint.copy(point);
+              }
+
+              break;
+
+            case 'Z':
+            case 'z':
+              path.currentPath.autoClose = true;
+
+              if (path.currentPath.curves.length > 0) {
+                // Reset point to beginning of Path
+                point.copy(firstPoint);
+                path.currentPath.currentPoint.copy(point);
+                isFirstPoint = true;
+              }
+
+              break;
+
+            default:
+              console.warn(command);
+          }
+
+          // console.log( type, parseFloats( data ), parseFloats( data ).length  )
+
+          doSetFirstPoint = false;
         }
-
-        // console.log( type, parseFloats( data ), parseFloats( data ).length  )
-
-        doSetFirstPoint = false;
-      }
 
       return path;
     }
 
     function parseCSSStylesheet(node) {
-      if (!node.sheet || !node.sheet.cssRules || !node.sheet.cssRules.length) {
+      if (!node.sheet || !node.sheet.cssRules || !node.sheet.cssRules.length)
         return;
-      }
 
       for (let i = 0; i < node.sheet.cssRules.length; i++) {
         const stylesheet = node.sheet.cssRules[i];
@@ -588,9 +601,14 @@ class SVGLoader extends Loader {
           .map((i) => i.trim());
 
         for (let j = 0; j < selectorList.length; j++) {
+          // Remove empty rules
+          const definitions = Object.fromEntries(
+            Object.entries(stylesheet.style).filter(([, v]) => v !== '')
+          );
+
           stylesheets[selectorList[j]] = Object.assign(
             stylesheets[selectorList[j]] || {},
-            stylesheet.style
+            definitions
           );
         }
       }
@@ -901,27 +919,22 @@ class SVGLoader extends Loader {
       }
 
       function addStyle(svgName, jsName, adjustFunction) {
-        if (adjustFunction === undefined) {
+        if (adjustFunction === undefined)
           adjustFunction = function copy(v) {
-            if (v.startsWith('url')) {
+            if (v.startsWith('url'))
               console.warn(
                 'SVGLoader: url access in attributes is not implemented.'
               );
-            }
 
             return v;
           };
-        }
 
-        if (node.hasAttribute(svgName)) {
+        if (node.hasAttribute(svgName))
           style[jsName] = adjustFunction(node.getAttribute(svgName));
-        }
-        if (stylesheetStyles[svgName]) {
+        if (stylesheetStyles[svgName])
           style[jsName] = adjustFunction(stylesheetStyles[svgName]);
-        }
-        if (node.style && node.style[svgName] && node.style[svgName] !== '') {
+        if (node.style && node.style[svgName] && node.style[svgName] !== '')
           style[jsName] = adjustFunction(node.style[svgName]);
-        }
       }
 
       function clamp(v) {
@@ -985,8 +998,8 @@ class SVGLoader extends Loader {
 
       let state = SEP;
       let seenComma = true;
-      let number = '';
-      let exponent = '';
+      let number = '',
+        exponent = '';
       const result = [];
 
       function throwSyntaxError(current, i, partial) {
@@ -1214,7 +1227,7 @@ class SVGLoader extends Loader {
         }
       }
 
-      let scale;
+      let scale = undefined;
 
       if (theUnit === 'px' && scope.defaultUnit !== 'px') {
         // Conversion scale from  pixels to inches, then to default units
@@ -1284,11 +1297,9 @@ class SVGLoader extends Loader {
           const closeParPos = transformText.length;
 
           if (openParPos > 0 && openParPos < closeParPos) {
-            const transformType = transformText.substr(0, openParPos);
+            const transformType = transformText.slice(0, openParPos);
 
-            const array = parseFloats(
-              transformText.substr(openParPos + 1, closeParPos - openParPos - 1)
-            );
+            const array = parseFloats(transformText.slice(openParPos + 1));
 
             currentTransform.identity();
 
@@ -1444,7 +1455,7 @@ class SVGLoader extends Loader {
             transfVec2(curve.v2);
           } else if (curve.isEllipseCurve) {
             if (isRotated) {
-              console.warn(
+              console.log(
                 'SVGLoader: Elliptic arc or ellipse rotation or skewing is not implemented.'
               );
             }
@@ -1552,16 +1563,16 @@ class SVGLoader extends Loader {
         t2 < 0 ||
         t2 > 1
       ) {
-        // 1. lines are parallel or edges don't intersect
+        //1. lines are parallel or edges don't intersect
 
         return null;
       } else if (nom1 === 0 && denom === 0) {
-        // 2. lines are colinear
+        //2. lines are colinear
 
-        // check if endpoints of edge2 (b0-b1) lies on edge1 (a0-a1)
+        //check if endpoints of edge2 (b0-b1) lies on edge1 (a0-a1)
         for (let i = 0; i < 2; i++) {
           classifyPoint(i === 0 ? b0 : b1, a0, a1);
-          // find position of this endpoints relatively to edge1
+          //find position of this endpoints relatively to edge1
           if (classifyResult.loc == IntersectionLocationType.ORIGIN) {
             const point = i === 0 ? b0 : b1;
             return { x: point.x, y: point.y, t: classifyResult.t };
@@ -1574,7 +1585,7 @@ class SVGLoader extends Loader {
 
         return null;
       } else {
-        // 3. edges intersect
+        //3. edges intersect
 
         for (let i = 0; i < 2; i++) {
           classifyPoint(i === 0 ? b0 : b1, a0, a1);
@@ -1773,7 +1784,7 @@ class SVGLoader extends Loader {
       stack.push(simplePath.identifier);
 
       if (_fillRule === 'evenodd') {
-        const isHole = stack.length % 2 === 0;
+        const isHole = stack.length % 2 === 0 ? true : false;
         const isHoleFor = stack[stack.length - 2];
 
         return {
@@ -1830,7 +1841,7 @@ class SVGLoader extends Loader {
       let maxX = -BIGNUMBER;
       let minX = BIGNUMBER;
 
-      // points.forEach(p => p.y *= -1);
+      //points.forEach(p => p.y *= -1);
 
       for (let i = 0; i < points.length; i++) {
         const p = points[i];
@@ -1862,6 +1873,7 @@ class SVGLoader extends Loader {
       }
 
       return {
+        curves: p.curves,
         points: points,
         isCW: ShapeUtils.isClockWise(points),
         identifier: identifier++,
@@ -1887,11 +1899,14 @@ class SVGLoader extends Loader {
       const amIAHole = isAHole[p.identifier];
 
       if (!amIAHole.isHole) {
-        const shape = new Shape(p.points);
+        const shape = new Shape();
+        shape.curves = p.curves;
         const holes = isAHole.filter((h) => h.isHole && h.for === p.identifier);
         holes.forEach((h) => {
-          const path = simplePaths[h.identifier];
-          shape.holes.push(new Path(path.points));
+          const hole = simplePaths[h.identifier];
+          const path = new Path();
+          path.curves = hole.curves;
+          shape.holes.push(path);
         });
         shapesToReturn.push(shape);
       }
@@ -2013,8 +2028,8 @@ class SVGLoader extends Loader {
     const strokeWidth2 = style.strokeWidth / 2;
 
     const deltaU = 1 / (numPoints - 1);
-    let u0 = 0;
-    let u1;
+    let u0 = 0,
+      u1;
 
     let innerSideModified;
     let joinIsOnLeftSide;

@@ -1,10 +1,11 @@
 import { rewrite, visit } from './visit.js';
 
 import { cut } from './cut.js';
+import { disjoint as disjoinGraphs } from '../graph/disjoint.js';
 import { taggedGroup } from './taggedGroup.js';
 import { toConcreteGeometry } from './toConcreteGeometry.js';
 
-export const disjoint = (geometries) => {
+export const disjoint = (geometries, strategy = 'incremental') => {
   // We need to determine the linearization of geometry by type, then rewrite
   // with the corresponding disjunction.
   const concreteGeometries = [];
@@ -22,13 +23,49 @@ export const disjoint = (geometries) => {
   for (const geometry of concreteGeometries) {
     visit(geometry, collect);
   }
-  const disjointGraphs = [];
-  for (let start = 0; start < originalGraphs.length; start++) {
-    let cutGraph = originalGraphs[start];
-    for (let nth = start + 1; nth < originalGraphs.length; nth++) {
-      cutGraph = cut(cutGraph, [originalGraphs[nth]]);
+  let disjointGraphs;
+  switch (strategy) {
+    case 'cacheCuts': {
+      disjointGraphs = [];
+      for (let start = 0; start < originalGraphs.length; start++) {
+        let cutGraph = originalGraphs[start];
+        for (let nth = start + 1; nth < originalGraphs.length; nth++) {
+          cutGraph = cut(cutGraph, [originalGraphs[nth]]);
+        }
+        disjointGraphs[start] = cutGraph;
+        console.log(start);
+      }
+      break;
     }
-    disjointGraphs[start] = cutGraph;
+    case 'fullSubtraction': {
+      disjointGraphs = [];
+      for (let start = 0; start < originalGraphs.length; start++) {
+        const cutGraph = cut(
+          originalGraphs[start],
+          originalGraphs.slice(start + 1)
+        );
+        disjointGraphs[start] = cutGraph;
+        console.log(start);
+      }
+      break;
+    }
+    case 'disjointSubtraction': {
+      disjointGraphs = [];
+      let start = originalGraphs.length;
+      while (--start >= 0) {
+        const cutGraph = cut(
+          originalGraphs[start],
+          disjointGraphs.slice(start + 1)
+        );
+        disjointGraphs[start] = cutGraph;
+        console.log(start);
+      }
+      break;
+    }
+    case 'incremental': {
+      disjointGraphs = disjoinGraphs(originalGraphs);
+      break;
+    }
   }
   const map = new Map();
   for (let nth = 0; nth < disjointGraphs.length; nth++) {

@@ -35,7 +35,7 @@
     "simplify-path": "^1.1.0",
     "svg-points": "^6.0.1",
     "svg-shapes": "^1.9.2",
-    "xmldom": "^0.5.0"
+    "xmldom": "^0.6.0"
   },
   "devDependencies": {
     "@jsxcad/convert-pdf": "^0.0.79",

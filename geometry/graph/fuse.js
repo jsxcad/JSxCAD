@@ -1,7 +1,9 @@
-import { deletePendingSurfaceMeshes, toSurfaceMesh } from './toSurfaceMesh.js';
-
-import { fromSurfaceMeshLazy } from './fromSurfaceMeshLazy.js';
-import { fuseSurfaceMeshes } from '@jsxcad/algorithm-cgal';
+import {
+  deletePendingSurfaceMeshes,
+  fromSurfaceMesh,
+  fuseSurfaceMeshes,
+  toSurfaceMesh,
+} from '@jsxcad/algorithm-cgal';
 import { taggedGraph } from '../tagged/taggedGraph.js';
 
 export const fuse = (sources) => {
@@ -16,10 +18,7 @@ export const fuse = (sources) => {
   }));
   const { fusedMeshes } = fuseSurfaceMeshes(sources);
   const fusedGeometries = fusedMeshes.map(({ mesh }) =>
-    taggedGraph(
-      { provenance: 'geometry/graph/fuse' },
-      fromSurfaceMeshLazy(mesh)
-    )
+    taggedGraph({ provenance: 'geometry/graph/fuse' }, fromSurfaceMesh(mesh))
   );
   deletePendingSurfaceMeshes();
   return fusedGeometries;

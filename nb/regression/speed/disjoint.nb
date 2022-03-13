@@ -1,0 +1,14 @@
+const r = Random();
+
+// 16 gives 0.37
+// 32 gives 1.06
+// 64 gives 5.99
+
+Box(10, 10, 10).seq({ to: 32 }, (t) => (s) => s.ry(r.in(0, 1)).rz(r.in(0, 1)).x(r.in(-50, 50)), Group).view(1).disjoint().pack().view(2);
+
+// 32 gives 0.21
+// 64 gives 0.28
+// 128 gives 0.34
+// 256 gives 0.61
+
+Box(10).seq({ to: 256 }, (t) => (s) => s.rz(r.in(0, 1)).x(r.in(-50, 50)), Group).view(1).disjoint().pack().view(2);

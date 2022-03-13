@@ -1067,7 +1067,6 @@ function parse$1(source,defaultNSMapCopy,entityMap,domBuilder,errorHandler){
 				if(end<0){
 					
 	        		tagName = source.substring(tagStart+2).replace(/[\s<].*/,'');
-	        		//console.error('#@@@@@@'+tagName)
 	        		errorHandler.error("end tag name: "+tagName+' is not complete:'+config.tagName);
 	        		end = tagStart+1+tagName.length;
 	        	}else if(tagName.match(/\s</)){
@@ -1075,8 +1074,6 @@ function parse$1(source,defaultNSMapCopy,entityMap,domBuilder,errorHandler){
 	        		errorHandler.error("end tag name: "+tagName+' maybe not complete');
 	        		end = tagStart+1+tagName.length;
 				}
-				//console.error(parseStack.length,parseStack)
-				//console.error(config);
 				var localNSMap = config.localNSMap;
 				var endMatch = config.tagName == tagName;
 				var endIgnoreCaseMach = endMatch || config.tagName&&config.tagName.toLowerCase() == tagName.toLowerCase();
@@ -1128,7 +1125,6 @@ function parse$1(source,defaultNSMapCopy,entityMap,domBuilder,errorHandler){
 						position(a.offset);
 						a.locator = copyLocator(locator,{});
 					}
-					//}catch(e){console.error('@@@@@'+e)}
 					domBuilder.locator = locator2;
 					if(appendElement(el,domBuilder,currentNSMap)){
 						parseStack.push(el);
@@ -2606,9 +2602,13 @@ function serializeToString(node,buf,isHTML,nodeFilter,visibleNamespaces){
 		if (needNamespaceDefine(node,isHTML, visibleNamespaces)) {
 			var prefix = node.prefix||'';
 			var uri = node.namespaceURI;
-			var ns = prefix ? ' xmlns:' + prefix : " xmlns";
-			buf.push(ns, '="' , uri , '"');
-			visibleNamespaces.push({ prefix: prefix, namespace:uri });
+			if (uri) {
+				// Avoid empty namespace value like xmlns:ds=""
+				// Empty namespace URL will we produce an invalid XML document
+				var ns = prefix ? ' xmlns:' + prefix : " xmlns";
+				buf.push(ns, '="' , uri , '"');
+				visibleNamespaces.push({ prefix: prefix, namespace:uri });
+			}
 		}
 		
 		if(child || isHTML && !/^(?:meta|link|img|br|hr|input)$/i.test(nodeName)){
@@ -2646,7 +2646,13 @@ function serializeToString(node,buf,isHTML,nodeFilter,visibleNamespaces){
 		}
 		return;
 	case ATTRIBUTE_NODE$1:
-		return buf.push(' ',node.name,'="',node.value.replace(/[&"]/g,_xmlEncoder),'"');
+		/**
+		 * Well-formedness constraint: No < in Attribute Values
+		 * The replacement text of any entity referred to directly or indirectly in an attribute value must not contain a <.
+		 * @see https://www.w3.org/TR/xml/#CleanAttrVals
+		 * @see https://www.w3.org/TR/xml/#NT-AttValue
+		 */
+		return buf.push(' ', node.name, '="', node.value.replace(/[<&"]/g,_xmlEncoder), '"');
 	case TEXT_NODE$1:
 		/**
 		 * The ampersand character (&) and the left angle bracket (<) must not appear in their literal form,

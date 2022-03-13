@@ -5,8 +5,10 @@ import { toPolygonsWithHoles } from './toPolygonsWithHoles.js';
 
 export const offset = (geometry, initial, { segments, step, limit } = {}) => {
   const offsetGraphs = [];
-  const { tags, plane, exactPlane } = geometry;
-  for (const { polygonsWithHoles } of toPolygonsWithHoles(geometry)) {
+  const { tags } = geometry;
+  for (const { polygonsWithHoles, plane, exactPlane } of toPolygonsWithHoles(
+    geometry
+  )) {
     for (const polygonWithHoles of polygonsWithHoles) {
       for (const offsetPolygon of offsetOfPolygonWithHoles(
         initial,

@@ -1,7 +1,10 @@
+import {
+  fromSurfaceMesh,
+  intersectionOfSurfaceMeshes,
+} from '@jsxcad/algorithm-cgal';
+
 import { doesNotOverlap } from './doesNotOverlap.js';
 import { fromEmpty } from './fromEmpty.js';
-import { fromSurfaceMeshLazy } from './fromSurfaceMeshLazy.js';
-import { intersectionOfSurfaceMeshes } from '@jsxcad/algorithm-cgal';
 import { taggedGraph } from '../tagged/taggedGraph.js';
 import { toSurfaceMesh } from './toSurfaceMesh.js';
 
@@ -12,7 +15,7 @@ export const intersection = (a, b) => {
   if (doesNotOverlap(a, b)) {
     return fromEmpty();
   }
-  const result = fromSurfaceMeshLazy(
+  const result = fromSurfaceMesh(
     intersectionOfSurfaceMeshes(
       toSurfaceMesh(a.graph),
       a.matrix,

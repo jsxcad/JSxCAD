@@ -1,8 +1,7 @@
-import { fromSurfaceMeshLazy } from './fromSurfaceMeshLazy.js';
+import { fromSurfaceMesh, transformSurfaceMesh } from '@jsxcad/algorithm-cgal';
 import { identityMatrix } from '@jsxcad/math-mat4';
 import { taggedGraph } from '../tagged/taggedGraph.js';
 import { toSurfaceMesh } from './toSurfaceMesh.js';
-import { transformSurfaceMesh } from '@jsxcad/algorithm-cgal';
 
 // FIX: Remove this function.
 export const transform = (geometry) => {
@@ -11,7 +10,7 @@ export const transform = (geometry) => {
   } else {
     return taggedGraph(
       { tags: geometry.tags, matrix: identityMatrix },
-      fromSurfaceMeshLazy(
+      fromSurfaceMesh(
         transformSurfaceMesh(toSurfaceMesh(geometry.graph), geometry.matrix)
       )
     );

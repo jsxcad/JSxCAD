@@ -1,5 +1,7 @@
-import { extrudeToPlaneOfSurfaceMesh } from '@jsxcad/algorithm-cgal';
-import { fromSurfaceMeshLazy } from './fromSurfaceMeshLazy.js';
+import {
+  extrudeToPlaneOfSurfaceMesh,
+  fromSurfaceMesh,
+} from '@jsxcad/algorithm-cgal';
 import { scale } from '@jsxcad/math-vec3';
 import { taggedGraph } from '../tagged/taggedGraph.js';
 import { toSurfaceMesh } from './toSurfaceMesh.js';
@@ -18,7 +20,7 @@ export const extrudeToPlane = (
   const [lowA = 0, lowB = 0, lowC = 0, lowD = 0] = low;
   return taggedGraph(
     { tags: geometry.tags },
-    fromSurfaceMeshLazy(
+    fromSurfaceMesh(
       extrudeToPlaneOfSurfaceMesh(
         toSurfaceMesh(geometry.graph),
         geometry.matrix,

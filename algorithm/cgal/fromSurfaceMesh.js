@@ -1,8 +1,8 @@
 import { graphSymbol, surfaceMeshSymbol } from './symbols.js';
 
-import { fromSurfaceMeshToLazyGraph } from '@jsxcad/algorithm-cgal';
+import { fromSurfaceMeshToLazyGraph } from './fromSurfaceMeshToLazyGraph.js';
 
-export const fromSurfaceMeshLazy = (surfaceMesh, forceNewGraph = false) => {
+export const fromSurfaceMesh = (surfaceMesh, forceNewGraph = false) => {
   if (!surfaceMesh) {
     throw Error('null surfaceMesh');
   }

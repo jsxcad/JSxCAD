@@ -1,7 +1,10 @@
-import { fromSurfaceMeshLazy } from './fromSurfaceMeshLazy.js';
+import {
+  fromSurfaceMesh,
+  toSurfaceMesh,
+  unionOfSurfaceMeshes,
+} from '@jsxcad/algorithm-cgal';
+
 import { taggedGraph } from '../tagged/taggedGraph.js';
-import { toSurfaceMesh } from './toSurfaceMesh.js';
-import { unionOfSurfaceMeshes } from '@jsxcad/algorithm-cgal';
 
 export const union = (a, b) => {
   if (a.graph.isEmpty) {
@@ -11,7 +14,7 @@ export const union = (a, b) => {
     return a;
   }
   // FIX: In an ideal world, if a and b do not overlap, we would generate a disjointAssembly of the two.
-  const result = fromSurfaceMeshLazy(
+  const result = fromSurfaceMesh(
     unionOfSurfaceMeshes(
       toSurfaceMesh(a.graph),
       a.matrix,

@@ -1,4 +1,4 @@
-import { composeTransforms, fromSurfaceMeshToLazyGraph, fromPointsToAlphaShapeAsSurfaceMesh, serializeSurfaceMesh, deleteSurfaceMesh, deserializeSurfaceMesh, fromGraphToSurfaceMesh, fromSurfaceMeshEmitBoundingBox, arrangePaths, fromPolygonsToSurfaceMesh, cutSurfaceMeshes, STATUS_OK, STATUS_UNCHANGED, STATUS_EMPTY, bendSurfaceMesh, clipSurfaceMeshes, computeCentroidOfSurfaceMesh, fitPlaneToPoints, arrangePathsIntoTriangles, arrangeSegmentsIntoTriangles, fuseSurfaceMeshes, SurfaceMeshQuery, fromSurfaceMeshToPolygonsWithHoles, insetOfPolygonWithHoles, eachPointOfSurfaceMesh, outlineSurfaceMesh, sectionOfSurfaceMesh, fromPointsToConvexHullAsSurfaceMesh, deformSurfaceMesh, demeshSurfaceMesh, extrudeSurfaceMesh, extrudeToPlaneOfSurfaceMesh, reverseFaceOrientationsOfSurfaceMesh, fromFunctionToSurfaceMesh, fromPointsToSurfaceMesh, generatePackingEnvelopeForSurfaceMesh, generateUpperEnvelopeForSurfaceMesh, fromSegmentToInverseTransform, invertTransform, growSurfaceMesh, joinSurfaceMeshes, loftBetweenCongruentSurfaceMeshes, loftBetweenSurfaceMeshes, minkowskiDifferenceOfSurfaceMeshes, minkowskiShellOfSurfaceMeshes, minkowskiSumOfSurfaceMeshes, offsetOfPolygonWithHoles, projectToPlaneOfSurfaceMesh, pushSurfaceMesh, remeshSurfaceMesh, isotropicRemeshingOfSurfaceMesh, removeSelfIntersectionsOfSurfaceMesh, approximateSurfaceMesh, simplifySurfaceMesh, subdivideSurfaceMesh, smoothShapeOfSurfaceMesh, smoothSurfaceMesh, separateSurfaceMesh, fromSurfaceMeshToTriangles, taperSurfaceMesh, doesSelfIntersectOfSurfaceMesh, twistSurfaceMesh, fromRotateXToTransform, fromRotateYToTransform, fromRotateZToTransform, fromTranslateToTransform, fromScaleToTransform } from './jsxcad-algorithm-cgal.js';
+import { composeTransforms, fromSurfaceMesh, fromPointsToAlphaShapeAsSurfaceMesh, fromSurfaceMeshEmitBoundingBox, toSurfaceMesh, serializeSurfaceMesh, arrangePaths, fromPolygonsToSurfaceMesh, cutSurfaceMeshes, STATUS_OK, STATUS_UNCHANGED, STATUS_EMPTY, deletePendingSurfaceMeshes, disjoint as disjoint$2, bendSurfaceMesh, clipSurfaceMeshes, computeCentroidOfSurfaceMesh, fitPlaneToPoints, arrangePathsIntoTriangles, arrangeSegmentsIntoTriangles, fuseSurfaceMeshes, SurfaceMeshQuery, fromSurfaceMeshToPolygonsWithHoles, insetOfPolygonWithHoles, eachPointOfSurfaceMesh, outlineSurfaceMesh, sectionOfSurfaceMesh, fromPointsToConvexHullAsSurfaceMesh, deformSurfaceMesh, demeshSurfaceMesh, extrudeSurfaceMesh, extrudeToPlaneOfSurfaceMesh, reverseFaceOrientationsOfSurfaceMesh, fromFunctionToSurfaceMesh, fromPointsToSurfaceMesh, generatePackingEnvelopeForSurfaceMesh, generateUpperEnvelopeForSurfaceMesh, fromSegmentToInverseTransform, invertTransform, growSurfaceMesh, joinSurfaceMeshes, loftBetweenCongruentSurfaceMeshes, loftBetweenSurfaceMeshes, minkowskiDifferenceOfSurfaceMeshes, minkowskiShellOfSurfaceMeshes, minkowskiSumOfSurfaceMeshes, offsetOfPolygonWithHoles, projectToPlaneOfSurfaceMesh, pushSurfaceMesh, remeshSurfaceMesh, isotropicRemeshingOfSurfaceMesh, removeSelfIntersectionsOfSurfaceMesh, approximateSurfaceMesh, simplifySurfaceMesh, subdivideSurfaceMesh, smoothShapeOfSurfaceMesh, smoothSurfaceMesh, separateSurfaceMesh, fromSurfaceMeshToTriangles, taperSurfaceMesh, doesSelfIntersectOfSurfaceMesh, twistSurfaceMesh, fromRotateXToTransform, fromRotateYToTransform, fromRotateZToTransform, fromTranslateToTransform, fromScaleToTransform } from './jsxcad-algorithm-cgal.js';
 export { arrangePolygonsWithHoles } from './jsxcad-algorithm-cgal.js';
 import { computeHash, write as write$1, read as read$1, readNonblocking as readNonblocking$1, ErrorWouldBlock, addPending } from './jsxcad-sys.js';
 import { transform as transform$4, equals, max, min, subtract, dot, distance, canonicalize as canonicalize$5, scale as scale$3 } from './jsxcad-math-vec3.js';
@@ -140,25 +140,6 @@ const allTags = (geometry) => {
   return collectedTags;
 };
 
-const graphSymbol = Symbol('graph');
-const surfaceMeshSymbol = Symbol('surfaceMeshSymbol');
-
-const fromSurfaceMeshLazy = (surfaceMesh, forceNewGraph = false) => {
-  if (!surfaceMesh) {
-    throw Error('null surfaceMesh');
-  }
-  if (surfaceMesh.provenance === undefined) {
-    throw Error('Surface mesh has no provenance');
-  }
-  let graph = surfaceMesh[graphSymbol];
-  if (forceNewGraph || graph === undefined) {
-    graph = fromSurfaceMeshToLazyGraph(surfaceMesh);
-    surfaceMesh[graphSymbol] = graph;
-    graph[surfaceMeshSymbol] = surfaceMesh;
-  }
-  return graph;
-};
-
 const taggedGraph = ({ tags = [], matrix, provenance }, graph) => {
   if (graph.length > 0) {
     throw Error('Graph should not be an array');
@@ -178,115 +159,8 @@ const taggedGraph = ({ tags = [], matrix, provenance }, graph) => {
 const alphaShape = ({ tags }, points, componentLimit) =>
   taggedGraph(
     { tags },
-    fromSurfaceMeshLazy(
-      fromPointsToAlphaShapeAsSurfaceMesh(points, componentLimit)
-    )
+    fromSurfaceMesh(fromPointsToAlphaShapeAsSurfaceMesh(points, componentLimit))
   );
-
-const cacheSize = 100;
-// const cacheSize = 1;
-const clock = [];
-let pointer = 0;
-const pending = new Set();
-
-for (let nth = 0; nth < cacheSize; nth++) {
-  clock.push({ live: false, surfaceMesh: null });
-}
-
-const evict = () => {
-  for (;;) {
-    pointer = (pointer + 1) % cacheSize;
-    if (clock[pointer].live) {
-      clock[pointer].live = false;
-    } else {
-      const surfaceMesh = clock[pointer].surfaceMesh;
-      if (surfaceMesh) {
-        surfaceMesh.cacheIndex = undefined;
-        pending.add(surfaceMesh);
-      }
-      return pointer;
-    }
-  }
-};
-
-const remember = (surfaceMesh) => {
-  if (surfaceMesh.cacheIndex !== undefined) {
-    clock[surfaceMesh.cacheIndex].live = true;
-    return;
-  }
-  const evictedIndex = evict();
-  const entry = clock[evictedIndex];
-  entry.live = true;
-  // If this was scheduled for deletion, rescue it -- it's back in the cache.
-  pending.delete(surfaceMesh);
-  entry.surfaceMesh = surfaceMesh;
-  surfaceMesh.cacheIndex = evictedIndex;
-};
-
-const deletePendingSurfaceMeshes = () => {
-  console.log(`QQ/deleting ${pending.size} surface meshes`);
-  for (const surfaceMesh of pending) {
-    if (surfaceMesh.isScheduledForDeletion) {
-      console.log(
-        `QQ/trying to delete isScheduledForDeletion ${surfaceMesh} ${surfaceMesh.provenance}`
-      );
-    } else if (surfaceMesh.isDeleted()) {
-      console.log(
-        `QQ/trying to delete isDeleted() ${surfaceMesh} ${surfaceMesh.provenance}`
-      );
-    } else {
-      console.log(`QQ/delete ${surfaceMesh} ${surfaceMesh.provenance}`);
-      surfaceMesh.isScheduledForDeletion = true;
-      // surfaceMesh.delete();
-      try {
-        // Make sure it's serialized and then unlink from the corresponding graph.
-        const graph = surfaceMesh[graphSymbol];
-        if (graph) {
-          if (!graph.serializedSurfaceMesh) {
-            graph.serializedSurfaceMesh = serializeSurfaceMesh(surfaceMesh);
-          }
-          if (graph[surfaceMeshSymbol] === surfaceMesh) {
-            delete graph[surfaceMeshSymbol];
-          }
-        }
-        delete surfaceMesh[graphSymbol];
-        deleteSurfaceMesh(surfaceMesh);
-      } catch (error) {
-        console.log(JSON.stringify(surfaceMesh));
-        throw error;
-      }
-    }
-  }
-  pending.clear();
-};
-
-const toSurfaceMesh = (graph) => {
-  let surfaceMesh = graph[surfaceMeshSymbol];
-  if (surfaceMesh) {
-    if (surfaceMesh.provenance === undefined) {
-      throw Error('Unknown surface mesh provenance');
-    }
-    if (surfaceMesh.isScheduledForDeletion) {
-      throw Error('Deleted surface mesh');
-    }
-    remember(surfaceMesh);
-    return surfaceMesh;
-  }
-  if (graph.serializedSurfaceMesh) {
-    try {
-      surfaceMesh = deserializeSurfaceMesh(graph.serializedSurfaceMesh);
-    } catch (error) {
-      console.log('Mesh deserialization failure');
-      throw error;
-    }
-  } else {
-    surfaceMesh = fromGraphToSurfaceMesh(graph);
-  }
-  remember(surfaceMesh);
-  graph[surfaceMeshSymbol] = surfaceMesh;
-  surfaceMesh[graphSymbol] = graph;
-  return surfaceMesh;
-};
 
 const measureBoundingBox$3 = (geometry) => {
   if (
@@ -373,14 +247,14 @@ const reify = (geometry) => {
   return rewrite(geometry, op);
 };
 
-const fromPolygonsWithHolesToTriangles = (polygonsWithHoles) => {
+const fromPolygonsWithHolesToTriangles = (geometry) => {
   const triangles = [];
-  for (const polygonWithHoles of polygonsWithHoles) {
+  for (const polygonWithHoles of geometry.polygonsWithHoles) {
     const paths = [polygonWithHoles, ...polygonWithHoles.holes];
     triangles.push(
       ...arrangePaths(
-        polygonWithHoles.plane,
-        polygonWithHoles.exactPlane,
+        geometry.plane,
+        geometry.exactPlane,
         paths,
         /* triangulate= */ true
       )
@@ -392,13 +266,13 @@ const fromPolygonsWithHolesToTriangles = (polygonsWithHoles) => {
 const fromTriangles = ({ tags, matrix }, triangles) =>
   taggedGraph(
     { tags, matrix },
-    fromSurfaceMeshLazy(fromPolygonsToSurfaceMesh(triangles))
+    fromSurfaceMesh(fromPolygonsToSurfaceMesh(triangles))
   );
 
 const fromPolygonsWithHoles = (geometry) =>
   fromTriangles(
     { tags: geometry.tags, matrix: geometry.matrix },
-    fromPolygonsWithHolesToTriangles(geometry.polygonsWithHoles)
+    fromPolygonsWithHolesToTriangles(geometry)
   );
 
 const taggedSegments = (
@@ -843,7 +717,7 @@ const cut$1 = (targetGraphs, targetSegments, sourceGraphs) => {
           mesh.provenance = 'cut';
           return taggedGraph(
             { tags, matrix, provenance: 'geometry/graph/cut' },
-            fromSurfaceMeshLazy(mesh)
+            fromSurfaceMesh(mesh)
           );
       }
     }
@@ -980,6 +854,15 @@ const cut = cached(
   }
 );
 
+const disjoint$1 = (geometries) => {
+  if (geometries.length < 2) {
+    return geometries;
+  }
+  const results = disjoint$2(geometries);
+  deletePendingSurfaceMeshes();
+  return results;
+};
+
 const taggedGroup = ({ tags = [], matrix, provenance }, ...content) => {
   if (content.some((value) => !value)) {
     throw Error(`Undefined Group content`);
@@ -993,7 +876,7 @@ const taggedGroup = ({ tags = [], matrix, provenance }, ...content) => {
   return { type: 'group', tags, matrix, content, provenance };
 };
 
-const disjoint = (geometries) => {
+const disjoint = (geometries, strategy = 'incremental') => {
   // We need to determine the linearization of geometry by type, then rewrite
   // with the corresponding disjunction.
   const concreteGeometries = [];
@@ -1011,13 +894,49 @@ const disjoint = (geometries) => {
   for (const geometry of concreteGeometries) {
     visit(geometry, collect);
   }
-  const disjointGraphs = [];
-  for (let start = 0; start < originalGraphs.length; start++) {
-    let cutGraph = originalGraphs[start];
-    for (let nth = start + 1; nth < originalGraphs.length; nth++) {
-      cutGraph = cut(cutGraph, [originalGraphs[nth]]);
+  let disjointGraphs;
+  switch (strategy) {
+    case 'cacheCuts': {
+      disjointGraphs = [];
+      for (let start = 0; start < originalGraphs.length; start++) {
+        let cutGraph = originalGraphs[start];
+        for (let nth = start + 1; nth < originalGraphs.length; nth++) {
+          cutGraph = cut(cutGraph, [originalGraphs[nth]]);
+        }
+        disjointGraphs[start] = cutGraph;
+        console.log(start);
+      }
+      break;
     }
-    disjointGraphs[start] = cutGraph;
+    case 'fullSubtraction': {
+      disjointGraphs = [];
+      for (let start = 0; start < originalGraphs.length; start++) {
+        const cutGraph = cut(
+          originalGraphs[start],
+          originalGraphs.slice(start + 1)
+        );
+        disjointGraphs[start] = cutGraph;
+        console.log(start);
+      }
+      break;
+    }
+    case 'disjointSubtraction': {
+      disjointGraphs = [];
+      let start = originalGraphs.length;
+      while (--start >= 0) {
+        const cutGraph = cut(
+          originalGraphs[start],
+          disjointGraphs.slice(start + 1)
+        );
+        disjointGraphs[start] = cutGraph;
+        console.log(start);
+      }
+      break;
+    }
+    case 'incremental': {
+      disjointGraphs = disjoint$1(originalGraphs);
+      break;
+    }
   }
   const map = new Map();
   for (let nth = 0; nth < disjointGraphs.length; nth++) {
@@ -1043,7 +962,7 @@ const assemble = (...geometries) => disjoint(geometries);
 const bend$1 = (geometry, radius) =>
   taggedGraph(
     { tags: geometry.tags, matrix: geometry.matrix },
-    fromSurfaceMeshLazy(
+    fromSurfaceMesh(
       bendSurfaceMesh(toSurfaceMesh(geometry.graph), geometry.matrix, radius)
     )
   );
@@ -1077,7 +996,7 @@ const clip$1 = (targetGraphs, targetSegments, sourceGraphs) => {
     sourceGraphs
   );
   const clippedGraphGeometries = clippedMeshes.map(({ matrix, mesh, tags }) =>
-    taggedGraph({ tags, matrix }, fromSurfaceMeshLazy(mesh))
+    taggedGraph({ tags, matrix }, fromSurfaceMesh(mesh))
   );
   const clippedSegmentsGeometries = clippedSegments.map(
     ({ matrix, segments, tags }) => taggedSegments({ tags, matrix }, segments)
@@ -1182,7 +1101,7 @@ const fromPaths = ({ tags }, paths, plane) => {
   }
   return taggedGraph(
     { tags },
-    fromSurfaceMeshLazy(fromPolygonsToSurfaceMesh(orientedPolygons))
+    fromSurfaceMesh(fromPolygonsToSurfaceMesh(orientedPolygons))
   );
 };
 
@@ -1216,7 +1135,7 @@ const fromSegments = ({ tags }, segments, plane) => {
   }
   return taggedGraph(
     { tags },
-    fromSurfaceMeshLazy(fromPolygonsToSurfaceMesh(orientedPolygons))
+    fromSurfaceMesh(fromPolygonsToSurfaceMesh(orientedPolygons))
   );
 };
 
@@ -1474,10 +1393,7 @@ const fuse$1 = (sources) => {
   }));
   const { fusedMeshes } = fuseSurfaceMeshes(sources);
   const fusedGeometries = fusedMeshes.map(({ mesh }) =>
-    taggedGraph(
-      { provenance: 'geometry/graph/fuse' },
-      fromSurfaceMeshLazy(mesh)
-    )
+    taggedGraph({ provenance: 'geometry/graph/fuse' }, fromSurfaceMesh(mesh))
   );
   deletePendingSurfaceMeshes();
   return fusedGeometries;
@@ -1663,8 +1579,10 @@ const inset$1 = (
   { segments = 8, step, limit } = {}
 ) => {
   const insetGraphs = [];
-  const { tags, plane, exactPlane } = geometry;
-  for (const { polygonsWithHoles } of toPolygonsWithHoles$1(geometry)) {
+  const { tags } = geometry;
+  for (const { polygonsWithHoles, plane, exactPlane } of toPolygonsWithHoles$1(
+    geometry
+  )) {
     for (const polygonWithHoles of polygonsWithHoles) {
       for (const insetPolygon of insetOfPolygonWithHoles(
         initial,
@@ -1899,7 +1817,7 @@ const sections = (geometry, matrices, { profile = false } = {}) => {
     /* profile= */ profile
   )) {
     graphs.push(
-      taggedGraph({ tags: geometry.tags }, fromSurfaceMeshLazy(planarMesh))
+      taggedGraph({ tags: geometry.tags }, fromSurfaceMesh(planarMesh))
     );
   }
   return graphs;
@@ -2465,7 +2383,7 @@ const canonicalize = (geometry) => {
 const convexHull = ({ tags }, points) =>
   taggedGraph(
     { tags },
-    fromSurfaceMeshLazy(fromPointsToConvexHullAsSurfaceMesh(points))
+    fromSurfaceMesh(fromPointsToConvexHullAsSurfaceMesh(points))
   );
 
 const deform$1 = (geometry, entries, iterations, tolerance, alpha) => {
@@ -2481,7 +2399,7 @@ const deform$1 = (geometry, entries, iterations, tolerance, alpha) => {
   }
   return taggedGraph(
     { tags: geometry.tags, matrix: geometry.matrix },
-    fromSurfaceMeshLazy(
+    fromSurfaceMesh(
       deformSurfaceMesh(
         toSurfaceMesh(geometry.graph),
         geometry.matrix,
@@ -2499,7 +2417,7 @@ const deform = op({ graph: deform$1 });
 const demesh$1 = (geometry, options) =>
   taggedGraph(
     { tags: geometry.tags, matrix: geometry.matrix },
-    fromSurfaceMeshLazy(
+    fromSurfaceMesh(
       demeshSurfaceMesh(toSurfaceMesh(geometry.graph), geometry.matrix, options)
     )
   );
@@ -2647,10 +2565,7 @@ const extrude$1 = (geometry, height, depth, normal) => {
   if (!extrudedMesh) {
     console.log(`Extrusion failed`);
   }
-  return taggedGraph(
-    { tags: geometry.tags },
-    fromSurfaceMeshLazy(extrudedMesh)
-  );
+  return taggedGraph({ tags: geometry.tags }, fromSurfaceMesh(extrudedMesh));
 };
 
 const graph$2 = (geometry, height, depth, direction) =>
@@ -2678,7 +2593,7 @@ const extrudeToPlane$1 = (
   const [lowA = 0, lowB = 0, lowC = 0, lowD = 0] = low;
   return taggedGraph(
     { tags: geometry.tags },
-    fromSurfaceMeshLazy(
+    fromSurfaceMesh(
       extrudeToPlaneOfSurfaceMesh(
         toSurfaceMesh(geometry.graph),
         geometry.matrix,
@@ -2772,7 +2687,7 @@ const flip$1 = (points) =>
 const reverseFaceOrientations = (geometry) =>
   taggedGraph(
     { tags: geometry.tags },
-    fromSurfaceMeshLazy(
+    fromSurfaceMesh(
       reverseFaceOrientationsOfSurfaceMesh(
         toSurfaceMesh(geometry.graph),
         geometry.matrix
@@ -2809,19 +2724,16 @@ const fresh = (geometry) => {
 const fromFunction = ({ tags }, op, options) =>
   taggedGraph(
     { tags },
-    fromSurfaceMeshLazy(
+    fromSurfaceMesh(
       fromFunctionToSurfaceMesh((x = 0, y = 0, z = 0) => op([x, y, z]), options)
     )
   );
 
 const fromPoints = ({ tags }, points) =>
-  taggedGraph({ tags }, fromSurfaceMeshLazy(fromPointsToSurfaceMesh(points)));
+  taggedGraph({ tags }, fromSurfaceMesh(fromPointsToSurfaceMesh(points)));
 
 const fromPolygons = ({ tags }, polygons) =>
-  taggedGraph(
-    { tags },
-    fromSurfaceMeshLazy(fromPolygonsToSurfaceMesh(polygons))
-  );
+  taggedGraph({ tags }, fromSurfaceMesh(fromPolygonsToSurfaceMesh(polygons)));
 
 const fromSurfaceToPathsImpl = (surface) => {
   return { type: 'paths', paths: surface };
@@ -2851,7 +2763,7 @@ const generatePackingEnvelope = op({ graph: generatePackingEnvelope$1 });
 const generateUpperEnvelope$1 = (geometry) =>
   taggedGraph(
     {},
-    fromSurfaceMeshLazy(
+    fromSurfaceMesh(
       generateUpperEnvelopeForSurfaceMesh(
         toSurfaceMesh(geometry.graph),
         geometry.matrix
@@ -3112,7 +3024,7 @@ const getTags = (geometry) => {
 const grow$1 = (geometry, amount) =>
   taggedGraph(
     { tags: geometry.tags, matrix: geometry.matrix },
-    fromSurfaceMeshLazy(growSurfaceMesh(toSurfaceMesh(geometry.graph), amount))
+    fromSurfaceMesh(growSurfaceMesh(toSurfaceMesh(geometry.graph), amount))
   );
 
 const grow = (geometry, amount) => {
@@ -3361,7 +3273,7 @@ const join$1 = (targets, sources) => {
   }));
   const { joinedMeshes } = joinSurfaceMeshes(targets, sources);
   const joinedGeometries = joinedMeshes.map(({ matrix, mesh, tags }) =>
-    taggedGraph({ tags, matrix }, fromSurfaceMeshLazy(mesh))
+    taggedGraph({ tags, matrix }, fromSurfaceMesh(mesh))
   );
   deletePendingSurfaceMeshes();
   return joinedGeometries;
@@ -3417,7 +3329,7 @@ const keep = (tags, geometry) =>
 const loft$1 = (closed, ...geometries) =>
   taggedGraph(
     { tags: geometries[0].tags },
-    fromSurfaceMeshLazy(
+    fromSurfaceMesh(
       loftBetweenCongruentSurfaceMeshes(
         closed,
         ...geometries.map((geometry) => [
@@ -3445,7 +3357,7 @@ const loft = (closed, ...geometries) => {
 const loft2$1 = (a, b) =>
   taggedGraph(
     { tags: a.tags },
-    fromSurfaceMeshLazy(
+    fromSurfaceMesh(
       loftBetweenSurfaceMeshes(
         toSurfaceMesh(a.graph),
         a.matrix,
@@ -3469,7 +3381,7 @@ const minkowskiDifference$1 = ({ tags }, a, b) => {
   }
   return taggedGraph(
     { tags },
-    fromSurfaceMeshLazy(
+    fromSurfaceMesh(
       minkowskiDifferenceOfSurfaceMeshes(
         toSurfaceMesh(a.graph),
         a.matrix,
@@ -3523,7 +3435,7 @@ const minkowskiShell$1 = ({ tags }, a, b) => {
   }
   return taggedGraph(
     { tags },
-    fromSurfaceMeshLazy(
+    fromSurfaceMesh(
       minkowskiShellOfSurfaceMeshes(
         toSurfaceMesh(a.graph),
         a.matrix,
@@ -3575,7 +3487,7 @@ const minkowskiSum$1 = ({ tags }, a, b) => {
   }
   return taggedGraph(
     { tags },
-    fromSurfaceMeshLazy(
+    fromSurfaceMesh(
       minkowskiSumOfSurfaceMeshes(
         toSurfaceMesh(a.graph),
         a.matrix,
@@ -3623,8 +3535,10 @@ const minkowskiSum = (geometry, offset) => {
 
 const offset$1 = (geometry, initial, { segments, step, limit } = {}) => {
   const offsetGraphs = [];
-  const { tags, plane, exactPlane } = geometry;
-  for (const { polygonsWithHoles } of toPolygonsWithHoles$1(geometry)) {
+  const { tags } = geometry;
+  for (const { polygonsWithHoles, plane, exactPlane } of toPolygonsWithHoles$1(
+    geometry
+  )) {
     for (const polygonWithHoles of polygonsWithHoles) {
       for (const offsetPolygon of offsetOfPolygonWithHoles(
         initial,
@@ -3670,7 +3584,7 @@ const projectToPlane$1 = (geometry, plane, direction) => {
   let { graph } = geometry;
   return taggedGraph(
     {},
-    fromSurfaceMeshLazy(
+    fromSurfaceMesh(
       projectToPlaneOfSurfaceMesh(
         toSurfaceMesh(graph),
         geometry.matrix,
@@ -3716,7 +3630,7 @@ const projectToPlane = (geometry, plane, direction) => {
 const push$1 = (geometry, force, minimumDistance, maximumDistance) =>
   taggedGraph(
     { tags: geometry.tags, matrix: geometry.matrix },
-    fromSurfaceMeshLazy(
+    fromSurfaceMesh(
       pushSurfaceMesh(
         toSurfaceMesh(geometry.graph),
         geometry.matrix,
@@ -3780,7 +3694,7 @@ const remesh$1 = (
     case 'isotropic': {
       return taggedGraph(
         { tags: geometry.tags, matrix: geometry.matrix },
-        fromSurfaceMeshLazy(
+        fromSurfaceMesh(
           isotropicRemeshingOfSurfaceMesh(
             toSurfaceMesh(geometry.graph),
             geometry.matrix,
@@ -3796,7 +3710,7 @@ const remesh$1 = (
     case 'edgeLength':
       return taggedGraph(
         { tags: geometry.tags, matrix: geometry.matrix },
-        fromSurfaceMeshLazy(
+        fromSurfaceMesh(
           remeshSurfaceMesh(
             toSurfaceMesh(geometry.graph),
             geometry.matrix,
@@ -3814,7 +3728,7 @@ const remesh = op({ graph: remesh$1 });
 const removeSelfIntersections$1 = (geometry) =>
   taggedGraph(
     { tags: geometry.tags, matrix: geometry.matrix },
-    fromSurfaceMeshLazy(
+    fromSurfaceMesh(
       removeSelfIntersectionsOfSurfaceMesh(toSurfaceMesh(geometry.graph))
     )
   );
@@ -3840,7 +3754,7 @@ const simplify$1 = (geometry, options) => {
     case 'simplify':
       return taggedGraph(
         { tags: geometry.tags, matrix: geometry.matrix },
-        fromSurfaceMeshLazy(
+        fromSurfaceMesh(
           simplifySurfaceMesh(
             toSurfaceMesh(geometry.graph),
             geometry.matrix,
@@ -3851,7 +3765,7 @@ const simplify$1 = (geometry, options) => {
     case 'approximate':
       return taggedGraph(
         { tags: geometry.tags, matrix: geometry.matrix },
-        fromSurfaceMeshLazy(
+        fromSurfaceMesh(
           approximateSurfaceMesh(
             toSurfaceMesh(geometry.graph),
             geometry.matrix,
@@ -3875,7 +3789,7 @@ const smooth$1 = (geometry, options = {}, selections = []) => {
     case 'mesh': {
       return taggedGraph(
         { tags: geometry.tags, matrix: geometry.matrix },
-        fromSurfaceMeshLazy(
+        fromSurfaceMesh(
           smoothSurfaceMesh(
             toSurfaceMesh(geometry.graph),
             geometry.matrix,
@@ -3891,7 +3805,7 @@ const smooth$1 = (geometry, options = {}, selections = []) => {
     case 'shape': {
       return taggedGraph(
         { tags: geometry.tags, matrix: geometry.matrix },
-        fromSurfaceMeshLazy(
+        fromSurfaceMesh(
           smoothShapeOfSurfaceMesh(
             toSurfaceMesh(geometry.graph),
             geometry.matrix,
@@ -3907,7 +3821,7 @@ const smooth$1 = (geometry, options = {}, selections = []) => {
     case 'subdivide': {
       return taggedGraph(
         { tags: geometry.tags },
-        fromSurfaceMeshLazy(
+        fromSurfaceMesh(
           subdivideSurfaceMesh(toSurfaceMesh(geometry.graph), options)
         )
       );
@@ -3936,7 +3850,7 @@ const separate$1 = (
       ).map((mesh) =>
         taggedGraph(
           { tags: geometry.tags, matrix: geometry.matrix },
-          fromSurfaceMeshLazy(mesh)
+          fromSurfaceMesh(mesh)
         )
       )
     );
@@ -4026,6 +3940,9 @@ const soup = (
     switch (geometry.type) {
       case 'graph': {
         const { graph } = geometry;
+        if (!graph) {
+          console.log(JSON.stringify(geometry));
+        }
         if (graph.isEmpty) {
           return taggedGroup({});
         } else {
@@ -4155,7 +4072,7 @@ const taper$1 = (
 ) =>
   taggedGraph(
     { tags: geometry.tags, matrix: geometry.matrix },
-    fromSurfaceMeshLazy(
+    fromSurfaceMesh(
       taperSurfaceMesh(
         toSurfaceMesh(geometry.graph),
         geometry.matrix,
@@ -4381,7 +4298,7 @@ const toTriangleArray = (geometry) => {
 const twist$1 = (geometry, turnsPerMm) =>
   taggedGraph(
     { tags: geometry.tags, matrix: geometry.matrix },
-    fromSurfaceMeshLazy(
+    fromSurfaceMesh(
       twistSurfaceMesh(
         toSurfaceMesh(geometry.graph),
         geometry.matrix,

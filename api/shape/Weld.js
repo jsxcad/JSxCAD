@@ -21,7 +21,7 @@ export const weld =
     }
     const welds = [];
     const arrangements = arrangePolygonsWithHoles(unwelded);
-    for (const { polygonsWithHoles } of arrangements) {
+    for (const polygonsWithHoles of arrangements) {
       // Keep the planar grouping.
       const triangles = fromPolygonsWithHolesToTriangles(polygonsWithHoles);
       const graph = fromTrianglesToGraph({}, triangles);

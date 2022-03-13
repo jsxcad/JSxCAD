@@ -1,9 +1,11 @@
-import { fromPointsToConvexHullAsSurfaceMesh } from '@jsxcad/algorithm-cgal';
-import { fromSurfaceMeshLazy } from './fromSurfaceMeshLazy.js';
+import {
+  fromPointsToConvexHullAsSurfaceMesh,
+  fromSurfaceMesh,
+} from '@jsxcad/algorithm-cgal';
 import { taggedGraph } from '../tagged/taggedGraph.js';
 
 export const convexHull = ({ tags }, points) =>
   taggedGraph(
     { tags },
-    fromSurfaceMeshLazy(fromPointsToConvexHullAsSurfaceMesh(points))
+    fromSurfaceMesh(fromPointsToConvexHullAsSurfaceMesh(points))
   );

@@ -19,8 +19,7 @@ test('Simple import', async (t) => {
       <!-- Show outline of canvas using 'rect' element -->
       <rect x="1" y="1" width="1198" height="398" style="fill:none;stroke:violet;stroke-width:2;"/>
       <rect x="400" y="100" width="400" height="200" fill="yellow" stroke="navy" stroke-width="10" />
-    </svg>
-`)
+    </svg>`)
   );
   const geometry = JSON.parse(
     JSON.stringify(

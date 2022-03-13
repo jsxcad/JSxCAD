@@ -42,7 +42,7 @@
     "eslint-plugin-promise": "^4.0.1",
     "eslint-plugin-react": "^7.17.0",
     "eslint-plugin-standard": "^4.0.0",
-    "rollup": "^2.56.0",
+    "rollup": "^2.51.2",
     "@rollup/plugin-commonjs": "^21.0.1",
     "rollup-plugin-node-builtins": "^2.1.2",
     "rollup-plugin-hypothetical": "^2.1.1",

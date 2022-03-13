@@ -1,5 +1,7 @@
-import { fromSurfaceMeshLazy } from './fromSurfaceMeshLazy.js';
-import { minkowskiSumOfSurfaceMeshes } from '@jsxcad/algorithm-cgal';
+import {
+  fromSurfaceMesh,
+  minkowskiSumOfSurfaceMeshes,
+} from '@jsxcad/algorithm-cgal';
 import { taggedGraph } from '../tagged/taggedGraph.js';
 import { toSurfaceMesh } from './toSurfaceMesh.js';
 
@@ -9,7 +11,7 @@ export const minkowskiSum = ({ tags }, a, b) => {
   }
   return taggedGraph(
     { tags },
-    fromSurfaceMeshLazy(
+    fromSurfaceMesh(
       minkowskiSumOfSurfaceMeshes(
         toSurfaceMesh(a.graph),
         a.matrix,

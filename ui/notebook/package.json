@@ -22,7 +22,7 @@
   "keywords": [],
   "license": "MIT",
   "dependencies": {
-    "base64-arraybuffer": "^0.2.0",
+    "base64-arraybuffer": "^1.0.1",
     "file-saver": "^2.0.2",
     "marked": "^1.1.1",
     "@jsxcad/ui-threejs": "^0.0.79",

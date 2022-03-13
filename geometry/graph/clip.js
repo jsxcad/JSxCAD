@@ -1,7 +1,10 @@
-import { deletePendingSurfaceMeshes, toSurfaceMesh } from './toSurfaceMesh.js';
+import {
+  clipSurfaceMeshes,
+  deletePendingSurfaceMeshes,
+  fromSurfaceMesh,
+  toSurfaceMesh,
+} from '@jsxcad/algorithm-cgal';
 
-import { clipSurfaceMeshes } from '@jsxcad/algorithm-cgal';
-import { fromSurfaceMeshLazy } from './fromSurfaceMeshLazy.js';
 import { taggedGraph } from '../tagged/taggedGraph.js';
 import { taggedSegments } from '../tagged/taggedSegments.js';
 
@@ -32,7 +35,7 @@ export const clip = (targetGraphs, targetSegments, sourceGraphs) => {
     sourceGraphs
   );
   const clippedGraphGeometries = clippedMeshes.map(({ matrix, mesh, tags }) =>
-    taggedGraph({ tags, matrix }, fromSurfaceMeshLazy(mesh))
+    taggedGraph({ tags, matrix }, fromSurfaceMesh(mesh))
   );
   const clippedSegmentsGeometries = clippedSegments.map(
     ({ matrix, segments, tags }) => taggedSegments({ tags, matrix }, segments)

@@ -1,6 +1,6 @@
 /* global Blob, alert, fetch */
 
-import Base64ArrayBuffer from 'base64-arraybuffer';
+import { decode } from 'base64-arraybuffer';
 import marked from 'marked';
 import { orbitDisplay } from '@jsxcad/ui-threejs';
 import { readOrWatch } from '@jsxcad/sys';
@@ -174,7 +174,7 @@ export const toDomElement = (
       for (let { path, base64Data, data, filename, type } of note.download
         .entries) {
         if (base64Data) {
-          data = Base64ArrayBuffer.decode(base64Data);
+          data = decode(base64Data);
         }
         {
           const button = document.createElement('button');

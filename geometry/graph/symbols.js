@@ -1,3 +1,1 @@
-export const graphSymbol = Symbol('graph');
-export const nefPolyhedronSymbol = Symbol('nefPolyhedron');
-export const surfaceMeshSymbol = Symbol('surfaceMeshSymbol');
+export { graphSymbol, surfaceMeshSymbol } from '@jsxcad/algorithm-cgal';

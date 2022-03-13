@@ -1,5 +1,7 @@
-import { fromSurfaceMeshLazy } from './fromSurfaceMeshLazy.js';
-import { minkowskiDifferenceOfSurfaceMeshes } from '@jsxcad/algorithm-cgal';
+import {
+  fromSurfaceMesh,
+  minkowskiDifferenceOfSurfaceMeshes,
+} from '@jsxcad/algorithm-cgal';
 import { taggedGraph } from '../tagged/taggedGraph.js';
 import { toSurfaceMesh } from './toSurfaceMesh.js';
 
@@ -9,7 +11,7 @@ export const minkowskiDifference = ({ tags }, a, b) => {
   }
   return taggedGraph(
     { tags },
-    fromSurfaceMeshLazy(
+    fromSurfaceMesh(
       minkowskiDifferenceOfSurfaceMeshes(
         toSurfaceMesh(a.graph),
         a.matrix,
