@@ -39,6 +39,7 @@ export {
 export { deletePendingSurfaceMeshes, toSurfaceMesh } from './toSurfaceMesh.js';
 export { graphSymbol, surfaceMeshSymbol } from './symbols.js';
 export { clipSurfaceMeshes } from './clipSurfaceMeshes.js';
+export { computeArea } from './computeArea.js';
 export { computeCentroidOfSurfaceMesh } from './computeCentroidOfSurfaceMesh.js';
 export { computeNormalOfSurfaceMesh } from './computeNormalOfSurfaceMesh.js';
 export { cutOutOfSurfaceMeshes } from './cutOutOfSurfaceMeshes.js';

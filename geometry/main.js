@@ -147,6 +147,7 @@ export { join } from './tagged/join.js';
 export { keep } from './tagged/keep.js';
 export { loft } from './tagged/loft.js';
 export { loft2 } from './tagged/loft2.js';
+export { measureArea } from './tagged/measureArea.js';
 export { measureBoundingBox } from './tagged/measureBoundingBox.js';
 export { minkowskiDifference } from './tagged/minkowskiDifference.js';
 export { minkowskiShell } from './tagged/minkowskiShell.js';
