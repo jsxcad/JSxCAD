@@ -1379,6 +1379,227 @@ const clipSurfaceMeshes = (targetMeshes, targetSegments, sources) => {
   }
 };
 
+const fromSurfaceMeshToLazyGraph = (mesh) => {
+  try {
+    const c = getCgal();
+    const graph = {
+      isClosed: c.Surface_mesh__is_closed(mesh),
+      isEmpty: c.Surface_mesh__is_empty(mesh),
+      isLazy: true,
+      provenance: 'algorithm/cgal/fromSurfaceMeshToLazyGraph',
+    };
+    return graph;
+  } catch (error) {
+    throw Error(error);
+  }
+};
+
+const fromSurfaceMesh = (surfaceMesh, forceNewGraph = false) => {
+  if (!surfaceMesh) {
+    throw Error('null surfaceMesh');
+  }
+  if (surfaceMesh.provenance === undefined) {
+    throw Error('Surface mesh has no provenance');
+  }
+  let graph = surfaceMesh[graphSymbol];
+  if (forceNewGraph || graph === undefined) {
+    graph = fromSurfaceMeshToLazyGraph(surfaceMesh);
+    surfaceMesh[graphSymbol] = graph;
+    graph[surfaceMeshSymbol] = surfaceMesh;
+  }
+  return graph;
+};
+
+const GEOMETRY_UNKNOWN = 0;
+const GEOMETRY_MESH = 1;
+const GEOMETRY_POLYGONS_WITH_HOLES = 2;
+const GEOMETRY_SEGMENTS = 3;
+
+const X$1 = 0;
+const Y$1 = 1;
+const Z$1 = 2;
+
+const fillCgalGeometry = (geometry, inputs) => {
+  const g = getCgal();
+  geometry.setSize(inputs.length);
+  for (let nth = 0; nth < inputs.length; nth++) {
+    geometry.setTransform(
+      nth,
+      toCgalTransformFromJsTransform(inputs[nth].matrix)
+    );
+    switch (inputs[nth].type) {
+      case 'graph':
+        geometry.setType(nth, GEOMETRY_MESH);
+        geometry.setMesh(nth, toSurfaceMesh(inputs[nth].graph));
+        break;
+      case 'polygonsWithHoles': {
+        let cursor = -1;
+        geometry.setType(nth, GEOMETRY_POLYGONS_WITH_HOLES);
+        geometry.fillPolygonsWithHoles(
+          nth,
+          (planeToFill) => {
+            if (inputs[nth].exactPlane) {
+              const [a, b, c, d] = inputs[nth].exactPlane;
+              g.fillExactQuadruple(planeToFill, a, b, c, d);
+            } else {
+              const [x, y, z, w] = inputs[nth].plane;
+              g.fillQuadruple(planeToFill, x, y, z, -w);
+            }
+          },
+          (boundaryToFill) => {
+            cursor += 1;
+            const polygon = inputs[nth].polygonsWithHoles[cursor];
+            if (polygon === undefined) {
+              return false;
+            }
+            if (polygon.exactPoints) {
+              for (const [x, y, z] of polygon.exactPoints) {
+                g.addExactPoint(boundaryToFill, x, y, z);
+              }
+            } else {
+              for (const [x, y, z] of polygon.points) {
+                g.addPoint(boundaryToFill, x, y, z);
+              }
+            }
+            return true;
+          },
+          (holeToFill, nthHole) => {
+            const polygon = inputs[nth].polygonsWithHoles[cursor];
+            if (polygon === undefined) {
+              return false;
+            }
+            const hole = polygon.holes[nthHole];
+            if (hole === undefined) {
+              return false;
+            }
+            if (hole.exactPoints) {
+              for (const [x, y, z] of hole.exactPoints) {
+                g.addExactPoint(holeToFill, x, y, z);
+              }
+            } else {
+              for (const [x, y, z] of hole.points) {
+                g.addPoint(holeToFill, x, y, z);
+              }
+            }
+            return true;
+          }
+        );
+        break;
+      }
+      case 'segments': {
+        geometry.setType(nth, GEOMETRY_SEGMENTS);
+        for (const [start, end] of inputs[nth].segments) {
+          geometry.addSegment(nth, start[X$1], start[Y$1], start[Z$1], end[X$1], end[Y$1], end[Z$1]);
+        }
+        break;
+      }
+      default: {
+        geometry.setType(nth, GEOMETRY_UNKNOWN);
+        break;
+      }
+    }
+  }
+  return geometry;
+};
+
+const toCgalGeometry = (inputs) => {
+  const cgalGeometry = new (getCgal().Geometry)();
+  fillCgalGeometry(cgalGeometry, inputs);
+  return cgalGeometry;
+};
+
+const fromCgalGeometry = (geometry, inputs) => {
+  const results = [];
+  for (let nth = 0; nth < inputs.length; nth++) {
+    switch (geometry.getType(nth)) {
+      case GEOMETRY_MESH: {
+        const mesh = geometry.releaseOutputMesh(nth);
+        mesh.provenance = 'fromOutputGeometry';
+        const { matrix, tags } = inputs[nth];
+        // Note: The 0th mesh is not emitted as it does not get cut.
+        results[nth] = {
+          type: 'graph',
+          matrix,
+          tags,
+          graph: fromSurfaceMesh(mesh),
+        };
+        break;
+      }
+      case GEOMETRY_POLYGONS_WITH_HOLES: {
+        const polygonsWithHoles = [];
+        let exactPoints, points, output;
+        const outputPolygon = (isHole) => {
+          points = [];
+          exactPoints = [];
+          if (isHole) {
+            output.holes.push({
+              points,
+              exactPoints,
+              holes: [],
+            });
+          } else {
+            output = {
+              points,
+              exactPoints,
+              holes: [],
+            };
+            polygonsWithHoles.push(output);
+          }
+        };
+        const outputPolygonPoint = (x, y, z, exactX, exactY, exactZ) => {
+          points.push([x, y, z]);
+          exactPoints.push([exactX, exactY, exactZ]);
+        };
+        geometry.emitPolygonsWithHoles(
+          nth,
+          outputPolygon,
+          outputPolygonPoint
+        );
+        const { matrix, tags, plane = [0, 0, 1, 0] } = inputs[nth];
+        results[nth] = {
+          type: 'polygonsWithHoles',
+          polygonsWithHoles,
+          plane,
+          matrix,
+          tags,
+        };
+        break;
+      }
+      case GEOMETRY_SEGMENTS: {
+        const { matrix, tags } = inputs[nth];
+        const segments = [];
+        results[nth] = {
+          type: 'segments',
+          segments,
+          matrix,
+          tags,
+        };
+        geometry.emitSegments(nth, (sX, sY, sZ, tX, tY, tZ) => {
+          segments.push([[sX, sY, sZ], [tX, tY, tZ]]);
+        });
+        break;
+      }
+      default: {
+        const { matrix, tags } = inputs[nth];
+        results[nth] = { type: 'group', tags, matrix, contents: [] };
+      }
+    }
+  }
+  return results;
+};
+
+const withCgalGeometry = (geometry, op) => {
+  const cgalGeometry = toCgalGeometry(geometry);
+  try {
+    return op(cgalGeometry);
+  } finally {
+    cgalGeometry.delete();
+  }
+};
+
+const computeArea = (linear) =>
+  withCgalGeometry(linear, getCgal().ComputeArea);
+
 const computeCentroidOfSurfaceMesh = (
   mesh,
   transform,
@@ -1535,215 +1756,6 @@ const demeshSurfaceMesh = (mesh, matrix) => {
   } catch (error) {
     throw Error(error);
   }
-};
-
-const fromSurfaceMeshToLazyGraph = (mesh) => {
-  try {
-    const c = getCgal();
-    const graph = {
-      isClosed: c.Surface_mesh__is_closed(mesh),
-      isEmpty: c.Surface_mesh__is_empty(mesh),
-      isLazy: true,
-      provenance: 'algorithm/cgal/fromSurfaceMeshToLazyGraph',
-    };
-    return graph;
-  } catch (error) {
-    throw Error(error);
-  }
-};
-
-const fromSurfaceMesh = (surfaceMesh, forceNewGraph = false) => {
-  if (!surfaceMesh) {
-    throw Error('null surfaceMesh');
-  }
-  if (surfaceMesh.provenance === undefined) {
-    throw Error('Surface mesh has no provenance');
-  }
-  let graph = surfaceMesh[graphSymbol];
-  if (forceNewGraph || graph === undefined) {
-    graph = fromSurfaceMeshToLazyGraph(surfaceMesh);
-    surfaceMesh[graphSymbol] = graph;
-    graph[surfaceMeshSymbol] = surfaceMesh;
-  }
-  return graph;
-};
-
-const GEOMETRY_UNKNOWN = 0;
-const GEOMETRY_MESH = 1;
-const GEOMETRY_POLYGONS_WITH_HOLES = 2;
-const GEOMETRY_SEGMENTS = 3;
-
-const X$1 = 0;
-const Y$1 = 1;
-const Z$1 = 2;
-
-const fillCgalGeometry = (geometry, inputs) => {
-  const g = getCgal();
-  geometry.setSize(inputs.length);
-  for (let nth = 0; nth < inputs.length; nth++) {
-    geometry.setTransform(
-      nth,
-      toCgalTransformFromJsTransform(inputs[nth].matrix)
-    );
-    switch (inputs[nth].type) {
-      case 'graph':
-        geometry.setType(nth, GEOMETRY_MESH);
-        geometry.setMesh(nth, toSurfaceMesh(inputs[nth].graph));
-        break;
-      case 'polygonsWithHoles': {
-        let cursor = 0;
-        geometry.setType(nth, GEOMETRY_POLYGONS_WITH_HOLES);
-        geometry.fillPolygonsWithHoles(
-          nth,
-          (planeToFill) => {
-            if (inputs[nth].exactPlane) {
-              const [a, b, c, d] = inputs[nth].exactPlane;
-              g.fillExactQuadruple(planeToFill, a, b, c, d);
-            } else {
-              const [x, y, z, w] = inputs[nth].plane;
-              g.fillQuadruple(planeToFill, x, y, z, -w);
-            }
-          },
-          (boundaryToFill) => {
-            const polygon = inputs[nth].polygonsWithHoles[cursor];
-            if (polygon === undefined) {
-              return false;
-            }
-            if (polygon.exactPoints) {
-              for (const [x, y, z] of polygon.exactPoints) {
-                g.addExactPoint(boundaryToFill, x, y, z);
-              }
-            } else {
-              for (const [x, y, z] of polygon.points) {
-                g.addPoint(boundaryToFill, x, y, z);
-              }
-            }
-            cursor += 1;
-            return true;
-          },
-          (holeToFill, nthHole) => {
-            const polygon = inputs[nth].polygonsWithHoles[cursor];
-            if (polygon === undefined) {
-              return false;
-            }
-            const hole = polygon.holes[nthHole];
-            if (hole === undefined) {
-              return false;
-            }
-            if (hole.exactPoints) {
-              for (const [x, y, z] of hole.exactPoints) {
-                g.addExactPoint(holeToFill, x, y, z);
-              }
-            } else {
-              for (const [x, y, z] of hole.points) {
-                g.addPoint(holeToFill, x, y, z);
-              }
-            }
-            return true;
-          }
-        );
-        break;
-      }
-      case 'segments': {
-        geometry.setType(nth, GEOMETRY_SEGMENTS);
-        for (const [start, end] of inputs[nth].segments) {
-          geometry.addSegment(nth, start[X$1], start[Y$1], start[Z$1], end[X$1], end[Y$1], end[Z$1]);
-        }
-        break;
-      }
-      default: {
-        geometry.setType(nth, GEOMETRY_UNKNOWN);
-        break;
-      }
-    }
-  }
-  return geometry;
-};
-
-const toCgalGeometry = (inputs) => {
-  const cgalGeometry = new (getCgal().Geometry)();
-  fillCgalGeometry(cgalGeometry, inputs);
-  return cgalGeometry;
-};
-
-const fromCgalGeometry = (geometry, inputs) => {
-  const results = [];
-  for (let nth = 0; nth < inputs.length; nth++) {
-    switch (geometry.getType(nth)) {
-      case GEOMETRY_MESH: {
-        const mesh = geometry.releaseOutputMesh(nth);
-        mesh.provenance = 'fromOutputGeometry';
-        const { matrix, tags } = inputs[nth];
-        // Note: The 0th mesh is not emitted as it does not get cut.
-        results[nth] = {
-          type: 'graph',
-          matrix,
-          tags,
-          graph: fromSurfaceMesh(mesh),
-        };
-        break;
-      }
-      case GEOMETRY_POLYGONS_WITH_HOLES: {
-        const polygonsWithHoles = [];
-        let exactPoints, points, output;
-        const outputPolygon = (isHole) => {
-          points = [];
-          exactPoints = [];
-          if (isHole) {
-            output.holes.push({
-              points,
-              exactPoints,
-              holes: [],
-            });
-          } else {
-            output = {
-              points,
-              exactPoints,
-              holes: [],
-            };
-            polygonsWithHoles.push(output);
-          }
-        };
-        const outputPolygonPoint = (x, y, z, exactX, exactY, exactZ) => {
-          points.push([x, y, z]);
-          exactPoints.push([exactX, exactY, exactZ]);
-        };
-        geometry.emitPolygonsWithHoles(
-          nth,
-          outputPolygon,
-          outputPolygonPoint
-        );
-        const { matrix, tags, plane = [0, 0, 1, 0] } = inputs[nth];
-        results[nth] = {
-          type: 'polygonsWithHoles',
-          polygonsWithHoles,
-          plane,
-          matrix,
-          tags,
-        };
-        break;
-      }
-      case GEOMETRY_SEGMENTS: {
-        const { matrix, tags } = inputs[nth];
-        const segments = [];
-        results[nth] = {
-          type: 'segments',
-          segments,
-          matrix,
-          tags,
-        };
-        geometry.emitSegments(nth, (sX, sY, sZ, tX, tY, tZ) => {
-          segments.push([[sX, sY, sZ], [tX, tY, tZ]]);
-        });
-        break;
-      }
-      default: {
-        const { matrix, tags } = inputs[nth];
-        results[nth] = { type: 'group', tags, matrix, contents: [] };
-      }
-    }
-  }
-  return results;
 };
 
 const disjoint = (inputs) => {
@@ -2967,4 +2979,4 @@ const wireframeSurfaceMesh = (mesh, transform) => {
   }
 };
 
-export { BOOLEAN_ADD, BOOLEAN_CLIP, BOOLEAN_CUT, STATUS_EMPTY, STATUS_OK, STATUS_UNCHANGED, STATUS_ZERO_THICKNESS, SurfaceMeshQuery, approximateSurfaceMesh, arrangePaths, arrangePathsIntoTriangles, arrangePolygonsWithHoles, arrangeSegments, arrangeSegmentsIntoTriangles, bendSurfaceMesh, blessed, booleansOfPolygonsWithHoles, clipSurfaceMeshes, composeTransforms, computeCentroidOfSurfaceMesh, computeNormalOfSurfaceMesh, cutOutOfSurfaceMeshes, cutSurfaceMeshes, deformSurfaceMesh, deletePendingSurfaceMeshes, deleteSurfaceMesh, demeshSurfaceMesh, deserializeSurfaceMesh, disjoint, doesSelfIntersectOfSurfaceMesh, eachPointOfSurfaceMesh, extrudeSurfaceMesh, extrudeToPlaneOfSurfaceMesh, fitPlaneToPoints, fromExactToCgalTransform, fromFunctionToSurfaceMesh, fromGraphToSurfaceMesh, fromIdentityToCgalTransform, fromPointsToAlphaShape2AsPolygonSegments, fromPointsToAlphaShapeAsSurfaceMesh, fromPointsToConvexHullAsSurfaceMesh, fromPointsToSurfaceMesh, fromPolygonsToSurfaceMesh, fromRotateXToTransform, fromRotateYToTransform, fromRotateZToTransform, fromScaleToTransform, fromSegmentToInverseTransform, fromSurfaceMesh, fromSurfaceMeshEmitBoundingBox, fromSurfaceMeshToGraph, fromSurfaceMeshToLazyGraph, fromSurfaceMeshToPolygons, fromSurfaceMeshToPolygonsWithHoles, fromSurfaceMeshToTriangles, fromTranslateToTransform, fuseSurfaceMeshes, generatePackingEnvelopeForSurfaceMesh, generateUpperEnvelopeForSurfaceMesh, graphSymbol, growSurfaceMesh, identity, initCgal, insetOfPolygonWithHoles, invertTransform, isotropicRemeshingOfSurfaceMesh, joinSurfaceMeshes, loftBetweenCongruentSurfaceMeshes, loftBetweenSurfaceMeshes, matrix6, minkowskiDifferenceOfSurfaceMeshes, minkowskiShellOfSurfaceMeshes, minkowskiSumOfSurfaceMeshes, offsetOfPolygonWithHoles, outlineSurfaceMesh, projectToPlaneOfSurfaceMesh, pushSurfaceMesh, remeshSurfaceMesh, removeSelfIntersectionsOfSurfaceMesh, reverseFaceOrientationsOfSurfaceMesh, sectionOfSurfaceMesh, separateSurfaceMesh, serializeSurfaceMesh, simplifySurfaceMesh, smoothShapeOfSurfaceMesh, smoothSurfaceMesh, subdivideSurfaceMesh, surfaceMeshSymbol, taperSurfaceMesh, toCgalTransformFromJsTransform, toSurfaceMesh, transformSurfaceMesh, twistSurfaceMesh, wireframeSurfaceMesh };
+export { BOOLEAN_ADD, BOOLEAN_CLIP, BOOLEAN_CUT, STATUS_EMPTY, STATUS_OK, STATUS_UNCHANGED, STATUS_ZERO_THICKNESS, SurfaceMeshQuery, approximateSurfaceMesh, arrangePaths, arrangePathsIntoTriangles, arrangePolygonsWithHoles, arrangeSegments, arrangeSegmentsIntoTriangles, bendSurfaceMesh, blessed, booleansOfPolygonsWithHoles, clipSurfaceMeshes, composeTransforms, computeArea, computeCentroidOfSurfaceMesh, computeNormalOfSurfaceMesh, cutOutOfSurfaceMeshes, cutSurfaceMeshes, deformSurfaceMesh, deletePendingSurfaceMeshes, deleteSurfaceMesh, demeshSurfaceMesh, deserializeSurfaceMesh, disjoint, doesSelfIntersectOfSurfaceMesh, eachPointOfSurfaceMesh, extrudeSurfaceMesh, extrudeToPlaneOfSurfaceMesh, fitPlaneToPoints, fromExactToCgalTransform, fromFunctionToSurfaceMesh, fromGraphToSurfaceMesh, fromIdentityToCgalTransform, fromPointsToAlphaShape2AsPolygonSegments, fromPointsToAlphaShapeAsSurfaceMesh, fromPointsToConvexHullAsSurfaceMesh, fromPointsToSurfaceMesh, fromPolygonsToSurfaceMesh, fromRotateXToTransform, fromRotateYToTransform, fromRotateZToTransform, fromScaleToTransform, fromSegmentToInverseTransform, fromSurfaceMesh, fromSurfaceMeshEmitBoundingBox, fromSurfaceMeshToGraph, fromSurfaceMeshToLazyGraph, fromSurfaceMeshToPolygons, fromSurfaceMeshToPolygonsWithHoles, fromSurfaceMeshToTriangles, fromTranslateToTransform, fuseSurfaceMeshes, generatePackingEnvelopeForSurfaceMesh, generateUpperEnvelopeForSurfaceMesh, graphSymbol, growSurfaceMesh, identity, initCgal, insetOfPolygonWithHoles, invertTransform, isotropicRemeshingOfSurfaceMesh, joinSurfaceMeshes, loftBetweenCongruentSurfaceMeshes, loftBetweenSurfaceMeshes, matrix6, minkowskiDifferenceOfSurfaceMeshes, minkowskiShellOfSurfaceMeshes, minkowskiSumOfSurfaceMeshes, offsetOfPolygonWithHoles, outlineSurfaceMesh, projectToPlaneOfSurfaceMesh, pushSurfaceMesh, remeshSurfaceMesh, removeSelfIntersectionsOfSurfaceMesh, reverseFaceOrientationsOfSurfaceMesh, sectionOfSurfaceMesh, separateSurfaceMesh, serializeSurfaceMesh, simplifySurfaceMesh, smoothShapeOfSurfaceMesh, smoothSurfaceMesh, subdivideSurfaceMesh, surfaceMeshSymbol, taperSurfaceMesh, toCgalTransformFromJsTransform, toSurfaceMesh, transformSurfaceMesh, twistSurfaceMesh, wireframeSurfaceMesh };

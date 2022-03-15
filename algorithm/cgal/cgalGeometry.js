@@ -26,7 +26,7 @@ export const fillCgalGeometry = (geometry, inputs) => {
         geometry.setMesh(nth, toSurfaceMesh(inputs[nth].graph));
         break;
       case 'polygonsWithHoles': {
-        let cursor = 0;
+        let cursor = -1;
         geometry.setType(nth, GEOMETRY_POLYGONS_WITH_HOLES);
         geometry.fillPolygonsWithHoles(
           nth,
@@ -40,6 +40,7 @@ export const fillCgalGeometry = (geometry, inputs) => {
             }
           },
           (boundaryToFill) => {
+            cursor += 1;
             const polygon = inputs[nth].polygonsWithHoles[cursor];
             if (polygon === undefined) {
               return false;
@@ -53,7 +54,6 @@ export const fillCgalGeometry = (geometry, inputs) => {
                 g.addPoint(boundaryToFill, x, y, z);
               }
             }
-            cursor += 1;
             return true;
           },
           (holeToFill, nthHole) => {

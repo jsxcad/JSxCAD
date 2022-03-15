@@ -253,6 +253,7 @@ export { add } from './add.js';
 export { and } from './and.js';
 export { addTo } from './addTo.js';
 export { align } from './align.js';
+export { area } from './area.js';
 export { as } from './as.js';
 export { asPart } from './asPart.js';
 export { at } from './at.js';
