@@ -412,7 +412,23 @@ test('Disjoint PolygonsWithHoles', (t) => {
             ['1', '1', '0'],
             ['-1', '1', '0'],
           ],
-          holes: [],
+          holes: [
+            {
+              points: [
+                [0.5, 0.5, 0],
+                [0.5, -0.5, 0],
+                [-0.5, -0.5, 0],
+                [-0.5, 0.5, 0],
+              ],
+              exactPoints: [
+                ['1/2', '1/2', '0'],
+                ['1/2', '-1/2', '0'],
+                ['-1/2', '-1/2', '0'],
+                ['-1/2', '1/2', '0'],
+              ],
+              holes: [],
+            },
+          ],
         },
       ],
       plane: [0, 0, 1, 0],
@@ -423,22 +439,66 @@ test('Disjoint PolygonsWithHoles', (t) => {
       polygonsWithHoles: [
         {
           points: [
-            [-1, -1, 0],
-            [1, -1, 0],
-            [1, 1, 0],
-            [-1, 1, 0],
+            [-0.5, -0.5, 0],
+            [0.5, -0.5, 0],
+            [0.5, 0.5, 0],
+            [-0.5, 0.5, 0],
           ],
           exactPoints: [
-            ['-1', '-1', '0'],
-            ['1', '-1', '0'],
-            ['1', '1', '0'],
-            ['-1', '1', '0'],
+            ['-1/2', '-1/2', '0'],
+            ['1/2', '-1/2', '0'],
+            ['1/2', '1/2', '0'],
+            ['-1/2', '1/2', '0'],
           ],
           holes: [],
         },
       ],
       plane: [0, 0, 1, 0],
       matrix: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1],
+    },
+  ]);
+});
+
+test('Disjoint Segments by Volumes', (t) => {
+  const r = disjoint([
+    {
+      type: 'segments',
+      segments: [
+        [
+          [-100, 0, 1],
+          [100, 0, 1],
+        ],
+      ],
+    },
+    {
+      type: 'graph',
+      matrix: blessed([1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]),
+      graph: fromSurfaceMesh(fromPolygonsToSurfaceMesh(largeBox)),
+    },
+  ]);
+  t.deepEqual(clean(r), [
+    {
+      type: 'segments',
+      segments: [
+        [
+          [-100, 0, 1],
+          [-1, 0, 1],
+        ],
+        [
+          [1, 0, 1],
+          [100, 0, 1],
+        ],
+      ],
+    },
+    {
+      type: 'graph',
+      matrix: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1],
+      graph: {
+        isClosed: true,
+        isEmpty: false,
+        isLazy: true,
+        provenance: 'algorithm/cgal/fromSurfaceMeshToLazyGraph',
+      },
     },
   ]);
 });
