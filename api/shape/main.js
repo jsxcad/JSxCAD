@@ -356,6 +356,7 @@ export { untag } from './untag.js';
 export { view } from './view.js';
 export { voidFn } from './void.js';
 export { voidIn } from './voidIn.js';
+export { volume } from './volume.js';
 export { voxels } from './voxels.js';
 export { weld } from './Weld.js';
 export { withFn } from './with.js';

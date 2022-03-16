@@ -1,5 +1,5 @@
 import { getCgal } from './getCgal.js';
 import { withCgalGeometry } from './cgalGeometry.js';
 
-export const computeArea = (linear) =>
+export const computeVolume = (linear) =>
   withCgalGeometry(linear, getCgal().ComputeVolume);

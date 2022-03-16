@@ -561,3 +561,5 @@ Box(2).cut(Box(1)).area(v => s => s.md(`Area is ${v.toFixed(2)}`));
 Area is 3.00
 
 Area of Box(2, 3, 4) is 52.00
+
+Volume of Box(2, 3, 4) is 24.00

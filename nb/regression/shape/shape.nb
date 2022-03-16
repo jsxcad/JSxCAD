@@ -281,3 +281,5 @@ md`Area of Box(2).cut(Box(1)) is ${Box(2).cut(Box(1)).area().toFixed(2)}`;
 Box(2).cut(Box(1)).area(v => s => s.md(`Area is ${v.toFixed(2)}`));
 
 md`Area of Box(2, 3, 4) is ${Box(2, 3, 4).area().toFixed(2)}`;
+
+md`Volume of Box(2, 3, 4) is ${Box(2, 3, 4).volume().toFixed(2)}`;
