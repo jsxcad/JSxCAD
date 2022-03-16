@@ -25,12 +25,6 @@ export {
 } from './arrangeSegments.js';
 export { bendSurfaceMesh } from './bendSurfaceMesh.js';
 export {
-  BOOLEAN_ADD,
-  BOOLEAN_CUT,
-  BOOLEAN_CLIP,
-  booleansOfPolygonsWithHoles,
-} from './booleansOfPolygonsWithHoles.js';
-export {
   STATUS_OK,
   STATUS_EMPTY,
   STATUS_ZERO_THICKNESS,

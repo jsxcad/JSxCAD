@@ -552,10 +552,12 @@ Box(10, 3, 3)
 
 ![Image](shape.md.61.png)
 
-Area of Box(2).cut(Box(1)) is 1.5000000000000004
+Area of Box(2).cut(Box(1)) is 3.00
 
 ```JavaScript
-Box(2).cut(Box(1)).area(v => s => s.md(`Area is ${v}`));
+Box(2).cut(Box(1)).area(v => s => s.md(`Area is ${v.toFixed(2)}`));
 ```
 
-Area is 1.5000000000000004
+Area is 3.00
+
+Area of Box(2, 3, 4) is 52.00

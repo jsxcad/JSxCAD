@@ -1755,6 +1755,7 @@ bool didAdmitPlane(Plane& plane, emscripten::val fill_plane) {
   }
 }
 
+#if 0
 bool admitPolygonWithHoles(const Plane& plane, Polygon_with_holes_2& polygon,
                            emscripten::val fill_boundary,
                            emscripten::val fill_hole) {
@@ -1803,6 +1804,7 @@ bool admitPolygonWithHoles(const Plane& plane, Polygon_with_holes_2& polygon,
 
   return true;
 }
+#endif
 
 template <typename MAP>
 struct Project {
@@ -3846,6 +3848,95 @@ int DisjointSurfaceMeshesWithIncrementalMasking(int meshCount,
   return STATUS_OK;
 }
 
+template <typename P>
+bool admitPolygonWithHoles(const Plane& plane, const Transformation& transform,
+                           P& polygon, emscripten::val fill_boundary,
+                           emscripten::val fill_hole) {
+  Points points;
+  Points* points_ptr = &points;
+  fill_boundary(points_ptr);
+  if (points.size() == 0) {
+    return false;
+  }
+  Polygon_2 boundary;
+  for (const auto& point : points) {
+    boundary.push_back(plane.to_2d(point.transform(transform)));
+  }
+  if (!boundary.is_simple()) {
+    std::cout << "Boundary is not simple" << std::endl;
+    return false;
+  }
+  if (boundary.orientation() == CGAL::Sign::NEGATIVE) {
+    boundary.reverse_orientation();
+  }
+
+  std::vector<Polygon_2> holes;
+  for (;;) {
+    Points points;
+    Points* points_ptr = &points;
+    fill_hole(points_ptr, holes.size());
+    if (points.size() == 0) {
+      break;
+    }
+    Polygon_2 hole;
+    for (const auto& point : points) {
+      hole.push_back(plane.to_2d(point.transform(transform)));
+    }
+    if (!hole.is_simple()) {
+      std::cout << "Hole is not simple" << std::endl;
+      return false;
+    }
+    if (hole.orientation() == CGAL::Sign::POSITIVE) {
+      hole.reverse_orientation();
+    }
+    holes.push_back(hole);
+  }
+
+  polygon = P(boundary, holes.begin(), holes.end());
+  return true;
+}
+
+template <typename P>
+void admitPolygonsWithHoles(const Plane& plane, const Transformation& transform,
+                            std::vector<P>& polygons,
+                            emscripten::val fill_boundary,
+                            emscripten::val fill_hole) {
+  for (;;) {
+    Polygon_with_holes_2 polygon;
+    if (!admitPolygonWithHoles(plane, transform, polygon, fill_boundary,
+                               fill_hole)) {
+      return;
+    }
+    polygons.push_back(polygon);
+  }
+}
+
+void emitPlane(const Plane& plane, emscripten::val& emit_plane) {
+  const auto a = plane.a().exact();
+  const auto b = plane.b().exact();
+  const auto c = plane.c().exact();
+  const auto d = plane.d().exact();
+  std::ostringstream x;
+  x << a;
+  std::string xs = x.str();
+  std::ostringstream y;
+  y << b;
+  std::string ys = y.str();
+  std::ostringstream z;
+  z << c;
+  std::string zs = z.str();
+  std::ostringstream w;
+  w << d;
+  std::string ws = w.str();
+  const double xd = CGAL::to_double(a);
+  const double yd = CGAL::to_double(b);
+  const double zd = CGAL::to_double(c);
+  const double ld = std::sqrt(xd * xd + yd * yd + zd * zd);
+  const double wd = CGAL::to_double(d);
+  // Normalize the approximate plane normal.
+  emit_plane(xd / ld, yd / ld, zd / ld, wd, xs, ys, zs, ws);
+}
+
 class Geometry {
  public:
   void setSize(int input_count) {
@@ -3913,7 +4004,8 @@ class Geometry {
     admitPlane(plane, fillPlane);
     planes_[nth] = plane.transform(*transforms_[nth]);
     Polygon_with_holes_2 polygon;
-    while (admitPolygonWithHoles(plane, polygon, fillBoundary, fillHole)) {
+    while (admitPolygonWithHoles(plane, *transforms_[nth], polygon,
+                                 fillBoundary, fillHole)) {
       gps_[nth]->join(polygon);
     }
   }
@@ -4132,8 +4224,11 @@ double ComputeArea(Geometry* geometry) {
   for (int nth = 0; nth < size; nth++) {
     switch (geometry->getType(nth)) {
       case GEOMETRY_MESH: {
+        Surface_mesh mesh(*geometry->getMesh(nth));
+        CGAL::Polygon_mesh_processing::transform(
+            *geometry->transforms_[nth], mesh, CGAL::parameters::all_default());
         area += CGAL::Polygon_mesh_processing::area(
-            *geometry->meshes_[nth], CGAL::parameters::all_default());
+            mesh, CGAL::parameters::all_default());
         break;
       }
       case GEOMETRY_POLYGONS_WITH_HOLES: {
@@ -4146,11 +4241,38 @@ double ComputeArea(Geometry* geometry) {
             area += hole.area();
           }
         }
+#if 0
+        Surface_mesh mesh;
+        GeneralPolygonSetToSurfaceMesh(geometry->planes_[nth],
+                                       *geometry->gps_[nth], mesh);
+        CGAL::Polygon_mesh_processing::transform(
+            *geometry->transforms_[nth], mesh, CGAL::parameters::all_default());
+        area += CGAL::Polygon_mesh_processing::area(
+            mesh, CGAL::parameters::all_default());
         break;
+#endif
       }
     }
   }
   return CGAL::to_double(area);
+}
+
+double ComputeVolume(Geometry* geometry) {
+  FT volume = 0;
+  int size = geometry->getSize();
+  for (int nth = 0; nth < size; nth++) {
+    switch (geometry->getType(nth)) {
+      case GEOMETRY_MESH: {
+        Surface_mesh mesh(*geometry->getMesh(nth));
+        CGAL::Polygon_mesh_processing::transform(
+            *geometry->transforms_[nth], mesh, CGAL::parameters::all_default());
+        volume += CGAL::Polygon_mesh_processing::volume(
+            mesh, CGAL::parameters::all_default());
+        break;
+      }
+    }
+  }
+  return CGAL::to_double(volume);
 }
 
 // FIX: The case where we take a section coplanar with a surface with a hole
@@ -5124,94 +5246,6 @@ void InsetOfPolygonWithHoles(double initial, double step, double limit,
   }
 }
 
-template <typename P>
-bool admitPolygonWithHoles(std::size_t nth_polygon, const Plane& plane,
-                           P& polygon, emscripten::val fill_boundary,
-                           emscripten::val fill_hole) {
-  Points points;
-  Points* points_ptr = &points;
-  fill_boundary(points_ptr, nth_polygon);
-  if (points.size() == 0) {
-    return false;
-  }
-  Polygon_2 boundary;
-  for (const auto& point : points) {
-    boundary.push_back(plane.to_2d(point));
-  }
-  if (!boundary.is_simple()) {
-    std::cout << "Boundary is not simple" << std::endl;
-    return false;
-  }
-  if (boundary.orientation() == CGAL::Sign::NEGATIVE) {
-    boundary.reverse_orientation();
-  }
-
-  std::vector<Polygon_2> holes;
-  for (;;) {
-    Points points;
-    Points* points_ptr = &points;
-    fill_hole(points_ptr, nth_polygon, holes.size());
-    if (points.size() == 0) {
-      break;
-    }
-    Polygon_2 hole;
-    for (const auto& point : points) {
-      hole.push_back(plane.to_2d(point));
-    }
-    if (!hole.is_simple()) {
-      std::cout << "Hole is not simple" << std::endl;
-      return false;
-    }
-    if (hole.orientation() == CGAL::Sign::POSITIVE) {
-      hole.reverse_orientation();
-    }
-    holes.push_back(hole);
-  }
-
-  polygon = P(boundary, holes.begin(), holes.end());
-  return true;
-}
-
-template <typename P>
-void admitPolygonsWithHoles(const Plane& plane, std::vector<P>& polygons,
-                            emscripten::val fill_boundary,
-                            emscripten::val fill_hole) {
-  for (;;) {
-    Polygon_with_holes_2 polygon;
-    if (!admitPolygonWithHoles(polygons.size(), plane, polygon, fill_boundary,
-                               fill_hole)) {
-      return;
-    }
-    polygons.push_back(polygon);
-  }
-}
-
-void emitPlane(const Plane& plane, emscripten::val& emit_plane) {
-  const auto a = plane.a().exact();
-  const auto b = plane.b().exact();
-  const auto c = plane.c().exact();
-  const auto d = plane.d().exact();
-  std::ostringstream x;
-  x << a;
-  std::string xs = x.str();
-  std::ostringstream y;
-  y << b;
-  std::string ys = y.str();
-  std::ostringstream z;
-  z << c;
-  std::string zs = z.str();
-  std::ostringstream w;
-  w << d;
-  std::string ws = w.str();
-  const double xd = CGAL::to_double(a);
-  const double yd = CGAL::to_double(b);
-  const double zd = CGAL::to_double(c);
-  const double ld = std::sqrt(xd * xd + yd * yd + zd * zd);
-  const double wd = CGAL::to_double(d);
-  // Normalize the approximate plane normal.
-  emit_plane(xd / ld, yd / ld, zd / ld, wd, xs, ys, zs, ws);
-}
-
 const int kAdd = 1;
 const int kCut = 2;
 const int kClip = 3;
@@ -5227,7 +5261,8 @@ void BooleansOfPolygonsWithHoles(const Plane& plane,
   std::vector<Traits::Polygon_with_holes_2> input;
   std::vector<Traits::Polygon_with_holes_2> output;
 
-  admitPolygonsWithHoles(plane, input, fill_boundary, fill_hole);
+  admitPolygonsWithHoles(plane, Transformation(CGAL::IDENTITY), input,
+                         fill_boundary, fill_hole);
 
   CGAL::General_polygon_set_2<Traits> set;
   int nthOperation = 0;
@@ -5364,8 +5399,8 @@ void ArrangePolygonsWithHoles(std::size_t count, emscripten::val fill_plane,
     plane = unitPlane(plane);
     Arrangement_2& arrangement = arrangements[plane];
     Polygon_with_holes_2 polygon;
-    admitPolygonWithHoles(nth_polygon, plane, polygon, fill_boundary,
-                          fill_hole);
+    admitPolygonWithHoles(plane, Transformation(CGAL::IDENTITY), polygon,
+                          fill_boundary, fill_hole);
     for (auto it = polygon.outer_boundary().edges_begin();
          it != polygon.outer_boundary().edges_end(); ++it) {
       insert(arrangement, *it);
@@ -6431,6 +6466,8 @@ EMSCRIPTEN_BINDINGS(module) {
                        &FromSurfaceMeshToPolygonsWithHoles,
                        emscripten::allow_raw_pointers());
   emscripten::function("ComputeArea", &ComputeArea,
+                       emscripten::allow_raw_pointers());
+  emscripten::function("ComputeVolume", &ComputeVolume,
                        emscripten::allow_raw_pointers());
   emscripten::function("ComputeCentroidOfSurfaceMesh",
                        &ComputeCentroidOfSurfaceMesh,
