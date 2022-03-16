@@ -25,12 +25,6 @@ export {
 } from './arrangeSegments.js';
 export { bendSurfaceMesh } from './bendSurfaceMesh.js';
 export {
-  BOOLEAN_ADD,
-  BOOLEAN_CUT,
-  BOOLEAN_CLIP,
-  booleansOfPolygonsWithHoles,
-} from './booleansOfPolygonsWithHoles.js';
-export {
   STATUS_OK,
   STATUS_EMPTY,
   STATUS_ZERO_THICKNESS,
@@ -40,6 +34,7 @@ export { deletePendingSurfaceMeshes, toSurfaceMesh } from './toSurfaceMesh.js';
 export { graphSymbol, surfaceMeshSymbol } from './symbols.js';
 export { clipSurfaceMeshes } from './clipSurfaceMeshes.js';
 export { computeArea } from './computeArea.js';
+export { computeVolume } from './computeVolume.js';
 export { computeCentroidOfSurfaceMesh } from './computeCentroidOfSurfaceMesh.js';
 export { computeNormalOfSurfaceMesh } from './computeNormalOfSurfaceMesh.js';
 export { cutOutOfSurfaceMeshes } from './cutOutOfSurfaceMeshes.js';

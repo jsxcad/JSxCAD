@@ -32,7 +32,7 @@ export const arrangePolygonsWithHoles = (polygons) => {
       }
     };
 
-    const fillHole = (out, nthPolygon, nthHole) => {
+    const fillHole = (out, nthHole) => {
       const hole = polygon.holes[nthHole];
       if (!hole) {
         return;

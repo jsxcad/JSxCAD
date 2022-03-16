@@ -46,8 +46,8 @@ test('Area of polygon with hole', (t) => {
         },
       ],
       plane: [0, 0, 1, 0],
-      matrix: blessed([1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]),
+      matrix: blessed([2, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]),
     },
   ]);
-  t.is(area.toFixed(4), (3).toFixed(4));
+  t.is(area.toFixed(4), (6).toFixed(4));
 });
