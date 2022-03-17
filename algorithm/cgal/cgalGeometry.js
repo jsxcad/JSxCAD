@@ -23,7 +23,7 @@ export const fillCgalGeometry = (geometry, inputs) => {
     switch (inputs[nth].type) {
       case 'graph':
         geometry.setType(nth, GEOMETRY_MESH);
-        geometry.setMesh(nth, toSurfaceMesh(inputs[nth].graph));
+        geometry.setInputMesh(nth, toSurfaceMesh(inputs[nth].graph));
         break;
       case 'polygonsWithHoles': {
         let cursor = -1;
@@ -82,7 +82,7 @@ export const fillCgalGeometry = (geometry, inputs) => {
       case 'segments': {
         geometry.setType(nth, GEOMETRY_SEGMENTS);
         for (const [start, end] of inputs[nth].segments) {
-          geometry.addSegment(nth, start[X], start[Y], start[Z], end[X], end[Y], end[Z]);
+          geometry.addInputSegment(nth, start[X], start[Y], start[Z], end[X], end[Y], end[Z]);
         }
         break;
       }
@@ -95,15 +95,15 @@ export const fillCgalGeometry = (geometry, inputs) => {
   return geometry;
 };
 
-export const toCgalGeometry = (inputs) => {
-  const cgalGeometry = new (getCgal().Geometry)();
+export const toCgalGeometry = (inputs, g = getCgal()) => {
+  const cgalGeometry = new (g.Geometry)();
   fillCgalGeometry(cgalGeometry, inputs);
   return cgalGeometry;
 };
 
-export const fromCgalGeometry = (geometry, inputs) => {
+export const fromCgalGeometry = (geometry, inputs, length = inputs.length) => {
   const results = [];
-  for (let nth = 0; nth < inputs.length; nth++) {
+  for (let nth = 0; nth < length; nth++) {
     switch (geometry.getType(nth)) {
       case GEOMETRY_MESH: {
         const mesh = geometry.releaseOutputMesh(nth);
@@ -181,11 +181,14 @@ export const fromCgalGeometry = (geometry, inputs) => {
   return results;
 };
 
-export const withCgalGeometry = (geometry, op) => {
-  const cgalGeometry = toCgalGeometry(geometry);
+export const withCgalGeometry = (inputs, op) => {
+  const g = getCgal();
+  const cgalGeometry = toCgalGeometry(inputs, g);
   try {
-    return op(cgalGeometry);
+    return op(cgalGeometry, g);
   } finally {
     cgalGeometry.delete();
   }
 };
+
+export { getCgal };

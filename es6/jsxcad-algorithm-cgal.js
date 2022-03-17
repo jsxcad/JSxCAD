@@ -1338,7 +1338,7 @@ const fillCgalGeometry = (geometry, inputs) => {
     switch (inputs[nth].type) {
       case 'graph':
         geometry.setType(nth, GEOMETRY_MESH);
-        geometry.setMesh(nth, toSurfaceMesh(inputs[nth].graph));
+        geometry.setInputMesh(nth, toSurfaceMesh(inputs[nth].graph));
         break;
       case 'polygonsWithHoles': {
         let cursor = -1;
@@ -1397,7 +1397,7 @@ const fillCgalGeometry = (geometry, inputs) => {
       case 'segments': {
         geometry.setType(nth, GEOMETRY_SEGMENTS);
         for (const [start, end] of inputs[nth].segments) {
-          geometry.addSegment(nth, start[X$1], start[Y$1], start[Z$1], end[X$1], end[Y$1], end[Z$1]);
+          geometry.addInputSegment(nth, start[X$1], start[Y$1], start[Z$1], end[X$1], end[Y$1], end[Z$1]);
         }
         break;
       }
@@ -1410,15 +1410,15 @@ const fillCgalGeometry = (geometry, inputs) => {
   return geometry;
 };
 
-const toCgalGeometry = (inputs) => {
-  const cgalGeometry = new (getCgal().Geometry)();
+const toCgalGeometry = (inputs, g = getCgal()) => {
+  const cgalGeometry = new (g.Geometry)();
   fillCgalGeometry(cgalGeometry, inputs);
   return cgalGeometry;
 };
 
-const fromCgalGeometry = (geometry, inputs) => {
+const fromCgalGeometry = (geometry, inputs, length = inputs.length) => {
   const results = [];
-  for (let nth = 0; nth < inputs.length; nth++) {
+  for (let nth = 0; nth < length; nth++) {
     switch (geometry.getType(nth)) {
       case GEOMETRY_MESH: {
         const mesh = geometry.releaseOutputMesh(nth);
@@ -1496,20 +1496,21 @@ const fromCgalGeometry = (geometry, inputs) => {
   return results;
 };
 
-const withCgalGeometry = (geometry, op) => {
-  const cgalGeometry = toCgalGeometry(geometry);
+const withCgalGeometry = (inputs, op) => {
+  const g = getCgal();
+  const cgalGeometry = toCgalGeometry(inputs, g);
   try {
-    return op(cgalGeometry);
+    return op(cgalGeometry, g);
   } finally {
     cgalGeometry.delete();
   }
 };
 
 const computeArea = (linear) =>
-  withCgalGeometry(linear, getCgal().ComputeArea);
+  withCgalGeometry(linear, (geometry, g) => g.ComputeArea(geometry));
 
 const computeVolume = (linear) =>
-  withCgalGeometry(linear, getCgal().ComputeVolume);
+  withCgalGeometry(linear, (geometry, g) => g.ComputeVolume(geometry));
 
 const computeCentroidOfSurfaceMesh = (
   mesh,
@@ -1550,6 +1551,19 @@ const computeNormalOfSurfaceMesh = (
     throw Error(error);
   }
 };
+
+const cut = (inputs, targetsLength) =>
+  withCgalGeometry(inputs, (cgalGeometry, g) => {
+    const status = g.Cut(cgalGeometry, targetsLength);
+    switch (status) {
+      case STATUS_ZERO_THICKNESS:
+        throw new ErrorZeroThickness('Zero thickness produced by disjoint');
+      case STATUS_OK:
+        return fromCgalGeometry(cgalGeometry, inputs, targetsLength);
+      default:
+        throw new Error(`Unexpected status ${status}`);
+    }
+  });
 
 const cutOutOfSurfaceMeshes = (a, aTransform, b, bTransform) => {
   try {
@@ -1669,29 +1683,21 @@ const demeshSurfaceMesh = (mesh, matrix) => {
   }
 };
 
-const disjoint = (inputs) => {
-  const g = getCgal();
-  // TODO: Merge with the linearization and rewrite phases in geometry/tagged.
-  const cgalGeometry = toCgalGeometry(inputs);
-  try {
+const disjoint = (inputs) =>
+  withCgalGeometry(inputs, (geometry, g) => {
     // These are custom inputs.
     const getIsMasked = (nth) =>
       inputs[nth].tags && inputs[nth].tags.includes('type:masked');
-    const status = g.DisjointIncrementally(cgalGeometry, getIsMasked);
-    if (status === STATUS_ZERO_THICKNESS) {
-      throw new ErrorZeroThickness('Zero thickness produced by disjoint');
+    const status = g.Disjoint(geometry, getIsMasked);
+    switch (status) {
+      case STATUS_ZERO_THICKNESS:
+        throw new ErrorZeroThickness('Zero thickness produced by disjoint');
+      case STATUS_OK:
+        return fromCgalGeometry(geometry, inputs);
+      default:
+        throw new Error(`Unexpected status ${status}`);
     }
-    if (status !== STATUS_OK) {
-      throw new Error(`Unexpected status ${status}`);
-    }
-    return fromCgalGeometry(cgalGeometry, inputs);
-  } catch (error) {
-    console.log(error.stack);
-    throw Error(error);
-  } finally {
-    cgalGeometry.delete();
-  }
-};
+  });
 
 const doesSelfIntersectOfSurfaceMesh = (mesh) => {
   try {
@@ -2890,4 +2896,4 @@ const wireframeSurfaceMesh = (mesh, transform) => {
   }
 };
 
-export { STATUS_EMPTY, STATUS_OK, STATUS_UNCHANGED, STATUS_ZERO_THICKNESS, SurfaceMeshQuery, approximateSurfaceMesh, arrangePaths, arrangePathsIntoTriangles, arrangePolygonsWithHoles, arrangeSegments, arrangeSegmentsIntoTriangles, bendSurfaceMesh, blessed, clipSurfaceMeshes, composeTransforms, computeArea, computeCentroidOfSurfaceMesh, computeNormalOfSurfaceMesh, computeVolume, cutOutOfSurfaceMeshes, cutSurfaceMeshes, deformSurfaceMesh, deletePendingSurfaceMeshes, deleteSurfaceMesh, demeshSurfaceMesh, deserializeSurfaceMesh, disjoint, doesSelfIntersectOfSurfaceMesh, eachPointOfSurfaceMesh, extrudeSurfaceMesh, extrudeToPlaneOfSurfaceMesh, fitPlaneToPoints, fromExactToCgalTransform, fromFunctionToSurfaceMesh, fromGraphToSurfaceMesh, fromIdentityToCgalTransform, fromPointsToAlphaShape2AsPolygonSegments, fromPointsToAlphaShapeAsSurfaceMesh, fromPointsToConvexHullAsSurfaceMesh, fromPointsToSurfaceMesh, fromPolygonsToSurfaceMesh, fromRotateXToTransform, fromRotateYToTransform, fromRotateZToTransform, fromScaleToTransform, fromSegmentToInverseTransform, fromSurfaceMesh, fromSurfaceMeshEmitBoundingBox, fromSurfaceMeshToGraph, fromSurfaceMeshToLazyGraph, fromSurfaceMeshToPolygons, fromSurfaceMeshToPolygonsWithHoles, fromSurfaceMeshToTriangles, fromTranslateToTransform, fuseSurfaceMeshes, generatePackingEnvelopeForSurfaceMesh, generateUpperEnvelopeForSurfaceMesh, graphSymbol, growSurfaceMesh, identity, initCgal, insetOfPolygonWithHoles, invertTransform, isotropicRemeshingOfSurfaceMesh, joinSurfaceMeshes, loftBetweenCongruentSurfaceMeshes, loftBetweenSurfaceMeshes, matrix6, minkowskiDifferenceOfSurfaceMeshes, minkowskiShellOfSurfaceMeshes, minkowskiSumOfSurfaceMeshes, offsetOfPolygonWithHoles, outlineSurfaceMesh, projectToPlaneOfSurfaceMesh, pushSurfaceMesh, remeshSurfaceMesh, removeSelfIntersectionsOfSurfaceMesh, reverseFaceOrientationsOfSurfaceMesh, sectionOfSurfaceMesh, separateSurfaceMesh, serializeSurfaceMesh, simplifySurfaceMesh, smoothShapeOfSurfaceMesh, smoothSurfaceMesh, subdivideSurfaceMesh, surfaceMeshSymbol, taperSurfaceMesh, toCgalTransformFromJsTransform, toSurfaceMesh, transformSurfaceMesh, twistSurfaceMesh, wireframeSurfaceMesh };
+export { STATUS_EMPTY, STATUS_OK, STATUS_UNCHANGED, STATUS_ZERO_THICKNESS, SurfaceMeshQuery, approximateSurfaceMesh, arrangePaths, arrangePathsIntoTriangles, arrangePolygonsWithHoles, arrangeSegments, arrangeSegmentsIntoTriangles, bendSurfaceMesh, blessed, clipSurfaceMeshes, composeTransforms, computeArea, computeCentroidOfSurfaceMesh, computeNormalOfSurfaceMesh, computeVolume, cut, cutOutOfSurfaceMeshes, cutSurfaceMeshes, deformSurfaceMesh, deletePendingSurfaceMeshes, deleteSurfaceMesh, demeshSurfaceMesh, deserializeSurfaceMesh, disjoint, doesSelfIntersectOfSurfaceMesh, eachPointOfSurfaceMesh, extrudeSurfaceMesh, extrudeToPlaneOfSurfaceMesh, fitPlaneToPoints, fromExactToCgalTransform, fromFunctionToSurfaceMesh, fromGraphToSurfaceMesh, fromIdentityToCgalTransform, fromPointsToAlphaShape2AsPolygonSegments, fromPointsToAlphaShapeAsSurfaceMesh, fromPointsToConvexHullAsSurfaceMesh, fromPointsToSurfaceMesh, fromPolygonsToSurfaceMesh, fromRotateXToTransform, fromRotateYToTransform, fromRotateZToTransform, fromScaleToTransform, fromSegmentToInverseTransform, fromSurfaceMesh, fromSurfaceMeshEmitBoundingBox, fromSurfaceMeshToGraph, fromSurfaceMeshToLazyGraph, fromSurfaceMeshToPolygons, fromSurfaceMeshToPolygonsWithHoles, fromSurfaceMeshToTriangles, fromTranslateToTransform, fuseSurfaceMeshes, generatePackingEnvelopeForSurfaceMesh, generateUpperEnvelopeForSurfaceMesh, graphSymbol, growSurfaceMesh, identity, initCgal, insetOfPolygonWithHoles, invertTransform, isotropicRemeshingOfSurfaceMesh, joinSurfaceMeshes, loftBetweenCongruentSurfaceMeshes, loftBetweenSurfaceMeshes, matrix6, minkowskiDifferenceOfSurfaceMeshes, minkowskiShellOfSurfaceMeshes, minkowskiSumOfSurfaceMeshes, offsetOfPolygonWithHoles, outlineSurfaceMesh, projectToPlaneOfSurfaceMesh, pushSurfaceMesh, remeshSurfaceMesh, removeSelfIntersectionsOfSurfaceMesh, reverseFaceOrientationsOfSurfaceMesh, sectionOfSurfaceMesh, separateSurfaceMesh, serializeSurfaceMesh, simplifySurfaceMesh, smoothShapeOfSurfaceMesh, smoothSurfaceMesh, subdivideSurfaceMesh, surfaceMeshSymbol, taperSurfaceMesh, toCgalTransformFromJsTransform, toSurfaceMesh, transformSurfaceMesh, twistSurfaceMesh, wireframeSurfaceMesh };

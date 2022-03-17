@@ -1,5 +1,21 @@
 import { update } from './update.js';
 
+export const replacer = (from, to, limit = from.length) => {
+  const map = new Map();
+  for (let nth = 0; nth < limit; nth++) {
+    map.set(from[nth], to[nth]);
+  }
+  const update = (geometry, descend) => {
+    const cut = map.get(geometry);
+    if (cut) {
+      return cut;
+    } else {
+      return descend();
+    }
+  };
+  return (geometry) => rewrite(geometry, update);
+};
+
 const validateContent = (geometry, content) => {
   if (content && content.some((value) => !value)) {
     for (const v of content) {

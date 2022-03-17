@@ -1,9 +1,9 @@
 import { toConcreteGeometry } from './toConcreteGeometry.js';
 import { visit } from './visit.js';
 
-export const linearize = (geometry, types, out) => {
+export const linearize = (geometry, filter, out) => {
   const collect = (geometry, descend) => {
-    if (types.includes(geometry.type)) {
+    if (filter(geometry)) {
       out.push(geometry);
     }
     descend();

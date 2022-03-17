@@ -1,11 +1,10 @@
+import { addSerializedSurfaceMeshes } from './serializeSurfaceMesh.js';
 import { blessed } from './transform.js';
 import { disjoint } from './disjoint.js';
 import { fromPolygonsToSurfaceMesh } from './fromPolygonsToSurfaceMesh.js';
 import { fromSurfaceMesh } from './fromSurfaceMesh.js';
 import { initCgal } from './getCgal.js';
-import { serializeSurfaceMesh } from './serializeSurfaceMesh.js';
 import test from 'ava';
-import { toSurfaceMesh } from './toSurfaceMesh.js';
 
 test.beforeEach(async (t) => {
   await initCgal();
@@ -199,13 +198,8 @@ test('Disjoint SurfaceMesh as Volumes', (t) => {
     graph: fromSurfaceMesh(fromPolygonsToSurfaceMesh(box)),
   };
   // The first entry is the pivot of the disjunction.
-  const r = disjoint([a, b]);
-  for (const { type, graph } of r) {
-    if (type === 'graph') {
-      graph.serializedSurfaceMesh = serializeSurfaceMesh(toSurfaceMesh(graph));
-    }
-  }
-  t.deepEqual(clean(r), [
+  const disjointed = addSerializedSurfaceMeshes(disjoint([a, b]));
+  t.deepEqual(clean(disjointed), [
     {
       type: 'graph',
       matrix: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1],
