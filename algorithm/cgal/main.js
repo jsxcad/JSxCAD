@@ -37,6 +37,7 @@ export { computeArea } from './computeArea.js';
 export { computeVolume } from './computeVolume.js';
 export { computeCentroidOfSurfaceMesh } from './computeCentroidOfSurfaceMesh.js';
 export { computeNormalOfSurfaceMesh } from './computeNormalOfSurfaceMesh.js';
+export { cut } from './cut.js';
 export { cutOutOfSurfaceMeshes } from './cutOutOfSurfaceMeshes.js';
 export { cutSurfaceMeshes } from './cutSurfaceMeshes.js';
 export { deformSurfaceMesh } from './deformSurfaceMesh.js';

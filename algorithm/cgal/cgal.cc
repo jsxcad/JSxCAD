@@ -3757,97 +3757,6 @@ int FuseSurfaceMeshes(size_t mesh_count, emscripten::val getMesh,
   return STATUS_OK;
 }
 
-int DisjointSurfaceMeshesWithIncrementalMasking(int meshCount,
-                                                emscripten::val nthMesh,
-                                                emscripten::val nthTransform,
-                                                emscripten::val nthMasked,
-                                                emscripten::val emit_mesh) {
-  // Surface_mesh mask;
-  std::vector<std::unique_ptr<Surface_mesh>> planar_masks;
-  std::vector<std::unique_ptr<Surface_mesh>> volume_masks;
-  for (int nth = 0; nth < meshCount; nth++) {
-    bool is_masked = nthMasked(nth).as<bool>();
-    const Surface_mesh* mesh =
-        nthMesh(nth).as<const Surface_mesh*>(emscripten::allow_raw_pointers());
-    if (CGAL::is_empty(*mesh)) {
-      Surface_mesh* empty = new Surface_mesh();
-      emit_mesh(nth, empty);
-      continue;
-    }
-    const Transformation* transform =
-        nthTransform(nth).as<const Transformation*>(
-            emscripten::allow_raw_pointers());
-    std::unique_ptr<Surface_mesh> oriented_mesh(new Surface_mesh(*mesh));
-    // Orient the mesh in the absolute frame of the masks.
-    CGAL::Polygon_mesh_processing::transform(*transform, *oriented_mesh,
-                                             CGAL::parameters::all_default());
-    Plane plane;
-    bool planar = IsPlanarSurfaceMesh(plane, *oriented_mesh);
-    if (nth > 0) {
-      std::unique_ptr<Surface_mesh> result(new Surface_mesh(*oriented_mesh));
-      if (planar) {
-        for (auto& planar_mask : planar_masks) {
-          if (CGAL::is_empty(*result)) {
-            break;
-          }
-          if (IsCoplanarSurfaceMesh(plane, *planar_mask)) {
-            DifferenceOfCoplanarSurfaceMeshes(plane, *result, *planar_mask,
-                                              *result);
-          }
-        }
-        for (auto& volume_mask : volume_masks) {
-          if (CGAL::is_empty(*result)) {
-            break;
-          }
-          // Now clip to the inverted volume mask to make planar surfaces
-          // disjoint with volumes. (Note that volumes are not made disjoint
-          // to planar surfaces)
-          Surface_mesh inverse_mask(*volume_mask);
-          CGAL::Polygon_mesh_processing::reverse_face_orientations(
-              inverse_mask);
-          CGAL::Polygon_mesh_processing::clip(*result, inverse_mask,
-                                              CGAL::parameters::all_default(),
-                                              CGAL::parameters::all_default());
-        }
-      } else {
-        for (auto& volume_mask : volume_masks) {
-          if (CGAL::is_empty(*result)) {
-            break;
-          }
-          if (!CGAL::Polygon_mesh_processing::do_intersect(
-                  *result, *volume_mask,
-                  CGAL::Polygon_mesh_processing::parameters::
-                      do_overlap_test_of_bounded_sides(true),
-                  CGAL::Polygon_mesh_processing::parameters::
-                      do_overlap_test_of_bounded_sides(true))) {
-            continue;
-          }
-          if (!CGAL::Polygon_mesh_processing::corefine_and_compute_difference(
-                  *result, *volume_mask, *result,
-                  CGAL::parameters::all_default(),
-                  CGAL::parameters::all_default(),
-                  CGAL::parameters::all_default())) {
-            return STATUS_ZERO_THICKNESS;
-          }
-        }
-      }
-      // Now emit the result in the original orientation.
-      CGAL::Polygon_mesh_processing::transform(transform->inverse(), *result,
-                                               CGAL::parameters::all_default());
-      Surface_mesh* released_result = result.release();
-      emit_mesh(nth, released_result);
-    }
-    if (!is_masked && !CGAL::is_empty(*oriented_mesh)) {
-      if (planar) {
-        planar_masks.push_back(std::move(oriented_mesh));
-      } else {
-        volume_masks.push_back(std::move(oriented_mesh));
-      }
-    }
-  }
-  return STATUS_OK;
-}
-
 template <typename P>
 bool admitPolygonWithHoles(const Plane& plane, const Transformation& transform,
                            P& polygon, emscripten::val fill_boundary,
@@ -3937,123 +3846,6 @@ void emitPlane(const Plane& plane, emscripten::val& emit_plane) {
   emit_plane(xd / ld, yd / ld, zd / ld, wd, xs, ys, zs, ws);
 }
 
-class Geometry {
- public:
-  void setSize(int input_count) {
-    input_count_ = input_count;
-    types_.clear();
-    types_.resize(input_count);
-    transforms_.clear();
-    transforms_.resize(input_count);
-    planes_.clear();
-    planes_.resize(input_count);
-    gps_.clear();
-    gps_.resize(input_count);
-    meshes_.clear();
-    meshes_.resize(input_count);
-    output_meshes_.clear();
-    output_meshes_.resize(input_count);
-    segments_.clear();
-    segments_.resize(input_count);
-    output_segments_.clear();
-    output_segments_.resize(input_count);
-  }
-
-  size_t getSize() { return input_count_; }
-
-  int getType(int nth) { return types_[nth]; }
-
-  void setType(int nth, int type) {
-    types_[nth] = GeometryType(type);
-    switch (type) {
-      case GEOMETRY_POLYGONS_WITH_HOLES: {
-        gps_[nth].reset(new General_polygon_set_2);
-        break;
-      }
-      case GEOMETRY_SEGMENTS: {
-        segments_[nth].reset(new std::vector<Segment>);
-        break;
-      }
-    }
-  }
-
-  void setTransform(int nth, const Transformation* transform) {
-    transforms_[nth] = transform;
-  }
-
-  void setMesh(int nth, const Surface_mesh* mesh) { meshes_[nth] = mesh; }
-
-  const Surface_mesh* getMesh(int nth) { return meshes_[nth]; }
-
-  void setOutputMesh(int nth, std::unique_ptr<Surface_mesh>& mesh) {
-    output_meshes_[nth] = std::move(mesh);
-  }
-
-  void setOutputMesh(int nth, Surface_mesh* mesh) {
-    output_meshes_[nth].reset(mesh);
-  }
-
-  Surface_mesh* releaseOutputMesh(int nth) {
-    return output_meshes_[nth].release();
-  }
-
-  void fillPolygonsWithHoles(int nth, emscripten::val fillPlane,
-                             emscripten::val fillBoundary,
-                             emscripten::val fillHole) {
-    Plane plane;
-    admitPlane(plane, fillPlane);
-    planes_[nth] = plane.transform(*transforms_[nth]);
-    Polygon_with_holes_2 polygon;
-    while (admitPolygonWithHoles(plane, *transforms_[nth], polygon,
-                                 fillBoundary, fillHole)) {
-      gps_[nth]->join(polygon);
-    }
-  }
-
-  void emitPolygonsWithHoles(int nth, emscripten::val emitPolygon,
-                             emscripten::val emitPoint) {
-    std::vector<Polygon_with_holes_2> polygonsWithHoles;
-    gps_[nth]->polygons_with_holes(std::back_inserter(polygonsWithHoles));
-    ::emitPolygonsWithHoles(planes_[nth], transforms_[nth]->inverse(),
-                            polygonsWithHoles, emitPolygon, emitPoint);
-  }
-
-  void addSegment(int nth, double sx, double sy, double sz, double tx,
-                  double ty, double tz) {
-    segments_[nth]->emplace_back(Point{sx, sy, sz}, Point{tx, ty, tz});
-  }
-
-  void addOutputSegment(int nth, Segment segment) {
-    if (output_segments_[nth] == nullptr) {
-      output_segments_[nth].reset(new std::vector<Segment>);
-    }
-    output_segments_[nth]->push_back(segment);
-  }
-
-  void emitSegments(int nth, emscripten::val emit) {
-    if (output_segments_[nth] == nullptr) {
-      return;
-    }
-    for (const Segment& segment : *output_segments_[nth]) {
-      Point s = segment.source();
-      Point t = segment.target();
-      emit(CGAL::to_double(s.x()), CGAL::to_double(s.y()),
-           CGAL::to_double(s.z()), CGAL::to_double(t.x()),
-           CGAL::to_double(t.y()), CGAL::to_double(t.z()));
-    }
-  }
-
-  int input_count_;
-  std::vector<GeometryType> types_;
-  std::vector<Plane> planes_;
-  std::vector<std::unique_ptr<General_polygon_set_2>> gps_;
-  std::vector<const Surface_mesh*> meshes_;
-  std::vector<std::unique_ptr<Surface_mesh>> output_meshes_;
-  std::vector<std::unique_ptr<std::vector<Segment>>> segments_;
-  std::vector<std::unique_ptr<std::vector<Segment>>> output_segments_;
-  std::vector<const Transformation*> transforms_;
-};
-
 CGAL::Bbox_2 computePolygonSetBounds(const General_polygon_set_2& gps) {
   CGAL::Bbox_2 bound;
   for (auto it = gps.arrangement().vertices_begin();
@@ -4067,62 +3859,86 @@ CGAL::Bbox_2 computePolygonSetBounds(const General_polygon_set_2& gps) {
   return bound;
 }
 
-int DisjointIncrementally(Geometry* geometry, emscripten::val getIsMasked) {
-  size_t input_count = geometry->getSize();
+class Geometry {
+ public:
+  void setSize(int size) {
+    types_.clear();
+    transforms_.clear();
+    planes_.clear();
+    gps_.clear();
+    input_meshes_.clear();
+    meshes_.clear();
+    input_segments_.clear();
+    segments_.clear();
+    bbox2_.clear();
+    bbox3_.clear();
+    resize(size);
+  }
 
-  std::vector<GeometryType>& types = geometry->types_;
-  std::vector<const Transformation*>& transforms = geometry->transforms_;
-  std::vector<Plane>& planes = geometry->planes_;
-  std::vector<std::unique_ptr<General_polygon_set_2>>& gps = geometry->gps_;
-  std::vector<std::unique_ptr<Surface_mesh>>& meshes = geometry->output_meshes_;
-  std::vector<std::unique_ptr<std::vector<Segment>>>& segments =
-      geometry->segments_;
-  std::vector<std::unique_ptr<std::vector<Segment>>>& output_segments =
-      geometry->output_segments_;
+  size_t size() { return size_; }
 
-  std::vector<std::unique_ptr<SurfaceMeshQuery>> queries;
+  void resize(int size) {
+    size_ = size;
+    types_.resize(size);
+    transforms_.resize(size);
+    planes_.resize(size);
+    gps_.resize(size);
+    input_meshes_.resize(size);
+    meshes_.resize(size);
+    input_segments_.resize(size);
+    segments_.resize(size);
+    bbox2_.resize(size);
+    bbox3_.resize(size);
+  }
 
-  Transformation identity(CGAL::IDENTITY);
+  GeometryType& type(int nth) { return types_[nth]; }
 
-  std::vector<bool> is_masked;
-  is_masked.resize(input_count);
+  bool is_mesh(int nth) { return type(nth) == GEOMETRY_MESH; }
+  bool is_empty_mesh(int nth) { return CGAL::is_empty(mesh(nth)); }
+  bool is_polygons(int nth) {
+    return type(nth) == GEOMETRY_POLYGONS_WITH_HOLES;
+  }
+  bool is_segments(int nth) { return type(nth) == GEOMETRY_SEGMENTS; }
 
-  std::vector<CGAL::Bbox_2> bounds_2;
-  bounds_2.resize(input_count);
+  bool has_transform(int nth) { return transforms_[nth] != nullptr; }
+  const Transformation& transform(int nth) { return *transforms_[nth]; }
 
-  std::vector<CGAL::Bbox_3> bounds_3;
-  bounds_3.resize(input_count);
+  Plane& plane(int nth) { return planes_[nth]; }
 
-  // Normalize inputs.
-  for (int nth = 0; nth < input_count; nth++) {
-    is_masked[nth] = getIsMasked(nth).as<bool>();
-    switch (types[nth]) {
-      case GEOMETRY_MESH: {
-        std::unique_ptr<Surface_mesh> oriented_mesh(
-            new Surface_mesh(*geometry->getMesh(nth)));
-        CGAL::Polygon_mesh_processing::transform(
-            *transforms[nth], *oriented_mesh, CGAL::parameters::all_default());
-        if (IsPlanarSurfaceMesh(planes[nth], *oriented_mesh)) {
-          geometry->setType(nth, GEOMETRY_POLYGONS_WITH_HOLES);
-          types[nth] = GEOMETRY_POLYGONS_WITH_HOLES;
-          for (int nth_plane = 0; nth_plane < nth; nth_plane++) {
-            if (types[nth_plane] == GEOMETRY_POLYGONS_WITH_HOLES &&
-                IsCoplanarSurfaceMesh(planes[nth_plane], *oriented_mesh)) {
-              // Force a consensus on plane choices.
-              planes[nth] = planes[nth_plane];
-              break;
-            }
-          }
-          PlanarSurfaceMeshToPolygonSet(planes[nth], *oriented_mesh, *gps[nth]);
-          bounds_2[nth] = computePolygonSetBounds(*gps[nth]);
-        } else {
-          bounds_3[nth] = CGAL::Polygon_mesh_processing::bbox(*oriented_mesh);
-          geometry->setOutputMesh(nth, oriented_mesh);
-          break;
-        }
-      }
+  bool has_input_mesh(int nth) { return input_meshes_[nth] != nullptr; }
+  const Surface_mesh& input_mesh(int nth) { return *input_meshes_[nth]; }
+
+  bool has_mesh(int nth) { return meshes_[nth] != nullptr; }
+  Surface_mesh& mesh(int nth) { return *meshes_[nth]; }
+
+  bool has_gps(int nth) { return gps_[nth] != nullptr; }
+  General_polygon_set_2& gps(int nth) { return *gps_[nth]; }
+
+  bool has_input_segments(int nth) { return input_segments_[nth] != nullptr; }
+  std::vector<Segment>& input_segments(int nth) {
+    return *input_segments_[nth];
+  }
+
+  bool has_segments(int nth) { return segments_[nth] != nullptr; }
+  std::vector<Segment>& segments(int nth) { return *segments_[nth]; }
+
+  CGAL::Bbox_2& bbox2(int nth) { return bbox2_[nth]; }
+  CGAL::Bbox_3& bbox3(int nth) { return bbox3_[nth]; }
+
+  size_t getSize() { return size_; }
+
+  int getType(int nth) { return types_[nth]; }
+
+  void setType(int nth, int type) {
+    types_[nth] = GeometryType(type);
+    switch (type) {
       case GEOMETRY_POLYGONS_WITH_HOLES: {
-        bounds_2[nth] = computePolygonSetBounds(*gps[nth]);
+        gps_[nth].reset(new General_polygon_set_2);
+        break;
+      }
+      case GEOMETRY_SEGMENTS: {
+        input_segments_[nth].reset(new std::vector<Segment>);
+        segments_[nth].reset(new std::vector<Segment>);
         break;
       }
       default:
@@ -4130,40 +3946,202 @@ int DisjointIncrementally(Geometry* geometry, emscripten::val getIsMasked) {
     }
   }
 
-  for (int start = input_count - 2; start >= 0; start--) {
-    switch (types[start]) {
+  void setTransform(int nth, const Transformation* transform) {
+    transforms_[nth] = transform;
+  }
+
+  void setInputMesh(int nth, const Surface_mesh* mesh) {
+    input_meshes_[nth] = mesh;
+  }
+
+  const Surface_mesh* getInputMesh(int nth) { return input_meshes_[nth]; }
+
+  void setMesh(int nth, std::unique_ptr<Surface_mesh>& mesh) {
+    meshes_[nth] = std::move(mesh);
+  }
+
+  void setMesh(int nth, Surface_mesh* mesh) { meshes_[nth].reset(mesh); }
+
+  Surface_mesh* releaseOutputMesh(int nth) { return meshes_[nth].release(); }
+
+  void fillPolygonsWithHoles(int nth, emscripten::val fillPlane,
+                             emscripten::val fillBoundary,
+                             emscripten::val fillHole) {
+    Plane admittedPlane;
+    admitPlane(admittedPlane, fillPlane);
+    plane(nth) = admittedPlane.transform(transform(nth));
+    Polygon_with_holes_2 polygon;
+    while (admitPolygonWithHoles(admittedPlane, transform(nth), polygon,
+                                 fillBoundary, fillHole)) {
+      gps(nth).join(polygon);
+    }
+  }
+
+  void emitPolygonsWithHoles(int nth, emscripten::val emitPolygon,
+                             emscripten::val emitPoint) {
+    std::vector<Polygon_with_holes_2> polygonsWithHoles;
+    gps(nth).polygons_with_holes(std::back_inserter(polygonsWithHoles));
+    ::emitPolygonsWithHoles(plane(nth), transform(nth).inverse(),
+                            polygonsWithHoles, emitPolygon, emitPoint);
+  }
+
+  void addInputSegment(int nth, double sx, double sy, double sz, double tx,
+                       double ty, double tz) {
+    input_segments(nth).emplace_back(Point{sx, sy, sz}, Point{tx, ty, tz});
+  }
+
+  void addSegment(int nth, Segment segment) {
+    if (!has_segments(nth)) {
+      segments_[nth].reset(new std::vector<Segment>);
+    }
+    segments(nth).push_back(segment);
+  }
+
+  void emitSegments(int nth, emscripten::val emit) {
+    if (!has_segments(nth)) {
+      return;
+    }
+    for (const Segment& segment : segments(nth)) {
+      Point s = segment.source();
+      Point t = segment.target();
+      emit(CGAL::to_double(s.x()), CGAL::to_double(s.y()),
+           CGAL::to_double(s.z()), CGAL::to_double(t.x()),
+           CGAL::to_double(t.y()), CGAL::to_double(t.z()));
+    }
+  }
+
+  void copyInputMeshesToOutputMeshes() {
+    for (size_t nth = 0; nth < size_; nth++) {
+      if (is_mesh(nth)) {
+        setMesh(nth, new Surface_mesh(input_mesh(nth)));
+      }
+    }
+  }
+
+  void transformMeshesToAbsoluteFrame() {
+    for (size_t nth = 0; nth < size_; nth++) {
+      if (is_mesh(nth)) {
+        CGAL::Polygon_mesh_processing::transform(
+            transform(nth), mesh(nth), CGAL::parameters::all_default());
+      }
+    }
+  }
+
+  void transformMeshesToLocalFrames() {
+    for (size_t nth = 0; nth < size_; nth++) {
+      CGAL::Polygon_mesh_processing::transform(
+          transform(nth).inverse(), mesh(nth), CGAL::parameters::all_default());
+    }
+  }
+
+  void convertPlanarMeshesToPolygons() {
+    for (size_t nth = 0; nth < size_; nth++) {
+      if (IsPlanarSurfaceMesh(plane(nth), mesh(nth))) {
+        setType(nth, GEOMETRY_POLYGONS_WITH_HOLES);
+        for (int nth_plane = 0; nth_plane < nth; nth_plane++) {
+          if (is_polygons(nth_plane) &&
+              IsCoplanarSurfaceMesh(plane(nth_plane), mesh(nth))) {
+            // Force a consensus on plane choices.
+            plane(nth) = plane(nth_plane);
+            break;
+          }
+        }
+        PlanarSurfaceMeshToPolygonSet(plane(nth), mesh(nth), gps(nth));
+      }
+    }
+  }
+
+  bool noGpsOverlap(size_t a, size_t b) {
+    return CGAL::do_overlap(bbox2_[a], bbox2_[b]) == false;
+  }
+
+  void updateGpsBounds(int nth) {
+    bbox2(nth) = computePolygonSetBounds(gps(nth));
+  }
+
+  bool noMeshOverlap(size_t a, size_t b) {
+    return CGAL::do_overlap(bbox3_[a], bbox3_[b]) == false;
+  }
+
+  void updateMeshBounds(int nth) {
+    bbox3(nth) = CGAL::Polygon_mesh_processing::bbox(mesh(nth));
+  }
+
+  void computeBounds() {
+    for (size_t nth = 0; nth < size_; nth++) {
+      switch (type(nth)) {
+        case GEOMETRY_MESH: {
+          updateMeshBounds(nth);
+          break;
+        }
+        case GEOMETRY_POLYGONS_WITH_HOLES: {
+          updateGpsBounds(nth);
+          break;
+        }
+        default:
+          break;
+      }
+    }
+  }
+
+  size_t size_;
+  std::vector<GeometryType> types_;
+  std::vector<const Transformation*> transforms_;
+  std::vector<Plane> planes_;
+  std::vector<std::unique_ptr<General_polygon_set_2>> gps_;
+  std::vector<const Surface_mesh*> input_meshes_;
+  std::vector<std::unique_ptr<Surface_mesh>> meshes_;
+  std::vector<std::unique_ptr<std::vector<Segment>>> input_segments_;
+  std::vector<std::unique_ptr<std::vector<Segment>>> segments_;
+  std::vector<CGAL::Bbox_2> bbox2_;
+  std::vector<CGAL::Bbox_3> bbox3_;
+};
+
+int Cut(Geometry* geometry, int targets) {
+  size_t size = geometry->size();
+
+  std::vector<std::unique_ptr<SurfaceMeshQuery>> queries;
+  Transformation identity(CGAL::IDENTITY);
+
+  geometry->copyInputMeshesToOutputMeshes();
+  geometry->transformMeshesToAbsoluteFrame();
+  geometry->convertPlanarMeshesToPolygons();
+  geometry->computeBounds();
+
+  for (int target = 0; target < targets; target++) {
+    switch (geometry->type(target)) {
       case GEOMETRY_MESH: {
-        if (CGAL::is_empty(*meshes[start])) {
+        if (geometry->is_empty_mesh(target)) {
           continue;
         }
-        for (int nth = start + 1; nth < input_count; nth++) {
-          if (is_masked[nth] || types[nth] != GEOMETRY_MESH ||
-              CGAL::is_empty(*meshes[nth]) ||
-              !CGAL::do_overlap(bounds_3[start], bounds_3[nth])) {
+        for (int nth = targets; nth < size; nth++) {
+          if (!geometry->is_mesh(nth) || geometry->is_empty_mesh(nth) ||
+              geometry->noMeshOverlap(target, nth)) {
             continue;
           }
-          Surface_mesh cut(*meshes[nth]);
+          Surface_mesh cutMeshCopy(geometry->mesh(nth));
           if (!CGAL::Polygon_mesh_processing::corefine_and_compute_difference(
-                  *meshes[start], cut, *meshes[start],
+                  geometry->mesh(target), cutMeshCopy, geometry->mesh(target),
                   CGAL::parameters::all_default(),
                   CGAL::parameters::all_default(),
                   CGAL::parameters::all_default())) {
             return STATUS_ZERO_THICKNESS;
           }
-          demesh(*meshes[start]);
-          bounds_3[start] = CGAL::Polygon_mesh_processing::bbox(*meshes[start]);
+          demesh(geometry->mesh(target));
+          geometry->updateMeshBounds(target);
         }
         break;
       }
       case GEOMETRY_POLYGONS_WITH_HOLES: {
-        for (int nth = start + 1; nth < input_count; nth++) {
+        for (int nth = targets; nth < size; nth++) {
           // TODO: Disjunction of planar by volume.
-          if (is_masked[nth] || types[nth] != GEOMETRY_POLYGONS_WITH_HOLES ||
-              planes[start] != planes[nth] ||
-              !CGAL::do_overlap(bounds_2[start], bounds_2[nth])) {
+          if (!geometry->is_polygons(nth) ||
+              geometry->plane(target) != geometry->plane(nth) ||
+              geometry->noGpsOverlap(target, nth)) {
             continue;
           }
-          gps[start]->difference(*gps[nth]);
+          geometry->gps(target).difference(geometry->gps(nth));
+          geometry->updateGpsBounds(target);
         }
         // TODO: Handle disjunction of surface by volume.
         break;
@@ -4171,16 +4149,15 @@ int DisjointIncrementally(Geometry* geometry, emscripten::val getIsMasked) {
       case GEOMETRY_SEGMENTS: {
         // TODO: Support disjunction by PolygonsWithHoles.
         std::vector<Segment> in;
+        geometry->input_segments(target).swap(in);
         std::vector<Segment> out;
-        segments[start]->swap(in);
-        for (int nth = start + 1; nth < input_count; nth++) {
-          if (is_masked[nth] || types[nth] != GEOMETRY_MESH ||
-              CGAL::is_empty(*meshes[nth])) {
+        for (int nth = targets; nth < size; nth++) {
+          if (!geometry->is_mesh(nth) || geometry->is_empty_mesh(nth)) {
             continue;
           }
-          if (queries[nth] == nullptr && types[nth] == GEOMETRY_MESH) {
+          if (queries[nth] == nullptr && geometry->is_mesh(nth)) {
             queries[nth].reset(
-                new SurfaceMeshQuery(meshes[nth].get(), &identity));
+                new SurfaceMeshQuery(&geometry->mesh(nth), &identity));
           }
           std::unique_ptr<SurfaceMeshQuery>& query = queries[nth];
           auto emit = [&](const Segment& segment) { out.push_back(segment); };
@@ -4190,8 +4167,98 @@ int DisjointIncrementally(Geometry* geometry, emscripten::val getIsMasked) {
           in.swap(out);
           out.clear();
         }
-        output_segments[start].reset(new std::vector<Segment>);
-        output_segments[start]->swap(in);
+        geometry->segments(target).swap(in);
+        break;
+      }
+      case GEOMETRY_UNKNOWN: {
+        std::cout << "Unknown type for Cut at " << target << std::endl;
+        return STATUS_INVALID_INPUT;
+      }
+    }
+  }
+
+  geometry->resize(targets);
+  geometry->transformMeshesToLocalFrames();
+
+  return STATUS_OK;
+}
+
+int Disjoint(Geometry* geometry, emscripten::val getIsMasked) {
+  size_t size = geometry->size();
+
+  std::vector<std::unique_ptr<SurfaceMeshQuery>> queries;
+  Transformation identity(CGAL::IDENTITY);
+
+  std::vector<bool> is_masked;
+  is_masked.resize(size);
+
+  geometry->copyInputMeshesToOutputMeshes();
+  geometry->transformMeshesToAbsoluteFrame();
+  geometry->convertPlanarMeshesToPolygons();
+  geometry->computeBounds();
+
+  for (int start = size - 2; start >= 0; start--) {
+    switch (geometry->type(start)) {
+      case GEOMETRY_MESH: {
+        if (geometry->is_empty_mesh(start)) {
+          continue;
+        }
+        for (int nth = start + 1; nth < size; nth++) {
+          if (is_masked[nth] || !geometry->is_mesh(nth) ||
+              geometry->is_empty_mesh(nth) ||
+              geometry->noMeshOverlap(start, nth)) {
+            continue;
+          }
+          Surface_mesh cutMeshCopy(geometry->mesh(nth));
+          if (!CGAL::Polygon_mesh_processing::corefine_and_compute_difference(
+                  geometry->mesh(start), cutMeshCopy, geometry->mesh(start),
+                  CGAL::parameters::all_default(),
+                  CGAL::parameters::all_default(),
+                  CGAL::parameters::all_default())) {
+            return STATUS_ZERO_THICKNESS;
+          }
+          demesh(geometry->mesh(start));
+          geometry->updateMeshBounds(start);
+        }
+        break;
+      }
+      case GEOMETRY_POLYGONS_WITH_HOLES: {
+        for (int nth = start + 1; nth < size; nth++) {
+          // TODO: Disjunction of planar by volume.
+          if (is_masked[nth] || !geometry->is_polygons(nth) ||
+              geometry->plane(start) != geometry->plane(nth) ||
+              geometry->noGpsOverlap(start, nth)) {
+            continue;
+          }
+          geometry->gps(start).difference(geometry->gps(nth));
+          geometry->updateGpsBounds(start);
+        }
+        // TODO: Handle disjunction of surface by volume.
+        break;
+      }
+      case GEOMETRY_SEGMENTS: {
+        // TODO: Support disjunction by PolygonsWithHoles.
+        std::vector<Segment> in;
+        geometry->input_segments(start).swap(in);
+        std::vector<Segment> out;
+        for (int nth = start + 1; nth < size; nth++) {
+          if (is_masked[nth] || !geometry->is_mesh(nth) ||
+              geometry->is_empty_mesh(nth)) {
+            continue;
+          }
+          if (queries[nth] == nullptr && geometry->is_mesh(nth)) {
+            queries[nth].reset(
+                new SurfaceMeshQuery(&geometry->mesh(nth), &identity));
+          }
+          std::unique_ptr<SurfaceMeshQuery>& query = queries[nth];
+          auto emit = [&](const Segment& segment) { out.push_back(segment); };
+          for (const Segment& segment : in) {
+            query->intersectSegment(false, segment, emit);
+          }
+          in.swap(out);
+          out.clear();
+        }
+        geometry->segments(start).swap(in);
         break;
       }
       case GEOMETRY_UNKNOWN: {
@@ -4201,39 +4268,26 @@ int DisjointIncrementally(Geometry* geometry, emscripten::val getIsMasked) {
     }
   }
 
-  // Rectify outputs.
-  for (int nth = 0; nth < types.size(); nth++) {
-    switch (types[nth]) {
-      case GEOMETRY_MESH: {
-        CGAL::Polygon_mesh_processing::transform(
-            transforms[nth]->inverse(), *meshes[nth],
-            CGAL::parameters::all_default());
-      }
-      default: {
-        break;
-      }
-    }
-  }
+  geometry->transformMeshesToLocalFrames();
 
   return STATUS_OK;
 }
 
 double ComputeArea(Geometry* geometry) {
   FT area = 0;
-  int size = geometry->getSize();
+  int size = geometry->size();
+  geometry->copyInputMeshesToOutputMeshes();
+  geometry->transformMeshesToAbsoluteFrame();
   for (int nth = 0; nth < size; nth++) {
     switch (geometry->getType(nth)) {
       case GEOMETRY_MESH: {
-        Surface_mesh mesh(*geometry->getMesh(nth));
-        CGAL::Polygon_mesh_processing::transform(
-            *geometry->transforms_[nth], mesh, CGAL::parameters::all_default());
         area += CGAL::Polygon_mesh_processing::area(
-            mesh, CGAL::parameters::all_default());
+            geometry->mesh(nth), CGAL::parameters::all_default());
         break;
       }
       case GEOMETRY_POLYGONS_WITH_HOLES: {
         std::vector<Polygon_with_holes_2> polygonsWithHoles;
-        geometry->gps_[nth]->polygons_with_holes(
+        geometry->gps(nth).polygons_with_holes(
             std::back_inserter(polygonsWithHoles));
         for (const Polygon_with_holes_2& pwh : polygonsWithHoles) {
           area += pwh.outer_boundary().area();
@@ -4241,16 +4295,6 @@ double ComputeArea(Geometry* geometry) {
             area += hole.area();
           }
         }
-#if 0
-        Surface_mesh mesh;
-        GeneralPolygonSetToSurfaceMesh(geometry->planes_[nth],
-                                       *geometry->gps_[nth], mesh);
-        CGAL::Polygon_mesh_processing::transform(
-            *geometry->transforms_[nth], mesh, CGAL::parameters::all_default());
-        area += CGAL::Polygon_mesh_processing::area(
-            mesh, CGAL::parameters::all_default());
-        break;
-#endif
       }
     }
   }
@@ -4259,15 +4303,14 @@ double ComputeArea(Geometry* geometry) {
 
 double ComputeVolume(Geometry* geometry) {
   FT volume = 0;
-  int size = geometry->getSize();
+  int size = geometry->size();
+  geometry->copyInputMeshesToOutputMeshes();
+  geometry->transformMeshesToAbsoluteFrame();
   for (int nth = 0; nth < size; nth++) {
     switch (geometry->getType(nth)) {
       case GEOMETRY_MESH: {
-        Surface_mesh mesh(*geometry->getMesh(nth));
-        CGAL::Polygon_mesh_processing::transform(
-            *geometry->transforms_[nth], mesh, CGAL::parameters::all_default());
         volume += CGAL::Polygon_mesh_processing::volume(
-            mesh, CGAL::parameters::all_default());
+            geometry->mesh(nth), CGAL::parameters::all_default());
         break;
       }
     }
@@ -6398,16 +6441,16 @@ EMSCRIPTEN_BINDINGS(module) {
 
   emscripten::class_<Geometry>("Geometry")
       .constructor<>()
-      .function("addSegment", &Geometry::addSegment)
+      .function("addInputSegment", &Geometry::addInputSegment)
       .function("fillPolygonsWithHoles", &Geometry::fillPolygonsWithHoles)
       .function("emitPolygonsWithHoles", &Geometry::emitPolygonsWithHoles)
       .function("emitSegments", &Geometry::emitSegments)
-      .function("getMesh", &Geometry::getMesh, emscripten::allow_raw_pointers())
       .function("getSize", &Geometry::setSize)
       .function("getType", &Geometry::getType)
       .function("releaseOutputMesh", &Geometry::releaseOutputMesh,
                 emscripten::allow_raw_pointers())
-      .function("setMesh", &Geometry::setMesh, emscripten::allow_raw_pointers())
+      .function("setInputMesh", &Geometry::setInputMesh,
+                emscripten::allow_raw_pointers())
       .function("setSize", &Geometry::setSize)
       .function("setTransform", &Geometry::setTransform,
                 emscripten::allow_raw_pointers())
@@ -6443,11 +6486,8 @@ EMSCRIPTEN_BINDINGS(module) {
                        emscripten::allow_raw_pointers());
   emscripten::function("FuseSurfaceMeshes", &FuseSurfaceMeshes,
                        emscripten::allow_raw_pointers());
-  emscripten::function("DisjointSurfaceMeshesWithIncrementalMasking",
-                       &DisjointSurfaceMeshesWithIncrementalMasking,
-                       emscripten::allow_raw_pointers());
-  emscripten::function("DisjointIncrementally", &DisjointIncrementally,
-                       emscripten::allow_raw_pointers());
+  emscripten::function("Cut", &Cut, emscripten::allow_raw_pointers());
+  emscripten::function("Disjoint", &Disjoint, emscripten::allow_raw_pointers());
   emscripten::function("SeparateSurfaceMesh", &SeparateSurfaceMesh,
                        emscripten::allow_raw_pointers());
   emscripten::function("TwistSurfaceMesh", &TwistSurfaceMesh,

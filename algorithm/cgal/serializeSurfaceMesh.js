@@ -1,5 +1,6 @@
 import { endTime, logInfo, startTime } from '@jsxcad/sys';
 import { getCgal } from './getCgal.js';
+import { toSurfaceMesh } from './toSurfaceMesh.js';
 
 export const serializeSurfaceMesh = (mesh) => {
   try {
@@ -19,4 +20,13 @@ export const serializeSurfaceMesh = (mesh) => {
   } catch (error) {
     throw Error(error);
   }
+};
+
+export const addSerializedSurfaceMeshes = (geometries) => {
+  for (const { type, graph } of geometries) {
+    if (type === 'graph') {
+      graph.serializedSurfaceMesh = serializeSurfaceMesh(toSurfaceMesh(graph));
+    }
+  }
+  return geometries;
 };

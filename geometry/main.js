@@ -39,7 +39,7 @@ export { canonicalize } from './tagged/canonicalize.js';
 export { canonicalize as canonicalizePath } from './path/canonicalize.js';
 export { canonicalize as canonicalizePaths } from './paths/canonicalize.js';
 export { convexHull as convexHullToGraph } from './graph/convexHull.js';
-export { cut } from './tagged/cut.js';
+export { cut } from './tagged/cut2.js';
 export { deduplicate as deduplicatePath } from './path/deduplicate.js';
 export { deform } from './tagged/deform.js';
 export { demesh } from './tagged/demesh.js';
