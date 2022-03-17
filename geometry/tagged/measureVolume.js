@@ -2,7 +2,8 @@ import { computeVolume } from '@jsxcad/algorithm-cgal';
 import { hasNotTypeVoid } from './type.js';
 import { linearize } from './linearize.js';
 
-const filter = (geometry) => geometry.type === 'graph' && hasNotTypeVoid(geometry);
+const filter = (geometry) =>
+  geometry.type === 'graph' && hasNotTypeVoid(geometry);
 
 export const measureVolume = (geometry) => {
   const linear = [];

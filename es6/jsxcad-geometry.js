@@ -2412,8 +2412,10 @@ const linearize = (geometry, filter, out) => {
   visit(toConcreteGeometry(geometry), collect);
 };
 
-const filterTargets = (geometry) => ['graph', 'polygonsWithHoles', 'segments'].includes(geometry.type);
-const filterRemoves = (geometry) => filterTargets(geometry) && isNotTypeMasked(geometry);
+const filterTargets = (geometry) =>
+  ['graph', 'polygonsWithHoles', 'segments'].includes(geometry.type);
+const filterRemoves = (geometry) =>
+  filterTargets(geometry) && isNotTypeMasked(geometry);
 
 const cut = (geometry, geometries) => {
   const concreteGeometry = toConcreteGeometry(geometry);
@@ -3416,7 +3418,9 @@ const loft2 = (...geometries) => {
   return loft2$1(...graphs);
 };
 
-const filter$1 = (geometry) => ['graph', 'polygonsWithHoles'].includes(geometry.type) && hasNotTypeVoid(geometry);
+const filter$1 = (geometry) =>
+  ['graph', 'polygonsWithHoles'].includes(geometry.type) &&
+  hasNotTypeVoid(geometry);
 
 const measureArea = (geometry) => {
   const linear = [];
@@ -3424,7 +3428,8 @@ const measureArea = (geometry) => {
   return computeArea(linear);
 };
 
-const filter = (geometry) => geometry.type === 'graph' && hasNotTypeVoid(geometry);
+const filter = (geometry) =>
+  geometry.type === 'graph' && hasNotTypeVoid(geometry);
 
 const measureVolume = (geometry) => {
   const linear = [];
@@ -3653,11 +3658,7 @@ const projectToPlane$1 = (geometry, plane, direction) => {
 };
 
 const paths = (geometry, plane, direction) => {
-  return projectToPlane$1(
-    fromPaths(geometry.paths),
-    plane,
-    direction
-  );
+  return projectToPlane$1(fromPaths(geometry.paths), plane, direction);
 };
 
 const projectToPlane = op({ graph: projectToPlane$1, paths });

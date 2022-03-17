@@ -4,8 +4,10 @@ import { linearize } from './linearize.js';
 import { replacer } from './visit.js';
 import { toConcreteGeometry } from './toConcreteGeometry.js';
 
-const filterTargets = (geometry) => ['graph', 'polygonsWithHoles', 'segments'].includes(geometry.type);
-const filterRemoves = (geometry) => filterTargets(geometry) && isNotTypeMasked(geometry);
+const filterTargets = (geometry) =>
+  ['graph', 'polygonsWithHoles', 'segments'].includes(geometry.type);
+const filterRemoves = (geometry) =>
+  filterTargets(geometry) && isNotTypeMasked(geometry);
 
 export const cut = (geometry, geometries) => {
   const concreteGeometry = toConcreteGeometry(geometry);

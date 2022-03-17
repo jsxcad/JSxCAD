@@ -1,11 +1,10 @@
+import { addSerializedSurfaceMeshes } from './serializeSurfaceMesh.js';
 import { blessed } from './transform.js';
 import { disjoint } from './disjoint.js';
 import { fromPolygonsToSurfaceMesh } from './fromPolygonsToSurfaceMesh.js';
 import { fromSurfaceMesh } from './fromSurfaceMesh.js';
 import { initCgal } from './getCgal.js';
-import { addSerializeSurfaceMeshes } from './serializeSurfaceMesh.js';
 import test from 'ava';
-import { toSurfaceMesh } from './toSurfaceMesh.js';
 
 test.beforeEach(async (t) => {
   await initCgal();
