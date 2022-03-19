@@ -1440,7 +1440,6 @@ const fromCgalGeometry = (geometry, inputs, length = inputs.length) => {
       }
     }
   }
-  console.log(JSON.stringify(results));
   return results;
 };
 
