@@ -1,4 +1,5 @@
-import { cut as cutWithCgal } from '@jsxcad/algorithm-cgal';
+import { cut as cutWithCgal, deletePendingSurfaceMeshes } from '@jsxcad/algorithm-cgal';
+
 import { isNotTypeMasked } from './tagged/type.js';
 import { linearize } from './tagged/linearize.js';
 import { replacer } from './tagged/visit.js';
@@ -18,5 +19,6 @@ export const cut = (geometry, geometries) => {
     linearize(geometry, filterRemoves, inputs);
   }
   const outputs = cutWithCgal(inputs, count);
+  deletePendingSurfaceMeshes();
   return replacer(inputs, outputs, count)(concreteGeometry);
 };

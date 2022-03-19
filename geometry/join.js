@@ -1,4 +1,4 @@
-import { join as joinWithCgal } from '@jsxcad/algorithm-cgal';
+import { deletePendingSurfaceMeshes, join as joinWithCgal } from '@jsxcad/algorithm-cgal';
 import { linearize } from './tagged/linearize.js';
 import { replacer } from './tagged/visit.js';
 import { toConcreteGeometry } from './tagged/toConcreteGeometry.js';
@@ -15,5 +15,6 @@ export const join = (geometry, geometries) => {
     linearize(geometry, filter, inputs);
   }
   const outputs = joinWithCgal(inputs, count);
+  deletePendingSurfaceMeshes();
   return replacer(inputs, outputs, count)(concreteGeometry);
 };
