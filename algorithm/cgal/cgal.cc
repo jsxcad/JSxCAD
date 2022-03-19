@@ -170,6 +170,7 @@ enum GeometryType {
   GEOMETRY_POLYGONS_WITH_HOLES = 2,
   GEOMETRY_SEGMENTS = 3,
   GEOMETRY_POINTS = 4,
+  GEOMETRY_EMPTY = 5,
 };
 
 namespace std {
@@ -4094,6 +4095,14 @@ class Geometry {
     }
   }
 
+  void removeEmptyMeshes() {
+    for (size_t nth = 0; nth < size_; nth++) {
+      if (is_mesh(nth) && is_empty_mesh(nth)) {
+        setType(nth, GEOMETRY_EMPTY);
+      }
+    }
+  }
+
   bool noGpsOverlap(size_t a, size_t b) {
     return CGAL::do_overlap(bbox2_[a], bbox2_[b]) == false;
   }
@@ -4219,6 +4228,9 @@ int Clip(Geometry* geometry, int targets) {
         // TBD
         break;
       }
+      case GEOMETRY_EMPTY: {
+        break;
+      }
       case GEOMETRY_UNKNOWN: {
         std::cout << "Unknown type for Cut at " << target << std::endl;
         return STATUS_INVALID_INPUT;
@@ -4227,6 +4239,7 @@ int Clip(Geometry* geometry, int targets) {
   }
 
   geometry->resize(targets);
+  geometry->removeEmptyMeshes();
   geometry->transformMeshesToLocalFrames();
 
   return STATUS_OK;
@@ -4309,6 +4322,9 @@ int Cut(Geometry* geometry, int targets) {
         // TBD
         break;
       }
+      case GEOMETRY_EMPTY: {
+        break;
+      }
       case GEOMETRY_UNKNOWN: {
         std::cout << "Unknown type for Cut at " << target << std::endl;
         return STATUS_INVALID_INPUT;
@@ -4317,6 +4333,7 @@ int Cut(Geometry* geometry, int targets) {
   }
 
   geometry->resize(targets);
+  geometry->removeEmptyMeshes();
   geometry->transformMeshesToLocalFrames();
 
   return STATUS_OK;
@@ -4404,6 +4421,9 @@ int Disjoint(Geometry* geometry, emscripten::val getIsMasked) {
         // TBD
         break;
       }
+      case GEOMETRY_EMPTY: {
+        break;
+      }
       case GEOMETRY_UNKNOWN: {
         std::cout << "Unknown type for Disjoint at " << start << std::endl;
         return STATUS_INVALID_INPUT;
@@ -4411,6 +4431,7 @@ int Disjoint(Geometry* geometry, emscripten::val getIsMasked) {
     }
   }
 
+  geometry->removeEmptyMeshes();
   geometry->transformMeshesToLocalFrames();
 
   return STATUS_OK;
@@ -4453,7 +4474,6 @@ int Join(Geometry* geometry, int targets) {
       }
       case GEOMETRY_POLYGONS_WITH_HOLES: {
         for (int nth = targets; nth < size; nth++) {
-          // TODO: Disjunction of planar by volume.
           if (!geometry->is_polygons(nth) ||
               geometry->plane(target) != geometry->plane(nth) ||
               geometry->noGpsOverlap(target, nth)) {
@@ -4462,7 +4482,6 @@ int Join(Geometry* geometry, int targets) {
           geometry->gps(target).join(geometry->gps(nth));
           geometry->updateGpsBounds(target);
         }
-        // TODO: Handle disjunction of surface by volume.
         break;
       }
       case GEOMETRY_SEGMENTS: {
@@ -4493,6 +4512,9 @@ int Join(Geometry* geometry, int targets) {
         }
         break;
       }
+      case GEOMETRY_EMPTY: {
+        break;
+      }
       case GEOMETRY_UNKNOWN: {
         std::cout << "Unknown type for Cut at " << target << std::endl;
         return STATUS_INVALID_INPUT;
@@ -4501,6 +4523,7 @@ int Join(Geometry* geometry, int targets) {
   }
 
   geometry->resize(targets);
+  geometry->removeEmptyMeshes();
   geometry->transformMeshesToLocalFrames();
 
   return STATUS_OK;

@@ -1,4 +1,4 @@
-import { composeTransforms, fromSurfaceMesh, fromPointsToAlphaShapeAsSurfaceMesh, arrangePaths, fromPolygonsToSurfaceMesh, disjoint as disjoint$1, bendSurfaceMesh, toSurfaceMesh, fromSurfaceMeshEmitBoundingBox, serializeSurfaceMesh, clip as clip$3, computeCentroidOfSurfaceMesh, fitPlaneToPoints, arrangePathsIntoTriangles, arrangeSegmentsIntoTriangles, fuseSurfaceMeshes, deletePendingSurfaceMeshes, SurfaceMeshQuery, fromSurfaceMeshToPolygonsWithHoles, insetOfPolygonWithHoles, eachPointOfSurfaceMesh, outlineSurfaceMesh, sectionOfSurfaceMesh, fromPointsToConvexHullAsSurfaceMesh, cut as cut$1, deformSurfaceMesh, demeshSurfaceMesh, extrudeSurfaceMesh, extrudeToPlaneOfSurfaceMesh, reverseFaceOrientationsOfSurfaceMesh, fromFunctionToSurfaceMesh, fromPointsToSurfaceMesh, generatePackingEnvelopeForSurfaceMesh, generateUpperEnvelopeForSurfaceMesh, fromSegmentToInverseTransform, invertTransform, growSurfaceMesh, clipSurfaceMeshes, join as join$3, loftBetweenCongruentSurfaceMeshes, loftBetweenSurfaceMeshes, computeArea, computeVolume, minkowskiDifferenceOfSurfaceMeshes, minkowskiShellOfSurfaceMeshes, minkowskiSumOfSurfaceMeshes, offsetOfPolygonWithHoles, projectToPlaneOfSurfaceMesh, pushSurfaceMesh, remeshSurfaceMesh, isotropicRemeshingOfSurfaceMesh, removeSelfIntersectionsOfSurfaceMesh, approximateSurfaceMesh, simplifySurfaceMesh, subdivideSurfaceMesh, smoothShapeOfSurfaceMesh, smoothSurfaceMesh, separateSurfaceMesh, fromSurfaceMeshToTriangles, taperSurfaceMesh, doesSelfIntersectOfSurfaceMesh, twistSurfaceMesh, joinSurfaceMeshes, fromRotateXToTransform, fromRotateYToTransform, fromRotateZToTransform, fromTranslateToTransform, fromScaleToTransform } from './jsxcad-algorithm-cgal.js';
+import { composeTransforms, fromSurfaceMesh, fromPointsToAlphaShapeAsSurfaceMesh, arrangePaths, fromPolygonsToSurfaceMesh, disjoint as disjoint$1, deletePendingSurfaceMeshes, bendSurfaceMesh, toSurfaceMesh, fromSurfaceMeshEmitBoundingBox, serializeSurfaceMesh, clip as clip$3, computeCentroidOfSurfaceMesh, fitPlaneToPoints, arrangePathsIntoTriangles, arrangeSegmentsIntoTriangles, fuseSurfaceMeshes, SurfaceMeshQuery, fromSurfaceMeshToPolygonsWithHoles, insetOfPolygonWithHoles, eachPointOfSurfaceMesh, outlineSurfaceMesh, sectionOfSurfaceMesh, fromPointsToConvexHullAsSurfaceMesh, cut as cut$1, deformSurfaceMesh, demeshSurfaceMesh, extrudeSurfaceMesh, extrudeToPlaneOfSurfaceMesh, reverseFaceOrientationsOfSurfaceMesh, fromFunctionToSurfaceMesh, fromPointsToSurfaceMesh, generatePackingEnvelopeForSurfaceMesh, generateUpperEnvelopeForSurfaceMesh, fromSegmentToInverseTransform, invertTransform, growSurfaceMesh, clipSurfaceMeshes, join as join$3, loftBetweenCongruentSurfaceMeshes, loftBetweenSurfaceMeshes, computeArea, computeVolume, minkowskiDifferenceOfSurfaceMeshes, minkowskiShellOfSurfaceMeshes, minkowskiSumOfSurfaceMeshes, offsetOfPolygonWithHoles, projectToPlaneOfSurfaceMesh, pushSurfaceMesh, remeshSurfaceMesh, isotropicRemeshingOfSurfaceMesh, removeSelfIntersectionsOfSurfaceMesh, approximateSurfaceMesh, simplifySurfaceMesh, subdivideSurfaceMesh, smoothShapeOfSurfaceMesh, smoothSurfaceMesh, separateSurfaceMesh, fromSurfaceMeshToTriangles, taperSurfaceMesh, doesSelfIntersectOfSurfaceMesh, twistSurfaceMesh, joinSurfaceMeshes, fromRotateXToTransform, fromRotateYToTransform, fromRotateZToTransform, fromTranslateToTransform, fromScaleToTransform } from './jsxcad-algorithm-cgal.js';
 export { arrangePolygonsWithHoles } from './jsxcad-algorithm-cgal.js';
 import { transform as transform$4, equals, max, min, subtract, dot, distance, canonicalize as canonicalize$5, scale as scale$3 } from './jsxcad-math-vec3.js';
 import { identityMatrix, fromTranslation, fromZRotation, fromScaling } from './jsxcad-math-mat4.js';
@@ -447,6 +447,7 @@ const disjoint = (geometries) => {
   for (const concreteGeometry of concreteGeometries) {
     disjointGeometries.push(update(concreteGeometry));
   }
+  deletePendingSurfaceMeshes();
   return taggedGroup({}, ...disjointGeometries);
 };
 
@@ -527,10 +528,16 @@ const measureBoundingBox$3 = (geometry) => {
       geometry.cache = {};
     }
     const { graph } = geometry;
+    if (graph.isEmpty) {
+      return [[Infinity, Infinity, Infinity], [-Infinity, -Infinity, -Infinity]];
+    }
     fromSurfaceMeshEmitBoundingBox(
       toSurfaceMesh(graph),
       geometry.matrix,
       (xMin, yMin, zMin, xMax, yMax, zMax) => {
+        if (!isFinite(xMin)) {
+          throw Error('Non-finite');
+        }
         geometry.cache.boundingBox = [
           [xMin, yMin, zMin],
           [xMax, yMax, zMax],
@@ -756,6 +763,7 @@ const clip$2 = (geometry, geometries) => {
     linearize(geometry, filter$3, inputs);
   }
   const outputs = clip$3(inputs, count);
+  deletePendingSurfaceMeshes();
   return replacer(inputs, outputs, count)(concreteGeometry);
 };
 
@@ -1564,6 +1572,10 @@ const measureBoundingBox = (geometry) => {
 
   visit(toConcreteGeometry(geometry), op);
 
+  if (minPoint[0] === Infinity) {
+    return [[0, 0, 0], [0, 0, 0]];
+  }
+
   return [minPoint, maxPoint];
 };
 
@@ -2202,6 +2214,7 @@ const cut = (geometry, geometries) => {
     linearize(geometry, filterRemoves, inputs);
   }
   const outputs = cut$1(inputs, count);
+  deletePendingSurfaceMeshes();
   return replacer(inputs, outputs, count)(concreteGeometry);
 };
 
@@ -3126,6 +3139,7 @@ const join$2 = (geometry, geometries) => {
     linearize(geometry, filter$2, inputs);
   }
   const outputs = join$3(inputs, count);
+  deletePendingSurfaceMeshes();
   return replacer(inputs, outputs, count)(concreteGeometry);
 };
 

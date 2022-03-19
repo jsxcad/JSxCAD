@@ -5,7 +5,7 @@ import { ErrorZeroThickness } from './error.js';
 
 export const join = (inputs, targetsLength) =>
   withCgalGeometry(inputs, (cgalGeometry, g) => {
-    const status = g.Clip(cgalGeometry, targetsLength);
+    const status = g.Join(cgalGeometry, targetsLength);
     switch (status) {
       case STATUS_ZERO_THICKNESS:
         throw new ErrorZeroThickness('Zero thickness produced by join');

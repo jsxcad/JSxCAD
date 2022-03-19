@@ -625,6 +625,7 @@ const fromTranslateToTransform = (x = 0, y = 0, z = 0) => {
       getCgal().Transformation__translate(x, y, z)
     );
   } catch (error) {
+    console.log(`QQ/fromTranslateToTransform: ${x} ${y} ${z}`);
     throw Error(error);
   }
 };
@@ -1268,6 +1269,7 @@ const GEOMETRY_MESH = 1;
 const GEOMETRY_POLYGONS_WITH_HOLES = 2;
 const GEOMETRY_SEGMENTS = 3;
 // const GEOMETRY_POINTS = 4;
+const GEOMETRY_EMPTY = 5;
 
 const X$1 = 0;
 const Y$1 = 1;
@@ -1433,12 +1435,14 @@ const fromCgalGeometry = (geometry, inputs, length = inputs.length) => {
         });
         break;
       }
-      default: {
-        const { matrix, tags } = inputs[nth];
-        results[nth] = { type: 'group', tags, matrix, contents: [] };
+      default:
+      case GEOMETRY_EMPTY: {
+        console.log(`QQ/geometry/out/empty`);
+        results[nth] = { type: 'group', contents: [] };
       }
     }
   }
+  console.log(JSON.stringify(results));
   return results;
 };
 
@@ -2383,7 +2387,7 @@ const isotropicRemeshingOfSurfaceMesh = (
 
 const join = (inputs, targetsLength) =>
   withCgalGeometry(inputs, (cgalGeometry, g) => {
-    const status = g.Clip(cgalGeometry, targetsLength);
+    const status = g.Join(cgalGeometry, targetsLength);
     switch (status) {
       case STATUS_ZERO_THICKNESS:
         throw new ErrorZeroThickness('Zero thickness produced by join');

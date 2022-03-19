@@ -10,10 +10,16 @@ export const measureBoundingBox = (geometry) => {
       geometry.cache = {};
     }
     const { graph } = geometry;
+    if (graph.isEmpty) {
+      return [[Infinity, Infinity, Infinity], [-Infinity, -Infinity, -Infinity]];
+    }
     fromSurfaceMeshEmitBoundingBox(
       toSurfaceMesh(graph),
       geometry.matrix,
       (xMin, yMin, zMin, xMax, yMax, zMax) => {
+        if (!isFinite(xMin)) {
+          throw Error('Non-finite');
+        }
         geometry.cache.boundingBox = [
           [xMin, yMin, zMin],
           [xMax, yMax, zMax],

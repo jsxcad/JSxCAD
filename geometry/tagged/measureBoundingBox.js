@@ -68,5 +68,9 @@ export const measureBoundingBox = (geometry) => {
 
   visit(toConcreteGeometry(geometry), op);
 
+  if (minPoint[0] === Infinity) {
+    return [[0, 0, 0], [0, 0, 0]];
+  }
+
   return [minPoint, maxPoint];
 };
