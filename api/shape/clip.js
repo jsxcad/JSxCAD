@@ -1,13 +1,13 @@
 import { Shape } from './Shape.js';
-import { intersection } from '@jsxcad/geometry';
+import { clip as clipGeometry } from '@jsxcad/geometry';
 
 export const clip =
   (...shapes) =>
   (shape) =>
     Shape.fromGeometry(
-      intersection(
+      clipGeometry(
         shape.toGeometry(),
-        ...shapes.map((other) => Shape.toShape(other, shape).toGeometry())
+        shapes.map((other) => Shape.toShape(other, shape).toGeometry())
       )
     );
 

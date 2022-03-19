@@ -8,7 +8,7 @@ export const cut = (inputs, targetsLength) =>
     const status = g.Cut(cgalGeometry, targetsLength);
     switch (status) {
       case STATUS_ZERO_THICKNESS:
-        throw new ErrorZeroThickness('Zero thickness produced by disjoint');
+        throw new ErrorZeroThickness('Zero thickness produced by cut');
       case STATUS_OK:
         return fromCgalGeometry(cgalGeometry, inputs, targetsLength);
       default:

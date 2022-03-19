@@ -169,6 +169,7 @@ enum GeometryType {
   GEOMETRY_MESH = 1,
   GEOMETRY_POLYGONS_WITH_HOLES = 2,
   GEOMETRY_SEGMENTS = 3,
+  GEOMETRY_POINTS = 4,
 };
 
 namespace std {
@@ -1458,8 +1459,16 @@ void demesh(Surface_mesh& mesh) {
   CGAL::Surface_mesh_simplification::Count_stop_predicate<Surface_mesh> stop(0);
   Demesh_cost<Kernel> cost;
   Demesh_safe_placement placement;
+  if (CGAL::Polygon_mesh_processing::does_self_intersect(
+          mesh, CGAL::parameters::all_default())) {
+    std::cout << "Demesh received self intersection" << std::endl;
+  }
   CGAL::Surface_mesh_simplification::edge_collapse(
       mesh, stop, CGAL::parameters::get_cost(cost).get_placement(placement));
+  if (CGAL::Polygon_mesh_processing::does_self_intersect(
+          mesh, CGAL::parameters::all_default())) {
+    std::cout << "Demesh produced self intersection" << std::endl;
+  }
 }
 
 const Surface_mesh* DemeshSurfaceMesh(const Surface_mesh* input,
@@ -1518,6 +1527,12 @@ const Surface_mesh* SimplifySurfaceMesh(const Surface_mesh* input,
   CGAL::Polygon_mesh_processing::transform(transform->inverse(), *output,
                                            CGAL::parameters::all_default());
 
+  if (CGAL::Polygon_mesh_processing::does_self_intersect(
+          *output, CGAL::parameters::all_default())) {
+    // Is the self-intersection test worthwhile?
+    CGAL::Polygon_mesh_processing::experimental::
+        autorefine_and_remove_self_intersections(*output);
+  }
   return output;
 }
 
@@ -3870,6 +3885,8 @@ class Geometry {
     meshes_.clear();
     input_segments_.clear();
     segments_.clear();
+    input_points_.clear();
+    points_.clear();
     bbox2_.clear();
     bbox3_.clear();
     resize(size);
@@ -3887,6 +3904,8 @@ class Geometry {
     meshes_.resize(size);
     input_segments_.resize(size);
     segments_.resize(size);
+    input_points_.resize(size);
+    points_.resize(size);
     bbox2_.resize(size);
     bbox3_.resize(size);
   }
@@ -3922,6 +3941,12 @@ class Geometry {
   bool has_segments(int nth) { return segments_[nth] != nullptr; }
   std::vector<Segment>& segments(int nth) { return *segments_[nth]; }
 
+  bool has_input_points(int nth) { return input_points_[nth] != nullptr; }
+  std::vector<Point>& input_points(int nth) { return *input_points_[nth]; }
+
+  bool has_points(int nth) { return points_[nth] != nullptr; }
+  std::vector<Point>& points(int nth) { return *points_[nth]; }
+
   CGAL::Bbox_2& bbox2(int nth) { return bbox2_[nth]; }
   CGAL::Bbox_3& bbox3(int nth) { return bbox3_[nth]; }
 
@@ -3939,6 +3964,11 @@ class Geometry {
       case GEOMETRY_SEGMENTS: {
         input_segments_[nth].reset(new std::vector<Segment>);
         segments_[nth].reset(new std::vector<Segment>);
+        break;
+      }
+      case GEOMETRY_POINTS: {
+        input_points_[nth].reset(new std::vector<Point>);
+        points_[nth].reset(new std::vector<Point>);
         break;
       }
       default:
@@ -3985,15 +4015,16 @@ class Geometry {
                             polygonsWithHoles, emitPolygon, emitPoint);
   }
 
+  void addInputPoint(int nth, double x, double y, double z) {
+    input_points(nth).emplace_back(Point{x, y, z});
+  }
+
   void addInputSegment(int nth, double sx, double sy, double sz, double tx,
                        double ty, double tz) {
     input_segments(nth).emplace_back(Point{sx, sy, sz}, Point{tx, ty, tz});
   }
 
   void addSegment(int nth, Segment segment) {
-    if (!has_segments(nth)) {
-      segments_[nth].reset(new std::vector<Segment>);
-    }
     segments(nth).push_back(segment);
   }
 
@@ -4007,6 +4038,18 @@ class Geometry {
       emit(CGAL::to_double(s.x()), CGAL::to_double(s.y()),
            CGAL::to_double(s.z()), CGAL::to_double(t.x()),
            CGAL::to_double(t.y()), CGAL::to_double(t.z()));
+    }
+  }
+
+  void addPoint(int nth, Point point) { points(nth).push_back(point); }
+
+  void emitPoints(int nth, emscripten::val emit) {
+    if (!has_points(nth)) {
+      return;
+    }
+    for (const Point& p : points(nth)) {
+      emit(CGAL::to_double(p.x()), CGAL::to_double(p.y()),
+           CGAL::to_double(p.z()));
     }
   }
 
@@ -4093,9 +4136,101 @@ class Geometry {
   std::vector<std::unique_ptr<Surface_mesh>> meshes_;
   std::vector<std::unique_ptr<std::vector<Segment>>> input_segments_;
   std::vector<std::unique_ptr<std::vector<Segment>>> segments_;
+  std::vector<std::unique_ptr<std::vector<Point>>> input_points_;
+  std::vector<std::unique_ptr<std::vector<Point>>> points_;
   std::vector<CGAL::Bbox_2> bbox2_;
   std::vector<CGAL::Bbox_3> bbox3_;
 };
+
+int Clip(Geometry* geometry, int targets) {
+  size_t size = geometry->size();
+
+  std::vector<std::unique_ptr<SurfaceMeshQuery>> queries;
+  Transformation identity(CGAL::IDENTITY);
+
+  geometry->copyInputMeshesToOutputMeshes();
+  geometry->transformMeshesToAbsoluteFrame();
+  geometry->convertPlanarMeshesToPolygons();
+  geometry->computeBounds();
+
+  for (int target = 0; target < targets; target++) {
+    switch (geometry->type(target)) {
+      case GEOMETRY_MESH: {
+        if (geometry->is_empty_mesh(target)) {
+          continue;
+        }
+        for (int nth = targets; nth < size; nth++) {
+          if (!geometry->is_mesh(nth) || geometry->is_empty_mesh(nth) ||
+              geometry->noMeshOverlap(target, nth)) {
+            continue;
+          }
+          Surface_mesh copy(geometry->mesh(nth));
+          if (!CGAL::Polygon_mesh_processing::corefine_and_compute_intersection(
+                  geometry->mesh(target), copy, geometry->mesh(target),
+                  CGAL::parameters::all_default(),
+                  CGAL::parameters::all_default(),
+                  CGAL::parameters::all_default())) {
+            return STATUS_ZERO_THICKNESS;
+          }
+          demesh(geometry->mesh(target));
+          geometry->updateMeshBounds(target);
+        }
+        break;
+      }
+      case GEOMETRY_POLYGONS_WITH_HOLES: {
+        for (int nth = targets; nth < size; nth++) {
+          // TODO: Disjunction of planar by volume.
+          if (!geometry->is_polygons(nth) ||
+              geometry->plane(target) != geometry->plane(nth) ||
+              geometry->noGpsOverlap(target, nth)) {
+            continue;
+          }
+          geometry->gps(target).intersection(geometry->gps(nth));
+          geometry->updateGpsBounds(target);
+        }
+        // TODO: Handle disjunction of surface by volume.
+        break;
+      }
+      case GEOMETRY_SEGMENTS: {
+        // TODO: Support disjunction by PolygonsWithHoles.
+        std::vector<Segment> in;
+        geometry->input_segments(target).swap(in);
+        std::vector<Segment> out;
+        for (int nth = targets; nth < size; nth++) {
+          if (!geometry->is_mesh(nth) || geometry->is_empty_mesh(nth)) {
+            continue;
+          }
+          if (queries[nth] == nullptr && geometry->is_mesh(nth)) {
+            queries[nth].reset(
+                new SurfaceMeshQuery(&geometry->mesh(nth), &identity));
+          }
+          std::unique_ptr<SurfaceMeshQuery>& query = queries[nth];
+          auto emit = [&](const Segment& segment) { out.push_back(segment); };
+          for (const Segment& segment : in) {
+            query->intersectSegment(true, segment, emit);
+          }
+          in.swap(out);
+          out.clear();
+        }
+        geometry->segments(target).swap(in);
+        break;
+      }
+      case GEOMETRY_POINTS: {
+        // TBD
+        break;
+      }
+      case GEOMETRY_UNKNOWN: {
+        std::cout << "Unknown type for Cut at " << target << std::endl;
+        return STATUS_INVALID_INPUT;
+      }
+    }
+  }
+
+  geometry->resize(targets);
+  geometry->transformMeshesToLocalFrames();
+
+  return STATUS_OK;
+}
 
 int Cut(Geometry* geometry, int targets) {
   size_t size = geometry->size();
@@ -4168,6 +4303,10 @@ int Cut(Geometry* geometry, int targets) {
           out.clear();
         }
         geometry->segments(target).swap(in);
+        break;
+      }
+      case GEOMETRY_POINTS: {
+        // TBD
         break;
       }
       case GEOMETRY_UNKNOWN: {
@@ -4261,6 +4400,10 @@ int Disjoint(Geometry* geometry, emscripten::val getIsMasked) {
         geometry->segments(start).swap(in);
         break;
       }
+      case GEOMETRY_POINTS: {
+        // TBD
+        break;
+      }
       case GEOMETRY_UNKNOWN: {
         std::cout << "Unknown type for Disjoint at " << start << std::endl;
         return STATUS_INVALID_INPUT;
@@ -4268,6 +4411,96 @@ int Disjoint(Geometry* geometry, emscripten::val getIsMasked) {
     }
   }
 
+  geometry->transformMeshesToLocalFrames();
+
+  return STATUS_OK;
+}
+
+int Join(Geometry* geometry, int targets) {
+  size_t size = geometry->size();
+
+  std::vector<std::unique_ptr<SurfaceMeshQuery>> queries;
+  Transformation identity(CGAL::IDENTITY);
+
+  geometry->copyInputMeshesToOutputMeshes();
+  geometry->transformMeshesToAbsoluteFrame();
+  geometry->convertPlanarMeshesToPolygons();
+  geometry->computeBounds();
+
+  for (int target = 0; target < targets; target++) {
+    switch (geometry->type(target)) {
+      case GEOMETRY_MESH: {
+        if (geometry->is_empty_mesh(target)) {
+          continue;
+        }
+        for (int nth = targets; nth < size; nth++) {
+          if (!geometry->is_mesh(nth) || geometry->is_empty_mesh(nth) ||
+              geometry->noMeshOverlap(target, nth)) {
+            continue;
+          }
+          Surface_mesh cutMeshCopy(geometry->mesh(nth));
+          if (!CGAL::Polygon_mesh_processing::corefine_and_compute_union(
+                  geometry->mesh(target), cutMeshCopy, geometry->mesh(target),
+                  CGAL::parameters::all_default(),
+                  CGAL::parameters::all_default(),
+                  CGAL::parameters::all_default())) {
+            return STATUS_ZERO_THICKNESS;
+          }
+          demesh(geometry->mesh(target));
+          geometry->updateMeshBounds(target);
+        }
+        break;
+      }
+      case GEOMETRY_POLYGONS_WITH_HOLES: {
+        for (int nth = targets; nth < size; nth++) {
+          // TODO: Disjunction of planar by volume.
+          if (!geometry->is_polygons(nth) ||
+              geometry->plane(target) != geometry->plane(nth) ||
+              geometry->noGpsOverlap(target, nth)) {
+            continue;
+          }
+          geometry->gps(target).join(geometry->gps(nth));
+          geometry->updateGpsBounds(target);
+        }
+        // TODO: Handle disjunction of surface by volume.
+        break;
+      }
+      case GEOMETRY_SEGMENTS: {
+        for (const Segment& segment : geometry->input_segments(target)) {
+          geometry->addSegment(target, segment);
+        }
+        for (int nth = targets; nth < size; nth++) {
+          if (!geometry->has_segments(nth)) {
+            continue;
+          }
+          for (const Segment& segment : geometry->input_segments(nth)) {
+            geometry->addSegment(target, segment);
+          }
+        }
+        break;
+      }
+      case GEOMETRY_POINTS: {
+        for (const Point& point : geometry->input_points(target)) {
+          geometry->addPoint(target, point);
+        }
+        for (int nth = targets; nth < size; nth++) {
+          if (!geometry->has_points(nth)) {
+            continue;
+          }
+          for (const Point& point : geometry->input_points(nth)) {
+            geometry->addPoint(target, point);
+          }
+        }
+        break;
+      }
+      case GEOMETRY_UNKNOWN: {
+        std::cout << "Unknown type for Cut at " << target << std::endl;
+        return STATUS_INVALID_INPUT;
+      }
+    }
+  }
+
+  geometry->resize(targets);
   geometry->transformMeshesToLocalFrames();
 
   return STATUS_OK;
@@ -6486,8 +6719,10 @@ EMSCRIPTEN_BINDINGS(module) {
                        emscripten::allow_raw_pointers());
   emscripten::function("FuseSurfaceMeshes", &FuseSurfaceMeshes,
                        emscripten::allow_raw_pointers());
+  emscripten::function("Clip", &Clip, emscripten::allow_raw_pointers());
   emscripten::function("Cut", &Cut, emscripten::allow_raw_pointers());
   emscripten::function("Disjoint", &Disjoint, emscripten::allow_raw_pointers());
+  emscripten::function("Join", &Join, emscripten::allow_raw_pointers());
   emscripten::function("SeparateSurfaceMesh", &SeparateSurfaceMesh,
                        emscripten::allow_raw_pointers());
   emscripten::function("TwistSurfaceMesh", &TwistSurfaceMesh,

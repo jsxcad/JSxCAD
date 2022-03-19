@@ -29,7 +29,7 @@ export { arrangePolygonsWithHoles } from './graph/arrangePolygonsWithHoles.js';
 export { assemble } from './tagged/assemble.js';
 export { bend } from './tagged/bend.js';
 export { cached } from './tagged/cached.js';
-export { clip } from './graph/clip.js';
+export { clip } from './clip.js';
 export { close as closePath } from './path/close.js';
 export { computeCentroid } from './tagged/computeCentroid.js';
 export { computeNormal } from './tagged/computeNormal.js';
@@ -39,12 +39,12 @@ export { canonicalize } from './tagged/canonicalize.js';
 export { canonicalize as canonicalizePath } from './path/canonicalize.js';
 export { canonicalize as canonicalizePaths } from './paths/canonicalize.js';
 export { convexHull as convexHullToGraph } from './graph/convexHull.js';
-export { cut } from './tagged/cut2.js';
+export { cut } from './cut.js';
 export { deduplicate as deduplicatePath } from './path/deduplicate.js';
 export { deform } from './tagged/deform.js';
 export { demesh } from './tagged/demesh.js';
 export { difference } from './tagged/difference.js';
-export { disjoint } from './tagged/disjoint.js';
+export { disjoint } from './disjoint.js';
 export { doesNotOverlap } from './tagged/doesNotOverlap.js';
 export { drop } from './tagged/drop.js';
 export { eachItem } from './tagged/eachItem.js';
@@ -143,7 +143,7 @@ export {
   typeVoid,
   typeWire,
 } from './tagged/type.js';
-export { join } from './tagged/join.js';
+export { join } from './join.js';
 export { keep } from './tagged/keep.js';
 export { loft } from './tagged/loft.js';
 export { loft2 } from './tagged/loft2.js';

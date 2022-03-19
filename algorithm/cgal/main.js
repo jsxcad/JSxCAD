@@ -32,6 +32,7 @@ export {
 } from './status.js';
 export { deletePendingSurfaceMeshes, toSurfaceMesh } from './toSurfaceMesh.js';
 export { graphSymbol, surfaceMeshSymbol } from './symbols.js';
+export { clip } from './clip.js';
 export { clipSurfaceMeshes } from './clipSurfaceMeshes.js';
 export { computeArea } from './computeArea.js';
 export { computeVolume } from './computeVolume.js';
@@ -71,6 +72,7 @@ export { growSurfaceMesh } from './growSurfaceMesh.js';
 export { initCgal } from './getCgal.js';
 export { insetOfPolygonWithHoles } from './insetOfPolygonWithHoles.js';
 export { isotropicRemeshingOfSurfaceMesh } from './isotropicRemeshingOfSurfaceMesh.js';
+export { join } from './join.js';
 export { joinSurfaceMeshes } from './joinSurfaceMeshes.js';
 export { loftBetweenCongruentSurfaceMeshes } from './loftBetweenCongruentSurfaceMeshes.js';
 export { loftBetweenSurfaceMeshes } from './loftBetweenSurfaceMeshes.js';

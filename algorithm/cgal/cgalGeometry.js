@@ -7,6 +7,7 @@ const GEOMETRY_UNKNOWN = 0;
 const GEOMETRY_MESH = 1;
 const GEOMETRY_POLYGONS_WITH_HOLES = 2;
 const GEOMETRY_SEGMENTS = 3;
+// const GEOMETRY_POINTS = 4;
 
 const X = 0;
 const Y = 1;
@@ -186,6 +187,8 @@ export const withCgalGeometry = (inputs, op) => {
   const cgalGeometry = toCgalGeometry(inputs, g);
   try {
     return op(cgalGeometry, g);
+  } catch (error) {
+    throw Error(error);
   } finally {
     cgalGeometry.delete();
   }
