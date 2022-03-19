@@ -290,7 +290,7 @@ log(aRectangle.size());
 ```
 
 ```JavaScript
-aRectangle.size(({ length }, s) => s.x(length)).md(`Move the shape along by its length`);
+aRectangle.size(({ length }) => s => s.x(length)).md(`Move the shape along by its length`);
 ```
 
 Move the shape along by its length

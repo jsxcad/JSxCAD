@@ -529,15 +529,15 @@ const measureBoundingBox$3 = (geometry) => {
     }
     const { graph } = geometry;
     if (graph.isEmpty) {
-      return [[Infinity, Infinity, Infinity], [-Infinity, -Infinity, -Infinity]];
+      return [
+        [Infinity, Infinity, Infinity],
+        [-Infinity, -Infinity, -Infinity],
+      ];
     }
     fromSurfaceMeshEmitBoundingBox(
       toSurfaceMesh(graph),
       geometry.matrix,
       (xMin, yMin, zMin, xMax, yMax, zMax) => {
-        if (!isFinite(xMin)) {
-          throw Error('Non-finite');
-        }
         geometry.cache.boundingBox = [
           [xMin, yMin, zMin],
           [xMax, yMax, zMax],
@@ -1573,7 +1573,10 @@ const measureBoundingBox = (geometry) => {
   visit(toConcreteGeometry(geometry), op);
 
   if (minPoint[0] === Infinity) {
-    return [[0, 0, 0], [0, 0, 0]];
+    return [
+      [0, 0, 0],
+      [0, 0, 0],
+    ];
   }
 
   return [minPoint, maxPoint];

@@ -1,4 +1,7 @@
-import { clip as clipWithCgal, deletePendingSurfaceMeshes } from '@jsxcad/algorithm-cgal';
+import {
+  clip as clipWithCgal,
+  deletePendingSurfaceMeshes,
+} from '@jsxcad/algorithm-cgal';
 import { linearize } from './tagged/linearize.js';
 import { replacer } from './tagged/visit.js';
 import { toConcreteGeometry } from './tagged/toConcreteGeometry.js';

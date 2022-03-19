@@ -768,7 +768,7 @@ const roundCoordinate = ([x, y, z]) => [round(x), round(y), round(z)];
 const align =
   (spec = 'xyz', origin = [0, 0, 0]) =>
   (shape) =>
-    shape.size(({ max, min, center }) => shape => {
+    shape.size(({ max, min, center }) => (shape) => {
       // This is producing very small deviations.
       // FIX: Try a more principled approach.
       max = roundCoordinate(max);
@@ -4060,34 +4060,24 @@ const Y$2 = 1;
 const Z$3 = 2;
 
 const size =
-  (op = size => shape => size) =>
+  (op = (size) => (shape) => size) =>
   (shape) => {
     const geometry = shape.toConcreteGeometry();
-    try {
     let [min, max] = measureBoundingBox(geometry);
-console.log('size');
-console.log(min);
-console.log(max);
-console.log(JSON.stringify(geometry));
     const length = max[X$2] - min[X$2];
     const width = max[Y$2] - min[Y$2];
     const height = max[Z$3] - min[Z$3];
     const center = scale$1(0.5, add(min, max));
     const radius = distance(center, max);
-    return op(
-      {
-        length,
-        width,
-        height,
-        max,
-        min,
-        center,
-        radius,
-      })(Shape.fromGeometry(geometry));
-    } catch (e) {
-      console.log(JSON.stringify(geometry));
-      throw e;
-    }
+    return op({
+      length,
+      width,
+      height,
+      max,
+      min,
+      center,
+      radius,
+    })(Shape.fromGeometry(geometry));
   };
 
 Shape.registerMethod('size', size);
@@ -4269,7 +4259,12 @@ Shape.registerMethod('toolpath', toolpath);
 
 const Z$2 = 2;
 
-const top = () => (shape) => shape.size(({ max }) => max[Z$2]);
+const top = () => (shape) =>
+  shape.size(
+    ({ max }) =>
+      (shape) =>
+        max[Z$2]
+  );
 
 Shape.registerMethod('top', top);
 

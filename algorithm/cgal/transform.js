@@ -201,7 +201,6 @@ export const fromTranslateToTransform = (x = 0, y = 0, z = 0) => {
       getCgal().Transformation__translate(x, y, z)
     );
   } catch (error) {
-    console.log(`QQ/fromTranslateToTransform: ${x} ${y} ${z}`);
     throw Error(error);
   }
 };

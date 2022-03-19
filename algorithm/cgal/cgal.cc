@@ -1460,16 +1460,8 @@ void demesh(Surface_mesh& mesh) {
   CGAL::Surface_mesh_simplification::Count_stop_predicate<Surface_mesh> stop(0);
   Demesh_cost<Kernel> cost;
   Demesh_safe_placement placement;
-  if (CGAL::Polygon_mesh_processing::does_self_intersect(
-          mesh, CGAL::parameters::all_default())) {
-    std::cout << "Demesh received self intersection" << std::endl;
-  }
   CGAL::Surface_mesh_simplification::edge_collapse(
       mesh, stop, CGAL::parameters::get_cost(cost).get_placement(placement));
-  if (CGAL::Polygon_mesh_processing::does_self_intersect(
-          mesh, CGAL::parameters::all_default())) {
-    std::cout << "Demesh produced self intersection" << std::endl;
-  }
 }
 
 const Surface_mesh* DemeshSurfaceMesh(const Surface_mesh* input,
@@ -4201,7 +4193,7 @@ int Clip(Geometry* geometry, int targets) {
         break;
       }
       case GEOMETRY_SEGMENTS: {
-        // TODO: Support disjunction by PolygonsWithHoles.
+        // TODO: Support clipping segments by PolygonsWithHoles.
         std::vector<Segment> in;
         geometry->input_segments(target).swap(in);
         std::vector<Segment> out;
@@ -4232,7 +4224,7 @@ int Clip(Geometry* geometry, int targets) {
         break;
       }
       case GEOMETRY_UNKNOWN: {
-        std::cout << "Unknown type for Cut at " << target << std::endl;
+        std::cout << "Unknown type for Clip at " << target << std::endl;
         return STATUS_INVALID_INPUT;
       }
     }
@@ -4516,7 +4508,7 @@ int Join(Geometry* geometry, int targets) {
         break;
       }
       case GEOMETRY_UNKNOWN: {
-        std::cout << "Unknown type for Cut at " << target << std::endl;
+        std::cout << "Unknown type for Join at " << target << std::endl;
         return STATUS_INVALID_INPUT;
       }
     }

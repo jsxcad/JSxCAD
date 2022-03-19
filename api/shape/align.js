@@ -14,7 +14,7 @@ const roundCoordinate = ([x, y, z]) => [round(x), round(y), round(z)];
 export const align =
   (spec = 'xyz', origin = [0, 0, 0]) =>
   (shape) =>
-    shape.size(({ max, min, center }) => shape => {
+    shape.size(({ max, min, center }) => (shape) => {
       // This is producing very small deviations.
       // FIX: Try a more principled approach.
       max = roundCoordinate(max);

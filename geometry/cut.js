@@ -1,4 +1,7 @@
-import { cut as cutWithCgal, deletePendingSurfaceMeshes } from '@jsxcad/algorithm-cgal';
+import {
+  cut as cutWithCgal,
+  deletePendingSurfaceMeshes,
+} from '@jsxcad/algorithm-cgal';
 
 import { isNotTypeMasked } from './tagged/type.js';
 import { linearize } from './tagged/linearize.js';

@@ -176,7 +176,6 @@ export const fromCgalGeometry = (geometry, inputs, length = inputs.length) => {
       }
       default:
       case GEOMETRY_EMPTY: {
-        console.log(`QQ/geometry/out/empty`);
         results[nth] = { type: 'group', contents: [] };
       }
     }
