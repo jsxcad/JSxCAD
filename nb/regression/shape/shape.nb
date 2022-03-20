@@ -101,10 +101,7 @@ Box(5).cut(Arc(4.9).align('x>')).scale(1, 1).gridView();
 Box(5).cut(Arc(4.9).align('x>')).scale(-1, 1).gridView();
 
 Box(1, 2, 3)
-  .size((size, shape) => {
-    md`${JSON.stringify(size)}`;
-    return shape;
-  });
+  .size(size => shape => shape.md(`${JSON.stringify(size)}`));
 
 Box(2, 2, 2)
   .color('red')

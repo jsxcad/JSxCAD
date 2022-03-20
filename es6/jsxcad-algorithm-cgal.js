@@ -117,7 +117,7 @@ function isAbsolute(path) {
 }
 
 // posix version
-function join() {
+function join$1() {
   var paths = Array.prototype.slice.call(arguments, 0);
   return normalize(filter(paths, function(p, index) {
     if (typeof p !== 'string') {
@@ -212,7 +212,7 @@ var _require_path_ = {
   sep: sep,
   delimiter: delimiter,
   relative: relative,
-  join: join,
+  join: join$1,
   isAbsolute: isAbsolute,
   normalize: normalize,
   resolve: resolve
@@ -1232,61 +1232,6 @@ const toSurfaceMesh = (graph) => {
   return surfaceMesh;
 };
 
-class ErrorZeroThickness extends Error {}
-
-const clipSurfaceMeshes = (targetMeshes, targetSegments, sources) => {
-  try {
-    const clippedMeshes = [];
-    const clippedSegments = [];
-    let nthSegments;
-    const status = getCgal().ClipSurfaceMeshes(
-      targetMeshes.length,
-      (nth) => targetMeshes[nth].mesh,
-      (nth) => toCgalTransformFromJsTransform(targetMeshes[nth].matrix),
-      targetSegments.length,
-      (nth, segmentProcessor) => {
-        nthSegments = nth;
-        const { segments, tags } = targetSegments[nth];
-        clippedSegments[nth] = { tags, segments: [] };
-        for (const [source, target] of segments) {
-          const [sourceX, sourceY, sourceZ] = source;
-          const [targetX, targetY, targetZ] = target;
-          segmentProcessor.clip(
-            sourceX,
-            sourceY,
-            sourceZ,
-            targetX,
-            targetY,
-            targetZ
-          );
-        }
-      },
-      sources.length,
-      (nth) => sources[nth].mesh,
-      (nth) => toCgalTransformFromJsTransform(sources[nth].matrix),
-      (nth, mesh) => {
-        mesh.provenance = 'clip';
-        const { matrix, tags } = targetMeshes[nth];
-        clippedMeshes[nth] = { matrix, mesh, tags };
-      },
-      (sourceX, sourceY, sourceZ, targetX, targetY, targetZ) => {
-        const source = [sourceX, sourceY, sourceZ];
-        const target = [targetX, targetY, targetZ];
-        clippedSegments[nthSegments].segments.push([source, target]);
-      }
-    );
-    if (status === STATUS_ZERO_THICKNESS) {
-      throw new ErrorZeroThickness('Zero thickness produced by clip');
-    }
-    if (status !== STATUS_OK) {
-      throw new Error(`Unexpected status ${status}`);
-    }
-    return { clippedMeshes, clippedSegments };
-  } catch (error) {
-    throw Error(error);
-  }
-};
-
 const fromSurfaceMeshToLazyGraph = (mesh) => {
   try {
     const c = getCgal();
@@ -1322,6 +1267,8 @@ const GEOMETRY_UNKNOWN = 0;
 const GEOMETRY_MESH = 1;
 const GEOMETRY_POLYGONS_WITH_HOLES = 2;
 const GEOMETRY_SEGMENTS = 3;
+// const GEOMETRY_POINTS = 4;
+const GEOMETRY_EMPTY = 5;
 
 const X$1 = 0;
 const Y$1 = 1;
@@ -1487,9 +1434,9 @@ const fromCgalGeometry = (geometry, inputs, length = inputs.length) => {
         });
         break;
       }
-      default: {
-        const { matrix, tags } = inputs[nth];
-        results[nth] = { type: 'group', tags, matrix, contents: [] };
+      default:
+      case GEOMETRY_EMPTY: {
+        results[nth] = { type: 'group', contents: [] };
       }
     }
   }
@@ -1501,8 +1448,78 @@ const withCgalGeometry = (inputs, op) => {
   const cgalGeometry = toCgalGeometry(inputs, g);
   try {
     return op(cgalGeometry, g);
+  } catch (error) {
+    throw Error(error);
   } finally {
     cgalGeometry.delete();
+  }
+};
+
+class ErrorZeroThickness extends Error {}
+
+const clip = (inputs, targetsLength) =>
+  withCgalGeometry(inputs, (cgalGeometry, g) => {
+    const status = g.Clip(cgalGeometry, targetsLength);
+    switch (status) {
+      case STATUS_ZERO_THICKNESS:
+        throw new ErrorZeroThickness('Zero thickness produced by clip');
+      case STATUS_OK:
+        return fromCgalGeometry(cgalGeometry, inputs, targetsLength);
+      default:
+        throw new Error(`Unexpected status ${status}`);
+    }
+  });
+
+const clipSurfaceMeshes = (targetMeshes, targetSegments, sources) => {
+  try {
+    const clippedMeshes = [];
+    const clippedSegments = [];
+    let nthSegments;
+    const status = getCgal().ClipSurfaceMeshes(
+      targetMeshes.length,
+      (nth) => targetMeshes[nth].mesh,
+      (nth) => toCgalTransformFromJsTransform(targetMeshes[nth].matrix),
+      targetSegments.length,
+      (nth, segmentProcessor) => {
+        nthSegments = nth;
+        const { segments, tags } = targetSegments[nth];
+        clippedSegments[nth] = { tags, segments: [] };
+        for (const [source, target] of segments) {
+          const [sourceX, sourceY, sourceZ] = source;
+          const [targetX, targetY, targetZ] = target;
+          segmentProcessor.clip(
+            sourceX,
+            sourceY,
+            sourceZ,
+            targetX,
+            targetY,
+            targetZ
+          );
+        }
+      },
+      sources.length,
+      (nth) => sources[nth].mesh,
+      (nth) => toCgalTransformFromJsTransform(sources[nth].matrix),
+      (nth, mesh) => {
+        mesh.provenance = 'clip';
+        const { matrix, tags } = targetMeshes[nth];
+        clippedMeshes[nth] = { matrix, mesh, tags };
+      },
+      (sourceX, sourceY, sourceZ, targetX, targetY, targetZ) => {
+        const source = [sourceX, sourceY, sourceZ];
+        const target = [targetX, targetY, targetZ];
+        clippedSegments[nthSegments].segments.push([source, target]);
+      }
+    );
+    if (status === STATUS_ZERO_THICKNESS) {
+      throw new ErrorZeroThickness('Zero thickness produced by clip');
+    }
+    if (status !== STATUS_OK) {
+      throw new Error(`Unexpected status ${status}`);
+    }
+    return { clippedMeshes, clippedSegments };
+  } catch (error) {
+    throw Error(error);
   }
 };
 
@@ -1557,7 +1574,7 @@ const cut = (inputs, targetsLength) =>
     const status = g.Cut(cgalGeometry, targetsLength);
     switch (status) {
       case STATUS_ZERO_THICKNESS:
-        throw new ErrorZeroThickness('Zero thickness produced by disjoint');
+        throw new ErrorZeroThickness('Zero thickness produced by cut');
       case STATUS_OK:
         return fromCgalGeometry(cgalGeometry, inputs, targetsLength);
       default:
@@ -2365,6 +2382,19 @@ const isotropicRemeshingOfSurfaceMesh = (
   }
 };
 
+const join = (inputs, targetsLength) =>
+  withCgalGeometry(inputs, (cgalGeometry, g) => {
+    const status = g.Join(cgalGeometry, targetsLength);
+    switch (status) {
+      case STATUS_ZERO_THICKNESS:
+        throw new ErrorZeroThickness('Zero thickness produced by join');
+      case STATUS_OK:
+        return fromCgalGeometry(cgalGeometry, inputs, targetsLength);
+      default:
+        throw new Error(`Unexpected status ${status}`);
+    }
+  });
+
 const joinSurfaceMeshes = (targets, sources) => {
   try {
     const joinedMeshes = [];
@@ -2896,4 +2926,4 @@ const wireframeSurfaceMesh = (mesh, transform) => {
   }
 };
 
-export { STATUS_EMPTY, STATUS_OK, STATUS_UNCHANGED, STATUS_ZERO_THICKNESS, SurfaceMeshQuery, approximateSurfaceMesh, arrangePaths, arrangePathsIntoTriangles, arrangePolygonsWithHoles, arrangeSegments, arrangeSegmentsIntoTriangles, bendSurfaceMesh, blessed, clipSurfaceMeshes, composeTransforms, computeArea, computeCentroidOfSurfaceMesh, computeNormalOfSurfaceMesh, computeVolume, cut, cutOutOfSurfaceMeshes, cutSurfaceMeshes, deformSurfaceMesh, deletePendingSurfaceMeshes, deleteSurfaceMesh, demeshSurfaceMesh, deserializeSurfaceMesh, disjoint, doesSelfIntersectOfSurfaceMesh, eachPointOfSurfaceMesh, extrudeSurfaceMesh, extrudeToPlaneOfSurfaceMesh, fitPlaneToPoints, fromExactToCgalTransform, fromFunctionToSurfaceMesh, fromGraphToSurfaceMesh, fromIdentityToCgalTransform, fromPointsToAlphaShape2AsPolygonSegments, fromPointsToAlphaShapeAsSurfaceMesh, fromPointsToConvexHullAsSurfaceMesh, fromPointsToSurfaceMesh, fromPolygonsToSurfaceMesh, fromRotateXToTransform, fromRotateYToTransform, fromRotateZToTransform, fromScaleToTransform, fromSegmentToInverseTransform, fromSurfaceMesh, fromSurfaceMeshEmitBoundingBox, fromSurfaceMeshToGraph, fromSurfaceMeshToLazyGraph, fromSurfaceMeshToPolygons, fromSurfaceMeshToPolygonsWithHoles, fromSurfaceMeshToTriangles, fromTranslateToTransform, fuseSurfaceMeshes, generatePackingEnvelopeForSurfaceMesh, generateUpperEnvelopeForSurfaceMesh, graphSymbol, growSurfaceMesh, identity, initCgal, insetOfPolygonWithHoles, invertTransform, isotropicRemeshingOfSurfaceMesh, joinSurfaceMeshes, loftBetweenCongruentSurfaceMeshes, loftBetweenSurfaceMeshes, matrix6, minkowskiDifferenceOfSurfaceMeshes, minkowskiShellOfSurfaceMeshes, minkowskiSumOfSurfaceMeshes, offsetOfPolygonWithHoles, outlineSurfaceMesh, projectToPlaneOfSurfaceMesh, pushSurfaceMesh, remeshSurfaceMesh, removeSelfIntersectionsOfSurfaceMesh, reverseFaceOrientationsOfSurfaceMesh, sectionOfSurfaceMesh, separateSurfaceMesh, serializeSurfaceMesh, simplifySurfaceMesh, smoothShapeOfSurfaceMesh, smoothSurfaceMesh, subdivideSurfaceMesh, surfaceMeshSymbol, taperSurfaceMesh, toCgalTransformFromJsTransform, toSurfaceMesh, transformSurfaceMesh, twistSurfaceMesh, wireframeSurfaceMesh };
+export { STATUS_EMPTY, STATUS_OK, STATUS_UNCHANGED, STATUS_ZERO_THICKNESS, SurfaceMeshQuery, approximateSurfaceMesh, arrangePaths, arrangePathsIntoTriangles, arrangePolygonsWithHoles, arrangeSegments, arrangeSegmentsIntoTriangles, bendSurfaceMesh, blessed, clip, clipSurfaceMeshes, composeTransforms, computeArea, computeCentroidOfSurfaceMesh, computeNormalOfSurfaceMesh, computeVolume, cut, cutOutOfSurfaceMeshes, cutSurfaceMeshes, deformSurfaceMesh, deletePendingSurfaceMeshes, deleteSurfaceMesh, demeshSurfaceMesh, deserializeSurfaceMesh, disjoint, doesSelfIntersectOfSurfaceMesh, eachPointOfSurfaceMesh, extrudeSurfaceMesh, extrudeToPlaneOfSurfaceMesh, fitPlaneToPoints, fromExactToCgalTransform, fromFunctionToSurfaceMesh, fromGraphToSurfaceMesh, fromIdentityToCgalTransform, fromPointsToAlphaShape2AsPolygonSegments, fromPointsToAlphaShapeAsSurfaceMesh, fromPointsToConvexHullAsSurfaceMesh, fromPointsToSurfaceMesh, fromPolygonsToSurfaceMesh, fromRotateXToTransform, fromRotateYToTransform, fromRotateZToTransform, fromScaleToTransform, fromSegmentToInverseTransform, fromSurfaceMesh, fromSurfaceMeshEmitBoundingBox, fromSurfaceMeshToGraph, fromSurfaceMeshToLazyGraph, fromSurfaceMeshToPolygons, fromSurfaceMeshToPolygonsWithHoles, fromSurfaceMeshToTriangles, fromTranslateToTransform, fuseSurfaceMeshes, generatePackingEnvelopeForSurfaceMesh, generateUpperEnvelopeForSurfaceMesh, graphSymbol, growSurfaceMesh, identity, initCgal, insetOfPolygonWithHoles, invertTransform, isotropicRemeshingOfSurfaceMesh, join, joinSurfaceMeshes, loftBetweenCongruentSurfaceMeshes, loftBetweenSurfaceMeshes, matrix6, minkowskiDifferenceOfSurfaceMeshes, minkowskiShellOfSurfaceMeshes, minkowskiSumOfSurfaceMeshes, offsetOfPolygonWithHoles, outlineSurfaceMesh, projectToPlaneOfSurfaceMesh, pushSurfaceMesh, remeshSurfaceMesh, removeSelfIntersectionsOfSurfaceMesh, reverseFaceOrientationsOfSurfaceMesh, sectionOfSurfaceMesh, separateSurfaceMesh, serializeSurfaceMesh, simplifySurfaceMesh, smoothShapeOfSurfaceMesh, smoothSurfaceMesh, subdivideSurfaceMesh, surfaceMeshSymbol, taperSurfaceMesh, toCgalTransformFromJsTransform, toSurfaceMesh, transformSurfaceMesh, twistSurfaceMesh, wireframeSurfaceMesh };

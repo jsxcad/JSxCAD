@@ -10,6 +10,12 @@ export const measureBoundingBox = (geometry) => {
       geometry.cache = {};
     }
     const { graph } = geometry;
+    if (graph.isEmpty) {
+      return [
+        [Infinity, Infinity, Infinity],
+        [-Infinity, -Infinity, -Infinity],
+      ];
+    }
     fromSurfaceMeshEmitBoundingBox(
       toSurfaceMesh(graph),
       geometry.matrix,

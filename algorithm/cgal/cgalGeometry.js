@@ -7,6 +7,8 @@ const GEOMETRY_UNKNOWN = 0;
 const GEOMETRY_MESH = 1;
 const GEOMETRY_POLYGONS_WITH_HOLES = 2;
 const GEOMETRY_SEGMENTS = 3;
+// const GEOMETRY_POINTS = 4;
+const GEOMETRY_EMPTY = 5;
 
 const X = 0;
 const Y = 1;
@@ -172,9 +174,9 @@ export const fromCgalGeometry = (geometry, inputs, length = inputs.length) => {
         });
         break;
       }
-      default: {
-        const { matrix, tags } = inputs[nth];
-        results[nth] = { type: 'group', tags, matrix, contents: [] };
+      default:
+      case GEOMETRY_EMPTY: {
+        results[nth] = { type: 'group', contents: [] };
       }
     }
   }
@@ -186,6 +188,8 @@ export const withCgalGeometry = (inputs, op) => {
   const cgalGeometry = toCgalGeometry(inputs, g);
   try {
     return op(cgalGeometry, g);
+  } catch (error) {
+    throw Error(error);
   } finally {
     cgalGeometry.delete();
   }
