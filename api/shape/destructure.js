@@ -54,3 +54,5 @@ export const destructure = (
     value,
   };
 };
+
+Shape.destructure = destructure;

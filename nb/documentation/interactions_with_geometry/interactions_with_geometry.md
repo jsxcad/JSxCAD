@@ -196,7 +196,7 @@ Once a shape is remeshed it can be twisted or bent about the origin.
 
 ```JavaScript
 Box(157, 20).ez(1).y(25)
-  .remesh({ method: 'edgeLength', lengths: [10, 8, 4] })
+  .remesh(10)
   .op(s => s.bend(25).and(s.outline()))
   .gridView()
   .md('A rectangle bent into a ring with a central radius of 25');

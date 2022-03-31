@@ -10,6 +10,7 @@ const segments = (geometry) => hasTypeWire(geometry);
 
 const polygonsWithHoles = (geometry) => {
   const segments = [];
+  // This is wrong -- it should project into 3d.
   for (const polygon of geometry.polygonsWithHoles) {
     let last = polygon.points[polygon.points.length - 1];
     for (const point of polygon.points) {

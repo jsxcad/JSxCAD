@@ -149,6 +149,8 @@ export const getFrom = (geometry) => find(geometry, 'from', [0, 0, 0]);
 export const getMatrix = (geometry) => geometry.matrix || identityMatrix;
 export const getTo = (geometry) => find(geometry, 'to', [0, 0, 1]);
 export const getUp = (geometry) => find(geometry, 'up', [0, -1, 0]);
+export const getZag = (geometry, otherwise = defaultZag) =>
+  find(geometry, 'zag', otherwise);
 
 const defaultZag = 0.01;
 

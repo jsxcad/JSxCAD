@@ -17,3 +17,5 @@ export const Cached = (name, thunk) => {
   };
   return op;
 };
+
+export default Cached;

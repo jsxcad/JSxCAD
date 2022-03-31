@@ -1,10 +1,12 @@
-import { fromPolygonsWithHoles as fromPolygonsWithHolesToGraph } from '../graph/fromPolygonsWithHoles.js';
-import { rewrite } from './visit.js';
-import { taggedSegments } from './taggedSegments.js';
-import { transform as transformPaths } from '../paths/transform.js';
-import { transform as transformPoints } from '../points/ops.js';
-import { transform as transformVec3 } from '@jsxcad/math-vec3';
+// import { rewrite } from './visit.js';
+// import { taggedSegments } from './taggedSegments.js';
+// import { transform as transformPaths } from '../paths/transform.js';
+// import { transform as transformPoints } from '../points/ops.js';
+// import { transform as transformVec3 } from '@jsxcad/math-vec3';
 
+export const toTransformedGeometry = (geometry) => geometry;
+
+/*
 const transformedGeometry = Symbol('transformedGeometry');
 
 export const clearTransformedGeometry = (geometry) => {
@@ -62,24 +64,17 @@ export const toTransformedGeometry = (geometry) => {
         case 'plan':
           return descend();
         // Leaf
-        case 'polygonsWithHoles':
-          return fromPolygonsWithHolesToGraph(geometry);
-        case 'segments':
-          return transformSegments(geometry);
         case 'paths':
           return descend({
             paths: transformPaths(geometry.matrix, geometry.paths),
             matrix: undefined,
           });
         case 'points':
-          return descend({
-            points: transformPoints(geometry.matrix, geometry.points),
-            matrix: undefined,
-          });
-        // These don't need a transformed version.
         case 'triangles':
         case 'toolpath':
         case 'graph':
+        case 'polygonsWithHoles':
+        case 'segments':
           return geometry;
         default:
           throw Error(
@@ -93,3 +88,4 @@ export const toTransformedGeometry = (geometry) => {
   }
   return geometry[transformedGeometry];
 };
+*/

@@ -133,7 +133,6 @@ const planetaryDesign3 = planetaryDesign2
 
 const planetaryDesign4a =
     solar
-      .log()
       .ez(-2);
 
 const planetaryDesign4b = planetaryDesign4a

@@ -35,7 +35,7 @@ const toSegments = ({ curveSegments, tolerance = 0.01 }, svgPath) => {
       case 'M': {
         newPath();
         const [x, y] = args;
-        appendPoint([x, y]);
+        appendPoint([x, y, 0]);
         break;
       }
       case 'C': {
@@ -51,7 +51,7 @@ const toSegments = ({ curveSegments, tolerance = 0.01 }, svgPath) => {
           ]
         );
         for (const [x, y] of simplifyPath(path, tolerance)) {
-          appendPoint([x, y]);
+          appendPoint([x, y, 0]);
         }
         break;
       }

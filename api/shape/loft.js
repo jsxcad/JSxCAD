@@ -2,13 +2,13 @@ import Shape from './Shape.js';
 import { loft as loftGeometry } from '@jsxcad/geometry';
 
 export const loft =
-  (...ops) =>
+  (...shapes) =>
   (shape) =>
     Shape.fromGeometry(
-      loftGeometry(
-        /* closed= */ false,
-        ...shape.toFlatValues(ops).map((shape) => shape.toGeometry())
-      )
+      loftGeometry([
+        shape.toGeometry(),
+        ...shape.toShapes(shapes).map((shape) => shape.toGeometry()),
+      ])
     );
 
 Shape.registerMethod('loft', loft);

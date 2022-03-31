@@ -23,6 +23,7 @@ export {
   arrangeSegments,
   arrangeSegmentsIntoTriangles,
 } from './arrangeSegments.js';
+export { bend } from './bend.js';
 export { bendSurfaceMesh } from './bendSurfaceMesh.js';
 export {
   STATUS_OK,
@@ -32,11 +33,13 @@ export {
 } from './status.js';
 export { deletePendingSurfaceMeshes, toSurfaceMesh } from './toSurfaceMesh.js';
 export { graphSymbol, surfaceMeshSymbol } from './symbols.js';
+export { cast } from './cast.js';
 export { clip } from './clip.js';
 export { clipSurfaceMeshes } from './clipSurfaceMeshes.js';
 export { computeArea } from './computeArea.js';
 export { computeVolume } from './computeVolume.js';
 export { computeCentroidOfSurfaceMesh } from './computeCentroidOfSurfaceMesh.js';
+export { computeNormal } from './computeNormal.js';
 export { computeNormalOfSurfaceMesh } from './computeNormalOfSurfaceMesh.js';
 export { cut } from './cut.js';
 export { cutOutOfSurfaceMeshes } from './cutOutOfSurfaceMeshes.js';
@@ -48,8 +51,10 @@ export { deserializeSurfaceMesh } from './deserializeSurfaceMesh.js';
 export { disjoint } from './disjoint.js';
 export { doesSelfIntersectOfSurfaceMesh } from './doesSelfIntersectOfSurfaceMesh.js';
 export { eachPointOfSurfaceMesh } from './eachPointOfSurfaceMesh.js';
+export { extrude } from './extrude.js';
 export { extrudeSurfaceMesh } from './extrudeSurfaceMesh.js';
 export { extrudeToPlaneOfSurfaceMesh } from './extrudeToPlaneOfSurfaceMesh.js';
+export { fill } from './fill.js';
 export { fitPlaneToPoints } from './fitPlaneToPoints.js';
 export { fromFunctionToSurfaceMesh } from './fromFunctionToSurfaceMesh.js';
 export { fromGraphToSurfaceMesh } from './fromGraphToSurfaceMesh.js';
@@ -65,19 +70,27 @@ export { fromSurfaceMeshToLazyGraph } from './fromSurfaceMeshToLazyGraph.js';
 export { fromSurfaceMeshToPolygons } from './fromSurfaceMeshToPolygons.js';
 export { fromSurfaceMeshToPolygonsWithHoles } from './fromSurfaceMeshToPolygonsWithHoles.js';
 export { fromSurfaceMeshToTriangles } from './fromSurfaceMeshToTriangles.js';
+export { fuse } from './fuse.js';
 export { fuseSurfaceMeshes } from './fuseSurfaceMeshes.js';
 export { generatePackingEnvelopeForSurfaceMesh } from './generatePackingEnvelopeForSurfaceMesh.js';
 export { generateUpperEnvelopeForSurfaceMesh } from './generateUpperEnvelopeForSurfaceMesh.js';
+export { grow } from './grow.js';
 export { growSurfaceMesh } from './growSurfaceMesh.js';
 export { initCgal } from './getCgal.js';
+export { inset } from './inset.js';
 export { insetOfPolygonWithHoles } from './insetOfPolygonWithHoles.js';
 export { isotropicRemeshingOfSurfaceMesh } from './isotropicRemeshingOfSurfaceMesh.js';
 export { join } from './join.js';
 export { joinSurfaceMeshes } from './joinSurfaceMeshes.js';
+export { link } from './link.js';
+export { loft } from './loft.js';
 export { loftBetweenCongruentSurfaceMeshes } from './loftBetweenCongruentSurfaceMeshes.js';
 export { loftBetweenSurfaceMeshes } from './loftBetweenSurfaceMeshes.js';
+export { offset } from './offset.js';
 export { offsetOfPolygonWithHoles } from './offsetOfPolygonWithHoles.js';
+export { outline } from './outline.js';
 export { outlineSurfaceMesh } from './outlineSurfaceMesh.js';
+export { makeUnitSphere } from './makeUnitSphere.js';
 export { minkowskiDifferenceOfSurfaceMeshes } from './minkowskiDifferenceOfSurfaceMeshes.js';
 export { minkowskiShellOfSurfaceMeshes } from './minkowskiShellOfSurfaceMeshes.js';
 export { minkowskiSumOfSurfaceMeshes } from './minkowskiSumOfSurfaceMeshes.js';
@@ -86,6 +99,7 @@ export { pushSurfaceMesh } from './pushSurfaceMesh.js';
 export { remeshSurfaceMesh } from './remeshSurfaceMesh.js';
 export { removeSelfIntersectionsOfSurfaceMesh } from './removeSelfIntersectionsOfSurfaceMesh.js';
 export { reverseFaceOrientationsOfSurfaceMesh } from './reverseFaceOrientationsOfSurfaceMesh.js';
+export { section } from './section.js';
 export { sectionOfSurfaceMesh } from './sectionOfSurfaceMesh.js';
 export { separateSurfaceMesh } from './separateSurfaceMesh.js';
 export { simplifySurfaceMesh } from './simplifySurfaceMesh.js';

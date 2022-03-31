@@ -41,7 +41,7 @@ export const soup = (
       case 'polygons':
         return show(toTrianglesFromPolygonsWithHoles(geometry));
       case 'polygonsWithHoles':
-        return show(toTrianglesFromPolygonsWithHoles(geometry));
+        return show(geometry);
       case 'segments':
       case 'triangles':
       case 'points':

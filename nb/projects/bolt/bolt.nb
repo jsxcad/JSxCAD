@@ -16,11 +16,7 @@ export const ScrewThreadSegmentBuilder = Cached('nb/projects/bolt/bolt.nb/ScrewT
     .y(diameter / -2)
     .ry(1 / 4)
     .loft(
-      seq((t) => (s) => s.rz(t).z(pitch * t * 1.001), {
-        from: -1,
-        by: 1 / 32,
-        to: 1,
-      })
+      seq({ from: -1, by: 1 / 32, to: 1 }, (t) => (s) => s.rz(t).z(pitch * t * 1.001), Group)
     )
     .scale(1, 1, turn === 'right' ? 1 : -1)
     .grow(-play)

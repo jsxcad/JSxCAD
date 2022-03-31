@@ -1,3 +1,4 @@
+import Point from './Point.js';
 import Shape from './Shape.js';
 import { extrude as extrudeGeometry } from '@jsxcad/geometry';
 import { normal } from './normal.js';
@@ -5,6 +6,7 @@ import { normal } from './normal.js';
 export const extrudeAlong =
   (direction, ...extents) =>
   (shape) => {
+    const vector = shape.toCoordinate(direction);
     const heights = extents.map((extent) => Shape.toValue(extent, shape));
     if (heights.length % 2 === 1) {
       heights.push(0);
@@ -16,14 +18,15 @@ export const extrudeAlong =
       const depth = heights.pop();
       if (height === depth) {
         // Return unextruded geometry at this height, instead.
-        // FIX: Should be along direction, not z.
-        extrusions.push(shape.z(height));
+        extrusions.push(shape.moveAlong(vector, height));
         continue;
       }
       extrusions.push(
         Shape.fromGeometry(
-          extrudeGeometry(shape.toGeometry(), height, depth, (geometry) =>
-            Shape.fromGeometry(geometry).toShape(direction, shape).toGeometry()
+          extrudeGeometry(
+            shape.toGeometry(),
+            Point().moveAlong(vector, height).toGeometry(),
+            Point().moveAlong(vector, depth).toGeometry()
           )
         )
       );

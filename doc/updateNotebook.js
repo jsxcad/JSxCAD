@@ -140,7 +140,7 @@ export const updateNotebook = async (
     await resolvePending();
     const { html, encodedNotebook } = await toHtml(notebook, {
       module,
-      modulePath: 'https://jsxcad.js.org/alpha',
+      modulePath: 'http://127.0.0.1:5001',
     });
     writeFileSync(`${target}.html`, html);
     const { imageUrlList } = await screenshot(

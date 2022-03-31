@@ -1,16 +1,13 @@
-import {
-  arrangePolygonsWithHoles,
-  fromPolygonsWithHolesToTriangles,
-  fromTrianglesToGraph,
-  taggedGroup,
-  toPolygonsWithHoles,
-} from '@jsxcad/geometry';
+// import { arrangePolygonsWithHoles, fromPolygonsWithHolesToTriangles, fromTrianglesToGraph, taggedGroup, toPolygonsWithHoles, } from '@jsxcad/geometry';
 
+import Group from './Group.js';
 import Shape from './Shape.js';
 
 export const weld =
   (...rest) =>
   (first) => {
+    return Group(first, ...rest).fill();
+/*
     const unwelded = [];
     for (const shape of [first, ...rest]) {
       // We lose the tags at this point.
@@ -29,6 +26,7 @@ export const weld =
     }
     // A group of planar welds.
     return Shape.fromGeometry(taggedGroup({}, ...welds));
+*/
   };
 
 Shape.registerMethod('weld', weld);

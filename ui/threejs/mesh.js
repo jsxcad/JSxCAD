@@ -9,8 +9,12 @@ import {
   LineSegments,
   Matrix4,
   Mesh,
+  Path,
   Points,
   PointsMaterial,
+  Quaternion,
+  Shape,
+  ShapeGeometry,
   Vector2,
   Vector3,
   VertexColors,
@@ -407,6 +411,57 @@ export const buildMeshes = async ({
         mesh.add(outline);
       }
 
+      scene.add(mesh);
+      break;
+    }
+    case 'polygonsWithHoles': {
+      const normal = new Vector3(
+        geometry.plane[0],
+        geometry.plane[1],
+        geometry.plane[2]
+      ).normalize();
+      const baseNormal = new Vector3(0, 0, 1);
+      const quaternion = new Quaternion().setFromUnitVectors(
+        normal,
+        baseNormal
+      );
+      mesh = new Group();
+      for (const { points, holes } of geometry.polygonsWithHoles) {
+        const boundaryPoints = [];
+        for (const point of points) {
+          boundaryPoints.push(
+            new Vector3(point[0], point[1], point[2]).applyQuaternion(
+              quaternion
+            )
+          );
+        }
+        const shape = new Shape(boundaryPoints);
+        for (const { points } of holes) {
+          const holePoints = [];
+          for (const point of points) {
+            holePoints.push(
+              new Vector3(point[0], point[1], point[2]).applyQuaternion(
+                quaternion
+              )
+            );
+          }
+          shape.holes.push(new Path(holePoints));
+        }
+        const shapeGeometry = new ShapeGeometry(shape);
+        const material = await buildMeshMaterial(definitions, tags);
+        mesh.add(new Mesh(shapeGeometry, material));
+        {
+          const edges = new EdgesGeometry(shapeGeometry);
+          const outline = new LineSegments(
+            edges,
+            new LineBasicMaterial({ color: 0x000000 })
+          );
+          outline.userData.isOutline = true;
+          outline.userData.hasShowOutline = tags.includes('show:outline');
+          outline.visible = outline.userData.hasShowOutline;
+          mesh.add(outline);
+        }
+      }
       scene.add(mesh);
       break;
     }

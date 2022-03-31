@@ -5,9 +5,9 @@ import { seq } from './seq.js';
 
 export const Spiral = (
   toPathFromTurn = (turn) => [[turn]],
-  { from, by, to, upto, downto } = {}
+  { from, by, to, upto, downto, close = false } = {}
 ) => {
-  let path = [null];
+  let path = [];
   for (const turn of seq(
     {
       from,
@@ -23,7 +23,21 @@ export const Spiral = (
     const subpath = toPathFromTurn(turn);
     path = concatenatePath(path, rotateZPath(radians, subpath));
   }
-  return Shape.fromPath(path);
+  const segments = [];
+  let last;
+  if (!path[0]) {
+    path.shift();
+  }
+  for (const point of path) {
+    if (last) {
+      segments.push([last, point]);
+    }
+    last = point;
+  }
+  if (last && close) {
+    segments.push([last, path[0]]);
+  }
+  return Shape.fromSegments(segments);
 };
 
 export default Spiral;

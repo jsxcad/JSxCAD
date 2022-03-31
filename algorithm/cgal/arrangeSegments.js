@@ -52,7 +52,7 @@ export const arrangeSegments = (
         emitPoint
       );
     } else {
-      const [x, y, z, w] = plane;
+      const [x, y, z, w] = plane || [0, 0, 1, 0];
       c.ArrangePathsApproximate(
         x,
         y,

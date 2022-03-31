@@ -1,45 +1,29 @@
-import { getScale, getSides } from './Plan.js';
+import { getScale, getZag } from './Plan.js';
 
-import Arc from './Arc.js';
+import Cached from './Cached.js';
 import Shape from './Shape.js';
+import { makeUnitSphere as makeUnitSphereWithCgal } from '@jsxcad/algorithm-cgal';
 import { taggedPlan } from '@jsxcad/geometry';
 
-// Approximates a UV sphere.
-const extrudeSphere =
-  (height = 1, { sides = 20 } = {}) =>
-  (shape) => {
-    const lofts = [];
+// 1mm seems reasonable for spheres.
+const DEFAULT_ORB_ZAG = 1;
 
-    const getEffectiveSlice = (slice) => {
-      if (slice === 0) {
-        return 0.5;
-      } else if (slice === latitudinalResolution) {
-        return latitudinalResolution - 0.5;
-      } else {
-        return slice;
-      }
-    };
-
-    const latitudinalResolution = sides;
-
-    for (let slice = 0; slice <= latitudinalResolution; slice++) {
-      const angle =
-        (Math.PI * 1.0 * getEffectiveSlice(slice)) / latitudinalResolution;
-      const z = Math.cos(angle);
-      const radius = Math.sin(angle);
-      lofts.push((s) => s.scale(radius, radius, 1).z(z * height));
-    }
-    return shape.loft(...lofts.reverse());
-  };
-
-Shape.registerMethod('extrudeSphere', extrudeSphere);
+const makeUnitSphere = Cached('orb', (tolerance) =>
+  Shape.fromGeometry(
+    makeUnitSphereWithCgal(/* angularBound= */ 30, tolerance, tolerance)
+  )
+);
 
 Shape.registerReifier('Orb', (geometry) => {
   const [scale, middle] = getScale(geometry);
-  const sides = getSides(geometry, 16);
-  return extrudeSphere(1, { sides: 2 + sides })(Arc(2).hasSides(sides * 2))
-    .scale(scale)
-    .move(middle);
+  const radius = Math.max(...scale);
+
+  // const angularBound = 30;
+  // const radiusBound = getZag(geometry, DEFAULT_ORB_ZAG) / radius;
+  // const distanceBound = getZag(geometry, DEFAULT_ORB_ZAG) / radius;
+  const tolerance = getZag(geometry, DEFAULT_ORB_ZAG) / radius;
+
+  return makeUnitSphere(tolerance).scale(scale).move(middle);
 });
 
 export const Orb = (x = 1, y = x, z = x) =>

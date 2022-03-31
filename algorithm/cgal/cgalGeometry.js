@@ -1,18 +1,15 @@
+import { toCgalTransformFromJsTransform, toJsTransformFromCgalTransform } from './transform.js';
+
 import { fromSurfaceMesh } from './fromSurfaceMesh.js';
 import { getCgal } from './getCgal.js';
-import { toCgalTransformFromJsTransform } from './transform.js';
 import { toSurfaceMesh } from './toSurfaceMesh.js';
 
 const GEOMETRY_UNKNOWN = 0;
 const GEOMETRY_MESH = 1;
 const GEOMETRY_POLYGONS_WITH_HOLES = 2;
 const GEOMETRY_SEGMENTS = 3;
-// const GEOMETRY_POINTS = 4;
+const GEOMETRY_POINTS = 4;
 const GEOMETRY_EMPTY = 5;
-
-const X = 0;
-const Y = 1;
-const Z = 2;
 
 export const fillCgalGeometry = (geometry, inputs) => {
   const g = getCgal();
@@ -48,12 +45,12 @@ export const fillCgalGeometry = (geometry, inputs) => {
               return false;
             }
             if (polygon.exactPoints) {
-              for (const [x, y, z] of polygon.exactPoints) {
-                g.addExactPoint(boundaryToFill, x, y, z);
+              for (const [x, y] of polygon.exactPoints) {
+                boundaryToFill.addExact(x, y);
               }
             } else {
-              for (const [x, y, z] of polygon.points) {
-                g.addPoint(boundaryToFill, x, y, z);
+              for (const [x, y] of polygon.points) {
+                boundaryToFill.add(x, y);
               }
             }
             return true;
@@ -68,12 +65,12 @@ export const fillCgalGeometry = (geometry, inputs) => {
               return false;
             }
             if (hole.exactPoints) {
-              for (const [x, y, z] of hole.exactPoints) {
-                g.addExactPoint(holeToFill, x, y, z);
+              for (const [x, y] of hole.exactPoints) {
+                holeToFill.addExact(x, y);
               }
             } else {
-              for (const [x, y, z] of hole.points) {
-                g.addPoint(holeToFill, x, y, z);
+              for (const [x, y] of hole.points) {
+                holeToFill.add(x, y);
               }
             }
             return true;
@@ -83,8 +80,25 @@ export const fillCgalGeometry = (geometry, inputs) => {
       }
       case 'segments': {
         geometry.setType(nth, GEOMETRY_SEGMENTS);
-        for (const [start, end] of inputs[nth].segments) {
-          geometry.addInputSegment(nth, start[X], start[Y], start[Z], end[X], end[Y], end[Z]);
+        for (const [[sX = 0, sY = 0, sZ = 0], [eX = 0, eY = 0, eZ = 0]] of inputs[nth].segments) {
+          try {
+            geometry.addInputSegment(nth, sX, sY, sZ, eX, eY, eZ);
+          } catch (error) {
+            throw error;
+          }
+        }
+        break;
+      }
+      case 'points': {
+        geometry.setType(nth, GEOMETRY_POINTS);
+        if (geometry.exactPoints) {
+          for (const [x, y, z] of geometry.exactPoints) {
+            geometry.addInputPointExact(x, y, z);
+          }
+        } else {
+          for (const [x, y, z] of geometry.points) {
+            geometry.addInputPoint(x, y, z);
+          }
         }
         break;
       }
@@ -103,14 +117,15 @@ export const toCgalGeometry = (inputs, g = getCgal()) => {
   return cgalGeometry;
 };
 
-export const fromCgalGeometry = (geometry, inputs, length = inputs.length) => {
+export const fromCgalGeometry = (geometry, inputs, length = inputs.length, start = 0) => {
   const results = [];
-  for (let nth = 0; nth < length; nth++) {
+  for (let nth = start; nth < length; nth++) {
     switch (geometry.getType(nth)) {
       case GEOMETRY_MESH: {
         const mesh = geometry.releaseOutputMesh(nth);
         mesh.provenance = 'fromOutputGeometry';
-        const { matrix, tags } = inputs[nth];
+        const matrix = toJsTransformFromCgalTransform(geometry.getTransform(nth));
+        const { tags = [] } = inputs[nth] || {};
         // Note: The 0th mesh is not emitted as it does not get cut.
         results[nth] = {
           type: 'graph',
@@ -122,7 +137,11 @@ export const fromCgalGeometry = (geometry, inputs, length = inputs.length) => {
       }
       case GEOMETRY_POLYGONS_WITH_HOLES: {
         const polygonsWithHoles = [];
-        let exactPoints, points, output;
+        let exactPlane, plane, exactPoints, points, output;
+        const outputPlane = (x, y, z, w, exactX, exactY, exactZ, exactW) => {
+          plane = [x, y, z, w];
+          exactPlane = [exactX, exactY, exactZ, exactW];
+        };
         const outputPolygon = (isHole) => {
           points = [];
           exactPoints = [];
@@ -141,27 +160,31 @@ export const fromCgalGeometry = (geometry, inputs, length = inputs.length) => {
             polygonsWithHoles.push(output);
           }
         };
-        const outputPolygonPoint = (x, y, z, exactX, exactY, exactZ) => {
-          points.push([x, y, z]);
-          exactPoints.push([exactX, exactY, exactZ]);
+        const outputPolygonPoint = (x, y, exactX, exactY) => {
+          points.push([x, y]);
+          exactPoints.push([exactX, exactY]);
         };
         geometry.emitPolygonsWithHoles(
           nth,
+          outputPlane,
           outputPolygon,
           outputPolygonPoint
         );
-        const { matrix, tags, plane = [0, 0, 1, 0] } = inputs[nth];
+        const matrix = toJsTransformFromCgalTransform(geometry.getTransform(nth));
+        const { tags = [] } = inputs[nth] || {};
         results[nth] = {
           type: 'polygonsWithHoles',
           polygonsWithHoles,
           plane,
+          exactPlane,
           matrix,
           tags,
         };
         break;
       }
       case GEOMETRY_SEGMENTS: {
-        const { matrix, tags } = inputs[nth];
+        const matrix = toJsTransformFromCgalTransform(geometry.getTransform(nth));
+        const { tags = [] } = inputs[nth] || {};
         const segments = [];
         results[nth] = {
           type: 'segments',
@@ -174,13 +197,40 @@ export const fromCgalGeometry = (geometry, inputs, length = inputs.length) => {
         });
         break;
       }
+      case GEOMETRY_POINTS: {
+        const matrix = toJsTransformFromCgalTransform(geometry.getTransform(nth));
+        const { tags = [] } = inputs[nth] || {};
+        const points = [];
+        const exactPoints = [];
+        results[nth] = {
+          type: 'points',
+          points,
+          exactPoints,
+          matrix,
+          tags,
+        };
+        geometry.emitPoints(nth, (x, y, z, exactX, exactY, exactZ) => {
+          points.push([x, y, z]);
+          exactPoints.push([exactX, exactY, exactZ]);
+        });
+        break;
+      }
       default:
       case GEOMETRY_EMPTY: {
-        results[nth] = { type: 'group', contents: [] };
+        results[nth] = { type: 'group', content: [], tags: [] };
       }
     }
   }
-  return results;
+  let output;
+  if (start === 0) {
+    output = results;
+  } else {
+    output = results.slice(start);
+  }
+  if (output.some(value => value === undefined)) {
+    throw Error(`QQ/producing undefined output`);
+  }
+  return output;
 };
 
 export const withCgalGeometry = (inputs, op) => {

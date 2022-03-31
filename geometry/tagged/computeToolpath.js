@@ -7,16 +7,16 @@ import {
 
 import KdBush from 'kdbush';
 import { computeHash } from '@jsxcad/sys';
-import { fuse } from './fuse.js';
+import { fuse } from '../fuse.js';
 import { getEdges } from '../path/getEdges.js';
 import { getNonVoidPaths } from './getNonVoidPaths.js';
 import { getNonVoidSegments } from './getNonVoidSegments.js';
 import { getQuery } from '../graph/getQuery.js';
 import { identityMatrix } from '@jsxcad/math-mat4';
-import { inset } from './inset.js';
+import { inset } from '../inset.js';
 import { measureBoundingBox } from './measureBoundingBox.js';
 import { outline } from './outline.js';
-import { section } from './section.js';
+import { section } from '../section.js';
 import { taggedToolpath } from './taggedToolpath.js';
 import { toConcreteGeometry } from './toConcreteGeometry.js';
 import { toSegments } from './toSegments.js';
@@ -55,9 +55,12 @@ export const computeToolpath = (
     let points = [];
 
     const concreteGeometry = toConcreteGeometry(geometry);
-    const sections = section(concreteGeometry, [identityMatrix]);
-    const fusedArea = fuse([sections]);
+    const sections = section(concreteGeometry, [{ type: 'points', matrix: identityMatrix }]);
+console.log(`QQ/sections: ${JSON.stringify(sections)}`);
+    const fusedArea = fuse(sections);
+console.log(`QQ/fusedArea: ${JSON.stringify(fusedArea)}`);
     const insetArea = inset(fusedArea, toolRadius);
+console.log(`QQ/insetArea: ${JSON.stringify(insetArea)}`);
 
     // Surfaces
     {
@@ -116,9 +119,15 @@ export const computeToolpath = (
     time('QQ/computeToolpath/Surfaces');
 
     // Profiles
-    for (const [start, end] of toSegments(outline(insetArea)).segments) {
-      points.push({ start: start, end: { end: end, type: 'required' } });
-      points.push({ start: end, note: 'segment end' });
+    {
+      const outlines = outline(insetArea);
+console.log(`QQ/outlines: ${JSON.stringify(outlines)}`);
+      const segments = toSegments(outlines);
+console.log(`QQ/segments: ${JSON.stringify(segments)}`);
+      for (const [start, end] of segments.segments) {
+        points.push({ start: start, end: { end: end, type: 'required' } });
+        points.push({ start: end, note: 'segment end' });
+      }
     }
     time('QQ/computeToolpath/Profiles');
 

@@ -1,4 +1,4 @@
-import { addSerializedSurfaceMeshes } from './serializeSurfaceMesh.js';
+import { addSerializedSurfaceMeshes } from './addSerializedSurfaceMeshes.js';
 import { blessed } from './transform.js';
 import { disjoint } from './disjoint.js';
 import { fromPolygonsToSurfaceMesh } from './fromPolygonsToSurfaceMesh.js';

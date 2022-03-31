@@ -1,4 +1,5 @@
-const timeout = 120000;
+// const timeout = 120000;
+const timeout = 240000;
 
 export const screenshot = async (html, { browser }) => {
   let timeoutCount = 0;
@@ -13,6 +14,7 @@ export const screenshot = async (html, { browser }) => {
       const width = 1024;
       const height = 1024;
       await page.setViewport({ width, height });
+      page.on('console', (msg) => console.log(msg.text()));
       page.on('error', (msg) => console.log(msg.text()));
       try {
         await page.setContent(html, { timeout });

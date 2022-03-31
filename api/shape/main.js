@@ -9,6 +9,10 @@
 
 import Shape from './Shape.js';
 
+// We need destructure available via Shape.
+// eslint-disable-next-line sort-imports
+import './destructure.js';
+
 // We need Plan.js to add Shape.registerReifier before later imports call it.
 // eslint-disable-next-line sort-imports
 import './Plan.js';
@@ -263,6 +267,7 @@ export { cast } from './cast.js';
 export { center } from './center.js';
 export { clip } from './clip.js';
 export { clipFrom } from './clipFrom.js';
+export { close } from './close.js';
 export { color } from './color.js';
 export { colors } from './colors.js';
 export { cloudSolid } from './cloudSolid.js';
@@ -293,6 +298,7 @@ export { grow } from './grow.js';
 export { inline } from './inline.js';
 export { inset } from './inset.js';
 export { keep } from './keep.js';
+export { link } from './link.js';
 export { loadGeometry } from './loadGeometry.js';
 export { loft } from './loft.js';
 export { loft2 } from './loft2.js';

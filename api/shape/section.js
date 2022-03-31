@@ -1,23 +1,22 @@
-import { Shape } from './Shape.js';
+import Point from './Point.js';
+import Shape from './Shape.js';
 import { section as sectionGeometry } from '@jsxcad/geometry';
 
 const baseSection =
   ({ profile = false } = {}, orientations) =>
   (shape) => {
     orientations = orientations
-      .flatMap((orientation) => Shape.toValue(orientation, shape))
-      .flatMap((orientation) => Shape.toValue(orientation, shape));
-    const matrices = [];
+      .flatMap((orientation) => Shape.toShapes(orientation, shape))
+      .flatMap((orientation) => Shape.toShapes(orientation, shape));
     if (orientations.length === 0) {
-      matrices.push({ plane: [0, 0, 1, 0] });
-    } else {
-      for (const item of orientations) {
-        const matrix = item.toGeometry().matrix;
-        matrices.push({ matrix });
-      }
+      orientations.push(Point());
     }
     return Shape.fromGeometry(
-      sectionGeometry(shape.toGeometry(), matrices, { profile })
+      sectionGeometry(
+        shape.toGeometry(),
+        orientations.map((orientation) => orientation.toGeometry()),
+        { profile }
+      )
     );
   };
 
