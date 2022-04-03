@@ -5,7 +5,7 @@ const Profile = (pitch = 1, depth = 4 / 3) =>
     Point(pitch / -2, depth),
     Point(pitch / 2, depth),
     Point(pitch / 2, depth / 2)
-  );
+  ).inset(0.01);
 
 Profile().view();
 
@@ -15,9 +15,7 @@ export const ScrewThreadSegmentBuilder = Cached('nb/projects/bolt/bolt.nb/ScrewT
   return Profile(pitch, (pitch * 0.5) / Math.tan(angle * Math.PI))
     .y(diameter / -2)
     .ry(1 / 4)
-    .loft(
-      seq({ from: -1, by: 1 / 32, to: 1 }, (t) => (s) => s.rz(t).z(pitch * t * 1.001), Group)
-    )
+    .seq({ from: -1, by: 1 / 32, to: 1 }, (t) => (s) => s.rz(t).z(pitch * t), Loft)
     .scale(1, 1, turn === 'right' ? 1 : -1)
     .grow(-play)
     .simplify({ eps: 0.01 })

@@ -12,7 +12,7 @@ export const store = async (geometry) => {
   if (geometry[isStored]) {
     return { type: 'link', hash: uuid };
   }
-  const stored = { ...geometry };
+  const stored = { ...geometry, content: geometry.content?.slice() };
   geometry[isStored] = true;
   // Share graphs across geometries.
   const graph = geometry.graph;

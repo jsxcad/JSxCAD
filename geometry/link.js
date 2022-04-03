@@ -5,7 +5,7 @@ import { taggedGroup } from './tagged/taggedGroup.js';
 import { toConcreteGeometry } from './tagged/toConcreteGeometry.js';
 
 const filter = (geometry) =>
-  ['segments'].includes(geometry.type) &&
+  ['points', 'segments'].includes(geometry.type) &&
   isNotTypeVoid(geometry);
 
 export const link = (geometries, close = false) => {

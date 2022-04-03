@@ -54,6 +54,7 @@ export { eachPointOfSurfaceMesh } from './eachPointOfSurfaceMesh.js';
 export { extrude } from './extrude.js';
 export { extrudeSurfaceMesh } from './extrudeSurfaceMesh.js';
 export { extrudeToPlaneOfSurfaceMesh } from './extrudeToPlaneOfSurfaceMesh.js';
+export { faces } from './faces.js';
 export { fill } from './fill.js';
 export { fitPlaneToPoints } from './fitPlaneToPoints.js';
 export { fromFunctionToSurfaceMesh } from './fromFunctionToSurfaceMesh.js';

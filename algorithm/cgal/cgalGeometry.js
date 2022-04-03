@@ -21,32 +21,36 @@ export const fillCgalGeometry = (geometry, inputs) => {
     );
     switch (inputs[nth].type) {
       case 'graph':
+        const { graph } = inputs[nth];
         geometry.setType(nth, GEOMETRY_MESH);
-        geometry.setInputMesh(nth, toSurfaceMesh(inputs[nth].graph));
+        geometry.setInputMesh(nth, toSurfaceMesh(graph));
         break;
       case 'polygonsWithHoles': {
+        const { exactPlane, plane, polygonsWithHoles } = inputs[nth];
         let cursor = -1;
         geometry.setType(nth, GEOMETRY_POLYGONS_WITH_HOLES);
         geometry.fillPolygonsWithHoles(
           nth,
           (planeToFill) => {
-            if (inputs[nth].exactPlane) {
-              const [a, b, c, d] = inputs[nth].exactPlane;
+            if (exactPlane) {
+              const [a, b, c, d] = exactPlane;
               g.fillExactQuadruple(planeToFill, a, b, c, d);
             } else {
-              const [x, y, z, w] = inputs[nth].plane;
+              const [x, y, z, w] = plane;
               g.fillQuadruple(planeToFill, x, y, z, -w);
             }
           },
           (boundaryToFill) => {
             cursor += 1;
-            const polygon = inputs[nth].polygonsWithHoles[cursor];
+            const polygon = polygonsWithHoles[cursor];
             if (polygon === undefined) {
               return false;
             }
             if (polygon.exactPoints) {
               for (const [x, y] of polygon.exactPoints) {
+                try {
                 boundaryToFill.addExact(x, y);
+                } catch (error) { console.log(`QQ/polygon/addExact: ${JSON.stringify([x, y])}`); throw error; }
               }
             } else {
               for (const [x, y] of polygon.points) {
@@ -56,7 +60,7 @@ export const fillCgalGeometry = (geometry, inputs) => {
             return true;
           },
           (holeToFill, nthHole) => {
-            const polygon = inputs[nth].polygonsWithHoles[cursor];
+            const polygon = polygonsWithHoles[cursor];
             if (polygon === undefined) {
               return false;
             }
@@ -66,7 +70,9 @@ export const fillCgalGeometry = (geometry, inputs) => {
             }
             if (hole.exactPoints) {
               for (const [x, y] of hole.exactPoints) {
+                try {
                 holeToFill.addExact(x, y);
+                } catch (error) { console.log(`QQ/hole/addExact: ${JSON.stringify([x, y])}`); throw error; }
               }
             } else {
               for (const [x, y] of hole.points) {
@@ -79,8 +85,9 @@ export const fillCgalGeometry = (geometry, inputs) => {
         break;
       }
       case 'segments': {
+        const { segments } = inputs[nth];
         geometry.setType(nth, GEOMETRY_SEGMENTS);
-        for (const [[sX = 0, sY = 0, sZ = 0], [eX = 0, eY = 0, eZ = 0]] of inputs[nth].segments) {
+        for (const [[sX = 0, sY = 0, sZ = 0], [eX = 0, eY = 0, eZ = 0]] of segments) {
           try {
             geometry.addInputSegment(nth, sX, sY, sZ, eX, eY, eZ);
           } catch (error) {
@@ -90,14 +97,15 @@ export const fillCgalGeometry = (geometry, inputs) => {
         break;
       }
       case 'points': {
+        const { exactPoints, points } = inputs[nth];
         geometry.setType(nth, GEOMETRY_POINTS);
-        if (geometry.exactPoints) {
-          for (const [x, y, z] of geometry.exactPoints) {
-            geometry.addInputPointExact(x, y, z);
+        if (exactPoints) {
+          for (const [x, y, z] of exactPoints) {
+            geometry.addInputPointExact(nth, x, y, z);
           }
         } else {
-          for (const [x, y, z] of geometry.points) {
-            geometry.addInputPoint(x, y, z);
+          for (const [x, y, z] of points) {
+            geometry.addInputPoint(nth, x, y, z);
           }
         }
         break;

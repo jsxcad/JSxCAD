@@ -110,13 +110,13 @@ Octagon(20).view();
 Creates a new spheroid
 
 ```JavaScript
-Orb(10).view();
+Orb(10).hasZag(0.1).view();
 ```
 
 ![Image](creating_geometry.md.12.png)
 
 ```JavaScript
-Orb(10, 5, 2).view();
+Orb(10, 5, 2).hasZag(0.1).view();
 ```
 
 ![Image](creating_geometry.md.13.png)

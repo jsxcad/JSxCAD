@@ -10,11 +10,11 @@ export const loadGeometry = async (
   { otherwise = fromUndefined } = {}
 ) => {
   logInfo('api/shape/loadGeometry', path);
-  const data = await read(path);
-  if (data === undefined) {
+  const geometry = await read(path);
+  if (geometry === undefined) {
     return otherwise();
   } else {
-    return Shape.fromGeometry(data);
+    return Shape.fromGeometry(geometry);
   }
 };
 

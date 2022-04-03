@@ -6,6 +6,7 @@ import {
   getSides,
 } from './Plan.js';
 
+import Point from './Point.js';
 import Shape from './Shape.js';
 import Spiral from './Spiral.js';
 import { taggedPlan } from '@jsxcad/geometry';
@@ -43,14 +44,13 @@ const reifyArc =
     let spiral;
 
     if (end - start === 1) {
-      spiral = Spiral((a) => [[1]], {
+      spiral = Spiral((t) => Point(1), {
         from: start - 1 / 4,
         upto: end - 1 / 4,
         by: effectiveStep,
-        close: true,
-      }).fill();
+      }).close().fill();
     } else {
-      spiral = Spiral((a) => [[1]], {
+      spiral = Spiral((t) => Point(1), {
         from: start - 1 / 4,
         to: end - 1 / 4,
         by: effectiveStep,

@@ -27,8 +27,6 @@ Arc(10).svg('fileName');
 
 ![Image](file_import_and_export.md.1.png)
 
-[fileName_0.svg](file_import_and_export.fileName_0.svg)
-
 ---
 ### Importing .stl
 Imports a .stl file which can then be used as geometry. A best effort is made to handle bad geometry in the .stl file.
@@ -62,7 +60,7 @@ importedSvg.align('xy').view();
 ![Image](file_import_and_export.md.3.png)
 
 ```JavaScript
-importedSvg.align('xy').scaleToFit(10).ez(2).notColor('#090000').view();
+importedSvg.align('xy').scaleToFit(10).fill().ez(2).notColor('#090000').view();
 ```
 
 ![Image](file_import_and_export.md.4.png)

@@ -62,7 +62,7 @@ Line(5, -1).rz(45).gridView().md(`Line(5, -1)`);
 
 Octagon(5).gridView().md(`Octagon(5)`);
 
-Orb(5).hasSides(20).view().md(`Orb(5)`);
+Orb(1).hasZag(0.1).view().md(`Orb(1).hasZag(0.1)`);
 
 Path(Point(0), Point(5), Point(5, 5), Point(0))
   .rz(45 / 2)
@@ -114,10 +114,10 @@ Tetragon(5).gridView().md(`Tetragon(5)`);
 
 Triangle(5).gridView().md(`Triangle(5)`);
 
-Wave((a) => [[0, sin(a * 3) * 100]], { to: 360 })
+Wave((t) => Point(0, sin(t * 3) * 100), { to: 360 })
   .align('xy')
   .gridView()
-  .md(`Wave((a) => [[0, sin(a * 3) * 100]], { to: 360 })`);
+  .md(`Wave((t) => Point(0, sin(t * 3) * 100), { to: 360 })`);
 
 Weld(Arc(4).x(-1), Box(5).x(1))
   .fill()
@@ -194,7 +194,5 @@ Box(12)
   .view();
 
 Group(Box(1), Box(1).rx(1 / 4))
-  .e(2)
+  .each(e(2))
   .view();
-
-Triangle(6).loft2(Octagon(4).rz(1 / 32).z(3)).view();

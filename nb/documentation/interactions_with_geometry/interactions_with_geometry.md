@@ -123,15 +123,14 @@ We need to get into the design in order to get at 'box' and 'bolt'
 ```JavaScript
 Box(10)
   .cut(Box(5))
-  .loft(seq((a) => (s) => s.scale(Math.pow(a, 3)).z(a * 10), { from: 1/128, by: 1 / 8 }))
+  .seq({ from: 1/128, by: 1/8 }, (a) => (s) => s.scale(Math.pow(a, 3)).z(a * 10), Loft)
   .view();
 ```
 
 ![Image](interactions_with_geometry.md.10.png)
 
 ---
-### Loop
-2D shapes can be 'looped' to create 3D shapes. In this example two circles are looped to create a hollow doughnut. See 'loft' for a similar behavior without the ends being joined.
+2D shapes can be 'looped' to create 3D shapes. In this example two circles are looped to create a hollow doughnut.
 
 TODO: In the future (a) => rz(a) can be replaced with rz.
 
@@ -140,7 +139,7 @@ Arc(6)
   .cut(Arc(3))
   .rx(0.25)
   .x(10)
-  .loop(seq((a) => rz(a), { by: 1 / 16, upto: 1 }))
+  .seq({ by: 1 / 16 }, rz, Loft)
   .view();
 ```
 
@@ -268,13 +267,13 @@ By default the slice is taken where the shape intersects the XY plane.
 Section takes shapes as arguments, and will use the plane of orientation of the shape.
 
 ```JavaScript
-Orb(4).section().view();
+Orb(4).hasZag(0.1).section().view();
 ```
 
 ![Image](interactions_with_geometry.md.23.png)
 
 ```JavaScript
-Orb(4).section(xy, xy.z(1), xy.z(2)).view();
+Orb(4).hasZag(0.1).section(Point().z(0), Point().z(1), Point().z(2)).view();
 ```
 
 ![Image](interactions_with_geometry.md.24.png)
