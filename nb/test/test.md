@@ -1,8 +1,5 @@
 ```JavaScript
-Line(15, -15)
-  .seq({ from: -10, to: 11 }, y, Group)
-  .clip(Arc(20).cut(Arc(10)).ez(1))
-  .view();
+Box(10).move(1, 2, 3).moveTo(s => s.center().log()).gridView();
 ```
 
 ![Image](test.md.0.png)

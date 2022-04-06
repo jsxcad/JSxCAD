@@ -1,12 +1,10 @@
 import {
-  getNonVoidPaths,
+  getNonVoidPolygonsWithHoles,
   getNonVoidSegments,
-  isClosedPath,
   isNotTypeWire,
   isTypeWire,
   measureBoundingBox,
   scale,
-  toPolygonsWithHoles,
   toTransformedGeometry,
 } from '@jsxcad/geometry';
 
@@ -34,7 +32,9 @@ export const toSvg = async (
     `<svg baseProfile="tiny" height="${height}mm" width="${width}mm" viewBox="${viewBox}" version="1.1" stroke="black" stroke-width=".1" fill="none" xmlns="http://www.w3.org/2000/svg">`,
   ];
 
-  for (const { tags, polygonsWithHoles } of toPolygonsWithHoles(geometry)) {
+  for (const { tags, polygonsWithHoles } of getNonVoidPolygonsWithHoles(
+    geometry
+  )) {
     for (const polygonWithHoles of polygonsWithHoles) {
       const { points, holes } = polygonWithHoles;
       const color = toRgbColorFromTags(tags, definitions);
@@ -55,34 +55,6 @@ export const toSvg = async (
         svg.push(
           `<path fill="${color}" stroke="${color}" d="${d.join(' ')}"/>`
         );
-      }
-    }
-  }
-
-  for (const { tags, paths } of getNonVoidPaths(geometry)) {
-    const color = toRgbColorFromTags(tags, definitions);
-    for (const path of paths) {
-      if (isClosedPath(path)) {
-        const d = path.map(
-          (point, index) => `${index === 0 ? 'M' : 'L'}${point[0]} ${point[1]}`
-        );
-        if (isTypeWire({ tags })) {
-          svg.push(
-            `<path fill="none" stroke="${color}" d="${d.join(' ')} z"/>`
-          );
-        } else {
-          svg.push(
-            `<path fill="${color}" stroke="${color}" d="${d.join(' ')} z"/>`
-          );
-        }
-      } else {
-        const d = path
-          .slice(1)
-          .map(
-            (point, index) =>
-              `${index === 0 ? 'M' : 'L'}${point[0]} ${point[1]}`
-          );
-        svg.push(`<path fill="none" stroke="${color}" d="${d.join(' ')}"/>`);
       }
     }
   }

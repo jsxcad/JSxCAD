@@ -67,6 +67,7 @@
 #include <CGAL/Projection_traits_xz_3.h>
 #include <CGAL/Projection_traits_yz_3.h>
 #include <CGAL/Quotient.h>
+#include <CGAL/Random.h>
 #include <CGAL/Simple_cartesian.h>
 #include <CGAL/Subdivision_method_3/subdivision_methods_3.h>
 #include <CGAL/Surface_mesh.h>
@@ -599,6 +600,9 @@ const Surface_mesh* FromFunctionToSurfaceMesh(
                        CGAL::to_double(p.z()))
                   .as<double>());
   };
+
+  CGAL::get_default_random() = CGAL::Random(0);
+
   Surface_3 surface(
       op,                                        // pointer to function
       Sphere_3(CGAL::ORIGIN, radius * radius));  // bounding sphere
@@ -4105,12 +4109,59 @@ int Clip(Geometry* geometry, int targets) {
   return STATUS_OK;
 }
 
+double ComputeArea(Geometry* geometry) {
+  FT area = 0;
+  int size = geometry->size();
+  geometry->copyInputMeshesToOutputMeshes();
+  geometry->transformToAbsoluteFrame();
+  for (int nth = 0; nth < size; nth++) {
+    switch (geometry->getType(nth)) {
+      case GEOMETRY_MESH: {
+        area += CGAL::Polygon_mesh_processing::area(
+            geometry->mesh(nth), CGAL::parameters::all_default());
+        break;
+      }
+      case GEOMETRY_POLYGONS_WITH_HOLES: {
+        std::vector<Polygon_with_holes_2> polygonsWithHoles;
+        geometry->gps(nth).polygons_with_holes(
+            std::back_inserter(polygonsWithHoles));
+        for (const Polygon_with_holes_2& pwh : polygonsWithHoles) {
+          area += pwh.outer_boundary().area();
+          for (const Polygon_2& hole : pwh.holes()) {
+            area += hole.area();
+          }
+        }
+      }
+    }
+  }
+  return CGAL::to_double(area);
+}
+
+int ComputeCentroid(Geometry* geometry) {
+  size_t size = geometry->size();
+  geometry->copyInputMeshesToOutputMeshes();
+  geometry->transformToAbsoluteFrame();
+  geometry->convertPolygonsToPlanarMeshes();
+  for (int nth = 0; nth < size; nth++) {
+    switch (geometry->getType(nth)) {
+      case GEOMETRY_MESH: {
+        Point centroid;
+        computeCentroidOfSurfaceMesh(centroid, geometry->mesh(nth));
+        geometry->setType(nth, GEOMETRY_POINTS);
+        geometry->addPoint(nth, centroid);
+        break;
+      }
+    }
+  }
+  geometry->transformToLocalFrame();
+  return STATUS_OK;
+}
+
 int ComputeNormal(Geometry* geometry) {
   size_t size = geometry->size();
   geometry->copyInputMeshesToOutputMeshes();
   geometry->transformToAbsoluteFrame();
   geometry->convertPlanarMeshesToPolygons();
-  geometry->computeBounds();
   for (int nth = 0; nth < size; nth++) {
     switch (geometry->getType(nth)) {
       case GEOMETRY_MESH: {
@@ -4129,6 +4180,23 @@ int ComputeNormal(Geometry* geometry) {
     }
   }
   return STATUS_OK;
+}
+
+double ComputeVolume(Geometry* geometry) {
+  FT volume = 0;
+  int size = geometry->size();
+  geometry->copyInputMeshesToOutputMeshes();
+  geometry->transformToAbsoluteFrame();
+  for (int nth = 0; nth < size; nth++) {
+    switch (geometry->getType(nth)) {
+      case GEOMETRY_MESH: {
+        volume += CGAL::Polygon_mesh_processing::volume(
+            geometry->mesh(nth), CGAL::parameters::all_default());
+        break;
+      }
+    }
+  }
+  return CGAL::to_double(volume);
 }
 
 int Cut(Geometry* geometry, int targets) {
@@ -4858,6 +4926,7 @@ int MakeUnitSphere(Geometry* geometry, double angularBound, double radiusBound,
   typedef CGAL::Surface_mesh<Point_3> Epick_Surface_mesh;
   Tr tr;          // 3D-Delaunay triangulation
   C2t3 c2t3(tr);  // 2D-complex in 3D-Delaunay triangulation
+  CGAL::get_default_random() = CGAL::Random(0);
   Surface_3 surface(unitSphereFunction<FT, Point_3>, Sphere_3(CGAL::ORIGIN, 2));
   CGAL::Surface_mesh_default_criteria_3<Tr> criteria(angularBound, radiusBound,
                                                      distanceBound);
@@ -5046,49 +5115,103 @@ int Section(Geometry* geometry, int transformCount,
   return STATUS_OK;
 }
 
-double ComputeArea(Geometry* geometry) {
-  FT area = 0;
+int Separate(Geometry* geometry, bool keep_shapes, bool keep_holes_in_shapes,
+             bool keep_holes_as_shapes) {
   int size = geometry->size();
-  geometry->copyInputMeshesToOutputMeshes();
-  geometry->transformToAbsoluteFrame();
+
   for (int nth = 0; nth < size; nth++) {
     switch (geometry->getType(nth)) {
       case GEOMETRY_MESH: {
-        area += CGAL::Polygon_mesh_processing::area(
-            geometry->mesh(nth), CGAL::parameters::all_default());
+        const Surface_mesh& input_mesh = geometry->input_mesh(nth);
+        if (!CGAL::is_closed(input_mesh)) {
+          continue;
+        }
+
+        std::vector<Surface_mesh> meshes;
+        std::vector<Surface_mesh> cavities;
+        std::vector<Surface_mesh> volumes;
+        CGAL::Polygon_mesh_processing::split_connected_components(input_mesh,
+                                                                  meshes);
+
+        // CHECK: Can we leverage volume_connected_components() here?
+        for (auto& mesh : meshes) {
+          // CHECK: Do we have an expensive move here?
+          if (CGAL::Polygon_mesh_processing::is_outward_oriented(mesh)) {
+            volumes.push_back(mesh);
+          } else {
+            cavities.push_back(mesh);
+          }
+        }
+
+        if (keep_shapes) {
+          for (auto& mesh : volumes) {
+            if (keep_holes_in_shapes) {
+              CGAL::Side_of_triangle_mesh<Surface_mesh, Kernel> inside(mesh);
+              for (auto& cavity : cavities) {
+                for (const auto vertex : cavity.vertices()) {
+                  if (inside(cavity.point(vertex)) == CGAL::ON_BOUNDED_SIDE) {
+                    // Include the cavity in the mesh.
+                    mesh.join(cavity);
+                  }
+                  // A single test is sufficient.
+                  break;
+                }
+              }
+            }
+            int target = geometry->add(GEOMETRY_MESH);
+            geometry->setMesh(target, new Surface_mesh(mesh));
+            geometry->setTransform(
+                target, new Transformation(geometry->transform(nth)));
+          }
+        }
+
+        if (keep_holes_as_shapes) {
+          for (auto& mesh : cavities) {
+            CGAL::Polygon_mesh_processing::reverse_face_orientations(mesh);
+            int target = geometry->add(GEOMETRY_MESH);
+            geometry->setMesh(target, new Surface_mesh(mesh));
+            geometry->setTransform(
+                target, new Transformation(geometry->transform(nth)));
+          }
+        }
         break;
       }
       case GEOMETRY_POLYGONS_WITH_HOLES: {
-        std::vector<Polygon_with_holes_2> polygonsWithHoles;
-        geometry->gps(nth).polygons_with_holes(
-            std::back_inserter(polygonsWithHoles));
-        for (const Polygon_with_holes_2& pwh : polygonsWithHoles) {
-          area += pwh.outer_boundary().area();
-          for (const Polygon_2& hole : pwh.holes()) {
-            area += hole.area();
+        std::vector<Polygon_with_holes_2> polygons;
+        geometry->gps(nth).polygons_with_holes(std::back_inserter(polygons));
+
+        for (const Polygon_with_holes_2& polygon : polygons) {
+          if (keep_shapes) {
+            int target = geometry->add(GEOMETRY_POLYGONS_WITH_HOLES);
+            geometry->setTransform(
+                target, new Transformation(geometry->transform(nth)));
+            geometry->plane(target) = geometry->plane(nth);
+            if (keep_holes_in_shapes) {
+              geometry->gps(target).join(polygon);
+            } else {
+              geometry->gps(target).join(polygon.outer_boundary());
+            }
+          }
+
+          if (keep_holes_as_shapes) {
+            for (auto hole = polygon.holes_begin(); hole != polygon.holes_end();
+                 ++hole) {
+              int target = geometry->add(GEOMETRY_POLYGONS_WITH_HOLES);
+              geometry->setTransform(
+                  target, new Transformation(geometry->transform(nth)));
+              geometry->plane(target) = geometry->plane(nth);
+              Polygon_2 shape = *hole;
+              shape.reverse_orientation();
+              geometry->gps(target).join(shape);
+            }
           }
         }
-      }
-    }
-  }
-  return CGAL::to_double(area);
-}
-
-double ComputeVolume(Geometry* geometry) {
-  FT volume = 0;
-  int size = geometry->size();
-  geometry->copyInputMeshesToOutputMeshes();
-  geometry->transformToAbsoluteFrame();
-  for (int nth = 0; nth < size; nth++) {
-    switch (geometry->getType(nth)) {
-      case GEOMETRY_MESH: {
-        volume += CGAL::Polygon_mesh_processing::volume(
-            geometry->mesh(nth), CGAL::parameters::all_default());
         break;
       }
     }
   }
-  return CGAL::to_double(volume);
+
+  return STATUS_OK;
 }
 
 void OutlineSurfaceMesh(const Surface_mesh* input,
@@ -6880,7 +7003,13 @@ EMSCRIPTEN_BINDINGS(module) {
   emscripten::function("Bend", &Bend, emscripten::allow_raw_pointers());
   emscripten::function("Cast", &Cast, emscripten::allow_raw_pointers());
   emscripten::function("Clip", &Clip, emscripten::allow_raw_pointers());
+  emscripten::function("ComputeArea", &ComputeArea,
+                       emscripten::allow_raw_pointers());
+  emscripten::function("ComputeCentroid", &ComputeCentroid,
+                       emscripten::allow_raw_pointers());
   emscripten::function("ComputeNormal", &ComputeNormal,
+                       emscripten::allow_raw_pointers());
+  emscripten::function("ComputeVolume", &ComputeVolume,
                        emscripten::allow_raw_pointers());
   emscripten::function("Cut", &Cut, emscripten::allow_raw_pointers());
   emscripten::function("Disjoint", &Disjoint, emscripten::allow_raw_pointers());
@@ -6898,6 +7027,7 @@ EMSCRIPTEN_BINDINGS(module) {
   emscripten::function("Offset", &Offset, emscripten::allow_raw_pointers());
   emscripten::function("Outline", &Outline, emscripten::allow_raw_pointers());
   emscripten::function("Section", &Section, emscripten::allow_raw_pointers());
+  emscripten::function("Separate", &Separate, emscripten::allow_raw_pointers());
 
   // New classes
   emscripten::class_<Geometry>("Geometry")
@@ -6955,10 +7085,6 @@ EMSCRIPTEN_BINDINGS(module) {
                        emscripten::allow_raw_pointers());
   emscripten::function("FromSurfaceMeshToPolygonsWithHoles",
                        &FromSurfaceMeshToPolygonsWithHoles,
-                       emscripten::allow_raw_pointers());
-  emscripten::function("ComputeArea", &ComputeArea,
-                       emscripten::allow_raw_pointers());
-  emscripten::function("ComputeVolume", &ComputeVolume,
                        emscripten::allow_raw_pointers());
   emscripten::function("ComputeCentroidOfSurfaceMesh",
                        &ComputeCentroidOfSurfaceMesh,

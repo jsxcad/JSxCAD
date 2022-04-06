@@ -16,7 +16,6 @@ import { identityMatrix } from '@jsxcad/math-mat4';
 import { inset } from '../inset.js';
 import { linearize } from './linearize.js';
 import { measureBoundingBox } from './measureBoundingBox.js';
-import { outline } from '../outline.js';
 import { section } from '../section.js';
 import { taggedToolpath } from './taggedToolpath.js';
 import { toConcreteGeometry } from './toConcreteGeometry.js';
@@ -74,7 +73,6 @@ export const computeToolpath = (
         console.log(`QQ/withAabbTreeQuery`);
         // The hexagon diameter is the tool radius.
         const isInteriorPoint = (x, y, z) => {
-          console.log(`isInteriorPoint(${x}, ${y}, ${z})`);
           return query.isIntersectingPointApproximate(x, y, z);
         };
         const [minPoint, maxPoint] = measureBoundingBox(sections);
@@ -134,12 +132,10 @@ export const computeToolpath = (
     time('QQ/computeToolpath/Surfaces');
 
     // Profiles
-    {
-      eachSegment(insetArea, ([start, end]) => {
-        points.push({ start: start, end: { end: end, type: 'required' } });
-        points.push({ start: end, note: 'segment end' });
-      });
-    }
+    eachSegment(insetArea, ([start, end]) => {
+      points.push({ start: start, end: { end: end, type: 'required' } });
+      points.push({ start: end, note: 'segment end' });
+    });
     time('QQ/computeToolpath/Profiles');
 
     // Grooves
@@ -460,9 +456,6 @@ export const computeToolpath = (
               destinations.length >= points.length
             ) {
               break;
-            }
-            if (range > 4) {
-              console.log(`QQ/range: ${range}`);
             }
           }
         }

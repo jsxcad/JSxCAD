@@ -1,10 +1,9 @@
 import {
-  getNonVoidPaths,
+  getNonVoidPolygonsWithHoles,
   getNonVoidSegments,
   measureBoundingBox,
   scale as scaleGeometry,
   toDisjointGeometry,
-  toPolygonsWithHoles,
   translate as translateGeometry,
 } from '@jsxcad/geometry';
 
@@ -91,7 +90,7 @@ export const toPdf = async (
       scaleGeometry([scale, scale, scale], await geometry)
     )
   );
-  for (const { tags, polygonsWithHoles } of toPolygonsWithHoles(
+  for (const { tags, polygonsWithHoles } of getNonVoidPolygonsWithHoles(
     disjointGeometry
   )) {
     for (const { points, holes } of polygonsWithHoles) {
@@ -113,27 +112,6 @@ export const toPdf = async (
       }
       // This should be controlled by tags.
       lines.push(`f`); // Surface paths are always filled.
-    }
-  }
-
-  for (const { tags, paths } of getNonVoidPaths(disjointGeometry)) {
-    lines.push(toStrokeColor(toRgbFromTags(tags, definitions, black)));
-    for (const path of paths) {
-      let nth = path[0] === null ? 1 : 0;
-      if (nth >= path.length) {
-        continue;
-      }
-      const [x1, y1] = path[nth];
-      lines.push(`${x1.toFixed(9)} ${y1.toFixed(9)} m`); // move-to.
-      for (nth++; nth < path.length; nth++) {
-        const [x2, y2] = path[nth];
-        lines.push(`${x2.toFixed(9)} ${y2.toFixed(9)} l`); // line-to.
-      }
-      if (path[0] !== null) {
-        // A leading null indicates an open path.
-        lines.push(`h`); // close path.
-      }
-      lines.push(`S`); // stroke.
     }
   }
 

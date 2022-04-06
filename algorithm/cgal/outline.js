@@ -15,4 +15,4 @@ export const outline = (inputs) => {
         throw new Error(`Unexpected status ${status}`);
     }
   });
-}
+};

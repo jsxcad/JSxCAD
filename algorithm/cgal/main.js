@@ -17,8 +17,6 @@ export {
 } from './transform.js';
 
 export { approximateSurfaceMesh } from './approximateSurfaceMesh.js';
-export { arrangePaths, arrangePathsIntoTriangles } from './arrangePaths.js';
-export { arrangePolygonsWithHoles } from './arrangePolygonsWithHoles.js';
 export {
   arrangeSegments,
   arrangeSegmentsIntoTriangles,
@@ -37,7 +35,7 @@ export { cast } from './cast.js';
 export { clip } from './clip.js';
 export { computeArea } from './computeArea.js';
 export { computeVolume } from './computeVolume.js';
-export { computeCentroidOfSurfaceMesh } from './computeCentroidOfSurfaceMesh.js';
+export { computeCentroid } from './computeCentroid.js';
 export { computeNormal } from './computeNormal.js';
 export { cut } from './cut.js';
 export { cutOutOfSurfaceMeshes } from './cutOutOfSurfaceMeshes.js';
@@ -64,7 +62,6 @@ export { fromSurfaceMeshEmitBoundingBox } from './fromSurfaceMeshEmitBoundingBox
 export { fromSurfaceMeshToGraph } from './fromSurfaceMeshToGraph.js';
 export { fromSurfaceMeshToLazyGraph } from './fromSurfaceMeshToLazyGraph.js';
 export { fromSurfaceMeshToPolygons } from './fromSurfaceMeshToPolygons.js';
-export { fromSurfaceMeshToPolygonsWithHoles } from './fromSurfaceMeshToPolygonsWithHoles.js';
 export { fromSurfaceMeshToTriangles } from './fromSurfaceMeshToTriangles.js';
 export { fuse } from './fuse.js';
 export { generatePackingEnvelopeForSurfaceMesh } from './generatePackingEnvelopeForSurfaceMesh.js';
@@ -83,12 +80,12 @@ export { makeUnitSphere } from './makeUnitSphere.js';
 export { minkowskiDifferenceOfSurfaceMeshes } from './minkowskiDifferenceOfSurfaceMeshes.js';
 export { minkowskiShellOfSurfaceMeshes } from './minkowskiShellOfSurfaceMeshes.js';
 export { minkowskiSumOfSurfaceMeshes } from './minkowskiSumOfSurfaceMeshes.js';
-export { projectToPlaneOfSurfaceMesh } from './projectToPlaneOfSurfaceMesh.js';
 export { pushSurfaceMesh } from './pushSurfaceMesh.js';
 export { remeshSurfaceMesh } from './remeshSurfaceMesh.js';
 export { removeSelfIntersectionsOfSurfaceMesh } from './removeSelfIntersectionsOfSurfaceMesh.js';
 export { reverseFaceOrientationsOfSurfaceMesh } from './reverseFaceOrientationsOfSurfaceMesh.js';
 export { section } from './section.js';
+export { separate } from './separate.js';
 export { separateSurfaceMesh } from './separateSurfaceMesh.js';
 export { simplifySurfaceMesh } from './simplifySurfaceMesh.js';
 export { smoothShapeOfSurfaceMesh } from './smoothShapeOfSurfaceMesh.js';
