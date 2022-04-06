@@ -35,7 +35,7 @@ const ToothSpacing = (teeth, tooth_pitch, pitch_line_offset) =>
   2 * ((teeth * tooth_pitch) / (3.14159265 * 2) - pitch_line_offset);
 
 const ToothProfileToFace = (...points) =>
-  Shape.fromOpenPath(points).close().fill();
+  Shape.fromOpenPath(points).loop().fill();
 
 export const MXL = {
   profile: ToothProfileToFace(

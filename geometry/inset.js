@@ -1,6 +1,6 @@
 import {
-  inset as insetWithCgal,
   deletePendingSurfaceMeshes,
+  inset as insetWithCgal,
 } from '@jsxcad/algorithm-cgal';
 
 import { isNotTypeVoid } from './tagged/type.js';

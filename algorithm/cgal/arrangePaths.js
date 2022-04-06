@@ -29,6 +29,7 @@ export const arrangePaths = (
   inputPolygons,
   triangulate = false
 ) => {
+  throw Error('die');
   try {
     const c = getCgal();
     let nth = 0;

@@ -1,5 +1,5 @@
 ```JavaScript
-Spiral((a) => [[1 + (a * 360) / 100]], {
+Spiral((t) => Point(1 + (t * 360) / 100), {
   to: 10,
   by: 3 / 360,
 }).and(toolpath())

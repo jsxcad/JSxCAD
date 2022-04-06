@@ -242,7 +242,9 @@ Shape.toShapes = (to, from) => {
   }
   if (to instanceof Shape) {
     if (to.toGeometry().type === 'group') {
-      to = to.toGeometry().content.map(content => Shape.fromGeometry(content));
+      to = to
+        .toGeometry()
+        .content.map((content) => Shape.fromGeometry(content));
     }
   }
   if (to instanceof Array) {

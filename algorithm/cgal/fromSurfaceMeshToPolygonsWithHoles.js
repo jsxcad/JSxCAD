@@ -2,6 +2,7 @@ import { getCgal } from './getCgal.js';
 import { toCgalTransformFromJsTransform } from './transform.js';
 
 export const fromSurfaceMeshToPolygonsWithHoles = (mesh, transform) => {
+  throw Error('die');
   try {
     const g = getCgal();
     const arrangements = [];

@@ -7,7 +7,7 @@ export const weld =
   (...rest) =>
   (first) => {
     return Group(first, ...rest).fill();
-/*
+    /*
     const unwelded = [];
     for (const shape of [first, ...rest]) {
       // We lose the tags at this point.

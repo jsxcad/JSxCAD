@@ -38,7 +38,6 @@ const toothResolution = control('toothResolution', 5, 'input');
 Gear()
   .hasTeeth(8)
   .and((s) => s.hasClearance(0.5).color('red'))
-  .fill()
   .gridView()
   .md(`Clearance adds play to the gear tips`);
 ```
@@ -70,7 +69,6 @@ Gear()
 Gear()
   .hasTeeth(8)
   .and((s) => s.hasBacklash(1).color('red'))
-  .fill()
   .gridView()
   .md(`Backlash adds play to the gear sides`);
 ```
@@ -88,7 +86,6 @@ Gear()
     (s) => s.hasPressureAngle(30).color('red'),
     (s) => s.hasPressureAngle(10).color('blue')
   )
-  .fill()
   .material('glass')
   .gridView()
   .md(`Pressure Angle makes the tip sharper or blunter`);

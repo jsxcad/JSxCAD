@@ -48,7 +48,9 @@ const reifyArc =
         from: start - 1 / 4,
         upto: end - 1 / 4,
         by: effectiveStep,
-      }).close().fill();
+      })
+        .loop()
+        .fill();
     } else {
       spiral = Spiral((t) => Point(1), {
         from: start - 1 / 4,

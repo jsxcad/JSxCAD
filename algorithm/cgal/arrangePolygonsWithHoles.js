@@ -1,6 +1,7 @@
 import { getCgal } from './getCgal.js';
 
 export const arrangePolygonsWithHoles = (polygons) => {
+  throw Error('die');
   try {
     const g = getCgal();
     let nth = -1;

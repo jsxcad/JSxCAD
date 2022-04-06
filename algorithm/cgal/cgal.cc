@@ -24,6 +24,7 @@
 #include <CGAL/Bounded_kernel.h>
 #include <CGAL/CORE_algebraic_number_traits.h>
 #include <CGAL/Complex_2_in_triangulation_3.h>
+#include <CGAL/Default.h>
 #include <CGAL/Delaunay_triangulation_2.h>
 #include <CGAL/Delaunay_triangulation_3.h>
 #include <CGAL/Env_surface_data_traits_3.h>
@@ -329,11 +330,22 @@ class SurfaceMeshQuery {
     inside_tester_.reset(new Inside_tester(*tree_));
   }
 
+  SurfaceMeshQuery(const Surface_mesh* mesh)
+      : is_volume_(CGAL::is_closed(*mesh)) {
+    mesh_.reset(new Surface_mesh(*mesh));
+    tree_.reset(new Tree(faces(*mesh_).first, faces(*mesh_).second, *mesh_));
+    inside_tester_.reset(new Inside_tester(*tree_));
+  }
+
   bool isIntersectingPointApproximate(double x, double y, double z) {
+    return isIntersectingPoint(Point(x, y, z));
+  }
+
+  bool isIntersectingPoint(const Point& point) {
     if (is_volume_) {
-      return (*inside_tester_)(Point(x, y, z)) != CGAL::ON_UNBOUNDED_SIDE;
+      return (*inside_tester_)(point) != CGAL::ON_UNBOUNDED_SIDE;
     } else {
-      return (*inside_tester_)(Point(x, y, z)) == CGAL::ON_BOUNDARY;
+      return (*inside_tester_)(point) == CGAL::ON_BOUNDARY;
     }
   }
 
@@ -389,8 +401,8 @@ class SurfaceMeshQuery {
           continue;
         }
         // Note: intersection->second is the intersected face index.
-        // CHECK: We get doubles because we're intersecting with the interior of
-        // the faces.
+        // CHECK: We get doubles because we're intersecting with the
+        // interior of the faces.
         if (const Point* point = boost::get<Point>(&intersection->first)) {
           points.push_back(*point);
         }
@@ -2528,7 +2540,6 @@ bool PolygonsWithHolesToSurfaceMesh(const Plane& plane,
         std::reverse(vertices.begin(), vertices.end());
       }
       if (result.add_face(vertices) == Surface_mesh::null_face()) {
-        std::cout << "PWH2SM/Cannot add facet" << std::endl;
         return false;
       }
     }
@@ -3403,7 +3414,7 @@ void insetOfPolygonWithHoles(
   }
 }
 
-Plane ensureFacetPlane(Surface_mesh& mesh,
+Plane ensureFacetPlane(const Surface_mesh& mesh,
                        std::unordered_map<Face_index, Plane>& facet_to_plane,
                        std::unordered_set<Plane>& planes, Face_index facet) {
   auto it = facet_to_plane.find(facet);
@@ -3649,6 +3660,23 @@ class Geometry {
     }
   }
 
+  void convertPolygonsToPlanarMeshes() {
+    for (size_t nth = 0; nth < size_; nth++) {
+      if (is_polygons(nth)) {
+        // Convert to planar mesh.
+        std::map<Point, Vertex_index> vertex_map;
+        setMesh(nth, new Surface_mesh);
+        if (!GeneralPolygonSetToSurfaceMesh(plane(nth), gps(nth), mesh(nth),
+                                            vertex_map)) {
+          std::cout << "QQ/convertPolygonsToPlanarMeshes failed";
+          return;
+        }
+        CGAL::Polygon_mesh_processing::triangulate_faces(mesh(nth));
+        setType(nth, GEOMETRY_MESH);
+      }
+    }
+  }
+
   void emitPolygonsWithHoles(int nth, emscripten::val emit_plane,
                              emscripten::val emit_polygon,
                              emscripten::val emit_point) {
@@ -3825,6 +3853,73 @@ class Geometry {
   std::vector<CGAL::Bbox_3> bbox3_;
 };
 
+class AabbTreeQuery {
+ public:
+  AabbTreeQuery() {}
+
+  void addGeometry(Geometry* geometry) {
+    int size = geometry->getSize();
+    surface_mesh_query_.resize(size);
+    for (int nth = 0; nth < size; nth++) {
+      switch (geometry->getType(nth)) {
+        case GEOMETRY_MESH: {
+          surface_mesh_query_[nth].reset(
+              new SurfaceMeshQuery(&geometry->mesh(nth)));
+        }
+      }
+    }
+  }
+
+  bool isIntersectingPointApproximate(double x, double y, double z) {
+    return isIntersectingPoint(Point(x, y, z));
+  }
+
+  bool isIntersectingPoint(const Point& point) {
+    for (const auto& query : surface_mesh_query_) {
+      if (query == nullptr) {
+        continue;
+      }
+      if (query->isIntersectingPoint(point)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  void intersectSegmentApproximate(bool do_clip, double source_x,
+                                   double source_y, double source_z,
+                                   double target_x, double target_y,
+                                   double target_z,
+                                   emscripten::val emit_segment) {
+    Segment segment(Point(source_x, source_y, source_z),
+                    Point(target_x, target_y, target_z));
+    auto emit = [&](Segment out) {
+      const Point& source = out.source();
+      const Point& target = out.target();
+      emit_segment(CGAL::to_double(source.x().exact()),
+                   CGAL::to_double(source.y().exact()),
+                   CGAL::to_double(source.z().exact()),
+                   CGAL::to_double(target.x().exact()),
+                   CGAL::to_double(target.y().exact()),
+                   CGAL::to_double(target.z().exact()));
+    };
+    intersectSegment(do_clip, segment, emit);
+  }
+
+  void intersectSegment(bool do_clip, const Segment& segment,
+                        std::function<void(const Segment&)> emit) {
+    for (const auto& query : surface_mesh_query_) {
+      if (query == nullptr) {
+        continue;
+      }
+      query->intersectSegment(do_clip, segment, emit);
+    }
+  }
+
+ private:
+  std::vector<std::unique_ptr<SurfaceMeshQuery>> surface_mesh_query_;
+};
+
 int Bend(Geometry* geometry, double referenceRadius) {
   int size = geometry->size();
   geometry->copyInputMeshesToOutputMeshes();
@@ -3878,7 +3973,7 @@ int Cast(Geometry* geometry, const Transformation* reference) {
   int size = geometry->size();
   geometry->copyInputMeshesToOutputMeshes();
   geometry->transformToAbsoluteFrame();
-  geometry->convertPlanarMeshesToPolygons();
+  geometry->convertPolygonsToPlanarMeshes();
 
   Plane reference_plane = Plane(0, 0, 1, 0).transform(*reference);
   Point reference_point = Point(0, 0, 0).transform(*reference);
@@ -3890,16 +3985,6 @@ int Cast(Geometry* geometry, const Transformation* reference) {
 
   for (int nth = 0; nth < size; nth++) {
     switch (geometry->getType(nth)) {
-      case GEOMETRY_POLYGONS_WITH_HOLES: {
-        // Convert to planar mesh.
-        std::map<Point, Vertex_index> vertex_map;
-        if (!GeneralPolygonSetToSurfaceMesh(geometry->plane(nth),
-                                            geometry->gps(nth),
-                                            geometry->mesh(nth), vertex_map)) {
-          return STATUS_INVALID_INPUT;
-        }
-        // fall through
-      }
       case GEOMETRY_MESH: {
         Surface_mesh& mesh = geometry->mesh(nth);
         Surface_mesh projected_mesh(mesh);
@@ -4700,8 +4785,6 @@ int Loft(Geometry* geometry) {
   geometry->transformToAbsoluteFrame();
   geometry->convertPlanarMeshesToPolygons();
 
-  // TODO: Check for a closed volume and cap otherwise.
-
   // CHECK: Building a polygon soup might be more robust.
 
   std::map<Point, Vertex_index> vertex_map;
@@ -4820,8 +4903,7 @@ int Offset(Geometry* geometry, double initial, double step, double limit,
 }
 
 int Outline(Geometry* geometry) {
-  size_t size = geometry->size();
-
+  int size = geometry->size();
   for (int nth = 0; nth < size; nth++) {
     switch (geometry->getType(nth)) {
       case GEOMETRY_SEGMENTS: {
@@ -4852,7 +4934,7 @@ int Outline(Geometry* geometry) {
         break;
       }
       case GEOMETRY_MESH: {
-        Surface_mesh& mesh = geometry->mesh(nth);
+        const Surface_mesh& mesh = geometry->input_mesh(nth);
         geometry->setType(nth, GEOMETRY_SEGMENTS);
 
         std::unordered_set<Plane> planes;
@@ -6773,28 +6855,6 @@ EMSCRIPTEN_BINDINGS(module) {
       .function("y", &Point::y)
       .function("z", &Point::z);
 
-  emscripten::class_<Geometry>("Geometry")
-      .constructor<>()
-      .function("addInputPoint", &Geometry::addInputPoint)
-      .function("addInputPointExact", &Geometry::addInputPointExact)
-      .function("addInputSegment", &Geometry::addInputSegment)
-      .function("fillPolygonsWithHoles", &Geometry::fillPolygonsWithHoles)
-      .function("emitPoints", &Geometry::emitPoints)
-      .function("emitPolygonsWithHoles", &Geometry::emitPolygonsWithHoles)
-      .function("emitSegments", &Geometry::emitSegments)
-      .function("getSize", &Geometry::getSize)
-      .function("getTransform", &Geometry::getTransform,
-                emscripten::allow_raw_pointers())
-      .function("getType", &Geometry::getType)
-      .function("releaseOutputMesh", &Geometry::releaseOutputMesh,
-                emscripten::allow_raw_pointers())
-      .function("setInputMesh", &Geometry::setInputMesh,
-                emscripten::allow_raw_pointers())
-      .function("setSize", &Geometry::setSize)
-      .function("setTransform", &Geometry::setTransform,
-                emscripten::allow_raw_pointers())
-      .function("setType", &Geometry::setType);
-
   emscripten::class_<SurfaceMeshQuery>("SurfaceMeshQuery")
       .constructor<const Surface_mesh*, const Transformation*>()
       .function("intersectSegmentApproximate",
@@ -6838,6 +6898,46 @@ EMSCRIPTEN_BINDINGS(module) {
   emscripten::function("Offset", &Offset, emscripten::allow_raw_pointers());
   emscripten::function("Outline", &Outline, emscripten::allow_raw_pointers());
   emscripten::function("Section", &Section, emscripten::allow_raw_pointers());
+
+  // New classes
+  emscripten::class_<Geometry>("Geometry")
+      .constructor<>()
+      .function("addInputPoint", &Geometry::addInputPoint)
+      .function("addInputPointExact", &Geometry::addInputPointExact)
+      .function("addInputSegment", &Geometry::addInputSegment)
+      .function("convertPlanarMeshesToPolygons",
+                &Geometry::convertPlanarMeshesToPolygons)
+      .function("convertPolygonsToPlanarMeshes",
+                &Geometry::convertPolygonsToPlanarMeshes)
+      .function("copyInputMeshesToOutputMeshes",
+                &Geometry::copyInputMeshesToOutputMeshes)
+      .function("fillPolygonsWithHoles", &Geometry::fillPolygonsWithHoles)
+      .function("emitPoints", &Geometry::emitPoints)
+      .function("emitPolygonsWithHoles", &Geometry::emitPolygonsWithHoles)
+      .function("emitSegments", &Geometry::emitSegments)
+      .function("getSize", &Geometry::getSize)
+      .function("getTransform", &Geometry::getTransform,
+                emscripten::allow_raw_pointers())
+      .function("getType", &Geometry::getType)
+      .function("releaseOutputMesh", &Geometry::releaseOutputMesh,
+                emscripten::allow_raw_pointers())
+      .function("setInputMesh", &Geometry::setInputMesh,
+                emscripten::allow_raw_pointers())
+      .function("setSize", &Geometry::setSize)
+      .function("setTransform", &Geometry::setTransform,
+                emscripten::allow_raw_pointers())
+      .function("setType", &Geometry::setType)
+      .function("transformToAbsoluteFrame",
+                &Geometry::transformToAbsoluteFrame);
+
+  emscripten::class_<AabbTreeQuery>("AabbTreeQuery")
+      .constructor<>()
+      .function("addGeometry", &AabbTreeQuery::addGeometry,
+                emscripten::allow_raw_pointers())
+      .function("intersectSegmentApproximate",
+                &AabbTreeQuery::intersectSegmentApproximate)
+      .function("isIntersectingPointApproximate",
+                &AabbTreeQuery::isIntersectingPointApproximate);
 
   emscripten::function("SeparateSurfaceMesh", &SeparateSurfaceMesh,
                        emscripten::allow_raw_pointers());

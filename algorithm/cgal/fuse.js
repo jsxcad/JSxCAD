@@ -10,7 +10,12 @@ export const fuse = (inputs) =>
       case STATUS_ZERO_THICKNESS:
         throw new ErrorZeroThickness('Zero thickness produced by fuse');
       case STATUS_OK:
-        return fromCgalGeometry(cgalGeometry, inputs, cgalGeometry.getSize(), inputs.length);
+        return fromCgalGeometry(
+          cgalGeometry,
+          inputs,
+          cgalGeometry.getSize(),
+          inputs.length
+        );
       default:
         throw new Error(`Unexpected status ${status}`);
     }

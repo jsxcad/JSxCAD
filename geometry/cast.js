@@ -18,5 +18,5 @@ export const cast = (geometry, reference) => {
   linearize(concreteGeometry, filter, inputs);
   const outputs = castWithCgal(inputs, reference);
   deletePendingSurfaceMeshes();
-  return outputs[0];
+  return taggedGroup({}, ...outputs);
 };

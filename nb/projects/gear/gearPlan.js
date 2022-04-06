@@ -70,5 +70,5 @@ Shape.registerReifier('Gear', (plan) => {
       (i) => rz(-i / numberOfTeeth),
       Group
     )
-    .close();
+    .loop();
 });

@@ -1,6 +1,6 @@
 import {
-  faces as facesWithCgal,
   deletePendingSurfaceMeshes,
+  faces as facesWithCgal,
 } from '@jsxcad/algorithm-cgal';
 
 import { isNotTypeVoid } from './tagged/type.js';

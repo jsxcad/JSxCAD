@@ -4,10 +4,7 @@ import Shape from './Shape.js';
 import { seq } from './seq.js';
 
 export const Wave = (...args) => {
-  const {
-    func: particle = Point,
-    object: options,
-  } = Shape.destructure(args);
+  const { func: particle = Point, object: options } = Shape.destructure(args);
   let particles = [];
   for (const xDistance of seq(
     options,

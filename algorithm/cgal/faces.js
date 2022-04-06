@@ -10,11 +10,7 @@ export const faces = (inputs) =>
       case STATUS_ZERO_THICKNESS:
         throw new ErrorZeroThickness('Zero thickness produced by faces');
       case STATUS_OK:
-        return fromCgalGeometry(
-          cgalGeometry,
-          inputs,
-          cgalGeometry.getSize(),
-        );
+        return fromCgalGeometry(cgalGeometry, inputs, cgalGeometry.getSize());
       default:
         throw new Error(`Unexpected status ${status}`);
     }

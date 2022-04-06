@@ -1,6 +1,6 @@
 import {
-  fill as fillWithCgal,
   deletePendingSurfaceMeshes,
+  fill as fillWithCgal,
 } from '@jsxcad/algorithm-cgal';
 
 import { isNotTypeVoid } from './tagged/type.js';

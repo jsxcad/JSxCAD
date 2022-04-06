@@ -19,7 +19,7 @@ const ToothSpacing = (teeth, tooth_pitch, pitch_line_offset) =>
 
 ```JavaScript
 const ToothProfileToFace = (...points) =>
-  Shape.fromOpenPath(points).close().fill();
+  Shape.fromOpenPath(points).loop().fill();
 ```
 
 ```JavaScript

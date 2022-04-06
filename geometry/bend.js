@@ -3,7 +3,6 @@ import {
   deletePendingSurfaceMeshes,
 } from '@jsxcad/algorithm-cgal';
 
-import { isNotTypeMasked } from './tagged/type.js';
 import { linearize } from './tagged/linearize.js';
 import { replacer } from './tagged/visit.js';
 import { toConcreteGeometry } from './tagged/toConcreteGeometry.js';

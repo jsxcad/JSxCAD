@@ -1,5 +1,4 @@
 import { eachPoint as eachPointOfPaths } from '../paths/eachPoint.js';
-import { eachPoint as eachPointOfPoints } from '../points/eachPoint.js';
 import { eachPoint as graph } from '../graph/eachPoint.js';
 import { op } from './op.js';
 import { transform } from '@jsxcad/math-vec3';
@@ -28,7 +27,7 @@ const polygonsWithHoles = (geometry, emit) => {
   }
 };
 
-const segments = ({segments, matrix}, emit) => {
+const segments = ({ segments, matrix }, emit) => {
   for (const [start, end] of segments) {
     emit(transform(matrix, start));
     emit(transform(matrix, end));

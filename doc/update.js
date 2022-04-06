@@ -16,77 +16,6 @@ process.on('uncaughtException', (err) => {
 
 const server = express();
 const cwd = process.cwd();
-/*
-const paths = [
-'cgal_browser.wasm',
-'jsxcad-algorithm-cgal.js',
-'jsxcad-algorithm-color.js',
-'jsxcad-algorithm-contour.js',
-'jsxcad-algorithm-material.js',
-'jsxcad-algorithm-pack.js',
-'jsxcad-algorithm-text.js',
-'jsxcad-algorithm-threejs.js',
-'jsxcad-algorithm-tool.js',
-'jsxcad-algorithm-verlet.js',
-'jsxcad-api.js',
-'jsxcad-api-shape.js',
-'jsxcad-api-threejs.js',
-'jsxcad-api-v1-armature.js',
-'jsxcad-api-v1-cursor.js',
-'jsxcad-api-v1-dst.js',
-'jsxcad-api-v1-dxf.js',
-'jsxcad-api-v1-font.js',
-'jsxcad-api-v1-gcode.js',
-'jsxcad-api-v1-ldraw.js',
-'jsxcad-api-v1-math.js',
-'jsxcad-api-v1-obj.js',
-'jsxcad-api-v1-off.js',
-'jsxcad-api-v1-pdf.js',
-'jsxcad-api-v1-png.js',
-'jsxcad-api-v1-shapefile.js',
-'jsxcad-api-v1-stl.js',
-'jsxcad-api-v1-svg.js',
-'jsxcad-api-v1-threejs.js',
-'jsxcad-api-v1-tools.js',
-'jsxcad-api-v1-units.js',
-'jsxcad-cache.js',
-'jsxcad-compiler.js',
-'jsxcad-convert-dst.js',
-'jsxcad-convert-dxf.js',
-'jsxcad-convert-gcode.js',
-'jsxcad-convert-ldraw.js',
-'jsxcad-convert-notebook.js',
-'jsxcad-convert-obj.js',
-'jsxcad-convert-off.js',
-'jsxcad-convert-pdf.js',
-'jsxcad-convert-png.js',
-'jsxcad-convert-shapefile.js',
-'jsxcad-convert-stl.js',
-'jsxcad-convert-svg.js',
-'jsxcad-convert-threejs.js',
-'jsxcad-data-shape.js',
-'jsxcad-geometry.js',
-'jsxcad-math-line2.js',
-'jsxcad-math-line3.js',
-'jsxcad-math-mat4.js',
-'jsxcad-math-plane.js',
-'jsxcad-math-poly3.js',
-'jsxcad-math-utils.js',
-'jsxcad-math-vec2.js',
-'jsxcad-math-vec3.js',
-'jsxcad-math-vec4.js',
-'jsxcad-sys.js',
-'jsxcad-ui-app.js',
-'jsxcad-ui-app-webworker.js',
-'jsxcad-ui-notebook.js',
-'jsxcad-ui-threejs.js',
-'jsxcad-ui-v1.js',
-'jsxcad-ui-v1-webworker.js',
-];
-for (const path of paths) {
-  server.get(`/${path}jsxcad-api-shape.js`, (req, res) => res.sendFile(`${cwd}/es6/${path}`));
-}
-*/
 server.use(express.static('es6'));
 server.listen(5001);
 
@@ -134,7 +63,7 @@ const build = async (baseDirectory = '.') => {
     for (const notebook of notebooks) {
       const startTime = new Date();
       const failedExpectations = [];
-      console.log(`Processing notebook: ${process.cwd()}/${notebook}.nb`);
+      console.log(`Processing notebook: ${cwd}/${notebook}.nb`);
       await updateNotebook(notebook, { failedExpectations, browser });
       if (
         failedExpectations.length > 0 &&

@@ -7,19 +7,20 @@ import {
 
 import KdBush from 'kdbush';
 import { computeHash } from '@jsxcad/sys';
+import { eachSegment } from '../eachSegment.js';
 import { fuse } from '../fuse.js';
 import { getEdges } from '../path/getEdges.js';
 import { getNonVoidPaths } from './getNonVoidPaths.js';
 import { getNonVoidSegments } from './getNonVoidSegments.js';
-import { getQuery } from '../graph/getQuery.js';
 import { identityMatrix } from '@jsxcad/math-mat4';
 import { inset } from '../inset.js';
+import { linearize } from './linearize.js';
 import { measureBoundingBox } from './measureBoundingBox.js';
-import { outline } from './outline.js';
+import { outline } from '../outline.js';
 import { section } from '../section.js';
 import { taggedToolpath } from './taggedToolpath.js';
 import { toConcreteGeometry } from './toConcreteGeometry.js';
-import { toSegments } from './toSegments.js';
+import { withAabbTreeQuery } from '@jsxcad/algorithm-cgal';
 
 const X = 0;
 const Y = 1;
@@ -55,79 +56,89 @@ export const computeToolpath = (
     let points = [];
 
     const concreteGeometry = toConcreteGeometry(geometry);
-    const sections = section(concreteGeometry, [{ type: 'points', matrix: identityMatrix }]);
-console.log(`QQ/sections: ${JSON.stringify(sections)}`);
+    const sections = section(concreteGeometry, [
+      { type: 'points', matrix: identityMatrix },
+    ]);
+    console.log(`QQ/sections: ${JSON.stringify(sections)}`);
     const fusedArea = fuse(sections);
-console.log(`QQ/fusedArea: ${JSON.stringify(fusedArea)}`);
+    console.log(`QQ/fusedArea: ${JSON.stringify(fusedArea)}`);
     const insetArea = inset(fusedArea, toolRadius);
-console.log(`QQ/insetArea: ${JSON.stringify(insetArea)}`);
+    console.log(`QQ/insetArea: ${JSON.stringify(insetArea)}`);
 
     // Surfaces
-    {
-      // The hexagon diameter is the tool radius.
-      const { isInteriorPoint, release } = getQuery(insetArea);
-      const [minPoint, maxPoint] = measureBoundingBox(sections);
-      const z = 0;
-      const sqrt3 = Math.sqrt(3);
-      const width = maxPoint[X] - minPoint[X];
-      const offsetX = (maxPoint[X] + minPoint[X]) / 2 - width / 2;
-      const height = maxPoint[Y] - minPoint[Y];
-      const offsetY = (maxPoint[Y] + minPoint[Y]) / 2 - height / 2;
-      const columns = width / (sqrt3 * 0.5 * toolRadius) + 1;
-      const rows = height / (toolRadius * 0.75);
-      const index = [];
-      for (let i = 0; i < columns; i++) {
-        index[i] = [];
-      }
-      const link = (point, neighbor) => {
-        if (neighbor) {
-          point.fillNeighbors.push(neighbor);
-          neighbor.fillNeighbors.push(point);
+    withAabbTreeQuery(
+      linearize(insetArea, ({ type }) =>
+        ['graph', 'polygonsWithHoles'].includes(type)
+      ),
+      (query) => {
+        console.log(`QQ/withAabbTreeQuery`);
+        // The hexagon diameter is the tool radius.
+        const isInteriorPoint = (x, y, z) => {
+          console.log(`isInteriorPoint(${x}, ${y}, ${z})`);
+          return query.isIntersectingPointApproximate(x, y, z);
+        };
+        const [minPoint, maxPoint] = measureBoundingBox(sections);
+        const z = 0;
+        const sqrt3 = Math.sqrt(3);
+        const width = maxPoint[X] - minPoint[X];
+        const offsetX = (maxPoint[X] + minPoint[X]) / 2 - width / 2;
+        const height = maxPoint[Y] - minPoint[Y];
+        const offsetY = (maxPoint[Y] + minPoint[Y]) / 2 - height / 2;
+        const columns = width / (sqrt3 * 0.5 * toolRadius) + 1;
+        const rows = height / (toolRadius * 0.75);
+        const index = [];
+        for (let i = 0; i < columns; i++) {
+          index[i] = [];
         }
-      };
-      for (let i = 0; i < columns; i++) {
-        for (let j = 0; j < rows; j++) {
-          // const x = offsetX + (i + (j % 2 ? 0.5 : 0)) * sqrt3 * toolRadius;
-          // const y = offsetY + j * toolRadius * 0.75;
-          const x = offsetX + (i + (j % 2) * 0.5) * toolRadius * sqrt3 * 0.5;
-          const y = offsetY + j * toolRadius * 0.75;
-          // FIX: We need to produce an affinity with each distinct contiguous area.
-          if (isInteriorPoint(x, y, z)) {
-            const point = { start: [x, y, z], isFill: true, fillNeighbors: [] };
-            index[i][j] = point;
-            points.push(point);
+        const link = (point, neighbor) => {
+          if (neighbor) {
+            point.fillNeighbors.push(neighbor);
+            neighbor.fillNeighbors.push(point);
+          }
+        };
+        for (let i = 0; i < columns; i++) {
+          for (let j = 0; j < rows; j++) {
+            // const x = offsetX + (i + (j % 2 ? 0.5 : 0)) * sqrt3 * toolRadius;
+            // const y = offsetY + j * toolRadius * 0.75;
+            const x = offsetX + (i + (j % 2) * 0.5) * toolRadius * sqrt3 * 0.5;
+            const y = offsetY + j * toolRadius * 0.75;
+            // FIX: We need to produce an affinity with each distinct contiguous area.
+            if (isInteriorPoint(x, y, z)) {
+              const point = {
+                start: [x, y, z],
+                isFill: true,
+                fillNeighbors: [],
+              };
+              index[i][j] = point;
+              points.push(point);
+            }
+          }
+        }
+        for (let i = 0; i < columns; i++) {
+          for (let j = 0; j < rows; j++) {
+            const point = index[i][j];
+            if (!point) {
+              continue;
+            }
+            link(point, index[i - 1][j]);
+            link(point, index[i][j - 1]);
+            if (j % 2) {
+              link(point, index[i + 1][j - 1]);
+            } else {
+              link(point, index[i - 1][j - 1]);
+            }
           }
         }
       }
-      for (let i = 0; i < columns; i++) {
-        for (let j = 0; j < rows; j++) {
-          const point = index[i][j];
-          if (!point) {
-            continue;
-          }
-          link(point, index[i - 1][j]);
-          link(point, index[i][j - 1]);
-          if (j % 2) {
-            link(point, index[i + 1][j - 1]);
-          } else {
-            link(point, index[i - 1][j - 1]);
-          }
-        }
-      }
-      release();
-    }
+    );
     time('QQ/computeToolpath/Surfaces');
 
     // Profiles
     {
-      const outlines = outline(insetArea);
-console.log(`QQ/outlines: ${JSON.stringify(outlines)}`);
-      const segments = toSegments(outlines);
-console.log(`QQ/segments: ${JSON.stringify(segments)}`);
-      for (const [start, end] of segments.segments) {
+      eachSegment(insetArea, ([start, end]) => {
         points.push({ start: start, end: { end: end, type: 'required' } });
         points.push({ start: end, note: 'segment end' });
-      }
+      });
     }
     time('QQ/computeToolpath/Profiles');
 
@@ -223,10 +234,27 @@ console.log(`QQ/segments: ${JSON.stringify(segments)}`);
     );
     time('QQ/computeToolpath/Index');
 
-    const jump = (toolpath, from, to) =>
-      toolpath.push({ op: 'jump', from: from, to: to });
+    const jump = (
+      toolpath,
+      [fromX = 0, fromY = 0, fromZ = 0],
+      [toX = 0, toY = 0, toZ = 0]
+    ) =>
+      toolpath.push({
+        op: 'jump',
+        from: [fromX, fromY, fromZ],
+        to: [toX, toY, toZ],
+      });
 
-    const cut = (toolpath, from, to) => toolpath.push({ op: 'cut', from, to });
+    const cut = (
+      toolpath,
+      [fromX = 0, fromY = 0, fromZ = 0],
+      [toX = 0, toY = 0, toZ = 0]
+    ) =>
+      toolpath.push({
+        op: 'cut',
+        from: [fromX, fromY, fromZ],
+        to: [toX, toY, toZ],
+      });
 
     const considerTargetPoint = (candidates, fulfilled, candidate, target) => {
       if (fulfilled.has(computeHash(target.start))) {

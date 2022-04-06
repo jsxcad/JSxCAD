@@ -1339,7 +1339,7 @@ const polygonsWithHoles$2 = (geometry, emit) => {
   }
 };
 
-const segments$3 = ({segments, matrix}, emit) => {
+const segments$3 = ({ segments, matrix }, emit) => {
   for (const [start, end] of segments) {
     emit(transform$3(matrix, start));
     emit(transform$3(matrix, end));
@@ -1737,10 +1737,10 @@ console.log(`QQ/segments: ${JSON.stringify(segments)}`);
     );
     time('QQ/computeToolpath/Index');
 
-    const jump = (toolpath, from, to) =>
-      toolpath.push({ op: 'jump', from: from, to: to });
+    const jump = (toolpath, [fromX = 0, fromY = 0, fromZ = 0], [toX = 0, toY = 0, toZ = 0]) =>
+      toolpath.push({ op: 'jump', from: [fromX, fromY, fromZ], to: [toX, toY, toZ] });
 
-    const cut = (toolpath, from, to) => toolpath.push({ op: 'cut', from, to });
+    const cut = (toolpath, [fromX = 0, fromY = 0, fromZ = 0], [toX = 0, toY = 0, toZ = 0]) => toolpath.push({ op: 'cut', from: [fromX, fromY, fromZ], to: [toX, toY, toZ] });
 
     const considerTargetPoint = (candidates, fulfilled, candidate, target) => {
       if (fulfilled.has(computeHash(target.start))) {

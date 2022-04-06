@@ -8,7 +8,9 @@ export const computeNormal = (inputs) =>
     const status = g.ComputeNormal(cgalGeometry);
     switch (status) {
       case STATUS_ZERO_THICKNESS:
-        throw new ErrorZeroThickness('Zero thickness produced by compute normal');
+        throw new ErrorZeroThickness(
+          'Zero thickness produced by compute normal'
+        );
       case STATUS_OK:
         return fromCgalGeometry(cgalGeometry, inputs);
       default:

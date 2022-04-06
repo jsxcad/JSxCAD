@@ -4,10 +4,7 @@ import Shape from './Shape.js';
 import { seq } from './seq.js';
 
 export const Spiral = (...args) => {
-  const {
-    func: particle = Point,
-    object: options,
-  } = Shape.destructure(args);
+  const { func: particle = Point, object: options } = Shape.destructure(args);
   let particles = [];
   for (const turn of seq(
     options,

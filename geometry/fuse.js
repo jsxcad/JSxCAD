@@ -1,6 +1,6 @@
 import {
-  fuse as fuseWithCgal,
   deletePendingSurfaceMeshes,
+  fuse as fuseWithCgal,
 } from '@jsxcad/algorithm-cgal';
 
 import { isNotTypeVoid } from './tagged/type.js';

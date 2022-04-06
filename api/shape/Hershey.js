@@ -1446,8 +1446,7 @@ export const toSegments = (letters) => {
     }
     xOffset += hersheyWidth[code] || 0;
   }
-  return Group(...rendered)
-    .scale(1 / 28);
+  return Group(...rendered).scale(1 / 28);
 };
 
 export const ofSize = (text, size) => toSegments(text).scale(size);
