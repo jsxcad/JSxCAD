@@ -935,6 +935,7 @@ const Surface_mesh* SmoothSurfaceMesh(const Surface_mesh* input,
                                       size_t selection_count,
                                       emscripten::val getMesh,
                                       emscripten::val getTransform) {
+  CGAL::get_default_random() = CGAL::Random(0);
   Surface_mesh working_input(*input);
 
   CGAL::Polygon_mesh_processing::transform(*input_transform, working_input,
@@ -1045,6 +1046,7 @@ const Surface_mesh* SmoothShapeOfSurfaceMesh(
     const Surface_mesh* input, const Transformation* input_transform,
     size_t iterations, double time, size_t selection_count,
     emscripten::val getMesh, emscripten::val getTransform) {
+  CGAL::get_default_random() = CGAL::Random(0);
   Surface_mesh working_input(*input);
   CGAL::Polygon_mesh_processing::transform(*input_transform, working_input,
                                            CGAL::parameters::all_default());
