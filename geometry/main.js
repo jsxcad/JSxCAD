@@ -192,12 +192,7 @@ export { transformCoordinate, transformingCoordinates } from './transform.js';
 export { translate as translatePath } from './path/ops.js';
 export { translate as translatePaths } from './paths/ops.js';
 export { toConcreteGeometry } from './tagged/toConcreteGeometry.js';
-export {
-  toDisjointGeometry,
-  toVisiblyDisjointGeometry,
-} from './tagged/toDisjointGeometry.js';
 export { toDisplayGeometry } from './tagged/toDisplayGeometry.js';
-export { toKeptGeometry } from './tagged/toKeptGeometry.js';
 export { toTransformedGeometry } from './tagged/toTransformedGeometry.js';
 export { toPoints } from './tagged/toPoints.js';
 export { toTriangleArray } from './tagged/toTriangleArray.js';

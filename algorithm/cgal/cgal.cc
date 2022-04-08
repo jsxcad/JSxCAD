@@ -4513,13 +4513,17 @@ int Fill(Geometry* geometry) {
         // We require segments to be their local z=0 plane.
         Plane plane(0, 0, 1, 0);
         Arrangement_2& arrangement = arrangements[Plane(0, 0, 1, 0)];
-        for (Segment s : geometry->input_segments(nth)) {
-          if (!plane.has_on(s.source()) || !plane.has_on(s.target())) {
+        for (Segment s3 : geometry->input_segments(nth)) {
+          if (!plane.has_on(s3.source()) || !plane.has_on(s3.target())) {
             continue;
           }
-          insert(arrangement,
-                 Segment_2(Point_2(s.source().x(), s.source().y()),
-                           Point_2(s.target().x(), s.target().y())));
+          Point_2 source(s3.source().x(), s3.source().y());
+          Point_2 target(s3.target().x(), s3.target().y());
+          if (source == target) {
+            continue;
+          }
+          Segment_2 s2(source, target);
+          insert(arrangement, s2);
         }
         break;
       }
@@ -4620,6 +4624,7 @@ int Fuse(Geometry* geometry) {
     }
     if (target == -1) {
       target = geometry->add(GEOMETRY_SEGMENTS);
+      geometry->setIdentityTransform(target);
     }
     for (const Segment& segment : geometry->input_segments(nth)) {
       geometry->addSegment(target, segment);
@@ -4632,6 +4637,7 @@ int Fuse(Geometry* geometry) {
     }
     if (target == -1) {
       target = geometry->add(GEOMETRY_POINTS);
+      geometry->setIdentityTransform(target);
     }
     for (const Point& point : geometry->input_points(nth)) {
       geometry->addPoint(target, point);

@@ -2,15 +2,13 @@ import { addPending, write as writePath } from '@jsxcad/sys';
 
 import { hash } from './hash.js';
 import { store } from './store.js';
-import { toDisjointGeometry } from './toDisjointGeometry.js';
 
 export const write = async (path, geometry, options) => {
-  const disjointGeometry = toDisjointGeometry(geometry);
   // Ensure that the geometry carries a hash before saving.
-  hash(disjointGeometry);
-  const stored = await store(disjointGeometry);
+  hash(geometry);
+  const stored = await store(geometry);
   await writePath(path, stored, options);
-  return disjointGeometry;
+  return geometry;
 };
 
 // Generally addPending(write(...)) seems a better option.

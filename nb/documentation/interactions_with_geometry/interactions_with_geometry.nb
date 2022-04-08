@@ -194,9 +194,9 @@ By default the slice is taken where the shape intersects the XY plane.
 Section takes shapes as arguments, and will use the plane of orientation of the shape.
 `;
 
-Orb(4).hasZag(0.1).section().view();
+Orb(4).section().view();
 
-Orb(4).hasZag(0.1).section(Point().z(0), Point().z(1), Point().z(2)).view();
+Orb(4).section(Point().z(0), Point().z(1), Point().z(2)).view();
 
 md`
 ---

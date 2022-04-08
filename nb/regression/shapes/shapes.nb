@@ -62,7 +62,7 @@ Line(5, -1).rz(45).gridView().md(`Line(5, -1)`);
 
 Octagon(5).gridView().md(`Octagon(5)`);
 
-Orb(1).hasZag(0.1).view().md(`Orb(1).hasZag(0.1)`);
+Orb(1).view().md(`Orb(1)`);
 
 Path(Point(0), Point(5), Point(5, 5), Point(0))
   .rz(45 / 2)
