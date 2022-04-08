@@ -27,6 +27,8 @@ Arc(10).svg('fileName');
 
 ![Image](file_import_and_export.md.1.png)
 
+[fileName_0.svg](file_import_and_export.fileName_0.svg)
+
 ---
 ### Importing .stl
 Imports a .stl file which can then be used as geometry. A best effort is made to handle bad geometry in the .stl file.

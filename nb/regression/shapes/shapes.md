@@ -142,12 +142,12 @@ Octagon(5).gridView().md(`Octagon(5)`);
 Octagon(5)
 
 ```JavaScript
-Orb(1).hasZag(0.1).view().md(`Orb(1).hasZag(0.1)`);
+Orb(1).view().md(`Orb(1)`);
 ```
 
 ![Image](shapes.md.13.png)
 
-Orb(1).hasZag(0.1)
+Orb(1)
 
 ```JavaScript
 Path(Point(0), Point(5), Point(5, 5), Point(0))

@@ -7,7 +7,6 @@ Here we break the bearing at the equator and pin the hemispheres together.
 ```JavaScript
 const Bearing = (diameter) =>
   Orb(diameter)
-    .hasZag(0.1)
     .cutout(Box(diameter).ez(diameter / 2), as('top'))
     .fitTo(
       Arc(4.5)

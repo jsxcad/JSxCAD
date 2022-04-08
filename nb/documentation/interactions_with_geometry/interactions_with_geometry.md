@@ -267,13 +267,13 @@ By default the slice is taken where the shape intersects the XY plane.
 Section takes shapes as arguments, and will use the plane of orientation of the shape.
 
 ```JavaScript
-Orb(4).hasZag(0.1).section().view();
+Orb(4).section().view();
 ```
 
 ![Image](interactions_with_geometry.md.23.png)
 
 ```JavaScript
-Orb(4).hasZag(0.1).section(Point().z(0), Point().z(1), Point().z(2)).view();
+Orb(4).section(Point().z(0), Point().z(1), Point().z(2)).view();
 ```
 
 ![Image](interactions_with_geometry.md.24.png)

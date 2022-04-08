@@ -3882,15 +3882,11 @@ Shape.registerMethod('rz', rz);
 const rotateZ = rz;
 Shape.registerMethod('rotateZ', rz);
 
-const saveGeometry = async (path, shape) => {
-  logInfo('api/shape/saveGeometry', path);
-  return Shape.fromGeometry(await write(path, shape.toGeometry()));
-};
+const saveGeometry = async (path, shape) =>
+  Shape.fromGeometry(await write(path, shape.toGeometry()));
 
-const saveGeometryNonblocking = (path, shape) => {
-  logInfo('api/shape/saveGeometryNonblocking', path);
-  return Shape.fromGeometry(writeNonblocking(path, shape.toGeometry()));
-};
+const saveGeometryNonblocking = (path, shape) =>
+  Shape.fromGeometry(writeNonblocking(path, shape.toGeometry()));
 
 const scale =
   (x = 1, y = x, z = y) =>

@@ -416,6 +416,8 @@ Triangle(14).svg('triangle');
 
 ![Image](shape.md.49.png)
 
+[triangle_0.svg](shape.triangle_0.svg)
+
 ```JavaScript
 Box(10)
   .ez(50, -50)
