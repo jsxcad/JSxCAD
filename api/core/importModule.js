@@ -4,8 +4,8 @@ import { isNode, read, restoreEmitGroup, saveEmitGroup } from '@jsxcad/sys';
 
 const DYNAMIC_MODULES = new Map();
 
-export const registerDynamicModule = (path, nodePath) => {
-  DYNAMIC_MODULES.set(path, isNode ? nodePath : path);
+export const registerDynamicModule = (path, browserPath, nodePath) => {
+  DYNAMIC_MODULES.set(path, isNode ? nodePath : browserPath);
 };
 
 const CACHED_MODULES = new Map();

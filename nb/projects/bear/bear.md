@@ -11,7 +11,7 @@ a.stl('bear');
 [bear_0.stl](bear.bear_0.stl)
 
 ```JavaScript
-a.section(seq(z => xy.z(z), { to: 200, by: 1 })).view();
+a.section(Point().seq({ to: 200, by: 1 }, z, Group)).view();
 ```
 
 ![Image](bear.md.1.png)

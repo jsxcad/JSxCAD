@@ -9,6 +9,10 @@
 
 import Shape from './Shape.js';
 
+// We need destructure available via Shape.
+// eslint-disable-next-line sort-imports
+import './destructure.js';
+
 // We need Plan.js to add Shape.registerReifier before later imports call it.
 // eslint-disable-next-line sort-imports
 import './Plan.js';
@@ -280,7 +284,6 @@ export { packingEnvelope } from './packingEnvelope.js';
 export { upperEnvelope } from './upperEnvelope.js';
 export { extrudeX, extrudeY, extrudeZ, ex, ey, ez } from './extrude.js';
 export { extrudeAlong, e } from './extrudeAlong.js';
-export { extrudeToPlane } from './extrudeToPlane.js';
 export { faces } from './faces.js';
 export { fill, withFill } from './fill.js';
 export { fit } from './fit.js';
@@ -293,11 +296,11 @@ export { grow } from './grow.js';
 export { inline } from './inline.js';
 export { inset } from './inset.js';
 export { keep } from './keep.js';
+export { link } from './Link.js';
 export { loadGeometry } from './loadGeometry.js';
 export { loft } from './loft.js';
-export { loft2 } from './loft2.js';
 export { log } from './log.js';
-export { loop } from './loop.js';
+export { loop } from './Loop.js';
 export { overlay } from './overlay.js';
 export { mask } from './mask.js';
 export { material } from './material.js';
@@ -321,6 +324,7 @@ export { pack } from './pack.js';
 export { play } from './play.js';
 export { points } from './points.js';
 export { push } from './push.js';
+export { reify } from './reify.js';
 export { remesh } from './remesh.js';
 export { removeSelfIntersections } from './removeSelfIntersections.js';
 export { rotate } from './rotate.js';
@@ -384,6 +388,9 @@ export { Icosahedron } from './Icosahedron.js';
 export { Implicit } from './Implicit.js';
 export { Join } from './Join.js';
 export { Line } from './Line.js';
+export { Link } from './Link.js';
+export { Loft } from './loft.js';
+export { Loop } from './Loop.js';
 export { Octagon } from './Octagon.js';
 export { Orb } from './Orb.js';
 export { Page } from './Page.js';

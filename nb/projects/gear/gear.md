@@ -55,6 +55,7 @@ Gear()
   .hasClearance(clearance)
   .hasBacklash(backlash)
   .hasToothResolution(toothResolution)
+  .fill()
   .ez(thickness)
   .material('wood')
   .stl(`gear_${numberOfTeeth}`);
@@ -102,7 +103,7 @@ const planetaryDesign1 = Arc(44)
 ```
 
 ```JavaScript
-const planetary = Gear().hasTeeth(8).md(`Our base involute gear.`);
+const planetary = Gear().hasTeeth(8).fill().md(`Our base involute gear.`);
 ```
 
 Our base involute gear.
@@ -219,7 +220,6 @@ const planetaryDesign3 = planetaryDesign2
 ```JavaScript
 const planetaryDesign4a =
     solar
-      .log()
       .ez(-2);
 ```
 
@@ -285,5 +285,3 @@ const planetaryDesign = planetaryDesign3
 [solar_0.stl](gear.solar_0.stl)
 
 ![Image](gear.md.13.png)
-
-[axle_0.stl](gear.axle_0.stl)

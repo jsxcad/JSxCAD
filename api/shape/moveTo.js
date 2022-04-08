@@ -1,5 +1,7 @@
 import Shape from './Shape.js';
 import { fromTranslateToTransform } from '@jsxcad/algorithm-cgal';
+import { linearize } from '@jsxcad/geometry';
+import { transform } from '@jsxcad/math-vec3';
 
 // FIX: This is probably the wrong approach to moving to a particular location.
 export const moveTo =
@@ -10,10 +12,14 @@ export const moveTo =
     z = Shape.toValue(z, shape);
     // Allow a Point to be provided.
     if (x instanceof Shape) {
-      const g = x.toTransformedGeometry();
-      if (g.type === 'points' && g.points.length === 1) {
-        // FIX: Consider how this might be more robust.
-        [x, y, z] = g.points[0];
+      const geometry = linearize(
+        x.toGeometry(),
+        ({ type, points }) => type === 'points' && points.length >= 1
+      );
+      if (geometry.length >= 1) {
+        const { matrix, points } = geometry[0];
+        const point = transform(matrix, points[0]);
+        [x, y, z] = point;
       }
     }
     if (!isFinite(x)) {

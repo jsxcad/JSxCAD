@@ -1,11 +1,15 @@
+import Point from './Point.js';
 import Shape from './Shape.js';
-import { projectToPlane as projectToPlaneOfGeometry } from '@jsxcad/geometry';
+import { cast as castGeometry } from '@jsxcad/geometry';
 
 export const cast =
-  (plane = [0, 0, 1, 0], direction = [0, 0, 1, 0]) =>
+  (plane = [0, 0, 1, 0], reference = Point()) =>
   (shape) =>
     Shape.fromGeometry(
-      projectToPlaneOfGeometry(shape.toGeometry(), plane, direction)
+      castGeometry(
+        shape.toGeometry(),
+        Shape.toShape(reference, shape).toGeometry()
+      )
     );
 
 Shape.registerMethod('cast', cast);

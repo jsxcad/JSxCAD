@@ -4,7 +4,6 @@ import {
   concatenatePath,
   flip,
   fromPolygonsToGraph,
-  openPath,
   rewriteTags,
   taggedGraph,
   taggedPaths,
@@ -18,7 +17,6 @@ import {
 } from '@jsxcad/geometry';
 
 import { endTime, getSourceLocation, startTime } from '@jsxcad/sys';
-import { destructure } from './destructure.js';
 import { identityMatrix } from '@jsxcad/math-mat4';
 
 export class Shape {
@@ -173,17 +171,46 @@ export const shapeMethod = (build) => {
   };
 };
 
-Shape.destructure = destructure;
-
 Shape.shapeMethod = shapeMethod;
 
-Shape.fromClosedPath = (path, context) =>
-  fromGeometry(taggedPaths({}, [closePath(path)]), context);
 Shape.fromGeometry = (geometry, context) => new Shape(geometry, context);
 Shape.fromGraph = (graph, context) =>
   new Shape(taggedGraph({}, graph), context);
-Shape.fromOpenPath = (path, context) =>
-  fromGeometry(taggedPaths({}, [openPath(path)]), context);
+Shape.fromClosedPath = (path, context) => {
+  const segments = [];
+  let first;
+  let last;
+  for (const point of path) {
+    if (point === null) {
+      continue;
+    }
+    if (!first) {
+      first = point;
+    }
+    if (last) {
+      segments.push([last, point]);
+    }
+    last = point;
+  }
+  if (first && last && first !== last) {
+    segments.push([last, first]);
+  }
+  return Shape.fromSegments(segments);
+};
+Shape.fromOpenPath = (path, context) => {
+  const segments = [];
+  let last;
+  for (const point of path) {
+    if (point === null) {
+      continue;
+    }
+    if (last) {
+      segments.push([last, point]);
+    }
+    last = point;
+  }
+  return Shape.fromSegments(segments);
+};
 Shape.fromSegments = (segments) => fromGeometry(taggedSegments({}, segments));
 Shape.fromPath = (path, context) =>
   fromGeometry(taggedPaths({}, [path]), context);
@@ -212,6 +239,13 @@ Shape.toShape = (to, from) => {
 Shape.toShapes = (to, from) => {
   if (to instanceof Function) {
     to = to(from);
+  }
+  if (to instanceof Shape) {
+    if (to.toGeometry().type === 'group') {
+      to = to
+        .toGeometry()
+        .content.map((content) => Shape.fromGeometry(content));
+    }
   }
   if (to instanceof Array) {
     return to
@@ -270,21 +304,20 @@ Shape.toCoordinate = (shape, x = 0, y = 0, z = 0) => {
     x = shape.get(x);
   }
   if (x instanceof Shape) {
-    const g = x.toTransformedGeometry();
-    if (g.type === 'points' && g.points.length === 1) {
-      // FIX: Consider how this might be more robust.
-      return g.points[0];
+    const points = x.toPoints();
+    if (points.length >= 1) {
+      return points[0];
     } else {
-      throw Error(`Unexpected coordinate value: ${x}`);
+      throw Error(`Unexpected coordinate value: ${JSON.stringify(x)}`);
     }
   } else if (x instanceof Array) {
     return x;
   } else if (typeof x === 'number') {
     if (typeof y !== 'number') {
-      throw Error(`Unexpected coordinate value: ${y}`);
+      throw Error(`Unexpected coordinate value: ${JSON.stringify(y)}`);
     }
     if (typeof z !== 'number') {
-      throw Error(`Unexpected coordinate value: ${z}`);
+      throw Error(`Unexpected coordinate value: ${JSON.stringify(z)}`);
     }
     return [x, y, z];
   } else {

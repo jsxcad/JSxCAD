@@ -5,7 +5,6 @@ import { rewrite } from './visit.js';
 import { taggedGroup } from './taggedGroup.js';
 import { toConcreteGeometry } from './toConcreteGeometry.js';
 import { toTriangles as toTrianglesFromGraph } from '../graph/toTriangles.js';
-import { toTriangles as toTrianglesFromPolygonsWithHoles } from '../polygonsWithHoles/toTriangles.js';
 
 export const soup = (
   geometry,
@@ -38,10 +37,8 @@ export const soup = (
         }
       }
       // Unreachable.
-      case 'polygons':
-        return show(toTrianglesFromPolygonsWithHoles(geometry));
       case 'polygonsWithHoles':
-        return show(toTrianglesFromPolygonsWithHoles(geometry));
+        return show(geometry);
       case 'segments':
       case 'triangles':
       case 'points':

@@ -12,7 +12,7 @@
     "lintfix": "eslint --fix *.js",
     "rollup": "rollup -c rollup_main.js",
     "test": "ava",
-    "tests": "ava *.test.js"
+    "tests": "ava --timeout=1000s *.test.js"
   },
   "contributors": [
     {
@@ -23,9 +23,11 @@
   "keywords": [],
   "license": "MIT",
   "dependencies": {
+    "@jsxcad/algorithm-cgal": "^0.0.79",
     "@jsxcad/algorithm-color": "^0.0.79",
     "@jsxcad/geometry": "^0.0.79",
     "@jsxcad/math-vec2": "^0.0.79",
+    "@jsxcad/sys": "^0.0.79",
     "dxf-writer": "^1.2.1",
     "dxf-parser": "^1.1.1"
   },

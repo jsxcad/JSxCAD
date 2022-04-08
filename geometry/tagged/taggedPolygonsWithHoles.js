@@ -1,5 +1,5 @@
 export const taggedPolygonsWithHoles = (
-  { tags = [], matrix, provenance, plane, exactPlane },
+  { tags = [], matrix, provenance },
   polygonsWithHoles
 ) => {
   return {
@@ -7,8 +7,7 @@ export const taggedPolygonsWithHoles = (
     tags,
     matrix,
     provenance,
-    plane,
-    exactPlane,
+    plane: [0, 0, 1, 0],
     polygonsWithHoles,
   };
 };

@@ -1,5 +1,4 @@
-import { hasTypeWire, taggedPaths, translatePaths } from '@jsxcad/geometry';
-
+import Group from './Group.js';
 import Shape from './Shape.js';
 
 // Hershey simplex one line font.
@@ -1417,21 +1416,40 @@ const hersheyWidth = {
   126: 24,
 };
 
-export const toPaths = (letters) => {
+const hersheySegments = [];
+
+for (const key of Object.keys(hersheyPaths)) {
+  const segments = [];
+  hersheySegments[key] = segments;
+  for (const path of hersheyPaths[key]) {
+    let last;
+    for (const point of path) {
+      if (point === null) {
+        continue;
+      }
+      if (last) {
+        segments.push([last, point]);
+      }
+      last = point;
+    }
+  }
+}
+
+export const toSegments = (letters) => {
   let xOffset = 0;
-  const mergedPaths = [];
+  const rendered = [];
   for (const letter of letters) {
     const code = letter.charCodeAt(0);
-    const paths = hersheyPaths[code] || [];
-    mergedPaths.push(...translatePaths([xOffset, 0, 0], paths));
+    const segments = hersheySegments[code];
+    if (segments) {
+      rendered.push(Shape.fromSegments(segments).x(xOffset));
+    }
     xOffset += hersheyWidth[code] || 0;
   }
-  return Shape.fromGeometry(hasTypeWire(taggedPaths({}, mergedPaths)))
-    .scale(1 / 28)
-    .outline();
+  return Group(...rendered).scale(1 / 28);
 };
 
-export const ofSize = (text, size) => toPaths(text).scale(size);
+export const ofSize = (text, size) => toSegments(text).scale(size);
 
 export const Hershey = ofSize;
 

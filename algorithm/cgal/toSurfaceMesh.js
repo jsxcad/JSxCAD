@@ -45,7 +45,9 @@ const remember = (surfaceMesh) => {
 };
 
 export const deletePendingSurfaceMeshes = () => {
-  console.log(`QQ/deleting ${pending.size} surface meshes`);
+  if (pending.size > 0) {
+    console.log(`QQ/deleting ${pending.size} surface meshes`);
+  }
   for (const surfaceMesh of pending) {
     if (surfaceMesh.isScheduledForDeletion) {
       console.log(

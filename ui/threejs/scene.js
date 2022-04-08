@@ -72,7 +72,7 @@ export const buildScene = ({
     spotLight.position.set(20, 20, 20);
     spotLight.castShadow = true;
     spotLight.receiveShadow = true;
-    spotLight.shadowCameraNear = 0.5;
+    spotLight.shadow.camera.near = 0.5;
     spotLight.shadow.mapSize.width = 1024 * 2;
     spotLight.shadow.mapSize.height = 1024 * 2;
     spotLight.userData.dressing = true;

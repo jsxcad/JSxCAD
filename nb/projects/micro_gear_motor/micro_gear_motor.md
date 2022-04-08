@@ -115,6 +115,7 @@ Sheath
 
 ```JavaScript
 const gear = Gear(20)
+  .fill()
   .cut(axleFlatProfile)
   .ez(4)
   .md('Gear')

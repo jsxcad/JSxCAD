@@ -1,15 +1,7 @@
 ```JavaScript
-Group(
-  seq(
-    (x) =>
-      Box(10)
-        .x(x)
-        .op((s) =>
-          Group(seq((y) => s.y(y), { from: -100, upto: 100, by: 60 }))
-        ),
-    { from: -100, upto: 100, by: 60 }
-  )
-)
+Box(10)
+  .seq({ from: -100, upto: 100, by: 60 }, y, Group)
+  .seq({ from: -100, upto: 100, by: 60 }, x, Group)
   .align('xy')
   .toolpath()
   .gcode('calibration');

@@ -64,10 +64,11 @@ Shape.registerReifier('Gear', (plan) => {
 
   const toothProfile = ToothProfile(r, b, c, k, toothResolution);
 
-  let profile = Shape.fromOpenPath([]);
-  for (let i = 0; i < numberOfTeeth - teethToHide; i++) {
-    profile = profile.concat(toothProfile.rotateZ(-i / numberOfTeeth));
-  }
-
-  return profile.close();
+  return toothProfile
+    .seq(
+      { upto: numberOfTeeth - teethToHide },
+      (i) => rz(-i / numberOfTeeth),
+      Group
+    )
+    .loop();
 });

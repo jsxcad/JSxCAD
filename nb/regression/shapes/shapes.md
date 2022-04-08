@@ -142,12 +142,12 @@ Octagon(5).gridView().md(`Octagon(5)`);
 Octagon(5)
 
 ```JavaScript
-Orb(5).hasSides(20).view().md(`Orb(5)`);
+Orb(1).view().md(`Orb(1)`);
 ```
 
 ![Image](shapes.md.13.png)
 
-Orb(5)
+Orb(1)
 
 ```JavaScript
 Path(Point(0), Point(5), Point(5, 5), Point(0))
@@ -262,15 +262,15 @@ Triangle(5).gridView().md(`Triangle(5)`);
 Triangle(5)
 
 ```JavaScript
-Wave((a) => [[0, sin(a * 3) * 100]], { to: 360 })
+Wave((t) => Point(0, sin(t * 3) * 100), { to: 360 })
   .align('xy')
   .gridView()
-  .md(`Wave((a) => [[0, sin(a * 3) * 100]], { to: 360 })`);
+  .md(`Wave((t) => Point(0, sin(t * 3) * 100), { to: 360 })`);
 ```
 
 ![Image](shapes.md.24.png)
 
-Wave((a) => [[0, sin(a * 3) * 100]], { to: 360 })
+Wave((t) => Point(0, sin(t * 3) * 100), { to: 360 })
 
 ```JavaScript
 Weld(Arc(4).x(-1), Box(5).x(1))
@@ -397,14 +397,8 @@ Box(12)
 
 ```JavaScript
 Group(Box(1), Box(1).rx(1 / 4))
-  .e(2)
+  .each(e(2))
   .view();
 ```
 
 ![Image](shapes.md.34.png)
-
-```JavaScript
-Triangle(6).loft2(Octagon(4).rz(1 / 32).z(3)).view();
-```
-
-![Image](shapes.md.35.png)

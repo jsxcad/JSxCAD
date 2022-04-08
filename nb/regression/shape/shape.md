@@ -423,7 +423,7 @@ Box(10)
   .ez(50, -50)
   .rx(0, 1 / 4)
   .fuse().view(0)
-  .remesh({ method: 'isotropic', iterations: 1, relaxationSteps: 1, targetEdgeLength: 0.5, }, Box(20, 20, 20))
+  .remesh(1, Box(20, 20, 20))
   .smooth({ method: 'shape', iterations: 1, time: 1 }, Box(9, 20, 20))
   .view();
 ```
@@ -508,21 +508,8 @@ Box(20, 20, 20)
 ![Image](shape.md.59.png)
 
 ```JavaScript
-Box(20, 20, 20)
-  .join(Box(10, 10, 40))
-  .join(Orb(4).hasSides(4).z(24))
-  .rx(1 / 16)
-  .align('z>')
-  .upperEnvelope()
-  .extrudeToPlane({ low: [0, 0, 1, 0], direction: [0, 0, -1, 0] })
-  .view(5);
-```
-
-![Image](shape.md.60.png)
-
-```JavaScript
 Box(10, 3, 3)
-  .remesh({ targetEdgeLength: 0.25 })
+  .remesh(1)
   .deform(
     [
       {
@@ -547,7 +534,7 @@ Box(10, 3, 3)
   .view();
 ```
 
-![Image](shape.md.61.png)
+![Image](shape.md.60.png)
 
 Area of Box(2).cut(Box(1)) is 3.00
 

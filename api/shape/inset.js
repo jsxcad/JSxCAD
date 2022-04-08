@@ -5,7 +5,7 @@ export const inset =
   (initial = 1, { segments = 16, step, limit } = {}) =>
   (shape) =>
     Shape.fromGeometry(
-      insetGeometry(shape.toGeometry(), initial, { segments, step, limit })
+      insetGeometry(shape.toGeometry(), initial, step, limit, segments)
     );
 
 // CHECK: Using 'with' for may be confusing, but andInset looks odd.

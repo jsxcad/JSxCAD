@@ -1,11 +1,12 @@
 import {
-  getNonVoidPaths,
+  disjoint as disjointGeometry,
+  getNonVoidPolygonsWithHoles,
   getNonVoidSegments,
   measureBoundingBox,
   scale as scaleGeometry,
-  toDisjointGeometry,
-  toPolygonsWithHoles,
-  translate as translateGeometry,
+  section as sectionGeometry,
+  transformCoordinate,
+  transformingCoordinates,
 } from '@jsxcad/geometry';
 
 import { toRgbFromTags } from '@jsxcad/algorithm-color';
@@ -85,26 +86,28 @@ export const toPdf = async (
   const width = max[X] - min[X];
   const height = max[Y] - min[Y];
   const lines = [];
-  const disjointGeometry = toDisjointGeometry(
-    translateGeometry(
-      [1, 1, 0],
-      scaleGeometry([scale, scale, scale], await geometry)
-    )
-  );
-  for (const { tags, polygonsWithHoles } of toPolygonsWithHoles(
-    disjointGeometry
+  const section = sectionGeometry(await geometry, [
+    { type: 'points', tags: [] },
+  ]);
+  const disjoint = disjointGeometry([section]);
+  const prepared = scaleGeometry([scale, scale, scale], disjoint);
+
+  for (const { matrix, tags, polygonsWithHoles } of getNonVoidPolygonsWithHoles(
+    prepared
   )) {
     for (const { points, holes } of polygonsWithHoles) {
       lines.push(toFillColor(toRgbFromTags(tags, definitions, black)));
       lines.push(toStrokeColor(toRgbFromTags(tags, definitions, black)));
       const drawLines = (points) => {
-        points.forEach(([x, y], nth) => {
-          if (nth === 0) {
-            lines.push(`${x.toFixed(9)} ${y.toFixed(9)} m`); // move-to.
-          } else {
-            lines.push(`${x.toFixed(9)} ${y.toFixed(9)} l`); // line-to.
-          }
-        });
+        points.forEach(
+          transformingCoordinates(matrix, ([x, y, z], nth) => {
+            if (nth === 0) {
+              lines.push(`${x.toFixed(9)} ${y.toFixed(9)} m`); // move-to.
+            } else {
+              lines.push(`${x.toFixed(9)} ${y.toFixed(9)} l`); // line-to.
+            }
+          })
+        );
         lines.push(`h`); // Polygons are always closed.
       };
       drawLines(points);
@@ -116,31 +119,12 @@ export const toPdf = async (
     }
   }
 
-  for (const { tags, paths } of getNonVoidPaths(disjointGeometry)) {
-    lines.push(toStrokeColor(toRgbFromTags(tags, definitions, black)));
-    for (const path of paths) {
-      let nth = path[0] === null ? 1 : 0;
-      if (nth >= path.length) {
-        continue;
-      }
-      const [x1, y1] = path[nth];
-      lines.push(`${x1.toFixed(9)} ${y1.toFixed(9)} m`); // move-to.
-      for (nth++; nth < path.length; nth++) {
-        const [x2, y2] = path[nth];
-        lines.push(`${x2.toFixed(9)} ${y2.toFixed(9)} l`); // line-to.
-      }
-      if (path[0] !== null) {
-        // A leading null indicates an open path.
-        lines.push(`h`); // close path.
-      }
-      lines.push(`S`); // stroke.
-    }
-  }
-
-  for (const { tags, segments } of getNonVoidSegments(disjointGeometry)) {
+  for (const { matrix, tags, segments } of getNonVoidSegments(prepared)) {
     lines.push(toStrokeColor(toRgbFromTags(tags, definitions, black)));
     let last;
-    for (const [start, end] of segments) {
+    for (let [start, end] of segments) {
+      start = transformCoordinate(matrix, start);
+      end = transformCoordinate(matrix, end);
       if (!last || start[X] !== last[X] || start[Y] !== last[Y]) {
         if (last) {
           lines.push(`S`); // stroke.

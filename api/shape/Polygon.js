@@ -1,9 +1,7 @@
+import Face from './Face.js';
 import Shape from './Shape.js';
 
-export const Polygon = (...points) =>
-  Shape.fromClosedPath(
-    points.map((point) => Shape.toCoordinate(undefined, point))
-  ).fill();
+export const Polygon = (...points) => Face(...points);
 
 export default Polygon;
 

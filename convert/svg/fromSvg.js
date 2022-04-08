@@ -7,11 +7,7 @@ import {
   matrix6,
 } from '@jsxcad/algorithm-cgal';
 
-import {
-  fill as fillGeometry,
-  taggedGroup,
-  transform as transformGeometry,
-} from '@jsxcad/geometry';
+import { fill as fillGeometry, taggedGroup } from '@jsxcad/geometry';
 
 import SvgPoints from 'svg-points/cjs/index.js';
 import XmlDom from 'xmldom';
@@ -200,10 +196,10 @@ export const fromSvg = async (
           const fill = attributes.fill;
           if (doFill && fill !== undefined && fill !== 'none' && fill !== '') {
             // Does fill, etc, inherit?
-            const tags = toTagsFromName(fill, definitions);
             geometry.content.push(
               fillGeometry(
-                transformGeometry(scale(matrix), { ...segments, tags })
+                { ...segments, matrix: scale(matrix) },
+                toTagsFromName(fill, definitions)
               )
             );
           }
@@ -216,11 +212,11 @@ export const fromSvg = async (
             strokeWidth !== 'none' &&
             strokeWidth !== '';
           if (doStroke && (hasStroke || hasStrokeWidth)) {
-            const scaledMatrix = scale(matrix);
-            const tags = toTagsFromName(stroke, definitions);
-            geometry.content.push(
-              transformGeometry(scaledMatrix, { ...segments, tags })
-            );
+            geometry.content.push({
+              ...segments,
+              tags: toTagsFromName(stroke, definitions),
+              matrix: scale(matrix),
+            });
           }
         };
 

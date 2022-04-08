@@ -23,7 +23,7 @@
   "keywords": [],
   "license": "MIT",
   "dependencies": {
-    "base64-arraybuffer": "^0.2.0",
+    "base64-arraybuffer": "^1.0.1",
     "@jsxcad/sys": "^0.0.79"
   },
   "devDependencies": {

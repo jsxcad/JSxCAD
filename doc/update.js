@@ -1,6 +1,7 @@
 import { reportTimes, watchLog } from '@jsxcad/sys';
 
 import { argv } from 'process';
+import express from 'express';
 import fs from 'fs';
 import path from 'path';
 import puppeteer from 'puppeteer';
@@ -13,10 +14,24 @@ process.on('uncaughtException', (err) => {
   process.exit(1); // mandatory (as per the Node.js docs)
 });
 
+const server = express();
+const cwd = process.cwd();
+server.use(express.static('es6'));
+server.listen(5001);
+
 const makePosixPath = (string) => string.split(path.sep).join(path.posix.sep);
 
 const build = async (baseDirectory = '.') => {
-  const browser = await puppeteer.launch({ headless: true });
+  const browser = await puppeteer.launch({
+    headless: true,
+    dumpio: true,
+    args: [
+      '--disable-features=BlockInsecurePrivateNetworkRequests',
+      '--disable-web-security',
+      '--disable-features=IsolateOrigins',
+      '--disable-site-isolation-trials',
+    ],
+  });
   const notebookDurations = [];
   const startTime = new Date();
   const logWatcher = ({ type, source, text }) => {
@@ -48,7 +63,7 @@ const build = async (baseDirectory = '.') => {
     for (const notebook of notebooks) {
       const startTime = new Date();
       const failedExpectations = [];
-      console.log(`Processing notebook: ${process.cwd()}/${notebook}.nb`);
+      console.log(`Processing notebook: ${cwd}/${notebook}.nb`);
       await updateNotebook(notebook, { failedExpectations, browser });
       if (
         failedExpectations.length > 0 &&

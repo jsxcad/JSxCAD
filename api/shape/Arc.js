@@ -6,6 +6,7 @@ import {
   getSides,
 } from './Plan.js';
 
+import Point from './Point.js';
 import Shape from './Shape.js';
 import Spiral from './Spiral.js';
 import { taggedPlan } from '@jsxcad/geometry';
@@ -43,15 +44,15 @@ const reifyArc =
     let spiral;
 
     if (end - start === 1) {
-      spiral = Spiral((a) => [[1]], {
+      spiral = Spiral((t) => Point(1), {
         from: start - 1 / 4,
         upto: end - 1 / 4,
         by: effectiveStep,
       })
-        .close()
+        .loop()
         .fill();
     } else {
-      spiral = Spiral((a) => [[1]], {
+      spiral = Spiral((t) => Point(1), {
         from: start - 1 / 4,
         to: end - 1 / 4,
         by: effectiveStep,
@@ -99,51 +100,85 @@ Shape.registerReifier('ArcX', reifyArc(X));
 Shape.registerReifier('ArcY', reifyArc(Y));
 Shape.registerReifier('ArcZ', reifyArc(Z));
 
-const ArcOp =
-  (type) =>
-  (x = 1, y = x, z = 0) => {
-    const c1 = [0, 0, 0];
-    const c2 = [0, 0, 0];
-    if (x instanceof Array) {
-      if (x[0] < x[1]) {
-        c1[X] = x[1];
-        c2[X] = x[0];
-      } else {
-        c1[X] = x[0];
-        c2[X] = x[1];
+const ArcOp = (type) => (x, y, z) => {
+  switch (type) {
+    case 'Arc':
+    case 'ArcZ':
+      if (x === undefined) {
+        x = 1;
       }
-    } else {
-      c1[X] = x / 2;
-      c2[X] = x / -2;
-    }
-    if (y instanceof Array) {
-      if (y[0] < y[1]) {
-        c1[Y] = y[1];
-        c2[Y] = y[0];
-      } else {
-        c1[Y] = y[0];
-        c2[Y] = y[1];
+      if (y === undefined) {
+        y = x;
       }
-    } else {
-      c1[Y] = y / 2;
-      c2[Y] = y / -2;
-    }
-    if (z instanceof Array) {
-      if (z[0] < z[1]) {
-        c1[Z] = z[1];
-        c2[Z] = z[0];
-      } else {
-        c1[Z] = z[0];
-        c2[Z] = z[1];
+      if (z === undefined) {
+        z = 0;
       }
+      break;
+    case 'ArcX':
+      if (y === undefined) {
+        y = 1;
+      }
+      if (z === undefined) {
+        z = y;
+      }
+      if (x === undefined) {
+        x = 0;
+      }
+      break;
+    case 'ArcY':
+      if (x === undefined) {
+        x = 1;
+      }
+      if (z === undefined) {
+        z = x;
+      }
+      if (y === undefined) {
+        y = 0;
+      }
+      break;
+  }
+  const c1 = [0, 0, 0];
+  const c2 = [0, 0, 0];
+  if (x instanceof Array) {
+    if (x[0] < x[1]) {
+      c1[X] = x[1];
+      c2[X] = x[0];
     } else {
-      c1[Z] = z / 2;
-      c2[Z] = z / -2;
+      c1[X] = x[0];
+      c2[X] = x[1];
     }
-    return Shape.fromGeometry(taggedPlan({}, { type }))
-      .hasC1(...c1)
-      .hasC2(...c2);
-  };
+  } else {
+    c1[X] = x / 2;
+    c2[X] = x / -2;
+  }
+  if (y instanceof Array) {
+    if (y[0] < y[1]) {
+      c1[Y] = y[1];
+      c2[Y] = y[0];
+    } else {
+      c1[Y] = y[0];
+      c2[Y] = y[1];
+    }
+  } else {
+    c1[Y] = y / 2;
+    c2[Y] = y / -2;
+  }
+  if (z instanceof Array) {
+    if (z[0] < z[1]) {
+      c1[Z] = z[1];
+      c2[Z] = z[0];
+    } else {
+      c1[Z] = z[0];
+      c2[Z] = z[1];
+    }
+  } else {
+    c1[Z] = z / 2;
+    c2[Z] = z / -2;
+  }
+  return Shape.fromGeometry(taggedPlan({}, { type }))
+    .hasC1(...c1)
+    .hasC2(...c2);
+};
 
 export const Arc = ArcOp('Arc');
 export const ArcX = ArcOp('ArcX');

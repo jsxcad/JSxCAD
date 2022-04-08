@@ -10,7 +10,6 @@ const paths = (geometry, height, depth, direction) =>
   extrude(fill(geometry), height, depth, direction);
 const polygonsWithHoles = (geometry, height, depth, direction) =>
   extrude(fromPolygonsWithHolesToGraph(geometry), height, depth, direction);
-const segments = (geometry, height, depth, direction) =>
-  extrude(fill(geometry), height, depth, direction);
+// const segments = (geometry, height, depth, direction) => extrude(fill(geometry), height, depth, direction);
 
-export const extrude = op({ graph, polygonsWithHoles, paths, segments });
+export const extrude = op({ graph, polygonsWithHoles, paths });

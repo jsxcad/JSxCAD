@@ -1,28 +1,19 @@
-import { concatenatePath, translatePath } from '@jsxcad/geometry';
-
+import Link from './Link.js';
+import Point from './Point.js';
 import Shape from './Shape.js';
 import { seq } from './seq.js';
 
-export const Wave = (
-  toPathFromXDistance = (xDistance) => [[0]],
-  { from, by, to, upto, downto } = {}
-) => {
-  let path = [null];
+export const Wave = (...args) => {
+  const { func: particle = Point, object: options } = Shape.destructure(args);
+  let particles = [];
   for (const xDistance of seq(
-    {
-      from,
-      by,
-      to,
-      upto,
-      downto,
-    },
+    options,
     (distance) => distance,
     (...numbers) => numbers
   )()) {
-    const subpath = toPathFromXDistance(xDistance);
-    path = concatenatePath(path, translatePath([xDistance, 0, 0], subpath));
+    particles.push(particle(xDistance).x(xDistance));
   }
-  return Shape.fromPath(path);
+  return Link(particles);
 };
 
 export default Wave;

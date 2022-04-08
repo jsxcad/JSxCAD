@@ -42,25 +42,20 @@ export const ToothProfile = (
   angle = -6.478958291841238,
   resolution = 5
 ) => {
-  console.log(`ToothProfile/1`);
   const path = [polar(rootRadius, -angle)];
   for (let i = 0; i <= resolution; i++) {
-    console.log(`ToothProfile/2: ${i}`);
     path.push(
       q7(i / resolution, rootRadius, baseRadius, outerRadius, angle, -1)
     );
   }
-  console.log(`ToothProfile/3`);
   for (let i = resolution; i >= 0; i--) {
     path.push(
       q7(i / resolution, rootRadius, baseRadius, outerRadius, angle, 1)
     );
   }
-  console.log(`ToothProfile/4`);
   if (rootRadius < baseRadius) {
     path.push(polar(rootRadius, angle));
   }
-  console.log(`ToothProfile/5`);
 
   return Shape.fromOpenPath(path);
 };

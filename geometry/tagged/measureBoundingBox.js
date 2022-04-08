@@ -3,7 +3,6 @@ import { max, min } from '@jsxcad/math-vec3';
 import { eachPoint } from './eachPoint.js';
 import { isVoid } from './isNotVoid.js';
 import { measureBoundingBox as measureBoundingBoxOfGraph } from '../graph/measureBoundingBox.js';
-import { measureBoundingBox as measureBoundingBoxOfPoints } from '../points/measureBoundingBox.js';
 import { measureBoundingBox as measureBoundingBoxOfPolygons } from '../polygons/measureBoundingBox.js';
 import { toConcreteGeometry } from './toConcreteGeometry.js';
 import { visit } from './visit.js';
@@ -52,7 +51,6 @@ export const measureBoundingBox = (geometry) => {
         ]);
       }
       case 'points':
-        return update(measureBoundingBoxOfPoints(geometry.points));
       case 'polygonsWithHoles':
       case 'segments':
       case 'paths':

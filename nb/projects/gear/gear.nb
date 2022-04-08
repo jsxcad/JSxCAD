@@ -17,6 +17,7 @@ Gear()
   .hasClearance(clearance)
   .hasBacklash(backlash)
   .hasToothResolution(toothResolution)
+  .fill()
   .ez(thickness)
   .material('wood')
   .stl(`gear_${numberOfTeeth}`);
@@ -45,7 +46,7 @@ Gear()
 
 md`### Planetary Gears`;
 
-const planetary = Gear().hasTeeth(8).md(`Our base involute gear.`);
+const planetary = Gear().hasTeeth(8).fill().md(`Our base involute gear.`);
 
 const planetaryFootprint = planetary
   .offset(0.2)
@@ -133,7 +134,6 @@ const planetaryDesign3 = planetaryDesign2
 
 const planetaryDesign4a =
     solar
-      .log()
       .ez(-2);
 
 const planetaryDesign4b = planetaryDesign4a

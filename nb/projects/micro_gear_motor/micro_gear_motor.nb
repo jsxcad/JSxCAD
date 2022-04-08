@@ -48,6 +48,7 @@ const cap = Group(capProfile.ez(-2, -0.0), sheath).md('Cap').stl('cap');
 const gearProfile = Gear(20).md('Gear Profile').gridView();
 
 const gear = Gear(20)
+  .fill()
   .cut(axleFlatProfile)
   .ez(4)
   .md('Gear')

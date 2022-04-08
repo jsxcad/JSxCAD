@@ -1,10 +1,10 @@
-import { toDisjointGeometry } from '@jsxcad/geometry';
+import { toConcreteGeometry } from '@jsxcad/geometry';
 
 export const toThreejsPage = async (
   geometry,
   { view, title = 'JSxCAD Viewer' } = {}
 ) => {
-  const disjointGeometry = toDisjointGeometry(await geometry);
+  const disjointGeometry = toConcreteGeometry(await geometry);
   const html = `
 <html>
  <head>

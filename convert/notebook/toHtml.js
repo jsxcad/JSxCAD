@@ -1,4 +1,4 @@
-import Base64ArrayBuffer from 'base64-arraybuffer';
+import { encode } from 'base64-arraybuffer';
 import { read } from '@jsxcad/sys';
 
 const encodeNotebook = async (notebook, { workspace, module } = {}) => {
@@ -31,7 +31,7 @@ const encodeNotebook = async (notebook, { workspace, module } = {}) => {
         if (data) {
           const encodedEntry = {
             ...entry,
-            base64Data: Base64ArrayBuffer.encode(data.buffer),
+            base64Data: encode(data.buffer),
           };
           delete encodedEntry.data;
           encodedEntries.push(encodedEntry);

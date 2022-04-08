@@ -35,7 +35,7 @@ const toSegments = ({ curveSegments, tolerance = 0.01 }, svgPath) => {
       case 'M': {
         newPath();
         const [x, y] = args;
-        appendPoint([x, y]);
+        appendPoint([x, y, 0]);
         break;
       }
       case 'C': {
@@ -51,7 +51,7 @@ const toSegments = ({ curveSegments, tolerance = 0.01 }, svgPath) => {
           ]
         );
         for (const [x, y] of simplifyPath(path, tolerance)) {
-          appendPoint([x, y]);
+          appendPoint([x, y, 0]);
         }
         break;
       }
@@ -74,7 +74,7 @@ export const fromSvgPath = (svgPath, options = {}) => {
     )
   );
   if (options.normalizeCoordinateSystem) {
-    return scale([1, -1, 0], taggedSegments({}, segments));
+    return scale([1, -1, 1], taggedSegments({}, segments));
   } else {
     return taggedSegments({}, segments);
   }

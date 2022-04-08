@@ -5,7 +5,7 @@ Arc(10)
   .cut(Triangle(5))
   .rx(1 / 4)
   .x(10)
-  .loop(seq((a) => rz(a), { by: 1 / 32, upto: 1 }))
+  .seq({ by: 1 / 32 }, rz, Loft)
   .cutout(Box(20, 20).ez(20))
   .view();
 ```

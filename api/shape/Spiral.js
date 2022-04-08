@@ -1,29 +1,19 @@
-import { concatenatePath, rotateZPath } from '@jsxcad/geometry';
-
-import { Shape } from './Shape.js';
+import Link from './Link.js';
+import Point from './Point.js';
+import Shape from './Shape.js';
 import { seq } from './seq.js';
 
-export const Spiral = (
-  toPathFromTurn = (turn) => [[turn]],
-  { from, by, to, upto, downto } = {}
-) => {
-  let path = [null];
+export const Spiral = (...args) => {
+  const { func: particle = Point, object: options } = Shape.destructure(args);
+  let particles = [];
   for (const turn of seq(
-    {
-      from,
-      by,
-      to,
-      upto,
-      downto,
-    },
-    (turn) => turn,
+    options,
+    (distance) => distance,
     (...numbers) => numbers
   )()) {
-    const radians = -turn * Math.PI * 2;
-    const subpath = toPathFromTurn(turn);
-    path = concatenatePath(path, rotateZPath(radians, subpath));
+    particles.push(particle(turn).rz(turn));
   }
-  return Shape.fromPath(path);
+  return Link(particles);
 };
 
 export default Spiral;
