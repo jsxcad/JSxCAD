@@ -1,19 +1,24 @@
 import {
-  getNonVoidPaths,
-  getPathEdges,
-  toKeptGeometry,
+  disjoint,
+  getNonVoidSegments,
+  section,
+  transformCoordinate,
 } from '@jsxcad/geometry';
 
 import Drawing from 'dxf-writer';
 
-export const toDxf = async (geometry, options = {}) => {
+const X = 0;
+const Y = 1;
+
+export const toDxf = async (baseGeometry, options = {}) => {
   const drawing = new Drawing();
-  const keptGeometry = toKeptGeometry(await geometry);
-  for (const { paths } of getNonVoidPaths(keptGeometry)) {
-    for (const path of paths) {
-      for (const [[x1, y1], [x2, y2]] of getPathEdges(path)) {
-        drawing.drawLine(x1, y1, x2, y2);
-      }
+  const sectioned = section(await baseGeometry, [{ type: 'points', tags: [] }]);
+  const geometry = disjoint([sectioned]);
+  for (const { matrix, segments } of getNonVoidSegments(geometry)) {
+    for (let [start, end] of segments) {
+      start = transformCoordinate(matrix, start);
+      end = transformCoordinate(matrix, end);
+      drawing.drawLine(start[X], start[Y], end[X], end[Y]);
     }
   }
   return drawing.toDxfString();

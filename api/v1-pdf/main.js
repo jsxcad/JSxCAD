@@ -1,1 +1,1 @@
-import './writePdf.js';
+import './pdf.js';

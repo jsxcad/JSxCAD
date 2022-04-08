@@ -3719,6 +3719,7 @@ class Geometry {
 
   void emitSegments(int nth, emscripten::val emit) {
     if (!has_segments(nth)) {
+      std::cout << "emitSegments/does_not_have" << std::endl;
       return;
     }
     for (const Segment& segment : segments(nth)) {
@@ -3742,6 +3743,16 @@ class Geometry {
     for (size_t nth = 0; nth < size_; nth++) {
       if (is_mesh(nth)) {
         setMesh(nth, new Surface_mesh(input_mesh(nth)));
+      }
+    }
+  }
+
+  void copyInputSegmentsToOutputSegments() {
+    for (size_t nth = 0; nth < size_; nth++) {
+      if (is_segments(nth)) {
+        for (const Segment& segment : input_segments(nth)) {
+          addSegment(nth, segment);
+        }
       }
     }
   }
@@ -4149,11 +4160,11 @@ int ComputeCentroid(Geometry* geometry) {
         computeCentroidOfSurfaceMesh(centroid, geometry->mesh(nth));
         geometry->setType(nth, GEOMETRY_POINTS);
         geometry->addPoint(nth, centroid);
+        geometry->setTransform(nth, new Transformation(CGAL::IDENTITY));
         break;
       }
     }
   }
-  geometry->transformToLocalFrame();
   return STATUS_OK;
 }
 
@@ -4302,6 +4313,7 @@ int Disjoint(Geometry* geometry, emscripten::val getIsMasked) {
 
   geometry->copyInputMeshesToOutputMeshes();
   geometry->transformToAbsoluteFrame();
+  geometry->copyInputSegmentsToOutputSegments();
   geometry->convertPlanarMeshesToPolygons();
   geometry->computeBounds();
 
@@ -4496,13 +4508,15 @@ int Fill(Geometry* geometry) {
   std::unordered_map<Plane, Arrangement_2> arrangements;
 
   for (int nth = 0; nth < size; nth++) {
-    const Plane plane =
-        geometry->has_plane(nth) ? geometry->plane(nth) : Plane(0, 0, 1, 0);
-    Arrangement_2& arrangement = arrangements[plane];
     switch (geometry->getType(nth)) {
       case GEOMETRY_SEGMENTS: {
         // We require segments to be their local z=0 plane.
+        Plane plane(0, 0, 1, 0);
+        Arrangement_2& arrangement = arrangements[Plane(0, 0, 1, 0)];
         for (Segment s : geometry->input_segments(nth)) {
+          if (!plane.has_on(s.source()) || !plane.has_on(s.target())) {
+            continue;
+          }
           insert(arrangement,
                  Segment_2(Point_2(s.source().x(), s.source().y()),
                            Point_2(s.target().x(), s.target().y())));
@@ -4510,6 +4524,7 @@ int Fill(Geometry* geometry) {
         break;
       }
       case GEOMETRY_POLYGONS_WITH_HOLES: {
+        Arrangement_2& arrangement = arrangements[geometry->plane(nth)];
         std::vector<Polygon_with_holes_2> polygons;
         geometry->gps(nth).polygons_with_holes(std::back_inserter(polygons));
         for (const Polygon_with_holes_2& polygon : polygons) {
@@ -4531,12 +4546,12 @@ int Fill(Geometry* geometry) {
 
   for (auto entry : arrangements) {
     const Plane& plane = entry.first;
-    Arrangement_2& arrangement = entry.second;
-    std::vector<Polygon_with_holes_2> polygons;
-    convertArrangementToPolygonsWithHoles(arrangement, polygons);
     int target = geometry->add(GEOMETRY_POLYGONS_WITH_HOLES);
     geometry->plane(target) = plane;
     geometry->setTransform(target, new Transformation(CGAL::IDENTITY));
+    std::vector<Polygon_with_holes_2> polygons;
+    Arrangement_2& arrangement = entry.second;
+    convertArrangementToPolygonsWithHoles(arrangement, polygons);
     for (Polygon_with_holes_2& polygon : polygons) {
       geometry->gps(target).join(polygon);
     }
@@ -5073,9 +5088,8 @@ int Section(Geometry* geometry, int transformCount,
           typedef std::list<Polyline_type> Polylines;
           CGAL::Polygon_mesh_slicer<Surface_mesh, Kernel> slicer(
               geometry->mesh(nth));
-          int target = geometry->add(GEOMETRY_POLYGONS_WITH_HOLES);
-          geometry->setTransform(target, transform);
-          geometry->plane(target) = plane;
+          geometry->setType(nth, GEOMETRY_POLYGONS_WITH_HOLES);
+          geometry->plane(nth) = plane;
           Polylines polylines;
           slicer(plane, std::back_inserter(polylines));
           for (const auto& polyline : polylines) {
@@ -5091,7 +5105,7 @@ int Section(Geometry* geometry, int transformCount,
             if (polygon.orientation() == CGAL::Sign::NEGATIVE) {
               polygon.reverse_orientation();
             }
-            geometry->gps(target).join(polygon);
+            geometry->gps(nth).join(polygon);
           }
           break;
         }
@@ -5099,19 +5113,33 @@ int Section(Geometry* geometry, int transformCount,
           Plane gps_plane =
               geometry->plane(nth).transform(geometry->transform(nth));
           if (gps_plane != plane) {
-            continue;
+            geometry->setType(nth, GEOMETRY_EMPTY);
           }
-          int target = geometry->add(GEOMETRY_POLYGONS_WITH_HOLES);
-          geometry->setTransform(target, transform);
-          geometry->plane(target) = plane;
-          // If we were a bit more clever, we could avoid this copy, but it's
-          // probably not significantly expensive.
-          geometry->gps(target) = geometry->gps(nth);
+          // FIX: Should produce segments if intersecting the plane.
+          break;
+        }
+        case GEOMETRY_SEGMENTS: {
+          for (const Segment& segment : geometry->input_segments(nth)) {
+            if (plane.has_on(segment.source()) &&
+                plane.has_on(segment.target())) {
+              geometry->addSegment(nth, segment);
+            }
+            // FIX: Should produce points if intersecting the plane.
+          }
+          break;
+        }
+        case GEOMETRY_POINTS: {
+          for (const Point& point : geometry->input_points(nth)) {
+            if (plane.has_on(point)) {
+              geometry->addPoint(nth, point);
+            }
+          }
           break;
         }
       }
     }
   }
+  geometry->transformToLocalFrame();
   return STATUS_OK;
 }
 
@@ -5795,142 +5823,6 @@ bool emitCircularPolygonsWithHoles(const Plane& plane,
   }
   return emitted;
 }
-
-#if 0
-void OffsetOfPolygonWithHoles(double initial, double step, double limit,
-                              int segments, std::size_t hole_count,
-                              emscripten::val fill_plane,
-                              emscripten::val fill_boundary,
-                              emscripten::val fill_hole,
-                              emscripten::val emit_polygon,
-                              emscripten::val emit_point) {
-  Plane plane;
-  admitPlane(plane, fill_plane);
-  plane = unitPlane(plane);
-
-  std::vector<Polygon_2> holes;
-
-  for (std::size_t nth = 0; nth < hole_count; nth++) {
-    Points points;
-    Points* points_ptr = &points;
-    fill_hole(points_ptr, nth);
-    Polygon_2 hole;
-    for (const auto& point : points) {
-      hole.push_back(plane.to_2d(point));
-    }
-    if (!hole.is_simple()) {
-      std::cout << "Hole is not simple" << std::endl;
-      return;
-    }
-    if (hole.orientation() != CGAL::Sign::NEGATIVE) {
-      hole.reverse_orientation();
-    }
-    holes.push_back(hole);
-  }
-
-  Polygon_2 boundary;
-
-  {
-    Points points;
-    Points* points_ptr = &points;
-    fill_boundary(points_ptr);
-    for (const auto& point : points) {
-      boundary.push_back(plane.to_2d(point));
-    }
-    if (!boundary.is_simple()) {
-      std::cout << "Boundary is not simple" << std::endl;
-      return;
-    }
-    if (boundary.orientation() != CGAL::Sign::POSITIVE) {
-      boundary.reverse_orientation();
-    }
-  }
-
-  std::vector<Polygon_with_holes_2> offset_polygons;
-
-  offsetOfPolygonWithHoles(initial, step, limit, segments, boundary,
-                           holes, offset_polygons);
-
-  emitPolygonsWithHoles(plane, offset_polygons, emit_polygon, emit_point);
-}
-
-void InsetOfPolygonWithHoles(double initial, double step, double limit,
-                             int segments, std::size_t hole_count,
-                             emscripten::val fill_plane,
-                             emscripten::val fill_boundary,
-                             emscripten::val fill_hole,
-                             emscripten::val emit_polygon,
-                             emscripten::val emit_point) {
-  typedef CGAL::Gps_segment_traits_2<Kernel> Traits;
-  Plane plane;
-  admitPlane(plane, fill_plane);
-  plane = unitPlane(plane);
-
-  Polygon_with_holes_2 insetting_boundary;
-
-  {
-    Points points;
-    Points* points_ptr = &points;
-    fill_boundary(points_ptr);
-    Polygon_2 boundary;
-    for (const auto& point : points) {
-      boundary.push_back(plane.to_2d(point));
-    }
-    if (!boundary.is_simple()) {
-      std::cout << "Boundary is not simple" << std::endl;
-      return;
-    }
-    if (boundary.orientation() == CGAL::Sign::POSITIVE) {
-      boundary.reverse_orientation();
-    }
-
-    // Stick a box around the boundary (which will now form a hole).
-    CGAL::Bbox_2 bb = boundary.bbox();
-    bb.dilate(10);
-
-    Polygon_2 frame;
-    frame.push_back(Point_2(bb.xmin(), bb.ymin()));
-    frame.push_back(Point_2(bb.xmax(), bb.ymin()));
-    frame.push_back(Point_2(bb.xmax(), bb.ymax()));
-    frame.push_back(Point_2(bb.xmin(), bb.ymax()));
-    if (frame.orientation() == CGAL::Sign::NEGATIVE) {
-      frame.reverse_orientation();
-    }
-
-    std::vector<Polygon_2> boundaries{boundary};
-
-    insetting_boundary =
-        Polygon_with_holes_2(frame, boundaries.begin(), boundaries.end());
-  }
-  std::vector<Polygon_2> holes;
-  for (std::size_t nth = 0; nth < hole_count; nth++) {
-    Points points;
-    Points* points_ptr = &points;
-    fill_hole(points_ptr, nth);
-    Polygon_2 hole;
-    for (const auto& point : points) {
-      hole.push_back(plane.to_2d(point));
-    }
-    if (!hole.is_simple()) {
-      std::cout << "InsetOfPolygonWithHoles: hole is not simple" << std::endl;
-    }
-    if (hole.orientation() == CGAL::Sign::NEGATIVE) {
-      hole.reverse_orientation();
-    }
-    if (!hole.is_simple()) {
-      return;
-    }
-    holes.push_back(hole);
-  }
-
-  std::vector<Polygon_with_holes_2> inset_polygons;
-
-  insetOfPolygonWithHoles(initial, step, limit, segments, plane,
-                          insetting_boundary, holes, inset_polygons);
-
-  emitPolygonsWithHoles(plane, inset_polygons, emit_polygon, emit_point);
-}
-#endif
 
 void emitArrangementsAsPolygonsWithHoles(
     const std::unordered_map<Plane, Arrangement_2>& arrangements,
@@ -7069,26 +6961,22 @@ EMSCRIPTEN_BINDINGS(module) {
       .function("isIntersectingPointApproximate",
                 &AabbTreeQuery::isIntersectingPointApproximate);
 
-  emscripten::function("SeparateSurfaceMesh", &SeparateSurfaceMesh,
-                       emscripten::allow_raw_pointers());
+  // emscripten::function("SeparateSurfaceMesh", &SeparateSurfaceMesh,
+  // emscripten::allow_raw_pointers());
   emscripten::function("TwistSurfaceMesh", &TwistSurfaceMesh,
                        emscripten::allow_raw_pointers());
-  // emscripten::function("BendSurfaceMesh", &BendSurfaceMesh,
-  // emscripten::allow_raw_pointers());
   emscripten::function("TaperSurfaceMesh", &TaperSurfaceMesh,
                        emscripten::allow_raw_pointers());
   emscripten::function("PushSurfaceMesh", &PushSurfaceMesh,
                        emscripten::allow_raw_pointers());
-  emscripten::function("OutlineSurfaceMesh", &OutlineSurfaceMesh,
-                       emscripten::allow_raw_pointers());
+  // emscripten::function("OutlineSurfaceMesh", &OutlineSurfaceMesh,
+  // emscripten::allow_raw_pointers());
   emscripten::function("WireframeSurfaceMesh", &WireframeSurfaceMesh,
                        emscripten::allow_raw_pointers());
-  emscripten::function("FromSurfaceMeshToPolygonsWithHoles",
-                       &FromSurfaceMeshToPolygonsWithHoles,
-                       emscripten::allow_raw_pointers());
-  emscripten::function("ComputeCentroidOfSurfaceMesh",
-                       &ComputeCentroidOfSurfaceMesh,
-                       emscripten::allow_raw_pointers());
+  // emscripten::function("FromSurfaceMeshToPolygonsWithHoles",
+  // &FromSurfaceMeshToPolygonsWithHoles, emscripten::allow_raw_pointers());
+  // emscripten::function("ComputeCentroidOfSurfaceMesh",
+  // &ComputeCentroidOfSurfaceMesh, emscripten::allow_raw_pointers());
   // emscripten::function("ComputeNormalOfSurfaceMesh",
   // &ComputeNormalOfSurfaceMesh, emscripten::allow_raw_pointers());
 
@@ -7192,13 +7080,11 @@ EMSCRIPTEN_BINDINGS(module) {
                        emscripten::allow_raw_pointers());
   emscripten::function("DeleteSurfaceMesh", &DeleteSurfaceMesh,
                        emscripten::allow_raw_pointers());
-  emscripten::function("ArrangePathsApproximate", &ArrangePathsApproximate,
-                       emscripten::allow_raw_pointers());
-  emscripten::function("ArrangePathsExact", &ArrangePathsExact,
-                       emscripten::allow_raw_pointers());
-  emscripten::function("ArrangePolygonsWithHoles", &ArrangePolygonsWithHoles,
-                       emscripten::allow_raw_pointers());
-  // emscripten::function("SectionOfSurfaceMesh", &SectionOfSurfaceMesh,
+  // emscripten::function("ArrangePathsApproximate", &ArrangePathsApproximate,
+  // emscripten::allow_raw_pointers());
+  // emscripten::function("ArrangePathsExact", &ArrangePathsExact,
+  // emscripten::allow_raw_pointers());
+  // emscripten::function("ArrangePolygonsWithHoles", &ArrangePolygonsWithHoles,
   // emscripten::allow_raw_pointers());
 
   // emscripten::function("getTotalMemory",

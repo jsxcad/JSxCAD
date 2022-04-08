@@ -142,6 +142,7 @@ export {
 } from './tagged/type.js';
 export { join } from './join.js';
 export { keep } from './tagged/keep.js';
+export { linearize } from './tagged/linearize.js';
 export { link } from './link.js';
 export { loft } from './loft.js';
 export { measureArea } from './tagged/measureArea.js';
@@ -187,6 +188,7 @@ export { taggedSketch } from './tagged/taggedSketch.js';
 export { taggedTriangles } from './tagged/taggedTriangles.js';
 export { taper } from './tagged/taper.js';
 export { test } from './tagged/test.js';
+export { transformCoordinate, transformingCoordinates } from './transform.js';
 export { translate as translatePath } from './path/ops.js';
 export { translate as translatePaths } from './paths/ops.js';
 export { toConcreteGeometry } from './tagged/toConcreteGeometry.js';

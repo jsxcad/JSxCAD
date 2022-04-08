@@ -131,10 +131,9 @@ export const fromCgalGeometry = (geometry, inputs, length = inputs.length, start
     switch (geometry.getType(nth)) {
       case GEOMETRY_MESH: {
         const mesh = geometry.releaseOutputMesh(nth);
-        mesh.provenance = 'fromOutputGeometry';
+        mesh.provenance = 'fromCgalGeometry';
         const matrix = toJsTransformFromCgalTransform(geometry.getTransform(nth));
         const { tags = [] } = inputs[nth] || {};
-        // Note: The 0th mesh is not emitted as it does not get cut.
         results[nth] = {
           type: 'graph',
           matrix,

@@ -86,7 +86,6 @@ export { removeSelfIntersectionsOfSurfaceMesh } from './removeSelfIntersectionsO
 export { reverseFaceOrientationsOfSurfaceMesh } from './reverseFaceOrientationsOfSurfaceMesh.js';
 export { section } from './section.js';
 export { separate } from './separate.js';
-export { separateSurfaceMesh } from './separateSurfaceMesh.js';
 export { simplifySurfaceMesh } from './simplifySurfaceMesh.js';
 export { smoothShapeOfSurfaceMesh } from './smoothShapeOfSurfaceMesh.js';
 export { smoothSurfaceMesh } from './smoothSurfaceMesh.js';

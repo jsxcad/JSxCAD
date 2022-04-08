@@ -74,7 +74,7 @@ export const fromSvgPath = (svgPath, options = {}) => {
     )
   );
   if (options.normalizeCoordinateSystem) {
-    return scale([1, -1, 0], taggedSegments({}, segments));
+    return scale([1, -1, 1], taggedSegments({}, segments));
   } else {
     return taggedSegments({}, segments);
   }
