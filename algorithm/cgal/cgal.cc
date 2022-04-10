@@ -3492,6 +3492,28 @@ void convertSurfaceMeshFacesToArrangements(
   }
 }
 
+template <typename Edge, typename Face, typename Point>
+bool projectPointToEnvelope(const Edge& edge, const Face& face,
+                            Point& projected) {
+  // Project the corner up to the surface.
+  auto p2 = edge->source()->point();
+  Line line(Point(p2.x(), p2.y(), 0), Vector(0, 0, 1).direction());
+  for (auto surface = face->surfaces_begin(); surface != face->surfaces_end();
+       ++surface) {
+    const auto& triangle = *surface;
+    const Plane plane(triangle.vertex(0), triangle.vertex(1),
+                      triangle.vertex(2));
+    const auto result = CGAL::intersection(line, plane);
+    if (result) {
+      if (const Point* p3 = boost::get<Point>(&*result)) {
+        projected = *p3;
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
 class Geometry {
  public:
   Geometry() {}
@@ -4411,11 +4433,35 @@ int Extrude(Geometry* geometry, const Transformation* top,
   geometry->transformToAbsoluteFrame();
   geometry->convertPlanarMeshesToPolygons();
 
+  typedef typename boost::property_map<Surface_mesh, CGAL::vertex_point_t>::type
+      VPMap;
+
   Vector up = Point(0, 0, 0).transform(*top) - Point(0, 0, 0);
   Vector down = Point(0, 0, 0).transform(*bottom) - Point(0, 0, 0);
 
   for (int nth = 0; nth < size; nth++) {
     switch (geometry->getType(nth)) {
+      case GEOMETRY_MESH: {
+        const Surface_mesh& mesh = geometry->mesh(nth);
+        if (CGAL::is_closed(mesh) || CGAL::is_empty(mesh)) {
+          // TODO: Support extrusion of an upper envelope of a solid.
+          continue;
+        }
+        // No protection against self-intersection.
+        std::unique_ptr<Surface_mesh> extruded_mesh(new Surface_mesh);
+        Project<VPMap> top(get(CGAL::vertex_point, *extruded_mesh), up);
+        Project<VPMap> bottom(get(CGAL::vertex_point, *extruded_mesh), down);
+        CGAL::Polygon_mesh_processing::extrude_mesh(mesh, *extruded_mesh,
+                                                    bottom, top);
+        CGAL::Polygon_mesh_processing::triangulate_faces(*extruded_mesh);
+        if (CGAL::Polygon_mesh_processing::volume(
+                *extruded_mesh, CGAL::parameters::all_default()) == 0) {
+          std::cout << "Extrude/zero-volume" << std::endl;
+          continue;
+        }
+        geometry->setMesh(nth, extruded_mesh);
+        break;
+      }
       case GEOMETRY_POLYGONS_WITH_HOLES: {
         Surface_mesh flat_mesh;
         std::map<Point, Vertex_index> vertex_map;
@@ -4435,8 +4481,6 @@ int Extrude(Geometry* geometry, const Transformation* top,
                     << std::endl;
           continue;
         }
-        typedef typename boost::property_map<Surface_mesh,
-                                             CGAL::vertex_point_t>::type VPMap;
         std::unique_ptr<Surface_mesh> extruded_mesh(new Surface_mesh);
         Project<VPMap> top(get(CGAL::vertex_point, *extruded_mesh), up);
         Project<VPMap> bottom(get(CGAL::vertex_point, *extruded_mesh), down);
@@ -4645,6 +4689,147 @@ int Fuse(Geometry* geometry) {
       geometry->addPoint(target, point);
     }
   }
+  return STATUS_OK;
+}
+
+int GenerateEnvelope(Geometry* geometry, int envelopeType) {
+  const int kUpper = 0;
+  const int kLower = 1;
+  if (envelopeType != kUpper && envelopeType != kLower) {
+    return STATUS_INVALID_INPUT;
+  }
+
+  typedef CGAL::Env_triangle_traits_3<Kernel> Traits_3;
+  typedef Kernel::Point_3 Point_3;
+  typedef Traits_3::Surface_3 Triangle_3;
+  typedef CGAL::Envelope_diagram_2<Traits_3> Envelope_diagram_2;
+
+  size_t size = geometry->size();
+
+  geometry->copyInputMeshesToOutputMeshes();
+  geometry->transformToAbsoluteFrame();
+  geometry->convertPlanarMeshesToPolygons();
+  geometry->computeBounds();
+
+  for (size_t nth = 0; nth < size; nth++) {
+    switch (geometry->getType(nth)) {
+      case GEOMETRY_MESH: {
+        Surface_mesh& mesh = geometry->mesh(nth);
+        assert(CGAL::Polygon_mesh_processing::triangulate_faces(mesh) == true);
+        std::list<Triangle_3> triangles;
+        {
+          auto& points = mesh.points();
+          for (const Face_index face : faces(mesh)) {
+            Halfedge_index a = halfedge(face, mesh);
+            Halfedge_index b = mesh.next(a);
+            triangles.emplace_back(points[mesh.source(a)],
+                                   points[mesh.source(b)],
+                                   points[mesh.target(b)]);
+          }
+        }
+        Envelope_diagram_2 diagram;
+        if (envelopeType == kUpper) {
+          CGAL::upper_envelope_3(triangles.begin(), triangles.end(), diagram);
+        } else if (envelopeType == kLower) {
+          CGAL::lower_envelope_3(triangles.begin(), triangles.end(), diagram);
+        }
+        std::vector<Point_3> points;
+        std::vector<std::vector<size_t>> polygons;
+
+        Envelope_diagram_2::Face_const_iterator face;
+        for (face = diagram.faces_begin(); face != diagram.faces_end();
+             ++face) {
+          if (face->is_unbounded()) {
+            continue;
+          }
+          std::vector<size_t> polygon;
+          Envelope_diagram_2::Ccb_halfedge_const_circulator start =
+              face->outer_ccb();
+          Envelope_diagram_2::Ccb_halfedge_const_circulator edge = start;
+          // TODO: Project the edges and generate polygons where the areas are
+          // non-zero.
+          do {
+            Point_3 point;
+            if (projectPointToEnvelope(edge, face, point)) {
+              size_t vertex = points.size();
+              points.push_back(point);
+              polygon.push_back(vertex);
+            }
+          } while (++edge != start);
+          polygons.push_back(std::move(polygon));
+        }
+
+        Envelope_diagram_2::Edge_const_iterator edge;
+        for (edge = diagram.edges_begin(); edge != diagram.edges_end();
+             ++edge) {
+          const auto& front = edge;
+          const auto& front_next = front->next();
+          const auto& back = front->twin();
+          const auto& back_next = back->next();
+
+          Point_3 front_point;
+          Point_3 front_next_point;
+          Point_3 back_point;
+          Point_3 back_next_point;
+          if (projectPointToEnvelope(front, front->face(), front_point) &&
+              projectPointToEnvelope(front_next, front_next->face(),
+                                     front_next_point) &&
+              projectPointToEnvelope(back, back->face(), back_point) &&
+              projectPointToEnvelope(back_next, back_next->face(),
+                                     back_next_point)) {
+            if (front_point == back_next_point &&
+                front_next_point == back_next_point) {
+              // This has zero area and can be ignored.
+            } else if (front_point == back_next_point) {
+              // This is a triangle.
+              std::vector<size_t> polygon;
+              polygon.push_back(points.size());
+              points.push_back(front_point);
+              polygon.push_back(points.size());
+              points.push_back(front_next_point);
+              polygon.push_back(points.size());
+              points.push_back(back_point);
+              polygons.push_back(std::move(polygon));
+            } else if (back_point == front_next_point) {
+              // This is a triangle.
+              std::vector<size_t> polygon;
+              polygon.push_back(points.size());
+              points.push_back(front_point);
+              polygon.push_back(points.size());
+              points.push_back(front_next_point);
+              polygon.push_back(points.size());
+              points.push_back(back_next_point);
+              polygons.push_back(std::move(polygon));
+            } else {
+              // This is a quadrilateral.
+              std::vector<size_t> polygon;
+              polygon.push_back(points.size());
+              points.push_back(front_point);
+              polygon.push_back(points.size());
+              points.push_back(front_next_point);
+              polygon.push_back(points.size());
+              points.push_back(back_point);
+              polygon.push_back(points.size());
+              points.push_back(back_next_point);
+              polygons.push_back(std::move(polygon));
+            }
+          }
+        }
+
+        CGAL::Polygon_mesh_processing::repair_polygon_soup(points, polygons);
+        CGAL::Polygon_mesh_processing::orient_polygon_soup(points, polygons);
+        std::unique_ptr<Surface_mesh> upper_surface(new Surface_mesh());
+        CGAL::Polygon_mesh_processing::polygon_soup_to_polygon_mesh(
+            points, polygons, *upper_surface);
+        assert(CGAL::Polygon_mesh_processing::triangulate_faces(
+                   *upper_surface) == true);
+        geometry->setMesh(nth, upper_surface);
+      }
+    }
+  }
+
+  geometry->transformToLocalFrame();
+
   return STATUS_OK;
 }
 
@@ -4897,6 +5082,61 @@ int Loft(Geometry* geometry) {
               geometry->plane(last), geometry->gps(last), geometry->plane(nth),
               geometry->gps(nth), geometry->mesh(target), vertex_map,
               /*flip=*/true);
+        }
+        last = nth;
+        count++;
+        break;
+      }
+      default: {
+        break;
+      }
+    }
+  }
+  if (count < 2) {
+    return STATUS_EMPTY;
+  }
+  if (!CGAL::is_closed(geometry->mesh(target)) && first != -1 && last != -1) {
+    // Cap the loft to close it.
+    GeneralPolygonSetToSurfaceMesh(geometry->plane(first), geometry->gps(first),
+                                   geometry->mesh(target), vertex_map,
+                                   /*flip=*/true);
+    GeneralPolygonSetToSurfaceMesh(geometry->plane(last), geometry->gps(last),
+                                   geometry->mesh(target), vertex_map,
+                                   /*flip=*/false);
+  }
+  CGAL::Polygon_mesh_processing::triangulate_faces(geometry->mesh(target));
+  if (CGAL::is_closed(geometry->mesh(target))) {
+    // Make sure it isn't inside out.
+    CGAL::Polygon_mesh_processing::orient_to_bound_a_volume(
+        geometry->mesh(target));
+  }
+  // Clean up the mesh.
+  demesh(geometry->mesh(target));
+  return STATUS_OK;
+}
+
+int Loft2(Geometry* geometry) {
+  typedef CGAL::Triple<int, int, int> Triangle_int;
+  size_t size = geometry->size();
+  geometry->copyInputMeshesToOutputMeshes();
+  geometry->transformToAbsoluteFrame();
+  geometry->convertPlanarMeshesToPolygons();
+
+  std::map<Point, Vertex_index> vertex_map;
+  int target = -1;
+  int first = -1;
+  int last = -1;
+  int count = 0;
+  for (int nth = 0; nth < size; nth++) {
+    switch (geometry->getType(nth)) {
+      case GEOMETRY_POLYGONS_WITH_HOLES: {
+        if (last == -1) {
+          first = nth;
+        } else {
+          std::vector<Point> polyline;
+          std::vector<Polygon_with_holes_2> polygons;
+          std::vector<Triangle_int> patch;
+          CGAL::Polygon_mesh_processing::triangulate_hole_polyline(points, std::back_inserter(patch));
         }
         last = nth;
         count++;
@@ -6045,28 +6285,7 @@ void GeneratePackingEnvelopeForSurfaceMesh(const Surface_mesh* input,
   }
 }
 
-template <typename Edge, typename Face, typename Point>
-bool projectPointToUpperEnvelope(const Edge& edge, const Face& face,
-                                 Point& projected) {
-  // Project the corner up to the surface.
-  auto p2 = edge->source()->point();
-  Line line(Point(p2.x(), p2.y(), 0), Vector(0, 0, 1).direction());
-  for (auto surface = face->surfaces_begin(); surface != face->surfaces_end();
-       ++surface) {
-    const auto& triangle = *surface;
-    const Plane plane(triangle.vertex(0), triangle.vertex(1),
-                      triangle.vertex(2));
-    const auto result = CGAL::intersection(line, plane);
-    if (result) {
-      if (const Point* p3 = boost::get<Point>(&*result)) {
-        projected = *p3;
-        return true;
-      }
-    }
-  }
-  return false;
-}
-
+#if 0
 Surface_mesh* GenerateUpperEnvelopeForSurfaceMesh(
     const Surface_mesh* input, const Transformation* transform) {
   Surface_mesh mesh(*input);
@@ -6092,14 +6311,14 @@ Surface_mesh* GenerateUpperEnvelopeForSurfaceMesh(
   }
 
   // Compute and print the minimization diagram.
-  Envelope_diagram_2 upper_diagram;
-  CGAL::upper_envelope_3(triangles.begin(), triangles.end(), upper_diagram);
+  Envelope_diagram_2 diagram;
+  CGAL::upper_envelope_3(triangles.begin(), triangles.end(), diagram);
 
   std::vector<Point_3> points;
   std::vector<std::vector<size_t>> polygons;
 
   Envelope_diagram_2::Face_const_iterator face;
-  for (face = upper_diagram.faces_begin(); face != upper_diagram.faces_end();
+  for (face = diagram.faces_begin(); face != diagram.faces_end();
        ++face) {
     if (face->is_unbounded()) {
       continue;
@@ -6111,7 +6330,7 @@ Surface_mesh* GenerateUpperEnvelopeForSurfaceMesh(
     // non-zero.
     do {
       Point_3 point;
-      if (projectPointToUpperEnvelope(edge, face, point)) {
+      if (projectPointToEnvelope(edge, face, point)) {
         size_t vertex = points.size();
         points.push_back(point);
         polygon.push_back(vertex);
@@ -6122,7 +6341,7 @@ Surface_mesh* GenerateUpperEnvelopeForSurfaceMesh(
   }
 
   Envelope_diagram_2::Edge_const_iterator edge;
-  for (edge = upper_diagram.edges_begin(); edge != upper_diagram.edges_end();
+  for (edge = diagram.edges_begin(); edge != diagram.edges_end();
        ++edge) {
     const auto& front = edge;
     const auto& front_next = front->next();
@@ -6133,11 +6352,11 @@ Surface_mesh* GenerateUpperEnvelopeForSurfaceMesh(
     Point_3 front_next_point;
     Point_3 back_point;
     Point_3 back_next_point;
-    if (projectPointToUpperEnvelope(front, front->face(), front_point) &&
-        projectPointToUpperEnvelope(front_next, front_next->face(),
+    if (projectPointToEnvelope(front, front->face(), front_point) &&
+        projectPointToEnvelope(front_next, front_next->face(),
                                     front_next_point) &&
-        projectPointToUpperEnvelope(back, back->face(), back_point) &&
-        projectPointToUpperEnvelope(back_next, back_next->face(),
+        projectPointToEnvelope(back, back->face(), back_point) &&
+        projectPointToEnvelope(back_next, back_next->face(),
                                     back_next_point)) {
       if (front_point == back_next_point &&
           front_next_point == back_next_point) {
@@ -6200,6 +6419,7 @@ Surface_mesh* GenerateUpperEnvelopeForSurfaceMesh(
          true);
   return upper_surface;
 }
+#endif
 
 bool computeFitPolygon(const Polygon_with_holes_2& space,
                        const Polygon_with_holes_2& shape, Point_2& picked) {
@@ -6899,36 +7119,6 @@ EMSCRIPTEN_BINDINGS(module) {
       .function("clip", &SurfaceMeshSegmentProcessor::clip)
       .function("cut", &SurfaceMeshSegmentProcessor::cut);
 
-  // New primitives
-  emscripten::function("Bend", &Bend, emscripten::allow_raw_pointers());
-  emscripten::function("Cast", &Cast, emscripten::allow_raw_pointers());
-  emscripten::function("Clip", &Clip, emscripten::allow_raw_pointers());
-  emscripten::function("ComputeArea", &ComputeArea,
-                       emscripten::allow_raw_pointers());
-  emscripten::function("ComputeCentroid", &ComputeCentroid,
-                       emscripten::allow_raw_pointers());
-  emscripten::function("ComputeNormal", &ComputeNormal,
-                       emscripten::allow_raw_pointers());
-  emscripten::function("ComputeVolume", &ComputeVolume,
-                       emscripten::allow_raw_pointers());
-  emscripten::function("Cut", &Cut, emscripten::allow_raw_pointers());
-  emscripten::function("Disjoint", &Disjoint, emscripten::allow_raw_pointers());
-  emscripten::function("Extrude", &Extrude, emscripten::allow_raw_pointers());
-  emscripten::function("Faces", &Faces, emscripten::allow_raw_pointers());
-  emscripten::function("Fill", &Fill, emscripten::allow_raw_pointers());
-  emscripten::function("Fuse", &Fuse, emscripten::allow_raw_pointers());
-  emscripten::function("Grow", &Grow, emscripten::allow_raw_pointers());
-  emscripten::function("Inset", &Inset, emscripten::allow_raw_pointers());
-  emscripten::function("Join", &Join, emscripten::allow_raw_pointers());
-  emscripten::function("Link", &Link, emscripten::allow_raw_pointers());
-  emscripten::function("Loft", &Loft, emscripten::allow_raw_pointers());
-  emscripten::function("MakeUnitSphere", &MakeUnitSphere,
-                       emscripten::allow_raw_pointers());
-  emscripten::function("Offset", &Offset, emscripten::allow_raw_pointers());
-  emscripten::function("Outline", &Outline, emscripten::allow_raw_pointers());
-  emscripten::function("Section", &Section, emscripten::allow_raw_pointers());
-  emscripten::function("Separate", &Separate, emscripten::allow_raw_pointers());
-
   // New classes
   emscripten::class_<Geometry>("Geometry")
       .constructor<>()
@@ -6969,6 +7159,38 @@ EMSCRIPTEN_BINDINGS(module) {
       .function("isIntersectingPointApproximate",
                 &AabbTreeQuery::isIntersectingPointApproximate);
 
+  // New primitives
+  emscripten::function("Bend", &Bend, emscripten::allow_raw_pointers());
+  emscripten::function("Cast", &Cast, emscripten::allow_raw_pointers());
+  emscripten::function("Clip", &Clip, emscripten::allow_raw_pointers());
+  emscripten::function("ComputeArea", &ComputeArea,
+                       emscripten::allow_raw_pointers());
+  emscripten::function("ComputeCentroid", &ComputeCentroid,
+                       emscripten::allow_raw_pointers());
+  emscripten::function("ComputeNormal", &ComputeNormal,
+                       emscripten::allow_raw_pointers());
+  emscripten::function("ComputeVolume", &ComputeVolume,
+                       emscripten::allow_raw_pointers());
+  emscripten::function("Cut", &Cut, emscripten::allow_raw_pointers());
+  emscripten::function("Disjoint", &Disjoint, emscripten::allow_raw_pointers());
+  emscripten::function("Extrude", &Extrude, emscripten::allow_raw_pointers());
+  emscripten::function("Faces", &Faces, emscripten::allow_raw_pointers());
+  emscripten::function("Fill", &Fill, emscripten::allow_raw_pointers());
+  emscripten::function("Fuse", &Fuse, emscripten::allow_raw_pointers());
+  emscripten::function("GenerateEnvelope", &GenerateEnvelope,
+                       emscripten::allow_raw_pointers());
+  emscripten::function("Grow", &Grow, emscripten::allow_raw_pointers());
+  emscripten::function("Inset", &Inset, emscripten::allow_raw_pointers());
+  emscripten::function("Join", &Join, emscripten::allow_raw_pointers());
+  emscripten::function("Link", &Link, emscripten::allow_raw_pointers());
+  emscripten::function("Loft", &Loft, emscripten::allow_raw_pointers());
+  emscripten::function("MakeUnitSphere", &MakeUnitSphere,
+                       emscripten::allow_raw_pointers());
+  emscripten::function("Offset", &Offset, emscripten::allow_raw_pointers());
+  emscripten::function("Outline", &Outline, emscripten::allow_raw_pointers());
+  emscripten::function("Section", &Section, emscripten::allow_raw_pointers());
+  emscripten::function("Separate", &Separate, emscripten::allow_raw_pointers());
+
   // emscripten::function("SeparateSurfaceMesh", &SeparateSurfaceMesh,
   // emscripten::allow_raw_pointers());
   emscripten::function("TwistSurfaceMesh", &TwistSurfaceMesh,
@@ -6991,9 +7213,8 @@ EMSCRIPTEN_BINDINGS(module) {
   emscripten::function("GeneratePackingEnvelopeForSurfaceMesh",
                        &GeneratePackingEnvelopeForSurfaceMesh,
                        emscripten::allow_raw_pointers());
-  emscripten::function("GenerateUpperEnvelopeForSurfaceMesh",
-                       &GenerateUpperEnvelopeForSurfaceMesh,
-                       emscripten::allow_raw_pointers());
+  // emscripten::function("GenerateUpperEnvelopeForSurfaceMesh",
+  // &GenerateUpperEnvelopeForSurfaceMesh, emscripten::allow_raw_pointers());
 
   emscripten::function("ReverseFaceOrientationsOfSurfaceMesh",
                        &ReverseFaceOrientationsOfSurfaceMesh,

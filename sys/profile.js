@@ -20,7 +20,7 @@ export const endTime = ({ start, name, aggregate }) => {
   aggregate.total += seconds;
   aggregate.count += 1;
   aggregate.average = aggregate.total / aggregate.count;
-/*
+  /*
   const { average, count, last, total } = aggregate;
   logInfo(
     'sys/profile/endTime',
