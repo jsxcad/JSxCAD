@@ -2369,11 +2369,33 @@ bool PolylineToSurfaceMeshRoof(const Polyline& polyline, Surface_mesh& result,
   return true;
 }
 
+FT computeDihedralDeviation(const Surface_mesh& mesh) {
+  FT sum = 0;
+  for (const Edge_index edge : edges(mesh)) {
+    const Halfedge_index halfedge = mesh.halfedge(edge);
+    Point p = mesh.point(mesh.target(mesh.next(halfedge)));
+    Point q = mesh.point(mesh.target(mesh.next(mesh.opposite(halfedge))));
+    Point r = mesh.point(mesh.source(halfedge));
+    Point s = mesh.point(mesh.target(halfedge));
+    FT deviation = CGAL::abs(
+        (CGAL::abs(CGAL::approximate_dihedral_angle(p, q, r, s)) / 180) - 1);
+    // std::cout << "deviation: " << deviation << " p: " << p << " q: " << q <<
+    // " r: " << r << " s: " << s << std::endl;
+    FT length = CGAL::sqrt(CGAL::to_double(CGAL::squared_distance(r, s)));
+    // std::cout << "length: " << length << std::endl;
+    FT delta = deviation * length;
+    // std::cout << "delta: " << delta << std::endl;
+    sum += delta;
+  }
+  // std::cout << "sum: " << sum << std::endl;
+  return sum;
+}
+
 bool PolylinesToSurfaceMeshWall(const Polyline& polyline_a,
                                 const Polyline& polyline_b,
-                                Surface_mesh& result, Vertex_map& vertex_map,
+                                Surface_mesh& final_mesh,
+                                Vertex_map& final_vertex_map,
                                 bool flip = false) {
-  std::cout << "QQ/1" << std::endl;
   const auto& null_face = Surface_mesh::null_face();
   size_t size_a = polyline_a.size();
   size_t nth_a = 0;
@@ -2384,33 +2406,34 @@ bool PolylinesToSurfaceMeshWall(const Polyline& polyline_a,
     FT cost;
     size_t nth_a, nth_b;
   };
-  std::function<bool(size_t, size_t, Surface_mesh, Vertex_map)> walk =
-      [&](size_t nth_a, size_t nth_b, Surface_mesh mesh,
-          Vertex_map vertices) -> bool {
+  Surface_mesh best_mesh;
+  Vertex_map best_vertex_map;
+  FT best_cost = -1;
+  std::function<bool(size_t, size_t, Surface_mesh&, Vertex_map&)> walk =
+      [&](size_t nth_a, size_t nth_b, Surface_mesh& mesh,
+          Vertex_map vertex_map) -> bool {
     if (nth_a >= size_a && nth_b >= size_b) {
-      std::cout << "QQ/2" << std::endl;
       if (CGAL::Polygon_mesh_processing::does_self_intersect(
-              result, CGAL::parameters::all_default())) {
+              mesh, CGAL::parameters::all_default())) {
         return false;
       }
-      std::cout << "QQ/3" << std::endl;
-      if (CGAL::Polygon_mesh_processing::area(result) >
-          CGAL::Polygon_mesh_processing::area(mesh)) {
-        result = std::move(mesh);
-        vertex_map = std::move(vertices);
+      FT cost = computeDihedralDeviation(mesh);
+      if (best_cost == -1 || cost < best_cost) {
+        std::cout << "QQ/best: " << cost << std::endl;
+        best_mesh = std::move(mesh);
+        best_vertex_map = std::move(vertex_map);
+        best_cost = cost;
+        return true;
       }
-      std::cout << "QQ/4" << std::endl;
-      return true;
+      std::cout << "QQ/cost: " << cost << std::endl;
+      return false;
     }
     struct candidate candidates[2];
     // Consider a triangle A .. A+1 .. B
     candidates[0].a = polyline_a[nth_a % size_a];
     candidates[0].b = polyline_a[(nth_a + 1) % size_a];
     candidates[0].c = polyline_b[nth_b % size_b];
-    candidates[0].cost =
-        max3(squared_distance(candidates[0].a, candidates[0].b),
-             squared_distance(candidates[0].b, candidates[0].c),
-             squared_distance(candidates[0].c, candidates[0].a));
+    candidates[0].cost = 0;
     candidates[0].nth_a = nth_a + 1;
     candidates[0].nth_b = nth_b;
 
@@ -2418,10 +2441,7 @@ bool PolylinesToSurfaceMeshWall(const Polyline& polyline_a,
     candidates[1].c = polyline_b[nth_b % size_b];
     candidates[1].b = polyline_b[(nth_b + 1) % size_b];
     candidates[1].a = polyline_a[nth_a % size_a];
-    candidates[1].cost =
-        max3(squared_distance(candidates[1].a, candidates[1].b),
-             squared_distance(candidates[1].b, candidates[1].c),
-             squared_distance(candidates[1].c, candidates[1].a));
+    candidates[0].cost = 0;
     candidates[1].nth_a = nth_a;
     candidates[1].nth_b = nth_b + 1;
 
@@ -2431,22 +2451,21 @@ bool PolylinesToSurfaceMeshWall(const Polyline& polyline_a,
 
     size_t nth_candidate = 0;
     for (struct candidate& candidate : candidates) {
-      std::cout << "QQ/5" << std::endl;
-      Face_index face =
-          result.add_face(ensureVertex(result, vertex_map, candidate.a),
-                          ensureVertex(result, vertex_map, candidate.b),
-                          ensureVertex(result, vertex_map, candidate.c));
-      std::cout << "QQ/6" << std::endl;
-      if (face != null_face &&
-          walk(candidate.nth_a, candidate.nth_b, mesh, vertices)) {
-        return true;
+      Surface_mesh next_mesh(mesh);
+      Vertex_map next_vertex_map(vertex_map);
+      Face_index face = next_mesh.add_face(
+          ensureVertex(next_mesh, next_vertex_map, candidate.a),
+          ensureVertex(next_mesh, next_vertex_map, candidate.b),
+          ensureVertex(next_mesh, next_vertex_map, candidate.c));
+      if (face != null_face) {
+        walk(candidate.nth_a, candidate.nth_b, next_mesh, next_vertex_map);
       }
-      std::cout << "QQ/7" << std::endl;
     }
     return false;
   };
-  walk(0, 0, result, vertex_map);
-  std::cout << "QQ/8" << std::endl;
+  walk(0, 0, final_mesh, final_vertex_map);
+  final_vertex_map = std::move(best_vertex_map);
+  final_mesh = std::move(best_mesh);
   return true;
 }
 
