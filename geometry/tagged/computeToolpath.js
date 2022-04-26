@@ -9,8 +9,6 @@ import KdBush from 'kdbush';
 import { computeHash } from '@jsxcad/sys';
 import { eachSegment } from '../eachSegment.js';
 import { fuse } from '../fuse.js';
-import { getEdges } from '../path/getEdges.js';
-import { getNonVoidPaths } from './getNonVoidPaths.js';
 import { getNonVoidSegments } from './getNonVoidSegments.js';
 import { identityMatrix } from '@jsxcad/math-mat4';
 import { inset } from '../inset.js';
@@ -19,6 +17,7 @@ import { measureBoundingBox } from './measureBoundingBox.js';
 import { section } from '../section.js';
 import { taggedToolpath } from './taggedToolpath.js';
 import { toConcreteGeometry } from './toConcreteGeometry.js';
+import { transformCoordinate } from '../transform.js';
 import { withAabbTreeQuery } from '@jsxcad/algorithm-cgal';
 
 const X = 0;
@@ -140,18 +139,12 @@ export const computeToolpath = (
 
     // Grooves
     // FIX: These should be sectioned segments.
-    for (const { segments } of getNonVoidSegments(concreteGeometry)) {
-      for (const [start, end] of segments) {
+    for (const { matrix, segments } of getNonVoidSegments(concreteGeometry)) {
+      for (const [localStart, localEnd] of segments) {
+        const start = transformCoordinate(localStart, matrix);
+        const end = transformCoordinate(localEnd, matrix);
         points.push({ start, end: { end, type: 'required' } });
         points.push({ start: end, note: 'groove end' });
-      }
-    }
-    for (const { paths } of getNonVoidPaths(concreteGeometry)) {
-      for (const path of paths) {
-        for (const [start, end] of getEdges(path)) {
-          points.push({ start, end: { end, type: 'required' } });
-          points.push({ start: end, note: 'groove end' });
-        }
       }
     }
     time('QQ/computeToolpath/Grooves');

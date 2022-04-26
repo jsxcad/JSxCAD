@@ -10,9 +10,9 @@ Assembly(Box(10), Arc(8), Triangle(5))
 
 Box(5, 7, 8).view().md(`Box(5, 7, 8)`);
 
-ChainedHull(Point(), Box(5).z(5), Arc(3).z(8))
+ChainHull(Point(), Box(5).z(5), Arc(3).z(8))
   .view()
-  .md(`ChainedHull(Point(), Box(5).z(5), Arc(3).z(8))`);
+  .md(`ChainHull(Point(), Box(5).z(5), Arc(3).z(8))`);
 
 Empty().view().md(`Empty()`);
 

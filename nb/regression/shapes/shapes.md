@@ -29,14 +29,14 @@ Box(5, 7, 8).view().md(`Box(5, 7, 8)`);
 Box(5, 7, 8)
 
 ```JavaScript
-ChainedHull(Point(), Box(5).z(5), Arc(3).z(8))
+ChainHull(Point(), Box(5).z(5), Arc(3).z(8))
   .view()
-  .md(`ChainedHull(Point(), Box(5).z(5), Arc(3).z(8))`);
+  .md(`ChainHull(Point(), Box(5).z(5), Arc(3).z(8))`);
 ```
 
 ![Image](shapes.md.3.png)
 
-ChainedHull(Point(), Box(5).z(5), Arc(3).z(8))
+ChainHull(Point(), Box(5).z(5), Arc(3).z(8))
 
 ```JavaScript
 Empty().view().md(`Empty()`);
@@ -402,3 +402,15 @@ Group(Box(1), Box(1).rx(1 / 4))
 ```
 
 ![Image](shapes.md.34.png)
+
+```JavaScript
+Orb(10)
+  .op(
+    (s) => s.lowerEnvelope().ez(-1).z(-5),
+    (s) => s.upperEnvelope().ez(1).z(5)
+  )
+  .align('z>')
+  .view(1);
+```
+
+![Image](shapes.md.35.png)

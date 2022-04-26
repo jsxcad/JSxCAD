@@ -122,7 +122,7 @@ We need to get into the design in order to get at 'box' and 'bolt'
 
 ```JavaScript
 Box(10)
-  .cut(Box(5))
+  // .cut(Box(5))
   .seq({ from: 1/128, by: 1/8 }, (a) => (s) => s.scale(Math.pow(a, 3)).z(a * 10), Loft)
   .view();
 ```
@@ -136,7 +136,7 @@ TODO: In the future (a) => rz(a) can be replaced with rz.
 
 ```JavaScript
 Arc(6)
-  .cut(Arc(3))
+  // .cut(Arc(3))
   .rx(0.25)
   .x(10)
   .seq({ by: 1 / 16 }, rz, Loft)
