@@ -1,4 +1,4 @@
-const transform = (matrix, [x = 0, y = 0, z = 0]) => {
+const transform = ([x = 0, y = 0, z = 0], matrix) => {
   if (!matrix) {
     return [x, y, z];
   }
@@ -10,10 +10,10 @@ const transform = (matrix, [x = 0, y = 0, z = 0]) => {
   ];
 };
 
-export const transformCoordinate = (matrix, coordinate) =>
-  transform(matrix, coordinate);
+export const transformCoordinate = (coordinate, matrix) =>
+  transform(coordinate, matrix);
 
 export const transformingCoordinates =
   (matrix, op) =>
   (coordinate, ...args) =>
-    op(transformCoordinate(matrix, coordinate), ...args);
+    op(transformCoordinate(coordinate, matrix), ...args);

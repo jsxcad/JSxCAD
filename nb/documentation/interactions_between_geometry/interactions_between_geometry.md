@@ -48,11 +48,11 @@ Arc(10).fitTo(Box(5)).pack().view();
 ![Image](interactions_between_geometry.md.3.png)
 
 ---
-### ChainedHull
+### ChainHull
 Performs the hull operation sequentially on the input shapes.
 
 ```JavaScript
-ChainedHull(Arc(10), Box(5).move(12, 12, 0), Arc(20).x(40)).view();
+ChainHull(Arc(10), Box(5).move(12, 12, 0), Arc(20).x(40)).view();
 ```
 
 ![Image](interactions_between_geometry.md.4.png)

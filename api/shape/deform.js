@@ -1,6 +1,6 @@
+import Point from './Point.js';
 import Shape from './Shape.js';
 import { deform as deformGeometry } from '@jsxcad/geometry';
-import { identityMatrix } from '@jsxcad/math-mat4';
 
 export const deform =
   (entries, { iterations, tolerance, alpha } = {}) =>
@@ -11,8 +11,8 @@ export const deform =
         entries.map(({ selection, deformation }) => ({
           selection: selection.toGeometry(),
           deformation: deformation
-            ? deformation.toGeometry().matrix
-            : identityMatrix,
+            ? deformation.toGeometry()
+            : Point().toGeometry,
         })),
         iterations,
         tolerance,
