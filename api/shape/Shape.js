@@ -167,7 +167,7 @@ export const registerShapeMethod = (name, op) => {
 
 export const shapeMethod = (build) => {
   return function (...args) {
-    return build(...args).at(this);
+    return build(...args).to(this);
   };
 };
 

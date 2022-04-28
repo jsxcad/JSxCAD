@@ -12,7 +12,7 @@ Triangle(10)
   .addTo(Box(5).color('blue'))
   .gridView();
 
-Box(5).align('x>y>').gridView();
+Box(5).to(align('x>y>')).gridView();
 
 Box(5)
   .as('box')
@@ -97,8 +97,8 @@ Box(1, 2, 3).ry(1/8).gridView();
 Box(1, 2, 3).rz(1/8).gridView();
 
 Box(5).scale(1, 2).gridView();
-Box(5).cut(Arc(4.9).align('x>')).scale(1, 1).gridView();
-Box(5).cut(Arc(4.9).align('x>')).scale(-1, 1).gridView();
+Box(5).cut(Arc(4.9).to(align('x>'))).scale(1, 1).gridView();
+Box(5).cut(Arc(4.9).to(align('x>'))).scale(-1, 1).gridView();
 
 Box(1, 2, 3)
   .size(size => shape => shape.md(`${JSON.stringify(size)}`));
@@ -244,7 +244,7 @@ Box(20, 20, 20)
   .join(Box(10, 10, 40))
   .join(Orb(4).hasSides(4).z(24))
   .rx(1 / 16)
-  .align('z>')
+  .to(align('z>'))
   .upperEnvelope()
   .extrudeToPlane({ low: [0, 0, 1, 0], direction: [0, 0, -1, 0] })
   .view(5);

@@ -178,7 +178,7 @@ const solar = Arc(20)
 
 ```JavaScript
 const rack = Box(20, Math.PI)
-  .align('x<')
+  .to(align('x<'))
   .cut(
     seq((a) => planetaryFootprint.rz(-a / 8).y(Math.PI * a), {
       from: -1,
@@ -285,3 +285,5 @@ const planetaryDesign = planetaryDesign3
 [solar_0.stl](gear.solar_0.stl)
 
 ![Image](gear.md.13.png)
+
+[axle_0.stl](gear.axle_0.stl)

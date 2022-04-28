@@ -25,7 +25,7 @@ Triangle(10)
 ![Image](shape.md.2.png)
 
 ```JavaScript
-Box(5).align('x>y>').gridView();
+Box(5).to(align('x>y>')).gridView();
 ```
 
 ![Image](shape.md.3.png)
@@ -224,13 +224,13 @@ Box(5).scale(1, 2).gridView();
 ![Image](shape.md.28.png)
 
 ```JavaScript
-Box(5).cut(Arc(4.9).align('x>')).scale(1, 1).gridView();
+Box(5).cut(Arc(4.9).to(align('x>'))).scale(1, 1).gridView();
 ```
 
 ![Image](shape.md.29.png)
 
 ```JavaScript
-Box(5).cut(Arc(4.9).align('x>')).scale(-1, 1).gridView();
+Box(5).cut(Arc(4.9).to(align('x>'))).scale(-1, 1).gridView();
 ```
 
 ![Image](shape.md.30.png)

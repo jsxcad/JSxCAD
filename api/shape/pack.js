@@ -6,6 +6,7 @@ import {
 } from '@jsxcad/geometry';
 
 import Shape from './Shape.js';
+import { align } from './align.js';
 import { pack as packAlgorithm } from '@jsxcad/algorithm-pack';
 
 export const pack =
@@ -49,7 +50,7 @@ export const pack =
     }
     let packedShape = Shape.fromGeometry(taggedGroup({}, ...packedLayers));
     if (size === undefined) {
-      packedShape = packedShape.align('xy');
+      packedShape = packedShape.to(align('xy'));
     }
     return packedShape;
   };

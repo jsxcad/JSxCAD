@@ -14,9 +14,9 @@ export const SocketBoard = (length, width, height, { sockets = [] } = {}) => {
       }
     }
   }
-  return Weld(Box(length * 8, width * 8).align('x>y>'), ...pieces)
+  return Weld(Box(length * 8, width * 8).to(align('x>y>')), ...pieces)
     .ez(height)
-    .align('xy')
+    .to(align('xy'))
     .as(`SocketBoard ${length} x ${width} x ${height}`);
 };
 ```
@@ -41,7 +41,7 @@ export const StudBoard = (length, width, height, { studs = [] } = {}) => {
     }
   }
   return Group(...board)
-    .align('xy')
+    .to(align('xy'))
     .as(`StudBoard ${length} x ${width} x ${height}`);
 };
 ```
@@ -226,7 +226,7 @@ export const AxleJoiner = (length) => Arc(8).cut(axleProfile).ez(length);
 
 ```JavaScript
 const technic_1x6 = Group(seq((n) => technic.x(n), { upto: 48, by: 8 }))
-  .align()
+  .to(align())
   .view();
 ```
 
@@ -247,22 +247,22 @@ Axle Joiner 16mm
 ```JavaScript
 const technicConnector = Arc(4.8)
   .ez(8, -8)
-  .at(xz)
+  .to(xz)
   .add(
     Arc(6.2)
       .ez(0.8 - 0.2)
-      .at(xz)
+      .to(xz)
   )
   .add(
     Arc(5.5)
       .ez(0.4)
-      .at(xz)
+      .to(xz)
       .y(-8 + 0.2)
   )
   .add(
     Arc(5.5)
       .ez(0.4)
-      .at(xz)
+      .to(xz)
       .y(8 - 0.2)
   )
   .cut(yz.Box(10, 6, 0.5).y(-8 + 3))
@@ -279,21 +279,21 @@ const technicConnector = Arc(4.8)
 ```JavaScript
 const halfTechnicConnector = Arc(4.8)
   .ez(8)
-  .at(xz)
+  .to(xz)
   .add(
     Arc(6.2)
       .ez(0.8 - 0.2)
-      .at(xz)
+      .to(xz)
   )
   .add(
     Arc(5.5)
       .ez(0.4)
-      .at(xz)
+      .to(xz)
       .y(8 - 0.2)
   )
   .cut(yz.Box(10, 6, 0.5).y(-8 + 3))
   .cut(yz.Box(10, 6, 0.5).y(8 - 3))
-  .clip(xz.Box(4.5, 6.2, 16))
+  .clip(xz.Box(4.5, 6.2, [0, 8]))
   .material('plastic')
   .stl('halfTechnicConnector');
 ```
@@ -304,7 +304,7 @@ const halfTechnicConnector = Arc(4.8)
 
 ```JavaScript
 const technicPlug5mm = halfTechnicConnector
-  .and(Arc(5).clip(Box(4.5, 5)).ez(-8).at(xz))
+  .and(Arc(5).clip(Box(4.5, 5)).ez(-8).to(xz))
   .stl('technicPlug5mm');
 ```
 

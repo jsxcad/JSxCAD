@@ -937,7 +937,6 @@ const Surface_mesh* SmoothSurfaceMesh(const Surface_mesh* input,
                                       size_t selection_count,
                                       emscripten::val getMesh,
                                       emscripten::val getTransform) {
-  CGAL::get_default_random() = CGAL::Random(0);
   Surface_mesh working_input(*input);
 
   CGAL::Polygon_mesh_processing::transform(*input_transform, working_input,
@@ -1025,6 +1024,7 @@ const Surface_mesh* SmoothSurfaceMesh(const Surface_mesh* input,
   CGAL::Boolean_property_map<std::set<Edge_index>> constrained_edge_map(
       constrained_edges);
 
+  CGAL::get_default_random() = CGAL::Random(0);
   CGAL::Polygon_mesh_processing::smooth_mesh(
       cartesian_mesh.faces(), cartesian_mesh,
       CGAL::Polygon_mesh_processing::parameters::number_of_iterations(
@@ -1048,7 +1048,6 @@ const Surface_mesh* SmoothShapeOfSurfaceMesh(
     const Surface_mesh* input, const Transformation* input_transform,
     size_t iterations, double time, size_t selection_count,
     emscripten::val getMesh, emscripten::val getTransform) {
-  CGAL::get_default_random() = CGAL::Random(0);
   Surface_mesh working_input(*input);
   CGAL::Polygon_mesh_processing::transform(*input_transform, working_input,
                                            CGAL::parameters::all_default());
@@ -1102,6 +1101,7 @@ const Surface_mesh* SmoothShapeOfSurfaceMesh(
   CGAL::Boolean_property_map<std::set<Vertex_index>> constrained_vertex_map(
       constrained_vertices);
 
+  CGAL::get_default_random() = CGAL::Random(0);
   CGAL::Polygon_mesh_processing::smooth_shape(
       cartesian_mesh.faces(), cartesian_mesh, time,
       CGAL::Polygon_mesh_processing::parameters::number_of_iterations(
@@ -2326,18 +2326,18 @@ class Strip {
         b_(b),
         last_(last),
         count_(1),
-        goodness_(0),
+        cost_(0),
         parent_(nullptr) {}
 
   Strip(size_t nth_a, size_t nth_b, const Point& a, const Point& b,
-        const Point& last, FT goodness, Strip* parent)
+        const Point& last, FT cost, Strip* parent)
       : nth_a_(nth_a),
         nth_b_(nth_b),
         a_(a),
         b_(b),
         last_(last),
         count_(1),
-        goodness_(goodness),
+        cost_(cost),
         parent_(parent) {
     parent->Acquire();
   }
@@ -2358,6 +2358,9 @@ class Strip {
     if (nth_a_ != size_a || nth_b_ != size_b) {
       return false;
     }
+    if (IsSelfIntersecting()) {
+      return false;
+    }
     // FIX: The current representation makes this expensive.
     Points points;
     Polygons polygons;
@@ -2371,7 +2374,7 @@ class Strip {
     return true;
   }
 
-  FT goodness() const { return goodness_; }
+  FT cost() const { return cost_; }
   Strip* parent() const { return parent_; }
   const Point& a() const { return a_; }
   const Point& b() const { return b_; }
@@ -2388,9 +2391,13 @@ class Strip {
     }
 
     // We skip the initial triangle, which is imaginary.
-    const Strip* strip = this;
-    while (strip->parent() != nullptr) {
+    for (Strip* strip = this; strip->parent() != nullptr;
+         strip = strip->parent()) {
       Triangle triangle(strip->a(), strip->b(), strip->last());
+      if (triangle.is_degenerate()) {
+        std::cout << "DoesIntersect/degenerate: " << triangle << std::endl;
+        continue;
+      }
       if (CGAL::do_intersect(triangle, to_add)) {
         auto result = CGAL::intersection(triangle, to_add);
         if (result) {
@@ -2425,30 +2432,80 @@ class Strip {
           }
         }
       }
-      strip = strip->parent();
+    }
+    return false;
+  }
+
+  bool IsSelfIntersecting() const {
+    for (const Strip* strip = this;
+         strip->parent() && strip->parent()->parent();
+         strip = strip->parent()) {
+      if (strip->parent()->DoesIntersect(strip->a(), strip->b(),
+                                         strip->last())) {
+        return true;
+      }
     }
     return false;
   }
 
   template <typename Queue>
-  void AddA(const Polyline& polyline, Queue& queue) {
-    if (nth_a() + 1 > polyline.size()) {
+  void Produce(const Polyline& polyline_a, const Polyline& polyline_b,
+               Queue& queue) {
+    Point next_a = polyline_a[(nth_a() + 1) % polyline_a.size()];
+    Point next_b = polyline_b[(nth_b() + 1) % polyline_b.size()];
+    // Non-competitive cases.
+    if (nth_a() + 1 > polyline_a.size()) {
       // This prevents going further than wrapping around to the start.
+      if (nth_b() + 1 > polyline_b.size()) {
+        // Nothing can be done.
+        return;
+      } else {
+        // Only b can advance.
+        queue.push(
+            new Strip(nth_a(), nth_b() + 1, a(), next_b, b(), cost(), this));
+        return;
+      }
+    } else if (nth_b() + 1 > polyline_b.size()) {
+      // Only a can advance.
+      queue.push(
+          new Strip(nth_a() + 1, nth_b(), next_a, b(), a(), cost(), this));
       return;
     }
-    Point next = polyline[(nth_a() + 1) % polyline.size()];
-    if (!DoesIntersect(next, b(), a())) {
+    // Both can advance; compute the relative costs.
+#if 0
+    if (true || !DoesIntersect(next, b(), a())) {
       FT deviation = CGAL::abs(
           (CGAL::abs(CGAL::approximate_dihedral_angle(last(), next, a(), b())) /
            180) -
           1);
-      FT length = CGAL::sqrt(CGAL::to_double(CGAL::squared_distance(a(), b())));
-      FT delta = 1 / (1 + deviation * length);
+      FT across =
+          CGAL::sqrt(CGAL::to_double(CGAL::squared_distance(b(), next)));
+      FT along = CGAL::sqrt(CGAL::to_double(CGAL::squared_distance(a(), next)));
       queue.push(new Strip(nth_a() + 1, nth_b(), next, b(), a(),
-                           goodness() + delta, this));
+                           cost() + across - along, this));
     }
+#endif
+    FT deviation_a = CGAL::abs(
+        (CGAL::abs(CGAL::approximate_dihedral_angle(last(), next_a, a(), b())) /
+         180) -
+        1);
+    FT deviation_b = CGAL::abs(
+        (CGAL::abs(CGAL::approximate_dihedral_angle(last(), next_b, a(), b())) /
+         180) -
+        1);
+    FT length_a =
+        CGAL::sqrt(CGAL::to_double(CGAL::squared_distance(b(), next_a)));
+    FT length_b =
+        CGAL::sqrt(CGAL::to_double(CGAL::squared_distance(a(), next_b)));
+    FT cost_a = length_a * (1 + deviation_a * 2);
+    FT cost_b = length_b * (1 + deviation_b * 2);
+    queue.push(new Strip(nth_a() + 1, nth_b(), next_a, b(), a(),
+                         cost() - cost_b + cost_a, this));
+    queue.push(new Strip(nth_a(), nth_b() + 1, a(), next_b, b(),
+                         cost() - cost_a + cost_b, this));
   }
 
+#if 0
   template <typename Queue>
   void AddB(const Polyline& polyline, Queue& queue) {
     if (nth_b() + 1 > polyline.size()) {
@@ -2456,17 +2513,19 @@ class Strip {
       return;
     }
     Point next = polyline[(nth_b() + 1) % polyline.size()];
-    if (!DoesIntersect(a(), next, b())) {
+    if (true || !DoesIntersect(a(), next, b())) {
       FT deviation = CGAL::abs(
           (CGAL::abs(CGAL::approximate_dihedral_angle(last(), next, a(), b())) /
            180) -
           1);
-      FT length = CGAL::sqrt(CGAL::to_double(CGAL::squared_distance(a(), b())));
-      FT delta = 1 / (1 + deviation * length);
+      FT length =
+          CGAL::sqrt(CGAL::to_double(CGAL::squared_distance(a(), next)));
+      FT along = CGAL::sqrt(CGAL::to_double(CGAL::squared_distance(b(), next)));
       queue.push(new Strip(nth_a(), nth_b() + 1, a(), next, b(),
-                           goodness() + delta, this));
+                           cost() + length - along, this));
     }
   }
+#endif
 
   size_t Release() {
     count_ -= 1;
@@ -2489,14 +2548,14 @@ class Strip {
   const Point b_;
   const Point last_;
   size_t count_;
-  const FT goodness_;
+  const FT cost_;
   Strip* parent_;
 };
 
 class StripComparator {
  public:
   bool operator()(const Strip* a, const Strip* b) {
-    return a->goodness() < b->goodness();
+    return a->cost() > b->cost();
   }
 };
 
@@ -2509,19 +2568,15 @@ Strip* PolylinesToStripWall(const Polyline& polyline_a,
   queue.emplace(new Strip(0, 0, polyline_b.front(), polyline_a.front(),
                           polyline_b.back()));
 
-  FT goodness = 0;
+  FT cost = 0;
   while (!queue.empty()) {
     Strip* top = queue.top();
-    if (top->goodness() < goodness) {
-      std::cout << "Backtracking: " << goodness << " to " << top->goodness();
-    }
-    goodness = top->goodness();
+    cost = top->cost();
     if (top->IsCompleteAndValid(polyline_a.size(), polyline_b.size())) {
       return top;
     }
     queue.pop();
-    top->AddA(polyline_a, queue);
-    top->AddB(polyline_b, queue);
+    top->Produce(polyline_a, polyline_b, queue);
     if (top->Release()) {
       delete top;
     }
@@ -2606,15 +2661,13 @@ void PolygonToPolyline(const Plane& plane, const Polygon_2& polygon,
 double computeBestDistanceBetweenPolylines(const Polyline& polyline_a,
                                            const Polyline& polyline_b,
                                            size_t& offset_b) {
-  size_t size = polyline_a.size();
+  size_t size_b = polyline_b.size();
   double distance = std::numeric_limits<double>::infinity();
   offset_b = 0;
-  for (size_t trial_offset_b = 0; trial_offset_b < size; trial_offset_b++) {
-    double trial_distance = 0;
-    for (size_t nth = 0; nth < size; nth++) {
-      trial_distance += CGAL::sqrt(CGAL::to_double(CGAL::squared_distance(
-          polyline_a[nth], polyline_b[(nth + trial_offset_b) % size])));
-    }
+  for (size_t trial_offset_b = 0; trial_offset_b < size_b; trial_offset_b++) {
+    const double trial_distance =
+        CGAL::sqrt(CGAL::to_double(CGAL::squared_distance(
+            polyline_a.front(), polyline_b[trial_offset_b])));
     if (trial_distance < distance) {
       distance = trial_distance;
       offset_b = trial_offset_b;
@@ -2667,6 +2720,23 @@ void alignPolylines3(Polyline& polyline_a, Polyline& polyline_b) {
     std::rotate(polyline_b.begin(), polyline_b.begin() + offset_b,
                 polyline_b.end());
   }
+}
+
+void splitLongPolylineEdges(Polyline& polyline, FT threshold) {
+  FT threshold2 = threshold * threshold;
+  Polyline split;
+  split.push_back(polyline.back());
+  polyline.pop_back();
+  while (!polyline.empty()) {
+    if (CGAL::squared_distance(split.back(), polyline.back()) > threshold2) {
+      polyline.push_back(CGAL::midpoint(split.back(), polyline.back()));
+    } else {
+      split.push_back(polyline.back());
+      polyline.pop_back();
+    }
+  }
+  std::reverse(split.begin(), split.end());
+  polyline = split;
 }
 
 bool GeneralPolygonSetToSurfaceMesh(const Plane& plane,
@@ -3792,9 +3862,12 @@ int Clip(Geometry* geometry, int targets) {
           continue;
         }
         for (int nth = targets; nth < size; nth++) {
-          if (!geometry->is_mesh(nth) || geometry->is_empty_mesh(nth) ||
-              geometry->noMeshOverlap(target, nth)) {
+          if (!geometry->is_mesh(nth) || geometry->is_empty_mesh(nth)) {
             continue;
+          }
+          if (geometry->noMeshOverlap(target, nth)) {
+            geometry->setType(target, GEOMETRY_EMPTY);
+            break;
           }
           Surface_mesh copy(geometry->mesh(nth));
           if (!CGAL::Polygon_mesh_processing::corefine_and_compute_intersection(
@@ -3813,9 +3886,12 @@ int Clip(Geometry* geometry, int targets) {
         for (int nth = targets; nth < size; nth++) {
           // TODO: Disjunction of planar by volume.
           if (!geometry->is_polygons(nth) ||
-              geometry->plane(target) != geometry->plane(nth) ||
-              geometry->noGpsOverlap(target, nth)) {
+              geometry->plane(target) != geometry->plane(nth)) {
             continue;
+          }
+          if (geometry->noGpsOverlap(target, nth)) {
+            geometry->setType(target, GEOMETRY_EMPTY);
+            break;
           }
           geometry->gps(target).intersection(geometry->gps(nth));
           geometry->updateGpsBounds(target);
@@ -4707,7 +4783,8 @@ int GenerateEnvelope(Geometry* geometry, int envelopeType) {
   return STATUS_OK;
 }
 
-int Grow(Geometry* geometry, const Transformation* transform) {
+int Grow(Geometry* geometry, const Transformation* transform, bool x, bool y,
+         bool z) {
   size_t size = geometry->size();
 
   geometry->copyInputMeshesToOutputMeshes();
@@ -4736,8 +4813,10 @@ int Grow(Geometry* geometry, const Transformation* transform) {
         }
 
         for (const Vertex_index vertex : mesh.vertices()) {
-          const Vector& vertex_unit_normal = vertex_normal_map[vertex];
-          mesh.point(vertex) += vertex_unit_normal * amount;
+          const Vector& n = vertex_normal_map[vertex];
+          Vector direction =
+              unitVector(Vector(x ? n.x() : 0, y ? n.y() : 0, z ? n.z() : 0));
+          mesh.point(vertex) += direction * amount;
         }
       }
     }
@@ -4934,13 +5013,14 @@ int Link(Geometry* geometry, bool close) {
   return STATUS_OK;
 }
 
-int Loft(Geometry* geometry) {
+int Loft(Geometry* geometry, bool close) {
   size_t size = geometry->size();
   geometry->copyInputMeshesToOutputMeshes();
   geometry->transformToAbsoluteFrame();
   geometry->convertPlanarMeshesToPolygons();
 
-  // CHECK: Building a polygon soup might be more robust.
+  Points points;
+  std::vector<std::vector<size_t>> polygons;
 
   std::vector<Polyline> polylines;
   for (int nth = 0; nth < size; nth++) {
@@ -4953,14 +5033,17 @@ int Loft(Geometry* geometry) {
             Halfedge_index h = start;
             do {
               Point p = mesh.point(mesh.source(h));
-              polyline.push_back(p);
+              if (polyline.empty() || polyline.back() != p) {
+                polyline.push_back(p);
+              }
               h = mesh.prev(h);
             } while (h != start);
-            polyline.push_back(polyline[0]);
             break;
           }
         }
         polylines.push_back(std::move(polyline));
+        CGAL::Polygon_mesh_processing::polygon_mesh_to_polygon_soup(
+            mesh, points, polygons);
         break;
       }
       case GEOMETRY_POLYGONS_WITH_HOLES: {
@@ -4984,7 +5067,9 @@ int Loft(Geometry* geometry) {
     return STATUS_EMPTY;
   }
   std::vector<Strip*> strips;
+  // splitLongPolylineEdges(polylines.front(), 1);
   for (size_t nth = 1; nth < polylines.size(); nth++) {
+    // splitLongPolylineEdges(polylines[nth], 1);
     alignPolylines3(polylines[nth - 1], polylines[nth]);
     strips.push_back(PolylinesToStripWall(polylines[nth - 1], polylines[nth]));
   }
@@ -4992,8 +5077,6 @@ int Loft(Geometry* geometry) {
   int target = geometry->add(GEOMETRY_MESH);
   geometry->setIdentityTransform(target);
   geometry->setMesh(target, new Surface_mesh);
-  Points points;
-  std::vector<std::vector<size_t>> polygons;
   for (Strip* strip : strips) {
     strip->ToSoup(points, polygons);
   }
@@ -5005,18 +5088,21 @@ int Loft(Geometry* geometry) {
                                                               mesh);
   assert(CGAL::Polygon_mesh_processing::triangulate_faces(mesh) == true);
   // Make an attempt to close holes.
-  bool failed = false;
-  while (!failed && !CGAL::is_closed(mesh)) {
-    for (const Surface_mesh::Halfedge_index edge : mesh.halfedges()) {
-      if (mesh.is_border(edge)) {
-        std::vector<Face_index> faces;
-        CGAL::Polygon_mesh_processing::triangulate_hole(
-            mesh, edge, std::back_inserter(faces),
-            CGAL::parameters::use_2d_constrained_delaunay_triangulation(false));
-        if (faces.empty()) {
-          failed = true;
+  if (close) {
+    bool failed = false;
+    while (!failed && !CGAL::is_closed(mesh)) {
+      for (const Surface_mesh::Halfedge_index edge : mesh.halfedges()) {
+        if (mesh.is_border(edge)) {
+          std::vector<Face_index> faces;
+          CGAL::Polygon_mesh_processing::triangulate_hole(
+              mesh, edge, std::back_inserter(faces),
+              CGAL::parameters::use_2d_constrained_delaunay_triangulation(
+                  false));
+          if (faces.empty()) {
+            failed = true;
+          }
+          break;
         }
-        break;
       }
     }
   }
@@ -5027,7 +5113,6 @@ int Loft(Geometry* geometry) {
   }
   // Clean up the mesh.
   demesh(geometry->mesh(target));
-  std::cout << "Loft: v3" << std::endl;
   return STATUS_OK;
 }
 

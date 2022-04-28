@@ -34,7 +34,10 @@ export const getInverseMatrices = (geometry) => {
       return { global, local };
     }
     default: {
-      return { global: geometry.matrix, local: geometry.matrix };
+      return {
+        global: geometry.matrix,
+        local: invertTransform(geometry.matrix),
+      };
     }
   }
 };

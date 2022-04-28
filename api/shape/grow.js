@@ -1,13 +1,19 @@
 import Point from './Point.js';
 import Shape from './Shape.js';
+import { destructure } from './destructure.js';
 import { grow as growGeometry } from '@jsxcad/geometry';
-import { removeSelfIntersections } from './removeSelfIntersections.js';
 
 export const grow =
-  (amount, { doRemoveSelfIntersections = true } = {}) =>
-  (shape) =>
-    Shape.fromGeometry(
-      growGeometry(shape.toGeometry(), Point().z(amount).toGeometry())
-    ).op(doRemoveSelfIntersections && removeSelfIntersections());
+  (...args) =>
+  (shape) => {
+    const { number: amount, string: axes = 'xyz' } = destructure(args);
+    return Shape.fromGeometry(
+      growGeometry(shape.toGeometry(), Point().z(amount).toGeometry(), {
+        x: axes.includes('x'),
+        y: axes.includes('y'),
+        z: axes.includes('z'),
+      })
+    );
+  };
 
 Shape.registerMethod('grow', grow);

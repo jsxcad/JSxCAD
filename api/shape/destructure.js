@@ -12,6 +12,7 @@ export const destructure = (
     object = {},
     func,
     number,
+    string,
     value,
   } = {}
 ) => {
@@ -40,6 +41,11 @@ export const destructure = (
         number = arg;
       }
     }
+    if (typeof arg === 'string') {
+      if (string === undefined) {
+        string = arg;
+      }
+    }
   }
   return {
     shapes,
@@ -51,6 +57,7 @@ export const destructure = (
     values,
     object,
     number,
+    string,
     value,
   };
 };

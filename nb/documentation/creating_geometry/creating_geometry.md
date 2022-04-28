@@ -70,7 +70,7 @@ Hexagon(6, 3, 2).view();
 A built in single line font useful for adding text
 
 ```JavaScript
-Hershey('Some Example Text', 20).align('xy').view();
+Hershey('Some Example Text', 20).to(align('xy')).view();
 ```
 
 ![Image](creating_geometry.md.8.png)

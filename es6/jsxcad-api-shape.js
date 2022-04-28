@@ -1,4 +1,4 @@
-import { closePath, concatenatePath, assemble as assemble$1, flip, toConcreteGeometry, toDisplayGeometry, toTransformedGeometry, toPoints, transform, rewriteTags, taggedGraph, taggedSegments, taggedPaths, taggedPoints, fromPolygonsToGraph, registerReifier, taggedPlan, taggedGroup, join as join$1, measureArea, taggedItem, getLeafs, getInverseMatrices, bend as bend$1, cast as cast$1, computeCentroid, convexHull, fuse as fuse$1, clip as clip$1, allTags, fromPointsToGraph, cut as cut$1, deform as deform$1, demesh as demesh$1, disjoint as disjoint$1, rewrite, visit, hasTypeVoid, taggedLayout, measureBoundingBox, getLayouts, isNotVoid, generatePackingEnvelope, computeNormal, extrude, faces as faces$1, fill as fill$1, eachSegment, removeSelfIntersections as removeSelfIntersections$1, grow as grow$1, outline as outline$1, inset as inset$1, link as link$1, read, readNonblocking, loft as loft$1, prepareForSerialization, generateLowerEnvelope, hasShowOverlay, hasTypeMasked, minkowskiDifference as minkowskiDifference$1, minkowskiShell as minkowskiShell$1, minkowskiSum as minkowskiSum$1, linearize, isVoid, offset as offset$1, eachPoint, push as push$1, remesh as remesh$1, write, writeNonblocking, simplify as simplify$1, section as section$1, separate as separate$1, serialize as serialize$1, smooth as smooth$1, taggedSketch, taper as taper$1, test as test$1, computeToolpath, twist as twist$1, generateUpperEnvelope, measureVolume, withQuery, alphaShape, fromFunctionToGraph } from './jsxcad-geometry.js';
+import { closePath, concatenatePath, assemble as assemble$1, flip, toConcreteGeometry, toDisplayGeometry, toTransformedGeometry, toPoints, transform, rewriteTags, taggedGraph, taggedSegments, taggedPaths, taggedPoints, fromPolygonsToGraph, registerReifier, taggedPlan, taggedGroup, join as join$1, measureArea, taggedItem, getLeafs, getInverseMatrices, bend as bend$1, cast as cast$1, computeCentroid, convexHull, fuse as fuse$1, clip as clip$1, allTags, fromPointsToGraph, cut as cut$1, deform as deform$1, demesh as demesh$1, disjoint as disjoint$1, rewrite, visit, hasTypeVoid, taggedLayout, measureBoundingBox, getLayouts, isNotVoid, generatePackingEnvelope, computeNormal, extrude, faces as faces$1, fill as fill$1, eachSegment, grow as grow$1, outline as outline$1, inset as inset$1, link as link$1, read, readNonblocking, loft as loft$1, prepareForSerialization, generateLowerEnvelope, hasShowOverlay, hasTypeMasked, minkowskiDifference as minkowskiDifference$1, minkowskiShell as minkowskiShell$1, minkowskiSum as minkowskiSum$1, linearize, isVoid, offset as offset$1, eachPoint, push as push$1, remesh as remesh$1, removeSelfIntersections as removeSelfIntersections$1, write, writeNonblocking, simplify as simplify$1, section as section$1, separate as separate$1, serialize as serialize$1, smooth as smooth$1, taggedSketch, taper as taper$1, test as test$1, computeToolpath, twist as twist$1, generateUpperEnvelope, measureVolume, withQuery, alphaShape, fromFunctionToGraph } from './jsxcad-geometry.js';
 import { getSourceLocation, startTime, endTime, emit, computeHash, logInfo, log as log$1, generateUniqueId, addPending, write as write$1 } from './jsxcad-sys.js';
 export { elapsed, emit, read, write } from './jsxcad-sys.js';
 import { identityMatrix, fromRotation } from './jsxcad-math-mat4.js';
@@ -160,7 +160,7 @@ const registerShapeMethod = (name, op) => {
 
 const shapeMethod = (build) => {
   return function (...args) {
-    return build(...args).at(this);
+    return build(...args).to(this);
   };
 };
 
@@ -376,6 +376,7 @@ const destructure = (
     object = {},
     func,
     number,
+    string,
     value,
   } = {}
 ) => {
@@ -404,6 +405,11 @@ const destructure = (
         number = arg;
       }
     }
+    if (typeof arg === 'string') {
+      if (string === undefined) {
+        string = arg;
+      }
+    }
   }
   return {
     shapes,
@@ -415,6 +421,7 @@ const destructure = (
     values,
     object,
     number,
+    string,
     value,
   };
 };
@@ -794,6 +801,11 @@ Shape.registerMethod('and', and);
 const addTo = (other) => (shape) => other.add(shape);
 Shape.registerMethod('addTo', addTo);
 
+const Point = (...args) =>
+  Shape.fromPoint(Shape.toCoordinate(undefined, ...args));
+
+Shape.prototype.Point = Shape.shapeMethod(Point);
+
 const X$6 = 0;
 const Y$6 = 1;
 const Z$6 = 2;
@@ -804,69 +816,74 @@ const round = (v) => Math.round(v * 1000) / 1000;
 
 const roundCoordinate = ([x, y, z]) => [round(x), round(y), round(z)];
 
-const align =
-  (spec = 'xyz', origin = [0, 0, 0]) =>
-  (shape) =>
-    shape.size(({ max, min, center }) => (shape) => {
-      // This is producing very small deviations.
-      // FIX: Try a more principled approach.
-      max = roundCoordinate(max);
-      min = roundCoordinate(min);
-      center = roundCoordinate(center);
-      const offset = [0, 0, 0];
-      let index = 0;
-      while (index < spec.length) {
-        switch (spec[index++]) {
-          case 'x': {
-            switch (spec[index]) {
-              case '>':
-                offset[X$6] = -min[X$6];
-                index += 1;
-                break;
-              case '<':
-                offset[X$6] = -max[X$6];
-                index += 1;
-                break;
-              default:
-                offset[X$6] = -center[X$6];
-            }
-            break;
+const computeOffset = (spec = 'xyz', origin = [0, 0, 0], shape) =>
+  shape.size(({ max, min, center }) => (shape) => {
+    // This is producing very small deviations.
+    // FIX: Try a more principled approach.
+    max = roundCoordinate(max);
+    min = roundCoordinate(min);
+    center = roundCoordinate(center);
+    const offset = [0, 0, 0];
+    let index = 0;
+    while (index < spec.length) {
+      switch (spec[index++]) {
+        case 'x': {
+          switch (spec[index]) {
+            case '>':
+              offset[X$6] = -min[X$6];
+              index += 1;
+              break;
+            case '<':
+              offset[X$6] = -max[X$6];
+              index += 1;
+              break;
+            default:
+              offset[X$6] = -center[X$6];
           }
-          case 'y': {
-            switch (spec[index]) {
-              case '>':
-                offset[Y$6] = -min[Y$6];
-                index += 1;
-                break;
-              case '<':
-                offset[Y$6] = -max[Y$6];
-                index += 1;
-                break;
-              default:
-                offset[Y$6] = -center[Y$6];
-            }
-            break;
+          break;
+        }
+        case 'y': {
+          switch (spec[index]) {
+            case '>':
+              offset[Y$6] = -min[Y$6];
+              index += 1;
+              break;
+            case '<':
+              offset[Y$6] = -max[Y$6];
+              index += 1;
+              break;
+            default:
+              offset[Y$6] = -center[Y$6];
           }
-          case 'z': {
-            switch (spec[index]) {
-              case '>':
-                offset[Z$6] = -min[Z$6];
-                index += 1;
-                break;
-              case '<':
-                offset[Z$6] = -max[Z$6];
-                index += 1;
-                break;
-              default:
-                offset[Z$6] = -center[Z$6];
-            }
-            break;
+          break;
+        }
+        case 'z': {
+          switch (spec[index]) {
+            case '>':
+              offset[Z$6] = -min[Z$6];
+              index += 1;
+              break;
+            case '<':
+              offset[Z$6] = -max[Z$6];
+              index += 1;
+              break;
+            default:
+              offset[Z$6] = -center[Z$6];
           }
+          break;
         }
       }
-      const moved = shape.move(...add(offset, origin));
-      return moved;
-    });
+    }
+    return offset;
+  });
+
+const align =
+  (spec = 'xyz', origin = [0, 0, 0]) =>
+  (shape) => {
+    const offset = computeOffset(spec, origin, shape);
+    const reference = Point().move(...subtract(origin, offset));
+    return reference;
+  };
 
 Shape.registerMethod('align', align);
 
@@ -902,7 +919,7 @@ const at =
   (selection, ...ops) =>
   (shape) => {
     if (ops.length === 0) {
-      ops.push(() => shape);
+      ops.push((local) => local);
     }
     ops = ops.map((op) => (op instanceof Function ? op : () => op));
     // We've already selected the item for reference, e.g., s.on(g('plate'), ...);
@@ -937,11 +954,6 @@ const billOfMaterials =
 
 Shape.registerMethod('billOfMaterials', billOfMaterials);
 Shape.registerMethod('bom', billOfMaterials);
-
-const Point = (...args) =>
-  Shape.fromPoint(Shape.toCoordinate(undefined, ...args));
-
-Shape.prototype.Point = Shape.shapeMethod(Point);
 
 const cast =
   (plane = [0, 0, 1, 0], reference = Point()) =>
@@ -1067,10 +1079,10 @@ const cutFrom = (other) => (shape) =>
 Shape.registerMethod('cutFrom', cutFrom);
 
 const cutout =
-  (other, op = (clipped) => clipped.void()) =>
+  (other, op = (cut) => (clipped) => cut.and(clipped.void())) =>
   (shape) => {
     other = Shape.toShape(other, shape);
-    return shape.cut(other).and(op(shape.clip(other)));
+    return shape.cut(other).op((cut) => op(cut)(shape.clip(other)));
   };
 Shape.registerMethod('cutout', cutout);
 
@@ -3325,17 +3337,18 @@ const gn = getNot;
 Shape.registerMethod('getNot', getNot);
 Shape.registerMethod('gn', gn);
 
-const removeSelfIntersections = () => (shape) =>
-  Shape.fromGeometry(removeSelfIntersections$1(shape.toGeometry()));
-
-Shape.registerMethod('removeSelfIntersections', removeSelfIntersections);
-
 const grow =
-  (amount, { doRemoveSelfIntersections = true } = {}) =>
-  (shape) =>
-    Shape.fromGeometry(
-      grow$1(shape.toGeometry(), Point().z(amount).toGeometry())
-    ).op(doRemoveSelfIntersections && removeSelfIntersections());
+  (...args) =>
+  (shape) => {
+    const { number: amount, string: axes = 'xyz' } = destructure(args);
+    return Shape.fromGeometry(
+      grow$1(shape.toGeometry(), Point().z(amount).toGeometry(), {
+        x: axes.includes('x'),
+        y: axes.includes('y'),
+        z: axes.includes('z'),
+      })
+    );
+  };
 
 Shape.registerMethod('grow', grow);
 
@@ -3427,6 +3440,24 @@ const loft =
     Loft(shape, ...shape.toShapes(shapes));
 
 Shape.registerMethod('loft', loft);
+
+const OpenLoft = (...shapes) =>
+  Shape.fromGeometry(
+    loft$1(
+      shapes.map((shape) => shape.toGeometry()),
+      /* close= */ false
+    )
+  );
+
+Shape.prototype.OpenLoft = Shape.shapeMethod(OpenLoft);
+Shape.OpenLoft = OpenLoft;
+
+const openLoft =
+  (...shapes) =>
+  (shape) =>
+    OpenLoft(shape, ...shape.toShapes(shapes));
+
+Shape.registerMethod('openLoft', openLoft);
 
 /**
  *
@@ -3799,7 +3830,7 @@ const pack =
     }
     let packedShape = Shape.fromGeometry(taggedGroup({}, ...packedLayers));
     if (size === undefined) {
-      packedShape = packedShape.align('xy');
+      packedShape = packedShape.to(align('xy'));
     }
     return packedShape;
   };
@@ -3860,6 +3891,11 @@ const remesh =
   };
 
 Shape.registerMethod('remesh', remesh);
+
+const removeSelfIntersections = () => (shape) =>
+  Shape.fromGeometry(removeSelfIntersections$1(shape.toGeometry()));
+
+Shape.registerMethod('removeSelfIntersections', removeSelfIntersections);
 
 // FIX: Move this to cgal.
 const rotate =
@@ -4278,10 +4314,10 @@ const to =
   (selection, ...ops) =>
   (shape) => {
     if (ops.length === 0) {
-      ops.push(() => shape);
+      ops.push((local) => local);
     }
     ops = ops.map((op) => (op instanceof Function ? op : () => op));
-    // We've already selected the item for reference, e.g., s.on(g('plate'), ...);
+    // We've already selected the item for reference, e.g., s.to(g('plate'), ...);
     if (selection instanceof Function) {
       selection = selection(shape);
     }

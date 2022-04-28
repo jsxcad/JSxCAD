@@ -1,7 +1,7 @@
 ```JavaScript
 (await readSvg('https://jsxcad.js.org/svg/dinosaur.svg', { fill: false }))
   .scale(10)
-  .align('xy')
+  .to(align('xy'))
   .and(toolpath())
   .gcode('dinosaur');
 ```

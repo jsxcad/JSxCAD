@@ -16,7 +16,7 @@ Cube with red cut-out.
 
 ```JavaScript
 Box(10, 10, 10)
-  .cutout(Arc(5, 5, 10), color('red'))
+  .cutout(Arc(5, 5, 10), cut => clipped => cut.and(clipped.color('red')))
   .view();
 ```
 

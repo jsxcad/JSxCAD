@@ -7,10 +7,10 @@ export const to =
   (selection, ...ops) =>
   (shape) => {
     if (ops.length === 0) {
-      ops.push(() => shape);
+      ops.push((local) => local);
     }
     ops = ops.map((op) => (op instanceof Function ? op : () => op));
-    // We've already selected the item for reference, e.g., s.on(g('plate'), ...);
+    // We've already selected the item for reference, e.g., s.to(g('plate'), ...);
     if (selection instanceof Function) {
       selection = selection(shape);
     }
