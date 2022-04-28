@@ -4,11 +4,14 @@ import { fromCgalGeometry, withCgalGeometry } from './cgalGeometry.js';
 import { ErrorZeroThickness } from './error.js';
 import { toCgalTransformFromJsTransform } from './transform.js';
 
-export const grow = (inputs, offset) =>
+export const grow = (inputs, offset, { x = true, y = true, z = true } = {}) =>
   withCgalGeometry(inputs, (cgalGeometry, g) => {
     const status = g.Grow(
       cgalGeometry,
-      toCgalTransformFromJsTransform(offset.matrix)
+      toCgalTransformFromJsTransform(offset.matrix),
+      x,
+      y,
+      z
     );
     switch (status) {
       case STATUS_ZERO_THICKNESS:

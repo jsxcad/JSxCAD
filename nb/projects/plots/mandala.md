@@ -1,6 +1,6 @@
 ```JavaScript
 (await readSvg('https://jsxcad.js.org/svg/mandala.svg', { fill: false }))
-  .align('xy')
+  .to(align('xy'))
   .scale(20)
   .and(toolpath())
   .gcode('mandala');

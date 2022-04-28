@@ -30,6 +30,7 @@ export const toTriangleArray = (geometry) => {
         }
         break;
       }
+      case 'polygonsWithHoles':
       case 'points':
       case 'paths':
       case 'segments':

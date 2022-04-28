@@ -1,9 +1,9 @@
 import Shape from './Shape.js';
 
 export const cutout =
-  (other, op = (clipped) => clipped.void()) =>
+  (other, op = (cut) => (clipped) => cut.and(clipped.void())) =>
   (shape) => {
     other = Shape.toShape(other, shape);
-    return shape.cut(other).and(op(shape.clip(other)));
+    return shape.cut(other).op((cut) => op(cut)(shape.clip(other)));
   };
 Shape.registerMethod('cutout', cutout);

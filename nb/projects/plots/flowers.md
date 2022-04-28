@@ -1,7 +1,7 @@
 ```JavaScript
 (await readSvg('https://jsxcad.js.org/svg/flowers.svg', { fill: false }))
   .scale(1 / 60)
-  .align()
+  .to(align())
   .and(toolpath())
   .gcode('flowers');
 ```

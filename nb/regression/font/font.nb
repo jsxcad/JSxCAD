@@ -17,4 +17,4 @@ md`
 #### Text(font, text, size=10)
 Text takes a font, the text to render, and an optional size defaulting to 10.
 `;
-Text(unYetGul, '字').align('xy').gridView();
+Text(unYetGul, '字').to(align('xy')).gridView();

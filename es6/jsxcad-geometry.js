@@ -1,4 +1,4 @@
-import { composeTransforms, fromSurfaceMesh, fromPointsToAlphaShapeAsSurfaceMesh, disjoint as disjoint$1, deletePendingSurfaceMeshes, bend as bend$1, fromSurfaceMeshEmitBoundingBox, toSurfaceMesh, serializeSurfaceMesh, cast as cast$1, clip as clip$1, computeCentroid as computeCentroid$1, computeNormal as computeNormal$1, outline as outline$1, fuse as fuse$1, inset as inset$1, eachPointOfSurfaceMesh, section as section$1, withAabbTreeQuery, convexHull as convexHull$1, cut as cut$1, deform as deform$1, demeshSurfaceMesh, extrude as extrude$1, faces as faces$1, reverseFaceOrientationsOfSurfaceMesh, fromFunctionToSurfaceMesh, fromPointsToSurfaceMesh, fromPolygonsToSurfaceMesh, generateEnvelope, generatePackingEnvelopeForSurfaceMesh, fromSegmentToInverseTransform, invertTransform, grow as grow$1, fill as fill$1, join as join$1, link as link$1, loft as loft$1, computeArea, computeVolume, minkowskiDifferenceOfSurfaceMeshes, minkowskiShellOfSurfaceMeshes, minkowskiSumOfSurfaceMeshes, offset as offset$1, pushSurfaceMesh, remeshSurfaceMesh, isotropicRemeshingOfSurfaceMesh, removeSelfIntersectionsOfSurfaceMesh, approximateSurfaceMesh, simplifySurfaceMesh, subdivideSurfaceMesh, smoothShapeOfSurfaceMesh, smoothSurfaceMesh, separate as separate$1, fromSurfaceMeshToTriangles, taperSurfaceMesh, doesSelfIntersectOfSurfaceMesh, twistSurfaceMesh, SurfaceMeshQuery, fromRotateXToTransform, fromRotateYToTransform, fromRotateZToTransform, fromTranslateToTransform, fromScaleToTransform } from './jsxcad-algorithm-cgal.js';
+import { composeTransforms, fromSurfaceMesh, fromPointsToAlphaShapeAsSurfaceMesh, disjoint as disjoint$1, deletePendingSurfaceMeshes, bend as bend$1, fromSurfaceMeshEmitBoundingBox, toSurfaceMesh, serializeSurfaceMesh, cast as cast$1, clip as clip$1, computeCentroid as computeCentroid$1, computeNormal as computeNormal$1, outline as outline$1, fuse as fuse$1, inset as inset$1, eachPointOfSurfaceMesh, section as section$1, withAabbTreeQuery, convexHull as convexHull$1, cut as cut$1, deform as deform$1, demeshSurfaceMesh, extrude as extrude$1, faces as faces$1, reverseFaceOrientationsOfSurfaceMesh, fromFunctionToSurfaceMesh, fromPointsToSurfaceMesh, fromPolygonsToSurfaceMesh, generateEnvelope, generatePackingEnvelopeForSurfaceMesh, invertTransform, fromSegmentToInverseTransform, grow as grow$1, fill as fill$1, join as join$1, link as link$1, loft as loft$1, computeArea, computeVolume, minkowskiDifferenceOfSurfaceMeshes, minkowskiShellOfSurfaceMeshes, minkowskiSumOfSurfaceMeshes, offset as offset$1, pushSurfaceMesh, remeshSurfaceMesh, isotropicRemeshingOfSurfaceMesh, removeSelfIntersectionsOfSurfaceMesh, approximateSurfaceMesh, simplifySurfaceMesh, subdivideSurfaceMesh, smoothShapeOfSurfaceMesh, smoothSurfaceMesh, separate as separate$1, fromSurfaceMeshToTriangles, taperSurfaceMesh, doesSelfIntersectOfSurfaceMesh, twistSurfaceMesh, SurfaceMeshQuery, fromRotateXToTransform, fromRotateYToTransform, fromRotateZToTransform, fromTranslateToTransform, fromScaleToTransform } from './jsxcad-algorithm-cgal.js';
 import { computeHash, write as write$1, read as read$1, readNonblocking as readNonblocking$1, ErrorWouldBlock, addPending } from './jsxcad-sys.js';
 import { transform as transform$4, min, max, equals, subtract, dot, distance, canonicalize as canonicalize$5 } from './jsxcad-math-vec3.js';
 import { identityMatrix, fromTranslation, fromZRotation, fromScaling } from './jsxcad-math-mat4.js';
@@ -2114,7 +2114,10 @@ const getInverseMatrices = (geometry) => {
       return { global, local };
     }
     default: {
-      return { global: geometry.matrix, local: geometry.matrix };
+      return {
+        global: geometry.matrix,
+        local: invertTransform(geometry.matrix),
+      };
     }
   }
 };
@@ -2343,11 +2346,11 @@ const getTags = (geometry) => {
 const filter$8 = (geometry, parent) =>
   ['graph'].includes(geometry.type) && isNotTypeVoid(geometry);
 
-const grow = (geometry, offset) => {
+const grow = (geometry, offset, options) => {
   const concreteGeometry = toConcreteGeometry(geometry);
   const inputs = [];
   linearize(concreteGeometry, filter$8, inputs);
-  const outputs = grow$1(inputs, offset);
+  const outputs = grow$1(inputs, offset, options);
   deletePendingSurfaceMeshes();
   return replacer(inputs, outputs)(concreteGeometry);
 };
@@ -3256,6 +3259,7 @@ const toTriangleArray = (geometry) => {
         }
         break;
       }
+      case 'polygonsWithHoles':
       case 'points':
       case 'paths':
       case 'segments':

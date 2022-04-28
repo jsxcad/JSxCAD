@@ -1,6 +1,6 @@
 ```JavaScript
 (await readSvg('https://jsxcad.js.org/svg/visnezh.svg', { fill: false }))
-  .align('xy')
+  .to(align('xy'))
   .scale(1 / 100)
   .and(toolpath())
   .gcode('visnezh');

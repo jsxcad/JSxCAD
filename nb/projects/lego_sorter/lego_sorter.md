@@ -42,12 +42,12 @@ const sorter = ring.and(base).stl('sorter');
 
 ```JavaScript
 const wall = wall1
-  .align('x<')
-  .and(align('x>'))
-  .align('x<')
-  .and(align('x>'))
-  .align('x<')
-  .and(align('x>'))
+  .to(align('x<'))
+  .and(to(align('x>')))
+  .to(align('x<'))
+  .and(to(align('x>')))
+  .to(align('x<'))
+  .and(to(align('x>')))
   .view();
 ```
 
@@ -57,7 +57,7 @@ const wall = wall1
 const bentWall = wall
   .clip(Box(475, 50, 500))
   .scale(1 / 1.5)
-  .align('z>')
+  .to(align('z>'))
   .y(51)
   .bend(50)
   .view();
