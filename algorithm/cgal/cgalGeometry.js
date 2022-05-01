@@ -103,7 +103,7 @@ export const fillCgalGeometry = (geometry, inputs) => {
           for (const [x, y, z] of exactPoints) {
             geometry.addInputPointExact(nth, x, y, z);
           }
-        } else {
+        } else if (points) {
           for (const [x, y, z] of points) {
             geometry.addInputPoint(nth, x, y, z);
           }

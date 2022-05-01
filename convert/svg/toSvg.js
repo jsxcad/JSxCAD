@@ -7,7 +7,7 @@ import {
   section,
   transformCoordinate,
   transformingCoordinates,
-  translate,
+  // translate,
 } from '@jsxcad/geometry';
 
 import { toRgbColorFromTags } from '@jsxcad/algorithm-color';
@@ -27,7 +27,7 @@ export const toSvg = async (
   const [min, max] = measureBoundingBox(scaled);
   const width = max[X] - min[X];
   const height = max[Y] - min[Y];
-  const geometry = translate([0, -height, 0], scaled);
+  const geometry = scaled;
   const viewBox = `${min[X].toFixed(5)} ${-max[Y].toFixed(5)} ${width.toFixed(
     5
   )} ${height.toFixed(5)}`;

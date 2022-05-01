@@ -22,9 +22,9 @@ Group(Box(10), Arc(8), Triangle(5))
   .md(`Group(Box(10), Arc(8), Triangle(5))`);
 
 Hershey('Hershey', 10)
-  .to(align('xy'))
+  .by(align('xy'))
   .gridView()
-  .md(`Hershey(10)('Hershey').to(align('xy'))`);
+  .md(`Hershey(10)('Hershey').by(align('xy'))`);
 
 Hexagon(10).gridView().md(`Hexagon(10)`);
 
@@ -115,7 +115,7 @@ Tetragon(5).gridView().md(`Tetragon(5)`);
 Triangle(5).gridView().md(`Triangle(5)`);
 
 Wave((t) => Point(0, sin(t * 3) * 100), { to: 360 })
-  .to(align('xy'))
+  .by(align('xy'))
   .gridView()
   .md(`Wave((t) => Point(0, sin(t * 3) * 100), { to: 360 })`);
 
@@ -202,5 +202,8 @@ Orb(10)
     (s) => s.lowerEnvelope().ez(-1).z(-5),
     (s) => s.upperEnvelope().ez(1).z(5)
   )
-  .to(align('z>'))
+  .by(align('z>'))
   .view(1);
+
+// Show a section with a hole in it.
+Box(10).cut(Box(5)).ez(1, -1).section().view();

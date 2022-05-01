@@ -8,30 +8,30 @@ const grid = Hexagon(16)
   )
   .gridView();
 
-const base = grid.cutFrom(Arc(100)).ez(1).gridView();
+const base = grid.cutfrom(Arc(100)).ez(1).gridView();
 
-const ring = Arc(99).cutFrom(Arc(102)).ez(2.5).gridView();
+const ring = Arc(99).cutfrom(Arc(102)).ez(2.5).gridView();
 
 const sorter = ring.and(base).stl('sorter');
 const wall1 = grid
-  .cutFrom(Box(80, 110))
+  .cutfrom(Box(80, 110))
   .rz(1 / 4)
   .ez(2)
   .rx(1 / 4);
 
 const wall = wall1
-  .to(align('x<'))
-  .and(to(align('x>')))
-  .to(align('x<'))
-  .and(to(align('x>')))
-  .to(align('x<'))
-  .and(to(align('x>')))
+  .by(align('x<'))
+  .and(by(align('x>')))
+  .by(align('x<'))
+  .and(by(align('x>')))
+  .by(align('x<'))
+  .and(by(align('x>')))
   .view();
 
 const bentWall = wall
   .clip(Box(475, 50, 500))
   .scale(1 / 1.5)
-  .to(align('z>'))
+  .by(align('z>'))
   .y(51)
   .bend(50)
   .view();

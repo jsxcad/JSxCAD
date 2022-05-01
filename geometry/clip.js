@@ -9,7 +9,7 @@ import { toConcreteGeometry } from './tagged/toConcreteGeometry.js';
 const filter = (geometry) =>
   ['graph', 'polygonsWithHoles', 'segments'].includes(geometry.type);
 
-export const clip = (geometry, geometries) => {
+export const clip = (geometry, geometries, open) => {
   const concreteGeometry = toConcreteGeometry(geometry);
   const inputs = [];
   linearize(concreteGeometry, filter, inputs);
@@ -17,7 +17,7 @@ export const clip = (geometry, geometries) => {
   for (const geometry of geometries) {
     linearize(geometry, filter, inputs);
   }
-  const outputs = clipWithCgal(inputs, count);
+  const outputs = clipWithCgal(inputs, count, open);
   deletePendingSurfaceMeshes();
   return replacer(inputs, outputs, count)(concreteGeometry);
 };

@@ -71,6 +71,7 @@ export { getItems } from './tagged/getItems.js';
 export { getInverseMatrices } from './tagged/getInverseMatrices.js';
 export { getLayouts } from './tagged/getLayouts.js';
 export { getLeafs } from './tagged/getLeafs.js';
+export { getLeafsIn } from './tagged/getLeafsIn.js';
 export { getNonVoidGraphs } from './tagged/getNonVoidGraphs.js';
 export { getNonVoidItems } from './tagged/getNonVoidItems.js';
 export { getNonVoidPaths } from './tagged/getNonVoidPaths.js';

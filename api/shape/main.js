@@ -7,7 +7,7 @@
  * the api uses.
  */
 
-import Shape from './Shape.js';
+import './Shape.js';
 
 // We need destructure available via Shape.
 // eslint-disable-next-line sort-imports
@@ -16,6 +16,8 @@ import './destructure.js';
 // We need Plan.js to add Shape.registerReifier before later imports call it.
 // eslint-disable-next-line sort-imports
 import './Plan.js';
+
+import Point from './Point.js';
 
 export {
   GrblConstantLaser,
@@ -28,224 +30,21 @@ export {
   defTool,
 } from './define.js';
 
-export const xy = Shape.fromGeometry({
-  type: 'item',
-  tags: ['item:xy'],
-  content: [
-    {
-      type: 'group',
-      content: [],
-      matrix: [
-        1,
-        0,
-        0,
-        0,
-        0,
-        1,
-        0,
-        0,
-        0,
-        0,
-        1,
-        0,
-        0,
-        0,
-        0,
-        1,
-        '1',
-        '0',
-        '0',
-        '0',
-        '0',
-        '1',
-        '0',
-        '0',
-        '0',
-        '0',
-        '1',
-        '0',
-        '1',
-      ],
-    },
-  ],
-  matrix: [
-    1,
-    0,
-    0,
-    0,
-    0,
-    1,
-    0,
-    0,
-    0,
-    0,
-    1,
-    0,
-    0,
-    0,
-    0,
-    1,
-    '1',
-    '0',
-    '0',
-    '0',
-    '0',
-    '1',
-    '0',
-    '0',
-    '0',
-    '0',
-    '1',
-    '0',
-    '1',
-  ],
-});
-export const xz = Shape.fromGeometry({
-  type: 'item',
-  tags: ['item:xz'],
-  content: [
-    {
-      type: 'group',
-      tags: [],
-      content: [],
-      matrix: [
-        1,
-        0,
-        0,
-        0,
-        0,
-        0,
-        -1,
-        0,
-        0,
-        1,
-        0,
-        0,
-        0,
-        0,
-        0,
-        1,
-        '1',
-        '0',
-        '0',
-        '0',
-        '0',
-        '0',
-        '1',
-        '0',
-        '0',
-        '-1',
-        '0',
-        '0',
-        '1',
-      ],
-    },
-  ],
-  matrix: [
-    1,
-    0,
-    0,
-    0,
-    0,
-    0,
-    -1,
-    0,
-    0,
-    1,
-    0,
-    0,
-    0,
-    0,
-    0,
-    1,
-    '1',
-    '0',
-    '0',
-    '0',
-    '0',
-    '0',
-    '1',
-    '0',
-    '0',
-    '-1',
-    '0',
-    '0',
-    '1',
-  ],
-});
-export const yz = Shape.fromGeometry({
-  type: 'item',
-  tags: ['item:yz'],
-  content: [
-    {
-      type: 'group',
-      tags: [],
-      content: [],
-      matrix: [
-        0,
-        0,
-        -1,
-        0,
-        0,
-        1,
-        0,
-        0,
-        1,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        1,
-        '0',
-        '0',
-        '1',
-        '0',
-        '0',
-        '1',
-        '0',
-        '0',
-        '-1',
-        '0',
-        '0',
-        '0',
-        '1',
-      ],
-    },
-  ],
-  matrix: [
-    0,
-    0,
-    -1,
-    0,
-    0,
-    1,
-    0,
-    0,
-    1,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    1,
-    '0',
-    '0',
-    '1',
-    '0',
-    '0',
-    '1',
-    '0',
-    '0',
-    '-1',
-    '0',
-    '0',
-    '0',
-    '1',
-  ],
-});
+export const X = (x = 0) => Point().x(x);
+export const Y = (y = 0) => Point().y(y);
+export const Z = (z = 0) => Point().z(z);
+export const XY = (z = 0) => Point().z(z);
+export const XZ = (y = 0) =>
+  Point()
+    .rx(-1 / 4)
+    .y(y);
+export const YZ = (x = 0) =>
+  Point()
+    .ry(-1 / 4)
+    .x(x);
+export const RX = (t = 0) => Point().rx(t);
+export const RY = (t = 0) => Point().ry(t);
+export const RZ = (t = 0) => Point().rz(t);
 
 export { md } from './md.js';
 
@@ -263,16 +62,19 @@ export { asPart } from './asPart.js';
 export { at } from './at.js';
 export { bend } from './bend.js';
 export { billOfMaterials } from './billOfMaterials.js';
+export { by } from './by.js';
 export { cast } from './cast.js';
 export { center } from './center.js';
 export { chainHull } from './ChainHull.js';
 export { clip } from './clip.js';
-export { clipFrom } from './clipFrom.js';
+export { clipopen } from './clipopen.js';
+export { clipfrom } from './clipfrom.js';
 export { color } from './color.js';
 export { colors } from './colors.js';
 export { cloudSolid } from './cloudSolid.js';
 export { cut } from './cut.js';
-export { cutFrom } from './cutFrom.js';
+export { cutfrom } from './cutfrom.js';
+export { cutopen } from './cutopen.js';
 export { cutout } from './cutout.js';
 export { deform } from './deform.js';
 export { demesh } from './demesh.js';
@@ -280,6 +82,7 @@ export { disjoint } from './disjoint.js';
 export { drop } from './drop.js';
 export { ensurePages } from './Page.js';
 export { each } from './each.js';
+export { eachIn } from './eachIn.js';
 export { edit } from './edit.js';
 export { packingEnvelope } from './packingEnvelope.js';
 export { extrudeX, extrudeY, extrudeZ, ex, ey, ez } from './extrude.js';
@@ -294,6 +97,7 @@ export { getEdge } from './getEdge.js';
 export { gn, getNot } from './getNot.js';
 export { grow } from './grow.js';
 export { hull } from './Hull.js';
+export { inFn } from './in.js';
 export { inline } from './inline.js';
 export { inset } from './inset.js';
 export { keep } from './keep.js';
@@ -305,6 +109,7 @@ export { loop } from './Loop.js';
 export { lowerEnvelope } from './lowerEnvelope.js';
 export { overlay } from './overlay.js';
 export { mask } from './mask.js';
+export { masking } from './masking.js';
 export { material } from './material.js';
 export { minkowskiDifference } from './minkowskiDifference.js';
 export { minkowskiShell } from './minkowskiShell.js';

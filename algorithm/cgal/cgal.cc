@@ -1432,6 +1432,10 @@ bool is_safe_to_move(const Surface_mesh& m, const Vertex_point_map& p,
                      const Halfedge_index start) {
   for (Halfedge_index e = m.next_around_source(start); e != start;
        e = m.next_around_source(e)) {
+    if (m.is_border(e) || m.is_border(m.opposite(e))) {
+      // CHECK: Think about how we could move points on borders.
+      return false;
+    }
     if (!is_coplanar_edge(m, p, e) && !is_collinear_edge(m, p, start, e)) {
       return false;
     }
@@ -1495,8 +1499,6 @@ const Surface_mesh* SimplifySurfaceMesh(const Surface_mesh* input,
                                         const Transformation* transform,
                                         double ratio, bool simplify_points,
                                         double eps) {
-  CGAL::get_default_random() = CGAL::Random(0);
-
   boost::unordered_map<Vertex_index, Cartesian_surface_mesh::Vertex_index>
       vertex_map;
 
@@ -1526,6 +1528,7 @@ const Surface_mesh* SimplifySurfaceMesh(const Surface_mesh* input,
       Cartesian_surface_mesh>
       stop(ratio);
 
+  CGAL::get_default_random() = CGAL::Random(0);
   CGAL::Surface_mesh_simplification::edge_collapse(cartesian_surface_mesh,
                                                    stop);
 
@@ -2472,19 +2475,6 @@ class Strip {
       return;
     }
     // Both can advance; compute the relative costs.
-#if 0
-    if (true || !DoesIntersect(next, b(), a())) {
-      FT deviation = CGAL::abs(
-          (CGAL::abs(CGAL::approximate_dihedral_angle(last(), next, a(), b())) /
-           180) -
-          1);
-      FT across =
-          CGAL::sqrt(CGAL::to_double(CGAL::squared_distance(b(), next)));
-      FT along = CGAL::sqrt(CGAL::to_double(CGAL::squared_distance(a(), next)));
-      queue.push(new Strip(nth_a() + 1, nth_b(), next, b(), a(),
-                           cost() + across - along, this));
-    }
-#endif
     FT deviation_a = CGAL::abs(
         (CGAL::abs(CGAL::approximate_dihedral_angle(last(), next_a, a(), b())) /
          180) -
@@ -2504,28 +2494,6 @@ class Strip {
     queue.push(new Strip(nth_a(), nth_b() + 1, a(), next_b, b(),
                          cost() - cost_a + cost_b, this));
   }
-
-#if 0
-  template <typename Queue>
-  void AddB(const Polyline& polyline, Queue& queue) {
-    if (nth_b() + 1 > polyline.size()) {
-      // This prevents going further than wrapping around to the start.
-      return;
-    }
-    Point next = polyline[(nth_b() + 1) % polyline.size()];
-    if (true || !DoesIntersect(a(), next, b())) {
-      FT deviation = CGAL::abs(
-          (CGAL::abs(CGAL::approximate_dihedral_angle(last(), next, a(), b())) /
-           180) -
-          1);
-      FT length =
-          CGAL::sqrt(CGAL::to_double(CGAL::squared_distance(a(), next)));
-      FT along = CGAL::sqrt(CGAL::to_double(CGAL::squared_distance(b(), next)));
-      queue.push(new Strip(nth_a(), nth_b() + 1, a(), next, b(),
-                           cost() + length - along, this));
-    }
-  }
-#endif
 
   size_t Release() {
     count_ -= 1;
@@ -2825,30 +2793,6 @@ bool emitPolygonsWithHoles(const std::vector<P>& polygons,
     }
   }
   return emitted;
-}
-
-void SurfaceMeshSectionToPolygonSet(const Plane& plane, const Surface_mesh& a,
-                                    General_polygon_set_2& set) {
-  typedef std::vector<Point> Polyline_type;
-  typedef std::list<Polyline_type> Polylines;
-  CGAL::Polygon_mesh_slicer<Surface_mesh, Kernel> slicer(a);
-  Polylines polylines;
-  slicer(plane, std::back_inserter(polylines));
-  for (const auto& polyline : polylines) {
-    std::size_t length = polyline.size();
-    if (length < 3 || polyline.front() != polyline.back()) {
-      continue;
-    }
-    Polygon_2 polygon;
-    // Skip the duplicated last point in the polyline.
-    for (std::size_t nth = 0; nth < length - 1; nth++) {
-      polygon.push_back(plane.to_2d(polyline[nth]));
-    }
-    if (polygon.orientation() == CGAL::Sign::NEGATIVE) {
-      polygon.reverse_orientation();
-    }
-    set.join(polygon);
-  }
 }
 
 class SurfaceMeshSegmentProcessor {
@@ -3424,6 +3368,10 @@ class Geometry {
     transforms_[nth] = transform;
   }
 
+  void copyTransform(int nth, const Transformation transform) {
+    transforms_[nth] = new Transformation(transform);
+  }
+
   const Transformation* getTransform(int nth) { return transforms_[nth]; }
 
   void setIdentityTransform(int nth) {
@@ -3844,7 +3792,7 @@ int Cast(Geometry* geometry, const Transformation* reference) {
   return STATUS_OK;
 }
 
-int Clip(Geometry* geometry, int targets) {
+int Clip(Geometry* geometry, int targets, bool open) {
   size_t size = geometry->size();
 
   std::vector<std::unique_ptr<SurfaceMeshQuery>> queries;
@@ -3869,13 +3817,24 @@ int Clip(Geometry* geometry, int targets) {
             geometry->setType(target, GEOMETRY_EMPTY);
             break;
           }
-          Surface_mesh copy(geometry->mesh(nth));
-          if (!CGAL::Polygon_mesh_processing::corefine_and_compute_intersection(
-                  geometry->mesh(target), copy, geometry->mesh(target),
-                  CGAL::parameters::all_default(),
-                  CGAL::parameters::all_default(),
-                  CGAL::parameters::all_default())) {
-            return STATUS_ZERO_THICKNESS;
+          Surface_mesh clipMeshCopy(geometry->mesh(nth));
+          if (open) {
+            Surface_mesh mask(geometry->mesh(target));
+            if (!CGAL::Polygon_mesh_processing::clip(
+                    geometry->mesh(target), clipMeshCopy,
+                    CGAL::parameters::use_compact_clipper(true),
+                    CGAL::parameters::use_compact_clipper(true))) {
+              return STATUS_ZERO_THICKNESS;
+            }
+          } else {
+            if (!CGAL::Polygon_mesh_processing::
+                    corefine_and_compute_intersection(
+                        geometry->mesh(target), clipMeshCopy,
+                        geometry->mesh(target), CGAL::parameters::all_default(),
+                        CGAL::parameters::all_default(),
+                        CGAL::parameters::all_default())) {
+              return STATUS_ZERO_THICKNESS;
+            }
           }
           demesh(geometry->mesh(target));
           geometry->updateMeshBounds(target);
@@ -4088,7 +4047,7 @@ int ConvexHull(Geometry* geometry) {
   return STATUS_OK;
 }
 
-int Cut(Geometry* geometry, int targets) {
+int Cut(Geometry* geometry, int targets, bool open) {
   size_t size = geometry->size();
   std::vector<std::unique_ptr<SurfaceMeshQuery>> queries;
   Transformation identity(CGAL::IDENTITY);
@@ -4109,12 +4068,24 @@ int Cut(Geometry* geometry, int targets) {
             continue;
           }
           Surface_mesh cutMeshCopy(geometry->mesh(nth));
-          if (!CGAL::Polygon_mesh_processing::corefine_and_compute_difference(
-                  geometry->mesh(target), cutMeshCopy, geometry->mesh(target),
-                  CGAL::parameters::all_default(),
-                  CGAL::parameters::all_default(),
-                  CGAL::parameters::all_default())) {
-            return STATUS_ZERO_THICKNESS;
+          if (open) {
+            CGAL::Polygon_mesh_processing::reverse_face_orientations(
+                cutMeshCopy);
+            Surface_mesh mask(geometry->mesh(target));
+            if (!CGAL::Polygon_mesh_processing::clip(
+                    geometry->mesh(target), cutMeshCopy,
+                    CGAL::parameters::use_compact_clipper(true),
+                    CGAL::parameters::use_compact_clipper(true))) {
+              return STATUS_ZERO_THICKNESS;
+            }
+          } else {
+            if (!CGAL::Polygon_mesh_processing::corefine_and_compute_difference(
+                    geometry->mesh(target), cutMeshCopy, geometry->mesh(target),
+                    CGAL::parameters::all_default(),
+                    CGAL::parameters::all_default(),
+                    CGAL::parameters::all_default())) {
+              return STATUS_ZERO_THICKNESS;
+            }
           }
           demesh(geometry->mesh(target));
           geometry->updateMeshBounds(target);
@@ -4175,6 +4146,7 @@ int Cut(Geometry* geometry, int targets) {
 
   geometry->resize(targets);
   geometry->removeEmptyMeshes();
+  geometry->convertPlanarMeshesToPolygons();
   geometry->transformToLocalFrame();
 
   return STATUS_OK;
@@ -5036,7 +5008,7 @@ int Loft(Geometry* geometry, bool close) {
               if (polyline.empty() || polyline.back() != p) {
                 polyline.push_back(p);
               }
-              h = mesh.prev(h);
+              h = mesh.next(h);
             } while (h != start);
             break;
           }
@@ -5067,9 +5039,7 @@ int Loft(Geometry* geometry, bool close) {
     return STATUS_EMPTY;
   }
   std::vector<Strip*> strips;
-  // splitLongPolylineEdges(polylines.front(), 1);
   for (size_t nth = 1; nth < polylines.size(); nth++) {
-    // splitLongPolylineEdges(polylines[nth], 1);
     alignPolylines3(polylines[nth - 1], polylines[nth]);
     strips.push_back(PolylinesToStripWall(polylines[nth - 1], polylines[nth]));
   }
@@ -5081,7 +5051,9 @@ int Loft(Geometry* geometry, bool close) {
     strip->ToSoup(points, polygons);
   }
   Surface_mesh& mesh = geometry->mesh(target);
-  CGAL::Polygon_mesh_processing::merge_duplicate_points_in_polygon_soup(
+  // CGAL::Polygon_mesh_processing::merge_duplicate_points_in_polygon_soup(
+  //    points, polygons, CGAL::parameters::all_default());
+  CGAL::Polygon_mesh_processing::repair_polygon_soup(
       points, polygons, CGAL::parameters::all_default());
   CGAL::Polygon_mesh_processing::orient_polygon_soup(points, polygons);
   CGAL::Polygon_mesh_processing::polygon_soup_to_polygon_mesh(points, polygons,
@@ -5110,6 +5082,15 @@ int Loft(Geometry* geometry, bool close) {
     // Make sure it isn't inside out.
     CGAL::Polygon_mesh_processing::orient_to_bound_a_volume(
         geometry->mesh(target));
+  }
+  if (CGAL::Polygon_mesh_processing::does_self_intersect(
+          mesh, CGAL::parameters::all_default())) {
+    std::cout << "Loft: self-intersection detected; attempting repair."
+              << std::endl;
+    CGAL::Polygon_mesh_processing::experimental::
+        autorefine_and_remove_self_intersections(mesh);
+    assert(!CGAL::Polygon_mesh_processing::does_self_intersect(
+        mesh, CGAL::parameters::all_default()));
   }
   // Clean up the mesh.
   demesh(geometry->mesh(target));
@@ -5262,30 +5243,28 @@ int Outline(Geometry* geometry) {
   return STATUS_OK;
 }
 
-int Section(Geometry* geometry, int transformCount,
-            emscripten::val getTransform) {
+int Section(Geometry* geometry, int count) {
   int size = geometry->size();
   geometry->copyInputMeshesToOutputMeshes();
   geometry->transformToAbsoluteFrame();
   geometry->convertPlanarMeshesToPolygons();
   const Plane base_plane(Point(0, 0, 0), Vector(0, 0, 1));
 
-  for (int nthTransform = 0; nthTransform < transformCount; nthTransform++) {
-    const Transformation* transform =
-        getTransform(nthTransform)
-            .as<const Transformation*>(emscripten::allow_raw_pointers());
-    Plane plane = base_plane.transform(*transform);
-    for (int nth = 0; nth < size; nth++) {
+  for (int nthTransform = count; nthTransform < size; nthTransform++) {
+    Plane plane = base_plane.transform(geometry->transform(nthTransform));
+    for (int nth = 0; nth < count; nth++) {
       switch (geometry->getType(nth)) {
         case GEOMETRY_MESH: {
           typedef std::vector<Point> Polyline_type;
           typedef std::list<Polyline_type> Polylines;
           CGAL::Polygon_mesh_slicer<Surface_mesh, Kernel> slicer(
               geometry->mesh(nth));
-          geometry->setType(nth, GEOMETRY_POLYGONS_WITH_HOLES);
-          geometry->plane(nth) = plane;
+          int target = geometry->add(GEOMETRY_POLYGONS_WITH_HOLES);
+          geometry->copyTransform(target, geometry->transform(nthTransform));
+          geometry->plane(target) = plane;
           Polylines polylines;
           slicer(plane, std::back_inserter(polylines));
+          std::vector<Polygon_2> cuts;
           for (const auto& polyline : polylines) {
             std::size_t length = polyline.size();
             if (length < 3 || polyline.front() != polyline.back()) {
@@ -5298,34 +5277,47 @@ int Section(Geometry* geometry, int transformCount,
             }
             if (polygon.orientation() == CGAL::Sign::NEGATIVE) {
               polygon.reverse_orientation();
+              cuts.push_back(std::move(polygon));
+              continue;
             }
-            geometry->gps(nth).join(polygon);
+            geometry->gps(target).join(polygon);
+          }
+          for (const Polygon_2& polygon : cuts) {
+            geometry->gps(target).difference(polygon);
           }
           break;
         }
         case GEOMETRY_POLYGONS_WITH_HOLES: {
+          // FIX: Should produce segments given non-coplanar intersection.
           Plane gps_plane =
               geometry->plane(nth).transform(geometry->transform(nth));
           if (gps_plane != plane) {
-            geometry->setType(nth, GEOMETRY_EMPTY);
+            break;
           }
-          // FIX: Should produce segments if intersecting the plane.
+          int target = geometry->add(GEOMETRY_POLYGONS_WITH_HOLES);
+          geometry->copyTransform(target, geometry->transform(nthTransform));
+          geometry->plane(target) = geometry->plane(nth);
+          geometry->gps(target) = geometry->gps(nth);
           break;
         }
         case GEOMETRY_SEGMENTS: {
+          int target = geometry->add(GEOMETRY_SEGMENTS);
+          geometry->copyTransform(target, geometry->transform(nthTransform));
           for (const Segment& segment : geometry->input_segments(nth)) {
             if (plane.has_on(segment.source()) &&
                 plane.has_on(segment.target())) {
-              geometry->addSegment(nth, segment);
+              geometry->addSegment(target, segment);
             }
             // FIX: Should produce points if intersecting the plane.
           }
           break;
         }
         case GEOMETRY_POINTS: {
+          int target = geometry->add(GEOMETRY_POINTS);
+          geometry->copyTransform(target, geometry->transform(nthTransform));
           for (const Point& point : geometry->input_points(nth)) {
             if (plane.has_on(point)) {
-              geometry->addPoint(nth, point);
+              geometry->addPoint(target, point);
             }
           }
           break;
