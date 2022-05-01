@@ -1140,7 +1140,7 @@ const fillCgalGeometry = (geometry, inputs) => {
           for (const [x, y, z] of exactPoints) {
             geometry.addInputPointExact(nth, x, y, z);
           }
-        } else {
+        } else if (points) {
           for (const [x, y, z] of points) {
             geometry.addInputPoint(nth, x, y, z);
           }
@@ -1339,9 +1339,9 @@ const cast = (inputs, reference) =>
     }
   });
 
-const clip = (inputs, targetsLength) =>
+const clip = (inputs, targetsLength, open = false) =>
   withCgalGeometry(inputs, (cgalGeometry, g) => {
-    const status = g.Clip(cgalGeometry, targetsLength);
+    const status = g.Clip(cgalGeometry, targetsLength, open);
     switch (status) {
       case STATUS_ZERO_THICKNESS:
         throw new ErrorZeroThickness('Zero thickness produced by clip');
@@ -1406,9 +1406,9 @@ const convexHull = (inputs) =>
     }
   });
 
-const cut = (inputs, targetsLength) =>
+const cut = (inputs, targetsLength, open = false) =>
   withCgalGeometry(inputs, (cgalGeometry, g) => {
-    const status = g.Cut(cgalGeometry, targetsLength);
+    const status = g.Cut(cgalGeometry, targetsLength, open);
     switch (status) {
       case STATUS_ZERO_THICKNESS:
         throw new ErrorZeroThickness('Zero thickness produced by cut');
@@ -2211,16 +2211,19 @@ const reverseFaceOrientationsOfSurfaceMesh = (mesh, transform) => {
   }
 };
 
-const section = (inputs, references) =>
+const section = (inputs, count) =>
   withCgalGeometry(inputs, (cgalGeometry, g) => {
-    const status = g.Section(cgalGeometry, references.length, (nth) =>
-      toCgalTransformFromJsTransform(references[nth].matrix)
-    );
+    const status = g.Section(cgalGeometry, count);
     switch (status) {
       case STATUS_ZERO_THICKNESS:
         throw new ErrorZeroThickness('Zero thickness produced by section');
       case STATUS_OK:
-        return fromCgalGeometry(cgalGeometry, inputs);
+        return fromCgalGeometry(
+          cgalGeometry,
+          inputs,
+          cgalGeometry.getSize(),
+          inputs.length
+        );
       default:
         throw new Error(`Unexpected status ${status}`);
     }

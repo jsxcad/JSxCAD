@@ -4,7 +4,7 @@ import {
 } from '@jsxcad/algorithm-cgal';
 
 import { linearize } from './tagged/linearize.js';
-import { replacer } from './tagged/visit.js';
+import { taggedGroup } from './tagged/taggedGroup.js';
 import { toConcreteGeometry } from './tagged/toConcreteGeometry.js';
 
 const filterInputs = (geometry) =>
@@ -20,11 +20,10 @@ export const section = (inputGeometry, referenceGeometries) => {
   const inputs = [];
   linearize(concreteGeometry, filterInputs, inputs);
   const count = inputs.length;
-  const references = [];
   for (const referenceGeometry of referenceGeometries) {
-    linearize(referenceGeometry, filterReferences, references);
+    linearize(referenceGeometry, filterReferences, inputs);
   }
-  const outputs = sectionWithCgal(inputs, references);
+  const outputs = sectionWithCgal(inputs, count);
   deletePendingSurfaceMeshes();
-  return replacer(inputs, outputs, count)(concreteGeometry);
+  return taggedGroup({}, ...outputs);
 };

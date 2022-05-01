@@ -77,7 +77,7 @@ export const align =
   (spec = 'xyz', origin = [0, 0, 0]) =>
   (shape) => {
     const offset = computeOffset(spec, origin, shape);
-    const reference = Point().move(...subtract(origin, offset));
+    const reference = Point().move(...subtract(offset, origin));
     return reference;
   };
 

@@ -90,7 +90,7 @@ Arc(10, 10, 5).color('blue').cut(Box(5, 5, 5).move(3, 0, 2).color('red')).view()
 The result is blue since the blue shape was cut.
 
 ```JavaScript
-Arc(10, 10, 5).cutFrom(Box(5, 5, 5).move(3, 0, 2)).view().md(`The result is red since the red shape was cut from.`);
+Arc(10, 10, 5).cutfrom(Box(5, 5, 5).move(3, 0, 2)).view().md(`The result is red since the red shape was cut from.`);
 ```
 
 ![Image](interactions_between_geometry.md.8.png)

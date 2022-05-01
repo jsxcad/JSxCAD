@@ -6,7 +6,9 @@ export const linearize = (geometry, filter, out = []) => {
     if (filter(geometry)) {
       out.push(geometry);
     }
-    descend();
+    if (geometry.type !== 'sketch') {
+      descend();
+    }
   };
   visit(toConcreteGeometry(geometry), collect);
   return out;

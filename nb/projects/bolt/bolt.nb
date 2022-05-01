@@ -42,7 +42,7 @@ export const NutThreadSegmentBuilder = Cached('nb/projects/bolt/bolt.nb/NutThrea
     angle,
     play: -play,
     turn
-  }).cutFrom(
+  }).cutfrom(
     Arc(diameter + thickness)
       .cut(Arc(diameter - depth))
       .ez(pitch)

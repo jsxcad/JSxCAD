@@ -59,14 +59,14 @@ Group(Box(10), Arc(8), Triangle(5))
 
 ```JavaScript
 Hershey('Hershey', 10)
-  .to(align('xy'))
+  .by(align('xy'))
   .gridView()
-  .md(`Hershey(10)('Hershey').to(align('xy'))`);
+  .md(`Hershey(10)('Hershey').by(align('xy'))`);
 ```
 
 ![Image](shapes.md.6.png)
 
-Hershey(10)('Hershey').to(align('xy'))
+Hershey(10)('Hershey').by(align('xy'))
 
 ```JavaScript
 Hexagon(10).gridView().md(`Hexagon(10)`);
@@ -263,7 +263,7 @@ Triangle(5)
 
 ```JavaScript
 Wave((t) => Point(0, sin(t * 3) * 100), { to: 360 })
-  .to(align('xy'))
+  .by(align('xy'))
   .gridView()
   .md(`Wave((t) => Point(0, sin(t * 3) * 100), { to: 360 })`);
 ```
@@ -409,8 +409,14 @@ Orb(10)
     (s) => s.lowerEnvelope().ez(-1).z(-5),
     (s) => s.upperEnvelope().ez(1).z(5)
   )
-  .to(align('z>'))
+  .by(align('z>'))
   .view(1);
 ```
 
 ![Image](shapes.md.35.png)
+
+```JavaScript
+Box(10).cut(Box(5)).ez(1, -1).section().view();
+```
+
+![Image](shapes.md.36.png)

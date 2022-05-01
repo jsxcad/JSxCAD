@@ -50,7 +50,7 @@ export const pack =
     }
     let packedShape = Shape.fromGeometry(taggedGroup({}, ...packedLayers));
     if (size === undefined) {
-      packedShape = packedShape.to(align('xy'));
+      packedShape = packedShape.by(align('xy'));
     }
     return packedShape;
   };

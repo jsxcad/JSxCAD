@@ -13,7 +13,7 @@ const filterTargets = (geometry) =>
 const filterRemoves = (geometry) =>
   filterTargets(geometry) && isNotTypeMasked(geometry);
 
-export const cut = (geometry, geometries) => {
+export const cut = (geometry, geometries, open = false) => {
   const concreteGeometry = toConcreteGeometry(geometry);
   const inputs = [];
   linearize(concreteGeometry, filterTargets, inputs);
@@ -21,7 +21,7 @@ export const cut = (geometry, geometries) => {
   for (const geometry of geometries) {
     linearize(geometry, filterRemoves, inputs);
   }
-  const outputs = cutWithCgal(inputs, count);
+  const outputs = cutWithCgal(inputs, count, open);
   deletePendingSurfaceMeshes();
   return replacer(inputs, outputs, count)(concreteGeometry);
 };

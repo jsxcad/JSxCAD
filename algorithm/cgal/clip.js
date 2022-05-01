@@ -3,9 +3,9 @@ import { fromCgalGeometry, withCgalGeometry } from './cgalGeometry.js';
 
 import { ErrorZeroThickness } from './error.js';
 
-export const clip = (inputs, targetsLength) =>
+export const clip = (inputs, targetsLength, open = false) =>
   withCgalGeometry(inputs, (cgalGeometry, g) => {
-    const status = g.Clip(cgalGeometry, targetsLength);
+    const status = g.Clip(cgalGeometry, targetsLength, open);
     switch (status) {
       case STATUS_ZERO_THICKNESS:
         throw new ErrorZeroThickness('Zero thickness produced by clip');

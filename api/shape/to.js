@@ -1,6 +1,5 @@
 import { getInverseMatrices, getLeafs } from '@jsxcad/geometry';
 
-import Group from './Group.js';
 import Shape from './Shape.js';
 
 export const to =
@@ -14,13 +13,12 @@ export const to =
     if (selection instanceof Function) {
       selection = selection(shape);
     }
-    const placed = [];
     for (const leaf of getLeafs(selection.toGeometry())) {
       const { local } = getInverseMatrices(leaf);
-      // Perform the operation, then switch to the local coordinate space.
-      placed.push(shape.transform(local).op(...ops));
+      // Switch to the local coordinate space, perform the operation, and come back to the global coordinate space.
+      shape = shape.transform(local).op(...ops);
     }
-    return Group(...placed);
+    return shape;
   };
 
 Shape.registerMethod('to', to);

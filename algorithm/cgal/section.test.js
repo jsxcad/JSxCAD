@@ -50,8 +50,8 @@ test('Section of tetrahedron.', (t) => {
     ),
   };
   const sections = section(
-    [geometry],
-    [{ matrix: blessed([...identityMatrix]) }]
+    [geometry, { type: 'points', matrix: blessed([...identityMatrix]) }],
+    1
   );
   t.deepEqual(JSON.parse(JSON.stringify(sections)), [
     {
@@ -135,8 +135,8 @@ test('Coplanar section of polygon is the polygon.', (t) => {
     plane: [0, 0, 1, 0],
   };
   const sections = section(
-    [geometry],
-    [{ matrix: blessed([...identityMatrix]) }]
+    [geometry, { type: 'points', matrix: blessed([...identityMatrix]) }],
+    1
   );
   t.deepEqual(JSON.parse(JSON.stringify(sections)), [
     {
@@ -220,14 +220,8 @@ test('Non-coplanar section of polygon is empty.', (t) => {
     plane: [0, 0, 1, 1],
   };
   const sections = section(
-    [geometry],
-    [{ matrix: blessed([...identityMatrix]) }]
+    [geometry, { type: 'points', matrix: blessed([...identityMatrix]) }],
+    1
   );
-  t.deepEqual(JSON.parse(JSON.stringify(sections)), [
-    {
-      content: [],
-      tags: [],
-      type: 'group',
-    },
-  ]);
+  t.deepEqual(JSON.parse(JSON.stringify(sections)), []);
 });

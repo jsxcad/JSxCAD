@@ -178,7 +178,7 @@ const solar = Arc(20)
 
 ```JavaScript
 const rack = Box(20, Math.PI)
-  .to(align('x<'))
+  .by(align('x<'))
   .cut(
     seq((a) => planetaryFootprint.rz(-a / 8).y(Math.PI * a), {
       from: -1,

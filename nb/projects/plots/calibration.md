@@ -2,7 +2,7 @@
 Box(10)
   .seq({ from: -100, upto: 100, by: 60 }, y, Group)
   .seq({ from: -100, upto: 100, by: 60 }, x, Group)
-  .to(align('xy'))
+  .by(align('xy'))
   .toolpath()
   .gcode('calibration');
 ```
