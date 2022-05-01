@@ -7,7 +7,7 @@ import {
   section,
   transformCoordinate,
   transformingCoordinates,
-  // translate,
+  translate,
 } from '@jsxcad/geometry';
 
 import { toRgbColorFromTags } from '@jsxcad/algorithm-color';
@@ -23,12 +23,15 @@ export const toSvg = async (
 ) => {
   const sectioned = section(await baseGeometry, [{ type: 'points', tags: [] }]);
   const disjointed = disjoint([sectioned]);
+  // svg reverses the Y axis.
   const scaled = scale([1, -1, 1], disjointed);
-  const [min, max] = measureBoundingBox(scaled);
+  const [baseMin] = measureBoundingBox(scaled);
+  const translated = translate([-baseMin[X], -baseMin[Y], 0], disjointed);
+  const geometry = translated;
+  const [min, max] = measureBoundingBox(geometry);
   const width = max[X] - min[X];
   const height = max[Y] - min[Y];
-  const geometry = scaled;
-  const viewBox = `${min[X].toFixed(5)} ${-max[Y].toFixed(5)} ${width.toFixed(
+  const viewBox = `${min[X].toFixed(5)} ${min[Y].toFixed(5)} ${width.toFixed(
     5
   )} ${height.toFixed(5)}`;
   const svg = [

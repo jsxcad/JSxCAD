@@ -1,6 +1,6 @@
 import { reallyQuantizeForSpace } from './jsxcad-math-utils.js';
 import { identity, composeTransforms, matrix6, fromTranslateToTransform, fromRotateZToTransform, fromScaleToTransform } from './jsxcad-algorithm-cgal.js';
-import { scale, taggedSegments, taggedGroup, fill, section, disjoint, measureBoundingBox, getNonVoidPolygonsWithHoles, transformingCoordinates, getNonVoidSegments, transformCoordinate } from './jsxcad-geometry.js';
+import { scale, taggedSegments, taggedGroup, fill, section, disjoint, measureBoundingBox, translate, getNonVoidPolygonsWithHoles, transformingCoordinates, getNonVoidSegments, transformCoordinate } from './jsxcad-geometry.js';
 import { toTagsFromName, toRgbColorFromTags } from './jsxcad-algorithm-color.js';
 
 const canonicalizeSegment = ([directive, ...args]) => [
@@ -4163,12 +4163,15 @@ const toSvg = async (
 ) => {
   const sectioned = section(await baseGeometry, [{ type: 'points', tags: [] }]);
   const disjointed = disjoint([sectioned]);
+  // svg reverses the Y axis.
   const scaled = scale([1, -1, 1], disjointed);
-  const [min, max] = measureBoundingBox(scaled);
+  const [baseMin] = measureBoundingBox(scaled);
+  const translated = translate([-baseMin[X], -baseMin[Y], 0], disjointed);
+  const geometry = translated;
+  const [min, max] = measureBoundingBox(geometry);
   const width = max[X] - min[X];
   const height = max[Y] - min[Y];
-  const geometry = scaled;
-  const viewBox = `${min[X].toFixed(5)} ${-max[Y].toFixed(5)} ${width.toFixed(
+  const viewBox = `${min[X].toFixed(5)} ${min[Y].toFixed(5)} ${width.toFixed(
     5
   )} ${height.toFixed(5)}`;
   const svg = [
