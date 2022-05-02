@@ -1033,6 +1033,7 @@ const Surface_mesh* SmoothSurfaceMesh(const Surface_mesh* input,
       constrained_edges);
 
   CGAL::get_default_random() = CGAL::Random(0);
+  std::srand(0);
   CGAL::Polygon_mesh_processing::smooth_mesh(
       cartesian_mesh.faces(), cartesian_mesh,
       CGAL::Polygon_mesh_processing::parameters::number_of_iterations(
@@ -1110,6 +1111,7 @@ const Surface_mesh* SmoothShapeOfSurfaceMesh(
       constrained_vertices);
 
   CGAL::get_default_random() = CGAL::Random(0);
+  std::srand(0);
   CGAL::Polygon_mesh_processing::smooth_shape(
       cartesian_mesh.faces(), cartesian_mesh, time,
       CGAL::Polygon_mesh_processing::parameters::number_of_iterations(
