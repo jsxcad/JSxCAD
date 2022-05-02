@@ -38,6 +38,18 @@ Arc(4)
   .view();
 
 
+
+md`
+---
+### Fuse
+
+Shapes which are grouped, assembled, or otherwise associated can be fused together to form a single solid
+
+`;
+
+Group(Arc(10), Arc(10).x(6)).fuse().view();
+
+
 md`
 ---
 ### Inset
@@ -58,19 +70,28 @@ An item has an exterior (which looks like an individual piece of geometry), and 
 The interior has its own frame of reference independent of any transformation of the exterior of the item.
 
 Since an item appears individual from the outside, tag and path selectors need to explicitly select item to access the interior.
+
+There are a number of item specific operators. .in() will enter an item, .asPart("Bolt") will define an item which is specified as a part. Parts can be listed with the .bom() operation.
 `;
 
 const aBolt = Arc(8, 8, 2)
   .and(Arc(4, 4, 14).z(-7))
   .color('brown')
-  .as('bolt')
+  .asPart('bolt')
   .view();
 
 const aBox = Box(10, 10, 10).as('box');
 
 const aDesign = aBox.fit(aBolt.z(10)).as('design').view();
 
-aDesign.get('*').pack().view().md(`We need to get into the design in order to get at 'box' and 'bolt'`);
+aDesign
+  .in()
+  .pack()
+  .view()
+  .md(`We need to get into the design in order to get at 'box' and 'bolt'`);
+
+log(aDesign.bom());
+
 
 md`
 ---
