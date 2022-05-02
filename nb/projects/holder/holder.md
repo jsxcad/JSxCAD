@@ -20,7 +20,6 @@ const magneticPenHolder = Arc(magnetDiameter)
       .ez(magnetHeight)
   )
   .to(YZ(0))
-  .rz(1/2)
   .by(align('z>'))
   .fit(
     Arc(penDiameter)

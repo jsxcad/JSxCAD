@@ -355,11 +355,19 @@ class SurfaceMeshQuery {
   }
 
   bool isInsidePointApproximate(double x, double y, double z) {
-    return (*inside_tester_)(Point(x, y, z)) == CGAL::ON_BOUNDED_SIDE;
+    return isInsidePoint(Point(x, y, z));
+  }
+
+  bool isInsidePoint(const Point& point) {
+    return (*inside_tester_)(point) == CGAL::ON_BOUNDED_SIDE;
   }
 
   bool isOutsidePointApproximate(double x, double y, double z) {
-    return (*inside_tester_)(Point(x, y, z)) == CGAL::ON_UNBOUNDED_SIDE;
+    return isOutsidePoint(Point(x, y, z));
+  }
+
+  bool isOutsidePoint(const Point& point) {
+    return (*inside_tester_)(point) == CGAL::ON_UNBOUNDED_SIDE;
   }
 
   void intersectSegmentApproximate(bool do_clip, double source_x,
@@ -1025,6 +1033,7 @@ const Surface_mesh* SmoothSurfaceMesh(const Surface_mesh* input,
       constrained_edges);
 
   CGAL::get_default_random() = CGAL::Random(0);
+  std::srand(0);
   CGAL::Polygon_mesh_processing::smooth_mesh(
       cartesian_mesh.faces(), cartesian_mesh,
       CGAL::Polygon_mesh_processing::parameters::number_of_iterations(
@@ -1102,6 +1111,7 @@ const Surface_mesh* SmoothShapeOfSurfaceMesh(
       constrained_vertices);
 
   CGAL::get_default_random() = CGAL::Random(0);
+  std::srand(0);
   CGAL::Polygon_mesh_processing::smooth_shape(
       cartesian_mesh.faces(), cartesian_mesh, time,
       CGAL::Polygon_mesh_processing::parameters::number_of_iterations(
@@ -4755,27 +4765,45 @@ int GenerateEnvelope(Geometry* geometry, int envelopeType) {
   return STATUS_OK;
 }
 
-int Grow(Geometry* geometry, const Transformation* transform, bool x, bool y,
-         bool z) {
+int Grow(Geometry* geometry, size_t count, bool x, bool y, bool z) {
   size_t size = geometry->size();
 
   geometry->copyInputMeshesToOutputMeshes();
   geometry->transformToAbsoluteFrame();
   geometry->convertPlanarMeshesToPolygons();
 
-  Point reference = Point(0, 0, 0).transform(*transform);
+  Point reference = Point(0, 0, 0).transform(geometry->transform(count));
   FT amount = reference.z();
 
-  for (int nth = 0; nth < size; nth++) {
+  std::vector<std::unique_ptr<SurfaceMeshQuery>> query;
+  query.reserve(size);
+  std::cout << "Grow/1" << std::endl;
+
+  for (int nth = 0; nth < count; nth++) {
     switch (geometry->getType(nth)) {
       case GEOMETRY_MESH: {
+        std::cout << "Grow/2" << std::endl;
         Surface_mesh& mesh = geometry->mesh(nth);
+        for (int selection = count + 1; selection < size; selection++) {
+          if (!geometry->is_mesh(selection)) {
+            continue;
+          }
+          std::cout << "Grow/3" << std::endl;
+          Surface_mesh working_selection(geometry->mesh(selection));
+          CGAL::Polygon_mesh_processing::corefine(
+              mesh, working_selection, CGAL::parameters::all_default(),
+              CGAL::parameters::all_default());
+          query[selection].reset(
+              new SurfaceMeshQuery(&geometry->mesh(selection)));
+        }
         bool created = false;
+        std::cout << "Grow/4" << std::endl;
         Surface_mesh::Property_map<Vertex_index, Vector> vertex_normal_map;
         std::tie(vertex_normal_map, created) =
             mesh.add_property_map<Vertex_index, Vector>("v:normal_map",
                                                         CGAL::NULL_VECTOR);
 
+        std::cout << "Grow/5" << std::endl;
         if (created) {
           CGAL::Polygon_mesh_processing::compute_vertex_normals(
               mesh, vertex_normal_map,
@@ -4784,15 +4812,34 @@ int Grow(Geometry* geometry, const Transformation* transform, bool x, bool y,
                   .geom_traits(Kernel()));
         }
 
+        std::cout << "Grow/6" << std::endl;
         for (const Vertex_index vertex : mesh.vertices()) {
+          const Point& point = mesh.point(vertex);
+          // Restrict transform to points in a selection.
+          bool inside = false;
+          bool queried = false;
+          for (int selection = count + 1; selection < size; selection++) {
+            if (query[selection]) {
+              queried = true;
+              if (query[selection]->isOutsidePoint(point)) {
+                inside = true;
+                break;
+              }
+            }
+          }
+          std::cout << "Grow/7" << std::endl;
+          if (queried && !inside) {
+            continue;
+          }
           const Vector& n = vertex_normal_map[vertex];
           Vector direction =
               unitVector(Vector(x ? n.x() : 0, y ? n.y() : 0, z ? n.z() : 0));
-          mesh.point(vertex) += direction * amount;
+          mesh.point(vertex) = point + direction * amount;
         }
       }
     }
   }
+  std::cout << "Grow/8" << std::endl;
 
   geometry->removeEmptyMeshes();
   geometry->transformToLocalFrame();
@@ -5239,6 +5286,32 @@ int Outline(Geometry* geometry) {
       }
     }
   }
+
+  return STATUS_OK;
+}
+
+int Seam(Geometry* geometry, size_t count) {
+  size_t size = geometry->size();
+
+  geometry->copyInputMeshesToOutputMeshes();
+  geometry->transformToAbsoluteFrame();
+  geometry->convertPlanarMeshesToPolygons();
+
+  for (int nth = 0; nth < count; nth++) {
+    switch (geometry->getType(nth)) {
+      case GEOMETRY_MESH: {
+        Surface_mesh& mesh = geometry->mesh(nth);
+        for (int selection = count; selection < size; selection++) {
+          Surface_mesh working_selection(geometry->mesh(selection));
+          CGAL::Polygon_mesh_processing::corefine(
+              mesh, working_selection, CGAL::parameters::all_default(),
+              CGAL::parameters::all_default());
+        }
+      }
+    }
+  }
+
+  geometry->transformToLocalFrame();
 
   return STATUS_OK;
 }
@@ -6938,6 +7011,7 @@ EMSCRIPTEN_BINDINGS(module) {
                        emscripten::allow_raw_pointers());
   emscripten::function("Offset", &Offset, emscripten::allow_raw_pointers());
   emscripten::function("Outline", &Outline, emscripten::allow_raw_pointers());
+  emscripten::function("Seam", &Seam, emscripten::allow_raw_pointers());
   emscripten::function("Section", &Section, emscripten::allow_raw_pointers());
   emscripten::function("Separate", &Separate, emscripten::allow_raw_pointers());
 

@@ -124,8 +124,6 @@ Weld(Arc(4).x(-1), Box(5).x(1))
   .gridView()
   .md(`Weld(Arc(5).x(-1), Box(5).x(1)).fill()`);
 
-Box(1).color('red').as('box').x(5).y(5).fit(Arc(10)).to(g('box')).gridView().md('Reposition to the local frame of reference of an item');
-
 const extentsA = [
   [2, 5],
   [2, 3],
@@ -207,3 +205,29 @@ Orb(10)
 
 // Show a section with a hole in it.
 Box(10).cut(Box(5)).ez(1, -1).section().view();
+
+Box(10, 10, 20)
+  .cutout(Box(20, 20, [8, 100]), (cut) => (clip) => cut.and(clip.grow(2, 'xy')))
+  .view();
+
+Box(10, 10, 20)
+  .grow(2, Box(10, 10, [7, 10]))
+  .view(3);
+
+Box(10, 10, 20)
+  .seam(Box(10, 10, [6, 11]))
+  .grow(1, Box(10, 10, [7, 10]))
+  .view(3, (s) => s.rx(1 / 2).by(align('z>')));
+
+const red = Arc(2).color('red');
+const blue = Box(10).x(10).color('blue');
+
+blue.fitTo(red.to(blue)).view();
+red.at(blue, cut(Box([10, 20], 20))).view();
+red.by(blue).view();
+
+Box(5)
+  .as('b')
+  .and(Triangle(5).as('t'))
+  .on(get('b'), rz(1 / 8))
+  .view();

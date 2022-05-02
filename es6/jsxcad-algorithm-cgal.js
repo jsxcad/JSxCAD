@@ -1921,20 +1921,14 @@ const generatePackingEnvelopeForSurfaceMesh = (
   }
 };
 
-const grow = (inputs, offset, { x = true, y = true, z = true } = {}) =>
+const grow = (inputs, count, { x = true, y = true, z = true } = {}) =>
   withCgalGeometry(inputs, (cgalGeometry, g) => {
-    const status = g.Grow(
-      cgalGeometry,
-      toCgalTransformFromJsTransform(offset.matrix),
-      x,
-      y,
-      z
-    );
+    const status = g.Grow(cgalGeometry, count, x, y, z);
     switch (status) {
       case STATUS_ZERO_THICKNESS:
         throw new ErrorZeroThickness('Zero thickness produced by grow');
       case STATUS_OK:
-        return fromCgalGeometry(cgalGeometry, inputs);
+        return fromCgalGeometry(cgalGeometry, inputs, count);
       default:
         throw new Error(`Unexpected status ${status}`);
     }
@@ -2211,6 +2205,19 @@ const reverseFaceOrientationsOfSurfaceMesh = (mesh, transform) => {
   }
 };
 
+const seam = (inputs, count) =>
+  withCgalGeometry(inputs, (cgalGeometry, g) => {
+    const status = g.Seam(cgalGeometry, count);
+    switch (status) {
+      case STATUS_ZERO_THICKNESS:
+        throw new ErrorZeroThickness('Zero thickness produced by seam');
+      case STATUS_OK:
+        return fromCgalGeometry(cgalGeometry, inputs, count);
+      default:
+        throw new Error(`Unexpected status ${status}`);
+    }
+  });
+
 const section = (inputs, count) =>
   withCgalGeometry(inputs, (cgalGeometry, g) => {
     const status = g.Section(cgalGeometry, count);
@@ -2430,4 +2437,4 @@ const withAabbTreeQuery = (inputs, op) =>
     }
   });
 
-export { STATUS_EMPTY, STATUS_OK, STATUS_UNCHANGED, STATUS_ZERO_THICKNESS, SurfaceMeshQuery, approximateSurfaceMesh, arrangeSegments, arrangeSegmentsIntoTriangles, bend, bendSurfaceMesh, blessed, cast, clip, composeTransforms, computeArea, computeCentroid, computeNormal, computeVolume, convexHull, cut, cutOutOfSurfaceMeshes, deform, deletePendingSurfaceMeshes, deleteSurfaceMesh, demeshSurfaceMesh, deserializeSurfaceMesh, disjoint, doesSelfIntersectOfSurfaceMesh, eachPointOfSurfaceMesh, extrude, faces, fill, fitPlaneToPoints, fromExactToCgalTransform, fromFunctionToSurfaceMesh, fromGraphToSurfaceMesh, fromIdentityToCgalTransform, fromPointsToAlphaShape2AsPolygonSegments, fromPointsToAlphaShapeAsSurfaceMesh, fromPointsToConvexHullAsSurfaceMesh, fromPointsToSurfaceMesh, fromPolygonsToSurfaceMesh, fromRotateXToTransform, fromRotateYToTransform, fromRotateZToTransform, fromScaleToTransform, fromSegmentToInverseTransform, fromSurfaceMesh, fromSurfaceMeshEmitBoundingBox, fromSurfaceMeshToGraph, fromSurfaceMeshToLazyGraph, fromSurfaceMeshToPolygons, fromSurfaceMeshToTriangles, fromTranslateToTransform, fuse, generateEnvelope, generatePackingEnvelopeForSurfaceMesh, graphSymbol, grow, identity, initCgal, inset, invertTransform, isotropicRemeshingOfSurfaceMesh, join, link, loft, makeUnitSphere, matrix6, minkowskiDifferenceOfSurfaceMeshes, minkowskiShellOfSurfaceMeshes, minkowskiSumOfSurfaceMeshes, offset, outline, pushSurfaceMesh, remeshSurfaceMesh, removeSelfIntersectionsOfSurfaceMesh, reverseFaceOrientationsOfSurfaceMesh, section, separate, serializeSurfaceMesh, simplifySurfaceMesh, smoothShapeOfSurfaceMesh, smoothSurfaceMesh, subdivideSurfaceMesh, surfaceMeshSymbol, taperSurfaceMesh, toCgalTransformFromJsTransform, toSurfaceMesh, transformSurfaceMesh, twistSurfaceMesh, wireframeSurfaceMesh, withAabbTreeQuery };
+export { STATUS_EMPTY, STATUS_OK, STATUS_UNCHANGED, STATUS_ZERO_THICKNESS, SurfaceMeshQuery, approximateSurfaceMesh, arrangeSegments, arrangeSegmentsIntoTriangles, bend, bendSurfaceMesh, blessed, cast, clip, composeTransforms, computeArea, computeCentroid, computeNormal, computeVolume, convexHull, cut, cutOutOfSurfaceMeshes, deform, deletePendingSurfaceMeshes, deleteSurfaceMesh, demeshSurfaceMesh, deserializeSurfaceMesh, disjoint, doesSelfIntersectOfSurfaceMesh, eachPointOfSurfaceMesh, extrude, faces, fill, fitPlaneToPoints, fromExactToCgalTransform, fromFunctionToSurfaceMesh, fromGraphToSurfaceMesh, fromIdentityToCgalTransform, fromPointsToAlphaShape2AsPolygonSegments, fromPointsToAlphaShapeAsSurfaceMesh, fromPointsToConvexHullAsSurfaceMesh, fromPointsToSurfaceMesh, fromPolygonsToSurfaceMesh, fromRotateXToTransform, fromRotateYToTransform, fromRotateZToTransform, fromScaleToTransform, fromSegmentToInverseTransform, fromSurfaceMesh, fromSurfaceMeshEmitBoundingBox, fromSurfaceMeshToGraph, fromSurfaceMeshToLazyGraph, fromSurfaceMeshToPolygons, fromSurfaceMeshToTriangles, fromTranslateToTransform, fuse, generateEnvelope, generatePackingEnvelopeForSurfaceMesh, graphSymbol, grow, identity, initCgal, inset, invertTransform, isotropicRemeshingOfSurfaceMesh, join, link, loft, makeUnitSphere, matrix6, minkowskiDifferenceOfSurfaceMeshes, minkowskiShellOfSurfaceMeshes, minkowskiSumOfSurfaceMeshes, offset, outline, pushSurfaceMesh, remeshSurfaceMesh, removeSelfIntersectionsOfSurfaceMesh, reverseFaceOrientationsOfSurfaceMesh, seam, section, separate, serializeSurfaceMesh, simplifySurfaceMesh, smoothShapeOfSurfaceMesh, smoothSurfaceMesh, subdivideSurfaceMesh, surfaceMeshSymbol, taperSurfaceMesh, toCgalTransformFromJsTransform, toSurfaceMesh, transformSurfaceMesh, twistSurfaceMesh, wireframeSurfaceMesh, withAabbTreeQuery };
