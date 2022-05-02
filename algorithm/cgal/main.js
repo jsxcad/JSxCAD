@@ -84,6 +84,7 @@ export { pushSurfaceMesh } from './pushSurfaceMesh.js';
 export { remeshSurfaceMesh } from './remeshSurfaceMesh.js';
 export { removeSelfIntersectionsOfSurfaceMesh } from './removeSelfIntersectionsOfSurfaceMesh.js';
 export { reverseFaceOrientationsOfSurfaceMesh } from './reverseFaceOrientationsOfSurfaceMesh.js';
+export { seam } from './seam.js';
 export { section } from './section.js';
 export { separate } from './separate.js';
 export { simplifySurfaceMesh } from './simplifySurfaceMesh.js';

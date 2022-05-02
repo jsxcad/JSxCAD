@@ -169,6 +169,7 @@ export { reverseFaceOrientations as reverseFaceOrientationsOfGraph } from './gra
 export { rotateZ as rotateZPath } from './path/ops.js';
 export { scale as scalePath } from './path/ops.js';
 export { scale as scalePaths } from './paths/ops.js';
+export { seam } from './seam.js';
 export { section } from './section.js';
 export { serialize } from './tagged/serialize.js';
 export { simplify } from './tagged/simplify.js';

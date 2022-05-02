@@ -13,10 +13,14 @@ export const to =
     if (selection instanceof Function) {
       selection = selection(shape);
     }
+    const { local } = getInverseMatrices(shape.toGeometry());
     for (const leaf of getLeafs(selection.toGeometry())) {
-      const { local } = getInverseMatrices(leaf);
+      const { global } = getInverseMatrices(leaf);
       // Switch to the local coordinate space, perform the operation, and come back to the global coordinate space.
-      shape = shape.transform(local).op(...ops);
+      shape = shape
+        .transform(local)
+        .op(...ops)
+        .transform(global);
     }
     return shape;
   };

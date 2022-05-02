@@ -176,8 +176,8 @@ b.at(
 
 b.to(
   (s) => s.getEdge(topEdge).getEdge(leftEdge).nth(0),
-  cut(Box(11, 3, 3).rx(1 / 8))
 )
+  .cut(Box(11, 3, 3).rx(1 / 8))
   .view()
 
 Voxels([0, 0, 0], [0, 0, 1], [1, 0, 1], [2, 0, 1]).view();

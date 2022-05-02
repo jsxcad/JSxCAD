@@ -284,14 +284,6 @@ Weld(Arc(4).x(-1), Box(5).x(1))
 Weld(Arc(5).x(-1), Box(5).x(1)).fill()
 
 ```JavaScript
-Box(1).color('red').as('box').x(5).y(5).fit(Arc(10)).to(g('box')).gridView().md('Reposition to the local frame of reference of an item');
-```
-
-![Image](shapes.md.26.png)
-
-Reposition to the local frame of reference of an item
-
-```JavaScript
 const extentsA = [
   [2, 5],
   [2, 3],
@@ -316,6 +308,18 @@ const extentsC = [
 ```
 
 ```JavaScript
+const q = Group(
+  ArcY(...extentsA).and(Box(...extentsA).material('glass')),
+  ArcX(...extentsB).and(Box(...extentsB).material('glass')),
+  ArcZ(...extentsC).and(Box(...extentsC).material('glass'))
+).view().md`Boxes and Arcs from extents`;
+```
+
+![Image](shapes.md.26.png)
+
+Boxes and Arcs from extents
+
+```JavaScript
 Line(15, -15)
   .seq({ from: -10, to: 11 }, y, Group)
   .clip(Arc(20).cut(Arc(10)))
@@ -325,25 +329,13 @@ Line(15, -15)
 ![Image](shapes.md.27.png)
 
 ```JavaScript
-const q = Group(
-  ArcY(...extentsA).and(Box(...extentsA).material('glass')),
-  ArcX(...extentsB).and(Box(...extentsB).material('glass')),
-  ArcZ(...extentsC).and(Box(...extentsC).material('glass'))
-).view().md`Boxes and Arcs from extents`;
-```
-
-![Image](shapes.md.28.png)
-
-Boxes and Arcs from extents
-
-```JavaScript
 Line(15, -15)
   .seq({ from: -10, to: 11 }, y, Group)
   .clip(Arc(20).cut(Arc(10)).ez(1))
   .view();
 ```
 
-![Image](shapes.md.29.png)
+![Image](shapes.md.28.png)
 
 ```JavaScript
 Line(-15, 15)
@@ -352,7 +344,7 @@ Line(-15, 15)
   .view();
 ```
 
-![Image](shapes.md.30.png)
+![Image](shapes.md.29.png)
 
 ```JavaScript
 Line(-15, 15)
@@ -361,7 +353,7 @@ Line(-15, 15)
   .view();
 ```
 
-![Image](shapes.md.31.png)
+![Image](shapes.md.30.png)
 
 ```JavaScript
 Box(12)
@@ -377,7 +369,7 @@ Box(12)
   .view();
 ```
 
-![Image](shapes.md.32.png)
+![Image](shapes.md.31.png)
 
 ```JavaScript
 Box(12)
@@ -393,7 +385,7 @@ Box(12)
   .view();
 ```
 
-![Image](shapes.md.33.png)
+![Image](shapes.md.32.png)
 
 ```JavaScript
 Group(Box(1), Box(1).rx(1 / 4))
@@ -401,7 +393,7 @@ Group(Box(1), Box(1).rx(1 / 4))
   .view();
 ```
 
-![Image](shapes.md.34.png)
+![Image](shapes.md.33.png)
 
 ```JavaScript
 Orb(10)
@@ -413,10 +405,71 @@ Orb(10)
   .view(1);
 ```
 
-![Image](shapes.md.35.png)
+![Image](shapes.md.34.png)
 
 ```JavaScript
 Box(10).cut(Box(5)).ez(1, -1).section().view();
 ```
 
+![Image](shapes.md.35.png)
+
+```JavaScript
+Box(10, 10, 20)
+  .cutout(Box(20, 20, [8, 100]), (cut) => (clip) => cut.and(clip.grow(2, 'xy')))
+  .view();
+```
+
 ![Image](shapes.md.36.png)
+
+```JavaScript
+Box(10, 10, 20)
+  .grow(2, Box(10, 10, [7, 10]))
+  .view(3);
+```
+
+![Image](shapes.md.37.png)
+
+```JavaScript
+Box(10, 10, 20)
+  .seam(Box(10, 10, [6, 11]))
+  .grow(1, Box(10, 10, [7, 10]))
+  .view(3, (s) => s.rx(1 / 2).by(align('z>')));
+```
+
+![Image](shapes.md.38.png)
+
+```JavaScript
+const red = Arc(2).color('red');
+```
+
+```JavaScript
+const blue = Box(10).x(10).color('blue');
+```
+
+```JavaScript
+Box(5)
+  .as('b')
+  .and(Triangle(5).as('t'))
+  .on(get('b'), rz(1 / 8))
+  .view();
+```
+
+![Image](shapes.md.39.png)
+
+```JavaScript
+blue.fitTo(red.to(blue)).view();
+```
+
+![Image](shapes.md.40.png)
+
+```JavaScript
+red.at(blue, cut(Box([10, 20], 20))).view();
+```
+
+![Image](shapes.md.41.png)
+
+```JavaScript
+red.by(blue).view();
+```
+
+![Image](shapes.md.42.png)
