@@ -393,8 +393,8 @@ b.at(
 ```JavaScript
 b.to(
   (s) => s.getEdge(topEdge).getEdge(leftEdge).nth(0),
-  cut(Box(11, 3, 3).rx(1 / 8))
 )
+  .cut(Box(11, 3, 3).rx(1 / 8))
   .view()
 ```
 
