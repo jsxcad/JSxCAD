@@ -10,19 +10,20 @@ Group(a, b).view();
 md`
 ---
 ### Align
-Returns a point relative to a shape which can be used for positioning other shapes
+Returns a point relative to a shape which can be used for positioning other shapes. Behavior needs to be updated to function this way.
 `;
 
-Group(a, b, b.at(a.align('>Y'))).view();
-//Group(a, b.at(a.align('>X')).view();
+Group(a, b, b.to(a.align('<x'))).view();
 
 md`
 ---
 ### At
-Places a shape at a reference point.
+Performes an operation on a shape at a particular location.
 `;
 
-Group(a, b.at(a)).view();
+Group(b, a.at(b, cut(b))).view(); //Moves a to b, makes the cut, then moves a back to it's original location
+
+//Group(a, b.at(a, clip(a)).view();
 
 md`
 ---
