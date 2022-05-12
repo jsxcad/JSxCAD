@@ -1,0 +1,41 @@
+md`# Reference Geometry`;
+md`Each shape in jot has it's own frame of reference which can be accessed. A shapes internal frame of reference can be used to position a new shape relative to an existing shape. A shapes frame of reference can be redefined by defining it as an item`;
+
+const a = Box(10, 10, 1).color('red').x(10);
+
+const b = Box(5, 5, 2).color('blue').y(10);
+
+Group(a, b).view();
+
+md`
+---
+### Align
+Returns a point relative to a shape which can be used for positioning other shapes
+`;
+
+Group(a, b, b.at(a.align('>Y'))).view();
+//Group(a, b.at(a.align('>X')).view();
+
+md`
+---
+### At
+Places a shape at a reference point.
+`;
+
+Group(a, b.at(a)).view();
+
+md`
+---
+### By
+Moves a shape from it's current location by a reference amount.
+`;
+
+Group(a, b.by(a)).view(); //Moves the blue square in the X direction the same amount that the red square had been moved
+
+md`
+---
+### To
+Moves a shape to a reference position.
+`;
+
+Group(a, b.to(a)).view(); //Moves the blue square to the red square

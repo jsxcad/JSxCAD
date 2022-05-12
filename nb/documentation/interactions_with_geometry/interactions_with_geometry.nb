@@ -10,6 +10,27 @@ Box(10, 10, 10).color('pink').view();
 
 md`
 ---
+### eachIn
+The individual components of a piece of geometry can be interacted with using .eachIn(). 
+The function takes two functions as arguments. The first function argument is applied to each element. 
+The second function argument determines what is returned. The result is returned as an array.
+`;
+
+const aGroup = Group(
+  Box(10, 200, 10),
+  Box(10, 200, 10).z(20),
+  Box(10, 200, 10).z(40)
+).view();
+
+Group(
+  ...aGroup.eachIn(
+    (s) => s.rz(Math.random()),
+    (b) => b
+  )
+).view(); //Rotates each one by some random amount
+
+md`
+---
 ### Extrude
 2D shapes can be 'extruded' to create 3D shapes. This can be abbreviated to .e() for brevity.
 
