@@ -7,6 +7,7 @@ import {
   Group,
   LineBasicMaterial,
   LineSegments,
+  Matrix3,
   Matrix4,
   Mesh,
   Path,
@@ -203,6 +204,66 @@ const updateUserData = (geometry, scene, userData) => {
     }
     userData.tags = geometry.tags;
   }
+};
+
+// https://gist.github.com/kevinmoran/b45980723e53edeb8a5a43c49f134724
+const orient = (mesh, source, target, offset) => {
+  const translation = new Matrix4();
+  translation.makeTranslation(0, 0, -offset);
+  mesh.applyMatrix4(translation);
+
+  const cosA = target.clone().dot(source);
+
+  if (cosA === 1) {
+    return;
+  }
+
+  if (cosA === -1) {
+    const w = 1;
+    const cosAlpha = -1;
+    const sinAlpha = 0;
+    const matrix4 = new Matrix4();
+
+    matrix4.set(w, 0, 0, 0,
+                0, cosAlpha, -sinAlpha, 0,
+                0, sinAlpha, cosAlpha, 0,
+                0, 0, 0, w);
+    mesh.applyMatrix4(matrix4);
+    return;
+  }
+
+  // Otherwise we need to build a matrix.
+
+  const axis = new Vector3();
+  axis.crossVectors(target, source);
+  const k = 1 / (1 + cosA);
+
+  const matrix3 = new Matrix3();
+  matrix3.set(
+      (axis.x * axis.x * k) + cosA,
+      (axis.y * axis.x * k) - axis.z,
+      (axis.z * axis.x * k) + axis.y,
+      (axis.x * axis.y * k) + axis.z,
+      (axis.y * axis.y * k) + cosA,
+      (axis.z * axis.y * k) - axis.x,
+      (axis.x * axis.z * k) - axis.y,
+      (axis.y * axis.z * k) + axis.x,
+      (axis.z * axis.z * k) + cosA);
+
+  const matrix4 = new Matrix4();
+  matrix4.setFromMatrix3(matrix3);
+
+  const position = new Vector3();
+  const quaternion = new Quaternion();
+  const scale = new Vector3();
+
+  matrix4.decompose(position, quaternion, scale);
+
+  console.log(`QQ/position: ${JSON.stringify(position)}`);
+  console.log(`QQ/quaternion: ${JSON.stringify(quaternion)}`);
+  console.log(`QQ/scale: ${JSON.stringify(scale)}`);
+
+  mesh.applyMatrix4(matrix4);
 };
 
 export const buildMeshes = async ({
@@ -421,29 +482,17 @@ export const buildMeshes = async ({
         geometry.plane[2]
       ).normalize();
       const baseNormal = new Vector3(0, 0, 1);
-      const quaternion = new Quaternion().setFromUnitVectors(
-        normal,
-        baseNormal
-      );
       mesh = new Group();
       for (const { points, holes } of geometry.polygonsWithHoles) {
         const boundaryPoints = [];
         for (const point of points) {
-          boundaryPoints.push(
-            new Vector3(point[0], point[1], point[2]).applyQuaternion(
-              quaternion
-            )
-          );
+          boundaryPoints.push(new Vector3(point[0], point[1], point[2]));
         }
         const shape = new Shape(boundaryPoints);
         for (const { points } of holes) {
           const holePoints = [];
           for (const point of points) {
-            holePoints.push(
-              new Vector3(point[0], point[1], point[2]).applyQuaternion(
-                quaternion
-              )
-            );
+            holePoints.push(new Vector3(point[0], point[1], point[2]));
           }
           shape.holes.push(new Path(holePoints));
         }
@@ -463,6 +512,8 @@ export const buildMeshes = async ({
         }
       }
       scene.add(mesh);
+      // Need to handle the origin shift.
+      orient(mesh, normal, baseNormal, geometry.plane[3]);
       break;
     }
     default:

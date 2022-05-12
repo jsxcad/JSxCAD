@@ -19,6 +19,7 @@ export {
   Line,
   LineBasicMaterial,
   LineSegments,
+  Matrix3,
   Matrix4,
   Mesh,
   MeshBasicMaterial,

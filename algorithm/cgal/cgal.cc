@@ -157,6 +157,7 @@ typedef std::vector<Polygon> Polygons;
 
 typedef CGAL::Polygon_2<Kernel> Polygon_2;
 typedef CGAL::Polygon_with_holes_2<Kernel> Polygon_with_holes_2;
+typedef std::vector<Polygon_with_holes_2> Polygons_with_holes_2;
 typedef CGAL::Straight_skeleton_2<Kernel> Straight_skeleton_2;
 
 typedef CGAL::General_polygon_set_2<CGAL::Gps_segment_traits_2<Kernel>>
@@ -232,6 +233,11 @@ FT compute_approximate_point_value(FT ft) {
   return CGAL::simplest_rational_in_interval<FT>(value - 0.001, value + 0.001);
 }
 
+Point_2 compute_approximate_point_2(Point_2 p2) {
+  return Point_2(compute_approximate_point_value(p2.x()),
+                 compute_approximate_point_value(p2.y()));
+}
+
 void compute_turn(double turn, RT& sin_alpha, RT& cos_alpha, RT& w) {
   // Convert angle to radians.
   double radians = turn * 2 * CGAL_PI;
@@ -282,6 +288,46 @@ Vector unitVector(const Vector& vector) {
         vector / CGAL_NTS approximate_sqrt(vector.squared_length());
     return unit_vector;
   }
+}
+
+// https://gist.github.com/kevinmoran/b45980723e53edeb8a5a43c49f134724
+Transformation orient(Vector source, Vector target) {
+  if (source == target) {
+    return Transformation(CGAL::IDENTITY);
+  }
+
+  if (target == -source) {
+    FT w = 1;
+    FT cos_alpha = -1;
+    FT sin_alpha = 0;
+    return Transformation(w, 0, 0, 0, 0, cos_alpha, -sin_alpha, 0, 0, sin_alpha,
+                          cos_alpha, 0, w);
+  }
+
+  Vector axis = CGAL::cross_product(target, source);
+
+  FT cos_a = target * source;
+
+  FT k = 1 / (1 + cos_a);
+
+  return Transformation(
+      (axis.x() * axis.x() * k) + cos_a, (axis.y() * axis.x() * k) - axis.z(),
+      (axis.z() * axis.x() * k) + axis.y(),
+      (axis.x() * axis.y() * k) + axis.z(), (axis.y() * axis.y() * k) + cos_a,
+      (axis.z() * axis.y() * k) - axis.x(),
+      (axis.x() * axis.z() * k) - axis.y(),
+      (axis.y() * axis.z() * k) + axis.x(), (axis.z() * axis.z() * k) + cos_a);
+}
+
+Transformation orient_plane(Plane source, Plane target) {
+  Point_2 zero(0, 0);
+  Point s = source.to_3d(zero);
+  Point t = target.to_3d(zero);
+  // Build a transform to get to this plane.
+  Transformation rotation = orient(unitVector(source.orthogonal_vector()),
+                                   unitVector(target.orthogonal_vector()));
+  Transformation translation = Transformation(CGAL::TRANSLATION, t - s);
+  return translation * rotation;
 }
 
 Plane PlaneOfSurfaceMeshFacet(const Surface_mesh& mesh, Face_index facet) {
@@ -3062,6 +3108,16 @@ Polygon_with_holes_2 transformPolygonWithHoles(
                               output_holes.end());
 }
 
+void transformPolygonsWithHoles(Polygons_with_holes_2& polygons,
+                                const Plane& input_plane,
+                                const Plane& output_plane,
+                                const Transformation& transform) {
+  for (Polygon_with_holes_2& polygon : polygons) {
+    polygon = transformPolygonWithHoles(polygon, input_plane, output_plane,
+                                        transform);
+  }
+}
+
 std::vector<Segment> transformSegments(const std::vector<Segment> segments,
                                        const Transformation& transform) {
   std::vector<Segment> output;
@@ -3227,10 +3283,12 @@ void convertSurfaceMeshFacesToArrangements(
         }
       }
       if (corner) {
-        Point_2 s = facet_plane.to_2d(mesh.point(mesh.source(edge)));
-        Point_2 t = facet_plane.to_2d(mesh.point(mesh.target(edge)));
-        if (s != t) {
-          Segment_2 segment{s, t};
+        Point s3 = mesh.point(mesh.source(edge));
+        Point t3 = mesh.point(mesh.target(edge));
+        Point_2 s2 = compute_approximate_point_2(facet_plane.to_2d(s3));
+        Point_2 t2 = compute_approximate_point_2(facet_plane.to_2d(t3));
+        if (s2 != t2) {
+          Segment_2 segment(s2, t2);
           insert(arrangement, segment);
         }
       }
@@ -3239,6 +3297,8 @@ void convertSurfaceMeshFacesToArrangements(
     } while (edge != start);
   }
 }
+
+bool lt(int a, int b) { return a < b; }
 
 template <typename Edge, typename Face, typename Point>
 bool projectPointToEnvelope(const Edge& edge, const Face& face,
@@ -3264,13 +3324,15 @@ bool projectPointToEnvelope(const Edge& edge, const Face& face,
 
 class Geometry {
  public:
-  Geometry() {}
+  Geometry() : is_absolute_frame_(false) {}
 
   void setSize(int size) {
+    std::cout << "setSize size=" << size << std::endl;
     types_.clear();
     transforms_.clear();
     planes_.clear();
     gps_.clear();
+    pwh_.clear();
     input_meshes_.clear();
     meshes_.clear();
     input_segments_.clear();
@@ -3282,7 +3344,9 @@ class Geometry {
     resize(size);
   }
 
-  int size() { return size_; }
+  int size() const {
+    return size_;
+  }
 
   void resize(int size) {
     size_ = size;
@@ -3290,6 +3354,7 @@ class Geometry {
     transforms_.resize(size);
     planes_.resize(size);
     gps_.resize(size);
+    pwh_.resize(size);
     input_meshes_.resize(size);
     meshes_.resize(size);
     input_segments_.resize(size);
@@ -3331,6 +3396,9 @@ class Geometry {
   bool has_gps(int nth) { return gps_[nth] != nullptr; }
   General_polygon_set_2& gps(int nth) { return *gps_[nth]; }
 
+  bool has_pwh(int nth) { return pwh_[nth] != nullptr; }
+  Polygons_with_holes_2& pwh(int nth) { return *pwh_[nth]; }
+
   bool has_input_segments(int nth) { return input_segments_[nth] != nullptr; }
   std::vector<Segment>& input_segments(int nth) {
     return *input_segments_[nth];
@@ -3353,10 +3421,11 @@ class Geometry {
   int getType(int nth) { return types_[nth]; }
 
   void setType(int nth, int type) {
+    std::cout << "setType nth=" << nth << " type=" << type << std::endl;
     types_[nth] = GeometryType(type);
     switch (type) {
       case GEOMETRY_POLYGONS_WITH_HOLES: {
-        gps_[nth].reset(new General_polygon_set_2);
+        pwh_[nth].reset(new Polygons_with_holes_2);
         break;
       }
       case GEOMETRY_SEGMENTS: {
@@ -3406,6 +3475,9 @@ class Geometry {
   void fillPolygonsWithHoles(int nth, emscripten::val fillPlane,
                              emscripten::val fillBoundary,
                              emscripten::val fillHole) {
+    assert(is_local_frame());
+    std::cout << "fillPolygonsWithHoles/0" << std::endl;
+#if 0
     Transformation local_to_absolute_transform = transform(nth);
     Plane local_plane;
     admitPlane(local_plane, fillPlane);
@@ -3413,27 +3485,55 @@ class Geometry {
     Plane absolute_plane =
         unitPlane(local_plane.transform(local_to_absolute_transform));
     // This means that pwh are always operating in an absolute frame.
-    // FIX: admitPolygonWithHoles doesn't distinguish error from exhaustion.
+    // This makes interaction with transformToAbsoluteFrame and
+    // transformToLocalFrame confusing.
+    // We could correct this by writing a transformGeneralPolygonSet function,
+    // which may be possible by accessing the underlying Arrangement_2, but
+    // transforming the vertices seems impractical.
+    // Instead we could store the PolygonsWithHoles and make the GPS an
+    std::cout << "cpmtp/1" << std::endl;
+    // problem for the operation -- this seems like a more reasonable
+    // approach.
     Polygon_with_holes_2 polygon;
     while (admitPolygonWithHoles(polygon, fillBoundary, fillHole)) {
       gps(nth).join(transformPolygonWithHoles(
           polygon, local_plane, absolute_plane, local_to_absolute_transform));
     }
     plane(nth) = absolute_plane;
+#else
+    Plane local_plane;
+    admitPlane(local_plane, fillPlane);
+    Polygon_with_holes_2 polygon;
+    Polygons_with_holes_2 polygons;
+    while (admitPolygonWithHoles(polygon, fillBoundary, fillHole)) {
+      polygons.push_back(std::move(polygon));
+    }
+    std::cout << "fillPolygonsWithHoles: nth=" << nth << std::endl;
+    std::cout << "fillPolygonsWithHoles: plane=" << local_plane << std::endl;
+    std::cout << "fillPolygonsWithHoles: unit_plane=" << unitPlane(local_plane)
+              << std::endl;
+    plane(nth) = unitPlane(local_plane);
+    pwh(nth) = std::move(polygons);
+#endif
   }
 
   // This should happen in the absolute frame.
   void convertPlanarMeshesToPolygons() {
+    std::cout << "cpmtp/1" << std::endl;
+    assert(is_absolute_frame());
     for (size_t nth = 0; nth < size_; nth++) {
       if (is_mesh(nth) && IsPlanarSurfaceMesh(plane(nth), mesh(nth))) {
         setType(nth, GEOMETRY_POLYGONS_WITH_HOLES);
         plane(nth) = unitPlane(plane(nth));
-        std::vector<Polygon_with_holes_2> polygonsWithHoles;
+        Polygons_with_holes_2 polygons_with_holes;
         PlanarSurfaceMeshToPolygonsWithHoles(plane(nth), mesh(nth),
-                                             polygonsWithHoles);
+                                             polygons_with_holes);
+        pwh(nth) = std::move(polygons_with_holes);
+#if 0
         for (auto& polygon : polygonsWithHoles) {
           gps(nth).join(polygon);
         }
+#endif
         setTransform(nth, new Transformation(CGAL::IDENTITY));
         mesh(nth).clear();
       }
@@ -3441,12 +3541,17 @@ class Geometry {
   }
 
   void convertPolygonsToPlanarMeshes() {
+    assert(is_absolute_frame());
     for (size_t nth = 0; nth < size_; nth++) {
       if (is_polygons(nth)) {
         // Convert to planar mesh.
         Vertex_map vertex_map;
         setMesh(nth, new Surface_mesh);
+#if 0
         if (!GeneralPolygonSetToSurfaceMesh(plane(nth), gps(nth), mesh(nth),
+                                            vertex_map)) {
+#endif
+        if (!PolygonsWithHolesToSurfaceMesh(plane(nth), pwh(nth), mesh(nth),
                                             vertex_map)) {
           std::cout << "QQ/convertPolygonsToPlanarMeshes failed";
           return;
@@ -3460,6 +3565,8 @@ class Geometry {
   void emitPolygonsWithHoles(int nth, emscripten::val emit_plane,
                              emscripten::val emit_polygon,
                              emscripten::val emit_point) {
+    assert(is_local_frame());
+#if 0
     Transformation absolute_to_local_transform = transform(nth).inverse();
     Plane absolute_plane = plane(nth);
     Plane local_plane =
@@ -3473,6 +3580,9 @@ class Geometry {
     emitPlane(local_plane, emit_plane);
     ::emitPolygonsWithHoles(polygonsWithHoles, emit_polygon, emit_point);
     plane(nth) = local_plane;
+#else
+    ::emitPolygonsWithHoles(*pwh_[nth], emit_polygon, emit_point);
+#endif
   }
 
   void addInputPoint(int nth, double x, double y, double z) {
@@ -3534,11 +3644,84 @@ class Geometry {
   }
 
   void transformToAbsoluteFrame() {
-    for (size_t nth = 0; nth < size_; nth++) {
+    assert(is_local_frame());
+    std::cout << "ttaf: version=" << 4 << std::endl;
+    std::cout << "ttaf: size=" << size() << std::endl;
+    for (int nth = 0; nth < size(); nth++) {
+      if (nth >= size()) {
+        std::cout << "nth >= size(); advise." << std::endl;
+        break;
+      }
+      assert(nth < 10);
+      std::cout << "2 < 3=" << (2 < 3) << std::endl;
+      std::cout << "3 < 2=" << (3 < 2) << std::endl;
+      std::cout << "nth=" << nth << std::endl;
+      std::cout << "size()=" << size() << std::endl;
+      std::cout << "lt(nth, size())=" << lt(nth, size()) << std::endl;
+      std::cout << "lt(nth, 3)=" << lt(nth, 3) << std::endl;
+      std::cout << "(nth < size())=" << (nth < size()) << std::endl;
+      std::cout << "(nth == size())=" << (nth == size()) << std::endl;
+      std::cout << "(nth > size())=" << (nth > size()) << std::endl;
+#if 0
+#if 0
+      std::cout << "(nth - limit)=" << (nth - limit) << std::endl;
+      std::cout << "(limit - nth)=" << (limit - nth) << std::endl;
+      std::cout << "(nth - limit) < 0 = " << ((limit - nth) < 0) << std::endl;
+      std::cout << "(nth - limit) == 0 = " << ((limit - nth) == 0) << std::endl;
+      std::cout << "(nth - limit) > 0 = " << ((limit - nth) > 0) << std::endl;
+      std::cout << "(nth < limit)=" << (nth < limit) << std::endl;
+      std::cout << "(nth == limit)=" << (nth == limit) << std::endl;
+      std::cout << "(nth > limit)=" << (nth > limit) << std::endl;
+      std::cout << "ttaf: nth=" << nth << " limit=" << limit
+                << " less=" << (nth < limit) << std::endl;
+#endif
+      if (nth >= limit) {
+        std::cout << "nth >= limit; break." << std::endl;
+        break;
+      }
+      std::cout << "ttaf: type=" << type(nth) << std::endl;
       switch (type(nth)) {
         case GEOMETRY_MESH: {
+          std::cout << "ttaf/mesh" << std::endl;
+#if 0
           CGAL::Polygon_mesh_processing::transform(
               transform(nth), mesh(nth), CGAL::parameters::all_default());
+#endif
+          break;
+        }
+        case GEOMETRY_POLYGONS_WITH_HOLES: {
+          std::cout << "ttaf/pwh/1" << std::endl;
+          Transformation local_to_absolute_transform = transform(nth);
+          std::cout << "ttaf/pwh/2: nth=" << nth << std::endl;
+          std::cout << "ttaf/pwh/2: plane=" << plane(nth) << std::endl;
+          Plane local_plane = plane(nth);
+          std::cout << "ttaf/pwh/3" << std::endl;
+          Plane absolute_plane =
+              unitPlane(local_plane.transform(local_to_absolute_transform));
+          std::cout << "ttaf/pwh/4" << std::endl;
+          // This means that pwh are always operating in an absolute frame.
+          // This makes interaction with transformToAbsoluteFrame and
+          // transformToLocalFrame confusing.
+          // We could correct this by writing a transformGeneralPolygonSet
+          // function, which may be possible by accessing the underlying
+          // Arrangement_2, but transforming the vertices seems impractical.
+          // Instead we could store the PolygonsWithHoles and make the GPS an
+          // problem for the operation -- this seems like a more reasonable
+          // approach.
+          Polygons_with_holes_2 polygons;
+          std::cout << "ttaf/pwh/5" << std::endl;
+          for (const Polygon_with_holes_2& polygon : pwh(nth)) {
+            std::cout << "ttaf/pwh/6" << std::endl;
+            polygons.push_back(std::move(
+                transformPolygonWithHoles(polygon, local_plane, absolute_plane,
+                                          local_to_absolute_transform)));
+            std::cout << "ttaf/pwh/7" << std::endl;
+          }
+          std::cout << "ttaf/pwh/8" << std::endl;
+          pwh(nth) = std::move(polygons);
+          std::cout << "ttaf/pwh/9" << std::endl;
+          plane(nth) = absolute_plane;
+          std::cout << "ttaf/pwh/10" << std::endl;
           break;
         }
         case GEOMETRY_SEGMENTS: {
@@ -3557,16 +3740,35 @@ class Geometry {
           break;
         }
       }
+#endif
     }
+    set_absolute_frame();
   }
 
   void transformToLocalFrame() {
+    assert(is_absolute_frame());
     for (size_t nth = 0; nth < size_; nth++) {
       switch (type(nth)) {
         case GEOMETRY_MESH: {
           CGAL::Polygon_mesh_processing::transform(
               transform(nth).inverse(), mesh(nth),
               CGAL::parameters::all_default());
+          break;
+        }
+        case GEOMETRY_POLYGONS_WITH_HOLES: {
+          Transformation absolute_to_local_transform = transform(nth).inverse();
+          Plane absolute_plane = plane(nth);
+          Plane local_plane =
+              unitPlane(absolute_plane.transform(absolute_to_local_transform));
+          Polygons_with_holes_2 polygonsWithHoles;
+          gps(nth).polygons_with_holes(std::back_inserter(polygonsWithHoles));
+          for (auto& polygon : polygonsWithHoles) {
+            polygon =
+                transformPolygonWithHoles(polygon, absolute_plane, local_plane,
+                                          absolute_to_local_transform);
+          }
+          plane(nth) = local_plane;
+          pwh(nth) = std::move(polygonsWithHoles);
           break;
         }
         case GEOMETRY_SEGMENTS: {
@@ -3586,6 +3788,7 @@ class Geometry {
         }
       }
     }
+    set_local_frame();
   }
 
   void removeEmptyMeshes() {
@@ -3596,19 +3799,27 @@ class Geometry {
     }
   }
 
-  bool noGpsOverlap(size_t a, size_t b) {
+  bool noOverlap2(size_t a, size_t b) {
     return CGAL::do_overlap(bbox2_[a], bbox2_[b]) == false;
   }
 
-  void updateGpsBounds(int nth) {
-    bbox2(nth) = computePolygonSetBounds(gps(nth));
+  void updateBounds2(int nth) {
+    if (has_gps(nth)) {
+      computePolygonSetBounds(gps(nth));
+    } else if (has_pwh(nth)) {
+      CGAL::Bbox_2 bb;
+      for (const Polygon_with_holes_2& polygon : *pwh_[nth]) {
+        bb += polygon.bbox();
+      }
+      bbox2(nth) = bb;
+    }
   }
 
-  bool noMeshOverlap(size_t a, size_t b) {
+  bool noOverlap3(size_t a, size_t b) {
     return CGAL::do_overlap(bbox3_[a], bbox3_[b]) == false;
   }
 
-  void updateMeshBounds(int nth) {
+  void updateBounds3(int nth) {
     bbox3(nth) = CGAL::Polygon_mesh_processing::bbox(mesh(nth));
   }
 
@@ -3616,11 +3827,11 @@ class Geometry {
     for (size_t nth = 0; nth < size_; nth++) {
       switch (type(nth)) {
         case GEOMETRY_MESH: {
-          updateMeshBounds(nth);
+          updateBounds3(nth);
           break;
         }
         case GEOMETRY_POLYGONS_WITH_HOLES: {
-          updateGpsBounds(nth);
+          updateBounds2(nth);
           break;
         }
         default:
@@ -3629,10 +3840,17 @@ class Geometry {
     }
   }
 
+  bool is_absolute_frame() { return is_absolute_frame_; }
+  bool is_local_frame() { return !is_absolute_frame_; }
+  bool set_absolute_frame() { is_absolute_frame_ = true; }
+  bool set_local_frame() { is_absolute_frame_ = false; }
+
   int size_;
+  bool is_absolute_frame_;
   std::vector<GeometryType> types_;
   std::vector<const Transformation*> transforms_;
   std::vector<Plane> planes_;
+  std::vector<std::unique_ptr<Polygons_with_holes_2>> pwh_;
   std::vector<std::unique_ptr<General_polygon_set_2>> gps_;
   std::vector<const Surface_mesh*> input_meshes_;
   std::vector<std::unique_ptr<Surface_mesh>> meshes_;
@@ -3794,10 +4012,12 @@ int Cast(Geometry* geometry, const Transformation* reference) {
           }
         }
         PlanarSurfaceMeshFacetsToPolygonSet(reference_plane, mesh,
-                                            geometry->gps(target));
+                                            geometry->gps(nth));
       }
     }
   }
+
+  geometry->transformToLocalFrame();
 
   return STATUS_OK;
 }
@@ -3823,7 +4043,7 @@ int Clip(Geometry* geometry, int targets, bool open) {
           if (!geometry->is_mesh(nth) || geometry->is_empty_mesh(nth)) {
             continue;
           }
-          if (geometry->noMeshOverlap(target, nth)) {
+          if (geometry->noOverlap3(target, nth)) {
             geometry->setType(target, GEOMETRY_EMPTY);
             break;
           }
@@ -3847,7 +4067,7 @@ int Clip(Geometry* geometry, int targets, bool open) {
             }
           }
           demesh(geometry->mesh(target));
-          geometry->updateMeshBounds(target);
+          geometry->updateBounds3(target);
         }
         break;
       }
@@ -3858,12 +4078,12 @@ int Clip(Geometry* geometry, int targets, bool open) {
               geometry->plane(target) != geometry->plane(nth)) {
             continue;
           }
-          if (geometry->noGpsOverlap(target, nth)) {
+          if (geometry->noOverlap2(target, nth)) {
             geometry->setType(target, GEOMETRY_EMPTY);
             break;
           }
           geometry->gps(target).intersection(geometry->gps(nth));
-          geometry->updateGpsBounds(target);
+          geometry->updateBounds2(target);
         }
         // TODO: Handle disjunction of surface by volume.
         break;
@@ -4052,6 +4272,7 @@ int ConvexHull(Geometry* geometry) {
   // compute convex hull of non-colinear points
   CGAL::convex_hull_3(points.begin(), points.end(), geometry->mesh(target));
 
+  geometry->transformToLocalFrame();
   geometry->convertPlanarMeshesToPolygons();
 
   return STATUS_OK;
@@ -4059,22 +4280,33 @@ int ConvexHull(Geometry* geometry) {
 
 int Cut(Geometry* geometry, int targets, bool open) {
   size_t size = geometry->size();
+  std::cout << "Cut/1a" << std::endl;
   std::vector<std::unique_ptr<SurfaceMeshQuery>> queries;
+  queries.reserve(size);
+  std::cout << "Cut/1b" << std::endl;
   Transformation identity(CGAL::IDENTITY);
+  std::cout << "Cut/1c" << std::endl;
   geometry->copyInputMeshesToOutputMeshes();
+  std::cout << "Cut/1d" << std::endl;
   geometry->transformToAbsoluteFrame();
+  std::cout << "Cut/1e" << std::endl;
   geometry->convertPlanarMeshesToPolygons();
+  std::cout << "Cut/1f" << std::endl;
   geometry->computeBounds();
+  std::cout << "Cut/1g" << std::endl;
 
+  std::cout << "Cut/2" << std::endl;
   for (int target = 0; target < targets; target++) {
+    std::cout << "Cut/2: target=" << target << std::endl;
     switch (geometry->type(target)) {
       case GEOMETRY_MESH: {
+        std::cout << "Cut/2/mesh" << std::endl;
         if (geometry->is_empty_mesh(target)) {
           continue;
         }
         for (int nth = targets; nth < size; nth++) {
           if (!geometry->is_mesh(nth) || geometry->is_empty_mesh(nth) ||
-              geometry->noMeshOverlap(target, nth)) {
+              geometry->noOverlap3(target, nth)) {
             continue;
           }
           Surface_mesh cutMeshCopy(geometry->mesh(nth));
@@ -4098,25 +4330,27 @@ int Cut(Geometry* geometry, int targets, bool open) {
             }
           }
           demesh(geometry->mesh(target));
-          geometry->updateMeshBounds(target);
+          geometry->updateBounds3(target);
         }
         break;
       }
       case GEOMETRY_POLYGONS_WITH_HOLES: {
+        std::cout << "Cut/2/pwh" << std::endl;
         for (int nth = targets; nth < size; nth++) {
           // TODO: Disjunction of planar by volume.
           if (!geometry->is_polygons(nth) ||
               geometry->plane(target) != geometry->plane(nth) ||
-              geometry->noGpsOverlap(target, nth)) {
+              geometry->noOverlap2(target, nth)) {
             continue;
           }
           geometry->gps(target).difference(geometry->gps(nth));
-          geometry->updateGpsBounds(target);
+          geometry->updateBounds2(target);
         }
         // TODO: Handle disjunction of surface by volume.
         break;
       }
       case GEOMETRY_SEGMENTS: {
+        std::cout << "Cut/2/segments" << std::endl;
         // TODO: Support disjunction by PolygonsWithHoles.
         std::vector<Segment> in;
         geometry->input_segments(target).swap(in);
@@ -4154,10 +4388,12 @@ int Cut(Geometry* geometry, int targets, bool open) {
     }
   }
 
+  std::cout << "Cut/3" << std::endl;
   geometry->resize(targets);
   geometry->removeEmptyMeshes();
   geometry->convertPlanarMeshesToPolygons();
   geometry->transformToLocalFrame();
+  std::cout << "Cut/4" << std::endl;
 
   return STATUS_OK;
 }
@@ -4282,7 +4518,7 @@ int Disjoint(Geometry* geometry, emscripten::val getIsMasked) {
         for (int nth = start + 1; nth < size; nth++) {
           if (is_masked[nth] || !geometry->is_mesh(nth) ||
               geometry->is_empty_mesh(nth) ||
-              geometry->noMeshOverlap(start, nth)) {
+              geometry->noOverlap3(start, nth)) {
             continue;
           }
           Surface_mesh cutMeshCopy(geometry->mesh(nth));
@@ -4294,7 +4530,7 @@ int Disjoint(Geometry* geometry, emscripten::val getIsMasked) {
             return STATUS_ZERO_THICKNESS;
           }
           demesh(geometry->mesh(start));
-          geometry->updateMeshBounds(start);
+          geometry->updateBounds3(start);
         }
         break;
       }
@@ -4303,11 +4539,11 @@ int Disjoint(Geometry* geometry, emscripten::val getIsMasked) {
           // TODO: Disjunction of planar by volume.
           if (is_masked[nth] || !geometry->is_polygons(nth) ||
               geometry->plane(start) != geometry->plane(nth) ||
-              geometry->noGpsOverlap(start, nth)) {
+              geometry->noOverlap2(start, nth)) {
             continue;
           }
           geometry->gps(start).difference(geometry->gps(nth));
-          geometry->updateGpsBounds(start);
+          geometry->updateBounds2(start);
         }
         // TODO: Handle disjunction of surface by volume.
         break;
@@ -4473,6 +4709,8 @@ int Faces(Geometry* geometry) {
     }
   }
 
+  geometry->transformToLocalFrame();
+
   return STATUS_OK;
 }
 
@@ -4559,7 +4797,7 @@ int Fuse(Geometry* geometry) {
       geometry->setMesh(target, new Surface_mesh());
       geometry->setIdentityTransform(target);
     }
-    if (geometry->noMeshOverlap(target, nth)) {
+    if (geometry->noOverlap3(target, nth)) {
       geometry->mesh(target).join(geometry->mesh(nth));
     } else {
       Surface_mesh cutMeshCopy(geometry->mesh(nth));
@@ -4571,7 +4809,7 @@ int Fuse(Geometry* geometry) {
       }
       demesh(geometry->mesh(target));
     }
-    geometry->updateMeshBounds(target);
+    geometry->updateBounds3(target);
   }
 
   int first_gps = geometry->size();
@@ -4593,7 +4831,7 @@ int Fuse(Geometry* geometry) {
       geometry->setIdentityTransform(target);
     }
     geometry->gps(target).join(geometry->gps(nth));
-    geometry->updateGpsBounds(target);
+    geometry->updateBounds2(target);
   }
 
   for (int target = -1, nth = 0; nth < size; nth++) {
@@ -4777,18 +5015,15 @@ int Grow(Geometry* geometry, size_t count, bool x, bool y, bool z) {
 
   std::vector<std::unique_ptr<SurfaceMeshQuery>> query;
   query.reserve(size);
-  std::cout << "Grow/1" << std::endl;
 
   for (int nth = 0; nth < count; nth++) {
     switch (geometry->getType(nth)) {
       case GEOMETRY_MESH: {
-        std::cout << "Grow/2" << std::endl;
         Surface_mesh& mesh = geometry->mesh(nth);
         for (int selection = count + 1; selection < size; selection++) {
           if (!geometry->is_mesh(selection)) {
             continue;
           }
-          std::cout << "Grow/3" << std::endl;
           Surface_mesh working_selection(geometry->mesh(selection));
           CGAL::Polygon_mesh_processing::corefine(
               mesh, working_selection, CGAL::parameters::all_default(),
@@ -4797,13 +5032,11 @@ int Grow(Geometry* geometry, size_t count, bool x, bool y, bool z) {
               new SurfaceMeshQuery(&geometry->mesh(selection)));
         }
         bool created = false;
-        std::cout << "Grow/4" << std::endl;
         Surface_mesh::Property_map<Vertex_index, Vector> vertex_normal_map;
         std::tie(vertex_normal_map, created) =
             mesh.add_property_map<Vertex_index, Vector>("v:normal_map",
                                                         CGAL::NULL_VECTOR);
 
-        std::cout << "Grow/5" << std::endl;
         if (created) {
           CGAL::Polygon_mesh_processing::compute_vertex_normals(
               mesh, vertex_normal_map,
@@ -4812,7 +5045,6 @@ int Grow(Geometry* geometry, size_t count, bool x, bool y, bool z) {
                   .geom_traits(Kernel()));
         }
 
-        std::cout << "Grow/6" << std::endl;
         for (const Vertex_index vertex : mesh.vertices()) {
           const Point& point = mesh.point(vertex);
           // Restrict transform to points in a selection.
@@ -4827,7 +5059,6 @@ int Grow(Geometry* geometry, size_t count, bool x, bool y, bool z) {
               }
             }
           }
-          std::cout << "Grow/7" << std::endl;
           if (queried && !inside) {
             continue;
           }
@@ -4839,7 +5070,6 @@ int Grow(Geometry* geometry, size_t count, bool x, bool y, bool z) {
       }
     }
   }
-  std::cout << "Grow/8" << std::endl;
 
   geometry->removeEmptyMeshes();
   geometry->transformToLocalFrame();
@@ -4898,7 +5128,7 @@ int Join(Geometry* geometry, int targets) {
           if (!geometry->is_mesh(nth) || geometry->is_empty_mesh(nth)) {
             continue;
           }
-          if (geometry->noMeshOverlap(target, nth)) {
+          if (geometry->noOverlap3(target, nth)) {
             geometry->mesh(target).join(geometry->mesh(nth));
           } else {
             Surface_mesh cutMeshCopy(geometry->mesh(nth));
@@ -4911,7 +5141,7 @@ int Join(Geometry* geometry, int targets) {
             }
             demesh(geometry->mesh(target));
           }
-          geometry->updateMeshBounds(target);
+          geometry->updateBounds3(target);
         }
         break;
       }
@@ -4922,7 +5152,7 @@ int Join(Geometry* geometry, int targets) {
             continue;
           }
           geometry->gps(target).join(geometry->gps(nth));
-          geometry->updateGpsBounds(target);
+          geometry->updateBounds2(target);
         }
         break;
       }
@@ -6616,33 +6846,12 @@ const Transformation* Transformation__rotate_z_toward(double x, double y) {
                             0, 0, 0, 0, w, 0, w);
 }
 
-// https://gist.github.com/kevinmoran/b45980723e53edeb8a5a43c49f134724
-Transformation Orient(Vector current, Vector target) {
-  if (current == target) {
-    return Transformation(CGAL::IDENTITY);
-  }
-
-  Vector axis = CGAL::cross_product(target, current);
-
-  FT cos_a = target * current;
-
-  FT k = 1 / (1 + cos_a);
-
-  return Transformation(
-      (axis.x() * axis.x() * k) + cos_a, (axis.y() * axis.x() * k) - axis.z(),
-      (axis.z() * axis.x() * k) + axis.y(),
-      (axis.x() * axis.y() * k) + axis.z(), (axis.y() * axis.y() * k) + cos_a,
-      (axis.z() * axis.y() * k) - axis.x(),
-      (axis.x() * axis.z() * k) - axis.y(),
-      (axis.y() * axis.z() * k) + axis.x(), (axis.z() * axis.z() * k) + cos_a);
-}
-
 Transformation Righten(Vector current) {
   Vector target(0, 0, 1);
   if (target * current == -1) {
     return TransformationFromXTurn(0.5);
   } else {
-    return Orient(current, target);
+    return orient(current, target);
   }
 }
 
@@ -6966,9 +7175,8 @@ EMSCRIPTEN_BINDINGS(module) {
       .function("setSize", &Geometry::setSize)
       .function("setTransform", &Geometry::setTransform,
                 emscripten::allow_raw_pointers())
-      .function("setType", &Geometry::setType)
-      .function("transformToAbsoluteFrame",
-                &Geometry::transformToAbsoluteFrame);
+      .function("setType", &Geometry::setType);
+  // .function("transformToAbsoluteFrame", &Geometry::transformToAbsoluteFrame)
 
   emscripten::class_<AabbTreeQuery>("AabbTreeQuery")
       .constructor<>()

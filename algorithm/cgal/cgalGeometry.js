@@ -21,11 +21,13 @@ export const fillCgalGeometry = (geometry, inputs) => {
     );
     switch (inputs[nth].type) {
       case 'graph':
+        console.log(`QQ/fillCgalGeometry/graph`);
         const { graph } = inputs[nth];
         geometry.setType(nth, GEOMETRY_MESH);
         geometry.setInputMesh(nth, toSurfaceMesh(graph));
         break;
       case 'polygonsWithHoles': {
+        console.log(`QQ/fillCgalGeometry/pwh`);
         const { exactPlane, plane, polygonsWithHoles } = inputs[nth];
         let cursor = -1;
         geometry.setType(nth, GEOMETRY_POLYGONS_WITH_HOLES);
@@ -85,6 +87,7 @@ export const fillCgalGeometry = (geometry, inputs) => {
         break;
       }
       case 'segments': {
+        console.log(`QQ/fillCgalGeometry/segments`);
         const { segments } = inputs[nth];
         geometry.setType(nth, GEOMETRY_SEGMENTS);
         for (const [[sX = 0, sY = 0, sZ = 0], [eX = 0, eY = 0, eZ = 0]] of segments) {
@@ -100,11 +103,11 @@ export const fillCgalGeometry = (geometry, inputs) => {
         const { exactPoints, points } = inputs[nth];
         geometry.setType(nth, GEOMETRY_POINTS);
         if (exactPoints) {
-          for (const [x, y, z] of exactPoints) {
+          for (const [x = '0', y = '0', z = '0'] of exactPoints) {
             geometry.addInputPointExact(nth, x, y, z);
           }
         } else if (points) {
-          for (const [x, y, z] of points) {
+          for (const [x = 0, y = 0, z = 0] of points) {
             geometry.addInputPoint(nth, x, y, z);
           }
         }

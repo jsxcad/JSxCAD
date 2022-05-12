@@ -4,7 +4,11 @@ import Shape from './Shape.js';
 export const op =
   (...fns) =>
   (shape) =>
-    Group(...fns.filter((fn) => fn).map((fn) => fn(shape)));
+    Group(
+      ...fns
+        .filter((fn) => fn)
+        .map((fn) => (fn instanceof Function ? fn(shape) : fn))
+    );
 
 export const withOp =
   (...fns) =>
