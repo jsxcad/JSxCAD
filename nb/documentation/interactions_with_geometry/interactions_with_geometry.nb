@@ -68,7 +68,7 @@ Shapes which are grouped, assembled, or otherwise associated can be fused togeth
 
 `;
 
-Group(Arc(10), Arc(10).x(6)).fuse().view();
+Arc(10).x(0, 6).fuse().view()
 
 
 md`
@@ -109,7 +109,7 @@ aDesign
   .in()
   .pack()
   .view()
-  .md(`We need to get into the design in order to get at 'box' and 'bolt'`);
+  .md(`We need to get into the 'design' item in order to get at 'box' and 'bolt'`);
 
 log(aDesign.bom());
 

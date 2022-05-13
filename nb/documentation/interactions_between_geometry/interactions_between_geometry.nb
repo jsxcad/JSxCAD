@@ -100,11 +100,11 @@ Hull(Arc(10), Box(5).move(12, 12, 0), Arc(20).x(40)).view();
 md`
 ---
 ### Mask
-Mask is used to create a void around something. Mostly used for adding play.
+Mask is used to create a void around something. This allows the shape to cut a larger hole than it's actual size to add play or for example around the threads of a bolt.
 `;
 
 const shaft = Arc(10, 10, 40).color('grey');
-shaft.mask(shaft.grow(1)).view();
+shaft.mask(grow(1)).view();
 
 md`
 ---

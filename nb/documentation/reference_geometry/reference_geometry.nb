@@ -18,12 +18,10 @@ Group(a, b, b.to(a.align('<x'))).view();
 md`
 ---
 ### At
-Performes an operation on a shape at a particular location.
+Performs an operation on a shape at a particular location.
 `;
 
-Group(b, a.at(b, cut(b))).view(); //Moves a to b, makes the cut, then moves a back to it's original location
-
-//Group(a, b.at(a, clip(a)).view();
+b.and(a.at(b, cut(b))).view(); //Moves a to b, makes the cut, then moves a back to it's original location
 
 md`
 ---
@@ -31,7 +29,7 @@ md`
 Moves a shape from it's current location by a reference amount.
 `;
 
-Group(a, b.by(a)).view(); //Moves the blue square in the X direction the same amount that the red square had been moved
+a.and(b.by(a)).view(); //Moves the blue square in the X direction the same amount that the red square had been moved
 
 md`
 ---
@@ -39,4 +37,4 @@ md`
 Moves a shape to a reference position.
 `;
 
-Group(a, b.to(a)).view(); //Moves the blue square to the red square
+a.and(b.to(a)).view(); //Moves the blue square to the red square
