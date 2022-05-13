@@ -4,7 +4,7 @@ One of the core functions of JSxCAD is creating geometry and a number of primiti
 
 ---
 ### Arc
-Create a circle or a section of a an arc
+Create a circle or a section of a an arc. The number of sides can be computed automatically to limit maximum deviation from the ideal circle using .hasZag(deviation).
 `;
 
 const aCircle = Arc(10).view();
@@ -12,6 +12,8 @@ const aCircle = Arc(10).view();
 const anElipseExtruded = Arc(10, 5, 2).view();
 
 const aCircleWithSides = Arc(10).hasSides(8).view();
+
+const aCircleWithZag = Arc(20).hasZag(0.1).view();
 
 md`
 ---
@@ -64,6 +66,28 @@ Creates a new line
 `;
 
 Line(10).view();
+
+md`
+---
+### Link
+Links a set of ordered points together into ordered segments.
+`;
+
+Group(Point(0, 0), Point(10, 10), Point(20, 10)).link().view();
+
+Arc(10)
+  .hasAngle(-1 / 3, 1 / 3)
+  .x(-3, 3)
+  .link()
+  .view();
+
+md`
+---
+### Loop
+Loop is very similar to link, except that the last point is connected back to the first point.
+`;
+
+Group(Point(0, 0), Point(10, 10), Point(20, 10)).loop().view();
 
 md`
 ---

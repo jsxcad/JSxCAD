@@ -63,6 +63,21 @@ Arc(10, 10, 5).color('blue').cut(Box(5, 5, 5).move(3, 0, 2).color('red')).view()
 
 Arc(10, 10, 5).cutfrom(Box(5, 5, 5).move(3, 0, 2)).view().md(`The result is red since the red shape was cut from.`);
 
+
+md`
+---
+### Fit
+Fits two shapes together such that one cuts into the other. The result is similar to assembly.
+`;
+
+const axle = Arc(5, 5, 10).color('brown');
+const wheel = Arc(20, 20, 2).color('grey');
+
+wheel.fitTo(axle).view();
+axle.fit(wheel).view();
+
+wheel.fitTo(axle).pack().view(); //In both of these cases the axle cuts the wheel.
+
 md`
 ---
 ### Group
@@ -81,6 +96,15 @@ md`
 Performs the hull operation on the input shapes.`;
 
 Hull(Arc(10), Box(5).move(12, 12, 0), Arc(20).x(40)).view();
+
+md`
+---
+### Mask
+Mask is used to create a mask around something. This allows the shape to cut a larger hole than it's actual size to add play or for example around the threads of a bolt.
+`;
+
+const shaft = Arc(10, 10, 40).color('grey');
+shaft.mask(grow(1)).view();
 
 md`
 ---
