@@ -4,18 +4,14 @@ import { fromCgalGeometry, withCgalGeometry } from './cgalGeometry.js';
 import { ErrorZeroThickness } from './error.js';
 import { toCgalTransformFromJsTransform } from './transform.js';
 
-export const extrude = (inputs, top, bottom) =>
+export const extrude = (inputs, count) =>
   withCgalGeometry(inputs, (cgalGeometry, g) => {
-    const status = g.Extrude(
-      cgalGeometry,
-      toCgalTransformFromJsTransform(top.matrix),
-      toCgalTransformFromJsTransform(bottom.matrix)
-    );
+    const status = g.Extrude(cgalGeometry, count);
     switch (status) {
       case STATUS_ZERO_THICKNESS:
         throw new ErrorZeroThickness('Zero thickness produced by extrude');
       case STATUS_OK:
-        return fromCgalGeometry(cgalGeometry, inputs);
+        return fromCgalGeometry(cgalGeometry, inputs, count);
       default:
         throw new Error(`Unexpected status ${status}`);
     }

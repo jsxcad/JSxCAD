@@ -16,7 +16,9 @@ export const extrude = (geometry, top, bottom) => {
   const concreteGeometry = toConcreteGeometry(geometry);
   const inputs = [];
   linearize(concreteGeometry, filter, inputs);
-  const outputs = extrudeWithCgal(inputs, top, bottom);
+  const count = inputs.length;
+  inputs.push(top, bottom);
+  const outputs = extrudeWithCgal(inputs, count);
   deletePendingSurfaceMeshes();
   return replacer(inputs, outputs)(concreteGeometry);
 };

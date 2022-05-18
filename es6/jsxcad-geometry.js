@@ -1884,7 +1884,9 @@ const extrude = (geometry, top, bottom) => {
   const concreteGeometry = toConcreteGeometry(geometry);
   const inputs = [];
   linearize(concreteGeometry, filter$d, inputs);
-  const outputs = extrude$1(inputs, top, bottom);
+  const count = inputs.length;
+  inputs.push(top, bottom);
+  const outputs = extrude$1(inputs, count);
   deletePendingSurfaceMeshes();
   return replacer(inputs, outputs)(concreteGeometry);
 };
@@ -2949,11 +2951,11 @@ const filter = (geometry) =>
   ['graph', 'polygonsWithHoles'].includes(geometry.type) &&
   isNotTypeVoid(geometry);
 
-const separate = (geometry) => {
+const separate = (geometry, keepShapes = true, keepHolesInShapes = true, keepHolesAsShapes = false) => {
   const concreteGeometry = toConcreteGeometry(geometry);
   const inputs = [];
   linearize(concreteGeometry, filter, inputs);
-  const outputs = separate$1(inputs);
+  const outputs = separate$1(inputs, keepShapes, keepHolesInShapes, keepHolesAsShapes);
   deletePendingSurfaceMeshes();
   return taggedGroup({}, ...outputs);
 };
