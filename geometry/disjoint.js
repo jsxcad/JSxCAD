@@ -8,7 +8,7 @@ import { taggedGroup } from './tagged/taggedGroup.js';
 import { toConcreteGeometry } from './tagged/toConcreteGeometry.js';
 
 const filter = (geometry) =>
-  ['graph', 'polygonsWithHoles', 'segments'].includes(geometry.type);
+  ['graph', 'polygonsWithHoles', 'segments', 'points'].includes(geometry.type);
 
 export const disjoint = (geometries) => {
   const concreteGeometries = geometries.map((geometry) =>

@@ -2,7 +2,6 @@ import { STATUS_OK, STATUS_ZERO_THICKNESS } from './status.js';
 import { fromCgalGeometry, withCgalGeometry } from './cgalGeometry.js';
 
 import { ErrorZeroThickness } from './error.js';
-import { toCgalTransformFromJsTransform } from './transform.js';
 
 export const extrude = (inputs, count) =>
   withCgalGeometry(inputs, (cgalGeometry, g) => {

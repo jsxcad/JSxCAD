@@ -9,5 +9,5 @@ export const Curve = (start, c1, c2, end) => {
   const p3 = Shape.toCoordinate(undefined, c2);
   const p4 = Shape.toCoordinate(undefined, end);
   const points = bezier(p1, p2, p3, p4, 10);
-  return Link(points.map(point => Point(point)));
+  return Link(points.map((point) => Point(point)));
 };

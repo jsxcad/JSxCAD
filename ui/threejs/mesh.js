@@ -224,10 +224,24 @@ const orient = (mesh, source, target, offset) => {
     const sinAlpha = 0;
     const matrix4 = new Matrix4();
 
-    matrix4.set(w, 0, 0, 0,
-                0, cosAlpha, -sinAlpha, 0,
-                0, sinAlpha, cosAlpha, 0,
-                0, 0, 0, w);
+    matrix4.set(
+      w,
+      0,
+      0,
+      0,
+      0,
+      cosAlpha,
+      -sinAlpha,
+      0,
+      0,
+      sinAlpha,
+      cosAlpha,
+      0,
+      0,
+      0,
+      0,
+      w
+    );
     mesh.applyMatrix4(matrix4);
     return;
   }
@@ -240,15 +254,16 @@ const orient = (mesh, source, target, offset) => {
 
   const matrix3 = new Matrix3();
   matrix3.set(
-      (axis.x * axis.x * k) + cosA,
-      (axis.y * axis.x * k) - axis.z,
-      (axis.z * axis.x * k) + axis.y,
-      (axis.x * axis.y * k) + axis.z,
-      (axis.y * axis.y * k) + cosA,
-      (axis.z * axis.y * k) - axis.x,
-      (axis.x * axis.z * k) - axis.y,
-      (axis.y * axis.z * k) + axis.x,
-      (axis.z * axis.z * k) + cosA);
+    axis.x * axis.x * k + cosA,
+    axis.y * axis.x * k - axis.z,
+    axis.z * axis.x * k + axis.y,
+    axis.x * axis.y * k + axis.z,
+    axis.y * axis.y * k + cosA,
+    axis.z * axis.y * k - axis.x,
+    axis.x * axis.z * k - axis.y,
+    axis.y * axis.z * k + axis.x,
+    axis.z * axis.z * k + cosA
+  );
 
   const matrix4 = new Matrix4();
   matrix4.setFromMatrix3(matrix3);

@@ -53,6 +53,7 @@ export { elapsed, emit, read, write } from '@jsxcad/sys';
 export { Shape } from './Shape.js';
 export { abstract } from './abstract.js';
 export { join } from './join.js';
+export { absolute } from './absolute.js';
 export { and } from './and.js';
 export { addTo } from './addTo.js';
 export { align } from './align.js';

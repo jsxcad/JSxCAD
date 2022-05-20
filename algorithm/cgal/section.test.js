@@ -59,16 +59,16 @@ test('Section of tetrahedron.', (t) => {
       polygonsWithHoles: [
         {
           points: [
+            [0, 1],
             [-1, 0],
             [0, -1],
             [1, 0],
-            [0, 1],
           ],
           exactPoints: [
+            ['0', '1'],
             ['-1', '0'],
             ['0', '-1'],
             ['1', '0'],
-            ['0', '1'],
           ],
           holes: [],
         },
@@ -144,16 +144,16 @@ test('Coplanar section of polygon is the polygon.', (t) => {
       polygonsWithHoles: [
         {
           points: [
-            [0, 1],
             [-1, 0],
             [0, -1],
             [1, 0],
+            [0, 1],
           ],
           exactPoints: [
-            ['0', '1'],
             ['-1', '0'],
             ['0', '-1'],
             ['1', '0'],
+            ['0', '1'],
           ],
           holes: [],
         },

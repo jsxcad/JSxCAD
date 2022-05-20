@@ -8,6 +8,7 @@ test('Basic', async (t) => {
   const geometry = await fromDxf(
     await readFile('toDxf.test.triangle.dxf', { encoding: 'utf8' })
   );
+  // FIX
   t.deepEqual(geometry, {
     type: 'assembly',
     content: [
