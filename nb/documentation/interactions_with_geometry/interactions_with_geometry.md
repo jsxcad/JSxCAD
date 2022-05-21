@@ -27,6 +27,18 @@ const aGroup = Group(
 
 ![Image](interactions_with_geometry.md.1.png)
 
+```JavaScript
+const rng = Random();
+```
+
+```JavaScript
+aGroup.eachIn(
+    (s) => s.rz(rng.to(1))
+  ).view(); // Rotates each one by some random amount
+```
+
+![Image](interactions_with_geometry.md.2.png)
+
 ---
 ### Extrude
 2D shapes can be 'extruded' to create 3D shapes. This can be abbreviated to .e() for brevity.
@@ -34,14 +46,6 @@ const aGroup = Group(
 A series of extends can be provided, these will be sorted and paired. Zero will be added if the number of extents is odd.
 
 e.g., s.ez(1, 2, 3, 4) will produce two extrusions -- one from 1z to 2z, and one from 3z to 4z.
-
-```JavaScript
-aGroup.eachIn(
-    (s) => s.rz(Math.random())
-  ).view(); //Rotates each one by some random amount
-```
-
-![Image](interactions_with_geometry.md.2.png)
 
 ```JavaScript
 Arc(10).view();
@@ -97,12 +101,6 @@ Arc(10).x(0, 6).fuse().view()
 const a = Arc(20).cut(Box(10));
 ```
 
-```JavaScript
-Group(a.inset(1).z(0.1).color('pink'), a.color('orange')).view();
-```
-
-![Image](interactions_with_geometry.md.8.png)
-
 ---
 ### Item
 Geometry can be formed into an 'item'.
@@ -114,6 +112,12 @@ The interior has its own frame of reference independent of any transformation of
 Since an item appears individual from the outside, tag and path selectors need to explicitly select item to access the interior.
 
 There are a number of item specific operators. .in() will enter an item, .asPart("Bolt") will define an item which is specified as a part. Parts can be listed with the .bom() operation.
+
+```JavaScript
+Group(a.inset(1).z(0.1).color('pink'), a.color('orange')).view();
+```
+
+![Image](interactions_with_geometry.md.8.png)
 
 ```JavaScript
 const aBolt = Arc(8, 8, 2)
@@ -129,15 +133,21 @@ const aBolt = Arc(8, 8, 2)
 const aBox = Box(10, 10, 10).as('box');
 ```
 
+---
+### Grow
+Expands the shape outwards by the input distance. May result in self intersections if not used cautiously.
+
 ```JavaScript
 const aDesign = aBox.fit(aBolt.z(10)).as('design').view();
 ```
 
 ![Image](interactions_with_geometry.md.10.png)
 
----
-### Grow
-Expands the shape outwards by the input distance. May result in self intersections if not used cautiously.
+```JavaScript
+Arc(10, 10, 5).grow(1).view();
+```
+
+![Image](interactions_with_geometry.md.11.png)
 
 ```JavaScript
 aDesign
@@ -147,19 +157,13 @@ aDesign
   .md(`We need to get into the 'design' item in order to get at 'box' and 'bolt'`);
 ```
 
-![Image](interactions_with_geometry.md.11.png)
+![Image](interactions_with_geometry.md.12.png)
 
 We need to get into the 'design' item in order to get at 'box' and 'bolt'
 
 ```JavaScript
 log(aDesign.bom());
 ```
-
-```JavaScript
-Arc(10, 10, 5).grow(1).view();
-```
-
-![Image](interactions_with_geometry.md.12.png)
 
 ---
 ### Loft
@@ -224,17 +228,17 @@ Box(5).x(0, 10, 20).view();
 const b = Arc(20).cut(Box(10)).with(Box(5).x(10));
 ```
 
----
-### Remesh
-Remesh can be used to break up the segments of a shape allowing it to be distorted.
-shape.remesh(4, 2) first breaks segments longer than 4 and then breaks segments longer than 2.
-At each step the shape is retriangulated to preserve manifold structure.
-
 ```JavaScript
 Group(b.offset(1).z(-0.1).color('pink'), b.color('orange')).view();
 ```
 
 ![Image](interactions_with_geometry.md.18.png)
+
+---
+### Remesh
+Remesh can be used to break up the segments of a shape allowing it to be distorted.
+shape.remesh(4, 2) first breaks segments longer than 4 and then breaks segments longer than 2.
+At each step the shape is retriangulated to preserve manifold structure.
 
 Once a shape is remeshed it can be twisted or bent about the origin.
 
@@ -263,31 +267,31 @@ const aRectangle = Box(5, 5, 15).view();
 ![Image](interactions_with_geometry.md.20.png)
 
 ```JavaScript
-Box(5)
-  .x(4)
-  .rz(0/8, 1/8, 2/8, 3/8, 4/8, 5/8, 6/8, 7/8)
-  .view();
+aRectangle.remesh({ method: 'edgeLength', lengths: [4, 2] }).view(undefined, { wireframe: true });
 ```
 
 ![Image](interactions_with_geometry.md.21.png)
 
 ```JavaScript
-aRectangle.remesh({ method: 'edgeLength', lengths: [4, 2] }).view(undefined, { wireframe: true });
-```
-
-![Image](interactions_with_geometry.md.22.png)
-
-```JavaScript
 aRectangle.rz(1 / 8).view();
 ```
 
-![Image](interactions_with_geometry.md.23.png)
+![Image](interactions_with_geometry.md.22.png)
 
 ```JavaScript
 aRectangle
   .rotateY(1 / 10)
   .x(4)
   .z(-2)
+  .view();
+```
+
+![Image](interactions_with_geometry.md.23.png)
+
+```JavaScript
+Box(5)
+  .x(4)
+  .rz(0/8, 1/8, 2/8, 3/8, 4/8, 5/8, 6/8, 7/8)
   .view();
 ```
 
@@ -364,18 +368,6 @@ const taggedAssembly = Assembly(
 
 ![Image](interactions_with_geometry.md.28.png)
 
-```JavaScript
-taggedAssembly.keep('user:A').noVoid().view();
-```
-
-![Image](interactions_with_geometry.md.29.png)
-
-```JavaScript
-taggedAssembly.drop('user:B').view();
-```
-
-![Image](interactions_with_geometry.md.30.png)
-
 ---
 #### Selection
 We can select parts of geometry based on tags using get(selector), getNot(selector), and nth(number).
@@ -388,6 +380,18 @@ value may also be the wildcard *.
 Selection does not traverse through item, except for the input shape.
 
 This means that s.get('a').get('b') will find b inside a, but otherwise b would not be found.
+
+```JavaScript
+taggedAssembly.keep('user:A').noVoid().view();
+```
+
+![Image](interactions_with_geometry.md.29.png)
+
+```JavaScript
+taggedAssembly.drop('user:B').view();
+```
+
+![Image](interactions_with_geometry.md.30.png)
 
 ```JavaScript
 Group(
