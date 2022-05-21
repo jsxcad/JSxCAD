@@ -76,6 +76,7 @@ export { link } from './link.js';
 export { loft } from './loft.js';
 export { offset } from './offset.js';
 export { outline } from './outline.js';
+export { makeAbsolute } from './makeAbsolute.js';
 export { makeUnitSphere } from './makeUnitSphere.js';
 export { minkowskiDifferenceOfSurfaceMeshes } from './minkowskiDifferenceOfSurfaceMeshes.js';
 export { minkowskiShellOfSurfaceMeshes } from './minkowskiShellOfSurfaceMeshes.js';

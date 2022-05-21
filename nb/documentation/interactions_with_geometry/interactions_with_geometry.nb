@@ -22,9 +22,11 @@ const aGroup = Group(
   Box(10, 200, 10).z(40)
 ).view();
 
+const rng = Random();
+
 aGroup.eachIn(
-    (s) => s.rz(Math.random())
-  ).view(); //Rotates each one by some random amount
+    (s) => s.rz(rng.to(1))
+  ).view(); // Rotates each one by some random amount
 
 md`
 ---

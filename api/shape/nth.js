@@ -6,7 +6,7 @@ export const nth =
   (shape) => {
     const candidates = shape.each(
       (leaf) => leaf,
-      (leafs) => leafs
+      (leafs) => (shape) => leafs
     );
     return Group(...ns.map((n) => candidates[n]));
   };

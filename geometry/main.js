@@ -147,6 +147,7 @@ export { keep } from './tagged/keep.js';
 export { linearize } from './tagged/linearize.js';
 export { link } from './link.js';
 export { loft } from './loft.js';
+export { makeAbsolute } from './makeAbsolute.js';
 export { measureArea } from './tagged/measureArea.js';
 export { measureBoundingBox } from './tagged/measureBoundingBox.js';
 export { measureVolume } from './tagged/measureVolume.js';

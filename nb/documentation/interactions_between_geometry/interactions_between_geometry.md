@@ -98,22 +98,52 @@ Arc(10, 10, 5).cutfrom(Box(5, 5, 5).move(3, 0, 2)).view().md(`The result is red 
 The result is red since the red shape was cut from.
 
 ---
+### Fit
+Fits two shapes together such that one cuts into the other. The result is similar to assembly.
+
+```JavaScript
+const axle = Arc(5, 5, 10).color('brown');
+```
+
+```JavaScript
+const wheel = Arc(20, 20, 2).color('grey');
+```
+
+---
 ### Group
 Similar to Assembly, group joins together a number of shapes, however unlike Assembly, Group does not subtract the shapes which means they are allowed to overlap which makes Group much faster to compute than Assembly.
 
 Group can also be done using the .and() operator.
 
 ```JavaScript
-Group(Arc(10, 10, 3), Arc(10, 10, 3).x(4)).view();
+wheel.fitTo(axle).view();
 ```
 
 ![Image](interactions_between_geometry.md.9.png)
 
 ```JavaScript
-Arc(10, 10, 3).and(Arc(10, 10, 3).x(4)).view(); //Does a group
+axle.fit(wheel).view();
 ```
 
 ![Image](interactions_between_geometry.md.10.png)
+
+```JavaScript
+wheel.fitTo(axle).pack().view(); //In both of these cases the axle cuts the wheel.
+```
+
+![Image](interactions_between_geometry.md.11.png)
+
+```JavaScript
+Group(Arc(10, 10, 3), Arc(10, 10, 3).x(4)).view();
+```
+
+![Image](interactions_between_geometry.md.12.png)
+
+```JavaScript
+Arc(10, 10, 3).and(Arc(10, 10, 3).x(4)).view(); //Does a group
+```
+
+![Image](interactions_between_geometry.md.13.png)
 
 ---
 ### Hull
@@ -123,20 +153,34 @@ Performs the hull operation on the input shapes.
 Hull(Arc(10), Box(5).move(12, 12, 0), Arc(20).x(40)).view();
 ```
 
-![Image](interactions_between_geometry.md.11.png)
+![Image](interactions_between_geometry.md.14.png)
+
+---
+### Mask
+Mask is used to create a mask around something. This allows the shape to cut a larger hole than it's actual size to add play or for example around the threads of a bolt.
+
+```JavaScript
+const shaft = Arc(10, 10, 40).color('grey');
+```
 
 ---
 ### Pack
 Pack takes input geometry and lays it out on a sheet. Groups and Assemblies are split apart, but items are preserved.
 
 ```JavaScript
+shaft.mask(grow(1)).view();
+```
+
+![Image](interactions_between_geometry.md.15.png)
+
+```JavaScript
 Group(Arc(10), Box(3), Box(3.5)).pack().view();
 ```
 
-![Image](interactions_between_geometry.md.12.png)
+![Image](interactions_between_geometry.md.16.png)
 
 ```JavaScript
 Group(Arc(10), Box(3), Box(3.5)).as('anItem').pack().view();
 ```
 
-![Image](interactions_between_geometry.md.13.png)
+![Image](interactions_between_geometry.md.17.png)

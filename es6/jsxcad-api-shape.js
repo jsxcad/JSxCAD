@@ -1,4 +1,4 @@
-import { closePath, concatenatePath, assemble as assemble$1, flip, toConcreteGeometry, toDisplayGeometry, toTransformedGeometry, toPoints, transform, rewriteTags, taggedGraph, taggedSegments, taggedPaths, taggedPoints, fromPolygonsToGraph, registerReifier, taggedPlan, taggedGroup, join as join$1, measureArea, taggedItem, getInverseMatrices, getLeafs, bend as bend$1, cast as cast$1, computeCentroid, convexHull, fuse as fuse$1, clip as clip$1, allTags, fromPointsToGraph, cut as cut$1, deform as deform$1, demesh as demesh$1, disjoint as disjoint$1, rewrite, visit, hasTypeVoid, taggedLayout, measureBoundingBox, getLayouts, isNotVoid, getLeafsIn, generatePackingEnvelope, computeNormal, extrude, faces as faces$1, fill as fill$1, eachSegment, grow as grow$1, outline as outline$1, inset as inset$1, link as link$1, read, readNonblocking, loft as loft$1, prepareForSerialization, generateLowerEnvelope, hasShowOverlay, hasTypeMasked, minkowskiDifference as minkowskiDifference$1, minkowskiShell as minkowskiShell$1, minkowskiSum as minkowskiSum$1, linearize, isVoid, offset as offset$1, eachPoint, push as push$1, remesh as remesh$1, removeSelfIntersections as removeSelfIntersections$1, write, writeNonblocking, seam as seam$1, section as section$1, separate as separate$1, serialize as serialize$1, simplify as simplify$1, taggedSketch, smooth as smooth$1, taper as taper$1, test as test$1, computeToolpath, twist as twist$1, generateUpperEnvelope, measureVolume, withQuery, alphaShape, fromFunctionToGraph } from './jsxcad-geometry.js';
+import { closePath, concatenatePath, assemble as assemble$1, flip, toConcreteGeometry, toDisplayGeometry, toTransformedGeometry, toPoints, transform, rewriteTags, taggedGraph, taggedSegments, taggedPaths, taggedPoints, fromPolygonsToGraph, registerReifier, taggedPlan, taggedGroup, join as join$1, makeAbsolute, measureArea, taggedItem, getInverseMatrices, getLeafs, bend as bend$1, cast as cast$1, computeCentroid, convexHull, fuse as fuse$1, clip as clip$1, allTags, fromPointsToGraph, cut as cut$1, deform as deform$1, demesh as demesh$1, disjoint as disjoint$1, rewrite, visit, hasTypeVoid, taggedLayout, measureBoundingBox, getLayouts, isNotVoid, getLeafsIn, generatePackingEnvelope, computeNormal, extrude, faces as faces$1, fill as fill$1, eachSegment, grow as grow$1, outline as outline$1, inset as inset$1, link as link$1, read, readNonblocking, loft as loft$1, prepareForSerialization, generateLowerEnvelope, hasShowOverlay, hasTypeMasked, minkowskiDifference as minkowskiDifference$1, minkowskiShell as minkowskiShell$1, minkowskiSum as minkowskiSum$1, linearize, isVoid, offset as offset$1, eachPoint, push as push$1, remesh as remesh$1, removeSelfIntersections as removeSelfIntersections$1, write, writeNonblocking, seam as seam$1, section as section$1, separate as separate$1, serialize as serialize$1, simplify as simplify$1, taggedSketch, smooth as smooth$1, taper as taper$1, test as test$1, computeToolpath, twist as twist$1, generateUpperEnvelope, measureVolume, withQuery, alphaShape, fromFunctionToGraph } from './jsxcad-geometry.js';
 import { getSourceLocation, startTime, endTime, emit, computeHash, logInfo, log as log$1, generateUniqueId, addPending, write as write$1 } from './jsxcad-sys.js';
 export { elapsed, emit, read, write } from './jsxcad-sys.js';
 import { identityMatrix, fromRotation } from './jsxcad-math-mat4.js';
@@ -789,6 +789,11 @@ const join =
 
 Shape.registerMethod('join', join);
 Shape.registerMethod('add', join);
+
+const absolute = () => (shape) =>
+  Shape.fromGeometry(makeAbsolute(shape.toGeometry()));
+
+Shape.registerMethod('absolute', absolute);
 
 const and =
   (...args) =>
@@ -3182,15 +3187,17 @@ const fix =
 Shape.registerMethod('fix', fix);
 
 const each =
-  (
-    leafOp = (leaf) => leaf,
-    groupOp = (leafs, shape) => Shape.Group(...leafs)
-  ) =>
+  (leafOp = (leaf) => leaf, groupOp = Shape.Group) =>
   (shape) => {
     const leafShapes = getLeafs(shape.toGeometry()).map((leaf) =>
-      leafOp(Shape.fromGeometry(leaf))
+      shape.op(leafOp(Shape.fromGeometry(leaf)))
     );
-    return groupOp(leafShapes, shape);
+    const grouped = groupOp(leafShapes);
+    if (grouped instanceof Function) {
+      return grouped(shape);
+    } else {
+      return grouped;
+    }
   };
 Shape.registerMethod('each', each);
 
@@ -3283,8 +3290,10 @@ Shape.registerMethod('ex', ex);
 Shape.registerMethod('ey', ey);
 Shape.registerMethod('ez', ez);
 
-const faces = () => (shape) =>
-  Shape.fromGeometry(faces$1(shape.toGeometry()));
+const faces =
+  (op = (s) => s) =>
+  (shape) =>
+    Shape.fromGeometry(faces$1(shape.toGeometry())).each(op);
 
 Shape.registerMethod('faces', faces);
 
@@ -3759,7 +3768,7 @@ const nth =
   (shape) => {
     const candidates = shape.each(
       (leaf) => leaf,
-      (leafs) => leafs
+      (leafs) => (shape) => leafs
     );
     return Group(...ns.map((n) => candidates[n]));
   };
@@ -3811,7 +3820,11 @@ Shape.registerMethod('on', on);
 const op =
   (...fns) =>
   (shape) =>
-    Group(...fns.filter((fn) => fn).map((fn) => fn(shape)));
+    Group(
+      ...fns
+        .filter((fn) => fn)
+        .map((fn) => (fn instanceof Function ? fn(shape) : fn))
+    );
 
 const withOp =
   (...fns) =>
@@ -5167,6 +5180,215 @@ const Cached = (name, thunk) => {
   return op;
 };
 
+function clone(point) { //TODO: use gl-vec2 for this
+    return [point[0], point[1]]
+}
+
+function vec2(x, y) {
+    return [x, y]
+}
+
+var _function = function createBezierBuilder(opt) {
+    opt = opt||{};
+
+    var RECURSION_LIMIT = typeof opt.recursion === 'number' ? opt.recursion : 8;
+    var FLT_EPSILON = typeof opt.epsilon === 'number' ? opt.epsilon : 1.19209290e-7;
+    var PATH_DISTANCE_EPSILON = typeof opt.pathEpsilon === 'number' ? opt.pathEpsilon : 1.0;
+
+    var curve_angle_tolerance_epsilon = typeof opt.angleEpsilon === 'number' ? opt.angleEpsilon : 0.01;
+    var m_angle_tolerance = opt.angleTolerance || 0;
+    var m_cusp_limit = opt.cuspLimit || 0;
+
+    return function bezierCurve(start, c1, c2, end, scale, points) {
+        if (!points)
+            points = [];
+
+        scale = typeof scale === 'number' ? scale : 1.0;
+        var distanceTolerance = PATH_DISTANCE_EPSILON / scale;
+        distanceTolerance *= distanceTolerance;
+        begin(start, c1, c2, end, points, distanceTolerance);
+        return points
+    }
+
+
+    ////// Based on:
+    ////// https://github.com/pelson/antigrain/blob/master/agg-2.4/src/agg_curves.cpp
+
+    function begin(start, c1, c2, end, points, distanceTolerance) {
+        points.push(clone(start));
+        var x1 = start[0],
+            y1 = start[1],
+            x2 = c1[0],
+            y2 = c1[1],
+            x3 = c2[0],
+            y3 = c2[1],
+            x4 = end[0],
+            y4 = end[1];
+        recursive(x1, y1, x2, y2, x3, y3, x4, y4, points, distanceTolerance, 0);
+        points.push(clone(end));
+    }
+
+    function recursive(x1, y1, x2, y2, x3, y3, x4, y4, points, distanceTolerance, level) {
+        if(level > RECURSION_LIMIT) 
+            return
+
+        var pi = Math.PI;
+
+        // Calculate all the mid-points of the line segments
+        //----------------------
+        var x12   = (x1 + x2) / 2;
+        var y12   = (y1 + y2) / 2;
+        var x23   = (x2 + x3) / 2;
+        var y23   = (y2 + y3) / 2;
+        var x34   = (x3 + x4) / 2;
+        var y34   = (y3 + y4) / 2;
+        var x123  = (x12 + x23) / 2;
+        var y123  = (y12 + y23) / 2;
+        var x234  = (x23 + x34) / 2;
+        var y234  = (y23 + y34) / 2;
+        var x1234 = (x123 + x234) / 2;
+        var y1234 = (y123 + y234) / 2;
+
+        if(level > 0) { // Enforce subdivision first time
+            // Try to approximate the full cubic curve by a single straight line
+            //------------------
+            var dx = x4-x1;
+            var dy = y4-y1;
+
+            var d2 = Math.abs((x2 - x4) * dy - (y2 - y4) * dx);
+            var d3 = Math.abs((x3 - x4) * dy - (y3 - y4) * dx);
+
+            var da1, da2;
+
+            if(d2 > FLT_EPSILON && d3 > FLT_EPSILON) {
+                // Regular care
+                //-----------------
+                if((d2 + d3)*(d2 + d3) <= distanceTolerance * (dx*dx + dy*dy)) {
+                    // If the curvature doesn't exceed the distanceTolerance value
+                    // we tend to finish subdivisions.
+                    //----------------------
+                    if(m_angle_tolerance < curve_angle_tolerance_epsilon) {
+                        points.push(vec2(x1234, y1234));
+                        return
+                    }
+
+                    // Angle & Cusp Condition
+                    //----------------------
+                    var a23 = Math.atan2(y3 - y2, x3 - x2);
+                    da1 = Math.abs(a23 - Math.atan2(y2 - y1, x2 - x1));
+                    da2 = Math.abs(Math.atan2(y4 - y3, x4 - x3) - a23);
+                    if(da1 >= pi) da1 = 2*pi - da1;
+                    if(da2 >= pi) da2 = 2*pi - da2;
+
+                    if(da1 + da2 < m_angle_tolerance) {
+                        // Finally we can stop the recursion
+                        //----------------------
+                        points.push(vec2(x1234, y1234));
+                        return
+                    }
+
+                    if(m_cusp_limit !== 0.0) {
+                        if(da1 > m_cusp_limit) {
+                            points.push(vec2(x2, y2));
+                            return
+                        }
+
+                        if(da2 > m_cusp_limit) {
+                            points.push(vec2(x3, y3));
+                            return
+                        }
+                    }
+                }
+            }
+            else {
+                if(d2 > FLT_EPSILON) {
+                    // p1,p3,p4 are collinear, p2 is considerable
+                    //----------------------
+                    if(d2 * d2 <= distanceTolerance * (dx*dx + dy*dy)) {
+                        if(m_angle_tolerance < curve_angle_tolerance_epsilon) {
+                            points.push(vec2(x1234, y1234));
+                            return
+                        }
+
+                        // Angle Condition
+                        //----------------------
+                        da1 = Math.abs(Math.atan2(y3 - y2, x3 - x2) - Math.atan2(y2 - y1, x2 - x1));
+                        if(da1 >= pi) da1 = 2*pi - da1;
+
+                        if(da1 < m_angle_tolerance) {
+                            points.push(vec2(x2, y2));
+                            points.push(vec2(x3, y3));
+                            return
+                        }
+
+                        if(m_cusp_limit !== 0.0) {
+                            if(da1 > m_cusp_limit) {
+                                points.push(vec2(x2, y2));
+                                return
+                            }
+                        }
+                    }
+                }
+                else if(d3 > FLT_EPSILON) {
+                    // p1,p2,p4 are collinear, p3 is considerable
+                    //----------------------
+                    if(d3 * d3 <= distanceTolerance * (dx*dx + dy*dy)) {
+                        if(m_angle_tolerance < curve_angle_tolerance_epsilon) {
+                            points.push(vec2(x1234, y1234));
+                            return
+                        }
+
+                        // Angle Condition
+                        //----------------------
+                        da1 = Math.abs(Math.atan2(y4 - y3, x4 - x3) - Math.atan2(y3 - y2, x3 - x2));
+                        if(da1 >= pi) da1 = 2*pi - da1;
+
+                        if(da1 < m_angle_tolerance) {
+                            points.push(vec2(x2, y2));
+                            points.push(vec2(x3, y3));
+                            return
+                        }
+
+                        if(m_cusp_limit !== 0.0) {
+                            if(da1 > m_cusp_limit)
+                            {
+                                points.push(vec2(x3, y3));
+                                return
+                            }
+                        }
+                    }
+                }
+                else {
+                    // Collinear case
+                    //-----------------
+                    dx = x1234 - (x1 + x4) / 2;
+                    dy = y1234 - (y1 + y4) / 2;
+                    if(dx*dx + dy*dy <= distanceTolerance) {
+                        points.push(vec2(x1234, y1234));
+                        return
+                    }
+                }
+            }
+        }
+
+        // Continue subdivision
+        //----------------------
+        recursive(x1, y1, x12, y12, x123, y123, x1234, y1234, points, distanceTolerance, level + 1); 
+        recursive(x1234, y1234, x234, y234, x34, y34, x4, y4, points, distanceTolerance, level + 1); 
+    }
+};
+
+var adaptiveBezierCurve = _function();
+
+const Curve = (start, c1, c2, end) => {
+  const p1 = Shape.toCoordinate(undefined, start);
+  const p2 = Shape.toCoordinate(undefined, c1);
+  const p3 = Shape.toCoordinate(undefined, c2);
+  const p4 = Shape.toCoordinate(undefined, end);
+  const points = adaptiveBezierCurve(p1, p2, p3, p4, 10);
+  return Link(points.map((point) => Point(point)));
+};
+
 const Empty = (...shapes) => Shape.fromGeometry(taggedGroup({}));
 
 Shape.prototype.Empty = Shape.shapeMethod(Empty);
@@ -5388,4 +5610,4 @@ const RX = (t = 0) => Point().rx(t);
 const RY = (t = 0) => Point().ry(t);
 const RZ = (t = 0) => Point().rz(t);
 
-export { Alpha, Arc, ArcX, ArcY, ArcZ, Assembly, Box, Cached, ChainHull, Edge, Edges, Empty, Face, GrblConstantLaser, GrblDynamicLaser, GrblPlotter, GrblSpindle, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Join, Line, Link, Loft, Loop, Octagon, Orb, Page, Path, Pentagon, Plan, Point, Points, Polygon, Polyhedron, RX, RY, RZ, Segments, Septagon, Shape, Spiral, SurfaceMesh, Tetragon, Triangle, Voxels, Wave, Weld, X, XY, XZ, Y, YZ, Z, abstract, addTo, align, and, area, as, asPart, at, bend, billOfMaterials, by, cast, center, chainHull, clip, clipfrom, clipopen, cloudSolid, color, colors, cut, cutfrom, cutopen, cutout, defRgbColor, defThreejsMaterial, defTool, define, deform, demesh, disjoint, drop, e, each, eachIn, edit, ensurePages, ex, extrudeAlong, extrudeX, extrudeY, extrudeZ, ey, ez, faces, fill, fit, fitTo, fuse, g, get, getEdge, getNot, gn, grow, hull, inFn, inline, inset, join, keep, link, loadGeometry, loft, log, loop, lowerEnvelope, mask, masking, material, md, minkowskiDifference, minkowskiShell, minkowskiSum, move, moveAlong, moveTo, n, noVoid, noop, normal, notColor, nth, ofPlan, offset, on, op, orient, outline, overlay, pack, packingEnvelope, play, points$1 as points, push, reify, remesh, removeSelfIntersections, rotate, rotateX, rotateY, rotateZ, rx, ry, rz, saveGeometry, scale, scaleToFit, scaleX, scaleY, scaleZ, seam, section, sectionProfile, separate, seq, serialize, simplify, size, sketch, smooth, sx, sy, sz, table, tag, tags, taper, test, tint, to, tool, toolpath, top, twist, untag, upperEnvelope, view, voidFn, voidIn, volume, voxels, weld, withFill, withFn, withInset, withOp, x, xyz, y, z };
+export { Alpha, Arc, ArcX, ArcY, ArcZ, Assembly, Box, Cached, ChainHull, Curve, Edge, Edges, Empty, Face, GrblConstantLaser, GrblDynamicLaser, GrblPlotter, GrblSpindle, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Join, Line, Link, Loft, Loop, Octagon, Orb, Page, Path, Pentagon, Plan, Point, Points, Polygon, Polyhedron, RX, RY, RZ, Segments, Septagon, Shape, Spiral, SurfaceMesh, Tetragon, Triangle, Voxels, Wave, Weld, X, XY, XZ, Y, YZ, Z, absolute, abstract, addTo, align, and, area, as, asPart, at, bend, billOfMaterials, by, cast, center, chainHull, clip, clipfrom, clipopen, cloudSolid, color, colors, cut, cutfrom, cutopen, cutout, defRgbColor, defThreejsMaterial, defTool, define, deform, demesh, disjoint, drop, e, each, eachIn, edit, ensurePages, ex, extrudeAlong, extrudeX, extrudeY, extrudeZ, ey, ez, faces, fill, fit, fitTo, fuse, g, get, getEdge, getNot, gn, grow, hull, inFn, inline, inset, join, keep, link, loadGeometry, loft, log, loop, lowerEnvelope, mask, masking, material, md, minkowskiDifference, minkowskiShell, minkowskiSum, move, moveAlong, moveTo, n, noVoid, noop, normal, notColor, nth, ofPlan, offset, on, op, orient, outline, overlay, pack, packingEnvelope, play, points$1 as points, push, reify, remesh, removeSelfIntersections, rotate, rotateX, rotateY, rotateZ, rx, ry, rz, saveGeometry, scale, scaleToFit, scaleX, scaleY, scaleZ, seam, section, sectionProfile, separate, seq, serialize, simplify, size, sketch, smooth, sx, sy, sz, table, tag, tags, taper, test, tint, to, tool, toolpath, top, twist, untag, upperEnvelope, view, voidFn, voidIn, volume, voxels, weld, withFill, withFn, withInset, withOp, x, xyz, y, z };

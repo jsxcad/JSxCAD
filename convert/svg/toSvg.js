@@ -2,6 +2,7 @@ import {
   disjoint,
   getNonVoidPolygonsWithHoles,
   getNonVoidSegments,
+  makeAbsolute,
   measureBoundingBox,
   scale,
   section,
@@ -27,7 +28,7 @@ export const toSvg = async (
   const scaled = scale([1, -1, 1], disjointed);
   const [baseMin] = measureBoundingBox(scaled);
   const translated = translate([-baseMin[X], -baseMin[Y], 0], disjointed);
-  const geometry = translated;
+  const geometry = makeAbsolute(translated);
   const [min, max] = measureBoundingBox(geometry);
   const width = max[X] - min[X];
   const height = max[Y] - min[Y];
@@ -78,7 +79,8 @@ export const toSvg = async (
     }
   }
 
-  for (const { matrix, tags, segments } of getNonVoidSegments(geometry)) {
+  for (const g of getNonVoidSegments(geometry)) {
+    const { matrix, tags, segments } = g;
     const color = toRgbColorFromTags(tags, definitions);
     let d = [];
     let first;

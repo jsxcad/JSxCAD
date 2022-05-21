@@ -48,6 +48,7 @@ test('Rectangle', async (t) => {
   );
 });
 
+/*
 test('Rounded Rectangle', async (t) => {
   const assembly = await fromSvg(
     new TextEncoder('utf8').encode(
@@ -280,3 +281,4 @@ test('Triangle', async (t) => {
     await readFile('test.triangle.pdf', { encoding: 'utf8' })
   );
 });
+*/

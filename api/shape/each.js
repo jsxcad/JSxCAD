@@ -2,14 +2,16 @@ import Shape from './Shape.js';
 import { getLeafs } from '@jsxcad/geometry';
 
 export const each =
-  (
-    leafOp = (leaf) => leaf,
-    groupOp = (leafs, shape) => Shape.Group(...leafs)
-  ) =>
+  (leafOp = (leaf) => leaf, groupOp = Shape.Group) =>
   (shape) => {
     const leafShapes = getLeafs(shape.toGeometry()).map((leaf) =>
-      leafOp(Shape.fromGeometry(leaf))
+      shape.op(leafOp(Shape.fromGeometry(leaf)))
     );
-    return groupOp(leafShapes, shape);
+    const grouped = groupOp(leafShapes);
+    if (grouped instanceof Function) {
+      return grouped(shape);
+    } else {
+      return grouped;
+    }
   };
 Shape.registerMethod('each', each);
