@@ -374,7 +374,7 @@ Voxels([0, 0, 0], [0, 0, 1], [1, 0, 1], [2, 0, 1]).view();
 
 ```JavaScript
 b.at(
-  (s) => s.edges().sort('x<y<').n(0).origin(),
+  (s) => s.edges().sort('x<y<z>').n(0).origin(),
   cut(Box(11, 3, 3).rx(1 / 8))
 ).view();
 ```
@@ -382,7 +382,7 @@ b.at(
 ![Image](shape.md.46.png)
 
 ```JavaScript
-b.by((s) => s.edges().sort('x<y<').n(0).origin())
+b.by((s) => s.edges().sort('x<y<z>').n(0).origin())
   .cut(Box(11, 3, 3).rx(1 / 8))
   .view();
 ```

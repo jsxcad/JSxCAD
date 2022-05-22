@@ -166,11 +166,11 @@ const b = Box(5)
   .y(10);
 
 b.at(
-  (s) => s.edges().sort('x<y<').n(0).origin(),
+  (s) => s.edges().sort('x<y<z>').n(0).origin(),
   cut(Box(11, 3, 3).rx(1 / 8))
 ).view();
 
-b.by((s) => s.edges().sort('x<y<').n(0).origin())
+b.by((s) => s.edges().sort('x<y<z>').n(0).origin())
   .cut(Box(11, 3, 3).rx(1 / 8))
   .view();
 
