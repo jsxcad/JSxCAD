@@ -155,9 +155,6 @@ Edges(
   .clip(Arc(5).cut(Arc(2)).ez(1, -1))
   .gridView();
 
-const topEdge = ([[, , startZ], [, , endZ]]) => Math.min(startZ, endZ);
-const leftEdge = ([[startX], [endX]]) => Math.min(startX, endX);
-
 const b = Box(5)
   .ez(5)
   .and(
@@ -169,16 +166,13 @@ const b = Box(5)
   .y(10);
 
 b.at(
-  (s) => s.getEdge(topEdge).getEdge(leftEdge).nth(0),
+  (s) => s.edges().sort('x<y<z>').n(0).origin(),
   cut(Box(11, 3, 3).rx(1 / 8))
-)
-  .view()
+).view();
 
-b.to(
-  (s) => s.getEdge(topEdge).getEdge(leftEdge).nth(0),
-)
+b.by((s) => s.edges().sort('x<y<z>').n(0).origin())
   .cut(Box(11, 3, 3).rx(1 / 8))
-  .view()
+  .view();
 
 Voxels([0, 0, 0], [0, 0, 1], [1, 0, 1], [2, 0, 1]).view();
 
@@ -282,3 +276,20 @@ Box(2).cut(Box(1)).area(v => s => s.md(`Area is ${v.toFixed(2)}`));
 md`Area of Box(2, 3, 4) is ${Box(2, 3, 4).area().toFixed(2)}`;
 
 md`Volume of Box(2, 3, 4) is ${Box(2, 3, 4).volume().toFixed(2)}`;
+
+const c = Box(10)
+  .rx(1 / 8)
+  .view();
+
+c.by(origin()).view();
+c.by(origin(), and(Box(5, 5, 5))).view();
+c.by(origin(), cut(Box(5, 5, 5))).view();
+
+Triangle(4)
+  .x(5)
+  .at(origin(), rz(1 / 16))
+  .view();
+
+Group(Box(), Triangle(1).x(2), Hexagon(1).x(4)).sort('x<3').view();
+
+Group(Box(), Triangle(1).x(2), Hexagon(1).x(4)).sort('x>1').view();

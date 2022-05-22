@@ -1,31 +1,18 @@
-import { getInverseMatrices, getLeafs } from '@jsxcad/geometry';
-
 import Shape from './Shape.js';
+import { destructure } from './destructure.js';
+import { getInverseMatrices } from '@jsxcad/geometry';
 
 export const at =
-  (selection, ...ops) =>
+  (...args) =>
   (shape) => {
-    if (ops.length === 0) {
-      return shape;
-    }
-    ops = ops.map((op) => (op instanceof Function ? op : () => op));
-    // We've already selected the item for reference, e.g., s.on(g('plate'), ...);
-    if (selection instanceof Function) {
-      selection = selection(shape);
-    }
-    // Will this have a problem with groups, etc?
-    const { global: shapeGlobal, local: shapeLocal } = getInverseMatrices(
-      shape.toGeometry()
-    );
-    for (const leaf of getLeafs(selection.toGeometry())) {
-      const { global: leafGlobal, local: leafLocal } = getInverseMatrices(leaf);
-      // Switch to the local coordinate space, perform the operation, and come back to the global coordinate space.
+    const { shapesAndFunctions: ops } = destructure(args);
+    const selections = shape.toShapes(ops.shift());
+    for (const selection of selections) {
+      const { local, global } = getInverseMatrices(selection.toGeometry());
       shape = shape
-        .transform(shapeLocal)
-        .transform(leafGlobal)
+        .transform(global)
         .op(...ops)
-        .transform(leafLocal)
-        .transform(shapeGlobal);
+        .transform(local);
     }
     return shape;
   };

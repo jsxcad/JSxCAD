@@ -231,3 +231,27 @@ Box(5)
   .and(Triangle(5).as('t'))
   .on(get('b'), rz(1 / 8))
   .view();
+
+Box(10).cut(Box(5, 50, 5)).view();
+
+Box(10).clip(Box(5, 50, 5)).view();
+
+Box(10).join(Box(5, 50, 5)).view();
+
+Box(10).and(Box(5, 50, 5)).disjoint().pack().view();
+
+Box(10)
+  .rz(1 / 8)
+  .at(edges(origin()), cut(Arc(5)))
+  .view();
+
+Triangle(10)
+  .cut(inset(2))
+  .at(edges(origin()), cut(Arc(1)))
+  .view();
+
+Triangle(10)
+  .cut(inset(4))
+  .rz(1 / 8)
+  .at(edges(origin()), cut(Arc(5)))
+  .view();

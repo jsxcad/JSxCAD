@@ -355,14 +355,6 @@ Edges(
 ![Image](shape.md.44.png)
 
 ```JavaScript
-const topEdge = ([[, , startZ], [, , endZ]]) => Math.min(startZ, endZ);
-```
-
-```JavaScript
-const leftEdge = ([[startX], [endX]]) => Math.min(startX, endX);
-```
-
-```JavaScript
 const b = Box(5)
   .ez(5)
   .and(
@@ -382,20 +374,17 @@ Voxels([0, 0, 0], [0, 0, 1], [1, 0, 1], [2, 0, 1]).view();
 
 ```JavaScript
 b.at(
-  (s) => s.getEdge(topEdge).getEdge(leftEdge).nth(0),
+  (s) => s.edges().sort('x<y<z>').n(0).origin(),
   cut(Box(11, 3, 3).rx(1 / 8))
-)
-  .view()
+).view();
 ```
 
 ![Image](shape.md.46.png)
 
 ```JavaScript
-b.to(
-  (s) => s.getEdge(topEdge).getEdge(leftEdge).nth(0),
-)
+b.by((s) => s.edges().sort('x<y<z>').n(0).origin())
   .cut(Box(11, 3, 3).rx(1 / 8))
-  .view()
+  .view();
 ```
 
 ![Image](shape.md.47.png)
@@ -547,3 +536,50 @@ Area is 3.00
 Area of Box(2, 3, 4) is 52.00
 
 Volume of Box(2, 3, 4) is 24.00
+
+```JavaScript
+const c = Box(10)
+  .rx(1 / 8)
+  .view();
+```
+
+![Image](shape.md.61.png)
+
+```JavaScript
+c.by(origin()).view();
+```
+
+![Image](shape.md.62.png)
+
+```JavaScript
+c.by(origin(), and(Box(5, 5, 5))).view();
+```
+
+![Image](shape.md.63.png)
+
+```JavaScript
+c.by(origin(), cut(Box(5, 5, 5))).view();
+```
+
+![Image](shape.md.64.png)
+
+```JavaScript
+Triangle(4)
+  .x(5)
+  .at(origin(), rz(1 / 16))
+  .view();
+```
+
+![Image](shape.md.65.png)
+
+```JavaScript
+Group(Box(), Triangle(1).x(2), Hexagon(1).x(4)).sort('x<3').view();
+```
+
+![Image](shape.md.66.png)
+
+```JavaScript
+Group(Box(), Triangle(1).x(2), Hexagon(1).x(4)).sort('x>1').view();
+```
+
+![Image](shape.md.67.png)

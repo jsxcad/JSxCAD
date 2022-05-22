@@ -473,3 +473,55 @@ red.by(blue).view();
 ```
 
 ![Image](shapes.md.42.png)
+
+```JavaScript
+Box(10).cut(Box(5, 50, 5)).view();
+```
+
+![Image](shapes.md.43.png)
+
+```JavaScript
+Box(10).clip(Box(5, 50, 5)).view();
+```
+
+![Image](shapes.md.44.png)
+
+```JavaScript
+Box(10).join(Box(5, 50, 5)).view();
+```
+
+![Image](shapes.md.45.png)
+
+```JavaScript
+Box(10).and(Box(5, 50, 5)).disjoint().pack().view();
+```
+
+![Image](shapes.md.46.png)
+
+```JavaScript
+Box(10)
+  .rz(1 / 8)
+  .at(edges(origin()), cut(Arc(5)))
+  .view();
+```
+
+![Image](shapes.md.47.png)
+
+```JavaScript
+Triangle(10)
+  .cut(inset(2))
+  .at(edges(origin()), cut(Arc(1)))
+  .view();
+```
+
+![Image](shapes.md.48.png)
+
+```JavaScript
+Triangle(10)
+  .cut(inset(4))
+  .rz(1 / 8)
+  .at(edges(origin()), cut(Arc(5)))
+  .view();
+```
+
+![Image](shapes.md.49.png)
