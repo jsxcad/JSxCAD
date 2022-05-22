@@ -2654,7 +2654,7 @@ var FileSaver_min = createCommonjsModule(function (module, exports) {
 
 });
 
-/* global Blob, alert */
+/* global Blob, alert, fetch */
 
 const downloadFile = async ({ filename, path, data, type, workspace }) => {
   if (path && !data) {

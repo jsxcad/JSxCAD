@@ -3890,6 +3890,37 @@ class AabbTreeQuery {
   std::vector<std::unique_ptr<SurfaceMeshQuery>> surface_mesh_query_;
 };
 
+void SurfaceMeshSectionToPolygonsWithHoles(const Surface_mesh& mesh,
+                                           const Plane& plane,
+                                           Polygons_with_holes_2& pwhs) {
+  typedef std::vector<Point> Polyline_type;
+  typedef std::list<Polyline_type> Polylines;
+  CGAL::Polygon_mesh_slicer<Surface_mesh, Kernel> slicer(mesh);
+  // int target = geometry->add(GEOMETRY_POLYGONS_WITH_HOLES);
+  // geometry->copyTransform(target, transform);
+  // geometry->plane(target) = plane;
+  Polylines polylines;
+  slicer(plane, std::back_inserter(polylines));
+  std::vector<Polygon_2> cuts;
+  for (const auto& polyline : polylines) {
+    std::size_t length = polyline.size();
+    if (length < 3 || polyline.front() != polyline.back()) {
+      continue;
+    }
+    Polygon_2 polygon;
+    // Skip the duplicated last point in the polyline.
+    for (std::size_t nth = 0; nth < length - 1; nth++) {
+      polygon.push_back(plane.to_2d(polyline[nth]));
+    }
+    if (polygon.orientation() == CGAL::Sign::NEGATIVE) {
+      polygon.reverse_orientation();
+      cuts.push_back(std::move(polygon));
+      continue;
+    }
+    pwhs.emplace_back(polygon);
+  }
+}
+
 int Bend(Geometry* geometry, double referenceRadius) {
   int size = geometry->size();
   geometry->copyInputMeshesToOutputMeshes();
@@ -4036,17 +4067,30 @@ int Clip(Geometry* geometry, int targets, bool open) {
       }
       case GEOMETRY_POLYGONS_WITH_HOLES: {
         for (int nth = targets; nth < size; nth++) {
-          // TODO: Disjunction of planar by volume.
-          if (!geometry->is_polygons(nth) ||
-              geometry->plane(target) != geometry->plane(nth)) {
-            continue;
+          switch (geometry->getType(nth)) {
+            case GEOMETRY_POLYGONS_WITH_HOLES: {
+              if (geometry->plane(target) != geometry->plane(nth)) {
+                continue;
+              }
+              if (geometry->noOverlap2(target, nth)) {
+                geometry->setType(target, GEOMETRY_EMPTY);
+                break;
+              }
+              geometry->gps(target).intersection(geometry->gps(nth));
+              geometry->updateBounds2(target);
+              break;
+            }
+            case GEOMETRY_MESH: {
+              Polygons_with_holes_2 pwhs;
+              SurfaceMeshSectionToPolygonsWithHoles(
+                  geometry->mesh(nth), geometry->plane(target), pwhs);
+              for (const Polygon_with_holes_2& pwh : pwhs) {
+                geometry->gps(target).intersection(pwh);
+              }
+              geometry->updateBounds2(target);
+              break;
+            }
           }
-          if (geometry->noOverlap2(target, nth)) {
-            geometry->setType(target, GEOMETRY_EMPTY);
-            break;
-          }
-          geometry->gps(target).intersection(geometry->gps(nth));
-          geometry->updateBounds2(target);
         }
         // TODO: Handle disjunction of surface by volume.
         break;
@@ -4295,16 +4339,28 @@ int Cut(Geometry* geometry, int targets, bool open) {
       }
       case GEOMETRY_POLYGONS_WITH_HOLES: {
         for (int nth = targets; nth < size; nth++) {
-          // TODO: Disjunction of planar by volume.
-          if (!geometry->is_polygons(nth) ||
-              geometry->plane(target) != geometry->plane(nth) ||
-              geometry->noOverlap2(target, nth)) {
-            continue;
+          switch (geometry->getType(nth)) {
+            case GEOMETRY_POLYGONS_WITH_HOLES: {
+              if (geometry->plane(target) != geometry->plane(nth) ||
+                  geometry->noOverlap2(target, nth)) {
+                continue;
+              }
+              geometry->gps(target).difference(geometry->gps(nth));
+              geometry->updateBounds2(target);
+              break;
+            }
+            case GEOMETRY_MESH: {
+              Polygons_with_holes_2 pwhs;
+              SurfaceMeshSectionToPolygonsWithHoles(
+                  geometry->mesh(nth), geometry->plane(target), pwhs);
+              for (const Polygon_with_holes_2& pwh : pwhs) {
+                geometry->gps(target).difference(pwh);
+              }
+              geometry->updateBounds2(target);
+              break;
+            }
           }
-          geometry->gps(target).difference(geometry->gps(nth));
-          geometry->updateBounds2(target);
         }
-        // TODO: Handle disjunction of surface by volume.
         break;
       }
       case GEOMETRY_SEGMENTS: {
@@ -4530,7 +4586,13 @@ int Disjoint(Geometry* geometry, emscripten::val getIsMasked) {
               break;
             }
             case GEOMETRY_MESH: {
-              // TODO: Handle disjunction of surface by volume.
+              Polygons_with_holes_2 pwhs;
+              SurfaceMeshSectionToPolygonsWithHoles(
+                  geometry->mesh(nth), geometry->plane(start), pwhs);
+              for (const Polygon_with_holes_2& pwh : pwhs) {
+                geometry->gps(start).difference(pwh);
+              }
+              geometry->updateBounds2(start);
               break;
             }
           }
@@ -5154,12 +5216,26 @@ int Join(Geometry* geometry, int targets) {
       }
       case GEOMETRY_POLYGONS_WITH_HOLES: {
         for (int nth = targets; nth < size; nth++) {
-          if (!geometry->is_polygons(nth) ||
-              geometry->plane(target) != geometry->plane(nth)) {
-            continue;
+          switch (geometry->getType(nth)) {
+            case GEOMETRY_POLYGONS_WITH_HOLES: {
+              if (geometry->plane(target) != geometry->plane(nth)) {
+                continue;
+              }
+              geometry->gps(target).join(geometry->gps(nth));
+              geometry->updateBounds2(target);
+              break;
+            }
+            case GEOMETRY_MESH: {
+              Polygons_with_holes_2 pwhs;
+              SurfaceMeshSectionToPolygonsWithHoles(
+                  geometry->mesh(nth), geometry->plane(target), pwhs);
+              for (const Polygon_with_holes_2& pwh : pwhs) {
+                geometry->gps(target).join(pwh);
+              }
+              geometry->updateBounds2(target);
+              break;
+            }
           }
-          geometry->gps(target).join(geometry->gps(nth));
-          geometry->updateBounds2(target);
         }
         break;
       }
@@ -5575,6 +5651,14 @@ int Section(Geometry* geometry, int count) {
     for (int nth = 0; nth < count; nth++) {
       switch (geometry->getType(nth)) {
         case GEOMETRY_MESH: {
+          Polygons_with_holes_2 pwhs;
+          SurfaceMeshSectionToPolygonsWithHoles(geometry->mesh(nth), plane,
+                                                pwhs);
+          int target = geometry->add(GEOMETRY_POLYGONS_WITH_HOLES);
+          geometry->copyTransform(target, geometry->transform(nthTransform));
+          geometry->plane(target) = plane;
+          geometry->pwh(target) = std::move(pwhs);
+#if 0
           typedef std::vector<Point> Polyline_type;
           typedef std::list<Polyline_type> Polylines;
           CGAL::Polygon_mesh_slicer<Surface_mesh, Kernel> slicer(
@@ -5602,6 +5686,7 @@ int Section(Geometry* geometry, int count) {
             }
             geometry->pwh(target).emplace_back(polygon);
           }
+#endif
           break;
         }
         case GEOMETRY_POLYGONS_WITH_HOLES: {
