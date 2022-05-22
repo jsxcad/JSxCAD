@@ -1,4 +1,4 @@
-/* global Blob, alert, fetch */
+/* global Blob, alert */
 
 import { decode } from 'base64-arraybuffer';
 import marked from 'marked';
