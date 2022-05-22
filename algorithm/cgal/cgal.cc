@@ -687,6 +687,7 @@ const Surface_mesh* FromFunctionToSurfaceMesh(
   };
 
   CGAL::get_default_random() = CGAL::Random(0);
+  std::srand(0);
 
   Surface_3 surface(
       op,                                        // pointer to function
@@ -1109,6 +1110,7 @@ const Surface_mesh* SmoothSurfaceMesh(const Surface_mesh* input,
 
   CGAL::get_default_random() = CGAL::Random(0);
   std::srand(0);
+
   CGAL::Polygon_mesh_processing::smooth_mesh(
       cartesian_mesh.faces(), cartesian_mesh,
       CGAL::Polygon_mesh_processing::parameters::number_of_iterations(
@@ -1187,6 +1189,7 @@ const Surface_mesh* SmoothShapeOfSurfaceMesh(
 
   CGAL::get_default_random() = CGAL::Random(0);
   std::srand(0);
+
   CGAL::Polygon_mesh_processing::smooth_shape(
       cartesian_mesh.faces(), cartesian_mesh, time,
       CGAL::Polygon_mesh_processing::parameters::number_of_iterations(
@@ -1426,6 +1429,8 @@ const Surface_mesh* ApproximateSurfaceMesh(
     bool with_dihedral_angle, bool optimize_anchor_location, bool pca_plane) {
   // This depends on the standard prng.
   // Lock it down to be deterministic.
+
+  CGAL::get_default_random() = CGAL::Random(0);
   std::srand(0);
 
   Surface_mesh working_input(*input);
@@ -1614,6 +1619,8 @@ const Surface_mesh* SimplifySurfaceMesh(const Surface_mesh* input,
       stop(ratio);
 
   CGAL::get_default_random() = CGAL::Random(0);
+  std::srand(0);
+
   CGAL::Surface_mesh_simplification::edge_collapse(cartesian_surface_mesh,
                                                    stop);
 
@@ -5488,7 +5495,10 @@ int MakeUnitSphere(Geometry* geometry, double angularBound, double radiusBound,
   typedef CGAL::Surface_mesh<Point_3> Epick_Surface_mesh;
   Tr tr;          // 3D-Delaunay triangulation
   C2t3 c2t3(tr);  // 2D-complex in 3D-Delaunay triangulation
+
   CGAL::get_default_random() = CGAL::Random(0);
+  std::srand(0);
+
   Surface_3 surface(unitSphereFunction<FT, Point_3>, Sphere_3(CGAL::ORIGIN, 2));
   CGAL::Surface_mesh_default_criteria_3<Tr> criteria(angularBound, radiusBound,
                                                      distanceBound);
