@@ -123,6 +123,7 @@ typedef std::vector<Point> Points;
 typedef Kernel::Ray_3 Ray;
 typedef Kernel::Segment_3 Segment;
 typedef std::vector<Segment> Segments;
+typedef Kernel::Triangle_2 Triangle_2;
 typedef Kernel::Triangle_3 Triangle;
 typedef Kernel::Vector_2 Vector_2;
 typedef Kernel::Vector_3 Vector;
@@ -2023,6 +2024,21 @@ void computeCentroidOfSurfaceMesh(Point& centroid, const Surface_mesh& mesh) {
     triangles.push_back(Triangle(
         mesh.point(mesh.source(h)), mesh.point(mesh.source(mesh.next(h))),
         mesh.point(mesh.source(mesh.next(mesh.next(h))))));
+  }
+  centroid = CGAL::centroid(triangles.begin(), triangles.end(),
+                            CGAL::Dimension_tag<2>());
+}
+
+void computeCentroidOfPolygonsWithHoles(const Polygons_with_holes_2& polygons,
+                                        Point_2& centroid) {
+  std::vector<Triangle_2> triangles;
+  std::vector<Polygon_2> facets;
+  CGAL::Polygon_triangulation_decomposition_2<Kernel> convexifier;
+  for (const auto& polygon : polygons) {
+    convexifier(polygon, std::back_inserter(facets));
+  }
+  for (const auto& facet : facets) {
+    triangles.emplace_back(facet[0], facet[1], facet[2]);
   }
   centroid = CGAL::centroid(triangles.begin(), triangles.end(),
                             CGAL::Dimension_tag<2>());
@@ -4750,7 +4766,8 @@ int Faces(Geometry* geometry) {
   geometry->transformToAbsoluteFrame();
   geometry->convertPolygonsToPlanarMeshes();
 
-  const Plane xz_plane(0, 0, 1, 0);
+  const Point zero(0, 0, 0);
+  const Plane xy_plane(0, 0, 1, 0);
 
   for (int nth = 0; nth < size; nth++) {
     switch (geometry->getType(nth)) {
@@ -4760,15 +4777,15 @@ int Faces(Geometry* geometry) {
                                               /*use_unit_planes=*/true);
         for (const auto& entry : arrangements) {
           const Plane& plane = entry.first;
-          const Transformation orient = orient_plane(xz_plane, plane);
+          Transformation transform = orient_plane(plane, xy_plane);
           const Arrangement_2& arrangement = entry.second;
           int target = geometry->add(GEOMETRY_POLYGONS_WITH_HOLES);
           convertArrangementToPolygonsWithHoles(arrangement,
                                                 geometry->pwh(target));
-          // The inverse transform will be applied in transformToLocalFrame.
-          geometry->copyTransform(target,
-                                  orient.inverse() * geometry->transform(nth));
-          // geometry->plane(target) = xz_plane;
+          Point centroid(0, 0, plane.d() * 2);
+          geometry->copyTransform(
+              target,
+              transform * Transformation(CGAL::TRANSLATION, zero - centroid));
           geometry->plane(target) = plane;
         }
         geometry->setType(nth, GEOMETRY_EMPTY);
@@ -6967,14 +6984,29 @@ const Transformation* InverseSegmentTransform(double startX, double startY,
   Point oriented_end = Point(endX, endY, endZ).transform(orient);
 
   Transformation align(CGAL::IDENTITY);
+
   if (oriented_end.y() != 0) {
     RT sin_alpha, cos_alpha, w;
     CGAL::rational_rotation_approximation(oriented_end.x(), oriented_end.y(),
                                           sin_alpha, cos_alpha, w, RT(1),
                                           RT(1000));
+    // Z rotation to bring y to the x axis.
     Transformation rotation(cos_alpha, sin_alpha, 0, 0, -sin_alpha, cos_alpha,
                             0, 0, 0, 0, w, 0, w);
-    align = rotation;  // .inverse();
+    oriented_end = oriented_end.transform(rotation);
+    align = rotation * align;
+  }
+
+  if (oriented_end.z() != 0) {
+    RT sin_alpha, cos_alpha, w;
+    CGAL::rational_rotation_approximation(oriented_end.x(), -oriented_end.z(),
+                                          sin_alpha, cos_alpha, w, RT(1),
+                                          RT(1000));
+    // Y rotation to bring z to the x axis.
+    Transformation rotation(cos_alpha, 0, -sin_alpha, 0, 0, w, 0, 0, sin_alpha,
+                            0, cos_alpha, 0, w);
+    oriented_end = oriented_end.transform(rotation);
+    align = rotation * align;
   }
 
   return new Transformation(align * orient);

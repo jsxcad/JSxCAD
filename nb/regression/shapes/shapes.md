@@ -525,3 +525,21 @@ Triangle(10)
 ```
 
 ![Image](shapes.md.49.png)
+
+```JavaScript
+Curve(Point(0, 0), Point(10, 0), Point(10, 10), Point(20, 10))
+  .rx(1 / 4)
+  .edges(ArcX(0, 10).hasSides(6), Loft)
+  .view();
+```
+
+![Image](shapes.md.50.png)
+
+```JavaScript
+Curve(Point(0, 0), Point(10, 0), Point(10, 10), Point(20, 10))
+  .rx(1 / 4)
+  .points(ArcX(0, 10).hasSides(6), Loft)
+  .view();
+```
+
+![Image](shapes.md.51.png)
