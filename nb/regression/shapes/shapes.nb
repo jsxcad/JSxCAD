@@ -255,3 +255,23 @@ Triangle(10)
   .rz(1 / 8)
   .at(edges(origin()), cut(Arc(5)))
   .view();
+
+Curve(Point(0, 0), Point(10, 0), Point(10, 10), Point(20, 10))
+  .rx(1 / 4)
+  .edges(ArcX(0, 10).hasSides(6), Loft)
+  .view();
+
+Curve(Point(0, 0), Point(10, 0), Point(10, 10), Point(20, 10))
+  .rx(1 / 4)
+  .points(ArcX(0, 10).hasSides(6), Loft)
+  .view();
+
+Orb(6)
+  .hasZag(2)
+  .faces(cut(inset(0.2)))
+  .view();
+
+Box(10, 10, 10)
+  .cut(faces(Box(4, 4, 4)))
+  .faces(cut(inset(1)))
+  .view();
