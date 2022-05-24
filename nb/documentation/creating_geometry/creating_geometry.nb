@@ -27,6 +27,19 @@ Box(10, 10, 2).view();
 
 md`
 ---
+### Curve
+Create a bezier curve. The number of segments is scaled automatically to match the curvature.
+`;
+
+Curve(Point(0, 0), Point(10, 10), Point(20, 30), Point(40, 0)).view();
+
+Curve([0, 0], [10, 0], [10, 10], [20, 10])
+  .rx(1 / 4)
+  .edges(ArcX(0, 4, 4).hasSides(6), Loft)
+  .view();
+
+md`
+---
 ### Empty
 Creates a new empty geometry
 `;
