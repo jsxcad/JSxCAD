@@ -28,7 +28,7 @@ Box(10, 10, 2).view();
 md`
 ---
 ### Curve
-Create a bezier curve. The order of arguments is start, control point one, control point two, end.
+Create a bezier curve. The number of segments is scaled automatically to match the curvature.
 `;
 
 Curve(Point(0, 0), Point(10, 10), Point(20, 30), Point(40, 0)).view();
