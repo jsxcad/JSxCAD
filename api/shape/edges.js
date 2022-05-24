@@ -1,5 +1,12 @@
-import { eachSegment, taggedSegments, transformCoordinate } from '@jsxcad/geometry';
-import { fromSegmentToInverseTransform, invertTransform } from '@jsxcad/algorithm-cgal';
+import {
+  eachSegment,
+  taggedSegments,
+  transformCoordinate,
+} from '@jsxcad/geometry';
+import {
+  fromSegmentToInverseTransform,
+  invertTransform,
+} from '@jsxcad/algorithm-cgal';
 
 import Group from './Group.js';
 import Shape from './Shape.js';
@@ -17,11 +24,16 @@ export const edges =
     const leafs = [];
     eachSegment(Shape.toShape(shape, shape).toGeometry(), (segment) => {
       const inverse = fromSegmentToInverseTransform(segment);
-      const baseSegment = [transformCoordinate(segment[0], inverse), transformCoordinate(segment[1], inverse)];
+      const baseSegment = [
+        transformCoordinate(segment[0], inverse),
+        transformCoordinate(segment[1], inverse),
+      ];
       const matrix = invertTransform(inverse);
       // We get a pair of absolute coordinates from eachSegment.
       // We need a segment from [0,0,0] to [x,0,0] in its local space.
-      leafs.push(leafOp(Shape.fromGeometry(taggedSegments({ matrix }, [baseSegment]))));
+      leafs.push(
+        leafOp(Shape.fromGeometry(taggedSegments({ matrix }, [baseSegment])))
+      );
     });
     const grouped = groupOp(...leafs);
     if (grouped instanceof Function) {

@@ -8,14 +8,17 @@ export const points =
   (...args) =>
   (shape) => {
     const { shapesAndFunctions } = destructure(args);
-    let [leafOp = (l) => l, groupOp = (g) => (s) => Group(...g)] = shapesAndFunctions;
+    let [leafOp = (l) => l, groupOp = (g) => (s) => Group(...g)] =
+      shapesAndFunctions;
     if (leafOp instanceof Shape) {
       const leafShape = leafOp;
       leafOp = (edge) => leafShape.to(edge);
     }
     const leafs = [];
-    eachPoint(Shape.toShape(shape, shape).toGeometry(), ([x = 0, y = 0, z = 0]) =>
-      leafs.push(leafOp(Point().move(x, y, z))));
+    eachPoint(
+      Shape.toShape(shape, shape).toGeometry(),
+      ([x = 0, y = 0, z = 0]) => leafs.push(leafOp(Point().move(x, y, z)))
+    );
     const grouped = groupOp(...leafs);
     if (grouped instanceof Function) {
       return grouped(shape);

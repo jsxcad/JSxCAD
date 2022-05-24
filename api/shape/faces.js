@@ -12,7 +12,10 @@ export const faces =
       const leafShape = leafOp;
       leafOp = (edge) => leafShape.to(edge);
     }
-    return Shape.fromGeometry(facesOfGeometry(shape.toGeometry())).each(leafOp, groupOp);
+    return Shape.fromGeometry(facesOfGeometry(shape.toGeometry())).each(
+      leafOp,
+      groupOp
+    );
   };
 
 Shape.registerMethod('faces', faces);

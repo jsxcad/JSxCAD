@@ -543,3 +543,21 @@ Curve(Point(0, 0), Point(10, 0), Point(10, 10), Point(20, 10))
 ```
 
 ![Image](shapes.md.51.png)
+
+```JavaScript
+Orb(6)
+  .hasZag(2)
+  .faces(cut(inset(0.2)))
+  .view();
+```
+
+![Image](shapes.md.52.png)
+
+```JavaScript
+Box(10, 10, 10)
+  .cut(faces(Box(4, 4, 4)))
+  .faces(cut(inset(1)))
+  .view();
+```
+
+![Image](shapes.md.53.png)

@@ -3224,11 +3224,16 @@ const edges =
     const leafs = [];
     eachSegment(Shape.toShape(shape, shape).toGeometry(), (segment) => {
       const inverse = fromSegmentToInverseTransform(segment);
-      const baseSegment = [transformCoordinate(segment[0], inverse), transformCoordinate(segment[1], inverse)];
+      const baseSegment = [
+        transformCoordinate(segment[0], inverse),
+        transformCoordinate(segment[1], inverse),
+      ];
       const matrix = invertTransform(inverse);
       // We get a pair of absolute coordinates from eachSegment.
       // We need a segment from [0,0,0] to [x,0,0] in its local space.
-      leafs.push(leafOp(Shape.fromGeometry(taggedSegments({ matrix }, [baseSegment]))));
+      leafs.push(
+        leafOp(Shape.fromGeometry(taggedSegments({ matrix }, [baseSegment])))
+      );
     });
     const grouped = groupOp(...leafs);
     if (grouped instanceof Function) {
@@ -3320,7 +3325,10 @@ const faces =
       const leafShape = leafOp;
       leafOp = (edge) => leafShape.to(edge);
     }
-    return Shape.fromGeometry(faces$1(shape.toGeometry())).each(leafOp, groupOp);
+    return Shape.fromGeometry(faces$1(shape.toGeometry())).each(
+      leafOp,
+      groupOp
+    );
   };
 
 Shape.registerMethod('faces', faces);
@@ -3967,14 +3975,17 @@ const points$1 =
   (...args) =>
   (shape) => {
     const { shapesAndFunctions } = destructure(args);
-    let [leafOp = (l) => l, groupOp = (g) => (s) => Group(...g)] = shapesAndFunctions;
+    let [leafOp = (l) => l, groupOp = (g) => (s) => Group(...g)] =
+      shapesAndFunctions;
     if (leafOp instanceof Shape) {
       const leafShape = leafOp;
       leafOp = (edge) => leafShape.to(edge);
     }
     const leafs = [];
-    eachPoint(Shape.toShape(shape, shape).toGeometry(), ([x = 0, y = 0, z = 0]) =>
-      leafs.push(leafOp(Point().move(x, y, z))));
+    eachPoint(
+      Shape.toShape(shape, shape).toGeometry(),
+      ([x = 0, y = 0, z = 0]) => leafs.push(leafOp(Point().move(x, y, z)))
+    );
     const grouped = groupOp(...leafs);
     if (grouped instanceof Function) {
       return grouped(shape);
@@ -4946,7 +4957,8 @@ Shape.prototype.Voxels = Shape.shapeMethod(Voxels);
 
 const weld =
   (...rest) =>
-  (first) => Group(first, ...rest).fill();
+  (first) =>
+    Group(first, ...rest).fill();
 
 Shape.registerMethod('weld', weld);
 

@@ -8,7 +8,7 @@ import { toConcreteGeometry } from './toConcreteGeometry.js';
 export const getInverseMatrices = (geometry) => {
   geometry = toConcreteGeometry(geometry);
   switch (geometry.type) {
-/*
+    /*
     case 'item': {
       // These maintain an invertible matrix.
       const global = geometry.matrix;
@@ -16,7 +16,7 @@ export const getInverseMatrices = (geometry) => {
       return { global, local };
     }
 */
-/*
+    /*
     case 'segments': {
       // This is a bit trickier.
       // We transform the matrices such that the first segment starts at [0, 0, 0], and extends to [length, 0, 0].
