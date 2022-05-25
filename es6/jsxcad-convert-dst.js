@@ -1,3 +1,5 @@
+import { scale, taggedSegments } from './jsxcad-geometry.js';
+
 var global$1 = (typeof global !== "undefined" ? global :
             typeof self !== "undefined" ? self :
             typeof window !== "undefined" ? window : {});
@@ -2095,53 +2097,49 @@ const fetchStitches = ({ previousX = 0, previousY = 0 }, fetchBytes) => {
   let x = previousX;
   let y = previousY;
 
-  const paths = [];
-  let path = [null, [previousX, previousY]];
-
-  const finishPath = () => {
-    if (path.length > 2) {
-      paths.push(path);
-    }
-    path = [null];
-  };
+  const segments = [];
 
   for (;;) {
     const [dx, dy, flag] = fetchStitch(fetchBytes);
 
-    x += dx;
-    y += dy;
+    const nextX = x + dx;
+    const nextY = y + dy;
 
     switch (flag) {
       default:
       case 'end': {
-        finishPath();
-        return paths;
+        return segments;
       }
       case 'color_change': {
-        finishPath();
-        path.push([x, y]);
+        segments.push([
+          [x, y],
+          [nextX, nextY],
+        ]);
         break;
       }
       case 'jump': {
-        finishPath();
         break;
       }
       case 'stitch': {
-        path.push([x, y]);
+        segments.push([
+          [x, y],
+          [nextX, nextY],
+        ]);
       }
     }
+
+    x = nextX;
+    y = nextY;
   }
 };
 
 const fromDst = async (data, options = {}) => {
   const fetcher = createByteFetcher(data);
   const header = fetchHeader({}, fetcher);
-  // FIX
-  return {
-    type: 'paths',
-    paths: fetchStitches(header, fetcher),
-    // paths: scalePaths([0.1, 0.1, 0.1], fetchStitches(header, fetcher)),
-  };
+  return scale(
+    [0.1, 0.1, 0.1],
+    taggedSegments({}, fetchStitches(header, fetcher))
+  );
 };
 
 export { fromDst };
