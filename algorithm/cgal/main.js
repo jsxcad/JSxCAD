@@ -42,6 +42,7 @@ export { cut } from './cut.js';
 export { cutOutOfSurfaceMeshes } from './cutOutOfSurfaceMeshes.js';
 export { deform } from './deform.js';
 export { deleteSurfaceMesh } from './deleteSurfaceMesh.js';
+export { demesh } from './demesh.js';
 export { demeshSurfaceMesh } from './demeshSurfaceMesh.js';
 export { deserializeSurfaceMesh } from './deserializeSurfaceMesh.js';
 export { disjoint } from './disjoint.js';

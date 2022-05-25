@@ -4531,6 +4531,17 @@ int Deform(Geometry* geometry, size_t length, size_t iterations,
   return STATUS_OK;
 }
 
+int Demesh(Geometry* geometry) {
+  int size = geometry->size();
+  geometry->copyInputMeshesToOutputMeshes();
+  for (int nth = 0; nth < size; nth++) {
+    if (!geometry->is_mesh(nth)) {
+      demesh(geometry->mesh(nth));
+    }
+  }
+  return STATUS_OK;
+}
+
 int Disjoint(Geometry* geometry, emscripten::val getIsMasked) {
   int size = geometry->size();
 
@@ -7336,6 +7347,7 @@ EMSCRIPTEN_BINDINGS(module) {
                        emscripten::allow_raw_pointers());
   emscripten::function("Cut", &Cut, emscripten::allow_raw_pointers());
   emscripten::function("Deform", &Deform, emscripten::allow_raw_pointers());
+  emscripten::function("Demesh", &Demesh, emscripten::allow_raw_pointers());
   emscripten::function("Disjoint", &Disjoint, emscripten::allow_raw_pointers());
   emscripten::function("Extrude", &Extrude, emscripten::allow_raw_pointers());
   emscripten::function("Faces", &Faces, emscripten::allow_raw_pointers());
