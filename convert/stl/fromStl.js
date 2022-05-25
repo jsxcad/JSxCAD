@@ -1,4 +1,4 @@
-import { fromPolygonsToGraph, taggedPaths } from '@jsxcad/geometry';
+import { fromPolygonsToGraph } from '@jsxcad/geometry';
 import parseStlAscii from 'parse-stl-ascii';
 import { parse as parseStlBinary } from './parseStlBinary.js';
 
@@ -32,8 +32,6 @@ export const fromStl = async (
   switch (geometry) {
     case 'graph':
       return fromPolygonsToGraph({}, polygons);
-    case 'paths':
-      return taggedPaths({}, polygons);
     default:
       throw Error(`Unknown geometry type ${geometry}`);
   }

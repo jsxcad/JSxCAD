@@ -47,6 +47,7 @@ export { demeshSurfaceMesh } from './demeshSurfaceMesh.js';
 export { deserializeSurfaceMesh } from './deserializeSurfaceMesh.js';
 export { disjoint } from './disjoint.js';
 export { doesSelfIntersectOfSurfaceMesh } from './doesSelfIntersectOfSurfaceMesh.js';
+export { eachPoint } from './eachPoint.js';
 export { eachPointOfSurfaceMesh } from './eachPointOfSurfaceMesh.js';
 export { extrude } from './extrude.js';
 export { faces } from './faces.js';

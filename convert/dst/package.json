@@ -22,9 +22,7 @@
   ],
   "keywords": [],
   "license": "MIT",
-  "dependencies": {
-    "@jsxcad/geometry": "^0.0.79"
-  },
+  "dependencies": {},
   "devDependencies": {
     "ava": "^3.9.0",
     "depcheck": "^1.4.1",

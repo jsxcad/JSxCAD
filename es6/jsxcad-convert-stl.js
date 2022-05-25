@@ -1,4 +1,4 @@
-import { taggedPaths, fromPolygonsToGraph, toTriangleArray } from './jsxcad-geometry.js';
+import { fromPolygonsToGraph, toTriangleArray } from './jsxcad-geometry.js';
 import { toPlane } from './jsxcad-math-poly3.js';
 
 function parse$1(str) {
@@ -129,8 +129,6 @@ const fromStl = async (
   switch (geometry) {
     case 'graph':
       return fromPolygonsToGraph({}, polygons);
-    case 'paths':
-      return taggedPaths({}, polygons);
     default:
       throw Error(`Unknown geometry type ${geometry}`);
   }

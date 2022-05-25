@@ -1,6 +1,6 @@
 import {
-  demesh as demeshWithCgal,
   deletePendingSurfaceMeshes,
+  demesh as demeshWithCgal,
 } from '@jsxcad/algorithm-cgal';
 
 import { linearize } from './tagged/linearize.js';

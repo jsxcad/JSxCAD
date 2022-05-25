@@ -132,7 +132,6 @@ export { orient } from './orient.js';
 export { pack } from './pack.js';
 export { play } from './play.js';
 export { points } from './points.js';
-export { push } from './push.js';
 export { reify } from './reify.js';
 export { remesh } from './remesh.js';
 export { removeSelfIntersections } from './removeSelfIntersections.js';

@@ -4684,6 +4684,58 @@ int Disjoint(Geometry* geometry, emscripten::val getIsMasked) {
   return STATUS_OK;
 }
 
+int EachPoint(Geometry* geometry, emscripten::val emit_point) {
+  size_t size = geometry->size();
+
+  geometry->copyInputMeshesToOutputMeshes();
+  geometry->copyInputSegmentsToOutputSegments();
+  geometry->copyInputPointsToOutputPoints();
+  geometry->transformToAbsoluteFrame();
+
+  for (int nth = 0; nth < size; nth++) {
+    switch (geometry->getType(nth)) {
+      case GEOMETRY_MESH: {
+        const Surface_mesh& mesh = geometry->mesh(nth);
+        for (const Vertex_index vertex : mesh.vertices()) {
+          emitPoint(mesh.point(vertex), emit_point);
+        }
+        break;
+      }
+      case GEOMETRY_POLYGONS_WITH_HOLES: {
+        const Plane& plane = geometry->plane(nth);
+        const Transformation& transform = geometry->transform(nth);
+        for (const Polygon_with_holes_2& polygon : geometry->pwh(nth)) {
+          for (const Point_2 point : polygon.outer_boundary()) {
+            emitPoint(plane.to_3d(point).transform(transform), emit_point);
+          }
+          for (auto hole = polygon.holes_begin(); hole != polygon.holes_end();
+               ++hole) {
+            for (const Point_2& point : *hole) {
+              emitPoint(plane.to_3d(point).transform(transform), emit_point);
+            }
+          }
+        }
+        break;
+      }
+      case GEOMETRY_SEGMENTS: {
+        for (const Segment& segment : geometry->segments(nth)) {
+          emitPoint(segment.source(), emit_point);
+          emitPoint(segment.target(), emit_point);
+        }
+        break;
+      }
+      case GEOMETRY_POINTS: {
+        for (const Point& point : geometry->points(nth)) {
+          emitPoint(point, emit_point);
+        }
+        break;
+      }
+    }
+  }
+
+  return STATUS_OK;
+}
+
 int Extrude(Geometry* geometry, size_t count) {
   size_t size = geometry->size();
 

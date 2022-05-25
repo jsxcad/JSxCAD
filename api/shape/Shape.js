@@ -6,7 +6,6 @@ import {
   fromPolygonsToGraph,
   rewriteTags,
   taggedGraph,
-  taggedPaths,
   taggedPoints,
   taggedSegments,
   toConcreteGeometry as toConcreteTaggedGeometry,
@@ -212,10 +211,6 @@ Shape.fromOpenPath = (path, context) => {
   return Shape.fromSegments(segments);
 };
 Shape.fromSegments = (segments) => fromGeometry(taggedSegments({}, segments));
-Shape.fromPath = (path, context) =>
-  fromGeometry(taggedPaths({}, [path]), context);
-Shape.fromPaths = (paths, context) =>
-  fromGeometry(taggedPaths({}, paths), context);
 Shape.fromPoint = (point, context) =>
   fromGeometry(taggedPoints({}, [point]), context);
 Shape.fromPoints = (points, context) =>
