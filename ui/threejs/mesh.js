@@ -285,7 +285,7 @@ const parseRational = (text) => {
   while (true) {
     const value = parseInt(numerator) / parseInt(denominator);
     if (!isFinite(value)) {
-      console.log(`Non-finite: ${numerator}/${denominator}`);
+      // console.log(`Non-finite: ${numerator}/${denominator}`);
       numerator = numerator.substring(0, numerator.length - 1);
       denominator = denominator.substring(0, denominator.length - 1);
       continue;
