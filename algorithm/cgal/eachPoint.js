@@ -3,7 +3,7 @@ import { withCgalGeometry } from './cgalGeometry.js';
 
 export const eachPoint = (inputs, emit) =>
   withCgalGeometry(inputs, (cgalGeometry, g) => {
-    const status = g.EachPoint(cgalGeometry, emit);
+    const status = g.EachPoint(cgalGeometry, (x, y, z) => emit([x, y, z]));
     switch (status) {
       case STATUS_OK:
         return;

@@ -1,5 +1,4 @@
 import { boot } from '@jsxcad/sys';
-import { canonicalize } from '@jsxcad/geometry';
 import { fromSvgPath } from './fromSvgPath.js';
 import fs from 'fs';
 import test from 'ava';
@@ -32,9 +31,7 @@ test('Parse a closed triangle.', async (t) => {
   const svgPath =
     'M200 100 L170.71067810058594 170.71067810058594 L100 200 L29.289321899414062 170.71067810058594 ' +
     'L0 100 L29.289321899414062 29.289321899414062 L100 0 L170.71067810058594 29.289321899414062 Z';
-  const geometry = canonicalize(
-    fromSvgPath(new TextEncoder('utf8').encode(svgPath))
-  );
+  const geometry = fromSvgPath(new TextEncoder('utf8').encode(svgPath));
   const svg = await toSvg(geometry);
   await writeFile('out.closed_path.svg', svg);
   t.is(
@@ -47,9 +44,7 @@ test('Parse a circle with a hole.', async (t) => {
   const svgPath =
     'M 950,81 A 107,107 0 0,1 950,295 A 107,107 0 0,1 950,81 z ' +
     'M 950,139 A 49,49 0 0,0 950,237 A 49,49 0 0,0 950,139 z';
-  const geometry = canonicalize(
-    fromSvgPath(new TextEncoder('utf8').encode(svgPath))
-  );
+  const geometry = fromSvgPath(new TextEncoder('utf8').encode(svgPath));
   const svg = await toSvg(geometry);
   await writeFile('out.circle_with_hole_path.svg', svg);
   t.is(

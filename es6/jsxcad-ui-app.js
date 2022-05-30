@@ -1050,7 +1050,7 @@ var factoryWithTypeCheckers = function(isValidElement, throwOnDirectAccess) {
 var PropTypes$3 = propTypes$1.exports;
 
 function _extends() {
-  _extends = Object.assign || function (target) {
+  _extends = Object.assign ? Object.assign.bind() : function (target) {
     for (var i = 1; i < arguments.length; i++) {
       var source = arguments[i];
 
@@ -1063,7 +1063,6 @@ function _extends() {
 
     return target;
   };
-
   return _extends.apply(this, arguments);
 }
 
@@ -42507,7 +42506,7 @@ var Table = /*#__PURE__*/ReactDOM$2.forwardRef(function (_ref, ref) {
 
 const ensureFile = async (file, url, {
   workspace
-} = {}) => {
+}) => {
   const sources = [];
 
   if (url !== undefined) {

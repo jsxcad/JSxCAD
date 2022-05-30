@@ -107,6 +107,9 @@ export const Page = (
   } else if (!pack && !size) {
     const layer = taggedGroup({}, ...layers);
     const packSize = measureBoundingBox(layer);
+    if (packSize === undefined) {
+      return Group();
+    }
     const pageWidth =
       Math.max(
         1,

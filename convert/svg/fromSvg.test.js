@@ -20,7 +20,7 @@ test('Rectangle', async (t) => {
     new TextEncoder('utf8').encode(
       `
        <?xml version="1.0"?>
-       <svg width="12cm" height="4cm" viewBox="0 0 1200 400" xmlns="http://www.w3.org/2000/svg" version="1.2" baseProfile="tiny">
+       <svg width="12cm" height="4cm" viewBox="-0 0 1200 400" xmlns="http://www.w3.org/2000/svg" version="1.2" baseProfile="tiny">
          <desc>Example rect01 - rectangle with sharp corners</desc>
          <!-- Show outline of canvas using 'rect' element -->
          <rect x="1" y="1" width="1198" height="398" fill="none" stroke="violet" stroke-width="2"/>
@@ -48,13 +48,12 @@ test('Rectangle', async (t) => {
   );
 });
 
-/*
 test('Rounded Rectangle', async (t) => {
   const assembly = await fromSvg(
     new TextEncoder('utf8').encode(
       `
        <?xml version="1.0"?>
-       <svg width="12cm" height="4cm" viewBox="0 0 1200 400" xmlns="http://www.w3.org/2000/svg" version="1.2" baseProfile="tiny">
+       <svg width="12cm" height="4cm" viewBox="-0 0 1200 400" xmlns="http://www.w3.org/2000/svg" version="1.2" baseProfile="tiny">
          <desc>Example rect02 - rounded rectangles</desc>
          <!-- Show outline of canvas using 'rect' element -->
          <rect x="1" y="1" width="1198" height="398" fill="none" stroke="blue" stroke-width="2"/>
@@ -91,7 +90,7 @@ test('Polyline', async (t) => {
     new TextEncoder('utf8').encode(
       `
        <?xml version="1.0"?>
-       <svg width="12cm" height="4cm" viewBox="0 0 1200 400" xmlns="http://www.w3.org/2000/svg" version="1.2" baseProfile="tiny">
+       <svg width="12cm" height="4cm" viewBox="-0 0 1200 400" xmlns="http://www.w3.org/2000/svg" version="1.2" baseProfile="tiny">
          <desc>Example polyline01 - increasingly larger bars</desc>
          <!-- Show outline of canvas using 'rect' element -->
          <rect x="1" y="1" width="1198" height="398" fill="none" stroke="blue" stroke-width="2" />
@@ -121,7 +120,7 @@ test('Circle', async (t) => {
     new TextEncoder('utf8').encode(
       `
        <?xml version="1.0"?>
-       <svg width="12cm" height="4cm" viewBox="0 0 1200 400" xmlns="http://www.w3.org/2000/svg" version="1.2" baseProfile="tiny">
+       <svg width="12cm" height="4cm" viewBox="-0 0 1200 400" xmlns="http://www.w3.org/2000/svg" version="1.2" baseProfile="tiny">
          <desc>Example circle01 - circle filled with red and stroked with blue</desc>
          <!-- Show outline of canvas using 'rect' element -->
          <rect x="1" y="1" width="1198" height="398" fill="none" stroke="blue" stroke-width="2"/>
@@ -151,7 +150,7 @@ test('Ellipse', async (t) => {
     new TextEncoder('utf8').encode(
       `
        <?xml version="1.0"?>
-       <svg width="12cm" height="4cm" viewBox="0 0 1200 400" xmlns="http://www.w3.org/2000/svg" version="1.2" baseProfile="tiny">
+       <svg width="12cm" height="4cm" viewBox="-0 0 1200 400" xmlns="http://www.w3.org/2000/svg" version="1.2" baseProfile="tiny">
          <desc>Example ellipse01 - examples of ellipses</desc>
          <!-- Show outline of canvas using 'rect' element -->
          <rect x="1" y="1" width="1198" height="398" fill="none" stroke="blue" stroke-width="2" />
@@ -184,7 +183,7 @@ test('Polygon', async (t) => {
     new TextEncoder('utf8').encode(
       `
        <?xml version="1.0"?>
-       <svg width="12cm" height="4cm" viewBox="0 0 1200 400" xmlns="http://www.w3.org/2000/svg" version="1.2" baseProfile="tiny">
+       <svg width="12cm" height="4cm" viewBox="-0 0 1200 400" xmlns="http://www.w3.org/2000/svg" version="1.2" baseProfile="tiny">
          <desc>Example polygon01 - star and hexagon</desc>
          <!-- Show outline of canvas using 'rect' element -->
          <rect x="1" y="1" width="1198" height="398" fill="none" stroke="blue" stroke-width="2" />
@@ -215,7 +214,7 @@ test('Complex', async (t) => {
     new TextEncoder('utf8').encode(
       `
        <?xml version="1.0"?>
-       <svg width="5cm" height="4cm" viewBox="0 0 500 400" xmlns="http://www.w3.org/2000/svg" version="1.2" baseProfile="tiny">
+       <svg width="5cm" height="4cm" viewBox="-0 0 500 400" xmlns="http://www.w3.org/2000/svg" version="1.2" baseProfile="tiny">
          <title>Example cubic01- cubic Bézier commands in path data</title>
          <desc>Picture showing a simple example of path data using both a "C" and an "S" command, along with annotations showing the control points and end points</desc>
          <rect fill="none" stroke="blue" stroke-width="1" x="1" y="1" width="498" height="398" />
@@ -281,4 +280,3 @@ test('Triangle', async (t) => {
     await readFile('test.triangle.pdf', { encoding: 'utf8' })
   );
 });
-*/

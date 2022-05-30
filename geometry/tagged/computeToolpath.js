@@ -13,7 +13,7 @@ import { getNonVoidSegments } from './getNonVoidSegments.js';
 import { identityMatrix } from '@jsxcad/math-mat4';
 import { inset } from '../inset.js';
 import { linearize } from './linearize.js';
-import { measureBoundingBox } from './measureBoundingBox.js';
+import { measureBoundingBox } from '../measureBoundingBox.js';
 import { section } from '../section.js';
 import { taggedToolpath } from './taggedToolpath.js';
 import { toConcreteGeometry } from './toConcreteGeometry.js';
@@ -57,11 +57,8 @@ export const computeToolpath = (
     const sections = section(concreteGeometry, [
       { type: 'points', matrix: identityMatrix },
     ]);
-    console.log(`QQ/sections: ${JSON.stringify(sections)}`);
     const fusedArea = fuse(sections);
-    console.log(`QQ/fusedArea: ${JSON.stringify(fusedArea)}`);
     const insetArea = inset(fusedArea, toolRadius);
-    console.log(`QQ/insetArea: ${JSON.stringify(insetArea)}`);
 
     // Surfaces
     withAabbTreeQuery(
@@ -69,7 +66,6 @@ export const computeToolpath = (
         ['graph', 'polygonsWithHoles'].includes(type)
       ),
       (query) => {
-        console.log(`QQ/withAabbTreeQuery`);
         // The hexagon diameter is the tool radius.
         const isInteriorPoint = (x, y, z) => {
           return query.isIntersectingPointApproximate(x, y, z);
@@ -400,6 +396,7 @@ export const computeToolpath = (
       toolpath: [],
       cost: 0,
       length: 0,
+      doNotExpress: true,
     };
     const fulfilled = new Set();
     for (;;) {
@@ -462,7 +459,9 @@ export const computeToolpath = (
         // Note that we include the imaginary seed point.
         const history = [];
         for (let node = candidate; node; node = node.last) {
-          history.push(node.toolpath);
+          if (!node.doNotExpress) {
+            history.push(node.toolpath);
+          }
         }
         const toolpath = [];
         while (history.length > 0) {

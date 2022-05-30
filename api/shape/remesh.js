@@ -9,12 +9,18 @@ export const remesh =
       shapesAndFunctions: selections,
       object: options,
     } = Shape.destructure(args);
+    const {
+      iterations = 1,
+      relaxationSteps = 1,
+      targetEdgeLength = resolution,
+    } = options;
     return Shape.fromGeometry(
       remeshGeometry(
         shape.toGeometry(),
-        resolution,
-        options,
-        shape.toShapes(selections).map((selection) => selection.toGeometry())
+        shape.toShapes(selections).map((selection) => selection.toGeometry()),
+        iterations,
+        relaxationSteps,
+        targetEdgeLength
       )
     );
   };

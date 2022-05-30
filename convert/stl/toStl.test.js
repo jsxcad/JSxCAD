@@ -1,5 +1,5 @@
 import { boot } from '@jsxcad/sys';
-import { fromPolygonsToGraph } from '@jsxcad/geometry';
+import { fromPolygons } from '@jsxcad/geometry';
 import { readFileSync } from 'fs';
 import test from 'ava';
 import { toStl } from './toStl.js';
@@ -60,7 +60,7 @@ const box1Solid = [
 ];
 
 test('Correctly render a box', async (t) => {
-  const stl = await toStl(fromPolygonsToGraph({}, box1Solid));
+  const stl = await toStl(fromPolygons({}, box1Solid));
   t.is(
     new TextDecoder('utf8').decode(stl),
     readFileSync('toStl.test.box.stl', { encoding: 'utf8' })

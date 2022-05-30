@@ -1,5 +1,5 @@
 import { computeHash } from '@jsxcad/sys';
-import { prepareForSerialization } from './prepareForSerialization.js';
+import { serialize } from '../serialize.js';
 
 export const hash = (geometry) => {
   if (geometry.hash === undefined) {
@@ -8,7 +8,7 @@ export const hash = (geometry) => {
         hash(content);
       }
     }
-    prepareForSerialization(geometry);
+    serialize(geometry);
     geometry.hash = computeHash(geometry);
   }
   return geometry.hash;

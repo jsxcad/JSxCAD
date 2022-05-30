@@ -2,14 +2,15 @@ import { hasShowOutline, hasShowSkin, hasShowWireframe } from './show.js';
 
 import { isNotTypeVoid } from './type.js';
 import { rewrite } from './visit.js';
+import { serialize } from '../serialize.js';
 import { taggedGroup } from './taggedGroup.js';
 import { toConcreteGeometry } from './toConcreteGeometry.js';
-import { toTriangles as toTrianglesFromGraph } from '../graph/toTriangles.js';
 
 export const soup = (
   geometry,
   { doTriangles = true, doOutline = true, doWireframe = true } = {}
 ) => {
+  geometry = serialize(geometry);
   const show = (geometry) => {
     if (doTriangles) {
       geometry = hasShowSkin(geometry);
@@ -33,7 +34,7 @@ export const soup = (
         if (graph.isEmpty) {
           return taggedGroup({});
         } else {
-          return show(toTrianglesFromGraph({ tags }, geometry));
+          return show(geometry);
         }
       }
       // Unreachable.

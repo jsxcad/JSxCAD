@@ -2,8 +2,7 @@ import {
   assemble,
   closePath,
   concatenatePath,
-  flip,
-  fromPolygonsToGraph,
+  fromPolygons,
   rewriteTags,
   taggedGraph,
   taggedPoints,
@@ -49,13 +48,6 @@ export class Shape {
     }
     this.geometry = geometry;
     this.context = context;
-  }
-
-  flip() {
-    return fromGeometry(
-      flip(toConcreteTaggedGeometry(this.toGeometry())),
-      this.context
-    );
   }
 
   toDisplayGeometry(options) {
@@ -216,7 +208,7 @@ Shape.fromPoint = (point, context) =>
 Shape.fromPoints = (points, context) =>
   fromGeometry(taggedPoints({}, points), context);
 Shape.fromPolygons = (polygons, context) =>
-  fromGeometry(fromPolygonsToGraph({}, polygons), context);
+  fromGeometry(fromPolygons({}, polygons), context);
 
 Shape.registerMethod = registerShapeMethod;
 

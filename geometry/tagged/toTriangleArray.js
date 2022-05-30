@@ -1,7 +1,7 @@
 import { identityMatrix } from '@jsxcad/math-mat4';
 import { isNotVoid } from './isNotVoid.js';
 import { toConcreteGeometry } from './toConcreteGeometry.js';
-import { toTriangles as toTrianglesFromGraph } from '../graph/toTriangles.js';
+import { toTriangles as toTrianglesFromGraph } from './toTriangles.js';
 import { transform } from '@jsxcad/math-vec3';
 import { visit } from './visit.js';
 

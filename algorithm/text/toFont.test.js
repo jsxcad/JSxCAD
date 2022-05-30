@@ -1,6 +1,6 @@
 import { boot, read } from '@jsxcad/sys';
 
-import { prepareForSerialization } from '@jsxcad/geometry';
+import { serialize } from '@jsxcad/geometry';
 import test from 'ava';
 import { toFont } from './toFont.js';
 
@@ -12,7 +12,7 @@ test('Render a letter', async (t) => {
   });
   const font = toFont({}, bytes);
   const letterA = font({}, 'ab');
-  t.deepEqual(JSON.parse(JSON.stringify(prepareForSerialization(letterA))), {
+  t.deepEqual(JSON.parse(JSON.stringify(serialize(letterA))), {
     type: 'group',
     tags: [],
     content: [
