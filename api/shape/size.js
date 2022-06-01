@@ -11,7 +11,19 @@ export const size =
   (op = (size) => (shape) => size) =>
   (shape) => {
     const geometry = shape.toConcreteGeometry();
-    let [min, max] = measureBoundingBox(geometry);
+    let bounds = measureBoundingBox(geometry);
+    if (bounds === undefined) {
+      return op({
+        length: 0,
+        width: 0,
+        height: 0,
+        max: [0, 0, 0],
+        min: [0, 0, 0],
+        center: [0, 0, 0],
+        radius: 0,
+      })(Shape.fromGeometry(geometry));
+    }
+    let [min, max] = bounds;
     const length = max[X] - min[X];
     const width = max[Y] - min[Y];
     const height = max[Z] - min[Z];

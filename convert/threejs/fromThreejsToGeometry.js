@@ -1,6 +1,6 @@
 import { Group, Mesh } from '@jsxcad/algorithm-threejs';
 
-import { fromTrianglesToGraph, taggedGroup } from '@jsxcad/geometry';
+import { fromPolygons, taggedGroup } from '@jsxcad/geometry';
 import { toTagFromRgb } from '@jsxcad/algorithm-color';
 
 export const fromThreejsToGeometry = async (threejs) => {
@@ -40,6 +40,6 @@ export const fromThreejsToGeometry = async (threejs) => {
         triangles.push({ points });
       }
     }
-    return fromTrianglesToGraph({ tags }, triangles);
+    return fromPolygons({ tags }, triangles);
   }
 };

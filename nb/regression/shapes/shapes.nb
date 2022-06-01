@@ -32,7 +32,7 @@ Hull(Arc(5), Box(5).z(5)).view().md(`Hull(Arc(5), Box(5).z(5))`);
 
 Icosahedron(5).view().md(`Icosahedron(5)`);
 
-const torusFn = ([x, y, z]) => {
+const torusFn = (x, y, z) => {
   const x2 = x * x,
     y2 = y * y,
     z2 = z * z;
@@ -54,9 +54,9 @@ const torusFn = ([x, y, z]) => {
 };
 
 // Determine why Implicit seems non-deterministic.
-Implicit(torusFn, { radius: 2 })
+Implicit(torusFn, 2)
   .view({ withGrid: false })
-  .md('Implicit(torusFn, { radius: 2 }');
+  .md('Implicit(torusFn, 2');
 
 Line(5, -1).rz(45).gridView().md(`Line(5, -1)`);
 

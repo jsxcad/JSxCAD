@@ -1,16 +1,16 @@
 Triangle(10)
   .color('red')
   .add(Box(5).color('blue'))
-  .gridView();
+  .gridView(1);
 
 Box(5)
   .and(Arc(5))
-  .gridView(undefined, { size: 800, triangles: false, outline: true, wireframe: false });
+  .gridView(2, { size: 800, triangles: false, outline: true, wireframe: false });
 
 Triangle(10)
   .color('red')
   .addTo(Box(5).color('blue'))
-  .gridView();
+  .gridView(3);
 
 Box(5).by(align('x>y>')).gridView();
 
@@ -18,17 +18,17 @@ Box(5)
   .as('box')
   .with(Arc(4).as('arc'))
   .keep('box')
-  .gridView();
+  .gridView(4);
 
 Box(5)
   .color('red')
   .clip(Arc(5.8).color('blue'))
-  .gridView();
+  .gridView(5);
 
 Box(5)
   .color('red')
   .clipFrom(Arc(5.8).color('blue'))
-  .gridView();
+  .gridView(6);
 
 Box(5).color('green').gridView();
 
@@ -42,63 +42,63 @@ Box(5)
 Box(5)
   .color('red')
   .cut(Arc(6).color('blue'))
-  .gridView();
+  .gridView(8);
 
 Box(5)
   .color('red')
   .cutfrom(Arc(6).color('blue'))
-  .gridView();
+  .gridView(9);
 
 Assembly(Box(5), Arc(6))
   .each((leafs) => leafs[0])
-  .gridView();
+  .gridView(10);
 
 Group(Box(5).color('red'), Arc(6).color('blue'))
   .fuse()
-  .gridView();
+  .gridView(11);
 
-Box(10).inset(0.5, 0.5).gridView();
+Box(10).inset(0.5, { step: 0.5 }).gridView(12);
 
 Assembly(Box(10).as('a'), Arc(6).as('b'))
   .keep('a')
-  .gridView();
+  .gridView(13);
 
 Box(10)
   .material('copper')
-  .gridView();
+  .gridView(14);
 
-Box(10).move(1, 2, 3).gridView();
-Box(10).moveTo(1, 2, 3).gridView();
-Box(10).move(1, 2, 3).moveTo(center()).gridView();
-Box(10).move(top()).gridView();
+Box(10).move(1, 2, 3).gridView(15);
+Box(10).moveTo(1, 2, 3).gridView(16);
+Box(10).move(1, 2, 3).moveTo(center()).gridView(17);
+Box(10).move(top()).gridView(18);
 
 Assembly(Box(5), Arc(5.5).void())
   .noVoid()
-  .gridView();
+  .gridView(19);
 
-Box(5).offset(1).gridView();
+Box(5).offset(1).gridView(20);
 
 Box(5)
   .op((s) => s.color('green'))
-  .gridView();
+  .gridView(21);
 
 Line(10)
   .orient({ at: [40, 50, 0] })
-  .gridView();
+  .gridView(22);
 
 Group(seq((n) => Arc(n), { from: 1, to: 20 }))
   .pack()
-  .gridView();
+  .gridView(23);
 
-Box(5).rotate(45).gridView();
+Box(5).rotate(45).gridView(24);
 
-Box(1, 2, 3).rx(1/8).gridView();
-Box(1, 2, 3).ry(1/8).gridView();
-Box(1, 2, 3).rz(1/8).gridView();
+Box(1, 2, 3).rx(1/8).gridView(25);
+Box(1, 2, 3).ry(1/8).gridView(26);
+Box(1, 2, 3).rz(1/8).gridView(27);
 
-Box(5).scale(1, 2).gridView();
-Box(5).cut(Arc(4.9).by(align('x>'))).scale(1, 1).gridView();
-Box(5).cut(Arc(4.9).by(align('x>'))).scale(-1, 1).gridView();
+Box(5).scale(1, 2).gridView(28);
+Box(5).cut(Arc(4.9).by(align('x>'))).scale(1, 1).gridView(29);
+Box(5).cut(Arc(4.9).by(align('x>'))).scale(-1, 1).gridView(30);
 
 Box(1, 2, 3)
   .size(size => shape => shape.md(`${JSON.stringify(size)}`));
@@ -106,7 +106,7 @@ Box(1, 2, 3)
 Box(2, 2, 2)
   .color('red')
   .and(Box(1, 1, 1).sketch())
-  .view();
+  .view(32);
 
 Box(1)
   .as('box')
@@ -115,34 +115,35 @@ Box(1)
     return shape;
   });
 
-Box(5, 5, 5).test().gridView();
+// Box(5, 5, 5).test().gridView();
+Box(5, 5, 5).gridView(34);
 
-Box(5).tool('laser').gridView();
+Box(5).tool('laser').gridView(35);
 
 Assembly(Box(5), Arc(6).void())
-  .gridView();
+  .gridView(36);
 
 Weld(Arc(6).x(-1), Arc(6).x(1), Arc(6).y(1), Arc(6).y(-1))
   .fill()
-  .gridView();
+  .gridView(37);
 
-Box(5).with(Arc(6)).gridView();
+Box(5).with(Arc(6)).gridView(38);
 
-Box(5).x(1).gridView();
-Box(5).y(1).gridView();
-Box(5).z(1).gridView();
+Box(5).x(1).gridView(39);
+Box(5).y(1).gridView(40);
+Box(5).z(1).gridView(41);
 
-Arc(10).voidIn(offset(1)).ez(5).view();
+Arc(10).voidIn(offset(1)).ez(5).view(42);
 
 Box(10)
   .ez(10)
   .color('green')
   .and((s) => s.faces().n(4).extrudeAlong(normal(), 1).tint('red'))
-  .view();
+  .view(43);
 
-Arc(10).color('blue').color('red').view();
+Arc(10).color('blue').color('red').view(44);
 
-Arc(10).color('blue').tint('red').view();
+Arc(10).color('blue').tint('red').view(45);
 
 Edges(
   seq((y) => [Point(-10, y, 0), Point(10, y, 0)], {
@@ -153,7 +154,7 @@ Edges(
 )
   .rz(1 / 8)
   .clip(Arc(5).cut(Arc(2)).ez(1, -1))
-  .gridView();
+  .gridView(46);
 
 const b = Box(5)
   .ez(5)
@@ -168,19 +169,19 @@ const b = Box(5)
 b.at(
   (s) => s.edges().sort('x<y<z>').n(0).origin(),
   cut(Box(11, 3, 3).rx(1 / 8))
-).view();
+).view(48);
 
 b.by((s) => s.edges().sort('x<y<z>').n(0).origin())
   .cut(Box(11, 3, 3).rx(1 / 8))
-  .view();
+  .view(49);
 
-Voxels([0, 0, 0], [0, 0, 1], [1, 0, 1], [2, 0, 1]).view();
+Voxels([0, 0, 0], [0, 0, 1], [1, 0, 1], [2, 0, 1]).view(50);
 
 Arc(2)
   .ez(5)
   .cut(Box(5).ry(1 / 16).ez(5).z(3))
   .simplify({ ratio: 0.1, eps: 0.01 })
-  .view();
+  .view(51);
 
 Triangle(14).svg('triangle');
 
@@ -190,19 +191,19 @@ Box(10)
   .fuse().view(0)
   .remesh(1, Box(20, 20, 20))
   .smooth({ method: 'shape', iterations: 1, time: 1 }, Box(9, 20, 20))
-  .view();
+  .view(53);
 
 Box(20, 20, 20)
   .view(1, { wireframe: true })
   .md('Original mesh')
   .remesh()
-  .view(2, { wireframe: true })
+  .view(54, { wireframe: true })
   .md('Isotropic remeshing')
   .cut(Box([0, 10], [0, -10], [0, 10]))
-  .view(3, { wireframe: true })
+  .view(55, { wireframe: true })
   .md('Cut')
   .demesh()
-  .view(4, { wireframe: true })
+  .view(56, { wireframe: true })
   .md('Cleaned mesh');
 
 Arc(4)
@@ -211,13 +212,14 @@ Arc(4)
   .material('glass')
   .color('orange')
   .and(toolpath())
-  .view();
+  .view(57);
 
 Box(10)
   .cut(Arc(6).x(6, -6), Box(1, 10))
   .and(toolpath())
-  .view();
+  .view(58);
 
+/*
 Arc(5)
   .x(4)
   .seq({ by: 1 / 8 }, rz, Join)
@@ -225,13 +227,14 @@ Arc(5)
   .and((s) => s.packingEnvelope().outline().color('red'),
        (s) => s.packingEnvelope({ offset: 1, threshold: 20 }).outline().color('green'))
   .view();
+*/
 
 Box(20, 20, 20)
   .join(Box(10, 10, 40))
   .rx(1 / 16)
   .material('glass')
   .and((s) => s.upperEnvelope().color('red'))
-  .view();
+  .view(60);
 
 /*
 Box(20, 20, 20)
@@ -244,6 +247,7 @@ Box(20, 20, 20)
   .view(5);
 */
 
+/*
 Box(10, 3, 3)
   .remesh(1)
   .deform(
@@ -267,7 +271,8 @@ Box(10, 3, 3)
       alpha: 0.05,
     }
   )
-  .view();
+  .view(62);
+*/
 
 md`Area of Box(2).cut(Box(1)) is ${Box(2).cut(Box(1)).area().toFixed(2)}`;
 
@@ -279,17 +284,17 @@ md`Volume of Box(2, 3, 4) is ${Box(2, 3, 4).volume().toFixed(2)}`;
 
 const c = Box(10)
   .rx(1 / 8)
-  .view();
+  .view(67);
 
-c.by(origin()).view();
-c.by(origin(), and(Box(5, 5, 5))).view();
-c.by(origin(), cut(Box(5, 5, 5))).view();
+c.by(origin()).view(68);
+c.by(origin(), and(Box(5, 5, 5))).view(69);
+c.by(origin(), cut(Box(5, 5, 5))).view(70);
 
 Triangle(4)
   .x(5)
   .at(origin(), rz(1 / 16))
-  .view();
+  .view(71);
 
-Group(Box(), Triangle(1).x(2), Hexagon(1).x(4)).sort('x<3').view();
+Group(Box(), Triangle(1).x(2), Hexagon(1).x(4)).sort('x<3').view(72);
 
-Group(Box(), Triangle(1).x(2), Hexagon(1).x(4)).sort('x>1').view();
+Group(Box(), Triangle(1).x(2), Hexagon(1).x(4)).sort('x>1').view(73);

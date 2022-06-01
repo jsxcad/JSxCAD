@@ -1,4 +1,8 @@
-import { measureBoundingBox, withQuery } from '@jsxcad/geometry';
+import {
+  linearize,
+  measureBoundingBox,
+  withAabbTreeQuery,
+} from '@jsxcad/geometry';
 
 import { Shape } from './Shape.js';
 
@@ -30,42 +34,53 @@ export const voxels =
     const min = floorPoint(boxMin, resolution);
     const max = ceilPoint(boxMax, resolution);
     const polygons = [];
-    withQuery(geometry, ({ isInteriorPoint }) => {
-      for (let x = min[X] - offset; x <= max[X] + offset; x += resolution) {
-        for (let y = min[Y] - offset; y <= max[Y] + offset; y += resolution) {
-          for (let z = min[Z] - offset; z <= max[Z] + offset; z += resolution) {
-            const state = isInteriorPoint(x, y, z);
-            if (state !== isInteriorPoint(x + resolution, y, z)) {
-              const face = [
-                [x + offset, y - offset, z - offset],
-                [x + offset, y + offset, z - offset],
-                [x + offset, y + offset, z + offset],
-                [x + offset, y - offset, z + offset],
-              ];
-              polygons.push({ points: state ? face : face.reverse() });
-            }
-            if (state !== isInteriorPoint(x, y + resolution, z)) {
-              const face = [
-                [x - offset, y + offset, z - offset],
-                [x + offset, y + offset, z - offset],
-                [x + offset, y + offset, z + offset],
-                [x - offset, y + offset, z + offset],
-              ];
-              polygons.push({ points: state ? face.reverse() : face });
-            }
-            if (state !== isInteriorPoint(x, y, z + resolution)) {
-              const face = [
-                [x - offset, y - offset, z + offset],
-                [x + offset, y - offset, z + offset],
-                [x + offset, y + offset, z + offset],
-                [x - offset, y + offset, z + offset],
-              ];
-              polygons.push({ points: state ? face : face.reverse() });
+    withAabbTreeQuery(
+      linearize(geometry, ({ type }) =>
+        ['graph', 'polygonsWithHoles'].includes(type)
+      ),
+      (query) => {
+        const isInteriorPoint = (x, y, z) =>
+          query.isIntersectingPointApproximate(x, y, z);
+        for (let x = min[X] - offset; x <= max[X] + offset; x += resolution) {
+          for (let y = min[Y] - offset; y <= max[Y] + offset; y += resolution) {
+            for (
+              let z = min[Z] - offset;
+              z <= max[Z] + offset;
+              z += resolution
+            ) {
+              const state = isInteriorPoint(x, y, z);
+              if (state !== isInteriorPoint(x + resolution, y, z)) {
+                const face = [
+                  [x + offset, y - offset, z - offset],
+                  [x + offset, y + offset, z - offset],
+                  [x + offset, y + offset, z + offset],
+                  [x + offset, y - offset, z + offset],
+                ];
+                polygons.push({ points: state ? face : face.reverse() });
+              }
+              if (state !== isInteriorPoint(x, y + resolution, z)) {
+                const face = [
+                  [x - offset, y + offset, z - offset],
+                  [x + offset, y + offset, z - offset],
+                  [x + offset, y + offset, z + offset],
+                  [x - offset, y + offset, z + offset],
+                ];
+                polygons.push({ points: state ? face.reverse() : face });
+              }
+              if (state !== isInteriorPoint(x, y, z + resolution)) {
+                const face = [
+                  [x - offset, y - offset, z + offset],
+                  [x + offset, y - offset, z + offset],
+                  [x + offset, y + offset, z + offset],
+                  [x - offset, y + offset, z + offset],
+                ];
+                polygons.push({ points: state ? face : face.reverse() });
+              }
             }
           }
         }
       }
-    });
+    );
     return Shape.fromPolygons(polygons);
   };
 

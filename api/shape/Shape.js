@@ -2,11 +2,9 @@ import {
   assemble,
   closePath,
   concatenatePath,
-  flip,
-  fromPolygonsToGraph,
+  fromPolygons,
   rewriteTags,
   taggedGraph,
-  taggedPaths,
   taggedPoints,
   taggedSegments,
   toConcreteGeometry as toConcreteTaggedGeometry,
@@ -50,13 +48,6 @@ export class Shape {
     }
     this.geometry = geometry;
     this.context = context;
-  }
-
-  flip() {
-    return fromGeometry(
-      flip(toConcreteTaggedGeometry(this.toGeometry())),
-      this.context
-    );
   }
 
   toDisplayGeometry(options) {
@@ -212,16 +203,12 @@ Shape.fromOpenPath = (path, context) => {
   return Shape.fromSegments(segments);
 };
 Shape.fromSegments = (segments) => fromGeometry(taggedSegments({}, segments));
-Shape.fromPath = (path, context) =>
-  fromGeometry(taggedPaths({}, [path]), context);
-Shape.fromPaths = (paths, context) =>
-  fromGeometry(taggedPaths({}, paths), context);
 Shape.fromPoint = (point, context) =>
   fromGeometry(taggedPoints({}, [point]), context);
 Shape.fromPoints = (points, context) =>
   fromGeometry(taggedPoints({}, points), context);
 Shape.fromPolygons = (polygons, context) =>
-  fromGeometry(fromPolygonsToGraph({}, polygons), context);
+  fromGeometry(fromPolygons({}, polygons), context);
 
 Shape.registerMethod = registerShapeMethod;
 

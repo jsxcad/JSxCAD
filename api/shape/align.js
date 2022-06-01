@@ -70,6 +70,10 @@ const computeOffset = (spec = 'xyz', origin = [0, 0, 0], shape) =>
         }
       }
     }
+    if (!offset.every(isFinite)) {
+      console.log(JSON.stringify(shape.toGeometry));
+      throw Error(`Non-finite/offset: ${offset}`);
+    }
     return offset;
   });
 

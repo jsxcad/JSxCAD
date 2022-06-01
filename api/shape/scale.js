@@ -1,5 +1,5 @@
 import Shape from './Shape.js';
-import { fromScaleToTransform } from '@jsxcad/algorithm-cgal';
+import { fromScaleToTransform } from '@jsxcad/geometry';
 
 export const scale =
   (x = 1, y = x, z = y) =>
@@ -17,7 +17,7 @@ export const scale =
     const negatives = (x < 0) + (y < 0) + (z < 0);
     if (negatives % 2) {
       // Compensate for inversion.
-      return shape.transform(fromScaleToTransform(x, y, z)).flip();
+      return shape.transform(fromScaleToTransform(x, y, z)).involute();
     } else {
       return shape.transform(fromScaleToTransform(x, y, z));
     }
