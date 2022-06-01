@@ -57,7 +57,7 @@ Group(Box(5).color('red'), Arc(6).color('blue'))
   .fuse()
   .gridView(11);
 
-Box(10).inset(0.5, 0.5).gridView(12);
+Box(10).inset(0.5, { step: 0.5 }).gridView(12);
 
 Assembly(Box(10).as('a'), Arc(6).as('b'))
   .keep('a')
@@ -247,6 +247,7 @@ Box(20, 20, 20)
   .view(5);
 */
 
+/*
 Box(10, 3, 3)
   .remesh(1)
   .deform(
@@ -271,6 +272,7 @@ Box(10, 3, 3)
     }
   )
   .view(62);
+*/
 
 md`Area of Box(2).cut(Box(1)) is ${Box(2).cut(Box(1)).area().toFixed(2)}`;
 

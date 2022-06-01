@@ -87,9 +87,13 @@ export const fillCgalGeometry = (geometry, inputs) => {
       case 'segments': {
         const { segments } = inputs[nth];
         geometry.setType(nth, GEOMETRY_SEGMENTS);
-        for (const [[sX = 0, sY = 0, sZ = 0], [eX = 0, eY = 0, eZ = 0]] of segments) {
+        for (const [[sX = 0, sY = 0, sZ = 0], [eX = 0, eY = 0, eZ = 0], exact] of segments) {
           try {
-            geometry.addInputSegment(nth, sX, sY, sZ, eX, eY, eZ);
+            if (exact) {
+              geometry.addInputSegmentExact(nth, exact);
+            } else {
+              geometry.addInputSegment(nth, sX, sY, sZ, eX, eY, eZ);
+            }
           } catch (error) {
             throw error;
           }
@@ -100,8 +104,13 @@ export const fillCgalGeometry = (geometry, inputs) => {
         const { exactPoints, points } = inputs[nth];
         geometry.setType(nth, GEOMETRY_POINTS);
         if (exactPoints) {
-          for (const [x = '0', y = '0', z = '0'] of exactPoints) {
-            geometry.addInputPointExact(nth, x, y, z);
+          for (const exact of exactPoints) {
+            try {
+              geometry.addInputPointExact(nth, exact);
+            } catch (error) {
+              console.log(`QQ/exact: ${JSON.stringify(exact)}`);
+              throw error;
+            }
           }
         } else if (points) {
           for (const [x = 0, y = 0, z = 0] of points) {
@@ -199,8 +208,8 @@ export const fromCgalGeometry = (geometry, inputs, length = inputs.length, start
           matrix,
           tags,
         };
-        geometry.emitSegments(nth, (sX, sY, sZ, tX, tY, tZ) => {
-          segments.push([[sX, sY, sZ], [tX, tY, tZ]]);
+        geometry.emitSegments(nth, (sX, sY, sZ, tX, tY, tZ, exact) => {
+          segments.push([[sX, sY, sZ], [tX, tY, tZ], exact]);
         });
         break;
       }
@@ -216,9 +225,9 @@ export const fromCgalGeometry = (geometry, inputs, length = inputs.length, start
           matrix,
           tags,
         };
-        geometry.emitPoints(nth, (x, y, z, exactX, exactY, exactZ) => {
+        geometry.emitPoints(nth, (x, y, z, exact) => {
           points.push([x, y, z]);
-          exactPoints.push([exactX, exactY, exactZ]);
+          exactPoints.push(exact);
         });
         break;
       }

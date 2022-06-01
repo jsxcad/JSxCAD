@@ -108,7 +108,7 @@ Group(Box(5).color('red'), Arc(6).color('blue'))
 ![Image](shape.md.10.png)
 
 ```JavaScript
-Box(10).inset(0.5, 0.5).gridView(12);
+Box(10).inset(0.5, { step: 0.5 }).gridView(12);
 ```
 
 ![Image](shape.md.11.png)
@@ -238,7 +238,7 @@ Box(1, 2, 3)
   .size(size => shape => shape.md(`${JSON.stringify(size)}`));
 ```
 
-{"length":1.0000000000000009,"width":2.0000000000000018,"height":3.0000000000000013,"max":[0.5000000000000001,1.0000000000000016,1.5000000000000002],"min":[-0.5000000000000008,-1.0000000000000002,-1.500000000000001],"center":[-3.3306690738754696e-16,6.661338147750939e-16,-4.440892098500626e-16],"radius":1.8708286933869718}
+{"length":1.0000000000000009,"width":2.0000000000000018,"height":3.0000000000000013,"max":[0.5000000000000008,1.0000000000000016,1.500000000000001],"min":[-0.5000000000000001,-1.0000000000000002,-1.5000000000000002],"center":[3.3306690738754696e-16,6.661338147750939e-16,4.440892098500626e-16],"radius":1.8708286933869718}
 
 ```JavaScript
 Box(2, 2, 2)
@@ -482,35 +482,6 @@ Box(20, 20, 20)
 
 ![Image](shape.md.57.png)
 
-```JavaScript
-Box(10, 3, 3)
-  .remesh(1)
-  .deform(
-    [
-      {
-        selection: Box([4.8, 5], 3, 3),
-        deformation: Point().rx(1 / 4),
-      },
-      {
-        selection: Box([-5, -4.8], 3, 3),
-        deformation: Point().rx(-1 / 4),
-      },
-      {
-        selection: Box([-0.1, 0.1], 3, 3),
-        deformation: Point().z(3),
-      },
-    ],
-    {
-      iterations: 1000,
-      tolerance: 0.001,
-      alpha: 0.05,
-    }
-  )
-  .view(62);
-```
-
-![Image](shape.md.58.png)
-
 Area of Box(2).cut(Box(1)) is 3.00
 
 ```JavaScript
@@ -529,7 +500,25 @@ const c = Box(10)
   .view(67);
 ```
 
+![Image](shape.md.58.png)
+
+```JavaScript
+c.by(origin()).view(68);
+```
+
 ![Image](shape.md.59.png)
+
+```JavaScript
+c.by(origin(), and(Box(5, 5, 5))).view(69);
+```
+
+![Image](shape.md.60.png)
+
+```JavaScript
+c.by(origin(), cut(Box(5, 5, 5))).view(70);
+```
+
+![Image](shape.md.61.png)
 
 ```JavaScript
 Triangle(4)
@@ -538,34 +527,16 @@ Triangle(4)
   .view(71);
 ```
 
-![Image](shape.md.60.png)
-
-```JavaScript
-c.by(origin()).view(68);
-```
-
-![Image](shape.md.61.png)
-
-```JavaScript
-c.by(origin(), and(Box(5, 5, 5))).view(69);
-```
-
 ![Image](shape.md.62.png)
-
-```JavaScript
-c.by(origin(), cut(Box(5, 5, 5))).view(70);
-```
-
-![Image](shape.md.63.png)
 
 ```JavaScript
 Group(Box(), Triangle(1).x(2), Hexagon(1).x(4)).sort('x<3').view(72);
 ```
 
-![Image](shape.md.64.png)
+![Image](shape.md.63.png)
 
 ```JavaScript
 Group(Box(), Triangle(1).x(2), Hexagon(1).x(4)).sort('x>1').view(73);
 ```
 
-![Image](shape.md.65.png)
+![Image](shape.md.64.png)

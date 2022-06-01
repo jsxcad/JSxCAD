@@ -497,7 +497,7 @@ export const buildMeshes = async ({
         if (tags.includes('type:void')) {
           material.transparent = true;
           material.depthWrite = false;
-          material.opacity *= 0.1;
+          material.opacity *= 0.125;
           mesh.castShadow = false;
           mesh.receiveShadow = false;
         }
@@ -507,13 +507,18 @@ export const buildMeshes = async ({
 
       {
         const edges = new EdgesGeometry(bufferGeometry);
-        const outline = new LineSegments(
-          edges,
-          new LineBasicMaterial({ color: 0x000000 })
-        );
+        const material = new LineBasicMaterial({ color: 0x000000 });
+        const outline = new LineSegments(edges, material);
         outline.userData.isOutline = true;
         outline.userData.hasShowOutline = tags.includes('show:outline');
         outline.visible = outline.userData.hasShowOutline;
+        if (tags.includes('type:void')) {
+          material.transparent = true;
+          material.depthWrite = false;
+          material.opacity *= 0.25;
+          mesh.castShadow = false;
+          mesh.receiveShadow = false;
+        }
         mesh.add(outline);
       }
 
@@ -571,7 +576,7 @@ export const buildMeshes = async ({
         if (tags.includes('type:void')) {
           material.transparent = true;
           material.depthWrite = false;
-          material.opacity *= 0.1;
+          material.opacity *= 0.125;
           mesh.castShadow = false;
           mesh.receiveShadow = false;
         }
@@ -625,17 +630,48 @@ export const buildMeshes = async ({
           shape.holes.push(new Path(holePoints));
         }
         const shapeGeometry = new ShapeGeometry(shape);
-        const material = await buildMeshMaterial(definitions, tags);
-        mesh.add(new Mesh(shapeGeometry, material));
+        if (tags.includes('show:skin')) {
+          const material = await buildMeshMaterial(definitions, tags);
+          mesh = new Mesh(shapeGeometry, material);
+          mesh.castShadow = true;
+          mesh.receiveShadow = true;
+          mesh.layers.set(layer);
+          updateUserData(geometry, scene, mesh.userData);
+          mesh.userData.tangible = true;
+          if (tags.includes('type:void')) {
+            material.transparent = true;
+            material.depthWrite = false;
+            material.opacity *= 0.125;
+            mesh.castShadow = false;
+            mesh.receiveShadow = false;
+          }
+        } else {
+          mesh = new Group();
+        }
+
         {
           const edges = new EdgesGeometry(shapeGeometry);
+          const material = new LineBasicMaterial({ color: 0x000000 });
+          const outline = new LineSegments(edges, material);
+          outline.userData.isOutline = true;
+          outline.userData.hasShowOutline = tags.includes('show:outline');
+          outline.visible = outline.userData.hasShowOutline;
+          if (tags.includes('type:void')) {
+            material.transparent = true;
+            material.depthWrite = false;
+            material.opacity *= 0.25;
+            mesh.castShadow = false;
+            mesh.receiveShadow = false;
+          }
+          mesh.add(outline);
+        }
+
+        if (tags.includes('show:wireframe')) {
+          const edges = new WireframeGeometry(shapeGeometry);
           const outline = new LineSegments(
             edges,
             new LineBasicMaterial({ color: 0x000000 })
           );
-          outline.userData.isOutline = true;
-          outline.userData.hasShowOutline = tags.includes('show:outline');
-          outline.visible = outline.userData.hasShowOutline;
           mesh.add(outline);
         }
       }

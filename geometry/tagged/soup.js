@@ -15,7 +15,7 @@ export const soup = (
     if (doTriangles) {
       geometry = hasShowSkin(geometry);
     }
-    if (doOutline && isNotTypeVoid(geometry)) {
+    if (doOutline /* && isNotTypeVoid(geometry) */) {
       geometry = hasShowOutline(geometry);
     }
     if (doWireframe && isNotTypeVoid(geometry)) {

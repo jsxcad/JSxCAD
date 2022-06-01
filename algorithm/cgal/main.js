@@ -86,7 +86,6 @@ export { offset } from './offset.js';
 export { outline } from './outline.js';
 export { makeAbsolute } from './makeAbsolute.js';
 export { makeUnitSphere } from './makeUnitSphere.js';
-export { mirror } from './mirror.js';
 export { pushSurfaceMesh } from './pushSurfaceMesh.js';
 export { remesh } from './remesh.js';
 export { remeshSurfaceMesh } from './remeshSurfaceMesh.js';

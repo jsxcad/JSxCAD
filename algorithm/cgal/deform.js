@@ -3,14 +3,15 @@ import { fromCgalGeometry, withCgalGeometry } from './cgalGeometry.js';
 
 import { ErrorZeroThickness } from './error.js';
 
+// FIX
 export const deform = (
   inputs,
   length,
   iterations = 1000,
   tolerance = 0.0001,
   alpha = 0.02
-) =>
-  withCgalGeometry(inputs, (cgalGeometry, g) => {
+) => {
+  return withCgalGeometry(inputs, (cgalGeometry, g) => {
     const status = g.Deform(cgalGeometry, length, iterations, tolerance, alpha);
     switch (status) {
       case STATUS_ZERO_THICKNESS:
@@ -21,3 +22,4 @@ export const deform = (
         throw new Error(`Unexpected status ${status}`);
     }
   });
+};

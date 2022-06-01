@@ -3,7 +3,7 @@ import Shape from './Shape.js';
 import { deform as deformGeometry } from '@jsxcad/geometry';
 
 export const deform =
-  (entries, { iterations, tolerance, alpha } = {}) =>
+  (entries = [], { iterations, tolerance, alpha } = {}) =>
   (shape) =>
     Shape.fromGeometry(
       deformGeometry(
@@ -12,7 +12,7 @@ export const deform =
           selection: selection.toGeometry(),
           deformation: deformation
             ? deformation.toGeometry()
-            : Point().toGeometry,
+            : Point().toGeometry(),
         })),
         iterations,
         tolerance,

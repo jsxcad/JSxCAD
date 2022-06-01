@@ -1,11 +1,11 @@
-import { closePath, concatenatePath, assemble as assemble$1, toDisplayGeometry, toConcreteGeometry, toTransformedGeometry, toPoints, transform, rewriteTags, taggedGraph, taggedSegments, taggedPoints, fromPolygons, registerReifier, taggedPlan, taggedGroup, join as join$1, makeAbsolute, measureArea, taggedItem, getInverseMatrices, bend as bend$1, getLeafs, cast as cast$1, computeCentroid, convexHull, fuse as fuse$1, clip as clip$1, allTags, cut as cut$1, deform as deform$1, demesh as demesh$1, disjoint as disjoint$1, rewrite, visit, hasTypeVoid, taggedLayout, measureBoundingBox, getLayouts, isNotVoid, getLeafsIn, eachSegment, transformCoordinate, computeNormal, extrude, faces as faces$1, fill as fill$1, fix as fix$2, grow as grow$1, outline as outline$1, inset as inset$1, involute as involute$1, link as link$1, read, readNonblocking, loft as loft$1, serialize as serialize$1, generateLowerEnvelope, hasShowOverlay, hasTypeMasked, linearize, isVoid, offset as offset$1, eachPoint, remesh as remesh$1, write, writeNonblocking, fromScaleToTransform, seam as seam$1, section as section$1, separate as separate$1, simplify as simplify$1, taggedSketch, smooth as smooth$1, computeToolpath, twist as twist$1, generateUpperEnvelope, measureVolume, withAabbTreeQuery, computeImplicitVolume } from './jsxcad-geometry.js';
+import { closePath, concatenatePath, assemble as assemble$1, toDisplayGeometry, toConcreteGeometry, toTransformedGeometry, toPoints, transform, rewriteTags, taggedGraph, taggedSegments, taggedPoints, fromPolygons, registerReifier, taggedPlan, taggedGroup, join as join$1, makeAbsolute, measureArea, taggedItem, getInverseMatrices, bend as bend$1, getLeafs, cast as cast$1, computeCentroid, convexHull, fuse as fuse$1, clip as clip$1, allTags, cut as cut$1, deform as deform$1, demesh as demesh$1, disjoint as disjoint$1, rewrite, visit, hasTypeVoid, computeNormal, extrude, link as link$1, taggedLayout, measureBoundingBox, getLayouts, isNotVoid, getLeafsIn, eachSegment, transformCoordinate, faces as faces$1, fill as fill$1, fix as fix$2, grow as grow$1, outline as outline$1, inset as inset$1, involute as involute$1, read, readNonblocking, loft as loft$1, serialize as serialize$1, generateLowerEnvelope, hasShowOverlay, hasTypeMasked, linearize, isVoid, offset as offset$1, eachPoint, remesh as remesh$1, write, writeNonblocking, fromScaleToTransform, seam as seam$1, section as section$1, separate as separate$1, simplify as simplify$1, taggedSketch, smooth as smooth$1, computeToolpath, twist as twist$1, generateUpperEnvelope, measureVolume, withAabbTreeQuery, computeImplicitVolume } from './jsxcad-geometry.js';
 import { getSourceLocation, startTime, endTime, emit, computeHash, logInfo, log as log$1, generateUniqueId, addPending, write as write$1 } from './jsxcad-sys.js';
 export { elapsed, emit, read, write } from './jsxcad-sys.js';
 import { identityMatrix, fromRotation } from './jsxcad-math-mat4.js';
 import { scale as scale$1, subtract, add, abs, transform as transform$1, squaredLength, normalize, cross, distance, lerp } from './jsxcad-math-vec3.js';
 import { zag } from './jsxcad-api-v1-math.js';
 import { toTagsFromName } from './jsxcad-algorithm-color.js';
-import { fromSegmentToInverseTransform, invertTransform, fromTranslateToTransform, fromRotateXToTransform, fromRotateYToTransform, fromRotateZToTransform, makeUnitSphere as makeUnitSphere$1 } from './jsxcad-algorithm-cgal.js';
+import { fromRotateXToTransform, fromRotateYToTransform, fromSegmentToInverseTransform, invertTransform, fromTranslateToTransform, fromRotateZToTransform, makeUnitSphere as makeUnitSphere$1 } from './jsxcad-algorithm-cgal.js';
 import { toTagsFromName as toTagsFromName$1 } from './jsxcad-algorithm-material.js';
 import { pack as pack$1 } from './jsxcad-algorithm-pack.js';
 import { toTagsFromName as toTagsFromName$2 } from './jsxcad-algorithm-tool.js';
@@ -1117,7 +1117,7 @@ const cutout =
 Shape.registerMethod('cutout', cutout);
 
 const deform =
-  (entries, { iterations, tolerance, alpha } = {}) =>
+  (entries = [], { iterations, tolerance, alpha } = {}) =>
   (shape) =>
     Shape.fromGeometry(
       deform$1(
@@ -1126,7 +1126,7 @@ const deform =
           selection: selection.toGeometry(),
           deformation: deformation
             ? deformation.toGeometry()
-            : Point().toGeometry,
+            : Point().toGeometry(),
         })),
         iterations,
         tolerance,
@@ -1258,6 +1258,93 @@ const drop = (tag) => (shape) => shape.on(get(tag), voidFn());
 
 Shape.registerMethod('drop', drop);
 
+const normal = () => (shape) =>
+  Shape.fromGeometry(computeNormal(shape.toGeometry()));
+
+Shape.registerMethod('normal', normal);
+
+const extrudeAlong =
+  (direction, ...extents) =>
+  (shape) => {
+    const vector = shape.toCoordinate(direction);
+    const heights = extents.map((extent) => Shape.toValue(extent, shape));
+    if (heights.length % 2 === 1) {
+      heights.push(0);
+    }
+    heights.sort((a, b) => a - b);
+    const extrusions = [];
+    while (heights.length > 0) {
+      const height = heights.pop();
+      const depth = heights.pop();
+      if (height === depth) {
+        // Return unextruded geometry at this height, instead.
+        extrusions.push(shape.moveAlong(vector, height));
+        continue;
+      }
+      extrusions.push(
+        Shape.fromGeometry(
+          extrude(
+            shape.toGeometry(),
+            Point().moveAlong(vector, height).toGeometry(),
+            Point().moveAlong(vector, depth).toGeometry()
+          )
+        )
+      );
+    }
+    return Shape.Group(...extrusions);
+  };
+
+// Note that the operator is applied to each leaf geometry by default.
+const e = (...extents) => extrudeAlong(normal(), ...extents);
+
+Shape.registerMethod('extrudeAlong', extrudeAlong);
+Shape.registerMethod('e', e);
+
+const extrudeX = (...extents) =>
+  extrudeAlong(Point(1, 0, 0), ...extents);
+const extrudeY = (...extents) =>
+  extrudeAlong(Point(0, 1, 0), ...extents);
+const extrudeZ = (...extents) =>
+  extrudeAlong(Point(0, 0, 1), ...extents);
+
+const ex = extrudeX;
+const ey = extrudeY;
+const ez = extrudeZ;
+
+Shape.registerMethod('ex', ex);
+Shape.registerMethod('ey', ey);
+Shape.registerMethod('ez', ez);
+
+// rx is in terms of turns -- 1/2 is a half turn.
+const rx =
+  (...turns) =>
+  (shape) =>
+    Shape.Group(
+      ...shape
+        .toFlatValues(turns)
+        .map((turn) => shape.transform(fromRotateXToTransform(turn)))
+    );
+
+Shape.registerMethod('rx', rx);
+
+const rotateX = rx;
+Shape.registerMethod('rotateX', rotateX);
+
+// ry is in terms of turns -- 1/2 is a half turn.
+const ry =
+  (...turns) =>
+  (shape) =>
+    Shape.Group(
+      ...shape
+        .toFlatValues(turns)
+        .map((turn) => shape.transform(fromRotateYToTransform(turn)))
+    );
+
+Shape.registerMethod('ry', ry);
+
+const rotateY = ry;
+Shape.registerMethod('rotateY', ry);
+
 const Edge = (source = 1, target = 0) =>
   Shape.fromSegments([
     [
@@ -1268,38 +1355,23 @@ const Edge = (source = 1, target = 0) =>
 
 Shape.prototype.Edge = Shape.shapeMethod(Edge);
 
-const Face = (...points) =>
-  Shape.fromPolygons([
-    { points: points.map((point) => Shape.toCoordinate(undefined, point)) },
-  ]);
+const Loop = (...shapes) =>
+  Shape.fromGeometry(
+    link$1(
+      Shape.toShapes(shapes).map((shape) => shape.toGeometry()),
+      /* close= */ true
+    )
+  );
 
-Shape.prototype.Face = Shape.shapeMethod(Face);
+Shape.prototype.Loop = Shape.shapeMethod(Loop);
+Shape.Loop = Loop;
 
-const ofPointPaths = (points = [], paths = []) => {
-  const polygons = [];
-  for (const path of paths) {
-    polygons.push({ points: path.map((point) => points[point]) });
-  }
-  return Shape.fromPolygons(polygons);
-};
+const loop =
+  (...shapes) =>
+  (shape) =>
+    Loop(shape, ...shape.toShapes(shapes, shape));
 
-const ofPolygons = (...polygons) => {
-  const out = [];
-  for (const polygon of polygons) {
-    if (polygon instanceof Array) {
-      out.push({ points: polygon });
-    } else if (polygon instanceof Shape) {
-      out.push({ points: polygon.toPoints() });
-    }
-  }
-  return Shape.fromPolygons(out);
-};
-
-const Polyhedron = (...args) => ofPolygons(...args);
-
-Polyhedron.ofPointPaths = ofPointPaths;
-
-Shape.prototype.Polyhedron = Shape.shapeMethod(Polyhedron);
+Shape.registerMethod('loop', loop);
 
 const X$7 = 0;
 const Y$7 = 1;
@@ -1309,40 +1381,27 @@ let fundamentalShapes;
 
 const fs = () => {
   if (fundamentalShapes === undefined) {
+    const f = Loop(
+      Point(1, 0, 0),
+      Point(1, 1, 0),
+      Point(0, 1, 0),
+      Point(0, 0, 0)
+    ).fill();
     fundamentalShapes = {
       tlfBox: Point(),
       tlBox: Edge(Point(0, 1, 0), Point(0, 0, 0)),
       tfBox: Edge(Point(0, 0, 0), Point(1, 0, 0)),
-      tBox: Face(
-        Point(1, 0, 0),
-        Point(1, 1, 0),
-        Point(0, 1, 0),
-        Point(0, 0, 0)
-      ),
-
+      tBox: f,
       lfBox: Edge(Point(0, 0, 0), Point(0, 0, 1)),
-      lBox: Face(
-        Point(0, 0, 0),
-        Point(0, 1, 0),
-        Point(0, 1, 1),
-        Point(0, 0, 1)
-      ),
-
-      fBox: Face(
-        Point(0, 0, 1),
-        Point(1, 0, 1),
-        Point(1, 0, 0),
-        Point(0, 0, 0)
-      ),
-
-      box: Polyhedron(
-        Face(Point(0, 0, 1), Point(0, 1, 1), Point(1, 1, 1), Point(1, 0, 1)),
-        Face(Point(0, 0, 0), Point(0, 1, 0), Point(1, 1, 0), Point(1, 0, 0)),
-        Face(Point(0, 0, 0), Point(0, 1, 0), Point(0, 1, 1), Point(0, 0, 1)),
-        Face(Point(1, 0, 0), Point(1, 1, 0), Point(1, 1, 1), Point(1, 0, 1)),
-        Face(Point(0, 0, 0), Point(1, 0, 0), Point(1, 0, 1), Point(0, 0, 1)),
-        Face(Point(0, 1, 0), Point(1, 1, 0), Point(1, 1, 1), Point(0, 1, 1))
-      ),
+      lBox: f
+        .ry(1 / 4)
+        .rz(1 / 2)
+        .rx(-1 / 4),
+      fBox: f
+        .rx(1 / 4)
+        .rz(1 / 2)
+        .ry(-1 / 4),
+      box: f.ez(1),
     };
   }
   return fundamentalShapes;
@@ -1353,80 +1412,60 @@ const reifyBox = (geometry) => {
     const corner1 = getCorner1(geometry);
     const corner2 = getCorner2(geometry);
 
-    const left = corner1[X$7];
-    const right = corner2[X$7];
+    const left = corner2[X$7];
+    const right = corner1[X$7];
 
-    const front = corner1[Y$7];
-    const back = corner2[Y$7];
+    const front = corner2[Y$7];
+    const back = corner1[Y$7];
 
-    const bottom = corner1[Z$7];
-    const top = corner2[Z$7];
+    const bottom = corner2[Z$7];
+    const top = corner1[Z$7];
 
     if (top === bottom) {
       if (left === right) {
         if (front === back) {
-          // return Point(bottom, left, front)
-          return fs().tlfBox.move(left, back, bottom);
+          return fs().tlfBox.move(left, front, bottom);
         } else {
-          // return Edge(Point(left, front, bottom), Point(right, back, top));
           return fs()
-            .tlBox.sy(front - back)
-            .move(left, back, bottom);
+            .tlBox.sy(back - front)
+            .move(left, front, bottom);
         }
       } else {
         if (front === back) {
-          // return Edge(Point(left, front, bottom), Point(right, back, top));
           return fs()
             .tfBox.sx(right - left)
-            .move(left, back, bottom);
+            .move(left, front, bottom);
         } else {
-          // left !== right && front !== back
-          // return Face(Point(left, back, bottom), Point(left, front, bottom), Point(right, front, top), Point(right, back, top));
           return fs()
             .tBox.sx(right - left)
-            .sy(front - back)
-            .move(left, back, bottom);
+            .sy(back - front)
+            .move(left, front, bottom);
         }
       }
     } else {
       if (left === right) {
         if (front === back) {
-          // return Edge(Point(left, front, bottom), Point(right, back, top));
           return fs()
             .lfBox.sz(top - bottom)
-            .move(left, back, bottom);
+            .move(left, front, bottom);
         } else {
-          // top !== bottom && front !== back
-          // return Face(Point(right, back, top), Point(right, front, top), Point(right, front, bottom), Point(left, back, bottom));
           return fs()
             .lBox.sz(top - bottom)
-            .sy(front - back)
-            .move(left, back, bottom);
+            .sy(back - front)
+            .move(left, front, bottom);
         }
       } else {
         if (front === back) {
-          // top !== bottom && left !== right
-          // return Face(Point(left, back, top), Point(right, front, top), Point(right, front, bottom), Point(left, back, bottom));
           return fs()
             .fBox.sz(top - bottom)
             .sx(right - left)
-            .move(left, back, bottom);
+            .move(left, front, bottom);
         } else {
-          // top !== bottom && front !== back && left !== right
-          /*
-          return Polyhedron(
-            Face( Point(left, back, top), Point(left, front, top), Point(right, front, top), Point(right, back, top)),
-            Face( Point(left, back, bottom), Point(left, front, bottom), Point(right, front, bottom), Point(right, back, bottom)),
-            Face( Point(left, back, bottom), Point(left, front, bottom), Point(left, front, top), Point(left, back, top)),
-            Face( Point(right, back, bottom), Point(right, front, bottom), Point(right, front, top), Point(right, back, top)),
-            Face( Point(left, back, bottom), Point(right, back, bottom), Point(right, back, top), Point(left, back, top)),
-            Face( Point(left, front, bottom), Point(right, front, bottom), Point(right, front, top), Point(left, front, top)));
-          */
           return fs()
             .box.sz(top - bottom)
             .sx(right - left)
-            .sy(front - back)
-            .move(left, back, bottom);
+            .sy(back - front)
+            .move(left, front, bottom);
         }
       }
     }
@@ -3230,63 +3269,6 @@ const edges =
 
 Shape.registerMethod('edges', edges);
 
-const normal = () => (shape) =>
-  Shape.fromGeometry(computeNormal(shape.toGeometry()));
-
-Shape.registerMethod('normal', normal);
-
-const extrudeAlong =
-  (direction, ...extents) =>
-  (shape) => {
-    const vector = shape.toCoordinate(direction);
-    const heights = extents.map((extent) => Shape.toValue(extent, shape));
-    if (heights.length % 2 === 1) {
-      heights.push(0);
-    }
-    heights.sort((a, b) => a - b);
-    const extrusions = [];
-    while (heights.length > 0) {
-      const height = heights.pop();
-      const depth = heights.pop();
-      if (height === depth) {
-        // Return unextruded geometry at this height, instead.
-        extrusions.push(shape.moveAlong(vector, height));
-        continue;
-      }
-      extrusions.push(
-        Shape.fromGeometry(
-          extrude(
-            shape.toGeometry(),
-            Point().moveAlong(vector, height).toGeometry(),
-            Point().moveAlong(vector, depth).toGeometry()
-          )
-        )
-      );
-    }
-    return Shape.Group(...extrusions);
-  };
-
-// Note that the operator is applied to each leaf geometry by default.
-const e = (...extents) => extrudeAlong(normal(), ...extents);
-
-Shape.registerMethod('extrudeAlong', extrudeAlong);
-Shape.registerMethod('e', e);
-
-const extrudeX = (...extents) =>
-  extrudeAlong(Point(1, 0, 0), ...extents);
-const extrudeY = (...extents) =>
-  extrudeAlong(Point(0, 1, 0), ...extents);
-const extrudeZ = (...extents) =>
-  extrudeAlong(Point(0, 0, 1), ...extents);
-
-const ex = extrudeX;
-const ey = extrudeY;
-const ez = extrudeZ;
-
-Shape.registerMethod('ex', ex);
-Shape.registerMethod('ey', ey);
-Shape.registerMethod('ez', ez);
-
 const faces =
   (...args) =>
   (shape) => {
@@ -3599,24 +3581,6 @@ const logMethod = function (op = (shape) => JSON.stringify(shape)) {
   return this;
 };
 Shape.prototype.log = logMethod;
-
-const Loop = (...shapes) =>
-  Shape.fromGeometry(
-    link$1(
-      Shape.toShapes(shapes).map((shape) => shape.toGeometry()),
-      /* close= */ true
-    )
-  );
-
-Shape.prototype.Loop = Shape.shapeMethod(Loop);
-Shape.Loop = Loop;
-
-const loop =
-  (...shapes) =>
-  (shape) =>
-    Loop(shape, ...shape.toShapes(shapes, shape));
-
-Shape.registerMethod('loop', loop);
 
 const lowerEnvelope = () => (shape) =>
   Shape.fromGeometry(generateLowerEnvelope(shape.toGeometry()));
@@ -4000,36 +3964,6 @@ const rotate =
   };
 
 Shape.registerMethod('rotate', rotate);
-
-// rx is in terms of turns -- 1/2 is a half turn.
-const rx =
-  (...turns) =>
-  (shape) =>
-    Shape.Group(
-      ...shape
-        .toFlatValues(turns)
-        .map((turn) => shape.transform(fromRotateXToTransform(turn)))
-    );
-
-Shape.registerMethod('rx', rx);
-
-const rotateX = rx;
-Shape.registerMethod('rotateX', rotateX);
-
-// ry is in terms of turns -- 1/2 is a half turn.
-const ry =
-  (...turns) =>
-  (shape) =>
-    Shape.Group(
-      ...shape
-        .toFlatValues(turns)
-        .map((turn) => shape.transform(fromRotateYToTransform(turn)))
-    );
-
-Shape.registerMethod('ry', ry);
-
-const rotateY = ry;
-Shape.registerMethod('rotateY', ry);
 
 // rz is in terms of turns -- 1/2 is a half turn.
 const rz =
@@ -5374,6 +5308,13 @@ const Empty = (...shapes) => Shape.fromGeometry(taggedGroup({}));
 
 Shape.prototype.Empty = Shape.shapeMethod(Empty);
 
+const Face = (...points) =>
+  Shape.fromPolygons([
+    { points: points.map((point) => Shape.toCoordinate(undefined, point)) },
+  ]);
+
+Shape.prototype.Face = Shape.shapeMethod(Face);
+
 const Hexagon = (x, y, z) => Arc(x, y, z).hasSides(6);
 
 Shape.prototype.Hexagon = Shape.shapeMethod(Hexagon);
@@ -5541,6 +5482,32 @@ Shape.prototype.Pentagon = Shape.shapeMethod(Pentagon);
 const Polygon = (...points) => Face(...points);
 
 Shape.prototype.Polygon = Shape.shapeMethod(Polygon);
+
+const ofPointPaths = (points = [], paths = []) => {
+  const polygons = [];
+  for (const path of paths) {
+    polygons.push({ points: path.map((point) => points[point]) });
+  }
+  return Shape.fromPolygons(polygons);
+};
+
+const ofPolygons = (...polygons) => {
+  const out = [];
+  for (const polygon of polygons) {
+    if (polygon instanceof Array) {
+      out.push({ points: polygon });
+    } else if (polygon instanceof Shape) {
+      out.push({ points: polygon.toPoints() });
+    }
+  }
+  return Shape.fromPolygons(out);
+};
+
+const Polyhedron = (...args) => ofPolygons(...args);
+
+Polyhedron.ofPointPaths = ofPointPaths;
+
+Shape.prototype.Polyhedron = Shape.shapeMethod(Polyhedron);
 
 const Segments = (...segments) =>
   Shape.fromSegments(

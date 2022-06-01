@@ -1,9 +1,12 @@
+import './extrude.js';
+import './rx.js';
+import './ry.js';
+
 import { getCorner1, getCorner2 } from './Plan.js';
 
 import Edge from './Edge.js';
-import Face from './Face.js';
+import Loop from './Loop.js';
 import Point from './Point.js';
-import Polyhedron from './Polyhedron.js';
 import Shape from './Shape.js';
 import { taggedPlan } from '@jsxcad/geometry';
 
@@ -15,40 +18,27 @@ let fundamentalShapes;
 
 const fs = () => {
   if (fundamentalShapes === undefined) {
+    const f = Loop(
+      Point(1, 0, 0),
+      Point(1, 1, 0),
+      Point(0, 1, 0),
+      Point(0, 0, 0)
+    ).fill();
     fundamentalShapes = {
       tlfBox: Point(),
       tlBox: Edge(Point(0, 1, 0), Point(0, 0, 0)),
       tfBox: Edge(Point(0, 0, 0), Point(1, 0, 0)),
-      tBox: Face(
-        Point(1, 0, 0),
-        Point(1, 1, 0),
-        Point(0, 1, 0),
-        Point(0, 0, 0)
-      ),
-
+      tBox: f,
       lfBox: Edge(Point(0, 0, 0), Point(0, 0, 1)),
-      lBox: Face(
-        Point(0, 0, 0),
-        Point(0, 1, 0),
-        Point(0, 1, 1),
-        Point(0, 0, 1)
-      ),
-
-      fBox: Face(
-        Point(0, 0, 1),
-        Point(1, 0, 1),
-        Point(1, 0, 0),
-        Point(0, 0, 0)
-      ),
-
-      box: Polyhedron(
-        Face(Point(0, 0, 1), Point(0, 1, 1), Point(1, 1, 1), Point(1, 0, 1)),
-        Face(Point(0, 0, 0), Point(0, 1, 0), Point(1, 1, 0), Point(1, 0, 0)),
-        Face(Point(0, 0, 0), Point(0, 1, 0), Point(0, 1, 1), Point(0, 0, 1)),
-        Face(Point(1, 0, 0), Point(1, 1, 0), Point(1, 1, 1), Point(1, 0, 1)),
-        Face(Point(0, 0, 0), Point(1, 0, 0), Point(1, 0, 1), Point(0, 0, 1)),
-        Face(Point(0, 1, 0), Point(1, 1, 0), Point(1, 1, 1), Point(0, 1, 1))
-      ),
+      lBox: f
+        .ry(1 / 4)
+        .rz(1 / 2)
+        .rx(-1 / 4),
+      fBox: f
+        .rx(1 / 4)
+        .rz(1 / 2)
+        .ry(-1 / 4),
+      box: f.ez(1),
     };
   }
   return fundamentalShapes;
@@ -59,80 +49,60 @@ const reifyBox = (geometry) => {
     const corner1 = getCorner1(geometry);
     const corner2 = getCorner2(geometry);
 
-    const left = corner1[X];
-    const right = corner2[X];
+    const left = corner2[X];
+    const right = corner1[X];
 
-    const front = corner1[Y];
-    const back = corner2[Y];
+    const front = corner2[Y];
+    const back = corner1[Y];
 
-    const bottom = corner1[Z];
-    const top = corner2[Z];
+    const bottom = corner2[Z];
+    const top = corner1[Z];
 
     if (top === bottom) {
       if (left === right) {
         if (front === back) {
-          // return Point(bottom, left, front)
-          return fs().tlfBox.move(left, back, bottom);
+          return fs().tlfBox.move(left, front, bottom);
         } else {
-          // return Edge(Point(left, front, bottom), Point(right, back, top));
           return fs()
-            .tlBox.sy(front - back)
-            .move(left, back, bottom);
+            .tlBox.sy(back - front)
+            .move(left, front, bottom);
         }
       } else {
         if (front === back) {
-          // return Edge(Point(left, front, bottom), Point(right, back, top));
           return fs()
             .tfBox.sx(right - left)
-            .move(left, back, bottom);
+            .move(left, front, bottom);
         } else {
-          // left !== right && front !== back
-          // return Face(Point(left, back, bottom), Point(left, front, bottom), Point(right, front, top), Point(right, back, top));
           return fs()
             .tBox.sx(right - left)
-            .sy(front - back)
-            .move(left, back, bottom);
+            .sy(back - front)
+            .move(left, front, bottom);
         }
       }
     } else {
       if (left === right) {
         if (front === back) {
-          // return Edge(Point(left, front, bottom), Point(right, back, top));
           return fs()
             .lfBox.sz(top - bottom)
-            .move(left, back, bottom);
+            .move(left, front, bottom);
         } else {
-          // top !== bottom && front !== back
-          // return Face(Point(right, back, top), Point(right, front, top), Point(right, front, bottom), Point(left, back, bottom));
           return fs()
             .lBox.sz(top - bottom)
-            .sy(front - back)
-            .move(left, back, bottom);
+            .sy(back - front)
+            .move(left, front, bottom);
         }
       } else {
         if (front === back) {
-          // top !== bottom && left !== right
-          // return Face(Point(left, back, top), Point(right, front, top), Point(right, front, bottom), Point(left, back, bottom));
           return fs()
             .fBox.sz(top - bottom)
             .sx(right - left)
-            .move(left, back, bottom);
+            .move(left, front, bottom);
         } else {
-          // top !== bottom && front !== back && left !== right
-          /*
-          return Polyhedron(
-            Face( Point(left, back, top), Point(left, front, top), Point(right, front, top), Point(right, back, top)),
-            Face( Point(left, back, bottom), Point(left, front, bottom), Point(right, front, bottom), Point(right, back, bottom)),
-            Face( Point(left, back, bottom), Point(left, front, bottom), Point(left, front, top), Point(left, back, top)),
-            Face( Point(right, back, bottom), Point(right, front, bottom), Point(right, front, top), Point(right, back, top)),
-            Face( Point(left, back, bottom), Point(right, back, bottom), Point(right, back, top), Point(left, back, top)),
-            Face( Point(left, front, bottom), Point(right, front, bottom), Point(right, front, top), Point(left, front, top)));
-          */
           return fs()
             .box.sz(top - bottom)
             .sx(right - left)
-            .sy(front - back)
-            .move(left, back, bottom);
+            .sy(back - front)
+            .move(left, front, bottom);
         }
       }
     }

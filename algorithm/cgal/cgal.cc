@@ -35,6 +35,7 @@
 #include <CGAL/IO/facets_in_complex_2_to_triangle_mesh.h>
 #include <CGAL/IO/io.h>
 #include <CGAL/Implicit_surface_3.h>
+#include <CGAL/Kernel_traits.h>
 #include <CGAL/Labeled_mesh_domain_3.h>
 #include <CGAL/Mesh_complex_3_in_triangulation_3.h>
 #include <CGAL/Mesh_criteria_3.h>
@@ -598,8 +599,38 @@ const Surface_mesh* FromPolygonSoupToSurfaceMesh(emscripten::val fill) {
   return mesh;
 }
 
+void write_point(const Point& p, std::ostringstream& o) {
+  o << p.x().exact() << " ";
+  o << p.y().exact() << " ";
+  o << p.z().exact();
+}
+
+void read_point(Point& point, std::istringstream& input) {
+  FT x, y, z;
+  input >> x;
+  input >> y;
+  input >> z;
+  point = Point(x, y, z);
+}
+
+void read_segment(Segment& segment, std::istringstream& input) {
+  Point source;
+  read_point(source, input);
+  Point target;
+  read_point(target, input);
+  segment = Segment(source, target);
+}
+
+void write_segment(Segment s, std::ostringstream& o) {
+  write_point(s.source(), o);
+  o << " ";
+  write_point(s.target(), o);
+}
+
 void emitPoint(Point p, emscripten::val emit_point) {
-  std::ostringstream x;
+  std::ostringstream exact;
+  write_point(p, exact);
+#if 0
   x << p.x().exact();
   std::string xs = x.str();
   std::ostringstream y;
@@ -608,8 +639,9 @@ void emitPoint(Point p, emscripten::val emit_point) {
   std::ostringstream z;
   z << p.z().exact();
   std::string zs = z.str();
+#endif
   emit_point(CGAL::to_double(p.x().exact()), CGAL::to_double(p.y().exact()),
-             CGAL::to_double(p.z().exact()), xs, ys, zs);
+             CGAL::to_double(p.z().exact()), exact.str());
 }
 
 void emitPoint2(Point_2 p, emscripten::val emit_point) {
@@ -1487,13 +1519,14 @@ const Surface_mesh* ApproximateSurfaceMesh(
   return output.release();
 }
 
-template <typename Vertex_point_map>
+template <typename Surface_mesh, typename Vertex_point_map,
+          typename Halfedge_index>
 bool is_coplanar_edge(const Surface_mesh& m, const Vertex_point_map& p,
                       const Halfedge_index e) {
   auto a = p[m.source(e)];
   auto b = p[m.target(e)];
   auto c = p[m.target(m.next(e))];
-  typename Kernel::Plane_3 plane(a, b, c);
+  typename CGAL::Kernel_traits<decltype(a)>::Kernel::Plane_3 plane(a, b, c);
   return plane.has_on(p[m.target(m.next(m.opposite(e)))]);
 }
 
@@ -1508,7 +1541,8 @@ bool is_sufficiently_coplanar_edge(const Surface_mesh& m,
   return angle < threshold;
 }
 
-template <typename Vertex_point_map>
+template <typename Surface_mesh, typename Vertex_point_map,
+          typename Halfedge_index>
 bool is_collinear_edge(const Surface_mesh& m, const Vertex_point_map& p,
                        const Halfedge_index e0, const Halfedge_index e1) {
   // Assume that e0 and e1 share the same source vertex.
@@ -1518,7 +1552,8 @@ bool is_collinear_edge(const Surface_mesh& m, const Vertex_point_map& p,
   return CGAL::collinear(a, b, c);
 }
 
-template <typename Vertex_point_map>
+template <typename Surface_mesh, typename Vertex_point_map,
+          typename Halfedge_index>
 bool is_safe_to_move(const Surface_mesh& m, const Vertex_point_map& p,
                      const Halfedge_index start) {
   for (Halfedge_index e = m.next_around_source(start); e != start;
@@ -1534,7 +1569,7 @@ bool is_safe_to_move(const Surface_mesh& m, const Vertex_point_map& p,
   return true;
 }
 
-template <typename Kernel>
+// template <typename Kernel>
 class Demesh_cost {
  public:
   Demesh_cost() {}
@@ -1543,7 +1578,8 @@ class Demesh_cost {
       const Profile& profile,
       const boost::optional<typename Profile::Point>& placement) const {
     // All options are equal priority -- delegate the decision to placement.
-    return FT(0);
+    // return typename Kernel::FT(0);
+    return typename Profile::FT(0);
   }
 };
 
@@ -1566,13 +1602,26 @@ class Demesh_safe_placement {
   }
 };
 
+template <typename Surface_mesh>
 void demesh(Surface_mesh& mesh) {
   CGAL::Surface_mesh_simplification::Count_stop_predicate<Surface_mesh> stop(0);
-  Demesh_cost<Kernel> cost;
+  Demesh_cost cost;
   Demesh_safe_placement placement;
   CGAL::Surface_mesh_simplification::edge_collapse(
       mesh, stop, CGAL::parameters::get_cost(cost).get_placement(placement));
 }
+
+#if 0
+void demesh_cartesian_mesh(Cartesian_surface_mesh& mesh) {
+  CGAL::Surface_mesh_simplification::Count_stop_predicate<
+      Cartesian_surface_mesh>
+      stop(0);
+  Demesh_cost<Cartesian_kernel> cost;
+  Demesh_safe_placement placement;
+  CGAL::Surface_mesh_simplification::edge_collapse(
+      mesh, stop, CGAL::parameters::get_cost(cost).get_placement(placement));
+}
+#endif
 
 const Surface_mesh* DemeshSurfaceMesh(const Surface_mesh* input,
                                       const Transformation* transform) {
@@ -3673,14 +3722,23 @@ class Geometry {
     input_points(nth).emplace_back(Point{x, y, z});
   }
 
-  void addInputPointExact(int nth, const std::string& x, const std::string& y,
-                          const std::string& z) {
-    input_points(nth).emplace_back(Point{to_FT(x), to_FT(y), to_FT(z)});
+  void addInputPointExact(int nth, const std::string& exact) {
+    std::istringstream i(exact);
+    Point p;
+    read_point(p, i);
+    input_points(nth).push_back(std::move(p));
   }
 
   void addInputSegment(int nth, double sx, double sy, double sz, double tx,
                        double ty, double tz) {
     input_segments(nth).emplace_back(Point{sx, sy, sz}, Point{tx, ty, tz});
+  }
+
+  void addInputSegmentExact(int nth, const std::string& serialization) {
+    std::istringstream i(serialization);
+    Segment s;
+    read_segment(s, i);
+    input_segments(nth).push_back(std::move(s));
   }
 
   void addSegment(int nth, const Segment& segment) {
@@ -3694,9 +3752,11 @@ class Geometry {
     for (const Segment& segment : segments(nth)) {
       Point s = segment.source();
       Point t = segment.target();
+      std::ostringstream exact;
+      write_segment(segment, exact);
       emit(CGAL::to_double(s.x()), CGAL::to_double(s.y()),
            CGAL::to_double(s.z()), CGAL::to_double(t.x()),
-           CGAL::to_double(t.y()), CGAL::to_double(t.z()));
+           CGAL::to_double(t.y()), CGAL::to_double(t.z()), exact.str());
     }
   }
 
@@ -4265,7 +4325,6 @@ int ComputeBoundingBox(Geometry* geometry, emscripten::val emit) {
       }
       case GEOMETRY_POLYGONS_WITH_HOLES: {
         const Plane& plane = geometry->plane(nth);
-        const Transformation& transform = geometry->transform(nth);
         for (const Polygon_with_holes_2& polygon : geometry->pwh(nth)) {
           for (const Point_2 point : polygon.outer_boundary()) {
             bbox += plane.to_3d(point).bbox();
@@ -4598,10 +4657,17 @@ int Cut(Geometry* geometry, int targets, bool open) {
   return STATUS_OK;
 }
 
+// FIX
 int Deform(Geometry* geometry, size_t length, size_t iterations,
            double tolerance, double alpha) {
+  typedef CGAL::Cartesian_converter<Cartesian_kernel, Kernel> converter;
+  typedef CGAL::Surface_mesh_deformation<Cartesian_surface_mesh, CGAL::Default,
+                                         CGAL::Default, CGAL::SRE_ARAP>
+      Surface_mesh_deformation;
+
+  converter from_cartesian;
+
   size_t size = geometry->size();
-  Transformation identity(CGAL::IDENTITY);
   geometry->copyInputMeshesToOutputMeshes();
   geometry->transformToAbsoluteFrame();
   geometry->convertPolygonsToPlanarMeshes();
@@ -4617,13 +4683,8 @@ int Deform(Geometry* geometry, size_t length, size_t iterations,
       if (CGAL::is_empty(working_selection)) {
         continue;
       }
-      const Transformation& selection_transform =
-          geometry->transform(target).inverse() * geometry->transform(nth);
       {
         Surface_mesh working_selection_copy(working_selection);
-        CGAL::Polygon_mesh_processing::transform(
-            selection_transform, working_selection_copy,
-            CGAL::parameters::all_default());
         CGAL::Polygon_mesh_processing::corefine(
             working_input, working_selection_copy,
             CGAL::parameters::all_default(), CGAL::parameters::all_default());
@@ -4633,9 +4694,7 @@ int Deform(Geometry* geometry, size_t length, size_t iterations,
     Cartesian_surface_mesh cartesian_mesh;
     copy_face_graph(working_input, cartesian_mesh);
 
-    typedef CGAL::Surface_mesh_deformation<
-        Cartesian_surface_mesh, CGAL::Default, CGAL::Default, CGAL::SRE_ARAP>
-        Surface_mesh_deformation;
+    // FIX: Need a pass to remove zero length edges.
 
     Surface_mesh_deformation deformation(cartesian_mesh);
     deformation.set_sre_arap_alpha(alpha);
@@ -4650,7 +4709,8 @@ int Deform(Geometry* geometry, size_t length, size_t iterations,
       if (CGAL::is_empty(working_selection)) {
         continue;
       }
-      const Transformation identity_transform(CGAL::IDENTITY);
+      CGAL::Side_of_triangle_mesh<Surface_mesh, Kernel> inside(
+          working_selection);
       const Transformation& deform_transform = geometry->transform(nth + 1);
       Cartesian_kernel::Aff_transformation_3 cartesian_deform_transform(
           CGAL::to_double(deform_transform.m(0, 0)),
@@ -4666,13 +4726,10 @@ int Deform(Geometry* geometry, size_t length, size_t iterations,
           CGAL::to_double(deform_transform.m(2, 2)),
           CGAL::to_double(deform_transform.m(2, 3)),
           CGAL::to_double(deform_transform.m(3, 3)));
-      SurfaceMeshQuery query(&working_selection, &identity_transform);
+      std::cout << "QQ/t: " << cartesian_deform_transform << std::endl;
       for (const Vertex_index vertex : vertices(cartesian_mesh)) {
         const auto& p = cartesian_mesh.point(vertex);
-        double x = CGAL::to_double(p.x());
-        double y = CGAL::to_double(p.y());
-        double z = CGAL::to_double(p.z());
-        if (!query.isOutsidePointApproximate(x, y, z)) {
+        if (inside(from_cartesian(p)) != CGAL::ON_UNBOUNDED_SIDE) {
           deformation.insert_control_vertex(vertex);
           deformation.set_target_position(
               vertex, p.transform(cartesian_deform_transform));
@@ -5121,9 +5178,11 @@ int FromPolygons(Geometry* geometry, emscripten::val fill) {
                                                               mesh);
   assert(CGAL::Polygon_mesh_processing::triangulate_faces(mesh) == true);
   // If a volume, ensure it is positive.
+#if 0
   if (CGAL::is_closed(mesh)) {
     CGAL::Polygon_mesh_processing::orient_to_bound_a_volume(mesh);
   }
+#endif
 
   return STATUS_OK;
 }
@@ -5479,6 +5538,18 @@ int Involute(Geometry* geometry) {
       }
       case GEOMETRY_POLYGONS_WITH_HOLES: {
         geometry->plane(nth) = geometry->plane(nth).opposite();
+        // Why are we reflecting along y?
+        for (Polygon_with_holes_2& polygon : geometry->pwh(nth)) {
+          for (Point_2& point : polygon.outer_boundary()) {
+            point = Point_2(point.x(), point.y() * -1);
+          }
+          for (auto hole = polygon.holes_begin(); hole != polygon.holes_end();
+               ++hole) {
+            for (Point_2& point : *hole) {
+              point = Point_2(point.x(), point.y() * -1);
+            }
+          }
+        }
         break;
       }
     }
@@ -5976,8 +6047,8 @@ int Remesh(Geometry* geometry, size_t count, size_t iterations,
       const Halfedge_index halfedge = mesh.halfedge(edge);
       const Vertex_index& source = mesh.source(halfedge);
       const Vertex_index& target = mesh.target(halfedge);
-      if (unconstrained_vertices.count(source) &&
-          unconstrained_vertices.count(target)) {
+      if (constrained_vertices.count(source) &&
+          constrained_vertices.count(target)) {
         constrained_edges.insert(edge);
       }
     }
@@ -7789,6 +7860,7 @@ EMSCRIPTEN_BINDINGS(module) {
       .function("addInputPoint", &Geometry::addInputPoint)
       .function("addInputPointExact", &Geometry::addInputPointExact)
       .function("addInputSegment", &Geometry::addInputSegment)
+      .function("addInputSegmentExact", &Geometry::addInputSegmentExact)
       .function("convertPlanarMeshesToPolygons",
                 &Geometry::convertPlanarMeshesToPolygons)
       .function("convertPolygonsToPlanarMeshes",
