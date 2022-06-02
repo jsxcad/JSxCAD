@@ -29,15 +29,12 @@ export { bend } from './bend.js';
 export { cached } from './tagged/cached.js';
 export { cast } from './cast.js';
 export { clip } from './clip.js';
-export { close as closePath } from './path/close.js';
 export { computeCentroid } from './computeCentroid.js';
 export { computeImplicitVolume } from './computeImplicitVolume.js';
 export { computeNormal } from './computeNormal.js';
 export { computeToolpath } from './tagged/computeToolpath.js';
-export { concatenate as concatenatePath } from './path/concatenate.js';
 export { convexHull } from './convexHull.js';
 export { cut } from './cut.js';
-export { deduplicate as deduplicatePath } from './path/deduplicate.js';
 export { deform } from './deform.js';
 export { demesh } from './demesh.js';
 export { disjoint } from './disjoint.js';
@@ -49,10 +46,10 @@ export { eachTriangle } from './eachTriangle.js';
 export { extrude } from './extrude.js';
 export { faces } from './faces.js';
 export { fix } from './fix.js';
-export { flip as flipPath } from './path/flip.js';
 export { fresh } from './tagged/fresh.js';
 export { fromPolygons } from './fromPolygons.js';
 export {
+  identity,
   fromRotateXToTransform,
   fromRotateYToTransform,
   fromRotateZToTransform,
@@ -76,7 +73,6 @@ export { getNonVoidPlans } from './tagged/getNonVoidPlans.js';
 export { getNonVoidPoints } from './tagged/getNonVoidPoints.js';
 export { getNonVoidSegments } from './tagged/getNonVoidSegments.js';
 export { getGraphs } from './tagged/getGraphs.js';
-export { getEdges as getPathEdges } from './path/getEdges.js';
 export { getPlans } from './tagged/getPlans.js';
 export { getPoints } from './tagged/getPoints.js';
 export { getTags } from './tagged/getTags.js';
@@ -85,9 +81,6 @@ export { hash } from './tagged/hash.js';
 export { involute } from './involute.js';
 export { fill } from './fill.js';
 export { inset } from './inset.js';
-export { isClockwise as isClockwisePath } from './path/isClockwise.js';
-export { isCounterClockwise as isCounterClockwisePath } from './path/isCounterClockwise.js';
-export { isClosed as isClosedPath } from './path/isClosed.js';
 export {
   isNotShow,
   isNotShowOutline,
@@ -146,14 +139,12 @@ export { measureBoundingBox } from './measureBoundingBox.js';
 export { measureVolume } from './tagged/measureVolume.js';
 export { offset } from './offset.js';
 export { op } from './tagged/op.js';
-export { open as openPath } from './path/open.js';
 export { outline } from './outline.js';
 export { read, readNonblocking } from './tagged/read.js';
 export { registerReifier } from './tagged/registerReifier.js';
 export { reify } from './tagged/reify.js';
 export { remesh } from './remesh.js';
 export { rewriteTags } from './tagged/rewriteTags.js';
-export { rotateZ as rotateZPath } from './path/ops.js';
 export { seam } from './seam.js';
 export { section } from './section.js';
 export { serialize } from './serialize.js';
@@ -174,7 +165,6 @@ export { taggedSegments } from './tagged/taggedSegments.js';
 export { taggedSketch } from './tagged/taggedSketch.js';
 export { taggedTriangles } from './tagged/taggedTriangles.js';
 export { transformCoordinate, transformingCoordinates } from './transform.js';
-export { translate as translatePath } from './path/ops.js';
 export { toConcreteGeometry } from './tagged/toConcreteGeometry.js';
 export { toDisplayGeometry } from './tagged/toDisplayGeometry.js';
 export { toTransformedGeometry } from './tagged/toTransformedGeometry.js';

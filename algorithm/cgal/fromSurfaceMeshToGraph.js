@@ -1,5 +1,7 @@
-import { equals } from '@jsxcad/math-vec3';
 import { getCgal } from './getCgal.js';
+
+const equals = ([ax, ay, az], [bx, by, bz]) =>
+  ax === bx && ay === by && az === bz;
 
 export const fromSurfaceMeshToGraph = (mesh) => {
   try {

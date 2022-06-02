@@ -1,7 +1,6 @@
-import { blessed } from './transform.js';
 import { fromPolygonsToSurfaceMesh } from './fromPolygonsToSurfaceMesh.js';
 import { fromSurfaceMesh } from './fromSurfaceMesh.js';
-import { identityMatrix } from '@jsxcad/math-mat4';
+import { identity } from './transform.js';
 import { initCgal } from './getCgal.js';
 import test from 'ava';
 import { withAabbTreeQuery } from './aabbTreeQuery.js';
@@ -184,7 +183,7 @@ test('Clip Segment by Surface', (t) => {
     [
       {
         type: 'graph',
-        matrix: blessed([...identityMatrix]),
+        matrix: identity(),
         graph: fromSurfaceMesh(fromPolygonsToSurfaceMesh(triangle)),
       },
     ],

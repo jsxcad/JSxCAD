@@ -11,6 +11,7 @@ import {
   Matrix4,
   Mesh,
   Path,
+  Plane,
   Points,
   PointsMaterial,
   Quaternion,
@@ -26,7 +27,6 @@ import { GEOMETRY_LAYER, SKETCH_LAYER } from './layers.js';
 
 import { buildMeshMaterial } from './material.js';
 import { setColor } from './color.js';
-import { toPlane } from '@jsxcad/math-poly3';
 
 // FIX: Found it somewhere -- attribute.
 const applyBoxUVImpl = (geom, transformMatrix, bbox, bboxMaxSize) => {
@@ -460,14 +460,17 @@ export const buildMeshes = async ({
           }
           triangle.push(vertex);
         }
-        const plane = toPlane(triangle);
-        if (plane === undefined) {
-          continue;
-        }
+        const plane = new Plane();
+        plane.setFromCoplanarPoints(
+          new Vector3(...triangle[0]),
+          new Vector3(...triangle[1]),
+          new Vector3(...triangle[2])
+        );
         positions.push(...triangle[0]);
         positions.push(...triangle[1]);
         positions.push(...triangle[2]);
-        const [x, y, z] = plane;
+        plane.normalize();
+        const { x, y, z } = plane.normal;
         normals.push(x, y, z);
         normals.push(x, y, z);
         normals.push(x, y, z);
@@ -519,80 +522,6 @@ export const buildMeshes = async ({
           mesh.castShadow = false;
           mesh.receiveShadow = false;
         }
-        mesh.add(outline);
-      }
-
-      if (tags.includes('show:wireframe')) {
-        const edges = new WireframeGeometry(bufferGeometry);
-        const outline = new LineSegments(
-          edges,
-          new LineBasicMaterial({ color: 0x000000 })
-        );
-        mesh.add(outline);
-      }
-
-      scene.add(mesh);
-      break;
-    }
-    case 'triangles': {
-      const prepareTriangles = (triangles) => {
-        const normals = [];
-        const positions = [];
-        for (const triangle of triangles) {
-          const plane = toPlane(triangle);
-          if (plane === undefined) {
-            continue;
-          }
-          const [px, py, pz] = plane;
-          for (const [x = 0, y = 0, z = 0] of triangle) {
-            normals.push(px, py, pz);
-            positions.push(x, y, z);
-          }
-        }
-        return { normals, positions };
-      };
-
-      const { triangles } = geometry;
-      const { positions, normals } = prepareTriangles(triangles);
-      const bufferGeometry = new BufferGeometry();
-      bufferGeometry.setAttribute(
-        'position',
-        new Float32BufferAttribute(positions, 3)
-      );
-      bufferGeometry.setAttribute(
-        'normal',
-        new Float32BufferAttribute(normals, 3)
-      );
-      applyBoxUV(bufferGeometry);
-
-      if (tags.includes('show:skin')) {
-        const material = await buildMeshMaterial(definitions, tags);
-        mesh = new Mesh(bufferGeometry, material);
-        mesh.castShadow = true;
-        mesh.receiveShadow = true;
-        mesh.layers.set(layer);
-        updateUserData(geometry, scene, mesh.userData);
-        mesh.userData.tangible = true;
-        if (tags.includes('type:void')) {
-          material.transparent = true;
-          material.depthWrite = false;
-          material.opacity *= 0.125;
-          mesh.castShadow = false;
-          mesh.receiveShadow = false;
-        }
-      } else {
-        mesh = new Group();
-      }
-
-      {
-        const edges = new EdgesGeometry(bufferGeometry);
-        const outline = new LineSegments(
-          edges,
-          new LineBasicMaterial({ color: 0x000000 })
-        );
-        outline.userData.isOutline = true;
-        outline.userData.hasShowOutline = tags.includes('show:outline');
-        outline.visible = outline.userData.hasShowOutline;
         mesh.add(outline);
       }
 

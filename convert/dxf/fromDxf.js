@@ -1,8 +1,9 @@
 import { scale, translate } from '@jsxcad/geometry';
 
 import DxfParser from 'dxf-parser';
-import { fromAngleRadians } from '@jsxcad/math-vec2';
 import { toTagFromRgbInt } from '@jsxcad/algorithm-color';
+
+const fromAngleRadians = (radians) => [Math.cos(radians), Math.sin(radians)];
 
 const buildRegularPolygon = (sides = 32) => {
   let points = [];

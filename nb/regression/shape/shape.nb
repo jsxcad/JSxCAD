@@ -90,7 +90,7 @@ Group(seq((n) => Arc(n), { from: 1, to: 20 }))
   .pack()
   .gridView(23);
 
-Box(5).rotate(45).gridView(24);
+// Box(5).rotate(45).gridView(24);
 
 Box(1, 2, 3).rx(1/8).gridView(25);
 Box(1, 2, 3).ry(1/8).gridView(26);

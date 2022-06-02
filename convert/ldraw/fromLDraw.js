@@ -1,17 +1,16 @@
 import {
-  flip,
-  isStrictlyCoplanar,
-  transform as transformOfPoly3,
-} from '@jsxcad/math-poly3';
-import { fromPolygons, rotateX, scale } from '@jsxcad/geometry';
+  fromPolygons,
+  rotateX,
+  scale,
+  transformCoordinate,
+} from '@jsxcad/geometry';
 
-import { fromValues as fromValuesToMatrix } from '@jsxcad/math-mat4';
 import { read } from '@jsxcad/sys';
 
 export const transform = (matrix, polygons) =>
   polygons.map((polygon) => ({
     ...polygon,
-    points: transformOfPoly3(matrix, polygon.points),
+    points: polygon.points.map((point) => transformCoordinate(point, matrix)),
   }));
 
 const RESOLUTION = 10000;
@@ -120,7 +119,7 @@ const fromCodeToPolygons = async (
           subInvert = !subInvert;
         }
         stack.push(subPart);
-        let matrix = fromValuesToMatrix(
+        let matrix = [
           flt(a),
           flt(d),
           flt(g),
@@ -136,8 +135,8 @@ const fromCodeToPolygons = async (
           ldu(x),
           ldu(y),
           ldu(z),
-          1.0
-        );
+          1.0,
+        ];
         polygons.push(
           ...transform(
             matrix,
@@ -163,9 +162,8 @@ const fromCodeToPolygons = async (
           [ldu(x2), ldu(y2), ldu(z2)],
           [ldu(x3), ldu(y3), ldu(z3)],
         ];
-        if (!isStrictlyCoplanar(polygon)) throw Error('die');
         if (Direction() === 'CW') {
-          polygons.push({ points: flip(polygon) });
+          polygons.push({ points: polygon.reverse() });
         } else {
           polygons.push({ points: polygon });
         }
@@ -181,19 +179,11 @@ const fromCodeToPolygons = async (
           [ldu(x4), ldu(y4), ldu(z4)],
         ];
         if (Direction() === 'CW') {
-          if (isStrictlyCoplanar(p)) {
-            polygons.push({ points: flip(p) });
-          } else {
-            polygons.push({ points: flip([p[0], p[1], p[3]]) });
-            polygons.push({ points: flip([p[2], p[3], p[1]]) });
-          }
+          polygons.push({ points: [p[3], p[1], p[0]] });
+          polygons.push({ points: [p[1], p[3], p[2]] });
         } else {
-          if (isStrictlyCoplanar(p)) {
-            polygons.push({ points: p });
-          } else {
-            polygons.push({ points: [p[0], p[1], p[3]] });
-            polygons.push({ points: [p[2], p[3], p[1]] });
-          }
+          polygons.push({ points: [p[0], p[1], p[3]] });
+          polygons.push({ points: [p[2], p[3], p[1]] });
         }
         break;
       }

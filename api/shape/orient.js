@@ -1,6 +1,32 @@
-import { cross, normalize, squaredLength, subtract } from '@jsxcad/math-vec3';
 import { Shape } from './Shape.js';
 import { getInverseMatrices } from '@jsxcad/geometry';
+
+const cross = ([ax, ay, az], [bx, by, bz]) => [
+  ay * bz - az * by,
+  az * bx - ax * bz,
+  ax * by - ay * bx,
+];
+
+const scale = (amount, [x = 0, y = 0, z = 0]) => [
+  x * amount,
+  y * amount,
+  z * amount,
+];
+
+const normalize = (a) => {
+  const [x, y, z] = a;
+  const len = x * x + y * y + z * z;
+  if (len > 0) {
+    // TODO: evaluate use of glm_invsqrt here?
+    return scale(1 / Math.sqrt(len), a);
+  } else {
+    return a;
+  }
+};
+
+const squaredLength = ([x, y, z]) => x * x + y * y + z * z;
+
+const subtract = ([ax, ay, az], [bx, by, bz]) => [ax - bx, ay - by, az - bz];
 
 const X = 0;
 const Y = 1;

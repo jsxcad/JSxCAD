@@ -1,8 +1,8 @@
 import { addSerializedSurfaceMeshes } from './addSerializedSurfaceMeshes.js';
-import { blessed } from './transform.js';
 import { disjoint } from './disjoint.js';
 import { fromPolygonsToSurfaceMesh } from './fromPolygonsToSurfaceMesh.js';
 import { fromSurfaceMesh } from './fromSurfaceMesh.js';
+import { identity } from './transform.js';
 import { initCgal } from './getCgal.js';
 import test from 'ava';
 
@@ -189,12 +189,12 @@ const largeBox = [
 test('Disjoint SurfaceMesh as Volumes', (t) => {
   const a = {
     type: 'graph',
-    matrix: blessed([1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]),
+    matrix: identity(),
     graph: fromSurfaceMesh(fromPolygonsToSurfaceMesh(largeBox)),
   };
   const b = {
     type: 'graph',
-    matrix: blessed([1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]),
+    matrix: identity(),
     graph: fromSurfaceMesh(fromPolygonsToSurfaceMesh(box)),
   };
   // The first entry is the pivot of the disjunction.
@@ -292,7 +292,7 @@ test('Disjoint SurfaceMesh as Volumes', (t) => {
 test('Disjoint SurfaceMesh as Surfaces', (t) => {
   const a = {
     type: 'graph',
-    matrix: blessed([1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]),
+    matrix: identity(),
     graph: fromSurfaceMesh(
       fromPolygonsToSurfaceMesh([
         {
@@ -308,7 +308,7 @@ test('Disjoint SurfaceMesh as Surfaces', (t) => {
   };
   const b = {
     type: 'graph',
-    matrix: blessed([1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]),
+    matrix: identity(),
     graph: fromSurfaceMesh(
       fromPolygonsToSurfaceMesh([
         {
@@ -456,7 +456,7 @@ test('Disjoint PolygonsWithHoles', (t) => {
   const r = disjoint([
     {
       type: 'polygonsWithHoles',
-      matrix: blessed([1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]),
+      matrix: identity(),
       plane: [0, 0, 1, 0],
       polygonsWithHoles: [
         {
@@ -494,7 +494,7 @@ test('Disjoint PolygonsWithHoles', (t) => {
     },
     {
       type: 'polygonsWithHoles',
-      matrix: blessed([1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]),
+      matrix: identity(),
       plane: [0, 0, 1, 0],
       polygonsWithHoles: [
         {
@@ -651,7 +651,7 @@ test('Disjoint Segments by Volumes', (t) => {
     },
     {
       type: 'graph',
-      matrix: blessed([1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]),
+      matrix: identity(),
       graph: fromSurfaceMesh(fromPolygonsToSurfaceMesh(largeBox)),
     },
   ]);

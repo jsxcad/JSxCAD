@@ -1,10 +1,6 @@
 import { getCgal } from './getCgal.js';
-import { identityMatrix } from '@jsxcad/math-mat4';
 
-export const blessed = (matrix) => {
-  matrix.blessed = true;
-  return matrix;
-};
+export const identityMatrix = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
 
 const M00 = 0;
 const M01 = 1;
@@ -83,13 +79,6 @@ export const toCgalTransformFromJsTransform = (
           m23,
           hw,
         ] = jsTransform;
-        if (!jsTransform.blessed) {
-          throw Error(
-            `Received unblessed non-identity approximate matrix: ${JSON.stringify(
-              jsTransform
-            )}`
-          );
-        }
         cgalTransform = fromApproximateToCgalTransform([
           m00,
           m01,
@@ -244,7 +233,23 @@ export const fromSegmentToInverseTransform = (
   }
 };
 
-export const identity = () => blessed(identityMatrix);
+export const identity = () => [...identityMatrix];
 
-export const matrix6 = (a, b, c, d, tx, ty) =>
-  blessed([a, b, 0, 0, c, d, 0, 0, 0, 0, 1, 0, tx, ty, 0, 1]);
+export const matrix6 = (a, b, c, d, tx, ty) => [
+  a,
+  b,
+  0,
+  0,
+  c,
+  d,
+  0,
+  0,
+  0,
+  0,
+  1,
+  0,
+  tx,
+  ty,
+  0,
+  1,
+];

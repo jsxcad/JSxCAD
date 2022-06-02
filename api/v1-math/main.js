@@ -1,5 +1,3 @@
-export * as vec from '@jsxcad/math-vec3';
-
 export { ease, linear } from './ease.js';
 
 export { Noise } from './Noise.js';

@@ -8,7 +8,6 @@ cp algorithm/pack/dist/main.js es6/jsxcad-algorithm-pack.js
 cp algorithm/text/dist/main.js es6/jsxcad-algorithm-text.js
 cp algorithm/threejs/dist/main.js es6/jsxcad-algorithm-threejs.js
 cp algorithm/tool/dist/main.js es6/jsxcad-algorithm-tool.js
-cp algorithm/verlet/dist/main.js es6/jsxcad-algorithm-verlet.js
 cp api/core/dist/main.js es6/jsxcad-api.js
 cp api/shape/dist/main.js es6/jsxcad-api-shape.js
 cp api/threejs/dist/main.js es6/jsxcad-api-threejs.js
@@ -47,15 +46,6 @@ cp convert/svg/dist/main.js es6/jsxcad-convert-svg.js
 cp convert/threejs/dist/main.js es6/jsxcad-convert-threejs.js
 cp data/shape/dist/main.js es6/jsxcad-data-shape.js
 cp geometry/dist/main.js es6/jsxcad-geometry.js
-cp math/line2/dist/main.js es6/jsxcad-math-line2.js
-cp math/line3/dist/main.js es6/jsxcad-math-line3.js
-cp math/mat4/dist/main.js es6/jsxcad-math-mat4.js
-cp math/plane/dist/main.js es6/jsxcad-math-plane.js
-cp math/poly3/dist/main.js es6/jsxcad-math-poly3.js
-cp math/utils/dist/main.js es6/jsxcad-math-utils.js
-cp math/vec2/dist/main.js es6/jsxcad-math-vec2.js
-cp math/vec3/dist/main.js es6/jsxcad-math-vec3.js
-cp math/vec4/dist/main.js es6/jsxcad-math-vec4.js
 cp sys/dist/main.js es6/jsxcad-sys.js
 cp ui/app/dist/main.js es6/jsxcad-ui-app.js
 cp ui/app/dist/webworker.js es6/jsxcad-ui-app-webworker.js

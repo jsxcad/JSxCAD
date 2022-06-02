@@ -24,7 +24,6 @@ export const soup = (
     return geometry;
   };
   const op = (geometry, descend) => {
-    const { tags } = geometry;
     switch (geometry.type) {
       case 'graph': {
         const { graph } = geometry;

@@ -1,5 +1,4 @@
 import Shape from './Shape.js';
-import { fromPoints } from '@jsxcad/math-poly3';
 import { getScale } from './Plan.js';
 import { taggedPlan } from '@jsxcad/geometry';
 
@@ -8,7 +7,7 @@ const fromPointsAndPaths = (points = [], paths = []) => {
   /** @type {Polygon[]} */
   const polygons = [];
   for (const path of paths) {
-    polygons.push({ points: fromPoints(path.map((nth) => points[nth])) });
+    polygons.push({ points: path.map((nth) => points[nth]) });
   }
   return polygons;
 };

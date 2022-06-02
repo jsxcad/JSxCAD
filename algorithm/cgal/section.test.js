@@ -1,7 +1,6 @@
-import { blessed } from './transform.js';
 import { fromPolygonsToSurfaceMesh } from './fromPolygonsToSurfaceMesh.js';
 import { fromSurfaceMesh } from './fromSurfaceMesh.js';
-import { identityMatrix } from '@jsxcad/math-mat4';
+import { identity } from './transform.js';
 import { initCgal } from './getCgal.js';
 import { section } from './section.js';
 import test from 'ava';
@@ -44,13 +43,13 @@ export const unitRegularTetrahedronPolygons = [
 test('Section of tetrahedron.', (t) => {
   const geometry = {
     type: 'graph',
-    matrix: blessed([...identityMatrix]),
+    matrix: identity(),
     graph: fromSurfaceMesh(
       fromPolygonsToSurfaceMesh(unitRegularTetrahedronPolygons)
     ),
   };
   const sections = section(
-    [geometry, { type: 'points', matrix: blessed([...identityMatrix]) }],
+    [geometry, { type: 'points', matrix: identity() }],
     1
   );
   t.deepEqual(JSON.parse(JSON.stringify(sections)), [
@@ -114,7 +113,7 @@ test('Section of tetrahedron.', (t) => {
 test('Coplanar section of polygon is the polygon.', (t) => {
   const geometry = {
     type: 'polygonsWithHoles',
-    matrix: blessed([...identityMatrix]),
+    matrix: identity(),
     polygonsWithHoles: [
       {
         points: [
@@ -135,7 +134,7 @@ test('Coplanar section of polygon is the polygon.', (t) => {
     plane: [0, 0, 1, 0],
   };
   const sections = section(
-    [geometry, { type: 'points', matrix: blessed([...identityMatrix]) }],
+    [geometry, { type: 'points', matrix: identity() }],
     1
   );
   t.deepEqual(JSON.parse(JSON.stringify(sections)), [
@@ -199,7 +198,7 @@ test('Coplanar section of polygon is the polygon.', (t) => {
 test('Non-coplanar section of polygon is empty.', (t) => {
   const geometry = {
     type: 'polygonsWithHoles',
-    matrix: blessed([...identityMatrix]),
+    matrix: identity(),
     polygonsWithHoles: [
       {
         points: [
@@ -220,7 +219,7 @@ test('Non-coplanar section of polygon is empty.', (t) => {
     plane: [0, 0, 1, 1],
   };
   const sections = section(
-    [geometry, { type: 'points', matrix: blessed([...identityMatrix]) }],
+    [geometry, { type: 'points', matrix: identity() }],
     1
   );
   t.deepEqual(JSON.parse(JSON.stringify(sections)), []);
