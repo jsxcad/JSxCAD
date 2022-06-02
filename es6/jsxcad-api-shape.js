@@ -394,11 +394,7 @@ const scale$4 = (amount, [x = 0, y = 0, z = 0]) => [
   y * amount,
   z * amount,
 ];
-const subtract$2 = ([ax, ay, az], [bx, by, bz]) => [
-  ax - bx,
-  ay - by,
-  az - bz,
-];
+const subtract$2 = ([ax, ay, az], [bx, by, bz]) => [ax - bx, ay - by, az - bz];
 
 const updatePlan =
   (...updates) =>
@@ -787,11 +783,7 @@ const X$8 = 0;
 const Y$8 = 1;
 const Z$8 = 2;
 
-const subtract$1 = ([ax, ay, az], [bx, by, bz]) => [
-  ax - bx,
-  ay - by,
-  az - bz,
-];
+const subtract$1 = ([ax, ay, az], [bx, by, bz]) => [ax - bx, ay - by, az - bz];
 
 // Round to the nearest 0.001 mm
 
@@ -3797,11 +3789,7 @@ const normalize = (a) => {
 
 const squaredLength = ([x, y, z]) => x * x + y * y + z * z;
 
-const subtract = ([ax, ay, az], [bx, by, bz]) => [
-  ax - bx,
-  ay - by,
-  az - bz,
-];
+const subtract = ([ax, ay, az], [bx, by, bz]) => [ax - bx, ay - by, az - bz];
 
 const X$5 = 0;
 const Y$5 = 1;

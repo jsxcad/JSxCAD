@@ -1,6 +1,7 @@
+import { linearize, transformCoordinate } from '@jsxcad/geometry';
+
 import Shape from './Shape.js';
 import { fromTranslateToTransform } from '@jsxcad/algorithm-cgal';
-import { transformCoordinate, linearize } from '@jsxcad/geometry';
 
 // FIX: This is probably the wrong approach to moving to a particular location.
 export const moveTo =

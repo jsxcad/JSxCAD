@@ -26,11 +26,7 @@ const normalize = (a) => {
 
 const squaredLength = ([x, y, z]) => x * x + y * y + z * z;
 
-const subtract = ([ax, ay, az], [bx, by, bz]) => [
-  ax - bx,
-  ay - by,
-  az - bz,
-];
+const subtract = ([ax, ay, az], [bx, by, bz]) => [ax - bx, ay - by, az - bz];
 
 const X = 0;
 const Y = 1;

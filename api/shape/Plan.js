@@ -14,11 +14,7 @@ const scale = (amount, [x = 0, y = 0, z = 0]) => [
   y * amount,
   z * amount,
 ];
-const subtract = ([ax, ay, az], [bx, by, bz]) => [
-  ax - bx,
-  ay - by,
-  az - bz,
-];
+const subtract = ([ax, ay, az], [bx, by, bz]) => [ax - bx, ay - by, az - bz];
 
 const updatePlan =
   (...updates) =>
