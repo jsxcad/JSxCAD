@@ -1,6 +1,5 @@
 export { SurfaceMeshQuery } from './SurfaceMeshQuery.js';
 export {
-  blessed,
   composeTransforms,
   fromExactToCgalTransform,
   fromIdentityToCgalTransform,
@@ -57,20 +56,12 @@ export { faces } from './faces.js';
 export { fill } from './fill.js';
 export { fitPlaneToPoints } from './fitPlaneToPoints.js';
 export { fix } from './fix.js';
-export { fromFunctionToSurfaceMesh } from './fromFunctionToSurfaceMesh.js';
 export { fromGraphToSurfaceMesh } from './fromGraphToSurfaceMesh.js';
-export { fromPointsToAlphaShapeAsSurfaceMesh } from './fromPointsToAlphaShapeAsSurfaceMesh.js';
-export { fromPointsToAlphaShape2AsPolygonSegments } from './fromPointsToAlphaShape2AsPolygonSegments.js';
-export { fromPointsToConvexHullAsSurfaceMesh } from './fromPointsToConvexHullAsSurfaceMesh.js';
-export { fromPointsToSurfaceMesh } from './fromPointsToSurfaceMesh.js';
 export { fromPolygons } from './fromPolygons.js';
 export { fromPolygonsToSurfaceMesh } from './fromPolygonsToSurfaceMesh.js';
 export { fromSurfaceMesh } from './fromSurfaceMesh.js';
-export { fromSurfaceMeshEmitBoundingBox } from './fromSurfaceMeshEmitBoundingBox.js';
 export { fromSurfaceMeshToGraph } from './fromSurfaceMeshToGraph.js';
 export { fromSurfaceMeshToLazyGraph } from './fromSurfaceMeshToLazyGraph.js';
-export { fromSurfaceMeshToPolygons } from './fromSurfaceMeshToPolygons.js';
-export { fromSurfaceMeshToTriangles } from './fromSurfaceMeshToTriangles.js';
 export { fuse } from './fuse.js';
 export { generateEnvelope } from './generateEnvelope.js';
 export { generatePackingEnvelopeForSurfaceMesh } from './generatePackingEnvelopeForSurfaceMesh.js';
@@ -88,7 +79,6 @@ export { makeAbsolute } from './makeAbsolute.js';
 export { makeUnitSphere } from './makeUnitSphere.js';
 export { pushSurfaceMesh } from './pushSurfaceMesh.js';
 export { remesh } from './remesh.js';
-export { remeshSurfaceMesh } from './remeshSurfaceMesh.js';
 export { removeSelfIntersectionsOfSurfaceMesh } from './removeSelfIntersectionsOfSurfaceMesh.js';
 export { reverseFaceOrientationsOfSurfaceMesh } from './reverseFaceOrientationsOfSurfaceMesh.js';
 export { seam } from './seam.js';

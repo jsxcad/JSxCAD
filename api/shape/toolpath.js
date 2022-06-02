@@ -3,7 +3,12 @@ import Group from './Group.js';
 import Points from './Points.js';
 import Shape from './Shape.js';
 import { computeToolpath } from '@jsxcad/geometry';
-import { lerp } from '@jsxcad/math-vec3';
+
+const lerp = (t, [ax, ay, az], [bx, by, bz]) => [
+  ax + t * (bx - ax),
+  ay + t * (by - ay),
+  az + t * (bz - az),
+];
 
 export const toolpath =
   ({

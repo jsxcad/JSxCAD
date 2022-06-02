@@ -1,6 +1,11 @@
 import Shape from './Shape.js';
 import { normal } from './normal.js';
-import { scale } from '@jsxcad/math-vec3';
+
+const scale = (amount, [x = 0, y = 0, z = 0]) => [
+  x * amount,
+  y * amount,
+  z * amount,
+];
 
 export const moveAlong =
   (direction, ...offsets) =>

@@ -1,9 +1,24 @@
-import { abs, add, scale, subtract } from '@jsxcad/math-vec3';
-import { registerReifier, taggedPlan } from '@jsxcad/geometry';
+import { identity, registerReifier, taggedPlan } from '@jsxcad/geometry';
 
 import { Shape } from './Shape.js';
-import { identityMatrix } from '@jsxcad/math-mat4';
 import { zag } from '@jsxcad/api-v1-math';
+
+const abs = ([x, y, z]) => [Math.abs(x), Math.abs(y), Math.abs(z)];
+const add = ([ax = 0, ay = 0, az = 0], [bx = 0, by = 0, bz = 0]) => [
+  ax + bx,
+  ay + by,
+  az + bz,
+];
+const scale = (amount, [x = 0, y = 0, z = 0]) => [
+  x * amount,
+  y * amount,
+  z * amount,
+];
+const subtract = ([ax, ay, az], [bx, by, bz]) => [
+  ax - bx,
+  ay - by,
+  az - bz,
+];
 
 const updatePlan =
   (...updates) =>
@@ -146,7 +161,7 @@ export const getAt = (geometry) => find(geometry, 'at', [0, 0, 0]);
 export const getCorner1 = (geometry) => find(geometry, 'corner1', [0, 0, 0]);
 export const getCorner2 = (geometry) => find(geometry, 'corner2', [0, 0, 0]);
 export const getFrom = (geometry) => find(geometry, 'from', [0, 0, 0]);
-export const getMatrix = (geometry) => geometry.matrix || identityMatrix;
+export const getMatrix = (geometry) => geometry.matrix || identity();
 export const getTo = (geometry) => find(geometry, 'to', [0, 0, 1]);
 export const getUp = (geometry) => find(geometry, 'up', [0, -1, 0]);
 export const getZag = (geometry, otherwise = defaultZag) =>

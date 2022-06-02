@@ -9,7 +9,7 @@
   "scripts": {
     "depcheck": "depcheck --ignores '@jsxcad/eslint*,eslint*,babel-eslint'",
     "lint": "eslint *.js",
-    "lintfix": "eslint --fix path/*.js paths/*.js plan/*.js points/*.js polygons/*.js tagged/*.js",
+    "lintfix": "eslint --fix *.js tagged/*.js",
     "rollup": "rollup -c rollup_main.js",
     "test": "ava --timeout=600s",
     "tests": "ava --timeout=600s */*.test.js"
@@ -24,11 +24,6 @@
   "license": "MIT",
   "dependencies": {
     "@jsxcad/algorithm-cgal": "^0.0.79",
-    "@jsxcad/data-shape": "^0.0.79",
-    "@jsxcad/math-mat4": "^0.0.79",
-    "@jsxcad/math-plane": "^0.0.79",
-    "@jsxcad/math-poly3": "^0.0.79",
-    "@jsxcad/math-vec3": "^0.0.79",
     "@jsxcad/sys": "^0.0.79",
     "kdbush": "^3.0.0",
     "rollup": "^2.51.2",

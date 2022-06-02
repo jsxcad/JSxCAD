@@ -131,7 +131,6 @@ export { play } from './play.js';
 export { points } from './points.js';
 export { reify } from './reify.js';
 export { remesh } from './remesh.js';
-export { rotate } from './rotate.js';
 export { rotateX, rx } from './rx.js';
 export { rotateY, ry } from './ry.js';
 export { rotateZ, rz } from './rz.js';

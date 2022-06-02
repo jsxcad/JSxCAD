@@ -1,10 +1,15 @@
 import Point from './Point.js';
 import Shape from './Shape.js';
-import { subtract } from '@jsxcad/math-vec3';
 
 const X = 0;
 const Y = 1;
 const Z = 2;
+
+const subtract = ([ax, ay, az], [bx, by, bz]) => [
+  ax - bx,
+  ay - by,
+  az - bz,
+];
 
 // Round to the nearest 0.001 mm
 

@@ -1,7 +1,6 @@
 import Shape from './Shape.js';
 import { fromTranslateToTransform } from '@jsxcad/algorithm-cgal';
-import { linearize } from '@jsxcad/geometry';
-import { transform } from '@jsxcad/math-vec3';
+import { transformCoordinate, linearize } from '@jsxcad/geometry';
 
 // FIX: This is probably the wrong approach to moving to a particular location.
 export const moveTo =
@@ -18,7 +17,7 @@ export const moveTo =
       );
       if (geometry.length >= 1) {
         const { matrix, points } = geometry[0];
-        const point = transform(matrix, points[0]);
+        const point = transformCoordinate(points[0], matrix);
         [x, y, z] = point;
       }
     }

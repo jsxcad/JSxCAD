@@ -1,4 +1,3 @@
-import { blessed } from './transform.js';
 import { computeArea } from './computeArea.js';
 import { initCgal } from './getCgal.js';
 
@@ -46,7 +45,7 @@ test('Area of polygon with hole', (t) => {
         },
       ],
       plane: [0, 0, 1, 0],
-      matrix: blessed([2, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]),
+      matrix: [2, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1],
     },
   ]);
   t.is(area.toFixed(4), (6).toFixed(4));

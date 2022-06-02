@@ -1,17 +1,17 @@
-import { identityMatrix } from '@jsxcad/math-mat4';
+import { identity } from '@jsxcad/algorithm-cgal';
 import { isNotVoid } from './isNotVoid.js';
 import { toConcreteGeometry } from './toConcreteGeometry.js';
 import { toTriangles as toTrianglesFromGraph } from './toTriangles.js';
-import { transform } from '@jsxcad/math-vec3';
+import { transformCoordinate } from '../transform.js';
 import { visit } from './visit.js';
 
 export const toTriangleArray = (geometry) => {
   const triangles = [];
   const op = (geometry, descend) => {
-    const { matrix = identityMatrix, tags, type } = geometry;
+    const { matrix = identity(), tags, type } = geometry;
     const transformTriangles = (triangles) =>
       triangles.map((triangle) =>
-        triangle.map((point) => transform(matrix, point))
+        triangle.map((point) => transformCoordinate(point, matrix))
       );
     switch (type) {
       case 'graph': {

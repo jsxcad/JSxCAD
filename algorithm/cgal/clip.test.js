@@ -1,9 +1,8 @@
 import { addSerializedSurfaceMeshes } from './addSerializedSurfaceMeshes.js';
-import { blessed } from './transform.js';
 import { clip } from './clip.js';
 import { fromPolygonsToSurfaceMesh } from './fromPolygonsToSurfaceMesh.js';
 import { fromSurfaceMesh } from './fromSurfaceMesh.js';
-import { identityMatrix } from '@jsxcad/math-mat4';
+import { identity } from './transform.js';
 import { initCgal } from './getCgal.js';
 
 import test from 'ava';
@@ -195,13 +194,13 @@ test('Clip', (t) => {
         {
           type: 'graph',
           graph: fromSurfaceMesh(a),
-          matrix: blessed([...identityMatrix]),
+          matrix: identity(),
           tags: ['a'],
         },
         {
           type: 'graph',
           graph: fromSurfaceMesh(b),
-          matrix: blessed([...identityMatrix]),
+          matrix: identity(),
           tags: ['b'],
         },
       ],

@@ -1,16 +1,10 @@
-import {
-  dot as computeDot,
-  equals,
-  distance as measureDistance,
-  subtract,
-} from '@jsxcad/math-vec3';
+import { identity, withAabbTreeQuery } from '@jsxcad/algorithm-cgal';
 
 import KdBush from 'kdbush';
 import { computeHash } from '@jsxcad/sys';
 import { eachSegment } from '../eachSegment.js';
 import { fuse } from '../fuse.js';
 import { getNonVoidSegments } from './getNonVoidSegments.js';
-import { identityMatrix } from '@jsxcad/math-mat4';
 import { inset } from '../inset.js';
 import { linearize } from './linearize.js';
 import { measureBoundingBox } from '../measureBoundingBox.js';
@@ -18,10 +12,20 @@ import { section } from '../section.js';
 import { taggedToolpath } from './taggedToolpath.js';
 import { toConcreteGeometry } from './toConcreteGeometry.js';
 import { transformCoordinate } from '../transform.js';
-import { withAabbTreeQuery } from '@jsxcad/algorithm-cgal';
 
 const X = 0;
 const Y = 1;
+
+const measureDistance = ([ax, ay, az], [bx, by, bz]) => {
+  const x = bx - ax;
+  const y = by - ay;
+  const z = bz - az;
+  return Math.sqrt(x * x + y * y + z * z);
+};
+const computeDot = ([ax, ay, az], [bx, by, bz]) => ax * bx + ay * by + az * bz;
+const equals = ([ax, ay, az], [bx, by, bz]) =>
+  ax === bx && ay === by && az === bz;
+const subtract = ([ax, ay, az], [bx, by, bz]) => [ax - bx, ay - by, az - bz];
 
 export const computeToolpath = (
   geometry,
@@ -55,7 +59,7 @@ export const computeToolpath = (
 
     const concreteGeometry = toConcreteGeometry(geometry);
     const sections = section(concreteGeometry, [
-      { type: 'points', matrix: identityMatrix },
+      { type: 'points', matrix: identity() },
     ]);
     const fusedArea = fuse(sections);
     const insetArea = inset(fusedArea, toolRadius);
@@ -70,7 +74,11 @@ export const computeToolpath = (
         const isInteriorPoint = (x, y, z) => {
           return query.isIntersectingPointApproximate(x, y, z);
         };
-        const [minPoint, maxPoint] = measureBoundingBox(sections);
+        const bounds = measureBoundingBox(sections);
+        if (!bounds) {
+          return;
+        }
+        const [minPoint, maxPoint] = bounds;
         const z = 0;
         const sqrt3 = Math.sqrt(3);
         const width = maxPoint[X] - minPoint[X];

@@ -1,7 +1,24 @@
-import { add, distance, scale } from '@jsxcad/math-vec3';
-
 import Shape from './Shape.js';
 import { measureBoundingBox } from '@jsxcad/geometry';
+
+const add = ([ax = 0, ay = 0, az = 0], [bx = 0, by = 0, bz = 0]) => [
+  ax + bx,
+  ay + by,
+  az + bz,
+];
+
+const distance = ([ax, ay, az], [bx, by, bz]) => {
+  const x = bx - ax;
+  const y = by - ay;
+  const z = bz - az;
+  return Math.sqrt(x * x + y * y + z * z);
+};
+
+const scale = (amount, [x = 0, y = 0, z = 0]) => [
+  x * amount,
+  y * amount,
+  z * amount,
+];
 
 const X = 0;
 const Y = 1;

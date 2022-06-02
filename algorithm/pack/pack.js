@@ -1,4 +1,3 @@
-import { max, min } from '@jsxcad/math-vec3';
 import {
   measureBoundingBox,
   toTransformedGeometry,
@@ -8,6 +7,18 @@ import {
 import BinPackingEs from 'bin-packing-es/build/bin-packing.js';
 
 const { GrowingPacker, Packer } = BinPackingEs;
+
+const max = ([ax, ay, az], [bx, by, bz]) => [
+  Math.max(ax, bx),
+  Math.max(ay, by),
+  Math.max(az, bz),
+];
+
+const min = ([ax, ay, az], [bx, by, bz]) => [
+  Math.min(ax, bx),
+  Math.min(ay, by),
+  Math.min(az, bz),
+];
 
 const X = 0;
 const Y = 1;

@@ -1,7 +1,5 @@
 import {
   assemble,
-  closePath,
-  concatenatePath,
   fromPolygons,
   rewriteTags,
   taggedGraph,
@@ -15,33 +13,8 @@ import {
 } from '@jsxcad/geometry';
 
 import { endTime, getSourceLocation, startTime } from '@jsxcad/sys';
-import { identityMatrix } from '@jsxcad/math-mat4';
 
 export class Shape {
-  close() {
-    const geometry = this.toConcreteGeometry();
-    if (!isSingleOpenPath(geometry)) {
-      throw Error('Close requires a single open path.');
-    }
-    return Shape.fromClosedPath(closePath(geometry.paths[0]));
-  }
-
-  concat(...shapes) {
-    const paths = [];
-    for (const shape of [this, ...shapes]) {
-      const geometry = shape.toConcreteGeometry();
-      if (!isSingleOpenPath(geometry)) {
-        throw Error(
-          `Concatenation requires single open paths: ${JSON.stringify(
-            geometry
-          )}`
-        );
-      }
-      paths.push(geometry.paths[0]);
-    }
-    return Shape.fromOpenPath(concatenatePath(...paths));
-  }
-
   constructor(geometry = assemble(), context) {
     if (geometry.geometry) {
       throw Error('die: { geometry: ... } is not valid geometry.');
@@ -83,11 +56,7 @@ export class Shape {
   }
 
   transform(matrix) {
-    if (matrix === identityMatrix) {
-      return this;
-    } else {
-      return fromGeometry(transform(matrix, this.toGeometry()), this.context);
-    }
+    return fromGeometry(transform(matrix, this.toGeometry()), this.context);
   }
 
   // Low level setter for reifiers.
@@ -123,9 +92,6 @@ export class Shape {
     return Shape.toNestedValues(values, this);
   }
 }
-
-const isSingleOpenPath = ({ paths }) =>
-  paths !== undefined && paths.length === 1 && paths[0][0] === null;
 
 Shape.method = {};
 
