@@ -16,22 +16,30 @@ import { transformCoordinate } from '../transform.js';
 const X = 0;
 const Y = 1;
 
-const measureDistance = ([ax, ay, az], [bx, by, bz]) => {
+const measureDistance = (
+  [ax = 0, ay = 0, az = 0],
+  [bx = 0, by = 0, bz = 0]
+) => {
   const x = bx - ax;
   const y = by - ay;
   const z = bz - az;
   return Math.sqrt(x * x + y * y + z * z);
 };
-const computeDot = ([ax, ay, az], [bx, by, bz]) => ax * bx + ay * by + az * bz;
-const equals = ([ax, ay, az], [bx, by, bz]) =>
+const computeDot = ([ax = 0, ay = 0, az = 0], [bx = 0, by = 0, bz = 0]) =>
+  ax * bx + ay * by + az * bz;
+const equals = ([ax = 0, ay = 0, az = 0], [bx = 0, by = 0, bz = 0]) =>
   ax === bx && ay === by && az === bz;
-const subtract = ([ax, ay, az], [bx, by, bz]) => [ax - bx, ay - by, az - bz];
+const subtract = ([ax = 0, ay = 0, az = 0], [bx = 0, by = 0, bz = 0]) => [
+  ax - bx,
+  ay - by,
+  az - bz,
+];
 
 export const computeToolpath = (
   geometry,
   {
-    toolDiameter = 1,
     jumpHeight = 1,
+    toolDiameter = 1,
     stepCost = toolDiameter * -2,
     turnCost = -2,
     neighborCost = -2,
@@ -153,12 +161,12 @@ export const computeToolpath = (
     }
     time('QQ/computeToolpath/Grooves');
 
-    const compareCoord = (a, b) => {
-      const dX = a[X] - b[X];
+    const compareCoord = ([aX = 0, aY = 0], [bX = 0, bY = 0]) => {
+      const dX = aX - bX;
       if (dX !== 0) {
         return dX;
       }
-      return a[Y] - b[Y];
+      return aY - bY;
     };
 
     const compareStart = (a, b) => compareCoord(a.start, b.start);
@@ -227,22 +235,14 @@ export const computeToolpath = (
     );
     time('QQ/computeToolpath/Index');
 
-    const jump = (
-      toolpath,
-      [fromX = 0, fromY = 0, fromZ = 0],
-      [toX = 0, toY = 0, toZ = 0]
-    ) =>
+    const jump = (toolpath, [fromX, fromY, fromZ], [toX, toY, toZ]) =>
       toolpath.push({
         op: 'jump',
         from: [fromX, fromY, fromZ],
         to: [toX, toY, toZ],
       });
 
-    const cut = (
-      toolpath,
-      [fromX = 0, fromY = 0, fromZ = 0],
-      [toX = 0, toY = 0, toZ = 0]
-    ) =>
+    const cut = (toolpath, [fromX, fromY, fromZ], [toX, toY, toZ]) =>
       toolpath.push({
         op: 'cut',
         from: [fromX, fromY, fromZ],
@@ -281,7 +281,11 @@ export const computeToolpath = (
       }
 
       const distance = measureDistance(candidate.at.start, target.start);
-      if ((candidate.at.isFill || target.isFill) && distance < toolDiameter) {
+      if (
+        (candidate.at.isFill || target.isFill) &&
+        distance < toolDiameter &&
+        candidate.at.start.every(isFinite)
+      ) {
         // Reaching a fill point fulfills it, but reaching a profile or groove point won't.
         const fulfills = [];
         if (target.isFill) {
@@ -400,11 +404,10 @@ export const computeToolpath = (
     };
 
     let candidate = {
-      at: { start: [0, 0, 0], ends: [] },
+      at: { start: [undefined, undefined, undefined], ends: [] },
       toolpath: [],
       cost: 0,
       length: 0,
-      doNotExpress: true,
     };
     const fulfilled = new Set();
     for (;;) {
@@ -439,7 +442,7 @@ export const computeToolpath = (
         }
         if (nextCandidates.length < subCandidateLimit) {
           // From this point they're really jumps.
-          const [x, y] = candidate.at.start;
+          const [x = 0, y = 0] = candidate.at.start;
           for (let range = 2; range < Infinity; range *= 2) {
             const destinations = kd.within(x, y, range);
             for (const destination of destinations) {
@@ -467,9 +470,7 @@ export const computeToolpath = (
         // Note that we include the imaginary seed point.
         const history = [];
         for (let node = candidate; node; node = node.last) {
-          if (!node.doNotExpress) {
-            history.push(node.toolpath);
-          }
+          history.push(node.toolpath);
         }
         const toolpath = [];
         while (history.length > 0) {

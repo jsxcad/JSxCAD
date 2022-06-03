@@ -149,8 +149,18 @@ test('Nested hexagons', (t) => {
     tags: [],
     toolpath: [
       {
+        op: 'jump',
+        from: [undefined, undefined, undefined],
+        to: [undefined, undefined, 1],
+      },
+      {
+        op: 'jump',
+        from: [undefined, undefined, 1],
+        to: [0.2158650880638795, 0.12499999999999711, 1],
+      },
+      {
         op: 'cut',
-        from: [0, 0, 0],
+        from: [0.2158650880638795, 0.12499999999999711, 1],
         to: [0.2158650880638795, 0.12499999999999711, 0],
       },
       {
