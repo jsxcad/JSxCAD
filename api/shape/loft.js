@@ -10,7 +10,7 @@ Shape.Loft = Loft;
 export const loft =
   (...shapes) =>
   (shape) =>
-    Loft(shape, ...shape.toShapes(shapes));
+    Loft(...shape.toShapes(shapes));
 
 Shape.registerMethod('loft', loft);
 

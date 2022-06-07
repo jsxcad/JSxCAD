@@ -11,7 +11,7 @@ Shape.prototype.Hull = Shape.shapeMethod(Hull);
 export const hull =
   (...shapes) =>
   (shape) =>
-    Hull(shape, ...shapes.map((other) => Shape.toShape(other, shape)));
+    Hull(...shapes.map((other) => Shape.toShape(other, shape)));
 
 Shape.registerMethod('hull', hull);
 
