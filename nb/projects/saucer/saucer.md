@@ -59,7 +59,7 @@ const saucer = profile
 const top = saucer
   .upperEnvelope()
   .involute()
-  .loft(Box(150).involute().z(5))
+  .loft(self(), Box(150).involute().z(5))
   .fitTo(knob)
   .as('top')
   .stl('knob', (s) => s.get('knob').by(align('>z')));
@@ -70,7 +70,7 @@ const top = saucer
 [knob_0.stl](saucer.knob_0.stl)
 
 ```JavaScript
-const base = saucer.lowerEnvelope().loft(Box(150).z(-12.01)).as('base');
+const base = saucer.lowerEnvelope().loft(self(), Box(150).z(-12.01)).as('base');
 ```
 
 ```JavaScript

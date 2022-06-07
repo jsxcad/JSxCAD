@@ -4093,7 +4093,10 @@ const sectionProfile =
 
 Shape.registerMethod('sectionProfile', sectionProfile);
 
-const self = (...args) => (shape) => shape;
+const self =
+  (...args) =>
+  (shape) =>
+    shape;
 
 Shape.registerMethod('self', self);
 

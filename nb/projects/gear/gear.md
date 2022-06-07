@@ -126,7 +126,7 @@ We'll use an offset template to cut the other gears
 ```JavaScript
 const ring = Arc(50)
   .hasAngle(-1 / 64, 1 / 64)
-  .hull(Point())
+  .hull(self(), Point())
   .cut(Arc(30))
   .cut(
     Group(
@@ -155,7 +155,7 @@ We simulate the gear motion to cut a single tooth, then rotate it around.
 ```JavaScript
 const solar = Arc(20)
   .hasAngle(-1 / 30, 1 / 30)
-  .hull(Point())
+  .hull(self(), Point())
   .cut(
     seq(
       (a) =>
