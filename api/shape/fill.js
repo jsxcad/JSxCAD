@@ -9,7 +9,4 @@ export const f = fill;
 Shape.registerMethod('fill', fill);
 Shape.registerMethod('f', f);
 
-export const withFill = () => (shape) => shape.group(shape.fill());
-Shape.registerMethod('withFill', withFill);
-
 export default fill;

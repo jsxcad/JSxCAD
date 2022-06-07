@@ -8,9 +8,4 @@ export const inset =
       insetGeometry(shape.toGeometry(), initial, step, limit, segments)
     );
 
-// CHECK: Using 'with' for may be confusing, but andInset looks odd.
-export const withInset = (initial, step, limit) => (shape) =>
-  shape.and(shape.inset(initial, step, limit));
-
 Shape.registerMethod('inset', inset);
-Shape.registerMethod('withInset', withInset);

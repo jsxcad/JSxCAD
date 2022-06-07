@@ -16,7 +16,7 @@ Box(5).by(align('x>y>')).gridView();
 
 Box(5)
   .as('box')
-  .with(Arc(4).as('arc'))
+  .fitTo(Arc(4).as('arc'))
   .keep('box')
   .gridView(4);
 
@@ -127,7 +127,7 @@ Weld(Arc(6).x(-1), Arc(6).x(1), Arc(6).y(1), Arc(6).y(-1))
   .fill()
   .gridView(37);
 
-Box(5).with(Arc(6)).gridView(38);
+Box(5).fitTo(Arc(6)).gridView(38);
 
 Box(5).x(1).gridView(39);
 Box(5).y(1).gridView(40);

@@ -263,7 +263,7 @@ Curve(Point(0, 0), Point(10, 0), Point(10, 10), Point(20, 10))
 
 Curve(Point(0, 0), Point(10, 0), Point(10, 10), Point(20, 10))
   .rx(1 / 4)
-  .points(ArcX(0, 10).hasSides(6), Loft)
+  .eachPoint(ArcX(0, 10).hasSides(6), Loft)
   .view();
 
 Orb(6)

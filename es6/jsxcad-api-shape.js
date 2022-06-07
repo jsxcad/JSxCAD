@@ -1,4 +1,4 @@
-import { assemble as assemble$1, toDisplayGeometry, toConcreteGeometry, toTransformedGeometry, toPoints, transform, rewriteTags, taggedGraph, taggedSegments, taggedPoints, fromPolygons, registerReifier, taggedPlan, identity, taggedGroup, join as join$1, makeAbsolute, measureArea, taggedItem, getInverseMatrices, bend as bend$1, getLeafs, cast as cast$1, computeCentroid, convexHull, fuse as fuse$1, clip as clip$1, allTags, cut as cut$1, deform as deform$1, demesh as demesh$1, disjoint as disjoint$1, rewrite, visit, hasTypeVoid, computeNormal, extrude, link as link$1, taggedLayout, measureBoundingBox, getLayouts, isNotVoid, getLeafsIn, eachSegment, transformCoordinate, faces as faces$1, fill as fill$1, fix as fix$2, grow as grow$1, outline as outline$1, inset as inset$1, involute as involute$1, read, readNonblocking, loft as loft$1, serialize as serialize$1, generateLowerEnvelope, hasShowOverlay, hasTypeMasked, linearize, isVoid, offset as offset$1, eachPoint, remesh as remesh$1, write, writeNonblocking, fromScaleToTransform, seam as seam$1, section as section$1, separate as separate$1, simplify as simplify$1, taggedSketch, smooth as smooth$1, computeToolpath, twist as twist$1, generateUpperEnvelope, measureVolume, withAabbTreeQuery, computeImplicitVolume } from './jsxcad-geometry.js';
+import { assemble as assemble$1, toDisplayGeometry, toConcreteGeometry, toTransformedGeometry, toPoints, transform, rewriteTags, taggedGraph, taggedSegments, taggedPoints, fromPolygons, registerReifier, taggedPlan, identity, taggedGroup, join as join$1, makeAbsolute, measureArea, taggedItem, getInverseMatrices, bend as bend$1, getLeafs, cast as cast$1, computeCentroid, convexHull, fuse as fuse$1, clip as clip$1, allTags, cut as cut$1, deform as deform$1, demesh as demesh$1, disjoint as disjoint$1, rewrite, visit, hasTypeVoid, computeNormal, extrude, link as link$1, taggedLayout, measureBoundingBox, getLayouts, isNotVoid, getLeafsIn, eachPoint as eachPoint$1, eachSegment, transformCoordinate, faces as faces$1, fill as fill$1, fix as fix$2, grow as grow$1, outline as outline$1, inset as inset$1, involute as involute$1, read, readNonblocking, loft as loft$1, serialize as serialize$1, generateLowerEnvelope, hasShowOverlay, hasTypeMasked, linearize, isVoid, offset as offset$1, remesh as remesh$1, write, writeNonblocking, fromScaleToTransform, seam as seam$1, section as section$1, separate as separate$1, simplify as simplify$1, taggedSketch, smooth as smooth$1, computeToolpath, twist as twist$1, generateUpperEnvelope, measureVolume, withAabbTreeQuery, wrap as wrap$1, computeImplicitVolume } from './jsxcad-geometry.js';
 import { getSourceLocation, startTime, endTime, emit, computeHash, logInfo, log as log$1, generateUniqueId, addPending, write as write$1 } from './jsxcad-sys.js';
 export { elapsed, emit, read, write } from './jsxcad-sys.js';
 import { zag } from './jsxcad-api-v1-math.js';
@@ -3212,6 +3212,30 @@ const eachIn =
   };
 Shape.registerMethod('eachIn', eachIn);
 
+const eachPoint =
+  (...args) =>
+  (shape) => {
+    const { shapesAndFunctions } = destructure(args);
+    let [leafOp = (l) => l, groupOp = Group] = shapesAndFunctions;
+    if (leafOp instanceof Shape) {
+      const leafShape = leafOp;
+      leafOp = (edge) => leafShape.to(edge);
+    }
+    const leafs = [];
+    eachPoint$1(
+      Shape.toShape(shape, shape).toGeometry(),
+      ([x = 0, y = 0, z = 0]) => leafs.push(leafOp(Point().move(x, y, z)))
+    );
+    const grouped = groupOp(...leafs);
+    if (grouped instanceof Function) {
+      return grouped(shape);
+    } else {
+      return grouped;
+    }
+  };
+
+Shape.registerMethod('eachPoint', eachPoint);
+
 const edit = (editId) => (shape) =>
   shape.untag('editId:*').tag(`editId:${editId}`);
 
@@ -3274,9 +3298,6 @@ const f = fill;
 
 Shape.registerMethod('fill', fill);
 Shape.registerMethod('f', f);
-
-const withFill = () => (shape) => shape.group(shape.fill());
-Shape.registerMethod('withFill', withFill);
 
 const assemble = (...shapes) => {
   shapes = shapes.filter((shape) => shape !== undefined);
@@ -3413,20 +3434,9 @@ const outline = () => (shape) =>
 
 Shape.registerMethod('outline', outline);
 
-const withOutline =
-  (op = (x) => x) =>
-  (shape) =>
-    shape.and(op(outline()));
-
-Shape.registerMethod('withOutline', withOutline);
-
 const inline = () => (shape) => outline({}, shape.flip());
 
 Shape.registerMethod('inline', inline);
-
-const withInline = () => (shape) => shape.with(inline());
-
-Shape.registerMethod('withInline', withInline);
 
 const inset =
   (initial = 1, { segments = 16, step, limit } = {}) =>
@@ -3435,12 +3445,7 @@ const inset =
       inset$1(shape.toGeometry(), initial, step, limit, segments)
     );
 
-// CHECK: Using 'with' for may be confusing, but andInset looks odd.
-const withInset = (initial, step, limit) => (shape) =>
-  shape.and(shape.inset(initial, step, limit));
-
 Shape.registerMethod('inset', inset);
-Shape.registerMethod('withInset', withInset);
 
 const involute = () => (shape) =>
   Shape.fromGeometry(involute$1(shape.toGeometry()));
@@ -3911,28 +3916,14 @@ const play =
 
 Shape.registerMethod('play', play);
 
-const points$1 =
-  (...args) =>
-  (shape) => {
-    const { shapesAndFunctions } = destructure(args);
-    let [leafOp = (l) => l, groupOp = (g) => (s) => Group(...g)] =
-      shapesAndFunctions;
-    if (leafOp instanceof Shape) {
-      const leafShape = leafOp;
-      leafOp = (edge) => leafShape.to(edge);
-    }
-    const leafs = [];
-    eachPoint(
-      Shape.toShape(shape, shape).toGeometry(),
-      ([x = 0, y = 0, z = 0]) => leafs.push(leafOp(Point().move(x, y, z)))
-    );
-    const grouped = groupOp(...leafs);
-    if (grouped instanceof Function) {
-      return grouped(shape);
-    } else {
-      return grouped;
-    }
-  };
+const points$1 = () => (shape) => {
+  const points = [];
+  eachPoint$1(
+    Shape.toShape(shape, shape).toGeometry(),
+    ([x = 0, y = 0, z = 0, exact]) => points.push([x, y, z, exact])
+  );
+  return Shape.fromGeometry(taggedPoints({}, points));
+};
 
 Shape.registerMethod('points', points$1);
 
@@ -4874,14 +4865,14 @@ const Weld = (first, ...rest) => first.weld(...rest);
 
 Shape.prototype.Weld = Shape.shapeMethod(Weld);
 
-// DEPRECATE
-
-const withFn =
-  (...shapes) =>
+const wrap =
+  (offset = 1, alpha = 20) =>
   (shape) =>
-    assemble(shape, ...shapes);
+    Shape.fromGeometry(
+      wrap$1(shape.toGeometry(), shape.getTags(), offset, alpha)
+    );
 
-Shape.registerMethod('with', withFn);
+Shape.registerMethod('wrap', wrap);
 
 const x =
   (...x) =>
@@ -5496,7 +5487,7 @@ const fromVec3 = (...points) =>
 const fromPoints = (...shapes) => {
   const vec3List = [];
   for (const shape of shapes) {
-    eachPoint(shape.toGeometry(), (vec3) => vec3List.push(vec3));
+    eachPoint$1(shape.toGeometry(), (vec3) => vec3List.push(vec3));
   }
   return fromVec3(...vec3List);
 };
@@ -5610,4 +5601,4 @@ const RX = (t = 0) => Point().rx(t);
 const RY = (t = 0) => Point().ry(t);
 const RZ = (t = 0) => Point().rz(t);
 
-export { Arc, ArcX, ArcY, ArcZ, Assembly, Box, Cached, ChainHull, Curve, Edge, Edges, Empty, Face, GrblConstantLaser, GrblDynamicLaser, GrblPlotter, GrblSpindle, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Join, Line, Link, Loft, Loop, Octagon, Orb, Page, Path, Pentagon, Plan, Point, Points, Polygon, Polyhedron, RX, RY, RZ, Segments, Septagon, Shape, Spiral, SurfaceMesh, Tetragon, Triangle, Voxels, Wave, Weld, X, XY, XZ, Y, YZ, Z, absolute, abstract, addTo, align, and, area, as, asPart, at, bend, billOfMaterials, by, cast, center, chainHull, clip, clipfrom, clipopen, color, colors, cut, cutfrom, cutopen, cutout, defRgbColor, defThreejsMaterial, defTool, define, deform, demesh, disjoint, drop, e, each, eachIn, edges, edit, ensurePages, ex, extrudeAlong, extrudeX, extrudeY, extrudeZ, ey, ez, faces, fill, fit, fitTo, fix, fuse, g, get, getNot, gn, grow, hull, inFn, inline, inset, involute, join, keep, link, loadGeometry, loft, log, loop, lowerEnvelope, mask, masking, material, md, move, moveAlong, moveTo, n, noVoid, noop, normal, notColor, nth, o, ofPlan, offset, on, op, orient, origin, outline, overlay, pack, play, points$1 as points, reify, remesh, rotateX, rotateY, rotateZ, rx, ry, rz, saveGeometry, scale$1 as scale, scaleToFit, scaleX, scaleY, scaleZ, seam, section, sectionProfile, separate, seq, serialize, simplify, size, sketch, smooth, sort, sx, sy, sz, table, tag, tags, tint, to, tool, toolpath, top, twist, untag, upperEnvelope, view, voidFn, voidIn, volume, voxels, weld, withFill, withFn, withInset, withOp, x, xyz, y, z };
+export { Arc, ArcX, ArcY, ArcZ, Assembly, Box, Cached, ChainHull, Curve, Edge, Edges, Empty, Face, GrblConstantLaser, GrblDynamicLaser, GrblPlotter, GrblSpindle, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Join, Line, Link, Loft, Loop, Octagon, Orb, Page, Path, Pentagon, Plan, Point, Points, Polygon, Polyhedron, RX, RY, RZ, Segments, Septagon, Shape, Spiral, SurfaceMesh, Tetragon, Triangle, Voxels, Wave, Weld, X, XY, XZ, Y, YZ, Z, absolute, abstract, addTo, align, and, area, as, asPart, at, bend, billOfMaterials, by, cast, center, chainHull, clip, clipfrom, clipopen, color, colors, cut, cutfrom, cutopen, cutout, defRgbColor, defThreejsMaterial, defTool, define, deform, demesh, disjoint, drop, e, each, eachIn, eachPoint, edges, edit, ensurePages, ex, extrudeAlong, extrudeX, extrudeY, extrudeZ, ey, ez, faces, fill, fit, fitTo, fix, fuse, g, get, getNot, gn, grow, hull, inFn, inline, inset, involute, join, keep, link, loadGeometry, loft, log, loop, lowerEnvelope, mask, masking, material, md, move, moveAlong, moveTo, n, noVoid, noop, normal, notColor, nth, o, ofPlan, offset, on, op, orient, origin, outline, overlay, pack, play, points$1 as points, reify, remesh, rotateX, rotateY, rotateZ, rx, ry, rz, saveGeometry, scale$1 as scale, scaleToFit, scaleX, scaleY, scaleZ, seam, section, sectionProfile, separate, seq, serialize, simplify, size, sketch, smooth, sort, sx, sy, sz, table, tag, tags, tint, to, tool, toolpath, top, twist, untag, upperEnvelope, view, voidFn, voidIn, volume, voxels, weld, withOp, wrap, x, xyz, y, z };

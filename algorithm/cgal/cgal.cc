@@ -8,14 +8,7 @@
 // Used in Deform, but it's unclear if this definition is correct.
 #define FE_UNDERFLOW 0
 
-#include <CGAL/Advancing_front_surface_reconstruction.h>
 #include <CGAL/Aff_transformation_3.h>
-#include <CGAL/Alpha_shape_2.h>
-#include <CGAL/Alpha_shape_3.h>
-#include <CGAL/Alpha_shape_cell_base_3.h>
-#include <CGAL/Alpha_shape_face_base_2.h>
-#include <CGAL/Alpha_shape_vertex_base_2.h>
-#include <CGAL/Alpha_shape_vertex_base_3.h>
 #include <CGAL/Arr_conic_traits_2.h>
 #include <CGAL/Arr_polyline_traits_2.h>
 #include <CGAL/Arr_segment_traits_2.h>
@@ -80,8 +73,8 @@
 #include <CGAL/Surface_mesh_simplification/Policies/Edge_collapse/Count_stop_predicate.h>
 #include <CGAL/Surface_mesh_simplification/edge_collapse.h>
 #include <CGAL/Unique_hash_map.h>
+#include <CGAL/alpha_wrap_3.h>
 #include <CGAL/approximated_offset_2.h>
-#include <CGAL/boost/graph/Named_function_parameters.h>
 #include <CGAL/boost/graph/convert_nef_polyhedron_to_polygon_mesh.h>
 #include <CGAL/cartesian_homogeneous_conversion.h>
 #include <CGAL/convex_hull_3.h>
@@ -146,6 +139,7 @@ typedef std::map<Point, Vertex_index> Vertex_map;
 
 typedef CGAL::Simple_cartesian<double> Cartesian_kernel;
 typedef Cartesian_kernel::Point_3 Cartesian_point;
+typedef std::vector<Cartesian_point> Cartesian_points;
 typedef CGAL::Surface_mesh<Cartesian_point> Cartesian_surface_mesh;
 
 typedef std::array<FT, 3> Triple;
@@ -160,6 +154,15 @@ typedef CGAL::Polygon_2<Kernel> Polygon_2;
 typedef CGAL::Polygon_with_holes_2<Kernel> Polygon_with_holes_2;
 typedef std::vector<Polygon_with_holes_2> Polygons_with_holes_2;
 typedef CGAL::Straight_skeleton_2<Kernel> Straight_skeleton_2;
+
+typedef CGAL::AABB_face_graph_triangle_primitive<Surface_mesh> Primitive;
+typedef CGAL::AABB_traits<Kernel, Primitive> Traits;
+typedef CGAL::AABB_tree<Traits> AABB_tree;
+typedef boost::optional<AABB_tree::Intersection_and_primitive_id<Point>::Type>
+    Point_intersection;
+typedef boost::optional<AABB_tree::Intersection_and_primitive_id<Segment>::Type>
+    Segment_intersection;
+typedef CGAL::Side_of_triangle_mesh<Surface_mesh, Kernel> Side_of_triangle_mesh;
 
 typedef CGAL::General_polygon_set_2<CGAL::Gps_segment_traits_2<Kernel>>
     General_polygon_set_2;
@@ -482,6 +485,25 @@ class SurfaceMeshQuery {
         points.push_back(target);
       }
       if (points.size() >= 2) {
+        if (points.size() % 2) {
+          std::cout << "QQ/odd intersections" << std::endl;
+          std::cout << "QQ/do_clip: " << do_clip << std::endl;
+          std::cout << "QQ/source: " << source << std::endl;
+          std::cout << "QQ/is_source_inside: " << is_source_inside << std::endl;
+          std::cout << "QQ/target: " << target << std::endl;
+          std::cout << "QQ/is_target_inside: " << is_target_inside << std::endl;
+          for (const auto& intersection : intersections) {
+            if (!intersection) {
+              continue;
+            }
+            // Note: intersection->second is the intersected face index.
+            // CHECK: We get doubles because we're intersecting with the
+            // interior of the faces.
+            if (const Point* point = boost::get<Point>(&intersection->first)) {
+              std::cout << "QQ/point: " << *point << std::endl;
+            }
+          }
+        }
         std::sort(points.begin(), points.end(),
                   [&](const Point& a, const Point& b) {
                     return CGAL::squared_distance(a, source) <
@@ -489,10 +511,11 @@ class SurfaceMeshQuery {
                   });
         points.erase(std::unique(points.begin(), points.end()), points.end());
         // Now we should have pairs of doubled pointwise intersections.
-        for (size_t index = 0; index < points.size(); index += 2) {
+        for (size_t index = 0; index < points.size() - 1; index += 2) {
           const Point& source = points[index + 0];
           const Point& target = points[index + 1];
-          emit(Segment(source, target));
+          Segment segment(source, target);
+          emit(segment);
         }
       }
     } else {
@@ -762,8 +785,8 @@ class Demesh_safe_placement {
   template <typename Profile>
   boost::optional<typename Profile::Point> operator()(
       const Profile& profile) const {
-    auto& m = profile.surface_mesh();
-    auto& p = profile.vertex_point_map();
+    const auto& m = profile.surface_mesh();
+    const auto& p = profile.vertex_point_map();
     if (is_safe_to_move(m, p, profile.v0_v1())) {
       return profile.p1();
     } else if (is_safe_to_move(m, p, profile.v1_v0())) {
@@ -1196,15 +1219,10 @@ bool PolygonsWithHolesToSurfaceMesh(const Plane& plane,
                                     std::vector<Polygon_with_holes_2>& polygons,
                                     Surface_mesh& result,
                                     Vertex_map& vertex_map, bool flip = false) {
-  CGAL::Polygon_triangulation_decomposition_2<Kernel> convexifier;
-  for (const auto& polygon : polygons) {
+  CGAL::Polygon_triangulation_decomposition_2<Kernel> triangulator;
+  for (const Polygon_with_holes_2& polygon : polygons) {
     std::vector<Polygon_2> facets;
-    if (polygon.number_of_holes() > 0) {
-      // CHECK: Could we just use connect_holes instead?
-      convexifier(polygon, std::back_inserter(facets));
-    } else {
-      facets.push_back(polygon.outer_boundary());
-    }
+    triangulator(polygon, std::back_inserter(facets));
     for (auto& facet : facets) {
       if (facet.orientation() != CGAL::Sign::POSITIVE) {
         facet.reverse_orientation();
@@ -1251,6 +1269,14 @@ void print_polygon_with_holes(
     print_polygon(*hit);
   }
   std::cout << " }" << std::endl;
+}
+
+template <class Kernel, class Container>
+void print_polygons_with_holes(
+    const std::vector<CGAL::Polygon_with_holes_2<Kernel, Container>>& pwhs) {
+  for (const auto& pwh : pwhs) {
+    print_polygon_with_holes(pwh);
+  }
 }
 
 FT max2(FT a, FT b) { return a > b ? a : b; }
@@ -2182,6 +2208,8 @@ class Geometry {
     pwh_.clear();
     input_meshes_.clear();
     meshes_.clear();
+    aabb_trees_.clear();
+    on_sides_.clear();
     input_segments_.clear();
     segments_.clear();
     input_points_.clear();
@@ -2202,6 +2230,8 @@ class Geometry {
     pwh_.resize(size);
     input_meshes_.resize(size);
     meshes_.resize(size);
+    aabb_trees_.resize(size);
+    on_sides_.resize(size);
     input_segments_.resize(size);
     segments_.resize(size);
     input_points_.resize(size);
@@ -2251,6 +2281,33 @@ class Geometry {
       meshes_[nth].reset(new Surface_mesh);
     }
     return *meshes_[nth];
+  }
+
+  bool has_aabb_tree(int nth) { return aabb_trees_[nth] != nullptr; }
+
+  void update_aabb_tree(int nth) {
+    Surface_mesh& m = mesh(nth);
+    aabb_trees_[nth].reset(new AABB_tree(faces(m).first, faces(m).second, m));
+  }
+
+  AABB_tree& aabb_tree(int nth) {
+    if (!has_aabb_tree(nth)) {
+      update_aabb_tree(nth);
+    }
+    return *aabb_trees_[nth];
+  }
+
+  bool has_on_side(int nth) { return on_sides_[nth] != nullptr; }
+
+  void update_on_side(int nth) {
+    on_sides_[nth].reset(new Side_of_triangle_mesh(aabb_tree(nth)));
+  }
+
+  Side_of_triangle_mesh& on_side(int nth) {
+    if (!has_on_side(nth)) {
+      update_on_side(nth);
+    }
+    return *on_sides_[nth];
   }
 
   bool has_gps(int nth) { return gps_[nth] != nullptr; }
@@ -2691,6 +2748,8 @@ class Geometry {
   std::vector<std::unique_ptr<General_polygon_set_2>> gps_;
   std::vector<const Surface_mesh*> input_meshes_;
   std::vector<std::unique_ptr<Surface_mesh>> meshes_;
+  std::vector<std::unique_ptr<AABB_tree>> aabb_trees_;
+  std::vector<std::unique_ptr<Side_of_triangle_mesh>> on_sides_;
   std::vector<std::unique_ptr<Segments>> input_segments_;
   std::vector<std::unique_ptr<Segments>> segments_;
   std::vector<std::unique_ptr<Points>> input_points_;
@@ -2765,6 +2824,62 @@ class AabbTreeQuery {
  private:
   std::vector<std::unique_ptr<SurfaceMeshQuery>> surface_mesh_query_;
 };
+
+void intersect_segment_with_volume(const Segment& segment, AABB_tree& tree,
+                                   Side_of_triangle_mesh& on_side, bool clip,
+                                   Segments& segments) {
+  const Point& source = segment.source();
+  const Point& target = segment.target();
+  std::list<Segment_intersection> intersections;
+  tree.all_intersections(segment, std::back_inserter(intersections));
+  Points points;
+  points.push_back(source);
+  points.push_back(target);
+  for (const auto& intersection : intersections) {
+    if (!intersection) {
+      continue;
+    }
+    if (const Point* point = boost::get<Point>(&intersection->first)) {
+      points.push_back(*point);
+    }
+    if (const Segment* segment = boost::get<Segment>(&intersection->first)) {
+      points.push_back(segment->source());
+      points.push_back(segment->target());
+    }
+  }
+  std::sort(points.begin(), points.end(), [&](const Point& a, const Point& b) {
+    return CGAL::squared_distance(a, source) <
+           CGAL::squared_distance(b, source);
+  });
+  points.erase(std::unique(points.begin(), points.end()), points.end());
+  for (size_t index = 1; index < points.size(); index++) {
+    const Point& source = points[index - 1];
+    const Point& target = points[index];
+    bool is_outside =
+        on_side(CGAL::midpoint(source, target)) == CGAL::ON_UNBOUNDED_SIDE;
+    if (is_outside) {
+      if (!clip) {
+        segments.emplace_back(source, target);
+      }
+    } else {
+      if (clip) {
+        segments.emplace_back(source, target);
+      }
+    }
+  }
+}
+
+void clip_segment_with_volume(const Segment& segment, AABB_tree& tree,
+                              Side_of_triangle_mesh& on_side,
+                              Segments& segments) {
+  return intersect_segment_with_volume(segment, tree, on_side, true, segments);
+}
+
+void cut_segment_with_volume(const Segment& segment, AABB_tree& tree,
+                             Side_of_triangle_mesh& on_side,
+                             Segments& segments) {
+  return intersect_segment_with_volume(segment, tree, on_side, false, segments);
+}
 
 void SurfaceMeshSectionToPolygonsWithHoles(const Surface_mesh& mesh,
                                            const Plane& plane,
@@ -2893,9 +3008,6 @@ int Cast(Geometry* geometry, const Transformation* reference) {
 int Clip(Geometry* geometry, int targets, bool open) {
   size_t size = geometry->size();
 
-  std::vector<std::unique_ptr<SurfaceMeshQuery>> queries;
-  Transformation identity(CGAL::IDENTITY);
-
   geometry->copyInputMeshesToOutputMeshes();
   geometry->copyInputSegmentsToOutputSegments();
   geometry->transformToAbsoluteFrame();
@@ -2980,14 +3092,10 @@ int Clip(Geometry* geometry, int targets, bool open) {
           if (!geometry->is_mesh(nth) || geometry->is_empty_mesh(nth)) {
             continue;
           }
-          if (queries[nth] == nullptr && geometry->is_mesh(nth)) {
-            queries[nth].reset(
-                new SurfaceMeshQuery(&geometry->mesh(nth), &identity));
-          }
-          std::unique_ptr<SurfaceMeshQuery>& query = queries[nth];
-          auto emit = [&](const Segment& segment) { out.push_back(segment); };
+          AABB_tree& tree = geometry->aabb_tree(nth);
+          Side_of_triangle_mesh& on_side = geometry->on_side(nth);
           for (const Segment& segment : in) {
-            query->intersectSegment(true, segment, emit);
+            clip_segment_with_volume(segment, tree, on_side, out);
           }
           in.swap(out);
           out.clear();
@@ -3274,9 +3382,6 @@ int ConvexHull(Geometry* geometry) {
 
 int Cut(Geometry* geometry, int targets, bool open) {
   size_t size = geometry->size();
-  std::vector<std::unique_ptr<SurfaceMeshQuery>> queries;
-  queries.resize(size);
-  Transformation identity(CGAL::IDENTITY);
   geometry->copyInputMeshesToOutputMeshes();
   geometry->copyInputSegmentsToOutputSegments();
   geometry->transformToAbsoluteFrame();
@@ -3355,16 +3460,10 @@ int Cut(Geometry* geometry, int targets, bool open) {
           if (!geometry->is_mesh(nth) || geometry->is_empty_mesh(nth)) {
             continue;
           }
-          assert(geometry->mesh(nth).is_valid());
-          if (queries[nth] == nullptr) {
-            queries[nth].reset(
-                new SurfaceMeshQuery(geometry->mesh(nth), identity));
-          }
-          SurfaceMeshQuery* query = queries[nth].get();
-          assert(query->mesh().is_valid());
-          auto emit = [&](const Segment& segment) { out.push_back(segment); };
+          AABB_tree& tree = geometry->aabb_tree(nth);
+          Side_of_triangle_mesh& on_side = geometry->on_side(nth);
           for (const Segment& segment : in) {
-            query->intersectSegment(false, segment, emit);
+            cut_segment_with_volume(segment, tree, on_side, out);
           }
           in.swap(out);
           out.clear();
@@ -3464,7 +3563,6 @@ int Deform(Geometry* geometry, size_t length, size_t iterations,
           CGAL::to_double(deform_transform.m(2, 2)),
           CGAL::to_double(deform_transform.m(2, 3)),
           CGAL::to_double(deform_transform.m(3, 3)));
-      std::cout << "QQ/t: " << cartesian_deform_transform << std::endl;
       for (const Vertex_index vertex : vertices(cartesian_mesh)) {
         const auto& p = cartesian_mesh.point(vertex);
         if (inside(from_cartesian(p)) != CGAL::ON_UNBOUNDED_SIDE) {
@@ -3503,14 +3601,8 @@ int Demesh(Geometry* geometry) {
 int Disjoint(Geometry* geometry, emscripten::val getIsMasked) {
   int size = geometry->size();
 
-  std::vector<std::unique_ptr<SurfaceMeshQuery>> queries;
-  Transformation identity(CGAL::IDENTITY);
-
   std::vector<bool> is_masked;
   is_masked.resize(size);
-
-  std::vector<std::unique_ptr<SurfaceMeshQuery>> query;
-  query.resize(size);
 
   geometry->copyInputMeshesToOutputMeshes();
   geometry->copyInputSegmentsToOutputSegments();
@@ -3598,17 +3690,13 @@ int Disjoint(Geometry* geometry, emscripten::val getIsMasked) {
           }
           switch (geometry->getType(nth)) {
             case GEOMETRY_MESH: {
-              if (query[nth] == nullptr) {
-                query[nth].reset(new SurfaceMeshQuery(geometry->mesh(nth)));
-              }
               Segments out;
               // TODO: See if we can leverage std::back_inserter instead of an
               // lexical closure.
-              auto emit = [&](const Segment& segment) {
-                out.push_back(segment);
-              };
+              AABB_tree& tree = geometry->aabb_tree(nth);
+              Side_of_triangle_mesh& on_side = geometry->on_side(nth);
               for (const Segment& segment : geometry->segments(start)) {
-                query[nth]->intersectSegment(false, segment, emit);
+                cut_segment_with_volume(segment, tree, on_side, out);
               }
               geometry->segments(start).swap(out);
               break;
@@ -3650,12 +3738,14 @@ int EachPoint(Geometry* geometry, emscripten::val emit_point) {
   geometry->copyInputPointsToOutputPoints();
   geometry->transformToAbsoluteFrame();
 
+  Points points;
+
   for (int nth = 0; nth < size; nth++) {
     switch (geometry->getType(nth)) {
       case GEOMETRY_MESH: {
         const Surface_mesh& mesh = geometry->mesh(nth);
         for (const Vertex_index vertex : mesh.vertices()) {
-          emitPoint(mesh.point(vertex), emit_point);
+          points.push_back(mesh.point(vertex));
         }
         break;
       }
@@ -3669,7 +3759,7 @@ int EachPoint(Geometry* geometry, emscripten::val emit_point) {
           for (auto hole = polygon.holes_begin(); hole != polygon.holes_end();
                ++hole) {
             for (const Point_2& point : *hole) {
-              emitPoint(plane.to_3d(point).transform(transform), emit_point);
+              points.push_back(plane.to_3d(point));
             }
           }
         }
@@ -3677,17 +3767,62 @@ int EachPoint(Geometry* geometry, emscripten::val emit_point) {
       }
       case GEOMETRY_SEGMENTS: {
         for (const Segment& segment : geometry->segments(nth)) {
-          emitPoint(segment.source(), emit_point);
-          emitPoint(segment.target(), emit_point);
+          points.push_back(segment.source());
+          points.push_back(segment.target());
         }
         break;
       }
       case GEOMETRY_POINTS: {
         for (const Point& point : geometry->points(nth)) {
-          emitPoint(point, emit_point);
+          points.push_back(point);
         }
         break;
       }
+    }
+  }
+
+  // There should be a better way to emit a unique set of points.
+  std::sort(points.begin(), points.end(), [&](const Point& a, const Point& b) {
+    FT x = a.x() - b.x();
+    if (x < 0) {
+      return true;
+    }
+    if (x > 0) {
+      return false;
+    }
+    FT y = a.y() - b.y();
+    if (y < 0) {
+      return true;
+    }
+    if (y > 0) {
+      return false;
+    }
+    return a.z() < b.z();
+  });
+  points.erase(std::unique(points.begin(), points.end()), points.end());
+
+  for (const Point& point : points) {
+    emitPoint(point, emit_point);
+  }
+
+  return STATUS_OK;
+}
+
+int EachTriangle(Geometry* geometry, emscripten::val emit_point) {
+  size_t size = geometry->getSize();
+
+  for (size_t nth = 0; nth < size; nth++) {
+    if (!geometry->is_mesh(nth)) {
+      continue;
+    }
+    const Surface_mesh& mesh = geometry->input_mesh(nth);
+    for (const Face_index facet : mesh.faces()) {
+      const auto& a = mesh.halfedge(facet);
+      const auto& b = mesh.next(a);
+      const auto& c = mesh.next(b);
+      emitPoint(mesh.point(mesh.source(a)), emit_point);
+      emitPoint(mesh.point(mesh.source(b)), emit_point);
+      emitPoint(mesh.point(mesh.source(c)), emit_point);
     }
   }
 
@@ -4164,9 +4299,6 @@ int Grow(Geometry* geometry, size_t count, bool x, bool y, bool z) {
   Point reference = Point(0, 0, 0).transform(geometry->transform(count));
   FT amount = reference.z();
 
-  std::vector<std::unique_ptr<SurfaceMeshQuery>> query;
-  query.resize(size);
-
   for (int nth = 0; nth < count; nth++) {
     switch (geometry->getType(nth)) {
       case GEOMETRY_MESH: {
@@ -4179,8 +4311,6 @@ int Grow(Geometry* geometry, size_t count, bool x, bool y, bool z) {
           CGAL::Polygon_mesh_processing::corefine(
               mesh, working_selection, CGAL::parameters::all_default(),
               CGAL::parameters::all_default());
-          query[selection].reset(
-              new SurfaceMeshQuery(&geometry->mesh(selection)));
         }
         bool created = false;
         Surface_mesh::Property_map<Vertex_index, Vector> vertex_normal_map;
@@ -4198,19 +4328,22 @@ int Grow(Geometry* geometry, size_t count, bool x, bool y, bool z) {
 
         for (const Vertex_index vertex : mesh.vertices()) {
           const Point& point = mesh.point(vertex);
-          // Restrict transform to points in a selection.
-          bool inside = false;
-          bool queried = false;
-          for (int selection = count + 1; selection < size; selection++) {
-            if (query[selection]) {
-              queried = true;
-              if (query[selection]->isOutsidePoint(point)) {
+          // By default all points are grown.
+          bool inside = true;
+          if (count + 1 < size) {
+            // There are selections, so limit the grown points.
+            inside = false;
+            for (int selection = count + 1; selection < size; selection++) {
+              if (geometry->on_side(selection)(point) ==
+                  CGAL::ON_UNBOUNDED_SIDE) {
                 inside = true;
                 break;
               }
             }
           }
-          if (queried && !inside) {
+          if (!inside) {
+            // There were selections provided, but the point wasn't in any of
+            // them.
             continue;
           }
           const Vector& n = vertex_normal_map[vertex];
@@ -4290,9 +4423,6 @@ int Involute(Geometry* geometry) {
 
 int Join(Geometry* geometry, int targets) {
   size_t size = geometry->size();
-
-  std::vector<std::unique_ptr<SurfaceMeshQuery>> queries;
-  Transformation identity(CGAL::IDENTITY);
 
   geometry->copyInputMeshesToOutputMeshes();
   geometry->copyInputSegmentsToOutputSegments();
@@ -5096,27 +5226,6 @@ int Smooth(Geometry* geometry, size_t count, size_t iterations, double time) {
   return STATUS_OK;
 }
 
-int EachTriangle(Geometry* geometry, emscripten::val emit_point) {
-  size_t size = geometry->getSize();
-
-  for (size_t nth = 0; nth < size; nth++) {
-    if (!geometry->is_mesh(nth)) {
-      continue;
-    }
-    const Surface_mesh& mesh = geometry->input_mesh(nth);
-    for (const Face_index facet : mesh.faces()) {
-      const auto& a = mesh.halfedge(facet);
-      const auto& b = mesh.next(a);
-      const auto& c = mesh.next(b);
-      emitPoint(mesh.point(mesh.source(a)), emit_point);
-      emitPoint(mesh.point(mesh.source(b)), emit_point);
-      emitPoint(mesh.point(mesh.source(c)), emit_point);
-    }
-  }
-
-  return STATUS_OK;
-}
-
 int Twist(Geometry* geometry, double turnsPerMm) {
   size_t size = geometry->getSize();
 
@@ -5147,6 +5256,80 @@ int Twist(Geometry* geometry, double turnsPerMm) {
       point = point.transform(transformation);
     }
   }
+
+  geometry->transformToLocalFrame();
+
+  return STATUS_OK;
+}
+
+int Wrap(Geometry* geometry, double alpha, double offset) {
+  typedef CGAL::Cartesian_converter<Kernel, Cartesian_kernel> converter;
+  converter to_cartesian;
+
+  size_t size = geometry->size();
+
+  geometry->copyInputMeshesToOutputMeshes();
+  geometry->copyInputSegmentsToOutputSegments();
+  geometry->copyInputPointsToOutputPoints();
+  geometry->transformToAbsoluteFrame();
+  geometry->convertPlanarMeshesToPolygons();
+
+  Cartesian_points points;
+  std::vector<std::vector<size_t>> faces;
+
+  for (int nth = 0; nth < size; nth++) {
+    switch (geometry->getType(nth)) {
+      case GEOMETRY_MESH: {
+        const Surface_mesh& mesh = geometry->mesh(nth);
+        for (const Face_index face : mesh.faces()) {
+          Halfedge_index a = mesh.halfedge(face);
+          Halfedge_index b = mesh.next(a);
+          Halfedge_index c = mesh.next(b);
+          size_t index = points.size();
+          faces.push_back({index, index + 1, index + 2});
+          points.push_back(to_cartesian(mesh.point(mesh.source(a))));
+          points.push_back(to_cartesian(mesh.point(mesh.source(b))));
+          points.push_back(to_cartesian(mesh.point(mesh.source(c))));
+        }
+        break;
+      }
+      case GEOMETRY_POLYGONS_WITH_HOLES: {
+        const Plane& plane = geometry->plane(nth);
+        CGAL::Polygon_triangulation_decomposition_2<Kernel> triangulator;
+        for (const auto& polygon : geometry->pwh(nth)) {
+          std::vector<Polygon_2> triangles;
+          triangulator(polygon, std::back_inserter(triangles));
+          for (const Polygon_2& triangle : triangles) {
+            size_t index = points.size();
+            faces.push_back({index, index + 1, index + 2});
+            points.push_back(to_cartesian(plane.to_3d(triangle[0])));
+            points.push_back(to_cartesian(plane.to_3d(triangle[1])));
+            points.push_back(to_cartesian(plane.to_3d(triangle[2])));
+          }
+        }
+        break;
+      }
+      case GEOMETRY_SEGMENTS: {
+        for (Segment s3 : geometry->segments(nth)) {
+          points.push_back(to_cartesian(s3.source()));
+          points.push_back(to_cartesian(s3.target()));
+        }
+        break;
+      }
+      case GEOMETRY_POINTS: {
+        for (Point p3 : geometry->points(nth)) {
+          points.push_back(to_cartesian(p3));
+        }
+        break;
+      }
+    }
+  }
+
+  Cartesian_surface_mesh cartesian_mesh;
+  alpha_wrap_3(points, alpha, offset, cartesian_mesh);
+  int target = geometry->add(GEOMETRY_MESH);
+  geometry->setIdentityTransform(target);
+  copy_face_graph(cartesian_mesh, geometry->mesh(target));
 
   geometry->transformToLocalFrame();
 
@@ -6032,6 +6215,7 @@ EMSCRIPTEN_BINDINGS(module) {
   emscripten::function("Simplify", &Simplify, emscripten::allow_raw_pointers());
   emscripten::function("Smooth", &Smooth, emscripten::allow_raw_pointers());
   emscripten::function("Twist", &Twist, emscripten::allow_raw_pointers());
+  emscripten::function("Wrap", &Wrap, emscripten::allow_raw_pointers());
 
   emscripten::function("FT__to_double", &FT__to_double,
                        emscripten::allow_raw_pointers());

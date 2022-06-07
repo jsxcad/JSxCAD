@@ -33,7 +33,7 @@ Box(5).by(align('x>y>')).gridView();
 ```JavaScript
 Box(5)
   .as('box')
-  .with(Arc(4).as('arc'))
+  .fitTo(Arc(4).as('arc'))
   .keep('box')
   .gridView(4);
 ```
@@ -280,7 +280,7 @@ Weld(Arc(6).x(-1), Arc(6).x(1), Arc(6).y(1), Arc(6).y(-1))
 ![Image](shape.md.33.png)
 
 ```JavaScript
-Box(5).with(Arc(6)).gridView(38);
+Box(5).fitTo(Arc(6)).gridView(38);
 ```
 
 ![Image](shape.md.34.png)
