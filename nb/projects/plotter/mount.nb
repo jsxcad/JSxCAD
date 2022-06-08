@@ -112,19 +112,17 @@ const upsideDesign2 = upsideDesign
   .on(get('shaft'), fit(toothedReel.z(6)))
   .view()
   .stl('box-top', get('box-top'))
-  .stl('box-pin', (s) => s.get('box-pin').ry(1 / 4))
-  .stl('box-base', (s) => s.get('box-base').rx(1 / 2))
+  .stl('box-pin', get('box-pin').ry(1 / 4))
+  .stl('box-base', get('box-base').rx(1 / 2))
   .stl('reel',
-    (s) =>
-      s
-        .get('toothedReel')
+         get('toothedReel')
         .n(1) // This is due to the cutout earlier?
         .on(
-          (s) => s.get('rim'),
-          (s) => s.color('green').void()
+          get('rim'),
+          color('green').void()
         )
         .material('glass'),
   )
-  .stl('rim', (s) => s.get('toothedReel').n(1).get('rim'))
-  .stl('clip', (s) => s.get('clip').rx(1 / 2));
+  .stl('rim', get('toothedReel').n(1).get('rim'))
+  .stl('clip', get('clip').rx(1 / 2));
 */

@@ -225,7 +225,7 @@ Box(5).x(0, 10, 20).view();
 2D shapes can be offset creating a new shape larger than the original by the specified amount. Hard exterior corners are rounded.
 
 ```JavaScript
-const b = Arc(20).cut(Box(10)).with(Box(5).x(10));
+const b = Arc(20).cut(Box(10)).fitTo(Box(5).x(10));
 ```
 
 ```JavaScript

@@ -1,15 +1,16 @@
 import Shape from './Shape.js';
 import { join as joinGeometry } from '@jsxcad/geometry';
 
-export const join =
+export const join = Shape.chainable(
   (...shapes) =>
-  (shape) =>
-    Shape.fromGeometry(
-      joinGeometry(
-        shape.toGeometry(),
-        shapes.map((other) => Shape.toShape(other, shape).toGeometry())
+    (shape) =>
+      Shape.fromGeometry(
+        joinGeometry(
+          shape.toGeometry(),
+          shapes.map((other) => Shape.toShape(other, shape).toGeometry())
+        )
       )
-    );
+);
 
 Shape.registerMethod('join', join);
 Shape.registerMethod('add', join);

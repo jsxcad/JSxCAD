@@ -1,14 +1,15 @@
 import Shape from './Shape.js';
 import { fromTranslateToTransform } from '@jsxcad/algorithm-cgal';
 
-export const move =
+export const move = Shape.chainable(
   (...args) =>
-  (shape) =>
-    Shape.Group(
-      ...Shape.toCoordinates(shape, ...args).map((coordinate) =>
-        shape.transform(fromTranslateToTransform(...coordinate))
+    (shape) =>
+      Shape.Group(
+        ...Shape.toCoordinates(shape, ...args).map((coordinate) =>
+          shape.transform(fromTranslateToTransform(...coordinate))
+        )
       )
-    );
+);
 
 export const xyz = move;
 

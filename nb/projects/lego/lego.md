@@ -14,7 +14,8 @@ export const SocketBoard = (length, width, height, { sockets = [] } = {}) => {
       }
     }
   }
-  return Weld(Box(length * 8, width * 8).by(align('x>y>')), ...pieces)
+  return Group(Box(length * 8, width * 8).by(align('x>y>')), ...pieces)
+    .fill()
     .ez(height)
     .by(align('xy'))
     .as(`SocketBoard ${length} x ${width} x ${height}`);
@@ -182,7 +183,7 @@ export const AxleProfile = () => {
   const width = 1.8 + 0.1;
   const diameter = 5 + 0.1;
   const line = Line(length / 2, length / -2);
-  const bar = Weld(
+  const bar = Group(
     line.y(width / 2),
     line.y(width / -2),
     Arc(diameter)
@@ -209,10 +210,11 @@ Axle Profile
 ![Image](lego.md.13.png)
 
 ```JavaScript
-const technic = Weld(box, Arc(4.8 + 0.2).y(5.6))
+const technic = Group(box, Arc(4.8 + 0.2).y(5.6))
+  .fill()
   .ez(8 - 0.8, 0.8)
-  .and(Weld(box, Arc(6.2 + 0.2).y(5.6)).ez(0.8))
-  .and(Weld(box, Arc(6.2 + 0.2).y(5.6)).ez(8, 8 - 0.8))
+  .and(Group(box, Arc(6.2 + 0.2).y(5.6)).fill().ez(0.8))
+  .and(Group(box, Arc(6.2 + 0.2).y(5.6)).fill().ez(8, 8 - 0.8))
   .stl('technic');
 ```
 

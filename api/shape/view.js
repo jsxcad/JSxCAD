@@ -75,30 +75,28 @@ export const baseView =
     return shape;
   };
 
-export const topView =
-  (...args) =>
-  (shape) => {
-    const {
-      value: viewId,
-      func: op = (x) => x,
-      object: options,
-    } = Shape.destructure(args, {
-      object: {
-        size: 512,
-        skin: true,
-        outline: true,
-        wireframe: false,
-        width: 1024,
-        height: 512,
-        position: [0, 0, 100],
-      },
-    });
-    return view(viewId, op, options)(shape);
-  };
+export const topView = Shape.chainable((...args) => (shape) => {
+  const {
+    value: viewId,
+    func: op = (x) => x,
+    object: options,
+  } = Shape.destructure(args, {
+    object: {
+      size: 512,
+      skin: true,
+      outline: true,
+      wireframe: false,
+      width: 1024,
+      height: 512,
+      position: [0, 0, 100],
+    },
+  });
+  return view(viewId, op, options)(shape);
+});
 
 Shape.registerMethod('topView', topView);
 
-export const gridView = (...args) => {
+export const gridView = Shape.chainable((...args) => {
   const {
     value: viewId,
     func: op = (x) => x,
@@ -116,76 +114,70 @@ export const gridView = (...args) => {
     },
   });
   return (shape) => view(viewId, op, options)(shape);
-};
+});
 
 Shape.registerMethod('gridView', gridView);
 
-export const frontView =
-  (...args) =>
-  (shape) => {
-    const {
-      value: viewId,
-      func: op = (x) => x,
-      object: options,
-    } = Shape.destructure(args, {
-      object: {
-        size: 512,
-        skin: true,
-        outline: true,
-        wireframe: false,
-        width: 1024,
-        height: 512,
-        position: [0, -100, 0],
-      },
-    });
-    return (shape) => view(viewId, op, options)(shape);
-  };
+export const frontView = Shape.chainable((...args) => (shape) => {
+  const {
+    value: viewId,
+    func: op = (x) => x,
+    object: options,
+  } = Shape.destructure(args, {
+    object: {
+      size: 512,
+      skin: true,
+      outline: true,
+      wireframe: false,
+      width: 1024,
+      height: 512,
+      position: [0, -100, 0],
+    },
+  });
+  return (shape) => view(viewId, op, options)(shape);
+});
 
 Shape.registerMethod('frontView', frontView);
 
-export const sideView =
-  (...args) =>
-  (shape) => {
-    const {
-      value: viewId,
-      func: op = (x) => x,
-      object: options,
-    } = Shape.destructure(args, {
-      object: {
-        size: 512,
-        skin: true,
-        outline: true,
-        wireframe: false,
-        width: 1024,
-        height: 512,
-        position: [100, 0, 0],
-      },
-    });
-    return view(viewId, op, options)(shape);
-  };
+export const sideView = Shape.chainable((...args) => (shape) => {
+  const {
+    value: viewId,
+    func: op = (x) => x,
+    object: options,
+  } = Shape.destructure(args, {
+    object: {
+      size: 512,
+      skin: true,
+      outline: true,
+      wireframe: false,
+      width: 1024,
+      height: 512,
+      position: [100, 0, 0],
+    },
+  });
+  return view(viewId, op, options)(shape);
+});
 
 Shape.registerMethod('sideView');
 
-export const view =
-  (...args) =>
-  (shape) => {
-    const {
-      value: viewId,
-      func: op = (x) => x,
-      object: options,
-    } = Shape.destructure(args);
-    switch (options.style) {
-      case 'grid':
-        return shape.gridView(viewId, op, options);
-      case 'none':
-        return shape;
-      case 'side':
-        return shape.sideView(viewId, op, options);
-      case 'top':
-        return shape.topView(viewId, op, options);
-      default:
-        return baseView(viewId, op, options)(shape);
-    }
-  };
+export const view = Shape.chainable((...args) => (shape) => {
+  const {
+    value: viewId,
+    func: op = (x) => x,
+    object: options,
+  } = Shape.destructure(args);
+  switch (options.style) {
+    case 'grid':
+      return shape.gridView(viewId, op, options);
+    case 'none':
+      return shape;
+    case 'side':
+      return shape.sideView(viewId, op, options);
+    case 'top':
+      return shape.topView(viewId, op, options);
+    default:
+      return baseView(viewId, op, options)(shape);
+  }
+});
 
 Shape.registerMethod('view', view);

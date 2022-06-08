@@ -14,9 +14,10 @@ Shape.Loop = Loop;
 
 export default Loop;
 
-export const loop =
+export const loop = Shape.chainable(
   (...shapes) =>
-  (shape) =>
-    Loop(shape, ...shape.toShapes(shapes, shape));
+    (shape) =>
+      Loop(shape, ...shape.toShapes(shapes, shape))
+);
 
 Shape.registerMethod('loop', loop);

@@ -1,9 +1,10 @@
 import Shape from './Shape.js';
 import assemble from './assemble.js';
 
-export const fitTo =
+export const fitTo = Shape.chainable(
   (...shapes) =>
-  (shape) =>
-    assemble(shape, ...shapes.map((other) => Shape.toShape(other, shape)));
+    (shape) =>
+      assemble(shape, ...shapes.map((other) => Shape.toShape(other, shape)))
+);
 
 Shape.registerMethod('fitTo', fitTo);

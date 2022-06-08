@@ -1,10 +1,11 @@
 import Shape from './Shape.js';
 import { scale } from './scale.js';
 
-export const scaleZ =
+export const scaleZ = Shape.chainable(
   (...z) =>
-  (shape) =>
-    Shape.Group(...shape.toFlatValues(z).map((z) => scale(1, 1, z)(shape)));
+    (shape) =>
+      Shape.Group(...shape.toFlatValues(z).map((z) => scale(1, 1, z)(shape)))
+);
 
 export const sz = scaleZ;
 

@@ -1,16 +1,12 @@
 import Shape from './Shape.js';
 import { inset as insetGeometry } from '@jsxcad/geometry';
 
-export const inset =
+export const inset = Shape.chainable(
   (initial = 1, { segments = 16, step, limit } = {}) =>
-  (shape) =>
-    Shape.fromGeometry(
-      insetGeometry(shape.toGeometry(), initial, step, limit, segments)
-    );
-
-// CHECK: Using 'with' for may be confusing, but andInset looks odd.
-export const withInset = (initial, step, limit) => (shape) =>
-  shape.and(shape.inset(initial, step, limit));
+    (shape) =>
+      Shape.fromGeometry(
+        insetGeometry(shape.toGeometry(), initial, step, limit, segments)
+      )
+);
 
 Shape.registerMethod('inset', inset);
-Shape.registerMethod('withInset', withInset);

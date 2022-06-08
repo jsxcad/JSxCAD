@@ -7,40 +7,35 @@ import {
   iang,
 } from './gearFn.js';
 
-Shape.registerMethod(
-  'hasTeeth',
+export const hasTeeth = Shape.chainable(
   (gearTeeth) => (s) => s.updatePlan({ gearTeeth })
 );
-
-Shape.registerMethod(
-  'hasMmPerTooth',
+export const hasMmPerTooth = Shape.chainable(
   (gearMmPerTooth) => (s) => s.updatePlan({ gearMmPerTooth })
 );
-
-Shape.registerMethod(
-  'hasHiddenTeeth',
+export const hasHiddenTeeth = Shape.chainable(
   (gearHiddenTeeth) => (s) => s.updatePlan({ gearHiddenTeeth })
 );
-
-Shape.registerMethod(
-  'hasPressureAngle',
+export const hasPressureAngle = Shape.chainable(
   (gearPressureAngle) => (s) => s.updatePlan({ gearPressureAngle })
 );
-
-Shape.registerMethod(
-  'hasClearance',
+export const hasClearance = Shape.chainable(
   (gearClearance) => (s) => s.updatePlan({ gearClearance })
 );
-
-Shape.registerMethod(
-  'hasBacklash',
+export const hasBacklash = Shape.chainable(
   (gearBacklash) => (s) => s.updatePlan({ gearBacklash })
 );
-
-Shape.registerMethod(
-  'hasToothResolution',
+export const hasToothResolution = Shape.chainable(
   (gearToothResolution) => (s) => s.updatePlan({ gearToothResolution })
 );
+
+Shape.registerMethod('hasTeeth', hasTeeth);
+Shape.registerMethod('hasMmPerTooth', hasMmPerTooth);
+Shape.registerMethod('hasHiddenTeeth', hasHiddenTeeth);
+Shape.registerMethod('hasPressureAngle', hasPressureAngle);
+Shape.registerMethod('hasClearance', hasClearance);
+Shape.registerMethod('hasBacklash', hasBacklash);
+Shape.registerMethod('hasToothResolution', hasToothResolution);
 
 Shape.registerReifier('Gear', (plan) => {
   const pi = Math.PI;

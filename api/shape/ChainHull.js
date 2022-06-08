@@ -10,10 +10,11 @@ export const ChainHull = (...shapes) => {
   return Join(...chain);
 };
 
-export const chainHull =
+export const chainHull = Shape.chainable(
   (...shapes) =>
-  (shape) =>
-    ChainHull(shape, ...shapes.map((other) => Shape.toShape(other, shape)));
+    (shape) =>
+      ChainHull(shape, ...shapes.map((other) => Shape.toShape(other, shape)))
+);
 
 Shape.registerMethod('chainHull', chainHull);
 

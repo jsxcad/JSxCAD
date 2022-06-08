@@ -14,7 +14,7 @@ const r = Random();
 const stars = star
   .seq(
     { upto: 20 },
-    () => (s) => s.x(r.in(-100, 100)).y(r.in(-100, 100)),
+    () => x(r.in(-100, 100)).y(r.in(-100, 100)),
     Group
   )
   .and(toolpath())

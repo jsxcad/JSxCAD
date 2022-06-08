@@ -174,4 +174,5 @@ export { transform } from './tagged/transform.js';
 export { twist } from './twist.js';
 export { update } from './tagged/update.js';
 export { withAabbTreeQuery } from '@jsxcad/algorithm-cgal';
+export { wrap } from './wrap.js';
 export { write, writeNonblocking } from './tagged/write.js';
