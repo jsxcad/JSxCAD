@@ -8,10 +8,11 @@ export const Hull = (...shapes) =>
 
 Shape.prototype.Hull = Shape.shapeMethod(Hull);
 
-export const hull =
+export const hull = Shape.chainable(
   (...shapes) =>
-  (shape) =>
-    Hull(...shapes.map((other) => Shape.toShape(other, shape)));
+    (shape) =>
+      Hull(...shapes.map((other) => Shape.toShape(other, shape)))
+);
 
 Shape.registerMethod('hull', hull);
 

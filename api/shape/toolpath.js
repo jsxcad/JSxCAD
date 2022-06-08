@@ -10,57 +10,58 @@ const lerp = (t, [ax, ay, az], [bx, by, bz]) => [
   az + t * (bz - az),
 ];
 
-export const toolpath =
+export const toolpath = Shape.chainable(
   ({
-    diameter = 1,
-    jumpHeight = 1,
-    stepCost = diameter * -2,
-    turnCost = -2,
-    neighborCost = -2,
-    stopCost = 30,
-    candidateLimit = 1,
-    subCandidateLimit = 1,
-  } = {}) =>
-  (shape) => {
-    const toolpath = computeToolpath(shape.toGeometry(), {
-      diameter,
-      jumpHeight,
-      stepCost,
-      turnCost,
-      neighborCost,
-      stopCost,
-      candidateLimit,
-      subCandidateLimit,
-    });
-    const cuts = [];
-    const jumpEnds = [];
-    const cutEnds = [];
-    const jumps = [];
-    // console.log(JSON.stringify(shape));
-    // console.log(JSON.stringify(toolpath));
-    for (const { op, from, to } of toolpath.toolpath) {
-      if (!from.every(isFinite)) {
-        // This is from an unknown position.
-        continue;
+      diameter = 1,
+      jumpHeight = 1,
+      stepCost = diameter * -2,
+      turnCost = -2,
+      neighborCost = -2,
+      stopCost = 30,
+      candidateLimit = 1,
+      subCandidateLimit = 1,
+    } = {}) =>
+    (shape) => {
+      const toolpath = computeToolpath(shape.toGeometry(), {
+        diameter,
+        jumpHeight,
+        stepCost,
+        turnCost,
+        neighborCost,
+        stopCost,
+        candidateLimit,
+        subCandidateLimit,
+      });
+      const cuts = [];
+      const jumpEnds = [];
+      const cutEnds = [];
+      const jumps = [];
+      // console.log(JSON.stringify(shape));
+      // console.log(JSON.stringify(toolpath));
+      for (const { op, from, to } of toolpath.toolpath) {
+        if (!from.every(isFinite)) {
+          // This is from an unknown position.
+          continue;
+        }
+        switch (op) {
+          case 'cut':
+            cuts.push([lerp(0.2, from, to), to]);
+            cutEnds.push(to);
+            break;
+          case 'jump':
+            jumps.push([lerp(0.2, from, to), to]);
+            jumpEnds.push(to);
+            break;
+        }
       }
-      switch (op) {
-        case 'cut':
-          cuts.push([lerp(0.2, from, to), to]);
-          cutEnds.push(to);
-          break;
-        case 'jump':
-          jumps.push([lerp(0.2, from, to), to]);
-          jumpEnds.push(to);
-          break;
-      }
+      return Group(
+        Points(cutEnds).color('red'),
+        Edges(cuts).color('red'),
+        Points(jumpEnds).color('blue'),
+        Edges(jumps).color('blue'),
+        Shape.fromGeometry(toolpath)
+      );
     }
-    return Group(
-      Points(cutEnds).color('red'),
-      Edges(cuts).color('red'),
-      Points(jumpEnds).color('blue'),
-      Edges(jumps).color('blue'),
-      Shape.fromGeometry(toolpath)
-    );
-  };
+);
 
 Shape.registerMethod('toolpath', toolpath);

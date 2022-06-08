@@ -1,9 +1,10 @@
 import Shape from './Shape.js';
 
-export const self =
+export const self = Shape.chainable(
   (...args) =>
-  (shape) =>
-    shape;
+    (shape) =>
+      shape
+);
 
 Shape.registerMethod('self', self);
 

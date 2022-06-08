@@ -1,7 +1,7 @@
 import { isVoid, rewrite, taggedGroup } from '@jsxcad/geometry';
 import { Shape } from './Shape.js';
 
-export const noVoid = (tags, select) => (shape) => {
+export const noVoid = Shape.chainable((tags, select) => (shape) => {
   const op = (geometry, descend) => {
     if (isVoid(geometry)) {
       return taggedGroup({});
@@ -12,6 +12,6 @@ export const noVoid = (tags, select) => (shape) => {
 
   const rewritten = rewrite(shape.toDisjointGeometry(), op);
   return Shape.fromGeometry(rewritten);
-};
+});
 
 Shape.registerMethod('noVoid', noVoid);

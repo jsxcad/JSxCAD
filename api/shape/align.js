@@ -78,13 +78,14 @@ const computeOffset = (spec = 'xyz', origin = [0, 0, 0], shape) =>
     return offset;
   });
 
-export const align =
+export const align = Shape.chainable(
   (spec = 'xyz', origin = [0, 0, 0]) =>
-  (shape) => {
-    const offset = computeOffset(spec, origin, shape);
-    const reference = Point().move(...subtract(offset, origin));
-    return reference;
-  };
+    (shape) => {
+      const offset = computeOffset(spec, origin, shape);
+      const reference = Point().move(...subtract(offset, origin));
+      return reference;
+    }
+);
 
 Shape.registerMethod('align', align);
 

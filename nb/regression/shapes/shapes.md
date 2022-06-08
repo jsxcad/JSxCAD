@@ -271,15 +271,15 @@ Wave((t) => Point(0, sin(t * 3) * 100), { to: 360 })
 Wave((t) => Point(0, sin(t * 3) * 100), { to: 360 })
 
 ```JavaScript
-Weld(Arc(4).x(-1), Box(5).x(1))
+Group(Arc(4).x(-1), Box(5).x(1))
   .fill()
   .gridView()
-  .md(`Weld(Arc(5).x(-1), Box(5).x(1)).fill()`);
+  .md(`Group(Arc(5).x(-1), Box(5).x(1)).fill()`);
 ```
 
 ![Image](shapes.md.24.png)
 
-Weld(Arc(5).x(-1), Box(5).x(1)).fill()
+Group(Arc(5).x(-1), Box(5).x(1)).fill()
 
 ```JavaScript
 const extentsA = [
@@ -361,9 +361,7 @@ Box(12)
       .rz(1 / 4, 3 / 4)
   )
   .color('black')
-  .fit((s) =>
-    s.separate({ keepHolesInShapes: true }).offset(1).fuse().color('yellow')
-  )
+  .fit(separate({ keepHolesInShapes: true }).offset(1).fuse().color('yellow'))
   .view();
 ```
 
@@ -377,9 +375,7 @@ Box(12)
       .rz(1 / 4, 3 / 4)
   )
   .color('black')
-  .fit((s) =>
-    s.separate({ keepHolesInShapes: false }).offset(1).fuse().color('yellow')
-  )
+  .fit(separate({ keepHolesInShapes: false }).offset(1).fuse().color('yellow'))
   .view();
 ```
 
@@ -396,8 +392,8 @@ Group(Box(1), Box(1).rx(1 / 4))
 ```JavaScript
 Orb(10)
   .op(
-    (s) => s.lowerEnvelope().ez(-1).z(-5),
-    (s) => s.upperEnvelope().ez(1).z(5)
+    lowerEnvelope().ez(-1).z(-5),
+    upperEnvelope().ez(1).z(5)
   )
   .by(align('z>'))
   .view(1);
@@ -431,7 +427,7 @@ Box(10, 10, 20)
 Box(10, 10, 20)
   .seam(Box(10, 10, [6, 11]))
   .grow(1, Box(10, 10, [7, 10]))
-  .view(3, (s) => s.rx(1 / 2).by(align('z>')));
+  .view(3, rx(1 / 2).by(align('z>')));
 ```
 
 ![Image](shapes.md.37.png)

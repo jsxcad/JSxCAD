@@ -1,11 +1,12 @@
 import Shape from './Shape.js';
 import { inset as insetGeometry } from '@jsxcad/geometry';
 
-export const inset =
+export const inset = Shape.chainable(
   (initial = 1, { segments = 16, step, limit } = {}) =>
-  (shape) =>
-    Shape.fromGeometry(
-      insetGeometry(shape.toGeometry(), initial, step, limit, segments)
-    );
+    (shape) =>
+      Shape.fromGeometry(
+        insetGeometry(shape.toGeometry(), initial, step, limit, segments)
+      )
+);
 
 Shape.registerMethod('inset', inset);

@@ -7,10 +7,11 @@ export const Loft = (...shapes) =>
 Shape.prototype.Loft = Shape.shapeMethod(Loft);
 Shape.Loft = Loft;
 
-export const loft =
+export const loft = Shape.chainable(
   (...shapes) =>
-  (shape) =>
-    Loft(...shape.toShapes(shapes));
+    (shape) =>
+      Loft(...shape.toShapes(shapes))
+);
 
 Shape.registerMethod('loft', loft);
 
@@ -25,10 +26,11 @@ export const OpenLoft = (...shapes) =>
 Shape.prototype.OpenLoft = Shape.shapeMethod(OpenLoft);
 Shape.OpenLoft = OpenLoft;
 
-export const openLoft =
+export const openLoft = Shape.chainable(
   (...shapes) =>
-  (shape) =>
-    OpenLoft(shape, ...shape.toShapes(shapes));
+    (shape) =>
+      OpenLoft(shape, ...shape.toShapes(shapes))
+);
 
 Shape.registerMethod('openLoft', openLoft);
 

@@ -22,7 +22,7 @@ export const ScrewThreadSegmentBuilder = Cached('nb/projects/bolt/bolt.nb/ScrewT
   return Profile(pitch, (pitch * 0.5) / Math.tan(angle * Math.PI))
     .y(diameter / -2)
     .ry(1 / 4)
-    .seq({ from: -1, by: 1 / 32, to: 1 }, (t) => (s) => s.rz(t).z(pitch * t), Loft)
+    .seq({ from: -1, by: 1 / 32, to: 1 }, (t) => rz(t).z(pitch * t), Loft)
     .scale(1, 1, turn === 'right' ? 1 : -1)
     .grow(-play)
     .simplify({ eps: 0.01 })
@@ -39,7 +39,7 @@ export const ScrewThreadSegment = (diameter, { pitch = 1, angle = 60 / 360, play
 ```JavaScript
 export const ScrewThreadBuilder = Cached('nb/projects/bolt/bolt.nb/ScrewThread', (diameter, height, pitch, angle, play, turn) =>
   ScrewThreadSegment(diameter, { pitch, angle, play, turn })
-    .z(seq((a) => a, { from: 0, to: height, by: pitch }))
+    .z(seq({ from: 0, to: height, by: pitch }))
     .cut(Box(diameter * 2).ez(height, height + pitch * 2))
     .op(s => { console.log(`ScrewThreadSegmentBuilder/matrix: ${s.toGeometry().matrix}`); return s; }));
 ```
@@ -73,7 +73,7 @@ export const NutThreadSegment = (diameter, { pitch = 1, thickness = pitch * 2, a
 ```JavaScript
 export const NutThreadBuilder = Cached('nb/projects/bolt/bolt.nb/NutThread', (diameter, height, pitch, angle, play, turn) =>
   NutThreadSegment(diameter, { pitch, angle, play, turn })
-    .z(seq((a) => a, { from: 0, to: height, by: pitch }))
+    .z(seq({ from: 0, to: height, by: pitch }))
     .cut(Box(diameter * 2).ez(height, height + pitch * 2)));
 ```
 

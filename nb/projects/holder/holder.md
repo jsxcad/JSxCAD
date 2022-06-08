@@ -14,7 +14,7 @@ const magnetHeight = 2.5;
 const magneticPenHolder = Arc(magnetDiameter)
   .material('steel')
   .ez(magnetHeight)
-  .fit((s) =>
+  .fit(
     Arc(magnetDiameter + 2)
       .material('plastic')
       .ez(magnetHeight)

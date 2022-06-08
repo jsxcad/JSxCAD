@@ -231,9 +231,3 @@ export const ensurePages = (geometry, depth = 0) => {
     return pages;
   }
 };
-
-const fix =
-  (options = {}) =>
-  (shape) =>
-    Page({ ...options, pack: false }, shape);
-Shape.registerMethod('fix', fix);

@@ -1,9 +1,10 @@
 import { Shape, fromGeometry } from './Shape.js';
 import { disjoint as disjointGeometry } from '@jsxcad/geometry';
 
-export const disjoint =
+export const disjoint = Shape.chainable(
   ({ strategy } = {}) =>
-  (shape) =>
-    fromGeometry(disjointGeometry([shape.toGeometry()], strategy));
+    (shape) =>
+      fromGeometry(disjointGeometry([shape.toGeometry()], strategy))
+);
 
 Shape.registerMethod('disjoint', disjoint);

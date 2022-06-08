@@ -36,79 +36,96 @@ const updatePlan =
 
 Shape.registerMethod('updatePlan', updatePlan);
 
-export const hasAngle =
+export const hasAngle = Shape.chainable(
   (start = 0, end = 0) =>
-  (shape) =>
-    shape.updatePlan({ angle: { start: start, end: end } });
-export const hasBase = (base) => (shape) => shape.updatePlan({ base });
-export const hasAt =
+    (shape) =>
+      shape.updatePlan({ angle: { start: start, end: end } })
+);
+export const hasBase = Shape.chainable(
+  (base) => (shape) => shape.updatePlan({ base })
+);
+export const hasAt = Shape.chainable(
   (x = 0, y = 0, z = 0) =>
-  (shape) =>
-    shape.updatePlan({
-      at: [x, y, z],
-    });
-export const hasCorner1 =
+    (shape) =>
+      shape.updatePlan({
+        at: [x, y, z],
+      })
+);
+export const hasCorner1 = Shape.chainable(
   (x = 0, y = x, z = 0) =>
-  (shape) =>
-    shape.updatePlan({
-      corner1: [x, y, z],
-    });
+    (shape) =>
+      shape.updatePlan({
+        corner1: [x, y, z],
+      })
+);
 export const hasC1 = hasCorner1;
-export const hasCorner2 =
+export const hasCorner2 = Shape.chainable(
   (x = 0, y = x, z = 0) =>
-  (shape) =>
-    shape.updatePlan({
-      corner2: [x, y, z],
-    });
+    (shape) =>
+      shape.updatePlan({
+        corner2: [x, y, z],
+      })
+);
 export const hasC2 = hasCorner2;
-export const hasDiameter =
+export const hasDiameter = Shape.chainable(
   (x = 1, y = x, z = 0) =>
-  (shape) =>
-    shape.updatePlan(
-      { corner1: [x / 2, y / 2, z / 2] },
-      { corner2: [x / -2, y / -2, z / -2] }
-    );
-export const hasRadius =
+    (shape) =>
+      shape.updatePlan(
+        { corner1: [x / 2, y / 2, z / 2] },
+        { corner2: [x / -2, y / -2, z / -2] }
+      )
+);
+export const hasRadius = Shape.chainable(
   (x = 1, y = x, z = 0) =>
-  (shape) =>
-    shape.updatePlan(
-      {
-        corner1: [x, y, z],
-      },
-      {
-        corner2: [-x, -y, -z],
-      }
-    );
-export const hasApothem =
+    (shape) =>
+      shape.updatePlan(
+        {
+          corner1: [x, y, z],
+        },
+        {
+          corner2: [-x, -y, -z],
+        }
+      )
+);
+export const hasApothem = Shape.chainable(
   (x = 1, y = x, z = 0) =>
-  (shape) =>
-    shape.updatePlan(
-      {
-        corner1: [x, y, z],
-      },
-      {
-        corner2: [-x, -y, -z],
-      },
-      { apothem: [x, y, z] }
-    );
-export const hasFrom =
+    (shape) =>
+      shape.updatePlan(
+        {
+          corner1: [x, y, z],
+        },
+        {
+          corner2: [-x, -y, -z],
+        },
+        { apothem: [x, y, z] }
+      )
+);
+export const hasFrom = Shape.chainable(
   (x = 0, y = 0, z = 0) =>
-  (shape) =>
-    shape.updatePlan({ from: [x, y, z] });
-export const hasSides =
+    (shape) =>
+      shape.updatePlan({ from: [x, y, z] })
+);
+export const hasSides = Shape.chainable(
   (sides = 1) =>
-  (shape) =>
-    shape.updatePlan({ sides });
-export const hasTo =
+    (shape) =>
+      shape.updatePlan({ sides })
+);
+export const hasTo = Shape.chainable(
   (x = 0, y = 0, z = 0) =>
-  (shape) =>
-    shape.updatePlan({ to: [x, y, z], top: undefined });
-export const hasTop = (top) => (shape) => shape.updatePlan({ top });
-export const hasUp =
+    (shape) =>
+      shape.updatePlan({ to: [x, y, z], top: undefined })
+);
+export const hasTop = Shape.chainable(
+  (top) => (shape) => shape.updatePlan({ top })
+);
+export const hasUp = Shape.chainable(
   (x = 0, y = 0, z = 0) =>
-  (shape) =>
-    shape.updatePlan({ up: [x, y, z], top: undefined });
-export const hasZag = (zag) => (shape) => shape.updatePlan({ zag });
+    (shape) =>
+      shape.updatePlan({ up: [x, y, z], top: undefined })
+);
+export const hasZag = Shape.chainable(
+  (zag) => (shape) => shape.updatePlan({ zag })
+);
 
 // Let's consider migrating to a 'has' prefix for planning.
 

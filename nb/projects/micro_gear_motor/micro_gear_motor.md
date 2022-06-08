@@ -143,7 +143,7 @@ Cap
 
 ```JavaScript
 const gearCutout = Gear(20).fill()
-  .op((s) => s.and(s.cutfrom(Arc(24)).inset(0.5)))
+  .and(cutfrom(Arc(24)).inset(0.5))
   .as('gear cutout')
   .md('Gear Cutout')
   .gridView();

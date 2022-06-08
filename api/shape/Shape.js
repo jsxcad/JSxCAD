@@ -321,6 +321,39 @@ Shape.toCoordinates = (shape, ...args) => {
   return coordinates;
 };
 
+Shape.chainable = (op) => {
+  let free, bound;
+
+  // This is waiting for a shape or a chain.
+  bound = {
+    apply(target, obj, args) {
+      // Received a shape.
+      return target(...args);
+    },
+    get(target, prop, receiver) {
+      return new Proxy(
+        (...args) =>
+          (s) => {
+            const a = s[prop];
+            const t = target(s);
+            const b = a.apply(t, args);
+            return b;
+          },
+        free
+      );
+    },
+  };
+
+  // This is waiting for arguments.
+  free = {
+    apply(target, obj, args) {
+      return new Proxy(target(...args), bound);
+    },
+  };
+
+  return new Proxy(op, free);
+};
+
 export const fromGeometry = Shape.fromGeometry;
 export const toGeometry = (shape) => shape.toGeometry();
 export const toConcreteGeometry = (shape) => shape.toConcreteGeometry();

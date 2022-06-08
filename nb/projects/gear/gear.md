@@ -37,7 +37,7 @@ const toothResolution = control('toothResolution', 5, 'input');
 ```JavaScript
 Gear()
   .hasTeeth(8)
-  .and((s) => s.hasClearance(0.5).color('red'))
+  .and(s => s.hasClearance(0.5).color('red'))
   .gridView()
   .md(`Clearance adds play to the gear tips`);
 ```
@@ -68,7 +68,7 @@ Gear()
 ```JavaScript
 Gear()
   .hasTeeth(8)
-  .and((s) => s.hasBacklash(1).color('red'))
+  .and(s => s.hasBacklash(1).color('red'))
   .gridView()
   .md(`Backlash adds play to the gear sides`);
 ```
@@ -83,8 +83,8 @@ Backlash adds play to the gear sides
 Gear()
   .hasTeeth(8)
   .and(
-    (s) => s.hasPressureAngle(30).color('red'),
-    (s) => s.hasPressureAngle(10).color('blue')
+    s => s.hasPressureAngle(30).color('red'),
+    s => s.hasPressureAngle(10).color('blue')
   )
   .material('glass')
   .gridView()
@@ -141,7 +141,7 @@ const ring = Arc(50)
       )
     )
   )
-  .rz(seq((a) => a, { by: 1 / 32 }))
+  .rz(seq({ by: 1 / 32 }))
   .gridView()
   .md(
     `We simulate the gear motion to cut a single tooth, then rotate it around.`
@@ -166,7 +166,7 @@ const solar = Arc(20)
       { from: -1, by: 1 / 16, to: 1 }
     )
   )
-  .rz(seq((a) => a, { by: 1 / 16 }))
+  .rz(seq({ by: 1 / 16 }))
   .fuse()
   .gridView()
   .md(
@@ -243,24 +243,21 @@ const planetaryDesign4 = planetaryDesign4c
 const planetaryDesign = planetaryDesign3
   .and(planetaryDesign4)
   .gridView()
-  .stl('hoop', (s) =>
-    s
-      .get('ring')
+  .stl('hoop',
+      get('ring')
       .get('hoop')
       .rx(0 / 2, 1 / 2)
   )
-  .stl('ring', (s) => s.get('ring').getNot('hoop'))
-  .stl('planetary', (s) =>
-    s
-      .get('planetary')
+  .stl('ring', get('ring').getNot('hoop'))
+  .stl('planetary', 
+      get('planetary')
       .n(0)
       .y(12)
       .rx(0 / 2, 1 / 2)
   )
-  .stl('solar', (s) => s.get('solar').getNot('axle'))
-  .stl('axle', (s) =>
-    s
-      .get('solar')
+  .stl('solar', get('solar').getNot('axle'))
+  .stl('axle', 
+      get('solar')
       .get('axle')
       .rx(0 / 2, 1 / 2)
   );

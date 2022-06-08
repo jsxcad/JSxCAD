@@ -79,14 +79,14 @@ Assembly(Box(5), Arc(5.5).void())
 Box(5).offset(1).gridView(20);
 
 Box(5)
-  .op((s) => s.color('green'))
+  .op(color('green'))
   .gridView(21);
 
 Line(10)
   .orient({ at: [40, 50, 0] })
   .gridView(22);
 
-Group(seq((n) => Arc(n), { from: 1, to: 20 }))
+Group(seq(Arc, { from: 1, to: 20 }))
   .pack()
   .gridView(23);
 
@@ -123,9 +123,11 @@ Box(5).tool('laser').gridView(35);
 Assembly(Box(5), Arc(6).void())
   .gridView(36);
 
+/*
 Weld(Arc(6).x(-1), Arc(6).x(1), Arc(6).y(1), Arc(6).y(-1))
   .fill()
   .gridView(37);
+*/
 
 Box(5).fitTo(Arc(6)).gridView(38);
 
@@ -138,7 +140,7 @@ Arc(10).voidIn(offset(1)).ez(5).view(42);
 Box(10)
   .ez(10)
   .color('green')
-  .and((s) => s.faces().n(4).extrudeAlong(normal(), 1).tint('red'))
+  .and(faces().n(4).extrudeAlong(normal(), 1).tint('red'))
   .view(43);
 
 Arc(10).color('blue').color('red').view(44);
@@ -167,11 +169,11 @@ const b = Box(5)
   .y(10);
 
 b.at(
-  (s) => s.edges().sort('x<y<z>').n(0).origin(),
+  edges().sort('x<y<z>').n(0).origin(),
   cut(Box(11, 3, 3).rx(1 / 8))
 ).view(48);
 
-b.by((s) => s.edges().sort('x<y<z>').n(0).origin())
+b.by(edges().sort('x<y<z>').n(0).origin())
   .cut(Box(11, 3, 3).rx(1 / 8))
   .view(49);
 
@@ -224,8 +226,8 @@ Arc(5)
   .x(4)
   .seq({ by: 1 / 8 }, rz, Join)
   .cut(Box(10, 20).y(6))
-  .and((s) => s.packingEnvelope().outline().color('red'),
-       (s) => s.packingEnvelope({ offset: 1, threshold: 20 }).outline().color('green'))
+  .and(packingEnvelope().outline().color('red'),
+       packingEnvelope({ offset: 1, threshold: 20 }).outline().color('green'))
   .view();
 */
 
@@ -233,7 +235,7 @@ Box(20, 20, 20)
   .join(Box(10, 10, 40))
   .rx(1 / 16)
   .material('glass')
-  .and((s) => s.upperEnvelope().color('red'))
+  .and(upperEnvelope().color('red'))
   .view(60);
 
 /*

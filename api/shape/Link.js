@@ -11,9 +11,10 @@ Shape.Link = Link;
 
 export default Link;
 
-export const link =
+export const link = Shape.chainable(
   (...shapes) =>
-  (shape) =>
-    Link([shape, ...shape.toShapes(shapes, shape)]);
+    (shape) =>
+      Link([shape, ...shape.toShapes(shapes, shape)])
+);
 
 Shape.registerMethod('link', link);

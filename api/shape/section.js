@@ -20,16 +20,18 @@ const baseSection =
     );
   };
 
-export const section =
+export const section = Shape.chainable(
   (...orientations) =>
-  (shape) =>
-    baseSection({ profile: false }, orientations)(shape);
+    (shape) =>
+      baseSection({ profile: false }, orientations)(shape)
+);
 
 Shape.registerMethod('section', section);
 
-export const sectionProfile =
+export const sectionProfile = Shape.chainable(
   (...orientations) =>
-  (shape) =>
-    baseSection({ profile: true }, orientations)(shape);
+    (shape) =>
+      baseSection({ profile: true }, orientations)(shape)
+);
 
 Shape.registerMethod('sectionProfile', sectionProfile);

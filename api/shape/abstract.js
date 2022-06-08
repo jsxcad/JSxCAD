@@ -32,21 +32,19 @@ const render = (abstract, shape) => {
   return shape.md(graph.join('\n'));
 };
 
-export const abstract =
-  (op = render) =>
-  (shape) => {
-    const walk = ({ type, tags, plan, content }) => {
-      if (type === 'group') {
-        return content.flatMap(walk);
-      } else if (type === 'plan') {
-        return [{ type, plan }];
-      } else if (content) {
-        return [{ type, tags, content: content.flatMap(walk) }];
-      } else {
-        return [{ type, tags }];
-      }
-    };
-    return op(taggedGroup({}, ...walk(shape.toGeometry())), shape);
+export const abstract = Shape.chainable((op = render) => (shape) => {
+  const walk = ({ type, tags, plan, content }) => {
+    if (type === 'group') {
+      return content.flatMap(walk);
+    } else if (type === 'plan') {
+      return [{ type, plan }];
+    } else if (content) {
+      return [{ type, tags, content: content.flatMap(walk) }];
+    } else {
+      return [{ type, tags }];
+    }
   };
+  return op(taggedGroup({}, ...walk(shape.toGeometry())), shape);
+});
 
 Shape.registerMethod('abstract', abstract);

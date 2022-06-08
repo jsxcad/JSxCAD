@@ -169,7 +169,7 @@ Box(5).offset(1).gridView(20);
 
 ```JavaScript
 Box(5)
-  .op((s) => s.color('green'))
+  .op(color('green'))
   .gridView(21);
 ```
 
@@ -184,7 +184,7 @@ Line(10)
 ![Image](shape.md.21.png)
 
 ```JavaScript
-Group(seq((n) => Arc(n), { from: 1, to: 20 }))
+Group(seq(Arc, { from: 1, to: 20 }))
   .pack()
   .gridView(23);
 ```
@@ -272,64 +272,56 @@ Assembly(Box(5), Arc(6).void())
 ![Image](shape.md.32.png)
 
 ```JavaScript
-Weld(Arc(6).x(-1), Arc(6).x(1), Arc(6).y(1), Arc(6).y(-1))
-  .fill()
-  .gridView(37);
+Box(5).fitTo(Arc(6)).gridView(38);
 ```
 
 ![Image](shape.md.33.png)
 
 ```JavaScript
-Box(5).fitTo(Arc(6)).gridView(38);
+Box(5).x(1).gridView(39);
 ```
 
 ![Image](shape.md.34.png)
 
 ```JavaScript
-Box(5).x(1).gridView(39);
+Box(5).y(1).gridView(40);
 ```
 
 ![Image](shape.md.35.png)
 
 ```JavaScript
-Box(5).y(1).gridView(40);
+Box(5).z(1).gridView(41);
 ```
 
 ![Image](shape.md.36.png)
 
 ```JavaScript
-Box(5).z(1).gridView(41);
+Arc(10).voidIn(offset(1)).ez(5).view(42);
 ```
 
 ![Image](shape.md.37.png)
 
 ```JavaScript
-Arc(10).voidIn(offset(1)).ez(5).view(42);
+Box(10)
+  .ez(10)
+  .color('green')
+  .and(faces().n(4).extrudeAlong(normal(), 1).tint('red'))
+  .view(43);
 ```
 
 ![Image](shape.md.38.png)
 
 ```JavaScript
-Box(10)
-  .ez(10)
-  .color('green')
-  .and((s) => s.faces().n(4).extrudeAlong(normal(), 1).tint('red'))
-  .view(43);
+Arc(10).color('blue').color('red').view(44);
 ```
 
 ![Image](shape.md.39.png)
 
 ```JavaScript
-Arc(10).color('blue').color('red').view(44);
-```
-
-![Image](shape.md.40.png)
-
-```JavaScript
 Arc(10).color('blue').tint('red').view(45);
 ```
 
-![Image](shape.md.41.png)
+![Image](shape.md.40.png)
 
 ```JavaScript
 Edges(
@@ -344,7 +336,7 @@ Edges(
   .gridView(46);
 ```
 
-![Image](shape.md.42.png)
+![Image](shape.md.41.png)
 
 ```JavaScript
 const b = Box(5)
@@ -359,8 +351,14 @@ const b = Box(5)
 ```
 
 ```JavaScript
+Voxels([0, 0, 0], [0, 0, 1], [1, 0, 1], [2, 0, 1]).view(50);
+```
+
+![Image](shape.md.42.png)
+
+```JavaScript
 b.at(
-  (s) => s.edges().sort('x<y<z>').n(0).origin(),
+  edges().sort('x<y<z>').n(0).origin(),
   cut(Box(11, 3, 3).rx(1 / 8))
 ).view(48);
 ```
@@ -368,18 +366,12 @@ b.at(
 ![Image](shape.md.43.png)
 
 ```JavaScript
-b.by((s) => s.edges().sort('x<y<z>').n(0).origin())
+b.by(edges().sort('x<y<z>').n(0).origin())
   .cut(Box(11, 3, 3).rx(1 / 8))
   .view(49);
 ```
 
 ![Image](shape.md.44.png)
-
-```JavaScript
-Voxels([0, 0, 0], [0, 0, 1], [1, 0, 1], [2, 0, 1]).view(50);
-```
-
-![Image](shape.md.45.png)
 
 ```JavaScript
 Arc(2)
@@ -389,13 +381,13 @@ Arc(2)
   .view(51);
 ```
 
-![Image](shape.md.46.png)
+![Image](shape.md.45.png)
 
 ```JavaScript
 Triangle(14).svg('triangle');
 ```
 
-![Image](shape.md.47.png)
+![Image](shape.md.46.png)
 
 [triangle_0.svg](shape.triangle_0.svg)
 
@@ -409,9 +401,9 @@ Box(10)
   .view(53);
 ```
 
-![Image](shape.md.48.png)
+![Image](shape.md.47.png)
 
-![Image](shape.md.49.png)
+![Image](shape.md.48.png)
 
 ```JavaScript
 Box(20, 20, 20)
@@ -428,19 +420,19 @@ Box(20, 20, 20)
   .md('Cleaned mesh');
 ```
 
-![Image](shape.md.50.png)
+![Image](shape.md.49.png)
 
 Original mesh
 
-![Image](shape.md.51.png)
+![Image](shape.md.50.png)
 
 Isotropic remeshing
 
-![Image](shape.md.52.png)
+![Image](shape.md.51.png)
 
 Cut
 
-![Image](shape.md.53.png)
+![Image](shape.md.52.png)
 
 Cleaned mesh
 
@@ -454,7 +446,7 @@ Arc(4)
   .view(57);
 ```
 
-![Image](shape.md.54.png)
+![Image](shape.md.53.png)
 
 ```JavaScript
 Box(10)
@@ -463,18 +455,18 @@ Box(10)
   .view(58);
 ```
 
-![Image](shape.md.55.png)
+![Image](shape.md.54.png)
 
 ```JavaScript
 Box(20, 20, 20)
   .join(Box(10, 10, 40))
   .rx(1 / 16)
   .material('glass')
-  .and((s) => s.upperEnvelope().color('red'))
+  .and(upperEnvelope().color('red'))
   .view(60);
 ```
 
-![Image](shape.md.56.png)
+![Image](shape.md.55.png)
 
 Area of Box(2).cut(Box(1)) is 3.00
 
@@ -494,7 +486,25 @@ const c = Box(10)
   .view(67);
 ```
 
+![Image](shape.md.56.png)
+
+```JavaScript
+c.by(origin()).view(68);
+```
+
 ![Image](shape.md.57.png)
+
+```JavaScript
+c.by(origin(), and(Box(5, 5, 5))).view(69);
+```
+
+![Image](shape.md.58.png)
+
+```JavaScript
+c.by(origin(), cut(Box(5, 5, 5))).view(70);
+```
+
+![Image](shape.md.59.png)
 
 ```JavaScript
 Triangle(4)
@@ -503,34 +513,16 @@ Triangle(4)
   .view(71);
 ```
 
-![Image](shape.md.58.png)
-
-```JavaScript
-c.by(origin()).view(68);
-```
-
-![Image](shape.md.59.png)
-
-```JavaScript
-c.by(origin(), and(Box(5, 5, 5))).view(69);
-```
-
 ![Image](shape.md.60.png)
-
-```JavaScript
-c.by(origin(), cut(Box(5, 5, 5))).view(70);
-```
-
-![Image](shape.md.61.png)
 
 ```JavaScript
 Group(Box(), Triangle(1).x(2), Hexagon(1).x(4)).sort('x<3').view(72);
 ```
 
-![Image](shape.md.62.png)
+![Image](shape.md.61.png)
 
 ```JavaScript
 Group(Box(), Triangle(1).x(2), Hexagon(1).x(4)).sort('x>1').view(73);
 ```
 
-![Image](shape.md.63.png)
+![Image](shape.md.62.png)
