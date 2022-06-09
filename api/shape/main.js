@@ -73,7 +73,7 @@ export { clipfrom } from './clipfrom.js';
 export { color } from './color.js';
 export { colors } from './colors.js';
 export { cut } from './cut.js';
-export { cutfrom } from './cutfrom.js';
+export { cutFrom } from './cutFrom.js';
 export { cutopen } from './cutopen.js';
 export { cutout } from './cutout.js';
 export { deform } from './deform.js';
