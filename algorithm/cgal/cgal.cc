@@ -45,6 +45,7 @@
 #include <CGAL/Polygon_mesh_processing/polygon_soup_to_polygon_mesh.h>
 #include <CGAL/Polygon_mesh_processing/random_perturbation.h>
 #include <CGAL/Polygon_mesh_processing/remesh.h>
+#include <CGAL/Polygon_mesh_processing/repair_degeneracies.h>
 #include <CGAL/Polygon_mesh_processing/repair_polygon_soup.h>
 #include <CGAL/Polygon_mesh_processing/repair_self_intersections.h>
 #include <CGAL/Polygon_mesh_processing/smooth_mesh.h>
@@ -136,6 +137,11 @@ typedef Traits_2::X_monotone_curve_2 Segment_2;
 typedef std::vector<Point> Polyline;
 typedef CGAL::Triple<int, int, int> Triangle_int;
 typedef std::map<Point, Vertex_index> Vertex_map;
+
+typedef CGAL::Exact_predicates_inexact_constructions_kernel Epick_kernel;
+typedef Epick_kernel::Point_3 Epick_point;
+typedef std::vector<Epick_point> Epick_points;
+typedef CGAL::Surface_mesh<Epick_point> Epick_surface_mesh;
 
 typedef CGAL::Simple_cartesian<double> Cartesian_kernel;
 typedef Cartesian_kernel::Point_3 Cartesian_point;
@@ -764,7 +770,6 @@ bool is_safe_to_move(const Surface_mesh& m, const Vertex_point_map& p,
   return true;
 }
 
-// template <typename Kernel>
 class Demesh_cost {
  public:
   Demesh_cost() {}
@@ -772,8 +777,6 @@ class Demesh_cost {
   boost::optional<typename Profile::FT> operator()(
       const Profile& profile,
       const boost::optional<typename Profile::Point>& placement) const {
-    // All options are equal priority -- delegate the decision to placement.
-    // return typename Kernel::FT(0);
     return typename Profile::FT(0);
   }
 };
@@ -2881,6 +2884,29 @@ void cut_segment_with_volume(const Segment& segment, AABB_tree& tree,
   return intersect_segment_with_volume(segment, tree, on_side, false, segments);
 }
 
+template <typename Point>
+void unique_points(std::vector<Point>& points) {
+  // There should be a better way to emit a unique set of points.
+  std::sort(points.begin(), points.end(), [&](const Point& a, const Point& b) {
+    FT x = a.x() - b.x();
+    if (x < 0) {
+      return true;
+    }
+    if (x > 0) {
+      return false;
+    }
+    FT y = a.y() - b.y();
+    if (y < 0) {
+      return true;
+    }
+    if (y > 0) {
+      return false;
+    }
+    return a.z() < b.z();
+  });
+  points.erase(std::unique(points.begin(), points.end()), points.end());
+}
+
 void SurfaceMeshSectionToPolygonsWithHoles(const Surface_mesh& mesh,
                                            const Plane& plane,
                                            Polygons_with_holes_2& pwhs) {
@@ -3781,25 +3807,7 @@ int EachPoint(Geometry* geometry, emscripten::val emit_point) {
     }
   }
 
-  // There should be a better way to emit a unique set of points.
-  std::sort(points.begin(), points.end(), [&](const Point& a, const Point& b) {
-    FT x = a.x() - b.x();
-    if (x < 0) {
-      return true;
-    }
-    if (x > 0) {
-      return false;
-    }
-    FT y = a.y() - b.y();
-    if (y < 0) {
-      return true;
-    }
-    if (y > 0) {
-      return false;
-    }
-    return a.z() < b.z();
-  });
-  points.erase(std::unique(points.begin(), points.end()), points.end());
+  unique_points(points);
 
   for (const Point& point : points) {
     emitPoint(point, emit_point);
@@ -5263,7 +5271,7 @@ int Twist(Geometry* geometry, double turnsPerMm) {
 }
 
 int Wrap(Geometry* geometry, double alpha, double offset) {
-  typedef CGAL::Cartesian_converter<Kernel, Cartesian_kernel> converter;
+  typedef CGAL::Cartesian_converter<Kernel, Epick_kernel> converter;
   converter to_cartesian;
 
   size_t size = geometry->size();
@@ -5274,7 +5282,7 @@ int Wrap(Geometry* geometry, double alpha, double offset) {
   geometry->transformToAbsoluteFrame();
   geometry->convertPlanarMeshesToPolygons();
 
-  Cartesian_points points;
+  Epick_points points;
   std::vector<std::vector<size_t>> faces;
 
   for (int nth = 0; nth < size; nth++) {
@@ -5325,8 +5333,8 @@ int Wrap(Geometry* geometry, double alpha, double offset) {
     }
   }
 
-  Cartesian_surface_mesh cartesian_mesh;
-  alpha_wrap_3(points, alpha, offset, cartesian_mesh);
+  Epick_surface_mesh cartesian_mesh;
+  alpha_wrap_3(points, faces, alpha, offset, cartesian_mesh);
   int target = geometry->add(GEOMETRY_MESH);
   geometry->setIdentityTransform(target);
   copy_face_graph(cartesian_mesh, geometry->mesh(target));

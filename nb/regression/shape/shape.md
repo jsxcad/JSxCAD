@@ -87,7 +87,7 @@ Box(5)
 ```JavaScript
 Box(5)
   .color('red')
-  .cutfrom(Arc(6).color('blue'))
+  .cutFrom(Arc(6).color('blue'))
   .gridView(9);
 ```
 
@@ -526,3 +526,12 @@ Group(Box(), Triangle(1).x(2), Hexagon(1).x(4)).sort('x>1').view(73);
 ```
 
 ![Image](shape.md.62.png)
+
+```JavaScript
+Box(5, 5, 20)
+  .rx(1 / 4, 1 / 32)
+  .wrap(1, 0.1)
+  .view(74);
+```
+
+![Image](shape.md.63.png)

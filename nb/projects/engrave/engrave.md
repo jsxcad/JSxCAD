@@ -13,7 +13,7 @@ const unYetGul = await readFont('https://jsxcad.js.org/ttf/UnYetgul.ttf');
 ```JavaScript
 const model = Text(unYetGul, text, 25)
   .by(align('xy'))
-  .cutfrom(Box(30, 26))
+  .cutFrom(Box(30, 26))
   .view()
   .md('Model');
 ```

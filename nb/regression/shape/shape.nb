@@ -46,7 +46,7 @@ Box(5)
 
 Box(5)
   .color('red')
-  .cutfrom(Arc(6).color('blue'))
+  .cutFrom(Arc(6).color('blue'))
   .gridView(9);
 
 Assembly(Box(5), Arc(6))
@@ -300,3 +300,8 @@ Triangle(4)
 Group(Box(), Triangle(1).x(2), Hexagon(1).x(4)).sort('x<3').view(72);
 
 Group(Box(), Triangle(1).x(2), Hexagon(1).x(4)).sort('x>1').view(73);
+
+Box(5, 5, 20)
+  .rx(1 / 4, 1 / 32)
+  .wrap(1, 0.1)
+  .view(74);
