@@ -1,11 +1,11 @@
-import { isNotTypeVoid } from './tagged/type.js';
+import { isNotTypeGhost } from './tagged/type.js';
 import { linearize } from './tagged/linearize.js';
 import { link as linkWithCgal } from '@jsxcad/algorithm-cgal';
 import { taggedGroup } from './tagged/taggedGroup.js';
 import { toConcreteGeometry } from './tagged/toConcreteGeometry.js';
 
 const filter = (geometry) =>
-  ['points', 'segments'].includes(geometry.type) && isNotTypeVoid(geometry);
+  ['points', 'segments'].includes(geometry.type) && isNotTypeGhost(geometry);
 
 export const link = (geometries, close = false) => {
   const inputs = [];

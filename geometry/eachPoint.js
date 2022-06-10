@@ -3,14 +3,14 @@ import {
   eachPoint as eachPointWithCgal,
 } from '@jsxcad/algorithm-cgal';
 
-import { isNotTypeVoid } from './tagged/type.js';
+import { isNotTypeGhost } from './tagged/type.js';
 import { linearize } from './tagged/linearize.js';
 import { toConcreteGeometry } from './tagged/toConcreteGeometry.js';
 
 const filter = (geometry) =>
   ['graph', 'polygonsWithHoles', 'segments', 'points'].includes(
     geometry.type
-  ) && isNotTypeVoid(geometry);
+  ) && isNotTypeGhost(geometry);
 
 export const eachPoint = (geometry, emit) => {
   const concreteGeometry = toConcreteGeometry(geometry);

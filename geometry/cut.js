@@ -2,16 +2,20 @@ import {
   cut as cutWithCgal,
   deletePendingSurfaceMeshes,
 } from '@jsxcad/algorithm-cgal';
+import { isNotTypeGhost, isNotTypeMasked, isTypeVoid } from './tagged/type.js';
 
-import { isNotTypeMasked } from './tagged/type.js';
 import { linearize } from './tagged/linearize.js';
 import { replacer } from './tagged/visit.js';
 import { toConcreteGeometry } from './tagged/toConcreteGeometry.js';
 
 const filterTargets = (geometry) =>
-  ['graph', 'polygonsWithHoles', 'segments'].includes(geometry.type);
+  ['graph', 'polygonsWithHoles', 'segments'].includes(geometry.type) &&
+  isNotTypeGhost(geometry);
+
 const filterRemoves = (geometry) =>
-  filterTargets(geometry) && isNotTypeMasked(geometry);
+  filterTargets(geometry) &&
+  isNotTypeMasked(geometry) &&
+  (isNotTypeGhost(geometry) || isTypeVoid(geometry));
 
 export const cut = (geometry, geometries, open = false) => {
   const concreteGeometry = toConcreteGeometry(geometry);

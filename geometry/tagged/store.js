@@ -17,6 +17,9 @@ export const store = async (geometry) => {
   // Share graphs across geometries.
   const graph = geometry.graph;
   if (graph && !graph[isStored]) {
+    if (graph.hash === undefined) {
+      throw Error(`Graph has no hash`);
+    }
     await write(`graph/${graph.hash}`, graph);
     stored.graph = {
       hash: graph.hash,

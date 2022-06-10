@@ -3,12 +3,12 @@ import {
   deletePendingSurfaceMeshes,
 } from '@jsxcad/algorithm-cgal';
 
-import { isNotTypeVoid } from './tagged/type.js';
+import { isNotTypeGhost } from './tagged/type.js';
 import { linearize } from './tagged/linearize.js';
 import { toConcreteGeometry } from './tagged/toConcreteGeometry.js';
 
 const filter = (geometry) =>
-  isNotTypeVoid(geometry) &&
+  isNotTypeGhost(geometry) &&
   ((geometry.type === 'graph' && !geometry.graph.isEmpty) ||
     ['polygonsWithHoles', 'segments', 'points'].includes(geometry.type));
 

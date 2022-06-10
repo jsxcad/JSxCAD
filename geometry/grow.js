@@ -3,13 +3,13 @@ import {
   grow as growWithCgal,
 } from '@jsxcad/algorithm-cgal';
 
-import { isNotTypeVoid } from './tagged/type.js';
+import { isNotTypeGhost } from './tagged/type.js';
 import { linearize } from './tagged/linearize.js';
 import { replacer } from './tagged/visit.js';
 import { toConcreteGeometry } from './tagged/toConcreteGeometry.js';
 
 const filter = (geometry, parent) =>
-  ['graph'].includes(geometry.type) && isNotTypeVoid(geometry);
+  ['graph'].includes(geometry.type) && isNotTypeGhost(geometry);
 
 export const grow = (geometry, offset, selections, options) => {
   const concreteGeometry = toConcreteGeometry(geometry);

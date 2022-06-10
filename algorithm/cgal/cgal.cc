@@ -596,8 +596,23 @@ void write_point(const Point& p, std::ostringstream& o) {
   o << p.z().exact();
 }
 
+// Approximations are in 100ths of a mm.
+void write_approximate_point(const Point& p, std::ostringstream& o) {
+  o << round(CGAL::to_double(p.x().exact()) * 100) << " ";
+  o << round(CGAL::to_double(p.y().exact()) * 100) << " ";
+  o << round(CGAL::to_double(p.z().exact()) * 100);
+}
+
 void read_point(Point& point, std::istringstream& input) {
   FT x, y, z;
+  input >> x;
+  input >> y;
+  input >> z;
+  point = Point(x, y, z);
+}
+
+void read_point_approximate(Point& point, std::istringstream& input) {
+  double x, y, z;
   input >> x;
   input >> y;
   input >> z;
@@ -2199,6 +2214,85 @@ bool projectPointToEnvelope(const Edge& edge, const Face& face,
   return false;
 }
 
+std::shared_ptr<Surface_mesh> DeserializeMesh(
+    const std::string& serialization) {
+  Surface_mesh* mesh = new Surface_mesh();
+  std::istringstream s(serialization);
+  std::size_t number_of_vertices;
+  s >> number_of_vertices;
+  for (std::size_t vertex = 0; vertex < number_of_vertices; vertex++) {
+    Point p;
+    read_point(p, s);
+    mesh->add_vertex(p);
+    // We don't use the approximate point, but we need to read past it.
+    read_point_approximate(p, s);
+  }
+  std::size_t number_of_facets;
+  s >> number_of_facets;
+  for (std::size_t facet = 0; facet < number_of_facets; facet++) {
+    std::size_t number_of_vertices_in_facet;
+    s >> number_of_vertices_in_facet;
+    std::vector<Vertex_index> vertices;
+    for (std::size_t nth = 0; nth < number_of_vertices_in_facet; nth++) {
+      std::size_t vertex;
+      s >> vertex;
+      if (vertex > number_of_vertices) {
+        std::cout << "Vertex " << vertex << " out of range "
+                  << number_of_vertices << std::endl;
+      }
+      vertices.push_back(Vertex_index(vertex));
+    }
+    mesh->add_face(vertices);
+  }
+  return std::shared_ptr<Surface_mesh>(mesh);
+}
+
+std::string SerializeMesh(std::shared_ptr<const Surface_mesh> mesh) {
+  // CHECK: We assume the mesh is compact.
+  std::ostringstream s;
+  size_t number_of_vertices = mesh->number_of_vertices();
+  s << number_of_vertices << "\n";
+  std::unordered_map<Vertex_index, size_t> vertex_map;
+  size_t vertex_count = 0;
+  for (const Vertex_index vertex : mesh->vertices()) {
+    const Point& p = mesh->point(vertex);
+    write_point(p, s);
+    s << " ";
+    write_approximate_point(p, s);
+    s << "\n";
+    vertex_map[vertex] = vertex_count++;
+  }
+  s << "\n";
+  s << mesh->number_of_faces() << "\n";
+  for (const Face_index facet : mesh->faces()) {
+    const auto& start = mesh->halfedge(facet);
+    std::size_t edge_count = 0;
+    {
+      Halfedge_index edge = start;
+      do {
+        edge_count++;
+        edge = mesh->next(edge);
+      } while (edge != start);
+    }
+    s << edge_count;
+    {
+      Halfedge_index edge = start;
+      do {
+        std::size_t vertex(vertex_map[mesh->source(edge)]);
+        if (vertex >= number_of_vertices) {
+          std::cout << "Vertex " << vertex << " out of range "
+                    << number_of_vertices << std::endl;
+          return "<invalid>";
+        }
+        s << " " << vertex;
+        edge = mesh->next(edge);
+      } while (edge != start);
+    }
+    s << "\n";
+  }
+  return s.str();
+}
+
 class Geometry {
  public:
   Geometry() : size_(0), is_absolute_frame_(false) {}
@@ -2264,8 +2358,7 @@ class Geometry {
 
   const Transformation& transform(int nth) {
     if (!has_transform(nth)) {
-      // Fix this leak.
-      transforms_[nth] = new Transformation(CGAL::IDENTITY);
+      transforms_[nth].reset(new Transformation(CGAL::IDENTITY));
     }
     return *transforms_[nth];
   }
@@ -2375,81 +2468,43 @@ class Geometry {
 
   void setType(int nth, int type) { types_[nth] = GeometryType(type); }
 
-  void setTransform(int nth, const Transformation* transform) {
+  void setTransform(int nth, std::shared_ptr<const Transformation> transform) {
     transforms_[nth] = transform;
   }
 
   void copyTransform(int nth, const Transformation transform) {
-    transforms_[nth] = new Transformation(transform);
+    transforms_[nth].reset(new Transformation(transform));
   }
 
-  const Transformation* getTransform(int nth) { return transforms_[nth]; }
+  const std::shared_ptr<const Transformation> getTransform(int nth) {
+    return transforms_[nth];
+  }
 
   void setIdentityTransform(int nth) {
-    // FIX: Let's do something about transform leakage.
-    setTransform(nth, new Transformation(CGAL::IDENTITY));
+    copyTransform(nth, Transformation(CGAL::IDENTITY));
   }
 
-  void setInputMesh(int nth, const Surface_mesh* mesh) {
+  void setInputMesh(int nth, const std::shared_ptr<const Surface_mesh>& mesh) {
     input_meshes_[nth] = mesh;
   }
 
-  const Surface_mesh* getInputMesh(int nth) { return input_meshes_[nth]; }
+  const std::shared_ptr<const Surface_mesh> getInputMesh(int nth) {
+    return input_meshes_[nth];
+  }
 
-  std::string serializeMesh(const Surface_mesh& mesh) {
-    // CHECK: We assume the mesh is compact.
+  void deserializeInputMesh(int nth, const std::string& serialization) {
+    input_meshes_[nth] = DeserializeMesh(serialization);
+  }
 
-    std::ostringstream s;
-
-    size_t number_of_vertices = mesh.number_of_vertices();
-
-    s << number_of_vertices << "\n";
-    std::unordered_map<Vertex_index, size_t> vertex_map;
-    size_t vertex_count = 0;
-    for (const Vertex_index vertex : mesh.vertices()) {
-      const Point& p = mesh.point(vertex);
-      s << p.x().exact() << " " << p.y().exact() << " " << p.z().exact()
-        << "\n";
-      vertex_map[vertex] = vertex_count++;
-    }
-    s << "\n";
-
-    s << mesh.number_of_faces() << "\n";
-    for (const Face_index facet : mesh.faces()) {
-      const auto& start = mesh.halfedge(facet);
-      std::size_t edge_count = 0;
-      {
-        Halfedge_index edge = start;
-        do {
-          edge_count++;
-          edge = mesh.next(edge);
-        } while (edge != start);
-      }
-      s << edge_count;
-      {
-        Halfedge_index edge = start;
-        do {
-          std::size_t vertex(vertex_map[mesh.source(edge)]);
-          if (vertex >= number_of_vertices) {
-            std::cout << "Vertex " << vertex << " out of range "
-                      << number_of_vertices << std::endl;
-            return "<invalid>";
-          }
-          s << " " << vertex;
-          edge = mesh.next(edge);
-        } while (edge != start);
-      }
-      s << "\n";
-    }
-
-    return s.str();
+  void deserializeMesh(int nth, const std::string& serialization) {
+    meshes_[nth] = DeserializeMesh(serialization);
   }
 
   std::string getSerializedInputMesh(int nth) {
-    return serializeMesh(input_mesh(nth));
+    return SerializeMesh(input_meshes_[nth]);
   }
 
-  std::string getSerializedMesh(int nth) { return serializeMesh(mesh(nth)); }
+  std::string getSerializedMesh(int nth) { return SerializeMesh(meshes_[nth]); }
 
   void setMesh(int nth, std::unique_ptr<Surface_mesh>& mesh) {
     meshes_[nth] = std::move(mesh);
@@ -2457,7 +2512,9 @@ class Geometry {
 
   void setMesh(int nth, Surface_mesh* mesh) { meshes_[nth].reset(mesh); }
 
-  Surface_mesh* releaseOutputMesh(int nth) { return meshes_[nth].release(); }
+  const std::shared_ptr<const Surface_mesh> getMesh(int nth) {
+    return meshes_[nth];
+  }
 
   void fillPolygonsWithHoles(int nth, emscripten::val fillPlane,
                              emscripten::val fillBoundary,
@@ -2484,7 +2541,7 @@ class Geometry {
         PlanarSurfaceMeshToPolygonsWithHoles(plane(nth), mesh(nth),
                                              polygons_with_holes);
         pwh(nth) = std::move(polygons_with_holes);
-        setTransform(nth, new Transformation(CGAL::IDENTITY));
+        setIdentityTransform(nth);
         mesh(nth).clear();
       }
     }
@@ -2745,12 +2802,12 @@ class Geometry {
   int size_;
   bool is_absolute_frame_;
   std::vector<GeometryType> types_;
-  std::vector<const Transformation*> transforms_;
+  std::vector<std::shared_ptr<const Transformation>> transforms_;
   std::vector<Plane> planes_;
   std::vector<std::unique_ptr<Polygons_with_holes_2>> pwh_;
   std::vector<std::unique_ptr<General_polygon_set_2>> gps_;
-  std::vector<const Surface_mesh*> input_meshes_;
-  std::vector<std::unique_ptr<Surface_mesh>> meshes_;
+  std::vector<std::shared_ptr<const Surface_mesh>> input_meshes_;
+  std::vector<std::shared_ptr<Surface_mesh>> meshes_;
   std::vector<std::unique_ptr<AABB_tree>> aabb_trees_;
   std::vector<std::unique_ptr<Side_of_triangle_mesh>> on_sides_;
   std::vector<std::unique_ptr<Segments>> input_segments_;
@@ -2999,7 +3056,7 @@ int Cast(Geometry* geometry, const Transformation* reference) {
 
   int target = geometry->add(GEOMETRY_POLYGONS_WITH_HOLES);
   geometry->plane(target) = reference_plane;
-  geometry->setTransform(target, new Transformation(CGAL::IDENTITY));
+  geometry->setIdentityTransform(target);
 
   for (int nth = 0; nth < size; nth++) {
     switch (geometry->getType(nth)) {
@@ -3250,7 +3307,7 @@ int ComputeCentroid(Geometry* geometry) {
         computeCentroidOfSurfaceMesh(centroid, geometry->mesh(nth));
         geometry->setType(nth, GEOMETRY_POINTS);
         geometry->addPoint(nth, centroid);
-        geometry->setTransform(nth, new Transformation(CGAL::IDENTITY));
+        geometry->setIdentityTransform(nth);
         break;
       }
     }
@@ -3907,7 +3964,7 @@ int Extrude(Geometry* geometry, size_t count) {
           continue;
         }
         geometry->setType(nth, GEOMETRY_MESH);
-        geometry->setTransform(nth, new Transformation(CGAL::IDENTITY));
+        geometry->setIdentityTransform(nth);
         geometry->setMesh(nth, extruded_mesh);
         break;
       }
@@ -4016,7 +4073,7 @@ int Fill(Geometry* geometry) {
     const Plane& plane = entry.first;
     int target = geometry->add(GEOMETRY_POLYGONS_WITH_HOLES);
     geometry->plane(target) = plane;
-    geometry->setTransform(target, new Transformation(CGAL::IDENTITY));
+    geometry->setIdentityTransform(target);
     std::vector<Polygon_with_holes_2> polygons;
     Arrangement_2& arrangement = entry.second;
     convertArrangementToPolygonsWithHoles(arrangement, geometry->pwh(target));
@@ -4540,7 +4597,7 @@ int Link(Geometry* geometry, bool close) {
   geometry->transformToAbsoluteFrame();
 
   int target = geometry->add(GEOMETRY_SEGMENTS);
-  geometry->copyTransform(target, Transformation(CGAL::IDENTITY));
+  geometry->setIdentityTransform(target);
   std::vector<Segment>& out = geometry->segments(target);
 
   bool has_last = false;
@@ -4727,7 +4784,7 @@ int MakeAbsolute(Geometry* geometry) {
   geometry->transformToAbsoluteFrame();
 
   for (int nth = 0; nth < size; nth++) {
-    geometry->copyTransform(nth, Transformation(CGAL::IDENTITY));
+    geometry->setIdentityTransform(nth);
   }
 
   // The local frame is the absolute frame.
@@ -4763,7 +4820,7 @@ int MakeUnitSphere(Geometry* geometry, double angularBound, double radiusBound,
 
   int target = geometry->add(GEOMETRY_MESH);
   geometry->setMesh(target, new Surface_mesh);
-  geometry->copyTransform(target, Transformation(CGAL::IDENTITY));
+  geometry->setIdentityTransform(target);
   copy_face_graph(epick_mesh, geometry->mesh(target));
   return STATUS_OK;
 }
@@ -4786,8 +4843,7 @@ int Offset(Geometry* geometry, double initial, double step, double limit,
           int target = geometry->add(GEOMETRY_POLYGONS_WITH_HOLES);
           geometry->pwh(target).push_back(std::move(offset_polygon));
           geometry->plane(target) = geometry->plane(nth);
-          geometry->setTransform(target,
-                                 new Transformation(geometry->transform(nth)));
+          geometry->copyTransform(target, geometry->transform(nth));
         }
       }
     }
@@ -5490,6 +5546,7 @@ void Surface_mesh__explore(const Surface_mesh* input,
   explorer.Explore(mesh);
 }
 
+#if 0
 std::string SerializeSurfaceMesh(const Surface_mesh* mesh,
                                  emscripten::val emit_error) {
   // CHECK: We assume the mesh is compact.
@@ -5538,7 +5595,9 @@ std::string SerializeSurfaceMesh(const Surface_mesh* mesh,
 
   return s.str();
 }
+#endif
 
+#if 0
 const Surface_mesh* DeserializeSurfaceMesh(std::string serialization) {
   Surface_mesh* mesh = new Surface_mesh();
   std::istringstream s(serialization);
@@ -5548,15 +5607,10 @@ const Surface_mesh* DeserializeSurfaceMesh(std::string serialization) {
   s >> number_of_vertices;
 
   for (std::size_t vertex = 0; vertex < number_of_vertices; vertex++) {
-    FT x;
-    s >> x;
-
-    FT y;
-    s >> y;
-
-    FT z;
-    s >> z;
-
+    Point p;
+    read_point(p, s);
+    Point a;
+    read_point_approximate(a, s);
     mesh->add_vertex(Point{x, y, z});
   }
 
@@ -5584,6 +5638,7 @@ const Surface_mesh* DeserializeSurfaceMesh(std::string serialization) {
 
   return mesh;
 }
+#endif
 
 bool Surface_mesh__triangulate_faces(Surface_mesh* mesh) {
   return CGAL::Polygon_mesh_processing::triangulate_faces(mesh->faces(), *mesh);
@@ -5833,20 +5888,25 @@ void Surface_mesh__bbox(const Surface_mesh* input,
 
 void DeleteSurfaceMesh(const Surface_mesh* input) { delete input; }
 
-const Transformation* Transformation__identity() {
-  return new Transformation(CGAL::IDENTITY);
+std::shared_ptr<const Transformation> Transformation__identity() {
+  return std::shared_ptr<const Transformation>(
+      new Transformation(CGAL::IDENTITY));
 }
 
-const Transformation* Transformation__compose(const Transformation* a,
-                                              const Transformation* b) {
-  return new Transformation(*a * *b);
+std::shared_ptr<const Transformation> Transformation__compose(
+    std::shared_ptr<const Transformation> a,
+    std::shared_ptr<const Transformation> b) {
+  return std::shared_ptr<const Transformation>(new Transformation(*a * *b));
 }
 
-const Transformation* Transformation__inverse(const Transformation* a) {
-  return new Transformation(a->inverse());
+std::shared_ptr<const Transformation> Transformation__inverse(
+    std::shared_ptr<const Transformation> a) {
+  return std::shared_ptr<const Transformation>(
+      new Transformation(a->inverse()));
 }
 
-void Transformation__to_exact(const Transformation* t, emscripten::val put) {
+void Transformation__to_exact(std::shared_ptr<const Transformation> t,
+                              emscripten::val put) {
   for (int i = 0; i < 3; i++) {
     for (int j = 0; j < 4; j++) {
       auto value = t->cartesian(i, j).exact();
@@ -5862,7 +5922,7 @@ void Transformation__to_exact(const Transformation* t, emscripten::val put) {
   put(serialization.str());
 }
 
-void Transformation__to_approximate(const Transformation* t,
+void Transformation__to_approximate(std::shared_ptr<const Transformation> t,
                                     emscripten::val put) {
   for (int i = 0; i < 3; i++) {
     for (int j = 0; j < 4; j++) {
@@ -5879,47 +5939,48 @@ FT get_double(emscripten::val get) { return to_FT(get().as<double>()); }
 
 FT get_string(emscripten::val get) { return to_FT(get().as<std::string>()); }
 
-const Transformation* Transformation__from_exact(
+std::shared_ptr<const Transformation> Transformation__from_exact(
     const std::string& v1, const std::string& v2, const std::string& v3,
     const std::string& v4, const std::string& v5, const std::string& v6,
     const std::string& v7, const std::string& v8, const std::string& v9,
     const std::string& v10, const std::string& v11, const std::string& v12,
     const std::string& v13) {
-  Transformation* t =
+  return std::shared_ptr<const Transformation>(
       new Transformation(to_FT(v1), to_FT(v2), to_FT(v3), to_FT(v4), to_FT(v5),
                          to_FT(v6), to_FT(v7), to_FT(v8), to_FT(v9), to_FT(v10),
-                         to_FT(v11), to_FT(v12), to_FT(v13));
-  return t;
+                         to_FT(v11), to_FT(v12), to_FT(v13)));
 }
 
-const Transformation* Transformation__from_approximate(
+std::shared_ptr<const Transformation> Transformation__from_approximate(
     double v1, double v2, double v3, double v4, double v5, double v6, double v7,
     double v8, double v9, double v10, double v11, double v12, double v13) {
-  Transformation* t =
+  return std::shared_ptr<const Transformation>(
       new Transformation(to_FT(v1), to_FT(v2), to_FT(v3), to_FT(v4), to_FT(v5),
                          to_FT(v6), to_FT(v7), to_FT(v8), to_FT(v9), to_FT(v10),
-                         to_FT(v11), to_FT(v12), to_FT(v13));
-  return t;
+                         to_FT(v11), to_FT(v12), to_FT(v13)));
 }
 
-const Transformation* Transformation__translate(double x, double y, double z) {
-  return new Transformation(
+std::shared_ptr<const Transformation> Transformation__translate(double x,
+                                                                double y,
+                                                                double z) {
+  return std::shared_ptr<const Transformation>(new Transformation(
       CGAL::TRANSLATION,
       Vector(compute_translation_offset(x), compute_translation_offset(y),
-             compute_translation_offset(z)));
+             compute_translation_offset(z))));
 }
 
-const Transformation* Transformation__scale(double x, double y, double z) {
-  return new Transformation(compute_scaling_factor(x), 0, 0, 0, 0,
-                            compute_scaling_factor(y), 0, 0, 0, 0,
-                            compute_scaling_factor(z), 0, 1);
+std::shared_ptr<const Transformation> Transformation__scale(double x, double y,
+                                                            double z) {
+  return std::shared_ptr<const Transformation>(new Transformation(
+      compute_scaling_factor(x), 0, 0, 0, 0, compute_scaling_factor(y), 0, 0, 0,
+      0, compute_scaling_factor(z), 0, 1));
 }
 
-const Transformation* Transformation__rotate_x(double a) {
+std::shared_ptr<const Transformation> Transformation__rotate_x(double a) {
   RT sin_alpha, cos_alpha, w;
   compute_turn(a, sin_alpha, cos_alpha, w);
-  return new Transformation(w, 0, 0, 0, 0, cos_alpha, -sin_alpha, 0, 0,
-                            sin_alpha, cos_alpha, 0, w);
+  return std::shared_ptr<const Transformation>(new Transformation(
+      w, 0, 0, 0, 0, cos_alpha, -sin_alpha, 0, 0, sin_alpha, cos_alpha, 0, w));
 }
 
 Transformation TransformationFromXTurn(double turn) {
@@ -5929,26 +5990,27 @@ Transformation TransformationFromXTurn(double turn) {
                         cos_alpha, 0, w);
 }
 
-const Transformation* Transformation__rotate_y(double a) {
+std::shared_ptr<const Transformation> Transformation__rotate_y(double a) {
   RT sin_alpha, cos_alpha, w;
   compute_turn(a, sin_alpha, cos_alpha, w);
-  return new Transformation(cos_alpha, 0, -sin_alpha, 0, 0, w, 0, 0, sin_alpha,
-                            0, cos_alpha, 0, w);
+  return std::shared_ptr<const Transformation>(new Transformation(
+      cos_alpha, 0, -sin_alpha, 0, 0, w, 0, 0, sin_alpha, 0, cos_alpha, 0, w));
 }
 
-const Transformation* Transformation__rotate_z(double a) {
+std::shared_ptr<const Transformation> Transformation__rotate_z(double a) {
   RT sin_alpha, cos_alpha, w;
   compute_turn(a, sin_alpha, cos_alpha, w);
-  return new Transformation(cos_alpha, sin_alpha, 0, 0, -sin_alpha, cos_alpha,
-                            0, 0, 0, 0, w, 0, w);
+  return std::shared_ptr<const Transformation>(new Transformation(
+      cos_alpha, sin_alpha, 0, 0, -sin_alpha, cos_alpha, 0, 0, 0, 0, w, 0, w));
 }
 
-const Transformation* Transformation__rotate_z_toward(double x, double y) {
+std::shared_ptr<const Transformation> Transformation__rotate_z_toward(
+    double x, double y) {
   RT sin_alpha, cos_alpha, w;
   CGAL::rational_rotation_approximation(FT(x), FT(y), sin_alpha, cos_alpha, w,
                                         RT(1), RT(1000));
-  return new Transformation(cos_alpha, sin_alpha, 0, 0, -sin_alpha, cos_alpha,
-                            0, 0, 0, 0, w, 0, w);
+  return std::shared_ptr<const Transformation>(new Transformation(
+      cos_alpha, sin_alpha, 0, 0, -sin_alpha, cos_alpha, 0, 0, 0, 0, w, 0, w));
 }
 
 Transformation Righten(Vector current) {
@@ -5960,11 +6022,9 @@ Transformation Righten(Vector current) {
   }
 }
 
-const Transformation* InverseSegmentTransform(double startX, double startY,
-                                              double startZ, double endX,
-                                              double endY, double endZ,
-                                              double normalX, double normalY,
-                                              double normalZ) {
+std::shared_ptr<const Transformation> InverseSegmentTransform(
+    double startX, double startY, double startZ, double endX, double endY,
+    double endZ, double normalX, double normalY, double normalZ) {
   Transformation orient =
       Righten(unitVector(Vector(normalX, normalY, normalZ))) *
       Transformation(CGAL::TRANSLATION, Vector(-startX, -startY, -startZ));
@@ -5997,7 +6057,8 @@ const Transformation* InverseSegmentTransform(double startX, double startY,
     align = rotation * align;
   }
 
-  return new Transformation(align * orient);
+  return std::shared_ptr<const Transformation>(
+      new Transformation(align * orient));
 }
 
 void Polygon_2__add(Polygon_2* polygon, double x, double y) {
@@ -6013,39 +6074,26 @@ using emscripten::select_const;
 using emscripten::select_overload;
 
 EMSCRIPTEN_BINDINGS(module) {
-  emscripten::class_<Transformation>("Transformation").constructor<>();
-  emscripten::function("Transformation__compose", &Transformation__compose,
-                       emscripten::allow_raw_pointers());
-  emscripten::function("Transformation__identity", &Transformation__identity,
-                       emscripten::allow_raw_pointers());
-  emscripten::function("Transformation__inverse", &Transformation__inverse,
-                       emscripten::allow_raw_pointers());
+  emscripten::class_<Transformation>("Transformation")
+      .smart_ptr<std::shared_ptr<const Transformation>>("Transformation");
+  emscripten::function("Transformation__compose", &Transformation__compose);
+  emscripten::function("Transformation__identity", &Transformation__identity);
+  emscripten::function("Transformation__inverse", &Transformation__inverse);
   emscripten::function("Transformation__from_approximate",
-                       &Transformation__from_approximate,
-                       emscripten::allow_raw_pointers());
+                       &Transformation__from_approximate);
   emscripten::function("Transformation__from_exact",
-                       &Transformation__from_exact,
-                       emscripten::allow_raw_pointers());
+                       &Transformation__from_exact);
   emscripten::function("Transformation__to_approximate",
-                       &Transformation__to_approximate,
-                       emscripten::allow_raw_pointers());
-  emscripten::function("Transformation__to_exact", &Transformation__to_exact,
-                       emscripten::allow_raw_pointers());
-  emscripten::function("Transformation__translate", &Transformation__translate,
-                       emscripten::allow_raw_pointers());
-  emscripten::function("Transformation__scale", &Transformation__scale,
-                       emscripten::allow_raw_pointers());
-  emscripten::function("Transformation__rotate_x", &Transformation__rotate_x,
-                       emscripten::allow_raw_pointers());
-  emscripten::function("Transformation__rotate_y", &Transformation__rotate_y,
-                       emscripten::allow_raw_pointers());
-  emscripten::function("Transformation__rotate_z", &Transformation__rotate_z,
-                       emscripten::allow_raw_pointers());
+                       &Transformation__to_approximate);
+  emscripten::function("Transformation__to_exact", &Transformation__to_exact);
+  emscripten::function("Transformation__translate", &Transformation__translate);
+  emscripten::function("Transformation__scale", &Transformation__scale);
+  emscripten::function("Transformation__rotate_x", &Transformation__rotate_x);
+  emscripten::function("Transformation__rotate_y", &Transformation__rotate_y);
+  emscripten::function("Transformation__rotate_z", &Transformation__rotate_z);
   emscripten::function("Transformation__rotate_z_toward",
-                       &Transformation__rotate_z_toward,
-                       emscripten::allow_raw_pointers());
-  emscripten::function("InverseSegmentTransform", &InverseSegmentTransform,
-                       emscripten::allow_raw_pointers());
+                       &Transformation__rotate_z_toward);
+  emscripten::function("InverseSegmentTransform", &InverseSegmentTransform);
 
   emscripten::class_<Triples>("Triples")
       .constructor<>()
@@ -6093,19 +6141,7 @@ EMSCRIPTEN_BINDINGS(module) {
   emscripten::class_<Vertex_index>("Vertex_index").constructor<std::size_t>();
 
   emscripten::class_<Surface_mesh>("Surface_mesh")
-      .constructor<>()
-      .function("add_vertex_1", (Vertex_index(Surface_mesh::*)(const Point&)) &
-                                    Surface_mesh::add_vertex)
-      .function("add_edge_2",
-                (Halfedge_index(Surface_mesh::*)(Vertex_index, Vertex_index)) &
-                    Surface_mesh::add_edge)
-      .function("add_face_3", (Face_index(Surface_mesh::*)(
-                                  Vertex_index, Vertex_index, Vertex_index)) &
-                                  Surface_mesh::add_face)
-      .function("add_face_4",
-                (Face_index(Surface_mesh::*)(Vertex_index, Vertex_index,
-                                             Vertex_index, Vertex_index)) &
-                    Surface_mesh::add_face)
+      .smart_ptr<std::shared_ptr<const Surface_mesh>>("Surface_mesh")
       .function("is_valid",
                 select_overload<bool(bool) const>(&Surface_mesh::is_valid))
       .function("is_empty", &Surface_mesh::is_empty)
@@ -6121,10 +6157,8 @@ EMSCRIPTEN_BINDINGS(module) {
   emscripten::function("fillExactQuadruple", &fillExactQuadruple,
                        emscripten::allow_raw_pointers());
 
-  emscripten::function("DeserializeSurfaceMesh", &DeserializeSurfaceMesh,
-                       emscripten::allow_raw_pointers());
-  emscripten::function("SerializeSurfaceMesh", &SerializeSurfaceMesh,
-                       emscripten::allow_raw_pointers());
+  emscripten::function("DeserializeMesh", &DeserializeMesh);
+  emscripten::function("SerializeMesh", &SerializeMesh);
 
   // New classes
   emscripten::class_<Geometry>("Geometry")
@@ -6139,23 +6173,21 @@ EMSCRIPTEN_BINDINGS(module) {
                 &Geometry::convertPolygonsToPlanarMeshes)
       .function("copyInputMeshesToOutputMeshes",
                 &Geometry::copyInputMeshesToOutputMeshes)
+      .function("deserializeInputMesh", &Geometry::deserializeInputMesh)
       .function("fillPolygonsWithHoles", &Geometry::fillPolygonsWithHoles)
       .function("emitPoints", &Geometry::emitPoints)
       .function("emitPolygonsWithHoles", &Geometry::emitPolygonsWithHoles)
       .function("emitSegments", &Geometry::emitSegments)
+      .function("getInputMesh", &Geometry::getMesh)
+      .function("getMesh", &Geometry::getMesh)
       .function("getSerializedInputMesh", &Geometry::getSerializedInputMesh)
       .function("getSerializedMesh", &Geometry::getSerializedMesh)
       .function("getSize", &Geometry::getSize)
-      .function("getTransform", &Geometry::getTransform,
-                emscripten::allow_raw_pointers())
+      .function("getTransform", &Geometry::getTransform)
       .function("getType", &Geometry::getType)
-      .function("releaseOutputMesh", &Geometry::releaseOutputMesh,
-                emscripten::allow_raw_pointers())
-      .function("setInputMesh", &Geometry::setInputMesh,
-                emscripten::allow_raw_pointers())
+      .function("setInputMesh", &Geometry::setInputMesh)
       .function("setSize", &Geometry::setSize)
-      .function("setTransform", &Geometry::setTransform,
-                emscripten::allow_raw_pointers())
+      .function("setTransform", &Geometry::setTransform)
       .function("setType", &Geometry::setType)
       .function("transformToAbsoluteFrame",
                 &Geometry::transformToAbsoluteFrame);

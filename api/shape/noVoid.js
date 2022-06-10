@@ -1,9 +1,9 @@
-import { isVoid, rewrite, taggedGroup } from '@jsxcad/geometry';
+import { isTypeVoid, rewrite, taggedGroup } from '@jsxcad/geometry';
 import { Shape } from './Shape.js';
 
 export const noVoid = Shape.chainable((tags, select) => (shape) => {
   const op = (geometry, descend) => {
-    if (isVoid(geometry)) {
+    if (isTypeVoid(geometry)) {
       return taggedGroup({});
     } else {
       return descend();

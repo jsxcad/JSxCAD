@@ -1,7 +1,7 @@
 import {
   getLayouts,
   getLeafs,
-  isNotVoid,
+  isNotTypeGhost,
   measureBoundingBox,
   taggedGroup,
   taggedLayout,
@@ -23,7 +23,7 @@ const getItemNames = (geometry) => {
   const op = (geometry, descend) => {
     if (
       geometry.type === 'item' &&
-      isNotVoid(geometry) &&
+      isNotTypeGhost(geometry) &&
       geometry.tags &&
       geometry.tags.some((tag) => tag.startsWith('item/'))
     ) {
