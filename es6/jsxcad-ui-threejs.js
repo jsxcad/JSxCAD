@@ -1058,7 +1058,14 @@ const buildMeshes = async ({
       let vertexCount = tokens[p++];
       const vertices = [];
       while (vertexCount-- > 0) {
-        vertices.push([tokens[p++], tokens[p++], tokens[p++]]);
+        // The first three are precise values that we don't use.
+        p += 3;
+        // These three are approximate values in 100th of mm that we will use.
+        vertices.push([
+          tokens[p++] / 100,
+          tokens[p++] / 100,
+          tokens[p++] / 100,
+        ]);
       }
       let faceCount = tokens[p++];
       const positions = [];
@@ -1066,7 +1073,9 @@ const buildMeshes = async ({
       while (faceCount-- > 0) {
         let vertexCount = tokens[p++];
         if (vertexCount !== 3) {
-          throw Error('Faces must be triangles');
+          throw Error(
+            `Faces must be triangles: vertexCount=${vertexCount} p=${p} serial=${serializedSurfaceMesh}`
+          );
         }
         const triangle = [];
         while (vertexCount-- > 0) {
@@ -1113,7 +1122,7 @@ const buildMeshes = async ({
         mesh.layers.set(layer);
         updateUserData(geometry, scene, mesh.userData);
         mesh.userData.tangible = true;
-        if (tags.includes('type:void')) {
+        if (tags.includes('type:ghost')) {
           material.transparent = true;
           material.depthWrite = false;
           material.opacity *= 0.125;
@@ -1131,7 +1140,7 @@ const buildMeshes = async ({
         outline.userData.isOutline = true;
         outline.userData.hasShowOutline = tags.includes('show:outline');
         outline.visible = outline.userData.hasShowOutline;
-        if (tags.includes('type:void')) {
+        if (tags.includes('type:ghost')) {
           material.transparent = true;
           material.depthWrite = false;
           material.opacity *= 0.25;
@@ -1183,7 +1192,7 @@ const buildMeshes = async ({
           mesh.layers.set(layer);
           updateUserData(geometry, scene, mesh.userData);
           mesh.userData.tangible = true;
-          if (tags.includes('type:void')) {
+          if (tags.includes('type:ghost')) {
             material.transparent = true;
             material.depthWrite = false;
             material.opacity *= 0.125;
@@ -1201,7 +1210,7 @@ const buildMeshes = async ({
           outline.userData.isOutline = true;
           outline.userData.hasShowOutline = tags.includes('show:outline');
           outline.visible = outline.userData.hasShowOutline;
-          if (tags.includes('type:void')) {
+          if (tags.includes('type:ghost')) {
             material.transparent = true;
             material.depthWrite = false;
             material.opacity *= 0.25;

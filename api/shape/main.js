@@ -96,6 +96,7 @@ export { fix } from './fix.js';
 export { o, origin } from './origin.js';
 export { fuse } from './fuse.js';
 export { g, get } from './get.js';
+export { ghost } from './ghost.js';
 export { gn, getNot } from './getNot.js';
 export { grow } from './grow.js';
 export { hull } from './Hull.js';

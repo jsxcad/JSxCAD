@@ -68,13 +68,9 @@ test('Exact', async (t) => {
     ],
     tags: [],
     graph: {
-      isClosed: true,
-      isEmpty: false,
-      isLazy: true,
-      provenance: 'algorithm/cgal/fromSurfaceMeshToLazyGraph',
       serializedSurfaceMesh:
-        '8\n-1 1 -1\n1 1 -1\n-1 -1 -1\n1 -1 -1\n-1 -1 1\n1 1 1\n-1 1 1\n1 -1 1\n\n12\n3 2 0 1\n3 1 3 2\n3 6 4 5\n3 7 5 4\n3 6 2 4\n3 2 6 0\n3 4 3 7\n3 3 4 2\n3 7 1 5\n3 1 7 3\n3 5 0 6\n3 0 5 1\n',
-      hash: 'B+UQNC1qSMdK+YDD8Ezbp9qaHrteo3ZupBPuobfftmo=',
+        '8\n-1 1 -1 -100 100 -100\n1 1 -1 100 100 -100\n-1 -1 -1 -100 -100 -100\n1 -1 -1 100 -100 -100\n-1 -1 1 -100 -100 100\n1 1 1 100 100 100\n-1 1 1 -100 100 100\n1 -1 1 100 -100 100\n\n12\n3 2 0 1\n3 1 3 2\n3 6 4 5\n3 7 5 4\n3 6 2 4\n3 2 6 0\n3 4 3 7\n3 3 4 2\n3 7 1 5\n3 1 7 3\n3 5 0 6\n3 0 5 1\n',
+      hash: 'No3aumpF1xgaXsjWNsEqERwYhZyCFOhtgI3y/ve1NaE=',
     },
   });
 });
@@ -140,13 +136,9 @@ test('Approximate', async (t) => {
     ],
     tags: [],
     graph: {
-      isClosed: true,
-      isEmpty: false,
-      isLazy: true,
-      provenance: 'algorithm/cgal/fromSurfaceMeshToLazyGraph',
       serializedSurfaceMesh:
-        '8\n-1/2 1/2 -1/2\n1 1 -1\n-1 -1 -1\n1 -1 -1\n-1 -1 1\n1 1 1\n-1 1 1\n1 -1 1\n\n12\n3 2 0 1\n3 1 3 2\n3 6 4 5\n3 7 5 4\n3 6 2 4\n3 2 6 0\n3 4 3 7\n3 3 4 2\n3 7 1 5\n3 1 7 3\n3 5 0 6\n3 0 5 1\n',
-      hash: 'dtq+q8I18Cy1LJFJzE6kcxH6NvrN1xXLXTpZ7S4dS9U=',
+        '8\n-1/2 1/2 -1/2 -50 50 -50\n1 1 -1 100 100 -100\n-1 -1 -1 -100 -100 -100\n1 -1 -1 100 -100 -100\n-1 -1 1 -100 -100 100\n1 1 1 100 100 100\n-1 1 1 -100 100 100\n1 -1 1 100 -100 100\n\n12\n3 2 0 1\n3 1 3 2\n3 6 4 5\n3 7 5 4\n3 6 2 4\n3 2 6 0\n3 4 3 7\n3 3 4 2\n3 7 1 5\n3 1 7 3\n3 5 0 6\n3 0 5 1\n',
+      hash: 'UjbyCFpgGcxcgNO+S5X/tUo6dmMr5Af7aUlOWD0P1Ck=',
     },
   });
 });

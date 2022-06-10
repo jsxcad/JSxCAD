@@ -30,6 +30,12 @@ export const isType =
   ({ tags }) =>
     tags.includes(type);
 
+export const typeGhost = 'type:ghost';
+export const hasNotTypeGhost = hasNotType(typeGhost);
+export const hasTypeGhost = hasType(typeGhost);
+export const isNotTypeGhost = isNotType(typeGhost);
+export const isTypeGhost = isType(typeGhost);
+
 export const typeMasked = 'type:masked';
 export const hasNotTypeMasked = hasNotType(typeMasked);
 export const hasTypeMasked = hasType(typeMasked);

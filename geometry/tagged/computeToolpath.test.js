@@ -33,7 +33,20 @@ test('Nested hexagons', (t) => {
               provenance: 'algorithm/cgal/fromSurfaceMeshToLazyGraph',
               isOutline: false,
               serializedSurfaceMesh:
-                '6\n0 1 0\n-13/15 1/2 0\n-13/15 -1/2 0\n0 -1 0\n13/15 1/2 0\n13/15 -1/2 0\n\n4\n3 2 0 1\n3 2 3 4\n3 4 3 5\n3 2 4 0\n',
+                '6\n' +
+                '0 1 0 0 1 0\n' +
+                '-13/15 1/2 0 -260 50 0\n' +
+                '-13/15 -1/2 0 -260 -50 0\n' +
+                '0 -1 0 0 -100 0\n' +
+                '13/15 1/2 0 260 50 0\n' +
+                '13/15 -1/2 0 260 -50 0\n' +
+                '\n' +
+                '4\n' +
+                '3 2 0 1\n' +
+                '3 2 3 4\n' +
+                '3 4 3 5\n' +
+                '3 2 4 0\n' +
+                '',
               hash: 'ayIZ0GZGWboXcO03t5CSPvNQC+SX0wpPzXrr4gv6ldc=',
             },
             matrix: [
@@ -98,7 +111,20 @@ test('Nested hexagons', (t) => {
               provenance: 'algorithm/cgal/fromSurfaceMeshToLazyGraph',
               isOutline: false,
               serializedSurfaceMesh:
-                '6\n0 1 0\n-13/15 1/2 0\n-13/15 -1/2 0\n0 -1 0\n13/15 1/2 0\n13/15 -1/2 0\n\n4\n3 2 0 1\n3 2 3 4\n3 4 3 5\n3 2 4 0\n',
+                '6\n' +
+                '0 1 0 0 1 0\n' +
+                '-13/15 1/2 0 -260 50 0\n' +
+                '-13/15 -1/2 0 -260 -50 0\n' +
+                '0 -1 0 0 -100 0\n' +
+                '13/15 1/2 0 260 50 0\n' +
+                '13/15 -1/2 0 260 -50 0\n' +
+                '\n' +
+                '4\n' +
+                '3 2 0 1\n' +
+                '3 2 3 4\n' +
+                '3 4 3 5\n' +
+                '3 2 4 0\n' +
+                '',
               hash: 'ayIZ0GZGWboXcO03t5CSPvNQC+SX0wpPzXrr4gv6ldc=',
             },
             matrix: [

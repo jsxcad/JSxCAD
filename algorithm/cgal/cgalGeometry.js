@@ -1,8 +1,9 @@
 import { toCgalTransformFromJsTransform, toJsTransformFromCgalTransform } from './transform.js';
 
-import { fromSurfaceMesh } from './fromSurfaceMesh.js';
+// import { fromSurfaceMesh } from './fromSurfaceMesh.js';
+import { computeHash } from '@jsxcad/sys';
 import { getCgal } from './getCgal.js';
-import { toSurfaceMesh } from './toSurfaceMesh.js';
+// import { toSurfaceMesh } from './toSurfaceMesh.js';
 
 const GEOMETRY_UNKNOWN = 0;
 const GEOMETRY_MESH = 1;
@@ -23,7 +24,14 @@ export const fillCgalGeometry = (geometry, inputs) => {
       case 'graph':
         const { graph } = inputs[nth];
         geometry.setType(nth, GEOMETRY_MESH);
-        geometry.setInputMesh(nth, toSurfaceMesh(graph));
+        let mesh = graph.mesh?.deref();
+        if (mesh) {
+          geometry.setInputMesh(nth, mesh);
+        } else if (graph.serializedSurfaceMesh) {
+          geometry.deserializeInputMesh(nth, graph.serializedSurfaceMesh);
+        } else {
+          throw Error(`Cannot deserialize surface mesh: ${JSON.stringify(inputs[nth])}`);
+        }
         break;
       case 'polygonsWithHoles': {
         const { exactPlane, plane, polygonsWithHoles } = inputs[nth];
@@ -135,19 +143,27 @@ export const toCgalGeometry = (inputs, g = getCgal()) => {
 };
 
 export const fromCgalGeometry = (geometry, inputs, length = inputs.length, start = 0) => {
+  const g = getCgal();
   const results = [];
   for (let nth = start; nth < length; nth++) {
     switch (geometry.getType(nth)) {
       case GEOMETRY_MESH: {
-        const mesh = geometry.releaseOutputMesh(nth);
-        mesh.provenance = 'fromCgalGeometry';
+        const newMesh = geometry.getMesh(nth);
         const matrix = toJsTransformFromCgalTransform(geometry.getTransform(nth));
-        const { tags = [] } = inputs[nth] || {};
+        let { tags = [], graph } = inputs[nth] || {};
+        if (graph === undefined || newMesh !== graph.mesh) {
+          graph = {
+            serializedSurfaceMesh: g.SerializeMesh(newMesh),
+            // mesh: new WeakRef(newMesh)
+          };
+          graph.hash = computeHash(graph);
+          newMesh.delete();
+        }
         results[nth] = {
           type: 'graph',
           matrix,
           tags,
-          graph: fromSurfaceMesh(mesh),
+          graph
         };
         break;
       }

@@ -1,7 +1,7 @@
 import {
   disjoint,
-  getNonVoidPolygonsWithHoles,
-  getNonVoidSegments,
+  isNotTypeGhost,
+  linearize,
   makeAbsolute,
   measureBoundingBox,
   scale,
@@ -46,8 +46,10 @@ export const toSvg = async (
     )}mm" viewBox="${viewBox}" version="1.1" stroke="black" stroke-width=".1" fill="none" xmlns="http://www.w3.org/2000/svg">`,
   ];
 
-  for (const { matrix, tags, polygonsWithHoles } of getNonVoidPolygonsWithHoles(
-    geometry
+  for (const { matrix, tags, polygonsWithHoles } of linearize(
+    geometry,
+    (geometry) =>
+      geometry.type === 'polygonsWithHoles' && isNotTypeGhost(geometry)
   )) {
     for (const polygonWithHoles of polygonsWithHoles) {
       const { points, holes } = polygonWithHoles;
@@ -79,7 +81,10 @@ export const toSvg = async (
     }
   }
 
-  for (const g of getNonVoidSegments(geometry)) {
+  for (const g of linearize(
+    geometry,
+    (geometry) => geometry.type === 'segments' && isNotTypeGhost(geometry)
+  )) {
     const { matrix, tags, segments } = g;
     const color = toRgbColorFromTags(tags, definitions);
     let d = [];

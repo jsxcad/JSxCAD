@@ -3,14 +3,14 @@ import {
   fuse as fuseWithCgal,
 } from '@jsxcad/algorithm-cgal';
 
-import { isNotTypeVoid } from './tagged/type.js';
+import { isNotTypeGhost } from './tagged/type.js';
 import { linearize } from './tagged/linearize.js';
 import { taggedGroup } from './tagged/taggedGroup.js';
 import { toConcreteGeometry } from './tagged/toConcreteGeometry.js';
 
 const filter = (geometry) =>
   ['graph', 'polygonsWithHoles', 'segments'].includes(geometry.type) &&
-  isNotTypeVoid(geometry);
+  isNotTypeGhost(geometry);
 
 export const fuse = (geometry) => {
   const concreteGeometry = toConcreteGeometry(geometry);

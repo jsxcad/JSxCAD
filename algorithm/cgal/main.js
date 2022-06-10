@@ -25,7 +25,9 @@ export {
   STATUS_ZERO_THICKNESS,
   STATUS_UNCHANGED,
 } from './status.js';
-export { deletePendingSurfaceMeshes, toSurfaceMesh } from './toSurfaceMesh.js';
+export {
+  deletePendingSurfaceMeshes /*, toSurfaceMesh */,
+} from './toSurfaceMesh.js';
 export { graphSymbol, surfaceMeshSymbol } from './symbols.js';
 export { cast } from './cast.js';
 export { clip } from './clip.js';

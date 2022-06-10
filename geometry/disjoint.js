@@ -2,13 +2,18 @@ import {
   deletePendingSurfaceMeshes,
   disjoint as disjointWithCgal,
 } from '@jsxcad/algorithm-cgal';
+
+import { isNotTypeGhost, isTypeVoid } from './tagged/type.js';
 import { linearize } from './tagged/linearize.js';
 import { replacer } from './tagged/visit.js';
 import { taggedGroup } from './tagged/taggedGroup.js';
 import { toConcreteGeometry } from './tagged/toConcreteGeometry.js';
 
 const filter = (geometry) =>
-  ['graph', 'polygonsWithHoles', 'segments', 'points'].includes(geometry.type);
+  ['graph', 'polygonsWithHoles', 'segments', 'points'].includes(
+    geometry.type
+  ) &&
+  (isNotTypeGhost(geometry) || isTypeVoid(geometry));
 
 export const disjoint = (geometries) => {
   const concreteGeometries = geometries.map((geometry) =>
