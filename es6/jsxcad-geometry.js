@@ -555,8 +555,12 @@ const clip = (geometry, geometries, open) => {
     linearize(geometry, filterClips, inputs);
   }
   const outputs = clip$1(inputs, count, open);
+  const ghosts = [];
+  for (let nth = count; nth < inputs.length; nth++) {
+    ghosts.push(hasTypeGhost(inputs[nth]));
+  }
   deletePendingSurfaceMeshes();
-  return replacer(inputs, outputs, count)(concreteGeometry);
+  return taggedGroup({}, replacer(inputs, outputs, count)(concreteGeometry), ...ghosts);
 };
 
 const filter$v = (geometry) =>
@@ -1432,8 +1436,12 @@ const cut = (geometry, geometries, open = false) => {
     linearize(geometry, filterRemoves, inputs);
   }
   const outputs = cut$1(inputs, count, open);
+  const ghosts = [];
+  for (let nth = count; nth < inputs.length; nth++) {
+    ghosts.push(hasTypeGhost(inputs[nth]));
+  }
   deletePendingSurfaceMeshes();
-  return replacer(inputs, outputs, count)(concreteGeometry);
+  return taggedGroup({}, replacer(inputs, outputs, count)(concreteGeometry), ...ghosts);
 };
 
 const filterShape = (geometry) =>
