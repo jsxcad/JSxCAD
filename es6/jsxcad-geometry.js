@@ -271,6 +271,7 @@ const linearize = (
       descend();
     }
   };
+  // FIX: Remove toConcreteGeometry.
   visit(toConcreteGeometry(geometry), collect);
   return out;
 };
@@ -560,7 +561,11 @@ const clip = (geometry, geometries, open) => {
     ghosts.push(hasTypeGhost(inputs[nth]));
   }
   deletePendingSurfaceMeshes();
-  return taggedGroup({}, replacer(inputs, outputs, count)(concreteGeometry), ...ghosts);
+  return taggedGroup(
+    {},
+    replacer(inputs, outputs, count)(concreteGeometry),
+    ...ghosts
+  );
 };
 
 const filter$v = (geometry) =>
@@ -1441,7 +1446,11 @@ const cut = (geometry, geometries, open = false) => {
     ghosts.push(hasTypeGhost(inputs[nth]));
   }
   deletePendingSurfaceMeshes();
-  return taggedGroup({}, replacer(inputs, outputs, count)(concreteGeometry), ...ghosts);
+  return taggedGroup(
+    {},
+    replacer(inputs, outputs, count)(concreteGeometry),
+    ...ghosts
+  );
 };
 
 const filterShape = (geometry) =>
@@ -1995,6 +2004,16 @@ const measureVolume = (geometry) => {
   return computeVolume(linear);
 };
 
+const removeIfGhost = (geometry) =>
+  isTypeGhost(geometry) ? taggedGroup({}) : geometry;
+
+const noGhost = (geometry) => {
+  const concreteGeometry = toConcreteGeometry(geometry);
+  const inputs = linearize(concreteGeometry, isTypeGhost);
+  const outputs = inputs.map(removeIfGhost);
+  return replacer(inputs, outputs)(concreteGeometry);
+};
+
 const filter$7 = (geometry) =>
   ['graph', 'polygonsWithHoles'].includes(geometry.type) &&
   isNotTypeGhost(geometry);
@@ -2468,4 +2487,4 @@ const translate = (vector, geometry) =>
 const scale = (vector, geometry) =>
   transform$1(fromScaleToTransform(...vector), geometry);
 
-export { allTags, assemble, bend, cached, cast, clip, computeCentroid, computeImplicitVolume, computeNormal, computeToolpath, convexHull, cut, deform, demesh, disjoint, drop, eachItem, eachPoint, eachSegment, eachTriangle, extrude, faces, fill, fix, fresh, fromPolygons, fuse, generateLowerEnvelope, generateUpperEnvelope, getAnySurfaces, getGraphs, getInverseMatrices, getItems, getLayouts, getLeafs, getLeafsIn, getPlans, getPoints, getTags, grow, hasNotShow, hasNotShowOutline, hasNotShowOverlay, hasNotShowSkin, hasNotShowWireframe, hasNotType, hasNotTypeGhost, hasNotTypeMasked, hasNotTypeVoid, hasNotTypeWire, hasShow, hasShowOutline, hasShowOverlay, hasShowSkin, hasShowWireframe, hasType, hasTypeGhost, hasTypeMasked, hasTypeVoid, hasTypeWire, hash, inset, involute, isNotShow, isNotShowOutline, isNotShowOverlay, isNotShowSkin, isNotShowWireframe, isNotType, isNotTypeGhost, isNotTypeMasked, isNotTypeVoid, isNotTypeWire, isShow, isShowOutline, isShowOverlay, isShowSkin, isShowWireframe, isType, isTypeGhost, isTypeMasked, isTypeVoid, isTypeWire, join, keep, linearize, link, loft, makeAbsolute, measureArea, measureBoundingBox, measureVolume, offset, op, outline, read, readNonblocking, registerReifier, reify, remesh, rewrite, rewriteTags, rotateX, rotateY, rotateZ, scale, seam, section, separate, serialize, showOutline, showOverlay, showSkin, showWireframe, simplify, smooth, soup, taggedDisplayGeometry, taggedGraph, taggedGroup, taggedItem, taggedLayout, taggedPlan, taggedPoints, taggedPolygons, taggedPolygonsWithHoles, taggedSegments, taggedSketch, taggedTriangles, toConcreteGeometry, toDisplayGeometry, toPoints, toTransformedGeometry, toTriangleArray, transform$1 as transform, transformCoordinate, transformingCoordinates, translate, twist, typeGhost, typeMasked, typeVoid, typeWire, update, visit, wrap, write, writeNonblocking };
+export { allTags, assemble, bend, cached, cast, clip, computeCentroid, computeImplicitVolume, computeNormal, computeToolpath, convexHull, cut, deform, demesh, disjoint, drop, eachItem, eachPoint, eachSegment, eachTriangle, extrude, faces, fill, fix, fresh, fromPolygons, fuse, generateLowerEnvelope, generateUpperEnvelope, getAnySurfaces, getGraphs, getInverseMatrices, getItems, getLayouts, getLeafs, getLeafsIn, getPlans, getPoints, getTags, grow, hasNotShow, hasNotShowOutline, hasNotShowOverlay, hasNotShowSkin, hasNotShowWireframe, hasNotType, hasNotTypeGhost, hasNotTypeMasked, hasNotTypeVoid, hasNotTypeWire, hasShow, hasShowOutline, hasShowOverlay, hasShowSkin, hasShowWireframe, hasType, hasTypeGhost, hasTypeMasked, hasTypeVoid, hasTypeWire, hash, inset, involute, isNotShow, isNotShowOutline, isNotShowOverlay, isNotShowSkin, isNotShowWireframe, isNotType, isNotTypeGhost, isNotTypeMasked, isNotTypeVoid, isNotTypeWire, isShow, isShowOutline, isShowOverlay, isShowSkin, isShowWireframe, isType, isTypeGhost, isTypeMasked, isTypeVoid, isTypeWire, join, keep, linearize, link, loft, makeAbsolute, measureArea, measureBoundingBox, measureVolume, noGhost, offset, op, outline, read, readNonblocking, registerReifier, reify, remesh, rewrite, rewriteTags, rotateX, rotateY, rotateZ, scale, seam, section, separate, serialize, showOutline, showOverlay, showSkin, showWireframe, simplify, smooth, soup, taggedDisplayGeometry, taggedGraph, taggedGroup, taggedItem, taggedLayout, taggedPlan, taggedPoints, taggedPolygons, taggedPolygonsWithHoles, taggedSegments, taggedSketch, taggedTriangles, toConcreteGeometry, toDisplayGeometry, toPoints, toTransformedGeometry, toTriangleArray, transform$1 as transform, transformCoordinate, transformingCoordinates, translate, twist, typeGhost, typeMasked, typeVoid, typeWire, update, visit, wrap, write, writeNonblocking };

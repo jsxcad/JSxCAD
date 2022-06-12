@@ -142,6 +142,7 @@ export { makeAbsolute } from './makeAbsolute.js';
 export { measureArea } from './tagged/measureArea.js';
 export { measureBoundingBox } from './measureBoundingBox.js';
 export { measureVolume } from './tagged/measureVolume.js';
+export { noGhost } from './noGhost.js';
 export { offset } from './offset.js';
 export { op } from './tagged/op.js';
 export { outline } from './outline.js';
