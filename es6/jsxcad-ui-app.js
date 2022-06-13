@@ -11064,6 +11064,8 @@ ace.define("ace/tooltip",["require","exports","module","ace/lib/oop","ace/lib/do
 
 require("./lib/oop");
 var dom = require("./lib/dom");
+
+var CLASSNAME = "ace_tooltip";
 function Tooltip (parentNode) {
     this.isOpen = false;
     this.$element = null;
@@ -11073,7 +11075,7 @@ function Tooltip (parentNode) {
 (function() {
     this.$init = function() {
         this.$element = dom.createElement("div");
-        this.$element.className = "ace_tooltip";
+        this.$element.className = CLASSNAME;
         this.$element.style.display = "none";
         this.$parentNode.appendChild(this.$element);
         return this.$element;
@@ -11108,6 +11110,7 @@ function Tooltip (parentNode) {
     this.hide = function() {
         if (this.isOpen) {
             this.getElement().style.display = "none";
+            this.getElement().className = CLASSNAME;
             this.isOpen = false;
         }
     };
@@ -11188,6 +11191,12 @@ function GutterHandler(mouseHandler) {
         tooltipAnnotation = annotation.text.join("<br/>");
 
         tooltip.setHtml(tooltipAnnotation);
+
+        var annotationClassName = annotation.className;
+        if (annotationClassName) {
+            tooltip.setClassName(annotationClassName.trim());
+        }
+
         tooltip.show();
         editor._signal("showGutterTooltip", tooltip);
         editor.on("mousewheel", hideTooltip);
@@ -12532,7 +12541,7 @@ function deHyphenate(str) {
     return str.replace(/-(.)/g, function(m, m1) { return m1.toUpperCase(); });
 }
 
-exports.version = "1.5.3";
+exports.version = "1.6.0";
 
 });
 
@@ -24950,15 +24959,15 @@ var Text = function(parentEl) {
 
     this.$renderSimpleLine = function(parent, tokens) {
         var screenColumn = 0;
-        var token = tokens[0];
-        var value = token.value;
-        if (this.displayIndentGuides)
-            value = this.renderIndentGuide(parent, value);
-        if (value)
-            screenColumn = this.$renderToken(parent, screenColumn, token, value);
-        for (var i = 1; i < tokens.length; i++) {
-            token = tokens[i];
-            value = token.value;
+
+        for (var i = 0; i < tokens.length; i++) {
+            var token = tokens[i];
+            var value = token.value;
+            if (i == 0 && this.displayIndentGuides) {
+                value = this.renderIndentGuide(parent, value);
+                if (!value)
+                    continue;
+            }
             if (screenColumn + value.length > this.MAX_LINE_LENGTH)
                 return this.$renderOverflowMessage(parent, screenColumn, token, value);
             screenColumn = this.$renderToken(parent, screenColumn, token, value);
@@ -40444,49 +40453,18 @@ dom.importCssString("\
     opacity: 0.5;\
     margin: 0.9em;\
 }\
+.ace_completion-message {\
+    color: blue;\
+}\
 .ace_editor.ace_autocomplete .ace_completion-highlight{\
     color: #2d69c7;\
 }\
 .ace_dark.ace_editor.ace_autocomplete .ace_completion-highlight{\
     color: #93ca12;\
 }\
-.ace_autocomplete.ace-tm .ace_marker-layer .ace_active-line {\
-    background-color: #CAD6FA;\
-    z-index: 1;\
-}\
-.ace_autocomplete.ace-tm .ace_line-hover {\
-    border: 1px solid #abbffe;\
-    margin-top: -1px;\
-    background: rgba(233,233,253,0.4);\
-}\
-.ace_autocomplete .ace_line-hover {\
-    position: absolute;\
-    z-index: 2;\
-}\
-.ace_autocomplete .ace_scroller {\
-    background: none;\
-    border: none;\
-    box-shadow: none;\
-}\
-.ace_rightAlignedText {\
-    color: gray;\
-    display: inline-block;\
-    position: absolute;\
-    right: 4px;\
-    text-align: right;\
-    z-index: -1;\
-}\
-.ace_completion-message {\
-    color: blue;\
-}\
-.ace_autocomplete .ace_completion-highlight{\
-    text-shadow: 0 0 0.01em;\
-}\
-.ace_autocomplete {\
-    width: 280px;\
+.ace_editor.ace_autocomplete {\
+    width: 300px;\
     z-index: 200000;\
-    background: #fbfbfb;\
-    color: #444;\
     border: 1px lightgray solid;\
     position: fixed;\
     box-shadow: 2px 3px 5px rgba(0,0,0,.2);\

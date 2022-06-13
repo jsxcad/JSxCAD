@@ -1,6 +1,7 @@
 import { composeTransforms, disjoint as disjoint$1, deletePendingSurfaceMeshes, bend as bend$1, serialize as serialize$1, cast as cast$1, clip as clip$1, computeCentroid as computeCentroid$1, computeImplicitVolume as computeImplicitVolume$1, computeNormal as computeNormal$1, outline as outline$1, fuse as fuse$1, inset as inset$1, computeBoundingBox, section as section$1, identity, withAabbTreeQuery, convexHull as convexHull$1, cut as cut$1, deform as deform$1, demesh as demesh$1, eachPoint as eachPoint$1, eachTriangle as eachTriangle$1, extrude as extrude$1, faces as faces$1, fix as fix$1, fromPolygons as fromPolygons$1, generateEnvelope, invertTransform, grow as grow$1, involute as involute$1, fill as fill$1, join as join$1, link as link$1, loft as loft$1, makeAbsolute as makeAbsolute$1, computeArea, computeVolume, offset as offset$1, remesh as remesh$1, seam as seam$1, simplify as simplify$1, smooth as smooth$1, separate as separate$1, twist as twist$1, wrap as wrap$1, fromRotateXToTransform, fromRotateYToTransform, fromRotateZToTransform, fromTranslateToTransform, fromScaleToTransform } from './jsxcad-algorithm-cgal.js';
 export { fromRotateXToTransform, fromRotateYToTransform, fromRotateZToTransform, fromScaleToTransform, fromTranslateToTransform, identity, withAabbTreeQuery } from './jsxcad-algorithm-cgal.js';
 import { computeHash, write as write$1, read as read$1, readNonblocking as readNonblocking$1, ErrorWouldBlock, addPending } from './jsxcad-sys.js';
+import { toTagsFromName } from './jsxcad-algorithm-material.js';
 
 const update = (geometry, updates, changes) => {
   if (updates === undefined) {
@@ -199,6 +200,7 @@ const hasNotTypeWire = hasNotType(typeWire);
 const hasTypeWire = hasType(typeWire);
 const isNotTypeWire = isNotType(typeWire);
 const isTypeWire = isType(typeWire);
+const isSegments = ({ type }) => type === 'segments';
 
 const registry = new Map();
 
@@ -271,6 +273,7 @@ const linearize = (
       descend();
     }
   };
+  // FIX: Remove toConcreteGeometry.
   visit(toConcreteGeometry(geometry), collect);
   return out;
 };
@@ -539,6 +542,70 @@ const cast = (geometry, reference) => {
   return taggedGroup({}, ...outputs);
 };
 
+const hasMatchingTag = (set, tags, whenSetUndefined = false) => {
+  if (set === undefined) {
+    return whenSetUndefined;
+  } else if (tags !== undefined && tags.some((tag) => set.includes(tag))) {
+    return true;
+  } else {
+    return false;
+  }
+};
+
+const buildCondition = (conditionTags, conditionSpec) => {
+  switch (conditionSpec) {
+    case 'has':
+      return (geometryTags) => hasMatchingTag(geometryTags, conditionTags);
+    case 'has not':
+      return (geometryTags) => !hasMatchingTag(geometryTags, conditionTags);
+    default:
+      return undefined;
+  }
+};
+
+const rewriteTags = (
+  add,
+  remove,
+  geometry,
+  conditionTags,
+  conditionSpec
+) => {
+  const condition = buildCondition(conditionTags, conditionSpec);
+  const composeTags = (geometryTags) => {
+    if (condition === undefined || condition(geometryTags)) {
+      if (geometryTags === undefined) {
+        return add.filter((tag) => !remove.includes(tag));
+      } else {
+        return [...add, ...geometryTags].filter((tag) => !remove.includes(tag));
+      }
+    } else {
+      return geometryTags;
+    }
+  };
+  const op = (geometry, descend) => {
+    switch (geometry.type) {
+      case 'group':
+        return descend();
+      default:
+        const composedTags = composeTags(geometry.tags);
+        if (composedTags === undefined) {
+          const copy = { ...geometry };
+          delete copy.tags;
+          return copy;
+        }
+        if (composedTags === geometry.tags) {
+          return geometry;
+        } else {
+          return descend({ tags: composedTags });
+        }
+    }
+  };
+  return rewrite(geometry, op);
+};
+
+const hasMaterial = (geometry, name) =>
+  rewriteTags(toTagsFromName(name), [], geometry);
+
 const filter$w = (geometry) =>
   ['graph', 'polygonsWithHoles', 'segments', 'points'].includes(
     geometry.type
@@ -555,8 +622,16 @@ const clip = (geometry, geometries, open) => {
     linearize(geometry, filterClips, inputs);
   }
   const outputs = clip$1(inputs, count, open);
+  const ghosts = [];
+  for (let nth = count; nth < inputs.length; nth++) {
+    ghosts.push(hasMaterial(hasTypeGhost(inputs[nth]), 'ghost'));
+  }
   deletePendingSurfaceMeshes();
-  return replacer(inputs, outputs, count)(concreteGeometry);
+  return taggedGroup(
+    {},
+    replacer(inputs, outputs, count)(concreteGeometry),
+    ...ghosts
+  );
 };
 
 const filter$v = (geometry) =>
@@ -848,31 +923,6 @@ const fuse = (geometry) => {
   return taggedGroup({}, ...outputs);
 };
 
-const isNotVoid = ({ tags }) => {
-  return tags === undefined || tags.includes('type:void') === false;
-};
-
-const eachNonVoidItem = (geometry, op) => {
-  const walk = (geometry, descend) => {
-    // FIX: Sketches aren't real either -- but this is a bit unclear.
-    if (geometry.type !== 'sketch' && isNotVoid(geometry)) {
-      op(geometry);
-      descend();
-    }
-  };
-  visit(geometry, walk);
-};
-
-const getNonVoidSegments = (geometry) => {
-  const segmentsets = [];
-  eachNonVoidItem(geometry, (item) => {
-    if (item.type === 'segments') {
-      segmentsets.push(item);
-    }
-  });
-  return segmentsets;
-};
-
 const filter$q = (geometry) =>
   ['graph', 'polygonsWithHoles'].includes(geometry.type) &&
   isNotTypeGhost(geometry);
@@ -1063,7 +1113,10 @@ const computeToolpath = (
 
     // Grooves
     // FIX: These should be sectioned segments.
-    for (const { matrix, segments } of getNonVoidSegments(concreteGeometry)) {
+    for (const { matrix, segments } of linearize(
+      concreteGeometry,
+      (geometry) => isSegments(geometry) && isTypeGhost(geometry)
+    )) {
       for (const [localStart, localEnd] of segments) {
         const start = transformCoordinate(localStart, matrix);
         const end = transformCoordinate(localEnd, matrix);
@@ -1432,8 +1485,16 @@ const cut = (geometry, geometries, open = false) => {
     linearize(geometry, filterRemoves, inputs);
   }
   const outputs = cut$1(inputs, count, open);
+  const ghosts = [];
+  for (let nth = count; nth < inputs.length; nth++) {
+    ghosts.push(hasMaterial(hasTypeGhost(inputs[nth]), 'ghost'));
+  }
   deletePendingSurfaceMeshes();
-  return replacer(inputs, outputs, count)(concreteGeometry);
+  return taggedGroup(
+    {},
+    replacer(inputs, outputs, count)(concreteGeometry),
+    ...ghosts
+  );
 };
 
 const filterShape = (geometry) =>
@@ -1482,67 +1543,6 @@ const demesh = (geometry) => {
   const outputs = demesh$1(inputs);
   deletePendingSurfaceMeshes();
   return replacer(inputs, outputs)(concreteGeometry);
-};
-
-const hasMatchingTag = (set, tags, whenSetUndefined = false) => {
-  if (set === undefined) {
-    return whenSetUndefined;
-  } else if (tags !== undefined && tags.some((tag) => set.includes(tag))) {
-    return true;
-  } else {
-    return false;
-  }
-};
-
-const buildCondition = (conditionTags, conditionSpec) => {
-  switch (conditionSpec) {
-    case 'has':
-      return (geometryTags) => hasMatchingTag(geometryTags, conditionTags);
-    case 'has not':
-      return (geometryTags) => !hasMatchingTag(geometryTags, conditionTags);
-    default:
-      return undefined;
-  }
-};
-
-const rewriteTags = (
-  add,
-  remove,
-  geometry,
-  conditionTags,
-  conditionSpec
-) => {
-  const condition = buildCondition(conditionTags, conditionSpec);
-  const composeTags = (geometryTags) => {
-    if (condition === undefined || condition(geometryTags)) {
-      if (geometryTags === undefined) {
-        return add.filter((tag) => !remove.includes(tag));
-      } else {
-        return [...add, ...geometryTags].filter((tag) => !remove.includes(tag));
-      }
-    } else {
-      return geometryTags;
-    }
-  };
-  const op = (geometry, descend) => {
-    switch (geometry.type) {
-      case 'group':
-        return descend();
-      default:
-        const composedTags = composeTags(geometry.tags);
-        if (composedTags === undefined) {
-          const copy = { ...geometry };
-          delete copy.tags;
-          return copy;
-        }
-        if (composedTags === geometry.tags) {
-          return geometry;
-        } else {
-          return descend({ tags: composedTags });
-        }
-    }
-  };
-  return rewrite(geometry, op);
 };
 
 // Dropped elements displace as usual, but are not included in positive output.
@@ -1987,6 +1987,16 @@ const measureVolume = (geometry) => {
   return computeVolume(linear);
 };
 
+const removeIfGhost = (geometry) =>
+  isTypeGhost(geometry) && !isTypeVoid(geometry) ? taggedGroup({}) : geometry;
+
+const noGhost = (geometry) => {
+  const concreteGeometry = toConcreteGeometry(geometry);
+  const inputs = linearize(concreteGeometry, isTypeGhost);
+  const outputs = inputs.map(removeIfGhost);
+  return replacer(inputs, outputs)(concreteGeometry);
+};
+
 const filter$7 = (geometry) =>
   ['graph', 'polygonsWithHoles'].includes(geometry.type) &&
   isNotTypeGhost(geometry);
@@ -2363,6 +2373,10 @@ const toPoints = (geometry) => {
   return taggedPoints({}, points);
 };
 
+const isNotVoid = ({ tags }) => {
+  return tags === undefined || tags.includes('type:void') === false;
+};
+
 Error.stackTraceLimit = Infinity;
 
 const toTriangles = ({ tags }, geometry) => {
@@ -2460,4 +2474,4 @@ const translate = (vector, geometry) =>
 const scale = (vector, geometry) =>
   transform$1(fromScaleToTransform(...vector), geometry);
 
-export { allTags, assemble, bend, cached, cast, clip, computeCentroid, computeImplicitVolume, computeNormal, computeToolpath, convexHull, cut, deform, demesh, disjoint, drop, eachItem, eachPoint, eachSegment, eachTriangle, extrude, faces, fill, fix, fresh, fromPolygons, fuse, generateLowerEnvelope, generateUpperEnvelope, getAnySurfaces, getGraphs, getInverseMatrices, getItems, getLayouts, getLeafs, getLeafsIn, getPlans, getPoints, getTags, grow, hasNotShow, hasNotShowOutline, hasNotShowOverlay, hasNotShowSkin, hasNotShowWireframe, hasNotType, hasNotTypeGhost, hasNotTypeMasked, hasNotTypeVoid, hasNotTypeWire, hasShow, hasShowOutline, hasShowOverlay, hasShowSkin, hasShowWireframe, hasType, hasTypeGhost, hasTypeMasked, hasTypeVoid, hasTypeWire, hash, inset, involute, isNotShow, isNotShowOutline, isNotShowOverlay, isNotShowSkin, isNotShowWireframe, isNotType, isNotTypeGhost, isNotTypeMasked, isNotTypeVoid, isNotTypeWire, isShow, isShowOutline, isShowOverlay, isShowSkin, isShowWireframe, isType, isTypeGhost, isTypeMasked, isTypeVoid, isTypeWire, join, keep, linearize, link, loft, makeAbsolute, measureArea, measureBoundingBox, measureVolume, offset, op, outline, read, readNonblocking, registerReifier, reify, remesh, rewrite, rewriteTags, rotateX, rotateY, rotateZ, scale, seam, section, separate, serialize, showOutline, showOverlay, showSkin, showWireframe, simplify, smooth, soup, taggedDisplayGeometry, taggedGraph, taggedGroup, taggedItem, taggedLayout, taggedPlan, taggedPoints, taggedPolygons, taggedPolygonsWithHoles, taggedSegments, taggedSketch, taggedTriangles, toConcreteGeometry, toDisplayGeometry, toPoints, toTransformedGeometry, toTriangleArray, transform$1 as transform, transformCoordinate, transformingCoordinates, translate, twist, typeGhost, typeMasked, typeVoid, typeWire, update, visit, wrap, write, writeNonblocking };
+export { allTags, assemble, bend, cached, cast, clip, computeCentroid, computeImplicitVolume, computeNormal, computeToolpath, convexHull, cut, deform, demesh, disjoint, drop, eachItem, eachPoint, eachSegment, eachTriangle, extrude, faces, fill, fix, fresh, fromPolygons, fuse, generateLowerEnvelope, generateUpperEnvelope, getAnySurfaces, getGraphs, getInverseMatrices, getItems, getLayouts, getLeafs, getLeafsIn, getPlans, getPoints, getTags, grow, hasMaterial, hasNotShow, hasNotShowOutline, hasNotShowOverlay, hasNotShowSkin, hasNotShowWireframe, hasNotType, hasNotTypeGhost, hasNotTypeMasked, hasNotTypeVoid, hasNotTypeWire, hasShow, hasShowOutline, hasShowOverlay, hasShowSkin, hasShowWireframe, hasType, hasTypeGhost, hasTypeMasked, hasTypeVoid, hasTypeWire, hash, inset, involute, isNotShow, isNotShowOutline, isNotShowOverlay, isNotShowSkin, isNotShowWireframe, isNotType, isNotTypeGhost, isNotTypeMasked, isNotTypeVoid, isNotTypeWire, isShow, isShowOutline, isShowOverlay, isShowSkin, isShowWireframe, isType, isTypeGhost, isTypeMasked, isTypeVoid, isTypeWire, join, keep, linearize, link, loft, makeAbsolute, measureArea, measureBoundingBox, measureVolume, noGhost, offset, op, outline, read, readNonblocking, registerReifier, reify, remesh, rewrite, rewriteTags, rotateX, rotateY, rotateZ, scale, seam, section, separate, serialize, showOutline, showOverlay, showSkin, showWireframe, simplify, smooth, soup, taggedDisplayGeometry, taggedGraph, taggedGroup, taggedItem, taggedLayout, taggedPlan, taggedPoints, taggedPolygons, taggedPolygonsWithHoles, taggedSegments, taggedSketch, taggedTriangles, toConcreteGeometry, toDisplayGeometry, toPoints, toTransformedGeometry, toTriangleArray, transform$1 as transform, transformCoordinate, transformingCoordinates, translate, twist, typeGhost, typeMasked, typeVoid, typeWire, update, visit, wrap, write, writeNonblocking };

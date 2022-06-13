@@ -24,6 +24,7 @@
   "license": "MIT",
   "dependencies": {
     "@jsxcad/algorithm-cgal": "^0.0.79",
+    "@jsxcad/algorithm-material": "^0.0.79",
     "@jsxcad/sys": "^0.0.79",
     "kdbush": "^3.0.0",
     "rollup": "^2.51.2",

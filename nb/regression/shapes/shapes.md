@@ -555,3 +555,21 @@ Box(10, 10, 10)
 ```
 
 ![Image](shapes.md.52.png)
+
+```JavaScript
+Box(10).cut(Triangle(11)).view(1);
+```
+
+![Image](shapes.md.53.png)
+
+```JavaScript
+Box(10).cut(Triangle(11)).clean().view(2);
+```
+
+![Image](shapes.md.54.png)
+
+```JavaScript
+Triangle(11).eachPoint(Arc(5), cut).view(5);
+```
+
+![Image](shapes.md.55.png)

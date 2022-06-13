@@ -39,8 +39,6 @@ export const baseView =
       width = 512,
       height = 256,
       position = [100, -100, 100],
-      withAxes = false,
-      withGrid = true,
     } = options;
 
     if (size !== undefined) {
@@ -67,8 +65,6 @@ export const baseView =
         height,
         position,
         inline,
-        withAxes,
-        withGrid,
       };
       emit({ hash: generateUniqueId(), path: viewPath, view });
     }
@@ -110,7 +106,6 @@ export const gridView = Shape.chainable((...args) => {
       width: 1024,
       height: 512,
       position: [0, 0, 100],
-      withGrid: true,
     },
   });
   return (shape) => view(viewId, op, options)(shape);

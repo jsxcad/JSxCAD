@@ -1169,7 +1169,7 @@ const buildMeshes = async ({
         geometry.plane[2]
       ).normalize();
       const baseNormal = new Vector3(0, 0, 1);
-      mesh = new Group();
+      const meshes = new Group();
       for (const { points, holes } of geometry.polygonsWithHoles) {
         const boundaryPoints = [];
         for (const point of points) {
@@ -1228,7 +1228,9 @@ const buildMeshes = async ({
           );
           mesh.add(outline);
         }
+        meshes.add(mesh);
       }
+      mesh = meshes;
       scene.add(mesh);
       // Need to handle the origin shift.
       orient(mesh, normal, baseNormal, geometry.plane[3]);
@@ -1681,7 +1683,7 @@ const staticDisplay = async (
     canvas,
     geometry,
     withAxes = false,
-    withGrid = true,
+    withGrid = false,
     definitions,
   } = {},
   page

@@ -271,3 +271,9 @@ Box(10, 10, 10)
   .cut(faces(Box(4, 4, 4)))
   .faces(cut(inset(1)))
   .view();
+
+Box(10).cut(Triangle(11)).view(1);
+
+Box(10).cut(Triangle(11)).clean().view(2);
+
+Triangle(11).eachPoint(Arc(5), cut).view(5);

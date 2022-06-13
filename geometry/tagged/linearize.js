@@ -15,6 +15,7 @@ export const linearize = (
       descend();
     }
   };
+  // FIX: Remove toConcreteGeometry.
   visit(toConcreteGeometry(geometry), collect);
   return out;
 };

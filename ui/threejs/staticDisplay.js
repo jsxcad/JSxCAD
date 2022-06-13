@@ -31,7 +31,7 @@ export const staticDisplay = async (
     canvas,
     geometry,
     withAxes = false,
-    withGrid = true,
+    withGrid = false,
     definitions,
   } = {},
   page

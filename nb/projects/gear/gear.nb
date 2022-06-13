@@ -58,18 +58,16 @@ const ring = Arc(50)
   .hull(self(), Point())
   .cut(Arc(30))
   .cut(
-    Group(
-      seq(
-        (a) =>
-          planetaryFootprint
-            .rz(a / -8)
-            .y(12)
-            .rz(a / 32)
-            .void(),
-        { from: -1, by: 1 / 16, to: 1 }
-      )
+    seq(
+      (a) =>
+        planetaryFootprint
+          .rz(a / -8)
+          .y(12)
+          .rz(a / 32),
+      { from: -1, by: 1 / 16, to: 1 }
     )
   )
+  .clean()
   .rz(seq({ by: 1 / 32 }))
   .gridView()
   .md(
@@ -89,12 +87,14 @@ const solar = Arc(20)
       { from: -1, by: 1 / 16, to: 1 }
     )
   )
+  .clean()
   .rz(seq({ by: 1 / 16 }))
   .fuse()
   .gridView()
   .md(
     `We simulate the gear motion to cut a single tooth, then rotate it around.`
-  );
+  )
+  .clean();
 
 const rack = Box(20, Math.PI)
   .by(align('x<'))
@@ -107,19 +107,22 @@ const rack = Box(20, Math.PI)
   )
   .y(seq((a) => a * Math.PI, { to: 10 }))
   .gridView()
-  .md(`We can do the same thing to cut a rack.`);
+  .md(`We can do the same thing to cut a rack.`)
+  .clean();
 
 const planetaryDesign1 = Arc(44)
   .ez(-4)
   .as('hoop')
-  .fitTo(Octagon(42).ez(-2, -4));
+  .fitTo(Octagon(42).ez(-2, -4))
+  .clean();
 
 const planetaryDesign2 = planetaryDesign1
   .cut(Octagon(42).ez(-2))
   .and(ring.clip(Octagon(42)).ez(-2))
   .cut(Arc(24).ez(-2, -4))
   .color('blue')
-  .as('ring');
+  .as('ring')
+  .clean();
 
 const planetaryDesign3 = planetaryDesign2
   .and(
@@ -131,13 +134,14 @@ const planetaryDesign3 = planetaryDesign2
       .x(12)
       .rz(1 / 4, 2 / 4, 3 / 4, 4 / 4)
   )
+  .clean();
 
 const planetaryDesign4a =
-    solar
-      .ez(-2);
+  solar
+    .ez(-2);
 
 const planetaryDesign4b = planetaryDesign4a
-      .and(Arc(23.5).ez(-2, -4))
+  .and(Arc(23.5).ez(-2, -4))
 
 const planetaryDesignAxle = Octagon(12).fitTo(Arc(8).void()).ez(-4).color('orange').as('axle');
 

@@ -3837,7 +3837,7 @@ int EachPoint(Geometry* geometry, emscripten::val emit_point) {
         const Transformation& transform = geometry->transform(nth);
         for (const Polygon_with_holes_2& polygon : geometry->pwh(nth)) {
           for (const Point_2 point : polygon.outer_boundary()) {
-            emitPoint(plane.to_3d(point).transform(transform), emit_point);
+            emitPoint(plane.to_3d(point), emit_point);
           }
           for (auto hole = polygon.holes_begin(); hole != polygon.holes_end();
                ++hole) {

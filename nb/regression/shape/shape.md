@@ -468,13 +468,13 @@ Box(20, 20, 20)
 
 ![Image](shape.md.55.png)
 
-Area of Box(2).cut(Box(1)) is 3.00
+Area of Box(2).cut(Box(1)) is 4.00
 
 ```JavaScript
 Box(2).cut(Box(1)).area(v => s => s.md(`Area is ${v.toFixed(2)}`));
 ```
 
-Area is 3.00
+Area is 4.00
 
 Area of Box(2, 3, 4) is 52.00
 

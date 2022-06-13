@@ -67,6 +67,7 @@ export { by } from './by.js';
 export { cast } from './cast.js';
 export { center } from './center.js';
 export { chainHull } from './ChainHull.js';
+export { clean } from './clean.js';
 export { clip } from './clip.js';
 export { clipopen } from './clipopen.js';
 export { clipfrom } from './clipfrom.js';
