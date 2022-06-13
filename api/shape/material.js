@@ -1,13 +1,9 @@
 import Shape from './Shape.js';
 
-import { rewriteTags } from '@jsxcad/geometry';
-import { toTagsFromName } from '@jsxcad/algorithm-material';
+import { hasMaterial } from '@jsxcad/geometry';
 
 export const material = Shape.chainable(
-  (name) => (shape) =>
-    Shape.fromGeometry(
-      rewriteTags(toTagsFromName(name), [], shape.toGeometry())
-    )
+  (name) => (shape) => Shape.fromGeometry(hasMaterial(shape.toGeometry(), name))
 );
 
 Shape.registerMethod('material', material);

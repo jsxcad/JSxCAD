@@ -9,6 +9,7 @@ import {
   isTypeVoid,
 } from './tagged/type.js';
 
+import { hasMaterial } from './hasMaterial.js';
 import { linearize } from './tagged/linearize.js';
 import { replacer } from './tagged/visit.js';
 import { taggedGroup } from './tagged/taggedGroup.js';
@@ -34,7 +35,7 @@ export const cut = (geometry, geometries, open = false) => {
   const outputs = cutWithCgal(inputs, count, open);
   const ghosts = [];
   for (let nth = count; nth < inputs.length; nth++) {
-    ghosts.push(hasTypeGhost(inputs[nth]));
+    ghosts.push(hasMaterial(hasTypeGhost(inputs[nth]), 'ghost'));
   }
   deletePendingSurfaceMeshes();
   return taggedGroup(

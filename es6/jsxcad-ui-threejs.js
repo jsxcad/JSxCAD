@@ -619,13 +619,7 @@ const merge = async (properties, parameters) => {
 };
 
 const setMaterial = async (definitions, tags, parameters) => {
-  let threejsMaterial;
-  if (tags.includes('type:ghost')) {
-    // FIX: This is ugly.
-    threejsMaterial = toThreejsMaterialFromTags(['material:rock'], definitions);
-  } else {
-    threejsMaterial = toThreejsMaterialFromTags(tags, definitions);
-  }
+  const threejsMaterial = toThreejsMaterialFromTags(tags, definitions);
   if (threejsMaterial !== undefined) {
     await merge(threejsMaterial, parameters);
     return threejsMaterial;

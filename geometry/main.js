@@ -19,8 +19,6 @@ export const translate = (vector, geometry) =>
 export const scale = (vector, geometry) =>
   transform(fromScaleToTransform(...vector), geometry);
 
-// export { isNotVoid, isVoid } from './tagged/isNotVoid.js';
-
 export { rewrite, visit } from './tagged/visit.js';
 
 export { allTags } from './tagged/allTags.js';
@@ -59,24 +57,18 @@ export {
 export { fuse } from './fuse.js';
 export { generateLowerEnvelope } from './generateLowerEnvelope.js';
 export { generateUpperEnvelope } from './generateUpperEnvelope.js';
-// export { getAnyNonVoidSurfaces } from './tagged/getAnyNonVoidSurfaces.js';
 export { getAnySurfaces } from './tagged/getAnySurfaces.js';
 export { getItems } from './tagged/getItems.js';
 export { getInverseMatrices } from './tagged/getInverseMatrices.js';
 export { getLayouts } from './tagged/getLayouts.js';
 export { getLeafs } from './tagged/getLeafs.js';
 export { getLeafsIn } from './tagged/getLeafsIn.js';
-// export { getNonVoidGraphs } from './tagged/getNonVoidGraphs.js';
-// export { getNonVoidItems } from './tagged/getNonVoidItems.js';
-// export { getNonVoidPolygonsWithHoles } from './tagged/getNonVoidPolygonsWithHoles.js';
-// export { getNonVoidPlans } from './tagged/getNonVoidPlans.js';
-// export { getNonVoidPoints } from './tagged/getNonVoidPoints.js';
-// export { getNonVoidSegments } from './tagged/getNonVoidSegments.js';
 export { getGraphs } from './tagged/getGraphs.js';
 export { getPlans } from './tagged/getPlans.js';
 export { getPoints } from './tagged/getPoints.js';
 export { getTags } from './tagged/getTags.js';
 export { grow } from './grow.js';
+export { hasMaterial } from './hasMaterial.js';
 export { hash } from './tagged/hash.js';
 export { involute } from './involute.js';
 export { fill } from './fill.js';

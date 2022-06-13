@@ -99,7 +99,8 @@ Pressure Angle makes the tip sharper or blunter
 const planetaryDesign1 = Arc(44)
   .ez(-4)
   .as('hoop')
-  .fitTo(Octagon(42).ez(-2, -4));
+  .fitTo(Octagon(42).ez(-2, -4))
+  .clean();
 ```
 
 ```JavaScript
@@ -145,7 +146,8 @@ const ring = Arc(50)
   .gridView()
   .md(
     `We simulate the gear motion to cut a single tooth, then rotate it around.`
-  );
+  )
+  .clean();
 ```
 
 ![Image](gear.md.5.png)
@@ -171,7 +173,8 @@ const solar = Arc(20)
   .gridView()
   .md(
     `We simulate the gear motion to cut a single tooth, then rotate it around.`
-  );
+  )
+  .clean();
 ```
 
 ![Image](gear.md.6.png)
@@ -188,7 +191,8 @@ const rack = Box(20, Math.PI)
   )
   .y(seq((a) => a * Math.PI, { to: 10 }))
   .gridView()
-  .md(`We can do the same thing to cut a rack.`);
+  .md(`We can do the same thing to cut a rack.`)
+  .clean();
 ```
 
 ![Image](gear.md.7.png)
@@ -201,7 +205,8 @@ const planetaryDesign2 = planetaryDesign1
   .and(ring.clip(Octagon(42)).ez(-2))
   .cut(Arc(24).ez(-2, -4))
   .color('blue')
-  .as('ring');
+  .as('ring')
+  .clean();
 ```
 
 ```JavaScript
@@ -215,17 +220,18 @@ const planetaryDesign3 = planetaryDesign2
       .x(12)
       .rz(1 / 4, 2 / 4, 3 / 4, 4 / 4)
   )
+  .clean();
 ```
 
 ```JavaScript
 const planetaryDesign4a =
-    solar
-      .ez(-2);
+  solar
+    .ez(-2);
 ```
 
 ```JavaScript
 const planetaryDesign4b = planetaryDesign4a
-      .and(Arc(23.5).ez(-2, -4))
+  .and(Arc(23.5).ez(-2, -4))
 ```
 
 ```JavaScript
