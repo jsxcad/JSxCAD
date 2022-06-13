@@ -1,10 +1,10 @@
 import { identity, withAabbTreeQuery } from '@jsxcad/algorithm-cgal';
+import { isSegments, isTypeGhost } from './type.js';
 
 import KdBush from 'kdbush';
 import { computeHash } from '@jsxcad/sys';
 import { eachSegment } from '../eachSegment.js';
 import { fuse } from '../fuse.js';
-import { getNonVoidSegments } from './getNonVoidSegments.js';
 import { inset } from '../inset.js';
 import { linearize } from './linearize.js';
 import { measureBoundingBox } from '../measureBoundingBox.js';
@@ -151,7 +151,10 @@ export const computeToolpath = (
 
     // Grooves
     // FIX: These should be sectioned segments.
-    for (const { matrix, segments } of getNonVoidSegments(concreteGeometry)) {
+    for (const { matrix, segments } of linearize(
+      concreteGeometry,
+      (geometry) => isSegments(geometry) && isTypeGhost(geometry)
+    )) {
       for (const [localStart, localEnd] of segments) {
         const start = transformCoordinate(localStart, matrix);
         const end = transformCoordinate(localEnd, matrix);

@@ -53,3 +53,9 @@ export const hasNotTypeWire = hasNotType(typeWire);
 export const hasTypeWire = hasType(typeWire);
 export const isNotTypeWire = isNotType(typeWire);
 export const isTypeWire = isType(typeWire);
+
+// Structural types.
+export const isGraph = ({ type }) => type === 'graph';
+export const isPolygonsWithHoles = ({ type }) => type === 'polygonsWithHoles';
+export const isSegments = ({ type }) => type === 'segments';
+export const isPoints = ({ type }) => type === 'points';

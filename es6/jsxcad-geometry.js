@@ -200,6 +200,7 @@ const hasNotTypeWire = hasNotType(typeWire);
 const hasTypeWire = hasType(typeWire);
 const isNotTypeWire = isNotType(typeWire);
 const isTypeWire = isType(typeWire);
+const isSegments = ({ type }) => type === 'segments';
 
 const registry = new Map();
 
@@ -922,31 +923,6 @@ const fuse = (geometry) => {
   return taggedGroup({}, ...outputs);
 };
 
-const isNotVoid = ({ tags }) => {
-  return tags === undefined || tags.includes('type:void') === false;
-};
-
-const eachNonVoidItem = (geometry, op) => {
-  const walk = (geometry, descend) => {
-    // FIX: Sketches aren't real either -- but this is a bit unclear.
-    if (geometry.type !== 'sketch' && isNotVoid(geometry)) {
-      op(geometry);
-      descend();
-    }
-  };
-  visit(geometry, walk);
-};
-
-const getNonVoidSegments = (geometry) => {
-  const segmentsets = [];
-  eachNonVoidItem(geometry, (item) => {
-    if (item.type === 'segments') {
-      segmentsets.push(item);
-    }
-  });
-  return segmentsets;
-};
-
 const filter$q = (geometry) =>
   ['graph', 'polygonsWithHoles'].includes(geometry.type) &&
   isNotTypeGhost(geometry);
@@ -1137,7 +1113,10 @@ const computeToolpath = (
 
     // Grooves
     // FIX: These should be sectioned segments.
-    for (const { matrix, segments } of getNonVoidSegments(concreteGeometry)) {
+    for (const { matrix, segments } of linearize(
+      concreteGeometry,
+      (geometry) => isSegments(geometry) && isTypeGhost(geometry)
+    )) {
       for (const [localStart, localEnd] of segments) {
         const start = transformCoordinate(localStart, matrix);
         const end = transformCoordinate(localEnd, matrix);
@@ -2392,6 +2371,10 @@ const toPoints = (geometry) => {
   const points = [];
   eachPoint(geometry, (point) => points.push(point));
   return taggedPoints({}, points);
+};
+
+const isNotVoid = ({ tags }) => {
+  return tags === undefined || tags.includes('type:void') === false;
 };
 
 Error.stackTraceLimit = Infinity;
