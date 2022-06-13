@@ -58,24 +58,21 @@ const ring = Arc(50)
   .hull(self(), Point())
   .cut(Arc(30))
   .cut(
-    Group(
-      seq(
-        (a) =>
-          planetaryFootprint
-            .rz(a / -8)
-            .y(12)
-            .rz(a / 32)
-            .void(),
-        { from: -1, by: 1 / 16, to: 1 }
-      )
+    seq(
+      (a) =>
+        planetaryFootprint
+          .rz(a / -8)
+          .y(12)
+          .rz(a / 32),
+      { from: -1, by: 1 / 16, to: 1 }
     )
   )
+  .clean()
   .rz(seq({ by: 1 / 32 }))
   .gridView()
   .md(
     `We simulate the gear motion to cut a single tooth, then rotate it around.`
-  )
-  .clean();
+  );
 
 const solar = Arc(20)
   .hasAngle(-1 / 30, 1 / 30)
@@ -90,6 +87,7 @@ const solar = Arc(20)
       { from: -1, by: 1 / 16, to: 1 }
     )
   )
+  .clean()
   .rz(seq({ by: 1 / 16 }))
   .fuse()
   .gridView()
