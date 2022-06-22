@@ -900,17 +900,7 @@ const parseRational = (text) => {
   if (text === '') {
     return 0;
   }
-  let [numerator, denominator = '1'] = text.split('/');
-  while (true) {
-    const value = parseInt(numerator) / parseInt(denominator);
-    if (!isFinite(value)) {
-      // console.log(`Non-finite: ${numerator}/${denominator}`);
-      numerator = numerator.substring(0, numerator.length - 1);
-      denominator = denominator.substring(0, denominator.length - 1);
-      continue;
-    }
-    return value;
-  }
+  return parseInt(text);
 };
 
 const buildMeshes = async ({
@@ -1074,7 +1064,9 @@ const buildMeshes = async ({
         let vertexCount = tokens[p++];
         if (vertexCount !== 3) {
           throw Error(
-            `Faces must be triangles: vertexCount=${vertexCount} p=${p} serial=${serializedSurfaceMesh}`
+            `Faces must be triangles: vertexCount=${vertexCount} p=${p} ps=${tokens
+              .slice(p, p + 10)
+              .join(' ')} serial=${serializedSurfaceMesh}`
           );
         }
         const triangle = [];

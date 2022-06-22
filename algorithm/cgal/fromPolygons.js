@@ -3,16 +3,16 @@ import { fromCgalGeometry, withCgalGeometry } from './cgalGeometry.js';
 
 import { ErrorZeroThickness } from './error.js';
 
-export const fromPolygons = (jsPolygons) => {
+export const fromPolygons = (jsPolygons, close = false, tolerance = 0.001) => {
   return withCgalGeometry([], (cgalGeometry, g) => {
-    const status = g.FromPolygons(cgalGeometry, (triples, polygons) => {
+    const status = g.FromPolygons(cgalGeometry, close, (triples, polygons) => {
       let index = 0;
       // FIX: Prefer exactPoints
       for (const { points } of jsPolygons) {
         // FIX: Clean this up and use exactPoints.
         const polygon = new g.Polygon();
         for (const [x, y, z] of points) {
-          g.addTriple(triples, x, y, z);
+          g.addTriple(triples, x, y, z, tolerance);
           g.Polygon__push_back(polygon, index++);
         }
         polygons.push_back(polygon);

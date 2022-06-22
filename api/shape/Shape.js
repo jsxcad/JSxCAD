@@ -174,7 +174,7 @@ Shape.fromPoint = (point, context) =>
 Shape.fromPoints = (points, context) =>
   fromGeometry(taggedPoints({}, points), context);
 Shape.fromPolygons = (polygons, context) =>
-  fromGeometry(fromPolygons({}, polygons), context);
+  fromGeometry(fromPolygons(polygons), context);
 
 Shape.registerMethod = registerShapeMethod;
 

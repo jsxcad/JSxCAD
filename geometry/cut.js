@@ -16,8 +16,9 @@ import { taggedGroup } from './tagged/taggedGroup.js';
 import { toConcreteGeometry } from './tagged/toConcreteGeometry.js';
 
 const filterTargets = (geometry) =>
-  ['graph', 'polygonsWithHoles', 'segments'].includes(geometry.type) &&
-  isNotTypeGhost(geometry);
+  ['graph', 'polygonsWithHoles', 'segments', 'points'].includes(
+    geometry.type
+  ) && isNotTypeGhost(geometry);
 
 const filterRemoves = (geometry) =>
   filterTargets(geometry) &&

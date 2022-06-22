@@ -2,7 +2,7 @@ import { Shape } from './Shape.js';
 import { getLeafs } from '@jsxcad/geometry';
 
 export const tags = Shape.chainable(
-  (namespace = 'user', op = (tags, shape) => tags) =>
+  (namespace = 'user', op = (tags) => (shape) => shape.md(`tags: ${tags}`)) =>
     (shape) => {
       const prefix = `${namespace}:`;
       const collected = [];
@@ -13,7 +13,7 @@ export const tags = Shape.chainable(
           }
         }
       }
-      return op(collected, shape);
+      return op(collected)(shape);
     }
 );
 

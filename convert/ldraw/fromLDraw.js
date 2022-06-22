@@ -1,8 +1,12 @@
 import {
   fromPolygons,
+  read as readGeometry,
   rotateX,
   scale,
+  taggedGroup,
   transformCoordinate,
+  transform as transformGeometry,
+  write as writeGeometry,
 } from '@jsxcad/geometry';
 
 import { read } from '@jsxcad/sys';
@@ -21,34 +25,45 @@ const URL_PREFIX = 'https://jsxcad.js.org/ldraw/ldraw';
 
 const readPart = async (part, { allowFetch = true } = {}) => {
   part = part.toLowerCase().replace(/\\/, '/');
+  const maybe = (type) => type;
   if (part.match(/^u[0-9]{4}/)) {
-    return read(`cache/ldraw/part/${part}`, {
+    return {
+      path: `cache/ldraw/part/${part}`,
       sources: [`${URL_PREFIX}/parts/${part}`],
-    });
+      type: maybe('part'),
+    };
   } else if (part.match(/^[0-9]{3}/)) {
-    return read(`cache/ldraw/part/${part}`, {
+    return {
+      path: `cache/ldraw/part/${part}`,
       sources: [`${URL_PREFIX}/parts/${part}`],
-    });
+      type: maybe('part'),
+    };
   } else if (part.match(/^s[/]/)) {
-    return read(`cache/ldraw/part/${part}`, {
+    return {
+      path: `cache/ldraw/part/${part}`,
       sources: [`${URL_PREFIX}/parts/${part}`],
-    });
+      type: maybe('subpart'),
+    };
   } else if (part.match(/^48[/]/)) {
-    return read(`cache/ldraw/primitive/${part}`, {
+    return {
+      path: `cache/ldraw/primitive/${part}`,
       sources: [`${URL_PREFIX}/p/${part}`],
-    });
+      type: maybe('primitive'),
+    };
   } else {
-    return read(`cache/ldraw/primitive/${part}`, {
+    return {
+      path: `cache/ldraw/primitive/${part}`,
       sources: [`${URL_PREFIX}/p/48/${part}`, `${URL_PREFIX}/p/${part}`],
-    });
+      type: maybe('primitive'),
+    };
   }
 };
 
 const fromDataToCode = (data) => {
   const code = [];
   const source = new TextDecoder('utf8').decode(data);
-  for (let line of source.split('\r\n')) {
-    let args = line.replace(/^\s+/, '').split(/\s+/);
+  for (let line of source.split(/\r?\n/)) {
+    let args = line.toLowerCase().replace(/^\s+/, '').split(/\s+/);
     code.push(args);
   }
   return { type: source.type, code: code, name: source.name };
@@ -59,24 +74,78 @@ const ldu = (text) => Math.round(flt(text) * RESOLUTION) / RESOLUTION;
 
 const fromPartToPolygons = async (
   part,
-  { allowFetch = true, invert = false, stack = [] }
+  {
+    allowFetch = true,
+    invert = false,
+    stack = [],
+    top = false,
+    override,
+    rebuild,
+  }
 ) => {
-  const data = await readPart(part, { allowFetch });
-  const code = fromDataToCode(data);
-  return fromCodeToPolygons(code, { allowFetch, invert, stack });
+  if (override) {
+    console.log(`QQ/part: ${part}`);
+  }
+  if (override && override[part]) {
+    return override[part];
+  }
+  const { path, sources, type } = await readPart(part, { allowFetch });
+  if (!rebuild && type === 'part') {
+    const geometry = await readGeometry(`cache/ldraw/geometry/${part}`);
+    if (geometry) {
+      console.log(`fromLDraw: Using cached ${part}`);
+      return { content: [geometry] };
+    }
+  }
+  const data = read(path, { sources });
+  const code = fromDataToCode(await data);
+  if (type === 'part') {
+    console.log(`fromLDraw: Computing ${part}`);
+  }
+  const { polygons, content } = await fromCodeToPolygons(code, {
+    allowFetch,
+    invert,
+    stack,
+    override,
+    rebuild,
+  });
+  if (type === 'part' /* && top */) {
+    if (polygons.length > 0) {
+      const geometry = fromPolygons(polygons, {
+        tags: [`ldraw:${part}`],
+        tolerance: 0.1,
+        close: false,
+      });
+      await writeGeometry(`cache/ldraw/geometry/${part}`, geometry);
+      console.log(`fromLDraw: Saving geometry for ${part}`);
+      return { content: [geometry] };
+    } else {
+      return { content };
+    }
+  } else {
+    return { content, polygons };
+  }
 };
 
 const fromCodeToPolygons = async (
   code,
-  { allowFetch = true, invert = false, stack = [] }
+  {
+    allowFetch = true,
+    invert = false,
+    stack = [],
+    top = false,
+    override,
+    rebuild,
+  }
 ) => {
-  let polygons = [];
-  let direction = 'CCW';
+  const content = [];
+  const polygons = [];
+  let direction = 'ccw';
   let invertNext = 0;
 
   function Direction() {
     if (invert) {
-      return { CCW: 'CW', CW: 'CCW' }[direction];
+      return { ccw: 'cw', cw: 'ccW' }[direction];
     } else {
       return direction;
     }
@@ -87,22 +156,22 @@ const fromCodeToPolygons = async (
       case 0: {
         // meta
         switch (args[1]) {
-          case 'BFC':
+          case 'bfc':
             switch (args[2]) {
-              case 'CERTIFY': {
+              case 'certify': {
                 switch (args[3]) {
-                  case 'CW': {
-                    direction = 'CW';
+                  case 'cw': {
+                    direction = 'cw';
                     break;
                   }
-                  case 'CCW': {
-                    direction = 'CCW';
+                  case 'ccw': {
+                    direction = 'ccw';
                     break;
                   }
                 }
                 break;
               }
-              case 'INVERTNEXT': {
+              case 'invertnext': {
                 invertNext = 2;
                 break;
               }
@@ -137,16 +206,36 @@ const fromCodeToPolygons = async (
           ldu(z),
           1.0,
         ];
-        polygons.push(
-          ...transform(
-            matrix,
-            await fromPartToPolygons(subPart, {
-              invert: subInvert,
-              stack,
-              allowFetch,
-            })
-          )
-        );
+
+        if (a < 0) {
+          subInvert = !subInvert;
+        }
+        if (e < 0) {
+          subInvert = !subInvert;
+        }
+        if (i < 0) {
+          subInvert = !subInvert;
+        }
+
+        const { polygons: partPolygons, content: partContent } =
+          await fromPartToPolygons(subPart, {
+            invert: subInvert,
+            stack,
+            allowFetch,
+            top,
+            override,
+            rebuild,
+          });
+        if (partPolygons) {
+          polygons.push(...transform(matrix, partPolygons));
+        }
+        if (partContent) {
+          content.push(
+            ...partContent.map((geometry) =>
+              transformGeometry(matrix, geometry)
+            )
+          );
+        }
         stack.pop();
         break;
       }
@@ -157,15 +246,15 @@ const fromCodeToPolygons = async (
       case 3: {
         // triangle
         let [, , x1, y1, z1, x2, y2, z2, x3, y3, z3] = args;
-        let polygon = [
+        let p = [
           [ldu(x1), ldu(y1), ldu(z1)],
           [ldu(x2), ldu(y2), ldu(z2)],
           [ldu(x3), ldu(y3), ldu(z3)],
         ];
-        if (Direction() === 'CW') {
-          polygons.push({ points: polygon.reverse() });
+        if (Direction() === 'cw') {
+          polygons.push({ points: [p[2], p[1], p[0]] });
         } else {
-          polygons.push({ points: polygon });
+          polygons.push({ points: [p[0], p[1], p[2]] });
         }
         break;
       }
@@ -178,12 +267,12 @@ const fromCodeToPolygons = async (
           [ldu(x3), ldu(y3), ldu(z3)],
           [ldu(x4), ldu(y4), ldu(z4)],
         ];
-        if (Direction() === 'CW') {
+        if (Direction() === 'cw') {
           polygons.push({ points: [p[3], p[1], p[0]] });
-          polygons.push({ points: [p[1], p[3], p[2]] });
+          polygons.push({ points: [p[3], p[2], p[1]] });
         } else {
           polygons.push({ points: [p[0], p[1], p[3]] });
-          polygons.push({ points: [p[2], p[3], p[1]] });
+          polygons.push({ points: [p[1], p[2], p[3]] });
         }
         break;
       }
@@ -191,23 +280,66 @@ const fromCodeToPolygons = async (
         // optional line
         break;
       }
+      default: {
+        // console.log(`QQ/unknown op ${args.join(' ')}`);
+        break;
+      }
     }
     if (invertNext > 0) {
       invertNext -= 1;
     }
   }
-  return polygons;
+  // console.log(`QQ/return polygons=${polygons.length} content=${content ? content.length : 0}`);
+  return { polygons, content };
 };
 
-export const fromLDrawPart = async (part, { allowFetch = true } = {}) => {
-  const polygons = await fromPartToPolygons(`${part}.dat`, { allowFetch });
-  const geometry = fromPolygons({}, polygons);
-  return rotateX(-90, scale([0.4, 0.4, 0.4], geometry));
+export const fromLDrawPart = async (
+  part,
+  { allowFetch = true, override, rebuild = false } = {}
+) => {
+  console.log(
+    `================================================================================`
+  );
+  const { content = [], polygons } = await fromPartToPolygons(`${part}.dat`, {
+    allowFetch,
+    top: true,
+    override,
+    rebuild,
+  });
+  if (polygons) {
+    content.push(
+      fromPolygons(polygons, {
+        tags: ['ldraw:data'],
+        tolerance: 0.1,
+        close: false,
+      })
+    );
+  }
+  return rotateX(-1 / 4, scale([0.4, 0.4, 0.4], taggedGroup({}, ...content)));
 };
 
-export const fromLDraw = async (data, { allowFetch = true } = {}) => {
+export const fromLDraw = async (
+  data,
+  { allowFetch = true, override, rebuild = false } = {}
+) => {
+  console.log(
+    `================================================================================`
+  );
   const code = fromDataToCode(data);
-  const polygons = await fromCodeToPolygons(code, { allowFetch });
-  const geometry = fromPolygons(polygons);
-  return rotateX(-90, scale([0.4, 0.4, 0.4], geometry));
+  const { content = [], polygons } = await fromCodeToPolygons(code, {
+    allowFetch,
+    top: true,
+    override,
+    rebuild,
+  });
+  if (polygons) {
+    content.push(
+      fromPolygons(polygons, {
+        tags: ['ldraw:data'],
+        tolerance: 0.1,
+        close: false,
+      })
+    );
+  }
+  return rotateX(-1 / 4, scale([0.4, 0.4, 0.4], taggedGroup({}, ...content)));
 };

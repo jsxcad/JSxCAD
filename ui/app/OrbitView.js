@@ -156,6 +156,7 @@ export class OrbitView extends React.PureComponent {
       if (!object) {
         return;
       }
+      console.log(`QQ/object/userData: ${JSON.stringify(object.userData)}`);
       if (object.userData.onClick) {
         return object.userData.onClick({ event });
       } else if (onClick) {

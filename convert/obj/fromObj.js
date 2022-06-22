@@ -15,7 +15,7 @@ export const fromObjSync = (data) => {
       });
       polygons.push({ points: polygon });
     }
-    group.push(fromPolygons({}, polygons));
+    group.push(fromPolygons(polygons));
   }
   return taggedGroup({}, ...group);
 };

@@ -168,7 +168,7 @@ Shape.fromPoint = (point, context) =>
 Shape.fromPoints = (points, context) =>
   fromGeometry(taggedPoints({}, points), context);
 Shape.fromPolygons = (polygons, context) =>
-  fromGeometry(fromPolygons({}, polygons), context);
+  fromGeometry(fromPolygons(polygons), context);
 
 Shape.registerMethod = registerShapeMethod;
 
@@ -972,7 +972,7 @@ Shape.registerMethod('bend', bend);
 
 // Is this better than s.get('part:*').tags('part')?
 const billOfMaterials = Shape.chainable(
-  (op = (list) => list) =>
+  (op = (list) => (shape) => list) =>
     (shape) =>
       shape.get('part:*').tags('part', op)
 );
@@ -4476,7 +4476,7 @@ const table = Shape.chainable((rows, columns, ...cells) => (shape) => {
 Shape.registerMethod('table', table);
 
 const tags = Shape.chainable(
-  (namespace = 'user', op = (tags, shape) => tags) =>
+  (namespace = 'user', op = (tags) => (shape) => shape.md(`tags: ${tags}`)) =>
     (shape) => {
       const prefix = `${namespace}:`;
       const collected = [];
@@ -4487,7 +4487,7 @@ const tags = Shape.chainable(
           }
         }
       }
-      return op(collected, shape);
+      return op(collected)(shape);
     }
 );
 

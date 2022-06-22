@@ -1,4 +1,4 @@
-import { toTriangleArray } from '@jsxcad/geometry';
+import { eachTriangle } from '@jsxcad/geometry';
 
 const X = 0;
 const Y = 1;
@@ -118,7 +118,7 @@ const compareTriangles = (t1, t2) => {
 
 export const toStl = async (geometry, { tolerance = 0.001 } = {}) => {
   const triangles = [];
-  for (const [a, b, c] of toTriangleArray(await geometry)) {
+  eachTriangle(await geometry, ([a, b, c]) => {
     triangles.push(
       orderVertices([
         roundVertex(a, tolerance),
@@ -126,7 +126,7 @@ export const toStl = async (geometry, { tolerance = 0.001 } = {}) => {
         roundVertex(c, tolerance),
       ])
     );
-  }
+  });
   triangles.sort(compareTriangles);
   const output = `solid JSxCAD\n${convertToFacets(
     triangles
