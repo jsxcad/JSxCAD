@@ -5,8 +5,11 @@ import {
 
 import { taggedGroup } from './tagged/taggedGroup.js';
 
-export const fromPolygons = (options, polygons) => {
-  const outputs = fromPolygonsWithCgal(polygons);
+export const fromPolygons = (
+  polygons,
+  { tags = [], close = false, tolerance = 0.001 } = {}
+) => {
+  const outputs = fromPolygonsWithCgal(polygons, close, tolerance);
   deletePendingSurfaceMeshes();
-  return taggedGroup({}, ...outputs);
+  return taggedGroup({}, ...outputs.map((output) => ({ ...output, tags })));
 };

@@ -2,7 +2,7 @@ import Shape from './Shape.js';
 
 // Is this better than s.get('part:*').tags('part')?
 export const billOfMaterials = Shape.chainable(
-  (op = (list) => list) =>
+  (op = (list) => (shape) => list) =>
     (shape) =>
       shape.get('part:*').tags('part', op)
 );

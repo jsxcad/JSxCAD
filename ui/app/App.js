@@ -2,12 +2,14 @@
 
 import * as PropTypes from 'prop-types';
 
+/*
 import {
   appendViewGroupCode,
   deleteViewGroupCode,
   extractViewGroupCode,
   rewriteViewGroupOrient,
 } from '@jsxcad/compiler';
+*/
 
 import {
   askService,
@@ -49,7 +51,7 @@ import Row from 'react-bootstrap/Row';
 import Table from 'react-bootstrap/Table';
 import { animationFrame } from './schedule.js';
 import { execute } from '@jsxcad/api';
-import { getWorldPosition } from '@jsxcad/ui-threejs';
+// import { getWorldPosition } from '@jsxcad/ui-threejs';
 
 const ensureFile = async (file, url, { workspace } = {}) => {
   const sources = [];
@@ -539,10 +541,12 @@ class App extends React.Component {
       }
       const model = FlexLayout.Model.fromJson(persistentModelConfig);
       await this.updateState({ model, WorkspaceOpenPaths });
+      /*
       // Now that layout is in place, run the notebooks we just loaded.
       for (const path of WorkspaceOpenPaths) {
         await this.Notebook.run(path);
       }
+      */
     };
 
     this.Notebook = {};
@@ -804,6 +808,7 @@ class App extends React.Component {
     this.View.jogPendingUpdate = new Map();
 
     this.View.jog = async (update) => {
+      /*
       const { object, path } = update;
 
       if (object) {
@@ -839,6 +844,7 @@ class App extends React.Component {
       };
 
       this.View.scheduleOperation({ path, operation });
+      */
     };
 
     this.View.keydown = async ({
@@ -851,6 +857,7 @@ class App extends React.Component {
       up,
       placeObject,
     }) => {
+      /*
       switch (event.key) {
         case 'Backspace':
         case 'Delete': {
@@ -969,6 +976,7 @@ class App extends React.Component {
           return false;
         }
       }
+    */
     };
 
     this.View.move = async ({ path, position, up, target, zoom }) => {

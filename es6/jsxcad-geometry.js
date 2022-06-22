@@ -1468,8 +1468,9 @@ const convexHull = (geometries) => {
 };
 
 const filterTargets$1 = (geometry) =>
-  ['graph', 'polygonsWithHoles', 'segments'].includes(geometry.type) &&
-  isNotTypeGhost(geometry);
+  ['graph', 'polygonsWithHoles', 'segments', 'points'].includes(
+    geometry.type
+  ) && isNotTypeGhost(geometry);
 
 const filterRemoves = (geometry) =>
   filterTargets$1(geometry) &&
@@ -1640,10 +1641,13 @@ const fresh = (geometry) => {
   return fresh;
 };
 
-const fromPolygons = (options, polygons) => {
-  const outputs = fromPolygons$1(polygons);
+const fromPolygons = (
+  polygons,
+  { tags = [], close = false, tolerance = 0.001 } = {}
+) => {
+  const outputs = fromPolygons$1(polygons, close, tolerance);
   deletePendingSurfaceMeshes();
-  return taggedGroup({}, ...outputs);
+  return taggedGroup({}, ...outputs.map((output) => ({ ...output, tags })));
 };
 
 const filter$i = (geometry) =>
@@ -2373,10 +2377,6 @@ const toPoints = (geometry) => {
   return taggedPoints({}, points);
 };
 
-const isNotVoid = ({ tags }) => {
-  return tags === undefined || tags.includes('type:void') === false;
-};
-
 Error.stackTraceLimit = Infinity;
 
 const toTriangles = ({ tags }, geometry) => {
@@ -2394,6 +2394,9 @@ const toTriangles = ({ tags }, geometry) => {
 const toTriangleArray = (geometry) => {
   const triangles = [];
   const op = (geometry, descend) => {
+    if (isTypeGhost(geometry)) {
+      return;
+    }
     const { matrix = identity(), tags, type } = geometry;
     const transformTriangles = (triangles) =>
       triangles.map((triangle) =>
@@ -2401,19 +2404,15 @@ const toTriangleArray = (geometry) => {
       );
     switch (type) {
       case 'graph': {
-        if (isNotVoid(geometry)) {
-          triangles.push(
-            ...transformTriangles(
-              toTriangles({ tags }, geometry).triangles
-            )
-          );
-        }
+        triangles.push(
+          ...transformTriangles(
+            toTriangles({ tags }, geometry).triangles
+          )
+        );
         break;
       }
       case 'triangles': {
-        if (isNotVoid(geometry)) {
-          triangles.push(...transformTriangles(geometry.triangles));
-        }
+        triangles.push(...transformTriangles(geometry.triangles));
         break;
       }
       case 'polygonsWithHoles':

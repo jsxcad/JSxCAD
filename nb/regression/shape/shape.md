@@ -252,6 +252,8 @@ Box(1)
   });
 ```
 
+tags:
+
 ```JavaScript
 Box(5, 5, 5).gridView(34);
 ```

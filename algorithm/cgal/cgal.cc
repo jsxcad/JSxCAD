@@ -98,6 +98,7 @@
 
 #include <array>
 #include <boost/algorithm/string.hpp>
+#include <boost/algorithm/string/replace.hpp>
 #include <boost/algorithm/string/split.hpp>
 #include <boost/range/adaptor/reversed.hpp>
 #include <queue>
@@ -220,8 +221,9 @@ FT compute_translation_offset(double value) {
   return CGAL::simplest_rational_in_interval<FT>(value - 0.001, value + 0.001);
 }
 
-FT compute_approximate_point_value(double value) {
-  return CGAL::simplest_rational_in_interval<FT>(value - 0.001, value + 0.001);
+FT compute_approximate_point_value(double value, double tolerance = 0.001) {
+  return CGAL::simplest_rational_in_interval<FT>(value - tolerance,
+                                                 value + tolerance);
 }
 
 FT compute_approximate_point_value(FT ft) {
@@ -824,8 +826,16 @@ void demesh(Surface_mesh& mesh) {
       mesh, stop, CGAL::parameters::get_cost(cost).get_placement(placement));
 }
 
-void addTriple(Triples* triples, double x, double y, double z) {
-  triples->emplace_back(Triple{x, y, z});
+void addTriple(Triples* triples, double x, double y, double z,
+               double tolerance = 0) {
+  if (tolerance > 0) {
+    FT exact_x = compute_approximate_point_value(x, tolerance);
+    FT exact_y = compute_approximate_point_value(y, tolerance);
+    FT exact_z = compute_approximate_point_value(z, tolerance);
+    triples->emplace_back(Triple{exact_x, exact_y, exact_z});
+  } else {
+    triples->emplace_back(Triple{x, y, z});
+  }
 }
 
 void fillQuadruple(Quadruple* q, double x, double y, double z, double w) {
@@ -2237,7 +2247,7 @@ std::shared_ptr<Surface_mesh> DeserializeMesh(
       std::size_t vertex;
       s >> vertex;
       if (vertex > number_of_vertices) {
-        std::cout << "Vertex " << vertex << " out of range "
+        std::cout << "DeserializeMesh: Vertex " << vertex << " out of range "
                   << number_of_vertices << std::endl;
       }
       vertices.push_back(Vertex_index(vertex));
@@ -2247,15 +2257,15 @@ std::shared_ptr<Surface_mesh> DeserializeMesh(
   return std::shared_ptr<Surface_mesh>(mesh);
 }
 
-std::string SerializeMesh(std::shared_ptr<const Surface_mesh> mesh) {
-  // CHECK: We assume the mesh is compact.
+std::string SerializeMesh(std::shared_ptr<const Surface_mesh> input_mesh) {
+  const Surface_mesh& mesh = *input_mesh;
   std::ostringstream s;
-  size_t number_of_vertices = mesh->number_of_vertices();
+  size_t number_of_vertices = mesh.number_of_vertices();
   s << number_of_vertices << "\n";
   std::unordered_map<Vertex_index, size_t> vertex_map;
   size_t vertex_count = 0;
-  for (const Vertex_index vertex : mesh->vertices()) {
-    const Point& p = mesh->point(vertex);
+  for (const Vertex_index vertex : mesh.vertices()) {
+    const Point& p = mesh.point(vertex);
     write_point(p, s);
     s << " ";
     write_approximate_point(p, s);
@@ -2263,29 +2273,29 @@ std::string SerializeMesh(std::shared_ptr<const Surface_mesh> mesh) {
     vertex_map[vertex] = vertex_count++;
   }
   s << "\n";
-  s << mesh->number_of_faces() << "\n";
-  for (const Face_index facet : mesh->faces()) {
-    const auto& start = mesh->halfedge(facet);
+  s << mesh.number_of_faces() << "\n";
+  for (const Face_index facet : mesh.faces()) {
+    const auto& start = mesh.halfedge(facet);
     std::size_t edge_count = 0;
     {
       Halfedge_index edge = start;
       do {
         edge_count++;
-        edge = mesh->next(edge);
+        edge = mesh.next(edge);
       } while (edge != start);
     }
     s << edge_count;
     {
       Halfedge_index edge = start;
       do {
-        std::size_t vertex(vertex_map[mesh->source(edge)]);
+        std::size_t vertex(vertex_map[mesh.source(edge)]);
         if (vertex >= number_of_vertices) {
-          std::cout << "Vertex " << vertex << " out of range "
+          std::cout << "SerializeMesh: Vertex " << vertex << " out of range "
                     << number_of_vertices << std::endl;
           return "<invalid>";
         }
         s << " " << vertex;
-        edge = mesh->next(edge);
+        edge = mesh.next(edge);
       } while (edge != start);
     }
     s << "\n";
@@ -2317,6 +2327,8 @@ class Geometry {
   }
 
   int size() const { return size_; }
+
+  void clear() { setSize(0); }
 
   void resize(int size) {
     size_ = size;
@@ -3093,6 +3105,7 @@ int Clip(Geometry* geometry, int targets, bool open) {
 
   geometry->copyInputMeshesToOutputMeshes();
   geometry->copyInputSegmentsToOutputSegments();
+  geometry->copyInputPointsToOutputPoints();
   geometry->transformToAbsoluteFrame();
   geometry->convertPlanarMeshesToPolygons();
   geometry->copyPolygonsWithHolesToGeneralPolygonSets();
@@ -3163,7 +3176,6 @@ int Clip(Geometry* geometry, int targets, bool open) {
             }
           }
         }
-        // TODO: Handle disjunction of surface by volume.
         break;
       }
       case GEOMETRY_SEGMENTS: {
@@ -3187,7 +3199,23 @@ int Clip(Geometry* geometry, int targets, bool open) {
         break;
       }
       case GEOMETRY_POINTS: {
-        // TBD
+        std::vector<Point> in;
+        geometry->points(target).swap(in);
+        std::vector<Point> out;
+        for (int nth = targets; nth < size; nth++) {
+          if (!geometry->is_mesh(nth) || geometry->is_empty_mesh(nth)) {
+            continue;
+          }
+          Side_of_triangle_mesh& on_side = geometry->on_side(nth);
+          for (const Point& point : in) {
+            if (on_side(point) != CGAL::ON_UNBOUNDED_SIDE) {
+              out.push_back(point);
+            }
+          }
+          in.swap(out);
+          out.clear();
+        }
+        geometry->points(target).swap(in);
         break;
       }
       case GEOMETRY_EMPTY: {
@@ -3467,6 +3495,7 @@ int Cut(Geometry* geometry, int targets, bool open) {
   size_t size = geometry->size();
   geometry->copyInputMeshesToOutputMeshes();
   geometry->copyInputSegmentsToOutputSegments();
+  geometry->copyInputPointsToOutputPoints();
   geometry->transformToAbsoluteFrame();
   geometry->convertPlanarMeshesToPolygons();
   geometry->copyPolygonsWithHolesToGeneralPolygonSets();
@@ -3555,7 +3584,23 @@ int Cut(Geometry* geometry, int targets, bool open) {
         break;
       }
       case GEOMETRY_POINTS: {
-        // TBD
+        std::vector<Point> in;
+        geometry->points(target).swap(in);
+        std::vector<Point> out;
+        for (int nth = targets; nth < size; nth++) {
+          if (!geometry->is_mesh(nth) || geometry->is_empty_mesh(nth)) {
+            continue;
+          }
+          Side_of_triangle_mesh& on_side = geometry->on_side(nth);
+          for (const Point& point : in) {
+            if (on_side(point) == CGAL::ON_UNBOUNDED_SIDE) {
+              out.push_back(point);
+            }
+          }
+          in.swap(out);
+          out.clear();
+        }
+        geometry->points(target).swap(in);
         break;
       }
       case GEOMETRY_EMPTY: {
@@ -3876,11 +3921,14 @@ int EachPoint(Geometry* geometry, emscripten::val emit_point) {
 int EachTriangle(Geometry* geometry, emscripten::val emit_point) {
   size_t size = geometry->getSize();
 
+  geometry->copyInputMeshesToOutputMeshes();
+  geometry->transformToAbsoluteFrame();
+
   for (size_t nth = 0; nth < size; nth++) {
     if (!geometry->is_mesh(nth)) {
       continue;
     }
-    const Surface_mesh& mesh = geometry->input_mesh(nth);
+    const Surface_mesh& mesh = geometry->mesh(nth);
     for (const Face_index facet : mesh.faces()) {
       const auto& a = mesh.halfedge(facet);
       const auto& b = mesh.next(a);
@@ -3890,6 +3938,8 @@ int EachTriangle(Geometry* geometry, emscripten::val emit_point) {
       emitPoint(mesh.point(mesh.source(c)), emit_point);
     }
   }
+
+  geometry->clear();
 
   return STATUS_OK;
 }
@@ -4091,30 +4141,61 @@ int Fix(Geometry* geometry, bool remove_self_intersections) {
     if (!geometry->is_mesh(nth)) {
       continue;
     }
+    Surface_mesh& mesh = geometry->mesh(nth);
     if (remove_self_intersections) {
       CGAL::Polygon_mesh_processing::experimental::
-          autorefine_and_remove_self_intersections(geometry->mesh(nth));
+          autorefine_and_remove_self_intersections(mesh);
     }
   }
   return STATUS_OK;
 }
 
-int FromPolygons(Geometry* geometry, emscripten::val fill) {
+int FromPolygons(Geometry* geometry, bool close, emscripten::val fill) {
   Triples triples;
   Polygons polygons;
   // Workaround for emscripten::val() bindings.
   Triples* triples_ptr = &triples;
   Polygons* polygons_ptr = &polygons;
   fill(triples_ptr, polygons_ptr);
-  CGAL::Polygon_mesh_processing::repair_polygon_soup(
-      triples, polygons, CGAL::parameters::geom_traits(Triple_array_traits()));
-  CGAL::Polygon_mesh_processing::orient_polygon_soup(triples, polygons);
   int target = geometry->add(GEOMETRY_MESH);
   Surface_mesh& mesh = geometry->mesh(target);
   geometry->setIdentityTransform(target);
-  CGAL::Polygon_mesh_processing::polygon_soup_to_polygon_mesh(triples, polygons,
-                                                              mesh);
+  Vertex_map vertex_map;
+  for (auto& polygon : polygons) {
+    std::vector<Vertex_index> vertices;
+    for (auto& index : polygon) {
+      // std::cout << "Index: " << index;
+      const Triple& triple = triples[index];
+      const Point point(triple[0], triple[1], triple[2]);
+      // std::cout << " Point: " << point;
+      Vertex_index vertex = ensureVertex(mesh, vertex_map, point);
+      // std::cout << " Vertex: " << vertex << std::endl;
+      vertices.push_back(vertex);
+    }
+    if (mesh.add_face(vertices) == Surface_mesh::null_face()) {
+      // If we couldn't add the face, perhaps it was misoriented -- try
+      // it the other way.
+      std::reverse(vertices.begin(), vertices.end());
+      mesh.add_face(vertices);
+    }
+  }
   assert(CGAL::Polygon_mesh_processing::triangulate_faces(mesh) == true);
+  demesh(mesh);
+  try {
+    Surface_mesh tmp(mesh);
+    if (CGAL::Polygon_mesh_processing::experimental::
+            autorefine_and_remove_self_intersections(tmp) &&
+        tmp.is_valid(true)) {
+      mesh = tmp;
+      assert(CGAL::Polygon_mesh_processing::triangulate_faces(mesh) == true);
+      demesh(mesh);
+    } else {
+      std::cout << "QQ/FromPolygons/autorefine failed" << std::endl;
+    }
+  } catch (const std::exception& e) {
+    std::cout << "QQ/FromPolygons/autorefine exception" << std::endl;
+    std::cout << e.what() << std::endl;
+  }
   return STATUS_OK;
 }
 
@@ -5389,11 +5470,16 @@ int Wrap(Geometry* geometry, double alpha, double offset) {
     }
   }
 
-  Epick_surface_mesh cartesian_mesh;
-  alpha_wrap_3(points, faces, alpha, offset, cartesian_mesh);
+  Epick_surface_mesh epick_mesh;
+  if (faces.empty()) {
+    alpha_wrap_3(points, alpha, offset, epick_mesh);
+  } else {
+    alpha_wrap_3(points, faces, alpha, offset, epick_mesh);
+  }
+
   int target = geometry->add(GEOMETRY_MESH);
   geometry->setIdentityTransform(target);
-  copy_face_graph(cartesian_mesh, geometry->mesh(target));
+  copy_face_graph(epick_mesh, geometry->mesh(target));
 
   geometry->transformToLocalFrame();
 
@@ -5545,100 +5631,6 @@ void Surface_mesh__explore(const Surface_mesh* input,
   }
   explorer.Explore(mesh);
 }
-
-#if 0
-std::string SerializeSurfaceMesh(const Surface_mesh* mesh,
-                                 emscripten::val emit_error) {
-  // CHECK: We assume the mesh is compact.
-
-  std::ostringstream s;
-
-  size_t number_of_vertices = mesh->number_of_vertices();
-
-  s << number_of_vertices << "\n";
-  std::unordered_map<Vertex_index, size_t> vertex_map;
-  size_t vertex_count = 0;
-  for (const Vertex_index vertex : mesh->vertices()) {
-    const Point& p = mesh->point(vertex);
-    s << p.x().exact() << " " << p.y().exact() << " " << p.z().exact() << "\n";
-    vertex_map[vertex] = vertex_count++;
-  }
-  s << "\n";
-
-  s << mesh->number_of_faces() << "\n";
-  for (const Face_index facet : mesh->faces()) {
-    const auto& start = mesh->halfedge(facet);
-    std::size_t edge_count = 0;
-    {
-      Halfedge_index edge = start;
-      do {
-        edge_count++;
-        edge = mesh->next(edge);
-      } while (edge != start);
-    }
-    s << edge_count;
-    {
-      Halfedge_index edge = start;
-      do {
-        std::size_t vertex(vertex_map[mesh->source(edge)]);
-        if (vertex >= number_of_vertices) {
-          std::cout << "Vertex " << vertex << " out of range "
-                    << number_of_vertices << std::endl;
-          emit_error(vertex, number_of_vertices);
-        }
-        s << " " << vertex;
-        edge = mesh->next(edge);
-      } while (edge != start);
-    }
-    s << "\n";
-  }
-
-  return s.str();
-}
-#endif
-
-#if 0
-const Surface_mesh* DeserializeSurfaceMesh(std::string serialization) {
-  Surface_mesh* mesh = new Surface_mesh();
-  std::istringstream s(serialization);
-
-  std::size_t number_of_vertices;
-
-  s >> number_of_vertices;
-
-  for (std::size_t vertex = 0; vertex < number_of_vertices; vertex++) {
-    Point p;
-    read_point(p, s);
-    Point a;
-    read_point_approximate(a, s);
-    mesh->add_vertex(Point{x, y, z});
-  }
-
-  std::size_t number_of_facets;
-
-  s >> number_of_facets;
-
-  for (std::size_t facet = 0; facet < number_of_facets; facet++) {
-    std::size_t number_of_vertices_in_facet;
-    s >> number_of_vertices_in_facet;
-    std::vector<Vertex_index> vertices;
-    for (std::size_t nth = 0; nth < number_of_vertices_in_facet; nth++) {
-      std::size_t vertex;
-      s >> vertex;
-
-      if (vertex > number_of_vertices) {
-        std::cout << "Vertex " << vertex << " out of range "
-                  << number_of_vertices << std::endl;
-      }
-
-      vertices.push_back(Vertex_index(vertex));
-    }
-    mesh->add_face(vertices);
-  }
-
-  return mesh;
-}
-#endif
 
 bool Surface_mesh__triangulate_faces(Surface_mesh* mesh) {
   return CGAL::Polygon_mesh_processing::triangulate_faces(mesh->faces(), *mesh);
@@ -6233,6 +6225,8 @@ EMSCRIPTEN_BINDINGS(module) {
   emscripten::function("Fix", &Fix, emscripten::allow_raw_pointers());
   emscripten::function("FromPolygons", &FromPolygons,
                        emscripten::allow_raw_pointers());
+  // emscripten::function("FromWrappedPolygons", &FromWrappedPolygons,
+  // emscripten::allow_raw_pointers());
   emscripten::function("Fuse", &Fuse, emscripten::allow_raw_pointers());
   emscripten::function("GenerateEnvelope", &GenerateEnvelope,
                        emscripten::allow_raw_pointers());

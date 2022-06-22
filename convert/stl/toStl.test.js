@@ -60,7 +60,7 @@ const box1Solid = [
 ];
 
 test('Correctly render a box', async (t) => {
-  const stl = await toStl(fromPolygons({}, box1Solid));
+  const stl = await toStl(fromPolygons(box1Solid));
   t.is(
     new TextDecoder('utf8').decode(stl),
     readFileSync('toStl.test.box.stl', { encoding: 'utf8' })

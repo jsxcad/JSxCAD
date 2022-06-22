@@ -32,7 +32,7 @@ export const fromOffSync = (data) => {
     const polygon = vertices.map((nthVertex) => points[nthVertex]);
     polygons.push({ points: polygon });
   }
-  return fromPolygons({}, polygons);
+  return fromPolygons(polygons);
 };
 
 export const fromOff = async (data) => fromOffSync(data);

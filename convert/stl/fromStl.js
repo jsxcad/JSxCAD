@@ -31,7 +31,7 @@ export const fromStl = async (
   }
   switch (geometry) {
     case 'graph':
-      return fromPolygons({}, polygons);
+      return fromPolygons(polygons);
     default:
       throw Error(`Unknown geometry type ${geometry}`);
   }

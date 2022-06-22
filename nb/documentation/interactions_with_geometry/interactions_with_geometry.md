@@ -353,9 +353,13 @@ A function can be supplied to receive the tags and shape.
 log(aRectangle.tag('tagString').tags());
 ```
 
+tags: tagString
+
 ```JavaScript
 aRectangle.tag('tagString').tags((tags, s) => s.md(`Tags ${tags}`));
 ```
+
+tags:
 
 Tags can be used to selectively keep or remove parts of geometry.
 
