@@ -48,11 +48,13 @@ export const hasTypeVoid = hasType(typeVoid);
 export const isNotTypeVoid = isNotType(typeVoid);
 export const isTypeVoid = isType(typeVoid);
 
+/*
 export const typeWire = 'type:wire';
 export const hasNotTypeWire = hasNotType(typeWire);
 export const hasTypeWire = hasType(typeWire);
 export const isNotTypeWire = isNotType(typeWire);
 export const isTypeWire = isType(typeWire);
+*/
 
 // Structural types.
 export const isGraph = ({ type }) => type === 'graph';

@@ -1,10 +1,13 @@
 import {
   Box3,
+  Frustum,
   GridHelper,
   LineSegments,
+  Matrix4,
   Mesh,
   MeshStandardMaterial,
   PlaneGeometry,
+  Shape,
   Vector3,
 } from '@jsxcad/algorithm-threejs';
 import { GEOMETRY_LAYER } from './layers.js';
@@ -29,7 +32,14 @@ export const moveToFit = ({
     if (object instanceof GridHelper) {
       return;
     }
-    if (object instanceof LineSegments || object instanceof Mesh) {
+    if (object.userData.tags && object.userData.tags.includes('type:ghost')) {
+      return;
+    }
+    if (
+      object instanceof LineSegments ||
+      object instanceof Mesh ||
+      object instanceof Shape
+    ) {
       const objectBox = new Box3();
       objectBox.setFromObject(object);
       if (
@@ -124,37 +134,47 @@ export const moveToFit = ({
     control.reset();
   }
 
-  const center = box.getCenter(new Vector3());
-
-  const size = {
-    x: Math.max(Math.abs(box.min.x), Math.abs(box.max.x)),
-    y: Math.max(Math.abs(box.min.y), Math.abs(box.max.y)),
-    z: Math.max(Math.abs(box.min.z), Math.abs(box.max.z)),
-  };
-
-  const maxSize = Math.max(size.x, size.y, size.z);
-  const fitHeightDistance =
-    maxSize / (2 * Math.atan((Math.PI * camera.fov) / 360));
-  const fitWidthDistance = fitHeightDistance / (camera.aspect || 1);
-  const zoomOut = 1.5;
-  const distance =
-    fitOffset * Math.max(fitHeightDistance, fitWidthDistance) * zoomOut;
-
   const target = new Vector3(0, 0, 0);
 
-  const direction = target
-    .clone()
-    .sub(camera.position)
-    .normalize()
-    .multiplyScalar(distance);
+  const points = [
+    new Vector3(box.min.x, box.min.y, box.min.z),
+    new Vector3(box.max.x, box.min.y, box.min.z),
+    new Vector3(box.min.x, box.max.y, box.min.z),
+    new Vector3(box.max.x, box.max.y, box.min.z),
+    new Vector3(box.min.x, box.min.y, box.max.z),
+    new Vector3(box.max.x, box.min.y, box.max.z),
+    new Vector3(box.min.x, box.max.y, box.max.z),
+    new Vector3(box.max.x, box.max.y, box.max.z),
+  ];
 
-  camera.near = distance / 100;
-  camera.far = distance * 100;
-  camera.updateProjectionMatrix();
+  // Back the camera off by 1mm at a time until the bounding box is contained by
+  // the frustrum.
+  // CHECK: Use a binary search if this becomes a latency problem.
+  for (let distance = 1; ; distance += 1) {
+    const direction = target
+      .clone()
+      .sub(camera.position)
+      .normalize()
+      .multiplyScalar(distance);
 
-  camera.position.copy(center).sub(direction);
+    camera.position.copy(target).sub(direction);
 
-  for (const control of controls) {
-    control.update();
+    camera.near = distance / 100;
+    camera.far = distance * 100;
+
+    camera.updateMatrix();
+    camera.updateMatrixWorld();
+
+    const frustum = new Frustum();
+    frustum.setFromProjectionMatrix(
+      new Matrix4().multiplyMatrices(
+        camera.projectionMatrix,
+        camera.matrixWorldInverse
+      )
+    );
+
+    if (points.every((point) => frustum.containsPoint(point))) {
+      break;
+    }
   }
 };

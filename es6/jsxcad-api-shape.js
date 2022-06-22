@@ -3083,7 +3083,7 @@ const buildLayoutGeometry = ({ layer, pageWidth, pageLength, margin }) => {
       Group(...title).move(pageWidth / -2, (pageLength * (1 + labelScale)) / 2)
     )
     .color('red')
-    .sketch()
+    .ghost()
     .toGeometry();
   return taggedLayout({ size, margin, title }, layer, visualization);
 };
@@ -4675,7 +4675,7 @@ const baseView =
       wireframe = false,
       inline,
       width = 512,
-      height = 256,
+      height = 512,
       position = [100, -100, 100],
     } = options;
 
@@ -4720,7 +4720,7 @@ const topView = Shape.chainable((...args) => (shape) => {
       skin: true,
       outline: true,
       wireframe: false,
-      width: 1024,
+      width: 512,
       height: 512,
       position: [0, 0, 100],
     },
@@ -4741,7 +4741,7 @@ const gridView = Shape.chainable((...args) => {
       skin: true,
       outline: true,
       wireframe: false,
-      width: 1024,
+      width: 512,
       height: 512,
       position: [0, 0, 100],
     },
@@ -4762,7 +4762,7 @@ const frontView = Shape.chainable((...args) => (shape) => {
       skin: true,
       outline: true,
       wireframe: false,
-      width: 1024,
+      width: 512,
       height: 512,
       position: [0, -100, 0],
     },
@@ -4783,7 +4783,7 @@ Shape.chainable((...args) => (shape) => {
       skin: true,
       outline: true,
       wireframe: false,
-      width: 1024,
+      width: 512,
       height: 512,
       position: [100, 0, 0],
     },

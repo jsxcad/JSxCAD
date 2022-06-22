@@ -73,9 +73,6 @@ const fromPartToPolygons = async (
     rebuild,
   }
 ) => {
-  if (override) {
-    console.log(`QQ/part: ${part}`);
-  }
   if (override && override[part]) {
     return override[part];
   }
@@ -271,7 +268,6 @@ const fromCodeToPolygons = async (
       invertNext -= 1;
     }
   }
-  // console.log(`QQ/return polygons=${polygons.length} content=${content ? content.length : 0}`);
   return { polygons, content };
 };
 
