@@ -624,6 +624,7 @@ export const buildMeshes = async ({
     }
     mesh.applyMatrix4(matrix);
     mesh.updateMatrix();
+    mesh.updateMatrixWorld();
   }
 
   if (geometry.content) {

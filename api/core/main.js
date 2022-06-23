@@ -42,21 +42,6 @@ registerDynamicModule(
   '../threejs/main.js'
 );
 registerDynamicModule(
-  '@' + 'jsxcad/api-v1-armature',
-  '@jsxcad/api-v1-armature',
-  '../v1-armature/main.js'
-);
-registerDynamicModule(
-  '@' + 'jsxcad/api-v1-cursor',
-  '@jsxcad/api-v1-cursor',
-  '../v1-cursor/main.js'
-);
-registerDynamicModule(
-  '@' + 'jsxcad/api-v1-deform',
-  '@jsxcad/api-v1-deform',
-  '../v1-deform/main.js'
-);
-registerDynamicModule(
   '@' + 'jsxcad/api-v1-dst',
   '@jsxcad/api-v1-dst',
   '../v1-dst/main.js'

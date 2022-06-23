@@ -29,7 +29,7 @@
     "passport-github2": "^0.1.11"
   },
   "devDependencies": {
-    "ava": "^3.9.0",
+    "ava": "^4.3.0",
     "depcheck": "^1.4.1",
     "eslint": "^7.0.0",
     "babel-eslint": "^10.0.1",

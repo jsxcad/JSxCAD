@@ -1,6 +1,8 @@
 import { Shape } from './Shape.js';
 import { clip as clipGeometry } from '@jsxcad/geometry';
 
+export const Clip = (shape, ...shapes) => shape.clip(...shapes);
+
 export const clip = Shape.chainable(
   (...shapes) =>
     (shape) =>

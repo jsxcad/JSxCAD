@@ -179,6 +179,7 @@ export { Assembly } from './Assembly.js';
 export { Box } from './Box.js';
 export { Cached } from './Cached.js';
 export { ChainHull } from './ChainHull.js';
+export { Clip } from './clip.js';
 export { Curve } from './Curve.js';
 export { Edge } from './Edge.js';
 export { Edges } from './Edges.js';
