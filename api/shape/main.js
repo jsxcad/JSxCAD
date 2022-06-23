@@ -213,6 +213,7 @@ export { Tetragon } from './Tetragon.js';
 export { Triangle } from './Triangle.js';
 export { Voxels } from './voxels.js';
 export { Wave } from './Wave.js';
+export { Wrap } from './wrap.js';
 export { ofPlan } from './Plan.js';
 
 export { foot, inch, mm, mil, cm, m, thou, yard } from '@jsxcad/api-v1-units';
