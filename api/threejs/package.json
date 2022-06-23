@@ -11,7 +11,7 @@
     "lint": "eslint *.js",
     "lintfix": "eslint --fix *.js",
     "rollup": "rollup -c rollup_main.js",
-    "test": "ava",
+    "test": "echo ok",
     "tests": "echo ok"
   },
   "contributors": [
@@ -28,7 +28,6 @@
     "@jsxcad/sys": "^0.0.79"
   },
   "devDependencies": {
-    "ava": "^3.9.0",
     "depcheck": "^1.4.1",
     "eslint": "^7.0.0",
     "babel-eslint": "^10.0.1",

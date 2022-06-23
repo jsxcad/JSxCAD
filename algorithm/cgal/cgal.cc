@@ -3975,10 +3975,14 @@ int Extrude(Geometry* geometry, size_t count) {
         CGAL::Polygon_mesh_processing::extrude_mesh(mesh, *extruded_mesh,
                                                     bottom, top);
         CGAL::Polygon_mesh_processing::triangulate_faces(*extruded_mesh);
-        if (CGAL::Polygon_mesh_processing::volume(
-                *extruded_mesh, CGAL::parameters::all_default()) == 0) {
+        FT volume = CGAL::Polygon_mesh_processing::volume(
+            *extruded_mesh, CGAL::parameters::all_default());
+        if (volume == 0) {
           std::cout << "Extrude/zero-volume" << std::endl;
           continue;
+        } else if (volume < 0) {
+          CGAL::Polygon_mesh_processing::reverse_face_orientations(
+              *extruded_mesh);
         }
         geometry->setMesh(nth, extruded_mesh);
         break;
@@ -4008,10 +4012,14 @@ int Extrude(Geometry* geometry, size_t count) {
         CGAL::Polygon_mesh_processing::extrude_mesh(flat_mesh, *extruded_mesh,
                                                     bottom, top);
         CGAL::Polygon_mesh_processing::triangulate_faces(*extruded_mesh);
-        if (CGAL::Polygon_mesh_processing::volume(
-                *extruded_mesh, CGAL::parameters::all_default()) == 0) {
+        FT volume = CGAL::Polygon_mesh_processing::volume(
+            *extruded_mesh, CGAL::parameters::all_default());
+        if (volume == 0) {
           std::cout << "Extrude/zero-volume" << std::endl;
           continue;
+        } else if (volume < 0) {
+          CGAL::Polygon_mesh_processing::reverse_face_orientations(
+              *extruded_mesh);
         }
         geometry->setType(nth, GEOMETRY_MESH);
         geometry->setIdentityTransform(nth);

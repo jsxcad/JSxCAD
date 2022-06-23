@@ -24,8 +24,6 @@
   "license": "MIT",
   "dependencies": {
     "@jsxcad/api-shape": "^0.0.79",
-    "@jsxcad/api-v1-armature": "^0.0.79",
-    "@jsxcad/api-v1-cursor": "^0.0.79",
     "@jsxcad/api-v1-dst": "^0.0.79",
     "@jsxcad/api-v1-font": "^0.0.79",
     "@jsxcad/api-v1-gcode": "^0.0.79",
@@ -56,7 +54,7 @@
     "hash-sum": "^2.0.0"
   },
   "devDependencies": {
-    "ava": "^3.9.0",
+    "ava": "^4.3.0",
     "depcheck": "^1.4.1",
     "eslint": "^7.0.0",
     "babel-eslint": "^10.0.1",

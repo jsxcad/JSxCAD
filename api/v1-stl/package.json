@@ -11,7 +11,7 @@
     "lint": "eslint *.js",
     "lintfix": "eslint --fix *.js",
     "rollup": "rollup -c rollup_main.js",
-    "test": "ava",
+    "test": "echo ok",
     "tests": "echo ok"
   },
   "contributors": [
@@ -30,7 +30,6 @@
     "hash-sum": "^2.0.0"
   },
   "devDependencies": {
-    "ava": "^3.9.0",
     "depcheck": "^1.4.1",
     "eslint": "^7.0.0",
     "babel-eslint": "^10.0.1",

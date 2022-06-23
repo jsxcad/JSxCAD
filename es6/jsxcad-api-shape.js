@@ -1075,6 +1075,8 @@ const clean = Shape.chainable(
 
 Shape.registerMethod('clean', clean);
 
+const Clip = (shape, ...shapes) => shape.clip(...shapes);
+
 const clip = Shape.chainable(
   (...shapes) =>
     (shape) =>
@@ -3083,7 +3085,7 @@ const buildLayoutGeometry = ({ layer, pageWidth, pageLength, margin }) => {
       Group(...title).move(pageWidth / -2, (pageLength * (1 + labelScale)) / 2)
     )
     .color('red')
-    .sketch()
+    .ghost()
     .toGeometry();
   return taggedLayout({ size, margin, title }, layer, visualization);
 };
@@ -4675,7 +4677,7 @@ const baseView =
       wireframe = false,
       inline,
       width = 512,
-      height = 256,
+      height = 512,
       position = [100, -100, 100],
     } = options;
 
@@ -4720,7 +4722,7 @@ const topView = Shape.chainable((...args) => (shape) => {
       skin: true,
       outline: true,
       wireframe: false,
-      width: 1024,
+      width: 512,
       height: 512,
       position: [0, 0, 100],
     },
@@ -4741,7 +4743,7 @@ const gridView = Shape.chainable((...args) => {
       skin: true,
       outline: true,
       wireframe: false,
-      width: 1024,
+      width: 512,
       height: 512,
       position: [0, 0, 100],
     },
@@ -4762,7 +4764,7 @@ const frontView = Shape.chainable((...args) => (shape) => {
       skin: true,
       outline: true,
       wireframe: false,
-      width: 1024,
+      width: 512,
       height: 512,
       position: [0, -100, 0],
     },
@@ -4783,7 +4785,7 @@ Shape.chainable((...args) => (shape) => {
       skin: true,
       outline: true,
       wireframe: false,
-      width: 1024,
+      width: 512,
       height: 512,
       position: [100, 0, 0],
     },
@@ -4960,6 +4962,11 @@ const Voxels = (...points) => {
 };
 
 Shape.prototype.Voxels = Shape.shapeMethod(Voxels);
+
+const Wrap =
+  (offset = 1, alpha = 0.1) =>
+  (...shapes) =>
+    Group(...shapes).wrap(offset, alpha);
 
 const wrap = Shape.chainable(
   (offset = 1, alpha = 0.1) =>
@@ -5701,4 +5708,4 @@ const RX = (t = 0) => Point().rx(t);
 const RY = (t = 0) => Point().ry(t);
 const RZ = (t = 0) => Point().rz(t);
 
-export { Arc, ArcX, ArcY, ArcZ, Assembly, Box, Cached, ChainHull, Curve, Edge, Edges, Empty, Face, GrblConstantLaser, GrblDynamicLaser, GrblPlotter, GrblSpindle, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Join, Line, Link, Loft, Loop, Octagon, Orb, Page, Path, Pentagon, Plan, Point, Points, Polygon, Polyhedron, RX, RY, RZ, Segments, Septagon, Shape, Spiral, SurfaceMesh, Tetragon, Triangle, Voxels, Wave, X, XY, XZ, Y, YZ, Z, absolute, abstract, addTo, align, and, area, as, asPart, at, bend, billOfMaterials, by, cast, center, chainHull, clean, clip, clipfrom, clipopen, color, colors, cut, cutFrom, cutopen, cutout, defRgbColor, defThreejsMaterial, defTool, define, deform, demesh, disjoint, drop, e, each, eachIn, eachPoint, edges, edit, ensurePages, ex, extrudeAlong, extrudeX, extrudeY, extrudeZ, ey, ez, faces, fill, fit, fitTo, fix, fuse, g, get, getNot, ghost, gn, grow, hull, inFn, inline, inset, involute, join, keep, link, loadGeometry, loft, log, loop, lowerEnvelope, mask, masking, material, md, move, moveAlong, moveTo, n, noVoid, noop, normal, notColor, nth, o, ofPlan, offset, on, op, orient, origin, outline, overlay, pack, points$1 as points, reify, remesh, rotateX, rotateY, rotateZ, rx, ry, rz, saveGeometry, scale$1 as scale, scaleToFit, scaleX, scaleY, scaleZ, seam, section, sectionProfile, self, separate, seq, serialize, simplify, size, sketch, smooth, sort, sx, sy, sz, table, tag, tags, tint, to, tool, toolpath, top, twist, untag, upperEnvelope, view, voidFn, voidIn, volume, voxels, wrap, x, xyz, y, z };
+export { Arc, ArcX, ArcY, ArcZ, Assembly, Box, Cached, ChainHull, Clip, Curve, Edge, Edges, Empty, Face, GrblConstantLaser, GrblDynamicLaser, GrblPlotter, GrblSpindle, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Join, Line, Link, Loft, Loop, Octagon, Orb, Page, Path, Pentagon, Plan, Point, Points, Polygon, Polyhedron, RX, RY, RZ, Segments, Septagon, Shape, Spiral, SurfaceMesh, Tetragon, Triangle, Voxels, Wave, Wrap, X, XY, XZ, Y, YZ, Z, absolute, abstract, addTo, align, and, area, as, asPart, at, bend, billOfMaterials, by, cast, center, chainHull, clean, clip, clipfrom, clipopen, color, colors, cut, cutFrom, cutopen, cutout, defRgbColor, defThreejsMaterial, defTool, define, deform, demesh, disjoint, drop, e, each, eachIn, eachPoint, edges, edit, ensurePages, ex, extrudeAlong, extrudeX, extrudeY, extrudeZ, ey, ez, faces, fill, fit, fitTo, fix, fuse, g, get, getNot, ghost, gn, grow, hull, inFn, inline, inset, involute, join, keep, link, loadGeometry, loft, log, loop, lowerEnvelope, mask, masking, material, md, move, moveAlong, moveTo, n, noVoid, noop, normal, notColor, nth, o, ofPlan, offset, on, op, orient, origin, outline, overlay, pack, points$1 as points, reify, remesh, rotateX, rotateY, rotateZ, rx, ry, rz, saveGeometry, scale$1 as scale, scaleToFit, scaleX, scaleY, scaleZ, seam, section, sectionProfile, self, separate, seq, serialize, simplify, size, sketch, smooth, sort, sx, sy, sz, table, tag, tags, tint, to, tool, toolpath, top, twist, untag, upperEnvelope, view, voidFn, voidIn, volume, voxels, wrap, x, xyz, y, z };

@@ -12,6 +12,7 @@ export {
   Euler,
   EventDispatcher,
   Float32BufferAttribute,
+  Frustum,
   GridHelper,
   Group,
   ImageBitmapLoader,

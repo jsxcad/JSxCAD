@@ -58,7 +58,7 @@ const buildLayoutGeometry = ({ layer, pageWidth, pageLength, margin }) => {
       Group(...title).move(pageWidth / -2, (pageLength * (1 + labelScale)) / 2)
     )
     .color('red')
-    .sketch()
+    .ghost()
     .toGeometry();
   return taggedLayout({ size, margin, title }, layer, visualization);
 };
