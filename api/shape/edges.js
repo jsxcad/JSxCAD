@@ -12,6 +12,9 @@ import Group from './Group.js';
 import Shape from './Shape.js';
 import { destructure } from './destructure.js';
 
+// TODO: Add an option to include a virtual segment at the target of the last
+// edge.
+
 export const edges = Shape.chainable((...args) => (shape) => {
   const { shapesAndFunctions } = destructure(args);
   let [leafOp = (l) => l, groupOp = Group] = shapesAndFunctions;

@@ -19,7 +19,6 @@ import {
   ShapeGeometry,
   Vector2,
   Vector3,
-  VertexColors,
   WireframeGeometry,
 } from '@jsxcad/algorithm-threejs';
 
@@ -326,71 +325,6 @@ export const buildMeshes = async ({
       bufferGeometry.setAttribute(
         'position',
         new Float32BufferAttribute(positions, 3)
-      );
-      mesh = new LineSegments(bufferGeometry, material);
-      mesh.layers.set(layer);
-      updateUserData(geometry, scene, mesh.userData);
-      scene.add(mesh);
-      break;
-    }
-    case 'paths': {
-      let transparent = false;
-      let opacity = 1;
-      const { paths } = geometry;
-      const bufferGeometry = new BufferGeometry();
-      const material = new LineBasicMaterial({
-        color: 0xffffff,
-        vertexColors: VertexColors,
-        transparent,
-        opacity,
-      });
-      const color = new Color(setColor(definitions, tags, {}, [0, 0, 0]).color);
-      const pathColors = [];
-      const positions = [];
-      const index = [];
-      for (const path of paths) {
-        const entry = { start: Math.floor(positions.length / 3), length: 0 };
-        let last = path.length - 1;
-        for (let nth = 0; nth < path.length; last = nth, nth += 1) {
-          const start = path[last];
-          const end = path[nth];
-          if (start === null || end === null) continue;
-          if (!start.every(isFinite) || !end.every(isFinite)) {
-            // Not sure where these non-finite path values are coming from.
-            continue;
-          }
-          const [aX = 0, aY = 0, aZ = 0] = start;
-          const [bX = 0, bY = 0, bZ = 0] = end;
-          pathColors.push(
-            color.r,
-            color.g,
-            color.b,
-            opacity,
-            color.r,
-            color.g,
-            color.b,
-            opacity
-          );
-          if (!isFinite(aX)) throw Error('die');
-          if (!isFinite(aY)) throw Error('die');
-          if (!isFinite(aZ)) throw Error('die');
-          if (!isFinite(bX)) throw Error('die');
-          if (!isFinite(bY)) throw Error('die');
-          if (!isFinite(bZ)) throw Error('die');
-          positions.push(aX, aY, aZ, bX, bY, bZ);
-          entry.length += 2;
-        }
-        if (entry.length > 0) {
-          index.push(entry);
-        }
-      }
-      bufferGeometry.setAttribute(
-        'position',
-        new Float32BufferAttribute(positions, 3)
-      );
-      bufferGeometry.setAttribute(
-        'color',
-        new Float32BufferAttribute(pathColors, 4)
       );
       mesh = new LineSegments(bufferGeometry, material);
       mesh.layers.set(layer);

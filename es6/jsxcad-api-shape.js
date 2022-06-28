@@ -3318,6 +3318,9 @@ const edit = Shape.chainable(
 
 Shape.registerMethod('edit', edit);
 
+// TODO: Add an option to include a virtual segment at the target of the last
+// edge.
+
 const edges = Shape.chainable((...args) => (shape) => {
   const { shapesAndFunctions } = destructure(args);
   let [leafOp = (l) => l, groupOp = Group] = shapesAndFunctions;
@@ -5638,9 +5641,9 @@ Polyhedron.ofPointPaths = ofPointPaths;
 
 Shape.prototype.Polyhedron = Shape.shapeMethod(Polyhedron);
 
-const Segments = (...segments) =>
+const Segments = (segments) =>
   Shape.fromSegments(
-    ...Shape.toNestedValues(segments).map(([source, target]) => [
+    Shape.toNestedValues(segments).map(([source, target]) => [
       Shape.toCoordinate(undefined, source),
       Shape.toCoordinate(undefined, target),
     ])

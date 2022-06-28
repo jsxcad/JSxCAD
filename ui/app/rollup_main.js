@@ -6,7 +6,10 @@ import '@babel/preset-react';
 import alias from '@rollup/plugin-alias';
 import babel from '@rollup/plugin-babel';
 import commonjs from '@rollup/plugin-commonjs';
+import css from 'rollup-plugin-scss';
+// import svg from 'rollup-plugin-svg-import';
 import hypothetical from 'rollup-plugin-hypothetical-windows-fix';
+import image from '@rollup/plugin-image';
 import json from 'rollup-plugin-json';
 import resolve from '@rollup/plugin-node-resolve';
 import sizes from 'rollup-plugin-sizes';
@@ -79,7 +82,6 @@ export default {
         ],
       },
     }),
-    // globals(),
     hypothetical({
       allowFallthrough: true,
       allowRealFiles: true,
@@ -115,6 +117,8 @@ export default {
     }),
     resolve({ browser: true }),
     json(),
+    css(),
+    image(),
     {
       transform(code, id) {
         return code.replace(/'@jsxcad\/([^']*)'/g, "'./jsxcad-$1.js'");
@@ -140,7 +144,8 @@ export default {
           .replace(
             /w.rowCount = w.pixelHeight [/] renderer.layerConfig.lineHeight/,
             'w.rowCount = Math.ceil(w.pixelHeight / renderer.layerConfig.lineHeight)'
-          );
+          )
+          .replace(/new EventEmitter2/, 'new EventEmitter2.EventEmitter2');
       },
     },
     sizes(),

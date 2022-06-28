@@ -16,6 +16,7 @@ export class OrbitView extends React.PureComponent {
       onClick: PropTypes.function,
       onDrag: PropTypes.function,
       onDragEnd: PropTypes.function,
+      onEdits: PropTypes.function,
       onKeydown: PropTypes.function,
       onJog: PropTypes.function,
       onUpdateGeometry: PropTypes.function,
@@ -113,6 +114,12 @@ export class OrbitView extends React.PureComponent {
         onMove({ path, position, up, target, zoom });
       }
     });
+    const handleEdits = ({ edits }) => {
+      const { onEdits } = this.props;
+      if (onEdits) {
+        onEdits({ edits });
+      }
+    };
     const handleJog = ({ object, at, to, up }) => {
       const { onJog, sourceLocation } = this.props;
       if (!object) {
@@ -147,6 +154,7 @@ export class OrbitView extends React.PureComponent {
     };
     anchorControls.addEventListener('change', handleJog);
     anchorControls.addEventListener('keydown', handleKeydown);
+    anchorControls.addEventListener('edits', handleEdits);
     const handleClick = (type) => (event) => {
       const { onClick, view, sourceLocation } = this.props;
       const rect = event.target.getBoundingClientRect();

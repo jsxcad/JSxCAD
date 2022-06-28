@@ -358,6 +358,42 @@ Vector SomeNormalOfSurfaceMesh(const Surface_mesh& mesh) {
   return CGAL::NULL_VECTOR;
 }
 
+template <class Kernel, class Container>
+void print_polygon(const CGAL::Polygon_2<Kernel, Container>& P) {
+  typename CGAL::Polygon_2<Kernel, Container>::Vertex_const_iterator vit;
+  std::cout << "[ " << P.size() << " vertices:";
+  for (vit = P.vertices_begin(); vit != P.vertices_end(); ++vit)
+    std::cout << " (" << *vit << ')';
+  std::cout << " ]" << std::endl;
+}
+
+template <class Kernel, class Container>
+void print_polygon_with_holes(
+    const CGAL::Polygon_with_holes_2<Kernel, Container>& pwh) {
+  if (!pwh.is_unbounded()) {
+    std::cout << "{ Outer boundary = ";
+    print_polygon(pwh.outer_boundary());
+  } else
+    std::cout << "{ Unbounded polygon." << std::endl;
+  typename CGAL::Polygon_with_holes_2<Kernel, Container>::Hole_const_iterator
+      hit;
+  unsigned int k = 1;
+  std::cout << " " << pwh.number_of_holes() << " holes:" << std::endl;
+  for (hit = pwh.holes_begin(); hit != pwh.holes_end(); ++hit, ++k) {
+    std::cout << " Hole #" << k << " = ";
+    print_polygon(*hit);
+  }
+  std::cout << " }" << std::endl;
+}
+
+template <class Kernel, class Container>
+void print_polygons_with_holes(
+    const std::vector<CGAL::Polygon_with_holes_2<Kernel, Container>>& pwhs) {
+  for (const auto& pwh : pwhs) {
+    print_polygon_with_holes(pwh);
+  }
+}
+
 class SurfaceMeshQuery {
   typedef CGAL::AABB_face_graph_triangle_primitive<Surface_mesh> Primitive;
   typedef CGAL::AABB_traits<Kernel, Primitive> Traits;
@@ -1028,6 +1064,7 @@ const Vertex_index ensureVertex(Surface_mesh& mesh, Vertex_map& vertices,
 
 void convertArrangementToPolygonsWithHoles(
     const Arrangement_2& arrangement, std::vector<Polygon_with_holes_2>& out) {
+  std::cout << "CATPWH/1" << std::endl;
   std::queue<Arrangement_2::Face_const_handle> undecided;
   CGAL::Unique_hash_map<Arrangement_2::Face_const_handle, CGAL::Sign> face_sign;
 
@@ -1040,6 +1077,7 @@ void convertArrangementToPolygonsWithHoles(
     }
   }
 
+  std::cout << "CATPWH/2" << std::endl;
   while (!undecided.empty()) {
     Arrangement_2::Face_const_handle face = undecided.front();
     undecided.pop();
@@ -1080,6 +1118,7 @@ void convertArrangementToPolygonsWithHoles(
     undecided.push(face);
   }
 
+  std::cout << "CATPWH/3" << std::endl;
   for (Arrangement_2::Face_const_iterator face = arrangement.faces_begin();
        face != arrangement.faces_end(); ++face) {
     if (face_sign[face] == CGAL::Sign::NEGATIVE) {
@@ -1112,6 +1151,12 @@ void convertArrangementToPolygonsWithHoles(
       polygon_boundary.resize(polygon_boundary.size() - 1);
     }
 
+    if (!polygon_boundary.is_simple()) {
+      std::cout << "Polygon is not simple: " << std::endl;
+      print_polygon(polygon_boundary);
+      continue;
+    }
+
     std::vector<Polygon_2> polygon_holes;
     for (Arrangement_2::Hole_const_iterator hole = face->holes_begin();
          hole != face->holes_end(); ++hole) {
@@ -1141,6 +1186,12 @@ void convertArrangementToPolygonsWithHoles(
         polygon_hole.resize(polygon_hole.size() - 1);
       }
 
+      if (!polygon_hole.is_simple()) {
+        std::cout << "Hole is not simple: " << std::endl;
+        print_polygon(polygon_hole);
+        continue;
+      }
+
       if (polygon_hole.orientation() != CGAL::Sign::NEGATIVE) {
         polygon_hole.reverse_orientation();
       }
@@ -1151,6 +1202,7 @@ void convertArrangementToPolygonsWithHoles(
           polygon_boundary, polygon_holes.begin(), polygon_holes.end()));
     }
   }
+  std::cout << "CATPWH/4" << std::endl;
 }
 
 void PlanarSurfaceMeshToPolygonsWithHoles(
@@ -1269,42 +1321,6 @@ bool PolygonsWithHolesToSurfaceMesh(const Plane& plane,
     }
   }
   return true;
-}
-
-template <class Kernel, class Container>
-void print_polygon(const CGAL::Polygon_2<Kernel, Container>& P) {
-  typename CGAL::Polygon_2<Kernel, Container>::Vertex_const_iterator vit;
-  std::cout << "[ " << P.size() << " vertices:";
-  for (vit = P.vertices_begin(); vit != P.vertices_end(); ++vit)
-    std::cout << " (" << *vit << ')';
-  std::cout << " ]" << std::endl;
-}
-
-template <class Kernel, class Container>
-void print_polygon_with_holes(
-    const CGAL::Polygon_with_holes_2<Kernel, Container>& pwh) {
-  if (!pwh.is_unbounded()) {
-    std::cout << "{ Outer boundary = ";
-    print_polygon(pwh.outer_boundary());
-  } else
-    std::cout << "{ Unbounded polygon." << std::endl;
-  typename CGAL::Polygon_with_holes_2<Kernel, Container>::Hole_const_iterator
-      hit;
-  unsigned int k = 1;
-  std::cout << " " << pwh.number_of_holes() << " holes:" << std::endl;
-  for (hit = pwh.holes_begin(); hit != pwh.holes_end(); ++hit, ++k) {
-    std::cout << " Hole #" << k << " = ";
-    print_polygon(*hit);
-  }
-  std::cout << " }" << std::endl;
-}
-
-template <class Kernel, class Container>
-void print_polygons_with_holes(
-    const std::vector<CGAL::Polygon_with_holes_2<Kernel, Container>>& pwhs) {
-  for (const auto& pwh : pwhs) {
-    print_polygon_with_holes(pwh);
-  }
 }
 
 FT max2(FT a, FT b) { return a > b ? a : b; }
@@ -4106,6 +4122,7 @@ int Fill(Geometry* geometry) {
           Segment_2 s2(source, target);
           insert(arrangement, s2);
         }
+        std::cout << "QQ/Fill/Arrangement: " << arrangement << std::endl;
         break;
       }
       case GEOMETRY_POLYGONS_WITH_HOLES: {
