@@ -188,7 +188,14 @@ const toThreejsMaterialFromTags = (
   otherwise
 ) => {
   for (const tag of tags) {
-    if (tag.startsWith('material:')) {
+    if (tag.startsWith('image:')) {
+      const map = tag.substring(6);
+      return {
+        reflectivity: 0.1,
+        emissiveIntensity: 0.25,
+        map,
+      };
+    } else if (tag.startsWith('material:')) {
       for (const definitions of [
         standardMaterialDefinitions,
         customDefinitions,

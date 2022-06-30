@@ -1064,7 +1064,6 @@ const Vertex_index ensureVertex(Surface_mesh& mesh, Vertex_map& vertices,
 
 void convertArrangementToPolygonsWithHoles(
     const Arrangement_2& arrangement, std::vector<Polygon_with_holes_2>& out) {
-  std::cout << "CATPWH/1" << std::endl;
   std::queue<Arrangement_2::Face_const_handle> undecided;
   CGAL::Unique_hash_map<Arrangement_2::Face_const_handle, CGAL::Sign> face_sign;
 
@@ -1077,7 +1076,6 @@ void convertArrangementToPolygonsWithHoles(
     }
   }
 
-  std::cout << "CATPWH/2" << std::endl;
   while (!undecided.empty()) {
     Arrangement_2::Face_const_handle face = undecided.front();
     undecided.pop();
@@ -1115,10 +1113,11 @@ void convertArrangementToPolygonsWithHoles(
         }
       } while (++edge != start);
     }
-    undecided.push(face);
+    if (!decided) {
+      undecided.push(face);
+    }
   }
 
-  std::cout << "CATPWH/3" << std::endl;
   for (Arrangement_2::Face_const_iterator face = arrangement.faces_begin();
        face != arrangement.faces_end(); ++face) {
     if (face_sign[face] == CGAL::Sign::NEGATIVE) {
@@ -1129,6 +1128,10 @@ void convertArrangementToPolygonsWithHoles(
     Arrangement_2::Ccb_halfedge_const_circulator start = face->outer_ccb();
     Arrangement_2::Ccb_halfedge_const_circulator edge = start;
     do {
+      if (edge->twin()->face() == edge->face()) {
+        // Skip antenna.
+        continue;
+      }
       const Point_2& point = edge->source()->point();
       if (point == edge->target()->point()) {
         // Skip zero length edges.
@@ -1164,6 +1167,10 @@ void convertArrangementToPolygonsWithHoles(
       Arrangement_2::Ccb_halfedge_const_circulator start = *hole;
       Arrangement_2::Ccb_halfedge_const_circulator edge = start;
       do {
+        if (edge->twin()->face() == edge->face()) {
+          // Skip antenna.
+          continue;
+        }
         const Point_2& point = edge->source()->point();
         if (point == edge->target()->point()) {
           // Skip zero length edges.
@@ -1185,7 +1192,6 @@ void convertArrangementToPolygonsWithHoles(
         // Skip colinear points.
         polygon_hole.resize(polygon_hole.size() - 1);
       }
-
       if (!polygon_hole.is_simple()) {
         std::cout << "Hole is not simple: " << std::endl;
         print_polygon(polygon_hole);
@@ -1202,7 +1208,6 @@ void convertArrangementToPolygonsWithHoles(
           polygon_boundary, polygon_holes.begin(), polygon_holes.end()));
     }
   }
-  std::cout << "CATPWH/4" << std::endl;
 }
 
 void PlanarSurfaceMeshToPolygonsWithHoles(
@@ -4122,7 +4127,6 @@ int Fill(Geometry* geometry) {
           Segment_2 s2(source, target);
           insert(arrangement, s2);
         }
-        std::cout << "QQ/Fill/Arrangement: " << arrangement << std::endl;
         break;
       }
       case GEOMETRY_POLYGONS_WITH_HOLES: {

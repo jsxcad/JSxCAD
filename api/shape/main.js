@@ -101,6 +101,7 @@ export { ghost } from './ghost.js';
 export { gn, getNot } from './getNot.js';
 export { grow } from './grow.js';
 export { hull } from './Hull.js';
+export { image } from './image.js';
 export { inFn } from './in.js';
 export { inline } from './inline.js';
 export { inset } from './inset.js';
