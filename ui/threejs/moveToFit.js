@@ -106,6 +106,7 @@ export const moveToFit = ({
     }
   }
   if (withGrid) {
+    // The visible mat is slightly below z0.
     const plane = new Mesh(
       new PlaneGeometry(length, width),
       new MeshStandardMaterial({
@@ -122,6 +123,26 @@ export const moveToFit = ({
     plane.userData.tangible = false;
     plane.userData.dressing = true;
     plane.userData.grid = true;
+    scene.add(plane);
+    gridState.objects.push(plane);
+  }
+
+  if (withGrid) {
+    // The interactive mat is on z0.
+    const plane = new Mesh(
+      new PlaneGeometry(length, width),
+      new MeshStandardMaterial({
+        transparent: true,
+        opacity: 0,
+      })
+    );
+    plane.castShadow = false;
+    plane.position.set(0, 0, 0);
+    plane.layers.set(gridLayer);
+    plane.userData.tangible = true;
+    plane.userData.dressing = true;
+    plane.userData.grid = true;
+    plane.userData.mat = true;
     scene.add(plane);
     gridState.objects.push(plane);
   }

@@ -369,8 +369,14 @@ class App extends React.Component {
     this.Clipboard = {};
 
     this.Clipboard.change = (data) => {
-      const { Clipboard } = this.state;
+      const { Clipboard = {} } = this.state;
       this.setState({ Clipboard: { ...Clipboard, code: data } });
+    };
+
+    this.Clipboard.getCode = (data) => {
+      const { Clipboard = {} } = this.state;
+      const { code = 'const $ = Group();' } = Clipboard;
+      return code;
     };
 
     this.Clipboard.run = () => {};
@@ -604,7 +610,8 @@ class App extends React.Component {
         });
         logInfo('app/App', `Run/6 ${path}`);
 
-        let script = NotebookText;
+        let script = this.Clipboard.getCode() + NotebookText;
+
         const evaluate = async (script) => {
           try {
             logInfo('app/App', `Distribute eval for ${path}`);
@@ -814,10 +821,10 @@ class App extends React.Component {
       const points = [];
       const segments = [];
       for (const edit of edits) {
-        const [type] = edit;
+        const [, type] = edit;
         switch (type) {
           case 'point': {
-            const [, point] = edit;
+            const [, , point] = edit;
             points.push(
               `[${point[0].toFixed(2)}, ${point[1].toFixed(
                 2
@@ -826,7 +833,7 @@ class App extends React.Component {
             break;
           }
           case 'segment': {
-            const [, source, target] = edit;
+            const [, , source, target] = edit;
             segments.push(
               `[[${source[0].toFixed(2)}, ${source[1].toFixed(
                 2
@@ -845,7 +852,20 @@ class App extends React.Component {
       if (segments.length > 0) {
         ops.push(`Segments([${segments.join(', ')}])`);
       }
-      this.Clipboard.change(ops.join('\n\n'));
+      switch (ops.length) {
+        case 0: {
+          this.Clipboard.change(``);
+          break;
+        }
+        case 1: {
+          this.Clipboard.change(`const $ = ${ops[0]};`);
+          break;
+        }
+        default: {
+          this.Clipboard.change(`const $ = Group(${ops.join(', ')});`);
+          break;
+        }
+      }
     };
 
     this.View.jogPendingUpdate = new Map();

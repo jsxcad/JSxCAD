@@ -4112,13 +4112,9 @@ int Fill(Geometry* geometry) {
   for (int nth = 0; nth < size; nth++) {
     switch (geometry->getType(nth)) {
       case GEOMETRY_SEGMENTS: {
-        // We require segments to be their local z=0 plane.
-        Plane plane(0, 0, 1, 0);
+        // FIX: We project the segments onto (0, 0, 1, 0).
         Arrangement_2& arrangement = arrangements[Plane(0, 0, 1, 0)];
         for (Segment s3 : geometry->segments(nth)) {
-          if (!plane.has_on(s3.source()) || !plane.has_on(s3.target())) {
-            continue;
-          }
           Point_2 source(s3.source().x(), s3.source().y());
           Point_2 target(s3.target().x(), s3.target().y());
           if (source == target) {

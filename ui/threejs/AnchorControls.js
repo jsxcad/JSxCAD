@@ -9,15 +9,13 @@ import {
   LineSegments,
   Mesh,
   MeshBasicMaterial,
-  Points,
-  PointsMaterial,
   Vector3,
 } from '@jsxcad/algorithm-threejs';
 import { SKETCH_LAYER } from './layers.js';
 import { raycast } from './raycast.js';
 
 class AnchorControls extends EventDispatcher {
-  constructor(_camera, _domElement, scene) {
+  constructor(_camera, _domElement, scene, render) {
     super();
 
     const _material = new MeshBasicMaterial({
@@ -49,8 +47,27 @@ class AnchorControls extends EventDispatcher {
     let _object = null;
     let _scene = scene;
 
+    let _edits = [];
+
+    let _cursor;
+
+    {
+      const cursorGeometry = new BufferGeometry();
+      const material = new LineBasicMaterial({ linewidth: 2, color: 0x000000 });
+      const positions = [0, 0, 0, 0, 0, 1];
+      cursorGeometry.setAttribute(
+        'position',
+        new Float32BufferAttribute(positions, 3)
+      );
+      _cursor = new LineSegments(cursorGeometry, material);
+      _cursor.visible = true;
+      _cursor.layers.set(SKETCH_LAYER);
+      _cursor.userData.dressing = true;
+      _cursor.userData.anchored = false;
+      _scene.add(_cursor);
+    }
+
     let _at = new Mesh(new BoxGeometry(1, 1, 1), yellow);
-    let _point = null;
 
     _at.visible = false;
     _at.layers.set(SKETCH_LAYER);
@@ -61,6 +78,8 @@ class AnchorControls extends EventDispatcher {
       if (!_object) {
         return;
       }
+      // Remove the edits that produced this object.
+      _edits = _edits.filter((entry) => entry.object !== _object);
       // We just hide the object, because we might be copying it later.
       _object.visible = false;
     };
@@ -206,14 +225,16 @@ class AnchorControls extends EventDispatcher {
     let _mouseX, _mouseY;
 
     const adviseEdits = () => {
+      /*
       const edits = [];
       scene.traverse((object) => {
         if (object.userData.edit) {
           edits.push(object.userData.edit);
         }
       });
+      */
       this.dispatchEvent({
-        edits,
+        edits: _edits,
         type: 'edits',
       });
     };
@@ -222,18 +243,52 @@ class AnchorControls extends EventDispatcher {
       const rect = event.target.getBoundingClientRect();
       _mouseX = ((event.clientX - rect.x) / rect.width) * 2 - 1;
       _mouseY = -((event.clientY - rect.y) / rect.height) * 2 + 1;
+
+      const { point, normal } = raycast(
+        _mouseX,
+        _mouseY,
+        _camera,
+        [_scene],
+        ({ object }) => object instanceof Mesh || object.userData.mat
+      );
+
+      if (point) {
+        const position = _cursor.geometry.attributes.position;
+        position.array[0] = point.x;
+        position.array[1] = point.y;
+        position.array[2] = point.z;
+        if (_cursor.userData.anchored !== true) {
+          position.array[3] = point.x + normal.x;
+          position.array[4] = point.y + normal.y;
+          position.array[5] = point.z + normal.z;
+        }
+        position.needsUpdate = true;
+        render();
+      }
     };
 
     const onKeyDown = (event) => {
       if (event.getModifierState('Control')) {
-        this.dispatchEvent({
-          at: _at,
-          deleteObject,
-          object: _object,
-          placeObject,
-          type: 'keydown',
-          event,
-        });
+        switch (event.key) {
+          case 'z': {
+            if (_edits.length > 0) {
+              const [object] = _edits[_edits.length - 1];
+              object.visible = false;
+              _edits.length -= 1;
+              adviseEdits();
+            }
+            break;
+          }
+          default:
+            this.dispatchEvent({
+              at: _at,
+              deleteObject,
+              object: _object,
+              placeObject,
+              type: 'keydown',
+              event,
+            });
+        }
       } else {
         // These exclude control keys.
         switch (event.key) {
@@ -296,61 +351,29 @@ class AnchorControls extends EventDispatcher {
             break;
 
           case 't': {
-            const { point } = raycast(
-              _mouseX,
-              _mouseY,
-              _camera,
-              [_scene],
-              ({ object }) => object instanceof Mesh
-            );
-            const threeGeometry = new BufferGeometry();
-            const material = new PointsMaterial({
-              size: _step / 5,
-            });
-            const positions = [0, 0, 0];
-            threeGeometry.setAttribute(
-              'position',
-              new Float32BufferAttribute(positions, 3)
-            );
-            const newPoint = new Points(threeGeometry, material);
-            newPoint.userData.tangible = true;
-            newPoint.userData.edit = ['point', [point.x, point.y, point.z]];
-            newPoint.layers.set(SKETCH_LAYER);
-            newPoint.position.copy(point);
-            scene.add(newPoint);
-            if (_point) {
-              const bufferGeometry = new BufferGeometry();
-              const material = new LineBasicMaterial({});
-              const positions = [
-                _point.position.x,
-                _point.position.y,
-                _point.position.z,
-                newPoint.position.x,
-                newPoint.position.y,
-                newPoint.position.z,
-              ];
-              bufferGeometry.setAttribute(
-                'position',
-                new Float32BufferAttribute(positions, 3)
+            const position = _cursor.geometry.attributes.position;
+            if (_cursor.userData.anchored) {
+              const segment = new LineSegments(
+                _cursor.geometry.clone(),
+                _cursor.material
               );
-              const segment = new LineSegments(bufferGeometry, material);
               segment.userData.tangible = true;
-              segment.userData.edit = [
+              _edits.push([
+                segment,
                 'segment',
-                [_point.position.x, _point.position.y, _point.position.z],
-                [newPoint.position.x, newPoint.position.y, newPoint.position.z],
-              ];
-              delete _point.userData.edit;
-              delete newPoint.userData.edit;
+                [position.array[0], position.array[1], position.array[2]],
+                [position.array[3], position.array[4], position.array[5]],
+              ]);
+              adviseEdits();
               segment.layers.set(SKETCH_LAYER);
               scene.attach(segment);
-              segment.attach(_point);
-              segment.attach(newPoint);
-              _point = null;
+              _cursor.userData.anchored = false;
             } else {
-              _point = newPoint;
+              position.array[3] = position.array[0];
+              position.array[4] = position.array[1];
+              position.array[5] = position.array[2];
+              _cursor.userData.anchored = true;
             }
-            adviseEdits();
             break;
           }
 

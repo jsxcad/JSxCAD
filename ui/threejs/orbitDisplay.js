@@ -30,12 +30,18 @@ const buildAnchorControls = ({
   camera,
   draggableObjects,
   endUpdating,
+  render,
   scene,
   startUpdating,
   trackballControls,
   viewerElement,
 }) => {
-  const anchorControls = new AnchorControls(camera, viewerElement, scene);
+  const anchorControls = new AnchorControls(
+    camera,
+    viewerElement,
+    scene,
+    render
+  );
   anchorControls.enable();
   return { anchorControls };
 };
