@@ -1,9 +1,12 @@
 // global document
 
 import {
-  ArrowHelper,
   BoxGeometry,
+  BufferGeometry,
   EventDispatcher,
+  Float32BufferAttribute,
+  LineBasicMaterial,
+  LineSegments,
   Mesh,
   MeshBasicMaterial,
   Vector3,
@@ -12,7 +15,7 @@ import { SKETCH_LAYER } from './layers.js';
 import { raycast } from './raycast.js';
 
 class AnchorControls extends EventDispatcher {
-  constructor(_camera, _domElement, _scene) {
+  constructor(_camera, _domElement, scene, render) {
     super();
 
     const _material = new MeshBasicMaterial({
@@ -42,46 +45,41 @@ class AnchorControls extends EventDispatcher {
 
     let _step = 1;
     let _object = null;
+    let _scene = scene;
+
+    let _edits = [];
+
+    let _cursor;
+
+    {
+      const cursorGeometry = new BufferGeometry();
+      const material = new LineBasicMaterial({ linewidth: 2, color: 0x000000 });
+      const positions = [0, 0, 0, 0, 0, 1];
+      cursorGeometry.setAttribute(
+        'position',
+        new Float32BufferAttribute(positions, 3)
+      );
+      _cursor = new LineSegments(cursorGeometry, material);
+      _cursor.visible = true;
+      _cursor.layers.set(SKETCH_LAYER);
+      _cursor.userData.dressing = true;
+      _cursor.userData.anchored = false;
+      _scene.add(_cursor);
+    }
 
     let _at = new Mesh(new BoxGeometry(1, 1, 1), yellow);
-
-    let _to = new Mesh(new BoxGeometry(0.5, 0.5, 0.5), red);
-    let _toArrow = new ArrowHelper();
-    let _lockTo = true;
-
-    let _up = new Mesh(new BoxGeometry(0.5, 0.5, 0.5), blue);
-    let _upArrow = new ArrowHelper();
-    let _lockUp = true;
 
     _at.visible = false;
     _at.layers.set(SKETCH_LAYER);
     _at.userData.dressing = true;
     _scene.add(_at);
 
-    _to.visible = false;
-    _to.layers.set(SKETCH_LAYER);
-    _to.userData.dressing = true;
-    _scene.add(_to);
-
-    _toArrow.layers.set(SKETCH_LAYER);
-    _toArrow.setColor(0xff0000);
-    _toArrow.userData.dressing = true;
-    _at.add(_toArrow);
-
-    _up.visible = false;
-    _up.layers.set(SKETCH_LAYER);
-    _up.userData.dressing = true;
-    _scene.add(_up);
-
-    _upArrow.layers.set(SKETCH_LAYER);
-    _upArrow.setColor(0x0000ff);
-    _upArrow.userData.dressing = true;
-    _at.add(_upArrow);
-
     const deleteObject = () => {
       if (!_object) {
         return;
       }
+      // Remove the edits that produced this object.
+      _edits = _edits.filter((entry) => entry.object !== _object);
       // We just hide the object, because we might be copying it later.
       _object.visible = false;
     };
@@ -126,7 +124,7 @@ class AnchorControls extends EventDispatcher {
       _yAxis.set(NaN, NaN, NaN);
       _zAxis.set(NaN, NaN, NaN);
 
-      // This could be more efficient, since we don't need to consider axes already asigned.
+      // This could be more efficient, since we don't need to consider axes already assigned.
       const fit = (v, cameraAxis) => {
         const xDot = x.dot(v);
         const xFit = Math.abs(xDot);
@@ -168,30 +166,15 @@ class AnchorControls extends EventDispatcher {
     // We're changing our state.
     const update = () => {
       if (_object) {
+        const parent = _object.parent;
+        _scene.attach(_object);
         _object.position.copy(_at.position);
-      }
-      const up = new Vector3();
-      up.subVectors(_up.position, _at.position);
-      up.normalize();
-      if (_object) {
-        _object.up.copy(up);
-        _object.lookAt(_to.position);
+        parent.attach(_object);
       }
       _at.scale.set(_step, _step, _step);
-      _to.scale.set(_step / 2, _step / 2, _step / 2);
-      _up.scale.set(_step / 2, _step / 2, _step / 2);
-      const dir = new Vector3();
-      dir.subVectors(_to.position, _at.position).normalize();
-      _toArrow.setDirection(dir);
-      _toArrow.setLength(_step * 5);
-      dir.subVectors(_up.position, _at.position).normalize();
-      _upArrow.setDirection(dir);
-      _upArrow.setLength(_step * 2);
       this.dispatchEvent({
         type: 'change',
         at: _at,
-        to: _to,
-        up: _up,
         object: _object,
       });
     };
@@ -208,23 +191,16 @@ class AnchorControls extends EventDispatcher {
         }
       }
       _at.material.color.setHex(0xff4500); // orange red
-      _at.visible = true;
-      _to.visible = true;
-      _up.visible = true;
+      // _at.visible = true;
 
       _at.position.set(0, 0, 0);
       _object.localToWorld(_at.position);
-
-      _to.position.set(0, 0, 1);
-      _object.localToWorld(_to.position);
-
-      _up.position.set(0, 1, 0);
-      _object.localToWorld(_up.position);
 
       change();
       update();
 
       _domElement.addEventListener('keydown', onKeyDown);
+      _domElement.addEventListener('mousemove', onMouseMove);
       this.dispatchEvent({ type: 'change' });
     };
 
@@ -246,20 +222,73 @@ class AnchorControls extends EventDispatcher {
 
     const dispose = () => detach();
 
-    const onKeyDown = (event) => {
-      // if (!_object) return;
+    let _mouseX, _mouseY;
 
+    const adviseEdits = () => {
+      /*
+      const edits = [];
+      scene.traverse((object) => {
+        if (object.userData.edit) {
+          edits.push(object.userData.edit);
+        }
+      });
+      */
+      this.dispatchEvent({
+        edits: _edits,
+        type: 'edits',
+      });
+    };
+
+    const onMouseMove = (event) => {
+      const rect = event.target.getBoundingClientRect();
+      _mouseX = ((event.clientX - rect.x) / rect.width) * 2 - 1;
+      _mouseY = -((event.clientY - rect.y) / rect.height) * 2 + 1;
+
+      const { point, normal } = raycast(
+        _mouseX,
+        _mouseY,
+        _camera,
+        [_scene],
+        ({ object }) => object instanceof Mesh || object.userData.mat
+      );
+
+      if (point) {
+        const position = _cursor.geometry.attributes.position;
+        position.array[0] = point.x;
+        position.array[1] = point.y;
+        position.array[2] = point.z;
+        if (_cursor.userData.anchored !== true) {
+          position.array[3] = point.x + normal.x;
+          position.array[4] = point.y + normal.y;
+          position.array[5] = point.z + normal.z;
+        }
+        position.needsUpdate = true;
+        render();
+      }
+    };
+
+    const onKeyDown = (event) => {
       if (event.getModifierState('Control')) {
-        this.dispatchEvent({
-          at: _at,
-          deleteObject,
-          object: _object,
-          placeObject,
-          type: 'keydown',
-          event,
-          to: _to,
-          up: _up,
-        });
+        switch (event.key) {
+          case 'z': {
+            if (_edits.length > 0) {
+              const [object] = _edits[_edits.length - 1];
+              object.visible = false;
+              _edits.length -= 1;
+              adviseEdits();
+            }
+            break;
+          }
+          default:
+            this.dispatchEvent({
+              at: _at,
+              deleteObject,
+              object: _object,
+              placeObject,
+              type: 'keydown',
+              event,
+            });
+        }
       } else {
         // These exclude control keys.
         switch (event.key) {
@@ -299,103 +328,64 @@ class AnchorControls extends EventDispatcher {
           case 'ArrowRight':
           case 'd':
             _at.position.addScaledVector(_xAxis, _step);
-            if (_lockUp) {
-              _up.position.addScaledVector(_xAxis, _step);
-            }
-            if (_lockTo) {
-              _to.position.addScaledVector(_xAxis, _step);
-            }
             break;
           case 'ArrowLeft':
           case 'a':
             _at.position.addScaledVector(_xAxis, -_step);
-            if (_lockUp) {
-              _up.position.addScaledVector(_xAxis, -_step);
-            }
-            if (_lockTo) {
-              _to.position.addScaledVector(_xAxis, -_step);
-            }
             break;
           case 'ArrowUp':
           case 'w':
             _at.position.addScaledVector(_yAxis, _step);
-            if (_lockUp) {
-              _up.position.addScaledVector(_yAxis, _step);
-            }
-            if (_lockTo) {
-              _to.position.addScaledVector(_yAxis, _step);
-            }
             break;
           case 'ArrowDown':
           case 's':
             _at.position.addScaledVector(_yAxis, -_step);
-            if (_lockUp) {
-              _up.position.addScaledVector(_yAxis, -_step);
-            }
-            if (_lockTo) {
-              _to.position.addScaledVector(_yAxis, -_step);
-            }
             break;
           case 'PageDown':
           case 'e':
             _at.position.addScaledVector(_zAxis, _step);
-            if (_lockUp) {
-              _up.position.addScaledVector(_zAxis, _step);
-            }
-            if (_lockTo) {
-              _to.position.addScaledVector(_zAxis, _step);
-            }
             break;
           case 'PageUp':
           case 'q':
             _at.position.addScaledVector(_zAxis, -_step);
-            if (_lockUp) {
-              _up.position.addScaledVector(_zAxis, -_step);
-            }
-            if (_lockTo) {
-              _to.position.addScaledVector(_zAxis, -_step);
-            }
             break;
 
-          // to
-          case 'h':
-            _to.position.addScaledVector(_xAxis, _step);
+          case 't': {
+            const position = _cursor.geometry.attributes.position;
+            if (_cursor.userData.anchored) {
+              const segment = new LineSegments(
+                _cursor.geometry.clone(),
+                _cursor.material
+              );
+              segment.userData.tangible = true;
+              _edits.push([
+                segment,
+                'segment',
+                [position.array[0], position.array[1], position.array[2]],
+                [position.array[3], position.array[4], position.array[5]],
+              ]);
+              adviseEdits();
+              segment.layers.set(SKETCH_LAYER);
+              scene.attach(segment);
+              _cursor.userData.anchored = false;
+            } else {
+              position.array[3] = position.array[0];
+              position.array[4] = position.array[1];
+              position.array[5] = position.array[2];
+              _cursor.userData.anchored = true;
+            }
             break;
-          case 'f':
-            _to.position.addScaledVector(_xAxis, -_step);
-            break;
-          case 't':
-            _to.position.addScaledVector(_yAxis, _step);
-            break;
-          case 'g':
-            _to.position.addScaledVector(_yAxis, -_step);
-            break;
-          case 'y':
-            _to.position.addScaledVector(_zAxis, _step);
-            break;
-          case 'r':
-            _to.position.addScaledVector(_zAxis, -_step);
-            break;
+          }
 
-          // up
-          case 'l':
-            _to.position.addScaledVector(_xAxis, _step);
+          case 'Delete':
+          case 'Backspace': {
+            if (_object) {
+              const object = _object;
+              detach();
+              object.removeFromParent();
+            }
             break;
-          case 'j':
-            _to.position.addScaledVector(_xAxis, -_step);
-            break;
-          case 'i':
-            _to.position.addScaledVector(_yAxis, _step);
-            break;
-          case 'k':
-            _to.position.addScaledVector(_yAxis, -_step);
-            break;
-          case 'o':
-            _to.position.addScaledVector(_zAxis, _step);
-            break;
-          case 'u':
-            _to.position.addScaledVector(_zAxis, -_step);
-            break;
+          }
 
           // Pass on other keystrokes
           default:
@@ -405,9 +395,7 @@ class AnchorControls extends EventDispatcher {
               event,
               object: _object,
               placeObject,
-              to: _to,
               type: 'keydown',
-              up: _up,
             });
             break;
         }
@@ -417,10 +405,7 @@ class AnchorControls extends EventDispatcher {
     };
 
     const onPointerDown = (event) => {
-      const rect = event.target.getBoundingClientRect();
-      const x = ((event.clientX - rect.x) / rect.width) * 2 - 1;
-      const y = -((event.clientY - rect.y) / rect.height) * 2 + 1;
-      const { object } = raycast(x, y, _camera, [_scene]);
+      const { object } = raycast(_mouseX, _mouseY, _camera, [_scene]);
       if (!object) {
         detach();
       } else {

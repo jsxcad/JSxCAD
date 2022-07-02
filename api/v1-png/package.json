@@ -25,11 +25,9 @@
   "dependencies": {
     "@jsxcad/algorithm-contour": "^0.0.79",
     "@jsxcad/api-shape": "^0.0.79",
-    "@jsxcad/api-v1-math": "^0.0.79",
     "@jsxcad/convert-png": "^0.0.79",
     "@jsxcad/geometry": "^0.0.79",
-    "@jsxcad/sys": "^0.0.79",
-    "simplify-path": "^1.1.0"
+    "@jsxcad/sys": "^0.0.79"
   },
   "devDependencies": {
     "depcheck": "^1.4.1",

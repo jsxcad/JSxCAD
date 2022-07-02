@@ -1,8 +1,8 @@
 import Shape from './Shape.js';
 
-export const Segments = (...segments) =>
+export const Segments = (segments) =>
   Shape.fromSegments(
-    ...Shape.toNestedValues(segments).map(([source, target]) => [
+    Shape.toNestedValues(segments).map(([source, target]) => [
       Shape.toCoordinate(undefined, source),
       Shape.toCoordinate(undefined, target),
     ])

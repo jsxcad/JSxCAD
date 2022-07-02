@@ -12540,7 +12540,7 @@ function deHyphenate(str) {
     return str.replace(/-(.)/g, function(m, m1) { return m1.toUpperCase(); });
 }
 
-exports.version = "1.6.0";
+exports.version = "1.7.1";
 
 });
 
@@ -23906,7 +23906,10 @@ var Gutter = function(parentEl) {
                 rowInfo.text.push(annoText);
 
             var type = annotation.type;
-            if (type == "error")
+            var className = annotation.className;
+            if (className) 
+                rowInfo.className = className;
+            else if (type == "error")
                 rowInfo.className = " ace_error";
             else if (type == "warning" && rowInfo.className != " ace_error")
                 rowInfo.className = " ace_warning";
@@ -27761,7 +27764,7 @@ var WorkerClient = function(worker) {
 
         this.$doc = doc;
         this.call("setValue", [doc.getValue()]);
-        doc.on("change", this.changeListener);
+        doc.on("change", this.changeListener, true);
     };
 
     this.changeListener = function(delta) {
@@ -40689,6 +40692,8 @@ var Autocomplete = function() {
         if (data.completer && data.completer.insertMatch) {
             data.completer.insertMatch(this.editor, data);
         } else {
+            if (!completions)
+                return false;
             if (completions.filterText) {
                 var ranges = this.editor.selection.getAllRanges();
                 for (var i = 0, range; range = ranges[i]; i++) {
@@ -42305,6 +42310,7 @@ class OrbitView extends ReactDOM$2.PureComponent {
       onClick: propTypes$1.exports["function"],
       onDrag: propTypes$1.exports["function"],
       onDragEnd: propTypes$1.exports["function"],
+      onEdits: propTypes$1.exports["function"],
       onKeydown: propTypes$1.exports["function"],
       onJog: propTypes$1.exports["function"],
       onUpdateGeometry: propTypes$1.exports["function"],
@@ -42451,6 +42457,20 @@ class OrbitView extends ReactDOM$2.PureComponent {
       }
     });
 
+    const handleEdits = ({
+      edits
+    }) => {
+      const {
+        onEdits
+      } = this.props;
+
+      if (onEdits) {
+        onEdits({
+          edits
+        });
+      }
+    };
+
     const handleJog = ({
       object,
       at,
@@ -42507,6 +42527,7 @@ class OrbitView extends ReactDOM$2.PureComponent {
 
     anchorControls.addEventListener('change', handleJog);
     anchorControls.addEventListener('keydown', handleKeydown);
+    anchorControls.addEventListener('edits', handleEdits);
 
     const handleClick = type => event => {
       const {
@@ -43012,13 +43033,23 @@ class App extends ReactDOM$2.Component {
 
     this.Clipboard.change = data => {
       const {
-        Clipboard
+        Clipboard = {}
       } = this.state;
       this.setState({
         Clipboard: { ...Clipboard,
           code: data
         }
       });
+    };
+
+    this.Clipboard.getCode = data => {
+      const {
+        Clipboard = {}
+      } = this.state;
+      const {
+        code = 'const $ = Group();'
+      } = Clipboard;
+      return code;
     };
 
     this.Clipboard.run = () => {};
@@ -43334,7 +43365,7 @@ class App extends ReactDOM$2.Component {
           workspace
         });
         logInfo('app/App', `Run/6 ${path}`);
-        let script = NotebookText;
+        let script = this.Clipboard.getCode() + NotebookText;
 
         const evaluate = async script => {
           try {
@@ -43522,6 +43553,14 @@ class App extends ReactDOM$2.Component {
     this.View.pendingOperations = [];
     this.View.operationsScheduled = false;
 
+    this.View.click = ({
+      object,
+      ray
+    }) => {
+      console.log(`QQ/object: ${JSON.stringify(object)}`);
+      console.log(`QQ/ray: ${JSON.stringify(ray)}`);
+    };
+
     this.View.executeOperations = async () => {
       try {
         while (this.View.pendingOperations.length > 0) {
@@ -43571,6 +43610,63 @@ class App extends ReactDOM$2.Component {
 
       this.View.operationsScheduled = true;
       this.View.executeOperations();
+    };
+
+    this.View.edits = async ({
+      edits
+    }) => {
+      const points = [];
+      const segments = [];
+
+      for (const edit of edits) {
+        const [, type] = edit;
+
+        switch (type) {
+          case 'point':
+            {
+              const [,, point] = edit;
+              points.push(`[${point[0].toFixed(2)}, ${point[1].toFixed(2)}, ${point[2].toFixed(2)}]`);
+              break;
+            }
+
+          case 'segment':
+            {
+              const [,, source, target] = edit;
+              segments.push(`[[${source[0].toFixed(2)}, ${source[1].toFixed(2)}, ${source[2].toFixed(2)}], [${target[0].toFixed(2)}, ${target[1].toFixed(2)}, ${target[2].toFixed(2)}]]`);
+              break;
+            }
+        }
+      }
+
+      const ops = [];
+
+      if (points.length > 0) {
+        ops.push(`Points([${points.join(', ')}])`);
+      }
+
+      if (segments.length > 0) {
+        ops.push(`Segments([${segments.join(', ')}])`);
+      }
+
+      switch (ops.length) {
+        case 0:
+          {
+            this.Clipboard.change(``);
+            break;
+          }
+
+        case 1:
+          {
+            this.Clipboard.change(`const $ = ${ops[0]};`);
+            break;
+          }
+
+        default:
+          {
+            this.Clipboard.change(`const $ = Group(${ops.join(', ')});`);
+            break;
+          }
+      }
     };
 
     this.View.jogPendingUpdate = new Map();
@@ -44024,6 +44120,8 @@ class App extends ReactDOM$2.Component {
               view: View.view,
               sourceLocation: View.sourceLocation,
               workspace: workspace,
+              onClick: this.View.click,
+              onEdits: this.View.edits,
               onJog: this.View.jog,
               onKeydown: this.View.keydown,
               onMove: this.View.move,

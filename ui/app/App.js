@@ -369,8 +369,14 @@ class App extends React.Component {
     this.Clipboard = {};
 
     this.Clipboard.change = (data) => {
-      const { Clipboard } = this.state;
+      const { Clipboard = {} } = this.state;
       this.setState({ Clipboard: { ...Clipboard, code: data } });
+    };
+
+    this.Clipboard.getCode = (data) => {
+      const { Clipboard = {} } = this.state;
+      const { code = 'const $ = Group();' } = Clipboard;
+      return code;
     };
 
     this.Clipboard.run = () => {};
@@ -604,7 +610,8 @@ class App extends React.Component {
         });
         logInfo('app/App', `Run/6 ${path}`);
 
-        let script = NotebookText;
+        let script = this.Clipboard.getCode() + NotebookText;
+
         const evaluate = async (script) => {
           try {
             logInfo('app/App', `Distribute eval for ${path}`);
@@ -768,6 +775,11 @@ class App extends React.Component {
     this.View.pendingOperations = [];
     this.View.operationsScheduled = false;
 
+    this.View.click = ({ object, ray }) => {
+      console.log(`QQ/object: ${JSON.stringify(object)}`);
+      console.log(`QQ/ray: ${JSON.stringify(ray)}`);
+    };
+
     this.View.executeOperations = async () => {
       try {
         while (this.View.pendingOperations.length > 0) {
@@ -803,6 +815,57 @@ class App extends React.Component {
       // Start processing.
       this.View.operationsScheduled = true;
       this.View.executeOperations();
+    };
+
+    this.View.edits = async ({ edits }) => {
+      const points = [];
+      const segments = [];
+      for (const edit of edits) {
+        const [, type] = edit;
+        switch (type) {
+          case 'point': {
+            const [, , point] = edit;
+            points.push(
+              `[${point[0].toFixed(2)}, ${point[1].toFixed(
+                2
+              )}, ${point[2].toFixed(2)}]`
+            );
+            break;
+          }
+          case 'segment': {
+            const [, , source, target] = edit;
+            segments.push(
+              `[[${source[0].toFixed(2)}, ${source[1].toFixed(
+                2
+              )}, ${source[2].toFixed(2)}], [${target[0].toFixed(
+                2
+              )}, ${target[1].toFixed(2)}, ${target[2].toFixed(2)}]]`
+            );
+            break;
+          }
+        }
+      }
+      const ops = [];
+      if (points.length > 0) {
+        ops.push(`Points([${points.join(', ')}])`);
+      }
+      if (segments.length > 0) {
+        ops.push(`Segments([${segments.join(', ')}])`);
+      }
+      switch (ops.length) {
+        case 0: {
+          this.Clipboard.change(``);
+          break;
+        }
+        case 1: {
+          this.Clipboard.change(`const $ = ${ops[0]};`);
+          break;
+        }
+        default: {
+          this.Clipboard.change(`const $ = Group(${ops.join(', ')});`);
+          break;
+        }
+      }
     };
 
     this.View.jogPendingUpdate = new Map();
@@ -1221,6 +1284,8 @@ class App extends React.Component {
               view={View.view}
               sourceLocation={View.sourceLocation}
               workspace={workspace}
+              onClick={this.View.click}
+              onEdits={this.View.edits}
               onJog={this.View.jog}
               onKeydown={this.View.keydown}
               onMove={this.View.move}

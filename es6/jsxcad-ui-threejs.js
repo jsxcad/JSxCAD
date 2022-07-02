@@ -1,4 +1,4 @@
-import { Object3D, PerspectiveCamera, Scene, AxesHelper, SpotLight, WebGLRenderer, Raycaster, Vector2, EventDispatcher, MeshBasicMaterial, Vector3, Mesh, BoxGeometry, ArrowHelper, MeshPhysicalMaterial, MeshPhongMaterial, MeshNormalMaterial, ImageBitmapLoader, CanvasTexture, RepeatWrapping, Group, Shape, Path, ShapeGeometry, EdgesGeometry, LineBasicMaterial, LineSegments, WireframeGeometry, Plane, BufferGeometry, Float32BufferAttribute, PointsMaterial, Points, VertexColors, Color, Matrix4, Box3, Matrix3, Quaternion, GridHelper, PlaneGeometry, MeshStandardMaterial, Frustum, Layers, TrackballControls } from './jsxcad-algorithm-threejs.js';
+import { Object3D, PerspectiveCamera, Scene, AxesHelper, SpotLight, WebGLRenderer, Raycaster, Vector2, Points, LineSegments, Shape, EventDispatcher, MeshBasicMaterial, Vector3, BufferGeometry, LineBasicMaterial, Float32BufferAttribute, Mesh, BoxGeometry, MeshPhysicalMaterial, MeshPhongMaterial, MeshNormalMaterial, ImageBitmapLoader, CanvasTexture, RepeatWrapping, Group, Path, ShapeGeometry, EdgesGeometry, WireframeGeometry, Plane, PointsMaterial, Color, Matrix4, Box3, Matrix3, Quaternion, GridHelper, PlaneGeometry, MeshStandardMaterial, Frustum, Layers, TrackballControls } from './jsxcad-algorithm-threejs.js';
 import { toRgbFromTags } from './jsxcad-algorithm-color.js';
 import { toThreejsMaterialFromTags } from './jsxcad-algorithm-material.js';
 
@@ -102,10 +102,34 @@ geometryRaycaster.layers.set(GEOMETRY_LAYER);
 
 let sketchRaycaster = new Raycaster();
 sketchRaycaster.layers.set(SKETCH_LAYER);
+sketchRaycaster.params.Line.threshold = 0.2;
+sketchRaycaster.params.Points.threshold = 0.2;
 
-const cast = (raycaster, position, camera, objects) => {
+const precedence = (a) => {
+  if (a.object instanceof Points) {
+    return 3;
+  } else if (a.object instanceof LineSegments) {
+    return 2;
+  } else if (a.object instanceof Shape) {
+    return 1;
+  } else {
+    return 0;
+  }
+};
+
+const order = (a, b) => {
+  const delta = a.distance - b.distance;
+  if (delta !== 0) {
+    return delta;
+  }
+  return precedence(b) - precedence(a);
+};
+
+const cast = (raycaster, position, camera, objects, filter = (s) => true) => {
   raycaster.setFromCamera(position, camera);
-  const intersects = raycaster.intersectObjects(objects, true);
+  const intersects = raycaster.intersectObjects(objects, true).filter(filter);
+
+  intersects.sort(order);
 
   for (const { face, object, point } of intersects) {
     if (!object.userData.tangible) {
@@ -113,22 +137,18 @@ const cast = (raycaster, position, camera, objects) => {
     }
     if (face) {
       const { normal } = face;
-      const ray = [
-        [point.x, point.y, point.z],
-        [normal.x, normal.y, normal.z],
-      ];
-      return { ray, object };
+      return { point, normal, object };
     } else {
       return { point, object };
     }
   }
 };
 
-const raycast = (x, y, camera, objects) => {
+const raycast = (x, y, camera, objects, filter) => {
   const position = new Vector2(x, y);
   return (
-    cast(sketchRaycaster, position, camera, objects) ||
-    cast(geometryRaycaster, position, camera, objects) ||
+    cast(sketchRaycaster, position, camera, objects, filter) ||
+    cast(geometryRaycaster, position, camera, objects, filter) ||
     {}
   );
 };
@@ -136,7 +156,7 @@ const raycast = (x, y, camera, objects) => {
 // global document
 
 class AnchorControls extends EventDispatcher {
-  constructor(_camera, _domElement, _scene) {
+  constructor(_camera, _domElement, scene, render) {
     super();
 
     const _material = new MeshBasicMaterial({
@@ -166,44 +186,41 @@ class AnchorControls extends EventDispatcher {
 
     let _step = 1;
     let _object = null;
+    let _scene = scene;
+
+    let _edits = [];
+
+    let _cursor;
+
+    {
+      const cursorGeometry = new BufferGeometry();
+      const material = new LineBasicMaterial({ linewidth: 2, color: 0x000000 });
+      const positions = [0, 0, 0, 0, 0, 1];
+      cursorGeometry.setAttribute(
+        'position',
+        new Float32BufferAttribute(positions, 3)
+      );
+      _cursor = new LineSegments(cursorGeometry, material);
+      _cursor.visible = true;
+      _cursor.layers.set(SKETCH_LAYER);
+      _cursor.userData.dressing = true;
+      _cursor.userData.anchored = false;
+      _scene.add(_cursor);
+    }
 
     let _at = new Mesh(new BoxGeometry(1, 1, 1), yellow);
-
-    let _to = new Mesh(new BoxGeometry(0.5, 0.5, 0.5), red);
-    let _toArrow = new ArrowHelper();
-
-    let _up = new Mesh(new BoxGeometry(0.5, 0.5, 0.5), blue);
-    let _upArrow = new ArrowHelper();
 
     _at.visible = false;
     _at.layers.set(SKETCH_LAYER);
     _at.userData.dressing = true;
     _scene.add(_at);
 
-    _to.visible = false;
-    _to.layers.set(SKETCH_LAYER);
-    _to.userData.dressing = true;
-    _scene.add(_to);
-
-    _toArrow.layers.set(SKETCH_LAYER);
-    _toArrow.setColor(0xff0000);
-    _toArrow.userData.dressing = true;
-    _at.add(_toArrow);
-
-    _up.visible = false;
-    _up.layers.set(SKETCH_LAYER);
-    _up.userData.dressing = true;
-    _scene.add(_up);
-
-    _upArrow.layers.set(SKETCH_LAYER);
-    _upArrow.setColor(0x0000ff);
-    _upArrow.userData.dressing = true;
-    _at.add(_upArrow);
-
     const deleteObject = () => {
       if (!_object) {
         return;
       }
+      // Remove the edits that produced this object.
+      _edits = _edits.filter((entry) => entry.object !== _object);
       // We just hide the object, because we might be copying it later.
       _object.visible = false;
     };
@@ -248,7 +265,7 @@ class AnchorControls extends EventDispatcher {
       _yAxis.set(NaN, NaN, NaN);
       _zAxis.set(NaN, NaN, NaN);
 
-      // This could be more efficient, since we don't need to consider axes already asigned.
+      // This could be more efficient, since we don't need to consider axes already assigned.
       const fit = (v, cameraAxis) => {
         const xDot = x.dot(v);
         const xFit = Math.abs(xDot);
@@ -290,30 +307,15 @@ class AnchorControls extends EventDispatcher {
     // We're changing our state.
     const update = () => {
       if (_object) {
+        const parent = _object.parent;
+        _scene.attach(_object);
         _object.position.copy(_at.position);
-      }
-      const up = new Vector3();
-      up.subVectors(_up.position, _at.position);
-      up.normalize();
-      if (_object) {
-        _object.up.copy(up);
-        _object.lookAt(_to.position);
+        parent.attach(_object);
       }
       _at.scale.set(_step, _step, _step);
-      _to.scale.set(_step / 2, _step / 2, _step / 2);
-      _up.scale.set(_step / 2, _step / 2, _step / 2);
-      const dir = new Vector3();
-      dir.subVectors(_to.position, _at.position).normalize();
-      _toArrow.setDirection(dir);
-      _toArrow.setLength(_step * 5);
-      dir.subVectors(_up.position, _at.position).normalize();
-      _upArrow.setDirection(dir);
-      _upArrow.setLength(_step * 2);
       this.dispatchEvent({
         type: 'change',
         at: _at,
-        to: _to,
-        up: _up,
         object: _object,
       });
     };
@@ -330,23 +332,16 @@ class AnchorControls extends EventDispatcher {
         }
       }
       _at.material.color.setHex(0xff4500); // orange red
-      _at.visible = true;
-      _to.visible = true;
-      _up.visible = true;
+      // _at.visible = true;
 
       _at.position.set(0, 0, 0);
       _object.localToWorld(_at.position);
-
-      _to.position.set(0, 0, 1);
-      _object.localToWorld(_to.position);
-
-      _up.position.set(0, 1, 0);
-      _object.localToWorld(_up.position);
 
       change();
       update();
 
       _domElement.addEventListener('keydown', onKeyDown);
+      _domElement.addEventListener('mousemove', onMouseMove);
       this.dispatchEvent({ type: 'change' });
     };
 
@@ -368,20 +363,73 @@ class AnchorControls extends EventDispatcher {
 
     const dispose = () => detach();
 
-    const onKeyDown = (event) => {
-      // if (!_object) return;
+    let _mouseX, _mouseY;
 
+    const adviseEdits = () => {
+      /*
+      const edits = [];
+      scene.traverse((object) => {
+        if (object.userData.edit) {
+          edits.push(object.userData.edit);
+        }
+      });
+      */
+      this.dispatchEvent({
+        edits: _edits,
+        type: 'edits',
+      });
+    };
+
+    const onMouseMove = (event) => {
+      const rect = event.target.getBoundingClientRect();
+      _mouseX = ((event.clientX - rect.x) / rect.width) * 2 - 1;
+      _mouseY = -((event.clientY - rect.y) / rect.height) * 2 + 1;
+
+      const { point, normal } = raycast(
+        _mouseX,
+        _mouseY,
+        _camera,
+        [_scene],
+        ({ object }) => object instanceof Mesh || object.userData.mat
+      );
+
+      if (point) {
+        const position = _cursor.geometry.attributes.position;
+        position.array[0] = point.x;
+        position.array[1] = point.y;
+        position.array[2] = point.z;
+        if (_cursor.userData.anchored !== true) {
+          position.array[3] = point.x + normal.x;
+          position.array[4] = point.y + normal.y;
+          position.array[5] = point.z + normal.z;
+        }
+        position.needsUpdate = true;
+        render();
+      }
+    };
+
+    const onKeyDown = (event) => {
       if (event.getModifierState('Control')) {
-        this.dispatchEvent({
-          at: _at,
-          deleteObject,
-          object: _object,
-          placeObject,
-          type: 'keydown',
-          event,
-          to: _to,
-          up: _up,
-        });
+        switch (event.key) {
+          case 'z': {
+            if (_edits.length > 0) {
+              const [object] = _edits[_edits.length - 1];
+              object.visible = false;
+              _edits.length -= 1;
+              adviseEdits();
+            }
+            break;
+          }
+          default:
+            this.dispatchEvent({
+              at: _at,
+              deleteObject,
+              object: _object,
+              placeObject,
+              type: 'keydown',
+              event,
+            });
+        }
       } else {
         // These exclude control keys.
         switch (event.key) {
@@ -421,103 +469,64 @@ class AnchorControls extends EventDispatcher {
           case 'ArrowRight':
           case 'd':
             _at.position.addScaledVector(_xAxis, _step);
-            {
-              _up.position.addScaledVector(_xAxis, _step);
-            }
-            {
-              _to.position.addScaledVector(_xAxis, _step);
-            }
             break;
           case 'ArrowLeft':
           case 'a':
             _at.position.addScaledVector(_xAxis, -_step);
-            {
-              _up.position.addScaledVector(_xAxis, -_step);
-            }
-            {
-              _to.position.addScaledVector(_xAxis, -_step);
-            }
             break;
           case 'ArrowUp':
           case 'w':
             _at.position.addScaledVector(_yAxis, _step);
-            {
-              _up.position.addScaledVector(_yAxis, _step);
-            }
-            {
-              _to.position.addScaledVector(_yAxis, _step);
-            }
             break;
           case 'ArrowDown':
           case 's':
             _at.position.addScaledVector(_yAxis, -_step);
-            {
-              _up.position.addScaledVector(_yAxis, -_step);
-            }
-            {
-              _to.position.addScaledVector(_yAxis, -_step);
-            }
             break;
           case 'PageDown':
           case 'e':
             _at.position.addScaledVector(_zAxis, _step);
-            {
-              _up.position.addScaledVector(_zAxis, _step);
-            }
-            {
-              _to.position.addScaledVector(_zAxis, _step);
-            }
             break;
           case 'PageUp':
           case 'q':
             _at.position.addScaledVector(_zAxis, -_step);
-            {
-              _up.position.addScaledVector(_zAxis, -_step);
-            }
-            {
-              _to.position.addScaledVector(_zAxis, -_step);
-            }
             break;
 
-          // to
-          case 'h':
-            _to.position.addScaledVector(_xAxis, _step);
+          case 't': {
+            const position = _cursor.geometry.attributes.position;
+            if (_cursor.userData.anchored) {
+              const segment = new LineSegments(
+                _cursor.geometry.clone(),
+                _cursor.material
+              );
+              segment.userData.tangible = true;
+              _edits.push([
+                segment,
+                'segment',
+                [position.array[0], position.array[1], position.array[2]],
+                [position.array[3], position.array[4], position.array[5]],
+              ]);
+              adviseEdits();
+              segment.layers.set(SKETCH_LAYER);
+              scene.attach(segment);
+              _cursor.userData.anchored = false;
+            } else {
+              position.array[3] = position.array[0];
+              position.array[4] = position.array[1];
+              position.array[5] = position.array[2];
+              _cursor.userData.anchored = true;
+            }
             break;
-          case 'f':
-            _to.position.addScaledVector(_xAxis, -_step);
-            break;
-          case 't':
-            _to.position.addScaledVector(_yAxis, _step);
-            break;
-          case 'g':
-            _to.position.addScaledVector(_yAxis, -_step);
-            break;
-          case 'y':
-            _to.position.addScaledVector(_zAxis, _step);
-            break;
-          case 'r':
-            _to.position.addScaledVector(_zAxis, -_step);
-            break;
+          }
 
-          // up
-          case 'l':
-            _to.position.addScaledVector(_xAxis, _step);
+          case 'Delete':
+          case 'Backspace': {
+            if (_object) {
+              const object = _object;
+              detach();
+              object.removeFromParent();
+            }
             break;
-          case 'j':
-            _to.position.addScaledVector(_xAxis, -_step);
-            break;
-          case 'i':
-            _to.position.addScaledVector(_yAxis, _step);
-            break;
-          case 'k':
-            _to.position.addScaledVector(_yAxis, -_step);
-            break;
-          case 'o':
-            _to.position.addScaledVector(_zAxis, _step);
-            break;
-          case 'u':
-            _to.position.addScaledVector(_zAxis, -_step);
-            break;
+          }
 
           // Pass on other keystrokes
           default:
@@ -527,9 +536,7 @@ class AnchorControls extends EventDispatcher {
               event,
               object: _object,
               placeObject,
-              to: _to,
               type: 'keydown',
-              up: _up,
             });
             break;
         }
@@ -539,10 +546,7 @@ class AnchorControls extends EventDispatcher {
     };
 
     const onPointerDown = (event) => {
-      const rect = event.target.getBoundingClientRect();
-      const x = ((event.clientX - rect.x) / rect.width) * 2 - 1;
-      const y = -((event.clientY - rect.y) / rect.height) * 2 + 1;
-      const { object } = raycast(x, y, _camera, [_scene]);
+      const { object } = raycast(_mouseX, _mouseY, _camera, [_scene]);
       if (!object) {
         detach();
       } else {
@@ -952,68 +956,6 @@ const buildMeshes = async ({
       scene.add(mesh);
       break;
     }
-    case 'paths': {
-      let transparent = false;
-      let opacity = 1;
-      const { paths } = geometry;
-      const bufferGeometry = new BufferGeometry();
-      const material = new LineBasicMaterial({
-        color: 0xffffff,
-        vertexColors: VertexColors,
-        transparent,
-        opacity,
-      });
-      const color = new Color(setColor(definitions, tags, {}, [0, 0, 0]).color);
-      const pathColors = [];
-      const positions = [];
-      for (const path of paths) {
-        const entry = { start: Math.floor(positions.length / 3), length: 0 };
-        let last = path.length - 1;
-        for (let nth = 0; nth < path.length; last = nth, nth += 1) {
-          const start = path[last];
-          const end = path[nth];
-          if (start === null || end === null) continue;
-          if (!start.every(isFinite) || !end.every(isFinite)) {
-            // Not sure where these non-finite path values are coming from.
-            continue;
-          }
-          const [aX = 0, aY = 0, aZ = 0] = start;
-          const [bX = 0, bY = 0, bZ = 0] = end;
-          pathColors.push(
-            color.r,
-            color.g,
-            color.b,
-            opacity,
-            color.r,
-            color.g,
-            color.b,
-            opacity
-          );
-          if (!isFinite(aX)) throw Error('die');
-          if (!isFinite(aY)) throw Error('die');
-          if (!isFinite(aZ)) throw Error('die');
-          if (!isFinite(bX)) throw Error('die');
-          if (!isFinite(bY)) throw Error('die');
-          if (!isFinite(bZ)) throw Error('die');
-          positions.push(aX, aY, aZ, bX, bY, bZ);
-          entry.length += 2;
-        }
-        if (entry.length > 0) ;
-      }
-      bufferGeometry.setAttribute(
-        'position',
-        new Float32BufferAttribute(positions, 3)
-      );
-      bufferGeometry.setAttribute(
-        'color',
-        new Float32BufferAttribute(pathColors, 4)
-      );
-      mesh = new LineSegments(bufferGeometry, material);
-      mesh.layers.set(layer);
-      updateUserData(geometry, scene, mesh.userData);
-      scene.add(mesh);
-      break;
-    }
     case 'points': {
       const { points } = geometry;
       const threeGeometry = new BufferGeometry();
@@ -1355,6 +1297,7 @@ const moveToFit = ({
     }
   }
   if (withGrid) {
+    // The visible mat is slightly below z0.
     const plane = new Mesh(
       new PlaneGeometry(length, width),
       new MeshStandardMaterial({
@@ -1371,6 +1314,26 @@ const moveToFit = ({
     plane.userData.tangible = false;
     plane.userData.dressing = true;
     plane.userData.grid = true;
+    scene.add(plane);
+    gridState.objects.push(plane);
+  }
+
+  if (withGrid) {
+    // The interactive mat is on z0.
+    const plane = new Mesh(
+      new PlaneGeometry(length, width),
+      new MeshStandardMaterial({
+        transparent: true,
+        opacity: 0,
+      })
+    );
+    plane.castShadow = false;
+    plane.position.set(0, 0, 0);
+    plane.layers.set(gridLayer);
+    plane.userData.tangible = true;
+    plane.userData.dressing = true;
+    plane.userData.grid = true;
+    plane.userData.mat = true;
     scene.add(plane);
     gridState.objects.push(plane);
   }
@@ -1408,8 +1371,8 @@ const moveToFit = ({
 
     camera.position.copy(target).sub(direction);
 
-    camera.near = distance / 100;
-    camera.far = distance * 100;
+    camera.near = 0.1; // 0.1mm
+    camera.far = 100 * 1000; // 1km
 
     camera.updateMatrix();
     camera.updateMatrixWorld();
@@ -1452,12 +1415,18 @@ const buildAnchorControls = ({
   camera,
   draggableObjects,
   endUpdating,
+  render,
   scene,
   startUpdating,
   trackballControls,
   viewerElement,
 }) => {
-  const anchorControls = new AnchorControls(camera, viewerElement, scene);
+  const anchorControls = new AnchorControls(
+    camera,
+    viewerElement,
+    scene,
+    render
+  );
   anchorControls.enable();
   return { anchorControls };
 };

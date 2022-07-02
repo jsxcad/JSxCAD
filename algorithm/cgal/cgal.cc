@@ -358,6 +358,42 @@ Vector SomeNormalOfSurfaceMesh(const Surface_mesh& mesh) {
   return CGAL::NULL_VECTOR;
 }
 
+template <class Kernel, class Container>
+void print_polygon(const CGAL::Polygon_2<Kernel, Container>& P) {
+  typename CGAL::Polygon_2<Kernel, Container>::Vertex_const_iterator vit;
+  std::cout << "[ " << P.size() << " vertices:";
+  for (vit = P.vertices_begin(); vit != P.vertices_end(); ++vit)
+    std::cout << " (" << *vit << ')';
+  std::cout << " ]" << std::endl;
+}
+
+template <class Kernel, class Container>
+void print_polygon_with_holes(
+    const CGAL::Polygon_with_holes_2<Kernel, Container>& pwh) {
+  if (!pwh.is_unbounded()) {
+    std::cout << "{ Outer boundary = ";
+    print_polygon(pwh.outer_boundary());
+  } else
+    std::cout << "{ Unbounded polygon." << std::endl;
+  typename CGAL::Polygon_with_holes_2<Kernel, Container>::Hole_const_iterator
+      hit;
+  unsigned int k = 1;
+  std::cout << " " << pwh.number_of_holes() << " holes:" << std::endl;
+  for (hit = pwh.holes_begin(); hit != pwh.holes_end(); ++hit, ++k) {
+    std::cout << " Hole #" << k << " = ";
+    print_polygon(*hit);
+  }
+  std::cout << " }" << std::endl;
+}
+
+template <class Kernel, class Container>
+void print_polygons_with_holes(
+    const std::vector<CGAL::Polygon_with_holes_2<Kernel, Container>>& pwhs) {
+  for (const auto& pwh : pwhs) {
+    print_polygon_with_holes(pwh);
+  }
+}
+
 class SurfaceMeshQuery {
   typedef CGAL::AABB_face_graph_triangle_primitive<Surface_mesh> Primitive;
   typedef CGAL::AABB_traits<Kernel, Primitive> Traits;
@@ -1077,7 +1113,9 @@ void convertArrangementToPolygonsWithHoles(
         }
       } while (++edge != start);
     }
-    undecided.push(face);
+    if (!decided) {
+      undecided.push(face);
+    }
   }
 
   for (Arrangement_2::Face_const_iterator face = arrangement.faces_begin();
@@ -1090,6 +1128,10 @@ void convertArrangementToPolygonsWithHoles(
     Arrangement_2::Ccb_halfedge_const_circulator start = face->outer_ccb();
     Arrangement_2::Ccb_halfedge_const_circulator edge = start;
     do {
+      if (edge->twin()->face() == edge->face()) {
+        // Skip antenna.
+        continue;
+      }
       const Point_2& point = edge->source()->point();
       if (point == edge->target()->point()) {
         // Skip zero length edges.
@@ -1112,6 +1154,12 @@ void convertArrangementToPolygonsWithHoles(
       polygon_boundary.resize(polygon_boundary.size() - 1);
     }
 
+    if (!polygon_boundary.is_simple()) {
+      std::cout << "Polygon is not simple: " << std::endl;
+      print_polygon(polygon_boundary);
+      continue;
+    }
+
     std::vector<Polygon_2> polygon_holes;
     for (Arrangement_2::Hole_const_iterator hole = face->holes_begin();
          hole != face->holes_end(); ++hole) {
@@ -1119,6 +1167,10 @@ void convertArrangementToPolygonsWithHoles(
       Arrangement_2::Ccb_halfedge_const_circulator start = *hole;
       Arrangement_2::Ccb_halfedge_const_circulator edge = start;
       do {
+        if (edge->twin()->face() == edge->face()) {
+          // Skip antenna.
+          continue;
+        }
         const Point_2& point = edge->source()->point();
         if (point == edge->target()->point()) {
           // Skip zero length edges.
@@ -1139,6 +1191,11 @@ void convertArrangementToPolygonsWithHoles(
                           polygon_hole[0])) {
         // Skip colinear points.
         polygon_hole.resize(polygon_hole.size() - 1);
+      }
+      if (!polygon_hole.is_simple()) {
+        std::cout << "Hole is not simple: " << std::endl;
+        print_polygon(polygon_hole);
+        continue;
       }
 
       if (polygon_hole.orientation() != CGAL::Sign::NEGATIVE) {
@@ -1269,42 +1326,6 @@ bool PolygonsWithHolesToSurfaceMesh(const Plane& plane,
     }
   }
   return true;
-}
-
-template <class Kernel, class Container>
-void print_polygon(const CGAL::Polygon_2<Kernel, Container>& P) {
-  typename CGAL::Polygon_2<Kernel, Container>::Vertex_const_iterator vit;
-  std::cout << "[ " << P.size() << " vertices:";
-  for (vit = P.vertices_begin(); vit != P.vertices_end(); ++vit)
-    std::cout << " (" << *vit << ')';
-  std::cout << " ]" << std::endl;
-}
-
-template <class Kernel, class Container>
-void print_polygon_with_holes(
-    const CGAL::Polygon_with_holes_2<Kernel, Container>& pwh) {
-  if (!pwh.is_unbounded()) {
-    std::cout << "{ Outer boundary = ";
-    print_polygon(pwh.outer_boundary());
-  } else
-    std::cout << "{ Unbounded polygon." << std::endl;
-  typename CGAL::Polygon_with_holes_2<Kernel, Container>::Hole_const_iterator
-      hit;
-  unsigned int k = 1;
-  std::cout << " " << pwh.number_of_holes() << " holes:" << std::endl;
-  for (hit = pwh.holes_begin(); hit != pwh.holes_end(); ++hit, ++k) {
-    std::cout << " Hole #" << k << " = ";
-    print_polygon(*hit);
-  }
-  std::cout << " }" << std::endl;
-}
-
-template <class Kernel, class Container>
-void print_polygons_with_holes(
-    const std::vector<CGAL::Polygon_with_holes_2<Kernel, Container>>& pwhs) {
-  for (const auto& pwh : pwhs) {
-    print_polygon_with_holes(pwh);
-  }
 }
 
 FT max2(FT a, FT b) { return a > b ? a : b; }
@@ -4091,13 +4112,9 @@ int Fill(Geometry* geometry) {
   for (int nth = 0; nth < size; nth++) {
     switch (geometry->getType(nth)) {
       case GEOMETRY_SEGMENTS: {
-        // We require segments to be their local z=0 plane.
-        Plane plane(0, 0, 1, 0);
+        // FIX: We project the segments onto (0, 0, 1, 0).
         Arrangement_2& arrangement = arrangements[Plane(0, 0, 1, 0)];
         for (Segment s3 : geometry->segments(nth)) {
-          if (!plane.has_on(s3.source()) || !plane.has_on(s3.target())) {
-            continue;
-          }
           Point_2 source(s3.source().x(), s3.source().y());
           Point_2 target(s3.target().x(), s3.target().y());
           if (source == target) {
