@@ -396,3 +396,5 @@ Segments([
 ])
   .fill()
   .topView();
+
+Arc(37).cut(inset(2)).ez(2).remesh(1).smooth(Box(50, 10, 20)).view();

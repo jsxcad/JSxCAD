@@ -42547,8 +42547,6 @@ class OrbitView extends ReactDOM$2.PureComponent {
         return;
       }
 
-      console.log(`QQ/object/userData: ${JSON.stringify(object.userData)}`);
-
       if (object.userData.onClick) {
         return object.userData.onClick({
           event
@@ -43556,10 +43554,7 @@ class App extends ReactDOM$2.Component {
     this.View.click = ({
       object,
       ray
-    }) => {
-      console.log(`QQ/object: ${JSON.stringify(object)}`);
-      console.log(`QQ/ray: ${JSON.stringify(ray)}`);
-    };
+    }) => {};
 
     this.View.executeOperations = async () => {
       try {

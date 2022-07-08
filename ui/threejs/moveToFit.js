@@ -24,7 +24,6 @@ export const moveToFit = ({
   gridState = { objects: [], visible: withGrid },
 } = {}) => {
   const { fit = true } = view;
-  const [length = 100, width = 100] = pageSize;
 
   let box;
 
@@ -105,35 +104,15 @@ export const moveToFit = ({
       gridState.objects.push(grid);
     }
   }
-  if (withGrid) {
-    // The visible mat is slightly below z0.
-    const plane = new Mesh(
-      new PlaneGeometry(length, width),
-      new MeshStandardMaterial({
-        color: 0x00ff00,
-        // depthWrite: false,
-        transparent: true,
-        opacity: 0.25,
-      })
-    );
-    plane.castShadow = false;
-    plane.receiveShadow = true;
-    plane.position.set(0, 0, -0.05);
-    plane.layers.set(gridLayer);
-    plane.userData.tangible = false;
-    plane.userData.dressing = true;
-    plane.userData.grid = true;
-    scene.add(plane);
-    gridState.objects.push(plane);
-  }
 
   if (withGrid) {
     // The interactive mat is on z0.
     const plane = new Mesh(
-      new PlaneGeometry(length, width),
+      new PlaneGeometry(10 * 1000, 10 * 1000),
       new MeshStandardMaterial({
         transparent: true,
         opacity: 0,
+        depthWrite: false,
       })
     );
     plane.castShadow = false;

@@ -1574,7 +1574,8 @@ const eachPoint = (geometry, emit) => {
   deletePendingSurfaceMeshes();
 };
 
-const filterTargets = (geometry) => ['graph'].includes(geometry.type);
+const filterTargets = (geometry) =>
+  ['graph'].includes(geometry.type) && isNotTypeGhost(geometry);
 
 const eachTriangle = (geometry, emitTriangle) => {
   const concreteGeometry = toConcreteGeometry(geometry);

@@ -74,5 +74,5 @@ export const buildMeshMaterial = async (definitions, tags) => {
   }
 
   // Else, default to normal material.
-  return new MeshNormalMaterial();
+  return new MeshNormalMaterial({ transparent: true, opacity: 1 });
 };

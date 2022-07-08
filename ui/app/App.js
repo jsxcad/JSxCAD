@@ -775,10 +775,7 @@ class App extends React.Component {
     this.View.pendingOperations = [];
     this.View.operationsScheduled = false;
 
-    this.View.click = ({ object, ray }) => {
-      console.log(`QQ/object: ${JSON.stringify(object)}`);
-      console.log(`QQ/ray: ${JSON.stringify(ray)}`);
-    };
+    this.View.click = ({ object, ray }) => {};
 
     this.View.executeOperations = async () => {
       try {
