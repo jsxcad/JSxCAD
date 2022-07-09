@@ -5341,7 +5341,6 @@ int Simplify(Geometry* geometry, double ratio, bool simplify_points,
 }
 
 int Smooth(Geometry* geometry, size_t count, size_t iterations, double time) {
-  std::cout << "QQ/Smooth/v1" << std::endl;
   size_t size = geometry->getSize();
 
   geometry->copyInputMeshesToOutputMeshes();
