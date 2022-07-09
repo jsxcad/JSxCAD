@@ -518,7 +518,7 @@ export const buildMeshes = async ({
 
         {
           const edges = new EdgesGeometry(shapeGeometry);
-          const material = new LineBasicMaterial({ color: 0x000000 });
+          const material = new LineBasicMaterial({ color: 0x000000, linewidth: 1 });
           const outline = new LineSegments(edges, material);
           outline.userData.isOutline = true;
           outline.userData.hasShowOutline = tags.includes('show:outline');

@@ -18,7 +18,6 @@ export const inset = (geometry, ...args) => {
   linearize(concreteGeometry, filter, inputs);
   const outputs = insetWithCgal(inputs, ...args);
   // Put the inner insets first.
-  outputs.reverse();
   deletePendingSurfaceMeshes();
   return taggedGroup({}, ...outputs);
 };

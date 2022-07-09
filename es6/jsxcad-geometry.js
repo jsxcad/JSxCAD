@@ -925,7 +925,6 @@ const inset = (geometry, ...args) => {
   linearize(concreteGeometry, filter$q, inputs);
   const outputs = inset$1(inputs, ...args);
   // Put the inner insets first.
-  outputs.reverse();
   deletePendingSurfaceMeshes();
   return taggedGroup({}, ...outputs);
 };
