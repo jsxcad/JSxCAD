@@ -15,19 +15,17 @@ const filter = (geometry) =>
     geometry.type
   ) && isNotTypeGhost(geometry);
 
-const filterClips = (geometry) => filter(geometry) && isNotTypeGhost(geometry);
-
 export const clip = (geometry, geometries, open) => {
   const concreteGeometry = toConcreteGeometry(geometry);
   const inputs = [];
   linearize(concreteGeometry, filter, inputs);
   const count = inputs.length;
   for (const geometry of geometries) {
-    linearize(geometry, filterClips, inputs);
+    linearize(geometry, filter, inputs);
   }
   const outputs = clipWithCgal(inputs, count, open);
   const ghosts = [];
-  for (let nth = count; nth < inputs.length; nth++) {
+  for (let nth = 0; nth < inputs.length; nth++) {
     ghosts.push(hasMaterial(hasTypeGhost(inputs[nth]), 'ghost'));
   }
   deletePendingSurfaceMeshes();

@@ -108,7 +108,7 @@ Group(Box(5).color('red'), Arc(6).color('blue'))
 ![Image](shape.md.10.png)
 
 ```JavaScript
-Box(10).inset(0.5, { step: 0.5 }).gridView(12);
+Box(10).inset(0.5, { step: 0.5 }).disjoint().n(0, 2, 4, 6, 8).gridView(13);
 ```
 
 ![Image](shape.md.11.png)
@@ -636,3 +636,9 @@ Segments([
 ```
 
 ![Image](shape.md.65.png)
+
+```JavaScript
+Arc(37).cut(inset(2)).ez(2).remesh(1).smooth(Box(50, 10, 20)).view();
+```
+
+![Image](shape.md.66.png)

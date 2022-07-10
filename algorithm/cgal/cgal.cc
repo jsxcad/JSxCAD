@@ -5344,6 +5344,7 @@ int Smooth(Geometry* geometry, size_t count, size_t iterations, double time) {
   size_t size = geometry->getSize();
 
   geometry->copyInputMeshesToOutputMeshes();
+  geometry->transformToAbsoluteFrame();
 
   for (size_t nth = 0; nth < size; nth++) {
     if (!geometry->is_mesh(nth)) {
@@ -5351,34 +5352,49 @@ int Smooth(Geometry* geometry, size_t count, size_t iterations, double time) {
     }
     Surface_mesh& mesh = geometry->mesh(nth);
 
-    Cartesian_surface_mesh cartesian_mesh;
-    copy_face_graph(mesh, cartesian_mesh);
-
-    std::set<Vertex_index> unconstrained_vertices;
-    for (int selection = count; selection < size; selection++) {
-      {
-        Surface_mesh working_selection(geometry->mesh(selection));
-        CGAL::Polygon_mesh_processing::corefine(
-            mesh, geometry->mesh(selection), CGAL::parameters::all_default(),
-            CGAL::parameters::all_default());
+    std::set<Vertex_index> constrained_vertices;
+    if (count < size) {
+      // Apply selections.
+      std::set<Vertex_index> unconstrained_vertices;
+      for (int selection = count; selection < size; selection++) {
+        {
+          Surface_mesh working_selection(geometry->mesh(selection));
+          CGAL::Polygon_mesh_processing::corefine(
+              mesh, geometry->mesh(selection), CGAL::parameters::all_default(),
+              CGAL::parameters::all_default());
+        }
+        CGAL::Side_of_triangle_mesh<Surface_mesh, Kernel> inside(
+            geometry->mesh(selection));
+        for (Vertex_index vertex : mesh.vertices()) {
+          if (inside(mesh.point(vertex)) != CGAL::ON_UNBOUNDED_SIDE) {
+            // This vertex may be smoothed.
+            unconstrained_vertices.insert(vertex);
+          }
+        }
       }
-      CGAL::Side_of_triangle_mesh<Surface_mesh, Kernel> inside(
-          geometry->mesh(selection));
       for (Vertex_index vertex : mesh.vertices()) {
-        if (inside(mesh.point(vertex)) != CGAL::ON_UNBOUNDED_SIDE) {
-          // This vertex may be smoothed.
-          unconstrained_vertices.insert(vertex);
+        if (!unconstrained_vertices.count(vertex)) {
+          constrained_vertices.insert(vertex);
         }
       }
     }
-    std::set<Vertex_index> constrained_vertices;
-    for (Vertex_index vertex : mesh.vertices()) {
-      if (!unconstrained_vertices.count(vertex)) {
-        constrained_vertices.insert(vertex);
-      }
+
+    std::set<Cartesian_surface_mesh::vertex_index>
+        cartesian_constrained_vertices;
+    boost::unordered_map<Surface_mesh::vertex_index,
+                         Cartesian_surface_mesh::vertex_index>
+        vertex_map;
+    Cartesian_surface_mesh cartesian_mesh;
+    copy_face_graph(mesh, cartesian_mesh,
+                    CGAL::parameters::vertex_to_vertex_map(
+                        boost::make_assoc_property_map(vertex_map)));
+
+    for (Vertex_index vertex : constrained_vertices) {
+      cartesian_constrained_vertices.insert(vertex_map[vertex]);
     }
-    CGAL::Boolean_property_map<std::set<Vertex_index>> constrained_vertex_map(
-        constrained_vertices);
+
+    CGAL::Boolean_property_map<std::set<Vertex_index>>
+        cartesian_constrained_vertex_map(cartesian_constrained_vertices);
 
     CGAL::get_default_random() = CGAL::Random(0);
     std::srand(0);
@@ -5387,10 +5403,12 @@ int Smooth(Geometry* geometry, size_t count, size_t iterations, double time) {
         cartesian_mesh.faces(), cartesian_mesh, time,
         CGAL::Polygon_mesh_processing::parameters::number_of_iterations(
             iterations)
-            .vertex_is_constrained_map(constrained_vertex_map));
+            .vertex_is_constrained_map(cartesian_constrained_vertex_map));
     mesh.clear();
     copy_face_graph(cartesian_mesh, mesh);
   }
+
+  geometry->transformToLocalFrame();
 
   // This may require self intersection removal.
   return STATUS_OK;

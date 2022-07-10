@@ -329,6 +329,7 @@ class AnchorControls extends EventDispatcher {
         const { isOutline } = child.userData;
         if (isOutline) {
           child.visible = true;
+          child.material.color.set(0x9900cc); // violet
         }
       }
       _at.material.color.setHex(0xff4500); // orange red
@@ -352,8 +353,11 @@ class AnchorControls extends EventDispatcher {
       _object.material.opacity /= 0.5;
       for (const child of _object.children) {
         const { isOutline, hasShowOutline } = child.userData;
-        if (isOutline && !hasShowOutline) {
-          child.visible = false;
+        if (isOutline) {
+          child.material.color.set(0x000000);
+          if (!hasShowOutline) {
+            child.visible = false;
+          }
         }
       }
       _object = null;
@@ -549,7 +553,7 @@ class AnchorControls extends EventDispatcher {
       const { object } = raycast(_mouseX, _mouseY, _camera, [_scene]);
       if (!object) {
         detach();
-      } else {
+      } else if (object !== _object) {
         attach(object);
       }
     };
@@ -648,7 +652,7 @@ const buildMeshMaterial = async (definitions, tags) => {
   }
 
   // Else, default to normal material.
-  return new MeshNormalMaterial();
+  return new MeshNormalMaterial({ transparent: true, opacity: 1 });
 };
 
 // FIX: Found it somewhere -- attribute.
@@ -1057,6 +1061,7 @@ const buildMeshes = async ({
         updateUserData(geometry, scene, mesh.userData);
         mesh.userData.tangible = true;
         if (tags.includes('type:ghost')) {
+          mesh.userData.tangible = false;
           material.transparent = true;
           material.depthWrite = false;
           material.opacity *= 0.125;
@@ -1075,6 +1080,7 @@ const buildMeshes = async ({
         outline.userData.hasShowOutline = tags.includes('show:outline');
         outline.visible = outline.userData.hasShowOutline;
         if (tags.includes('type:ghost')) {
+          mesh.userData.tangible = false;
           material.transparent = true;
           material.depthWrite = false;
           material.opacity *= 0.25;
@@ -1127,6 +1133,7 @@ const buildMeshes = async ({
           updateUserData(geometry, scene, mesh.userData);
           mesh.userData.tangible = true;
           if (tags.includes('type:ghost')) {
+            mesh.userData.tangible = false;
             material.transparent = true;
             material.depthWrite = false;
             material.opacity *= 0.125;
@@ -1139,12 +1146,13 @@ const buildMeshes = async ({
 
         {
           const edges = new EdgesGeometry(shapeGeometry);
-          const material = new LineBasicMaterial({ color: 0x000000 });
+          const material = new LineBasicMaterial({ color: 0x000000, linewidth: 2 });
           const outline = new LineSegments(edges, material);
           outline.userData.isOutline = true;
           outline.userData.hasShowOutline = tags.includes('show:outline');
           outline.visible = outline.userData.hasShowOutline;
           if (tags.includes('type:ghost')) {
+            mesh.userData.tangible = false;
             material.transparent = true;
             material.depthWrite = false;
             material.opacity *= 0.25;
@@ -1215,7 +1223,6 @@ const moveToFit = ({
   gridState = { objects: [], visible: withGrid },
 } = {}) => {
   const { fit = true } = view;
-  const [length = 100, width = 100] = pageSize;
 
   let box;
 
@@ -1296,35 +1303,15 @@ const moveToFit = ({
       gridState.objects.push(grid);
     }
   }
-  if (withGrid) {
-    // The visible mat is slightly below z0.
-    const plane = new Mesh(
-      new PlaneGeometry(length, width),
-      new MeshStandardMaterial({
-        color: 0x00ff00,
-        // depthWrite: false,
-        transparent: true,
-        opacity: 0.25,
-      })
-    );
-    plane.castShadow = false;
-    plane.receiveShadow = true;
-    plane.position.set(0, 0, -0.05);
-    plane.layers.set(gridLayer);
-    plane.userData.tangible = false;
-    plane.userData.dressing = true;
-    plane.userData.grid = true;
-    scene.add(plane);
-    gridState.objects.push(plane);
-  }
 
   if (withGrid) {
     // The interactive mat is on z0.
     const plane = new Mesh(
-      new PlaneGeometry(length, width),
+      new PlaneGeometry(10 * 1000, 10 * 1000),
       new MeshStandardMaterial({
         transparent: true,
         opacity: 0,
+        depthWrite: false,
       })
     );
     plane.castShadow = false;

@@ -188,6 +188,7 @@ class AnchorControls extends EventDispatcher {
         const { isOutline } = child.userData;
         if (isOutline) {
           child.visible = true;
+          child.material.color.set(0x9900cc); // violet
         }
       }
       _at.material.color.setHex(0xff4500); // orange red
@@ -211,8 +212,11 @@ class AnchorControls extends EventDispatcher {
       _object.material.opacity /= 0.5;
       for (const child of _object.children) {
         const { isOutline, hasShowOutline } = child.userData;
-        if (isOutline && !hasShowOutline) {
-          child.visible = false;
+        if (isOutline) {
+          child.material.color.set(0x000000);
+          if (!hasShowOutline) {
+            child.visible = false;
+          }
         }
       }
       _object = null;
@@ -408,7 +412,7 @@ class AnchorControls extends EventDispatcher {
       const { object } = raycast(_mouseX, _mouseY, _camera, [_scene]);
       if (!object) {
         detach();
-      } else {
+      } else if (object !== _object) {
         attach(object);
       }
     };

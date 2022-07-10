@@ -605,19 +605,17 @@ const filter$w = (geometry) =>
     geometry.type
   ) && isNotTypeGhost(geometry);
 
-const filterClips = (geometry) => filter$w(geometry) && isNotTypeGhost(geometry);
-
 const clip = (geometry, geometries, open) => {
   const concreteGeometry = toConcreteGeometry(geometry);
   const inputs = [];
   linearize(concreteGeometry, filter$w, inputs);
   const count = inputs.length;
   for (const geometry of geometries) {
-    linearize(geometry, filterClips, inputs);
+    linearize(geometry, filter$w, inputs);
   }
   const outputs = clip$1(inputs, count, open);
   const ghosts = [];
-  for (let nth = count; nth < inputs.length; nth++) {
+  for (let nth = 0; nth < inputs.length; nth++) {
     ghosts.push(hasMaterial(hasTypeGhost(inputs[nth]), 'ghost'));
   }
   deletePendingSurfaceMeshes();
@@ -926,6 +924,7 @@ const inset = (geometry, ...args) => {
   const inputs = [];
   linearize(concreteGeometry, filter$q, inputs);
   const outputs = inset$1(inputs, ...args);
+  // Put the inner insets first.
   deletePendingSurfaceMeshes();
   return taggedGroup({}, ...outputs);
 };
@@ -1574,7 +1573,8 @@ const eachPoint = (geometry, emit) => {
   deletePendingSurfaceMeshes();
 };
 
-const filterTargets = (geometry) => ['graph'].includes(geometry.type);
+const filterTargets = (geometry) =>
+  ['graph'].includes(geometry.type) && isNotTypeGhost(geometry);
 
 const eachTriangle = (geometry, emitTriangle) => {
   const concreteGeometry = toConcreteGeometry(geometry);
