@@ -61,6 +61,7 @@ export { area } from './area.js';
 export { as } from './as.js';
 export { asPart } from './asPart.js';
 export { at } from './at.js';
+export { bb } from './bb.js';
 export { bend } from './bend.js';
 export { billOfMaterials } from './billOfMaterials.js';
 export { by } from './by.js';

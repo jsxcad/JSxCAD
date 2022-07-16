@@ -51,6 +51,7 @@ export class OrbitView extends React.PureComponent {
       updateGeometry,
     } = await orbitDisplay(
       {
+        path,
         view: { target, up, position },
         geometry: data,
         withAxes,
@@ -114,10 +115,10 @@ export class OrbitView extends React.PureComponent {
         onMove({ path, position, up, target, zoom });
       }
     });
-    const handleEdits = ({ edits }) => {
+    const handleEdits = ({ edits, editId }) => {
       const { onEdits } = this.props;
       if (onEdits) {
-        onEdits({ edits });
+        onEdits({ edits, editId });
       }
     };
     const handleJog = ({ object, at, to, up }) => {

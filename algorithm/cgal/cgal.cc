@@ -174,6 +174,8 @@ typedef CGAL::Side_of_triangle_mesh<Surface_mesh, Kernel> Side_of_triangle_mesh;
 typedef CGAL::General_polygon_set_2<CGAL::Gps_segment_traits_2<Kernel>>
     General_polygon_set_2;
 
+using CGAL::Kernel_traits;
+
 enum Status {
   STATUS_OK = 0,
   STATUS_EMPTY = 1,
@@ -780,7 +782,7 @@ bool is_coplanar_edge(const Surface_mesh& m, const Vertex_point_map& p,
   auto a = p[m.source(e)];
   auto b = p[m.target(e)];
   auto c = p[m.target(m.next(e))];
-  typename CGAL::Kernel_traits<decltype(a)>::Kernel::Plane_3 plane(a, b, c);
+  typename Kernel_traits<decltype(a)>::Kernel::Plane_3 plane(a, b, c);
   return plane.has_on(p[m.target(m.next(m.opposite(e)))]);
 }
 
@@ -2336,6 +2338,7 @@ class Geometry {
     pwh_.clear();
     input_meshes_.clear();
     meshes_.clear();
+    epick_meshes_.clear();
     aabb_trees_.clear();
     on_sides_.clear();
     input_segments_.clear();
@@ -2360,6 +2363,7 @@ class Geometry {
     pwh_.resize(size);
     input_meshes_.resize(size);
     meshes_.resize(size);
+    epick_meshes_.resize(size);
     aabb_trees_.resize(size);
     on_sides_.resize(size);
     input_segments_.resize(size);
@@ -2410,6 +2414,16 @@ class Geometry {
       meshes_[nth].reset(new Surface_mesh);
     }
     return *meshes_[nth];
+  }
+
+  bool has_epick_mesh(int nth) { return epick_meshes_[nth] != nullptr; }
+
+  Epick_surface_mesh& epick_mesh(int nth) {
+    if (!has_epick_mesh(nth)) {
+      epick_meshes_[nth].reset(new Epick_surface_mesh);
+      copy_face_graph(mesh(nth), *epick_meshes_[nth]);
+    }
+    return *epick_meshes_[nth];
   }
 
   bool has_aabb_tree(int nth) { return aabb_trees_[nth] != nullptr; }
@@ -2841,6 +2855,7 @@ class Geometry {
   std::vector<std::unique_ptr<General_polygon_set_2>> gps_;
   std::vector<std::shared_ptr<const Surface_mesh>> input_meshes_;
   std::vector<std::shared_ptr<Surface_mesh>> meshes_;
+  std::vector<std::shared_ptr<Epick_surface_mesh>> epick_meshes_;
   std::vector<std::unique_ptr<AABB_tree>> aabb_trees_;
   std::vector<std::unique_ptr<Side_of_triangle_mesh>> on_sides_;
   std::vector<std::unique_ptr<Segments>> input_segments_;
@@ -4502,10 +4517,9 @@ int Grow(Geometry* geometry, size_t count, bool x, bool y, bool z) {
           // By default all points are grown.
           bool inside = true;
           if (count + 1 < size) {
-            // There are selections, so limit the grown points.
             inside = false;
             for (int selection = count + 1; selection < size; selection++) {
-              if (geometry->on_side(selection)(point) ==
+              if (geometry->on_side(selection)(point) !=
                   CGAL::ON_UNBOUNDED_SIDE) {
                 inside = true;
                 break;
@@ -5038,8 +5052,110 @@ int Outline(Geometry* geometry) {
   return STATUS_OK;
 }
 
+template <typename Kernel, typename Surface_mesh>
+void remesh(Surface_mesh& mesh,
+            std::vector<std::reference_wrapper<const Surface_mesh>>& selections,
+            int iterations, int relaxation_steps, double target_edge_length) {
+  std::set<Vertex_index> unconstrained_vertices;
+  std::set<Face_index> unconstrained_faces;
+  if (selections.size() > 0) {
+    for (const Surface_mesh& selection : selections) {
+      {
+        Surface_mesh working_selection(selection);
+        CGAL::Polygon_mesh_processing::corefine(
+            mesh, working_selection, CGAL::parameters::all_default(),
+            CGAL::parameters::all_default());
+      }
+      CGAL::Side_of_triangle_mesh<Surface_mesh, Kernel> inside(selection);
+      for (Vertex_index vertex : mesh.vertices()) {
+        if (inside(mesh.point(vertex)) == CGAL::ON_BOUNDED_SIDE) {
+          // This vertex may be remeshed.
+          unconstrained_vertices.insert(vertex);
+        }
+      }
+      for (Face_index face : mesh.faces()) {
+        const Halfedge_index start = mesh.halfedge(face);
+        Halfedge_index edge = start;
+        bool include = true;
+        do {
+          if (inside(mesh.point(mesh.source(edge))) ==
+              CGAL::ON_UNBOUNDED_SIDE) {
+            include = false;
+            break;
+          }
+          edge = mesh.next(edge);
+        } while (edge != start);
+        if (include) {
+          unconstrained_faces.insert(face);
+        }
+      }
+    }
+  } else {
+    for (Face_index face : mesh.faces()) {
+      unconstrained_faces.insert(face);
+    }
+  }
+  // The vertices are always constrained.
+  std::set<Vertex_index> constrained_vertices;
+  for (Vertex_index vertex : mesh.vertices()) {
+    constrained_vertices.insert(vertex);
+  }
+  std::set<Edge_index> constrained_edges;
+  for (Edge_index edge : mesh.edges()) {
+    const Halfedge_index halfedge = mesh.halfedge(edge);
+    const Vertex_index& source = mesh.source(halfedge);
+    const Vertex_index& target = mesh.target(halfedge);
+    if (constrained_vertices.count(source) &&
+        constrained_vertices.count(target)) {
+      constrained_edges.insert(edge);
+    }
+  }
+  CGAL::Boolean_property_map<std::set<Vertex_index>> constrained_vertex_map(
+      constrained_vertices);
+  CGAL::Boolean_property_map<std::set<Edge_index>> constrained_edge_map(
+      constrained_edges);
+  CGAL::Polygon_mesh_processing::isotropic_remeshing(
+      unconstrained_faces, target_edge_length, mesh,
+      CGAL::Polygon_mesh_processing::parameters::number_of_iterations(
+          iterations)
+          .vertex_point_map(mesh.points())
+          .edge_is_constrained_map(constrained_edge_map)
+          .number_of_relaxation_steps(relaxation_steps));
+}
+
 int Remesh(Geometry* geometry, size_t count, size_t iterations,
-           size_t relaxation_steps, double target_edge_length, bool exact) {
+           size_t relaxation_steps, double target_edge_length) {
+  int size = geometry->getSize();
+
+  geometry->copyInputMeshesToOutputMeshes();
+  geometry->transformToAbsoluteFrame();
+
+  std::vector<std::reference_wrapper<const Surface_mesh>> selections;
+
+  for (int selection = count; selection < count; selection++) {
+    selections.push_back(geometry->mesh(selection));
+  }
+
+  for (int nth = 0; nth < count; nth++) {
+    remesh<Kernel>(geometry->mesh(nth), selections, iterations,
+                   relaxation_steps, target_edge_length);
+  }
+
+  geometry->transformToLocalFrame();
+
+  return STATUS_OK;
+
+#if 0
+  struct halfedge2edge {
+    halfedge2edge(const Surface_mesh& m, std::vector<Edge_index>& edges)
+        : m_mesh(m), m_edges(edges) {}
+    void operator()(const Halfedge_index& h) const {
+      m_edges.push_back(edge(h, m_mesh));
+    }
+    const Surface_mesh& m_mesh;
+    std::vector<Edge_index>& m_edges;
+  };
+
   int size = geometry->getSize();
 
   geometry->copyInputMeshesToOutputMeshes();
@@ -5050,30 +5166,57 @@ int Remesh(Geometry* geometry, size_t count, size_t iterations,
       continue;
     }
     Surface_mesh& mesh = geometry->mesh(nth);
+    // std::vector<Edge_index> border;
+    // CGAL::Polygon_mesh_processing::border_halfedges(faces(mesh), mesh,
+    // boost::make_function_output_iterator(halfedge2edge(mesh, border)));
+    // CGAL::Polygon_mesh_processing::split_long_edges(edges(mesh),
+    // target_edge_length, mesh);
     std::set<Vertex_index> unconstrained_vertices;
-    for (int selection = count; selection < size; selection++) {
-      {
-        Surface_mesh working_selection(geometry->mesh(selection));
-        CGAL::Polygon_mesh_processing::corefine(
-            mesh, working_selection, CGAL::parameters::all_default(),
-            CGAL::parameters::all_default());
-      }
-      CGAL::Side_of_triangle_mesh<Surface_mesh, Kernel> inside(
-          geometry->mesh(selection));
-      for (Vertex_index vertex : mesh.vertices()) {
-        if (inside(mesh.point(vertex)) != CGAL::ON_UNBOUNDED_SIDE) {
-          // This vertex may be remeshed.
-          unconstrained_vertices.insert(vertex);
+    std::set<Face_index> unconstrained_faces;
+    if (count < size) {
+      for (int selection = count; selection < size; selection++) {
+        {
+          Surface_mesh working_selection(geometry->mesh(selection));
+          CGAL::Polygon_mesh_processing::corefine(
+              mesh, working_selection, CGAL::parameters::all_default(),
+              CGAL::parameters::all_default());
+        }
+        CGAL::Side_of_triangle_mesh<Surface_mesh, Kernel> inside(
+            geometry->mesh(selection));
+        for (Vertex_index vertex : mesh.vertices()) {
+          if (inside(mesh.point(vertex)) == CGAL::ON_BOUNDED_SIDE) {
+            // This vertex may be remeshed.
+            unconstrained_vertices.insert(vertex);
+          }
+        }
+        for (Face_index face : mesh.faces()) {
+          const Halfedge_index start = mesh.halfedge(face);
+          Halfedge_index edge = start;
+          bool include = true;
+          do {
+            if (inside(mesh.point(mesh.source(edge))) ==
+                CGAL::ON_UNBOUNDED_SIDE) {
+              include = false;
+              break;
+            }
+            edge = mesh.next(edge);
+          } while (edge != start);
+          if (include) {
+            unconstrained_faces.insert(face);
+          }
         }
       }
-    }
-    std::set<Vertex_index> constrained_vertices;
-    std::set<Edge_index> constrained_edges;
-    for (Vertex_index vertex : mesh.vertices()) {
-      if (!unconstrained_vertices.count(vertex)) {
-        constrained_vertices.insert(vertex);
+    } else {
+      for (Face_index face : mesh.faces()) {
+        unconstrained_faces.insert(face);
       }
     }
+    // The vertices are always constrained.
+    std::set<Vertex_index> constrained_vertices;
+    for (Vertex_index vertex : mesh.vertices()) {
+      constrained_vertices.insert(vertex);
+    }
+    std::set<Edge_index> constrained_edges;
     for (Edge_index edge : mesh.edges()) {
       const Halfedge_index halfedge = mesh.halfedge(edge);
       const Vertex_index& source = mesh.source(halfedge);
@@ -5088,11 +5231,10 @@ int Remesh(Geometry* geometry, size_t count, size_t iterations,
     CGAL::Boolean_property_map<std::set<Edge_index>> constrained_edge_map(
         constrained_edges);
     CGAL::Polygon_mesh_processing::isotropic_remeshing(
-        mesh.faces(), target_edge_length, mesh,
+        unconstrained_faces, target_edge_length, mesh,
         CGAL::Polygon_mesh_processing::parameters::number_of_iterations(
             iterations)
             .vertex_point_map(mesh.points())
-            .vertex_is_constrained_map(constrained_vertex_map)
             .edge_is_constrained_map(constrained_edge_map)
             .number_of_relaxation_steps(relaxation_steps));
   }
@@ -5100,6 +5242,7 @@ int Remesh(Geometry* geometry, size_t count, size_t iterations,
   geometry->transformToLocalFrame();
 
   return STATUS_OK;
+#endif
 }
 
 int Seam(Geometry* geometry, size_t count) {
@@ -5340,72 +5483,107 @@ int Simplify(Geometry* geometry, double ratio, bool simplify_points,
   return STATUS_OK;
 }
 
-int Smooth(Geometry* geometry, size_t count, size_t iterations, double time) {
+struct Constrained_vertex_map {
+ public:
+  Constrained_vertex_map(CGAL::Unique_hash_map<Vertex_index, bool>& map)
+      : map_(map) {}
+  friend bool get(Constrained_vertex_map& self, Vertex_index key) {
+    return self.map_[key];
+  }
+
+ private:
+  const CGAL::Unique_hash_map<Vertex_index, bool>& map_;
+};
+
+int Smooth(Geometry* geometry, size_t count, double resolution, int iterations,
+           double time, int remesh_iterations, int remesh_relaxation_steps) {
   size_t size = geometry->getSize();
 
   geometry->copyInputMeshesToOutputMeshes();
   geometry->transformToAbsoluteFrame();
 
+  std::vector<std::reference_wrapper<const Epick_surface_mesh>> selections;
+  for (int selection = count; selection < size; selection++) {
+    selections.push_back(geometry->epick_mesh(selection));
+  }
+
   for (size_t nth = 0; nth < size; nth++) {
     if (!geometry->is_mesh(nth)) {
       continue;
     }
-    Surface_mesh& mesh = geometry->mesh(nth);
+    Epick_surface_mesh& mesh = geometry->epick_mesh(nth);
 
-    std::set<Vertex_index> constrained_vertices;
+    CGAL::Unique_hash_map<Vertex_index, bool> constrained_vertices(true);
+    // std::set<Vertex_index> constrained_vertices;
+    // std::set<Vertex_index> unconstrained_vertices;
+    CGAL::Unique_hash_map<Face_index, bool> relevant_faces(false);
+
     if (count < size) {
       // Apply selections.
-      std::set<Vertex_index> unconstrained_vertices;
-      for (int selection = count; selection < size; selection++) {
-        {
-          Surface_mesh working_selection(geometry->mesh(selection));
-          CGAL::Polygon_mesh_processing::corefine(
-              mesh, geometry->mesh(selection), CGAL::parameters::all_default(),
-              CGAL::parameters::all_default());
-        }
-        CGAL::Side_of_triangle_mesh<Surface_mesh, Kernel> inside(
-            geometry->mesh(selection));
+      // Remesh will handle adding the selection edges.
+      remesh<Epick_kernel>(mesh, selections, remesh_iterations,
+                           remesh_relaxation_steps, resolution);
+      for (const Epick_surface_mesh& selection : selections) {
+        CGAL::Side_of_triangle_mesh<Epick_surface_mesh, Epick_kernel> inside(
+            selection);
         for (Vertex_index vertex : mesh.vertices()) {
-          if (inside(mesh.point(vertex)) != CGAL::ON_UNBOUNDED_SIDE) {
+          if (inside(mesh.point(vertex)) == CGAL::ON_BOUNDED_SIDE) {
             // This vertex may be smoothed.
-            unconstrained_vertices.insert(vertex);
+            constrained_vertices[vertex] = false;
           }
         }
-      }
-      for (Vertex_index vertex : mesh.vertices()) {
-        if (!unconstrained_vertices.count(vertex)) {
-          constrained_vertices.insert(vertex);
+        for (Face_index face : mesh.faces()) {
+          const Halfedge_index start = mesh.halfedge(face);
+          Halfedge_index edge = start;
+          do {
+            if (inside(mesh.point(mesh.source(edge))) !=
+                CGAL::ON_UNBOUNDED_SIDE) {
+              relevant_faces[face] = true;
+              break;
+            }
+            edge = mesh.next(edge);
+          } while (edge != start);
         }
       }
+    } else {
+      remesh<Epick_kernel>(mesh, selections, remesh_iterations,
+                           remesh_relaxation_steps, resolution);
+      for (Vertex_index vertex : mesh.vertices()) {
+        constrained_vertices[vertex] = false;
+      }
+      for (Face_index face : mesh.faces()) {
+        relevant_faces[face] = true;
+      }
     }
 
-    std::set<Cartesian_surface_mesh::vertex_index>
-        cartesian_constrained_vertices;
-    boost::unordered_map<Surface_mesh::vertex_index,
-                         Cartesian_surface_mesh::vertex_index>
-        vertex_map;
-    Cartesian_surface_mesh cartesian_mesh;
-    copy_face_graph(mesh, cartesian_mesh,
-                    CGAL::parameters::vertex_to_vertex_map(
-                        boost::make_assoc_property_map(vertex_map)));
+    // CGAL::Boolean_property_map<std::set<Vertex_index>>
+    // constrained_vertex_map(constrained_vertices);
 
-    for (Vertex_index vertex : constrained_vertices) {
-      cartesian_constrained_vertices.insert(vertex_map[vertex]);
+    Constrained_vertex_map constrained_vertex_map(constrained_vertices);
+
+    // CGAL::Boolean_property_map<CGAL::Unique_hash_map<Vertex_index, bool>>
+    //    constrained_vertex_map(constrained_vertices);
+
+    std::vector<Face_index> faces;
+    for (Face_index face : mesh.faces()) {
+      if (true || relevant_faces[face]) {
+        // CHECK: Why do we need all of the faces?
+        faces.push_back(face);
+      }
     }
-
-    CGAL::Boolean_property_map<std::set<Vertex_index>>
-        cartesian_constrained_vertex_map(cartesian_constrained_vertices);
 
     CGAL::get_default_random() = CGAL::Random(0);
     std::srand(0);
 
+    // Maybe it does work -- it just doesn't try to build a curve ...
     CGAL::Polygon_mesh_processing::smooth_shape(
-        cartesian_mesh.faces(), cartesian_mesh, time,
+        faces, mesh, time,
         CGAL::Polygon_mesh_processing::parameters::number_of_iterations(
             iterations)
-            .vertex_is_constrained_map(cartesian_constrained_vertex_map));
-    mesh.clear();
-    copy_face_graph(cartesian_mesh, mesh);
+            .vertex_is_constrained_map(constrained_vertex_map));
+    geometry->mesh(nth).clear();
+    copy_face_graph(mesh, geometry->mesh(nth));
+    demesh(geometry->mesh(nth));
   }
 
   geometry->transformToLocalFrame();

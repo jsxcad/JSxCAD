@@ -35,15 +35,24 @@ const buildAnchorControls = ({
   startUpdating,
   trackballControls,
   viewerElement,
+  editId,
 }) => {
-  const anchorControls = new AnchorControls(
+  const anchorControls = new AnchorControls({
     camera,
-    viewerElement,
+    domElement: viewerElement,
     scene,
-    render
-  );
+    render,
+    editId,
+  });
   anchorControls.enable();
   return { anchorControls };
+};
+
+const toEditIdFromPath = (path) => {
+  if (path) {
+    const pieces = path.split('/');
+    return pieces.slice(pieces.length - 2).join('$');
+  }
 };
 
 export const orbitDisplay = async (
@@ -59,6 +68,7 @@ export const orbitDisplay = async (
   } = {},
   page
 ) => {
+  const editId = toEditIdFromPath(path);
   const width = page.offsetWidth;
   const height = page.offsetHeight;
 
@@ -150,6 +160,7 @@ export const orbitDisplay = async (
     trackballControls,
     view,
     viewerElement: displayCanvas,
+    editId,
   });
 
   anchorControls.addEventListener('change', update);

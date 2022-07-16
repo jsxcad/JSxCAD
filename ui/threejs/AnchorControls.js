@@ -15,7 +15,7 @@ import { SKETCH_LAYER } from './layers.js';
 import { raycast } from './raycast.js';
 
 class AnchorControls extends EventDispatcher {
-  constructor(_camera, _domElement, scene, render) {
+  constructor({ camera, domElement, scene, render, editId }) {
     super();
 
     const _material = new MeshBasicMaterial({
@@ -43,6 +43,8 @@ class AnchorControls extends EventDispatcher {
     const _yAxis = new Vector3();
     const _zAxis = new Vector3();
 
+    let _camera = camera;
+    let _domElement = domElement;
     let _step = 1;
     let _object = null;
     let _scene = scene;
@@ -239,6 +241,7 @@ class AnchorControls extends EventDispatcher {
       */
       this.dispatchEvent({
         edits: _edits,
+        editId: editId,
         type: 'edits',
       });
     };

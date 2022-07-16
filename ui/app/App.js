@@ -814,7 +814,7 @@ class App extends React.Component {
       this.View.executeOperations();
     };
 
-    this.View.edits = async ({ edits }) => {
+    this.View.edits = async ({ edits, editId }) => {
       const points = [];
       const segments = [];
       for (const edit of edits) {
@@ -855,11 +855,11 @@ class App extends React.Component {
           break;
         }
         case 1: {
-          this.Clipboard.change(`const $ = ${ops[0]};`);
+          this.Clipboard.change(`const ${editId} = ${ops[0]};`);
           break;
         }
         default: {
-          this.Clipboard.change(`const $ = Group(${ops.join(', ')});`);
+          this.Clipboard.change(`const ${editId} = Group(${ops.join(', ')});`);
           break;
         }
       }

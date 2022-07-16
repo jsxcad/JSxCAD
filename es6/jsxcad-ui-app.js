@@ -42366,6 +42366,7 @@ class OrbitView extends ReactDOM$2.PureComponent {
       trackballControls,
       updateGeometry
     } = await orbitDisplay({
+      path,
       view: {
         target,
         up,
@@ -42458,7 +42459,8 @@ class OrbitView extends ReactDOM$2.PureComponent {
     });
 
     const handleEdits = ({
-      edits
+      edits,
+      editId
     }) => {
       const {
         onEdits
@@ -42466,7 +42468,8 @@ class OrbitView extends ReactDOM$2.PureComponent {
 
       if (onEdits) {
         onEdits({
-          edits
+          edits,
+          editId
         });
       }
     };
@@ -43608,7 +43611,8 @@ class App extends ReactDOM$2.Component {
     };
 
     this.View.edits = async ({
-      edits
+      edits,
+      editId
     }) => {
       const points = [];
       const segments = [];
@@ -43652,13 +43656,13 @@ class App extends ReactDOM$2.Component {
 
         case 1:
           {
-            this.Clipboard.change(`const $ = ${ops[0]};`);
+            this.Clipboard.change(`const ${editId} = ${ops[0]};`);
             break;
           }
 
         default:
           {
-            this.Clipboard.change(`const $ = Group(${ops.join(', ')});`);
+            this.Clipboard.change(`const ${editId} = Group(${ops.join(', ')});`);
             break;
           }
       }

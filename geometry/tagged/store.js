@@ -20,6 +20,11 @@ export const store = async (geometry) => {
     if (graph.hash === undefined) {
       throw Error(`Graph has no hash`);
     }
+    if (!graph.serializedSurfaceMesh) {
+      throw Error('die');
+    } else {
+      console.log(`Wrote graph: ${JSON.stringify(graph)}`);
+    }
     await write(`graph/${graph.hash}`, graph);
     stored.graph = {
       hash: graph.hash,
@@ -43,6 +48,7 @@ export const store = async (geometry) => {
   return { type: 'link', hash: uuid };
 };
 
+/*
 export const storeNonblocking = (geometry) => {
   if (geometry[isStored]) {
     return { stored: { type: 'link', hash: geometry.hash }, wouldBlock: false };
@@ -55,6 +61,9 @@ export const storeNonblocking = (geometry) => {
   if (graph && !graph[isStored]) {
     if (!graph.hash) {
       graph.hash = hash(graph);
+    }
+    if (!graph.serializedSurfaceMesh) {
+      throw Error('die');
     }
     try {
       writeNonblocking(`graph/${graph.hash}`, graph);
@@ -95,3 +104,4 @@ export const storeNonblocking = (geometry) => {
   geometry[isStored] = true;
   return { stored: { type: 'link', hash: uuid }, wouldBlock };
 };
+*/
