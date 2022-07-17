@@ -582,24 +582,37 @@ class App extends React.Component {
       const NotebookAdvice = this.Notebook.ensureAdvice(path);
       const NotebookPath = path;
       const topLevel = new Map();
+      const profile = new Map();
+      const updateProfile = (times) => {
+        for (const [name, entry] of times) {
+          const { total } = entry;
+          if (!profile.has(name)) {
+            profile.set(name, total);
+          } else {
+            profile.set(name, profile.get(name) + total);
+          }
+        }
+      };
+      const logProfile = () => {
+        const entries = [...profile];
+        entries.sort(([aName, aTotal], [bName, bTotal]) => aTotal - bTotal);
+        for (const [name, total] of entries) {
+          logInfo('app/Profile', `${name} ${total}`);
+        }
+      };
       try {
-        logInfo('app/App', `Run/1 ${path}`);
         await this.updateState({ NotebookState: 'running' });
         // Terminate any services running for this path, since we're going to restart evaluating it.
         await terminateActiveServices((context) => context.path === path);
-        logInfo('app/App', `Run/2 ${path}`);
         // CHECK: Can we get rid of this?
         clearEmitted();
-        logInfo('app/App', `Run/3 ${path}`);
 
         const NotebookText = await this.Notebook.save(path);
-        logInfo('app/App', `Run/4 ${path}`);
 
         if (!NotebookPath.endsWith('.js') && !NotebookPath.endsWith('.nb')) {
           // We don't know how to run anything else.
           return;
         }
-        logInfo('app/App', `Run/5 ${path}`);
 
         // FIX: This is a bit awkward.
         // The responsibility for updating the control values ought to be with what
@@ -608,13 +621,11 @@ class App extends React.Component {
         await write(`control/${NotebookPath}`, notebookControlData, {
           workspace,
         });
-        logInfo('app/App', `Run/6 ${path}`);
 
         let script = this.Clipboard.getCode() + NotebookText;
 
         const evaluate = async (script) => {
           try {
-            logInfo('app/App', `Distribute eval for ${path}`);
             const result = await this.ask(
               {
                 op: 'app/evaluate',
@@ -626,6 +637,7 @@ class App extends React.Component {
               { path }
             );
             if (result) {
+              updateProfile(result);
               return result;
             } else {
               // The error will have come back via a note.
@@ -637,7 +649,6 @@ class App extends React.Component {
         };
         const replay = async (script) => {
           try {
-            logInfo('app/App', `Distribute eval for ${path}`);
             const result = await this.ask(
               {
                 op: 'app/evaluate',
@@ -649,6 +660,7 @@ class App extends React.Component {
               { path }
             );
             if (result) {
+              updateProfile(result);
               return result;
             } else {
               // The error will have come back via a note.
@@ -659,7 +671,6 @@ class App extends React.Component {
           }
         };
         NotebookAdvice.definitions = topLevel;
-        logInfo('app/App', `Execute notebook run ${path}`);
         await execute(script, {
           evaluate,
           replay,
@@ -673,6 +684,7 @@ class App extends React.Component {
       } finally {
         await this.updateState({ NotebookState: 'idle' });
         logInfo('app/App', `Completed notebook run ${path}`);
+        logProfile();
       }
     };
 
@@ -1345,7 +1357,7 @@ class App extends React.Component {
           );
         }
         case 'Log': {
-          const { LogMessages = [], LogFilter = '^sys/' } = this.state;
+          const { LogMessages = [], LogFilter = '^app/Profile' } = this.state;
           return (
             <div>
               <Card>
@@ -1391,7 +1403,7 @@ class App extends React.Component {
                       <tbody>
                         {LogMessages.filter(
                           ({ source }) =>
-                            !source || !LogFilter || !source.match(LogFilter)
+                            !source || !LogFilter || source.match(LogFilter)
                         ).map(({ type, source, text, id }, index) => (
                           <tr key={index}>
                             <td>{id}</td>

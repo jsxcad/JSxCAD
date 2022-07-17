@@ -369,9 +369,7 @@ const store = async (geometry) => {
       throw Error(`Graph has no hash`);
     }
     if (!graph.serializedSurfaceMesh) {
-      throw Error('die');
-    } else {
-      console.log(`Wrote graph: ${JSON.stringify(graph)}`);
+      throw Error('Attempted to store graph without serialization');
     }
     await write$1(`graph/${graph.hash}`, graph);
     stored.graph = {
@@ -395,64 +393,6 @@ const store = async (geometry) => {
   await write$1(`hash/${uuid}`, stored);
   return { type: 'link', hash: uuid };
 };
-
-/*
-export const storeNonblocking = (geometry) => {
-  if (geometry[isStored]) {
-    return { stored: { type: 'link', hash: geometry.hash }, wouldBlock: false };
-  }
-  const uuid = hash(geometry);
-  const stored = { ...geometry };
-  // Share graphs across geometries.
-  const graph = geometry.graph;
-  let wouldBlock;
-  if (graph && !graph[isStored]) {
-    if (!graph.hash) {
-      graph.hash = hash(graph);
-    }
-    if (!graph.serializedSurfaceMesh) {
-      throw Error('die');
-    }
-    try {
-      writeNonblocking(`graph/${graph.hash}`, graph);
-    } catch (error) {
-      if (error instanceof ErrorWouldBlock) {
-        wouldBlock = error;
-      }
-    }
-    stored.graph = { hash: graph.hash };
-  }
-  if (geometry.content) {
-    for (let nth = 0; nth < geometry.content.length; nth++) {
-      if (!geometry.content[nth]) {
-        throw Error('Store has empty content/3');
-      }
-      const { stored: contentStored, wouldBlock: contentWouldBlock } =
-        storeNonblocking(geometry.content[nth]);
-      if (contentWouldBlock) {
-        wouldBlock = contentWouldBlock;
-      }
-      stored.content[nth] = contentStored;
-      if (!stored.content[nth]) {
-        throw Error(
-          `Store has empty content/4: contentWouldBlock ${contentWouldBlock} from ${JSON.stringify(
-            geometry
-          )}`
-        );
-      }
-    }
-  }
-  try {
-    writeNonblocking(`hash/${uuid}`, stored);
-  } catch (error) {
-    if (error instanceof ErrorWouldBlock) {
-      wouldBlock = error;
-    }
-  }
-  geometry[isStored] = true;
-  return { stored: { type: 'link', hash: uuid }, wouldBlock };
-};
-*/
 
 const isLoaded = Symbol('isLoaded');
 
@@ -1539,7 +1479,7 @@ const filterRemoves = (geometry) =>
   isNotTypeMasked(geometry) &&
   (isNotTypeGhost(geometry) || isTypeVoid(geometry));
 
-const cut = (geometry, geometries, open = false) => {
+const cut = (geometry, geometries, open = false, exact = true) => {
   const concreteGeometry = toConcreteGeometry(geometry);
   const inputs = [];
   linearize(concreteGeometry, filterTargets$1, inputs);
@@ -1547,7 +1487,7 @@ const cut = (geometry, geometries, open = false) => {
   for (const geometry of geometries) {
     linearize(geometry, filterRemoves, inputs);
   }
-  const outputs = cut$1(inputs, count, open);
+  const outputs = cut$1(inputs, count, open, exact);
   const ghosts = [];
   for (let nth = count; nth < inputs.length; nth++) {
     ghosts.push(hasMaterial(hasTypeGhost(inputs[nth]), 'ghost'));
@@ -2191,11 +2131,11 @@ const seam = (geometry, selections) => {
 
 const filter$4 = (geometry) => ['graph'].includes(geometry.type);
 
-const simplify = (geometry, ratio, simplifyPoints, eps) => {
+const simplify = (geometry, ratio, eps) => {
   const concreteGeometry = toConcreteGeometry(geometry);
   const inputs = [];
   linearize(concreteGeometry, filter$4, inputs);
-  const outputs = simplify$1(inputs, ratio, simplifyPoints, eps);
+  const outputs = simplify$1(inputs, ratio, eps);
   deletePendingSurfaceMeshes();
   return replacer(inputs, outputs)(concreteGeometry);
 };

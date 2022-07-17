@@ -43337,40 +43337,57 @@ class App extends ReactDOM$2.Component {
       const NotebookAdvice = this.Notebook.ensureAdvice(path);
       const NotebookPath = path;
       const topLevel = new Map();
+      const profile = new Map();
+
+      const updateProfile = times => {
+        for (const [name, entry] of times) {
+          const {
+            total
+          } = entry;
+
+          if (!profile.has(name)) {
+            profile.set(name, total);
+          } else {
+            profile.set(name, profile.get(name) + total);
+          }
+        }
+      };
+
+      const logProfile = () => {
+        const entries = [...profile];
+        entries.sort(([aName, aTotal], [bName, bTotal]) => aTotal - bTotal);
+
+        for (const [name, total] of entries) {
+          logInfo('app/Profile', `${name} ${total}`);
+        }
+      };
 
       try {
-        logInfo('app/App', `Run/1 ${path}`);
         await this.updateState({
           NotebookState: 'running'
         }); // Terminate any services running for this path, since we're going to restart evaluating it.
 
-        await terminateActiveServices(context => context.path === path);
-        logInfo('app/App', `Run/2 ${path}`); // CHECK: Can we get rid of this?
+        await terminateActiveServices(context => context.path === path); // CHECK: Can we get rid of this?
 
         clearEmitted();
-        logInfo('app/App', `Run/3 ${path}`);
         const NotebookText = await this.Notebook.save(path);
-        logInfo('app/App', `Run/4 ${path}`);
 
         if (!NotebookPath.endsWith('.js') && !NotebookPath.endsWith('.nb')) {
           // We don't know how to run anything else.
           return;
-        }
-
-        logInfo('app/App', `Run/5 ${path}`); // FIX: This is a bit awkward.
+        } // FIX: This is a bit awkward.
         // The responsibility for updating the control values ought to be with what
         // renders the notebook.
+
 
         const notebookControlData = await getNotebookControlData();
         await write(`control/${NotebookPath}`, notebookControlData, {
           workspace
         });
-        logInfo('app/App', `Run/6 ${path}`);
         let script = this.Clipboard.getCode() + NotebookText;
 
         const evaluate = async script => {
           try {
-            logInfo('app/App', `Distribute eval for ${path}`);
             const result = await this.ask({
               op: 'app/evaluate',
               script,
@@ -43382,6 +43399,7 @@ class App extends ReactDOM$2.Component {
             });
 
             if (result) {
+              updateProfile(result);
               return result;
             } else {
               // The error will have come back via a note.
@@ -43394,7 +43412,6 @@ class App extends ReactDOM$2.Component {
 
         const replay = async script => {
           try {
-            logInfo('app/App', `Distribute eval for ${path}`);
             const result = await this.ask({
               op: 'app/evaluate',
               script,
@@ -43406,6 +43423,7 @@ class App extends ReactDOM$2.Component {
             });
 
             if (result) {
+              updateProfile(result);
               return result;
             } else {
               // The error will have come back via a note.
@@ -43417,7 +43435,6 @@ class App extends ReactDOM$2.Component {
         };
 
         NotebookAdvice.definitions = topLevel;
-        logInfo('app/App', `Execute notebook run ${path}`);
         await execute(script, {
           evaluate,
           replay,
@@ -43433,6 +43450,7 @@ class App extends ReactDOM$2.Component {
           NotebookState: 'idle'
         });
         logInfo('app/App', `Completed notebook run ${path}`);
+        logProfile();
       }
     };
 
@@ -44155,7 +44173,7 @@ class App extends ReactDOM$2.Component {
           {
             const {
               LogMessages = [],
-              LogFilter = '^sys/'
+              LogFilter = '^app/Profile'
             } = this.state;
             return v$1("div", null, v$1(Card, null, v$1(Card.Body, null, v$1(Card.Title, null, "Log Messages"), v$1(Card.Text, null, v$1(FormImpl, null, v$1(Row, null, v$1(Col, null, v$1(FormImpl.Group, {
               controlId: "LogFilterId"
@@ -44179,7 +44197,7 @@ class App extends ReactDOM$2.Component {
               hover: true
             }, v$1("thead", null, v$1("tr", null, v$1("td", null, "ID"), v$1("td", null, "Type"), v$1("td", null, "Source"), v$1("td", null, "Message"))), v$1("tbody", null, LogMessages.filter(({
               source
-            }) => !source || !LogFilter || !source.match(LogFilter)).map(({
+            }) => !source || !LogFilter || source.match(LogFilter)).map(({
               type,
               source,
               text,

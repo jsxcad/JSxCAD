@@ -359,6 +359,7 @@ const destructure = (
     functions = [],
     arrays = [],
     objects = [],
+    strings = [],
     values = [],
     object = {},
     func,
@@ -393,6 +394,7 @@ const destructure = (
       }
     }
     if (typeof arg === 'string') {
+      strings.push(arg);
       if (string === undefined) {
         string = arg;
       }
@@ -409,6 +411,7 @@ const destructure = (
     object,
     number,
     string,
+    strings,
     value,
   };
 };
@@ -1422,22 +1425,28 @@ const colors = Shape.chainable(
 
 Shape.registerMethod('colors', colors);
 
-const cut = Shape.chainable(
-  (...shapes) =>
-    (shape) =>
-      Shape.fromGeometry(
-        cut$1(
-          shape.toGeometry(),
-          shape.toShapes(shapes).map((other) => other.toGeometry())
-        )
-      )
-);
+const cut = Shape.chainable((...args) => (shape) => {
+  const { strings: modes, shapesAndFunctions: shapes } = destructure(args);
+  return Shape.fromGeometry(
+    cut$1(
+      shape.toGeometry(),
+      shape.toShapes(shapes).map((other) => other.toGeometry()),
+      modes.includes('open'),
+      !modes.includes('fast') // not exact.
+    )
+  );
+});
 
 Shape.registerMethod('cut', cut);
 
-const cutFrom = Shape.chainable(
-  (other) => (shape) => Shape.toShape(other, shape).cut(shape)
-);
+const cutFrom = Shape.chainable((...args) => (shape) => {
+  const { shapesAndFunctions: others, strings: modes } = destructure(args);
+  if (others.length !== 1) {
+    throw Error(`cutFrom requires one shape or function.`);
+  }
+  const [other] = others;
+  return Shape.toShape(other, shape).cut(shape, ...modes);
+});
 
 Shape.registerMethod('cutFrom', cutFrom);
 
@@ -4337,11 +4346,9 @@ const serialize = Shape.chainable(
 Shape.registerMethod('serialize', serialize);
 
 const simplify = Shape.chainable((...args) => (shape) => {
-  const { object: options = {} } = destructure(args);
-  const { ratio, simplifyPoints, eps } = options;
-  return Shape.fromGeometry(
-    simplify$1(shape.toGeometry(), ratio, simplifyPoints, eps)
-  );
+  const { object: options = {}, number: eps } = destructure(args);
+  const { ratio = 1.0 } = options;
+  return Shape.fromGeometry(simplify$1(shape.toGeometry(), ratio, eps));
 });
 
 Shape.registerMethod('simplify', simplify);

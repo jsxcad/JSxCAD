@@ -845,7 +845,9 @@ class Demesh_safe_placement {
       const Profile& profile) const {
     const auto& m = profile.surface_mesh();
     const auto& p = profile.vertex_point_map();
-    if (is_safe_to_move(m, p, profile.v0_v1())) {
+    if (profile.p0() == profile.p1()) {
+      return profile.p0();
+    } else if (is_safe_to_move(m, p, profile.v0_v1())) {
       return profile.p1();
     } else if (is_safe_to_move(m, p, profile.v1_v0())) {
       return profile.p0();
@@ -2385,6 +2387,7 @@ class Geometry {
 
   bool is_mesh(int nth) { return type(nth) == GEOMETRY_MESH; }
   bool is_empty_mesh(int nth) { return CGAL::is_empty(mesh(nth)); }
+  bool is_empty_epick_mesh(int nth) { return CGAL::is_empty(epick_mesh(nth)); }
   bool is_polygons(int nth) {
     return type(nth) == GEOMETRY_POLYGONS_WITH_HOLES;
   }
@@ -2822,6 +2825,10 @@ class Geometry {
 
   void updateBounds3(int nth) {
     bbox3(nth) = CGAL::Polygon_mesh_processing::bbox(mesh(nth));
+  }
+
+  void updateEpickBounds3(int nth) {
+    bbox3(nth) = CGAL::Polygon_mesh_processing::bbox(epick_mesh(nth));
   }
 
   void computeBounds() {
@@ -3527,7 +3534,7 @@ int ConvexHull(Geometry* geometry) {
   return STATUS_OK;
 }
 
-int Cut(Geometry* geometry, int targets, bool open) {
+int Cut(Geometry* geometry, int targets, bool open, bool exact) {
   size_t size = geometry->size();
   geometry->copyInputMeshesToOutputMeshes();
   geometry->copyInputSegmentsToOutputSegments();
@@ -3543,33 +3550,76 @@ int Cut(Geometry* geometry, int targets, bool open) {
         if (geometry->is_empty_mesh(target)) {
           continue;
         }
-        for (int nth = targets; nth < size; nth++) {
-          if (!geometry->is_mesh(nth) || geometry->is_empty_mesh(nth) ||
-              geometry->noOverlap3(target, nth)) {
-            continue;
-          }
-          Surface_mesh cutMeshCopy(geometry->mesh(nth));
-          if (open) {
-            CGAL::Polygon_mesh_processing::reverse_face_orientations(
-                cutMeshCopy);
-            Surface_mesh mask(geometry->mesh(target));
-            if (!CGAL::Polygon_mesh_processing::clip(
-                    geometry->mesh(target), cutMeshCopy,
-                    CGAL::parameters::use_compact_clipper(true),
-                    CGAL::parameters::use_compact_clipper(true))) {
-              return STATUS_ZERO_THICKNESS;
+        if (exact) {
+          for (int nth = targets; nth < size; nth++) {
+            if (!geometry->is_mesh(nth) || geometry->is_empty_mesh(nth) ||
+                geometry->noOverlap3(target, nth)) {
+              continue;
             }
-          } else {
-            if (!CGAL::Polygon_mesh_processing::corefine_and_compute_difference(
-                    geometry->mesh(target), cutMeshCopy, geometry->mesh(target),
-                    CGAL::parameters::all_default(),
-                    CGAL::parameters::all_default(),
-                    CGAL::parameters::all_default())) {
-              return STATUS_ZERO_THICKNESS;
+            Surface_mesh cutMeshCopy(geometry->mesh(nth));
+            if (open) {
+              CGAL::Polygon_mesh_processing::reverse_face_orientations(
+                  cutMeshCopy);
+              Surface_mesh mask(geometry->mesh(target));
+              if (!CGAL::Polygon_mesh_processing::clip(
+                      geometry->mesh(target), cutMeshCopy,
+                      CGAL::parameters::use_compact_clipper(true),
+                      CGAL::parameters::use_compact_clipper(true))) {
+                return STATUS_ZERO_THICKNESS;
+              }
+            } else {
+              if (!CGAL::Polygon_mesh_processing::
+                      corefine_and_compute_difference(
+                          geometry->mesh(target), cutMeshCopy,
+                          geometry->mesh(target),
+                          CGAL::parameters::all_default(),
+                          CGAL::parameters::all_default(),
+                          CGAL::parameters::all_default())) {
+                return STATUS_ZERO_THICKNESS;
+              }
             }
+            demesh(geometry->mesh(target));
+            geometry->updateBounds3(target);
           }
-          demesh(geometry->mesh(target));
-          geometry->updateBounds3(target);
+        } else {
+          // Inexact mesh cuts.
+          bool modified = false;
+          for (int nth = targets; nth < size; nth++) {
+            if (!geometry->is_mesh(nth) || geometry->is_empty_epick_mesh(nth) ||
+                geometry->noOverlap3(target, nth)) {
+              continue;
+            }
+            Epick_surface_mesh cutMeshCopy(geometry->epick_mesh(nth));
+            if (open) {
+              CGAL::Polygon_mesh_processing::reverse_face_orientations(
+                  cutMeshCopy);
+              Epick_surface_mesh mask(geometry->epick_mesh(target));
+              if (!CGAL::Polygon_mesh_processing::clip(
+                      geometry->epick_mesh(target), cutMeshCopy,
+                      CGAL::parameters::use_compact_clipper(true),
+                      CGAL::parameters::use_compact_clipper(true))) {
+                return STATUS_ZERO_THICKNESS;
+              }
+            } else {
+              if (!CGAL::Polygon_mesh_processing::
+                      corefine_and_compute_difference(
+                          geometry->epick_mesh(target), cutMeshCopy,
+                          geometry->epick_mesh(target),
+                          CGAL::parameters::all_default(),
+                          CGAL::parameters::all_default(),
+                          CGAL::parameters::all_default())) {
+                return STATUS_ZERO_THICKNESS;
+              }
+            }
+            demesh(geometry->epick_mesh(target));
+            geometry->updateEpickBounds3(target);
+            modified = true;
+          }
+          if (modified) {
+            geometry->mesh(target).clear();
+            copy_face_graph(geometry->epick_mesh(target),
+                            geometry->mesh(target));
+          }
         }
         break;
       }
@@ -5439,19 +5489,6 @@ int Simplify(Geometry* geometry, double ratio, bool simplify_points,
     boost::unordered_map<Vertex_index, Cartesian_surface_mesh::Vertex_index>
         vertex_map;
 
-    if (simplify_points) {
-      for (const Vertex_index vertex : mesh.vertices()) {
-        Point& point = mesh.point(vertex);
-        double x = CGAL::to_double(point.x());
-        double y = CGAL::to_double(point.y());
-        double z = CGAL::to_double(point.z());
-        point =
-            Point(CGAL::simplest_rational_in_interval<FT>(x - eps, x + eps),
-                  CGAL::simplest_rational_in_interval<FT>(y - eps, y + eps),
-                  CGAL::simplest_rational_in_interval<FT>(z - eps, z + eps));
-      }
-    }
-
     Cartesian_surface_mesh cartesian_surface_mesh;
     copy_face_graph(mesh, cartesian_surface_mesh,
                     CGAL::parameters::vertex_to_vertex_output_iterator(
@@ -5472,12 +5509,28 @@ int Simplify(Geometry* geometry, double ratio, bool simplify_points,
                     CGAL::parameters::vertex_to_vertex_map(
                         boost::make_assoc_property_map(vertex_map)));
 
+    if (simplify_points) {
+      for (const Vertex_index vertex : mesh.vertices()) {
+        Point& point = mesh.point(vertex);
+        double x = CGAL::to_double(point.x());
+        double y = CGAL::to_double(point.y());
+        double z = CGAL::to_double(point.z());
+        point =
+            Point(CGAL::simplest_rational_in_interval<FT>(x - eps, x + eps),
+                  CGAL::simplest_rational_in_interval<FT>(y - eps, y + eps),
+                  CGAL::simplest_rational_in_interval<FT>(z - eps, z + eps));
+      }
+    }
+    demesh(mesh);
+
+#if 0
     if (CGAL::Polygon_mesh_processing::does_self_intersect(
             mesh, CGAL::parameters::all_default())) {
       // Is the self-intersection test worthwhile?
       CGAL::Polygon_mesh_processing::experimental::
           autorefine_and_remove_self_intersections(mesh);
     }
+#endif
   }
 
   return STATUS_OK;

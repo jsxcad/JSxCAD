@@ -2,6 +2,11 @@ import { logInfo } from './log.js';
 
 export const aggregates = new Map();
 
+export const clearTimes = () => {
+  aggregates.clear();
+};
+export const getTimes = () => [...aggregates];
+
 export const startTime = (name) => {
   if (!aggregates.has(name)) {
     aggregates.set(name, { name, count: 0, total: 0, average: 0 });
@@ -36,7 +41,7 @@ export const reportTimes = () => {
   const entries = [...aggregates.values()].sort((a, b) => a.total - b.total);
   for (const { average, count, last, name, total } of entries) {
     logInfo(
-      'sys/profile',
+      'profile',
       `${name} average: ${average.toFixed(
         2
       )} count: ${count} last: ${last.toFixed(2)} total: ${total.toFixed(2)}`
