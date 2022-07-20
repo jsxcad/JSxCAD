@@ -30,6 +30,12 @@ export const isType =
   ({ tags }) =>
     tags.includes(type);
 
+export const typeReference = 'type:reference';
+export const hasNotTypeReference = hasNotType(typeReference);
+export const hasTypeReference = hasType(typeReference);
+export const isNotTypeReference = isNotType(typeReference);
+export const isTypeReference = isType(typeReference);
+
 export const typeGhost = 'type:ghost';
 export const hasNotTypeGhost = hasNotType(typeGhost);
 export const hasTypeGhost = hasType(typeGhost);
@@ -47,14 +53,6 @@ export const hasNotTypeVoid = hasNotType(typeVoid);
 export const hasTypeVoid = hasType(typeVoid);
 export const isNotTypeVoid = isNotType(typeVoid);
 export const isTypeVoid = isType(typeVoid);
-
-/*
-export const typeWire = 'type:wire';
-export const hasNotTypeWire = hasNotType(typeWire);
-export const hasTypeWire = hasType(typeWire);
-export const isNotTypeWire = isNotType(typeWire);
-export const isTypeWire = isType(typeWire);
-*/
 
 // Structural types.
 export const isGraph = ({ type }) => type === 'graph';

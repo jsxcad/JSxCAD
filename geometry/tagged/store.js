@@ -1,6 +1,5 @@
-import { ErrorWouldBlock, write } from '@jsxcad/sys';
-
 import { hash } from './hash.js';
+import { write } from '@jsxcad/sys';
 
 export const isStored = Symbol('isStored');
 

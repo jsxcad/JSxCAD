@@ -44256,10 +44256,16 @@ class App extends ReactDOM$2.Component {
             const commit = this.Log.pendingMessages;
             this.Log.pendingMessages = [];
             const {
+              LogFilter = '^app/Profile',
               LogMessages = []
             } = this.state;
+
+            const filter = ({
+              source
+            }) => !source || !LogFilter || source.match(LogFilter);
+
             await this.updateState({
-              LogMessages: [...commit, ...LogMessages.slice(0, 99)]
+              LogMessages: [...commit, ...LogMessages.slice(0, 99)].filter(filter)
             });
           }
         } finally {

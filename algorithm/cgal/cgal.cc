@@ -23,6 +23,7 @@
 #include <CGAL/Env_surface_data_traits_3.h>
 #include <CGAL/Env_triangle_traits_3.h>
 #include <CGAL/Exact_predicates_exact_constructions_kernel.h>
+#include <CGAL/Exact_rational.h>
 #include <CGAL/FPU_extension.h>
 #include <CGAL/Gps_traits_2.h>
 #include <CGAL/IO/facets_in_complex_2_to_triangle_mesh.h>
@@ -107,7 +108,11 @@
 #include <thread>
 #endif
 
-typedef CGAL::Exact_predicates_exact_constructions_kernel Kernel;
+typedef CGAL::Exact_predicates_exact_constructions_kernel Epeck_kernel;
+typedef CGAL::Exact_predicates_inexact_constructions_kernel Epick_kernel;
+typedef Epeck_kernel Kernel;
+typedef CGAL::Cartesian_converter<Kernel, Epick_kernel>
+    Epeck_to_epick_converter;
 
 typedef Kernel::FT FT;
 typedef Kernel::RT RT;
@@ -139,15 +144,17 @@ typedef std::vector<Point> Polyline;
 typedef CGAL::Triple<int, int, int> Triangle_int;
 typedef std::map<Point, Vertex_index> Vertex_map;
 
-typedef CGAL::Exact_predicates_inexact_constructions_kernel Epick_kernel;
 typedef Epick_kernel::Point_3 Epick_point;
 typedef std::vector<Epick_point> Epick_points;
 typedef CGAL::Surface_mesh<Epick_point> Epick_surface_mesh;
 
 typedef CGAL::Simple_cartesian<double> Cartesian_kernel;
+typedef CGAL::Cartesian<CGAL::Exact_rational> Exact_rational_kernel;
 typedef Cartesian_kernel::Point_3 Cartesian_point;
 typedef std::vector<Cartesian_point> Cartesian_points;
 typedef CGAL::Surface_mesh<Cartesian_point> Cartesian_surface_mesh;
+typedef CGAL::Surface_mesh<Exact_rational_kernel::Point_3>
+    Exact_rational_surface_mesh;
 
 typedef std::array<FT, 3> Triple;
 typedef std::vector<Triple> Triples;
@@ -191,6 +198,7 @@ enum GeometryType {
   GEOMETRY_SEGMENTS = 3,
   GEOMETRY_POINTS = 4,
   GEOMETRY_EMPTY = 5,
+  GEOMETRY_REFERENCE = 6,
 };
 
 namespace std {
@@ -2227,9 +2235,12 @@ void check() {
   }
 }
 
-template <typename Edge, typename Face, typename Point>
+template <typename Kernel, typename Edge, typename Face, typename Point>
 bool projectPointToEnvelope(const Edge& edge, const Face& face,
                             Point& projected) {
+  typedef typename Kernel::Line_3 Line;
+  typedef typename Kernel::Vector_3 Vector;
+  typedef typename Kernel::Plane_3 Plane;
   // Project the corner up to the surface.
   auto p2 = edge->source()->point();
   Line line(Point(p2.x(), p2.y(), 0), Vector(0, 0, 1).direction());
@@ -2384,6 +2395,8 @@ class Geometry {
     setType(target, type);
     return target;
   }
+
+  bool is_reference(int nth) { return type(nth) == GEOMETRY_REFERENCE; }
 
   bool is_mesh(int nth) { return type(nth) == GEOMETRY_MESH; }
   bool is_empty_mesh(int nth) { return CGAL::is_empty(mesh(nth)); }
@@ -3154,6 +3167,7 @@ int Clip(Geometry* geometry, int targets, bool open) {
   geometry->copyPolygonsWithHolesToGeneralPolygonSets();
   geometry->computeBounds();
 
+  Epeck_to_epick_converter epeck_to_epick;
   for (int target = 0; target < targets; target++) {
     switch (geometry->type(target)) {
       case GEOMETRY_MESH: {
@@ -3161,6 +3175,17 @@ int Clip(Geometry* geometry, int targets, bool open) {
           continue;
         }
         for (int nth = targets; nth < size; nth++) {
+          if (geometry->is_reference(nth)) {
+            Plane plane(0, 0, 1, 0);
+            plane = plane.transform(geometry->transform(nth));
+            if (!CGAL::Polygon_mesh_processing::clip(
+                    geometry->mesh(target), plane,
+                    CGAL::parameters::use_compact_clipper(true).clip_volume(
+                        open == false))) {
+              return STATUS_ZERO_THICKNESS;
+            }
+            continue;
+          }
           if (!geometry->is_mesh(nth) || geometry->is_empty_mesh(nth)) {
             continue;
           }
@@ -3261,6 +3286,7 @@ int Clip(Geometry* geometry, int targets, bool open) {
         geometry->points(target).swap(in);
         break;
       }
+      case GEOMETRY_REFERENCE:
       case GEOMETRY_EMPTY: {
         break;
       }
@@ -3544,6 +3570,7 @@ int Cut(Geometry* geometry, int targets, bool open, bool exact) {
   geometry->copyPolygonsWithHolesToGeneralPolygonSets();
   geometry->computeBounds();
 
+  Epeck_to_epick_converter epeck_to_epick_converter;
   for (int target = 0; target < targets; target++) {
     switch (geometry->type(target)) {
       case GEOMETRY_MESH: {
@@ -3552,6 +3579,17 @@ int Cut(Geometry* geometry, int targets, bool open, bool exact) {
         }
         if (exact) {
           for (int nth = targets; nth < size; nth++) {
+            if (geometry->is_reference(nth)) {
+              Plane plane(0, 0, 1, 0);
+              plane = plane.transform(geometry->transform(nth)).opposite();
+              if (!CGAL::Polygon_mesh_processing::clip(
+                      geometry->mesh(target), plane,
+                      CGAL::parameters::use_compact_clipper(true).clip_volume(
+                          open == false))) {
+                return STATUS_ZERO_THICKNESS;
+              }
+              continue;
+            }
             if (!geometry->is_mesh(nth) || geometry->is_empty_mesh(nth) ||
                 geometry->noOverlap3(target, nth)) {
               continue;
@@ -3585,6 +3623,18 @@ int Cut(Geometry* geometry, int targets, bool open, bool exact) {
           // Inexact mesh cuts.
           bool modified = false;
           for (int nth = targets; nth < size; nth++) {
+            if (geometry->is_reference(nth)) {
+              Plane plane(0, 0, 1, 0);
+              plane = plane.transform(geometry->transform(nth)).opposite();
+              if (!CGAL::Polygon_mesh_processing::clip(
+                      geometry->epick_mesh(target),
+                      epeck_to_epick_converter(plane),
+                      CGAL::parameters::use_compact_clipper(true).clip_volume(
+                          open == false))) {
+                return STATUS_ZERO_THICKNESS;
+              }
+              continue;
+            }
             if (!geometry->is_mesh(nth) || geometry->is_empty_epick_mesh(nth) ||
                 geometry->noOverlap3(target, nth)) {
               continue;
@@ -3689,6 +3739,7 @@ int Cut(Geometry* geometry, int targets, bool open, bool exact) {
         geometry->points(target).swap(in);
         break;
       }
+      case GEOMETRY_REFERENCE:
       case GEOMETRY_EMPTY: {
         break;
       }
@@ -3927,6 +3978,7 @@ int Disjoint(Geometry* geometry, emscripten::val getIsMasked) {
         // TODO: Support disjunction by volumes, segments, polygons.
         break;
       }
+      case GEOMETRY_REFERENCE:
       case GEOMETRY_EMPTY: {
         break;
       }
@@ -4378,15 +4430,18 @@ int Fuse(Geometry* geometry) {
 }
 
 int GenerateEnvelope(Geometry* geometry, int envelopeType) {
+  typedef Epeck_kernel Envelope_kernel;
+  typedef CGAL::Surface_mesh<Envelope_kernel::Point_3> Envelope_mesh;
   const int kUpper = 0;
   const int kLower = 1;
   if (envelopeType != kUpper && envelopeType != kLower) {
     return STATUS_INVALID_INPUT;
   }
 
-  typedef CGAL::Env_triangle_traits_3<Kernel> Traits_3;
-  typedef Kernel::Point_3 Point_3;
-  typedef Traits_3::Surface_3 Triangle_3;
+  typedef CGAL::Env_triangle_traits_3<Envelope_kernel> Traits_3;
+  typedef Envelope_kernel::Line_3 Line_3;
+  typedef Envelope_kernel::Point_3 Point_3;
+  typedef Traits_3::Surface_3 Env_triangle_3;
   typedef CGAL::Envelope_diagram_2<Traits_3> Envelope_diagram_2;
 
   size_t size = geometry->size();
@@ -4401,17 +4456,21 @@ int GenerateEnvelope(Geometry* geometry, int envelopeType) {
   for (size_t nth = 0; nth < size; nth++) {
     switch (geometry->getType(nth)) {
       case GEOMETRY_MESH: {
-        Surface_mesh& mesh = geometry->mesh(nth);
+        Envelope_mesh mesh;
+        copy_face_graph(geometry->mesh(nth), mesh);
         assert(CGAL::Polygon_mesh_processing::triangulate_faces(mesh) == true);
-        std::list<Triangle_3> triangles;
+        std::list<Env_triangle_3> triangles;
         {
           auto& points = mesh.points();
           for (const Face_index face : faces(mesh)) {
             Halfedge_index a = halfedge(face, mesh);
             Halfedge_index b = mesh.next(a);
-            triangles.emplace_back(points[mesh.source(a)],
-                                   points[mesh.source(b)],
-                                   points[mesh.target(b)]);
+            Envelope_kernel::Triangle_3 triangle(points[mesh.source(a)],
+                                                 points[mesh.source(b)],
+                                                 points[mesh.target(b)]);
+            if (!triangle.is_degenerate()) {
+              triangles.emplace_back(triangle);
+            }
           }
         }
         Envelope_diagram_2 diagram;
@@ -4437,7 +4496,7 @@ int GenerateEnvelope(Geometry* geometry, int envelopeType) {
           // non-zero.
           do {
             Point_3 point;
-            if (projectPointToEnvelope(edge, face, point)) {
+            if (projectPointToEnvelope<Envelope_kernel>(edge, face, point)) {
               size_t vertex = points.size();
               points.push_back(point);
               polygon.push_back(vertex);
@@ -4458,12 +4517,14 @@ int GenerateEnvelope(Geometry* geometry, int envelopeType) {
           Point_3 front_next_point;
           Point_3 back_point;
           Point_3 back_next_point;
-          if (projectPointToEnvelope(front, front->face(), front_point) &&
-              projectPointToEnvelope(front_next, front_next->face(),
-                                     front_next_point) &&
-              projectPointToEnvelope(back, back->face(), back_point) &&
-              projectPointToEnvelope(back_next, back_next->face(),
-                                     back_next_point)) {
+          if (projectPointToEnvelope<Envelope_kernel>(front, front->face(),
+                                                      front_point) &&
+              projectPointToEnvelope<Envelope_kernel>(
+                  front_next, front_next->face(), front_next_point) &&
+              projectPointToEnvelope<Envelope_kernel>(back, back->face(),
+                                                      back_point) &&
+              projectPointToEnvelope<Envelope_kernel>(
+                  back_next, back_next->face(), back_next_point)) {
             if (front_point == back_next_point &&
                 front_next_point == back_next_point) {
               // This has zero area and can be ignored.
@@ -4505,16 +4566,16 @@ int GenerateEnvelope(Geometry* geometry, int envelopeType) {
 
         CGAL::Polygon_mesh_processing::repair_polygon_soup(points, polygons);
         CGAL::Polygon_mesh_processing::orient_polygon_soup(points, polygons);
-        std::unique_ptr<Surface_mesh> upper_surface(new Surface_mesh());
+        Envelope_mesh surface;
         CGAL::Polygon_mesh_processing::polygon_soup_to_polygon_mesh(
-            points, polygons, *upper_surface);
-        assert(CGAL::Polygon_mesh_processing::triangulate_faces(
-                   *upper_surface) == true);
+            points, polygons, surface);
+        assert(CGAL::Polygon_mesh_processing::triangulate_faces(surface) ==
+               true);
         if (envelopeType == kLower) {
-          CGAL::Polygon_mesh_processing::reverse_face_orientations(
-              *upper_surface);
+          CGAL::Polygon_mesh_processing::reverse_face_orientations(surface);
         }
-        geometry->setMesh(nth, upper_surface);
+        geometry->mesh(nth).clear();
+        copy_face_graph(surface, geometry->mesh(nth));
         break;
       }
     }
@@ -4741,6 +4802,7 @@ int Join(Geometry* geometry, int targets) {
         }
         break;
       }
+      case GEOMETRY_REFERENCE:
       case GEOMETRY_EMPTY: {
         break;
       }
@@ -5480,6 +5542,7 @@ int Simplify(Geometry* geometry, double ratio, bool simplify_points,
   size_t size = geometry->getSize();
 
   geometry->copyInputMeshesToOutputMeshes();
+  geometry->transformToAbsoluteFrame();
 
   for (int nth = 0; nth < size; nth++) {
     if (!geometry->is_mesh(nth)) {
@@ -5522,16 +5585,9 @@ int Simplify(Geometry* geometry, double ratio, bool simplify_points,
       }
     }
     demesh(mesh);
-
-#if 0
-    if (CGAL::Polygon_mesh_processing::does_self_intersect(
-            mesh, CGAL::parameters::all_default())) {
-      // Is the self-intersection test worthwhile?
-      CGAL::Polygon_mesh_processing::experimental::
-          autorefine_and_remove_self_intersections(mesh);
-    }
-#endif
   }
+
+  geometry->transformToLocalFrame();
 
   return STATUS_OK;
 }

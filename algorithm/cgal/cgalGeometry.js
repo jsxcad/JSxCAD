@@ -1,9 +1,7 @@
 import { toCgalTransformFromJsTransform, toJsTransformFromCgalTransform } from './transform.js';
 
-// import { fromSurfaceMesh } from './fromSurfaceMesh.js';
 import { computeHash } from '@jsxcad/sys';
 import { getCgal } from './getCgal.js';
-// import { toSurfaceMesh } from './toSurfaceMesh.js';
 
 const GEOMETRY_UNKNOWN = 0;
 const GEOMETRY_MESH = 1;
@@ -11,15 +9,21 @@ const GEOMETRY_POLYGONS_WITH_HOLES = 2;
 const GEOMETRY_SEGMENTS = 3;
 const GEOMETRY_POINTS = 4;
 const GEOMETRY_EMPTY = 5;
+const GEOMETRY_REFERENCE = 6;
 
 export const fillCgalGeometry = (geometry, inputs) => {
   const g = getCgal();
   geometry.setSize(inputs.length);
   for (let nth = 0; nth < inputs.length; nth++) {
+    const { tags = [] } = inputs[nth];
     geometry.setTransform(
       nth,
       toCgalTransformFromJsTransform(inputs[nth].matrix)
     );
+    if (tags.includes('type:reference')) {
+      geometry.setType(nth, GEOMETRY_REFERENCE);
+      continue;
+    }
     switch (inputs[nth].type) {
       case 'graph':
         const { graph } = inputs[nth];
