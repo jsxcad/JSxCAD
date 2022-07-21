@@ -8,6 +8,7 @@ export const destructure = (
     functions = [],
     arrays = [],
     objects = [],
+    strings = [],
     values = [],
     object = {},
     func,
@@ -42,6 +43,7 @@ export const destructure = (
       }
     }
     if (typeof arg === 'string') {
+      strings.push(arg);
       if (string === undefined) {
         string = arg;
       }
@@ -58,6 +60,7 @@ export const destructure = (
     object,
     number,
     string,
+    strings,
     value,
   };
 };

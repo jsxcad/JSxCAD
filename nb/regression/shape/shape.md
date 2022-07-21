@@ -642,3 +642,21 @@ Arc(37).cut(inset(2)).ez(2).remesh(1).smooth(Box(50, 10, 20)).view();
 ```
 
 ![Image](shape.md.66.png)
+
+```JavaScript
+Box(4, 4, 4).cutout(X(0), and).view();
+```
+
+![Image](shape.md.67.png)
+
+```JavaScript
+Box(4, 4, 4).cut('open', Box(2, 2, 8)).view();
+```
+
+![Image](shape.md.68.png)
+
+```JavaScript
+Box(4, 4, 4).clip('open', Box(2, 2, 8)).view();
+```
+
+![Image](shape.md.69.png)

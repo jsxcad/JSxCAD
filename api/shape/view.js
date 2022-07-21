@@ -28,7 +28,7 @@ const markContent = (geometry) => {
 
 // FIX: Avoid the extra read-write cycle.
 export const baseView =
-  (viewId, op = (x) => x, options = {}) =>
+  (viewId = '', op = (x) => x, options = {}) =>
   (shape) => {
     let {
       size,

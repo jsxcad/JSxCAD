@@ -1,6 +1,5 @@
-import { ErrorWouldBlock, write, writeNonblocking } from '@jsxcad/sys';
-
 import { hash } from './hash.js';
+import { write } from '@jsxcad/sys';
 
 export const isStored = Symbol('isStored');
 
@@ -19,6 +18,9 @@ export const store = async (geometry) => {
   if (graph && !graph[isStored]) {
     if (graph.hash === undefined) {
       throw Error(`Graph has no hash`);
+    }
+    if (!graph.serializedSurfaceMesh) {
+      throw Error('Attempted to store graph without serialization');
     }
     await write(`graph/${graph.hash}`, graph);
     stored.graph = {
@@ -41,57 +43,4 @@ export const store = async (geometry) => {
   }
   await write(`hash/${uuid}`, stored);
   return { type: 'link', hash: uuid };
-};
-
-export const storeNonblocking = (geometry) => {
-  if (geometry[isStored]) {
-    return { stored: { type: 'link', hash: geometry.hash }, wouldBlock: false };
-  }
-  const uuid = hash(geometry);
-  const stored = { ...geometry };
-  // Share graphs across geometries.
-  const graph = geometry.graph;
-  let wouldBlock;
-  if (graph && !graph[isStored]) {
-    if (!graph.hash) {
-      graph.hash = hash(graph);
-    }
-    try {
-      writeNonblocking(`graph/${graph.hash}`, graph);
-    } catch (error) {
-      if (error instanceof ErrorWouldBlock) {
-        wouldBlock = error;
-      }
-    }
-    stored.graph = { hash: graph.hash };
-  }
-  if (geometry.content) {
-    for (let nth = 0; nth < geometry.content.length; nth++) {
-      if (!geometry.content[nth]) {
-        throw Error('Store has empty content/3');
-      }
-      const { stored: contentStored, wouldBlock: contentWouldBlock } =
-        storeNonblocking(geometry.content[nth]);
-      if (contentWouldBlock) {
-        wouldBlock = contentWouldBlock;
-      }
-      stored.content[nth] = contentStored;
-      if (!stored.content[nth]) {
-        throw Error(
-          `Store has empty content/4: contentWouldBlock ${contentWouldBlock} from ${JSON.stringify(
-            geometry
-          )}`
-        );
-      }
-    }
-  }
-  try {
-    writeNonblocking(`hash/${uuid}`, stored);
-  } catch (error) {
-    if (error instanceof ErrorWouldBlock) {
-      wouldBlock = error;
-    }
-  }
-  geometry[isStored] = true;
-  return { stored: { type: 'link', hash: uuid }, wouldBlock };
 };

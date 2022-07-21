@@ -156,7 +156,7 @@ const raycast = (x, y, camera, objects, filter) => {
 // global document
 
 class AnchorControls extends EventDispatcher {
-  constructor(_camera, _domElement, scene, render) {
+  constructor({ camera, domElement, scene, render, editId }) {
     super();
 
     const _material = new MeshBasicMaterial({
@@ -184,6 +184,8 @@ class AnchorControls extends EventDispatcher {
     const _yAxis = new Vector3();
     const _zAxis = new Vector3();
 
+    let _camera = camera;
+    let _domElement = domElement;
     let _step = 1;
     let _object = null;
     let _scene = scene;
@@ -380,6 +382,7 @@ class AnchorControls extends EventDispatcher {
       */
       this.dispatchEvent({
         edits: _edits,
+        editId: editId,
         type: 'edits',
       });
     };
@@ -996,11 +999,11 @@ const buildMeshes = async ({
       while (vertexCount-- > 0) {
         // The first three are precise values that we don't use.
         p += 3;
-        // These three are approximate values in 100th of mm that we will use.
+        // These three are approximate values in 1000th of mm that we will use.
         vertices.push([
-          tokens[p++] / 100,
-          tokens[p++] / 100,
-          tokens[p++] / 100,
+          tokens[p++] / 1000,
+          tokens[p++] / 1000,
+          tokens[p++] / 1000,
         ]);
       }
       let faceCount = tokens[p++];
@@ -1146,7 +1149,10 @@ const buildMeshes = async ({
 
         {
           const edges = new EdgesGeometry(shapeGeometry);
-          const material = new LineBasicMaterial({ color: 0x000000, linewidth: 2 });
+          const material = new LineBasicMaterial({
+            color: 0x000000,
+            linewidth: 1,
+          });
           const outline = new LineSegments(edges, material);
           outline.userData.isOutline = true;
           outline.userData.hasShowOutline = tags.includes('show:outline');
@@ -1407,15 +1413,24 @@ const buildAnchorControls = ({
   startUpdating,
   trackballControls,
   viewerElement,
+  editId,
 }) => {
-  const anchorControls = new AnchorControls(
+  const anchorControls = new AnchorControls({
     camera,
-    viewerElement,
+    domElement: viewerElement,
     scene,
-    render
-  );
+    render,
+    editId,
+  });
   anchorControls.enable();
   return { anchorControls };
+};
+
+const toEditIdFromPath = (path) => {
+  if (path) {
+    const pieces = path.split('/');
+    return pieces.slice(pieces.length - 2).join('$');
+  }
 };
 
 const orbitDisplay = async (
@@ -1431,6 +1446,7 @@ const orbitDisplay = async (
   } = {},
   page
 ) => {
+  const editId = toEditIdFromPath(path);
   const width = page.offsetWidth;
   const height = page.offsetHeight;
 
@@ -1522,6 +1538,7 @@ const orbitDisplay = async (
     trackballControls,
     view,
     viewerElement: displayCanvas,
+    editId,
   });
 
   anchorControls.addEventListener('change', update);

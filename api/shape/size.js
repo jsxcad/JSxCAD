@@ -28,7 +28,7 @@ export const size = Shape.chainable(
   (op = (size) => (shape) => size) =>
     (shape) => {
       const geometry = shape.toConcreteGeometry();
-      let bounds = measureBoundingBox(geometry);
+      const bounds = measureBoundingBox(geometry);
       if (bounds === undefined) {
         return op({
           length: 0,
@@ -40,7 +40,7 @@ export const size = Shape.chainable(
           radius: 0,
         })(Shape.fromGeometry(geometry));
       }
-      let [min, max] = bounds;
+      const [min, max] = bounds;
       const length = max[X] - min[X];
       const width = max[Y] - min[Y];
       const height = max[Z] - min[Z];

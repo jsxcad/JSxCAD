@@ -23,6 +23,7 @@
 #include <CGAL/Env_surface_data_traits_3.h>
 #include <CGAL/Env_triangle_traits_3.h>
 #include <CGAL/Exact_predicates_exact_constructions_kernel.h>
+#include <CGAL/Exact_rational.h>
 #include <CGAL/FPU_extension.h>
 #include <CGAL/Gps_traits_2.h>
 #include <CGAL/IO/facets_in_complex_2_to_triangle_mesh.h>
@@ -107,7 +108,11 @@
 #include <thread>
 #endif
 
-typedef CGAL::Exact_predicates_exact_constructions_kernel Kernel;
+typedef CGAL::Exact_predicates_exact_constructions_kernel Epeck_kernel;
+typedef CGAL::Exact_predicates_inexact_constructions_kernel Epick_kernel;
+typedef Epeck_kernel Kernel;
+typedef CGAL::Cartesian_converter<Kernel, Epick_kernel>
+    Epeck_to_epick_converter;
 
 typedef Kernel::FT FT;
 typedef Kernel::RT RT;
@@ -139,15 +144,17 @@ typedef std::vector<Point> Polyline;
 typedef CGAL::Triple<int, int, int> Triangle_int;
 typedef std::map<Point, Vertex_index> Vertex_map;
 
-typedef CGAL::Exact_predicates_inexact_constructions_kernel Epick_kernel;
 typedef Epick_kernel::Point_3 Epick_point;
 typedef std::vector<Epick_point> Epick_points;
 typedef CGAL::Surface_mesh<Epick_point> Epick_surface_mesh;
 
 typedef CGAL::Simple_cartesian<double> Cartesian_kernel;
+typedef CGAL::Cartesian<CGAL::Exact_rational> Exact_rational_kernel;
 typedef Cartesian_kernel::Point_3 Cartesian_point;
 typedef std::vector<Cartesian_point> Cartesian_points;
 typedef CGAL::Surface_mesh<Cartesian_point> Cartesian_surface_mesh;
+typedef CGAL::Surface_mesh<Exact_rational_kernel::Point_3>
+    Exact_rational_surface_mesh;
 
 typedef std::array<FT, 3> Triple;
 typedef std::vector<Triple> Triples;
@@ -174,6 +181,8 @@ typedef CGAL::Side_of_triangle_mesh<Surface_mesh, Kernel> Side_of_triangle_mesh;
 typedef CGAL::General_polygon_set_2<CGAL::Gps_segment_traits_2<Kernel>>
     General_polygon_set_2;
 
+using CGAL::Kernel_traits;
+
 enum Status {
   STATUS_OK = 0,
   STATUS_EMPTY = 1,
@@ -189,6 +198,7 @@ enum GeometryType {
   GEOMETRY_SEGMENTS = 3,
   GEOMETRY_POINTS = 4,
   GEOMETRY_EMPTY = 5,
+  GEOMETRY_REFERENCE = 6,
 };
 
 namespace std {
@@ -636,9 +646,9 @@ void write_point(const Point& p, std::ostringstream& o) {
 
 // Approximations are in 100ths of a mm.
 void write_approximate_point(const Point& p, std::ostringstream& o) {
-  o << round(CGAL::to_double(p.x().exact()) * 100) << " ";
-  o << round(CGAL::to_double(p.y().exact()) * 100) << " ";
-  o << round(CGAL::to_double(p.z().exact()) * 100);
+  o << round(CGAL::to_double(p.x().exact()) * 1000) << " ";
+  o << round(CGAL::to_double(p.y().exact()) * 1000) << " ";
+  o << round(CGAL::to_double(p.z().exact()) * 1000);
 }
 
 void read_point(Point& point, std::istringstream& input) {
@@ -780,7 +790,7 @@ bool is_coplanar_edge(const Surface_mesh& m, const Vertex_point_map& p,
   auto a = p[m.source(e)];
   auto b = p[m.target(e)];
   auto c = p[m.target(m.next(e))];
-  typename CGAL::Kernel_traits<decltype(a)>::Kernel::Plane_3 plane(a, b, c);
+  typename Kernel_traits<decltype(a)>::Kernel::Plane_3 plane(a, b, c);
   return plane.has_on(p[m.target(m.next(m.opposite(e)))]);
 }
 
@@ -843,7 +853,9 @@ class Demesh_safe_placement {
       const Profile& profile) const {
     const auto& m = profile.surface_mesh();
     const auto& p = profile.vertex_point_map();
-    if (is_safe_to_move(m, p, profile.v0_v1())) {
+    if (profile.p0() == profile.p1()) {
+      return profile.p0();
+    } else if (is_safe_to_move(m, p, profile.v0_v1())) {
       return profile.p1();
     } else if (is_safe_to_move(m, p, profile.v1_v0())) {
       return profile.p0();
@@ -2223,9 +2235,12 @@ void check() {
   }
 }
 
-template <typename Edge, typename Face, typename Point>
+template <typename Kernel, typename Edge, typename Face, typename Point>
 bool projectPointToEnvelope(const Edge& edge, const Face& face,
                             Point& projected) {
+  typedef typename Kernel::Line_3 Line;
+  typedef typename Kernel::Vector_3 Vector;
+  typedef typename Kernel::Plane_3 Plane;
   // Project the corner up to the surface.
   auto p2 = edge->source()->point();
   Line line(Point(p2.x(), p2.y(), 0), Vector(0, 0, 1).direction());
@@ -2336,6 +2351,7 @@ class Geometry {
     pwh_.clear();
     input_meshes_.clear();
     meshes_.clear();
+    epick_meshes_.clear();
     aabb_trees_.clear();
     on_sides_.clear();
     input_segments_.clear();
@@ -2360,6 +2376,7 @@ class Geometry {
     pwh_.resize(size);
     input_meshes_.resize(size);
     meshes_.resize(size);
+    epick_meshes_.resize(size);
     aabb_trees_.resize(size);
     on_sides_.resize(size);
     input_segments_.resize(size);
@@ -2379,8 +2396,11 @@ class Geometry {
     return target;
   }
 
+  bool is_reference(int nth) { return type(nth) == GEOMETRY_REFERENCE; }
+
   bool is_mesh(int nth) { return type(nth) == GEOMETRY_MESH; }
   bool is_empty_mesh(int nth) { return CGAL::is_empty(mesh(nth)); }
+  bool is_empty_epick_mesh(int nth) { return CGAL::is_empty(epick_mesh(nth)); }
   bool is_polygons(int nth) {
     return type(nth) == GEOMETRY_POLYGONS_WITH_HOLES;
   }
@@ -2410,6 +2430,16 @@ class Geometry {
       meshes_[nth].reset(new Surface_mesh);
     }
     return *meshes_[nth];
+  }
+
+  bool has_epick_mesh(int nth) { return epick_meshes_[nth] != nullptr; }
+
+  Epick_surface_mesh& epick_mesh(int nth) {
+    if (!has_epick_mesh(nth)) {
+      epick_meshes_[nth].reset(new Epick_surface_mesh);
+      copy_face_graph(mesh(nth), *epick_meshes_[nth]);
+    }
+    return *epick_meshes_[nth];
   }
 
   bool has_aabb_tree(int nth) { return aabb_trees_[nth] != nullptr; }
@@ -2810,6 +2840,10 @@ class Geometry {
     bbox3(nth) = CGAL::Polygon_mesh_processing::bbox(mesh(nth));
   }
 
+  void updateEpickBounds3(int nth) {
+    bbox3(nth) = CGAL::Polygon_mesh_processing::bbox(epick_mesh(nth));
+  }
+
   void computeBounds() {
     for (size_t nth = 0; nth < size_; nth++) {
       switch (type(nth)) {
@@ -2841,6 +2875,7 @@ class Geometry {
   std::vector<std::unique_ptr<General_polygon_set_2>> gps_;
   std::vector<std::shared_ptr<const Surface_mesh>> input_meshes_;
   std::vector<std::shared_ptr<Surface_mesh>> meshes_;
+  std::vector<std::shared_ptr<Epick_surface_mesh>> epick_meshes_;
   std::vector<std::unique_ptr<AABB_tree>> aabb_trees_;
   std::vector<std::unique_ptr<Side_of_triangle_mesh>> on_sides_;
   std::vector<std::unique_ptr<Segments>> input_segments_;
@@ -3132,6 +3167,7 @@ int Clip(Geometry* geometry, int targets, bool open) {
   geometry->copyPolygonsWithHolesToGeneralPolygonSets();
   geometry->computeBounds();
 
+  Epeck_to_epick_converter epeck_to_epick;
   for (int target = 0; target < targets; target++) {
     switch (geometry->type(target)) {
       case GEOMETRY_MESH: {
@@ -3139,6 +3175,17 @@ int Clip(Geometry* geometry, int targets, bool open) {
           continue;
         }
         for (int nth = targets; nth < size; nth++) {
+          if (geometry->is_reference(nth)) {
+            Plane plane(0, 0, 1, 0);
+            plane = plane.transform(geometry->transform(nth));
+            if (!CGAL::Polygon_mesh_processing::clip(
+                    geometry->mesh(target), plane,
+                    CGAL::parameters::use_compact_clipper(true).clip_volume(
+                        open == false))) {
+              return STATUS_ZERO_THICKNESS;
+            }
+            continue;
+          }
           if (!geometry->is_mesh(nth) || geometry->is_empty_mesh(nth)) {
             continue;
           }
@@ -3239,6 +3286,7 @@ int Clip(Geometry* geometry, int targets, bool open) {
         geometry->points(target).swap(in);
         break;
       }
+      case GEOMETRY_REFERENCE:
       case GEOMETRY_EMPTY: {
         break;
       }
@@ -3512,7 +3560,7 @@ int ConvexHull(Geometry* geometry) {
   return STATUS_OK;
 }
 
-int Cut(Geometry* geometry, int targets, bool open) {
+int Cut(Geometry* geometry, int targets, bool open, bool exact) {
   size_t size = geometry->size();
   geometry->copyInputMeshesToOutputMeshes();
   geometry->copyInputSegmentsToOutputSegments();
@@ -3522,39 +3570,106 @@ int Cut(Geometry* geometry, int targets, bool open) {
   geometry->copyPolygonsWithHolesToGeneralPolygonSets();
   geometry->computeBounds();
 
+  Epeck_to_epick_converter epeck_to_epick_converter;
   for (int target = 0; target < targets; target++) {
     switch (geometry->type(target)) {
       case GEOMETRY_MESH: {
         if (geometry->is_empty_mesh(target)) {
           continue;
         }
-        for (int nth = targets; nth < size; nth++) {
-          if (!geometry->is_mesh(nth) || geometry->is_empty_mesh(nth) ||
-              geometry->noOverlap3(target, nth)) {
-            continue;
-          }
-          Surface_mesh cutMeshCopy(geometry->mesh(nth));
-          if (open) {
-            CGAL::Polygon_mesh_processing::reverse_face_orientations(
-                cutMeshCopy);
-            Surface_mesh mask(geometry->mesh(target));
-            if (!CGAL::Polygon_mesh_processing::clip(
-                    geometry->mesh(target), cutMeshCopy,
-                    CGAL::parameters::use_compact_clipper(true),
-                    CGAL::parameters::use_compact_clipper(true))) {
-              return STATUS_ZERO_THICKNESS;
+        if (exact) {
+          for (int nth = targets; nth < size; nth++) {
+            if (geometry->is_reference(nth)) {
+              Plane plane(0, 0, 1, 0);
+              plane = plane.transform(geometry->transform(nth)).opposite();
+              if (!CGAL::Polygon_mesh_processing::clip(
+                      geometry->mesh(target), plane,
+                      CGAL::parameters::use_compact_clipper(true).clip_volume(
+                          open == false))) {
+                return STATUS_ZERO_THICKNESS;
+              }
+              continue;
             }
-          } else {
-            if (!CGAL::Polygon_mesh_processing::corefine_and_compute_difference(
-                    geometry->mesh(target), cutMeshCopy, geometry->mesh(target),
-                    CGAL::parameters::all_default(),
-                    CGAL::parameters::all_default(),
-                    CGAL::parameters::all_default())) {
-              return STATUS_ZERO_THICKNESS;
+            if (!geometry->is_mesh(nth) || geometry->is_empty_mesh(nth) ||
+                geometry->noOverlap3(target, nth)) {
+              continue;
             }
+            Surface_mesh cutMeshCopy(geometry->mesh(nth));
+            if (open) {
+              CGAL::Polygon_mesh_processing::reverse_face_orientations(
+                  cutMeshCopy);
+              Surface_mesh mask(geometry->mesh(target));
+              if (!CGAL::Polygon_mesh_processing::clip(
+                      geometry->mesh(target), cutMeshCopy,
+                      CGAL::parameters::use_compact_clipper(true),
+                      CGAL::parameters::use_compact_clipper(true))) {
+                return STATUS_ZERO_THICKNESS;
+              }
+            } else {
+              if (!CGAL::Polygon_mesh_processing::
+                      corefine_and_compute_difference(
+                          geometry->mesh(target), cutMeshCopy,
+                          geometry->mesh(target),
+                          CGAL::parameters::all_default(),
+                          CGAL::parameters::all_default(),
+                          CGAL::parameters::all_default())) {
+                return STATUS_ZERO_THICKNESS;
+              }
+            }
+            demesh(geometry->mesh(target));
+            geometry->updateBounds3(target);
           }
-          demesh(geometry->mesh(target));
-          geometry->updateBounds3(target);
+        } else {
+          // Inexact mesh cuts.
+          bool modified = false;
+          for (int nth = targets; nth < size; nth++) {
+            if (geometry->is_reference(nth)) {
+              Plane plane(0, 0, 1, 0);
+              plane = plane.transform(geometry->transform(nth)).opposite();
+              if (!CGAL::Polygon_mesh_processing::clip(
+                      geometry->epick_mesh(target),
+                      epeck_to_epick_converter(plane),
+                      CGAL::parameters::use_compact_clipper(true).clip_volume(
+                          open == false))) {
+                return STATUS_ZERO_THICKNESS;
+              }
+              continue;
+            }
+            if (!geometry->is_mesh(nth) || geometry->is_empty_epick_mesh(nth) ||
+                geometry->noOverlap3(target, nth)) {
+              continue;
+            }
+            Epick_surface_mesh cutMeshCopy(geometry->epick_mesh(nth));
+            if (open) {
+              CGAL::Polygon_mesh_processing::reverse_face_orientations(
+                  cutMeshCopy);
+              Epick_surface_mesh mask(geometry->epick_mesh(target));
+              if (!CGAL::Polygon_mesh_processing::clip(
+                      geometry->epick_mesh(target), cutMeshCopy,
+                      CGAL::parameters::use_compact_clipper(true),
+                      CGAL::parameters::use_compact_clipper(true))) {
+                return STATUS_ZERO_THICKNESS;
+              }
+            } else {
+              if (!CGAL::Polygon_mesh_processing::
+                      corefine_and_compute_difference(
+                          geometry->epick_mesh(target), cutMeshCopy,
+                          geometry->epick_mesh(target),
+                          CGAL::parameters::all_default(),
+                          CGAL::parameters::all_default(),
+                          CGAL::parameters::all_default())) {
+                return STATUS_ZERO_THICKNESS;
+              }
+            }
+            demesh(geometry->epick_mesh(target));
+            geometry->updateEpickBounds3(target);
+            modified = true;
+          }
+          if (modified) {
+            geometry->mesh(target).clear();
+            copy_face_graph(geometry->epick_mesh(target),
+                            geometry->mesh(target));
+          }
         }
         break;
       }
@@ -3624,6 +3739,7 @@ int Cut(Geometry* geometry, int targets, bool open) {
         geometry->points(target).swap(in);
         break;
       }
+      case GEOMETRY_REFERENCE:
       case GEOMETRY_EMPTY: {
         break;
       }
@@ -3862,6 +3978,7 @@ int Disjoint(Geometry* geometry, emscripten::val getIsMasked) {
         // TODO: Support disjunction by volumes, segments, polygons.
         break;
       }
+      case GEOMETRY_REFERENCE:
       case GEOMETRY_EMPTY: {
         break;
       }
@@ -4313,15 +4430,18 @@ int Fuse(Geometry* geometry) {
 }
 
 int GenerateEnvelope(Geometry* geometry, int envelopeType) {
+  typedef Epeck_kernel Envelope_kernel;
+  typedef CGAL::Surface_mesh<Envelope_kernel::Point_3> Envelope_mesh;
   const int kUpper = 0;
   const int kLower = 1;
   if (envelopeType != kUpper && envelopeType != kLower) {
     return STATUS_INVALID_INPUT;
   }
 
-  typedef CGAL::Env_triangle_traits_3<Kernel> Traits_3;
-  typedef Kernel::Point_3 Point_3;
-  typedef Traits_3::Surface_3 Triangle_3;
+  typedef CGAL::Env_triangle_traits_3<Envelope_kernel> Traits_3;
+  typedef Envelope_kernel::Line_3 Line_3;
+  typedef Envelope_kernel::Point_3 Point_3;
+  typedef Traits_3::Surface_3 Env_triangle_3;
   typedef CGAL::Envelope_diagram_2<Traits_3> Envelope_diagram_2;
 
   size_t size = geometry->size();
@@ -4336,17 +4456,21 @@ int GenerateEnvelope(Geometry* geometry, int envelopeType) {
   for (size_t nth = 0; nth < size; nth++) {
     switch (geometry->getType(nth)) {
       case GEOMETRY_MESH: {
-        Surface_mesh& mesh = geometry->mesh(nth);
+        Envelope_mesh mesh;
+        copy_face_graph(geometry->mesh(nth), mesh);
         assert(CGAL::Polygon_mesh_processing::triangulate_faces(mesh) == true);
-        std::list<Triangle_3> triangles;
+        std::list<Env_triangle_3> triangles;
         {
           auto& points = mesh.points();
           for (const Face_index face : faces(mesh)) {
             Halfedge_index a = halfedge(face, mesh);
             Halfedge_index b = mesh.next(a);
-            triangles.emplace_back(points[mesh.source(a)],
-                                   points[mesh.source(b)],
-                                   points[mesh.target(b)]);
+            Envelope_kernel::Triangle_3 triangle(points[mesh.source(a)],
+                                                 points[mesh.source(b)],
+                                                 points[mesh.target(b)]);
+            if (!triangle.is_degenerate()) {
+              triangles.emplace_back(triangle);
+            }
           }
         }
         Envelope_diagram_2 diagram;
@@ -4372,7 +4496,7 @@ int GenerateEnvelope(Geometry* geometry, int envelopeType) {
           // non-zero.
           do {
             Point_3 point;
-            if (projectPointToEnvelope(edge, face, point)) {
+            if (projectPointToEnvelope<Envelope_kernel>(edge, face, point)) {
               size_t vertex = points.size();
               points.push_back(point);
               polygon.push_back(vertex);
@@ -4393,12 +4517,14 @@ int GenerateEnvelope(Geometry* geometry, int envelopeType) {
           Point_3 front_next_point;
           Point_3 back_point;
           Point_3 back_next_point;
-          if (projectPointToEnvelope(front, front->face(), front_point) &&
-              projectPointToEnvelope(front_next, front_next->face(),
-                                     front_next_point) &&
-              projectPointToEnvelope(back, back->face(), back_point) &&
-              projectPointToEnvelope(back_next, back_next->face(),
-                                     back_next_point)) {
+          if (projectPointToEnvelope<Envelope_kernel>(front, front->face(),
+                                                      front_point) &&
+              projectPointToEnvelope<Envelope_kernel>(
+                  front_next, front_next->face(), front_next_point) &&
+              projectPointToEnvelope<Envelope_kernel>(back, back->face(),
+                                                      back_point) &&
+              projectPointToEnvelope<Envelope_kernel>(
+                  back_next, back_next->face(), back_next_point)) {
             if (front_point == back_next_point &&
                 front_next_point == back_next_point) {
               // This has zero area and can be ignored.
@@ -4440,16 +4566,16 @@ int GenerateEnvelope(Geometry* geometry, int envelopeType) {
 
         CGAL::Polygon_mesh_processing::repair_polygon_soup(points, polygons);
         CGAL::Polygon_mesh_processing::orient_polygon_soup(points, polygons);
-        std::unique_ptr<Surface_mesh> upper_surface(new Surface_mesh());
+        Envelope_mesh surface;
         CGAL::Polygon_mesh_processing::polygon_soup_to_polygon_mesh(
-            points, polygons, *upper_surface);
-        assert(CGAL::Polygon_mesh_processing::triangulate_faces(
-                   *upper_surface) == true);
+            points, polygons, surface);
+        assert(CGAL::Polygon_mesh_processing::triangulate_faces(surface) ==
+               true);
         if (envelopeType == kLower) {
-          CGAL::Polygon_mesh_processing::reverse_face_orientations(
-              *upper_surface);
+          CGAL::Polygon_mesh_processing::reverse_face_orientations(surface);
         }
-        geometry->setMesh(nth, upper_surface);
+        geometry->mesh(nth).clear();
+        copy_face_graph(surface, geometry->mesh(nth));
         break;
       }
     }
@@ -4502,10 +4628,9 @@ int Grow(Geometry* geometry, size_t count, bool x, bool y, bool z) {
           // By default all points are grown.
           bool inside = true;
           if (count + 1 < size) {
-            // There are selections, so limit the grown points.
             inside = false;
             for (int selection = count + 1; selection < size; selection++) {
-              if (geometry->on_side(selection)(point) ==
+              if (geometry->on_side(selection)(point) !=
                   CGAL::ON_UNBOUNDED_SIDE) {
                 inside = true;
                 break;
@@ -4677,6 +4802,7 @@ int Join(Geometry* geometry, int targets) {
         }
         break;
       }
+      case GEOMETRY_REFERENCE:
       case GEOMETRY_EMPTY: {
         break;
       }
@@ -5038,8 +5164,110 @@ int Outline(Geometry* geometry) {
   return STATUS_OK;
 }
 
+template <typename Kernel, typename Surface_mesh>
+void remesh(Surface_mesh& mesh,
+            std::vector<std::reference_wrapper<const Surface_mesh>>& selections,
+            int iterations, int relaxation_steps, double target_edge_length) {
+  std::set<Vertex_index> unconstrained_vertices;
+  std::set<Face_index> unconstrained_faces;
+  if (selections.size() > 0) {
+    for (const Surface_mesh& selection : selections) {
+      {
+        Surface_mesh working_selection(selection);
+        CGAL::Polygon_mesh_processing::corefine(
+            mesh, working_selection, CGAL::parameters::all_default(),
+            CGAL::parameters::all_default());
+      }
+      CGAL::Side_of_triangle_mesh<Surface_mesh, Kernel> inside(selection);
+      for (Vertex_index vertex : mesh.vertices()) {
+        if (inside(mesh.point(vertex)) == CGAL::ON_BOUNDED_SIDE) {
+          // This vertex may be remeshed.
+          unconstrained_vertices.insert(vertex);
+        }
+      }
+      for (Face_index face : mesh.faces()) {
+        const Halfedge_index start = mesh.halfedge(face);
+        Halfedge_index edge = start;
+        bool include = true;
+        do {
+          if (inside(mesh.point(mesh.source(edge))) ==
+              CGAL::ON_UNBOUNDED_SIDE) {
+            include = false;
+            break;
+          }
+          edge = mesh.next(edge);
+        } while (edge != start);
+        if (include) {
+          unconstrained_faces.insert(face);
+        }
+      }
+    }
+  } else {
+    for (Face_index face : mesh.faces()) {
+      unconstrained_faces.insert(face);
+    }
+  }
+  // The vertices are always constrained.
+  std::set<Vertex_index> constrained_vertices;
+  for (Vertex_index vertex : mesh.vertices()) {
+    constrained_vertices.insert(vertex);
+  }
+  std::set<Edge_index> constrained_edges;
+  for (Edge_index edge : mesh.edges()) {
+    const Halfedge_index halfedge = mesh.halfedge(edge);
+    const Vertex_index& source = mesh.source(halfedge);
+    const Vertex_index& target = mesh.target(halfedge);
+    if (constrained_vertices.count(source) &&
+        constrained_vertices.count(target)) {
+      constrained_edges.insert(edge);
+    }
+  }
+  CGAL::Boolean_property_map<std::set<Vertex_index>> constrained_vertex_map(
+      constrained_vertices);
+  CGAL::Boolean_property_map<std::set<Edge_index>> constrained_edge_map(
+      constrained_edges);
+  CGAL::Polygon_mesh_processing::isotropic_remeshing(
+      unconstrained_faces, target_edge_length, mesh,
+      CGAL::Polygon_mesh_processing::parameters::number_of_iterations(
+          iterations)
+          .vertex_point_map(mesh.points())
+          .edge_is_constrained_map(constrained_edge_map)
+          .number_of_relaxation_steps(relaxation_steps));
+}
+
 int Remesh(Geometry* geometry, size_t count, size_t iterations,
-           size_t relaxation_steps, double target_edge_length, bool exact) {
+           size_t relaxation_steps, double target_edge_length) {
+  int size = geometry->getSize();
+
+  geometry->copyInputMeshesToOutputMeshes();
+  geometry->transformToAbsoluteFrame();
+
+  std::vector<std::reference_wrapper<const Surface_mesh>> selections;
+
+  for (int selection = count; selection < count; selection++) {
+    selections.push_back(geometry->mesh(selection));
+  }
+
+  for (int nth = 0; nth < count; nth++) {
+    remesh<Kernel>(geometry->mesh(nth), selections, iterations,
+                   relaxation_steps, target_edge_length);
+  }
+
+  geometry->transformToLocalFrame();
+
+  return STATUS_OK;
+
+#if 0
+  struct halfedge2edge {
+    halfedge2edge(const Surface_mesh& m, std::vector<Edge_index>& edges)
+        : m_mesh(m), m_edges(edges) {}
+    void operator()(const Halfedge_index& h) const {
+      m_edges.push_back(edge(h, m_mesh));
+    }
+    const Surface_mesh& m_mesh;
+    std::vector<Edge_index>& m_edges;
+  };
+
   int size = geometry->getSize();
 
   geometry->copyInputMeshesToOutputMeshes();
@@ -5050,30 +5278,57 @@ int Remesh(Geometry* geometry, size_t count, size_t iterations,
       continue;
     }
     Surface_mesh& mesh = geometry->mesh(nth);
+    // std::vector<Edge_index> border;
+    // CGAL::Polygon_mesh_processing::border_halfedges(faces(mesh), mesh,
+    // boost::make_function_output_iterator(halfedge2edge(mesh, border)));
+    // CGAL::Polygon_mesh_processing::split_long_edges(edges(mesh),
+    // target_edge_length, mesh);
     std::set<Vertex_index> unconstrained_vertices;
-    for (int selection = count; selection < size; selection++) {
-      {
-        Surface_mesh working_selection(geometry->mesh(selection));
-        CGAL::Polygon_mesh_processing::corefine(
-            mesh, working_selection, CGAL::parameters::all_default(),
-            CGAL::parameters::all_default());
-      }
-      CGAL::Side_of_triangle_mesh<Surface_mesh, Kernel> inside(
-          geometry->mesh(selection));
-      for (Vertex_index vertex : mesh.vertices()) {
-        if (inside(mesh.point(vertex)) != CGAL::ON_UNBOUNDED_SIDE) {
-          // This vertex may be remeshed.
-          unconstrained_vertices.insert(vertex);
+    std::set<Face_index> unconstrained_faces;
+    if (count < size) {
+      for (int selection = count; selection < size; selection++) {
+        {
+          Surface_mesh working_selection(geometry->mesh(selection));
+          CGAL::Polygon_mesh_processing::corefine(
+              mesh, working_selection, CGAL::parameters::all_default(),
+              CGAL::parameters::all_default());
+        }
+        CGAL::Side_of_triangle_mesh<Surface_mesh, Kernel> inside(
+            geometry->mesh(selection));
+        for (Vertex_index vertex : mesh.vertices()) {
+          if (inside(mesh.point(vertex)) == CGAL::ON_BOUNDED_SIDE) {
+            // This vertex may be remeshed.
+            unconstrained_vertices.insert(vertex);
+          }
+        }
+        for (Face_index face : mesh.faces()) {
+          const Halfedge_index start = mesh.halfedge(face);
+          Halfedge_index edge = start;
+          bool include = true;
+          do {
+            if (inside(mesh.point(mesh.source(edge))) ==
+                CGAL::ON_UNBOUNDED_SIDE) {
+              include = false;
+              break;
+            }
+            edge = mesh.next(edge);
+          } while (edge != start);
+          if (include) {
+            unconstrained_faces.insert(face);
+          }
         }
       }
-    }
-    std::set<Vertex_index> constrained_vertices;
-    std::set<Edge_index> constrained_edges;
-    for (Vertex_index vertex : mesh.vertices()) {
-      if (!unconstrained_vertices.count(vertex)) {
-        constrained_vertices.insert(vertex);
+    } else {
+      for (Face_index face : mesh.faces()) {
+        unconstrained_faces.insert(face);
       }
     }
+    // The vertices are always constrained.
+    std::set<Vertex_index> constrained_vertices;
+    for (Vertex_index vertex : mesh.vertices()) {
+      constrained_vertices.insert(vertex);
+    }
+    std::set<Edge_index> constrained_edges;
     for (Edge_index edge : mesh.edges()) {
       const Halfedge_index halfedge = mesh.halfedge(edge);
       const Vertex_index& source = mesh.source(halfedge);
@@ -5088,11 +5343,10 @@ int Remesh(Geometry* geometry, size_t count, size_t iterations,
     CGAL::Boolean_property_map<std::set<Edge_index>> constrained_edge_map(
         constrained_edges);
     CGAL::Polygon_mesh_processing::isotropic_remeshing(
-        mesh.faces(), target_edge_length, mesh,
+        unconstrained_faces, target_edge_length, mesh,
         CGAL::Polygon_mesh_processing::parameters::number_of_iterations(
             iterations)
             .vertex_point_map(mesh.points())
-            .vertex_is_constrained_map(constrained_vertex_map)
             .edge_is_constrained_map(constrained_edge_map)
             .number_of_relaxation_steps(relaxation_steps));
   }
@@ -5100,6 +5354,7 @@ int Remesh(Geometry* geometry, size_t count, size_t iterations,
   geometry->transformToLocalFrame();
 
   return STATUS_OK;
+#endif
 }
 
 int Seam(Geometry* geometry, size_t count) {
@@ -5287,6 +5542,7 @@ int Simplify(Geometry* geometry, double ratio, bool simplify_points,
   size_t size = geometry->getSize();
 
   geometry->copyInputMeshesToOutputMeshes();
+  geometry->transformToAbsoluteFrame();
 
   for (int nth = 0; nth < size; nth++) {
     if (!geometry->is_mesh(nth)) {
@@ -5295,19 +5551,6 @@ int Simplify(Geometry* geometry, double ratio, bool simplify_points,
     Surface_mesh& mesh = geometry->mesh(nth);
     boost::unordered_map<Vertex_index, Cartesian_surface_mesh::Vertex_index>
         vertex_map;
-
-    if (simplify_points) {
-      for (const Vertex_index vertex : mesh.vertices()) {
-        Point& point = mesh.point(vertex);
-        double x = CGAL::to_double(point.x());
-        double y = CGAL::to_double(point.y());
-        double z = CGAL::to_double(point.z());
-        point =
-            Point(CGAL::simplest_rational_in_interval<FT>(x - eps, x + eps),
-                  CGAL::simplest_rational_in_interval<FT>(y - eps, y + eps),
-                  CGAL::simplest_rational_in_interval<FT>(z - eps, z + eps));
-      }
-    }
 
     Cartesian_surface_mesh cartesian_surface_mesh;
     copy_face_graph(mesh, cartesian_surface_mesh,
@@ -5329,83 +5572,127 @@ int Simplify(Geometry* geometry, double ratio, bool simplify_points,
                     CGAL::parameters::vertex_to_vertex_map(
                         boost::make_assoc_property_map(vertex_map)));
 
-    if (CGAL::Polygon_mesh_processing::does_self_intersect(
-            mesh, CGAL::parameters::all_default())) {
-      // Is the self-intersection test worthwhile?
-      CGAL::Polygon_mesh_processing::experimental::
-          autorefine_and_remove_self_intersections(mesh);
+    if (simplify_points) {
+      for (const Vertex_index vertex : mesh.vertices()) {
+        Point& point = mesh.point(vertex);
+        double x = CGAL::to_double(point.x());
+        double y = CGAL::to_double(point.y());
+        double z = CGAL::to_double(point.z());
+        point =
+            Point(CGAL::simplest_rational_in_interval<FT>(x - eps, x + eps),
+                  CGAL::simplest_rational_in_interval<FT>(y - eps, y + eps),
+                  CGAL::simplest_rational_in_interval<FT>(z - eps, z + eps));
+      }
     }
+    demesh(mesh);
   }
+
+  geometry->transformToLocalFrame();
 
   return STATUS_OK;
 }
 
-int Smooth(Geometry* geometry, size_t count, size_t iterations, double time) {
+struct Constrained_vertex_map {
+ public:
+  Constrained_vertex_map(CGAL::Unique_hash_map<Vertex_index, bool>& map)
+      : map_(map) {}
+  friend bool get(Constrained_vertex_map& self, Vertex_index key) {
+    return self.map_[key];
+  }
+
+ private:
+  const CGAL::Unique_hash_map<Vertex_index, bool>& map_;
+};
+
+int Smooth(Geometry* geometry, size_t count, double resolution, int iterations,
+           double time, int remesh_iterations, int remesh_relaxation_steps) {
   size_t size = geometry->getSize();
 
   geometry->copyInputMeshesToOutputMeshes();
   geometry->transformToAbsoluteFrame();
 
+  std::vector<std::reference_wrapper<const Epick_surface_mesh>> selections;
+  for (int selection = count; selection < size; selection++) {
+    selections.push_back(geometry->epick_mesh(selection));
+  }
+
   for (size_t nth = 0; nth < size; nth++) {
     if (!geometry->is_mesh(nth)) {
       continue;
     }
-    Surface_mesh& mesh = geometry->mesh(nth);
+    Epick_surface_mesh& mesh = geometry->epick_mesh(nth);
 
-    std::set<Vertex_index> constrained_vertices;
+    CGAL::Unique_hash_map<Vertex_index, bool> constrained_vertices(true);
+    // std::set<Vertex_index> constrained_vertices;
+    // std::set<Vertex_index> unconstrained_vertices;
+    CGAL::Unique_hash_map<Face_index, bool> relevant_faces(false);
+
     if (count < size) {
       // Apply selections.
-      std::set<Vertex_index> unconstrained_vertices;
-      for (int selection = count; selection < size; selection++) {
-        {
-          Surface_mesh working_selection(geometry->mesh(selection));
-          CGAL::Polygon_mesh_processing::corefine(
-              mesh, geometry->mesh(selection), CGAL::parameters::all_default(),
-              CGAL::parameters::all_default());
-        }
-        CGAL::Side_of_triangle_mesh<Surface_mesh, Kernel> inside(
-            geometry->mesh(selection));
+      // Remesh will handle adding the selection edges.
+      remesh<Epick_kernel>(mesh, selections, remesh_iterations,
+                           remesh_relaxation_steps, resolution);
+      for (const Epick_surface_mesh& selection : selections) {
+        CGAL::Side_of_triangle_mesh<Epick_surface_mesh, Epick_kernel> inside(
+            selection);
         for (Vertex_index vertex : mesh.vertices()) {
-          if (inside(mesh.point(vertex)) != CGAL::ON_UNBOUNDED_SIDE) {
+          if (inside(mesh.point(vertex)) == CGAL::ON_BOUNDED_SIDE) {
             // This vertex may be smoothed.
-            unconstrained_vertices.insert(vertex);
+            constrained_vertices[vertex] = false;
           }
         }
-      }
-      for (Vertex_index vertex : mesh.vertices()) {
-        if (!unconstrained_vertices.count(vertex)) {
-          constrained_vertices.insert(vertex);
+        for (Face_index face : mesh.faces()) {
+          const Halfedge_index start = mesh.halfedge(face);
+          Halfedge_index edge = start;
+          do {
+            if (inside(mesh.point(mesh.source(edge))) !=
+                CGAL::ON_UNBOUNDED_SIDE) {
+              relevant_faces[face] = true;
+              break;
+            }
+            edge = mesh.next(edge);
+          } while (edge != start);
         }
       }
+    } else {
+      remesh<Epick_kernel>(mesh, selections, remesh_iterations,
+                           remesh_relaxation_steps, resolution);
+      for (Vertex_index vertex : mesh.vertices()) {
+        constrained_vertices[vertex] = false;
+      }
+      for (Face_index face : mesh.faces()) {
+        relevant_faces[face] = true;
+      }
     }
 
-    std::set<Cartesian_surface_mesh::vertex_index>
-        cartesian_constrained_vertices;
-    boost::unordered_map<Surface_mesh::vertex_index,
-                         Cartesian_surface_mesh::vertex_index>
-        vertex_map;
-    Cartesian_surface_mesh cartesian_mesh;
-    copy_face_graph(mesh, cartesian_mesh,
-                    CGAL::parameters::vertex_to_vertex_map(
-                        boost::make_assoc_property_map(vertex_map)));
+    // CGAL::Boolean_property_map<std::set<Vertex_index>>
+    // constrained_vertex_map(constrained_vertices);
 
-    for (Vertex_index vertex : constrained_vertices) {
-      cartesian_constrained_vertices.insert(vertex_map[vertex]);
+    Constrained_vertex_map constrained_vertex_map(constrained_vertices);
+
+    // CGAL::Boolean_property_map<CGAL::Unique_hash_map<Vertex_index, bool>>
+    //    constrained_vertex_map(constrained_vertices);
+
+    std::vector<Face_index> faces;
+    for (Face_index face : mesh.faces()) {
+      if (true || relevant_faces[face]) {
+        // CHECK: Why do we need all of the faces?
+        faces.push_back(face);
+      }
     }
-
-    CGAL::Boolean_property_map<std::set<Vertex_index>>
-        cartesian_constrained_vertex_map(cartesian_constrained_vertices);
 
     CGAL::get_default_random() = CGAL::Random(0);
     std::srand(0);
 
+    // Maybe it does work -- it just doesn't try to build a curve ...
     CGAL::Polygon_mesh_processing::smooth_shape(
-        cartesian_mesh.faces(), cartesian_mesh, time,
+        faces, mesh, time,
         CGAL::Polygon_mesh_processing::parameters::number_of_iterations(
             iterations)
-            .vertex_is_constrained_map(cartesian_constrained_vertex_map));
-    mesh.clear();
-    copy_face_graph(cartesian_mesh, mesh);
+            .vertex_is_constrained_map(constrained_vertex_map));
+    geometry->mesh(nth).clear();
+    copy_face_graph(mesh, geometry->mesh(nth));
+    demesh(geometry->mesh(nth));
   }
 
   geometry->transformToLocalFrame();

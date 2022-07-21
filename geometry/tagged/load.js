@@ -23,6 +23,9 @@ export const load = async (geometry) => {
   // Link to any associated graph structure.
   if (geometry.graph && geometry.graph.hash) {
     geometry.graph = await read(`graph/${geometry.graph.hash}`);
+    if (!geometry.graph.serializedSurfaceMesh) {
+      throw Error('die');
+    }
   }
   if (geometry.content) {
     for (let nth = 0; nth < geometry.content.length; nth++) {
@@ -52,11 +55,13 @@ export const loadNonblocking = (geometry) => {
   if (geometry[isLoaded]) {
     return geometry;
   }
-  geometry[isLoaded] = true;
   geometry[isStored] = true;
   // Link to any associated graph structure.
   if (geometry.graph && geometry.graph.hash) {
     geometry.graph = readNonblocking(`graph/${geometry.graph.hash}`);
+    if (!geometry.graph.serializedSurfaceMesh) {
+      throw Error('die');
+    }
   }
   if (geometry.content) {
     for (let nth = 0; nth < geometry.content.length; nth++) {
@@ -69,5 +74,6 @@ export const loadNonblocking = (geometry) => {
       }
     }
   }
+  geometry[isLoaded] = true;
   return geometry;
 };

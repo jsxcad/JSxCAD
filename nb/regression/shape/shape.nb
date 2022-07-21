@@ -398,3 +398,8 @@ Segments([
   .topView();
 
 Arc(37).cut(inset(2)).ez(2).remesh(1).smooth(Box(50, 10, 20)).view();
+
+Box(4, 4, 4).cutout(X(0), and).view();
+
+Box(4, 4, 4).cut('open', Box(2, 2, 8)).view();
+Box(4, 4, 4).clip('open', Box(2, 2, 8)).view();

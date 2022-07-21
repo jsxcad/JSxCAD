@@ -25,7 +25,7 @@ const filterRemoves = (geometry) =>
   isNotTypeMasked(geometry) &&
   (isNotTypeGhost(geometry) || isTypeVoid(geometry));
 
-export const cut = (geometry, geometries, open = false) => {
+export const cut = (geometry, geometries, open = false, exact = true) => {
   const concreteGeometry = toConcreteGeometry(geometry);
   const inputs = [];
   linearize(concreteGeometry, filterTargets, inputs);
@@ -33,7 +33,7 @@ export const cut = (geometry, geometries, open = false) => {
   for (const geometry of geometries) {
     linearize(geometry, filterRemoves, inputs);
   }
-  const outputs = cutWithCgal(inputs, count, open);
+  const outputs = cutWithCgal(inputs, count, open, exact);
   const ghosts = [];
   for (let nth = count; nth < inputs.length; nth++) {
     ghosts.push(hasMaterial(hasTypeGhost(inputs[nth]), 'ghost'));

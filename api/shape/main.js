@@ -17,7 +17,7 @@ import './destructure.js';
 // eslint-disable-next-line sort-imports
 import './Plan.js';
 
-import Point from './Point.js';
+import Ref from './Ref.js';
 
 export {
   GrblConstantLaser,
@@ -30,21 +30,21 @@ export {
   defTool,
 } from './define.js';
 
-export const X = (x = 0) => Point().x(x);
-export const Y = (y = 0) => Point().y(y);
-export const Z = (z = 0) => Point().z(z);
-export const XY = (z = 0) => Point().z(z);
+export const X = (x = 0) => Ref().x(x);
+export const Y = (y = 0) => Ref().y(y);
+export const Z = (z = 0) => Ref().z(z);
+export const XY = (z = 0) => Ref().z(z);
 export const XZ = (y = 0) =>
-  Point()
+  Ref()
     .rx(-1 / 4)
     .y(y);
 export const YZ = (x = 0) =>
-  Point()
+  Ref()
     .ry(-1 / 4)
     .x(x);
-export const RX = (t = 0) => Point().rx(t);
-export const RY = (t = 0) => Point().ry(t);
-export const RZ = (t = 0) => Point().rz(t);
+export const RX = (t = 0) => Ref().rx(t);
+export const RY = (t = 0) => Ref().ry(t);
+export const RZ = (t = 0) => Ref().rz(t);
 
 export { md } from './md.js';
 
@@ -61,6 +61,7 @@ export { area } from './area.js';
 export { as } from './as.js';
 export { asPart } from './asPart.js';
 export { at } from './at.js';
+export { bb } from './bb.js';
 export { bend } from './bend.js';
 export { billOfMaterials } from './billOfMaterials.js';
 export { by } from './by.js';
@@ -132,6 +133,7 @@ export { outline } from './outline.js';
 export { orient } from './orient.js';
 export { pack } from './pack.js';
 export { points } from './points.js';
+export { ref } from './Ref.js';
 export { reify } from './reify.js';
 export { remesh } from './remesh.js';
 export { rotateX, rx } from './rx.js';

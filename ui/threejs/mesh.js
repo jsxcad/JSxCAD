@@ -368,11 +368,11 @@ export const buildMeshes = async ({
       while (vertexCount-- > 0) {
         // The first three are precise values that we don't use.
         p += 3;
-        // These three are approximate values in 100th of mm that we will use.
+        // These three are approximate values in 1000th of mm that we will use.
         vertices.push([
-          tokens[p++] / 100,
-          tokens[p++] / 100,
-          tokens[p++] / 100,
+          tokens[p++] / 1000,
+          tokens[p++] / 1000,
+          tokens[p++] / 1000,
         ]);
       }
       let faceCount = tokens[p++];
@@ -518,7 +518,10 @@ export const buildMeshes = async ({
 
         {
           const edges = new EdgesGeometry(shapeGeometry);
-          const material = new LineBasicMaterial({ color: 0x000000, linewidth: 1 });
+          const material = new LineBasicMaterial({
+            color: 0x000000,
+            linewidth: 1,
+          });
           const outline = new LineSegments(edges, material);
           outline.userData.isOutline = true;
           outline.userData.hasShowOutline = tags.includes('show:outline');
