@@ -64,8 +64,8 @@ test('Simple import', async (t) => {
         tags: ['color:#da38da'],
         graph: {
           serializedSurfaceMesh:
-            '8\n2 2 0 200 200 0\n0 0 0 0 0 0\n1200 0 0 120000 0 0\n1198 2 0 119800 200 0\n1200 400 0 120000 40000 0\n1198 398 0 119800 39800 0\n0 400 0 0 40000 0\n2 398 0 200 39800 0\n\n8\n3 2 0 1\n3 3 0 2\n3 4 3 2\n3 5 3 4\n3 6 5 4\n3 7 5 6\n3 1 7 6\n3 0 7 1\n',
-          hash: 'XCE6Lbh6Abgme1DM4G7qxJJoPRb6zv9DPeJaiHg9N7c=',
+            '8\n2 2 0 2000 2000 0\n0 0 0 0 0 0\n1200 0 0 1.2e+06 0 0\n1198 2 0 1.198e+06 2000 0\n1200 400 0 1.2e+06 400000 0\n1198 398 0 1.198e+06 398000 0\n0 400 0 0 400000 0\n2 398 0 2000 398000 0\n\n8\n3 2 0 1\n3 3 0 2\n3 4 3 2\n3 5 3 4\n3 6 5 4\n3 7 5 6\n3 1 7 6\n3 0 7 1\n',
+          hash: '1R7gYKwBLAiwHZq3Q8pVNbw5sNkVX19iGpRfDBsdzjk=',
         },
       },
       {
@@ -104,8 +104,8 @@ test('Simple import', async (t) => {
         tags: ['color:#ffff00'],
         graph: {
           serializedSurfaceMesh:
-            '4\n400 300 0 40000 30000 0\n400 100 0 40000 10000 0\n800 100 0 80000 10000 0\n800 300 0 80000 30000 0\n\n2\n3 2 0 1\n3 0 2 3\n',
-          hash: 'VDzYqa3kHUa7C2VImo6ZRuoNlIcUwyefOY/NF5fIuI0=',
+            '4\n400 300 0 400000 300000 0\n400 100 0 400000 100000 0\n800 100 0 800000 100000 0\n800 300 0 800000 300000 0\n\n2\n3 2 0 1\n3 0 2 3\n',
+          hash: 'oJQi2XxHYfETaGKTRuSt2Vs0D5yLOPCzpFaLkLZTlFU=',
         },
       },
       {
@@ -144,8 +144,8 @@ test('Simple import', async (t) => {
         tags: ['color:#000037'],
         graph: {
           serializedSurfaceMesh:
-            '8\n405 105 0 40500 10500 0\n395 95 0 39500 9500 0\n805 95 0 80500 9500 0\n795 105 0 79500 10500 0\n805 305 0 80500 30500 0\n795 295 0 79500 29500 0\n395 305 0 39500 30500 0\n405 295 0 40500 29500 0\n\n8\n3 2 0 1\n3 3 0 2\n3 4 3 2\n3 5 3 4\n3 6 5 4\n3 7 5 6\n3 1 7 6\n3 0 7 1\n',
-          hash: 'DDTqXtifRsluvoILfqhf4SB7BoOx8hZ9LN3w/LX+22A=',
+            '8\n405 105 0 405000 105000 0\n395 95 0 395000 95000 0\n805 95 0 805000 95000 0\n795 105 0 795000 105000 0\n805 305 0 805000 305000 0\n795 295 0 795000 295000 0\n395 305 0 395000 305000 0\n405 295 0 405000 295000 0\n\n8\n3 2 0 1\n3 3 0 2\n3 4 3 2\n3 5 3 4\n3 6 5 4\n3 7 5 6\n3 1 7 6\n3 0 7 1\n',
+          hash: 'E4hdnuymmxBnA+6gxf0/Hytuek/VdfEN5UW+mxgByOM=',
         },
       },
     ],

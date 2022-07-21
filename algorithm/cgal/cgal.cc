@@ -646,9 +646,9 @@ void write_point(const Point& p, std::ostringstream& o) {
 
 // Approximations are in 100ths of a mm.
 void write_approximate_point(const Point& p, std::ostringstream& o) {
-  o << round(CGAL::to_double(p.x().exact()) * 100) << " ";
-  o << round(CGAL::to_double(p.y().exact()) * 100) << " ";
-  o << round(CGAL::to_double(p.z().exact()) * 100);
+  o << round(CGAL::to_double(p.x().exact()) * 1000) << " ";
+  o << round(CGAL::to_double(p.y().exact()) * 1000) << " ";
+  o << round(CGAL::to_double(p.z().exact()) * 1000);
 }
 
 void read_point(Point& point, std::istringstream& input) {
