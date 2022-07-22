@@ -3635,38 +3635,25 @@ const loadGeometryNonblocking = (path) => {
   }
 };
 
-const Loft = (...shapes) =>
-  Shape.fromGeometry(loft$1(shapes.map((shape) => shape.toGeometry())));
+const Loft = (...args) => {
+  const { strings: modes, shapesAndFunctions: shapes } = destructure(args);
+  return Shape.fromGeometry(
+    loft$1(
+      shapes.map((shape) => shape.toGeometry()),
+      !modes.includes('open')
+    )
+  );
+};
 
 Shape.prototype.Loft = Shape.shapeMethod(Loft);
 Shape.Loft = Loft;
 
-const loft = Shape.chainable(
-  (...shapes) =>
-    (shape) =>
-      Loft(...shape.toShapes(shapes))
-);
+const loft = Shape.chainable((...args) => (shape) => {
+  const { strings: modes, shapesAndFunctions: shapes } = destructure(args);
+  return Loft(...shape.toShapes(shapes), ...modes);
+});
 
 Shape.registerMethod('loft', loft);
-
-const OpenLoft = (...shapes) =>
-  Shape.fromGeometry(
-    loft$1(
-      shapes.map((shape) => shape.toGeometry()),
-      /* close= */ false
-    )
-  );
-
-Shape.prototype.OpenLoft = Shape.shapeMethod(OpenLoft);
-Shape.OpenLoft = OpenLoft;
-
-const openLoft = Shape.chainable(
-  (...shapes) =>
-    (shape) =>
-      OpenLoft(shape, ...shape.toShapes(shapes))
-);
-
-Shape.registerMethod('openLoft', openLoft);
 
 /**
  *

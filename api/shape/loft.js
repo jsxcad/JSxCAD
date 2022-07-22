@@ -1,37 +1,25 @@
 import Shape from './Shape.js';
+import { destructure } from './destructure.js';
 import { loft as loftGeometry } from '@jsxcad/geometry';
 
-export const Loft = (...shapes) =>
-  Shape.fromGeometry(loftGeometry(shapes.map((shape) => shape.toGeometry())));
+export const Loft = (...args) => {
+  const { strings: modes, shapesAndFunctions: shapes } = destructure(args);
+  return Shape.fromGeometry(
+    loftGeometry(
+      shapes.map((shape) => shape.toGeometry()),
+      !modes.includes('open')
+    )
+  );
+};
 
 Shape.prototype.Loft = Shape.shapeMethod(Loft);
 Shape.Loft = Loft;
 
-export const loft = Shape.chainable(
-  (...shapes) =>
-    (shape) =>
-      Loft(...shape.toShapes(shapes))
-);
+export const loft = Shape.chainable((...args) => (shape) => {
+  const { strings: modes, shapesAndFunctions: shapes } = destructure(args);
+  return Loft(...shape.toShapes(shapes), ...modes);
+});
 
 Shape.registerMethod('loft', loft);
-
-export const OpenLoft = (...shapes) =>
-  Shape.fromGeometry(
-    loftGeometry(
-      shapes.map((shape) => shape.toGeometry()),
-      /* close= */ false
-    )
-  );
-
-Shape.prototype.OpenLoft = Shape.shapeMethod(OpenLoft);
-Shape.OpenLoft = OpenLoft;
-
-export const openLoft = Shape.chainable(
-  (...shapes) =>
-    (shape) =>
-      OpenLoft(shape, ...shape.toShapes(shapes))
-);
-
-Shape.registerMethod('openLoft', openLoft);
 
 export default Loft;

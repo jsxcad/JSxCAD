@@ -36,11 +36,13 @@
 #include <CGAL/Mesh_triangulation_3.h>
 #include <CGAL/Polygon_2.h>
 #include <CGAL/Polygon_convex_decomposition_2.h>
+#include <CGAL/Polygon_mesh_processing/angle_and_area_smoothing.h>
 #include <CGAL/Polygon_mesh_processing/bbox.h>
 #include <CGAL/Polygon_mesh_processing/clip.h>
 #include <CGAL/Polygon_mesh_processing/corefinement.h>
 #include <CGAL/Polygon_mesh_processing/detect_features.h>
 #include <CGAL/Polygon_mesh_processing/extrude.h>
+#include <CGAL/Polygon_mesh_processing/internal/Hole_filling/Triangulate_hole_polyline.h>
 #include <CGAL/Polygon_mesh_processing/orientation.h>
 #include <CGAL/Polygon_mesh_processing/polygon_mesh_to_polygon_soup.h>
 #include <CGAL/Polygon_mesh_processing/polygon_soup_to_polygon_mesh.h>
@@ -49,7 +51,6 @@
 #include <CGAL/Polygon_mesh_processing/repair_degeneracies.h>
 #include <CGAL/Polygon_mesh_processing/repair_polygon_soup.h>
 #include <CGAL/Polygon_mesh_processing/repair_self_intersections.h>
-#include <CGAL/Polygon_mesh_processing/smooth_mesh.h>
 #include <CGAL/Polygon_mesh_processing/smooth_shape.h>
 #include <CGAL/Polygon_mesh_processing/transform.h>
 #include <CGAL/Polygon_mesh_processing/triangulate_faces.h>
@@ -4883,6 +4884,196 @@ int Link(Geometry* geometry, bool close) {
   return STATUS_OK;
 }
 
+template <class Weight_>
+struct Loft_weight_calculator {
+  typedef Weight_ Weight;
+  Loft_weight_calculator(int top_start, int top_end, int bottom_start,
+                         int bottom_end)
+      : top_start(top_start),
+        top_end(top_end),
+        bottom_start(bottom_start),
+        bottom_end(bottom_end) {}
+
+  bool in_top(int i) const { return top_start <= i && i < top_end; }
+
+  bool in_bottom(int i) const { return bottom_start <= i && i < bottom_end; }
+
+  template <class Point_3, class LookupTable>
+  Weight operator()(const std::vector<Point_3>& P,
+                    const std::vector<Point_3>& Q, int i, int j, int k,
+                    const LookupTable& lambda) const {
+    if (CGAL::collinear(P[i], P[j], P[k])) {
+      return Weight::NOT_VALID();
+    }
+    int top_count = in_top(i) + in_top(j) + in_top(k);
+    if (top_count >= 3) {
+      return Weight::NOT_VALID();
+    }
+    int bottom_count = in_bottom(i) + in_bottom(j) + in_bottom(k);
+    if (bottom_count >= 3) {
+      return Weight::NOT_VALID();
+    }
+    return Weight(P, Q, i, j, k, lambda);
+  }
+
+  int top_start;
+  int top_end;
+  int bottom_start;
+  int bottom_end;
+};
+
+int Loft(Geometry* geometry, bool close) {
+  size_t size = geometry->size();
+  geometry->copyInputMeshesToOutputMeshes();
+  geometry->transformToAbsoluteFrame();
+  geometry->convertPlanarMeshesToPolygons();
+
+  Points points;
+  std::vector<std::vector<size_t>> polygons;
+
+  std::vector<Polyline> polylines;
+  for (int nth = 0; nth < size; nth++) {
+    switch (geometry->getType(nth)) {
+      case GEOMETRY_MESH: {
+        std::vector<Point> polyline;
+        Surface_mesh& mesh = geometry->mesh(nth);
+        for (const auto start : mesh.halfedges()) {
+          if (mesh.is_border(start)) {
+            Halfedge_index h = start;
+            do {
+              Point p = mesh.point(mesh.source(h));
+              if (polyline.empty() || polyline.back() != p) {
+                polyline.push_back(p);
+              }
+              h = mesh.next(h);
+            } while (h != start);
+            break;
+          }
+        }
+        if (polyline.size() == 0) {
+          continue;
+        }
+        polylines.push_back(std::move(polyline));
+        CGAL::Polygon_mesh_processing::polygon_mesh_to_polygon_soup(
+            mesh, points, polygons);
+        break;
+      }
+      case GEOMETRY_POLYGONS_WITH_HOLES: {
+        if (geometry->pwh(nth).size() == 0) {
+          continue;
+        }
+        Polyline polyline;
+        PolygonToPolyline(geometry->plane(nth),
+                          geometry->pwh(nth)[0].outer_boundary(), polyline);
+        if (polyline.size() == 0) {
+          continue;
+        }
+        polylines.push_back(std::move(polyline));
+        break;
+      }
+      default: {
+        break;
+      }
+    }
+  }
+  if (polylines.size() < 2) {
+    std::cout << "Need at least two polylines." << std::endl;
+    return STATUS_EMPTY;
+  }
+  for (size_t nth = 1; nth < polylines.size(); nth++) {
+    assert(polylines[nth - 1].size() > 0);
+    assert(polylines[nth].size() > 0);
+    alignPolylines3(polylines[nth - 1], polylines[nth]);
+    const Polyline& polyline_a = polylines[nth - 1];
+    const Polyline& polyline_b = polylines[nth];
+    Polyline joined;
+    int bottom_start = joined.size();
+    joined.push_back(polyline_a.front());
+    for (size_t nth = 1; nth < polyline_a.size(); nth++) {
+      joined.push_back(polyline_a[nth]);
+    }
+    joined.push_back(polyline_a.front());
+    int bottom_end = joined.size();
+    // Here's where we jump across.
+    int top_start = joined.size();
+    joined.push_back(polyline_b.front());
+    for (size_t nth = 0; nth < polyline_b.size(); nth++) {
+      joined.push_back(polyline_b[polyline_b.size() - 1 - nth]);
+    }
+    int top_end = joined.size();
+    // Here's where we jump back.
+    std::size_t start = points.size();
+    points.insert(points.end(), joined.begin(), joined.end());
+    std::vector<Triangle_int> triangles;
+
+    typedef CGAL::internal::Weight_min_max_dihedral_and_area Weight;
+    typedef Loft_weight_calculator<Weight> WC;
+
+    CGAL::Polygon_mesh_processing::triangulate_hole_polyline(
+        joined, std::back_inserter(triangles),
+        CGAL::parameters::use_2d_constrained_delaunay_triangulation(false)
+            .weight_calculator(
+                WC(top_start, top_end, bottom_start, bottom_end)));
+    if (triangles.empty()) {
+      std::cout << "QQ/triangulate_hole_polyline/non-productive" << std::endl;
+    }
+    for (auto& triangle : triangles) {
+      std::vector<size_t> polygon{start + triangle.get<0>(),
+                                  start + triangle.get<1>(),
+                                  start + triangle.get<2>()};
+      polygons.push_back(polygon);
+    }
+  }
+
+  int target = geometry->add(GEOMETRY_MESH);
+  geometry->setIdentityTransform(target);
+  geometry->setMesh(target, new Surface_mesh);
+  Surface_mesh& mesh = geometry->mesh(target);
+  CGAL::Polygon_mesh_processing::repair_polygon_soup(
+      points, polygons, CGAL::parameters::all_default());
+  CGAL::Polygon_mesh_processing::orient_polygon_soup(points, polygons);
+  CGAL::Polygon_mesh_processing::polygon_soup_to_polygon_mesh(points, polygons,
+                                                              mesh);
+  assert(CGAL::Polygon_mesh_processing::triangulate_faces(mesh) == true);
+  // Make an attempt to close holes.
+  if (close) {
+    bool failed = false;
+    while (!failed && !CGAL::is_closed(mesh)) {
+      for (const Surface_mesh::Halfedge_index edge : mesh.halfedges()) {
+        if (mesh.is_border(edge)) {
+          std::vector<Face_index> faces;
+          CGAL::Polygon_mesh_processing::triangulate_hole(
+              mesh, edge, std::back_inserter(faces),
+              CGAL::parameters::use_2d_constrained_delaunay_triangulation(
+                  false));
+          if (faces.empty()) {
+            failed = true;
+          }
+          break;
+        }
+      }
+    }
+  }
+  if (CGAL::is_closed(geometry->mesh(target))) {
+    // Make sure it isn't inside out.
+    CGAL::Polygon_mesh_processing::orient_to_bound_a_volume(
+        geometry->mesh(target));
+  }
+  if (CGAL::Polygon_mesh_processing::does_self_intersect(
+          mesh, CGAL::parameters::all_default())) {
+    std::cout << "Loft: self-intersection detected; attempting repair."
+              << std::endl;
+    CGAL::Polygon_mesh_processing::experimental::
+        autorefine_and_remove_self_intersections(mesh);
+    assert(!CGAL::Polygon_mesh_processing::does_self_intersect(
+        mesh, CGAL::parameters::all_default()));
+  }
+  // Clean up the mesh.
+  demesh(geometry->mesh(target));
+  return STATUS_OK;
+}
+
+#if 0
 int Loft(Geometry* geometry, bool close) {
   size_t size = geometry->size();
   geometry->copyInputMeshesToOutputMeshes();
@@ -4956,8 +5147,6 @@ int Loft(Geometry* geometry, bool close) {
     strip->ToSoup(points, polygons);
   }
   Surface_mesh& mesh = geometry->mesh(target);
-  // CGAL::Polygon_mesh_processing::merge_duplicate_points_in_polygon_soup(
-  //    points, polygons, CGAL::parameters::all_default());
   CGAL::Polygon_mesh_processing::repair_polygon_soup(
       points, polygons, CGAL::parameters::all_default());
   CGAL::Polygon_mesh_processing::orient_polygon_soup(points, polygons);
@@ -5001,6 +5190,7 @@ int Loft(Geometry* geometry, bool close) {
   demesh(geometry->mesh(target));
   return STATUS_OK;
 }
+#endif
 
 template <typename FT, typename Point>
 FT unitSphereFunction(Point p) {
