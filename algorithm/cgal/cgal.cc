@@ -36,11 +36,13 @@
 #include <CGAL/Mesh_triangulation_3.h>
 #include <CGAL/Polygon_2.h>
 #include <CGAL/Polygon_convex_decomposition_2.h>
+#include <CGAL/Polygon_mesh_processing/angle_and_area_smoothing.h>
 #include <CGAL/Polygon_mesh_processing/bbox.h>
 #include <CGAL/Polygon_mesh_processing/clip.h>
 #include <CGAL/Polygon_mesh_processing/corefinement.h>
 #include <CGAL/Polygon_mesh_processing/detect_features.h>
 #include <CGAL/Polygon_mesh_processing/extrude.h>
+#include <CGAL/Polygon_mesh_processing/internal/Hole_filling/Triangulate_hole_polyline.h>
 #include <CGAL/Polygon_mesh_processing/orientation.h>
 #include <CGAL/Polygon_mesh_processing/polygon_mesh_to_polygon_soup.h>
 #include <CGAL/Polygon_mesh_processing/polygon_soup_to_polygon_mesh.h>
@@ -49,7 +51,6 @@
 #include <CGAL/Polygon_mesh_processing/repair_degeneracies.h>
 #include <CGAL/Polygon_mesh_processing/repair_polygon_soup.h>
 #include <CGAL/Polygon_mesh_processing/repair_self_intersections.h>
-#include <CGAL/Polygon_mesh_processing/smooth_mesh.h>
 #include <CGAL/Polygon_mesh_processing/smooth_shape.h>
 #include <CGAL/Polygon_mesh_processing/transform.h>
 #include <CGAL/Polygon_mesh_processing/triangulate_faces.h>
@@ -141,6 +142,7 @@ typedef CGAL::Arr_segment_traits_2<Kernel> Traits_2;
 typedef CGAL::Arrangement_2<Traits_2> Arrangement_2;
 typedef Traits_2::X_monotone_curve_2 Segment_2;
 typedef std::vector<Point> Polyline;
+typedef std::vector<Polyline> Polylines;
 typedef CGAL::Triple<int, int, int> Triangle_int;
 typedef std::map<Point, Vertex_index> Vertex_map;
 
@@ -1074,6 +1076,180 @@ const Vertex_index ensureVertex(Surface_mesh& mesh, Vertex_map& vertices,
   return it->second;
 }
 
+void convertSimpleArrangementToPolygonsWithHoles(
+    const Arrangement_2& arrangement, Polygons_with_holes_2& out) {
+  CGAL::Unique_hash_map<Arrangement_2::Face_const_handle, CGAL::Sign> face_sign(
+      CGAL::Sign::ZERO);
+  std::queue<Arrangement_2::Face_const_handle> todo;
+  face_sign[arrangement.unbounded_face()] = CGAL::Sign::NEGATIVE;
+  todo.push(arrangement.unbounded_face());
+  while (!todo.empty()) {
+    Arrangement_2::Face_const_handle face = todo.front();
+    CGAL::Sign sign = face_sign[face];
+    switch (sign) {
+      case CGAL::Sign::POSITIVE: {
+        if (face->number_of_outer_ccbs() == 1) {
+          Arrangement_2::Ccb_halfedge_const_circulator start =
+              face->outer_ccb();
+          Arrangement_2::Ccb_halfedge_const_circulator edge = start;
+          do {
+            Arrangement_2::Face_const_handle neighbor = edge->twin()->face();
+            if (face_sign[neighbor] == CGAL::Sign::ZERO) {
+              face_sign[neighbor] = CGAL::Sign::POSITIVE;
+              todo.push(neighbor);
+            }
+          } while (++edge != start);
+        }
+        for (Arrangement_2::Hole_const_iterator hole = face->holes_begin();
+             hole != face->holes_end(); ++hole) {
+          Arrangement_2::Ccb_halfedge_const_circulator start = *hole;
+          Arrangement_2::Ccb_halfedge_const_circulator edge = start;
+          do {
+            Arrangement_2::Face_const_handle neighbor = edge->twin()->face();
+            if (face_sign[neighbor] == CGAL::Sign::ZERO) {
+              face_sign[neighbor] = CGAL::Sign::NEGATIVE;
+              todo.push(neighbor);
+            }
+          } while (++edge != start);
+        }
+        break;
+      }
+      case CGAL::Sign::NEGATIVE: {
+        if (face->number_of_outer_ccbs() == 1) {
+          Arrangement_2::Ccb_halfedge_const_circulator start =
+              face->outer_ccb();
+          Arrangement_2::Ccb_halfedge_const_circulator edge = start;
+          do {
+            Arrangement_2::Face_const_handle neighbor = edge->twin()->face();
+            if (face_sign[neighbor] == CGAL::Sign::ZERO) {
+              face_sign[neighbor] = CGAL::Sign::NEGATIVE;
+              todo.push(neighbor);
+            }
+          } while (++edge != start);
+        }
+        for (Arrangement_2::Hole_const_iterator hole = face->holes_begin();
+             hole != face->holes_end(); ++hole) {
+          Arrangement_2::Ccb_halfedge_const_circulator start = *hole;
+          Arrangement_2::Ccb_halfedge_const_circulator edge = start;
+          do {
+            Arrangement_2::Face_const_handle neighbor = edge->twin()->face();
+            if (face_sign[neighbor] == CGAL::Sign::ZERO) {
+              face_sign[neighbor] = CGAL::Sign::POSITIVE;
+              todo.push(neighbor);
+            }
+          } while (++edge != start);
+        }
+        break;
+      }
+      case CGAL::Sign::ZERO: {
+        std::cout << "Face/zero" << std::endl;
+      }
+    }
+
+    todo.pop();
+  }
+
+  for (Arrangement_2::Face_const_iterator face = arrangement.faces_begin();
+       face != arrangement.faces_end(); ++face) {
+    if (face_sign[face] == CGAL::Sign::ZERO) {
+      std::cout << "Unreached face" << std::endl;
+    }
+    if (face_sign[face] == CGAL::Sign::NEGATIVE) {
+      continue;
+    }
+    Polygon_2 polygon_boundary;
+
+    Arrangement_2::Ccb_halfedge_const_circulator start = face->outer_ccb();
+    Arrangement_2::Ccb_halfedge_const_circulator edge = start;
+    do {
+      if (edge->twin()->face() == edge->face()) {
+        // Skip antenna.
+        continue;
+      }
+      const Point_2& point = edge->source()->point();
+      if (point == edge->target()->point()) {
+        // Skip zero length edges.
+        continue;
+      }
+      if (polygon_boundary.size() >= 2 &&
+          CGAL::collinear(polygon_boundary.end()[-2],
+                          polygon_boundary.end()[-1], point)) {
+        // Skip colinear points.
+        polygon_boundary.end()[-1] = point;
+      } else {
+        polygon_boundary.push_back(point);
+      }
+    } while (++edge != start);
+
+    if (polygon_boundary.size() > 3 &&
+        CGAL::collinear(polygon_boundary.end()[-2], polygon_boundary.end()[-1],
+                        polygon_boundary[0])) {
+      // Skip colinear points.
+      polygon_boundary.resize(polygon_boundary.size() - 1);
+    }
+
+    if (!polygon_boundary.is_simple()) {
+      std::cout << "Polygon is not simple: " << std::endl;
+      print_polygon(polygon_boundary);
+      continue;
+    }
+
+    if (polygon_boundary.orientation() == CGAL::Sign::ZERO) {
+      continue;
+    } else if (polygon_boundary.orientation() == CGAL::Sign::NEGATIVE) {
+      polygon_boundary.reverse_orientation();
+    }
+
+    std::vector<Polygon_2> polygon_holes;
+    for (Arrangement_2::Hole_const_iterator hole = face->holes_begin();
+         hole != face->holes_end(); ++hole) {
+      Polygon_2 polygon_hole;
+      Arrangement_2::Ccb_halfedge_const_circulator start = *hole;
+      Arrangement_2::Ccb_halfedge_const_circulator edge = start;
+      do {
+        if (edge->twin()->face() == edge->face()) {
+          // Skip antenna.
+          continue;
+        }
+        const Point_2& point = edge->source()->point();
+        if (point == edge->target()->point()) {
+          // Skip zero length edges.
+          continue;
+        }
+        if (polygon_hole.size() >= 2 &&
+            CGAL::collinear(polygon_hole.end()[-2], polygon_hole.end()[-1],
+                            point)) {
+          // Skip colinear points.
+          polygon_hole.end()[-1] = point;
+        } else {
+          polygon_hole.push_back(point);
+        }
+      } while (++edge != start);
+
+      if (polygon_hole.size() > 3 &&
+          CGAL::collinear(polygon_hole.end()[-2], polygon_hole.end()[-1],
+                          polygon_hole[0])) {
+        // Skip colinear points.
+        polygon_hole.resize(polygon_hole.size() - 1);
+      }
+      if (!polygon_hole.is_simple()) {
+        std::cout << "Hole is not simple: " << std::endl;
+        print_polygon(polygon_hole);
+        continue;
+      }
+
+      if (polygon_hole.orientation() == CGAL::Sign::ZERO) {
+        continue;
+      } else if (polygon_hole.orientation() == CGAL::Sign::POSITIVE) {
+        polygon_hole.reverse_orientation();
+      }
+      polygon_holes.push_back(polygon_hole);
+    }
+    out.push_back(Polygon_with_holes_2(polygon_boundary, polygon_holes.begin(),
+                                       polygon_holes.end()));
+  }
+}
+
 void convertArrangementToPolygonsWithHoles(
     const Arrangement_2& arrangement, std::vector<Polygon_with_holes_2>& out) {
   std::queue<Arrangement_2::Face_const_handle> undecided;
@@ -1084,6 +1260,7 @@ void convertArrangementToPolygonsWithHoles(
     if (!face->has_outer_ccb()) {
       face_sign[face] = CGAL::Sign::NEGATIVE;
     } else {
+      face_sign[face] = CGAL::Sign::ZERO;
       undecided.push(face);
     }
   }
@@ -3035,32 +3212,21 @@ void unique_points(std::vector<Point>& points) {
 void SurfaceMeshSectionToPolygonsWithHoles(const Surface_mesh& mesh,
                                            const Plane& plane,
                                            Polygons_with_holes_2& pwhs) {
-  typedef std::vector<Point> Polyline_type;
-  typedef std::list<Polyline_type> Polylines;
   CGAL::Polygon_mesh_slicer<Surface_mesh, Kernel> slicer(mesh);
-  // int target = geometry->add(GEOMETRY_POLYGONS_WITH_HOLES);
-  // geometry->copyTransform(target, transform);
-  // geometry->plane(target) = plane;
+  Arrangement_2 arrangement;
   Polylines polylines;
   slicer(plane, std::back_inserter(polylines));
-  std::vector<Polygon_2> cuts;
   for (const auto& polyline : polylines) {
     std::size_t length = polyline.size();
     if (length < 3 || polyline.front() != polyline.back()) {
       continue;
     }
-    Polygon_2 polygon;
-    // Skip the duplicated last point in the polyline.
-    for (std::size_t nth = 0; nth < length - 1; nth++) {
-      polygon.push_back(plane.to_2d(polyline[nth]));
+    for (std::size_t nth = 1; nth < length; nth++) {
+      insert(arrangement, Segment_2(plane.to_2d(polyline[nth - 1]),
+                                    plane.to_2d(polyline[nth])));
     }
-    if (polygon.orientation() == CGAL::Sign::NEGATIVE) {
-      polygon.reverse_orientation();
-      cuts.push_back(std::move(polygon));
-      continue;
-    }
-    pwhs.emplace_back(polygon);
   }
+  convertSimpleArrangementToPolygonsWithHoles(arrangement, pwhs);
 }
 
 int Bend(Geometry* geometry, double referenceRadius) {
@@ -4883,81 +5049,89 @@ int Link(Geometry* geometry, bool close) {
   return STATUS_OK;
 }
 
-int Loft(Geometry* geometry, bool close) {
-  size_t size = geometry->size();
-  geometry->copyInputMeshesToOutputMeshes();
-  geometry->transformToAbsoluteFrame();
-  geometry->convertPlanarMeshesToPolygons();
+// This weight calculator refuses weights for triangles within the same lofting
+// span.
+template <class Weight_>
+struct Loft_weight_calculator {
+  typedef Weight_ Weight;
+  Loft_weight_calculator(int top_start, int top_end, int bottom_start,
+                         int bottom_end)
+      : top_start(top_start),
+        top_end(top_end),
+        bottom_start(bottom_start),
+        bottom_end(bottom_end) {}
 
-  Points points;
-  std::vector<std::vector<size_t>> polygons;
+  bool in_top(int i) const { return top_start <= i && i < top_end; }
 
-  std::vector<Polyline> polylines;
-  for (int nth = 0; nth < size; nth++) {
-    switch (geometry->getType(nth)) {
-      case GEOMETRY_MESH: {
-        std::vector<Point> polyline;
-        Surface_mesh& mesh = geometry->mesh(nth);
-        for (const auto start : mesh.halfedges()) {
-          if (mesh.is_border(start)) {
-            Halfedge_index h = start;
-            do {
-              Point p = mesh.point(mesh.source(h));
-              if (polyline.empty() || polyline.back() != p) {
-                polyline.push_back(p);
-              }
-              h = mesh.next(h);
-            } while (h != start);
-            break;
-          }
-        }
-        if (polyline.size() == 0) {
-          continue;
-        }
-        polylines.push_back(std::move(polyline));
-        CGAL::Polygon_mesh_processing::polygon_mesh_to_polygon_soup(
-            mesh, points, polygons);
-        break;
-      }
-      case GEOMETRY_POLYGONS_WITH_HOLES: {
-        if (geometry->pwh(nth).size() == 0) {
-          continue;
-        }
-        Polyline polyline;
-        PolygonToPolyline(geometry->plane(nth),
-                          geometry->pwh(nth)[0].outer_boundary(), polyline);
-        if (polyline.size() == 0) {
-          continue;
-        }
-        polylines.push_back(std::move(polyline));
-        break;
-      }
-      default: {
-        break;
-      }
+  bool in_bottom(int i) const { return bottom_start <= i && i < bottom_end; }
+
+  template <class Point_3, class LookupTable>
+  Weight operator()(const std::vector<Point_3>& P,
+                    const std::vector<Point_3>& Q, int i, int j, int k,
+                    const LookupTable& lambda) const {
+    if (CGAL::collinear(P[i], P[j], P[k])) {
+      return Weight::NOT_VALID();
     }
-  }
-  if (polylines.size() < 2) {
-    std::cout << "Need at least two polylines." << std::endl;
-    return STATUS_EMPTY;
-  }
-  std::vector<Strip*> strips;
-  for (size_t nth = 1; nth < polylines.size(); nth++) {
-    assert(polylines[nth - 1].size() > 0);
-    assert(polylines[nth].size() > 0);
-    alignPolylines3(polylines[nth - 1], polylines[nth]);
-    strips.push_back(PolylinesToStripWall(polylines[nth - 1], polylines[nth]));
+    int top_count = in_top(i) + in_top(j) + in_top(k);
+    if (top_count >= 3) {
+      return Weight::NOT_VALID();
+    }
+    int bottom_count = in_bottom(i) + in_bottom(j) + in_bottom(k);
+    if (bottom_count >= 3) {
+      return Weight::NOT_VALID();
+    }
+    return Weight(P, Q, i, j, k, lambda);
   }
 
-  int target = geometry->add(GEOMETRY_MESH);
-  geometry->setIdentityTransform(target);
-  geometry->setMesh(target, new Surface_mesh);
-  for (Strip* strip : strips) {
-    strip->ToSoup(points, polygons);
+  int top_start;
+  int top_end;
+  int bottom_start;
+  int bottom_end;
+};
+
+void loftBetweenPolylines(Polyline& lower, Polyline& upper, Points& points,
+                          Polygons& polygons) {
+  alignPolylines3(lower, upper);
+  Polyline joined;
+  int bottom_start = joined.size();
+  joined.push_back(lower.front());
+  for (size_t nth = 1; nth < lower.size(); nth++) {
+    joined.push_back(lower[nth]);
   }
-  Surface_mesh& mesh = geometry->mesh(target);
-  // CGAL::Polygon_mesh_processing::merge_duplicate_points_in_polygon_soup(
-  //    points, polygons, CGAL::parameters::all_default());
+  joined.push_back(lower.front());
+  int bottom_end = joined.size();
+  // Here's where we jump across.
+  int top_start = joined.size();
+  joined.push_back(upper.front());
+  for (size_t nth = 0; nth < upper.size(); nth++) {
+    joined.push_back(upper[upper.size() - 1 - nth]);
+  }
+  int top_end = joined.size();
+  // Here's where we jump back.
+  std::size_t start = points.size();
+  points.insert(points.end(), joined.begin(), joined.end());
+  std::vector<Triangle_int> triangles;
+
+  typedef CGAL::internal::Weight_min_max_dihedral_and_area Weight;
+  typedef Loft_weight_calculator<Weight> WC;
+
+  CGAL::Polygon_mesh_processing::triangulate_hole_polyline(
+      joined, std::back_inserter(triangles),
+      CGAL::parameters::use_2d_constrained_delaunay_triangulation(false)
+          .weight_calculator(WC(top_start, top_end, bottom_start, bottom_end)));
+  if (triangles.empty()) {
+    std::cout << "QQ/triangulate_hole_polyline/non-productive" << std::endl;
+  }
+  for (auto& triangle : triangles) {
+    std::vector<size_t> polygon{start + triangle.get<0>(),
+                                start + triangle.get<1>(),
+                                start + triangle.get<2>()};
+    polygons.push_back(polygon);
+  }
+}
+
+void buildMeshFromPolygons(Points& points, Polygons& polygons, bool close,
+                           Surface_mesh& mesh) {
   CGAL::Polygon_mesh_processing::repair_polygon_soup(
       points, polygons, CGAL::parameters::all_default());
   CGAL::Polygon_mesh_processing::orient_polygon_soup(points, polygons);
@@ -4983,13 +5157,12 @@ int Loft(Geometry* geometry, bool close) {
       }
     }
   }
-  if (CGAL::is_closed(geometry->mesh(target))) {
+  if (CGAL::is_closed(mesh)) {
     // Make sure it isn't inside out.
-    CGAL::Polygon_mesh_processing::orient_to_bound_a_volume(
-        geometry->mesh(target));
+    CGAL::Polygon_mesh_processing::orient_to_bound_a_volume(mesh);
   }
-  if (CGAL::Polygon_mesh_processing::does_self_intersect(
-          mesh, CGAL::parameters::all_default())) {
+  if (false && CGAL::Polygon_mesh_processing::does_self_intersect(
+                   mesh, CGAL::parameters::all_default())) {
     std::cout << "Loft: self-intersection detected; attempting repair."
               << std::endl;
     CGAL::Polygon_mesh_processing::experimental::
@@ -4997,6 +5170,153 @@ int Loft(Geometry* geometry, bool close) {
     assert(!CGAL::Polygon_mesh_processing::does_self_intersect(
         mesh, CGAL::parameters::all_default()));
   }
+}
+
+int Loft(Geometry* geometry, bool close) {
+  size_t size = geometry->size();
+  geometry->copyInputMeshesToOutputMeshes();
+  geometry->transformToAbsoluteFrame();
+  geometry->convertPlanarMeshesToPolygons();
+
+  Points points;
+  Polygons polygons;
+
+  Points hole_points;
+  Polygons hole_polygons;
+
+  struct Polyline_with_holes {
+   public:
+    Polyline_with_holes() {}
+    Polyline_with_holes(const Polyline& boundary) : boundary(boundary) {}
+    Polyline_with_holes(const Polyline& boundary, const Polylines& holes)
+        : boundary(boundary), holes(holes) {}
+    Polyline boundary;
+    Polylines holes;
+  };
+
+  typedef std::vector<Polyline_with_holes> Polylines_with_holes;
+
+  std::vector<Polylines_with_holes> layers;
+
+  for (int nth = 0; nth < size; nth++) {
+    Polylines_with_holes layer;
+    switch (geometry->getType(nth)) {
+      case GEOMETRY_MESH: {
+        Polyline polyline;
+        Surface_mesh& mesh = geometry->mesh(nth);
+        for (const auto start : mesh.halfedges()) {
+          if (mesh.is_border(start)) {
+            Halfedge_index h = start;
+            do {
+              Point p = mesh.point(mesh.source(h));
+              if (polyline.empty() || polyline.back() != p) {
+                polyline.push_back(p);
+              }
+              h = mesh.next(h);
+            } while (h != start);
+            break;
+          }
+        }
+        if (polyline.size() == 0) {
+          continue;
+        }
+        layer.emplace_back(polyline);
+        CGAL::Polygon_mesh_processing::polygon_mesh_to_polygon_soup(
+            mesh, points, polygons);
+        break;
+      }
+      case GEOMETRY_POLYGONS_WITH_HOLES: {
+        if (geometry->pwh(nth).size() == 0) {
+          continue;
+        }
+        Polygons_with_holes_2& pwhs = geometry->pwh(nth);
+        for (Polygon_with_holes_2& pwh : pwhs) {
+          Polyline_with_holes polyline_with_holes;
+          PolygonToPolyline(geometry->plane(nth), pwh.outer_boundary(),
+                            polyline_with_holes.boundary);
+          if (polyline_with_holes.boundary.size() == 0) {
+            continue;
+          }
+          for (auto hole = pwh.holes_begin(); hole != pwh.holes_end(); ++hole) {
+            Polyline polyline;
+            PolygonToPolyline(geometry->plane(nth), *hole, polyline);
+            polyline_with_holes.holes.push_back(polyline);
+          }
+          layer.push_back(polyline_with_holes);
+        }
+        break;
+      }
+      default: {
+        break;
+      }
+    }
+    layers.push_back(layer);
+  }
+  if (layers.size() < 2) {
+    std::cout << "Need at least two layers." << std::endl;
+    return STATUS_EMPTY;
+  }
+  for (size_t nth = 1; nth < layers.size(); nth++) {
+    Polylines_with_holes lower_layer = layers[nth - 1];
+    Polylines_with_holes upper_layer = layers[nth];
+    // For each island in the lower layer, find the closest island in the upper
+    // layer.
+    while (!lower_layer.empty() && !upper_layer.empty()) {
+      Polyline_with_holes lower = lower_layer.back();
+      lower_layer.pop_back();
+      std::sort(
+          upper_layer.begin(), upper_layer.end(),
+          [&](const Polyline_with_holes& a, const Polyline_with_holes& b) {
+            size_t offset;
+            FT best_a = computeBestDistanceBetweenPolylines(lower.boundary,
+                                                            a.boundary, offset);
+            FT best_b = computeBestDistanceBetweenPolylines(lower.boundary,
+                                                            b.boundary, offset);
+            return best_a <= best_b;
+          });
+      Polyline_with_holes upper = upper_layer.back();
+      upper_layer.pop_back();
+      // Just loft the first polyline with its first hole for now.
+      loftBetweenPolylines(lower.boundary, upper.boundary, points, polygons);
+      while (!lower.holes.empty() && !upper.holes.empty()) {
+        Polyline lower_hole = lower.holes.back();
+        lower.holes.pop_back();
+        std::sort(upper.holes.begin(), upper.holes.end(),
+                  [&](const Polyline& a, const Polyline& b) {
+                    size_t offset;
+                    FT best_a = computeBestDistanceBetweenPolylines(lower_hole,
+                                                                    a, offset);
+                    FT best_b = computeBestDistanceBetweenPolylines(lower_hole,
+                                                                    b, offset);
+                    return best_a <= best_b;
+                  });
+        Polyline upper_hole = upper.holes.back();
+        upper.holes.pop_back();
+        loftBetweenPolylines(lower_hole, upper_hole, hole_points,
+                             hole_polygons);
+      }
+    }
+  }
+
+  std::unique_ptr<Surface_mesh> islands(new Surface_mesh);
+  buildMeshFromPolygons(points, polygons, close, *islands);
+
+  Surface_mesh holes;
+  buildMeshFromPolygons(hole_points, hole_polygons, close, holes);
+
+  if (close) {
+    if (!CGAL::Polygon_mesh_processing::corefine_and_compute_difference(
+            *islands, holes, *islands, CGAL::parameters::all_default(),
+            CGAL::parameters::all_default(), CGAL::parameters::all_default())) {
+      return STATUS_ZERO_THICKNESS;
+    }
+  } else {
+    islands->join(holes);
+  }
+
+  int target = geometry->add(GEOMETRY_MESH);
+  geometry->setIdentityTransform(target);
+  geometry->setMesh(target, islands);
   // Clean up the mesh.
   demesh(geometry->mesh(target));
   return STATUS_OK;

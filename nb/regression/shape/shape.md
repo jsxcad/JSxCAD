@@ -660,3 +660,15 @@ Box(4, 4, 4).clip('open', Box(2, 2, 8)).view();
 ```
 
 ![Image](shape.md.69.png)
+
+```JavaScript
+Loft(Box(3).cut(Arc(2)), Hexagon(3).cut(Arc(2)).z(10)).view();
+```
+
+![Image](shape.md.70.png)
+
+```JavaScript
+Loft('open', Box(3).cut(Arc(2)), Hexagon(3).cut(Arc(2)).z(10)).view();
+```
+
+![Image](shape.md.71.png)

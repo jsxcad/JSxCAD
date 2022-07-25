@@ -403,3 +403,6 @@ Box(4, 4, 4).cutout(X(0), and).view();
 
 Box(4, 4, 4).cut('open', Box(2, 2, 8)).view();
 Box(4, 4, 4).clip('open', Box(2, 2, 8)).view();
+
+Loft(Box(3).cut(Arc(2)), Hexagon(3).cut(Arc(2)).z(10)).view();
+Loft('open', Box(3).cut(Arc(2)), Hexagon(3).cut(Arc(2)).z(10)).view();

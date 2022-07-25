@@ -18,9 +18,9 @@ export const loadGeometry = async (
   }
 };
 
-export const loadGeometryNonblocking = (path) => {
+export const loadGeometryNonblocking = (path, options) => {
   logInfo('api/shape/loadGeometryNonblocking', path);
-  const geometry = readNonblocking(path);
+  const geometry = readNonblocking(path, options);
   if (geometry) {
     return Shape.fromGeometry(geometry);
   }

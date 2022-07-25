@@ -602,3 +602,13 @@ Box(5, 5, 20)
 ```
 
 ![Image](shapes.md.58.png)
+
+```JavaScript
+Box(10)
+  .cut(Box(5).cut(Box(3).cut(Box(1))))
+  .ez(3)
+  .section()
+  .view();
+```
+
+![Image](shapes.md.59.png)
