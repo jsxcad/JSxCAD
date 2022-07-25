@@ -26,7 +26,7 @@ test('Triangle', async (t) => {
       [1, 0, 0],
     ],
   ];
-  const dxf = await toDxf({ type: 'segments', segments });
+  const dxf = await toDxf({ tags: [], type: 'segments', segments });
   await writeFile('toDxf.out.triangle.dxf', dxf, { encoding: 'utf8' });
   t.is(dxf, await readFile('toDxf.test.triangle.dxf', { encoding: 'utf8' }));
 });

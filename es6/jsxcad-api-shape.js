@@ -623,14 +623,17 @@ const Plan = (type) => Shape.fromGeometry(taggedPlan({}, { type }));
 
 Shape.registerReifier = (name, op) => {
   const finishedOp = (geometry) => {
+    const timer = startTime(`Reify ${name}`);
     const shape = op(geometry);
     if (!(shape instanceof Shape)) {
       throw Error('Expected Shape');
     }
-    return shape
+    const result = shape
       .transform(getMatrix(geometry))
       .setTags(geometry.tags)
       .toGeometry();
+    endTime(timer);
+    return result;
   };
   registerReifier(name, finishedOp);
   return finishedOp;
@@ -3627,9 +3630,9 @@ const loadGeometry = async (
   }
 };
 
-const loadGeometryNonblocking = (path) => {
+const loadGeometryNonblocking = (path, options) => {
   logInfo('api/shape/loadGeometryNonblocking', path);
-  const geometry = readNonblocking(path);
+  const geometry = readNonblocking(path, options);
   if (geometry) {
     return Shape.fromGeometry(geometry);
   }
@@ -5251,22 +5254,21 @@ const Assembly = (...shapes) =>
 
 Shape.prototype.Assembly = Shape.shapeMethod(Assembly);
 
-const Cached = (name, thunk) => {
+const Cached = (name, thunk, enable = true) => {
   const op = (...args) => {
-    console.log(`QQ/Cached/name: ${name}`);
+    if (!enable) {
+      return thunk();
+    }
     const path = `cached/${name}/${JSON.stringify(args)}`;
     // The first time we hit this, we'll schedule a read and throw, then wait for the read to complete, and retry.
-    const cached = loadGeometryNonblocking(path);
-    console.log(`QQ/Cached/load: ${JSON.stringify(cached)}`);
+    const cached = loadGeometryNonblocking(path, { errorOnMissing: true });
     if (cached) {
       return cached;
     }
     // The read we scheduled last time produced undefined, so we fall through to here.
     const shape = thunk(...args);
     // This will schedule a write and throw, then wait for the write to complete, and retry.
-    console.log(`QQ/Cached/save: ${JSON.stringify(shape)}`);
     saveGeometryNonblocking(path, shape);
-    console.log(`QQ/Cached/unreachable`);
     return shape;
   };
   return op;

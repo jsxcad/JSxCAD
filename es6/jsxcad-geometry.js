@@ -959,7 +959,9 @@ const measureBoundingBox = (geometry) => {
 };
 
 const filterInputs = (geometry) =>
-  ['graph', 'polygonsWithHoles', 'segments', 'points'].includes(geometry.type);
+  ['graph', 'polygonsWithHoles', 'segments', 'points'].includes(
+    geometry.type
+  ) && isNotTypeGhost(geometry);
 
 const filterReferences = (geometry) =>
   ['graph', 'polygonsWithHoles', 'segments', 'points', 'empty'].includes(
@@ -975,8 +977,12 @@ const section = (inputGeometry, referenceGeometries) => {
     linearize(referenceGeometry, filterReferences, inputs);
   }
   const outputs = section$1(inputs, count);
+  const ghosts = [];
+  for (let nth = 0; nth < count; nth++) {
+    ghosts.push(hasMaterial(hasTypeGhost(inputs[nth]), 'ghost'));
+  }
   deletePendingSurfaceMeshes();
-  return taggedGroup({}, ...outputs);
+  return taggedGroup({}, ...outputs, ...ghosts);
 };
 
 const taggedToolpath = ({ tags = [], provenance }, toolpath) => {

@@ -59,7 +59,7 @@ const saucer = profile
 const top = saucer
   .upperEnvelope()
   .involute()
-  .loft(self(), Box(150).involute().z(5))
+  .loft(self(), Box(150).z(5))
   .fitTo(knob)
   .as('top')
   .stl('knob', get('knob').by(align('>z')));

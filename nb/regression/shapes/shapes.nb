@@ -294,3 +294,9 @@ Box(5, 5, 20)
   .fuse()
   .smooth(1, ArcX(5, 16, 16))
   .view();
+
+Box(10)
+  .cut(Box(5).cut(Box(3).cut(Box(1))))
+  .ez(3)
+  .section()
+  .view();

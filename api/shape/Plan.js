@@ -1,3 +1,4 @@
+import { endTime, startTime } from '@jsxcad/sys';
 import { identity, registerReifier, taggedPlan } from '@jsxcad/geometry';
 
 import { Shape } from './Shape.js';
@@ -214,14 +215,17 @@ export const Plan = (type) => Shape.fromGeometry(taggedPlan({}, { type }));
 
 Shape.registerReifier = (name, op) => {
   const finishedOp = (geometry) => {
+    const timer = startTime(`Reify ${name}`);
     const shape = op(geometry);
     if (!(shape instanceof Shape)) {
       throw Error('Expected Shape');
     }
-    return shape
+    const result = shape
       .transform(getMatrix(geometry))
       .setTags(geometry.tags)
       .toGeometry();
+    endTime(timer);
+    return result;
   };
   registerReifier(name, finishedOp);
   return finishedOp;

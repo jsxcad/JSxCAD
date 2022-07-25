@@ -1,17 +1,17 @@
 import { Group, Shape, loadGeometry, saveGeometry } from '@jsxcad/api-shape';
-
 import {
   addOnEmitHandler,
   addPending,
   beginEmitGroup,
   computeHash,
   emit,
+  endTime,
   finishEmitGroup,
   flushEmitGroup,
-  getConfig,
   logInfo,
   read,
   resolvePending,
+  startTime,
   write,
 } from '@jsxcad/sys';
 
@@ -73,7 +73,7 @@ export const $run = async (op, { path, id, text, sha }) => {
   const meta = await read(`meta/def/${path}/${id}`);
   if (!meta || meta.sha !== sha) {
     logInfo('api/core/$run', text);
-    const startTime = new Date();
+    const timer = startTime(`${path}/${id}`);
     beginRecordingNotes(path, id);
     beginEmitGroup({ path, id });
     emitSourceText(text);
@@ -94,18 +94,7 @@ export const $run = async (op, { path, id, text, sha }) => {
       throw error;
     }
     await resolvePending();
-    const endTime = new Date();
-    const durationMinutes = (endTime - startTime) / 60000;
-    try {
-      if (getConfig().api.evaluate.showTimeViaMd) {
-        const md = `Evaluation time ${durationMinutes.toFixed(2)} minutes.`;
-        emit({ md, hash: computeHash(md) });
-      }
-    } catch (error) {}
-    logInfo(
-      'api/core/evaluate/duration',
-      `Evaluation time ${durationMinutes.toFixed(2)}: ${text}`
-    );
+    endTime(timer);
     finishEmitGroup({ path, id });
     if (typeof result === 'object') {
       const type = result.constructor.name;
