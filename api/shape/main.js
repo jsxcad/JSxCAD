@@ -85,6 +85,7 @@ export { drop } from './drop.js';
 export { ensurePages } from './Page.js';
 export { each } from './each.js';
 export { eachIn } from './eachIn.js';
+export { eachEdge } from './eachEdge.js';
 export { eachPoint } from './eachPoint.js';
 export { edit } from './edit.js';
 export { edges } from './edges.js';

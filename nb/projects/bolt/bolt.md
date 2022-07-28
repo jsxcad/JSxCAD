@@ -74,7 +74,8 @@ export const NutThreadSegment = (diameter, { pitch = 1, thickness = pitch * 2, a
 export const NutThreadBuilder = Cached('nb/projects/bolt/bolt.nb/NutThread', (diameter, height, pitch, angle, play, eps, turn) =>
   NutThreadSegment(diameter, { pitch, angle, play, eps, turn })
     .z(seq({ from: 0, to: height, by: pitch }))
-    .cut(Box(diameter * 2).ez(height, height + pitch * 2)));
+    .cut(Box(diameter * 2).ez(height, height + pitch * 2))
+    .clean());
 ```
 
 ```JavaScript
