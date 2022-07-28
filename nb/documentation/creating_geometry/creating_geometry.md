@@ -58,7 +58,7 @@ Curve(Point(0, 0), Point(10, 10), Point(20, 30), Point(40, 0)).view();
 ```JavaScript
 Curve([0, 0], [10, 0], [10, 10], [20, 10])
   .rx(1 / 4)
-  .edges(ArcX(0, 4, 4).hasSides(6), Loft)
+  .eachEdge(ArcX(0, 4, 4).hasSides(6), Loft)
   .view();
 ```
 

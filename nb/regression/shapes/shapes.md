@@ -495,7 +495,7 @@ Box(10).and(Box(5, 50, 5)).disjoint().pack().view();
 ```JavaScript
 Box(10)
   .rz(1 / 8)
-  .at(edges(origin()), cut(Arc(5)))
+  .at(eachEdge(origin()), cut(Arc(5)))
   .view();
 ```
 
@@ -504,7 +504,7 @@ Box(10)
 ```JavaScript
 Triangle(10)
   .cut(inset(2))
-  .at(edges(origin()), cut(Arc(1)))
+  .at(eachEdge(origin()), cut(Arc(1)))
   .view();
 ```
 
@@ -514,7 +514,7 @@ Triangle(10)
 Triangle(10)
   .cut(inset(4))
   .rz(1 / 8)
-  .at(edges(origin()), cut(Arc(5)))
+  .at(eachEdge(origin()), cut(Arc(5)))
   .view();
 ```
 
@@ -523,7 +523,7 @@ Triangle(10)
 ```JavaScript
 Curve(Point(0, 0), Point(10, 0), Point(10, 10), Point(20, 10))
   .rx(1 / 4)
-  .edges(ArcX(0, 10).hasSides(6), Loft)
+  .eachEdge(ArcX(0, 10).hasSides(6), Loft)
   .view();
 ```
 

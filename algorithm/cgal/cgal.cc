@@ -2836,8 +2836,18 @@ class Geometry {
     input_segments(nth).push_back(std::move(s));
   }
 
-  void addSegment(int nth, const Segment& segment) {
-    segments(nth).push_back(segment);
+  void addSegment(int nth, const Segment& segment,
+                  bool has_target_length = false,
+                  FT squared_target_length = 0) {
+    if (has_target_length && segment.squared_length() > squared_target_length) {
+      addSegment(nth, Segment(segment.source(), CGAL::midpoint(segment)),
+                 has_target_length, squared_target_length);
+      addSegment(nth, Segment(CGAL::midpoint(segment), segment.target()),
+                 has_target_length, squared_target_length);
+      return;
+    } else {
+      segments(nth).push_back(segment);
+    }
   }
 
   void emitSegments(int nth, emscripten::val emit) {
@@ -6656,12 +6666,7 @@ std::shared_ptr<const Transformation> Transformation__rotate_z_toward(
 }
 
 Transformation Righten(Vector current) {
-  Vector target(0, 0, 1);
-  if (target * current == -1) {
-    return TransformationFromXTurn(0.5);
-  } else {
-    return orient(current, target);
-  }
+  return orient(current, Vector(0, 0, 1));
 }
 
 std::shared_ptr<const Transformation> InverseSegmentTransform(
@@ -6675,7 +6680,7 @@ std::shared_ptr<const Transformation> InverseSegmentTransform(
 
   Transformation align(CGAL::IDENTITY);
 
-  if (oriented_end.y() != 0) {
+  if (oriented_end.x() != 0 || oriented_end.y() != 0) {
     RT sin_alpha, cos_alpha, w;
     CGAL::rational_rotation_approximation(oriented_end.x(), oriented_end.y(),
                                           sin_alpha, cos_alpha, w, RT(1),
@@ -6687,7 +6692,7 @@ std::shared_ptr<const Transformation> InverseSegmentTransform(
     align = rotation * align;
   }
 
-  if (oriented_end.z() != 0) {
+  if (oriented_end.x() != 0 || oriented_end.z() != 0) {
     RT sin_alpha, cos_alpha, w;
     CGAL::rational_rotation_approximation(oriented_end.x(), -oriented_end.z(),
                                           sin_alpha, cos_alpha, w, RT(1),
