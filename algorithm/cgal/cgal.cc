@@ -6666,12 +6666,7 @@ std::shared_ptr<const Transformation> Transformation__rotate_z_toward(
 }
 
 Transformation Righten(Vector current) {
-  Vector target(0, 0, 1);
-  if (false && target * current == -1) {
-    return TransformationFromXTurn(0.5);
-  } else {
-    return orient(current, target);
-  }
+  return orient(current, Vector(0, 0, 1));
 }
 
 std::shared_ptr<const Transformation> InverseSegmentTransform(
