@@ -1,4 +1,4 @@
-import { reportTimes, watchLog } from '@jsxcad/sys';
+import { getTimes, reportTimes, watchLog } from '@jsxcad/sys';
 
 import { argv } from 'process';
 import express from 'express';
@@ -105,6 +105,17 @@ const build = async (baseDirectory = '.') => {
     exitCode = 1;
   }
   await browser.close();
+  {
+    console.log('Profile');
+    const entries = getTimes();
+    entries.sort(
+      ([aName, aEntry], [bName, bEntry]) => aEntry.total - bEntry.total
+    );
+    for (const [name, entry] of entries) {
+      const { total } = entry;
+      console.log(`${name} ${total.toFixed(2)}`);
+    }
+  }
   process.stderr.write('', () =>
     process.stdout.write('', () => process.exit(exitCode))
   );

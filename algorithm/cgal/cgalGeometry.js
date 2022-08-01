@@ -148,6 +148,7 @@ export const toCgalGeometry = (inputs, g = getCgal()) => {
 
 export const fromCgalGeometry = (geometry, inputs, length = inputs.length, start = 0) => {
   const g = getCgal();
+  g.Test(0, false);
   const results = [];
   for (let nth = start; nth < length; nth++) {
     switch (geometry.getType(nth)) {
