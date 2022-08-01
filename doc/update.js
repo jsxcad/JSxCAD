@@ -88,6 +88,18 @@ const build = async (baseDirectory = '.') => {
     const finishTime = new Date();
     const minutesDuration = (finishTime - startTime) / 60000.0;
     console.log(`Total time ${minutesDuration.toFixed(2)}.`);
+    {
+      // Print out the operation level profile.
+      console.log('Profile');
+      const entries = getTimes();
+      entries.sort(
+        ([aName, aEntry], [bName, bEntry]) => aEntry.total - bEntry.total
+      );
+      for (const [name, entry] of entries) {
+        const { total } = entry;
+        console.log(`${name} ${total.toFixed(2)}`);
+      }
+    }
     if (collectedFailedExpectations.length > 0) {
       console.log('Expectations failed:');
       for (const failedExpectation of collectedFailedExpectations) {
@@ -105,17 +117,6 @@ const build = async (baseDirectory = '.') => {
     exitCode = 1;
   }
   await browser.close();
-  {
-    console.log('Profile');
-    const entries = getTimes();
-    entries.sort(
-      ([aName, aEntry], [bName, bEntry]) => aEntry.total - bEntry.total
-    );
-    for (const [name, entry] of entries) {
-      const { total } = entry;
-      console.log(`${name} ${total.toFixed(2)}`);
-    }
-  }
   process.stderr.write('', () =>
     process.stdout.write('', () => process.exit(exitCode))
   );
