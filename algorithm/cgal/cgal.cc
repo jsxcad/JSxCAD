@@ -1,3 +1,4 @@
+// #define CGAL_NO_UNCERTAIN_CONVERSION_OPERATOR
 // #define BOOST_DISABLE_THREADS
 
 // These are added to make Deform work.
@@ -111,7 +112,10 @@
 
 typedef CGAL::Exact_predicates_exact_constructions_kernel Epeck_kernel;
 typedef CGAL::Exact_predicates_inexact_constructions_kernel Epick_kernel;
+typedef CGAL::Cartesian<CGAL::Exact_rational> Exact_rational_kernel;
+
 typedef Epeck_kernel Kernel;
+
 typedef CGAL::Cartesian_converter<Kernel, Epick_kernel>
     Epeck_to_epick_converter;
 
@@ -151,7 +155,6 @@ typedef std::vector<Epick_point> Epick_points;
 typedef CGAL::Surface_mesh<Epick_point> Epick_surface_mesh;
 
 typedef CGAL::Simple_cartesian<double> Cartesian_kernel;
-typedef CGAL::Cartesian<CGAL::Exact_rational> Exact_rational_kernel;
 typedef Cartesian_kernel::Point_3 Cartesian_point;
 typedef std::vector<Cartesian_point> Cartesian_points;
 typedef CGAL::Surface_mesh<Cartesian_point> Cartesian_surface_mesh;
@@ -3388,9 +3391,9 @@ int Clip(Geometry* geometry, int targets, bool open) {
               return STATUS_ZERO_THICKNESS;
             }
           }
-          demesh(geometry->mesh(target));
           geometry->updateBounds3(target);
         }
+        demesh(geometry->mesh(target));
         break;
       }
       case GEOMETRY_POLYGONS_WITH_HOLES: {
@@ -3792,9 +3795,9 @@ int Cut(Geometry* geometry, int targets, bool open, bool exact) {
                 return STATUS_ZERO_THICKNESS;
               }
             }
-            demesh(geometry->mesh(target));
             geometry->updateBounds3(target);
           }
+          demesh(geometry->mesh(target));
         } else {
           // Inexact mesh cuts.
           bool modified = false;
@@ -3837,7 +3840,6 @@ int Cut(Geometry* geometry, int targets, bool open, bool exact) {
                 return STATUS_ZERO_THICKNESS;
               }
             }
-            demesh(geometry->epick_mesh(target));
             geometry->updateEpickBounds3(target);
             modified = true;
           }
@@ -3846,6 +3848,7 @@ int Cut(Geometry* geometry, int targets, bool open, bool exact) {
             copy_face_graph(geometry->epick_mesh(target),
                             geometry->mesh(target));
           }
+          demesh(geometry->mesh(target));
         }
         break;
       }
@@ -4039,7 +4042,8 @@ int Demesh(Geometry* geometry) {
   return STATUS_OK;
 }
 
-int Disjoint(Geometry* geometry, emscripten::val getIsMasked) {
+// This tries to make the largest disjoints first.
+int disjointBackward(Geometry* geometry, emscripten::val getIsMasked) {
   int size = geometry->size();
 
   std::vector<bool> is_masked;
@@ -4052,7 +4056,7 @@ int Disjoint(Geometry* geometry, emscripten::val getIsMasked) {
   geometry->copyPolygonsWithHolesToGeneralPolygonSets();
   geometry->computeBounds();
 
-  for (int start = size - 2; start >= 0; start--) {
+  for (int start = 0; start < size - 1; start++) {
     switch (geometry->type(start)) {
       case GEOMETRY_MESH: {
         if (geometry->is_empty_mesh(start)) {
@@ -4078,7 +4082,6 @@ int Disjoint(Geometry* geometry, emscripten::val getIsMasked) {
                           CGAL::parameters::all_default())) {
                 return STATUS_ZERO_THICKNESS;
               }
-              demesh(geometry->mesh(start));
               geometry->updateBounds3(start);
               break;
             }
@@ -4093,6 +4096,7 @@ int Disjoint(Geometry* geometry, emscripten::val getIsMasked) {
             }
           }
         }
+        demesh(geometry->mesh(start));
         break;
       }
       case GEOMETRY_POLYGONS_WITH_HOLES: {
@@ -4170,6 +4174,151 @@ int Disjoint(Geometry* geometry, emscripten::val getIsMasked) {
   geometry->transformToLocalFrame();
 
   return STATUS_OK;
+}
+
+// This tries to make the smallest disjoints.
+int disjointForward(Geometry* geometry, emscripten::val getIsMasked) {
+  int size = geometry->size();
+
+  std::vector<bool> is_masked;
+  is_masked.resize(size);
+
+  geometry->copyInputMeshesToOutputMeshes();
+  geometry->copyInputSegmentsToOutputSegments();
+  geometry->transformToAbsoluteFrame();
+  geometry->convertPlanarMeshesToPolygons();
+  geometry->copyPolygonsWithHolesToGeneralPolygonSets();
+  geometry->computeBounds();
+
+  for (int start = size - 2; start >= 0; start--) {
+    switch (geometry->type(start)) {
+      case GEOMETRY_MESH: {
+        if (geometry->is_empty_mesh(start)) {
+          continue;
+        }
+        for (int nth = start + 1; nth < size; nth++) {
+          if (is_masked[nth]) {
+            continue;
+          }
+          switch (geometry->type(nth)) {
+            case GEOMETRY_MESH: {
+              if (geometry->is_empty_mesh(nth) ||
+                  geometry->noOverlap3(start, nth)) {
+                continue;
+              }
+              Surface_mesh cutMeshCopy(geometry->mesh(nth));
+              if (!CGAL::Polygon_mesh_processing::
+                      corefine_and_compute_difference(
+                          geometry->mesh(start), cutMeshCopy,
+                          geometry->mesh(start),
+                          CGAL::parameters::all_default(),
+                          CGAL::parameters::all_default(),
+                          CGAL::parameters::all_default())) {
+                return STATUS_ZERO_THICKNESS;
+              }
+              geometry->updateBounds3(start);
+              break;
+            }
+            case GEOMETRY_SEGMENTS: {
+              break;
+            }
+            case GEOMETRY_POLYGONS_WITH_HOLES: {
+              break;
+            }
+            default: {
+              break;
+            }
+          }
+        }
+        demesh(geometry->mesh(start));
+        break;
+      }
+      case GEOMETRY_POLYGONS_WITH_HOLES: {
+        for (int nth = start + 1; nth < size; nth++) {
+          if (is_masked[nth]) {
+            continue;
+          }
+          switch (geometry->getType(nth)) {
+            case GEOMETRY_POLYGONS_WITH_HOLES: {
+              if (geometry->plane(start) != geometry->plane(nth) ||
+                  geometry->noOverlap2(start, nth)) {
+                continue;
+              }
+              geometry->gps(start).difference(geometry->gps(nth));
+              geometry->updateBounds2(start);
+              break;
+            }
+            case GEOMETRY_MESH: {
+              Polygons_with_holes_2 pwhs;
+              SurfaceMeshSectionToPolygonsWithHoles(
+                  geometry->mesh(nth), geometry->plane(start), pwhs);
+              for (const Polygon_with_holes_2& pwh : pwhs) {
+                geometry->gps(start).difference(pwh);
+              }
+              geometry->updateBounds2(start);
+              break;
+            }
+          }
+        }
+        break;
+      }
+      case GEOMETRY_SEGMENTS: {
+        for (int nth = start + 1; nth < size; nth++) {
+          if (is_masked[nth]) {
+            continue;
+          }
+          switch (geometry->getType(nth)) {
+            case GEOMETRY_MESH: {
+              Segments out;
+              // TODO: See if we can leverage std::back_inserter instead of an
+              // lexical closure.
+              AABB_tree& tree = geometry->aabb_tree(nth);
+              Side_of_triangle_mesh& on_side = geometry->on_side(nth);
+              for (const Segment& segment : geometry->segments(start)) {
+                cut_segment_with_volume(segment, tree, on_side, out);
+              }
+              geometry->segments(start).swap(out);
+              break;
+            }
+            case GEOMETRY_SEGMENTS: {
+              // TODO: Support disjunction by polygons-with-holes.
+              break;
+            }
+          }
+        }
+        break;
+      }
+      case GEOMETRY_POINTS: {
+        // TODO: Support disjunction by volumes, segments, polygons.
+        break;
+      }
+      case GEOMETRY_REFERENCE:
+      case GEOMETRY_EMPTY: {
+        break;
+      }
+      case GEOMETRY_UNKNOWN: {
+        std::cout << "Unknown type for Disjoint at " << start << std::endl;
+        return STATUS_INVALID_INPUT;
+      }
+    }
+  }
+
+  geometry->removeEmptyMeshes();
+  geometry->copyGeneralPolygonSetsToPolygonsWithHoles();
+  geometry->transformToLocalFrame();
+
+  return STATUS_OK;
+}
+
+int Disjoint(Geometry* geometry, emscripten::val getIsMasked, int mode) {
+  switch (mode == 0) {
+    case 0:  // 50.58
+      return disjointBackward(geometry, getIsMasked);
+    case 1:  // 30.65
+      return disjointForward(geometry, getIsMasked);
+    default:
+      return STATUS_INVALID_INPUT;
+  }
 }
 
 int EachPoint(Geometry* geometry, emscripten::val emit_point) {
@@ -4925,10 +5074,10 @@ int Join(Geometry* geometry, int targets) {
                     CGAL::parameters::all_default())) {
               return STATUS_ZERO_THICKNESS;
             }
-            demesh(geometry->mesh(target));
           }
           geometry->updateBounds3(target);
         }
+        demesh(geometry->mesh(target));
         break;
       }
       case GEOMETRY_POLYGONS_WITH_HOLES: {
@@ -6717,6 +6866,30 @@ void Polygon_2__addExact(Polygon_2* polygon, const std::string& x,
   polygon->push_back(Point_2(to_FT(x), to_FT(y)));
 }
 
+void Test2(size_t nth, bool use_exceptions) {
+  if (use_exceptions) {
+    throw std::runtime_error("Test");
+  }
+}
+
+void Test(size_t count, bool use_exceptions) {
+  if (use_exceptions) {
+    for (size_t nth = 0; nth < count; nth++) {
+      try {
+        Test2(nth, true);
+      } catch (const std::exception& e) {
+      }
+    }
+  } else {
+    for (size_t nth = 0; nth < count; nth++) {
+      Test2(nth, false);
+    }
+  }
+
+  std::cout << "Make certain throw count: " << CGAL::make_certain_throw_count
+            << std::endl;
+}
+
 using emscripten::select_const;
 using emscripten::select_overload;
 
@@ -6905,6 +7078,8 @@ EMSCRIPTEN_BINDINGS(module) {
   emscripten::function("Smooth", &Smooth, emscripten::allow_raw_pointers());
   emscripten::function("Twist", &Twist, emscripten::allow_raw_pointers());
   emscripten::function("Wrap", &Wrap, emscripten::allow_raw_pointers());
+
+  emscripten::function("Test", &Test, emscripten::allow_raw_pointers());
 
   emscripten::function("FT__to_double", &FT__to_double,
                        emscripten::allow_raw_pointers());

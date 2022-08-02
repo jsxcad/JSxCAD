@@ -1514,11 +1514,12 @@ const demesh = Shape.chainable(
 
 Shape.registerMethod('demesh', demesh);
 
-const disjoint = Shape.chainable(
-  ({ strategy } = {}) =>
-    (shape) =>
-      fromGeometry(disjoint$1([shape.toGeometry()], strategy))
-);
+const disjoint = Shape.chainable((...args) => (shape) => {
+  const { strings: modes } = destructure(args);
+  return fromGeometry(
+    disjoint$1([shape.toGeometry()], modes.includes('backward') ? 0 : 1)
+  );
+});
 
 Shape.registerMethod('disjoint', disjoint);
 
