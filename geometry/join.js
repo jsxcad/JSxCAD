@@ -10,7 +10,7 @@ import { toConcreteGeometry } from './tagged/toConcreteGeometry.js';
 
 const filter = (noVoid) => (geometry) =>
   ['graph', 'polygonsWithHoles', 'segments'].includes(geometry.type) &&
-  (isNotTypeGhost(geometry) || !noVoid || isTypeVoid(geometry));
+  (isNotTypeGhost(geometry) || (!noVoid && isTypeVoid(geometry)));
 
 const filterAdds = (noVoid) => (geometry) =>
   filter(geometry) &&

@@ -1605,17 +1605,17 @@ const eachTriangle = (geometry, emitTriangle) => {
   deletePendingSurfaceMeshes();
 };
 
-const filter$l = (geometry) =>
+const filter$l = (noVoid) => (geometry) =>
   ['graph', 'polygonsWithHoles'].includes(geometry.type) &&
-  isNotTypeGhost(geometry);
+  (isNotTypeGhost(geometry) || (!noVoid && isTypeVoid));
 
-const extrude = (geometry, top, bottom) => {
+const extrude = (geometry, top, bottom, noVoid) => {
   const concreteGeometry = toConcreteGeometry(geometry);
   const inputs = [];
-  linearize(concreteGeometry, filter$l, inputs);
+  linearize(concreteGeometry, filter$l(noVoid), inputs);
   const count = inputs.length;
   inputs.push(top, bottom);
-  const outputs = extrude$1(inputs, count);
+  const outputs = extrude$1(inputs, count, noVoid);
   deletePendingSurfaceMeshes();
   return replacer(inputs, outputs)(concreteGeometry);
 };
@@ -1933,7 +1933,7 @@ const isShowWireframe = (geometry) => isShow(geometry, showWireframe);
 
 const filter$d = (noVoid) => (geometry) =>
   ['graph', 'polygonsWithHoles', 'segments'].includes(geometry.type) &&
-  (isNotTypeGhost(geometry) || !noVoid || isTypeVoid(geometry));
+  (isNotTypeGhost(geometry) || (!noVoid && isTypeVoid(geometry)));
 
 const filterAdds = (noVoid) => (geometry) =>
   filter$d(geometry) &&

@@ -650,3 +650,51 @@ Orb(5, 5, 5)
 ```
 
 ![Image](shape.md.68.png)
+
+```JavaScript
+Box(4).fit(Arc(6).void()).ez(1).view();
+```
+
+![Image](shape.md.69.png)
+
+```JavaScript
+Box(4).fit(Arc(6).void()).ez(1, 'noVoid').view();
+```
+
+![Image](shape.md.70.png)
+
+```JavaScript
+Box(4).fitTo(Arc(4).void()).cut(Hexagon(3)).clean().view();
+```
+
+![Image](shape.md.71.png)
+
+```JavaScript
+Box(4).fitTo(Arc(4).void()).cut(Hexagon(3), 'noVoid').clean().view();
+```
+
+![Image](shape.md.72.png)
+
+```JavaScript
+Box(4).fitTo(Arc(3).void()).join(Box(1, 5)).clean().view();
+```
+
+![Image](shape.md.73.png)
+
+```JavaScript
+Box(4).fitTo(Arc(3).void()).join(Box(1, 5), 'noVoid').clean().view();
+```
+
+![Image](shape.md.74.png)
+
+```JavaScript
+Box(4).fitTo(Arc(3).void()).clip(Box(1, 5)).clean().view();
+```
+
+![Image](shape.md.75.png)
+
+```JavaScript
+Box(4).fitTo(Arc(3).void()).clip(Box(1, 5), 'noVoid').clean().view();
+```
+
+![Image](shape.md.76.png)
