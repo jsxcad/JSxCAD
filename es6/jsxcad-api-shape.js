@@ -805,16 +805,17 @@ const abstract = Shape.chainable((op = render) => (shape) => {
 
 Shape.registerMethod('abstract', abstract);
 
-const join = Shape.chainable(
-  (...shapes) =>
-    (shape) =>
-      Shape.fromGeometry(
-        join$1(
-          shape.toGeometry(),
-          shapes.map((other) => Shape.toShape(other, shape).toGeometry())
-        )
-      )
-);
+const join = Shape.chainable((...args) => (shape) => {
+  const { strings: modes, shapesAndFunctions: shapes } = destructure(args);
+  return Shape.fromGeometry(
+    join$1(
+      shape.toGeometry(),
+      shapes.map((other) => Shape.toShape(other, shape).toGeometry()),
+      modes.includes('exact'),
+      modes.includes('noVoid')
+    )
+  );
+});
 
 Shape.registerMethod('join', join);
 Shape.registerMethod('add', join);
@@ -1392,7 +1393,9 @@ const clip = Shape.chainable((...args) => (shape) => {
     clip$1(
       shape.toGeometry(),
       shapes.map((other) => Shape.toShape(other, shape).toGeometry()),
-      modes.includes('open')
+      modes.includes('open'),
+      modes.includes('exact'),
+      modes.includes('noVoid')
     )
   );
 });
@@ -1444,7 +1447,8 @@ const cut = Shape.chainable((...args) => (shape) => {
       shape.toGeometry(),
       shape.toShapes(shapes).map((other) => other.toGeometry()),
       modes.includes('open'),
-      modes.includes('exact')
+      modes.includes('exact'),
+      modes.includes('noVoid')
     )
   );
 });
@@ -1517,7 +1521,11 @@ Shape.registerMethod('demesh', demesh);
 const disjoint = Shape.chainable((...args) => (shape) => {
   const { strings: modes } = destructure(args);
   return fromGeometry(
-    disjoint$1([shape.toGeometry()], modes.includes('backward') ? 0 : 1)
+    disjoint$1(
+      [shape.toGeometry()],
+      modes.includes('backward') ? 0 : 1,
+      modes.includes('exact')
+    )
   );
 });
 
