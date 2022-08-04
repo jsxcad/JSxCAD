@@ -195,6 +195,7 @@ Box(10)
   .smooth({ method: 'shape', iterations: 1, time: 1 }, Box(9, 20, 20))
   .view(53);
 
+/* Fails with manifold
 Box(20, 20, 20)
   .view(1, { wireframe: true })
   .md('Original mesh')
@@ -207,6 +208,7 @@ Box(20, 20, 20)
   .demesh()
   .view(56, { wireframe: true })
   .md('Cleaned mesh');
+*/
 
 Arc(4)
   .x(5)

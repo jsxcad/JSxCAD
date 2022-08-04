@@ -304,15 +304,3 @@ const train = (
 ```
 
 ![Image](ldraw.md.0.png)
-
-```JavaScript
-const wrapped = train.wrap(1, 0.5).view(material('glass'));
-```
-
-![Image](ldraw.md.1.png)
-
-```JavaScript
-const cutaway = wrapped.clip(Box([-40, 0], 320, [0, 80])).view(material('glass'));
-```
-
-![Image](ldraw.md.2.png)

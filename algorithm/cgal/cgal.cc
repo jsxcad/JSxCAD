@@ -110,6 +110,8 @@
 #include <thread>
 #endif
 
+#include "manifold.h"
+
 typedef CGAL::Exact_predicates_exact_constructions_kernel Epeck_kernel;
 typedef CGAL::Exact_predicates_inexact_constructions_kernel Epick_kernel;
 typedef CGAL::Cartesian<CGAL::Exact_rational> Exact_rational_kernel;
@@ -721,6 +723,44 @@ void emitNthPoint(int nth, Point p, emscripten::val emit_point) {
 
 Vector unitVector(const Vector& vector);
 Vector NormalOfSurfaceMeshFacet(const Surface_mesh& mesh, Face_index facet);
+
+void buildManifoldFromSurfaceMesh(const Surface_mesh& surface_mesh,
+                                  manifold::Manifold& manifold) {
+  manifold::Mesh manifold_mesh;
+  manifold_mesh.vertPos.resize(surface_mesh.number_of_vertices());
+  for (const auto& vertex : surface_mesh.vertices()) {
+    // std::cout << "Vertex: " << size_t(vertex) << std::endl;
+    const Point& point = surface_mesh.point(vertex);
+    glm::vec3 p(CGAL::to_double(point.x()), CGAL::to_double(point.y()),
+                CGAL::to_double(point.z()));
+    manifold_mesh.vertPos[size_t(vertex)] = std::move(p);
+  }
+  manifold_mesh.triVerts.resize(surface_mesh.number_of_faces());
+  for (const auto& facet : surface_mesh.faces()) {
+    // std::cout << "Facet: " << size_t(facet) << std::endl;
+    const auto a = surface_mesh.halfedge(facet);
+    const auto b = surface_mesh.next(a);
+    glm::ivec3 t(surface_mesh.source(a), surface_mesh.source(b),
+                 surface_mesh.target(b));
+    manifold_mesh.triVerts[facet] = std::move(t);
+  }
+  manifold = manifold::Manifold(manifold_mesh);
+}
+
+void buildSurfaceMeshFromManifold(const manifold::Manifold& manifold,
+                                  Surface_mesh& surface_mesh) {
+  manifold::Mesh mesh = manifold.GetMesh();
+  for (std::size_t nth = 0; nth < mesh.vertPos.size(); nth++) {
+    const glm::vec3& p = mesh.vertPos[nth];
+    Point point(p[0], p[1], p[2]);
+    assert(size_t(surface_mesh.add_vertex(point)) == nth);
+  }
+  for (std::size_t nth = 0; nth < mesh.triVerts.size(); nth++) {
+    const glm::ivec3& t = mesh.triVerts[nth];
+    assert(size_t(surface_mesh.add_face(Vertex_index(t[0]), Vertex_index(t[1]),
+                                        Vertex_index(t[2]))) == nth);
+  }
+}
 
 #if 0
 const Surface_mesh* ApproximateSurfaceMesh(
@@ -3335,7 +3375,7 @@ int Cast(Geometry* geometry, const Transformation* reference) {
   return STATUS_OK;
 }
 
-int Clip(Geometry* geometry, int targets, bool open) {
+int Clip(Geometry* geometry, int targets, bool open, bool exact) {
   size_t size = geometry->size();
 
   geometry->copyInputMeshesToOutputMeshes();
@@ -3381,7 +3421,7 @@ int Clip(Geometry* geometry, int targets, bool open) {
                     CGAL::parameters::use_compact_clipper(true))) {
               return STATUS_ZERO_THICKNESS;
             }
-          } else {
+          } else if (exact) {
             if (!CGAL::Polygon_mesh_processing::
                     corefine_and_compute_intersection(
                         geometry->mesh(target), clipMeshCopy,
@@ -3390,6 +3430,17 @@ int Clip(Geometry* geometry, int targets, bool open) {
                         CGAL::parameters::all_default())) {
               return STATUS_ZERO_THICKNESS;
             }
+          } else {
+            // TODO: Optimize out unnecessary conversions.
+            manifold::Manifold target_manifold;
+            buildManifoldFromSurfaceMesh(geometry->mesh(target),
+                                         target_manifold);
+            manifold::Manifold nth_manifold;
+            buildManifoldFromSurfaceMesh(geometry->mesh(nth), nth_manifold);
+            target_manifold ^= nth_manifold;
+            geometry->mesh(target).clear();
+            buildSurfaceMeshFromManifold(target_manifold,
+                                         geometry->mesh(target));
           }
           geometry->updateBounds3(target);
         }
@@ -3756,100 +3807,56 @@ int Cut(Geometry* geometry, int targets, bool open, bool exact) {
         if (geometry->is_empty_mesh(target)) {
           continue;
         }
-        if (exact) {
-          for (int nth = targets; nth < size; nth++) {
-            if (geometry->is_reference(nth)) {
-              Plane plane(0, 0, 1, 0);
-              plane = plane.transform(geometry->transform(nth)).opposite();
-              if (!CGAL::Polygon_mesh_processing::clip(
-                      geometry->mesh(target), plane,
-                      CGAL::parameters::use_compact_clipper(true).clip_volume(
-                          open == false))) {
-                return STATUS_ZERO_THICKNESS;
-              }
-              continue;
+        for (int nth = targets; nth < size; nth++) {
+          if (geometry->is_reference(nth)) {
+            Plane plane(0, 0, 1, 0);
+            plane = plane.transform(geometry->transform(nth)).opposite();
+            if (!CGAL::Polygon_mesh_processing::clip(
+                    geometry->mesh(target), plane,
+                    CGAL::parameters::use_compact_clipper(true).clip_volume(
+                        open == false))) {
+              return STATUS_ZERO_THICKNESS;
             }
-            if (!geometry->is_mesh(nth) || geometry->is_empty_mesh(nth) ||
-                geometry->noOverlap3(target, nth)) {
-              continue;
-            }
-            Surface_mesh cutMeshCopy(geometry->mesh(nth));
-            if (open) {
-              CGAL::Polygon_mesh_processing::reverse_face_orientations(
-                  cutMeshCopy);
-              Surface_mesh mask(geometry->mesh(target));
-              if (!CGAL::Polygon_mesh_processing::clip(
-                      geometry->mesh(target), cutMeshCopy,
-                      CGAL::parameters::use_compact_clipper(true),
-                      CGAL::parameters::use_compact_clipper(true))) {
-                return STATUS_ZERO_THICKNESS;
-              }
-            } else {
-              if (!CGAL::Polygon_mesh_processing::
-                      corefine_and_compute_difference(
-                          geometry->mesh(target), cutMeshCopy,
-                          geometry->mesh(target),
-                          CGAL::parameters::all_default(),
-                          CGAL::parameters::all_default(),
-                          CGAL::parameters::all_default())) {
-                return STATUS_ZERO_THICKNESS;
-              }
-            }
-            geometry->updateBounds3(target);
+            continue;
           }
-          demesh(geometry->mesh(target));
-        } else {
-          // Inexact mesh cuts.
-          bool modified = false;
-          for (int nth = targets; nth < size; nth++) {
-            if (geometry->is_reference(nth)) {
-              Plane plane(0, 0, 1, 0);
-              plane = plane.transform(geometry->transform(nth)).opposite();
-              if (!CGAL::Polygon_mesh_processing::clip(
-                      geometry->epick_mesh(target),
-                      epeck_to_epick_converter(plane),
-                      CGAL::parameters::use_compact_clipper(true).clip_volume(
-                          open == false))) {
-                return STATUS_ZERO_THICKNESS;
-              }
-              continue;
-            }
-            if (!geometry->is_mesh(nth) || geometry->is_empty_epick_mesh(nth) ||
-                geometry->noOverlap3(target, nth)) {
-              continue;
-            }
-            Epick_surface_mesh cutMeshCopy(geometry->epick_mesh(nth));
-            if (open) {
-              CGAL::Polygon_mesh_processing::reverse_face_orientations(
-                  cutMeshCopy);
-              Epick_surface_mesh mask(geometry->epick_mesh(target));
-              if (!CGAL::Polygon_mesh_processing::clip(
-                      geometry->epick_mesh(target), cutMeshCopy,
-                      CGAL::parameters::use_compact_clipper(true),
-                      CGAL::parameters::use_compact_clipper(true))) {
-                return STATUS_ZERO_THICKNESS;
-              }
-            } else {
-              if (!CGAL::Polygon_mesh_processing::
-                      corefine_and_compute_difference(
-                          geometry->epick_mesh(target), cutMeshCopy,
-                          geometry->epick_mesh(target),
-                          CGAL::parameters::all_default(),
-                          CGAL::parameters::all_default(),
-                          CGAL::parameters::all_default())) {
-                return STATUS_ZERO_THICKNESS;
-              }
-            }
-            geometry->updateEpickBounds3(target);
-            modified = true;
+          if (!geometry->is_mesh(nth) || geometry->is_empty_mesh(nth) ||
+              geometry->noOverlap3(target, nth)) {
+            continue;
           }
-          if (modified) {
+          Surface_mesh cutMeshCopy(geometry->mesh(nth));
+          if (open) {
+            CGAL::Polygon_mesh_processing::reverse_face_orientations(
+                cutMeshCopy);
+            Surface_mesh mask(geometry->mesh(target));
+            if (!CGAL::Polygon_mesh_processing::clip(
+                    geometry->mesh(target), cutMeshCopy,
+                    CGAL::parameters::use_compact_clipper(true),
+                    CGAL::parameters::use_compact_clipper(true))) {
+              return STATUS_ZERO_THICKNESS;
+            }
+          } else if (exact) {
+            if (!CGAL::Polygon_mesh_processing::corefine_and_compute_difference(
+                    geometry->mesh(target), cutMeshCopy, geometry->mesh(target),
+                    CGAL::parameters::all_default(),
+                    CGAL::parameters::all_default(),
+                    CGAL::parameters::all_default())) {
+              return STATUS_ZERO_THICKNESS;
+            }
+          } else {
+            // TODO: Optimize out unnecessary conversions.
+            manifold::Manifold target_manifold;
+            buildManifoldFromSurfaceMesh(geometry->mesh(target),
+                                         target_manifold);
+            manifold::Manifold nth_manifold;
+            buildManifoldFromSurfaceMesh(geometry->mesh(nth), nth_manifold);
+            target_manifold -= nth_manifold;
             geometry->mesh(target).clear();
-            copy_face_graph(geometry->epick_mesh(target),
-                            geometry->mesh(target));
+            buildSurfaceMeshFromManifold(target_manifold,
+                                         geometry->mesh(target));
           }
-          demesh(geometry->mesh(target));
+          geometry->updateBounds3(target);
         }
+        demesh(geometry->mesh(target));
         break;
       }
       case GEOMETRY_POLYGONS_WITH_HOLES: {
@@ -4043,7 +4050,8 @@ int Demesh(Geometry* geometry) {
 }
 
 // This tries to make the largest disjoints first.
-int disjointBackward(Geometry* geometry, emscripten::val getIsMasked) {
+int disjointBackward(Geometry* geometry, emscripten::val getIsMasked,
+                     bool exact) {
   int size = geometry->size();
 
   std::vector<bool> is_masked;
@@ -4072,15 +4080,28 @@ int disjointBackward(Geometry* geometry, emscripten::val getIsMasked) {
                   geometry->noOverlap3(start, nth)) {
                 continue;
               }
-              Surface_mesh cutMeshCopy(geometry->mesh(nth));
-              if (!CGAL::Polygon_mesh_processing::
-                      corefine_and_compute_difference(
-                          geometry->mesh(start), cutMeshCopy,
-                          geometry->mesh(start),
-                          CGAL::parameters::all_default(),
-                          CGAL::parameters::all_default(),
-                          CGAL::parameters::all_default())) {
-                return STATUS_ZERO_THICKNESS;
+              if (exact) {
+                Surface_mesh cutMeshCopy(geometry->mesh(nth));
+                if (!CGAL::Polygon_mesh_processing::
+                        corefine_and_compute_difference(
+                            geometry->mesh(start), cutMeshCopy,
+                            geometry->mesh(start),
+                            CGAL::parameters::all_default(),
+                            CGAL::parameters::all_default(),
+                            CGAL::parameters::all_default())) {
+                  return STATUS_ZERO_THICKNESS;
+                }
+              } else {
+                // TODO: Optimize out unnecessary conversions.
+                manifold::Manifold target_manifold;
+                buildManifoldFromSurfaceMesh(geometry->mesh(start),
+                                             target_manifold);
+                manifold::Manifold nth_manifold;
+                buildManifoldFromSurfaceMesh(geometry->mesh(nth), nth_manifold);
+                target_manifold -= nth_manifold;
+                geometry->mesh(start).clear();
+                buildSurfaceMeshFromManifold(target_manifold,
+                                             geometry->mesh(start));
               }
               geometry->updateBounds3(start);
               break;
@@ -4177,7 +4198,8 @@ int disjointBackward(Geometry* geometry, emscripten::val getIsMasked) {
 }
 
 // This tries to make the smallest disjoints.
-int disjointForward(Geometry* geometry, emscripten::val getIsMasked) {
+int disjointForward(Geometry* geometry, emscripten::val getIsMasked,
+                    bool exact) {
   int size = geometry->size();
 
   std::vector<bool> is_masked;
@@ -4206,15 +4228,28 @@ int disjointForward(Geometry* geometry, emscripten::val getIsMasked) {
                   geometry->noOverlap3(start, nth)) {
                 continue;
               }
-              Surface_mesh cutMeshCopy(geometry->mesh(nth));
-              if (!CGAL::Polygon_mesh_processing::
-                      corefine_and_compute_difference(
-                          geometry->mesh(start), cutMeshCopy,
-                          geometry->mesh(start),
-                          CGAL::parameters::all_default(),
-                          CGAL::parameters::all_default(),
-                          CGAL::parameters::all_default())) {
-                return STATUS_ZERO_THICKNESS;
+              if (exact) {
+                Surface_mesh cutMeshCopy(geometry->mesh(nth));
+                if (!CGAL::Polygon_mesh_processing::
+                        corefine_and_compute_difference(
+                            geometry->mesh(start), cutMeshCopy,
+                            geometry->mesh(start),
+                            CGAL::parameters::all_default(),
+                            CGAL::parameters::all_default(),
+                            CGAL::parameters::all_default())) {
+                  return STATUS_ZERO_THICKNESS;
+                }
+              } else {
+                // TODO: Optimize out unnecessary conversions.
+                manifold::Manifold target_manifold;
+                buildManifoldFromSurfaceMesh(geometry->mesh(start),
+                                             target_manifold);
+                manifold::Manifold nth_manifold;
+                buildManifoldFromSurfaceMesh(geometry->mesh(nth), nth_manifold);
+                target_manifold -= nth_manifold;
+                geometry->mesh(start).clear();
+                buildSurfaceMeshFromManifold(target_manifold,
+                                             geometry->mesh(start));
               }
               geometry->updateBounds3(start);
               break;
@@ -4310,12 +4345,13 @@ int disjointForward(Geometry* geometry, emscripten::val getIsMasked) {
   return STATUS_OK;
 }
 
-int Disjoint(Geometry* geometry, emscripten::val getIsMasked, int mode) {
+int Disjoint(Geometry* geometry, emscripten::val getIsMasked, int mode,
+             bool exact) {
   switch (mode == 0) {
     case 0:  // 50.58
-      return disjointBackward(geometry, getIsMasked);
+      return disjointBackward(geometry, getIsMasked, exact);
     case 1:  // 30.65
-      return disjointForward(geometry, getIsMasked);
+      return disjointForward(geometry, getIsMasked, exact);
     default:
       return STATUS_INVALID_INPUT;
   }
@@ -5042,7 +5078,7 @@ int Involute(Geometry* geometry) {
   return STATUS_OK;
 }
 
-int Join(Geometry* geometry, int targets) {
+int Join(Geometry* geometry, int targets, bool exact) {
   size_t size = geometry->size();
 
   geometry->copyInputMeshesToOutputMeshes();
@@ -5065,7 +5101,7 @@ int Join(Geometry* geometry, int targets) {
           }
           if (geometry->noOverlap3(target, nth)) {
             geometry->mesh(target).join(geometry->mesh(nth));
-          } else {
+          } else if (exact) {
             Surface_mesh cutMeshCopy(geometry->mesh(nth));
             if (!CGAL::Polygon_mesh_processing::corefine_and_compute_union(
                     geometry->mesh(target), cutMeshCopy, geometry->mesh(target),
@@ -5074,6 +5110,17 @@ int Join(Geometry* geometry, int targets) {
                     CGAL::parameters::all_default())) {
               return STATUS_ZERO_THICKNESS;
             }
+          } else {
+            // TODO: Optimize out unnecessary conversions.
+            manifold::Manifold target_manifold;
+            buildManifoldFromSurfaceMesh(geometry->mesh(target),
+                                         target_manifold);
+            manifold::Manifold nth_manifold;
+            buildManifoldFromSurfaceMesh(geometry->mesh(nth), nth_manifold);
+            target_manifold += nth_manifold;
+            geometry->mesh(target).clear();
+            buildSurfaceMeshFromManifold(target_manifold,
+                                         geometry->mesh(target));
           }
           geometry->updateBounds3(target);
         }
@@ -6866,30 +6913,6 @@ void Polygon_2__addExact(Polygon_2* polygon, const std::string& x,
   polygon->push_back(Point_2(to_FT(x), to_FT(y)));
 }
 
-void Test2(size_t nth, bool use_exceptions) {
-  if (use_exceptions) {
-    throw std::runtime_error("Test");
-  }
-}
-
-void Test(size_t count, bool use_exceptions) {
-  if (use_exceptions) {
-    for (size_t nth = 0; nth < count; nth++) {
-      try {
-        Test2(nth, true);
-      } catch (const std::exception& e) {
-      }
-    }
-  } else {
-    for (size_t nth = 0; nth < count; nth++) {
-      Test2(nth, false);
-    }
-  }
-
-  std::cout << "Make certain throw count: " << CGAL::make_certain_throw_count
-            << std::endl;
-}
-
 using emscripten::select_const;
 using emscripten::select_overload;
 
@@ -7078,8 +7101,6 @@ EMSCRIPTEN_BINDINGS(module) {
   emscripten::function("Smooth", &Smooth, emscripten::allow_raw_pointers());
   emscripten::function("Twist", &Twist, emscripten::allow_raw_pointers());
   emscripten::function("Wrap", &Wrap, emscripten::allow_raw_pointers());
-
-  emscripten::function("Test", &Test, emscripten::allow_raw_pointers());
 
   emscripten::function("FT__to_double", &FT__to_double,
                        emscripten::allow_raw_pointers());

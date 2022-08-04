@@ -2,6 +2,7 @@ const penDiameter = 10.5;
 const magnetDiameter = 5.0;
 const magnetHeight = 2.5;
 
+/*
 const magneticPenHolder = Arc(magnetDiameter)
   .material('steel')
   .ez(magnetHeight)
@@ -22,3 +23,4 @@ const magneticPenHolder = Arc(magnetDiameter)
   )
   .view()
   .stl('holder', drop('material:steel'));
+*/

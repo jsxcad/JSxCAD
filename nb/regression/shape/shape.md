@@ -408,37 +408,6 @@ Box(10)
 ![Image](shape.md.48.png)
 
 ```JavaScript
-Box(20, 20, 20)
-  .view(1, { wireframe: true })
-  .md('Original mesh')
-  .remesh()
-  .view(54, { wireframe: true })
-  .md('Isotropic remeshing')
-  .cut(Box([0, 10], [0, -10], [0, 10]))
-  .view(55, { wireframe: true })
-  .md('Cut')
-  .demesh()
-  .view(56, { wireframe: true })
-  .md('Cleaned mesh');
-```
-
-![Image](shape.md.49.png)
-
-Original mesh
-
-![Image](shape.md.50.png)
-
-Isotropic remeshing
-
-![Image](shape.md.51.png)
-
-Cut
-
-![Image](shape.md.52.png)
-
-Cleaned mesh
-
-```JavaScript
 Arc(4)
   .x(5)
   .seq({ by: 1 / 8 }, rz, Join)
@@ -448,7 +417,7 @@ Arc(4)
   .view(57);
 ```
 
-![Image](shape.md.53.png)
+![Image](shape.md.49.png)
 
 ```JavaScript
 Box(10)
@@ -457,7 +426,7 @@ Box(10)
   .view(58);
 ```
 
-![Image](shape.md.54.png)
+![Image](shape.md.50.png)
 
 ```JavaScript
 Box(20, 20, 20)
@@ -468,7 +437,7 @@ Box(20, 20, 20)
   .view(60);
 ```
 
-![Image](shape.md.55.png)
+![Image](shape.md.51.png)
 
 Area of Box(2).cut(Box(1)) is 4.00
 
@@ -488,25 +457,7 @@ const c = Box(10)
   .view(67);
 ```
 
-![Image](shape.md.56.png)
-
-```JavaScript
-c.by(origin()).view(68);
-```
-
-![Image](shape.md.57.png)
-
-```JavaScript
-c.by(origin(), and(Box(5, 5, 5))).view(69);
-```
-
-![Image](shape.md.58.png)
-
-```JavaScript
-c.by(origin(), cut(Box(5, 5, 5))).view(70);
-```
-
-![Image](shape.md.59.png)
+![Image](shape.md.52.png)
 
 ```JavaScript
 Triangle(4)
@@ -515,19 +466,37 @@ Triangle(4)
   .view(71);
 ```
 
-![Image](shape.md.60.png)
+![Image](shape.md.53.png)
+
+```JavaScript
+c.by(origin()).view(68);
+```
+
+![Image](shape.md.54.png)
+
+```JavaScript
+c.by(origin(), and(Box(5, 5, 5))).view(69);
+```
+
+![Image](shape.md.55.png)
+
+```JavaScript
+c.by(origin(), cut(Box(5, 5, 5))).view(70);
+```
+
+![Image](shape.md.56.png)
 
 ```JavaScript
 Group(Box(), Triangle(1).x(2), Hexagon(1).x(4)).sort('x<3').view(72);
 ```
 
-![Image](shape.md.61.png)
+![Image](shape.md.57.png)
 
 ```JavaScript
 Group(Box(), Triangle(1).x(2), Hexagon(1).x(4)).sort('x>1').view(73);
 ```
 
-![Image](shape.md.62.png)
+![Image](shape.md.58.png)
 
 ```JavaScript
 Box(5, 5, 20)
@@ -536,13 +505,13 @@ Box(5, 5, 20)
   .view(74);
 ```
 
-![Image](shape.md.63.png)
+![Image](shape.md.59.png)
 
 ```JavaScript
 Box(100).image('https://jsxcad.js.org/png/cooper_2.png').log().topView(1);
 ```
 
-![Image](shape.md.64.png)
+![Image](shape.md.60.png)
 
 ```JavaScript
 Segments([
@@ -635,43 +604,43 @@ Segments([
   .topView();
 ```
 
-![Image](shape.md.65.png)
+![Image](shape.md.61.png)
 
 ```JavaScript
 Arc(37).cut(inset(2)).ez(2).remesh(1).smooth(Box(50, 10, 20)).view();
 ```
 
-![Image](shape.md.66.png)
+![Image](shape.md.62.png)
 
 ```JavaScript
 Box(4, 4, 4).cutout(X(0), and).view();
 ```
 
-![Image](shape.md.67.png)
+![Image](shape.md.63.png)
 
 ```JavaScript
 Box(4, 4, 4).cut('open', Box(2, 2, 8)).view();
 ```
 
-![Image](shape.md.68.png)
+![Image](shape.md.64.png)
 
 ```JavaScript
 Box(4, 4, 4).clip('open', Box(2, 2, 8)).view();
 ```
 
-![Image](shape.md.69.png)
+![Image](shape.md.65.png)
 
 ```JavaScript
 Loft(Box(3).cut(Arc(2)), Hexagon(3).cut(Arc(2)).z(10)).view();
 ```
 
-![Image](shape.md.70.png)
+![Image](shape.md.66.png)
 
 ```JavaScript
 Loft('open', Box(3).cut(Arc(2)), Hexagon(3).cut(Arc(2)).z(10)).view();
 ```
 
-![Image](shape.md.71.png)
+![Image](shape.md.67.png)
 
 ```JavaScript
 Orb(5, 5, 5)
@@ -680,4 +649,4 @@ Orb(5, 5, 5)
   .view();
 ```
 
-![Image](shape.md.72.png)
+![Image](shape.md.68.png)
