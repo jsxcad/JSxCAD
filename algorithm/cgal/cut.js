@@ -3,7 +3,7 @@ import { fromCgalGeometry, withCgalGeometry } from './cgalGeometry.js';
 
 import { ErrorZeroThickness } from './error.js';
 
-export const cut = (inputs, targetsLength, open = false, exact = true) =>
+export const cut = (inputs, targetsLength, open = false, exact = false) =>
   withCgalGeometry(inputs, (cgalGeometry, g) => {
     const status = g.Cut(cgalGeometry, targetsLength, open, exact);
     switch (status) {

@@ -9,7 +9,8 @@ export const cut = Shape.chainable((...args) => (shape) => {
       shape.toGeometry(),
       shape.toShapes(shapes).map((other) => other.toGeometry()),
       modes.includes('open'),
-      !modes.includes('fast') // not exact.
+      modes.includes('exact'),
+      modes.includes('noVoid')
     )
   );
 });

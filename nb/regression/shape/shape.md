@@ -408,35 +408,16 @@ Box(10)
 ![Image](shape.md.48.png)
 
 ```JavaScript
-Box(20, 20, 20)
-  .view(1, { wireframe: true })
-  .md('Original mesh')
-  .remesh()
-  .view(54, { wireframe: true })
-  .md('Isotropic remeshing')
-  .cut(Box([0, 10], [0, -10], [0, 10]))
-  .view(55, { wireframe: true })
-  .md('Cut')
-  .demesh()
-  .view(56, { wireframe: true })
-  .md('Cleaned mesh');
+Hershey('Disabled', 20).by(align('xy')).topView();
 ```
 
 ![Image](shape.md.49.png)
 
-Original mesh
-
 ![Image](shape.md.50.png)
-
-Isotropic remeshing
 
 ![Image](shape.md.51.png)
 
-Cut
-
 ![Image](shape.md.52.png)
-
-Cleaned mesh
 
 ```JavaScript
 Arc(4)
@@ -491,28 +472,28 @@ const c = Box(10)
 ![Image](shape.md.56.png)
 
 ```JavaScript
-c.by(origin()).view(68);
+Triangle(4)
+  .x(5)
+  .at(origin(), rz(1 / 16))
+  .view(71);
 ```
 
 ![Image](shape.md.57.png)
 
 ```JavaScript
-c.by(origin(), and(Box(5, 5, 5))).view(69);
+c.by(origin()).view(68);
 ```
 
 ![Image](shape.md.58.png)
 
 ```JavaScript
-c.by(origin(), cut(Box(5, 5, 5))).view(70);
+c.by(origin(), and(Box(5, 5, 5))).view(69);
 ```
 
 ![Image](shape.md.59.png)
 
 ```JavaScript
-Triangle(4)
-  .x(5)
-  .at(origin(), rz(1 / 16))
-  .view(71);
+c.by(origin(), cut(Box(5, 5, 5))).view(70);
 ```
 
 ![Image](shape.md.60.png)
@@ -681,3 +662,51 @@ Orb(5, 5, 5)
 ```
 
 ![Image](shape.md.72.png)
+
+```JavaScript
+Box(4).fit(Arc(6).void()).ez(1).view();
+```
+
+![Image](shape.md.73.png)
+
+```JavaScript
+Box(4).fit(Arc(6).void()).ez(1, 'noVoid').view();
+```
+
+![Image](shape.md.74.png)
+
+```JavaScript
+Box(4).fitTo(Arc(4).void()).cut(Hexagon(3)).clean().view();
+```
+
+![Image](shape.md.75.png)
+
+```JavaScript
+Box(4).fitTo(Arc(4).void()).cut(Hexagon(3), 'noVoid').clean().view();
+```
+
+![Image](shape.md.76.png)
+
+```JavaScript
+Box(4).fitTo(Arc(3).void()).join(Box(1, 5)).clean().view();
+```
+
+![Image](shape.md.77.png)
+
+```JavaScript
+Box(4).fitTo(Arc(3).void()).join(Box(1, 5), 'noVoid').clean().view();
+```
+
+![Image](shape.md.78.png)
+
+```JavaScript
+Box(4).fitTo(Arc(3).void()).clip(Box(1, 5)).clean().view();
+```
+
+![Image](shape.md.79.png)
+
+```JavaScript
+Box(4).fitTo(Arc(3).void()).clip(Box(1, 5), 'noVoid').clean().view();
+```
+
+![Image](shape.md.80.png)

@@ -5,7 +5,11 @@ import { disjoint as disjointGeometry } from '@jsxcad/geometry';
 export const disjoint = Shape.chainable((...args) => (shape) => {
   const { strings: modes } = destructure(args);
   return fromGeometry(
-    disjointGeometry([shape.toGeometry()], modes.includes('backward') ? 0 : 1)
+    disjointGeometry(
+      [shape.toGeometry()],
+      modes.includes('backward') ? 0 : 1,
+      modes.includes('exact')
+    )
   );
 });
 

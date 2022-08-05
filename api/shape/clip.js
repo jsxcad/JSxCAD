@@ -10,7 +10,9 @@ export const clip = Shape.chainable((...args) => (shape) => {
     clipGeometry(
       shape.toGeometry(),
       shapes.map((other) => Shape.toShape(other, shape).toGeometry()),
-      modes.includes('open')
+      modes.includes('open'),
+      modes.includes('exact'),
+      modes.includes('noVoid')
     )
   );
 });

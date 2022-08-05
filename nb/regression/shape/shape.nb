@@ -195,6 +195,7 @@ Box(10)
   .smooth({ method: 'shape', iterations: 1, time: 1 }, Box(9, 20, 20))
   .view(53);
 
+/* Fails with manifold
 Box(20, 20, 20)
   .view(1, { wireframe: true })
   .md('Original mesh')
@@ -207,6 +208,11 @@ Box(20, 20, 20)
   .demesh()
   .view(56, { wireframe: true })
   .md('Cleaned mesh');
+*/
+Hershey('Disabled', 20).by(align('xy')).topView();
+Hershey('Disabled', 20).by(align('xy')).topView();
+Hershey('Disabled', 20).by(align('xy')).topView();
+Hershey('Disabled', 20).by(align('xy')).topView();
 
 Arc(4)
   .x(5)
@@ -411,3 +417,19 @@ Orb(5, 5, 5)
   .hasZag(5)
   .eachEdge((e, l) => Box([0, l * 0.75], [0, 0.1], 0.2).to(e))
   .view();
+
+Box(4).fit(Arc(6).void()).ez(1).view();
+
+Box(4).fit(Arc(6).void()).ez(1, 'noVoid').view();
+
+Box(4).fitTo(Arc(4).void()).cut(Hexagon(3)).clean().view();
+
+Box(4).fitTo(Arc(4).void()).cut(Hexagon(3), 'noVoid').clean().view();
+
+Box(4).fitTo(Arc(3).void()).join(Box(1, 5)).clean().view();
+
+Box(4).fitTo(Arc(3).void()).join(Box(1, 5), 'noVoid').clean().view();
+
+Box(4).fitTo(Arc(3).void()).clip(Box(1, 5)).clean().view();
+
+Box(4).fitTo(Arc(3).void()).clip(Box(1, 5), 'noVoid').clean().view();

@@ -2,7 +2,7 @@ import {
   clip as clipWithCgal,
   deletePendingSurfaceMeshes,
 } from '@jsxcad/algorithm-cgal';
-import { hasTypeGhost, isNotTypeGhost } from './tagged/type.js';
+import { hasTypeGhost, isNotTypeGhost, isTypeVoid } from './tagged/type.js';
 
 import { hasMaterial } from './hasMaterial.js';
 import { linearize } from './tagged/linearize.js';
@@ -10,20 +10,21 @@ import { replacer } from './tagged/visit.js';
 import { taggedGroup } from './tagged/taggedGroup.js';
 import { toConcreteGeometry } from './tagged/toConcreteGeometry.js';
 
-const filter = (geometry) =>
+const filter = (noVoid) => (geometry) =>
   ['graph', 'polygonsWithHoles', 'segments', 'points'].includes(
     geometry.type
-  ) && isNotTypeGhost(geometry);
+  ) &&
+  (isNotTypeGhost(geometry) || (!noVoid && isTypeVoid(geometry)));
 
-export const clip = (geometry, geometries, open) => {
+export const clip = (geometry, geometries, open, exact, noVoid) => {
   const concreteGeometry = toConcreteGeometry(geometry);
   const inputs = [];
-  linearize(concreteGeometry, filter, inputs);
+  linearize(concreteGeometry, filter(noVoid), inputs);
   const count = inputs.length;
   for (const geometry of geometries) {
-    linearize(geometry, filter, inputs);
+    linearize(geometry, filter(noVoid), inputs);
   }
-  const outputs = clipWithCgal(inputs, count, open);
+  const outputs = clipWithCgal(inputs, count, open, exact);
   const ghosts = [];
   for (let nth = 0; nth < inputs.length; nth++) {
     ghosts.push(hasMaterial(hasTypeGhost(inputs[nth]), 'ghost'));

@@ -15,23 +15,22 @@ import { replacer } from './tagged/visit.js';
 import { taggedGroup } from './tagged/taggedGroup.js';
 import { toConcreteGeometry } from './tagged/toConcreteGeometry.js';
 
-const filterTargets = (geometry) =>
+const filterTargets = (noVoid) => (geometry) =>
   ['graph', 'polygonsWithHoles', 'segments', 'points'].includes(
     geometry.type
-  ) && isNotTypeGhost(geometry);
+  ) &&
+  (isNotTypeGhost(geometry) || (!noVoid && isTypeVoid(geometry)));
 
-const filterRemoves = (geometry) =>
-  filterTargets(geometry) &&
-  isNotTypeMasked(geometry) &&
-  (isNotTypeGhost(geometry) || isTypeVoid(geometry));
+const filterRemoves = (noVoid) => (geometry) =>
+  filterTargets(noVoid)(geometry) && isNotTypeMasked(geometry);
 
-export const cut = (geometry, geometries, open = false, exact = true) => {
+export const cut = (geometry, geometries, open = false, exact, noVoid) => {
   const concreteGeometry = toConcreteGeometry(geometry);
   const inputs = [];
-  linearize(concreteGeometry, filterTargets, inputs);
+  linearize(concreteGeometry, filterTargets(noVoid), inputs);
   const count = inputs.length;
   for (const geometry of geometries) {
-    linearize(geometry, filterRemoves, inputs);
+    linearize(geometry, filterRemoves(noVoid), inputs);
   }
   const outputs = cutWithCgal(inputs, count, open, exact);
   const ghosts = [];

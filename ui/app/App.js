@@ -1,4 +1,4 @@
-/* global */
+/* global FileReader */
 
 import * as PropTypes from 'prop-types';
 
@@ -1145,6 +1145,18 @@ class App extends React.Component {
       await this.Notebook.run(path);
     };
 
+    this.Workspace.uploadWorkingPath = async (path, e) => {
+      const { workspace } = this.props;
+
+      const file = document.getElementById('WorkspaceUploadControl').files[0];
+      const reader = new FileReader();
+      const writeData = async (data) => {
+        await write(`source/${path}`, new Uint8Array(data), { workspace });
+      };
+      reader.onload = (e) => writeData(e.target.result);
+      reader.readAsArrayBuffer(file);
+    };
+
     this.Workspace.openWorkingFile = async (file) => {
       const { WorkspaceOpenPaths = [] } = this.state;
       const path = file.substring(7);
@@ -1190,7 +1202,11 @@ class App extends React.Component {
     this.factory = (node) => {
       switch (node.getComponent()) {
         case 'Workspace': {
-          const { WorkspaceFiles = [], WorkspaceOpenPaths = [] } = this.state;
+          const {
+            WorkspaceFiles = [],
+            WorkspaceOpenPaths = [],
+            WorkspaceLoadPath,
+          } = this.state;
           const isDisabled = (file) =>
             WorkspaceOpenPaths.includes(file.substring(7));
           const computeListItemVariant = (file) =>
@@ -1205,20 +1221,52 @@ class App extends React.Component {
                       <Row>
                         <Col>
                           <Form.Group controlId="WorkspaceLoadPathId">
-                            <Form.Control placeholder="URL or Path" />
+                            <Form.Control
+                              placeholder="URL or Path"
+                              onChange={(e) =>
+                                this.updateState({
+                                  WorkspaceLoadPath: e.target.value,
+                                })
+                              }
+                            />
                           </Form.Group>
                         </Col>
                         <Col xs="auto">
                           <Button
                             variant="primary"
                             onClick={() => {
-                              const { value } = document.getElementById(
-                                'WorkspaceLoadPathId'
-                              );
-                              this.Workspace.loadWorkingPath(value);
+                              const { WorkspaceLoadPath } = this.state;
+                              this.Workspace.loadWorkingPath(WorkspaceLoadPath);
                             }}
+                            disabled={!WorkspaceLoadPath}
                           >
                             Add
+                          </Button>
+                          <Form.Control
+                            as="input"
+                            type="file"
+                            id="WorkspaceUploadControl"
+                            multiple={false}
+                            onChange={(e) => {
+                              const { WorkspaceLoadPath } = this.state;
+                              this.Workspace.uploadWorkingPath(
+                                WorkspaceLoadPath,
+                                e
+                              );
+                            }}
+                            style={{ display: 'none' }}
+                          />
+                          &nbsp;
+                          <Button
+                            variant="primary"
+                            onClick={() => {
+                              document
+                                .getElementById('WorkspaceUploadControl')
+                                .click();
+                            }}
+                            disabled={!WorkspaceLoadPath}
+                          >
+                            Upload
                           </Button>
                         </Col>
                       </Row>

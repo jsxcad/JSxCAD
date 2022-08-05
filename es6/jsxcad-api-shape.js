@@ -805,16 +805,17 @@ const abstract = Shape.chainable((op = render) => (shape) => {
 
 Shape.registerMethod('abstract', abstract);
 
-const join = Shape.chainable(
-  (...shapes) =>
-    (shape) =>
-      Shape.fromGeometry(
-        join$1(
-          shape.toGeometry(),
-          shapes.map((other) => Shape.toShape(other, shape).toGeometry())
-        )
-      )
-);
+const join = Shape.chainable((...args) => (shape) => {
+  const { strings: modes, shapesAndFunctions: shapes } = destructure(args);
+  return Shape.fromGeometry(
+    join$1(
+      shape.toGeometry(),
+      shapes.map((other) => Shape.toShape(other, shape).toGeometry()),
+      modes.includes('exact'),
+      modes.includes('noVoid')
+    )
+  );
+});
 
 Shape.registerMethod('join', join);
 Shape.registerMethod('add', join);
@@ -983,37 +984,41 @@ const normal = Shape.chainable(
 
 Shape.registerMethod('normal', normal);
 
-const extrudeAlong = Shape.chainable(
-  (direction, ...extents) =>
-    (shape) => {
-      const vector = shape.toCoordinate(direction);
-      const heights = extents.map((extent) => Shape.toValue(extent, shape));
-      if (heights.length % 2 === 1) {
-        heights.push(0);
-      }
-      heights.sort((a, b) => a - b);
-      const extrusions = [];
-      while (heights.length > 0) {
-        const height = heights.pop();
-        const depth = heights.pop();
-        if (height === depth) {
-          // Return unextruded geometry at this height, instead.
-          extrusions.push(shape.moveAlong(vector, height));
-          continue;
-        }
-        extrusions.push(
-          Shape.fromGeometry(
-            extrude(
-              shape.toGeometry(),
-              Point().moveAlong(vector, height).toGeometry(),
-              Point().moveAlong(vector, depth).toGeometry()
-            )
-          )
-        );
-      }
-      return Shape.Group(...extrusions);
+const isNotString = (value) => typeof value !== 'string';
+
+// This interface is a bit awkward.
+const extrudeAlong = Shape.chainable((direction, ...args) => (shape) => {
+  const { strings: modes, values: extents } = destructure(args);
+  const vector = shape.toCoordinate(direction);
+  const heights = extents
+    .filter(isNotString)
+    .map((extent) => Shape.toValue(extent, shape));
+  if (heights.length % 2 === 1) {
+    heights.push(0);
+  }
+  heights.sort((a, b) => a - b);
+  const extrusions = [];
+  while (heights.length > 0) {
+    const height = heights.pop();
+    const depth = heights.pop();
+    if (height === depth) {
+      // Return unextruded geometry at this height, instead.
+      extrusions.push(shape.moveAlong(vector, height));
+      continue;
     }
-);
+    extrusions.push(
+      Shape.fromGeometry(
+        extrude(
+          shape.toGeometry(),
+          Point().moveAlong(vector, height).toGeometry(),
+          Point().moveAlong(vector, depth).toGeometry(),
+          modes.includes('noVoid')
+        )
+      )
+    );
+  }
+  return Shape.Group(...extrusions);
+});
 
 // Note that the operator is applied to each leaf geometry by default.
 const e = (...extents) => extrudeAlong(normal(), ...extents);
@@ -1392,7 +1397,9 @@ const clip = Shape.chainable((...args) => (shape) => {
     clip$1(
       shape.toGeometry(),
       shapes.map((other) => Shape.toShape(other, shape).toGeometry()),
-      modes.includes('open')
+      modes.includes('open'),
+      modes.includes('exact'),
+      modes.includes('noVoid')
     )
   );
 });
@@ -1444,7 +1451,8 @@ const cut = Shape.chainable((...args) => (shape) => {
       shape.toGeometry(),
       shape.toShapes(shapes).map((other) => other.toGeometry()),
       modes.includes('open'),
-      !modes.includes('fast') // not exact.
+      modes.includes('exact'),
+      modes.includes('noVoid')
     )
   );
 });
@@ -1517,7 +1525,11 @@ Shape.registerMethod('demesh', demesh);
 const disjoint = Shape.chainable((...args) => (shape) => {
   const { strings: modes } = destructure(args);
   return fromGeometry(
-    disjoint$1([shape.toGeometry()], modes.includes('backward') ? 0 : 1)
+    disjoint$1(
+      [shape.toGeometry()],
+      modes.includes('backward') ? 0 : 1,
+      modes.includes('exact')
+    )
   );
 });
 

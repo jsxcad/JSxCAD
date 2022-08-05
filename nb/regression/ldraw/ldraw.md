@@ -13,6 +13,12 @@ import { LDraw } from '@jsxcad/api-v1-ldraw';
 ```
 
 ```JavaScript
+const wrapped = Hershey('Disabled', 20).by(align('xy')).topView();
+```
+
+![Image](ldraw.md.0.png)
+
+```JavaScript
 const train = (
   await LDraw(
     `
@@ -303,16 +309,10 @@ const train = (
 ).view(material('glass'));
 ```
 
-![Image](ldraw.md.0.png)
-
-```JavaScript
-const wrapped = train.wrap(1, 0.5).view(material('glass'));
-```
-
 ![Image](ldraw.md.1.png)
 
 ```JavaScript
-const cutaway = wrapped.clip(Box([-40, 0], 320, [0, 80])).view(material('glass'));
+const cutaway = Hershey('Disabled', 20).by(align('xy')).topView();
 ```
 
 ![Image](ldraw.md.2.png)
