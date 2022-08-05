@@ -210,6 +210,9 @@ Box(20, 20, 20)
   .md('Cleaned mesh');
 */
 Hershey('Disabled', 20).by(align('xy')).topView();
+Hershey('Disabled', 20).by(align('xy')).topView();
+Hershey('Disabled', 20).by(align('xy')).topView();
+Hershey('Disabled', 20).by(align('xy')).topView();
 
 Arc(4)
   .x(5)
