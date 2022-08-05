@@ -24,3 +24,4 @@ const magneticPenHolder = Arc(magnetDiameter)
   .view()
   .stl('holder', drop('material:steel'));
 */
+const magneticPenHolder = Hershey('Disabled', 20).by(align('xy')).topView();

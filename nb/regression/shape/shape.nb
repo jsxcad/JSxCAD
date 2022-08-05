@@ -209,6 +209,7 @@ Box(20, 20, 20)
   .view(56, { wireframe: true })
   .md('Cleaned mesh');
 */
+Hershey('Disabled', 20).by(align('xy')).topView();
 
 Arc(4)
   .x(5)
