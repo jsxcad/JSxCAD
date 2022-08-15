@@ -361,7 +361,7 @@ Voxels([0, 0, 0], [0, 0, 1], [1, 0, 1], [2, 0, 1]).view(50);
 ```JavaScript
 b.at(
   eachEdge().sort('x<y<z>').n(0).origin(),
-  cut(Box(11, 3, 3).rx(1 / 8))
+  cut(Box(11, 3, 3))
 ).view(48);
 ```
 
@@ -369,7 +369,7 @@ b.at(
 
 ```JavaScript
 b.by(eachEdge().sort('x<y<z>').n(0).origin())
-  .cut(Box(11, 3, 3).rx(1 / 8))
+  .cut(Box(11, 3, 3))
   .view(49);
 ```
 
@@ -657,7 +657,7 @@ Loft('open', Box(3).cut(Arc(2)), Hexagon(3).cut(Arc(2)).z(10)).view();
 ```JavaScript
 Orb(5, 5, 5)
   .hasZag(5)
-  .eachEdge((e, l) => Box([0, l * 0.75], [0, 0.1], 0.2).to(e))
+  .eachEdge((e, l) => Box([0, l * 0.75], [0, 0.1], [0, 0.1]).to(e), (f, e) => e)
   .view();
 ```
 
