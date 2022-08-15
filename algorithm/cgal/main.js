@@ -46,7 +46,7 @@ export { disjoint } from './disjoint.js';
 export { eachPoint } from './eachPoint.js';
 export { eachTriangle } from './eachTriangle.js';
 export { extrude } from './extrude.js';
-export { faces } from './faces.js';
+export { faceEdges } from './faceEdges.js';
 export { fill } from './fill.js';
 export { fitPlaneToPoints } from './fitPlaneToPoints.js';
 export { fix } from './fix.js';

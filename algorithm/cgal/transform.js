@@ -209,10 +209,7 @@ export const fromScaleToTransform = (x = 0, y = 0, z = 0) => {
 
 export const fromSegmentToInverseTransform = (
   [[startX = 0, startY = 0, startZ = 0], [endX = 0, endY = 0, endZ = 0]],
-  [
-    [originX = 0, originY = 0, originZ = 0] = [],
-    [normalX = 0, normalY = 0, normalZ = 1] = [],
-  ] = []
+  [normalX = 0, normalY = 0, normalZ = 1]
 ) => {
   try {
     return toJsTransformFromCgalTransform(
@@ -223,9 +220,9 @@ export const fromSegmentToInverseTransform = (
         endX,
         endY,
         endZ,
-        normalX - originX,
-        normalY - originY,
-        normalZ - originZ
+        normalX,
+        normalY,
+        normalZ
       )
     );
   } catch (error) {

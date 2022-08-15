@@ -527,8 +527,6 @@ Curve(Point(0, 0), Point(10, 0), Point(10, 10), Point(20, 10))
   .view();
 ```
 
-![Image](shapes.md.49.png)
-
 ```JavaScript
 Curve(Point(0, 0), Point(10, 0), Point(10, 10), Point(20, 10))
   .rx(1 / 4)
@@ -536,7 +534,7 @@ Curve(Point(0, 0), Point(10, 0), Point(10, 10), Point(20, 10))
   .view();
 ```
 
-![Image](shapes.md.50.png)
+![Image](shapes.md.49.png)
 
 ```JavaScript
 Orb(6)
@@ -545,7 +543,7 @@ Orb(6)
   .view();
 ```
 
-![Image](shapes.md.51.png)
+![Image](shapes.md.50.png)
 
 ```JavaScript
 Box(10, 10, 10)
@@ -554,25 +552,25 @@ Box(10, 10, 10)
   .view();
 ```
 
-![Image](shapes.md.52.png)
+![Image](shapes.md.51.png)
 
 ```JavaScript
 Box(10).cut(Triangle(11)).view(1);
 ```
 
-![Image](shapes.md.53.png)
+![Image](shapes.md.52.png)
 
 ```JavaScript
 Box(10).cut(Triangle(11)).clean().view(2);
 ```
 
-![Image](shapes.md.54.png)
+![Image](shapes.md.53.png)
 
 ```JavaScript
 Triangle(11).eachPoint(Arc(5), cut).view(5);
 ```
 
-![Image](shapes.md.55.png)
+![Image](shapes.md.54.png)
 
 ```JavaScript
 Box(10)
@@ -583,7 +581,7 @@ Box(10)
   .view();
 ```
 
-![Image](shapes.md.56.png)
+![Image](shapes.md.55.png)
 
 ```JavaScript
 Box(10, 10, [0, 3])
@@ -591,7 +589,7 @@ Box(10, 10, [0, 3])
   .view();
 ```
 
-![Image](shapes.md.57.png)
+![Image](shapes.md.56.png)
 
 ```JavaScript
 Box(5, 5, 20)
@@ -601,7 +599,7 @@ Box(5, 5, 20)
   .view();
 ```
 
-![Image](shapes.md.58.png)
+![Image](shapes.md.57.png)
 
 ```JavaScript
 Box(10)
@@ -611,4 +609,4 @@ Box(10)
   .view();
 ```
 
-![Image](shapes.md.59.png)
+![Image](shapes.md.58.png)

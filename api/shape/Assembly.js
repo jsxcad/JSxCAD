@@ -1,10 +1,13 @@
 import Shape from './Shape.js';
-import { assemble } from '@jsxcad/geometry';
+import { destructure } from './destructure.js';
+import { fitTo } from './fitTo.js';
 
-export const Assembly = (...shapes) =>
-  Shape.fromGeometry(
-    assemble(...Shape.toShapes(shapes).map((shape) => shape.toGeometry()))
-  );
+export const Assembly = (...args) => {
+  const { strings: modes, shapesAndFunctions: unresolvedShapes } =
+    destructure(args);
+  const [shape, ...shapes] = Shape.toShapes(unresolvedShapes);
+  return fitTo(...modes, ...shapes)(shape);
+};
 
 export default Assembly;
 

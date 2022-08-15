@@ -1,4 +1,4 @@
-import { Shape, ensurePages } from './jsxcad-api-shape.js';
+import { Shape, destructure, ensurePages } from './jsxcad-api-shape.js';
 import { fromStl, toStl } from './jsxcad-convert-stl.js';
 import { read, emit, getSourceLocation, generateUniqueId, addPending, write, getPendingErrorHandler } from './jsxcad-sys.js';
 import { hash } from './jsxcad-geometry.js';
@@ -104,13 +104,16 @@ const prepareStl = (shape, name, op = (s) => s, options = {}) => {
   return entries;
 };
 
-const stl = (name, op, options) => (shape) => {
-  const entries = prepareStl(shape, name, op, options);
-  const download = { entries };
-  const hash$1 = hashSum({ name }) + hash(shape.toGeometry());
-  emit({ download, hash: hash$1 });
-  return shape;
-};
+const stl =
+  (...args) =>
+  (shape) => {
+    const { value: name, func: op, object: options } = destructure(args);
+    const entries = prepareStl(shape, name, op, options);
+    const download = { entries };
+    const hash$1 = hashSum({ name }) + hash(shape.toGeometry());
+    emit({ download, hash: hash$1 });
+    return shape;
+  };
 
 Shape.registerMethod('stl', stl);
 

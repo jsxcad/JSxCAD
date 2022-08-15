@@ -710,3 +710,40 @@ Box(4).fitTo(Arc(3).void()).clip(Box(1, 5), 'noVoid').clean().view();
 ```
 
 ![Image](shape.md.80.png)
+
+```JavaScript
+Box(10, 10, 10)
+  .and(
+    eachEdge((e, l) =>
+      Box([0, l], [0, 1.5])
+        .and(
+          ArcX([0, l * 0.95], [1, 2], 1)
+            .y(1)
+            .hasAngle(0 / 4, 2 / 4)
+        )
+        .to(e)
+    )
+  )
+  .view(10);
+```
+
+![Image](shape.md.81.png)
+
+```JavaScript
+Septagon(10, 10, 10)
+  .cut(
+    eachEdge({ selections: [Box(10, [-4, 10], [5, 10])] }, (e, l) =>
+      Box([0, l], 2, 2)
+        .clip(
+          ArcX([0, l], 2, 2)
+            .hasAngle(0 / 4, 2 / 4)
+            .grow(0.01)
+        )
+        .to(e)
+    )
+  )
+  .clean()
+  .view(24);
+```
+
+![Image](shape.md.82.png)

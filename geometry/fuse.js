@@ -12,11 +12,11 @@ const filter = (geometry) =>
   ['graph', 'polygonsWithHoles', 'segments'].includes(geometry.type) &&
   isNotTypeGhost(geometry);
 
-export const fuse = (geometry) => {
+export const fuse = (geometry, exact = false) => {
   const concreteGeometry = toConcreteGeometry(geometry);
   const inputs = [];
   linearize(concreteGeometry, filter, inputs);
-  const outputs = fuseWithCgal(inputs);
+  const outputs = fuseWithCgal(inputs, exact);
   deletePendingSurfaceMeshes();
   return taggedGroup({}, ...outputs);
 };

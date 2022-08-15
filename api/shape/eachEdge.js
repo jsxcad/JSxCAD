@@ -1,5 +1,5 @@
 import {
-  eachSegment,
+  eachFaceEdges,
   taggedSegments,
   transformCoordinate,
 } from '@jsxcad/geometry';
@@ -22,31 +22,53 @@ export const length = ([ax, ay, az], [bx, by, bz]) => {
   return Math.sqrt(x * x + y * y + z * z);
 };
 
+export const subtract = ([ax, ay, az], [bx, by, bz]) => [
+  ax - bx,
+  ay - by,
+  az - bz,
+];
+
 export const eachEdge = Shape.chainable((...args) => (shape) => {
-  const { shapesAndFunctions } = destructure(args);
-  let [leafOp = (edge) => edge, groupOp = Group] = shapesAndFunctions;
-  if (leafOp instanceof Shape) {
-    const leafShape = leafOp;
-    leafOp = (edge) => leafShape.to(edge);
+  const { shapesAndFunctions, object: options = {} } = destructure(args);
+  const { selections = [] } = options;
+  let [edgeOp = (e, l) => e, faceOp = Group, groupOp = Group] =
+    shapesAndFunctions;
+  if (edgeOp instanceof Shape) {
+    const edgeShape = edgeOp;
+    edgeOp = (edge) => edgeShape.to(edge);
   }
-  const leafs = [];
-  eachSegment(Shape.toShape(shape, shape).toGeometry(), (segment) => {
-    const inverse = fromSegmentToInverseTransform(segment);
-    const baseSegment = [
-      transformCoordinate(segment[0], inverse),
-      transformCoordinate(segment[1], inverse),
-    ];
-    const matrix = invertTransform(inverse);
-    // We get a pair of absolute coordinates from eachSegment.
-    // We need a segment from [0,0,0] to [x,0,0] in its local space.
-    leafs.push(
-      leafOp(
-        Shape.fromGeometry(taggedSegments({ matrix }, [baseSegment])),
-        length(segment[0], segment[1])
-      )
-    );
-  });
-  const grouped = groupOp(...leafs);
+  const faces = [];
+  eachFaceEdges(
+    Shape.toShape(shape, shape).toGeometry(),
+    shape.toShapes(selections).map((selection) => selection.toGeometry()),
+    (faceGeometry, edgeGeometry) => {
+      const { segments, normals } = edgeGeometry;
+      const edges = [];
+      if (segments) {
+        for (let nth = 0; nth < segments.length; nth++) {
+          const segment = segments[nth];
+          const [source, target] = segment;
+          const normal = normals ? subtract(normals[nth], source) : [0, 0, 1];
+          const inverse = fromSegmentToInverseTransform(segment, normal);
+          const baseSegment = [
+            transformCoordinate(source, inverse),
+            transformCoordinate(target, inverse),
+          ];
+          const matrix = invertTransform(inverse);
+          // We get a pair of absolute coordinates from eachSegment.
+          // We need a segment from [0,0,0] to [x,0,0] in its local space.
+          edges.push(
+            edgeOp(
+              Shape.fromGeometry(taggedSegments({ matrix }, [baseSegment])),
+              length(source, target)
+            )
+          );
+        }
+      }
+      faces.push(faceOp(Shape.fromGeometry(faceGeometry), Group(...edges)));
+    }
+  );
+  const grouped = groupOp(...faces);
   if (grouped instanceof Function) {
     return grouped(shape);
   } else {

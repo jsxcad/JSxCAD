@@ -3,9 +3,9 @@ import { fromCgalGeometry, withCgalGeometry } from './cgalGeometry.js';
 
 import { ErrorZeroThickness } from './error.js';
 
-export const fuse = (inputs) =>
+export const fuse = (inputs, exact = false) =>
   withCgalGeometry(inputs, (cgalGeometry, g) => {
-    const status = g.Fuse(cgalGeometry);
+    const status = g.Fuse(cgalGeometry, exact);
     switch (status) {
       case STATUS_ZERO_THICKNESS:
         throw new ErrorZeroThickness('Zero thickness produced by fuse');
