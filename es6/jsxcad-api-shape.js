@@ -979,7 +979,8 @@ const at = Shape.chainable((...args) => (shape) => {
 Shape.registerMethod('at', at);
 
 const normal = Shape.chainable(
-  () => (shape) => Shape.fromGeometry(computeNormal(shape.toGeometry()))
+  () => (shape) =>
+    Shape.fromGeometry(computeNormal(shape.toGeometry()))
 );
 
 Shape.registerMethod('normal', normal);
@@ -989,7 +990,14 @@ const isNotString = (value) => typeof value !== 'string';
 // This interface is a bit awkward.
 const extrudeAlong = Shape.chainable((direction, ...args) => (shape) => {
   const { strings: modes, values: extents } = destructure(args);
-  const vector = shape.toCoordinate(direction);
+  let vector;
+  try {
+    // This will fail on ghost geometry.
+    vector = shape.toCoordinate(direction);
+  } catch (e) {
+    // TODO: Be more selective.
+    return Shape.Group();
+  }
   const heights = extents
     .filter(isNotString)
     .map((extent) => Shape.toValue(extent, shape));
@@ -3484,7 +3492,7 @@ const faces = (...args) => {
     const faceShape = faceOp;
     faceOp = (face) => faceShape.to(face);
   }
-  return eachEdge((e, l) => e, (f, e) => faceOp(f), groupOp)
+  return eachEdge((e, l) => e, (e, f) => faceOp(f), groupOp)
 };
 
 Shape.registerMethod('faces', faces);

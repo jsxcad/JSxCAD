@@ -686,7 +686,7 @@ const computeNormal = (geometry, top, bottom) => {
   linearize(concreteGeometry, filter$u, inputs);
   const outputs = computeNormal$1(inputs, top, bottom);
   deletePendingSurfaceMeshes();
-  return replacer(inputs, outputs)(concreteGeometry);
+  return taggedGroup({}, ...outputs);
 };
 
 function sortKD(ids, coords, nodeSize, left, right, depth) {

@@ -356,6 +356,7 @@ void deorient(Vector source, Vector normal, Transformation& align) {
     Transformation rotation(cos_alpha, sin_alpha, 0, 0, -sin_alpha, cos_alpha,
                             0, 0, 0, 0, w, 0, w);
     source = source.transform(rotation);
+    normal = normal.transform(rotation);
     align = rotation * align;
   }
 
@@ -367,6 +368,7 @@ void deorient(Vector source, Vector normal, Transformation& align) {
     Transformation rotation(cos_alpha, 0, -sin_alpha, 0, 0, w, 0, 0, sin_alpha,
                             0, cos_alpha, 0, w);
     source = source.transform(rotation);
+    normal = normal.transform(rotation);
     align = rotation * align;
   }
 
@@ -824,7 +826,6 @@ void buildManifoldFromSurfaceMesh(const Surface_mesh& surface_mesh,
   manifold::Mesh manifold_mesh;
   manifold_mesh.vertPos.resize(surface_mesh.number_of_vertices());
   for (const auto& vertex : surface_mesh.vertices()) {
-    // std::cout << "Vertex: " << size_t(vertex) << std::endl;
     const Point& point = surface_mesh.point(vertex);
     glm::vec3 p(CGAL::to_double(point.x()), CGAL::to_double(point.y()),
                 CGAL::to_double(point.z()));
@@ -832,7 +833,6 @@ void buildManifoldFromSurfaceMesh(const Surface_mesh& surface_mesh,
   }
   manifold_mesh.triVerts.resize(surface_mesh.number_of_faces());
   for (const auto& facet : surface_mesh.faces()) {
-    // std::cout << "Facet: " << size_t(facet) << std::endl;
     const auto a = surface_mesh.halfedge(facet);
     const auto b = surface_mesh.next(a);
     glm::ivec3 t(surface_mesh.source(a), surface_mesh.source(b),
@@ -4759,12 +4759,9 @@ int FromPolygons(Geometry* geometry, bool close, emscripten::val fill) {
   for (auto& polygon : polygons) {
     std::vector<Vertex_index> vertices;
     for (auto& index : polygon) {
-      // std::cout << "Index: " << index;
       const Triple& triple = triples[index];
       const Point point(triple[0], triple[1], triple[2]);
-      // std::cout << " Point: " << point;
       Vertex_index vertex = ensureVertex(mesh, vertex_map, point);
-      // std::cout << " Vertex: " << vertex << std::endl;
       vertices.push_back(vertex);
     }
     if (mesh.add_face(vertices) == Surface_mesh::null_face()) {
@@ -7155,10 +7152,10 @@ std::shared_ptr<const Transformation> InverseSegmentTransform(
     double startX, double startY, double startZ, double endX, double endY,
     double endZ, double normalX, double normalY, double normalZ) {
 #if 1
-  Transformation align(CGAL::IDENTITY);
   Point zero(0, 0, 0);
   Point start(startX, startY, startZ);
   Point end(endX, endY, endZ);
+  Transformation align(CGAL::IDENTITY);
   deorient(end - start, Vector(normalX, normalY, normalZ), align);
   return std::shared_ptr<const Transformation>(
       new Transformation(align * translate(zero - start)));

@@ -34,7 +34,7 @@ export const faces = (...args) => {
     const faceShape = faceOp;
     faceOp = (face) => faceShape.to(face);
   }
-  return eachEdge((e, l) => e, (f, e) => faceOp(f), groupOp)
+  return eachEdge((e, l) => e, (e, f) => faceOp(f), groupOp)
 };
 
 Shape.registerMethod('faces', faces);

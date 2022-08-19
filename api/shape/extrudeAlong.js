@@ -9,7 +9,14 @@ const isNotString = (value) => typeof value !== 'string';
 // This interface is a bit awkward.
 export const extrudeAlong = Shape.chainable((direction, ...args) => (shape) => {
   const { strings: modes, values: extents } = destructure(args);
-  const vector = shape.toCoordinate(direction);
+  let vector;
+  try {
+    // This will fail on ghost geometry.
+    vector = shape.toCoordinate(direction);
+  } catch (e) {
+    // TODO: Be more selective.
+    return Shape.Group();
+  }
   const heights = extents
     .filter(isNotString)
     .map((extent) => Shape.toValue(extent, shape));
