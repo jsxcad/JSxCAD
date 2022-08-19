@@ -495,7 +495,7 @@ Box(10).and(Box(5, 50, 5)).disjoint().pack().view();
 ```JavaScript
 Box(10)
   .rz(1 / 8)
-  .at(eachEdge(origin()), cut(Arc(5)))
+  .cut(eachEdge(Arc(5)))
   .view();
 ```
 

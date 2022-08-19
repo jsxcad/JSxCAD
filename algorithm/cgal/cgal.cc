@@ -7154,14 +7154,14 @@ std::shared_ptr<const Transformation> Transformation__rotate_z_toward(
 std::shared_ptr<const Transformation> InverseSegmentTransform(
     double startX, double startY, double startZ, double endX, double endY,
     double endZ, double normalX, double normalY, double normalZ) {
-#if 0
+#if 1
   Transformation align(CGAL::IDENTITY);
   Point zero(0, 0, 0);
   Point start(startX, startY, startZ);
   Point end(endX, endY, endZ);
   deorient(end - start, Vector(normalX, normalY, normalZ), align);
   return std::shared_ptr<const Transformation>(
-      new Transformation(translate(zero - start) * align));
+      new Transformation(align * translate(zero - start)));
 #else
   Transformation orient =
       Transformation(CGAL::TRANSLATION, Vector(-startX, -startY, -startZ));

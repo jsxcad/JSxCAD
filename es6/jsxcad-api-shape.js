@@ -3368,7 +3368,7 @@ const subtract$1 = ([ax, ay, az], [bx, by, bz]) => [
 const eachEdge = Shape.chainable((...args) => (shape) => {
   const { shapesAndFunctions, object: options = {} } = destructure(args);
   const { selections = [] } = options;
-  let [edgeOp = (e, l) => e, faceOp = Group, groupOp = Group] =
+  let [edgeOp = (e, l) => e, faceOp = (e, f) => e, groupOp = Group] =
     shapesAndFunctions;
   if (edgeOp instanceof Shape) {
     const edgeShape = edgeOp;
@@ -3402,7 +3402,7 @@ const eachEdge = Shape.chainable((...args) => (shape) => {
           );
         }
       }
-      faces.push(faceOp(Shape.fromGeometry(faceGeometry), Group(...edges)));
+      faces.push(faceOp(Group(...edges), Shape.fromGeometry(faceGeometry)));
     }
   );
   const grouped = groupOp(...faces);
@@ -3479,7 +3479,11 @@ export default faces;
 
 const faces = (...args) => {
   const { shapesAndFunctions } = destructure(args);
-  let [faceOp = (l) => l, groupOp = Group] = shapesAndFunctions;
+  let [faceOp = (face) => face, groupOp = Group] = shapesAndFunctions;
+  if (faceOp instanceof Shape) {
+    const faceShape = faceOp;
+    faceOp = (face) => faceShape.to(face);
+  }
   return eachEdge((e, l) => e, (f, e) => faceOp(f), groupOp)
 };
 
