@@ -32,6 +32,7 @@ export { computeImplicitVolume } from './computeImplicitVolume.js';
 export { computeNormal } from './computeNormal.js';
 export { computeToolpath } from './tagged/computeToolpath.js';
 export { convexHull } from './convexHull.js';
+export { convertPolygonsToMeshes } from './convertPolygonsToMeshes.js';
 export { cut } from './cut.js';
 export { deform } from './deform.js';
 export { demesh } from './demesh.js';

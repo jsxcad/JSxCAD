@@ -347,7 +347,7 @@ Transformation orient(Vector source, Vector target) {
       (axis.y() * axis.z() * k) + axis.x(), (axis.z() * axis.z() * k) + cos_a);
 }
 #else
-void deorient(Vector source, Vector normal, Transformation& align) {
+void disorient_along_x(Vector source, Vector normal, Transformation& align) {
   if (source.x() != 0 || source.y() != 0) {
     RT sin_alpha, cos_alpha, w;
     CGAL::rational_rotation_approximation(source.x(), source.y(), sin_alpha,
@@ -383,7 +383,7 @@ void deorient(Vector source, Vector normal, Transformation& align) {
   }
 }
 
-void reorient(Vector target, Vector normal, Transformation& align) {
+void reorient_along_x(Vector target, Vector normal, Transformation& align) {
   if (normal.y() != 0) {
     RT sin_alpha, cos_alpha, w;
     CGAL::rational_rotation_approximation(-normal.y(), normal.z(), sin_alpha,
@@ -417,11 +417,72 @@ void reorient(Vector target, Vector normal, Transformation& align) {
   }
 }
 
-Transformation orient(Vector source, Vector source_normal, Vector target,
-                      Vector target_normal) {
+Transformation orient_along_x(Vector source, Vector source_normal,
+                              Vector target, Vector target_normal) {
   Transformation transform(CGAL::IDENTITY);
-  deorient(source, source_normal, transform);
-  reorient(target, target_normal, transform);
+  disorient_along_x(source, source_normal, transform);
+  reorient_along_x(target, target_normal, transform);
+  return transform;
+}
+
+void disorient_along_z(Vector source, Vector normal, Transformation& align) {
+  if (source.y() != 0) {
+    RT sin_alpha, cos_alpha, w;
+    CGAL::rational_rotation_approximation(-source.z(), -source.y(), sin_alpha,
+                                          cos_alpha, w, RT(1), RT(1000));
+    // X rotation to bring y to the z axis.
+    Transformation rotation(w, 0, 0, 0, 0, cos_alpha, -sin_alpha, 0, 0,
+                            sin_alpha, cos_alpha, 0, w);
+    source = source.transform(rotation);
+    normal = normal.transform(rotation);
+    align = rotation * align;
+  }
+
+  if (source.x() != 0) {
+    RT sin_alpha, cos_alpha, w;
+    CGAL::rational_rotation_approximation(-source.z(), -source.x(), sin_alpha,
+                                          cos_alpha, w, RT(1), RT(1000));
+    // Y rotation to bring x to the z axis.
+    Transformation rotation(cos_alpha, 0, -sin_alpha, 0, 0, w, 0, 0, sin_alpha,
+                            0, cos_alpha, 0, w);
+    source = source.transform(rotation);
+    normal = normal.transform(rotation);
+    align = rotation * align;
+  }
+
+  if (source.z() < 0) {
+    RT sin_alpha, cos_alpha, w;
+    compute_turn(0.5, sin_alpha, cos_alpha, w);
+    // CGAL::rational_rotation_approximation(-source.z(), -source.x(),
+    // sin_alpha, cos_alpha, w, RT(1), RT(1000));
+    //  Y rotation to bring x to the z axis.
+    Transformation rotation(cos_alpha, 0, -sin_alpha, 0, 0, w, 0, 0, sin_alpha,
+                            0, cos_alpha, 0, w);
+    source = source.transform(rotation);
+    normal = normal.transform(rotation);
+    align = rotation * align;
+  }
+
+  if (normal.y() != 0 || normal.x() != 0) {
+    RT sin_alpha, cos_alpha, w;
+    CGAL::rational_rotation_approximation(normal.y(), normal.x(), sin_alpha,
+                                          cos_alpha, w, RT(1), RT(1000));
+    // Z rotation to bring the normal to the x axis.
+    Transformation rotation(cos_alpha, sin_alpha, 0, 0, -sin_alpha, cos_alpha,
+                            0, 0, 0, 0, w, 0, w);
+    source = source.transform(rotation);
+    normal = normal.transform(rotation);
+    align = rotation * align;
+  }
+}
+
+void reorient_along_z(Vector target, Vector normal, Transformation& align) {}
+
+Transformation orient_along_z(Vector source, Vector source_normal,
+                              Vector target, Vector target_normal) {
+  Transformation transform(CGAL::IDENTITY);
+  disorient_along_x(source, source_normal, transform);
+  reorient_along_x(target, target_normal, transform);
   return transform;
 }
 #endif
@@ -433,13 +494,33 @@ Transformation translate(const Vector& vector) {
 Transformation orient_plane(Plane source, Plane target) {
   Point_2 zero(0, 0);
   // Build a transform to get to this plane.
-  Transformation rotation = orient(
+  Transformation rotation = orient_along_x(
       unitVector(source.orthogonal_vector()), unitVector(source.base1()),
       unitVector(target.orthogonal_vector()), unitVector(target.base1()));
   Point s = source.to_3d(zero).transform(rotation);
   Point t = target.to_3d(zero).transform(rotation);
   Transformation translation = translate(t - s);
   return translation * rotation;
+}
+
+Transformation disorient_plane_along_x(Plane source) {
+  Transformation transform(CGAL::IDENTITY);
+  disorient_along_x(unitVector(source.orthogonal_vector()),
+                    unitVector(source.base1()), transform);
+  Point s = source.to_3d(Point_2(0, 0));
+  // return translate(s.transform(rotation) - Point(0, 0, 0)) * rotation *
+  // translate(Point(0, 0, 0) - s);
+  transform = transform * translate(Point(0, 0, 0) - s);
+  return transform;
+}
+
+Transformation disorient_plane_along_z(Plane source) {
+  Transformation transform(CGAL::IDENTITY);
+  disorient_along_z(unitVector(source.orthogonal_vector()),
+                    unitVector(source.base1()), transform);
+  Point s = source.to_3d(Point_2(0, 0));
+  transform = transform * translate(Point(0, 0, 0) - s);
+  return transform;
 }
 
 Plane PlaneOfSurfaceMeshFacet(const Surface_mesh& mesh, Face_index facet) {
@@ -2364,10 +2445,14 @@ void transformSegments(Segments& segments, const Transformation& transform) {
   }
 }
 
+void transformEdge(Edge& edge, const Transformation& transform) {
+  edge = Edge(edge.segment.transform(transform),
+              edge.normal.transform(transform), edge.face_id);
+}
+
 void transformEdges(Edges& edges, const Transformation& transform) {
   for (Edge& edge : edges) {
-    edge = Edge(edge.segment.transform(transform),
-                edge.normal.transform(transform), edge.face_id);
+    transformEdge(edge, transform);
   }
 }
 
@@ -2925,6 +3010,7 @@ class Geometry {
       polygons.push_back(std::move(polygon));
     }
     plane(nth) = unitPlane(local_plane);
+    // plane(nth) = Plane(0, 0, 1, 0);
     pwh(nth) = std::move(polygons);
   }
 
@@ -2967,6 +3053,7 @@ class Geometry {
                              emscripten::val emit_point) {
     assert(is_local_frame());
     emitPlane(plane(nth), emit_plane);
+    // emitPlane(Plane(0, 0, 1, 0), emit_plane);
     ::emitPolygonsWithHoles(pwh(nth), emit_polygon, emit_point);
   }
 
@@ -3919,6 +4006,14 @@ int ConvexHull(Geometry* geometry) {
   CGAL::convex_hull_3(points.begin(), points.end(), geometry->mesh(target));
 
   geometry->convertPlanarMeshesToPolygons();
+  geometry->transformToLocalFrame();
+
+  return STATUS_OK;
+}
+
+int ConvertPolygonsToMeshes(Geometry* geometry) {
+  geometry->transformToAbsoluteFrame();
+  geometry->convertPolygonsToPlanarMeshes();
   geometry->transformToLocalFrame();
 
   return STATUS_OK;
@@ -5827,7 +5922,6 @@ int FaceEdges(Geometry* geometry, int count) {
         break;
       }
       case GEOMETRY_POLYGONS_WITH_HOLES: {
-        geometry->add(GEOMETRY_EDGES);  // TODO: Remove this dummy output.
         int face_target = geometry->add(GEOMETRY_POLYGONS_WITH_HOLES);
         geometry->plane(face_target) = geometry->plane(nth);
         geometry->pwh(face_target) = geometry->pwh(nth);
@@ -5941,7 +6035,9 @@ int FaceEdges(Geometry* geometry, int count) {
         for (auto& face_id : face_ids) {
           int face_target = geometry->add(GEOMETRY_POLYGONS_WITH_HOLES);
           int edge_target = geometry->add(GEOMETRY_EDGES);
-          const Plane& plane = facet_to_plane[Face_index(face_id)];
+          const Plane& plane = unitPlane(facet_to_plane[Face_index(face_id)]);
+          const Plane xy_plane(0, 0, 1, 0);
+          Transformation disorientation = disorient_plane_along_z(plane);
 
           Arrangement_2 arrangement;
           for (auto& edge : geometry->edges(all_edge_target)) {
@@ -5955,10 +6051,8 @@ int FaceEdges(Geometry* geometry, int count) {
           Polygons_with_holes_2 pwhs;
           convertSimpleArrangementToPolygonsWithHoles(arrangement, pwhs);
           geometry->pwh(face_target) = std::move(pwhs);
-          const Point zero(0, 0, 0);
-          const Plane xy_plane(0, 0, 1, 0);
-          Transformation transform = orient_plane(plane, xy_plane);
-          geometry->copyTransform(face_target, transform.inverse());
+          geometry->copyTransform(edge_target, disorientation.inverse());
+          geometry->copyTransform(face_target, disorientation.inverse());
           geometry->plane(face_target) = plane;
         }
 
@@ -7156,7 +7250,7 @@ std::shared_ptr<const Transformation> InverseSegmentTransform(
   Point start(startX, startY, startZ);
   Point end(endX, endY, endZ);
   Transformation align(CGAL::IDENTITY);
-  deorient(end - start, Vector(normalX, normalY, normalZ), align);
+  disorient_along_z(end - start, Vector(normalX, normalY, normalZ), align);
   return std::shared_ptr<const Transformation>(
       new Transformation(align * translate(zero - start)));
 #else
@@ -7367,6 +7461,8 @@ EMSCRIPTEN_BINDINGS(module) {
   emscripten::function("ComputeVolume", &ComputeVolume,
                        emscripten::allow_raw_pointers());
   emscripten::function("ConvexHull", &ConvexHull,
+                       emscripten::allow_raw_pointers());
+  emscripten::function("ConvertPolygonsToMeshes", &ConvertPolygonsToMeshes,
                        emscripten::allow_raw_pointers());
   emscripten::function("Cut", &Cut, emscripten::allow_raw_pointers());
   emscripten::function("Deform", &Deform, emscripten::allow_raw_pointers());

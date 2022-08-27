@@ -19,7 +19,9 @@ export const eachFaceEdges = (geometry, selections, emitFaceEdges) => {
   for (const selection of selections) {
     linearize(toConcreteGeometry(selection), filter, inputs);
   }
-  const outputs = faceEdgesWithCgal(inputs, count);
+  const outputs = faceEdgesWithCgal(inputs, count).filter(({ type }) =>
+    ['polygonsWithHoles', 'segments'].includes(type)
+  );
   for (let nth = 0; nth < outputs.length; nth += 2) {
     const face = outputs[nth + 0];
     const edges = outputs[nth + 1];

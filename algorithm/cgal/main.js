@@ -37,6 +37,7 @@ export { computeCentroid } from './computeCentroid.js';
 export { computeImplicitVolume } from './computeImplicitVolume.js';
 export { computeNormal } from './computeNormal.js';
 export { computeVolume } from './computeVolume.js';
+export { convertPolygonsToMeshes } from './convertPolygonsToMeshes.js';
 export { convexHull } from './convexHull.js';
 export { cut } from './cut.js';
 export { deform } from './deform.js';

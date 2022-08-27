@@ -14,7 +14,7 @@ export const faceEdges = (inputs, count) => {
           cgalGeometry,
           inputs,
           cgalGeometry.getSize(),
-          inputs.length + 1
+          inputs.length
         );
       default:
         throw new Error(`Unexpected status ${status}`);

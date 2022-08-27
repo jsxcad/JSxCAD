@@ -28,6 +28,9 @@ export const subtract = ([ax, ay, az], [bx, by, bz]) => [
   az - bz,
 ];
 
+const SOURCE = 0;
+const TARGET = 1;
+
 export const eachEdge = Shape.chainable((...args) => (shape) => {
   const { shapesAndFunctions, object: options = {} } = destructure(args);
   const { selections = [] } = options;
@@ -42,25 +45,35 @@ export const eachEdge = Shape.chainable((...args) => (shape) => {
     Shape.toShape(shape, shape).toGeometry(),
     shape.toShapes(selections).map((selection) => selection.toGeometry()),
     (faceGeometry, edgeGeometry) => {
-      const { segments, normals } = edgeGeometry;
+      const { matrix, segments, normals } = edgeGeometry;
       const edges = [];
       if (segments) {
         for (let nth = 0; nth < segments.length; nth++) {
           const segment = segments[nth];
-          const [source, target] = segment;
-          const normal = normals ? subtract(normals[nth], source) : [0, 0, 1];
-          const inverse = fromSegmentToInverseTransform(segment, normal);
-          const baseSegment = [
-            transformCoordinate(source, inverse),
-            transformCoordinate(target, inverse),
+          const normal = normals
+            ? subtract(normals[nth], segment[SOURCE])
+            : [0, 0, 1];
+          const absoluteSegment = [
+            transformCoordinate(segment[SOURCE], matrix),
+            transformCoordinate(segment[TARGET], matrix),
           ];
-          const matrix = invertTransform(inverse);
+          const inverse = fromSegmentToInverseTransform(
+            absoluteSegment,
+            normal
+          );
+          const baseSegment = [
+            transformCoordinate(absoluteSegment[SOURCE], inverse),
+            transformCoordinate(absoluteSegment[TARGET], inverse),
+          ];
+          const inverseMatrix = invertTransform(inverse);
           // We get a pair of absolute coordinates from eachSegment.
           // We need a segment from [0,0,0] to [x,0,0] in its local space.
           edges.push(
             edgeOp(
-              Shape.fromGeometry(taggedSegments({ matrix }, [baseSegment])),
-              length(source, target)
+              Shape.fromGeometry(
+                taggedSegments({ matrix: inverseMatrix }, [baseSegment])
+              ),
+              length(segment[SOURCE], segment[TARGET])
             )
           );
         }

@@ -126,28 +126,24 @@ test('[[2.55,7.45,5],[2.55,12.55,5]] normal [0, 0, 1]', (t) => {
   const normal = [0, 0, 1];
   const transform = fromSegmentToInverseTransform(segment, normal);
   t.deepEqual(transformVec3(transform, segment[0]), [0, 0, 0]);
-  t.deepEqual(transformVec3(transform, segment[1]), [5.1000000000000005, 0, 0]);
+  t.deepEqual(transformVec3(transform, segment[1]), [0, 0, 5.1000000000000005]);
   t.deepEqual(clean(transform), [
-    0,
     -1,
     0,
     0,
+    0,
+    0,
+    0,
     1,
     0,
     0,
-    0,
-    0,
-    0,
     1,
     0,
-    -7.45,
+    0,
     2.55,
     -5,
+    -7.45,
     1,
-    '0',
-    '1',
-    '0',
-    '-8387954305977549/1125899906842624',
     '-1',
     '0',
     '0',
@@ -156,6 +152,10 @@ test('[[2.55,7.45,5],[2.55,12.55,5]] normal [0, 0, 1]', (t) => {
     '0',
     '1',
     '-5',
+    '0',
+    '1',
+    '0',
+    '-8387954305977549/1125899906842624',
     '1',
   ]);
 });
@@ -168,36 +168,36 @@ test('[[[2.5,12.5,5],[2.5,7.5,5]]],"normal":[1,0,0]', (t) => {
   const normal = [1, 0, 0];
   const transform = fromSegmentToInverseTransform(segment, normal);
 
-  t.deepEqual(transformVec3(transform, segment[1]), [5, 0, 0]);
+  t.deepEqual(transformVec3(transform, segment[1]), [0, 0, 5]);
   t.deepEqual(clean(transform), [
-    0,
-    1,
-    0,
     0,
     -1,
     0,
     0,
     0,
     0,
+    -1,
     0,
     1,
     0,
-    12.5,
-    -2.5,
+    0,
+    0,
     -5,
+    2.5,
+    12.5,
     1,
-    '0',
-    '-1',
-    '0',
-    '25/2',
-    '1',
-    '0',
-    '0',
-    '-5/2',
     '0',
     '0',
     '1',
     '-5',
+    '-1',
+    '0',
+    '0',
+    '5/2',
+    '0',
+    '-1',
+    '0',
+    '25/2',
     '1',
   ]);
 });

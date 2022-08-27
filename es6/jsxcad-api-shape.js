@@ -1,4 +1,4 @@
-import { assemble as assemble$1, toDisplayGeometry, toConcreteGeometry, toTransformedGeometry, toPoints, transform, rewriteTags, taggedGraph, taggedSegments, taggedPoints, fromPolygons, registerReifier, taggedPlan, identity, hasTypeReference, taggedGroup, join as join$1, makeAbsolute, measureArea, taggedItem, getInverseMatrices, computeNormal, extrude, link as link$1, measureBoundingBox, bend as bend$1, getLeafs, cast as cast$1, computeCentroid, convexHull, fuse as fuse$1, noGhost, clip as clip$1, allTags, cut as cut$1, deform as deform$1, demesh as demesh$1, disjoint as disjoint$1, rewrite, visit, hasTypeGhost, hasTypeVoid, getLayouts, taggedLayout, isNotTypeGhost, getLeafsIn, eachFaceEdges, transformCoordinate, eachPoint as eachPoint$1, eachSegment, fill as fill$1, fix as fix$1, grow as grow$1, outline as outline$1, inset as inset$1, involute as involute$1, read, readNonblocking, loft as loft$1, serialize as serialize$1, generateLowerEnvelope, hasShowOverlay, hasTypeMasked, hasMaterial, linearize, isTypeVoid, offset as offset$1, remesh as remesh$1, write, writeNonblocking, fromScaleToTransform, seam as seam$1, section as section$1, separate as separate$1, simplify as simplify$1, taggedSketch, smooth as smooth$1, computeToolpath, twist as twist$1, generateUpperEnvelope, measureVolume, withAabbTreeQuery, wrap as wrap$1, computeImplicitVolume } from './jsxcad-geometry.js';
+import { assemble as assemble$1, toDisplayGeometry, toConcreteGeometry, toTransformedGeometry, toPoints, transform, rewriteTags, taggedGraph, taggedSegments, taggedPoints, fromPolygons, registerReifier, taggedPlan, identity, hasTypeReference, taggedGroup, join as join$1, makeAbsolute, measureArea, taggedItem, getInverseMatrices, computeNormal, extrude, link as link$1, measureBoundingBox, bend as bend$1, getLeafs, cast as cast$1, computeCentroid, convexHull, fuse as fuse$1, noGhost, clip as clip$1, allTags, cut as cut$1, deform as deform$1, demesh as demesh$1, disjoint as disjoint$1, rewrite, visit, hasTypeGhost, hasTypeVoid, getLayouts, taggedLayout, isNotTypeGhost, getLeafsIn, eachFaceEdges, transformCoordinate, eachPoint as eachPoint$1, fill as fill$1, fix as fix$1, grow as grow$1, outline as outline$1, inset as inset$1, involute as involute$1, read, readNonblocking, loft as loft$1, serialize as serialize$1, generateLowerEnvelope, hasShowOverlay, hasTypeMasked, hasMaterial, linearize, isTypeVoid, offset as offset$1, remesh as remesh$1, write, writeNonblocking, fromScaleToTransform, seam as seam$1, section as section$1, separate as separate$1, simplify as simplify$1, taggedSketch, smooth as smooth$1, computeToolpath, twist as twist$1, generateUpperEnvelope, measureVolume, withAabbTreeQuery, wrap as wrap$1, computeImplicitVolume } from './jsxcad-geometry.js';
 import { getSourceLocation, startTime, endTime, emit, computeHash, logInfo, log as log$1, ErrorWouldBlock, generateUniqueId, addPending, write as write$1 } from './jsxcad-sys.js';
 export { elapsed, emit, read, write } from './jsxcad-sys.js';
 import { zag } from './jsxcad-api-v1-math.js';
@@ -979,8 +979,7 @@ const at = Shape.chainable((...args) => (shape) => {
 Shape.registerMethod('at', at);
 
 const normal = Shape.chainable(
-  () => (shape) =>
-    Shape.fromGeometry(computeNormal(shape.toGeometry()))
+  () => (shape) => Shape.fromGeometry(computeNormal(shape.toGeometry()))
 );
 
 Shape.registerMethod('normal', normal);
@@ -3373,6 +3372,9 @@ const subtract$1 = ([ax, ay, az], [bx, by, bz]) => [
   az - bz,
 ];
 
+const SOURCE = 0;
+const TARGET = 1;
+
 const eachEdge = Shape.chainable((...args) => (shape) => {
   const { shapesAndFunctions, object: options = {} } = destructure(args);
   const { selections = [] } = options;
@@ -3387,25 +3389,35 @@ const eachEdge = Shape.chainable((...args) => (shape) => {
     Shape.toShape(shape, shape).toGeometry(),
     shape.toShapes(selections).map((selection) => selection.toGeometry()),
     (faceGeometry, edgeGeometry) => {
-      const { segments, normals } = edgeGeometry;
+      const { matrix, segments, normals } = edgeGeometry;
       const edges = [];
       if (segments) {
         for (let nth = 0; nth < segments.length; nth++) {
           const segment = segments[nth];
-          const [source, target] = segment;
-          const normal = normals ? subtract$1(normals[nth], source) : [0, 0, 1];
-          const inverse = fromSegmentToInverseTransform(segment, normal);
-          const baseSegment = [
-            transformCoordinate(source, inverse),
-            transformCoordinate(target, inverse),
+          const normal = normals
+            ? subtract$1(normals[nth], segment[SOURCE])
+            : [0, 0, 1];
+          const absoluteSegment = [
+            transformCoordinate(segment[SOURCE], matrix),
+            transformCoordinate(segment[TARGET], matrix),
           ];
-          const matrix = invertTransform(inverse);
+          const inverse = fromSegmentToInverseTransform(
+            absoluteSegment,
+            normal
+          );
+          const baseSegment = [
+            transformCoordinate(absoluteSegment[SOURCE], inverse),
+            transformCoordinate(absoluteSegment[TARGET], inverse),
+          ];
+          const inverseMatrix = invertTransform(inverse);
           // We get a pair of absolute coordinates from eachSegment.
           // We need a segment from [0,0,0] to [x,0,0] in its local space.
           edges.push(
             edgeOp(
-              Shape.fromGeometry(taggedSegments({ matrix }, [baseSegment])),
-              length(source, target)
+              Shape.fromGeometry(
+                taggedSegments({ matrix: inverseMatrix }, [baseSegment])
+              ),
+              length(segment[SOURCE], segment[TARGET])
             )
           );
         }
@@ -3451,39 +3463,47 @@ const edit = Shape.chainable(
 
 Shape.registerMethod('edit', edit);
 
-const edges = Shape.chainable(() => (shape) => {
+/*
+import { eachSegment, taggedSegments } from './jsxcad-geometry.js';
+
+import Shape from './Shape.js';
+
+export const edges = Shape.chainable(() => (shape) => {
   const segments = [];
   eachSegment(Shape.toShape(shape, shape).toGeometry(), (segment) =>
     segments.push(segment)
   );
   return Shape.fromGeometry(taggedSegments({}, segments));
 });
+*/
 
-Shape.registerMethod('edges', edges);
-
-/*
-import Group from './Group.js';
-import Shape from './Shape.js';
-import { destructure } from './destructure.js';
-import { faces as facesOfGeometry } from './jsxcad-geometry.js';
-
-export const faces = Shape.chainable((...args) => (shape) => {
-  const { shapesAndFunctions } = destructure(args);
-  let [leafOp = (l) => l, groupOp = Group] = shapesAndFunctions;
-  if (leafOp instanceof Shape) {
-    const leafShape = leafOp;
-    leafOp = (edge) => leafShape.to(edge);
+const edges = Shape.chainable((...args) => (shape) => {
+  const { shapesAndFunctions, object: options = {} } = destructure(args);
+  const { selections = [] } = options;
+  let [edgesOp = (edges) => edges, groupOp = Group] = shapesAndFunctions;
+  if (edgesOp instanceof Shape) {
+    const edgesShape = edgesOp;
+    edgesOp = (edges) => edgesShape.to(edges);
   }
-  return Shape.fromGeometry(facesOfGeometry(shape.toGeometry())).each(
-    leafOp,
-    groupOp
+  const edges = [];
+  eachFaceEdges(
+    Shape.toShape(shape, shape).toGeometry(),
+    shape.toShapes(selections).map((selection) => selection.toGeometry()),
+    (faceGeometry, edgeGeometry) => {
+      if (edgeGeometry) {
+        edges.push(edgesOp(Shape.fromGeometry(edgeGeometry)));
+      }
+    }
   );
+  const grouped = groupOp(...edges);
+  if (grouped instanceof Function) {
+    return grouped(shape);
+  } else {
+    return grouped;
+  }
 });
 
-Shape.registerMethod('faces', faces);
-
-export default faces;
-*/
+Shape.registerMethod('edges', edges);
 
 const faces = (...args) => {
   const { shapesAndFunctions } = destructure(args);
@@ -3492,7 +3512,11 @@ const faces = (...args) => {
     const faceShape = faceOp;
     faceOp = (face) => faceShape.to(face);
   }
-  return eachEdge((e, l) => e, (e, f) => faceOp(f), groupOp)
+  return eachEdge(
+    (e, l) => e,
+    (e, f) => faceOp(f),
+    groupOp
+  );
 };
 
 Shape.registerMethod('faces', faces);
