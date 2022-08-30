@@ -317,6 +317,41 @@ Vector unitVector(const Vector& vector) {
   }
 }
 
+Transformation rotate_x_to_y0(const Vector& direction) {
+  FT sin_alpha, cos_alpha, w;
+  CGAL::rational_rotation_approximation(direction.z(), direction.y(), sin_alpha,
+                                        cos_alpha, w, RT(1), RT(1000));
+  return Transformation(w, 0, 0, 0, 0, cos_alpha, -sin_alpha, 0, 0, sin_alpha,
+                        cos_alpha, 0, w);
+}
+
+Transformation rotate_y_to_x0(const Vector& direction) {
+  FT sin_alpha, cos_alpha, w;
+  CGAL::rational_rotation_approximation(direction.z(), direction.x(), sin_alpha,
+                                        cos_alpha, w, RT(1), RT(1000));
+  return Transformation(cos_alpha, 0, -sin_alpha, 0, 0, w, 0, 0, sin_alpha, 0,
+                        cos_alpha, 0, w);
+}
+
+Transformation rotate_z_to_y0(const Vector& direction) {
+  FT sin_alpha, cos_alpha, w;
+#if 0
+  double radians =
+      atan2(CGAL::to_double(direction.y()), CGAL::to_double(direction.x()));
+  std::cout << "Radians: " << radians << std::endl;
+  std::cout << "Degrees: " << ((radians / CGAL_PI) * 180) << std::endl;
+  CGAL::rational_rotation_approximation(radians, sin_alpha, cos_alpha, w, RT(1),
+                                        RT(1000));
+  transform = Transformation(cos_alpha, sin_alpha, 0, 0, -sin_alpha, cos_alpha,
+                             0, 0, 0, 0, w, 0, w);
+#else
+  CGAL::rational_rotation_approximation(direction.x(), direction.y(), sin_alpha,
+                                        cos_alpha, w, RT(1), RT(1000));
+  return Transformation(cos_alpha, sin_alpha, 0, 0, -sin_alpha, cos_alpha, 0, 0,
+                        0, 0, w, 0, w);
+#endif
+}
+
 #if 0
 // https://gist.github.com/kevinmoran/b45980723e53edeb8a5a43c49f134724
 Transformation orient(Vector source, Vector target) {
@@ -426,54 +461,33 @@ Transformation orient_along_x(Vector source, Vector source_normal,
 }
 
 void disorient_along_z(Vector source, Vector normal, Transformation& align) {
+  std::cout << std::endl << "v/3" << std::endl;
+  std::cout << "normal/0/qq: " << normal << std::endl;
   if (source.y() != 0) {
-    RT sin_alpha, cos_alpha, w;
-    CGAL::rational_rotation_approximation(-source.z(), -source.y(), sin_alpha,
-                                          cos_alpha, w, RT(1), RT(1000));
-    // X rotation to bring y to the z axis.
-    Transformation rotation(w, 0, 0, 0, 0, cos_alpha, -sin_alpha, 0, 0,
-                            sin_alpha, cos_alpha, 0, w);
+    Transformation rotation = rotate_x_to_y0(source);
+    std::cout << "rotate_x_toward/transform: " << rotation << std::endl;
     source = source.transform(rotation);
     normal = normal.transform(rotation);
     align = rotation * align;
   }
 
+  std::cout << "normal/1: " << normal << std::endl;
   if (source.x() != 0) {
-    RT sin_alpha, cos_alpha, w;
-    CGAL::rational_rotation_approximation(-source.z(), -source.x(), sin_alpha,
-                                          cos_alpha, w, RT(1), RT(1000));
-    // Y rotation to bring x to the z axis.
-    Transformation rotation(cos_alpha, 0, -sin_alpha, 0, 0, w, 0, 0, sin_alpha,
-                            0, cos_alpha, 0, w);
+    Transformation rotation = rotate_y_to_x0(source);
     source = source.transform(rotation);
     normal = normal.transform(rotation);
     align = rotation * align;
   }
 
-  if (source.z() < 0) {
-    RT sin_alpha, cos_alpha, w;
-    compute_turn(0.5, sin_alpha, cos_alpha, w);
-    // CGAL::rational_rotation_approximation(-source.z(), -source.x(),
-    // sin_alpha, cos_alpha, w, RT(1), RT(1000));
-    //  Y rotation to bring x to the z axis.
-    Transformation rotation(cos_alpha, 0, -sin_alpha, 0, 0, w, 0, 0, sin_alpha,
-                            0, cos_alpha, 0, w);
+  std::cout << "normal/3/xy: " << normal << std::endl;
+  if (normal.x() != 0 || normal.y() != 0) {
+    Transformation rotation = rotate_z_to_y0(normal);
     source = source.transform(rotation);
     normal = normal.transform(rotation);
     align = rotation * align;
   }
 
-  if (normal.y() != 0 || normal.x() != 0) {
-    RT sin_alpha, cos_alpha, w;
-    CGAL::rational_rotation_approximation(normal.y(), normal.x(), sin_alpha,
-                                          cos_alpha, w, RT(1), RT(1000));
-    // Z rotation to bring the normal to the x axis.
-    Transformation rotation(cos_alpha, sin_alpha, 0, 0, -sin_alpha, cos_alpha,
-                            0, 0, 0, 0, w, 0, w);
-    source = source.transform(rotation);
-    normal = normal.transform(rotation);
-    align = rotation * align;
-  }
+  std::cout << "normal/4: " << normal << std::endl;
 }
 
 void reorient_along_z(Vector target, Vector normal, Transformation& align) {}
@@ -7235,11 +7249,8 @@ std::shared_ptr<const Transformation> Transformation__rotate_z(double a) {
 
 std::shared_ptr<const Transformation> Transformation__rotate_z_toward(
     double x, double y) {
-  RT sin_alpha, cos_alpha, w;
-  CGAL::rational_rotation_approximation(FT(x), FT(y), sin_alpha, cos_alpha, w,
-                                        RT(1), RT(1000));
-  return std::shared_ptr<const Transformation>(new Transformation(
-      cos_alpha, sin_alpha, 0, 0, -sin_alpha, cos_alpha, 0, 0, 0, 0, w, 0, w));
+  Transformation transform = rotate_z_to_y0(Vector(x, y, 0));
+  return std::shared_ptr<const Transformation>(new Transformation(transform));
 }
 
 std::shared_ptr<const Transformation> InverseSegmentTransform(
