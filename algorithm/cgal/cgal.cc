@@ -335,21 +335,10 @@ Transformation rotate_y_to_x0(const Vector& direction) {
 
 Transformation rotate_z_to_y0(const Vector& direction) {
   FT sin_alpha, cos_alpha, w;
-#if 0
-  double radians =
-      atan2(CGAL::to_double(direction.y()), CGAL::to_double(direction.x()));
-  std::cout << "Radians: " << radians << std::endl;
-  std::cout << "Degrees: " << ((radians / CGAL_PI) * 180) << std::endl;
-  CGAL::rational_rotation_approximation(radians, sin_alpha, cos_alpha, w, RT(1),
-                                        RT(1000));
-  transform = Transformation(cos_alpha, sin_alpha, 0, 0, -sin_alpha, cos_alpha,
-                             0, 0, 0, 0, w, 0, w);
-#else
   CGAL::rational_rotation_approximation(direction.x(), direction.y(), sin_alpha,
                                         cos_alpha, w, RT(1), RT(1000));
   return Transformation(cos_alpha, sin_alpha, 0, 0, -sin_alpha, cos_alpha, 0, 0,
                         0, 0, w, 0, w);
-#endif
 }
 
 #if 0
@@ -461,32 +450,29 @@ Transformation orient_along_x(Vector source, Vector source_normal,
 }
 
 void disorient_along_z(Vector source, Vector normal, Transformation& align) {
-  std::cout << std::endl << "v/3" << std::endl;
-  std::cout << "normal/0/qq: " << normal << std::endl;
-  if (source.y() != 0) {
+  std::cout << std::endl << "v/7" << std::endl;
+  std::cout << "normal/3/xy: " << normal << std::endl;
+  if (source.y() != 0 || source.z() != 0) {
     Transformation rotation = rotate_x_to_y0(source);
-    std::cout << "rotate_x_toward/transform: " << rotation << std::endl;
     source = source.transform(rotation);
-    normal = normal.transform(rotation);
     align = rotation * align;
   }
 
   std::cout << "normal/1: " << normal << std::endl;
-  if (source.x() != 0) {
+  if (source.x() != 0 || source.z() != 0) {
     Transformation rotation = rotate_y_to_x0(source);
     source = source.transform(rotation);
-    normal = normal.transform(rotation);
     align = rotation * align;
   }
 
-  std::cout << "normal/3/xy: " << normal << std::endl;
-  if (normal.x() != 0 || normal.y() != 0) {
-    Transformation rotation = rotate_z_to_y0(normal);
-    source = source.transform(rotation);
-    normal = normal.transform(rotation);
+  Vector transformedNormal = normal.transform(align);
+
+  if (transformedNormal.x() != 0 || transformedNormal.y() != 0) {
+    Transformation rotation = rotate_z_to_y0(transformedNormal);
     align = rotation * align;
   }
 
+  std::cout << "source/4: " << source << std::endl;
   std::cout << "normal/4: " << normal << std::endl;
 }
 
@@ -5880,7 +5866,6 @@ int Outline(Geometry* geometry) {
           }
           const Plane facet_plane =
               ensureFacetPlane(mesh, facet_to_plane, planes, facet);
-          Vector unitNormal = unitVector(NormalOfSurfaceMeshFacet(mesh, facet));
           Halfedge_index edge = start;
           do {
             bool corner = false;
@@ -5941,7 +5926,7 @@ int FaceEdges(Geometry* geometry, int count) {
         geometry->pwh(face_target) = geometry->pwh(nth);
         int target = geometry->add(GEOMETRY_EDGES);
         const Plane& plane = geometry->plane(nth);
-        Vector normal = plane.orthogonal_vector();
+        Vector normal = unitVector(plane.orthogonal_vector());
         for (const Polygon_with_holes_2& polygon : geometry->pwh(nth)) {
           for (auto s2 = polygon.outer_boundary().edges_begin();
                s2 != polygon.outer_boundary().edges_end(); ++s2) {
@@ -5987,10 +5972,10 @@ int FaceEdges(Geometry* geometry, int count) {
           }
           const Plane facet_plane =
               ensureFacetPlane(mesh, facet_to_plane, planes, facet);
-          Vector unitNormal = NormalOfSurfaceMeshFacet(mesh, facet);
           Halfedge_index edge = start;
           do {
             Plane bisecting_plane;
+            Vector edge_normal;
             bool corner = false;
             const auto& opposite_facet = mesh.face(mesh.opposite(edge));
             if (opposite_facet == mesh.null_face()) {
@@ -6000,8 +5985,9 @@ int FaceEdges(Geometry* geometry, int count) {
               const Plane opposite_facet_plane = ensureFacetPlane(
                   mesh, facet_to_plane, planes, opposite_facet);
               if (facet_plane != opposite_facet_plane) {
-                bisecting_plane =
+                Plane bisecting_plane =
                     CGAL::bisector(facet_plane, opposite_facet_plane);
+                edge_normal = unitVector(bisecting_plane.orthogonal_vector());
                 corner = true;
               } else {
                 // Set up an equivalence tree toward the lowest id.
@@ -6026,10 +6012,14 @@ int FaceEdges(Geometry* geometry, int count) {
               Segment segment = Segment(s, t);
 
               if (selections.empty() || inside_any(segment, selections)) {
-                geometry->addEdge(
-                    all_edge_target,
-                    Edge(segment, s + bisecting_plane.orthogonal_vector(),
-                         int(facet)));
+                geometry->addEdge(all_edge_target,
+                                  Edge(segment, s + edge_normal, int(facet)));
+#if 0
+                // Show the normal.
+                geometry->addEdge(all_edge_target,
+                                  Edge(Segment(s, s + edge_normal),
+                                       Point(0, 0, 0), int(facet)));
+#endif
               }
             }
             const auto& next = mesh.next(edge);
@@ -7247,9 +7237,24 @@ std::shared_ptr<const Transformation> Transformation__rotate_z(double a) {
       cos_alpha, sin_alpha, 0, 0, -sin_alpha, cos_alpha, 0, 0, 0, 0, w, 0, w));
 }
 
-std::shared_ptr<const Transformation> Transformation__rotate_z_toward(
-    double x, double y) {
-  Transformation transform = rotate_z_to_y0(Vector(x, y, 0));
+std::shared_ptr<const Transformation> Transformation__rotate_x_to_y0(double x,
+                                                                     double y,
+                                                                     double z) {
+  Transformation transform = rotate_x_to_y0(Vector(x, y, z));
+  return std::shared_ptr<const Transformation>(new Transformation(transform));
+}
+
+std::shared_ptr<const Transformation> Transformation__rotate_y_to_x0(double x,
+                                                                     double y,
+                                                                     double z) {
+  Transformation transform = rotate_y_to_x0(Vector(x, y, z));
+  return std::shared_ptr<const Transformation>(new Transformation(transform));
+}
+
+std::shared_ptr<const Transformation> Transformation__rotate_z_to_y0(double x,
+                                                                     double y,
+                                                                     double z) {
+  Transformation transform = rotate_z_to_y0(Vector(x, y, z));
   return std::shared_ptr<const Transformation>(new Transformation(transform));
 }
 
@@ -7344,8 +7349,12 @@ EMSCRIPTEN_BINDINGS(module) {
   emscripten::function("Transformation__rotate_x", &Transformation__rotate_x);
   emscripten::function("Transformation__rotate_y", &Transformation__rotate_y);
   emscripten::function("Transformation__rotate_z", &Transformation__rotate_z);
-  emscripten::function("Transformation__rotate_z_toward",
-                       &Transformation__rotate_z_toward);
+  emscripten::function("Transformation__rotate_x_to_y0",
+                       &Transformation__rotate_x_to_y0);
+  emscripten::function("Transformation__rotate_y_to_x0",
+                       &Transformation__rotate_y_to_x0);
+  emscripten::function("Transformation__rotate_z_to_y0",
+                       &Transformation__rotate_z_to_y0);
   emscripten::function("InverseSegmentTransform", &InverseSegmentTransform);
 
   emscripten::class_<Triples>("Triples")

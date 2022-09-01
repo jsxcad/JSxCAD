@@ -3394,16 +3394,16 @@ const eachEdge = Shape.chainable((...args) => (shape) => {
       if (segments) {
         for (let nth = 0; nth < segments.length; nth++) {
           const segment = segments[nth];
-          const normal = normals
-            ? subtract$1(normals[nth], segment[SOURCE])
-            : [0, 0, 1];
           const absoluteSegment = [
             transformCoordinate(segment[SOURCE], matrix),
             transformCoordinate(segment[TARGET], matrix),
           ];
+          const absoluteNormal = normals
+            ? subtract$1(transformCoordinate(normals[nth], matrix), absoluteSegment[SOURCE])
+            : [0, 0, 1];
           const inverse = fromSegmentToInverseTransform(
             absoluteSegment,
-            normal
+            absoluteNormal
           );
           const baseSegment = [
             transformCoordinate(absoluteSegment[SOURCE], inverse),
