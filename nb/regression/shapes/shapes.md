@@ -495,7 +495,7 @@ Box(10).and(Box(5, 50, 5)).disjoint().pack().view();
 ```JavaScript
 Box(10)
   .rz(1 / 8)
-  .cut(eachEdge(Arc(5)))
+  .cut(eachPoint(Arc(5)))
   .view();
 ```
 
@@ -504,7 +504,7 @@ Box(10)
 ```JavaScript
 Triangle(10)
   .cut(inset(2))
-  .at(eachEdge(origin()), cut(Arc(1)))
+  .cut(eachPoint(Arc(1)))
   .view();
 ```
 
@@ -514,7 +514,7 @@ Triangle(10)
 Triangle(10)
   .cut(inset(4))
   .rz(1 / 8)
-  .at(eachEdge(origin()), cut(Arc(5)))
+  .cut(eachPoint(Arc(5)))
   .view();
 ```
 

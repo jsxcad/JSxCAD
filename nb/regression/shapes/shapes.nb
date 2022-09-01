@@ -238,18 +238,18 @@ Box(10).and(Box(5, 50, 5)).disjoint().pack().view();
 
 Box(10)
   .rz(1 / 8)
-  .cut(eachEdge(Arc(5)))
+  .cut(eachPoint(Arc(5)))
   .view();
 
 Triangle(10)
   .cut(inset(2))
-  .at(eachEdge(origin()), cut(Arc(1)))
+  .cut(eachPoint(Arc(1)))
   .view();
 
 Triangle(10)
   .cut(inset(4))
   .rz(1 / 8)
-  .at(eachEdge(origin()), cut(Arc(5)))
+  .cut(eachPoint(Arc(5)))
   .view();
 
 Curve(Point(0, 0), Point(10, 0), Point(10, 10), Point(20, 10))
