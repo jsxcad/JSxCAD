@@ -252,10 +252,16 @@ export const matrix6 = (a, b, c, d, tx, ty) => [
 ];
 
 export const rotateXToY0 = ([x, y, z]) =>
-  toJsTransformFromCgalTransform(getCgal().Transformation__rotate_x_to_y0(x, y, z));
+  toJsTransformFromCgalTransform(
+    getCgal().Transformation__rotate_x_to_y0(x, y, z)
+  );
 
 export const rotateYToX0 = ([x, y, z]) =>
-  toJsTransformFromCgalTransform(getCgal().Transformation__rotate_y_to_x0(x, y, z));
+  toJsTransformFromCgalTransform(
+    getCgal().Transformation__rotate_y_to_x0(x, y, z)
+  );
 
 export const rotateZToY0 = ([x, y, z]) =>
-  toJsTransformFromCgalTransform(getCgal().Transformation__rotate_z_to_y0(x, y, z));
+  toJsTransformFromCgalTransform(
+    getCgal().Transformation__rotate_z_to_y0(x, y, z)
+  );

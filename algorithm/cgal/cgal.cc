@@ -450,15 +450,12 @@ Transformation orient_along_x(Vector source, Vector source_normal,
 }
 
 void disorient_along_z(Vector source, Vector normal, Transformation& align) {
-  std::cout << std::endl << "v/7" << std::endl;
-  std::cout << "normal/3/xy: " << normal << std::endl;
   if (source.y() != 0 || source.z() != 0) {
     Transformation rotation = rotate_x_to_y0(source);
     source = source.transform(rotation);
     align = rotation * align;
   }
 
-  std::cout << "normal/1: " << normal << std::endl;
   if (source.x() != 0 || source.z() != 0) {
     Transformation rotation = rotate_y_to_x0(source);
     source = source.transform(rotation);
@@ -471,9 +468,6 @@ void disorient_along_z(Vector source, Vector normal, Transformation& align) {
     Transformation rotation = rotate_z_to_y0(transformedNormal);
     align = rotation * align;
   }
-
-  std::cout << "source/4: " << source << std::endl;
-  std::cout << "normal/4: " << normal << std::endl;
 }
 
 void reorient_along_z(Vector target, Vector normal, Transformation& align) {}
