@@ -361,7 +361,7 @@ Voxels([0, 0, 0], [0, 0, 1], [1, 0, 1], [2, 0, 1]).view(50);
 ```JavaScript
 b.at(
   eachEdge().sort('x<y<z>').n(0).origin(),
-  cut(Box(11, 3, 3).rx(1 / 8))
+  cut(Box(3, 3, 11))
 ).view(48);
 ```
 
@@ -369,7 +369,7 @@ b.at(
 
 ```JavaScript
 b.by(eachEdge().sort('x<y<z>').n(0).origin())
-  .cut(Box(11, 3, 3).rx(1 / 8))
+  .cut(Box(3, 3, 11))
   .view(49);
 ```
 
@@ -657,7 +657,7 @@ Loft('open', Box(3).cut(Arc(2)), Hexagon(3).cut(Arc(2)).z(10)).view();
 ```JavaScript
 Orb(5, 5, 5)
   .hasZag(5)
-  .eachEdge((e, l) => Box([0, l * 0.75], [0, 0.1], 0.2).to(e))
+  .eachEdge((e, l) => Box([0, 0.1], [0, 0.1], [0, l * 0.75]).to(e))
   .view();
 ```
 
@@ -710,3 +710,40 @@ Box(4).fitTo(Arc(3).void()).clip(Box(1, 5), 'noVoid').clean().view();
 ```
 
 ![Image](shape.md.80.png)
+
+```JavaScript
+Box(10, 10, 10)
+  .and(
+    eachEdge((e, l) =>
+      Box([0, 1.5], 0, [0, l])
+        .and(
+          Arc([1, 2], 1, [0, l * 0.95])
+            .y(1)
+            .hasAngle(1 / 4, 3 / 4)
+        )
+        .to(e)
+    )
+  )
+  .view();
+```
+
+![Image](shape.md.81.png)
+
+```JavaScript
+Septagon(10, 10, 10)
+  .cut(
+    eachEdge({ selections: [Box(10, [-4, 10], [5, 10])] }, (e, l) =>
+      Box(2, 2, [0, l])
+        .clip(
+          Arc(2, 2, [0, l])
+            .hasAngle(1 / 4, 3 / 4)
+            .grow(0.01)
+        )
+        .to(e)
+    )
+  )
+  .clean()
+  .view();
+```
+
+![Image](shape.md.82.png)

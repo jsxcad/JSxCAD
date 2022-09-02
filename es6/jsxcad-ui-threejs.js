@@ -1,4 +1,4 @@
-import { Object3D, PerspectiveCamera, Scene, AxesHelper, SpotLight, WebGLRenderer, Raycaster, Vector2, Points, LineSegments, Shape, EventDispatcher, MeshBasicMaterial, Vector3, BufferGeometry, LineBasicMaterial, Float32BufferAttribute, Mesh, BoxGeometry, MeshPhysicalMaterial, MeshPhongMaterial, MeshNormalMaterial, ImageBitmapLoader, CanvasTexture, RepeatWrapping, Group, Path, ShapeGeometry, EdgesGeometry, WireframeGeometry, Plane, PointsMaterial, Color, Matrix4, Box3, Matrix3, Quaternion, GridHelper, PlaneGeometry, MeshStandardMaterial, Frustum, Layers, TrackballControls } from './jsxcad-algorithm-threejs.js';
+import { Object3D, PerspectiveCamera, Scene, AxesHelper, SpotLight, WebGLRenderer, Raycaster, Vector2, Points, LineSegments, Shape, EventDispatcher, MeshBasicMaterial, Vector3, BufferGeometry, LineBasicMaterial, Float32BufferAttribute, Mesh, BoxGeometry, MeshPhysicalMaterial, MeshPhongMaterial, MeshNormalMaterial, ImageBitmapLoader, CanvasTexture, RepeatWrapping, Matrix4, Plane, Group, Path, ShapeGeometry, EdgesGeometry, WireframeGeometry, PointsMaterial, Color, Box3, GridHelper, PlaneGeometry, MeshStandardMaterial, Frustum, Layers, TrackballControls } from './jsxcad-algorithm-threejs.js';
 import { toRgbFromTags } from './jsxcad-algorithm-color.js';
 import { toThreejsMaterialFromTags } from './jsxcad-algorithm-material.js';
 
@@ -836,6 +836,7 @@ const updateUserData = (geometry, scene, userData) => {
   }
 };
 
+/*
 // https://gist.github.com/kevinmoran/b45980723e53edeb8a5a43c49f134724
 const orient = (mesh, source, target, offset) => {
   const translation = new Matrix4();
@@ -906,6 +907,7 @@ const orient = (mesh, source, target, offset) => {
 
   mesh.applyMatrix4(matrix4);
 };
+*/
 
 const parseRational = (text) => {
   if (text === '') {
@@ -926,7 +928,18 @@ const buildMeshes = async ({
   }
   const { tags = [] } = geometry;
   const layer = tags.includes('show:overlay') ? SKETCH_LAYER : GEOMETRY_LAYER;
+  let noTransform = false;
   let mesh;
+  let matrix;
+
+  if (geometry.matrix) {
+    matrix = new Matrix4();
+    // Bypass matrix.set to use column-major ordering.
+    for (let nth = 0; nth < 16; nth++) {
+      matrix.elements[nth] = geometry.matrix[nth];
+    }
+  }
+
   switch (geometry.type) {
     case 'layout': {
       const [width, length] = geometry.layout.size;
@@ -1106,23 +1119,31 @@ const buildMeshes = async ({
       break;
     }
     case 'polygonsWithHoles': {
+      // noTransform = true;
+      /*
       const normal = new Vector3(
         geometry.plane[0],
         geometry.plane[1],
         geometry.plane[2]
       ).normalize();
+      */
       const baseNormal = new Vector3(0, 0, 1);
+      const plane = new Plane(baseNormal, 0);
       const meshes = new Group();
       for (const { points, holes } of geometry.polygonsWithHoles) {
         const boundaryPoints = [];
-        for (const point of points) {
-          boundaryPoints.push(new Vector3(point[0], point[1], point[2]));
+        for (const p2 of points) {
+          const p3 = new Vector3(p2[0], p2[1], 0);
+          plane.projectPoint(p3, p3);
+          boundaryPoints.push(p3);
         }
         const shape = new Shape(boundaryPoints);
         for (const { points } of holes) {
           const holePoints = [];
-          for (const point of points) {
-            holePoints.push(new Vector3(point[0], point[1], point[2]));
+          for (const p2 of points) {
+            const p3 = new Vector3(p2[0], p2[1], 0);
+            plane.projectPoint(p3, p3);
+            holePoints.push(p3);
           }
           shape.holes.push(new Path(holePoints));
         }
@@ -1181,20 +1202,18 @@ const buildMeshes = async ({
       mesh = meshes;
       scene.add(mesh);
       // Need to handle the origin shift.
-      orient(mesh, normal, baseNormal, geometry.plane[3]);
+      // orient(mesh, normal, baseNormal, geometry.plane[3]);
       break;
     }
     default:
       throw Error(`Non-display geometry: ${geometry.type}`);
   }
 
-  if (mesh && geometry.matrix) {
-    const matrix = new Matrix4();
-    // Bypass matrix.set to use column-major ordering.
-    for (let nth = 0; nth < 16; nth++) {
-      matrix.elements[nth] = geometry.matrix[nth];
-    }
+  if (mesh && geometry.matrix && !noTransform) {
     mesh.applyMatrix4(matrix);
+  }
+
+  if (mesh) {
     mesh.updateMatrix();
     mesh.updateMatrixWorld();
   }

@@ -10,6 +10,7 @@ const GEOMETRY_SEGMENTS = 3;
 const GEOMETRY_POINTS = 4;
 const GEOMETRY_EMPTY = 5;
 const GEOMETRY_REFERENCE = 6;
+const GEOMETRY_EDGES = 7;
 
 export const fillCgalGeometry = (geometry, inputs) => {
   const g = getCgal();
@@ -248,6 +249,28 @@ export const fromCgalGeometry = (geometry, inputs, length = inputs.length, start
         geometry.emitPoints(nth, (x, y, z, exact) => {
           points.push([x, y, z]);
           exactPoints.push(exact);
+        });
+        break;
+      }
+      case GEOMETRY_EDGES: {
+        // TODO: Figure out segments vs edges.
+        const matrix = toJsTransformFromCgalTransform(geometry.getTransform(nth));
+        const { tags = [] } = inputs[nth] || {};
+        const segments = [];
+        const normals = [];
+        const faces = [];
+        results[nth] = {
+          type: 'segments',
+          segments,
+          matrix,
+          tags,
+          normals,
+          faces,
+        };
+        geometry.emitEdges(nth, (sX, sY, sZ, tX, tY, tZ, nX, nY, nZ, face, exact) => {
+          segments.push([[sX, sY, sZ], [tX, tY, tZ], exact]);
+          normals.push([nX, nY, nZ]);
+          faces.push(face);
         });
         break;
       }

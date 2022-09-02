@@ -2540,54 +2540,6 @@ class Handle {
 
 var Handle_1 = Handle;
 
-class TagsManager {
-    constructor() {
-        this.lines = [];
-    }
-
-    /**
-     *
-     * @param {number} x
-     * @param {number} y
-     * @param {number} z
-     */
-    point(x, y, z = 0) {
-        this.push(10, x);
-        this.push(20, y);
-        this.push(30, z);
-    }
-
-    /**
-     *
-     * @param {string} name The name of the section
-     */
-    start(name) {
-        this.push(0, "SECTION");
-        this.push(2, name);
-    }
-
-    end() {
-        this.push(0, "ENDSEC");
-    }
-
-    addHeaderVariable(name, tagsElements) {
-        this.push(9, `$${name}`);
-        tagsElements.forEach((tagElement) => {
-            this.push(tagElement[0], tagElement[1]);
-        });
-    }
-
-    push(code, value) {
-        this.lines.push(code, value);
-    }
-
-    toDxfString() {
-        return this.lines.join("\n");
-    }
-}
-
-var TagsManager_1 = TagsManager;
-
 class DatabaseObject {
     constructor(subclass = null) {
         this.handle = Handle_1.next();
@@ -2977,7 +2929,7 @@ class Arc extends DatabaseObject_1 {
         manager.push(0, "ARC");
         super.tags(manager);
         manager.push(8, this.layer.name);
-        manager.addPointTags(this.x, this.y);
+        manager.point(this.x, this.y);
         manager.push(40, this.r);
         manager.push(100, "AcDbArc");
         manager.push(50, this.startAngle);
@@ -3423,7 +3375,7 @@ class Ellipse extends DatabaseObject_1 {
     tags(manager) {
         // https://www.autodesk.com/techpubs/autocad/acadr14/dxf/ellipse_al_u05_c.htm
         manager.push(0, "ELLIPSE");
-        super.tags();
+        super.tags(manager);
         manager.push(8, this.layer.name);
         manager.point(this.x, this.y);
         manager.push(11, this.majorAxisX);
@@ -3437,6 +3389,54 @@ class Ellipse extends DatabaseObject_1 {
 }
 
 var Ellipse_1 = Ellipse;
+
+class TagsManager {
+    constructor() {
+        this.lines = [];
+    }
+
+    /**
+     *
+     * @param {number} x
+     * @param {number} y
+     * @param {number} z
+     */
+    point(x, y, z = 0) {
+        this.push(10, x);
+        this.push(20, y);
+        this.push(30, z);
+    }
+
+    /**
+     *
+     * @param {string} name The name of the section
+     */
+    start(name) {
+        this.push(0, "SECTION");
+        this.push(2, name);
+    }
+
+    end() {
+        this.push(0, "ENDSEC");
+    }
+
+    addHeaderVariable(name, tagsElements) {
+        this.push(9, `$${name}`);
+        tagsElements.forEach((tagElement) => {
+            this.push(tagElement[0], tagElement[1]);
+        });
+    }
+
+    push(code, value) {
+        this.lines.push(code, value);
+    }
+
+    toDxfString() {
+        return this.lines.join("\n");
+    }
+}
+
+var TagsManager_1 = TagsManager;
 
 class Drawing {
     constructor() {

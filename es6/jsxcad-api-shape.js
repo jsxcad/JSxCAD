@@ -1,4 +1,4 @@
-import { assemble as assemble$1, toDisplayGeometry, toConcreteGeometry, toTransformedGeometry, toPoints, transform, rewriteTags, taggedGraph, taggedSegments, taggedPoints, fromPolygons, registerReifier, taggedPlan, identity, hasTypeReference, taggedGroup, join as join$1, makeAbsolute, measureArea, taggedItem, getInverseMatrices, computeNormal, extrude, link as link$1, measureBoundingBox, bend as bend$1, getLeafs, cast as cast$1, computeCentroid, convexHull, fuse as fuse$1, noGhost, clip as clip$1, allTags, cut as cut$1, deform as deform$1, demesh as demesh$1, disjoint as disjoint$1, rewrite, visit, hasTypeGhost, hasTypeVoid, getLayouts, taggedLayout, isNotTypeGhost, getLeafsIn, eachSegment, transformCoordinate, eachPoint as eachPoint$1, faces as faces$1, fill as fill$1, fix as fix$1, grow as grow$1, outline as outline$1, inset as inset$1, involute as involute$1, read, readNonblocking, loft as loft$1, serialize as serialize$1, generateLowerEnvelope, hasShowOverlay, hasTypeMasked, hasMaterial, linearize, isTypeVoid, offset as offset$1, remesh as remesh$1, write, writeNonblocking, fromScaleToTransform, seam as seam$1, section as section$1, separate as separate$1, simplify as simplify$1, taggedSketch, smooth as smooth$1, computeToolpath, twist as twist$1, generateUpperEnvelope, measureVolume, withAabbTreeQuery, wrap as wrap$1, computeImplicitVolume } from './jsxcad-geometry.js';
+import { assemble as assemble$1, toDisplayGeometry, toConcreteGeometry, toTransformedGeometry, toPoints, transform, rewriteTags, taggedGraph, taggedSegments, taggedPoints, fromPolygons, registerReifier, taggedPlan, identity, hasTypeReference, taggedGroup, join as join$1, makeAbsolute, measureArea, taggedItem, getInverseMatrices, computeNormal, extrude, link as link$1, measureBoundingBox, bend as bend$1, getLeafs, cast as cast$1, computeCentroid, convexHull, fuse as fuse$1, noGhost, clip as clip$1, allTags, cut as cut$1, deform as deform$1, demesh as demesh$1, disjoint as disjoint$1, rewrite, visit, hasTypeGhost, hasTypeVoid, getLayouts, taggedLayout, isNotTypeGhost, getLeafsIn, eachFaceEdges, transformCoordinate, eachPoint as eachPoint$1, fill as fill$1, fix as fix$1, grow as grow$1, outline as outline$1, inset as inset$1, involute as involute$1, read, readNonblocking, loft as loft$1, serialize as serialize$1, generateLowerEnvelope, hasShowOverlay, hasTypeMasked, hasMaterial, linearize, isTypeVoid, offset as offset$1, remesh as remesh$1, write, writeNonblocking, fromScaleToTransform, seam as seam$1, section as section$1, separate as separate$1, simplify as simplify$1, taggedSketch, smooth as smooth$1, computeToolpath, twist as twist$1, generateUpperEnvelope, measureVolume, withAabbTreeQuery, wrap as wrap$1, computeImplicitVolume } from './jsxcad-geometry.js';
 import { getSourceLocation, startTime, endTime, emit, computeHash, logInfo, log as log$1, ErrorWouldBlock, generateUniqueId, addPending, write as write$1 } from './jsxcad-sys.js';
 export { elapsed, emit, read, write } from './jsxcad-sys.js';
 import { zag } from './jsxcad-api-v1-math.js';
@@ -429,7 +429,7 @@ const scale$4 = (amount, [x = 0, y = 0, z = 0]) => [
   y * amount,
   z * amount,
 ];
-const subtract$2 = ([ax, ay, az], [bx, by, bz]) => [ax - bx, ay - by, az - bz];
+const subtract$3 = ([ax, ay, az], [bx, by, bz]) => [ax - bx, ay - by, az - bz];
 
 const updatePlan =
   (...updates) =>
@@ -614,7 +614,7 @@ const getScale = (geometry) => {
   const corner1 = getCorner1(geometry);
   const corner2 = getCorner2(geometry);
   return [
-    scale$4(0.5, subtract$2(corner1, corner2)),
+    scale$4(0.5, subtract$3(corner1, corner2)),
     scale$4(0.5, add$2(corner1, corner2)),
   ];
 };
@@ -847,7 +847,7 @@ const X$8 = 0;
 const Y$8 = 1;
 const Z$8 = 2;
 
-const subtract$1 = ([ax, ay, az], [bx, by, bz]) => [ax - bx, ay - by, az - bz];
+const subtract$2 = ([ax, ay, az], [bx, by, bz]) => [ax - bx, ay - by, az - bz];
 
 // Round to the nearest 0.001 mm
 
@@ -924,7 +924,7 @@ const align = Shape.chainable(
   (spec = 'xyz', origin = [0, 0, 0]) =>
     (shape) => {
       const offset = computeOffset(spec, origin, shape);
-      const reference = Point().move(...subtract$1(offset, origin));
+      const reference = Point().move(...subtract$2(offset, origin));
       return reference;
     }
 );
@@ -989,7 +989,14 @@ const isNotString = (value) => typeof value !== 'string';
 // This interface is a bit awkward.
 const extrudeAlong = Shape.chainable((direction, ...args) => (shape) => {
   const { strings: modes, values: extents } = destructure(args);
-  const vector = shape.toCoordinate(direction);
+  let vector;
+  try {
+    // This will fail on ghost geometry.
+    vector = shape.toCoordinate(direction);
+  } catch (e) {
+    // TODO: Be more selective.
+    return Shape.Group();
+  }
   const heights = extents
     .filter(isNotString)
     .map((extent) => Shape.toValue(extent, shape));
@@ -3359,31 +3366,69 @@ const length = ([ax, ay, az], [bx, by, bz]) => {
   return Math.sqrt(x * x + y * y + z * z);
 };
 
+const subtract$1 = ([ax, ay, az], [bx, by, bz]) => [
+  ax - bx,
+  ay - by,
+  az - bz,
+];
+
+const SOURCE = 0;
+const TARGET = 1;
+
 const eachEdge = Shape.chainable((...args) => (shape) => {
-  const { shapesAndFunctions } = destructure(args);
-  let [leafOp = (edge) => edge, groupOp = Group] = shapesAndFunctions;
-  if (leafOp instanceof Shape) {
-    const leafShape = leafOp;
-    leafOp = (edge) => leafShape.to(edge);
+  const { shapesAndFunctions, object: options = {} } = destructure(args);
+  const { selections = [] } = options;
+  let [edgeOp = (e, l) => e, faceOp = (e, f) => e, groupOp = Group] =
+    shapesAndFunctions;
+  if (edgeOp instanceof Shape) {
+    const edgeShape = edgeOp;
+    edgeOp = (edge) => edgeShape.to(edge);
   }
-  const leafs = [];
-  eachSegment(Shape.toShape(shape, shape).toGeometry(), (segment) => {
-    const inverse = fromSegmentToInverseTransform(segment);
-    const baseSegment = [
-      transformCoordinate(segment[0], inverse),
-      transformCoordinate(segment[1], inverse),
-    ];
-    const matrix = invertTransform(inverse);
-    // We get a pair of absolute coordinates from eachSegment.
-    // We need a segment from [0,0,0] to [x,0,0] in its local space.
-    leafs.push(
-      leafOp(
-        Shape.fromGeometry(taggedSegments({ matrix }, [baseSegment])),
-        length(segment[0], segment[1])
-      )
-    );
-  });
-  const grouped = groupOp(...leafs);
+  const faces = [];
+  eachFaceEdges(
+    Shape.toShape(shape, shape).toGeometry(),
+    shape.toShapes(selections).map((selection) => selection.toGeometry()),
+    (faceGeometry, edgeGeometry) => {
+      const { matrix, segments, normals } = edgeGeometry;
+      const edges = [];
+      if (segments) {
+        for (let nth = 0; nth < segments.length; nth++) {
+          const segment = segments[nth];
+          const absoluteSegment = [
+            transformCoordinate(segment[SOURCE], matrix),
+            transformCoordinate(segment[TARGET], matrix),
+          ];
+          const absoluteNormal = normals
+            ? subtract$1(
+                transformCoordinate(normals[nth], matrix),
+                absoluteSegment[SOURCE]
+              )
+            : [0, 0, 1];
+          const inverse = fromSegmentToInverseTransform(
+            absoluteSegment,
+            absoluteNormal
+          );
+          const baseSegment = [
+            transformCoordinate(absoluteSegment[SOURCE], inverse),
+            transformCoordinate(absoluteSegment[TARGET], inverse),
+          ];
+          const inverseMatrix = invertTransform(inverse);
+          // We get a pair of absolute coordinates from eachSegment.
+          // We need a segment from [0,0,0] to [x,0,0] in its local space.
+          edges.push(
+            edgeOp(
+              Shape.fromGeometry(
+                taggedSegments({ matrix: inverseMatrix }, [baseSegment])
+              ),
+              length(segment[SOURCE], segment[TARGET])
+            )
+          );
+        }
+      }
+      faces.push(faceOp(Group(...edges), Shape.fromGeometry(faceGeometry)));
+    }
+  );
+  const grouped = groupOp(...faces);
   if (grouped instanceof Function) {
     return grouped(shape);
   } else {
@@ -3421,28 +3466,61 @@ const edit = Shape.chainable(
 
 Shape.registerMethod('edit', edit);
 
-const edges = Shape.chainable(() => (shape) => {
+/*
+import { eachSegment, taggedSegments } from './jsxcad-geometry.js';
+
+import Shape from './Shape.js';
+
+export const edges = Shape.chainable(() => (shape) => {
   const segments = [];
   eachSegment(Shape.toShape(shape, shape).toGeometry(), (segment) =>
     segments.push(segment)
   );
   return Shape.fromGeometry(taggedSegments({}, segments));
 });
+*/
+
+const edges = Shape.chainable((...args) => (shape) => {
+  const { shapesAndFunctions, object: options = {} } = destructure(args);
+  const { selections = [] } = options;
+  let [edgesOp = (edges) => edges, groupOp = Group] = shapesAndFunctions;
+  if (edgesOp instanceof Shape) {
+    const edgesShape = edgesOp;
+    edgesOp = (edges) => edgesShape.to(edges);
+  }
+  const edges = [];
+  eachFaceEdges(
+    Shape.toShape(shape, shape).toGeometry(),
+    shape.toShapes(selections).map((selection) => selection.toGeometry()),
+    (faceGeometry, edgeGeometry) => {
+      if (edgeGeometry) {
+        edges.push(edgesOp(Shape.fromGeometry(edgeGeometry)));
+      }
+    }
+  );
+  const grouped = groupOp(...edges);
+  if (grouped instanceof Function) {
+    return grouped(shape);
+  } else {
+    return grouped;
+  }
+});
 
 Shape.registerMethod('edges', edges);
 
-const faces = Shape.chainable((...args) => (shape) => {
+const faces = (...args) => {
   const { shapesAndFunctions } = destructure(args);
-  let [leafOp = (l) => l, groupOp = Group] = shapesAndFunctions;
-  if (leafOp instanceof Shape) {
-    const leafShape = leafOp;
-    leafOp = (edge) => leafShape.to(edge);
+  let [faceOp = (face) => face, groupOp = Group] = shapesAndFunctions;
+  if (faceOp instanceof Shape) {
+    const faceShape = faceOp;
+    faceOp = (face) => faceShape.to(face);
   }
-  return Shape.fromGeometry(faces$1(shape.toGeometry())).each(
-    leafOp,
+  return eachEdge(
+    (e, l) => e,
+    (e, f) => faceOp(f),
     groupOp
   );
-});
+};
 
 Shape.registerMethod('faces', faces);
 
@@ -3455,34 +3533,34 @@ const f = fill;
 Shape.registerMethod('fill', fill);
 Shape.registerMethod('f', f);
 
-const assemble = (...shapes) => {
+const assemble = (modes, ...shapes) => {
   shapes = shapes.filter((shape) => shape !== undefined);
-  switch (shapes.length) {
-    case 0: {
-      return Shape.fromGeometry(assemble$1());
-    }
-    case 1: {
-      return shapes[0];
-    }
-    default: {
-      return fromGeometry(assemble$1(...shapes.map(toGeometry)));
-    }
-  }
+  return fromGeometry(
+    disjoint$1(shapes.map(toGeometry), undefined, modes.includes('exact'))
+  );
 };
 
-const fit = Shape.chainable(
-  (...shapes) =>
-    (shape) =>
-      assemble(...shapes.map((other) => Shape.toShape(other, shape)), shape)
-);
+const fit = Shape.chainable((...args) => {
+  const { strings: modes, shapesAndFunctions: shapes } = destructure(args);
+  return (shape) =>
+    assemble(
+      modes,
+      ...shapes.map((other) => Shape.toShape(other, shape)),
+      shape
+    );
+});
 
 Shape.registerMethod('fit', fit);
 
-const fitTo = Shape.chainable(
-  (...shapes) =>
-    (shape) =>
-      assemble(shape, ...shapes.map((other) => Shape.toShape(other, shape)))
-);
+const fitTo = Shape.chainable((...args) => {
+  const { strings: modes, shapesAndFunctions: shapes } = destructure(args);
+  return (shape) =>
+    assemble(
+      modes,
+      shape,
+      ...shapes.map((other) => Shape.toShape(other, shape))
+    );
+});
 
 Shape.registerMethod('fitTo', fitTo);
 
@@ -3505,9 +3583,12 @@ const o = origin;
 Shape.registerMethod('origin', origin);
 Shape.registerMethod('o', o);
 
-const fuse = Shape.chainable(
-  () => (shape) => fromGeometry(fuse$1(shape.toGeometry()))
-);
+const fuse = Shape.chainable((...args) => (shape) => {
+  const { strings: modes } = destructure(args);
+  return fromGeometry(
+    fuse$1(shape.toGeometry(), modes.includes('exact'))
+  );
+});
 
 Shape.registerMethod('fuse', fuse);
 
@@ -3598,9 +3679,15 @@ const inFn = Shape.chainable(() => (shape) => {
 
 Shape.registerMethod('in', inFn);
 
-const outline = Shape.chainable(
-  () => (shape) => Shape.fromGeometry(outline$1(shape.toGeometry()))
-);
+const outline = Shape.chainable((...args) => (shape) => {
+  const { shapesAndFunctions: selections } = destructure(args);
+  return Shape.fromGeometry(
+    outline$1(
+      shape.toGeometry(),
+      shape.toShapes(selections).map((selection) => selection.toGeometry())
+    )
+  );
+});
 
 Shape.registerMethod('outline', outline);
 
@@ -3970,7 +4057,7 @@ const Z$6 = 2;
 // up rotates around the axis to point a dorsal position toward.
 
 const orient = Shape.chainable(
-  ({ at = [0, 0, 0], to = [0, 0, 0], up = [0, 0, 0] }) =>
+  ({ at = [0, 0, 0], to = [0, 0, 1], up = [1, 0, 0] } = {}) =>
     (shape) => {
       const { local } = getInverseMatrices(shape.toGeometry());
       // Algorithm from threejs Matrix4
@@ -5149,6 +5236,13 @@ const reifyArc =
         to: end - 1 / 4,
         by: effectiveStep,
       });
+      if (
+        (axis === X$1 && left !== right) ||
+        (axis === Y$1 && front !== back) ||
+        (axis === Z$1 && top !== bottom)
+      ) {
+        spiral = spiral.loop().fill();
+      }
     }
 
     switch (axis) {
@@ -5159,7 +5253,7 @@ const reifyArc =
           .scale(scale)
           .move(middle);
         if (left !== right) {
-          spiral = spiral.fill().ex(left - middle[X$1], right - middle[X$1]);
+          spiral = spiral.ex(left - middle[X$1], right - middle[X$1]);
         }
         break;
       }
@@ -5170,7 +5264,7 @@ const reifyArc =
           .scale(scale)
           .move(middle);
         if (front !== back) {
-          spiral = spiral.fill().ey(front - middle[Y$1], back - middle[Y$1]);
+          spiral = spiral.ey(front - middle[Y$1], back - middle[Y$1]);
         }
         break;
       }
@@ -5178,7 +5272,7 @@ const reifyArc =
         scale[Z$1] = 1;
         spiral = spiral.scale(scale).move(middle);
         if (top !== bottom) {
-          spiral = spiral.fill().ez(top - middle[Z$1], bottom - middle[Z$1]);
+          spiral = spiral.ez(top - middle[Z$1], bottom - middle[Z$1]);
         }
         break;
       }
@@ -5282,10 +5376,12 @@ Shape.prototype.ArcX = Shape.shapeMethod(ArcX);
 Shape.prototype.ArcY = Shape.shapeMethod(ArcY);
 Shape.prototype.ArcZ = Shape.shapeMethod(ArcZ);
 
-const Assembly = (...shapes) =>
-  Shape.fromGeometry(
-    assemble$1(...Shape.toShapes(shapes).map((shape) => shape.toGeometry()))
-  );
+const Assembly = (...args) => {
+  const { strings: modes, shapesAndFunctions: unresolvedShapes } =
+    destructure(args);
+  const [shape, ...shapes] = Shape.toShapes(unresolvedShapes);
+  return fitTo(...modes, ...shapes)(shape);
+};
 
 Shape.prototype.Assembly = Shape.shapeMethod(Assembly);
 
@@ -5789,4 +5885,4 @@ const RX = (t = 0) => Ref().rx(t);
 const RY = (t = 0) => Ref().ry(t);
 const RZ = (t = 0) => Ref().rz(t);
 
-export { Arc, ArcX, ArcY, ArcZ, Assembly, Box, Cached, ChainHull, Clip, Curve, Edge, Edges, Empty, Face, GrblConstantLaser, GrblDynamicLaser, GrblPlotter, GrblSpindle, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Join, Line, Link, Loft, Loop, Octagon, Orb, Page, Path, Pentagon, Plan, Point, Points, Polygon, Polyhedron, RX, RY, RZ, Segments, Septagon, Shape, Spiral, SurfaceMesh, Tetragon, Triangle, Voxels, Wave, Wrap, X, XY, XZ, Y, YZ, Z, absolute, abstract, addTo, align, and, area, as, asPart, at, bb, bend, billOfMaterials, by, cast, center, chainHull, clean, clip, clipfrom, clipopen, color, colors, cut, cutFrom, cutopen, cutout, defRgbColor, defThreejsMaterial, defTool, define, deform, demesh, disjoint, drop, e, each, eachEdge, eachIn, eachPoint, edges, edit, ensurePages, ex, extrudeAlong, extrudeX, extrudeY, extrudeZ, ey, ez, faces, fill, fit, fitTo, fix, fuse, g, get, getNot, ghost, gn, grow, hull, image, inFn, inline, inset, involute, join, keep, link, loadGeometry, loft, log, loop, lowerEnvelope, mask, masking, material, md, move, moveAlong, moveTo, n, noVoid, noop, normal, notColor, nth, o, ofPlan, offset, on, op, orient, origin, outline, overlay, pack, points$1 as points, ref, reify, remesh, rotateX, rotateY, rotateZ, rx, ry, rz, saveGeometry, scale$1 as scale, scaleToFit, scaleX, scaleY, scaleZ, seam, section, sectionProfile, self, separate, seq, serialize, simplify, size, sketch, smooth, sort, sx, sy, sz, table, tag, tags, tint, to, tool, toolpath, top, twist, untag, upperEnvelope, view, voidFn, voidIn, volume, voxels, wrap, x, xyz, y, z };
+export { Arc, ArcX, ArcY, ArcZ, Assembly, Box, Cached, ChainHull, Clip, Curve, Edge, Edges, Empty, Face, GrblConstantLaser, GrblDynamicLaser, GrblPlotter, GrblSpindle, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Join, Line, Link, Loft, Loop, Octagon, Orb, Page, Path, Pentagon, Plan, Point, Points, Polygon, Polyhedron, RX, RY, RZ, Segments, Septagon, Shape, Spiral, SurfaceMesh, Tetragon, Triangle, Voxels, Wave, Wrap, X, XY, XZ, Y, YZ, Z, absolute, abstract, addTo, align, and, area, as, asPart, at, bb, bend, billOfMaterials, by, cast, center, chainHull, clean, clip, clipfrom, clipopen, color, colors, cut, cutFrom, cutopen, cutout, defRgbColor, defThreejsMaterial, defTool, define, deform, demesh, destructure, disjoint, drop, e, each, eachEdge, eachIn, eachPoint, edges, edit, ensurePages, ex, extrudeAlong, extrudeX, extrudeY, extrudeZ, ey, ez, faces, fill, fit, fitTo, fix, fuse, g, get, getNot, ghost, gn, grow, hull, image, inFn, inline, inset, involute, join, keep, link, loadGeometry, loft, log, loop, lowerEnvelope, mask, masking, material, md, move, moveAlong, moveTo, n, noVoid, noop, normal, notColor, nth, o, ofPlan, offset, on, op, orient, origin, outline, overlay, pack, points$1 as points, ref, reify, remesh, rotateX, rotateY, rotateZ, rx, ry, rz, saveGeometry, scale$1 as scale, scaleToFit, scaleX, scaleY, scaleZ, seam, section, sectionProfile, self, separate, seq, serialize, simplify, size, sketch, smooth, sort, sx, sy, sz, table, tag, tags, tint, to, tool, toolpath, top, twist, untag, upperEnvelope, view, voidFn, voidIn, volume, voxels, wrap, x, xyz, y, z };

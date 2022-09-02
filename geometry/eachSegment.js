@@ -4,13 +4,25 @@ import { transformCoordinate } from './transform.js';
 
 const filter = ({ type }) => type === 'segments';
 
-export const eachSegment = (geometry, emit) => {
-  for (const { matrix, segments } of linearize(outline(geometry), filter)) {
-    for (const [source, target] of segments) {
-      emit([
-        transformCoordinate(source, matrix),
-        transformCoordinate(target, matrix),
-      ]);
+export const eachSegment = (geometry, emit, selections = []) => {
+  for (const { matrix, segments, normals, faces } of linearize(
+    outline(geometry, selections),
+    filter
+  )) {
+    for (let nth = 0; nth < segments.length; nth++) {
+      const [source, target] = segments[nth];
+      const normal = normals
+        ? transformCoordinate(normals[nth], matrix)
+        : undefined;
+      const face = faces ? faces[nth] : undefined;
+      emit(
+        [
+          transformCoordinate(source, matrix),
+          transformCoordinate(target, matrix),
+        ],
+        normal,
+        face
+      );
     }
   }
 };

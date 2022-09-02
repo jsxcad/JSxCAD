@@ -118,9 +118,6 @@ typedef CGAL::Cartesian<CGAL::Exact_rational> Exact_rational_kernel;
 
 typedef Epeck_kernel Kernel;
 
-typedef CGAL::Cartesian_converter<Kernel, Epick_kernel>
-    Epeck_to_epick_converter;
-
 typedef Kernel::FT FT;
 typedef Kernel::RT RT;
 typedef Kernel::Line_3 Line;
@@ -188,6 +185,20 @@ typedef CGAL::Side_of_triangle_mesh<Surface_mesh, Kernel> Side_of_triangle_mesh;
 typedef CGAL::General_polygon_set_2<CGAL::Gps_segment_traits_2<Kernel>>
     General_polygon_set_2;
 
+struct Edge {
+  Edge(const Segment& segment, const Point& normal, int face_id)
+      : segment(segment), normal(normal), face_id(face_id) {}
+
+  Edge(const Segment& segment, const Point& normal)
+      : segment(segment), normal(normal), face_id(-1) {}
+
+  Segment segment;
+  Point normal;
+  int face_id;
+};
+
+typedef std::vector<Edge> Edges;
+
 using CGAL::Kernel_traits;
 
 enum Status {
@@ -206,6 +217,7 @@ enum GeometryType {
   GEOMETRY_POINTS = 4,
   GEOMETRY_EMPTY = 5,
   GEOMETRY_REFERENCE = 6,
+  GEOMETRY_EDGES = 7,
 };
 
 namespace std {
@@ -305,6 +317,31 @@ Vector unitVector(const Vector& vector) {
   }
 }
 
+Transformation rotate_x_to_y0(const Vector& direction) {
+  FT sin_alpha, cos_alpha, w;
+  CGAL::rational_rotation_approximation(direction.z(), direction.y(), sin_alpha,
+                                        cos_alpha, w, RT(1), RT(1000));
+  return Transformation(w, 0, 0, 0, 0, cos_alpha, -sin_alpha, 0, 0, sin_alpha,
+                        cos_alpha, 0, w);
+}
+
+Transformation rotate_y_to_x0(const Vector& direction) {
+  FT sin_alpha, cos_alpha, w;
+  CGAL::rational_rotation_approximation(direction.z(), direction.x(), sin_alpha,
+                                        cos_alpha, w, RT(1), RT(1000));
+  return Transformation(cos_alpha, 0, -sin_alpha, 0, 0, w, 0, 0, sin_alpha, 0,
+                        cos_alpha, 0, w);
+}
+
+Transformation rotate_z_to_y0(const Vector& direction) {
+  FT sin_alpha, cos_alpha, w;
+  CGAL::rational_rotation_approximation(direction.x(), direction.y(), sin_alpha,
+                                        cos_alpha, w, RT(1), RT(1000));
+  return Transformation(cos_alpha, sin_alpha, 0, 0, -sin_alpha, cos_alpha, 0, 0,
+                        0, 0, w, 0, w);
+}
+
+#if 0
 // https://gist.github.com/kevinmoran/b45980723e53edeb8a5a43c49f134724
 Transformation orient(Vector source, Vector target) {
   if (source == target) {
@@ -333,16 +370,151 @@ Transformation orient(Vector source, Vector target) {
       (axis.x() * axis.z() * k) - axis.y(),
       (axis.y() * axis.z() * k) + axis.x(), (axis.z() * axis.z() * k) + cos_a);
 }
+#else
+void disorient_along_x(Vector source, Vector normal, Transformation& align) {
+  if (source.x() != 0 || source.y() != 0) {
+    RT sin_alpha, cos_alpha, w;
+    CGAL::rational_rotation_approximation(source.x(), source.y(), sin_alpha,
+                                          cos_alpha, w, RT(1), RT(1000));
+    // Z rotation to bring y to the x axis.
+    Transformation rotation(cos_alpha, sin_alpha, 0, 0, -sin_alpha, cos_alpha,
+                            0, 0, 0, 0, w, 0, w);
+    source = source.transform(rotation);
+    normal = normal.transform(rotation);
+    align = rotation * align;
+  }
+
+  if (source.x() != 0 || source.z() != 0) {
+    RT sin_alpha, cos_alpha, w;
+    CGAL::rational_rotation_approximation(source.x(), -source.z(), sin_alpha,
+                                          cos_alpha, w, RT(1), RT(1000));
+    // Y rotation to bring z to the x axis.
+    Transformation rotation(cos_alpha, 0, -sin_alpha, 0, 0, w, 0, 0, sin_alpha,
+                            0, cos_alpha, 0, w);
+    source = source.transform(rotation);
+    normal = normal.transform(rotation);
+    align = rotation * align;
+  }
+
+  if (normal.y() != 0) {
+    RT sin_alpha, cos_alpha, w;
+    CGAL::rational_rotation_approximation(normal.y(), -normal.z(), sin_alpha,
+                                          cos_alpha, w, RT(1), RT(1000));
+    // X rotation to bring the normal to the x axis.
+    Transformation rotation(w, 0, 0, 0, 0, cos_alpha, -sin_alpha, 0, 0,
+                            sin_alpha, cos_alpha, 0, w);
+    align = rotation * align;
+  }
+}
+
+void reorient_along_x(Vector target, Vector normal, Transformation& align) {
+  if (normal.y() != 0) {
+    RT sin_alpha, cos_alpha, w;
+    CGAL::rational_rotation_approximation(-normal.y(), normal.z(), sin_alpha,
+                                          cos_alpha, w, RT(1), RT(1000));
+    // X rotation to bring the normal to the x axis.
+    Transformation rotation(w, 0, 0, 0, 0, cos_alpha, -sin_alpha, 0, 0,
+                            sin_alpha, cos_alpha, 0, w);
+    align = rotation * align;
+  }
+
+  if (target.x() != 0 || target.z() != 0) {
+    RT sin_alpha, cos_alpha, w;
+    CGAL::rational_rotation_approximation(-target.x(), target.z(), sin_alpha,
+                                          cos_alpha, w, RT(1), RT(1000));
+    // Y rotation to bring z to the x axis.
+    Transformation rotation(cos_alpha, 0, -sin_alpha, 0, 0, w, 0, 0, sin_alpha,
+                            0, cos_alpha, 0, w);
+    target = target.transform(rotation);
+    align = rotation * align;
+  }
+
+  if (target.x() != 0 || target.y() != 0) {
+    RT sin_alpha, cos_alpha, w;
+    CGAL::rational_rotation_approximation(-target.x(), -target.y(), sin_alpha,
+                                          cos_alpha, w, RT(1), RT(1000));
+    // Z rotation to bring y to the x axis.
+    Transformation rotation(cos_alpha, sin_alpha, 0, 0, -sin_alpha, cos_alpha,
+                            0, 0, 0, 0, w, 0, w);
+    target = target.transform(rotation);
+    align = rotation * align;
+  }
+}
+
+Transformation orient_along_x(Vector source, Vector source_normal,
+                              Vector target, Vector target_normal) {
+  Transformation transform(CGAL::IDENTITY);
+  disorient_along_x(source, source_normal, transform);
+  reorient_along_x(target, target_normal, transform);
+  return transform;
+}
+
+void disorient_along_z(Vector source, Vector normal, Transformation& align) {
+  if (source.y() != 0 || source.z() != 0) {
+    Transformation rotation = rotate_x_to_y0(source);
+    source = source.transform(rotation);
+    align = rotation * align;
+  }
+
+  if (source.x() != 0 || source.z() != 0) {
+    Transformation rotation = rotate_y_to_x0(source);
+    source = source.transform(rotation);
+    align = rotation * align;
+  }
+
+  Vector transformedNormal = normal.transform(align);
+
+  if (transformedNormal.x() != 0 || transformedNormal.y() != 0) {
+    Transformation rotation = rotate_z_to_y0(transformedNormal);
+    align = rotation * align;
+  }
+}
+
+void reorient_along_z(Vector target, Vector normal, Transformation& align) {}
+
+Transformation orient_along_z(Vector source, Vector source_normal,
+                              Vector target, Vector target_normal) {
+  Transformation transform(CGAL::IDENTITY);
+  disorient_along_x(source, source_normal, transform);
+  reorient_along_x(target, target_normal, transform);
+  return transform;
+}
+#endif
+
+Transformation translate(const Vector& vector) {
+  return Transformation(CGAL::TRANSLATION, vector);
+}
 
 Transformation orient_plane(Plane source, Plane target) {
   Point_2 zero(0, 0);
-  Point s = source.to_3d(zero);
-  Point t = target.to_3d(zero);
   // Build a transform to get to this plane.
-  Transformation rotation = orient(unitVector(source.orthogonal_vector()),
-                                   unitVector(target.orthogonal_vector()));
-  Transformation translation = Transformation(CGAL::TRANSLATION, t - s);
+  Transformation rotation = orient_along_x(
+      unitVector(source.orthogonal_vector()), unitVector(source.base1()),
+      unitVector(target.orthogonal_vector()), unitVector(target.base1()));
+  Point s = source.to_3d(zero).transform(rotation);
+  Point t = target.to_3d(zero).transform(rotation);
+  Transformation translation = translate(t - s);
   return translation * rotation;
+}
+
+Transformation disorient_plane_along_x(Plane source) {
+  Transformation transform(CGAL::IDENTITY);
+  disorient_along_x(unitVector(source.orthogonal_vector()),
+                    unitVector(source.base1()), transform);
+  Point s = source.to_3d(Point_2(0, 0));
+  // return translate(s.transform(rotation) - Point(0, 0, 0)) * rotation *
+  // translate(Point(0, 0, 0) - s);
+  transform = transform * translate(Point(0, 0, 0) - s);
+  return transform;
+}
+
+Transformation disorient_plane_along_z(Plane source) {
+  Transformation transform(CGAL::IDENTITY);
+  disorient_along_z(unitVector(source.orthogonal_vector()),
+                    unitVector(source.base1()), transform);
+  Point s = source.to_3d(Point_2(0, 0));
+  transform = transform * translate(Point(0, 0, 0) - s);
+  return transform;
 }
 
 Plane PlaneOfSurfaceMeshFacet(const Surface_mesh& mesh, Face_index facet) {
@@ -729,7 +901,6 @@ void buildManifoldFromSurfaceMesh(const Surface_mesh& surface_mesh,
   manifold::Mesh manifold_mesh;
   manifold_mesh.vertPos.resize(surface_mesh.number_of_vertices());
   for (const auto& vertex : surface_mesh.vertices()) {
-    // std::cout << "Vertex: " << size_t(vertex) << std::endl;
     const Point& point = surface_mesh.point(vertex);
     glm::vec3 p(CGAL::to_double(point.x()), CGAL::to_double(point.y()),
                 CGAL::to_double(point.z()));
@@ -737,7 +908,6 @@ void buildManifoldFromSurfaceMesh(const Surface_mesh& surface_mesh,
   }
   manifold_mesh.triVerts.resize(surface_mesh.number_of_faces());
   for (const auto& facet : surface_mesh.faces()) {
-    // std::cout << "Facet: " << size_t(facet) << std::endl;
     const auto a = surface_mesh.halfedge(facet);
     const auto b = surface_mesh.next(a);
     glm::ivec3 t(surface_mesh.source(a), surface_mesh.source(b),
@@ -2269,6 +2439,17 @@ void transformSegments(Segments& segments, const Transformation& transform) {
   }
 }
 
+void transformEdge(Edge& edge, const Transformation& transform) {
+  edge = Edge(edge.segment.transform(transform),
+              edge.normal.transform(transform), edge.face_id);
+}
+
+void transformEdges(Edges& edges, const Transformation& transform) {
+  for (Edge& edge : edges) {
+    transformEdge(edge, transform);
+  }
+}
+
 void transformPoints(Points& points, const Transformation& transform) {
   for (Point& point : points) {
     point = point.transform(transform);
@@ -2577,6 +2758,7 @@ class Geometry {
     input_segments_.clear();
     segments_.clear();
     input_points_.clear();
+    edges_.clear();
     points_.clear();
     bbox2_.clear();
     bbox3_.clear();
@@ -2601,6 +2783,7 @@ class Geometry {
     on_sides_.resize(size);
     input_segments_.resize(size);
     segments_.resize(size);
+    edges_.resize(size);
     input_points_.resize(size);
     points_.resize(size);
     bbox2_.resize(size);
@@ -2625,6 +2808,7 @@ class Geometry {
     return type(nth) == GEOMETRY_POLYGONS_WITH_HOLES;
   }
   bool is_segments(int nth) { return type(nth) == GEOMETRY_SEGMENTS; }
+  bool is_edges(int nth) { return type(nth) == GEOMETRY_EDGES; }
   bool is_points(int nth) { return type(nth) == GEOMETRY_POINTS; }
 
   bool has_transform(int nth) { return transforms_[nth] != nullptr; }
@@ -2724,6 +2908,15 @@ class Geometry {
     return *segments_[nth];
   }
 
+  bool has_edges(int nth) { return edges_[nth] != nullptr; }
+
+  Edges& edges(int nth) {
+    if (!has_edges(nth)) {
+      edges_[nth].reset(new Edges);
+    }
+    return *edges_[nth];
+  }
+
   bool has_input_points(int nth) { return input_points_[nth] != nullptr; }
 
   Points& input_points(int nth) {
@@ -2811,6 +3004,7 @@ class Geometry {
       polygons.push_back(std::move(polygon));
     }
     plane(nth) = unitPlane(local_plane);
+    // plane(nth) = Plane(0, 0, 1, 0);
     pwh(nth) = std::move(polygons);
   }
 
@@ -2853,6 +3047,7 @@ class Geometry {
                              emscripten::val emit_point) {
     assert(is_local_frame());
     emitPlane(plane(nth), emit_plane);
+    // emitPlane(Plane(0, 0, 1, 0), emit_plane);
     ::emitPolygonsWithHoles(pwh(nth), emit_polygon, emit_point);
   }
 
@@ -2879,18 +3074,8 @@ class Geometry {
     input_segments(nth).push_back(std::move(s));
   }
 
-  void addSegment(int nth, const Segment& segment,
-                  bool has_target_length = false,
-                  FT squared_target_length = 0) {
-    if (has_target_length && segment.squared_length() > squared_target_length) {
-      addSegment(nth, Segment(segment.source(), CGAL::midpoint(segment)),
-                 has_target_length, squared_target_length);
-      addSegment(nth, Segment(CGAL::midpoint(segment), segment.target()),
-                 has_target_length, squared_target_length);
-      return;
-    } else {
-      segments(nth).push_back(segment);
-    }
+  void addSegment(int nth, const Segment& segment) {
+    segments(nth).push_back(segment);
   }
 
   void emitSegments(int nth, emscripten::val emit) {
@@ -2898,13 +3083,36 @@ class Geometry {
       return;
     }
     for (const Segment& segment : segments(nth)) {
-      Point s = segment.source();
-      Point t = segment.target();
+      const Point& s = segment.source();
+      const Point& t = segment.target();
       std::ostringstream exact;
       write_segment(segment, exact);
       emit(CGAL::to_double(s.x()), CGAL::to_double(s.y()),
            CGAL::to_double(s.z()), CGAL::to_double(t.x()),
            CGAL::to_double(t.y()), CGAL::to_double(t.z()), exact.str());
+    }
+  }
+
+  void addEdge(int nth, const Edge& edge) { edges(nth).push_back(edge); }
+
+  void emitEdges(int nth, emscripten::val emit) {
+    if (!has_edges(nth)) {
+      return;
+    }
+    for (const Edge& edge : edges(nth)) {
+      const Segment& segment = edge.segment;
+      const Point& s = segment.source();
+      const Point& t = segment.target();
+      const Point& n = edge.normal;
+      std::ostringstream exact;
+      write_segment(segment, exact);
+      exact << " ";
+      write_point(edge.normal, exact);
+      emit(CGAL::to_double(s.x()), CGAL::to_double(s.y()),
+           CGAL::to_double(s.z()), CGAL::to_double(t.x()),
+           CGAL::to_double(t.y()), CGAL::to_double(t.z()),
+           CGAL::to_double(n.x()), CGAL::to_double(n.y()),
+           CGAL::to_double(n.z()), edge.face_id, exact.str());
     }
   }
 
@@ -2994,6 +3202,10 @@ class Geometry {
           transformPoints(points(nth), transform(nth));
           break;
         }
+        case GEOMETRY_EDGES: {
+          transformEdges(edges(nth), transform(nth));
+          break;
+        }
         default: {
           break;
         }
@@ -3028,6 +3240,10 @@ class Geometry {
         }
         case GEOMETRY_POINTS: {
           transformPoints(points(nth), transform(nth).inverse());
+          break;
+        }
+        case GEOMETRY_EDGES: {
+          transformEdges(edges(nth), transform(nth).inverse());
           break;
         }
         default: {
@@ -3110,6 +3326,7 @@ class Geometry {
   std::vector<std::unique_ptr<Side_of_triangle_mesh>> on_sides_;
   std::vector<std::unique_ptr<Segments>> input_segments_;
   std::vector<std::unique_ptr<Segments>> segments_;
+  std::vector<std::unique_ptr<Edges>> edges_;
   std::vector<std::unique_ptr<Points>> input_points_;
   std::vector<std::unique_ptr<Points>> points_;
   std::vector<CGAL::Bbox_2> bbox2_;
@@ -3386,7 +3603,6 @@ int Clip(Geometry* geometry, int targets, bool open, bool exact) {
   geometry->copyPolygonsWithHolesToGeneralPolygonSets();
   geometry->computeBounds();
 
-  Epeck_to_epick_converter epeck_to_epick;
   for (int target = 0; target < targets; target++) {
     switch (geometry->type(target)) {
       case GEOMETRY_MESH: {
@@ -3699,15 +3915,14 @@ int ComputeNormal(Geometry* geometry) {
         computeNormalOfSurfaceMesh(normal, geometry->mesh(nth));
         geometry->setType(nth, GEOMETRY_POINTS);
         geometry->addPoint(nth, Point(0, 0, 0));
-        geometry->copyTransform(
-            nth, Transformation(CGAL::TRANSLATION, normal).inverse());
+        geometry->copyTransform(nth, translate(normal).inverse());
         break;
       }
       case GEOMETRY_POLYGONS_WITH_HOLES: {
         Vector normal = geometry->plane(nth).orthogonal_vector();
         geometry->setType(nth, GEOMETRY_POINTS);
         geometry->addPoint(nth, Point(0, 0, 0));
-        geometry->copyTransform(nth, Transformation(CGAL::TRANSLATION, normal));
+        geometry->copyTransform(nth, translate(normal));
         break;
       }
     }
@@ -3790,6 +4005,14 @@ int ConvexHull(Geometry* geometry) {
   return STATUS_OK;
 }
 
+int ConvertPolygonsToMeshes(Geometry* geometry) {
+  geometry->transformToAbsoluteFrame();
+  geometry->convertPolygonsToPlanarMeshes();
+  geometry->transformToLocalFrame();
+
+  return STATUS_OK;
+}
+
 int Cut(Geometry* geometry, int targets, bool open, bool exact) {
   size_t size = geometry->size();
   geometry->copyInputMeshesToOutputMeshes();
@@ -3800,7 +4023,6 @@ int Cut(Geometry* geometry, int targets, bool open, bool exact) {
   geometry->copyPolygonsWithHolesToGeneralPolygonSets();
   geometry->computeBounds();
 
-  Epeck_to_epick_converter epeck_to_epick_converter;
   for (int target = 0; target < targets; target++) {
     switch (geometry->type(target)) {
       case GEOMETRY_MESH: {
@@ -4521,7 +4743,6 @@ int Extrude(Geometry* geometry, size_t count) {
               *extruded_mesh);
         }
         geometry->setType(nth, GEOMETRY_MESH);
-        geometry->setIdentityTransform(nth);
         geometry->setMesh(nth, extruded_mesh);
         break;
       }
@@ -4532,46 +4753,6 @@ int Extrude(Geometry* geometry, size_t count) {
   }
 
   geometry->removeEmptyMeshes();
-  geometry->transformToLocalFrame();
-
-  return STATUS_OK;
-}
-
-int Faces(Geometry* geometry) {
-  size_t size = geometry->size();
-
-  geometry->copyInputMeshesToOutputMeshes();
-  geometry->transformToAbsoluteFrame();
-  geometry->convertPolygonsToPlanarMeshes();
-
-  const Point zero(0, 0, 0);
-  const Plane xy_plane(0, 0, 1, 0);
-
-  for (int nth = 0; nth < size; nth++) {
-    switch (geometry->getType(nth)) {
-      case GEOMETRY_MESH: {
-        std::unordered_map<Plane, Arrangement_2> arrangements;
-        convertSurfaceMeshFacesToArrangements(geometry->mesh(nth), arrangements,
-                                              /*use_unit_planes=*/true);
-        for (const auto& entry : arrangements) {
-          const Plane& plane = entry.first;
-          Transformation transform = orient_plane(plane, xy_plane);
-          const Arrangement_2& arrangement = entry.second;
-          int target = geometry->add(GEOMETRY_POLYGONS_WITH_HOLES);
-          convertArrangementToPolygonsWithHoles(arrangement,
-                                                geometry->pwh(target));
-          Point centroid(0, 0, plane.d() * 2);
-          geometry->copyTransform(
-              target,
-              transform * Transformation(CGAL::TRANSLATION, zero - centroid));
-          geometry->plane(target) = plane;
-        }
-        geometry->setType(nth, GEOMETRY_EMPTY);
-        break;
-      }
-    }
-  }
-
   geometry->transformToLocalFrame();
 
   return STATUS_OK;
@@ -4667,12 +4848,9 @@ int FromPolygons(Geometry* geometry, bool close, emscripten::val fill) {
   for (auto& polygon : polygons) {
     std::vector<Vertex_index> vertices;
     for (auto& index : polygon) {
-      // std::cout << "Index: " << index;
       const Triple& triple = triples[index];
       const Point point(triple[0], triple[1], triple[2]);
-      // std::cout << " Point: " << point;
       Vertex_index vertex = ensureVertex(mesh, vertex_map, point);
-      // std::cout << " Vertex: " << vertex << std::endl;
       vertices.push_back(vertex);
     }
     if (mesh.add_face(vertices) == Surface_mesh::null_face()) {
@@ -4702,7 +4880,7 @@ int FromPolygons(Geometry* geometry, bool close, emscripten::val fill) {
   return STATUS_OK;
 }
 
-int Fuse(Geometry* geometry) {
+int Fuse(Geometry* geometry, bool exact) {
   size_t size = geometry->size();
 
   geometry->copyInputMeshesToOutputMeshes();
@@ -4712,28 +4890,43 @@ int Fuse(Geometry* geometry) {
   geometry->copyPolygonsWithHolesToGeneralPolygonSets();
   geometry->computeBounds();
 
-  for (int target = -1, nth = 0; nth < size; nth++) {
-    if (!geometry->is_mesh(nth) || geometry->is_empty_mesh(nth)) {
-      continue;
-    }
-    if (target == -1) {
-      target = geometry->add(GEOMETRY_MESH);
-      geometry->setMesh(target, new Surface_mesh());
-      geometry->setIdentityTransform(target);
-    }
-    if (geometry->noOverlap3(target, nth)) {
-      geometry->mesh(target).join(geometry->mesh(nth));
-    } else {
-      Surface_mesh cutMeshCopy(geometry->mesh(nth));
-      if (!CGAL::Polygon_mesh_processing::corefine_and_compute_union(
-              geometry->mesh(target), cutMeshCopy, geometry->mesh(target),
-              CGAL::parameters::all_default(), CGAL::parameters::all_default(),
-              CGAL::parameters::all_default())) {
-        return STATUS_ZERO_THICKNESS;
+  {
+    int target = -1;
+    for (int nth = 0; nth < size; nth++) {
+      if (!geometry->is_mesh(nth) || geometry->is_empty_mesh(nth)) {
+        continue;
       }
+      if (target == -1) {
+        target = geometry->add(GEOMETRY_MESH);
+        geometry->setMesh(target, new Surface_mesh());
+        geometry->setIdentityTransform(target);
+      }
+      if (geometry->noOverlap3(target, nth)) {
+        geometry->mesh(target).join(geometry->mesh(nth));
+      } else if (exact) {
+        Surface_mesh cutMeshCopy(geometry->mesh(nth));
+        if (!CGAL::Polygon_mesh_processing::corefine_and_compute_union(
+                geometry->mesh(target), cutMeshCopy, geometry->mesh(target),
+                CGAL::parameters::all_default(),
+                CGAL::parameters::all_default(),
+                CGAL::parameters::all_default())) {
+          return STATUS_ZERO_THICKNESS;
+        }
+      } else {
+        // TODO: Optimize out unnecessary conversions.
+        manifold::Manifold target_manifold;
+        buildManifoldFromSurfaceMesh(geometry->mesh(target), target_manifold);
+        manifold::Manifold nth_manifold;
+        buildManifoldFromSurfaceMesh(geometry->mesh(nth), nth_manifold);
+        target_manifold += nth_manifold;
+        geometry->mesh(target).clear();
+        buildSurfaceMeshFromManifold(target_manifold, geometry->mesh(target));
+      }
+      geometry->updateBounds3(target);
+    }
+    if (target != -1) {
       demesh(geometry->mesh(target));
     }
-    geometry->updateBounds3(target);
   }
 
   int first_gps = geometry->size();
@@ -5610,6 +5803,19 @@ int Offset(Geometry* geometry, double initial, double step, double limit,
   return STATUS_OK;
 }
 
+template <typename Triangle_mesh, typename Kernel>
+bool inside_any(const Segment& segment,
+                std::vector<CGAL::Side_of_triangle_mesh<Triangle_mesh, Kernel>>&
+                    selections) {
+  for (const auto& selection : selections) {
+    if (selection(segment.source()) != CGAL::ON_UNBOUNDED_SIDE &&
+        selection(segment.target()) != CGAL::ON_UNBOUNDED_SIDE) {
+      return true;
+    }
+  }
+  return false;
+}
+
 int Outline(Geometry* geometry) {
   int size = geometry->size();
 
@@ -5654,7 +5860,6 @@ int Outline(Geometry* geometry) {
           }
           const Plane facet_plane =
               ensureFacetPlane(mesh, facet_to_plane, planes, facet);
-          Vector unitNormal = unitVector(NormalOfSurfaceMeshFacet(mesh, facet));
           Halfedge_index edge = start;
           do {
             bool corner = false;
@@ -5686,6 +5891,180 @@ int Outline(Geometry* geometry) {
       }
     }
   }
+
+  return STATUS_OK;
+}
+
+int FaceEdges(Geometry* geometry, int count) {
+  int size = geometry->size();
+
+  geometry->copyInputSegmentsToOutputSegments();
+  geometry->copyInputMeshesToOutputMeshes();
+  geometry->transformToAbsoluteFrame();
+
+  std::vector<CGAL::Side_of_triangle_mesh<Surface_mesh, Kernel>> selections;
+  for (int nth = count; nth < size; nth++) {
+    if (geometry->is_mesh(nth)) {
+      selections.emplace_back(geometry->mesh(nth));
+    }
+  }
+
+  for (int nth = 0; nth < count; nth++) {
+    switch (geometry->getType(nth)) {
+      case GEOMETRY_SEGMENTS: {
+        break;
+      }
+      case GEOMETRY_POLYGONS_WITH_HOLES: {
+        int face_target = geometry->add(GEOMETRY_POLYGONS_WITH_HOLES);
+        geometry->plane(face_target) = geometry->plane(nth);
+        geometry->pwh(face_target) = geometry->pwh(nth);
+        int target = geometry->add(GEOMETRY_EDGES);
+        const Plane& plane = geometry->plane(nth);
+        Vector normal = unitVector(plane.orthogonal_vector());
+        for (const Polygon_with_holes_2& polygon : geometry->pwh(nth)) {
+          for (auto s2 = polygon.outer_boundary().edges_begin();
+               s2 != polygon.outer_boundary().edges_end(); ++s2) {
+            Segment segment(plane.to_3d(s2->source()),
+                            plane.to_3d(s2->target()));
+            if (selections.empty() || inside_any(segment, selections)) {
+              geometry->addEdge(target,
+                                Edge(segment, segment.source() + normal));
+            }
+          }
+          for (auto hole = polygon.holes_begin(); hole != polygon.holes_end();
+               ++hole) {
+            for (auto s2 = hole->edges_begin(); s2 != hole->edges_end(); ++s2) {
+              Segment segment(plane.to_3d(s2->source()),
+                              plane.to_3d(s2->target()));
+              if (selections.empty() || inside_any(segment, selections)) {
+                geometry->addEdge(target,
+                                  Edge(segment, segment.source() + normal));
+              }
+            }
+          }
+        }
+        break;
+      }
+      case GEOMETRY_MESH: {
+        const Surface_mesh& mesh = geometry->mesh(nth);
+        int all_edge_target = geometry->add(GEOMETRY_EDGES);
+
+        std::unordered_set<Plane> planes;
+        std::unordered_map<Face_index, Plane> facet_to_plane;
+        CGAL::Unique_hash_map<Face_index, Face_index> facet_to_face;
+
+        // Initialize the face map.
+        for (const auto& facet : mesh.faces()) {
+          facet_to_face[facet] = facet;
+        }
+
+        // FIX: Make this more efficient.
+        for (const auto& facet : mesh.faces()) {
+          const auto& start = mesh.halfedge(facet);
+          if (mesh.is_removed(start)) {
+            continue;
+          }
+          const Plane facet_plane =
+              ensureFacetPlane(mesh, facet_to_plane, planes, facet);
+          Halfedge_index edge = start;
+          do {
+            Plane bisecting_plane;
+            Vector edge_normal;
+            bool corner = false;
+            const auto& opposite_facet = mesh.face(mesh.opposite(edge));
+            if (opposite_facet == mesh.null_face()) {
+              bisecting_plane = facet_plane;
+              corner = true;
+            } else {
+              const Plane opposite_facet_plane = ensureFacetPlane(
+                  mesh, facet_to_plane, planes, opposite_facet);
+              if (facet_plane != opposite_facet_plane) {
+                Plane bisecting_plane =
+                    CGAL::bisector(facet_plane, opposite_facet_plane);
+                edge_normal = unitVector(bisecting_plane.orthogonal_vector());
+                corner = true;
+              } else {
+                // Set up an equivalence tree toward the lowest id.
+                if (facet_to_face[facet] < facet_to_face[opposite_facet]) {
+                  for (const auto& f : mesh.faces()) {
+                    if (facet_to_face[f] == facet_to_face[opposite_facet]) {
+                      facet_to_face[f] = facet_to_face[facet];
+                    }
+                  }
+                } else {
+                  for (const auto& f : mesh.faces()) {
+                    if (facet_to_face[f] == facet_to_face[facet]) {
+                      facet_to_face[f] = facet_to_face[opposite_facet];
+                    }
+                  }
+                }
+              }
+            }
+            if (corner) {
+              Point s = mesh.point(mesh.source(edge));
+              Point t = mesh.point(mesh.target(edge));
+              Segment segment = Segment(s, t);
+
+              if (selections.empty() || inside_any(segment, selections)) {
+                geometry->addEdge(all_edge_target,
+                                  Edge(segment, s + edge_normal, int(facet)));
+#if 0
+                // Show the normal.
+                geometry->addEdge(all_edge_target,
+                                  Edge(Segment(s, s + edge_normal),
+                                       Point(0, 0, 0), int(facet)));
+#endif
+              }
+            }
+            const auto& next = mesh.next(edge);
+            edge = next;
+          } while (edge != start);
+        }
+
+        std::set<int> face_ids;
+
+        // Update the edges with their canonical face affiliation.
+        for (auto& edge : geometry->edges(all_edge_target)) {
+          edge.face_id = int(facet_to_face[Face_index(edge.face_id)]);
+          face_ids.insert(edge.face_id);
+        }
+
+        // Build edges / polygons pairs.
+        for (auto& face_id : face_ids) {
+          int face_target = geometry->add(GEOMETRY_POLYGONS_WITH_HOLES);
+          int edge_target = geometry->add(GEOMETRY_EDGES);
+          const Plane& plane = unitPlane(facet_to_plane[Face_index(face_id)]);
+          const Plane xy_plane(0, 0, 1, 0);
+          Transformation disorientation = disorient_plane_along_z(plane);
+
+          Arrangement_2 arrangement;
+          for (auto& edge : geometry->edges(all_edge_target)) {
+            if (edge.face_id == face_id) {
+              insert(arrangement,
+                     Segment_2(plane.to_2d(edge.segment.source()),
+                               plane.to_2d(edge.segment.target())));
+              geometry->addEdge(edge_target, edge);
+            }
+          }
+          Polygons_with_holes_2 pwhs;
+          convertSimpleArrangementToPolygonsWithHoles(arrangement, pwhs);
+          geometry->pwh(face_target) = std::move(pwhs);
+          geometry->copyTransform(edge_target, disorientation.inverse());
+          geometry->copyTransform(face_target, disorientation.inverse());
+          geometry->plane(face_target) = plane;
+        }
+
+        geometry->setType(all_edge_target, GEOMETRY_EMPTY);
+        break;
+      }
+      default: {
+        geometry->setType(nth, GEOMETRY_EMPTY);
+        break;
+      }
+    }
+  }
+
+  geometry->transformToLocalFrame();
 
   return STATUS_OK;
 }
@@ -6852,24 +7231,40 @@ std::shared_ptr<const Transformation> Transformation__rotate_z(double a) {
       cos_alpha, sin_alpha, 0, 0, -sin_alpha, cos_alpha, 0, 0, 0, 0, w, 0, w));
 }
 
-std::shared_ptr<const Transformation> Transformation__rotate_z_toward(
-    double x, double y) {
-  RT sin_alpha, cos_alpha, w;
-  CGAL::rational_rotation_approximation(FT(x), FT(y), sin_alpha, cos_alpha, w,
-                                        RT(1), RT(1000));
-  return std::shared_ptr<const Transformation>(new Transformation(
-      cos_alpha, sin_alpha, 0, 0, -sin_alpha, cos_alpha, 0, 0, 0, 0, w, 0, w));
+std::shared_ptr<const Transformation> Transformation__rotate_x_to_y0(double x,
+                                                                     double y,
+                                                                     double z) {
+  Transformation transform = rotate_x_to_y0(Vector(x, y, z));
+  return std::shared_ptr<const Transformation>(new Transformation(transform));
 }
 
-Transformation Righten(Vector current) {
-  return orient(current, Vector(0, 0, 1));
+std::shared_ptr<const Transformation> Transformation__rotate_y_to_x0(double x,
+                                                                     double y,
+                                                                     double z) {
+  Transformation transform = rotate_y_to_x0(Vector(x, y, z));
+  return std::shared_ptr<const Transformation>(new Transformation(transform));
+}
+
+std::shared_ptr<const Transformation> Transformation__rotate_z_to_y0(double x,
+                                                                     double y,
+                                                                     double z) {
+  Transformation transform = rotate_z_to_y0(Vector(x, y, z));
+  return std::shared_ptr<const Transformation>(new Transformation(transform));
 }
 
 std::shared_ptr<const Transformation> InverseSegmentTransform(
     double startX, double startY, double startZ, double endX, double endY,
     double endZ, double normalX, double normalY, double normalZ) {
+#if 1
+  Point zero(0, 0, 0);
+  Point start(startX, startY, startZ);
+  Point end(endX, endY, endZ);
+  Transformation align(CGAL::IDENTITY);
+  disorient_along_z(end - start, Vector(normalX, normalY, normalZ), align);
+  return std::shared_ptr<const Transformation>(
+      new Transformation(align * translate(zero - start)));
+#else
   Transformation orient =
-      Righten(unitVector(Vector(normalX, normalY, normalZ))) *
       Transformation(CGAL::TRANSLATION, Vector(-startX, -startY, -startZ));
 
   Point oriented_end = Point(endX, endY, endZ).transform(orient);
@@ -6900,8 +7295,22 @@ std::shared_ptr<const Transformation> InverseSegmentTransform(
     align = rotation * align;
   }
 
+  Point oriented_normal = Point(normalX, normalY, normalZ).transform(align);
+
+  if (oriented_normal.y() != 0) {
+    RT sin_alpha, cos_alpha, w;
+    CGAL::rational_rotation_approximation(oriented_normal.y(),
+                                          -oriented_normal.z(), sin_alpha,
+                                          cos_alpha, w, RT(1), RT(1000));
+    // X rotation to bring the normal to the x axis.
+    Transformation rotation(w, 0, 0, 0, 0, cos_alpha, -sin_alpha, 0, 0,
+                            sin_alpha, cos_alpha, 0, w);
+    align = rotation * align;
+  }
+
   return std::shared_ptr<const Transformation>(
       new Transformation(align * orient));
+#endif
 }
 
 void Polygon_2__add(Polygon_2* polygon, double x, double y) {
@@ -6934,8 +7343,12 @@ EMSCRIPTEN_BINDINGS(module) {
   emscripten::function("Transformation__rotate_x", &Transformation__rotate_x);
   emscripten::function("Transformation__rotate_y", &Transformation__rotate_y);
   emscripten::function("Transformation__rotate_z", &Transformation__rotate_z);
-  emscripten::function("Transformation__rotate_z_toward",
-                       &Transformation__rotate_z_toward);
+  emscripten::function("Transformation__rotate_x_to_y0",
+                       &Transformation__rotate_x_to_y0);
+  emscripten::function("Transformation__rotate_y_to_x0",
+                       &Transformation__rotate_y_to_x0);
+  emscripten::function("Transformation__rotate_z_to_y0",
+                       &Transformation__rotate_z_to_y0);
   emscripten::function("InverseSegmentTransform", &InverseSegmentTransform);
 
   emscripten::class_<Triples>("Triples")
@@ -7020,6 +7433,7 @@ EMSCRIPTEN_BINDINGS(module) {
       .function("fillPolygonsWithHoles", &Geometry::fillPolygonsWithHoles)
       .function("emitPoints", &Geometry::emitPoints)
       .function("emitPolygonsWithHoles", &Geometry::emitPolygonsWithHoles)
+      .function("emitEdges", &Geometry::emitEdges)
       .function("emitSegments", &Geometry::emitSegments)
       .function("getInputMesh", &Geometry::getMesh)
       .function("getMesh", &Geometry::getMesh)
@@ -7062,6 +7476,8 @@ EMSCRIPTEN_BINDINGS(module) {
                        emscripten::allow_raw_pointers());
   emscripten::function("ConvexHull", &ConvexHull,
                        emscripten::allow_raw_pointers());
+  emscripten::function("ConvertPolygonsToMeshes", &ConvertPolygonsToMeshes,
+                       emscripten::allow_raw_pointers());
   emscripten::function("Cut", &Cut, emscripten::allow_raw_pointers());
   emscripten::function("Deform", &Deform, emscripten::allow_raw_pointers());
   emscripten::function("Demesh", &Demesh, emscripten::allow_raw_pointers());
@@ -7071,7 +7487,8 @@ EMSCRIPTEN_BINDINGS(module) {
   emscripten::function("EachTriangle", &EachTriangle,
                        emscripten::allow_raw_pointers());
   emscripten::function("Extrude", &Extrude, emscripten::allow_raw_pointers());
-  emscripten::function("Faces", &Faces, emscripten::allow_raw_pointers());
+  emscripten::function("FaceEdges", &FaceEdges,
+                       emscripten::allow_raw_pointers());
   emscripten::function("Fill", &Fill, emscripten::allow_raw_pointers());
   emscripten::function("Fix", &Fix, emscripten::allow_raw_pointers());
   emscripten::function("FromPolygons", &FromPolygons,

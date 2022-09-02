@@ -13,7 +13,7 @@
     "rollup": "lerna run rollup",
     "doc": "node doc/update.js",
     "test": "lerna run tests",
-    "tests": "lerna run tests"
+    "tests": "lerna run tests --stream --concurrency=1"
   },
   "contributors": [
     {

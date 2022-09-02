@@ -38,7 +38,7 @@ const Z = 2;
 // up rotates around the axis to point a dorsal position toward.
 
 export const orient = Shape.chainable(
-  ({ at = [0, 0, 0], to = [0, 0, 0], up = [0, 0, 0] }) =>
+  ({ at = [0, 0, 0], to = [0, 0, 1], up = [1, 0, 0] } = {}) =>
     (shape) => {
       const { local } = getInverseMatrices(shape.toGeometry());
       // Algorithm from threejs Matrix4

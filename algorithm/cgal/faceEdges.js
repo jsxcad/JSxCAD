@@ -3,12 +3,12 @@ import { fromCgalGeometry, withCgalGeometry } from './cgalGeometry.js';
 
 import { ErrorZeroThickness } from './error.js';
 
-export const faces = (inputs) =>
-  withCgalGeometry(inputs, (cgalGeometry, g) => {
-    const status = g.Faces(cgalGeometry);
+export const faceEdges = (inputs, count) => {
+  return withCgalGeometry(inputs, (cgalGeometry, g) => {
+    const status = g.FaceEdges(cgalGeometry, count);
     switch (status) {
       case STATUS_ZERO_THICKNESS:
-        throw new ErrorZeroThickness('Zero thickness produced by faces');
+        throw new ErrorZeroThickness('Zero thickness produced by faceEdges');
       case STATUS_OK:
         return fromCgalGeometry(
           cgalGeometry,
@@ -20,3 +20,4 @@ export const faces = (inputs) =>
         throw new Error(`Unexpected status ${status}`);
     }
   });
+};

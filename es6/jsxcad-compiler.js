@@ -23051,9 +23051,6 @@ const appendViewGroupCode = (
   if (!astToAppend) {
     return;
   }
-  console.log(
-    `QQ/appendViewGroupCode/rewriteOrient: ${main_3(astToAppend).code}`
-  );
   main_1(ast, {
     visitCallExpression(expression) {
       try {
@@ -23095,7 +23092,6 @@ const deleteViewGroupCode = (script, { viewId, nth }) => {
       }
     },
   });
-  console.log(main_3(ast).code);
   return main_3(ast).code;
 };
 

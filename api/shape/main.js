@@ -80,6 +80,7 @@ export { cutopen } from './cutopen.js';
 export { cutout } from './cutout.js';
 export { deform } from './deform.js';
 export { demesh } from './demesh.js';
+export { destructure } from './destructure.js';
 export { disjoint } from './disjoint.js';
 export { drop } from './drop.js';
 export { ensurePages } from './Page.js';

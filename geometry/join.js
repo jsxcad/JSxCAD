@@ -3,18 +3,17 @@ import {
   join as joinWithCgal,
 } from '@jsxcad/algorithm-cgal';
 
-import { isNotTypeGhost, isTypeVoid } from './tagged/type.js';
+import { isNotTypeGhost } from './tagged/type.js';
 import { linearize } from './tagged/linearize.js';
 import { replacer } from './tagged/visit.js';
 import { toConcreteGeometry } from './tagged/toConcreteGeometry.js';
 
 const filter = (noVoid) => (geometry) =>
   ['graph', 'polygonsWithHoles', 'segments'].includes(geometry.type) &&
-  (isNotTypeGhost(geometry) || (!noVoid && isTypeVoid(geometry)));
+  isNotTypeGhost(geometry);
 
 const filterAdds = (noVoid) => (geometry) =>
-  filter(geometry) &&
-  (isNotTypeGhost(geometry) || !noVoid || isTypeVoid(geometry));
+  filter(geometry) && isNotTypeGhost(geometry);
 
 export const join = (geometry, geometries, exact, noVoid) => {
   const concreteGeometry = toConcreteGeometry(geometry);

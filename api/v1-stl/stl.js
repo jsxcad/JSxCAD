@@ -1,4 +1,4 @@
-import { Shape, ensurePages } from '@jsxcad/api-shape';
+import { Shape, destructure, ensurePages } from '@jsxcad/api-shape';
 import {
   addPending,
   emit,
@@ -37,12 +37,15 @@ export const prepareStl = (shape, name, op = (s) => s, options = {}) => {
   return entries;
 };
 
-export const stl = (name, op, options) => (shape) => {
-  const entries = prepareStl(shape, name, op, options);
-  const download = { entries };
-  const hash = hashSum({ name }) + hashGeometry(shape.toGeometry());
-  emit({ download, hash });
-  return shape;
-};
+export const stl =
+  (...args) =>
+  (shape) => {
+    const { value: name, func: op, object: options } = destructure(args);
+    const entries = prepareStl(shape, name, op, options);
+    const download = { entries };
+    const hash = hashSum({ name }) + hashGeometry(shape.toGeometry());
+    emit({ download, hash });
+    return shape;
+  };
 
 Shape.registerMethod('stl', stl);

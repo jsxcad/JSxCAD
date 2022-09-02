@@ -1,5 +1,6 @@
 import { hasShowOutline, hasShowSkin, hasShowWireframe } from './show.js';
 
+import { convertPolygonsToMeshes } from '../convertPolygonsToMeshes.js';
 import { isNotTypeVoid } from './type.js';
 import { rewrite } from './visit.js';
 import { serialize } from '../serialize.js';
@@ -10,7 +11,7 @@ export const soup = (
   geometry,
   { doTriangles = true, doOutline = true, doWireframe = true } = {}
 ) => {
-  geometry = serialize(geometry);
+  geometry = serialize(convertPolygonsToMeshes(geometry));
   const show = (geometry) => {
     if (doTriangles) {
       geometry = hasShowSkin(geometry);

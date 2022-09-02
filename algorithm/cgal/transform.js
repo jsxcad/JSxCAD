@@ -209,10 +209,7 @@ export const fromScaleToTransform = (x = 0, y = 0, z = 0) => {
 
 export const fromSegmentToInverseTransform = (
   [[startX = 0, startY = 0, startZ = 0], [endX = 0, endY = 0, endZ = 0]],
-  [
-    [originX = 0, originY = 0, originZ = 0] = [],
-    [normalX = 0, normalY = 0, normalZ = 1] = [],
-  ] = []
+  [normalX = 0, normalY = 0, normalZ = 1]
 ) => {
   try {
     return toJsTransformFromCgalTransform(
@@ -223,9 +220,9 @@ export const fromSegmentToInverseTransform = (
         endX,
         endY,
         endZ,
-        normalX - originX,
-        normalY - originY,
-        normalZ - originZ
+        normalX,
+        normalY,
+        normalZ
       )
     );
   } catch (error) {
@@ -253,3 +250,18 @@ export const matrix6 = (a, b, c, d, tx, ty) => [
   0,
   1,
 ];
+
+export const rotateXToY0 = ([x, y, z]) =>
+  toJsTransformFromCgalTransform(
+    getCgal().Transformation__rotate_x_to_y0(x, y, z)
+  );
+
+export const rotateYToX0 = ([x, y, z]) =>
+  toJsTransformFromCgalTransform(
+    getCgal().Transformation__rotate_y_to_x0(x, y, z)
+  );
+
+export const rotateZToY0 = ([x, y, z]) =>
+  toJsTransformFromCgalTransform(
+    getCgal().Transformation__rotate_z_to_y0(x, y, z)
+  );
