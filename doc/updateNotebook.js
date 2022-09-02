@@ -17,7 +17,9 @@ import { screenshot } from './screenshot.js';
 import { toHtml } from '@jsxcad/convert-notebook';
 
 const IGNORED_PIXEL_THRESHOLD_OBSERVED_PATHS = new Set([
-  'nb/regression/shape/shape.md.51.observed.png',
+  'nb/regression/shapes/shapes.md.10.observed.png',
+  'nb/regression/shapes/shapes.md.56.observed.png',
+  'nb/regression/shapes/shapes.md.57.observed.png',
   'nb/regression/smooth/smooth.md.3.observed.png',
 ]);
 const PIXEL_THRESHOLD = 3000;
