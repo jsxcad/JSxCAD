@@ -12,8 +12,8 @@
     "publish-npm": "lerna publish",
     "rollup": "lerna run rollup",
     "doc": "node doc/update.js",
-    "test": "lerna run tests",
-    "tests": "lerna run tests --stream --concurrency=1"
+    "test": "lerna run tests --stream --concurrency=1 ",
+    "tests": "lerna run tests --stream --concurrency=1 --loglevel=silly"
   },
   "contributors": [
     {
@@ -58,7 +58,7 @@
     "eslint-plugin-promise": "^4.0.1",
     "eslint-plugin-react": "^7.17.0",
     "eslint-plugin-standard": "^4.0.0",
-    "lerna": "^4.0.0",
+    "lerna": "^5.5.0",
     "prettier": "^2.3.1"
   },
   "publishConfig": {

@@ -5,13 +5,18 @@ import test from 'ava';
 import { toFont } from './toFont.js';
 
 test('Render a letter', async (t) => {
+  console.log('1/boot');
   await boot();
+  console.log('2/read');
   const bytes = await read('GreatVibes-Regular.ttf', {
     doSerialize: false,
     sources: ['GreatVibes-Regular.ttf'],
   });
+  console.log('3/toFont');
   const font = toFont({}, bytes);
+  console.log('4/font');
   const letterA = font({}, 'ab');
+  console.log('5/serialize');
   t.deepEqual(JSON.parse(JSON.stringify(serialize(letterA))), {
     type: 'group',
     tags: [],
