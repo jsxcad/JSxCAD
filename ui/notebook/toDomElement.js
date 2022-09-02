@@ -1,7 +1,7 @@
 /* global Blob, alert */
 
 import { decode } from 'base64-arraybuffer';
-import marked from 'marked';
+import { marked } from 'marked';
 import { orbitDisplay } from '@jsxcad/ui-threejs';
 import { readOrWatch } from '@jsxcad/sys';
 import saveAs from 'file-saver';
