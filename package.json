@@ -12,7 +12,7 @@
     "publish-npm": "lerna publish",
     "rollup": "lerna run rollup",
     "doc": "node doc/update.js",
-    "test": "lerna run tests --stream --concurrency=1",
+    "test": "lerna run tests --stream --concurrency=1 ",
     "tests": "lerna run tests --stream --concurrency=1 --loglevel=silly"
   },
   "contributors": [
