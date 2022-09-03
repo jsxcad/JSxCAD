@@ -1185,9 +1185,12 @@ class App extends React.Component {
       try {
         this.Model.saving = true;
         const { workspace } = this.props;
-        const { WorkspaceOpenPaths } = this.state;
+        const { WorkspaceOpenPaths, WorkspaceLoadPath, WorkspaceLoadPrefix } =
+          this.state;
         const config = {
           WorkspaceOpenPaths,
+          WorkspaceLoadPath,
+          WorkspaceLoadPrefix,
         };
         await write('config/Workspace', config, { workspace });
       } finally {
@@ -1196,7 +1199,42 @@ class App extends React.Component {
     };
 
     this.Workspace.restore = async () => {
-      // We restore these via Model.restore.
+      // We restore WorkspaceOpenPaths via Model.restore.
+      const { WorkspaceLoadPath, WorkspaceLoadPrefix } = await read(
+        'config/Workspace',
+        { workspace }
+      );
+      await this.updateState({ WorkspaceLoadPath, WorkspaceLoadPrefix });
+    };
+
+    this.Workspace.export = async (prefix) => {
+      const { WorkspaceFiles = [] } = this.state;
+      const { workspace } = this.props;
+      const directory = await window.showDirectoryPicker({ mode: 'readwrite' });
+      const sourcePrefix = `source/${prefix}`;
+      const getFile = async (cwd, pieces) => {
+        if (pieces.length >= 2) {
+          return getFile(
+            await cwd.getDirectoryHandle(pieces[0], { create: true }),
+            pieces.slice(1)
+          );
+        } else {
+          return cwd.getFileHandle(pieces[0], { create: true });
+        }
+      };
+      for (const path of WorkspaceFiles) {
+        if (path.startsWith(sourcePrefix)) {
+          const file = await getFile(
+            directory,
+            path.substring(sourcePrefix.length).split('/')
+          );
+          const writable = await file.createWritable();
+          const data = await read(path, { workspace });
+          await writable.write(data);
+          await writable.close();
+        }
+      }
+      await this.Workspace.store();
     };
 
     this.factory = (node) => {
@@ -1206,6 +1244,7 @@ class App extends React.Component {
             WorkspaceFiles = [],
             WorkspaceOpenPaths = [],
             WorkspaceLoadPath,
+            WorkspaceLoadPrefix,
           } = this.state;
           const isDisabled = (file) =>
             WorkspaceOpenPaths.includes(file.substring(7));
@@ -1220,6 +1259,33 @@ class App extends React.Component {
                     <Form>
                       <Row>
                         <Col>
+                          <Form.Group controlId="WorkspaceLoadPrefixId">
+                            <Form.Control
+                              placeholder="Prefix"
+                              onChange={(e) =>
+                                this.updateState({
+                                  WorkspaceLoadPrefix: e.target.value,
+                                })
+                              }
+                              value={WorkspaceLoadPrefix}
+                            />
+                            <Form.Text>Prefix</Form.Text>
+                          </Form.Group>
+                        </Col>
+                        <Col>
+                          <Button
+                            onClick={() => {
+                              const { WorkspaceLoadPrefix } = this.state;
+                              this.Workspace.export(WorkspaceLoadPrefix);
+                            }}
+                            disabled={!WorkspaceLoadPrefix}
+                          >
+                            Export
+                          </Button>
+                        </Col>
+                      </Row>
+                      <Row>
+                        <Col>
                           <Form.Group controlId="WorkspaceLoadPathId">
                             <Form.Control
                               placeholder="URL or Path"
@@ -1228,15 +1294,20 @@ class App extends React.Component {
                                   WorkspaceLoadPath: e.target.value,
                                 })
                               }
+                              value={WorkspaceLoadPath}
                             />
+                            <Form.Text>Path</Form.Text>
                           </Form.Group>
                         </Col>
                         <Col xs="auto">
                           <Button
                             variant="primary"
                             onClick={() => {
-                              const { WorkspaceLoadPath } = this.state;
-                              this.Workspace.loadWorkingPath(WorkspaceLoadPath);
+                              const { WorkspaceLoadPath, WorkspaceLoadPrefix } =
+                                this.state;
+                              this.Workspace.loadWorkingPath(
+                                `${WorkspaceLoadPrefix}${WorkspaceLoadPath}`
+                              );
                             }}
                             disabled={!WorkspaceLoadPath}
                           >
@@ -1250,7 +1321,7 @@ class App extends React.Component {
                             onChange={(e) => {
                               const { WorkspaceLoadPath } = this.state;
                               this.Workspace.uploadWorkingPath(
-                                WorkspaceLoadPath,
+                                `${WorkspaceLoadPrefix}${WorkspaceLoadPath}`,
                                 e
                               );
                             }}
