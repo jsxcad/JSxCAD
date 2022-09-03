@@ -94,7 +94,7 @@ const fromPartToPolygons = async (
       return { content: [geometry] };
     }
   }
-  const data = read(path, { sources });
+  const data = read(path, { sources, allowFetch });
   const code = fromDataToCode(await data);
   if (type === 'part') {
     console.log(`fromLDraw: Computing ${part}`);
