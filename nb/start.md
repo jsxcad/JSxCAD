@@ -4,9 +4,9 @@ Press Shift-Enter or click Run above to generate notebook.
 
 ## Links
 
-1. [Documentation](../nb/documentation/index.md)
-1. [Regression](../nb/regression/regression.md)
-1. [Projects](../nb/projects/index.md)
+1. [Documentation](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/documentation/index.nb)
+1. [Regression](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/regression/regression.nb)
+1. [Projects](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/projects/index.nb)
 
 ## Introduction
 
@@ -25,10 +25,10 @@ Clicking on a view maximizes and allows rotation and animation; use Escape to re
 You can Control-Click on a link in the editor to visit a page.
 
 '''
-import 'https://gitcdn.link/cdn/jsxcad/JSxCAD/master/nb/examples.nb';
+import 'https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/examples.nb';
 '''
 
-You can click on links in a notebook, like so: [examples.nb](../nb/examples.md)
+You can click on links in a notebook, like so: [examples.nb](#JSxCAD@https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/examples.nb)
 
 The back button should return as usual, and urls can be bookmarked normally.
 

@@ -1555,7 +1555,11 @@ class App extends React.Component {
 
     window.onhashchange = ({ newURL }) => {
       const hash = new URL(newURL).hash.substring(1);
-      const [workspace, path] = hash.split('@');
+      let [workspace, path] = hash.split('@');
+      if (path === undefined) {
+        path = workspace;
+        workspace = 'JSxCAD';
+      }
       console.log({ workspace, path });
       this.Notebook.clickLink(undefined, path);
     };

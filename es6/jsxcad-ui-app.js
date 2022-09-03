@@ -41256,7 +41256,13 @@ class App extends ReactDOM$2.Component {
       newURL
     }) => {
       const hash = new URL(newURL).hash.substring(1);
-      const [workspace, path] = hash.split('@');
+      let [workspace, path] = hash.split('@');
+
+      if (path === undefined) {
+        path = workspace;
+        workspace = 'JSxCAD';
+      }
+
       console.log({
         workspace,
         path
