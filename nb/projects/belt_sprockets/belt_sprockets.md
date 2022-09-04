@@ -53,7 +53,7 @@ export const Pulley = (profile, teeth) => {
   }
   const teethToCut = Group(...teethArray);
 
-  return center.cut(teethToCut);
+  return center.cut(teethToCut).clean();
 };
 ```
 
