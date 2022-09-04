@@ -40953,10 +40953,14 @@ class App extends ReactDOM$2.Component {
           workspace
         } = this.props;
         const {
-          WorkspaceOpenPaths
+          WorkspaceOpenPaths,
+          WorkspaceLoadPath,
+          WorkspaceLoadPrefix
         } = this.state;
         const config = {
-          WorkspaceOpenPaths
+          WorkspaceOpenPaths,
+          WorkspaceLoadPath,
+          WorkspaceLoadPrefix
         };
         await write('config/Workspace', config, {
           workspace
@@ -40966,7 +40970,57 @@ class App extends ReactDOM$2.Component {
       }
     };
 
-    this.Workspace.restore = async () => {// We restore these via Model.restore.
+    this.Workspace.restore = async () => {
+      // We restore WorkspaceOpenPaths via Model.restore.
+      const {
+        WorkspaceLoadPath,
+        WorkspaceLoadPrefix
+      } = await read('config/Workspace', {
+        workspace
+      });
+      await this.updateState({
+        WorkspaceLoadPath,
+        WorkspaceLoadPrefix
+      });
+    };
+
+    this.Workspace.export = async prefix => {
+      const {
+        WorkspaceFiles = []
+      } = this.state;
+      const {
+        workspace
+      } = this.props;
+      const directory = await window.showDirectoryPicker({
+        mode: 'readwrite'
+      });
+      const sourcePrefix = `source/${prefix}`;
+
+      const getFile = async (cwd, pieces) => {
+        if (pieces.length >= 2) {
+          return getFile(await cwd.getDirectoryHandle(pieces[0], {
+            create: true
+          }), pieces.slice(1));
+        } else {
+          return cwd.getFileHandle(pieces[0], {
+            create: true
+          });
+        }
+      };
+
+      for (const path of WorkspaceFiles) {
+        if (path.startsWith(sourcePrefix)) {
+          const file = await getFile(directory, path.substring(sourcePrefix.length).split('/'));
+          const writable = await file.createWritable();
+          const data = await read(path, {
+            workspace
+          });
+          await writable.write(data);
+          await writable.close();
+        }
+      }
+
+      await this.Workspace.store();
     };
 
     this.factory = node => {
@@ -40976,7 +41030,8 @@ class App extends ReactDOM$2.Component {
             const {
               WorkspaceFiles = [],
               WorkspaceOpenPaths = [],
-              WorkspaceLoadPath
+              WorkspaceLoadPath,
+              WorkspaceLoadPrefix
             } = this.state;
 
             const isDisabled = file => WorkspaceOpenPaths.includes(file.substring(7));
@@ -40984,21 +41039,39 @@ class App extends ReactDOM$2.Component {
             const computeListItemVariant = file => isDisabled(file) ? 'secondary' : 'primary';
 
             return v$1("div", null, v$1(Card, null, v$1(Card.Body, null, v$1(Card.Title, null, "Load Working Path"), v$1(Card.Text, null, v$1(FormImpl, null, v$1(Row, null, v$1(Col, null, v$1(FormImpl.Group, {
+              controlId: "WorkspaceLoadPrefixId"
+            }, v$1(FormImpl.Control, {
+              placeholder: "Prefix",
+              onChange: e => this.updateState({
+                WorkspaceLoadPrefix: e.target.value
+              }),
+              value: WorkspaceLoadPrefix
+            }), v$1(FormImpl.Text, null, "Prefix"))), v$1(Col, null, v$1(Button, {
+              onClick: () => {
+                const {
+                  WorkspaceLoadPrefix
+                } = this.state;
+                this.Workspace.export(WorkspaceLoadPrefix);
+              },
+              disabled: !WorkspaceLoadPrefix
+            }, "Export"))), v$1(Row, null, v$1(Col, null, v$1(FormImpl.Group, {
               controlId: "WorkspaceLoadPathId"
             }, v$1(FormImpl.Control, {
               placeholder: "URL or Path",
               onChange: e => this.updateState({
                 WorkspaceLoadPath: e.target.value
-              })
-            }))), v$1(Col, {
+              }),
+              value: WorkspaceLoadPath
+            }), v$1(FormImpl.Text, null, "Path"))), v$1(Col, {
               xs: "auto"
             }, v$1(Button, {
               variant: "primary",
               onClick: () => {
                 const {
-                  WorkspaceLoadPath
+                  WorkspaceLoadPath,
+                  WorkspaceLoadPrefix
                 } = this.state;
-                this.Workspace.loadWorkingPath(WorkspaceLoadPath);
+                this.Workspace.loadWorkingPath(`${WorkspaceLoadPrefix}${WorkspaceLoadPath}`);
               },
               disabled: !WorkspaceLoadPath
             }, "Add"), v$1(FormImpl.Control, {
@@ -41010,7 +41083,7 @@ class App extends ReactDOM$2.Component {
                 const {
                   WorkspaceLoadPath
                 } = this.state;
-                this.Workspace.uploadWorkingPath(WorkspaceLoadPath, e);
+                this.Workspace.uploadWorkingPath(`${WorkspaceLoadPrefix}${WorkspaceLoadPath}`, e);
               },
               style: {
                 display: 'none'
@@ -41256,7 +41329,13 @@ class App extends ReactDOM$2.Component {
       newURL
     }) => {
       const hash = new URL(newURL).hash.substring(1);
-      const [workspace, path] = hash.split('@');
+      let [workspace, path] = hash.split('@');
+
+      if (path === undefined) {
+        path = workspace;
+        workspace = 'JSxCAD';
+      }
+
       console.log({
         workspace,
         path

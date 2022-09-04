@@ -30,7 +30,7 @@ test('fuzz', (t) => {
   const rng = new Prando(0);
   const g = () =>
     rng.next() < 0.25 ? 0 : Math.min(Math.max((rng.next() - 0.5) * 3.0, -1), 1);
-  for (let nth = 0; nth < 10000; nth++) {
+  for (let nth = 0; nth < 100; nth++) {
     const source = [g(), g(), g()];
     const target = [g(), g(), g()];
     const normal = [g(), g(), g()];

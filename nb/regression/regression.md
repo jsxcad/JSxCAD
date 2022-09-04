@@ -4,7 +4,7 @@ These notebooks are used for regression tests.
 
 ## Regession Notebooks
 
-1. [Font](../../nb/regression/font/font.md)
-1. [Parts](../../nb/regression/parts/parts.md)
-1. [Shape](../../nb/regression/shape/shape.md)
-1. [Shapes](../../nb/regression/shapes/shapes.md)
+1. [Font](#JSxCAD@https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/regression/font/font.nb)
+1. [Parts](#JSxCAD@https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/regression/parts/parts.nb)
+1. [Shape](#JSxCAD@https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/regression/shape/shape.nb)
+1. [Shapes](#JSxCAD@https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/regression/shapes/shapes.nb)
