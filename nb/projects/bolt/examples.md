@@ -1,5 +1,10 @@
 ```JavaScript
-import { NutThread, NutThreadSegment, ScrewThread, ScrewThreadSegment } from './bolt.nb';
+import {
+  NutThread,
+  NutThreadSegment,
+  ScrewThread,
+  ScrewThreadSegment,
+} from './bolt.nb';
 ```
 
 ```JavaScript
@@ -38,7 +43,7 @@ NutThread(20, 10)
 NutThreadSegment(20, { play: 0.1 })
   .color('orange')
   .and(ScrewThreadSegment(20, { play: 0.1 }).color('blue'))
-  .clip(Box([0, 50], [0, 50], [0, 50]))
+  .clip(Box([0, 10], [0, 10], [0, 10]))
   .view()
   .md(`NutThread(20, 10).and(ScrewThread(20, 10))`);
 ```

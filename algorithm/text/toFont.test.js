@@ -17,7 +17,9 @@ test('Render a letter', async (t) => {
   console.log('4/font');
   const letterA = font({}, 'ab');
   console.log('5/serialize');
-  t.deepEqual(JSON.parse(JSON.stringify(serialize(letterA))), {
+  const serialized = JSON.parse(JSON.stringify(serialize(letterA)));
+  console.log('6/test');
+  t.deepEqual(serialized, {
     type: 'group',
     tags: [],
     content: [

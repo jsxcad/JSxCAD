@@ -1,4 +1,4 @@
 const a = await readStl('https://jsxcad.js.org/stl/bear.stl');
 
 a.stl('bear');
-a.section(Point().seq({ to: 200, by: 1 }, z, Group)).view();
+a.section(seq({ to: 200, by: 1 }, XY, Group)).view();

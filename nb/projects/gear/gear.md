@@ -37,7 +37,7 @@ const toothResolution = control('toothResolution', 5, 'input');
 ```JavaScript
 Gear()
   .hasTeeth(8)
-  .and(s => s.hasClearance(0.5).color('red'))
+  .and((s) => s.hasClearance(0.5).color('red'))
   .gridView()
   .md(`Clearance adds play to the gear tips`);
 ```
@@ -68,7 +68,7 @@ Gear()
 ```JavaScript
 Gear()
   .hasTeeth(8)
-  .and(s => s.hasBacklash(1).color('red'))
+  .and((s) => s.hasBacklash(1).color('red'))
   .gridView()
   .md(`Backlash adds play to the gear sides`);
 ```
@@ -83,8 +83,8 @@ Backlash adds play to the gear sides
 Gear()
   .hasTeeth(8)
   .and(
-    s => s.hasPressureAngle(30).color('red'),
-    s => s.hasPressureAngle(10).color('blue')
+    (s) => s.hasPressureAngle(30).color('red'),
+    (s) => s.hasPressureAngle(10).color('blue')
   )
   .material('glass')
   .gridView()
@@ -110,7 +110,11 @@ const planetary = Gear().hasTeeth(8).fill().md(`Our base involute gear.`);
 Our base involute gear.
 
 ```JavaScript
-const planetaryDesignAxle = Octagon(12).fitTo(Arc(8).void()).ez(-4).color('orange').as('axle');
+const planetaryDesignAxle = Octagon(12)
+  .fitTo(Arc(8).void())
+  .ez(-4)
+  .color('orange')
+  .as('axle');
 ```
 
 ```JavaScript
@@ -222,46 +226,43 @@ const planetaryDesign3 = planetaryDesign2
 ```
 
 ```JavaScript
-const planetaryDesign4a =
-  solar
-    .ez(-2);
+const planetaryDesign4a = solar.ez(-2);
 ```
 
 ```JavaScript
-const planetaryDesign4b = planetaryDesign4a
-  .and(Arc(23.5).ez(-2, -4))
+const planetaryDesign4b = planetaryDesign4a.and(Arc(23.5).ez(-2, -4));
 ```
 
 ```JavaScript
-const planetaryDesign4c = planetaryDesign4b
-      .fitTo(planetaryDesignAxle);
+const planetaryDesign4c = planetaryDesign4b.fitTo(planetaryDesignAxle);
 ```
 
 ```JavaScript
-const planetaryDesign4 = planetaryDesign4c
-      .color('green')
-      .as('solar');
+const planetaryDesign4 = planetaryDesign4c.color('green').as('solar');
 ```
 
 ```JavaScript
 const planetaryDesign = planetaryDesign3
   .and(planetaryDesign4)
   .gridView()
-  .stl('hoop',
-      get('ring')
+  .stl(
+    'hoop',
+    get('ring')
       .get('hoop')
       .rx(0 / 2, 1 / 2)
   )
   .stl('ring', get('ring').getNot('hoop'))
-  .stl('planetary', 
-      get('planetary')
+  .stl(
+    'planetary',
+    get('planetary')
       .n(0)
       .y(12)
       .rx(0 / 2, 1 / 2)
   )
   .stl('solar', get('solar').getNot('axle'))
-  .stl('axle', 
-      get('solar')
+  .stl(
+    'axle',
+    get('solar')
       .get('axle')
       .rx(0 / 2, 1 / 2)
   );

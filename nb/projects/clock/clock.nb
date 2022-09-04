@@ -36,7 +36,9 @@ const Hand = ({ reach, tipRadius, thickness }) =>
       .move(reach * faceRadius)
   ).cut(Arc().hasRadius(axleRadius));
 
-const aladinRegular = await readFont('https://jsxcad.js.org/ttf/Aladin-Regular.ttf');
+const aladinRegular = await readFont(
+  'https://jsxcad.js.org/ttf/Aladin-Regular.ttf'
+);
 
 const Face = ({ axleRadius, faceRadius, fontSize }) =>
   Arc()
