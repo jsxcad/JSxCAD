@@ -178,6 +178,7 @@ export const read = async (path, options = {}) => {
     useCache = true,
     forceNoCache = false,
     decode,
+    otherwise,
   } = options;
   const qualifiedPath = qualifyPath(path, workspace);
   const file = ensureQualifiedFile(path, qualifiedPath);
@@ -218,7 +219,7 @@ export const read = async (path, options = {}) => {
       file.data = await file.data;
     }
   }
-  return file.data;
+  return file.data || otherwise;
 };
 
 export const readOrWatch = async (path, options = {}) => {

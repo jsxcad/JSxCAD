@@ -24,9 +24,7 @@ const aGroup = Group(
 
 const rng = Random();
 
-aGroup.eachIn(
-    (s) => s.rz(rng.to(1))
-  ).view(); // Rotates each one by some random amount
+aGroup.eachIn((s) => s.rz(rng.to(1))).view(); // Rotates each one by some random amount
 
 md`
 ---
@@ -57,8 +55,6 @@ Arc(4)
   .and(cast())
   .view();
 
-
-
 md`
 ---
 ### Fuse
@@ -67,8 +63,7 @@ Shapes which are grouped, assembled, or otherwise associated can be fused togeth
 
 `;
 
-Arc(10).x(0, 6).fuse().view()
-
+Arc(10).x(0, 6).fuse().view();
 
 md`
 ---
@@ -108,10 +103,11 @@ aDesign
   .in()
   .pack()
   .view()
-  .md(`We need to get into the 'design' item in order to get at 'box' and 'bolt'`);
+  .md(
+    `We need to get into the 'design' item in order to get at 'box' and 'bolt'`
+  );
 
 log(aDesign.bom());
-
 
 md`
 ---
@@ -130,7 +126,11 @@ md`
 
 Box(10)
   // .cut(Box(5))
-  .seq({ from: 1/128, by: 1/8 }, (a) => (s) => s.scale(Math.pow(a, 3)).z(a * 10), Loft)
+  .seq(
+    { from: 1 / 128, by: 1 / 8 },
+    (a) => (s) => s.scale(Math.pow(a, 3)).z(a * 10),
+    Loft
+  )
   .view();
 
 md`
@@ -140,14 +140,12 @@ md`
 TODO: In the future (a) => rz(a) can be replaced with rz.
 `;
 
-
 Arc(6)
   // .cut(Arc(3))
   .rx(0.25)
   .x(10)
   .seq({ by: 1 / 16 }, rz, Loft)
   .view();
-
 
 md`
 ---
@@ -165,7 +163,6 @@ Box(5, 5, 5).x(10).y(2).z(12).view();
 
 Box(5).x(0, 10, 20).view();
 
-
 md`
 ---
 ### Offset 
@@ -175,7 +172,6 @@ md`
 
 const b = Arc(20).cut(Box(10)).fitTo(Box(5).x(10));
 Group(b.offset(1).z(-0.1).color('pink'), b.color('orange')).view();
-
 
 md`
 ---
@@ -187,9 +183,11 @@ At each step the shape is retriangulated to preserve manifold structure.
 
 md`Once a shape is remeshed it can be twisted or bent about the origin.`;
 
-Box(157, 20).ez(1).y(25)
+Box(157, 20)
+  .ez(1)
+  .y(25)
   .remesh(10)
-  .op(s => s.bend(25).and(s.outline()))
+  .op((s) => s.bend(25).and(s.outline()))
   .gridView()
   .md('A rectangle bent into a ring with a central radius of 25');
 
@@ -203,7 +201,9 @@ Multiple turns can be provided, which will produce one result per turn.
 
 const aRectangle = Box(5, 5, 15).view();
 
-aRectangle.remesh({ method: 'edgeLength', lengths: [4, 2] }).view(undefined, { wireframe: true });
+aRectangle
+  .remesh({ method: 'edgeLength', lengths: [4, 2] })
+  .view(undefined, { wireframe: true });
 
 aRectangle.rz(1 / 8).view();
 
@@ -215,7 +215,7 @@ aRectangle
 
 Box(5)
   .x(4)
-  .rz(0/8, 1/8, 2/8, 3/8, 4/8, 5/8, 6/8, 7/8)
+  .rz(0 / 8, 1 / 8, 2 / 8, 3 / 8, 4 / 8, 5 / 8, 6 / 8, 7 / 8)
   .view();
 
 md`
@@ -249,7 +249,13 @@ A function can be provided to receive the dimensions along with the shape.
 
 log(aRectangle.size());
 
-aRectangle.size(({ length }) => s => s.x(length)).md(`Move the shape along by its length`);
+aRectangle
+  .size(
+    ({ length }) =>
+      (s) =>
+        s.x(length)
+  )
+  .md(`Move the shape along by its length`);
 
 md`
 ---
@@ -319,4 +325,5 @@ Box(11)
   .ez(10)
   .rx(-1 / 8)
   .op((s) => s.voxels(1).color('green').and(s.outline().sketch().color('red')))
-  .view().md('Produce a voxel representation with a 1mm resolution');
+  .view()
+  .md('Produce a voxel representation with a 1mm resolution');
