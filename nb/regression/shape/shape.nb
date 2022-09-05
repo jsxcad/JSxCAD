@@ -1,34 +1,21 @@
-Triangle(10)
-  .color('red')
-  .add(Box(5).color('blue'))
-  .gridView(1);
+Triangle(10).color('red').add(Box(5).color('blue')).gridView(1);
 
-Box(5)
-  .and(Arc(5))
-  .gridView(2, { size: 800, triangles: false, outline: true, wireframe: false });
+Box(5).and(Arc(5)).gridView(2, {
+  size: 800,
+  triangles: false,
+  outline: true,
+  wireframe: false,
+});
 
-Triangle(10)
-  .color('red')
-  .addTo(Box(5).color('blue'))
-  .gridView(3);
+Triangle(10).color('red').addTo(Box(5).color('blue')).gridView(3);
 
 Box(5).by(align('x>y>')).gridView();
 
-Box(5)
-  .as('box')
-  .fitTo(Arc(4).as('arc'))
-  .keep('box')
-  .gridView(4);
+Box(5).as('box').fitTo(Arc(4).as('arc')).keep('box').gridView(4);
 
-Box(5)
-  .color('red')
-  .clip(Arc(5.8).color('blue'))
-  .gridView(5);
+Box(5).color('red').clip(Arc(5.8).color('blue')).gridView(5);
 
-Box(5)
-  .color('red')
-  .clipFrom(Arc(5.8).color('blue'))
-  .gridView(6);
+Box(5).color('red').clipFrom(Arc(5.8).color('blue')).gridView(6);
 
 Box(5).color('green').gridView();
 
@@ -39,48 +26,32 @@ Box(5)
     return s;
   });
 
-Box(5)
-  .color('red')
-  .cut(Arc(6).color('blue'))
-  .gridView(8);
+Box(5).color('red').cut(Arc(6).color('blue')).gridView(8);
 
-Box(5)
-  .color('red')
-  .cutFrom(Arc(6).color('blue'))
-  .gridView(9);
+Box(5).color('red').cutFrom(Arc(6).color('blue')).gridView(9);
 
 Assembly(Box(5), Arc(6))
   .each((leafs) => leafs[0])
   .gridView(10);
 
-Group(Box(5).color('red'), Arc(6).color('blue'))
-  .fuse()
-  .gridView(11);
+Group(Box(5).color('red'), Arc(6).color('blue')).fuse().gridView(11);
 
 Box(10).inset(0.5, { step: 0.5 }).disjoint().n(0, 2, 4, 6, 8).gridView(13);
 
-Assembly(Box(10).as('a'), Arc(6).as('b'))
-  .keep('a')
-  .gridView(13);
+Assembly(Box(10).as('a'), Arc(6).as('b')).keep('a').gridView(13);
 
-Box(10)
-  .material('copper')
-  .gridView(14);
+Box(10).material('copper').gridView(14);
 
 Box(10).move(1, 2, 3).gridView(15);
 Box(10).moveTo(1, 2, 3).gridView(16);
 Box(10).move(1, 2, 3).moveTo(center()).gridView(17);
 Box(10).move(top()).gridView(18);
 
-Assembly(Box(5), Arc(5.5).void())
-  .noVoid()
-  .gridView(19);
+Assembly(Box(5), Arc(5.5).void()).noVoid().gridView(19);
 
 Box(5).offset(1).gridView(20);
 
-Box(5)
-  .op(color('green'))
-  .gridView(21);
+Box(5).op(color('green')).gridView(21);
 
 Line(10)
   .orient({ at: [40, 50, 0] })
@@ -92,21 +63,29 @@ Group(seq(Arc, { from: 1, to: 20 }))
 
 // Box(5).rotate(45).gridView(24);
 
-Box(1, 2, 3).rx(1/8).gridView(25);
-Box(1, 2, 3).ry(1/8).gridView(26);
-Box(1, 2, 3).rz(1/8).gridView(27);
+Box(1, 2, 3)
+  .rx(1 / 8)
+  .gridView(25);
+Box(1, 2, 3)
+  .ry(1 / 8)
+  .gridView(26);
+Box(1, 2, 3)
+  .rz(1 / 8)
+  .gridView(27);
 
 Box(5).scale(1, 2).gridView(28);
-Box(5).cut(Arc(4.9).by(align('x>'))).scale(1, 1).gridView(29);
-Box(5).cut(Arc(4.9).by(align('x>'))).scale(-1, 1).gridView(30);
+Box(5)
+  .cut(Arc(4.9).by(align('x>')))
+  .scale(1, 1)
+  .gridView(29);
+Box(5)
+  .cut(Arc(4.9).by(align('x>')))
+  .scale(-1, 1)
+  .gridView(30);
 
-Box(1, 2, 3)
-  .size(size => shape => shape.md(`${JSON.stringify(size)}`));
+Box(1, 2, 3).size((size) => (shape) => shape.md(`${JSON.stringify(size)}`));
 
-Box(2, 2, 2)
-  .color('red')
-  .and(Box(1, 1, 1).sketch())
-  .view(32);
+Box(2, 2, 2).color('red').and(Box(1, 1, 1).sketch()).view(32);
 
 Box(1)
   .as('box')
@@ -114,20 +93,11 @@ Box(1)
     md`${tags}`;
     return shape;
   });
-
-// Box(5, 5, 5).test().gridView();
 Box(5, 5, 5).gridView(34);
 
 Box(5).tool('laser').gridView(35);
 
-Assembly(Box(5), Arc(6).void())
-  .gridView(36);
-
-/*
-Weld(Arc(6).x(-1), Arc(6).x(1), Arc(6).y(1), Arc(6).y(-1))
-  .fill()
-  .gridView(37);
-*/
+Assembly(Box(5), Arc(6).void()).gridView(36);
 
 Box(5).fitTo(Arc(6)).gridView(38);
 
@@ -168,20 +138,20 @@ const b = Box(5)
   .material('glass')
   .y(10);
 
-b.at(
-  eachEdge().sort('x<y<z>').n(0).origin(),
-  cut(Box(3, 3, 11))
-).view(48);
+b.at(eachEdge().sort('x<y<z>').n(0).origin(), cut(Box(3, 3, 11))).view(48);
 
-b.by(eachEdge().sort('x<y<z>').n(0).origin())
-  .cut(Box(3, 3, 11))
-  .view(49);
+b.by(eachEdge().sort('x<y<z>').n(0).origin()).cut(Box(3, 3, 11)).view(49);
 
 Voxels([0, 0, 0], [0, 0, 1], [1, 0, 1], [2, 0, 1]).view(50);
 
 Arc(2)
   .ez(5)
-  .cut(Box(5).ry(1 / 16).ez(5).z(3))
+  .cut(
+    Box(5)
+      .ry(1 / 16)
+      .ez(5)
+      .z(3)
+  )
   .simplify({ ratio: 0.1, eps: 0.01 })
   .view(51);
 
@@ -190,30 +160,24 @@ Triangle(14).svg('triangle');
 Box(10)
   .ez(50, -50)
   .rx(0, 1 / 4)
-  .fuse().view(0)
+  .fuse()
+  .view(0)
   .remesh(1, Box(20, 20, 20))
   .smooth({ method: 'shape', iterations: 1, time: 1 }, Box(9, 20, 20))
   .view(53);
 
-/* Fails with manifold
 Box(20, 20, 20)
   .view(1, { wireframe: true })
   .md('Original mesh')
   .remesh()
   .view(54, { wireframe: true })
   .md('Isotropic remeshing')
-  .cut(Box([0, 10], [0, -10], [0, 10]))
+  .cut('exact', Box([0, 10], [0, -10], [0, 10]))
   .view(55, { wireframe: true })
   .md('Cut')
   .demesh()
   .view(56, { wireframe: true })
   .md('Cleaned mesh');
-*/
-Hershey('Disabled', 20).by(align('xy')).topView();
-Hershey('Disabled', 20).by(align('xy')).topView();
-Hershey('Disabled', 20).by(align('xy')).topView();
-Hershey('Disabled', 20).by(align('xy')).topView();
-
 Arc(4)
   .x(5)
   .seq({ by: 1 / 8 }, rz, Join)
@@ -222,20 +186,7 @@ Arc(4)
   .and(toolpath())
   .view(57);
 
-Box(10)
-  .cut(Arc(6).x(6, -6), Box(1, 10))
-  .and(toolpath())
-  .view(58);
-
-/*
-Arc(5)
-  .x(4)
-  .seq({ by: 1 / 8 }, rz, Join)
-  .cut(Box(10, 20).y(6))
-  .and(packingEnvelope().outline().color('red'),
-       packingEnvelope({ offset: 1, threshold: 20 }).outline().color('green'))
-  .view();
-*/
+Box(10).cut(Arc(6).x(6, -6), Box(1, 10)).and(toolpath()).view(58);
 
 Box(20, 20, 20)
   .join(Box(10, 10, 40))
@@ -284,7 +235,9 @@ Box(10, 3, 3)
 
 md`Area of Box(2).cut(Box(1)) is ${Box(2).cut(Box(1)).area().toFixed(2)}`;
 
-Box(2).cut(Box(1)).area(v => s => s.md(`Area is ${v.toFixed(2)}`));
+Box(2)
+  .cut(Box(1))
+  .area((v) => (s) => s.md(`Area is ${v.toFixed(2)}`));
 
 md`Area of Box(2, 3, 4) is ${Box(2, 3, 4).area().toFixed(2)}`;
 

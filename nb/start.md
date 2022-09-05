@@ -5,6 +5,7 @@ Press Shift-Enter or click Run above to generate notebook.
 ## Links
 
 1. [Documentation](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/documentation/index.nb)
+1. [API](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/index.nb)
 1. [Regression](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/regression/regression.nb)
 1. [Projects](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/projects/index.nb)
 

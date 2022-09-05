@@ -13,10 +13,7 @@ const assembled = Hexagon(50, 50, 50)
 ![Image](hex.md.0.png)
 
 ```JavaScript
-const disassembled = assembled
-  .each(to(XY()))
-  .pack()
-  .view();
+const disassembled = assembled.each(to(XY())).pack().view();
 ```
 
 ![Image](hex.md.1.png)

@@ -5,7 +5,7 @@ These example projects may be useful to see what can be done and to get started 
 * [28BYJ-48](#JSxCAD@https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/projects/28BYJ-48/28BYJ-48.nb)
 * [Bear](#JSxCAD@https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/projects/bear/bear.nb)
 * [Bearing](#JSxCAD@https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/projects/bearing/bearing.nb)
-* [Belt Sprockets](#JSxCAD@https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/projects/belt_sprokets/belt_sprokets.nb)
+* [Belt Sprockets](#JSxCAD@https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/projects/belt_sprockets/belt_sprockets.nb)
 * [Bolt](#JSxCAD@https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/projects/bolt/bolt.nb)
 * [Clock](#JSxCAD@https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/projects/clock/clock.nb)
 * [Engrave](#JSxCAD@https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/projects/engrave/engrave.nb)

@@ -8,7 +8,4 @@ const assembled = Hexagon(50, 50, 50)
   )
   .view();
 
-const disassembled = assembled
-  .each(to(XY()))
-  .pack()
-  .view();
+const disassembled = assembled.each(to(XY())).pack().view();

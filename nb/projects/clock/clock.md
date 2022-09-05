@@ -63,7 +63,9 @@ Hand(hourHand).topView();
 ![Image](clock.md.0.png)
 
 ```JavaScript
-const aladinRegular = await readFont('https://jsxcad.js.org/ttf/Aladin-Regular.ttf');
+const aladinRegular = await readFont(
+  'https://jsxcad.js.org/ttf/Aladin-Regular.ttf'
+);
 ```
 
 The hour hand.
