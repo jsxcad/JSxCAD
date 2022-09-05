@@ -39706,7 +39706,8 @@ class App extends ReactDOM$2.Component {
   static get propTypes() {
     return {
       workspace: propTypes$1.exports.string,
-      sha: propTypes$1.exports.string
+      sha: propTypes$1.exports.string,
+      path: propTypes$1.exports.start
     };
   }
 
@@ -40179,12 +40180,6 @@ class App extends ReactDOM$2.Component {
         model,
         WorkspaceOpenPaths
       });
-      /*
-      // Now that layout is in place, run the notebooks we just loaded.
-      for (const path of WorkspaceOpenPaths) {
-        await this.Notebook.run(path);
-      }
-      */
     };
 
     this.Notebook = {};
@@ -40976,7 +40971,8 @@ class App extends ReactDOM$2.Component {
         WorkspaceLoadPath,
         WorkspaceLoadPrefix
       } = await read('config/Workspace', {
-        workspace
+        workspace,
+        otherwise: {}
       });
       await this.updateState({
         WorkspaceLoadPath,
@@ -41030,8 +41026,8 @@ class App extends ReactDOM$2.Component {
             const {
               WorkspaceFiles = [],
               WorkspaceOpenPaths = [],
-              WorkspaceLoadPath,
-              WorkspaceLoadPrefix
+              WorkspaceLoadPath = '',
+              WorkspaceLoadPrefix = ''
             } = this.state;
 
             const isDisabled = file => WorkspaceOpenPaths.includes(file.substring(7));
@@ -41349,6 +41345,7 @@ class App extends ReactDOM$2.Component {
     await this.Workspace.restore();
     await this.View.restore();
     await this.Model.restore();
+    this.Notebook.clickLink(undefined, this.props.path);
   }
 
   async updateState(state) {
@@ -41381,12 +41378,14 @@ class App extends ReactDOM$2.Component {
 const installUi = async ({
   document,
   workspace,
-  sha
+  sha,
+  path
 }) => {
   await boot();
   ReactDOM$2.render(v$1(App, {
     sha: 'master',
-    workspace: 'JSxCAD'
+    workspace: 'JSxCAD',
+    path: path
   }), document.getElementById('container'));
 };
 

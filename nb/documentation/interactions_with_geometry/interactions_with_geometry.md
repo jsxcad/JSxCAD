@@ -32,9 +32,7 @@ const rng = Random();
 ```
 
 ```JavaScript
-aGroup.eachIn(
-    (s) => s.rz(rng.to(1))
-  ).view(); // Rotates each one by some random amount
+aGroup.eachIn((s) => s.rz(rng.to(1))).view(); // Rotates each one by some random amount
 ```
 
 ![Image](interactions_with_geometry.md.2.png)
@@ -88,7 +86,7 @@ Arc(4)
 Shapes which are grouped, assembled, or otherwise associated can be fused together to form a single solid
 
 ```JavaScript
-Arc(10).x(0, 6).fuse().view()
+Arc(10).x(0, 6).fuse().view();
 ```
 
 ![Image](interactions_with_geometry.md.7.png)
@@ -154,7 +152,9 @@ aDesign
   .in()
   .pack()
   .view()
-  .md(`We need to get into the 'design' item in order to get at 'box' and 'bolt'`);
+  .md(
+    `We need to get into the 'design' item in order to get at 'box' and 'bolt'`
+  );
 ```
 
 ![Image](interactions_with_geometry.md.12.png)
@@ -172,7 +172,11 @@ log(aDesign.bom());
 ```JavaScript
 Box(10)
   // .cut(Box(5))
-  .seq({ from: 1/128, by: 1/8 }, (a) => (s) => s.scale(Math.pow(a, 3)).z(a * 10), Loft)
+  .seq(
+    { from: 1 / 128, by: 1 / 8 },
+    (a) => (s) => s.scale(Math.pow(a, 3)).z(a * 10),
+    Loft
+  )
   .view();
 ```
 
@@ -243,9 +247,11 @@ At each step the shape is retriangulated to preserve manifold structure.
 Once a shape is remeshed it can be twisted or bent about the origin.
 
 ```JavaScript
-Box(157, 20).ez(1).y(25)
+Box(157, 20)
+  .ez(1)
+  .y(25)
   .remesh(10)
-  .op(s => s.bend(25).and(s.outline()))
+  .op((s) => s.bend(25).and(s.outline()))
   .gridView()
   .md('A rectangle bent into a ring with a central radius of 25');
 ```
@@ -267,7 +273,9 @@ const aRectangle = Box(5, 5, 15).view();
 ![Image](interactions_with_geometry.md.20.png)
 
 ```JavaScript
-aRectangle.remesh({ method: 'edgeLength', lengths: [4, 2] }).view(undefined, { wireframe: true });
+aRectangle
+  .remesh({ method: 'edgeLength', lengths: [4, 2] })
+  .view(undefined, { wireframe: true });
 ```
 
 ![Image](interactions_with_geometry.md.21.png)
@@ -291,7 +299,7 @@ aRectangle
 ```JavaScript
 Box(5)
   .x(4)
-  .rz(0/8, 1/8, 2/8, 3/8, 4/8, 5/8, 6/8, 7/8)
+  .rz(0 / 8, 1 / 8, 2 / 8, 3 / 8, 4 / 8, 5 / 8, 6 / 8, 7 / 8)
   .view();
 ```
 
@@ -338,7 +346,13 @@ log(aRectangle.size());
 ```
 
 ```JavaScript
-aRectangle.size(({ length }) => s => s.x(length)).md(`Move the shape along by its length`);
+aRectangle
+  .size(
+    ({ length }) =>
+      (s) =>
+        s.x(length)
+  )
+  .md(`Move the shape along by its length`);
 ```
 
 Move the shape along by its length
@@ -452,7 +466,8 @@ Box(11)
   .ez(10)
   .rx(-1 / 8)
   .op((s) => s.voxels(1).color('green').and(s.outline().sketch().color('red')))
-  .view().md('Produce a voxel representation with a 1mm resolution');
+  .view()
+  .md('Produce a voxel representation with a 1mm resolution');
 ```
 
 ![Image](interactions_with_geometry.md.34.png)

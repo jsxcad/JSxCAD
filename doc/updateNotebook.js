@@ -139,7 +139,11 @@ export const updateNotebook = async (
     const module = `${target}.nb`;
     const topLevel = new Map();
     // FIX: Sort out top-level evaluation vs module caching.
-    await api.importModule(module, { clearUpdateEmits: false, topLevel, readCache: false });
+    await api.importModule(module, {
+      clearUpdateEmits: false,
+      topLevel,
+      readCache: false,
+    });
     await resolvePending();
     const { html, encodedNotebook } = await toHtml(notebook, {
       module,

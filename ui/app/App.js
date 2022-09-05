@@ -2,15 +2,6 @@
 
 import * as PropTypes from 'prop-types';
 
-/*
-import {
-  appendViewGroupCode,
-  deleteViewGroupCode,
-  extractViewGroupCode,
-  rewriteViewGroupOrient,
-} from '@jsxcad/compiler';
-*/
-
 import {
   askService,
   ask as askSys,
@@ -51,7 +42,6 @@ import Row from 'react-bootstrap/Row';
 import Table from 'react-bootstrap/Table';
 import { animationFrame } from './schedule.js';
 import { execute } from '@jsxcad/api';
-// import { getWorldPosition } from '@jsxcad/ui-threejs';
 
 const ensureFile = async (file, url, { workspace } = {}) => {
   const sources = [];
@@ -182,6 +172,7 @@ class App extends React.Component {
     return {
       workspace: PropTypes.string,
       sha: PropTypes.string,
+      path: PropTypes.start,
     };
   }
 
@@ -547,12 +538,6 @@ class App extends React.Component {
       }
       const model = FlexLayout.Model.fromJson(persistentModelConfig);
       await this.updateState({ model, WorkspaceOpenPaths });
-      /*
-      // Now that layout is in place, run the notebooks we just loaded.
-      for (const path of WorkspaceOpenPaths) {
-        await this.Notebook.run(path);
-      }
-      */
     };
 
     this.Notebook = {};
@@ -1202,7 +1187,7 @@ class App extends React.Component {
       // We restore WorkspaceOpenPaths via Model.restore.
       const { WorkspaceLoadPath, WorkspaceLoadPrefix } = await read(
         'config/Workspace',
-        { workspace }
+        { workspace, otherwise: {} }
       );
       await this.updateState({ WorkspaceLoadPath, WorkspaceLoadPrefix });
     };
@@ -1243,8 +1228,8 @@ class App extends React.Component {
           const {
             WorkspaceFiles = [],
             WorkspaceOpenPaths = [],
-            WorkspaceLoadPath,
-            WorkspaceLoadPrefix,
+            WorkspaceLoadPath = '',
+            WorkspaceLoadPrefix = '',
           } = this.state;
           const isDisabled = (file) =>
             WorkspaceOpenPaths.includes(file.substring(7));
@@ -1642,6 +1627,8 @@ class App extends React.Component {
     await this.Workspace.restore();
     await this.View.restore();
     await this.Model.restore();
+
+    this.Notebook.clickLink(undefined, this.props.path);
   }
 
   async updateState(state) {
@@ -1668,10 +1655,10 @@ class App extends React.Component {
   }
 }
 
-export const installUi = async ({ document, workspace, sha }) => {
+export const installUi = async ({ document, workspace, sha, path }) => {
   await boot();
   ReactDOM.render(
-    <App sha={'master'} workspace={'JSxCAD'} />,
+    <App sha={'master'} workspace={'JSxCAD'} path={path} />,
     document.getElementById('container')
   );
 };

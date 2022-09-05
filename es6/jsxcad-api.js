@@ -328,6 +328,7 @@ const buildImportModule =
       evaluate: evaluate$1,
       replay,
       doRelease = true,
+      readCache = true,
     } = {}
   ) => {
     let emitGroup;
@@ -336,7 +337,7 @@ const buildImportModule =
         emitGroup = saveEmitGroup();
         await release();
       }
-      if (CACHED_MODULES.has(name)) {
+      if (readCache && CACHED_MODULES.has(name)) {
         // It's ok for a module to evaluate to undefined so we need to check has explicitly.
         return CACHED_MODULES.get(name);
       }
@@ -346,6 +347,7 @@ const buildImportModule =
         CACHED_MODULES.set(name, module);
         return module;
       }
+      console.log(`QQ/Building module: ${name}`);
       let script;
       if (script === undefined) {
         const path = `source/${name}`;
