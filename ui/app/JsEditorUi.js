@@ -76,8 +76,6 @@ export class JsEditorUi extends React.PureComponent {
   constructor(props) {
     super(props);
     this.state = {};
-
-    this.onKeyDown = this.onKeyDown.bind(this);
     this.onValueChange = this.onValueChange.bind(this);
   }
 
@@ -240,57 +238,11 @@ export class JsEditorUi extends React.PureComponent {
     return PrismJS.highlight(data, PrismJS.languages.js);
   }
 
-  stop(e) {
-    e.stopPropagation();
-  }
-
-  preventDefault(e) {
-    e.preventDefault();
-    return false;
-  }
-
-  onKeyDown(e) {
-    const ENTER = 13;
-    const S = 83;
-    const SHIFT = 16;
-    const CONTROL = 17;
-
-    const key = e.which || e.keyCode || 0;
-
-    switch (key) {
-      case CONTROL:
-      case SHIFT:
-        return true;
-    }
-
-    const { ctrlKey, shiftKey } = e;
-    switch (key) {
-      case ENTER: {
-        if (shiftKey) {
-          e.preventDefault();
-          e.stopPropagation();
-          this.run();
-          return false;
-        }
-        break;
-      }
-      case S: {
-        if (ctrlKey) {
-          e.preventDefault();
-          e.stopPropagation();
-          this.save();
-          return false;
-        }
-        break;
-      }
-    }
-  }
-
   render() {
-    const { data = '' } = this.props;
+    try {
+      const { data = '' } = this.props;
 
-    return (
-      <div onKeyDown={this.onKeyDown}>
+      return (
         <AceEditor
           ref={(ref) => {
             this.aceEditor = ref;
@@ -312,8 +264,11 @@ export class JsEditorUi extends React.PureComponent {
           width="100%"
           wrapEnabled={true}
         />
-      </div>
-    );
+      );
+    } catch (e) {
+      console.log(e.stack);
+      throw e;
+    }
   }
 }
 

@@ -32,6 +32,7 @@ import Col from 'react-bootstrap/Col';
 import FlexLayout from 'flexlayout-react';
 import Form from 'react-bootstrap/Form';
 import JsEditorUi from './JsEditorUi.js';
+import JsViewerUi from './JsViewerUi.js';
 import ListGroup from 'react-bootstrap/ListGroup';
 import OrbitView from './OrbitView.js';
 import Prettier from 'https://unpkg.com/prettier@2.3.2/esm/standalone.mjs';
@@ -247,6 +248,8 @@ class App extends React.Component {
               if (domElementByHash.has(entry.hash)) {
                 // Reuse the element we built earlier
                 console.log(`Re-appending ${entry.hash} to ${path}/${id}`);
+                // FIX: This is a problem because it removes the child from where it
+                // was.
                 domElement.appendChild(domElementByHash.get(entry.hash));
               } else {
                 const element = toDomElement([entry], {
@@ -494,6 +497,7 @@ class App extends React.Component {
         await this.Model.store();
       } finally {
         this.Model.changing = false;
+        this.updateHash();
       }
     };
 
@@ -548,6 +552,7 @@ class App extends React.Component {
       // This is a bit of a hack, since selectTab toggles.
       model.getNodeById('View').getParent()._setSelected(-1);
       model.doAction(FlexLayout.Actions.selectTab('View'));
+      await animationFrame();
       this.View.store();
     };
 
@@ -557,7 +562,21 @@ class App extends React.Component {
 
     this.Notebook.runStart = {};
 
+    this.Notebook.getSelectedPath = () => {
+      const { model } = this.state;
+      const { _activeTabSet } = model;
+      const { selected } = _activeTabSet._attributes;
+      if (selected === -1) {
+        return;
+      }
+      const tab = _activeTabSet._children[selected];
+      return tab._attributes.name;
+    };
+
     this.Notebook.run = async (path, options) => {
+      if (!path) {
+        return;
+      }
       logInfo('app/App', `Request notebook run ${path}`);
       // Note the time that this run started.
       // This can be used to note which assets are obsoleted by the completion of the run.
@@ -688,8 +707,10 @@ class App extends React.Component {
       // Let state propagate.
       await animationFrame();
 
-      // Automatically run the notebook on load. The user can hit Stop.
-      // await this.Notebook.run(path);
+      // Automatically run the notebook on first load.
+      if (!this.Notebook.runStart[path]) {
+        this.Notebook.run(path);
+      }
     };
 
     this.Notebook.save = async (path) => {
@@ -726,22 +747,45 @@ class App extends React.Component {
       return cleanText;
     };
 
+    this.Notebook.cycleMode = async (path) => {
+      // await this.Notebook.close(path);
+      const { [`NotebookMode/${path}`]: mode } = this.state;
+      let newMode;
+      switch (mode) {
+        case 'edit':
+          newMode = 'view';
+          break;
+        default:
+        case 'view':
+          newMode = 'edit';
+          break;
+      }
+      await this.updateState({ [`NotebookMode/${path}`]: newMode });
+      // this.Notebook.clickLink(path);
+    };
+
     this.Notebook.change = (path, data) => {
+      console.log(`QQ/Notebook.change: ${path} ${data}`);
       this.setState({ [`NotebookText/${path}`]: data });
     };
 
-    this.Notebook.clickLink = async (path, link) => {
+    this.Notebook.clickLink = async (path) => {
+      if (!path) {
+        return;
+      }
       const { model } = this.state;
-      await this.Workspace.loadWorkingPath(link);
+      await this.Workspace.loadWorkingPath(path);
       // This is a bit of a hack, since selectTab toggles.
-      const nodeId = `Notebook/${link}`;
+      const nodeId = `Notebook/${path}`;
       model.getNodeById(nodeId).getParent()._setSelected(-1);
       model.doAction(FlexLayout.Actions.selectTab(nodeId));
+      await animationFrame();
       this.View.store();
+      await this.Notebook.run(path);
     };
 
     this.Notebook.close = async (closedPath) => {
-      const { WorkspaceOpenPaths = [] } = this.state;
+      const { model, WorkspaceOpenPaths = [] } = this.state;
       await this.updateState({
         [`NotebookText/${closedPath}`]: undefined,
         [`NotebookAdvice/${closedPath}`]: undefined,
@@ -749,6 +793,8 @@ class App extends React.Component {
           (path) => path !== closedPath
         ),
       });
+      model.doAction(FlexLayout.Actions.deleteTab(`Notebook/${closedPath}`));
+      await animationFrame();
       this.Workspace.store();
     };
 
@@ -1111,7 +1157,7 @@ class App extends React.Component {
     this.Workspace = {};
 
     this.Workspace.loadWorkingPath = async (path) => {
-      const { WorkspaceOpenPaths = [] } = this.state;
+      const { model, WorkspaceOpenPaths = [] } = this.state;
       if (WorkspaceOpenPaths.includes(path)) {
         // FIX: Add indication?
         return;
@@ -1120,14 +1166,17 @@ class App extends React.Component {
         WorkspaceOpenPaths: [...WorkspaceOpenPaths, path],
       });
       await this.Notebook.load(path);
+      const nodeId = `Notebook/${path}`;
       this.layoutRef.current.addTabToTabSet('Notebooks', {
-        id: `Notebook/${path}`,
+        id: nodeId,
         type: 'tab',
         name: path,
         component: 'Notebook',
       });
+      model
+        .getNodeById(nodeId)
+        .setEventListener('close', () => this.Notebook.close(path));
       await this.Workspace.store();
-      await this.Notebook.run(path);
     };
 
     this.Workspace.uploadWorkingPath = async (path, e) => {
@@ -1143,24 +1192,9 @@ class App extends React.Component {
     };
 
     this.Workspace.openWorkingFile = async (file) => {
-      const { WorkspaceOpenPaths = [] } = this.state;
-      const path = file.substring(7);
-      if (WorkspaceOpenPaths.includes(path)) {
-        // FIX: Add indication?
-        return;
-      }
-      await this.updateState({
-        WorkspaceOpenPaths: [...WorkspaceOpenPaths, path],
-      });
-      await this.Notebook.load(path);
-      this.layoutRef.current.addTabToTabSet('Notebooks', {
-        id: `Notebook/${path}`,
-        type: 'tab',
-        name: path,
-        component: 'Notebook',
-      });
-      await this.Workspace.store();
-      await this.Notebook.run(path);
+      const path = file.substring('source/'.length);
+      await this.Notebook.clickLink(path);
+      this.Notebook.run(path);
     };
 
     this.Workspace.store = async () => {
@@ -1361,23 +1395,44 @@ class App extends React.Component {
         }
         case 'Notebook': {
           const path = node.getName();
-          const { [`NotebookText/${path}`]: NotebookText } = this.state;
+          const {
+            [`NotebookMode/${path}`]: NotebookMode = 'view',
+            [`NotebookText/${path}`]: NotebookText,
+          } = this.state;
           const NotebookAdvice = this.Notebook.ensureAdvice(path);
-          return (
-            <JsEditorUi
-              onRun={() => this.Notebook.run(path)}
-              onSave={() => this.Notebook.save(path)}
-              onChange={(data) => this.Notebook.change(path, data)}
-              onClickLink={(link) => this.Notebook.clickLink(path, link)}
-              onClose={() => this.Notebook.close(path)}
-              data={NotebookText}
-              advice={NotebookAdvice}
-            />
-          );
+          switch (NotebookMode) {
+            case 'edit':
+              return (
+                <JsEditorUi
+                  mode={NotebookMode}
+                  onRun={() => this.Notebook.run(path)}
+                  onSave={() => this.Notebook.save(path)}
+                  onChange={(data) => this.Notebook.change(path, data)}
+                  onClickLink={(path) => this.Notebook.clickLink(path)}
+                  data={NotebookText}
+                  advice={NotebookAdvice}
+                  // onClose={() => this.Notebook.close(path)}
+                />
+              );
+            default:
+            case 'view':
+              return (
+                <JsViewerUi
+                  mode={NotebookMode}
+                  onRun={() => this.Notebook.run(path)}
+                  onSave={() => this.Notebook.save(path)}
+                  onChange={(data) => this.Notebook.change(path, data)}
+                  onClickLink={(path) => this.Notebook.clickLink(path)}
+                  data={NotebookText}
+                  advice={NotebookAdvice}
+                  // onClose={() => this.Notebook.close(path)}
+                />
+              );
+          }
         }
         case 'Clipboard': {
           const { Clipboard = {} } = this.state;
-          const { code } = Clipboard;
+          const { code = '' } = Clipboard;
           return (
             <JsEditorUi
               onRun={() => this.Clipboard.run()}
@@ -1616,8 +1671,7 @@ class App extends React.Component {
         path = workspace;
         workspace = 'JSxCAD';
       }
-      console.log({ workspace, path });
-      this.Notebook.clickLink(undefined, path);
+      this.Notebook.clickLink(path);
     };
 
     this.servicesActiveCounts = {};
@@ -1628,7 +1682,64 @@ class App extends React.Component {
     await this.View.restore();
     await this.Model.restore();
 
-    this.Notebook.clickLink(undefined, this.props.path);
+    this.Notebook.clickLink(this.props.path);
+
+    window.addEventListener('keydown', (e) => this.onKeyDown(e));
+  }
+
+  updateHash() {
+    const path = this.Notebook.getSelectedPath();
+    const hash = path ? `#${path}` : '';
+    if (window.location.hash !== hash) {
+      window.history.pushState(null, null, hash);
+    }
+  }
+
+  onKeyDown(e) {
+    const CONTROL = 17;
+    const E = 69;
+    const ENTER = 13;
+    const S = 83;
+    const SHIFT = 16;
+
+    const key = e.which || e.keyCode || 0;
+
+    switch (key) {
+      case CONTROL:
+      case SHIFT:
+        return true;
+    }
+
+    const { ctrlKey, shiftKey } = e;
+    switch (key) {
+      case ENTER: {
+        if (shiftKey) {
+          e.preventDefault();
+          e.stopPropagation();
+          this.Notebook.run(this.Notebook.getSelectedPath());
+          return false;
+        }
+        break;
+      }
+      case S: {
+        if (ctrlKey) {
+          e.preventDefault();
+          e.stopPropagation();
+          this.Notebook.save(this.Notebook.getSelectedPath());
+          return false;
+        }
+        break;
+      }
+      case E: {
+        if (ctrlKey) {
+          e.preventDefault();
+          e.stopPropagation();
+          this.Notebook.cycleMode(this.Notebook.getSelectedPath());
+          return false;
+        }
+        break;
+      }
+    }
   }
 
   async updateState(state) {
