@@ -385,6 +385,7 @@ export const toEcmascript = async (
     imports = new Map(),
     indirectImports = new Map(),
     noLines = false,
+    workspace,
   } = {}
 ) => {
   const lines = noLines ? undefined : script.split('\n');
@@ -398,7 +399,7 @@ export const toEcmascript = async (
   const sideEffectors = [];
 
   // Start by loading the controls
-  const controls = (await read(`control/${path}`)) || {};
+  const controls = (await read(`control/${path}`, { workspace })) || {};
 
   await processProgram(ast, {
     lines,

@@ -38600,7 +38600,12 @@ class JsEditorUi extends ReactDOM$2.PureComponent {
               const notebookDefinition = notebookDefinitions[definition];
               const widget = widgets.get(definition);
 
-              if (widget && widget.el !== notebookDefinition.domElement) {
+              if (widget && widget.el !== notebookDefinition.widgetElement) {
+                // Stash the elements for re-use.
+                for (const domElement of notebookDefinition.domElements) {
+                  notebookDefinition.wip.appendChild(domElement);
+                }
+
                 widgetManager.removeLineWidget(widget);
                 widgets.delete(definition);
               }
@@ -38613,14 +38618,20 @@ class JsEditorUi extends ReactDOM$2.PureComponent {
                     initSourceLocation
                   } = entry;
                   const {
-                    domElement
+                    domElements
                   } = notebookDefinition;
 
-                  if (!domElement) {
+                  if (!domElements) {
                     continue;
                   }
 
-                  const pixelHeight = domElement.offsetHeight;
+                  const widgetElement = document.createElement('div');
+                  let pixelHeight = 0;
+
+                  for (const e of domElements) {
+                    pixelHeight += e.offsetHeight;
+                    widgetElement.appendChild(e);
+                  }
 
                   if (!pixelHeight) {
                     continue;
@@ -38630,22 +38641,23 @@ class JsEditorUi extends ReactDOM$2.PureComponent {
                     row: initSourceLocation.end.line - 1,
                     coverLine: false,
                     fixedWidth: true,
-                    el: domElement
+                    el: widgetElement
                   };
                   const lineHeight = editor.renderer.layerConfig.lineHeight;
                   const rowCount = Math.ceil(pixelHeight / lineHeight);
-                  domElement.style.height = `${rowCount * lineHeight}px`;
-                  domElement.style.zIndex = -1;
+                  widgetElement.style.height = `${rowCount * lineHeight}px`;
+                  widgetElement.style.zIndex = -1;
                   widgetManager.addLineWidget(widget);
 
                   if (widget.rowCount !== Math.floor(widget.rowCount)) {
                     throw Error(`Widget height is not a whole number of rows`);
                   }
 
-                  domElement.classList.add(`rowCount_${widget.rowCount}`, `lineHeight_${lineHeight}`, `pixelHeight_${pixelHeight}`); // Display the hidden element.
+                  widgetElement.classList.add(`rowCount_${widget.rowCount}`, `lineHeight_${lineHeight}`, `pixelHeight_${pixelHeight}`); // Display the hidden element.
 
-                  domElement.style.visibility = '';
+                  widgetElement.style.visibility = '';
                   widgets.set(definition, widget);
+                  notebookDefinition.widgetElements = domElements;
                 }
               }
             }
@@ -38781,7 +38793,7 @@ class JsViewerUi extends ReactDOM$2.PureComponent {
 
           for (const definition of Object.keys(notebookDefinitions)) {
             const {
-              domElement,
+              domElements,
               notes
             } = notebookDefinitions[definition];
             const {
@@ -38789,20 +38801,26 @@ class JsViewerUi extends ReactDOM$2.PureComponent {
             } = advice.definitions.get(definition);
             const line = initSourceLocation.start.line;
             orderedNotes.push({
-              domElement,
+              domElements,
               notes,
               line
             });
           }
 
-          orderedNotes.sort((a, b) => a.line - b.line); // FIX: This produces flicker.
+          orderedNotes.sort((a, b) => a.line - b.line);
+
+          while (container.firstChild) {
+            container.removeChild(container.firstChild);
+          }
 
           for (const {
-            domElement
+            domElements
           } of orderedNotes) {
-            domElement.style.visibility = '';
-            domElement.style.position = '';
-            container.appendChild(domElement);
+            for (const domElement of domElements) {
+              domElement.style.visibility = '';
+              domElement.style.position = '';
+              container.appendChild(domElement);
+            }
           }
 
           mermaid.init(undefined, '.mermaid');
@@ -38849,8 +38867,7 @@ class JsViewerUi extends ReactDOM$2.PureComponent {
       onKeyDown: this.onKeyDown,
       ref: ref => {
         this.view = ref;
-      },
-      tabindex: "0"
+      }
     });
   }
 
@@ -39844,13 +39861,20 @@ class App extends ReactDOM$2.Component {
               return notebookNotes[note.hash];
             };
 
-            const domElement = document.createElement('div'); // Attach the domElement invisibly so that we can compute the size.
-            // Add it at the top so that it doesn't extend the bottom of the page.
+            let wip = document.getElementById('notebook/wip');
 
-            document.body.prepend(domElement);
-            domElement.style.display = 'block';
-            domElement.style.visibility = 'hidden';
-            domElement.style.position = 'absolute';
+            if (!wip) {
+              wip = document.createElement('div');
+              wip.id = 'notebook/wip'; // Attach the wip invisibly so that we can compute the size.
+              // Add it at the top so that it doesn't extend the bottom of the page.
+
+              document.body.prepend(wip);
+              wip.style.display = 'block';
+              wip.style.visibility = 'hidden';
+              wip.style.position = 'absolute';
+            }
+
+            const domElements = [];
             let nthView = 0;
 
             for (const note of notes) {
@@ -39883,8 +39907,9 @@ class App extends ReactDOM$2.Component {
                 // Reuse the element we built earlier
                 console.log(`Re-appending ${entry.hash} to ${path}/${id}`); // FIX: This is a problem because it removes the child from where it
                 // was.
+                // domElement.appendChild(domElementByHash.get(entry.hash));
 
-                domElement.appendChild(domElementByHash.get(entry.hash));
+                domElements.push(domElementByHash.get(entry.hash));
               } else {
                 const element = toDomElement([entry], {
                   onClickView: ({
@@ -39911,7 +39936,8 @@ class App extends ReactDOM$2.Component {
                 });
                 domElementByHash.set(entry.hash, element);
                 console.log(`Appending ${entry.hash} to ${path}/${id}`);
-                domElement.appendChild(element);
+                wip.appendChild(element);
+                domElements.push(element);
                 console.log(`Marking ${entry.hash} in ${path}/${id}`);
                 await animationFrame(); // We need to build the element.
 
@@ -39984,7 +40010,8 @@ class App extends ReactDOM$2.Component {
             await animationFrame();
             notebookDefinitions[id] = {
               notes,
-              domElement
+              wip,
+              domElements
             };
 
             if (NotebookAdvice.onUpdate) {
@@ -40435,7 +40462,8 @@ class App extends ReactDOM$2.Component {
           evaluate,
           replay,
           path: NotebookPath,
-          topLevel
+          topLevel,
+          workspace
         });
         await resolvePending();
       } catch (error) {
@@ -40536,7 +40564,8 @@ class App extends ReactDOM$2.Component {
 
       await this.updateState({
         [`NotebookMode/${path}`]: newMode
-      }); // this.Notebook.clickLink(path);
+      });
+      this.Notebook.store(); // this.Notebook.clickLink(path);
     };
 
     this.Notebook.change = (path, data) => {
@@ -40598,6 +40627,31 @@ class App extends ReactDOM$2.Component {
         [key]: createdAdvice
       });
       return createdAdvice;
+    };
+
+    this.Notebook.store = async () => {
+      const state = {};
+
+      for (const key of Object.keys(this.state)) {
+        if (key.startsWith('NotebookMode/')) {
+          state[key] = this.state[key];
+        }
+      }
+
+      await write('config/Notebook', state, {
+        workspace
+      });
+    };
+
+    this.Notebook.restore = async () => {
+      const {
+        workspace
+      } = this.props;
+      const state = await read('config/Notebook', {
+        workspace
+      });
+      await this.updateState({ ...state
+      });
     };
 
     this.View = {};
@@ -41087,7 +41141,7 @@ class App extends ReactDOM$2.Component {
       // We restore WorkspaceOpenPaths via Model.restore.
       const {
         WorkspaceLoadPath,
-        WorkspaceLoadPrefix
+        WorkspaceLoadPrefix = 'https://github.com/jsxcad/JSxCAD/tree/master/nb/'
       } = await read('config/Workspace', {
         workspace,
         otherwise: {}
@@ -41477,6 +41531,7 @@ class App extends ReactDOM$2.Component {
     await this.Config.restore();
     await this.Workspace.restore();
     await this.View.restore();
+    await this.Notebook.restore();
     await this.Model.restore();
     this.Notebook.clickLink(this.props.path);
     window.addEventListener('keydown', e => this.onKeyDown(e));

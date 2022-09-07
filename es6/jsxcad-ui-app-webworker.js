@@ -159,7 +159,8 @@ const agent = async ({
           };
           await evaluate(script, {
             api,
-            path
+            path,
+            workspace
           });
           await sys.log({
             op: 'evaluate',
