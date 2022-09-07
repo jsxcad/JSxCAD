@@ -468,14 +468,16 @@ class App extends React.Component {
       }
     };
 
-    this.Layout.renderTab = (tabNode, { buttons }) => {
+    this.Layout.renderTab = (tabNode, values) => {
+      const { buttons } = values;
       const id = tabNode.getId();
       if (id.startsWith('Notebook/')) {
-        const path = id.substring(9);
         buttons.push(
           <span
             id={`Spinners/${id}`}
-            dangerouslySetInnerHTML={this.Layout.buildSpinners(path)}
+            dangerouslySetInnerHTML={this.Layout.buildSpinners(
+              id.substring('Notebook/'.length)
+            )}
           />
         );
       }
@@ -573,13 +575,13 @@ class App extends React.Component {
 
     this.Notebook.getSelectedPath = () => {
       const { model } = this.state;
-      const { _activeTabSet } = model;
-      const { selected } = _activeTabSet._attributes;
+      const tabset = model.getNodeById('Notebooks');
+      const { selected } = tabset._attributes;
       if (selected === -1) {
         return;
       }
-      const tab = _activeTabSet._children[selected];
-      return tab._attributes.name;
+      const tab = tabset._children[selected];
+      return tab._attributes.id.substring('Notebook/'.length);
     };
 
     this.Notebook.run = async (path, options) => {
@@ -1194,10 +1196,14 @@ class App extends React.Component {
       });
       await this.Notebook.load(path);
       const nodeId = `Notebook/${path}`;
+      const toNameFromPath = (path) => {
+        const pieces = path.split('/');
+        return pieces[pieces.length - 1];
+      };
       this.layoutRef.current.addTabToTabSet('Notebooks', {
         id: nodeId,
         type: 'tab',
-        name: path,
+        name: toNameFromPath(path),
         component: 'Notebook',
       });
       model
@@ -1421,7 +1427,7 @@ class App extends React.Component {
           );
         }
         case 'Notebook': {
-          const path = node.getName();
+          const path = node.getId().substring('Notebook/'.length);
           const {
             [`NotebookMode/${path}`]: NotebookMode = 'view',
             [`NotebookText/${path}`]: NotebookText,
