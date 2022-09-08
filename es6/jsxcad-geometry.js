@@ -543,11 +543,20 @@ const filter$y = (geometry) =>
   ['graph', 'polygonsWithHoles'].includes(geometry.type) &&
   isNotTypeGhost(geometry);
 
-const cast = (geometry, reference) => {
+const filterReferences$1 = (geometry) =>
+  ['graph', 'polygonsWithHoles', 'segments', 'points', 'empty'].includes(
+    geometry.type
+  );
+
+const cast = (planeReference, sourceReference, geometry) => {
   const concreteGeometry = toConcreteGeometry(geometry);
   const inputs = [];
+  linearize(toConcreteGeometry(planeReference), filterReferences$1, inputs);
+  inputs.length = 1;
+  linearize(toConcreteGeometry(sourceReference), filterReferences$1, inputs);
+  inputs.length = 2;
   linearize(concreteGeometry, filter$y, inputs);
-  const outputs = cast$1(inputs, reference);
+  const outputs = cast$1(inputs);
   deletePendingSurfaceMeshes();
   return taggedGroup({}, ...outputs);
 };

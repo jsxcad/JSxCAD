@@ -1,0 +1,19 @@
+md`
+# shape.clipFrom(other)
+
+Clips other by shape, rather than shape by other.
+
+See: [clip](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/clip.nb)
+`;
+
+Box(10)
+  .color('blue')
+  .clipFrom(Arc(12).color('red'))
+  .view()
+  .md("Box(10).color('blue').clipFrom(Arc(12).color('red'))");
+
+Box(10)
+  .color('blue')
+  .clip(Arc(12).color('red'))
+  .view()
+  .md("Box(10).color('blue').clip(Arc(12).color('red'))");

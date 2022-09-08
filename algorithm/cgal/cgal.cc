@@ -3548,21 +3548,21 @@ int Bend(Geometry* geometry, double referenceRadius) {
   return STATUS_OK;
 }
 
-int Cast(Geometry* geometry, const Transformation* reference) {
+int Cast(Geometry* geometry) {
   int size = geometry->size();
   geometry->copyInputMeshesToOutputMeshes();
   geometry->transformToAbsoluteFrame();
   geometry->convertPolygonsToPlanarMeshes();
 
-  Plane reference_plane = Plane(0, 0, 1, 0).transform(*reference);
-  Point reference_point = Point(0, 0, 0).transform(*reference);
+  Plane reference_plane = Plane(0, 0, 1, 0).transform(geometry->transform(0));
+  Point reference_point = Point(0, 0, 0).transform(geometry->transform(1));
   Vector reference_vector = reference_point - Point(0, 0, 0);
 
   int target = geometry->add(GEOMETRY_POLYGONS_WITH_HOLES);
   geometry->plane(target) = reference_plane;
   geometry->setIdentityTransform(target);
 
-  for (int nth = 0; nth < size; nth++) {
+  for (int nth = 2; nth < size; nth++) {
     switch (geometry->getType(nth)) {
       case GEOMETRY_MESH: {
         Surface_mesh& mesh = geometry->mesh(nth);
@@ -3571,22 +3571,22 @@ int Cast(Geometry* geometry, const Transformation* reference) {
         auto& output_map = projected_mesh.points();
         // Squash the mesh.
         for (auto& vertex : mesh.vertices()) {
-          auto result = CGAL::intersection(
-              Line(get(input_map, vertex),
-                   get(input_map, vertex) + reference_vector),
-              reference_plane);
+          const Line line(get(input_map, vertex),
+                          get(input_map, vertex) + reference_vector);
+          auto result = CGAL::intersection(line, reference_plane);
           if (result) {
             if (Point* point = boost::get<Point>(&*result)) {
               put(output_map, vertex, *point);
             }
           }
         }
-        PlanarSurfaceMeshFacetsToPolygonSet(reference_plane, mesh,
-                                            geometry->gps(nth));
+        PlanarSurfaceMeshFacetsToPolygonSet(reference_plane, projected_mesh,
+                                            geometry->gps(target));
       }
     }
   }
 
+  geometry->copyGeneralPolygonSetsToPolygonsWithHoles();
   geometry->transformToLocalFrame();
 
   return STATUS_OK;

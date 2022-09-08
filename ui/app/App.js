@@ -723,6 +723,8 @@ class App extends React.Component {
       if (!this.Notebook.runStart[path]) {
         this.Notebook.run(path);
       }
+
+      return notebookText;
     };
 
     this.Notebook.save = async (path) => {
@@ -1186,7 +1188,11 @@ class App extends React.Component {
     this.Workspace = {};
 
     this.Workspace.loadWorkingPath = async (path) => {
-      const { model, WorkspaceOpenPaths = [] } = this.state;
+      const {
+        model,
+        WorkspaceOpenPaths = [],
+        [`NotebookMode/${path}`]: mode,
+      } = this.state;
       if (WorkspaceOpenPaths.includes(path)) {
         // FIX: Add indication?
         return;
@@ -1194,7 +1200,12 @@ class App extends React.Component {
       await this.updateState({
         WorkspaceOpenPaths: [...WorkspaceOpenPaths, path],
       });
-      await this.Notebook.load(path);
+      const text = await this.Notebook.load(path);
+      if (!mode) {
+        await this.updateState({
+          [`NotebookMode/${path}`]: text ? 'view' : 'edit',
+        });
+      }
       const nodeId = `Notebook/${path}`;
       const toNameFromPath = (path) => {
         const pieces = path.split('/');

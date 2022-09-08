@@ -1141,12 +1141,9 @@ const deletePendingSurfaceMeshes = () => {
   pending.clear();
 };
 
-const cast = (inputs, reference) =>
+const cast = (inputs) =>
   withCgalGeometry(inputs, (cgalGeometry, g) => {
-    const status = g.Cast(
-      cgalGeometry,
-      toCgalTransformFromJsTransform(reference.matrix)
-    );
+    const status = g.Cast(cgalGeometry);
     switch (status) {
       case STATUS_ZERO_THICKNESS:
         throw new ErrorZeroThickness('Zero thickness produced by cast');

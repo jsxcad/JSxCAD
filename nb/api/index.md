@@ -2,7 +2,12 @@
 
 ## Constructors
 * [Arc](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/Arc.nb)
+* [Assembly](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/Assembly.nb)
+* [Cached](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/Cached.nb)
+* [ChainHull](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/ChainHull.nb)
 * [Edge](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/Edge.nb)
+* [Icosahedron](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/Icosahedron.nb)
+* [Orb](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/Orb.nb)
 
 ## Operators
 * [absolute](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/absolute.nb)
@@ -10,4 +15,18 @@
 * [addTo](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/addTo.nb)
 * [align](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/align.nb)
 * [and](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/and.nb)
+* [area](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/area.nb)
+* [as](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/as.nb)
+* [asPart](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/asPart.nb)
+* [at](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/at.nb)
+* [bb](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/bb.nb)
+* [bend](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/bend.nb)
+* [bom](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/bom.nb)
+* [by](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/by.nb)
+* [center](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/center.nb)
+* [clean](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/clean.nb)
+* [clip](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/clip.nb)
+* [clipFrom](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/clipFrom.nb)
+* [color](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/color.nb)
 * [eachEdge](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/eachEdge.nb)
+* [shadow](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/shadow.nb)

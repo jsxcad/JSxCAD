@@ -1,0 +1,12 @@
+md`
+# shape.bom(op)
+
+Extracts a Bill of Materials from the parts in shape.
+
+See: [asPart](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/asPart.nb)
+`;
+Box(3)
+  .asPart('lid')
+  .and(z(1).rz(1 / 5), Triangle(3).z(2).asPart('base'))
+  .view()
+  .bom();

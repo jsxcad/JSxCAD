@@ -1,0 +1,18 @@
+md`
+# shape.as(id)
+
+Wraps shape in an item with the provided id.
+
+An item acts like a single piece of geometry but may contain a complex composition.
+
+It can be extracted using shape.get(id).
+
+See: [get](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/get.nb), [nth](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/nth.nb).
+`;
+Box(10)
+  .and(Arc(2, 2, [0, 2]))
+  .view(1, n(0))
+  .md('The first leaf nth(0) is the box.')
+  .as('plate')
+  .view(2, n(0))
+  .md('Now it is an item, the first leaf nth(0) is the composition');

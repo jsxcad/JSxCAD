@@ -4,13 +4,17 @@ import { getInverseMatrices } from '@jsxcad/geometry';
 
 export const at = Shape.chainable((...args) => (shape) => {
   const { shapesAndFunctions: ops } = destructure(args);
+  const { local, global } = getInverseMatrices(shape.toGeometry());
   const selections = shape.toShapes(ops.shift());
   for (const selection of selections) {
-    const { local, global } = getInverseMatrices(selection.toGeometry());
+    const { local: selectionLocal, global: selectionGlobal } =
+      getInverseMatrices(selection.toGeometry());
     shape = shape
-      .transform(global)
+      .transform(local)
+      .transform(selectionGlobal)
       .op(...ops)
-      .transform(local);
+      .transform(selectionLocal)
+      .transform(global);
   }
   return shape;
 });
