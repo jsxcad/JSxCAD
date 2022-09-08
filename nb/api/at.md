@@ -1,0 +1,21 @@
+shape.at(reference, ...op)
+
+Performs each op in sequence on shape in each reference frame.
+
+```JavaScript
+Box(2, 2, 5)
+  .y(12)
+  .view(1)
+  .md('The object')
+  .at(XY(), cut(Arc(2, 2, [0, 2.5]).y(-1).x(1)))
+  .view(2)
+  .md('The box is cut as though placed at the origin.');
+```
+
+![Image](at.md.0.png)
+
+The object
+
+![Image](at.md.1.png)
+
+The box is cut as though placed at the origin.

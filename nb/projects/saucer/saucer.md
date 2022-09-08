@@ -65,10 +65,6 @@ const top = saucer
   .stl('knob', get('knob').by(align('>z')));
 ```
 
-![Image](saucer.md.3.png)
-
-[knob_0.stl](saucer.knob_0.stl)
-
 ```JavaScript
 const base = saucer.lowerEnvelope().loft(self(), Box(150).z(-12.01)).as('base');
 ```
@@ -88,7 +84,7 @@ const topWithPegHoles = top
   );
 ```
 
-![Image](saucer.md.4.png)
+![Image](saucer.md.3.png)
 
 [top_0.stl](saucer.top_0.stl)
 
@@ -103,6 +99,6 @@ const baseWithPegHoles = base
   .stl('base');
 ```
 
-![Image](saucer.md.5.png)
+![Image](saucer.md.4.png)
 
 [base_0.stl](saucer.base_0.stl)

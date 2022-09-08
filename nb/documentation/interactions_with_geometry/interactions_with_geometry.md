@@ -65,16 +65,16 @@ Arc(10).ez(1, 2, -1, -2).view();
 
 ---
 ### Cast
-3D shapes can be 'cast' as shadows to create 2D shapes.
+3D shapes can be cast as shadows to create 2D shapes.
 
-A plane (default [0, 0, 1, 0]) to cast upon and a direction (default [0, 0, 1, 0]) can be provided.
+A plane (default XY(0)) to cast upon and a direction (default XY(1)) can be provided.
 
 ```JavaScript
 Arc(4)
   .ez(10)
   .rx(1 / 8)
   .material('glass')
-  .and(cast())
+  .and(shadow())
   .view();
 ```
 
@@ -164,6 +164,8 @@ We need to get into the 'design' item in order to get at 'box' and 'bolt'
 ```JavaScript
 log(aDesign.bom());
 ```
+
+Materials:
 
 ---
 ### Loft

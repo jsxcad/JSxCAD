@@ -1,0 +1,12 @@
+md`
+# shape.bb(margin)
+
+Produces an axis-aligned bounding box dilated by the specified margin.
+`;
+
+Orb(5).and(bb(0).material('glass')).view().md('A minimal bounding box.');
+
+Orb(5)
+  .and(bb(1).material('glass'))
+  .view()
+  .md('A bounding box with a margin of 1.');

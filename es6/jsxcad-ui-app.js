@@ -40499,6 +40499,8 @@ class App extends ReactDOM$2.Component {
       if (!this.Notebook.runStart[path]) {
         this.Notebook.run(path);
       }
+
+      return notebookText;
     };
 
     this.Notebook.save = async path => {
@@ -41060,7 +41062,8 @@ class App extends ReactDOM$2.Component {
     this.Workspace.loadWorkingPath = async path => {
       const {
         model,
-        WorkspaceOpenPaths = []
+        WorkspaceOpenPaths = [],
+        [`NotebookMode/${path}`]: mode
       } = this.state;
 
       if (WorkspaceOpenPaths.includes(path)) {
@@ -41071,7 +41074,14 @@ class App extends ReactDOM$2.Component {
       await this.updateState({
         WorkspaceOpenPaths: [...WorkspaceOpenPaths, path]
       });
-      await this.Notebook.load(path);
+      const text = await this.Notebook.load(path);
+
+      if (!mode) {
+        await this.updateState({
+          [`NotebookMode/${path}`]: text ? 'view' : 'edit'
+        });
+      }
+
       const nodeId = `Notebook/${path}`;
 
       const toNameFromPath = path => {

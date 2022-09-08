@@ -12,4 +12,6 @@ const beam = Box(2, 2).ez(10).asPart('beam');
 const diskBeam = disk.and(beam).asPart('diskBeam');
 ```
 
-The bill of materials is disk,diskBeam
+Materials: disk, diskBeam
+
+The bill of materials is [object Object]

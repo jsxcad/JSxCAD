@@ -1,0 +1,12 @@
+md`
+# Icosahedron(...dimensions)
+
+Produces an icosahedron that fits the bounding dimensions.
+`;
+
+Icosahedron(3).and(Box(3, 3, 3).material('glass')).view().md('Icosahedron(3)');
+
+Icosahedron(1, 2, 3)
+  .and(Box(1, 2, 3).material('glass'))
+  .view()
+  .md('Icosahedron(1, 2, 3)');

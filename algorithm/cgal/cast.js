@@ -2,14 +2,10 @@ import { STATUS_OK, STATUS_ZERO_THICKNESS } from './status.js';
 import { fromCgalGeometry, withCgalGeometry } from './cgalGeometry.js';
 
 import { ErrorZeroThickness } from './error.js';
-import { toCgalTransformFromJsTransform } from './transform.js';
 
-export const cast = (inputs, reference) =>
+export const cast = (inputs) =>
   withCgalGeometry(inputs, (cgalGeometry, g) => {
-    const status = g.Cast(
-      cgalGeometry,
-      toCgalTransformFromJsTransform(reference.matrix)
-    );
+    const status = g.Cast(cgalGeometry);
     switch (status) {
       case STATUS_ZERO_THICKNESS:
         throw new ErrorZeroThickness('Zero thickness produced by cast');

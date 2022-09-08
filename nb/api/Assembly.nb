@@ -1,0 +1,12 @@
+md`
+Assembly(...shapes)
+
+Produces a disjoint assembly of shapes.
+`;
+
+Assembly(Box(10), Arc(8), Triangle(6))
+  .view(1)
+  .md('The assembled assembly.')
+  .pack()
+  .view(2)
+  .md('The disassembled assembly.');
