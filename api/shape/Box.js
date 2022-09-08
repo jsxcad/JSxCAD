@@ -108,7 +108,9 @@ const reifyBox = (geometry) => {
     }
   };
 
-  return build().tag(...geometry.tags);
+  return build()
+    .absolute()
+    .tag(...geometry.tags);
 };
 
 Shape.registerReifier('Box', reifyBox);

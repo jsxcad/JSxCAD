@@ -99,7 +99,7 @@ const reifyArc =
       }
     }
 
-    return spiral.tag(...geometry.tags);
+    return spiral.absolute().tag(...geometry.tags);
   };
 
 Shape.registerReifier('Arc', reifyArc(Z));
