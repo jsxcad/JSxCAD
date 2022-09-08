@@ -43,17 +43,21 @@ export class JsViewerUi extends React.PureComponent {
         if (advice && advice.definitions) {
           const orderedNotes = [];
           for (const definition of Object.keys(notebookDefinitions)) {
-            const { domElement, notes } = notebookDefinitions[definition];
+            const { domElements, notes } = notebookDefinitions[definition];
             const { initSourceLocation } = advice.definitions.get(definition);
             const line = initSourceLocation.start.line;
-            orderedNotes.push({ domElement, notes, line });
+            orderedNotes.push({ domElements, notes, line });
           }
           orderedNotes.sort((a, b) => a.line - b.line);
-          // FIX: This produces flicker.
-          for (const { domElement } of orderedNotes) {
-            domElement.style.visibility = '';
-            domElement.style.position = '';
-            container.appendChild(domElement);
+          while (container.firstChild) {
+            container.removeChild(container.firstChild);
+          }
+          for (const { domElements } of orderedNotes) {
+            for (const domElement of domElements) {
+              domElement.style.visibility = '';
+              domElement.style.position = '';
+              container.appendChild(domElement);
+            }
           }
           mermaid.init(undefined, '.mermaid');
         }
@@ -92,7 +96,6 @@ export class JsViewerUi extends React.PureComponent {
         ref={(ref) => {
           this.view = ref;
         }}
-        tabindex="0"
       ></Col>
     );
   }

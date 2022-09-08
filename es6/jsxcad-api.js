@@ -207,6 +207,7 @@ const execute = async (
     topLevel = new Map(),
     parallelUpdateLimit = Infinity,
     clearUpdateEmits = false,
+    workspace,
   }
 ) => {
   const where = isWebWorker ? 'worker' : 'browser';
@@ -227,6 +228,7 @@ const execute = async (
         updates,
         replays,
         exports,
+        workspace,
       });
       // Make sure modules are prepared.
       if (!importsDone) {

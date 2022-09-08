@@ -215,13 +215,19 @@ class App extends React.Component {
               return notebookNotes[note.hash];
             };
 
-            const domElement = document.createElement('div');
-            // Attach the domElement invisibly so that we can compute the size.
-            // Add it at the top so that it doesn't extend the bottom of the page.
-            document.body.prepend(domElement);
-            domElement.style.display = 'block';
-            domElement.style.visibility = 'hidden';
-            domElement.style.position = 'absolute';
+            let wip = document.getElementById('notebook/wip');
+            if (!wip) {
+              wip = document.createElement('div');
+              wip.id = 'notebook/wip';
+              // Attach the wip invisibly so that we can compute the size.
+              // Add it at the top so that it doesn't extend the bottom of the page.
+
+              document.body.prepend(wip);
+              wip.style.display = 'block';
+              wip.style.visibility = 'hidden';
+              wip.style.position = 'absolute';
+            }
+            const domElements = [];
 
             let nthView = 0;
             for (const note of notes) {
@@ -250,7 +256,8 @@ class App extends React.Component {
                 console.log(`Re-appending ${entry.hash} to ${path}/${id}`);
                 // FIX: This is a problem because it removes the child from where it
                 // was.
-                domElement.appendChild(domElementByHash.get(entry.hash));
+                // domElement.appendChild(domElementByHash.get(entry.hash));
+                domElements.push(domElementByHash.get(entry.hash));
               } else {
                 const element = toDomElement([entry], {
                   onClickView: ({ path, view, workspace, sourceLocation }) =>
@@ -270,7 +277,8 @@ class App extends React.Component {
                 });
                 domElementByHash.set(entry.hash, element);
                 console.log(`Appending ${entry.hash} to ${path}/${id}`);
-                domElement.appendChild(element);
+                wip.appendChild(element);
+                domElements.push(element);
                 console.log(`Marking ${entry.hash} in ${path}/${id}`);
 
                 await animationFrame();
@@ -336,7 +344,8 @@ class App extends React.Component {
 
             notebookDefinitions[id] = {
               notes,
-              domElement,
+              wip,
+              domElements,
             };
 
             if (NotebookAdvice.onUpdate) {
@@ -459,14 +468,16 @@ class App extends React.Component {
       }
     };
 
-    this.Layout.renderTab = (tabNode, { buttons }) => {
+    this.Layout.renderTab = (tabNode, values) => {
+      const { buttons } = values;
       const id = tabNode.getId();
       if (id.startsWith('Notebook/')) {
-        const path = id.substring(9);
         buttons.push(
           <span
             id={`Spinners/${id}`}
-            dangerouslySetInnerHTML={this.Layout.buildSpinners(path)}
+            dangerouslySetInnerHTML={this.Layout.buildSpinners(
+              id.substring('Notebook/'.length)
+            )}
           />
         );
       }
@@ -564,13 +575,13 @@ class App extends React.Component {
 
     this.Notebook.getSelectedPath = () => {
       const { model } = this.state;
-      const { _activeTabSet } = model;
-      const { selected } = _activeTabSet._attributes;
+      const tabset = model.getNodeById('Notebooks');
+      const { selected } = tabset._attributes;
       if (selected === -1) {
         return;
       }
-      const tab = _activeTabSet._children[selected];
-      return tab._attributes.name;
+      const tab = tabset._children[selected];
+      return tab._attributes.id.substring('Notebook/'.length);
     };
 
     this.Notebook.run = async (path, options) => {
@@ -680,6 +691,7 @@ class App extends React.Component {
           replay,
           path: NotebookPath,
           topLevel,
+          workspace,
         });
         await resolvePending();
       } catch (error) {
@@ -761,6 +773,7 @@ class App extends React.Component {
           break;
       }
       await this.updateState({ [`NotebookMode/${path}`]: newMode });
+      this.Notebook.store();
       // this.Notebook.clickLink(path);
     };
 
@@ -811,6 +824,22 @@ class App extends React.Component {
       };
       this.setState({ [key]: createdAdvice });
       return createdAdvice;
+    };
+
+    this.Notebook.store = async () => {
+      const state = {};
+      for (const key of Object.keys(this.state)) {
+        if (key.startsWith('NotebookMode/')) {
+          state[key] = this.state[key];
+        }
+      }
+      await write('config/Notebook', state, { workspace });
+    };
+
+    this.Notebook.restore = async () => {
+      const { workspace } = this.props;
+      const state = await read('config/Notebook', { workspace });
+      await this.updateState({ ...state });
     };
 
     this.View = {};
@@ -1167,10 +1196,14 @@ class App extends React.Component {
       });
       await this.Notebook.load(path);
       const nodeId = `Notebook/${path}`;
+      const toNameFromPath = (path) => {
+        const pieces = path.split('/');
+        return pieces[pieces.length - 1];
+      };
       this.layoutRef.current.addTabToTabSet('Notebooks', {
         id: nodeId,
         type: 'tab',
-        name: path,
+        name: toNameFromPath(path),
         component: 'Notebook',
       });
       model
@@ -1219,10 +1252,10 @@ class App extends React.Component {
 
     this.Workspace.restore = async () => {
       // We restore WorkspaceOpenPaths via Model.restore.
-      const { WorkspaceLoadPath, WorkspaceLoadPrefix } = await read(
-        'config/Workspace',
-        { workspace, otherwise: {} }
-      );
+      const {
+        WorkspaceLoadPath,
+        WorkspaceLoadPrefix = 'https://github.com/jsxcad/JSxCAD/tree/master/nb/',
+      } = await read('config/Workspace', { workspace, otherwise: {} });
       await this.updateState({ WorkspaceLoadPath, WorkspaceLoadPrefix });
     };
 
@@ -1394,7 +1427,7 @@ class App extends React.Component {
           );
         }
         case 'Notebook': {
-          const path = node.getName();
+          const path = node.getId().substring('Notebook/'.length);
           const {
             [`NotebookMode/${path}`]: NotebookMode = 'view',
             [`NotebookText/${path}`]: NotebookText,
@@ -1680,6 +1713,7 @@ class App extends React.Component {
     await this.Config.restore();
     await this.Workspace.restore();
     await this.View.restore();
+    await this.Notebook.restore();
     await this.Model.restore();
 
     this.Notebook.clickLink(this.props.path);

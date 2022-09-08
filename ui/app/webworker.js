@@ -70,7 +70,7 @@ const agent = async ({ ask, message, type, tell }) => {
         try {
           // console.log({ op: 'text', text: `QQ/script: ${script}` });
           const api = { ...baseApi, sha };
-          await evaluateScript(script, { api, path });
+          await evaluateScript(script, { api, path, workspace });
           await sys.log({ op: 'evaluate', status: 'success' });
           // Wait for any pending operations.
           // Finally answer the top level question.

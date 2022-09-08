@@ -151,7 +151,11 @@ export class JsEditorUi extends React.PureComponent {
             for (const definition of Object.keys(notebookDefinitions)) {
               const notebookDefinition = notebookDefinitions[definition];
               const widget = widgets.get(definition);
-              if (widget && widget.el !== notebookDefinition.domElement) {
+              if (widget && widget.el !== notebookDefinition.widgetElement) {
+                // Stash the elements for re-use.
+                for (const domElement of notebookDefinition.domElements) {
+                  notebookDefinition.wip.appendChild(domElement);
+                }
                 widgetManager.removeLineWidget(widget);
                 widgets.delete(definition);
               }
@@ -159,11 +163,16 @@ export class JsEditorUi extends React.PureComponent {
                 const entry = advice.definitions.get(definition);
                 if (entry) {
                   const { initSourceLocation } = entry;
-                  const { domElement } = notebookDefinition;
-                  if (!domElement) {
+                  const { domElements } = notebookDefinition;
+                  if (!domElements) {
                     continue;
                   }
-                  const pixelHeight = domElement.offsetHeight;
+                  const widgetElement = document.createElement('div');
+                  let pixelHeight = 0;
+                  for (const e of domElements) {
+                    pixelHeight += e.offsetHeight;
+                    widgetElement.appendChild(e);
+                  }
                   if (!pixelHeight) {
                     continue;
                   }
@@ -171,12 +180,12 @@ export class JsEditorUi extends React.PureComponent {
                     row: initSourceLocation.end.line - 1,
                     coverLine: false,
                     fixedWidth: true,
-                    el: domElement,
+                    el: widgetElement,
                   };
                   const lineHeight = editor.renderer.layerConfig.lineHeight;
                   const rowCount = Math.ceil(pixelHeight / lineHeight);
-                  domElement.style.height = `${rowCount * lineHeight}px`;
-                  domElement.style.zIndex = -1;
+                  widgetElement.style.height = `${rowCount * lineHeight}px`;
+                  widgetElement.style.zIndex = -1;
 
                   widgetManager.addLineWidget(widget);
 
@@ -184,14 +193,15 @@ export class JsEditorUi extends React.PureComponent {
                     throw Error(`Widget height is not a whole number of rows`);
                   }
 
-                  domElement.classList.add(
+                  widgetElement.classList.add(
                     `rowCount_${widget.rowCount}`,
                     `lineHeight_${lineHeight}`,
                     `pixelHeight_${pixelHeight}`
                   );
                   // Display the hidden element.
-                  domElement.style.visibility = '';
+                  widgetElement.style.visibility = '';
                   widgets.set(definition, widget);
+                  notebookDefinition.widgetElements = domElements;
                 }
               }
             }
