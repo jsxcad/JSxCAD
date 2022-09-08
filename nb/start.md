@@ -1,6 +1,8 @@
 # Jot (JSxCAD)
 
-Press Shift-Enter or click Run above to generate notebook.
+Press Shift-Enter to save and regenerate notebook.
+
+Press Control-E to cycle between editing and viewing a notebook.
 
 ## Links
 

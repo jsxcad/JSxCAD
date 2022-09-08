@@ -17,8 +17,6 @@ import './destructure.js';
 // eslint-disable-next-line sort-imports
 import './Plan.js';
 
-import Ref from './Ref.js';
-
 export {
   GrblConstantLaser,
   GrblDynamicLaser,
@@ -30,23 +28,9 @@ export {
   defTool,
 } from './define.js';
 
-export const X = (x = 0) => Ref().x(x);
-export const Y = (y = 0) => Ref().y(y);
-export const Z = (z = 0) => Ref().z(z);
-export const XY = (z = 0) => Ref().z(z);
-export const XZ = (y = 0) =>
-  Ref()
-    .rx(-1 / 4)
-    .y(y);
-export const YZ = (x = 0) =>
-  Ref()
-    .ry(-1 / 4)
-    .x(x);
-export const RX = (t = 0) => Ref().rx(t);
-export const RY = (t = 0) => Ref().ry(t);
-export const RZ = (t = 0) => Ref().rz(t);
-
 export { md } from './md.js';
+
+export { X, Y, Z, XY, XZ, YZ, RX, RY, RZ } from './refs.js';
 
 export { elapsed, emit, read, write } from '@jsxcad/sys';
 
@@ -97,6 +81,7 @@ export { fill } from './fill.js';
 export { fit } from './fit.js';
 export { fitTo } from './fitTo.js';
 export { fix } from './fix.js';
+export { flat } from './flat.js';
 export { o, origin } from './origin.js';
 export { fuse } from './fuse.js';
 export { g, get } from './get.js';
@@ -211,6 +196,7 @@ export { Point } from './Point.js';
 export { Points } from './Points.js';
 export { Polygon } from './Polygon.js';
 export { Polyhedron } from './Polyhedron.js';
+export { Ref } from './Ref.js';
 export { Segments } from './Segments.js';
 export { Septagon } from './Septagon.js';
 export { Spiral } from './Spiral.js';

@@ -1,0 +1,26 @@
+md`
+# Arc(...dimensions)
+
+Produces an arc z axis within the dimensions provided.
+
+See: [ArcZ](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/ArcZ.nb)
+`;
+
+Group(Arc(4), Arc(4, [3, 4]))
+  .view()
+  .md('Dimensions may be ranges.');
+
+Arc(4, 5, 6).view().md('Three dimensions are supported.');
+
+Arc(4)
+  .hasAngle(1 / 16, 15 / 16)
+  .view()
+  .md('Angle constraints can be supplied to produce open arcs.');
+
+Arc(4)
+  .hasAngle(1 / 16, 15 / 16)
+  .and(Point())
+  .loop()
+  .fill()
+  .view()
+  .md('Points are ordered to allow loops.');

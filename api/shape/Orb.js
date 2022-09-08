@@ -23,7 +23,7 @@ Shape.registerReifier('Orb', (geometry) => {
   // const distanceBound = getZag(geometry, DEFAULT_ORB_ZAG) / radius;
   const tolerance = getZag(geometry, DEFAULT_ORB_ZAG) / radius;
 
-  return makeUnitSphere(tolerance).scale(scale).move(middle);
+  return makeUnitSphere(tolerance).scale(scale).move(middle).absolute();
 });
 
 export const Orb = (x = 1, y = x, z = x) =>
