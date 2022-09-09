@@ -24,7 +24,6 @@
   "license": "MIT",
   "dependencies": {
     "@jsxcad/api-v1-math": "^0.0.79",
-    "@jsxcad/api-v1-units": "^0.0.79",
     "@jsxcad/algorithm-cgal": "^0.0.79",
     "@jsxcad/algorithm-color": "^0.0.79",
     "@jsxcad/algorithm-pack": "^0.0.79",

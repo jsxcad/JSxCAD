@@ -6,17 +6,16 @@ import { eachPoint as eachPointOfGeometry } from '@jsxcad/geometry';
 
 export const eachPoint = Shape.chainable((...args) => (shape) => {
   const { shapesAndFunctions } = destructure(args);
-  let [leafOp = (l) => (s) => l, groupOp = Group] = shapesAndFunctions;
-  if (leafOp instanceof Shape) {
-    const leafShape = leafOp;
-    leafOp = (edge) => (shape) => leafShape.by(edge);
+  let [pointOp = (point, shape) => point, groupOp = Group] = shapesAndFunctions;
+  if (pointOp instanceof Shape) {
+    const pointShape = pointOp;
+    pointOp = (point) => pointShape.by(point);
   }
-  const leafs = [];
-  eachPointOfGeometry(
-    Shape.toShape(shape, shape).toGeometry(),
-    ([x = 0, y = 0, z = 0]) => leafs.push(leafOp(Point().move(x, y, z))(shape))
+  const points = [];
+  eachPointOfGeometry(shape.toGeometry(), ([x = 0, y = 0, z = 0]) =>
+    points.push(pointOp(Point().move(x, y, z), shape))
   );
-  const grouped = groupOp(...leafs);
+  const grouped = groupOp(...points);
   if (grouped instanceof Function) {
     return grouped(shape);
   } else {

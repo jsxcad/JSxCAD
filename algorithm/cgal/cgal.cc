@@ -4188,13 +4188,17 @@ int Deform(Geometry* geometry, size_t length, size_t iterations,
 
     // Corefine the target with the selections.
     // This will allow deformations to occur along clear boundaries.
-    for (size_t nth = length; nth < size; nth += 2) {
+    for (size_t nth = length; nth < size; nth++) {
       Surface_mesh& working_selection = geometry->mesh(nth);
       if (CGAL::is_empty(working_selection)) {
         continue;
       }
       {
         Surface_mesh working_selection_copy(working_selection);
+        // Corefine with the local frame position of the selection.
+        CGAL::Polygon_mesh_processing::transform(
+            geometry->transform(nth).inverse(), working_selection_copy,
+            CGAL::parameters::all_default());
         CGAL::Polygon_mesh_processing::corefine(
             working_input, working_selection_copy,
             CGAL::parameters::all_default(), CGAL::parameters::all_default());
@@ -4214,14 +4218,19 @@ int Deform(Geometry* geometry, size_t length, size_t iterations,
       deformation.insert_roi_vertex(vertex);
     }
 
-    for (size_t nth = length; nth < size; nth += 2) {
-      Surface_mesh& working_selection = geometry->mesh(nth);
+    for (size_t nth = length; nth < size; nth++) {
+      Surface_mesh working_selection(geometry->mesh(nth));
       if (CGAL::is_empty(working_selection)) {
         continue;
       }
+      // Select with the local frame position of the selection.
+      CGAL::Polygon_mesh_processing::transform(
+          geometry->transform(nth).inverse(), working_selection,
+          CGAL::parameters::all_default());
       CGAL::Side_of_triangle_mesh<Surface_mesh, Kernel> inside(
           working_selection);
-      const Transformation& deform_transform = geometry->transform(nth + 1);
+      // Deform with the local-to-absolute transform of the selection.
+      const Transformation& deform_transform = geometry->transform(nth);
       Cartesian_kernel::Aff_transformation_3 cartesian_deform_transform(
           CGAL::to_double(deform_transform.m(0, 0)),
           CGAL::to_double(deform_transform.m(0, 1)),
@@ -4265,8 +4274,9 @@ int Demesh(Geometry* geometry) {
   geometry->copyInputMeshesToOutputMeshes();
   for (int nth = 0; nth < size; nth++) {
     if (!geometry->is_mesh(nth)) {
-      demesh(geometry->mesh(nth));
+      continue;
     }
+    demesh(geometry->mesh(nth));
   }
   return STATUS_OK;
 }

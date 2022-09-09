@@ -1,8 +1,9 @@
 import { Shape } from './Shape.js';
 import { getLeafs } from '@jsxcad/geometry';
+import { note } from './note.js';
 
 export const tags = Shape.chainable(
-  (namespace = 'user', op = (tags) => (shape) => shape.md(`tags: ${tags}`)) =>
+  (namespace = 'user', op = (tags) => note(`tags: ${tags}`)) =>
     (shape) => {
       const prefix = `${namespace}:`;
       const collected = [];

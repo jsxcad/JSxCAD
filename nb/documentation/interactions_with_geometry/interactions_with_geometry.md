@@ -377,7 +377,7 @@ aRectangle.tag('tagString').tags((tags, s) => s.md(`Tags ${tags}`));
 
 tags:
 
-Tags can be used to selectively keep or remove parts of geometry.
+Tags can be used to selectively drop parts of geometry.
 
 ```JavaScript
 const taggedAssembly = Assembly(
@@ -402,16 +402,10 @@ Selection does not traverse through item, except for the input shape.
 This means that s.get('a').get('b') will find b inside a, but otherwise b would not be found.
 
 ```JavaScript
-taggedAssembly.keep('user:A').noVoid().view();
+taggedAssembly.drop(get('user:B')).view();
 ```
 
 ![Image](interactions_with_geometry.md.29.png)
-
-```JavaScript
-taggedAssembly.drop('user:B').view();
-```
-
-![Image](interactions_with_geometry.md.30.png)
 
 ```JavaScript
 Group(
@@ -426,15 +420,15 @@ Group(
   .md('All non-copper things.');
 ```
 
-![Image](interactions_with_geometry.md.31.png)
+![Image](interactions_with_geometry.md.30.png)
 
 All items.
 
-![Image](interactions_with_geometry.md.32.png)
+![Image](interactions_with_geometry.md.31.png)
 
 All green things.
 
-![Image](interactions_with_geometry.md.33.png)
+![Image](interactions_with_geometry.md.32.png)
 
 All non-copper things.
 
@@ -472,6 +466,6 @@ Box(11)
   .md('Produce a voxel representation with a 1mm resolution');
 ```
 
-![Image](interactions_with_geometry.md.34.png)
+![Image](interactions_with_geometry.md.33.png)
 
 Produce a voxel representation with a 1mm resolution

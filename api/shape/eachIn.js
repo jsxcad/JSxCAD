@@ -1,6 +1,7 @@
 import Shape from './Shape.js';
 import { getLeafsIn } from '@jsxcad/geometry';
 
+// CHECK: Is this obsoleted by .in().each()?
 export const eachIn = Shape.chainable(
   (
       leafOp = (leaf) => leaf,

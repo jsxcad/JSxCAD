@@ -270,16 +270,14 @@ log(aRectangle.tag('tagString').tags());
 aRectangle.tag('tagString').tags((tags, s) => s.md(`Tags ${tags}`));
 
 md`
-Tags can be used to selectively keep or remove parts of geometry.`;
+Tags can be used to selectively drop parts of geometry.`;
 
 const taggedAssembly = Assembly(
   Arc(10, 10, 2).color('blue').tag('A'),
   Box(6, 5, 2).move(2, 1, 1).color('red').tag('B')
 ).view();
 
-taggedAssembly.keep('user:A').noVoid().view();
-
-taggedAssembly.drop('user:B').view();
+taggedAssembly.drop(get('user:B')).view();
 
 md`
 ---

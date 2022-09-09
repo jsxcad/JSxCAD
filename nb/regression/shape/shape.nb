@@ -11,7 +11,7 @@ Triangle(10).color('red').addTo(Box(5).color('blue')).gridView(3);
 
 Box(5).by(align('x>y>')).gridView();
 
-Box(5).as('box').fitTo(Arc(4).as('arc')).keep('box').gridView(4);
+Box(5).as('box').fitTo(Arc(4).as('arc')).drop(getNot('box')).gridView(4);
 
 Box(5).color('red').clip(Arc(5.8).color('blue')).gridView(5);
 
@@ -21,7 +21,7 @@ Box(5).color('green').gridView();
 
 Box(5)
   .color('green')
-  .colors((colors, s) => {
+  .tags('color', (colors) => (s) => {
     md`Colors are ${colors}`;
     return s;
   });
@@ -38,7 +38,7 @@ Group(Box(5).color('red'), Arc(6).color('blue')).fuse().gridView(11);
 
 Box(10).inset(0.5, { step: 0.5 }).disjoint().n(0, 2, 4, 6, 8).gridView(13);
 
-Assembly(Box(10).as('a'), Arc(6).as('b')).keep('a').gridView(13);
+Assembly(Box(10).as('a'), Arc(6).as('b')).drop(getNot('a')).gridView(13);
 
 Box(10).material('copper').gridView(14);
 
@@ -358,7 +358,7 @@ Segments([
 
 Arc(37).cut(inset(2)).ez(2).remesh(1).smooth(Box(50, 10, 20)).view();
 
-Box(4, 4, 4).cutout(X(0), and).view();
+Box(4, 4, 4).cutOut(X(0)).view();
 
 Box(4, 4, 4).cut('open', Box(2, 2, 8)).view();
 Box(4, 4, 4).clip('open', Box(2, 2, 8)).view();

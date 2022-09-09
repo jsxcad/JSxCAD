@@ -501,11 +501,6 @@ registerDynamicModule(
   './jsxcad-api-v1-svg.js',
   '../v1-svg/main.js'
 );
-registerDynamicModule(
-  '@' + 'jsxcad/api-v1-units',
-  './jsxcad-api-v1-units.js',
-  '../v1-units/main.js'
-);
 
 setApi(api);
 
