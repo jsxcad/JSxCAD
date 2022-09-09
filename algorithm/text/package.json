@@ -46,6 +46,9 @@
     "rollup-plugin-node-globals": "^1.4.0",
     "rollup-plugin-node-resolve": "^4.2.3"
   },
+  "ava": {
+    "workerThreads": false
+  },
   "publishConfig": {
     "access": "public"
   },
