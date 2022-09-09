@@ -1,5 +1,5 @@
 // Worker threads seem to be producing hangs in tests.
 
-export default {
+module.exports = {
   workerThreads: false
-}
+};
