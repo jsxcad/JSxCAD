@@ -13,7 +13,12 @@ md`
 * [Edges](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/Edges.nb)
 * [Empty](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/Empty.nb)
 * [Face](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/Face.nb)
+* [Group](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/Group.nb)
+* [Hershey](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/Hershey.nb)
+* [Hexagon](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/Hexagon.nb)
+* [Hull](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/Hull.nb)
 * [Icosahedron](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/Icosahedron.nb)
+* [Implicit](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/Implicit.nb)
 * [Orb](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/Orb.nb)
 `;
 md`
@@ -59,5 +64,13 @@ md`
 * [fitTo](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/fitTo.nb)
 * [flat](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/flat.nb)
 * [fuse](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/fuse.nb)
+* [get](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/get.nb)
+* [getNot](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/getNot.nb)
+* [ghost](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/ghost.nb)
+* [grow](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/grow.nb)
+* [image](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/image.nb)
+* [in](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/in.nb)
+* [inset](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/inset.nb)
+* [involute](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/involute.nb)
 * [shadow](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/shadow.nb)
 `;
