@@ -111,13 +111,13 @@ Box(10).move(1, 2, 3).gridView(15);
 ![Image](shape.md.14.png)
 
 ```JavaScript
-Box(10).moveTo(1, 2, 3).gridView(16);
+Box(10).to(Point(1, 2, 3)).gridView(16);
 ```
 
 ![Image](shape.md.15.png)
 
 ```JavaScript
-Box(10).move(1, 2, 3).moveTo(center()).gridView(17);
+Box(10).move(1, 2, 3).to(center()).gridView(17);
 ```
 
 ![Image](shape.md.16.png)

@@ -1,7 +1,7 @@
 ### fitTo()
 Parameter|Default|Type
 ---|---|---
-|...others||The shapes to fit
+...others||The shapes to fit
 
 Assembles the shapes into a disjoint fit.
 

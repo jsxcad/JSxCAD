@@ -43,8 +43,8 @@ Assembly(Box(10).as('a'), Arc(6).as('b')).drop(getNot('a')).gridView(13);
 Box(10).material('copper').gridView(14);
 
 Box(10).move(1, 2, 3).gridView(15);
-Box(10).moveTo(1, 2, 3).gridView(16);
-Box(10).move(1, 2, 3).moveTo(center()).gridView(17);
+Box(10).to(Point(1, 2, 3)).gridView(16);
+Box(10).move(1, 2, 3).to(center()).gridView(17);
 Box(10).move(top()).gridView(18);
 
 Assembly(Box(5), Arc(5.5).void()).noVoid().gridView(19);

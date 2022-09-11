@@ -1,12 +1,13 @@
 md`
-### shape.cut(...other, ['exact', 'open', 'noVoid'])
+### cut()
+Parameter|Default|Type
+---|---|---
+...others||The shapes to join
+'exact'|false|Use exact, but slower, computations
+'open'|false|May produce a surface rather than a solid
+'noVoid'|false|Does not cut void shapes.
 
-Removes the coverage of shape that covered by any of the other shapes.
-
-Flags:
-* 'exact' uses slower but exact computations. Non-exact maintains a watertight manifold.
-* 'open' may produce a surface rather than a solid.
-* 'noVoid' does not cut void geometry.
+The results should be watertight manifolds.
 
 See: [cutFrom](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/cutFrom.nb)
 `;

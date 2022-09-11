@@ -1,12 +1,12 @@
-# shape.clip
-#### (...other, ['exact', 'open', 'noVoid'])
+### clip()
+Parameter|Default|Type
+---|---|---
+...others||The shapes to join
+'exact'|false|Use exact, but slower, computations
+'open'|false|May produce a surface rather than a solid
+'noVoid'|false|Does not clip void shapes.
 
 Limits the coverage of shape that covered by all of the other shapes.
-
-Flags:
-* 'exact' uses slower but exact computations. Non-exact maintains a watertight manifold.
-* 'open' produces a surface rather than a solid.
-* 'noVoid' does not clip void geometry.
 
 See: [clipFrom](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/clipFrom.nb)
 

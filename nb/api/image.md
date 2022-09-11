@@ -7,6 +7,8 @@ This specifies an image to use as a texture for a shape.
 
 The texture does not affect the geometry.
 
+See: [material](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/material.nb)
+
 ```JavaScript
 Orb(4)
   .hasZag(0.1)
