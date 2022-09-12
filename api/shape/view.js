@@ -26,6 +26,27 @@ const markContent = (geometry) => {
   }
 };
 
+const applyModes = (options, modes) => {
+  if (modes.includes('wireframe')) {
+    options.wireframe = true;
+  }
+  if (modes.includes('noWireframe')) {
+    options.wireframe = false;
+  }
+  if (modes.includes('skin')) {
+    options.skin = true;
+  }
+  if (modes.includes('noSkin')) {
+    options.skin = false;
+  }
+  if (modes.includes('outline')) {
+    options.outline = true;
+  }
+  if (modes.includes('noOutline')) {
+    options.outline = false;
+  }
+};
+
 // FIX: Avoid the extra read-write cycle.
 export const baseView =
   (viewId = '', op = (x) => x, options = {}) =>
@@ -76,6 +97,7 @@ export const topView = Shape.chainable((...args) => (shape) => {
     value: viewId,
     func: op = (x) => x,
     object: options,
+    strings: modes,
   } = Shape.destructure(args, {
     object: {
       size: 512,
@@ -87,6 +109,7 @@ export const topView = Shape.chainable((...args) => (shape) => {
       position: [0, 0, 100],
     },
   });
+  applyModes(options, modes);
   return view(viewId, op, options)(shape);
 });
 
@@ -97,6 +120,7 @@ export const gridView = Shape.chainable((...args) => {
     value: viewId,
     func: op = (x) => x,
     object: options,
+    strings: modes,
   } = Shape.destructure(args, {
     object: {
       size: 512,
@@ -108,6 +132,7 @@ export const gridView = Shape.chainable((...args) => {
       position: [0, 0, 100],
     },
   });
+  applyModes(options, modes);
   return (shape) => view(viewId, op, options)(shape);
 });
 
@@ -118,6 +143,7 @@ export const frontView = Shape.chainable((...args) => (shape) => {
     value: viewId,
     func: op = (x) => x,
     object: options,
+    strings: modes,
   } = Shape.destructure(args, {
     object: {
       size: 512,
@@ -129,6 +155,7 @@ export const frontView = Shape.chainable((...args) => (shape) => {
       position: [0, -100, 0],
     },
   });
+  applyModes(options, modes);
   return (shape) => view(viewId, op, options)(shape);
 });
 
@@ -139,6 +166,7 @@ export const sideView = Shape.chainable((...args) => (shape) => {
     value: viewId,
     func: op = (x) => x,
     object: options,
+    strings: modes,
   } = Shape.destructure(args, {
     object: {
       size: 512,
@@ -150,6 +178,7 @@ export const sideView = Shape.chainable((...args) => (shape) => {
       position: [100, 0, 0],
     },
   });
+  applyModes(options, modes);
   return view(viewId, op, options)(shape);
 });
 
@@ -160,17 +189,19 @@ export const view = Shape.chainable((...args) => (shape) => {
     value: viewId,
     func: op = (x) => x,
     object: options,
+    strings: modes,
   } = Shape.destructure(args);
   switch (options.style) {
     case 'grid':
-      return shape.gridView(viewId, op, options);
+      return shape.gridView(viewId, op, options, ...modes);
     case 'none':
       return shape;
     case 'side':
-      return shape.sideView(viewId, op, options);
+      return shape.sideView(viewId, op, options, ...modes);
     case 'top':
-      return shape.topView(viewId, op, options);
+      return shape.topView(viewId, op, options, ...modes);
     default:
+      applyModes(options, modes);
       return baseView(viewId, op, options)(shape);
   }
 });

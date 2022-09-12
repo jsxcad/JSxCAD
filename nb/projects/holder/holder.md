@@ -32,7 +32,7 @@ const magneticPenHolder = Arc(magnetDiameter)
       .x(1.1)
   )
   .view()
-  .stl('holder', drop('material:steel'));
+  .stl('holder', drop(get('material:steel')));
 ```
 
 ![Image](holder.md.0.png)

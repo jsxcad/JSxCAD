@@ -106,11 +106,6 @@ registerDynamicModule(
   '@jsxcad/api-v1-svg',
   '../v1-svg/main.js'
 );
-registerDynamicModule(
-  '@' + 'jsxcad/api-v1-units',
-  '@jsxcad/api-v1-units',
-  '../v1-units/main.js'
-);
 
 export { evaluate, execute } from './evaluate.js';
 

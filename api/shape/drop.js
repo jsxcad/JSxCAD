@@ -1,9 +1,8 @@
 import { Shape } from './Shape.js';
-import { get } from './get.js';
-import { voidFn } from './void.js';
+import { ghost } from './ghost.js';
 
 export const drop = Shape.chainable(
-  (tag) => (shape) => shape.on(get(tag), voidFn())
+  (selector) => (shape) => shape.on(selector, ghost())
 );
 
 Shape.registerMethod('drop', drop);

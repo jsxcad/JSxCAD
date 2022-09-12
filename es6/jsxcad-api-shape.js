@@ -1,4 +1,4 @@
-import { assemble as assemble$1, toDisplayGeometry, toConcreteGeometry, toTransformedGeometry, toPoints, transform, rewriteTags, taggedGraph, taggedSegments, taggedPoints, fromPolygons, registerReifier, taggedPlan, identity, hasTypeReference, taggedGroup, join as join$1, makeAbsolute, measureArea, taggedItem, getInverseMatrices, computeNormal, extrude, transformCoordinate, link as link$1, measureBoundingBox, bend as bend$1, getLeafs, computeCentroid, convexHull, fuse as fuse$1, noGhost, clip as clip$1, allTags, cut as cut$1, deform as deform$1, demesh as demesh$1, disjoint as disjoint$1, rewrite, visit, hasTypeGhost, hasTypeVoid, getLayouts, taggedLayout, isNotTypeGhost, getLeafsIn, eachFaceEdges, eachPoint as eachPoint$1, fill as fill$1, fix as fix$1, grow as grow$1, outline as outline$1, inset as inset$1, involute as involute$1, read, readNonblocking, loft as loft$1, serialize as serialize$1, generateLowerEnvelope, hasShowOverlay, hasTypeMasked, hasMaterial, linearize, isTypeVoid, offset as offset$1, remesh as remesh$1, write, writeNonblocking, fromScaleToTransform, seam as seam$1, section as section$1, separate as separate$1, cast, simplify as simplify$1, taggedSketch, smooth as smooth$1, computeToolpath, twist as twist$1, generateUpperEnvelope, measureVolume, withAabbTreeQuery, wrap as wrap$1, computeImplicitVolume } from './jsxcad-geometry.js';
+import { assemble as assemble$1, toDisplayGeometry, toConcreteGeometry, toTransformedGeometry, toPoints, transform, rewriteTags, taggedGraph, taggedSegments, taggedPoints, fromPolygons, registerReifier, taggedPlan, identity, hasTypeReference, taggedGroup, join as join$1, makeAbsolute, measureArea, taggedItem, getInverseMatrices, computeNormal, extrude, transformCoordinate, link as link$1, measureBoundingBox, bend as bend$1, getLeafs, computeCentroid, convexHull, fuse as fuse$1, noGhost, clip as clip$1, cut as cut$1, deform as deform$1, demesh as demesh$1, disjoint as disjoint$1, hasTypeGhost, getLayouts, taggedLayout, visit, isNotTypeGhost, eachFaceEdges, eachPoint as eachPoint$1, fill as fill$1, fix as fix$1, rewrite, grow as grow$1, inset as inset$1, involute as involute$1, read, readNonblocking, loft as loft$1, serialize as serialize$1, generateLowerEnvelope, hasShowOverlay, hasTypeMasked, hasMaterial, isTypeVoid, offset as offset$1, outline as outline$1, remesh as remesh$1, write, writeNonblocking, fromScaleToTransform, seam as seam$1, section as section$1, separate as separate$1, cast, simplify as simplify$1, taggedSketch, smooth as smooth$1, computeToolpath, twist as twist$1, generateUpperEnvelope, hasTypeVoid, measureVolume, withAabbTreeQuery, linearize, wrap as wrap$1, computeImplicitVolume } from './jsxcad-geometry.js';
 import { getSourceLocation, startTime, endTime, emit, computeHash, logInfo, log as log$1, ErrorWouldBlock, generateUniqueId, addPending, write as write$1 } from './jsxcad-sys.js';
 export { elapsed, emit, read, write } from './jsxcad-sys.js';
 import { zag } from './jsxcad-api-v1-math.js';
@@ -6,7 +6,6 @@ import { fromRotateXToTransform, fromRotateYToTransform, fromSegmentToInverseTra
 import { toTagsFromName } from './jsxcad-algorithm-color.js';
 import { pack as pack$1 } from './jsxcad-algorithm-pack.js';
 import { toTagsFromName as toTagsFromName$1 } from './jsxcad-algorithm-tool.js';
-export { cm, foot, inch, m, mil, mm, thou, yard } from './jsxcad-api-v1-units.js';
 
 class Shape {
   constructor(geometry = assemble$1(), context) {
@@ -1318,9 +1317,23 @@ const bend = Shape.chainable(
 
 Shape.registerMethod('bend', bend);
 
+const Note = (md) => {
+  if (Array.isArray(md)) {
+    md = md.join(', ');
+  }
+  emit({ md, hash: computeHash(md) });
+};
+
+const note = Shape.chainable((md) => (shape) => {
+  Note(md);
+  return shape;
+});
+
+Shape.registerMethod('note', note);
+
 // Is this better than s.get('part:*').tags('part')?
 const billOfMaterials = Shape.chainable(
-  (op = (list) => (shape) => shape.md(`Materials: ${list.join(', ')}`)) =>
+  (op = (list) => note(`Materials: ${list.join(', ')}`)) =>
     (shape) =>
       shape.get('part:*').tags('part', op)
 );
@@ -1438,19 +1451,6 @@ const color = Shape.chainable(
 
 Shape.registerMethod('color', color);
 
-const colors = Shape.chainable(
-  (op = (colors, shape) => colors) =>
-    (shape) =>
-      op(
-        [...allTags(shape.toGeometry())]
-          .filter((tag) => tag.startsWith('color/'))
-          .map((tag) => tag.substring(6)),
-        shape
-      )
-);
-
-Shape.registerMethod('colors', colors);
-
 const cut = Shape.chainable((...args) => (shape) => {
   const { strings: modes, shapesAndFunctions: shapes } = destructure(args);
   return Shape.fromGeometry(
@@ -1477,47 +1477,35 @@ const cutFrom = Shape.chainable((...args) => (shape) => {
 
 Shape.registerMethod('cutFrom', cutFrom);
 
-const cutopen = Shape.chainable(
-  (...shapes) =>
-    (shape) =>
-      Shape.fromGeometry(
-        cut$1(
-          shape.toGeometry(),
-          shape.toShapes(shapes).map((other) => other.toGeometry()),
-          /* open= */ true
-        )
-      )
-);
+const cutOut = Shape.chainable((...args) => (shape) => {
+  const {
+    shapesAndFunctions: others,
+    functions,
+    strings: modes,
+  } = destructure(args);
+  const [cutOp = (shape) => shape, clipOp = (shape) => shape, groupOp = Group] =
+    functions;
+  const other = shape.toShape(others[0]);
+  return groupOp(
+    shape.cut(other, ...modes).op(cutOp),
+    shape.clip(other, ...modes).op(clipOp)
+  );
+});
+Shape.registerMethod('cutOut', cutOut);
 
-Shape.registerMethod('cutopen', cutopen);
-
-const cutout = Shape.chainable(
-  (other, op = (cut) => (clipped) => cut.and(clipped.void())) =>
-    (shape) => {
-      other = Shape.toShape(other, shape);
-      return shape.cut(other).op((cut) => op(cut)(shape.clip(other)));
-    }
-);
-Shape.registerMethod('cutout', cutout);
-
-const deform = Shape.chainable(
-  (entries = [], { iterations, tolerance, alpha } = {}) =>
-    (shape) =>
-      Shape.fromGeometry(
-        deform$1(
-          shape.toGeometry(),
-          entries.map(({ selection, deformation }) => ({
-            selection: selection.toGeometry(),
-            deformation: deformation
-              ? deformation.toGeometry()
-              : Point().toGeometry(),
-          })),
-          iterations,
-          tolerance,
-          alpha
-        )
-      )
-);
+const deform = Shape.chainable((...args) => (shape) => {
+  const { shapesAndFunctions: selections, object: options } = destructure(args);
+  const { iterations, tolerance, alpha } = options;
+  return Shape.fromGeometry(
+    deform$1(
+      shape.toGeometry(),
+      selections.map((selection) => shape.toShape(selection).toGeometry()),
+      iterations,
+      tolerance,
+      alpha
+    )
+  );
+});
 
 Shape.registerMethod('deform', deform);
 
@@ -1542,108 +1530,14 @@ const disjoint = Shape.chainable((...args) => (shape) => {
 
 Shape.registerMethod('disjoint', disjoint);
 
-const qualifyTag = (tag, namespace = 'user') => {
-  if (tag.includes(':')) {
-    return tag;
-  }
-  return `${namespace}:${tag}`;
-};
-
-const tagMatcher = (tag, namespace = 'user') => {
-  const qualifiedTag = qualifyTag(tag, namespace);
-  if (qualifiedTag.endsWith(':*')) {
-    const [namespace] = qualifiedTag.split(':');
-    const prefix = `${namespace}:`;
-    return (tag) => tag.startsWith(prefix);
-  } else {
-    return (tag) => tag === qualifiedTag;
-  }
-};
-
-const oneOfTagMatcher = (tags, namespace = 'user') => {
-  const matchers = tags.map((tag) => tagMatcher(tag, namespace));
-  const isMatch = (tag) => {
-    for (const matcher of matchers) {
-      if (matcher(tag)) {
-        return true;
-      }
-    }
-    return false;
-  };
-  return isMatch;
-};
-
-const tagGeometry = (geometry, tags) => {
-  const tagsToAdd = tags.map((tag) => qualifyTag(tag, 'user'));
-  const op = (geometry, descend) => {
-    switch (geometry.type) {
-      case 'group':
-      case 'layout': {
-        return descend();
-      }
-      default: {
-        const tags = [...(geometry.tags || [])];
-        for (const tagToAdd of tagsToAdd) {
-          if (!tags.includes(tagToAdd)) {
-            tags.push(tagToAdd);
-          }
-        }
-        return descend({ tags });
-      }
-    }
-  };
-  return rewrite(geometry, op);
-};
-
-const tag = Shape.chainable(
-  (...tags) =>
-    (shape) =>
-      Shape.fromGeometry(tagGeometry(shape.toGeometry(), tags))
+const ghost = Shape.chainable(
+  () => (shape) => Shape.fromGeometry(hasTypeGhost(shape.toGeometry()))
 );
 
-Shape.registerMethod('tag', tag);
-
-const get = Shape.chainable((...tags) => (shape) => {
-  const isMatch = oneOfTagMatcher(tags, 'item');
-  const picks = [];
-  const walk = (geometry, descend) => {
-    const { tags, type } = geometry;
-    if (type === 'group') {
-      return descend();
-    }
-    if (isMatch(`type:${geometry.type}`)) {
-      picks.push(Shape.fromGeometry(geometry));
-    } else {
-      for (const tag of tags) {
-        if (isMatch(tag)) {
-          picks.push(Shape.fromGeometry(geometry));
-          break;
-        }
-      }
-    }
-    if (type !== 'item') {
-      return descend();
-    }
-  };
-  const geometry = shape.toGeometry();
-  visit(geometry, walk);
-  return Group(...picks);
-});
-
-const g = get;
-
-Shape.registerMethod('get', get);
-Shape.registerMethod('g', get);
-
-const voidFn = Shape.chainable(
-  () => (shape) =>
-    Shape.fromGeometry(hasTypeGhost(hasTypeVoid(shape.toGeometry())))
-);
-
-Shape.registerMethod('void', voidFn);
+Shape.registerMethod('ghost', ghost);
 
 const drop = Shape.chainable(
-  (tag) => (shape) => shape.on(get(tag), voidFn())
+  (selector) => (shape) => shape.on(selector, ghost())
 );
 
 Shape.registerMethod('drop', drop);
@@ -3336,20 +3230,6 @@ const each = Shape.chainable((...args) => (shape) => {
 });
 Shape.registerMethod('each', each);
 
-const eachIn = Shape.chainable(
-  (
-      leafOp = (leaf) => leaf,
-      groupOp = (leafs, shape) => Shape.Group(...leafs)
-    ) =>
-    (shape) => {
-      const leafShapes = getLeafsIn(shape.toGeometry()).map((leaf) =>
-        leafOp(Shape.fromGeometry(leaf))
-      );
-      return groupOp(leafShapes, shape);
-    }
-);
-Shape.registerMethod('eachIn', eachIn);
-
 // TODO: Add an option to include a virtual segment at the target of the last
 // edge.
 
@@ -3434,17 +3314,16 @@ Shape.registerMethod('eachEdge', eachEdge);
 
 const eachPoint = Shape.chainable((...args) => (shape) => {
   const { shapesAndFunctions } = destructure(args);
-  let [leafOp = (l) => (s) => l, groupOp = Group] = shapesAndFunctions;
-  if (leafOp instanceof Shape) {
-    const leafShape = leafOp;
-    leafOp = (edge) => (shape) => leafShape.by(edge);
+  let [pointOp = (point, shape) => point, groupOp = Group] = shapesAndFunctions;
+  if (pointOp instanceof Shape) {
+    const pointShape = pointOp;
+    pointOp = (point) => pointShape.by(point);
   }
-  const leafs = [];
-  eachPoint$1(
-    Shape.toShape(shape, shape).toGeometry(),
-    ([x = 0, y = 0, z = 0]) => leafs.push(leafOp(Point().move(x, y, z))(shape))
+  const points = [];
+  eachPoint$1(shape.toGeometry(), ([x = 0, y = 0, z = 0]) =>
+    points.push(pointOp(Point().move(x, y, z), shape))
   );
-  const grouped = groupOp(...leafs);
+  const grouped = groupOp(...points);
   if (grouped instanceof Function) {
     return grouped(shape);
   } else {
@@ -3590,11 +3469,98 @@ const fuse = Shape.chainable((...args) => (shape) => {
 
 Shape.registerMethod('fuse', fuse);
 
-const ghost = Shape.chainable(
-  () => (shape) => Shape.fromGeometry(hasTypeGhost(shape.toGeometry()))
+const qualifyTag = (tag, namespace = 'user') => {
+  if (tag.includes(':')) {
+    return tag;
+  }
+  return `${namespace}:${tag}`;
+};
+
+const tagMatcher = (tag, namespace = 'user') => {
+  const qualifiedTag = qualifyTag(tag, namespace);
+  if (qualifiedTag.endsWith(':*')) {
+    const [namespace] = qualifiedTag.split(':');
+    const prefix = `${namespace}:`;
+    return (tag) => tag.startsWith(prefix);
+  } else {
+    return (tag) => tag === qualifiedTag;
+  }
+};
+
+const oneOfTagMatcher = (tags, namespace = 'user') => {
+  const matchers = tags.map((tag) => tagMatcher(tag, namespace));
+  const isMatch = (tag) => {
+    for (const matcher of matchers) {
+      if (matcher(tag)) {
+        return true;
+      }
+    }
+    return false;
+  };
+  return isMatch;
+};
+
+const tagGeometry = (geometry, tags) => {
+  const tagsToAdd = tags.map((tag) => qualifyTag(tag, 'user'));
+  const op = (geometry, descend) => {
+    switch (geometry.type) {
+      case 'group':
+      case 'layout': {
+        return descend();
+      }
+      default: {
+        const tags = [...(geometry.tags || [])];
+        for (const tagToAdd of tagsToAdd) {
+          if (!tags.includes(tagToAdd)) {
+            tags.push(tagToAdd);
+          }
+        }
+        return descend({ tags });
+      }
+    }
+  };
+  return rewrite(geometry, op);
+};
+
+const tag = Shape.chainable(
+  (...tags) =>
+    (shape) =>
+      Shape.fromGeometry(tagGeometry(shape.toGeometry(), tags))
 );
 
-Shape.registerMethod('ghost', ghost);
+Shape.registerMethod('tag', tag);
+
+const get = Shape.chainable((...tags) => (shape) => {
+  const isMatch = oneOfTagMatcher(tags, 'item');
+  const picks = [];
+  const walk = (geometry, descend) => {
+    const { tags, type } = geometry;
+    if (type === 'group') {
+      return descend();
+    }
+    if (isMatch(`type:${geometry.type}`)) {
+      picks.push(Shape.fromGeometry(geometry));
+    } else {
+      for (const tag of tags) {
+        if (isMatch(tag)) {
+          picks.push(Shape.fromGeometry(geometry));
+          break;
+        }
+      }
+    }
+    if (type !== 'item') {
+      return descend();
+    }
+  };
+  const geometry = shape.toGeometry();
+  visit(geometry, walk);
+  return Group(...picks);
+});
+
+const g = get;
+
+Shape.registerMethod('get', get);
+Shape.registerMethod('g', get);
 
 const getNot = Shape.chainable((...tags) => (shape) => {
   const isMatch = oneOfTagMatcher(tags, 'item');
@@ -3677,24 +3643,6 @@ const inFn = Shape.chainable(() => (shape) => {
 
 Shape.registerMethod('in', inFn);
 
-const outline = Shape.chainable((...args) => (shape) => {
-  const { shapesAndFunctions: selections } = destructure(args);
-  return Shape.fromGeometry(
-    outline$1(
-      shape.toGeometry(),
-      shape.toShapes(selections).map((selection) => selection.toGeometry())
-    )
-  );
-});
-
-Shape.registerMethod('outline', outline);
-
-const inline = Shape.chainable(
-  () => (shape) => outline({}, shape.flip())
-);
-
-Shape.registerMethod('inline', inline);
-
 const inset = Shape.chainable(
   (initial = 1, { segments = 16, step, limit } = {}) =>
     (shape) =>
@@ -3710,12 +3658,6 @@ const involute = Shape.chainable(
 );
 
 Shape.registerMethod('involute', involute);
-
-const keep = Shape.chainable(
-  (tag) => (shape) => shape.on(getNot(tag), voidFn())
-);
-
-Shape.registerMethod('keep', keep);
 
 const Link = (...shapes) =>
   Shape.fromGeometry(
@@ -3899,37 +3841,6 @@ const m = (...offsets) => moveAlong(normal(), ...offsets);
 Shape.registerMethod('m', m);
 Shape.registerMethod('moveAlong', moveAlong);
 
-// FIX: This is probably the wrong approach to moving to a particular location.
-const moveTo = Shape.chainable((x = 0, y = 0, z = 0) => (shape) => {
-  x = Shape.toValue(x, shape);
-  y = Shape.toValue(y, shape);
-  z = Shape.toValue(z, shape);
-  // Allow a Point to be provided.
-  if (x instanceof Shape) {
-    const geometry = linearize(
-      x.toGeometry(),
-      ({ type, points }) => type === 'points' && points.length >= 1
-    );
-    if (geometry.length >= 1) {
-      const { matrix, points } = geometry[0];
-      const point = transformCoordinate(points[0], matrix);
-      [x, y, z] = point;
-    }
-  }
-  if (!isFinite(x)) {
-    x = 0;
-  }
-  if (!isFinite(y)) {
-    y = 0;
-  }
-  if (!isFinite(z)) {
-    z = 0;
-  }
-  return shape.transform(fromTranslateToTransform(-x, -y, -z));
-});
-
-Shape.registerMethod('moveTo', moveTo);
-
 const noop = Shape.chainable(() => (shape) => shape);
 
 const noVoid = Shape.chainable((tags, select) => (shape) => {
@@ -4017,6 +3928,18 @@ const op = Shape.chainable(
 );
 
 Shape.registerMethod('op', op);
+
+const outline = Shape.chainable((...args) => (shape) => {
+  const { shapesAndFunctions: selections } = destructure(args);
+  return Shape.fromGeometry(
+    outline$1(
+      shape.toGeometry(),
+      shape.toShapes(selections).map((selection) => selection.toGeometry())
+    )
+  );
+});
+
+Shape.registerMethod('outline', outline);
 
 const cross = ([ax, ay, az], [bx, by, bz]) => [
   ay * bz - az * by,
@@ -4456,6 +4379,10 @@ const seq = Shape.chainable((...args) => (shape) => {
 
 Shape.registerMethod('seq', seq);
 
+const Seq = (...args) => Empty().seq(...args);
+
+Shape.prototype.Seq = Shape.shapeMethod(Seq);
+
 const serialize = Shape.chainable(
   (op = (v) => v, groupOp = (v, s) => s) =>
     (shape) =>
@@ -4663,7 +4590,7 @@ const table = Shape.chainable((rows, columns, ...cells) => (shape) => {
 Shape.registerMethod('table', table);
 
 const tags = Shape.chainable(
-  (namespace = 'user', op = (tags) => (shape) => shape.md(`tags: ${tags}`)) =>
+  (namespace = 'user', op = (tags) => note(`tags: ${tags}`)) =>
     (shape) => {
       const prefix = `${namespace}:`;
       const collected = [];
@@ -4851,6 +4778,27 @@ const markContent = (geometry) => {
   }
 };
 
+const applyModes = (options, modes) => {
+  if (modes.includes('wireframe')) {
+    options.wireframe = true;
+  }
+  if (modes.includes('noWireframe')) {
+    options.wireframe = false;
+  }
+  if (modes.includes('skin')) {
+    options.skin = true;
+  }
+  if (modes.includes('noSkin')) {
+    options.skin = false;
+  }
+  if (modes.includes('outline')) {
+    options.outline = true;
+  }
+  if (modes.includes('noOutline')) {
+    options.outline = false;
+  }
+};
+
 // FIX: Avoid the extra read-write cycle.
 const baseView =
   (viewId = '', op = (x) => x, options = {}) =>
@@ -4901,6 +4849,7 @@ const topView = Shape.chainable((...args) => (shape) => {
     value: viewId,
     func: op = (x) => x,
     object: options,
+    strings: modes,
   } = Shape.destructure(args, {
     object: {
       size: 512,
@@ -4912,6 +4861,7 @@ const topView = Shape.chainable((...args) => (shape) => {
       position: [0, 0, 100],
     },
   });
+  applyModes(options, modes);
   return view(viewId, op, options)(shape);
 });
 
@@ -4922,6 +4872,7 @@ const gridView = Shape.chainable((...args) => {
     value: viewId,
     func: op = (x) => x,
     object: options,
+    strings: modes,
   } = Shape.destructure(args, {
     object: {
       size: 512,
@@ -4933,6 +4884,7 @@ const gridView = Shape.chainable((...args) => {
       position: [0, 0, 100],
     },
   });
+  applyModes(options, modes);
   return (shape) => view(viewId, op, options)(shape);
 });
 
@@ -4943,6 +4895,7 @@ const frontView = Shape.chainable((...args) => (shape) => {
     value: viewId,
     func: op = (x) => x,
     object: options,
+    strings: modes,
   } = Shape.destructure(args, {
     object: {
       size: 512,
@@ -4954,6 +4907,7 @@ const frontView = Shape.chainable((...args) => (shape) => {
       position: [0, -100, 0],
     },
   });
+  applyModes(options, modes);
   return (shape) => view(viewId, op, options)(shape);
 });
 
@@ -4964,6 +4918,7 @@ Shape.chainable((...args) => (shape) => {
     value: viewId,
     func: op = (x) => x,
     object: options,
+    strings: modes,
   } = Shape.destructure(args, {
     object: {
       size: 512,
@@ -4975,6 +4930,7 @@ Shape.chainable((...args) => (shape) => {
       position: [100, 0, 0],
     },
   });
+  applyModes(options, modes);
   return view(viewId, op, options)(shape);
 });
 
@@ -4985,22 +4941,31 @@ const view = Shape.chainable((...args) => (shape) => {
     value: viewId,
     func: op = (x) => x,
     object: options,
+    strings: modes,
   } = Shape.destructure(args);
   switch (options.style) {
     case 'grid':
-      return shape.gridView(viewId, op, options);
+      return shape.gridView(viewId, op, options, ...modes);
     case 'none':
       return shape;
     case 'side':
-      return shape.sideView(viewId, op, options);
+      return shape.sideView(viewId, op, options, ...modes);
     case 'top':
-      return shape.topView(viewId, op, options);
+      return shape.topView(viewId, op, options, ...modes);
     default:
+      applyModes(options, modes);
       return baseView(viewId, op, options)(shape);
   }
 });
 
 Shape.registerMethod('view', view);
+
+const voidFn = Shape.chainable(
+  () => (shape) =>
+    Shape.fromGeometry(hasTypeGhost(hasTypeVoid(shape.toGeometry())))
+);
+
+Shape.registerMethod('void', voidFn);
 
 const voidIn = Shape.chainable(
   (other) => (shape) => Shape.toShape(other, shape).fitTo(shape.void())
@@ -5617,14 +5582,27 @@ var _function = function createBezierBuilder(opt) {
 
 var adaptiveBezierCurve = _function();
 
-const Curve = (start, c1, c2, end) => {
+const DEFAULT_CURVE_ZAG = 1;
+
+const reifyCurve = (geometry) => {
+  const { plan } = geometry;
+  const { controlPoints } = plan;
+  const { start, c1, c2, end } = controlPoints;
   const p1 = Shape.toCoordinate(undefined, start);
   const p2 = Shape.toCoordinate(undefined, c1);
   const p3 = Shape.toCoordinate(undefined, c2);
   const p4 = Shape.toCoordinate(undefined, end);
-  const points = adaptiveBezierCurve(p1, p2, p3, p4, 10);
+  const zag = getZag(geometry, DEFAULT_CURVE_ZAG);
+  const points = adaptiveBezierCurve(p1, p2, p3, p4, 10 / zag);
   return Link(points.map((point) => Point(point)));
 };
+
+Shape.registerReifier('Curve', reifyCurve);
+
+const Curve = (start, c1, c2, end) =>
+  Shape.fromGeometry(
+    taggedPlan({}, { type: 'Curve', controlPoints: { start, c1, c2, end } })
+  );
 
 const Face = (...points) =>
   Shape.fromPolygons([
@@ -5742,8 +5720,20 @@ const Implicit = (...args) => {
 
 Shape.prototype.Implicit = Shape.shapeMethod(Implicit);
 
-const Line = (forward, backward = 0) =>
-  Edge(Point(forward), Point(backward));
+const Line = (...extents) => {
+  const offsets = Shape.toFlatValues(extents);
+  if (offsets.length % 2 === 1) {
+    offsets.push(0);
+  }
+  offsets.sort((a, b) => a - b);
+  const edges = [];
+  for (let nth = 0; nth < offsets.length; nth += 2) {
+    const end = offsets[nth];
+    const begin = offsets[nth + 1];
+    edges.push(Edge(Point(begin), Point(end)));
+  }
+  return Group(...edges);
+};
 
 Shape.prototype.Line = Shape.shapeMethod(Line);
 
@@ -5872,4 +5862,4 @@ const Wave = (...args) => {
 
 Shape.prototype.Wave = Shape.shapeMethod(Wave);
 
-export { Arc, ArcX, ArcY, ArcZ, Assembly, Box, Cached, ChainHull, Clip, Curve, Edge, Edges, Empty, Face, GrblConstantLaser, GrblDynamicLaser, GrblPlotter, GrblSpindle, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Join, Line, Link, Loft, Loop, Octagon, Orb, Page, Path, Pentagon, Plan, Point, Points, Polygon, Polyhedron, RX, RY, RZ, Ref, Segments, Septagon, Shape, Spiral, SurfaceMesh, Tetragon, Triangle, Voxels, Wave, Wrap, X$8 as X, XY, XZ, Y$8 as Y, YZ, Z$8 as Z, absolute, abstract, addTo, align, and, area, as, asPart, at, bb, bend, billOfMaterials, by, center, chainHull, clean, clip, clipFrom, color, colors, cut, cutFrom, cutopen, cutout, defRgbColor, defThreejsMaterial, defTool, define, deform, demesh, destructure, disjoint, drop, e, each, eachEdge, eachIn, eachPoint, edges, edit, ensurePages, ex, extrudeAlong, extrudeX, extrudeY, extrudeZ, ey, ez, faces, fill, fit, fitTo, fix, flat, fuse, g, get, getNot, ghost, gn, grow, hull, image, inFn, inline, inset, involute, join, keep, link, loadGeometry, loft, log, loop, lowerEnvelope, mask, masking, material, md, move, moveAlong, moveTo, n, noVoid, noop, normal, notColor, nth, o, ofPlan, offset, on, op, orient, origin, outline, overlay, pack, points$1 as points, ref, reify, remesh, rotateX, rotateY, rotateZ, rx, ry, rz, saveGeometry, scale$1 as scale, scaleToFit, scaleX, scaleY, scaleZ, seam, section, sectionProfile, self, separate, seq, serialize, shadow, simplify, size, sketch, smooth, sort, sx, sy, sz, table, tag, tags, tint, to, tool, toolpath, top, twist, untag, upperEnvelope, view, voidFn, voidIn, volume, voxels, wrap, x, xyz, y, z };
+export { Arc, ArcX, ArcY, ArcZ, Assembly, Box, Cached, ChainHull, Clip, Curve, Edge, Edges, Empty, Face, GrblConstantLaser, GrblDynamicLaser, GrblPlotter, GrblSpindle, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Join, Line, Link, Loft, Loop, Note, Octagon, Orb, Page, Path, Pentagon, Plan, Point, Points, Polygon, Polyhedron, RX, RY, RZ, Ref, Segments, Septagon, Seq, Shape, Spiral, SurfaceMesh, Tetragon, Triangle, Voxels, Wave, Wrap, X$8 as X, XY, XZ, Y$8 as Y, YZ, Z$8 as Z, absolute, abstract, addTo, align, and, area, as, asPart, at, bb, bend, billOfMaterials, by, center, chainHull, clean, clip, clipFrom, color, cut, cutFrom, cutOut, defRgbColor, defThreejsMaterial, defTool, define, deform, demesh, destructure, disjoint, drop, e, each, eachEdge, eachPoint, edges, edit, ensurePages, ex, extrudeAlong, extrudeX, extrudeY, extrudeZ, ey, ez, faces, fill, fit, fitTo, fix, flat, fuse, g, get, getNot, ghost, gn, grow, hull, image, inFn, inset, involute, join, link, loadGeometry, loft, log, loop, lowerEnvelope, m, mask, masking, material, md, move, moveAlong, n, noVoid, noop, normal, notColor, note, nth, o, ofPlan, offset, on, op, orient, origin, outline, overlay, pack, points$1 as points, ref, reify, remesh, rotateX, rotateY, rotateZ, rx, ry, rz, saveGeometry, scale$1 as scale, scaleToFit, scaleX, scaleY, scaleZ, seam, section, sectionProfile, self, separate, seq, serialize, shadow, simplify, size, sketch, smooth, sort, sx, sy, sz, table, tag, tags, tint, to, tool, toolpath, top, twist, untag, upperEnvelope, view, voidFn, voidIn, volume, voxels, wrap, x, xyz, y, z };

@@ -409,7 +409,7 @@ Box(10).cut(Box(5)).ez(1, -1).section().view();
 
 ```JavaScript
 Box(10, 10, 20)
-  .cutout(Box(20, 20, [8, 100]), (cut) => (clip) => cut.and(clip.grow(2, 'xy')))
+  .cutOut(Box(20, 20, [8, 100]), noop(), grow(2, 'xy'))
   .view();
 ```
 

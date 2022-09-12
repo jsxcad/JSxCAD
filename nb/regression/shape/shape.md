@@ -28,7 +28,7 @@ Box(5).by(align('x>y>')).gridView();
 ![Image](shape.md.3.png)
 
 ```JavaScript
-Box(5).as('box').fitTo(Arc(4).as('arc')).keep('box').gridView(4);
+Box(5).as('box').fitTo(Arc(4).as('arc')).drop(getNot('box')).gridView(4);
 ```
 
 ![Image](shape.md.4.png)
@@ -54,13 +54,13 @@ Box(5).color('green').gridView();
 ```JavaScript
 Box(5)
   .color('green')
-  .colors((colors, s) => {
+  .tags('color', (colors) => (s) => {
     md`Colors are ${colors}`;
     return s;
   });
 ```
 
-Colors are
+Colors are green
 
 ```JavaScript
 Box(5).color('red').cut(Arc(6).color('blue')).gridView(8);
@@ -93,7 +93,7 @@ Box(10).inset(0.5, { step: 0.5 }).disjoint().n(0, 2, 4, 6, 8).gridView(13);
 ![Image](shape.md.11.png)
 
 ```JavaScript
-Assembly(Box(10).as('a'), Arc(6).as('b')).keep('a').gridView(13);
+Assembly(Box(10).as('a'), Arc(6).as('b')).drop(getNot('a')).gridView(13);
 ```
 
 ![Image](shape.md.12.png)
@@ -111,13 +111,13 @@ Box(10).move(1, 2, 3).gridView(15);
 ![Image](shape.md.14.png)
 
 ```JavaScript
-Box(10).moveTo(1, 2, 3).gridView(16);
+Box(10).to(Point(1, 2, 3)).gridView(16);
 ```
 
 ![Image](shape.md.15.png)
 
 ```JavaScript
-Box(10).move(1, 2, 3).moveTo(center()).gridView(17);
+Box(10).move(1, 2, 3).to(center()).gridView(17);
 ```
 
 ![Image](shape.md.16.png)
@@ -622,7 +622,7 @@ Arc(37).cut(inset(2)).ez(2).remesh(1).smooth(Box(50, 10, 20)).view();
 ![Image](shape.md.66.png)
 
 ```JavaScript
-Box(4, 4, 4).cutout(X(0), and).view();
+Box(4, 4, 4).cutOut(X(0)).view();
 ```
 
 ![Image](shape.md.67.png)

@@ -1,3 +1,4 @@
+import Empty from './Empty.js';
 import Shape from './Shape.js';
 
 const EPSILON = 1e-5;
@@ -87,3 +88,7 @@ export const seq = Shape.chainable((...args) => (shape) => {
 });
 
 Shape.registerMethod('seq', seq);
+
+export const Seq = (...args) => Empty().seq(...args);
+
+Shape.prototype.Seq = Shape.shapeMethod(Seq);

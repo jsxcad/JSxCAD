@@ -1,4 +1,4 @@
-# shape.clipFrom(other)
+# shape.clipFrom(other, ['exact', 'open', 'noVoid'])
 
 Clips other by shape, rather than shape by other.
 

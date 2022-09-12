@@ -10,24 +10,6 @@ Box(10, 10, 10).color('pink').view();
 
 md`
 ---
-### eachIn
-The individual components of a piece of geometry can be interacted with using .eachIn(). 
-The function takes two functions as arguments. The first function argument is applied to each element. 
-The second function argument needs to be revisited, but ideally it would apply to all of the elements something like foo.eachIn(a => a, Loft).
-`;
-
-const aGroup = Group(
-  Box(10, 200, 10),
-  Box(10, 200, 10).z(20),
-  Box(10, 200, 10).z(40)
-).view();
-
-const rng = Random();
-
-aGroup.eachIn((s) => s.rz(rng.to(1))).view(); // Rotates each one by some random amount
-
-md`
----
 ### Extrude
 2D shapes can be 'extruded' to create 3D shapes. This can be abbreviated to .e() for brevity.
 
@@ -270,16 +252,14 @@ log(aRectangle.tag('tagString').tags());
 aRectangle.tag('tagString').tags((tags, s) => s.md(`Tags ${tags}`));
 
 md`
-Tags can be used to selectively keep or remove parts of geometry.`;
+Tags can be used to selectively drop parts of geometry.`;
 
 const taggedAssembly = Assembly(
   Arc(10, 10, 2).color('blue').tag('A'),
   Box(6, 5, 2).move(2, 1, 1).color('red').tag('B')
 ).view();
 
-taggedAssembly.keep('user:A').noVoid().view();
-
-taggedAssembly.drop('user:B').view();
+taggedAssembly.drop(get('user:B')).view();
 
 md`
 ---

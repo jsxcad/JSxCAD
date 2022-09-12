@@ -37,7 +37,6 @@
     "@jsxcad/api-v1-svg": "^0.0.79",
     "@jsxcad/api-v1-threejs": "^0.0.79",
     "@jsxcad/api-v1-tools": "^0.0.79",
-    "@jsxcad/api-v1-units": "^0.0.79",
     "@jsxcad/algorithm-cgal": "^0.0.79",
     "@jsxcad/algorithm-color": "^0.0.79",
     "@jsxcad/algorithm-material": "^0.0.79",
