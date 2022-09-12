@@ -1,0 +1,49 @@
+md`
+### material()
+Parameter|Default|Type
+---|---|---
+materal||Name of the material to use.
+
+Supported materials:
+* aluminium
+* brass
+* brick
+* cardboard
+* circuit
+* copper
+* glass
+* grass
+* leaves
+* metal
+* paper
+* plastic
+* rock
+* steel
+* transparent
+* water
+* wood
+* wet-glass
+* zinc-steel
+
+See: [image](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/image.nb)
+`;
+
+Box(5, 5, 2).material('aluminium').view().note("material('aluminium')");
+Box(5, 5, 2).material('brass').view().note("material('brass')");
+Box(5, 5, 2).material('brick').view().note("material('brick')");
+Box(5, 5, 2).material('cardboard').view().note("material('cardboard')");
+Box(5, 5, 2).material('circuit').view().note("material('circuit')");
+Box(5, 5, 2).material('copper').view().note("material('copper')");
+Box(5, 5, 2).material('glass').view().note("material('glass')");
+Box(5, 5, 2).material('grass').view().note("material('grass')");
+Box(5, 5, 2).material('leaves').view().note("material('leaves')");
+Box(5, 5, 2).material('metal').view().note("material('metal')");
+Box(5, 5, 2).material('paper').view().note("material('paper')");
+Box(5, 5, 2).material('plastic').view().note("material('plastic')");
+Box(5, 5, 2).material('rock').view().note("material('rock')");
+Box(5, 5, 2).material('steel').view().note("material('steel')");
+Box(5, 5, 2).material('transparent').view().note("material('transparent')");
+Box(5, 5, 2).material('water').view().note("material('water')");
+Box(5, 5, 2).material('wood').view().note("material('wood')");
+Box(5, 5, 2).material('wet-glass').view().note("material('wet-glass')");
+Box(5, 5, 2).material('zinc-steel').view().note("material('zinc-steel')");

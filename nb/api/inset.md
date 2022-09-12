@@ -8,6 +8,8 @@ initial|1|Number of mm to initially inset by.
 
 Produces a surface inscribed within the shape.
 
+See: [offset](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/offset.nb).
+
 ```JavaScript
 Arc(5)
   .join(Box(10, 2, 2))

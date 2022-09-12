@@ -1,0 +1,10 @@
+md`
+### outline()
+Produces segments representing the geometric edges of the shape.
+
+See: [edges](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/edges.nb)
+`;
+Arc(3, 3, 1)
+  .outline()
+  .view()
+  .note('Arc(3, 3, 1).outline() shows the geometric shape.');

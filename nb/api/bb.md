@@ -1,4 +1,9 @@
-# shape.bb(margin)
+### bb()
+Parameter|Default|Type
+---|---|---
+xMargin|1|Number of mm to add on the x axis.
+yMargin|xMargin|Number of mm to add on the x axis.
+zMargin|yMargin|Number of mm to add on the x axis.
 
 Produces an axis-aligned bounding box dilated by the specified margin.
 

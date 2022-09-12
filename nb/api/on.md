@@ -1,0 +1,39 @@
+### on()
+Parameter|Default|Type
+---|---|---
+selector||Leaves to select within shape.
+op|noOp|Shape or Operation to replace a selected leaf.
+
+Rewrites the shape structure so that the selected leaves are replaced.
+
+op is called with the leaf to be replaced.
+
+```JavaScript
+Group(Box(5).color('blue'), Box(5).color('red'))
+  .pack()
+  .in()
+  .view(1)
+  .note("Group(Box(5).color('blue'), Box(5).color('red')).pack()")
+  .on(get('color:red'), cut(inset(1)))
+  .view(2)
+  .note(
+    "on(get('color:red'), cut(inset(1))) replaces the red box with its cut(inset(1))"
+  )
+  .on(get('color:blue'), Triangle(5))
+  .view(3)
+  .note(
+    "on(get('color:blue'), Triangle(5)) replaces the blue box with a triangle."
+  );
+```
+
+![Image](on.md.0.png)
+
+Group(Box(5).color('blue'), Box(5).color('red')).pack()
+
+![Image](on.md.1.png)
+
+on(get('color:red'), cut(inset(1))) replaces the red box with its cut(inset(1))
+
+![Image](on.md.2.png)
+
+on(get('color:blue'), Triangle(5)) replaces the blue box with a triangle.

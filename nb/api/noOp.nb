@@ -1,0 +1,9 @@
+md`
+### noOp()
+Just returns the incoming shape.
+`;
+
+Box()
+  .eachEdge(noOp())
+  .view()
+  .note('Box().eachEdge(noOp()) produces each edge as is.');

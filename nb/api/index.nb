@@ -100,6 +100,7 @@ md`
 * [origin](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/origin.nb)
 * [outline](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/outline.nb)
 * [overlay](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/overlay.nb)
+* [pack](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/pack.nb)
 * [shadow](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/shadow.nb)
 * [upperEnvelope](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/upperEnvelope.nb)
 `;

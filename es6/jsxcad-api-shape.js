@@ -1294,18 +1294,21 @@ const add$1 = ([ax = 0, ay = 0, az = 0], [bx = 0, by = 0, bz = 0]) => [
   az + bz,
 ];
 
-const bb = Shape.chainable((offset = 1) => (shape) => {
-  const geometry = shape.toConcreteGeometry();
-  const bounds = measureBoundingBox(geometry);
-  if (bounds === undefined) {
-    return Empty();
-  } else {
-    const [min, max] = bounds;
-    return Box()
-      .hasC2(...add$1(min, [-offset, -offset, -offset]))
-      .hasC1(...add$1(max, [offset, offset, offset]));
-  }
-});
+const bb = Shape.chainable(
+  (xOffset = 1, yOffset = xOffset, zOffset = yOffset) =>
+    (shape) => {
+      const geometry = shape.toConcreteGeometry();
+      const bounds = measureBoundingBox(geometry);
+      if (bounds === undefined) {
+        return Empty();
+      } else {
+        const [min, max] = bounds;
+        return Box()
+          .hasC2(...add$1(min, [-xOffset, -yOffset, -zOffset]))
+          .hasC1(...add$1(max, [xOffset, yOffset, zOffset]));
+      }
+    }
+);
 
 Shape.registerMethod('bb', bb);
 
@@ -3844,7 +3847,7 @@ Shape.registerMethod('moveAlong', moveAlong);
 const noOp = Shape.chainable(() => (shape) => shape);
 
 const noVoid = Shape.chainable(
-  () => (shape) => shape.on(get('type:void', Empty()))
+  () => (shape) => shape.on(get('type:void'), Empty())
 );
 
 Shape.registerMethod('noVoid', noVoid);
