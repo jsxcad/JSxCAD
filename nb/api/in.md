@@ -1,5 +1,5 @@
 ### in()
-Produces the interior of an item.
+Produces the shape structure inside the item.
 
 This is necessary as most operations do not cross the item boundary, and consider the item as a leaf geometry.
 
