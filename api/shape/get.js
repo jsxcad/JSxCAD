@@ -34,3 +34,5 @@ export const g = get;
 
 Shape.registerMethod('get', get);
 Shape.registerMethod('g', get);
+
+export default get;

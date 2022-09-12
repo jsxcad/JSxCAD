@@ -62,7 +62,7 @@ importedSvg.by(align('xy')).view();
 ![Image](file_import_and_export.md.3.png)
 
 ```JavaScript
-importedSvg.by(align('xy')).scaleToFit(10).fill().ez(2).notColor('#090000').view();
+importedSvg.by(align('xy')).scaleToFit(10).fill().ez(2).untag('color:#090000').view();
 ```
 
 ![Image](file_import_and_export.md.4.png)

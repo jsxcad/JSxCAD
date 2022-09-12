@@ -38,7 +38,7 @@ Imports a .svg file which can then be used as geometry.`;
 const importedSvg = await readSvg('https://jsxcad.js.org/svg/rocket.svg', { fill: false });
 importedSvg.by(align('xy')).view();
 
-importedSvg.by(align('xy')).scaleToFit(10).fill().ez(2).notColor('#090000').view();
+importedSvg.by(align('xy')).scaleToFit(10).fill().ez(2).untag('color:#090000').view();
 
 import { readCollada, readSvg as readSvgWithThreejs } from '@jsxcad/api-threejs';
 

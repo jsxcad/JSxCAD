@@ -54,11 +54,12 @@ const buildScene = ({
   }
 
   {
-    // const light = new DirectionalLight(0xffffff, 0.25);
     const light = new SpotLight(0xffffff, 0.7);
     light.target = camera;
     light.position.set(0.1, 0.1, 1);
     light.userData.dressing = true;
+    light.layers.enable(SKETCH_LAYER);
+    light.layers.enable(GEOMETRY_LAYER);
     camera.add(light);
   }
 
@@ -72,6 +73,8 @@ const buildScene = ({
     spotLight.shadow.mapSize.width = 1024 * 2;
     spotLight.shadow.mapSize.height = 1024 * 2;
     spotLight.userData.dressing = true;
+    spotLight.layers.enable(SKETCH_LAYER);
+    spotLight.layers.enable(GEOMETRY_LAYER);
     scene.add(spotLight);
   }
 
