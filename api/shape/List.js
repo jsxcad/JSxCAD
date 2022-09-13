@@ -7,6 +7,8 @@ export const list =
   (shape) =>
     List(...shapes);
 
+Shape.registerMethod('list', list);
+
 Shape.List = List;
 
 export default List;

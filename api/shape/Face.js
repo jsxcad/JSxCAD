@@ -1,9 +1,7 @@
 import Shape from './Shape.js';
 
 export const Face = (...points) =>
-  Shape.fromPolygons([
-    { points: points.map((point) => Shape.toCoordinate(undefined, point)) },
-  ]);
+  Shape.fromPolygons([{ points: Shape.toCoordinates(undefined, points) }]);
 
 export default Face;
 

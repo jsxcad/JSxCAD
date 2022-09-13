@@ -282,15 +282,26 @@ Shape.toCoordinates = (shape, ...args) => {
       x = shape.get(x);
     }
     if (x instanceof Shape) {
-      const g = x.toTransformedGeometry();
-      if (g.type === 'points' && g.points.length === 1) {
-        // FIX: Consider how this might be more robust.
-        coordinates.push(g.points[0]);
+      if (x.toGeometry().type === 'group') {
+        coordinates.push(
+          ...Shape.toCoordinates(
+            shape,
+            ...x
+              .toGeometry()
+              .content.map((geometry) => Shape.fromGeometry(geometry))
+          )
+        );
       } else {
-        throw Error(`Unexpected coordinate value: ${x}`);
+        coordinates.push(Shape.toCoordinate(shape, x));
       }
     } else if (x instanceof Array) {
-      coordinates.push(x);
+      if (isNaN(x[0]) || isNaN(x[1]) || isNaN(x[2])) {
+        for (const element of x) {
+          coordinates.push(...Shape.toCoordinates(shape, element));
+        }
+      } else {
+        coordinates.push(x);
+      }
     } else if (typeof x === 'number') {
       let y = args.shift();
       let z = args.shift();
@@ -1551,6 +1562,8 @@ const list =
   (...shapes) =>
   (shape) =>
     List(...shapes);
+
+Shape.registerMethod('list', list);
 
 Shape.List = List;
 
@@ -3016,13 +3029,19 @@ const buildLayoutGeometry = ({ layer, pageWidth, pageLength, margin }) => {
     .getNot('type:ghost')
     .tags('item', list)
     .filter((name) => name !== '')
+    .flatMap((name) => name)
     .sort();
   const labelScale = 0.0125 * 10;
   const size = [pageWidth, pageLength];
   const r = (v) => Math.floor(v * 100) / 100;
   const fontHeight = Math.max(pageWidth, pageLength) * labelScale;
   const title = [];
-  title.push(Hershey(`${r(pageWidth)} x ${r(pageLength)}`, fontHeight));
+  if (isFinite(pageWidth) && isFinite(pageLength)) {
+    // CHECK: Even when this is only called once we're getting a duplication of the
+    // 'x' at the start. If we replace it with 'abc', we get the 'b' at the start.
+    const text = `${r(pageWidth)} x ${r(pageLength)}`;
+    title.push(Hershey(text, fontHeight));
+  }
   for (let nth = 0; nth < itemNames.length; nth++) {
     title.push(Hershey(itemNames[nth], fontHeight).y((nth + 1) * fontHeight));
   }
@@ -3231,6 +3250,7 @@ const each = Shape.chainable((...args) => (shape) => {
     return grouped;
   }
 });
+
 Shape.registerMethod('each', each);
 
 // TODO: Add an option to include a virtual segment at the target of the last
@@ -5594,9 +5614,7 @@ const Curve = (start, c1, c2, end) =>
   );
 
 const Face = (...points) =>
-  Shape.fromPolygons([
-    { points: points.map((point) => Shape.toCoordinate(undefined, point)) },
-  ]);
+  Shape.fromPolygons([{ points: Shape.toCoordinates(undefined, points) }]);
 
 Shape.prototype.Face = Shape.shapeMethod(Face);
 

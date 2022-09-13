@@ -289,15 +289,26 @@ Shape.toCoordinates = (shape, ...args) => {
       x = shape.get(x);
     }
     if (x instanceof Shape) {
-      const g = x.toTransformedGeometry();
-      if (g.type === 'points' && g.points.length === 1) {
-        // FIX: Consider how this might be more robust.
-        coordinates.push(g.points[0]);
+      if (x.toGeometry().type === 'group') {
+        coordinates.push(
+          ...Shape.toCoordinates(
+            shape,
+            ...x
+              .toGeometry()
+              .content.map((geometry) => Shape.fromGeometry(geometry))
+          )
+        );
       } else {
-        throw Error(`Unexpected coordinate value: ${x}`);
+        coordinates.push(Shape.toCoordinate(shape, x));
       }
     } else if (x instanceof Array) {
-      coordinates.push(x);
+      if (isNaN(x[0]) || isNaN(x[1]) || isNaN(x[2])) {
+        for (const element of x) {
+          coordinates.push(...Shape.toCoordinates(shape, element));
+        }
+      } else {
+        coordinates.push(x);
+      }
     } else if (typeof x === 'number') {
       let y = args.shift();
       let z = args.shift();

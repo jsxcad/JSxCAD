@@ -24,13 +24,19 @@ const buildLayoutGeometry = ({ layer, pageWidth, pageLength, margin }) => {
     .getNot('type:ghost')
     .tags('item', list)
     .filter((name) => name !== '')
+    .flatMap((name) => name)
     .sort();
   const labelScale = 0.0125 * 10;
   const size = [pageWidth, pageLength];
   const r = (v) => Math.floor(v * 100) / 100;
   const fontHeight = Math.max(pageWidth, pageLength) * labelScale;
   const title = [];
-  title.push(Hershey(`${r(pageWidth)} x ${r(pageLength)}`, fontHeight));
+  if (isFinite(pageWidth) && isFinite(pageLength)) {
+    // CHECK: Even when this is only called once we're getting a duplication of the
+    // 'x' at the start. If we replace it with 'abc', we get the 'b' at the start.
+    const text = `${r(pageWidth)} x ${r(pageLength)}`;
+    title.push(Hershey(text, fontHeight));
+  }
   for (let nth = 0; nth < itemNames.length; nth++) {
     title.push(Hershey(itemNames[nth], fontHeight).y((nth + 1) * fontHeight));
   }
