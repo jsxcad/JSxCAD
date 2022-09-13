@@ -64,10 +64,10 @@ Octagon(5).gridView().md(`Octagon(5)`);
 
 Orb(1).view().md(`Orb(1)`);
 
-Path(Point(0), Point(5), Point(5, 5), Point(0))
+Link(Point(0), Point(5), Point(5, 5), Point(0))
   .rz(45 / 2)
   .gridView()
-  .md(`Path(Point(0), Point(5), Point(5, 5), Point(0)).rz(45 / 2)`);
+  .md(`Link(Point(0), Point(5), Point(5, 5), Point(0)).rz(45 / 2)`);
 
 Pentagon(5).gridView().md(`Pentagon(5)`);
 

@@ -22,6 +22,9 @@
 * [Loop](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/Loop.nb)
 * [Orb](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/Orb.nb)
 * [Octagon](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/Octagon.nb)
+* [Page](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/Page.nb)
+* [Pentagon](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/Pentagon.nb)
+* [Plan](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/Plan.nb)
 
 ## Operators
 * [absolute](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/absolute.nb)
@@ -97,5 +100,6 @@
 * [outline](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/outline.nb)
 * [overlay](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/overlay.nb)
 * [pack](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/pack.nb)
+* [page](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/page.nb)
 * [shadow](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/shadow.nb)
 * [upperEnvelope](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/upperEnvelope.nb)

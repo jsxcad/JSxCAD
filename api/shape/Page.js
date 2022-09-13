@@ -1,45 +1,30 @@
+import { List, list } from './List.js';
+
 import {
   getLayouts,
   getLeafs,
-  isNotTypeGhost,
   measureBoundingBox,
   taggedGroup,
   taggedLayout,
-  visit,
 } from '@jsxcad/geometry';
 
 import Box from './Box.js';
 import Group from './Group.js';
 import Hershey from './Hershey.js';
 import Shape from './Shape.js';
+import { destructure } from './destructure.js';
 
 const MIN = 0;
 const MAX = 1;
 const X = 0;
 const Y = 1;
 
-const getItemNames = (geometry) => {
-  const names = new Set();
-  const op = (geometry, descend) => {
-    if (
-      geometry.type === 'item' &&
-      isNotTypeGhost(geometry) &&
-      geometry.tags &&
-      geometry.tags.some((tag) => tag.startsWith('item/'))
-    ) {
-      geometry.tags
-        .filter((tag) => tag.startsWith('item/'))
-        .forEach((tag) => names.add(tag.substring(5)));
-    } else {
-      descend();
-    }
-  };
-  visit(geometry, op);
-  return [...names].sort();
-};
-
 const buildLayoutGeometry = ({ layer, pageWidth, pageLength, margin }) => {
-  const itemNames = getItemNames(layer).filter((name) => name !== '');
+  const itemNames = layer
+    .getNot('type:ghost')
+    .tags('item', list)
+    .filter((name) => name !== '')
+    .sort();
   const labelScale = 0.0125 * 10;
   const size = [pageWidth, pageLength];
   const r = (v) => Math.floor(v * 100) / 100;
@@ -58,21 +43,30 @@ const buildLayoutGeometry = ({ layer, pageWidth, pageLength, margin }) => {
       Group(...title).move(pageWidth / -2, (pageLength * (1 + labelScale)) / 2)
     )
     .color('red')
-    .ghost()
-    .toGeometry();
-  return taggedLayout({ size, margin, title }, layer, visualization);
+    .ghost();
+  return Shape.fromGeometry(
+    taggedLayout(
+      { size, margin, title },
+      layer.toGeometry(),
+      visualization.toGeometry()
+    )
+  );
 };
 
-export const Page = (
-  {
+export const Page = (...args) => {
+  const {
+    object: options,
+    strings: modes,
+    shapesAndFunctions: shapes,
+  } = destructure(args);
+  const {
     size,
     pageMargin = 5,
     itemMargin = 1,
     itemsPerPage = Infinity,
-    pack = true,
-  },
-  ...shapes
-) => {
+  } = options;
+  const pack = modes.includes('pack');
+
   const margin = itemMargin;
   const layers = [];
   for (const shape of shapes) {
@@ -81,7 +75,7 @@ export const Page = (
     }
   }
   if (!pack && size) {
-    const layer = taggedGroup({}, ...layers);
+    const layer = Shape.fromGeometry(taggedGroup({}, ...layers));
     const [width, height] = size;
     const packSize = [
       [-width / 2, -height / 2, 0],
@@ -101,12 +95,10 @@ export const Page = (
         Math.abs(packSize[MIN][Y] * 2)
       ) +
       pageMargin * 2;
-    return Shape.fromGeometry(
-      buildLayoutGeometry({ layer, pageWidth, pageLength, margin })
-    );
+    return buildLayoutGeometry({ layer, pageWidth, pageLength, margin });
   } else if (!pack && !size) {
-    const layer = taggedGroup({}, ...layers);
-    const packSize = measureBoundingBox(layer);
+    const layer = Shape.fromGeometry(taggedGroup({}, ...layers));
+    const packSize = measureBoundingBox(layer.toGeometry());
     if (packSize === undefined) {
       return Group();
     }
@@ -125,13 +117,14 @@ export const Page = (
       ) +
       pageMargin * 2;
     if (isFinite(pageWidth) && isFinite(pageLength)) {
-      return Shape.fromGeometry(
-        buildLayoutGeometry({ layer, pageWidth, pageLength, margin })
-      );
+      return buildLayoutGeometry({ layer, pageWidth, pageLength, margin });
     } else {
-      return Shape.fromGeometry(
-        buildLayoutGeometry({ layer, pageWidth: 0, pageLength: 0, margin })
-      );
+      return buildLayoutGeometry({
+        layer,
+        pageWidth: 0,
+        pageLength: 0,
+        margin,
+      });
     }
   } else if (pack && size) {
     // Content fits to page size.
@@ -150,7 +143,7 @@ export const Page = (
     const pageLength = Math.max(1, packSize[MAX][Y] - packSize[MIN][Y]);
     if (isFinite(pageWidth) && isFinite(pageLength)) {
       const plans = [];
-      for (const layer of content.toDisjointGeometry().content[0].content) {
+      for (const layer of content.get('pack:layer', List)) {
         plans.push(
           buildLayoutGeometry({
             layer,
@@ -160,7 +153,7 @@ export const Page = (
           })
         );
       }
-      return Shape.fromGeometry(taggedGroup({}, ...plans));
+      return Group(...plans);
     } else {
       const layer = taggedGroup({}, ...layers);
       return buildLayoutGeometry({
@@ -173,7 +166,7 @@ export const Page = (
   } else if (pack && !size) {
     const packSize = [];
     // Page fits to content size.
-    const content = Shape.fromGeometry(taggedGroup({}, ...layers)).pack({
+    const contents = Shape.fromGeometry(taggedGroup({}, ...layers)).pack({
       pageMargin,
       itemMargin,
       perLayout: itemsPerPage,
@@ -188,18 +181,17 @@ export const Page = (
     const pageLength = packSize[MAX][Y] - packSize[MIN][Y];
     if (isFinite(pageWidth) && isFinite(pageLength)) {
       const plans = [];
-      for (const layer of content.toDisjointGeometry().content[0].content) {
-        const layoutGeometry = buildLayoutGeometry({
+      for (const layer of contents.get('pack:layout', List)) {
+        const layout = buildLayoutGeometry({
           layer,
           packSize,
           pageWidth,
           pageLength,
           margin,
         });
-        Shape.fromGeometry(layoutGeometry);
-        plans.push(layoutGeometry);
+        plans.push(layout);
       }
-      return Shape.fromGeometry(taggedGroup({}, ...plans));
+      return Group(...plans);
     } else {
       const layer = taggedGroup({}, ...layers);
       return buildLayoutGeometry({
@@ -213,9 +205,9 @@ export const Page = (
 };
 
 const page =
-  (options = {}) =>
+  (...args) =>
   (shape) =>
-    Page(options, shape);
+    Page(shape, ...args);
 Shape.registerMethod('page', page);
 
 export default Page;

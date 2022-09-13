@@ -1,4 +1,4 @@
-import { assemble as assemble$1, toDisplayGeometry, toConcreteGeometry, toTransformedGeometry, toPoints, transform, rewriteTags, taggedGraph, taggedSegments, taggedPoints, fromPolygons, registerReifier, taggedPlan, identity, hasTypeReference, taggedGroup, join as join$1, makeAbsolute, measureArea, taggedItem, getInverseMatrices, computeNormal, extrude, transformCoordinate, link as link$1, measureBoundingBox, bend as bend$1, getLeafs, computeCentroid, convexHull, fuse as fuse$1, noGhost, clip as clip$1, cut as cut$1, deform as deform$1, demesh as demesh$1, disjoint as disjoint$1, hasTypeGhost, getLayouts, taggedLayout, visit, isNotTypeGhost, eachFaceEdges, eachPoint as eachPoint$1, fill as fill$1, fix as fix$1, rewrite, grow as grow$1, inset as inset$1, involute as involute$1, read, readNonblocking, loft as loft$1, serialize as serialize$1, generateLowerEnvelope, hasShowOverlay, hasTypeMasked, hasMaterial, offset as offset$1, outline as outline$1, remesh as remesh$1, write, writeNonblocking, fromScaleToTransform, seam as seam$1, section as section$1, separate as separate$1, cast, simplify as simplify$1, taggedSketch, smooth as smooth$1, computeToolpath, twist as twist$1, generateUpperEnvelope, hasTypeVoid, measureVolume, withAabbTreeQuery, linearize, wrap as wrap$1, computeImplicitVolume } from './jsxcad-geometry.js';
+import { assemble as assemble$1, toDisplayGeometry, toConcreteGeometry, toTransformedGeometry, toPoints, transform, rewriteTags, taggedGraph, taggedSegments, taggedPoints, fromPolygons, registerReifier, taggedPlan, identity, hasTypeReference, taggedGroup, join as join$1, makeAbsolute, measureArea, taggedItem, getInverseMatrices, computeNormal, extrude, transformCoordinate, link as link$1, measureBoundingBox, bend as bend$1, getLeafs, computeCentroid, convexHull, fuse as fuse$1, noGhost, clip as clip$1, cut as cut$1, deform as deform$1, demesh as demesh$1, disjoint as disjoint$1, hasTypeGhost, getLayouts, taggedLayout, eachFaceEdges, eachPoint as eachPoint$1, fill as fill$1, fix as fix$1, rewrite, visit, grow as grow$1, inset as inset$1, involute as involute$1, read, readNonblocking, loft as loft$1, serialize as serialize$1, generateLowerEnvelope, hasShowOverlay, hasTypeMasked, hasMaterial, offset as offset$1, outline as outline$1, remesh as remesh$1, write, writeNonblocking, fromScaleToTransform, seam as seam$1, section as section$1, separate as separate$1, cast, simplify as simplify$1, taggedSketch, smooth as smooth$1, computeToolpath, twist as twist$1, generateUpperEnvelope, hasTypeVoid, measureVolume, withAabbTreeQuery, linearize, wrap as wrap$1, computeImplicitVolume } from './jsxcad-geometry.js';
 import { getSourceLocation, startTime, endTime, emit, computeHash, logInfo, log as log$1, ErrorWouldBlock, generateUniqueId, addPending, write as write$1 } from './jsxcad-sys.js';
 export { elapsed, emit, read, write } from './jsxcad-sys.js';
 import { zag } from './jsxcad-api-v1-math.js';
@@ -1545,6 +1545,15 @@ const drop = Shape.chainable(
 
 Shape.registerMethod('drop', drop);
 
+const List = (...shapes) => shapes;
+
+const list =
+  (...shapes) =>
+  (shape) =>
+    List(...shapes);
+
+Shape.List = List;
+
 // Hershey simplex one line font.
 // See: http://paulbourke.net/dataformats/hershey/
 
@@ -3002,28 +3011,12 @@ const MAX = 1;
 const X$5 = 0;
 const Y$5 = 1;
 
-const getItemNames = (geometry) => {
-  const names = new Set();
-  const op = (geometry, descend) => {
-    if (
-      geometry.type === 'item' &&
-      isNotTypeGhost(geometry) &&
-      geometry.tags &&
-      geometry.tags.some((tag) => tag.startsWith('item/'))
-    ) {
-      geometry.tags
-        .filter((tag) => tag.startsWith('item/'))
-        .forEach((tag) => names.add(tag.substring(5)));
-    } else {
-      descend();
-    }
-  };
-  visit(geometry, op);
-  return [...names].sort();
-};
-
 const buildLayoutGeometry = ({ layer, pageWidth, pageLength, margin }) => {
-  const itemNames = getItemNames(layer).filter((name) => name !== '');
+  const itemNames = layer
+    .getNot('type:ghost')
+    .tags('item', list)
+    .filter((name) => name !== '')
+    .sort();
   const labelScale = 0.0125 * 10;
   const size = [pageWidth, pageLength];
   const r = (v) => Math.floor(v * 100) / 100;
@@ -3042,21 +3035,30 @@ const buildLayoutGeometry = ({ layer, pageWidth, pageLength, margin }) => {
       Group(...title).move(pageWidth / -2, (pageLength * (1 + labelScale)) / 2)
     )
     .color('red')
-    .ghost()
-    .toGeometry();
-  return taggedLayout({ size, margin, title }, layer, visualization);
+    .ghost();
+  return Shape.fromGeometry(
+    taggedLayout(
+      { size, margin, title },
+      layer.toGeometry(),
+      visualization.toGeometry()
+    )
+  );
 };
 
-const Page = (
-  {
+const Page = (...args) => {
+  const {
+    object: options,
+    strings: modes,
+    shapesAndFunctions: shapes,
+  } = destructure(args);
+  const {
     size,
     pageMargin = 5,
     itemMargin = 1,
     itemsPerPage = Infinity,
-    pack = true,
-  },
-  ...shapes
-) => {
+  } = options;
+  const pack = modes.includes('pack');
+
   const margin = itemMargin;
   const layers = [];
   for (const shape of shapes) {
@@ -3065,7 +3067,7 @@ const Page = (
     }
   }
   if (!pack && size) {
-    const layer = taggedGroup({}, ...layers);
+    const layer = Shape.fromGeometry(taggedGroup({}, ...layers));
     const [width, height] = size;
     const packSize = [
       [-width / 2, -height / 2, 0],
@@ -3085,12 +3087,10 @@ const Page = (
         Math.abs(packSize[MIN][Y$5] * 2)
       ) +
       pageMargin * 2;
-    return Shape.fromGeometry(
-      buildLayoutGeometry({ layer, pageWidth, pageLength, margin })
-    );
+    return buildLayoutGeometry({ layer, pageWidth, pageLength, margin });
   } else if (!pack && !size) {
-    const layer = taggedGroup({}, ...layers);
-    const packSize = measureBoundingBox(layer);
+    const layer = Shape.fromGeometry(taggedGroup({}, ...layers));
+    const packSize = measureBoundingBox(layer.toGeometry());
     if (packSize === undefined) {
       return Group();
     }
@@ -3109,13 +3109,14 @@ const Page = (
       ) +
       pageMargin * 2;
     if (isFinite(pageWidth) && isFinite(pageLength)) {
-      return Shape.fromGeometry(
-        buildLayoutGeometry({ layer, pageWidth, pageLength, margin })
-      );
+      return buildLayoutGeometry({ layer, pageWidth, pageLength, margin });
     } else {
-      return Shape.fromGeometry(
-        buildLayoutGeometry({ layer, pageWidth: 0, pageLength: 0, margin })
-      );
+      return buildLayoutGeometry({
+        layer,
+        pageWidth: 0,
+        pageLength: 0,
+        margin,
+      });
     }
   } else if (pack && size) {
     // Content fits to page size.
@@ -3134,7 +3135,7 @@ const Page = (
     const pageLength = Math.max(1, packSize[MAX][Y$5] - packSize[MIN][Y$5]);
     if (isFinite(pageWidth) && isFinite(pageLength)) {
       const plans = [];
-      for (const layer of content.toDisjointGeometry().content[0].content) {
+      for (const layer of content.get('pack:layer', List)) {
         plans.push(
           buildLayoutGeometry({
             layer,
@@ -3144,7 +3145,7 @@ const Page = (
           })
         );
       }
-      return Shape.fromGeometry(taggedGroup({}, ...plans));
+      return Group(...plans);
     } else {
       const layer = taggedGroup({}, ...layers);
       return buildLayoutGeometry({
@@ -3157,7 +3158,7 @@ const Page = (
   } else if (pack && !size) {
     const packSize = [];
     // Page fits to content size.
-    const content = Shape.fromGeometry(taggedGroup({}, ...layers)).pack({
+    const contents = Shape.fromGeometry(taggedGroup({}, ...layers)).pack({
       pageMargin,
       itemMargin,
       perLayout: itemsPerPage,
@@ -3172,18 +3173,17 @@ const Page = (
     const pageLength = packSize[MAX][Y$5] - packSize[MIN][Y$5];
     if (isFinite(pageWidth) && isFinite(pageLength)) {
       const plans = [];
-      for (const layer of content.toDisjointGeometry().content[0].content) {
-        const layoutGeometry = buildLayoutGeometry({
+      for (const layer of contents.get('pack:layout', List)) {
+        const layout = buildLayoutGeometry({
           layer,
           packSize,
           pageWidth,
           pageLength,
           margin,
         });
-        Shape.fromGeometry(layoutGeometry);
-        plans.push(layoutGeometry);
+        plans.push(layout);
       }
-      return Shape.fromGeometry(taggedGroup({}, ...plans));
+      return Group(...plans);
     } else {
       const layer = taggedGroup({}, ...layers);
       return buildLayoutGeometry({
@@ -3197,9 +3197,9 @@ const Page = (
 };
 
 const page =
-  (options = {}) =>
+  (...args) =>
   (shape) =>
-    Page(options, shape);
+    Page(shape, ...args);
 Shape.registerMethod('page', page);
 
 const ensurePages = (geometry, depth = 0) => {
@@ -3533,7 +3533,8 @@ const tag = Shape.chainable(
 
 Shape.registerMethod('tag', tag);
 
-const get = Shape.chainable((...tags) => (shape) => {
+const get = Shape.chainable((...args) => (shape) => {
+  const { strings: tags, func: groupOp = Group } = destructure(args);
   const isMatch = oneOfTagMatcher(tags, 'item');
   const picks = [];
   const walk = (geometry, descend) => {
@@ -3557,7 +3558,7 @@ const get = Shape.chainable((...tags) => (shape) => {
   };
   const geometry = shape.toGeometry();
   visit(geometry, walk);
-  return Group(...picks);
+  return groupOp(...picks);
 });
 
 const g = get;
@@ -4055,13 +4056,15 @@ const pack = Shape.chainable(
         } else {
           packedLayers.push(
             taggedItem(
-              {},
+              { tags: ['pack:layout'] },
               taggedGroup({}, ...packed.map(toTransformedGeometry))
             )
           );
         }
         todo.unshift(...unpacked);
       }
+      // CHECK: Can this distinguish between a set of packed paged, and a single
+      // page that's packed?
       let packedShape = Shape.fromGeometry(taggedGroup({}, ...packedLayers));
       if (size === undefined) {
         packedShape = packedShape.by(align('xy'));
@@ -4307,7 +4310,7 @@ const seq = Shape.chainable((...args) => (shape) => {
     op = (n) => n;
   }
   if (!groupOp) {
-    groupOp = (...values) => values;
+    groupOp = List;
   }
 
   const indexes = [];
@@ -5753,22 +5756,6 @@ const Orb = (x = 1, y = x, z = x) =>
 
 Shape.prototype.Orb = Shape.shapeMethod(Orb);
 
-const fromVec3 = (...points) =>
-  Shape.fromOpenPath(points.map(([x = 0, y = 0, z = 0]) => [x, y, z]));
-
-const fromPoints = (...shapes) => {
-  const vec3List = [];
-  for (const shape of shapes) {
-    eachPoint$1(shape.toGeometry(), (vec3) => vec3List.push(vec3));
-  }
-  return fromVec3(...vec3List);
-};
-
-const Path = (...points) => fromPoints(...points);
-Path.fromVec3 = fromVec3;
-
-Shape.prototype.Path = Shape.shapeMethod(Path);
-
 const Pentagon = (x, y, z) => Arc(x, y, z).hasSides(5);
 
 Shape.prototype.Pentagon = Shape.shapeMethod(Pentagon);
@@ -5848,4 +5835,4 @@ const Wave = (...args) => {
 
 Shape.prototype.Wave = Shape.shapeMethod(Wave);
 
-export { Arc, ArcX, ArcY, ArcZ, Assembly, Box, Cached, ChainHull, Clip, Curve, Edge, Edges, Empty, Face, GrblConstantLaser, GrblDynamicLaser, GrblPlotter, GrblSpindle, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Join, Line, Link, Loft, Loop, Note, Octagon, Orb, Page, Path, Pentagon, Plan, Point, Points, Polygon, Polyhedron, RX, RY, RZ, Ref, Segments, Septagon, Seq, Shape, Spiral, SurfaceMesh, Tetragon, Triangle, Voxels, Wave, Wrap, X$8 as X, XY, XZ, Y$8 as Y, YZ, Z$8 as Z, absolute, abstract, addTo, align, and, area, as, asPart, at, bb, bend, billOfMaterials, by, center, chainHull, clean, clip, clipFrom, color, cut, cutFrom, cutOut, defRgbColor, defThreejsMaterial, defTool, define, deform, demesh, destructure, disjoint, drop, e, each, eachEdge, eachPoint, edges, edit, ensurePages, ex, extrudeAlong, extrudeX, extrudeY, extrudeZ, ey, ez, faces, fill, fit, fitTo, fix, flat, fuse, g, get, getNot, ghost, gn, grow, hull, image, inFn, inset, involute, join, link, loadGeometry, loft, log, loop, lowerEnvelope, m, mask, masking, material, md, move, moveAlong, n, noOp, noVoid, normal, note, nth, o, ofPlan, offset, on, op, orient, origin, outline, overlay, pack, points$1 as points, ref, reify, remesh, rotateX, rotateY, rotateZ, rx, ry, rz, saveGeometry, scale$1 as scale, scaleToFit, scaleX, scaleY, scaleZ, seam, section, sectionProfile, self, separate, seq, serialize, shadow, simplify, size, sketch, smooth, sort, sx, sy, sz, table, tag, tags, tint, to, tool, toolpath, top, twist, untag, upperEnvelope, view, voidFn, voidIn, volume, voxels, wrap, x, xyz, y, z };
+export { Arc, ArcX, ArcY, ArcZ, Assembly, Box, Cached, ChainHull, Clip, Curve, Edge, Edges, Empty, Face, GrblConstantLaser, GrblDynamicLaser, GrblPlotter, GrblSpindle, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Join, Line, Link, List, Loft, Loop, Note, Octagon, Orb, Page, Pentagon, Plan, Point, Points, Polygon, Polyhedron, RX, RY, RZ, Ref, Segments, Septagon, Seq, Shape, Spiral, SurfaceMesh, Tetragon, Triangle, Voxels, Wave, Wrap, X$8 as X, XY, XZ, Y$8 as Y, YZ, Z$8 as Z, absolute, abstract, addTo, align, and, area, as, asPart, at, bb, bend, billOfMaterials, by, center, chainHull, clean, clip, clipFrom, color, cut, cutFrom, cutOut, defRgbColor, defThreejsMaterial, defTool, define, deform, demesh, destructure, disjoint, drop, e, each, eachEdge, eachPoint, edges, edit, ensurePages, ex, extrudeAlong, extrudeX, extrudeY, extrudeZ, ey, ez, faces, fill, fit, fitTo, fix, flat, fuse, g, get, getNot, ghost, gn, grow, hull, image, inFn, inset, involute, join, link, list, loadGeometry, loft, log, loop, lowerEnvelope, m, mask, masking, material, md, move, moveAlong, n, noOp, noVoid, normal, note, nth, o, ofPlan, offset, on, op, orient, origin, outline, overlay, pack, points$1 as points, ref, reify, remesh, rotateX, rotateY, rotateZ, rx, ry, rz, saveGeometry, scale$1 as scale, scaleToFit, scaleX, scaleY, scaleZ, seam, section, sectionProfile, self, separate, seq, serialize, shadow, simplify, size, sketch, smooth, sort, sx, sy, sz, table, tag, tags, tint, to, tool, toolpath, top, twist, untag, upperEnvelope, view, voidFn, voidIn, volume, voxels, wrap, x, xyz, y, z };

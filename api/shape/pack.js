@@ -44,13 +44,15 @@ export const pack = Shape.chainable(
         } else {
           packedLayers.push(
             taggedItem(
-              {},
+              { tags: ['pack:layout'] },
               taggedGroup({}, ...packed.map(toTransformedGeometry))
             )
           );
         }
         todo.unshift(...unpacked);
       }
+      // CHECK: Can this distinguish between a set of packed paged, and a single
+      // page that's packed?
       let packedShape = Shape.fromGeometry(taggedGroup({}, ...packedLayers));
       if (size === undefined) {
         packedShape = packedShape.by(align('xy'));
