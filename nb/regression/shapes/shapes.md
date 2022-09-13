@@ -148,15 +148,15 @@ Orb(1).view().md(`Orb(1)`);
 Orb(1)
 
 ```JavaScript
-Path(Point(0), Point(5), Point(5, 5), Point(0))
+Link(Point(0), Point(5), Point(5, 5), Point(0))
   .rz(45 / 2)
   .gridView()
-  .md(`Path(Point(0), Point(5), Point(5, 5), Point(0)).rz(45 / 2)`);
+  .md(`Link(Point(0), Point(5), Point(5, 5), Point(0)).rz(45 / 2)`);
 ```
 
 ![Image](shapes.md.13.png)
 
-Path(Point(0), Point(5), Point(5, 5), Point(0)).rz(45 / 2)
+Link(Point(0), Point(5), Point(5, 5), Point(0)).rz(45 / 2)
 
 ```JavaScript
 Pentagon(5).gridView().md(`Pentagon(5)`);
@@ -409,7 +409,7 @@ Box(10).cut(Box(5)).ez(1, -1).section().view();
 
 ```JavaScript
 Box(10, 10, 20)
-  .cutOut(Box(20, 20, [8, 100]), noop(), grow(2, 'xy'))
+  .cutOut(Box(20, 20, [8, 100]), noOp(), grow(2, 'xy'))
   .view();
 ```
 

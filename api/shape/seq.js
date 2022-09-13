@@ -1,4 +1,5 @@
 import Empty from './Empty.js';
+import List from './List.js';
 import Shape from './Shape.js';
 
 const EPSILON = 1e-5;
@@ -31,7 +32,7 @@ export const seq = Shape.chainable((...args) => (shape) => {
     op = (n) => n;
   }
   if (!groupOp) {
-    groupOp = (...values) => values;
+    groupOp = List;
   }
 
   const indexes = [];

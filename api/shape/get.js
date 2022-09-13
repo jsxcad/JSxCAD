@@ -1,9 +1,11 @@
 import Group from './Group.js';
 import Shape from './Shape.js';
+import { destructure } from './destructure.js';
 import { oneOfTagMatcher } from './tag.js';
 import { visit } from '@jsxcad/geometry';
 
-export const get = Shape.chainable((...tags) => (shape) => {
+export const get = Shape.chainable((...args) => (shape) => {
+  const { strings: tags, func: groupOp = Group } = destructure(args);
   const isMatch = oneOfTagMatcher(tags, 'item');
   const picks = [];
   const walk = (geometry, descend) => {
@@ -27,10 +29,12 @@ export const get = Shape.chainable((...tags) => (shape) => {
   };
   const geometry = shape.toGeometry();
   visit(geometry, walk);
-  return Group(...picks);
+  return groupOp(...picks);
 });
 
 export const g = get;
 
 Shape.registerMethod('get', get);
 Shape.registerMethod('g', get);
+
+export default get;

@@ -1,0 +1,21 @@
+md`
+### page()
+Parameter|Default|Type
+---|---|---
+{size}||Pair of numbers [width, height]
+{pageMargin}|5|Number of mm to reserve around the edge of the page
+{itemMargin}|1|Number of mm to reserve around each item on the page
+{itemsPerPage}|Infinity|Maximum number of shapes per page
+'pack'|false|Automatically layout the items on the page.
+
+Paginates the incoming shape for display or output.
+
+See: [pack](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/pack.nb), [Page](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/Page.nb).
+`;
+
+Seq({ upto: 20 }, () => Box(), Group)
+  .page('pack')
+  .view()
+  .note(
+    "Seq({ upto: 20 }, () => Box(), Group).page('pack') packs 20 boxes onto a page."
+  );

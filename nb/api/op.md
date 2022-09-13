@@ -1,0 +1,18 @@
+### op()
+Parameter|Default|Type
+---|---|---
+...op||Operations.
+
+Produces a group of shapes by applying op to the incoming shape.
+
+```JavaScript
+Arc(5)
+  .op(color('red'), material('blue'), cutFrom(offset(1)), e(1))
+  .pack()
+  .view()
+  .note("op(color('red'), material('blue'), cutFrom(offset(1)), e(1))");
+```
+
+![Image](op.md.0.png)
+
+op(color('red'), material('blue'), cutFrom(offset(1)), e(1))

@@ -20,4 +20,5 @@ export const each = Shape.chainable((...args) => (shape) => {
     return grouped;
   }
 });
+
 Shape.registerMethod('each', each);
