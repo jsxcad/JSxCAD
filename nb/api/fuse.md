@@ -6,9 +6,9 @@ See: [join](https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/join.n
 
 ```JavaScript
 Box(6, 4, 2)
-  .ry(seq({ by: 1 / 8 }))
+  .seq({ by: 1 / 8 }, ry)
   .view(1)
-  .note('Box(6, 4, 2).ry(seq({ by: 1 / 8 })) arranges boxes in a group')
+  .note('Box(6, 4, 2).seq({ by: 1 / 8 }, ry) arranges boxes in a group')
   .fuse()
   .view(2)
   .note('fuse() turns them into a single solid');
@@ -16,7 +16,7 @@ Box(6, 4, 2)
 
 ![Image](fuse.md.0.png)
 
-Box(6, 4, 2).ry(seq({ by: 1 / 8 })) arranges boxes in a group
+Box(6, 4, 2).seq({ by: 1 / 8 }, ry) arranges boxes in a group
 
 ![Image](fuse.md.1.png)
 

@@ -23,6 +23,6 @@ Line(5)
   .view()
   .note('Line(5).and(rz(1 / 8)) produces a 1/8th angle.');
 
-Line(seq({ from: -1, upto: 1, by: 1 / 8 }))
+Line(seq({ from: -1, upto: 1, by: 1 / 8 }, noOp, List))
   .view()
   .note('Line(seq({ from: -1, upto: 1, by: 1 / 8 })) produces a dashed line.');

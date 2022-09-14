@@ -11,7 +11,7 @@ See: [n](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/n.nb)
 
 ```JavaScript
 Line(0.1, 5)
-  .rz(seq({ by: 1 / 8 }))
+  .seq({ by: 1 / 8 }, rz)
   .view(1)
   .note('All of the lines are included.')
   .nth(0, 3, 6)

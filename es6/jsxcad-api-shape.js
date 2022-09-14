@@ -4174,7 +4174,7 @@ const scale$1 = Shape.chainable((x = 1, y = x, z = y) => (shape) => {
   const negatives = (x < 0) + (y < 0) + (z < 0);
   if (negatives % 2) {
     // Compensate for inversion.
-    return shape.transform(fromScaleToTransform(x, y, z)).involute();
+    return shape.transform(fromScaleToTransform(x, y, z)); // .involute();
   } else {
     return shape.transform(fromScaleToTransform(x, y, z));
   }
@@ -4273,30 +4273,17 @@ const sectionProfile = Shape.chainable(
 
 Shape.registerMethod('sectionProfile', sectionProfile);
 
-const self = Shape.chainable(
-  (...args) =>
-    (shape) =>
-      shape
-);
-
-Shape.registerMethod('self', self);
-
-const separate = Shape.chainable(
-  ({
-      keepShapes = true,
-      keepHolesInShapes = true,
-      keepHolesAsShapes = false,
-    } = {}) =>
-    (shape) =>
-      Shape.fromGeometry(
-        separate$1(
-          shape.toGeometry(),
-          keepShapes,
-          keepHolesInShapes,
-          keepHolesAsShapes
-        )
-      )
-);
+const separate = Shape.chainable((...args) => (shape) => {
+  const { strings: modes = [] } = destructure(args);
+  return Shape.fromGeometry(
+    separate$1(
+      shape.toGeometry(),
+      !modes.includes('noShapes'),
+      !modes.includes('noHoles'),
+      modes.includes('holesAsShapes')
+    )
+  );
+});
 
 Shape.registerMethod('separate', separate);
 
@@ -4330,7 +4317,7 @@ const seq = Shape.chainable((...args) => (shape) => {
     op = (n) => n;
   }
   if (!groupOp) {
-    groupOp = List;
+    groupOp = Group;
   }
 
   const indexes = [];
@@ -5796,7 +5783,7 @@ const ofPolygons = (...polygons) => {
     if (polygon instanceof Array) {
       out.push({ points: polygon });
     } else if (polygon instanceof Shape) {
-      out.push({ points: polygon.toPoints() });
+      out.push({ points: polygon.toPoints().reverse() });
     }
   }
   return Shape.fromPolygons(out);
@@ -5808,7 +5795,7 @@ Polyhedron.ofPointPaths = ofPointPaths;
 
 Shape.prototype.Polyhedron = Shape.shapeMethod(Polyhedron);
 
-const Segments = (segments) =>
+const Segments = (segments = []) =>
   Shape.fromSegments(
     Shape.toNestedValues(segments).map(([source, target]) => [
       Shape.toCoordinate(undefined, source),
@@ -5817,10 +5804,6 @@ const Segments = (segments) =>
   );
 
 Shape.prototype.Segments = Shape.shapeMethod(Segments);
-
-const Septagon = (x, y, z) => Arc(x, y, z).hasSides(7);
-
-Shape.prototype.Septagon = Shape.shapeMethod(Septagon);
 
 const SurfaceMesh = (
   serializedSurfaceMesh,
@@ -5853,4 +5836,4 @@ const Wave = (...args) => {
 
 Shape.prototype.Wave = Shape.shapeMethod(Wave);
 
-export { Arc, ArcX, ArcY, ArcZ, Assembly, Box, Cached, ChainHull, Clip, Curve, Edge, Edges, Empty, Face, GrblConstantLaser, GrblDynamicLaser, GrblPlotter, GrblSpindle, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Join, Line, Link, List, Loft, Loop, Note, Octagon, Orb, Page, Pentagon, Plan, Point, Points, Polygon, Polyhedron, RX, RY, RZ, Ref, Segments, Septagon, Seq, Shape, Spiral, SurfaceMesh, Tetragon, Triangle, Voxels, Wave, Wrap, X$8 as X, XY, XZ, Y$8 as Y, YZ, Z$8 as Z, absolute, abstract, addTo, align, and, area, as, asPart, at, bb, bend, billOfMaterials, by, center, chainHull, clean, clip, clipFrom, color, cut, cutFrom, cutOut, defRgbColor, defThreejsMaterial, defTool, define, deform, demesh, destructure, disjoint, drop, e, each, eachEdge, eachPoint, edges, edit, ensurePages, ex, extrudeAlong, extrudeX, extrudeY, extrudeZ, ey, ez, faces, fill, fit, fitTo, fix, flat, fuse, g, get, getNot, ghost, gn, grow, hull, image, inFn, inset, involute, join, link, list, loadGeometry, loft, log, loop, lowerEnvelope, m, mask, masking, material, md, move, moveAlong, n, noOp, noVoid, normal, note, nth, o, ofPlan, offset, on, op, orient, origin, outline, overlay, pack, points$1 as points, ref, reify, remesh, rotateX, rotateY, rotateZ, rx, ry, rz, saveGeometry, scale$1 as scale, scaleToFit, scaleX, scaleY, scaleZ, seam, section, sectionProfile, self, separate, seq, serialize, shadow, simplify, size, sketch, smooth, sort, sx, sy, sz, table, tag, tags, tint, to, tool, toolpath, top, twist, untag, upperEnvelope, view, voidFn, voidIn, volume, voxels, wrap, x, xyz, y, z };
+export { Arc, ArcX, ArcY, ArcZ, Assembly, Box, Cached, ChainHull, Clip, Curve, Edge, Edges, Empty, Face, GrblConstantLaser, GrblDynamicLaser, GrblPlotter, GrblSpindle, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Join, Line, Link, List, Loft, Loop, Note, Octagon, Orb, Page, Pentagon, Plan, Point, Points, Polygon, Polyhedron, RX, RY, RZ, Ref, Segments, Seq, Shape, Spiral, SurfaceMesh, Tetragon, Triangle, Voxels, Wave, Wrap, X$8 as X, XY, XZ, Y$8 as Y, YZ, Z$8 as Z, absolute, abstract, addTo, align, and, area, as, asPart, at, bb, bend, billOfMaterials, by, center, chainHull, clean, clip, clipFrom, color, cut, cutFrom, cutOut, defRgbColor, defThreejsMaterial, defTool, define, deform, demesh, destructure, disjoint, drop, e, each, eachEdge, eachPoint, edges, edit, ensurePages, ex, extrudeAlong, extrudeX, extrudeY, extrudeZ, ey, ez, faces, fill, fit, fitTo, fix, flat, fuse, g, get, getNot, ghost, gn, grow, hull, image, inFn, inset, involute, join, link, list, loadGeometry, loft, log, loop, lowerEnvelope, m, mask, masking, material, md, move, moveAlong, n, noOp, noVoid, normal, note, nth, o, ofPlan, offset, on, op, orient, origin, outline, overlay, pack, points$1 as points, ref, reify, remesh, rotateX, rotateY, rotateZ, rx, ry, rz, saveGeometry, scale$1 as scale, scaleToFit, scaleX, scaleY, scaleZ, seam, section, sectionProfile, separate, seq, serialize, shadow, simplify, size, sketch, smooth, sort, sx, sy, sz, table, tag, tags, tint, to, tool, toolpath, top, twist, untag, upperEnvelope, view, voidFn, voidIn, volume, voxels, wrap, x, xyz, y, z };

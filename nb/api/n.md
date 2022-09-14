@@ -11,13 +11,13 @@ See: [nth](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/nth.nb
 
 ```JavaScript
 Line(0.1, 5)
-  .rz(seq({ by: 1 / 8 }))
+  .seq({ by: 1 / 8 }, rz)
   .view(1)
   .note('All of the lines are included.')
   .n(0, 3, 6)
   .view(2)
   .note(
-    'Line(0.1, 5).rz(seq({ by: 1 / 8 })).n(0, 3, 6) extracts lines 0, 3, and 6.'
+    'Line(0.1, 5).seq({ by: 1 / 8 }, rz).n(0, 3, 6) extracts lines 0, 3, and 6.'
   );
 ```
 
@@ -27,4 +27,4 @@ All of the lines are included.
 
 ![Image](n.md.1.png)
 
-Line(0.1, 5).rz(seq({ by: 1 / 8 })).n(0, 3, 6) extracts lines 0, 3, and 6.
+Line(0.1, 5).seq({ by: 1 / 8 }, rz).n(0, 3, 6) extracts lines 0, 3, and 6.

@@ -7,7 +7,7 @@ _Consider deprecating this operator._
 ```JavaScript
 Box()
   .x(3, 6)
-  .rz(seq({ by: 1 / 2 }))
+  .seq({ by: 1 / 2 }, rz)
   .abstract();
 ```
 

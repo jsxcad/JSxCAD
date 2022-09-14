@@ -14,7 +14,7 @@ export const ofPolygons = (...polygons) => {
     if (polygon instanceof Array) {
       out.push({ points: polygon });
     } else if (polygon instanceof Shape) {
-      out.push({ points: polygon.toPoints() });
+      out.push({ points: polygon.toPoints().reverse() });
     }
   }
   return Shape.fromPolygons(out);

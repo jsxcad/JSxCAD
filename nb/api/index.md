@@ -28,6 +28,9 @@
 * [Point](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/Point.nb)
 * [Points](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/Points.nb)
 * [Polygon](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/Polygon.nb)
+* [Polyhedron](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/Polyhedron.nb)
+* [Ref](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/Ref.nb)
+* [Segments](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/Segments.nb)
 
 ## Operators
 * [absolute](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/absolute.nb)
@@ -105,5 +108,12 @@
 * [pack](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/pack.nb)
 * [page](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/page.nb)
 * [points](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/points.nb)
+* [remesh](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/remesh.nb)
+* [scale](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/scale.nb)
+* [scaleToFit](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/scaleToFit.nb)
+* [seam](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/seam.nb)
+* [section](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/section.nb)
+* [separate](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/separate.nb)
+* [seq](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/seq.nb)
 * [shadow](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/shadow.nb)
 * [upperEnvelope](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/upperEnvelope.nb)

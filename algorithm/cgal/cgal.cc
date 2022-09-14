@@ -6159,7 +6159,7 @@ int Remesh(Geometry* geometry, size_t count, size_t iterations,
 
   std::vector<std::reference_wrapper<const Surface_mesh>> selections;
 
-  for (int selection = count; selection < count; selection++) {
+  for (int selection = count; selection < size; selection++) {
     selections.push_back(geometry->mesh(selection));
   }
 

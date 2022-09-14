@@ -8,9 +8,9 @@ Destructures shape into transformed leaves and regroups the result.
 
 ```JavaScript
 Box(5)
-  .rx(seq({ by: 1 / 8, upto: 1 }))
+  .seq({ by: 1 / 8, upto: 1 }, rx)
   .view(1)
-  .md('Box(5).rx(seq({ by: 1 / 8, upto: 1 })) produces eight sheets')
+  .md('Box(5).seq({ by: 1 / 8, upto: 1 }, rx) produces eight sheets')
   .each(offset(0.5).cut(inset(0.5)))
   .view(2)
   .md(
@@ -20,7 +20,7 @@ Box(5)
 
 ![Image](each.md.0.png)
 
-Box(5).rx(seq({ by: 1 / 8, upto: 1 })) produces eight sheets
+Box(5).seq({ by: 1 / 8, upto: 1 }, rx) produces eight sheets
 
 ![Image](each.md.1.png)
 
