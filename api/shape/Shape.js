@@ -225,6 +225,8 @@ Shape.toFlatValues = (to, from) => {
       .filter((value) => value !== undefined)
       .flatMap((value) => Shape.toValue(value, from))
       .flatMap((value) => Shape.toValue(value, from));
+  } else if (to instanceof Shape && to.toGeometry().type === 'group') {
+    return Shape.toFlatValues(to.toGeometry().content, from);
   } else {
     return [Shape.toValue(to, from)];
   }

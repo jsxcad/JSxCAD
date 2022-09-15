@@ -46,7 +46,7 @@ const knob = Loft(
 const top = saucer
   .upperEnvelope()
   .involute()
-  .loft(self(), Box(150).z(5))
+  .loft(noOp(), Box(150).z(5))
   .fitTo(knob)
   .as('top')
   .stl('knob', get('knob').by(align('>z')));
@@ -64,7 +64,7 @@ const topWithPegHoles = top
       .by(align('>z'))
   );
 
-const base = saucer.lowerEnvelope().loft(self(), Box(150).z(-12.01)).as('base');
+const base = saucer.lowerEnvelope().loft(noOp(), Box(150).z(-12.01)).as('base');
 
 const baseWithPegHoles = base
   .cut(Arc(8.2).ez(-12, 5).x(50, -50).y(35, -35))

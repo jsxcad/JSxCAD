@@ -228,7 +228,7 @@ Polyhedron(
       [[4, 1, 0], [4, 2, 1], [4, 3, 2], [4, 0, 3], [3, 0, 1], [3, 1, 2]])
 
 ```JavaScript
-Septagon(5).gridView().md(`Septagon(5)`);
+Arc(5).hasSides(7).gridView().md(`Septagon(5)`);
 ```
 
 ![Image](shapes.md.19.png)

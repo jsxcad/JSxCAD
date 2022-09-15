@@ -12,7 +12,7 @@ See: [to](https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/to.nb).
 Box(6, 4, 2)
   .view(1)
   .note('Box(6, 4, 2) is our starting shape in its preferred orientation')
-  .ry(seq({ by: 1 / 8 }))
+  .seq({ by: 1 / 8 }, ry)
   .cut(Arc(1, 1, 8))
   .view(2)
   .note('We arrange the boxes and perform a cut')

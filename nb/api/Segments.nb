@@ -1,0 +1,23 @@
+md`
+### Segments()
+Parameter|Default|Type
+---|---|---
+segments|[]|Set of [source, target] segments.
+
+These segments do not have individual orientation.
+
+See: [Edge](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/Edge.nb).
+`;
+
+Segments([
+  [
+    [1, 1],
+    [1, -1],
+  ],
+  [
+    [1, 1, 0],
+    [1, 1, 1],
+  ],
+])
+  .view()
+  .note('Segments([[[1, 1], [1, -1]], [[1, 1, 0], [1, 1, 1]]])');

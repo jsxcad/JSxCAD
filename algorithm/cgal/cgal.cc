@@ -3458,6 +3458,7 @@ void cut_segment_with_volume(const Segment& segment, AABB_tree& tree,
 
 template <typename Point>
 void unique_points(std::vector<Point>& points) {
+#if 0
   // There should be a better way to emit a unique set of points.
   std::sort(points.begin(), points.end(), [&](const Point& a, const Point& b) {
     FT x = a.x() - b.x();
@@ -3476,6 +3477,8 @@ void unique_points(std::vector<Point>& points) {
     }
     return a.z() < b.z();
   });
+#endif
+  // This won't make points unique, but should remove repeated points.
   points.erase(std::unique(points.begin(), points.end()), points.end());
 }
 
@@ -6159,7 +6162,7 @@ int Remesh(Geometry* geometry, size_t count, size_t iterations,
 
   std::vector<std::reference_wrapper<const Surface_mesh>> selections;
 
-  for (int selection = count; selection < count; selection++) {
+  for (int selection = count; selection < size; selection++) {
     selections.push_back(geometry->mesh(selection));
   }
 

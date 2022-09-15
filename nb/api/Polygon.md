@@ -6,13 +6,13 @@ Parameter|Default|Type
 Constructs a polygon from a sequence of points.
 
 ```JavaScript
-Polygon(Point(6).rz(seq({ by: 1 / 8, upto: 1 })))
+Polygon(Point(6).seq({ by: 1 / 8, upto: 1 }, rz))
   .view()
   .note(
-    'Polygon(Point(10).rz(seq({ by: 1 / 8, upto: 1 }))) produces a regular octagon.'
+    'Polygon(Point(10).seq({ by: 1 / 8, upto: 1 }, rz)) produces a regular octagon.'
   );
 ```
 
 ![Image](Polygon.md.0.png)
 
-Polygon(Point(10).rz(seq({ by: 1 / 8, upto: 1 }))) produces a regular octagon.
+Polygon(Point(10).seq({ by: 1 / 8, upto: 1 }, rz)) produces a regular octagon.

@@ -13,7 +13,7 @@ export const ChainHull = (...shapes) => {
 export const chainHull = Shape.chainable(
   (...shapes) =>
     (shape) =>
-      ChainHull(shape, ...shapes.map((other) => Shape.toShape(other, shape)))
+      ChainHull(...Shape.toShapes(shapes, shape))
 );
 
 Shape.registerMethod('chainHull', chainHull);

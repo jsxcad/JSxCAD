@@ -17,9 +17,9 @@ Loop(Point(0, 0, 0), Point(0, 1, 0), Point(1, 1, 0))
   );
 
 Arc([4, 5], 2, 0)
-  .rz(seq({ by: 1 / 32 }))
+  .seq({ by: 1 / 32 }, rz)
   .fill()
   .view()
   .note(
-    'Arc([4, 5], 2, 0).rz(seq({ by: 1 / 32 })).fill() shows the odd-even rule.'
+    'Arc([4, 5], 2, 0).seq({ by: 1 / 32 }, rz).fill() shows the odd-even rule.'
   );

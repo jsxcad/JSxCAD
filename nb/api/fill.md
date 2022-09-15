@@ -23,14 +23,14 @@ Loop(Point(0, 0, 0), Point(0, 1, 0), Point(1, 1, 0)).fill() produces a triangle.
 
 ```JavaScript
 Arc([4, 5], 2, 0)
-  .rz(seq({ by: 1 / 32 }))
+  .seq({ by: 1 / 32 }, rz)
   .fill()
   .view()
   .note(
-    'Arc([4, 5], 2, 0).rz(seq({ by: 1 / 32 })).fill() shows the odd-even rule.'
+    'Arc([4, 5], 2, 0).seq({ by: 1 / 32 }, rz).fill() shows the odd-even rule.'
   );
 ```
 
 ![Image](fill.md.1.png)
 
-Arc([4, 5], 2, 0).rz(seq({ by: 1 / 32 })).fill() shows the odd-even rule.
+Arc([4, 5], 2, 0).seq({ by: 1 / 32 }, rz).fill() shows the odd-even rule.

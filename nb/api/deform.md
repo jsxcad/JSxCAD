@@ -29,7 +29,7 @@ Box(10, 3, 3)
       alpha: 0.05,
     }
   )
-  .view(3);
+  .view(1);
 ```
 
 ![Image](deform.md.0.png)

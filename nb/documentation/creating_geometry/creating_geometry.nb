@@ -147,14 +147,6 @@ Polygon([0, 0, 0], [10, 0, 0], [10, 10, 0]).view();
 
 md`
 ---
-### Septagon
-Creates a Septagon.
-`;
-
-Septagon(10).view();
-
-md`
----
 ### Triangle
 Triangle creates a new triangle.
 `;
