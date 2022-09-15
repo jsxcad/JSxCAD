@@ -51,12 +51,3 @@ NutThreadSegment(20, { play: 0.1 })
 ![Image](examples.md.4.png)
 
 NutThread(20, 10).and(ScrewThread(20, 10))
-
-```JavaScript
-ScrewThreadSegment(20, { turn: 'right' })
-  .color('purple')
-  .and(ScrewThreadSegment(20, { turn: 'left' }).color('green'))
-  .view();
-```
-
-![Image](examples.md.5.png)

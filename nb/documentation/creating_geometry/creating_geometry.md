@@ -209,16 +209,6 @@ Polygon([0, 0, 0], [10, 0, 0], [10, 10, 0]).view();
 ![Image](creating_geometry.md.21.png)
 
 ---
-### Septagon
-Creates a Septagon.
-
-```JavaScript
-Septagon(10).view();
-```
-
-![Image](creating_geometry.md.22.png)
-
----
 ### Triangle
 Triangle creates a new triangle.
 
@@ -226,4 +216,4 @@ Triangle creates a new triangle.
 Triangle(4, 9).view();
 ```
 
-![Image](creating_geometry.md.23.png)
+![Image](creating_geometry.md.22.png)

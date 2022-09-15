@@ -33,7 +33,7 @@ export const ScrewThreadSegmentBuilder = Cached(
       .scale(1, 1, turn === 'right' ? 1 : -1)
       .simplify(0.01)
       .add(Arc(diameter - depth).ez(pitch, -pitch))
-      .clip(Box(diameter * 2).ez(pitch / 2, pitch / -2))
+      .clip('exact', Box(diameter * 2).ez(pitch / 2, pitch / -2))
       .z(pitch / 2);
   }
 );
@@ -51,8 +51,8 @@ export const ScrewThreadBuilder = Cached(
   'nb/projects/bolt/bolt.nb/ScrewThread',
   (diameter, height, pitch, angle, play, turn) =>
     ScrewThreadSegment(diameter, { pitch, angle, play, turn })
-      .z(seq({ from: 0, to: height, by: pitch }))
-      .cut('fastx', Box(diameter * 2).ez(height, height + pitch * 2))
+      .seq({ from: 0, to: height, by: pitch }, z)
+      .cut('exact', Box(diameter * 2).ez(height, height + pitch * 2))
       .clean()
 );
 ```
@@ -68,9 +68,9 @@ export const NutThreadSegmentBuilder = Cached(
       play: -play,
       turn,
     }).cutFrom(
-      'fastx',
+      'exact',
       Arc(diameter + thickness)
-        .cut('fastx', Arc(diameter - depth))
+        .cut('exact', Arc(diameter - depth))
         .ez(pitch)
     );
   }
@@ -103,8 +103,8 @@ export const NutThreadBuilder = Cached(
   'nb/projects/bolt/bolt.nb/NutThread',
   (diameter, height, pitch, angle, play, turn) =>
     NutThreadSegment(diameter, { pitch, angle, play, turn })
-      .z(seq({ from: 0, to: height, by: pitch }))
-      .cut('fastx', Box(diameter * 2).ez(height, height + pitch * 2))
+      .seq({ from: 0, to: height, by: pitch }, z)
+      .cut('exact', Box(diameter * 2).ez(height, height + pitch * 2))
 );
 ```
 

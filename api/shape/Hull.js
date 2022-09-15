@@ -11,7 +11,7 @@ Shape.prototype.Hull = Shape.shapeMethod(Hull);
 export const hull = Shape.chainable(
   (...shapes) =>
     (shape) =>
-      Hull(...shapes.map((other) => Shape.toShape(other, shape)))
+      Hull(...shape.toShapes(shapes))
 );
 
 Shape.registerMethod('hull', hull);

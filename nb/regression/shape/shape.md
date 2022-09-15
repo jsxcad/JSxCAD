@@ -309,7 +309,7 @@ Edges(
     from: -6,
     to: 6,
     by: 1 / 4,
-  })
+  }, List)
 )
   .rz(1 / 8)
   .clip(Arc(5).cut(Arc(2)).ez(1, -1))
@@ -727,7 +727,8 @@ Box(10, 10, 10)
 ![Image](shape.md.81.png)
 
 ```JavaScript
-Septagon(10, 10, 10)
+Arc(10, 10, 10)
+  .hasSides(7)
   .cut(
     eachEdge({ selections: [Box(10, [-4, 10], [5, 10])] }, (e, l) =>
       Box(2, 2, [0, l])

@@ -20,7 +20,10 @@ NutThreadSegment(20, { play: 0.1 })
   .view()
   .md(`NutThread(20, 10).and(ScrewThread(20, 10))`);
 
+/*
+FIX: Figure out why this is now failing.
 ScrewThreadSegment(20, { turn: 'right' })
   .color('purple')
   .and(ScrewThreadSegment(20, { turn: 'left' }).color('green'))
   .view();
+*/

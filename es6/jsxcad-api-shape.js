@@ -218,6 +218,8 @@ Shape.toFlatValues = (to, from) => {
       .filter((value) => value !== undefined)
       .flatMap((value) => Shape.toValue(value, from))
       .flatMap((value) => Shape.toValue(value, from));
+  } else if (to instanceof Shape && to.toGeometry().type === 'group') {
+    return Shape.toFlatValues(to.toGeometry().content, from);
   } else {
     return [Shape.toValue(to, from)];
   }
@@ -1403,7 +1405,7 @@ Shape.prototype.Hull = Shape.shapeMethod(Hull);
 const hull = Shape.chainable(
   (...shapes) =>
     (shape) =>
-      Hull(...shapes.map((other) => Shape.toShape(other, shape)))
+      Hull(...shape.toShapes(shapes))
 );
 
 Shape.registerMethod('hull', hull);
@@ -1424,7 +1426,7 @@ const ChainHull = (...shapes) => {
 const chainHull = Shape.chainable(
   (...shapes) =>
     (shape) =>
-      ChainHull(shape, ...shapes.map((other) => Shape.toShape(other, shape)))
+      ChainHull(...Shape.toShapes(shapes, shape))
 );
 
 Shape.registerMethod('chainHull', chainHull);

@@ -131,20 +131,20 @@ We'll use an offset template to cut the other gears
 ```JavaScript
 const ring = Arc(50)
   .hasAngle(-1 / 64, 1 / 64)
-  .hull(self(), Point())
+  .hull(noOp(), Point())
   .cut(Arc(30))
   .cut(
     seq(
+      { from: -1, by: 1 / 16, to: 1 },
       (a) =>
         planetaryFootprint
           .rz(a / -8)
           .y(12)
-          .rz(a / 32),
-      { from: -1, by: 1 / 16, to: 1 }
+          .rz(a / 32)
     )
   )
   .clean()
-  .rz(seq({ by: 1 / 32 }))
+  .seq({ by: 1 / 32 }, rz)
   .gridView()
   .md(
     `We simulate the gear motion to cut a single tooth, then rotate it around.`
@@ -158,19 +158,19 @@ We simulate the gear motion to cut a single tooth, then rotate it around.
 ```JavaScript
 const solar = Arc(20)
   .hasAngle(-1 / 30, 1 / 30)
-  .hull(self(), Point())
+  .hull(noOp(), Point())
   .cut(
     seq(
+      { from: -1, by: 1 / 16, to: 1 },
       (a) =>
         planetaryFootprint
           .rz(a / 8)
           .y(12)
-          .rz(a / 16),
-      { from: -1, by: 1 / 16, to: 1 }
+          .rz(a / 16)
     )
   )
   .clean()
-  .rz(seq({ by: 1 / 16 }))
+  .seq({ by: 1 / 16 }, rz)
   .fuse()
   .gridView()
   .md(
@@ -185,13 +185,15 @@ const solar = Arc(20)
 const rack = Box(20, Math.PI)
   .by(align('x<'))
   .cut(
-    seq((a) => planetaryFootprint.rz(-a / 8).y(Math.PI * a), {
+    seq(
+{
       from: -1,
       by: 1 / 8,
       to: 1,
-    })
+    },
+(a) => planetaryFootprint.rz(-a / 8).y(Math.PI * a))
   )
-  .y(seq((a) => a * Math.PI, { to: 10 }))
+  .seq({ to: 10 }, (a) => y(a * Math.PI))
   .gridView()
   .md(`We can do the same thing to cut a rack.`)
   .clean();
