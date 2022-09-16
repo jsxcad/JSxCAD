@@ -39,7 +39,6 @@ export const buildImportModule =
         CACHED_MODULES.set(name, module);
         return module;
       }
-      console.log(`QQ/Building module: ${name}`);
       let script;
       if (script === undefined) {
         const path = `source/${name}`;

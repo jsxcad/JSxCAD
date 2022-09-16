@@ -7,7 +7,11 @@ JSxCAD offers a number of ways to interact two or more geometries to create new 
 Returns the shape extended to include the space of the added shapes.
 
 ```JavaScript
-Arc(10, 10, 5).color('blue').add(Box(5, 5, 5).move(3, 0, 2).color('red')).view().md(`The result is blue since the blue shape was added to`);
+Arc(10, 10, 5)
+  .color('blue')
+  .add(Box(5, 5, 5).move(3, 0, 2).color('red'))
+  .view()
+  .note(`The result is blue since the blue shape was added to`);
 ```
 
 ![Image](interactions_between_geometry.md.0.png)
@@ -62,7 +66,11 @@ ChainHull(Arc(10), Box(5).move(12, 12, 0), Arc(20).x(40)).view();
 Returns the shape limited to the space of the clipping shapes.
 
 ```JavaScript
-Arc(10, 10, 5).color('blue').clip(Box(5, 5, 5).move(3, 0, 2).color('red')).view().md(`The result is blue since the blue shape was clipped`);
+Arc(10, 10, 5)
+  .color('blue')
+  .clip(Box(5, 5, 5).move(3, 0, 2).color('red'))
+  .view()
+  .md(`The result is blue since the blue shape was clipped`);
 ```
 
 ![Image](interactions_between_geometry.md.5.png)
@@ -70,7 +78,11 @@ Arc(10, 10, 5).color('blue').clip(Box(5, 5, 5).move(3, 0, 2).color('red')).view(
 The result is blue since the blue shape was clipped
 
 ```JavaScript
-Arc(10, 10, 5).color('blue').clipFrom(Box(5, 5, 5).move(3, 0, 2).color('red')).view().md(`The result is red since the red shape was clipped from.`);
+Arc(10, 10, 5)
+  .color('blue')
+  .clipFrom(Box(5, 5, 5).move(3, 0, 2).color('red'))
+  .view()
+  .md(`The result is red since the red shape was clipped from.`);
 ```
 
 ![Image](interactions_between_geometry.md.6.png)
@@ -82,7 +94,11 @@ The result is red since the red shape was clipped from.
 Returns the shape with space of the cut shapes removed.
 
 ```JavaScript
-Arc(10, 10, 5).color('blue').cut(Box(5, 5, 5).move(3, 0, 2).color('red')).view().md(`The result is blue since the blue shape was cut.`);
+Arc(10, 10, 5)
+  .color('blue')
+  .cut(Box(5, 5, 5).move(3, 0, 2).color('red'))
+  .view()
+  .md(`The result is blue since the blue shape was cut.`);
 ```
 
 ![Image](interactions_between_geometry.md.7.png)
@@ -90,7 +106,10 @@ Arc(10, 10, 5).color('blue').cut(Box(5, 5, 5).move(3, 0, 2).color('red')).view()
 The result is blue since the blue shape was cut.
 
 ```JavaScript
-Arc(10, 10, 5).cutFrom(Box(5, 5, 5).move(3, 0, 2)).view().md(`The result is red since the red shape was cut from.`);
+Arc(10, 10, 5)
+  .cutFrom(Box(5, 5, 5).move(3, 0, 2))
+  .view()
+  .md(`The result is red since the red shape was cut from.`);
 ```
 
 ![Image](interactions_between_geometry.md.8.png)

@@ -54,10 +54,7 @@ Box(5).color('green').gridView();
 ```JavaScript
 Box(5)
   .color('green')
-  .tags('color', (colors) => (s) => {
-    md`Colors are ${colors}`;
-    return s;
-  });
+  .tags('color', (colors) => note(`Colors are ${colors}`));
 ```
 
 Colors are green
@@ -225,13 +222,8 @@ Box(2, 2, 2).color('red').and(Box(1, 1, 1).sketch()).view(32);
 ```JavaScript
 Box(1)
   .as('box')
-  .tags((tags, shape) => {
-    md`${tags}`;
-    return shape;
-  });
+  .tags((tags) => note(`${tags}`));
 ```
-
-tags:
 
 ```JavaScript
 Box(5, 5, 5).gridView(34);
@@ -305,11 +297,15 @@ Arc(10).color('blue').tint('red').view(45);
 
 ```JavaScript
 Edges(
-  seq((y) => [Point(-10, y, 0), Point(10, y, 0)], {
-    from: -6,
-    to: 6,
-    by: 1 / 4,
-  }, List)
+  seq(
+    (y) => [Point(-10, y, 0), Point(10, y, 0)],
+    {
+      from: -6,
+      to: 6,
+      by: 1 / 4,
+    },
+    List
+  )
 )
   .rz(1 / 8)
   .clip(Arc(5).cut(Arc(2)).ez(1, -1))

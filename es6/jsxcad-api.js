@@ -129,22 +129,18 @@ const pending = [];
 
 const acquire = async () => {
   if (locked) {
-    console.log(`QQ/acquire/wait`);
     return new Promise((resolve, reject) => pending.push(resolve));
   } else {
-    console.log(`QQ/acquire`);
     locked = true;
   }
 };
 
 const release = async () => {
   if (pending.length > 0) {
-    console.log(`QQ/release/schedule`);
     const resolve = pending.pop();
     resolve(true);
   } else {
     locked = false;
-    console.log(`QQ/release`);
   }
 };
 
@@ -172,7 +168,6 @@ const evaluate = async (ecmascript, { api, path }) => {
     );
     // Add import to make import.meta.url available.
     const op = await builder({ ...api, import: { meta: { url: path } } });
-    console.log('QQ/evaluate/done');
     // Retry until none of the operations block.
     for (;;) {
       try {
@@ -210,15 +205,12 @@ const execute = async (
     workspace,
   }
 ) => {
-  const where = isWebWorker ? 'worker' : 'browser';
   try {
     let replaysDone = false;
     let importsDone = false;
-    console.log(`QQ/Evaluate`);
     const scheduled = new Set();
     const completed = new Set();
     for (;;) {
-      console.log(`QQ/Compile`);
       const updates = {};
       const replays = {};
       const exports = [];
@@ -301,7 +293,6 @@ const execute = async (
         }
       }
       // Finally compute the exports.
-      console.log(`QQ/Exports ${where}`);
       for (const entry of exports) {
         return await evaluate(entry, { path });
       }
@@ -349,7 +340,6 @@ const buildImportModule =
         CACHED_MODULES.set(name, module);
         return module;
       }
-      console.log(`QQ/Building module: ${name}`);
       let script;
       if (script === undefined) {
         const path = `source/${name}`;
