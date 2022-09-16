@@ -18,7 +18,7 @@ See: [absolute](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/a
 
 ```JavaScript
 Box(10, 3, 3)
-  //.remesh(1)
+  .remesh(1)
   .deform(
     Box([4.8, 5], 3, 3).rx(1 / 4),
     Box([-5, -4.8], 3, 3).rx(-1 / 4),
