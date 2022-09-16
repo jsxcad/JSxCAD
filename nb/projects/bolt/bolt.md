@@ -2,7 +2,7 @@
 
 This project allows you to design bolts and nuts.
 
-[See examples](https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/projects/bolt/examples.nb)
+[See examples](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/projects/bolt/examples.nb)
 
 ```JavaScript
 const Profile = (pitch = 1, depth = 4 / 3) =>
@@ -33,7 +33,7 @@ export const ScrewThreadSegmentBuilder = Cached(
       .scale(1, 1, turn === 'right' ? 1 : -1)
       .simplify(0.01)
       .add(Arc(diameter - depth).ez(pitch, -pitch))
-      .clip('exact', Box(diameter * 2).ez(pitch / 2, pitch / -2))
+      .clip(Box(diameter * 2).ez(pitch / 2, pitch / -2))
       .z(pitch / 2);
   }
 );
@@ -52,7 +52,7 @@ export const ScrewThreadBuilder = Cached(
   (diameter, height, pitch, angle, play, turn) =>
     ScrewThreadSegment(diameter, { pitch, angle, play, turn })
       .seq({ from: 0, to: height, by: pitch }, z)
-      .cut('exact', Box(diameter * 2).ez(height, height + pitch * 2))
+      .cut('fastx', Box(diameter * 2).ez(height, height + pitch * 2))
       .clean()
 );
 ```
@@ -68,9 +68,9 @@ export const NutThreadSegmentBuilder = Cached(
       play: -play,
       turn,
     }).cutFrom(
-      'exact',
+      'fastx',
       Arc(diameter + thickness)
-        .cut('exact', Arc(diameter - depth))
+        .cut('fastx', Arc(diameter - depth))
         .ez(pitch)
     );
   }
@@ -104,7 +104,7 @@ export const NutThreadBuilder = Cached(
   (diameter, height, pitch, angle, play, turn) =>
     NutThreadSegment(diameter, { pitch, angle, play, turn })
       .seq({ from: 0, to: height, by: pitch }, z)
-      .cut('exact', Box(diameter * 2).ez(height, height + pitch * 2))
+      .cut('fastx', Box(diameter * 2).ez(height, height + pitch * 2))
 );
 ```
 

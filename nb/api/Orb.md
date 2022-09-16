@@ -1,7 +1,7 @@
 ### Orb
 Parameter|Default|Type
 ---|---|---
-|dimensions|[1, 1, 1]|The size of the bounding box of the orb.
+...dimensions|[1, 1, 1]|The size of the bounding box of the orb.
 
 Produces an orb that fits into the bounding box.
 
@@ -20,12 +20,15 @@ Orb(5).and(Box(5, 5, 5).material('glass')).view().md('Orb(5)');
 Orb(5)
 
 ```JavaScript
-Orb(3, 4, 5).and(Box(3, 4, 5).material('glass')).view().md('Orb(3, 4, 5)');
+Orb(3, 4, [0, 5])
+  .and(Box(3, 4, [0, 5]).material('glass'))
+  .view()
+  .md('Orb(3, 4, [0, 5])');
 ```
 
 ![Image](Orb.md.1.png)
 
-Orb(3, 4, 5)
+Orb(3, 4, [0, 5])
 
 ```JavaScript
 Orb(5)

@@ -41,11 +41,13 @@ Line(5)
 Line(5).and(rz(1 / 8)) produces a 1/8th angle.
 
 ```JavaScript
-Line(seq({ from: -1, upto: 1, by: 1 / 8 }, noOp, List))
+Line(seq({ from: -1, upto: 1, by: 1 / 8 }, noOp(), List))
   .view()
-  .note('Line(seq({ from: -1, upto: 1, by: 1 / 8 })) produces a dashed line.');
+  .note(
+    'Line(seq({ from: -1, upto: 1, by: 1 / 8 }, noOp(), List)) produces a dashed line.'
+  );
 ```
 
 ![Image](Line.md.3.png)
 
-Line(seq({ from: -1, upto: 1, by: 1 / 8 })) produces a dashed line.
+Line(seq({ from: -1, upto: 1, by: 1 / 8 }, noOp(), List)) produces a dashed line.

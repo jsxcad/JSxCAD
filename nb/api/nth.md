@@ -17,7 +17,7 @@ Line(0.1, 5)
   .nth(0, 3, 6)
   .view(2)
   .note(
-    'Line(0.1, 5).rz(seq({ by: 1 / 8 })).nth(0, 3, 6) extracts lines 0, 3, and 6.'
+    'Line(0.1, 5).seq({ by: 1 / 8 }, rz).nth(0, 3, 6) extracts lines 0, 3, and 6.'
   );
 ```
 
@@ -27,4 +27,4 @@ All of the lines are included.
 
 ![Image](nth.md.1.png)
 
-Line(0.1, 5).rz(seq({ by: 1 / 8 })).nth(0, 3, 6) extracts lines 0, 3, and 6.
+Line(0.1, 5).seq({ by: 1 / 8 }, rz).nth(0, 3, 6) extracts lines 0, 3, and 6.

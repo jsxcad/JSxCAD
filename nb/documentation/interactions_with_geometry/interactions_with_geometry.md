@@ -346,10 +346,10 @@ log(aRectangle.tag('tagString').tags());
 tags: tagString
 
 ```JavaScript
-aRectangle.tag('tagString').tags((tags, s) => s.md(`Tags ${tags}`));
+aRectangle.tag('tagString').tags((tags) => note(`Tags ${tags}`));
 ```
 
-tags:
+Tags tagString
 
 Tags can be used to selectively drop parts of geometry.
 
