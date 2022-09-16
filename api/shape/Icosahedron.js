@@ -1,5 +1,6 @@
+import { buildCorners, getScale } from './Plan.js';
+
 import Shape from './Shape.js';
-import { getScale } from './Plan.js';
 import { taggedPlan } from '@jsxcad/geometry';
 
 /** @type {function(Point[], Path[]):Triangle[]} */
@@ -72,12 +73,12 @@ Shape.registerReifier('Icosahedron', (geometry) => {
   return c;
 });
 
-export const Icosahedron = (x = 1, y = x, z = x) =>
-  Shape.fromGeometry(taggedPlan({}, { type: 'Icosahedron' })).hasDiameter(
-    x,
-    y,
-    z
-  );
+export const Icosahedron = (x = 1, y = x, z = x) => {
+  const [c1, c2] = buildCorners(x, y, z);
+  return Shape.fromGeometry(taggedPlan({}, { type: 'Icosahedron' }))
+    .hasC1(...c1)
+    .hasC2(...c2);
+};
 
 export default Icosahedron;
 

@@ -503,7 +503,6 @@ const readNonblocking = (path, options) => {
 };
 
 const write = async (path, geometry, options) => {
-  console.log(`QQ/geometry/write`);
   // Ensure that the geometry carries a hash before saving.
   hash(geometry);
   const stored = await store(geometry);
@@ -513,7 +512,6 @@ const write = async (path, geometry, options) => {
 
 // Generally addPending(write(...)) seems a better option.
 const writeNonblocking = (path, geometry, options) => {
-  console.log(`QQ/geometry/writeNonblocking`);
   addPending(write(path, geometry, options));
   return geometry;
 };
@@ -2255,9 +2253,6 @@ const soup = (
     switch (geometry.type) {
       case 'graph': {
         const { graph } = geometry;
-        if (!graph) {
-          console.log(JSON.stringify(geometry));
-        }
         if (graph.isEmpty) {
           return taggedGroup({});
         } else {

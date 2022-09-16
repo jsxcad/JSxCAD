@@ -21,10 +21,7 @@ Box(5).color('green').gridView();
 
 Box(5)
   .color('green')
-  .tags('color', (colors) => (s) => {
-    md`Colors are ${colors}`;
-    return s;
-  });
+  .tags('color', (colors) => note(`Colors are ${colors}`));
 
 Box(5).color('red').cut(Arc(6).color('blue')).gridView(8);
 
@@ -89,10 +86,7 @@ Box(2, 2, 2).color('red').and(Box(1, 1, 1).sketch()).view(32);
 
 Box(1)
   .as('box')
-  .tags((tags, shape) => {
-    md`${tags}`;
-    return shape;
-  });
+  .tags((tags) => note(`${tags}`));
 Box(5, 5, 5).gridView(34);
 
 Box(5).tool('laser').gridView(35);
@@ -118,11 +112,15 @@ Arc(10).color('blue').color('red').view(44);
 Arc(10).color('blue').tint('red').view(45);
 
 Edges(
-  seq((y) => [Point(-10, y, 0), Point(10, y, 0)], {
-    from: -6,
-    to: 6,
-    by: 1 / 4,
-  }, List)
+  seq(
+    (y) => [Point(-10, y, 0), Point(10, y, 0)],
+    {
+      from: -6,
+      to: 6,
+      by: 1 / 4,
+    },
+    List
+  )
 )
   .rz(1 / 8)
   .clip(Arc(5).cut(Arc(2)).ez(1, -1))

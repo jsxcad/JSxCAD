@@ -32,7 +32,7 @@ jobs:
       - run: npm run rollup
       - run: ./publish-es6.sh
       - run: ./publish-wasm.sh
-      - run: npm run doc
+      - run: npm run doc -- --quiet
       - name: Upload Artifacts
         if: ${{ failure() }}
         uses: actions/upload-artifact@v2

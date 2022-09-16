@@ -211,6 +211,52 @@ export const getScale = (geometry) => {
   ];
 };
 
+const X = 0;
+const Y = 1;
+const Z = 2;
+
+export const buildCorners = (x, y, z) => {
+  const c1 = [0, 0, 0];
+  const c2 = [0, 0, 0];
+  if (x instanceof Array) {
+    if (x[0] < x[1]) {
+      c1[X] = x[1];
+      c2[X] = x[0];
+    } else {
+      c1[X] = x[0];
+      c2[X] = x[1];
+    }
+  } else {
+    c1[X] = x / 2;
+    c2[X] = x / -2;
+  }
+  if (y instanceof Array) {
+    if (y[0] < y[1]) {
+      c1[Y] = y[1];
+      c2[Y] = y[0];
+    } else {
+      c1[Y] = y[0];
+      c2[Y] = y[1];
+    }
+  } else {
+    c1[Y] = y / 2;
+    c2[Y] = y / -2;
+  }
+  if (z instanceof Array) {
+    if (z[0] < z[1]) {
+      c1[Z] = z[1];
+      c2[Z] = z[0];
+    } else {
+      c1[Z] = z[0];
+      c2[Z] = z[1];
+    }
+  } else {
+    c1[Z] = z / 2;
+    c2[Z] = z / -2;
+  }
+  return [c1, c2];
+};
+
 export const Plan = (type) => Shape.fromGeometry(taggedPlan({}, { type }));
 
 Shape.registerReifier = (name, op) => {

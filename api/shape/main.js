@@ -195,7 +195,6 @@ export { Segments } from './Segments.js';
 export { Seq } from './seq.js';
 export { Spiral } from './Spiral.js';
 export { SurfaceMesh } from './SurfaceMesh.js';
-export { Tetragon } from './Tetragon.js';
 export { Triangle } from './Triangle.js';
 export { Voxels } from './voxels.js';
 export { Wave } from './Wave.js';

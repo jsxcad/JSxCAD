@@ -1,4 +1,4 @@
-import { assemble as assemble$1, toDisplayGeometry, toConcreteGeometry, toTransformedGeometry, toPoints, transform, rewriteTags, taggedGraph, taggedSegments, taggedPoints, fromPolygons, registerReifier, taggedPlan, identity, hasTypeReference, taggedGroup, join as join$1, makeAbsolute, measureArea, taggedItem, getInverseMatrices, computeNormal, extrude, transformCoordinate, link as link$1, measureBoundingBox, bend as bend$1, getLeafs, computeCentroid, convexHull, fuse as fuse$1, noGhost, clip as clip$1, cut as cut$1, deform as deform$1, demesh as demesh$1, disjoint as disjoint$1, hasTypeGhost, getLayouts, taggedLayout, eachFaceEdges, eachPoint as eachPoint$1, fill as fill$1, fix as fix$1, rewrite, visit, grow as grow$1, inset as inset$1, involute as involute$1, read, readNonblocking, loft as loft$1, serialize as serialize$1, generateLowerEnvelope, hasShowOverlay, hasTypeMasked, hasMaterial, offset as offset$1, outline as outline$1, remesh as remesh$1, write, writeNonblocking, fromScaleToTransform, seam as seam$1, section as section$1, separate as separate$1, cast, simplify as simplify$1, taggedSketch, smooth as smooth$1, computeToolpath, twist as twist$1, generateUpperEnvelope, hasTypeVoid, measureVolume, withAabbTreeQuery, linearize, wrap as wrap$1, computeImplicitVolume } from './jsxcad-geometry.js';
+import { assemble as assemble$1, toDisplayGeometry, toConcreteGeometry, toTransformedGeometry, toPoints, transform, rewriteTags, taggedGraph, taggedSegments, taggedPoints, fromPolygons, registerReifier, taggedPlan, identity, hasTypeReference, taggedGroup, join as join$1, makeAbsolute, measureArea, taggedItem, getInverseMatrices, computeNormal, extrude, transformCoordinate, link as link$1, measureBoundingBox, bend as bend$1, getLeafs, computeCentroid, convexHull, fuse as fuse$1, noGhost, clip as clip$1, cut as cut$1, deform as deform$1, demesh as demesh$1, disjoint as disjoint$1, hasTypeGhost, getLayouts, taggedLayout, eachFaceEdges, eachPoint as eachPoint$1, fill as fill$1, fix as fix$1, rewrite, visit, grow as grow$1, inset as inset$1, involute as involute$1, read, readNonblocking, loft as loft$1, serialize as serialize$1, generateLowerEnvelope, hasShowOverlay, hasTypeMasked, hasMaterial, offset as offset$1, outline as outline$1, remesh as remesh$1, write, writeNonblocking, fromScaleToTransform, seam as seam$1, section as section$1, separate as separate$1, cast, simplify as simplify$1, taggedSketch, smooth as smooth$1, computeToolpath, twist as twist$1, generateUpperEnvelope, hasTypeVoid, measureVolume, withAabbTreeQuery, linearize, wrap as wrap$1, computeImplicitVolume, hash } from './jsxcad-geometry.js';
 import { getSourceLocation, startTime, endTime, emit, computeHash, logInfo, log as log$1, ErrorWouldBlock, generateUniqueId, addPending, write as write$1 } from './jsxcad-sys.js';
 export { elapsed, emit, read, write } from './jsxcad-sys.js';
 import { zag } from './jsxcad-api-v1-math.js';
@@ -631,6 +631,52 @@ const getScale = (geometry) => {
   ];
 };
 
+const X$9 = 0;
+const Y$9 = 1;
+const Z$9 = 2;
+
+const buildCorners = (x, y, z) => {
+  const c1 = [0, 0, 0];
+  const c2 = [0, 0, 0];
+  if (x instanceof Array) {
+    if (x[0] < x[1]) {
+      c1[X$9] = x[1];
+      c2[X$9] = x[0];
+    } else {
+      c1[X$9] = x[0];
+      c2[X$9] = x[1];
+    }
+  } else {
+    c1[X$9] = x / 2;
+    c2[X$9] = x / -2;
+  }
+  if (y instanceof Array) {
+    if (y[0] < y[1]) {
+      c1[Y$9] = y[1];
+      c2[Y$9] = y[0];
+    } else {
+      c1[Y$9] = y[0];
+      c2[Y$9] = y[1];
+    }
+  } else {
+    c1[Y$9] = y / 2;
+    c2[Y$9] = y / -2;
+  }
+  if (z instanceof Array) {
+    if (z[0] < z[1]) {
+      c1[Z$9] = z[1];
+      c2[Z$9] = z[0];
+    } else {
+      c1[Z$9] = z[0];
+      c2[Z$9] = z[1];
+    }
+  } else {
+    c1[Z$9] = z / 2;
+    c2[Z$9] = z / -2;
+  }
+  return [c1, c2];
+};
+
 const Plan = (type) => Shape.fromGeometry(taggedPlan({}, { type }));
 
 Shape.registerReifier = (name, op) => {
@@ -1252,44 +1298,7 @@ const reifyBox = (geometry) => {
 Shape.registerReifier('Box', reifyBox);
 
 const Box = (x = 1, y = x, z = 0) => {
-  const c1 = [0, 0, 0];
-  const c2 = [0, 0, 0];
-  if (x instanceof Array) {
-    if (x[0] < x[1]) {
-      c1[X$6] = x[1];
-      c2[X$6] = x[0];
-    } else {
-      c1[X$6] = x[0];
-      c2[X$6] = x[1];
-    }
-  } else {
-    c1[X$6] = x / 2;
-    c2[X$6] = x / -2;
-  }
-  if (y instanceof Array) {
-    if (y[0] < y[1]) {
-      c1[Y$6] = y[1];
-      c2[Y$6] = y[0];
-    } else {
-      c1[Y$6] = y[0];
-      c2[Y$6] = y[1];
-    }
-  } else {
-    c1[Y$6] = y / 2;
-    c2[Y$6] = y / -2;
-  }
-  if (z instanceof Array) {
-    if (z[0] < z[1]) {
-      c1[Z$6] = z[1];
-      c2[Z$6] = z[0];
-    } else {
-      c1[Z$6] = z[0];
-      c2[Z$6] = z[1];
-    }
-  } else {
-    c1[Z$6] = z / 2;
-    c2[Z$6] = z / -2;
-  }
+  const [c1, c2] = buildCorners(x, y, z);
   return Shape.fromGeometry(taggedPlan({}, { type: 'Box' }))
     .hasC1(...c1)
     .hasC2(...c2);
@@ -4507,64 +4516,61 @@ const X$2 = 0;
 const Y$2 = 1;
 const Z$3 = 2;
 
-const sort = Shape.chainable(
-  (spec = 'z<y<x<', origin = [0, 0, 0]) =>
-    (shape) => {
-      let leafs = getLeafs(shape.toGeometry()).map((leaf) => {
-        const [min, max] = measureBoundingBox(leaf);
-        const shape = Shape.fromGeometry(leaf);
-        return { min, max, shape };
-      });
-      const ops = [];
-      while (spec) {
-        const found = spec.match(/([xyz])([<>])([0-9.])?(.*)/);
-        if (found === null) {
-          throw Error(`Bad sort spec ${spec}`);
-        }
-        const [, dimension, order, limit, rest] = found;
-        console.log(`dimension: ${dimension}`);
-        console.log(`order: ${order}`);
-        console.log(`limit: ${limit}`);
-        console.log(`rest: ${rest}`);
-        // We apply the sorting ops in reverse.
-        ops.unshift({ dimension, order, limit });
-        spec = rest;
-      }
-      for (const { dimension, order, limit } of ops) {
-        let axis;
-        switch (dimension) {
-          case 'x':
-            axis = X$2;
-            break;
-          case 'y':
-            axis = Y$2;
-            break;
-          case 'z':
-            axis = Z$3;
-            break;
-        }
-        if (limit !== undefined) {
-          switch (order) {
-            case '>':
-              leafs = leafs.filter(({ min }) => min[axis] > limit);
-              break;
-            case '<':
-              leafs = leafs.filter(({ max }) => max[axis] < limit);
-              break;
-          }
-        }
-        switch (order) {
-          case '>':
-            leafs = leafs.sort((a, b) => b.min[axis] - a.min[axis]);
-            break;
-          case '<':
-            leafs = leafs.sort((a, b) => a.max[axis] - b.max[axis]);
-            break;
-        }
-      }
-      return Group(...leafs.map(({ shape }) => shape));
+const sort = Shape.chainable((spec = 'z<y<x<') => (shape) => {
+  let leafs = getLeafs(shape.toGeometry()).map((leaf) => {
+    const [min, max] = measureBoundingBox(leaf);
+    const shape = Shape.fromGeometry(leaf);
+    return { min, max, shape };
+  });
+  const ops = [];
+  while (spec) {
+    const found = spec.match(/([xyz])([<>])([0-9.])?(.*)/);
+    if (found === null) {
+      throw Error(`Bad sort spec ${spec}`);
     }
-);
+    const [, dimension, order, limit, rest] = found;
+    console.log(`dimension: ${dimension}`);
+    console.log(`order: ${order}`);
+    console.log(`limit: ${limit}`);
+    console.log(`rest: ${rest}`);
+    // We apply the sorting ops in reverse.
+    ops.unshift({ dimension, order, limit });
+    spec = rest;
+  }
+  for (const { dimension, order, limit } of ops) {
+    let axis;
+    switch (dimension) {
+      case 'x':
+        axis = X$2;
+        break;
+      case 'y':
+        axis = Y$2;
+        break;
+      case 'z':
+        axis = Z$3;
+        break;
+    }
+    if (limit !== undefined) {
+      switch (order) {
+        case '>':
+          leafs = leafs.filter(({ min }) => min[axis] > limit);
+          break;
+        case '<':
+          leafs = leafs.filter(({ max }) => max[axis] < limit);
+          break;
+      }
+    }
+    switch (order) {
+      case '>':
+        leafs = leafs.sort((a, b) => b.min[axis] - a.min[axis]);
+        break;
+      case '<':
+        leafs = leafs.sort((a, b) => a.max[axis] - b.max[axis]);
+        break;
+    }
+  }
+  return Group(...leafs.map(({ shape }) => shape));
+});
 
 Shape.registerMethod('sort', sort);
 
@@ -4587,21 +4593,22 @@ const table = Shape.chainable((rows, columns, ...cells) => (shape) => {
 
 Shape.registerMethod('table', table);
 
-const tags = Shape.chainable(
-  (namespace = 'user', op = (tags) => note(`tags: ${tags}`)) =>
-    (shape) => {
-      const prefix = `${namespace}:`;
-      const collected = [];
-      for (const { tags } of getLeafs(shape.toGeometry())) {
-        for (const tag of tags) {
-          if (tag.startsWith(prefix)) {
-            collected.push(tag.substring(prefix.length));
-          }
-        }
+const tags = Shape.chainable((...args) => (shape) => {
+  const {
+    string: namespace = 'user',
+    func: op = (tags) => note(`tags: ${tags}`),
+  } = destructure(args);
+  const prefix = `${namespace}:`;
+  const collected = [];
+  for (const { tags } of getLeafs(shape.toGeometry())) {
+    for (const tag of tags) {
+      if (tag.startsWith(prefix)) {
+        collected.push(tag.substring(prefix.length));
       }
-      return op(collected)(shape);
     }
-);
+  }
+  return op(collected)(shape);
+});
 
 Shape.registerMethod('tags', tags);
 
@@ -5298,44 +5305,7 @@ const ArcOp = (type) => (x, y, z) => {
       }
       break;
   }
-  const c1 = [0, 0, 0];
-  const c2 = [0, 0, 0];
-  if (x instanceof Array) {
-    if (x[0] < x[1]) {
-      c1[X] = x[1];
-      c2[X] = x[0];
-    } else {
-      c1[X] = x[0];
-      c2[X] = x[1];
-    }
-  } else {
-    c1[X] = x / 2;
-    c2[X] = x / -2;
-  }
-  if (y instanceof Array) {
-    if (y[0] < y[1]) {
-      c1[Y] = y[1];
-      c2[Y] = y[0];
-    } else {
-      c1[Y] = y[0];
-      c2[Y] = y[1];
-    }
-  } else {
-    c1[Y] = y / 2;
-    c2[Y] = y / -2;
-  }
-  if (z instanceof Array) {
-    if (z[0] < z[1]) {
-      c1[Z] = z[1];
-      c2[Z] = z[0];
-    } else {
-      c1[Z] = z[0];
-      c2[Z] = z[1];
-    }
-  } else {
-    c1[Z] = z / 2;
-    c2[Z] = z / -2;
-  }
+  const [c1, c2] = buildCorners(x, y, z);
   return Shape.fromGeometry(taggedPlan({}, { type }))
     .hasC1(...c1)
     .hasC2(...c2);
@@ -5681,12 +5651,12 @@ Shape.registerReifier('Icosahedron', (geometry) => {
   return c;
 });
 
-const Icosahedron = (x = 1, y = x, z = x) =>
-  Shape.fromGeometry(taggedPlan({}, { type: 'Icosahedron' })).hasDiameter(
-    x,
-    y,
-    z
-  );
+const Icosahedron = (x = 1, y = x, z = x) => {
+  const [c1, c2] = buildCorners(x, y, z);
+  return Shape.fromGeometry(taggedPlan({}, { type: 'Icosahedron' }))
+    .hasC1(...c1)
+    .hasC2(...c2);
+};
 
 Shape.prototype.Icosahedron = Shape.shapeMethod(Icosahedron);
 
@@ -5758,8 +5728,12 @@ Shape.registerReifier('Orb', (geometry) => {
   return makeUnitSphere(tolerance).scale(scale).move(middle).absolute();
 });
 
-const Orb = (x = 1, y = x, z = x) =>
-  Shape.fromGeometry(taggedPlan({}, { type: 'Orb' })).hasDiameter(x, y, z);
+const Orb = (x = 1, y = x, z = x) => {
+  const [c1, c2] = buildCorners(x, y, z);
+  return Shape.fromGeometry(taggedPlan({}, { type: 'Orb' }))
+    .hasC1(...c1)
+    .hasC2(...c2);
+};
 
 Shape.prototype.Orb = Shape.shapeMethod(Orb);
 
@@ -5810,14 +5784,15 @@ Shape.prototype.Segments = Shape.shapeMethod(Segments);
 const SurfaceMesh = (
   serializedSurfaceMesh,
   { isClosed = true, matrix } = {}
-) =>
-  Shape.fromGeometry(
-    taggedGraph({ tags: [], matrix }, { serializedSurfaceMesh, isClosed })
+) => {
+  const geometry = taggedGraph(
+    { tags: [], matrix },
+    { serializedSurfaceMesh, isClosed }
   );
-
-const Tetragon = (x, y, z) => Arc(x, y, z).hasSides(4);
-
-Shape.prototype.Tetragon = Shape.shapeMethod(Tetragon);
+  geometry.graph.hash = computeHash(geometry.graph);
+  hash(geometry);
+  return Shape.fromGeometry(geometry);
+};
 
 const Triangle = (x, y, z) => Arc(x, y, z).hasSides(3);
 
@@ -5838,4 +5813,4 @@ const Wave = (...args) => {
 
 Shape.prototype.Wave = Shape.shapeMethod(Wave);
 
-export { Arc, ArcX, ArcY, ArcZ, Assembly, Box, Cached, ChainHull, Clip, Curve, Edge, Edges, Empty, Face, GrblConstantLaser, GrblDynamicLaser, GrblPlotter, GrblSpindle, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Join, Line, Link, List, Loft, Loop, Note, Octagon, Orb, Page, Pentagon, Plan, Point, Points, Polygon, Polyhedron, RX, RY, RZ, Ref, Segments, Seq, Shape, Spiral, SurfaceMesh, Tetragon, Triangle, Voxels, Wave, Wrap, X$8 as X, XY, XZ, Y$8 as Y, YZ, Z$8 as Z, absolute, abstract, addTo, align, and, area, as, asPart, at, bb, bend, billOfMaterials, by, center, chainHull, clean, clip, clipFrom, color, cut, cutFrom, cutOut, defRgbColor, defThreejsMaterial, defTool, define, deform, demesh, destructure, disjoint, drop, e, each, eachEdge, eachPoint, edges, edit, ensurePages, ex, extrudeAlong, extrudeX, extrudeY, extrudeZ, ey, ez, faces, fill, fit, fitTo, fix, flat, fuse, g, get, getNot, ghost, gn, grow, hull, image, inFn, inset, involute, join, link, list, loadGeometry, loft, log, loop, lowerEnvelope, m, mask, masking, material, md, move, moveAlong, n, noOp, noVoid, normal, note, nth, o, ofPlan, offset, on, op, orient, origin, outline, overlay, pack, points$1 as points, ref, reify, remesh, rotateX, rotateY, rotateZ, rx, ry, rz, saveGeometry, scale$1 as scale, scaleToFit, scaleX, scaleY, scaleZ, seam, section, sectionProfile, separate, seq, serialize, shadow, simplify, size, sketch, smooth, sort, sx, sy, sz, table, tag, tags, tint, to, tool, toolpath, top, twist, untag, upperEnvelope, view, voidFn, voidIn, volume, voxels, wrap, x, xyz, y, z };
+export { Arc, ArcX, ArcY, ArcZ, Assembly, Box, Cached, ChainHull, Clip, Curve, Edge, Edges, Empty, Face, GrblConstantLaser, GrblDynamicLaser, GrblPlotter, GrblSpindle, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Join, Line, Link, List, Loft, Loop, Note, Octagon, Orb, Page, Pentagon, Plan, Point, Points, Polygon, Polyhedron, RX, RY, RZ, Ref, Segments, Seq, Shape, Spiral, SurfaceMesh, Triangle, Voxels, Wave, Wrap, X$8 as X, XY, XZ, Y$8 as Y, YZ, Z$8 as Z, absolute, abstract, addTo, align, and, area, as, asPart, at, bb, bend, billOfMaterials, by, center, chainHull, clean, clip, clipFrom, color, cut, cutFrom, cutOut, defRgbColor, defThreejsMaterial, defTool, define, deform, demesh, destructure, disjoint, drop, e, each, eachEdge, eachPoint, edges, edit, ensurePages, ex, extrudeAlong, extrudeX, extrudeY, extrudeZ, ey, ez, faces, fill, fit, fitTo, fix, flat, fuse, g, get, getNot, ghost, gn, grow, hull, image, inFn, inset, involute, join, link, list, loadGeometry, loft, log, loop, lowerEnvelope, m, mask, masking, material, md, move, moveAlong, n, noOp, noVoid, normal, note, nth, o, ofPlan, offset, on, op, orient, origin, outline, overlay, pack, points$1 as points, ref, reify, remesh, rotateX, rotateY, rotateZ, rx, ry, rz, saveGeometry, scale$1 as scale, scaleToFit, scaleX, scaleY, scaleZ, seam, section, sectionProfile, separate, seq, serialize, shadow, simplify, size, sketch, smooth, sort, sx, sy, sz, table, tag, tags, tint, to, tool, toolpath, top, twist, untag, upperEnvelope, view, voidFn, voidIn, volume, voxels, wrap, x, xyz, y, z };

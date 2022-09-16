@@ -10,10 +10,10 @@ Destructures shape into transformed leaves and regroups the result.
 Box(5)
   .seq({ by: 1 / 8, upto: 1 }, rx)
   .view(1)
-  .md('Box(5).seq({ by: 1 / 8, upto: 1 }, rx) produces eight sheets')
+  .note('Box(5).seq({ by: 1 / 8, upto: 1 }, rx) produces eight sheets')
   .each(offset(0.5).cut(inset(0.5)))
   .view(2)
-  .md(
+  .note(
     'each(offset(0.5).cut(inset(0.5))) has transformed each sheet individually'
   );
 ```

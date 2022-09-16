@@ -110,8 +110,6 @@ Arc(5).hasSides(7).gridView().md(`Septagon(5)`);
 
 Spiral().gridView().md(`Spiral()`);
 
-Tetragon(5).gridView().md(`Tetragon(5)`);
-
 Triangle(5).gridView().md(`Triangle(5)`);
 
 Wave((t) => Point(0, sin(t * 3) * 100), { to: 360 })

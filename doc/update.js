@@ -22,7 +22,7 @@ server.listen(5001);
 
 const makePosixPath = (string) => string.split(path.sep).join(path.posix.sep);
 
-const build = async (baseDirectory = '.') => {
+const build = async (mode, baseDirectory = '.') => {
   const browser = await puppeteer.launch({
     headless: true,
     dumpio: true,
@@ -36,6 +36,9 @@ const build = async (baseDirectory = '.') => {
   const notebookDurations = [];
   const startTime = new Date();
   const logWatcher = ({ type, source, text }) => {
+    if (mode === '--quiet' && type === 'info') {
+      return;
+    }
     console.log(`[${type}] ${source} ${text}`);
   };
   let exitCode;
@@ -122,4 +125,4 @@ const build = async (baseDirectory = '.') => {
   );
 };
 
-build(argv[2]);
+build(argv[2], argv[3]);

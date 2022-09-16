@@ -1,4 +1,5 @@
 import {
+  buildCorners,
   getAngle,
   getCorner1,
   getCorner2,
@@ -144,44 +145,7 @@ const ArcOp = (type) => (x, y, z) => {
       }
       break;
   }
-  const c1 = [0, 0, 0];
-  const c2 = [0, 0, 0];
-  if (x instanceof Array) {
-    if (x[0] < x[1]) {
-      c1[X] = x[1];
-      c2[X] = x[0];
-    } else {
-      c1[X] = x[0];
-      c2[X] = x[1];
-    }
-  } else {
-    c1[X] = x / 2;
-    c2[X] = x / -2;
-  }
-  if (y instanceof Array) {
-    if (y[0] < y[1]) {
-      c1[Y] = y[1];
-      c2[Y] = y[0];
-    } else {
-      c1[Y] = y[0];
-      c2[Y] = y[1];
-    }
-  } else {
-    c1[Y] = y / 2;
-    c2[Y] = y / -2;
-  }
-  if (z instanceof Array) {
-    if (z[0] < z[1]) {
-      c1[Z] = z[1];
-      c2[Z] = z[0];
-    } else {
-      c1[Z] = z[0];
-      c2[Z] = z[1];
-    }
-  } else {
-    c1[Z] = z / 2;
-    c2[Z] = z / -2;
-  }
+  const [c1, c2] = buildCorners(x, y, z);
   return Shape.fromGeometry(taggedPlan({}, { type }))
     .hasC1(...c1)
     .hasC2(...c2);

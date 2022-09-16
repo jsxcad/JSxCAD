@@ -27,7 +27,6 @@ export const evaluate = async (ecmascript, { api, path }) => {
     );
     // Add import to make import.meta.url available.
     const op = await builder({ ...api, import: { meta: { url: path } } });
-    console.log('QQ/evaluate/done');
     // Retry until none of the operations block.
     for (;;) {
       try {
@@ -65,15 +64,12 @@ export const execute = async (
     workspace,
   }
 ) => {
-  const where = isWebWorker ? 'worker' : 'browser';
   try {
     let replaysDone = false;
     let importsDone = false;
-    console.log(`QQ/Evaluate`);
     const scheduled = new Set();
     const completed = new Set();
     for (;;) {
-      console.log(`QQ/Compile`);
       const updates = {};
       const replays = {};
       const exports = [];
@@ -156,7 +152,6 @@ export const execute = async (
         }
       }
       // Finally compute the exports.
-      console.log(`QQ/Exports ${where}`);
       for (const entry of exports) {
         return await evaluate(entry, { path });
       }

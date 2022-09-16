@@ -1,4 +1,4 @@
-import { getScale, getZag } from './Plan.js';
+import { buildCorners, getScale, getZag } from './Plan.js';
 
 import Cached from './Cached.js';
 import Shape from './Shape.js';
@@ -26,8 +26,12 @@ Shape.registerReifier('Orb', (geometry) => {
   return makeUnitSphere(tolerance).scale(scale).move(middle).absolute();
 });
 
-export const Orb = (x = 1, y = x, z = x) =>
-  Shape.fromGeometry(taggedPlan({}, { type: 'Orb' })).hasDiameter(x, y, z);
+export const Orb = (x = 1, y = x, z = x) => {
+  const [c1, c2] = buildCorners(x, y, z);
+  return Shape.fromGeometry(taggedPlan({}, { type: 'Orb' }))
+    .hasC1(...c1)
+    .hasC2(...c2);
+};
 
 Shape.prototype.Orb = Shape.shapeMethod(Orb);
 

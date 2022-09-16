@@ -249,7 +249,7 @@ A function can be supplied to receive the tags and shape.
 
 log(aRectangle.tag('tagString').tags());
 
-aRectangle.tag('tagString').tags((tags, s) => s.md(`Tags ${tags}`));
+aRectangle.tag('tagString').tags((tags) => note(`Tags ${tags}`));
 
 md`
 Tags can be used to selectively drop parts of geometry.`;
