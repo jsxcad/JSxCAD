@@ -5,12 +5,7 @@ Triangle(10).color('red').add(Box(5).color('blue')).gridView(1);
 ![Image](shape.md.0.png)
 
 ```JavaScript
-Box(5).and(Arc(5)).gridView(2, {
-  size: 800,
-  triangles: false,
-  outline: true,
-  wireframe: false,
-});
+Box(5).and(Arc(5)).view(2, 'top', 'noSkin', 'noWireframe', { size: 800 });
 ```
 
 ![Image](shape.md.1.png)
@@ -387,16 +382,16 @@ Box(10)
 
 ```JavaScript
 Box(20, 20, 20)
-  .view(1, { wireframe: true })
+  .view(1, 'wireframe')
   .md('Original mesh')
   .remesh()
-  .view(54, { wireframe: true })
+  .view(54, 'wireframe')
   .md('Isotropic remeshing')
   .cut('exact', Box([0, 10], [0, -10], [0, 10]))
-  .view(55, { wireframe: true })
+  .view(55, 'wireframe')
   .md('Cut')
   .demesh()
-  .view(56, { wireframe: true })
+  .view(56, 'wireframe')
   .md('Cleaned mesh');
 ```
 

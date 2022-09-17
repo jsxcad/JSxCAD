@@ -4,7 +4,7 @@ const fused = Box(20, 20, 20)
   .cut(Box(10, 10, 100))
   .fuse()
   .view(1)
-  .md('fused');
+  .note('fused');
 ```
 
 ![Image](smooth.md.0.png)
@@ -12,10 +12,7 @@ const fused = Box(20, 20, 20)
 fused
 
 ```JavaScript
-const remeshed = fused
-  .remesh()
-  .view(1, { wireframe: true })
-  .md('remeshed');
+const remeshed = fused.remesh().view(1, 'wireframe').note('remeshed');
 ```
 
 ![Image](smooth.md.1.png)
@@ -23,10 +20,7 @@ const remeshed = fused
 remeshed
 
 ```JavaScript
-const smoothed = remeshed
-  .smooth()
-  .view(1)
-  .md('smoothed');
+const smoothed = remeshed.smooth().view(1).note('smoothed');
 ```
 
 ![Image](smooth.md.2.png)
@@ -34,10 +28,7 @@ const smoothed = remeshed
 smoothed
 
 ```JavaScript
-const simplified = smoothed
-  .simplify()
-  .view(1)
-  .md('simplified');
+const simplified = smoothed.simplify().view(1).note('simplified');
 ```
 
 ![Image](smooth.md.3.png)

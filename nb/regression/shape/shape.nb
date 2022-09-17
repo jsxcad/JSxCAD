@@ -1,11 +1,6 @@
 Triangle(10).color('red').add(Box(5).color('blue')).gridView(1);
 
-Box(5).and(Arc(5)).gridView(2, {
-  size: 800,
-  triangles: false,
-  outline: true,
-  wireframe: false,
-});
+Box(5).and(Arc(5)).view(2, 'top', 'noSkin', 'noWireframe', { size: 800 });
 
 Triangle(10).color('red').addTo(Box(5).color('blue')).gridView(3);
 
@@ -168,16 +163,16 @@ Box(10)
   .view(53);
 
 Box(20, 20, 20)
-  .view(1, { wireframe: true })
+  .view(1, 'wireframe')
   .md('Original mesh')
   .remesh()
-  .view(54, { wireframe: true })
+  .view(54, 'wireframe')
   .md('Isotropic remeshing')
   .cut('exact', Box([0, 10], [0, -10], [0, 10]))
-  .view(55, { wireframe: true })
+  .view(55, 'wireframe')
   .md('Cut')
   .demesh()
-  .view(56, { wireframe: true })
+  .view(56, 'wireframe')
   .md('Cleaned mesh');
 Arc(4)
   .x(5)

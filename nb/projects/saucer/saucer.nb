@@ -58,8 +58,9 @@ const topWithPegHoles = top
       .rz(1 / 12)
       .ez(-12, 5)
   )
-  .stl('top', 
-      getNot('knob')
+  .stl(
+    'top2',
+    getNot('knob')
       .rx(1 / 2)
       .by(align('>z'))
   );

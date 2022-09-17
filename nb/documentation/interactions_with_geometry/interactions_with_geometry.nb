@@ -183,9 +183,7 @@ Multiple turns can be provided, which will produce one result per turn.
 
 const aRectangle = Box(5, 5, 15).view();
 
-aRectangle
-  .remesh({ method: 'edgeLength', lengths: [4, 2] })
-  .view(undefined, { wireframe: true });
+aRectangle.remesh({ method: 'edgeLength', lengths: [4, 2] }).view('wireframe');
 
 aRectangle.rz(1 / 8).view();
 

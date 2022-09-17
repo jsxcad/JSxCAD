@@ -3,19 +3,10 @@ const fused = Box(20, 20, 20)
   .cut(Box(10, 10, 100))
   .fuse()
   .view(1)
-  .md('fused');
+  .note('fused');
 
-const remeshed = fused
-  .remesh()
-  .view(1, { wireframe: true })
-  .md('remeshed');
+const remeshed = fused.remesh().view(1, 'wireframe').note('remeshed');
 
-const smoothed = remeshed
-  .smooth()
-  .view(1)
-  .md('smoothed');
+const smoothed = remeshed.smooth().view(1).note('smoothed');
 
-const simplified = smoothed
-  .simplify()
-  .view(1)
-  .md('simplified');
+const simplified = smoothed.simplify().view(1).note('simplified');
