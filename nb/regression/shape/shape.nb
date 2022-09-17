@@ -99,7 +99,10 @@ Box(5).x(1).gridView(39);
 Box(5).y(1).gridView(40);
 Box(5).z(1).gridView(41);
 
-Arc(10).fitTo(offset(1).void()).ez(5).view(42);
+Arc(10)
+  .op((s) => s.offset(1).fitTo(s.void()))
+  .ez(5)
+  .view(42);
 
 Box(10)
   .ez(10)

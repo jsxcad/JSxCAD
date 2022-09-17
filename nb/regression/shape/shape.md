@@ -268,8 +268,13 @@ Box(5).z(1).gridView(41);
 ![Image](shape.md.36.png)
 
 ```JavaScript
-Arc(10).fitTo(offset(1).void()).ez(5).view(42);
+Arc(10)
+  .op((s) => s.offset(1).fitTo(s.void()))
+  .ez(5)
+  .view(42);
 ```
+
+![Image](shape.md.37.png)
 
 ```JavaScript
 Box(10)
@@ -279,19 +284,19 @@ Box(10)
   .view(43);
 ```
 
-![Image](shape.md.37.png)
+![Image](shape.md.38.png)
 
 ```JavaScript
 Arc(10).color('blue').color('red').view(44);
 ```
 
-![Image](shape.md.38.png)
+![Image](shape.md.39.png)
 
 ```JavaScript
 Arc(10).color('blue').tint('red').view(45);
 ```
 
-![Image](shape.md.39.png)
+![Image](shape.md.40.png)
 
 ```JavaScript
 Edges(
@@ -310,7 +315,7 @@ Edges(
   .gridView(46);
 ```
 
-![Image](shape.md.40.png)
+![Image](shape.md.41.png)
 
 ```JavaScript
 const b = Box(5)
@@ -328,19 +333,19 @@ const b = Box(5)
 Voxels([0, 0, 0], [0, 0, 1], [1, 0, 1], [2, 0, 1]).view(50);
 ```
 
-![Image](shape.md.41.png)
+![Image](shape.md.42.png)
 
 ```JavaScript
 b.at(eachEdge().sort('x<y<z>').n(0).origin(), cut(Box(3, 3, 11))).view(48);
 ```
 
-![Image](shape.md.42.png)
+![Image](shape.md.43.png)
 
 ```JavaScript
 b.by(eachEdge().sort('x<y<z>').n(0).origin()).cut(Box(3, 3, 11)).view(49);
 ```
 
-![Image](shape.md.43.png)
+![Image](shape.md.44.png)
 
 ```JavaScript
 Arc(2)
@@ -355,13 +360,13 @@ Arc(2)
   .view(51);
 ```
 
-![Image](shape.md.44.png)
+![Image](shape.md.45.png)
 
 ```JavaScript
 Triangle(14).svg('triangle');
 ```
 
-![Image](shape.md.45.png)
+![Image](shape.md.46.png)
 
 [triangle_0.svg](shape.triangle_0.svg)
 
@@ -376,9 +381,9 @@ Box(10)
   .view(53);
 ```
 
-![Image](shape.md.46.png)
-
 ![Image](shape.md.47.png)
+
+![Image](shape.md.48.png)
 
 ```JavaScript
 Box(20, 20, 20)
@@ -395,19 +400,19 @@ Box(20, 20, 20)
   .md('Cleaned mesh');
 ```
 
-![Image](shape.md.48.png)
+![Image](shape.md.49.png)
 
 Original mesh
 
-![Image](shape.md.49.png)
+![Image](shape.md.50.png)
 
 Isotropic remeshing
 
-![Image](shape.md.50.png)
+![Image](shape.md.51.png)
 
 Cut
 
-![Image](shape.md.51.png)
+![Image](shape.md.52.png)
 
 Cleaned mesh
 
@@ -421,13 +426,13 @@ Arc(4)
   .view(57);
 ```
 
-![Image](shape.md.52.png)
+![Image](shape.md.53.png)
 
 ```JavaScript
 Box(10).cut(Arc(6).x(6, -6), Box(1, 10)).and(toolpath()).view(58);
 ```
 
-![Image](shape.md.53.png)
+![Image](shape.md.54.png)
 
 ```JavaScript
 Box(20, 20, 20)
@@ -438,7 +443,7 @@ Box(20, 20, 20)
   .view(60);
 ```
 
-![Image](shape.md.54.png)
+![Image](shape.md.55.png)
 
 Area of Box(2).cut(Box(1)) is 4.00
 
@@ -460,25 +465,25 @@ const c = Box(10)
   .view(67);
 ```
 
-![Image](shape.md.55.png)
+![Image](shape.md.56.png)
 
 ```JavaScript
 c.by(origin()).view(68);
 ```
 
-![Image](shape.md.56.png)
+![Image](shape.md.57.png)
 
 ```JavaScript
 c.by(origin(), and(Box(5, 5, 5))).view(69);
 ```
 
-![Image](shape.md.57.png)
+![Image](shape.md.58.png)
 
 ```JavaScript
 c.by(origin(), cut(Box(5, 5, 5))).view(70);
 ```
 
-![Image](shape.md.58.png)
+![Image](shape.md.59.png)
 
 ```JavaScript
 Triangle(4)
@@ -487,19 +492,19 @@ Triangle(4)
   .view(71);
 ```
 
-![Image](shape.md.59.png)
+![Image](shape.md.60.png)
 
 ```JavaScript
 Group(Box(), Triangle(1).x(2), Hexagon(1).x(4)).sort('x<3').view(72);
 ```
 
-![Image](shape.md.60.png)
+![Image](shape.md.61.png)
 
 ```JavaScript
 Group(Box(), Triangle(1).x(2), Hexagon(1).x(4)).sort('x>1').view(73);
 ```
 
-![Image](shape.md.61.png)
+![Image](shape.md.62.png)
 
 ```JavaScript
 Box(5, 5, 20)
@@ -508,13 +513,13 @@ Box(5, 5, 20)
   .view(74);
 ```
 
-![Image](shape.md.62.png)
+![Image](shape.md.63.png)
 
 ```JavaScript
 Box(100).image('https://jsxcad.js.org/png/cooper_2.png').log().topView(1);
 ```
 
-![Image](shape.md.63.png)
+![Image](shape.md.64.png)
 
 ```JavaScript
 Segments([
@@ -607,43 +612,43 @@ Segments([
   .topView();
 ```
 
-![Image](shape.md.64.png)
+![Image](shape.md.65.png)
 
 ```JavaScript
 Arc(37).cut(inset(2)).ez(2).remesh(1).smooth(Box(50, 10, 20)).view();
 ```
 
-![Image](shape.md.65.png)
+![Image](shape.md.66.png)
 
 ```JavaScript
 Box(4, 4, 4).cutOut(X(0)).view();
 ```
 
-![Image](shape.md.66.png)
+![Image](shape.md.67.png)
 
 ```JavaScript
 Box(4, 4, 4).cut('open', Box(2, 2, 8)).view();
 ```
 
-![Image](shape.md.67.png)
+![Image](shape.md.68.png)
 
 ```JavaScript
 Box(4, 4, 4).clip('open', Box(2, 2, 8)).view();
 ```
 
-![Image](shape.md.68.png)
+![Image](shape.md.69.png)
 
 ```JavaScript
 Loft(Box(3).cut(Arc(2)), Hexagon(3).cut(Arc(2)).z(10)).view();
 ```
 
-![Image](shape.md.69.png)
+![Image](shape.md.70.png)
 
 ```JavaScript
 Loft('open', Box(3).cut(Arc(2)), Hexagon(3).cut(Arc(2)).z(10)).view();
 ```
 
-![Image](shape.md.70.png)
+![Image](shape.md.71.png)
 
 ```JavaScript
 Orb(5, 5, 5)
@@ -652,55 +657,55 @@ Orb(5, 5, 5)
   .view();
 ```
 
-![Image](shape.md.71.png)
+![Image](shape.md.72.png)
 
 ```JavaScript
 Box(4).fit(Arc(6).void()).ez(1).view();
 ```
 
-![Image](shape.md.72.png)
+![Image](shape.md.73.png)
 
 ```JavaScript
 Box(4).fit(Arc(6).void()).ez(1, 'noVoid').view();
 ```
 
-![Image](shape.md.73.png)
+![Image](shape.md.74.png)
 
 ```JavaScript
 Box(4).fitTo(Arc(4).void()).cut(Hexagon(3)).clean().view();
 ```
 
-![Image](shape.md.74.png)
+![Image](shape.md.75.png)
 
 ```JavaScript
 Box(4).fitTo(Arc(4).void()).cut(Hexagon(3), 'noVoid').clean().view();
 ```
 
-![Image](shape.md.75.png)
+![Image](shape.md.76.png)
 
 ```JavaScript
 Box(4).fitTo(Arc(3).void()).join(Box(1, 5)).clean().view();
 ```
 
-![Image](shape.md.76.png)
+![Image](shape.md.77.png)
 
 ```JavaScript
 Box(4).fitTo(Arc(3).void()).join(Box(1, 5), 'noVoid').clean().view();
 ```
 
-![Image](shape.md.77.png)
+![Image](shape.md.78.png)
 
 ```JavaScript
 Box(4).fitTo(Arc(3).void()).clip(Box(1, 5)).clean().view();
 ```
 
-![Image](shape.md.78.png)
+![Image](shape.md.79.png)
 
 ```JavaScript
 Box(4).fitTo(Arc(3).void()).clip(Box(1, 5), 'noVoid').clean().view();
 ```
 
-![Image](shape.md.79.png)
+![Image](shape.md.80.png)
 
 ```JavaScript
 Box(10, 10, 10)
@@ -718,7 +723,7 @@ Box(10, 10, 10)
   .view();
 ```
 
-![Image](shape.md.80.png)
+![Image](shape.md.81.png)
 
 ```JavaScript
 Arc(10, 10, 10)
@@ -738,4 +743,4 @@ Arc(10, 10, 10)
   .view();
 ```
 
-![Image](shape.md.81.png)
+![Image](shape.md.82.png)
