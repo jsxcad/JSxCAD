@@ -3,8 +3,6 @@ Parameter|Default|Type
 ---|---|---
 color||The name of the color to tint with.
 
-Sets the color of all leaf geometry in shape to the named color, replacing existing colors.
-
 Mixes the named color with all leaf geometry, merging with existing colors.
 
 The names may be textual, e.g, 'red', or numeric, e.g., '#fafafe'.

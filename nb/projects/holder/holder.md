@@ -26,7 +26,7 @@ const magneticPenHolder = Arc(magnetDiameter)
     'exact',
     Arc(penDiameter)
       .material('plastic')
-      .voidIn(offset(1))
+      .fitTo(offset(1).void())
       .ez(magnetDiameter + 2 + 0.1, -0.1)
       .by(align('x<'))
       .x(1.1)

@@ -11,7 +11,7 @@
     "prettier": "prettier --write .",
     "publish-npm": "lerna publish",
     "rollup": "lerna run rollup",
-    "doc": "node doc/update.js",
+    "doc": "node doc/update.js --verbose",
     "test": "lerna run tests --stream --concurrency=1",
     "tests": "lerna run tests --stream --concurrency=1 --loglevel=silly"
   },

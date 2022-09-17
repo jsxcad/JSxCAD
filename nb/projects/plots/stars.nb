@@ -1,0 +1,14 @@
+const star = Triangle(5)
+  .seq({ upto: 120 / 360, by: 30 / 360 }, rz, Join)
+  .view();
+
+const r = Random();
+
+const stars = star
+  .seq(
+    { upto: 20 },
+    () => x(r.in(-100, 100)).y(r.in(-100, 100)),
+    Group
+  )
+  .and(toolpath())
+  .gcode('stars');

@@ -1,4 +1,4 @@
-### Orb
+### Orb()
 Parameter|Default|Type
 ---|---|---
 ...dimensions|[1, 1, 1]|The size of the bounding box of the orb.

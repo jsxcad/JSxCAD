@@ -42,7 +42,7 @@ Box(10).material('copper').gridView(14);
 Box(10).move(1, 2, 3).gridView(15);
 Box(10).to(Point(1, 2, 3)).gridView(16);
 Box(10).move(1, 2, 3).to(center()).gridView(17);
-Box(10).move(top()).gridView(18);
+Box(10, 10, 10).move(faces().sort('z>').n(0)).view(18);
 
 Assembly(Box(5), Arc(5.5).void()).noVoid().gridView(19);
 
@@ -99,7 +99,7 @@ Box(5).x(1).gridView(39);
 Box(5).y(1).gridView(40);
 Box(5).z(1).gridView(41);
 
-Arc(10).voidIn(offset(1)).ez(5).view(42);
+Arc(10).fitTo(offset(1).void()).ez(5).view(42);
 
 Box(10)
   .ez(10)

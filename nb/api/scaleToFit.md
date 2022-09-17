@@ -1,4 +1,6 @@
 ### scaleToFit()
+Parameter|Default|Type
+---|---|---
 ...dimensions|[1, 1, 1]|Dimensions of a bounding box to fill.
 
 The shape is scaled to fit the bounding box dimensions.

@@ -36,12 +36,12 @@ Assembly(
   .scale(3)
   .ry(0 / 32)
   .clean()
-  .topView(1)
+  .view(1, 'top')
   .each(to(XY()))
   .pack()
   .y(-45)
   .by(align('xy'))
-  .topView(2);
+  .view(2, 'top');
 ```
 
 ![Image](start.md.0.png)

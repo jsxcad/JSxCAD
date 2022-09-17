@@ -1,0 +1,6 @@
+// Probably from https://www.pinterest.de/pin/200410252158492924/
+(await readSvg('https://jsxcad.js.org/svg/dinosaur.svg', { fill: false }))
+  .scale(10)
+  .by(align('xy'))
+  .and(toolpath())
+  .gcode('dinosaur');
