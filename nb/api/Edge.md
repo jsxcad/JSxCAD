@@ -1,36 +1,28 @@
-# Edge
-'''
-Edge(source = [0, 0, 0], target = [0, 0, 1], normal = [1, 0, 0]);
-'''
+### Edge()
+Parameter|Default|Type
+---|---|---
+source|[1, 1, 1]|Coordinate of the start point.
+target|[0, 0, 1]|Coordinate of the end point.
+normal|[1, 0, 0]|Coordinate of a normal point.
 
 This produces an oriented segment from source coordinate to target coordinate.
 
 The segment has a consistent local orientation along z, facing x.
 
-## See also
-[eachEdge](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/eachEdge.nb)
-
-## Examples
-
-Edges can be used to orient other geometry.
+See: [eachEdge](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/eachEdge.nb).
 
 ```JavaScript
 Box([0, 1], [0, 2], [0, 10])
   .to(Edge(Point(), Point(0, 6), Point(0, 0, 5)))
-  .view();
+  .view(1)
+  .note(
+    'Box([0, 1], [0, 2], [0, 10]).to(Edge(Point(), Point(0, 6), Point(0, 0, 5))) orients a box at an edge.'
+  );
 ```
 
 ![Image](Edge.md.0.png)
 
-```JavaScript
-Box([0, 1], [0, 2], [0, 10])
-  .to(Edge(Point(), [5, 3]))
-  .view();
-```
-
-![Image](Edge.md.1.png)
-
-Edges can also be used to build faces.
+Box([0, 1], [0, 2], [0, 10]).to(Edge(Point(), Point(0, 6), Point(0, 0, 5))) orients a box at an edge.
 
 ```JavaScript
 Group(
@@ -40,7 +32,12 @@ Group(
   Edge([1, 0], [0, 0])
 )
   .fill()
-  .topView();
+  .view(1, 'top')
+  .note(
+    'Group(Edge([0, 0], [0, 1]), Edge([0, 1], [1, 1]), Edge([1, 1], [1, 0]), Edge([1, 0], [0, 0])).fill() builds a face from edges.'
+  );
 ```
 
-![Image](Edge.md.2.png)
+![Image](Edge.md.1.png)
+
+Group(Edge([0, 0], [0, 1]), Edge([0, 1], [1, 1]), Edge([1, 1], [1, 0]), Edge([1, 0], [0, 0])).fill() builds a face from edges.

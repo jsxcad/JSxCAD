@@ -1,4 +1,4 @@
-### shape.demesh()
+### demesh()
 
 Removes facets that do not contribute to the geometrical shape and which are not required by triangulation.
 

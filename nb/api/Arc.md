@@ -1,8 +1,13 @@
-# Arc(...dimensions)
+### Arc()
+Parameter|Default|Type
+---|---|---
+...dimensions|[1, 1, 1]|The size of the bounding box of the arc.
 
 Produces an arc z axis within the dimensions provided.
 
-See: [ArcZ](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/ArcZ.nb)
+Arc is equivanent to ArcZ.
+
+See: [ArcX](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/ArcX.nb), [ArcY](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/ArcY.nb), [ArcZ](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/ArcZ.nb).
 
 ```JavaScript
 Group(Arc(4), Arc(4, [3, 4]))

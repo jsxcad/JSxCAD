@@ -1,7 +1,7 @@
 ### Edges()
 Parameter|Default|Type
 ---|---|---
-|edges|[]]|List of lists of coordinates to construct
+|edges|[]|List of lists of coordinates to construct
 
 Constructs a set of segments given the supplied coordinates.
 

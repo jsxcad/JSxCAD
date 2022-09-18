@@ -1,13 +1,13 @@
-# Cached(name, constructor)
+### Cached()
+Parameter|Default|Type
+---|---|---
+name||Unique string qualifying the cached shapes.
+constructor||Function to perform the construction.
 
-Returns a caching version of the constructor.
-
-The name is used to distinguish the constructions.
-
-On subsequent invocations with the same arguments, the cached version will be reused.
+Checks for a cached construction. If not present it computes and saves it for reuse.
 
 ```JavaScript
-Cached('box', Box)(1, 2, 4).view().md("Cached('box', Box)(1, 2, 4)");
+Cached('box', Box)(1, 2, 4).view().note("Cached('box', Box)(1, 2, 4)");
 ```
 
 ![Image](Cached.md.0.png)

@@ -1,4 +1,4 @@
-### shape.each()
+### each()
 Parameter|Default|Type
 ---|---|---
 |leafOp|self|Function to transform each leaf.

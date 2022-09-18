@@ -1,4 +1,4 @@
-### shape.cutOut()
+### cutOut()
 Parameter|Default|Type
 ---|---|---
 |other|self|Shape: The shape to cut and clip against

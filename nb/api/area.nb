@@ -1,14 +1,16 @@
 md`
-# shape.area(op = value => shape => value)
+### area()
+Parameter|Default|Type
+---|---|---
+op|value => shape => value|Function to receive the area.
 
 Calls op(value)(shape) with the computed surface area of the shape.
-
-_Check: Does op have a useful signature?_
 `;
 
 Box(2)
   .view()
-  .area((v) => (s) => s.md(`A 2x2 box has an area of ${v}`));
+  .area((a) => note(`Box(2).area() gives ${a}`));
+
 Box(2, 2, 2)
   .view()
-  .area((v) => (s) => s.md(`A 2x2x2 box has an area of ${v}`));
+  .area((a) => note(`Box(2, 2, 2).area() gives ${a}`));

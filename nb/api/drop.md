@@ -1,4 +1,4 @@
-### shape.drop()
+### drop()
 Parameter|Default|Type
 ---|---|---
 |selector|self|Shape: the shapes to drop.

@@ -1,4 +1,7 @@
-# shape.as(id)
+### as()
+Parameter|Default|Type
+---|---|---
+id||The id of the item to construct.
 
 Wraps shape in an item with the provided id.
 
@@ -12,16 +15,16 @@ See: [get](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/get.nb
 Box(10)
   .and(Arc(2, 2, [0, 2]))
   .view(1, n(0))
-  .md('The first leaf nth(0) is the box.')
+  .md('Given Box(10).and(Arc(2, 2, [0, 2])) n(0) is the box.')
   .as('plate')
   .view(2, n(0))
-  .md('Now it is an item, the first leaf nth(0) is the composition');
+  .md("as('plate') means nth(0) is the whole item.");
 ```
 
 ![Image](as.md.0.png)
 
-The first leaf nth(0) is the box.
+Given Box(10).and(Arc(2, 2, [0, 2])) n(0) is the box.
 
 ![Image](as.md.1.png)
 
-Now it is an item, the first leaf nth(0) is the composition
+as('plate') means nth(0) is the whole item.

@@ -1,43 +1,36 @@
-# shape.addTo(other)
+### shape.addTo()
+Parameter|Default|Type
+---|---|---
+other||The shape to be extended.
 
 Extends the form of other to cover the form of shape.
 
-'''
-Box(10)
-  .color('blue')
-  .addTo(Triangle(15).color('green'))
-  .view();
-'''
+See: [add](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/add.nb).
 
 ```JavaScript
 Box(10)
   .color('blue')
   .addTo(Triangle(15).color('green'))
   .view()
-  .md('The result is green.');
+  .note(
+    "Box(10).color('blue').addTo(Triangle(15).color('green')) produces a green result."
+  );
 ```
 
 ![Image](addTo.md.0.png)
 
-The result is green.
-
-Constrast this with [add](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/add.nb) which extends shape to cover other.
-
-'''
-Box(10)
-  .color('blue')
-  .add(Triangle(15).color('green'))
-  .view()
-'''
+Box(10).color('blue').addTo(Triangle(15).color('green')) produces a green result.
 
 ```JavaScript
 Box(10)
   .color('blue')
   .add(Triangle(15).color('green'))
   .view()
-  .md('The result is blue.');
+  .note(
+    "Box(10).color('blue').add(Triangle(15).color('green')) produces a blue result."
+  );
 ```
 
 ![Image](addTo.md.1.png)
 
-The result is blue.
+Box(10).color('blue').add(Triangle(15).color('green')) produces a blue result.

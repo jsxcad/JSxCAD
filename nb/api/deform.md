@@ -1,4 +1,4 @@
-### shape.deform
+### deform()
 Parameter|Default|Type
 ---|---|---
 ...selections||Shapes: the selections to manipulate

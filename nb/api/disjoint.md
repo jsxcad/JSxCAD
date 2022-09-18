@@ -1,4 +1,4 @@
-### shape.disjoint()
+### disjoint()
 
 Attempts to make the leaf geometry of a shape disjoint, so that only one shape covers one region of space.
 

@@ -1,4 +1,4 @@
-### shape.edges()
+### edges()
 Parameter|Default|Type
 ---|---|---
 edgeOp|edges => edges|Function to transform edges.

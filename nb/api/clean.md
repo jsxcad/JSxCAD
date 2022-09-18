@@ -1,4 +1,4 @@
-# shape.clean()
+### clean()
 
 Removes ghost geometry, but not voids.
 
@@ -6,36 +6,34 @@ Removes ghost geometry, but not voids.
 Box(10)
   .cut(Arc(8))
   .view(1)
-  .md('We can see the ghost of the cut with Box(10).cut(Arc(8)).')
+  .note('Box(10).cut(Arc(8)) shows the ghost of the cut.')
   .clean()
   .view(2)
-  .md('Now the ghost has been cleaned Box(10).cut(Arc(8)).clean().');
+  .note('clean() removes the ghost.');
 ```
 
 ![Image](clean.md.0.png)
 
-We can see the ghost of the cut with Box(10).cut(Arc(8)).
+Box(10).cut(Arc(8)) shows the ghost of the cut.
 
 ![Image](clean.md.1.png)
 
-Now the ghost has been cleaned Box(10).cut(Arc(8)).clean().
+clean() removes the ghost.
 
 ```JavaScript
 Box(10)
   .fitTo(Arc(8).void())
   .view(1)
-  .md('We can see the void arc with Box(10).fitTo(Arc(8).void())')
+  .note('Box(10).fitTo(Arc(8).void()) shows the void arc.')
   .clean()
   .view(2)
-  .md(
-    'We can still see the void arc with Box(10).fitTo(Arc(8).void()).clean()'
-  );
+  .note('clean() shows the void arc remains.');
 ```
 
 ![Image](clean.md.2.png)
 
-We can see the void arc with Box(10).fitTo(Arc(8).void())
+Box(10).fitTo(Arc(8).void()) shows the void arc.
 
 ![Image](clean.md.3.png)
 
-We can still see the void arc with Box(10).fitTo(Arc(8).void()).clean()
+clean() shows the void arc remains.
