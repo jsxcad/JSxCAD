@@ -22,7 +22,15 @@ server.listen(5001);
 
 const makePosixPath = (string) => string.split(path.sep).join(path.posix.sep);
 
-const build = async (mode, baseDirectory = '.') => {
+const processArgs = (args) => {
+  const isQuiet = args.includes('--quiet');
+  const last = args[args.length - 1];
+  const baseDirectory = (last && !last.startsWith('--')) ? last : '.';
+  return { isQuiet, baseDirectory };
+};
+
+const build = async (...args) => {
+  const { isQuiet, baseDirectory } = processArgs(args);
   const browser = await puppeteer.launch({
     headless: true,
     dumpio: true,
@@ -36,7 +44,7 @@ const build = async (mode, baseDirectory = '.') => {
   const notebookDurations = [];
   const startTime = new Date();
   const logWatcher = ({ type, source, text }) => {
-    if (mode === '--quiet' && type === 'info') {
+    if (type === 'info' && isQuiet) {
       return;
     }
     console.log(`[${type}] ${source} ${text}`);
