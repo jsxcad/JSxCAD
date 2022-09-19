@@ -90,7 +90,7 @@ export const buildScene = ({
     });
     renderer.autoClear = false;
     renderer.setSize(width, height, /* updateStyle= */ false);
-    renderer.setClearColor(0xffffff);
+    renderer.setClearColor(0xeeeeee);
     renderer.antiAlias = false;
     renderer.inputGamma = true;
     renderer.outputGamma = true;
