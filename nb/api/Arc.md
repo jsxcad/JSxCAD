@@ -11,7 +11,7 @@ See: [ArcX](../../nb/api/ArcX.nb), [ArcY](#https://raw.githubusercontent.com/jsx
 
 ```JavaScript
 Group(Arc(4), Arc(4, [3, 4]))
-  .view()
+  .view(1)
   .md('Dimensions may be ranges.');
 ```
 

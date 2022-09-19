@@ -12,7 +12,7 @@ See: [ArcX](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/ArcX.
 `;
 
 Group(Arc(4), Arc(4, [3, 4]))
-  .view()
+  .view(1)
   .md('Dimensions may be ranges.');
 
 Arc(4, 5, 6).view().md('Three dimensions are supported.');

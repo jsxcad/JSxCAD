@@ -742,7 +742,7 @@ const checkIsWebWorker = () => {
 
 const isWebWorker = checkIsWebWorker();
 
-const isNode$1 =
+const isNode =
   typeof process !== 'undefined' &&
   process.versions != null &&
   process.versions.node != null;
@@ -928,7 +928,7 @@ const webWorker = (spec) =>
 let serviceId = 0;
 
 const newWorker = (spec) => {
-  if (isNode$1) {
+  if (isNode) {
     return nodeWorker();
   } else if (isBrowser) {
     return webWorker(spec);
@@ -1239,13 +1239,6 @@ function microSeconds$4() {
     return ms * 1000;
   }
 }
-/**
- * copied from the 'detect-node' npm module
- * We cannot use the module directly because it causes problems with rollup
- * @link https://github.com/iliakan/detect-node/blob/master/index.js
- */
-
-var isNode = Object.prototype.toString.call(typeof process !== 'undefined' ? process : 0) === '[object process]';
 
 var microSeconds$3 = microSeconds$4;
 var type$3 = 'native';
@@ -1281,11 +1274,9 @@ function onMessage$3(channelState, fn) {
   channelState.messagesCallback = fn;
 }
 function canBeUsed$3() {
-  /**
-   * in the electron-renderer, isNode will be true even if we are in browser-context
-   * so we also check if window is undefined
-   */
-  if (isNode && typeof window === 'undefined') return false;
+  if (typeof window === 'undefined') {
+    return false;
+  }
 
   if (typeof BroadcastChannel === 'function') {
     if (BroadcastChannel._pubkey) {
@@ -1293,7 +1284,9 @@ function canBeUsed$3() {
     }
 
     return true;
-  } else return false;
+  } else {
+    return false;
+  }
 }
 function averageResponseTime$3() {
   return 150;
@@ -1744,9 +1737,12 @@ function onMessage$2(channelState, fn, time) {
   readNewMessages(channelState);
 }
 function canBeUsed$2() {
-  if (isNode) return false;
   var idb = getIdb();
-  if (!idb) return false;
+
+  if (!idb) {
+    return false;
+  }
+
   return true;
 }
 function averageResponseTime$2(options) {
@@ -1885,7 +1881,6 @@ function onMessage$1(channelState, fn, time) {
   channelState.messagesCallback = fn;
 }
 function canBeUsed$1() {
-  if (isNode) return false;
   var ls = getLocalStorage();
   if (!ls) return false;
 
@@ -1981,7 +1976,6 @@ function chooseMethod(options) {
   var chooseMethods = [].concat(options.methods, METHODS).filter(Boolean); // the line below will be removed from es5/browser builds
 
 
-
   if (options.type) {
     if (options.type === 'simulate') {
       // only use simulate-method if directly chosen
@@ -1999,7 +1993,7 @@ function chooseMethod(options) {
    */
 
 
-  if (!options.webWorkerSupport && !isNode) {
+  if (!options.webWorkerSupport) {
     chooseMethods = chooseMethods.filter(function (m) {
       return m.type !== 'idb';
     });
@@ -2368,7 +2362,7 @@ const { promises: promises$3 } = fs;
 const { serialize } = v8$1;
 
 const getFileWriter = () => {
-  if (isNode$1) {
+  if (isNode) {
     return async (qualifiedPath, data) => {
       try {
         await promises$3.mkdir(dirname(qualifiedPath), { recursive: true });
@@ -2449,7 +2443,7 @@ const getUrlFetcher = () => {
   if (isWebWorker) {
     return self.fetch;
   }
-  if (isNode$1) {
+  if (isNode) {
     return nodeFetch;
   }
   throw Error('Expected browser or web worker or node');
@@ -2458,7 +2452,7 @@ const getUrlFetcher = () => {
 const urlFetcher = getUrlFetcher();
 
 const getExternalFileFetcher = () => {
-  if (isNode$1) {
+  if (isNode) {
     // FIX: Put this through getFile, also.
     return async (qualifiedPath) => {
       try {
@@ -2481,7 +2475,7 @@ const getExternalFileFetcher = () => {
 const externalFileFetcher = getExternalFileFetcher();
 
 const getInternalFileFetcher = () => {
-  if (isNode$1) {
+  if (isNode) {
     // FIX: Put this through getFile, also.
     return async (qualifiedPath, doSerialize = true) => {
       try {
@@ -2509,7 +2503,7 @@ const getInternalFileFetcher = () => {
 const internalFileFetcher = getInternalFileFetcher();
 
 const getInternalFileVersionFetcher = (qualify = qualifyPath) => {
-  if (isNode$1) {
+  if (isNode) {
     // FIX: Put this through getFile, also.
     return (qualifiedPath) => {
       // FIX: Use a proper version.
@@ -2813,7 +2807,7 @@ const removeOnEmitHandler = (handler) => onEmitHandlers.delete(handler);
 const { promises: promises$1 } = fs;
 
 const getFileLister = async ({ workspace }) => {
-  if (isNode$1) {
+  if (isNode) {
     // FIX: Put this through getFile, also.
     return async () => {
       const qualifiedPaths = new Set();
@@ -3057,7 +3051,7 @@ const unwatchServices = (watcher) => {
 const { promises } = fs;
 
 const getPersistentFileDeleter = () => {
-  if (isNode$1) {
+  if (isNode) {
     return async (qualifiedPath) => {
       return promises.unlink(qualifiedPath);
     };
@@ -3095,4 +3089,4 @@ let nanoid = (size = 21) => {
 
 const generateUniqueId = () => nanoid();
 
-export { ErrorWouldBlock, addOnEmitHandler, addPending, ask, askService, askServices, beginEmitGroup, boot, clearCacheDb, clearEmitted, clearTimes, computeHash, createConversation, createService, elapsed, emit, endTime, finishEmitGroup, flushEmitGroup, generateUniqueId, getActiveServices, getConfig, getControlValue, getFilesystem, getPendingErrorHandler, getServicePoolInfo, getSourceLocation, getTimes, getWorkspace, isBrowser, isNode$1 as isNode, isWebWorker, listFiles, log, logError, logInfo, onBoot, qualifyPath, read, readNonblocking, readOrWatch, remove, removeOnEmitHandler, reportTimes, resolvePending, restoreEmitGroup, saveEmitGroup, setConfig, setControlValue, setHandleAskUser, setPendingErrorHandler, setupFilesystem, setupWorkspace, sleep, startTime$1 as startTime, tellServices, terminateActiveServices, unwatchFile, unwatchFileCreation, unwatchFileDeletion, unwatchLog, unwatchServices, waitServices, watchFile, watchFileCreation, watchFileDeletion, watchLog, watchServices, write, writeNonblocking };
+export { ErrorWouldBlock, addOnEmitHandler, addPending, ask, askService, askServices, beginEmitGroup, boot, clearCacheDb, clearEmitted, clearTimes, computeHash, createConversation, createService, elapsed, emit, endTime, finishEmitGroup, flushEmitGroup, generateUniqueId, getActiveServices, getConfig, getControlValue, getFilesystem, getPendingErrorHandler, getServicePoolInfo, getSourceLocation, getTimes, getWorkspace, isBrowser, isNode, isWebWorker, listFiles, log, logError, logInfo, onBoot, qualifyPath, read, readNonblocking, readOrWatch, remove, removeOnEmitHandler, reportTimes, resolvePending, restoreEmitGroup, saveEmitGroup, setConfig, setControlValue, setHandleAskUser, setPendingErrorHandler, setupFilesystem, setupWorkspace, sleep, startTime$1 as startTime, tellServices, terminateActiveServices, unwatchFile, unwatchFileCreation, unwatchFileDeletion, unwatchLog, unwatchServices, waitServices, watchFile, watchFileCreation, watchFileDeletion, watchLog, watchServices, write, writeNonblocking };

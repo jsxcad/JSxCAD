@@ -1506,6 +1506,41 @@ class App extends React.Component {
             />
           );
         }
+        case 'Help': {
+          return (
+            <div>
+              <blockquote>
+                These links will open in a separate window.
+                <ul>
+                  <li>
+                    <a
+                      href="https://github.com/jsxcad/JSxCAD/blob/master/nb/start.md"
+                      target="help"
+                    >
+                      Getting Started
+                    </a>
+                  </li>
+                  <li>
+                    <a
+                      href="https://github.com/jsxcad/JSxCAD/blob/master/nb/api/index.md"
+                      target="help"
+                    >
+                      API Documentation
+                    </a>
+                  </li>
+                  <li>
+                    <a
+                      href="https://github.com/jsxcad/JSxCAD/blob/master/nb/projects/index.md"
+                      target="help"
+                    >
+                      Projects
+                    </a>
+                  </li>
+                </ul>
+              </blockquote>
+            </div>
+          );
+        }
         case 'Files': {
           const { WorkspaceFiles = [] } = this.state;
           return (

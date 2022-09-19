@@ -1083,9 +1083,9 @@ function _objectWithoutPropertiesLoose(source, excluded) {
 var classnames = {exports: {}};
 
 /*!
-  Copyright (c) 2018 Jed Watson.
-  Licensed under the MIT License (MIT), see
-  http://jedwatson.github.io/classnames
+	Copyright (c) 2018 Jed Watson.
+	Licensed under the MIT License (MIT), see
+	http://jedwatson.github.io/classnames
 */
 
 (function (module) {
@@ -1114,14 +1114,15 @@ var classnames = {exports: {}};
 					}
 				}
 			} else if (argType === 'object') {
-				if (arg.toString === Object.prototype.toString) {
-					for (var key in arg) {
-						if (hasOwn.call(arg, key) && arg[key]) {
-							classes.push(key);
-						}
-					}
-				} else {
+				if (arg.toString !== Object.prototype.toString && !arg.toString.toString().includes('[native code]')) {
 					classes.push(arg.toString());
+					continue;
+				}
+
+				for (var key in arg) {
+					if (hasOwn.call(arg, key) && arg[key]) {
+						classes.push(key);
+					}
 				}
 			}
 		}
@@ -9719,7 +9720,7 @@ var reportErrorIfPathIsNotConfigured = function () {
         reportErrorIfPathIsNotConfigured = function () { };
     }
 };
-exports.version = "1.10.0";
+exports.version = "1.10.1";
 
 });
 
@@ -41364,6 +41365,20 @@ class App extends ReactDOM$2.Component {
               onUpdateGeometry: this.View.updateGeometry,
               trackballState: trackballState
             });
+          }
+
+        case 'Help':
+          {
+            return v$1("div", null, v$1("blockquote", null, "These links will open in a separate window.", v$1("ul", null, v$1("li", null, v$1("a", {
+              href: "https://github.com/jsxcad/JSxCAD/blob/master/nb/start.md",
+              target: "help"
+            }, "Getting Started")), v$1("li", null, v$1("a", {
+              href: "https://github.com/jsxcad/JSxCAD/blob/master/nb/api/index.md",
+              target: "help"
+            }, "API Documentation")), v$1("li", null, v$1("a", {
+              href: "https://github.com/jsxcad/JSxCAD/blob/master/nb/projects/index.md",
+              target: "help"
+            }, "Projects")))));
           }
 
         case 'Files':
