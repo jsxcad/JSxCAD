@@ -7,7 +7,7 @@ Extracts leaf geometry by index.
 
 A longhand operator nth() is equivalent.
 
-See: [nth](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/nth.nb)
+See: [nth](../../nb/api/nth.md)
 
 ```JavaScript
 Line(0.1, 5)

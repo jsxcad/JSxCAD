@@ -7,15 +7,15 @@ Parameter|Default|Type
 Extrudes the surface by the extents provided.
 If the number of extents is odd, 0 will be appended.
 
-The operator [e](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/e.nb) is supplied as shorthand for extrudeAlong(normal(), ...)
+The operator [e](../../nb/api/e.md) is supplied as shorthand for extrudeAlong(normal(), ...)
 
-The operator [ex](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/ex.nb) is supplied as shorthand for extrudeAlong([1, 0, 0], ...)
+The operator [ex](../../nb/api/ex.md) is supplied as shorthand for extrudeAlong([1, 0, 0], ...)
 
-The operator [ey](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/ey.nb) is supplied as shorthand for extrudeAlong([0, 1, 0], ...)
+The operator [ey](../../nb/api/ey.md) is supplied as shorthand for extrudeAlong([0, 1, 0], ...)
 
-The operator [ez](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/ez.nb) is supplied as shorthand for extrudeAlong([0, 0, 1], ...)
+The operator [ez](../../nb/api/ez.md) is supplied as shorthand for extrudeAlong([0, 0, 1], ...)
 
-See [e](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/e.nb), [ex](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/ex.nb), [ey](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/ey.nb), [ez](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/ez.nb)
+See [e](../../nb/api/e.nb), [ex](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/ex.nb), [ey](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/ey.nb), [ez](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/ez.md)
 
 _Consider renaming extrudeAlong to extrude._
 

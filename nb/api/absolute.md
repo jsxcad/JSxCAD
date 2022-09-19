@@ -1,50 +1,39 @@
-# shape.absolute()
+# absolute()
 
 Makes the local orientation of a shape match its absolute orientation.
 
-This means that [flat](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/flat.nb) will have no effect.
+This means that [flat](../../nb/api/flat.md) will have no effect.
 
-'''
-Box(10)
-  .e(1)
-  .rx(1 / 8)
-  .absolute()
-  .flat()
-  .view()
-'''
+See: [flat](../../nb/api/flat.md).
 
 ```JavaScript
 Box(10)
   .ez(1)
   .rx(1 / 8)
+  .view(1)
+  .note('Box(10).ez(1).rx(1 / 8) rotates a box')
+  .view(2, flat())
+  .note('flat() will restore it to its local orientation.')
   .absolute()
+  .view(3)
+  .note('absolute() will not affect its global orientation.')
   .flat()
-  .view()
-  .md('It is already disoriented.');
+  .view(4)
+  .note('But now flat() will restore it to that orientation.');
 ```
 
 ![Image](absolute.md.0.png)
 
-It is already disoriented.
-
-Without absolute, the shape will be returned to its local orientation by [flat](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/flat.nb).
-'''
-Box(10)
-  .ez(1)
-  .rx(1 / 8)
-  .flat()
-  .view()
-'''
-
-```JavaScript
-Box(10)
-  .e(1)
-  .rx(1 / 8)
-  .flat()
-  .view()
-  .md('It becomes disoriented.');
-```
+Box(10).ez(1).rx(1 / 8) rotates a box
 
 ![Image](absolute.md.1.png)
 
-It becomes disoriented.
+flat() will restore it to its local orientation.
+
+![Image](absolute.md.2.png)
+
+absolute() will not affect its global orientation.
+
+![Image](absolute.md.3.png)
+
+But now flat() will restore it to that orientation.

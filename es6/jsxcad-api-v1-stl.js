@@ -99,7 +99,7 @@ const prepareStl = (shape, name, op = (s) => s, options = {}) => {
       type: 'application/sla',
     });
     // Produce a view of what will be downloaded.
-    Shape.fromGeometry(entry).view(name, options.view);
+    Shape.fromGeometry(entry).view(hashSum(name), options.view);
   }
   return entries;
 };

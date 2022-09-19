@@ -36,6 +36,8 @@ md`
 * [Segments](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/Segments.nb)
 * [Spiral](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/Spiral.nb)
 * [SurfaceMesh](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/SurfaceMesh.nb)
+* [Triangle](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/Triangle.nb)
+* [Wave](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/Wave.nb)
 `;
 md`
 ## Operators
@@ -134,5 +136,17 @@ md`
 * [tag](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/tag.nb)
 * [tags](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/tags.nb)
 * [tint](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/tint.nb)
+* [to](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/to.nb)
+* [toolpath](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/toolpath.nb)
+* [twist](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/twist.nb)
+* [untag](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/untag.nb)
 * [upperEnvelope](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/upperEnvelope.nb)
+* [view](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/view.nb)
+* [void](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/void.nb)
+* [volume](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/volume.nb)
+* [voxels](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/voxels.nb)
+* [wrap](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/wrap.nb)
+* [x](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/x.nb)
+* [y](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/y.nb)
+* [z](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/z.nb)
 `;

@@ -1,7 +1,7 @@
 ### outline()
 Produces segments representing the geometric edges of the shape.
 
-See: [edges](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/edges.nb)
+See: [edges](../../nb/api/edges.md)
 
 ```JavaScript
 Arc(3, 3, 1)

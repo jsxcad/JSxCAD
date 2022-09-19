@@ -7,7 +7,7 @@ Provides a template operator to output markdown.
 
 Note is similar, but cannot be used as a template tag operator.
 
-See: [Note](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/Note.nb)
+See: [Note](../../nb/api/Note.md)
 
 ```JavaScript
 Note('md\`Hello, this is *markdown*.\` produces:');

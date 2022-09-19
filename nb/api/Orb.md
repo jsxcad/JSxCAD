@@ -1,4 +1,4 @@
-### Orb
+### Orb()
 Parameter|Default|Type
 ---|---|---
 ...dimensions|[1, 1, 1]|The size of the bounding box of the orb.
@@ -9,7 +9,7 @@ The error of the orb is limited by hasZag(mm), defaulting to 1.
 
 Dimensions may be ranges as usual. e.g., Orb(1, 2, [4, 5]).
 
-See: [hasZag](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/hasZag.nb)
+See: [hasZag](../../nb/api/hasZag.md)
 
 ```JavaScript
 Orb(5).and(Box(5, 5, 5).material('glass')).view().md('Orb(5)');

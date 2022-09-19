@@ -5,7 +5,7 @@ offset||Coordinate giving [x, y, z] offset.
 
 Moves a shape by the offset given.
 
-See: [moveAlong](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/moveAlong.nb)
+See: [moveAlong](../../nb/api/moveAlong.md)
 
 ```JavaScript
 Box().move(0, 1, 0).view().note('Box().move(0, 1, 0) moves one along y.');

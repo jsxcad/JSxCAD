@@ -77,8 +77,9 @@ const topWithPegHoles = top
       .rz(1 / 12)
       .ez(-12, 5)
   )
-  .stl('top', 
-      getNot('knob')
+  .stl(
+    'top2',
+    getNot('knob')
       .rx(1 / 2)
       .by(align('>z'))
   );
@@ -86,7 +87,7 @@ const topWithPegHoles = top
 
 ![Image](saucer.md.3.png)
 
-[top_0.stl](saucer.top_0.stl)
+[top2_0.stl](saucer.top2_0.stl)
 
 ```JavaScript
 const baseWithPegHoles = base

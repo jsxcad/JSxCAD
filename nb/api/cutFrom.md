@@ -8,7 +8,7 @@ other||Shape
 
 Cuts other by shape, rather than shape by other.
 
-See: [cut](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/cut.nb)
+See: [cut](../../nb/api/cut.md)
 
 ```JavaScript
 Box(10)

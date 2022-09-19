@@ -5,7 +5,7 @@ Parameter|Default|Type
 
 Moves a shape by distances along its normal.
 
-See: [moveAlong](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/m.nb)
+See: [moveAlong](../../nb/api/m.md)
 
 ```JavaScript
 Box(5)

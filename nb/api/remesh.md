@@ -9,9 +9,9 @@ resolution|1|Target edge length in mm.
 
 Attempts to cover the geometric shape with isotropic facets.
 
-The shape can be returned to its geometric triangulation via [demesh](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/demesh.nb).
+The shape can be returned to its geometric triangulation via [demesh](../../nb/api/demesh.md).
 
-See: [demesh](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/demesh.nb)
+See: [demesh](../../nb/api/demesh.md)
 
 ```JavaScript
 Box(5, 5, 5).remesh(2.5).view('wireframe').note('Box(5, 5, 5).remesh(2.5)');

@@ -8,7 +8,7 @@ Parameter|Default|Type
 
 The results should be watertight manifolds.
 
-See: [cutFrom](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/cutFrom.nb)
+See: [cutFrom](../../nb/api/cutFrom.md)
 
 ```JavaScript
 Box(10)

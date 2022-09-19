@@ -4,7 +4,7 @@ Parameter|Default|Type
 
 This produces a octagon that would be inscribed within an arc inscribed within a bounding box of the given size.
 
-See: [Arc](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/Arc.nb).
+See: [Arc](../../nb/api/Arc.md).
 
 _FIX: The whole Arc should be red._
 

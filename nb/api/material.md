@@ -24,7 +24,7 @@ Supported materials:
 * wet-glass
 * zinc-steel
 
-See: [image](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/image.nb)
+See: [image](../../nb/api/image.md)
 
 ```JavaScript
 Box(5, 5, 2).material('aluminium').view().note("material('aluminium')");

@@ -1,8 +1,13 @@
-# shape.clipFrom(other, ['exact', 'open', 'noVoid'])
-
+### clipFrom()
+Parameter|Default|Type
+---|---|---
+other||The shape to clip
+'exact'|false|Use exact, but slower, computations
+'open'|false|May produce a surface rather than a solid
+'noVoid'|false|Does not clip void shapes.
 Clips other by shape, rather than shape by other.
 
-See: [clip](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/clip.nb)
+See: [clip](../../nb/api/clip.md)
 
 ```JavaScript
 Box(10)

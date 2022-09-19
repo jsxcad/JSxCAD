@@ -5,7 +5,7 @@ This can be visualized as a point.
 
 For complex shapes the normal may be somewhat arbitrary and unintuitive.
 
-See [extrudeAlong](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/extrudeAlong.nb), [moveAlong](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/moveAlong.nb).
+See [extrudeAlong](../../nb/api/extrudeAlong.nb), [moveAlong](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/moveAlong.md).
 
 ```JavaScript
 Box(5)

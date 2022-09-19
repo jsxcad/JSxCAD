@@ -633,7 +633,7 @@ const getScale = (geometry) => {
 
 const X$9 = 0;
 const Y$9 = 1;
-const Z$9 = 2;
+const Z$8 = 2;
 
 const buildCorners = (x, y, z) => {
   const c1 = [0, 0, 0];
@@ -664,15 +664,15 @@ const buildCorners = (x, y, z) => {
   }
   if (z instanceof Array) {
     if (z[0] < z[1]) {
-      c1[Z$9] = z[1];
-      c2[Z$9] = z[0];
+      c1[Z$8] = z[1];
+      c2[Z$8] = z[0];
     } else {
-      c1[Z$9] = z[0];
-      c2[Z$9] = z[1];
+      c1[Z$8] = z[0];
+      c2[Z$8] = z[1];
     }
   } else {
-    c1[Z$9] = z / 2;
-    c2[Z$9] = z / -2;
+    c1[Z$8] = z / 2;
+    c2[Z$8] = z / -2;
   }
   return [c1, c2];
 };
@@ -817,7 +817,7 @@ Shape.registerMethod('ref', ref);
 
 const X$8 = (x = 0) => Ref().x(x);
 const Y$8 = (y = 0) => Ref().y(y);
-const Z$8 = (z = 0) => Ref().z(z);
+const Z$7 = (z = 0) => Ref().z(z);
 const XY = (z = 0) => Ref().z(z);
 const XZ = (y = 0) =>
   Ref()
@@ -919,7 +919,7 @@ Shape.registerMethod('addTo', addTo);
 
 const X$7 = 0;
 const Y$7 = 1;
-const Z$7 = 2;
+const Z$6 = 2;
 
 const subtract$2 = ([ax, ay, az], [bx, by, bz]) => [ax - bx, ay - by, az - bz];
 
@@ -973,15 +973,15 @@ const computeOffset = (spec = 'xyz', origin = [0, 0, 0], shape) =>
         case 'z': {
           switch (spec[index]) {
             case '>':
-              offset[Z$7] = -min[Z$7];
+              offset[Z$6] = -min[Z$6];
               index += 1;
               break;
             case '<':
-              offset[Z$7] = -max[Z$7];
+              offset[Z$6] = -max[Z$6];
               index += 1;
               break;
             default:
-              offset[Z$7] = -center[Z$7];
+              offset[Z$6] = -center[Z$6];
           }
           break;
         }
@@ -1194,7 +1194,7 @@ Shape.registerMethod('loop', loop);
 
 const X$6 = 0;
 const Y$6 = 1;
-const Z$6 = 2;
+const Z$5 = 2;
 
 let fundamentalShapes;
 
@@ -1237,8 +1237,8 @@ const reifyBox = (geometry) => {
     const front = corner2[Y$6];
     const back = corner1[Y$6];
 
-    const bottom = corner2[Z$6];
-    const top = corner1[Z$6];
+    const bottom = corner2[Z$5];
+    const top = corner1[Z$5];
 
     if (top === bottom) {
       if (left === right) {
@@ -3988,7 +3988,7 @@ const subtract = ([ax, ay, az], [bx, by, bz]) => [ax - bx, ay - by, az - bz];
 
 const X$4 = 0;
 const Y$4 = 1;
-const Z$5 = 2;
+const Z$4 = 2;
 
 // These are all absolute positions in the world.
 // at is where the object's origin should move to.
@@ -4002,21 +4002,21 @@ const orient = Shape.chainable(
       // Algorithm from threejs Matrix4
       let u = subtract(up, at);
       if (squaredLength(u) === 0) {
-        u[Z$5] = 1;
+        u[Z$4] = 1;
       }
       u = normalize(u);
       let z = subtract(to, at);
       if (squaredLength(z) === 0) {
-        z[Z$5] = 1;
+        z[Z$4] = 1;
       }
       z = normalize(z);
       let x = cross(u, z);
       if (squaredLength(x) === 0) {
         // u and z are parallel
-        if (Math.abs(u[Z$5]) === 1) {
+        if (Math.abs(u[Z$4]) === 1) {
           z[X$4] += 0.0001;
         } else {
-          z[Z$5] += 0.0001;
+          z[Z$4] += 0.0001;
         }
         z = normalize(z);
         x = cross(u, z);
@@ -4026,15 +4026,15 @@ const orient = Shape.chainable(
       const lookAt = [
         x[X$4],
         x[Y$4],
-        x[Z$5],
+        x[Z$4],
         0,
         y[X$4],
         y[Y$4],
-        y[Z$5],
+        y[Z$4],
         0,
         z[X$4],
         z[Y$4],
-        z[Z$5],
+        z[Z$4],
         0,
         0,
         0,
@@ -4441,7 +4441,7 @@ const scale = (amount, [x = 0, y = 0, z = 0]) => [
 
 const X$3 = 0;
 const Y$3 = 1;
-const Z$4 = 2;
+const Z$3 = 2;
 
 const size = Shape.chainable(
   (op = (size) => (shape) => size) =>
@@ -4462,7 +4462,7 @@ const size = Shape.chainable(
       const [min, max] = bounds;
       const length = max[X$3] - min[X$3];
       const width = max[Y$3] - min[Y$3];
-      const height = max[Z$4] - min[Z$4];
+      const height = max[Z$3] - min[Z$3];
       const center = scale(0.5, add(min, max));
       const radius = distance(center, max);
       return op({
@@ -4514,7 +4514,7 @@ Shape.registerMethod('smooth', smooth);
 
 const X$2 = 0;
 const Y$2 = 1;
-const Z$3 = 2;
+const Z$2 = 2;
 
 const sort = Shape.chainable((spec = 'z<y<x<') => (shape) => {
   let leafs = getLeafs(shape.toGeometry()).map((leaf) => {
@@ -4547,7 +4547,7 @@ const sort = Shape.chainable((spec = 'z<y<x<') => (shape) => {
         axis = Y$2;
         break;
       case 'z':
-        axis = Z$3;
+        axis = Z$2;
         break;
     }
     if (limit !== undefined) {
@@ -4619,9 +4619,13 @@ const tint = Shape.chainable(
 
 Shape.registerMethod('tint', tint);
 
-const to = Shape.chainable(
-  (selection) => (shape) => shape.by(origin()).by(shape.toShape(selection))
-);
+const to = Shape.chainable((...references) => (shape) => {
+  const arranged = [];
+  for (const reference of shape.toShapes(references)) {
+    arranged.push(shape.by(origin()).by(reference));
+  }
+  return Group(...arranged);
+});
 
 Shape.registerMethod('to', to);
 
@@ -4711,19 +4715,6 @@ const toolpath = Shape.chainable(
 
 Shape.registerMethod('toolpath', toolpath);
 
-const Z$2 = 2;
-
-const top = Shape.chainable(
-  () => (shape) =>
-    shape.size(
-      ({ max }) =>
-        (shape) =>
-          max[Z$2]
-    )
-);
-
-Shape.registerMethod('top', top);
-
 const twist = Shape.chainable(
   (turnsPerMm = 1) =>
     (shape) =>
@@ -4768,40 +4759,26 @@ const upperEnvelope = Shape.chainable(
 
 Shape.registerMethod('upperEnvelope', upperEnvelope);
 
-const markContent = (geometry) => {
-  if (geometry.type === 'group') {
-    return {
-      ...geometry,
-      content: geometry.content.map((child, nth) =>
-        tagGeometry(untagGeometry(child, ['groupChildId:*']), [
-          `groupChildId:${nth}`,
-        ])
-      ),
-    };
-  } else {
-    return geometry;
-  }
-};
-
-const applyModes = (options, modes) => {
+const applyModes = (shape, options, modes) => {
   if (modes.includes('wireframe')) {
-    options.wireframe = true;
+    shape = shape.tag('show:wireframe');
   }
   if (modes.includes('noWireframe')) {
-    options.wireframe = false;
+    shape = shape.tag('show:noWireframe');
   }
   if (modes.includes('skin')) {
-    options.skin = true;
+    shape = shape.tag('show:skin');
   }
   if (modes.includes('noSkin')) {
-    options.skin = false;
+    shape = shape.tag('show:noSkin');
   }
-  if (modes.includes('outline')) {
-    options.outline = true;
+  if (modes.includes('Outline')) {
+    shape = shape.tag('show:outline');
   }
   if (modes.includes('noOutline')) {
-    options.outline = false;
+    shape = shape.tag('show:noOutline');
   }
+  return shape;
 };
 
 // FIX: Avoid the extra read-write cycle.
@@ -4810,9 +4787,6 @@ const baseView =
   (shape) => {
     let {
       size,
-      skin = true,
-      outline = true,
-      wireframe = false,
       inline,
       width = 512,
       height = 512,
@@ -4829,9 +4803,7 @@ const baseView =
       console.log('No sourceLocation');
     }
     const { id, path } = sourceLocation;
-    for (const entry of ensurePages(
-      markContent(viewShape.toDisplayGeometry({ skin, outline, wireframe }))
-    )) {
+    for (const entry of ensurePages(viewShape.toDisplayGeometry())) {
       const geometry = tagGeometry(untagGeometry(entry, ['viewId:*']), [
         `viewId:${viewId}`,
       ]);
@@ -4866,13 +4838,13 @@ const topView = Shape.chainable((...args) => (shape) => {
       position: [0, 0, 100],
     },
   });
-  applyModes(options, modes);
-  return view(viewId, op, options)(shape);
+  shape = applyModes(shape, options, modes);
+  return baseView(viewId, op, options)(shape);
 });
 
 Shape.registerMethod('topView', topView);
 
-const gridView = Shape.chainable((...args) => {
+const gridView = Shape.chainable((...args) => (shape) => {
   const {
     value: viewId,
     func: op = (x) => x,
@@ -4889,8 +4861,8 @@ const gridView = Shape.chainable((...args) => {
       position: [0, 0, 100],
     },
   });
-  applyModes(options, modes);
-  return (shape) => view(viewId, op, options)(shape);
+  shape = applyModes(shape, options, modes);
+  return baseView(viewId, op, options)(shape);
 });
 
 Shape.registerMethod('gridView', gridView);
@@ -4912,13 +4884,13 @@ const frontView = Shape.chainable((...args) => (shape) => {
       position: [0, -100, 0],
     },
   });
-  applyModes(options, modes);
-  return (shape) => view(viewId, op, options)(shape);
+  shape = applyModes(shape, options, modes);
+  return baseView(viewId, op, options)(shape);
 });
 
 Shape.registerMethod('frontView', frontView);
 
-Shape.chainable((...args) => (shape) => {
+const sideView = Shape.chainable((...args) => (shape) => {
   const {
     value: viewId,
     func: op = (x) => x,
@@ -4935,11 +4907,11 @@ Shape.chainable((...args) => (shape) => {
       position: [100, 0, 0],
     },
   });
-  applyModes(options, modes);
-  return view(viewId, op, options)(shape);
+  shape = applyModes(shape, options, modes);
+  return baseView(viewId, op, options)(shape);
 });
 
-Shape.registerMethod('sideView');
+Shape.registerMethod('sideView', sideView);
 
 const view = Shape.chainable((...args) => (shape) => {
   const {
@@ -4948,6 +4920,19 @@ const view = Shape.chainable((...args) => (shape) => {
     object: options,
     strings: modes,
   } = Shape.destructure(args);
+  shape = applyModes(shape, options, modes);
+  if (modes.includes('grid')) {
+    options.style = 'grid';
+  }
+  if (modes.includes('none')) {
+    options.style = 'none';
+  }
+  if (modes.includes('side')) {
+    options.style = 'side';
+  }
+  if (modes.includes('top')) {
+    options.style = 'top';
+  }
   switch (options.style) {
     case 'grid':
       return shape.gridView(viewId, op, options, ...modes);
@@ -4958,7 +4943,6 @@ const view = Shape.chainable((...args) => (shape) => {
     case 'top':
       return shape.topView(viewId, op, options, ...modes);
     default:
-      applyModes(options, modes);
       return baseView(viewId, op, options)(shape);
   }
 });
@@ -4971,12 +4955,6 @@ const voidFn = Shape.chainable(
 );
 
 Shape.registerMethod('void', voidFn);
-
-const voidIn = Shape.chainable(
-  (other) => (shape) => Shape.toShape(other, shape).fitTo(shape.void())
-);
-
-Shape.registerMethod('voidIn', voidIn);
 
 const volume = Shape.chainable(
   (op = (value) => (shape) => value) =>
@@ -5813,4 +5791,4 @@ const Wave = (...args) => {
 
 Shape.prototype.Wave = Shape.shapeMethod(Wave);
 
-export { Arc, ArcX, ArcY, ArcZ, Assembly, Box, Cached, ChainHull, Clip, Curve, Edge, Edges, Empty, Face, GrblConstantLaser, GrblDynamicLaser, GrblPlotter, GrblSpindle, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Join, Line, Link, List, Loft, Loop, Note, Octagon, Orb, Page, Pentagon, Plan, Point, Points, Polygon, Polyhedron, RX, RY, RZ, Ref, Segments, Seq, Shape, Spiral, SurfaceMesh, Triangle, Voxels, Wave, Wrap, X$8 as X, XY, XZ, Y$8 as Y, YZ, Z$8 as Z, absolute, abstract, addTo, align, and, area, as, asPart, at, bb, bend, billOfMaterials, by, center, chainHull, clean, clip, clipFrom, color, cut, cutFrom, cutOut, defRgbColor, defThreejsMaterial, defTool, define, deform, demesh, destructure, disjoint, drop, e, each, eachEdge, eachPoint, edges, edit, ensurePages, ex, extrudeAlong, extrudeX, extrudeY, extrudeZ, ey, ez, faces, fill, fit, fitTo, fix, flat, fuse, g, get, getNot, ghost, gn, grow, hull, image, inFn, inset, involute, join, link, list, loadGeometry, loft, log, loop, lowerEnvelope, m, mask, masking, material, md, move, moveAlong, n, noOp, noVoid, normal, note, nth, o, ofPlan, offset, on, op, orient, origin, outline, overlay, pack, points$1 as points, ref, reify, remesh, rotateX, rotateY, rotateZ, rx, ry, rz, saveGeometry, scale$1 as scale, scaleToFit, scaleX, scaleY, scaleZ, seam, section, sectionProfile, separate, seq, serialize, shadow, simplify, size, sketch, smooth, sort, sx, sy, sz, table, tag, tags, tint, to, tool, toolpath, top, twist, untag, upperEnvelope, view, voidFn, voidIn, volume, voxels, wrap, x, xyz, y, z };
+export { Arc, ArcX, ArcY, ArcZ, Assembly, Box, Cached, ChainHull, Clip, Curve, Edge, Edges, Empty, Face, GrblConstantLaser, GrblDynamicLaser, GrblPlotter, GrblSpindle, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Join, Line, Link, List, Loft, Loop, Note, Octagon, Orb, Page, Pentagon, Plan, Point, Points, Polygon, Polyhedron, RX, RY, RZ, Ref, Segments, Seq, Shape, Spiral, SurfaceMesh, Triangle, Voxels, Wave, Wrap, X$8 as X, XY, XZ, Y$8 as Y, YZ, Z$7 as Z, absolute, abstract, addTo, align, and, area, as, asPart, at, bb, bend, billOfMaterials, by, center, chainHull, clean, clip, clipFrom, color, cut, cutFrom, cutOut, defRgbColor, defThreejsMaterial, defTool, define, deform, demesh, destructure, disjoint, drop, e, each, eachEdge, eachPoint, edges, edit, ensurePages, ex, extrudeAlong, extrudeX, extrudeY, extrudeZ, ey, ez, faces, fill, fit, fitTo, fix, flat, fuse, g, get, getNot, ghost, gn, grow, hull, image, inFn, inset, involute, join, link, list, loadGeometry, loft, log, loop, lowerEnvelope, m, mask, masking, material, md, move, moveAlong, n, noOp, noVoid, normal, note, nth, o, ofPlan, offset, on, op, orient, origin, outline, overlay, pack, points$1 as points, ref, reify, remesh, rotateX, rotateY, rotateZ, rx, ry, rz, saveGeometry, scale$1 as scale, scaleToFit, scaleX, scaleY, scaleZ, seam, section, sectionProfile, separate, seq, serialize, shadow, simplify, size, sketch, smooth, sort, sx, sy, sz, table, tag, tags, tint, to, tool, toolpath, twist, untag, upperEnvelope, view, voidFn, volume, voxels, wrap, x, xyz, y, z };

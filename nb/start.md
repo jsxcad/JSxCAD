@@ -6,10 +6,10 @@ Press Control-E to cycle between editing and viewing a notebook.
 
 ## Links
 
-1. [Documentation](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/documentation/index.nb)
-1. [API](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/index.nb)
-1. [Regression](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/regression/regression.nb)
-1. [Projects](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/projects/index.nb)
+1. [Documentation](../nb/documentation/index.md)
+1. [API](../nb/api/index.md)
+1. [Regression](../nb/regression/regression.md)
+1. [Projects](../nb/projects/index.md)
 
 ## Introduction
 
@@ -36,12 +36,12 @@ Assembly(
   .scale(3)
   .ry(0 / 32)
   .clean()
-  .topView(1)
+  .view(1, 'top')
   .each(to(XY()))
   .pack()
   .y(-45)
   .by(align('xy'))
-  .topView(2);
+  .view(2, 'top');
 ```
 
 ![Image](start.md.0.png)

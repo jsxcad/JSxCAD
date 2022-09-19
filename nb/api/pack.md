@@ -17,7 +17,7 @@ These pages may be packed as items, or downloaded as a series.
 
 The packaged page is an item, accessing the content will require using in().
 
-See: [in](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/in.nb)
+See: [in](../../nb/api/in.md)
 
 ```JavaScript
 Seq({ upto: 10 }, Box, Group)

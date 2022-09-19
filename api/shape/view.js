@@ -11,40 +11,26 @@ import { ensurePages } from './Page.js';
 import { tagGeometry } from './tag.js';
 import { untagGeometry } from './untag.js';
 
-const markContent = (geometry) => {
-  if (geometry.type === 'group') {
-    return {
-      ...geometry,
-      content: geometry.content.map((child, nth) =>
-        tagGeometry(untagGeometry(child, ['groupChildId:*']), [
-          `groupChildId:${nth}`,
-        ])
-      ),
-    };
-  } else {
-    return geometry;
-  }
-};
-
-const applyModes = (options, modes) => {
+const applyModes = (shape, options, modes) => {
   if (modes.includes('wireframe')) {
-    options.wireframe = true;
+    shape = shape.tag('show:wireframe');
   }
   if (modes.includes('noWireframe')) {
-    options.wireframe = false;
+    shape = shape.tag('show:noWireframe');
   }
   if (modes.includes('skin')) {
-    options.skin = true;
+    shape = shape.tag('show:skin');
   }
   if (modes.includes('noSkin')) {
-    options.skin = false;
+    shape = shape.tag('show:noSkin');
   }
-  if (modes.includes('outline')) {
-    options.outline = true;
+  if (modes.includes('Outline')) {
+    shape = shape.tag('show:outline');
   }
   if (modes.includes('noOutline')) {
-    options.outline = false;
+    shape = shape.tag('show:noOutline');
   }
+  return shape;
 };
 
 // FIX: Avoid the extra read-write cycle.
@@ -53,9 +39,6 @@ export const baseView =
   (shape) => {
     let {
       size,
-      skin = true,
-      outline = true,
-      wireframe = false,
       inline,
       width = 512,
       height = 512,
@@ -72,9 +55,7 @@ export const baseView =
       console.log('No sourceLocation');
     }
     const { id, path } = sourceLocation;
-    for (const entry of ensurePages(
-      markContent(viewShape.toDisplayGeometry({ skin, outline, wireframe }))
-    )) {
+    for (const entry of ensurePages(viewShape.toDisplayGeometry())) {
       const geometry = tagGeometry(untagGeometry(entry, ['viewId:*']), [
         `viewId:${viewId}`,
       ]);
@@ -109,13 +90,13 @@ export const topView = Shape.chainable((...args) => (shape) => {
       position: [0, 0, 100],
     },
   });
-  applyModes(options, modes);
-  return view(viewId, op, options)(shape);
+  shape = applyModes(shape, options, modes);
+  return baseView(viewId, op, options)(shape);
 });
 
 Shape.registerMethod('topView', topView);
 
-export const gridView = Shape.chainable((...args) => {
+export const gridView = Shape.chainable((...args) => (shape) => {
   const {
     value: viewId,
     func: op = (x) => x,
@@ -132,8 +113,8 @@ export const gridView = Shape.chainable((...args) => {
       position: [0, 0, 100],
     },
   });
-  applyModes(options, modes);
-  return (shape) => view(viewId, op, options)(shape);
+  shape = applyModes(shape, options, modes);
+  return baseView(viewId, op, options)(shape);
 });
 
 Shape.registerMethod('gridView', gridView);
@@ -155,8 +136,8 @@ export const frontView = Shape.chainable((...args) => (shape) => {
       position: [0, -100, 0],
     },
   });
-  applyModes(options, modes);
-  return (shape) => view(viewId, op, options)(shape);
+  shape = applyModes(shape, options, modes);
+  return baseView(viewId, op, options)(shape);
 });
 
 Shape.registerMethod('frontView', frontView);
@@ -178,11 +159,11 @@ export const sideView = Shape.chainable((...args) => (shape) => {
       position: [100, 0, 0],
     },
   });
-  applyModes(options, modes);
-  return view(viewId, op, options)(shape);
+  shape = applyModes(shape, options, modes);
+  return baseView(viewId, op, options)(shape);
 });
 
-Shape.registerMethod('sideView');
+Shape.registerMethod('sideView', sideView);
 
 export const view = Shape.chainable((...args) => (shape) => {
   const {
@@ -191,6 +172,19 @@ export const view = Shape.chainable((...args) => (shape) => {
     object: options,
     strings: modes,
   } = Shape.destructure(args);
+  shape = applyModes(shape, options, modes);
+  if (modes.includes('grid')) {
+    options.style = 'grid';
+  }
+  if (modes.includes('none')) {
+    options.style = 'none';
+  }
+  if (modes.includes('side')) {
+    options.style = 'side';
+  }
+  if (modes.includes('top')) {
+    options.style = 'top';
+  }
   switch (options.style) {
     case 'grid':
       return shape.gridView(viewId, op, options, ...modes);
@@ -201,7 +195,6 @@ export const view = Shape.chainable((...args) => (shape) => {
     case 'top':
       return shape.topView(viewId, op, options, ...modes);
     default:
-      applyModes(options, modes);
       return baseView(viewId, op, options)(shape);
   }
 });

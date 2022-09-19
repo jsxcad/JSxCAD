@@ -6,7 +6,7 @@ Parameter|Default|Type
 Extrudes the surface along its normal by the extents provided.
 
 
-See [extrudeAlong](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/extrudeAlong.nb)
+See [extrudeAlong](../../nb/api/extrudeAlong.md)
 
 ```JavaScript
 Box(10)

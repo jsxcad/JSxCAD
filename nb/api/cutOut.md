@@ -1,4 +1,4 @@
-### shape.cutOut()
+### cutOut()
 Parameter|Default|Type
 ---|---|---
 |other|self|Shape: The shape to cut and clip against
@@ -11,7 +11,7 @@ Parameter|Default|Type
 
 Cut and clips shape by other, passing through the mode flags.
 
-See: [clip](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/cut.nb), [cut](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/cut.nb).
+See: [clip](../../nb/api/cut.nb), [cut](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/cut.md).
 
 ```JavaScript
 Box(10)

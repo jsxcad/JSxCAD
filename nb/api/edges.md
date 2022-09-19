@@ -1,4 +1,4 @@
-### shape.edges()
+### edges()
 Parameter|Default|Type
 ---|---|---
 edgeOp|edges => edges|Function to transform edges.
@@ -7,7 +7,7 @@ groupOp|Group|Function to group transformed edges.
 
 Extracts edges into a collection of unoriented segments.
 
-See: [eachEdge](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/eachEdge.nb)
+See: [eachEdge](../../nb/api/eachEdge.md)
 
 ```JavaScript
 Box(5, 5, 5).edges().view().md('Box(5, 5, 5).edges()');

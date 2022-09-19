@@ -1,5 +1,8 @@
 md`
-# shape.align(axes = 'xyz')
+### align()
+Parameter|Default|Type
+---|---|---
+axes|'xyz'|The axis spec.
 
 This produces a reference point such that shape.by(point) will move shape to that alignment position.
 
@@ -11,9 +14,11 @@ const origin = Box(0.5, 0.5, 5)
   .color('yellow')
   .overlay();
 
-Box(10, 10, 1).by(align()).and(origin).view().md('align()');
+Box(10, 10, 1).view().note('Box(10, 10, 1)');
 
-Box(10, 10, 1).by(align('x>')).and(origin).view().md("align('x>')");
+Box(10, 10, 1).by(align()).and(origin).view().md('by(align())');
+
+Box(10, 10, 1).by(align('x>')).and(origin).view().md("by(align('x>'))");
 
 Box(10, 10, 1).by(align('x<')).and(origin).view().md("align('x<')");
 Box(10, 10, 1).by(align('x')).and(origin).view().md("align('x')");

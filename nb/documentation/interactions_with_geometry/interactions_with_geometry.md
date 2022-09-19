@@ -249,9 +249,7 @@ const aRectangle = Box(5, 5, 15).view();
 ![Image](interactions_with_geometry.md.18.png)
 
 ```JavaScript
-aRectangle
-  .remesh({ method: 'edgeLength', lengths: [4, 2] })
-  .view(undefined, { wireframe: true });
+aRectangle.remesh({ method: 'edgeLength', lengths: [4, 2] }).view('wireframe');
 ```
 
 ![Image](interactions_with_geometry.md.19.png)

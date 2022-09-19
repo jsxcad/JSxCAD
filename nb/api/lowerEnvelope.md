@@ -6,7 +6,7 @@ The envelope is monotonic - there is no vertical convexity.
 
 The envelope is safe for vertical extrusion.
 
-See: [upperEnvelope](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/upperEnvelope.nb)
+See: [upperEnvelope](../../nb/api/upperEnvelope.md)
 
 ```JavaScript
 Orb(5).lowerEnvelope().view().note('The lower envelope of a rough sphere.');

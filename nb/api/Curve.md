@@ -1,4 +1,10 @@
-# Curve(start, c1, c2, end)
+### Curve()
+Parameter|Default|Type
+---|---|---
+start||Coordinate of the start.
+c1||Coordinate of the first control point.
+c2||Coordinate of the second control point.
+end||Coordinate of the third control point.
 
 Produces a curve from start to end with two control points.
 
@@ -9,20 +15,16 @@ _Todo: Check zag correctness._
 ```JavaScript
 Curve([0, 0], [0, 1], [3, 1], [3, 2])
   .view(1)
-  .md('Curve([0, 0], [0, 1], [3, 1], [3, 2])');
+  .note('Curve([0, 0], [0, 1], [3, 1], [3, 2])')
+  .hasZag(0.1)
+  .view(2)
+  .note('hasZag(0.1) increases the resolution.');
 ```
 
 ![Image](Curve.md.0.png)
 
 Curve([0, 0], [0, 1], [3, 1], [3, 2])
 
-```JavaScript
-Curve(Point(0, 0), [0, 1], [3, 1], Point(3, 2))
-  .hasZag(0.1)
-  .view(4)
-  .md('Curve(Point(0, 0), [0, 1], [3, 1], Point(3, 2)).hasZag(0.1)');
-```
-
 ![Image](Curve.md.1.png)
 
-Curve(Point(0, 0), [0, 1], [3, 1], Point(3, 2)).hasZag(0.1)
+hasZag(0.1) increases the resolution.

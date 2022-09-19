@@ -437,7 +437,7 @@ export const buildMeshes = async ({
       );
       applyBoxUV(bufferGeometry);
 
-      if (tags.includes('show:skin')) {
+      if (!tags.includes('show:noSkin')) {
         const material = await buildMeshMaterial(definitions, tags);
         mesh = new Mesh(bufferGeometry, material);
         mesh.castShadow = true;
@@ -462,7 +462,7 @@ export const buildMeshes = async ({
         const material = new LineBasicMaterial({ color: 0x000000 });
         const outline = new LineSegments(edges, material);
         outline.userData.isOutline = true;
-        outline.userData.hasShowOutline = tags.includes('show:outline');
+        outline.userData.hasShowOutline = !tags.includes('show:noOutline');
         outline.visible = outline.userData.hasShowOutline;
         if (tags.includes('type:ghost')) {
           mesh.userData.tangible = false;
@@ -517,7 +517,7 @@ export const buildMeshes = async ({
           shape.holes.push(new Path(holePoints));
         }
         const shapeGeometry = new ShapeGeometry(shape);
-        if (tags.includes('show:skin')) {
+        if (!tags.includes('show:noSkin')) {
           const material = await buildMeshMaterial(definitions, tags);
           mesh = new Mesh(shapeGeometry, material);
           mesh.castShadow = true;
@@ -545,7 +545,7 @@ export const buildMeshes = async ({
           });
           const outline = new LineSegments(edges, material);
           outline.userData.isOutline = true;
-          outline.userData.hasShowOutline = tags.includes('show:outline');
+          outline.userData.hasShowOutline = !tags.includes('show:noOutline');
           outline.visible = outline.userData.hasShowOutline;
           if (tags.includes('type:ghost')) {
             mesh.userData.tangible = false;

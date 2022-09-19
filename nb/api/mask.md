@@ -9,7 +9,7 @@ When the result is cut away from something, other will be removed, and shape wil
 
 This allows for things like threaded bolts with cylindrical hole fittings.
 
-See: [masking](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/masking.nb)
+See: [masking](../../nb/api/masking.md)
 
 ```JavaScript
 Arc(4)

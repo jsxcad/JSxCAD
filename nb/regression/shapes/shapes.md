@@ -122,9 +122,7 @@ Line(5, -1).rz(45).gridView().md(`Line(5, -1)`);
 Line(5, -1)
 
 ```JavaScript
-Implicit(torusFn, 2)
-  .view({ withGrid: false })
-  .md('Implicit(torusFn, 2');
+Implicit(torusFn, 2).view({ withGrid: false }).md('Implicit(torusFn, 2');
 ```
 
 ![Image](shapes.md.10.png)
@@ -383,10 +381,7 @@ Group(Box(1), Box(1).rx(1 / 4))
 
 ```JavaScript
 Orb(10)
-  .op(
-    lowerEnvelope().ez(-1).z(-5),
-    upperEnvelope().ez(1).z(5)
-  )
+  .op(lowerEnvelope().ez(-1).z(-5), upperEnvelope().ez(1).z(5))
   .by(align('z>'))
   .view(1);
 ```

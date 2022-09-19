@@ -4,7 +4,7 @@ Parameter|Default|Type
 |direction|_required_|Reference shape.
 |...distances||Distances to move in mm.
 
-See: [m](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/m.nb)
+See: [m](../../nb/api/m.md)
 
 ```JavaScript
 Box()

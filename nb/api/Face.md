@@ -1,4 +1,4 @@
-### Face
+### Face()
 Parameter|Default|Type
 ---|---|---
 |...coordinates||List coordinates to turn into a face.

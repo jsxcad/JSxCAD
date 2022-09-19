@@ -4,7 +4,7 @@ Sets the color of all leaf geometry in shape to the named color, replacing exist
 
 The names may be textual, e.g, 'red', or numeric, e.g., '#fafafe'.
 
-See: [tint](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/tint.nb)
+See: [tint](../../nb/api/tint.md)
 
 ```JavaScript
 Group(

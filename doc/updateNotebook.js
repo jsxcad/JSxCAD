@@ -104,7 +104,7 @@ const writeMarkdown = async (
   const markdown = output
     .join('\n')
     .replace(
-      /#JSxCAD@https:\/\/gitcdn.link\/cdn\/jsxcad\/JSxCAD\/master\/(.*).nb/g,
+      /#https:\/\/raw.githubusercontent.com\/jsxcad\/JSxCAD\/master\/(.*).nb/g,
       (_, modulePath) => `${root}/${modulePath}.md`
     );
 

@@ -9,7 +9,7 @@ The shapes are linked by straight segments.
 
 The polyline is not closed.
 
-See: [Loop](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/Loop.nb)
+See: [Loop](../../nb/api/Loop.md)
 
 _Note: We should rethink Arc and Box being implicitly filled._
 

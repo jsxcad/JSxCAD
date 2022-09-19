@@ -1,6 +1,6 @@
 # Lego compatible blocks
 
-[Examples](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/projects/lego/examples.nb)
+[Examples](../../../nb/projects/lego/examples.md)
 
 ```JavaScript
 export const SocketBoard = (length, width, height, { sockets = [] } = {}) => {

@@ -1,4 +1,4 @@
-### shape.drop()
+### drop()
 Parameter|Default|Type
 ---|---|---
 |selector|self|Shape: the shapes to drop.
@@ -7,7 +7,7 @@ Drop removes the selected leaf shapes from shape.
 
 get() and getNot() are common selectors.
 
-See: [get](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/get.nb)
+See: [get](../../nb/api/get.md)
 
 ```JavaScript
 Box(5, 5, 5)

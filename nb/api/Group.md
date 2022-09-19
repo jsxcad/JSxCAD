@@ -7,9 +7,9 @@ Collects the shapes in a group.
 
 A group is an ordered list of shapes, that do not otherwise interact.
 
-Elements of the group can be accessed via [n](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/n.nb)
+Elements of the group can be accessed via [n](../../nb/api/n.md)
 
-See: [n](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/n.nb)
+See: [n](../../nb/api/n.md)
 
 ```JavaScript
 Group(Box().color('red'), Triangle().outline(), Arc().points())

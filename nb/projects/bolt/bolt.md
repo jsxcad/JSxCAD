@@ -2,7 +2,7 @@
 
 This project allows you to design bolts and nuts.
 
-[See examples](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/projects/bolt/examples.nb)
+[See examples](../../../nb/projects/bolt/examples.md)
 
 ```JavaScript
 const Profile = (pitch = 1, depth = 4 / 3) =>

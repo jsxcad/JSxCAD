@@ -5,7 +5,7 @@ Parameter|Default|Type
 
 Add non-geometric edges where the selections intersect the shape.
 
-See: [demesh](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/demesh.nb), [remesh](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/remesh.nb).
+See: [demesh](../../nb/api/demesh.nb), [remesh](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/remesh.md).
 
 ```JavaScript
 Box(5, 5, 5)
