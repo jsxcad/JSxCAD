@@ -25,7 +25,7 @@ const makePosixPath = (string) => string.split(path.sep).join(path.posix.sep);
 const processArgs = (args) => {
   const isQuiet = args.includes('--quiet');
   const last = args[args.length - 1];
-  const baseDirectory = (last && !last.startsWith('--')) ? last : '.';
+  const baseDirectory = last && !last.startsWith('--') ? last : '.';
   return { isQuiet, baseDirectory };
 };
 
