@@ -7,7 +7,7 @@ other||The shape to clip
 'noVoid'|false|Does not clip void shapes.
 Clips other by shape, rather than shape by other.
 
-See: [clip](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/clip.nb)
+See: [clip](../../nb/api/clip.md)
 
 ```JavaScript
 Box(10)

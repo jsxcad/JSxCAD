@@ -4,7 +4,7 @@ Parameter|Default|Type
 
 This produces a pentagon that would be inscribed within an arc inscribed within a bounding box of the given size.
 
-See: [Arc](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/Arc.nb).
+See: [Arc](../../nb/api/Arc.md).
 
 ```JavaScript
 Box(10)

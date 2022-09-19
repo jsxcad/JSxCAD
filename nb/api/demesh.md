@@ -4,7 +4,7 @@ Removes facets that do not contribute to the geometrical shape and which are not
 
 Demeshing a shape can speed up subsequent operations, but some operations require a densely meshed shape.
 
-See: [remesh](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/remesh.nb)
+See: [remesh](../../nb/api/remesh.md)
 
 ```JavaScript
 Box(5, 5, 5)

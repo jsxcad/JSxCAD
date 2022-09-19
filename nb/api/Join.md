@@ -6,7 +6,7 @@ Parameter|Default|Type
 
 Join takes an empty geometry and extends it to cover the space of shapes.
 
-See: [join](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/join.nb)
+See: [join](../../nb/api/join.md)
 
 ```JavaScript
 Join(Box(1, 2, 3), Box(3, 2, 1))

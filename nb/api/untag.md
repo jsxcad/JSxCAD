@@ -7,7 +7,7 @@ This removes the tags specified.
 
 Unqualified tags are in the 'user' namespace.
 
-See: [tag](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/tag.nb).
+See: [tag](../../nb/api/tag.md).
 
 ```JavaScript
 Box()

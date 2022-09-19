@@ -9,7 +9,7 @@ Parameter|Default|Type
 
 Paginates the incoming shape for display or output.
 
-See: [pack](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/pack.nb), [Page](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/Page.nb).
+See: [pack](../../nb/api/pack.nb), [Page](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/Page.md).
 
 ```JavaScript
 Seq({ upto: 20 }, () => Box(), Group)

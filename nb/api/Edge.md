@@ -9,7 +9,7 @@ This produces an oriented segment from source coordinate to target coordinate.
 
 The segment has a consistent local orientation along z, facing x.
 
-See: [eachEdge](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/eachEdge.nb).
+See: [eachEdge](../../nb/api/eachEdge.md).
 
 ```JavaScript
 Box([0, 1], [0, 2], [0, 10])

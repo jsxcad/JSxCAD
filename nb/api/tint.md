@@ -7,7 +7,7 @@ Mixes the named color with all leaf geometry, merging with existing colors.
 
 The names may be textual, e.g, 'red', or numeric, e.g., '#fafafe'.
 
-See: [color](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/color.nb)
+See: [color](../../nb/api/color.md)
 
 ```JavaScript
 Box()

@@ -10,7 +10,7 @@ Parameter|Default|Type
 
 Builds a page for display or output.
 
-See: [pack](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/pack.nb), [page](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/page.nb).
+See: [pack](../../nb/api/pack.nb), [page](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/page.md).
 
 _Note: The implementation of Page needs cleaning up._
 

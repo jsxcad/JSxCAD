@@ -7,7 +7,7 @@ Bends a shape onto a circle of the given radius.
 
 The shape needs to have an appropriate meshing density.
 
-See: [remesh](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/remesh.nb)
+See: [remesh](../../nb/api/remesh.md)
 
 ```JavaScript
 Box(40, 1, 5)

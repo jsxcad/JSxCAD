@@ -7,7 +7,7 @@ Extracts leaf geometry by index.
 
 A shorthand operator n() is equivalent.
 
-See: [n](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/n.nb)
+See: [n](../../nb/api/n.md)
 
 ```JavaScript
 Line(0.1, 5)

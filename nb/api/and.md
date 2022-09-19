@@ -7,7 +7,7 @@ Produces a group of the incoming shape and the _others_.
 
 Equivalent to Group(shape, ...shapes).
 
-See: [Group](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/Group.nb)
+See: [Group](../../nb/api/Group.md)
 
 ```JavaScript
 Box(5)

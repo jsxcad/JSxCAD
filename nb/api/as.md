@@ -9,7 +9,7 @@ An item acts like a single piece of geometry but may contain a complex compositi
 
 It can be extracted using shape.get(id).
 
-See: [get](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/get.nb), [nth](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/nth.nb).
+See: [get](../../nb/api/get.nb), [nth](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/nth.md).
 
 ```JavaScript
 Box(10)

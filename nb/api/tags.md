@@ -6,7 +6,7 @@ namespace|'user'|String giving the namespace of the tags to extract.
 
 Collects the set of tags of the given namespace associated with leaf geometry in the incoming shape.
 
-See: [tag](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/tag.nb).
+See: [tag](../../nb/api/tag.md).
 
 ```JavaScript
 Box()

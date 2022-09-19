@@ -5,7 +5,7 @@ other||The shape to be extended.
 
 Extends the form of other to cover the form of shape.
 
-See: [add](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/add.nb).
+See: [add](../../nb/api/add.md).
 
 ```JavaScript
 Box(10)

@@ -5,7 +5,7 @@ turnsPerMm|1|Turns around z for each mm along z.
 
 This twists the shape by moving vertices. The shape may need remeshing or seams added.
 
-See: [remesh](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/remesh.nb), [seam](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/seam.nb)
+See: [remesh](../../nb/api/remesh.nb), [seam](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/seam.md)
 
 _Note: May produce self-intersection._
 

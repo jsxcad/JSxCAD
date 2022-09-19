@@ -3,7 +3,7 @@ Produces a reference point showing the transform required to move the object to 
 
 This can be visualized as a point.
 
-See [normal](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/normal.nb).
+See [normal](../../nb/api/normal.md).
 
 ```JavaScript
 Box(5)

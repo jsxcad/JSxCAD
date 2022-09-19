@@ -8,7 +8,7 @@ Parameter|Default|Type
 
 Limits the coverage of shape that covered by all of the other shapes.
 
-See: [clipFrom](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/clipFrom.nb)
+See: [clipFrom](../../nb/api/clipFrom.md)
 
 ```JavaScript
 Box(10)

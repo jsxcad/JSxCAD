@@ -5,7 +5,7 @@ segments|[]|Set of [source, target] segments.
 
 These segments do not have individual orientation.
 
-See: [Edge](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/Edge.nb).
+See: [Edge](../../nb/api/Edge.md).
 
 ```JavaScript
 Segments([

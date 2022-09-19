@@ -5,7 +5,7 @@ op|list => note()|Function to receive the bill of materials.
 
 Extracts a Bill of Materials from the parts in shape.
 
-See: [asPart](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/asPart.nb)
+See: [asPart](../../nb/api/asPart.md)
 
 ```JavaScript
 Box(3)

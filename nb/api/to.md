@@ -5,7 +5,7 @@ reference||The reference to move to.
 
 Moves shape so that its origin is aligned at the reference.
 
-See: [at](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/at.nb)
+See: [at](../../nb/api/at.md)
 
 ```JavaScript
 Box(1, 2, 3)

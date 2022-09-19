@@ -3,7 +3,7 @@ Parameter|Default|Type
 ---|---|---
 ...offsets||Number of mm along x to move the shape.
 
-See: [y](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/y.nb), [z](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/z.nb).
+See: [y](../../nb/api/y.nb), [z](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/z.md).
 
 _Note: Should support ranged dimensions._
 

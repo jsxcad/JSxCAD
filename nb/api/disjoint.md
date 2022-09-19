@@ -2,7 +2,7 @@
 
 Attempts to make the leaf geometry of a shape disjoint, so that only one shape covers one region of space.
 
-See: [fit](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/fit.nb), [fitTo](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/fitTo.nb)
+See: [fit](../../nb/api/fit.nb), [fitTo](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/fitTo.md)
 
 ```JavaScript
 Box(10, 10, [0, -5])

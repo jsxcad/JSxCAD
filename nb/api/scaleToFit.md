@@ -5,7 +5,7 @@ Parameter|Default|Type
 
 The shape is scaled to fit the bounding box dimensions.
 
-See: [scale](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/scale.nb).
+See: [scale](../../nb/api/scale.md).
 
 _Note: Should support ranged dimensions._
 

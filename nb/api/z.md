@@ -3,7 +3,7 @@ Parameter|Default|Type
 ---|---|---
 ...offsets||Number of mm along z to move the shape.
 
-See: [x](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/x.nb), [y](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/y.nb).
+See: [x](../../nb/api/x.nb), [y](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/y.md).
 
 ```JavaScript
 Box(5, 5, 1).z(-5, 2, 5).view().note('Box(5, 5, 1).z(-5, 2, 5)');

@@ -9,7 +9,7 @@ groupOp|Group|
 Each edge is independently oriented.
 
 ## See also
-[Edge](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/Edge.nb)
+[Edge](../../nb/api/Edge.md)
 
 ```JavaScript
 Box(5, 5, 5)

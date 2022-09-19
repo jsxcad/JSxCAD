@@ -4,7 +4,7 @@ The shape is marked as a void.
 
 It will be used in subtractive operations but not additive operations.
 
-See: [noVoid](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/noVoid.nb).
+See: [noVoid](../../nb/api/noVoid.md).
 
 ```JavaScript
 Box()

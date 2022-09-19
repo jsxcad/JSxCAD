@@ -7,7 +7,7 @@ Produces an arc z axis within the dimensions provided.
 
 Arc is equivanent to ArcZ.
 
-See: [ArcX](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/ArcX.nb), [ArcY](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/ArcY.nb), [ArcZ](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/ArcZ.nb).
+See: [ArcX](../../nb/api/ArcX.nb), [ArcY](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/ArcY.nb), [ArcZ](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/ArcZ.md).
 
 ```JavaScript
 Group(Arc(4), Arc(4, [3, 4]))

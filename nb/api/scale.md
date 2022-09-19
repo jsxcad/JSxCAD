@@ -5,7 +5,7 @@ The shape is scaled along those dimensions.
 
 Negative dimensions are supported.
 
-See: [scaleToFit](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/scaleToFit.nb), [sx](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/sx.nb), [sy](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/sy.nb), [sz](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/sz.nb).
+See: [scaleToFit](../../nb/api/scaleToFit.nb), [sx](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/sx.nb), [sy](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/sy.nb), [sz](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/sz.md).
 
 ```JavaScript
 Box(1, 1).scale(1, 1).topView().note('Box(1, 1).scale(1, 1)');

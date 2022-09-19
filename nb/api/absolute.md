@@ -2,9 +2,9 @@
 
 Makes the local orientation of a shape match its absolute orientation.
 
-This means that [flat](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/flat.nb) will have no effect.
+This means that [flat](../../nb/api/flat.md) will have no effect.
 
-See: [flat](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/flat.nb).
+See: [flat](../../nb/api/flat.md).
 
 ```JavaScript
 Box(10)

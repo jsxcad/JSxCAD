@@ -3,7 +3,7 @@ Parameter|Default|Type
 ---|---|---
 op|(volume) => (shape) => volume|Function receiving the computed volume.
 
-See: [area](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/area.nb).
+See: [area](../../nb/api/area.md).
 
 ```JavaScript
 Box(1, 1, 1)

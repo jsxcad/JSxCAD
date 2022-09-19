@@ -5,7 +5,7 @@ id||The id of the part to construct.
 
 Constructs an item as with shape.as(id), but labels it as a part for use with a shape.bom().
 
-See: [as](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/as.nb), [bom](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/bom.nb)
+See: [as](../../nb/api/as.nb), [bom](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/bom.md)
 
 ```JavaScript
 Box(3)

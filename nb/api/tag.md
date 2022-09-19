@@ -19,7 +19,7 @@ part|Part identifiers.
 color|Colors.
 material|Materials.
 
-See: [tags](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/tags.nb), [get](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/get.nb), [color](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/color.nb), [material](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/material.nb), [item](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/item.nb), [part](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/part.nb).
+See: [tags](../../nb/api/tags.nb), [get](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/get.nb), [color](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/color.nb), [material](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/material.nb), [item](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/item.nb), [part](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/part.md).
 
 ```JavaScript
 Box().tag('a', 'b', 'c').tags().note("Box().tag('a', 'b', 'c').tags()");

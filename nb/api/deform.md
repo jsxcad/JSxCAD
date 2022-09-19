@@ -14,7 +14,7 @@ Primitive shapes are created in their local orientation, but arbitrary shapes ca
 
 e.g., '''shape.deform(other.absolute().rx(1/4))'''
 
-See: [absolute](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/absolute.nb)
+See: [absolute](../../nb/api/absolute.md)
 
 ```JavaScript
 Box(10, 3, 3)
