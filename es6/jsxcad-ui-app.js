@@ -39774,7 +39774,12 @@ const defaultModelConfig = {
       type: 'tabset',
       weight: 100,
       enableDeleteWhenEmpty: false,
-      children: []
+      children: [{
+        id: 'Notebook/https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/start.nb',
+        type: 'tab',
+        name: 'start.nb',
+        component: 'Notebook'
+      }]
     }, {
       id: 'Clipboards',
       type: 'tabset',
