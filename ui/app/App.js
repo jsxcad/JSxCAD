@@ -1448,7 +1448,7 @@ class App extends React.Component {
                     <Form>
                       <Form.Group controlId="WorkspaceLoadPathId">
                         <Form.Control
-                          placeholder="URL or Path"
+                          placeholder="Path (extending Base Path)"
                           onChange={(e) =>
                             this.updateState({
                               WorkspaceLoadPath: e.target.value,
@@ -1469,7 +1469,7 @@ class App extends React.Component {
                         }}
                         disabled={!WorkspaceLoadPath}
                       >
-                        Add New Path
+                        Import or Open New
                       </Button>
                       <Form.Control
                         as="input"
@@ -1495,7 +1495,7 @@ class App extends React.Component {
                         }}
                         disabled={!WorkspaceLoadPath}
                       >
-                        Upload
+                        Upload from Computer
                       </Button>
                     </Form>
                   </Card.Text>
@@ -1638,7 +1638,7 @@ class App extends React.Component {
                       variant="primary"
                       onClick={this.Files.deleteCachedFiles}
                     >
-                      Delete Regeneable Files
+                      Delete Temporary Files
                     </Button>
                   </Card.Text>
                 </Card.Body>

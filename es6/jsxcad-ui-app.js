@@ -41391,7 +41391,7 @@ class App extends ReactDOM$2.Component {
             }, "Revert Selected Paths"))))), v$1(Card, null, v$1(Card.Body, null, v$1(Card.Title, null, "Import"), v$1(Card.Text, null, v$1(FormImpl, null, v$1(FormImpl.Group, {
               controlId: "WorkspaceLoadPathId"
             }, v$1(FormImpl.Control, {
-              placeholder: "URL or Path",
+              placeholder: "Path (extending Base Path)",
               onChange: e => this.updateState({
                 WorkspaceLoadPath: e.target.value
               }),
@@ -41406,7 +41406,7 @@ class App extends ReactDOM$2.Component {
                 this.Workspace.loadWorkingPath(`${WorkspaceLoadPrefix}${WorkspaceLoadPath}`);
               },
               disabled: !WorkspaceLoadPath
-            }, "Add New Path"), v$1(FormImpl.Control, {
+            }, "Import or Open New"), v$1(FormImpl.Control, {
               as: "input",
               type: "file",
               id: "WorkspaceUploadControl",
@@ -41426,7 +41426,7 @@ class App extends ReactDOM$2.Component {
                 document.getElementById('WorkspaceUploadControl').click();
               },
               disabled: !WorkspaceLoadPath
-            }, "Upload"))))), v$1(Card, null, v$1(Card.Body, null, v$1(Card.Title, null, "Reset Workspace"), v$1(Card.Text, null, v$1(Button, {
+            }, "Upload from Computer"))))), v$1(Card, null, v$1(Card.Body, null, v$1(Card.Title, null, "Reset Workspace"), v$1(Card.Text, null, v$1(Button, {
               variant: "primary",
               onClick: this.Workspace.reset
             }, "Reset")))));
@@ -41531,7 +41531,7 @@ class App extends ReactDOM$2.Component {
             return v$1("div", null, v$1(Card, null, v$1(Card.Body, null, v$1(Card.Title, null, "(Advanced Interface)"), v$1(Card.Text, null, "This provides lower level access to the internal filesystem."))), v$1(Card, null, v$1(Card.Body, null, v$1(Card.Title, null, "Clear Cached Files"), v$1(Card.Text, null, v$1(Button, {
               variant: "primary",
               onClick: this.Files.deleteCachedFiles
-            }, "Delete Regeneable Files"))), v$1(Card.Body, null, v$1(Card.Title, null, "Source Files"), v$1(Card.Text, null, v$1(Table, {
+            }, "Delete Temporary Files"))), v$1(Card.Body, null, v$1(Card.Title, null, "Source Files"), v$1(Card.Text, null, v$1(Table, {
               striped: true,
               border: true,
               hover: true
