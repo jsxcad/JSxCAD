@@ -9,6 +9,7 @@ import { animationFrame } from './schedule.js';
 export class JsViewerUi extends React.PureComponent {
   static get propTypes() {
     return {
+      path: PropTypes.string,
       data: PropTypes.string,
       advice: PropTypes.object,
       onChange: PropTypes.func,

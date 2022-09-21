@@ -1083,9 +1083,9 @@ function _objectWithoutPropertiesLoose(source, excluded) {
 var classnames = {exports: {}};
 
 /*!
-  Copyright (c) 2018 Jed Watson.
-  Licensed under the MIT License (MIT), see
-  http://jedwatson.github.io/classnames
+	Copyright (c) 2018 Jed Watson.
+	Licensed under the MIT License (MIT), see
+	http://jedwatson.github.io/classnames
 */
 
 (function (module) {
@@ -1114,14 +1114,15 @@ var classnames = {exports: {}};
 					}
 				}
 			} else if (argType === 'object') {
-				if (arg.toString === Object.prototype.toString) {
-					for (var key in arg) {
-						if (hasOwn.call(arg, key) && arg[key]) {
-							classes.push(key);
-						}
-					}
-				} else {
+				if (arg.toString !== Object.prototype.toString && !arg.toString.toString().includes('[native code]')) {
 					classes.push(arg.toString());
+					continue;
+				}
+
+				for (var key in arg) {
+					if (hasOwn.call(arg, key) && arg[key]) {
+						classes.push(key);
+					}
 				}
 			}
 		}
@@ -1229,7 +1230,7 @@ function createChainedFunction() {
   }, null);
 }
 
-var _excluded$n = ["as", "disabled", "onKeyDown"];
+var _excluded$p = ["as", "disabled", "onKeyDown"];
 
 function isTrivialHref(href) {
   return !href || href.trim() === '#';
@@ -1248,7 +1249,7 @@ var SafeAnchor = /*#__PURE__*/ReactDOM$2.forwardRef(function (_ref, ref) {
       Component = _ref$as === void 0 ? 'a' : _ref$as,
       disabled = _ref.disabled,
       onKeyDown = _ref.onKeyDown,
-      props = _objectWithoutPropertiesLoose(_ref, _excluded$n);
+      props = _objectWithoutPropertiesLoose(_ref, _excluded$p);
 
   var handleClick = function handleClick(event) {
     var href = props.href,
@@ -1297,8 +1298,8 @@ var SafeAnchor = /*#__PURE__*/ReactDOM$2.forwardRef(function (_ref, ref) {
 SafeAnchor.displayName = 'SafeAnchor';
 var SafeAnchor$1 = SafeAnchor;
 
-var _excluded$m = ["bsPrefix", "variant", "size", "active", "className", "block", "type", "as"];
-var defaultProps$8 = {
+var _excluded$o = ["bsPrefix", "variant", "size", "active", "className", "block", "type", "as"];
+var defaultProps$9 = {
   variant: 'primary',
   active: false,
   disabled: false
@@ -1312,7 +1313,7 @@ var Button = /*#__PURE__*/ReactDOM$2.forwardRef(function (_ref, ref) {
       block = _ref.block,
       type = _ref.type,
       as = _ref.as,
-      props = _objectWithoutPropertiesLoose(_ref, _excluded$m);
+      props = _objectWithoutPropertiesLoose(_ref, _excluded$o);
 
   var prefix = useBootstrapPrefix(bsPrefix, 'btn');
   var classes = classNames(className, prefix, active && 'active', variant && prefix + "-" + variant, block && prefix + "-block", size && prefix + "-" + size);
@@ -1341,7 +1342,34 @@ var Button = /*#__PURE__*/ReactDOM$2.forwardRef(function (_ref, ref) {
   }));
 });
 Button.displayName = 'Button';
-Button.defaultProps = defaultProps$8;
+Button.defaultProps = defaultProps$9;
+
+var _excluded$n = ["bsPrefix", "size", "toggle", "vertical", "className", "as"];
+var defaultProps$8 = {
+  vertical: false,
+  toggle: false,
+  role: 'group'
+};
+var ButtonGroup = /*#__PURE__*/ReactDOM$2.forwardRef(function (_ref, ref) {
+  var bsPrefix = _ref.bsPrefix,
+      size = _ref.size,
+      toggle = _ref.toggle,
+      vertical = _ref.vertical,
+      className = _ref.className,
+      _ref$as = _ref.as,
+      Component = _ref$as === void 0 ? 'div' : _ref$as,
+      rest = _objectWithoutPropertiesLoose(_ref, _excluded$n);
+
+  var prefix = useBootstrapPrefix(bsPrefix, 'btn-group');
+  var baseClass = prefix;
+  if (vertical) baseClass = prefix + "-vertical";
+  return /*#__PURE__*/ReactDOM$2.createElement(Component, _extends({}, rest, {
+    ref: ref,
+    className: classNames(className, baseClass, size && prefix + "-" + size, toggle && prefix + "-toggle")
+  }));
+});
+ButtonGroup.displayName = 'ButtonGroup';
+ButtonGroup.defaultProps = defaultProps$8;
 
 var rHyphen = /-(.)/g;
 function camelize(string) {
@@ -1350,7 +1378,7 @@ function camelize(string) {
   });
 }
 
-var _excluded$l = ["className", "bsPrefix", "as"];
+var _excluded$m = ["className", "bsPrefix", "as"];
 
 var pascalCase = function pascalCase(str) {
   return str[0].toUpperCase() + camelize(str).slice(1);
@@ -1369,7 +1397,7 @@ function createWithBsPrefix(prefix, _temp) {
         bsPrefix = _ref2.bsPrefix,
         _ref2$as = _ref2.as,
         Tag = _ref2$as === void 0 ? Component || 'div' : _ref2$as,
-        props = _objectWithoutPropertiesLoose(_ref2, _excluded$l);
+        props = _objectWithoutPropertiesLoose(_ref2, _excluded$m);
 
     var resolvedPrefix = useBootstrapPrefix(bsPrefix, prefix);
     return /*#__PURE__*/ReactDOM$2.createElement(Tag, _extends({
@@ -1395,7 +1423,7 @@ var context = /*#__PURE__*/ReactDOM$2.createContext(null);
 context.displayName = 'CardContext';
 var CardContext = context;
 
-var _excluded$k = ["bsPrefix", "className", "variant", "as"];
+var _excluded$l = ["bsPrefix", "className", "variant", "as"];
 var defaultProps$7 = {
   variant: null
 };
@@ -1406,7 +1434,7 @@ function (_ref, ref) {
       variant = _ref.variant,
       _ref$as = _ref.as,
       Component = _ref$as === void 0 ? 'img' : _ref$as,
-      props = _objectWithoutPropertiesLoose(_ref, _excluded$k);
+      props = _objectWithoutPropertiesLoose(_ref, _excluded$l);
 
   var prefix = useBootstrapPrefix(bsPrefix, 'card-img');
   return /*#__PURE__*/ReactDOM$2.createElement(Component, _extends({
@@ -1418,7 +1446,7 @@ CardImg.displayName = 'CardImg';
 CardImg.defaultProps = defaultProps$7;
 var CardImg$1 = CardImg;
 
-var _excluded$j = ["bsPrefix", "className", "bg", "text", "border", "body", "children", "as"];
+var _excluded$k = ["bsPrefix", "className", "bg", "text", "border", "body", "children", "as"];
 var DivStyledAsH5 = divWithClassName('h5');
 var DivStyledAsH6 = divWithClassName('h6');
 var CardBody = createWithBsPrefix('card-body');
@@ -1450,7 +1478,7 @@ var Card = /*#__PURE__*/ReactDOM$2.forwardRef(function (_ref, ref) {
       children = _ref.children,
       _ref$as = _ref.as,
       Component = _ref$as === void 0 ? 'div' : _ref$as,
-      props = _objectWithoutPropertiesLoose(_ref, _excluded$j);
+      props = _objectWithoutPropertiesLoose(_ref, _excluded$k);
 
   var prefix = useBootstrapPrefix(bsPrefix, 'card');
   var cardContext = d(function () {
@@ -1481,7 +1509,7 @@ Card.Header = CardHeader;
 Card.Footer = CardFooter;
 Card.ImgOverlay = CardImgOverlay;
 
-var _excluded$i = ["bsPrefix", "className", "as"];
+var _excluded$j = ["bsPrefix", "className", "as"];
 var DEVICE_SIZES$1 = ['xl', 'lg', 'md', 'sm', 'xs'];
 var Col = /*#__PURE__*/ReactDOM$2.forwardRef( // Need to define the default "as" during prop destructuring to be compatible with styled-components github.com/react-bootstrap/react-bootstrap/issues/3595
 function (_ref, ref) {
@@ -1489,7 +1517,7 @@ function (_ref, ref) {
       className = _ref.className,
       _ref$as = _ref.as,
       Component = _ref$as === void 0 ? 'div' : _ref$as,
-      props = _objectWithoutPropertiesLoose(_ref, _excluded$i);
+      props = _objectWithoutPropertiesLoose(_ref, _excluded$j);
 
   var prefix = useBootstrapPrefix(bsPrefix, 'col');
   var spans = [];
@@ -7990,7 +8018,7 @@ function all() {
 module.exports = exports['default'];
 }(all, all.exports));
 
-var _excluded$h = ["as", "className", "type", "tooltip"];
+var _excluded$i = ["as", "className", "type", "tooltip"];
 var propTypes = {
   /**
    * Specify whether the feedback is for valid or invalid fields
@@ -8012,7 +8040,7 @@ function (_ref, ref) {
       type = _ref$type === void 0 ? 'valid' : _ref$type,
       _ref$tooltip = _ref.tooltip,
       tooltip = _ref$tooltip === void 0 ? false : _ref$tooltip,
-      props = _objectWithoutPropertiesLoose(_ref, _excluded$h);
+      props = _objectWithoutPropertiesLoose(_ref, _excluded$i);
 
   return /*#__PURE__*/ReactDOM$2.createElement(Component, _extends({}, props, {
     ref: ref,
@@ -8028,7 +8056,7 @@ var FormContext = /*#__PURE__*/ReactDOM$2.createContext({
 });
 var FormContext$1 = FormContext;
 
-var _excluded$g = ["id", "bsPrefix", "bsCustomPrefix", "className", "type", "isValid", "isInvalid", "isStatic", "as"];
+var _excluded$h = ["id", "bsPrefix", "bsCustomPrefix", "className", "type", "isValid", "isInvalid", "isStatic", "as"];
 var FormCheckInput = /*#__PURE__*/ReactDOM$2.forwardRef(function (_ref, ref) {
   var id = _ref.id,
       bsPrefix = _ref.bsPrefix,
@@ -8043,7 +8071,7 @@ var FormCheckInput = /*#__PURE__*/ReactDOM$2.forwardRef(function (_ref, ref) {
       isStatic = _ref.isStatic,
       _ref$as = _ref.as,
       Component = _ref$as === void 0 ? 'input' : _ref$as,
-      props = _objectWithoutPropertiesLoose(_ref, _excluded$g);
+      props = _objectWithoutPropertiesLoose(_ref, _excluded$h);
 
   var _useContext = F$1(FormContext$1),
       controlId = _useContext.controlId,
@@ -8064,13 +8092,13 @@ var FormCheckInput = /*#__PURE__*/ReactDOM$2.forwardRef(function (_ref, ref) {
 FormCheckInput.displayName = 'FormCheckInput';
 var FormCheckInput$1 = FormCheckInput;
 
-var _excluded$f = ["bsPrefix", "bsCustomPrefix", "className", "htmlFor"];
+var _excluded$g = ["bsPrefix", "bsCustomPrefix", "className", "htmlFor"];
 var FormCheckLabel = /*#__PURE__*/ReactDOM$2.forwardRef(function (_ref, ref) {
   var bsPrefix = _ref.bsPrefix,
       bsCustomPrefix = _ref.bsCustomPrefix,
       className = _ref.className,
       htmlFor = _ref.htmlFor,
-      props = _objectWithoutPropertiesLoose(_ref, _excluded$f);
+      props = _objectWithoutPropertiesLoose(_ref, _excluded$g);
 
   var _useContext = F$1(FormContext$1),
       controlId = _useContext.controlId,
@@ -8090,7 +8118,7 @@ var FormCheckLabel = /*#__PURE__*/ReactDOM$2.forwardRef(function (_ref, ref) {
 FormCheckLabel.displayName = 'FormCheckLabel';
 var FormCheckLabel$1 = FormCheckLabel;
 
-var _excluded$e = ["id", "bsPrefix", "bsCustomPrefix", "inline", "disabled", "isValid", "isInvalid", "feedbackTooltip", "feedback", "className", "style", "title", "type", "label", "children", "custom", "as"];
+var _excluded$f = ["id", "bsPrefix", "bsCustomPrefix", "inline", "disabled", "isValid", "isInvalid", "feedbackTooltip", "feedback", "className", "style", "title", "type", "label", "children", "custom", "as"];
 var FormCheck = /*#__PURE__*/ReactDOM$2.forwardRef(function (_ref, ref) {
   var id = _ref.id,
       bsPrefix = _ref.bsPrefix,
@@ -8117,7 +8145,7 @@ var FormCheck = /*#__PURE__*/ReactDOM$2.forwardRef(function (_ref, ref) {
       propCustom = _ref.custom,
       _ref$as = _ref.as,
       as = _ref$as === void 0 ? 'input' : _ref$as,
-      props = _objectWithoutPropertiesLoose(_ref, _excluded$e);
+      props = _objectWithoutPropertiesLoose(_ref, _excluded$f);
 
   var custom = type === 'switch' ? true : propCustom;
 
@@ -8163,7 +8191,7 @@ FormCheck.Input = FormCheckInput$1;
 FormCheck.Label = FormCheckLabel$1;
 var FormCheck$1 = FormCheck;
 
-var _excluded$d = ["id", "bsPrefix", "bsCustomPrefix", "className", "isValid", "isInvalid", "lang", "as"];
+var _excluded$e = ["id", "bsPrefix", "bsCustomPrefix", "className", "isValid", "isInvalid", "lang", "as"];
 var FormFileInput = /*#__PURE__*/ReactDOM$2.forwardRef(function (_ref, ref) {
   var id = _ref.id,
       bsPrefix = _ref.bsPrefix,
@@ -8174,7 +8202,7 @@ var FormFileInput = /*#__PURE__*/ReactDOM$2.forwardRef(function (_ref, ref) {
       lang = _ref.lang,
       _ref$as = _ref.as,
       Component = _ref$as === void 0 ? 'input' : _ref$as,
-      props = _objectWithoutPropertiesLoose(_ref, _excluded$d);
+      props = _objectWithoutPropertiesLoose(_ref, _excluded$e);
 
   var _useContext = F$1(FormContext$1),
       controlId = _useContext.controlId,
@@ -8198,13 +8226,13 @@ var FormFileInput = /*#__PURE__*/ReactDOM$2.forwardRef(function (_ref, ref) {
 FormFileInput.displayName = 'FormFileInput';
 var FormFileInput$1 = FormFileInput;
 
-var _excluded$c = ["bsPrefix", "bsCustomPrefix", "className", "htmlFor"];
+var _excluded$d = ["bsPrefix", "bsCustomPrefix", "className", "htmlFor"];
 var FormFileLabel = /*#__PURE__*/ReactDOM$2.forwardRef(function (_ref, ref) {
   var bsPrefix = _ref.bsPrefix,
       bsCustomPrefix = _ref.bsCustomPrefix,
       className = _ref.className,
       htmlFor = _ref.htmlFor,
-      props = _objectWithoutPropertiesLoose(_ref, _excluded$c);
+      props = _objectWithoutPropertiesLoose(_ref, _excluded$d);
 
   var _useContext = F$1(FormContext$1),
       controlId = _useContext.controlId,
@@ -8225,7 +8253,7 @@ var FormFileLabel = /*#__PURE__*/ReactDOM$2.forwardRef(function (_ref, ref) {
 FormFileLabel.displayName = 'FormFileLabel';
 var FormFileLabel$1 = FormFileLabel;
 
-var _excluded$b = ["id", "bsPrefix", "bsCustomPrefix", "disabled", "isValid", "isInvalid", "feedbackTooltip", "feedback", "className", "style", "label", "children", "custom", "lang", "data-browse", "as", "inputAs"];
+var _excluded$c = ["id", "bsPrefix", "bsCustomPrefix", "disabled", "isValid", "isInvalid", "feedbackTooltip", "feedback", "className", "style", "label", "children", "custom", "lang", "data-browse", "as", "inputAs"];
 var FormFile = /*#__PURE__*/ReactDOM$2.forwardRef(function (_ref, ref) {
   var id = _ref.id,
       bsPrefix = _ref.bsPrefix,
@@ -8250,7 +8278,7 @@ var FormFile = /*#__PURE__*/ReactDOM$2.forwardRef(function (_ref, ref) {
       Component = _ref$as === void 0 ? 'div' : _ref$as,
       _ref$inputAs = _ref.inputAs,
       inputAs = _ref$inputAs === void 0 ? 'input' : _ref$inputAs,
-      props = _objectWithoutPropertiesLoose(_ref, _excluded$b);
+      props = _objectWithoutPropertiesLoose(_ref, _excluded$c);
 
   var _ref2 = custom ? [bsCustomPrefix, 'custom'] : [bsPrefix, 'form-file'],
       prefix = _ref2[0],
@@ -8346,7 +8374,7 @@ var warning = function() {};
 
 var warning_1 = warning;
 
-var _excluded$a = ["bsPrefix", "bsCustomPrefix", "type", "size", "htmlSize", "id", "className", "isValid", "isInvalid", "plaintext", "readOnly", "custom", "as"];
+var _excluded$b = ["bsPrefix", "bsCustomPrefix", "type", "size", "htmlSize", "id", "className", "isValid", "isInvalid", "plaintext", "readOnly", "custom", "as"];
 var FormControl = /*#__PURE__*/ReactDOM$2.forwardRef(function (_ref, ref) {
   var bsPrefix = _ref.bsPrefix,
       bsCustomPrefix = _ref.bsCustomPrefix,
@@ -8364,7 +8392,7 @@ var FormControl = /*#__PURE__*/ReactDOM$2.forwardRef(function (_ref, ref) {
       custom = _ref.custom,
       _ref$as = _ref.as,
       Component = _ref$as === void 0 ? 'input' : _ref$as,
-      props = _objectWithoutPropertiesLoose(_ref, _excluded$a);
+      props = _objectWithoutPropertiesLoose(_ref, _excluded$b);
 
   var _useContext = F$1(FormContext$1),
       controlId = _useContext.controlId;
@@ -8413,7 +8441,7 @@ var FormControl$1 = Object.assign(FormControl, {
   Feedback: Feedback$1
 });
 
-var _excluded$9 = ["bsPrefix", "className", "children", "controlId", "as"];
+var _excluded$a = ["bsPrefix", "className", "children", "controlId", "as"];
 var FormGroup = /*#__PURE__*/ReactDOM$2.forwardRef(function (_ref, ref) {
   var bsPrefix = _ref.bsPrefix,
       className = _ref.className,
@@ -8421,7 +8449,7 @@ var FormGroup = /*#__PURE__*/ReactDOM$2.forwardRef(function (_ref, ref) {
       controlId = _ref.controlId,
       _ref$as = _ref.as,
       Component = _ref$as === void 0 ? 'div' : _ref$as,
-      props = _objectWithoutPropertiesLoose(_ref, _excluded$9);
+      props = _objectWithoutPropertiesLoose(_ref, _excluded$a);
 
   bsPrefix = useBootstrapPrefix(bsPrefix, 'form-group');
   var context = d(function () {
@@ -8439,7 +8467,7 @@ var FormGroup = /*#__PURE__*/ReactDOM$2.forwardRef(function (_ref, ref) {
 FormGroup.displayName = 'FormGroup';
 var FormGroup$1 = FormGroup;
 
-var _excluded$8 = ["as", "bsPrefix", "column", "srOnly", "className", "htmlFor"];
+var _excluded$9 = ["as", "bsPrefix", "column", "srOnly", "className", "htmlFor"];
 var defaultProps$5 = {
   column: false,
   srOnly: false
@@ -8452,7 +8480,7 @@ var FormLabel = /*#__PURE__*/ReactDOM$2.forwardRef(function (_ref, ref) {
       srOnly = _ref.srOnly,
       className = _ref.className,
       htmlFor = _ref.htmlFor,
-      props = _objectWithoutPropertiesLoose(_ref, _excluded$8);
+      props = _objectWithoutPropertiesLoose(_ref, _excluded$9);
 
   var _useContext = F$1(FormContext$1),
       controlId = _useContext.controlId;
@@ -8483,7 +8511,7 @@ FormLabel.displayName = 'FormLabel';
 FormLabel.defaultProps = defaultProps$5;
 var FormLabel$1 = FormLabel;
 
-var _excluded$7 = ["bsPrefix", "className", "as", "muted"];
+var _excluded$8 = ["bsPrefix", "className", "as", "muted"];
 var FormText = /*#__PURE__*/ReactDOM$2.forwardRef( // Need to define the default "as" during prop destructuring to be compatible with styled-components github.com/react-bootstrap/react-bootstrap/issues/3595
 function (_ref, ref) {
   var bsPrefix = _ref.bsPrefix,
@@ -8491,7 +8519,7 @@ function (_ref, ref) {
       _ref$as = _ref.as,
       Component = _ref$as === void 0 ? 'small' : _ref$as,
       muted = _ref.muted,
-      props = _objectWithoutPropertiesLoose(_ref, _excluded$7);
+      props = _objectWithoutPropertiesLoose(_ref, _excluded$8);
 
   bsPrefix = useBootstrapPrefix(bsPrefix, 'form-text');
   return /*#__PURE__*/ReactDOM$2.createElement(Component, _extends({}, props, {
@@ -8513,7 +8541,7 @@ Switch.Input = FormCheck$1.Input;
 Switch.Label = FormCheck$1.Label;
 var Switch$1 = Switch;
 
-var _excluded$6 = ["bsPrefix", "inline", "className", "validated", "as"];
+var _excluded$7 = ["bsPrefix", "inline", "className", "validated", "as"];
 var FormRow = createWithBsPrefix('form-row');
 var defaultProps$4 = {
   inline: false
@@ -8525,7 +8553,7 @@ var FormImpl = /*#__PURE__*/ReactDOM$2.forwardRef(function (_ref, ref) {
       validated = _ref.validated,
       _ref$as = _ref.as,
       Component = _ref$as === void 0 ? 'form' : _ref$as,
-      props = _objectWithoutPropertiesLoose(_ref, _excluded$6);
+      props = _objectWithoutPropertiesLoose(_ref, _excluded$7);
 
   bsPrefix = useBootstrapPrefix(bsPrefix, 'form');
   return /*#__PURE__*/ReactDOM$2.createElement(Component, _extends({}, props, {
@@ -8543,6 +8571,56 @@ FormImpl.File = FormFile$1;
 FormImpl.Switch = Switch$1;
 FormImpl.Label = FormLabel$1;
 FormImpl.Text = FormText$1;
+
+var _excluded$6 = ["bsPrefix", "size", "hasValidation", "className", "as"];
+var InputGroupAppend = createWithBsPrefix('input-group-append');
+var InputGroupPrepend = createWithBsPrefix('input-group-prepend');
+var InputGroupText = createWithBsPrefix('input-group-text', {
+  Component: 'span'
+});
+
+var InputGroupCheckbox = function InputGroupCheckbox(props) {
+  return /*#__PURE__*/ReactDOM$2.createElement(InputGroupText, null, /*#__PURE__*/ReactDOM$2.createElement("input", _extends({
+    type: "checkbox"
+  }, props)));
+};
+
+var InputGroupRadio = function InputGroupRadio(props) {
+  return /*#__PURE__*/ReactDOM$2.createElement(InputGroupText, null, /*#__PURE__*/ReactDOM$2.createElement("input", _extends({
+    type: "radio"
+  }, props)));
+};
+
+/**
+ *
+ * @property {InputGroupAppend} Append
+ * @property {InputGroupPrepend} Prepend
+ * @property {InputGroupText} Text
+ * @property {InputGroupRadio} Radio
+ * @property {InputGroupCheckbox} Checkbox
+ */
+var InputGroup = /*#__PURE__*/ReactDOM$2.forwardRef(function (_ref, ref) {
+  var bsPrefix = _ref.bsPrefix,
+      size = _ref.size,
+      hasValidation = _ref.hasValidation,
+      className = _ref.className,
+      _ref$as = _ref.as,
+      Component = _ref$as === void 0 ? 'div' : _ref$as,
+      props = _objectWithoutPropertiesLoose(_ref, _excluded$6);
+
+  bsPrefix = useBootstrapPrefix(bsPrefix, 'input-group');
+  return /*#__PURE__*/ReactDOM$2.createElement(Component, _extends({
+    ref: ref
+  }, props, {
+    className: classNames(className, bsPrefix, size && bsPrefix + "-" + size, hasValidation && 'has-validation')
+  }));
+});
+InputGroup.displayName = 'InputGroup';
+InputGroup.Text = InputGroupText;
+InputGroup.Radio = InputGroupRadio;
+InputGroup.Checkbox = InputGroupCheckbox;
+InputGroup.Append = InputGroupAppend;
+InputGroup.Prepend = InputGroupPrepend;
 
 var lib = {};
 
@@ -9719,7 +9797,7 @@ var reportErrorIfPathIsNotConfigured = function () {
         reportErrorIfPathIsNotConfigured = function () { };
     }
 };
-exports.version = "1.10.0";
+exports.version = "1.10.1";
 
 });
 
@@ -38500,6 +38578,7 @@ aceEditorCompleter.setCompleters([snippetCompleter]);
 class JsEditorUi extends ReactDOM$2.PureComponent {
   static get propTypes() {
     return {
+      path: propTypes$1.exports.string,
       data: propTypes$1.exports.string,
       advice: propTypes$1.exports.object,
       onRun: propTypes$1.exports.func,
@@ -38554,8 +38633,19 @@ class JsEditorUi extends ReactDOM$2.PureComponent {
       const {
         value = ''
       } = token;
-      const [url = ''] = extractUrls(value);
-      this.props.onClickLink(url);
+      const [url = ''] = extractUrls(value) || [];
+
+      if (url) {
+        return this.props.onClickLink(url);
+      } // Match './xxx' and '../xxx'.
+
+
+      const match = value.match(/^'([.][.]?[/].*)'$/);
+
+      if (match) {
+        const uri = new URL(match[1], this.props.path);
+        return this.props.onClickLink(uri.toString());
+      }
     });
     editor.session.notebookElements = {};
     const {
@@ -38747,6 +38837,7 @@ class JsEditorUi extends ReactDOM$2.PureComponent {
 class JsViewerUi extends ReactDOM$2.PureComponent {
   static get propTypes() {
     return {
+      path: propTypes$1.exports.string,
       data: propTypes$1.exports.string,
       advice: propTypes$1.exports.object,
       onChange: propTypes$1.exports.func,
@@ -39773,7 +39864,12 @@ const defaultModelConfig = {
       type: 'tabset',
       weight: 100,
       enableDeleteWhenEmpty: false,
-      children: []
+      children: [{
+        id: 'Notebook/https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/start.nb',
+        type: 'tab',
+        name: 'start.nb',
+        component: 'Notebook'
+      }]
     }, {
       id: 'Clipboards',
       type: 'tabset',
@@ -39831,7 +39927,7 @@ class App extends ReactDOM$2.Component {
           return ask(identifier, options);
 
         case 'deleteFile':
-          return remove(options, path);
+          return remove(path, options);
 
         case 'log':
           return log(entry);
@@ -40545,7 +40641,6 @@ class App extends ReactDOM$2.Component {
     };
 
     this.Notebook.cycleMode = async path => {
-      // await this.Notebook.close(path);
       const {
         [`NotebookMode/${path}`]: mode
       } = this.state;
@@ -40565,7 +40660,7 @@ class App extends ReactDOM$2.Component {
       await this.updateState({
         [`NotebookMode/${path}`]: newMode
       });
-      this.Notebook.store(); // this.Notebook.clickLink(path);
+      this.Notebook.store();
     };
 
     this.Notebook.change = (path, data) => {
@@ -41123,6 +41218,18 @@ class App extends ReactDOM$2.Component {
       this.Notebook.run(path);
     };
 
+    this.Workspace.closeWorkingFile = async file => {
+      const path = file.substring('source/'.length);
+      await this.Notebook.close(path);
+    };
+
+    this.Workspace.revertWorkingFile = async file => {
+      await this.Workspace.closeWorkingFile(file);
+      await remove(file, {
+        workspace
+      });
+    };
+
     this.Workspace.store = async () => {
       if (this.Workspace.saving) {
         return;
@@ -41151,11 +41258,21 @@ class App extends ReactDOM$2.Component {
       }
     };
 
+    this.Workspace.reset = async () => {
+      const {
+        workspace
+      } = this.props;
+      await remove('config/Workspace', {
+        workspace
+      });
+      await this.Workspace.restore();
+    };
+
     this.Workspace.restore = async () => {
       // We restore WorkspaceOpenPaths via Model.restore.
       const {
         WorkspaceLoadPath,
-        WorkspaceLoadPrefix = 'https://github.com/jsxcad/JSxCAD/tree/master/nb/'
+        WorkspaceLoadPrefix = 'https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/'
       } = await read('config/Workspace', {
         workspace,
         otherwise: {}
@@ -41216,11 +41333,12 @@ class App extends ReactDOM$2.Component {
               WorkspaceLoadPrefix = ''
             } = this.state;
 
-            const isDisabled = file => WorkspaceOpenPaths.includes(file.substring(7));
+            const isOpen = file => WorkspaceOpenPaths.includes(file.substring(7));
 
-            const computeListItemVariant = file => isDisabled(file) ? 'secondary' : 'primary';
+            const computeListItemVariant = file => isOpen(file) ? 'primary' : 'secondary';
 
-            return v$1("div", null, v$1(Card, null, v$1(Card.Body, null, v$1(Card.Title, null, "Load Working Path"), v$1(Card.Text, null, v$1(FormImpl, null, v$1(Row, null, v$1(Col, null, v$1(FormImpl.Group, {
+            const prefix = `source/${WorkspaceLoadPrefix}`;
+            return v$1("div", null, v$1(Card, null, v$1(Card.Body, null, v$1(Card.Title, null, "Set Base Path"), v$1(Card.Text, null, v$1(FormImpl, null, v$1(FormImpl.Group, {
               controlId: "WorkspaceLoadPrefixId"
             }, v$1(FormImpl.Control, {
               placeholder: "Prefix",
@@ -41228,7 +41346,7 @@ class App extends ReactDOM$2.Component {
                 WorkspaceLoadPrefix: e.target.value
               }),
               value: WorkspaceLoadPrefix
-            }), v$1(FormImpl.Text, null, "Prefix"))), v$1(Col, null, v$1(Button, {
+            })))))), v$1(Card, null, v$1(Card.Body, null, v$1(Card.Title, null, "Export Paths to Folder"), v$1(Card.Text, null, v$1(FormImpl, null, v$1(Button, {
               onClick: () => {
                 const {
                   WorkspaceLoadPrefix
@@ -41236,17 +41354,49 @@ class App extends ReactDOM$2.Component {
                 this.Workspace.export(WorkspaceLoadPrefix);
               },
               disabled: !WorkspaceLoadPrefix
-            }, "Export"))), v$1(Row, null, v$1(Col, null, v$1(FormImpl.Group, {
+            }, "Export"))))), v$1(Card, null, v$1(Card.Body, null, v$1(Card.Title, null, "Working Paths"), v$1(Card.Text, null, v$1(FormImpl, null, v$1(ListGroup, null, WorkspaceFiles.filter(file => file.startsWith(prefix)).map((file, index) => v$1(ListGroup.Item, {
+              key: index
+            }, v$1(ButtonGroup, {
+              variant: computeListItemVariant(file),
+              key: index
+            }, v$1(InputGroup.Checkbox, {
+              key: index,
+              type: "checkbox",
+              id: `WorkspaceRevert/${file}`
+            }), v$1(Button, {
+              variant: computeListItemVariant(file),
+              key: index,
+              action: true,
+              active: false,
+              onClick: event => {
+                event.target.blur();
+
+                if (isOpen(file)) {
+                  this.Workspace.closeWorkingFile(file);
+                } else {
+                  this.Workspace.openWorkingFile(file);
+                }
+              }
+            }, file.substring(prefix.length)))))))), v$1(Card.Text, null, v$1(FormImpl, null, v$1(Button, {
+              onClick: async event => {
+                for (const input of document.querySelectorAll('input:checked')) {
+                  if (!input.id.startsWith('WorkspaceRevert/')) {
+                    continue;
+                  }
+
+                  const file = input.id.substring('WorkspaceRevert/'.length);
+                  this.Workspace.revertWorkingFile(file);
+                }
+              }
+            }, "Revert Selected Paths"))))), v$1(Card, null, v$1(Card.Body, null, v$1(Card.Title, null, "Import"), v$1(Card.Text, null, v$1(FormImpl, null, v$1(FormImpl.Group, {
               controlId: "WorkspaceLoadPathId"
             }, v$1(FormImpl.Control, {
-              placeholder: "URL or Path",
+              placeholder: "Path (extending Base Path)",
               onChange: e => this.updateState({
                 WorkspaceLoadPath: e.target.value
               }),
               value: WorkspaceLoadPath
-            }), v$1(FormImpl.Text, null, "Path"))), v$1(Col, {
-              xs: "auto"
-            }, v$1(Button, {
+            }), v$1(FormImpl.Text, null, "Path")), v$1(Button, {
               variant: "primary",
               onClick: () => {
                 const {
@@ -41256,7 +41406,7 @@ class App extends ReactDOM$2.Component {
                 this.Workspace.loadWorkingPath(`${WorkspaceLoadPrefix}${WorkspaceLoadPath}`);
               },
               disabled: !WorkspaceLoadPath
-            }, "Add"), v$1(FormImpl.Control, {
+            }, "Import or Open New"), v$1(FormImpl.Control, {
               as: "input",
               type: "file",
               id: "WorkspaceUploadControl",
@@ -41276,17 +41426,10 @@ class App extends ReactDOM$2.Component {
                 document.getElementById('WorkspaceUploadControl').click();
               },
               disabled: !WorkspaceLoadPath
-            }, "Upload"))))))), v$1(Card, null, v$1(Card.Body, null, v$1(Card.Title, null, "Open Working Path"), v$1(Card.Text, null, v$1(ListGroup, null, WorkspaceFiles.filter(file => file.startsWith('source/')).map((file, index) => v$1(ListGroup.Item, {
-              variant: computeListItemVariant(file),
-              key: index,
-              action: true,
-              disabled: isDisabled(file),
-              active: false,
-              onClick: event => {
-                event.target.blur();
-                this.Workspace.openWorkingFile(file);
-              }
-            }, file.substring(7))))))));
+            }, "Upload from Computer"))))), v$1(Card, null, v$1(Card.Body, null, v$1(Card.Title, null, "Reset Workspace"), v$1(Card.Text, null, v$1(Button, {
+              variant: "primary",
+              onClick: this.Workspace.reset
+            }, "Reset")))));
           }
 
         case 'Notebook':
@@ -41306,9 +41449,9 @@ class App extends ReactDOM$2.Component {
                   onSave: () => this.Notebook.save(path),
                   onChange: data => this.Notebook.change(path, data),
                   onClickLink: path => this.Notebook.clickLink(path),
+                  path: path,
                   data: NotebookText,
-                  advice: NotebookAdvice // onClose={() => this.Notebook.close(path)}
-
+                  advice: NotebookAdvice
                 });
 
               default:
@@ -41319,9 +41462,9 @@ class App extends ReactDOM$2.Component {
                   onSave: () => this.Notebook.save(path),
                   onChange: data => this.Notebook.change(path, data),
                   onClickLink: path => this.Notebook.clickLink(path),
+                  path: path,
                   data: NotebookText,
-                  advice: NotebookAdvice // onClose={() => this.Notebook.close(path)}
-
+                  advice: NotebookAdvice
                 });
             }
           }
@@ -41366,15 +41509,29 @@ class App extends ReactDOM$2.Component {
             });
           }
 
+        case 'Help':
+          {
+            return v$1("div", null, v$1("blockquote", null, "These links will open in a separate window.", v$1("ul", null, v$1("li", null, v$1("a", {
+              href: "https://github.com/jsxcad/JSxCAD/blob/master/nb/start.md",
+              target: "help"
+            }, "Getting Started")), v$1("li", null, v$1("a", {
+              href: "https://github.com/jsxcad/JSxCAD/blob/master/nb/api/index.md",
+              target: "help"
+            }, "API Documentation")), v$1("li", null, v$1("a", {
+              href: "https://github.com/jsxcad/JSxCAD/blob/master/nb/projects/index.md",
+              target: "help"
+            }, "Projects")))));
+          }
+
         case 'Files':
           {
             const {
               WorkspaceFiles = []
             } = this.state;
-            return v$1("div", null, v$1(Card, null, v$1(Card.Body, null, v$1(Card.Title, null, "Clear Cached Files"), v$1(Card.Text, null, v$1(Button, {
+            return v$1("div", null, v$1(Card, null, v$1(Card.Body, null, v$1(Card.Title, null, "(Advanced Interface)"), v$1(Card.Text, null, "This provides lower level access to the internal filesystem."))), v$1(Card, null, v$1(Card.Body, null, v$1(Card.Title, null, "Clear Cached Files"), v$1(Card.Text, null, v$1(Button, {
               variant: "primary",
               onClick: this.Files.deleteCachedFiles
-            }, "Delete Regeneable Files"))), v$1(Card.Body, null, v$1(Card.Title, null, "Source Files"), v$1(Card.Text, null, v$1(Table, {
+            }, "Delete Temporary Files"))), v$1(Card.Body, null, v$1(Card.Title, null, "Source Files"), v$1(Card.Text, null, v$1(Table, {
               striped: true,
               border: true,
               hover: true
