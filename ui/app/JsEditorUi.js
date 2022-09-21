@@ -62,6 +62,7 @@ aceEditorCompleter.setCompleters([snippetCompleter]);
 export class JsEditorUi extends React.PureComponent {
   static get propTypes() {
     return {
+      path: PropTypes.string,
       data: PropTypes.string,
       advice: PropTypes.object,
       onRun: PropTypes.func,
@@ -104,8 +105,16 @@ export class JsEditorUi extends React.PureComponent {
 
     editor.on('linkClick', ({ token }) => {
       const { value = '' } = token;
-      const [url = ''] = ExtractUrls(value);
-      this.props.onClickLink(url);
+      const [url = ''] = ExtractUrls(value) || [];
+      if (url) {
+        return this.props.onClickLink(url);
+      }
+      // Match './xxx' and '../xxx'.
+      const match = value.match(/^'([.][.]?[/].*)'$/);
+      if (match) {
+        const uri = new URL(match[1], this.props.path);
+        return this.props.onClickLink(uri.toString());
+      }
     });
 
     editor.session.notebookElements = {};

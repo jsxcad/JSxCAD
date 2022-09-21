@@ -27,10 +27,12 @@ import {
 import { getNotebookControlData, toDomElement } from '@jsxcad/ui-notebook';
 
 import Button from 'react-bootstrap/Button';
+import ButtonGroup from 'react-bootstrap/ButtonGroup';
 import Card from 'react-bootstrap/Card';
 import Col from 'react-bootstrap/Col';
 import FlexLayout from 'flexlayout-react';
 import Form from 'react-bootstrap/Form';
+import InputGroup from 'react-bootstrap/InputGroup';
 import JsEditorUi from './JsEditorUi.js';
 import JsViewerUi from './JsViewerUi.js';
 import ListGroup from 'react-bootstrap/ListGroup';
@@ -199,7 +201,7 @@ class App extends React.Component {
         case 'ask':
           return askSys(identifier, options);
         case 'deleteFile':
-          return remove(options, path);
+          return remove(path, options);
         case 'log':
           return log(entry);
         case 'notes':
@@ -769,7 +771,6 @@ class App extends React.Component {
     };
 
     this.Notebook.cycleMode = async (path) => {
-      // await this.Notebook.close(path);
       const { [`NotebookMode/${path}`]: mode } = this.state;
       let newMode;
       switch (mode) {
@@ -783,7 +784,6 @@ class App extends React.Component {
       }
       await this.updateState({ [`NotebookMode/${path}`]: newMode });
       this.Notebook.store();
-      // this.Notebook.clickLink(path);
     };
 
     this.Notebook.change = (path, data) => {
@@ -1248,6 +1248,16 @@ class App extends React.Component {
       this.Notebook.run(path);
     };
 
+    this.Workspace.closeWorkingFile = async (file) => {
+      const path = file.substring('source/'.length);
+      await this.Notebook.close(path);
+    };
+
+    this.Workspace.revertWorkingFile = async (file) => {
+      await this.Workspace.closeWorkingFile(file);
+      await remove(file, { workspace });
+    };
+
     this.Workspace.store = async () => {
       if (this.Workspace.saving) {
         return;
@@ -1268,11 +1278,17 @@ class App extends React.Component {
       }
     };
 
+    this.Workspace.reset = async () => {
+      const { workspace } = this.props;
+      await remove('config/Workspace', { workspace });
+      await this.Workspace.restore();
+    };
+
     this.Workspace.restore = async () => {
       // We restore WorkspaceOpenPaths via Model.restore.
       const {
         WorkspaceLoadPath,
-        WorkspaceLoadPrefix = 'https://github.com/jsxcad/JSxCAD/tree/master/nb/',
+        WorkspaceLoadPrefix = 'https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/',
       } = await read('config/Workspace', { workspace, otherwise: {} });
       await this.updateState({ WorkspaceLoadPath, WorkspaceLoadPrefix });
     };
@@ -1316,128 +1332,182 @@ class App extends React.Component {
             WorkspaceLoadPath = '',
             WorkspaceLoadPrefix = '',
           } = this.state;
-          const isDisabled = (file) =>
+          const isOpen = (file) =>
             WorkspaceOpenPaths.includes(file.substring(7));
           const computeListItemVariant = (file) =>
-            isDisabled(file) ? 'secondary' : 'primary';
+            isOpen(file) ? 'primary' : 'secondary';
+          const prefix = `source/${WorkspaceLoadPrefix}`;
           return (
             <div>
               <Card>
                 <Card.Body>
-                  <Card.Title>Load Working Path</Card.Title>
+                  <Card.Title>Set Base Path</Card.Title>
                   <Card.Text>
                     <Form>
-                      <Row>
-                        <Col>
-                          <Form.Group controlId="WorkspaceLoadPrefixId">
-                            <Form.Control
-                              placeholder="Prefix"
-                              onChange={(e) =>
-                                this.updateState({
-                                  WorkspaceLoadPrefix: e.target.value,
-                                })
-                              }
-                              value={WorkspaceLoadPrefix}
-                            />
-                            <Form.Text>Prefix</Form.Text>
-                          </Form.Group>
-                        </Col>
-                        <Col>
-                          <Button
-                            onClick={() => {
-                              const { WorkspaceLoadPrefix } = this.state;
-                              this.Workspace.export(WorkspaceLoadPrefix);
-                            }}
-                            disabled={!WorkspaceLoadPrefix}
-                          >
-                            Export
-                          </Button>
-                        </Col>
-                      </Row>
-                      <Row>
-                        <Col>
-                          <Form.Group controlId="WorkspaceLoadPathId">
-                            <Form.Control
-                              placeholder="URL or Path"
-                              onChange={(e) =>
-                                this.updateState({
-                                  WorkspaceLoadPath: e.target.value,
-                                })
-                              }
-                              value={WorkspaceLoadPath}
-                            />
-                            <Form.Text>Path</Form.Text>
-                          </Form.Group>
-                        </Col>
-                        <Col xs="auto">
-                          <Button
-                            variant="primary"
-                            onClick={() => {
-                              const { WorkspaceLoadPath, WorkspaceLoadPrefix } =
-                                this.state;
-                              this.Workspace.loadWorkingPath(
-                                `${WorkspaceLoadPrefix}${WorkspaceLoadPath}`
-                              );
-                            }}
-                            disabled={!WorkspaceLoadPath}
-                          >
-                            Add
-                          </Button>
-                          <Form.Control
-                            as="input"
-                            type="file"
-                            id="WorkspaceUploadControl"
-                            multiple={false}
-                            onChange={(e) => {
-                              const { WorkspaceLoadPath } = this.state;
-                              this.Workspace.uploadWorkingPath(
-                                `${WorkspaceLoadPrefix}${WorkspaceLoadPath}`,
-                                e
-                              );
-                            }}
-                            style={{ display: 'none' }}
-                          />
-                          &nbsp;
-                          <Button
-                            variant="primary"
-                            onClick={() => {
-                              document
-                                .getElementById('WorkspaceUploadControl')
-                                .click();
-                            }}
-                            disabled={!WorkspaceLoadPath}
-                          >
-                            Upload
-                          </Button>
-                        </Col>
-                      </Row>
+                      <Form.Group controlId="WorkspaceLoadPrefixId">
+                        <Form.Control
+                          placeholder="Prefix"
+                          onChange={(e) =>
+                            this.updateState({
+                              WorkspaceLoadPrefix: e.target.value,
+                            })
+                          }
+                          value={WorkspaceLoadPrefix}
+                        />
+                      </Form.Group>
                     </Form>
                   </Card.Text>
                 </Card.Body>
               </Card>
               <Card>
                 <Card.Body>
-                  <Card.Title>Open Working Path</Card.Title>
+                  <Card.Title>Export Paths to Folder</Card.Title>
                   <Card.Text>
-                    <ListGroup>
-                      {WorkspaceFiles.filter((file) =>
-                        file.startsWith('source/')
-                      ).map((file, index) => (
-                        <ListGroup.Item
-                          variant={computeListItemVariant(file)}
-                          key={index}
-                          action
-                          disabled={isDisabled(file)}
-                          active={false}
-                          onClick={(event) => {
-                            event.target.blur();
-                            this.Workspace.openWorkingFile(file);
-                          }}
-                        >
-                          {file.substring(7)}
-                        </ListGroup.Item>
-                      ))}
-                    </ListGroup>
+                    <Form>
+                      <Button
+                        onClick={() => {
+                          const { WorkspaceLoadPrefix } = this.state;
+                          this.Workspace.export(WorkspaceLoadPrefix);
+                        }}
+                        disabled={!WorkspaceLoadPrefix}
+                      >
+                        Export
+                      </Button>
+                    </Form>
+                  </Card.Text>
+                </Card.Body>
+              </Card>
+              <Card>
+                <Card.Body>
+                  <Card.Title>Working Paths</Card.Title>
+                  <Card.Text>
+                    <Form>
+                      <ListGroup>
+                        {WorkspaceFiles.filter((file) =>
+                          file.startsWith(prefix)
+                        ).map((file, index) => (
+                          <ListGroup.Item key={index}>
+                            <ButtonGroup
+                              variant={computeListItemVariant(file)}
+                              key={index}
+                            >
+                              <InputGroup.Checkbox
+                                key={index}
+                                type="checkbox"
+                                id={`WorkspaceRevert/${file}`}
+                              />
+                              <Button
+                                variant={computeListItemVariant(file)}
+                                key={index}
+                                action
+                                active={false}
+                                onClick={(event) => {
+                                  event.target.blur();
+                                  if (isOpen(file)) {
+                                    this.Workspace.closeWorkingFile(file);
+                                  } else {
+                                    this.Workspace.openWorkingFile(file);
+                                  }
+                                }}
+                              >
+                                {file.substring(prefix.length)}
+                              </Button>
+                            </ButtonGroup>
+                          </ListGroup.Item>
+                        ))}
+                      </ListGroup>
+                    </Form>
+                  </Card.Text>
+                  <Card.Text>
+                    <Form>
+                      <Button
+                        onClick={async (event) => {
+                          for (const input of document.querySelectorAll(
+                            'input:checked'
+                          )) {
+                            if (!input.id.startsWith('WorkspaceRevert/')) {
+                              continue;
+                            }
+                            const file = input.id.substring(
+                              'WorkspaceRevert/'.length
+                            );
+                            this.Workspace.revertWorkingFile(file);
+                          }
+                        }}
+                      >
+                        Revert Selected Paths
+                      </Button>
+                    </Form>
+                  </Card.Text>
+                </Card.Body>
+              </Card>
+              <Card>
+                <Card.Body>
+                  <Card.Title>Import</Card.Title>
+                  <Card.Text>
+                    <Form>
+                      <Form.Group controlId="WorkspaceLoadPathId">
+                        <Form.Control
+                          placeholder="URL or Path"
+                          onChange={(e) =>
+                            this.updateState({
+                              WorkspaceLoadPath: e.target.value,
+                            })
+                          }
+                          value={WorkspaceLoadPath}
+                        />
+                        <Form.Text>Path</Form.Text>
+                      </Form.Group>
+                      <Button
+                        variant="primary"
+                        onClick={() => {
+                          const { WorkspaceLoadPath, WorkspaceLoadPrefix } =
+                            this.state;
+                          this.Workspace.loadWorkingPath(
+                            `${WorkspaceLoadPrefix}${WorkspaceLoadPath}`
+                          );
+                        }}
+                        disabled={!WorkspaceLoadPath}
+                      >
+                        Add New Path
+                      </Button>
+                      <Form.Control
+                        as="input"
+                        type="file"
+                        id="WorkspaceUploadControl"
+                        multiple={false}
+                        onChange={(e) => {
+                          const { WorkspaceLoadPath } = this.state;
+                          this.Workspace.uploadWorkingPath(
+                            `${WorkspaceLoadPrefix}${WorkspaceLoadPath}`,
+                            e
+                          );
+                        }}
+                        style={{ display: 'none' }}
+                      />
+                      &nbsp;
+                      <Button
+                        variant="primary"
+                        onClick={() => {
+                          document
+                            .getElementById('WorkspaceUploadControl')
+                            .click();
+                        }}
+                        disabled={!WorkspaceLoadPath}
+                      >
+                        Upload
+                      </Button>
+                    </Form>
+                  </Card.Text>
+                </Card.Body>
+              </Card>
+              <Card>
+                <Card.Body>
+                  <Card.Title>Reset Workspace</Card.Title>
+                  <Card.Text>
+                    <Button variant="primary" onClick={this.Workspace.reset}>
+                      Reset
+                    </Button>
                   </Card.Text>
                 </Card.Body>
               </Card>
@@ -1460,9 +1530,9 @@ class App extends React.Component {
                   onSave={() => this.Notebook.save(path)}
                   onChange={(data) => this.Notebook.change(path, data)}
                   onClickLink={(path) => this.Notebook.clickLink(path)}
+                  path={path}
                   data={NotebookText}
                   advice={NotebookAdvice}
-                  // onClose={() => this.Notebook.close(path)}
                 />
               );
             default:
@@ -1474,9 +1544,9 @@ class App extends React.Component {
                   onSave={() => this.Notebook.save(path)}
                   onChange={(data) => this.Notebook.change(path, data)}
                   onClickLink={(path) => this.Notebook.clickLink(path)}
+                  path={path}
                   data={NotebookText}
                   advice={NotebookAdvice}
-                  // onClose={() => this.Notebook.close(path)}
                 />
               );
           }
@@ -1552,6 +1622,14 @@ class App extends React.Component {
           const { WorkspaceFiles = [] } = this.state;
           return (
             <div>
+              <Card>
+                <Card.Body>
+                  <Card.Title>(Advanced Interface)</Card.Title>
+                  <Card.Text>
+                    This provides lower level access to the internal filesystem.
+                  </Card.Text>
+                </Card.Body>
+              </Card>
               <Card>
                 <Card.Body>
                   <Card.Title>Clear Cached Files</Card.Title>
