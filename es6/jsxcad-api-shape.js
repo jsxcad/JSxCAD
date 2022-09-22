@@ -3495,9 +3495,9 @@ Shape.registerMethod('origin', origin);
 Shape.registerMethod('o', o);
 
 const fuse = Shape.chainable((...args) => (shape) => {
-  const { strings: modes } = destructure(args);
+  const { strings: modes, shapesAndFunctions: shapes } = destructure(args);
   return fromGeometry(
-    fuse$1(shape.toGeometry(), modes.includes('exact'))
+    fuse$1(Group(shape, ...shapes).toGeometry(), modes.includes('exact'))
   );
 });
 

@@ -5931,7 +5931,7 @@ int FaceEdges(Geometry* geometry, int count) {
         int face_target = geometry->add(GEOMETRY_POLYGONS_WITH_HOLES);
         geometry->plane(face_target) = geometry->plane(nth);
         geometry->pwh(face_target) = geometry->pwh(nth);
-        int target = geometry->add(GEOMETRY_EDGES);
+        int edge_target = geometry->add(GEOMETRY_EDGES);
         const Plane& plane = geometry->plane(nth);
         Vector normal = unitVector(plane.orthogonal_vector());
         for (const Polygon_with_holes_2& polygon : geometry->pwh(nth)) {
@@ -5940,7 +5940,7 @@ int FaceEdges(Geometry* geometry, int count) {
             Segment segment(plane.to_3d(s2->source()),
                             plane.to_3d(s2->target()));
             if (selections.empty() || inside_any(segment, selections)) {
-              geometry->addEdge(target,
+              geometry->addEdge(edge_target,
                                 Edge(segment, segment.source() + normal));
             }
           }
@@ -5950,12 +5950,14 @@ int FaceEdges(Geometry* geometry, int count) {
               Segment segment(plane.to_3d(s2->source()),
                               plane.to_3d(s2->target()));
               if (selections.empty() || inside_any(segment, selections)) {
-                geometry->addEdge(target,
+                geometry->addEdge(edge_target,
                                   Edge(segment, segment.source() + normal));
               }
             }
           }
         }
+        geometry->copyTransform(face_target, geometry->transform(nth));
+        geometry->copyTransform(edge_target, geometry->transform(nth));
         break;
       }
       case GEOMETRY_MESH: {
@@ -6047,7 +6049,6 @@ int FaceEdges(Geometry* geometry, int count) {
           int face_target = geometry->add(GEOMETRY_POLYGONS_WITH_HOLES);
           int edge_target = geometry->add(GEOMETRY_EDGES);
           const Plane& plane = unitPlane(facet_to_plane[Face_index(face_id)]);
-          const Plane xy_plane(0, 0, 1, 0);
           Transformation disorientation = disorient_plane_along_z(plane);
 
           Arrangement_2 arrangement;

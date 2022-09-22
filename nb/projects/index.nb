@@ -19,4 +19,5 @@ These example projects may be useful to see what can be done and to get started 
 * [Plots](#https://raw.githubusercontent.com/jsxcad/JSxCAD/${sha}/nb/projects/pentacular/plots/plots.nb)
 * [Plotter](#https://raw.githubusercontent.com/jsxcad/JSxCAD/${sha}/nb/projects/pentacular/plotter/plotter.nb)
 * [Saucer](#https://raw.githubusercontent.com/jsxcad/JSxCAD/${sha}/nb/projects/pentacular/saucer/saucer.nb)
+* [Terrarium](#https://raw.githubusercontent.com/jsxcad/JSxCAD/${sha}/nb/projects/pentacular/terrarium/terrarium.nb)
 `;

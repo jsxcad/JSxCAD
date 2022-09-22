@@ -18,3 +18,4 @@ These example projects may be useful to see what can be done and to get started 
 * [Plots](../../nb/projects/pentacular/plots/plots.md)
 * [Plotter](../../nb/projects/pentacular/plotter/plotter.md)
 * [Saucer](../../nb/projects/pentacular/saucer/saucer.md)
+* [Terrarium](../../nb/projects/pentacular/terrarium/terrarium.md)
