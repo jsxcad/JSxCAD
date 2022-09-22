@@ -161,7 +161,7 @@ export const Page = (...args) => {
       }
       return Group(...plans);
     } else {
-      const layer = taggedGroup({}, ...layers);
+      const layer = Shape.fromGeometry(taggedGroup({}, ...layers));
       return buildLayoutGeometry({
         layer,
         pageWidth: 0,
@@ -199,7 +199,7 @@ export const Page = (...args) => {
       }
       return Group(...plans);
     } else {
-      const layer = taggedGroup({}, ...layers);
+      const layer = Shape.fromGeometry(taggedGroup({}, ...layers));
       return buildLayoutGeometry({
         layer,
         pageWidth: 0,
@@ -210,10 +210,11 @@ export const Page = (...args) => {
   }
 };
 
-const page =
+export const page =
   (...args) =>
   (shape) =>
     Page(shape, ...args);
+
 Shape.registerMethod('page', page);
 
 export default Page;

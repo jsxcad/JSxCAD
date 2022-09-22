@@ -6023,12 +6023,6 @@ int FaceEdges(Geometry* geometry, int count) {
               if (selections.empty() || inside_any(segment, selections)) {
                 geometry->addEdge(all_edge_target,
                                   Edge(segment, s + edge_normal, int(facet)));
-#if 0
-                // Show the normal.
-                geometry->addEdge(all_edge_target,
-                                  Edge(Segment(s, s + edge_normal),
-                                       Point(0, 0, 0), int(facet)));
-#endif
               }
             }
             const auto& next = mesh.next(edge);
@@ -6318,8 +6312,10 @@ int Section(Geometry* geometry, int count) {
           Polygons_with_holes_2 pwhs;
           SurfaceMeshSectionToPolygonsWithHoles(geometry->mesh(nth), plane,
                                                 pwhs);
+          Transformation disorientation =
+              disorient_plane_along_z(unitPlane(plane));
           int target = geometry->add(GEOMETRY_POLYGONS_WITH_HOLES);
-          geometry->copyTransform(target, geometry->transform(nthTransform));
+          geometry->copyTransform(target, disorientation.inverse());
           geometry->plane(target) = plane;
           geometry->pwh(target) = std::move(pwhs);
           break;

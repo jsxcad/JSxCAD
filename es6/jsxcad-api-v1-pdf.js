@@ -1,5 +1,5 @@
 import { Shape, ensurePages } from './jsxcad-api-shape.js';
-import { emit, getPendingErrorHandler, addPending } from './jsxcad-sys.js';
+import { getPendingErrorHandler, addPending, emit } from './jsxcad-sys.js';
 import { hash } from './jsxcad-geometry.js';
 import { toPdf } from './jsxcad-convert-pdf.js';
 
@@ -73,28 +73,32 @@ var hashSum = sum;
 
 const preparePdf = (shape, name, op = (s) => s, options = {}) => {
   let index = 0;
-  const entries = [];
+  const records = [];
   for (const entry of ensurePages(op(shape).toDisjointGeometry())) {
-    const op = toPdf(entry, options).catch(getPendingErrorHandler());
-    addPending(op);
-    entries.push({
-      data: op,
-      filename: `${name}_${index++}.pdf`,
+    const pending = toPdf(entry, options).catch(getPendingErrorHandler());
+    addPending(pending);
+    const filename = `${name}_${index++}.pdf`;
+    const record = {
+      data: pending,
+      filename,
       type: 'application/pdf',
-    });
-    Shape.fromGeometry(entry).gridView(name, options.view);
+    };
+    records.push(record);
+    const shape = Shape.fromGeometry(entry);
+    shape.gridView(filename, options.view);
+    const download = { entries: [record] };
+    const hash$1 =
+      hashSum({ filename, options }) + hash(shape.toGeometry());
+    emit({ download, hash: hash$1 });
   }
-  return entries;
+  return records;
 };
 
 const pdf =
   (...args) =>
   (shape) => {
     const { value: name, func: op, object: options } = Shape.destructure(args);
-    const entries = preparePdf(shape, name, op, options);
-    const download = { entries };
-    const hash$1 = hashSum({ name, options }) + hash(shape.toGeometry());
-    emit({ download, hash: hash$1 });
+    preparePdf(shape, name, op, options);
     return shape;
   };
 
