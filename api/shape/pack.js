@@ -37,19 +37,22 @@ export const pack = Shape.chainable(
           { size, pageMargin, itemMargin },
           ...input
         );
-        packSize[0] = minPoint;
-        packSize[1] = maxPoint;
-        if (packed.length === 0) {
-          break;
-        } else {
-          packedLayers.push(
-            taggedItem(
-              { tags: ['pack:layout'] },
-              taggedGroup({}, ...packed.map(toTransformedGeometry))
-            )
-          );
+        if (minPoint.every(isFinite) && maxPoint.every(isFinite)) {
+          // CHECK: Why is this being overwritten by each pass?
+          packSize[0] = minPoint;
+          packSize[1] = maxPoint;
+          if (packed.length === 0) {
+            break;
+          } else {
+            packedLayers.push(
+              taggedItem(
+                { tags: ['pack:layout'] },
+                taggedGroup({}, ...packed.map(toTransformedGeometry))
+              )
+            );
+          }
+          todo.unshift(...unpacked);
         }
-        todo.unshift(...unpacked);
       }
       // CHECK: Can this distinguish between a set of packed paged, and a single
       // page that's packed?

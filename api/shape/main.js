@@ -112,6 +112,7 @@ export { op } from './op.js';
 export { outline } from './outline.js';
 export { orient } from './orient.js';
 export { pack } from './pack.js';
+export { page } from './Page.js';
 export { points } from './points.js';
 export { ref } from './Ref.js';
 export { reify } from './reify.js';

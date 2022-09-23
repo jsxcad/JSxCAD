@@ -1,7 +1,15 @@
 md`
 ### fuse()
+Parameter|Default|Type
+---|---|---
+...others||Additional shapes to fuse.
+'exact'|false|Use exact, but slower, geometry
 
-Attempts to joins all of the parts of the shape.
+Attempts to fuse all of the parts of the shape.
+
+Note that Group(a, b).join(c, d) will produce four shapes: a.join(c), a.join(c), b.join(c), b.join(d).
+
+However Group(a, b).fuse(c, d) will produce one shape.
 
 See: [join](https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/join.nb).
 `;

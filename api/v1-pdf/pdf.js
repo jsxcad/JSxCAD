@@ -7,28 +7,32 @@ import { toPdf } from '@jsxcad/convert-pdf';
 
 export const preparePdf = (shape, name, op = (s) => s, options = {}) => {
   let index = 0;
-  const entries = [];
+  const records = [];
   for (const entry of ensurePages(op(shape).toDisjointGeometry())) {
-    const op = toPdf(entry, options).catch(getPendingErrorHandler());
-    addPending(op);
-    entries.push({
-      data: op,
-      filename: `${name}_${index++}.pdf`,
+    const pending = toPdf(entry, options).catch(getPendingErrorHandler());
+    addPending(pending);
+    const filename = `${name}_${index++}.pdf`;
+    const record = {
+      data: pending,
+      filename,
       type: 'application/pdf',
-    });
-    Shape.fromGeometry(entry).gridView(name, options.view);
+    };
+    records.push(record);
+    const shape = Shape.fromGeometry(entry);
+    shape.gridView(filename, options.view);
+    const download = { entries: [record] };
+    const hash =
+      hashSum({ filename, options }) + hashGeometry(shape.toGeometry());
+    emit({ download, hash });
   }
-  return entries;
+  return records;
 };
 
 const pdf =
   (...args) =>
   (shape) => {
     const { value: name, func: op, object: options } = Shape.destructure(args);
-    const entries = preparePdf(shape, name, op, options);
-    const download = { entries };
-    const hash = hashSum({ name, options }) + hashGeometry(shape.toGeometry());
-    emit({ download, hash });
+    preparePdf(shape, name, op, options);
     return shape;
   };
 

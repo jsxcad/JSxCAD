@@ -15,12 +15,15 @@ const say = (message) => {
 };
 
 const reportError = (error) => {
-  const entry = { text: error.stack ? error.stack : error, level: 'serious' };
+  const entry = {
+    text: error.stack ? error.stack : '' + error,
+    level: 'serious',
+  };
   const hash = hashSum(entry);
   sys.emit({ error: entry, hash });
   sys.log({
     op: 'text',
-    text: error.stack ? error.stack : error,
+    text: error.stack ? error.stack : '' + error,
     level: 'serious',
   });
 };
