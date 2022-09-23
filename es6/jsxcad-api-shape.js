@@ -183,21 +183,27 @@ Shape.toShape = (to, from) => {
 };
 
 Shape.toShapes = (to, from) => {
+  console.log(`QQ/toShapes/to/1: ${to}`);
   if (to instanceof Function) {
     to = to(from);
+    console.log(`QQ/toShapes/to/2: ${to}`);
   }
   if (to instanceof Shape) {
     if (to.toGeometry().type === 'group') {
       to = to
         .toGeometry()
         .content.map((content) => Shape.fromGeometry(content));
+      console.log(`QQ/toShapes/to/3: ${to}`);
     }
   }
   if (to instanceof Array) {
-    return to
+    const flat = to
       .filter((value) => value !== undefined)
       .flatMap((value) => Shape.toShapes(value, from));
+    console.log(`QQ/flat: ${flat}`);
+    return flat;
   } else {
+    console.log(`QQ/flat: []`);
     return [Shape.toShape(to, from)];
   }
 };
@@ -3253,9 +3259,9 @@ const each = Shape.chainable((...args) => (shape) => {
     leafOp = (edge) => leafShape.to(edge);
   }
   const leafShapes = getLeafs(shape.toGeometry()).map((leaf) =>
-    shape.op(leafOp(Shape.fromGeometry(leaf)))
+    leafOp(Shape.fromGeometry(leaf))
   );
-  const grouped = groupOp(leafShapes);
+  const grouped = groupOp(...leafShapes);
   if (grouped instanceof Function) {
     return grouped(shape);
   } else {
@@ -3872,7 +3878,11 @@ const moveAlong = Shape.chainable((direction, ...offsets) => (shape) => {
   return Shape.Group(...moves);
 });
 
-const m = (...offsets) => moveAlong(normal(), ...offsets);
+const m = Shape.chainable(
+  (...offsets) =>
+    (shape) =>
+      shape.moveAlong(normal(), ...offsets)
+);
 
 Shape.registerMethod('m', m);
 Shape.registerMethod('moveAlong', moveAlong);

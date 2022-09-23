@@ -1,4 +1,12 @@
 const standardMaterialDefinitions = {
+  'material:acrylic': {
+    threejsMaterial: {
+      opacity: 0.5,
+      transparent: true,
+      metalness: 0.0,
+      depthWrite: false,
+    },
+  },
   'material:aluminium': {
     threejsMaterial: {
       metalness: 0.0,
