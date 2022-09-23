@@ -183,27 +183,21 @@ Shape.toShape = (to, from) => {
 };
 
 Shape.toShapes = (to, from) => {
-  console.log(`QQ/toShapes/to/1: ${to}`);
   if (to instanceof Function) {
     to = to(from);
-    console.log(`QQ/toShapes/to/2: ${to}`);
   }
   if (to instanceof Shape) {
     if (to.toGeometry().type === 'group') {
       to = to
         .toGeometry()
         .content.map((content) => Shape.fromGeometry(content));
-      console.log(`QQ/toShapes/to/3: ${to}`);
     }
   }
   if (to instanceof Array) {
-    const flat = to
+    return to
       .filter((value) => value !== undefined)
       .flatMap((value) => Shape.toShapes(value, from));
-    console.log(`QQ/flat: ${flat}`);
-    return flat;
   } else {
-    console.log(`QQ/flat: []`);
     return [Shape.toShape(to, from)];
   }
 };
@@ -3898,7 +3892,9 @@ Shape.registerMethod('noVoid', noVoid);
 const nth = Shape.chainable((...ns) => (shape) => {
   const candidates = shape.each(
     (leaf) => leaf,
-    (leafs) => (shape) => leafs
+    (...leafs) =>
+      (shape) =>
+        leafs
   );
   return Group(...ns.map((n) => candidates[n]));
 });

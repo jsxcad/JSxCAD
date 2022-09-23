@@ -201,10 +201,9 @@ Shape.toShapes = (to, from) => {
     }
   }
   if (to instanceof Array) {
-    const flat = to
+    return to
       .filter((value) => value !== undefined)
       .flatMap((value) => Shape.toShapes(value, from));
-    return flat;
   } else {
     return [Shape.toShape(to, from)];
   }

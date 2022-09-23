@@ -1,3 +1,15 @@
+# Terrarium
+
+This is a simple terrarium design intended to be cut from transparent acrylic.
+
+* The terrarium forms a box with the corners removed, allowing for excess water drainage.
+* A hole is provided in the top to allow the top panel to be removed or water to be added.
+* A lid is provided for the hole to minimize moisture loss.
+
+This terrarium was designed for growing moss, but might be useful for other kinds of plants as well.
+
+### Parameters
+
 ```JavaScript
 const length = control('box length', 50, 'input');
 ```
@@ -54,7 +66,7 @@ const Lid = (holeDiameter, thickness, kerf) =>
     .fitTo(
       Box(thickness - kerf * 2, thickness - kerf * 2, thickness * 2).as('pin')
     )
-    .material('glass')
+    .material('acrylic')
     .as('lid');
 ```
 
@@ -63,6 +75,8 @@ const makeLid = () => (shape) =>
   shape
     .get('lid')
     .in()
+    .note('#### Lid')
+    .note('These profiles assemble to form the lid')
     .pdf(
       'lid_base',
       z(-thickness / 2)
@@ -86,6 +100,9 @@ const makeLid = () => (shape) =>
         .offset(kerf)
         .clean()
         .outline()
+    )
+    .note(
+      'Stack the larger disc on the smaller and then push the rectangular pin through to connect them.'
     );
 ```
 
@@ -106,8 +123,7 @@ const Terrarium = (
       (e, f) => f.e(-thickness).cut(e)
     )
     .cut(Arc(holeDiameter, holeDiameter, [height - thickness, height]))
-    .material('glass')
-    .on(n(0), material('plastic').color('green'))
+    .material('acrylic')
     .clean()
     .as('terrarium');
 ```
@@ -117,59 +133,119 @@ const makeTerrarium = () => (shape) =>
   shape
     .get('terrarium')
     .in()
-    .note(
-      `Terrarium: ${length}x${width}x${height} thickness ${thickness} hinge length ${hingeLength} hole diameter ${holeDiameter}`
-    )
     .each(flat())
     .section()
     .offset(kerf)
-    .pdf('faces', outline().page('pack', { itemsPerPage: 1 }));
+    .note('#### Panels')
+    .note(
+      "These are the profiles you'll need to cut out to assemble the terrarium."
+    )
+    .pdf('faces', outline().page('pack', { itemsPerPage: 1 }))
+    .note('Fit the profiles together to form a box with the hole on the top.');
 ```
 
+### Preview
+
+This is a preview of the assembled 50x50x50mm terrarium formed from 3mm acrylic with a 5mm hinge length and a 20mm diameter hole in the top with matching plug, cut with a 0.09mm laser beam.
+
 ```JavaScript
-Terrarium(length, width, height, thickness, hingeLength, holeDiameter, kerf)
+const terrarium = Terrarium(
+  length,
+  width,
+  height,
+  thickness,
+  hingeLength,
+  holeDiameter,
+  kerf
+)
   .and(Lid(holeDiameter, thickness, kerf).z(height))
-  .view()
-  .z(-height)
-  .op(makeTerrarium(), makeLid());
+  .view(1)
+  .view(
+    2,
+    get('terrarium')
+      .by(align())
+      .in()
+      .untag('material:acrylic')
+      .each((s) =>
+        s
+          .ghost()
+          .and(
+            Edge(s.center(), s.center().moveAlong(s.center(), 1)).color(
+              'green'
+            ),
+            s.moveAlong(s.center(), 1)
+          )
+      )
+  );
 ```
 
 ![Image](terrarium.md.0.png)
 
-Terrarium: 50x50x50 thickness 3 hinge length 5 hole diameter 20
-
 ![Image](terrarium.md.1.png)
 
-[faces_0.pdf](terrarium.faces_0.pdf)
+### Instructions
+
+Specify the dimensions of the terrarium you want, taking some care with the sheet thickness and kerf.
+
+I recommend cutting two pieces to test how well they mesh with the kerf supplied.
+
+The panels should have a snug fit, so that the assembly is solid without requiring glue.
+
+The lid should have a snug fit internally, but a loose connection to the top panel so that it can be easily removed.
+
+```JavaScript
+terrarium
+  .z(-height)
+  .note('### Laser cut profiles')
+  .op(makeTerrarium(), makeLid());
+```
+
+### Laser cut profiles
+
+#### Panels
+
+These are the profiles you'll need to cut out to assemble the terrarium.
 
 ![Image](terrarium.md.2.png)
 
-[faces_1.pdf](terrarium.faces_1.pdf)
+[faces_0.pdf](terrarium.faces_0.pdf)
 
 ![Image](terrarium.md.3.png)
 
-[faces_2.pdf](terrarium.faces_2.pdf)
+[faces_1.pdf](terrarium.faces_1.pdf)
 
 ![Image](terrarium.md.4.png)
 
-[faces_3.pdf](terrarium.faces_3.pdf)
+[faces_2.pdf](terrarium.faces_2.pdf)
 
 ![Image](terrarium.md.5.png)
 
-[faces_4.pdf](terrarium.faces_4.pdf)
+[faces_3.pdf](terrarium.faces_3.pdf)
 
 ![Image](terrarium.md.6.png)
 
-[faces_5.pdf](terrarium.faces_5.pdf)
+[faces_4.pdf](terrarium.faces_4.pdf)
 
 ![Image](terrarium.md.7.png)
 
-[lid_base_0.pdf](terrarium.lid_base_0.pdf)
+[faces_5.pdf](terrarium.faces_5.pdf)
+
+Fit the profiles together to form a box with the hole on the top.
+
+#### Lid
+
+These profiles assemble to form the lid
 
 ![Image](terrarium.md.8.png)
 
-[lid_top_0.pdf](terrarium.lid_top_0.pdf)
+[lid_base_0.pdf](terrarium.lid_base_0.pdf)
 
 ![Image](terrarium.md.9.png)
 
+[lid_top_0.pdf](terrarium.lid_top_0.pdf)
+
+![Image](terrarium.md.10.png)
+
 [lid_pin_0.pdf](terrarium.lid_pin_0.pdf)
+
+Stack the larger disc on the smaller and then push the rectangular pin through to connect them.
