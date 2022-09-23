@@ -19,7 +19,11 @@ export const moveAlong = Shape.chainable((direction, ...offsets) => (shape) => {
   return Shape.Group(...moves);
 });
 
-export const m = (...offsets) => moveAlong(normal(), ...offsets);
+export const m = Shape.chainable(
+  (...offsets) =>
+    (shape) =>
+      shape.moveAlong(normal(), ...offsets)
+);
 
 Shape.registerMethod('m', m);
 Shape.registerMethod('moveAlong', moveAlong);

@@ -3253,9 +3253,9 @@ const each = Shape.chainable((...args) => (shape) => {
     leafOp = (edge) => leafShape.to(edge);
   }
   const leafShapes = getLeafs(shape.toGeometry()).map((leaf) =>
-    shape.op(leafOp(Shape.fromGeometry(leaf)))
+    leafOp(Shape.fromGeometry(leaf))
   );
-  const grouped = groupOp(leafShapes);
+  const grouped = groupOp(...leafShapes);
   if (grouped instanceof Function) {
     return grouped(shape);
   } else {
@@ -3872,7 +3872,11 @@ const moveAlong = Shape.chainable((direction, ...offsets) => (shape) => {
   return Shape.Group(...moves);
 });
 
-const m = (...offsets) => moveAlong(normal(), ...offsets);
+const m = Shape.chainable(
+  (...offsets) =>
+    (shape) =>
+      shape.moveAlong(normal(), ...offsets)
+);
 
 Shape.registerMethod('m', m);
 Shape.registerMethod('moveAlong', moveAlong);
@@ -3888,7 +3892,9 @@ Shape.registerMethod('noVoid', noVoid);
 const nth = Shape.chainable((...ns) => (shape) => {
   const candidates = shape.each(
     (leaf) => leaf,
-    (leafs) => (shape) => leafs
+    (...leafs) =>
+      (shape) =>
+        leafs
   );
   return Group(...ns.map((n) => candidates[n]));
 });

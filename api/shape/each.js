@@ -11,9 +11,9 @@ export const each = Shape.chainable((...args) => (shape) => {
     leafOp = (edge) => leafShape.to(edge);
   }
   const leafShapes = getLeafs(shape.toGeometry()).map((leaf) =>
-    shape.op(leafOp(Shape.fromGeometry(leaf)))
+    leafOp(Shape.fromGeometry(leaf))
   );
-  const grouped = groupOp(leafShapes);
+  const grouped = groupOp(...leafShapes);
   if (grouped instanceof Function) {
     return grouped(shape);
   } else {

@@ -4,7 +4,9 @@ import Shape from './Shape.js';
 export const nth = Shape.chainable((...ns) => (shape) => {
   const candidates = shape.each(
     (leaf) => leaf,
-    (leafs) => (shape) => leafs
+    (...leafs) =>
+      (shape) =>
+        leafs
   );
   return Group(...ns.map((n) => candidates[n]));
 });
