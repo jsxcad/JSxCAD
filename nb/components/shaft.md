@@ -33,7 +33,8 @@ Flat({ diameter, length: flatLength, thickness: flatThickness })
   )
   .note(
     `Flat({ diameter: ${diameter}, length: ${flatLength}, thickness: ${flatThickness} })`
-  );
+  )
+  .abstract();
 ```
 
 ![Image](shaft.md.0.png)
@@ -41,6 +42,11 @@ Flat({ diameter, length: flatLength, thickness: flatThickness })
 import { Flat } from 'https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/components/shaft.nb';
 
 Flat({ diameter: 5, length: 5, thickness: 3 })
+
+'''mermaid
+graph LR;
+  0[item<br>item:flat]
+'''
 
 ```JavaScript
 export const Shaft = ({ diameter = 10, length = 10, play = 0.2 } = {}) =>
@@ -72,7 +78,8 @@ Shaft({ diameter, length, play })
   .note(
     "import { Shaft } from 'https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/components/shaft.nb';"
   )
-  .note(`Shaft({ diameter: ${diameter}, length: ${length}, play: ${play} })`);
+  .note(`Shaft({ diameter: ${diameter}, length: ${length}, play: ${play} })`)
+  .abstract();
 ```
 
 ![Image](shaft.md.1.png)
@@ -80,6 +87,11 @@ Shaft({ diameter, length, play })
 import { Shaft } from 'https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/components/shaft.nb';
 
 Shaft({ diameter: 5, length: 10, play: 0.2 })
+
+'''mermaid
+graph LR;
+  0[item<br>item:shaft]
+'''
 
 ```JavaScript
 FlatShaft({
@@ -97,7 +109,8 @@ FlatShaft({
 
   .note(
     `FlatShaft({ diameter: ${diameter}, length: ${length}, flatLength: ${flatLength}, flatThickness: ${flatThickness}, play: ${play} })`
-  );
+  )
+  .abstract();
 ```
 
 ![Image](shaft.md.2.png)
@@ -105,3 +118,12 @@ FlatShaft({
 import { FlatShaft } from 'https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/components/shaft.nb';
 
 FlatShaft({ diameter: 5, length: 10, flatLength: 5, flatThickness: 3, play: 0.2 })
+
+'''mermaid
+graph LR;
+  0[item<br>item:shaft]
+  0 --> 1;
+  1[item<br>item:flat<br>type:void<br>type:ghost]
+  0 --> 2;
+  2[item<br>item:flat<br>type:masked]
+'''

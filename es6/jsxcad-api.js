@@ -316,6 +316,12 @@ const registerDynamicModule = (path, browserPath, nodePath) => {
 
 const CACHED_MODULES = new Map();
 
+let toSourceFromName = (name) => name;
+
+const setToSourceFromNameFunction = (op) => {
+  toSourceFromName = op;
+};
+
 const buildImportModule =
   (baseApi) =>
   async (
@@ -350,7 +356,7 @@ const buildImportModule =
       if (script === undefined) {
         const path = `source/${name}`;
         const sources = [];
-        sources.push(name);
+        sources.push(toSourceFromName(name));
         script = await read(path, { sources, workspace });
       }
       if (script === undefined) {
@@ -417,6 +423,7 @@ const api = {
   readStl,
   readObj,
   readOff,
+  setToSourceFromNameFunction,
   stl,
   toSvg,
 };

@@ -129,9 +129,7 @@ const writeMarkdown = async (
 const toSourceFromName = (baseDirectory) => (name) => {
   const prefix = 'https://raw.githubusercontent.com/jsxcad/JSxCAD/master/';
   if (name.startsWith(prefix)) {
-    const source = name.substring(prefix.length);
-    console.log(`QQ/source: ${source}`);
-    return source;
+    return name.substring(prefix.length);
   }
   return name;
 };
