@@ -10,6 +10,12 @@ export const registerDynamicModule = (path, browserPath, nodePath) => {
 
 const CACHED_MODULES = new Map();
 
+let toSourceFromName = (name) => name;
+
+export const setToSourceFromNameFunction = (op) => {
+  toSourceFromName = op;
+};
+
 export const buildImportModule =
   (baseApi) =>
   async (
@@ -44,12 +50,15 @@ export const buildImportModule =
       if (script === undefined) {
         const path = `source/${name}`;
         const sources = [];
-        sources.push(name);
+        console.log(`QQ/name: ${name}`);
+        sources.push(toSourceFromName(name));
+        console.log(`QQ/sources: ${JSON.stringify(sources)}`);
         script = await read(path, { sources, workspace });
       }
       if (script === undefined) {
         throw Error(`Cannot import module ${name}`);
       }
+      console.log(`QQ/script: ${script.constructor} ${JSON.stringify(script)}`);
       const scriptText =
         typeof script === 'string'
           ? script

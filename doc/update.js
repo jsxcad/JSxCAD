@@ -76,7 +76,7 @@ const build = async (...args) => {
       const startTime = new Date();
       const failedExpectations = [];
       console.log(`Processing notebook: ${cwd}/${notebook}.nb`);
-      await updateNotebook(notebook, { failedExpectations, browser });
+      await updateNotebook(notebook, { failedExpectations, browser, baseDirectory });
       if (
         failedExpectations.length > 0 &&
         collectedFailedExpectations.length > 0

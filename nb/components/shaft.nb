@@ -36,14 +36,16 @@ Flat({ diameter, length: flatLength, thickness: flatThickness })
   )
   .note(
     `Flat({ diameter: ${diameter}, length: ${flatLength}, thickness: ${flatThickness} })`
-  );
+  )
+  .abstract();
 
 Shaft({ diameter, length, play })
   .view()
   .note(
     "import { Shaft } from 'https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/components/shaft.nb';"
   )
-  .note(`Shaft({ diameter: ${diameter}, length: ${length}, play: ${play} })`);
+  .note(`Shaft({ diameter: ${diameter}, length: ${length}, play: ${play} })`)
+  .abstract();
 
 FlatShaft({
   diameter,
@@ -60,4 +62,5 @@ FlatShaft({
 
   .note(
     `FlatShaft({ diameter: ${diameter}, length: ${length}, flatLength: ${flatLength}, flatThickness: ${flatThickness}, play: ${play} })`
-  );
+  )
+  .abstract();

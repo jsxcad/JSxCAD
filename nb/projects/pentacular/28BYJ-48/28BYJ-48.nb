@@ -1,3 +1,5 @@
+import { FlatShaft } from 'https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/components/shaft.nb';
+
 md`
 ### 28BYJ-48
 
@@ -58,17 +60,17 @@ export const StepperMotor28byj48 = ({
         Box(connectorBaseHeight, connectorBaseWidth).x(bodyDiameter / -2 + 2)
       )
       .ez(-bodyHeight)
-      .mask(grow(bodyPlay))
-      .as('body'),
+      .mask(grow(bodyPlay)),
     Group(
       Arc(shaftBaseDiameter).ez(0, -shaftBaseHeight),
-      Arc(shaftDiameter).ez(shaftLength - shaftFlatsLength),
-      Arc(shaftDiameter)
-        .clip(Box(shaftDiameter, shaftFlats))
-        .ez(shaftLength, shaftLength - shaftFlatsLength)
+      FlatShaft({
+        diameter: shaftDiameter,
+        length: shaftLength,
+        flatLength: shaftFlatsLength,
+        flatThickness: shaftFlats,
+        play: 0.2,
+      })
     )
-      .mask(grow(shaftPlay))
-      .as('shaft')
       .x(bodyDiameter / 2 - shaftOffset)
       .z(shaftBaseHeight),
     Arc(tabDiameter)
@@ -84,7 +86,7 @@ export const StepperMotor28byj48 = ({
           .y(totalDiameter / 2 - tabDiameter / 2)
           .rz(0, 1 / 2)
       )
-  );
+  ).as('28byj48');
 
 StepperMotor28byj48({
   bodyDiameter,
@@ -112,4 +114,5 @@ StepperMotor28byj48({
   )
   .note(
     `StepperMotor28byj48({ bodyDiameter: ${bodyDiameter}, bodyHeight: ${bodyHeight}, bodyPlay: ${bodyPlay}, totalDiameter: ${totalDiameter}, tabDiameter: ${tabDiameter}, holeDiameter: ${holeDiameter}, shaftDiameter: ${shaftDiameter}, shaftFlats: ${shaftFlats}, shaftOffset: ${shaftOffset}, shaftBaseDiameter: ${shaftBaseDiameter}, shaftBaseHeight: ${shaftBaseHeight}, shaftLength: ${shaftLength}, shaftPlay: ${shaftPlay}, connectorWidth: ${connectorWidth}, connectorLength: ${connectorLength}, connectorBaseWidth: ${connectorBaseWidth}, connectorBaseHeight: ${connectorBaseHeight}, connectorHeight: ${connectorHeight} })`
-  );
+  )
+  .abstract();
