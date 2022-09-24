@@ -96,7 +96,12 @@ export const execute = async (
         }
         // We could run these in parallel, but let's keep it simple for now.
         for (const path of imports) {
-          await importModule(path, { evaluate, replay, doRelease: false });
+          await importModule(path, {
+            evaluate,
+            replay,
+            doRelease: false,
+            workspace,
+          });
         }
         // At this point the modules should build with a simple replay.
       }

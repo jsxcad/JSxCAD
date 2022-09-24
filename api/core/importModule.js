@@ -21,6 +21,7 @@ export const buildImportModule =
       replay,
       doRelease = true,
       readCache = true,
+      workspace,
     } = {}
   ) => {
     let emitGroup;
@@ -44,7 +45,7 @@ export const buildImportModule =
         const path = `source/${name}`;
         const sources = [];
         sources.push(name);
-        script = await read(path, { sources });
+        script = await read(path, { sources, workspace });
       }
       if (script === undefined) {
         throw Error(`Cannot import module ${name}`);

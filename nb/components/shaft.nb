@@ -1,0 +1,63 @@
+md`### Shaft, Flat, and FlatShaft`;
+
+export const Flat = ({ diameter = 10, length = 10, thickness = 5 } = {}) =>
+  Arc(diameter).clip(Box(diameter, thickness)).ez(length).clean().as('flat');
+
+export const Shaft = ({ diameter = 10, length = 10, play = 0.2 } = {}) =>
+  Arc(diameter).ez(length).clean().mask(grow(play)).as('shaft');
+
+export const FlatShaft = ({
+  diameter = 10,
+  length = 10,
+  flatLength = 10,
+  flatThickness = 5,
+  play = 0.2,
+} = {}) =>
+  Group(
+    Arc(diameter).ez(length - flatLength),
+    Flat({ diameter, length: flatLength, thickness: flatThickness }).z(
+      length - flatLength
+    )
+  )
+    .clean()
+    .mask(grow(play))
+    .as('shaft');
+
+const diameter = control('diameter', 5, 'input');
+const length = control('length', 10, 'input');
+const flatLength = control('flat length', 5, 'input');
+const flatThickness = control('flat thickness', 3, 'input');
+const play = control('play', 0.2, 'input');
+
+Flat({ diameter, length: flatLength, thickness: flatThickness })
+  .view()
+  .note(
+    "import { Flat } from 'https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/components/shaft.nb';"
+  )
+  .note(
+    `Flat({ diameter: ${diameter}, length: ${flatLength}, thickness: ${flatThickness} })`
+  );
+
+Shaft({ diameter, length, play })
+  .view()
+  .note(
+    "import { Shaft } from 'https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/components/shaft.nb';"
+  )
+  .note(`Shaft({ diameter: ${diameter}, length: ${length}, play: ${play} })`);
+
+FlatShaft({
+  diameter,
+  length,
+  flatLength,
+  flatThickness,
+  play,
+})
+  // .on(get('shaft').in().get('flat'), fit(Arc(10).ez(1, 2).material('acrylic')))
+  .view()
+  .note(
+    "import { FlatShaft } from 'https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/components/shaft.nb';"
+  )
+
+  .note(
+    `FlatShaft({ diameter: ${diameter}, length: ${length}, flatLength: ${flatLength}, flatThickness: ${flatThickness}, play: ${play} })`
+  );
