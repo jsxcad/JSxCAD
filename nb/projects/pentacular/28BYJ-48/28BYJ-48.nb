@@ -108,7 +108,9 @@ StepperMotor28byj48({
   connectorBaseHeight,
   connectorHeight,
 })
+  .note('### Example')
   .view(rz(1 / 4))
+  .note('#### Invocation')
   .note(
     "import { StepperMotor28byj48 } from 'https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/projects/pentacular/28BYJ-48/28BYJ-48.nb';"
   )

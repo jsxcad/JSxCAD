@@ -3,7 +3,7 @@ import { taggedGroup } from '@jsxcad/geometry';
 
 const render = (abstract, shape) => {
   const graph = [];
-  graph.push("'''mermaid");
+  graph.push("```mermaid");
   graph.push('graph LR;');
 
   let id = 0;
@@ -27,7 +27,7 @@ const render = (abstract, shape) => {
 
   render(identify(abstract));
 
-  graph.push("'''");
+  graph.push("```");
 
   return shape.md(graph.join('\n'));
 };
