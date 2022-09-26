@@ -237,7 +237,12 @@ const execute = async (
         }
         // We could run these in parallel, but let's keep it simple for now.
         for (const path of imports) {
-          await importModule(path, { evaluate, replay, doRelease: false });
+          await importModule(path, {
+            evaluate,
+            replay,
+            doRelease: false,
+            workspace,
+          });
         }
         // At this point the modules should build with a simple replay.
       }
@@ -311,6 +316,12 @@ const registerDynamicModule = (path, browserPath, nodePath) => {
 
 const CACHED_MODULES = new Map();
 
+let toSourceFromName = (name) => name;
+
+const setToSourceFromNameFunction = (op) => {
+  toSourceFromName = op;
+};
+
 const buildImportModule =
   (baseApi) =>
   async (
@@ -322,6 +333,7 @@ const buildImportModule =
       replay,
       doRelease = true,
       readCache = true,
+      workspace,
     } = {}
   ) => {
     let emitGroup;
@@ -344,8 +356,8 @@ const buildImportModule =
       if (script === undefined) {
         const path = `source/${name}`;
         const sources = [];
-        sources.push(name);
-        script = await read(path, { sources });
+        sources.push(toSourceFromName(name));
+        script = await read(path, { sources, workspace });
       }
       if (script === undefined) {
         throw Error(`Cannot import module ${name}`);
@@ -411,6 +423,7 @@ const api = {
   readStl,
   readObj,
   readOff,
+  setToSourceFromNameFunction,
   stl,
   toSvg,
 };

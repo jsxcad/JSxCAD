@@ -1,4 +1,14 @@
-const a = await readStl('https://jsxcad.js.org/stl/bear.stl');
+md`### Bear model sliced`;
 
-a.stl('bear');
-a.section(seq({ to: 200, by: 1 }, XY, Group)).view();
+const url = control('url', 'https://jsxcad.js.org/stl/bear.stl', 'input');
+const height = control('height', 200, 'input');
+const spacing = control('spacing', 2, 'input');
+
+const a = (await readStl(url)).by(align('z>'));
+
+a.stl('bear').note('This is a low-poly model of a bear.');
+a.section(seq({ to: height, by: spacing }, XY, Group))
+  .note(`Stl sliced each ${spacing}mm up to ${height}mm.`)
+  .view()
+  .note('Laid out on a single sheet for cutting.')
+  .pdf('slices', each(flat()).page('pack'));

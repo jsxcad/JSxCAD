@@ -417,12 +417,8 @@ graph LR;
   0[group<br>]
   0 --> 1;
   1[item<br>item:box]
-  1 --> 2;
-  2[plan<br>]
-  0 --> 3;
-  3[item<br>item:bar]
-  3 --> 4;
-  4[plan<br>]
+  0 --> 2;
+  2[item<br>item:bar]
 '''
 
 ---

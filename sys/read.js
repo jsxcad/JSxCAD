@@ -147,7 +147,7 @@ const fetchSources = async (sources, { workspace }) => {
           // Assume a file path.
           const data = await externalFileFetcher(source);
           if (data !== undefined) {
-            return data;
+            return new Uint8Array(data);
           }
         }
       } catch (e) {}

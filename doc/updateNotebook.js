@@ -126,9 +126,17 @@ const writeMarkdown = async (
   }
 };
 
+const toSourceFromName = (baseDirectory) => (name) => {
+  const prefix = 'https://raw.githubusercontent.com/jsxcad/JSxCAD/master/';
+  if (name.startsWith(prefix)) {
+    return name.substring(prefix.length);
+  }
+  return name;
+};
+
 export const updateNotebook = async (
   target,
-  { failedExpectations = [], browser } = {}
+  { failedExpectations = [], browser, baseDirectory } = {}
 ) => {
   clearEmitted();
   await boot();
@@ -139,6 +147,7 @@ export const updateNotebook = async (
     const module = `${target}.nb`;
     const topLevel = new Map();
     // FIX: Sort out top-level evaluation vs module caching.
+    api.setToSourceFromNameFunction(toSourceFromName(baseDirectory));
     await api.importModule(module, {
       clearUpdateEmits: false,
       topLevel,

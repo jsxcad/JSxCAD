@@ -10,6 +10,12 @@ export const registerDynamicModule = (path, browserPath, nodePath) => {
 
 const CACHED_MODULES = new Map();
 
+let toSourceFromName = (name) => name;
+
+export const setToSourceFromNameFunction = (op) => {
+  toSourceFromName = op;
+};
+
 export const buildImportModule =
   (baseApi) =>
   async (
@@ -21,6 +27,7 @@ export const buildImportModule =
       replay,
       doRelease = true,
       readCache = true,
+      workspace,
     } = {}
   ) => {
     let emitGroup;
@@ -43,8 +50,8 @@ export const buildImportModule =
       if (script === undefined) {
         const path = `source/${name}`;
         const sources = [];
-        sources.push(name);
-        script = await read(path, { sources });
+        sources.push(toSourceFromName(name));
+        script = await read(path, { sources, workspace });
       }
       if (script === undefined) {
         throw Error(`Cannot import module ${name}`);
