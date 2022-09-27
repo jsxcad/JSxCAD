@@ -158,11 +158,20 @@ export const updateNotebook = async (
       module,
       modulePath: 'http://127.0.0.1:5001',
     });
-    writeFileSync(`${target}.html`, html);
     const { imageUrlList } = await screenshot(
       new TextDecoder('utf8').decode(html),
       { browser }
     );
+    {
+      // Build a version for jsxcad.js.org/nb/
+      const { html } = await toHtml(notebook, {
+        module,
+        modulePath: 'https://jsxcad.js.org/alpha',
+        useMermaid: true,
+        useControls: false,
+      });
+      writeFileSync(`${target}.html`, html);
+    }
     await writeMarkdown(
       target,
       encodedNotebook,

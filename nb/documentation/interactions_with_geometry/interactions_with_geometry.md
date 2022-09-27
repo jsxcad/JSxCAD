@@ -412,14 +412,14 @@ We can generate an abstract view of the geometry to be displayed as a graph.
 Box(4).as('box').and(Arc(5).ez(10).as('bar')).abstract();
 ```
 
-'''mermaid
+```mermaid
 graph LR;
   0[group<br>]
   0 --> 1;
   1[item<br>item:box]
   0 --> 2;
   2[item<br>item:bar]
-'''
+```
 
 ---
 ### Voxels

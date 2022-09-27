@@ -79,6 +79,8 @@ const toHtml = async (
     title = 'JSxCAD Viewer',
     modulePath = 'https://gitcdn.link/cdn/jsxcad/JSxCAD/master/es6',
     module,
+    useControls = false,
+    useMermaid = false,
   } = {}
 ) => {
   const encodedNotebook = await encodeNotebook(notebook, { module });
@@ -149,6 +151,11 @@ const toHtml = async (
       padding: 5px;
     }
   </style>
+  ${
+    useMermaid
+      ? '<script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>'
+      : ''
+  }
  </head>
  <body>
   <script type='module'>
@@ -171,7 +178,9 @@ const toHtml = async (
     const run = async () => {
       const body = document.getElementsByTagName('body')[0];
       const bookElement = document.createElement('div');
-      const notebookElement = await toDomElement(await prepareViews(notebook));
+      const notebookElement = await toDomElement(await prepareViews(notebook), { useControls: ${
+        useControls ? 'true' : 'false'
+      } });
       bookElement.appendChild(notebookElement);
       body.appendChild(bookElement);
       bookElement.classList.add('book', 'notebook', 'loaded');
@@ -179,6 +188,7 @@ const toHtml = async (
 
     if (document.readyState === 'complete') {
       run();
+      ${useMermaid ? 'mermaid.init();' : ''}
     } else {
       document.onreadystatechange = () => {
         if (document.readyState === 'complete') {

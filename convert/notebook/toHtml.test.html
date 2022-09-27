@@ -65,6 +65,7 @@
       padding: 5px;
     }
   </style>
+  
  </head>
  <body>
   <script type='module'>
@@ -456,7 +457,7 @@
     const run = async () => {
       const body = document.getElementsByTagName('body')[0];
       const bookElement = document.createElement('div');
-      const notebookElement = await toDomElement(await prepareViews(notebook));
+      const notebookElement = await toDomElement(await prepareViews(notebook), { useControls: false });
       bookElement.appendChild(notebookElement);
       body.appendChild(bookElement);
       bookElement.classList.add('book', 'notebook', 'loaded');
@@ -464,6 +465,7 @@
 
     if (document.readyState === 'complete') {
       run();
+      
     } else {
       document.onreadystatechange = () => {
         if (document.readyState === 'complete') {

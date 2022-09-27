@@ -12,9 +12,9 @@ Box()
   .note('Box().x(3, 6).seq({ by: 1 / 2 }, rz).abstract()');
 ```
 
-'''mermaid
+```mermaid
 graph LR;
   0[group<br>]
-'''
+```
 
 Box().x(3, 6).seq({ by: 1 / 2 }, rz).abstract()
