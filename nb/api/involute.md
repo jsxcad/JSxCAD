@@ -1,3 +1,4 @@
+[index](../../nb/api/index.md)
 ### involute()
 Produces a surface inscribed within the shape.
 

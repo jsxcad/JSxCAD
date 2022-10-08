@@ -1,3 +1,4 @@
+[index](../../nb/api/index.md)
 ### noVoid
 
 Removes void geometry from the incoming shape.

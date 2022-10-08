@@ -38,4 +38,4 @@ const final = base.cut(grabber).stl('test shape.stl');
 
 ![Image](thing.md.4.png)
 
-[test shape.stl_0.stl](thing.test%20shape.stl_0.stl)
+[test shape.stl_1.stl](thing.test%20shape.stl_1.stl)

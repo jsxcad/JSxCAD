@@ -58,21 +58,23 @@ const replayRecordedNotes = async (path, id) => {
   flushEmitGroup();
 };
 
-const emitSourceLocation = ({ path, id }) => {
+/*
+export const emitSourceLocation = ({ path, id }) => {
   const setContext = { sourceLocation: { path, id } };
   emit({ hash: computeHash(setContext), setContext });
 };
+*/
 
 const emitSourceText = (sourceText) =>
   emit({ hash: computeHash(sourceText), sourceText });
 
-const $run = async (op, { path, id, text, sha }) => {
+const $run = async (op, { path, id, text, sha, line }) => {
   const meta = await read(`meta/def/${path}/${id}`);
   if (!meta || meta.sha !== sha) {
     logInfo('api/core/$run', text);
     const timer = startTime(`${path}/${id}`);
     beginRecordingNotes();
-    beginEmitGroup({ path, id });
+    beginEmitGroup({ path, id, line });
     emitSourceText(text);
     let result;
     try {
@@ -86,7 +88,7 @@ const $run = async (op, { path, id, text, sha }) => {
           .md('Debug Geometry: ')
           .view();
         await resolvePending();
-        finishEmitGroup({ path, id });
+        finishEmitGroup({ path, id, line });
       }
       throw error;
     }
@@ -119,7 +121,6 @@ var notesApi = /*#__PURE__*/Object.freeze({
   clearRecordedNotes: clearRecordedNotes,
   saveRecordedNotes: saveRecordedNotes,
   replayRecordedNotes: replayRecordedNotes,
-  emitSourceLocation: emitSourceLocation,
   emitSourceText: emitSourceText,
   $run: $run
 });
@@ -322,6 +323,44 @@ const setToSourceFromNameFunction = (op) => {
   toSourceFromName = op;
 };
 
+const importScript = async (
+  baseApi,
+  name,
+  scriptText,
+  {
+    clearUpdateEmits = false,
+    topLevel = new Map(),
+    evaluate: evaluate$1,
+    replay,
+    doRelease = true,
+    readCache = true,
+    workspace,
+  } = {}
+) => {
+  try {
+    const path = name;
+    const api = { ...baseApi, sha: 'master' };
+    if (!evaluate$1) {
+      evaluate$1 = (script) => evaluate(script, { api, path });
+    }
+    if (!replay) {
+      replay = (script) => evaluate(script, { api, path });
+    }
+    const builtModule = await execute(scriptText, {
+      evaluate: evaluate$1,
+      replay,
+      path,
+      topLevel,
+      parallelUpdateLimit: 1,
+      clearUpdateEmits,
+    });
+    CACHED_MODULES.set(name, builtModule);
+    return builtModule;
+  } catch (error) {
+    throw error;
+  }
+};
+
 const buildImportModule =
   (baseApi) =>
   async (
@@ -329,7 +368,7 @@ const buildImportModule =
     {
       clearUpdateEmits = false,
       topLevel = new Map(),
-      evaluate: evaluate$1,
+      evaluate,
       replay,
       doRelease = true,
       readCache = true,
@@ -367,22 +406,15 @@ const buildImportModule =
           ? script
           : new TextDecoder('utf8').decode(script);
       const path = name;
-      const api = { ...baseApi, sha: 'master' };
-      if (!evaluate$1) {
-        evaluate$1 = (script) => evaluate(script, { api, path });
-      }
-      if (!replay) {
-        replay = (script) => evaluate(script, { api, path });
-      }
-      const builtModule = await execute(scriptText, {
-        evaluate: evaluate$1,
+      const builtModule = await importScript(baseApi, name, scriptText, {
+        evaluate,
         replay,
         path,
         topLevel,
         parallelUpdateLimit: 1,
         clearUpdateEmits,
+        workspace,
       });
-      CACHED_MODULES.set(name, builtModule);
       return builtModule;
     } catch (error) {
       throw error;
@@ -507,4 +539,4 @@ registerDynamicModule(
 
 setApi(api);
 
-export { api as default, evaluate, execute };
+export { api as default, evaluate, execute, importScript };

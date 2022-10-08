@@ -1,3 +1,4 @@
+[index](../../nb/api/index.md)
 ### void()
 
 The shape is marked as a void.

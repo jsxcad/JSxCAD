@@ -87,7 +87,7 @@ const topWithPegHoles = top
 
 ![Image](saucer.md.3.png)
 
-[top2_0.stl](saucer.top2_0.stl)
+[top2_1.stl](saucer.top2_1.stl)
 
 ```JavaScript
 const baseWithPegHoles = base
@@ -102,4 +102,4 @@ const baseWithPegHoles = base
 
 ![Image](saucer.md.4.png)
 
-[base_0.stl](saucer.base_0.stl)
+[base_1.stl](saucer.base_1.stl)

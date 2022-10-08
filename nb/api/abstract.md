@@ -1,3 +1,4 @@
+[index](../../nb/api/index.md)
 # abstract()
 
 Provides a graph of the shapes internal structure.

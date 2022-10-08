@@ -13,4 +13,4 @@ Arc(44.5)
 
 ![Image](spindle_mount.md.0.png)
 
-[spindle_mount_0.stl](spindle_mount.spindle_mount_0.stl)
+[spindle_mount_1.stl](spindle_mount.spindle_mount_1.stl)

@@ -1,3 +1,4 @@
+[index](../../nb/api/index.md)
 ### smooth()
 Parameter|Default|Type
 ---|---|---

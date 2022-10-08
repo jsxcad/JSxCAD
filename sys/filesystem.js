@@ -27,7 +27,7 @@ export const setupFilesystem = ({ fileBase } = {}) => {
 };
 
 export const setupWorkspace = (workspace) =>
-  setupFilesystem({ filebase: workspace });
+  setupFilesystem({ fileBase: workspace });
 
 export const getFilesystem = () => {
   if (base !== undefined) {

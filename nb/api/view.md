@@ -1,3 +1,4 @@
+[index](../../nb/api/index.md)
 ### view()
 Parameter|Default|Type
 ---|---|---

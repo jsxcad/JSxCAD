@@ -4242,7 +4242,7 @@ const toSvg = async (
 
   svg.push('</svg>');
   const output = svg.join('\n');
-  return new TextEncoder('utf8').encode(output);
+  return new TextEncoder('utf8').encode(`${output}\n`);
 };
 
 export { fromSvg, fromSvgPath$1 as fromSvgPath, toSvg };

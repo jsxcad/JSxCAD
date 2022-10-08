@@ -1,3 +1,4 @@
+[index](../../nb/api/index.md)
 ### twist()
 Parameter|Default|Type
 ---|---|---

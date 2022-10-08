@@ -1,3 +1,4 @@
+[index](../../nb/api/index.md)
 ### fuse()
 Parameter|Default|Type
 ---|---|---

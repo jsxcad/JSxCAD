@@ -29,4 +29,4 @@ const hexagonalTile = Tile(6).stl('hex');
 
 ![Image](map.md.2.png)
 
-[hex_0.stl](map.hex_0.stl)
+[hex_1.stl](map.hex_1.stl)

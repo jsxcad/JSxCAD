@@ -12,6 +12,7 @@ import Box from './Box.js';
 import Group from './Group.js';
 import Hershey from './Hershey.js';
 import Shape from './Shape.js';
+import { align } from './align.js';
 import { destructure } from './destructure.js';
 
 const MIN = 0;
@@ -19,7 +20,13 @@ const MAX = 1;
 const X = 0;
 const Y = 1;
 
-const buildLayoutGeometry = ({ layer, pageWidth, pageLength, margin }) => {
+const buildLayoutGeometry = ({
+  layer,
+  pageWidth,
+  pageLength,
+  margin,
+  center = false,
+}) => {
   const itemNames = layer
     .getNot('type:ghost')
     .tags('item', list)
@@ -50,13 +57,17 @@ const buildLayoutGeometry = ({ layer, pageWidth, pageLength, margin }) => {
     )
     .color('red')
     .ghost();
-  return Shape.fromGeometry(
+  let layout = Shape.fromGeometry(
     taggedLayout(
       { size, margin, title },
       layer.toGeometry(),
       visualization.toGeometry()
     )
   );
+  if (center) {
+    layout = layout.by(align());
+  }
+  return layout;
 };
 
 export const Page = (...args) => {
@@ -65,13 +76,18 @@ export const Page = (...args) => {
     strings: modes,
     shapesAndFunctions: shapes,
   } = destructure(args);
-  const {
+  let {
     size,
     pageMargin = 5,
     itemMargin = 1,
     itemsPerPage = Infinity,
   } = options;
   const pack = modes.includes('pack');
+  const center = modes.includes('center');
+
+  if (modes.includes('a4')) {
+    size = [210, 297];
+  }
 
   const margin = itemMargin;
   const layers = [];
@@ -101,7 +117,13 @@ export const Page = (...args) => {
         Math.abs(packSize[MIN][Y] * 2)
       ) +
       pageMargin * 2;
-    return buildLayoutGeometry({ layer, pageWidth, pageLength, margin });
+    return buildLayoutGeometry({
+      layer,
+      pageWidth,
+      pageLength,
+      margin,
+      center,
+    });
   } else if (!pack && !size) {
     const layer = Shape.fromGeometry(taggedGroup({}, ...layers));
     const packSize = measureBoundingBox(layer.toGeometry());
@@ -123,13 +145,20 @@ export const Page = (...args) => {
       ) +
       pageMargin * 2;
     if (isFinite(pageWidth) && isFinite(pageLength)) {
-      return buildLayoutGeometry({ layer, pageWidth, pageLength, margin });
+      return buildLayoutGeometry({
+        layer,
+        pageWidth,
+        pageLength,
+        margin,
+        center,
+      });
     } else {
       return buildLayoutGeometry({
         layer,
         pageWidth: 0,
         pageLength: 0,
         margin,
+        center,
       });
     }
   } else if (pack && size) {
@@ -149,13 +178,14 @@ export const Page = (...args) => {
     const pageLength = Math.max(1, packSize[MAX][Y] - packSize[MIN][Y]);
     if (isFinite(pageWidth) && isFinite(pageLength)) {
       const plans = [];
-      for (const layer of content.get('pack:layer', List)) {
+      for (const layer of content.get('pack:layout', List)) {
         plans.push(
           buildLayoutGeometry({
             layer,
             pageWidth,
             pageLength,
             margin,
+            center,
           })
         );
       }
@@ -167,6 +197,7 @@ export const Page = (...args) => {
         pageWidth: 0,
         pageLength: 0,
         margin,
+        center,
       });
     }
   } else if (pack && !size) {
@@ -194,6 +225,7 @@ export const Page = (...args) => {
           pageWidth,
           pageLength,
           margin,
+          center,
         });
         plans.push(layout);
       }
@@ -205,6 +237,7 @@ export const Page = (...args) => {
         pageWidth: 0,
         pageLength: 0,
         margin,
+        center,
       });
     }
   }

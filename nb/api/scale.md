@@ -1,3 +1,4 @@
+[index](../../nb/api/index.md)
 ### scale()
 ...dimensions|[1, 1, 1]|Dimensions by which to scale.
 

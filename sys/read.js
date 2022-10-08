@@ -14,6 +14,7 @@ import { addPending } from './pending.js';
 import { db } from './db.js';
 import { logInfo } from './log.js';
 import nodeFetch from 'node-fetch';
+import { notifyFileRead } from './broadcast.js';
 import { write } from './write.js';
 
 const { promises } = fs;
@@ -179,6 +180,7 @@ export const read = async (path, options = {}) => {
     forceNoCache = false,
     decode,
     otherwise,
+    notifyFileReadEnabled = true,
   } = options;
   const qualifiedPath = qualifyPath(path, workspace);
   const file = ensureQualifiedFile(path, qualifiedPath);
@@ -218,6 +220,9 @@ export const read = async (path, options = {}) => {
       // Resolve any outstanding promises.
       file.data = await file.data;
     }
+  }
+  if (notifyFileReadEnabled) {
+    await notifyFileRead(path, workspace);
   }
   return file.data || otherwise;
 };

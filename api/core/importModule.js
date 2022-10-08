@@ -16,6 +16,44 @@ export const setToSourceFromNameFunction = (op) => {
   toSourceFromName = op;
 };
 
+export const importScript = async (
+  baseApi,
+  name,
+  scriptText,
+  {
+    clearUpdateEmits = false,
+    topLevel = new Map(),
+    evaluate,
+    replay,
+    doRelease = true,
+    readCache = true,
+    workspace,
+  } = {}
+) => {
+  try {
+    const path = name;
+    const api = { ...baseApi, sha: 'master' };
+    if (!evaluate) {
+      evaluate = (script) => baseEvaluate(script, { api, path });
+    }
+    if (!replay) {
+      replay = (script) => baseEvaluate(script, { api, path });
+    }
+    const builtModule = await execute(scriptText, {
+      evaluate,
+      replay,
+      path,
+      topLevel,
+      parallelUpdateLimit: 1,
+      clearUpdateEmits,
+    });
+    CACHED_MODULES.set(name, builtModule);
+    return builtModule;
+  } catch (error) {
+    throw error;
+  }
+};
+
 export const buildImportModule =
   (baseApi) =>
   async (
@@ -61,22 +99,15 @@ export const buildImportModule =
           ? script
           : new TextDecoder('utf8').decode(script);
       const path = name;
-      const api = { ...baseApi, sha: 'master' };
-      if (!evaluate) {
-        evaluate = (script) => baseEvaluate(script, { api, path });
-      }
-      if (!replay) {
-        replay = (script) => baseEvaluate(script, { api, path });
-      }
-      const builtModule = await execute(scriptText, {
+      const builtModule = await importScript(baseApi, name, scriptText, {
         evaluate,
         replay,
         path,
         topLevel,
         parallelUpdateLimit: 1,
         clearUpdateEmits,
+        workspace,
       });
-      CACHED_MODULES.set(name, builtModule);
       return builtModule;
     } catch (error) {
       throw error;

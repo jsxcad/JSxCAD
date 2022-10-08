@@ -45,6 +45,7 @@ cp data/shape/dist/main.js es6/jsxcad-data-shape.js
 cp geometry/dist/main.js es6/jsxcad-geometry.js
 cp sys/dist/main.js es6/jsxcad-sys.js
 cp ui/app/dist/main.js es6/jsxcad-ui-app.js
+cp ui/app/dist/standalone.js es6/jsxcad-ui-app-standalone.js
 cp ui/app/dist/webworker.js es6/jsxcad-ui-app-webworker.js
 cp ui/notebook/dist/main.js es6/jsxcad-ui-notebook.js
 cp ui/threejs/dist/main.js es6/jsxcad-ui-threejs.js

@@ -43,6 +43,7 @@ export { eachItem } from './tagged/eachItem.js';
 export { eachPoint } from './eachPoint.js';
 export { eachSegment } from './eachSegment.js';
 export { eachTriangle } from './eachTriangle.js';
+export { eagerTransform } from './eagerTransform.js';
 export { extrude } from './extrude.js';
 export { fix } from './fix.js';
 export { fresh } from './tagged/fresh.js';

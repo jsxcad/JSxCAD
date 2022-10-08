@@ -1,3 +1,4 @@
+[index](../../nb/api/index.md)
 ### seam()
 Parameter|Default|Type
 ---|---|---

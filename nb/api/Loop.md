@@ -1,3 +1,4 @@
+[index](../../nb/api/index.md)
 ### Loop(...shapes)
 Parameter|Default|Type
 ---|---|---

@@ -80,7 +80,8 @@ const generateCode = async (
       if (entry.importSource) {
         add(imports, entry.importSource);
       }
-      const { path, id, code, text, sha } = entry;
+      const { path, id, code, text, sha, sourceLocation } = entry;
+      const line = sourceLocation.start.line;
       if (code) {
         body.push(
           parse(
@@ -89,7 +90,7 @@ const generateCode = async (
               body: code,
             })}; return ${id}; }, { path: '${path}', id: '${id}', text: ${escape(
               text
-            )}, sha: '${sha}' });`,
+            )}, sha: '${sha}', line: ${line} });`,
             parseOptions
           )
         );

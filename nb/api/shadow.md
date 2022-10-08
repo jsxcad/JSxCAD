@@ -1,3 +1,4 @@
+[index](../../nb/api/index.md)
 # shape.shadow(plane, direction)
 
 Projects shape onto the given plane at the given direction.

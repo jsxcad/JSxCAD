@@ -54,7 +54,14 @@ export const beginEmitGroup = (sourceLocation) => {
 
 export const flushEmitGroup = () => {
   for (const onEmitHandler of onEmitHandlers) {
-    onEmitHandler([...emitGroup]);
+    const group = [...emitGroup];
+    let nth = 0;
+    for (const entry of group) {
+      if (entry.sourceLocation) {
+        entry.sourceLocation.nth = ++nth;
+      }
+    }
+    onEmitHandler(group);
   }
   emitGroup.splice(0);
 };

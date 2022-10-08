@@ -1,3 +1,4 @@
+[index](../../nb/api/index.md)
 ### noOp()
 Just returns the incoming shape.
 

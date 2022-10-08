@@ -1,4 +1,5 @@
 md`
+[index](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/index.nb)
 ### disjoint()
 
 Attempts to make the leaf geometry of a shape disjoint, so that only one shape covers one region of space.

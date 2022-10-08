@@ -1,3 +1,4 @@
+[index](../../nb/api/index.md)
 # Icosahedron(...dimensions)
 
 Produces an icosahedron that fits the bounding dimensions.

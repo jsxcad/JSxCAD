@@ -47,8 +47,8 @@ const monocle_37x12x2x2 = Monocle(37, 12, 2, 2);
 
 ![Image](monocle.md.1.png)
 
-[frame-37x12x2x2_0.stl](monocle.frame-37x12x2x2_0.stl)
+[frame-37x12x2x2_1.stl](monocle.frame-37x12x2x2_1.stl)
 
 ![Image](monocle.md.2.png)
 
-[lens-37x12x2x2_0.stl](monocle.lens-37x12x2x2_0.stl)
+[lens-37x12x2x2_1.stl](monocle.lens-37x12x2x2_1.stl)

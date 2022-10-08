@@ -147,19 +147,19 @@ export const toCgalGeometry = (inputs, g = getCgal()) => {
   return cgalGeometry;
 };
 
-export const fromCgalGeometry = (geometry, inputs, length = inputs.length, start = 0) => {
+export const fromCgalGeometry = (geometry, inputs, length = inputs.length, start = 0, copyOriginal = false) => {
   const g = getCgal();
   const results = [];
   for (let nth = start; nth < length; nth++) {
+    const origin = copyOriginal ? geometry.getOrigin(nth) : nth;
     switch (geometry.getType(nth)) {
       case GEOMETRY_MESH: {
         const newMesh = geometry.getMesh(nth);
         const matrix = toJsTransformFromCgalTransform(geometry.getTransform(nth));
-        let { tags = [], graph } = inputs[nth] || {};
+        let { tags = [], graph } = inputs[origin] || {};
         if (graph === undefined || newMesh !== graph.mesh) {
           graph = {
             serializedSurfaceMesh: g.SerializeMesh(newMesh),
-            // mesh: new WeakRef(newMesh)
           };
           graph.hash = computeHash(graph);
           newMesh.delete();
@@ -208,7 +208,7 @@ export const fromCgalGeometry = (geometry, inputs, length = inputs.length, start
           outputPolygonPoint
         );
         const matrix = toJsTransformFromCgalTransform(geometry.getTransform(nth));
-        const { tags = [] } = inputs[nth] || {};
+        const { tags = [] } = inputs[origin] || {};
         results[nth] = {
           type: 'polygonsWithHoles',
           polygonsWithHoles,
@@ -221,7 +221,7 @@ export const fromCgalGeometry = (geometry, inputs, length = inputs.length, start
       }
       case GEOMETRY_SEGMENTS: {
         const matrix = toJsTransformFromCgalTransform(geometry.getTransform(nth));
-        const { tags = [] } = inputs[nth] || {};
+        const { tags = [] } = inputs[origin] || {};
         const segments = [];
         results[nth] = {
           type: 'segments',
@@ -236,7 +236,7 @@ export const fromCgalGeometry = (geometry, inputs, length = inputs.length, start
       }
       case GEOMETRY_POINTS: {
         const matrix = toJsTransformFromCgalTransform(geometry.getTransform(nth));
-        const { tags = [] } = inputs[nth] || {};
+        const { tags = [] } = inputs[origin] || {};
         const points = [];
         const exactPoints = [];
         results[nth] = {
@@ -255,7 +255,7 @@ export const fromCgalGeometry = (geometry, inputs, length = inputs.length, start
       case GEOMETRY_EDGES: {
         // TODO: Figure out segments vs edges.
         const matrix = toJsTransformFromCgalTransform(geometry.getTransform(nth));
-        const { tags = [] } = inputs[nth] || {};
+        const { tags = [] } = inputs[origin] || {};
         const segments = [];
         const normals = [];
         const faces = [];

@@ -1,4 +1,5 @@
 md`
+[index](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/index.nb)
 ### fill()
 
 Converts the shape to segments and fills them to produce surfaces.

@@ -63,7 +63,7 @@ Gear()
 
 ![Image](gear.md.1.png)
 
-[gear_16_0.stl](gear.gear_16_0.stl)
+[gear_16_1.stl](gear.gear_16_1.stl)
 
 ```JavaScript
 Gear()
@@ -274,12 +274,12 @@ const planetaryDesign = planetaryDesign3
 
 ![Image](gear.md.9.png)
 
-[ring_0.stl](gear.ring_0.stl)
+[ring_1.stl](gear.ring_1.stl)
 
 ![Image](gear.md.10.png)
 
-[planetary_0.stl](gear.planetary_0.stl)
+[planetary_1.stl](gear.planetary_1.stl)
 
 ![Image](gear.md.11.png)
 
-[solar_0.stl](gear.solar_0.stl)
+[solar_1.stl](gear.solar_1.stl)

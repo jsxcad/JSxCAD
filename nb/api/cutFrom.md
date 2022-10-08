@@ -1,3 +1,4 @@
+[index](../../nb/api/index.md)
 ### shape.cutFrom
 Parameter|Default|Type
 ---|---|---

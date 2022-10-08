@@ -1,3 +1,4 @@
+[index](../../nb/index.md)
 # Shape API
 
 ## Constructors

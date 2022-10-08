@@ -1,3 +1,4 @@
+[index](../../nb/api/index.md)
 ### sketch()
 Converts the incoming shape to a sketch.
 

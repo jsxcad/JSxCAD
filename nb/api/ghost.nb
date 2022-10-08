@@ -1,4 +1,5 @@
 md`
+[index](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/index.nb)
 ### ghost()
 Make a shape into ghost geometry, which is displayed transparently, but does not otherwise interact or produce output.
 

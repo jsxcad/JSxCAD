@@ -1,3 +1,4 @@
+[index](../../nb/api/index.md)
 ### points()
 
 Produces a set of points from the incoming shape.

@@ -1,3 +1,4 @@
+[index](../../nb/api/index.md)
 ### drop()
 Parameter|Default|Type
 ---|---|---

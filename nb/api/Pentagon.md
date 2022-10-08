@@ -1,3 +1,4 @@
+[index](../../nb/api/index.md)
 ### Pentagon()
 Parameter|Default|Type
 ...dimensions||Size of the bounding box to contain the hexagon.

@@ -1,3 +1,4 @@
+[index](../../nb/api/index.md)
 ### pack()
 Parameter|Default|Type
 ---|---|---

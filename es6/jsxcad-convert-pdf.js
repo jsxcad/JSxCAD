@@ -139,7 +139,7 @@ const toPdf = async (
       footer
     )
     .join('\n');
-  return new TextEncoder('utf8').encode(output);
+  return new TextEncoder('utf8').encode(`${output}\n`);
 };
 
 export { toPdf };

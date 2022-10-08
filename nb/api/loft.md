@@ -1,3 +1,4 @@
+[index](../../nb/api/index.md)
 ### loft(...shapes)
 Parameter|Default|Type
 ---|---|---

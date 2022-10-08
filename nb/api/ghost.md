@@ -1,3 +1,4 @@
+[index](../../nb/api/index.md)
 ### ghost()
 Make a shape into ghost geometry, which is displayed transparently, but does not otherwise interact or produce output.
 

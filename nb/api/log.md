@@ -1,3 +1,4 @@
+[index](../../nb/api/index.md)
 ### log()
 Outputs the geometry data for debugging.
 

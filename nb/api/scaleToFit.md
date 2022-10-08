@@ -1,3 +1,4 @@
+[index](../../nb/api/index.md)
 ### scaleToFit()
 Parameter|Default|Type
 ---|---|---

@@ -1,3 +1,4 @@
+[index](../../nb/api/index.md)
 ### SurfaceMesh()
 Parameter|Default|Type
 ---|---|---

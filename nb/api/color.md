@@ -1,3 +1,4 @@
+[index](../../nb/api/index.md)
 # shape.color(name)
 
 Sets the color of all leaf geometry in shape to the named color, replacing existing colors.

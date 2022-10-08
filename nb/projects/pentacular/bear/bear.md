@@ -22,7 +22,7 @@ a.stl('bear').note('This is a low-poly model of a bear.');
 
 ![Image](bear.md.0.png)
 
-[bear_0.stl](bear.bear_0.stl)
+[bear_1.stl](bear.bear_1.stl)
 
 This is a low-poly model of a bear.
 

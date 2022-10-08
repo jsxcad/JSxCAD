@@ -1,6 +1,6 @@
 import { Shape, destructure, ensurePages } from './jsxcad-api-shape.js';
 import { fromStl, toStl } from './jsxcad-convert-stl.js';
-import { read, emit, getSourceLocation, generateUniqueId, addPending, write, getPendingErrorHandler } from './jsxcad-sys.js';
+import { read, getSourceLocation, generateUniqueId, addPending, emit, write, getPendingErrorHandler } from './jsxcad-sys.js';
 import { hash } from './jsxcad-geometry.js';
 
 const readStl = async (
@@ -82,7 +82,7 @@ var hashSum = sum;
 const prepareStl = (shape, name, op = (s) => s, options = {}) => {
   const { path } = getSourceLocation();
   let index = 0;
-  const entries = [];
+  const records = [];
   for (const entry of ensurePages(op(shape).toDisjointGeometry())) {
     const stlPath = `download/stl/${path}/${generateUniqueId()}`;
     const render = async () => {
@@ -93,25 +93,27 @@ const prepareStl = (shape, name, op = (s) => s, options = {}) => {
       }
     };
     addPending(render());
-    entries.push({
+    const filename = `${name}_${index++}.stl`;
+    const record = {
       path: stlPath,
       filename: `${name}_${index++}.stl`,
       type: 'application/sla',
-    });
+    };
+    records.push(record);
     // Produce a view of what will be downloaded.
-    Shape.fromGeometry(entry).view(hashSum(name), options.view);
+    const hash$1 =
+      hashSum({ filename, options }) + hash(shape.toGeometry());
+    Shape.fromGeometry(entry).view(hash$1, options.view);
+    emit({ download: { entries: [record] }, hash: hash$1 });
   }
-  return entries;
+  return records;
 };
 
 const stl =
   (...args) =>
   (shape) => {
     const { value: name, func: op, object: options } = destructure(args);
-    const entries = prepareStl(shape, name, op, options);
-    const download = { entries };
-    const hash$1 = hashSum({ name }) + hash(shape.toGeometry());
-    emit({ download, hash: hash$1 });
+    prepareStl(shape, name, op, options);
     return shape;
   };
 

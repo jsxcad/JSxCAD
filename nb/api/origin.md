@@ -1,3 +1,4 @@
+[index](../../nb/api/index.md)
 ### origin()
 Produces a reference point showing the transform required to move the object to its local origin.
 

@@ -4,6 +4,7 @@ const fileChangeWatchers = new Set();
 const fileChangeWatchersByPath = new Map();
 const fileCreationWatchers = new Set();
 const fileDeletionWatchers = new Set();
+const fileReadWatchers = new Set();
 
 export const runFileCreationWatchers = async (path, workspace) => {
   for (const watcher of fileCreationWatchers) {
@@ -13,6 +14,12 @@ export const runFileCreationWatchers = async (path, workspace) => {
 
 export const runFileDeletionWatchers = async (path, workspace) => {
   for (const watcher of fileDeletionWatchers) {
+    await watcher(path, workspace);
+  }
+};
+
+export const runFileReadWatchers = async (path, workspace) => {
+  for (const watcher of fileReadWatchers) {
     await watcher(path, workspace);
   }
 };
@@ -76,6 +83,11 @@ export const unwatchFileDeletion = async (thunk) => {
   return thunk;
 };
 
+export const unwatchFileRead = async (thunk) => {
+  fileReadWatchers.delete(thunk);
+  return thunk;
+};
+
 export const watchFileChange = async (thunk) => {
   fileChangeWatchers.add(thunk);
   return thunk;
@@ -88,5 +100,10 @@ export const watchFileCreation = async (thunk) => {
 
 export const watchFileDeletion = async (thunk) => {
   fileDeletionWatchers.add(thunk);
+  return thunk;
+};
+
+export const watchFileRead = async (thunk) => {
+  fileReadWatchers.add(thunk);
   return thunk;
 };

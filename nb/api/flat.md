@@ -1,3 +1,4 @@
+[index](../../nb/api/index.md)
 ### flat()
 
 Puts the shape into its preferred orientation (which is not necessarily flat).

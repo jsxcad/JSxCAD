@@ -1,16 +1,17 @@
+import { toHtmlFromNotebook, toHtmlFromScript } from './toHtml.js';
+
 import { boot } from '@jsxcad/sys';
 import fs from 'fs';
 import test from 'ava';
-import { toHtml } from './toHtml.js';
 import { unitGeodesicSphere20Polygons } from '@jsxcad/data-shape';
 
-const { readFile } = fs.promises;
+const { readFile, writeFile } = fs.promises;
 
 test.beforeEach(async (t) => {
   await boot();
 });
 
-test('Test notebook', async (t) => {
+test('Test precomputed notebook', async (t) => {
   const notebook = [
     { md: '# Test Notebook.', hash: 'a' },
     { md: '## A Sphere.', hash: 'b' },
@@ -24,9 +25,19 @@ test('Test notebook', async (t) => {
       hash: 'c',
     },
   ];
-  const { html } = await toHtml(notebook);
+  const { html } = await toHtmlFromNotebook(notebook);
   t.is(
     new TextDecoder('utf8').decode(html),
     await readFile('toHtml.test.html', { encoding: 'utf8' })
+  );
+});
+
+test('Test dynamic notebook', async (t) => {
+  const files = { 'test.js': 'Box(1).view()' };
+  const { html } = await toHtmlFromScript({ files, module: 'test.js' });
+  await writeFile('toHtml.dynamic.test.html', html, { encoding: 'utf8' });
+  t.is(
+    new TextDecoder('utf8').decode(html),
+    await readFile('toHtml.dynamic.test.html', { encoding: 'utf8' })
   );
 });
