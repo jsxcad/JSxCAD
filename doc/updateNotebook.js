@@ -164,7 +164,6 @@ export const updateNotebook = async (
     if (files[path] || !path.startsWith('source/')) {
       return;
     }
-    console.log(`QQ/addFile ${path} ${workspace}`);
     const data = await read(path, { workspace, ephemeral: true, notifyFileReadEnabled: false });
     files[path] = data;
   };

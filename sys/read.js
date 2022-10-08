@@ -7,18 +7,17 @@ import * as v8 from 'v8';
 import { ensureQualifiedFile, getFile } from './files.js';
 import { getFilesystem, qualifyPath } from './filesystem.js';
 import { isBrowser, isNode, isWebWorker } from './browserOrNode.js';
+import { logError, logInfo } from './log.js';
 import { unwatchFile, watchFile } from './watchers.js';
 
 import { ErrorWouldBlock } from './error.js';
 import { addPending } from './pending.js';
 import { db } from './db.js';
-import { logInfo } from './log.js';
 import nodeFetch from 'node-fetch';
 import { notifyFileRead } from './broadcast.js';
 import { write } from './write.js';
 
 const { promises } = fs;
-const { deserialize } = v8;
 
 const getUrlFetcher = () => {
   if (isBrowser) {
@@ -46,7 +45,7 @@ const getExternalFileFetcher = () => {
         if (e.code && e.code === 'ENOENT') {
           return {};
         }
-        logInfo('sys/getExternalFile/error', e.toString());
+        logError('sys/getExternalFile/error', `qualifiedPath=${qualifiedPath} error=${e.toString()}`);
       }
     };
   } else if (isBrowser || isWebWorker) {
@@ -61,19 +60,16 @@ const externalFileFetcher = getExternalFileFetcher();
 const getInternalFileFetcher = () => {
   if (isNode) {
     // FIX: Put this through getFile, also.
-    return async (qualifiedPath, doSerialize = true) => {
+    return async (qualifiedPath) => {
       try {
         let data = await promises.readFile(qualifiedPath);
-        if (doSerialize) {
-          data = deserialize(data);
-        }
         // FIX: Use a proper version.
         return { data, version: 0 };
       } catch (e) {
         if (e.code && e.code === 'ENOENT') {
           return {};
         }
-        logInfo('sys/getExternalFile/error', e.toString());
+        logError('sys/getExternalFile/error', `qualifiedPath=${qualifiedPath} error=${e.toString()}`);
       }
     };
   } else if (isBrowser || isWebWorker) {
@@ -103,10 +99,10 @@ const getInternalFileVersionFetcher = (qualify = qualifyPath) => {
 const internalFileVersionFetcher = getInternalFileVersionFetcher();
 
 // Fetch from internal store.
-const fetchPersistent = (qualifiedPath, { workspace, doSerialize }) => {
+const fetchPersistent = (qualifiedPath, { workspace }) => {
   try {
     if (workspace) {
-      return internalFileFetcher(qualifiedPath, doSerialize);
+      return internalFileFetcher(qualifiedPath);
     } else {
       return {};
     }
@@ -114,7 +110,7 @@ const fetchPersistent = (qualifiedPath, { workspace, doSerialize }) => {
     if (e.code && e.code === 'ENOENT') {
       return {};
     }
-    logInfo('sys/fetchPersistent/error', e.toString());
+    logError('sys/fetchPersistent/error', `qualifiedPath=${qualifiedPath} error=${e.toString()}`);
   }
 };
 
@@ -127,7 +123,7 @@ const fetchPersistentVersion = (qualifiedPath, { workspace }) => {
     if (e.code && e.code === 'ENOENT') {
       return;
     }
-    logInfo('sys/fetchPersistentVersion/error', e.toString());
+    logError('sys/fetchPersistentVersion/error', `qualifiedPath=${qualifiedPath} error=${e.toString()}`);
   }
 };
 
@@ -185,8 +181,6 @@ export const read = async (path, options = {}) => {
   const qualifiedPath = qualifyPath(path, workspace);
   const file = ensureQualifiedFile(path, qualifiedPath);
 
-  console.log(`QQ/read: ${path} ${workspace}`);
-
   if (file.data && workspace && !ephemeral) {
     // Check that the version is still up to date.
     const persistentVersion = await fetchPersistentVersion(qualifiedPath, { workspace });
@@ -200,7 +194,6 @@ export const read = async (path, options = {}) => {
   if (file.data === undefined || useCache === false || forceNoCache) {
     const { value, version } = await fetchPersistent(qualifiedPath, {
       workspace,
-      doSerialize: true,
     });
     file.data = value;
     file.version = version;
@@ -218,7 +211,7 @@ export const read = async (path, options = {}) => {
     file.data = data;
   }
   if (file.data !== undefined) {
-    if (file.data.then) {
+    while (file.data.then) {
       // Resolve any outstanding promises.
       file.data = await file.data;
     }

@@ -28,6 +28,7 @@ const getFileWriter = () => {
         const version = 0;
         return version;
       } catch (error) {
+        console.dir(data, { depth: null });
         throw error;
       }
     };
@@ -56,7 +57,9 @@ export const writeNonblocking = (path, data, options = {}) => {
 };
 
 export const write = async (path, data, options = {}) => {
-  data = await data;
+  while (data.then) {
+    data = await data;
+  }
 
   if (typeof data === 'function') {
     // Always fail to write functions.

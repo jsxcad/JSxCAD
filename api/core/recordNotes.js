@@ -72,7 +72,7 @@ export const emitSourceText = (sourceText) =>
   emit({ hash: computeHash(sourceText), sourceText });
 
 export const $run = async (op, { path, id, text, sha, line }) => {
-  const meta = await read(`meta/def/${path}/${id}`);
+  const meta = await read(`meta/def/${path}/${id}.meta`);
   if (!meta || meta.sha !== sha) {
     logInfo('api/core/$run', text);
     const timer = startTime(`${path}/${id}`);
@@ -102,8 +102,8 @@ export const $run = async (op, { path, id, text, sha, line }) => {
       const type = result.constructor.name;
       switch (type) {
         case 'Shape':
-          await saveGeometry(`data/def/${path}/${id}`, result);
-          await write(`meta/def/${path}/${id}`, { sha, type });
+          await saveGeometry(`data/def/${path}/${id}.data`, result);
+          await write(`meta/def/${path}/${id}.meta`, { sha, type });
           await saveRecordedNotes(path, id);
           return result;
       }
@@ -112,7 +112,7 @@ export const $run = async (op, { path, id, text, sha, line }) => {
     return result;
   } else if (meta.type === 'Shape') {
     await replayRecordedNotes(path, id);
-    return loadGeometry(`data/def/${path}/${id}`);
+    return loadGeometry(`data/def/${path}/${id}.data`);
   } else {
     throw Error('Unexpected cached result');
   }

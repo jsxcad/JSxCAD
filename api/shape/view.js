@@ -59,7 +59,7 @@ export const baseView =
       const geometry = tagGeometry(untagGeometry(entry, ['viewId:*']), [
         `viewId:${viewId}`,
       ]);
-      const viewPath = `view/${path}/${id}/${viewId}`;
+      const viewPath = `view/${path}/${id}/${viewId}.view`;
       addPending(write(viewPath, geometry));
       const view = {
         viewId,
