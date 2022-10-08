@@ -1,3 +1,4 @@
+[index](../../nb/api/index.md)
 ### in()
 Produces the shape structure inside the item.
 

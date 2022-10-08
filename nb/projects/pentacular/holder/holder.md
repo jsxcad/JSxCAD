@@ -39,4 +39,4 @@ const magneticPenHolder = Arc(magnetDiameter)
 
 ![Image](holder.md.1.png)
 
-[holder_0.stl](holder.holder_0.stl)
+[holder_1.stl](holder.holder_1.stl)

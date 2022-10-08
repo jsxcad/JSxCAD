@@ -71,6 +71,7 @@ export class JsEditorUi extends React.PureComponent {
       onClickLink: PropTypes.func,
       onClose: PropTypes.func,
       onSelectView: PropTypes.func,
+      onCursorChange: PropTypes.func,
     };
   }
 
@@ -91,7 +92,7 @@ export class JsEditorUi extends React.PureComponent {
   async componentDidMount() {
     const { editor } = this.aceEditor;
     const { session } = editor;
-    const { advice } = this.props;
+    const { advice, onCursorChange } = this.props;
 
     if (!advice) {
       return;
@@ -114,6 +115,15 @@ export class JsEditorUi extends React.PureComponent {
       if (match) {
         const uri = new URL(match[1], this.props.path);
         return this.props.onClickLink(uri.toString());
+      }
+    });
+
+    let currentRow;
+
+    editor.on('changeSelection', () => {
+      if (onCursorChange && currentRow !== editor.selection.cursor.row) {
+        currentRow = editor.selection.cursor.row;
+        onCursorChange(currentRow + 1);
       }
     });
 

@@ -1,3 +1,4 @@
+[index](../../nb/api/index.md)
 ### sz()
 dimension|1|Dimension by which to scale along the z axis
 

@@ -2,10 +2,18 @@ import {
   addOnEmitHandler,
   boot,
   clearEmitted,
+  read,
   removeOnEmitHandler,
   resolvePending,
+  setNotifyFileReadEnabled,
+  unwatchFileRead,
+  watchFileRead,
 } from '@jsxcad/sys';
 import { readFileSync, writeFileSync } from 'fs';
+import {
+  toHtmlFromNotebook,
+  toStandaloneFromScript,
+} from '@jsxcad/convert-notebook';
 
 import Base64ArrayBuffer from 'base64-arraybuffer';
 import api from '@jsxcad/api';
@@ -14,7 +22,6 @@ import pathModule from 'path';
 import pixelmatch from 'pixelmatch';
 import pngjs from 'pngjs';
 import { screenshot } from './screenshot.js';
-import { toHtml } from '@jsxcad/convert-notebook';
 
 const IGNORED_PIXEL_THRESHOLD_OBSERVED_PATHS = new Set([
   'nb/regression/shapes/shapes.md.10.observed.png',
@@ -32,7 +39,8 @@ const writeMarkdown = async (
   modulePath,
   notebook,
   imageUrlList,
-  failedExpectations
+  failedExpectations,
+  workspace
 ) => {
   const output = [];
   let imageCount = 0;
@@ -61,9 +69,12 @@ const writeMarkdown = async (
     }
     if (download) {
       const { entries } = download;
-      for (let { base64Data, filename, data } of entries) {
+      for (let { base64Data, filename, data, path } of entries) {
         if (!data && base64Data) {
           data = new Uint8Array(Base64ArrayBuffer.decode(base64Data));
+        }
+        if (!data) {
+          data = await read(path, { workspace });
         }
         const observedPath = `${modulePath}.observed.${filename}`;
         const expectedPath = `${modulePath}.${filename}`;
@@ -91,7 +102,12 @@ const writeMarkdown = async (
           )})`
         );
         output.push('');
-        writeFileSync(observedPath, data);
+        try {
+          writeFileSync(observedPath, data);
+        } catch (e) {
+          console.log(`QQ/entries: ${JSON.stringify(entries)}`);
+          throw e;
+        }
       }
     }
   }
@@ -136,38 +152,59 @@ const toSourceFromName = (baseDirectory) => (name) => {
 
 export const updateNotebook = async (
   target,
-  { failedExpectations = [], browser, baseDirectory } = {}
+  { failedExpectations = [], browser, baseDirectory, workspace } = {}
 ) => {
   clearEmitted();
   await boot();
   const notebook = [];
   const onEmitHandler = addOnEmitHandler((notes) => notebook.push(...notes));
+  const files = {};
+  const addFile = async (path, workspace) => {
+    if (files[path] || !path.startsWith('source/')) {
+      return;
+    }
+    const data = await read(path, { workspace, notifyFileReadEnabled: false });
+    files[path] = new TextDecoder('utf8').decode(data);
+  };
+  let fileReadWatcher = watchFileRead(addFile);
   try {
     // FIX: This may produce a non-deterministic ordering for now.
     const module = `${target}.nb`;
     const topLevel = new Map();
     // FIX: Sort out top-level evaluation vs module caching.
     api.setToSourceFromNameFunction(toSourceFromName(baseDirectory));
+    setNotifyFileReadEnabled(true);
     await api.importModule(module, {
       clearUpdateEmits: false,
       topLevel,
       readCache: false,
     });
     await resolvePending();
-    const { html, encodedNotebook } = await toHtml(notebook, {
+    const { html, encodedNotebook } = await toHtmlFromNotebook(notebook, {
       module,
       modulePath: 'http://127.0.0.1:5001',
     });
-    writeFileSync(`${target}.html`, html);
     const { imageUrlList } = await screenshot(
       new TextDecoder('utf8').decode(html),
       { browser }
     );
+    {
+      // Build a version for jsxcad.js.org/nb/
+      const { html } = await toStandaloneFromScript({
+        module,
+        files,
+        modulePath: 'https://jsxcad.js.org/alpha',
+        useMermaid: true,
+        useControls: true,
+      });
+      writeFileSync(`${target}.html`, html);
+    }
     await writeMarkdown(
       target,
       encodedNotebook,
       imageUrlList,
-      failedExpectations
+      failedExpectations,
+      workspace
     );
     for (let nth = 0; nth < imageUrlList.length; nth++) {
       const observedPath = `${target}.md.${nth}.observed.png`;
@@ -231,5 +268,6 @@ export const updateNotebook = async (
     throw error;
   } finally {
     removeOnEmitHandler(onEmitHandler);
+    unwatchFileRead(fileReadWatcher);
   }
 };

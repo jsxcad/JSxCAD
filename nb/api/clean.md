@@ -1,3 +1,4 @@
+[index](../../nb/api/index.md)
 ### clean()
 
 Removes ghost geometry, but not voids.

@@ -1,3 +1,4 @@
+[index](../../nb/api/index.md)
 ### lowerEnvelope()
 
 Generates a shape that covers the base of the shape.

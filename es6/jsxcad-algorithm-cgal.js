@@ -405,7 +405,6 @@ const initCgal = async () => {
             parts.pop();
             const prefix = parts.join('/');
             const wasmPathname = `${prefix}/${path}`;
-            console.log(`QQ/wasmPathname: ${wasmPathname}`);
             return wasmPathname;
           } else {
             const parts = url.split('/');
@@ -897,19 +896,19 @@ const toCgalGeometry = (inputs, g = getCgal()) => {
   return cgalGeometry;
 };
 
-const fromCgalGeometry = (geometry, inputs, length = inputs.length, start = 0) => {
+const fromCgalGeometry = (geometry, inputs, length = inputs.length, start = 0, copyOriginal = false) => {
   const g = getCgal();
   const results = [];
   for (let nth = start; nth < length; nth++) {
+    const origin = copyOriginal ? geometry.getOrigin(nth) : nth;
     switch (geometry.getType(nth)) {
       case GEOMETRY_MESH: {
         const newMesh = geometry.getMesh(nth);
         const matrix = toJsTransformFromCgalTransform(geometry.getTransform(nth));
-        let { tags = [], graph } = inputs[nth] || {};
+        let { tags = [], graph } = inputs[origin] || {};
         if (graph === undefined || newMesh !== graph.mesh) {
           graph = {
             serializedSurfaceMesh: g.SerializeMesh(newMesh),
-            // mesh: new WeakRef(newMesh)
           };
           graph.hash = computeHash(graph);
           newMesh.delete();
@@ -958,7 +957,7 @@ const fromCgalGeometry = (geometry, inputs, length = inputs.length, start = 0) =
           outputPolygonPoint
         );
         const matrix = toJsTransformFromCgalTransform(geometry.getTransform(nth));
-        const { tags = [] } = inputs[nth] || {};
+        const { tags = [] } = inputs[origin] || {};
         results[nth] = {
           type: 'polygonsWithHoles',
           polygonsWithHoles,
@@ -971,7 +970,7 @@ const fromCgalGeometry = (geometry, inputs, length = inputs.length, start = 0) =
       }
       case GEOMETRY_SEGMENTS: {
         const matrix = toJsTransformFromCgalTransform(geometry.getTransform(nth));
-        const { tags = [] } = inputs[nth] || {};
+        const { tags = [] } = inputs[origin] || {};
         const segments = [];
         results[nth] = {
           type: 'segments',
@@ -986,7 +985,7 @@ const fromCgalGeometry = (geometry, inputs, length = inputs.length, start = 0) =
       }
       case GEOMETRY_POINTS: {
         const matrix = toJsTransformFromCgalTransform(geometry.getTransform(nth));
-        const { tags = [] } = inputs[nth] || {};
+        const { tags = [] } = inputs[origin] || {};
         const points = [];
         const exactPoints = [];
         results[nth] = {
@@ -1005,7 +1004,7 @@ const fromCgalGeometry = (geometry, inputs, length = inputs.length, start = 0) =
       case GEOMETRY_EDGES: {
         // TODO: Figure out segments vs edges.
         const matrix = toJsTransformFromCgalTransform(geometry.getTransform(nth));
-        const { tags = [] } = inputs[nth] || {};
+        const { tags = [] } = inputs[origin] || {};
         const segments = [];
         const normals = [];
         const faces = [];
@@ -1401,6 +1400,21 @@ const eachTriangle = (inputs, emitTriangle) => {
     }
   });
 };
+
+const eagerTransform = (inputs) =>
+  withCgalGeometry(inputs, (cgalGeometry, g) => {
+    const status = g.EagerTransform(cgalGeometry, inputs.length - 1);
+    switch (status) {
+      case STATUS_ZERO_THICKNESS:
+        throw new ErrorZeroThickness(
+          'Zero thickness produced by eagerTransform'
+        );
+      case STATUS_OK:
+        return fromCgalGeometry(cgalGeometry, inputs, inputs.length - 1);
+      default:
+        throw new Error(`Unexpected status ${status}`);
+    }
+  });
 
 const extrude = (inputs, count) =>
   withCgalGeometry(inputs, (cgalGeometry, g) => {
@@ -1877,7 +1891,8 @@ const section = (inputs, count) =>
           cgalGeometry,
           inputs,
           cgalGeometry.getSize(),
-          inputs.length
+          inputs.length,
+          /* copyOriginal= */ true
         );
       default:
         throw new Error(`Unexpected status ${status}`);
@@ -2039,4 +2054,4 @@ const wrap = (inputs, alpha, offset) =>
     }
   });
 
-export { STATUS_EMPTY, STATUS_OK, STATUS_UNCHANGED, STATUS_ZERO_THICKNESS, arrangeSegments, arrangeSegmentsIntoTriangles, bend, cast, clip, composeTransforms, computeArea, computeBoundingBox, computeCentroid, computeImplicitVolume, computeNormal, computeVolume, convertPolygonsToMeshes, convexHull, cut, deform, deletePendingSurfaceMeshes, deleteSurfaceMesh, demesh, disjoint, eachPoint, eachTriangle, extrude, faceEdges, fill, fitPlaneToPoints, fix, fromExactToCgalTransform, fromIdentityToCgalTransform, fromPolygons, fromRotateXToTransform, fromRotateYToTransform, fromRotateZToTransform, fromScaleToTransform, fromSegmentToInverseTransform, fromSurfaceMesh, fromSurfaceMeshToGraph, fromSurfaceMeshToLazyGraph, fromTranslateToTransform, fuse, generateEnvelope, graphSymbol, grow, identity, initCgal, inset, invertTransform, involute, join, link, loft, makeAbsolute, makeUnitSphere, matrix6, offset, outline, pushSurfaceMesh, remesh, seam, section, separate, serialize, simplify, smooth, smoothSurfaceMesh, surfaceMeshSymbol, toCgalTransformFromJsTransform, twist, withAabbTreeQuery, wrap };
+export { STATUS_EMPTY, STATUS_OK, STATUS_UNCHANGED, STATUS_ZERO_THICKNESS, arrangeSegments, arrangeSegmentsIntoTriangles, bend, cast, clip, composeTransforms, computeArea, computeBoundingBox, computeCentroid, computeImplicitVolume, computeNormal, computeVolume, convertPolygonsToMeshes, convexHull, cut, deform, deletePendingSurfaceMeshes, deleteSurfaceMesh, demesh, disjoint, eachPoint, eachTriangle, eagerTransform, extrude, faceEdges, fill, fitPlaneToPoints, fix, fromExactToCgalTransform, fromIdentityToCgalTransform, fromPolygons, fromRotateXToTransform, fromRotateYToTransform, fromRotateZToTransform, fromScaleToTransform, fromSegmentToInverseTransform, fromSurfaceMesh, fromSurfaceMeshToGraph, fromSurfaceMeshToLazyGraph, fromTranslateToTransform, fuse, generateEnvelope, graphSymbol, grow, identity, initCgal, inset, invertTransform, involute, join, link, loft, makeAbsolute, makeUnitSphere, matrix6, offset, outline, pushSurfaceMesh, remesh, seam, section, separate, serialize, simplify, smooth, smoothSurfaceMesh, surfaceMeshSymbol, toCgalTransformFromJsTransform, twist, withAabbTreeQuery, wrap };

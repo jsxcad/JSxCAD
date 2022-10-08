@@ -15,9 +15,9 @@ export const scale = Shape.chainable((x = 1, y = x, z = y) => (shape) => {
   const negatives = (x < 0) + (y < 0) + (z < 0);
   if (negatives % 2) {
     // Compensate for inversion.
-    return shape.transform(fromScaleToTransform(x, y, z)); // .involute();
+    return shape.eagerTransform(fromScaleToTransform(x, y, z)).involute();
   } else {
-    return shape.transform(fromScaleToTransform(x, y, z));
+    return shape.eagerTransform(fromScaleToTransform(x, y, z));
   }
 });
 

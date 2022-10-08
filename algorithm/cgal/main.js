@@ -46,6 +46,7 @@ export { demesh } from './demesh.js';
 export { disjoint } from './disjoint.js';
 export { eachPoint } from './eachPoint.js';
 export { eachTriangle } from './eachTriangle.js';
+export { eagerTransform } from './eagerTransform.js';
 export { extrude } from './extrude.js';
 export { faceEdges } from './faceEdges.js';
 export { fill } from './fill.js';

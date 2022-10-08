@@ -1,3 +1,4 @@
+[index](../../nb/api/index.md)
 ### outline()
 Produces segments representing the geometric edges of the shape.
 

@@ -44,7 +44,8 @@ const $1 = await $run(async () => {
   path: '',
   id: '$1',
   text: undefined,
-  sha: 'd3d743575d242dbbfc82a4d23ded4f43d538977c'
+  sha: 'd3d743575d242dbbfc82a4d23ded4f43d538977c',
+  line: 1
 });
 
 
@@ -64,7 +65,8 @@ const $1 = await $run(async () => {
   path: '',
   id: '$1',
   text: undefined,
-  sha: 'd3d743575d242dbbfc82a4d23ded4f43d538977c'
+  sha: 'd3d743575d242dbbfc82a4d23ded4f43d538977c',
+  line: 1
 });
 
 const Mountain = await $run(async () => {
@@ -75,7 +77,8 @@ const Mountain = await $run(async () => {
   path: '',
   id: 'Mountain',
   text: undefined,
-  sha: '8004fc2084b4f6da7851dc47e8cb5612edbef602'
+  sha: '8004fc2084b4f6da7851dc47e8cb5612edbef602',
+  line: 3
 });
 
 const mountainView = await $run(async () => {
@@ -86,7 +89,8 @@ const mountainView = await $run(async () => {
   path: '',
   id: 'mountainView',
   text: undefined,
-  sha: 'dfc411bd02db82d7dc9410873aab460c274d2b01'
+  sha: 'dfc411bd02db82d7dc9410873aab460c274d2b01',
+  line: 4
 });
 
 const $2 = await $run(async () => {
@@ -99,7 +103,8 @@ const $2 = await $run(async () => {
   path: '',
   id: '$2',
   text: undefined,
-  sha: '46ba2bee79153c17eef85ba46ecea6f9168c571f'
+  sha: '46ba2bee79153c17eef85ba46ecea6f9168c571f',
+  line: 5
 });
 
 
@@ -119,7 +124,8 @@ const $1 = await $run(async () => {
   path: '',
   id: '$1',
   text: undefined,
-  sha: 'd3d743575d242dbbfc82a4d23ded4f43d538977c'
+  sha: 'd3d743575d242dbbfc82a4d23ded4f43d538977c',
+  line: 1
 });
 
 const Mountain = await $run(async () => {
@@ -130,7 +136,8 @@ const Mountain = await $run(async () => {
   path: '',
   id: 'Mountain',
   text: undefined,
-  sha: '8004fc2084b4f6da7851dc47e8cb5612edbef602'
+  sha: '8004fc2084b4f6da7851dc47e8cb5612edbef602',
+  line: 3
 });
 
 
@@ -150,7 +157,8 @@ const $1 = await $run(async () => {
   path: '',
   id: '$1',
   text: undefined,
-  sha: 'd3d743575d242dbbfc82a4d23ded4f43d538977c'
+  sha: 'd3d743575d242dbbfc82a4d23ded4f43d538977c',
+  line: 1
 });
 
 const Mountain = await $run(async () => {
@@ -161,7 +169,8 @@ const Mountain = await $run(async () => {
   path: '',
   id: 'Mountain',
   text: undefined,
-  sha: '8004fc2084b4f6da7851dc47e8cb5612edbef602'
+  sha: '8004fc2084b4f6da7851dc47e8cb5612edbef602',
+  line: 3
 });
 
 const mountainView = await $run(async () => {
@@ -172,7 +181,8 @@ const mountainView = await $run(async () => {
   path: '',
   id: 'mountainView',
   text: undefined,
-  sha: 'dfc411bd02db82d7dc9410873aab460c274d2b01'
+  sha: 'dfc411bd02db82d7dc9410873aab460c274d2b01',
+  line: 4
 });
 
 
@@ -222,7 +232,8 @@ const $1 = await $run(async () => {
   path: '',
   id: '$1',
   text: undefined,
-  sha: 'd3d743575d242dbbfc82a4d23ded4f43d538977c'
+  sha: 'd3d743575d242dbbfc82a4d23ded4f43d538977c',
+  line: 1
 });
 
 
@@ -242,7 +253,8 @@ const $1 = await $run(async () => {
   path: '',
   id: '$1',
   text: undefined,
-  sha: 'd3d743575d242dbbfc82a4d23ded4f43d538977c'
+  sha: 'd3d743575d242dbbfc82a4d23ded4f43d538977c',
+  line: 1
 });
 
 const Mountain = await $run(async () => {
@@ -253,7 +265,8 @@ const Mountain = await $run(async () => {
   path: '',
   id: 'Mountain',
   text: undefined,
-  sha: '8004fc2084b4f6da7851dc47e8cb5612edbef602'
+  sha: '8004fc2084b4f6da7851dc47e8cb5612edbef602',
+  line: 3
 });
 
 const mountainView = await $run(async () => {
@@ -264,7 +277,8 @@ const mountainView = await $run(async () => {
   path: '',
   id: 'mountainView',
   text: undefined,
-  sha: 'dfc411bd02db82d7dc9410873aab460c274d2b01'
+  sha: 'dfc411bd02db82d7dc9410873aab460c274d2b01',
+  line: 4
 });
 
 const $2 = await $run(async () => {
@@ -277,7 +291,8 @@ const $2 = await $run(async () => {
   path: '',
   id: '$2',
   text: undefined,
-  sha: '46ba2bee79153c17eef85ba46ecea6f9168c571f'
+  sha: '46ba2bee79153c17eef85ba46ecea6f9168c571f',
+  line: 5
 });
 
 
@@ -297,7 +312,8 @@ const $1 = await $run(async () => {
   path: '',
   id: '$1',
   text: undefined,
-  sha: 'd3d743575d242dbbfc82a4d23ded4f43d538977c'
+  sha: 'd3d743575d242dbbfc82a4d23ded4f43d538977c',
+  line: 1
 });
 
 const Mountain = await $run(async () => {
@@ -308,7 +324,8 @@ const Mountain = await $run(async () => {
   path: '',
   id: 'Mountain',
   text: undefined,
-  sha: '8004fc2084b4f6da7851dc47e8cb5612edbef602'
+  sha: '8004fc2084b4f6da7851dc47e8cb5612edbef602',
+  line: 3
 });
 
 
@@ -328,7 +345,8 @@ const $1 = await $run(async () => {
   path: '',
   id: '$1',
   text: undefined,
-  sha: 'd3d743575d242dbbfc82a4d23ded4f43d538977c'
+  sha: 'd3d743575d242dbbfc82a4d23ded4f43d538977c',
+  line: 1
 });
 
 const Mountain = await $run(async () => {
@@ -339,7 +357,8 @@ const Mountain = await $run(async () => {
   path: '',
   id: 'Mountain',
   text: undefined,
-  sha: '8004fc2084b4f6da7851dc47e8cb5612edbef602'
+  sha: '8004fc2084b4f6da7851dc47e8cb5612edbef602',
+  line: 3
 });
 
 const mountainView = await $run(async () => {
@@ -350,7 +369,8 @@ const mountainView = await $run(async () => {
   path: '',
   id: 'mountainView',
   text: undefined,
-  sha: 'dfc411bd02db82d7dc9410873aab460c274d2b01'
+  sha: 'dfc411bd02db82d7dc9410873aab460c274d2b01',
+  line: 4
 });
 
 

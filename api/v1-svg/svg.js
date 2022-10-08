@@ -15,7 +15,7 @@ import { toSvg } from '@jsxcad/convert-svg';
 export const prepareSvg = (shape, name, op = (s) => s, options = {}) => {
   const { path } = getSourceLocation();
   let index = 0;
-  const entries = [];
+  const records = [];
   for (const entry of ensurePages(op(shape).toDisjointGeometry())) {
     const svgPath = `download/svg/${path}/${generateUniqueId()}`;
     const render = async () => {
@@ -26,23 +26,25 @@ export const prepareSvg = (shape, name, op = (s) => s, options = {}) => {
       }
     };
     addPending(render());
-    entries.push({
+    const filename = `${name}_${index++}.svg`;
+    const record = {
       path: svgPath,
-      filename: `${name}_${index++}.svg`,
+      filename,
       type: 'image/svg+xml',
-    });
-    Shape.fromGeometry(entry).gridView(name, options.view);
+    };
+    records.push(record);
+    const hash =
+      hashSum({ filename, options }) + hashGeometry(shape.toGeometry());
+    Shape.fromGeometry(entry).gridView(hash, options.view);
+    emit({ download: { entries: [record] }, hash });
   }
-  return entries;
+  return records;
 };
 
 export const svg =
   (name, op, options = {}) =>
   (shape) => {
-    const entries = prepareSvg(shape, name, op, options);
-    const download = { entries };
-    const hash = hashSum({ name, options }) + hashGeometry(shape.toGeometry());
-    emit({ download, hash });
+    prepareSvg(shape, name, op, options);
     return shape;
   };
 

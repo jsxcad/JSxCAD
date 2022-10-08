@@ -1,6 +1,6 @@
 import { Shape, ensurePages } from './jsxcad-api-shape.js';
 import { fromSvgPath, fromSvg, toSvg } from './jsxcad-convert-svg.js';
-import { read, emit, getSourceLocation, generateUniqueId, addPending, write, getPendingErrorHandler } from './jsxcad-sys.js';
+import { read, getSourceLocation, generateUniqueId, addPending, emit, write, getPendingErrorHandler } from './jsxcad-sys.js';
 import { hash } from './jsxcad-geometry.js';
 
 /**
@@ -123,7 +123,7 @@ var hashSum = sum;
 const prepareSvg = (shape, name, op = (s) => s, options = {}) => {
   const { path } = getSourceLocation();
   let index = 0;
-  const entries = [];
+  const records = [];
   for (const entry of ensurePages(op(shape).toDisjointGeometry())) {
     const svgPath = `download/svg/${path}/${generateUniqueId()}`;
     const render = async () => {
@@ -134,23 +134,25 @@ const prepareSvg = (shape, name, op = (s) => s, options = {}) => {
       }
     };
     addPending(render());
-    entries.push({
+    const filename = `${name}_${index++}.svg`;
+    const record = {
       path: svgPath,
-      filename: `${name}_${index++}.svg`,
+      filename,
       type: 'image/svg+xml',
-    });
-    Shape.fromGeometry(entry).gridView(name, options.view);
+    };
+    records.push(record);
+    const hash$1 =
+      hashSum({ filename, options }) + hash(shape.toGeometry());
+    Shape.fromGeometry(entry).gridView(hash$1, options.view);
+    emit({ download: { entries: [record] }, hash: hash$1 });
   }
-  return entries;
+  return records;
 };
 
 const svg =
   (name, op, options = {}) =>
   (shape) => {
-    const entries = prepareSvg(shape, name, op, options);
-    const download = { entries };
-    const hash$1 = hashSum({ name, options }) + hash(shape.toGeometry());
-    emit({ download, hash: hash$1 });
+    prepareSvg(shape, name, op, options);
     return shape;
   };
 

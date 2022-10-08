@@ -65,12 +65,13 @@
       padding: 5px;
     }
   </style>
+  
  </head>
  <body>
   <script type='module'>
-    import { Shape } from 'https://gitcdn.link/cdn/jsxcad/JSxCAD/master/es6/jsxcad-api-shape.js';
-    import { dataUrl } from 'https://gitcdn.link/cdn/jsxcad/JSxCAD/master/es6/jsxcad-ui-threejs.js';
-    import { toDomElement } from 'https://gitcdn.link/cdn/jsxcad/JSxCAD/master/es6/jsxcad-ui-notebook.js';
+    import { Shape } from 'https://jsxcad.js.org/alpha/jsxcad-api-shape.js';
+    import { dataUrl } from 'https://jsxcad.js.org/alpha/jsxcad-ui-threejs.js';
+    import { toDomElement } from 'https://jsxcad.js.org/alpha/jsxcad-ui-notebook.js';
 
     const notebook = [
   {
@@ -456,7 +457,7 @@
     const run = async () => {
       const body = document.getElementsByTagName('body')[0];
       const bookElement = document.createElement('div');
-      const notebookElement = await toDomElement(await prepareViews(notebook));
+      const notebookElement = await toDomElement(await prepareViews(notebook), { useControls: false });
       bookElement.appendChild(notebookElement);
       body.appendChild(bookElement);
       bookElement.classList.add('book', 'notebook', 'loaded');
@@ -464,6 +465,7 @@
 
     if (document.readyState === 'complete') {
       run();
+      
     } else {
       document.onreadystatechange = () => {
         if (document.readyState === 'complete') {

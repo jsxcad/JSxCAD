@@ -1,5 +1,6 @@
 import {
   assemble,
+  eagerTransform,
   fromPolygons,
   rewriteTags,
   taggedGraph,
@@ -57,6 +58,13 @@ export class Shape {
 
   transform(matrix) {
     return fromGeometry(transform(matrix, this.toGeometry()), this.context);
+  }
+
+  eagerTransform(matrix) {
+    return fromGeometry(
+      eagerTransform(matrix, this.toGeometry()),
+      this.context
+    );
   }
 
   // Low level setter for reifiers.

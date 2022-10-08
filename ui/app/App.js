@@ -1,7 +1,11 @@
 /* global FileReader */
 
+import './react-flexlayout.css';
+import './react-multi-split-pane.css';
+
 import * as PropTypes from 'prop-types';
 
+import Notebook, { updateNotebookState } from './Notebook.js';
 import {
   askService,
   ask as askSys,
@@ -24,8 +28,6 @@ import {
   write,
 } from '@jsxcad/sys';
 
-import { getNotebookControlData, toDomElement } from '@jsxcad/ui-notebook';
-
 import Button from 'react-bootstrap/Button';
 import ButtonGroup from 'react-bootstrap/ButtonGroup';
 import Card from 'react-bootstrap/Card';
@@ -42,9 +44,13 @@ import PrettierParserBabel from 'https://unpkg.com/prettier@2.3.2/esm/parser-bab
 import React from 'react';
 import ReactDOM from 'react-dom';
 import Row from 'react-bootstrap/Row';
+import SplitPaneModule from 'react-multi-split-pane';
 import Table from 'react-bootstrap/Table';
 import { animationFrame } from './schedule.js';
 import { execute } from '@jsxcad/api';
+import { getNotebookControlData } from '@jsxcad/ui-notebook';
+
+const { SplitPane } = SplitPaneModule;
 
 const ensureFile = async (file, url, { workspace } = {}) => {
   const sources = [];
@@ -195,8 +201,8 @@ class App extends React.Component {
     const { sha, workspace } = this.props;
 
     this.agent = async ({ ask, message, type }) => {
-      const { op, entry, identifier, notes, options, path, sourceLocation } =
-        message;
+      // const { op, entry, identifier, notes, options, path, sourceLocation } =
+      const { op, entry, identifier, options, path } = message;
       switch (op) {
         case 'ask':
           return askSys(identifier, options);
@@ -205,163 +211,81 @@ class App extends React.Component {
         case 'log':
           return log(entry);
         case 'notes':
+          return updateNotebookState(this, message);
+        /*
           {
             const { id, path } = sourceLocation;
-            const NotebookTextKey = `NotebookText/${path}`;
-
-            if (this.state[NotebookTextKey] === undefined) {
-              // These notes are for an unloaded module.
-            }
-
-            const NotebookAdvice = this.Notebook.ensureAdvice(path);
-            const { domElementByHash, notebookNotes, notebookDefinitions } =
-              NotebookAdvice;
-
-            const ensureNotebookNote = (note) => {
-              if (!notebookNotes[note.hash]) {
-                notebookNotes[note.hash] = note;
+            const updateNote = (note) => {
+              if (!note.hash) {
+                return;
               }
-              return notebookNotes[note.hash];
+              const op = (state) => {
+                const { [`NotebookNotes/${path}`]: oldNotebookNotes = {} } = state;
+                console.log(`QQ/updateNote: ${JSON.stringify(note)}`);
+                const oldNote = oldNotebookNotes[note.hash] || {};
+                const newNotebookNotes = { ...oldNotebookNotes, [note.hash]: { ...oldNote, ...note } };
+                return { [`NotebookNotes/${path}`]: newNotebookNotes };
+              };
+              this.setState(op);
             };
 
-            let wip = document.getElementById('notebook/wip');
-            if (!wip) {
-              wip = document.createElement('div');
-              wip.id = 'notebook/wip';
-              // Attach the wip invisibly so that we can compute the size.
-              // Add it at the top so that it doesn't extend the bottom of the page.
-
-              document.body.prepend(wip);
-              wip.style.display = 'block';
-              wip.style.visibility = 'hidden';
-              wip.style.position = 'absolute';
-            }
-            const domElements = [];
-
-            let nthView = 0;
             for (const note of notes) {
-              if (note.hash === undefined) {
-                continue;
-              }
-              const entry = ensureNotebookNote(note);
-              if (entry.view) {
-                nthView += 1;
-                if (entry.sourceLocation) {
-                  entry.sourceLocation.nthView = nthView;
-                }
-                const { orbitView } = NotebookAdvice;
-                entry.openView = false;
-                if (orbitView) {
-                  if (
-                    orbitView.sourceLocation.id === id &&
-                    orbitView.sourceLocation.nthView === nthView
-                  ) {
-                    entry.openView = true;
+              updateNote(note);
+              if (note.view) {
+                if (!note.url) {
+                  const cachedUrl = await read(`thumbnail/${note.hash}`, {
+                    workspace,
+                  });
+                  if (cachedUrl) {
+                    console.log(`QQ/cachedUrl: ${note.hash} ${cachedUrl}`);
+                    updateNote({ hash: note.hash, url: cachedUrl });
+                  } else if (note.view && !note.url) {
+                    const { path, view } = note;
+                    const { width, height } = view;
+                    const canvas = document.createElement('canvas');
+                    canvas.width = width;
+                    canvas.height = height;
+                    const offscreenCanvas = canvas.transferControlToOffscreen();
+                    const Gender = async () => {
+                      try {
+                        logInfo('app/App', `Ask render for ${path}/${id}`);
+                        const url = await this.ask(
+                          {
+                            op: 'app/staticView',
+                            path,
+                            workspace,
+                            view,
+                            offscreenCanvas,
+                          },
+                          { path },
+                          [offscreenCanvas]
+                        );
+                        console.log(`Finished render for ${path}/${id}`);
+                        // Cache the thumbnail for next time.
+                        await write(`thumbnail/${note.hash}`, url, {
+                          workspace,
+                        });
+                        console.log(`QQ/render: ${note.hash} ${url}`);
+                        updateNote({ hash: note.hash, url });
+                      } catch (error) {
+                        if (error.message === 'Terminated') {
+                          // Try again.
+                          return render();
+                        } else {
+                          window.alert(error.stack);
+                        }
+                      }
+                    };
+                    // Render the image asynchronously -- it won't affect layout.
+                    console.log(`Schedule render for ${path}/${id}`);
+                    render();
                   }
                 }
               }
-              if (domElementByHash.has(entry.hash)) {
-                // Reuse the element we built earlier
-                console.log(`Re-appending ${entry.hash} to ${path}/${id}`);
-                // FIX: This is a problem because it removes the child from where it
-                // was.
-                // domElement.appendChild(domElementByHash.get(entry.hash));
-                domElements.push(domElementByHash.get(entry.hash));
-              } else {
-                const element = toDomElement([entry], {
-                  onClickView: ({ path, view, workspace, sourceLocation }) =>
-                    this.Notebook.clickView({
-                      path,
-                      view,
-                      workspace,
-                      sourceLocation,
-                    }),
-                  onClickMake: ({ path, workspace, sourceLocation }) =>
-                    this.Notebook.clickMake({
-                      path,
-                      workspace,
-                      sourceLocation,
-                    }),
-                  workspace,
-                });
-                domElementByHash.set(entry.hash, element);
-                console.log(`Appending ${entry.hash} to ${path}/${id}`);
-                wip.appendChild(element);
-                domElements.push(element);
-                console.log(`Marking ${entry.hash} in ${path}/${id}`);
-
-                await animationFrame();
-
-                // We need to build the element.
-                const cachedUrl = await read(`thumbnail/${entry.hash}`, {
-                  workspace,
-                });
-                if (cachedUrl) {
-                  const render = async () => {
-                    console.log(`Retrieved thumbnail for ${path}/${id}`);
-                    if (element && element.firstChild) {
-                      element.firstChild.src = cachedUrl;
-                    }
-                  };
-                  render();
-                } else if (entry.view && !entry.url) {
-                  const { path, view } = entry;
-                  const { width, height } = view;
-                  const canvas = document.createElement('canvas');
-                  canvas.width = width;
-                  canvas.height = height;
-                  const offscreenCanvas = canvas.transferControlToOffscreen();
-                  const render = async () => {
-                    try {
-                      logInfo('app/App', `Ask render for ${path}/${id}`);
-                      const url = await this.ask(
-                        {
-                          op: 'app/staticView',
-                          path,
-                          workspace,
-                          view,
-                          offscreenCanvas,
-                        },
-                        { path },
-                        [offscreenCanvas]
-                      );
-                      console.log(`Finished render for ${path}/${id}`);
-                      // Cache the thumbnail for next time.
-                      await write(`thumbnail/${entry.hash}`, url, {
-                        workspace,
-                      });
-                      if (element && element.firstChild) {
-                        element.firstChild.src = url;
-                      }
-                    } catch (error) {
-                      if (error.message === 'Terminated') {
-                        // Try again.
-                        return render();
-                      } else {
-                        window.alert(error.stack);
-                      }
-                    }
-                  };
-                  // Render the image asynchronously -- it won't affect layout.
-                  console.log(`Schedule render for ${path}/${id}`);
-                  render();
-                }
-              }
-            }
-
-            await animationFrame();
-
-            notebookDefinitions[id] = {
-              notes,
-              wip,
-              domElements,
-            };
-
-            if (NotebookAdvice.onUpdate) {
-              await NotebookAdvice.onUpdate();
             }
           }
           return;
+*/
         default:
           throw Error(`Unknown operation ${op}`);
       }
@@ -791,6 +715,12 @@ class App extends React.Component {
       this.setState({ [`NotebookText/${path}`]: data });
     };
 
+    this.Notebook.selectLine = async (path, line) => {
+      await this.updateState({
+        [`NotebookLine/${path}`]: line,
+      });
+    };
+
     this.Notebook.clickLink = async (path) => {
       if (!path) {
         return;
@@ -833,6 +763,11 @@ class App extends React.Component {
       };
       this.setState({ [key]: createdAdvice });
       return createdAdvice;
+    };
+
+    this.Notebook.updateAdvice = (path, advice) => {
+      const key = `NotebookAdvice/${path}`;
+      this.setState({ [key]: { ...advice } });
     };
 
     this.Notebook.store = async () => {
@@ -1519,24 +1454,36 @@ class App extends React.Component {
           const {
             [`NotebookMode/${path}`]: NotebookMode = 'view',
             [`NotebookText/${path}`]: NotebookText,
+            [`NotebookNotes/${path}`]: NotebookNotes = [],
+            [`NotebookLine/${path}`]: NotebookLine,
           } = this.state;
           const NotebookAdvice = this.Notebook.ensureAdvice(path);
           switch (NotebookMode) {
             case 'edit':
               return (
-                <JsEditorUi
-                  mode={NotebookMode}
-                  onRun={() => this.Notebook.run(path)}
-                  onSave={() => this.Notebook.save(path)}
-                  onChange={(data) => this.Notebook.change(path, data)}
-                  onClickLink={(path) => this.Notebook.clickLink(path)}
-                  path={path}
-                  data={NotebookText}
-                  advice={NotebookAdvice}
-                />
+                <SplitPane>
+                  <Notebook
+                    notes={NotebookNotes}
+                    onClickView={this.Notebook.clickView}
+                    selectedLine={NotebookLine}
+                    workspace={workspace}
+                  />
+                  <JsEditorUi
+                    mode={NotebookMode}
+                    onRun={() => this.Notebook.run(path)}
+                    onSave={() => this.Notebook.save(path)}
+                    onChange={(data) => this.Notebook.change(path, data)}
+                    onClickLink={(path) => this.Notebook.clickLink(path)}
+                    onCursorChange={(row) =>
+                      this.Notebook.selectLine(path, row)
+                    }
+                    path={path}
+                    data={NotebookText}
+                    advice={NotebookAdvice}
+                  />
+                </SplitPane>
               );
-            default:
-            case 'view':
+            case 'old-view':
               return (
                 <JsViewerUi
                   mode={NotebookMode}
@@ -1549,6 +1496,17 @@ class App extends React.Component {
                   advice={NotebookAdvice}
                 />
               );
+            default:
+            case 'view': {
+              return (
+                <Notebook
+                  notes={NotebookNotes}
+                  onClickView={this.Notebook.clickView}
+                  selectedLine={NotebookLine}
+                  workspace={workspace}
+                />
+              );
+            }
           }
         }
         case 'Clipboard': {

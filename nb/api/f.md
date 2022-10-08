@@ -1,3 +1,4 @@
+[index](../../nb/api/index.md)
 ### f()
 
 Converts the shape to segments and fills them to produce surfaces.

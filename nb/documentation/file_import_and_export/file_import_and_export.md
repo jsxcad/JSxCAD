@@ -15,7 +15,7 @@ Arc(10, 10, 10).stl('fileName');
 
 ![Image](file_import_and_export.md.0.png)
 
-[fileName_0.stl](file_import_and_export.fileName_0.stl)
+[fileName_1.stl](file_import_and_export.fileName_1.stl)
 
 ---
 ### Exporting .svg

@@ -1,3 +1,4 @@
+[index](../../nb/api/index.md)
 ### overlay()
 Mark the shape to be displayed over the top of normal geometry.
 

@@ -19,11 +19,10 @@ export const preparePdf = (shape, name, op = (s) => s, options = {}) => {
     };
     records.push(record);
     const shape = Shape.fromGeometry(entry);
-    shape.gridView(filename, options.view);
-    const download = { entries: [record] };
     const hash =
       hashSum({ filename, options }) + hashGeometry(shape.toGeometry());
-    emit({ download, hash });
+    shape.gridView(filename, options.view);
+    emit({ download: { entries: [record] }, hash });
   }
   return records;
 };

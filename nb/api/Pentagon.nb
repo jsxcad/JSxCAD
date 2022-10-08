@@ -1,4 +1,5 @@
 md`
+[index](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/index.nb)
 ### Pentagon()
 Parameter|Default|Type
 ...dimensions||Size of the bounding box to contain the hexagon.

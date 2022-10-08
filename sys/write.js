@@ -75,7 +75,11 @@ export const write = async (path, data, options = {}) => {
   file.data = data;
 
   if (!ephemeral && workspace !== undefined) {
-    file.version = await fileWriter(qualifiedPath, data);
+    try {
+      file.version = await fileWriter(qualifiedPath, data);
+    } catch (e) {
+      throw e;
+    }
   }
 
   // Let everyone else know the file has changed.

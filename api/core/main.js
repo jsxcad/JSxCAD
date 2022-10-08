@@ -20,6 +20,8 @@ import { readSvg } from '@jsxcad/api-v1-svg';
 import { setApi } from './api.js';
 import { toSvg } from '@jsxcad/convert-svg';
 
+export { importScript } from './importModule.js';
+
 const api = {
   _: undefined,
   ...mathApi,

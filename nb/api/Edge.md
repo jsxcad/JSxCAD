@@ -1,3 +1,4 @@
+[index](../../nb/api/index.md)
 ### Edge()
 Parameter|Default|Type
 ---|---|---

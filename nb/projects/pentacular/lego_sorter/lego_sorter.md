@@ -38,7 +38,7 @@ const sorter = ring.and(base).stl('sorter');
 
 ![Image](lego_sorter.md.3.png)
 
-[sorter_0.stl](lego_sorter.sorter_0.stl)
+[sorter_1.stl](lego_sorter.sorter_1.stl)
 
 ```JavaScript
 const wall = wall1
@@ -73,4 +73,4 @@ bentWall.and(ring, base, ring.z(52)).scale(1.5).view().stl('tall_sorter');
 
 ![Image](lego_sorter.md.7.png)
 
-[tall_sorter_0.stl](lego_sorter.tall_sorter_0.stl)
+[tall_sorter_1.stl](lego_sorter.tall_sorter_1.stl)

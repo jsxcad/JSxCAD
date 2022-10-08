@@ -1,3 +1,4 @@
+[index](../../nb/api/index.md)
 # absolute()
 
 Makes the local orientation of a shape match its absolute orientation.

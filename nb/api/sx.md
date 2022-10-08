@@ -1,3 +1,4 @@
+[index](../../nb/api/index.md)
 ### sx()
 dimension|1|Dimension by which to scale along the x axis
 

@@ -63,7 +63,7 @@ var lookup = typeof Uint8Array === 'undefined' ? [] : new Uint8Array(256);
 for (var i = 0; i < chars.length; i++) {
     lookup[chars.charCodeAt(i)] = i;
 }
-var encode = function (arraybuffer) {
+var encode$1 = function (arraybuffer) {
     var bytes = new Uint8Array(arraybuffer), i, len = bytes.length, base64 = '';
     for (i = 0; i < len; i += 3) {
         base64 += chars[bytes[i] >> 2];
@@ -78,6 +78,26 @@ var encode = function (arraybuffer) {
         base64 = base64.substring(0, base64.length - 2) + '==';
     }
     return base64;
+};
+var decode$1 = function (base64) {
+    var bufferLength = base64.length * 0.75, len = base64.length, i, p = 0, encoded1, encoded2, encoded3, encoded4;
+    if (base64[base64.length - 1] === '=') {
+        bufferLength--;
+        if (base64[base64.length - 2] === '=') {
+            bufferLength--;
+        }
+    }
+    var arraybuffer = new ArrayBuffer(bufferLength), bytes = new Uint8Array(arraybuffer);
+    for (i = 0; i < len; i += 4) {
+        encoded1 = lookup[base64.charCodeAt(i)];
+        encoded2 = lookup[base64.charCodeAt(i + 1)];
+        encoded3 = lookup[base64.charCodeAt(i + 2)];
+        encoded4 = lookup[base64.charCodeAt(i + 3)];
+        bytes[p++] = (encoded1 << 2) | (encoded2 >> 4);
+        bytes[p++] = ((encoded2 & 15) << 4) | (encoded3 >> 2);
+        bytes[p++] = ((encoded3 & 3) << 6) | (encoded4 & 63);
+    }
+    return arraybuffer;
 };
 
 const hashObject = (object, hash) => {
@@ -132,7 +152,7 @@ const computeHash = (value) => {
   // const hash = createHash('sha256');
   const hash = new Digest.SHA256('sha256');
   hashValue(value, hash);
-  return encode(hash.finalize());
+  return encode$1(hash.finalize());
 };
 
 const fromStringToIntegerHash = (s) =>
@@ -336,17 +356,21 @@ function openDB(name, version, { blocked, upgrade, blocking, terminated } = {}) 
     const openPromise = wrap(request);
     if (upgrade) {
         request.addEventListener('upgradeneeded', (event) => {
-            upgrade(wrap(request.result), event.oldVersion, event.newVersion, wrap(request.transaction));
+            upgrade(wrap(request.result), event.oldVersion, event.newVersion, wrap(request.transaction), event);
         });
     }
-    if (blocked)
-        request.addEventListener('blocked', () => blocked());
+    if (blocked) {
+        request.addEventListener('blocked', (event) => blocked(
+        // Casting due to https://github.com/microsoft/TypeScript-DOM-lib-generator/pull/1405
+        event.oldVersion, event.newVersion, event));
+    }
     openPromise
         .then((db) => {
         if (terminated)
             db.addEventListener('close', () => terminated());
-        if (blocking)
-            db.addEventListener('versionchange', () => blocking());
+        if (blocking) {
+            db.addEventListener('versionchange', (event) => blocking(event.oldVersion, event.newVersion, event));
+        }
     })
         .catch(() => { });
     return openPromise;
@@ -1063,7 +1087,7 @@ const setupFilesystem = ({ fileBase } = {}) => {
 };
 
 const setupWorkspace = (workspace) =>
-  setupFilesystem({ filebase: workspace });
+  setupFilesystem({ fileBase: workspace });
 
 const getFilesystem = () => {
   if (base !== undefined) {
@@ -1078,6 +1102,7 @@ const fileChangeWatchers = new Set();
 const fileChangeWatchersByPath = new Map();
 const fileCreationWatchers = new Set();
 const fileDeletionWatchers = new Set();
+const fileReadWatchers = new Set();
 
 const runFileCreationWatchers = async (path, workspace) => {
   for (const watcher of fileCreationWatchers) {
@@ -1087,6 +1112,12 @@ const runFileCreationWatchers = async (path, workspace) => {
 
 const runFileDeletionWatchers = async (path, workspace) => {
   for (const watcher of fileDeletionWatchers) {
+    await watcher(path, workspace);
+  }
+};
+
+const runFileReadWatchers = async (path, workspace) => {
+  for (const watcher of fileReadWatchers) {
     await watcher(path, workspace);
   }
 };
@@ -1145,6 +1176,11 @@ const unwatchFileDeletion = async (thunk) => {
   return thunk;
 };
 
+const unwatchFileRead = async (thunk) => {
+  fileReadWatchers.delete(thunk);
+  return thunk;
+};
+
 const watchFileCreation = async (thunk) => {
   fileCreationWatchers.add(thunk);
   return thunk;
@@ -1152,6 +1188,11 @@ const watchFileCreation = async (thunk) => {
 
 const watchFileDeletion = async (thunk) => {
   fileDeletionWatchers.add(thunk);
+  return thunk;
+};
+
+const watchFileRead = async (thunk) => {
+  fileReadWatchers.add(thunk);
   return thunk;
 };
 
@@ -1568,8 +1609,12 @@ function getMessagesHigherThan(db, lastCursorId) {
     };
   });
 }
-function removeMessagesById(db, ids) {
-  var tx = db.transaction([OBJECT_STORE_ID], 'readwrite', TRANSACTION_SETTINGS);
+function removeMessagesById(channelState, ids) {
+  if (channelState.closed) {
+    return Promise.resolve([]);
+  }
+
+  var tx = channelState.db.transaction(OBJECT_STORE_ID, 'readwrite', TRANSACTION_SETTINGS);
   var objectStore = tx.objectStore(OBJECT_STORE_ID);
   return Promise.all(ids.map(function (id) {
     var deleteRequest = objectStore["delete"](id);
@@ -1608,9 +1653,9 @@ function getOldMessages(db, ttl) {
     };
   });
 }
-function cleanOldMessages(db, ttl) {
-  return getOldMessages(db, ttl).then(function (tooOld) {
-    return removeMessagesById(db, tooOld.map(function (msg) {
+function cleanOldMessages(channelState) {
+  return getOldMessages(channelState.db, channelState.options.idb.ttl).then(function (tooOld) {
+    return removeMessagesById(channelState, tooOld.map(function (msg) {
       return msg.id;
     }));
   });
@@ -1730,7 +1775,7 @@ function postMessage$2(channelState, messageJson) {
   }).then(function () {
     if (randomInt(0, 10) === 0) {
       /* await (do not await) */
-      cleanOldMessages(channelState.db, channelState.options.idb.ttl);
+      cleanOldMessages(channelState);
     }
   });
   return channelState.writeBlockPromise;
@@ -2297,6 +2342,9 @@ const receiveNotification = async ({ id, op, path, workspace }) => {
     case 'deletePath':
       await runFileDeletionWatchers(path, workspace);
       break;
+    case 'readPath':
+      await runFileReadWatchers(path, workspace);
+      break;
     default:
       throw Error(
         `Unexpected broadcast ${JSON.stringify({ id, op, path, workspace })}`
@@ -2331,6 +2379,24 @@ const notifyFileCreation = async (path, workspace) =>
 
 const notifyFileDeletion = async (path, workspace) =>
   sendBroadcast({ id: self$1 && self$1.id, op: 'deletePath', path, workspace });
+
+let notifyFileReadEnabled = false;
+
+const setNotifyFileReadEnabled = (state) => {
+  notifyFileReadEnabled = state;
+};
+
+const notifyFileRead = async (path, workspace) => {
+  if (!notifyFileReadEnabled) {
+    return;
+  }
+  return sendBroadcast({
+    id: self$1 && self$1.id,
+    op: 'readPath',
+    path,
+    workspace,
+  });
+};
 
 initBroadcastChannel();
 
@@ -2426,7 +2492,11 @@ const write = async (path, data, options = {}) => {
   file.data = data;
 
   if (!ephemeral && workspace !== undefined) {
-    file.version = await fileWriter(qualifiedPath, data);
+    try {
+      file.version = await fileWriter(qualifiedPath, data);
+    } catch (e) {
+      throw e;
+    }
   }
 
   // Let everyone else know the file has changed.
@@ -2600,6 +2670,7 @@ const read = async (path, options = {}) => {
     forceNoCache = false,
     decode,
     otherwise,
+    notifyFileReadEnabled = true,
   } = options;
   const qualifiedPath = qualifyPath(path, workspace);
   const file = ensureQualifiedFile(path, qualifiedPath);
@@ -2639,6 +2710,9 @@ const read = async (path, options = {}) => {
       // Resolve any outstanding promises.
       file.data = await file.data;
     }
+  }
+  if (notifyFileReadEnabled) {
+    await notifyFileRead(path, workspace);
   }
   return file.data || otherwise;
 };
@@ -2781,7 +2855,14 @@ const beginEmitGroup = (sourceLocation) => {
 
 const flushEmitGroup = () => {
   for (const onEmitHandler of onEmitHandlers) {
-    onEmitHandler([...emitGroup]);
+    const group = [...emitGroup];
+    let nth = 0;
+    for (const entry of group) {
+      if (entry.sourceLocation) {
+        entry.sourceLocation.nth = ++nth;
+      }
+    }
+    onEmitHandler(group);
   }
   emitGroup.splice(0);
 };
@@ -2807,6 +2888,32 @@ const finishEmitGroup = (sourceLocation) => {
 };
 
 const removeOnEmitHandler = (handler) => onEmitHandlers.delete(handler);
+
+const encode = (data) => {
+  if (typeof data === 'string') {
+    data = new TextEncoder('utf-8').encode(data);
+  }
+  return encode$1(data.buffer);
+};
+
+const decode = (string) => new Uint8Array(decode$1(string));
+
+const encodeFiles = (unencoded) => {
+  const encoded = {};
+  for (const key of Object.keys(unencoded)) {
+    encoded[key] = encode(unencoded[key]);
+  }
+  return encodeURIComponent(JSON.stringify(encoded));
+};
+
+const decodeFiles = (string) => {
+  const encoded = JSON.parse(decodeURIComponent(string));
+  const decoded = {};
+  for (const key of Object.keys(encoded)) {
+    decoded[key] = decode(encoded[key]);
+  }
+  return decoded;
+};
 
 const { promises: promises$1 } = fs;
 
@@ -3093,4 +3200,4 @@ let nanoid = (size = 21) => {
 
 const generateUniqueId = () => nanoid();
 
-export { ErrorWouldBlock, addOnEmitHandler, addPending, ask, askService, askServices, beginEmitGroup, boot, clearCacheDb, clearEmitted, clearTimes, computeHash, createConversation, createService, elapsed, emit, endTime, finishEmitGroup, flushEmitGroup, generateUniqueId, getActiveServices, getConfig, getControlValue, getFilesystem, getPendingErrorHandler, getServicePoolInfo, getSourceLocation, getTimes, getWorkspace, isBrowser, isNode, isWebWorker, listFiles, log, logError, logInfo, onBoot, qualifyPath, read, readNonblocking, readOrWatch, remove, removeOnEmitHandler, reportTimes, resolvePending, restoreEmitGroup, saveEmitGroup, setConfig, setControlValue, setHandleAskUser, setPendingErrorHandler, setupFilesystem, setupWorkspace, sleep, startTime$1 as startTime, tellServices, terminateActiveServices, unwatchFile, unwatchFileCreation, unwatchFileDeletion, unwatchLog, unwatchServices, waitServices, watchFile, watchFileCreation, watchFileDeletion, watchLog, watchServices, write, writeNonblocking };
+export { ErrorWouldBlock, addOnEmitHandler, addPending, ask, askService, askServices, beginEmitGroup, boot, clearCacheDb, clearEmitted, clearTimes, computeHash, createConversation, createService, decode, decodeFiles, elapsed, emit, encode, encodeFiles, endTime, finishEmitGroup, flushEmitGroup, generateUniqueId, getActiveServices, getConfig, getControlValue, getFilesystem, getPendingErrorHandler, getServicePoolInfo, getSourceLocation, getTimes, getWorkspace, isBrowser, isNode, isWebWorker, listFiles, log, logError, logInfo, onBoot, qualifyPath, read, readNonblocking, readOrWatch, remove, removeOnEmitHandler, reportTimes, resolvePending, restoreEmitGroup, saveEmitGroup, setConfig, setControlValue, setHandleAskUser, setNotifyFileReadEnabled, setPendingErrorHandler, setupFilesystem, setupWorkspace, sleep, startTime$1 as startTime, tellServices, terminateActiveServices, unwatchFile, unwatchFileCreation, unwatchFileDeletion, unwatchFileRead, unwatchLog, unwatchServices, waitServices, watchFile, watchFileCreation, watchFileDeletion, watchFileRead, watchLog, watchServices, write, writeNonblocking };

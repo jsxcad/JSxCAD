@@ -11,7 +11,8 @@
     "lintfix": "eslint --fix *.js",
     "test": "ava",
     "tests": "ava *.test.js",
-    "rollup": "node --max-old-space-size=4096 ../../node_modules/rollup/dist/bin/rollup -c rollup_main.js && rollup -c rollup_webworker.js"
+    "rollup": "node --max-old-space-size=4096 ../../node_modules/rollup/dist/bin/rollup -c rollup_main.js && rollup -c rollup_webworker.js && rollup -c rollup_standalone.js",
+    "rollup_standalone": "node --max-old-space-size=4096 ../../node_modules/rollup/dist/bin/rollup -c rollup_standalone.js"
   },
   "contributors": [
     {
@@ -27,13 +28,18 @@
     "@jsxcad/ui-notebook": "^0.0.79",
     "@jsxcad/ui-threejs": "^0.0.79",
     "ace-builds": "^1.4.7",
+    "base64-arraybuffer": "^1.0.1",
     "extract-urls": "^1.3.2",
+    "file-saver": "^2.0.2",
     "hash-sum": "^2.0.0",
+    "marked": "^4.0.10",
     "preact": "10.5.14",
     "prismjs": "^1.17.1",
     "prop-types": "^15.7.2",
     "react-ace": "^9.5.0",
     "react-bootstrap": "^1.0.0-beta.14",
+    "react-multi-split-pane": "^0.3.3",
+    "react-spinners": "^0.13.5",
     "flexlayout-react": "^0.5.20"
   },
   "devDependencies": {
@@ -59,6 +65,7 @@
     "eslint-plugin-react": "^7.17.0",
     "eslint-plugin-standard": "^4.0.0",
     "rollup": "^2.51.2",
+    "rollup-plugin-import-css": "^3.0.3",
     "rollup-plugin-hypothetical-windows-fix": "^2.1.1",
     "rollup-plugin-json": "^4.0.0",
     "rollup-plugin-scss": "^3.0.0",

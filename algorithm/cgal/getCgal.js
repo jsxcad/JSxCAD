@@ -48,7 +48,6 @@ export const initCgal = async () => {
             parts.pop();
             const prefix = parts.join('/');
             const wasmPathname = `${prefix}/${path}`;
-            console.log(`QQ/wasmPathname: ${wasmPathname}`);
             return wasmPathname;
           } else {
             const parts = url.split('/');

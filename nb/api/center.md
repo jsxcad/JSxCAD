@@ -1,3 +1,4 @@
+[index](../../nb/api/index.md)
 ### center()
 Computes the centroid of shape.
 

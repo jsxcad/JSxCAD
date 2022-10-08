@@ -1,4 +1,5 @@
 md`
+[index](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/index.nb)
 ### demesh()
 
 Removes facets that do not contribute to the geometrical shape and which are not required by triangulation.

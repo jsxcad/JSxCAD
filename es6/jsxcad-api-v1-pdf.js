@@ -85,11 +85,10 @@ const preparePdf = (shape, name, op = (s) => s, options = {}) => {
     };
     records.push(record);
     const shape = Shape.fromGeometry(entry);
-    shape.gridView(filename, options.view);
-    const download = { entries: [record] };
     const hash$1 =
       hashSum({ filename, options }) + hash(shape.toGeometry());
-    emit({ download, hash: hash$1 });
+    shape.gridView(filename, options.view);
+    emit({ download: { entries: [record] }, hash: hash$1 });
   }
   return records;
 };

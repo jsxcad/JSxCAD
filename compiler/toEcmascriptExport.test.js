@@ -29,7 +29,8 @@ const $1 = await $run(async () => {
   path: '',
   id: '$1',
   text: undefined,
-  sha: '0c97e728789dce7f7552ef78cbf0bd9701e74e93'
+  sha: '0c97e728789dce7f7552ef78cbf0bd9701e74e93',
+  line: 1
 });
 
 const Gear = await $run(async () => {
@@ -40,7 +41,8 @@ const Gear = await $run(async () => {
   path: '',
   id: 'Gear',
   text: undefined,
-  sha: 'a1ff55341b3778065ee162ce9465cfa8096a9210'
+  sha: 'a1ff55341b3778065ee162ce9465cfa8096a9210',
+  line: 4
 });
 
 return {
@@ -67,7 +69,8 @@ const $1 = await $run(async () => {
   path: '',
   id: '$1',
   text: undefined,
-  sha: '0c97e728789dce7f7552ef78cbf0bd9701e74e93'
+  sha: '0c97e728789dce7f7552ef78cbf0bd9701e74e93',
+  line: 1
 });
 
 
@@ -87,7 +90,8 @@ const $1 = await $run(async () => {
   path: '',
   id: '$1',
   text: undefined,
-  sha: '0c97e728789dce7f7552ef78cbf0bd9701e74e93'
+  sha: '0c97e728789dce7f7552ef78cbf0bd9701e74e93',
+  line: 1
 });
 
 const Gear = await $run(async () => {
@@ -98,7 +102,8 @@ const Gear = await $run(async () => {
   path: '',
   id: 'Gear',
   text: undefined,
-  sha: 'a1ff55341b3778065ee162ce9465cfa8096a9210'
+  sha: 'a1ff55341b3778065ee162ce9465cfa8096a9210',
+  line: 4
 });
 
 

@@ -61,7 +61,6 @@ function getDefaults() {
     sanitize: false,
     sanitizer: null,
     silent: false,
-    smartLists: false,
     smartypants: false,
     tokenizer: null,
     walkTokens: null,
@@ -2896,6 +2895,7 @@ const toDomElement = (
     onClickMake = sendFile,
     onClickDownload = downloadFile,
     workspace,
+    useControls = true,
   } = {}
 ) => {
   const definitions = {};
@@ -3043,68 +3043,75 @@ const toDomElement = (
     if (note.control) {
       const div = document.createElement('div');
       const { type, label, value, options } = note.control;
-      switch (type) {
-        case 'input': {
-          const input = document.createElement('input');
-          input.classList.add('note', 'control', 'input', 'box');
-          input.name = label;
-          input.value = value;
-          div.appendChild(input);
-          break;
-        }
-        case 'check': {
-          const input = document.createElement('input');
-          input.classList.add('note', 'control', 'input', 'checkbox');
-          input.name = label;
-          input.type = 'checkbox';
-          input.checked = value;
-          div.appendChild(input);
-          break;
-        }
-        case 'select': {
-          const input = document.createElement('select');
-          input.classList.add('note', 'control', 'input', 'checkbox');
-          input.name = label;
-          input.value = value;
-          for (const optionValue of options.options || []) {
-            const option = document.createElement('option');
-            option.value = optionValue;
-            if (optionValue === value) {
-              option.selected = true;
-            }
-            option.innerText = optionValue;
-            input.appendChild(option);
+      if (useControls) {
+        switch (type) {
+          case 'input': {
+            const input = document.createElement('input');
+            input.classList.add('note', 'control', 'input', 'box');
+            input.name = label;
+            input.value = value;
+            div.appendChild(input);
+            break;
           }
-          div.appendChild(input);
-          break;
-        }
-        case 'slider': {
-          const { min = 0, max = 100, step = 1 } = options;
-          const output = document.createElement('span');
-          output.innerText = value;
-          div.appendChild(output);
-          const input = document.createElement('input');
-          input.classList.add('note', 'control', 'input', 'slider');
-          input.name = label;
-          input.type = 'range';
-          input.min = min;
-          input.max = max;
-          input.step = step;
-          input.value = value;
-          div.appendChild(input);
-          input.addEventListener('change', () => {
-            output.innerText = input.value;
-          });
-          input.addEventListener('input', () => {
-            output.innerText = input.value;
-          });
-          break;
+          case 'check': {
+            const input = document.createElement('input');
+            input.classList.add('note', 'control', 'input', 'checkbox');
+            input.name = label;
+            input.type = 'checkbox';
+            input.checked = value;
+            div.appendChild(input);
+            break;
+          }
+          case 'select': {
+            const input = document.createElement('select');
+            input.classList.add('note', 'control', 'input', 'checkbox');
+            input.name = label;
+            input.value = value;
+            for (const optionValue of options.options || []) {
+              const option = document.createElement('option');
+              option.value = optionValue;
+              if (optionValue === value) {
+                option.selected = true;
+              }
+              option.innerText = optionValue;
+              input.appendChild(option);
+            }
+            div.appendChild(input);
+            break;
+          }
+          case 'slider': {
+            const { min = 0, max = 100, step = 1 } = options;
+            const output = document.createElement('span');
+            output.innerText = value;
+            div.appendChild(output);
+            const input = document.createElement('input');
+            input.classList.add('note', 'control', 'input', 'slider');
+            input.name = label;
+            input.type = 'range';
+            input.min = min;
+            input.max = max;
+            input.step = step;
+            input.value = value;
+            div.appendChild(input);
+            input.addEventListener('change', () => {
+              output.innerText = input.value;
+            });
+            input.addEventListener('input', () => {
+              output.innerText = input.value;
+            });
+            break;
+          }
         }
       }
       const labelNode = document.createElement('label');
       labelNode.htmlFor = label;
       labelNode.appendChild(document.createTextNode(label));
       div.appendChild(labelNode);
+      if (!useControls) {
+        const output = document.createElement('span');
+        output.innerText = ': ' + value;
+        div.appendChild(output);
+      }
       container.appendChild(div);
     }
   }

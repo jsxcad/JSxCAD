@@ -1,3 +1,4 @@
+[index](../../nb/api/index.md)
 ### Face()
 Parameter|Default|Type
 ---|---|---

@@ -1,3 +1,4 @@
+[index](../../nb/api/index.md)
 # abstract()
 
 Provides a graph of the shapes internal structure.
@@ -12,9 +13,9 @@ Box()
   .note('Box().x(3, 6).seq({ by: 1 / 2 }, rz).abstract()');
 ```
 
-'''mermaid
+```mermaid
 graph LR;
   0[group<br>]
-'''
+```
 
 Box().x(3, 6).seq({ by: 1 / 2 }, rz).abstract()

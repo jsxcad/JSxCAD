@@ -1,3 +1,4 @@
+[index](../../nb/api/index.md)
 ### extrudeAlong()
 Parameter|Default|Type
 ---|---|---

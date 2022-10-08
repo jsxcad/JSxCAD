@@ -32,6 +32,7 @@ export {
   restoreEmitGroup,
   saveEmitGroup,
 } from './emit.js';
+export { decode, decodeFiles, encode, encodeFiles } from './encode.js';
 export {
   getFilesystem,
   getWorkspace,
@@ -47,9 +48,11 @@ export {
   unwatchFile,
   unwatchFileCreation,
   unwatchFileDeletion,
+  unwatchFileRead,
   watchFile,
   watchFileCreation,
   watchFileDeletion,
+  watchFileRead,
 } from './watchers.js';
 
 export { createConversation } from './conversation.js';
@@ -65,6 +68,7 @@ export {
   watchServices,
 } from './servicePool.js';
 export { remove } from './remove.js';
+export { setNotifyFileReadEnabled } from './broadcast.js';
 export { sleep } from './sleep.js';
 export { write, writeNonblocking } from './write.js';
 export { generateUniqueId } from './generateUniqueId.js';

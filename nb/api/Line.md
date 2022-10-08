@@ -1,3 +1,4 @@
+[index](../../nb/api/index.md)
 ### Line()
 Parameter|Default|Type
 ---|---|---

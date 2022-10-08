@@ -1,3 +1,4 @@
+[index](../../nb/api/index.md)
 ### link(...shapes)
 Parameter|Default|Type
 ---|---|---

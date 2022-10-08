@@ -1,1 +1,5 @@
-export { toHtml } from './toHtml.js';
+export {
+  toHtmlFromNotebook,
+  toHtmlFromScript,
+  toStandaloneFromScript,
+} from './toHtml.js';

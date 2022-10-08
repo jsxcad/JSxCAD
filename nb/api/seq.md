@@ -1,3 +1,4 @@
+[index](../../nb/api/index.md)
 ### seq()
 Parameter|Default|Type
 ---|---|---

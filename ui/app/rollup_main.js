@@ -6,7 +6,8 @@ import '@babel/preset-react';
 import alias from '@rollup/plugin-alias';
 import babel from '@rollup/plugin-babel';
 import commonjs from '@rollup/plugin-commonjs';
-import css from 'rollup-plugin-scss';
+// import css from 'rollup-plugin-scss';
+import css from 'rollup-plugin-import-css';
 // import svg from 'rollup-plugin-svg-import';
 import hypothetical from 'rollup-plugin-hypothetical-windows-fix';
 import image from '@rollup/plugin-image';
@@ -117,7 +118,7 @@ export default {
     }),
     resolve({ browser: true }),
     json(),
-    css(),
+    css({ output: 'main.css' }),
     image(),
     {
       transform(code, id) {

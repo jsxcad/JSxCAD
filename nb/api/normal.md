@@ -1,3 +1,4 @@
+[index](../../nb/api/index.md)
 ### normal()
 Produces a reference point along the direction normal to the shape.
 

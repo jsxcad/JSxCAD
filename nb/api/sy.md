@@ -1,3 +1,4 @@
+[index](../../nb/api/index.md)
 ### sy()
 dimension|1|Dimension by which to scale along the y axis
 

@@ -80,6 +80,7 @@ const build = async (...args) => {
         failedExpectations,
         browser,
         baseDirectory,
+        workspace: 'JSxCAD',
       });
       if (
         failedExpectations.length > 0 &&

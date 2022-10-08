@@ -1,3 +1,4 @@
+[index](../../nb/api/index.md)
 ### Point()
 Parameter|Default|Type
 ---|---|---

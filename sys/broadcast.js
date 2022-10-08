@@ -2,6 +2,7 @@ import {
   runFileChangeWatchers,
   runFileCreationWatchers,
   runFileDeletionWatchers,
+  runFileReadWatchers,
 } from './watchers.js';
 
 import { BroadcastChannel } from './broadcast-channel.js';
@@ -24,6 +25,9 @@ const receiveNotification = async ({ id, op, path, workspace }) => {
       break;
     case 'deletePath':
       await runFileDeletionWatchers(path, workspace);
+      break;
+    case 'readPath':
+      await runFileReadWatchers(path, workspace);
       break;
     default:
       throw Error(
@@ -59,5 +63,23 @@ export const notifyFileCreation = async (path, workspace) =>
 
 export const notifyFileDeletion = async (path, workspace) =>
   sendBroadcast({ id: self && self.id, op: 'deletePath', path, workspace });
+
+let notifyFileReadEnabled = false;
+
+export const setNotifyFileReadEnabled = (state) => {
+  notifyFileReadEnabled = state;
+};
+
+export const notifyFileRead = async (path, workspace) => {
+  if (!notifyFileReadEnabled) {
+    return;
+  }
+  return sendBroadcast({
+    id: self && self.id,
+    op: 'readPath',
+    path,
+    workspace,
+  });
+};
 
 initBroadcastChannel();

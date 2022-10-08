@@ -61,21 +61,23 @@ export const replayRecordedNotes = async (path, id) => {
   flushEmitGroup();
 };
 
+/*
 export const emitSourceLocation = ({ path, id }) => {
   const setContext = { sourceLocation: { path, id } };
   emit({ hash: computeHash(setContext), setContext });
 };
+*/
 
 export const emitSourceText = (sourceText) =>
   emit({ hash: computeHash(sourceText), sourceText });
 
-export const $run = async (op, { path, id, text, sha }) => {
+export const $run = async (op, { path, id, text, sha, line }) => {
   const meta = await read(`meta/def/${path}/${id}`);
   if (!meta || meta.sha !== sha) {
     logInfo('api/core/$run', text);
     const timer = startTime(`${path}/${id}`);
     beginRecordingNotes(path, id);
-    beginEmitGroup({ path, id });
+    beginEmitGroup({ path, id, line });
     emitSourceText(text);
     let result;
     try {
@@ -89,7 +91,7 @@ export const $run = async (op, { path, id, text, sha }) => {
           .md('Debug Geometry: ')
           .view();
         await resolvePending();
-        finishEmitGroup({ path, id });
+        finishEmitGroup({ path, id, line });
       }
       throw error;
     }

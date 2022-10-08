@@ -2762,6 +2762,7 @@ class Geometry {
     points_.clear();
     bbox2_.clear();
     bbox3_.clear();
+    origin_.clear();
     resize(size);
   }
 
@@ -2788,6 +2789,7 @@ class Geometry {
     points_.resize(size);
     bbox2_.resize(size);
     bbox3_.resize(size);
+    origin_.resize(size);
   }
 
   GeometryType& type(int nth) { return types_[nth]; }
@@ -2943,6 +2945,10 @@ class Geometry {
   int getType(int nth) { return types_[nth]; }
 
   void setType(int nth, int type) { types_[nth] = GeometryType(type); }
+
+  int& origin(int nth) { return origin_[nth]; }
+
+  int getOrigin(int nth) { return origin_[nth]; }
 
   void setTransform(int nth, std::shared_ptr<const Transformation> transform) {
     transforms_[nth] = transform;
@@ -3331,6 +3337,7 @@ class Geometry {
   std::vector<std::unique_ptr<Points>> points_;
   std::vector<CGAL::Bbox_2> bbox2_;
   std::vector<CGAL::Bbox_3> bbox3_;
+  std::vector<int> origin_;
 };
 
 class AabbTreeQuery {
@@ -6270,6 +6277,55 @@ int Remesh(Geometry* geometry, size_t count, size_t iterations,
 #endif
 }
 
+int EagerTransform(Geometry* geometry, int count) {
+  size_t size = geometry->size();
+
+  geometry->copyInputMeshesToOutputMeshes();
+  geometry->copyInputSegmentsToOutputSegments();
+  geometry->copyInputPointsToOutputPoints();
+  geometry->transformToAbsoluteFrame();
+
+  const Transformation& transform = geometry->transform(count);
+
+  for (int nth = 0; nth < count; nth++) {
+    switch (geometry->getType(nth)) {
+      case GEOMETRY_MESH: {
+        CGAL::Polygon_mesh_processing::transform(
+            transform, geometry->mesh(nth), CGAL::parameters::all_default());
+        break;
+      }
+      case GEOMETRY_POLYGONS_WITH_HOLES: {
+        Plane transformed_plane =
+            unitPlane(geometry->plane(nth).transform(transform));
+        transformPolygonsWithHoles(geometry->pwh(nth), geometry->plane(nth),
+                                   transformed_plane, transform);
+        geometry->plane(nth) = transformed_plane;
+        break;
+      }
+      case GEOMETRY_POINTS: {
+        transformPoints(geometry->points(nth), transform);
+        break;
+      }
+      case GEOMETRY_SEGMENTS: {
+        transformSegments(geometry->segments(nth), transform);
+        break;
+      }
+      case GEOMETRY_EDGES: {
+        transformEdges(geometry->edges(nth), transform);
+        break;
+      }
+      case GEOMETRY_REFERENCE: {
+        geometry->copyTransform(nth, transform * geometry->transform(nth));
+        break;
+      }
+    }
+  }
+
+  geometry->transformToLocalFrame();
+
+  return STATUS_OK;
+}
+
 int Seam(Geometry* geometry, size_t count) {
   size_t size = geometry->size();
 
@@ -6315,6 +6371,7 @@ int Section(Geometry* geometry, int count) {
           Transformation disorientation =
               disorient_plane_along_z(unitPlane(plane));
           int target = geometry->add(GEOMETRY_POLYGONS_WITH_HOLES);
+          geometry->origin(target) = nth;
           geometry->copyTransform(target, disorientation.inverse());
           geometry->plane(target) = plane;
           geometry->pwh(target) = std::move(pwhs);
@@ -6326,6 +6383,7 @@ int Section(Geometry* geometry, int count) {
             break;
           }
           int target = geometry->add(GEOMETRY_POLYGONS_WITH_HOLES);
+          geometry->origin(target) = nth;
           geometry->copyTransform(target, geometry->transform(nthTransform));
           geometry->plane(target) = geometry->plane(nth);
           geometry->pwh(target) = geometry->pwh(nth);
@@ -6333,6 +6391,7 @@ int Section(Geometry* geometry, int count) {
         }
         case GEOMETRY_SEGMENTS: {
           int target = geometry->add(GEOMETRY_SEGMENTS);
+          geometry->origin(target) = nth;
           geometry->copyTransform(target, geometry->transform(nthTransform));
           for (const Segment& segment : geometry->segments(nth)) {
             if (plane.has_on(segment.source()) &&
@@ -6345,6 +6404,7 @@ int Section(Geometry* geometry, int count) {
         }
         case GEOMETRY_POINTS: {
           int target = geometry->add(GEOMETRY_POINTS);
+          geometry->origin(target) = nth;
           geometry->copyTransform(target, geometry->transform(nthTransform));
           for (const Point& point : geometry->points(nth)) {
             if (plane.has_on(point)) {
@@ -7447,6 +7507,7 @@ EMSCRIPTEN_BINDINGS(module) {
       .function("emitSegments", &Geometry::emitSegments)
       .function("getInputMesh", &Geometry::getMesh)
       .function("getMesh", &Geometry::getMesh)
+      .function("getOrigin", &Geometry::getOrigin)
       .function("getSerializedInputMesh", &Geometry::getSerializedInputMesh)
       .function("getSerializedMesh", &Geometry::getSerializedMesh)
       .function("getSize", &Geometry::getSize)
@@ -7495,6 +7556,8 @@ EMSCRIPTEN_BINDINGS(module) {
   emscripten::function("EachPoint", &EachPoint,
                        emscripten::allow_raw_pointers());
   emscripten::function("EachTriangle", &EachTriangle,
+                       emscripten::allow_raw_pointers());
+  emscripten::function("EagerTransform", &EagerTransform,
                        emscripten::allow_raw_pointers());
   emscripten::function("Extrude", &Extrude, emscripten::allow_raw_pointers());
   emscripten::function("FaceEdges", &FaceEdges,

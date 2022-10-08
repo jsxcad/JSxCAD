@@ -1,3 +1,4 @@
+[index](../../nb/api/index.md)
 ### Hershey()
 Parameter|Default|Type
 text||String containing the text to render.
