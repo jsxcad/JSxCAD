@@ -6,6 +6,7 @@ import {
   removeOnEmitHandler,
   resolvePending,
   setNotifyFileReadEnabled,
+  setupFilesystem,
   unwatchFileRead,
   watchFileRead,
 } from '@jsxcad/sys';
@@ -163,8 +164,9 @@ export const updateNotebook = async (
     if (files[path] || !path.startsWith('source/')) {
       return;
     }
-    const data = await read(path, { workspace, notifyFileReadEnabled: false });
-    files[path] = new TextDecoder('utf8').decode(data);
+    console.log(`QQ/addFile ${path} ${workspace}`);
+    const data = await read(path, { workspace, ephemeral: true, notifyFileReadEnabled: false });
+    files[path] = data;
   };
   let fileReadWatcher = watchFileRead(addFile);
   try {
@@ -173,11 +175,13 @@ export const updateNotebook = async (
     const topLevel = new Map();
     // FIX: Sort out top-level evaluation vs module caching.
     api.setToSourceFromNameFunction(toSourceFromName(baseDirectory));
+    setupFilesystem({ fileBase: workspace });
     setNotifyFileReadEnabled(true);
     await api.importModule(module, {
       clearUpdateEmits: false,
       topLevel,
       readCache: false,
+      workspace,
     });
     await resolvePending();
     const { html, encodedNotebook } = await toHtmlFromNotebook(notebook, {

@@ -185,12 +185,14 @@ export const read = async (path, options = {}) => {
   const qualifiedPath = qualifyPath(path, workspace);
   const file = ensureQualifiedFile(path, qualifiedPath);
 
-  if (file.data && workspace) {
+  console.log(`QQ/read: ${path} ${workspace}`);
+
+  if (file.data && workspace && !ephemeral) {
     // Check that the version is still up to date.
+    const persistentVersion = await fetchPersistentVersion(qualifiedPath, { workspace });
     if (
-      file.version !==
-      (await fetchPersistentVersion(qualifiedPath, { workspace }))
-    ) {
+      file.version !== persistentVersion) {
+      console.log(`QQ/read/invalidate: version ${file.version} vs ${persistentVersion}`);
       file.data = undefined;
     }
   }
@@ -211,7 +213,7 @@ export const read = async (path, options = {}) => {
     }
     if (!ephemeral && file.data !== undefined) {
       // Update persistent cache.
-      await write(path, data, { ...options, doSerialize: true }, path, data);
+      await write(path, data, options, path, data);
     }
     file.data = data;
   }

@@ -46,6 +46,7 @@ export const importScript = async (
       topLevel,
       parallelUpdateLimit: 1,
       clearUpdateEmits,
+      workspace,
     });
     CACHED_MODULES.set(name, builtModule);
     return builtModule;
@@ -74,6 +75,7 @@ export const buildImportModule =
         emitGroup = saveEmitGroup();
         await release();
       }
+      // FIX: The module cache should be per workspace.
       if (readCache && CACHED_MODULES.has(name)) {
         // It's ok for a module to evaluate to undefined so we need to check has explicitly.
         return CACHED_MODULES.get(name);
