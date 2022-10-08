@@ -1461,16 +1461,27 @@ class App extends React.Component {
           switch (NotebookMode) {
             case 'edit':
               return (
-                <JsEditorUi
-                  mode={NotebookMode}
-                  onRun={() => this.Notebook.run(path)}
-                  onSave={() => this.Notebook.save(path)}
-                  onChange={(data) => this.Notebook.change(path, data)}
-                  onClickLink={(path) => this.Notebook.clickLink(path)}
-                  path={path}
-                  data={NotebookText}
-                  advice={NotebookAdvice}
-                />
+                <SplitPane>
+                  <Notebook
+                    notes={NotebookNotes}
+                    onClickView={this.Notebook.clickView}
+                    selectedLine={NotebookLine}
+                    workspace={workspace}
+                  />
+                  <JsEditorUi
+                    mode={NotebookMode}
+                    onRun={() => this.Notebook.run(path)}
+                    onSave={() => this.Notebook.save(path)}
+                    onChange={(data) => this.Notebook.change(path, data)}
+                    onClickLink={(path) => this.Notebook.clickLink(path)}
+                    onCursorChange={(row) =>
+                      this.Notebook.selectLine(path, row)
+                    }
+                    path={path}
+                    data={NotebookText}
+                    advice={NotebookAdvice}
+                  />
+                </SplitPane>
               );
             case 'old-view':
               return (
@@ -1487,35 +1498,14 @@ class App extends React.Component {
               );
             default:
             case 'view': {
-              // <Notebook notes={NotebookNotes} onClickView={this.Notebook.clickView} workspace={workspace} />
-              try {
-                return (
-                  <SplitPane>
-                    <Notebook
-                      notes={NotebookNotes}
-                      onClickView={this.Notebook.clickView}
-                      selectedLine={NotebookLine}
-                      workspace={workspace}
-                    />
-                    <JsEditorUi
-                      mode={NotebookMode}
-                      onRun={() => this.Notebook.run(path)}
-                      onSave={() => this.Notebook.save(path)}
-                      onChange={(data) => this.Notebook.change(path, data)}
-                      onClickLink={(path) => this.Notebook.clickLink(path)}
-                      onCursorChange={(row) =>
-                        this.Notebook.selectLine(path, row)
-                      }
-                      path={path}
-                      data={NotebookText}
-                      advice={NotebookAdvice}
-                    />
-                  </SplitPane>
-                );
-              } catch (e) {
-                console.log(e.stack);
-                throw e;
-              }
+              return (
+                <Notebook
+                  notes={NotebookNotes}
+                  onClickView={this.Notebook.clickView}
+                  selectedLine={NotebookLine}
+                  workspace={workspace}
+                />
+              );
             }
           }
         }

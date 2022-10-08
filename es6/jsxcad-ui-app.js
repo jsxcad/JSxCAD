@@ -45553,16 +45553,22 @@ class App extends ReactDOM$3.Component {
 
             switch (NotebookMode) {
               case 'edit':
-                return v$1(JsEditorUi, {
+                return v$1(SplitPane, null, v$1(Notebook, {
+                  notes: NotebookNotes,
+                  onClickView: this.Notebook.clickView,
+                  selectedLine: NotebookLine,
+                  workspace: workspace
+                }), v$1(JsEditorUi, {
                   mode: NotebookMode,
                   onRun: () => this.Notebook.run(path),
                   onSave: () => this.Notebook.save(path),
                   onChange: data => this.Notebook.change(path, data),
                   onClickLink: path => this.Notebook.clickLink(path),
+                  onCursorChange: row => this.Notebook.selectLine(path, row),
                   path: path,
                   data: NotebookText,
                   advice: NotebookAdvice
-                });
+                }));
 
               case 'old-view':
                 return v$1(JsViewerUi, {
@@ -45579,28 +45585,12 @@ class App extends ReactDOM$3.Component {
               default:
               case 'view':
                 {
-                  // <Notebook notes={NotebookNotes} onClickView={this.Notebook.clickView} workspace={workspace} />
-                  try {
-                    return v$1(SplitPane, null, v$1(Notebook, {
-                      notes: NotebookNotes,
-                      onClickView: this.Notebook.clickView,
-                      selectedLine: NotebookLine,
-                      workspace: workspace
-                    }), v$1(JsEditorUi, {
-                      mode: NotebookMode,
-                      onRun: () => this.Notebook.run(path),
-                      onSave: () => this.Notebook.save(path),
-                      onChange: data => this.Notebook.change(path, data),
-                      onClickLink: path => this.Notebook.clickLink(path),
-                      onCursorChange: row => this.Notebook.selectLine(path, row),
-                      path: path,
-                      data: NotebookText,
-                      advice: NotebookAdvice
-                    }));
-                  } catch (e) {
-                    console.log(e.stack);
-                    throw e;
-                  }
+                  return v$1(Notebook, {
+                    notes: NotebookNotes,
+                    onClickView: this.Notebook.clickView,
+                    selectedLine: NotebookLine,
+                    workspace: workspace
+                  });
                 }
             }
           }
